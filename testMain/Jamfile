@@ -1,0 +1,41 @@
+########### testMain app #############
+
+
+project :
+	requirements <include>./
+        <include>$(TOP)/OIFMinuit2
+        <include>$(TOP)/OIFGeneva
+        <include>$(TOP)/PIFBW
+        <include>$(TOP)/DIFRoot2Part
+	<include>$(MINUIT2)/include
+	<include>$(GENEVA)/include
+	<linkflags>-lgomp
+	;
+
+lib testMain : 
+        [ glob *.cpp : *App.cpp ]
+        : : ;
+
+if $(GENEVAIF)="YES" { 
+exe testMainApp : 
+        testMainApp.cpp 
+        testMain
+        $(TOP)/OIFMinuit2//OIFMinuit2
+        $(TOP)/OIFGeneva//OIFGeneva  
+        $(TOP)/PIFBW//PIFBW
+        $(TOP)/DIFRoot2Part//DIFRoot2Part  
+        : ;
+} else {
+exe testMainApp : 
+        testMainApp.cpp 
+        testMain
+        $(TOP)/OIFMinuit2//OIFMinuit2
+        $(TOP)/PIFBW//PIFBW
+        $(TOP)/DIFRoot2Part//DIFRoot2Part  
+        : ;
+}
+
+install dist : testMain : <location>$(TOP)/lib ;
+install dist2 : testMainApp : <location>$(TOP)/bin ;
+
+

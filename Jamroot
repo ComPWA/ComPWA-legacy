@@ -1,0 +1,56 @@
+########### ComPWA Jamroot #############
+import os ;
+path-constant TOP : . ;
+
+local GENEVA = [ os.environ GENEVA ] ;
+local ROOTSYS = [ os.environ ROOTSYS ] ;
+local MINUIT2 = [ os.environ MINUIT2 ] ;
+local BOOST_BUILD_PATH = [ os.environ BOOST_BUILD_PATH ]
+
+#BOOSTLIBS = -lboost_date_time -lboost_filesystem -lboost_program_options -lboost_regex -lboost_serialization -lboost_system -lboost_thread -lboost_test_exec_monitor -L$(BOOST_BUILD_PATH)/lib ;
+BOOSTLIBS = -lboost_date_time -lboost_filesystem -lboost_program_options -lboost_regex -lboost_serialization -lboost_system -lboost_thread-mt -lboost_test_exec_monitor -L$(BOOST_BUILD_PATH)/lib ;
+
+local rlibs = [ SHELL "$(ROOTSYS)/bin/root-config --libs" ] ;
+ROOTLIBS = [ MATCH "(.*)[\n]" : $(rlibs) ] ;
+
+actions rootlibs
+{
+	$(ROOTSYS)/bin/root-config --libs
+}
+
+project :
+	requirements <include>./  
+        <include>$(TOP)/Core
+	<include>$(ROOTSYS)/include
+	<include>$(BOOST_BUILD_PATH)/include
+	<cxxflags>-ftemplate-depth-256
+	<cxxflags>-std=c++0x
+	<linkflags>$(ROOTLIBS)
+	<linkflags>$(BOOSTLIBS)
+	<linkflags>-lEG
+	;
+
+if $(MINTUIT2) {
+  lib Minuit2 : : <file>$(MINUIT2)/lib/libMinuit2.so : : ;
+} else {
+  lib Minuit2 : : <file>/usr/lib64/root/libMinuit2.so : : ;
+}
+
+if $(GENEVA) { 
+  lib Geneva : :  <file>$(GENEVA)/lib/libgeneva-all.so : : ;
+  lib GemCom : :  <file>$(GENEVA)/lib/libgemfony-common.so : : ;
+  lib GemCou : :  <file>$(GENEVA)/lib/libgemfony-courtier.so : : ;
+  lib GemInd : :  <file>$(GENEVA)/lib/libgemfony-geneva-individuals.so : : ;
+  lib GemGen : :  <file>$(GENEVA)/lib/libgemfony-geneva.so : : ;
+  lib GemHap : :  <file>$(GENEVA)/lib/libgemfony-hap.so : : ;
+}
+
+#lib HepMc : : <file>$(extern)/lib/libHepMC.so : : ;
+
+build-project DIFRoot2Part ; 
+build-project PIFBW ;
+build-project OIFMinuit2 ;
+if $(GENEVA) { 
+  build-project OIFGeneva ;
+}
+build-project testMain ;

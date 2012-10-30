@@ -1,0 +1,17 @@
+########### OIFMinuit2 lib #############
+
+#build-project OIFMinuit2 ;
+
+project :
+	requirements <include>./
+	<include>$(MINUIT2)/include
+	;
+
+lib OIFMinuit2 : 
+        [ glob *.cpp ] 
+   #     OIFMinuit2//OIFMinuit2  
+        : <use>$(TOP)//Minuit2 
+        : <library>$(TOP)//Minuit2 ;
+
+install dist : OIFMinuit2 : <location>$(TOP)/lib ;
+

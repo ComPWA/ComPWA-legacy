@@ -1,0 +1,6 @@
+#setenv BOOST_BUILD_PATH 
+#setenv GENEVA           /usr/local/geneva
+#setenv MINUIT2          
+#setenv ROOTSYS          
+
+#setenv LD_LIBRARY_PATH  ${LD_LIBRARY_PATH}:$GENEVA/lib:

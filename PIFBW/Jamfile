@@ -1,0 +1,10 @@
+########### PIFBW lib #############
+
+project :
+	requirements <include>./
+	;
+
+lib PIFBW : 
+        [ glob *.cpp ] ;
+
+install dist : PIFBW : <location>$(TOP)/lib ;

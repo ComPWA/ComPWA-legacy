@@ -1,0 +1,11 @@
+########### DIFRoot2Part lib #############
+
+project :
+	requirements <include>./
+	;
+
+lib DIFRoot2Part : 
+        [ glob *.cpp ] ;
+
+install dist : DIFRoot2Part : <location>$(TOP)/lib ;
+
