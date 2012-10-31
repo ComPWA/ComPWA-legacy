@@ -10,8 +10,8 @@ project :
 lib OIFGeneva : 
         [ glob *.cpp ] 
    #     OIFGeneva//OIFGeneva  
-        : <use>$(TOP)//GemCom <use>$(TOP)//GemCou <use>$(TOP)//GemInd <use>$(TOP)//GemGen <use>$(TOP)//GemHap
-        : <library>$(TOP)//GemCom <library>$(TOP)//GemCou <library>$(TOP)//GemInd <library>$(TOP)//GemGen <library>$(TOP)//GemHap ;
+        : <use>$(TOP)//Geneva
+        : <library>$(TOP)//Geneva ;
 
 install dist : OIFGeneva : <location>$(TOP)/lib ;
 

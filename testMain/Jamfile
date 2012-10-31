@@ -7,7 +7,7 @@ project :
         <include>$(TOP)/OIFGeneva
         <include>$(TOP)/PIFBW
         <include>$(TOP)/DIFRoot2Part
-	<include>$(MINUIT2)/include
+        <include>$(MINUIT2)/include
 	<include>$(GENEVA)/include
 	<linkflags>-lgomp
 	;
