@@ -1,4 +1,4 @@
-setenv BOOST_BUILD_PATH /usr/
+#setenv BOOST_BUILD_PATH 
 #setenv GENEVA           /usr/local/geneva
 #setenv MINUIT2          
 setenv ROOTSYS          /usr/

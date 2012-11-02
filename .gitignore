@@ -1,0 +1,6 @@
+# files that are ignored by git
+*.project
+*.cproject
+bin/
+lib/
+*~

@@ -11,48 +11,48 @@
   std::vector<double> evaluation1;
 
   iteration.push_back(0);
-  evaluation0.push_back(7.8776e+06);
-  evaluation1.push_back(3.84485e+07);
+  evaluation0.push_back(3.25851e+07);
+  evaluation1.push_back(3.35735e+07);
 
   iteration.push_back(1000);
-  evaluation0.push_back(72037.6);
-  evaluation1.push_back(72037.6);
+  evaluation0.push_back(32294.3);
+  evaluation1.push_back(32296.6);
 
   iteration.push_back(2000);
-  evaluation0.push_back(50217);
-  evaluation1.push_back(50217.5);
+  evaluation0.push_back(30917.4);
+  evaluation1.push_back(30917.4);
 
   iteration.push_back(3000);
-  evaluation0.push_back(34764.2);
-  evaluation1.push_back(34764.7);
+  evaluation0.push_back(26124);
+  evaluation1.push_back(26124);
 
   iteration.push_back(4000);
-  evaluation0.push_back(23050.2);
-  evaluation1.push_back(23050.5);
+  evaluation0.push_back(25877.8);
+  evaluation1.push_back(25877.8);
 
   iteration.push_back(5000);
-  evaluation0.push_back(17270.5);
-  evaluation1.push_back(17270.5);
+  evaluation0.push_back(25503.8);
+  evaluation1.push_back(25503.8);
 
   iteration.push_back(6000);
-  evaluation0.push_back(13123.9);
-  evaluation1.push_back(13123.9);
+  evaluation0.push_back(25503.8);
+  evaluation1.push_back(25503.8);
 
   iteration.push_back(7000);
-  evaluation0.push_back(11146);
-  evaluation1.push_back(11146);
+  evaluation0.push_back(25063.4);
+  evaluation1.push_back(25063.4);
 
   iteration.push_back(8000);
-  evaluation0.push_back(9367.26);
-  evaluation1.push_back(9367.26);
+  evaluation0.push_back(24336.9);
+  evaluation1.push_back(24336.9);
 
   iteration.push_back(9000);
-  evaluation0.push_back(7918.24);
-  evaluation1.push_back(7918.24);
+  evaluation0.push_back(23544.3);
+  evaluation1.push_back(23544.3);
 
   iteration.push_back(10000);
-  evaluation0.push_back(6859.02);
-  evaluation1.push_back(6859.02);
+  evaluation0.push_back(19749.1);
+  evaluation1.push_back(19762.9);
 
   // Transfer the vectors into arrays
   double iteration_arr[iteration.size()];

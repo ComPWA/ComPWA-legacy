@@ -15,7 +15,7 @@ using namespace std;
 /**
  * The main function.
  */
-int PhysicsTest(int argc, char **argv){
+int main(int argc, char **argv){
 
   PIFBW* testBW = new PIFBW();
   cout << "BreitWigner Intensity: " << testBW->intensity(1.5, 1.5, 0.3) << endl;

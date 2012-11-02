@@ -13,7 +13,6 @@
 
 // Minimizer Interface header files go here
 #include "OIFMinuit.hpp"
-#include "OIFGeneva.hpp"
 
 // The toy-data to fit to
 #include "PolyFit.hpp"
@@ -24,8 +23,7 @@ using namespace std;
 /**
  * The main function.
  */
-int OptimizerTest(int argc, char **argv){
-  std::string whichMinimizer("all");
+int main(int argc, char **argv){
   double p0=-10., p1=10., p2=1., p3=-0.01, sigma_smear=3;
 
   // Generate data distribution
@@ -35,15 +33,7 @@ int OptimizerTest(int argc, char **argv){
   vector<shared_ptr<OIFBase> > myMinimizerList;
 
   // Add minimizers
-  if (whichMinimizer=="Geneva") myMinimizerList.push_back(shared_ptr<OIFBase> (new OIFGeneva(myFit)));
-  else if (whichMinimizer=="Minuit") myMinimizerList.push_back(shared_ptr<OIFBase> (new OIFMinuit(myFit)));
-  else if (whichMinimizer=="all") {
-    myMinimizerList.push_back(shared_ptr<OIFBase> (new OIFGeneva(myFit)));
-    myMinimizerList.push_back(shared_ptr<OIFBase> (new OIFMinuit(myFit)));
-  }else{
-   std::cout << "Minimizer/t" << whichMinimizer << "\tdoesn't exist" << std::endl;
-   return 0;
-  }
+  myMinimizerList.push_back(shared_ptr<OIFBase> (new OIFMinuit(myFit)));
 
   // Initiate parameters
   double val[4], min[4], max[4], err[4];

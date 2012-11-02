@@ -1,4 +1,5 @@
 export BOOST_BUILD_PATH=/local/data/michel/PWA/boost_1_44_0/build
+export BOOST_ROOT=/local/data/michel/PWA/boost_1_44_0
 export GENEVA=/local/data/michel/PWA/geneva-0.9.1/build
 export MINUIT2=/local/data/michel/PWA/Minuit2-5.24.00
 export ROOTSYS=/local/data/michel/fairroot/build

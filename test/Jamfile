@@ -1,0 +1,53 @@
+########### test apps #############
+
+#build-project testMain ;
+
+project :
+	requirements <include>./
+        <include>$(TOP)/OIFMinuit2
+        <include>$(TOP)/OIFGeneva
+        <include>$(TOP)/PIFBW
+        <include>$(TOP)/DIFRoot2Part
+	<linkflags>-lgomp
+	;
+
+lib test : 
+        [ glob *.cpp : *App.cpp ]
+        : : ;
+        
+exe cx0testApp : 
+        CX0TestApp.cpp 
+        test
+        : ;
+        
+exe dataiftestApp : 
+        DataIFTestApp.cpp 
+        test
+        $(TOP)/DIFRoot2Part//DIFRoot2Part  
+        : ;
+
+if $(GENEVA) { 
+   exe optimizertestApp : 
+            OptimizerTestApp.cpp 
+            test
+            $(TOP)/OIFMinuit2//OIFMinuit2
+            $(TOP)/OIFGeneva//OIFGeneva   
+            : ;
+} else {
+  exe optimizertestApp : 
+            MinuitTestApp.cpp 
+            test
+            $(TOP)/OIFMinuit2//OIFMinuit2
+            : ;
+}
+
+exe physicstestApp : 
+        PhysicsTestApp.cpp 
+        test
+        $(TOP)/PIFBW//PIFBW  
+        : ;
+
+install dist : test : <location>$(TOP)/lib ;
+install dist2 : cx0testApp dataiftestApp optimizertestApp physicstestApp : <location>$(TOP)/bin ;
+
+
