@@ -1,8 +1,10 @@
-/**
+//! Geneva Argument Parser.
+/*! \class GArgumentParser
  * @file GArgumentParser.hpp
- */
-
-/*
+ *
+ * Geneva argument parser to interpret command line arguments and config
+ * files. Adapted for the use in ComPWA. Original Copyright see below:
+ *
  * Copyright (C) Gemfony scientific UG (haftungsbeschraenkt) and Karlsruhe
  * Institute of Technology (University of the State of Baden-Wuerttemberg
  * and National Laboratory of the Helmholtz Association).

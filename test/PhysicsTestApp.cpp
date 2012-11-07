@@ -1,3 +1,11 @@
+//! Test-Application of the Physics-IF.
+/*!
+ * @file PhysicsTestApp.cpp
+ * This tiny application tests the interface to the Physics-Module. The simple
+ * implementation using a 1-dim Breit-Wigner is used and the intensity at the mean
+ * of the distribution is printed.
+*/
+
 // Standard header files go here
 #include <iostream>
 #include <cmath>

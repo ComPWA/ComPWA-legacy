@@ -1,3 +1,10 @@
+//! Internal container representing a particle.
+/*! \class PWAParticle
+ * @file PWAParticle.hpp
+ * This class provides a internal container for information of a particle. The
+ * class provides the momentum 4-vector and pid of the particle.
+*/
+
 #ifndef PWAPARTICLE_HPP_
 #define PWAPARTICLE_HPP_
 

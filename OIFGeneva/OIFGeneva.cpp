@@ -6,12 +6,11 @@
 #include "OIFGeneva.hpp"
 #include "GStartIndividual.hpp"
 
-using namespace std;
 using namespace Gem::Geneva;
 using namespace Gem::Courtier;
 using namespace Gem::Hap;
 
-OIFGeneva::OIFGeneva(shared_ptr<OIFData> theData, string inConfigFile, boost::uint16_t inparallelizationMode, bool inserverMode, string inip, unsigned short inport, Gem::Common::serializationMode inserMode) : _myData(theData),configFile(inConfigFile),parallelizationMode(inparallelizationMode),serverMode(inserverMode),ip(inip),port(inport),serMode(inserMode){
+OIFGeneva::OIFGeneva(std::shared_ptr<OIFData> theData, std::string inConfigFile, boost::uint16_t inparallelizationMode, bool inserverMode, std::string inip, unsigned short inport, Gem::Common::serializationMode inserMode) : _myData(theData),configFile(inConfigFile),parallelizationMode(inparallelizationMode),serverMode(inserverMode),ip(inip),port(inport),serMode(inserMode){
   bool parsedConfig = parseConfigFile(configFile,
 		      nProducerThreads,
 		      nEvaluationThreads,
@@ -26,7 +25,7 @@ OIFGeneva::OIFGeneva(shared_ptr<OIFData> theData, string inConfigFile, boost::ui
 		      processingCycles,
 		      returnRegardless,
 		      waitFactor);
-    if(!parsedConfig) cout << "TODO" << endl;
+    if(!parsedConfig) std::cout << "TODO" << std::endl;
 }
 
 OIFGeneva::~OIFGeneva()
@@ -60,7 +59,7 @@ const double OIFGeneva::exec(unsigned int Npar,  double* par,  double* min, doub
   //***************************************************************************
 
  // Create the first set of parent individuals. Initialization of parameters is (should be) done randomly.
-  vector<boost::shared_ptr<GStartIndividual> > parentIndividuals;
+  std::vector<boost::shared_ptr<GStartIndividual> > parentIndividuals;
   for(std::size_t p = 0 ; p<nParents; p++) {
     //TODO: vary start parameters
     boost::shared_ptr<GStartIndividual> gdii_ptr(new GStartIndividual(_myData, Npar, par, min, max, err));
@@ -138,7 +137,7 @@ const double OIFGeneva::exec(unsigned int Npar,  double* par,  double* min, doub
 
   boost::shared_ptr<GStartIndividual> bestIndividual_ptr=pop_ptr->getBestIndividual<GStartIndividual>();
 
-  vector<double> resultPar;
+  std::vector<double> resultPar;
   bestIndividual_ptr->getPar(resultPar);
 
   for(unsigned int i=0; i<Npar; i++){

@@ -1,0 +1,234 @@
+\hypertarget{classOIFGeneva}{
+\section{OIFGeneva Class Reference}
+\label{d4/dce/classOIFGeneva}\index{OIFGeneva@{OIFGeneva}}
+}
+
+
+Wrapper of the Geneva Optimizer library.  
+
+
+
+
+{\ttfamily \#include $<$OIFGeneva.hpp$>$}
+
+Inheritance diagram for OIFGeneva:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{d4/dce/classOIFGeneva}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classOIFGeneva_a4c7ee39e6fe5ea8f7050c878369a4e94}{OIFGeneva} (shared\_\-ptr$<$ \hyperlink{classOIFData}{OIFData} $>$ theData, string inConfigFile=\char`\"{}./../test/GStartProject.cfg\char`\"{}, boost::uint16\_\-t inparallelizationMode=1, bool inserverMode=false, string inip=\char`\"{}localhost\char`\"{}, unsigned short inport=10000, Gem::Common::serializationMode inserMode=Gem::Common::SERIALIZATIONMODE\_\-TEXT)
+\begin{DoxyCompactList}\small\item\em Default Constructor (0x0) \end{DoxyCompactList}\item 
+virtual const double \hyperlink{classOIFGeneva_a1a5cf2ace477bd40ce1c4848365a2f13}{exec} (unsigned int Npar, double $\ast$par, double $\ast$min, double $\ast$max, double $\ast$err)
+\item 
+virtual \hyperlink{classOIFGeneva_a72a8b0d30f8ef7d1d7dbe51a15a412e3}{$\sim$OIFGeneva} ()
+\end{DoxyCompactItemize}
+\subsection*{Private Attributes}
+\begin{DoxyCompactItemize}
+\item 
+shared\_\-ptr$<$ \hyperlink{classOIFData}{OIFData} $>$ \hyperlink{classOIFGeneva_ae130ae2db7c8c880ff426eefc9191949}{\_\-myData}
+\item 
+std::string \hyperlink{classOIFGeneva_abf5610433384454ae4884b2f17f01f01}{configFile}
+\item 
+boost::uint16\_\-t \hyperlink{classOIFGeneva_ae51bcfad038f5365a2ff5c4d0691e05b}{parallelizationMode}
+\item 
+bool \hyperlink{classOIFGeneva_a12fed8d5df83853111e8e9bba2b00b5e}{serverMode}
+\item 
+std::string \hyperlink{classOIFGeneva_a24b10918d314755d3c566ea8c17b2bc1}{ip}
+\item 
+unsigned short \hyperlink{classOIFGeneva_a49edc5e8fefa9137eab821b81f8015b1}{port}
+\item 
+Gem::Common::serializationMode \hyperlink{classOIFGeneva_aaad7df3d69cbe6399123820e7fef2a3c}{serMode}
+\item 
+boost::uint16\_\-t \hyperlink{classOIFGeneva_a4b3bfbf12d2911a081fc7c5feb9c4ae7}{nProducerThreads}
+\item 
+boost::uint16\_\-t \hyperlink{classOIFGeneva_a9afb57f9439eddc693b06456c7f1a4a6}{nEvaluationThreads}
+\item 
+std::size\_\-t \hyperlink{classOIFGeneva_a9797a7ec73f3bf9b192799813f601600}{populationSize}
+\item 
+std::size\_\-t \hyperlink{classOIFGeneva_a01cfc180dd253ea8767446e4116f8bb2}{nParents}
+\item 
+boost::uint32\_\-t \hyperlink{classOIFGeneva_ae2a0cd2de953edc56ffa0dbb743fc9af}{maxIterations}
+\item 
+long \hyperlink{classOIFGeneva_a48b49d12e4ecd4a0e19b31692224f2a7}{maxMinutes}
+\item 
+boost::uint32\_\-t \hyperlink{classOIFGeneva_a4419a9af665e5589174b4442fb3e44b9}{reportIteration}
+\item 
+Gem::Geneva::recoScheme \hyperlink{classOIFGeneva_a84d9c1da4a30943abe44cbc58162755f}{rScheme}
+\item 
+std::size\_\-t \hyperlink{classOIFGeneva_ae17ccd19943bfe1ced5f7b0373c36ee9}{arraySize}
+\item 
+Gem::Geneva::sortingMode \hyperlink{classOIFGeneva_a74949f91a856d291c760b6668ace8275}{smode}
+\item 
+boost::uint32\_\-t \hyperlink{classOIFGeneva_a1e194ecfec04056b27e32205839a3f60}{processingCycles}
+\item 
+bool \hyperlink{classOIFGeneva_a812f07c15fdfda372b6fb82ad9d3795a}{returnRegardless}
+\item 
+boost::uint32\_\-t \hyperlink{classOIFGeneva_ad40b4a27317aacf88a920b07c23010ab}{waitFactor}
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Wrapper of the Geneva Optimizer library. 
+
+\subsection{Constructor \& Destructor Documentation}
+\hypertarget{classOIFGeneva_a4c7ee39e6fe5ea8f7050c878369a4e94}{
+\index{OIFGeneva@{OIFGeneva}!OIFGeneva@{OIFGeneva}}
+\index{OIFGeneva@{OIFGeneva}!OIFGeneva@{OIFGeneva}}
+\subsubsection[{OIFGeneva}]{\setlength{\rightskip}{0pt plus 5cm}OIFGeneva::OIFGeneva (
+\begin{DoxyParamCaption}
+\item[{shared\_\-ptr$<$ {\bf OIFData} $>$}]{theData, }
+\item[{string}]{inConfigFile = {\ttfamily \char`\"{}./../test/GStartProject.cfg\char`\"{}}, }
+\item[{boost::uint16\_\-t}]{inparallelizationMode = {\ttfamily 1}, }
+\item[{bool}]{inserverMode = {\ttfamily false}, }
+\item[{string}]{inip = {\ttfamily \char`\"{}localhost\char`\"{}}, }
+\item[{unsigned short}]{inport = {\ttfamily 10000}, }
+\item[{Gem::Common::serializationMode}]{inserMode = {\ttfamily Gem::Common::SERIALIZATIONMODE\_\-TEXT}}
+\end{DoxyParamCaption}
+)}}
+\label{d4/dce/classOIFGeneva_a4c7ee39e6fe5ea8f7050c878369a4e94}
+
+
+Default Constructor (0x0) 
+
+\hypertarget{classOIFGeneva_a72a8b0d30f8ef7d1d7dbe51a15a412e3}{
+\index{OIFGeneva@{OIFGeneva}!$\sim$OIFGeneva@{$\sim$OIFGeneva}}
+\index{$\sim$OIFGeneva@{$\sim$OIFGeneva}!OIFGeneva@{OIFGeneva}}
+\subsubsection[{$\sim$OIFGeneva}]{\setlength{\rightskip}{0pt plus 5cm}OIFGeneva::$\sim$OIFGeneva (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{d4/dce/classOIFGeneva_a72a8b0d30f8ef7d1d7dbe51a15a412e3}
+Destructor 
+
+\subsection{Member Function Documentation}
+\hypertarget{classOIFGeneva_a1a5cf2ace477bd40ce1c4848365a2f13}{
+\index{OIFGeneva@{OIFGeneva}!exec@{exec}}
+\index{exec@{exec}!OIFGeneva@{OIFGeneva}}
+\subsubsection[{exec}]{\setlength{\rightskip}{0pt plus 5cm}const double OIFGeneva::exec (
+\begin{DoxyParamCaption}
+\item[{unsigned int}]{Npar, }
+\item[{double $\ast$}]{par, }
+\item[{double $\ast$}]{min, }
+\item[{double $\ast$}]{max, }
+\item[{double $\ast$}]{err}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{d4/dce/classOIFGeneva_a1a5cf2ace477bd40ce1c4848365a2f13}
+
+
+Implements \hyperlink{classOIFBase_acc6067869ca4adf70f00075196c5ebdf}{OIFBase}.
+
+
+
+\subsection{Member Data Documentation}
+\hypertarget{classOIFGeneva_ae130ae2db7c8c880ff426eefc9191949}{
+\index{OIFGeneva@{OIFGeneva}!\_\-myData@{\_\-myData}}
+\index{\_\-myData@{\_\-myData}!OIFGeneva@{OIFGeneva}}
+\subsubsection[{\_\-myData}]{\setlength{\rightskip}{0pt plus 5cm}shared\_\-ptr$<${\bf OIFData}$>$ {\bf OIFGeneva::\_\-myData}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{d4/dce/classOIFGeneva_ae130ae2db7c8c880ff426eefc9191949}
+\hypertarget{classOIFGeneva_ae17ccd19943bfe1ced5f7b0373c36ee9}{
+\index{OIFGeneva@{OIFGeneva}!arraySize@{arraySize}}
+\index{arraySize@{arraySize}!OIFGeneva@{OIFGeneva}}
+\subsubsection[{arraySize}]{\setlength{\rightskip}{0pt plus 5cm}std::size\_\-t {\bf OIFGeneva::arraySize}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{d4/dce/classOIFGeneva_ae17ccd19943bfe1ced5f7b0373c36ee9}
+\hypertarget{classOIFGeneva_abf5610433384454ae4884b2f17f01f01}{
+\index{OIFGeneva@{OIFGeneva}!configFile@{configFile}}
+\index{configFile@{configFile}!OIFGeneva@{OIFGeneva}}
+\subsubsection[{configFile}]{\setlength{\rightskip}{0pt plus 5cm}std::string {\bf OIFGeneva::configFile}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{d4/dce/classOIFGeneva_abf5610433384454ae4884b2f17f01f01}
+\hypertarget{classOIFGeneva_a24b10918d314755d3c566ea8c17b2bc1}{
+\index{OIFGeneva@{OIFGeneva}!ip@{ip}}
+\index{ip@{ip}!OIFGeneva@{OIFGeneva}}
+\subsubsection[{ip}]{\setlength{\rightskip}{0pt plus 5cm}std::string {\bf OIFGeneva::ip}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{d4/dce/classOIFGeneva_a24b10918d314755d3c566ea8c17b2bc1}
+\hypertarget{classOIFGeneva_ae2a0cd2de953edc56ffa0dbb743fc9af}{
+\index{OIFGeneva@{OIFGeneva}!maxIterations@{maxIterations}}
+\index{maxIterations@{maxIterations}!OIFGeneva@{OIFGeneva}}
+\subsubsection[{maxIterations}]{\setlength{\rightskip}{0pt plus 5cm}boost::uint32\_\-t {\bf OIFGeneva::maxIterations}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{d4/dce/classOIFGeneva_ae2a0cd2de953edc56ffa0dbb743fc9af}
+\hypertarget{classOIFGeneva_a48b49d12e4ecd4a0e19b31692224f2a7}{
+\index{OIFGeneva@{OIFGeneva}!maxMinutes@{maxMinutes}}
+\index{maxMinutes@{maxMinutes}!OIFGeneva@{OIFGeneva}}
+\subsubsection[{maxMinutes}]{\setlength{\rightskip}{0pt plus 5cm}long {\bf OIFGeneva::maxMinutes}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{d4/dce/classOIFGeneva_a48b49d12e4ecd4a0e19b31692224f2a7}
+\hypertarget{classOIFGeneva_a9afb57f9439eddc693b06456c7f1a4a6}{
+\index{OIFGeneva@{OIFGeneva}!nEvaluationThreads@{nEvaluationThreads}}
+\index{nEvaluationThreads@{nEvaluationThreads}!OIFGeneva@{OIFGeneva}}
+\subsubsection[{nEvaluationThreads}]{\setlength{\rightskip}{0pt plus 5cm}boost::uint16\_\-t {\bf OIFGeneva::nEvaluationThreads}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{d4/dce/classOIFGeneva_a9afb57f9439eddc693b06456c7f1a4a6}
+\hypertarget{classOIFGeneva_a01cfc180dd253ea8767446e4116f8bb2}{
+\index{OIFGeneva@{OIFGeneva}!nParents@{nParents}}
+\index{nParents@{nParents}!OIFGeneva@{OIFGeneva}}
+\subsubsection[{nParents}]{\setlength{\rightskip}{0pt plus 5cm}std::size\_\-t {\bf OIFGeneva::nParents}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{d4/dce/classOIFGeneva_a01cfc180dd253ea8767446e4116f8bb2}
+\hypertarget{classOIFGeneva_a4b3bfbf12d2911a081fc7c5feb9c4ae7}{
+\index{OIFGeneva@{OIFGeneva}!nProducerThreads@{nProducerThreads}}
+\index{nProducerThreads@{nProducerThreads}!OIFGeneva@{OIFGeneva}}
+\subsubsection[{nProducerThreads}]{\setlength{\rightskip}{0pt plus 5cm}boost::uint16\_\-t {\bf OIFGeneva::nProducerThreads}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{d4/dce/classOIFGeneva_a4b3bfbf12d2911a081fc7c5feb9c4ae7}
+\hypertarget{classOIFGeneva_ae51bcfad038f5365a2ff5c4d0691e05b}{
+\index{OIFGeneva@{OIFGeneva}!parallelizationMode@{parallelizationMode}}
+\index{parallelizationMode@{parallelizationMode}!OIFGeneva@{OIFGeneva}}
+\subsubsection[{parallelizationMode}]{\setlength{\rightskip}{0pt plus 5cm}boost::uint16\_\-t {\bf OIFGeneva::parallelizationMode}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{d4/dce/classOIFGeneva_ae51bcfad038f5365a2ff5c4d0691e05b}
+\hypertarget{classOIFGeneva_a9797a7ec73f3bf9b192799813f601600}{
+\index{OIFGeneva@{OIFGeneva}!populationSize@{populationSize}}
+\index{populationSize@{populationSize}!OIFGeneva@{OIFGeneva}}
+\subsubsection[{populationSize}]{\setlength{\rightskip}{0pt plus 5cm}std::size\_\-t {\bf OIFGeneva::populationSize}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{d4/dce/classOIFGeneva_a9797a7ec73f3bf9b192799813f601600}
+\hypertarget{classOIFGeneva_a49edc5e8fefa9137eab821b81f8015b1}{
+\index{OIFGeneva@{OIFGeneva}!port@{port}}
+\index{port@{port}!OIFGeneva@{OIFGeneva}}
+\subsubsection[{port}]{\setlength{\rightskip}{0pt plus 5cm}unsigned short {\bf OIFGeneva::port}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{d4/dce/classOIFGeneva_a49edc5e8fefa9137eab821b81f8015b1}
+\hypertarget{classOIFGeneva_a1e194ecfec04056b27e32205839a3f60}{
+\index{OIFGeneva@{OIFGeneva}!processingCycles@{processingCycles}}
+\index{processingCycles@{processingCycles}!OIFGeneva@{OIFGeneva}}
+\subsubsection[{processingCycles}]{\setlength{\rightskip}{0pt plus 5cm}boost::uint32\_\-t {\bf OIFGeneva::processingCycles}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{d4/dce/classOIFGeneva_a1e194ecfec04056b27e32205839a3f60}
+\hypertarget{classOIFGeneva_a4419a9af665e5589174b4442fb3e44b9}{
+\index{OIFGeneva@{OIFGeneva}!reportIteration@{reportIteration}}
+\index{reportIteration@{reportIteration}!OIFGeneva@{OIFGeneva}}
+\subsubsection[{reportIteration}]{\setlength{\rightskip}{0pt plus 5cm}boost::uint32\_\-t {\bf OIFGeneva::reportIteration}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{d4/dce/classOIFGeneva_a4419a9af665e5589174b4442fb3e44b9}
+\hypertarget{classOIFGeneva_a812f07c15fdfda372b6fb82ad9d3795a}{
+\index{OIFGeneva@{OIFGeneva}!returnRegardless@{returnRegardless}}
+\index{returnRegardless@{returnRegardless}!OIFGeneva@{OIFGeneva}}
+\subsubsection[{returnRegardless}]{\setlength{\rightskip}{0pt plus 5cm}bool {\bf OIFGeneva::returnRegardless}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{d4/dce/classOIFGeneva_a812f07c15fdfda372b6fb82ad9d3795a}
+\hypertarget{classOIFGeneva_a84d9c1da4a30943abe44cbc58162755f}{
+\index{OIFGeneva@{OIFGeneva}!rScheme@{rScheme}}
+\index{rScheme@{rScheme}!OIFGeneva@{OIFGeneva}}
+\subsubsection[{rScheme}]{\setlength{\rightskip}{0pt plus 5cm}Gem::Geneva::recoScheme {\bf OIFGeneva::rScheme}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{d4/dce/classOIFGeneva_a84d9c1da4a30943abe44cbc58162755f}
+\hypertarget{classOIFGeneva_aaad7df3d69cbe6399123820e7fef2a3c}{
+\index{OIFGeneva@{OIFGeneva}!serMode@{serMode}}
+\index{serMode@{serMode}!OIFGeneva@{OIFGeneva}}
+\subsubsection[{serMode}]{\setlength{\rightskip}{0pt plus 5cm}Gem::Common::serializationMode {\bf OIFGeneva::serMode}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{d4/dce/classOIFGeneva_aaad7df3d69cbe6399123820e7fef2a3c}
+\hypertarget{classOIFGeneva_a12fed8d5df83853111e8e9bba2b00b5e}{
+\index{OIFGeneva@{OIFGeneva}!serverMode@{serverMode}}
+\index{serverMode@{serverMode}!OIFGeneva@{OIFGeneva}}
+\subsubsection[{serverMode}]{\setlength{\rightskip}{0pt plus 5cm}bool {\bf OIFGeneva::serverMode}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{d4/dce/classOIFGeneva_a12fed8d5df83853111e8e9bba2b00b5e}
+\hypertarget{classOIFGeneva_a74949f91a856d291c760b6668ace8275}{
+\index{OIFGeneva@{OIFGeneva}!smode@{smode}}
+\index{smode@{smode}!OIFGeneva@{OIFGeneva}}
+\subsubsection[{smode}]{\setlength{\rightskip}{0pt plus 5cm}Gem::Geneva::sortingMode {\bf OIFGeneva::smode}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{d4/dce/classOIFGeneva_a74949f91a856d291c760b6668ace8275}
+\hypertarget{classOIFGeneva_ad40b4a27317aacf88a920b07c23010ab}{
+\index{OIFGeneva@{OIFGeneva}!waitFactor@{waitFactor}}
+\index{waitFactor@{waitFactor}!OIFGeneva@{OIFGeneva}}
+\subsubsection[{waitFactor}]{\setlength{\rightskip}{0pt plus 5cm}boost::uint32\_\-t {\bf OIFGeneva::waitFactor}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{d4/dce/classOIFGeneva_ad40b4a27317aacf88a920b07c23010ab}
+
+
+The documentation for this class was generated from the following files:\begin{DoxyCompactItemize}
+\item 
+OIFGeneva/\hyperlink{OIFGeneva_8hpp}{OIFGeneva.hpp}\item 
+OIFGeneva/\hyperlink{OIFGeneva_8cpp}{OIFGeneva.cpp}\end{DoxyCompactItemize}

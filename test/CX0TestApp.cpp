@@ -1,10 +1,9 @@
-//============================================================================
-// Name        : testMain.cpp
-// Author      : Mathias Michel
-// Version     :
-// Copyright   : 
-// Description : Hello World in C++, Ansi-style
-//============================================================================
+//! Test-Application to check c++11 support.
+/*!
+ * @file CX0TestApp.cpp
+ * This tiny application test some features of the new c++11 standard. One can
+ * compile and run this to check the c++11 support of the used compiler/system.
+*/
 
 #include <iostream>
 #include <memory>

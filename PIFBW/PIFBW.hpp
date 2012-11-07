@@ -1,3 +1,10 @@
+//! Physics Module with simple 1D Breit-Wigner.
+/*! \class PIFBW
+ * @file PIFBW.hpp
+ * This class provides a simple Breit-Wigner calculation with given parameters.
+ * It fulfills the PIFBase interface to be compatible with other ComPWA modules.
+*/
+
 #ifndef _PIFBW_HPP
 #define _PIFBW_HPP
 

@@ -1,3 +1,10 @@
+//! Minuit2 function to be optimized.
+/*! \class OIFMinuitFcn
+ * @file OIFMinuitFcn.hpp
+ * Based on the Minuit2 FcnBase. This class uses the OIFData interface for the
+ * optimization.
+*/
+
 #ifndef _OIFMinuitFcn_HPP
 #define _OIFMinuitFcn_HPP
 

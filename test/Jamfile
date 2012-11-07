@@ -2,14 +2,34 @@
 
 #build-project testMain ;
 
+BOOSTLIBS = -lboost_date_time -lboost_filesystem -lboost_program_options -lboost_regex -lboost_serialization -lboost_system -lboost_thread -lboost_test_exec_monitor -L$(BOOST_BUILD_PATH)/lib ;
+
+local rlibs = [ SHELL "$ROOTSYS/bin/root-config --libs" ] ;
+ROOTLIBS = [ MATCH "(.*)[\n]" : $(rlibs) ] ;
+
 project :
 	requirements <include>./
+        <include>$(TOP)/Core
         <include>$(TOP)/OIFMinuit2
         <include>$(TOP)/OIFGeneva
         <include>$(TOP)/PIFBW
         <include>$(TOP)/DIFRoot2Part
+        <include>$(TOP)/EIFChiOneD
+	<include>$(ROOTINC)
+	<include>$(BOOST_BUILD_PATH)/include
+	<cxxflags>-ftemplate-depth-256
+	<cxxflags>-std=c++0x
+	<linkflags>$(BOOSTLIBS)
+	<linkflags>$(ROOTLIBS)
 	<linkflags>-lgomp
+	<linkflags>-lEG
 	;
+
+echo "Root-Libs testMainApp:" ;
+echo $(ROOTLIBS) ;
+
+echo "Boost-Libs testMainApp:" ;
+echo $(BOOSTLIBS) ;
 
 lib test : 
         [ glob *.cpp : *App.cpp ]
@@ -26,19 +46,19 @@ exe dataiftestApp :
         $(TOP)/DIFRoot2Part//DIFRoot2Part  
         : ;
 
-if $(GENEVA) { 
-   exe optimizertestApp : 
-            OptimizerTestApp.cpp 
-            test
-            $(TOP)/OIFMinuit2//OIFMinuit2
-            $(TOP)/OIFGeneva//OIFGeneva   
-            : ;
+if $(GENEVAIF) = YES { 
+exe optimizertestApp : 
+        OptimizerTestApp.cpp 
+        test
+        $(TOP)/OIFMinuit2//OIFMinuit2
+        $(TOP)/OIFGeneva//OIFGeneva   
+        : ;
 } else {
-  exe optimizertestApp : 
-            MinuitTestApp.cpp 
-            test
-            $(TOP)/OIFMinuit2//OIFMinuit2
-            : ;
+exe optimizertestApp : 
+        MinuitTestApp.cpp 
+        test
+        $(TOP)/OIFMinuit2//OIFMinuit2
+        : ;
 }
 
 exe physicstestApp : 
@@ -46,8 +66,16 @@ exe physicstestApp :
         test
         $(TOP)/PIFBW//PIFBW  
         : ;
+        
+exe estimatortestApp : 
+        EstimatorTestApp.cpp 
+        test
+        $(TOP)/EIFChiOneD//EIFChiOneD 
+        $(TOP)/PIFBW//PIFBW  
+        $(TOP)/DIFRoot2Part//DIFRoot2Part
+        : ;
 
 install dist : test : <location>$(TOP)/lib ;
-install dist2 : cx0testApp dataiftestApp optimizertestApp physicstestApp : <location>$(TOP)/bin ;
+install dist2 : cx0testApp dataiftestApp optimizertestApp physicstestApp estimatortestApp : <location>$(TOP)/bin ;
 
 

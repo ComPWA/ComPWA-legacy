@@ -1,0 +1,103 @@
+\hypertarget{GArgumentParser_8hpp}{
+\section{OIFGeneva/GArgumentParser.hpp File Reference}
+\label{d4/d3c/GArgumentParser_8hpp}\index{OIFGeneva/GArgumentParser.hpp@{OIFGeneva/GArgumentParser.hpp}}
+}
+
+
+Geneva argument parser to interpret command line arguments and config files.  
+
+
+{\ttfamily \#include $<$iostream$>$}\par
+{\ttfamily \#include $<$fstream$>$}\par
+{\ttfamily \#include $<$sstream$>$}\par
+{\ttfamily \#include $<$string$>$}\par
+{\ttfamily \#include $<$vector$>$}\par
+{\ttfamily \#include $<$boost/version.hpp$>$}\par
+{\ttfamily \#include $<$boost/program\_\-options.hpp$>$}\par
+{\ttfamily \#include $<$boost/filesystem.hpp$>$}\par
+{\ttfamily \#include $<$common/GCommonEnums.hpp$>$}\par
+{\ttfamily \#include $<$common/GSerializationHelperFunctionsT.hpp$>$}\par
+{\ttfamily \#include $<$geneva/GOptimizationEnums.hpp$>$}\par
+\subsection*{Namespaces}
+\begin{DoxyCompactItemize}
+\item 
+namespace \hyperlink{namespaceGem}{Gem}
+\item 
+namespace \hyperlink{namespaceGem_1_1Geneva}{Gem::Geneva}
+\end{DoxyCompactItemize}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+bool \hyperlink{namespaceGem_1_1Geneva_a32eaed60d47903f4584394f0ceb6567c}{Gem::Geneva::parseCommandLine} (int argc, char $\ast$$\ast$argv, std::string \&configFile, boost::uint16\_\-t \&parallelizationMode, bool \&serverMode, std::string \&ip, unsigned short \&port, Gem::Common::serializationMode \&serMode)
+\item 
+bool \hyperlink{namespaceGem_1_1Geneva_a72bec142348625258508d6cb05700395}{Gem::Geneva::parseConfigFile} (const std::string \&configFile, boost::uint16\_\-t \&nProducerThreads, boost::uint16\_\-t \&nEvaluationThreads, std::size\_\-t \&populationSize, std::size\_\-t \&nParents, boost::uint32\_\-t \&maxIterations, long \&maxMinutes, boost::uint32\_\-t \&reportIteration, recoScheme \&rScheme, sortingMode \&smode, std::size\_\-t \&arraySize, boost::uint32\_\-t \&processingCycles, bool \&returnRegardless, boost::uint32\_\-t \&waitFactor)
+\end{DoxyCompactItemize}
+\subsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+const boost::uint16\_\-t \hyperlink{namespaceGem_1_1Geneva_a505a99cdd13909343ea78ab3bdf56474}{Gem::Geneva::DEFAULTNPRODUCERTHREADS} = 10
+\item 
+const boost::uint16\_\-t \hyperlink{namespaceGem_1_1Geneva_a86f3fe2eb8311d0a9b5c18a32c8ee4f1}{Gem::Geneva::DEFAULTNEVALUATIONTHREADS} = 4
+\item 
+const std::size\_\-t \hyperlink{namespaceGem_1_1Geneva_a09727ec1a0c3212b45a43896ba422151}{Gem::Geneva::DEFAULTPOPULATIONSIZE} = 100
+\item 
+const std::size\_\-t \hyperlink{namespaceGem_1_1Geneva_a7ba466fb273415c31b26532094f2dd51}{Gem::Geneva::DEFAULTNPARENTS} = 5
+\item 
+const boost::uint32\_\-t \hyperlink{namespaceGem_1_1Geneva_a71dd5f6f26fa4f040b16cc729074f219}{Gem::Geneva::DEFAULTMAXITERATIONS} = 2000
+\item 
+const long \hyperlink{namespaceGem_1_1Geneva_a84c4227f18d85106f2377e8f5cbddf4d}{Gem::Geneva::DEFAULTMAXMINUTES} = 10
+\item 
+const boost::uint32\_\-t \hyperlink{namespaceGem_1_1Geneva_a2b3f870846aa6ccf4502b14e837707d4}{Gem::Geneva::DEFAULTREPORTITERATION} = 1
+\item 
+const recoScheme \hyperlink{namespaceGem_1_1Geneva_abf07d2c9bf8cc79475a14f410e435cd0}{Gem::Geneva::DEFAULTRSCHEME} = VALUERECOMBINE
+\item 
+const bool \hyperlink{namespaceGem_1_1Geneva_acfa46336c5707f08a2ef1e87fde2ba4d}{Gem::Geneva::DEFAULTVERBOSE} = true
+\item 
+const bool \hyperlink{namespaceGem_1_1Geneva_a0d079f912cda83149347effa10cc7039}{Gem::Geneva::DEFAULTPARALLELIZATIONMODE} = 1
+\item 
+const std::size\_\-t \hyperlink{namespaceGem_1_1Geneva_ad46712aab7136ab7e747ea8860ab46ff}{Gem::Geneva::DEFAULTARRAYSIZE} = 1000
+\item 
+const bool \hyperlink{namespaceGem_1_1Geneva_ae70305897c4fb0100476012f61c32ae9}{Gem::Geneva::DEFAULTPRODUCTIONPLACE} = true
+\item 
+const bool \hyperlink{namespaceGem_1_1Geneva_ae66444afbff6f0454a6f7087d0b9ee0a}{Gem::Geneva::DEFAULTUSECOMMONADAPTOR} = false
+\item 
+const unsigned short \hyperlink{namespaceGem_1_1Geneva_ab35a5c233444f13095b80a36270de007}{Gem::Geneva::DEFAULTPORT} = 10000
+\item 
+const std::string \hyperlink{namespaceGem_1_1Geneva_a06037b35202b3efd9e20000d566bd790}{Gem::Geneva::DEFAULTIP} = \char`\"{}localhost\char`\"{}
+\item 
+const std::string \hyperlink{namespaceGem_1_1Geneva_aaba4e2cd93c01787464ebd89699a0259}{Gem::Geneva::DEFAULTCONFIGFILE} = \char`\"{}./GStartProject.cfg\char`\"{}
+\item 
+const sortingMode \hyperlink{namespaceGem_1_1Geneva_ae75bab36ebf398bfef62bc0432280980}{Gem::Geneva::DEFAULTSORTINGSCHEME} = MUPLUSNU
+\item 
+const boost::uint32\_\-t \hyperlink{namespaceGem_1_1Geneva_a1295783da2a3d26bd95ee66a2b1e0e28}{Gem::Geneva::DEFAULTSTARTITERATION} = 0
+\item 
+const boost::uint32\_\-t \hyperlink{namespaceGem_1_1Geneva_a6c15979db3e3fb1efa968e5444296b01}{Gem::Geneva::DEFAULTPROCESSINGCYCLES} = 1
+\item 
+const bool \hyperlink{namespaceGem_1_1Geneva_aa28d6ada86d874ce11bde88b5569a34d}{Gem::Geneva::DEFAULTRETURNREGARDLESS} = true
+\item 
+const std::size\_\-t \hyperlink{namespaceGem_1_1Geneva_ac381bed98f84863017b49a4c155199fe}{Gem::Geneva::DEFAULTNBTCONSUMERTHREADS} = 2
+\item 
+const boost::uint32\_\-t \hyperlink{namespaceGem_1_1Geneva_a1a77f7000b4cb6095f973fc2d0571ff9}{Gem::Geneva::DEFAULTGBTCWAITFACTOR} = 5
+\item 
+const Gem::Common::serializationMode \hyperlink{namespaceGem_1_1Geneva_abffd76330c5d5bbb1808dd71a3241944}{Gem::Geneva::DEFAULTSERMODE} = Gem::Common::SERIALIZATIONMODE\_\-TEXT
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Geneva argument parser to interpret command line arguments and config files. Adapted for the use in ComPWA. Original Copyright see below:
+
+Copyright (C) Gemfony scientific UG (haftungsbeschraenkt) and Karlsruhe Institute of Technology (University of the State of Baden-\/Wuerttemberg and National Laboratory of the Helmholtz Association).
+
+See the AUTHORS file in the top-\/level directory for a list of authors.
+
+Contact: contact \mbox{[}at\mbox{]} gemfony (dot) com
+
+This file is part of the Geneva library collection
+
+Geneva is free software: you can redistribute it and/or modify it under the terms of version 3 of the GNU Affero General Public License as published by the Free Software Foundation.
+
+Geneva is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License along with the Geneva library. If not, see $<$\href{http://www.gnu.org/licenses/}{\tt http://www.gnu.org/licenses/}$>$.
+
+For further information on Gemfony scientific and Geneva, visit \href{http://www.gemfony.com}{\tt http://www.gemfony.com} . 

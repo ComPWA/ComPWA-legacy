@@ -1,3 +1,13 @@
+//! Test-Application of the Minuit2 Optimizer-IF.
+/*!
+ * @file MinuitTestApp.cpp
+ * This tiny application tests the interface to the Minuit2 Optimizer. The test
+ * dataset is generated in the PolyFit.hpp class, which creates smeared 1-dim data
+ * according to a polynomial function. Then the Minuit2-IF is used to fit the same
+ * polynomial to the smeared points and as a result the optimized parameters are
+ * printed.
+*/
+
 // Standard header files go here
 #include <iostream>
 #include <cmath>

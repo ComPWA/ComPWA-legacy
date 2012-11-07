@@ -1,0 +1,14 @@
+########### EIFChiOneD lib #############
+
+project :
+	requirements <include>./
+         <include>$(TOP)/Core
+	<cxxflags>-ftemplate-depth-256
+	<cxxflags>-std=c++0x
+	;
+
+lib EIFChiOneD : 
+        [ glob *.cpp ] ;
+
+install dist : EIFChiOneD : <location>$(TOP)/lib ;
+

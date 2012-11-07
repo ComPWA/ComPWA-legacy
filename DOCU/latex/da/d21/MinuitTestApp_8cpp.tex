@@ -1,0 +1,40 @@
+\hypertarget{MinuitTestApp_8cpp}{
+\section{test/MinuitTestApp.cpp File Reference}
+\label{da/d21/MinuitTestApp_8cpp}\index{test/MinuitTestApp.cpp@{test/MinuitTestApp.cpp}}
+}
+
+
+Test-\/Application of the Minuit2 Optimizer-\/IF.  
+
+
+{\ttfamily \#include $<$iostream$>$}\par
+{\ttfamily \#include $<$cmath$>$}\par
+{\ttfamily \#include $<$sstream$>$}\par
+{\ttfamily \#include $<$vector$>$}\par
+{\ttfamily \#include $<$string$>$}\par
+{\ttfamily \#include $<$memory$>$}\par
+{\ttfamily \#include $<$boost/lexical\_\-cast.hpp$>$}\par
+{\ttfamily \#include \char`\"{}OIFMinuit.hpp\char`\"{}}\par
+{\ttfamily \#include \char`\"{}PolyFit.hpp\char`\"{}}\par
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+int \hyperlink{MinuitTestApp_8cpp_a3c04138a5bfe5d72780bb7e82a18e627}{main} (int argc, char $\ast$$\ast$argv)
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Test-\/Application of the Minuit2 Optimizer-\/IF. This tiny application tests the interface to the Minuit2 Optimizer. The test dataset is generated in the \hyperlink{PolyFit_8hpp}{PolyFit.hpp} class, which creates smeared 1-\/dim data according to a polynomial function. Then the Minuit2-\/IF is used to fit the same polynomial to the smeared points and as a result the optimized parameters are printed. 
+
+\subsection{Function Documentation}
+\hypertarget{MinuitTestApp_8cpp_a3c04138a5bfe5d72780bb7e82a18e627}{
+\index{MinuitTestApp.cpp@{MinuitTestApp.cpp}!main@{main}}
+\index{main@{main}!MinuitTestApp.cpp@{MinuitTestApp.cpp}}
+\subsubsection[{main}]{\setlength{\rightskip}{0pt plus 5cm}int main (
+\begin{DoxyParamCaption}
+\item[{int}]{argc, }
+\item[{char $\ast$$\ast$}]{argv}
+\end{DoxyParamCaption}
+)}}
+\label{da/d21/MinuitTestApp_8cpp_a3c04138a5bfe5d72780bb7e82a18e627}
+The main function. 

@@ -1,3 +1,12 @@
+//! Test implementation of OIFData.hpp.
+/*! \class PolyFit
+ * @file PolyFit.hpp
+ * This class derives from OIFData.hpp, the data-interface of the optimizers. It
+ * represents a set of 1-dim data-points, which are created when instantiating
+ * this class using a polynomial and smearing the points with a gausian distri-
+ * bution. It also provides a draw function to visualize the data-points.
+*/
+
 #ifndef _PolyFit_H
 #define _PolyFit_H
 

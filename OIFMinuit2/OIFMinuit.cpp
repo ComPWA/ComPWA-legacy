@@ -12,21 +12,19 @@
 //#include "Examples/Tutorial/FitIF/MinimizerInterface/MIBase.hh"
 
 using namespace ROOT::Minuit2;
-using namespace std;
 
-OIFMinuit::OIFMinuit(shared_ptr<OIFData> theData) : _myFcn(theData){
+OIFMinuit::OIFMinuit(std::shared_ptr<OIFData> theData) : _myFcn(theData){
   //_myFcn = new MIMinuitFcn(theData);
 }
 
-OIFMinuit::~OIFMinuit()
-{
+OIFMinuit::~OIFMinuit(){
   //delete _myFcn;
 }
 
 const double OIFMinuit::exec(unsigned int Npar,  double* par,  double* min, double* max, double* err){
 
-  string s;
-  stringstream out;
+  std::string s;
+  std::stringstream out;
   
   MnUserParameters upar;
   for(unsigned int i=0; i<Npar; ++i){

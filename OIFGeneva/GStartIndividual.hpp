@@ -1,8 +1,10 @@
-/**
+//! Geneva individual for optimization.
+/*! \class GStartIndividual
  * @file GStartIndividual.hpp
- */
-
-/*
+ *
+ * Geneva individual extended to the use in ComPWA, using OIFData to access
+ * the data. Original Copyright see below:
+ *
  * Copyright (C) Gemfony scientific UG (haftungsbeschraenkt) and Karlsruhe
  * Institute of Technology (University of the State of Baden-Wuerttemberg
  * and National Laboratory of the Helmholtz Association).
@@ -110,9 +112,12 @@ public:
 	 * A simple constructor that initializes this object with a collection of bounded
 	 * double variables.
 	 *
-	 * @param dim The amount of variables
+	 * @param data The data to be optimized to
+	 * @param parDim The amount of variables
+	 * @param val The value of the variables
 	 * @param min The lower boundary of the variables
 	 * @param max The upper boundary of the variables
+	 * @param err The error of the variables
 	 */
   GStartIndividual(std::shared_ptr<OIFData> data, unsigned int parDim, double* val, double* min, double* max, double* err)
 		: GParameterSet()

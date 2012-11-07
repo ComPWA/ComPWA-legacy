@@ -2,16 +2,24 @@
 
 #build-project OIFGeneva ;
 
+echo "Geneva-Includes used:" ;
+echo $(GENEVA) ;
+
 project :
 	requirements <include>./
+        <include>$(TOP)/Core
+	<include>$(BOOST_BUILD_PATH)/include
 	<include>$(GENEVA)/include
+	<cxxflags>-ftemplate-depth-256
+	<cxxflags>-std=c++0x
+	<linkflags>$(BOOSTLIBS)
 	;
 
 lib OIFGeneva : 
         [ glob *.cpp ] 
    #     OIFGeneva//OIFGeneva  
-        : <use>$(TOP)//Geneva
-        : <library>$(TOP)//Geneva ;
+        : <use>$(TOP)//GemCom <use>$(TOP)//GemCou <use>$(TOP)//GemInd <use>$(TOP)//GemGen <use>$(TOP)//GemHap
+        : <library>$(TOP)//GemCom <library>$(TOP)//GemCou <library>$(TOP)//GemInd <library>$(TOP)//GemGen <library>$(TOP)//GemHap ;
 
 install dist : OIFGeneva : <location>$(TOP)/lib ;
 

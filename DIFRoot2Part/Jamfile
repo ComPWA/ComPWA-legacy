@@ -1,7 +1,23 @@
 ########### DIFRoot2Part lib #############
 
+local rlibs = [ SHELL "$ROOTSYS/bin/root-config --libs" ] ;
+ROOTLIBS = [ MATCH "(.*)[\n]" : $(rlibs) ] ;
+
+echo "Root-Includes used:" ;
+echo $(ROOTINC) ;
+
+echo "Rootlibs used:" ;
+echo $(ROOTLIBS) ;
+
 project :
 	requirements <include>./
+         <include>$(TOP)/Core
+	<include>$(ROOTINC)
+	<include>$(BOOST_BUILD_PATH)/include
+	<cxxflags>-ftemplate-depth-256
+	<cxxflags>-std=c++0x
+	<linkflags>$(ROOTLIBS)
+	<linkflags>-lEG
 	;
 
 lib DIFRoot2Part : 

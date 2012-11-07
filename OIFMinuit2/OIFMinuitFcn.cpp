@@ -6,14 +6,13 @@
 #include <iostream>
 
 using namespace ROOT::Minuit2;
-using namespace std;
 
-OIFMinuitFcn::OIFMinuitFcn(shared_ptr<OIFData> myData) :
+OIFMinuitFcn::OIFMinuitFcn(std::shared_ptr<OIFData> myData) :
   _myDataPtr(myData)
 {
   if (0==_myDataPtr) {
     //Alert << "Data pointer is 0 !!!!" << endmsg;
-	cout << "Data pointer is 0 !!!!" << endl;
+      std::cout << "Data pointer is 0 !!!!" << std::endl;
     exit(1);
   }
 }
@@ -22,11 +21,11 @@ OIFMinuitFcn::~OIFMinuitFcn()
 {
 }
 
-double OIFMinuitFcn::operator()(const vector<double>& par) const
+double OIFMinuitFcn::operator()(const std::vector<double>& par) const
 {
   double result=_myDataPtr->controlParameter(par);
   //DebugMsg << "current minimized value:\t"<< result << endmsg;
-  cout << "current minimized value:\t"<< result << endl;
+  std::cout << "current minimized value:\t"<< result << std::endl;
   return result;
 }
 

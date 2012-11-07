@@ -1,35 +1,24 @@
+//! Optimizer Data Base-Class.
+/*! \class OIFData
+ * @file OIFData.hpp
+ * This class provides the interface for the optimizer module to access the data.
+ * If the access to the data is provided fulfilling this interface, then one can
+ * use the same data and parameter-set with different optimizers.
+*/
+
 #ifndef OIFDATA_HPP_
 #define OIFDATA_HPP_
 
 #include <vector>
 
-class OIFData
-{
-	///////////////////////////////////////////////////////////////////////
-	//friend class boost::serialization::access;
-
-	//template<typename Archive>
-	//void serialize(Archive & ar, const unsigned int) {
-	//	using boost::serialization::make_nvp;
-
-	//	ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(GParameterSet);
-
-		/* Add your own class-variables here in the following way:
-			ar & BOOST_SERIALIZATION_NVP(myVar);
-			or
-			ar & make_nvp("myVar", myVar); // The latter form can be necessary when dealing with templates
-		 */
-  //}
-	///////////////////////////////////////////////////////////////////////
+class OIFData{
 
 public:
 
-	OIFData()
-	  {
-	  }
+  OIFData(){
+  }
 
-  virtual ~OIFData()
-	{ /* nothing */	}
+  virtual ~OIFData(){ /* nothing */	}
 
   virtual double controlParameter(const std::vector<double>& minPar) =0;
  

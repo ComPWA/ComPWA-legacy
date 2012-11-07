@@ -1,0 +1,137 @@
+\hypertarget{classPolyFit}{
+\section{PolyFit Class Reference}
+\label{de/d89/classPolyFit}\index{PolyFit@{PolyFit}}
+}
+
+
+Test implementation of \hyperlink{OIFData_8hpp}{OIFData.hpp}.  
+
+
+
+
+{\ttfamily \#include $<$PolyFit.hpp$>$}
+
+Inheritance diagram for PolyFit:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{de/d89/classPolyFit}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classPolyFit_abfc9528462669ea53ce08e4945c4ce99}{PolyFit} (double p0, double p1, double p2, double p3, double sigma)
+\begin{DoxyCompactList}\small\item\em Constructor. \end{DoxyCompactList}\item 
+virtual \hyperlink{classPolyFit_a3462736e02f02d3ab46ccd64aaf235d3}{$\sim$PolyFit} ()
+\item 
+double \hyperlink{classPolyFit_a5e7833b86023f7497b548711777bc273}{controlParameter} (const vector$<$ double $>$ \&minPar)
+\item 
+void \hyperlink{classPolyFit_ad90dd471fea18051d5c0c2e5b483f0a5}{drawGraph} (double a, double b, double c, double d)
+\end{DoxyCompactItemize}
+\subsection*{Private Attributes}
+\begin{DoxyCompactItemize}
+\item 
+shared\_\-ptr$<$ TFile $>$ \hyperlink{classPolyFit_a9905a65c08ba059c98a0e4cf14dc1752}{\_\-theTFile}
+\item 
+map$<$ unsigned int, TGraph $\ast$ $>$ \hyperlink{classPolyFit_ae3de4c7d4cda8ce2cf162d9d70631cba}{\_\-myGraph}
+\item 
+vector$<$ double $>$ \hyperlink{classPolyFit_a0092a72e38616b0541f5ca2d3e109397}{\_\-xValue}
+\item 
+vector$<$ double $>$ \hyperlink{classPolyFit_a29d10890ebfda2ec6f0e7697dca5258f}{\_\-yValue}
+\item 
+double \hyperlink{classPolyFit_a0a19ea869319d65f97de4d0bc95e8061}{\_\-sigma}
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Test implementation of \hyperlink{OIFData_8hpp}{OIFData.hpp}. 
+
+\subsection{Constructor \& Destructor Documentation}
+\hypertarget{classPolyFit_abfc9528462669ea53ce08e4945c4ce99}{
+\index{PolyFit@{PolyFit}!PolyFit@{PolyFit}}
+\index{PolyFit@{PolyFit}!PolyFit@{PolyFit}}
+\subsubsection[{PolyFit}]{\setlength{\rightskip}{0pt plus 5cm}PolyFit::PolyFit (
+\begin{DoxyParamCaption}
+\item[{double}]{p0, }
+\item[{double}]{p1, }
+\item[{double}]{p2, }
+\item[{double}]{p3, }
+\item[{double}]{sigma}
+\end{DoxyParamCaption}
+)}}
+\label{de/d89/classPolyFit_abfc9528462669ea53ce08e4945c4ce99}
+
+
+Constructor. 
+
+\hypertarget{classPolyFit_a3462736e02f02d3ab46ccd64aaf235d3}{
+\index{PolyFit@{PolyFit}!$\sim$PolyFit@{$\sim$PolyFit}}
+\index{$\sim$PolyFit@{$\sim$PolyFit}!PolyFit@{PolyFit}}
+\subsubsection[{$\sim$PolyFit}]{\setlength{\rightskip}{0pt plus 5cm}PolyFit::$\sim$PolyFit (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{de/d89/classPolyFit_a3462736e02f02d3ab46ccd64aaf235d3}
+Destructor 
+
+\subsection{Member Function Documentation}
+\hypertarget{classPolyFit_a5e7833b86023f7497b548711777bc273}{
+\index{PolyFit@{PolyFit}!controlParameter@{controlParameter}}
+\index{controlParameter@{controlParameter}!PolyFit@{PolyFit}}
+\subsubsection[{controlParameter}]{\setlength{\rightskip}{0pt plus 5cm}double PolyFit::controlParameter (
+\begin{DoxyParamCaption}
+\item[{const vector$<$ double $>$ \&}]{minPar}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{de/d89/classPolyFit_a5e7833b86023f7497b548711777bc273}
+
+
+Implements \hyperlink{classOIFData_adb5b2e9a28b1767f07ccb8737211ff4f}{OIFData}.
+
+\hypertarget{classPolyFit_ad90dd471fea18051d5c0c2e5b483f0a5}{
+\index{PolyFit@{PolyFit}!drawGraph@{drawGraph}}
+\index{drawGraph@{drawGraph}!PolyFit@{PolyFit}}
+\subsubsection[{drawGraph}]{\setlength{\rightskip}{0pt plus 5cm}void PolyFit::drawGraph (
+\begin{DoxyParamCaption}
+\item[{double}]{a, }
+\item[{double}]{b, }
+\item[{double}]{c, }
+\item[{double}]{d}
+\end{DoxyParamCaption}
+)}}
+\label{de/d89/classPolyFit_ad90dd471fea18051d5c0c2e5b483f0a5}
+
+
+\subsection{Member Data Documentation}
+\hypertarget{classPolyFit_ae3de4c7d4cda8ce2cf162d9d70631cba}{
+\index{PolyFit@{PolyFit}!\_\-myGraph@{\_\-myGraph}}
+\index{\_\-myGraph@{\_\-myGraph}!PolyFit@{PolyFit}}
+\subsubsection[{\_\-myGraph}]{\setlength{\rightskip}{0pt plus 5cm}map$<$unsigned int, TGraph$\ast$ $>$ {\bf PolyFit::\_\-myGraph}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{de/d89/classPolyFit_ae3de4c7d4cda8ce2cf162d9d70631cba}
+\hypertarget{classPolyFit_a0a19ea869319d65f97de4d0bc95e8061}{
+\index{PolyFit@{PolyFit}!\_\-sigma@{\_\-sigma}}
+\index{\_\-sigma@{\_\-sigma}!PolyFit@{PolyFit}}
+\subsubsection[{\_\-sigma}]{\setlength{\rightskip}{0pt plus 5cm}double {\bf PolyFit::\_\-sigma}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{de/d89/classPolyFit_a0a19ea869319d65f97de4d0bc95e8061}
+\hypertarget{classPolyFit_a9905a65c08ba059c98a0e4cf14dc1752}{
+\index{PolyFit@{PolyFit}!\_\-theTFile@{\_\-theTFile}}
+\index{\_\-theTFile@{\_\-theTFile}!PolyFit@{PolyFit}}
+\subsubsection[{\_\-theTFile}]{\setlength{\rightskip}{0pt plus 5cm}shared\_\-ptr$<$TFile$>$ {\bf PolyFit::\_\-theTFile}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{de/d89/classPolyFit_a9905a65c08ba059c98a0e4cf14dc1752}
+\hypertarget{classPolyFit_a0092a72e38616b0541f5ca2d3e109397}{
+\index{PolyFit@{PolyFit}!\_\-xValue@{\_\-xValue}}
+\index{\_\-xValue@{\_\-xValue}!PolyFit@{PolyFit}}
+\subsubsection[{\_\-xValue}]{\setlength{\rightskip}{0pt plus 5cm}vector$<$ double $>$ {\bf PolyFit::\_\-xValue}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{de/d89/classPolyFit_a0092a72e38616b0541f5ca2d3e109397}
+\hypertarget{classPolyFit_a29d10890ebfda2ec6f0e7697dca5258f}{
+\index{PolyFit@{PolyFit}!\_\-yValue@{\_\-yValue}}
+\index{\_\-yValue@{\_\-yValue}!PolyFit@{PolyFit}}
+\subsubsection[{\_\-yValue}]{\setlength{\rightskip}{0pt plus 5cm}vector$<$ double $>$ {\bf PolyFit::\_\-yValue}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{de/d89/classPolyFit_a29d10890ebfda2ec6f0e7697dca5258f}
+
+
+The documentation for this class was generated from the following files:\begin{DoxyCompactItemize}
+\item 
+test/\hyperlink{PolyFit_8hpp}{PolyFit.hpp}\item 
+test/\hyperlink{PolyFit_8cpp}{PolyFit.cpp}\end{DoxyCompactItemize}

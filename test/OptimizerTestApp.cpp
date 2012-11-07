@@ -1,3 +1,15 @@
+//! Test-Application of the Optimizer-IF.
+/*!
+ * @file OptimizerTestApp.cpp
+ * This tiny application tests the interface to the Optimizers Minuit2 and Geneva.
+ * The test dataset is generated in the PolyFit.hpp class, which creates smeared
+ * 1-dim data according to a polynomial function. Then the Optimizer-IF implemen-
+ * tations Minuit2 (OIFMinuit.hpp) and Geneva (OIFGeneva.hpp) are used one after
+ * the other to fit the same polynomial to the smeared points. As a result the
+ * optimized parameters are printed. Note: In this example Minuit2 uses the final
+ * parameters of Geneva as starting values!
+*/
+
 // Standard header files go here
 #include <iostream>
 #include <cmath>

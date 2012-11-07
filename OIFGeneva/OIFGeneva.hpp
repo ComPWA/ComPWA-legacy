@@ -1,3 +1,12 @@
+//! Wrapper of the Geneva Optimizer library.
+/*! \class OIFGeneva
+ * @file OIFGeneva.hpp
+ * This class provides a wrapper around the Geneva library. It fulfills the
+ * OIFBase interface to be easily adapted to other modules. Parameters for the
+ * optimization have to be provided in a config-file, the data needs to be
+ * provided with the OIFData interface.
+*/
+
 #ifndef _OIFGENEVA_HPP
 #define _OIFGENEVA_HPP
 
@@ -23,13 +32,11 @@
 #include <common/GSerializationHelperFunctionsT.hpp>
 #include <geneva/GOptimizationEnums.hpp>
 
-using namespace std;
-
 class OIFGeneva : public OIFBase {
 
 public:
   /// Default Constructor (0x0)
-	OIFGeneva(shared_ptr<OIFData> theData, string inConfigFile="./GStartProject.cfg", boost::uint16_t inparallelizationMode=1, bool inserverMode=false, string inip="localhost", unsigned short inport=10000, Gem::Common::serializationMode inserMode=Gem::Common::SERIALIZATIONMODE_TEXT);
+  OIFGeneva(std::shared_ptr<OIFData> theData, std::string inConfigFile="./../test/GStartProject.cfg", boost::uint16_t inparallelizationMode=1, bool inserverMode=false, std::string inip="localhost", unsigned short inport=10000, Gem::Common::serializationMode inserMode=Gem::Common::SERIALIZATIONMODE_TEXT);
   virtual const double exec(unsigned int Npar, double* par,  double* min, double* max, double* err); 
 
   /** Destructor */
@@ -38,7 +45,7 @@ public:
  protected:
 
  private:
-   shared_ptr<OIFData> _myData;
+  std::shared_ptr<OIFData> _myData;
  // vector<string> paramNames;
 
   std::string configFile;	

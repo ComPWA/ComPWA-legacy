@@ -1,6 +1,9 @@
 # files that are ignored by git
 *.project
 *.cproject
+*.prefs
+.settings/
+test/.settings/
 bin/
 lib/
 *~

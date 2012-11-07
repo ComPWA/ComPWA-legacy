@@ -1,0 +1,35 @@
+\hypertarget{OIFGeneva_8hpp}{
+\section{OIFGeneva/OIFGeneva.hpp File Reference}
+\label{d2/dcf/OIFGeneva_8hpp}\index{OIFGeneva/OIFGeneva.hpp@{OIFGeneva/OIFGeneva.hpp}}
+}
+
+
+This class provides a wrapper around the Geneva library.  
+
+
+{\ttfamily \#include $<$vector$>$}\par
+{\ttfamily \#include $<$memory$>$}\par
+{\ttfamily \#include \char`\"{}OIFData.hpp\char`\"{}}\par
+{\ttfamily \#include \char`\"{}OIFBase.hpp\char`\"{}}\par
+{\ttfamily \#include \char`\"{}GArgumentParser.hpp\char`\"{}}\par
+{\ttfamily \#include $<$boost/program\_\-options.hpp$>$}\par
+{\ttfamily \#include $<$boost/filesystem.hpp$>$}\par
+{\ttfamily \#include $<$courtier/GAsioHelperFunctions.hpp$>$}\par
+{\ttfamily \#include $<$courtier/GAsioTCPClientT.hpp$>$}\par
+{\ttfamily \#include $<$courtier/GAsioTCPConsumerT.hpp$>$}\par
+{\ttfamily \#include $<$geneva/GBrokerEA.hpp$>$}\par
+{\ttfamily \#include $<$geneva/GEvolutionaryAlgorithm.hpp$>$}\par
+{\ttfamily \#include $<$geneva/GIndividual.hpp$>$}\par
+{\ttfamily \#include $<$geneva/GMultiThreadedEA.hpp$>$}\par
+{\ttfamily \#include $<$common/GCommonEnums.hpp$>$}\par
+{\ttfamily \#include $<$common/GSerializationHelperFunctionsT.hpp$>$}\par
+{\ttfamily \#include $<$geneva/GOptimizationEnums.hpp$>$}\par
+\subsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+class \hyperlink{classOIFGeneva}{OIFGeneva}
+\begin{DoxyCompactList}\small\item\em Wrapper of the Geneva Optimizer library. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+This class provides a wrapper around the Geneva library. It fulfills the \hyperlink{classOIFBase}{OIFBase} interface to be easily adapted to other modules. Parameters for the optimization have to be provided in a config-\/file, the data needs to be provided with the \hyperlink{classOIFData}{OIFData} interface. 

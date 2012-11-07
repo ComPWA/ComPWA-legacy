@@ -1,0 +1,7 @@
+window_sizes 1200 896 300 894 682 136
+show_stereotypes
+selected artifact_ref 128002 // main
+open
+  deploymentview_ref 128002 // test
+end
+end
