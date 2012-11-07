@@ -1,4 +1,9 @@
 ########### PIFBW lib #############
+import os ;
+
+local BOOST_BUILD_PATH = [ os.environ BOOST_BUILD_PATH ] ;
+
+BOOSTLIBS = -lboost_date_time -lboost_filesystem -lboost_program_options -lboost_regex -lboost_serialization -lboost_system -lboost_thread-mt -lboost_test_exec_monitor ;
 
 project :
 	requirements <include>./

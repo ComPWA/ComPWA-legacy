@@ -1,9 +1,17 @@
 ########### OIFGeneva lib #############
+import os ;
 
-#build-project OIFGeneva ;
+local GENEVA = [ os.environ GENEVA ] ;
+local BOOST_BUILD_PATH = [ os.environ BOOST_BUILD_PATH ] ;
 
-echo "Geneva-Includes used:" ;
-echo $(GENEVA) ;
+BOOSTLIBS = -lboost_date_time -lboost_filesystem -lboost_program_options -lboost_regex -lboost_serialization -lboost_system -lboost_thread-mt -lboost_test_exec_monitor ;
+
+lib Geneva : :  <file>$(GENEVA)/lib/libgemfony-common.so
+                <file>$(GENEVA)/lib/libgemfony-courtier.so
+                <file>$(GENEVA)/lib/libgemfony-geneva-individuals.so
+                <file>$(GENEVA)/lib/libgemfony-geneva.so
+                <file>$(GENEVA)/lib/libgemfony-hap.so
+                : : ;
 
 project :
 	requirements <include>./
@@ -18,8 +26,8 @@ project :
 lib OIFGeneva : 
         [ glob *.cpp ] 
    #     OIFGeneva//OIFGeneva  
-        : <use>$(TOP)//GemCom <use>$(TOP)//GemCou <use>$(TOP)//GemInd <use>$(TOP)//GemGen <use>$(TOP)//GemHap
-        : <library>$(TOP)//GemCom <library>$(TOP)//GemCou <library>$(TOP)//GemInd <library>$(TOP)//GemGen <library>$(TOP)//GemHap ;
+        : <use>$(TOP)/OIFGeneva//Geneva
+        : <library>$(TOP)/OIFGeneva//Geneva
 
 install dist : OIFGeneva : <location>$(TOP)/lib ;
 

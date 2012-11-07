@@ -2,5 +2,7 @@
 #setenv GENEVA           /usr/local/geneva
 #setenv MINUIT2          
 setenv ROOTSYS          /usr/
+setenv ROOTINCLUDE      /usr/include/root
+
 
 #setenv LD_LIBRARY_PATH  ${LD_LIBRARY_PATH}:$GENEVA/lib:
