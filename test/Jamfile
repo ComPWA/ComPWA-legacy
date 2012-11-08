@@ -9,7 +9,7 @@ local BOOST_BUILD_PATH = [ os.environ BOOST_BUILD_PATH ] ;
 local rlibs = [ SHELL "$ROOTSYS/bin/root-config --libs" ] ;
 ROOTLIBS = [ MATCH "(.*)[\n]" : $(rlibs) ] ;
 
-BOOSTLIBS = -lboost_date_time -lboost_filesystem -lboost_program_options -lboost_regex -lboost_serialization -lboost_system -lboost_thread-mt -lboost_test_exec_monitor ;
+BOOSTLIBS = -lboost_date_time -lboost_filesystem -lboost_program_options -lboost_regex -lboost_serialization -lboost_system -lboost_thread-mt -lboost_test_exec_monitor -L$(BOOST_BUILD_PATH)/lib ;
 
 local rlibs = [ SHELL "$ROOTSYS/bin/root-config --libs" ] ;
 ROOTLIBS = [ MATCH "(.*)[\n]" : $(rlibs) ] ;
