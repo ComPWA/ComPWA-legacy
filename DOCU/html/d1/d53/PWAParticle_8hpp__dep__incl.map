@@ -1,0 +1,10 @@
+<map id="G" name="G">
+<area shape="rect" id="node3" href="$d8/d14/PWAEvent_8hpp.html" title="This class provides a internal container for event&#45;based information." alt="" coords="361,83,505,112"/>
+<area shape="rect" id="node11" href="$db/d8a/DataIFTestApp_8cpp.html" title="Test&#45;Application of the Root Data&#45;IF." alt="" coords="680,315,843,344"/>
+<area shape="rect" id="node17" href="$d8/d80/EIFChiOneD_8cpp.html" title="EIFChiOneD/EIFChiOneD.cpp" alt="" coords="5,315,205,344"/>
+<area shape="rect" id="node5" href="$db/d2c/DIFBase_8hpp.html" title="This class provides the interface to experimental data." alt="" coords="368,160,499,189"/>
+<area shape="rect" id="node7" href="$db/d3e/DIFRootReader_8hpp.html" title="This class reads event&#45;based data from root&#45;files." alt="" coords="432,237,656,267"/>
+<area shape="rect" id="node15" href="$d3/d5d/EIFChiOneD_8hpp.html" title="This class calculates a simple &#160;of a intensity and a dataset." alt="" coords="208,237,408,267"/>
+<area shape="rect" id="node9" href="$dd/de5/DIFRootReader_8cpp.html" title="DIFRoot2Part/DIFRootReader.cpp" alt="" coords="432,315,656,344"/>
+<area shape="rect" id="node13" href="$d4/d31/EstimatorTestApp_8cpp.html" title="Test&#45;Application of a simple &#160;estimator." alt="" coords="229,315,408,344"/>
+</map>

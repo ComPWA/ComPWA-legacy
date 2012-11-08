@@ -76,26 +76,24 @@ var searchBox = new SearchBox("searchBox", "../../search",false,'Search');
 <a name="l00019"></a>00019 <span class="preprocessor">#include &quot;<a class="code" href="../../db/d2c/DIFBase_8hpp.html" title="This class provides the interface to experimental data.">DIFBase.hpp</a>&quot;</span>
 <a name="l00020"></a>00020 <span class="preprocessor">#include &quot;<a class="code" href="../../d8/d14/PWAEvent_8hpp.html" title="This class provides a internal container for event-based information.">PWAEvent.hpp</a>&quot;</span>
 <a name="l00021"></a>00021 
-<a name="l00022"></a>00022 <span class="keyword">using namespace </span>std;
+<a name="l00022"></a><a class="code" href="../../db/d1d/classEIFChiOneD.html">00022</a> <span class="keyword">class </span><a class="code" href="../../db/d1d/classEIFChiOneD.html" title="Simple -Estimator.">EIFChiOneD</a> : <span class="keyword">public</span> <a class="code" href="../../df/d13/classEIFBase.html" title="Estimator Interface Base-Class.">EIFBase</a> {
 <a name="l00023"></a>00023 
-<a name="l00024"></a><a class="code" href="../../db/d1d/classEIFChiOneD.html">00024</a> <span class="keyword">class </span><a class="code" href="../../db/d1d/classEIFChiOneD.html" title="Simple -Estimator.">EIFChiOneD</a> : <span class="keyword">public</span> <a class="code" href="../../df/d13/classEIFBase.html" title="Estimator Interface Base-Class.">EIFBase</a> {
-<a name="l00025"></a>00025 
-<a name="l00026"></a>00026 <span class="keyword">public</span>:
-<a name="l00028"></a>00028   <a class="code" href="../../db/d1d/classEIFChiOneD.html" title="Simple -Estimator.">EIFChiOneD</a>(shared_ptr&lt;PIFBase&gt;, shared_ptr&lt;DIFBase&gt;);
+<a name="l00024"></a>00024 <span class="keyword">public</span>:
+<a name="l00026"></a>00026   <a class="code" href="../../db/d1d/classEIFChiOneD.html#a777b712b06dd2c760f1071e2cc932eba" title="Default Constructor (0x0)">EIFChiOneD</a>(std::shared_ptr&lt;PIFBase&gt;, std::shared_ptr&lt;DIFBase&gt;);
+<a name="l00027"></a>00027 
+<a name="l00028"></a>00028   <span class="keyword">virtual</span> <span class="keyword">const</span> <span class="keywordtype">int</span> <a class="code" href="../../db/d1d/classEIFChiOneD.html#a8a428668c99022b2b9bdae756fe792ca">getEstimatedVal</a>(<span class="keywordtype">double</span>&amp;);
 <a name="l00029"></a>00029 
-<a name="l00030"></a>00030   <span class="keyword">virtual</span> <span class="keyword">const</span> <span class="keywordtype">int</span> getEstimatedVal(<span class="keywordtype">double</span>&amp;);
-<a name="l00031"></a>00031 
-<a name="l00033"></a>00033   <span class="keyword">virtual</span> ~<a class="code" href="../../db/d1d/classEIFChiOneD.html" title="Simple -Estimator.">EIFChiOneD</a>();
+<a name="l00031"></a>00031   <span class="keyword">virtual</span> <a class="code" href="../../db/d1d/classEIFChiOneD.html#ac826a3c3af84dd72fd96e32d597dd560">~EIFChiOneD</a>();
+<a name="l00032"></a>00032 
+<a name="l00033"></a>00033 <span class="keyword">protected</span>:
 <a name="l00034"></a>00034 
-<a name="l00035"></a>00035 <span class="keyword">protected</span>:
-<a name="l00036"></a>00036 
-<a name="l00037"></a>00037 <span class="keyword">private</span>:
-<a name="l00038"></a><a class="code" href="../../db/d1d/classEIFChiOneD.html#a615022d2c2b0b7bad99d4942b22f1be0">00038</a>   shared_ptr&lt;PIFBase&gt; <a class="code" href="../../db/d1d/classEIFChiOneD.html#a615022d2c2b0b7bad99d4942b22f1be0">pPIF_</a>;
-<a name="l00039"></a><a class="code" href="../../db/d1d/classEIFChiOneD.html#a8f16868a00dcf27d29ef837c73d24848">00039</a>   shared_ptr&lt;DIFBase&gt; <a class="code" href="../../db/d1d/classEIFChiOneD.html#a8f16868a00dcf27d29ef837c73d24848">pDIF_</a>;
+<a name="l00035"></a>00035 <span class="keyword">private</span>:
+<a name="l00036"></a><a class="code" href="../../db/d1d/classEIFChiOneD.html#a54b481cfd837c78597ef9a7d7a872961">00036</a>   std::shared_ptr&lt;PIFBase&gt; <a class="code" href="../../db/d1d/classEIFChiOneD.html#a54b481cfd837c78597ef9a7d7a872961">pPIF_</a>;
+<a name="l00037"></a><a class="code" href="../../db/d1d/classEIFChiOneD.html#a2700a77eb9736ea1468adea10acdd823">00037</a>   std::shared_ptr&lt;DIFBase&gt; <a class="code" href="../../db/d1d/classEIFChiOneD.html#a2700a77eb9736ea1468adea10acdd823">pDIF_</a>;
+<a name="l00038"></a>00038 
+<a name="l00039"></a>00039 };
 <a name="l00040"></a>00040 
-<a name="l00041"></a>00041 };
-<a name="l00042"></a>00042 
-<a name="l00043"></a>00043 <span class="preprocessor">#endif </span><span class="comment">/* _EIFChiOneD_HPP */</span>
+<a name="l00041"></a>00041 <span class="preprocessor">#endif </span><span class="comment">/* _EIFChiOneD_HPP */</span>
 </pre></div></div>
 </div>
 <!-- window showing the filter options -->
@@ -112,7 +110,7 @@ var searchBox = new SearchBox("searchBox", "../../search",false,'Search');
 </iframe>
 </div>
 
-<hr class="footer"/><address class="footer"><small>Generated on Tue Nov 6 2012 for ComPWA by&#160;
+<hr class="footer"/><address class="footer"><small>Generated on Thu Nov 8 2012 for ComPWA by&#160;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="../../doxygen.png" alt="doxygen"/></a> 1.7.4 </small></address>
 </body>

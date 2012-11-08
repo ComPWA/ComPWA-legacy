@@ -1,0 +1,12 @@
+<map id="G" name="G">
+<area shape="rect" id="node3" href="$df/dfa/GStartIndividual_8hpp.html" title="Geneva individual extended to the use in ComPWA, using OIFData to access the data." alt="" coords="5,83,216,112"/>
+<area shape="rect" id="node7" href="$d2/dcf/OIFGeneva_8hpp.html" title="This class provides a wrapper around the Geneva library." alt="" coords="240,83,424,112"/>
+<area shape="rect" id="node12" href="$d8/d0f/OIFMinuit_8hpp.html" title="This class provides a wrapper around the Minuit2 library." alt="" coords="448,83,619,112"/>
+<area shape="rect" id="node19" href="$d5/db0/OIFMinuitFcn_8cpp.html" title="OIFMinuit2/OIFMinuitFcn.cpp" alt="" coords="781,83,976,112"/>
+<area shape="rect" id="node21" href="$d2/dcb/PolyFit_8hpp.html" title="This class derives from OIFData.hpp, the data&#45;interface of the optimizers." alt="" coords="643,83,757,112"/>
+<area shape="rect" id="node5" href="$dc/ddb/OIFGeneva_8cpp.html" title="OIFGeneva/OIFGeneva.cpp" alt="" coords="19,160,203,189"/>
+<area shape="rect" id="node10" href="$d4/db7/OptimizerTestApp_8cpp.html" title="Test&#45;Application of the Optimizer&#45;IF." alt="" coords="421,160,600,189"/>
+<area shape="rect" id="node14" href="$d7/d2d/OIFMinuit_8cpp.html" title="OIFMinuit2/OIFMinuit.cpp" alt="" coords="227,160,397,189"/>
+<area shape="rect" id="node16" href="$da/d21/MinuitTestApp_8cpp.html" title="Test&#45;Application of the Minuit2 Optimizer&#45;IF." alt="" coords="624,160,781,189"/>
+<area shape="rect" id="node25" href="$d5/d8b/PolyFit_8cpp.html" title="test/PolyFit.cpp" alt="" coords="805,160,920,189"/>
+</map>

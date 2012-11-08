@@ -11,16 +11,30 @@ Wrapper of the Geneva Optimizer library.
 
 {\ttfamily \#include $<$OIFGeneva.hpp$>$}
 
-Inheritance diagram for OIFGeneva:\begin{figure}[H]
+
+
+Inheritance diagram for OIFGeneva:
+\nopagebreak
+\begin{figure}[H]
 \begin{center}
 \leavevmode
-\includegraphics[height=2.000000cm]{d4/dce/classOIFGeneva}
+\includegraphics[width=188pt]{d9/d88/classOIFGeneva__inherit__graph}
+\end{center}
+\end{figure}
+
+
+Collaboration diagram for OIFGeneva:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=600pt]{df/d29/classOIFGeneva__coll__graph}
 \end{center}
 \end{figure}
 \subsection*{Public Member Functions}
 \begin{DoxyCompactItemize}
 \item 
-\hyperlink{classOIFGeneva_a4c7ee39e6fe5ea8f7050c878369a4e94}{OIFGeneva} (shared\_\-ptr$<$ \hyperlink{classOIFData}{OIFData} $>$ theData, string inConfigFile=\char`\"{}./../test/GStartProject.cfg\char`\"{}, boost::uint16\_\-t inparallelizationMode=1, bool inserverMode=false, string inip=\char`\"{}localhost\char`\"{}, unsigned short inport=10000, Gem::Common::serializationMode inserMode=Gem::Common::SERIALIZATIONMODE\_\-TEXT)
+\hyperlink{classOIFGeneva_ab0725fff35e64106d69979527715f674}{OIFGeneva} (std::shared\_\-ptr$<$ \hyperlink{classOIFData}{OIFData} $>$ theData, std::string inConfigFile=\char`\"{}./../test/GStartProject.cfg\char`\"{}, boost::uint16\_\-t inparallelizationMode=1, bool inserverMode=false, std::string inip=\char`\"{}localhost\char`\"{}, unsigned short inport=10000, Gem::Common::serializationMode inserMode=Gem::Common::SERIALIZATIONMODE\_\-TEXT)
 \begin{DoxyCompactList}\small\item\em Default Constructor (0x0) \end{DoxyCompactList}\item 
 virtual const double \hyperlink{classOIFGeneva_a1a5cf2ace477bd40ce1c4848365a2f13}{exec} (unsigned int Npar, double $\ast$par, double $\ast$min, double $\ast$max, double $\ast$err)
 \item 
@@ -29,7 +43,7 @@ virtual \hyperlink{classOIFGeneva_a72a8b0d30f8ef7d1d7dbe51a15a412e3}{$\sim$OIFGe
 \subsection*{Private Attributes}
 \begin{DoxyCompactItemize}
 \item 
-shared\_\-ptr$<$ \hyperlink{classOIFData}{OIFData} $>$ \hyperlink{classOIFGeneva_ae130ae2db7c8c880ff426eefc9191949}{\_\-myData}
+std::shared\_\-ptr$<$ \hyperlink{classOIFData}{OIFData} $>$ \hyperlink{classOIFGeneva_a6f384385ad5eebc149aa9cc84665c271}{\_\-myData}
 \item 
 std::string \hyperlink{classOIFGeneva_abf5610433384454ae4884b2f17f01f01}{configFile}
 \item 
@@ -75,21 +89,21 @@ boost::uint32\_\-t \hyperlink{classOIFGeneva_ad40b4a27317aacf88a920b07c23010ab}{
 Wrapper of the Geneva Optimizer library. 
 
 \subsection{Constructor \& Destructor Documentation}
-\hypertarget{classOIFGeneva_a4c7ee39e6fe5ea8f7050c878369a4e94}{
+\hypertarget{classOIFGeneva_ab0725fff35e64106d69979527715f674}{
 \index{OIFGeneva@{OIFGeneva}!OIFGeneva@{OIFGeneva}}
 \index{OIFGeneva@{OIFGeneva}!OIFGeneva@{OIFGeneva}}
 \subsubsection[{OIFGeneva}]{\setlength{\rightskip}{0pt plus 5cm}OIFGeneva::OIFGeneva (
 \begin{DoxyParamCaption}
-\item[{shared\_\-ptr$<$ {\bf OIFData} $>$}]{theData, }
-\item[{string}]{inConfigFile = {\ttfamily \char`\"{}./../test/GStartProject.cfg\char`\"{}}, }
+\item[{std::shared\_\-ptr$<$ {\bf OIFData} $>$}]{theData, }
+\item[{std::string}]{inConfigFile = {\ttfamily \char`\"{}./../test/GStartProject.cfg\char`\"{}}, }
 \item[{boost::uint16\_\-t}]{inparallelizationMode = {\ttfamily 1}, }
 \item[{bool}]{inserverMode = {\ttfamily false}, }
-\item[{string}]{inip = {\ttfamily \char`\"{}localhost\char`\"{}}, }
+\item[{std::string}]{inip = {\ttfamily \char`\"{}localhost\char`\"{}}, }
 \item[{unsigned short}]{inport = {\ttfamily 10000}, }
 \item[{Gem::Common::serializationMode}]{inserMode = {\ttfamily Gem::Common::SERIALIZATIONMODE\_\-TEXT}}
 \end{DoxyParamCaption}
 )}}
-\label{d4/dce/classOIFGeneva_a4c7ee39e6fe5ea8f7050c878369a4e94}
+\label{d4/dce/classOIFGeneva_ab0725fff35e64106d69979527715f674}
 
 
 Default Constructor (0x0) 
@@ -126,11 +140,11 @@ Implements \hyperlink{classOIFBase_acc6067869ca4adf70f00075196c5ebdf}{OIFBase}.
 
 
 \subsection{Member Data Documentation}
-\hypertarget{classOIFGeneva_ae130ae2db7c8c880ff426eefc9191949}{
+\hypertarget{classOIFGeneva_a6f384385ad5eebc149aa9cc84665c271}{
 \index{OIFGeneva@{OIFGeneva}!\_\-myData@{\_\-myData}}
 \index{\_\-myData@{\_\-myData}!OIFGeneva@{OIFGeneva}}
-\subsubsection[{\_\-myData}]{\setlength{\rightskip}{0pt plus 5cm}shared\_\-ptr$<${\bf OIFData}$>$ {\bf OIFGeneva::\_\-myData}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
-\label{d4/dce/classOIFGeneva_ae130ae2db7c8c880ff426eefc9191949}
+\subsubsection[{\_\-myData}]{\setlength{\rightskip}{0pt plus 5cm}std::shared\_\-ptr$<${\bf OIFData}$>$ {\bf OIFGeneva::\_\-myData}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{d4/dce/classOIFGeneva_a6f384385ad5eebc149aa9cc84665c271}
 \hypertarget{classOIFGeneva_ae17ccd19943bfe1ced5f7b0373c36ee9}{
 \index{OIFGeneva@{OIFGeneva}!arraySize@{arraySize}}
 \index{arraySize@{arraySize}!OIFGeneva@{OIFGeneva}}
