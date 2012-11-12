@@ -1,0 +1,14 @@
+########### ComPWA Core lib #############
+
+project :
+	requirements <include>./
+	<include>$(ROOTINC)
+	<cxxflags>-ftemplate-depth-256
+	<cxxflags>-std=c++0x
+	;
+
+lib ComPWA : 
+        [ glob *.cpp ] ;
+
+install dist : ComPWA : <location>$(TOP)/lib ;
+
