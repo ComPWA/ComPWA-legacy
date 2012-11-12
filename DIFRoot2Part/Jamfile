@@ -18,7 +18,9 @@ project :
 	;
 
 lib DIFRoot2Part : 
-        [ glob *.cpp ] ;
+        [ glob *.cpp ] 
+        $(TOP)/Core//ComPWA  
+        ;
 
 install dist : DIFRoot2Part : <location>$(TOP)/lib ;
 

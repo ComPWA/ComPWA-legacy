@@ -16,25 +16,39 @@ EIFChiOneD::~EIFChiOneD(){
 
 }
 
-const int EIFChiOneD::getEstimatedVal(double& outChi){
+double EIFChiOneD::controlParameter(const std::vector<double>& minPar){
   unsigned int nEvents = pDIF_->getNEvents();
 
   double chi=0;
   for(unsigned int evt = 0; evt < nEvents; evt++){
     PWAEvent theEvent;
     PWAParticle a, b;
-    if(!(pDIF_->getEvent(evt, theEvent)))
+    if( !(pDIF_->getEvent(evt, theEvent)) ){
+      std::cout << "EIFChiOneD::controlParameter: Event not readable!" << std::endl; //TODO Exception
       continue;
-    theEvent.getParticle(0,a);
-    theEvent.getParticle(1,b);
-    double masssq = pow(a.getE()+b.getE(),2) - pow(a.getPx()+b.getPx() ,2) - pow(a.getPy()+b.getPy() ,2) - pow(a.getPz()+b.getPz() ,2);
+    }
+    if( !(theEvent.getParticle(0,a)) ){
+      std::cout << "EIFChiOneD::controlParameter: Particle A not readable!" << std::endl; //TODO Exception
+      continue;
+    }
+    if( !(theEvent.getParticle(1,b)) ){
+      std::cout << "EIFChiOneD::controlParameter: Particle B not readable!" << std::endl; //TODO Exception
+      continue;
+    }
+    //const double ta(a.getE());
+   // std::cout << "Test" << std::endl;
+    //std::cout << "Event, E, Px: \t" << evt << "\t" << a.getE() << "\t" << a.getPx() << std::endl;
+    double masssq = 0;
+    masssq += pow(a.getE()+b.getE(),2);
+    masssq -= pow(a.getPx()+b.getPx() ,2);
+    masssq -= pow(a.getPy()+b.getPy() ,2);
+    masssq -= pow(a.getPz()+b.getPz() ,2);
 
-    double intens = pPIF_->intensity(masssq, 1.5, 0.3); //TODO: par optimierbar
+    //std::cout << "Event, Par0, Par1: \t" << evt << "\t" << minPar.at(0) << "\t" << minPar.at(1) << std::endl;
+    double intens = pPIF_->intensity(masssq, minPar.at(0), minPar.at(1));
 
-    chi += fabs(masssq - intens); //TODO: real Chi2
+    chi += fabs(masssq - intens)/(double)nEvents; //TODO: real Chi2
   }
 
-  outChi = chi;
-
-  return 0;
+  return chi;
 }

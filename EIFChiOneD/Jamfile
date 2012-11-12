@@ -8,7 +8,9 @@ project :
 	;
 
 lib EIFChiOneD : 
-        [ glob *.cpp ] ;
+        [ glob *.cpp ]
+        $(TOP)/Core//ComPWA 
+         ;
 
 install dist : EIFChiOneD : <location>$(TOP)/lib ;
 

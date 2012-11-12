@@ -19,6 +19,7 @@ OIFMinuitFcn::OIFMinuitFcn(std::shared_ptr<OIFData> myData) :
 
 OIFMinuitFcn::~OIFMinuitFcn()
 {
+  //std::cout << "~OIFMinuitFcn: I'll be back" << std::endl;
 }
 
 double OIFMinuitFcn::operator()(const std::vector<double>& par) const

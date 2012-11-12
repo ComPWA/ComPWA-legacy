@@ -37,7 +37,7 @@ using namespace std;
  * The main function.
  */
 int main(int argc, char **argv){
-  std::string whichMinimizer("all");
+  string whichMinimizer("all");
   double p0=-10., p1=10., p2=1., p3=-0.01, sigma_smear=3;
 
   // Generate data distribution

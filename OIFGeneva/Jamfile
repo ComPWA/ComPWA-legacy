@@ -26,6 +26,7 @@ project :
 lib OIFGeneva : 
         [ glob *.cpp ] 
    #     OIFGeneva//OIFGeneva  
+        $(TOP)/Core//ComPWA
         : <use>$(TOP)/OIFGeneva//Geneva
         : <library>$(TOP)/OIFGeneva//Geneva
         ;

@@ -15,10 +15,11 @@
 #include <string>
 #include <memory>
 
-// Physics Interface header files go here
+// ComPWA header files go here
 #include "DIFRootReader.hpp"
 #include "PIFBW.hpp"
 #include "EIFChiOneD.hpp"
+#include "PWAParticle.hpp"
 
 using namespace std;
 
@@ -33,11 +34,13 @@ int main(int argc, char **argv){
   shared_ptr<PIFBW> testBW(new PIFBW());
 
   shared_ptr<EIFChiOneD> testEsti(new EIFChiOneD(testBW, myReader));
-  double result;
-  testEsti->getEstimatedVal(result);
+  vector<double> minPar;
+  minPar.push_back(1.5);
+  minPar.push_back(0.3);
+  double result=0;
+  result = testEsti->controlParameter(minPar);
   cout << "1dim Fit optimal par Chi2: " << result << endl;
 
   cout << "Done ..." << endl << endl;
-
   return 0;
 }

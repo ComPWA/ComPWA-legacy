@@ -15,6 +15,8 @@ project :
 	;
 
 lib PIFBW : 
-        [ glob *.cpp ] ;
+        [ glob *.cpp ] 
+        $(TOP)/Core//ComPWA
+        ;
 
 install dist : PIFBW : <location>$(TOP)/lib ;

@@ -44,6 +44,7 @@ exe cx0testApp :
 exe dataiftestApp : 
         DataIFTestApp.cpp 
         test
+        $(TOP)/Core//ComPWA
         $(TOP)/DIFRoot2Part//DIFRoot2Part  
         : ;
 
@@ -51,6 +52,7 @@ if $(GENEVA) {
 exe optimizertestApp : 
         OptimizerTestApp.cpp 
         test
+        $(TOP)/Core//ComPWA
         $(TOP)/OIFMinuit2//OIFMinuit2
         $(TOP)/OIFGeneva//OIFGeneva   
         : ;
@@ -58,6 +60,7 @@ exe optimizertestApp :
 exe optimizertestApp : 
         MinuitTestApp.cpp 
         test
+        $(TOP)/Core//ComPWA
         $(TOP)/OIFMinuit2//OIFMinuit2
         : ;
 }
@@ -65,18 +68,30 @@ exe optimizertestApp :
 exe physicstestApp : 
         PhysicsTestApp.cpp 
         test
+        $(TOP)/Core//ComPWA
         $(TOP)/PIFBW//PIFBW  
         : ;
         
 exe estimatortestApp : 
         EstimatorTestApp.cpp 
         test
+        $(TOP)/Core//ComPWA
         $(TOP)/EIFChiOneD//EIFChiOneD 
         $(TOP)/PIFBW//PIFBW  
         $(TOP)/DIFRoot2Part//DIFRoot2Part
         : ;
+        
+exe integrationtestApp : 
+        IntegrationTestApp.cpp 
+        test
+        $(TOP)/Core//ComPWA
+        $(TOP)/EIFChiOneD//EIFChiOneD 
+        $(TOP)/PIFBW//PIFBW  
+        $(TOP)/DIFRoot2Part//DIFRoot2Part
+        $(TOP)/OIFMinuit2//OIFMinuit2
+        : ;
 
 install dist : test : <location>$(TOP)/lib ;
 install dist2 : cx0testApp dataiftestApp optimizertestApp physicstestApp estimatortestApp : <location>$(TOP)/bin ;
-
+install dist3 : integrationtestApp : <location>$(TOP)/bin ;
 

@@ -18,7 +18,7 @@ using namespace std;
 //#include "ErrLogger/ErrLogger.hh"
 
 PolyFit::PolyFit(double p0, double p1, double p2, double p3, double sigma) :
-  _theTFile(new TFile("myFit.root","RECREATE")),
+  _theTFile(new TFile("test/myFit.root","RECREATE")),
   _sigma(sigma)
 {
 
@@ -102,7 +102,9 @@ void PolyFit::drawGraph(double a, double b, double c, double d){
 
 PolyFit::~PolyFit()
 {
-   _theTFile->Write();
-   _theTFile->Close();
+  //cout << "writa polyy-fit data" << endl;
+  _theTFile->Write();
+  _theTFile->Close();
+  //cout << "done" << endl << endl;
 }
 

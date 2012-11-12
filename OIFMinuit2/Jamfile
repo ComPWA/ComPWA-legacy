@@ -27,6 +27,7 @@ project :
 lib OIFMinuit2 : 
         [ glob *.cpp ] 
    #     OIFMinuit2//OIFMinuit2  
+        $(TOP)/Core//ComPWA
         : <use>$(TOP)/OIFMinuit2//Minuit2 
         : <library>$(TOP)/OIFMinuit2//Minuit2 ;
 

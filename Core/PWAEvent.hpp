@@ -5,36 +5,24 @@
  * class provides a list of particles of the event.
 */
 
-#ifndef PWAEvent_HPP_
-#define PWAEvent_HPP_
+#ifndef _PWAEvent_HPP_
+#define _PWAEvent_HPP_
 
 #include <vector>
-#include <PWAParticle.hpp>
+#include "PWAParticle.hpp"
 
 class PWAEvent{
 
 public:
 
-  PWAEvent(){
-  }
+  PWAEvent();
 
-  virtual void addParticle(const PWAParticle inParticle){
-    fParticles.push_back(inParticle);
-  }
+  virtual void addParticle(PWAParticle inParticle);
 
-  virtual ~PWAEvent() { /* nothing */	}
+  virtual ~PWAEvent();
 
   virtual const inline unsigned int getNParticles() { return fParticles.size(); }
-  virtual const int getParticle(const unsigned int id, PWAParticle& out){
-    if(id>=getNParticles()){
-      //TODO Exception
-      return 0;
-    } else {
-      out = fParticles.at(id);
-      return 1;
-    }
-    return 0;
-  }
+  virtual const int getParticle(const unsigned int id, PWAParticle& out);
 
 protected:
   std::vector<PWAParticle> fParticles;

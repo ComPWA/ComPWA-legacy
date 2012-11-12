@@ -30,6 +30,7 @@ OIFGeneva::OIFGeneva(std::shared_ptr<OIFData> theData, std::string inConfigFile,
 
 OIFGeneva::~OIFGeneva()
 {
+  //std::cout << "OIFGeneva::~OIFGeneva: I'll be back" << std::endl;
   //delete _myFcn;
 }
 

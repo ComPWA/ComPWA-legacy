@@ -18,6 +18,7 @@ OIFMinuit::OIFMinuit(std::shared_ptr<OIFData> theData) : _myFcn(theData){
 }
 
 OIFMinuit::~OIFMinuit(){
+  //std::cout << "OIFMinuit::~OIFMinuit: I'll be back" << std::endl;
   //delete _myFcn;
 }
 

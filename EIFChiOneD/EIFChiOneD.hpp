@@ -25,7 +25,7 @@ public:
   /// Default Constructor (0x0)
   EIFChiOneD(std::shared_ptr<PIFBase>, std::shared_ptr<DIFBase>);
 
-  virtual const int getEstimatedVal(double&);
+  virtual double controlParameter(const std::vector<double>& minPar);
 
   /** Destructor */
   virtual ~EIFChiOneD();

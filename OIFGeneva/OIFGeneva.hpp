@@ -36,7 +36,7 @@ class OIFGeneva : public OIFBase {
 
 public:
   /// Default Constructor (0x0)
-  OIFGeneva(std::shared_ptr<OIFData> theData, std::string inConfigFile="./../test/GStartProject.cfg", boost::uint16_t inparallelizationMode=1, bool inserverMode=false, std::string inip="localhost", unsigned short inport=10000, Gem::Common::serializationMode inserMode=Gem::Common::SERIALIZATIONMODE_TEXT);
+  OIFGeneva(std::shared_ptr<OIFData> theData, std::string inConfigFile="test/GStartProject.cfg", boost::uint16_t inparallelizationMode=1, bool inserverMode=false, std::string inip="localhost", unsigned short inport=10000, Gem::Common::serializationMode inserMode=Gem::Common::SERIALIZATIONMODE_TEXT);
   virtual const double exec(unsigned int Npar, double* par,  double* min, double* max, double* err); 
 
   /** Destructor */
