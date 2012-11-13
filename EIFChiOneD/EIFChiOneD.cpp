@@ -7,6 +7,7 @@
 #include "EIFChiOneD.hpp"
 #include "PWAEvent.hpp"
 #include "PWAParticle.hpp"
+#include "PWAParameter.hpp"
 
 EIFChiOneD::EIFChiOneD(std::shared_ptr<PIFBase> inPIF, std::shared_ptr<DIFBase> inDIF) : pPIF_(inPIF), pDIF_(inDIF){
 
@@ -16,7 +17,7 @@ EIFChiOneD::~EIFChiOneD(){
 
 }
 
-double EIFChiOneD::controlParameter(const std::vector<double>& minPar){
+double EIFChiOneD::controlParameter(const std::vector<PWAParameter<double> >& minPar){
   unsigned int nEvents = pDIF_->getNEvents();
 
   double chi=0;
@@ -45,7 +46,9 @@ double EIFChiOneD::controlParameter(const std::vector<double>& minPar){
     masssq -= pow(a.getPz()+b.getPz() ,2);
 
     //std::cout << "Event, Par0, Par1: \t" << evt << "\t" << minPar.at(0) << "\t" << minPar.at(1) << std::endl;
-    double intens = pPIF_->intensity(masssq, minPar.at(0), minPar.at(1));
+    std::vector<double> x;
+    x.push_back(masssq);
+    double intens = pPIF_->intensity(x, minPar);
 
     chi += fabs(masssq - intens)/(double)nEvents; //TODO: real Chi2
   }

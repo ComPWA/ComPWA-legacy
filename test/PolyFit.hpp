@@ -24,6 +24,7 @@
 //#include "qft++/topincludes/relativistic-quantum-mechanics.hh"
 
 #include "OIFData.hpp"
+#include "PWAParameter.hpp"
 
 using namespace std;
 
@@ -46,7 +47,7 @@ public:
   virtual ~PolyFit();
 
 
-  double controlParameter(const vector<double>& minPar);
+  double controlParameter(const vector<PWAParameter<double> >& minPar);
   void drawGraph(double a, double b, double c, double d);
   // Getters:
  

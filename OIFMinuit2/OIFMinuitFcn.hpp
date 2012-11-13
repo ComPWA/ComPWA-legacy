@@ -13,6 +13,8 @@
 //#include <boost/shared_ptr.hpp>
 //#include <cassert>
 #include "Minuit2/FCNBase.h"
+#include "OIFData.hpp"
+#include "PWAParameter.hpp"
 
 class OIFData;
 
@@ -26,7 +28,7 @@ public:
   OIFMinuitFcn(std::shared_ptr<OIFData> theData);
   virtual ~OIFMinuitFcn();
 
-  double operator()(const std::vector<double>& par) const;
+  double operator()(const std::vector<double>& x) const;
 
   double Up() const;
 

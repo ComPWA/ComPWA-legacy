@@ -138,11 +138,11 @@ const double OIFGeneva::exec(unsigned int Npar,  double* par,  double* min, doub
 
   boost::shared_ptr<GStartIndividual> bestIndividual_ptr=pop_ptr->getBestIndividual<GStartIndividual>();
 
-  std::vector<double> resultPar;
+  std::vector<PWAParameter<double> > resultPar;
   bestIndividual_ptr->getPar(resultPar);
 
   for(unsigned int i=0; i<Npar; i++){
-    par[i]=resultPar.at(i);
+    par[i]=resultPar.at(i).GetValue();
   }
 
   return _myData->controlParameter(resultPar);// bestIndividual_ptr->fitnessCalculation();

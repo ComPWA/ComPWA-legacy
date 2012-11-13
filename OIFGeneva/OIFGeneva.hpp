@@ -15,6 +15,7 @@
 //#include <boost/shared_ptr.hpp>
 #include "OIFData.hpp"
 #include "OIFBase.hpp"
+#include "PWAParameter.hpp"
 #include "GArgumentParser.hpp"
 
 #include <boost/program_options.hpp>

@@ -71,7 +71,9 @@
 #include <geneva/GParameterObjectCollection.hpp>
 #include <geneva/GParameterSet.hpp>
 
+// ComPWA header files go here
 #include "OIFData.hpp"
+#include "PWAParameter.hpp"
 
 #ifdef GENEVATESTING
 #include <common/GUnitTestFrameworkT.hpp>
@@ -168,10 +170,10 @@ public:
 	virtual ~GStartIndividual()
 	{ /* nothing */	}
 
-  bool getPar(std::vector<double>& val){
+  bool getPar(std::vector<PWAParameter<double> >& val){
 		GStartIndividual::conversion_iterator<GConstrainedDoubleObject> it(this->end());
 		for(it=this->begin(); it!=this->end(); ++it) {
-		  val.push_back((*it)->value());
+		  val.push_back(PWAParameter<double>((*it)->value(),0,0,0));
 		}
                 return true;
   }
@@ -366,9 +368,9 @@ protected:
 		// to add error checks here upon first invocation.
 
 		GStartIndividual::conversion_iterator<GConstrainedDoubleObject> it(this->end());
-		std::vector<double> minPar;
+		std::vector<PWAParameter<double> > minPar;
 		for(it=this->begin(); it!=this->end(); ++it) {
-		  minPar.push_back((*it)->value());
+		  minPar.push_back(PWAParameter<double>((*it)->value(),0,0,0));
 		}
       
 		return theData->controlParameter(minPar);

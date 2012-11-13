@@ -13,6 +13,7 @@
 #define _EIFBASE_HPP_
 
 #include "OIFData.hpp"
+#include "PWAParameter.hpp"
 
 class EIFBase : public OIFData
 {
@@ -26,7 +27,7 @@ public:
   /* nothing */
   }
 
-  virtual double controlParameter(const std::vector<double>& minPar) = 0;
+  virtual double controlParameter(const std::vector<PWAParameter<double> >& minPar) = 0;
 
 };
 

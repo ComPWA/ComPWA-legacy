@@ -18,6 +18,7 @@
 #include "PIFBase.hpp"
 #include "DIFBase.hpp"
 #include "PWAEvent.hpp"
+#include "PWAParameter.hpp"
 
 class EIFChiOneD : public EIFBase {
 
@@ -25,7 +26,7 @@ public:
   /// Default Constructor (0x0)
   EIFChiOneD(std::shared_ptr<PIFBase>, std::shared_ptr<DIFBase>);
 
-  virtual double controlParameter(const std::vector<double>& minPar);
+  virtual double controlParameter(const std::vector<PWAParameter<double> >& minPar);
 
   /** Destructor */
   virtual ~EIFChiOneD();

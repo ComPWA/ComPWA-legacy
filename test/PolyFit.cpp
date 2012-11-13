@@ -47,12 +47,12 @@ PolyFit::PolyFit(double p0, double p1, double p2, double p3, double sigma) :
 
 }
 
-double PolyFit::controlParameter(const std::vector<double>& minPar){
+double PolyFit::controlParameter(const std::vector<PWAParameter<double> >& minPar){
  
   // Calculate chi^2 for current set of fit parameters 
   double result=0.;
   for (unsigned int i=0; i<_xValue.size(); i++){
-    double yValFit=minPar[0]+minPar[1]*_xValue[i]+minPar[2]*_xValue[i]*_xValue[i]+minPar[3]*_xValue[i]*_xValue[i]*_xValue[i];
+    double yValFit=minPar[0].GetValue()+minPar[1].GetValue()*_xValue[i]+minPar[2].GetValue()*_xValue[i]*_xValue[i]+minPar[3].GetValue()*_xValue[i]*_xValue[i]*_xValue[i];
     double yValExp=_yValue[i];
     double tmpChi=((yValExp-yValFit)*(yValExp-yValFit))/(_sigma*_sigma);
     result+=tmpChi;

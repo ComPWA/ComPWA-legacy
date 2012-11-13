@@ -10,6 +10,7 @@
 #define OIFDATA_HPP_
 
 #include <vector>
+#include "PWAParameter.hpp"
 
 class OIFData{
 
@@ -20,7 +21,7 @@ public:
 
   virtual ~OIFData(){ /* nothing */	}
 
-  virtual double controlParameter(const std::vector<double>& minPar) =0;
+  virtual double controlParameter(const std::vector<PWAParameter<double> >& minPar) =0;
  
 };
 

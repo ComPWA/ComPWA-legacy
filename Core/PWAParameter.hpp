@@ -28,11 +28,12 @@ public:
     err_ = error;
   }
 
-  PWAParameter(const PWAParameter& in){
-    val_ = in.GetValue();
+  PWAParameter(const PWAParameter<T>& in){
+    *this = in;
+   /* val_ = in.GetValue();
     min_ = in.GetMinValue();
     max_ = in.GetMaxValue();
-    err_ = in.GetError();
+    err_ = in.GetError();*/
   }
 
   virtual ~PWAParameter() { /* nothing */	}
@@ -42,10 +43,10 @@ public:
   virtual const inline T GetMaxValue() const {return max_;}
   virtual const inline T GetError() const {return err_;}
 
-  virtual const inline void SetValue(const T value) const {val_ = value;}
-  virtual const inline void SetMinValue(const T min) const {min_ = min;}
-  virtual const inline void SetMaxValue(const T max) const {max_ = max;}
-  virtual const inline void SetError(const T error) const {err_ = error;}
+  virtual inline void SetValue(const T value) {val_ = value;}
+  virtual inline void SetMinValue(const T min) {min_ = min;}
+  virtual inline void SetMaxValue(const T max) {max_ = max;}
+  virtual inline void SetError(const T error) {err_ = error;}
 
 protected:
   T val_, min_, max_, err_;

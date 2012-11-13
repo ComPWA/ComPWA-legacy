@@ -16,6 +16,7 @@
 
 // Physics Interface header files go here
 #include "PIFBW.hpp"
+#include "PWAParameter.hpp"
 
 using namespace std;
 
@@ -26,7 +27,12 @@ using namespace std;
 int main(int argc, char **argv){
 
   PIFBW* testBW = new PIFBW();
-  cout << "BreitWigner Intensity: " << testBW->intensity(1.5, 1.5, 0.3) << endl;
+  vector<double> x;
+  x.push_back(1.5);
+  vector<PWAParameter<double> > par;
+  par.push_back(PWAParameter<double>(1.5, 0.5, 2.5, 0.1));
+  par.push_back(PWAParameter<double>(0.3, 0.1, 0.5, 0.05));
+  cout << "BreitWigner Intensity: " << testBW->intensity(x, par) << endl;
 
   cout << "Done ..." << endl << endl;
 

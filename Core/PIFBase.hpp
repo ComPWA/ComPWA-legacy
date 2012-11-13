@@ -12,6 +12,9 @@
 #ifndef PIFBASE_HPP_
 #define PIFBASE_HPP_
 
+#include <vector>
+#include "PWAParameter.hpp"
+
 class PIFBase
 {
 
@@ -24,7 +27,8 @@ public:
   virtual ~PIFBase()
 	{ /* nothing */	}
 
-  virtual const double intensity(double x, double M, double T) =0;
+  //virtual const double intensity(double x, double M, double T) =0;
+  virtual const double intensity(std::vector<double> x, std::vector<PWAParameter<double> > par) =0;
 
 };
 
