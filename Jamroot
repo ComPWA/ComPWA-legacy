@@ -1,6 +1,4 @@
 ########### ComPWA Jamroot #############
-import os ;
-local GENEVA = [ os.environ GENEVA ] ;
 path-constant TOP : . ;
 
 # Configure the used packages here:
@@ -9,7 +7,5 @@ build-project DIFRoot2Part ;
 build-project PIFBW ;
 build-project EIFChiOneD ;
 build-project OIFMinuit2 ;
-if $(GENEVA) {
-  build-project OIFGeneva ;
-}
+# build-project OIFGeneva ;
 build-project test ;
