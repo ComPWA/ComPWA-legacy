@@ -41,6 +41,12 @@ exe cx0testApp :
         test
         : ;
         
+exe parametertestApp : 
+        ParameterTestApp.cpp 
+        test
+        $(TOP)/Core//ComPWA 
+        : ;
+        
 exe dataiftestApp : 
         DataIFTestApp.cpp 
         test
@@ -92,6 +98,6 @@ exe integrationtestApp :
         : ;
 
 install dist : test : <location>$(TOP)/lib ;
-install dist2 : cx0testApp dataiftestApp optimizertestApp physicstestApp estimatortestApp : <location>$(TOP)/bin ;
-install dist3 : integrationtestApp : <location>$(TOP)/bin ;
+install dist2 : parametertestApp cx0testApp dataiftestApp optimizertestApp physicstestApp : <location>$(TOP)/bin ;
+install dist3 : estimatortestApp integrationtestApp : <location>$(TOP)/bin ;
 

@@ -76,7 +76,7 @@ int main(int argc, char **argv) {
   cout << endl;
 
   //========= Regular Expr. ==========
-  DataIFTestApp.cpp  cout << "Regular Expressions: " << endl;
+  cout << "Regular Expressions: " << endl;
   cout << "Not supported by gcc up to 4.6 " << endl;
   string input;
   regex integer("(\\+|-)?[[:digit:]]+");
