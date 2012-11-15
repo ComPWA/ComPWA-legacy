@@ -1,5 +1,0 @@
-<map id="G" name="G">
-<area shape="rect" id="node1" href="$d0/d31/classOIFBase.html" title="Optimizer Interface Base&#45;Class." alt="" coords="5,32,80,61"/>
-<area shape="rect" id="node3" href="$d4/dce/classOIFGeneva.html" title="Wrapper of the Geneva Optimizer library." alt="" coords="129,5,217,35"/>
-<area shape="rect" id="node5" href="$d5/db7/classOIFMinuit.html" title="Wrapper of the Minuit2 Optimizer library." alt="" coords="135,59,212,88"/>
-</map>

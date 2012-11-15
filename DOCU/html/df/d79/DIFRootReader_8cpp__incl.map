@@ -1,6 +1,0 @@
-<map id="G" name="G">
-<area shape="rect" id="node11" href="$db/d3e/DIFRootReader_8hpp.html" title="This class reads event&#45;based data from root&#45;files." alt="" coords="819,83,957,112"/>
-<area shape="rect" id="node17" href="$db/d2c/DIFBase_8hpp.html" title="This class provides the interface to experimental data." alt="" coords="339,160,437,189"/>
-<area shape="rect" id="node19" href="$d8/d14/PWAEvent_8hpp.html" title="This class provides a internal container for event&#45;based information." alt="" coords="340,237,452,267"/>
-<area shape="rect" id="node22" href="$d3/ded/PWAParticle_8hpp.html" title="This class provides a internal container for information of a particle." alt="" coords="289,315,412,344"/>
-</map>

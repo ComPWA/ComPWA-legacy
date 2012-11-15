@@ -1,9 +1,0 @@
-<map id="G" name="G">
-<area shape="rect" id="node3" href="$d2/dcf/OIFGeneva_8hpp.html" title="This class provides a wrapper around the Geneva library." alt="" coords="209,83,393,112"/>
-<area shape="rect" id="node9" href="$d8/d0f/OIFMinuit_8hpp.html" title="This class provides a wrapper around the Minuit2 library." alt="" coords="417,83,588,112"/>
-<area shape="rect" id="node5" href="$dc/ddb/OIFGeneva_8cpp.html" title="OIFGeneva/OIFGeneva.cpp" alt="" coords="5,160,189,189"/>
-<area shape="rect" id="node7" href="$d4/db7/OptimizerTestApp_8cpp.html" title="Test&#45;Application of the Optimizer&#45;IF." alt="" coords="213,160,392,189"/>
-<area shape="rect" id="node11" href="$d7/d2d/OIFMinuit_8cpp.html" title="OIFMinuit2/OIFMinuit.cpp" alt="" coords="416,160,587,189"/>
-<area shape="rect" id="node13" href="$d5/d26/IntegrationTestApp_8cpp.html" title="Test&#45;Application for full fit with simple modules." alt="" coords="611,160,792,189"/>
-<area shape="rect" id="node15" href="$da/d21/MinuitTestApp_8cpp.html" title="Test&#45;Application of the Minuit2 Optimizer&#45;IF." alt="" coords="816,160,973,189"/>
-</map>
