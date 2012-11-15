@@ -71,60 +71,61 @@ var searchBox = new SearchBox("searchBox", "../../search",false,'Search');
 <a name="l00015"></a>00015 <span class="comment">//#include &lt;boost/shared_ptr.hpp&gt;</span>
 <a name="l00016"></a>00016 <span class="preprocessor">#include &quot;<a class="code" href="../../db/dc2/OIFData_8hpp.html" title="This class provides the interface for the optimizer module to access the data.">OIFData.hpp</a>&quot;</span>
 <a name="l00017"></a>00017 <span class="preprocessor">#include &quot;<a class="code" href="../../d8/dc8/OIFBase_8hpp.html" title="This class provides the interface to (external) optimization libraries or routines.">OIFBase.hpp</a>&quot;</span>
-<a name="l00018"></a>00018 <span class="preprocessor">#include &quot;<a class="code" href="../../d4/d3c/GArgumentParser_8hpp.html" title="Geneva argument parser to interpret command line arguments and config files.">GArgumentParser.hpp</a>&quot;</span>
-<a name="l00019"></a>00019 
-<a name="l00020"></a>00020 <span class="preprocessor">#include &lt;boost/program_options.hpp&gt;</span>
-<a name="l00021"></a>00021 <span class="preprocessor">#include &lt;boost/filesystem.hpp&gt;</span>
-<a name="l00022"></a>00022 
-<a name="l00023"></a>00023 <span class="comment">// Geneva header files go here</span>
-<a name="l00024"></a>00024 <span class="preprocessor">#include &lt;courtier/GAsioHelperFunctions.hpp&gt;</span>
-<a name="l00025"></a>00025 <span class="preprocessor">#include &lt;courtier/GAsioTCPClientT.hpp&gt;</span>
-<a name="l00026"></a>00026 <span class="preprocessor">#include &lt;courtier/GAsioTCPConsumerT.hpp&gt;</span>
-<a name="l00027"></a>00027 <span class="preprocessor">#include &lt;geneva/GBrokerEA.hpp&gt;</span>
-<a name="l00028"></a>00028 <span class="preprocessor">#include &lt;geneva/GEvolutionaryAlgorithm.hpp&gt;</span>
-<a name="l00029"></a>00029 <span class="preprocessor">#include &lt;geneva/GIndividual.hpp&gt;</span>
-<a name="l00030"></a>00030 <span class="preprocessor">#include &lt;geneva/GMultiThreadedEA.hpp&gt;</span>
-<a name="l00031"></a>00031 <span class="preprocessor">#include &lt;common/GCommonEnums.hpp&gt;</span>
-<a name="l00032"></a>00032 <span class="preprocessor">#include &lt;common/GSerializationHelperFunctionsT.hpp&gt;</span>
-<a name="l00033"></a>00033 <span class="preprocessor">#include &lt;geneva/GOptimizationEnums.hpp&gt;</span>
-<a name="l00034"></a>00034 
-<a name="l00035"></a><a class="code" href="../../d4/dce/classOIFGeneva.html">00035</a> <span class="keyword">class </span><a class="code" href="../../d4/dce/classOIFGeneva.html" title="Wrapper of the Geneva Optimizer library.">OIFGeneva</a> : <span class="keyword">public</span> <a class="code" href="../../d0/d31/classOIFBase.html" title="Optimizer Interface Base-Class.">OIFBase</a> {
-<a name="l00036"></a>00036 
-<a name="l00037"></a>00037 <span class="keyword">public</span>:
-<a name="l00039"></a>00039   <a class="code" href="../../d4/dce/classOIFGeneva.html#ab0725fff35e64106d69979527715f674" title="Default Constructor (0x0)">OIFGeneva</a>(std::shared_ptr&lt;OIFData&gt; theData, std::string inConfigFile=<span class="stringliteral">&quot;./../test/GStartProject.cfg&quot;</span>, boost::uint16_t inparallelizationMode=1, <span class="keywordtype">bool</span> inserverMode=<span class="keyword">false</span>, std::string inip=<span class="stringliteral">&quot;localhost&quot;</span>, <span class="keywordtype">unsigned</span> <span class="keywordtype">short</span> inport=10000, Gem::Common::serializationMode inserMode=Gem::Common::SERIALIZATIONMODE_TEXT);
-<a name="l00040"></a>00040   <span class="keyword">virtual</span> <span class="keyword">const</span> <span class="keywordtype">double</span> <a class="code" href="../../d4/dce/classOIFGeneva.html#a1a5cf2ace477bd40ce1c4848365a2f13">exec</a>(<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> Npar, <span class="keywordtype">double</span>* par,  <span class="keywordtype">double</span>* min, <span class="keywordtype">double</span>* max, <span class="keywordtype">double</span>* err); 
-<a name="l00041"></a>00041 
-<a name="l00043"></a>00043   <span class="keyword">virtual</span> <a class="code" href="../../d4/dce/classOIFGeneva.html#a72a8b0d30f8ef7d1d7dbe51a15a412e3">~OIFGeneva</a>();
-<a name="l00044"></a>00044 
-<a name="l00045"></a>00045  <span class="keyword">protected</span>:
-<a name="l00046"></a>00046 
-<a name="l00047"></a>00047  <span class="keyword">private</span>:
-<a name="l00048"></a><a class="code" href="../../d4/dce/classOIFGeneva.html#a6f384385ad5eebc149aa9cc84665c271">00048</a>   std::shared_ptr&lt;OIFData&gt; <a class="code" href="../../d4/dce/classOIFGeneva.html#a6f384385ad5eebc149aa9cc84665c271">_myData</a>;
-<a name="l00049"></a>00049  <span class="comment">// vector&lt;string&gt; paramNames;</span>
-<a name="l00050"></a>00050 
-<a name="l00051"></a><a class="code" href="../../d4/dce/classOIFGeneva.html#abf5610433384454ae4884b2f17f01f01">00051</a>   std::string <a class="code" href="../../d4/dce/classOIFGeneva.html#abf5610433384454ae4884b2f17f01f01">configFile</a>;       
-<a name="l00052"></a><a class="code" href="../../d4/dce/classOIFGeneva.html#ae51bcfad038f5365a2ff5c4d0691e05b">00052</a>   boost::uint16_t <a class="code" href="../../d4/dce/classOIFGeneva.html#ae51bcfad038f5365a2ff5c4d0691e05b">parallelizationMode</a>;
-<a name="l00053"></a><a class="code" href="../../d4/dce/classOIFGeneva.html#a12fed8d5df83853111e8e9bba2b00b5e">00053</a>   <span class="keywordtype">bool</span> <a class="code" href="../../d4/dce/classOIFGeneva.html#a12fed8d5df83853111e8e9bba2b00b5e">serverMode</a>;
-<a name="l00054"></a><a class="code" href="../../d4/dce/classOIFGeneva.html#a24b10918d314755d3c566ea8c17b2bc1">00054</a>   std::string <a class="code" href="../../d4/dce/classOIFGeneva.html#a24b10918d314755d3c566ea8c17b2bc1">ip</a>;
-<a name="l00055"></a><a class="code" href="../../d4/dce/classOIFGeneva.html#a49edc5e8fefa9137eab821b81f8015b1">00055</a>   <span class="keywordtype">unsigned</span> <span class="keywordtype">short</span> <a class="code" href="../../d4/dce/classOIFGeneva.html#a49edc5e8fefa9137eab821b81f8015b1">port</a>;
-<a name="l00056"></a><a class="code" href="../../d4/dce/classOIFGeneva.html#aaad7df3d69cbe6399123820e7fef2a3c">00056</a>   Gem::Common::serializationMode <a class="code" href="../../d4/dce/classOIFGeneva.html#aaad7df3d69cbe6399123820e7fef2a3c">serMode</a>;
-<a name="l00057"></a><a class="code" href="../../d4/dce/classOIFGeneva.html#a4b3bfbf12d2911a081fc7c5feb9c4ae7">00057</a>   boost::uint16_t <a class="code" href="../../d4/dce/classOIFGeneva.html#a4b3bfbf12d2911a081fc7c5feb9c4ae7">nProducerThreads</a>;
-<a name="l00058"></a><a class="code" href="../../d4/dce/classOIFGeneva.html#a9afb57f9439eddc693b06456c7f1a4a6">00058</a>   boost::uint16_t <a class="code" href="../../d4/dce/classOIFGeneva.html#a9afb57f9439eddc693b06456c7f1a4a6">nEvaluationThreads</a>;
-<a name="l00059"></a><a class="code" href="../../d4/dce/classOIFGeneva.html#a9797a7ec73f3bf9b192799813f601600">00059</a>   std::size_t <a class="code" href="../../d4/dce/classOIFGeneva.html#a9797a7ec73f3bf9b192799813f601600">populationSize</a>;
-<a name="l00060"></a><a class="code" href="../../d4/dce/classOIFGeneva.html#a01cfc180dd253ea8767446e4116f8bb2">00060</a>   std::size_t <a class="code" href="../../d4/dce/classOIFGeneva.html#a01cfc180dd253ea8767446e4116f8bb2">nParents</a>;
-<a name="l00061"></a><a class="code" href="../../d4/dce/classOIFGeneva.html#ae2a0cd2de953edc56ffa0dbb743fc9af">00061</a>   boost::uint32_t <a class="code" href="../../d4/dce/classOIFGeneva.html#ae2a0cd2de953edc56ffa0dbb743fc9af">maxIterations</a>;
-<a name="l00062"></a><a class="code" href="../../d4/dce/classOIFGeneva.html#a48b49d12e4ecd4a0e19b31692224f2a7">00062</a>   <span class="keywordtype">long</span> <a class="code" href="../../d4/dce/classOIFGeneva.html#a48b49d12e4ecd4a0e19b31692224f2a7">maxMinutes</a>;
-<a name="l00063"></a><a class="code" href="../../d4/dce/classOIFGeneva.html#a4419a9af665e5589174b4442fb3e44b9">00063</a>   boost::uint32_t <a class="code" href="../../d4/dce/classOIFGeneva.html#a4419a9af665e5589174b4442fb3e44b9">reportIteration</a>;
-<a name="l00064"></a><a class="code" href="../../d4/dce/classOIFGeneva.html#a84d9c1da4a30943abe44cbc58162755f">00064</a>   Gem::Geneva::recoScheme <a class="code" href="../../d4/dce/classOIFGeneva.html#a84d9c1da4a30943abe44cbc58162755f">rScheme</a>;
-<a name="l00065"></a><a class="code" href="../../d4/dce/classOIFGeneva.html#ae17ccd19943bfe1ced5f7b0373c36ee9">00065</a>   std::size_t <a class="code" href="../../d4/dce/classOIFGeneva.html#ae17ccd19943bfe1ced5f7b0373c36ee9">arraySize</a>;
-<a name="l00066"></a><a class="code" href="../../d4/dce/classOIFGeneva.html#a74949f91a856d291c760b6668ace8275">00066</a>   Gem::Geneva::sortingMode <a class="code" href="../../d4/dce/classOIFGeneva.html#a74949f91a856d291c760b6668ace8275">smode</a>;
-<a name="l00067"></a><a class="code" href="../../d4/dce/classOIFGeneva.html#a1e194ecfec04056b27e32205839a3f60">00067</a>   boost::uint32_t <a class="code" href="../../d4/dce/classOIFGeneva.html#a1e194ecfec04056b27e32205839a3f60">processingCycles</a>;
-<a name="l00068"></a><a class="code" href="../../d4/dce/classOIFGeneva.html#a812f07c15fdfda372b6fb82ad9d3795a">00068</a>   <span class="keywordtype">bool</span> <a class="code" href="../../d4/dce/classOIFGeneva.html#a812f07c15fdfda372b6fb82ad9d3795a">returnRegardless</a>;
-<a name="l00069"></a><a class="code" href="../../d4/dce/classOIFGeneva.html#ad40b4a27317aacf88a920b07c23010ab">00069</a>   boost::uint32_t <a class="code" href="../../d4/dce/classOIFGeneva.html#ad40b4a27317aacf88a920b07c23010ab">waitFactor</a>;
-<a name="l00070"></a>00070 
-<a name="l00071"></a>00071 };
-<a name="l00072"></a>00072 
-<a name="l00073"></a>00073 <span class="preprocessor">#endif </span><span class="comment">/* _OIFGeneva_HPP */</span>
+<a name="l00018"></a>00018 <span class="preprocessor">#include &quot;<a class="code" href="../../d1/d85/PWAParameter_8hpp.html" title="This class provides a internal container for information of a fit parameter.">PWAParameter.hpp</a>&quot;</span>
+<a name="l00019"></a>00019 <span class="preprocessor">#include &quot;<a class="code" href="../../d4/d3c/GArgumentParser_8hpp.html" title="Geneva argument parser to interpret command line arguments and config files.">GArgumentParser.hpp</a>&quot;</span>
+<a name="l00020"></a>00020 
+<a name="l00021"></a>00021 <span class="preprocessor">#include &lt;boost/program_options.hpp&gt;</span>
+<a name="l00022"></a>00022 <span class="preprocessor">#include &lt;boost/filesystem.hpp&gt;</span>
+<a name="l00023"></a>00023 
+<a name="l00024"></a>00024 <span class="comment">// Geneva header files go here</span>
+<a name="l00025"></a>00025 <span class="preprocessor">#include &lt;courtier/GAsioHelperFunctions.hpp&gt;</span>
+<a name="l00026"></a>00026 <span class="preprocessor">#include &lt;courtier/GAsioTCPClientT.hpp&gt;</span>
+<a name="l00027"></a>00027 <span class="preprocessor">#include &lt;courtier/GAsioTCPConsumerT.hpp&gt;</span>
+<a name="l00028"></a>00028 <span class="preprocessor">#include &lt;geneva/GBrokerEA.hpp&gt;</span>
+<a name="l00029"></a>00029 <span class="preprocessor">#include &lt;geneva/GEvolutionaryAlgorithm.hpp&gt;</span>
+<a name="l00030"></a>00030 <span class="preprocessor">#include &lt;geneva/GIndividual.hpp&gt;</span>
+<a name="l00031"></a>00031 <span class="preprocessor">#include &lt;geneva/GMultiThreadedEA.hpp&gt;</span>
+<a name="l00032"></a>00032 <span class="preprocessor">#include &lt;common/GCommonEnums.hpp&gt;</span>
+<a name="l00033"></a>00033 <span class="preprocessor">#include &lt;common/GSerializationHelperFunctionsT.hpp&gt;</span>
+<a name="l00034"></a>00034 <span class="preprocessor">#include &lt;geneva/GOptimizationEnums.hpp&gt;</span>
+<a name="l00035"></a>00035 
+<a name="l00036"></a><a class="code" href="../../d4/dce/classOIFGeneva.html">00036</a> <span class="keyword">class </span><a class="code" href="../../d4/dce/classOIFGeneva.html" title="Wrapper of the Geneva Optimizer library.">OIFGeneva</a> : <span class="keyword">public</span> <a class="code" href="../../d0/d31/classOIFBase.html" title="Optimizer Interface Base-Class.">OIFBase</a> {
+<a name="l00037"></a>00037 
+<a name="l00038"></a>00038 <span class="keyword">public</span>:
+<a name="l00040"></a>00040   <a class="code" href="../../d4/dce/classOIFGeneva.html#a89e83a814e6571cb875d18cdedf42449" title="Default Constructor (0x0)">OIFGeneva</a>(std::shared_ptr&lt;OIFData&gt; theData, std::string inConfigFile=<span class="stringliteral">&quot;test/GStartProject.cfg&quot;</span>, boost::uint16_t inparallelizationMode=1, <span class="keywordtype">bool</span> inserverMode=<span class="keyword">false</span>, std::string inip=<span class="stringliteral">&quot;localhost&quot;</span>, <span class="keywordtype">unsigned</span> <span class="keywordtype">short</span> inport=10000, Gem::Common::serializationMode inserMode=Gem::Common::SERIALIZATIONMODE_TEXT);
+<a name="l00041"></a>00041   <span class="keyword">virtual</span> <span class="keyword">const</span> <span class="keywordtype">double</span> <a class="code" href="../../d4/dce/classOIFGeneva.html#a1a5cf2ace477bd40ce1c4848365a2f13">exec</a>(<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> Npar, <span class="keywordtype">double</span>* par,  <span class="keywordtype">double</span>* min, <span class="keywordtype">double</span>* max, <span class="keywordtype">double</span>* err); 
+<a name="l00042"></a>00042 
+<a name="l00044"></a>00044   <span class="keyword">virtual</span> <a class="code" href="../../d4/dce/classOIFGeneva.html#a72a8b0d30f8ef7d1d7dbe51a15a412e3">~OIFGeneva</a>();
+<a name="l00045"></a>00045 
+<a name="l00046"></a>00046  <span class="keyword">protected</span>:
+<a name="l00047"></a>00047 
+<a name="l00048"></a>00048  <span class="keyword">private</span>:
+<a name="l00049"></a><a class="code" href="../../d4/dce/classOIFGeneva.html#a6f384385ad5eebc149aa9cc84665c271">00049</a>   std::shared_ptr&lt;OIFData&gt; <a class="code" href="../../d4/dce/classOIFGeneva.html#a6f384385ad5eebc149aa9cc84665c271">_myData</a>;
+<a name="l00050"></a>00050  <span class="comment">// vector&lt;string&gt; paramNames;</span>
+<a name="l00051"></a>00051 
+<a name="l00052"></a><a class="code" href="../../d4/dce/classOIFGeneva.html#abf5610433384454ae4884b2f17f01f01">00052</a>   std::string <a class="code" href="../../d4/dce/classOIFGeneva.html#abf5610433384454ae4884b2f17f01f01">configFile</a>;       
+<a name="l00053"></a><a class="code" href="../../d4/dce/classOIFGeneva.html#ae51bcfad038f5365a2ff5c4d0691e05b">00053</a>   boost::uint16_t <a class="code" href="../../d4/dce/classOIFGeneva.html#ae51bcfad038f5365a2ff5c4d0691e05b">parallelizationMode</a>;
+<a name="l00054"></a><a class="code" href="../../d4/dce/classOIFGeneva.html#a12fed8d5df83853111e8e9bba2b00b5e">00054</a>   <span class="keywordtype">bool</span> <a class="code" href="../../d4/dce/classOIFGeneva.html#a12fed8d5df83853111e8e9bba2b00b5e">serverMode</a>;
+<a name="l00055"></a><a class="code" href="../../d4/dce/classOIFGeneva.html#a24b10918d314755d3c566ea8c17b2bc1">00055</a>   std::string <a class="code" href="../../d4/dce/classOIFGeneva.html#a24b10918d314755d3c566ea8c17b2bc1">ip</a>;
+<a name="l00056"></a><a class="code" href="../../d4/dce/classOIFGeneva.html#a49edc5e8fefa9137eab821b81f8015b1">00056</a>   <span class="keywordtype">unsigned</span> <span class="keywordtype">short</span> <a class="code" href="../../d4/dce/classOIFGeneva.html#a49edc5e8fefa9137eab821b81f8015b1">port</a>;
+<a name="l00057"></a><a class="code" href="../../d4/dce/classOIFGeneva.html#aaad7df3d69cbe6399123820e7fef2a3c">00057</a>   Gem::Common::serializationMode <a class="code" href="../../d4/dce/classOIFGeneva.html#aaad7df3d69cbe6399123820e7fef2a3c">serMode</a>;
+<a name="l00058"></a><a class="code" href="../../d4/dce/classOIFGeneva.html#a4b3bfbf12d2911a081fc7c5feb9c4ae7">00058</a>   boost::uint16_t <a class="code" href="../../d4/dce/classOIFGeneva.html#a4b3bfbf12d2911a081fc7c5feb9c4ae7">nProducerThreads</a>;
+<a name="l00059"></a><a class="code" href="../../d4/dce/classOIFGeneva.html#a9afb57f9439eddc693b06456c7f1a4a6">00059</a>   boost::uint16_t <a class="code" href="../../d4/dce/classOIFGeneva.html#a9afb57f9439eddc693b06456c7f1a4a6">nEvaluationThreads</a>;
+<a name="l00060"></a><a class="code" href="../../d4/dce/classOIFGeneva.html#a9797a7ec73f3bf9b192799813f601600">00060</a>   std::size_t <a class="code" href="../../d4/dce/classOIFGeneva.html#a9797a7ec73f3bf9b192799813f601600">populationSize</a>;
+<a name="l00061"></a><a class="code" href="../../d4/dce/classOIFGeneva.html#a01cfc180dd253ea8767446e4116f8bb2">00061</a>   std::size_t <a class="code" href="../../d4/dce/classOIFGeneva.html#a01cfc180dd253ea8767446e4116f8bb2">nParents</a>;
+<a name="l00062"></a><a class="code" href="../../d4/dce/classOIFGeneva.html#ae2a0cd2de953edc56ffa0dbb743fc9af">00062</a>   boost::uint32_t <a class="code" href="../../d4/dce/classOIFGeneva.html#ae2a0cd2de953edc56ffa0dbb743fc9af">maxIterations</a>;
+<a name="l00063"></a><a class="code" href="../../d4/dce/classOIFGeneva.html#a48b49d12e4ecd4a0e19b31692224f2a7">00063</a>   <span class="keywordtype">long</span> <a class="code" href="../../d4/dce/classOIFGeneva.html#a48b49d12e4ecd4a0e19b31692224f2a7">maxMinutes</a>;
+<a name="l00064"></a><a class="code" href="../../d4/dce/classOIFGeneva.html#a4419a9af665e5589174b4442fb3e44b9">00064</a>   boost::uint32_t <a class="code" href="../../d4/dce/classOIFGeneva.html#a4419a9af665e5589174b4442fb3e44b9">reportIteration</a>;
+<a name="l00065"></a><a class="code" href="../../d4/dce/classOIFGeneva.html#a84d9c1da4a30943abe44cbc58162755f">00065</a>   Gem::Geneva::recoScheme <a class="code" href="../../d4/dce/classOIFGeneva.html#a84d9c1da4a30943abe44cbc58162755f">rScheme</a>;
+<a name="l00066"></a><a class="code" href="../../d4/dce/classOIFGeneva.html#ae17ccd19943bfe1ced5f7b0373c36ee9">00066</a>   std::size_t <a class="code" href="../../d4/dce/classOIFGeneva.html#ae17ccd19943bfe1ced5f7b0373c36ee9">arraySize</a>;
+<a name="l00067"></a><a class="code" href="../../d4/dce/classOIFGeneva.html#a74949f91a856d291c760b6668ace8275">00067</a>   Gem::Geneva::sortingMode <a class="code" href="../../d4/dce/classOIFGeneva.html#a74949f91a856d291c760b6668ace8275">smode</a>;
+<a name="l00068"></a><a class="code" href="../../d4/dce/classOIFGeneva.html#a1e194ecfec04056b27e32205839a3f60">00068</a>   boost::uint32_t <a class="code" href="../../d4/dce/classOIFGeneva.html#a1e194ecfec04056b27e32205839a3f60">processingCycles</a>;
+<a name="l00069"></a><a class="code" href="../../d4/dce/classOIFGeneva.html#a812f07c15fdfda372b6fb82ad9d3795a">00069</a>   <span class="keywordtype">bool</span> <a class="code" href="../../d4/dce/classOIFGeneva.html#a812f07c15fdfda372b6fb82ad9d3795a">returnRegardless</a>;
+<a name="l00070"></a><a class="code" href="../../d4/dce/classOIFGeneva.html#ad40b4a27317aacf88a920b07c23010ab">00070</a>   boost::uint32_t <a class="code" href="../../d4/dce/classOIFGeneva.html#ad40b4a27317aacf88a920b07c23010ab">waitFactor</a>;
+<a name="l00071"></a>00071 
+<a name="l00072"></a>00072 };
+<a name="l00073"></a>00073 
+<a name="l00074"></a>00074 <span class="preprocessor">#endif </span><span class="comment">/* _OIFGeneva_HPP */</span>
 </pre></div></div>
 </div>
 <!-- window showing the filter options -->
@@ -141,7 +142,7 @@ var searchBox = new SearchBox("searchBox", "../../search",false,'Search');
 </iframe>
 </div>
 
-<hr class="footer"/><address class="footer"><small>Generated on Thu Nov 8 2012 for ComPWA by&#160;
+<hr class="footer"/><address class="footer"><small>Generated on Tue Nov 13 2012 for ComPWA by&#160;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="../../doxygen.png" alt="doxygen"/></a> 1.7.4 </small></address>
 </body>

@@ -1,5 +1,6 @@
 <map id="G" name="G">
-<area shape="rect" id="node1" href="$d0/d31/classOIFBase.html" title="Optimizer Interface Base&#45;Class." alt="" coords="5,32,80,61"/>
-<area shape="rect" id="node3" href="$d4/dce/classOIFGeneva.html" title="Wrapper of the Geneva Optimizer library." alt="" coords="129,5,217,35"/>
-<area shape="rect" id="node5" href="$d5/db7/classOIFMinuit.html" title="Wrapper of the Minuit2 Optimizer library." alt="" coords="135,59,212,88"/>
+<area shape="rect" id="node1" href="$d1/d4f/classOIFData.html" title="Optimizer Data Base&#45;Class." alt="" coords="5,32,77,61"/>
+<area shape="rect" id="node3" href="$df/d13/classEIFBase.html" title="Estimator Interface Base&#45;Class." alt="" coords="127,5,199,35"/>
+<area shape="rect" id="node7" href="$de/d89/classPolyFit.html" title="Test implementation of OIFData.hpp." alt="" coords="132,59,193,88"/>
+<area shape="rect" id="node5" href="$db/d1d/classEIFChiOneD.html" title="Simple &#45;Estimator." alt="" coords="249,5,345,35"/>
 </map>

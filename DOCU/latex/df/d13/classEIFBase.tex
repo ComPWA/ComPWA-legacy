@@ -13,12 +13,20 @@ Estimator Interface Base-\/Class.
 
 
 
-Inheritance diagram for EIFBase:
-\nopagebreak
+Inheritance diagram for EIFBase:\nopagebreak
 \begin{figure}[H]
 \begin{center}
 \leavevmode
-\includegraphics[width=184pt]{d7/d7a/classEIFBase__inherit__graph}
+\includegraphics[width=186pt]{d7/d7a/classEIFBase__inherit__graph}
+\end{center}
+\end{figure}
+
+
+Collaboration diagram for EIFBase:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=186pt]{db/da5/classEIFBase__coll__graph}
 \end{center}
 \end{figure}
 \subsection*{Public Member Functions}
@@ -28,7 +36,7 @@ Inheritance diagram for EIFBase:
 \item 
 virtual \hyperlink{classEIFBase_ae4253811072d1d4251a009bda238f450}{$\sim$EIFBase} ()
 \item 
-virtual const int \hyperlink{classEIFBase_af98fe883244454497c421bc824b96188}{getEstimatedVal} (double \&)=0
+virtual double \hyperlink{classEIFBase_a85937003fd68b507ddc99bfcee3a4b27}{controlParameter} (const std::vector$<$ \hyperlink{classPWAParameter}{PWAParameter}$<$ double $>$ $>$ \&minPar)=0
 \end{DoxyCompactItemize}
 
 
@@ -57,18 +65,22 @@ Estimator Interface Base-\/Class.
 
 
 \subsection{Member Function Documentation}
-\hypertarget{classEIFBase_af98fe883244454497c421bc824b96188}{
-\index{EIFBase@{EIFBase}!getEstimatedVal@{getEstimatedVal}}
-\index{getEstimatedVal@{getEstimatedVal}!EIFBase@{EIFBase}}
-\subsubsection[{getEstimatedVal}]{\setlength{\rightskip}{0pt plus 5cm}virtual const int EIFBase::getEstimatedVal (
+\hypertarget{classEIFBase_a85937003fd68b507ddc99bfcee3a4b27}{
+\index{EIFBase@{EIFBase}!controlParameter@{controlParameter}}
+\index{controlParameter@{controlParameter}!EIFBase@{EIFBase}}
+\subsubsection[{controlParameter}]{\setlength{\rightskip}{0pt plus 5cm}virtual double EIFBase::controlParameter (
 \begin{DoxyParamCaption}
-\item[{double \&}]{}
+\item[{const std::vector$<$ {\bf PWAParameter}$<$ double $>$ $>$ \&}]{minPar}
 \end{DoxyParamCaption}
 )\hspace{0.3cm}{\ttfamily  \mbox{[}pure virtual\mbox{]}}}}
-\label{df/d13/classEIFBase_af98fe883244454497c421bc824b96188}
+\label{df/d13/classEIFBase_a85937003fd68b507ddc99bfcee3a4b27}
 
 
-Implemented in \hyperlink{classEIFChiOneD_a8a428668c99022b2b9bdae756fe792ca}{EIFChiOneD}.
+Implements \hyperlink{classOIFData_a12eef51d074a73b5b261c411e79cbb37}{OIFData}.
+
+
+
+Implemented in \hyperlink{classEIFChiOneD_a014a763220034f5547c2d395b3508b8d}{EIFChiOneD}.
 
 
 

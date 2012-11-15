@@ -28,9 +28,10 @@ int main(int argc, char **argv){
   PWAParameter<int> c(2,0,5,1); //int par
   PWAParameter<int> d(c); //copy constructor
   shared_ptr<PWAParameter<int> > p(new PWAParameter<int>(3,0,5,1)); //pointer
-  vector<PWAParameter<int> > v; //vector
+  vector<PWAParameter<int> > v, w; //vector
   for(unsigned int par=0; par<10; par++)
     v.push_back(PWAParameter<int>(par,0,10,1));
+  w = v; //copy vector
 
   //Test reading
   cout << "Constructor-Test output: \t" << endl;
@@ -41,6 +42,8 @@ int main(int argc, char **argv){
   cout << "pointer int: \t" << *p << endl;
   for(unsigned int par=0; par<10; par++)
     cout << "vector " << par << ": \t" << v[par] << endl;
+  for(unsigned int par=0; par<10; par++)
+    cout << "copyvec " << par << ": \t" << v[par] << endl;
   cout << endl;
 
   //Test Getter & Setter

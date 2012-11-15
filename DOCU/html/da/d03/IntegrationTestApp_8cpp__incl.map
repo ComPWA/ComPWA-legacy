@@ -1,0 +1,16 @@
+<map id="G" name="G">
+<area shape="rect" id="node15" href="$db/d3e/DIFRootReader_8hpp.html" title="This class reads event&#45;based data from root&#45;files." alt="" coords="735,83,873,112"/>
+<area shape="rect" id="node45" href="$dd/da0/PIFBW_8hpp.html" title="This class provides a simple Breit&#45;Wigner calculation with given parameters." alt="" coords="2296,160,2387,189"/>
+<area shape="rect" id="node57" href="$d3/d5d/EIFChiOneD_8hpp.html" title="This class calculates a simple &#160;of a intensity and a dataset." alt="" coords="1624,83,1747,112"/>
+<area shape="rect" id="node73" href="$d8/d0f/OIFMinuit_8hpp.html" title="This class provides a wrapper around the Minuit2 library." alt="" coords="1933,83,2037,112"/>
+<area shape="rect" id="node88" href="$d2/dcb/PolyFit_8hpp.html" title="This class derives from OIFData.hpp, the data&#45;interface of the optimizers." alt="" coords="1109,160,1197,189"/>
+<area shape="rect" id="node20" href="$db/d2c/DIFBase_8hpp.html" title="This class provides the interface to experimental data." alt="" coords="1323,160,1421,189"/>
+<area shape="rect" id="node22" href="$d8/d14/PWAEvent_8hpp.html" title="This class provides a internal container for event&#45;based information." alt="" coords="1421,237,1533,267"/>
+<area shape="rect" id="node25" href="$d3/ded/PWAParticle_8hpp.html" title="This class provides a internal container for information of a particle." alt="" coords="1416,315,1539,344"/>
+<area shape="rect" id="node49" href="$de/dc5/PIFBase_8hpp.html" title="This class provides the interface to the model which tries to describe the intensity." alt="" coords="2184,237,2283,267"/>
+<area shape="rect" id="node52" href="$d1/d85/PWAParameter_8hpp.html" title="This class provides a internal container for information of a fit parameter." alt="" coords="1613,315,1752,344"/>
+<area shape="rect" id="node62" href="$df/d05/EIFBase_8hpp.html" title="This class provides the interface to classes which estimate the &quot;closeness&quot; of the modeled intensity ..." alt="" coords="1749,160,1848,189"/>
+<area shape="rect" id="node64" href="$db/dc2/OIFData_8hpp.html" title="This class provides the interface for the optimizer module to access the data." alt="" coords="1752,237,1848,267"/>
+<area shape="rect" id="node78" href="$d8/dc8/OIFBase_8hpp.html" title="This class provides the interface to (external) optimization libraries or routines." alt="" coords="2173,160,2272,189"/>
+<area shape="rect" id="node80" href="$d4/dce/OIFMinuitFcn_8hpp.html" title="Based on the Minuit2 FcnBase." alt="" coords="1973,160,2099,189"/>
+</map>

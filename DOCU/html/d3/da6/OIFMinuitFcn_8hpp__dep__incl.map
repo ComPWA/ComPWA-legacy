@@ -1,7 +1,8 @@
 <map id="G" name="G">
-<area shape="rect" id="node3" href="$d8/d0f/OIFMinuit_8hpp.html" title="This class provides a wrapper around the Minuit2 library." alt="" coords="193,83,364,112"/>
-<area shape="rect" id="node11" href="$d5/db0/OIFMinuitFcn_8cpp.html" title="OIFMinuit2/OIFMinuitFcn.cpp" alt="" coords="388,83,583,112"/>
+<area shape="rect" id="node3" href="$d8/d0f/OIFMinuit_8hpp.html" title="This class provides a wrapper around the Minuit2 library." alt="" coords="301,83,472,112"/>
+<area shape="rect" id="node13" href="$d5/db0/OIFMinuitFcn_8cpp.html" title="OIFMinuit2/OIFMinuitFcn.cpp" alt="" coords="496,83,691,112"/>
 <area shape="rect" id="node5" href="$d7/d2d/OIFMinuit_8cpp.html" title="OIFMinuit2/OIFMinuit.cpp" alt="" coords="5,160,176,189"/>
-<area shape="rect" id="node7" href="$da/d21/MinuitTestApp_8cpp.html" title="Test&#45;Application of the Minuit2 Optimizer&#45;IF." alt="" coords="200,160,357,189"/>
-<area shape="rect" id="node9" href="$d4/db7/OptimizerTestApp_8cpp.html" title="Test&#45;Application of the Optimizer&#45;IF." alt="" coords="381,160,560,189"/>
+<area shape="rect" id="node7" href="$d5/d26/IntegrationTestApp_8cpp.html" title="Test&#45;Application for full fit with simple modules." alt="" coords="200,160,381,189"/>
+<area shape="rect" id="node9" href="$da/d21/MinuitTestApp_8cpp.html" title="Test&#45;Application of the Minuit2 Optimizer&#45;IF." alt="" coords="405,160,563,189"/>
+<area shape="rect" id="node11" href="$d4/db7/OptimizerTestApp_8cpp.html" title="Test&#45;Application of the Optimizer&#45;IF." alt="" coords="587,160,765,189"/>
 </map>

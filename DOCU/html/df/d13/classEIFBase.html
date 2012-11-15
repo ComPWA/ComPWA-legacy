@@ -66,7 +66,7 @@ var searchBox = new SearchBox("searchBox", "../../search",false,'Search');
 <div class="title">EIFBase Class Reference</div>  </div>
 </div>
 <div class="contents">
-<!-- doxytag: class="EIFBase" -->
+<!-- doxytag: class="EIFBase" --><!-- doxytag: inherits="OIFData" -->
 <p>Estimator Interface Base-Class.  
  <a href="../../df/d13/classEIFBase.html#details">More...</a></p>
 
@@ -76,7 +76,14 @@ Inheritance diagram for EIFBase:</div>
 <div class="dyncontent">
 <div class="center"><img src="../../d7/d7a/classEIFBase__inherit__graph.png" border="0" usemap="#EIFBase_inherit__map" alt="Inheritance graph"/></div>
 <map name="EIFBase_inherit__map" id="EIFBase_inherit__map">
-<area shape="rect" id="node3" href="../../db/d1d/classEIFChiOneD.html" title="Simple &#45;Estimator." alt="" coords="5,174,144,311"/></map>
+<area shape="rect" id="node5" href="../../db/d1d/classEIFChiOneD.html" title="Simple &#45;Estimator." alt="" coords="5,342,147,479"/><area shape="rect" id="node2" href="../../d1/d4f/classOIFData.html" title="Optimizer Data Base&#45;Class." alt="" coords="5,5,147,125"/></map>
+<center><span class="legend">[<a href="../../graph_legend.html">legend</a>]</span></center></div>
+<div class="dynheader">
+Collaboration diagram for EIFBase:</div>
+<div class="dyncontent">
+<div class="center"><img src="../../db/da5/classEIFBase__coll__graph.png" border="0" usemap="#EIFBase_coll__map" alt="Collaboration graph"/></div>
+<map name="EIFBase_coll__map" id="EIFBase_coll__map">
+<area shape="rect" id="node2" href="../../d1/d4f/classOIFData.html" title="Optimizer Data Base&#45;Class." alt="" coords="5,5,147,125"/></map>
 <center><span class="legend">[<a href="../../graph_legend.html">legend</a>]</span></center></div>
 
 <p><a href="../../d3/dd3/classEIFBase-members.html">List of all members.</a></p>
@@ -85,7 +92,7 @@ Inheritance diagram for EIFBase:</div>
 Public Member Functions</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../df/d13/classEIFBase.html#a8b6ea6ef6b90d40293b55a71249cb5f0">EIFBase</a> ()</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../df/d13/classEIFBase.html#ae4253811072d1d4251a009bda238f450">~EIFBase</a> ()</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">virtual const int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../df/d13/classEIFBase.html#af98fe883244454497c421bc824b96188">getEstimatedVal</a> (double &amp;)=0</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">virtual double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../df/d13/classEIFBase.html#a85937003fd68b507ddc99bfcee3a4b27">controlParameter</a> (const std::vector&lt; <a class="el" href="../../d2/d41/classPWAParameter.html">PWAParameter</a>&lt; double &gt; &gt; &amp;minPar)=0</td></tr>
 </table>
 <hr/><a name="details" id="details"></a><h2>Detailed Description</h2>
 <div class="textblock"><p>Estimator Interface Base-Class. </p>
@@ -123,22 +130,24 @@ Public Member Functions</h2></td></tr>
 </div>
 </div>
 <hr/><h2>Member Function Documentation</h2>
-<a class="anchor" id="af98fe883244454497c421bc824b96188"></a><!-- doxytag: member="EIFBase::getEstimatedVal" ref="af98fe883244454497c421bc824b96188" args="(double &amp;)=0" -->
+<a class="anchor" id="a85937003fd68b507ddc99bfcee3a4b27"></a><!-- doxytag: member="EIFBase::controlParameter" ref="a85937003fd68b507ddc99bfcee3a4b27" args="(const std::vector&lt; PWAParameter&lt; double &gt; &gt; &amp;minPar)=0" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">virtual const int EIFBase::getEstimatedVal </td>
+          <td class="memname">virtual double EIFBase::controlParameter </td>
           <td>(</td>
-          <td class="paramtype">double &amp;&#160;</td>
-          <td class="paramname"></td><td>)</td>
+          <td class="paramtype">const std::vector&lt; <a class="el" href="../../d2/d41/classPWAParameter.html">PWAParameter</a>&lt; double &gt; &gt; &amp;&#160;</td>
+          <td class="paramname"><em>minPar</em></td><td>)</td>
           <td><code> [pure virtual]</code></td>
         </tr>
       </table>
 </div>
 <div class="memdoc">
 
-<p>Implemented in <a class="el" href="../../db/d1d/classEIFChiOneD.html#a8a428668c99022b2b9bdae756fe792ca">EIFChiOneD</a>.</p>
+<p>Implements <a class="el" href="../../d1/d4f/classOIFData.html#a12eef51d074a73b5b261c411e79cbb37">OIFData</a>.</p>
+
+<p>Implemented in <a class="el" href="../../db/d1d/classEIFChiOneD.html#a014a763220034f5547c2d395b3508b8d">EIFChiOneD</a>.</p>
 
 </div>
 </div>
@@ -160,7 +169,7 @@ Public Member Functions</h2></td></tr>
 </iframe>
 </div>
 
-<hr class="footer"/><address class="footer"><small>Generated on Thu Nov 8 2012 for ComPWA by&#160;
+<hr class="footer"/><address class="footer"><small>Generated on Tue Nov 13 2012 for ComPWA by&#160;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="../../doxygen.png" alt="doxygen"/></a> 1.7.4 </small></address>
 </body>

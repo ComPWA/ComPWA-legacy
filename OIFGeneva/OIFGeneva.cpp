@@ -5,6 +5,7 @@
 #include <memory>
 #include "OIFGeneva.hpp"
 #include "GStartIndividual.hpp"
+#include "PWAParameter.hpp"
 
 using namespace Gem::Geneva;
 using namespace Gem::Courtier;
@@ -34,7 +35,16 @@ OIFGeneva::~OIFGeneva()
   //delete _myFcn;
 }
 
-const double OIFGeneva::exec(unsigned int Npar,  double* par,  double* min, double* max, double* err){
+const double OIFGeneva::exec(std::vector<PWAParameter<double> >& par){
+  // create par arrays
+  unsigned int NPar = par.size();
+  double val[NPar], min[NPar], max[NPar], err[NPar];
+  for(unsigned int i=0; i<NPar; i++){
+      val[i] = par[i].GetValue();
+      min[i] = par[i].GetMinValue();
+      max[i] = par[i].GetMaxValue();
+      err[i] = par[i].GetError();
+  }
 
   // Random numbers are our most valuable good. Set the number of threads
   GRANDOMFACTORY->setNProducerThreads(nProducerThreads);
@@ -63,7 +73,7 @@ const double OIFGeneva::exec(unsigned int Npar,  double* par,  double* min, doub
   std::vector<boost::shared_ptr<GStartIndividual> > parentIndividuals;
   for(std::size_t p = 0 ; p<nParents; p++) {
     //TODO: vary start parameters
-    boost::shared_ptr<GStartIndividual> gdii_ptr(new GStartIndividual(_myData, Npar, par, min, max, err));
+    boost::shared_ptr<GStartIndividual> gdii_ptr(new GStartIndividual(_myData, NPar, val, min, max, err));
     gdii_ptr->setProcessingCycles(processingCycles);
 
     parentIndividuals.push_back(gdii_ptr);
@@ -130,7 +140,7 @@ const double OIFGeneva::exec(unsigned int Npar,  double* par,  double* min, doub
   pop_ptr->setReportIteration(reportIteration);
   pop_ptr->setRecombinationMethod(rScheme);
   pop_ptr->setSortingScheme(smode);
-  
+
   // Do the actual optimization
   pop_ptr->optimize();
 
@@ -141,9 +151,9 @@ const double OIFGeneva::exec(unsigned int Npar,  double* par,  double* min, doub
   std::vector<PWAParameter<double> > resultPar;
   bestIndividual_ptr->getPar(resultPar);
 
-  for(unsigned int i=0; i<Npar; i++){
-    par[i]=resultPar.at(i).GetValue();
-  }
+  //par = resultPar; Geneva ignores bounds and errors!
+  for(unsigned int i=0; i<par.size(); i++)  //TODO: better way?
+    par[i].SetValue(resultPar[i].GetValue());
 
   return _myData->controlParameter(resultPar);// bestIndividual_ptr->fitnessCalculation();
 }

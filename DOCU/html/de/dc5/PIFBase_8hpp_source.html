@@ -66,23 +66,27 @@ var searchBox = new SearchBox("searchBox", "../../search",false,'Search');
 <a name="l00012"></a>00012 <span class="preprocessor">#ifndef PIFBASE_HPP_</span>
 <a name="l00013"></a>00013 <span class="preprocessor"></span><span class="preprocessor">#define PIFBASE_HPP_</span>
 <a name="l00014"></a>00014 <span class="preprocessor"></span>
-<a name="l00015"></a><a class="code" href="../../d5/d3f/classPIFBase.html">00015</a> <span class="keyword">class </span><a class="code" href="../../d5/d3f/classPIFBase.html" title="Physics Interface Base-Class.">PIFBase</a>
-<a name="l00016"></a>00016 {
+<a name="l00015"></a>00015 <span class="preprocessor">#include &lt;vector&gt;</span>
+<a name="l00016"></a>00016 <span class="preprocessor">#include &quot;<a class="code" href="../../d1/d85/PWAParameter_8hpp.html" title="This class provides a internal container for information of a fit parameter.">PWAParameter.hpp</a>&quot;</span>
 <a name="l00017"></a>00017 
-<a name="l00018"></a>00018 <span class="keyword">public</span>:
-<a name="l00019"></a>00019 
-<a name="l00020"></a><a class="code" href="../../d5/d3f/classPIFBase.html#aa435256425c756fa92b2008ca7381a47">00020</a>   <a class="code" href="../../d5/d3f/classPIFBase.html#aa435256425c756fa92b2008ca7381a47">PIFBase</a>()
-<a name="l00021"></a>00021           {
-<a name="l00022"></a>00022           }
-<a name="l00023"></a>00023 
-<a name="l00024"></a><a class="code" href="../../d5/d3f/classPIFBase.html#a0b598b33b36f0ecda10c9cafe3c8e083">00024</a>   <span class="keyword">virtual</span> <a class="code" href="../../d5/d3f/classPIFBase.html#a0b598b33b36f0ecda10c9cafe3c8e083">~PIFBase</a>()
-<a name="l00025"></a>00025         { <span class="comment">/* nothing */</span> }
+<a name="l00018"></a><a class="code" href="../../d5/d3f/classPIFBase.html">00018</a> <span class="keyword">class </span><a class="code" href="../../d5/d3f/classPIFBase.html" title="Physics Interface Base-Class.">PIFBase</a>
+<a name="l00019"></a>00019 {
+<a name="l00020"></a>00020 
+<a name="l00021"></a>00021 <span class="keyword">public</span>:
+<a name="l00022"></a>00022 
+<a name="l00023"></a><a class="code" href="../../d5/d3f/classPIFBase.html#aa435256425c756fa92b2008ca7381a47">00023</a>   <a class="code" href="../../d5/d3f/classPIFBase.html#aa435256425c756fa92b2008ca7381a47">PIFBase</a>()
+<a name="l00024"></a>00024           {
+<a name="l00025"></a>00025           }
 <a name="l00026"></a>00026 
-<a name="l00027"></a>00027   <span class="keyword">virtual</span> <span class="keyword">const</span> <span class="keywordtype">double</span> <a class="code" href="../../d5/d3f/classPIFBase.html#a7e0628a7d23475f2471fb9b7262659cf">intensity</a>(<span class="keywordtype">double</span> x, <span class="keywordtype">double</span> M, <span class="keywordtype">double</span> T) =0;
-<a name="l00028"></a>00028 
-<a name="l00029"></a>00029 };
-<a name="l00030"></a>00030 
-<a name="l00031"></a>00031 <span class="preprocessor">#endif</span>
+<a name="l00027"></a><a class="code" href="../../d5/d3f/classPIFBase.html#a0b598b33b36f0ecda10c9cafe3c8e083">00027</a>   <span class="keyword">virtual</span> <a class="code" href="../../d5/d3f/classPIFBase.html#a0b598b33b36f0ecda10c9cafe3c8e083">~PIFBase</a>()
+<a name="l00028"></a>00028         { <span class="comment">/* nothing */</span> }
+<a name="l00029"></a>00029 
+<a name="l00030"></a>00030   <span class="comment">//virtual const double intensity(double x, double M, double T) =0;</span>
+<a name="l00031"></a>00031   <span class="keyword">virtual</span> <span class="keyword">const</span> <span class="keywordtype">double</span> <a class="code" href="../../d5/d3f/classPIFBase.html#a4def79f9856b29d19525dc0ac037da7b">intensity</a>(std::vector&lt;double&gt; x, std::vector&lt;<a class="code" href="../../d2/d41/classPWAParameter.html" title="Internal container representing a parameter.">PWAParameter&lt;double&gt;</a> &gt; par) =0;
+<a name="l00032"></a>00032 
+<a name="l00033"></a>00033 };
+<a name="l00034"></a>00034 
+<a name="l00035"></a>00035 <span class="preprocessor">#endif</span>
 </pre></div></div>
 </div>
 <!-- window showing the filter options -->
@@ -99,7 +103,7 @@ var searchBox = new SearchBox("searchBox", "../../search",false,'Search');
 </iframe>
 </div>
 
-<hr class="footer"/><address class="footer"><small>Generated on Thu Nov 8 2012 for ComPWA by&#160;
+<hr class="footer"/><address class="footer"><small>Generated on Tue Nov 13 2012 for ComPWA by&#160;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="../../doxygen.png" alt="doxygen"/></a> 1.7.4 </small></address>
 </body>

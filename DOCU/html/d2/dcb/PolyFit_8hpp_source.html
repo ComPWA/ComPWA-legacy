@@ -80,45 +80,46 @@ var searchBox = new SearchBox("searchBox", "../../search",false,'Search');
 <a name="l00024"></a>00024 <span class="comment">//#include &quot;qft++/topincludes/relativistic-quantum-mechanics.hh&quot;</span>
 <a name="l00025"></a>00025 
 <a name="l00026"></a>00026 <span class="preprocessor">#include &quot;<a class="code" href="../../db/dc2/OIFData_8hpp.html" title="This class provides the interface for the optimizer module to access the data.">OIFData.hpp</a>&quot;</span>
-<a name="l00027"></a>00027 
-<a name="l00028"></a>00028 <span class="keyword">using namespace </span>std;
-<a name="l00029"></a>00029 
-<a name="l00030"></a>00030 <span class="keyword">class </span>TFile;
-<a name="l00031"></a>00031 <span class="keyword">class </span>TGraph;
-<a name="l00032"></a>00032 <span class="keyword">class </span>TCanvas;
-<a name="l00033"></a>00033 <span class="keyword">class </span>TRandom;
-<a name="l00034"></a>00034 
-<a name="l00035"></a><a class="code" href="../../de/d89/classPolyFit.html">00035</a> <span class="keyword">class </span><a class="code" href="../../de/d89/classPolyFit.html" title="Test implementation of OIFData.hpp.">PolyFit</a> : <span class="keyword">public</span> <a class="code" href="../../d1/d4f/classOIFData.html" title="Optimizer Data Base-Class.">OIFData</a> {
-<a name="l00036"></a>00036 
-<a name="l00037"></a>00037 <span class="keyword">public</span>:
-<a name="l00038"></a>00038 
-<a name="l00039"></a>00039   <span class="comment">// create/copy/destroy:</span>
-<a name="l00040"></a>00040 
-<a name="l00042"></a>00042   <a class="code" href="../../de/d89/classPolyFit.html" title="Test implementation of OIFData.hpp.">PolyFit</a>(<span class="keywordtype">double</span> p0, <span class="keywordtype">double</span> p1, <span class="keywordtype">double</span> p2, <span class="keywordtype">double</span> p3, <span class="keywordtype">double</span> sigma);
-<a name="l00043"></a>00043 
+<a name="l00027"></a>00027 <span class="preprocessor">#include &quot;<a class="code" href="../../d1/d85/PWAParameter_8hpp.html" title="This class provides a internal container for information of a fit parameter.">PWAParameter.hpp</a>&quot;</span>
+<a name="l00028"></a>00028 
+<a name="l00029"></a>00029 <span class="keyword">using namespace </span>std;
+<a name="l00030"></a>00030 
+<a name="l00031"></a>00031 <span class="keyword">class </span>TFile;
+<a name="l00032"></a>00032 <span class="keyword">class </span>TGraph;
+<a name="l00033"></a>00033 <span class="keyword">class </span>TCanvas;
+<a name="l00034"></a>00034 <span class="keyword">class </span>TRandom;
+<a name="l00035"></a>00035 
+<a name="l00036"></a><a class="code" href="../../de/d89/classPolyFit.html">00036</a> <span class="keyword">class </span><a class="code" href="../../de/d89/classPolyFit.html" title="Test implementation of OIFData.hpp.">PolyFit</a> : <span class="keyword">public</span> <a class="code" href="../../d1/d4f/classOIFData.html" title="Optimizer Data Base-Class.">OIFData</a> {
+<a name="l00037"></a>00037 
+<a name="l00038"></a>00038 <span class="keyword">public</span>:
+<a name="l00039"></a>00039 
+<a name="l00040"></a>00040   <span class="comment">// create/copy/destroy:</span>
+<a name="l00041"></a>00041 
+<a name="l00043"></a>00043   <a class="code" href="../../de/d89/classPolyFit.html" title="Test implementation of OIFData.hpp.">PolyFit</a>(<span class="keywordtype">double</span> p0, <span class="keywordtype">double</span> p1, <span class="keywordtype">double</span> p2, <span class="keywordtype">double</span> p3, <span class="keywordtype">double</span> sigma);
 <a name="l00044"></a>00044 
-<a name="l00046"></a>00046   <span class="keyword">virtual</span> ~<a class="code" href="../../de/d89/classPolyFit.html" title="Test implementation of OIFData.hpp.">PolyFit</a>();
-<a name="l00047"></a>00047 
+<a name="l00045"></a>00045 
+<a name="l00047"></a>00047   <span class="keyword">virtual</span> ~<a class="code" href="../../de/d89/classPolyFit.html" title="Test implementation of OIFData.hpp.">PolyFit</a>();
 <a name="l00048"></a>00048 
-<a name="l00049"></a>00049   <span class="keywordtype">double</span> controlParameter(<span class="keyword">const</span> vector&lt;double&gt;&amp; minPar);
-<a name="l00050"></a>00050   <span class="keywordtype">void</span> drawGraph(<span class="keywordtype">double</span> a, <span class="keywordtype">double</span> b, <span class="keywordtype">double</span> c, <span class="keywordtype">double</span> d);
-<a name="l00051"></a>00051   <span class="comment">// Getters:</span>
-<a name="l00052"></a>00052  
-<a name="l00053"></a>00053 <span class="keyword">protected</span>:
-<a name="l00054"></a>00054 
+<a name="l00049"></a>00049 
+<a name="l00050"></a>00050   <span class="keywordtype">double</span> controlParameter(<span class="keyword">const</span> vector&lt;<a class="code" href="../../d2/d41/classPWAParameter.html" title="Internal container representing a parameter.">PWAParameter&lt;double&gt;</a> &gt;&amp; minPar);
+<a name="l00051"></a>00051   <span class="keywordtype">void</span> drawGraph(<span class="keywordtype">double</span> a, <span class="keywordtype">double</span> b, <span class="keywordtype">double</span> c, <span class="keywordtype">double</span> d);
+<a name="l00052"></a>00052   <span class="comment">// Getters:</span>
+<a name="l00053"></a>00053  
+<a name="l00054"></a>00054 <span class="keyword">protected</span>:
 <a name="l00055"></a>00055 
-<a name="l00056"></a>00056 <span class="keyword">private</span>:
-<a name="l00057"></a><a class="code" href="../../de/d89/classPolyFit.html#a9905a65c08ba059c98a0e4cf14dc1752">00057</a>   shared_ptr&lt;TFile&gt; <a class="code" href="../../de/d89/classPolyFit.html#a9905a65c08ba059c98a0e4cf14dc1752">_theTFile</a>;
-<a name="l00058"></a><a class="code" href="../../de/d89/classPolyFit.html#ae3de4c7d4cda8ce2cf162d9d70631cba">00058</a>   map &lt;unsigned int, TGraph* &gt; <a class="code" href="../../de/d89/classPolyFit.html#ae3de4c7d4cda8ce2cf162d9d70631cba">_myGraph</a>;
-<a name="l00059"></a>00059 
-<a name="l00060"></a><a class="code" href="../../de/d89/classPolyFit.html#a0092a72e38616b0541f5ca2d3e109397">00060</a>   vector&lt; double &gt; <a class="code" href="../../de/d89/classPolyFit.html#a0092a72e38616b0541f5ca2d3e109397">_xValue</a>;
-<a name="l00061"></a><a class="code" href="../../de/d89/classPolyFit.html#a29d10890ebfda2ec6f0e7697dca5258f">00061</a>   vector&lt; double &gt; <a class="code" href="../../de/d89/classPolyFit.html#a29d10890ebfda2ec6f0e7697dca5258f">_yValue</a>;
-<a name="l00062"></a>00062 
-<a name="l00063"></a><a class="code" href="../../de/d89/classPolyFit.html#a0a19ea869319d65f97de4d0bc95e8061">00063</a>   <span class="keywordtype">double</span> <a class="code" href="../../de/d89/classPolyFit.html#a0a19ea869319d65f97de4d0bc95e8061">_sigma</a>;
-<a name="l00064"></a>00064 
-<a name="l00065"></a>00065 };
-<a name="l00066"></a>00066 
-<a name="l00067"></a>00067 <span class="preprocessor">#endif</span>
+<a name="l00056"></a>00056 
+<a name="l00057"></a>00057 <span class="keyword">private</span>:
+<a name="l00058"></a><a class="code" href="../../de/d89/classPolyFit.html#a9905a65c08ba059c98a0e4cf14dc1752">00058</a>   shared_ptr&lt;TFile&gt; <a class="code" href="../../de/d89/classPolyFit.html#a9905a65c08ba059c98a0e4cf14dc1752">_theTFile</a>;
+<a name="l00059"></a><a class="code" href="../../de/d89/classPolyFit.html#ae3de4c7d4cda8ce2cf162d9d70631cba">00059</a>   map &lt;unsigned int, TGraph* &gt; <a class="code" href="../../de/d89/classPolyFit.html#ae3de4c7d4cda8ce2cf162d9d70631cba">_myGraph</a>;
+<a name="l00060"></a>00060 
+<a name="l00061"></a><a class="code" href="../../de/d89/classPolyFit.html#a0092a72e38616b0541f5ca2d3e109397">00061</a>   vector&lt; double &gt; <a class="code" href="../../de/d89/classPolyFit.html#a0092a72e38616b0541f5ca2d3e109397">_xValue</a>;
+<a name="l00062"></a><a class="code" href="../../de/d89/classPolyFit.html#a29d10890ebfda2ec6f0e7697dca5258f">00062</a>   vector&lt; double &gt; <a class="code" href="../../de/d89/classPolyFit.html#a29d10890ebfda2ec6f0e7697dca5258f">_yValue</a>;
+<a name="l00063"></a>00063 
+<a name="l00064"></a><a class="code" href="../../de/d89/classPolyFit.html#a0a19ea869319d65f97de4d0bc95e8061">00064</a>   <span class="keywordtype">double</span> <a class="code" href="../../de/d89/classPolyFit.html#a0a19ea869319d65f97de4d0bc95e8061">_sigma</a>;
+<a name="l00065"></a>00065 
+<a name="l00066"></a>00066 };
+<a name="l00067"></a>00067 
+<a name="l00068"></a>00068 <span class="preprocessor">#endif</span>
 </pre></div></div>
 </div>
 <!-- window showing the filter options -->
@@ -135,7 +136,7 @@ var searchBox = new SearchBox("searchBox", "../../search",false,'Search');
 </iframe>
 </div>
 
-<hr class="footer"/><address class="footer"><small>Generated on Thu Nov 8 2012 for ComPWA by&#160;
+<hr class="footer"/><address class="footer"><small>Generated on Tue Nov 13 2012 for ComPWA by&#160;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="../../doxygen.png" alt="doxygen"/></a> 1.7.4 </small></address>
 </body>

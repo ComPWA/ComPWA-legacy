@@ -59,7 +59,8 @@ var searchBox = new SearchBox("searchBox", "../../search",false,'Search');
 </div>
 <div class="header">
   <div class="summary">
-<a href="#func-members">Functions</a>  </div>
+<a href="#func-members">Functions</a> &#124;
+<a href="#var-members">Variables</a>  </div>
   <div class="headertitle">
 <div class="title">test/CX0TestApp.cpp File Reference</div>  </div>
 </div>
@@ -69,22 +70,45 @@ var searchBox = new SearchBox("searchBox", "../../search",false,'Search');
 <a href="#details">More...</a></p>
 <div class="textblock"><code>#include &lt;iostream&gt;</code><br/>
 <code>#include &lt;memory&gt;</code><br/>
+<code>#include &lt;string&gt;</code><br/>
+<code>#include &lt;regex&gt;</code><br/>
+<code>#include &lt;algorithm&gt;</code><br/>
+<code>#include &lt;thread&gt;</code><br/>
 </div><div class="textblock"><div class="dynheader">
 Include dependency graph for CX0TestApp.cpp:</div>
 <div class="dyncontent">
 <div class="center"><img src="../../db/d23/CX0TestApp_8cpp__incl.png" border="0" usemap="#test_2CX0TestApp_8cpp" alt=""/></div>
-<map name="test_2CX0TestApp_8cpp" id="test_2CX0TestApp_8cpp">
-</map>
 </div>
 </div><table class="memberdecls">
 <tr><td colspan="2"><h2><a name="func-members"></a>
 Functions</h2></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/d7b/CX0TestApp_8cpp.html#a21132c53bc6cd5332561a5f8a528e420">call_from_thread</a> (unsigned int tid)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/d7b/CX0TestApp_8cpp.html#a3c04138a5bfe5d72780bb7e82a18e627">main</a> (int argc, char **argv)</td></tr>
+<tr><td colspan="2"><h2><a name="var-members"></a>
+Variables</h2></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">static const int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/d7b/CX0TestApp_8cpp.html#ac2d0ab5e69029d08b446d94e9400f3a7">num_threads</a> = 10</td></tr>
 </table>
 <hr/><a name="details" id="details"></a><h2>Detailed Description</h2>
 <div class="textblock"><p>Test-Application to check c++11 support. </p>
-<p>This tiny application test some features of the new c++11 standard. One can compile and run this to check the c++11 support of the used compiler/system. </p>
+<p>This tiny application test some features of the new c++11 standard. One can compile and run this to check the c++11 support of the used compiler/system. The features tested are: shared_pointer, raw strings, auto type's, lamdas, threading and regular expressions. </p>
 </div><hr/><h2>Function Documentation</h2>
+<a class="anchor" id="a21132c53bc6cd5332561a5f8a528e420"></a><!-- doxytag: member="CX0TestApp.cpp::call_from_thread" ref="a21132c53bc6cd5332561a5f8a528e420" args="(unsigned int tid)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void call_from_thread </td>
+          <td>(</td>
+          <td class="paramtype">unsigned int&#160;</td>
+          <td class="paramname"><em>tid</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
 <a class="anchor" id="a3c04138a5bfe5d72780bb7e82a18e627"></a><!-- doxytag: member="CX0TestApp.cpp::main" ref="a3c04138a5bfe5d72780bb7e82a18e627" args="(int argc, char **argv)" -->
 <div class="memitem">
 <div class="memproto">
@@ -112,6 +136,20 @@ Functions</h2></td></tr>
 
 </div>
 </div>
+<hr/><h2>Variable Documentation</h2>
+<a class="anchor" id="ac2d0ab5e69029d08b446d94e9400f3a7"></a><!-- doxytag: member="CX0TestApp.cpp::num_threads" ref="ac2d0ab5e69029d08b446d94e9400f3a7" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">const int <a class="el" href="../../d5/d7b/CX0TestApp_8cpp.html#ac2d0ab5e69029d08b446d94e9400f3a7">num_threads</a> = 10<code> [static]</code></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
 </div>
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
@@ -127,7 +165,7 @@ Functions</h2></td></tr>
 </iframe>
 </div>
 
-<hr class="footer"/><address class="footer"><small>Generated on Thu Nov 8 2012 for ComPWA by&#160;
+<hr class="footer"/><address class="footer"><small>Generated on Tue Nov 13 2012 for ComPWA by&#160;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="../../doxygen.png" alt="doxygen"/></a> 1.7.4 </small></address>
 </body>

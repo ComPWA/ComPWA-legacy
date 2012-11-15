@@ -8,8 +8,11 @@
  * other modules are necessary to work with the new optimizer library or routine.
 */
 
-#ifndef MIBASE_HPP_
-#define MIBASE_HPP_
+#ifndef _OIFBASE_HPP_
+#define _OIFBASE_HPP_
+
+#include <vector>
+#include "PWAParameter.hpp"
 
 class OIFBase
 {
@@ -23,7 +26,8 @@ public:
   virtual ~OIFBase()
 	{ /* nothing */	}
 
-  virtual const double exec(unsigned int Npar, double* par,  double* min, double* max, double* err) =0;
+  // TODO: template <class T> or map?
+  virtual const double exec(std::vector<PWAParameter<double> >& par) =0;
  
 };
 

@@ -76,7 +76,7 @@ Inheritance diagram for PIFBase:</div>
 <div class="dyncontent">
 <div class="center"><img src="../../d7/d2b/classPIFBase__inherit__graph.png" border="0" usemap="#PIFBase_inherit__map" alt="Inheritance graph"/></div>
 <map name="PIFBase_inherit__map" id="PIFBase_inherit__map">
-<area shape="rect" id="node3" href="../../d8/d58/classPIFBW.html" title="Physics Module with simple 1D Breit&#45;Wigner." alt="" coords="5,174,112,311"/></map>
+<area shape="rect" id="node3" href="../../d8/d58/classPIFBW.html" title="Physics Module with simple 1D Breit&#45;Wigner." alt="" coords="5,173,112,328"/></map>
 <center><span class="legend">[<a href="../../graph_legend.html">legend</a>]</span></center></div>
 
 <p><a href="../../df/da3/classPIFBase-members.html">List of all members.</a></p>
@@ -85,7 +85,7 @@ Inheritance diagram for PIFBase:</div>
 Public Member Functions</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/d3f/classPIFBase.html#aa435256425c756fa92b2008ca7381a47">PIFBase</a> ()</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/d3f/classPIFBase.html#a0b598b33b36f0ecda10c9cafe3c8e083">~PIFBase</a> ()</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">virtual const double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/d3f/classPIFBase.html#a7e0628a7d23475f2471fb9b7262659cf">intensity</a> (double x, double M, double T)=0</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">virtual const double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/d3f/classPIFBase.html#a4def79f9856b29d19525dc0ac037da7b">intensity</a> (std::vector&lt; double &gt; x, std::vector&lt; <a class="el" href="../../d2/d41/classPWAParameter.html">PWAParameter</a>&lt; double &gt; &gt; par)=0</td></tr>
 </table>
 <hr/><a name="details" id="details"></a><h2>Detailed Description</h2>
 <div class="textblock"><p>Physics Interface Base-Class. </p>
@@ -123,27 +123,21 @@ Public Member Functions</h2></td></tr>
 </div>
 </div>
 <hr/><h2>Member Function Documentation</h2>
-<a class="anchor" id="a7e0628a7d23475f2471fb9b7262659cf"></a><!-- doxytag: member="PIFBase::intensity" ref="a7e0628a7d23475f2471fb9b7262659cf" args="(double x, double M, double T)=0" -->
+<a class="anchor" id="a4def79f9856b29d19525dc0ac037da7b"></a><!-- doxytag: member="PIFBase::intensity" ref="a4def79f9856b29d19525dc0ac037da7b" args="(std::vector&lt; double &gt; x, std::vector&lt; PWAParameter&lt; double &gt; &gt; par)=0" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
           <td class="memname">virtual const double PIFBase::intensity </td>
           <td>(</td>
-          <td class="paramtype">double&#160;</td>
+          <td class="paramtype">std::vector&lt; double &gt;&#160;</td>
           <td class="paramname"><em>x</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">double&#160;</td>
-          <td class="paramname"><em>M</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">double&#160;</td>
-          <td class="paramname"><em>T</em>&#160;</td>
+          <td class="paramtype">std::vector&lt; <a class="el" href="../../d2/d41/classPWAParameter.html">PWAParameter</a>&lt; double &gt; &gt;&#160;</td>
+          <td class="paramname"><em>par</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -154,7 +148,7 @@ Public Member Functions</h2></td></tr>
 </div>
 <div class="memdoc">
 
-<p>Implemented in <a class="el" href="../../d8/d58/classPIFBW.html#a044bc6c62245217b03abcd9d7b4e9e25">PIFBW</a>.</p>
+<p>Implemented in <a class="el" href="../../d8/d58/classPIFBW.html#a231933fa9e3a852e81dafb34b695da23">PIFBW</a>.</p>
 
 </div>
 </div>
@@ -176,7 +170,7 @@ Public Member Functions</h2></td></tr>
 </iframe>
 </div>
 
-<hr class="footer"/><address class="footer"><small>Generated on Thu Nov 8 2012 for ComPWA by&#160;
+<hr class="footer"/><address class="footer"><small>Generated on Tue Nov 13 2012 for ComPWA by&#160;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="../../doxygen.png" alt="doxygen"/></a> 1.7.4 </small></address>
 </body>

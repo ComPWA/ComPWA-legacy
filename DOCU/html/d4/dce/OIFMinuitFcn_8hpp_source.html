@@ -71,32 +71,34 @@ var searchBox = new SearchBox("searchBox", "../../search",false,'Search');
 <a name="l00013"></a>00013 <span class="comment">//#include &lt;boost/shared_ptr.hpp&gt;</span>
 <a name="l00014"></a>00014 <span class="comment">//#include &lt;cassert&gt;</span>
 <a name="l00015"></a>00015 <span class="preprocessor">#include &quot;Minuit2/FCNBase.h&quot;</span>
-<a name="l00016"></a>00016 
-<a name="l00017"></a>00017 <span class="keyword">class </span><a class="code" href="../../d1/d4f/classOIFData.html" title="Optimizer Data Base-Class.">OIFData</a>;
+<a name="l00016"></a>00016 <span class="preprocessor">#include &quot;<a class="code" href="../../db/dc2/OIFData_8hpp.html" title="This class provides the interface for the optimizer module to access the data.">OIFData.hpp</a>&quot;</span>
+<a name="l00017"></a>00017 <span class="preprocessor">#include &quot;<a class="code" href="../../d1/d85/PWAParameter_8hpp.html" title="This class provides a internal container for information of a fit parameter.">PWAParameter.hpp</a>&quot;</span>
 <a name="l00018"></a>00018 
-<a name="l00019"></a><a class="code" href="../../d0/d10/namespaceROOT.html">00019</a> <span class="keyword">namespace </span>ROOT {
+<a name="l00019"></a>00019 <span class="keyword">class </span><a class="code" href="../../d1/d4f/classOIFData.html" title="Optimizer Data Base-Class.">OIFData</a>;
 <a name="l00020"></a>00020 
-<a name="l00021"></a><a class="code" href="../../d6/d3a/namespaceROOT_1_1Minuit2.html">00021</a>    <span class="keyword">namespace </span>Minuit2 {
-<a name="l00022"></a><a class="code" href="../../d3/dc7/classROOT_1_1Minuit2_1_1OIFMinuitFcn.html">00022</a> <span class="keyword">class </span><a class="code" href="../../d3/dc7/classROOT_1_1Minuit2_1_1OIFMinuitFcn.html">OIFMinuitFcn</a> : <span class="keyword">public</span> FCNBase {
-<a name="l00023"></a>00023 
-<a name="l00024"></a>00024 <span class="keyword">public</span>:
+<a name="l00021"></a><a class="code" href="../../d0/d10/namespaceROOT.html">00021</a> <span class="keyword">namespace </span>ROOT {
+<a name="l00022"></a>00022 
+<a name="l00023"></a><a class="code" href="../../d6/d3a/namespaceROOT_1_1Minuit2.html">00023</a>    <span class="keyword">namespace </span>Minuit2 {
+<a name="l00024"></a><a class="code" href="../../d3/dc7/classROOT_1_1Minuit2_1_1OIFMinuitFcn.html">00024</a> <span class="keyword">class </span><a class="code" href="../../d3/dc7/classROOT_1_1Minuit2_1_1OIFMinuitFcn.html">OIFMinuitFcn</a> : <span class="keyword">public</span> FCNBase {
 <a name="l00025"></a>00025 
-<a name="l00026"></a>00026   <a class="code" href="../../d3/dc7/classROOT_1_1Minuit2_1_1OIFMinuitFcn.html#aff2f5645420e8719ebc6415b04184433">OIFMinuitFcn</a>(std::shared_ptr&lt;OIFData&gt; theData);
-<a name="l00027"></a>00027   <span class="keyword">virtual</span> <a class="code" href="../../d3/dc7/classROOT_1_1Minuit2_1_1OIFMinuitFcn.html#a6f933e4568fc0d8ad5a6d3d6ad2fd727">~OIFMinuitFcn</a>();
-<a name="l00028"></a>00028 
-<a name="l00029"></a>00029   <span class="keywordtype">double</span> <a class="code" href="../../d3/dc7/classROOT_1_1Minuit2_1_1OIFMinuitFcn.html#a7e83033d923f085fa8192c8952027f39">operator()</a>(<span class="keyword">const</span> std::vector&lt;double&gt;&amp; par) <span class="keyword">const</span>;
+<a name="l00026"></a>00026 <span class="keyword">public</span>:
+<a name="l00027"></a>00027 
+<a name="l00028"></a>00028   <a class="code" href="../../d3/dc7/classROOT_1_1Minuit2_1_1OIFMinuitFcn.html#aff2f5645420e8719ebc6415b04184433">OIFMinuitFcn</a>(std::shared_ptr&lt;OIFData&gt; theData);
+<a name="l00029"></a>00029   <span class="keyword">virtual</span> <a class="code" href="../../d3/dc7/classROOT_1_1Minuit2_1_1OIFMinuitFcn.html#a6f933e4568fc0d8ad5a6d3d6ad2fd727">~OIFMinuitFcn</a>();
 <a name="l00030"></a>00030 
-<a name="l00031"></a>00031   <span class="keywordtype">double</span> <a class="code" href="../../d3/dc7/classROOT_1_1Minuit2_1_1OIFMinuitFcn.html#a6f55d1c39778acd5bbed8e04e6f049e4">Up</a>() <span class="keyword">const</span>;
+<a name="l00031"></a>00031   <span class="keywordtype">double</span> <a class="code" href="../../d3/dc7/classROOT_1_1Minuit2_1_1OIFMinuitFcn.html#a63e67f9e6ea5bf0dcfd09102d3d37eb1">operator()</a>(<span class="keyword">const</span> std::vector&lt;double&gt;&amp; x) <span class="keyword">const</span>;
 <a name="l00032"></a>00032 
-<a name="l00033"></a>00033 <span class="keyword">private</span>:
-<a name="l00034"></a><a class="code" href="../../d3/dc7/classROOT_1_1Minuit2_1_1OIFMinuitFcn.html#a0fd03437f3d07ab064773733efb8e4bf">00034</a>   std::shared_ptr&lt;OIFData&gt; <a class="code" href="../../d3/dc7/classROOT_1_1Minuit2_1_1OIFMinuitFcn.html#a0fd03437f3d07ab064773733efb8e4bf">_myDataPtr</a>;
-<a name="l00035"></a>00035 };
-<a name="l00036"></a>00036   }  <span class="comment">// namespace Minuit2</span>
-<a name="l00037"></a>00037 
-<a name="l00038"></a>00038 }  <span class="comment">// namespace ROOT</span>
+<a name="l00033"></a>00033   <span class="keywordtype">double</span> <a class="code" href="../../d3/dc7/classROOT_1_1Minuit2_1_1OIFMinuitFcn.html#a6f55d1c39778acd5bbed8e04e6f049e4">Up</a>() <span class="keyword">const</span>;
+<a name="l00034"></a>00034 
+<a name="l00035"></a>00035 <span class="keyword">private</span>:
+<a name="l00036"></a><a class="code" href="../../d3/dc7/classROOT_1_1Minuit2_1_1OIFMinuitFcn.html#a0fd03437f3d07ab064773733efb8e4bf">00036</a>   std::shared_ptr&lt;OIFData&gt; <a class="code" href="../../d3/dc7/classROOT_1_1Minuit2_1_1OIFMinuitFcn.html#a0fd03437f3d07ab064773733efb8e4bf">_myDataPtr</a>;
+<a name="l00037"></a>00037 };
+<a name="l00038"></a>00038   }  <span class="comment">// namespace Minuit2</span>
 <a name="l00039"></a>00039 
-<a name="l00040"></a>00040 
-<a name="l00041"></a>00041 <span class="preprocessor">#endif </span>
+<a name="l00040"></a>00040 }  <span class="comment">// namespace ROOT</span>
+<a name="l00041"></a>00041 
+<a name="l00042"></a>00042 
+<a name="l00043"></a>00043 <span class="preprocessor">#endif </span>
 </pre></div></div>
 </div>
 <!-- window showing the filter options -->
@@ -113,7 +115,7 @@ var searchBox = new SearchBox("searchBox", "../../search",false,'Search');
 </iframe>
 </div>
 
-<hr class="footer"/><address class="footer"><small>Generated on Thu Nov 8 2012 for ComPWA by&#160;
+<hr class="footer"/><address class="footer"><small>Generated on Tue Nov 13 2012 for ComPWA by&#160;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="../../doxygen.png" alt="doxygen"/></a> 1.7.4 </small></address>
 </body>

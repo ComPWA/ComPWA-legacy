@@ -67,12 +67,21 @@ var searchBox = new SearchBox("searchBox", "../../search",false,'Search');
 
 <p>This class provides the interface to classes which estimate the "closeness" of the modeled intensity to the data.  
 <a href="#details">More...</a></p>
-<div class="textblock"><div class="dynheader">
+<div class="textblock"><code>#include &quot;<a class="el" href="../../db/dc2/OIFData_8hpp_source.html">OIFData.hpp</a>&quot;</code><br/>
+<code>#include &quot;<a class="el" href="../../d1/d85/PWAParameter_8hpp_source.html">PWAParameter.hpp</a>&quot;</code><br/>
+</div><div class="textblock"><div class="dynheader">
+Include dependency graph for EIFBase.hpp:</div>
+<div class="dyncontent">
+<div class="center"><img src="../../d5/d54/EIFBase_8hpp__incl.png" border="0" usemap="#Core_2EIFBase_8hpp" alt=""/></div>
+<map name="Core_2EIFBase_8hpp" id="Core_2EIFBase_8hpp">
+<area shape="rect" id="node3" href="../../db/dc2/OIFData_8hpp.html" title="This class provides the interface for the optimizer module to access the data." alt="" coords="24,83,120,112"/><area shape="rect" id="node7" href="../../d1/d85/PWAParameter_8hpp.html" title="This class provides a internal container for information of a fit parameter." alt="" coords="88,160,227,189"/></map>
+</div>
+</div><div class="textblock"><div class="dynheader">
 This graph shows which files directly or indirectly include this file:</div>
 <div class="dyncontent">
 <div class="center"><img src="../../d7/def/EIFBase_8hpp__dep__incl.png" border="0" usemap="#Core_2EIFBase_8hppdep" alt=""/></div>
 <map name="Core_2EIFBase_8hppdep" id="Core_2EIFBase_8hppdep">
-<area shape="rect" id="node3" href="../../d3/d5d/EIFChiOneD_8hpp.html" title="This class calculates a simple &#160;of a intensity and a dataset." alt="" coords="112,83,312,112"/><area shape="rect" id="node5" href="../../d8/d80/EIFChiOneD_8cpp.html" title="EIFChiOneD/EIFChiOneD.cpp" alt="" coords="5,160,205,189"/><area shape="rect" id="node7" href="../../d4/d31/EstimatorTestApp_8cpp.html" title="Test&#45;Application of a simple &#160;estimator." alt="" coords="229,160,408,189"/></map>
+<area shape="rect" id="node3" href="../../d3/d5d/EIFChiOneD_8hpp.html" title="This class calculates a simple &#160;of a intensity and a dataset." alt="" coords="219,83,419,112"/><area shape="rect" id="node5" href="../../d8/d80/EIFChiOneD_8cpp.html" title="EIFChiOneD/EIFChiOneD.cpp" alt="" coords="5,160,205,189"/><area shape="rect" id="node7" href="../../d4/d31/EstimatorTestApp_8cpp.html" title="Test&#45;Application of a simple &#160;estimator." alt="" coords="229,160,408,189"/><area shape="rect" id="node9" href="../../d5/d26/IntegrationTestApp_8cpp.html" title="Test&#45;Application for full fit with simple modules." alt="" coords="432,160,613,189"/></map>
 </div>
 </div>
 <p><a href="../../df/d05/EIFBase_8hpp_source.html">Go to the source code of this file.</a></p>
@@ -84,7 +93,7 @@ Classes</h2></td></tr>
 </table>
 <hr/><a name="details" id="details"></a><h2>Detailed Description</h2>
 <div class="textblock"><p>This class provides the interface to classes which estimate the "closeness" of the modeled intensity to the data. </p>
-<p>As it is pure virtual, one needs at least one implementation to provide an estimator for the analysis. If a new estimator is derived from and fulfills this base-class, no change in other modules are necessary to work with the new estimation function. </p>
+<p>As it is pure virtual, one needs at least one implementation to provide an estimator for the analysis. If a new estimator is derived from and fulfills this base-class, no change in other modules are necessary to work with the new estimation function. As it is derived from <a class="el" href="../../d1/d4f/classOIFData.html" title="Optimizer Data Base-Class.">OIFData</a>, it can be used in the optimizer modules. </p>
 </div></div>
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
@@ -100,7 +109,7 @@ Classes</h2></td></tr>
 </iframe>
 </div>
 
-<hr class="footer"/><address class="footer"><small>Generated on Thu Nov 8 2012 for ComPWA by&#160;
+<hr class="footer"/><address class="footer"><small>Generated on Tue Nov 13 2012 for ComPWA by&#160;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="../../doxygen.png" alt="doxygen"/></a> 1.7.4 </small></address>
 </body>

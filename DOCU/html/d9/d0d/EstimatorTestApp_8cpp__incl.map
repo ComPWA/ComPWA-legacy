@@ -1,10 +1,12 @@
 <map id="G" name="G">
-<area shape="rect" id="node15" href="$db/d3e/DIFRootReader_8hpp.html" title="This class reads event&#45;based data from root&#45;files." alt="" coords="1193,83,1332,112"/>
-<area shape="rect" id="node45" href="$dd/da0/PIFBW_8hpp.html" title="This class provides a simple Breit&#45;Wigner calculation with given parameters." alt="" coords="355,83,445,112"/>
-<area shape="rect" id="node51" href="$d3/d5d/EIFChiOneD_8hpp.html" title="This class calculates a simple &#160;of a intensity and a dataset." alt="" coords="541,83,664,112"/>
-<area shape="rect" id="node20" href="$db/d2c/DIFBase_8hpp.html" title="This class provides the interface to experimental data." alt="" coords="791,160,889,189"/>
-<area shape="rect" id="node22" href="$d8/d14/PWAEvent_8hpp.html" title="This class provides a internal container for event&#45;based information." alt="" coords="628,237,740,267"/>
-<area shape="rect" id="node25" href="$d3/ded/PWAParticle_8hpp.html" title="This class provides a internal container for information of a particle." alt="" coords="524,315,647,344"/>
-<area shape="rect" id="node49" href="$de/dc5/PIFBase_8hpp.html" title="This class provides the interface to the model which tries to describe the intensity." alt="" coords="351,160,449,189"/>
-<area shape="rect" id="node56" href="$df/d05/EIFBase_8hpp.html" title="This class provides the interface to classes which estimate the &quot;closeness&quot; of the modeled intensity ..." alt="" coords="524,160,623,189"/>
+<area shape="rect" id="node15" href="$db/d3e/DIFRootReader_8hpp.html" title="This class reads event&#45;based data from root&#45;files." alt="" coords="1181,83,1320,112"/>
+<area shape="rect" id="node25" href="$d3/ded/PWAParticle_8hpp.html" title="This class provides a internal container for information of a particle." alt="" coords="635,315,757,344"/>
+<area shape="rect" id="node45" href="$dd/da0/PIFBW_8hpp.html" title="This class provides a simple Breit&#45;Wigner calculation with given parameters." alt="" coords="716,83,807,112"/>
+<area shape="rect" id="node52" href="$d1/d85/PWAParameter_8hpp.html" title="This class provides a internal container for information of a fit parameter." alt="" coords="156,315,295,344"/>
+<area shape="rect" id="node57" href="$d3/d5d/EIFChiOneD_8hpp.html" title="This class calculates a simple &#160;of a intensity and a dataset." alt="" coords="421,83,544,112"/>
+<area shape="rect" id="node20" href="$db/d2c/DIFBase_8hpp.html" title="This class provides the interface to experimental data." alt="" coords="813,160,912,189"/>
+<area shape="rect" id="node22" href="$d8/d14/PWAEvent_8hpp.html" title="This class provides a internal container for event&#45;based information." alt="" coords="739,237,851,267"/>
+<area shape="rect" id="node49" href="$de/dc5/PIFBase_8hpp.html" title="This class provides the interface to the model which tries to describe the intensity." alt="" coords="517,237,616,267"/>
+<area shape="rect" id="node62" href="$df/d05/EIFBase_8hpp.html" title="This class provides the interface to classes which estimate the &quot;closeness&quot; of the modeled intensity ..." alt="" coords="293,160,392,189"/>
+<area shape="rect" id="node64" href="$db/dc2/OIFData_8hpp.html" title="This class provides the interface for the optimizer module to access the data." alt="" coords="296,237,392,267"/>
 </map>

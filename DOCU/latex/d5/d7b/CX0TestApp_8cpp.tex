@@ -9,25 +9,44 @@ Test-\/Application to check c++11 support.
 
 {\ttfamily \#include $<$iostream$>$}\par
 {\ttfamily \#include $<$memory$>$}\par
-Include dependency graph for CX0TestApp.cpp:
-\nopagebreak
+{\ttfamily \#include $<$string$>$}\par
+{\ttfamily \#include $<$regex$>$}\par
+{\ttfamily \#include $<$algorithm$>$}\par
+{\ttfamily \#include $<$thread$>$}\par
+Include dependency graph for CX0TestApp.cpp:\nopagebreak
 \begin{figure}[H]
 \begin{center}
 \leavevmode
-\includegraphics[width=204pt]{db/d23/CX0TestApp_8cpp__incl}
+\includegraphics[width=400pt]{db/d23/CX0TestApp_8cpp__incl}
 \end{center}
 \end{figure}
 \subsection*{Functions}
 \begin{DoxyCompactItemize}
 \item 
+void \hyperlink{CX0TestApp_8cpp_a21132c53bc6cd5332561a5f8a528e420}{call\_\-from\_\-thread} (unsigned int tid)
+\item 
 int \hyperlink{CX0TestApp_8cpp_a3c04138a5bfe5d72780bb7e82a18e627}{main} (int argc, char $\ast$$\ast$argv)
+\end{DoxyCompactItemize}
+\subsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+static const int \hyperlink{CX0TestApp_8cpp_ac2d0ab5e69029d08b446d94e9400f3a7}{num\_\-threads} = 10
 \end{DoxyCompactItemize}
 
 
 \subsection{Detailed Description}
-Test-\/Application to check c++11 support. This tiny application test some features of the new c++11 standard. One can compile and run this to check the c++11 support of the used compiler/system. 
+Test-\/Application to check c++11 support. This tiny application test some features of the new c++11 standard. One can compile and run this to check the c++11 support of the used compiler/system. The features tested are: shared\_\-pointer, raw strings, auto type's, lamdas, threading and regular expressions. 
 
 \subsection{Function Documentation}
+\hypertarget{CX0TestApp_8cpp_a21132c53bc6cd5332561a5f8a528e420}{
+\index{CX0TestApp.cpp@{CX0TestApp.cpp}!call\_\-from\_\-thread@{call\_\-from\_\-thread}}
+\index{call\_\-from\_\-thread@{call\_\-from\_\-thread}!CX0TestApp.cpp@{CX0TestApp.cpp}}
+\subsubsection[{call\_\-from\_\-thread}]{\setlength{\rightskip}{0pt plus 5cm}void call\_\-from\_\-thread (
+\begin{DoxyParamCaption}
+\item[{unsigned int}]{tid}
+\end{DoxyParamCaption}
+)}}
+\label{d5/d7b/CX0TestApp_8cpp_a21132c53bc6cd5332561a5f8a528e420}
 \hypertarget{CX0TestApp_8cpp_a3c04138a5bfe5d72780bb7e82a18e627}{
 \index{CX0TestApp.cpp@{CX0TestApp.cpp}!main@{main}}
 \index{main@{main}!CX0TestApp.cpp@{CX0TestApp.cpp}}
@@ -38,3 +57,11 @@ Test-\/Application to check c++11 support. This tiny application test some featu
 \end{DoxyParamCaption}
 )}}
 \label{d5/d7b/CX0TestApp_8cpp_a3c04138a5bfe5d72780bb7e82a18e627}
+
+
+\subsection{Variable Documentation}
+\hypertarget{CX0TestApp_8cpp_ac2d0ab5e69029d08b446d94e9400f3a7}{
+\index{CX0TestApp.cpp@{CX0TestApp.cpp}!num\_\-threads@{num\_\-threads}}
+\index{num\_\-threads@{num\_\-threads}!CX0TestApp.cpp@{CX0TestApp.cpp}}
+\subsubsection[{num\_\-threads}]{\setlength{\rightskip}{0pt plus 5cm}const int {\bf num\_\-threads} = 10\hspace{0.3cm}{\ttfamily  \mbox{[}static\mbox{]}}}}
+\label{d5/d7b/CX0TestApp_8cpp_ac2d0ab5e69029d08b446d94e9400f3a7}

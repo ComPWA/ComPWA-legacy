@@ -77,14 +77,14 @@ Inheritance diagram for EIFChiOneD:</div>
 <div class="dyncontent">
 <div class="center"><img src="../../dc/de7/classEIFChiOneD__inherit__graph.png" border="0" usemap="#EIFChiOneD_inherit__map" alt="Inheritance graph"/></div>
 <map name="EIFChiOneD_inherit__map" id="EIFChiOneD_inherit__map">
-<area shape="rect" id="node2" href="../../df/d13/classEIFBase.html" title="Estimator Interface Base&#45;Class." alt="" coords="5,5,144,125"/></map>
+<area shape="rect" id="node2" href="../../df/d13/classEIFBase.html" title="Estimator Interface Base&#45;Class." alt="" coords="5,173,147,293"/><area shape="rect" id="node4" href="../../d1/d4f/classOIFData.html" title="Optimizer Data Base&#45;Class." alt="" coords="5,5,147,125"/></map>
 <center><span class="legend">[<a href="../../graph_legend.html">legend</a>]</span></center></div>
 <div class="dynheader">
 Collaboration diagram for EIFChiOneD:</div>
 <div class="dyncontent">
 <div class="center"><img src="../../d2/db1/classEIFChiOneD__coll__graph.png" border="0" usemap="#EIFChiOneD_coll__map" alt="Collaboration graph"/></div>
 <map name="EIFChiOneD_coll__map" id="EIFChiOneD_coll__map">
-<area shape="rect" id="node2" href="../../df/d13/classEIFBase.html" title="Estimator Interface Base&#45;Class." alt="" coords="5,5,144,125"/></map>
+<area shape="rect" id="node2" href="../../df/d13/classEIFBase.html" title="Estimator Interface Base&#45;Class." alt="" coords="5,173,147,293"/><area shape="rect" id="node4" href="../../d1/d4f/classOIFData.html" title="Optimizer Data Base&#45;Class." alt="" coords="5,5,147,125"/></map>
 <center><span class="legend">[<a href="../../graph_legend.html">legend</a>]</span></center></div>
 
 <p><a href="../../d8/de1/classEIFChiOneD-members.html">List of all members.</a></p>
@@ -93,7 +93,7 @@ Collaboration diagram for EIFChiOneD:</div>
 Public Member Functions</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/d1d/classEIFChiOneD.html#a777b712b06dd2c760f1071e2cc932eba">EIFChiOneD</a> (std::shared_ptr&lt; <a class="el" href="../../d5/d3f/classPIFBase.html">PIFBase</a> &gt;, std::shared_ptr&lt; <a class="el" href="../../d9/db5/classDIFBase.html">DIFBase</a> &gt;)</td></tr>
 <tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Default Constructor (0x0)  <a href="#a777b712b06dd2c760f1071e2cc932eba"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">virtual const int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/d1d/classEIFChiOneD.html#a8a428668c99022b2b9bdae756fe792ca">getEstimatedVal</a> (double &amp;)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">virtual double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/d1d/classEIFChiOneD.html#a014a763220034f5547c2d395b3508b8d">controlParameter</a> (const std::vector&lt; <a class="el" href="../../d2/d41/classPWAParameter.html">PWAParameter</a>&lt; double &gt; &gt; &amp;minPar)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/d1d/classEIFChiOneD.html#ac826a3c3af84dd72fd96e32d597dd560">~EIFChiOneD</a> ()</td></tr>
 <tr><td colspan="2"><h2><a name="pri-attribs"></a>
 Private Attributes</h2></td></tr>
@@ -150,22 +150,22 @@ Private Attributes</h2></td></tr>
 </div>
 </div>
 <hr/><h2>Member Function Documentation</h2>
-<a class="anchor" id="a8a428668c99022b2b9bdae756fe792ca"></a><!-- doxytag: member="EIFChiOneD::getEstimatedVal" ref="a8a428668c99022b2b9bdae756fe792ca" args="(double &amp;)" -->
+<a class="anchor" id="a014a763220034f5547c2d395b3508b8d"></a><!-- doxytag: member="EIFChiOneD::controlParameter" ref="a014a763220034f5547c2d395b3508b8d" args="(const std::vector&lt; PWAParameter&lt; double &gt; &gt; &amp;minPar)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">const int EIFChiOneD::getEstimatedVal </td>
+          <td class="memname">double EIFChiOneD::controlParameter </td>
           <td>(</td>
-          <td class="paramtype">double &amp;&#160;</td>
-          <td class="paramname"><em>outChi</em></td><td>)</td>
+          <td class="paramtype">const std::vector&lt; <a class="el" href="../../d2/d41/classPWAParameter.html">PWAParameter</a>&lt; double &gt; &gt; &amp;&#160;</td>
+          <td class="paramname"><em>minPar</em></td><td>)</td>
           <td><code> [virtual]</code></td>
         </tr>
       </table>
 </div>
 <div class="memdoc">
 
-<p>Implements <a class="el" href="../../df/d13/classEIFBase.html#af98fe883244454497c421bc824b96188">EIFBase</a>.</p>
+<p>Implements <a class="el" href="../../df/d13/classEIFBase.html#a85937003fd68b507ddc99bfcee3a4b27">EIFBase</a>.</p>
 
 </div>
 </div>
@@ -215,7 +215,7 @@ Private Attributes</h2></td></tr>
 </iframe>
 </div>
 
-<hr class="footer"/><address class="footer"><small>Generated on Thu Nov 8 2012 for ComPWA by&#160;
+<hr class="footer"/><address class="footer"><small>Generated on Tue Nov 13 2012 for ComPWA by&#160;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="../../doxygen.png" alt="doxygen"/></a> 1.7.4 </small></address>
 </body>

@@ -13,8 +13,7 @@ Physics Module with simple 1D Breit-\/Wigner.
 
 
 
-Inheritance diagram for PIFBW:
-\nopagebreak
+Inheritance diagram for PIFBW:\nopagebreak
 \begin{figure}[H]
 \begin{center}
 \leavevmode
@@ -23,8 +22,7 @@ Inheritance diagram for PIFBW:
 \end{figure}
 
 
-Collaboration diagram for PIFBW:
-\nopagebreak
+Collaboration diagram for PIFBW:\nopagebreak
 \begin{figure}[H]
 \begin{center}
 \leavevmode
@@ -37,6 +35,8 @@ Collaboration diagram for PIFBW:
 \hyperlink{classPIFBW_a5dcb579e7810aedea4a13073415992e3}{PIFBW} ()
 \begin{DoxyCompactList}\small\item\em Default Constructor (0x0) \end{DoxyCompactList}\item 
 virtual const double \hyperlink{classPIFBW_a044bc6c62245217b03abcd9d7b4e9e25}{intensity} (double x, double M, double T)
+\item 
+virtual const double \hyperlink{classPIFBW_a231933fa9e3a852e81dafb34b695da23}{intensity} (std::vector$<$ double $>$ x, std::vector$<$ \hyperlink{classPWAParameter}{PWAParameter}$<$ double $>$ $>$ par)
 \item 
 virtual \hyperlink{classPIFBW_ae37b777b3d43bd6a78e07f8e971ba005}{$\sim$PIFBW} ()
 \end{DoxyCompactItemize}
@@ -98,9 +98,19 @@ Destructor
 \end{DoxyParamCaption}
 )\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
 \label{d8/d58/classPIFBW_a044bc6c62245217b03abcd9d7b4e9e25}
+\hypertarget{classPIFBW_a231933fa9e3a852e81dafb34b695da23}{
+\index{PIFBW@{PIFBW}!intensity@{intensity}}
+\index{intensity@{intensity}!PIFBW@{PIFBW}}
+\subsubsection[{intensity}]{\setlength{\rightskip}{0pt plus 5cm}const double PIFBW::intensity (
+\begin{DoxyParamCaption}
+\item[{std::vector$<$ double $>$}]{x, }
+\item[{std::vector$<$ {\bf PWAParameter}$<$ double $>$ $>$}]{par}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{d8/d58/classPIFBW_a231933fa9e3a852e81dafb34b695da23}
 
 
-Implements \hyperlink{classPIFBase_a7e0628a7d23475f2471fb9b7262659cf}{PIFBase}.
+Implements \hyperlink{classPIFBase_a4def79f9856b29d19525dc0ac037da7b}{PIFBase}.
 
 
 

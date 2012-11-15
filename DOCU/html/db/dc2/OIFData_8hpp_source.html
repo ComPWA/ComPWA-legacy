@@ -67,21 +67,22 @@ var searchBox = new SearchBox("searchBox", "../../search",false,'Search');
 <a name="l00010"></a>00010 <span class="preprocessor"></span><span class="preprocessor">#define OIFDATA_HPP_</span>
 <a name="l00011"></a>00011 <span class="preprocessor"></span>
 <a name="l00012"></a>00012 <span class="preprocessor">#include &lt;vector&gt;</span>
-<a name="l00013"></a>00013 
-<a name="l00014"></a><a class="code" href="../../d1/d4f/classOIFData.html">00014</a> <span class="keyword">class </span><a class="code" href="../../d1/d4f/classOIFData.html" title="Optimizer Data Base-Class.">OIFData</a>{
-<a name="l00015"></a>00015 
-<a name="l00016"></a>00016 <span class="keyword">public</span>:
-<a name="l00017"></a>00017 
-<a name="l00018"></a><a class="code" href="../../d1/d4f/classOIFData.html#a11151212f0897c14c0b81b0b55939473">00018</a>   <a class="code" href="../../d1/d4f/classOIFData.html#a11151212f0897c14c0b81b0b55939473">OIFData</a>(){
-<a name="l00019"></a>00019   }
-<a name="l00020"></a>00020 
-<a name="l00021"></a><a class="code" href="../../d1/d4f/classOIFData.html#ab7126c43d4911e022db3033996fc345c">00021</a>   <span class="keyword">virtual</span> <a class="code" href="../../d1/d4f/classOIFData.html#ab7126c43d4911e022db3033996fc345c">~OIFData</a>(){ <span class="comment">/* nothing */</span>     }
-<a name="l00022"></a>00022 
-<a name="l00023"></a>00023   <span class="keyword">virtual</span> <span class="keywordtype">double</span> <a class="code" href="../../d1/d4f/classOIFData.html#adb5b2e9a28b1767f07ccb8737211ff4f">controlParameter</a>(<span class="keyword">const</span> std::vector&lt;double&gt;&amp; minPar) =0;
-<a name="l00024"></a>00024  
-<a name="l00025"></a>00025 };
-<a name="l00026"></a>00026 
-<a name="l00027"></a>00027 <span class="preprocessor">#endif</span>
+<a name="l00013"></a>00013 <span class="preprocessor">#include &quot;<a class="code" href="../../d1/d85/PWAParameter_8hpp.html" title="This class provides a internal container for information of a fit parameter.">PWAParameter.hpp</a>&quot;</span>
+<a name="l00014"></a>00014 
+<a name="l00015"></a><a class="code" href="../../d1/d4f/classOIFData.html">00015</a> <span class="keyword">class </span><a class="code" href="../../d1/d4f/classOIFData.html" title="Optimizer Data Base-Class.">OIFData</a>{
+<a name="l00016"></a>00016 
+<a name="l00017"></a>00017 <span class="keyword">public</span>:
+<a name="l00018"></a>00018 
+<a name="l00019"></a><a class="code" href="../../d1/d4f/classOIFData.html#a11151212f0897c14c0b81b0b55939473">00019</a>   <a class="code" href="../../d1/d4f/classOIFData.html#a11151212f0897c14c0b81b0b55939473">OIFData</a>(){
+<a name="l00020"></a>00020   }
+<a name="l00021"></a>00021 
+<a name="l00022"></a><a class="code" href="../../d1/d4f/classOIFData.html#ab7126c43d4911e022db3033996fc345c">00022</a>   <span class="keyword">virtual</span> <a class="code" href="../../d1/d4f/classOIFData.html#ab7126c43d4911e022db3033996fc345c">~OIFData</a>(){ <span class="comment">/* nothing */</span>     }
+<a name="l00023"></a>00023 
+<a name="l00024"></a>00024   <span class="keyword">virtual</span> <span class="keywordtype">double</span> <a class="code" href="../../d1/d4f/classOIFData.html#a12eef51d074a73b5b261c411e79cbb37">controlParameter</a>(<span class="keyword">const</span> std::vector&lt;<a class="code" href="../../d2/d41/classPWAParameter.html" title="Internal container representing a parameter.">PWAParameter&lt;double&gt;</a> &gt;&amp; minPar) =0;
+<a name="l00025"></a>00025  
+<a name="l00026"></a>00026 };
+<a name="l00027"></a>00027 
+<a name="l00028"></a>00028 <span class="preprocessor">#endif</span>
 </pre></div></div>
 </div>
 <!-- window showing the filter options -->
@@ -98,7 +99,7 @@ var searchBox = new SearchBox("searchBox", "../../search",false,'Search');
 </iframe>
 </div>
 
-<hr class="footer"/><address class="footer"><small>Generated on Thu Nov 8 2012 for ComPWA by&#160;
+<hr class="footer"/><address class="footer"><small>Generated on Tue Nov 13 2012 for ComPWA by&#160;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="../../doxygen.png" alt="doxygen"/></a> 1.7.4 </small></address>
 </body>

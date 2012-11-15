@@ -1,4 +1,3 @@
 <map id="G" name="G">
-<area shape="rect" id="node1" href="$d1/d4f/classOIFData.html" title="Optimizer Data Base&#45;Class." alt="" coords="5,5,77,35"/>
-<area shape="rect" id="node3" href="$de/d89/classPolyFit.html" title="Test implementation of OIFData.hpp." alt="" coords="127,5,188,35"/>
+<area shape="rect" id="node1" href="$d5/d19/classOIFMinuitFcn.html" title="Minuit2 function to be optimized." alt="" coords="5,5,107,35"/>
 </map>

@@ -1,6 +1,6 @@
 //! Test-Application for full fit with simple modules.
 /*!
- * @file EstimatorTestApp.cpp
+ * @file IntegrationTestApp.cpp
  * This tiny application tests a simple fit procedure with a set of simple
  * modules. It uses a simle \f$\chi^{2}\f$ estimator EIFChiOneD, it reads data
  * via the root-reader module DIFRootReader and uses the intensity provided by
@@ -22,11 +22,10 @@
 #include "PIFBW.hpp"
 #include "EIFChiOneD.hpp"
 #include "OIFMinuit.hpp"
+#include "PWAParameter.hpp"
 
 //Test header files go here
 #include "PolyFit.hpp"
-
-using namespace std;
 
 /************************************************************************************************/
 /**
@@ -34,21 +33,26 @@ using namespace std;
  */
 int main(int argc, char **argv){
   string file="test/2Part-4vecs.root";
-  shared_ptr<DIFRootReader> myReader(new DIFRootReader(file));
-  shared_ptr<PIFBW> testBW(new PIFBW());
-  shared_ptr<EIFChiOneD> testEsti(new EIFChiOneD(testBW, myReader));
-  shared_ptr<OIFBase> opti(new OIFMinuit(testEsti));
+  std::cout << "Load Modules" << std::endl;
+  std::shared_ptr<DIFBase> myReader(new DIFRootReader(file));
+  std::shared_ptr<PIFBase> testBW(new PIFBW());
+  std::shared_ptr<EIFBase> testEsti(new EIFChiOneD(testBW, myReader));
+  std::shared_ptr<OIFBase> opti(new OIFMinuit(testEsti));
 
   // Initiate parameters
-  double val[2], min[2], max[2], err[2];
-  val[0] = 1.5; max[0] = 2.5; min[0] = 0.5; err[0] = 0.5;
-  val[1] = 0.3; max[1] = 0.5; min[1] = 0.1; err[1] = 0.1;
+  //double val[2], min[2], max[2], err[2];
+  //val[0] = 1.5; max[0] = 2.5; min[0] = 0.5; err[0] = 0.5;
+  //val[1] = 0.3; max[1] = 0.5; min[1] = 0.1; err[1] = 0.1;
+  std::vector<PWAParameter<double> > par;
+  par.push_back(PWAParameter<double>(1.5,0.5,2.5,0.5));
+  par.push_back(PWAParameter<double>(0.3,0.1,0.5,0.1));
 
-  double genResult = opti->exec(2, val,  min, max, err);
+  std::cout << "Start Fit" << std::endl;
+  double genResult = opti->exec(par);
 
   std::cout << "Minimized final par :\t" << genResult << std::endl;
-  std::cout << "final M:\t" << val[0] << " +- " << err[0] << std::endl;
-  std::cout << "final T:\t" << val[1] << " +- " << err[1] << std::endl;
+  std::cout << "final M:\t" << par[0].GetValue() << " +- " << par[0].GetError() << std::endl;
+  std::cout << "final T:\t" << par[1].GetValue() << " +- " << par[1].GetError() << std::endl;
 
   return 0;
 }

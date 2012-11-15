@@ -1,4 +1,5 @@
 <map id="G" name="G">
-<area shape="rect" id="node15" href="$dd/da0/PIFBW_8hpp.html" title="This class provides a simple Breit&#45;Wigner calculation with given parameters." alt="" coords="405,83,496,112"/>
-<area shape="rect" id="node19" href="$de/dc5/PIFBase_8hpp.html" title="This class provides the interface to the model which tries to describe the intensity." alt="" coords="376,160,475,189"/>
+<area shape="rect" id="node15" href="$dd/da0/PIFBW_8hpp.html" title="This class provides a simple Breit&#45;Wigner calculation with given parameters." alt="" coords="315,83,405,112"/>
+<area shape="rect" id="node22" href="$d1/d85/PWAParameter_8hpp.html" title="This class provides a internal container for information of a fit parameter." alt="" coords="185,237,324,267"/>
+<area shape="rect" id="node19" href="$de/dc5/PIFBase_8hpp.html" title="This class provides the interface to the model which tries to describe the intensity." alt="" coords="329,160,428,189"/>
 </map>

@@ -7,12 +7,21 @@
 This class provides the interface to classes which estimate the \char`\"{}closeness\char`\"{} of the modeled intensity to the data.  
 
 
+{\ttfamily \#include \char`\"{}OIFData.hpp\char`\"{}}\par
+{\ttfamily \#include \char`\"{}PWAParameter.hpp\char`\"{}}\par
+Include dependency graph for EIFBase.hpp:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=284pt]{d5/d54/EIFBase_8hpp__incl}
+\end{center}
+\end{figure}
 This graph shows which files directly or indirectly include this file:
 \nopagebreak
 \begin{figure}[H]
 \begin{center}
 \leavevmode
-\includegraphics[width=382pt]{d7/def/EIFBase_8hpp__dep__incl}
+\includegraphics[width=400pt]{d7/def/EIFBase_8hpp__dep__incl}
 \end{center}
 \end{figure}
 \subsection*{Classes}
@@ -23,4 +32,4 @@ class \hyperlink{classEIFBase}{EIFBase}
 
 
 \subsection{Detailed Description}
-This class provides the interface to classes which estimate the \char`\"{}closeness\char`\"{} of the modeled intensity to the data. As it is pure virtual, one needs at least one implementation to provide an estimator for the analysis. If a new estimator is derived from and fulfills this base-\/class, no change in other modules are necessary to work with the new estimation function. 
+This class provides the interface to classes which estimate the \char`\"{}closeness\char`\"{} of the modeled intensity to the data. As it is pure virtual, one needs at least one implementation to provide an estimator for the analysis. If a new estimator is derived from and fulfills this base-\/class, no change in other modules are necessary to work with the new estimation function. As it is derived from \hyperlink{classOIFData}{OIFData}, it can be used in the optimizer modules. 

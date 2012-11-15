@@ -1,5 +1,6 @@
 <map id="G" name="G">
-<area shape="rect" id="node3" href="$da/d21/MinuitTestApp_8cpp.html" title="Test&#45;Application of the Minuit2 Optimizer&#45;IF." alt="" coords="5,83,163,112"/>
-<area shape="rect" id="node5" href="$d4/db7/OptimizerTestApp_8cpp.html" title="Test&#45;Application of the Optimizer&#45;IF." alt="" coords="187,83,365,112"/>
-<area shape="rect" id="node7" href="$d5/d8b/PolyFit_8cpp.html" title="test/PolyFit.cpp" alt="" coords="389,83,504,112"/>
+<area shape="rect" id="node3" href="$d5/d26/IntegrationTestApp_8cpp.html" title="Test&#45;Application for full fit with simple modules." alt="" coords="5,83,187,112"/>
+<area shape="rect" id="node5" href="$da/d21/MinuitTestApp_8cpp.html" title="Test&#45;Application of the Minuit2 Optimizer&#45;IF." alt="" coords="211,83,368,112"/>
+<area shape="rect" id="node7" href="$d4/db7/OptimizerTestApp_8cpp.html" title="Test&#45;Application of the Optimizer&#45;IF." alt="" coords="392,83,571,112"/>
+<area shape="rect" id="node9" href="$d5/d8b/PolyFit_8cpp.html" title="test/PolyFit.cpp" alt="" coords="595,83,709,112"/>
 </map>
