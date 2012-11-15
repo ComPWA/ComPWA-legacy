@@ -1,8 +1,0 @@
-<map id="G" name="G">
-<area shape="rect" id="node13" href="$d2/dcf/OIFGeneva_8hpp.html" title="This class provides a wrapper around the Geneva library." alt="" coords="5075,83,5190,112"/>
-<area shape="rect" id="node67" href="$df/dfa/GStartIndividual_8hpp.html" title="Geneva individual extended to the use in ComPWA, using OIFData to access the data." alt="" coords="2471,83,2610,112"/>
-<area shape="rect" id="node17" href="$db/dc2/OIFData_8hpp.html" title="This class provides the interface for the optimizer module to access the data." alt="" coords="3847,160,3943,189"/>
-<area shape="rect" id="node20" href="$d1/d85/PWAParameter_8hpp.html" title="This class provides a internal container for information of a fit parameter." alt="" coords="3832,237,3971,267"/>
-<area shape="rect" id="node25" href="$d8/dc8/OIFBase_8hpp.html" title="This class provides the interface to (external) optimization libraries or routines." alt="" coords="5882,160,5980,189"/>
-<area shape="rect" id="node28" href="$d4/d3c/GArgumentParser_8hpp.html" title="Geneva argument parser to interpret command line arguments and config files." alt="" coords="4663,160,4812,189"/>
-</map>

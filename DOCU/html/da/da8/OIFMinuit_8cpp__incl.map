@@ -1,7 +1,0 @@
-<map id="G" name="G">
-<area shape="rect" id="node23" href="$d8/d0f/OIFMinuit_8hpp.html" title="This class provides a wrapper around the Minuit2 library." alt="" coords="324,83,428,112"/>
-<area shape="rect" id="node27" href="$db/dc2/OIFData_8hpp.html" title="This class provides the interface for the optimizer module to access the data." alt="" coords="144,237,240,267"/>
-<area shape="rect" id="node35" href="$d8/dc8/OIFBase_8hpp.html" title="This class provides the interface to (external) optimization libraries or routines." alt="" coords="395,160,493,189"/>
-<area shape="rect" id="node37" href="$d4/dce/OIFMinuitFcn_8hpp.html" title="Based on the Minuit2 FcnBase." alt="" coords="245,160,371,189"/>
-<area shape="rect" id="node30" href="$d1/d85/PWAParameter_8hpp.html" title="This class provides a internal container for information of a fit parameter." alt="" coords="419,315,557,344"/>
-</map>
