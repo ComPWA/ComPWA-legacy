@@ -31,8 +31,14 @@ const double OIFMinuit::exec(std::vector<PWAParameter<double> >& par){
     out.str("");
     out << i;
     s = out.str();
-    //std::cout << "Par " << i << ": \t" << par[i] << std::endl;
-    upar.Add(s, par[i].GetValue(), par[i].GetError());// TODO: bounds, par[i].GetMaxValue(), par[i].GetMinValue());
+
+    //use as much information as possible: (just bounds but no error not supported by minuit)
+    if( par[i].HasBounds() && par[i].HasError() )
+      upar.Add(s, par[i].GetValue(), par[i].GetError(), par[i].GetMaxValue(), par[i].GetMinValue());
+    else if( par[i].HasError() )
+      upar.Add(s, par[i].GetValue(), par[i].GetError());
+    else
+      upar.Add(s, par[i].GetValue());
   }
 
   MnMigrad migrad(_myFcn, upar);

@@ -27,7 +27,7 @@ int main(int argc, char **argv){
   PWAParameter<double> b; //empty double
   PWAParameter<int> c(2,0,5,1); //int par
   PWAParameter<int> d(c); //copy constructor
-  PWAParameter<int> e(2,10,5,1); //contructor with wrong bounds
+  PWAParameter<int> e(7,10,5,1); //contructor with wrong bounds
   shared_ptr<PWAParameter<int> > p(new PWAParameter<int>(3,0,5,1)); //pointer
   vector<PWAParameter<int> > v, w; //vector
   for(unsigned int par=0; par<10; par++)
@@ -60,7 +60,7 @@ int main(int argc, char **argv){
   cout << endl;
 
   //Test bound check
-  cout << "bound output (e(2,10,5,1): \t" << endl;
+  cout << "bound output (e(7,10,5,1): \t" << endl;
   cout << "Initial: \t\t" << e << endl;
   cout << "HasBounds: \t\t\t" << e.HasBounds() << endl;
   e.SetMaxValue(-1);
