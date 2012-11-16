@@ -96,8 +96,18 @@ exe integrationtestApp :
         $(TOP)/DIFRoot2Part//DIFRoot2Part
         $(TOP)/OIFMinuit2//OIFMinuit2
         : ;
+        
+exe runmanagertestApp : 
+        RunManagerTestApp.cpp 
+        test
+        $(TOP)/Core//ComPWA
+        $(TOP)/EIFChiOneD//EIFChiOneD 
+        $(TOP)/PIFBW//PIFBW  
+        $(TOP)/DIFRoot2Part//DIFRoot2Part
+        $(TOP)/OIFMinuit2//OIFMinuit2
+        : ;
 
 install dist : test : <location>$(TOP)/lib ;
 install dist2 : parametertestApp cx0testApp dataiftestApp optimizertestApp physicstestApp : <location>$(TOP)/bin ;
-install dist3 : estimatortestApp integrationtestApp : <location>$(TOP)/bin ;
+install dist3 : estimatortestApp integrationtestApp runmanagertestApp : <location>$(TOP)/bin ;
 
