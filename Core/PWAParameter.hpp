@@ -98,7 +98,7 @@ public:
   /*!
    * Simple copy constructor using the = operator. As this operator is not
    * overloaded in this class, c++ will copy every member variable. As this
-   * is a container class, this hould be fine.
+   * is a container class, this should be fine.
    * \param in input PWAParameter which variables will be copied
   */
   PWAParameter(const PWAParameter<T>& in){
@@ -227,9 +227,8 @@ protected:
 
   //! A protected function which creates an output string for printing
   /*!
-   * This function uses all available information about the parameter the
-   * parameter to create a string which will be streamed via the stream
-   * operator <<.
+   * This function uses all available information about the parameter
+   * to create a string which will be streamed via the stream operator <<.
    * \sa operator<<, to_str()
   */
   void make_str() {

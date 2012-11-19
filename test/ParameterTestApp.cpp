@@ -14,6 +14,7 @@
 
 //Core header files go here
 #include "PWAParameter.hpp"
+#include "PWAParameterList.hpp"
 
 using namespace std;
 
@@ -73,5 +74,16 @@ int main(int argc, char **argv){
   cout << "After SetMinMax(5,10): \t" << e << endl;
   cout << endl;
 
+  //Test parameter list
+  cout << endl;
+  cout << "Test of PWAParameterList" << endl;
+  PWAParameterList testempty;
+  cout << "Empty Constructor: \t" << testempty << endl;
+  PWAParameterList ints(v);
+  cout << "IntVec Constructor: \t" << ints << endl;
+  ints.AddParameter(b);
+  cout << "IntVec added float: \t" << ints << endl;
+  PWAParameter<int> toFill; ints.GetParameter(2,toFill);
+  cout << "IntVec get int 2: \t" << toFill << endl;
   return 0;
 }
