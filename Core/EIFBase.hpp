@@ -27,7 +27,7 @@ public:
   /* nothing */
   }
 
-  virtual double controlParameter(const std::vector<PWAParameter<double> >& minPar) = 0;
+  virtual double controlParameter(std::vector<PWAParameter<double> >& minPar) = 0;
 
 };
 

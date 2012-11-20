@@ -47,7 +47,7 @@ PolyFit::PolyFit(double p0, double p1, double p2, double p3, double sigma) :
 
 }
 
-double PolyFit::controlParameter(const std::vector<PWAParameter<double> >& minPar){
+double PolyFit::controlParameter(std::vector<PWAParameter<double> >& minPar){
  
   // Calculate chi^2 for current set of fit parameters 
   double result=0.;

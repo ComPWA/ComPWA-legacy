@@ -2,7 +2,6 @@
 
 project :
 	requirements <include>./
-	<include>$(ROOTINC)
 	<cxxflags>-ftemplate-depth-256
 	<cxxflags>-std=c++0x
 	;

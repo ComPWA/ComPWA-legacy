@@ -106,8 +106,15 @@ exe runmanagertestApp :
         $(TOP)/DIFRoot2Part//DIFRoot2Part
         $(TOP)/OIFMinuit2//OIFMinuit2
         : ;
+        
+exe gentwopartApp : 
+        GenTwoPartApp.cpp 
+        test
+        $(TOP)/Core//ComPWA
+        $(TOP)/PIFBW//PIFBW  
+        : ;
 
-install dist : test : <location>$(TOP)/lib ;
-install dist2 : parametertestApp cx0testApp dataiftestApp optimizertestApp physicstestApp : <location>$(TOP)/bin ;
-install dist3 : estimatortestApp integrationtestApp runmanagertestApp : <location>$(TOP)/bin ;
+install dist : test : <location>$(TOP)/lib <threading>single ;
+install dist2 : parametertestApp cx0testApp dataiftestApp optimizertestApp physicstestApp : <location>$(TOP)/bin <threading>single ;
+install dist3 : estimatortestApp integrationtestApp runmanagertestApp gentwopartApp : <location>$(TOP)/bin <threading>single ;
 

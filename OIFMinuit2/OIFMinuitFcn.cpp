@@ -24,7 +24,7 @@ OIFMinuitFcn::~OIFMinuitFcn(){
 double OIFMinuitFcn::operator()(const std::vector<double>& x) const{
   std::vector<PWAParameter<double> > par;
   for(unsigned int i=0; i<x.size(); i++)
-    par.push_back(PWAParameter<double>(x[i],0,0,0));
+    par.push_back(PWAParameter<double>(x[i]));
   double result=_myDataPtr->controlParameter(par);
   //DebugMsg << "current minimized value:\t"<< result << endmsg;
   std::cout << "current minimized value:\t"<< result << std::endl;

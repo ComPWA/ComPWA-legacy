@@ -2,9 +2,9 @@
 import os ;
 
 local MINUIT2 = [ os.environ MINUIT2 ] ;
-local BOOST_BUILD_PATH = [ os.environ BOOST_BUILD_PATH ] ;
+#local BOOST_BUILD_PATH = [ os.environ BOOST_BUILD_PATH ] ;
 
-BOOSTLIBS = -lboost_date_time -lboost_filesystem -lboost_program_options -lboost_regex -lboost_serialization -lboost_system -lboost_thread-mt -lboost_test_exec_monitor -L$(BOOST_BUILD_PATH)/lib ;
+#BOOSTLIBS = -lboost_date_time -lboost_filesystem -lboost_program_options -lboost_regex -lboost_serialization -lboost_system -lboost_thread-mt -lboost_test_exec_monitor -L$(BOOST_BUILD_PATH)/lib ;
 
 if $(MINUIT2) {
   lib Minuit2 : : <file>$(MINUIT2)/lib/libMinuit2.so  : : ;
@@ -17,11 +17,9 @@ if $(MINUIT2) {
 project :
 	requirements <include>./
         <include>$(TOP)/Core
-	<include>$(BOOST_BUILD_PATH)/include
 	<include>$(MINUIT2INC)
 	<cxxflags>-ftemplate-depth-256
 	<cxxflags>-std=c++0x
-	<linkflags>$(BOOSTLIBS)
 	;
 
 lib OIFMinuit2 : 

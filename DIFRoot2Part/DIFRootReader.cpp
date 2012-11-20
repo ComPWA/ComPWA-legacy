@@ -9,7 +9,8 @@ DIFRootReader::DIFRootReader(std::string inConfigFile){
 
   fFile = new TFile(inConfigFile.c_str());
   fTree = (TTree*) fFile->Get("data");
-  fParticles = new TClonesArray("TParticle",100);
+  fParticles = new TClonesArray("TParticle");
+  fTree->GetBranch("Particles")->SetAutoDelete(false);
   fTree->SetBranchAddress("Particles",&fParticles);
   fFile->cd();
 
@@ -29,6 +30,7 @@ const int DIFRootReader::getEvent(const int i, PWAEvent& inEvent){
   if(i>=0) {fEvent=i;}
   else {fEvent++;}
 
+  fParticles->Clear();
   fTree->GetEntry(fEvent);
 
   // Get number of particle in TClonesrray

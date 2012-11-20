@@ -39,11 +39,16 @@ int main(int argc, char **argv){
     DIFRootReader myReader("test/2Part-4vecs.root");
     unsigned int maxEvents = myReader.getNEvents();
     double masssq;
-    TH1D* bw = new TH1D("bw","inv. mass of 2 particles",1000,0.,4.);
-    bw->GetXaxis()->SetTitle("m_{12}^{2} / GeV^{2}");
+    TH1D* bw = new TH1D("bw","inv. mass of 2 particles",1000,0.,2.4);
+    bw->GetXaxis()->SetTitle("m_{12} / GeV");
     bw->GetXaxis()->CenterTitle();
     bw->GetYaxis()->SetTitle("#");
     bw->GetYaxis()->CenterTitle();
+    TH1D* bw2 = new TH1D("bw2","inv. mass-sq of 2 particles",1000,0.,4.);
+    bw2->GetXaxis()->SetTitle("m_{12}^{2} / GeV^{2}");
+    bw2->GetXaxis()->CenterTitle();
+    bw2->GetYaxis()->SetTitle("#");
+    bw2->GetYaxis()->CenterTitle();
 
     for(unsigned int i = 0; i < maxEvents; i++){
         PWAEvent event;
@@ -57,12 +62,13 @@ int main(int argc, char **argv){
     	event.getParticle(1,b);
     	masssq = pow(a.getE()+b.getE(),2) - pow(a.getPx()+b.getPx() ,2) - pow(a.getPy()+b.getPy() ,2) - pow(a.getPz()+b.getPz() ,2);
 
-    	bw->Fill(masssq);
+        bw->Fill(sqrt(masssq));
+    	bw2->Fill(masssq);
     }
 
     TFile output("test/InputTest.root","RECREATE","ROOT_Tree");
     bw->Write();
-
+    bw2->Write();
     output.Write();
     output.Close();
 

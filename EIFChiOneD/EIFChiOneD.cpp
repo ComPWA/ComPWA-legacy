@@ -17,8 +17,14 @@ EIFChiOneD::~EIFChiOneD(){
 
 }
 
-double EIFChiOneD::controlParameter(const std::vector<PWAParameter<double> >& minPar){
+double EIFChiOneD::controlParameter(std::vector<PWAParameter<double> >& minPar){
   unsigned int nEvents = pDIF_->getNEvents();
+
+ // std::cout << std::endl << "Test" << std::endl;
+ // std::cout << "Events: \t" << nEvents << std::endl;
+ // std::cout << "Parameter" << std::endl;
+ // for(unsigned int i=0; i<minPar.size(); i++)
+ //   std::cout << i << "-t Par " << minPar.at(i) << std::endl;
 
   double chi=0;
   for(unsigned int evt = 0; evt < nEvents; evt++){
@@ -36,9 +42,7 @@ double EIFChiOneD::controlParameter(const std::vector<PWAParameter<double> >& mi
       std::cout << "EIFChiOneD::controlParameter: Particle B not readable!" << std::endl; //TODO Exception
       continue;
     }
-    //const double ta(a.getE());
-   // std::cout << "Test" << std::endl;
-    //std::cout << "Event, E, Px: \t" << evt << "\t" << a.getE() << "\t" << a.getPx() << std::endl;
+
     double masssq = 0;
     masssq += pow(a.getE()+b.getE(),2);
     masssq -= pow(a.getPx()+b.getPx() ,2);
@@ -47,7 +51,7 @@ double EIFChiOneD::controlParameter(const std::vector<PWAParameter<double> >& mi
 
     //std::cout << "Event, Par0, Par1: \t" << evt << "\t" << minPar.at(0) << "\t" << minPar.at(1) << std::endl;
     std::vector<double> x;
-    x.push_back(masssq);
+    x.push_back(sqrt(masssq));
     double intens = pPIF_->intensity(x, minPar);
 
     chi += fabs(masssq - intens)/(double)nEvents; //TODO: real Chi2

@@ -52,7 +52,7 @@ const double OIFMinuit::exec(std::vector<PWAParameter<double> >& par){
    minMin = migrad2();
  }
 
-  //save minized values
+  //save minimzed values
   for(unsigned int i=0; i<par.size(); ++i){
     out.str("");
     out << i;

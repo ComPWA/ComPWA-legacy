@@ -44,15 +44,19 @@ int main(int argc, char **argv){
   //val[0] = 1.5; max[0] = 2.5; min[0] = 0.5; err[0] = 0.5;
   //val[1] = 0.3; max[1] = 0.5; min[1] = 0.1; err[1] = 0.1;
   std::vector<PWAParameter<double> > par;
-  par.push_back(PWAParameter<double>(1.5,0.5,2.5,0.5));
-  par.push_back(PWAParameter<double>(0.3,0.1,0.5,0.1));
+  par.push_back(PWAParameter<double>(1.7,0.5,2.5,0.5));
+  par.push_back(PWAParameter<double>(0.2,0.1,0.5,0.1));
+
+  std::cout << "Inital par :\t" << std::endl;
+  std::cout << "inital M:\t" << par[0] << std::endl;
+  std::cout << "inital T:\t" << par[1] << std::endl;
 
   std::cout << "Start Fit" << std::endl;
   double genResult = opti->exec(par);
 
   std::cout << "Minimized final par :\t" << genResult << std::endl;
-  std::cout << "final M:\t" << par[0].GetValue() << " +- " << par[0].GetError() << std::endl;
-  std::cout << "final T:\t" << par[1].GetValue() << " +- " << par[1].GetError() << std::endl;
+  std::cout << "final M:\t" << par[0] << std::endl;
+  std::cout << "final T:\t" << par[1] << std::endl;
 
   return 0;
 }

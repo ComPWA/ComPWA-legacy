@@ -45,7 +45,7 @@ int main(int argc, char **argv){
   for(unsigned int par=0; par<10; par++)
     cout << "vector " << par << ": \t" << v[par] << endl;
   for(unsigned int par=0; par<10; par++)
-    cout << "copyvec " << par << ": \t" << v[par] << endl;
+    cout << "copyvec " << par << ": \t" << w[par] << endl;
   cout << endl;
 
   //Test Getter & Setter

@@ -26,7 +26,7 @@ public:
   /// Default Constructor (0x0)
   EIFChiOneD(std::shared_ptr<PIFBase>, std::shared_ptr<DIFBase>);
 
-  virtual double controlParameter(const std::vector<PWAParameter<double> >& minPar);
+  virtual double controlParameter(std::vector<PWAParameter<double> >& minPar);
 
   /** Destructor */
   virtual ~EIFChiOneD();

@@ -47,7 +47,7 @@ public:
   virtual ~PolyFit();
 
 
-  double controlParameter(const vector<PWAParameter<double> >& minPar);
+  double controlParameter(vector<PWAParameter<double> >& minPar);
   void drawGraph(double a, double b, double c, double d);
   // Getters:
  
