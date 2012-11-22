@@ -17,7 +17,7 @@ EIFChiOneD::~EIFChiOneD(){
 
 }
 
-double EIFChiOneD::controlParameter(std::vector<PWAParameter<double> >& minPar){
+double EIFChiOneD::controlParameter(std::vector<std::shared_ptr<PWAParameter> >& minPar){
   unsigned int nEvents = pDIF_->getNEvents();
 
  // std::cout << std::endl << "Test" << std::endl;
@@ -54,7 +54,7 @@ double EIFChiOneD::controlParameter(std::vector<PWAParameter<double> >& minPar){
     x.push_back(sqrt(masssq));
     double intens = pPIF_->intensity(x, minPar);
 
-    chi += fabs(masssq - intens)/(double)nEvents; //TODO: real Chi2
+    chi += (masssq - intens)*(masssq - intens)/(double)nEvents;
   }
 
   return chi;

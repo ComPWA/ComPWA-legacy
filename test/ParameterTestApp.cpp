@@ -15,6 +15,7 @@
 //Core header files go here
 #include "PWAParameter.hpp"
 #include "PWAParameterList.hpp"
+#include "PWAGenericPar.hpp"
 
 using namespace std;
 
@@ -24,15 +25,15 @@ using namespace std;
  */
 int main(int argc, char **argv){
   //Test constructors
-  PWAParameter<int> a; //empty
-  PWAParameter<double> b; //empty double
-  PWAParameter<int> c(2,0,5,1); //int par
-  PWAParameter<int> d(c); //copy constructor
-  PWAParameter<int> e(7,10,5,1); //contructor with wrong bounds
-  shared_ptr<PWAParameter<int> > p(new PWAParameter<int>(3,0,5,1)); //pointer
-  vector<PWAParameter<int> > v, w; //vector
+  PWAGenericPar<int> a; //empty
+  PWAGenericPar<double> b; //empty double
+  PWAGenericPar<int> c(2,0,5,1); //int par
+  PWAGenericPar<int> d(c); //copy constructor
+  PWAGenericPar<int> e(7,10,5,1); //contructor with wrong bounds
+  shared_ptr<PWAGenericPar<int> > p(new PWAGenericPar<int>(3,0,5,1)); //pointer
+  vector<PWAGenericPar<int> > v, w; //vector
   for(unsigned int par=0; par<10; par++)
-    v.push_back(PWAParameter<int>(par,0,10,1));
+    v.push_back(PWAGenericPar<int>(par,0,10,1));
   w = v; //copy vector
 
   //Test reading
@@ -51,12 +52,12 @@ int main(int argc, char **argv){
   //Test Getter & Setter
   cout << "Get & Set output: \t" << endl;
   cout << "Initial: \t" << a << endl;
-  a.SetValue(7); a.SetMaxValue(10); a.SetError(1);
+  a.SetTValue(7); a.SetTMaxValue(10); a.SetTError(1);
   cout << "Setted: \t" << a << endl;
-  cout << "GetVal: \t\t" << a.GetValue() << endl;
-  cout << "GetMin: \t\t" << a.GetMinValue() << endl;
-  cout << "GetMax: \t\t" << a.GetMaxValue() << endl;
-  cout << "GetErr: \t\t" << a.GetError() << endl;
+  cout << "GetVal: \t\t" << a.GetTValue() << endl;
+  cout << "GetMin: \t\t" << a.GetTMinValue() << endl;
+  cout << "GetMax: \t\t" << a.GetTMaxValue() << endl;
+  cout << "GetErr: \t\t" << a.GetTError() << endl;
   cout << "Final: \t\t" << a << endl;
   cout << endl;
 
@@ -64,13 +65,13 @@ int main(int argc, char **argv){
   cout << "bound output (e(7,10,5,1): \t" << endl;
   cout << "Initial: \t\t" << e << endl;
   cout << "HasBounds: \t\t\t" << e.HasBounds() << endl;
-  e.SetMaxValue(-1);
+  e.SetTMaxValue(-1);
   cout << "After SetMaxValue(-1): \t" << e << endl;
-  e.SetMaxValue(6);
+  e.SetTMaxValue(6);
   cout << "After SetMaxValue(6): \t" << e << endl;
-  e.SetMinMax(10,5);
+  e.SetTMinMax(10,5);
   cout << "After SetMinMax(10,5): \t" << e << endl;
-  e.SetMinMax(5,10);
+  e.SetTMinMax(5,10);
   cout << "After SetMinMax(5,10): \t" << e << endl;
   cout << endl;
 
@@ -83,7 +84,7 @@ int main(int argc, char **argv){
   cout << "IntVec Constructor: \t" << ints << endl;
   ints.AddParameter(b);
   cout << "IntVec added float: \t" << ints << endl;
-  PWAParameter<int> toFill; ints.GetParameter(2,toFill);
+  PWAGenericPar<int> toFill; ints.GetParameter(2,toFill);
   cout << "IntVec get int 2: \t" << toFill << endl;
   return 0;
 }

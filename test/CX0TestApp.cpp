@@ -24,7 +24,34 @@ void call_from_thread(unsigned int tid) {
   cout << "Launched by thread " << tid << endl;
 }
 
+class Base{
+public:
+  Base(const unsigned int in):i(in){}
+  virtual const unsigned int GetInt(){return i;}
+  virtual void SetInt(const unsigned int in) = 0;
+
+protected:
+  unsigned int i;
+};
+
+class Derived : public Base{
+public:
+  Derived(const unsigned int in):Base(in){}
+  virtual void SetInt(const unsigned int in){i=in*10;}
+
+};
+
 int main(int argc, char **argv) {
+
+  //=== shared_ptr in a vector: ===
+  vector<shared_ptr<Base> > baseVec;
+  baseVec.push_back(shared_ptr<Derived>(new Derived(5)));
+  baseVec.push_back(shared_ptr<Derived>(new Derived(10)));
+  /*"old" way:
+   * vector<Base*> baseVec;
+   * baseVec.push_back(new Derived(5));
+   * baseVec.push_back(new Derived(10));
+   */
 
   //========= c++11 test ==========
   string hello = "say hello to c++11 Basics: ";

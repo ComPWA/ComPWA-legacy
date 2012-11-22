@@ -27,6 +27,7 @@
 #include "OIFMinuit.hpp"
 #include "OIFGeneva.hpp"
 #include "PWAParameter.hpp"
+#include "PWAGenericPar.hpp"
 
 // The toy-data to fit to
 #include "PolyFit.hpp"
@@ -43,14 +44,14 @@ int main(int argc, char **argv){
   std::shared_ptr<OIFData> myFit(new PolyFit(p0, p1, p2, p3, sigma_smear));
 
   //--------------------------Minimizer IF --------------------------------------------------------
-  std::vector<shared_ptr<OIFBase> > myMinimizerList;
+  std::vector<std::shared_ptr<OIFBase> > myMinimizerList;
 
   // Add minimizers
-  if (whichMinimizer=="Geneva") myMinimizerList.push_back(shared_ptr<OIFBase> (new OIFGeneva(myFit)));
-  else if (whichMinimizer=="Minuit") myMinimizerList.push_back(shared_ptr<OIFBase> (new OIFMinuit(myFit)));
+  if (whichMinimizer=="Geneva") myMinimizerList.push_back(std::shared_ptr<OIFBase> (new OIFGeneva(myFit)));
+  else if (whichMinimizer=="Minuit") myMinimizerList.push_back(std::shared_ptr<OIFBase> (new OIFMinuit(myFit)));
   else if (whichMinimizer=="all") {
-    myMinimizerList.push_back(shared_ptr<OIFBase> (new OIFGeneva(myFit)));
-    myMinimizerList.push_back(shared_ptr<OIFBase> (new OIFMinuit(myFit)));
+    myMinimizerList.push_back(std::shared_ptr<OIFBase> (new OIFGeneva(myFit)));
+    myMinimizerList.push_back(std::shared_ptr<OIFBase> (new OIFMinuit(myFit)));
   }else{
    std::cout << "Minimizer/t" << whichMinimizer << "\tdoesn't exist" << std::endl;
    return 0;
@@ -62,11 +63,11 @@ int main(int argc, char **argv){
   val[1] = 9.8; max[1] = 15; min[1] = 5; err[1] = 2;
   val[2] = 1.1; max[2] = 1.5; min[2] = 0.5; err[2] = 0.3;
   val[3] = -0.008; max[3] = 0.; min[3] = -0.02; err[3] = 0.005;*/
-  std::vector<PWAParameter<double> > par;
-  par.push_back(PWAParameter<double>(-11,-20,0,3));
-  par.push_back(PWAParameter<double>(9.8,5,15,2));
-  par.push_back(PWAParameter<double>(1.1,0.5,1.5,0.3));
-  par.push_back(PWAParameter<double>(-0.008,-0.02,0,0.005));
+  std::vector<std::shared_ptr<PWAParameter> > par;
+  par.push_back(std::shared_ptr<PWAParameter>(new PWAGenericPar<double>(-11,-20,0,3)));
+  par.push_back(std::shared_ptr<PWAParameter>(new PWAGenericPar<double>(9.8,5,15,2)));
+  par.push_back(std::shared_ptr<PWAParameter>(new PWAGenericPar<double>(1.1,0.5,1.5,0.3)));
+  par.push_back(std::shared_ptr<PWAParameter>(new PWAGenericPar<double>(-0.008,-0.02,0,0.005)));
 
   // Loop over minimizers (at the moment this means: Geneva, Minuit or Geneva then Minuit)
   for(unsigned int Nmin=0; Nmin<myMinimizerList.size(); Nmin++){
@@ -77,7 +78,7 @@ int main(int argc, char **argv){
 
     std::cout << "Minimizer " << Nmin << "\t final par :\t" << genResult << std::endl;
     for(unsigned int i=0; i<par.size(); i++)
-      std::cout << "final par "<< i << ":\t" << par[i] << std::endl;
+      std::cout << "final par "<< i << ":\t" << *(par[i]) << std::endl;
     std::cout << "Done ..." << std::endl << std::endl;
   }
 

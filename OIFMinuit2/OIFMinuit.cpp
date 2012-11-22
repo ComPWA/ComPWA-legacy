@@ -22,7 +22,7 @@ OIFMinuit::~OIFMinuit(){
   //delete _myFcn;
 }
 
-const double OIFMinuit::exec(std::vector<PWAParameter<double> >& par){
+const double OIFMinuit::exec(std::vector<std::shared_ptr<PWAParameter> >& par){
   std::string s;
   std::stringstream out;
 
@@ -33,12 +33,12 @@ const double OIFMinuit::exec(std::vector<PWAParameter<double> >& par){
     s = out.str();
 
     //use as much information as possible: (just bounds but no error not supported by minuit)
-    if( par[i].HasBounds() && par[i].HasError() )
-      upar.Add(s, par[i].GetValue(), par[i].GetError(), par[i].GetMaxValue(), par[i].GetMinValue());
-    else if( par[i].HasError() )
-      upar.Add(s, par[i].GetValue(), par[i].GetError());
+    if( par[i]->UseBounds() && par[i]->HasError() )
+      upar.Add(s, par[i]->GetValue(), par[i]->GetError(), par[i]->GetMaxValue(), par[i]->GetMinValue());
+    else if( par[i]->HasError() )
+      upar.Add(s, par[i]->GetValue(), par[i]->GetError());
     else
-      upar.Add(s, par[i].GetValue());
+      upar.Add(s, par[i]->GetValue());
   }
 
   MnMigrad migrad(_myFcn, upar);
@@ -57,8 +57,8 @@ const double OIFMinuit::exec(std::vector<PWAParameter<double> >& par){
     out.str("");
     out << i;
     s = out.str();
-    par[i].SetValue(minMin.UserState().Value(s));
-    par[i].SetError(minMin.UserState().Error(s));
+    par[i]->SetValue(minMin.UserState().Value(s));
+    par[i]->SetError(minMin.UserState().Error(s));
   }
 
   return minMin.Fval();

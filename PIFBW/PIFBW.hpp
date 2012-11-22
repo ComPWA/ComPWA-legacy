@@ -20,7 +20,7 @@ public:
   PIFBW();
 
   virtual const double intensity(double x, double M, double T);
-  virtual const double intensity(std::vector<double> x, std::vector<PWAParameter<double> > par);
+  virtual const double intensity(std::vector<double> x, std::vector<std::shared_ptr<PWAParameter> >& par);
 
   /** Destructor */
   virtual ~PIFBW();

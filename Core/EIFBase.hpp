@@ -12,6 +12,9 @@
 #ifndef _EIFBASE_HPP_
 #define _EIFBASE_HPP_
 
+#include <vector>
+#include <memory>
+
 #include "OIFData.hpp"
 #include "PWAParameter.hpp"
 
@@ -27,7 +30,7 @@ public:
   /* nothing */
   }
 
-  virtual double controlParameter(std::vector<PWAParameter<double> >& minPar) = 0;
+  virtual double controlParameter(std::vector<std::shared_ptr<PWAParameter> >& minPar) = 0;
 
 };
 

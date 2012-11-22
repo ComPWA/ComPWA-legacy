@@ -12,6 +12,8 @@
 #define _OIFBASE_HPP_
 
 #include <vector>
+#include <memory>
+
 #include "PWAParameter.hpp"
 
 class OIFBase
@@ -27,7 +29,7 @@ public:
 	{ /* nothing */	}
 
   // TODO: template <class T> or map?
-  virtual const double exec(std::vector<PWAParameter<double> >& par) =0;
+  virtual const double exec(std::vector<std::shared_ptr<PWAParameter> >& par) =0;
  
 };
 

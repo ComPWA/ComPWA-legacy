@@ -27,10 +27,11 @@
 // Physics Interface header files go here
 #include "PIFBW.hpp"
 #include "PWAParameter.hpp"
+#include "PWAGenericPar.hpp"
 
 using namespace std;
 
-const unsigned int MaxEvents = 10000;
+const unsigned int MaxEvents = 100000;
 
 //constants
 const Double_t M = 3.096916; // GeV/c² (J/Psi mass)
@@ -48,9 +49,9 @@ int main(int argc, char **argv){
 
   //Simple Breit-Wigner Physics-Module setup
   shared_ptr<PIFBW> testBW(new PIFBW());
-  vector<PWAParameter<double> > par;
-  par.push_back(PWAParameter<double>(1.5, 0.5, 2.5, 0.1));
-  par.push_back(PWAParameter<double>(0.3, 0.1, 0.5, 0.05));
+  vector<shared_ptr<PWAParameter> > minPar;
+  minPar.push_back(shared_ptr<PWAGenericPar<double> >(new PWAGenericPar<double>(1.5,0.5,2.5,0.1)));
+  minPar.push_back(shared_ptr<PWAGenericPar<double> >(new PWAGenericPar<double>(0.3,0.1,0.2,0.01)));
 
   //Output File setup
   TFile output("test/2Part-4vecs.root","recreate");
@@ -86,7 +87,7 @@ int main(int argc, char **argv){
       //call physics module
       vector<double> x;
       x.push_back(pPm.Mag());
-      double BWpdf = testBW->intensity(x, par); //TMath::BreitWigner(pPm.Mag(),1.2,0.2);
+      double BWpdf = testBW->intensity(x, minPar); //TMath::BreitWigner(pPm.Mag(),1.2,0.2);
 
       double test = rando.Uniform(0,10);
 

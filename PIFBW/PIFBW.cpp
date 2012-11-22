@@ -20,8 +20,8 @@ const double PIFBW::intensity(double x, double M, double T){
   return BreitWigner(x, M, T);
 }
 
-const double PIFBW::intensity(std::vector<double> x, std::vector<PWAParameter<double> > par){
-  return BreitWigner(x.at(0), par.at(0).GetValue(), par.at(1).GetValue());
+const double PIFBW::intensity(std::vector<double> x, std::vector<std::shared_ptr<PWAParameter> >& par){
+  return BreitWigner(x.at(0), par.at(0)->GetValue(), par.at(1)->GetValue());
 }
 
 const double PIFBW::BreitWigner(double x, double M, double T){

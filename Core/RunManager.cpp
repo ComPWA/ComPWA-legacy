@@ -18,7 +18,7 @@ RunManager::~RunManager(){
   /* nothing */
 }
 
-bool RunManager::startFit(std::vector<PWAParameter<double> >& inPar){
+bool RunManager::startFit(std::vector<std::shared_ptr<PWAParameter> >& inPar){
   if( !valid_ )
     return false;
 

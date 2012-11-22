@@ -12,6 +12,7 @@
 #include <vector>
 //#include <boost/shared_ptr.hpp>
 #include <memory>
+
 #include "OIFData.hpp"
 #include "OIFBase.hpp"
 #include "PWAParameter.hpp"
@@ -24,7 +25,7 @@ class OIFMinuit : public OIFBase {
 public:
   /// Default Constructor (0x0)
   OIFMinuit(std::shared_ptr<OIFData> theData);
-  virtual const double exec(std::vector<PWAParameter<double> >& par);
+  virtual const double exec(std::vector<std::shared_ptr<PWAParameter> >& par);
 
   /** Destructor */
   virtual ~OIFMinuit();

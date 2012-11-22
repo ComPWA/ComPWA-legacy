@@ -9,12 +9,14 @@
 #ifndef _RUNMANAGER_HPP_
 #define _RUNMANAGER_HPP_
 
+#include <vector>
 #include <memory>
 
 #include "DIFBase.hpp"
 #include "EIFBase.hpp"
 #include "PIFBase.hpp"
 #include "OIFBase.hpp"
+#include "PWAParameter.hpp"
 
 class RunManager
 {
@@ -26,7 +28,7 @@ public:
 
   virtual ~RunManager();
 
-  virtual bool startFit(std::vector<PWAParameter<double> >& );
+  virtual bool startFit(std::vector<std::shared_ptr<PWAParameter> >& );
 
 protected:
   std::shared_ptr<DIFBase> pData_; /*!< Pointer to Data-Module */

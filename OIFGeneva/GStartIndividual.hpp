@@ -74,6 +74,7 @@
 // ComPWA header files go here
 #include "OIFData.hpp"
 #include "PWAParameter.hpp"
+#include "PWAGenericPar.hpp"
 
 #ifdef GENEVATESTING
 #include <common/GUnitTestFrameworkT.hpp>
@@ -170,10 +171,10 @@ public:
 	virtual ~GStartIndividual()
 	{ /* nothing */	}
 
-  bool getPar(std::vector<PWAParameter<double> >& val){
+  bool getPar(std::vector<std::shared_ptr<PWAParameter> >& val){
 		GStartIndividual::conversion_iterator<GConstrainedDoubleObject> it(this->end());
 		for(it=this->begin(); it!=this->end(); ++it) {
-		  val.push_back(PWAParameter<double>((*it)->value(),0,0,0));
+		  val.push_back(std::shared_ptr<PWAGenericPar<double> >(new PWAGenericPar<double>((*it)->value(),0,0,0)));
 		}
                 return true;
   }
@@ -368,9 +369,9 @@ protected:
 		// to add error checks here upon first invocation.
 
 		GStartIndividual::conversion_iterator<GConstrainedDoubleObject> it(this->end());
-		std::vector<PWAParameter<double> > minPar;
+		std::vector<std::shared_ptr<PWAParameter> > minPar;
 		for(it=this->begin(); it!=this->end(); ++it) {
-		  minPar.push_back(PWAParameter<double>((*it)->value(),0,0,0));
+		  minPar.push_back(std::shared_ptr<PWAGenericPar<double> >(new PWAGenericPar<double>((*it)->value(),0,0,0)));
 		}
       
 		return theData->controlParameter(minPar);

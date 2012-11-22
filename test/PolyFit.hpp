@@ -1,7 +1,7 @@
-//! Test implementation of OIFData.hpp.
+//! Test implementation of OIFData.
 /*! \class PolyFit
  * @file PolyFit.hpp
- * This class derives from OIFData.hpp, the data-interface of the optimizers. It
+ * This class derives from OIFData, the data-interface of the optimizers. It
  * represents a set of 1-dim data-points, which are created when instantiating
  * this class using a polynomial and smearing the points with a gausian distri-
  * bution. It also provides a draw function to visualize the data-points.
@@ -18,15 +18,11 @@
 #include <cassert>
 #include <memory>
 
-#include <boost/shared_ptr.hpp>
-
 #include "TROOT.h"
 //#include "qft++/topincludes/relativistic-quantum-mechanics.hh"
 
 #include "OIFData.hpp"
 #include "PWAParameter.hpp"
-
-using namespace std;
 
 class TFile;
 class TGraph;
@@ -47,7 +43,7 @@ public:
   virtual ~PolyFit();
 
 
-  double controlParameter(vector<PWAParameter<double> >& minPar);
+  double controlParameter(std::vector<std::shared_ptr<PWAParameter> >& minPar);
   void drawGraph(double a, double b, double c, double d);
   // Getters:
  
@@ -55,11 +51,11 @@ protected:
 
 
 private:
-  shared_ptr<TFile> _theTFile;
-  map <unsigned int, TGraph* > _myGraph;
+  std::shared_ptr<TFile> _theTFile;
+  std::map <unsigned int, TGraph* > _myGraph;
 
-  vector< double > _xValue;
-  vector< double > _yValue;
+  std::vector< double > _xValue;
+  std::vector< double > _yValue;
 
   double _sigma;
 

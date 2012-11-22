@@ -9,3 +9,7 @@ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$GENEVA/lib:$MINUIT2/lib:$ROOTSYS/lib/ro
 
 echo "check libs:"
 echo $LD_LIBRARY_PATH
+
+#prevents minuit vom using multiple threads
+#needed as long as data-reader is not thread-safe
+export OMP_NUM_THREADS=1

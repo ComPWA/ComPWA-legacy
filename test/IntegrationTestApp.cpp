@@ -23,6 +23,7 @@
 #include "EIFChiOneD.hpp"
 #include "OIFMinuit.hpp"
 #include "PWAParameter.hpp"
+#include "PWAGenericPar.hpp"
 
 //Test header files go here
 #include "PolyFit.hpp"
@@ -32,7 +33,7 @@
  * The main function.
  */
 int main(int argc, char **argv){
-  string file="test/2Part-4vecs.root";
+  std::string file="test/2Part-4vecs.root";
   std::cout << "Load Modules" << std::endl;
   std::shared_ptr<DIFBase> myReader(new DIFRootReader(file));
   std::shared_ptr<PIFBase> testBW(new PIFBW());
@@ -43,20 +44,20 @@ int main(int argc, char **argv){
   //double val[2], min[2], max[2], err[2];
   //val[0] = 1.5; max[0] = 2.5; min[0] = 0.5; err[0] = 0.5;
   //val[1] = 0.3; max[1] = 0.5; min[1] = 0.1; err[1] = 0.1;
-  std::vector<PWAParameter<double> > par;
-  par.push_back(PWAParameter<double>(1.7,0.5,2.5,0.5));
-  par.push_back(PWAParameter<double>(0.2,0.1,0.5,0.1));
+  std::vector<std::shared_ptr<PWAParameter> > par;
+  par.push_back(std::shared_ptr<PWAParameter>(new PWAGenericPar<double>(1.7,0.5,2.5,0.1)));
+  par.push_back(std::shared_ptr<PWAParameter>(new PWAGenericPar<double>(0.2,0.1,0.2,0.01)));
 
   std::cout << "Inital par :\t" << std::endl;
-  std::cout << "inital M:\t" << par[0] << std::endl;
-  std::cout << "inital T:\t" << par[1] << std::endl;
+  std::cout << "inital M:\t" << *(par[0]) << std::endl;
+  std::cout << "inital T:\t" << *(par[1]) << std::endl;
 
   std::cout << "Start Fit" << std::endl;
   double genResult = opti->exec(par);
 
   std::cout << "Minimized final par :\t" << genResult << std::endl;
-  std::cout << "final M:\t" << par[0] << std::endl;
-  std::cout << "final T:\t" << par[1] << std::endl;
+  std::cout << "final M:\t" << *(par[0]) << std::endl;
+  std::cout << "final T:\t" << *(par[1]) << std::endl;
 
   return 0;
 }

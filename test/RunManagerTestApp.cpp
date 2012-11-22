@@ -23,6 +23,7 @@
 #include "EIFChiOneD.hpp"
 #include "OIFMinuit.hpp"
 #include "PWAParameter.hpp"
+#include "PWAGenericPar.hpp"
 #include "RunManager.hpp"
 
 //Test header files go here
@@ -33,7 +34,7 @@
  * The main function.
  */
 int main(int argc, char **argv){
-  string file="test/2Part-4vecs.root";
+  std::string file="test/2Part-4vecs.root";
   std::cout << "Load Modules" << std::endl;
   std::shared_ptr<DIFBase> myReader(new DIFRootReader(file));
   std::shared_ptr<PIFBase> testBW(new PIFBW());
@@ -42,16 +43,16 @@ int main(int argc, char **argv){
   std::shared_ptr<RunManager> run(new RunManager(myReader, testEsti, testBW, opti));
 
   // Initiate parameters
-  std::vector<PWAParameter<double> > par;
-  par.push_back(PWAParameter<double>(1.5,0.5,2.5,0.5));
-  par.push_back(PWAParameter<double>(0.3,0.1,0.5,0.1));
+  std::vector<std::shared_ptr<PWAParameter> > par;
+  par.push_back(std::shared_ptr<PWAParameter>(new PWAGenericPar<double>(1.7,0.5,2.5,0.1)));
+  par.push_back(std::shared_ptr<PWAParameter>(new PWAGenericPar<double>(0.2,0.1,0.2,0.01)));
 
   std::cout << "Start Fit" << std::endl;
   run->startFit(par);
 
   std::cout << "Minimized final par :\t" << std::endl;
-  std::cout << "final M:\t" << par[0].GetValue() << " +- " << par[0].GetError() << std::endl;
-  std::cout << "final T:\t" << par[1].GetValue() << " +- " << par[1].GetError() << std::endl;
+  std::cout << "final M:\t" << *(par[0]) << std::endl;
+  std::cout << "final T:\t" << *(par[1]) << std::endl;
 
   return 0;
 }

@@ -13,8 +13,6 @@
 #include "TF1.h"
 #include "TGraphErrors.h"
 
-using namespace std;
-
 //#include "ErrLogger/ErrLogger.hh"
 
 PolyFit::PolyFit(double p0, double p1, double p2, double p3, double sigma) :
@@ -24,17 +22,17 @@ PolyFit::PolyFit(double p0, double p1, double p2, double p3, double sigma) :
 
   // Display parameters for test distribution 
 
-  cout << endl;
+  std::cout << std::endl;
   /*Info <<"Set p0 as "<< p0 << endmsg;
   Info <<"Set p1 as "<< p1 << endmsg;
   Info <<"Set p2 as "<< p2 << endmsg;
   Info <<"Set p3 as "<< p3 << endmsg;
   Info <<"Set sigma as "<< sigma << endmsg;*/
-  cout <<"Set p0 as "<< p0 << endl;
-  cout <<"Set p1 as "<< p1 << endl;
-  cout <<"Set p2 as "<< p2 << endl;
-  cout <<"Set p3 as "<< p3 << endl;
-  cout <<"Set sigma as "<< sigma << endl;
+  std::cout <<"Set p0 as "<< p0 << std::endl;
+  std::cout <<"Set p1 as "<< p1 << std::endl;
+  std::cout <<"Set p2 as "<< p2 << std::endl;
+  std::cout <<"Set p3 as "<< p3 << std::endl;
+  std::cout <<"Set sigma as "<< sigma << std::endl;
 
   // Generate test distribution and smear them with a gaussian
   TRandom randomNumber;
@@ -47,12 +45,12 @@ PolyFit::PolyFit(double p0, double p1, double p2, double p3, double sigma) :
 
 }
 
-double PolyFit::controlParameter(std::vector<PWAParameter<double> >& minPar){
+double PolyFit::controlParameter(std::vector<std::shared_ptr<PWAParameter> >& minPar){
  
   // Calculate chi^2 for current set of fit parameters 
   double result=0.;
   for (unsigned int i=0; i<_xValue.size(); i++){
-    double yValFit=minPar[0].GetValue()+minPar[1].GetValue()*_xValue[i]+minPar[2].GetValue()*_xValue[i]*_xValue[i]+minPar[3].GetValue()*_xValue[i]*_xValue[i]*_xValue[i];
+    double yValFit=minPar[0]->GetValue()+minPar[1]->GetValue()*_xValue[i]+minPar[2]->GetValue()*_xValue[i]*_xValue[i]+minPar[3]->GetValue()*_xValue[i]*_xValue[i]*_xValue[i];
     double yValExp=_yValue[i];
     double tmpChi=((yValExp-yValFit)*(yValExp-yValFit))/(_sigma*_sigma);
     result+=tmpChi;

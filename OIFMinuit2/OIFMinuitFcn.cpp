@@ -1,6 +1,7 @@
 #include "OIFMinuitFcn.hpp"
 #include "OIFData.hpp"
 #include "PWAParameter.hpp"
+#include "PWAGenericPar.hpp"
 //#include "ErrLogger/ErrLogger.hh"
 #include <cassert>
 #include <memory>
@@ -22,9 +23,9 @@ OIFMinuitFcn::~OIFMinuitFcn(){
 }
 
 double OIFMinuitFcn::operator()(const std::vector<double>& x) const{
-  std::vector<PWAParameter<double> > par;
+  std::vector<std::shared_ptr<PWAParameter> > par;
   for(unsigned int i=0; i<x.size(); i++)
-    par.push_back(PWAParameter<double>(x[i]));
+    par.push_back(std::shared_ptr<PWAGenericPar<double> >(new PWAGenericPar<double>(x[i])));
   double result=_myDataPtr->controlParameter(par);
   //DebugMsg << "current minimized value:\t"<< result << endmsg;
   std::cout << "current minimized value:\t"<< result << std::endl;

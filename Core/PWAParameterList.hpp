@@ -13,7 +13,7 @@
 #include <sstream>
 #include <vector>
 
-#include "PWAParameter.hpp"
+#include "PWAGenericPar.hpp"
 
 class PWAParameterList
 {
@@ -35,7 +35,7 @@ public:
    * \param inVec input vector of double parameters
    * \sa addParameter(PWAParameter<double>&)
   */
-  PWAParameterList(const std::vector<PWAParameter<double> >& inVec);
+  PWAParameterList(const std::vector<PWAGenericPar<double> >& inVec);
 
   //! Standard constructor with a vector of integer PWAParameter
   /*!
@@ -46,7 +46,7 @@ public:
    * \param inVec input vector of integer parameters
    * \sa addParameter(PWAParameter<integer>&)
   */
-  PWAParameterList(const std::vector<PWAParameter<int> >& inVec);
+  PWAParameterList(const std::vector<PWAGenericPar<int> >& inVec);
 
   //! Standard constructor with a vector of boolean PWAParameter
   /*!
@@ -57,7 +57,7 @@ public:
    * \param inVec input vector of boolean parameters
    * \sa addParameter(PWAParameter<bool>&)
   */
-  PWAParameterList(const std::vector<PWAParameter<bool> >& inVec);
+  PWAParameterList(const std::vector<PWAGenericPar<bool> >& inVec);
 
   //! Standard constructor with a vector of bool, int and double PWAParameter
   /*!
@@ -69,8 +69,8 @@ public:
    * \param inB input vector of boolean parameters
    * \sa addParameter(PWAParameter<double>&, PWAParameter<int>&, PWAParameter<bool>&)
   */
-  PWAParameterList(const std::vector<PWAParameter<double> >& inD,
-      const std::vector<PWAParameter<int> >& inI, const std::vector<PWAParameter<bool> >& inB);
+  PWAParameterList(const std::vector<PWAGenericPar<double> >& inD,
+      const std::vector<PWAGenericPar<int> >& inI, const std::vector<PWAGenericPar<bool> >& inB);
 
   //! Copy constructor using = operator
   /*!
@@ -94,7 +94,7 @@ public:
    * \param i input number of parameter to load
    * \param par output container for loaded parameter
   */
-  virtual const int GetParameter(const unsigned int i, PWAParameter<double>& par) const ;
+  virtual const int GetParameter(const unsigned int i, PWAGenericPar<double>& par) const ;
 
   //! Getter for integer parameter
   /*!
@@ -102,7 +102,7 @@ public:
    * \param i input number of parameter to load
    * \param par output container for loaded parameter
   */
-  virtual const int GetParameter(const unsigned int i, PWAParameter<int>& par) const ;
+  virtual const int GetParameter(const unsigned int i, PWAGenericPar<int>& par) const ;
 
   //! Getter for boolean parameter
   /*!
@@ -110,28 +110,28 @@ public:
    * \param i input number of parameter to load
    * \param par output container for loaded parameter
   */
-  virtual const int GetParameter(const unsigned int i, PWAParameter<bool>& par) const ;
+  virtual const int GetParameter(const unsigned int i, PWAGenericPar<bool>& par) const ;
 
   //! Add floating point parameter
   /*!
    * Adds a floating point parameter to the list
    * \param par input parameter
   */
-  virtual void AddParameter(PWAParameter<double>& par);
+  virtual void AddParameter(PWAGenericPar<double>& par);
 
   //! Add integer parameter
   /*!
    * Adds an integer parameter to the list
    * \param par input parameter
   */
-  virtual void AddParameter(PWAParameter<int>& par);
+  virtual void AddParameter(PWAGenericPar<int>& par);
 
   //! Add boolean parameter
   /*!
    * Adds an boolean parameter to the list
    * \param par input parameter
   */
-  virtual void AddParameter(PWAParameter<bool>& par);
+  virtual void AddParameter(PWAGenericPar<bool>& par);
 
   //! A public function returning a string with parameter information
   /*!
@@ -144,9 +144,9 @@ public:
   std::string const& to_str() const;
 
 protected:
-  std::vector<PWAParameter<double> > vDoublePar_; /*!< Vector of floating point parameters */
-  std::vector<PWAParameter<int> > vIntPar_; /*!< Vector of integer parameters */
-  std::vector<PWAParameter<bool> > vBoolPar_; /*!< Vector of boolean parameters */
+  std::vector<PWAGenericPar<double> > vDoublePar_; /*!< Vector of floating point parameters */
+  std::vector<PWAGenericPar<int> > vIntPar_; /*!< Vector of integer parameters */
+  std::vector<PWAGenericPar<bool> > vBoolPar_; /*!< Vector of boolean parameters */
   std::string out_; /*!< Output string to print information */
 
   //! A protected function which creates an output string for printing

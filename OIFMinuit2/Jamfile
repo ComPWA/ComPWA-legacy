@@ -26,8 +26,8 @@ lib OIFMinuit2 :
         [ glob *.cpp ] 
    #     OIFMinuit2//OIFMinuit2  
         $(TOP)/Core//ComPWA
-        : <use>$(TOP)/OIFMinuit2//Minuit2 
-        : <library>$(TOP)/OIFMinuit2//Minuit2 ;
+        : <use>$(TOP)/OIFMinuit2//Minuit2 <threading>single 
+        : <library>$(TOP)/OIFMinuit2//Minuit2 <threading>single ;
 
-install dist : OIFMinuit2 : <location>$(TOP)/lib ;
+install dist : OIFMinuit2 : <location>$(TOP)/lib <threading>single ;
 

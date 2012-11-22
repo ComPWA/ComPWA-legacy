@@ -6,23 +6,23 @@ PWAParameterList::PWAParameterList(){
   make_str();
 }
 
-PWAParameterList::PWAParameterList(const std::vector<PWAParameter<double> >& inVec)
+PWAParameterList::PWAParameterList(const std::vector<PWAGenericPar<double> >& inVec)
 :vDoublePar_(inVec){
   make_str();
 }
 
-PWAParameterList::PWAParameterList(const std::vector<PWAParameter<int> >& inVec)
+PWAParameterList::PWAParameterList(const std::vector<PWAGenericPar<int> >& inVec)
 :vIntPar_(inVec){
   make_str();
 }
 
-PWAParameterList::PWAParameterList(const std::vector<PWAParameter<bool> >& inVec)
+PWAParameterList::PWAParameterList(const std::vector<PWAGenericPar<bool> >& inVec)
 :vBoolPar_(inVec){
   make_str();
 }
 
-PWAParameterList::PWAParameterList(const std::vector<PWAParameter<double> >& inD,
-    const std::vector<PWAParameter<int> >& inI, const std::vector<PWAParameter<bool> >& inB)
+PWAParameterList::PWAParameterList(const std::vector<PWAGenericPar<double> >& inD,
+    const std::vector<PWAGenericPar<int> >& inI, const std::vector<PWAGenericPar<bool> >& inB)
 :vDoublePar_(inD), vIntPar_(inI), vBoolPar_(inB){
   make_str();
 }
@@ -35,7 +35,7 @@ PWAParameterList::~PWAParameterList() {
   /* nothing */
 }
 
-const int PWAParameterList::GetParameter(const unsigned int i, PWAParameter<double>& par) const {
+const int PWAParameterList::GetParameter(const unsigned int i, PWAGenericPar<double>& par) const {
   if( i < vDoublePar_.size() ){
       //TODO Exception?
       return 0;
@@ -44,7 +44,7 @@ const int PWAParameterList::GetParameter(const unsigned int i, PWAParameter<doub
   return 1;
 }
 
-const int PWAParameterList::GetParameter(const unsigned int i, PWAParameter<int>& par) const {
+const int PWAParameterList::GetParameter(const unsigned int i, PWAGenericPar<int>& par) const {
   if( i < vIntPar_.size() ){
       //TODO Exception?
       return 0;
@@ -53,7 +53,7 @@ const int PWAParameterList::GetParameter(const unsigned int i, PWAParameter<int>
   return 1;
 }
 
-const int PWAParameterList::GetParameter(const unsigned int i, PWAParameter<bool>& par) const {
+const int PWAParameterList::GetParameter(const unsigned int i, PWAGenericPar<bool>& par) const {
   if( i < vBoolPar_.size() ){
       //TODO Exception?
       return 0;
@@ -62,17 +62,17 @@ const int PWAParameterList::GetParameter(const unsigned int i, PWAParameter<bool
   return 1;
 }
 
-void PWAParameterList::AddParameter(PWAParameter<double>& par) {
+void PWAParameterList::AddParameter(PWAGenericPar<double>& par) {
   vDoublePar_.push_back(par);
   make_str();
 }
 
-void PWAParameterList::AddParameter(PWAParameter<int>& par) {
+void PWAParameterList::AddParameter(PWAGenericPar<int>& par) {
   vIntPar_.push_back(par);
   make_str();
 }
 
-void PWAParameterList::AddParameter(PWAParameter<bool>& par) {
+void PWAParameterList::AddParameter(PWAGenericPar<bool>& par) {
   vBoolPar_.push_back(par);
   make_str();
 }

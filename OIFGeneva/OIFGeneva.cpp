@@ -35,15 +35,15 @@ OIFGeneva::~OIFGeneva()
   //delete _myFcn;
 }
 
-const double OIFGeneva::exec(std::vector<PWAParameter<double> >& par){
+const double OIFGeneva::exec(std::vector<std::shared_ptr<PWAParameter> >& par){
   // create par arrays
   unsigned int NPar = par.size();
   double val[NPar], min[NPar], max[NPar], err[NPar];
   for(unsigned int i=0; i<NPar; i++){
-      val[i] = par[i].GetValue();
-      min[i] = par[i].GetMinValue();
-      max[i] = par[i].GetMaxValue();
-      err[i] = par[i].GetError();
+      val[i] = par[i]->GetValue();
+      min[i] = par[i]->GetMinValue();
+      max[i] = par[i]->GetMaxValue();
+      err[i] = par[i]->GetError();
   }
 
   // Random numbers are our most valuable good. Set the number of threads
@@ -148,12 +148,13 @@ const double OIFGeneva::exec(std::vector<PWAParameter<double> >& par){
 
   boost::shared_ptr<GStartIndividual> bestIndividual_ptr=pop_ptr->getBestIndividual<GStartIndividual>();
 
-  std::vector<PWAParameter<double> > resultPar;
+  std::vector<std::shared_ptr<PWAParameter> > resultPar;
   bestIndividual_ptr->getPar(resultPar);
 
   //par = resultPar; Geneva ignores bounds and errors!
-  for(unsigned int i=0; i<par.size(); i++)  //TODO: better way?
-    par[i].SetValue(resultPar[i].GetValue());
+  for(unsigned int i=0; i<par.size(); i++){  //TODO: better way, no cast or check type
+    par[i]->SetValue(resultPar[i]->GetValue());
+  }
 
   return _myData->controlParameter(resultPar);// bestIndividual_ptr->fitnessCalculation();
 }

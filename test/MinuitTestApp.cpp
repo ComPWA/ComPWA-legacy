@@ -47,11 +47,11 @@ int main(int argc, char **argv){
   myMinimizerList.push_back(shared_ptr<OIFBase> (new OIFMinuit(myFit)));
 
   // Initiate parameters
-  std::vector<PWAParameter<double> > par;
-  par.push_back(PWAParameter<double>(-11,-20,0,3));
-  par.push_back(PWAParameter<double>(9.8,5,15,2));
-  par.push_back(PWAParameter<double>(1.1,0.5,1.5,0.3));
-  par.push_back(PWAParameter<double>(-0.008,-0.02,0,0.005));
+  vector<shared_ptr<PWAParameter> > par;
+  par.push_back(shared_ptr<PWAGenericPar<double> >(new PWAGenericPar<double>(-11,-20,0,3)));
+  par.push_back(shared_ptr<PWAGenericPar<double> >(new PWAGenericPar<double>(9.8,5,15,2)));
+  par.push_back(shared_ptr<PWAGenericPar<double> >(new PWAGenericPar<double>(1.1,0.5,1.5,0.3)));
+  par.push_back(shared_ptr<PWAGenericPar<double> >(new PWAGenericPar<double>(-0.008,-0.02,0,0.005)));
 
   // Loop over minimizers (at the moment this means: Geneva, Minuit or Geneva then Minuit)
   for(unsigned int Nmin=0; Nmin<myMinimizerList.size(); Nmin++){
