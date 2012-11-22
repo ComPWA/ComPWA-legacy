@@ -27,12 +27,13 @@ using namespace std;
  */
 int main(int argc, char **argv){
 
-  PIFBW* testBW = new PIFBW();
+  shared_ptr<PIFBase> testBW(new PIFBW());
   vector<double> x;
   x.push_back(1.5);
   vector<shared_ptr<PWAParameter> > par;
-  par.push_back(shared_ptr<PWAParameter>(new PWAGenericPar<double>(1.5, 0.5, 2.5, 0.1)));
-  par.push_back(shared_ptr<PWAParameter>(new PWAGenericPar<double>(0.3, 0.1, 0.5, 0.05)));
+  //par.push_back(shared_ptr<PWAParameter>(new PWAGenericPar<double>(1.5, 0.5, 2.5, 0.1)));
+ // par.push_back(shared_ptr<PWAParameter>(new PWAGenericPar<double>(0.3, 0.1, 0.5, 0.05)));
+  testBW->fillStartParVec(par);
   cout << "BreitWigner Intensity: " << testBW->intensity(x, par) << endl;
 
   cout << "Done ..." << endl << endl;

@@ -31,6 +31,8 @@ public:
 
   virtual const double intensity(std::vector<double> x, std::vector<std::shared_ptr<PWAParameter> >& par) =0;
 
+  virtual const bool fillStartParVec(std::vector<std::shared_ptr<PWAParameter> >& outPar) =0;
+
 };
 
 #endif

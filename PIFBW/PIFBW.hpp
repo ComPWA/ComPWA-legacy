@@ -21,6 +21,7 @@ public:
 
   virtual const double intensity(double x, double M, double T);
   virtual const double intensity(std::vector<double> x, std::vector<std::shared_ptr<PWAParameter> >& par);
+  virtual const bool fillStartParVec(std::vector<std::shared_ptr<PWAParameter> >& outPar);
 
   /** Destructor */
   virtual ~PIFBW();
