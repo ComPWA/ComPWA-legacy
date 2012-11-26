@@ -19,6 +19,9 @@ public:
   /// Default Constructor (0x0)
   PIFBW();
 
+  //For normalization
+  virtual const double integral(const double min, const double max, std::vector<std::shared_ptr<PWAParameter> >& par);
+  virtual const double drawInt(double *x, double *p); //For easy usage in a root TF1
   virtual const double intensity(double x, double M, double T);
   virtual const double intensity(std::vector<double> x, std::vector<std::shared_ptr<PWAParameter> >& par);
   virtual const bool fillStartParVec(std::vector<std::shared_ptr<PWAParameter> >& outPar);

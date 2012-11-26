@@ -21,7 +21,7 @@ project :
         <include>$(TOP)/OIFGeneva
         <include>$(TOP)/PIFBW
         <include>$(TOP)/DIFRoot2Part
-        <include>$(TOP)/EIFChiOneD
+        <include>$(TOP)/EIFMinLogLH
 	<include>$(ROOTINC)
 	<include>$(BOOST_BUILD_PATH)/include
 	<cxxflags>-ftemplate-depth-256
@@ -82,7 +82,7 @@ exe estimatortestApp :
         EstimatorTestApp.cpp 
         test
         $(TOP)/Core//ComPWA
-        $(TOP)/EIFChiOneD//EIFChiOneD 
+        $(TOP)/EIFMinLogLH//EIFMinLogLH 
         $(TOP)/PIFBW//PIFBW  
         $(TOP)/DIFRoot2Part//DIFRoot2Part
         : ;
@@ -91,7 +91,7 @@ exe integrationtestApp :
         IntegrationTestApp.cpp 
         test
         $(TOP)/Core//ComPWA
-        $(TOP)/EIFChiOneD//EIFChiOneD 
+        $(TOP)/EIFMinLogLH//EIFMinLogLH 
         $(TOP)/PIFBW//PIFBW  
         $(TOP)/DIFRoot2Part//DIFRoot2Part
         $(TOP)/OIFMinuit2//OIFMinuit2
@@ -101,7 +101,7 @@ exe runmanagertestApp :
         RunManagerTestApp.cpp 
         test
         $(TOP)/Core//ComPWA
-        $(TOP)/EIFChiOneD//EIFChiOneD 
+        $(TOP)/EIFMinLogLH//EIFMinLogLH 
         $(TOP)/PIFBW//PIFBW  
         $(TOP)/DIFRoot2Part//DIFRoot2Part
         $(TOP)/OIFMinuit2//OIFMinuit2

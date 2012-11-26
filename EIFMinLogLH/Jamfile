@@ -1,0 +1,16 @@
+########### EIFMinLogLH lib #############
+
+project :
+	requirements <include>./
+         <include>$(TOP)/Core
+	<cxxflags>-ftemplate-depth-256
+	<cxxflags>-std=c++0x
+	;
+
+lib EIFMinLogLH : 
+        [ glob *.cpp ]
+        $(TOP)/Core//ComPWA 
+         ;
+
+install dist : EIFMinLogLH : <location>$(TOP)/lib ;
+

@@ -20,7 +20,7 @@
 // ComPWA header files go here
 #include "DIFRootReader.hpp"
 #include "PIFBW.hpp"
-#include "EIFChiOneD.hpp"
+#include "EIFMinLogLH.hpp"
 #include "OIFMinuit.hpp"
 #include "PWAParameter.hpp"
 #include "PWAGenericPar.hpp"
@@ -38,7 +38,7 @@ int main(int argc, char **argv){
   std::cout << "Load Modules" << std::endl;
   std::shared_ptr<DIFBase> myReader(new DIFRootReader(file));
   std::shared_ptr<PIFBase> testBW(new PIFBW());
-  std::shared_ptr<EIFBase> testEsti(new EIFChiOneD(testBW, myReader)); //TODO: <- should be done by runManager
+  std::shared_ptr<EIFBase> testEsti(new EIFMinLogLH(testBW, myReader)); //TODO: <- should be done by runManager
   std::shared_ptr<OIFBase> opti(new OIFMinuit(testEsti));
   std::shared_ptr<RunManager> run(new RunManager(myReader, testEsti, testBW, opti));
 

@@ -35,6 +35,8 @@ int main(int argc, char **argv){
  // par.push_back(shared_ptr<PWAParameter>(new PWAGenericPar<double>(0.3, 0.1, 0.5, 0.05)));
   testBW->fillStartParVec(par);
   cout << "BreitWigner Intensity: " << testBW->intensity(x, par) << endl;
+  cout << "BreitWigner Integral: " << testBW->integral(0.,5., par) << endl;
+  cout << "BreitWigner Intensity normalized: " << testBW->intensity(x, par) / testBW->integral(0.,5., par) << endl;
 
   cout << "Done ..." << endl << endl;
 

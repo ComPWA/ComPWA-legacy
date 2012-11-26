@@ -18,7 +18,7 @@
 // ComPWA header files go here
 #include "DIFRootReader.hpp"
 #include "PIFBW.hpp"
-#include "EIFChiOneD.hpp"
+#include "EIFMinLogLH.hpp"
 #include "PWAParticle.hpp"
 #include "PWAParameter.hpp"
 #include "PWAGenericPar.hpp"
@@ -35,13 +35,37 @@ int main(int argc, char **argv){
   shared_ptr<DIFRootReader> myReader(new DIFRootReader(file));
   shared_ptr<PIFBW> testBW(new PIFBW());
 
-  shared_ptr<EIFChiOneD> testEsti(new EIFChiOneD(testBW, myReader));
+  shared_ptr<EIFMinLogLH> testEsti(new EIFMinLogLH(testBW, myReader));
   vector<shared_ptr<PWAParameter> > minPar;
-  minPar.push_back(shared_ptr<PWAGenericPar<double> >(new PWAGenericPar<double>(1.5,1.,2.,0.1)));
-  minPar.push_back(shared_ptr<PWAGenericPar<double> >(new PWAGenericPar<double>(0.3,0.1,0.2,0.01)));
+  testBW->fillStartParVec(minPar);
   double result=0;
   result = testEsti->controlParameter(minPar);
-  cout << "1dim Fit optimal par Chi2: " << result << endl;
+  cout << "1dim Fit optimal Likelihood: " << result << endl;
+
+  minPar[0]->SetValue(1.7);
+  minPar[1]->SetValue(0.3);
+  result = testEsti->controlParameter(minPar);
+  cout << "1.7 0.3: " << result << endl;
+
+  minPar[0]->SetValue(1.3);
+  minPar[1]->SetValue(0.3);
+  result = testEsti->controlParameter(minPar);
+  cout << "1.3 0.3: " << result << endl;
+
+  minPar[0]->SetValue(1.5);
+  minPar[1]->SetValue(0.2);
+  result = testEsti->controlParameter(minPar);
+  cout << "1.5 0.2: " << result << endl;
+
+  minPar[0]->SetValue(1.5);
+  minPar[1]->SetValue(0.4);
+  result = testEsti->controlParameter(minPar);
+  cout << "1.5 0.4:  " << result << endl;
+
+  minPar[0]->SetValue(1.5);
+  minPar[1]->SetValue(0.01);
+  result = testEsti->controlParameter(minPar);
+  cout << "1.5 0.01:  " << result << endl;
 
   cout << "Done ..." << endl << endl;
   return 0;

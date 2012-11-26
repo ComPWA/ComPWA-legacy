@@ -4,29 +4,27 @@
 #include <vector>
 #include <cmath>
 
-#include "EIFChiOneD.hpp"
+#include "EIFMinLogLH.hpp"
 #include "PWAEvent.hpp"
 #include "PWAParticle.hpp"
 #include "PWAParameter.hpp"
 
-EIFChiOneD::EIFChiOneD(std::shared_ptr<PIFBase> inPIF, std::shared_ptr<DIFBase> inDIF) : pPIF_(inPIF), pDIF_(inDIF){
+EIFMinLogLH::EIFMinLogLH(std::shared_ptr<PIFBase> inPIF, std::shared_ptr<DIFBase> inDIF) : pPIF_(inPIF), pDIF_(inDIF){
 
 }
 
-EIFChiOneD::~EIFChiOneD(){
+EIFMinLogLH::~EIFMinLogLH(){
 
 }
 
-double EIFChiOneD::controlParameter(std::vector<std::shared_ptr<PWAParameter> >& minPar){
+double EIFMinLogLH::controlParameter(std::vector<std::shared_ptr<PWAParameter> >& minPar){
   unsigned int nEvents = pDIF_->getNEvents();
 
- // std::cout << std::endl << "Test" << std::endl;
- // std::cout << "Events: \t" << nEvents << std::endl;
- // std::cout << "Parameter" << std::endl;
- // for(unsigned int i=0; i<minPar.size(); i++)
- //   std::cout << i << "-t Par " << minPar.at(i) << std::endl;
+  //std::vector<double> y; //calculate normalization TODO: do in physics
+  //y.push_back(minPar[0]->GetValue());
+  double norm = pPIF_->integral(0.,5., minPar);
 
-  double chi=0;
+  double lh=0; //calculate LH:
   for(unsigned int evt = 0; evt < nEvents; evt++){
     PWAEvent theEvent;
     PWAParticle a, b;
@@ -49,13 +47,12 @@ double EIFChiOneD::controlParameter(std::vector<std::shared_ptr<PWAParameter> >&
     masssq -= pow(a.getPy()+b.getPy() ,2);
     masssq -= pow(a.getPz()+b.getPz() ,2);
 
-    //std::cout << "Event, Par0, Par1: \t" << evt << "\t" << minPar.at(0) << "\t" << minPar.at(1) << std::endl;
     std::vector<double> x;
     x.push_back(sqrt(masssq));
     double intens = pPIF_->intensity(x, minPar);
 
-    chi += (x[0] - intens)*(x[0] - intens)/(double)nEvents; //Just for binned data
+    lh -= (log(intens/norm));
   }
 
-  return chi;
+  return lh;
 }

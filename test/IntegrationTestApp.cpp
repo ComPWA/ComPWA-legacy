@@ -17,16 +17,22 @@
 #include <string>
 #include <memory>
 
-// ComPWA header files go here
-#include "DIFRootReader.hpp"
-#include "PIFBW.hpp"
-#include "EIFChiOneD.hpp"
-#include "OIFMinuit.hpp"
+// Root header files go here
+#include "TF1.h"
+#include "TH1D.h"
+#include "TFile.h"
+
+//Core header files go here
+#include "PWAEvent.hpp"
+#include "PWAParticle.hpp"
 #include "PWAParameter.hpp"
 #include "PWAGenericPar.hpp"
 
-//Test header files go here
-#include "PolyFit.hpp"
+// ComPWA header files go here
+#include "DIFRootReader.hpp"
+#include "PIFBW.hpp"
+#include "EIFMinLogLH.hpp"
+#include "OIFMinuit.hpp"
 
 /************************************************************************************************/
 /**
@@ -37,16 +43,14 @@ int main(int argc, char **argv){
   std::cout << "Load Modules" << std::endl;
   std::shared_ptr<DIFBase> myReader(new DIFRootReader(file));
   std::shared_ptr<PIFBase> testBW(new PIFBW());
-  std::shared_ptr<EIFBase> testEsti(new EIFChiOneD(testBW, myReader));
+  std::shared_ptr<EIFBase> testEsti(new EIFMinLogLH(testBW, myReader));
   std::shared_ptr<OIFBase> opti(new OIFMinuit(testEsti));
 
   // Initiate parameters
-  //double val[2], min[2], max[2], err[2];
-  //val[0] = 1.5; max[0] = 2.5; min[0] = 0.5; err[0] = 0.5;
-  //val[1] = 0.3; max[1] = 0.5; min[1] = 0.1; err[1] = 0.1;
   std::vector<std::shared_ptr<PWAParameter> > par;
-  par.push_back(std::shared_ptr<PWAParameter>(new PWAGenericPar<double>(1.7,0.5,2.5,0.1)));
-  par.push_back(std::shared_ptr<PWAParameter>(new PWAGenericPar<double>(0.2,0.1,0.2,0.01)));
+  testBW->fillStartParVec(par);
+  par[0]->SetValue(1.7);
+  par[1]->SetValue(0.2);
 
   std::cout << "Inital par :\t" << std::endl;
   std::cout << "inital M:\t" << *(par[0]) << std::endl;
@@ -58,6 +62,40 @@ int main(int argc, char **argv){
   std::cout << "Minimized final par :\t" << genResult << std::endl;
   std::cout << "final M:\t" << *(par[0]) << std::endl;
   std::cout << "final T:\t" << *(par[1]) << std::endl;
+
+  //Create some output
+  TH1D* bw = new TH1D("bw","inv. mass of 2 particles",1000,0.,2.4);
+  bw->GetXaxis()->SetTitle("m_{12} / GeV");
+  bw->GetXaxis()->CenterTitle();
+  bw->GetYaxis()->SetTitle("#");
+  bw->GetYaxis()->CenterTitle();
+
+  for(unsigned int i = 0; i < myReader->getNEvents(); i++){
+      PWAEvent event;
+      PWAParticle a, b;
+      double masssq = 0;
+
+      if(!myReader->getEvent(i, event)) continue;
+      //if(!event) continue;
+      //cout << "Event: \t" << i << "\t NParticles: \t" << event.getNParticles() << endl;
+      event.getParticle(0,a);
+      event.getParticle(1,b);
+      masssq = pow(a.getE()+b.getE(),2) - pow(a.getPx()+b.getPx() ,2) - pow(a.getPy()+b.getPy() ,2) - pow(a.getPz()+b.getPz() ,2);
+
+      bw->Fill(sqrt(masssq));
+  }
+
+  //PIFBW *drawBW = (PIFBW*) (&(*testBW));
+  TF1* fitresult = new TF1("fitresult", ((PIFBW*)testBW.get()), &PIFBW::drawInt,0.,2.4,3,"PIFBW","intensity");
+  fitresult->FixParameter(0, par[0]->GetValue());
+  fitresult->FixParameter(1, par[1]->GetValue());
+  //fitresult->FixParameter(2, par[2]->GetValue());
+  bw->Fit(fitresult);
+
+  TFile output("test/IntegrationTest.root","RECREATE","ROOT_Tree");
+  bw->Write();
+  output.Write();
+  output.Close();
 
   return 0;
 }
