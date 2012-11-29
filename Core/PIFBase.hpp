@@ -22,18 +22,23 @@ class PIFBase
 
 public:
 
-  PIFBase()
+  PIFBase(const double min, const double max)
+    :min_(min),max_(max)
 	  {
 	  }
 
   virtual ~PIFBase()
 	{ /* nothing */	}
 
-  virtual const double integral(const double min, const double max, std::vector<std::shared_ptr<PWAParameter> >& par) =0;
+  virtual const double integral(std::vector<std::shared_ptr<PWAParameter> >& par) =0;
 
   virtual const double intensity(std::vector<double> x, std::vector<std::shared_ptr<PWAParameter> >& par) =0;
 
   virtual const bool fillStartParVec(std::vector<std::shared_ptr<PWAParameter> >& outPar) =0;
+
+protected:
+  double min_;
+  double max_;
 
 };
 

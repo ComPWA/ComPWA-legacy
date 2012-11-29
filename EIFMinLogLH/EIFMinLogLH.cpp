@@ -20,9 +20,7 @@ EIFMinLogLH::~EIFMinLogLH(){
 double EIFMinLogLH::controlParameter(std::vector<std::shared_ptr<PWAParameter> >& minPar){
   unsigned int nEvents = pDIF_->getNEvents();
 
-  //std::vector<double> y; //calculate normalization TODO: do in physics
-  //y.push_back(minPar[0]->GetValue());
-  double norm = pPIF_->integral(0.,5., minPar);
+  double norm = pPIF_->integral(minPar);
 
   double lh=0; //calculate LH:
   for(unsigned int evt = 0; evt < nEvents; evt++){

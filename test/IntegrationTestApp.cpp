@@ -42,7 +42,7 @@ int main(int argc, char **argv){
   std::string file="test/2Part-4vecs.root";
   std::cout << "Load Modules" << std::endl;
   std::shared_ptr<DIFBase> myReader(new DIFRootReader(file));
-  std::shared_ptr<PIFBase> testBW(new PIFBW());
+  std::shared_ptr<PIFBase> testBW(new PIFBW(0.,5.));
   std::shared_ptr<EIFBase> testEsti(new EIFMinLogLH(testBW, myReader));
   std::shared_ptr<OIFBase> opti(new OIFMinuit(testEsti));
 

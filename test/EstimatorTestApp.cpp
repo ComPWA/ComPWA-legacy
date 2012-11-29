@@ -33,7 +33,7 @@ int main(int argc, char **argv){
   string file="test/2Part-4vecs.root";
   //DIFRootReader myReader("test/2Part-4vecs.root");
   shared_ptr<DIFRootReader> myReader(new DIFRootReader(file));
-  shared_ptr<PIFBW> testBW(new PIFBW());
+  shared_ptr<PIFBW> testBW(new PIFBW(0.,5.));
 
   shared_ptr<EIFMinLogLH> testEsti(new EIFMinLogLH(testBW, myReader));
   vector<shared_ptr<PWAParameter> > minPar;

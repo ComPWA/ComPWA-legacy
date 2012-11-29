@@ -9,7 +9,7 @@
 
 using namespace std;
 
-PIFBW::PIFBW() {
+PIFBW::PIFBW(const double min, const double max) : PIFBase(min, max) {
   //_myFcn = new MIMinuitFcn(theData);
 }
 
@@ -18,16 +18,16 @@ PIFBW::~PIFBW()
   //delete _myFcn;
 }
 
-const double PIFBW::integral(const double min, const double max, std::vector<std::shared_ptr<PWAParameter> >& par){
+const double PIFBW::integral(std::vector<std::shared_ptr<PWAParameter> >& par){
   double integral = 0;
   unsigned int nSteps = 1000000;
-  double step = (max-min)/(double)nSteps;
+  double step = (max_-min_)/(double)nSteps;
 
-  integral += step*BreitWigner(min, par.at(0)->GetValue(), par.at(1)->GetValue())/2.;
+  integral += step*BreitWigner(min_, par.at(0)->GetValue(), par.at(1)->GetValue())/2.;
   for(unsigned int k=1; k<nSteps; k++){
-    integral += step*BreitWigner((min+k*step), par.at(0)->GetValue(), par.at(1)->GetValue());
+    integral += step*BreitWigner((min_+k*step), par.at(0)->GetValue(), par.at(1)->GetValue());
   }
-  integral += step*BreitWigner(max, par.at(0)->GetValue(), par.at(1)->GetValue())/2.;
+  integral += step*BreitWigner(max_, par.at(0)->GetValue(), par.at(1)->GetValue())/2.;
 
   return integral;
 }
