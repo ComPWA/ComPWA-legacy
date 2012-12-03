@@ -31,7 +31,7 @@
 // ComPWA header files go here
 #include "DIFRootReader.hpp"
 #include "PIFBW.hpp"
-#include "EIFMinLogLH.hpp"
+#include "EIFChiOneD.hpp"
 #include "OIFMinuit.hpp"
 
 /************************************************************************************************/
@@ -41,9 +41,9 @@
 int main(int argc, char **argv){
   std::string file="test/2Part-4vecs.root";
   std::cout << "Load Modules" << std::endl;
-  std::shared_ptr<DIFBase> myReader(new DIFRootReader(file, false));
+  std::shared_ptr<DIFBase> myReader(new DIFRootReader(file, true));
   std::shared_ptr<PIFBase> testBW(new PIFBW(0.,5.));
-  std::shared_ptr<EIFBase> testEsti(new EIFMinLogLH(testBW, myReader));
+  std::shared_ptr<EIFBase> testEsti(new EIFChiOneD(testBW, myReader));
   std::shared_ptr<OIFBase> opti(new OIFMinuit(testEsti));
 
   // Initiate parameters
@@ -92,7 +92,7 @@ int main(int argc, char **argv){
   //fitresult->FixParameter(2, par[2]->GetValue());
   bw->Fit(fitresult);
 
-  TFile output("test/IntegrationTest.root","RECREATE","ROOT_Tree");
+  TFile output("test/IntegrationTestBinned.root","RECREATE","ROOT_Tree");
   bw->Write();
   output.Write();
   output.Close();

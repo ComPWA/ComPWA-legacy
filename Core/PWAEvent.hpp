@@ -17,6 +17,8 @@ public:
 
   PWAEvent();
 
+  PWAEvent(const double inWeight);
+
   virtual void addParticle(PWAParticle inParticle);
 
   virtual ~PWAEvent();
@@ -26,6 +28,7 @@ public:
 
 protected:
   std::vector<PWAParticle> fParticles;
+  double fWeight;
   //PWAParticle fParticleB;
   //TODO: other event info?
 

@@ -22,6 +22,7 @@ project :
         <include>$(TOP)/PIFBW
         <include>$(TOP)/DIFRoot2Part
         <include>$(TOP)/EIFMinLogLH
+        <include>$(TOP)/EIFChiOneD
 	<include>$(ROOTINC)
 	<include>$(BOOST_BUILD_PATH)/include
 	<cxxflags>-ftemplate-depth-256
@@ -83,6 +84,7 @@ exe estimatortestApp :
         test
         $(TOP)/Core//ComPWA
         $(TOP)/EIFMinLogLH//EIFMinLogLH 
+        $(TOP)/EIFChiOneD//EIFChiOneD 
         $(TOP)/PIFBW//PIFBW  
         $(TOP)/DIFRoot2Part//DIFRoot2Part
         : ;
@@ -92,6 +94,16 @@ exe integrationtestApp :
         test
         $(TOP)/Core//ComPWA
         $(TOP)/EIFMinLogLH//EIFMinLogLH 
+        $(TOP)/PIFBW//PIFBW  
+        $(TOP)/DIFRoot2Part//DIFRoot2Part
+        $(TOP)/OIFMinuit2//OIFMinuit2
+        : ;
+        
+exe integrationtestbinnedApp : 
+        IntegrationTestBinnedApp.cpp 
+        test
+        $(TOP)/Core//ComPWA
+        $(TOP)/EIFChiOneD//EIFChiOneD 
         $(TOP)/PIFBW//PIFBW  
         $(TOP)/DIFRoot2Part//DIFRoot2Part
         $(TOP)/OIFMinuit2//OIFMinuit2
@@ -116,5 +128,5 @@ exe gentwopartApp :
 
 install dist : test : <location>$(TOP)/lib <threading>single ;
 install dist2 : parametertestApp cx0testApp dataiftestApp optimizertestApp physicstestApp : <location>$(TOP)/bin <threading>single ;
-install dist3 : estimatortestApp integrationtestApp runmanagertestApp gentwopartApp : <location>$(TOP)/bin <threading>single ;
+install dist3 : estimatortestApp integrationtestApp integrationtestbinnedApp runmanagertestApp gentwopartApp : <location>$(TOP)/bin <threading>single ;
 

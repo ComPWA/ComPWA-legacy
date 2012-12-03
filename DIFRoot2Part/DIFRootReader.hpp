@@ -9,8 +9,10 @@
 #define _DIFRootReader_HPP
 
 #include <vector>
+#include <map>
 #include <memory>
 #include <string>
+#include <utility>
 
 //PWA-Headers
 #include "DIFBase.hpp"
@@ -30,25 +32,30 @@ class DIFRootReader : public DIFBase {
 
 public:
   /// Default Constructor (0x0)
-  DIFRootReader(std::string inConfigFile);
+  DIFRootReader(const std::string inConfigFile, const bool binned);
 
   virtual const int getEvent(const int, PWAEvent&);
+  virtual const int getBin(const int, double&, double&);
   virtual const int getEvent(const int, TLorentzVector& , TLorentzVector& , double&);
 
   virtual const unsigned int getNEvents() const {return fmaxEvents;};
+  virtual const unsigned int getNBins() const {return fmaxBins;};
 
   /** Destructor */
   virtual ~DIFRootReader();
 
 protected:
-
-private:
   TFile* fFile;
   TTree* fTree;
   TClonesArray* fParticles;
   unsigned int fmaxEvents;
   unsigned int fEvent;
+  bool fBinned;
+  unsigned int fmaxBins;
+  std::map<int, std::pair<double,double> > fBins;
   // vector<string> paramNames;
+
+  virtual void bin();
 
 };
 

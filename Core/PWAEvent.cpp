@@ -3,7 +3,12 @@
 #include "PWAEvent.hpp"
 
 
-PWAEvent::PWAEvent(){
+PWAEvent::PWAEvent():fWeight(1.){
+
+}
+
+PWAEvent::PWAEvent(const double inWeight):fWeight(inWeight){
+
 }
 
 void PWAEvent::addParticle(PWAParticle inParticle){

@@ -24,8 +24,10 @@ public:
   virtual ~DIFBase()
 	{ /* nothing */	}
   virtual const int getEvent(const int, PWAEvent&) =0;
+  virtual const int getBin(const int, double&, double&)=0; //TODO: seperate?
 
   virtual const unsigned int getNEvents() const =0;
+  virtual const unsigned int getNBins() const =0;
 
 };
 

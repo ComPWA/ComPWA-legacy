@@ -19,6 +19,7 @@
 #include "DIFRootReader.hpp"
 #include "PIFBW.hpp"
 #include "EIFMinLogLH.hpp"
+#include "EIFChiOneD.hpp"
 #include "PWAParticle.hpp"
 #include "PWAParameter.hpp"
 #include "PWAGenericPar.hpp"
@@ -32,7 +33,7 @@ using namespace std;
 int main(int argc, char **argv){
   string file="test/2Part-4vecs.root";
   //DIFRootReader myReader("test/2Part-4vecs.root");
-  shared_ptr<DIFRootReader> myReader(new DIFRootReader(file));
+  shared_ptr<DIFRootReader> myReader(new DIFRootReader(file, true));
   shared_ptr<PIFBW> testBW(new PIFBW(0.,5.));
 
   shared_ptr<EIFMinLogLH> testEsti(new EIFMinLogLH(testBW, myReader));
@@ -67,6 +68,11 @@ int main(int argc, char **argv){
   result = testEsti->controlParameter(minPar);
   cout << "1.5 0.01:  " << result << endl;
 
-  cout << "Done ..." << endl << endl;
+  shared_ptr<EIFChiOneD> testEsti2(new EIFChiOneD(testBW, myReader));
+  minPar[0]->SetValue(1.5);
+  minPar[1]->SetValue(0.3);
+  result = testEsti2->controlParameter(minPar);
+  cout << "1dim Fit optimal Chi: " << result << endl;
+
   return 0;
 }
