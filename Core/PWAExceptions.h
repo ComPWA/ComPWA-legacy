@@ -45,7 +45,7 @@ protected:
 //------------------------------------------------------------------------------
 //! @class   BadConfig
 //!
-//! @brief   Cannot connect to database or config is not complete
+//! @brief   Config is not complete
 //------------------------------------------------------------------------------
 class BadConfig : public Exception {
 public:

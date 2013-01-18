@@ -7,7 +7,7 @@
 #include "EIFChiOneD.hpp"
 #include "PWAParameter.hpp"
 
-EIFChiOneD::EIFChiOneD(std::shared_ptr<PIFBase> inPIF, std::shared_ptr<DIFBase> inDIF) : pPIF_(inPIF), pDIF_(inDIF){
+EIFChiOneD::EIFChiOneD(std::shared_ptr<Amplitude> inPIF, std::shared_ptr<Data> inDIF) : pPIF_(inPIF), pDIF_(inDIF){
 
 }
 

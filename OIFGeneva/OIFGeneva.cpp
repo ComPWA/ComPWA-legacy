@@ -11,7 +11,7 @@ using namespace Gem::Geneva;
 using namespace Gem::Courtier;
 using namespace Gem::Hap;
 
-OIFGeneva::OIFGeneva(std::shared_ptr<OIFData> theData, std::string inConfigFile, boost::uint16_t inparallelizationMode, bool inserverMode, std::string inip, unsigned short inport, Gem::Common::serializationMode inserMode) : _myData(theData),configFile(inConfigFile),parallelizationMode(inparallelizationMode),serverMode(inserverMode),ip(inip),port(inport),serMode(inserMode){
+OIFGeneva::OIFGeneva(std::shared_ptr<ControlParameter> theData, std::string inConfigFile, boost::uint16_t inparallelizationMode, bool inserverMode, std::string inip, unsigned short inport, Gem::Common::serializationMode inserMode) : _myData(theData),configFile(inConfigFile),parallelizationMode(inparallelizationMode),serverMode(inserverMode),ip(inip),port(inport),serMode(inserMode){
   bool parsedConfig = parseConfigFile(configFile,
 		      nProducerThreads,
 		      nEvaluationThreads,

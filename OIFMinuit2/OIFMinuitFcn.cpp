@@ -1,5 +1,5 @@
 #include "OIFMinuitFcn.hpp"
-#include "OIFData.hpp"
+#include "ControlParameter.hpp"
 #include "PWAParameter.hpp"
 #include "PWAGenericPar.hpp"
 //#include "ErrLogger/ErrLogger.hh"
@@ -9,7 +9,7 @@
 
 using namespace ROOT::Minuit2;
 
-OIFMinuitFcn::OIFMinuitFcn(std::shared_ptr<OIFData> myData) :
+OIFMinuitFcn::OIFMinuitFcn(std::shared_ptr<ControlParameter> myData) :
   _myDataPtr(myData){
   if (0==_myDataPtr) {
     //Alert << "Data pointer is 0 !!!!" << endmsg;

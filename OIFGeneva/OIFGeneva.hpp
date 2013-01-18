@@ -2,9 +2,9 @@
 /*! \class OIFGeneva
  * @file OIFGeneva.hpp
  * This class provides a wrapper around the Geneva library. It fulfills the
- * OIFBase interface to be easily adapted to other modules. Parameters for the
+ * Optimizer interface to be easily adapted to other modules. Parameters for the
  * optimization have to be provided in a config-file, the data needs to be
- * provided with the OIFData interface.
+ * provided with the ControlParameter interface.
 */
 
 #ifndef _OIFGENEVA_HPP
@@ -13,8 +13,8 @@
 #include <vector>
 #include <memory>
 //#include <boost/shared_ptr.hpp>
-#include "OIFData.hpp"
-#include "OIFBase.hpp"
+#include "ControlParameter.hpp"
+#include "Optimizer.hpp"
 #include "PWAParameter.hpp"
 #include "GArgumentParser.hpp"
 
@@ -33,11 +33,11 @@
 #include <common/GSerializationHelperFunctionsT.hpp>
 #include <geneva/GOptimizationEnums.hpp>
 
-class OIFGeneva : public OIFBase {
+class OIFGeneva : public Optimizer {
 
 public:
   /// Default Constructor (0x0)
-  OIFGeneva(std::shared_ptr<OIFData> theData, std::string inConfigFile="test/GStartProject.cfg", boost::uint16_t inparallelizationMode=1, bool inserverMode=false, std::string inip="localhost", unsigned short inport=10000, Gem::Common::serializationMode inserMode=Gem::Common::SERIALIZATIONMODE_TEXT);
+  OIFGeneva(std::shared_ptr<ControlParameter> theData, std::string inConfigFile="test/GStartProject.cfg", boost::uint16_t inparallelizationMode=1, bool inserverMode=false, std::string inip="localhost", unsigned short inport=10000, Gem::Common::serializationMode inserMode=Gem::Common::SERIALIZATIONMODE_TEXT);
   virtual const double exec(std::vector<std::shared_ptr<PWAParameter> >& par) ;
 
   /** Destructor */
@@ -46,7 +46,7 @@ public:
  protected:
 
  private:
-  std::shared_ptr<OIFData> _myData;
+  std::shared_ptr<ControlParameter> _myData;
  // vector<string> paramNames;
 
   std::string configFile;	

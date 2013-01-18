@@ -39,7 +39,18 @@ const int DIFRootReader::getEvent(const int i, PWAEvent& inEvent){
 
   // Get number of particle in TClonesrray
   unsigned int nParts = fParticles->GetEntriesFast();
-  if(nParts!=2) return 0;
+
+  TParticle* partN;
+  TLorentzVector inN;
+  for(unsigned int part=0; part<nParts; part++){
+    partN = 0;
+    partN = (TParticle*) fParticles->At(part);
+    if(!partN) continue;
+    partN->Momentum(inN);
+    inEvent.addParticle(PWAParticle(inN.X(), inN.Y(), inN.Z(), inN.E()));
+  }
+
+  /*if(nParts!=2) return 0;
 
   TParticle* part1 = (TParticle*) fParticles->At(0); //pip
   TParticle* part2 = (TParticle*) fParticles->At(1); //pim
@@ -54,7 +65,7 @@ const int DIFRootReader::getEvent(const int i, PWAEvent& inEvent){
   //shared_ptr<PWAEvent> tmp(new PWAEvent());
   //inEvent = make_shared<PWAEvent>();
   for(unsigned int part=0; part<out.size(); part++)
-    inEvent.addParticle(out.at(part));
+    inEvent.addParticle(out.at(part));*/
 
   return 1;
 }

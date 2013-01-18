@@ -2,7 +2,7 @@
 /*! \class GStartIndividual
  * @file GStartIndividual.hpp
  *
- * Geneva individual extended to the use in ComPWA, using OIFData to access
+ * Geneva individual extended to the use in ComPWA, using ControlParameter to access
  * the data. Original Copyright see below:
  *
  * Copyright (C) Gemfony scientific UG (haftungsbeschraenkt) and Karlsruhe
@@ -72,7 +72,7 @@
 #include <geneva/GParameterSet.hpp>
 
 // ComPWA header files go here
-#include "OIFData.hpp"
+#include "ControlParameter.hpp"
 #include "PWAParameter.hpp"
 #include "PWAGenericPar.hpp"
 
@@ -122,7 +122,7 @@ public:
 	 * @param max The upper boundary of the variables
 	 * @param err The error of the variables
 	 */
-  GStartIndividual(std::shared_ptr<OIFData> data, unsigned int parDim, double* val, double* min, double* max, double* err)
+  GStartIndividual(std::shared_ptr<ControlParameter> data, unsigned int parDim, double* val, double* min, double* max, double* err)
 		: GParameterSet()
 	  {
 	        theData = data;
@@ -389,7 +389,7 @@ private:
 	/********************************************************************************************/
 	// You can add other variables here. Do not forget to serialize them if necessary
 	// int myVar;
-  std::shared_ptr<OIFData> theData;
+  std::shared_ptr<ControlParameter> theData;
 };
 
 /*************************************************************************************************/

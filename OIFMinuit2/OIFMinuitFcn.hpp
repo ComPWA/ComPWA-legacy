@@ -1,7 +1,7 @@
 //! Minuit2 function to be optimized.
 /*! \class OIFMinuitFcn
  * @file OIFMinuitFcn.hpp
- * Based on the Minuit2 FcnBase. This class uses the OIFData interface for the
+ * Based on the Minuit2 FcnBase. This class uses the ControlParameter interface for the
  * optimization.
 */
 
@@ -13,10 +13,10 @@
 //#include <boost/shared_ptr.hpp>
 //#include <cassert>
 #include "Minuit2/FCNBase.h"
-#include "OIFData.hpp"
+#include "ControlParameter.hpp"
 #include "PWAParameter.hpp"
 
-class OIFData;
+class ControlParameter;
 
 namespace ROOT {
 
@@ -25,7 +25,7 @@ class OIFMinuitFcn : public FCNBase {
 
 public:
 
-  OIFMinuitFcn(std::shared_ptr<OIFData> theData);
+  OIFMinuitFcn(std::shared_ptr<ControlParameter> theData);
   virtual ~OIFMinuitFcn();
 
   double operator()(const std::vector<double>& x) const;
@@ -33,7 +33,7 @@ public:
   double Up() const;
 
 private:
-  std::shared_ptr<OIFData> _myDataPtr;
+  std::shared_ptr<ControlParameter> _myDataPtr;
 };
   }  // namespace Minuit2
 

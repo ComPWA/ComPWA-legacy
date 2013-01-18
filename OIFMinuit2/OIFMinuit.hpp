@@ -2,8 +2,8 @@
 /*! \class OIFMinuit
  * @file OIFMinuit.hpp
  * This class provides a wrapper around the Minuit2 library. It fulfills the
- * OIFBase interface to be easily adapted to other modules. The data needs to
- * be provided with the OIFData interface.
+ * Optimizer interface to be easily adapted to other modules. The data needs to
+ * be provided with the ControlParameter interface.
 */
 
 #ifndef _OIFMINUIT_HPP
@@ -13,18 +13,18 @@
 //#include <boost/shared_ptr.hpp>
 #include <memory>
 
-#include "OIFData.hpp"
-#include "OIFBase.hpp"
+#include "ControlParameter.hpp"
+#include "Optimizer.hpp"
 #include "PWAParameter.hpp"
 #include "OIFMinuitFcn.hpp"
 
 using namespace ROOT::Minuit2;
 
-class OIFMinuit : public OIFBase {
+class OIFMinuit : public Optimizer {
 
 public:
   /// Default Constructor (0x0)
-  OIFMinuit(std::shared_ptr<OIFData> theData);
+  OIFMinuit(std::shared_ptr<ControlParameter> theData);
   virtual const double exec(std::vector<std::shared_ptr<PWAParameter> >& par);
 
   /** Destructor */

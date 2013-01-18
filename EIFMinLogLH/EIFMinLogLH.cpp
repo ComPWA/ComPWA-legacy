@@ -9,7 +9,7 @@
 #include "PWAParticle.hpp"
 #include "PWAParameter.hpp"
 
-EIFMinLogLH::EIFMinLogLH(std::shared_ptr<PIFBase> inPIF, std::shared_ptr<DIFBase> inDIF) : pPIF_(inPIF), pDIF_(inDIF){
+EIFMinLogLH::EIFMinLogLH(std::shared_ptr<Amplitude> inPIF, std::shared_ptr<Data> inDIF) : pPIF_(inPIF), pDIF_(inDIF){
 
 }
 

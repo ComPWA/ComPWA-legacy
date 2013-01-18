@@ -2,7 +2,7 @@
 /*! \class DIFRootReader
  * @file DIFRootReader.hpp
  * This class reads event-based data from root-files. It implements the
- * interface of DIFBase.hpp.
+ * interface of Data.hpp.
 */
 
 #ifndef _DIFRootReader_HPP
@@ -15,7 +15,7 @@
 #include <utility>
 
 //PWA-Headers
-#include "DIFBase.hpp"
+#include "Data.hpp"
 #include "PWAEvent.hpp"
 
 //Root-Headers
@@ -28,7 +28,7 @@
 #include "TTree.h"
 #include "TRandom3.h"
 
-class DIFRootReader : public DIFBase {
+class DIFRootReader : public Data {
 
 public:
   /// Default Constructor (0x0)

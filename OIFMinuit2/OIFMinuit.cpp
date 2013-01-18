@@ -13,7 +13,7 @@
 
 using namespace ROOT::Minuit2;
 
-OIFMinuit::OIFMinuit(std::shared_ptr<OIFData> theData) : _myFcn(theData){
+OIFMinuit::OIFMinuit(std::shared_ptr<ControlParameter> theData) : _myFcn(theData){
   //_myFcn = new MIMinuitFcn(theData);
 }
 

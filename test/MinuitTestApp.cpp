@@ -38,13 +38,13 @@ int main(int argc, char **argv){
   double p0=-10., p1=10., p2=1., p3=-0.01, sigma_smear=3;
 
   // Generate data distribution
-  shared_ptr<OIFData> myFit(new PolyFit(p0, p1, p2, p3, sigma_smear));
+  shared_ptr<ControlParameter> myFit(new PolyFit(p0, p1, p2, p3, sigma_smear));
 
   //--------------------------Minimizer IF --------------------------------------------------------
-  vector<shared_ptr<OIFBase> > myMinimizerList;
+  vector<shared_ptr<Optimizer> > myMinimizerList;
 
   // Add minimizers
-  myMinimizerList.push_back(shared_ptr<OIFBase> (new OIFMinuit(myFit)));
+  myMinimizerList.push_back(shared_ptr<Optimizer> (new OIFMinuit(myFit)));
 
   // Initiate parameters
   vector<shared_ptr<PWAParameter> > par;
@@ -56,7 +56,7 @@ int main(int argc, char **argv){
   // Loop over minimizers (at the moment this means: Geneva, Minuit or Geneva then Minuit)
   for(unsigned int Nmin=0; Nmin<myMinimizerList.size(); Nmin++){
     // Pointer to one ot the used minimizers
-    shared_ptr<OIFBase> minimizer = myMinimizerList[Nmin];
+    shared_ptr<Optimizer> minimizer = myMinimizerList[Nmin];
     // Do the actual minimization
     double genResult = minimizer->exec(par);
 

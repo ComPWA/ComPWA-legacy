@@ -27,7 +27,7 @@ using namespace std;
  */
 int main(int argc, char **argv){
 
-  shared_ptr<PIFBase> testBW(new PIFBW(0.,5.));
+  shared_ptr<Amplitude> testBW(new PIFBW(0.,5.));
   vector<double> x;
   x.push_back(1.5);
   vector<shared_ptr<PWAParameter> > par;

@@ -12,10 +12,10 @@
 #include <vector>
 #include <memory>
 
-#include "DIFBase.hpp"
-#include "EIFBase.hpp"
-#include "PIFBase.hpp"
-#include "OIFBase.hpp"
+#include "Data.hpp"
+#include "Estimator.hpp"
+#include "Amplitude.hpp"
+#include "Optimizer.hpp"
 #include "PWAParameter.hpp"
 
 class RunManager
@@ -23,18 +23,18 @@ class RunManager
 
 public:
 
-  RunManager(std::shared_ptr<DIFBase>, std::shared_ptr<EIFBase>,
-      std::shared_ptr<PIFBase>, std::shared_ptr<OIFBase>);
+  RunManager(std::shared_ptr<Data>, std::shared_ptr<Estimator>,
+      std::shared_ptr<Amplitude>, std::shared_ptr<Optimizer>);
 
   virtual ~RunManager();
 
   virtual bool startFit(std::vector<std::shared_ptr<PWAParameter> >& );
 
 protected:
-  std::shared_ptr<DIFBase> pData_; /*!< Pointer to Data-Module */
-  std::shared_ptr<EIFBase> pEsti_; /*!< Pointer to Estimator-Module */
-  std::shared_ptr<PIFBase> pPhys_; /*!< Pointer to Physics-Module */
-  std::shared_ptr<OIFBase> pOpti_; /*!< Pointer to Optimizer-Module */
+  std::shared_ptr<Data> pData_; /*!< Pointer to Data-Module */
+  std::shared_ptr<Estimator> pEsti_; /*!< Pointer to Estimator-Module */
+  std::shared_ptr<Amplitude> pPhys_; /*!< Pointer to Physics-Module */
+  std::shared_ptr<Optimizer> pOpti_; /*!< Pointer to Optimizer-Module */
   //TODO: log
   bool valid_; /*!< setup a valid configuration? */
   bool success_; /*!< fitting ended successfully? */

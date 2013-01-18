@@ -1,6 +1,10 @@
 ########### DIFRoot2Part lib #############
 import os ;
 
+local BOOST_BUILD_PATH = [ os.environ BOOST_BUILD_PATH ] ;
+
+BOOSTLIBS = -lboost_date_time -lboost_filesystem -lboost_program_options -lboost_regex -lboost_serialization -lboost_system -lboost_thread-mt -lboost_test_exec_monitor -L$(BOOST_BUILD_PATH)/lib ;
+
 local ROOTSYS = [ os.environ ROOTSYS ] ;
 local ROOTINC = [ os.environ ROOTINCLUDE ] ;
 
@@ -11,16 +15,22 @@ project :
 	requirements <include>./
         <include>$(TOP)/Core
 	<include>$(ROOTINC)
+	<include>$(BOOST_BUILD_PATH)/include
 	<cxxflags>-ftemplate-depth-256
 	<cxxflags>-std=c++0x
 	<linkflags>$(ROOTLIBS)
 	<linkflags>-lEG
+	<linkflags>$(BOOSTLIBS)
 	;
 
 lib DIFRoot2Part : 
-        [ glob *.cpp ] 
+        [ glob *.cpp : *Test.cpp ] 
         $(TOP)/Core//ComPWA  
         ;
 
 install dist : DIFRoot2Part : <location>$(TOP)/lib ;
+
+using testing ;
+lib boost_unit_test_framework ;
+run DataTest.cpp DIFRoot2Part $(TOP)/Core//ComPWA boost_unit_test_framework ;
 

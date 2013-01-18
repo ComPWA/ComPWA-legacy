@@ -20,6 +20,7 @@ project :
         <include>$(TOP)/OIFMinuit2
         <include>$(TOP)/OIFGeneva
         <include>$(TOP)/PIFBW
+        <include>$(TOP)/AmplitudeSum
         <include>$(TOP)/DIFRoot2Part
         <include>$(TOP)/EIFMinLogLH
         <include>$(TOP)/EIFChiOneD
@@ -31,6 +32,10 @@ project :
 	<linkflags>$(ROOTLIBS)
 	<linkflags>-lgomp
 	<linkflags>-lEG
+	<linkflags>-lRooFit
+	<linkflags>-lRooFitCore
+	<linkflags>-L/local/home/mathias/workspace/nextPWA/external/qft++/lib
+	<linkflags>-lqft++
 	;
 
 lib test : 
@@ -125,8 +130,22 @@ exe gentwopartApp :
         $(TOP)/Core//ComPWA
         $(TOP)/PIFBW//PIFBW  
         : ;
+        
+exe gendalitzApp : 
+        GenDalitzApp.cpp 
+        test
+        $(TOP)/Core//ComPWA
+        $(TOP)/AmplitudeSum//AmpSum
+        : ;
+        
+exe dalitzplotApp : 
+        DalitzDataPlotterApp.cpp 
+        test
+        $(TOP)/Core//ComPWA
+        $(TOP)/DIFRoot2Part//DIFRoot2Part  
+        : ;
 
 install dist : test : <location>$(TOP)/lib <threading>single ;
 install dist2 : parametertestApp cx0testApp dataiftestApp optimizertestApp physicstestApp : <location>$(TOP)/bin <threading>single ;
-install dist3 : estimatortestApp integrationtestApp integrationtestbinnedApp runmanagertestApp gentwopartApp : <location>$(TOP)/bin <threading>single ;
+install dist3 : estimatortestApp integrationtestApp integrationtestbinnedApp runmanagertestApp gentwopartApp gendalitzApp dalitzplotApp : <location>$(TOP)/bin <threading>single ;
 

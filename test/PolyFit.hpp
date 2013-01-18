@@ -1,7 +1,7 @@
-//! Test implementation of OIFData.
+//! Test implementation of ControlParameter.
 /*! \class PolyFit
  * @file PolyFit.hpp
- * This class derives from OIFData, the data-interface of the optimizers. It
+ * This class derives from ControlParameter, the data-interface of the optimizers. It
  * represents a set of 1-dim data-points, which are created when instantiating
  * this class using a polynomial and smearing the points with a gausian distri-
  * bution. It also provides a draw function to visualize the data-points.
@@ -21,7 +21,7 @@
 #include "TROOT.h"
 //#include "qft++/topincludes/relativistic-quantum-mechanics.hh"
 
-#include "OIFData.hpp"
+#include "ControlParameter.hpp"
 #include "PWAParameter.hpp"
 
 class TFile;
@@ -29,7 +29,7 @@ class TGraph;
 class TCanvas;
 class TRandom;
 
-class PolyFit : public OIFData {
+class PolyFit : public ControlParameter {
 
 public:
 

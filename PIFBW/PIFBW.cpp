@@ -9,7 +9,7 @@
 
 using namespace std;
 
-PIFBW::PIFBW(const double min, const double max) : PIFBase(min, max) {
+PIFBW::PIFBW(const double min, const double max):min_(min),max_(max) {
   //_myFcn = new MIMinuitFcn(theData);
 }
 
