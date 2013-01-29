@@ -9,7 +9,7 @@
 #define _PWAEvent_HPP_
 
 #include <vector>
-#include "PWAParticle.hpp"
+#include "Core/PWAParticle.hpp"
 
 class PWAEvent{
 

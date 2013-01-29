@@ -23,8 +23,8 @@
 #include "DataReader/RootReader/RootReader.hpp"
 
 //Core header files go here
-#include "PWAEvent.hpp"
-#include "PWAParticle.hpp"
+#include "Core/PWAEvent.hpp"
+#include "Core/PWAParticle.hpp"
 
 using namespace std;
 

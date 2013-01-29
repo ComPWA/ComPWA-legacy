@@ -9,14 +9,14 @@
  * ControlParameter, it can be used in the optimizer modules.
 */
 
-#ifndef _EIFBASE_HPP_
-#define _EIFBASE_HPP_
+#ifndef _ESTIMATOR_HPP_
+#define _ESTIMATOR_HPP_
 
 #include <vector>
 #include <memory>
 
-#include "ControlParameter.hpp"
-#include "PWAParameter.hpp"
+#include "Core/ControlParameter.hpp"
+#include "Core/PWAParameter.hpp"
 
 class Estimator : public ControlParameter
 {

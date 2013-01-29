@@ -13,9 +13,9 @@
 #include <memory>
 
 //Core header files go here
-#include "PWAParameter.hpp"
-#include "PWAParameterList.hpp"
-#include "PWAGenericPar.hpp"
+#include "Core/PWAParameter.hpp"
+#include "Core/PWAParameterList.hpp"
+#include "Core/PWAGenericPar.hpp"
 
 using namespace std;
 

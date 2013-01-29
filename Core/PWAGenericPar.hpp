@@ -16,7 +16,7 @@
 #include <sstream>
 #include <typeinfo>
 
-#include "PWAParameter.hpp"
+#include "Core/PWAParameter.hpp"
 
 template <class T>
 class PWAGenericPar : public PWAParameter

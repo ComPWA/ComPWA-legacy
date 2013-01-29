@@ -8,13 +8,13 @@
  * other modules are necessary to work with the new optimizer library or routine.
 */
 
-#ifndef _OIFBASE_HPP_
-#define _OIFBASE_HPP_
+#ifndef _OPTIMIZER_HPP_
+#define _OPTIMIZER_HPP_
 
 #include <vector>
 #include <memory>
 
-#include "PWAParameter.hpp"
+#include "Core/PWAParameter.hpp"
 
 class Optimizer
 {

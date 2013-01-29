@@ -7,10 +7,10 @@
  * modules are necessary to work with the new dataset.
 */
 
-#ifndef DIFBASE_HPP_
-#define DIFBASE_HPP_
+#ifndef DATA_HPP_
+#define DATA_HPP_
 
-#include "PWAEvent.hpp"
+#include "Core/PWAEvent.hpp"
 
 class Data
 {

@@ -16,8 +16,8 @@
 
 // Physics Interface header files go here
 #include "Physics/BreitWigner/BreitWigner.hpp"
-#include "PWAParameter.hpp"
-#include "PWAGenericPar.hpp"
+#include "Core/PWAParameter.hpp"
+#include "Core/PWAGenericPar.hpp"
 
 using namespace std;
 

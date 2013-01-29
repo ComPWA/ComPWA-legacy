@@ -1,11 +1,11 @@
 #include <memory>
 
-#include "Data.hpp"
-#include "Estimator.hpp"
-#include "Amplitude.hpp"
-#include "Optimizer.hpp"
+#include "Core/Data.hpp"
+#include "Core/Estimator.hpp"
+#include "Core/Amplitude.hpp"
+#include "Core/Optimizer.hpp"
 
-#include "RunManager.hpp"
+#include "Core/RunManager.hpp"
 
 RunManager::RunManager(std::shared_ptr<Data> inD, std::shared_ptr<Estimator> inE,
       std::shared_ptr<Amplitude> inP, std::shared_ptr<Optimizer> inO)

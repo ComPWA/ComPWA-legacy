@@ -21,8 +21,8 @@
 #include "TROOT.h"
 //#include "qft++/topincludes/relativistic-quantum-mechanics.hh"
 
-#include "ControlParameter.hpp"
-#include "PWAParameter.hpp"
+#include "Core/ControlParameter.hpp"
+#include "Core/PWAParameter.hpp"
 
 class TFile;
 class TGraph;

@@ -6,13 +6,13 @@
  * use the same data and parameter-set with different optimizers.
 */
 
-#ifndef OIFDATA_HPP_
-#define OIFDATA_HPP_
+#ifndef CONTROLPARAMETER_HPP_
+#define CONTROLPARAMETER_HPP_
 
 #include <vector>
 #include <memory>
 
-#include "PWAParameter.hpp"
+#include "Core/PWAParameter.hpp"
 
 class ControlParameter{
 

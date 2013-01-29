@@ -1,6 +1,6 @@
 #include <vector>
-#include "PWAParticle.hpp"
-#include "PWAEvent.hpp"
+#include "Core/PWAParticle.hpp"
+#include "Core/PWAEvent.hpp"
 
 
 PWAEvent::PWAEvent():fWeight(1.){

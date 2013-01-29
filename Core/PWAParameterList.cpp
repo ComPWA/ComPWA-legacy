@@ -1,6 +1,6 @@
 #include <vector>
 
-#include "PWAParameterList.hpp"
+#include "Core/PWAParameterList.hpp"
 
 PWAParameterList::PWAParameterList(){
   make_str();

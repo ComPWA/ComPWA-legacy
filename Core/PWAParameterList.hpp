@@ -13,7 +13,7 @@
 #include <sstream>
 #include <vector>
 
-#include "PWAGenericPar.hpp"
+#include "Core/PWAGenericPar.hpp"
 
 class PWAParameterList
 {

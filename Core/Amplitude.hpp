@@ -15,7 +15,7 @@
 #include <vector>
 #include <memory>
 
-#include "PWAParameter.hpp"
+#include "Core/PWAParameter.hpp"
 
 class Amplitude
 {

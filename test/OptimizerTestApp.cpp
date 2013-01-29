@@ -26,11 +26,11 @@
 // Minimizer Interface header files go here
 #include "Optimizer/Minuit2/MinuitIF.hpp"
 #include "Optimizer/Geneva/GenevaIF.hpp"
-#include "PWAParameter.hpp"
-#include "PWAGenericPar.hpp"
+#include "Core/PWAParameter.hpp"
+#include "Core/PWAGenericPar.hpp"
 
 // The toy-data to fit to
-#include "PolyFit.hpp"
+#include "test/PolyFit.hpp"
 
 /************************************************************************************************/
 /**

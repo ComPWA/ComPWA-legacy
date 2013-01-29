@@ -1,7 +1,7 @@
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE Number
 #include <boost/test/unit_test.hpp>
-#include <PWAGenericPar.hpp>
+#include <Core/PWAGenericPar.hpp>
 #include <memory>
 #include <vector>
 

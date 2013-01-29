@@ -12,11 +12,11 @@
 #include <vector>
 #include <memory>
 
-#include "Data.hpp"
-#include "Estimator.hpp"
-#include "Amplitude.hpp"
-#include "Optimizer.hpp"
-#include "PWAParameter.hpp"
+#include "Core/Data.hpp"
+#include "Core/Estimator.hpp"
+#include "Core/Amplitude.hpp"
+#include "Core/Optimizer.hpp"
+#include "Core/PWAParameter.hpp"
 
 class RunManager
 {
