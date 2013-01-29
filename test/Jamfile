@@ -16,18 +16,10 @@ ROOTLIBS = [ MATCH "(.*)[\n]" : $(rlibs) ] ;
 
 project :
 	requirements <include>./
+	    <include>$(TOP)
         <include>$(TOP)/Core
-        <include>$(TOP)/OIFMinuit2
-        <include>$(TOP)/OIFGeneva
-        <include>$(TOP)/PIFBW
-        <include>$(TOP)/AmplitudeSum
-        <include>$(TOP)/DIFRoot2Part
-        <include>$(TOP)/EIFMinLogLH
-        <include>$(TOP)/EIFChiOneD
 	<include>$(ROOTINC)
 	<include>$(BOOST_BUILD_PATH)/include
-	<cxxflags>-ftemplate-depth-256
-	<cxxflags>-std=c++0x
 	<linkflags>$(BOOSTLIBS)
 	<linkflags>$(ROOTLIBS)
 	<linkflags>-lgomp
@@ -57,7 +49,7 @@ exe dataiftestApp :
         DataIFTestApp.cpp 
         test
         $(TOP)/Core//ComPWA
-        $(TOP)/DIFRoot2Part//DIFRoot2Part  
+        $(TOP)/DataReader/RootReader//RootReader  
         : ;
 
 if $(GENEVA) { 
@@ -65,15 +57,15 @@ exe optimizertestApp :
         OptimizerTestApp.cpp 
         test
         $(TOP)/Core//ComPWA
-        $(TOP)/OIFMinuit2//OIFMinuit2
-        $(TOP)/OIFGeneva//OIFGeneva   
+        $(TOP)/Optimizer/Minuit2//Minuit2IF
+        $(TOP)/Optimizer/Geneva//GenevaIF  
         : ;
 } else {
 exe optimizertestApp : 
         MinuitTestApp.cpp 
         test
         $(TOP)/Core//ComPWA
-        $(TOP)/OIFMinuit2//OIFMinuit2
+        $(TOP)/Optimizer/Minuit2//Minuit2IF
         : ;
 }
 
@@ -81,68 +73,68 @@ exe physicstestApp :
         PhysicsTestApp.cpp 
         test
         $(TOP)/Core//ComPWA
-        $(TOP)/PIFBW//PIFBW  
+        $(TOP)/Physics/BreitWigner//BreitWigner  
         : ;
         
 exe estimatortestApp : 
         EstimatorTestApp.cpp 
         test
         $(TOP)/Core//ComPWA
-        $(TOP)/EIFMinLogLH//EIFMinLogLH 
-        $(TOP)/EIFChiOneD//EIFChiOneD 
-        $(TOP)/PIFBW//PIFBW  
-        $(TOP)/DIFRoot2Part//DIFRoot2Part
+        $(TOP)/Estimator/MinLogLH//MinLogLH 
+        $(TOP)/Estimator/ChiOneD//ChiOneD 
+        $(TOP)/Physics/BreitWigner//BreitWigner  
+        $(TOP)/DataReader/RootReader//RootReader
         : ;
         
 exe integrationtestApp : 
         IntegrationTestApp.cpp 
         test
         $(TOP)/Core//ComPWA
-        $(TOP)/EIFMinLogLH//EIFMinLogLH 
-        $(TOP)/PIFBW//PIFBW  
-        $(TOP)/DIFRoot2Part//DIFRoot2Part
-        $(TOP)/OIFMinuit2//OIFMinuit2
+        $(TOP)/Estimator/MinLogLH//MinLogLH 
+        $(TOP)/Physics/BreitWigner//BreitWigner   
+        $(TOP)/DataReader/RootReader//RootReader
+        $(TOP)/Optimizer/Minuit2//Minuit2IF
         : ;
         
 exe integrationtestbinnedApp : 
         IntegrationTestBinnedApp.cpp 
         test
         $(TOP)/Core//ComPWA
-        $(TOP)/EIFChiOneD//EIFChiOneD 
-        $(TOP)/PIFBW//PIFBW  
-        $(TOP)/DIFRoot2Part//DIFRoot2Part
-        $(TOP)/OIFMinuit2//OIFMinuit2
+        $(TOP)/Estimator/ChiOneD//ChiOneD 
+        $(TOP)/Physics/BreitWigner//BreitWigner   
+        $(TOP)/DataReader/RootReader//RootReader
+        $(TOP)/Optimizer/Minuit2//Minuit2IF
         : ;
         
 exe runmanagertestApp : 
         RunManagerTestApp.cpp 
         test
         $(TOP)/Core//ComPWA
-        $(TOP)/EIFMinLogLH//EIFMinLogLH 
-        $(TOP)/PIFBW//PIFBW  
-        $(TOP)/DIFRoot2Part//DIFRoot2Part
-        $(TOP)/OIFMinuit2//OIFMinuit2
+        $(TOP)/Estimator/MinLogLH//MinLogLH 
+        $(TOP)/Physics/BreitWigner//BreitWigner   
+        $(TOP)/DataReader/RootReader//RootReader
+        $(TOP)/Optimizer/Minuit2//Minuit2IF
         : ;
         
 exe gentwopartApp : 
         GenTwoPartApp.cpp 
         test
         $(TOP)/Core//ComPWA
-        $(TOP)/PIFBW//PIFBW  
+        $(TOP)/Physics/BreitWigner//BreitWigner  
         : ;
         
 exe gendalitzApp : 
         GenDalitzApp.cpp 
         test
         $(TOP)/Core//ComPWA
-        $(TOP)/AmplitudeSum//AmpSum
+        $(TOP)/Physics/AmplitudeSum//AmpSum  
         : ;
         
 exe dalitzplotApp : 
         DalitzDataPlotterApp.cpp 
         test
         $(TOP)/Core//ComPWA
-        $(TOP)/DIFRoot2Part//DIFRoot2Part  
+        $(TOP)/DataReader/RootReader//RootReader  
         : ;
 
 install dist : test : <location>$(TOP)/lib <threading>single ;

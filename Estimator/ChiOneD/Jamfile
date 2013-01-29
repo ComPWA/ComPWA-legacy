@@ -1,0 +1,9 @@
+########### ChiOneD lib #############
+
+lib ChiOneD : 
+        [ glob *.cpp ]
+        $(TOP)/Core//ComPWA 
+         ;
+
+install dist : ChiOneD : <location>$(TOP)/lib ;
+

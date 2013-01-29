@@ -1,0 +1,16 @@
+########### Physics Jamfile #############
+path-constant PHYSICS : . ;
+
+# Build Physics Core
+
+# Configure the used packages here:
+build-project BreitWigner ;
+build-project AmplitudeSum ;
+
+# Combine physics libs
+lib Physics : 
+        $(PHYSICS)/BreitWigner//BreitWigner
+        $(PHYSICS)/AmplitudeSum//AmpSum
+        ;
+
+install dist5 : Physics : <location>$(TOP)/lib ;

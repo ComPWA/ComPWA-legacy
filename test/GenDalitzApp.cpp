@@ -25,7 +25,7 @@
 #include "TRandom3.h"
 
 // Physics Interface header files go here
-#include "AmpSumIntensity.hpp"
+#include "Physics/AmplitudeSum/AmpSumIntensity.hpp"
 #include "PWAParameter.hpp"
 #include "PWAGenericPar.hpp"
 

@@ -20,7 +20,7 @@
 #include "TFile.h"
 
 // Data Interface header files go here
-#include "DIFRootReader.hpp"
+#include "DataReader/RootReader/RootReader.hpp"
 
 //Core header files go here
 #include "PWAEvent.hpp"
@@ -37,7 +37,7 @@ int main(int argc, char **argv){
     cout << "DataIF Root 2Particles started " << endl << endl;
 
     string file = "test/2Part-4vecs.root";
-    DIFRootReader myReader(file, false);
+    RootReader myReader(file, false);
     unsigned int maxEvents = myReader.getNEvents();
     double masssq;
     TH1D* bw = new TH1D("bw","inv. mass of 2 particles",1000,0.,2.4);

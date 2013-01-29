@@ -4,7 +4,7 @@
  * This tiny application tests the interface to the Optimizers Minuit2 and Geneva.
  * The test dataset is generated in the PolyFit.hpp class, which creates smeared
  * 1-dim data according to a polynomial function. Then the Optimizer-IF implemen-
- * tations Minuit2 (OIFMinuit.hpp) and Geneva (OIFGeneva.hpp) are used one after
+ * tations Minuit2 (MinuitIF.hpp) and Geneva (GenevaIF.hpp) are used one after
  * the other to fit the same polynomial to the smeared points. As a result the
  * optimized parameters are printed. Note: In this example Minuit2 uses the final
  * parameters of Geneva as starting values!
@@ -24,8 +24,8 @@
 //#include "ErrLogger/ErrLogger.hh"
 
 // Minimizer Interface header files go here
-#include "OIFMinuit.hpp"
-#include "OIFGeneva.hpp"
+#include "Optimizer/Minuit2/MinuitIF.hpp"
+#include "Optimizer/Geneva/GenevaIF.hpp"
 #include "PWAParameter.hpp"
 #include "PWAGenericPar.hpp"
 
@@ -45,11 +45,11 @@ int main(int argc, char **argv){
   //--------------------------Minimizer IF --------------------------------------------------------
   std::vector<std::shared_ptr<Optimizer> > myMinimizerList;
   // Add minimizers
-  if (whichMinimizer=="Geneva") myMinimizerList.push_back(std::shared_ptr<Optimizer> (new OIFGeneva(myFit)));
-  else if (whichMinimizer=="Minuit") myMinimizerList.push_back(std::shared_ptr<Optimizer> (new OIFMinuit(myFit)));
+  if (whichMinimizer=="Geneva") myMinimizerList.push_back(std::shared_ptr<Optimizer> (new GenevaIF(myFit)));
+  else if (whichMinimizer=="Minuit") myMinimizerList.push_back(std::shared_ptr<Optimizer> (new MinuitIF(myFit)));
   else if (whichMinimizer=="all") {
-    myMinimizerList.push_back(std::shared_ptr<Optimizer> (new OIFGeneva(myFit)));
-    myMinimizerList.push_back(std::shared_ptr<Optimizer> (new OIFMinuit(myFit)));
+    myMinimizerList.push_back(std::shared_ptr<Optimizer> (new GenevaIF(myFit)));
+    myMinimizerList.push_back(std::shared_ptr<Optimizer> (new MinuitIF(myFit)));
   }else{
    std::cout << "Minimizer/t" << whichMinimizer << "\tdoesn't exist" << std::endl;
    return 0;
@@ -60,7 +60,7 @@ int main(int argc, char **argv){
   par.push_back(std::shared_ptr<PWAParameter>(new PWAGenericPar<double>(9.8,5,15,2)));
   par.push_back(std::shared_ptr<PWAParameter>(new PWAGenericPar<double>(1.1,0.5,1.5,0.3)));
   par.push_back(std::shared_ptr<PWAParameter>(new PWAGenericPar<double>(-0.008,-0.02,0,0.005)));
-  // Loop over minimizers (at the moment this means: Geneva, Minuit or Geneva then Minuit)
+  // Loop over minimizers (at the moment this means: Geneva, MinuitIF or Geneva then MinuitIF)
   for(unsigned int Nmin=0; Nmin<myMinimizerList.size(); Nmin++){
     // Pointer to one ot the used minimizers
       std::shared_ptr<Optimizer> minimizer = myMinimizerList[Nmin];

@@ -2,10 +2,10 @@
 /*!
  * @file RunManagerTestApp.cpp
  * This tiny application tests a simple fit procedure with a set of simple
- * modules. It uses a simle \f$\chi^{2}\f$ estimator EIFChiOneD, it reads data
- * via the root-reader module DIFRootReader and uses the intensity provided by
- * the simple 1D-Breit-Wigner physics module PIFBW. The optimization of the
- * parameters is done with the Minuit2 module OIFMinuit. The class RunManager
+ * modules. It uses a simle \f$\chi^{2}\f$ estimator ChiOneD, it reads data
+ * via the root-reader module RootReader and uses the intensity provided by
+ * the simple 1D-Breit-Wigner physics module BreitWigner. The optimization of the
+ * parameters is done with the Minuit2 module MinuitIF. The class RunManager
  * is used to perform the actual fitting procedure.
 */
 
@@ -18,13 +18,13 @@
 #include <memory>
 
 // ComPWA header files go here
-#include "DIFRootReader.hpp"
-#include "PIFBW.hpp"
-#include "EIFMinLogLH.hpp"
-#include "OIFMinuit.hpp"
-#include "PWAParameter.hpp"
-#include "PWAGenericPar.hpp"
-#include "RunManager.hpp"
+#include "DataReader/RootReader/RootReader.hpp"
+#include "Physics/BreitWigner/BreitWigner.hpp"
+#include "Estimator/MinLogLH/MinLogLH.hpp"
+#include "Optimizer/Minuit2/MinuitIF.hpp"
+#include "Core/PWAParameter.hpp"
+#include "Core/PWAGenericPar.hpp"
+#include "Core/RunManager.hpp"
 
 //Test header files go here
 #include "PolyFit.hpp"
@@ -36,10 +36,10 @@
 int main(int argc, char **argv){
   std::string file="test/2Part-4vecs.root";
   std::cout << "Load Modules" << std::endl;
-  std::shared_ptr<Data> myReader(new DIFRootReader(file, false));
-  std::shared_ptr<Amplitude> testBW(new PIFBW(0.,5.));
-  std::shared_ptr<Estimator> testEsti(new EIFMinLogLH(testBW, myReader)); //TODO: <- should be done by runManager
-  std::shared_ptr<Optimizer> opti(new OIFMinuit(testEsti));
+  std::shared_ptr<Data> myReader(new RootReader(file, false));
+  std::shared_ptr<Amplitude> testBW(new BreitWigner(0.,5.));
+  std::shared_ptr<Estimator> testEsti(new MinLogLH(testBW, myReader)); //TODO: <- should be done by runManager
+  std::shared_ptr<Optimizer> opti(new MinuitIF(testEsti));
   std::shared_ptr<RunManager> run(new RunManager(myReader, testEsti, testBW, opti));
 
   // Initiate parameters

@@ -25,7 +25,7 @@
 #include "TRandom3.h"
 
 // Physics Interface header files go here
-#include "PIFBW.hpp"
+#include "Physics/BreitWigner/BreitWigner.hpp"
 #include "PWAParameter.hpp"
 #include "PWAGenericPar.hpp"
 
@@ -48,7 +48,7 @@ int main(int argc, char **argv){
   TRandom3 rando;
 
   //Simple Breit-Wigner Physics-Module setup
-  shared_ptr<PIFBW> testBW(new PIFBW(0.,5.));
+  shared_ptr<BreitWigner> testBW(new BreitWigner(0.,5.));
   vector<shared_ptr<PWAParameter> > minPar;
   minPar.push_back(shared_ptr<PWAGenericPar<double> >(new PWAGenericPar<double>(1.5,0.5,2.5,0.1)));
   minPar.push_back(shared_ptr<PWAGenericPar<double> >(new PWAGenericPar<double>(0.3,0.1,0.2,0.01)));

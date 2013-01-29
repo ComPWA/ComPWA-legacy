@@ -1,0 +1,16 @@
+########### Estimator Jamfile #############
+path-constant ESTIMATOR : . ;
+
+# Build Estimator Core
+
+# Configure the used packages here:
+build-project ChiOneD ;
+build-project MinLogLH ;
+
+# Combine Estimator libs
+lib Estimator : 
+        $(ESTIMATOR)/ChiOneD//ChiOneD
+        $(ESTIMATOR)/MinLogLH//MinLogLH
+        ;
+
+install dist3 : Estimator : <location>$(TOP)/lib ;

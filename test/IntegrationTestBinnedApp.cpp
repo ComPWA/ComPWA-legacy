@@ -2,10 +2,10 @@
 /*!
  * @file IntegrationTestApp.cpp
  * This tiny application tests a simple fit procedure with a set of simple
- * modules. It uses a simle \f$\chi^{2}\f$ estimator EIFChiOneD, it reads data
- * via the root-reader module DIFRootReader and uses the intensity provided by
- * the simple 1D-Breit-Wigner physics module PIFBW. The optimization of the
- * parameters is done with the Minuit2 module OIFMinuit. As result the
+ * modules. It uses a simle \f$\chi^{2}\f$ estimator ChiOneD, it reads data
+ * via the root-reader module RootReader and uses the intensity provided by
+ * the simple 1D-Breit-Wigner physics module BreitWigner. The optimization of the
+ * parameters is done with the Minuit2 module MinuitIF. As result the
  * optimized parameters are printed to the terminal.
 */
 
@@ -23,16 +23,16 @@
 #include "TFile.h"
 
 //Core header files go here
-#include "PWAEvent.hpp"
-#include "PWAParticle.hpp"
-#include "PWAParameter.hpp"
-#include "PWAGenericPar.hpp"
+#include "Core/PWAEvent.hpp"
+#include "Core/PWAParticle.hpp"
+#include "Core/PWAParameter.hpp"
+#include "Core/PWAGenericPar.hpp"
 
 // ComPWA header files go here
-#include "DIFRootReader.hpp"
-#include "PIFBW.hpp"
-#include "EIFChiOneD.hpp"
-#include "OIFMinuit.hpp"
+#include "DataReader/RootReader/RootReader.hpp"
+#include "Physics/BreitWigner/BreitWigner.hpp"
+#include "Estimator/ChiOneD/ChiOneD.hpp"
+#include "Optimizer/Minuit2/MinuitIF.hpp"
 
 /************************************************************************************************/
 /**
@@ -41,10 +41,10 @@
 int main(int argc, char **argv){
   std::string file="test/2Part-4vecs.root";
   std::cout << "Load Modules" << std::endl;
-  std::shared_ptr<Data> myReader(new DIFRootReader(file, true));
-  std::shared_ptr<Amplitude> testBW(new PIFBW(0.,5.));
-  std::shared_ptr<Estimator> testEsti(new EIFChiOneD(testBW, myReader));
-  std::shared_ptr<Optimizer> opti(new OIFMinuit(testEsti));
+  std::shared_ptr<Data> myReader(new RootReader(file, true));
+  std::shared_ptr<Amplitude> testBW(new BreitWigner(0.,5.));
+  std::shared_ptr<Estimator> testEsti(new ChiOneD(testBW, myReader));
+  std::shared_ptr<Optimizer> opti(new MinuitIF(testEsti));
 
   // Initiate parameters
   std::vector<std::shared_ptr<PWAParameter> > par;
@@ -85,8 +85,8 @@ int main(int argc, char **argv){
       bw->Fill(sqrt(masssq));
   }
 
-  //PIFBW *drawBW = (PIFBW*) (&(*testBW));
-  TF1* fitresult = new TF1("fitresult", ((PIFBW*)testBW.get()), &PIFBW::drawInt,0.,2.4,3,"PIFBW","intensity");
+  //BreitWigner *drawBW = (BreitWigner*) (&(*testBW));
+  TF1* fitresult = new TF1("fitresult", ((BreitWigner*)testBW.get()), &BreitWigner::drawInt,0.,2.4,3,"PIFBW","intensity");
   fitresult->FixParameter(0, par[0]->GetValue());
   fitresult->FixParameter(1, par[1]->GetValue());
   //fitresult->FixParameter(2, par[2]->GetValue());

@@ -15,7 +15,7 @@
 #include <memory>
 
 // Physics Interface header files go here
-#include "PIFBW.hpp"
+#include "Physics/BreitWigner/BreitWigner.hpp"
 #include "PWAParameter.hpp"
 #include "PWAGenericPar.hpp"
 
@@ -27,7 +27,7 @@ using namespace std;
  */
 int main(int argc, char **argv){
 
-  shared_ptr<Amplitude> testBW(new PIFBW(0.,5.));
+  shared_ptr<Amplitude> testBW(new BreitWigner(0.,5.));
   vector<double> x;
   x.push_back(1.5);
   vector<shared_ptr<PWAParameter> > par;

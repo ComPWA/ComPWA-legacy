@@ -1,0 +1,16 @@
+########### Optimizer Jamfile #############
+path-constant OPTIMIZER : . ;
+
+# Build Optimizer Core
+
+# Configure the used packages here:
+build-project Geneva ;
+build-project Minuit2 ;
+
+# Combine Optimizer libs
+lib Optimizer : 
+        $(OPTIMIZER)/Geneva//Geneva
+        $(OPTIMIZER)/Minuit2//Minuit2
+        ;
+
+install dist4 : Optimizer : <location>$(TOP)/lib ;

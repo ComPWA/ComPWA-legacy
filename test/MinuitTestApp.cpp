@@ -24,6 +24,7 @@
 // Minimizer Interface header files go here
 #include "OIFMinuit.hpp"
 #include "PWAParameter.hpp"
+#include "PWAGenericPar.hpp"
 
 // The toy-data to fit to
 #include "PolyFit.hpp"
@@ -44,7 +45,7 @@ int main(int argc, char **argv){
   vector<shared_ptr<Optimizer> > myMinimizerList;
 
   // Add minimizers
-  myMinimizerList.push_back(shared_ptr<Optimizer> (new OIFMinuit(myFit)));
+  myMinimizerList.push_back(shared_ptr<Optimizer> (new MinuitIF(myFit)));
 
   // Initiate parameters
   vector<shared_ptr<PWAParameter> > par;
@@ -53,7 +54,7 @@ int main(int argc, char **argv){
   par.push_back(shared_ptr<PWAGenericPar<double> >(new PWAGenericPar<double>(1.1,0.5,1.5,0.3)));
   par.push_back(shared_ptr<PWAGenericPar<double> >(new PWAGenericPar<double>(-0.008,-0.02,0,0.005)));
 
-  // Loop over minimizers (at the moment this means: Geneva, Minuit or Geneva then Minuit)
+  // Loop over minimizers (at the moment this means: Geneva, MinuitIF or Geneva then MinuitIF)
   for(unsigned int Nmin=0; Nmin<myMinimizerList.size(); Nmin++){
     // Pointer to one ot the used minimizers
     shared_ptr<Optimizer> minimizer = myMinimizerList[Nmin];

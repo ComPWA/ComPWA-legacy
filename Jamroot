@@ -1,13 +1,16 @@
 ########### ComPWA Jamroot #############
 path-constant TOP : . ;
 
+project :
+	requirements <include>$(TOP)
+	<cxxflags>-ftemplate-depth-256
+	<cxxflags>-std=c++0x
+	;
+
 # Configure the used packages here:
 build-project Core ; 
-build-project DIFRoot2Part ; 
-build-project PIFBW ;
-build-project AmplitudeSum ;
-build-project EIFChiOneD ;
-build-project EIFMinLogLH ;
-build-project OIFMinuit2 ;
-build-project OIFGeneva ;
+build-project Physics ;
+build-project DataReader ; 
+build-project Estimator ;
+build-project Optimizer ;
 build-project test ;

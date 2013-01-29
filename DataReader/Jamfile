@@ -1,0 +1,14 @@
+########### Data Input Jamfile #############
+path-constant DATAREADER : . ;
+
+# Build DataReader Core
+
+# Configure the used packages here:
+build-project RootReader ; 
+
+# Combine DataReader libs
+lib DataReader : 
+        $(DATAREADER)/RootReader//RootReader
+        ;
+
+install dist2 : DataReader : <location>$(TOP)/lib ;
