@@ -1,4 +1,8 @@
 ########### RootReader lib #############
+# @brief
+# This package is a data reader, which reads the data from root files
+# @end
+
 import os ;
 
 local BOOST_BUILD_PATH = [ os.environ BOOST_BUILD_PATH ] ;

@@ -4,5 +4,8 @@ setenv GENEVA           /usr/local/geneva
 setenv ROOTSYS          /usr/
 setenv ROOTINCLUDE      /usr/include/root
 
-
-setenv LD_LIBRARY_PATH  ${LD_LIBRARY_PATH}:$GENEVA/lib:
+if($?LD_LIBRARY_PATH) then
+  setenv LD_LIBRARY_PATH  ${LD_LIBRARY_PATH}:$GENEVA/lib:`pwd`/lib
+else
+  setenv LD_LIBRARY_PATH  $GENEVA/lib:`pwd`/lib
+endif
