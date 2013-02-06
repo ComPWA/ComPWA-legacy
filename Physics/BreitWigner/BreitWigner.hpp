@@ -10,7 +10,7 @@
 
 #include <vector>
 #include <memory>
-#include "Core/Amplitude.hpp"
+#include "Physics/Amplitude.hpp"
 
 
 class BreitWigner : public Amplitude {

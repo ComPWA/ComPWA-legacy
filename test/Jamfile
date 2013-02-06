@@ -126,7 +126,7 @@ exe gendalitzApp :
         GenDalitzApp.cpp 
         test
         $(TOP)/Core//ComPWA
-        $(TOP)/Physics/AmplitudeSum//AmpSum  
+        $(TOP)/Physics/AmplitudeSum//AmplitudeSum  
         : ;
         
 exe dalitzplotApp : 

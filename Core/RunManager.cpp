@@ -1,9 +1,9 @@
 #include <memory>
 
-#include "Core/Data.hpp"
-#include "Core/Estimator.hpp"
-#include "Core/Amplitude.hpp"
-#include "Core/Optimizer.hpp"
+#include "DataReader/Data.hpp"
+#include "Estimator/Estimator.hpp"
+#include "Physics/Amplitude.hpp"
+#include "Optimizer/Optimizer.hpp"
 
 #include "Core/RunManager.hpp"
 

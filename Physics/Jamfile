@@ -1,16 +1,15 @@
 ########### Physics Jamfile #############
 path-constant PHYSICS : . ;
 
-# Build Physics Core
-
-# Configure the used packages here:
-build-project BreitWigner ;
+# libPhysics.so will consist of these packages:
 build-project AmplitudeSum ;
+build-project BreitWigner ;
 
-# Combine physics libs
+# Build libPhysics.so
 lib Physics : 
+        [ glob *.cpp ]
+        $(PHYSICS)/AmplitudeSum//AmplitudeSum
         $(PHYSICS)/BreitWigner//BreitWigner
-        $(PHYSICS)/AmplitudeSum//AmpSum
         ;
 
-install dist5 : Physics : <location>$(TOP)/lib ;
+install dist : Physics : <location>$(TOP)/lib ;

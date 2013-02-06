@@ -1,5 +1,5 @@
 #include "Optimizer/Minuit2/MinuitFcn.hpp"
-#include "Core/ControlParameter.hpp"
+#include "Optimizer/ControlParameter.hpp"
 #include "Core/PWAParameter.hpp"
 #include "Core/PWAGenericPar.hpp"
 //#include "ErrLogger/ErrLogger.hh"

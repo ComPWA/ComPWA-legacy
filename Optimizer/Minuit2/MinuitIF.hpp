@@ -13,8 +13,8 @@
 //#include <boost/shared_ptr.hpp>
 #include <memory>
 
-#include "Core/ControlParameter.hpp"
-#include "Core/Optimizer.hpp"
+#include "Optimizer/ControlParameter.hpp"
+#include "Optimizer/Optimizer.hpp"
 #include "Core/PWAParameter.hpp"
 #include "Optimizer/Minuit2/MinuitFcn.hpp"
 

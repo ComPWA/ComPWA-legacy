@@ -13,8 +13,8 @@
 #include <vector>
 #include <memory>
 //#include <boost/shared_ptr.hpp>
-#include "Core/ControlParameter.hpp"
-#include "Core/Optimizer.hpp"
+#include "Optimizer/ControlParameter.hpp"
+#include "Optimizer/Optimizer.hpp"
 #include "Core/PWAParameter.hpp"
 #include "Optimizer/Geneva/GArgumentParser.hpp"
 

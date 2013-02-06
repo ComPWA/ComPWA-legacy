@@ -25,9 +25,9 @@ project :
 	<linkflags>$(BOOSTLIBS)
 	;
 
-lib AmpSum : 
+lib AmplitudeSum : 
         [ glob *.cpp : *Test.cpp ] 
         $(TOP)/Core//ComPWA
         ;
 
-install dist : AmpSum : <location>$(TOP)/lib ;
+install dist : AmplitudeSum : <location>$(TOP)/lib ;

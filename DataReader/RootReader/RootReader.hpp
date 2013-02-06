@@ -15,7 +15,7 @@
 #include <utility>
 
 //PWA-Headers
-#include "Core/Data.hpp"
+#include "DataReader/Data.hpp"
 #include "Core/PWAEvent.hpp"
 
 //Root-Headers

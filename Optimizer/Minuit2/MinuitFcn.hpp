@@ -13,7 +13,7 @@
 //#include <boost/shared_ptr.hpp>
 //#include <cassert>
 #include "Minuit2/FCNBase.h"
-#include "Core/ControlParameter.hpp"
+#include "Optimizer/ControlParameter.hpp"
 #include "Core/PWAParameter.hpp"
 
 class ControlParameter;

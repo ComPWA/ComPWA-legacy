@@ -1,14 +1,13 @@
-########### Data Input Jamfile #############
+########### DataReader Jamfile #############
 path-constant DATAREADER : . ;
 
-# Build DataReader Core
+# libDataReader.so will consist of these packages:
+build-project RootReader ;
 
-# Configure the used packages here:
-build-project RootReader ; 
-
-# Combine DataReader libs
+# Build libDataReader.so
 lib DataReader : 
+        [ glob *.cpp ]
         $(DATAREADER)/RootReader//RootReader
         ;
 
-install dist2 : DataReader : <location>$(TOP)/lib ;
+install dist : DataReader : <location>$(TOP)/lib ;

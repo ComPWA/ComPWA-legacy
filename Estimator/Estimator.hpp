@@ -15,7 +15,7 @@
 #include <vector>
 #include <memory>
 
-#include "Core/ControlParameter.hpp"
+#include "Optimizer/ControlParameter.hpp"
 #include "Core/PWAParameter.hpp"
 
 class Estimator : public ControlParameter

@@ -22,7 +22,7 @@
 #include "RooFitResult.h"
 #include "RooComplex.h"
 
-#include "Core/Amplitude.hpp"
+#include "Physics/Amplitude.hpp"
 #include "Core/PWAParameter.hpp"
 #include "Core/PWAGenericPar.hpp"
 

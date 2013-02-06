@@ -72,7 +72,7 @@
 #include <geneva/GParameterSet.hpp>
 
 // ComPWA header files go here
-#include "Core/ControlParameter.hpp"
+#include "Optimizer/ControlParameter.hpp"
 #include "Core/PWAParameter.hpp"
 #include "Core/PWAGenericPar.hpp"
 
