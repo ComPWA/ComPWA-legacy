@@ -26,6 +26,7 @@ sub createTopLevelJamfile {
         "\n" .
         "# Build lib$_[0].so\n" .
         "lib $_[0] : \n" .
+        "        [ glob *.cpp ]\n" .
         $dependency .
         "        ;\n" .
         "\n" .
