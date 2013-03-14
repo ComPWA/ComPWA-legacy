@@ -26,8 +26,8 @@
 
 // Physics Interface header files go here
 #include "Physics/AmplitudeSum/AmpSumIntensity.hpp"
-#include "Core/PWAParameter.hpp"
-#include "Core/PWAGenericPar.hpp"
+#include "Core/Parameter.hpp"
+#include "Core/ParameterList.hpp"
 
 using namespace std;
 
@@ -52,8 +52,8 @@ int main(int argc, char **argv){
 
   //Simple Breit-Wigner Physics-Module setup
   shared_ptr<AmpSumIntensity> testBW(new AmpSumIntensity(M, Br, m1, m2, m3));
-  vector<shared_ptr<PWAParameter> > minPar;
-  minPar.push_back(shared_ptr<PWAGenericPar<double> >(new PWAGenericPar<double>(1.5,0.5,2.5,0.1)));
+  ParameterList minPar;
+  minPar.AddParameter(DoubleParameter(1.5,0.5,2.5,0.1));
 
   //Output File setup
   TFile output("test/3Part-4vecs.root","recreate");

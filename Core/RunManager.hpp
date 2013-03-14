@@ -16,7 +16,7 @@
 #include "Estimator/Estimator.hpp"
 #include "Physics/Amplitude.hpp"
 #include "Optimizer/Optimizer.hpp"
-#include "Core/PWAParameter.hpp"
+#include "Core/ParameterList.hpp"
 
 class RunManager
 {
@@ -28,7 +28,7 @@ public:
 
   virtual ~RunManager();
 
-  virtual bool startFit(std::vector<std::shared_ptr<PWAParameter> >& );
+  virtual bool startFit(ParameterList& );
 
 protected:
   std::shared_ptr<Data> pData_; /*!< Pointer to Data-Module */

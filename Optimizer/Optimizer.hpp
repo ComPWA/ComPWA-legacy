@@ -14,7 +14,7 @@
 #include <vector>
 #include <memory>
 
-#include "Core/PWAParameter.hpp"
+#include "Core/ParameterList.hpp"
 
 class Optimizer
 {
@@ -29,7 +29,7 @@ public:
 	{ /* nothing */	}
 
   // TODO: template <class T> or map?
-  virtual const double exec(std::vector<std::shared_ptr<PWAParameter> >& par) =0;
+  virtual const double exec(ParameterList& par) =0;
  
 };
 

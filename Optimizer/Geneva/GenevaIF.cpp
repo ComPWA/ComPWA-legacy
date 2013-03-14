@@ -5,7 +5,8 @@
 #include <memory>
 #include "Optimizer/Geneva/GenevaIF.hpp"
 #include "Optimizer/Geneva/GStartIndividual.hpp"
-#include "Core/PWAParameter.hpp"
+#include "Core/ParameterList.hpp"
+#include "Core/Parameter.hpp"
 
 using namespace Gem::Geneva;
 using namespace Gem::Courtier;
@@ -35,15 +36,15 @@ GenevaIF::~GenevaIF()
   //delete _myFcn;
 }
 
-const double GenevaIF::exec(std::vector<std::shared_ptr<PWAParameter> >& par){
+const double GenevaIF::exec(ParameterList& par){
   // create par arrays
-  unsigned int NPar = par.size();
+  unsigned int NPar = par.GetNDouble(); //just doubles up to now, TODO
   double val[NPar], min[NPar], max[NPar], err[NPar];
   for(unsigned int i=0; i<NPar; i++){
-      val[i] = par[i]->GetValue();
-      min[i] = par[i]->GetMinValue();
-      max[i] = par[i]->GetMaxValue();
-      err[i] = par[i]->GetError();
+      val[i] = par.GetDoubleParameter(i).GetValue();
+      min[i] = par.GetDoubleParameter(i).GetMinValue();
+      max[i] = par.GetDoubleParameter(i).GetMaxValue();
+      err[i] = par.GetDoubleParameter(i).GetError();
   }
 
   // Random numbers are our most valuable good. Set the number of threads
@@ -148,12 +149,12 @@ const double GenevaIF::exec(std::vector<std::shared_ptr<PWAParameter> >& par){
 
   boost::shared_ptr<GStartIndividual> bestIndividual_ptr=pop_ptr->getBestIndividual<GStartIndividual>();
 
-  std::vector<std::shared_ptr<PWAParameter> > resultPar;
+  ParameterList resultPar;
   bestIndividual_ptr->getPar(resultPar);
 
   //par = resultPar; Geneva ignores bounds and errors!
-  for(unsigned int i=0; i<par.size(); i++){  //TODO: better way, no cast or check type
-    par[i]->SetValue(resultPar[i]->GetValue());
+  for(unsigned int i=0; i<par.GetNDouble(); i++){  //TODO: better way, no cast or check type
+    par.GetDoubleParameter(i).SetValue(resultPar.GetDoubleParameter(i).GetValue());
   }
 
   return _myData->controlParameter(resultPar);// bestIndividual_ptr->fitnessCalculation();

@@ -89,13 +89,13 @@ public:
   virtual ~ParameterList();
 
   //! Getter for number of parameter
-  virtual const inline int GetNParameter() const {return (vDoublePar_.size()+vIntPar_.size()+vBoolPar_.size());}
+  virtual const inline unsigned int GetNParameter() const {return (vDoublePar_.size()+vIntPar_.size()+vBoolPar_.size());}
   //! Getter for number of double parameter
-  virtual const inline int GetNDouble() const {return vDoublePar_.size();}
+  virtual const inline unsigned int GetNDouble() const {return vDoublePar_.size();}
   //! Getter for number of integer parameter
-  virtual const inline int GetNInteger() const {return vIntPar_.size();}
+  virtual const inline unsigned int GetNInteger() const {return vIntPar_.size();}
   //! Getter for number of boolean parameter
-  virtual const inline int GetNBool() const {return vBoolPar_.size();}
+  virtual const inline unsigned int GetNBool() const {return vBoolPar_.size();}
 
   //! Getter for floating point parameter
   /*!
@@ -103,7 +103,7 @@ public:
    * \param i input number of parameter to load
    * \return par output container for loaded parameter
   */
-  virtual const DoubleParameter GetDoubleParameter(const unsigned int i) const ;
+  virtual DoubleParameter& GetDoubleParameter(const unsigned int i) ;
 
   //! Getter for integer parameter
   /*!
@@ -111,7 +111,7 @@ public:
    * \param i input number of parameter to load
    * \return par output container for loaded parameter
   */
-  virtual const IntegerParameter GetIntegerParameter(const unsigned int i) const ;
+  virtual IntegerParameter& GetIntegerParameter(const unsigned int i) ;
 
   //! Getter for boolean parameter
   /*!
@@ -119,7 +119,7 @@ public:
    * \param i input number of parameter to load
    * \return par output container for loaded parameter
   */
-  virtual const BoolParameter GetBoolParameter(const unsigned int i) const ;
+  virtual BoolParameter& GetBoolParameter(const unsigned int i) ;
 
   //! Getter for parameter value
   /*!
@@ -159,21 +159,21 @@ public:
    * Adds a floating point parameter to the list
    * \param par input parameter
   */
-  virtual void AddParameter(DoubleParameter& par);
+  virtual void AddParameter(DoubleParameter par);
 
   //! Add integer parameter
   /*!
    * Adds an integer parameter to the list
    * \param par input parameter
   */
-  virtual void AddParameter(IntegerParameter& par);
+  virtual void AddParameter(IntegerParameter par);
 
   //! Add boolean parameter
   /*!
    * Adds an boolean parameter to the list
    * \param par input parameter
   */
-  virtual void AddParameter(BoolParameter& par);
+  virtual void AddParameter(BoolParameter par);
 
   //! A public function returning a string with parameter information
   /*!

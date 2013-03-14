@@ -16,7 +16,7 @@
 #include <memory>
 
 #include "Optimizer/ControlParameter.hpp"
-#include "Core/PWAParameter.hpp"
+#include "Core/ParameterList.hpp"
 
 class Estimator : public ControlParameter
 {
@@ -30,7 +30,7 @@ public:
   /* nothing */
   }
 
-  virtual double controlParameter(std::vector<std::shared_ptr<PWAParameter> >& minPar) = 0;
+  virtual double controlParameter(ParameterList& minPar) = 0;
 
 };
 

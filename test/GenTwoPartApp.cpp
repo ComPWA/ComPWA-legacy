@@ -26,8 +26,8 @@
 
 // Physics Interface header files go here
 #include "Physics/BreitWigner/BreitWigner.hpp"
-#include "Core/PWAParameter.hpp"
-#include "Core/PWAGenericPar.hpp"
+#include "Core/Parameter.hpp"
+#include "Core/ParameterList.hpp"
 
 using namespace std;
 
@@ -49,9 +49,9 @@ int main(int argc, char **argv){
 
   //Simple Breit-Wigner Physics-Module setup
   shared_ptr<BreitWigner> testBW(new BreitWigner(0.,5.));
-  vector<shared_ptr<PWAParameter> > minPar;
-  minPar.push_back(shared_ptr<PWAGenericPar<double> >(new PWAGenericPar<double>(1.5,0.5,2.5,0.1)));
-  minPar.push_back(shared_ptr<PWAGenericPar<double> >(new PWAGenericPar<double>(0.3,0.1,0.2,0.01)));
+  ParameterList minPar;
+  minPar.AddParameter(DoubleParameter(1.5,0.5,2.5,0.1));
+  minPar.AddParameter(DoubleParameter(0.3,0.1,0.2,0.01));
 
   //Output File setup
   TFile output("test/2Part-4vecs.root","recreate");

@@ -11,7 +11,7 @@
 #include <vector>
 #include <memory>
 #include "Physics/Amplitude.hpp"
-
+#include "Core/ParameterList.hpp"
 
 class BreitWigner : public Amplitude {
 
@@ -20,11 +20,11 @@ public:
   BreitWigner(const double min, const double max);
 
   //For normalization
-  virtual const double integral(std::vector<std::shared_ptr<PWAParameter> >& par);
+  virtual const double integral(ParameterList& par);
   virtual const double drawInt(double *x, double *p); //For easy usage in a root TF1
   virtual const double intensity(double x, double M, double T);
-  virtual const double intensity(std::vector<double> x, std::vector<std::shared_ptr<PWAParameter> >& par);
-  virtual const bool fillStartParVec(std::vector<std::shared_ptr<PWAParameter> >& outPar);
+  virtual const double intensity(std::vector<double> x, ParameterList& par);
+  virtual const bool fillStartParVec(ParameterList& outPar);
 
   /** Destructor */
   virtual ~BreitWigner();

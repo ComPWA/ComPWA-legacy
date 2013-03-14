@@ -15,7 +15,7 @@
 
 #include "Optimizer/ControlParameter.hpp"
 #include "Optimizer/Optimizer.hpp"
-#include "Core/PWAParameter.hpp"
+#include "Core/ParameterList.hpp"
 #include "Optimizer/Minuit2/MinuitFcn.hpp"
 
 using namespace ROOT::Minuit2;
@@ -25,7 +25,7 @@ class MinuitIF : public Optimizer {
 public:
   /// Default Constructor (0x0)
   MinuitIF(std::shared_ptr<ControlParameter> theData);
-  virtual const double exec(std::vector<std::shared_ptr<PWAParameter> >& par);
+  virtual const double exec(ParameterList& par);
 
   /** Destructor */
   virtual ~MinuitIF();

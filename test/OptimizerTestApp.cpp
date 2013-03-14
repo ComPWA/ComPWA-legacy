@@ -26,8 +26,8 @@
 // Minimizer Interface header files go here
 #include "Optimizer/Minuit2/MinuitIF.hpp"
 #include "Optimizer/Geneva/GenevaIF.hpp"
-#include "Core/PWAParameter.hpp"
-#include "Core/PWAGenericPar.hpp"
+#include "Core/ParameterList.hpp"
+#include "Core/Parameter.hpp"
 
 // The toy-data to fit to
 #include "test/PolyFit.hpp"
@@ -55,11 +55,11 @@ int main(int argc, char **argv){
    return 0;
   }
 
-  std::vector<std::shared_ptr<PWAParameter> > par;
-  par.push_back(std::shared_ptr<PWAParameter>(new PWAGenericPar<double>(-11,-20,0,3)));
-  par.push_back(std::shared_ptr<PWAParameter>(new PWAGenericPar<double>(9.8,5,15,2)));
-  par.push_back(std::shared_ptr<PWAParameter>(new PWAGenericPar<double>(1.1,0.5,1.5,0.3)));
-  par.push_back(std::shared_ptr<PWAParameter>(new PWAGenericPar<double>(-0.008,-0.02,0,0.005)));
+  ParameterList par;
+  par.AddParameter(DoubleParameter(-11,-20,0,3));
+  par.AddParameter(DoubleParameter(9.8,5,15,2));
+  par.AddParameter(DoubleParameter(1.1,0.5,1.5,0.3));
+  par.AddParameter(DoubleParameter(-0.008,-0.02,0,0.005));
   // Loop over minimizers (at the moment this means: Geneva, MinuitIF or Geneva then MinuitIF)
   for(unsigned int Nmin=0; Nmin<myMinimizerList.size(); Nmin++){
     // Pointer to one ot the used minimizers
@@ -68,12 +68,12 @@ int main(int argc, char **argv){
     double genResult = minimizer->exec(par);
 
     std::cout << "Minimizer " << Nmin << "\t final par :\t" << genResult << std::endl;
-    for(unsigned int i=0; i<par.size(); i++)
-      std::cout << "final par "<< i << ":\t" << *(par[i]) << std::endl;
+    for(unsigned int i=0; i<par.GetNDouble(); i++)
+      std::cout << "final par "<< i << ":\t" << par.GetParameterValue(i) << std::endl;
     std::cout << "Done ..." << std::endl << std::endl;
   }
 
   // Plot results
-  myFit->drawGraph(par[0]->GetValue(),par[1]->GetValue(),par[2]->GetValue(),par[3]->GetValue());
+  myFit->drawGraph(par.GetParameterValue(0),par.GetParameterValue(1),par.GetParameterValue(2),par.GetParameterValue(3));
   return 0;
 }

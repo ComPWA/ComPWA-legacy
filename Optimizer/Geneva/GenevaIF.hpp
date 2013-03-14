@@ -15,7 +15,7 @@
 //#include <boost/shared_ptr.hpp>
 #include "Optimizer/ControlParameter.hpp"
 #include "Optimizer/Optimizer.hpp"
-#include "Core/PWAParameter.hpp"
+#include "Core/ParameterList.hpp"
 #include "Optimizer/Geneva/GArgumentParser.hpp"
 
 #include <boost/program_options.hpp>
@@ -38,7 +38,7 @@ class GenevaIF : public Optimizer {
 public:
   /// Default Constructor (0x0)
   GenevaIF(std::shared_ptr<ControlParameter> theData, std::string inConfigFile="test/GStartProject.cfg", boost::uint16_t inparallelizationMode=1, bool inserverMode=false, std::string inip="localhost", unsigned short inport=10000, Gem::Common::serializationMode inserMode=Gem::Common::SERIALIZATIONMODE_TEXT);
-  virtual const double exec(std::vector<std::shared_ptr<PWAParameter> >& par) ;
+  virtual const double exec(ParameterList& par) ;
 
   /** Destructor */
   virtual ~GenevaIF();

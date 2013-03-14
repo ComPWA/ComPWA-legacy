@@ -21,8 +21,8 @@
 #include "Estimator/MinLogLH/MinLogLH.hpp"
 #include "Estimator/ChiOneD/ChiOneD.hpp"
 #include "Core/PWAParticle.hpp"
-#include "Core/PWAParameter.hpp"
-#include "Core/PWAGenericPar.hpp"
+#include "Core/Parameter.hpp"
+#include "Core/ParameterList.hpp"
 
 using namespace std;
 
@@ -37,40 +37,40 @@ int main(int argc, char **argv){
   shared_ptr<BreitWigner> testBW(new BreitWigner(0.,5.));
 
   shared_ptr<MinLogLH> testEsti(new MinLogLH(testBW, myReader));
-  vector<shared_ptr<PWAParameter> > minPar;
+  ParameterList minPar;
   testBW->fillStartParVec(minPar);
   double result=0;
   result = testEsti->controlParameter(minPar);
   cout << "1dim Fit optimal Likelihood: " << result << endl;
 
-  minPar[0]->SetValue(1.7);
-  minPar[1]->SetValue(0.3);
+  minPar.SetParameterValue(0,1.7);
+  minPar.SetParameterValue(1,0.3);
   result = testEsti->controlParameter(minPar);
   cout << "1.7 0.3: " << result << endl;
 
-  minPar[0]->SetValue(1.3);
-  minPar[1]->SetValue(0.3);
+  minPar.SetParameterValue(0,1.3);
+  minPar.SetParameterValue(1,0.3);
   result = testEsti->controlParameter(minPar);
   cout << "1.3 0.3: " << result << endl;
 
-  minPar[0]->SetValue(1.5);
-  minPar[1]->SetValue(0.2);
+  minPar.SetParameterValue(0,1.5);
+  minPar.SetParameterValue(1,0.2);
   result = testEsti->controlParameter(minPar);
   cout << "1.5 0.2: " << result << endl;
 
-  minPar[0]->SetValue(1.5);
-  minPar[1]->SetValue(0.4);
+  minPar.SetParameterValue(0,1.5);
+  minPar.SetParameterValue(1,0.4);
   result = testEsti->controlParameter(minPar);
   cout << "1.5 0.4:  " << result << endl;
 
-  minPar[0]->SetValue(1.5);
-  minPar[1]->SetValue(0.01);
+  minPar.SetParameterValue(0,1.5);
+  minPar.SetParameterValue(1,0.01);
   result = testEsti->controlParameter(minPar);
   cout << "1.5 0.01:  " << result << endl;
 
   shared_ptr<ChiOneD> testEsti2(new ChiOneD(testBW, myReader));
-  minPar[0]->SetValue(1.5);
-  minPar[1]->SetValue(0.3);
+  minPar.SetParameterValue(0,1.5);
+  minPar.SetParameterValue(1,0.3);
   result = testEsti2->controlParameter(minPar);
   cout << "1dim Fit optimal Chi: " << result << endl;
 

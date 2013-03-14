@@ -16,8 +16,8 @@
 
 // Physics Interface header files go here
 #include "Physics/BreitWigner/BreitWigner.hpp"
-#include "Core/PWAParameter.hpp"
-#include "Core/PWAGenericPar.hpp"
+#include "Core/Parameter.hpp"
+#include "Core/ParameterList.hpp"
 
 using namespace std;
 
@@ -30,7 +30,7 @@ int main(int argc, char **argv){
   shared_ptr<Amplitude> testBW(new BreitWigner(0.,5.));
   vector<double> x;
   x.push_back(1.5);
-  vector<shared_ptr<PWAParameter> > par;
+  ParameterList par;
   //par.push_back(shared_ptr<PWAParameter>(new PWAGenericPar<double>(1.5, 0.5, 2.5, 0.1)));
  // par.push_back(shared_ptr<PWAParameter>(new PWAGenericPar<double>(0.3, 0.1, 0.5, 0.05)));
   testBW->fillStartParVec(par);

@@ -12,7 +12,7 @@
 #include <vector>
 #include <memory>
 
-#include "Core/PWAParameter.hpp"
+#include "Core/ParameterList.hpp"
 
 class ControlParameter{
 
@@ -23,7 +23,7 @@ public:
 
   virtual ~ControlParameter(){ /* nothing */	}
 
-  virtual double controlParameter(std::vector<std::shared_ptr<PWAParameter> >& minPar) =0;
+  virtual double controlParameter(ParameterList& minPar) =0;
  
 };
 

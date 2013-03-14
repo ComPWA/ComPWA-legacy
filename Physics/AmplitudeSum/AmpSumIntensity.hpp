@@ -23,8 +23,8 @@
 #include "RooComplex.h"
 
 #include "Physics/Amplitude.hpp"
-#include "Core/PWAParameter.hpp"
-#include "Core/PWAGenericPar.hpp"
+#include "Core/Parameter.hpp"
+#include "Core/ParameterList.hpp"
 
 #include "Physics/AmplitudeSum/AmpRelBreitWignerRes.hpp"
 #include "Physics/AmplitudeSum/AmpGausRes.hpp"
@@ -128,7 +128,7 @@ public:
     totAmp23.addBW (inter12_0, ri0, phii0, angd12_i);
   }
 
-  virtual const double integral(std::vector<std::shared_ptr<PWAParameter> >& par){
+  virtual const double integral(ParameterList& par){
     double integral = 0;
     /*unsigned int nSteps = 1000000;   TODO
     double step = (max_-min_)/(double)nSteps;
@@ -142,7 +142,7 @@ public:
     return integral;
   }
 
-  virtual const double intensity(std::vector<double> x, std::vector<std::shared_ptr<PWAParameter> >& par){
+  virtual const double intensity(std::vector<double> x, ParameterList& par){
     ma.setVal(sqrt(x[0])); mb.setVal(sqrt(x[1])); mc.setVal(sqrt(x[2]));
     double AMPpdf = totAmp23.evaluate();
     if(AMPpdf!=AMPpdf){
@@ -151,10 +151,12 @@ public:
     }
     return AMPpdf;
   }
-  virtual const bool fillStartParVec(std::vector<std::shared_ptr<PWAParameter> >& outPar){
-    if(outPar.size())
-      return false; //already filled
-    outPar.push_back(shared_ptr<PWAParameter>(new PWAGenericPar<double>(1.5, 0.5, 2.5, 0.1)));
+
+  virtual const bool fillStartParVec(ParameterList& outPar){
+    if(outPar.GetNParameter())
+      return false; //already filled, TODO: exception?
+
+    outPar.AddParameter(DoubleParameter(1.5, 0.5, 2.5, 0.1));
     return true;
   }
 

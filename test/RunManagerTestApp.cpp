@@ -22,7 +22,8 @@
 #include "Physics/BreitWigner/BreitWigner.hpp"
 #include "Estimator/MinLogLH/MinLogLH.hpp"
 #include "Optimizer/Minuit2/MinuitIF.hpp"
-#include "Core/PWAParameter.hpp"
+#include "Core/Parameter.hpp"
+#include "Core/ParameterList.hpp"
 #include "Core/PWAGenericPar.hpp"
 #include "Core/RunManager.hpp"
 
@@ -43,16 +44,16 @@ int main(int argc, char **argv){
   std::shared_ptr<RunManager> run(new RunManager(myReader, testEsti, testBW, opti));
 
   // Initiate parameters
-  std::vector<std::shared_ptr<PWAParameter> > par;
-  par.push_back(std::shared_ptr<PWAParameter>(new PWAGenericPar<double>(1.7,0.5,2.5,0.1)));
-  par.push_back(std::shared_ptr<PWAParameter>(new PWAGenericPar<double>(0.2,0.1,0.2,0.01)));
+  ParameterList par;
+  par.AddParameter(DoubleParameter(1.7,0.5,2.5,0.1));
+  par.AddParameter(DoubleParameter(0.2,0.1,0.2,0.01));
 
   std::cout << "Start Fit" << std::endl;
   run->startFit(par);
 
   std::cout << "Minimized final par :\t" << std::endl;
-  std::cout << "final M:\t" << *(par[0]) << std::endl;
-  std::cout << "final T:\t" << *(par[1]) << std::endl;
+  std::cout << "final M:\t" << par.GetParameterValue(0) << std::endl;
+  std::cout << "final T:\t" << par.GetParameterValue(1) << std::endl;
 
   return 0;
 }

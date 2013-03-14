@@ -47,21 +47,21 @@ int main(int argc, char **argv){
   std::shared_ptr<Optimizer> opti(new MinuitIF(testEsti));
 
   // Initiate parameters
-  std::vector<std::shared_ptr<PWAParameter> > par;
+  ParameterList par;
   testBW->fillStartParVec(par);
-  par[0]->SetValue(1.7);
-  par[1]->SetValue(0.2);
+  par.GetDoubleParameter(0).SetValue(1.7);
+  par.GetDoubleParameter(0).SetValue(0.2);
 
   std::cout << "Inital par :\t" << std::endl;
-  std::cout << "inital M:\t" << *(par[0]) << std::endl;
-  std::cout << "inital T:\t" << *(par[1]) << std::endl;
+  std::cout << "inital M:\t" << par.GetDoubleParameter(0).GetValue() << std::endl;
+  std::cout << "inital T:\t" << par.GetDoubleParameter(1).GetValue() << std::endl;
 
   std::cout << "Start Fit" << std::endl;
   double genResult = opti->exec(par);
 
   std::cout << "Minimized final par :\t" << genResult << std::endl;
-  std::cout << "final M:\t" << *(par[0]) << std::endl;
-  std::cout << "final T:\t" << *(par[1]) << std::endl;
+  std::cout << "final M:\t" << par.GetDoubleParameter(0).GetValue() << std::endl;
+  std::cout << "final T:\t" << par.GetDoubleParameter(1).GetValue() << std::endl;
 
   //Create some output
   TH1D* bw = new TH1D("bw","inv. mass of 2 particles",1000,0.,2.4);
@@ -87,8 +87,8 @@ int main(int argc, char **argv){
 
   //BreitWigner *drawBW = (BreitWigner*) (&(*testBW));
   TF1* fitresult = new TF1("fitresult", ((BreitWigner*)testBW.get()), &BreitWigner::drawInt,0.,2.4,3,"PIFBW","intensity");
-  fitresult->FixParameter(0, par[0]->GetValue());
-  fitresult->FixParameter(1, par[1]->GetValue());
+  fitresult->FixParameter(0, par.GetDoubleParameter(0).GetValue());
+  fitresult->FixParameter(1, par.GetDoubleParameter(1).GetValue());
   //fitresult->FixParameter(2, par[2]->GetValue());
   bw->Fit(fitresult);
 

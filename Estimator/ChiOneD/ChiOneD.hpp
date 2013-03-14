@@ -18,7 +18,7 @@
 #include "Physics/Amplitude.hpp"
 #include "DataReader/Data.hpp"
 #include "Core/PWAEvent.hpp"
-#include "Core/PWAParameter.hpp"
+#include "Core/ParameterList.hpp"
 
 class ChiOneD : public Estimator {
 
@@ -26,7 +26,7 @@ public:
   /// Default Constructor (0x0)
   ChiOneD(std::shared_ptr<Amplitude>, std::shared_ptr<Data>);
 
-  virtual double controlParameter(std::vector<std::shared_ptr<PWAParameter> >& minPar);
+  virtual double controlParameter(ParameterList& minPar);
 
   /** Destructor */
   virtual ~ChiOneD();

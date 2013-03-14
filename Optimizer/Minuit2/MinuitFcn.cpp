@@ -1,7 +1,7 @@
 #include "Optimizer/Minuit2/MinuitFcn.hpp"
 #include "Optimizer/ControlParameter.hpp"
-#include "Core/PWAParameter.hpp"
-#include "Core/PWAGenericPar.hpp"
+#include "Core/ParameterList.hpp"
+#include "Core/Parameter.hpp"
 //#include "ErrLogger/ErrLogger.hh"
 #include <cassert>
 #include <memory>
@@ -23,9 +23,9 @@ MinuitFcn::~MinuitFcn(){
 }
 
 double MinuitFcn::operator()(const std::vector<double>& x) const{
-  std::vector<std::shared_ptr<PWAParameter> > par;
+  ParameterList par;
   for(unsigned int i=0; i<x.size(); i++)
-    par.push_back(std::shared_ptr<PWAGenericPar<double> >(new PWAGenericPar<double>(x[i])));
+    par.AddParameter(DoubleParameter(x[i]));
   double result=_myDataPtr->controlParameter(par);
   //DebugMsg << "current minimized value:\t"<< result << endmsg;
   std::cout << "current minimized value:\t"<< result << std::endl;

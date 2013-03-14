@@ -15,7 +15,7 @@
 #include <vector>
 #include <memory>
 
-#include "Core/PWAParameter.hpp"
+#include "Core/ParameterList.hpp"
 
 class Amplitude
 {
@@ -29,11 +29,11 @@ public:
   virtual ~Amplitude()
 	{ /* nothing */	}
 
-  virtual const double integral(std::vector<std::shared_ptr<PWAParameter> >& par) =0;
+  virtual const double integral(ParameterList& par) =0;
 
-  virtual const double intensity(std::vector<double> x, std::vector<std::shared_ptr<PWAParameter> >& par) =0;
+  virtual const double intensity(std::vector<double> x, ParameterList& par) =0;
 
-  virtual const bool fillStartParVec(std::vector<std::shared_ptr<PWAParameter> >& outPar) =0;
+  virtual const bool fillStartParVec(ParameterList& outPar) =0;
 
 
 };

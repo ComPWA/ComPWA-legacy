@@ -9,7 +9,8 @@
 #include "Minuit2/MnMinos.h"
 #include "Minuit2/MnStrategy.h"
 #include "Optimizer/Minuit2/MinuitIF.hpp"
-#include "Core/PWAParameter.hpp"
+#include "Core/ParameterList.hpp"
+#include "Core/Parameter.hpp"
 
 using namespace ROOT::Minuit2;
 
@@ -22,23 +23,26 @@ MinuitIF::~MinuitIF(){
   //delete _myFcn;
 }
 
-const double MinuitIF::exec(std::vector<std::shared_ptr<PWAParameter> >& par){
+const double MinuitIF::exec(ParameterList& par){
   std::string s;
   std::stringstream out;
 
   MnUserParameters upar;
-  for(unsigned int i=0; i<par.size(); ++i){
+  for(unsigned int i=0; i<par.GetNDouble(); ++i){ //only doubles for minuit
     out.str("");
     out << i;
     s = out.str();
 
     //use as much information as possible: (just bounds but no error not supported by minuit)
-    if( par[i]->UseBounds() && par[i]->HasError() )
-      upar.Add(s, par[i]->GetValue(), par[i]->GetError(), par[i]->GetMaxValue(), par[i]->GetMinValue());
-    else if( par[i]->HasError() )
-      upar.Add(s, par[i]->GetValue(), par[i]->GetError());
+    //try{
+      DoubleParameter& actPat = par.GetDoubleParameter(i);
+    //}
+    if( actPat.UseBounds() && actPat.HasError() )
+      upar.Add(s, actPat.GetValue(), actPat.GetError(), actPat.GetMaxValue(), actPat.GetMinValue());
+    else if( actPat.HasError() )
+      upar.Add(s, actPat.GetValue(), actPat.GetError());
     else
-      upar.Add(s, par[i]->GetValue());
+      upar.Add(s, actPat.GetValue());
   }
 
   MnMigrad migrad(_myFcn, upar);
@@ -53,12 +57,13 @@ const double MinuitIF::exec(std::vector<std::shared_ptr<PWAParameter> >& par){
  }
 
   //save minimzed values
-  for(unsigned int i=0; i<par.size(); ++i){
+  for(unsigned int i=0; i<par.GetNDouble(); ++i){
     out.str("");
     out << i;
     s = out.str();
-    par[i]->SetValue(minMin.UserState().Value(s));
-    par[i]->SetError(minMin.UserState().Error(s));
+    DoubleParameter& actPat = par.GetDoubleParameter(i);
+    actPat.SetValue(minMin.UserState().Value(s));
+    actPat.SetError(minMin.UserState().Error(s));
   }
 
   return minMin.Fval();

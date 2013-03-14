@@ -22,7 +22,7 @@
 //#include "qft++/topincludes/relativistic-quantum-mechanics.hh"
 
 #include "Optimizer/ControlParameter.hpp"
-#include "Core/PWAParameter.hpp"
+#include "Core/ParameterList.hpp"
 
 class TFile;
 class TGraph;
@@ -43,7 +43,7 @@ public:
   virtual ~PolyFit();
 
 
-  double controlParameter(std::vector<std::shared_ptr<PWAParameter> >& minPar);
+  double controlParameter(ParameterList& minPar);
   void drawGraph(double a, double b, double c, double d);
   // Getters:
  

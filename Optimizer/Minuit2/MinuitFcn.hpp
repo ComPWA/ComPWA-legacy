@@ -14,7 +14,7 @@
 //#include <cassert>
 #include "Minuit2/FCNBase.h"
 #include "Optimizer/ControlParameter.hpp"
-#include "Core/PWAParameter.hpp"
+#include "Core/ParameterList.hpp"
 
 class ControlParameter;
 

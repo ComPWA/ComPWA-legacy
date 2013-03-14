@@ -7,7 +7,7 @@
 #include "Estimator/MinLogLH/MinLogLH.hpp"
 #include "Core/PWAEvent.hpp"
 #include "Core/PWAParticle.hpp"
-#include "Core/PWAParameter.hpp"
+#include "Core/ParameterList.hpp"
 
 MinLogLH::MinLogLH(std::shared_ptr<Amplitude> inPIF, std::shared_ptr<Data> inDIF) : pPIF_(inPIF), pDIF_(inDIF){
 
@@ -17,7 +17,7 @@ MinLogLH::~MinLogLH(){
 
 }
 
-double MinLogLH::controlParameter(std::vector<std::shared_ptr<PWAParameter> >& minPar){
+double MinLogLH::controlParameter(ParameterList& minPar){
   unsigned int nEvents = pDIF_->getNEvents();
 
   double norm = pPIF_->integral(minPar);

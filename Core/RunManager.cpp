@@ -4,6 +4,7 @@
 #include "Estimator/Estimator.hpp"
 #include "Physics/Amplitude.hpp"
 #include "Optimizer/Optimizer.hpp"
+#include "Core/ParameterList.hpp"
 
 #include "Core/RunManager.hpp"
 
@@ -18,7 +19,7 @@ RunManager::~RunManager(){
   /* nothing */
 }
 
-bool RunManager::startFit(std::vector<std::shared_ptr<PWAParameter> >& inPar){
+bool RunManager::startFit(ParameterList& inPar){
   if( !valid_ )
     return false;
 

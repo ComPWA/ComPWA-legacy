@@ -35,26 +35,26 @@ ParameterList::~ParameterList() {
   /* nothing */
 }
 
-const DoubleParameter ParameterList::GetDoubleParameter(const unsigned int i) const {
+DoubleParameter& ParameterList::GetDoubleParameter(const unsigned int i) {
   if( !(i < vDoublePar_.size()) ){
       throw BadParameter("Double Parameter not found");
-      return 0;
+      //return 0;
   }
   return vDoublePar_.at(i);
 }
 
-const IntegerParameter ParameterList::GetIntegerParameter(const unsigned int i) const {
+IntegerParameter& ParameterList::GetIntegerParameter(const unsigned int i) {
   if( !(i < vIntPar_.size()) ){
       throw BadParameter("Integer Parameter not found");
-      return 0;
+      //return 0;
   }
   return vIntPar_.at(i);
 }
 
-const BoolParameter ParameterList::GetBoolParameter(const unsigned int i) const {
+BoolParameter& ParameterList::GetBoolParameter(const unsigned int i) {
   if( !(i < vBoolPar_.size()) ){
       throw BadParameter("Bool Parameter not found");
-      return 0;
+      //return 0;
   }
   return vBoolPar_.at(i);
 }
@@ -102,17 +102,17 @@ void ParameterList::SetParameterValue(const unsigned int i, const bool inVal) {
   return;
 }
 
-void ParameterList::AddParameter(DoubleParameter& par) {
+void ParameterList::AddParameter(DoubleParameter par) {
   vDoublePar_.push_back(par);
   make_str();
 }
 
-void ParameterList::AddParameter(IntegerParameter& par) {
+void ParameterList::AddParameter(IntegerParameter par) {
   vIntPar_.push_back(par);
   make_str();
 }
 
-void ParameterList::AddParameter(BoolParameter& par) {
+void ParameterList::AddParameter(BoolParameter par) {
   vBoolPar_.push_back(par);
   make_str();
 }
