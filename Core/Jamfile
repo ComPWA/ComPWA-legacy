@@ -20,3 +20,4 @@ install dist : ComPWA : <location>$(TOP)/lib ;
 using testing ;
 lib boost_unit_test_framework ;
 run ParameterTest.cpp ComPWA boost_unit_test_framework ;
+run ParameterListTest.cpp ComPWA boost_unit_test_framework ;

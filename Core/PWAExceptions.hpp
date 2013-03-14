@@ -47,15 +47,47 @@ protected:
 //!
 //! @brief   Config is not complete
 //------------------------------------------------------------------------------
-class BadConfig : public Exception {
+class BadConfig : public PWAException {
 public:
   BadConfig ( const std::string& error ) :
-    Exception(error)
+    PWAException(error)
   {}
   BadConfig ( const char *error ) :
-    Exception(error)
+    PWAException(error)
   {}
-  ~BadConfig () throw() {}
+  virtual ~BadConfig () throw() {}
+};
+
+//------------------------------------------------------------------------------
+//! @class   BadParameter
+//!
+//! @brief   Parameter not existing
+//------------------------------------------------------------------------------
+class BadParameter : public PWAException {
+public:
+  BadParameter ( const std::string& error ) :
+    PWAException(error)
+  {}
+  BadParameter ( const char *error ) :
+    PWAException(error)
+  {}
+  virtual ~BadParameter () throw() {}
+};
+
+//------------------------------------------------------------------------------
+//! @class   ParameterFixed
+//!
+//! @brief   Parameter cannot be changed
+//------------------------------------------------------------------------------
+class ParameterFixed : public PWAException {
+public:
+  ParameterFixed ( const std::string& error = "Parameter fixed" ) :
+    PWAException(error)
+  {}
+  ParameterFixed ( const char *error ) :
+    PWAException(error)
+  {}
+  virtual ~ParameterFixed () throw() {}
 };
 
 

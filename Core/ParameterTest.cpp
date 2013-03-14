@@ -1,29 +1,30 @@
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE Number
 #include <boost/test/unit_test.hpp>
-#include <Core/PWAGenericPar.hpp>
+#include <Core/Parameter.hpp>
+#include <Core/PWAExceptions.hpp>
 #include <memory>
 #include <vector>
 
-BOOST_AUTO_TEST_SUITE(GenericParSuite);
+BOOST_AUTO_TEST_SUITE(ParameterSuite);
 
 BOOST_AUTO_TEST_CASE(BoundsCheck)
 {
-  PWAGenericPar<int> parWrong(7,10,5,1);
+  IntegerParameter parWrong(7,10,5,1);
   BOOST_CHECK(!parWrong.HasBounds());
-  parWrong.SetTMaxValue(-1);
+  parWrong.SetMaxValue(-1);
   BOOST_CHECK(!parWrong.HasBounds());
-  parWrong.SetTMaxValue(6);
+  parWrong.SetMaxValue(6);
   BOOST_CHECK(!parWrong.HasBounds());
-  parWrong.SetTMinMax(10,5);
+  parWrong.SetMinMax(10,5);
   BOOST_CHECK(!parWrong.HasBounds());
-  parWrong.SetTMinMax(5,10);
+  parWrong.SetMinMax(5,10);
   BOOST_CHECK(parWrong.HasBounds());
 }
 
 BOOST_AUTO_TEST_CASE(SetGetCheck)
 {
-  PWAGenericPar<int> emptyInt;
+  IntegerParameter emptyInt;
   emptyInt.SetValue(7); emptyInt.SetMinMax(0,10); emptyInt.SetError(1);
   BOOST_CHECK_CLOSE(emptyInt.GetValue(), 7., 0.0001);
   BOOST_CHECK_CLOSE(emptyInt.GetMinValue(), 0., 0.0001);
@@ -31,17 +32,28 @@ BOOST_AUTO_TEST_CASE(SetGetCheck)
   BOOST_CHECK_CLOSE(emptyInt.GetError(), 1., 0.0001);
 }
 
+BOOST_AUTO_TEST_CASE(FixValueCheck)
+{
+  DoubleParameter emptyFloat;
+  emptyFloat.SetValue(7.); emptyFloat.SetMinMax(0.,10.); emptyFloat.SetError(1.);
+  BOOST_CHECK(!emptyFloat.IsFixed());
+  emptyFloat.SetParameterFixed();
+  BOOST_CHECK(emptyFloat.IsFixed());
+  BOOST_CHECK_THROW(emptyFloat.SetValue(8.), ParameterFixed);
+  BOOST_CHECK_CLOSE(emptyFloat.GetValue(), 7., 0.0001);
+}
+
 BOOST_AUTO_TEST_CASE(ConstructorCheck)
 {
-  PWAGenericPar<int> emptyInt;
-  PWAGenericPar<double> emptyFloat;
-  PWAGenericPar<int> parInt(2,0,5,1);
-  PWAGenericPar<int> parCopy(parInt);
-  PWAGenericPar<int> parWrong(7,10,5,1);
-  std::shared_ptr<PWAGenericPar<int> > pParInt(new PWAGenericPar<int>(3,0,5,1));
-  std::vector<PWAGenericPar<int> > vecParInt, vecParIntCopy;
+  IntegerParameter emptyInt;
+  DoubleParameter emptyFloat;
+  IntegerParameter parInt(2,0,5,1);
+  IntegerParameter parCopy(parInt);
+  IntegerParameter parWrong(7,10,5,1);
+  std::shared_ptr<IntegerParameter> pParInt(new IntegerParameter(3,0,5,1));
+  std::vector<DoubleParameter> vecParInt, vecParIntCopy;
   for(unsigned int par=0; par<10; par++)
-    vecParInt.push_back(PWAGenericPar<int>(par,0,10,1));
+    vecParInt.push_back(DoubleParameter(par,0,10,1));
   vecParIntCopy = vecParInt; //copy vector
 
   BOOST_CHECK_CLOSE(emptyInt.GetValue(), 0., 0.0001);
