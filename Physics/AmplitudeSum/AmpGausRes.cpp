@@ -35,6 +35,16 @@ AmpGausRes::AmpGausRes(const AmpGausRes& other, const char* newname) :
   initialise();
 }
 
+AmpGausRes::AmpGausRes(const AmpGausRes& other) :
+  AmpAbsDynamicalFunction(other.GetName(), other.GetTitle()),
+  _x("x", this, other._x),
+  _m0("m0", this, other._m0),
+  _resWidth("resWidth", this, other._resWidth),
+  _subSys(other._subSys)
+{
+  initialise();
+}
+
 AmpGausRes::~AmpGausRes() 
 {
 }
@@ -43,7 +53,7 @@ void AmpGausRes::initialise()
 {
 }   
 
-RooComplex AmpGausRes::evaluate() {
+RooComplex AmpGausRes::evaluate() const {
 
 
   double m0 = Double_t(_m0);

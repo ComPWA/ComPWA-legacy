@@ -13,6 +13,11 @@
 #include <string>
 #include <memory>
 
+// Boost header files go here
+#include <boost/foreach.hpp>
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/xml_parser.hpp>
+
 // Root header files go here
 #include "TMath.h"
 #include "TLorentzVector.h"
@@ -26,6 +31,7 @@
 
 // Physics Interface header files go here
 #include "Physics/AmplitudeSum/AmpSumIntensity.hpp"
+#include "Physics/AmplitudeSum/AmplitudeSetup.hpp"
 #include "Core/Parameter.hpp"
 #include "Core/ParameterList.hpp"
 
@@ -50,8 +56,22 @@ int main(int argc, char **argv){
   unsigned int i=0;
   TRandom3 rando;
 
+  //load resonances
+  AmplitudeSetup ini("test/JPSI_ypipi.xml");
+  cout << "loaded file " << ini.getFileName() << " with " << ini.getResonances().size() << " resonances:" << endl;
+  for(std::vector<Resonance>::iterator reso=ini.getResonances().begin(); reso!=ini.getResonances().end(); reso++){
+    cout << endl << "Resonance " << (*reso).m_name << endl;
+    cout << "Mass =  " << (*reso).m_mass << " with range " << (*reso).m_mass_min << " to " << (*reso).m_mass_max << endl;
+    cout << "Width = " << (*reso).m_width << " with range " << (*reso).m_width_min << " to " << (*reso).m_width_max << endl;
+    cout << "Spin =  " << (*reso).m_spin << " m = " << (*reso).m_m << " n = " << (*reso).m_n << endl;
+    cout << "Strength =  " << (*reso).m_strength << " Phase = " << (*reso).m_phase << endl;
+    cout << "Breakupmomentum =  " << (*reso).m_breakup_mom << endl;
+    cout << "DaughterA =  " << (*reso).m_daugtherA << " DaughterB = " << (*reso).m_daugtherB << endl;
+  }
+  cout << endl << endl;
+
   //Simple Breit-Wigner Physics-Module setup
-  shared_ptr<AmpSumIntensity> testBW(new AmpSumIntensity(M, Br, m1, m2, m3));
+  AmpSumIntensity testBW(M, Br, m1, m2, m3, ini);
   ParameterList minPar;
   minPar.AddParameter(DoubleParameter(1.5,0.5,2.5,0.1));
 
@@ -103,7 +123,7 @@ int main(int argc, char **argv){
       x.push_back(m23sq);
       x.push_back(m13sq);
       x.push_back(m12sq);
-      double AMPpdf = testBW->intensity(x, minPar);
+      double AMPpdf = testBW.intensity(x, minPar);
 
       double test = rando.Uniform(0,10);
 

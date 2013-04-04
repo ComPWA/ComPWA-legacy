@@ -21,11 +21,15 @@
 #include "RooDataHist.h"
 #include "RooFitResult.h"
 #include "RooComplex.h"
+#include "RooAbsReal.h"
+#include "RooAbsArg.h"
+#include "RooRealProxy.h"
 
 #include "Physics/Amplitude.hpp"
 #include "Core/Parameter.hpp"
 #include "Core/ParameterList.hpp"
 
+#include "Physics/AmplitudeSum/AmplitudeSetup.hpp"
 #include "Physics/AmplitudeSum/AmpRelBreitWignerRes.hpp"
 #include "Physics/AmplitudeSum/AmpGausRes.hpp"
 #include "Physics/AmplitudeSum/AmpFlatteRes.hpp"
@@ -36,7 +40,8 @@ class AmpSumIntensity : public Amplitude {
 
 public:
   /// Default Constructor (0x0)
-  AmpSumIntensity(const double inM, const double inBr, const double in1, const double in2, const double in3)
+  AmpSumIntensity(const double inM, const double inBr, const double in1
+      ,const double in2, const double in3, AmplitudeSetup ini)
   : M(inM), Br(inBr), m1(in1), m2(in2), m3(in3),PI(3.14159),
     m23_sq_min((m2+m3)*(m2+m3)),
     m23_sq_max((M-m1)*(M-m1)),
@@ -50,82 +55,68 @@ public:
     ma("ma", "mass", m23_min, m23_max),
     mb("mb", "mass", m13_min, m13_max),
     mc("mc", "mass", m12_min, m12_max),
-    totAmp23("rbwAmp23", "totAmp"){
+    totAmp("relBWsumAmplitude", "totAmp"){
 
     //AmpSumOfAmplitudes totAmp23("rbwAmp23", "totAmp");
 
-    //Resonance Parameter
-    mr0 = RooRealVar("m_{f0(1710)}", "resMass", 1.5, 1.0, 2.0);
-    qr0 = RooRealVar("q0", "breakupMom", 1.0);
-    gr0 = RooRealVar("#Gamma_{f(1710)}", "resWidth", 0.05, 0., 2.) ;
-    rr0 = RooRealVar("r_{0}", "amplitude", 1.);
-    phir0 = RooRealVar("#phi_{0}", "phase", 2.*PI/3.);
 
-    mr1 = RooRealVar("m_{fJ(2220)}", "resMass", 2.1, 1.5, 2.9);
-    qr1 = RooRealVar("q1", "breakupMom", 1.0);
-    gr1 = RooRealVar("#Gamma_{f(2220)}", "resWidth", 0.1, 0., 2.) ;
-    rr1 = RooRealVar("r_{1}", "amplitude", 1);
-    phir1 = RooRealVar("#phi_{1}", "phase", PI);
+    //unsigned int numReso = ini.getResonances().size();
+    for(std::vector<Resonance>::iterator reso=ini.getResonances().begin(); reso!=ini.getResonances().end(); reso++){
+      Resonance tmp = (*reso);
+      //setup RooVars
+      mr.push_back( std::shared_ptr<RooRealVar> (new RooRealVar(("m_{"+tmp.m_name+"}").c_str(), "resMass", tmp.m_mass, tmp.m_mass_min, tmp.m_mass_max) ) );
+      qr.push_back( std::shared_ptr<RooRealVar> (new RooRealVar(("q_{"+tmp.m_name+"}").c_str(), "breakupMom", tmp.m_breakup_mom) ) );
+      gr.push_back( std::shared_ptr<RooRealVar> (new RooRealVar(("g_{"+tmp.m_name+"}").c_str(), "resWidth", tmp.m_width, tmp.m_width_min, tmp.m_width_max) ) );
+      rr.push_back( std::shared_ptr<RooRealVar> (new RooRealVar(("r_{"+tmp.m_name+"}").c_str(), "amplitude", tmp.m_strength) ) );
+      phir.push_back( std::shared_ptr<RooRealVar> (new RooRealVar(("phi_{"+tmp.m_name+"}").c_str(), "phase", tmp.m_phase) ) );
 
-    mr2 = RooRealVar("m_{fJ(1900)}", "resMass", 2.0, 1.5, 2.5);
-    qr2 = RooRealVar("q2", "breakupMom", 1.0);
-    gr2 = RooRealVar("#Gamma_{f(1900)}", "resWidth", 0.1, 0., 2.) ;
-    rr2 = RooRealVar("r_{2}", "amplitude", 1);
-    phir2 = RooRealVar("#phi_{2}", "phase", 2*PI);
+      aj.push_back( std::shared_ptr<RooRealVar> (new RooRealVar(("j_{"+tmp.m_name+"}").c_str(), "j", tmp.m_spin) ) );
+      am.push_back( std::shared_ptr<RooRealVar> (new RooRealVar(("m_{"+tmp.m_name+"}").c_str(), "m", tmp.m_m) ) );
+      an.push_back( std::shared_ptr<RooRealVar> (new RooRealVar(("n_{"+tmp.m_name+"}").c_str(), "n", tmp.m_n) ) );
 
-    mi0 = RooRealVar("m_{Hyp(1500)}", "resMass", 1., 0.8, 1.2);
-    qi0 = RooRealVar("qi", "breakupMom", 1.0);
-    gi0 = RooRealVar("#Gamma_{Hyp(1500)}", "resWidth", 0.05, 0., 8.) ;
-    ri0 = RooRealVar("r_{i}", "amplitude", 0.5);
-    phii0 = RooRealVar("#phi_{i}", "phase", 0);
+      //setup Dynamics and Angular Distribution
+      unsigned int last = mr.size()-1;
+      if(tmp.m_daugtherA==2 && tmp.m_daugtherB==3){
+        std::shared_ptr<AmpRelBreitWignerRes> tmpbw(new AmpRelBreitWignerRes(tmp.m_name.c_str(),
+            tmp.m_name.c_str(), ma, *mr[last], *gr[last], *qr[last], 1, tmp.m_spin) );
+        tmpbw->setDecayMasses(m2, m3);
+        rbw.push_back(tmpbw);
+        angd.push_back( std::shared_ptr<AmpWigner> (new AmpWigner(("a_{"+tmp.m_name+"}").c_str(), ("a_{"+tmp.m_name+"}").c_str(),
+            mc, ma, mb, 1, *aj[last], *am[last], *an[last]) ) );
+        totAmp.addBW(rbw.at(last), *rr.at(last), *phir.at(last), angd.at(last));
+      }else if(tmp.m_daugtherA==1 && tmp.m_daugtherB==3){
+        std::shared_ptr<AmpRelBreitWignerRes> tmpbw(new AmpRelBreitWignerRes(tmp.m_name.c_str(),
+            tmp.m_name.c_str(), mb, *mr[last], *gr[last], *qr[last], 2, tmp.m_spin) );
+        tmpbw->setDecayMasses(m1, m3);
+        rbw.push_back(tmpbw);
+        angd.push_back( std::shared_ptr<AmpWigner> (new AmpWigner(("a_{"+tmp.m_name+"}").c_str(), ("a_{"+tmp.m_name+"}").c_str(),
+            mc, ma, mb, 2, *aj[last], *am[last], *an[last]) ) );
+        totAmp.addBW(rbw.at(last), *rr.at(last), *phir.at(last), angd.at(last));
+      }else if(tmp.m_daugtherA==1 && tmp.m_daugtherB==2){
+        std::shared_ptr<AmpRelBreitWignerRes> tmpbw(new AmpRelBreitWignerRes(tmp.m_name.c_str(),
+            tmp.m_name.c_str(), mc, *mr[last], *gr[last], *qr[last], 3, tmp.m_spin) );
+        tmpbw->setDecayMasses(m1, m2);
+        rbw.push_back(tmpbw);
+        angd.push_back( std::shared_ptr<AmpWigner> (new AmpWigner(("a_{"+tmp.m_name+"}").c_str(), ("a_{"+tmp.m_name+"}").c_str(),
+            mc, ma, mb, 3, *aj[last], *am[last], *an[last]) ) );
+        totAmp.addBW(rbw.at(last), *rr.at(last), *phir.at(last), angd.at(last));
+      }else{ //ignore resonance
+          //std::cout << "Problem" << std::cout;
+          mr.pop_back();
+          qr.pop_back();
+          gr.pop_back();
+          rr.pop_back();
+          phir.pop_back();
+          aj.pop_back();
+          am.pop_back();
+          an.pop_back();
+      }
 
-    //Resonances
-    rbwm23_0 = new AmpRelBreitWignerRes("f1710", "f1710", ma, mr0, gr0, qr0, 1, 0);
-    //AmpFlatteRes * rbwm23_0 = new AmpFlatteRes("f1710", "f1710", ma, mr0, gr0, qr0, 1, 0);
-    rbwm23_1 = new AmpRelBreitWignerRes("f2220", "f2220", ma, mr1, gr1, qr1, 1, 0);
-    rbwm23_2 = new AmpRelBreitWignerRes("f1900", "f1900", ma, mr2, gr2, qr2, 1, 0);
-    //AmpGausRes * rbwm23_1 = new AmpGausRes("f2220", "f2220", ma, mr1, gr1, 0);
+      //rbw.at(last).printName(std::cout);
+      //angd.at(last).printName(std::cout);
+    }
 
-    inter13_0 = new AmpRelBreitWignerRes("H1500_a", "H1500_a", mb, mi0, gi0, qi0, 2, 0);
-
-    inter12_0 = new AmpRelBreitWignerRes("H1500_b", "H1500_b", mc, mi0, gi0, qi0, 3, 0);
-
-    //const double mPi = 0.13957;
-    rbwm23_0->setDecayMasses (m2, m3);
-  //  rbwm23_0->setBarrierMass (0.8, 0.8);
-    rbwm23_1->setDecayMasses (m2, m3);
-    rbwm23_2->setDecayMasses (m2, m3);
-
-    inter13_0->setDecayMasses (m1, m3);
-
-    inter12_0->setDecayMasses (m1, m2);
-
-    //Angular Distribution Parameter
-    aj0 = RooRealVar("j_{f(1710)}", "j", 2.);
-    am0 = RooRealVar("m_{f(1710)}", "m", 0.);
-    an0 = RooRealVar("n_{f(1710)}", "n", 0.) ;
-
-    aj1 = RooRealVar("j_{f(2220)}", "j", 1.);
-    am1 = RooRealVar("m_{f(2220)}", "m", 0.);
-    an1 = RooRealVar("n_{f(2220)}", "n", 0.);
-
-    aji = RooRealVar("j_{H(1500)}", "j", 0.);
-    ami = RooRealVar("m_{H(1500)}", "m", 0.);
-    ani = RooRealVar("n_{H(1500)}", "n", 0.);
-
-    //Angular Distributions
-    angd23_0 = new AmpWigner("a_f1710", "a_f1710", mc, ma, mb, 1, aj0, am0, an0);
-    angd23_1 = new AmpWigner("a_f2220", "a_f2220", mc, ma, mb, 1, aj1, am1, an1);
-
-    angd13_i = new AmpWigner("a_H1500_a", "a_H1500_a", mc, ma, mb, 2, aji, ami, ani);
-
-    angd12_i = new AmpWigner("a_H1500_b", "a_H1500_b", mc, ma, mb, 3, aji, ami, ani);
-
-    totAmp23.addBW (rbwm23_0, rr0, phir0, angd23_0);
-    totAmp23.addBW (rbwm23_1, rr1, phir1, angd23_0);
-    totAmp23.addBW (rbwm23_2, rr2, phir2, angd23_1);
-    totAmp23.addBW (inter13_0, ri0, phii0, angd13_i);
-    totAmp23.addBW (inter12_0, ri0, phii0, angd12_i);
+    std::cout << "completed setup" << std::endl;
   }
 
   virtual const double integral(ParameterList& par){
@@ -144,9 +135,9 @@ public:
 
   virtual const double intensity(std::vector<double> x, ParameterList& par){
     ma.setVal(sqrt(x[0])); mb.setVal(sqrt(x[1])); mc.setVal(sqrt(x[2]));
-    double AMPpdf = totAmp23.evaluate();
+    double AMPpdf = totAmp.evaluate();
     if(AMPpdf!=AMPpdf){
-      //cout << "Error: Intensity is not a number!!" << endl;
+      //cout << "Error: Intensity is not a number!!" << endl; TODO: exception
       return 0;
     }
     return AMPpdf;
@@ -162,15 +153,7 @@ public:
 
   /** Destructor */
   virtual ~AmpSumIntensity(){
-    delete rbwm23_0;
-    delete rbwm23_1;
-    delete rbwm23_2;
-    delete inter13_0;
-    delete inter12_0;
-    delete angd23_0;
-    delete angd23_1;
-    delete angd13_i;
-    delete angd12_i;
+
   }
 
  protected:
@@ -201,56 +184,31 @@ public:
   RooRealVar mb;
   RooRealVar mc;
 
-  AmpSumOfAmplitudes totAmp23;
+  AmpSumOfAmplitudes totAmp;
 
   //Resonance Variables
-  RooRealVar mr0;
-  RooRealVar qr0;
-  RooRealVar gr0;
-  RooRealVar rr0;
-  RooRealVar phir0;
+  std::vector<std::shared_ptr<RooRealVar> > mr;
+  std::vector<std::shared_ptr<RooRealVar> > qr;
+  std::vector<std::shared_ptr<RooRealVar> > gr;
+  std::vector<std::shared_ptr<RooRealVar> > rr;
+  std::vector<std::shared_ptr<RooRealVar> > phir;
+  std::vector<std::shared_ptr<RooRealVar> > aj;
+  std::vector<std::shared_ptr<RooRealVar> > am;
+  std::vector<std::shared_ptr<RooRealVar> > an;
 
-  RooRealVar mr1;
-  RooRealVar qr1;
-  RooRealVar gr1;
-  RooRealVar rr1;
-  RooRealVar phir1;
+  std::vector<std::shared_ptr<AmpAbsDynamicalFunction> > rbw;
+  std::vector<std::shared_ptr<AmpWigner> > angd;
 
-  RooRealVar mr2;
-  RooRealVar qr2;
-  RooRealVar gr2;
-  RooRealVar rr2;
-  RooRealVar phir2;
-
-  RooRealVar mi0;
-  RooRealVar qi0;
-  RooRealVar gi0;
-  RooRealVar ri0;
-  RooRealVar phii0;
-
-  AmpRelBreitWignerRes * rbwm23_0;
+  /*AmpRelBreitWignerRes * rbwm23_0;
   AmpRelBreitWignerRes * rbwm23_1;
   AmpRelBreitWignerRes * rbwm23_2;
   AmpRelBreitWignerRes * inter13_0;
-  AmpRelBreitWignerRes * inter12_0;
+  AmpRelBreitWignerRes * inter12_0;*/
 
-  //Angular Distribution Variables
-  RooRealVar aj0;
-  RooRealVar am0;
-  RooRealVar an0;
-
-  RooRealVar aj1;
-  RooRealVar am1;
-  RooRealVar an1;
-
-  RooRealVar aji;
-  RooRealVar ami;
-  RooRealVar ani;
-
-  AmpWigner * angd23_0;
+ /* AmpWigner * angd23_0;
   AmpWigner * angd23_1;
   AmpWigner * angd13_i;
-  AmpWigner * angd12_i;
+  AmpWigner * angd12_i;*/
 
  private:
 

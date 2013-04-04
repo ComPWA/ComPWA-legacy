@@ -33,6 +33,7 @@ public:
                        Int_t resSpin) ; 
 
   AmpFlatteRes(const AmpFlatteRes&, const char*);
+  AmpFlatteRes(const AmpFlatteRes&);
 
 
   virtual ~AmpFlatteRes();
@@ -48,7 +49,7 @@ public:
   void setBarrierMass(double, double);
   
   virtual void initialise();
-  virtual RooComplex evaluate();
+  virtual RooComplex evaluate() const;
 
   // the following are needed by the RooAbsArg interface, but not yet 
   // implemented
@@ -65,7 +66,7 @@ public:
   virtual void fillTreeBranch(TTree&);
   virtual RooAbsArg* createFundamental(const char*) const ;
 
-  inline virtual bool isSubSys(const unsigned int subSys){return (subSys==_subSys);};
+  inline virtual bool isSubSys(const unsigned int subSys)const{return (subSys==_subSys);};
 
 protected:
   RooRealProxy _x;

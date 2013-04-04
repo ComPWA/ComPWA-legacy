@@ -12,12 +12,15 @@
 #include "RooCategoryProxy.h"
 #include "RooAbsReal.h"
 #include "RooAbsCategory.h"
-#include "RooListProxy.h"
+//#include "RooListProxy.h"
 
 #include "Physics/AmplitudeSum/AmpAbsDynamicalFunction.hpp"
 #include "Physics/AmplitudeSum/AmpWigner.hpp"
 
-class TIterator;
+#include <vector>
+#include <memory>
+
+//class TIterator;
 class RooRealVar;
  
 class AmpSumOfAmplitudes : public RooAbsPdf {
@@ -28,8 +31,8 @@ public:
   virtual TObject* clone(const char* newname) const { return new AmpSumOfAmplitudes(*this,newname); }
   virtual ~AmpSumOfAmplitudes();
 
-  void addBW(AmpAbsDynamicalFunction*, RooRealVar&, RooRealVar&);
-  void addBW(AmpAbsDynamicalFunction*, RooRealVar&, RooRealVar&, AmpWigner*);
+  void addBW(std::shared_ptr<AmpAbsDynamicalFunction>, RooRealVar&, RooRealVar&);
+  void addBW(std::shared_ptr<AmpAbsDynamicalFunction>, RooRealVar&, RooRealVar&, std::shared_ptr<AmpWigner>);
 
   Double_t evaluateSlice(RooComplex*, unsigned int, unsigned int) const ;
   Double_t evaluate() const ;
@@ -37,15 +40,19 @@ public:
 protected:
 
 private:
-  RooListProxy _pdfList ;   //  List of component PDFs
-  RooListProxy _intList;    //  List of relative intensities
-  RooListProxy _phaseList;  //  List of relative phases
-  RooListProxy _angList ;   //  List of component angular distributions
+  //RooListProxy _pdfList ;   //  List of component PDFs
+  //RooListProxy _intList;    //  List of relative intensities
+  //RooListProxy _phaseList;  //  List of relative phases
+  //RooListProxy _angList ;   //  List of component angular distributions
+  std::vector<std::shared_ptr<AmpAbsDynamicalFunction> > _pdfList ;   //  List of component PDFs
+  std::vector<RooRealVar> _intList;    //  List of relative intensities
+  std::vector<RooRealVar> _phaseList;  //  List of relative phases
+  std::vector<std::shared_ptr<AmpWigner> > _angList ;   //  List of component angular distributions
 
-  TIterator* _pdfIter  ;
-  TIterator* _intIter  ;
-  TIterator* _phaseIter;
-  TIterator* _angIter;
+  //TIterator* _pdfIter  ;
+  //TIterator* _intIter  ;
+  //TIterator* _phaseIter;
+  //TIterator* _angIter;
 
   //ClassDef(AmpSumOfAmplitudes,1) // Your description goes here...
 };

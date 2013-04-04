@@ -43,6 +43,20 @@ AmpRelBreitWignerRes::AmpRelBreitWignerRes(const AmpRelBreitWignerRes& other, co
   initialise();
 }
 
+AmpRelBreitWignerRes::AmpRelBreitWignerRes(const AmpRelBreitWignerRes& other) :
+  AmpAbsDynamicalFunction(other.GetName(), other.GetTitle()),
+  _x("x", this, other._x),
+  _m0("m0", this, other._m0),
+  _resWidth("resWidth", this, other._resWidth),
+  _d("d", this, other._d),
+  _subSys(other._subSys),
+  _spin(other._spin),
+  _ma(other._ma),
+  _mb(other._mb)
+{
+  initialise();
+}
+
 AmpRelBreitWignerRes::~AmpRelBreitWignerRes() 
 {
 }
@@ -95,7 +109,7 @@ double AmpRelBreitWignerRes::BLprime2() const {
 }
 
 
-RooComplex AmpRelBreitWignerRes::evaluate() {
+RooComplex AmpRelBreitWignerRes::evaluate() const {
 
   // double m0 = p.Mass ();
   //    double Gamma0 = p.Width ();
@@ -114,7 +128,7 @@ RooComplex AmpRelBreitWignerRes::evaluate() {
 
   Gamma0 = double(_resWidth);
   GammaV = Gamma0 * (m0 / m) * pow(q() / q0(), 2.*_spin + 1.)  * BLprime2();
-  
+
   RooComplex denom = RooComplex(m0*m0 - m*m, -m0 * GammaV);
 
   return (RooComplex(_m0 * Gamma0) / denom);

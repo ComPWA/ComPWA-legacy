@@ -43,6 +43,20 @@ AmpFlatteRes::AmpFlatteRes(const AmpFlatteRes& other, const char* newname) :
   initialise();
 }
 
+AmpFlatteRes::AmpFlatteRes(const AmpFlatteRes& other) :
+  AmpAbsDynamicalFunction(other.GetName(), other.GetTitle()),
+  _x("x", this, other._x),
+  _m0("m0", this, other._m0),
+  _resWidth("resWidth", this, other._resWidth),
+  _d("d", this, other._d),
+  _subSys(other._subSys),
+  _spin(other._spin),
+  _ma(other._ma),
+  _mb(other._mb)
+{
+  initialise();
+}
+
 AmpFlatteRes::~AmpFlatteRes() 
 {
 }
@@ -120,7 +134,7 @@ double AmpFlatteRes::BLprime2() const {
   return sqrt ( (1.-(mamb*mamb/Double_t(_x)/Double_t(_x)))*(1.-(mapb*mapb/Double_t(_x)/Double_t(_x))) );
 }*/
 
-RooComplex AmpFlatteRes::evaluate() {
+RooComplex AmpFlatteRes::evaluate() const {
 
   double m0 = Double_t(_m0);
   double m  = Double_t(_x);

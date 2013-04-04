@@ -32,7 +32,7 @@ public:
 
   virtual inline bool hasDist(){return toEvaluate;};
   virtual void initialise();
-  virtual double evaluate();
+  virtual double evaluate() const;
 
   // the following are needed by the RooAbsArg interface, but not yet 
   // implemented
@@ -67,13 +67,13 @@ protected:
 
   bool toEvaluate;
 
-  double lambda(double x, double y, double z);
-  Double_t s1max(Double_t, Double_t, Double_t, Double_t, Double_t);
-  Double_t s1min(Double_t, Double_t, Double_t, Double_t, Double_t);
-  Double_t s2max(Double_t, Double_t, Double_t, Double_t, Double_t);
-  Double_t s2min(Double_t, Double_t, Double_t, Double_t, Double_t);
-  Double_t s3max(Double_t, Double_t, Double_t, Double_t, Double_t);
-  Double_t s3min(Double_t, Double_t, Double_t, Double_t, Double_t);
+  double lambda(double x, double y, double z)const;
+  Double_t s1max(Double_t, Double_t, Double_t, Double_t, Double_t)const;
+  Double_t s1min(Double_t, Double_t, Double_t, Double_t, Double_t)const;
+  Double_t s2max(Double_t, Double_t, Double_t, Double_t, Double_t)const;
+  Double_t s2min(Double_t, Double_t, Double_t, Double_t, Double_t)const;
+  Double_t s3max(Double_t, Double_t, Double_t, Double_t, Double_t)const;
+  Double_t s3min(Double_t, Double_t, Double_t, Double_t, Double_t)const;
 
 private:
 

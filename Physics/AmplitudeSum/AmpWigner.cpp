@@ -74,11 +74,11 @@ void AmpWigner::initialise()
 {
 }    
 
-double AmpWigner::lambda(double x, double y, double z){
+double AmpWigner::lambda(double x, double y, double z)const{
   return x*x+y*y+z*z-2.*x*y-2.*x*z-2.*y*z;
 }
 
-Double_t AmpWigner::s2min(Double_t s1, Double_t m0, Double_t m1, Double_t m2, Double_t m3)
+Double_t AmpWigner::s2min(Double_t s1, Double_t m0, Double_t m1, Double_t m2, Double_t m3)const
 {
 	Double_t s      = m0*m0;
 	Double_t lamterm = sqrt( lambda(s1,s,m1*m1) ) * sqrt( lambda(s1, m2*m2, m3*m3) );
@@ -88,7 +88,7 @@ Double_t AmpWigner::s2min(Double_t s1, Double_t m0, Double_t m1, Double_t m2, Do
 	return result;
 }
 
-Double_t AmpWigner::s2max(Double_t s1, Double_t m0, Double_t m1, Double_t m2, Double_t m3)
+Double_t AmpWigner::s2max(Double_t s1, Double_t m0, Double_t m1, Double_t m2, Double_t m3)const
 {
 	Double_t s      = m0*m0;
 	Double_t lamterm = sqrt( lambda(s1,s,m1*m1) ) * sqrt( lambda(s1, m2*m2, m3*m3) );
@@ -98,7 +98,7 @@ Double_t AmpWigner::s2max(Double_t s1, Double_t m0, Double_t m1, Double_t m2, Do
 	return result;
 }
 
-Double_t AmpWigner::s3min(Double_t s1, Double_t m0, Double_t m1, Double_t m2, Double_t m3)
+Double_t AmpWigner::s3min(Double_t s1, Double_t m0, Double_t m1, Double_t m2, Double_t m3)const
 {
 	Double_t s      = m0*m0;
 	Double_t lamterm = sqrt( lambda(s1,s,m1*m1) ) * sqrt( lambda(s1, m3*m3, m1*m1) );
@@ -108,7 +108,7 @@ Double_t AmpWigner::s3min(Double_t s1, Double_t m0, Double_t m1, Double_t m2, Do
 	return result;
 }
 
-Double_t AmpWigner::s3max(Double_t s1, Double_t m0, Double_t m1, Double_t m2, Double_t m3)
+Double_t AmpWigner::s3max(Double_t s1, Double_t m0, Double_t m1, Double_t m2, Double_t m3)const
 {
 	Double_t s      = m0*m0;
 	Double_t lamterm = sqrt( lambda(s1,s,m1*m1) ) * sqrt( lambda(s1, m3*m3, m1*m1) );
@@ -118,7 +118,7 @@ Double_t AmpWigner::s3max(Double_t s1, Double_t m0, Double_t m1, Double_t m2, Do
 	return result;
 }
 
-Double_t AmpWigner::s1min(Double_t s2, Double_t m0, Double_t m1, Double_t m2, Double_t m3)
+Double_t AmpWigner::s1min(Double_t s2, Double_t m0, Double_t m1, Double_t m2, Double_t m3)const
 {
 	Double_t s      = m0*m0;
 	Double_t lamterm = sqrt( lambda(s2,s,m2*m2) ) * sqrt( lambda(s2, m3*m3, m1*m1) );
@@ -128,7 +128,7 @@ Double_t AmpWigner::s1min(Double_t s2, Double_t m0, Double_t m1, Double_t m2, Do
 	return result;
 }
 
-Double_t AmpWigner::s1max(Double_t s2, Double_t m0, Double_t m1, Double_t m2, Double_t m3)
+Double_t AmpWigner::s1max(Double_t s2, Double_t m0, Double_t m1, Double_t m2, Double_t m3)const
 {
 	Double_t s      = m0*m0;
 	Double_t lamterm = sqrt( lambda(s2,s,m2*m2) ) * sqrt( lambda(s2, m1*m1, m3*m3) );
@@ -138,7 +138,7 @@ Double_t AmpWigner::s1max(Double_t s2, Double_t m0, Double_t m1, Double_t m2, Do
 	return result;
 }
 
-double AmpWigner::evaluate() {
+double AmpWigner::evaluate() const {
   if(!toEvaluate) return 1.;
 
   double locmin_sq, locmax_sq, beta;

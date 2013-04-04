@@ -23,8 +23,8 @@ public:
   virtual ~AmpAbsDynamicalFunction();
 
   virtual void initialise() = 0; 
-  virtual RooComplex evaluate() = 0;
-  virtual bool isSubSys(const unsigned int) = 0;
+  virtual RooComplex evaluate() const = 0;
+  virtual bool isSubSys(const unsigned int) const = 0;
  
 
   // the following are needed by the RooAbsArg interface, but not yet 
