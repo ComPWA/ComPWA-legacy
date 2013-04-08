@@ -71,11 +71,11 @@ int main(int argc, char **argv){
   bw->GetYaxis()->CenterTitle();
 
   for(unsigned int i = 0; i < myReader->getNEvents(); i++){
-      PWAEvent event;
+      PWAEvent event(myReader->getEvent(i));
       PWAParticle a, b;
       double masssq = 0;
 
-      if(!myReader->getEvent(i, event)) continue;
+      //if(!myReader->getEvent(i, event)) continue; TODO: try exception
       //if(!event) continue;
       //cout << "Event: \t" << i << "\t NParticles: \t" << event.getNParticles() << endl;
       event.getParticle(0,a);

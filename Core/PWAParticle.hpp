@@ -32,11 +32,11 @@ public:
   }
 
   PWAParticle(const PWAParticle& inParticle){
-    px = inParticle.getPx();
-    py = inParticle.getPy();
-    pz = inParticle.getPz();
-    E = inParticle.getE();
-    pid = inParticle.getPid();
+    px = inParticle.px;
+    py = inParticle.py;
+    pz = inParticle.pz;
+    E = inParticle.E;
+    pid = inParticle.pid;
   }
 
   virtual ~PWAParticle(){ /* nothing */	}

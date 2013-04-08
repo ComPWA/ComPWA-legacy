@@ -24,12 +24,13 @@ double MinLogLH::controlParameter(ParameterList& minPar){
 
   double lh=0; //calculate LH:
   for(unsigned int evt = 0; evt < nEvents; evt++){
-    PWAEvent theEvent;
+    PWAEvent theEvent(pDIF_->getEvent(evt));
     PWAParticle a, b;
+   /* TODO: try read exceptions
     if( !(pDIF_->getEvent(evt, theEvent)) ){
       std::cout << "EIFChiOneD::controlParameter: Event not readable!" << std::endl; //TODO Exception
       continue;
-    }
+    }*/
     if( !(theEvent.getParticle(0,a)) ){
       std::cout << "EIFChiOneD::controlParameter: Particle A not readable!" << std::endl; //TODO Exception
       continue;

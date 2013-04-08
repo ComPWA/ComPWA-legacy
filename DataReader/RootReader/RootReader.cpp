@@ -18,23 +18,37 @@ RootReader::RootReader(const std::string inConfigFile, const bool binned=false):
   fmaxEvents=fTree->GetEntries();
   fEvent=0;
 
-  if(fBinned)
+  //if(fBinned)
     bin();
+  storeEvents();
+
+  fFile->Close();
 }
 
 RootReader::~RootReader(){
-  fFile->Close();
+  //fFile->Close();
   delete fParticles;
   delete fFile;
   //delete _myFcn;
 }
 
-const int RootReader::getEvent(const int i, PWAEvent& inEvent){
+const std::vector<std::string>& RootReader::getVariableNames(){
+  if(!fVarNames.size()){ //TODO: init
+    fVarNames.push_back("dataname1");
+    fVarNames.push_back("dataname2");
+  }
+  return fVarNames;
+}
+
+const PWAEvent& RootReader::getEvent(const int i){
+  //PWAEvent outEvent;
 
   if(i>=0) {fEvent=i;}
   else {fEvent++;}
 
-  fParticles->Clear();
+  return fEvents.at(i);
+
+  /*fParticles->Clear();
   fTree->GetEntry(fEvent);
 
   // Get number of particle in TClonesrray
@@ -47,10 +61,10 @@ const int RootReader::getEvent(const int i, PWAEvent& inEvent){
     partN = (TParticle*) fParticles->At(part);
     if(!partN) continue;
     partN->Momentum(inN);
-    inEvent.addParticle(PWAParticle(inN.X(), inN.Y(), inN.Z(), inN.E()));
+    outEvent.addParticle(PWAParticle(inN.X(), inN.Y(), inN.Z(), inN.E()));
   }
 
-  /*if(nParts!=2) return 0;
+  if(nParts!=2) return 0;
 
   TParticle* part1 = (TParticle*) fParticles->At(0); //pip
   TParticle* part2 = (TParticle*) fParticles->At(1); //pim
@@ -67,7 +81,7 @@ const int RootReader::getEvent(const int i, PWAEvent& inEvent){
   for(unsigned int part=0; part<out.size(); part++)
     inEvent.addParticle(out.at(part));*/
 
-  return 1;
+  //return outEvent;
 }
 
 const int RootReader::getBin(const int i, double& m12, double& weight){
@@ -79,7 +93,7 @@ const int RootReader::getBin(const int i, double& m12, double& weight){
   return 1;
 }
 
-const int RootReader::getEvent(const int i,TLorentzVector& in1, TLorentzVector& in2, double& inm12){
+/*const int RootReader::getEvent(const int i,TLorentzVector& in1, TLorentzVector& in2, double& inm12){
 
   //TLorentzVector pPip,pPim,pPm12;
   //TLorentzVector V(0,0,0,0);
@@ -104,7 +118,33 @@ const int RootReader::getEvent(const int i,TLorentzVector& in1, TLorentzVector& 
   inm12=(in1+in2).Mag2();
 
   return 1;
+}*/
+
+void RootReader::storeEvents(){
+
+  for(unsigned int evt=0; evt<fmaxEvents; evt++){
+    PWAEvent tmp;
+    fParticles->Clear();
+    fTree->GetEntry(evt);
+
+    // Get number of particle in TClonesrray
+    unsigned int nParts = fParticles->GetEntriesFast();
+
+    TParticle* partN;
+    TLorentzVector inN;
+    for(unsigned int part=0; part<nParts; part++){
+      partN = 0;
+      partN = (TParticle*) fParticles->At(part);
+      if(!partN) continue;
+      partN->Momentum(inN);
+      tmp.addParticle(PWAParticle(inN.X(), inN.Y(), inN.Z(), inN.E()));
+    }//particle loop
+
+    fEvents.push_back(tmp);
+  }//event loop
+
 }
+
 
 void RootReader::bin(){
   double min=-1, max=-1;

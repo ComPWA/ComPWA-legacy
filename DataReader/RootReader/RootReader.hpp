@@ -34,9 +34,11 @@ public:
   /// Default Constructor (0x0)
   RootReader(const std::string inConfigFile, const bool binned);
 
-  virtual const int getEvent(const int, PWAEvent&);
+  virtual const std::vector<std::string>& getVariableNames();
+
+  virtual const PWAEvent& getEvent(const int);
   virtual const int getBin(const int, double&, double&);
-  virtual const int getEvent(const int, TLorentzVector& , TLorentzVector& , double&);
+  //virtual const int getEvent(const int, TLorentzVector& , TLorentzVector& , double&);
 
   virtual const unsigned int getNEvents() const {return fmaxEvents;};
   virtual const unsigned int getNBins() const {return fmaxBins;};
@@ -53,8 +55,10 @@ protected:
   bool fBinned;
   unsigned int fmaxBins;
   std::map<int, std::pair<double,double> > fBins;
-  // vector<string> paramNames;
+  std::vector<std::string> fVarNames;
+  std::vector<PWAEvent> fEvents;
 
+  virtual void storeEvents();
   virtual void bin();
 
 };

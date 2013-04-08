@@ -10,6 +10,9 @@
 #ifndef DATA_HPP_
 #define DATA_HPP_
 
+#include <vector>
+#include <string>
+
 #include "Core/PWAEvent.hpp"
 
 class Data
@@ -23,8 +26,11 @@ public:
 
   virtual ~Data()
 	{ /* nothing */	}
-  virtual const int getEvent(const int, PWAEvent&) =0;
-  virtual const int getBin(const int, double&, double&)=0; //TODO: seperate?
+
+  virtual const std::vector<std::string>& getVariableNames() =0;
+
+  virtual const PWAEvent& getEvent(const int) =0;
+  virtual const int getBin(const int, double&, double&) =0; //TODO: BinDataTyp, dynamic dimension
 
   virtual const unsigned int getNEvents() const =0;
   virtual const unsigned int getNBins() const =0;
