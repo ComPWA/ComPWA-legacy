@@ -38,12 +38,6 @@ exe cx0testApp :
         test
         : ;
         
-exe parametertestApp : 
-        ParameterTestApp.cpp 
-        test
-        $(TOP)/Core//ComPWA 
-        : ;
-        
 exe dataiftestApp : 
         DataIFTestApp.cpp 
         test
@@ -137,6 +131,6 @@ exe dalitzplotApp :
         : ;
 
 install dist : test : <location>$(TOP)/lib <threading>single ;
-install dist2 : parametertestApp cx0testApp dataiftestApp optimizertestApp physicstestApp : <location>$(TOP)/bin <threading>single ;
+install dist2 : cx0testApp dataiftestApp optimizertestApp physicstestApp : <location>$(TOP)/bin <threading>single ;
 install dist3 : estimatortestApp integrationtestApp integrationtestbinnedApp runmanagertestApp gentwopartApp gendalitzApp dalitzplotApp : <location>$(TOP)/bin <threading>single ;
 

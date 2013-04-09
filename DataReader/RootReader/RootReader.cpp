@@ -40,8 +40,8 @@ const std::vector<std::string>& RootReader::getVariableNames(){
   return fVarNames;
 }
 
-const PWAEvent& RootReader::getEvent(const int i){
-  //PWAEvent outEvent;
+const Event& RootReader::getEvent(const int i){
+  //Event outEvent;
 
   if(i>=0) {fEvent=i;}
   else {fEvent++;}
@@ -76,8 +76,8 @@ const PWAEvent& RootReader::getEvent(const int i){
   out.push_back(Particle(in1.X(), in1.Y(), in1.Z(), in1.E()));
   out.push_back(Particle(in2.X(), in2.Y(), in2.Z(), in2.E()));
 
-  //shared_ptr<PWAEvent> tmp(new PWAEvent());
-  //inEvent = make_shared<PWAEvent>();
+  //shared_ptr<Event> tmp(new Event());
+  //inEvent = make_shared<Event>();
   for(unsigned int part=0; part<out.size(); part++)
     inEvent.addParticle(out.at(part));*/
 
@@ -123,7 +123,7 @@ const int RootReader::getBin(const int i, double& m12, double& weight){
 void RootReader::storeEvents(){
 
   for(unsigned int evt=0; evt<fmaxEvents; evt++){
-    PWAEvent tmp;
+    Event tmp;
     fParticles->Clear();
     fTree->GetEntry(evt);
 

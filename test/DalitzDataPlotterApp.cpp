@@ -23,7 +23,7 @@
 #include "DataReader/RootReader/RootReader.hpp"
 
 //Core header files go here
-#include "Core/PWAEvent.hpp"
+#include "Core/Event.hpp"
 #include "Core/Particle.hpp"
 
 using namespace std;
@@ -57,17 +57,16 @@ int main(int argc, char **argv){
     bw23->GetYaxis()->CenterTitle();
 
     for(unsigned int i = 0; i < maxEvents; i++){
-        PWAEvent event(myReader.getEvent(i));
-        Particle a, b, c;
+        Event event(myReader.getEvent(i));
 
     	//myReader.getEvent(-1, a, b, masssq);
     	//if(!myReader.getEvent(i, event)) continue; TODO: try exception
     	if(!event.getNParticles() == 3) continue;
     	//if(!event) continue;
     	//cout << "Event: \t" << i << "\t NParticles: \t" << event.getNParticles() << endl;
-    	event.getParticle(0,a);
-    	event.getParticle(1,b);
-        event.getParticle(2,c);
+    	const Particle &a(event.getParticle(0));
+    	const Particle &b(event.getParticle(1));
+    	const Particle &c(event.getParticle(2));
     	masssq12 = pow(a.E+b.E,2) - pow(a.px+b.px ,2) - pow(a.py+b.py ,2) - pow(a.pz+b.pz ,2);
         masssq13 = pow(a.E+c.E,2) - pow(a.px+c.px ,2) - pow(a.py+c.py ,2) - pow(a.pz+c.pz ,2);
         masssq23 = pow(b.E+c.E,2) - pow(b.px+c.px ,2) - pow(b.py+c.py ,2) - pow(b.pz+c.pz ,2);

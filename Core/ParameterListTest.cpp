@@ -3,7 +3,7 @@
 #include <boost/test/unit_test.hpp>
 #include <Core/Parameter.hpp>
 #include <Core/ParameterList.hpp>
-#include <Core/PWAExceptions.hpp>
+#include <Core/Exceptions.hpp>
 #include <memory>
 #include <vector>
 

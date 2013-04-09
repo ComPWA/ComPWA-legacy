@@ -15,7 +15,7 @@ BOOST_AUTO_TEST_CASE(ReadingCheck)
   RootReader myReader(file, false);
   BOOST_CHECK_EQUAL(myReader.getNEvents(), (unsigned int)100000);
 
-  PWAEvent event;
+  Event event;
   BOOST_CHECK(myReader.getEvent(5, event));
 }
 

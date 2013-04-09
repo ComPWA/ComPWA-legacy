@@ -16,7 +16,7 @@
 
 //PWA-Headers
 #include "DataReader/Data.hpp"
-#include "Core/PWAEvent.hpp"
+#include "Core/Event.hpp"
 
 //Root-Headers
 #include "TMath.h"
@@ -36,7 +36,7 @@ public:
 
   virtual const std::vector<std::string>& getVariableNames();
 
-  virtual const PWAEvent& getEvent(const int);
+  virtual const Event& getEvent(const int);
   virtual const int getBin(const int, double&, double&);
   //virtual const int getEvent(const int, TLorentzVector& , TLorentzVector& , double&);
 
@@ -56,7 +56,7 @@ protected:
   unsigned int fmaxBins;
   std::map<int, std::pair<double,double> > fBins;
   std::vector<std::string> fVarNames;
-  std::vector<PWAEvent> fEvents;
+  std::vector<Event> fEvents;
 
   virtual void storeEvents();
   virtual void bin();

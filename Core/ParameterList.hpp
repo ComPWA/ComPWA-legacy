@@ -14,7 +14,7 @@
 #include <vector>
 
 #include "Core/Parameter.hpp"
-#include "Core/PWAExceptions.hpp"
+#include "Core/Exceptions.hpp"
 
 class ParameterList
 {

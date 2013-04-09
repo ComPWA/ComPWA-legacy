@@ -17,7 +17,7 @@
 #include "Estimator/Estimator.hpp"
 #include "Physics/Amplitude.hpp"
 #include "DataReader/Data.hpp"
-#include "Core/PWAEvent.hpp"
+#include "Core/Event.hpp"
 #include "Core/ParameterList.hpp"
 
 class MinLogLH : public Estimator {

@@ -14,7 +14,7 @@
 #include <string>
 #include <sstream>
 
-#include "Core/PWAExceptions.hpp"
+#include "Core/Exceptions.hpp"
 
 class DoubleParameter
 {

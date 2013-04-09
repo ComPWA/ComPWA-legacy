@@ -1,5 +1,5 @@
 //! ComPWA Exceptions
-/*! \class PWAException
+/*! \class Exception
  * @file PWAExceptions.hpp
  * This class defines the ComPWA exception base-class and provides a set of
  * standard exceptions.
@@ -12,30 +12,30 @@
 #include <string>
 
 
-class PWAException : public std::exception {
+class Exception : public std::exception {
 public:
-  PWAException(const PWAException& e) throw() :
+  Exception(const Exception& e) throw() :
     std::exception(e),
     what_(e.what_)
   {}
 
-  PWAException& operator=(const PWAException& rhs) throw() {
+  Exception& operator=(const Exception& rhs) throw() {
     what_ = rhs.what_;
     return *this;
   }
 
-  virtual ~PWAException() throw() { }
+  virtual ~Exception() throw() { }
 
   virtual const char* what() const throw() {
     return what_.c_str();
   }
 
 protected:
-  PWAException(const char* w = "") throw() :
+  Exception(const char* w = "") throw() :
     what_(w)
   {}
 
-  PWAException(const std::string& w) throw() :
+  Exception(const std::string& w) throw() :
     what_(w)
   {}
 
@@ -47,13 +47,13 @@ protected:
 //!
 //! @brief   Config is not complete
 //------------------------------------------------------------------------------
-class BadConfig : public PWAException {
+class BadConfig : public Exception {
 public:
   BadConfig ( const std::string& error ) :
-    PWAException(error)
+    Exception(error)
   {}
   BadConfig ( const char *error ) :
-    PWAException(error)
+    Exception(error)
   {}
   virtual ~BadConfig () throw() {}
 };
@@ -63,13 +63,13 @@ public:
 //!
 //! @brief   Parameter not existing
 //------------------------------------------------------------------------------
-class BadParameter : public PWAException {
+class BadParameter : public Exception {
 public:
   BadParameter ( const std::string& error ) :
-    PWAException(error)
+    Exception(error)
   {}
   BadParameter ( const char *error ) :
-    PWAException(error)
+    Exception(error)
   {}
   virtual ~BadParameter () throw() {}
 };
@@ -79,13 +79,13 @@ public:
 //!
 //! @brief   Parameter cannot be changed
 //------------------------------------------------------------------------------
-class ParameterFixed : public PWAException {
+class ParameterFixed : public Exception {
 public:
   ParameterFixed ( const std::string& error = "Parameter fixed" ) :
-    PWAException(error)
+    Exception(error)
   {}
   ParameterFixed ( const char *error ) :
-    PWAException(error)
+    Exception(error)
   {}
   virtual ~ParameterFixed () throw() {}
 };

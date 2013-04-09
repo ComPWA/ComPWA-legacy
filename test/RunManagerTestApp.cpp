@@ -24,7 +24,6 @@
 #include "Optimizer/Minuit2/MinuitIF.hpp"
 #include "Core/Parameter.hpp"
 #include "Core/ParameterList.hpp"
-#include "Core/PWAGenericPar.hpp"
 #include "Core/RunManager.hpp"
 
 //Test header files go here

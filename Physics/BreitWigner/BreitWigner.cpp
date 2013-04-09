@@ -6,7 +6,6 @@
 #include "Physics/BreitWigner/BreitWigner.hpp"
 #include "Core/ParameterList.hpp"
 #include "Core/Parameter.hpp"
-#include "Core/PWAGenericPar.hpp"
 
 using namespace std;
 

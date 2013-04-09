@@ -23,7 +23,7 @@
 #include "TFile.h"
 
 //Core header files go here
-#include "Core/PWAEvent.hpp"
+#include "Core/Event.hpp"
 #include "Core/Particle.hpp"
 #include "Core/Parameter.hpp"
 #include "Core/ParameterList.hpp"
@@ -71,15 +71,14 @@ int main(int argc, char **argv){
   bw->GetYaxis()->CenterTitle();
 
   for(unsigned int i = 0; i < myReader->getNEvents(); i++){
-      PWAEvent event(myReader->getEvent(i));
-      Particle a, b;
+      Event event(myReader->getEvent(i));
       double masssq = 0;
 
       //if(!myReader->getEvent(i, event)) continue; TODO: try wxception
       //if(!event) continue;
       //cout << "Event: \t" << i << "\t NParticles: \t" << event.getNParticles() << endl;
-      event.getParticle(0,a);
-      event.getParticle(1,b);
+      const Particle &a(event.getParticle(0));
+      const Particle &b(event.getParticle(1));
       masssq = pow(a.E+b.E,2) - pow(a.px+b.px ,2) - pow(a.py+b.py ,2) - pow(a.pz+b.pz ,2);
 
       bw->Fill(sqrt(masssq));

@@ -5,8 +5,8 @@
  * class provides the momentum 4-vector and pid of the particle.
 */
 
-#ifndef _PWAPARTICLE_HPP_
-#define _PWAPARTICLE_HPP_
+#ifndef _PARTICLE_HPP_
+#define _PARTICLE_HPP_
 
 #include <vector>
 
@@ -19,6 +19,8 @@ struct Particle
   Particle(double inPx, double inPy, double inPz, double inE, int inpid=0)
     :px(inPx),py(inPy),pz(inPz),E(inE),pid(inpid){
   }
+
+  //TODO: operators, mass-square of 2 particles ..
 
  /* Particle(const Particle& inParticle){
     px = inParticle.px;
