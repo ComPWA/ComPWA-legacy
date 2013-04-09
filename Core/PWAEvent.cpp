@@ -1,5 +1,5 @@
 #include <vector>
-#include "Core/PWAParticle.hpp"
+#include "Core/Particle.hpp"
 #include "Core/PWAEvent.hpp"
 
 
@@ -11,13 +11,13 @@ PWAEvent::PWAEvent(const double inWeight):fWeight(inWeight){
 
 }
 
-void PWAEvent::addParticle(PWAParticle inParticle){
+void PWAEvent::addParticle(Particle inParticle){
   fParticles.push_back(inParticle);
 }
 
 PWAEvent::~PWAEvent() { /* nothing */	}
 
-const int PWAEvent::getParticle(const unsigned int id, PWAParticle& out){
+const int PWAEvent::getParticle(const unsigned int id, Particle& out){
   if(id>=getNParticles()){
     //TODO Exception
     return 0;

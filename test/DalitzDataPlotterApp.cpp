@@ -24,7 +24,7 @@
 
 //Core header files go here
 #include "Core/PWAEvent.hpp"
-#include "Core/PWAParticle.hpp"
+#include "Core/Particle.hpp"
 
 using namespace std;
 
@@ -58,7 +58,7 @@ int main(int argc, char **argv){
 
     for(unsigned int i = 0; i < maxEvents; i++){
         PWAEvent event(myReader.getEvent(i));
-        PWAParticle a, b, c;
+        Particle a, b, c;
 
     	//myReader.getEvent(-1, a, b, masssq);
     	//if(!myReader.getEvent(i, event)) continue; TODO: try exception
@@ -68,9 +68,9 @@ int main(int argc, char **argv){
     	event.getParticle(0,a);
     	event.getParticle(1,b);
         event.getParticle(2,c);
-    	masssq12 = pow(a.getE()+b.getE(),2) - pow(a.getPx()+b.getPx() ,2) - pow(a.getPy()+b.getPy() ,2) - pow(a.getPz()+b.getPz() ,2);
-        masssq13 = pow(a.getE()+c.getE(),2) - pow(a.getPx()+c.getPx() ,2) - pow(a.getPy()+c.getPy() ,2) - pow(a.getPz()+c.getPz() ,2);
-        masssq23 = pow(b.getE()+c.getE(),2) - pow(b.getPx()+c.getPx() ,2) - pow(b.getPy()+c.getPy() ,2) - pow(b.getPz()+c.getPz() ,2);
+    	masssq12 = pow(a.E+b.E,2) - pow(a.px+b.px ,2) - pow(a.py+b.py ,2) - pow(a.pz+b.pz ,2);
+        masssq13 = pow(a.E+c.E,2) - pow(a.px+c.px ,2) - pow(a.py+c.py ,2) - pow(a.pz+c.pz ,2);
+        masssq23 = pow(b.E+c.E,2) - pow(b.px+c.px ,2) - pow(b.py+c.py ,2) - pow(b.pz+c.pz ,2);
 
     	bw12->Fill(masssq12,masssq13);
         bw13->Fill(masssq13,masssq12);

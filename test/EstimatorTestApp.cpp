@@ -20,7 +20,7 @@
 #include "Physics/BreitWigner/BreitWigner.hpp"
 #include "Estimator/MinLogLH/MinLogLH.hpp"
 #include "Estimator/ChiOneD/ChiOneD.hpp"
-#include "Core/PWAParticle.hpp"
+#include "Core/Particle.hpp"
 #include "Core/Parameter.hpp"
 #include "Core/ParameterList.hpp"
 

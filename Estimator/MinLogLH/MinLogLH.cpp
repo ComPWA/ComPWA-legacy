@@ -6,7 +6,7 @@
 
 #include "Estimator/MinLogLH/MinLogLH.hpp"
 #include "Core/PWAEvent.hpp"
-#include "Core/PWAParticle.hpp"
+#include "Core/Particle.hpp"
 #include "Core/ParameterList.hpp"
 
 MinLogLH::MinLogLH(std::shared_ptr<Amplitude> inPIF, std::shared_ptr<Data> inDIF) : pPIF_(inPIF), pDIF_(inDIF){
@@ -25,7 +25,7 @@ double MinLogLH::controlParameter(ParameterList& minPar){
   double lh=0; //calculate LH:
   for(unsigned int evt = 0; evt < nEvents; evt++){
     PWAEvent theEvent(pDIF_->getEvent(evt));
-    PWAParticle a, b;
+    Particle a, b;
    /* TODO: try read exceptions
     if( !(pDIF_->getEvent(evt, theEvent)) ){
       std::cout << "EIFChiOneD::controlParameter: Event not readable!" << std::endl; //TODO Exception
@@ -41,10 +41,7 @@ double MinLogLH::controlParameter(ParameterList& minPar){
     }
 
     double masssq = 0;
-    masssq += pow(a.getE()+b.getE(),2);
-    masssq -= pow(a.getPx()+b.getPx() ,2);
-    masssq -= pow(a.getPy()+b.getPy() ,2);
-    masssq -= pow(a.getPz()+b.getPz() ,2);
+    masssq += (pow(a.E+b.E,2) - pow(a.px+b.px ,2) - pow(a.py+b.py ,2) - pow(a.pz+b.pz ,2));
 
     std::vector<double> x;
     x.push_back(sqrt(masssq));

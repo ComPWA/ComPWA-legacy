@@ -61,7 +61,7 @@ const PWAEvent& RootReader::getEvent(const int i){
     partN = (TParticle*) fParticles->At(part);
     if(!partN) continue;
     partN->Momentum(inN);
-    outEvent.addParticle(PWAParticle(inN.X(), inN.Y(), inN.Z(), inN.E()));
+    outEvent.addParticle(Particle(inN.X(), inN.Y(), inN.Z(), inN.E()));
   }
 
   if(nParts!=2) return 0;
@@ -72,9 +72,9 @@ const PWAEvent& RootReader::getEvent(const int i){
   TLorentzVector in1, in2;
   part1->Momentum(in1);
   part2->Momentum(in2);
-  std::vector<PWAParticle> out;
-  out.push_back(PWAParticle(in1.X(), in1.Y(), in1.Z(), in1.E()));
-  out.push_back(PWAParticle(in2.X(), in2.Y(), in2.Z(), in2.E()));
+  std::vector<Particle> out;
+  out.push_back(Particle(in1.X(), in1.Y(), in1.Z(), in1.E()));
+  out.push_back(Particle(in2.X(), in2.Y(), in2.Z(), in2.E()));
 
   //shared_ptr<PWAEvent> tmp(new PWAEvent());
   //inEvent = make_shared<PWAEvent>();
@@ -137,7 +137,7 @@ void RootReader::storeEvents(){
       partN = (TParticle*) fParticles->At(part);
       if(!partN) continue;
       partN->Momentum(inN);
-      tmp.addParticle(PWAParticle(inN.X(), inN.Y(), inN.Z(), inN.E()));
+      tmp.addParticle(Particle(inN.X(), inN.Y(), inN.Z(), inN.E()));
     }//particle loop
 
     fEvents.push_back(tmp);

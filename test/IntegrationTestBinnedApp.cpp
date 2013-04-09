@@ -24,7 +24,7 @@
 
 //Core header files go here
 #include "Core/PWAEvent.hpp"
-#include "Core/PWAParticle.hpp"
+#include "Core/Particle.hpp"
 #include "Core/PWAParameter.hpp"
 #include "Core/PWAGenericPar.hpp"
 
@@ -72,7 +72,7 @@ int main(int argc, char **argv){
 
   for(unsigned int i = 0; i < myReader->getNEvents(); i++){
       PWAEvent event(myReader->getEvent(i));
-      PWAParticle a, b;
+      Particle a, b;
       double masssq = 0;
 
       //if(!myReader->getEvent(i, event)) continue; TODO: try exception
@@ -80,7 +80,7 @@ int main(int argc, char **argv){
       //cout << "Event: \t" << i << "\t NParticles: \t" << event.getNParticles() << endl;
       event.getParticle(0,a);
       event.getParticle(1,b);
-      masssq = pow(a.getE()+b.getE(),2) - pow(a.getPx()+b.getPx() ,2) - pow(a.getPy()+b.getPy() ,2) - pow(a.getPz()+b.getPz() ,2);
+      masssq = pow(a.E+b.E,2) - pow(a.px+b.px ,2) - pow(a.py+b.py ,2) - pow(a.pz+b.pz ,2);
 
       bw->Fill(sqrt(masssq));
   }

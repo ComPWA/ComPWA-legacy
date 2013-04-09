@@ -9,7 +9,7 @@
 #define _PWAEvent_HPP_
 
 #include <vector>
-#include "Core/PWAParticle.hpp"
+#include "Core/Particle.hpp"
 
 class PWAEvent{
 
@@ -19,17 +19,17 @@ public:
 
   PWAEvent(const double inWeight);
 
-  virtual void addParticle(PWAParticle inParticle);
+  virtual void addParticle(Particle inParticle);
 
   virtual ~PWAEvent();
 
   virtual const inline unsigned int getNParticles() { return fParticles.size(); }
-  virtual const int getParticle(const unsigned int id, PWAParticle& out);
+  virtual const int getParticle(const unsigned int id, Particle& out);
 
 protected:
-  std::vector<PWAParticle> fParticles;
+  std::vector<Particle> fParticles;
   double fWeight;
-  //PWAParticle fParticleB;
+  //Particle fParticleB;
   //TODO: other event info?
 
 };
