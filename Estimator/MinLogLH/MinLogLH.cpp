@@ -25,8 +25,7 @@ double MinLogLH::controlParameter(ParameterList& minPar){
   double lh=0; //calculate LH:
   for(unsigned int evt = 0; evt < nEvents; evt++){
     Event theEvent(pDIF_->getEvent(evt));
-    const Particle &a(theEvent.getParticle(0));
-    const Particle &b(theEvent.getParticle(1));
+
    /* TODO: try read exceptions
     if( !(pDIF_->getEvent(evt, theEvent)) ){
       std::cout << "EIFChiOneD::controlParameter: Event not readable!" << std::endl; //TODO Exception
@@ -41,14 +40,45 @@ double MinLogLH::controlParameter(ParameterList& minPar){
       continue;
     }*/
 
-    double masssq = 0;
-    masssq += (pow(a.E+b.E,2) - pow(a.px+b.px ,2) - pow(a.py+b.py ,2) - pow(a.pz+b.pz ,2));
-
     std::vector<double> x;
-    x.push_back(sqrt(masssq));
-    double intens = pPIF_->intensity(x, minPar);
+    unsigned int nParts = theEvent.getNParticles();
 
-    lh -= (log(intens/norm));
+    switch(nParts){ //TODO: other cases, better "x" description (selection of particles?)
+    case 2:{
+      const Particle &a(theEvent.getParticle(0));
+      const Particle &b(theEvent.getParticle(1));
+
+      double masssq = 0;
+      masssq += (pow(a.E+b.E,2) - pow(a.px+b.px ,2) - pow(a.py+b.py ,2) - pow(a.pz+b.pz ,2));
+      x.push_back(sqrt(masssq));
+
+      break;
+    }
+    case 3:{
+      const Particle &a(theEvent.getParticle(0));
+      const Particle &b(theEvent.getParticle(1));
+      const Particle &c(theEvent.getParticle(2));
+
+      double masssqa = 0, masssqb = 0, masssqc = 0;
+      masssqa += (pow(a.E+b.E,2) - pow(a.px+b.px ,2) - pow(a.py+b.py ,2) - pow(a.pz+b.pz ,2));
+      masssqb += (pow(a.E+c.E,2) - pow(a.px+c.px ,2) - pow(a.py+c.py ,2) - pow(a.pz+c.pz ,2));
+      masssqc += (pow(c.E+b.E,2) - pow(c.px+b.px ,2) - pow(c.py+b.py ,2) - pow(c.pz+b.pz ,2));
+      x.push_back(sqrt(masssqa));
+      x.push_back(sqrt(masssqb));
+      x.push_back(sqrt(masssqc));
+
+      break;
+    }
+    default:{
+      //TODO: exception "i dont know how to handle this data"
+      break;
+    }
+    }
+
+    double intens = pPIF_->intensity(x, minPar);
+    if(intens>0){
+      lh -= (log(intens/norm));
+    }
   }
 
   return lh;

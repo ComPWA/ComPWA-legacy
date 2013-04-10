@@ -2,7 +2,7 @@
 /*!
  * @file IntegrationTestApp.cpp
  * This tiny application tests a simple fit procedure with a set of simple
- * modules. It uses a simle \f$\chi^{2}\f$ estimator ChiOneD, it reads data
+ * modules. It uses a simle LH-estimator MinLogLH, it reads data
  * via the root-reader module RootReader and uses the intensity provided by
  * the simple 1D-Breit-Wigner physics module BreitWigner. The optimization of the
  * parameters is done with the Minuit2 module MinuitIF. As result the

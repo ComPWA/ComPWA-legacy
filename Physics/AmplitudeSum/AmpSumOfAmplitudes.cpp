@@ -72,13 +72,22 @@ void AmpSumOfAmplitudes::addBW(std::shared_ptr<AmpAbsDynamicalFunction> theRes ,
    // ENTER EXPRESSION IN TERMS OF VARIABLE ARGUMENTS HERE 
    RooComplex res;
 
+   //std::cout << "res = \t" << res.abs2() << std::endl;
+
    for(unsigned int i=0; i<_pdfList.size(); i++){
      double a = _intList[i].getVal();
      double phi = _phaseList[i].getVal();
      RooComplex eiphi (cos(phi), sin(phi));
 
+     //std::cout << "a = \t" << a << std::endl;
+     //std::cout << "phi = \t" << phi << std::endl;
+     //std::cout << "BW = \t" << _pdfList[i]->evaluate() << std::endl;
+     //std::cout << "AD = \t" << _angList[i]->evaluate() << std::endl;
+
      res = res + _pdfList[i]->evaluate() * a * eiphi * _angList[i]->evaluate();
    }
+
+   //std::cout << "res final = \t" << res.abs2() << std::endl;
 
    return res.abs2() ; 
  } 

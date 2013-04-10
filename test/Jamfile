@@ -129,8 +129,18 @@ exe dalitzplotApp :
         $(TOP)/Core//ComPWA
         $(TOP)/DataReader/RootReader//RootReader  
         : ;
+        
+exe dalitzfitApp : 
+        DalitzFitApp.cpp 
+        test
+        $(TOP)/Core//ComPWA
+        $(TOP)/Physics/AmplitudeSum//AmplitudeSum  
+        $(TOP)/DataReader/RootReader//RootReader
+        $(TOP)/Estimator/MinLogLH//MinLogLH 
+        $(TOP)/Optimizer/Minuit2//Minuit2IF
+        : ;
 
 install dist : test : <location>$(TOP)/lib <threading>single ;
-install dist2 : cx0testApp dataiftestApp optimizertestApp physicstestApp : <location>$(TOP)/bin <threading>single ;
+install dist2 : dalitzfitApp cx0testApp dataiftestApp optimizertestApp physicstestApp : <location>$(TOP)/bin <threading>single ;
 install dist3 : estimatortestApp integrationtestApp integrationtestbinnedApp runmanagertestApp gentwopartApp gendalitzApp dalitzplotApp : <location>$(TOP)/bin <threading>single ;
 

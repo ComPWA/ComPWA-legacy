@@ -13,7 +13,7 @@ MinuitFcn::MinuitFcn(std::shared_ptr<ControlParameter> myData) :
   _myDataPtr(myData){
   if (0==_myDataPtr) {
     //Alert << "Data pointer is 0 !!!!" << endmsg;
-      std::cout << "Data pointer is 0 !!!!" << std::endl;
+      std::cout << "Data pointer is 0 !!!!" << std::endl; //TODO exception
     exit(1);
   }
 }
@@ -24,11 +24,14 @@ MinuitFcn::~MinuitFcn(){
 
 double MinuitFcn::operator()(const std::vector<double>& x) const{
   ParameterList par;
-  for(unsigned int i=0; i<x.size(); i++)
+  for(unsigned int i=0; i<x.size(); i++){
+    std::cout << x[i] << " ";
     par.AddParameter(DoubleParameter(x[i]));
+  }
   double result=_myDataPtr->controlParameter(par);
-  //DebugMsg << "current minimized value:\t"<< result << endmsg;
-  std::cout << "current minimized value:\t"<< result << std::endl;
+  std::cout << std::endl << "current minimized value:\t"<< result << std::endl;
+
+  std::cout << std::endl;
   return result;
 }
 

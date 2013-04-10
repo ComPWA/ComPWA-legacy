@@ -120,7 +120,7 @@ public:
   }
 
   virtual const double integral(ParameterList& par){
-    double integral = 0;
+    double integral = 1;
     /*unsigned int nSteps = 1000000;   TODO
     double step = (max_-min_)/(double)nSteps;
 
@@ -134,12 +134,29 @@ public:
   }
 
   virtual const double intensity(std::vector<double> x, ParameterList& par){
+    //TODO: check x exception
+    if(x.size()!=3) return 0;
+
     ma.setVal(sqrt(x[0])); mb.setVal(sqrt(x[1])); mc.setVal(sqrt(x[2]));
-    double AMPpdf = totAmp.evaluate();
-    if(AMPpdf!=AMPpdf){
-      //cout << "Error: Intensity is not a number!!" << endl; TODO: exception
+
+    if( par.GetNDouble()>rr.size() ){
+        std::cout << "Error: Parameterlist doesnt match model!!" << std::endl; //TODO: exception
       return 0;
     }
+
+    for(unsigned int i=0; i<rr.size(); i++){
+      rr[i]->setVal(par.GetDoubleParameter(i).GetValue());
+      //phir[i]->setVal(par.GetDoubleParameter(2*i+1).GetValue());
+    }
+    //rr[rr.size()-1]->setVal(par.GetDoubleParameter(2*(rr.size()-1)).GetValue());
+
+    double AMPpdf = totAmp.evaluate();
+
+    if(AMPpdf!=AMPpdf){
+        //std::cout << "Error: Intensity is not a number!!" << std::endl; //TODO: exception
+      return 0;
+    }
+
     return AMPpdf;
   }
 
@@ -147,7 +164,14 @@ public:
     if(outPar.GetNParameter())
       return false; //already filled, TODO: exception?
 
-    outPar.AddParameter(DoubleParameter(1.5, 0.5, 2.5, 0.1));
+    for(unsigned int i=0; i<rr.size();i++){
+      //add strength and phases of the used amplitudes
+
+      outPar.AddParameter(DoubleParameter(rr[i]->getVal(), rr[i]->getMin(), rr[i]->getMax(), rr[i]->getError()));
+      //outPar.AddParameter(DoubleParameter(phir[i]->getVal(), phir[i]->getMin(), phir[i]->getMax(), phir[i]->getError()));
+    }
+    //outPar.AddParameter(DoubleParameter(rr[rr.size()-1]->getVal(), rr[rr.size()-1]->getMin(), rr[rr.size()-1]->getMax(), rr[rr.size()-1]->getError()));
+    //outPar.AddParameter(DoubleParameter(1.5, 0.5, 2.5, 0.1));
     return true;
   }
 
