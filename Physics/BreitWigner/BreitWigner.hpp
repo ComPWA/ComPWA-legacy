@@ -23,7 +23,7 @@ public:
   virtual const double integral(ParameterList& par);
   virtual const double drawInt(double *x, double *p); //For easy usage in a root TF1
   virtual const double intensity(double x, double M, double T);
-  virtual const double intensity(std::vector<double> x, ParameterList& par);
+  virtual const double intensity(std::vector<double>& x, ParameterList& par);
   virtual const bool fillStartParVec(ParameterList& outPar);
 
   /** Destructor */

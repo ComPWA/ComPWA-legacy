@@ -22,6 +22,13 @@ double MinLogLH::controlParameter(ParameterList& minPar){
 
   double norm = pPIF_->integral(minPar);
 
+  /*std::cout << std::endl << "ControlPar LH: " << std::endl;
+  std::cout << "Events: " << nEvents << std::endl;
+  for(unsigned int i=0; i<minPar.GetNDouble(); i++){
+    std::cout << minPar.GetParameterValue(i) << " ";
+  }
+  std::cout << std::endl;*/
+
   double lh=0; //calculate LH:
   for(unsigned int evt = 0; evt < nEvents; evt++){
     Event theEvent(pDIF_->getEvent(evt));
@@ -74,6 +81,8 @@ double MinLogLH::controlParameter(ParameterList& minPar){
       break;
     }
     }
+
+    //std::cout << "ControlPar list " << minPar.GetNDouble() <<std::endl;
 
     double intens = pPIF_->intensity(x, minPar);
     if(intens>0){

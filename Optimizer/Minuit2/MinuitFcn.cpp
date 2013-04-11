@@ -36,7 +36,7 @@ double MinuitFcn::operator()(const std::vector<double>& x) const{
 }
 
 double MinuitFcn::Up() const{
-return 1.;
+return 0.5; //TODO: Setter, LH 0.5, Chi2 1.
 }
 
 

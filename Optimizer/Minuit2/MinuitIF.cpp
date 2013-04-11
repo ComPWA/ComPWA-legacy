@@ -43,6 +43,9 @@ const double MinuitIF::exec(ParameterList& par){
       upar.Add(s, actPat.GetValue(), actPat.GetError());
     else
       upar.Add(s, actPat.GetValue());
+
+    if(actPat.IsFixed())
+      upar.Fix(s);
   }
 
   MnMigrad migrad(_myFcn, upar);

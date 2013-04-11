@@ -47,14 +47,14 @@ AmpSumOfAmplitudes::AmpSumOfAmplitudes() :
    //something TODO?
  }
 
-void AmpSumOfAmplitudes::addBW(std::shared_ptr<AmpAbsDynamicalFunction> theRes , RooRealVar &r, RooRealVar &phi, std::shared_ptr<AmpWigner> theAng) {
+void AmpSumOfAmplitudes::addBW(std::shared_ptr<AmpAbsDynamicalFunction> theRes , std::shared_ptr<RooRealVar> r, std::shared_ptr<RooRealVar> phi, std::shared_ptr<AmpWigner> theAng) {
   _pdfList.push_back(theRes);
   _intList.push_back(r);
   _phaseList.push_back(phi);
   _angList.push_back(theAng);
 }
 
-void AmpSumOfAmplitudes::addBW(std::shared_ptr<AmpAbsDynamicalFunction> theRes , RooRealVar &r, RooRealVar &phi) {
+void AmpSumOfAmplitudes::addBW(std::shared_ptr<AmpAbsDynamicalFunction> theRes , std::shared_ptr<RooRealVar> r, std::shared_ptr<RooRealVar> phi) {
   _pdfList.push_back(theRes);
   _intList.push_back(r);
   _phaseList.push_back(phi);
@@ -75,8 +75,8 @@ void AmpSumOfAmplitudes::addBW(std::shared_ptr<AmpAbsDynamicalFunction> theRes ,
    //std::cout << "res = \t" << res.abs2() << std::endl;
 
    for(unsigned int i=0; i<_pdfList.size(); i++){
-     double a = _intList[i].getVal();
-     double phi = _phaseList[i].getVal();
+     double a = _intList[i]->getVal();
+     double phi = _phaseList[i]->getVal();
      RooComplex eiphi (cos(phi), sin(phi));
 
      //std::cout << "a = \t" << a << std::endl;
@@ -100,8 +100,8 @@ void AmpSumOfAmplitudes::addBW(std::shared_ptr<AmpAbsDynamicalFunction> theRes ,
    int itReso=0, sys=0;
 
    for(unsigned int i=0; i<_pdfList.size(); i++){
-     double a = _intList[i].getVal();
-     double phi = _phaseList[i].getVal();
+     double a = _intList[i]->getVal();
+     double phi = _phaseList[i]->getVal();
      RooComplex eiphi (cos(phi), sin(phi));
      if(itReso<3) sys = 0; //TODO: way better!!!
      else if(itReso<5) sys = 1;

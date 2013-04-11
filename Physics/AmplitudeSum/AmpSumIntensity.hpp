@@ -83,7 +83,7 @@ public:
         rbw.push_back(tmpbw);
         angd.push_back( std::shared_ptr<AmpWigner> (new AmpWigner(("a_{"+tmp.m_name+"}").c_str(), ("a_{"+tmp.m_name+"}").c_str(),
             mc, ma, mb, 1, *aj[last], *am[last], *an[last]) ) );
-        totAmp.addBW(rbw.at(last), *rr.at(last), *phir.at(last), angd.at(last));
+        totAmp.addBW(rbw.at(last), rr.at(last), phir.at(last), angd.at(last));
       }else if(tmp.m_daugtherA==1 && tmp.m_daugtherB==3){
         std::shared_ptr<AmpRelBreitWignerRes> tmpbw(new AmpRelBreitWignerRes(tmp.m_name.c_str(),
             tmp.m_name.c_str(), mb, *mr[last], *gr[last], *qr[last], 2, tmp.m_spin) );
@@ -91,7 +91,7 @@ public:
         rbw.push_back(tmpbw);
         angd.push_back( std::shared_ptr<AmpWigner> (new AmpWigner(("a_{"+tmp.m_name+"}").c_str(), ("a_{"+tmp.m_name+"}").c_str(),
             mc, ma, mb, 2, *aj[last], *am[last], *an[last]) ) );
-        totAmp.addBW(rbw.at(last), *rr.at(last), *phir.at(last), angd.at(last));
+        totAmp.addBW(rbw.at(last), rr.at(last), phir.at(last), angd.at(last));
       }else if(tmp.m_daugtherA==1 && tmp.m_daugtherB==2){
         std::shared_ptr<AmpRelBreitWignerRes> tmpbw(new AmpRelBreitWignerRes(tmp.m_name.c_str(),
             tmp.m_name.c_str(), mc, *mr[last], *gr[last], *qr[last], 3, tmp.m_spin) );
@@ -99,7 +99,7 @@ public:
         rbw.push_back(tmpbw);
         angd.push_back( std::shared_ptr<AmpWigner> (new AmpWigner(("a_{"+tmp.m_name+"}").c_str(), ("a_{"+tmp.m_name+"}").c_str(),
             mc, ma, mb, 3, *aj[last], *am[last], *an[last]) ) );
-        totAmp.addBW(rbw.at(last), *rr.at(last), *phir.at(last), angd.at(last));
+        totAmp.addBW(rbw.at(last), rr.at(last), phir.at(last), angd.at(last));
       }else{ //ignore resonance
           //std::cout << "Problem" << std::cout;
           mr.pop_back();
@@ -120,27 +120,28 @@ public:
   }
 
   virtual const double integral(ParameterList& par){
-    double integral = 1;
-    /*unsigned int nSteps = 1000000;   TODO
-    double step = (max_-min_)/(double)nSteps;
+    /*double integral = 1;
+    unsigned int nSteps = 1000000;
+    double stepa = (ma.getMax()-ma.getMin())/(double)nSteps;
+    double stepb = (mb.getMax()-mb.getMin())/(double)nSteps;
 
-    integral += step*BreitWigner(min_, par.at(0)->GetValue(), par.at(1)->GetValue())/2.;
+    //TODO: better approximation
+
     for(unsigned int k=1; k<nSteps; k++){
-      integral += step*BreitWigner((min_+k*step), par.at(0)->GetValue(), par.at(1)->GetValue());
-    }
-    integral += step*BreitWigner(max_, par.at(0)->GetValue(), par.at(1)->GetValue())/2.;*/
+      integral += step*intensity((ma.getMin()+k*step), par);
+    }*/
 
-    return integral;
+    return totAmp.getNorm();//integral;
   }
 
-  virtual const double intensity(std::vector<double> x, ParameterList& par){
+  virtual const double intensity(std::vector<double>& x, ParameterList& par){
     //TODO: check x exception
     if(x.size()!=3) return 0;
 
-    ma.setVal(sqrt(x[0])); mb.setVal(sqrt(x[1])); mc.setVal(sqrt(x[2]));
+    ma.setVal(x[0]); mb.setVal(x[1]); mc.setVal(x[2]);
 
     if( par.GetNDouble()>rr.size() ){
-        std::cout << "Error: Parameterlist doesnt match model!!" << std::endl; //TODO: exception
+        std::cout << "Error: Parameterlist doesn't match model!!" << std::endl; //TODO: exception
       return 0;
     }
 
@@ -167,7 +168,11 @@ public:
     for(unsigned int i=0; i<rr.size();i++){
       //add strength and phases of the used amplitudes
 
-      outPar.AddParameter(DoubleParameter(rr[i]->getVal(), rr[i]->getMin(), rr[i]->getMax(), rr[i]->getError()));
+      //outPar.AddParameter(DoubleParameter(rr[i]->getVal()));
+      if(rr[i]->hasError()) //TODO: check bounds
+        outPar.AddParameter(DoubleParameter(rr[i]->getVal(), rr[i]->getMin(), rr[i]->getMax(), rr[i]->getError()));
+      else
+        outPar.AddParameter(DoubleParameter(rr[i]->getVal(), 0.1));
       //outPar.AddParameter(DoubleParameter(phir[i]->getVal(), phir[i]->getMin(), phir[i]->getMax(), phir[i]->getError()));
     }
     //outPar.AddParameter(DoubleParameter(rr[rr.size()-1]->getVal(), rr[rr.size()-1]->getMin(), rr[rr.size()-1]->getMax(), rr[rr.size()-1]->getError()));
@@ -223,16 +228,42 @@ public:
   std::vector<std::shared_ptr<AmpAbsDynamicalFunction> > rbw;
   std::vector<std::shared_ptr<AmpWigner> > angd;
 
-  /*AmpRelBreitWignerRes * rbwm23_0;
-  AmpRelBreitWignerRes * rbwm23_1;
-  AmpRelBreitWignerRes * rbwm23_2;
-  AmpRelBreitWignerRes * inter13_0;
-  AmpRelBreitWignerRes * inter12_0;*/
+  double lambda(double x, double y, double z){
+    return x*x+y*y+z*z-2.*x*y-2.*x*z-2.*y*z;
+  }
 
- /* AmpWigner * angd23_0;
-  AmpWigner * angd23_1;
-  AmpWigner * angd13_i;
-  AmpWigner * angd12_i;*/
+  double m13_sq_max_constr(double &m23_sq){
+    return m1*m1+m3*m3+0.5/m23_sq*((M*M-m23_sq-m1*m1)*(m23_sq-m2*m2+m3*m3)+sqrt(lambda(m23_sq,M*M,m1*m1))*sqrt(lambda(m23_sq,m2*m2,m3*m3)));
+  }
+
+  double m13_sq_min_constr(double &m23_sq){
+    return m1*m1+m3*m3+0.5/m23_sq*((M*M-m23_sq-m1*m1)*(m23_sq-m2*m2+m3*m3)-sqrt(lambda(m23_sq,M*M,m1*m1))*sqrt(lambda(m23_sq,m2*m2,m3*m3)));
+  }
+
+  double m23_sq_max_constr(double &m13_sq){
+    return m2*m2+m3*m3+0.5/m13_sq*((M*M-m13_sq-m2*m2)*(m13_sq-m1*m1+m3*m3)+sqrt(lambda(m13_sq,M*M,m2*m2))*sqrt(lambda(m13_sq,m1*m1,m3*m3)));
+  }
+
+  double m23_sq_min_constr(double &m13_sq){
+    return m2*m2+m3*m3+0.5/m13_sq*((M*M-m13_sq-m2*m2)*(m13_sq-m1*m1+m3*m3)-sqrt(lambda(m13_sq,M*M,m2*m2))*sqrt(lambda(m13_sq,m1*m1,m3*m3)));
+  }
+
+  double mb_sq_max_constr(double &ma_sq){
+    return m13_sq_max_constr(ma_sq);
+  }
+
+  double mb_sq_min_constr(double &ma_sq){
+    return m13_sq_min_constr(ma_sq);
+  }
+
+  double ma_sq_max_constr(double &mb_sq){
+    return m23_sq_max_constr(mb_sq);
+  }
+
+  double ma_sq_min_constr(double &mb_sq){
+    return m23_sq_min_constr(mb_sq);
+  }
+
 
  private:
 

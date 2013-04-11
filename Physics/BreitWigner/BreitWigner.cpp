@@ -40,7 +40,7 @@ const double BreitWigner::intensity(double x, double M, double T){
   return BreitWignerValue(x, M, T);
 }
 
-const double BreitWigner::intensity(std::vector<double> x, ParameterList& par){
+const double BreitWigner::intensity(std::vector<double>& x, ParameterList& par){
   return BreitWignerValue(x.at(0), par.GetDoubleParameter(0).GetValue(), par.GetDoubleParameter(1).GetValue());
 }
 

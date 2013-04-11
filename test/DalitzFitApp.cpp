@@ -58,14 +58,22 @@ int main(int argc, char **argv){
   // Initiate parameters
   ParameterList par;
   amps->fillStartParVec(par); //perfect startvalues
+  std::vector<double> x;
+  x.push_back(1.); x.push_back(1.); x.push_back(1.);
+  std::cout << "LH mit optimalen intensitäten: " << esti->controlParameter(par) << std::endl;
+  for(unsigned int i=0; i<2; i++){
+    par.GetDoubleParameter(i).SetValue(3./(double)(i+1));
+  }
+  std::cout << "LH mit folgenden intensitäten: " << esti->controlParameter(par) << std::endl;
 
   for(unsigned int i=0; i<par.GetNDouble(); i++){
       std::cout << "Parameter " << i << " = " << par.GetDoubleParameter(i).GetValue() << std::endl;
   }
 
-  //std::vector<double> x;
-  //x.push_back(1.); x.push_back(1.); x.push_back(1.);
-  //std::cout << "Start Int:" << amps->intensity(x,par) << std::endl;
+  std::cout << "Fixing 5 of 7 parameters " << std::endl;
+  for(unsigned int i=2; i<par.GetNDouble(); i++){
+      par.GetDoubleParameter(i).FixParameter(true);
+    }
 
   std::cout << "Start Fit" << std::endl;
   double genResult = opti->exec(par);
