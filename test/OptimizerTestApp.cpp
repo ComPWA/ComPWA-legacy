@@ -51,7 +51,7 @@ int main(int argc, char **argv){
     myMinimizerList.push_back(std::shared_ptr<Optimizer> (new GenevaIF(myFit)));
     myMinimizerList.push_back(std::shared_ptr<Optimizer> (new MinuitIF(myFit)));
   }else{
-   std::cout << "Minimizer/t" << whichMinimizer << "\tdoesn't exist" << std::endl;
+   std::cout << "Minimizer\t" << whichMinimizer << "\tdoesn't exist" << std::endl;
    return 0;
   }
 
@@ -62,8 +62,8 @@ int main(int argc, char **argv){
   par.AddParameter(DoubleParameter(-0.008,-0.02,0,0.005));
   // Loop over minimizers (at the moment this means: Geneva, MinuitIF or Geneva then MinuitIF)
   for(unsigned int Nmin=0; Nmin<myMinimizerList.size(); Nmin++){
-    // Pointer to one ot the used minimizers
-      std::shared_ptr<Optimizer> minimizer = myMinimizerList[Nmin];
+    // Pointer to one of the used minimizers
+    std::shared_ptr<Optimizer> minimizer = myMinimizerList.at(Nmin);
     // Do the actual minimization
     double genResult = minimizer->exec(par);
 

@@ -16,6 +16,7 @@
 #include "Optimizer/ControlParameter.hpp"
 #include "Optimizer/Optimizer.hpp"
 #include "Core/ParameterList.hpp"
+#include "Core/Parameter.hpp"
 #include "Optimizer/Geneva/GArgumentParser.hpp"
 
 #include <boost/program_options.hpp>

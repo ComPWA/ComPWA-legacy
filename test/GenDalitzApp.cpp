@@ -53,7 +53,7 @@ const Double_t PI = 3.14159; // m/s
  * The main function.
  */
 int main(int argc, char **argv){
-  unsigned int i=0;
+  unsigned int i=0, mc=0;
   TRandom3 rando;
 
   //load resonances
@@ -73,15 +73,22 @@ int main(int argc, char **argv){
   //Simple Breit-Wigner Physics-Module setup
   AmpSumIntensity testBW(M, Br, m1, m2, m3, ini);
   ParameterList minPar;
-  minPar.AddParameter(DoubleParameter(1.5,0.5,2.5,0.1));
+  testBW.fillStartParVec(minPar);
+ // minPar.AddParameter(DoubleParameter(1.5,0.5,2.5,0.1));
 
   //Output File setup
   TFile output("test/3Part-4vecs.root","recreate");
   output.SetCompressionLevel(1); //try level 2 also
+
   TTree fTree ("data","Dalitz-Gen");
   TClonesArray *fEvt = new TClonesArray("TParticle");
-  TClonesArray &ar = *fEvt;
+  //TClonesArray &ar = *fEvt;
   fTree.Branch("Particles",&fEvt);
+
+  TTree fTreePHSP ("mc","Dalitz-Gen-PHSP");
+  TClonesArray *fEvtPHSP = new TClonesArray("TParticle");
+  //TClonesArray &ar = *fEvt;
+  fTreePHSP.Branch("Particles",&fEvtPHSP);
 
   //Generation
   TLorentzVector W(0.0, 0.0, 0.0, M);//= beam + target;
@@ -120,9 +127,9 @@ int main(int argc, char **argv){
 
       //call physics module
       vector<double> x;
-      x.push_back(m23sq);
-      x.push_back(m13sq);
-      x.push_back(m12sq);
+      x.push_back(sqrt(m23sq));
+      x.push_back(sqrt(m13sq));
+      x.push_back(sqrt(m12sq));
       double AMPpdf = testBW.intensity(x, minPar);
 
       double test = rando.Uniform(0,10);
@@ -137,10 +144,20 @@ int main(int argc, char **argv){
 
         fTree.Fill();
       }
+
+      if(mc<MaxEvents){
+        mc++;
+        new((*fEvtPHSP)[0]) TParticle(fparticleGam);
+        new((*fEvtPHSP)[1]) TParticle(fparticlePip);
+        new((*fEvtPHSP)[2]) TParticle(fparticlePim);
+
+        fTreePHSP.Fill();
+      }
   }while(i<MaxEvents);
 
   fTree.Print();
   fTree.Write();
+  fTreePHSP.Write();
   output.Close();
 
   cout << "Done ..." << endl << endl;

@@ -6,10 +6,11 @@
 #include "DataReader/RootReader/RootReader.hpp"
 #include "TParticle.h"
 
-RootReader::RootReader(const std::string inConfigFile, const bool binned=false):fBinned(binned){
+RootReader::RootReader(const std::string inRootFile, const bool binned=false, const std::string inTreeName="data")
+    :fBinned(binned){
 
-  fFile = new TFile(inConfigFile.c_str());
-  fTree = (TTree*) fFile->Get("data");
+  fFile = new TFile(inRootFile.c_str());
+  fTree = (TTree*) fFile->Get(inTreeName.c_str());
   fParticles = new TClonesArray("TParticle");
   fTree->GetBranch("Particles")->SetAutoDelete(false);
   fTree->SetBranchAddress("Particles",&fParticles);

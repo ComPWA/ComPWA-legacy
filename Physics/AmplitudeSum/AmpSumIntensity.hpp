@@ -131,7 +131,8 @@ public:
       integral += step*intensity((ma.getMin()+k*step), par);
     }*/
 
-    return totAmp.getNorm();//integral;
+    return 1;
+    //return totAmp.getNorm();//integral;
   }
 
   virtual const double intensity(std::vector<double>& x, ParameterList& par){

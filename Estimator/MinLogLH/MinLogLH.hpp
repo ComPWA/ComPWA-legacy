@@ -25,6 +25,7 @@ class MinLogLH : public Estimator {
 public:
   /// Default Constructor (0x0)
   MinLogLH(std::shared_ptr<Amplitude>, std::shared_ptr<Data>);
+  MinLogLH(std::shared_ptr<Amplitude>, std::shared_ptr<Data>, std::shared_ptr<Data>);
 
   virtual double controlParameter(ParameterList& minPar);
 
@@ -36,6 +37,7 @@ protected:
 private:
   std::shared_ptr<Amplitude> pPIF_;
   std::shared_ptr<Data> pDIF_;
+  std::shared_ptr<Data> pPHSP_;
 
 };
 

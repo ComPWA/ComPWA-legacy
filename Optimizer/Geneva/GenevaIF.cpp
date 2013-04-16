@@ -38,6 +38,7 @@ GenevaIF::~GenevaIF()
 
 const double GenevaIF::exec(ParameterList& par){
   // create par arrays
+  std::cout<< " Geneva starts " << std::cout;
   unsigned int NPar = par.GetNDouble(); //just doubles up to now, TODO
   double val[NPar], min[NPar], max[NPar], err[NPar];
   for(unsigned int i=0; i<NPar; i++){

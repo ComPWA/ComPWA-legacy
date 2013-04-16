@@ -31,7 +31,6 @@ double MinuitFcn::operator()(const std::vector<double>& x) const{
   double result=_myDataPtr->controlParameter(par);
   std::cout << std::endl << "current minimized value:\t"<< result << std::endl;
 
-  std::cout << std::endl;
   return result;
 }
 

@@ -36,7 +36,7 @@
 int main(int argc, char **argv){
   std::string file="test/2Part-4vecs.root";
   std::cout << "Load Modules" << std::endl;
-  std::shared_ptr<Data> myReader(new RootReader(file, false));
+  std::shared_ptr<Data> myReader(new RootReader(file, false,"data"));
   std::shared_ptr<Amplitude> testBW(new BreitWigner(0.,5.));
   std::shared_ptr<Estimator> testEsti(new MinLogLH(testBW, myReader)); //TODO: <- should be done by runManager
   std::shared_ptr<Optimizer> opti(new MinuitIF(testEsti));
