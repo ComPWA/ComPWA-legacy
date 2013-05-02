@@ -100,7 +100,7 @@ int main(int argc, char **argv){
   event.SetDecay(W, 3, masses);
 
   TLorentzVector *pGamma,*pPip,*pPim,pPm23,pPm13;
-  double weight, m23sq, m13sq, m12sq;
+  double weight, m23sq, m13sq, m12sq, maxTest=0;
   cout << "Start generation of y pi0 pi0 Dalitz" << endl;
   do{
       weight = event.Generate();
@@ -132,11 +132,13 @@ int main(int argc, char **argv){
       x.push_back(sqrt(m12sq));
       double AMPpdf = testBW.intensity(x, minPar);
 
-      double test = rando.Uniform(0,10);
+      double test = rando.Uniform(0,5);
 
       //mb.setVal(m13);
       //double m13pdf = totAmp13.getVal();//fun_combi2->Eval(m13);
-      if(test<(weight*AMPpdf)){
+      if(maxTest<(weight*AMPpdf))
+        maxTest=(weight*AMPpdf);
+      if(i<MaxEvents && test<(weight*AMPpdf)){
         i++;
         new((*fEvt)[0]) TParticle(fparticleGam);
         new((*fEvt)[1]) TParticle(fparticlePip);
@@ -145,7 +147,7 @@ int main(int argc, char **argv){
         fTree.Fill();
       }
 
-      if(mc<MaxEvents){
+      if(mc<MaxEvents && test<weight){
         mc++;
         new((*fEvtPHSP)[0]) TParticle(fparticleGam);
         new((*fEvtPHSP)[1]) TParticle(fparticlePip);
@@ -153,14 +155,14 @@ int main(int argc, char **argv){
 
         fTreePHSP.Fill();
       }
-  }while(i<MaxEvents);
+  }while(i<MaxEvents || mc<MaxEvents);
 
   fTree.Print();
   fTree.Write();
   fTreePHSP.Write();
   output.Close();
 
-  cout << "Done ..." << endl << endl;
+  cout << "Done ... " << maxTest << endl << endl;
 
   return 0;
 }

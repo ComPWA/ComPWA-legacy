@@ -13,7 +13,7 @@
 #include <memory>
 #include <string>
 
-//PWA-Headers
+//PWA-Header
 #include "Estimator/Estimator.hpp"
 #include "Physics/Amplitude.hpp"
 #include "DataReader/Data.hpp"

@@ -82,17 +82,17 @@ int main(int argc, char **argv){
   std::cout << "Final LH = " << genResult << std::endl;
 
   //Plot result
-  TH2D* bw12 = new TH2D("bw12","inv. mass-sq of particles 1&2 FitResult",1000,0.,10.,1000,0.,10.);
+  TH2D* bw12 = new TH2D("bw12","inv. mass-sq of particles 1&2 Generated",1000,0.,10.,1000,0.,10.);
   bw12->GetXaxis()->SetTitle("m_{12}^{2} / GeV^{2}");
   bw12->GetXaxis()->CenterTitle();
   bw12->GetYaxis()->SetTitle("#");
   bw12->GetYaxis()->CenterTitle();
-  TH2D* bw13 = new TH2D("bw13","inv. mass-sq of particles 1&3 FitResult",1000,0.,10.,1000,0.,10.);
+  TH2D* bw13 = new TH2D("bw13","inv. mass-sq of particles 1&3 Generated",1000,0.,10.,1000,0.,10.);
   bw13->GetXaxis()->SetTitle("m_{13}^{2} / GeV^{2}");
   bw13->GetXaxis()->CenterTitle();
   bw13->GetYaxis()->SetTitle("#");
   bw13->GetYaxis()->CenterTitle();
-  TH2D* bw23 = new TH2D("bw23","inv. mass-sq of particles 2&3 FitResult",1000,0.,10.,1000,0.,10.);
+  TH2D* bw23 = new TH2D("bw23","inv. mass-sq of particles 2&3 Generated",1000,0.,10.,1000,0.,10.);
   bw23->GetXaxis()->SetTitle("m_{23}^{2} / GeV^{2}");
   bw23->GetXaxis()->CenterTitle();
   bw23->GetYaxis()->SetTitle("#");

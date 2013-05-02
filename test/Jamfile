@@ -25,7 +25,7 @@ project :
 	<linkflags>-lEG
 	<linkflags>-lRooFit
 	<linkflags>-lRooFitCore
-	<linkflags>-L/local/home/mathias/workspace/nextPWA/external/qft++/lib
+	<linkflags>-L$(TOP)/external/qft++/lib
 	<linkflags>-lqft++
 	;
 

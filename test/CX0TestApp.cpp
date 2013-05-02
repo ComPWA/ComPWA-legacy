@@ -95,11 +95,12 @@ int main(int argc, char **argv) {
   for (int i = 0; i < num_threads; ++i) {
       t[i] = thread(call_from_thread, i);
   }
-  cout << "Launched from the main\n";
+  cout << "Launched from the main\n" << endl;
   //Join the threads with the main thread
   for (int i = 0; i < num_threads; ++i) {
       t[i].join();
   }
+  cout << endl <<"Launched from the main after join\n" << endl;
   cout << endl;
 
   //========= Regular Expr. ==========

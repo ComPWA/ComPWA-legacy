@@ -22,9 +22,9 @@
 //#include "ErrLogger/ErrLogger.hh"
 
 // Minimizer Interface header files go here
-#include "OIFMinuit.hpp"
-#include "PWAParameter.hpp"
-#include "PWAGenericPar.hpp"
+#include "Optimizer/Minuit2/MinuitIF.hpp"
+#include "Core/ParameterList.hpp"
+#include "Core/Parameter.hpp"
 
 // The toy-data to fit to
 #include "PolyFit.hpp"
@@ -48,11 +48,11 @@ int main(int argc, char **argv){
   myMinimizerList.push_back(shared_ptr<Optimizer> (new MinuitIF(myFit)));
 
   // Initiate parameters
-  vector<shared_ptr<PWAParameter> > par;
-  par.push_back(shared_ptr<PWAGenericPar<double> >(new PWAGenericPar<double>(-11,-20,0,3)));
-  par.push_back(shared_ptr<PWAGenericPar<double> >(new PWAGenericPar<double>(9.8,5,15,2)));
-  par.push_back(shared_ptr<PWAGenericPar<double> >(new PWAGenericPar<double>(1.1,0.5,1.5,0.3)));
-  par.push_back(shared_ptr<PWAGenericPar<double> >(new PWAGenericPar<double>(-0.008,-0.02,0,0.005)));
+  ParameterList par;
+  par.AddParameter(DoubleParameter(-11,-20,0,3));
+  par.AddParameter(DoubleParameter(9.8,5,15,2));
+  par.AddParameter(DoubleParameter(1.1,0.5,1.5,0.3));
+  par.AddParameter(DoubleParameter(-0.008,-0.02,0,0.005));
 
   // Loop over minimizers (at the moment this means: Geneva, MinuitIF or Geneva then MinuitIF)
   for(unsigned int Nmin=0; Nmin<myMinimizerList.size(); Nmin++){
@@ -62,8 +62,8 @@ int main(int argc, char **argv){
     double genResult = minimizer->exec(par);
 
     std::cout << "Minimizer " << Nmin << "\t final par :\t" << genResult << std::endl;
-    for(unsigned int i=0; i<par.size(); i++)
-      std::cout << "final par "<< i << ":\t" << par[i] << std::endl;
+    for(unsigned int i=0; i<par.GetNDouble(); i++)
+      std::cout << "final par "<< i << ":\t" << par.GetParameterValue(i) << std::endl;
     std::cout << "Done ..." << std::endl << std::endl;
   }
 
