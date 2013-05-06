@@ -60,6 +60,12 @@ int main(int argc, char **argv){
   par.AddParameter(DoubleParameter(9.8,5,15,2));
   par.AddParameter(DoubleParameter(1.1,0.5,1.5,0.3));
   par.AddParameter(DoubleParameter(-0.008,-0.02,0,0.005));
+
+  std::cout << "Starting Parameters:" << std::endl;
+  for(unsigned int i=0; i<par.GetNDouble(); i++)
+    std::cout << "Parameter "<< i << ":\t" << par.GetParameterValue(i) << std::endl;
+  std::cout << std::endl << std::endl << std::endl;
+
   // Loop over minimizers (at the moment this means: Geneva, MinuitIF or Geneva then MinuitIF)
   for(unsigned int Nmin=0; Nmin<myMinimizerList.size(); Nmin++){
     // Pointer to one of the used minimizers

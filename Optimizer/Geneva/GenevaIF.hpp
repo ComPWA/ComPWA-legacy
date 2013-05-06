@@ -7,23 +7,30 @@
  * provided with the ControlParameter interface.
 */
 
-#ifndef _OIFGENEVA_HPP
-#define _OIFGENEVA_HPP
+#ifndef _GENEVAIF_HPP
+#define _GENEVAIF_HPP
+
+
+// Boost header files go here
+
+// Geneva header files go here
 
 #include <vector>
 #include <memory>
+#include <iostream>
 //#include <boost/shared_ptr.hpp>
 #include "Optimizer/ControlParameter.hpp"
 #include "Optimizer/Optimizer.hpp"
 #include "Core/ParameterList.hpp"
 #include "Core/Parameter.hpp"
-#include "Optimizer/Geneva/GArgumentParser.hpp"
+#include "Optimizer/Geneva/GStartIndividual.hpp"
+//#include "Optimizer/Geneva/GArgumentParser.hpp"
 
 #include <boost/program_options.hpp>
 #include <boost/filesystem.hpp>
 
 // Geneva header files go here
-#include <courtier/GAsioHelperFunctions.hpp>
+/*#include <courtier/GAsioHelperFunctions.hpp>
 #include <courtier/GAsioTCPClientT.hpp>
 #include <courtier/GAsioTCPConsumerT.hpp>
 #include <geneva/GBrokerEA.hpp>
@@ -32,13 +39,14 @@
 #include <geneva/GMultiThreadedEA.hpp>
 #include <common/GCommonEnums.hpp>
 #include <common/GSerializationHelperFunctionsT.hpp>
-#include <geneva/GOptimizationEnums.hpp>
+#include <geneva/GOptimizationEnums.hpp>*/
+#include "geneva/Go2.hpp"
 
 class GenevaIF : public Optimizer {
 
 public:
   /// Default Constructor (0x0)
-  GenevaIF(std::shared_ptr<ControlParameter> theData, std::string inConfigFile="test/GStartProject.cfg", boost::uint16_t inparallelizationMode=1, bool inserverMode=false, std::string inip="localhost", unsigned short inport=10000, Gem::Common::serializationMode inserMode=Gem::Common::SERIALIZATIONMODE_TEXT);
+  GenevaIF(std::shared_ptr<ControlParameter> theData, std::string inConfigFileDir="test/config/");
   virtual const double exec(ParameterList& par) ;
 
   /** Destructor */
@@ -48,9 +56,10 @@ public:
 
  private:
   std::shared_ptr<ControlParameter> _myData;
+  std::string configFileDir;
  // vector<string> paramNames;
 
-  std::string configFile;	
+  /*
   boost::uint16_t parallelizationMode;
   bool serverMode;
   std::string ip;
@@ -68,8 +77,8 @@ public:
   Gem::Geneva::sortingMode smode;
   boost::uint32_t processingCycles;
   bool returnRegardless;
-  boost::uint32_t waitFactor;
+  boost::uint32_t waitFactor;*/
 
 };
 
-#endif /* _OIFGeneva_HPP */
+#endif /* _GENEVAIF_HPP */

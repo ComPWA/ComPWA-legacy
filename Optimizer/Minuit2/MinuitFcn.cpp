@@ -25,11 +25,11 @@ MinuitFcn::~MinuitFcn(){
 double MinuitFcn::operator()(const std::vector<double>& x) const{
   ParameterList par;
   for(unsigned int i=0; i<x.size(); i++){
-    std::cout << x[i] << " ";
+    //std::cout << x[i] << " ";
     par.AddParameter(DoubleParameter(x[i]));
   }
   double result=_myDataPtr->controlParameter(par);
-  std::cout << std::endl << "current minimized value:\t"<< result << std::endl;
+  std::cout << "current minimized value:\t"<< result << std::endl;
 
   return result;
 }

@@ -4,7 +4,7 @@ import os ;
 local GENEVA = [ os.environ GENEVA ] ;
 local BOOST_BUILD_PATH = [ os.environ BOOST_BUILD_PATH ] ;
 
-BOOSTLIBS = -lboost_date_time -lboost_filesystem -lboost_program_options -lboost_regex -lboost_serialization -lboost_system -lboost_thread-mt -lboost_test_exec_monitor -L$(BOOST_BUILD_PATH)/lib ;
+BOOSTLIBS = -lboost_date_time -lboost_filesystem -lboost_program_options -lboost_regex -lboost_serialization -lboost_system -lboost_thread -lboost_test_exec_monitor -L$(BOOST_BUILD_PATH)/lib ;
 
 lib Geneva : :  <file>$(GENEVA)/lib/libgemfony-common.so
                 <file>$(GENEVA)/lib/libgemfony-courtier.so
@@ -12,6 +12,7 @@ lib Geneva : :  <file>$(GENEVA)/lib/libgemfony-common.so
                 <file>$(GENEVA)/lib/libgemfony-geneva.so
                 <file>$(GENEVA)/lib/libgemfony-hap.so
                 : : ;
+               
 
 project :
 	requirements 
