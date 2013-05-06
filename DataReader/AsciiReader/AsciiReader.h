@@ -24,13 +24,13 @@ class AsciiReader : public Data {
 
 public:
   /// Default Constructor (0x0)
-  AsciiReader( const std::string inConfigFile );
+  AsciiReader( const std::string inConfigFile, const int particles );
 
-  virtual const Event* getEvent( const int );
+  virtual const Event& getEvent( const int );
   virtual const int getBin( const int, double&, double& );
 
-  virtual const unsigned int getNEvents() const { return EvtList.size(); };
-  virtual const unsigned int getNBins() const {return fmaxBins;};
+  virtual const unsigned int getNEvents() const { return EvtList_.size(); };
+  virtual const unsigned int getNBins() const {return fmaxBins_;};
 
   /** Destructor */
   virtual ~AsciiReader();
@@ -38,7 +38,8 @@ public:
 protected:
 
 private:
-  std::vector<Event> EvtList_;
+  std::vector<Event*> EvtList_;
+  unsigned int fmaxBins_;
 
 };
 

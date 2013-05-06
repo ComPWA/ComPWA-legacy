@@ -8,9 +8,10 @@
 #include <utility>
 
 // 3rd party headers
-#include "external/qft++/tensor/Vector4.hh"
+#include "external/qft++/include/Tensor.h"
 
 // local headers
+#include "Core/Exceptions.hpp"
 #include "DataReader/AsciiReader/AsciiReader.h"
 
 //_____ D E F I N I T I O N S __________________________________________________
@@ -22,7 +23,9 @@
 //_____ F U N C T I O N S ______________________________________________________
 
 // Constructors and destructors
-AsciiReader::AsciiReader( const std::string inConfigFile, int particles  ) {
+AsciiReader::AsciiReader( const std::string inConfigFile, const int particles  )
+  : fmaxBins_(0)
+{
 
   std::ifstream currentStream;
   currentStream.open ( inConfigFile.c_str() );
@@ -39,7 +42,7 @@ AsciiReader::AsciiReader( const std::string inConfigFile, int particles  ) {
     }
 
     if (!currentStream.fail()) {
-      EvtList_.add( newEvent );
+      EvtList_.push_back( newEvent );
       // for ( parts = 0; parts < linesToSkip; parts++ )
       //   currentStream >> px >> py >> pz >> e;
     }
@@ -51,11 +54,12 @@ AsciiReader::~AsciiReader() {
   EvtList_.clear();
 }
 
-const Event* AsciiReader::getEvent( const int index ) {
-  if ( EvtList_.size() <= index )
+const Event& AsciiReader::getEvent( const int index ) {
+  if ( EvtList_.size() <= (unsigned int)index )
     throw BadIndex("Index exceeds max number of events");
 
-  return EvtList_.at( index );
+  Event* thisEvent = EvtList_.at( index );
+  return *thisEvent;
 }
 
 const int AsciiReader::getBin( const int i, double& m12, double& weight ) {
