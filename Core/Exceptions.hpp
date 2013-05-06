@@ -75,6 +75,22 @@ public:
 };
 
 //------------------------------------------------------------------------------
+//! @class   BadIndex
+//!
+//! @brief   Index out of range
+//------------------------------------------------------------------------------
+class BadIndex : public Exception {
+public:
+  BadIndex ( const std::string& error ) :
+    Exception(error)
+  {}
+  BadIndex ( const char *error ) :
+    Exception(error)
+  {}
+  virtual ~BadIndex () throw() {}
+};
+
+//------------------------------------------------------------------------------
 //! @class   ParameterFixed
 //!
 //! @brief   Parameter cannot be changed

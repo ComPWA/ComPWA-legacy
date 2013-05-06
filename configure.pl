@@ -10,15 +10,16 @@ sub createTopLevelJamfile {
     my $TOP = uc($_[0]);
     my $subproject;
     my $dependency;
+    local *OUT;
     
-    open( IN, '+>./'.$_[0].'/Jamfile' ) or die $!;
+    open( OUT, '+>./'.$_[0].'/Jamfile' ) or die $!;
 
     foreach my $project ( @{$_[1]} ) {
       $subproject = $subproject . "build-project $project ;\n";
       $dependency = $dependency . "        \$($TOP)/$project//$project\n";
     }
 
-    print IN "########### $_[0] Jamfile #############\n" .
+    print OUT "########### $_[0] Jamfile #############\n" .
         "path-constant $TOP : . ;\n" .
         "\n" .
         "# lib$_[0].so will consist of these packages:\n" .
@@ -31,7 +32,7 @@ sub createTopLevelJamfile {
         "        ;\n" .
         "\n" .
         "install dist : $_[0] : <location>\$(TOP)/lib ;\n";
-    close( IN );
+    close( OUT );
   }
 }
 
@@ -44,7 +45,7 @@ sub readProjectDescription {
     read( CF, my $data, -s $_[2] );
     close( CF );
 
-    if( $data =~ /\@brief(.*)\@end/s) {
+    if( $data =~ /\@brief(.*)\@end/s ) {
       my $result = $1;
       $result =~ s/^\s*#\s*//mg;
       $result =~ s/[\n,\r]/ /mg;
