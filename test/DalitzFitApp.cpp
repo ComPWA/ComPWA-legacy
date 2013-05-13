@@ -55,7 +55,8 @@ int main(int argc, char **argv){
   std::shared_ptr<Data> myReader(new RootReader(file, false,"data"));
   std::shared_ptr<Data> myPHSPReader(new RootReader(file, false,"mc"));
   std::shared_ptr<Amplitude> amps(new AmpSumIntensity(M, Br, m1, m2, m3, ini));
-  std::shared_ptr<Estimator> esti(new MinLogLH(amps, myReader, myPHSPReader));
+  std::shared_ptr<ControlParameter> esti = MinLogLH::createInstance(amps, myReader, myPHSPReader);
+  //std::shared_ptr<Estimator> esti(new MinLogLH(amps, myReader, myPHSPReader));
   std::shared_ptr<Optimizer> opti(new MinuitIF(esti));
 
   // Initiate parameters

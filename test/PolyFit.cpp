@@ -3,6 +3,7 @@
 #include <sstream>
 #include <iostream>
 #include <string>
+#include <memory>
 #include "PolyFit.hpp"
 
 #include "TFile.h"
@@ -14,6 +15,13 @@
 #include "TGraphErrors.h"
 
 //#include "ErrLogger/ErrLogger.hh"
+
+std::shared_ptr<ControlParameter> PolyFit::createInstance(double p0, double p1, double p2, double p3, double sigma){
+  if(!instance_)
+    instance_ = std::shared_ptr<ControlParameter>(new PolyFit(p0, p1, p2, p3, sigma));
+
+  return instance_;
+}
 
 PolyFit::PolyFit(double p0, double p1, double p2, double p3, double sigma) :
   _theTFile(new TFile("test/myFit.root","RECREATE")),
@@ -104,5 +112,6 @@ PolyFit::~PolyFit()
   _theTFile->Write();
   _theTFile->Close();
   //cout << "done" << endl << endl;
+  //delete instance_;
 }
 

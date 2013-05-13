@@ -22,16 +22,34 @@ class Estimator : public ControlParameter
 {
 
 public:
-
-  Estimator(){
-  }
-
-  virtual ~Estimator(){
-  /* nothing */
-  }
+  //static std::shared_ptr<Estimator> Instance();
 
   virtual double controlParameter(ParameterList& minPar) = 0;
 
+protected:
+    //static std::shared_ptr<Estimator> instance_;
+
+    Estimator(){
+    }
+
+    virtual ~Estimator(){
+    /* nothing */
+    }
+
+
 };
+
+//std::shared_ptr<Estimator> Estimator::Instance() {
+ //   return Estimator::instance_;
+//}
+
+//std::shared_ptr<Estimator> Estimator::instance_ = 0;
+
+//Why can i do this here but not inside ControlParameter.hpp?
+/*std::shared_ptr<ControlParameter> ControlParameter::Instance() {
+    return ControlParameter::instance_;
+}
+
+std::shared_ptr<ControlParameter> ControlParameter::instance_ = 0;*/
 
 #endif

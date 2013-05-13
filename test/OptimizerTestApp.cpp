@@ -40,7 +40,7 @@ int main(int argc, char **argv){
   std::string whichMinimizer("all");
   double p0=-10., p1=10., p2=1., p3=-0.01, sigma_smear=3;
   // Generate data distribution
-  std::shared_ptr<PolyFit> myFit(new PolyFit(p0, p1, p2, p3, sigma_smear));
+  std::shared_ptr<ControlParameter> myFit = PolyFit::createInstance(p0, p1, p2, p3, sigma_smear);
 
   //--------------------------Minimizer IF --------------------------------------------------------
   std::vector<std::shared_ptr<Optimizer> > myMinimizerList;
@@ -56,10 +56,10 @@ int main(int argc, char **argv){
   }
 
   ParameterList par;
-  par.AddParameter(DoubleParameter(-11,-20,0,3));
-  par.AddParameter(DoubleParameter(9.8,5,15,2));
-  par.AddParameter(DoubleParameter(1.1,0.5,1.5,0.3));
-  par.AddParameter(DoubleParameter(-0.008,-0.02,0,0.005));
+  par.AddParameter(DoubleParameter(-50,-100,-5,50));
+  par.AddParameter(DoubleParameter(50,0,100,50));
+  par.AddParameter(DoubleParameter(10,-20,20,10));
+  par.AddParameter(DoubleParameter(-0.1,-0.2,0,0.05));
 
   std::cout << "Starting Parameters:" << std::endl;
   for(unsigned int i=0; i<par.GetNDouble(); i++)
@@ -80,6 +80,6 @@ int main(int argc, char **argv){
   }
 
   // Plot results
-  myFit->drawGraph(par.GetParameterValue(0),par.GetParameterValue(1),par.GetParameterValue(2),par.GetParameterValue(3));
+  //myFit->drawGraph(par.GetParameterValue(0),par.GetParameterValue(1),par.GetParameterValue(2),par.GetParameterValue(3));
   return 0;
 }

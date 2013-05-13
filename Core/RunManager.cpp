@@ -8,7 +8,7 @@
 
 #include "Core/RunManager.hpp"
 
-RunManager::RunManager(std::shared_ptr<Data> inD, std::shared_ptr<Estimator> inE,
+RunManager::RunManager(std::shared_ptr<Data> inD, std::shared_ptr<ControlParameter> inE,
       std::shared_ptr<Amplitude> inP, std::shared_ptr<Optimizer> inO)
       : pData_(inD), pEsti_(inE), pPhys_(inP), pOpti_(inO), valid_(false), success_(false) {
   if(inD && inE && inP && inO)

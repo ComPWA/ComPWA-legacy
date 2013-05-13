@@ -17,14 +17,24 @@
 class ControlParameter{
 
 public:
+  static std::shared_ptr<ControlParameter> Instance();
+
+  virtual double controlParameter(ParameterList& minPar) =0;
+
+protected:
+  static std::shared_ptr<ControlParameter> instance_;
 
   ControlParameter(){
   }
 
   virtual ~ControlParameter(){ /* nothing */	}
-
-  virtual double controlParameter(ParameterList& minPar) =0;
  
 };
+
+/*std::shared_ptr<ControlParameter> ControlParameter::Instance() {
+    return ControlParameter::instance_;
+}
+
+std::shared_ptr<ControlParameter> ControlParameter::instance_ = 0;*/
 
 #endif

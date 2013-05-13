@@ -38,7 +38,7 @@ public:
 protected:
 
 private:
-  std::vector<Event*> EvtList_;
+  std::vector<Event> EvtList_;
   unsigned int fmaxBins_;
 
 };

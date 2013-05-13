@@ -42,7 +42,7 @@ int main(int argc, char **argv){
   std::cout << "Load Modules" << std::endl;
   std::shared_ptr<Data> myReader(new RootReader(file, true,"data"));
   std::shared_ptr<Amplitude> testBW(new BreitWigner(0.,5.));
-  std::shared_ptr<Estimator> testEsti(new ChiOneD(testBW, myReader));
+  std::shared_ptr<ControlParameter> testEsti = ChiOneD::createInstance(testBW, myReader);
   std::shared_ptr<Optimizer> opti(new MinuitIF(testEsti));
 
   // Initiate parameters

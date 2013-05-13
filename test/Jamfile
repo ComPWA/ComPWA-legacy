@@ -32,6 +32,7 @@ project :
 
 lib test : 
         [ glob *.cpp : *App.cpp ]
+        $(TOP)/Optimizer//Optimizer 
         : : ;
         
 exe cx0testApp : 

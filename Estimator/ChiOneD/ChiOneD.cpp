@@ -15,6 +15,13 @@ ChiOneD::~ChiOneD(){
 
 }
 
+std::shared_ptr<ControlParameter> ChiOneD::createInstance(std::shared_ptr<Amplitude> inPIF, std::shared_ptr<Data> inDIF){
+  if(!instance_)
+    instance_ = std::shared_ptr<ControlParameter>(new ChiOneD(inPIF, inDIF));
+
+  return instance_;
+}
+
 double ChiOneD::controlParameter(ParameterList& minPar){
   unsigned int nBins = pDIF_->getNBins();
 

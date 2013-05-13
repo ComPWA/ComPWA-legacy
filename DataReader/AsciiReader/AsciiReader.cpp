@@ -34,11 +34,11 @@ AsciiReader::AsciiReader( const std::string inConfigFile, const int particles  )
 
   while( !currentStream.eof() ) {
     double e, px, py, pz;
-    Event* newEvent = new Event();
+    Event newEvent;
 
     for ( int parts = 0; parts < particles; parts++ ) {
       currentStream >> px >> py >> pz >> e;
-      newEvent->addParticle( Particle( px, py, pz, e ) );
+      newEvent.addParticle( Particle( px, py, pz, e ) );
     }
 
     if (!currentStream.fail()) {
@@ -58,8 +58,7 @@ const Event& AsciiReader::getEvent( const int index ) {
   if ( EvtList_.size() <= (unsigned int)index )
     throw BadIndex("Index exceeds max number of events");
 
-  Event* thisEvent = EvtList_.at( index );
-  return *thisEvent;
+  return EvtList_.at( index );
 }
 
 const int AsciiReader::getBin( const int i, double& m12, double& weight ) {

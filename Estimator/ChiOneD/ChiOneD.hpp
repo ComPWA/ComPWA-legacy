@@ -23,15 +23,15 @@
 class ChiOneD : public Estimator {
 
 public:
-  /// Default Constructor (0x0)
-  ChiOneD(std::shared_ptr<Amplitude>, std::shared_ptr<Data>);
-
+  static std::shared_ptr<ControlParameter> createInstance(std::shared_ptr<Amplitude>, std::shared_ptr<Data>);
   virtual double controlParameter(ParameterList& minPar);
 
   /** Destructor */
   virtual ~ChiOneD();
 
 protected:
+  /// Default Constructor (0x0)
+  ChiOneD(std::shared_ptr<Amplitude>, std::shared_ptr<Data>);
 
 private:
   std::shared_ptr<Amplitude> pPIF_;

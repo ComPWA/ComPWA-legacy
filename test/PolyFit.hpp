@@ -34,10 +34,7 @@ class PolyFit : public ControlParameter {
 public:
 
   // create/copy/destroy:
-
-  ///Constructor 
-  PolyFit(double p0, double p1, double p2, double p3, double sigma);
-
+  static std::shared_ptr<ControlParameter> createInstance(double p0, double p1, double p2, double p3, double sigma);
 
   /** Destructor */
   virtual ~PolyFit();
@@ -58,6 +55,8 @@ private:
   std::vector< double > _yValue;
 
   double _sigma;
+
+  PolyFit(double p0, double p1, double p2, double p3, double sigma);
 
 };
 

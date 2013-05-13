@@ -23,7 +23,7 @@ class RunManager
 
 public:
 
-  RunManager(std::shared_ptr<Data>, std::shared_ptr<Estimator>,
+  RunManager(std::shared_ptr<Data>, std::shared_ptr<ControlParameter>,
       std::shared_ptr<Amplitude>, std::shared_ptr<Optimizer>);
 
   virtual ~RunManager();
@@ -32,7 +32,7 @@ public:
 
 protected:
   std::shared_ptr<Data> pData_; /*!< Pointer to Data-Module */
-  std::shared_ptr<Estimator> pEsti_; /*!< Pointer to Estimator-Module */
+  std::shared_ptr<ControlParameter> pEsti_; /*!< Pointer to Estimator-Module */
   std::shared_ptr<Amplitude> pPhys_; /*!< Pointer to Physics-Module */
   std::shared_ptr<Optimizer> pOpti_; /*!< Pointer to Optimizer-Module */
   //TODO: log

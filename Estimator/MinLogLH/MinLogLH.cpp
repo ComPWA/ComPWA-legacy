@@ -19,13 +19,29 @@ MinLogLH::MinLogLH(std::shared_ptr<Amplitude> inPIF, std::shared_ptr<Data> inDIF
 
 }
 
-MinLogLH::~MinLogLH(){
+std::shared_ptr<ControlParameter> MinLogLH::createInstance(std::shared_ptr<Amplitude> inPIF, std::shared_ptr<Data> inDIF){
+  if(!instance_)
+    instance_ = std::shared_ptr<ControlParameter>(new MinLogLH(inPIF, inDIF));
 
+  return instance_;
+}
+
+std::shared_ptr<ControlParameter> MinLogLH::createInstance(std::shared_ptr<Amplitude> inPIF, std::shared_ptr<Data> inDIF, std::shared_ptr<Data> inPHSP){
+  if(!instance_)
+    instance_ = std::shared_ptr<ControlParameter>(new MinLogLH(inPIF, inDIF, inPHSP));
+
+  return instance_;
+}
+
+MinLogLH::~MinLogLH(){
+  //delete instance_;
 }
 
 double MinLogLH::controlParameter(ParameterList& minPar){
   unsigned int nEvents = pDIF_->getNEvents();
-  unsigned int nPHSPEvts = pPHSP_->getNEvents();
+  unsigned int nPHSPEvts=0;
+  if(pPHSP_)
+    nPHSPEvts = pPHSP_->getNEvents();
   unsigned int nParts = ((Event)pDIF_->getEvent(0)).getNParticles();
 
   //check if able to handle this many particles
