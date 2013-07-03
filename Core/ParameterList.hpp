@@ -183,7 +183,7 @@ public:
    * \return string with parameter information
    * \sa operator<<
   */
-  std::string const& to_str() const;
+  std::string const& to_str() ;
 
 protected:
   std::vector<DoubleParameter> vDoublePar_; /*!< Vector of floating point parameters */
@@ -206,7 +206,7 @@ protected:
    * of this class has to be outside the namespace of the class.
    * \sa make_str(), to_str()
   */
-  friend std::ostream & operator<<(std::ostream &os, const ParameterList &p);
+  friend std::ostream & operator<<(std::ostream &os, ParameterList &p);
 
 };
 

@@ -81,7 +81,9 @@ double MinLogLH::controlParameter(ParameterList& minPar){
         }
       }
       norm/=nPHSPEvts;
-     // norm=log(norm);
+      //norm*=pPIF_->volume()/2.;
+      //norm=nEvents*log(norm);
+      //savedNorm=norm;
     }//else{
       //TODO: Exceptions no PHSPMC, try numerical integration?
     //}
@@ -140,12 +142,12 @@ double MinLogLH::controlParameter(ParameterList& minPar){
 
       double intens = pPIF_->intensity(x, minPar);
       if(intens>0){
-        lh -= (log(intens));
+        lh += log(intens);
       }
 
     }
-    lh/=nEvents;
-    lh += norm;
+    lh=nEvents*norm-lh;
+    //lh -= norm;
     break;
   }
   default:{

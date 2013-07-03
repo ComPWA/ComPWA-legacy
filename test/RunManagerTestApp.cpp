@@ -44,8 +44,8 @@ int main(int argc, char **argv){
 
   // Initiate parameters
   ParameterList par;
-  par.AddParameter(DoubleParameter(1.7,0.5,2.5,0.1));
-  par.AddParameter(DoubleParameter(0.2,0.1,0.2,0.01));
+  par.AddParameter(DoubleParameter("BWPos",1.7,0.5,2.5,0.1));
+  par.AddParameter(DoubleParameter("BWWidth",0.2,0.1,0.2,0.01));
 
   std::cout << "Start Fit" << std::endl;
   run->startFit(par);

@@ -142,11 +142,12 @@ void ParameterList::make_str() {
   out_ = oss.str();
 }
 
-std::string const& ParameterList::to_str() const {
+std::string const& ParameterList::to_str() {
+  make_str();
   return out_;
 }
 
-std::ostream & operator<<(std::ostream &os, const ParameterList &p){
+std::ostream & operator<<(std::ostream &os, ParameterList &p){
   return os << p.to_str();
 }
 

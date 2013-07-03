@@ -32,6 +32,11 @@ const double BreitWigner::integral(ParameterList& par){
 
   return integral;
 }
+
+const double BreitWigner::volume(){
+  return 0;
+}
+
 const double BreitWigner::drawInt(double* x, double *p){
   return p[2]*BreitWignerValue(x[0], p[0], p[1]);
 }
@@ -48,8 +53,8 @@ const bool BreitWigner::fillStartParVec(ParameterList& outPar){
   if(outPar.GetNParameter())
     return false; //already filled ,TODO: exception?
 
-  outPar.AddParameter(DoubleParameter(1.5, 0.5, 2.5, 0.1));
-  outPar.AddParameter(DoubleParameter(0.3, 0.1, 0.5, 0.05));
+  outPar.AddParameter(DoubleParameter("BreitWignerPosition",1.5, 0.5, 2.5, 0.1));
+  outPar.AddParameter(DoubleParameter("BreitWignerWidth",0.3, 0.1, 0.5, 0.05));
 
   return true;
 }

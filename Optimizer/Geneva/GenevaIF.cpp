@@ -43,7 +43,9 @@
 
 using namespace Gem::Geneva;
 
-GenevaIF::GenevaIF(std::shared_ptr<ControlParameter> theData, std::string inConfigFileDir) : _myData(theData),configFileDir(inConfigFileDir){
+GenevaIF::GenevaIF(std::shared_ptr<ControlParameter> theData, std::string inConfigFileDir)
+  : _myData(theData),configFileDir(inConfigFileDir),parallelizationMode(GO2_DEF_DEFAULPARALLELIZATIONMODE),
+    serMode(GO2_DEF_SERIALIZATIONMODE),clientMode(GO2_DEF_CLIENTMODE),ip(GO2_DEF_IP),port(GO2_DEF_PORT){
 
 }
 
@@ -51,16 +53,32 @@ GenevaIF::~GenevaIF(){
 
 }
 
+void GenevaIF::setServerMode(){
+  parallelizationMode = Gem::Geneva::PARMODE_BROKERAGE;
+  serMode = Gem::Common::SERIALIZATIONMODE_BINARY;
+  clientMode = false;
+}
+
+void GenevaIF::setClientMode(std::string serverip, unsigned int serverport){
+  parallelizationMode = Gem::Geneva::PARMODE_BROKERAGE;
+  serMode = Gem::Common::SERIALIZATIONMODE_BINARY;
+  clientMode = true;
+  ip = serverip;
+  port = serverport;
+}
+
 const double GenevaIF::exec(ParameterList& par) {
 	Go2::init();
 	//Go2 go(argc, argv, configFile);
-	Go2 go( GO2_DEF_CLIENTMODE, GO2_DEF_SERIALIZATIONMODE, GO2_DEF_IP, GO2_DEF_PORT,
-	    (configFileDir+"Go2.json"), GO2_DEF_DEFAULPARALLELIZATIONMODE, GO2_DEF_DEFAULTVERBOSE);
+	Go2 go( clientMode, serMode, ip, port,
+	    (configFileDir+"Go2.json"), parallelizationMode, GO2_DEF_DEFAULTVERBOSE);
 
 	//---------------------------------------------------------------------
 	// Initialize a client, if requested
-	if(go.clientMode()) {
-		return go.clientRun();
+
+        if(go.clientMode()) {
+	  std::cout << "Geneva Client waiting for action!" << std::endl;
+	  return go.clientRun();
 	}
 
 	//---------------------------------------------------------------------
@@ -69,7 +87,9 @@ const double GenevaIF::exec(ParameterList& par) {
 	//Provide Parameter in Geneva-Style
 	unsigned int NPar = par.GetNDouble(); //just doubles up to now, TODO
 	double val[NPar], min[NPar], max[NPar], err[NPar];
+	std::string names[NPar];
 	for(unsigned int i=0; i<NPar; i++){
+	  names[i] = par.GetDoubleParameter(i).GetName();
 	  val[i] = par.GetDoubleParameter(i).GetValue();
 	  min[i] = par.GetDoubleParameter(i).GetMinValue();
 	  max[i] = par.GetDoubleParameter(i).GetMaxValue();
@@ -77,11 +97,11 @@ const double GenevaIF::exec(ParameterList& par) {
 	}
 
 	// Make an individual known to the optimizer
-	boost::shared_ptr<GStartIndividual> p(new GStartIndividual(_myData, NPar, val, min, max, err));
+	boost::shared_ptr<GStartIndividual> p(new GStartIndividual(_myData, NPar, names, val, min, max, err));
 	go.push_back(p);
 
 	// Add an evolutionary algorithm to the Go2 class.
-        GEvolutionaryAlgorithmFactory ea((configFileDir+"GEvolutionaryAlgorithm.json"), PARMODE_MULTITHREADED);
+        GEvolutionaryAlgorithmFactory ea((configFileDir+"GEvolutionaryAlgorithm.json"), parallelizationMode);
 	go & ea();
 
 	// Perform the actual optimization
@@ -92,7 +112,7 @@ const double GenevaIF::exec(ParameterList& par) {
 
 	// Terminate
 	double result = bestIndividual_ptr->getBestKnownFitness();
-	int whattodowiththisidontknow =  Go2::finalize();
+	int whattodowiththisidontknow =  go.finalize(); //Go2::finalize();
 
         //write Parameters back
 	ParameterList resultPar;

@@ -43,6 +43,10 @@ public:
 
 int main(int argc, char **argv) {
 
+ // unsigned int a=1,b=2;
+ // int c[3][3];
+ // int d = c[a,b];
+
   //=== shared_ptr in a vector: ===
   vector<shared_ptr<Base> > baseVec;
   baseVec.push_back(shared_ptr<Derived>(new Derived(5)));

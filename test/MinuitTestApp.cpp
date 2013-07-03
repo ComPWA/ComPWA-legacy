@@ -49,10 +49,10 @@ int main(int argc, char **argv){
 
   // Initiate parameters
   ParameterList par;
-  par.AddParameter(DoubleParameter(-11,-20,0,3));
-  par.AddParameter(DoubleParameter(9.8,5,15,2));
-  par.AddParameter(DoubleParameter(1.1,0.5,1.5,0.3));
-  par.AddParameter(DoubleParameter(-0.008,-0.02,0,0.005));
+  par.AddParameter(DoubleParameter("p0",-50,-100,-5,50));
+  par.AddParameter(DoubleParameter("p1",50,0,100,50));
+  par.AddParameter(DoubleParameter("p2",10,-20,20,10));
+  par.AddParameter(DoubleParameter("p3",-0.1,-0.2,0,0.05));
 
   // Loop over minimizers (at the moment this means: Geneva, MinuitIF or Geneva then MinuitIF)
   for(unsigned int Nmin=0; Nmin<myMinimizerList.size(); Nmin++){

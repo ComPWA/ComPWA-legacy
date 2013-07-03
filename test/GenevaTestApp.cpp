@@ -24,7 +24,6 @@
 //#include "ErrLogger/ErrLogger.hh"
 
 // Minimizer Interface header files go here
-#include "Optimizer/Minuit2/MinuitIF.hpp"
 #include "Optimizer/Geneva/GenevaIF.hpp"
 #include "Core/ParameterList.hpp"
 #include "Core/Parameter.hpp"
@@ -37,23 +36,23 @@
  * The main function.
  */
 int main(int argc, char **argv){
-  std::string whichMinimizer("all");
+  bool iamserver=false;
+  if( argc>1 ){
+    iamserver=true;
+    std::cout << "I am the Geneva Server:" << std::endl;
+  }else{
+    std::cout << "I am a Geneva Client:" << std::endl;
+  }
   double p0=-10., p1=10., p2=1., p3=-0.01, sigma_smear=3;
   // Generate data distribution
   std::shared_ptr<ControlParameter> myFit = PolyFit::createInstance(p0, p1, p2, p3, sigma_smear);
 
   //--------------------------Minimizer IF --------------------------------------------------------
-  std::vector<std::shared_ptr<Optimizer> > myMinimizerList;
-  // Add minimizers
-  if (whichMinimizer=="Geneva") myMinimizerList.push_back(std::shared_ptr<Optimizer> (new GenevaIF(myFit)));
-  else if (whichMinimizer=="Minuit") myMinimizerList.push_back(std::shared_ptr<Optimizer> (new MinuitIF(myFit)));
-  else if (whichMinimizer=="all") {
-    myMinimizerList.push_back(std::shared_ptr<Optimizer> (new GenevaIF(myFit)));
-    myMinimizerList.push_back(std::shared_ptr<Optimizer> (new MinuitIF(myFit)));
-  }else{
-   std::cout << "Minimizer\t" << whichMinimizer << "\tdoesn't exist" << std::endl;
-   return 0;
-  }
+  std::shared_ptr<GenevaIF> myMinimizer(std::shared_ptr<GenevaIF> (new GenevaIF(myFit)));
+  if(iamserver)
+    myMinimizer->setServerMode();
+  else
+    myMinimizer->setClientMode();
 
   ParameterList par;
   par.AddParameter(DoubleParameter("p0",-50,-100,-5,50));
@@ -61,24 +60,22 @@ int main(int argc, char **argv){
   par.AddParameter(DoubleParameter("p2",10,-20,20,10));
   par.AddParameter(DoubleParameter("p3",-0.1,-0.2,0,0.05));
 
-  std::cout << "Starting Parameters:" << std::endl;
-  for(unsigned int i=0; i<par.GetNDouble(); i++)
-    std::cout << "Parameter "<< i << ":\t" << par.GetParameterValue(i) << std::endl;
-  std::cout << std::endl << std::endl << std::endl;
-
-  // Loop over minimizers (at the moment this means: Geneva, MinuitIF or Geneva then MinuitIF)
-  for(unsigned int Nmin=0; Nmin<myMinimizerList.size(); Nmin++){
-    // Pointer to one of the used minimizers
-    std::shared_ptr<Optimizer> minimizer = myMinimizerList.at(Nmin);
-    // Do the actual minimization
-    double genResult = minimizer->exec(par);
-
-    std::cout << "Minimizer " << Nmin << "\t final par :\t" << genResult << std::endl;
-    //for(unsigned int i=0; i<par.GetNDouble(); i++)
-    //  std::cout << "final par "<< i << ":\t" << par.GetParameterValue(i) << std::endl;
-    std::cout << "Final: " << par << std::endl;
-    std::cout << "Done ..." << std::endl << std::endl;
+  if(iamserver){
+    std::cout << "Starting Parameters:" << std::endl;
+    for(unsigned int i=0; i<par.GetNDouble(); i++)
+      std::cout << "Parameter "<< i << ":\t" << par.GetParameterValue(i) << std::endl;
+    std::cout << std::endl << std::endl << std::endl;
   }
+
+  double genResult = myMinimizer->exec(par);
+
+  if(iamserver){
+    std::cout << "Geneva final par :\t" << genResult << std::endl;
+    for(unsigned int i=0; i<par.GetNDouble(); i++)
+      std::cout << "final par "<< i << ":\t" << par.GetParameterValue(i) << std::endl;
+  }
+  std::cout << "Done ..." << std::endl << std::endl;
+
 
   // Plot results
   //myFit->drawGraph(par.GetParameterValue(0),par.GetParameterValue(1),par.GetParameterValue(2),par.GetParameterValue(3));

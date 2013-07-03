@@ -135,19 +135,23 @@ public:
     //return totAmp.getNorm();//integral;
   }
 
+  virtual const double volume(){
+    return -1.*(m23_sq_min-m23_sq_max)*(m13_sq_min-m13_sq_max)*(m12_sq_min-m12_sq_max);
+  }
+
   virtual const double intensity(std::vector<double>& x, ParameterList& par){
     //TODO: check x exception
     if(x.size()!=3) return 0;
 
     ma.setVal(x[0]); mb.setVal(x[1]); mc.setVal(x[2]);
 
-    if( par.GetNDouble()>rr.size() ){
+    if( par.GetNDouble()>mr.size() ){
         std::cout << "Error: Parameterlist doesn't match model!!" << std::endl; //TODO: exception
       return 0;
     }
 
-    for(unsigned int i=0; i<rr.size(); i++){
-      rr[i]->setVal(par.GetDoubleParameter(i).GetValue());
+    for(unsigned int i=0; i<mr.size(); i++){
+      mr[i]->setVal(par.GetDoubleParameter(i).GetValue());
       //phir[i]->setVal(par.GetDoubleParameter(2*i+1).GetValue());
     }
     //rr[rr.size()-1]->setVal(par.GetDoubleParameter(2*(rr.size()-1)).GetValue());
@@ -171,9 +175,9 @@ public:
 
       //outPar.AddParameter(DoubleParameter(rr[i]->getVal()));
       if(rr[i]->hasError()) //TODO: check bounds
-        outPar.AddParameter(DoubleParameter(rr[i]->getVal(), rr[i]->getMin(), rr[i]->getMax(), rr[i]->getError()));
+        outPar.AddParameter(DoubleParameter(mr[i]->GetName(),mr[i]->getVal(), mr[i]->getMin(), mr[i]->getMax(), mr[i]->getError()));
       else
-        outPar.AddParameter(DoubleParameter(rr[i]->getVal(), 0.1));
+        outPar.AddParameter(DoubleParameter(mr[i]->GetName(),mr[i]->getVal(), 0.1));
       //outPar.AddParameter(DoubleParameter(phir[i]->getVal(), phir[i]->getMin(), phir[i]->getMax(), phir[i]->getError()));
     }
     //outPar.AddParameter(DoubleParameter(rr[rr.size()-1]->getVal(), rr[rr.size()-1]->getMin(), rr[rr.size()-1]->getMax(), rr[rr.size()-1]->getError()));

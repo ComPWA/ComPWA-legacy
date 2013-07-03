@@ -50,8 +50,8 @@ int main(int argc, char **argv){
   //Simple Breit-Wigner Physics-Module setup
   shared_ptr<BreitWigner> testBW(new BreitWigner(0.,5.));
   ParameterList minPar;
-  minPar.AddParameter(DoubleParameter(1.5,0.5,2.5,0.1));
-  minPar.AddParameter(DoubleParameter(0.3,0.1,0.2,0.01));
+  minPar.AddParameter(DoubleParameter("BWPos",1.5,0.5,2.5,0.1));
+  minPar.AddParameter(DoubleParameter("BWWidth",0.3,0.1,0.2,0.01));
 
   //Output File setup
   TFile output("test/2Part-4vecs.root","recreate");

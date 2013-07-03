@@ -13,12 +13,12 @@ BOOST_AUTO_TEST_CASE(ConstructorCheck)
 {
   std::vector<IntegerParameter> vecParInt;
   for(unsigned int par=0; par<10; par++)
-    vecParInt.push_back(IntegerParameter(par,0,10,1));
+    vecParInt.push_back(IntegerParameter(std::string("listPar"+par),par,0,10,1));
 
   ParameterList testList(vecParInt);
-  DoubleParameter dTest(2.2);
+  DoubleParameter dTest("doublePAr",2.2);
   testList.AddParameter(dTest);
-  BoolParameter bTest(true);
+  BoolParameter bTest("boolPar",true);
   testList.AddParameter(bTest);
 
   BOOST_CHECK_CLOSE(testList.GetNParameter(), 12., 0.0001);

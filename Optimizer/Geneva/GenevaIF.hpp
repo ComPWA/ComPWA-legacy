@@ -52,11 +52,19 @@ public:
   /** Destructor */
   virtual ~GenevaIF();
 
+  virtual void setServerMode();
+  virtual void setClientMode(std::string serverip="localhost", unsigned int serverport=10000);
+
  protected:
 
  private:
   std::shared_ptr<ControlParameter> _myData;
   std::string configFileDir;
+  Gem::Geneva::parMode parallelizationMode;
+  Gem::Common::serializationMode serMode;
+  bool clientMode;
+  std::string ip;
+  unsigned int port;
  // vector<string> paramNames;
 
   /*

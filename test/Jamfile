@@ -40,6 +40,12 @@ exe cx0testApp :
         test
         : ;
         
+exe treetestApp : 
+        TreeTestApp.cpp 
+        test
+        $(TOP)/Core//ComPWA
+        : ;
+        
 exe dataiftestApp : 
         DataIFTestApp.cpp 
         test
@@ -54,6 +60,13 @@ exe optimizertestApp :
         $(TOP)/Core//ComPWA
         $(TOP)/Optimizer/Minuit2//Minuit2IF
         $(TOP)/Optimizer/Geneva//GenevaIF  
+        : ;
+        
+exe genevatestApp : 
+        GenevaTestApp.cpp 
+        test
+        $(TOP)/Core//ComPWA
+        $(TOP)/Optimizer/Geneva//GenevaIF 
         : ;
 } else {
 exe optimizertestApp : 
@@ -143,6 +156,9 @@ exe dalitzfitApp :
         : ;
 
 install dist : test : <location>$(TOP)/lib <threading>single ;
-install dist2 : dalitzfitApp cx0testApp dataiftestApp optimizertestApp physicstestApp : <location>$(TOP)/bin <threading>single ;
+install dist2 : dalitzfitApp treetestApp cx0testApp dataiftestApp optimizertestApp physicstestApp : <location>$(TOP)/bin <threading>single ;
 install dist3 : estimatortestApp integrationtestApp integrationtestbinnedApp runmanagertestApp gentwopartApp gendalitzApp dalitzplotApp : <location>$(TOP)/bin <threading>single ;
 
+if $(GENEVA) { 
+install dist7 : genevatestApp : <location>$(TOP)/bin ;
+}

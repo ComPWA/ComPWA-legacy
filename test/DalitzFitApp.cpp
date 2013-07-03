@@ -23,6 +23,13 @@
 #include "TFile.h"
 #include "TLorentzVector.h"
 #include "TH2D.h"
+#include "TMath.h"
+#include "TParticle.h"
+#include "TGenPhaseSpace.h"
+#include "TROOT.h"
+#include "TClonesArray.h"
+#include "TTree.h"
+#include "TRandom3.h"
 
 //Core header files go here
 #include "Core/Event.hpp"
@@ -62,12 +69,13 @@ int main(int argc, char **argv){
   // Initiate parameters
   ParameterList par;
   amps->fillStartParVec(par); //perfect startvalues
-  std::cout << "LH mit optimalen intensitäten: " << esti->controlParameter(par) << std::endl;
+  std::cout << "LH with optimal resonance peaks: " << esti->controlParameter(par) << std::endl;
   for(unsigned int i=0; i<par.GetNDouble(); i++){
-    par.GetDoubleParameter(i).SetValue(300./(double)(i+1));
-    par.GetDoubleParameter(i).SetError(10.);
+    DoubleParameter tmp = par.GetDoubleParameter(i);
+    tmp.SetValue(tmp.GetValue());
+    tmp.SetError(tmp.GetValue());
   }
-  std::cout << "LH mit folgenden intensitäten: " << esti->controlParameter(par) << std::endl;
+  std::cout << "LH with following resonance peaks: " << esti->controlParameter(par) << std::endl;
 
   for(unsigned int i=0; i<par.GetNDouble(); i++){
       std::cout << "Parameter " << i << " = " << par.GetDoubleParameter(i).GetValue() << std::endl;
@@ -81,6 +89,12 @@ int main(int argc, char **argv){
   std::cout << "Start Fit" << std::endl;
   double genResult = opti->exec(par);
   std::cout << "Final LH = " << genResult << std::endl;
+
+  std::cout << "Optimierte intensitäten: " << esti->controlParameter(par) << std::endl;
+
+  for(unsigned int i=0; i<par.GetNDouble(); i++){
+      std::cout << "Parameter " << i << " = " << par.GetDoubleParameter(i).GetValue() << std::endl;
+  }
 
   //Plot result
   TH2D* bw12 = new TH2D("bw12","inv. mass-sq of particles 1&2 Generated",1000,0.,10.,1000,0.,10.);
@@ -134,6 +148,22 @@ int main(int argc, char **argv){
   bw23FIT->GetYaxis()->SetTitle("#");
   bw23FIT->GetYaxis()->CenterTitle();
 
+  /*TH2D* bw12DIFF = new TH2D("bw12DIFF","inv. mass-sq of particles 1&2 FitResult",1000,0.,10.,1000,0.,10.);
+  bw12DIFF->GetXaxis()->SetTitle("m_{12}^{2} / GeV^{2}");
+  bw12DIFF->GetXaxis()->CenterTitle();
+  bw12DIFF->GetYaxis()->SetTitle("#");
+  bw12DIFF->GetYaxis()->CenterTitle();
+  TH2D* bw13DIFF = new TH2D("bw13DIFF","inv. mass-sq of particles 1&3 FitResult",1000,0.,10.,1000,0.,10.);
+  bw13DIFF->GetXaxis()->SetTitle("m_{13}^{2} / GeV^{2}");
+  bw13DIFF->GetXaxis()->CenterTitle();
+  bw13DIFF->GetYaxis()->SetTitle("#");
+  bw13PHSP->GetYaxis()->CenterTitle();
+  TH2D* bw23DIFF = new TH2D("bw23DIFF","inv. mass-sq of particles 2&3 FitResult",1000,0.,10.,1000,0.,10.);
+  bw23DIFF->GetXaxis()->SetTitle("m_{23}^{2} / GeV^{2}");
+  bw23DIFF->GetXaxis()->CenterTitle();
+  bw23DIFF->GetYaxis()->SetTitle("#");
+  bw23DIFF->GetYaxis()->CenterTitle();*/
+
   double masssq12, masssq13, masssq23;
   for(unsigned int i = 0; i < myReader->getNEvents(); i++){
       Event event(myReader->getEvent(i));
@@ -154,6 +184,10 @@ int main(int argc, char **argv){
       bw13->Fill(masssq13,masssq12);
       bw23->Fill(masssq23,masssq12);
   }
+
+  TH2D* bw12DIFF = (TH2D*)bw12->Clone("bw12DIFF");
+  TH2D* bw13DIFF = (TH2D*)bw13->Clone("bw13DIFF");
+  TH2D* bw23DIFF = (TH2D*)bw23->Clone("bw23DIFF");
 
   for(unsigned int i = 0; i < maxEventsPHSP; i++){
       Event event(myReaderPHSP.getEvent(i));
@@ -178,10 +212,77 @@ int main(int argc, char **argv){
       x.push_back(sqrt(masssq23));
       x.push_back(sqrt(masssq13));
       x.push_back(sqrt(masssq12));
-      bw12FIT->Fill(masssq12,masssq13,amps->intensity(x,par));
-      bw13FIT->Fill(masssq13,masssq12,amps->intensity(x,par));
-      bw23FIT->Fill(masssq23,masssq12,amps->intensity(x,par));
+      //bw12FIT->Fill(masssq12,masssq13,1000*amps->intensity(x,par));
+    //  bw13FIT->Fill(masssq13,masssq12,1000*amps->intensity(x,par));
+     // bw23FIT->Fill(masssq23,masssq12,1000*amps->intensity(x,par));
   }
+
+
+  //Generation
+  TRandom3 rando;
+  TLorentzVector W(0.0, 0.0, 0.0, M);//= beam + target;
+
+  //(Momentum, Energy units are Gev/C, GeV)
+  Double_t masses[3] = { m1, m2, m2} ;
+  TGenPhaseSpace event;
+  event.SetDecay(W, 3, masses);
+
+  TLorentzVector *pGamma,*pPip,*pPim,pPm23,pPm13;
+  double weight, m23sq, m13sq, m12sq, maxTest=0;
+  cout << "Start generation of y pi0 pi0 Dalitz Result" << endl;
+  unsigned int i = 0;
+  do{
+        weight = event.Generate();
+
+        pGamma = event.GetDecay(0);
+        pPip    = event.GetDecay(1);
+        pPim    = event.GetDecay(2);
+
+        pPm23 = *pPim + *pPip;
+        pPm13 = *pGamma + *pPim;
+
+        m23sq=pPm23.M2(); m13sq=pPm13.M2();
+
+        m12sq=M*M-m13sq-m23sq;
+        if(m12sq<0){
+          //cout << tmpm12_sq << "\t" << M*M << "\t" << m13_sq << "\t" << m23_sq << endl;
+          //continue;
+          m12sq=0.0001;
+        }
+
+        TParticle fparticleGam(22,1,0,0,0,0,*pGamma,W);
+        TParticle fparticlePip(211,1,0,0,0,0,*pPip,W);
+        TParticle fparticlePim(-211,1,0,0,0,0,*pPim,W);
+
+        //call physics module
+        vector<double> x;
+        x.push_back(sqrt(m23sq));
+        x.push_back(sqrt(m13sq));
+        x.push_back(sqrt(m12sq));
+        double AMPpdf = amps->intensity(x, par);
+
+        double test = rando.Uniform(0,5);
+
+        //mb.setVal(m13);
+        //double m13pdf = totAmp13.getVal();//fun_combi2->Eval(m13);
+        if(maxTest<(weight*AMPpdf))
+          maxTest=(weight*AMPpdf);
+        if(test<(weight*AMPpdf)){
+          i++;
+
+          bw12FIT->Fill(m12sq,m13sq);
+          bw13FIT->Fill(m13sq,m23sq);
+          bw23FIT->Fill(m23sq,m12sq);
+        }
+
+    }while(i<100000);
+
+  //bw12DIFF->Add(bw12FIT,-1.0);
+ // bw23DIFF->Add(bw23FIT,-1.0);
+ // bw13DIFF->Add(bw13FIT,-1.0);
+  bw12DIFF = new TH2D(*bw12 - *bw12FIT);
+  bw23DIFF = new TH2D(*bw23 - *bw23FIT);
+  bw13DIFF = new TH2D(*bw13 - *bw13FIT);
 
   TFile output("test/FitResultJPSI.root","RECREATE","ROOT_Tree");
   bw12->Write();
@@ -193,6 +294,9 @@ int main(int argc, char **argv){
   bw12FIT->Write();
   bw13FIT->Write();
   bw23FIT->Write();
+  bw12DIFF->Write();
+  bw13DIFF->Write();
+  bw23DIFF->Write();
   output.Write();
   output.Close();
 

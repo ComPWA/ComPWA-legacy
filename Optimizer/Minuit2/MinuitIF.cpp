@@ -52,13 +52,13 @@ const double MinuitIF::exec(ParameterList& par){
   std::cout <<"start migrad "<< std::endl;
   //for(unsigned int i=0; i<par.GetNDouble(); i++)
  //   std::cout << upar.Parameter(i).Value() << " " << upar.Parameter(i).IsFixed() << std::endl;
-  FunctionMinimum minMin = migrad();
+  FunctionMinimum minMin = migrad(20,0.1);//TODO
 
  if(!minMin.IsValid()) {
    //try with higher strategy
      std::cout <<"FM is invalid, try with strategy = 2."<< std::endl;
    MnMigrad migrad2(_myFcn, minMin.UserState(), MnStrategy(2));
-   minMin = migrad2();
+   minMin = migrad2(10,0.1);//TODO
  }
 
   //save minimzed values
