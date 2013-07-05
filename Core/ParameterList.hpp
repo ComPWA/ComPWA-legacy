@@ -10,9 +10,11 @@
 
 #include <iostream>
 #include <string>
+#include <memory>
 #include <sstream>
 #include <vector>
 
+#include "Core/AbsParameter.hpp"
 #include "Core/Parameter.hpp"
 #include "Core/Exceptions.hpp"
 
@@ -153,6 +155,12 @@ public:
   */
   virtual void SetParameterValue(const unsigned int i, const bool inVal) ;
 
+  //! Add parameter via abstract pointer
+  /*!
+   * Adds a parameter with to be defined type to the list
+   * \param par input parameter
+  */
+  virtual void AddParameter(std::shared_ptr<AbsParameter> par);
 
   //! Add floating point parameter
   /*!

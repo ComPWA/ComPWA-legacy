@@ -102,6 +102,33 @@ void ParameterList::SetParameterValue(const unsigned int i, const bool inVal) {
   return;
 }
 
+void ParameterList::AddParameter(std::shared_ptr<AbsParameter> par) {
+  switch(par->type())
+  {
+  case ParType::COMPLEX: //TODO
+    //cout << "Easy\n";
+    break;
+  case ParType::DOUBLE:{
+    DoubleParameter* tmp = (DoubleParameter*) par.get(); //TODO: saver
+    vDoublePar_.push_back(*tmp);
+    break;}
+  case ParType::INTEGER:{
+    IntegerParameter* tmp = (IntegerParameter*) par.get();
+    vIntPar_.push_back(*tmp);
+    break;}
+  case ParType::BOOL:{
+    BoolParameter* tmp = (BoolParameter*) par.get();
+    vBoolPar_.push_back(*tmp);
+    break;}
+  default:{
+    //TODO exception
+    //cout << "Invalid Selection\n";
+    break;}
+  }
+ // vDoublePar_.push_back(par);
+  make_str();
+}
+
 void ParameterList::AddParameter(DoubleParameter par) {
   vDoublePar_.push_back(par);
   make_str();

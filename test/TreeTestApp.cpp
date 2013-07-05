@@ -18,6 +18,7 @@
 #include "Core/Functions.hpp"
 #include "Core/TreeNode.hpp"
 #include "Core/FunctionTree.hpp"
+#include "Core/Parameter.hpp"
 
 /*struct TreeNode{
   TreeNode(double inValue, std::string inName, std::shared_ptr<Strategy> strat, std::shared_ptr<TreeNode> parent)
@@ -128,53 +129,87 @@ protected:
 //This function will be called from a thread
 
 int main(int argc, char **argv) {
+  bool autonodes=true;
 
-  //------------SetUp some operations for Amp = a * ( b + c)-----------
+  //------------SetUp some operations for R = a * ( b + c * d)-----------
   std::shared_ptr<Strategy> add = std::shared_ptr<Strategy>(new AddAll());
   std::shared_ptr<Strategy> mult = std::shared_ptr<Strategy>(new MultAll());
 
-  //------------SetUp some nodes for Amp = a * ( b + c)----------------
-  std::shared_ptr<TreeNode> Amplitude =
-      std::shared_ptr<TreeNode>(new TreeNode("Amplitude", mult, NULL));
-  std::shared_ptr<TreeNode> A =
-      std::shared_ptr<TreeNode>(new TreeNode("a", NULL, Amplitude));
-  A->changeVal(5);
-  std::shared_ptr<TreeNode> BC =
-      std::shared_ptr<TreeNode>(new TreeNode("bc", add, Amplitude));
-  //Amplitude->addChild(A);
-  //Amplitude->addChild(BC);
-  std::shared_ptr<TreeNode> B =
-      std::shared_ptr<TreeNode>(new TreeNode("b", NULL, BC));
-  B->changeVal(2);
-  std::shared_ptr<TreeNode> C =
-      std::shared_ptr<TreeNode>(new TreeNode("c", NULL, BC));
-  C->changeVal(3);
-  //BC->addChild(B);
-  //BC->addChild(C);
-  FunctionTree test(Amplitude);
-  test.addNode(A);
-  test.addNode(BC);
-  test.addNode(B);
-  test.addNode(C);
+  //------------SetUp the parameters for R = a * ( b + c * d)-----------
+  std::shared_ptr<DoubleParameter> parA(new DoubleParameter("parA",5.));
+  std::shared_ptr<DoubleParameter> parB(new DoubleParameter("parB",2.));
+  std::shared_ptr<DoubleParameter> parC(new DoubleParameter("parC",3.));
+  std::shared_ptr<DoubleParameter> parD(new DoubleParameter("parD",1.));
+
+  std::shared_ptr<FunctionTree> myTree;
+
+  if(autonodes){ //Let FunctionTree manage the creation of the tree
+
+    myTree = std::shared_ptr<FunctionTree>(new FunctionTree());
+    myTree->createHead("R", mult);
+    myTree->createLeaf("a", parA, "R");
+    myTree->createNode("bcd", add, "R");
+    myTree->createLeaf("b", parB, "bcd");
+    myTree->createNode("cd", mult, "bcd");
+    myTree->createLeaf("c", parC, "cd");
+    myTree->createLeaf("d", parD, "cd");
+
+  }else{ //create Tree manually
+
+    //parameter container for intermediate results and final result
+    std::shared_ptr<DoubleParameter> finalA(new DoubleParameter("finalA",0.));
+    std::shared_ptr<DoubleParameter> interBCD(new DoubleParameter("interBCD",0.));
+    std::shared_ptr<DoubleParameter> interCD(new DoubleParameter("interCD",0.));
+
+    //------------SetUp some nodes for R = a * ( b + c * d)----------------
+    std::shared_ptr<TreeNode> R =
+        std::shared_ptr<TreeNode>(new TreeNode("R", finalA, mult, NULL));
+    std::shared_ptr<TreeNode> A =
+        std::shared_ptr<TreeNode>(new TreeNode("a", parA, NULL, R));
+    parA->Attach(A);
+    std::shared_ptr<TreeNode> BCD =
+        std::shared_ptr<TreeNode>(new TreeNode("bcd", interBCD, add, R));
+    std::shared_ptr<TreeNode> B =
+        std::shared_ptr<TreeNode>(new TreeNode("b", parB, NULL, BCD));
+    parB->Attach(B);
+    std::shared_ptr<TreeNode> CD =
+        std::shared_ptr<TreeNode>(new TreeNode("cd", interCD, add, BCD));
+    std::shared_ptr<TreeNode> C =
+        std::shared_ptr<TreeNode>(new TreeNode("c", parC, NULL, CD));
+    parC->Attach(C);
+    std::shared_ptr<TreeNode> D =
+        std::shared_ptr<TreeNode>(new TreeNode("d", parD, NULL, CD));
+    parD->Attach(D);
+    myTree = std::shared_ptr<FunctionTree>(new FunctionTree(R));
+    myTree->addNode(A);
+    myTree->addNode(BCD);
+    myTree->addNode(B);
+    myTree->addNode(CD);
+    myTree->addNode(C);
+    myTree->addNode(D);
+
+  }
+
+  //------------Finished SetUp, now check Tree----------------
 
   std::cout << "Tree set up, not calculated" << std::endl;
-  std::cout << std::endl << test.head() << std::endl << std::endl;
+  std::cout << std::endl << myTree << std::endl << std::endl;
 
   //------------Trigger Calculation----------------
-  test.recalculate();
+  myTree->recalculate();
 
   std::cout << "Tree calculated" << std::endl;
-  std::cout << std::endl << test.head() << std::endl << std::endl;
+  std::cout << std::endl << myTree << std::endl << std::endl;
 
-  A->changeVal(1.);
+  parB->SetValue(3.);
 
-  std::cout << "Changed a from 5 to 1 " << std::endl;
-  std::cout << std::endl << test.head() << std::endl << std::endl;
+  std::cout << "Changed b from 2 to 3 " << std::endl;
+  std::cout << std::endl << myTree << std::endl << std::endl;
 
-  test.recalculate();
+  myTree->recalculate();
 
-  std::cout << "Changed a from 5 to 1 and recalculated " << std::endl;
-  std::cout << std::endl << test.head() << std::endl << std::endl;
+  std::cout << "Changed b from 2 to 3 and recalculated " << std::endl;
+  std::cout << std::endl << myTree << std::endl << std::endl;
 
 
   return 0;

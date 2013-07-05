@@ -1,9 +1,9 @@
-//! Base class for internal parameter.
+//! Implementations for internal parameter.
 /*! \class DoubleParameter
  * \class IntegerParameter
  * \class BoolParameter
  * @file Parameter.hpp
- * This class defines the internal container of a fit parameter.
+ * This class implements some internal container of parameters.
  * A parameter consists of a value with optional bounds and error.
 */
 
@@ -15,27 +15,8 @@
 #include <sstream>
 #include <complex>
 
+#include "Core/AbsParameter.hpp"
 #include "Core/Exceptions.hpp"
-
-enum ParType { COMPLEX = 1, DOUBLE = 2, INTEGER = 3, BOOL = 4, UNDEFINED = 0};
-
-class AbsParameter
-{
-public:
-  AbsParameter(std::string name, ParType type=ParType::UNDEFINED):name_(name), type_(type){
-
-  }
-
-  virtual const std::string& GetName(){
-    return name_;
-  }
-
-  virtual const std::string type()=0;
-
-protected:
-  std::string name_;
-  ParType type_;
-};
 
 class ComplexParameter : public AbsParameter
 {
@@ -160,9 +141,9 @@ public:
   virtual const inline std::complex<double> GetError() const {return err_;}
 
   //! Getter for FunctionTree support
-  virtual const std::complex<double> getNodeValue(){
-    return val_;
-  }
+  //virtual const std::complex<double> getNodeValue(){
+  //  return val_;
+  //}
 
   //! Setter for value of parameter
   virtual void SetValue(const std::complex<double> inVal) {
@@ -172,6 +153,7 @@ public:
     }
     val_ = inVal;
     make_str();
+    Notify();
   }
   //! Setter for error of parameter
   virtual void SetError(const std::complex<double> inErr) {err_ = inErr; error_ = true; make_str();}
@@ -234,30 +216,17 @@ public:
   //! Set parameter free or fixed
   virtual const inline void FixParameter(const bool fixed) {fixed_=fixed;}
 
-  //! A public function returning a string with parameter information
-  /*!
-   * This function simply returns the member string out_, which contains
-   * all parameter information. The string gets rebuild with every change
-   * of the parameter.
-   * \return string with parameter information
-   * \sa operator<<, make_str()
-  */
-  std::string const& to_str() const{
-    return out_;
-  }
-
   //! A public function returning a string naming its type
   /*!
    * This function is used to get the type of the implementation of this
    * general parameter interface.
    * \sa operator<<, to_str(), make_str()
   */
-  virtual const std::string type(){
+  virtual const std::string TypeName(){
     return "complex double";
   }
 
 protected:
-  std::string out_; /*!< Output string to print information */
   bool bounds_; /*!< Are valid bounds defined for this parameter? */
   bool error_; /*!< Is an error defined for this parameter? */
   bool usebounds_; /*!< Do you want to restrict your parameter? */
@@ -297,24 +266,15 @@ protected:
       oss << "\t  Min-Max = " << min_ << " to " << max_;
     if(error_)
       oss << "\t  Err = " << err_;
-    oss << "\t Type = " << type();
+    oss << "\t Type = " << TypeName();
     out_ = oss.str();
+
+    std::stringstream ovs;
+    ovs << val_;
+    outVal_ = ovs.str();
   }
 
-  //! friend function to stream parameter information to output
-  /*!
-   * Declaring the stream-operator << as friend allows to stream parameter
-   * information to the output as easily as a generic type. The definition
-   * of this class has to be outside the namespace of the class.
-   * \sa make_str(), to_str()
-  */
-  friend std::ostream & operator<<(std::ostream &os, const ComplexParameter& p);
-
 };
-
-inline std::ostream & operator<<(std::ostream &os, const ComplexParameter& p){
-  return os << p.to_str();
-}
 
 class DoubleParameter : public AbsParameter
 {
@@ -451,6 +411,7 @@ public:
     }
     val_ = inVal;
     make_str();
+    Notify();
   }
   //! Setter for error of parameter
   virtual void SetError(const double inErr) {err_ = inErr; error_ = true; make_str();}
@@ -513,30 +474,18 @@ public:
   //! Set parameter free or fixed
   virtual const inline void FixParameter(const bool fixed) {fixed_=fixed;}
 
-  //! A public function returning a string with parameter information
-  /*!
-   * This function simply returns the member string out_, which contains
-   * all parameter information. The string gets rebuild with every change
-   * of the parameter.
-   * \return string with parameter information
-   * \sa operator<<, make_str()
-  */
-  std::string const& to_str() const{
-    return out_;
-  }
-
   //! A public function returning a string naming its type
   /*!
    * This function is used to get the type of the implementation of this
    * general parameter interface.
    * \sa operator<<, to_str(), make_str()
   */
-  virtual const std::string type(){
+  virtual const std::string TypeName(){
     return "double";
   }
 
 protected:
-  std::string out_; /*!< Output string to print information */
+  //std::string out_; /*!< Output string to print information */
   bool bounds_; /*!< Are valid bounds defined for this parameter? */
   bool error_; /*!< Is an error defined for this parameter? */
   bool usebounds_; /*!< Do you want to restrict your parameter? */
@@ -575,24 +524,15 @@ protected:
       oss << "\t  Min-Max = " << min_ << " to " << max_;
     if(error_)
       oss << "\t  Err = " << err_;
-    oss << "\t Type = " << type();
+    oss << "\t Type = " << TypeName();
     out_ = oss.str();
+
+    std::stringstream ovs;
+    ovs << val_;
+    outVal_ = ovs.str();
   }
 
-  //! friend function to stream parameter information to output
-  /*!
-   * Declaring the stream-operator << as friend allows to stream parameter
-   * information to the output as easily as a generic type. The definition
-   * of this class has to be outside the namespace of the class.
-   * \sa make_str(), to_str()
-  */
-  friend std::ostream & operator<<(std::ostream &os, const DoubleParameter& p);
-
 };
-
-inline std::ostream & operator<<(std::ostream &os, const DoubleParameter& p){
-  return os << p.to_str();
-}
 
 class IntegerParameter : public AbsParameter
 {
@@ -729,6 +669,7 @@ public:
     }
     val_ = inVal;
     make_str();
+    Notify();
   }
   //! Setter for error of parameter
   virtual void SetError(const int inErr) {err_ = inErr; error_ = true; make_str();}
@@ -791,30 +732,18 @@ public:
   //! Set parameter free or fixed
   virtual const inline void FixParameter(const bool fixed) {fixed_=fixed;}
 
-  //! A public function returning a string with parameter information
-  /*!
-   * This function simply returns the member string out_, which contains
-   * all parameter information. The string gets rebuild with every change
-   * of the parameter.
-   * \return string with parameter information
-   * \sa operator<<, make_str()
-  */
-  std::string const& to_str() const{
-    return out_;
-  }
-
   //! A public function returning a string naming its type
   /*!
    * This function is used to get the type of the implementation of this
    * general parameter interface.
    * \sa operator<<, to_str(), make_str()
   */
-  virtual const std::string type(){
+  virtual const std::string TypeName(){
     return "integer";
   }
 
 protected:
-  std::string out_; /*!< Output string to print information */
+  //std::string out_; /*!< Output string to print information */
   bool bounds_; /*!< Are valid bounds defined for this parameter? */
   bool error_; /*!< Is an error defined for this parameter? */
   bool usebounds_; /*!< Do you want to restrict your parameter? */
@@ -853,24 +782,15 @@ protected:
       oss << "\t  Min-Max = " << min_ << " to " << max_;
     if(error_)
       oss << "\t  Err = " << err_;
-    oss << "\t Type = " << type();
+    oss << "\t Type = " << TypeName();
     out_ = oss.str();
+
+    std::stringstream ovs;
+    ovs << val_;
+    outVal_ = ovs.str();
   }
 
-  //! friend function to stream parameter information to output
-  /*!
-   * Declaring the stream-operator << as friend allows to stream parameter
-   * information to the output as easily as a generic type. The definition
-   * of this class has to be outside the namespace of the class.
-   * \sa make_str(), to_str()
-  */
-  friend std::ostream & operator<<(std::ostream &os, const IntegerParameter& p);
-
 };
-
-inline std::ostream & operator<<(std::ostream &os, const IntegerParameter& p){
-  return os << p.to_str();
-}
 
 class BoolParameter : public AbsParameter
 {
@@ -955,6 +875,7 @@ public:
     }
     val_ = inVal;
     make_str();
+    Notify();
   }
   //! Setter for error of parameter
   virtual void SetError(const bool inErr) {err_ = inErr; error_ = true; make_str();}
@@ -966,31 +887,18 @@ public:
   //! Set parameter free or fixed
   virtual const inline void FixParameter(const bool fixed) {fixed_=fixed;}
 
-
-  //! A public function returning a string with parameter information
-  /*!
-   * This function simply returns the member string out_, which contains
-   * all parameter information. The string gets rebuild with every change
-   * of the parameter.
-   * \return string with parameter information
-   * \sa operator<<, make_str()
-  */
-  std::string const& to_str() const{
-    return out_;
-  }
-
   //! A public function returning a string naming its type
   /*!
    * This function is used to get the type of the implementation of this
    * general parameter interface.
    * \sa operator<<, to_str(), make_str()
   */
-  virtual const std::string type(){
+  virtual const std::string TypeName(){
     return "boolean";
   }
 
 protected:
-  std::string out_; /*!< Output string to print information */
+  //std::string out_; /*!< Output string to print information */
   bool error_; /*!< Is an error defined for this parameter? */
   bool usebounds_; /*!< Do you want to restrict your parameter? */
   bool fixed_; /*!< Do you want to keep parameter fixed? */
@@ -1008,23 +916,14 @@ protected:
     oss << "\t Val = " << val_;
     if(error_)
       oss << "\t  Err = " << err_;
-    oss << "\t Type = " << type();
+    oss << "\t Type = " << TypeName();
     out_ = oss.str();
+
+    std::stringstream ovs;
+    ovs << val_;
+    outVal_ = ovs.str();
   }
 
-  //! friend function to stream parameter information to output
-  /*!
-   * Declaring the stream-operator << as friend allows to stream parameter
-   * information to the output as easily as a generic type. The definition
-   * of this class has to be outside the namespace of the class.
-   * \sa make_str(), to_str()
-  */
-  friend std::ostream & operator<<(std::ostream &os, const BoolParameter& p);
-
 };
-
-inline std::ostream & operator<<(std::ostream &os, const BoolParameter& p){
-  return os << p.to_str();
-}
 
 #endif

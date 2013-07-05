@@ -13,8 +13,12 @@
 #include <memory>
 
 #include "Core/Functions.hpp"
+#include "Core/ParameterList.hpp"
+#include "Core/AbsParameter.hpp"
+#include "Core/Parameter.hpp"
+#include "Core/ParObserver.hpp"
 
-class TreeNode : public std::enable_shared_from_this<TreeNode>{
+class TreeNode : public std::enable_shared_from_this<TreeNode>, public ParObserver {
 public:
   //! Standard constructor
    /*!
@@ -23,7 +27,7 @@ public:
     * /param strat strategy how this node is calculated
     * /param parent pointer to connected upper level node
    */
-  TreeNode(std::string name, std::shared_ptr<Strategy> strat, std::shared_ptr<TreeNode> parent);
+  TreeNode(std::string name, std::shared_ptr<AbsParameter> intResult, std::shared_ptr<Strategy> strat, std::shared_ptr<TreeNode> parent);
 
   //! Destructor
   ~TreeNode();
@@ -38,18 +42,18 @@ public:
     return _changed;
   };
 
-  inline void changeVal(const double& newVal){
-    _value=newVal;
-    for(unsigned int i=0; i<_parents.size(); i++)
-      _parents[i]->update();
+  //inline void changeVal(const double& newVal){
+  //  _value=newVal;
+  //  for(unsigned int i=0; i<_parents.size(); i++)
+  //    _parents[i]->Update();
     //changed=true;
-  };
+  //};
 
-  void update();
+  void Update();
 
   void recalculate();
 
-  const double& getValue(){
+  const std::shared_ptr<AbsParameter> getValue(){
     return _value;
   };
 
@@ -77,7 +81,7 @@ protected:
   std::vector<std::shared_ptr<TreeNode> > _parents;
   std::vector<std::shared_ptr<TreeNode> > _children;
 
-  double _value;
+  std::shared_ptr<AbsParameter> _value;
   std::string _name; /*!< Unique name of this node */
   bool _changed;
   //std::string childOP;
