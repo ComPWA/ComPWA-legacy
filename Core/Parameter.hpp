@@ -27,6 +27,7 @@ public:
    /*!
     * Standard constructor with just a name provided. Creates parameter
     * with value 0 but without bounds or an error.
+    * \param inName internal string identifier of this parameter
     * \sa make_str()
    */
   ComplexParameter(std::string inName):AbsParameter(inName,ParType::COMPLEX),val_(0.,0.),min_(0.,0.),max_(0.,0.),err_(0.,0.) {
@@ -38,6 +39,7 @@ public:
    /*!
     * Standard constructor with just value and name provided. Creates parameter
     * with given value but without bounds or an error.
+    * \param inName internal string identifier of this parameter
     * \param value input value of the parameter
     * \sa make_str()
    */
@@ -50,6 +52,7 @@ public:
    /*!
     * Standard constructor with value and error provided. Creates parameter
     * with given value and error but without bounds.
+    * \param inName internal string identifier of this parameter
     * \param value input value of the parameter
     * \param error input error of the parameter
     * \sa make_str()
@@ -66,6 +69,7 @@ public:
     * Standard constructor with value and bounds provided. Creates parameter
     * with given value and bounds but without error. If a check for valid
     * bounds fails, just the value is used.
+    * \param inName internal string identifier of this parameter
     * \param value input value of the parameter
     * \param min input lower bound
     * \param max input upper bound
@@ -87,6 +91,7 @@ public:
     * Standard constructor with value, bounds and error provided. Creates
     * parameter with the given information. If a check for valid bounds
     * fails, just value and error are used.
+    * \param inName internal string identifier of this parameter
     * \param value input value of the parameter
     * \param min input lower bound
     * \param max input upper bound
@@ -285,6 +290,7 @@ public:
    /*!
     * Standard constructor with no information provided. Creates parameter
     * with value 0 but without bounds or an error.
+    * \param inName internal string identifier of this parameter
     * \sa make_str()
    */
   DoubleParameter(std::string inName):AbsParameter(inName, ParType::DOUBLE),val_(0),min_(0),max_(0),err_(0) {
@@ -296,6 +302,7 @@ public:
    /*!
     * Standard constructor with just a value provided. Creates parameter
     * with given value but without bounds or an error.
+    * \param inName internal string identifier of this parameter
     * \param value input value of the parameter
     * \sa make_str()
    */
@@ -308,6 +315,7 @@ public:
    /*!
     * Standard constructor with value and error provided. Creates parameter
     * with given value and error but without bounds.
+    * \param inName internal string identifier of this parameter
     * \param value input value of the parameter
     * \param error input error of the parameter
     * \sa make_str()
@@ -324,6 +332,7 @@ public:
     * Standard constructor with value and bounds provided. Creates parameter
     * with given value and bounds but without error. If a check for valid
     * bounds fails, just the value is used.
+    * \param inName internal string identifier of this parameter
     * \param value input value of the parameter
     * \param min input lower bound
     * \param max input upper bound
@@ -345,6 +354,7 @@ public:
     * Standard constructor with value, bounds and error provided. Creates
     * parameter with the given information. If a check for valid bounds
     * fails, just value and error are used.
+    * \param inName internal string identifier of this parameter
     * \param value input value of the parameter
     * \param min input lower bound
     * \param max input upper bound
@@ -543,6 +553,7 @@ public:
    /*!
     * Standard constructor with no information provided. Creates parameter
     * with value 0 but without bounds or an error.
+    * \param inName internal string identifier of this parameter
     * \sa make_str()
    */
   IntegerParameter(std::string inName):AbsParameter(inName, ParType::INTEGER),val_(0),min_(0),max_(0),err_(0) {
@@ -554,6 +565,7 @@ public:
    /*!
     * Standard constructor with just a value provided. Creates parameter
     * with given value but without bounds or an error.
+    * \param inName internal string identifier of this parameter
     * \param value input value of the parameter
     * \sa make_str()
    */
@@ -566,6 +578,7 @@ public:
    /*!
     * Standard constructor with value and error provided. Creates parameter
     * with given value and error but without bounds.
+    * \param inName internal string identifier of this parameter
     * \param value input value of the parameter
     * \param error input error of the parameter
     * \sa make_str()
@@ -582,6 +595,7 @@ public:
     * Standard constructor with value and bounds provided. Creates parameter
     * with given value and bounds but without error. If a check for valid
     * bounds fails, just the value is used.
+    * \param inName internal string identifier of this parameter
     * \param value input value of the parameter
     * \param min input lower bound
     * \param max input upper bound
@@ -603,6 +617,7 @@ public:
     * Standard constructor with value, bounds and error provided. Creates
     * parameter with the given information. If a check for valid bounds
     * fails, just value and error are used.
+    * \param inName internal string identifier of this parameter
     * \param value input value of the parameter
     * \param min input lower bound
     * \param max input upper bound
@@ -801,6 +816,7 @@ public:
    /*!
     * Standard constructor with no information provided. Creates parameter
     * with value 0 but without bounds or an error.
+    * \param inName internal string identifier of this parameter
     * \sa make_str()
    */
   BoolParameter(std::string inName):AbsParameter(inName,ParType::BOOL),val_(0),err_(0) {
@@ -812,6 +828,7 @@ public:
    /*!
     * Standard constructor with just a value provided. Creates parameter
     * with given value but without bounds or an error.
+    * \param inName internal string identifier of this parameter
     * \param value input value of the parameter
     * \sa make_str()
    */
@@ -824,6 +841,7 @@ public:
    /*!
     * Standard constructor with value and error provided. Creates parameter
     * with given value and error but without bounds.
+    * \param inName internal string identifier of this parameter
     * \param value input value of the parameter
     * \param error input error of the parameter
     * \sa make_str()

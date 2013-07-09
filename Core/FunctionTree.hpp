@@ -32,7 +32,7 @@ public:
   //! Standard constructor
    /*!
     * Standard constructor with the top node provided
-    * /param TreeNode first node assigned as head
+    * /param head first node to be used as head
    */
   FunctionTree(std::shared_ptr<TreeNode> head):head_(head){
     nodes_.insert(std::pair<std::string, std::shared_ptr<TreeNode> >(head->getName(),head));
@@ -47,7 +47,7 @@ public:
    /*!
     * Add a node to the function tree
     * Adds Top-Down-Linking to the node
-    * \param TreeNode to be added
+    * \param newNode Node to be added
    */
   virtual void addNode(std::shared_ptr<TreeNode> newNode){
     //TODO: check existence, throw exception
@@ -58,8 +58,8 @@ public:
   //! Create head node of FcnTree
    /*!
     * Add top node to the function tree
-    * \param string name of node
-    * \param Strategy how the node calculates its value
+    * \param name identifier of node
+    * \param strat Strategy with which the node calculates its value
     * \sa addNode(), createNode(), createLeaf()
    */
   virtual void createHead(const std::string& name, std::shared_ptr<Strategy> strat){
@@ -76,9 +76,9 @@ public:
    /*!
     * Create and add a node to the function tree
     * Adds Top-Down-Linking to the node
-    * \param string name of noder
-    * \param Strategy how the node calculates its value
-    * \param TreeNode parent of this node (for linking)
+    * \param name identifier of node
+    * \param strat Strategy with which the node calculates its value
+    * \param parent the parent of this node (for linking)
     * \sa addNode(), createHead(), createLeaf()
    */
   virtual void createNode(const std::string& name, std::shared_ptr<Strategy> strat, std::string parent){
@@ -97,9 +97,9 @@ public:
     * Create and add a node to the function tree
     * Adds Top-Down-Linking to the node
     * Attaches the Node as Observer to the external parameter
-    * \param string name of node
-    * \param AbsParameter the parameter this node gets its value from
-    * \param string parents name (for linking)
+    * \param name identifier of node
+    * \param extPar the parameter this node represents
+    * \param parent the parent of this node (for linking)
     * \sa addNode(), createHead(), createNode()
    */
   virtual void createLeaf(const std::string& name, std::shared_ptr<AbsParameter> extPar, std::string parent){
@@ -139,6 +139,8 @@ public:
   /*!
    * Declaring the stream-operator << as friend allows to stream parameter
    * information to the output as easily as a generic type.
+   * \param out the ostream the object is piped to
+   * \param b the piped object
    * \sa make_str(), to_str()
   */
   friend std::ostream& operator<<( std::ostream& out, std::shared_ptr<FunctionTree> b ){
@@ -147,8 +149,8 @@ public:
 
 
 protected:
-  std::shared_ptr<TreeNode> head_;
-  std::map<std::string, std::shared_ptr<TreeNode> > nodes_; /*!< boost directed graph used for our function */
+  std::shared_ptr<TreeNode> head_; /*!< the head node storing the absolute result */
+  std::map<std::string, std::shared_ptr<TreeNode> > nodes_; /*!< map to store the nodes */
 
 };
 

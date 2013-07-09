@@ -1,12 +1,12 @@
 //! ComPWA Exceptions
 /*! \class Exception
- * @file PWAExceptions.hpp
+ * @file Exceptions.hpp
  * This class defines the ComPWA exception base-class and provides a set of
  * standard exceptions.
 */
 
-#ifndef PWAEXCEPTIONS_H
-#define PWAEXCEPTIONS_H
+#ifndef EXCEPTIONS_H
+#define EXCEPTIONS_H
 
 #include <exception>
 #include <string>

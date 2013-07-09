@@ -1,6 +1,6 @@
 //! Reader for data in ASCII-Format like Pawian's epemEvtReader
-/*! \class PawianEpemReader
- * @file PawianEpemReader.hpp
+/*! \class AsciiReader
+ * @file AsciiReader.hpp
  * This class reads event-based data from ascii-files in the same syntax as Pawian's epemEvtReader. It implements the
  * interface of Data.hpp.
 */
@@ -43,4 +43,4 @@ private:
 
 };
 
-#endif /* _RootReader_HPP */
+#endif /* _ASCII_READER_H_ */
