@@ -1,0 +1,15 @@
+########### DataReader Jamfile #############
+path-constant DATAREADER : . ;
+
+# libDataReader.so will consist of these packages:
+build-project AsciiReader ;
+build-project RootReader ;
+
+# Build libDataReader.so
+lib DataReader : 
+        [ glob *.cpp ]
+        $(DATAREADER)/AsciiReader//AsciiReader
+        $(DATAREADER)/RootReader//RootReader
+        ;
+
+install dist : DataReader : <location>$(TOP)/lib ;

@@ -1,10 +1,9 @@
 
 #module load root/5.32.00
-export PATH=$PATH:$BOOST_ROOT
 
-export COMPWA_DIR=/data/work/kpha1/weidenka/ComPWA
+export COMPWA_DIR=/home/weidenka/rootAnalysis/ComPWA
 export PWA_LIBS=$COMPWA_DIR/lib
-export EXTERNAL_DIR=$COMPWA_DIR/external
+export EXTERNAL_DIR=/data/work/kpha1/weidenka/external
 
 export QFT_LIB=$EXTERNAL_DIR/qft++/lib
 
@@ -17,6 +16,8 @@ export BOOST_BUILD_PATH=$BOOST_ROOT/build
 
 export ROOTSYS=/home/weidenka/opt/
 export ROOTINCLUDE=$ROOTSYS/include/root
+
+export PATH=$PATH:$BOOST_ROOT
 
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$GENEVA/lib:$ROOTSYS/lib/root:$MINUIT2/lib:$BOOST_BUILD_PATH/lib:$PWA_LIBS:$QFT_LIB
 

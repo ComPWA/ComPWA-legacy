@@ -1,0 +1,11 @@
+########### Estimator Jamfile #############
+path-constant ESTIMATOR : . ;
+
+# libEstimator.so will consist of these packages:
+
+# Build libEstimator.so
+lib Estimator : 
+        [ glob *.cpp ]
+        ;
+
+install dist : Estimator : <location>$(TOP)/lib ;

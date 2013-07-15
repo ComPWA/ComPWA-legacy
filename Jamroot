@@ -1,0 +1,16 @@
+########### ComPWA Jamroot #############
+path-constant TOP : . ;
+
+project :
+	requirements <include>$(TOP)
+	<cxxflags>-ftemplate-depth-256
+	<cxxflags>-std=c++0x
+	;
+
+# Configure the used packages here:
+build-project Core ; 
+build-project Physics ;
+build-project DataReader ; 
+build-project Estimator ;
+build-project Optimizer ;
+build-project test ;

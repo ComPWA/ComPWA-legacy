@@ -1,0 +1,10 @@
+########### MinLogLH lib #############
+
+lib MinLogLH : 
+        [ glob *.cpp ]
+        $(TOP)/Core//ComPWA 
+        $(TOP)/Optimizer//Optimizer 
+         ;
+
+install dist : MinLogLH : <location>$(TOP)/lib ;
+

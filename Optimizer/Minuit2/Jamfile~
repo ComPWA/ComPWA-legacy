@@ -1,0 +1,20 @@
+########### OIFMinuit2 lib #############
+
+#build-project OIFMinuit2 ;
+
+project :
+	requirements <include>./
+        <include>$(TOP)/Core
+	<include>$(BOOST_BUILD_PATH)/include
+	<include>$(MINUIT2)/include
+	<cxxflags>-ftemplate-depth-256
+	<cxxflags>-std=c++0x
+	<linkflags>$(BOOSTLIBS)
+	;
+
+lib OIFMinuit2 : 
+        [ glob *.cpp ] 
+   #     OIFMinuit2//OIFMinuit2  
+        : <use>$(TOP)//Minuit2 
+        : <library>$(TOP)//Minuit2 ;
+

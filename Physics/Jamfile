@@ -1,0 +1,15 @@
+########### Physics Jamfile #############
+path-constant PHYSICS : . ;
+
+# libPhysics.so will consist of these packages:
+build-project AmplitudeSum ;
+build-project BreitWigner ;
+
+# Build libPhysics.so
+lib Physics : 
+        [ glob *.cpp ]
+        $(PHYSICS)/AmplitudeSum//AmplitudeSum
+        $(PHYSICS)/BreitWigner//BreitWigner
+        ;
+
+install dist : Physics : <location>$(TOP)/lib ;

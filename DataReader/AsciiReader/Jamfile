@@ -1,0 +1,20 @@
+########### AsciiReader lib #############
+# @brief
+# This package is a data reader, which reads the data from ascii files
+# @end
+
+project :
+	requirements
+	;
+
+lib AsciiReader : 
+        [ glob *.cpp : *Test.cpp ] 
+        $(TOP)/Core//ComPWA  
+        ;
+        
+#using testing ;
+#lib boost_unit_test_framework ;
+#run DataTest.cpp AsciiReader $(TOP)/Core//ComPWA boost_unit_test_framework ;
+
+install dist : AsciiReader : <location>$(TOP)/lib ;
+

@@ -1,0 +1,11 @@
+########### Optimizer Jamfile #############
+path-constant OPTIMIZER : . ;
+
+# libOptimizer.so will consist of these packages:
+
+# Build libOptimizer.so
+lib Optimizer : 
+        [ glob *.cpp ]
+        ;
+
+install dist : Optimizer : <location>$(TOP)/lib ;

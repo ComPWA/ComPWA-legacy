@@ -1,0 +1,22 @@
+########### SliceFit lib #############
+
+local ROOTSYS = [ os.environ ROOTSYS ] ;
+local ROOTINC = [ os.environ ROOTINCLUDE ] ;
+
+local rlibs = [ SHELL "$ROOTSYS/bin/root-config --libs" ] ;
+ROOTLIBS = [ MATCH "(.*)[\n]" : $(rlibs) ] ;
+
+project :
+	requirements
+	<include>$(ROOTINC)
+	<linkflags>$(ROOTLIBS)
+	<linkflags>-lEG
+	;
+
+lib SliceFit : 
+        [ glob *.cpp ]
+        $(TOP)/Core//ComPWA 
+         ;
+
+install dist : SliceFit : <location>$(TOP)/lib ;
+

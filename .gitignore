@@ -1,0 +1,11 @@
+.DS_Store
+*.root
+*.so
+*.o
+*.d
+~*
+setup.sh
+bin/
+lib/
+external
+

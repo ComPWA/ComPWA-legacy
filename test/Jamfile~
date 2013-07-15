@@ -1,0 +1,64 @@
+########### testMain app #############
+
+#build-project testMain ;
+
+BOOSTLIBS = -lboost_date_time -lboost_filesystem -lboost_program_options -lboost_regex -lboost_serialization -lboost_system -lboost_thread -lboost_test_exec_monitor -L$(BOOST_BUILD_PATH)/lib ;
+
+local rlibs = [ SHELL "$ROOTSYS/bin/root-config --libs" ] ;
+ROOTLIBS = [ MATCH "(.*)[\n]" : $(rlibs) ] ;
+
+actions rootlibs
+{
+	$(ROOTSYS)/bin/root-config --libs
+}
+
+project :
+	requirements <include>./
+        <include>$(TOP)/Core
+        <include>$(TOP)/OIFMinuit2
+        <include>$(TOP)/OIFGeneva
+        <include>$(TOP)/PIFBW
+        <include>$(TOP)/DIFRoot2Part
+	<include>$(ROOTSYS)/include
+	<include>$(BOOST_BUILD_PATH)/include
+	<cxxflags>-ftemplate-depth-256
+	<cxxflags>-std=c++0x
+	<linkflags>$(BOOSTLIBS)
+	<linkflags>$(ROOTLIBS)
+	<linkflags>-lgomp
+	;
+
+echo "Root-Libs testMainApp:" ;
+echo $(ROOTLIBS) ;
+
+echo "Boost-Libs testMainApp:" ;
+echo $(BOOSTLIBS) ;
+
+lib testMain : 
+        [ glob *.cpp : *App.cpp ]
+#        $(TOP)/OIFMinuit2//OIFMinuit2
+#        $(TOP)/OIFGeneva//OIFGeneva
+        #: <use>$(TOP)//GemCom <use>$(TOP)//GemCou <use>$(TOP)//GemInd <use>$(TOP)//GemGen <use>$(TOP)//GemHap <use>$(TOP)//Minuit2
+        #: <library>$(TOP)//GemCom <library>$(TOP)//GemCou <library>$(TOP)//GemInd <library>$(TOP)//GemGen <library>$(TOP)//GemHap <library>$(TOP)//Minuit2 ;
+        : : ;
+
+exe testMainApp : 
+        testMainApp.cpp 
+        testMain
+        $(TOP)/OIFMinuit2//OIFMinuit2
+        $(TOP)/OIFGeneva//OIFGeneva  
+        $(TOP)/PIFBW//PIFBW
+        $(TOP)/DIFRoot2Part//DIFRoot2Part  
+        : ;
+
+install dist : testMain : <location>$(TOP)/lib ;
+install dist2 : testMainApp : <location>$(TOP)/bin ;
+
+#alias install : install-bin install-lib ;
+#install install-bin : applications : <location>$(TOP)/bin ;
+#install install-lib : helper : <location>$(TOP)/lib ;
+
+#install-lib : testMain : <location>$(TOP)/lib ;
+#install-bin : testMainApp : <location>$(TOP)/bin ;
+
+
