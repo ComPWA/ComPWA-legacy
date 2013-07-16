@@ -12,6 +12,7 @@
 #include <memory>
 //#include <boost/shared_ptr.hpp>
 //#include <cassert>
+//#include "Minuit2/FCNBase.h"
 #include "Minuit2/FCNBase.h"
 #include "Optimizer/ControlParameter.hpp"
 #include "Core/ParameterList.hpp"

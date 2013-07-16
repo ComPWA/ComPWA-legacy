@@ -1,4 +1,5 @@
 ########### SliceFit lib #############
+import os ;
 
 local ROOTSYS = [ os.environ ROOTSYS ] ;
 local ROOTINC = [ os.environ ROOTINCLUDE ] ;

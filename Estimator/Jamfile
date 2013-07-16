@@ -1,6 +1,9 @@
 ########### Estimator Jamfile #############
 path-constant ESTIMATOR : . ;
 
+build-project ChiOneD ;
+build-project MinLogLH ;
+#build-project SliceFit ;
 # libEstimator.so will consist of these packages:
 
 # Build libEstimator.so

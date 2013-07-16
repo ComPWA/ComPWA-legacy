@@ -1,7 +1,11 @@
 ########### Optimizer Jamfile #############
 path-constant OPTIMIZER : . ;
 
+build-project Minuit2 ;
+#build-project Geneva ;
+
 # libOptimizer.so will consist of these packages:
+
 
 # Build libOptimizer.so
 lib Optimizer : 
