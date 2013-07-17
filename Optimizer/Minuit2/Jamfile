@@ -1,32 +1,35 @@
 ########### Minuit2IF lib #############
 import os ;
 
+local OS = [ os.environ OS ] ;
+local OS_UNIX = Linux ;
 local MINUIT2 = [ os.environ MINUIT2 ] ;
-#local BOOST_BUILD_PATH = [ os.environ BOOST_BUILD_PATH ] ;
+local BOOST_BUILD_PATH = [ os.environ BOOST_BUILD_PATH ] ;
 
 #BOOSTLIBS = -lboost_date_time -lboost_filesystem -lboost_program_options -lboost_regex -lboost_serialization -lboost_system -lboost_thread-mt -lboost_test_exec_monitor -L$(BOOST_BUILD_PATH)/lib ;
 
-#if $(MINUIT2) {
-  #lib Minuit2 : : <file>$(MINUIT2)/lib/libMinuit2.so  : : ;
-  lib Minuit2 : : <file>$(MINUIT2)/lib/libMinuit2.dylib  : : ;
-  local MINUIT2INC = $(MINUIT2)/include ;
-#} else {
-#  lib Minuit2 : : <file>/usr/lib64/root/libMinuit2.so : : ;
-#  local MINUIT2INC = /usr/include/root ;
-#}
+if $(OS)=Linux {
+#UNIX
+   lib Minuit2 : : <file>$(MINUIT2)/lib/libMinuit2.so  : : ;
+} else {
+#OSX
+   lib Minuit2 : : <file>$(MINUIT2)/lib/libMinuit2.dylib  : : ;
+}
+local MINUIT2INC = $(MINUIT2)/include ;
 
 project :
-	requirements
+   requirements
 	<include>$(MINUIT2INC)
-    #<linkflags>-l$(MINUIT2)/lib/libMinuit2.so
-	;
+	#<linkflags>-l$(MINUIT2)/lib/libMinuit2.so
+	#<linkflags>$(BOOSTLIBS)
+;
 
 lib Minuit2IF : 
-        [ glob *.cpp ] 
-        $(TOP)/Core//ComPWA
-		: <use>$(TOP)/Optimizer/Minuit2//Minuit2 <threading>single 
-		: <library>$(TOP)/Optimizer/Minuit2//Minuit2 <threading>single 
-        ;
+   [ glob *.cpp ] 
+   $(TOP)/Core//ComPWA
+   : <use>$(TOP)/Optimizer/Minuit2//Minuit2 <threading>single 
+   : <library>$(TOP)/Optimizer/Minuit2//Minuit2 <threading>single 
+;
 
 install dist : Minuit2IF : <location>$(TOP)/lib <threading>single ;
 

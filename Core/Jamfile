@@ -3,8 +3,8 @@ import os ;
 
 local BOOST_PATH = [ os.environ BOOST_BUILD_PATH ] ;
 
-#BOOSTLIBS = -lboost_date_time -lboost_filesystem -lboost_program_options -lboost_regex -lboost_serialization -lboost_system -lboost_thread -lboost_test_exec_monitor -L$(BOOST_PATH)/lib ;
-BOOSTLIBS = -lboost_date_time -lboost_filesystem -lboost_program_options -lboost_regex -lboost_serialization -lboost_system -lboost_thread -lboost_test_exec_monitor -L/Users/weidenka/work/external/boost_1_48_0/build/lib ;
+BOOSTLIBS = -lboost_date_time -lboost_filesystem -lboost_program_options -lboost_regex -lboost_serialization -lboost_system -lboost_thread -lboost_test_exec_monitor -L$(BOOST_PATH)/lib ;
+#BOOSTLIBS = -lboost_date_time -lboost_filesystem -lboost_program_options -lboost_regex -lboost_serialization -lboost_system -lboost_thread -lboost_test_exec_monitor -L/Users/weidenka/work/external/boost_1_48_0/build/lib ;
 
 project :
 	requirements
