@@ -69,7 +69,7 @@ int main(int argc, char **argv){
     cout << "DaughterA =  " << (*reso).m_daugtherA << " DaughterB = " << (*reso).m_daugtherB << endl;
   }
   cout << endl << endl;
-
+  cout<<"muhuhu"<<endl;
   //Simple Breit-Wigner Physics-Module setup
   AmpSumIntensity testBW(M, Br, m1, m2, m3, ini);
   ParameterList minPar;

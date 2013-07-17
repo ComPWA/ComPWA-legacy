@@ -80,9 +80,11 @@ public:
       if(tmp.m_daugtherA==2 && tmp.m_daugtherB==3){
         std::shared_ptr<AmpRelBreitWignerRes> tmpbw(new AmpRelBreitWignerRes(tmp.m_name.c_str(),
             tmp.m_name.c_str(), ma, *mr[last], *gr[last], *qr[last], 1, tmp.m_spin) );
-	  const double* mass_first = &m2;//WRONG???
-	  const double* mass_second = &m3;
-        tmpbw->setDecayMasses(*mass_first,*mass_second);
+        const double* mass_first = &m2;//WRONG???
+        const double* mass_second = &m3;
+	  tmpbw->setDecayMasses(*mass_first,*mass_second);
+//	  tmpbw->setDecayMasses(m2,m3);
+
         rbw.push_back(tmpbw);
         angd.push_back( std::shared_ptr<AmpWigner> (new AmpWigner(("a_{"+tmp.m_name+"}").c_str(), ("a_{"+tmp.m_name+"}").c_str(),
             mc, ma, mb, 1, *aj[last], *am[last], *an[last]) ) );
@@ -104,6 +106,7 @@ public:
             mc, ma, mb, 3, *aj[last], *am[last], *an[last]) ) );
         totAmp.addBW(rbw.at(last), rr.at(last), phir.at(last), angd.at(last));
       }else{ //ignore resonance
+
           //std::cout << "Problem" << std::cout;
           mr.pop_back();
           qr.pop_back();

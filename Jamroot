@@ -1,5 +1,12 @@
 ########### ComPWA Jamroot #############
+import os ; 
 path-constant TOP : . ;
+
+#local ONMYMAC = [ os.environ ONMYMAC ] ;
+
+#if $(ONMYMAC) { 
+#using gcc : gcc-mp-4.8
+#}
 
 project :
 	requirements <include>$(TOP)

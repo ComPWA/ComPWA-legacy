@@ -11,11 +11,11 @@ using namespace ROOT::Minuit2;
 
 MinuitFcn::MinuitFcn(std::shared_ptr<ControlParameter> myData) :
   _myDataPtr(myData){
-  if (0==_myDataPtr) {
+  //if (_myDataPtr==0) {//does not compile on OSX
     //Alert << "Data pointer is 0 !!!!" << endmsg;
-      std::cout << "Data pointer is 0 !!!!" << std::endl; //TODO exception
-    exit(1);
-  }
+      //std::cout << "Data pointer is 0 !!!!" << std::endl; //TODO exception
+    //exit(1);
+  //}
 }
 
 MinuitFcn::~MinuitFcn(){

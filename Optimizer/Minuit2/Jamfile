@@ -7,7 +7,8 @@ local MINUIT2 = [ os.environ MINUIT2 ] ;
 #BOOSTLIBS = -lboost_date_time -lboost_filesystem -lboost_program_options -lboost_regex -lboost_serialization -lboost_system -lboost_thread-mt -lboost_test_exec_monitor -L$(BOOST_BUILD_PATH)/lib ;
 
 #if $(MINUIT2) {
-  lib Minuit2 : : <file>$(MINUIT2)/lib/libMinuit2.so  : : ;
+  #lib Minuit2 : : <file>$(MINUIT2)/lib/libMinuit2.so  : : ;
+  lib Minuit2 : : <file>$(MINUIT2)/lib/libMinuit2.dylib  : : ;
   local MINUIT2INC = $(MINUIT2)/include ;
 #} else {
 #  lib Minuit2 : : <file>/usr/lib64/root/libMinuit2.so : : ;
