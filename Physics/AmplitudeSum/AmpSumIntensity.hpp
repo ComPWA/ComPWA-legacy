@@ -185,6 +185,7 @@ public:
           angd.push_back( tmpWigner );
           totAmp.addBW(rbw.at(last), rr.at(last), phir.at(last), angd.at(last));
 //    	  totAmp.addBW(rbw.at(last), rr.at(last), phir.at(last));
+          cout<<"12123"<<endl;
       }
       else continue;
     }
