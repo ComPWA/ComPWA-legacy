@@ -34,7 +34,7 @@ using namespace std;
  */
 int main(int argc, char **argv){
 
-    cout << "DataIF Root 2Particles started " << endl << endl;
+	cout << "DataIF Root 2Particles started " << endl << endl;
 
     string file = "test/2Part-4vecs.root";
     RootReader myReader(file, false,"data");

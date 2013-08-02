@@ -74,40 +74,78 @@ public:
       am.push_back( std::shared_ptr<RooRealVar> (new RooRealVar(("m_{"+tmp.m_name+"}").c_str(), "m", tmp.m_m) ) );
       an.push_back( std::shared_ptr<RooRealVar> (new RooRealVar(("n_{"+tmp.m_name+"}").c_str(), "n", tmp.m_n) ) );
 
-	  //if(tmp.m_type=="BW"){}
-      //setup Dynamics and Angular Distribution
-      unsigned int last = mr.size()-1;
+
+//      unsigned int last = mr.size()-1;
+//      if(tmp.m_daugtherA==2 && tmp.m_daugtherB==3){
+//        std::shared_ptr<AmpRelBreitWignerRes> tmpbw(new AmpRelBreitWignerRes(tmp.m_name.c_str(),
+//            tmp.m_name.c_str(), ma, *mr[last], *gr[last], *qr[last], 1, tmp.m_spin) );
+//        tmpbw->setDecayMasses(m2, m3);
+//        rbw.push_back(tmpbw);
+//        angd.push_back( std::shared_ptr<AmpWigner> (new AmpWigner(("a_{"+tmp.m_name+"}").c_str(), ("a_{"+tmp.m_name+"}").c_str(),
+//            mc, ma, mb, 1, *aj[last], *am[last], *an[last]) ) );
+//        totAmp.addBW(rbw.at(last), rr.at(last), phir.at(last), angd.at(last));
+//      }else if(tmp.m_daugtherA==1 && tmp.m_daugtherB==3){
+//        std::shared_ptr<AmpRelBreitWignerRes> tmpbw(new AmpRelBreitWignerRes(tmp.m_name.c_str(),
+//            tmp.m_name.c_str(), mb, *mr[last], *gr[last], *qr[last], 2, tmp.m_spin) );
+//        tmpbw->setDecayMasses(m1, m3);
+//        rbw.push_back(tmpbw);
+//        angd.push_back( std::shared_ptr<AmpWigner> (new AmpWigner(("a_{"+tmp.m_name+"}").c_str(), ("a_{"+tmp.m_name+"}").c_str(),
+//            mc, ma, mb, 2, *aj[last], *am[last], *an[last]) ) );
+//        totAmp.addBW(rbw.at(last), rr.at(last), phir.at(last), angd.at(last));
+//      }else if(tmp.m_daugtherA==1 && tmp.m_daugtherB==2){
+//        std::shared_ptr<AmpRelBreitWignerRes> tmpbw(new AmpRelBreitWignerRes(tmp.m_name.c_str(),
+//            tmp.m_name.c_str(), mc, *mr[last], *gr[last], *qr[last], 3, tmp.m_spin) );
+//        tmpbw->setDecayMasses(m1, m2);
+//        rbw.push_back(tmpbw);
+//        angd.push_back( std::shared_ptr<AmpWigner> (new AmpWigner(("a_{"+tmp.m_name+"}").c_str(), ("a_{"+tmp.m_name+"}").c_str(),
+//            mc, ma, mb, 3, *aj[last], *am[last], *an[last]) ) );
+//        totAmp.addBW(rbw.at(last), rr.at(last), phir.at(last), angd.at(last));
+//      }else{ //ignore resonance
+//          //std::cout << "Problem" << std::cout;
+//          mr.pop_back();
+//          qr.pop_back();
+//          gr.pop_back();
+//          rr.pop_back();
+//          phir.pop_back();
+//          aj.pop_back();
+//          am.pop_back();
+//          an.pop_back();
+//      }
+      par1.push_back( std::shared_ptr<RooRealVar> (new RooRealVar(("par1_{"+tmp.m_name+"}").c_str(), "n", tmp.m_par1) ) );
+      par2.push_back( std::shared_ptr<RooRealVar> (new RooRealVar(("par2_{"+tmp.m_name+"}").c_str(), "n", tmp.m_par2) ) );
+      const double* mass_first;
+      const double* mass_third;
+      const double* mass_second;
+      RooAbsReal* mass_eval_12;
+      RooAbsReal* mass_eval_23;
+      RooAbsReal* mass_eval_13;
+      int count;
       if(tmp.m_daugtherA==2 && tmp.m_daugtherB==3){
-        std::shared_ptr<AmpRelBreitWignerRes> tmpbw(new AmpRelBreitWignerRes(tmp.m_name.c_str(),
-            tmp.m_name.c_str(), ma, *mr[last], *gr[last], *qr[last], 1, tmp.m_spin) );
-        const double* mass_first = &m2;//WRONG???
-        const double* mass_second = &m3;
-	  tmpbw->setDecayMasses(*mass_first,*mass_second);
-//	  tmpbw->setDecayMasses(m2,m3);
-
-        rbw.push_back(tmpbw);
-        angd.push_back( std::shared_ptr<AmpWigner> (new AmpWigner(("a_{"+tmp.m_name+"}").c_str(), ("a_{"+tmp.m_name+"}").c_str(),
-            mc, ma, mb, 1, *aj[last], *am[last], *an[last]) ) );
-        totAmp.addBW(rbw.at(last), rr.at(last), phir.at(last), angd.at(last));
+          mass_first = &m2;
+          mass_second = &m3;
+          mass_third = &m1;
+          mass_eval_12 = &ma;
+          mass_eval_23 = &mb;
+          mass_eval_13 = &mc;
+          count=1;
       }else if(tmp.m_daugtherA==1 && tmp.m_daugtherB==3){
-        std::shared_ptr<AmpRelBreitWignerRes> tmpbw(new AmpRelBreitWignerRes(tmp.m_name.c_str(),
-            tmp.m_name.c_str(), mb, *mr[last], *gr[last], *qr[last], 2, tmp.m_spin) );
-        tmpbw->setDecayMasses(m1, m3);
-        rbw.push_back(tmpbw);
-        angd.push_back( std::shared_ptr<AmpWigner> (new AmpWigner(("a_{"+tmp.m_name+"}").c_str(), ("a_{"+tmp.m_name+"}").c_str(),
-            mc, ma, mb, 2, *aj[last], *am[last], *an[last]) ) );
-        totAmp.addBW(rbw.at(last), rr.at(last), phir.at(last), angd.at(last));
+          mass_first = &m1;
+          mass_second = &m3;
+          mass_third = &m2;
+          mass_eval_12 = &mb;
+          mass_eval_23 = &mc;
+          mass_eval_13 = &ma;
+          count=2;
       }else if(tmp.m_daugtherA==1 && tmp.m_daugtherB==2){
-        std::shared_ptr<AmpRelBreitWignerRes> tmpbw(new AmpRelBreitWignerRes(tmp.m_name.c_str(),
-            tmp.m_name.c_str(), mc, *mr[last], *gr[last], *qr[last], 3, tmp.m_spin) );
-        tmpbw->setDecayMasses(m1, m2);
-        rbw.push_back(tmpbw);
-        angd.push_back( std::shared_ptr<AmpWigner> (new AmpWigner(("a_{"+tmp.m_name+"}").c_str(), ("a_{"+tmp.m_name+"}").c_str(),
-            mc, ma, mb, 3, *aj[last], *am[last], *an[last]) ) );
-        totAmp.addBW(rbw.at(last), rr.at(last), phir.at(last), angd.at(last));
+          mass_first = &m1;
+          mass_second = &m2;
+          mass_third = &m3;
+          mass_eval_12 = &mc;
+          mass_eval_23 = &ma;
+          mass_eval_13 = &mb;
+          count=3;
       }else{ //ignore resonance
-
-          //std::cout << "Problem" << std::cout;
+          std::cout << "Resonance ignores due to ERROR!" << std::cout;
           mr.pop_back();
           qr.pop_back();
           gr.pop_back();
@@ -116,10 +154,39 @@ public:
           aj.pop_back();
           am.pop_back();
           an.pop_back();
+          continue;
       }
 
-      //rbw.at(last).printName(std::cout);
-      //angd.at(last).printName(std::cout);
+      //setup Dynamics and Angular Distribution
+      unsigned int last = mr.size()-1;
+      if(tmp.m_type=="relBW"){
+          std::shared_ptr<AmpRelBreitWignerRes> tmpbw(new AmpRelBreitWignerRes(tmp.m_name.c_str(),
+                  tmp.m_name.c_str(), *mass_eval_12, *mr[last], *gr[last], *qr[last], 1, tmp.m_spin) );
+    	  tmpbw->setDecayMasses(*mass_first,*mass_second);
+          rbw.push_back(tmpbw);
+//         angd.push_back( std::shared_ptr<AmpWigner> (new AmpWigner(("a_{"+tmp.m_name+"}").c_str(), ("a_{"+tmp.m_name+"}").c_str(),
+//			  *mass_eval_23, *mass_eval_12, *mass_eval_13, count, *aj[last], *am[last], *an[last]) ) );
+          std::shared_ptr<AmpWigner> tmpWigner(new AmpWigner(("a_{"+tmp.m_name+"}").c_str(), ("a_{"+tmp.m_name+"}").c_str(),
+			  mc, ma, mb, count, *aj[last], *am[last], *an[last]) ) ;
+          tmpWigner->setDecayMasses(M, *mass_first, *mass_second , *mass_third);
+          angd.push_back( tmpWigner );
+          totAmp.addBW(rbw.at(last), rr.at(last), phir.at(last), angd.at(last));
+//          totAmp.addBW(rbw.at(last), rr.at(last), phir.at(last));
+      }
+      else if(tmp.m_type=="flatte"){
+          std::shared_ptr<AmpFlatteRes> tmpbw(new AmpFlatteRes(tmp.m_name.c_str(),
+                  tmp.m_name.c_str(), *mass_eval_12, *mr[last], *gr[last], *qr[last], *par1[last], *par2[last], count, tmp.m_spin) );
+          tmpbw->setDecayMasses(*mass_first,*mass_second);
+          tmpbw->setBarrierMass(0.547853,0.1396);//a_0->eta pi hidden channel
+          rbw.push_back(tmpbw);
+          std::shared_ptr<AmpWigner> tmpWigner(new AmpWigner(("a_{"+tmp.m_name+"}").c_str(), ("a_{"+tmp.m_name+"}").c_str(),
+			  mc, ma, mb, count, *aj[last], *am[last], *an[last]) ) ;
+          tmpWigner->setDecayMasses(M, *mass_first, *mass_second , *mass_third);
+          angd.push_back( tmpWigner );
+          totAmp.addBW(rbw.at(last), rr.at(last), phir.at(last), angd.at(last));
+//    	  totAmp.addBW(rbw.at(last), rr.at(last), phir.at(last));
+      }
+      else continue;
     }
 
     std::cout << "completed setup" << std::endl;

@@ -28,7 +28,7 @@ public:
 		       RooAbsReal& _resMass, RooAbsReal& _resWidth,
 		       RooAbsReal& _q0,
 		       int _subsys,
-                       Int_t resSpin) ; 
+               Int_t resSpin) ;
 
   AmpRelBreitWignerRes(const AmpRelBreitWignerRes&, const char*);
   AmpRelBreitWignerRes(const AmpRelBreitWignerRes&);

@@ -37,7 +37,7 @@
 
 using namespace std;
 
-const unsigned int MaxEvents = 10000;
+const unsigned int MaxEvents = 12000;
 
 //constants
 const Double_t M = 1.86486; // GeV/c² (D0)
@@ -45,6 +45,11 @@ const Double_t Br = 0.0; // GeV/c² (width)
 const Double_t m1 = 0.497614; // GeV/c² (K_S^0)
 const Double_t m2 = 0.493677; // GeV/c² (K^-)
 const Double_t m3 = 0.493677; // GeV/c² (K^+)
+//const Double_t M = 3.096916; // GeV/c (J/psi+)
+//const Double_t Br = 0.000093; // GeV/c (width)
+//const Double_t m1 = 0.; // GeV/c (gamma)
+//const Double_t m2 = 0.139570; // GeV/c (pi)
+//const Double_t m3 = 0.139570; // GeV/c (pi)
 //const Double_t c = 299792458.; // m/s
 const Double_t PI = 3.14159;
 
@@ -58,10 +63,12 @@ int main(int argc, char **argv){
 
   //load resonances
   AmplitudeSetup ini("test/DKsKKRes.xml");
-  cout << "loaded file " << ini.getFileName() << " with " << ini.getResonances().size() << " resonances:" << endl;
+//    AmplitudeSetup ini("test/JPSI_ypipi.xml");
+  cout << "loaded file " << ini.getFileName() << " with " << ini.getResonances().size() << " resonances:" << std::endl;
   for(std::vector<Resonance>::iterator reso=ini.getResonances().begin(); reso!=ini.getResonances().end(); reso++){
     cout << endl << "Resonance " << (*reso).m_name << endl;
     cout << "Mass =  " << (*reso).m_mass << " with range " << (*reso).m_mass_min << " to " << (*reso).m_mass_max << endl;
+    cout << "Type =  " << (*reso).m_type << endl;
     cout << "Width = " << (*reso).m_width << " with range " << (*reso).m_width_min << " to " << (*reso).m_width_max << endl;
     cout << "Spin =  " << (*reso).m_spin << " m = " << (*reso).m_m << " n = " << (*reso).m_n << endl;
     cout << "Strength =  " << (*reso).m_strength << " Phase = " << (*reso).m_phase << endl;
@@ -69,7 +76,6 @@ int main(int argc, char **argv){
     cout << "DaughterA =  " << (*reso).m_daugtherA << " DaughterB = " << (*reso).m_daugtherB << endl;
   }
   cout << endl << endl;
-  cout<<"muhuhu"<<endl;
   //Simple Breit-Wigner Physics-Module setup
   AmpSumIntensity testBW(M, Br, m1, m2, m3, ini);
   ParameterList minPar;

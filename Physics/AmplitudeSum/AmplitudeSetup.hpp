@@ -133,6 +133,7 @@ void AmplitudeSetup::save(const std::string &filename)
    BOOST_FOREACH( Resonance const& v, m_resonances ) {
      ptree & node = pt.add("amplitude_setup.resonance", "");
      pt.put("name", v.m_name);
+     pt.put("type", v.m_type);
      pt.put("mass", v.m_mass);
      pt.put("mass_min", v.m_mass_min);
      pt.put("mass_max", v.m_mass_max);

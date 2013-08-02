@@ -15,6 +15,8 @@ AmpFlatteRes::AmpFlatteRes(const char *name, const char *title,
 					   RooAbsReal& x, ///  mass at which to evaluate RBW
 					   RooAbsReal& resMass, RooAbsReal& resWidth,
 					   RooAbsReal& d, ///  meson radius
+				       RooAbsReal& par1,
+				       RooAbsReal& par2,
 					   int subSys, ///  meson radius
 					   Int_t resSpin) :
   AmpAbsDynamicalFunction(name,title),
@@ -22,6 +24,8 @@ AmpFlatteRes::AmpFlatteRes(const char *name, const char *title,
   _m0("m0", "Mass", this, resMass),
   _resWidth("resWidth", "Width", this, resWidth),
   _d("d", "d", this, d),
+  _par1("par1","par1",this,par1),
+  _par2("par2","par2",this,par2),
   _subSys(subSys),
   _spin(resSpin)
 {
@@ -35,6 +39,8 @@ AmpFlatteRes::AmpFlatteRes(const AmpFlatteRes& other, const char* newname) :
   _m0("m0", this, other._m0),
   _resWidth("resWidth", this, other._resWidth),
   _d("d", this, other._d),
+  _par1("par1","par1",this,other._par1),
+  _par2("par2","par2",this,other._par2),
   _subSys(other._subSys),
   _spin(other._spin),
   _ma(other._ma),
@@ -49,6 +55,8 @@ AmpFlatteRes::AmpFlatteRes(const AmpFlatteRes& other) :
   _m0("m0", this, other._m0),
   _resWidth("resWidth", this, other._resWidth),
   _d("d", this, other._d),
+  _par1("par1","par1",this,other._par1),
+  _par2("par2","par2",this,other._par2),
   _subSys(other._subSys),
   _spin(other._spin),
   _ma(other._ma),
@@ -135,26 +143,37 @@ double AmpFlatteRes::BLprime2() const {
 }*/
 
 RooComplex AmpFlatteRes::evaluate() const {
+	if(_mBarA<0||_mBarA>5||_mBarB<0||_mBarB>5) {
+		cout<<"Barrier masses not set! Use setBarrierMass() first!"<<endl;
+		return 0;
+	}
+	double m0 = Double_t(_m0);
+	double m  = Double_t(_x);
 
-  double m0 = Double_t(_m0);
-  double m  = Double_t(_x);
+	double Gamma0 = double(_resWidth);
+	//double GammaV = Gamma0 * (m0 / m) * pow(q() / q0(), 2.*_spin + 1.)  * BLprime2();
+	double gam1=1./sqrt(2./5.), gam2=1./sqrt(3./5.); //gam1^2+gam2^2=1, gam1/gam2=1.5 fixed from SU(3), TODO: set channel dependent
 
-  double Gamma0 = double(_resWidth);
-  //double GammaV = Gamma0 * (m0 / m) * pow(q() / q0(), 2.*_spin + 1.)  * BLprime2();
-  double gam1=0.6325, gam2=0.7746; //gam1=1./sqrt(2./5.), gam2=1./sqrt(3./5.); //gam1^2+gam2^2=1; TODO: set channel dependent
-  double p1 = q0(_ma,_mb);
-  double p2 = q0(_mBarA,_mBarB);
-  double g1 = gam1*sqrt(m0*Gamma0);
-  double g2 = gam2*sqrt(m0*Gamma0);
-  
-  RooComplex denom = RooComplex(m0*m0 - m*m, -p1*g1*g1-p2*g2*g2);
+	double p1 = q0(_mBarA,_mBarB);//break-up momenta hidden channel (e.g. a0->eta pi)
+	//    double p1 = 2*q0(_mBarA,_mBarB)/m;//break-up momenta hidden channel (e.g. a0->eta pi)
+	double p2 = q0(_ma,_mb);//break-up momenta decay channel (e.g. a0->KK)
+	//  double p2 = 2*q0(_ma,_mb)/m;//break-up momenta decay channel (e.g. a0->KK)
 
-  RooComplex result = (RooComplex(_m0 * Gamma0) / denom); //sqrt(Gamma0 * GammaI) ?
-  if(result.re()!=result.re()) {std::cout << "OH OH RE" << std::endl; return 0;}
-  if(result.im()!=result.im()) {std::cout << "OH OH IM" << std::endl; return 0;}
-  return result; 
+	double g1 = gam1*sqrt(m0*Gamma0);
+	//  double g1 = _par1;//couppling a0->eta pi
+	double g2 = gam2*sqrt(m0*Gamma0);
+	//  double g2 = _par2;//coupling a0->KK
+
+	RooComplex denom = RooComplex(m0*m0 - m*m, -p1*g1*g1-p2*g2*g2);
+	// cout<<-p1*g1*g1-p2*g2*g2<<endl;
+	RooComplex result = (RooComplex(_m0 * Gamma0) / denom); //sqrt(Gamma0 * GammaI) ?
+	//  RooComplex result = (RooComplex(g2*g2,0) / denom); //use KK decay channel here
+	//cout<<denom.re()<<" "<<denom.im()<<endl;
+	if(result.re()!=result.re()) {std::cout << "OH OH RE" << std::endl; return 0;}
+	if(result.im()!=result.im()) {std::cout << "OH OH IM" << std::endl; return 0;}
+	return result;
 }
-                       
+
 ////  implement stubs for virtual functions
 ////  to satisfy interface of RooAbsArg.
 ////  not sure which ones are really needed.

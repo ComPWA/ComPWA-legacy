@@ -33,6 +33,7 @@ public:
   virtual inline bool hasDist(){return toEvaluate;};
   virtual void initialise();
   virtual double evaluate() const;
+  void setDecayMasses(double, double, double, double);
 
   // the following are needed by the RooAbsArg interface, but not yet 
   // implemented

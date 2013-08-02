@@ -40,10 +40,10 @@ AmpWigner::AmpWigner(const char *name, const char *title,
   toEvaluate=true;
   initialise();
 
-  _M = 3.096916;  //TODO: Setter!
-  _m1 = 0.;
-  _m2 = 0.139570;
-  _m3 = 0.139570;
+//  _M = 1.864;  //TODO: Setter!
+//  _m1 = 0.49;
+//  _m2 = 0.49;
+//  _m3 = 0.49;
 }
 
 
@@ -60,10 +60,10 @@ AmpWigner::AmpWigner(const AmpWigner& other, const char* newname) :
 {
   initialise();
 
-  _M = 3.096916;  //TODO: Setter!
-  _m1 = 0.;
-  _m2 = 0.139570;
-  _m3 = 0.139570;
+//  _M = 1.864;  //TODO: Setter!
+//  _m1 = 0.49;
+//  _m2 = 0.49;
+//  _m3 = 0.49;
 }
 
 AmpWigner::~AmpWigner() 
@@ -73,6 +73,13 @@ AmpWigner::~AmpWigner()
 void AmpWigner::initialise() 
 {
 }    
+
+void AmpWigner::setDecayMasses(double M, double m1, double m2, double m3){
+	_M=M;
+	_m1=m1;
+	_m2=m2;
+	_m3=m3;
+}
 
 double AmpWigner::lambda(double x, double y, double z)const{
   return x*x+y*y+z*z-2.*x*y-2.*x*z-2.*y*z;
@@ -171,6 +178,7 @@ double AmpWigner::evaluate() const {
   //  return 0.;
 
   Spin j(_inSpin), m(_outSpin1), n(_outSpin2);
+//  cout<<Wigner_d(j,m,n,beta)<<endl;
   return Wigner_d(j,m,n,beta);
 }
                        

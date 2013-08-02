@@ -35,44 +35,45 @@ using namespace std;
 int main(int argc, char **argv){
 
     cout << "DataIF Root 3Particles started " << endl << endl;
-
+double min_range=0.9;
+double max_range=2.;
     string file = "test/3Part-4vecs.root";
     RootReader myReader(file, false,"data");
     unsigned int maxEvents = myReader.getNEvents();
     double masssq12, masssq13, masssq23;
-    TH2D* bw12 = new TH2D("bw12","inv. mass-sq of particles 1&2",1000,0.,10.,1000,0.,10.);
+    TH2D* bw12 = new TH2D("bw12","inv. mass-sq of particles 1&2",1000,min_range,max_range,1000,min_range,max_range);
     bw12->GetXaxis()->SetTitle("m_{12}^{2} / GeV^{2}");
     bw12->GetXaxis()->CenterTitle();
-    bw12->GetYaxis()->SetTitle("#");
+    bw12->GetYaxis()->SetTitle("m_{13}^{2} / GeV^{2}");
     bw12->GetYaxis()->CenterTitle();
-    TH2D* bw13 = new TH2D("bw13","inv. mass-sq of particles 1&3",1000,0.,10.,1000,0.,10.);
+    TH2D* bw13 = new TH2D("bw13","inv. mass-sq of particles 1&3",1000,min_range,max_range,1000,min_range,max_range);
     bw13->GetXaxis()->SetTitle("m_{13}^{2} / GeV^{2}");
     bw13->GetXaxis()->CenterTitle();
-    bw13->GetYaxis()->SetTitle("#");
+    bw13->GetYaxis()->SetTitle("m_{12}^{2} / GeV^{2}");
     bw13->GetYaxis()->CenterTitle();
-    TH2D* bw23 = new TH2D("bw23","inv. mass-sq of particles 2&3",1000,0.,10.,1000,0.,10.);
+    TH2D* bw23 = new TH2D("bw23","inv. mass-sq of particles 2&3",1000,min_range,max_range,1000,min_range,max_range);
     bw23->GetXaxis()->SetTitle("m_{23}^{2} / GeV^{2}");
     bw23->GetXaxis()->CenterTitle();
-    bw23->GetYaxis()->SetTitle("#");
+    bw23->GetYaxis()->SetTitle("m_{13}^{2} / GeV^{2}");
     bw23->GetYaxis()->CenterTitle();
 
     RootReader myReaderPHSP(file, false,"mc");
     unsigned int maxEventsPHSP = myReaderPHSP.getNEvents();
     //double masssq12PHSP, masssq13PHSP, masssq23PHSP;
-    TH2D* bw12PHSP = new TH2D("bw12PHSP","inv. mass-sq of particles 1&2 PHSP",1000,0.,10.,1000,0.,10.);
+    TH2D* bw12PHSP = new TH2D("bw12PHSP","inv. mass-sq of particles 1&2 PHSP",1000,min_range,max_range,1000,min_range,max_range);
     bw12PHSP->GetXaxis()->SetTitle("m_{12}^{2} / GeV^{2}");
     bw12PHSP->GetXaxis()->CenterTitle();
-    bw12PHSP->GetYaxis()->SetTitle("#");
+    bw12PHSP->GetYaxis()->SetTitle("m_{13}^{2} / GeV^{2}");
     bw12PHSP->GetYaxis()->CenterTitle();
-    TH2D* bw13PHSP = new TH2D("bw13PHSP","inv. mass-sq of particles 1&3 PHSP",1000,0.,10.,1000,0.,10.);
+    TH2D* bw13PHSP = new TH2D("bw13PHSP","inv. mass-sq of particles 1&3 PHSP",1000,min_range,max_range,1000,min_range,max_range);
     bw13PHSP->GetXaxis()->SetTitle("m_{13}^{2} / GeV^{2}");
     bw13PHSP->GetXaxis()->CenterTitle();
-    bw13PHSP->GetYaxis()->SetTitle("#");
+    bw13PHSP->GetYaxis()->SetTitle("m_{12}^{2} / GeV^{2}");
     bw13PHSP->GetYaxis()->CenterTitle();
-    TH2D* bw23PHSP = new TH2D("bw23PHSP","inv. mass-sq of particles 2&3 PHSP",1000,0.,10.,1000,0.,10.);
+    TH2D* bw23PHSP = new TH2D("bw23PHSP","inv. mass-sq of particles 2&3 PHSP",1000,min_range,max_range,1000,min_range,max_range);
     bw23PHSP->GetXaxis()->SetTitle("m_{23}^{2} / GeV^{2}");
     bw23PHSP->GetXaxis()->CenterTitle();
-    bw23PHSP->GetYaxis()->SetTitle("#");
+    bw23PHSP->GetYaxis()->SetTitle("m_{13}^{2} / GeV^{2}");
     bw23PHSP->GetYaxis()->CenterTitle();
 
     for(unsigned int i = 0; i < maxEvents; i++){
@@ -92,7 +93,7 @@ int main(int argc, char **argv){
 
     	bw12->Fill(masssq12,masssq13);
         bw13->Fill(masssq13,masssq12);
-        bw23->Fill(masssq23,masssq12);
+        bw23->Fill(masssq23,masssq13);
     }
 
     for(unsigned int i = 0; i < maxEventsPHSP; i++){
@@ -112,7 +113,7 @@ int main(int argc, char **argv){
 
         bw12PHSP->Fill(masssq12,masssq13);
         bw13PHSP->Fill(masssq13,masssq12);
-        bw23PHSP->Fill(masssq23,masssq12);
+        bw23PHSP->Fill(masssq23,masssq13);
     }
 
     TFile output("test/DalitzJPSI.root","RECREATE","ROOT_Tree");

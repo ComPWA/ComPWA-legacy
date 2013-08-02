@@ -29,6 +29,8 @@ public:
 		       RooAbsReal& _x, ///  mass at which to evaluate RBW
 		       RooAbsReal& _resMass, RooAbsReal& _resWidth,
 		       RooAbsReal& _q0,
+		       RooAbsReal& par1,
+		       RooAbsReal& par2,
 		       int _subsys,
                        Int_t resSpin) ; 
 
@@ -75,6 +77,8 @@ protected:
   RooRealProxy _m0;
   RooRealProxy _resWidth;
   RooRealProxy _d;
+  RooRealProxy _par1;
+  RooRealProxy _par2;
   unsigned int _subSys;
   int _spin;
 
@@ -83,8 +87,8 @@ protected:
   double _mb;
 
   // mass of particle which pair can be produced close to resonance
-  double _mBarA;
   double _mBarB;
+  double _mBarA;
 
 private:
 
