@@ -25,14 +25,12 @@ AmpWigner::AmpWigner(const char *name, const char *title,
 		       RooAbsReal& m12, ///  
                        RooAbsReal& m23, ///  
                        RooAbsReal& m13, ///  
-                       const int subSysFlag, ///  
 		       RooAbsReal& inSpin, RooAbsReal& outSpin1,
 		       RooAbsReal& outSpin2) :
   RooAbsArg(name,title),
   _m12("m12", "Observable", this, m12),
   _m23("m23", "Observable", this, m23),
   _m13("m13", "Observable", this, m13),
-  _subSysFlag(subSysFlag),
   _inSpin("inSpin", "inSpin", this, inSpin),
   _outSpin1("outSpin1", "outSpin", this, outSpin1),
   _outSpin2("outSpin2", "outSpin", this, outSpin2)
@@ -52,7 +50,6 @@ AmpWigner::AmpWigner(const AmpWigner& other, const char* newname) :
   _m12("m12", "Observable", this, other._m12),
   _m23("m23", "Observable", this, other._m23),
   _m13("m13", "Observable", this, other._m13),
-  _subSysFlag(other._subSysFlag),
   _inSpin("inSpin", this, other._inSpin),
   _outSpin1("outSpin1", this, other._outSpin1),
   _outSpin2("outSpin2", this, other._outSpin2),
@@ -150,28 +147,9 @@ double AmpWigner::evaluate() const {
 
   double locmin_sq, locmax_sq, beta;
 
-  switch(_subSysFlag){
-    case 1:{ //reso in m23
       locmin_sq = s2min(_m23*_m23,_M,_m1,_m2,_m3); 
       locmax_sq = s2max(_m23*_m23,_M,_m1,_m2,_m3);
       beta=acos((2.*_m13*_m13-locmax_sq-locmin_sq)/(locmax_sq-locmin_sq));
-      break;
-    }
-    case 2:{ //reso in m13
-      locmin_sq = s1min(_m13*_m13,_M,_m1,_m2,_m3); 
-      locmax_sq = s1max(_m13*_m13,_M,_m1,_m2,_m3);
-      beta=acos((2.*_m23*_m23-locmax_sq-locmin_sq)/(locmax_sq-locmin_sq));
-      break;
-    }
-    case 3:{ //reso in m12
-      //return 1;
-      locmin_sq = s1min(_m12*_m12,_M,_m1,_m3,_m2); 
-      locmax_sq = s1max(_m12*_m12,_M,_m1,_m3,_m2);
-      beta=acos((2.*_m23*_m23-locmax_sq-locmin_sq)/(locmax_sq-locmin_sq));
-      if(beta!=beta) return 1.;
-      break;
-    }
-  }
 
   //double locmin_sq = s2min(_y*_y), locmax_sq = s2max(_y*_y);
   //if( _x*_x>locmax_sq || _x*_x<locmin_sq )

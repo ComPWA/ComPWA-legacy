@@ -187,7 +187,7 @@ public:
     	  tmpbw->setDecayMasses(*mass_first,*mass_second);
           rbw.push_back(tmpbw);
           std::shared_ptr<AmpWigner> tmpWigner(new AmpWigner(("a_{"+tmp.m_name+"}").c_str(), ("a_{"+tmp.m_name+"}").c_str(),
-			  *mass13, *mass12, *mass23, 1, *aj[last], *am[last], *an[last]) ) ;
+			  *mass13, *mass12, *mass23, *aj[last], *am[last], *an[last]) ) ;
           tmpWigner->setDecayMasses(M, *mass_first, *mass_second , *mass_third);
           angd.push_back( tmpWigner );
           totAmp.addBW(rbw.at(last), rr.at(last), phir.at(last), angd.at(last));
@@ -200,7 +200,7 @@ public:
           tmpbw->setBarrierMass(0.547853,0.1396);//a_0->eta pi hidden channel
           rbw.push_back(tmpbw);
           std::shared_ptr<AmpWigner> tmpWigner(new AmpWigner(("a_{"+tmp.m_name+"}").c_str(), ("a_{"+tmp.m_name+"}").c_str(),
-			  *mass13, *mass12, *mass23, 1, *aj[last], *am[last], *an[last]) ) ;
+			  *mass13, *mass12, *mass23, *aj[last], *am[last], *an[last]) ) ;
           tmpWigner->setDecayMasses(M, *mass_first, *mass_second , *mass_third);
           angd.push_back( tmpWigner );
 //          totAmp.addBW(rbw.at(last), rr.at(last), phir.at(last), angd.at(last));

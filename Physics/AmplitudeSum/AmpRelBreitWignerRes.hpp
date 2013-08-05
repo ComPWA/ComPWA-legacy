@@ -37,6 +37,7 @@ public:
   virtual ~AmpRelBreitWignerRes();
 
   void setDecayMasses(double, double);
+  double getSpin(){return _spin;};
 
   double q0() const;
   double q()  const;

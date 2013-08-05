@@ -22,7 +22,6 @@ public:
 
   AmpWigner(const char *name, const char *title,
 		       RooAbsReal& _m12, RooAbsReal& _m23, RooAbsReal& _m13,
-                       const int _subSysFlag,
 		       RooAbsReal& _inSpin, RooAbsReal& _outSpin1,
 		       RooAbsReal& _outSpin2) ; 
 
@@ -56,7 +55,6 @@ protected:
   RooRealProxy _m23; //m23
   RooRealProxy _m13; //m13
 
-  int _subSysFlag;
 
   RooRealProxy _inSpin; 
   RooRealProxy _outSpin1;

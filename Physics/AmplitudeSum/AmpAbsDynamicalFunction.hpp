@@ -24,6 +24,7 @@ public:
 
   virtual void initialise() = 0; 
   virtual RooComplex evaluate() const = 0;
+  virtual double getSpin() = 0;
   virtual bool isSubSys(const unsigned int) const = 0;
  
 

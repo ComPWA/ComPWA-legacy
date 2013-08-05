@@ -131,8 +131,9 @@ RooComplex AmpRelBreitWignerRes::evaluate() const {
 
   RooComplex denom = RooComplex(m0*m0 - m*m, -m0 * GammaV);
 
-  return (RooComplex(_m0 * Gamma0) / denom);
-//  return (RooComplex(BLprime2()) / denom);//TODO: which one is correct?
+  return (RooComplex(_m0 * Gamma0) / denom);//seems to be correct
+//  std::cout<<sqrt(BLprime2())<<" "<<_m0*Gamma0<<std::endl;
+  return (RooComplex(sqrt(BLprime2())) / denom);//wrong!!
 }
                        
 ////  implement stubs for virtual functions

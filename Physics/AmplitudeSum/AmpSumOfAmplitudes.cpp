@@ -84,7 +84,8 @@ void AmpSumOfAmplitudes::addBW(std::shared_ptr<AmpAbsDynamicalFunction> theRes ,
      //std::cout << "BW = \t" << _pdfList[i]->evaluate() << std::endl;
      //std::cout << "AD = \t" << _angList[i]->evaluate() << std::endl;
 
-     res = res + _pdfList[i]->evaluate() * a * eiphi * _angList[i]->evaluate();
+     RooComplex twoJplusOne(2*_pdfList[i]->getSpin()+1);
+     res = res + twoJplusOne * _pdfList[i]->evaluate() * a * eiphi * _angList[i]->evaluate();
    }
 
    //std::cout << "res final = \t" << res.abs2() << std::endl;

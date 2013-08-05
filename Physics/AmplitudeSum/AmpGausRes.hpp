@@ -38,6 +38,7 @@ public:
   virtual void initialise();
   virtual RooComplex evaluate()const;
 
+  double getSpin(){return 0;};
   // the following are needed by the RooAbsArg interface, but not yet 
   // implemented
 

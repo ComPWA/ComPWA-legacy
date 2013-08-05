@@ -101,14 +101,14 @@ double AmpFlatteRes::q0(double ma, double mb) const {
   double mapb = ma + mb;
   double mamb = ma - mb;
   
-  return sqrt ( (fabs(_m0*_m0 - mapb*mapb)) * (_m0*_m0 - mamb*mamb) ) / (2. * _m0 );
+  return sqrt ( fabs((_m0*_m0 - mapb*mapb) * (_m0*_m0 - mamb*mamb)) ) / (2. * _m0 );
 }
 
 double AmpFlatteRes::q(double ma, double mb) const {
   double mapb = ma + mb;
   double mamb = ma - mb;
   
-  return sqrt ( (_x*_x - mapb*mapb) * (_x*_x - mamb*mamb) ) / (2. * _x );
+  return sqrt ( fabs((_x*_x - mapb*mapb) * (_x*_x - mamb*mamb)) ) / (2. * _x );
 }
 
 
@@ -152,24 +152,20 @@ RooComplex AmpFlatteRes::evaluate() const {
 
 	double Gamma0 = double(_resWidth);
 	//double GammaV = Gamma0 * (m0 / m) * pow(q() / q0(), 2.*_spin + 1.)  * BLprime2();
-	double gam1=1./sqrt(2./5.), gam2=1./sqrt(3./5.); //gam1^2+gam2^2=1, gam1/gam2=1.5 fixed from SU(3), TODO: set channel dependent
+	//	double gam1=1./sqrt(2./5.), gam2=1./sqrt(3./5.); //gam1^2+gam2^2=1, gam1/gam2=1.5 fixed from SU(3), TODO: set channel dependent
 
-	double p1 = q0(_mBarA,_mBarB);//break-up momenta hidden channel (e.g. a0->eta pi)
-	//    double p1 = 2*q0(_mBarA,_mBarB)/m;//break-up momenta hidden channel (e.g. a0->eta pi)
-	double p2 = q0(_ma,_mb);//break-up momenta decay channel (e.g. a0->KK)
-	//  double p2 = 2*q0(_ma,_mb)/m;//break-up momenta decay channel (e.g. a0->KK)
-
-	double g1 = gam1*sqrt(m0*Gamma0);
-	//  double g1 = _par1;//couppling a0->eta pi
-	double g2 = gam2*sqrt(m0*Gamma0);
-	//  double g2 = _par2;//coupling a0->KK
+	double p1 = 2*q(_mBarA,_mBarB)/m;//break-up momenta hidden channel (e.g. a0->eta pi)
+	double p2 = 2*q(_ma,_mb)/m;//break-up momenta decay channel (e.g. a0->KK)
+	double g1 = _par1;//couppling a0->eta pi
+	double g2 = _par2;//coupling a0->KK
+	//	double g2 = sqrt(_m0*Gamma0-_par1*_par1);//couppling do not fulfill g1*g1+g2*g2=m0 Gamma0!
 
 	RooComplex denom = RooComplex(m0*m0 - m*m, -p1*g1*g1-p2*g2*g2);
-	// cout<<-p1*g1*g1-p2*g2*g2<<endl;
-	RooComplex result = (RooComplex(_m0 * Gamma0) / denom); //sqrt(Gamma0 * GammaI) ?
-	//  RooComplex result = (RooComplex(g2*g2,0) / denom); //use KK decay channel here
-	//cout<<denom.re()<<" "<<denom.im()<<endl;
+	/* NOTE: Here we use the flatte formular which is according to my understanding only valid for scattering processes.
+	 * For the decay we should use a P-Vector approach*/
+	RooComplex result = (RooComplex(g2*g2,0) / denom); //use KK decay channel here
 	if(result.re()!=result.re()) {std::cout << "OH OH RE" << std::endl; return 0;}
+//	RooComplex result = (RooComplex(0.001,0) / denom); //use KK decay channel here
 	if(result.im()!=result.im()) {std::cout << "OH OH IM" << std::endl; return 0;}
 	return result;
 }

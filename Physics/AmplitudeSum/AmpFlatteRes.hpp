@@ -50,6 +50,7 @@ public:
   void setDecayMasses(double, double);
   void setBarrierMass(double, double);
   
+  double getSpin(){return _spin;};
   virtual void initialise();
   virtual RooComplex evaluate() const;
 
