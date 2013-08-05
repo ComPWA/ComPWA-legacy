@@ -12,10 +12,10 @@
 #include "RooRealVar.h"
 
 AmpRelBreitWignerRes::AmpRelBreitWignerRes(const char *name, const char *title,
-					   RooAbsReal& x, ///  mass at which to evaluate RBW
+					   RooAbsReal& x, //  mass at which to evaluate RBW
 					   RooAbsReal& resMass, RooAbsReal& resWidth,
-					   RooAbsReal& d, ///  meson radius
-					   int subSys, ///  meson radius
+					   RooAbsReal& d, //  meson radius
+					   int subSys,
 					   Int_t resSpin) :
   AmpAbsDynamicalFunction(name,title),
   _x("x", "Observable", this, x),

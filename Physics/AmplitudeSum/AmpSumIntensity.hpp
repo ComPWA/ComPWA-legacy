@@ -113,37 +113,59 @@ public:
 //      }
       par1.push_back( std::shared_ptr<RooRealVar> (new RooRealVar(("par1_{"+tmp.m_name+"}").c_str(), "n", tmp.m_par1) ) );
       par2.push_back( std::shared_ptr<RooRealVar> (new RooRealVar(("par2_{"+tmp.m_name+"}").c_str(), "n", tmp.m_par2) ) );
-      const double* mass_first;
+
+      /*
+       * SORT ORDER: internally particles are sort as M -> (m1 m2) m3, with m1 m2 forming the resonance and m3 is the
+       * spectator hadron.
+       */
+      const double* mass_first;//masses of decay products
       const double* mass_third;
       const double* mass_second;
-      RooAbsReal* mass_eval_12;
-      RooAbsReal* mass_eval_23;
-      RooAbsReal* mass_eval_13;
-      int count;
-      if(tmp.m_daugtherA==2 && tmp.m_daugtherB==3){
+      RooAbsReal* mass12;//dalitz plot variables
+      RooAbsReal* mass23;
+      RooAbsReal* mass13;
+      if((tmp.m_daugtherA==2 && tmp.m_daugtherB==3) ){
           mass_first = &m2;
           mass_second = &m3;
           mass_third = &m1;
-          mass_eval_12 = &ma;
-          mass_eval_23 = &mb;
-          mass_eval_13 = &mc;
-          count=1;
-      }else if(tmp.m_daugtherA==1 && tmp.m_daugtherB==3){
+          mass12 = &ma;
+          mass23 = &mb;
+          mass13 = &mc;
+      }else if((tmp.m_daugtherA==3 && tmp.m_daugtherB==2) ){
+          mass_first = &m3;
+          mass_second = &m2;
+          mass_third = &m1;
+          mass12 = &ma;
+          mass23 = &mb;
+          mass13 = &mc;
+      }else if( (tmp.m_daugtherA==1 && tmp.m_daugtherB==3) ){
           mass_first = &m1;
           mass_second = &m3;
           mass_third = &m2;
-          mass_eval_12 = &mb;
-          mass_eval_23 = &mc;
-          mass_eval_13 = &ma;
-          count=2;
-      }else if(tmp.m_daugtherA==1 && tmp.m_daugtherB==2){
-          mass_first = &m1;
+          mass12 = &mb;
+          mass23 = &ma;
+          mass13 = &mc;
+      }else if( (tmp.m_daugtherA==3 && tmp.m_daugtherB==1) ){
+          mass_first = &m3;
+          mass_second = &m1;
+          mass_third = &m2;
+          mass12 = &mb;
+          mass23 = &ma;
+          mass13 = &mc;
+      }else if( (tmp.m_daugtherA==1 && tmp.m_daugtherB==2) ){
+          mass_first = &m1;//BUG SOMEWHERE for the case 1,2 or 2,1
           mass_second = &m2;
           mass_third = &m3;
-          mass_eval_12 = &mc;
-          mass_eval_23 = &ma;
-          mass_eval_13 = &mb;
-          count=3;
+          mass12 = &mc;
+          mass23 = &ma;
+          mass13 = &mb;
+      }else if( (tmp.m_daugtherA==2 && tmp.m_daugtherB==1) ){
+          mass_first = &m2;
+          mass_second = &m1;
+          mass_third = &m3;
+          mass12 = &mc;
+          mass23 = &ma;
+          mass13 = &mb;
       }else{ //ignore resonance
           std::cout << "Resonance ignores due to ERROR!" << std::cout;
           mr.pop_back();
@@ -161,13 +183,11 @@ public:
       unsigned int last = mr.size()-1;
       if(tmp.m_type=="relBW"){
           std::shared_ptr<AmpRelBreitWignerRes> tmpbw(new AmpRelBreitWignerRes(tmp.m_name.c_str(),
-                  tmp.m_name.c_str(), *mass_eval_12, *mr[last], *gr[last], *qr[last], 1, tmp.m_spin) );
+                  tmp.m_name.c_str(), *mass12, *mr[last], *gr[last], *qr[last], 1, tmp.m_spin) );
     	  tmpbw->setDecayMasses(*mass_first,*mass_second);
           rbw.push_back(tmpbw);
-//         angd.push_back( std::shared_ptr<AmpWigner> (new AmpWigner(("a_{"+tmp.m_name+"}").c_str(), ("a_{"+tmp.m_name+"}").c_str(),
-//			  *mass_eval_23, *mass_eval_12, *mass_eval_13, count, *aj[last], *am[last], *an[last]) ) );
           std::shared_ptr<AmpWigner> tmpWigner(new AmpWigner(("a_{"+tmp.m_name+"}").c_str(), ("a_{"+tmp.m_name+"}").c_str(),
-			  mc, ma, mb, count, *aj[last], *am[last], *an[last]) ) ;
+			  *mass13, *mass12, *mass23, 1, *aj[last], *am[last], *an[last]) ) ;
           tmpWigner->setDecayMasses(M, *mass_first, *mass_second , *mass_third);
           angd.push_back( tmpWigner );
           totAmp.addBW(rbw.at(last), rr.at(last), phir.at(last), angd.at(last));
@@ -175,17 +195,16 @@ public:
       }
       else if(tmp.m_type=="flatte"){
           std::shared_ptr<AmpFlatteRes> tmpbw(new AmpFlatteRes(tmp.m_name.c_str(),
-                  tmp.m_name.c_str(), *mass_eval_12, *mr[last], *gr[last], *qr[last], *par1[last], *par2[last], count, tmp.m_spin) );
+                  tmp.m_name.c_str(), *mass12, *mr[last], *gr[last], *qr[last], *par1[last], *par2[last], 1, tmp.m_spin) );
           tmpbw->setDecayMasses(*mass_first,*mass_second);
           tmpbw->setBarrierMass(0.547853,0.1396);//a_0->eta pi hidden channel
           rbw.push_back(tmpbw);
           std::shared_ptr<AmpWigner> tmpWigner(new AmpWigner(("a_{"+tmp.m_name+"}").c_str(), ("a_{"+tmp.m_name+"}").c_str(),
-			  mc, ma, mb, count, *aj[last], *am[last], *an[last]) ) ;
+			  *mass13, *mass12, *mass23, 1, *aj[last], *am[last], *an[last]) ) ;
           tmpWigner->setDecayMasses(M, *mass_first, *mass_second , *mass_third);
           angd.push_back( tmpWigner );
-          totAmp.addBW(rbw.at(last), rr.at(last), phir.at(last), angd.at(last));
-//    	  totAmp.addBW(rbw.at(last), rr.at(last), phir.at(last));
-          cout<<"12123"<<endl;
+//          totAmp.addBW(rbw.at(last), rr.at(last), phir.at(last), angd.at(last));
+    	  totAmp.addBW(rbw.at(last), rr.at(last), phir.at(last));
       }
       else continue;
     }
