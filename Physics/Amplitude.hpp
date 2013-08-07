@@ -35,6 +35,9 @@ public:
 
   virtual const bool fillStartParVec(ParameterList& outPar) =0;
 
+  virtual void printAmps() =0;
+
+
 
 };
 

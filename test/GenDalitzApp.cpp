@@ -35,6 +35,8 @@
 #include "Core/Parameter.hpp"
 #include "Core/ParameterList.hpp"
 
+#include "Analysis/PlotData.hpp"
+
 using namespace std;
 
 const unsigned int MaxEvents = 15000;
@@ -58,6 +60,7 @@ int main(int argc, char **argv){
   unsigned int i=0, mc=0;
   TRandom3 rando;
 
+  std::string outFile="gen-out.root";
   //load resonances
   AmplitudeSetup ini("test/DKsKKRes.xml");
 //    AmplitudeSetup ini("test/JPSI_ypipi.xml");
@@ -80,8 +83,6 @@ int main(int argc, char **argv){
  // minPar.AddParameter(DoubleParameter(1.5,0.5,2.5,0.1));
 
   //Output File setup
-  TFile output("test/3Part-4vecs.root","recreate");
-  output.SetCompressionLevel(1); //try level 2 also
 
   TTree fTree ("data","Dalitz-Gen");
   TClonesArray *fEvt = new TClonesArray("TParticle");
@@ -164,7 +165,11 @@ int main(int argc, char **argv){
         fTreePHSP.Fill();
       }
   }while(i<MaxEvents || mc<MaxEvents);
+  plotData plot(std::string("dalitz"),outFile, std::shared_ptr<Data>(new RootReader(&fTree,0)));  plot.plot();
+  plotData plotPhsp(std::string("dalitz_phsp"),outFile, std::shared_ptr<Data>(new RootReader(&fTreePHSP,0)));  plotPhsp.plot();
 
+  TFile output("test/3Part-4vecs.root","recreate");
+  output.SetCompressionLevel(1); //try level 2 also
   fTree.Print();
   fTree.Write();
   fTreePHSP.Write();

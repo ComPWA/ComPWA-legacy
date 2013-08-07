@@ -6,6 +6,13 @@
 #include "DataReader/RootReader/RootReader.hpp"
 #include "TParticle.h"
 
+RootReader::RootReader():fBinned(0){//empty dataset
+  fTree = new TTree();
+  fParticles = new TClonesArray("TParticle");
+  fFile = new TFile();
+  fmaxEvents=0;
+  fEvent=0;
+}
 RootReader::RootReader(const std::string inRootFile, const bool binned=false, const std::string inTreeName="data")
     :fBinned(binned){
 
@@ -15,6 +22,25 @@ RootReader::RootReader(const std::string inRootFile, const bool binned=false, co
   fTree->GetBranch("Particles")->SetAutoDelete(false);
   fTree->SetBranchAddress("Particles",&fParticles);
   fFile->cd();
+
+  fmaxEvents=fTree->GetEntries();
+  fEvent=0;
+
+  //if(fBinned)
+    bin();
+  storeEvents();
+
+  fFile->Close();
+}
+RootReader::RootReader(TTree* in, const bool binned=false)
+    :fBinned(binned){
+
+  fFile = new TFile();
+  fTree = (TTree*) in->Clone();
+  fParticles = new TClonesArray("TParticle");
+  fTree->GetBranch("Particles")->SetAutoDelete(false);
+  fTree->SetBranchAddress("Particles",&fParticles);
+//  fFile->cd();
 
   fmaxEvents=fTree->GetEntries();
   fEvent=0;

@@ -26,6 +26,7 @@ public:
   virtual const double intensity(std::vector<double>& x, ParameterList& par);
   virtual const bool fillStartParVec(ParameterList& outPar);
 
+  virtual void printAmps(){return;}
   /** Destructor */
   virtual ~BreitWigner();
 

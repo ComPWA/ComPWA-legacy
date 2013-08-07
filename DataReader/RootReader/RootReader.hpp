@@ -32,7 +32,9 @@ class RootReader : public Data {
 
 public:
   /// Default Constructor (0x0)
+  RootReader();
   RootReader(const std::string inRootFile, const bool binned, const std::string inTreeName);
+  RootReader(TTree* in, const bool binned);
 
   virtual const std::vector<std::string>& getVariableNames();
 

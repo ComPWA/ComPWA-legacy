@@ -136,6 +136,8 @@ exe gendalitzApp :
         test
         $(TOP)/Core//ComPWA
         $(TOP)/Physics/AmplitudeSum//AmplitudeSum  
+        $(TOP)/DataReader/RootReader
+        $(TOP)/Analysis
         : ;
         
 exe dalitzplotApp : 
@@ -153,6 +155,7 @@ exe dalitzfitApp :
         $(TOP)/DataReader/RootReader//RootReader
         $(TOP)/Estimator/MinLogLH//MinLogLH 
         $(TOP)/Optimizer/Minuit2//Minuit2IF
+        $(TOP)/Analysis
         : ;
 
 install dist : test : <location>$(TOP)/lib <threading>single ;

@@ -64,6 +64,7 @@ public:
     for(std::vector<Resonance>::iterator reso=ini.getResonances().begin(); reso!=ini.getResonances().end(); reso++){
       Resonance tmp = (*reso);
       //setup RooVars
+      namer.push_back(tmp.m_name);
       mr.push_back( std::shared_ptr<RooRealVar> (new RooRealVar(("m_{"+tmp.m_name+"}").c_str(), "resMass", tmp.m_mass, tmp.m_mass_min, tmp.m_mass_max) ) );
       qr.push_back( std::shared_ptr<RooRealVar> (new RooRealVar(("q_{"+tmp.m_name+"}").c_str(), "breakupMom", tmp.m_breakup_mom) ) );
       gr.push_back( std::shared_ptr<RooRealVar> (new RooRealVar(("g_{"+tmp.m_name+"}").c_str(), "resWidth", tmp.m_width, tmp.m_width_min, tmp.m_width_max) ) );
@@ -264,15 +265,23 @@ public:
       //add strength and phases of the used amplitudes
 
       //outPar.AddParameter(DoubleParameter(rr[i]->getVal()));
-      if(rr[i]->hasError()) //TODO: check bounds
+      if(rr[i]->hasError()){ //TODO: check bounds
         outPar.AddParameter(DoubleParameter(rr[i]->getVal(), rr[i]->getMin(), rr[i]->getMax(), rr[i]->getError()));
-      else
+//        outPar.AddParameter(DoubleParameter(phir[i]->getVal(), phir[i]->getMin(), phir[i]->getMax(), phir[i]->getError()));
+      }else
         outPar.AddParameter(DoubleParameter(rr[i]->getVal(), 0.1));
-      //outPar.AddParameter(DoubleParameter(phir[i]->getVal(), phir[i]->getMin(), phir[i]->getMax(), phir[i]->getError()));
+//      outPar.AddParameter(DoubleParameter(phir[i]->getVal(), 0.1));
     }
     //outPar.AddParameter(DoubleParameter(rr[rr.size()-1]->getVal(), rr[rr.size()-1]->getMin(), rr[rr.size()-1]->getMax(), rr[rr.size()-1]->getError()));
     //outPar.AddParameter(DoubleParameter(1.5, 0.5, 2.5, 0.1));
     return true;
+  }
+
+   virtual void printAmps(){
+	  unsigned int nAmps=rr.size();
+	  cout<<"== Printing amplitudes with current(!) set of parameters:"<<endl;
+	  for(unsigned int i=0;i<nAmps;i++)
+		  cout<<namer[i]<<":	Amplitude: "<<rr[i]->getVal()<<"+-"<<rr[i]->getError()<<"	Phase: "<<phir[i]->getVal()<<"+-"<<phir[i]->getError()<<endl;
   }
 
   /** Destructor */
@@ -311,6 +320,7 @@ public:
   AmpSumOfAmplitudes totAmp;
 
   //Resonance Variables
+  std::vector<std::string> namer;
   std::vector<std::shared_ptr<RooRealVar> > mr;
   std::vector<std::shared_ptr<RooRealVar> > qr;
   std::vector<std::shared_ptr<RooRealVar> > gr;
