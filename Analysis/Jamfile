@@ -53,6 +53,7 @@ project :
 lib Analysis : 
         [ glob PlotData.cpp ] 
         $(TOP)/Core//ComPWA
+   		$(TOP)/DataReader/RootReader//RootReader
         ;
 
 exe gendalitzApp : 
