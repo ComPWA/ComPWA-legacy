@@ -37,6 +37,8 @@ public:
 
   virtual void printAmps() =0;
 
+  virtual double getMaxVal() =0;
+
 
 
 };

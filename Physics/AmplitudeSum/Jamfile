@@ -9,6 +9,8 @@ local ROOTSYS = [ os.environ ROOTSYS ] ;
 local ROOTINC = [ os.environ ROOTINCLUDE ] ;
 local QFTINC = [ os.environ QFT_INCLUDE ] ;
 local QFT = [ os.environ QFT ] ;
+local MINUIT2 = [ os.environ MINUIT2 ] ;
+
 
 local rlibs = [ SHELL "$ROOTSYS/bin/root-config --libs" ] ;
 ROOTLIBS = [ MATCH "(.*)[\n]" : $(rlibs) ] ;
@@ -19,6 +21,7 @@ project :
         <include>$(ROOTINC)
         <include>$(QFTINC)
 	    <include>$(BOOST_BUILD_PATH)/include
+	    <include>$(MINUIT2)/include
 	<linkflags>$(ROOTLIBS)
 	<linkflags>-lEG
 	<linkflags>-lRooFit
@@ -31,6 +34,8 @@ project :
 lib AmplitudeSum : 
         [ glob *.cpp : *Test.cpp ] 
         $(TOP)/Core//ComPWA
+        $(TOP)/Estimator/MinLogLH//MinLogLH 
+        $(TOP)/Optimizer/Minuit2//Minuit2IF
         ;
 
 install dist : AmplitudeSum : <location>$(TOP)/lib ;

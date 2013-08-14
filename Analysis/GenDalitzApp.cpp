@@ -39,7 +39,7 @@
 
 using namespace std;
 
-const unsigned int MaxEvents = 15000;
+const unsigned int MaxEvents = 150000;
 
 //constants
 const Double_t M = 1.86486; // GeV/c² (D0)
@@ -62,28 +62,15 @@ int main(int argc, char **argv){
 
   std::string outFile="gen-out.root";
   //load resonances
-  AmplitudeSetup ini("test/DKsKKRes.xml");
-//    AmplitudeSetup ini("test/JPSI_ypipi.xml");
-  cout << "loaded file " << ini.getFileName() << " with " << ini.getResonances().size() << " resonances:" << std::endl;
-  for(std::vector<Resonance>::iterator reso=ini.getResonances().begin(); reso!=ini.getResonances().end(); reso++){
-    cout << endl << "Resonance " << (*reso).m_name << endl;
-    cout << "Mass =  " << (*reso).m_mass << " with range " << (*reso).m_mass_min << " to " << (*reso).m_mass_max << endl;
-    cout << "Type =  " << (*reso).m_type << endl;
-    cout << "Width = " << (*reso).m_width << " with range " << (*reso).m_width_min << " to " << (*reso).m_width_max << endl;
-    cout << "Spin =  " << (*reso).m_spin << " m = " << (*reso).m_m << " n = " << (*reso).m_n << endl;
-    cout << "Strength =  " << (*reso).m_strength << " Phase = " << (*reso).m_phase << endl;
-    cout << "Breakupmomentum =  " << (*reso).m_breakup_mom << endl;
-    cout << "DaughterA =  " << (*reso).m_daugtherA << " DaughterB = " << (*reso).m_daugtherB << endl;
-  }
-  cout << endl << endl;
+  AmplitudeSetup ini("Analysis/DKsKKRes.xml");
+  cout << "loaded file " << ini.getFileName() << " with " << ini.getResonances().size() << " resonances!" << std::endl;
   //Simple Breit-Wigner Physics-Module setup
   AmpSumIntensity testBW(M, Br, m1, m2, m3, ini);
+  testBW.printAmps();
   ParameterList minPar;
   testBW.fillStartParVec(minPar);
- // minPar.AddParameter(DoubleParameter(1.5,0.5,2.5,0.1));
 
   //Output File setup
-
   TTree fTree ("data","Dalitz-Gen");
   TClonesArray *fEvt = new TClonesArray("TParticle");
   //TClonesArray &ar = *fEvt;
@@ -106,7 +93,7 @@ int main(int argc, char **argv){
   TLorentzVector *p0,*p1,*p2,pPm23,pPm13,pPm12;
   double weight, m23sq, m13sq, m12sq, maxTest=0;
    int scale = (int) MaxEvents/10;
-  cout << "Start generation of K_S0 K- K+ Dalitz" << endl;
+  cout << "Start generation of K_S0 K- K+ Dalitzplot" << endl;
   do{
       weight = event.Generate();
 
@@ -137,13 +124,11 @@ int main(int argc, char **argv){
       vector<double> x;
       x.push_back(sqrt(m23sq));
       x.push_back(sqrt(m13sq));
-      x.push_back(sqrt(m12sq));
+//      x.push_back(sqrt(m12sq));//use only two parameters
       double AMPpdf = testBW.intensity(x, minPar);
+//      double test = rando.Uniform(0,5);
+      double test = rando.Uniform(0,testBW.getMaxVal()*2);
 
-      double test = rando.Uniform(0,5);//TODO: use findMax for PDF!!
-
-      //mb.setVal(m13);
-      //double m13pdf = totAmp13.getVal();//fun_combi2->Eval(m13);
       if(maxTest<(weight*AMPpdf))
         maxTest=(weight*AMPpdf);
       if(i<MaxEvents && test<(weight*AMPpdf)){
@@ -168,11 +153,11 @@ int main(int argc, char **argv){
   plotData plot(std::string("dalitz"),outFile, std::shared_ptr<Data>(new RootReader(&fTree,0)));  plot.plot();
   plotData plotPhsp(std::string("dalitz_phsp"),outFile, std::shared_ptr<Data>(new RootReader(&fTreePHSP,0)));  plotPhsp.plot();
 
-  TFile output("test/3Part-4vecs.root","recreate");
+  TFile output(outFile.c_str(),"update");
   output.SetCompressionLevel(1); //try level 2 also
   fTree.Print();
-  fTree.Write();
-  fTreePHSP.Write();
+  fTree.Write("",TObject::kOverwrite,0);
+  fTreePHSP.Write("",TObject::kOverwrite,0);
   output.Close();
 
   cout << "Done ... " << maxTest << endl << endl;

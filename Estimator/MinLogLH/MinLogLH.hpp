@@ -1,5 +1,5 @@
-//! Negative Log Likelihood-Estimator.
 /*! \class MinLogLH
+//! Negative Log Likelihood-Estimator.
  * @file MinLogLH.hpp
  * This class calculates a simple -log(LH) of a intensity and a dataset.
  * Data and Model are provided in the constructor using the Amplitude and Data

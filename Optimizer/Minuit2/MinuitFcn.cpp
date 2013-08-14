@@ -11,11 +11,11 @@ using namespace ROOT::Minuit2;
 
 MinuitFcn::MinuitFcn(std::shared_ptr<ControlParameter> myData) :
   _myDataPtr(myData){
-  //if (_myDataPtr==0) {//does not compile on OSX
-    //Alert << "Data pointer is 0 !!!!" << endmsg;
-      //std::cout << "Data pointer is 0 !!!!" << std::endl; //TODO exception
-    //exit(1);
-  //}
+//  if (0==_myDataPtr) {//does not compile on OSX
+//    Alert << "Data pointer is 0 !!!!" << endmsg;
+//      std::cout << "Data pointer is 0 !!!!" << std::endl; //TODO exception
+//    exit(1);
+//  }
 }
 
 MinuitFcn::~MinuitFcn(){
@@ -28,7 +28,7 @@ double MinuitFcn::operator()(const std::vector<double>& x) const{
     //std::cout << x[i] << " ";
     par.AddParameter(DoubleParameter(x[i]));
   }
-  double result=_myDataPtr->controlParameter(par);
+  double result=_myDataPtr->controlParameter(par);//returns likelihood (from e.g. MinLogLH)
   std::cout << "current minimized value:\t"<< result << std::endl;
 
   return result;

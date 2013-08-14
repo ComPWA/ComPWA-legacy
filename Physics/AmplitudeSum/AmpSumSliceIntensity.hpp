@@ -186,6 +186,7 @@ public:
   virtual ~AmpSumSliceIntensity(){
 
   }
+  double getMaxVal(){ return 5;}
 
  protected:
 //constants

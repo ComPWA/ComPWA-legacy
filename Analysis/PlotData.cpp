@@ -26,7 +26,7 @@ void plotData::plot(){
 
 	double min_range=.9;
 	double max_range=2.;
-	int nBins=100;
+	int nBins=300;
 	//Plot result
 	TH2D* bw2312 = new TH2D("bw2312","DATA",nBins,min_range,max_range,nBins,min_range,max_range);
 	bw2312->GetXaxis()->SetTitle("m_{23}^{2} / GeV^{2}");
