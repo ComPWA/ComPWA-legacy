@@ -104,8 +104,8 @@ protected:
 	std::vector<std::shared_ptr<RooRealVar> > an;
 
 	std::vector<std::shared_ptr<AmpAbsDynamicalFunction> > rbw;
-	std::vector<std::shared_ptr<AmpWigner> > angd;
 
+	std::vector<std::shared_ptr<AmpWigner> > angd;
 	unsigned int nAmps;
 
 	double lambda(double x, double y, double z){

@@ -170,6 +170,8 @@ AmpSumIntensity::AmpSumIntensity(const double inM, const double inBr, const doub
 	}
 	nAmps=rr.size();
 	std::cout << "completed setup" << std::endl;
+}
+double AmpSumIntensity::getMaxVal(){
 
 	std::cout<< "Calculating maximum value of function..."<<std::endl;
 	std::shared_ptr<ControlParameter> esti( new AmpFcn(this));
@@ -190,9 +192,8 @@ AmpSumIntensity::AmpSumIntensity(const double inM, const double inBr, const doub
 	maxVal = (-1)*opti->exec(parList);
 	cout<<"maximum value: "<<maxVal<<endl;
 	std::cout<<"maximum at: m23="<<ma.getVal()<<" m13="<<mb.getVal()<<" m12="<<mc.getVal()<<std::endl;
+	return maxVal;
 }
-
-double AmpSumIntensity::getMaxVal(){ return maxVal; }
 
 const double AmpSumIntensity::integral(ParameterList& par){
 	/*double integral = 1;
