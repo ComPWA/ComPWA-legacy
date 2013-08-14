@@ -11,29 +11,71 @@ local ROOTSYS = [ os.environ ROOTSYS ] ;
 local ROOTINC = [ os.environ ROOTINCLUDE ] ;
 local QFTINC = [ os.environ QFT_INCLUDE ] ;
 local QFT = [ os.environ QFT ] ;
+local MINUIT2 = [ os.environ MINUIT2 ] ;
 
 local rlibs = [ SHELL "$ROOTSYS/bin/root-config --libs" ] ;
 ROOTLIBS = [ MATCH "(.*)[\n]" : $(rlibs) ] ;
 
+#project :
+#	requirements
+#        <include>$(TOP)/external/qft++/include
+#        <include>$(ROOTINC)
+#        <include>$(QFTINC)
+#	    <include>$(BOOST_BUILD_PATH)/include
+#	    <include>$(MINUIT2)/include
+#	<linkflags>$(ROOTLIBS)
+#	#<linkflags>-lEG
+#	<linkflags>-lRooFit
+#	<linkflags>-lRooFitCore
+#	#<linkflags>-L$(QFT)/lib
+#	#<linkflags>-lqft++
+#	<linkflags>$(BOOSTLIBS)
+#	;
 project :
-	requirements
-        <include>$(TOP)/external/qft++/include
-        <include>$(ROOTINC)
+	requirements <include>./
+	    <include>$(TOP)
+	<include>$(ROOTINC)
+	<include>$(BOOST_BUILD_PATH)/include
+	<include>$(GENEVA)/include
         <include>$(QFTINC)
-	    <include>$(BOOST_BUILD_PATH)/include
+        <include>$(MINUIT2)/include
+	<linkflags>$(BOOSTLIBS)
 	<linkflags>$(ROOTLIBS)
-	#<linkflags>-lEG
+	<linkflags>-lgomp
+	<linkflags>-lEG
 	<linkflags>-lRooFit
 	<linkflags>-lRooFitCore
-	#<linkflags>-L$(QFT)/lib
-	#<linkflags>-lqft++
-	<linkflags>$(BOOSTLIBS)
+	#<linkflags>-L$(TOP)/external/qft++/lib
+	<linkflags>-L$(QFT)/lib
+	<linkflags>-lqft++
 	;
 
 lib Analysis : 
-        [ glob *.cpp : *Test.cpp ] 
+        [ glob PlotData.cpp ] 
         $(TOP)/Core//ComPWA
-        $(TOP)/DataReader/RootReader//RootReader
         ;
 
+exe gendalitzApp : 
+        GenDalitzApp.cpp 
+        Analysis
+        $(TOP)/Core//ComPWA
+        $(TOP)/Physics/AmplitudeSum//AmplitudeSum  
+        $(TOP)/DataReader/RootReader
+        $(TOP)/Estimator/MinLogLH//MinLogLH 
+        $(TOP)/Optimizer/Minuit2//Minuit2IF
+        : ;
+        
+        
+exe dalitzfitApp : 
+        DalitzFitApp.cpp 
+        Analysis
+        $(TOP)/Core//ComPWA
+        $(TOP)/Physics/AmplitudeSum//AmplitudeSum  
+        $(TOP)/DataReader/RootReader//RootReader
+        $(TOP)/Estimator/MinLogLH//MinLogLH 
+        $(TOP)/Optimizer/Minuit2//Minuit2IF
+        : ;
+
 install dist : Analysis : <location>$(TOP)/lib ;
+install dist2 : dalitzfitApp gendalitzApp : <location>$(TOP)/bin <threading>single ;
+

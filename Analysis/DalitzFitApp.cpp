@@ -50,9 +50,9 @@ const Double_t PI = 3.14159; // m/s
  * The main function.
  */
 int main(int argc, char **argv){
-  std::string file="test/3Part-4vecs.root";
+  std::string file="gen-out.root";
   std::string outFile="fit-out.root";
-  AmplitudeSetup ini("test/DKsKKRes.xml");//put start parameters here
+  AmplitudeSetup ini("Analysis/DKsKKRes.xml");//put start parameters here
   std::cout << "Load Modules" << std::endl;
   std::shared_ptr<Data> myReader(new RootReader(file, false,"data"));
   std::shared_ptr<Data> myPHSPReader(new RootReader(file, false,"mc"));
@@ -65,6 +65,7 @@ int main(int argc, char **argv){
   ParameterList par;
   amps->fillStartParVec(par); //perfect startvalues
   amps->printAmps();
+  amps->getMaxVal();
   std::cout << "LH with start parameters from xml file: " << esti->controlParameter(par) << std::endl;
 //  for(unsigned int i=0; i<par.GetNDouble(); i++){
 //    par.GetDoubleParameter(i).SetValue(300./(double)(i+1));
@@ -82,8 +83,8 @@ int main(int argc, char **argv){
   //  }
 
   std::cout << "Start Fit" << std::endl;
-//  double genResult = opti->exec(par);
-//  std::cout << "Final LH = " << genResult << std::endl;
+  double genResult = opti->exec(par);
+  std::cout << "Final LH = " << genResult << std::endl;
   amps->printAmps();
 
   plotData pl("muh",outFile, myReader,myPHSPReader,amps);

@@ -136,7 +136,7 @@ double MinLogLH::controlParameter(ParameterList& minPar){
       masssqc += (pow(c.E+b.E,2) - pow(c.px+b.px ,2) - pow(c.py+b.py ,2) - pow(c.pz+b.pz ,2));
       x.push_back(sqrt(masssqa));
       x.push_back(sqrt(masssqb));
-      x.push_back(sqrt(masssqc));
+//      x.push_back(sqrt(masssqc));
 
       double intens = pPIF_->intensity(x, minPar);
       if(intens>0){

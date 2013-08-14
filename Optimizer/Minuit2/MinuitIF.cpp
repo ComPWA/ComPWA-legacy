@@ -50,8 +50,8 @@ const double MinuitIF::exec(ParameterList& par){
 
   MnMigrad migrad(_myFcn, upar);
   std::cout <<"start migrad "<< std::endl;
-  //for(unsigned int i=0; i<par.GetNDouble(); i++)
- //   std::cout << upar.Parameter(i).Value() << " " << upar.Parameter(i).IsFixed() << std::endl;
+//  for(unsigned int i=0; i<par.GetNDouble(); i++)
+//    std::cout << upar.Parameter(i).Value() << " " << upar.Parameter(i).IsFixed() << std::endl;
   FunctionMinimum minMin = migrad();
 
  if(!minMin.IsValid()) {

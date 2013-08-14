@@ -27,6 +27,7 @@ public:
   virtual const bool fillStartParVec(ParameterList& outPar);
 
   virtual void printAmps(){return;}
+  virtual double getMaxVal(){return 5;}//TODO: implementation needed
   /** Destructor */
   virtual ~BreitWigner();
 

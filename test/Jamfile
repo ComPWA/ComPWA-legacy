@@ -130,40 +130,16 @@ exe gentwopartApp :
         $(TOP)/Core//ComPWA
         $(TOP)/Physics/BreitWigner//BreitWigner  
         : ;
+         
         
-exe gendalitzApp : 
-        GenDalitzApp.cpp 
-        test
-        $(TOP)/Core//ComPWA
-        $(TOP)/Physics/AmplitudeSum//AmplitudeSum  
-        $(TOP)/DataReader/RootReader
-        $(TOP)/Analysis
-        : ;
-        
-exe dalitzplotApp : 
-        DalitzDataPlotterApp.cpp 
-        test
-        $(TOP)/Core//ComPWA
-        $(TOP)/DataReader/RootReader//RootReader  
-        : ;
-        
-exe dalitzfitApp : 
-        DalitzFitApp.cpp 
-        test
-        $(TOP)/Core//ComPWA
-        $(TOP)/Physics/AmplitudeSum//AmplitudeSum  
-        $(TOP)/DataReader/RootReader//RootReader
-        $(TOP)/Estimator/MinLogLH//MinLogLH 
-        $(TOP)/Optimizer/Minuit2//Minuit2IF
-        $(TOP)/Analysis
-        : ;
 
-install dist : test : <location>$(TOP)/lib <threading>single ;
-#install dist2 : dalitzfitApp cx0testApp dataiftestApp optimizertestApp physicstestApp : <location>$(TOP)/bin <threading>single ;
-install dist2 : dalitzfitApp dataiftestApp optimizertestApp physicstestApp : <location>$(TOP)/bin <threading>single ;
-install dist3 : estimatortestApp integrationtestApp integrationtestbinnedApp runmanagertestApp gentwopartApp gendalitzApp dalitzplotApp : <location>$(TOP)/bin <threading>single ;
-install my : gendalitzApp : <location>$(TOP)/bin <threading>single ;
 
-if $(GENEVA) { 
-install dist7 : genevatestApp : <location>$(TOP)/bin ;
-}
+#install dist : test : <location>$(TOP)/lib <threading>single ;
+#install dist2 : cx0testApp dataiftestApp optimizertestApp physicstestApp : <location>$(TOP)/bin <threading>single ;
+#install dist2 : dataiftestApp optimizertestApp physicstestApp : <location>$(TOP)/bin <threading>single ;
+#install dist3 : estimatortestApp integrationtestApp integrationtestbinnedApp runmanagertestApp gentwopartApp  : <location>$(TOP)/bin <threading>single ;
+#install my : gendalitzApp : <location>$(TOP)/bin <threading>single ;
+
+#if $(GENEVA) { 
+#install dist7 : genevatestApp : <location>$(TOP)/bin ;
+#}

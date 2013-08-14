@@ -16,9 +16,12 @@ if $(OS) = LINUX {
 }
 local MINUIT2INC = $(MINUIT2)/include ;
 
+ECHO $(MINUIT2INC) ;
+
 project :
    requirements
 	<include>$(MINUIT2INC)
+        #<include>$(MINUIT2)/include
 	#<linkflags>-l$(MINUIT2)/lib/libMinuit2.so
 	#<linkflags>$(BOOSTLIBS)
 ;

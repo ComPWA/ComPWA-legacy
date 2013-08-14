@@ -150,15 +150,11 @@ RooComplex AmpFlatteRes::evaluate() const {
 	double m0 = Double_t(_m0);
 	double m  = Double_t(_x);
 
-	double Gamma0 = double(_resWidth);
-	//double GammaV = Gamma0 * (m0 / m) * pow(q() / q0(), 2.*_spin + 1.)  * BLprime2();
-	//	double gam1=1./sqrt(2./5.), gam2=1./sqrt(3./5.); //gam1^2+gam2^2=1, gam1/gam2=1.5 fixed from SU(3), TODO: set channel dependent
-
 	double p1 = 2*q(_mBarA,_mBarB)/m;//break-up momenta hidden channel (e.g. a0->eta pi)
 	double p2 = 2*q(_ma,_mb)/m;//break-up momenta decay channel (e.g. a0->KK)
 	double g1 = _par1;//couppling a0->eta pi
 	double g2 = _par2;//coupling a0->KK
-	//	double g2 = sqrt(_m0*Gamma0-_par1*_par1);//couppling do not fulfill g1*g1+g2*g2=m0 Gamma0!
+	//	double g2 = sqrt(_m0*Gamma0-_par1*_par1);//couppling does not fulfill g1*g1+g2*g2=m0 Gamma0!
 
 	RooComplex denom = RooComplex(m0*m0 - m*m, -p1*g1*g1-p2*g2*g2);
 	/* NOTE: Here we use the flatte formular which is according to my understanding only valid for scattering processes.
