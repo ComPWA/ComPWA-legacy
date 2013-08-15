@@ -2,8 +2,8 @@
 // Wrapper to provide intensity of amplitude sum
 //****************************************************************************
 
-#ifndef _AMPSUMINTENSITY_HPP
-#define _AMPSUMINTENSITY_HPP
+#ifndef _AMPSUMSLICEINTENSITY_HPP
+#define _AMPSUMSLICEINTENSITY_HPP
 
 #include <vector>
 #include <memory>
