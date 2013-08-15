@@ -67,6 +67,7 @@ int main(int argc, char **argv){
   //Simple Breit-Wigner Physics-Module setup
   AmpSumIntensity testBW(M, Br, m1, m2, m3, ini);
   testBW.printAmps();
+  double maxFcnVal = testBW.getMaxVal();
   ParameterList minPar;
   testBW.fillStartParVec(minPar);
 
@@ -127,7 +128,7 @@ int main(int argc, char **argv){
 //      x.push_back(sqrt(m12sq));//use only two parameters
       double AMPpdf = testBW.intensity(x, minPar);
 //      double test = rando.Uniform(0,5);
-      double test = rando.Uniform(0,testBW.getMaxVal()*2);
+      double test = rando.Uniform(0,maxFcnVal*1.2);
 
       if(maxTest<(weight*AMPpdf))
         maxTest=(weight*AMPpdf);

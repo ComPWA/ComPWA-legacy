@@ -163,8 +163,8 @@ AmpSumIntensity::AmpSumIntensity(const double inM, const double inBr, const doub
 					*mass13, *mass12, *mass23, *aj[last], *am[last], *an[last]) ) ;
 			tmpWigner->setDecayMasses(M, *mass_first, *mass_second , *mass_third);
 			angd.push_back( tmpWigner );
-			//          totAmp.addBW(rbw.at(last), rr.at(last), phir.at(last), angd.at(last));
-			totAmp.addBW(rbw.at(last), rr.at(last), phir.at(last));
+			totAmp.addBW(rbw.at(last), rr.at(last), phir.at(last), angd.at(last));
+//			totAmp.addBW(rbw.at(last), rr.at(last), phir.at(last));
 		}
 		else continue;
 	}
