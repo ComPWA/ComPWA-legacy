@@ -16,21 +16,6 @@ local MINUIT2 = [ os.environ MINUIT2 ] ;
 local rlibs = [ SHELL "$ROOTSYS/bin/root-config --libs" ] ;
 ROOTLIBS = [ MATCH "(.*)[\n]" : $(rlibs) ] ;
 
-#project :
-#	requirements
-#        <include>$(TOP)/external/qft++/include
-#        <include>$(ROOTINC)
-#        <include>$(QFTINC)
-#	    <include>$(BOOST_BUILD_PATH)/include
-#	    <include>$(MINUIT2)/include
-#	<linkflags>$(ROOTLIBS)
-#	#<linkflags>-lEG
-#	<linkflags>-lRooFit
-#	<linkflags>-lRooFitCore
-#	#<linkflags>-L$(QFT)/lib
-#	#<linkflags>-lqft++
-#	<linkflags>$(BOOSTLIBS)
-#	;
 project :
 	requirements <include>./
 	    <include>$(TOP)
@@ -71,7 +56,9 @@ exe ampSvc :
         Analysis
         $(TOP)/Core//ComPWA
         $(TOP)/Physics/AmplitudeSum//AmplitudeSum  
-        : ;
+        #: <linkflags>-Wl,-rpath=/usr/lib64 
+        : 
+;
         
 exe dalitzfitApp : 
         DalitzFitApp.cpp 
@@ -81,7 +68,8 @@ exe dalitzfitApp :
         $(TOP)/DataReader/RootReader//RootReader
         $(TOP)/Estimator/MinLogLH//MinLogLH 
         $(TOP)/Optimizer/Minuit2//Minuit2IF
-        : ;
+        #: <linkflags>-static 
+;
 
 install dist : Analysis : <location>$(TOP)/lib ;
 install dist2 : dalitzfitApp gendalitzApp ampSvc : <location>$(TOP)/bin <threading>single ;

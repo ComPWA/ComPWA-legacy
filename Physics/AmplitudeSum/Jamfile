@@ -36,6 +36,7 @@ lib AmplitudeSum :
         $(TOP)/Core//ComPWA
         $(TOP)/Estimator/MinLogLH//MinLogLH 
         $(TOP)/Optimizer/Minuit2//Minuit2IF
-        ;
+        #: <link>static 
+;
 
 install dist : AmplitudeSum : <location>$(TOP)/lib ;

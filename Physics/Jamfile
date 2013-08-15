@@ -10,6 +10,7 @@ lib Physics :
         [ glob *.cpp ]
         $(PHYSICS)/AmplitudeSum//AmplitudeSum
         $(PHYSICS)/BreitWigner//BreitWigner
-        ;
+        #: <link>static 
+;
 
 install dist : Physics : <location>$(TOP)/lib ;

@@ -50,7 +50,7 @@ int main(int argc, char **argv){
 	ParameterList par; testBW.fillStartParVec(par);
 	if(argc==6) {
 //		std::cout.clear() ;
-		cout<<"max "<<testBW.getMaxVal()<<endl;
+		cout<<"rEsUlT "<<testBW.getMaxVal()<<endl;
 	}
 	else{
 		std::vector<double> x;
@@ -58,7 +58,7 @@ int main(int argc, char **argv){
 		x.push_back(m13);
 		double eval = testBW.intensity(x,par);
 //		std::cout.clear() ;
-		cout<<"dec ";
+		cout<<"rEsUlT ";
 		if(eval>rndVal) cout<<"1"<<endl;
 		else cout<<"0"<<endl;
 

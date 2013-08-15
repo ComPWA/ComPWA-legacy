@@ -26,11 +26,19 @@ project :
 	#<linkflags>$(BOOSTLIBS)
 ;
 
+#lib Minuit2IF : 
+#   [ glob *.cpp ] 
+#   $(TOP)/Core//ComPWA
+#   #: <use>$(TOP)/Optimizer/Minuit2//Minuit2 <threading>single 
+#   #: <library>$(TOP)/Optimizer/Minuit2//Minuit2 <threading>single 
+#;
 lib Minuit2IF : 
    [ glob *.cpp ] 
    $(TOP)/Core//ComPWA
    : <use>$(TOP)/Optimizer/Minuit2//Minuit2 <threading>single 
    : <library>$(TOP)/Optimizer/Minuit2//Minuit2 <threading>single 
+#: <link>static
+#: <link>shared 
 ;
 
 install dist : Minuit2IF : <location>$(TOP)/lib <threading>single ;
