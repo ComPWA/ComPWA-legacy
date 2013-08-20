@@ -9,8 +9,8 @@
 
 using namespace ROOT::Minuit2;
 
-MinuitFcn::MinuitFcn(std::shared_ptr<ControlParameter> myData) :
-  _myDataPtr(myData){
+MinuitFcn::MinuitFcn(std::shared_ptr<ControlParameter> myData, ParameterList& parList) :
+  _myDataPtr(myData), _parList(parList){
   if (0==_myDataPtr) {
     //Alert << "Data pointer is 0 !!!!" << endmsg;
       std::cout << "Data pointer is 0 !!!!" << std::endl; //TODO exception
@@ -23,12 +23,16 @@ MinuitFcn::~MinuitFcn(){
 }
 
 double MinuitFcn::operator()(const std::vector<double>& x) const{
-  ParameterList par;
+  //ParameterList par;
   for(unsigned int i=0; i<x.size(); i++){
     //std::cout << x[i] << " ";
-    par.AddParameter(DoubleParameter(std::string("tmpPar"+i),x[i]));
+    //par.AddParameter(DoubleParameter(std::string("tmpPar"+i),x[i]));
+      //_parList.SetParameterValue(i,x[i]);
+    std::shared_ptr<DoubleParameter> actPat = _parList.GetDoubleParameter(i);
+    if(!actPat->IsFixed())
+      actPat->SetValue(x[i]);
   }
-  double result=_myDataPtr->controlParameter(par);
+  double result=_myDataPtr->controlParameter(_parList);
   std::cout << "current minimized value:\t"<< result << std::endl;
 
   return result;

@@ -28,6 +28,7 @@
 #include "Physics/Amplitude.hpp"
 #include "Core/Parameter.hpp"
 #include "Core/ParameterList.hpp"
+#include "Core/Functions.hpp"
 
 #include "Physics/AmplitudeSum/AmplitudeSetup.hpp"
 #include "Physics/AmplitudeSum/AmpRelBreitWignerRes.hpp"
@@ -36,11 +37,11 @@
 #include "Physics/AmplitudeSum/AmpWigner.hpp"
 #include "Physics/AmplitudeSum/AmpSumOfAmplitudes.hpp"
 
-class AmpSumIntensity : public Amplitude {
+class AmpSum {
 
 public:
   /// Default Constructor (0x0)
-  AmpSumIntensity(const double inM, const double inBr, const double in1
+  AmpSum(const double inM, const double inBr, const double in1
       ,const double in2, const double in3, AmplitudeSetup ini)
   : M(inM), Br(inBr), m1(in1), m2(in2), m3(in3),PI(3.14159),
     m23_sq_min((m2+m3)*(m2+m3)),
@@ -146,12 +147,12 @@ public:
     ma.setVal(x[0]); mb.setVal(x[1]); mc.setVal(x[2]);
 
     if( par.GetNDouble()>mr.size() ){
-        std::cout << "Error: Parameterlist doesn't match model!!" << std::endl; //TODO: exception
+        std::cout << "Error: Parameterlist doesn't match model!! " << par.GetNDouble() << std::endl; //TODO: exception
       return 0;
     }
 
     for(unsigned int i=0; i<mr.size(); i++){
-      mr[i]->setVal(par.GetDoubleParameter(i).GetValue());
+      mr[i]->setVal(par.GetDoubleParameter(i)->GetValue());
       //phir[i]->setVal(par.GetDoubleParameter(2*i+1).GetValue());
     }
     //rr[rr.size()-1]->setVal(par.GetDoubleParameter(2*(rr.size()-1)).GetValue());
@@ -175,9 +176,9 @@ public:
 
       //outPar.AddParameter(DoubleParameter(rr[i]->getVal()));
       if(rr[i]->hasError()) //TODO: check bounds
-        outPar.AddParameter(DoubleParameter(mr[i]->GetName(),mr[i]->getVal(), mr[i]->getMin(), mr[i]->getMax(), mr[i]->getError()));
+        outPar.AddParameter(std::shared_ptr<DoubleParameter>(new DoubleParameter(mr[i]->GetName(),mr[i]->getVal(), mr[i]->getMin(), mr[i]->getMax(), mr[i]->getError())));
       else
-        outPar.AddParameter(DoubleParameter(mr[i]->GetName(),mr[i]->getVal(), 0.1));
+        outPar.AddParameter(std::shared_ptr<DoubleParameter>(new DoubleParameter(mr[i]->GetName(),mr[i]->getVal(), 0.1)));
       //outPar.AddParameter(DoubleParameter(phir[i]->getVal(), phir[i]->getMin(), phir[i]->getMax(), phir[i]->getError()));
     }
     //outPar.AddParameter(DoubleParameter(rr[rr.size()-1]->getVal(), rr[rr.size()-1]->getMin(), rr[rr.size()-1]->getMax(), rr[rr.size()-1]->getError()));
@@ -186,7 +187,7 @@ public:
   }
 
   /** Destructor */
-  virtual ~AmpSumIntensity(){
+  virtual ~AmpSum(){
 
   }
 
@@ -271,6 +272,95 @@ public:
 
 
  private:
+
+
+};
+
+class AmpSumStrategy : public Strategy {
+public:
+  AmpSumStrategy(std::shared_ptr<AmpSum> amplitude):_amplitude(amplitude){
+    ;
+  }
+
+  virtual const std::string to_str() const {
+    return "AmpSumOfAmplitudesComplete";
+  }
+
+  virtual std::shared_ptr<AbsParameter> execute(const ParameterList& paras) {
+    std::shared_ptr<DoubleParameter> amp(new DoubleParameter("AmpSumOfAmplitudesComplete"));
+    std::vector<double> x;
+    x.push_back(paras.GetParameterValue("ma"));
+    x.push_back(paras.GetParameterValue("mb"));
+    x.push_back(paras.GetParameterValue("mc"));
+    ParameterList par(paras);
+    par.RemoveDouble("ma"); par.RemoveDouble("mb"); par.RemoveDouble("mc");
+    amp->SetValue(_amplitude->intensity(x, par));
+    return amp;
+  }
+
+protected:
+  std::shared_ptr<AmpSum> _amplitude;
+};
+
+class AmpSumIntensity : public Amplitude {
+
+public:
+  /// Default Constructor (0x0)
+  AmpSumIntensity(const double inM, const double inBr, const double in1
+      ,const double in2, const double in3, AmplitudeSetup ini)
+  : totAmp(new AmpSum(inM, inBr, in1, in2, in3, ini)){
+
+  }
+
+  virtual const double integral(ParameterList& par){
+    return totAmp->integral(par);
+  }
+
+  virtual const double volume(){
+    return totAmp->volume();
+  }
+
+  virtual const ParameterList intensity(std::vector<double>& x, ParameterList& par){
+    ParameterList result;
+    result.AddParameter(std::shared_ptr<DoubleParameter>(new DoubleParameter("AmpSumResult",totAmp->intensity(x, par))));
+    return result;
+  }
+
+  virtual const bool fillStartParVec(ParameterList& outPar){
+    return totAmp->fillStartParVec(outPar);
+  }
+
+  virtual std::shared_ptr<FunctionTree> functionTree(ParameterList& outPar) {
+    if(outPar.GetNDouble()>0) return NULL;
+    std::shared_ptr<FunctionTree> myTree;
+    totAmp->fillStartParVec(outPar);
+    outPar.AddParameter(std::shared_ptr<DoubleParameter>(new DoubleParameter("ma",0)));
+    outPar.AddParameter(std::shared_ptr<DoubleParameter>(new DoubleParameter("mb",0)));
+    outPar.AddParameter(std::shared_ptr<DoubleParameter>(new DoubleParameter("mc",0)));
+
+    std::shared_ptr<Strategy> ampSumComplete = std::shared_ptr<Strategy>(new AmpSumStrategy(totAmp));
+
+    myTree = std::shared_ptr<FunctionTree>(new FunctionTree());
+    myTree->createHead("totAmp", ampSumComplete);
+    for(unsigned int i=0; i<outPar.GetNDouble(); i++){
+      std::shared_ptr<DoubleParameter> tmp = outPar.GetDoubleParameter(i);
+      myTree->createLeaf(tmp->GetName(), tmp, "totAmp");
+    }
+   // myTree->createLeaf("b", parB, "bcd");
+    //myTree->createLeaf("c", parC, "cd");
+    //myTree->createLeaf("d", parD, "cd");
+
+
+    return myTree;
+  }
+
+  /** Destructor */
+  virtual ~AmpSumIntensity(){
+
+  }
+
+ protected:
+  std::shared_ptr<AmpSum> totAmp;
 
 
 };

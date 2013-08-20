@@ -25,7 +25,7 @@ class MinuitFcn : public FCNBase {
 
 public:
 
-  MinuitFcn(std::shared_ptr<ControlParameter> theData);
+  MinuitFcn(std::shared_ptr<ControlParameter> theData, ParameterList& parList);
   virtual ~MinuitFcn();
 
   double operator()(const std::vector<double>& x) const;
@@ -34,6 +34,7 @@ public:
 
 private:
   std::shared_ptr<ControlParameter> _myDataPtr;
+  ParameterList& _parList;
 };
   }  // namespace Minuit2
 

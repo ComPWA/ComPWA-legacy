@@ -16,6 +16,7 @@
 #include <memory>
 
 #include "Core/ParameterList.hpp"
+#include "Core/FunctionTree.hpp"
 
 class Amplitude
 {
@@ -32,9 +33,14 @@ public:
   virtual const double integral(ParameterList& par) =0;
   virtual const double volume() =0;
 
-  virtual const double intensity(std::vector<double>& x, ParameterList& par) =0;
+  virtual const ParameterList intensity(std::vector<double>& x, ParameterList& par) =0;
 
   virtual const bool fillStartParVec(ParameterList& outPar) =0;
+
+  virtual std::shared_ptr<FunctionTree> functionTree(ParameterList& outPar) {
+    //if not implemented, return NULL-pointer
+    return NULL;
+  }
 
 
 };

@@ -9,19 +9,25 @@
 #define _Event_HPP_
 
 #include <vector>
+#include <string>
+
 #include "Core/Particle.hpp"
 
 class Event{
 
 public:
-
   Event();
 
-  Event(const double inWeight);
+  Event(const std::string& name);
+
+  Event(const double inWeight, const std::string& name);
 
   virtual void addParticle(Particle inParticle);
 
   virtual ~Event();
+
+  virtual void inline setName(const std::string& name) { fName = name; }
+  virtual const inline std::string& getName() { return fName; }
 
   virtual const inline unsigned int getNParticles() { return fParticles.size(); }
   virtual const Particle& getParticle(const unsigned int id);
@@ -29,6 +35,7 @@ public:
 protected:
   std::vector<Particle> fParticles;
   double fWeight;
+  std::string fName;
   //Particle fParticleB;
   //TODO: other event info?
 

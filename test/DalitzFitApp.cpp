@@ -36,6 +36,7 @@
 #include "Core/Particle.hpp"
 #include "Core/Parameter.hpp"
 #include "Core/ParameterList.hpp"
+#include "Core/FunctionTree.hpp"
 
 // ComPWA header files go here
 #include "DataReader/RootReader/RootReader.hpp"
@@ -56,29 +57,48 @@ const Double_t PI = 3.14159; // m/s
  * The main function.
  */
 int main(int argc, char **argv){
+  bool useFctTree = false;
+
   std::string file="test/3Part-4vecs.root";
   AmplitudeSetup ini("test/JPSI_ypipi.xml");
   std::cout << "Load Modules" << std::endl;
   std::shared_ptr<Data> myReader(new RootReader(file, false,"data"));
   std::shared_ptr<Data> myPHSPReader(new RootReader(file, false,"mc"));
   std::shared_ptr<Amplitude> amps(new AmpSumIntensity(M, Br, m1, m2, m3, ini));
-  std::shared_ptr<ControlParameter> esti = MinLogLH::createInstance(amps, myReader, myPHSPReader);
-  //std::shared_ptr<Estimator> esti(new MinLogLH(amps, myReader, myPHSPReader));
-  std::shared_ptr<Optimizer> opti(new MinuitIF(esti));
-
   // Initiate parameters
   ParameterList par;
-  amps->fillStartParVec(par); //perfect startvalues
+  std::shared_ptr<ControlParameter> esti;
+  if(!useFctTree){//using tree?
+    amps->fillStartParVec(par); //perfect startvalues
+    //std::cout << "Pars: " << par.GetNDouble() << std::endl;
+    esti = MinLogLH::createInstance(amps, myReader, myPHSPReader);
+  }else{
+    std::shared_ptr<FunctionTree> physicsTree = amps->functionTree(par);
+    esti = MinLogLH::createInstance(physicsTree, myReader, myPHSPReader);
+  }
+  //std::shared_ptr<ControlParameter> esti = MinLogLH::createInstance(amps, myReader, myPHSPReader);
+  //std::shared_ptr<Estimator> esti(new MinLogLH(amps, myReader, myPHSPReader));
+  std::shared_ptr<Optimizer> opti(new MinuitIF(esti, par));
+
+  ParameterList test;
+  if(useFctTree)
+    if(!amps->functionTree(test))
+      return 1;
+
   std::cout << "LH with optimal resonance peaks: " << esti->controlParameter(par) << std::endl;
   for(unsigned int i=0; i<par.GetNDouble(); i++){
-    DoubleParameter tmp = par.GetDoubleParameter(i);
-    tmp.SetValue(tmp.GetValue());
-    tmp.SetError(tmp.GetValue());
+    std::shared_ptr<DoubleParameter> tmp = par.GetDoubleParameter(i);
+    if(i>1){
+      tmp->FixParameter(true);
+    }else{
+      tmp->SetValue(tmp->GetValue()*0.9);
+      tmp->SetError(tmp->GetValue());
+    }
   }
   std::cout << "LH with following resonance peaks: " << esti->controlParameter(par) << std::endl;
 
   for(unsigned int i=0; i<par.GetNDouble(); i++){
-      std::cout << "Parameter " << i << " = " << par.GetDoubleParameter(i).GetValue() << std::endl;
+      std::cout << "Parameter " << i << " = " << par.GetDoubleParameter(i)->GetValue() << std::endl;
   }
 
  // std::cout << "Fixing 5 of 7 parameters " << std::endl;
@@ -93,7 +113,7 @@ int main(int argc, char **argv){
   std::cout << "Optimierte intensitäten: " << esti->controlParameter(par) << std::endl;
 
   for(unsigned int i=0; i<par.GetNDouble(); i++){
-      std::cout << "Parameter " << i << " = " << par.GetDoubleParameter(i).GetValue() << std::endl;
+      std::cout << "Parameter " << i << " = " << par.GetDoubleParameter(i)->GetValue() << std::endl;
   }
 
   //Plot result
@@ -229,6 +249,10 @@ int main(int argc, char **argv){
 
   TLorentzVector *pGamma,*pPip,*pPim,pPm23,pPm13;
   double weight, m23sq, m13sq, m12sq, maxTest=0;
+  ParameterList paras(par);
+  if(useFctTree){
+    paras.RemoveDouble("ma"); paras.RemoveDouble("mb"); paras.RemoveDouble("mc");
+  }
   cout << "Start generation of y pi0 pi0 Dalitz Result" << endl;
   unsigned int i = 0;
   do{
@@ -259,7 +283,9 @@ int main(int argc, char **argv){
         x.push_back(sqrt(m23sq));
         x.push_back(sqrt(m13sq));
         x.push_back(sqrt(m12sq));
-        double AMPpdf = amps->intensity(x, par);
+        ParameterList intensL = amps->intensity(x, paras);
+        double AMPpdf = intensL.GetDoubleParameter(0)->GetValue();
+        //double AMPpdf = amps->intensity(x, par);
 
         double test = rando.Uniform(0,5);
 

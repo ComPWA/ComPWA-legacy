@@ -32,7 +32,9 @@ double ChiOneD::controlParameter(ParameterList& minPar){
 
     std::vector<double> x;
     x.push_back(m12);
-    double intens = pPIF_->intensity(x, minPar);
+    ParameterList intensL = pPIF_->intensity(x, minPar);
+    double intens = intensL.GetDoubleParameter(0)->GetValue();
+    //double intens = pPIF_->intensity(x, minPar);
 
     chi += (weight - intens)*(weight - intens)/(double)nBins; //Just for binned data
   }

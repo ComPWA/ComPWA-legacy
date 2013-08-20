@@ -4,12 +4,16 @@ path-constant PHYSICS : . ;
 # libPhysics.so will consist of these packages:
 build-project AmplitudeSum ;
 build-project BreitWigner ;
+build-project BlackScholes ;
+build-project NeuralNetwork ;
 
 # Build libPhysics.so
 lib Physics : 
         [ glob *.cpp ]
         $(PHYSICS)/AmplitudeSum//AmplitudeSum
         $(PHYSICS)/BreitWigner//BreitWigner
+        $(PHYSICS)/BlackScholes//BlackScholes
+        $(PHYSICS)/NeuralNetwork//NeuralNetwork
         ;
 
 install dist : Physics : <location>$(TOP)/lib ;

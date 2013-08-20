@@ -12,13 +12,16 @@
 #include <vector>
 #include <memory>
 #include <string>
+#include <map>
 
 #include "Core/Functions.hpp"
 #include "Core/TreeNode.hpp"
 #include "Core/AbsParameter.hpp"
 #include "Core/Parameter.hpp"
 
-class FunctionTree
+#include "Optimizer/ControlParameter.hpp"
+
+class FunctionTree //: public ControlParametr
 {
 public:
   //! Standard constructor
@@ -94,7 +97,40 @@ public:
 
   //! Create a leaf for the FcnTree
    /*!
-    * Create and add a node to the function tree
+    * Create and add a static node to the function tree if not existing yet
+    * Adds Top-Down-Linking to the node
+    * \param name identifier of node
+    * \param extPar the parameter this node represents
+    * \param parent the parent of this node (for linking)
+    * \sa addNode(), createHead(), createNode()
+   */
+  virtual void createLeaf(const std::string name, const double extPar, std::string parent){
+    std::shared_ptr<TreeNode> parentNode = nodes_.at(parent);
+    std::shared_ptr<TreeNode> leaf;
+    std::shared_ptr<DoubleParameter> staticVal(new DoubleParameter("ParOfNode_"+name,extPar));
+
+    //check if Leaf already exists
+    bool exists = true;
+    if ( nodes_.find( name ) == nodes_.end() ) {
+      exists=false;
+    } else {
+      leaf = nodes_.at(name);
+    }
+
+    //setup connections
+    if(exists){
+      leaf->addParent(parentNode);
+      //TODO: check if also static?
+    }else{
+      leaf = std::shared_ptr<TreeNode>(new TreeNode(name, staticVal, NULL, parentNode));
+      nodes_.insert(std::pair<std::string, std::shared_ptr<TreeNode> >(name,leaf));
+      leaf->linkParents();
+    }
+  }
+
+  //! Create a leaf for the FcnTree
+   /*!
+    * Create and add a node to the function tree if not existing yet
     * Adds Top-Down-Linking to the node
     * Attaches the Node as Observer to the external parameter
     * \param name identifier of node
@@ -102,12 +138,27 @@ public:
     * \param parent the parent of this node (for linking)
     * \sa addNode(), createHead(), createNode()
    */
-  virtual void createLeaf(const std::string& name, std::shared_ptr<AbsParameter> extPar, std::string parent){
+  virtual void createLeaf(const std::string name, std::shared_ptr<AbsParameter> extPar, std::string parent){
     std::shared_ptr<TreeNode> parentNode = nodes_.at(parent);
-    std::shared_ptr<TreeNode> newNode(new TreeNode(name, extPar, NULL, parentNode));
-    nodes_.insert(std::pair<std::string, std::shared_ptr<TreeNode> >(name,newNode));
-    newNode->linkParents();
-    extPar->Attach(newNode);
+    std::shared_ptr<TreeNode> leaf;
+
+    //check if Leaf already exists
+    bool exists = true;
+    if ( nodes_.find( name ) == nodes_.end() ) {
+      exists=false;
+    } else {
+      leaf = nodes_.at(name);
+    }
+
+    //setup connections
+    if(exists){
+      leaf->addParent(parentNode);
+    }else{
+      leaf = std::shared_ptr<TreeNode>(new TreeNode(name, extPar, NULL, parentNode));
+      nodes_.insert(std::pair<std::string, std::shared_ptr<TreeNode> >(name,leaf));
+      leaf->linkParents();
+      extPar->Attach(leaf);
+    }
   }
 
   //! return the head of the tree
@@ -116,10 +167,36 @@ public:
     * \return FuntionTreeNode at head of tree
    */
   virtual const std::shared_ptr<TreeNode> head() const {
-    //fcnTree_.
     return head_;
     //TODO: return double? ;
   }
+
+ /* virtual double controlParameter(ParameterList& minPar){
+    ParType resultType = head_->getValue()->type();
+    switch(par->type())
+      {
+      case ParType::COMPLEX: //TODO
+        //cout << "Easy\n";
+        break;
+      case ParType::DOUBLE:{
+        DoubleParameter* tmp = (DoubleParameter*) par.get(); //TODO: saver
+        return tmp->GetValue();
+        break;}
+      case ParType::INTEGER:{
+        IntegerParameter* tmp = (IntegerParameter*) par.get();
+        return tmp->GetValue();
+        break;}
+      case ParType::BOOL:{
+        BoolParameter* tmp = (BoolParameter*) par.get();
+        return tmp->GetValue();
+        break;}
+      default:{
+        //TODO exception
+        //cout << "Invalid Selection\n";
+        break;}
+      }
+    return 0;
+  }*/
 
   void recalculate(){
     head_->recalculate();

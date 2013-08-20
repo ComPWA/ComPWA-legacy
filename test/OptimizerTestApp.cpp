@@ -42,24 +42,24 @@ int main(int argc, char **argv){
   // Generate data distribution
   std::shared_ptr<ControlParameter> myFit = PolyFit::createInstance(p0, p1, p2, p3, sigma_smear);
 
+  ParameterList par;
+  par.AddParameter(std::shared_ptr<DoubleParameter>(new DoubleParameter("p0",-50,-100,-5,50)));
+  par.AddParameter(std::shared_ptr<DoubleParameter>(new DoubleParameter("p1",50,0,100,50)));
+  par.AddParameter(std::shared_ptr<DoubleParameter>(new DoubleParameter("p2",10,-20,20,10)));
+  par.AddParameter(std::shared_ptr<DoubleParameter>(new DoubleParameter("p3",-0.1,-0.2,0,0.05)));
+
   //--------------------------Minimizer IF --------------------------------------------------------
   std::vector<std::shared_ptr<Optimizer> > myMinimizerList;
   // Add minimizers
   if (whichMinimizer=="Geneva") myMinimizerList.push_back(std::shared_ptr<Optimizer> (new GenevaIF(myFit)));
-  else if (whichMinimizer=="Minuit") myMinimizerList.push_back(std::shared_ptr<Optimizer> (new MinuitIF(myFit)));
+  else if (whichMinimizer=="Minuit") myMinimizerList.push_back(std::shared_ptr<Optimizer> (new MinuitIF(myFit,par)));
   else if (whichMinimizer=="all") {
     myMinimizerList.push_back(std::shared_ptr<Optimizer> (new GenevaIF(myFit)));
-    myMinimizerList.push_back(std::shared_ptr<Optimizer> (new MinuitIF(myFit)));
+    myMinimizerList.push_back(std::shared_ptr<Optimizer> (new MinuitIF(myFit,par)));
   }else{
    std::cout << "Minimizer\t" << whichMinimizer << "\tdoesn't exist" << std::endl;
    return 0;
   }
-
-  ParameterList par;
-  par.AddParameter(DoubleParameter("p0",-50,-100,-5,50));
-  par.AddParameter(DoubleParameter("p1",50,0,100,50));
-  par.AddParameter(DoubleParameter("p2",10,-20,20,10));
-  par.AddParameter(DoubleParameter("p3",-0.1,-0.2,0,0.05));
 
   std::cout << "Starting Parameters:" << std::endl;
   for(unsigned int i=0; i<par.GetNDouble(); i++)

@@ -50,8 +50,8 @@ int main(int argc, char **argv){
   //Simple Breit-Wigner Physics-Module setup
   shared_ptr<BreitWigner> testBW(new BreitWigner(0.,5.));
   ParameterList minPar;
-  minPar.AddParameter(DoubleParameter("BWPos",1.5,0.5,2.5,0.1));
-  minPar.AddParameter(DoubleParameter("BWWidth",0.3,0.1,0.2,0.01));
+  minPar.AddParameter(std::shared_ptr<DoubleParameter>(new DoubleParameter("BWPos",1.5,0.5,2.5,0.1)));
+  minPar.AddParameter(std::shared_ptr<DoubleParameter>(new DoubleParameter("BWWidth",0.3,0.1,0.2,0.01)));
 
   //Output File setup
   TFile output("test/2Part-4vecs.root","recreate");
@@ -87,7 +87,9 @@ int main(int argc, char **argv){
       //call physics module
       vector<double> x;
       x.push_back(pPm.Mag());
-      double BWpdf = testBW->intensity(x, minPar); //TMath::BreitWigner(pPm.Mag(),1.2,0.2);
+      ParameterList intensL = testBW->intensity(x, minPar);
+      double BWpdf = intensL.GetDoubleParameter(0)->GetValue();
+      //double BWpdf = testBW->intensity(x, minPar); //TMath::BreitWigner(pPm.Mag(),1.2,0.2);
 
       double test = rando.Uniform(0,10);
 

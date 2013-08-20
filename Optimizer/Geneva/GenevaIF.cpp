@@ -30,6 +30,7 @@
 
 // Standard header files go here
 #include <iostream>
+#include <limits>
 
 // Geneva header files go here
 #include "geneva/Go2.hpp"
@@ -89,11 +90,20 @@ const double GenevaIF::exec(ParameterList& par) {
 	double val[NPar], min[NPar], max[NPar], err[NPar];
 	std::string names[NPar];
 	for(unsigned int i=0; i<NPar; i++){
-	  names[i] = par.GetDoubleParameter(i).GetName();
-	  val[i] = par.GetDoubleParameter(i).GetValue();
-	  min[i] = par.GetDoubleParameter(i).GetMinValue();
-	  max[i] = par.GetDoubleParameter(i).GetMaxValue();
-	  err[i] = par.GetDoubleParameter(i).GetError();
+	  std::shared_ptr<DoubleParameter> dpar = par.GetDoubleParameter(i);
+	  names[i] = dpar->GetName();
+	  val[i] = dpar->GetValue();
+	  if(dpar->HasBounds()){
+	    min[i] = dpar->GetMinValue();
+	    max[i] = dpar->GetMaxValue();
+	  }else{
+	    max[i] = 1.79768e+307;//std::numeric_limits<double>::max();
+	    min[i] = -1.79768e+307;//-1*max[i];
+	  }
+	  if(dpar->HasError())
+	    err[i] = dpar->GetError();
+	  else
+	    err[i] = val[i];
 	}
 
 	// Make an individual known to the optimizer
@@ -118,7 +128,7 @@ const double GenevaIF::exec(ParameterList& par) {
 	ParameterList resultPar;
 	bestIndividual_ptr->getPar(resultPar);
 	for(unsigned int i=0; i<par.GetNDouble(); i++){  //TODO: better way, no cast or check type
-	  par.GetDoubleParameter(i).SetValue(resultPar.GetDoubleParameter(i).GetValue());
+	  par.GetDoubleParameter(i)->SetValue(resultPar.GetDoubleParameter(i)->GetValue());
 	}
 
 	return result;

@@ -1,13 +1,17 @@
 #include <vector>
+#include <string>
 #include "Core/Particle.hpp"
 #include "Core/Event.hpp"
 
-
-Event::Event():fWeight(1.){
+Event::Event():fWeight(1.),fName(""){
 
 }
 
-Event::Event(const double inWeight):fWeight(inWeight){
+Event::Event(const std::string& name):fWeight(1.),fName(name){
+
+}
+
+Event::Event(const double inWeight, const std::string& name=""):fWeight(inWeight),fName(name){
 
 }
 

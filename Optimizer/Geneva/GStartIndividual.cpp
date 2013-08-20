@@ -108,7 +108,7 @@ bool GStartIndividual::getPar(ParameterList& val){
                 std::string test;
                 if(i<parNames.size())
                   test = parNames.at(i);
-                val.AddParameter(DoubleParameter(test,(*it)->value(),0.,0.,0.));
+                val.AddParameter(std::shared_ptr<DoubleParameter>(new DoubleParameter(test,(*it)->value(),0.,0.,0.)));
               }
               return true;
 }
@@ -177,7 +177,7 @@ double GStartIndividual::fitnessCalculation(){
               //boost::shared_ptr<GConstrainedDoubleObject> ptr = (*it);
               //std::cout << "Value: " << (*it)->value() << " Iterator: "<< (*it).get() << std::endl;
 
-            minPar.AddParameter(DoubleParameter(test,(*it)->value(),0,0,0));
+            minPar.AddParameter(std::shared_ptr<DoubleParameter>(new DoubleParameter(test,(*it)->value(),0,0,0)));
             //  minPar.AddParameter(DoubleParameter("test",(*it)->value(),0,0,0));
 
             i++;

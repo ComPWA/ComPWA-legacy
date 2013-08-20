@@ -36,14 +36,12 @@ public:
 
   Double_t evaluateSlice(RooComplex*, unsigned int, unsigned int) const ;
   Double_t evaluate() const ;
-  
+
 protected:
   std::vector<std::shared_ptr<AmpAbsDynamicalFunction> > _pdfList ;   //  List of component PDFs
   std::vector<std::shared_ptr<RooRealVar> > _intList;    //  List of relative intensities
   std::vector<std::shared_ptr<RooRealVar> > _phaseList;  //  List of relative phases
   std::vector<std::shared_ptr<AmpWigner> > _angList ;   //  List of component angular distributions
-
-
 
 };
  

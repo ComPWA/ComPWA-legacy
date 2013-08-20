@@ -114,6 +114,27 @@ exe integrationtestbinnedApp :
         $(TOP)/Optimizer/Minuit2//Minuit2IF
         : ;
         
+exe blackscholesApp : 
+        BlackScholesApp.cpp 
+        test
+        $(TOP)/Core//ComPWA
+        $(TOP)/Estimator/StockLeastSquares//StockLeastSquares 
+        $(TOP)/Physics/BlackScholes//BlackScholes   
+        $(TOP)/DataReader/StockReader//StockReader
+        $(TOP)/Optimizer/Minuit2//Minuit2IF
+        : ;
+        
+exe neuralnetworkApp : 
+        NeuralNetworkApp.cpp 
+        test
+        $(TOP)/Core//ComPWA
+        $(TOP)/Estimator/StockLeastSquares//StockLeastSquares 
+        $(TOP)/Physics/NeuralNetwork//NeuralNetwork   
+        $(TOP)/DataReader/StockReader//StockReader
+        $(TOP)/Optimizer/Geneva//GenevaIF
+        $(TOP)/Optimizer/Minuit2//Minuit2IF
+        : ;
+        
 exe runmanagertestApp : 
         RunManagerTestApp.cpp 
         test
@@ -156,7 +177,7 @@ exe dalitzfitApp :
         : ;
 
 install dist : test : <location>$(TOP)/lib <threading>single ;
-install dist2 : dalitzfitApp treetestApp cx0testApp dataiftestApp optimizertestApp physicstestApp : <location>$(TOP)/bin <threading>single ;
+install dist2 : dalitzfitApp treetestApp cx0testApp dataiftestApp optimizertestApp physicstestApp blackscholesApp neuralnetworkApp : <location>$(TOP)/bin <threading>single ;
 install dist3 : estimatortestApp integrationtestApp integrationtestbinnedApp runmanagertestApp gentwopartApp gendalitzApp dalitzplotApp : <location>$(TOP)/bin <threading>single ;
 
 if $(GENEVA) { 

@@ -65,6 +65,11 @@ public:
     _children.push_back(newChild);
   };
 
+  void addParent(std::shared_ptr<TreeNode> newParent){
+    _parents.push_back(newParent);
+    newParent->_children.push_back(shared_from_this());
+  };
+
   //! Get value of this node
    /*!
     * pure virtual function inheriting classes must implement to provide a

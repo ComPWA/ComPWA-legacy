@@ -114,7 +114,7 @@ int main(int argc, char **argv){
 
       m23sq=pPm23.M2(); m13sq=pPm13.M2();
 
-      m12sq=M*M-m13sq-m23sq;
+      m12sq=M*M+m1*m1+m2*m2+m3*m3-m13sq-m23sq;
       if(m12sq<0){
         //cout << tmpm12_sq << "\t" << M*M << "\t" << m13_sq << "\t" << m23_sq << endl;
         //continue;
@@ -130,7 +130,9 @@ int main(int argc, char **argv){
       x.push_back(sqrt(m23sq));
       x.push_back(sqrt(m13sq));
       x.push_back(sqrt(m12sq));
-      double AMPpdf = testBW.intensity(x, minPar);
+      ParameterList intensL = testBW.intensity(x, minPar);
+      double AMPpdf = intensL.GetDoubleParameter(0)->GetValue();
+      //double AMPpdf = testBW.intensity(x, minPar);
 
       double test = rando.Uniform(0,5);
 

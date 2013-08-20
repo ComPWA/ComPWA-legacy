@@ -55,10 +55,10 @@ int main(int argc, char **argv){
     myMinimizer->setClientMode();
 
   ParameterList par;
-  par.AddParameter(DoubleParameter("p0",-50,-100,-5,50));
-  par.AddParameter(DoubleParameter("p1",50,0,100,50));
-  par.AddParameter(DoubleParameter("p2",10,-20,20,10));
-  par.AddParameter(DoubleParameter("p3",-0.1,-0.2,0,0.05));
+  par.AddParameter(std::shared_ptr<DoubleParameter>(new DoubleParameter("p0",-50,-100,-5,50)));
+  par.AddParameter(std::shared_ptr<DoubleParameter>(new DoubleParameter("p1",50,0,100,50)));
+  par.AddParameter(std::shared_ptr<DoubleParameter>(new DoubleParameter("p2",10,-20,20,10)));
+  par.AddParameter(std::shared_ptr<DoubleParameter>(new DoubleParameter("p3",-0.1,-0.2,0,0.05)));
 
   if(iamserver){
     std::cout << "Starting Parameters:" << std::endl;

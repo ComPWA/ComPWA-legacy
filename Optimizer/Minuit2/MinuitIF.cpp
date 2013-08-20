@@ -14,7 +14,7 @@
 
 using namespace ROOT::Minuit2;
 
-MinuitIF::MinuitIF(std::shared_ptr<ControlParameter> theData) : _myFcn(theData){
+MinuitIF::MinuitIF(std::shared_ptr<ControlParameter> theData, ParameterList& par) : _myFcn(theData, par){
   //_myFcn = new MIMinuitFcn(theData);
 }
 
@@ -24,35 +24,36 @@ MinuitIF::~MinuitIF(){
 }
 
 const double MinuitIF::exec(ParameterList& par){
-  std::string s;
-  std::stringstream out;
+  //std::string s;
+  //std::stringstream out;
 
   MnUserParameters upar;
   for(unsigned int i=0; i<par.GetNDouble(); ++i){ //only doubles for minuit
-    out.str("");
-    out << i;
-    s = out.str();
+
+    //out.str("");
+    //out << i;
+    //s = out.str();
 
     //use as much information as possible: (just bounds but no error not supported by minuit)
     //try{
-      DoubleParameter& actPat = par.GetDoubleParameter(i);
+      std::shared_ptr<DoubleParameter> actPat = par.GetDoubleParameter(i);
     //}
-    if( actPat.UseBounds() && actPat.HasError() )
-      upar.Add(s, actPat.GetValue(), actPat.GetError(), actPat.GetMaxValue(), actPat.GetMinValue());
-    else if( actPat.HasError() )
-      upar.Add(s, actPat.GetValue(), actPat.GetError());
+    if( actPat->UseBounds() && actPat->HasError() )
+      upar.Add(actPat->GetName(), actPat->GetValue(), actPat->GetError(), actPat->GetMaxValue(), actPat->GetMinValue());
+    else if( actPat->HasError() )
+      upar.Add(actPat->GetName(), actPat->GetValue(), actPat->GetError());
     else
-      upar.Add(s, actPat.GetValue());
+      upar.Add(actPat->GetName(), actPat->GetValue());
 
-    if(actPat.IsFixed())
-      upar.Fix(s);
+    if(actPat->IsFixed())
+      upar.Fix(actPat->GetName());
   }
 
   MnMigrad migrad(_myFcn, upar);
   std::cout <<"start migrad "<< std::endl;
   //for(unsigned int i=0; i<par.GetNDouble(); i++)
  //   std::cout << upar.Parameter(i).Value() << " " << upar.Parameter(i).IsFixed() << std::endl;
-  FunctionMinimum minMin = migrad(20,0.1);//TODO
+  FunctionMinimum minMin = migrad(100,0.00001);//TODO
 
  if(!minMin.IsValid()) {
    //try with higher strategy
@@ -63,13 +64,13 @@ const double MinuitIF::exec(ParameterList& par){
 
   //save minimzed values
   for(unsigned int i=0; i<par.GetNDouble(); ++i){
-    out.str("");
-    out << i;
-    s = out.str();
-    DoubleParameter& actPat = par.GetDoubleParameter(i);
-    if(!actPat.IsFixed()){
-      actPat.SetValue(minMin.UserState().Value(s));
-      actPat.SetError(minMin.UserState().Error(s));
+    //out.str("");
+    //out << i;
+   // s = out.str();
+    std::shared_ptr<DoubleParameter> actPat = par.GetDoubleParameter(i);
+    if(!actPat->IsFixed()){
+      actPat->SetValue(minMin.UserState().Value(actPat->GetName()));
+      actPat->SetError(minMin.UserState().Error(actPat->GetName()));
     }
   }
 

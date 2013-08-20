@@ -20,7 +20,7 @@
 
 enum ParType { COMPLEX = 1, DOUBLE = 2, INTEGER = 3, BOOL = 4, UNDEFINED = 0};
 
-class AbsParameter
+class AbsParameter //: public std::enable_shared_from_this<AbsParameter>
 {
 public:
   //! Constructor with name of parameter and optional type
@@ -63,6 +63,11 @@ public:
         }
     }
   }
+
+  //! Return shared_pointer pointing to this Parameter
+  //std::shared_ptr<AbsParameter> getptr() {
+  //    return shared_from_this();
+  //}
 
   //! friend function to stream parameter information to output
   /*!
