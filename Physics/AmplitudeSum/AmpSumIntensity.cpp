@@ -144,7 +144,7 @@ AmpSumIntensity::AmpSumIntensity(const double inM, const double inBr, const doub
 		if(tmp.m_type=="relBW"){
 			std::shared_ptr<AmpRelBreitWignerRes> tmpbw(new AmpRelBreitWignerRes(tmp.m_name.c_str(),
 					tmp.m_name.c_str(), *mass12, *mr[last], *gr[last], *qr[last], 1, tmp.m_spin) );
-			tmpbw->setDecayMasses(*mass_first,*mass_second);
+			tmpbw->setDecayMasses(*mass_first,*mass_second,*mass_third, M);
 			rbw.push_back(tmpbw);
 			std::shared_ptr<AmpWigner> tmpWigner(new AmpWigner(("a_{"+tmp.m_name+"}").c_str(), ("a_{"+tmp.m_name+"}").c_str(),
 					*mass13, *mass12, *mass23, *aj[last], *am[last], *an[last]) ) ;
@@ -156,15 +156,15 @@ AmpSumIntensity::AmpSumIntensity(const double inM, const double inBr, const doub
 		else if(tmp.m_type=="flatte"){
 			std::shared_ptr<AmpFlatteRes> tmpbw(new AmpFlatteRes(tmp.m_name.c_str(),
 					tmp.m_name.c_str(), *mass12, *mr[last], *gr[last], *qr[last], *par1[last], *par2[last], 1, tmp.m_spin) );
-			tmpbw->setDecayMasses(*mass_first,*mass_second);
+			tmpbw->setDecayMasses(*mass_first,*mass_second,*mass_third, M);
 			tmpbw->setBarrierMass(0.547853,0.1396);//a_0->eta pi hidden channel
 			rbw.push_back(tmpbw);
 			std::shared_ptr<AmpWigner> tmpWigner(new AmpWigner(("a_{"+tmp.m_name+"}").c_str(), ("a_{"+tmp.m_name+"}").c_str(),
 					*mass13, *mass12, *mass23, *aj[last], *am[last], *an[last]) ) ;
 			tmpWigner->setDecayMasses(M, *mass_first, *mass_second , *mass_third);
 			angd.push_back( tmpWigner );
-			totAmp.addBW(rbw.at(last), rr.at(last), phir.at(last), angd.at(last));
-//			totAmp.addBW(rbw.at(last), rr.at(last), phir.at(last));
+//			totAmp.addBW(rbw.at(last), rr.at(last), phir.at(last), angd.at(last));
+			totAmp.addBW(rbw.at(last), rr.at(last), phir.at(last));
 		}
 		else continue;
 	}
@@ -228,6 +228,7 @@ const double AmpSumIntensity::intensity(std::vector<double>& x, ParameterList& p
 		phir[i]->setVal(par.GetDoubleParameter(nAmps+i).GetValue());//fixed
 	}
 
+//	std::cout<<" -- "<<x[0]<<" "<<x[1]<<std::endl;
 	double AMPpdf = totAmp.evaluate();
 
 	if(AMPpdf!=AMPpdf){

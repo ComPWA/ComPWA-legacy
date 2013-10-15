@@ -59,7 +59,6 @@
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.assembler.base.1667198369" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.base">
 								<option id="gnu.both.asm.option.include.paths.1325231248" name="Include paths (-I)" superClass="gnu.both.asm.option.include.paths" valueType="includePath">
-									<listOptionValue builtIn="false" value="/opt/root-v5.34.03/include/root"/>
 									<listOptionValue builtIn="false" value="/Users/weidenka/work/external/qft++/include"/>
 									<listOptionValue builtIn="false" value="/Users/weidenka/work/external/boost_1_48_0/build/include"/>
 									<listOptionValue builtIn="false" value="/opt/local/include"/>

@@ -19,15 +19,11 @@ AmpFlatteRes::AmpFlatteRes(const char *name, const char *title,
 				       RooAbsReal& par2,
 					   int subSys, ///  meson radius
 					   Int_t resSpin) :
-  AmpAbsDynamicalFunction(name,title),
+  AmpAbsDynamicalFunction(name,title), AmpKinematics(resMass.getVal(), resSpin, AmpKinematics::barrierType(BWPrime), d.getVal(), 1.5),
   _x("x", "Observable", this, x),
-  _m0("m0", "Mass", this, resMass),
-  _resWidth("resWidth", "Width", this, resWidth),
-  _d("d", "d", this, d),
   _par1("par1","par1",this,par1),
   _par2("par2","par2",this,par2),
-  _subSys(subSys),
-  _spin(resSpin)
+  _subSys(subSys)
 {
   initialise();
 }
@@ -35,32 +31,22 @@ AmpFlatteRes::AmpFlatteRes(const char *name, const char *title,
 
 AmpFlatteRes::AmpFlatteRes(const AmpFlatteRes& other, const char* newname) :
   AmpAbsDynamicalFunction(other, newname),
+  AmpKinematics(other),
   _x("x", this, other._x),
-  _m0("m0", this, other._m0),
-  _resWidth("resWidth", this, other._resWidth),
-  _d("d", this, other._d),
   _par1("par1","par1",this,other._par1),
   _par2("par2","par2",this,other._par2),
-  _subSys(other._subSys),
-  _spin(other._spin),
-  _ma(other._ma),
-  _mb(other._mb)
+  _subSys(other._subSys)
 {
   initialise();
 }
 
 AmpFlatteRes::AmpFlatteRes(const AmpFlatteRes& other) :
   AmpAbsDynamicalFunction(other.GetName(), other.GetTitle()),
+  AmpKinematics(other),
   _x("x", this, other._x),
-  _m0("m0", this, other._m0),
-  _resWidth("resWidth", this, other._resWidth),
-  _d("d", this, other._d),
   _par1("par1","par1",this,other._par1),
   _par2("par2","par2",this,other._par2),
-  _subSys(other._subSys),
-  _spin(other._spin),
-  _ma(other._ma),
-  _mb(other._mb)
+  _subSys(other._subSys)
 {
   initialise();
 }
@@ -73,99 +59,34 @@ void AmpFlatteRes::initialise()
 {
 }
 
-void AmpFlatteRes::setDecayMasses(double ma, double mb) {
-  _ma = ma;
-  _mb = mb;
-}
-
 void AmpFlatteRes::setBarrierMass(double mBarA, double mBarB) {
   _mBarA = mBarA;
   _mBarB = mBarB;
 }
-
-double AmpFlatteRes::q0() const {
-  double mapb = _ma + _mb;
-  double mamb = _ma - _mb;
-  
-  return sqrt ( (_m0*_m0 - mapb*mapb) * (_m0*_m0 - mamb*mamb) ) / (2. * _m0 );
-}
-
-double AmpFlatteRes::q() const {
-  double mapb = _ma + _mb;
-  double mamb = _ma - _mb;
-  
-  return sqrt ( (_x*_x - mapb*mapb) * (_x*_x - mamb*mamb) ) / (2. * _x );
-}
-
-double AmpFlatteRes::q0(double ma, double mb) const {
-  double mapb = ma + mb;
-  double mamb = ma - mb;
-  
-  return sqrt ( fabs((_m0*_m0 - mapb*mapb) * (_m0*_m0 - mamb*mamb)) ) / (2. * _m0 );
-}
-
-double AmpFlatteRes::q(double ma, double mb) const {
-  double mapb = ma + mb;
-  double mamb = ma - mb;
-  
-  return sqrt ( fabs((_x*_x - mapb*mapb) * (_x*_x - mamb*mamb)) ) / (2. * _x );
-}
-
-
-// compute part of the Blatt-Weisskopf barrier factor
-//   BLprime = sqrt (F(q0)/F(q))
-double AmpFlatteRes::F(double p) const {
-  double retVal = 1;
-
-  if (_spin == 0)
-    retVal = 1;
-  else if (_spin == 1) 
-    retVal = 1 + p*p * _d*_d;
-  else if (_spin == 2) {
-    double z = p*p * _d*_d;
-    retVal = (z-3.)*(z-3.) + 9*z;
-  }
-  return retVal;
-}
-    
-
-// compute square of Blatt-Weisskopf barrier factor
-double AmpFlatteRes::BLprime2() const {
-  //  cout << q0() << " " << q() << "\t" << F(q0()) << " " << F(q()) << endl;
-  return F(q0()) / F(q());
-}
-
-/*double AmpFlatteRes::phspTerm(double ma, double mb) const {
-  double mapb = ma + mb;
-  double mamb = ma - mb;
-  
-  return sqrt ( (1.-(mamb*mamb/Double_t(_x)/Double_t(_x)))*(1.-(mapb*mapb/Double_t(_x)/Double_t(_x))) );
-}*/
 
 RooComplex AmpFlatteRes::evaluate() const {
 	if(_mBarA<0||_mBarA>5||_mBarB<0||_mBarB>5) {
 		cout<<"Barrier masses not set! Use setBarrierMass() first!"<<endl;
 		return 0;
 	}
-	double m0 = Double_t(_m0);
+//	double m0 = Double_t(_m0);
 	double m  = Double_t(_x);
 
-	double p1 = 2*q(_mBarA,_mBarB)/m;//break-up momenta hidden channel (e.g. a0->eta pi)
-	double p2 = 2*q(_ma,_mb)/m;//break-up momenta decay channel (e.g. a0->KK)
+	double p1 = 2*q(m, _mBarA,_mBarB)/m;//break-up momenta hidden channel (e.g. a0->eta pi)
+	double p2 = 2*q(m, _ma,_mb)/m;//break-up momenta decay channel (e.g. a0->KK)
 	double g1 = _par1;//couppling a0->eta pi
 	double g2 = _par2;//coupling a0->KK
-	//	double g2 = sqrt(_m0*Gamma0-_par1*_par1);//couppling does not fulfill g1*g1+g2*g2=m0 Gamma0!
 
-	RooComplex denom = RooComplex(m0*m0 - m*m, -p1*g1*g1-p2*g2*g2);
-	/* NOTE: Here we use the flatte formular which is according to my understanding only valid for scattering processes.
-	 * For the decay we should use a P-Vector approach*/
-	RooComplex result = (RooComplex(g2*g2,0) / denom); //use KK decay channel here
-	if(result.re()!=result.re()) {std::cout << "OH OH RE" << std::endl; return 0;}
-//	RooComplex result = (RooComplex(0.001,0) / denom); //use KK decay channel here
-	if(result.im()!=result.im()) {std::cout << "OH OH IM" << std::endl; return 0;}
+	RooComplex denom = RooComplex(_mR*_mR - m*m, -p1*g1*g1-p2*g2*g2);
+
+//	RooComplex result = (RooComplex(g2*g2,0) / denom); //use KK decay channel here
+	RooComplex result = (RooComplex(g2,0) / denom); //use KK decay channel here
+
+	if(result.re()!=result.re()) {std::cout << "RE part NAN" << std::endl; return 0;}
+	if(result.im()!=result.im()) {std::cout << "IM part NAN" << std::endl; return 0;}
 	return result;
-}
 
+}
 ////  implement stubs for virtual functions
 ////  to satisfy interface of RooAbsArg.
 ////  not sure which ones are really needed.
@@ -234,6 +155,6 @@ RooAbsArg* AmpFlatteRes::createFundamental(const char*) const {
 
 Bool_t AmpFlatteRes::isIdentical(const RooAbsArg&, Bool_t){
   cout << __PRETTY_FUNCTION__ << endl;
-  ;
+  return 0;
 }
 

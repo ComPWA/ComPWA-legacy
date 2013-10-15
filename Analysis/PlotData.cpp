@@ -26,7 +26,7 @@ void plotData::plot(){
 
 	double min_range=.9;
 	double max_range=2.;
-	int nBins=300;
+	int nBins=100;
 	//Plot result
 	TH2D* bw2312 = new TH2D("bw2312","DATA",nBins,min_range,max_range,nBins,min_range,max_range);
 	bw2312->GetXaxis()->SetTitle("m_{23}^{2} / GeV^{2}");
@@ -102,9 +102,9 @@ void plotData::plot(){
 		masssq13 = pow(a.E+c.E,2) - pow(a.px+c.px ,2) - pow(a.py+c.py ,2) - pow(a.pz+c.pz ,2);
 		masssq23 = pow(b.E+c.E,2) - pow(b.px+c.px ,2) - pow(b.py+c.py ,2) - pow(b.pz+c.pz ,2);
 
-		bw2312->Fill(masssq12,masssq13);
-		bw1213->Fill(masssq13,masssq12);
-		bw2313->Fill(masssq23,masssq12);
+		bw2312->Fill(masssq23,masssq12);
+		bw1213->Fill(masssq12,masssq13);
+		bw2313->Fill(masssq23,masssq13);
 	}
 
 	for(unsigned int i = 0; i < _set2->getNEvents(); i++){
@@ -122,18 +122,18 @@ void plotData::plot(){
 		masssq13 = pow(a.E+c.E,2) - pow(a.px+c.px ,2) - pow(a.py+c.py ,2) - pow(a.pz+c.pz ,2);
 		masssq23 = pow(b.E+c.E,2) - pow(b.px+c.px ,2) - pow(b.py+c.py ,2) - pow(b.pz+c.pz ,2);
 
-		bw2312PHSP->Fill(masssq12,masssq13);
-		bw1213PHSP->Fill(masssq13,masssq12);
-		bw2313PHSP->Fill(masssq23,masssq12);
+		bw2312PHSP->Fill(masssq23,masssq12);
+		bw1213PHSP->Fill(masssq12,masssq13);
+		bw2313PHSP->Fill(masssq23,masssq13);
 
 		vector<double> x;
 		x.push_back(sqrt(masssq23));
 		x.push_back(sqrt(masssq13));
-		x.push_back(sqrt(masssq12));
+//		x.push_back(sqrt(masssq12));
 		if(_par.GetNParameter()!=0){
-			bw2312FIT->Fill(masssq12,masssq13,_amp->intensity(x,_par));
-			bw1213FIT->Fill(masssq13,masssq12,_amp->intensity(x,_par));
-			bw2313FIT->Fill(masssq23,masssq12,_amp->intensity(x,_par));
+			bw2312FIT->Fill(masssq23,masssq12,_amp->intensity(x,_par));
+			bw1213FIT->Fill(masssq12,masssq13,_amp->intensity(x,_par));
+			bw2313FIT->Fill(masssq23,masssq13,_amp->intensity(x,_par));
 		}
 	}
 	TCanvas* c1 = new TCanvas(_name.c_str(),_name.c_str(),200,10,1400,700);
@@ -163,7 +163,7 @@ void plotData::plot(){
 		cout<<"Choose a style for plotting!"<<endl;
 	}
 
-	TFile* tf = new TFile(_outFile.c_str(),"UPDATE");
+	TFile* tf = new TFile(_outFile.c_str(),"update");
 	if ( tf->IsZombie() ) {
 		std::cout << "Error opening output file" << std::endl;
 		exit(-1);

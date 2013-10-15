@@ -77,7 +77,7 @@ void AmpSumOfAmplitudes::addBW(std::shared_ptr<AmpAbsDynamicalFunction> theRes ,
    for(unsigned int i=0; i<_pdfList.size(); i++){
      double a = _intList[i]->getVal();
      double phi = _phaseList[i]->getVal();
-     RooComplex eiphi (cos(phi), sin(phi));
+     RooComplex eiphi (a*cos(phi),a*sin(phi));
 
      //std::cout << "a = \t" << a << std::endl;
      //std::cout << "phi = \t" << phi << std::endl;
@@ -85,8 +85,13 @@ void AmpSumOfAmplitudes::addBW(std::shared_ptr<AmpAbsDynamicalFunction> theRes ,
      //std::cout << "AD = \t" << _angList[i]->evaluate() << std::endl;
 
      RooComplex twoJplusOne(2*_pdfList[i]->getSpin()+1);
-     res = res + twoJplusOne * _pdfList[i]->evaluate() * a * eiphi * _angList[i]->evaluate();
+//     res = res + twoJplusOne * _pdfList[i]->evaluate() * a * eiphi * _angList[i]->evaluate();
+     res = res + twoJplusOne * _pdfList[i]->evaluate() * eiphi * _angList[i]->evaluate();
+
+//     std::cout<<_pdfList[i]->GetName()<<" "<<_pdfList[i]->evaluate() << " " <<eiphi<< " "<<_angList[i]->evaluate()<<std::endl;
    }
+//   std::cout<<"=="<<res<<std::endl;
+//   std::cout<<"=="<<res.abs2()<<std::endl;
 
    //std::cout << "res final = \t" << res.abs2() << std::endl;
 

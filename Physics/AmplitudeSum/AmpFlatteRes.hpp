@@ -19,10 +19,11 @@
 #include "RooAbsArg.h"
 #include "RooRealProxy.h"
 #include "Physics/AmplitudeSum/AmpAbsDynamicalFunction.hpp"
+#include "Physics/AmplitudeSum/AmpKinematics.hpp"
 
 using namespace std;
 
-class AmpFlatteRes : public AmpAbsDynamicalFunction  {
+class AmpFlatteRes : public AmpAbsDynamicalFunction, public AmpKinematics {
 public:
 
   AmpFlatteRes(const char *name, const char *title,
@@ -37,22 +38,14 @@ public:
   AmpFlatteRes(const AmpFlatteRes&, const char*);
   AmpFlatteRes(const AmpFlatteRes&);
 
-
   virtual ~AmpFlatteRes();
 
-  double q0() const;
-  double q()  const;
-  double q0(double, double) const;
-  double q(double, double)  const;
-  double BLprime2() const;
-  double F(double) const;
-
-  void setDecayMasses(double, double);
   void setBarrierMass(double, double);
   
   double getSpin(){return _spin;};
   virtual void initialise();
   virtual RooComplex evaluate() const;
+  virtual double evaluateAngle() const {};
 
   // the following are needed by the RooAbsArg interface, but not yet 
   // implemented
@@ -74,18 +67,9 @@ public:
 
 protected:
   RooRealProxy _x;
-
-  RooRealProxy _m0;
-  RooRealProxy _resWidth;
-  RooRealProxy _d;
   RooRealProxy _par1;
   RooRealProxy _par2;
   unsigned int _subSys;
-  int _spin;
-
-  // masses of decay particles for this resonance
-  double _ma;
-  double _mb;
 
   // mass of particle which pair can be produced close to resonance
   double _mBarB;

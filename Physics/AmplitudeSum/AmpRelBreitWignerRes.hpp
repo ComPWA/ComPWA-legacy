@@ -19,8 +19,10 @@
 #include "RooAbsArg.h"
 #include "RooRealProxy.h"
 #include "Physics/AmplitudeSum/AmpAbsDynamicalFunction.hpp"
+#include "Physics/AmplitudeSum/AmpKinematics.hpp"
+#include "Physics/AmplitudeSum/AmpWigner.hpp"
 
-class AmpRelBreitWignerRes : public AmpAbsDynamicalFunction  {
+class AmpRelBreitWignerRes : public AmpAbsDynamicalFunction, public AmpKinematics {
 public:
 
   AmpRelBreitWignerRes(const char *name, const char *title,
@@ -28,7 +30,10 @@ public:
 		       RooAbsReal& _resMass, RooAbsReal& _resWidth,
 		       RooAbsReal& _q0,
 		       int _subsys,
-               Int_t resSpin) ;
+               Int_t resSpin,
+               Int_t m,
+               Int_t n,
+               ) ;
 
   AmpRelBreitWignerRes(const AmpRelBreitWignerRes&, const char*);
   AmpRelBreitWignerRes(const AmpRelBreitWignerRes&);
@@ -36,13 +41,7 @@ public:
 
   virtual ~AmpRelBreitWignerRes();
 
-  void setDecayMasses(double, double);
   double getSpin(){return _spin;};
-
-  double q0() const;
-  double q()  const;
-  double BLprime2() const;
-  double F(double) const;
   
   virtual void initialise();
   virtual RooComplex evaluate() const ;
@@ -67,18 +66,11 @@ public:
 
 protected:
   RooRealProxy _x;
-
-  RooRealProxy _m0;
   RooRealProxy _resWidth;
-  RooRealProxy _d;
   unsigned int _subSys;
-  int _spin;
+  AmpWigner _wignerD;
 
-  // masses of decay particles for this resonance
-  double _ma;
-  double _mb;
-
-
+  virtual double evaluateAngle() const {};
 private:
 
   //ClassDef(AmpRelBreitWignerRes,1) // Relativistic Breit-Wigner resonance model

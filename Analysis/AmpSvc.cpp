@@ -22,7 +22,6 @@
 using namespace std;
 
 int main(int argc, char **argv){
-//	std::cout.setstate(std::ios::failbit) ;
 	if(argc!=9&& argc!=6){
 		cout<<"Usage: get fcn value at m23 m13 -> "<<argv[0]<<" <modelFile> <M> <m1> <m2> <m3> <m23> <m13> <rndVal>"<<endl;
 		cout<<"Usage: get max value -> "<<argv[0]<<" <modelFile> <M> <m1> <m2> <m3>"<<endl;
@@ -48,10 +47,8 @@ int main(int argc, char **argv){
 	AmpSumIntensity testBW(M, 0.0, m1, m2, m3, ini);
 //	testBW.printAmps();
 	ParameterList par; testBW.fillStartParVec(par);
-	if(argc==6) {
-//		std::cout.clear() ;
+	if(argc==6)
 		cout<<"rEsUlT "<<testBW.getMaxVal()<<endl;
-	}
 	else{
 		std::vector<double> x;
 		x.push_back(m23);
