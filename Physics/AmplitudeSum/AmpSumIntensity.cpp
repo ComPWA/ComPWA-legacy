@@ -32,32 +32,40 @@
 #include "Physics/AmplitudeSum/AmpFlatteRes.hpp"
 #include "Physics/AmplitudeSum/AmpWigner.hpp"
 #include "Physics/AmplitudeSum/AmpSumOfAmplitudes.hpp"
-
 #include "Physics/AmplitudeSum/AmpSumIntensity.hpp"
 
 /// Default Constructor (0x0)
-AmpSumIntensity::AmpSumIntensity(const double inM, const double inBr, const double in1
-		,const double in2, const double in3, AmplitudeSetup ini)
-: M(inM), Br(inBr), m1(in1), m2(in2), m3(in3),PI(3.14159),
-  m23_sq_min((m2+m3)*(m2+m3)),
-  m23_sq_max((M-m1)*(M-m1)),
-  m13_sq_min((m1+m3)*(m1+m3)),
-  m13_sq_max((M-m2)*(M-m2)),
-  m12_sq_min((m1+m2)*(m1+m2)),
-  m12_sq_max((M-m3)*(M-m3)),
-  m23_min((m2+m3)), m23_max((M-m1)),
-  m13_min((m1+m3)), m13_max((M-m2)),
-  m12_min((m1+m2)), m12_max((M-m3)),
-  ma("ma", "mass", m23_min, m23_max),
-  mb("mb", "mass", m13_min, m13_max),
-  mc("mc", "mass", m12_min, m12_max),
-  totAmp("relBWsumAmplitude", "totAmp"){
+AmpSumIntensity::AmpSumIntensity(const DPKinematics kin, AmplitudeSetup ini) :
+_kin(kin),
+dpPoint(_kin),
+ma("ma", "mass", _kin.m23_min, _kin.m23_max),
+mb("mb", "mass", _kin.m13_min, _kin.m13_max),
+mc("mc", "mass", _kin.m12_min, _kin.m12_max),
+totAmp("relBWsumAmplitude", "totAmp"),
+ampSetup(ini)
+{
+	init();
+}
 
+AmpSumIntensity::AmpSumIntensity(const double inM, const double inBr, const double in1
+		,const double in2, const double in3, AmplitudeSetup ini) :
+				  _kin(inM, inBr, in1, in2, in3,"","",""),
+				  dpPoint(_kin),
+				  ma("ma", "mass", _kin.m23_min, _kin.m23_max),
+				  mb("mb", "mass", _kin.m13_min, _kin.m13_max),
+				  mc("mc", "mass", _kin.m12_min, _kin.m12_max),
+				  totAmp("relBWsumAmplitude", "totAmp"),
+				  ampSetup(ini)
+{
+
+	init();
+}
+
+void AmpSumIntensity::init(){
 	//AmpSumOfAmplitudes totAmp23("rbwAmp23", "totAmp");
 
-
 	//unsigned int numReso = ini.getResonances().size();
-	for(std::vector<Resonance>::iterator reso=ini.getResonances().begin(); reso!=ini.getResonances().end(); reso++){
+	for(std::vector<Resonance>::iterator reso=ampSetup.getResonances().begin(); reso!=ampSetup.getResonances().end(); reso++){
 		Resonance tmp = (*reso);
 		//setup RooVars
 		namer.push_back(tmp.m_name);
@@ -78,6 +86,7 @@ AmpSumIntensity::AmpSumIntensity(const double inM, const double inBr, const doub
 		 * SORT ORDER: internally particles are sort as M -> (m1 m2) m3, with m1 m2 forming the resonance and m3 is the
 		 * spectator hadron.
 		 */
+		int subSys = tmp.m_daugtherA + tmp.m_daugtherB;
 		const double* mass_first;//masses of decay products
 		const double* mass_third;
 		const double* mass_second;
@@ -85,44 +94,44 @@ AmpSumIntensity::AmpSumIntensity(const double inM, const double inBr, const doub
 		RooAbsReal* mass23;
 		RooAbsReal* mass13;
 		if((tmp.m_daugtherA==2 && tmp.m_daugtherB==3) ){
-			mass_first = &m2;
-			mass_second = &m3;
-			mass_third = &m1;
+			mass_first = &_kin.m2;
+			mass_second = &_kin.m3;
+			mass_third = &_kin.m1;
 			mass12 = &ma;
 			mass23 = &mb;
 			mass13 = &mc;
 		}else if((tmp.m_daugtherA==3 && tmp.m_daugtherB==2) ){
-			mass_first = &m3;
-			mass_second = &m2;
-			mass_third = &m1;
+			mass_first = &_kin.m3;
+			mass_second = &_kin.m2;
+			mass_third = &_kin.m1;
 			mass12 = &ma;
 			mass23 = &mb;
 			mass13 = &mc;
 		}else if( (tmp.m_daugtherA==1 && tmp.m_daugtherB==3) ){
-			mass_first = &m1;
-			mass_second = &m3;
-			mass_third = &m2;
+			mass_first = &_kin.m1;
+			mass_second = &_kin.m3;
+			mass_third = &_kin.m2;
 			mass12 = &mb;
 			mass23 = &ma;
 			mass13 = &mc;
 		}else if( (tmp.m_daugtherA==3 && tmp.m_daugtherB==1) ){
-			mass_first = &m3;
-			mass_second = &m1;
-			mass_third = &m2;
+			mass_first = &_kin.m3;
+			mass_second = &_kin.m1;
+			mass_third = &_kin.m2;
 			mass12 = &mb;
 			mass23 = &ma;
 			mass13 = &mc;
 		}else if( (tmp.m_daugtherA==1 && tmp.m_daugtherB==2) ){
-			mass_first = &m1;//BUG SOMEWHERE for the case 1,2 or 2,1
-			mass_second = &m2;
-			mass_third = &m3;
+			mass_first = &_kin.m1;//BUG SOMEWHERE for the case 1,2 or 2,1
+			mass_second = &_kin.m2;
+			mass_third = &_kin.m3;
 			mass12 = &mc;
 			mass23 = &ma;
 			mass13 = &mb;
 		}else if( (tmp.m_daugtherA==2 && tmp.m_daugtherB==1) ){
-			mass_first = &m2;
-			mass_second = &m1;
-			mass_third = &m3;
+			mass_first = &_kin.m2;
+			mass_second = &_kin.m1;
+			mass_third = &_kin.m3;
 			mass12 = &mc;
 			mass23 = &ma;
 			mass13 = &mb;
@@ -142,28 +151,28 @@ AmpSumIntensity::AmpSumIntensity(const double inM, const double inBr, const doub
 		//setup Dynamics and Angular Distribution
 		unsigned int last = mr.size()-1;
 		if(tmp.m_type=="relBW"){
+//			std::shared_ptr<AmpRelBreitWignerRes> tmpbw(new AmpRelBreitWignerRes(tmp.m_name.c_str(),
+//					tmp.m_name.c_str(), *point, *mr[last], *gr[last], *qr[last], 1, tmp.m_spin,tmp.m_m,tmp.m_n) );
 			std::shared_ptr<AmpRelBreitWignerRes> tmpbw(new AmpRelBreitWignerRes(tmp.m_name.c_str(),
-					tmp.m_name.c_str(), *mass12, *mr[last], *gr[last], *qr[last], 1, tmp.m_spin) );
-			tmpbw->setDecayMasses(*mass_first,*mass_second,*mass_third, M);
+					tmp.m_name.c_str(),*mass23, *mass12, *mr[last], *gr[last], *qr[last], 1, tmp.m_spin,tmp.m_m,tmp.m_n) );
+			tmpbw->setDecayMasses(*mass_first,*mass_second,*mass_third, _kin.M);
 			rbw.push_back(tmpbw);
-			std::shared_ptr<AmpWigner> tmpWigner(new AmpWigner(("a_{"+tmp.m_name+"}").c_str(), ("a_{"+tmp.m_name+"}").c_str(),
-					*mass13, *mass12, *mass23, *aj[last], *am[last], *an[last]) ) ;
-			tmpWigner->setDecayMasses(M, *mass_first, *mass_second , *mass_third);
-			angd.push_back( tmpWigner );
-			totAmp.addBW(rbw.at(last), rr.at(last), phir.at(last), angd.at(last));
-			//          totAmp.addBW(rbw.at(last), rr.at(last), phir.at(last));
+			//			std::shared_ptr<AmpWigner> tmpWigner(new AmpWigner(("a_{"+tmp.m_name+"}").c_str(), ("a_{"+tmp.m_name+"}").c_str(),
+			//					 *mass23,*mass12, tmp.m_spin, tmp.m_m, tmp.m_n)) ;
+			//			tmpWigner->setDecayMasses(M, *mass_first, *mass_second , *mass_third);
+			//			angd.push_back( tmpWigner );
+			totAmp.addBW(rbw.at(last), rr.at(last), phir.at(last));
 		}
 		else if(tmp.m_type=="flatte"){
 			std::shared_ptr<AmpFlatteRes> tmpbw(new AmpFlatteRes(tmp.m_name.c_str(),
-					tmp.m_name.c_str(), *mass12, *mr[last], *gr[last], *qr[last], *par1[last], *par2[last], 1, tmp.m_spin) );
-			tmpbw->setDecayMasses(*mass_first,*mass_second,*mass_third, M);
+					tmp.m_name.c_str(),*mass23, *mass12, *mr[last], *gr[last], *qr[last], *par1[last], *par2[last], 1, tmp.m_spin,tmp.m_m,tmp.m_n) );
+			tmpbw->setDecayMasses(*mass_first,*mass_second,*mass_third, _kin.M);
 			tmpbw->setBarrierMass(0.547853,0.1396);//a_0->eta pi hidden channel
 			rbw.push_back(tmpbw);
-			std::shared_ptr<AmpWigner> tmpWigner(new AmpWigner(("a_{"+tmp.m_name+"}").c_str(), ("a_{"+tmp.m_name+"}").c_str(),
-					*mass13, *mass12, *mass23, *aj[last], *am[last], *an[last]) ) ;
-			tmpWigner->setDecayMasses(M, *mass_first, *mass_second , *mass_third);
-			angd.push_back( tmpWigner );
-//			totAmp.addBW(rbw.at(last), rr.at(last), phir.at(last), angd.at(last));
+			//			std::shared_ptr<AmpWigner> tmpWigner(new AmpWigner(("a_{"+tmp.m_name+"}").c_str(), ("a_{"+tmp.m_name+"}").c_str(),
+			//					 *mass23,*mass12, tmp.m_spin, tmp.m_m, tmp.m_n)) ;
+			//			tmpWigner->setDecayMasses(M, *mass_first, *mass_second , *mass_third);
+			//			angd.push_back( tmpWigner );
 			totAmp.addBW(rbw.at(last), rr.at(last), phir.at(last));
 		}
 		else continue;
@@ -179,8 +188,8 @@ double AmpSumIntensity::getMaxVal(){
 	ParameterList parList;
 	//		parList.AddParameter(DoubleParameter((m23_max-m23_min)/2,m23_min,m23_max,0.001));//Start parameters
 	//		parList.AddParameter(DoubleParameter((m13_max-m13_max)/2,m13_min,m13_max,0.001));//fit is sensitive to start values
-	parList.AddParameter(DoubleParameter(1.1,m23_min,m23_max,0.001));//Start parameters
-	parList.AddParameter(DoubleParameter(1.2,m13_min,m13_max,0.001));//fit is sensitive to start values
+	parList.AddParameter(DoubleParameter(1.1,_kin.m23_min,_kin.m23_max,0.001));//Start parameters
+	parList.AddParameter(DoubleParameter(1.2,_kin.m13_min,_kin.m13_max,0.001));//fit is sensitive to start values
 	//		std::vector<double> eeee;
 	//		eeee.push_back(1.08);
 	//		eeee.push_back(1.23);
@@ -216,7 +225,7 @@ const double AmpSumIntensity::intensity(std::vector<double>& x, ParameterList& p
 	if(x.size()!=2) return 0;
 
 	ma.setVal(x[0]); mb.setVal(x[1]); //mc.setVal(x[2]);
-	mc.setVal(M*M+m1*m1+m2*m2+m3*m3-x[0]*x[0]-x[1]*x[1]);
+	mc.setVal(_kin.M*_kin.M+_kin.m1*_kin.m1+_kin.m2*_kin.m2+_kin.m3*_kin.m3-x[0]*x[0]-x[1]*x[1]);
 	//    if( par.GetNDouble()>rr.size() ){
 	//        std::cout << "Error: Parameterlist doesn't match model!!" << std::endl; //TODO: exception
 	//      return 0;
@@ -228,7 +237,7 @@ const double AmpSumIntensity::intensity(std::vector<double>& x, ParameterList& p
 		phir[i]->setVal(par.GetDoubleParameter(nAmps+i).GetValue());//fixed
 	}
 
-//	std::cout<<" -- "<<x[0]<<" "<<x[1]<<std::endl;
+	//	std::cout<<" -- "<<x[0]<<" "<<x[1]<<std::endl;
 	double AMPpdf = totAmp.evaluate();
 
 	if(AMPpdf!=AMPpdf){

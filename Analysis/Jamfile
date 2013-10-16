@@ -45,6 +45,7 @@ exe gendalitzApp :
         GenDalitzApp.cpp 
         Analysis
         $(TOP)/Core//ComPWA
+        $(TOP)/Physics/DPKinematics//DPKinematics
         $(TOP)/Physics/AmplitudeSum//AmplitudeSum  
         $(TOP)/DataReader/RootReader
         $(TOP)/Estimator/MinLogLH//MinLogLH 

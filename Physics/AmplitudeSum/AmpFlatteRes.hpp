@@ -20,6 +20,7 @@
 #include "RooRealProxy.h"
 #include "Physics/AmplitudeSum/AmpAbsDynamicalFunction.hpp"
 #include "Physics/AmplitudeSum/AmpKinematics.hpp"
+#include "Physics/AmplitudeSum/AmpWigner.hpp"
 
 using namespace std;
 
@@ -27,13 +28,16 @@ class AmpFlatteRes : public AmpAbsDynamicalFunction, public AmpKinematics {
 public:
 
   AmpFlatteRes(const char *name, const char *title,
-		       RooAbsReal& _x, ///  mass at which to evaluate RBW
+		       RooAbsReal& _x13, ///  mass at which to evaluate RBW
+		       RooAbsReal& _x23, ///  mass at which to evaluate RBW
 		       RooAbsReal& _resMass, RooAbsReal& _resWidth,
 		       RooAbsReal& _q0,
 		       RooAbsReal& par1,
 		       RooAbsReal& par2,
 		       int _subsys,
-                       Int_t resSpin) ; 
+                       Int_t resSpin,
+                       Int_t m,
+                       Int_t n) ;
 
   AmpFlatteRes(const AmpFlatteRes&, const char*);
   AmpFlatteRes(const AmpFlatteRes&);
@@ -42,10 +46,13 @@ public:
 
   void setBarrierMass(double, double);
   
-  double getSpin(){return _spin;};
   virtual void initialise();
   virtual RooComplex evaluate() const;
-  virtual double evaluateAngle() const {};
+  virtual double evaluate(double x[],int dim, void * param) const {return 0;};//used for MC integration
+  void setDecayMasses(double, double, double, double);
+//  double getMaximum() const{return 1;};
+  double integral() const {return 1;};
+	double getSpin() {return _spin;}; //needs to be declared in AmpAbsDynamicalFunction
 
   // the following are needed by the RooAbsArg interface, but not yet 
   // implemented
@@ -66,11 +73,14 @@ public:
   inline virtual bool isSubSys(const unsigned int subSys)const{return (subSys==_subSys);};
 
 protected:
-  RooRealProxy _x;
+  RooRealProxy _x13;
+  RooRealProxy _x23;
   RooRealProxy _par1;
   RooRealProxy _par2;
   unsigned int _subSys;
+  AmpWigner _wignerD;
 
+//  virtual double evaluateAngle() const {};
   // mass of particle which pair can be produced close to resonance
   double _mBarB;
   double _mBarA;

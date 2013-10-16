@@ -54,12 +54,13 @@ private:
     std::vector<Resonance> m_resonances;          // resonances
 public:
     AmplitudeSetup(const std::string &filename){load(filename);};
+    AmplitudeSetup(const AmplitudeSetup& other) : m_file(other.m_file), m_resonances(other.m_resonances) {};
     void load(const std::string &filename);
     void save(const std::string &filename);
     ~AmplitudeSetup(){};
 
     inline const std::string & getFileName() const {return m_file;};
-    inline std::vector<Resonance> & getResonances() {return m_resonances;};
+    inline std::vector<Resonance> & getResonances() { return m_resonances; };
 };
 
 // Loads amplitude_setup structure from the specified XML file

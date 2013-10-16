@@ -1,4 +1,4 @@
-########### AmplitudeSum lib #############
+########### DPKinematics lib #############
 import os ;
 
 local BOOST_BUILD_PATH = [ os.environ BOOST_BUILD_PATH ] ;
@@ -17,27 +17,15 @@ ROOTLIBS = [ MATCH "(.*)[\n]" : $(rlibs) ] ;
 
 project :
 	requirements
-        <include>$(TOP)/external/qft++/include
         <include>$(ROOTINC)
-        <include>$(QFTINC)
-	    <include>$(BOOST_BUILD_PATH)/include
-	    <include>$(MINUIT2)/include
 	<linkflags>$(ROOTLIBS)
-	<linkflags>-lEG
 	<linkflags>-lRooFit
 	<linkflags>-lRooFitCore
-	<linkflags>-L$(QFT)/lib
-	<linkflags>-lqft++
-	<linkflags>$(BOOSTLIBS)
 	;
 
-lib AmplitudeSum : 
-        [ glob *.cpp : *Test.cpp ] 
-        $(TOP)/Core//ComPWA
-        $(TOP)/Estimator/MinLogLH//MinLogLH 
-        $(TOP)/Optimizer/Minuit2//Minuit2IF
-        $(PHYSICS)/DPKinematics//DPKinematics
-        #: <link>static 
-;
+lib DPKinematics : 
+        [ glob *.cpp ] 
+        $(TOP)/Core//ComPWA 
+		;
 
-install dist : AmplitudeSum : <location>$(TOP)/lib ;
+install dist : DPKinematics : <location>$(TOP)/lib ;

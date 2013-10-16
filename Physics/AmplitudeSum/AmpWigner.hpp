@@ -21,9 +21,8 @@ public:
   AmpWigner();
 
   AmpWigner(const char *name, const char *title,
-		       RooAbsReal& _m12, RooAbsReal& _m23, RooAbsReal& _m13,
-		       RooAbsReal& _inSpin, RooAbsReal& _outSpin1,
-		       RooAbsReal& _outSpin2) ; 
+		       RooAbsReal& _m13, RooAbsReal& _m23,
+		       UInt_t spin, UInt_t m, UInt_t n) ;
 
   AmpWigner(const AmpWigner&, const char*);
 
@@ -51,14 +50,13 @@ public:
   virtual Bool_t isIdentical(const RooAbsArg&, Bool_t);
 
 protected:
-  RooRealProxy _m12; //m12
   RooRealProxy _m23; //m23
   RooRealProxy _m13; //m13
 
 
-  RooRealProxy _inSpin; 
-  RooRealProxy _outSpin1;
-  RooRealProxy _outSpin2;
+  UInt_t _inSpin;
+  UInt_t _outSpin1;
+  UInt_t _outSpin2;
 
   Double_t _M;
   Double_t _m1;

@@ -63,12 +63,14 @@ int main(int argc, char **argv){
 	unsigned int i=0, mc=0;
 	TRandom3 rando;
 
+	DPKinematics kin(M,Br,m1,m2,m3,"KS_0","K-","K+");
 	std::string outFile="gen-out.root";
 	//load resonances
 	AmplitudeSetup ini("Analysis/DKsKKRes.xml");
 	cout << "loaded file " << ini.getFileName() << " with " << ini.getResonances().size() << " resonances!" << std::endl;
 	//Simple Breit-Wigner Physics-Module setup
 	AmpSumIntensity testBW(M, Br, m1, m2, m3, ini);
+//	AmpSumIntensity testBW(kin, ini);
 	testBW.printAmps();
 	double maxFcnVal = testBW.getMaxVal();
 	ParameterList minPar;

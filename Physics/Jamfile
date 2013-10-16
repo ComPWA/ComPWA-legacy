@@ -1,13 +1,16 @@
 ########### Physics Jamfile #############
+import os ;
 path-constant PHYSICS : . ;
 
 # libPhysics.so will consist of these packages:
+build-project DPKinematics ;
 build-project AmplitudeSum ;
 build-project BreitWigner ;
 
 # Build libPhysics.so
 lib Physics : 
         [ glob *.cpp ]
+        $(PHYSICS)/DPKinematics//DPKinematics
         $(PHYSICS)/AmplitudeSum//AmplitudeSum
         $(PHYSICS)/BreitWigner//BreitWigner
         #: <link>static 

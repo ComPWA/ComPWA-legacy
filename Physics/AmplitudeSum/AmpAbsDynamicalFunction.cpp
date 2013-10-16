@@ -1,5 +1,7 @@
 #include "RooAbsArg.h"
 #include "Physics/AmplitudeSum/AmpAbsDynamicalFunction.hpp"
+#include <iostream>
+#include <TRandom.h>
 
 AmpAbsDynamicalFunction::AmpAbsDynamicalFunction(const char *name, const char *title) :
   RooAbsArg (name, title) 
@@ -21,3 +23,4 @@ TObject* AmpAbsDynamicalFunction::clone(const char *newname)  const
 {
   return 0;
 }
+

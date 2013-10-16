@@ -37,7 +37,9 @@ public:
 
   virtual void initialise();
   virtual RooComplex evaluate()const;
-  virtual double evaluateAngle() const {};
+  virtual double evaluate(double x[],int dim, void * param) const {return 0;};//used for MC integration
+  double getMaximum() const {return 1;};
+  double integral() const {return 1;};
 
   double getSpin(){return 0;};
   // the following are needed by the RooAbsArg interface, but not yet 
@@ -67,6 +69,7 @@ protected:
   unsigned int _subSys;
 
 
+//  virtual double evaluateAngle() const {};
 private:
 
   //ClassDef(AmpGausRes,1) // Relativistic Breit-Wigner resonance model
