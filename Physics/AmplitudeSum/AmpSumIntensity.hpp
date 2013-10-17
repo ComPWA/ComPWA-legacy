@@ -39,7 +39,7 @@
 #include "Physics/AmplitudeSum/AmpWigner.hpp"
 #include "Physics/AmplitudeSum/AmpSumOfAmplitudes.hpp"
 #include "Physics/DPKinematics/DPKinematics.hpp"
-#include "Physics/DPKinematics/DPpoint.hpp"
+#include "Physics/DPKinematics/DataPoint.hpp"
 
 class AmpSumIntensity : public Amplitude {
 
@@ -88,7 +88,6 @@ protected:
 	//	const Double_t m12_min;
 	//	const Double_t m12_max;
 
-	DPpoint dpPoint;
 	RooRealVar ma;
 	RooRealVar mb;
 	RooRealVar mc;

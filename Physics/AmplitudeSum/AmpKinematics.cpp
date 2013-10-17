@@ -5,6 +5,8 @@
  *      Author: weidenka
  */
 #include "Physics/AmplitudeSum/AmpKinematics.hpp"
+#include "Physics/DPKinematics/DPKinematics.hpp"
+#include "Physics/DPKinematics/DataPoint.hpp"
 
 AmpKinematics::AmpKinematics(const AmpKinematics& other) :
 _ma(other._ma),
@@ -21,20 +23,34 @@ _motherRadius(other._motherRadius)
 {
 
 };
-AmpKinematics::AmpKinematics(double mR, int spin, int m, int n, barrierType type, double mesonRadius=1.5, double motherRadius=1.5) :
+AmpKinematics::AmpKinematics(double mR, int subSys, int spin, int m, int n, barrierType type, double mesonRadius=1.5, double motherRadius=1.5) :
 						_ma(-999), _mb(-999), _mc(-999), _M(-999),
-						_mR(mR),
+						_mR(mR),_subSys(subSys),
 						_type(type),
 						_spin(spin),_m(m),_n(n),
 						_mesonRadius(mesonRadius),
 						_motherRadius(motherRadius)
 {
+	static dataPoint* point = dataPoint::instance();
+	_M=point->DPKin.M;
+	if(_subSys==5){
+		_ma=point->DPKin.m3;
+		_mb=point->DPKin.m2;
+		_mc=point->DPKin.m1;}
+	if(_subSys==4){
+		_ma=point->DPKin.m2;
+		_mb=point->DPKin.m1;
+		_mc=point->DPKin.m3;}
+	if(_subSys==3){
+		_ma=point->DPKin.m2;
+		_mb=point->DPKin.m1;
+		_mc=point->DPKin.m3;}
+}
 
-};
-AmpKinematics::AmpKinematics(double ma, double mb , double mc, double M, double mR, barrierType type, int spin, int m, int n, double mesonR=1.5, double motherR=1.5) :
+AmpKinematics::AmpKinematics(double ma, double mb , double mc, double M, double mR, int subSys, barrierType type, int spin, int m, int n, double mesonR=1.5, double motherR=1.5) :
 						_ma(ma), _mb(mb), _mc(mc),
 						_M(M),
-						_mR(mR),
+						_mR(mR),_subSys(subSys),
 						_type(type),
 						_spin(spin),_m(m),_n(n),
 						_mesonRadius(mesonR),

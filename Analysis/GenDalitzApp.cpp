@@ -39,6 +39,8 @@
 #include "RooRealVar.h"
 #include "RooConstVar.h"
 #include "Analysis/PlotData.hpp"
+#include "Physics/DPKinematics/DPKinematics.hpp"
+#include "Physics/DPKinematics/DataPoint.hpp"
 
 using namespace std;
 
@@ -64,6 +66,8 @@ int main(int argc, char **argv){
 	TRandom3 rando;
 
 	DPKinematics kin(M,Br,m1,m2,m3,"KS_0","K-","K+");
+	static dataPoint* point = dataPoint::instance(kin);
+
 	std::string outFile="gen-out.root";
 	//load resonances
 	AmplitudeSetup ini("Analysis/DKsKKRes.xml");
@@ -72,7 +76,8 @@ int main(int argc, char **argv){
 	AmpSumIntensity testBW(M, Br, m1, m2, m3, ini);
 //	AmpSumIntensity testBW(kin, ini);
 	testBW.printAmps();
-	double maxFcnVal = testBW.getMaxVal();
+	double maxFcnVal = -999;
+//	double maxFcnVal = testBW.getMaxVal();
 	ParameterList minPar;
 	testBW.fillStartParVec(minPar);
 
@@ -115,6 +120,7 @@ int main(int argc, char **argv){
 		pPm12 = *p0 + *p1;
 
 		m23sq=pPm23.M2(); m13sq=pPm13.M2(); m12sq=pPm12.M2();
+		point->setMsq(3,m12sq); point->setMsq(4,m13sq); point->setMsq(5,m23sq);
 
 		if(m12sq<0)	m12sq=0.0001;
 
@@ -135,7 +141,7 @@ int main(int argc, char **argv){
 	cout << "Generating MC: ["<<MaxEvents<<" events] ";
 	do{
 		weight = event.Generate();
-
+//		cout<<"next event..."<<endl;
 		p0 = event.GetDecay(0);
 		p1    = event.GetDecay(1);
 		p2    = event.GetDecay(2);
@@ -145,6 +151,10 @@ int main(int argc, char **argv){
 		pPm12 = *p0 + *p1;
 
 		m23sq=pPm23.M2(); m13sq=pPm13.M2(); m12sq=pPm12.M2();
+//		cout<<"gen: "<<sqrt(m12sq)<<" "<<sqrt(m13sq)<<" "<<sqrt(m23sq)<<endl;
+		point->setMsq(3,m12sq); point->setMsq(4,m13sq); point->setMsq(5,m23sq);
+//		cout<<point->getMsq(3)<<" " <<point->getMsq(4)<< " " << point->getMsq(5)<<endl;
+//		cout<<sqrt(m12sq)<< " "<<sqrt(M*M+m1*m1+m2*m2+m3*m3-m23sq-m13sq)<<endl;
 
 		if(m12sq<0)	m12sq=0.0001;
 

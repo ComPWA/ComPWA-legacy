@@ -12,7 +12,6 @@
 #include "RooRealVar.h"
 
 AmpRelBreitWignerRes::AmpRelBreitWignerRes(const char *name, const char *title,
-		DPpoint& _point, //  mass at which to evaluate RBW
 		RooAbsReal& resMass, RooAbsReal& resWidth,
 		RooAbsReal& d, //  meson radius
 		int subSys,
@@ -21,15 +20,13 @@ AmpRelBreitWignerRes::AmpRelBreitWignerRes(const char *name, const char *title,
 		Int_t n
 		) :
 		AmpAbsDynamicalFunction(name,title),
-		AmpKinematics(resMass.getVal(), resSpin, m, n, AmpKinematics::barrierType(BWPrime), d.getVal(), 1.5),
-		_x13("x13", "Observable", this, 0),
-		_x23("x23", "Observable",this, 0),
+		AmpKinematics(resMass.getVal(), subSys, resSpin, m, n, AmpKinematics::barrierType(BWPrime), d.getVal(), 1.5),
+//		_x13("x13", "Observable", this, 0),
+//		_x23("x23", "Observable",this, 0),
 		_resWidth("resWidth", "Width", this, resWidth),
-		_subSys(subSys),
-//		_dpPoint=_point,
-		_wignerD(name, title, _point.getMspec(subSys), _point.getM(subSys), (UInt_t)resSpin, (UInt_t)m, (UInt_t)n)
+//		_subSys(subSys),
+		_wignerD(name, title, (UInt_t)resSpin, (UInt_t)m, (UInt_t)n, subSys)
 {
-//	_dpPoint=_point;
 	initialise();
 }
 AmpRelBreitWignerRes::AmpRelBreitWignerRes(const char *name, const char *title,
@@ -43,12 +40,12 @@ AmpRelBreitWignerRes::AmpRelBreitWignerRes(const char *name, const char *title,
 		Int_t n
 		) :
 		AmpAbsDynamicalFunction(name,title),
-		AmpKinematics(resMass.getVal(), resSpin, m, n, AmpKinematics::barrierType(BWPrime), d.getVal(), 1.5),
+		AmpKinematics(resMass.getVal(), subSys, resSpin, m, n, AmpKinematics::barrierType(BWPrime), d.getVal(), 1.5),
 		_x13("x13", "Observable", this, x13),
 		_x23("x23", "Observable",this, x23),
 		_resWidth("resWidth", "Width", this, resWidth),
-		_subSys(subSys),
-		_wignerD(name, title, x13, x23, (UInt_t)resSpin, (UInt_t)m, (UInt_t)n)
+//		_subSys(subSys),
+		_wignerD(name, title, x13, x23, (UInt_t)resSpin, (UInt_t)m, (UInt_t)n, subSys)
 {
 	initialise();
 }
@@ -60,7 +57,6 @@ AmpRelBreitWignerRes::AmpRelBreitWignerRes(const AmpRelBreitWignerRes& other, co
 		  _x13("x13", this, other._x13),
 		  _x23("x23", this, other._x23),
 		  _resWidth("resWidth", this, other._resWidth),
-		  _subSys(other._subSys),
 		  _wignerD(other._wignerD)
 {
 	initialise();
@@ -72,7 +68,6 @@ AmpRelBreitWignerRes::AmpRelBreitWignerRes(const AmpRelBreitWignerRes& other) :
 		  _x13("x13", this, other._x13),
 		  _x23("x23", this, other._x23),
 		  _resWidth("resWidth", this, other._resWidth),
-		  _subSys(other._subSys),
 		  _wignerD(other._wignerD)
 {
 	initialise();
@@ -96,16 +91,16 @@ RooComplex AmpRelBreitWignerRes::evaluate() const {
 		std::cout<<"Masses of decay products not set!"<<std::endl;
 		return 0;
 	}
-//	this->getMaximum();
 	RooComplex result;
-	double m  = Double_t(_x23);
+//	double m  = Double_t(_x23);
+	double m = dataPoint::instance()->getM(_subSys);
 	double spinTerm = _wignerD.evaluate();
 	double Gamma0 = double(_resWidth);
 	double GammaV = Gamma0 * pow(q(m) / q0(), 2.*_spin + 1.) * (_mR / m) * BLres2(m);
 
 	RooComplex denom = RooComplex(_mR*_mR - m*m, -_mR * GammaV);
 
-//	  result = RooComplex(_mR * Gamma0) / denom; //wrong!
+//	  result = RooComplex(spinTerm*_mR * Gamma0) / denom; //wrong!
 	//  result = RooComplex(spinTerm*BLprime2(m)) / denom;
 	result = RooComplex( spinTerm ) / denom; //Laura++ (old) definition - is this used in DKsKK analysis?
 //	result = RooComplex( spinTerm*sqrt(BLres2(m))*sqrt(BLmother2(m)) ) / denom; //Laura++ (new) definition
@@ -114,12 +109,12 @@ RooComplex AmpRelBreitWignerRes::evaluate() const {
 	if(result.im()!=result.im()) {std::cout << "IM part NAN" << std::endl; return 0;}
 	return result;
 }
-double AmpRelBreitWignerRes::evaluate(double x[], int dim, void * param) const {
-
-	if( !_dpPoint.DPKin.isWithinDP(x[0],x[1]) ) return 0;
-
-	return 1;
-}
+//double AmpRelBreitWignerRes::evaluate(double x[], int dim, void * param) const {
+//
+//	if( !_dpPoint.DPKin.isWithinDP(x[0],x[1]) ) return 0;
+//
+//	return 1;
+//}
 
 ////  implement stubs for virtual functions
 ////  to satisfy interface of RooAbsArg.

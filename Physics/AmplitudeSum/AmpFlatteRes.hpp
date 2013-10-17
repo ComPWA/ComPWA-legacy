@@ -48,7 +48,7 @@ public:
   
   virtual void initialise();
   virtual RooComplex evaluate() const;
-  virtual double evaluate(double x[],int dim, void * param) const {return 0;};//used for MC integration
+//  virtual double evaluate(double x[],int dim, void * param) const {return 0;};//used for MC integration
   void setDecayMasses(double, double, double, double);
 //  double getMaximum() const{return 1;};
   double integral() const {return 1;};
@@ -77,7 +77,7 @@ protected:
   RooRealProxy _x23;
   RooRealProxy _par1;
   RooRealProxy _par2;
-  unsigned int _subSys;
+//  unsigned int _subSys;
   AmpWigner _wignerD;
 
 //  virtual double evaluateAngle() const {};

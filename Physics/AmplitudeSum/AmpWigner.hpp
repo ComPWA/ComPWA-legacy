@@ -12,6 +12,8 @@
 
 #include "RooRealProxy.h"
 #include "RooAbsReal.h"
+#include "Physics/DPKinematics/DPKinematics.hpp"
+#include "Physics/DPKinematics/DataPoint.hpp"
 
 using namespace std;
 
@@ -19,10 +21,12 @@ class AmpWigner : public RooAbsArg {
 public:
 
   AmpWigner();
+  AmpWigner(const char *name, const char *title,
+		       UInt_t spin, UInt_t m, UInt_t n, UInt_t subSys) ;
 
   AmpWigner(const char *name, const char *title,
 		       RooAbsReal& _m13, RooAbsReal& _m23,
-		       UInt_t spin, UInt_t m, UInt_t n) ;
+		       UInt_t spin, UInt_t m, UInt_t n, UInt_t subSys) ;
 
   AmpWigner(const AmpWigner&, const char*);
 
@@ -57,6 +61,7 @@ protected:
   UInt_t _inSpin;
   UInt_t _outSpin1;
   UInt_t _outSpin2;
+  int _subSys;
 
   Double_t _M;
   Double_t _m1;

@@ -19,6 +19,8 @@
 #include "RooAbsArg.h"
 #include "RooRealProxy.h"
 #include "Physics/AmplitudeSum/AmpAbsDynamicalFunction.hpp"
+#include "Physics/DPKinematics/DPKinematics.hpp"
+#include "Physics/DPKinematics/DataPoint.hpp"
 
 using namespace std;
 

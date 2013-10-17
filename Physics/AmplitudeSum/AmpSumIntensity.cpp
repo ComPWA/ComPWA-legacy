@@ -37,7 +37,6 @@
 /// Default Constructor (0x0)
 AmpSumIntensity::AmpSumIntensity(const DPKinematics kin, AmplitudeSetup ini) :
 _kin(kin),
-dpPoint(_kin),
 ma("ma", "mass", _kin.m23_min, _kin.m23_max),
 mb("mb", "mass", _kin.m13_min, _kin.m13_max),
 mc("mc", "mass", _kin.m12_min, _kin.m12_max),
@@ -50,7 +49,6 @@ ampSetup(ini)
 AmpSumIntensity::AmpSumIntensity(const double inM, const double inBr, const double in1
 		,const double in2, const double in3, AmplitudeSetup ini) :
 				  _kin(inM, inBr, in1, in2, in3,"","",""),
-				  dpPoint(_kin),
 				  ma("ma", "mass", _kin.m23_min, _kin.m23_max),
 				  mb("mb", "mass", _kin.m13_min, _kin.m13_max),
 				  mc("mc", "mass", _kin.m12_min, _kin.m12_max),
@@ -153,9 +151,12 @@ void AmpSumIntensity::init(){
 		if(tmp.m_type=="relBW"){
 //			std::shared_ptr<AmpRelBreitWignerRes> tmpbw(new AmpRelBreitWignerRes(tmp.m_name.c_str(),
 //					tmp.m_name.c_str(), *point, *mr[last], *gr[last], *qr[last], 1, tmp.m_spin,tmp.m_m,tmp.m_n) );
+//			std::shared_ptr<AmpRelBreitWignerRes> tmpbw(new AmpRelBreitWignerRes(tmp.m_name.c_str(),
+//					tmp.m_name.c_str(),*mass23, *mass12, *mr[last], *gr[last], *qr[last], subSys, tmp.m_spin,tmp.m_m,tmp.m_n) );
 			std::shared_ptr<AmpRelBreitWignerRes> tmpbw(new AmpRelBreitWignerRes(tmp.m_name.c_str(),
-					tmp.m_name.c_str(),*mass23, *mass12, *mr[last], *gr[last], *qr[last], 1, tmp.m_spin,tmp.m_m,tmp.m_n) );
-			tmpbw->setDecayMasses(*mass_first,*mass_second,*mass_third, _kin.M);
+					tmp.m_name.c_str(),*mr[last], *gr[last], *qr[last], subSys, tmp.m_spin,tmp.m_m,tmp.m_n) );
+//			tmpbw->setDecayMasses(*mass_first,*mass_second,*mass_third, _kin.M);
+
 			rbw.push_back(tmpbw);
 			//			std::shared_ptr<AmpWigner> tmpWigner(new AmpWigner(("a_{"+tmp.m_name+"}").c_str(), ("a_{"+tmp.m_name+"}").c_str(),
 			//					 *mass23,*mass12, tmp.m_spin, tmp.m_m, tmp.m_n)) ;
@@ -165,7 +166,7 @@ void AmpSumIntensity::init(){
 		}
 		else if(tmp.m_type=="flatte"){
 			std::shared_ptr<AmpFlatteRes> tmpbw(new AmpFlatteRes(tmp.m_name.c_str(),
-					tmp.m_name.c_str(),*mass23, *mass12, *mr[last], *gr[last], *qr[last], *par1[last], *par2[last], 1, tmp.m_spin,tmp.m_m,tmp.m_n) );
+					tmp.m_name.c_str(),*mass23, *mass12, *mr[last], *gr[last], *qr[last], *par1[last], *par2[last], subSys, tmp.m_spin,tmp.m_m,tmp.m_n) );
 			tmpbw->setDecayMasses(*mass_first,*mass_second,*mass_third, _kin.M);
 			tmpbw->setBarrierMass(0.547853,0.1396);//a_0->eta pi hidden channel
 			rbw.push_back(tmpbw);
@@ -224,8 +225,10 @@ const double AmpSumIntensity::intensity(std::vector<double>& x, ParameterList& p
 	//TODO: check x exception
 	if(x.size()!=2) return 0;
 
+//	DPpoint2* point = DPpoint2::instance();
 	ma.setVal(x[0]); mb.setVal(x[1]); //mc.setVal(x[2]);
-	mc.setVal(_kin.M*_kin.M+_kin.m1*_kin.m1+_kin.m2*_kin.m2+_kin.m3*_kin.m3-x[0]*x[0]-x[1]*x[1]);
+	mc.setVal( sqrt(_kin.M*_kin.M + _kin.m1*_kin.m1 + _kin.m2*_kin.m2 + _kin.m3*_kin.m3 - x[0]*x[0] - x[1]*x[1]) );
+
 	//    if( par.GetNDouble()>rr.size() ){
 	//        std::cout << "Error: Parameterlist doesn't match model!!" << std::endl; //TODO: exception
 	//      return 0;

@@ -23,13 +23,12 @@ AmpFlatteRes::AmpFlatteRes(const char *name, const char *title,
 		Int_t m,
 		Int_t n) :
 		AmpAbsDynamicalFunction(name,title),
-		AmpKinematics(resMass.getVal(), resSpin, m, n, AmpKinematics::barrierType(BWPrime), d.getVal(), 1.5),
+		AmpKinematics(resMass.getVal(), subSys, resSpin, m, n, AmpKinematics::barrierType(BWPrime), d.getVal(), 1.5),
 		_x13("x13", "Observable", this, x13),
 		_x23("x23", "Observable", this, x23),
 		_par1("par1","par1",this,par1),
 		_par2("par2","par2",this,par2),
-		_subSys(subSys),
-		_wignerD(name, title, x13, x23, (UInt_t) resSpin,(UInt_t)  m,(UInt_t)  n)
+		_wignerD(name, title, x13, x23, (UInt_t) resSpin,(UInt_t)  m,(UInt_t)  n, subSys)
 {
 	initialise();
 }
@@ -42,7 +41,6 @@ AmpFlatteRes::AmpFlatteRes(const AmpFlatteRes& other, const char* newname) :
 		  _x23("x23", "Observable", this, other._x23),
 		  _par1("par1","par1",this,other._par1),
 		  _par2("par2","par2",this,other._par2),
-		  _subSys(other._subSys),
 		  _wignerD(other._wignerD)
 {
 	initialise();
@@ -55,7 +53,6 @@ AmpFlatteRes::AmpFlatteRes(const AmpFlatteRes& other) :
 		  _x23("x23", "Observable", this, other._x23),
 		  _par1("par1","par1",this,other._par1),
 		  _par2("par2","par2",this,other._par2),
-		  _subSys(other._subSys),
 		  _wignerD(other._wignerD)
 {
 	initialise();
@@ -85,7 +82,8 @@ RooComplex AmpFlatteRes::evaluate() const {
 		return 0;
 	}
 	//	double m0 = Double_t(_m0);
-	double m  = Double_t(_x23);
+	double m = dataPoint::instance()->getM(_subSys);
+//	double m  = Double_t(_x23);
 
 	double p1 = 2*q(m, _mBarA,_mBarB)/m;//break-up momenta hidden channel (e.g. a0->eta pi)
 	double p2 = 2*q(m, _ma,_mb)/m;//break-up momenta decay channel (e.g. a0->KK)

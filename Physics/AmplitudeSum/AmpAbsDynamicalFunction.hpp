@@ -11,8 +11,6 @@
 #include "TObject.h"
 #include "RooComplex.h"
 #include "RooAbsArg.h"
-#include "Physics/DPKinematics/DPKinematics.hpp"
-#include "Physics/DPKinematics/DPpoint.hpp"
 
 #include <vector>
 
@@ -26,7 +24,7 @@ public:
 
   virtual void initialise() = 0; 
   virtual RooComplex evaluate() const = 0;
-  virtual double evaluate(double x[],int dim, void * param) const = 0;//used for MC integration
+//  virtual double evaluate(double x[],int dim, void * param) const = 0;//used for MC integration
   virtual double getSpin() = 0;
   virtual bool isSubSys(const unsigned int) const = 0;
   virtual double integral() const = 0;

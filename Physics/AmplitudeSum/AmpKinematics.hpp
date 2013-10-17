@@ -14,8 +14,8 @@
 class AmpKinematics{
 public:
 	enum barrierType{BWPrime,BW,none};
-	AmpKinematics(double, int, int, int, barrierType, double, double);
-	AmpKinematics(double, double, double, double, double, barrierType, int, int, int, double, double);
+	AmpKinematics(double,int, int, int, int, barrierType, double, double);
+	AmpKinematics(double, double, double, double, double, int, barrierType, int, int, int, double, double);
 	AmpKinematics(const AmpKinematics& other);
 	~AmpKinematics(){};
 
@@ -47,6 +47,7 @@ protected:
 	int _spin;
 	int _m;
 	int _n;
+	int _subSys;
 	double _mesonRadius, _motherRadius;
 
 private:

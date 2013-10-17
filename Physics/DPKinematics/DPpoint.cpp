@@ -12,7 +12,9 @@
 DPpoint::DPpoint(DPKinematics kin) : DPKin(kin),
 m13("m13","inv. mass 1 3", DPKin.m13_min,DPKin.m13_min),
 m23("m23","inv. mass 2 3", DPKin.m23_min,DPKin.m23_min),
-m12("m23","inv. mass 2 3", DPKin.m12_min,DPKin.m12_min){};
+m12("m23","inv. mass 2 3", DPKin.m12_min,DPKin.m12_min)
+{
+};
 
 RooRealVar& DPpoint::getM(int subsys){
 	switch(subsys){

@@ -21,14 +21,11 @@
 #include "Physics/AmplitudeSum/AmpAbsDynamicalFunction.hpp"
 #include "Physics/AmplitudeSum/AmpKinematics.hpp"
 #include "Physics/AmplitudeSum/AmpWigner.hpp"
-#include "Physics/DPKinematics/DPKinematics.hpp"
-#include "Physics/DPKinematics/DPpoint.hpp"
 
 class AmpRelBreitWignerRes : public AmpAbsDynamicalFunction, public AmpKinematics {
 public:
 
   AmpRelBreitWignerRes(const char *name, const char *title,
-		       DPpoint& _point,
 		       RooAbsReal& _resMass, RooAbsReal& _resWidth,
 		       RooAbsReal& _radius,
 		       int _subsys,
@@ -54,7 +51,7 @@ public:
 
   virtual void initialise();
   virtual RooComplex evaluate() const ;
-  virtual double evaluate(double x[],int dim, void * param) const;//used for MC integration
+//  virtual double evaluate(double x[],int dim, void * param) const;//used for MC integration
   void setDecayMasses(double, double, double, double);
 //  double integral(ParameterList& par) const;
 //  double getMaximum() const{return 1;};
@@ -80,11 +77,10 @@ public:
   inline virtual bool isSubSys(const unsigned int subSys)const{return (subSys==_subSys);};
 
 protected:
-  DPpoint _dpPoint;
   RooRealProxy _x13;
   RooRealProxy _x23;
   RooRealProxy _resWidth;
-  unsigned int _subSys;
+//  unsigned int _subSys;
   AmpWigner _wignerD;
 
 //  virtual double evaluateAngle() const {};

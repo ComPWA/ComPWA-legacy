@@ -57,7 +57,8 @@ RooComplex AmpGausRes::evaluate() const {
 
 
   double m0 = Double_t(_m0);
-  double m  = Double_t(_x);
+//  double m  = Double_t(_x);
+	double m = dataPoint::instance()->getM(_subSys);
   
   RooComplex gaus = RooComplex(exp(-1*(m-m0)*(m-m0)/_resWidth/_resWidth/2.),0);
 
