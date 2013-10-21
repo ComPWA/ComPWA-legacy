@@ -54,6 +54,7 @@ public:
 	virtual const double integral(ParameterList& par);
 
 	virtual const double intensity(std::vector<double>& x, ParameterList& par);
+	virtual const double intensity(ParameterList& par);
 
 	virtual const bool fillStartParVec(ParameterList& outPar);
 

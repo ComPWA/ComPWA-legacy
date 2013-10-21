@@ -71,7 +71,6 @@ AmpWigner::~AmpWigner()
 void AmpWigner::initialise() 
 {
 	static dataPoint* point = dataPoint::instance();
-//	cout<<"================== "<<point->DPKin.m3<<endl;
 	_M=point->DPKin.M;
 	if(_subSys==5){
 		_m1=point->DPKin.m1;
@@ -85,8 +84,9 @@ void AmpWigner::initialise()
 		_m1=point->DPKin.m3;
 		_m2=point->DPKin.m2;
 		_m3=point->DPKin.m1;}
-}    
+	cout<<_m1<< " "<<_m2<<" " <<_m3<<endl;
 
+}    
 void AmpWigner::setDecayMasses(double m1, double m2, double m3, double M){
 	_M=M; _m1=m3; _m2=m2; _m3=m1;
 	return;
@@ -172,7 +172,7 @@ double AmpWigner::evaluate() const {
 	if(_subSys==3) mod=4;
 	double invM2 = dataPoint::instance()->getM(mod);
 
-	dataPoint* point = dataPoint::instance();
+//	dataPoint* point = dataPoint::instance();
 	//	cout<<point->getM(3)<<" " <<point->getM(4)<< " " << point->getM(5)<<endl;
 	//	double locmin_sq2 = s2min(_m23*_m23,_M,_m1,_m2,_m3);
 	//	double locmax_sq2 = s2max(_m23*_m23,_M,_m1,_m2,_m3);

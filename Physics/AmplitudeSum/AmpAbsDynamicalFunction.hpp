@@ -13,6 +13,7 @@
 #include "RooAbsArg.h"
 
 #include <vector>
+#include <complex>
 
 class AmpAbsDynamicalFunction : public RooAbsArg  {
 public:
@@ -21,6 +22,7 @@ public:
   AmpAbsDynamicalFunction(const AmpAbsDynamicalFunction&, const char*);
 
   virtual ~AmpAbsDynamicalFunction();
+
 
   virtual void initialise() = 0; 
   virtual RooComplex evaluate() const = 0;

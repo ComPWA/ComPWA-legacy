@@ -51,6 +51,16 @@ exe gendalitzApp :
         $(TOP)/Optimizer/Minuit2//Minuit2IF
         $(TOP)/Physics/DPKinematics//DPKinematics
         : ;
+exe gendalitz2App : 
+        GenDalitz2App.cpp 
+        Analysis
+        $(TOP)/Core//ComPWA
+        $(TOP)/Physics/AmplitudeSum//AmplitudeSum  
+        $(TOP)/DataReader/RootReader
+        $(TOP)/Estimator/MinLogLH//MinLogLH 
+        $(TOP)/Optimizer/Minuit2//Minuit2IF
+        $(TOP)/Physics/DPKinematics//DPKinematics
+        : ;
 
 exe ampSvc : 
         AmpSvc.cpp 
@@ -73,5 +83,5 @@ exe dalitzfitApp :
 ;
 
 install dist : Analysis : <location>$(TOP)/lib ;
-install dist2 : dalitzfitApp gendalitzApp ampSvc : <location>$(TOP)/bin <threading>single ;
+install dist2 : dalitzfitApp gendalitzApp gendalitz2App ampSvc : <location>$(TOP)/bin <threading>single ;
 

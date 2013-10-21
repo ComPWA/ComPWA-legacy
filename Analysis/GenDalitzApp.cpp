@@ -44,7 +44,7 @@
 
 using namespace std;
 
-const unsigned int MaxEvents = 12000;
+const unsigned int MaxEvents = 1200;
 
 //constants
 const Double_t M = 1.86486; // GeV/c² (D0)
@@ -73,8 +73,9 @@ int main(int argc, char **argv){
 	AmplitudeSetup ini("Analysis/DKsKKRes.xml");
 	cout << "loaded file " << ini.getFileName() << " with " << ini.getResonances().size() << " resonances!" << std::endl;
 	//Simple Breit-Wigner Physics-Module setup
-	AmpSumIntensity testBW(M, Br, m1, m2, m3, ini);
-//	AmpSumIntensity testBW(kin, ini);
+	//AmpSumIntensity testBW(M, Br, m1, m2, m3, ini);
+    AmpSumIntensity testBW(kin, ini);
+
 	testBW.printAmps();
 	double maxFcnVal = -999;
 //	double maxFcnVal = testBW.getMaxVal();
@@ -127,7 +128,8 @@ int main(int argc, char **argv){
 		vector<double> x;
 		x.push_back(sqrt(m23sq));
 		x.push_back(sqrt(m13sq));
-		double AMPpdf = testBW.intensity(x, minPar);
+//		double AMPpdf = testBW.intensity(x, minPar);
+		double AMPpdf = testBW.intensity(minPar);
 
 		if(weight>maxWeight) maxWeight=weight;
 		if(weight<minWeight) minWeight=weight;
@@ -141,7 +143,6 @@ int main(int argc, char **argv){
 	cout << "Generating MC: ["<<MaxEvents<<" events] ";
 	do{
 		weight = event.Generate();
-//		cout<<"next event..."<<endl;
 		p0 = event.GetDecay(0);
 		p1    = event.GetDecay(1);
 		p2    = event.GetDecay(2);
@@ -151,10 +152,7 @@ int main(int argc, char **argv){
 		pPm12 = *p0 + *p1;
 
 		m23sq=pPm23.M2(); m13sq=pPm13.M2(); m12sq=pPm12.M2();
-//		cout<<"gen: "<<sqrt(m12sq)<<" "<<sqrt(m13sq)<<" "<<sqrt(m23sq)<<endl;
 		point->setMsq(3,m12sq); point->setMsq(4,m13sq); point->setMsq(5,m23sq);
-//		cout<<point->getMsq(3)<<" " <<point->getMsq(4)<< " " << point->getMsq(5)<<endl;
-//		cout<<sqrt(m12sq)<< " "<<sqrt(M*M+m1*m1+m2*m2+m3*m3-m23sq-m13sq)<<endl;
 
 		if(m12sq<0)	m12sq=0.0001;
 
@@ -163,16 +161,9 @@ int main(int argc, char **argv){
 		TParticle fparticleKplus(321,1,0,0,0,0,*p2,W);
 
 		//call physics module
-		vector<double> x;
-		x.push_back(sqrt(m23sq));
-		x.push_back(sqrt(m13sq));
-		//      x.push_back(sqrt(m12sq));//use only two parameters
-		double AMPpdf = testBW.intensity(x, minPar);
+		double AMPpdf = testBW.intensity(minPar);
 		double test = rando.Uniform(0,genMaxVal);
-		//      double test = rando.Uniform(0,maxFcnVal*1.2);
 
-		//      cout<<weight<<endl;
-		//      weight=1;
 		if(maxTest<(weight*AMPpdf))
 			maxTest=(weight*AMPpdf);
 //		if(i==12000) break;

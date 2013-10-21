@@ -26,6 +26,15 @@ using namespace std;
 
 class AmpFlatteRes : public AmpAbsDynamicalFunction, public AmpKinematics {
 public:
+  AmpFlatteRes(const char *name, const char *title,
+		       RooAbsReal& _resMass, RooAbsReal& _resWidth,
+		       RooAbsReal& _q0,
+		       RooAbsReal& par1,
+		       RooAbsReal& par2,
+		       int _subsys,
+                       Int_t resSpin,
+                       Int_t m,
+                       Int_t n) ;
 
   AmpFlatteRes(const char *name, const char *title,
 		       RooAbsReal& _x13, ///  mass at which to evaluate RBW

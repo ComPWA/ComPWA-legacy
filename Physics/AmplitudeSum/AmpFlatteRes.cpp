@@ -10,6 +10,24 @@
 #include <cmath>
 #include "Physics/AmplitudeSum/AmpFlatteRes.hpp"
 #include "RooRealVar.h"
+AmpFlatteRes::AmpFlatteRes(const char *name, const char *title,
+		RooAbsReal& resMass, RooAbsReal& resWidth,
+		RooAbsReal& d, ///  meson radius
+		RooAbsReal& par1,
+		RooAbsReal& par2,
+		int subSys, ///  meson radius
+		Int_t resSpin,
+		Int_t m,
+		Int_t n) :
+		AmpAbsDynamicalFunction(name,title),
+		AmpKinematics(resMass.getVal(), subSys, resSpin, m, n, AmpKinematics::barrierType(BWPrime), d.getVal(), 1.5),
+		_par1("par1","par1",this,par1),
+		_par2("par2","par2",this,par2),
+		_wignerD(name, title, (UInt_t) resSpin,(UInt_t)  m,(UInt_t)  n, subSys)
+{
+	initialise();
+}
+
 
 AmpFlatteRes::AmpFlatteRes(const char *name, const char *title,
 		RooAbsReal& x13, ///  mass at which to evaluate RBW
@@ -83,6 +101,7 @@ RooComplex AmpFlatteRes::evaluate() const {
 	}
 	//	double m0 = Double_t(_m0);
 	double m = dataPoint::instance()->getM(_subSys);
+	double spinTerm = _wignerD.evaluate();
 //	double m  = Double_t(_x23);
 
 	double p1 = 2*q(m, _mBarA,_mBarB)/m;//break-up momenta hidden channel (e.g. a0->eta pi)
@@ -93,7 +112,7 @@ RooComplex AmpFlatteRes::evaluate() const {
 	RooComplex denom = RooComplex(_mR*_mR - m*m, -p1*g1*g1-p2*g2*g2);
 
 	//	RooComplex result = (RooComplex(g2*g2,0) / denom); //use KK decay channel here
-	RooComplex result = (RooComplex(g2,0) / denom); //use KK decay channel here
+	RooComplex result = (RooComplex(spinTerm * g2,0) / denom); //use KK decay channel here
 
 	if(result.re()!=result.re()) {std::cout << "RE part NAN" << std::endl; return 0;}
 	if(result.im()!=result.im()) {std::cout << "IM part NAN" << std::endl; return 0;}

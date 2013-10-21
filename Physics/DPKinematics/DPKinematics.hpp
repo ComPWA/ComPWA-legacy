@@ -13,8 +13,9 @@ public:
 	void init();
 	DPKinematics(double _M, double _Br, double _m1, double _m2, double _m3, std::string _name1, std::string _name2, std::string _name3);
 	DPKinematics(const DPKinematics& other);
+	double getThirdVariable(double, double) const;
 	bool isWithinDP() const;
-	bool isWithinDP(double m23, double m13, double m12) const;
+	bool isWithinDP(double m23, double m13, double m12=0) const;
 
 	double lambda(double x, double y, double z)const;
 	Double_t s2min(Double_t s1, Double_t m0, Double_t m1, Double_t m2, Double_t m3)const;
