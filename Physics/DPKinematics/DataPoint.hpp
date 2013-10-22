@@ -6,8 +6,9 @@
  */
 #ifndef DPPOINT2_HPP_
 #define DPPOINT2_HPP_
-#include "RooRealVar.h"
 
+#include <cstdlib>
+#include <math.h>
 class DPKinematics;
 
 class dataPoint
@@ -48,9 +49,6 @@ public:
 	DPKinematics DPKin;
 
 protected:
-	//	RooRealVar m13;
-	//	RooRealVar m23;
-	//	RooRealVar m12;
 	double m13;
 	double m23;
 	double m12;

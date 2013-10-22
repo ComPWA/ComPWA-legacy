@@ -1,12 +1,12 @@
 /*
  * DPKinematics.cpp
+
  *
  *  Created on: Oct 16, 2013
  *      Author: weidenka
  */
 
 #include "Physics/DPKinematics/DPKinematics.hpp"
-#include "Physics/DPKinematics/DPpoint.hpp"
 #include "Physics/DPKinematics/dataPoint.hpp"
 
 void DPKinematics::init(){
@@ -45,15 +45,15 @@ bool DPKinematics::isWithinDP() const{
 
 bool DPKinematics::isWithinDP(double m23, double m13, double m12) const{
 	//mostly copied from Laura++
-	Double_t e3Cms23 = (m23*m23 - m2*m2 + m3*m3)/(2.0*m23); //energy of part3 in 23 rest frame
-	Double_t p3Cms23 = sqrt(-(m3*m3-e3Cms23*e3Cms23)); //momentum of part3 in 23 rest frame
-	Double_t e1Cms23 = (M*M - m23*m23 - m1*m1)/(2.0*m23); //energy of part1 in 23 rest frame
-	Double_t p1Cms23 = sqrt(-(m1*m1-e1Cms23*e1Cms23)); //momentum of part1 in 23 rest frame
+	double e3Cms23 = (m23*m23 - m2*m2 + m3*m3)/(2.0*m23); //energy of part3 in 23 rest frame
+	double p3Cms23 = sqrt(-(m3*m3-e3Cms23*e3Cms23)); //momentum of part3 in 23 rest frame
+	double e1Cms23 = (M*M - m23*m23 - m1*m1)/(2.0*m23); //energy of part1 in 23 rest frame
+	double p1Cms23 = sqrt(-(m1*m1-e1Cms23*e1Cms23)); //momentum of part1 in 23 rest frame
 
-	Double_t term = 2.0*e3Cms23*e1Cms23+ m1*m1 + m3*m3;
+	double term = 2.0*e3Cms23*e1Cms23+ m1*m1 + m3*m3;
 
-	Double_t _m13SqLocMin = term - 2.0*p3Cms23*p1Cms23;
-	Double_t _m13SqLocMax = term + 2.0*p3Cms23*p1Cms23;
+	double _m13SqLocMin = term - 2.0*p3Cms23*p1Cms23;
+	double _m13SqLocMax = term + 2.0*p3Cms23*p1Cms23;
 
 	if(m13*m13 >= _m13SqLocMin && m13*m13 <= _m13SqLocMax) return 1;
 	return 0;
@@ -63,62 +63,62 @@ double DPKinematics::lambda(double x, double y, double z)const{
 	return x*x+y*y+z*z-2.*x*y-2.*x*z-2.*y*z;
 }
 
-Double_t DPKinematics::s2min(Double_t s1, Double_t m0, Double_t m1, Double_t m2, Double_t m3)const
+double DPKinematics::s2min(double s1, double m0, double m1, double m2, double m3)const
 {
-	Double_t s      = m0*m0;
-	Double_t lamterm = sqrt( lambda(s1,s,m1*m1) ) * sqrt( lambda(s1, m2*m2, m3*m3) );
+	double s      = m0*m0;
+	double lamterm = sqrt( lambda(s1,s,m1*m1) ) * sqrt( lambda(s1, m2*m2, m3*m3) );
 
-	Double_t result  = m1*m1 + m3*m3 + ( (s-s1-m1*m1)*(s1-m2*m2+m3*m3) - lamterm )/(2.*s1);
+	double result  = m1*m1 + m3*m3 + ( (s-s1-m1*m1)*(s1-m2*m2+m3*m3) - lamterm )/(2.*s1);
 
 	return result;
 }
 
-Double_t DPKinematics::s2max(Double_t s1, Double_t m0, Double_t m1, Double_t m2, Double_t m3)const
+double DPKinematics::s2max(double s1, double m0, double m1, double m2, double m3)const
 {
-	Double_t s      = m0*m0;
-	Double_t lamterm = sqrt( lambda(s1,s,m1*m1) ) * sqrt( lambda(s1, m2*m2, m3*m3) );
+	double s      = m0*m0;
+	double lamterm = sqrt( lambda(s1,s,m1*m1) ) * sqrt( lambda(s1, m2*m2, m3*m3) );
 
-	Double_t result  = m1*m1 + m3*m3 + ( (s-s1-m1*m1)*(s1-m2*m2+m3*m3) + lamterm )/(2.*s1);
+	double result  = m1*m1 + m3*m3 + ( (s-s1-m1*m1)*(s1-m2*m2+m3*m3) + lamterm )/(2.*s1);
 
 	return result;
 }
 
-Double_t DPKinematics::s3min(Double_t s1, Double_t m0, Double_t m1, Double_t m2, Double_t m3)const
+double DPKinematics::s3min(double s1, double m0, double m1, double m2, double m3)const
 {
-	Double_t s      = m0*m0;
-	Double_t lamterm = sqrt( lambda(s1,s,m1*m1) ) * sqrt( lambda(s1, m3*m3, m1*m1) );
+	double s      = m0*m0;
+	double lamterm = sqrt( lambda(s1,s,m1*m1) ) * sqrt( lambda(s1, m3*m3, m1*m1) );
 
-	Double_t result  = m1*m1 + m2*m2 + ( (s-s1-m1*m1)*(s1-m1*m1+m2*m2) - lamterm )/(2.*s1);
+	double result  = m1*m1 + m2*m2 + ( (s-s1-m1*m1)*(s1-m1*m1+m2*m2) - lamterm )/(2.*s1);
 
 	return result;
 }
 
-Double_t DPKinematics::s3max(Double_t s1, Double_t m0, Double_t m1, Double_t m2, Double_t m3)const
+double DPKinematics::s3max(double s1, double m0, double m1, double m2, double m3)const
 {
-	Double_t s      = m0*m0;
-	Double_t lamterm = sqrt( lambda(s1,s,m1*m1) ) * sqrt( lambda(s1, m3*m3, m1*m1) );
+	double s      = m0*m0;
+	double lamterm = sqrt( lambda(s1,s,m1*m1) ) * sqrt( lambda(s1, m3*m3, m1*m1) );
 
-	Double_t result  = m1*m1 + m2*m2 + ( (s-s1-m1*m1)*(s1-m1*m1+m3*m3) + lamterm )/(2.*s1);
+	double result  = m1*m1 + m2*m2 + ( (s-s1-m1*m1)*(s1-m1*m1+m3*m3) + lamterm )/(2.*s1);
 
 	return result;
 }
 
-Double_t DPKinematics::s1min(Double_t s2, Double_t m0, Double_t m1, Double_t m2, Double_t m3)const
+double DPKinematics::s1min(double s2, double m0, double m1, double m2, double m3)const
 {
-	Double_t s      = m0*m0;
-	Double_t lamterm = sqrt( lambda(s2,s,m2*m2) ) * sqrt( lambda(s2, m3*m3, m1*m1) );
+	double s      = m0*m0;
+	double lamterm = sqrt( lambda(s2,s,m2*m2) ) * sqrt( lambda(s2, m3*m3, m1*m1) );
 
-	Double_t result  = m2*m2 + m3*m3 + ( (s-s2-m2*m2)*(s2-m1*m1+m3*m3) - lamterm )/(2.*s2);
+	double result  = m2*m2 + m3*m3 + ( (s-s2-m2*m2)*(s2-m1*m1+m3*m3) - lamterm )/(2.*s2);
 
 	return result;
 }
 
-Double_t DPKinematics::s1max(Double_t s2, Double_t m0, Double_t m1, Double_t m2, Double_t m3)const
+double DPKinematics::s1max(double s2, double m0, double m1, double m2, double m3)const
 {
-	Double_t s      = m0*m0;
-	Double_t lamterm = sqrt( lambda(s2,s,m2*m2) ) * sqrt( lambda(s2, m1*m1, m3*m3) );
+	double s      = m0*m0;
+	double lamterm = sqrt( lambda(s2,s,m2*m2) ) * sqrt( lambda(s2, m1*m1, m3*m3) );
 
-	Double_t result  = m2*m2 + m3*m3 + ( (s-s2-m2*m2)*(s2-m1*m1+m3*m3) + lamterm )/(2.*s2);
+	double result  = m2*m2 + m3*m3 + ( (s-s2-m2*m2)*(s2-m1*m1+m3*m3) + lamterm )/(2.*s2);
 
 	return result;
 }

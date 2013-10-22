@@ -35,9 +35,6 @@
 #include "Core/Parameter.hpp"
 #include "Core/ParameterList.hpp"
 
-#include "RooAbsReal.h"
-#include "RooRealVar.h"
-#include "RooConstVar.h"
 #include "Analysis/PlotData.hpp"
 #include "Physics/DPKinematics/DPKinematics.hpp"
 #include "Physics/DPKinematics/DataPoint.hpp"

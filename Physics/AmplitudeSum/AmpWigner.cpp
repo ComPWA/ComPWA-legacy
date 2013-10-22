@@ -9,21 +9,15 @@
 
 #include <cmath>
 #include "Physics/AmplitudeSum/AmpWigner.hpp"
-#include "RooAbsReal.h"
-#include "RooRealVar.h"
 
 #include "qft++.h"
 
-AmpWigner::AmpWigner():
-RooAbsArg("none","")
+AmpWigner::AmpWigner()
 {
 	toEvaluate=false;
 }
-AmpWigner::AmpWigner(const char *name, const char *title,
-		UInt_t spin, UInt_t m,  UInt_t n,UInt_t subSys) :
-						  RooAbsArg(name,title),
-						  //				  _m13("m13", "Observable", 0.0),
-						  //				  _m23("m23", "Observable", 0.0),
+AmpWigner::AmpWigner(const char *name,
+		unsigned int spin, unsigned int m,  unsigned int n,unsigned int subSys) :
 						  _inSpin(spin),
 						  _outSpin1(m),
 						  _outSpin2(n),
@@ -32,29 +26,8 @@ AmpWigner::AmpWigner(const char *name, const char *title,
 	toEvaluate=true;
 	initialise();
 }
-
-
-AmpWigner::AmpWigner(const char *name, const char *title,
-		RooAbsReal& m13, ///
-		RooAbsReal& m23, ///
-		UInt_t spin, UInt_t m,  UInt_t n,UInt_t subSys) :
-						  RooAbsArg(name,title),
-						  _m13("m13", "Observable", this, m13),
-						  _m23("m23", "Observable", this, m23),
-						  _inSpin(spin),
-						  _outSpin1(m),
-						  _outSpin2(n),
-						  _subSys(subSys)
-{
-	toEvaluate=true;
-	initialise();
-}
-
 
 AmpWigner::AmpWigner(const AmpWigner& other, const char* newname) :
-						  RooAbsArg(other, newname),
-						  _m13("m13", "Observable", this, other._m13),
-						  _m23("m23", "Observable", this, other._m23),
 						  _inSpin(other._inSpin),
 						  _outSpin1(other._outSpin1),
 						  _outSpin2(other._outSpin2),
@@ -90,70 +63,6 @@ void AmpWigner::initialise()
 void AmpWigner::setDecayMasses(double m1, double m2, double m3, double M){
 	_M=M; _m1=m3; _m2=m2; _m3=m1;
 	return;
-}
-
-double AmpWigner::lambda(double x, double y, double z)const{
-	return x*x+y*y+z*z-2.*x*y-2.*x*z-2.*y*z;
-}
-
-Double_t AmpWigner::s2min(Double_t s1, Double_t m0, Double_t m1, Double_t m2, Double_t m3)const
-{
-	Double_t s      = m0*m0;
-	Double_t lamterm = sqrt( lambda(s1,s,m1*m1) ) * sqrt( lambda(s1, m2*m2, m3*m3) );
-
-	Double_t result  = m1*m1 + m3*m3 + ( (s-s1-m1*m1)*(s1-m2*m2+m3*m3) - lamterm )/(2.*s1);
-
-	return result;
-}
-
-Double_t AmpWigner::s2max(Double_t s1, Double_t m0, Double_t m1, Double_t m2, Double_t m3)const
-{
-	Double_t s      = m0*m0;
-	Double_t lamterm = sqrt( lambda(s1,s,m1*m1) ) * sqrt( lambda(s1, m2*m2, m3*m3) );
-
-	Double_t result  = m1*m1 + m3*m3 + ( (s-s1-m1*m1)*(s1-m2*m2+m3*m3) + lamterm )/(2.*s1);
-
-	return result;
-}
-
-Double_t AmpWigner::s3min(Double_t s1, Double_t m0, Double_t m1, Double_t m2, Double_t m3)const
-{
-	Double_t s      = m0*m0;
-	Double_t lamterm = sqrt( lambda(s1,s,m1*m1) ) * sqrt( lambda(s1, m3*m3, m1*m1) );
-
-	Double_t result  = m1*m1 + m2*m2 + ( (s-s1-m1*m1)*(s1-m1*m1+m2*m2) - lamterm )/(2.*s1);
-
-	return result;
-}
-
-Double_t AmpWigner::s3max(Double_t s1, Double_t m0, Double_t m1, Double_t m2, Double_t m3)const
-{
-	Double_t s      = m0*m0;
-	Double_t lamterm = sqrt( lambda(s1,s,m1*m1) ) * sqrt( lambda(s1, m3*m3, m1*m1) );
-
-	Double_t result  = m1*m1 + m2*m2 + ( (s-s1-m1*m1)*(s1-m1*m1+m3*m3) + lamterm )/(2.*s1);
-
-	return result;
-}
-
-Double_t AmpWigner::s1min(Double_t s2, Double_t m0, Double_t m1, Double_t m2, Double_t m3)const
-{
-	Double_t s      = m0*m0;
-	Double_t lamterm = sqrt( lambda(s2,s,m2*m2) ) * sqrt( lambda(s2, m3*m3, m1*m1) );
-
-	Double_t result  = m2*m2 + m3*m3 + ( (s-s2-m2*m2)*(s2-m1*m1+m3*m3) - lamterm )/(2.*s2);
-
-	return result;
-}
-
-Double_t AmpWigner::s1max(Double_t s2, Double_t m0, Double_t m1, Double_t m2, Double_t m3)const
-{
-	Double_t s      = m0*m0;
-	Double_t lamterm = sqrt( lambda(s2,s,m2*m2) ) * sqrt( lambda(s2, m1*m1, m3*m3) );
-
-	Double_t result  = m2*m2 + m3*m3 + ( (s-s2-m2*m2)*(s2-m1*m1+m3*m3) + lamterm )/(2.*s2);
-
-	return result;
 }
 
 double AmpWigner::evaluate() const {
@@ -205,72 +114,67 @@ double AmpWigner::evaluate() const {
 	return result;
 }
 
-////  implement stubs for virtual functions
-////  to satisfy interface of RooAbsArg.
-////  not sure which ones are really needed.
 
-TObject*  AmpWigner::clone (const char *newname) const 
+double AmpWigner::lambda(double x, double y, double z)const{
+	return x*x+y*y+z*z-2.*x*y-2.*x*z-2.*y*z;
+}
+
+double AmpWigner::s2min(double s1, double m0, double m1, double m2, double m3)const
 {
-	//  std::cout << "Unimplemented AmpRelBreitWignerRes::clone called for " << this << endl
-	//	    << "This will crash the program! "
-	//	    << endl;
+	double s      = m0*m0;
+	double lamterm = sqrt( lambda(s1,s,m1*m1) ) * sqrt( lambda(s1, m2*m2, m3*m3) );
 
-	//  cout << __PRETTY_FUNCTION__ << "(" << ((newname)?newname:"(null)") << ")" << endl;
-	return new AmpWigner(*this, newname);
+	double result  = m1*m1 + m3*m3 + ( (s-s1-m1*m1)*(s1-m2*m2+m3*m3) - lamterm )/(2.*s1);
+
+	return result;
 }
 
-Bool_t AmpWigner::readFromStream(std::istream&, Bool_t, Bool_t) {
-	cout << __PRETTY_FUNCTION__ << endl;
-	return false;
+double AmpWigner::s2max(double s1, double m0, double m1, double m2, double m3)const
+{
+	double s      = m0*m0;
+	double lamterm = sqrt( lambda(s1,s,m1*m1) ) * sqrt( lambda(s1, m2*m2, m3*m3) );
+
+	double result  = m1*m1 + m3*m3 + ( (s-s1-m1*m1)*(s1-m2*m2+m3*m3) + lamterm )/(2.*s1);
+
+	return result;
 }
 
-void AmpWigner::writeToStream(std::ostream&, Bool_t) const {
-	cout << __PRETTY_FUNCTION__ << endl;
-	;
+double AmpWigner::s3min(double s1, double m0, double m1, double m2, double m3)const
+{
+	double s      = m0*m0;
+	double lamterm = sqrt( lambda(s1,s,m1*m1) ) * sqrt( lambda(s1, m3*m3, m1*m1) );
+
+	double result  = m1*m1 + m2*m2 + ( (s-s1-m1*m1)*(s1-m1*m1+m2*m2) - lamterm )/(2.*s1);
+
+	return result;
 }
 
-Bool_t AmpWigner::operator==(const RooAbsArg&) {
-	cout << __PRETTY_FUNCTION__ << endl;
-	return false;
+double AmpWigner::s3max(double s1, double m0, double m1, double m2, double m3)const
+{
+	double s      = m0*m0;
+	double lamterm = sqrt( lambda(s1,s,m1*m1) ) * sqrt( lambda(s1, m3*m3, m1*m1) );
+
+	double result  = m1*m1 + m2*m2 + ( (s-s1-m1*m1)*(s1-m1*m1+m3*m3) + lamterm )/(2.*s1);
+
+	return result;
 }
 
-void AmpWigner::syncCache(const RooArgSet*)  {
-	cout << __PRETTY_FUNCTION__ << endl;
-	;
+double AmpWigner::s1min(double s2, double m0, double m1, double m2, double m3)const
+{
+	double s      = m0*m0;
+	double lamterm = sqrt( lambda(s2,s,m2*m2) ) * sqrt( lambda(s2, m3*m3, m1*m1) );
+
+	double result  = m2*m2 + m3*m3 + ( (s-s2-m2*m2)*(s2-m1*m1+m3*m3) - lamterm )/(2.*s2);
+
+	return result;
 }
 
-void AmpWigner::copyCache(const RooAbsArg*, Bool_t, Bool_t) {
-	cout << __PRETTY_FUNCTION__ << endl;
-	;
-}
+double AmpWigner::s1max(double s2, double m0, double m1, double m2, double m3)const
+{
+	double s      = m0*m0;
+	double lamterm = sqrt( lambda(s2,s,m2*m2) ) * sqrt( lambda(s2, m1*m1, m3*m3) );
 
-void AmpWigner::attachToTree(TTree&, Int_t) {
-	cout << __PRETTY_FUNCTION__ << endl;
-	;
-}
+	double result  = m2*m2 + m3*m3 + ( (s-s2-m2*m2)*(s2-m1*m1+m3*m3) + lamterm )/(2.*s2);
 
-void AmpWigner::attachToVStore(RooVectorDataStore&) {
-	cout << __PRETTY_FUNCTION__ << endl;
-	;
-}
-
-void AmpWigner::setTreeBranchStatus(TTree&, Bool_t) {
-	cout << __PRETTY_FUNCTION__ << endl;
-	;
-}
-
-void AmpWigner::fillTreeBranch(TTree&) {
-	cout << __PRETTY_FUNCTION__ << endl;
-	;
-}
-RooAbsArg* AmpWigner::createFundamental(const char*) const {
-	std::cout << "Unimplemented " << __PRETTY_FUNCTION__ << " called for " << this << endl
-			<< "This might crash the program! "
-			<< endl;
-	return 0;
-}
-
-Bool_t AmpWigner::isIdentical(const RooAbsArg&, Bool_t){
-	cout << __PRETTY_FUNCTION__ << endl;
-	;
+	return result;
 }

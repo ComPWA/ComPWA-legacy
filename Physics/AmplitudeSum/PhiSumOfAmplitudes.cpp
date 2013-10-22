@@ -8,99 +8,85 @@
 
 #include <cmath> 
 
-#include "Riostream.h" 
-#include "TMath.h" 
+//#include "Riostream.h"
+//#include "TMath.h"
 
-#include "RooAbsReal.h" 
-#include "RooRealVar.h"
-#include "RooAbsCategory.h" 
-#include "RooLinkedListIter.h"
+//#include "RooAbsReal.h"
+//#include "RooRealVar.h"
+//#include "RooAbsCategory.h"
+//#include "RooLinkedListIter.h"
 
 #include "qft++.h"
 
 #include "Physics/AmplitudeSum/PhiSumOfAmplitudes.hpp"
 
-using namespace ROOT;
-
 //ClassImp(PhiSumOfAmplitudes)
 
- PhiSumOfAmplitudes::PhiSumOfAmplitudes(const char *name, const char *title) :
-   RooAbsPdf(name,title), 
-  _pdfList("!pdfs","List of PDFs",this),
-  _intList("!intensities","List of intensities",this),
-  _phaseList("!phases","List of phases",this),
-  _angList("!angdists","List of angular distributions",this)
+ PhiSumOfAmplitudes::PhiSumOfAmplitudes(const char *name) : _name(name)
  { 
-   _pdfIter = _pdfList.createIterator() ;
-   _intIter = _intList.createIterator() ;
-   _phaseIter = _phaseList.createIterator() ;
-   _angIter = _angList.createIterator() ;
+//   _pdfIter = _pdfList.createIterator() ;
+//   _intIter = _intList.createIterator() ;
+//   _phaseIter = _phaseList.createIterator() ;
+//   _angIter = _angList.createIterator() ;
  } 
 
 
  PhiSumOfAmplitudes::PhiSumOfAmplitudes(const PhiSumOfAmplitudes& other, const char* name) :  
-   RooAbsPdf(other,name), 
-   _pdfList("!pdfs",this,other._pdfList),
-   _intList("!intensities",this,other._intList),
-   _phaseList("!phases",this,other._phaseList),
-   _angList("!angdists",this,other._angList)
+						 _name(name),
+   _pdfList(other._pdfList),
+   _intList(other._intList),
+   _phaseList(other._phaseList),
+   _angList(other._angList)
  { 
-   _pdfIter = _pdfList.createIterator() ;
-   _intIter = _intList.createIterator() ;
-   _phaseIter = _phaseList.createIterator() ;
-   _angIter = _angList.createIterator() ;
+//   _pdfIter = _pdfList.createIterator() ;
+//   _intIter = _intList.createIterator() ;
+//   _phaseIter = _phaseList.createIterator() ;
+//   _angIter = _angList.createIterator() ;
  } 
-
-void PhiSumOfAmplitudes::addBW(AmpRelBreitWignerRes* theRes , RooRealVar &r, RooRealVar &phi, AmpWigner* theAng) {
-  _pdfList.add(*theRes);
-  _intList.add(r);
-  _phaseList.add(phi);
-  _angList.add(*theAng);
+void PhiSumOfAmplitudes::addBW(std::shared_ptr<AmpAbsDynamicalFunction> theRes , std::shared_ptr<DoubleParameter> r, std::shared_ptr<DoubleParameter> phi, std::shared_ptr<AmpWigner> theAng) {
+  _pdfList.push_back(theRes);
+  _intList.push_back(r);
+  _phaseList.push_back(phi);
+  _angList.push_back(theAng);
 }
 
-void PhiSumOfAmplitudes::addBW(AmpRelBreitWignerRes* theRes , RooRealVar &r, RooRealVar &phi) {
-  _pdfList.add(*theRes);
-  _intList.add(r);
-  _phaseList.add(phi);
-  /*RooRealVar beta("beta", "mass", 0.);
-  RooRealVar j ("j", "j", 0.);
-  RooRealVar m ("m", "m", 0.);
-  RooRealVar n ("n", "n", 0.) ; 
-  _angList.add(AmpWigner("none", "none", beta, j, m, n));*/
-  _angList.add(AmpWigner());
+void PhiSumOfAmplitudes::addBW(std::shared_ptr<AmpAbsDynamicalFunction> theRes , std::shared_ptr<DoubleParameter> r, std::shared_ptr<DoubleParameter> phi) {
+  _pdfList.push_back(theRes);
+  _intList.push_back(r);
+  _phaseList.push_back(phi);
+  _angList.push_back(std::shared_ptr<AmpWigner>(new AmpWigner()));
 }
 
-
-Double_t PhiSumOfAmplitudes::evaluate() const 
+double PhiSumOfAmplitudes::evaluate() const
  { 
    // ENTER EXPRESSION IN TERMS OF VARIABLE ARGUMENTS HERE 
-   RooComplex res;
+   std::complex<double> res(0,0);
 
-   AmpRelBreitWignerRes *pdf;
-   RooRealVar *theInt;
-   RooRealVar *thePhase;
-   AmpWigner *ang;
+//   AmpRelBreitWignerRes *pdf;
+//   RooRealVar *theInt;
+//   RooRealVar *thePhase;
+//   AmpWigner *ang;
 
-   _pdfIter->Reset();
-   _intIter->Reset();
-   _phaseIter->Reset();
-   _angIter->Reset();
+//   _pdfIter->Reset();
+//   _intIter->Reset();
+//   _phaseIter->Reset();
+//   _angIter->Reset();
 
    //   TIterator* _pdfIter = _pdfList.createIterator() ;
    //   AmpRelBreitWignerRes *pdf;
 
 
-   while((pdf      = (AmpRelBreitWignerRes*)_pdfIter->Next()) &&
-	 (theInt   = (RooRealVar*)_intIter->Next())        && 
-	 (thePhase = (RooRealVar*)_phaseIter->Next())      &&
-         (ang      = (AmpWigner*)_angIter->Next())  ) {
-     double a = theInt->getVal();
-     double phi = thePhase->getVal();
-     RooComplex eiphi (cos(phi), sin(phi));
+//   while((pdf      = (AmpRelBreitWignerRes*)_pdfIter->Next()) &&
+//	 (theInt   = (RooRealVar*)_intIter->Next())        &&
+//	 (thePhase = (RooRealVar*)_phaseIter->Next())      &&
+//         (ang      = (AmpWigner*)_angIter->Next())  ) {
+//     double a = theInt->getVal();
+//     double phi = thePhase->getVal();
+//     std::complex<double> eiphi(cos(phi), sin(phi));
+//
+//     res = res + pdf->evaluate() * a * eiphi * ang->evaluate();
+//   }
 
-     res = res + pdf->evaluate() * a * eiphi * ang->evaluate();
-   }
-
-   return fabs(3.1416+atan2(res.im(),res.re())); 
+   return fabs(3.1416+atan2(res.imag(),res.real()));
  } 
 

@@ -8,23 +8,6 @@
 #include <vector>
 #include <memory>
 
-#include "RooRealVar.h"
-#include "RooFormulaVar.h"
-#include "RooPlot.h"
-#include "RooCmdArg.h"
-#include "RooMsgService.h"
-#include "RooGlobalFunc.h"
-#include "RooCFunction1Binding.h"
-#include "RooGaussian.h"
-#include "RooAddPdf.h"
-#include "RooDataSet.h"
-#include "RooDataHist.h"
-#include "RooFitResult.h"
-#include "RooComplex.h"
-#include "RooAbsReal.h"
-#include "RooAbsArg.h"
-#include "RooRealProxy.h"
-
 #include "Physics/Amplitude.hpp"
 #include "Core/Parameter.hpp"
 #include "Core/ParameterList.hpp"
@@ -79,7 +62,7 @@ public:
       if(tmp.m_daugtherA==2 && tmp.m_daugtherB==3){
         std::shared_ptr<AmpRelBreitWignerRes> tmpbw(new AmpRelBreitWignerRes(tmp.m_name.c_str(),
             tmp.m_name.c_str(), ma, *mr[last], *gr[last], *qr[last], 1, tmp.m_spin) );
-        tmpbw->setDecayMasses(m2, m3);
+//        tmpbw->setDecayMasses(m2, m3);
         rbw.push_back(tmpbw);
         angd.push_back( std::shared_ptr<AmpWigner> (new AmpWigner(("a_{"+tmp.m_name+"}").c_str(), ("a_{"+tmp.m_name+"}").c_str(),
             mc, ma, mb, 1, *aj[last], *am[last], *an[last]) ) );
@@ -87,7 +70,7 @@ public:
       }else if(tmp.m_daugtherA==1 && tmp.m_daugtherB==3){
         std::shared_ptr<AmpRelBreitWignerRes> tmpbw(new AmpRelBreitWignerRes(tmp.m_name.c_str(),
             tmp.m_name.c_str(), mb, *mr[last], *gr[last], *qr[last], 2, tmp.m_spin) );
-        tmpbw->setDecayMasses(m1, m3);
+//        tmpbw->setDecayMasses(m1, m3);
         rbw.push_back(tmpbw);
         angd.push_back( std::shared_ptr<AmpWigner> (new AmpWigner(("a_{"+tmp.m_name+"}").c_str(), ("a_{"+tmp.m_name+"}").c_str(),
             mc, ma, mb, 2, *aj[last], *am[last], *an[last]) ) );
@@ -95,7 +78,7 @@ public:
       }else if(tmp.m_daugtherA==1 && tmp.m_daugtherB==2){
         std::shared_ptr<AmpRelBreitWignerRes> tmpbw(new AmpRelBreitWignerRes(tmp.m_name.c_str(),
             tmp.m_name.c_str(), mc, *mr[last], *gr[last], *qr[last], 3, tmp.m_spin) );
-        tmpbw->setDecayMasses(m1, m2);
+//        tmpbw->setDecayMasses(m1, m2);
         rbw.push_back(tmpbw);
         angd.push_back( std::shared_ptr<AmpWigner> (new AmpWigner(("a_{"+tmp.m_name+"}").c_str(), ("a_{"+tmp.m_name+"}").c_str(),
             mc, ma, mb, 3, *aj[last], *am[last], *an[last]) ) );

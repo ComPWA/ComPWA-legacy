@@ -229,6 +229,8 @@ public:
   virtual const std::string type(){
     return "double";
   }
+   //operator for convertion to double. Class can be used as a normal double variable in operations.
+  operator double() const{ return val_;};
 
 protected:
   std::string out_; /*!< Output string to print information */
@@ -501,6 +503,7 @@ public:
   virtual const std::string type(){
     return "integer";
   }
+  operator int() const { return val_; };
 
 protected:
   std::string out_; /*!< Output string to print information */

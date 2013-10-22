@@ -1,8 +1,7 @@
 #ifndef DPKINEMATICS_HPP_
 #define DPKINEMATICS_HPP_
 
-#include "RooAbsReal.h"
-
+#include <iostream>
 class DPpoint;
 class dataPoint;
 
@@ -18,18 +17,18 @@ public:
 	bool isWithinDP(double m23, double m13, double m12=0) const;
 
 	double lambda(double x, double y, double z)const;
-	Double_t s2min(Double_t s1, Double_t m0, Double_t m1, Double_t m2, Double_t m3)const;
-	Double_t s2max(Double_t s1, Double_t m0, Double_t m1, Double_t m2, Double_t m3)const;
-	Double_t s3min(Double_t s1, Double_t m0, Double_t m1, Double_t m2, Double_t m3)const;
-	Double_t s3max(Double_t s1, Double_t m0, Double_t m1, Double_t m2, Double_t m3)const;
-	Double_t s1min(Double_t s2, Double_t m0, Double_t m1, Double_t m2, Double_t m3)const;
-	Double_t s1max(Double_t s2, Double_t m0, Double_t m1, Double_t m2, Double_t m3)const;
-	Double_t s2min(Double_t s1)const { return s2min(s1,M,m1,m2,m3); };
-	Double_t s2max(Double_t s1)const { return s2max(s1,M,m1,m2,m3); };
-	Double_t s3min(Double_t s1)const { return s3min(s1,M,m1,m2,m3); };
-	Double_t s3max(Double_t s1)const { return s3max(s1,M,m1,m2,m3); };
-	Double_t s1min(Double_t s2)const { return s1min(s2,M,m1,m2,m3); };
-	Double_t s1max(Double_t s2)const { return s1max(s2,M,m1,m2,m3); };
+	double s2min(double s1, double m0, double m1, double m2, double m3)const;
+	double s2max(double s1, double m0, double m1, double m2, double m3)const;
+	double s3min(double s1, double m0, double m1, double m2, double m3)const;
+	double s3max(double s1, double m0, double m1, double m2, double m3)const;
+	double s1min(double s2, double m0, double m1, double m2, double m3)const;
+	double s1max(double s2, double m0, double m1, double m2, double m3)const;
+	double s2min(double s1)const { return s2min(s1,M,m1,m2,m3); };
+	double s2max(double s1)const { return s2max(s1,M,m1,m2,m3); };
+	double s3min(double s1)const { return s3min(s1,M,m1,m2,m3); };
+	double s3max(double s1)const { return s3max(s1,M,m1,m2,m3); };
+	double s1min(double s2)const { return s1min(s2,M,m1,m2,m3); };
+	double s1max(double s2)const { return s1max(s2,M,m1,m2,m3); };
 
 	double M;
 	double Br;

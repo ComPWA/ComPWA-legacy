@@ -9,9 +9,6 @@
 #include "Physics/DPKinematics/DataPoint.hpp"
 
 AmpKinematics::AmpKinematics(const AmpKinematics& other) :
-_ma(other._ma),
-_mb(other._mb),
-_mc(other._mc),
 _M(other._M),
 _mR(other._mR),
 _type(other._type),
@@ -23,9 +20,8 @@ _motherRadius(other._motherRadius)
 {
 
 };
-AmpKinematics::AmpKinematics(double mR, int subSys, int spin, int m, int n, barrierType type, double mesonRadius=1.5, double motherRadius=1.5) :
-						_ma(-999), _mb(-999), _mc(-999), _M(-999),
-						_mR(mR),_subSys(subSys),
+AmpKinematics::AmpKinematics(DoubleParameter mR, int subSys, int spin, int m, int n, barrierType type, double mesonRadius=1.5, double motherRadius=1.5) :
+						_M(-999), _mR(mR),_subSys(subSys),
 						_type(type),
 						_spin(spin),_m(m),_n(n),
 						_mesonRadius(mesonRadius),
@@ -47,9 +43,8 @@ AmpKinematics::AmpKinematics(double mR, int subSys, int spin, int m, int n, barr
 		_mc=point->DPKin.m3;}
 }
 
-AmpKinematics::AmpKinematics(double ma, double mb , double mc, double M, double mR, int subSys, barrierType type, int spin, int m, int n, double mesonR=1.5, double motherR=1.5) :
-						_ma(ma), _mb(mb), _mc(mc),
-						_M(M),
+AmpKinematics::AmpKinematics(double ma, double mb , double mc, double M, DoubleParameter mR, int subSys, barrierType type, int spin, int m, int n, double mesonR=1.5, double motherR=1.5) :
+						_ma(ma), _mb(mb), _mc(mc), _M(M),
 						_mR(mR),_subSys(subSys),
 						_type(type),
 						_spin(spin),_m(m),_n(n),
@@ -69,11 +64,13 @@ double AmpKinematics::q0(double ma, double mb) const {
 	double mapb = ma + mb;
 	double mamb = ma - mb;
 
-	if( (_mR*_mR - mapb*mapb) < 0 ) {
+	double mr = _mR.GetValue();
+
+	if( (mr*mr - mapb*mapb) < 0 ) {
 		std::cout<<"AmpKinematics: Trying to calculate break-up momentum below threshold!"<<std::endl;
 		return 0; //below threshold
 	}
-	return sqrt( (_mR*_mR - mapb*mapb) * (_mR*_mR - mamb*mamb)) / (2. * _mR );
+	return sqrt( (mr*mr - mapb*mapb) * (mr*mr - mamb*mamb)) / (2. * mr );
 }
 double AmpKinematics::q(double x, double ma, double mb) const {
 	double mapb = ma + mb;

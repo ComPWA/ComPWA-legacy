@@ -10,23 +10,19 @@
 
 #include <vector>
 
-#include "RooRealProxy.h"
-#include "RooAbsReal.h"
+//#include "RooRealProxy.h"
+//#include "RooAbsReal.h"
 #include "Physics/DPKinematics/DPKinematics.hpp"
 #include "Physics/DPKinematics/DataPoint.hpp"
 
 using namespace std;
 
-class AmpWigner : public RooAbsArg {
+class AmpWigner{
 public:
 
   AmpWigner();
-  AmpWigner(const char *name, const char *title,
-		       UInt_t spin, UInt_t m, UInt_t n, UInt_t subSys) ;
-
-  AmpWigner(const char *name, const char *title,
-		       RooAbsReal& _m13, RooAbsReal& _m23,
-		       UInt_t spin, UInt_t m, UInt_t n, UInt_t subSys) ;
+  AmpWigner(const char *name,
+		       unsigned int spin, unsigned int m, unsigned int n, unsigned int subSys) ;
 
   AmpWigner(const AmpWigner&, const char*);
 
@@ -37,49 +33,28 @@ public:
   virtual double evaluate() const;
   void setDecayMasses(double, double, double, double);
 
-  // the following are needed by the RooAbsArg interface, but not yet 
-  // implemented
-
-  virtual TObject*  clone (const char *newname) const ;
-  virtual Bool_t readFromStream(std::istream&, Bool_t, Bool_t);
-  virtual void writeToStream(std::ostream&, Bool_t) const;
-  virtual Bool_t operator==(const RooAbsArg&);
-  virtual void syncCache(const RooArgSet*);
-  virtual void copyCache(const RooAbsArg*, Bool_t, Bool_t);
-  virtual void attachToTree(TTree&, Int_t);
-  virtual void attachToVStore(RooVectorDataStore&);
-  virtual void setTreeBranchStatus(TTree&, Bool_t);
-  virtual void fillTreeBranch(TTree&);
-  virtual RooAbsArg* createFundamental(const char*) const ;
-  virtual Bool_t isIdentical(const RooAbsArg&, Bool_t);
-
 protected:
-  RooRealProxy _m23; //m23
-  RooRealProxy _m13; //m13
+  unsigned int _inSpin;
+  unsigned int _outSpin1;
+  unsigned int _outSpin2;
+  unsigned int _subSys;
 
-
-  UInt_t _inSpin;
-  UInt_t _outSpin1;
-  UInt_t _outSpin2;
-  int _subSys;
-
-  Double_t _M;
-  Double_t _m1;
-  Double_t _m2;
-  Double_t _m3;
+  double _M;
+  double _m1;
+  double _m2;
+  double _m3;
 
   bool toEvaluate;
 
   double lambda(double x, double y, double z)const;
-  Double_t s1max(Double_t, Double_t, Double_t, Double_t, Double_t)const;
-  Double_t s1min(Double_t, Double_t, Double_t, Double_t, Double_t)const;
-  Double_t s2max(Double_t, Double_t, Double_t, Double_t, Double_t)const;
-  Double_t s2min(Double_t, Double_t, Double_t, Double_t, Double_t)const;
-  Double_t s3max(Double_t, Double_t, Double_t, Double_t, Double_t)const;
-  Double_t s3min(Double_t, Double_t, Double_t, Double_t, Double_t)const;
+  double s1max(double, double, double, double, double)const;
+  double s1min(double, double, double, double, double)const;
+  double s2max(double, double, double, double, double)const;
+  double s2min(double, double, double, double, double)const;
+  double s3max(double, double, double, double, double)const;
+  double s3min(double, double, double, double, double)const;
 
 private:
-
   //ClassDef(AmpWigner,1) // Wigner_d angular distribution
 
 };
