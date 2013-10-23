@@ -78,7 +78,7 @@
        <width_min>0.</width_min>
        <width_max>2.</width_max>
        <strength>1.</strength>
-       <phase>0.</phase>
+       <phase>1.6</phase>
        <spin>2</spin>
        <m>0</m>
        <n>0</n>
@@ -87,11 +87,11 @@
     </resonance>
     <resonance>
        <name>omega</name>
-       <mass>1.</mass>
-       <mass_min>0.8</mass_min>
-       <mass_max>1.2</mass_max>
+       <mass>0.783</mass>
+       <mass_min>0.5</mass_min>
+       <mass_max>1.</mass_max>
        <breakup_mom>1.</breakup_mom>
-       <width>0.05</width>
+       <width>0.0085</width>
        <width_min>0.</width_min>
        <width_max>2.</width_max>
        <strength>1.</strength>
@@ -104,11 +104,11 @@
     </resonance>
     <resonance>
        <name>omega</name>
-       <mass>1.</mass>
-       <mass_min>0.8</mass_min>
-       <mass_max>1.2</mass_max>
+       <mass>0.783</mass>
+       <mass_min>0.5</mass_min>
+       <mass_max>1.</mass_max>
        <breakup_mom>1.</breakup_mom>
-       <width>0.05</width>
+       <width>0.0085</width>
        <width_min>0.</width_min>
        <width_max>2.</width_max>
        <strength>1.</strength>

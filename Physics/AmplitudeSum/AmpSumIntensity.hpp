@@ -1,3 +1,13 @@
+//-------------------------------------------------------------------------------
+// Copyright (c) 2013 Mathias Michel.
+// All rights reserved. This program and the accompanying materials
+// are made available under the terms of the GNU Public License v3.0
+// which accompanies this distribution, and is available at
+// http://www.gnu.org/licenses/gpl.html
+//
+// Contributors:
+//     Mathias Michel - initial API and implementation
+//-------------------------------------------------------------------------------
 //****************************************************************************
 // Wrapper to provide intensity of amplitude sum
 //****************************************************************************
@@ -146,14 +156,17 @@ public:
 
     ma.setVal(x[0]); mb.setVal(x[1]); mc.setVal(x[2]);
 
-    if( par.GetNDouble()>mr.size() ){
+    if( par.GetNDouble()>(rr.size()*2) ){
         std::cout << "Error: Parameterlist doesn't match model!! " << par.GetNDouble() << std::endl; //TODO: exception
       return 0;
     }
 
-    for(unsigned int i=0; i<mr.size(); i++){
-      mr[i]->setVal(par.GetDoubleParameter(i)->GetValue());
-      //phir[i]->setVal(par.GetDoubleParameter(2*i+1).GetValue());
+    for(unsigned int i=0; i<rr.size(); i++){
+      double im=par.GetDoubleParameter(2*i+1)->GetValue(), re=par.GetDoubleParameter(2*i)->GetValue();
+      if(!par.GetDoubleParameter(2*i)->IsFixed())
+        rr[i]->setVal(sqrt(re*re+im*im));
+      if(!par.GetDoubleParameter(2*i+1)->IsFixed())
+        phir[i]->setVal(atan2(im,re));
     }
     //rr[rr.size()-1]->setVal(par.GetDoubleParameter(2*(rr.size()-1)).GetValue());
 
@@ -176,9 +189,13 @@ public:
 
       //outPar.AddParameter(DoubleParameter(rr[i]->getVal()));
       if(rr[i]->hasError()) //TODO: check bounds
-        outPar.AddParameter(std::shared_ptr<DoubleParameter>(new DoubleParameter(mr[i]->GetName(),mr[i]->getVal(), mr[i]->getMin(), mr[i]->getMax(), mr[i]->getError())));
+        outPar.AddParameter(std::shared_ptr<DoubleParameter>(new DoubleParameter(rr[i]->GetName(),rr[i]->getVal()*cos(phir[i]->getVal()), rr[i]->getMin(), rr[i]->getMax(), rr[i]->getError())));
       else
-        outPar.AddParameter(std::shared_ptr<DoubleParameter>(new DoubleParameter(mr[i]->GetName(),mr[i]->getVal(), 0.1)));
+        outPar.AddParameter(std::shared_ptr<DoubleParameter>(new DoubleParameter(rr[i]->GetName(),rr[i]->getVal()*cos(phir[i]->getVal()), 0.1)));
+      if(phir[i]->hasError()) //TODO: check bounds
+        outPar.AddParameter(std::shared_ptr<DoubleParameter>(new DoubleParameter(phir[i]->GetName(),rr[i]->getVal()*sin(phir[i]->getVal()), phir[i]->getMin(), phir[i]->getMax(), phir[i]->getError())));
+      else
+        outPar.AddParameter(std::shared_ptr<DoubleParameter>(new DoubleParameter(phir[i]->GetName(),rr[i]->getVal()*sin(phir[i]->getVal()), 0.1)));
       //outPar.AddParameter(DoubleParameter(phir[i]->getVal(), phir[i]->getMin(), phir[i]->getMax(), phir[i]->getError()));
     }
     //outPar.AddParameter(DoubleParameter(rr[rr.size()-1]->getVal(), rr[rr.size()-1]->getMin(), rr[rr.size()-1]->getMax(), rr[rr.size()-1]->getError()));

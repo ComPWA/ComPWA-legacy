@@ -1,3 +1,13 @@
+//-------------------------------------------------------------------------------
+// Copyright (c) 2013 Mathias Michel.
+// All rights reserved. This program and the accompanying materials
+// are made available under the terms of the GNU Public License v3.0
+// which accompanies this distribution, and is available at
+// http://www.gnu.org/licenses/gpl.html
+//
+// Contributors:
+//     Mathias Michel - initial API and implementation
+//-------------------------------------------------------------------------------
 //! Test-Application for full fit with simple BW-dalitz-model.
 /*!
  * @file DalitzFitApp.cpp
@@ -57,6 +67,10 @@ const Double_t PI = 3.14159; // m/s
  * The main function.
  */
 int main(int argc, char **argv){
+  std::cout << "  ComPWA Copyright (C) 2013  Mathias Michel " << std::endl;
+  std::cout << "  This program comes with ABSOLUTELY NO WARRANTY; for details see license.txt" << std::endl;
+  std::cout << std::endl;
+
   bool useFctTree = false;
 
   std::string file="test/3Part-4vecs.root";
@@ -85,20 +99,23 @@ int main(int argc, char **argv){
     if(!amps->functionTree(test))
       return 1;
 
-  std::cout << "LH with optimal resonance peaks: " << esti->controlParameter(par) << std::endl;
+  std::cout << "LH with optimal parameters: " << esti->controlParameter(par) << std::endl;
+  double startInt[par.GetNDouble()], optiInt[par.GetNDouble()];
   for(unsigned int i=0; i<par.GetNDouble(); i++){
     std::shared_ptr<DoubleParameter> tmp = par.GetDoubleParameter(i);
-    if(i>1){
+    optiInt[i] = tmp->GetValue();
+    if(i<2 || i>5){ //omega's and f0 fixed
       tmp->FixParameter(true);
     }else{
-      tmp->SetValue(tmp->GetValue()*0.9);
+      tmp->SetValue(tmp->GetValue()/((i+1)*7));
       tmp->SetError(tmp->GetValue());
     }
+    startInt[i] = tmp->GetValue();
   }
-  std::cout << "LH with following resonance peaks: " << esti->controlParameter(par) << std::endl;
+  std::cout << "LH with following parameters: " << esti->controlParameter(par) << std::endl;
 
   for(unsigned int i=0; i<par.GetNDouble(); i++){
-      std::cout << "Parameter " << i << " = " << par.GetDoubleParameter(i)->GetValue() << std::endl;
+      std::cout << par.GetDoubleParameter(i)->GetName() << " = " << par.GetDoubleParameter(i)->GetValue() << std::endl;
   }
 
  // std::cout << "Fixing 5 of 7 parameters " << std::endl;
@@ -113,7 +130,9 @@ int main(int argc, char **argv){
   std::cout << "Optimierte intensitäten: " << esti->controlParameter(par) << std::endl;
 
   for(unsigned int i=0; i<par.GetNDouble(); i++){
-      std::cout << "Parameter " << i << " = " << par.GetDoubleParameter(i)->GetValue() << std::endl;
+      std::cout << par.GetDoubleParameter(i)->GetName() << " = " << par.GetDoubleParameter(i)->GetValue();
+      std::cout << "   [ start: " << startInt[i] << " ,";
+      std::cout << " optimal: " << optiInt[i] << " ]" << std::endl;
   }
 
   //Plot result
@@ -168,7 +187,7 @@ int main(int argc, char **argv){
   bw23FIT->GetYaxis()->SetTitle("#");
   bw23FIT->GetYaxis()->CenterTitle();
 
-  /*TH2D* bw12DIFF = new TH2D("bw12DIFF","inv. mass-sq of particles 1&2 FitResult",1000,0.,10.,1000,0.,10.);
+  TH2D* bw12DIFF = new TH2D("bw12DIFF","inv. mass-sq of particles 1&2 FitResult",1000,0.,10.,1000,0.,10.);
   bw12DIFF->GetXaxis()->SetTitle("m_{12}^{2} / GeV^{2}");
   bw12DIFF->GetXaxis()->CenterTitle();
   bw12DIFF->GetYaxis()->SetTitle("#");
@@ -182,7 +201,7 @@ int main(int argc, char **argv){
   bw23DIFF->GetXaxis()->SetTitle("m_{23}^{2} / GeV^{2}");
   bw23DIFF->GetXaxis()->CenterTitle();
   bw23DIFF->GetYaxis()->SetTitle("#");
-  bw23DIFF->GetYaxis()->CenterTitle();*/
+  bw23DIFF->GetYaxis()->CenterTitle();
 
   double masssq12, masssq13, masssq23;
   for(unsigned int i = 0; i < myReader->getNEvents(); i++){
@@ -205,9 +224,9 @@ int main(int argc, char **argv){
       bw23->Fill(masssq23,masssq12);
   }
 
-  TH2D* bw12DIFF = (TH2D*)bw12->Clone("bw12DIFF");
-  TH2D* bw13DIFF = (TH2D*)bw13->Clone("bw13DIFF");
-  TH2D* bw23DIFF = (TH2D*)bw23->Clone("bw23DIFF");
+ // TH2D* bw12DIFF = (TH2D*)bw12->Clone("bw12DIFF");
+ // TH2D* bw13DIFF = (TH2D*)bw13->Clone("bw13DIFF");
+ // TH2D* bw23DIFF = (TH2D*)bw23->Clone("bw23DIFF");
 
   for(unsigned int i = 0; i < maxEventsPHSP; i++){
       Event event(myReaderPHSP.getEvent(i));
@@ -297,18 +316,21 @@ int main(int argc, char **argv){
           i++;
 
           bw12FIT->Fill(m12sq,m13sq);
-          bw13FIT->Fill(m13sq,m23sq);
+          bw13FIT->Fill(m13sq,m12sq);
           bw23FIT->Fill(m23sq,m12sq);
         }
 
     }while(i<100000);
 
-  //bw12DIFF->Add(bw12FIT,-1.0);
- // bw23DIFF->Add(bw23FIT,-1.0);
- // bw13DIFF->Add(bw13FIT,-1.0);
-  bw12DIFF = new TH2D(*bw12 - *bw12FIT);
-  bw23DIFF = new TH2D(*bw23 - *bw23FIT);
-  bw13DIFF = new TH2D(*bw13 - *bw13FIT);
+  bw12DIFF->Add(bw12,1.0);
+  bw23DIFF->Add(bw23,1.0);
+  bw13DIFF->Add(bw13,1.0);
+  bw12DIFF->Divide(bw12FIT);
+  bw23DIFF->Divide(bw23FIT);
+  bw13DIFF->Divide(bw13FIT);
+ // bw12DIFF = new TH2D(*bw12 - *bw12FIT);
+ // bw23DIFF = new TH2D(*bw23 - *bw23FIT);
+ // bw13DIFF = new TH2D(*bw13 - *bw13FIT);
 
   TFile output("test/FitResultJPSI.root","RECREATE","ROOT_Tree");
   bw12->Write();

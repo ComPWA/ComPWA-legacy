@@ -1,3 +1,13 @@
+//-------------------------------------------------------------------------------
+// Copyright (c) 2013 Mathias Michel.
+// All rights reserved. This program and the accompanying materials
+// are made available under the terms of the GNU Public License v3.0
+// which accompanies this distribution, and is available at
+// http://www.gnu.org/licenses/gpl.html
+//
+// Contributors:
+//     Mathias Michel - initial API and implementation
+//-------------------------------------------------------------------------------
 #include <vector>
 #include <string>
 #include <sstream>
@@ -53,14 +63,14 @@ const double MinuitIF::exec(ParameterList& par){
   std::cout <<"start migrad "<< std::endl;
   //for(unsigned int i=0; i<par.GetNDouble(); i++)
  //   std::cout << upar.Parameter(i).Value() << " " << upar.Parameter(i).IsFixed() << std::endl;
-  FunctionMinimum minMin = migrad(100,0.00001);//TODO
+  FunctionMinimum minMin = migrad(200,0.001);//TODO
 
- if(!minMin.IsValid()) {
+ //if(!minMin.IsValid()) {
    //try with higher strategy
-     std::cout <<"FM is invalid, try with strategy = 2."<< std::endl;
-   MnMigrad migrad2(_myFcn, minMin.UserState(), MnStrategy(2));
-   minMin = migrad2(10,0.1);//TODO
- }
+ //    std::cout <<"FM is invalid, try with strategy = 2."<< std::endl;
+//   MnMigrad migrad2(_myFcn, minMin.UserState(), MnStrategy(2));
+//   minMin = migrad2(10,0.1);//TODO
+// }
 
   //save minimzed values
   for(unsigned int i=0; i<par.GetNDouble(); ++i){

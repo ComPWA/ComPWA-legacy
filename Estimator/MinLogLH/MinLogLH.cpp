@@ -1,3 +1,13 @@
+//-------------------------------------------------------------------------------
+// Copyright (c) 2013 Mathias Michel.
+// All rights reserved. This program and the accompanying materials
+// are made available under the terms of the GNU Public License v3.0
+// which accompanies this distribution, and is available at
+// http://www.gnu.org/licenses/gpl.html
+//
+// Contributors:
+//     Mathias Michel - initial API and implementation
+//-------------------------------------------------------------------------------
 #include <sstream>
 #include <iostream>
 #include <memory>
@@ -96,9 +106,9 @@ double MinLogLH::controlParameter(ParameterList& minPar){
         masssqa += (pow(a.E+b.E,2) - pow(a.px+b.px ,2) - pow(a.py+b.py ,2) - pow(a.pz+b.pz ,2));
         masssqb += (pow(a.E+c.E,2) - pow(a.px+c.px ,2) - pow(a.py+c.py ,2) - pow(a.pz+c.pz ,2));
         masssqc += (pow(c.E+b.E,2) - pow(c.px+b.px ,2) - pow(c.py+b.py ,2) - pow(c.pz+b.pz ,2));
-        x.push_back(sqrt(masssqa));
-        x.push_back(sqrt(masssqb));
-        x.push_back(sqrt(masssqc));
+        x.push_back(sqrt(masssqc)); //23
+        x.push_back(sqrt(masssqb)); //13
+        x.push_back(sqrt(masssqa)); //12
 
         double intens = 0;
         if(pPIF_){
@@ -121,7 +131,7 @@ double MinLogLH::controlParameter(ParameterList& minPar){
           norm+=intens;
         }
       }
-      norm/=nPHSPEvts;
+      //norm/=nPHSPEvts;
       //norm*=pPIF_->volume()/2.;
       //norm=nEvents*log(norm);
       //savedNorm=norm;
@@ -196,9 +206,9 @@ double MinLogLH::controlParameter(ParameterList& minPar){
       masssqa += (pow(a.E+b.E,2) - pow(a.px+b.px ,2) - pow(a.py+b.py ,2) - pow(a.pz+b.pz ,2));
       masssqb += (pow(a.E+c.E,2) - pow(a.px+c.px ,2) - pow(a.py+c.py ,2) - pow(a.pz+c.pz ,2));
       masssqc += (pow(c.E+b.E,2) - pow(c.px+b.px ,2) - pow(c.py+b.py ,2) - pow(c.pz+b.pz ,2));
-      x.push_back(sqrt(masssqa));
-      x.push_back(sqrt(masssqb));
-      x.push_back(sqrt(masssqc));
+      x.push_back(sqrt(masssqc)); //23
+      x.push_back(sqrt(masssqb)); //13
+      x.push_back(sqrt(masssqa)); //12
 
       //double intens = pPIF_->intensity(x, minPar);
      // ParameterList intensL = pPIF_->intensity(x, minPar);
@@ -221,11 +231,12 @@ double MinLogLH::controlParameter(ParameterList& minPar){
         intens=0;
       }
       if(intens>0){
-        lh += log(intens);
+        lh += log10(intens);
       }
 
     }
-    lh=nEvents*norm-lh;
+    //lh = nEvents/2.*(norm/(nPHSPEvts-1))*(norm/(nPHSPEvts-1)) - lh + nEvents*log10(norm/nPHSPEvts);
+    lh = nEvents*log10(norm/nPHSPEvts) - lh ;
     //lh -= norm;
     break;
   }

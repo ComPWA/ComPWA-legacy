@@ -1,3 +1,13 @@
+//-------------------------------------------------------------------------------
+// Copyright (c) 2013 Mathias Michel.
+// All rights reserved. This program and the accompanying materials
+// are made available under the terms of the GNU Public License v3.0
+// which accompanies this distribution, and is available at
+// http://www.gnu.org/licenses/gpl.html
+//
+// Contributors:
+//     Mathias Michel - initial API and implementation
+//-------------------------------------------------------------------------------
 //! Test-Application for full fit with simple modules.
 /*!
  * @file IntegrationTestApp.cpp
@@ -38,6 +48,10 @@
  * The main function.
  */
 int main(int argc, char **argv){
+  std::cout << "  ComPWA Copyright (C) 2013  Mathias Michel " << std::endl;
+  std::cout << "  This program comes with ABSOLUTELY NO WARRANTY; for details see license.txt" << std::endl;
+  std::cout << std::endl;
+
   std::string file="test/2Part-4vecs.root";
   std::cout << "Load Modules" << std::endl;
   std::shared_ptr<Data> myReader(new RootReader(file, true,"data"));
