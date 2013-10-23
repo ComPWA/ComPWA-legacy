@@ -16,7 +16,7 @@ to reference the authors of ComPWA in every scientific publication
 which is making use even of parts of the software contained in the
 package.
 
-As reference the web-address https://github.com/??? should
+As reference the web-address https://github.com/MathiasMichel/ComPWA should
 be used.
 
 Please also notify the authors of any publication which intends to use
