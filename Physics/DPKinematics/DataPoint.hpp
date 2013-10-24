@@ -3,6 +3,9 @@
  *
  *  Created on: Oct 16, 2013
  *      Author: weidenka
+ *
+ *      dataPoint is a singleton class which provides a
+ *      certain phase space point to all classes of the framework.
  */
 #ifndef DPPOINT2_HPP_
 #define DPPOINT2_HPP_

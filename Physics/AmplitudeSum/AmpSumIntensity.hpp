@@ -47,12 +47,12 @@ public:
 
 protected:
 	void init();
-	AmplitudeSetup ampSetup;
 	const DPKinematics _kin;
+	AmpSumOfAmplitudes totAmp;
+	AmplitudeSetup ampSetup;
 
 	double maxVal;
 
-	AmpSumOfAmplitudes totAmp;
 
 	//Resonance Variables
 	std::vector<std::string> namer;

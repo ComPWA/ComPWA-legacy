@@ -1,3 +1,14 @@
+
+/*
+ * DPKinematics.hpp
+ *
+ *  Created on: Oct 18, 2013
+ *      Author: weidenka
+ *
+ *		DPKinematics stores information about the dalitz plot kinematics, namly the
+ *		masses. It can caluclate boundaries and check if a certain point lies
+ *		within the kinematically allowed region.
+ */
 #ifndef DPKINEMATICS_HPP_
 #define DPKINEMATICS_HPP_
 
@@ -10,6 +21,7 @@ class DPKinematics
 public:
 	DPKinematics(){};
 	void init();
+	DPKinematics(std::string _nameMother, std::string _name1, std::string _name2, std::string _name3);
 	DPKinematics(double _M, double _Br, double _m1, double _m2, double _m3, std::string _name1, std::string _name2, std::string _name3);
 	DPKinematics(const DPKinematics& other);
 	double getThirdVariable(double, double) const;
@@ -33,7 +45,7 @@ public:
 	double M;
 	double Br;
 	double m1, m2, m3;
-	std::string name1, name2, name3;
+	std::string nameMother, name1, name2, name3;
 
 	double m23_sq_min, m23_sq_max;
 	double m13_sq_min, m13_sq_max;

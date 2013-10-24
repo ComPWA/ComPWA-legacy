@@ -8,6 +8,7 @@
 
 #include "Physics/DPKinematics/DPKinematics.hpp"
 #include "Physics/DPKinematics/dataPoint.hpp"
+#include "Physics/DPKinematics/PhysConst.hpp"
 
 void DPKinematics::init(){
 	m23_sq_min= ((m2+m3)*(m2+m3));
@@ -19,6 +20,16 @@ void DPKinematics::init(){
 	m23_min=((m2+m3)); m23_max=((M-m1));
 	m13_min=((m1+m3)); m13_max=((M-m2));
 	m12_min=((m1+m2)); m12_max=((M-m3));
+};
+DPKinematics::DPKinematics(std::string _nameMother, std::string _name1, std::string _name2, std::string _name3):
+						Br(0.0), nameMother(_nameMother), name1(_name1), name2(_name2), name3(_name3)
+{
+	M = PhysConst::instance()->getMass(_nameMother);
+	m1 = PhysConst::instance()->getMass(_name1);
+	m2 = PhysConst::instance()->getMass(_name2);
+	m3 = PhysConst::instance()->getMass(_name3);
+//	std::cout<<M<< " "<<m1<<" " <<m2<<" " <<m3<<std::endl;
+	init();
 };
 DPKinematics::DPKinematics(double _M, double _Br, double _m1, double _m2, double _m3, std::string _name1, std::string _name2, std::string _name3):
 						M(_M), Br(_Br), m1(_m1), m2(_m2), m3(_m3), name1(_name1), name2(_name2), name3(_name3)
@@ -36,6 +47,10 @@ double DPKinematics::getThirdVariable(double invmass1, double invmass2) const{
 	return sqrt(M*M+m1*m1+m2*m2+m3*m3-invmass1*invmass1-invmass2*invmass2);
 }
 bool DPKinematics::isWithinDP() const{
+	/*!
+	 * checks if phase space point lies within the kinematically
+	 * allowed region. Point is taken from dataPoint singleton.
+	 */
 	static dataPoint* point = dataPoint::instance();
 	double s1 = point->getMsq(2,3);
 	double s2 = point->getMsq(1,3);
@@ -44,6 +59,13 @@ bool DPKinematics::isWithinDP() const{
 }
 
 bool DPKinematics::isWithinDP(double m23, double m13, double m12) const{
+	/*!
+	 * \brief checks if phase space point lies within the kinematically allowed region.
+	 * \param m23 invariant mass of particles 2 and 3
+	 * \param m13 invariant mass of particles 2 and 3
+	 * \param m12 invariant mass of particles 2 and 3
+	 *
+	 */
 	//mostly copied from Laura++
 	double e3Cms23 = (m23*m23 - m2*m2 + m3*m3)/(2.0*m23); //energy of part3 in 23 rest frame
 	double p3Cms23 = sqrt(-(m3*m3-e3Cms23*e3Cms23)); //momentum of part3 in 23 rest frame

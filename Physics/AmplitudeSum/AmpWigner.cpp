@@ -57,7 +57,7 @@ void AmpWigner::initialise()
 		_m1=point->DPKin.m3;
 		_m2=point->DPKin.m2;
 		_m3=point->DPKin.m1;}
-	cout<<_m1<< " "<<_m2<<" " <<_m3<<endl;
+//	cout<<"AmpWigner DEBUG set masses to m1="<<_m1<< " m2="<<_m2<<" m3=" <<_m3<<endl;
 
 }    
 void AmpWigner::setDecayMasses(double m1, double m2, double m3, double M){

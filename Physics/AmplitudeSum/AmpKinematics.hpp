@@ -18,7 +18,7 @@ public:
 	AmpKinematics(DoubleParameter,int, int, int, int, barrierType, double, double);
 	AmpKinematics(double, double, double, double, DoubleParameter, int, barrierType, int, int, int, double, double);
 	AmpKinematics(const AmpKinematics& other);
-	~AmpKinematics(){};
+	virtual ~AmpKinematics(){};
 
 	double getECMS3_12(){return 1;};
 	double getECMS1_12(){return 1;};
@@ -45,9 +45,9 @@ public:
 protected:
 	double _ma, _mb, _mc, _M;
 	DoubleParameter _mR;
+	unsigned int _subSys;
 	barrierType _type;
-	int _spin; int _m; int _n;
-	int _subSys;
+	unsigned int _spin; int _m; int _n;
 	double _mesonRadius, _motherRadius;
 
 private:

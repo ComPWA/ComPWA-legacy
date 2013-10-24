@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+	<xs:simpleType name="errorType">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="up" />
+			<xs:enumeration value="down" />
+			<xs:enumeration value="central" />
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:complexType name="error">
+		<xs:sequence>
+			<xs:element name="value" type="xs:double" minOccurs="0"
+				maxOccurs="1" />
+		</xs:sequence>
+		<xs:attribute name="typ" type="errorType" default="central" />
+	</xs:complexType>
+
+	<xs:complexType name="valueWithError">
+		<xs:sequence>
+			<xs:element name="value" type="xs:double" />
+			<xs:element name="error" type="error" minOccurs="0"
+				maxOccurs="2" />
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="particle">
+		<xs:sequence>
+			<xs:element name="ID" type="xs:integer" minOccurs="1"
+				maxOccurs="1" />
+			<xs:element name="name" type="xs:string" minOccurs="1"
+				maxOccurs="1" />
+			<xs:element name="mass" type="valueWithError" minOccurs="1"
+				maxOccurs="1" />
+			<xs:element name="width" type="valueWithError" minOccurs="0"
+				maxOccurs="1" />
+			<xs:element name="charge" type="xs:integer" minOccurs="1"
+				maxOccurs="1" />
+			<xs:element name="J" type="xs:integer" minOccurs="1"
+				maxOccurs="1" />
+			<xs:element name="P" type="xs:integer" minOccurs="0"
+				maxOccurs="1" default="0" />
+			<xs:element name="C" type="xs:integer" minOccurs="0"
+				maxOccurs="1" default="0" />
+			<xs:element name="radius" type="xs:double" default="1.5"
+				minOccurs="0" maxOccurs="1" />
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="particleFlatte">
+		<xs:complexContent>
+			<xs:extension base="particle">
+				<xs:sequence>
+					<xs:element name="coupling1_ID1" type="xs:integer" />
+					<xs:element name="coupling1_ID2" type="xs:integer" />
+					<xs:element name="coupling1" type="xs:double" />
+					<xs:element name="coupling2_ID1" type="xs:integer" />
+					<xs:element name="coupling2_ID2" type="xs:integer" />
+					<xs:element name="coupling2" type="xs:double" />
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+
+	<xs:element name="particleList">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="reference" type="xs:string" minOccurs="1"
+					maxOccurs="1" />
+				<xs:element name="particle" type="particle" maxOccurs="unbounded" />
+				<xs:element name="particleFlatte" type="particleFlatte"
+					maxOccurs="unbounded" />
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+</xs:schema>
+

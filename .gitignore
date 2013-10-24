@@ -9,4 +9,5 @@ setup.sh
 bin/
 lib/
 external
+doc/
 
