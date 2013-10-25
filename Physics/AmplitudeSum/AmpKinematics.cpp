@@ -100,7 +100,7 @@ double AmpKinematics::BLmother2(double x) const {
 	return FormFactor(t0,t);
 }
 double AmpKinematics::FormFactor(double z0, double z) const{
-	double nom, denom;
+	double nom=0, denom=0;
 	if (_spin == 0) return 1;
 	else if (_spin == 1){
 		if(_type==barrierType::BWPrime){

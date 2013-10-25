@@ -20,18 +20,18 @@
 					<folderInfo id="cdt.managedbuild.toolchain.gnu.base.53314186.823137162" name="/" resourcePath="">
 						<toolChain id="cdt.managedbuild.toolchain.gnu.base.1291077507" name="Linux GCC" superClass="cdt.managedbuild.toolchain.gnu.base">
 							<targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.MachO64" id="cdt.managedbuild.target.gnu.platform.base.238744031" name="Debug Platform" osList="linux,hpux,aix,qnx" superClass="cdt.managedbuild.target.gnu.platform.base"/>
-							<builder command="bjam" id="cdt.managedbuild.target.gnu.builder.base.1805522806" incrementalBuildTarget="" keepEnvironmentInBuildfile="false" managedBuildOn="false" name="Gnu Make Builder" superClass="cdt.managedbuild.target.gnu.builder.base"/>
+							<builder arguments="toolset=darwin" command="bjam" id="cdt.managedbuild.target.gnu.builder.base.1805522806" incrementalBuildTarget="" keepEnvironmentInBuildfile="false" managedBuildOn="false" name="Gnu Make Builder" superClass="cdt.managedbuild.target.gnu.builder.base"/>
 							<tool id="cdt.managedbuild.tool.gnu.archiver.base.1560724450" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.base"/>
 							<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.base.122317523" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.base">
 								<option id="gnu.cpp.compiler.option.include.paths.2043065735" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
 									<listOptionValue builtIn="false" value="/Users/weidenka/work/external/qft++/include"/>
 									<listOptionValue builtIn="false" value="/Users/weidenka/work/external/Minuit2-5.28.00/build/include"/>
-									<listOptionValue builtIn="false" value="/Users/weidenka/work/external/boost_1_48_0/build/include"/>
 									<listOptionValue builtIn="false" value="/opt/local/include/gcc45/c++"/>
 									<listOptionValue builtIn="false" value="/opt/local/include"/>
 									<listOptionValue builtIn="false" value="/usr/include"/>
 									<listOptionValue builtIn="false" value="/usr/include/c++/4.2.1"/>
 									<listOptionValue builtIn="false" value="/Users/weidenka/work/external/root-v5.34.09/include"/>
+									<listOptionValue builtIn="false" value="/Users/weidenka/work/external/boost_1_54_0/build/include"/>
 								</option>
 								<option id="gnu.cpp.compiler.option.preprocessor.def.82094642" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="__GXX_EXPERIMENTAL_CXX0X__"/>
@@ -41,12 +41,10 @@
 							<tool id="cdt.managedbuild.tool.gnu.c.compiler.base.425395092" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.base">
 								<option id="gnu.c.compiler.option.include.paths.1740847467" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" valueType="includePath">
 									<listOptionValue builtIn="false" value="/Users/weidenka/work/external/qft++/include"/>
-									<listOptionValue builtIn="false" value="/Users/weidenka/work/external/boost_1_48_0/build/include"/>
 									<listOptionValue builtIn="false" value="/opt/local/include"/>
 									<listOptionValue builtIn="false" value="/opt/local/include/gcc45/c++"/>
 									<listOptionValue builtIn="false" value="/usr/include"/>
 									<listOptionValue builtIn="false" value="/usr/include/c++/4.2.1"/>
-									<listOptionValue builtIn="false" value="/Users/weidenka/work/external/root-v5.34.09/include"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.1173473161" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
 							</tool>
@@ -59,8 +57,6 @@
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.assembler.base.1667198369" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.base">
 								<option id="gnu.both.asm.option.include.paths.1325231248" name="Include paths (-I)" superClass="gnu.both.asm.option.include.paths" valueType="includePath">
-									<listOptionValue builtIn="false" value="/Users/weidenka/work/external/qft++/include"/>
-									<listOptionValue builtIn="false" value="/Users/weidenka/work/external/boost_1_48_0/build/include"/>
 									<listOptionValue builtIn="false" value="/opt/local/include"/>
 									<listOptionValue builtIn="false" value="/usr/include/c++/4.2.1"/>
 								</option>

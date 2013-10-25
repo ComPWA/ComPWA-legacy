@@ -5,7 +5,8 @@ path-constant TOP : . ;
 #local ONMYMAC = [ os.environ ONMYMAC ] ;
 
 #if $(ONMYMAC) { 
-#using gcc : gcc-mp-4.8
+#using gcc : : /usr/bin/gcc ;
+#using g++ : : /usr/bin/g++ ;
 #}
 
 project :

@@ -14,13 +14,15 @@ AmpFlatteRes::AmpFlatteRes(const char *name,
 		DoubleParameter& resMass, DoubleParameter& resWidth,
 		double& mesonRadius, ///  meson radius
 		DoubleParameter& couplingHidden, DoubleParameter& coupling,
-		double _massHiddenChannelA, double _massHiddenChannelB,
+		double massHiddenChannelA, double massHiddenChannelB,
 		int subSys, ///  meson radius
 		int resSpin, int m, int n) :
 		AmpAbsDynamicalFunction(name),
 		AmpKinematics(resMass, subSys, resSpin, m, n, AmpKinematics::barrierType(BWPrime), mesonRadius, 1.5),
 		_couplingHiddenChannel(couplingHidden),
 		_coupling(coupling),
+		_massHiddenChannelA(massHiddenChannelA),
+		_massHiddenChannelB(massHiddenChannelB),
 		_wignerD(name, resSpin,m,n, subSys)
 {
 	initialise();

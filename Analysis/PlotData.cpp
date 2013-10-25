@@ -92,7 +92,7 @@ void plotData::plot(){
 
 		//myReader.getEvent(-1, a, b, masssq);
 		//if(!myReader.getEvent(i, event)) continue; TODO: try exception
-		if(!event.getNParticles() == 3) continue;
+		if(event.getNParticles() != 3) continue;
 		//if(!event) continue;
 		//cout << "Event: \t" << i << "\t NParticles: \t" << event.getNParticles() << endl;
 		const Particle &a(event.getParticle(0));
@@ -112,7 +112,7 @@ void plotData::plot(){
 
 		//myReader.getEvent(-1, a, b, masssq);
 		//if(!myReader.getEvent(i, event)) continue; TODO: try exception
-		if(!event.getNParticles() == 3) continue;
+		if( event.getNParticles() != 3 ) continue;
 		//if(!event) continue;
 		//cout << "Event: \t" << i << "\t NParticles: \t" << event.getNParticles() << endl;
 		const Particle &a(event.getParticle(0));

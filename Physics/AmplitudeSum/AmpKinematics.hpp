@@ -27,7 +27,6 @@ public:
 	void setBarrierType(int) { };
 	void setBarrierRadi(double mesonRadius, double motherRadius) {_mesonRadius=mesonRadius; _motherRadius=motherRadius; };
 
-	virtual double integral() const = 0;
 	double q0(double, double) const;
 	double q0()  const { return q0( _ma, _mb ); };
 	double q(double, double, double)  const;
