@@ -23,7 +23,6 @@
 
 #include <vector>
 #include <string>
-
 #include "Core/Particle.hpp"
 
 class Event{

@@ -22,82 +22,53 @@
 
 #include <vector>
 
-#include "TObject.h"
-#include "TString.h"
-#include "RooComplex.h"
-#include "RooAbsReal.h"
-#include "RooAbsArg.h"
-#include "RooRealProxy.h"
+//#include "TObject.h"
+//#include "TString.h"
+//#include "RooComplex.h"
+//#include "RooAbsReal.h"
+//#include "RooAbsArg.h"
+//#include "RooRealProxy.h"
 #include "Physics/AmplitudeSum/AmpAbsDynamicalFunction.hpp"
+#include "Physics/AmplitudeSum/AmpKinematics.hpp"
+#include "Physics/AmplitudeSum/AmpWigner.hpp"
 
 using namespace std;
 
-class AmpFlatteRes : public AmpAbsDynamicalFunction  {
+class AmpFlatteRes : public AmpAbsDynamicalFunction, public AmpKinematics {
 public:
+	AmpFlatteRes(const char *name,
+			DoubleParameter& resMass, DoubleParameter& resWidth,
+			double& mesonRadius,
+			DoubleParameter& couplingHidden, DoubleParameter& coupling,
+			double _massHiddenChannelA, double _massHiddenChannelB,
+			int _subsys, int resSpin, int m, int n) ;
 
-  AmpFlatteRes(const char *name, const char *title,
-		       RooAbsReal& _x, ///  mass at which to evaluate RBW
-		       RooAbsReal& _resMass, RooAbsReal& _resWidth,
-		       RooAbsReal& _q0,
-		       int _subsys,
-                       Int_t resSpin) ; 
+	AmpFlatteRes(const AmpFlatteRes&, const char*);
+	AmpFlatteRes(const AmpFlatteRes&);
 
-  AmpFlatteRes(const AmpFlatteRes&, const char*);
-  AmpFlatteRes(const AmpFlatteRes&);
+	virtual ~AmpFlatteRes();
 
+	void setBarrierMass(double, double);
 
-  virtual ~AmpFlatteRes();
-
-  double q0() const;
-  double q()  const;
-  double q0(double, double) const;
-  double q(double, double)  const;
-  double BLprime2() const;
-  double F(double) const;
-
-  void setDecayMasses(double, double);
-  void setBarrierMass(double, double);
-  
-  virtual void initialise();
-  virtual RooComplex evaluate() const;
-
-  // the following are needed by the RooAbsArg interface, but not yet 
-  // implemented
-
-  virtual TObject*  clone (const char *newname) const ;
-  virtual Bool_t readFromStream(std::istream&, Bool_t, Bool_t);
-  virtual void writeToStream(std::ostream&, Bool_t) const;
-  virtual Bool_t operator==(const RooAbsArg&);
-  virtual void syncCache(const RooArgSet*);
-  virtual void copyCache(const RooAbsArg*, Bool_t, Bool_t);
-  virtual void attachToTree(TTree&, Int_t);
-  virtual void attachToVStore(RooVectorDataStore&);
-  virtual void setTreeBranchStatus(TTree&, Bool_t);
-  virtual void fillTreeBranch(TTree&);
-  virtual RooAbsArg* createFundamental(const char*) const ;
-
-  inline virtual bool isSubSys(const unsigned int subSys)const{return (subSys==_subSys);};
+	virtual void initialise();
+	virtual std::complex<double> evaluate() const;
+	//  virtual double evaluate(double x[],int dim, void * param) const {return 0;};//used for MC integration
+	void setDecayMasses(double, double, double, double);
+	//  double getMaximum() const{return 1;};
+	double integral() const {return 1;};
+	double getSpin() {return _spin;}; //needs to be declared in AmpAbsDynamicalFunction
+	inline virtual bool isSubSys(const unsigned int subSys)const{return (subSys==_subSys);};
 
 protected:
-  RooRealProxy _x;
+	DoubleParameter _couplingHiddenChannel;
+	DoubleParameter _coupling;
+	AmpWigner _wignerD;
 
-  RooRealProxy _m0;
-  RooRealProxy _resWidth;
-  RooRealProxy _d;
-  unsigned int _subSys;
-  int _spin;
-
-  // masses of decay particles for this resonance
-  double _ma;
-  double _mb;
-
-  // mass of particle which pair can be produced close to resonance
-  double _mBarA;
-  double _mBarB;
+	double _massHiddenChannelA;//hidden channel: mass particle A
+	double _massHiddenChannelB; //hidden channel: mass particle B
 
 private:
-
-  //ClassDef(AmpFlatteRes,1) // Relativistic Breit-Wigner resonance model
+	//ClassDef(AmpFlatteRes,1) // Relativistic Breit-Wigner resonance model
 
 };
 

@@ -1,0 +1,16 @@
+\hypertarget{_estimator_8hpp}{\section{Estimator/\-Estimator.hpp File Reference}
+\label{_estimator_8hpp}\index{Estimator/\-Estimator.\-hpp@{Estimator/\-Estimator.\-hpp}}
+}
+{\ttfamily \#include $<$vector$>$}\\*
+{\ttfamily \#include $<$memory$>$}\\*
+{\ttfamily \#include \char`\"{}Optimizer/\-Control\-Parameter.\-hpp\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}Core/\-Parameter\-List.\-hpp\char`\"{}}\\*
+\subsection*{Data Structures}
+\begin{DoxyCompactItemize}
+\item 
+class \hyperlink{class_estimator}{Estimator}
+\begin{DoxyCompactList}\small\item\em \hyperlink{class_estimator}{Estimator} Interface Base-\/\-Class. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+This class provides the interface to classes which estimate the \char`\"{}closeness\char`\"{} of the modeled intensity to the data. As it is pure virtual, one needs at least one implementation to provide an estimator for the analysis. If a new estimator is derived from and fulfills this base-\/class, no change in other modules are necessary to work with the new estimation function. As it is derived from \hyperlink{class_control_parameter}{Control\-Parameter}, it can be used in the optimizer modules. 

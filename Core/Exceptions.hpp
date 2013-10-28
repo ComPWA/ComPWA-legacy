@@ -18,8 +18,8 @@
  * standard exceptions.
 */
 
-#ifndef EXCEPTIONS_H
-#define EXCEPTIONS_H
+#ifndef PWAEXCEPTIONS_H
+#define PWAEXCEPTIONS_H
 
 #include <exception>
 #include <string>

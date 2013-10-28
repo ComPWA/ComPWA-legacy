@@ -1,26 +1,19 @@
 ########### AmplitudeSum lib #############
 import os ;
 
-local BOOST_BUILD_PATH = [ os.environ BOOST_BUILD_PATH ] ;
+local BOOST_ROOT = [ os.environ BOOST_ROOT ] ;
+local QFT = [ os.environ QFT ] ;
 
-BOOSTLIBS = -lboost_date_time -lboost_filesystem -lboost_program_options -lboost_regex -lboost_serialization -lboost_system -lboost_thread -lboost_test_exec_monitor -L$(BOOST_BUILD_PATH)/lib ;
-
-local ROOTSYS = [ os.environ ROOTSYS ] ;
-local ROOTINC = [ os.environ ROOTINCLUDE ] ;
+BOOSTLIBS = -lboost_date_time -lboost_filesystem -lboost_program_options -lboost_regex -lboost_serialization -lboost_system -lboost_thread -lboost_test_exec_monitor -L$(BOOST_ROOT)/lib ;
 
 local rlibs = [ SHELL "$ROOTSYS/bin/root-config --libs" ] ;
 ROOTLIBS = [ MATCH "(.*)[\n]" : $(rlibs) ] ;
 
 project :
 	requirements
-        <include>$(TOP)/external/qft++/include
-        <include>$(ROOTINC)
-	    <include>$(BOOST_BUILD_PATH)/include
-	<linkflags>$(ROOTLIBS)
-	<linkflags>-lEG
-	<linkflags>-lRooFit
-	<linkflags>-lRooFitCore
-	<linkflags>-L$(TOP)/external/qft++/lib
+        <include>$(QFT)/include
+	    <include>$(BOOST_ROOT)/include
+	<linkflags>-L$(QFT)/lib
 	<linkflags>-lqft++
 	<linkflags>$(BOOSTLIBS)
 	;
@@ -28,6 +21,7 @@ project :
 lib AmplitudeSum : 
         [ glob *.cpp : *Test.cpp ] 
         $(TOP)/Core//ComPWA
+        $(PHYSICS)/DPKinematics//DPKinematics
         ;
 
 install dist : AmplitudeSum : <location>$(TOP)/lib ;

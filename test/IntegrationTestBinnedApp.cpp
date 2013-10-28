@@ -100,6 +100,7 @@ int main(int argc, char **argv){
 
   //BreitWigner *drawBW = (BreitWigner*) (&(*testBW));
   TF1* fitresult = new TF1("fitresult", ((BreitWigner*)testBW.get()), &BreitWigner::drawInt,0.,2.4,3,"PIFBW","intensity");
+
   fitresult->FixParameter(0, par.GetDoubleParameter(0)->GetValue());
   fitresult->FixParameter(1, par.GetDoubleParameter(1)->GetValue());
   //fitresult->FixParameter(2, par[2]->GetValue());

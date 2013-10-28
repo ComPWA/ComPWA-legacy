@@ -1,0 +1,415 @@
+\hypertarget{class_integer_parameter}{\section{Integer\-Parameter Class Reference}
+\label{class_integer_parameter}\index{Integer\-Parameter@{Integer\-Parameter}}
+}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{class_integer_parameter_a3b6c7d2cf7e6e405618c28477c4a6163}{Integer\-Parameter} ()
+\begin{DoxyCompactList}\small\item\em Standard constructor without information. \end{DoxyCompactList}\item 
+\hyperlink{class_integer_parameter_a342142d0c742fa3beb1c691cd2d6c4ad}{Integer\-Parameter} (const int value)
+\begin{DoxyCompactList}\small\item\em Standard constructor with a value. \end{DoxyCompactList}\item 
+\hyperlink{class_integer_parameter_aa9d240d2ba83905ffa1cfd9fe1b1c213}{Integer\-Parameter} (const int value, const int error)
+\begin{DoxyCompactList}\small\item\em Standard constructor with value and error. \end{DoxyCompactList}\item 
+\hyperlink{class_integer_parameter_ab71291d38ec332a26558ee01fae1985c}{Integer\-Parameter} (const int value, const int min, const int max)
+\begin{DoxyCompactList}\small\item\em Standard constructor with value and bounds. \end{DoxyCompactList}\item 
+\hyperlink{class_integer_parameter_a79d506e1eaaba1fd38d2b450d7c19667}{Integer\-Parameter} (const int value, const int min, const int max, const int error)
+\begin{DoxyCompactList}\small\item\em Standard constructor with value, bounds and error. \end{DoxyCompactList}\item 
+\hyperlink{class_integer_parameter_a4601b4b1d68bac1e0a599324e3c5b1fb}{Integer\-Parameter} (const \hyperlink{class_integer_parameter}{Integer\-Parameter} \&in)
+\begin{DoxyCompactList}\small\item\em Copy constructor using = operator. \end{DoxyCompactList}\item 
+virtual \hyperlink{class_integer_parameter_a66cbb6a345278f86c5af0fdb2961aa95}{$\sim$\-Integer\-Parameter} ()
+\begin{DoxyCompactList}\small\item\em Empty Destructor. \end{DoxyCompactList}\item 
+\hypertarget{class_integer_parameter_a321225fbd82f3d272af0b0785c293014}{virtual const bool \hyperlink{class_integer_parameter_a321225fbd82f3d272af0b0785c293014}{Has\-Bounds} () const }\label{class_integer_parameter_a321225fbd82f3d272af0b0785c293014}
+
+\begin{DoxyCompactList}\small\item\em Check if parameter has bounds. \end{DoxyCompactList}\item 
+\hypertarget{class_integer_parameter_a2fa6e3a0cb1c288b8dd3d37860b6dea1}{virtual const bool \hyperlink{class_integer_parameter_a2fa6e3a0cb1c288b8dd3d37860b6dea1}{Use\-Bounds} () const }\label{class_integer_parameter_a2fa6e3a0cb1c288b8dd3d37860b6dea1}
+
+\begin{DoxyCompactList}\small\item\em Check if bounds should be used. \end{DoxyCompactList}\item 
+\hypertarget{class_integer_parameter_abbd590feb425e997ff3bd635c2708ef8}{virtual const bool \hyperlink{class_integer_parameter_abbd590feb425e997ff3bd635c2708ef8}{Has\-Error} () const }\label{class_integer_parameter_abbd590feb425e997ff3bd635c2708ef8}
+
+\begin{DoxyCompactList}\small\item\em Check if parameter has an error. \end{DoxyCompactList}\item 
+\hypertarget{class_integer_parameter_ae5779fb4971fce0b087b2b601ba1d6ea}{virtual const bool \hyperlink{class_integer_parameter_ae5779fb4971fce0b087b2b601ba1d6ea}{Is\-Fixed} () const }\label{class_integer_parameter_ae5779fb4971fce0b087b2b601ba1d6ea}
+
+\begin{DoxyCompactList}\small\item\em Check if parameter is fixed. \end{DoxyCompactList}\item 
+\hypertarget{class_integer_parameter_a26592ec6fde9f8991306037826be90ca}{virtual const int \hyperlink{class_integer_parameter_a26592ec6fde9f8991306037826be90ca}{Get\-Value} () const }\label{class_integer_parameter_a26592ec6fde9f8991306037826be90ca}
+
+\begin{DoxyCompactList}\small\item\em Getter for value of parameter. \end{DoxyCompactList}\item 
+\hypertarget{class_integer_parameter_a266385f52f2c760732c25adcc1419e8b}{virtual const int \hyperlink{class_integer_parameter_a266385f52f2c760732c25adcc1419e8b}{Get\-Min\-Value} () const }\label{class_integer_parameter_a266385f52f2c760732c25adcc1419e8b}
+
+\begin{DoxyCompactList}\small\item\em Getter for lower bound of parameter. \end{DoxyCompactList}\item 
+\hypertarget{class_integer_parameter_ab70d708a642c3b78b8f72991e140c77c}{virtual const int \hyperlink{class_integer_parameter_ab70d708a642c3b78b8f72991e140c77c}{Get\-Max\-Value} () const }\label{class_integer_parameter_ab70d708a642c3b78b8f72991e140c77c}
+
+\begin{DoxyCompactList}\small\item\em Getter for upper bound of parameter. \end{DoxyCompactList}\item 
+\hypertarget{class_integer_parameter_a544118e88bfe32f43606adeee1ff9985}{virtual const int \hyperlink{class_integer_parameter_a544118e88bfe32f43606adeee1ff9985}{Get\-Error} () const }\label{class_integer_parameter_a544118e88bfe32f43606adeee1ff9985}
+
+\begin{DoxyCompactList}\small\item\em Getter for error of parameter. \end{DoxyCompactList}\item 
+\hypertarget{class_integer_parameter_a681cf09d9d150835450446cd7b8b2cfb}{virtual void \hyperlink{class_integer_parameter_a681cf09d9d150835450446cd7b8b2cfb}{Set\-Value} (const int in\-Val)}\label{class_integer_parameter_a681cf09d9d150835450446cd7b8b2cfb}
+
+\begin{DoxyCompactList}\small\item\em Setter for value of parameter. \end{DoxyCompactList}\item 
+\hypertarget{class_integer_parameter_a91d73f38cbbf3a344a9355c459a34145}{virtual void \hyperlink{class_integer_parameter_a91d73f38cbbf3a344a9355c459a34145}{Set\-Error} (const int in\-Err)}\label{class_integer_parameter_a91d73f38cbbf3a344a9355c459a34145}
+
+\begin{DoxyCompactList}\small\item\em Setter for error of parameter. \end{DoxyCompactList}\item 
+\hypertarget{class_integer_parameter_ace6b35a334076dafd65124709c096098}{virtual const bool \hyperlink{class_integer_parameter_ace6b35a334076dafd65124709c096098}{Set\-Min\-Max} (const int in\-Min, const int in\-Max)}\label{class_integer_parameter_ace6b35a334076dafd65124709c096098}
+
+\begin{DoxyCompactList}\small\item\em Setter for bounds of parameter. \end{DoxyCompactList}\item 
+virtual const bool \hyperlink{class_integer_parameter_a8a9aa6481a17e2f9c81c72c758050b95}{Set\-Min\-Value} (const int min)
+\begin{DoxyCompactList}\small\item\em Setter for lower bound. \end{DoxyCompactList}\item 
+virtual const bool \hyperlink{class_integer_parameter_a25e9abebc74581a887aadbd6c60e431f}{Set\-Max\-Value} (const int max)
+\begin{DoxyCompactList}\small\item\em Setter for upper bound. \end{DoxyCompactList}\item 
+\hypertarget{class_integer_parameter_aed709aa9573ad1ebd0e6bdd0923847cc}{virtual const void \hyperlink{class_integer_parameter_aed709aa9573ad1ebd0e6bdd0923847cc}{Use\-Bounds} (const bool use)}\label{class_integer_parameter_aed709aa9573ad1ebd0e6bdd0923847cc}
+
+\begin{DoxyCompactList}\small\item\em Set if bounds should be used. \end{DoxyCompactList}\item 
+\hypertarget{class_integer_parameter_a0b2857e6e04aa72260601eb1d8d04822}{virtual const void \hyperlink{class_integer_parameter_a0b2857e6e04aa72260601eb1d8d04822}{Set\-Parameter\-Fixed} ()}\label{class_integer_parameter_a0b2857e6e04aa72260601eb1d8d04822}
+
+\begin{DoxyCompactList}\small\item\em Call to fix parameter. \end{DoxyCompactList}\item 
+\hypertarget{class_integer_parameter_aaf5d8de1cad5e36a8390a4f1c6a1e4e1}{virtual const void \hyperlink{class_integer_parameter_aaf5d8de1cad5e36a8390a4f1c6a1e4e1}{Set\-Parameter\-Free} ()}\label{class_integer_parameter_aaf5d8de1cad5e36a8390a4f1c6a1e4e1}
+
+\begin{DoxyCompactList}\small\item\em Call to free parameter. \end{DoxyCompactList}\item 
+\hypertarget{class_integer_parameter_addaf4594889140804622055648cb4205}{virtual const void \hyperlink{class_integer_parameter_addaf4594889140804622055648cb4205}{Fix\-Parameter} (const bool fixed)}\label{class_integer_parameter_addaf4594889140804622055648cb4205}
+
+\begin{DoxyCompactList}\small\item\em Set parameter free or fixed. \end{DoxyCompactList}\item 
+std\-::string const \& \hyperlink{class_integer_parameter_a6e4a624ea0599cffcfc5f420b7931a36}{to\-\_\-str} () const 
+\begin{DoxyCompactList}\small\item\em A public function returning a string with parameter information. \end{DoxyCompactList}\item 
+virtual const std\-::string \hyperlink{class_integer_parameter_ae1452a0f19fa7c5140b12f39c6fd1300}{type} ()
+\begin{DoxyCompactList}\small\item\em A public function returning a string naming its type. \end{DoxyCompactList}\item 
+\hypertarget{class_integer_parameter_a4d4097e57daf46dfb5131ede39acc578}{{\bfseries operator int} () const }\label{class_integer_parameter_a4d4097e57daf46dfb5131ede39acc578}
+
+\end{DoxyCompactItemize}
+\subsection*{Protected Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+bool \hyperlink{class_integer_parameter_a0d33cf98f71bd2c2e3106989398a271b}{check\-\_\-bounds} (const int min, const int max)
+\begin{DoxyCompactList}\small\item\em A protected function to check if bounds are valid. \end{DoxyCompactList}\item 
+virtual void \hyperlink{class_integer_parameter_a0432071f33c3d53b730dbe888ff90f46}{make\-\_\-str} ()
+\begin{DoxyCompactList}\small\item\em A protected function which creates an output string for printing. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Protected Attributes}
+\begin{DoxyCompactItemize}
+\item 
+std\-::string \hyperlink{class_integer_parameter_abf6356e2879d6f09f45a52d65844998f}{out\-\_\-}
+\item 
+bool \hyperlink{class_integer_parameter_a6f95c4b841a3d669d15c46e787f73153}{bounds\-\_\-}
+\item 
+bool \hyperlink{class_integer_parameter_a611862af84b9db773cf8690fb0f888fb}{error\-\_\-}
+\item 
+bool \hyperlink{class_integer_parameter_ab68632ed3d270b082ebfb16de643e3df}{usebounds\-\_\-}
+\item 
+bool \hyperlink{class_integer_parameter_a7a3f5d9413ccb5fd1814a7db9e77dcfc}{fixed\-\_\-}
+\item 
+\hypertarget{class_integer_parameter_a2e91e7ac1f8e3881928738e0354bffea}{int {\bfseries val\-\_\-}}\label{class_integer_parameter_a2e91e7ac1f8e3881928738e0354bffea}
+
+\item 
+\hypertarget{class_integer_parameter_a7d37150cc66baebfd0a7cb0679dd8705}{int {\bfseries min\-\_\-}}\label{class_integer_parameter_a7d37150cc66baebfd0a7cb0679dd8705}
+
+\item 
+\hypertarget{class_integer_parameter_af4d3eab97deb4577e316d210e51ebd7c}{int {\bfseries max\-\_\-}}\label{class_integer_parameter_af4d3eab97deb4577e316d210e51ebd7c}
+
+\item 
+int \hyperlink{class_integer_parameter_a713ac37a8c8d820e212881178719ae91}{err\-\_\-}
+\end{DoxyCompactItemize}
+\subsection*{Friends}
+\begin{DoxyCompactItemize}
+\item 
+std\-::ostream \& \hyperlink{class_integer_parameter_ab9a320e078948aa0ce31b2adec766bfc}{operator$<$$<$} (std\-::ostream \&os, const \hyperlink{class_integer_parameter}{Integer\-Parameter} \&p)
+\begin{DoxyCompactList}\small\item\em friend function to stream parameter information to output \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Constructor \& Destructor Documentation}
+\hypertarget{class_integer_parameter_a3b6c7d2cf7e6e405618c28477c4a6163}{\index{Integer\-Parameter@{Integer\-Parameter}!Integer\-Parameter@{Integer\-Parameter}}
+\index{Integer\-Parameter@{Integer\-Parameter}!IntegerParameter@{Integer\-Parameter}}
+\subsubsection[{Integer\-Parameter}]{\setlength{\rightskip}{0pt plus 5cm}Integer\-Parameter\-::\-Integer\-Parameter (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}}\label{class_integer_parameter_a3b6c7d2cf7e6e405618c28477c4a6163}
+
+
+Standard constructor without information. 
+
+Standard constructor with no information provided. Creates parameter with value 0 but without bounds or an error. \begin{DoxySeeAlso}{See Also}
+\hyperlink{class_integer_parameter_a0432071f33c3d53b730dbe888ff90f46}{make\-\_\-str()} 
+\end{DoxySeeAlso}
+\hypertarget{class_integer_parameter_a342142d0c742fa3beb1c691cd2d6c4ad}{\index{Integer\-Parameter@{Integer\-Parameter}!Integer\-Parameter@{Integer\-Parameter}}
+\index{Integer\-Parameter@{Integer\-Parameter}!IntegerParameter@{Integer\-Parameter}}
+\subsubsection[{Integer\-Parameter}]{\setlength{\rightskip}{0pt plus 5cm}Integer\-Parameter\-::\-Integer\-Parameter (
+\begin{DoxyParamCaption}
+\item[{const int}]{value}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}}\label{class_integer_parameter_a342142d0c742fa3beb1c691cd2d6c4ad}
+
+
+Standard constructor with a value. 
+
+Standard constructor with just a value provided. Creates parameter with given value but without bounds or an error. 
+\begin{DoxyParams}{Parameters}
+{\em value} & input value of the parameter \\
+\hline
+\end{DoxyParams}
+\begin{DoxySeeAlso}{See Also}
+\hyperlink{class_integer_parameter_a0432071f33c3d53b730dbe888ff90f46}{make\-\_\-str()} 
+\end{DoxySeeAlso}
+\hypertarget{class_integer_parameter_aa9d240d2ba83905ffa1cfd9fe1b1c213}{\index{Integer\-Parameter@{Integer\-Parameter}!Integer\-Parameter@{Integer\-Parameter}}
+\index{Integer\-Parameter@{Integer\-Parameter}!IntegerParameter@{Integer\-Parameter}}
+\subsubsection[{Integer\-Parameter}]{\setlength{\rightskip}{0pt plus 5cm}Integer\-Parameter\-::\-Integer\-Parameter (
+\begin{DoxyParamCaption}
+\item[{const int}]{value, }
+\item[{const int}]{error}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}}\label{class_integer_parameter_aa9d240d2ba83905ffa1cfd9fe1b1c213}
+
+
+Standard constructor with value and error. 
+
+Standard constructor with value and error provided. Creates parameter with given value and error but without bounds. 
+\begin{DoxyParams}{Parameters}
+{\em value} & input value of the parameter \\
+\hline
+{\em error} & input error of the parameter \\
+\hline
+\end{DoxyParams}
+\begin{DoxySeeAlso}{See Also}
+\hyperlink{class_integer_parameter_a0432071f33c3d53b730dbe888ff90f46}{make\-\_\-str()} 
+\end{DoxySeeAlso}
+\hypertarget{class_integer_parameter_ab71291d38ec332a26558ee01fae1985c}{\index{Integer\-Parameter@{Integer\-Parameter}!Integer\-Parameter@{Integer\-Parameter}}
+\index{Integer\-Parameter@{Integer\-Parameter}!IntegerParameter@{Integer\-Parameter}}
+\subsubsection[{Integer\-Parameter}]{\setlength{\rightskip}{0pt plus 5cm}Integer\-Parameter\-::\-Integer\-Parameter (
+\begin{DoxyParamCaption}
+\item[{const int}]{value, }
+\item[{const int}]{min, }
+\item[{const int}]{max}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}}\label{class_integer_parameter_ab71291d38ec332a26558ee01fae1985c}
+
+
+Standard constructor with value and bounds. 
+
+Standard constructor with value and bounds provided. Creates parameter with given value and bounds but without error. If a check for valid bounds fails, just the value is used. 
+\begin{DoxyParams}{Parameters}
+{\em value} & input value of the parameter \\
+\hline
+{\em min} & input lower bound \\
+\hline
+{\em max} & input upper bound \\
+\hline
+\end{DoxyParams}
+\begin{DoxySeeAlso}{See Also}
+\hyperlink{class_integer_parameter_a0432071f33c3d53b730dbe888ff90f46}{make\-\_\-str()}, \hyperlink{class_integer_parameter_a0d33cf98f71bd2c2e3106989398a271b}{check\-\_\-bounds()} 
+\end{DoxySeeAlso}
+\hypertarget{class_integer_parameter_a79d506e1eaaba1fd38d2b450d7c19667}{\index{Integer\-Parameter@{Integer\-Parameter}!Integer\-Parameter@{Integer\-Parameter}}
+\index{Integer\-Parameter@{Integer\-Parameter}!IntegerParameter@{Integer\-Parameter}}
+\subsubsection[{Integer\-Parameter}]{\setlength{\rightskip}{0pt plus 5cm}Integer\-Parameter\-::\-Integer\-Parameter (
+\begin{DoxyParamCaption}
+\item[{const int}]{value, }
+\item[{const int}]{min, }
+\item[{const int}]{max, }
+\item[{const int}]{error}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}}\label{class_integer_parameter_a79d506e1eaaba1fd38d2b450d7c19667}
+
+
+Standard constructor with value, bounds and error. 
+
+Standard constructor with value, bounds and error provided. Creates parameter with the given information. If a check for valid bounds fails, just value and error are used. 
+\begin{DoxyParams}{Parameters}
+{\em value} & input value of the parameter \\
+\hline
+{\em min} & input lower bound \\
+\hline
+{\em max} & input upper bound \\
+\hline
+{\em error} & input error of the parameter \\
+\hline
+\end{DoxyParams}
+\begin{DoxySeeAlso}{See Also}
+\hyperlink{class_integer_parameter_a0432071f33c3d53b730dbe888ff90f46}{make\-\_\-str()}, \hyperlink{class_integer_parameter_a0d33cf98f71bd2c2e3106989398a271b}{check\-\_\-bounds()} 
+\end{DoxySeeAlso}
+\hypertarget{class_integer_parameter_a4601b4b1d68bac1e0a599324e3c5b1fb}{\index{Integer\-Parameter@{Integer\-Parameter}!Integer\-Parameter@{Integer\-Parameter}}
+\index{Integer\-Parameter@{Integer\-Parameter}!IntegerParameter@{Integer\-Parameter}}
+\subsubsection[{Integer\-Parameter}]{\setlength{\rightskip}{0pt plus 5cm}Integer\-Parameter\-::\-Integer\-Parameter (
+\begin{DoxyParamCaption}
+\item[{const {\bf Integer\-Parameter} \&}]{in}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}}\label{class_integer_parameter_a4601b4b1d68bac1e0a599324e3c5b1fb}
+
+
+Copy constructor using = operator. 
+
+Simple copy constructor using the = operator. As this operator is not overloaded in this class, c++ will copy every member variable. As this is a container class, this should be fine. 
+\begin{DoxyParams}{Parameters}
+{\em in} & input P\-W\-A\-Parameter which variables will be copied \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_integer_parameter_a66cbb6a345278f86c5af0fdb2961aa95}{\index{Integer\-Parameter@{Integer\-Parameter}!$\sim$\-Integer\-Parameter@{$\sim$\-Integer\-Parameter}}
+\index{$\sim$\-Integer\-Parameter@{$\sim$\-Integer\-Parameter}!IntegerParameter@{Integer\-Parameter}}
+\subsubsection[{$\sim$\-Integer\-Parameter}]{\setlength{\rightskip}{0pt plus 5cm}virtual Integer\-Parameter\-::$\sim$\-Integer\-Parameter (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [virtual]}}}\label{class_integer_parameter_a66cbb6a345278f86c5af0fdb2961aa95}
+
+
+Empty Destructor. 
+
+There is nothing to destroy \-:( 
+
+\subsection{Member Function Documentation}
+\hypertarget{class_integer_parameter_a0d33cf98f71bd2c2e3106989398a271b}{\index{Integer\-Parameter@{Integer\-Parameter}!check\-\_\-bounds@{check\-\_\-bounds}}
+\index{check\-\_\-bounds@{check\-\_\-bounds}!IntegerParameter@{Integer\-Parameter}}
+\subsubsection[{check\-\_\-bounds}]{\setlength{\rightskip}{0pt plus 5cm}bool Integer\-Parameter\-::check\-\_\-bounds (
+\begin{DoxyParamCaption}
+\item[{const int}]{min, }
+\item[{const int}]{max}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [protected]}}}\label{class_integer_parameter_a0d33cf98f71bd2c2e3106989398a271b}
+
+
+A protected function to check if bounds are valid. 
+
+This function checks if the bounds of the parameter are valid\-: Upper bound should be larger then lower bound and the value should be inside of the bounds. 
+\begin{DoxyParams}{Parameters}
+{\em max} & upper bound to check \\
+\hline
+{\em min} & lower bound to check \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+bool if bounds are valid 
+\end{DoxyReturn}
+\begin{DoxySeeAlso}{See Also}
+Parameter(const double value, const double min, const double max) 
+
+Parameter(const double value, const double min, const double max, const double error) 
+
+\hyperlink{class_integer_parameter_ace6b35a334076dafd65124709c096098}{Set\-Min\-Max()}, \hyperlink{class_integer_parameter_a8a9aa6481a17e2f9c81c72c758050b95}{Set\-Min\-Value()}, \hyperlink{class_integer_parameter_a25e9abebc74581a887aadbd6c60e431f}{Set\-Max\-Value()} 
+\end{DoxySeeAlso}
+\hypertarget{class_integer_parameter_a0432071f33c3d53b730dbe888ff90f46}{\index{Integer\-Parameter@{Integer\-Parameter}!make\-\_\-str@{make\-\_\-str}}
+\index{make\-\_\-str@{make\-\_\-str}!IntegerParameter@{Integer\-Parameter}}
+\subsubsection[{make\-\_\-str}]{\setlength{\rightskip}{0pt plus 5cm}virtual void Integer\-Parameter\-::make\-\_\-str (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [protected]}, {\ttfamily [virtual]}}}\label{class_integer_parameter_a0432071f33c3d53b730dbe888ff90f46}
+
+
+A protected function which creates an output string for printing. 
+
+This function uses all available information about the parameter to create a string which will be streamed via the stream operator $<$$<$. \begin{DoxySeeAlso}{See Also}
+operator$<$$<$, \hyperlink{class_integer_parameter_a6e4a624ea0599cffcfc5f420b7931a36}{to\-\_\-str()}, \hyperlink{class_integer_parameter_ae1452a0f19fa7c5140b12f39c6fd1300}{type()} 
+\end{DoxySeeAlso}
+\hypertarget{class_integer_parameter_a25e9abebc74581a887aadbd6c60e431f}{\index{Integer\-Parameter@{Integer\-Parameter}!Set\-Max\-Value@{Set\-Max\-Value}}
+\index{Set\-Max\-Value@{Set\-Max\-Value}!IntegerParameter@{Integer\-Parameter}}
+\subsubsection[{Set\-Max\-Value}]{\setlength{\rightskip}{0pt plus 5cm}virtual const bool Integer\-Parameter\-::\-Set\-Max\-Value (
+\begin{DoxyParamCaption}
+\item[{const int}]{max}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [virtual]}}}\label{class_integer_parameter_a25e9abebc74581a887aadbd6c60e431f}
+
+
+Setter for upper bound. 
+
+Setter for upper bound of the parameter. If a check for valid bounds fails, it returns false and nothing changes. This means if the upper bound is invalid the parameter maintains its old bounds if it had some. 
+\begin{DoxyParams}{Parameters}
+{\em max} & input upper bound \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+bool if successful (re)set upper bound 
+\end{DoxyReturn}
+\begin{DoxySeeAlso}{See Also}
+\hyperlink{class_integer_parameter_a0d33cf98f71bd2c2e3106989398a271b}{check\-\_\-bounds()} 
+\end{DoxySeeAlso}
+\hypertarget{class_integer_parameter_a8a9aa6481a17e2f9c81c72c758050b95}{\index{Integer\-Parameter@{Integer\-Parameter}!Set\-Min\-Value@{Set\-Min\-Value}}
+\index{Set\-Min\-Value@{Set\-Min\-Value}!IntegerParameter@{Integer\-Parameter}}
+\subsubsection[{Set\-Min\-Value}]{\setlength{\rightskip}{0pt plus 5cm}virtual const bool Integer\-Parameter\-::\-Set\-Min\-Value (
+\begin{DoxyParamCaption}
+\item[{const int}]{min}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [virtual]}}}\label{class_integer_parameter_a8a9aa6481a17e2f9c81c72c758050b95}
+
+
+Setter for lower bound. 
+
+Setter for lower bound of the parameter. If a check for valid bounds fails, it returns false and nothing changes. This means if the lower bound is invalid the parameter maintains its old bounds if it had some. 
+\begin{DoxyParams}{Parameters}
+{\em min} & input lower bound \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+bool if successful (re)set lower bound 
+\end{DoxyReturn}
+\begin{DoxySeeAlso}{See Also}
+\hyperlink{class_integer_parameter_a0d33cf98f71bd2c2e3106989398a271b}{check\-\_\-bounds()} 
+\end{DoxySeeAlso}
+\hypertarget{class_integer_parameter_a6e4a624ea0599cffcfc5f420b7931a36}{\index{Integer\-Parameter@{Integer\-Parameter}!to\-\_\-str@{to\-\_\-str}}
+\index{to\-\_\-str@{to\-\_\-str}!IntegerParameter@{Integer\-Parameter}}
+\subsubsection[{to\-\_\-str}]{\setlength{\rightskip}{0pt plus 5cm}std\-::string const\& Integer\-Parameter\-::to\-\_\-str (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily [inline]}}}\label{class_integer_parameter_a6e4a624ea0599cffcfc5f420b7931a36}
+
+
+A public function returning a string with parameter information. 
+
+This function simply returns the member string out\-\_\-, which contains all parameter information. The string gets rebuild with every change of the parameter. \begin{DoxyReturn}{Returns}
+string with parameter information 
+\end{DoxyReturn}
+\begin{DoxySeeAlso}{See Also}
+operator$<$$<$, \hyperlink{class_integer_parameter_a0432071f33c3d53b730dbe888ff90f46}{make\-\_\-str()} 
+\end{DoxySeeAlso}
+\hypertarget{class_integer_parameter_ae1452a0f19fa7c5140b12f39c6fd1300}{\index{Integer\-Parameter@{Integer\-Parameter}!type@{type}}
+\index{type@{type}!IntegerParameter@{Integer\-Parameter}}
+\subsubsection[{type}]{\setlength{\rightskip}{0pt plus 5cm}virtual const std\-::string Integer\-Parameter\-::type (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [virtual]}}}\label{class_integer_parameter_ae1452a0f19fa7c5140b12f39c6fd1300}
+
+
+A public function returning a string naming its type. 
+
+This function is used to get the type of the implementation of this general parameter interface. \begin{DoxySeeAlso}{See Also}
+operator$<$$<$, \hyperlink{class_integer_parameter_a6e4a624ea0599cffcfc5f420b7931a36}{to\-\_\-str()}, \hyperlink{class_integer_parameter_a0432071f33c3d53b730dbe888ff90f46}{make\-\_\-str()} 
+\end{DoxySeeAlso}
+
+
+\subsection{Friends And Related Function Documentation}
+\hypertarget{class_integer_parameter_ab9a320e078948aa0ce31b2adec766bfc}{\index{Integer\-Parameter@{Integer\-Parameter}!operator$<$$<$@{operator$<$$<$}}
+\index{operator$<$$<$@{operator$<$$<$}!IntegerParameter@{Integer\-Parameter}}
+\subsubsection[{operator$<$$<$}]{\setlength{\rightskip}{0pt plus 5cm}std\-::ostream\& operator$<$$<$ (
+\begin{DoxyParamCaption}
+\item[{std\-::ostream \&}]{os, }
+\item[{const {\bf Integer\-Parameter} \&}]{p}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [friend]}}}\label{class_integer_parameter_ab9a320e078948aa0ce31b2adec766bfc}
+
+
+friend function to stream parameter information to output 
+
+Declaring the stream-\/operator $<$$<$ as friend allows to stream parameter information to the output as easily as a generic type. The definition of this class has to be outside the namespace of the class. \begin{DoxySeeAlso}{See Also}
+\hyperlink{class_integer_parameter_a0432071f33c3d53b730dbe888ff90f46}{make\-\_\-str()}, \hyperlink{class_integer_parameter_a6e4a624ea0599cffcfc5f420b7931a36}{to\-\_\-str()} 
+\end{DoxySeeAlso}
+
+
+\subsection{Field Documentation}
+\hypertarget{class_integer_parameter_a6f95c4b841a3d669d15c46e787f73153}{\index{Integer\-Parameter@{Integer\-Parameter}!bounds\-\_\-@{bounds\-\_\-}}
+\index{bounds\-\_\-@{bounds\-\_\-}!IntegerParameter@{Integer\-Parameter}}
+\subsubsection[{bounds\-\_\-}]{\setlength{\rightskip}{0pt plus 5cm}bool Integer\-Parameter\-::bounds\-\_\-\hspace{0.3cm}{\ttfamily [protected]}}}\label{class_integer_parameter_a6f95c4b841a3d669d15c46e787f73153}
+Are valid bounds defined for this parameter? \hypertarget{class_integer_parameter_a713ac37a8c8d820e212881178719ae91}{\index{Integer\-Parameter@{Integer\-Parameter}!err\-\_\-@{err\-\_\-}}
+\index{err\-\_\-@{err\-\_\-}!IntegerParameter@{Integer\-Parameter}}
+\subsubsection[{err\-\_\-}]{\setlength{\rightskip}{0pt plus 5cm}int Integer\-Parameter\-::err\-\_\-\hspace{0.3cm}{\ttfamily [protected]}}}\label{class_integer_parameter_a713ac37a8c8d820e212881178719ae91}
+Containers of parameter information \hypertarget{class_integer_parameter_a611862af84b9db773cf8690fb0f888fb}{\index{Integer\-Parameter@{Integer\-Parameter}!error\-\_\-@{error\-\_\-}}
+\index{error\-\_\-@{error\-\_\-}!IntegerParameter@{Integer\-Parameter}}
+\subsubsection[{error\-\_\-}]{\setlength{\rightskip}{0pt plus 5cm}bool Integer\-Parameter\-::error\-\_\-\hspace{0.3cm}{\ttfamily [protected]}}}\label{class_integer_parameter_a611862af84b9db773cf8690fb0f888fb}
+Is an error defined for this parameter? \hypertarget{class_integer_parameter_a7a3f5d9413ccb5fd1814a7db9e77dcfc}{\index{Integer\-Parameter@{Integer\-Parameter}!fixed\-\_\-@{fixed\-\_\-}}
+\index{fixed\-\_\-@{fixed\-\_\-}!IntegerParameter@{Integer\-Parameter}}
+\subsubsection[{fixed\-\_\-}]{\setlength{\rightskip}{0pt plus 5cm}bool Integer\-Parameter\-::fixed\-\_\-\hspace{0.3cm}{\ttfamily [protected]}}}\label{class_integer_parameter_a7a3f5d9413ccb5fd1814a7db9e77dcfc}
+Do you want to keep parameter fixed? \hypertarget{class_integer_parameter_abf6356e2879d6f09f45a52d65844998f}{\index{Integer\-Parameter@{Integer\-Parameter}!out\-\_\-@{out\-\_\-}}
+\index{out\-\_\-@{out\-\_\-}!IntegerParameter@{Integer\-Parameter}}
+\subsubsection[{out\-\_\-}]{\setlength{\rightskip}{0pt plus 5cm}std\-::string Integer\-Parameter\-::out\-\_\-\hspace{0.3cm}{\ttfamily [protected]}}}\label{class_integer_parameter_abf6356e2879d6f09f45a52d65844998f}
+Output string to print information \hypertarget{class_integer_parameter_ab68632ed3d270b082ebfb16de643e3df}{\index{Integer\-Parameter@{Integer\-Parameter}!usebounds\-\_\-@{usebounds\-\_\-}}
+\index{usebounds\-\_\-@{usebounds\-\_\-}!IntegerParameter@{Integer\-Parameter}}
+\subsubsection[{usebounds\-\_\-}]{\setlength{\rightskip}{0pt plus 5cm}bool Integer\-Parameter\-::usebounds\-\_\-\hspace{0.3cm}{\ttfamily [protected]}}}\label{class_integer_parameter_ab68632ed3d270b082ebfb16de643e3df}
+Do you want to restrict your parameter? 
+
+The documentation for this class was generated from the following file\-:\begin{DoxyCompactItemize}
+\item 
+Core/\hyperlink{_parameter_8hpp}{Parameter.\-hpp}\end{DoxyCompactItemize}

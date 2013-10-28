@@ -56,6 +56,7 @@ int main(int argc, char **argv){
   // Generate data distribution
   std::shared_ptr<ControlParameter> myFit = PolyFit::createInstance(p0, p1, p2, p3, sigma_smear);
 
+
   ParameterList par;
   par.AddParameter(std::shared_ptr<DoubleParameter>(new DoubleParameter("p0",-50,-100,-5,50)));
   par.AddParameter(std::shared_ptr<DoubleParameter>(new DoubleParameter("p1",50,0,100,50)));
@@ -88,6 +89,7 @@ int main(int argc, char **argv){
     double genResult = minimizer->exec(par);
 
     std::cout << "Minimizer " << Nmin << "\t final par :\t" << genResult << std::endl;
+
     //for(unsigned int i=0; i<par.GetNDouble(); i++)
     //  std::cout << "final par "<< i << ":\t" << par.GetParameterValue(i) << std::endl;
     std::cout << "Final: " << par << std::endl;

@@ -57,6 +57,7 @@ int main(int argc, char **argv){
   std::cout << "Load Modules" << std::endl;
   std::shared_ptr<Data> myReader(new RootReader(file, false,"data"));
   std::shared_ptr<Amplitude> testBW(new BreitWigner(0.,5.));
+
   // Initiate parameters
   ParameterList par;
   testBW->fillStartParVec(par);
@@ -69,7 +70,6 @@ int main(int argc, char **argv){
   std::cout << "Inital par :\t" << std::endl;
   std::cout << "inital M:\t" << par.GetDoubleParameter(0)->GetValue() << std::endl;
   std::cout << "inital T:\t" << par.GetDoubleParameter(1)->GetValue() << std::endl;
-
   std::cout << "Start Fit" << std::endl;
   double genResult = opti->exec(par);
 

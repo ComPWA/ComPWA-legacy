@@ -8,26 +8,18 @@
 // Contributors:
 //     Mathias Michel - initial API and implementation
 //-------------------------------------------------------------------------------
-#include "RooAbsArg.h"
+//#include "RooAbsArg.h"
 #include "Physics/AmplitudeSum/AmpAbsDynamicalFunction.hpp"
 
-AmpAbsDynamicalFunction::AmpAbsDynamicalFunction(const char *name, const char *title) :
-  RooAbsArg (name, title) 
+AmpAbsDynamicalFunction::AmpAbsDynamicalFunction(const char *name) : _name(name)
 {
 
 }
 
-AmpAbsDynamicalFunction::AmpAbsDynamicalFunction(const AmpAbsDynamicalFunction& other, const char* newname) :
-  RooAbsArg(other, newname) 
+AmpAbsDynamicalFunction::AmpAbsDynamicalFunction(const AmpAbsDynamicalFunction& other, const char* newname)
 {
 }
 
 AmpAbsDynamicalFunction::~AmpAbsDynamicalFunction() 
 {
-}
-
-
-TObject* AmpAbsDynamicalFunction::clone(const char *newname)  const
-{
-  return 0;
 }

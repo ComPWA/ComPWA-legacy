@@ -503,6 +503,11 @@ public:
    * general parameter interface.
    * \sa operator<<, to_str(), make_str()
   */
+   //operator for convertion to double. Class can be used as a normal double variable in operations.
+  operator double() const{ return val_;};
+
+protected:
+  std::string out_; /*!< Output string to print information */
   virtual const std::string TypeName(){
     return "double";
   }
@@ -766,6 +771,8 @@ public:
    * general parameter interface.
    * \sa operator<<, to_str(), make_str()
   */
+  operator int() const { return val_; };
+
   virtual const std::string TypeName(){
     return "integer";
   }

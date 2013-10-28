@@ -43,6 +43,7 @@ using namespace std;
  * The main function.
  */
 int main(int argc, char **argv){
+
   std::cout << "  ComPWA Copyright (C) 2013  Mathias Michel " << std::endl;
   std::cout << "  This program comes with ABSOLUTELY NO WARRANTY; for details see license.txt" << std::endl;
   std::cout << std::endl;

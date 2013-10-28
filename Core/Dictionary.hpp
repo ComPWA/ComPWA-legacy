@@ -11,6 +11,7 @@
 // Contributors:
 //     Mathias Michel - initial API and implementation
 //-------------------------------------------------------------------------------
+
 //! Dictionary to manage information provided by modules
 /*! \class Dictionary
  * @file Dictionary.hpp

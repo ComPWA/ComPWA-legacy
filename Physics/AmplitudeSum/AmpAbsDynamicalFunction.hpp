@@ -18,35 +18,36 @@
 #ifndef AMP_ABS_DYNAMICAL_FUNCTION
 #define AMP_ABS_DYNAMICAL_FUNCTION
 
-#include "TObject.h"
-#include "RooComplex.h"
-#include "RooAbsArg.h"
-
+//#include "TObject.h"
+//#include "RooComplex.h"
+//#include "RooAbsArg.h"
+#include "Core/Parameter.hpp"
 #include <vector>
+#include <complex>
 
-class AmpAbsDynamicalFunction : public RooAbsArg  {
+class AmpAbsDynamicalFunction {
 public:
-  AmpAbsDynamicalFunction(const char *name, const char *title);
+  AmpAbsDynamicalFunction(const char *name);
 
   AmpAbsDynamicalFunction(const AmpAbsDynamicalFunction&, const char*);
 
   virtual ~AmpAbsDynamicalFunction();
 
+
   virtual void initialise() = 0; 
-  virtual RooComplex evaluate() const = 0;
+  virtual std::complex<double> evaluate() const = 0;
+//  virtual double evaluate(double x[],int dim, void * param) const = 0;//used for MC integration
+  virtual double getSpin() = 0;
   virtual bool isSubSys(const unsigned int) const = 0;
+  virtual double integral() const = 0;
+
+  virtual std::string GetName(){ return _name; };
+  virtual std::string GetTitle(){ return GetName(); };
  
-
-  // the following are needed by the RooAbsArg interface, but not yet 
-  // implemented
-
-  virtual TObject*  clone (const char *newname) const = 0 ;  
-
-
 protected:
+  std::string _name;
 
 private:
-
   //ClassDef(AmpAbsDynamicalFunction,1) // Abstract dynamical function
 
 };

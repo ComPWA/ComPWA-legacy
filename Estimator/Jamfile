@@ -4,14 +4,14 @@ path-constant ESTIMATOR : . ;
 # libEstimator.so will consist of these packages:
 build-project ChiOneD ;
 build-project MinLogLH ;
-build-project StockLeastSquares ;
+#build-project StockLeastSquares ;
 
 # Build libEstimator.so
 lib Estimator : 
         [ glob *.cpp ]
         $(ESTIMATOR)/ChiOneD//ChiOneD
         $(ESTIMATOR)/MinLogLH//MinLogLH
-        $(ESTIMATOR)/StockLeastSquares//StockLeastSquares
+        #$(ESTIMATOR)/StockLeastSquares//StockLeastSquares
         ;
 
 install dist : Estimator : <location>$(TOP)/lib ;

@@ -1,0 +1,20 @@
+########### DPKinematics lib #############
+import os ;
+local BOOST_ROOT = [ os.environ BOOST_ROOT ] ;
+
+BOOSTLIBS = -lboost_date_time -lboost_filesystem -lboost_program_options -lboost_regex -lboost_serialization -lboost_system -lboost_thread -lboost_test_exec_monitor ;
+
+project :
+	requirements
+	    <include>$(BOOST_ROOT)/include
+	<linkflags>-L$(BOOST_ROOT)/lib 
+	<linkflags>$(BOOSTLIBS)
+	;
+
+
+lib DPKinematics : 
+        [ glob *.cpp ] 
+        $(TOP)/Core//ComPWA 
+		;
+
+install dist : DPKinematics : <location>$(TOP)/lib ;

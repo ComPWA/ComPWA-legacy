@@ -1,0 +1,69 @@
+\hypertarget{_dalitz_fit_app_8cpp}{\section{Analysis/\-Dalitz\-Fit\-App.cpp File Reference}
+\label{_dalitz_fit_app_8cpp}\index{Analysis/\-Dalitz\-Fit\-App.\-cpp@{Analysis/\-Dalitz\-Fit\-App.\-cpp}}
+}
+
+
+Test-\/\-Application for full fit with simple B\-W-\/dalitz-\/model.  
+
+
+{\ttfamily \#include $<$iostream$>$}\\*
+{\ttfamily \#include $<$cmath$>$}\\*
+{\ttfamily \#include $<$sstream$>$}\\*
+{\ttfamily \#include $<$vector$>$}\\*
+{\ttfamily \#include $<$string$>$}\\*
+{\ttfamily \#include $<$memory$>$}\\*
+{\ttfamily \#include \char`\"{}T\-F1.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}T\-H1\-D.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}T\-File.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}T\-Lorentz\-Vector.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}T\-H2\-D.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}Core/\-Event.\-hpp\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}Core/\-Particle.\-hpp\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}Core/\-Parameter.\-hpp\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}Core/\-Parameter\-List.\-hpp\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}Data\-Reader/\-Root\-Reader/\-Root\-Reader.\-hpp\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}Physics/\-Amplitude\-Sum/\-Amp\-Sum\-Intensity.\-hpp\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}Estimator/\-Min\-Log\-L\-H/\-Min\-Log\-L\-H.\-hpp\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}Optimizer/\-Minuit2/\-Minuit\-I\-F.\-hpp\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}Analysis/\-Plot\-Data.\-hpp\char`\"{}}\\*
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+int \hyperlink{_dalitz_fit_app_8cpp_a3c04138a5bfe5d72780bb7e82a18e627}{main} (int argc, char $\ast$$\ast$argv)
+\end{DoxyCompactItemize}
+\subsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{_dalitz_fit_app_8cpp_acb959f7b0abeddfde4175cb62025d56a}{const Double\-\_\-t {\bfseries M} = 3.\-096916}\label{_dalitz_fit_app_8cpp_acb959f7b0abeddfde4175cb62025d56a}
+
+\item 
+\hypertarget{_dalitz_fit_app_8cpp_a0a0f79bc350021411798f6ac6cfacbc7}{const Double\-\_\-t {\bfseries Br} = 0.\-000093}\label{_dalitz_fit_app_8cpp_a0a0f79bc350021411798f6ac6cfacbc7}
+
+\item 
+\hypertarget{_dalitz_fit_app_8cpp_ad4b1dc0c54e834c5c1ca325ebcd66fc3}{const Double\-\_\-t {\bfseries m1} = 0.}\label{_dalitz_fit_app_8cpp_ad4b1dc0c54e834c5c1ca325ebcd66fc3}
+
+\item 
+\hypertarget{_dalitz_fit_app_8cpp_ada5f2cdf434605648b802a0e13f67c82}{const Double\-\_\-t {\bfseries m2} = 0.\-139570}\label{_dalitz_fit_app_8cpp_ada5f2cdf434605648b802a0e13f67c82}
+
+\item 
+\hypertarget{_dalitz_fit_app_8cpp_ade198176253fe8f58cd46dae72aae18e}{const Double\-\_\-t {\bfseries m3} = 0.\-139570}\label{_dalitz_fit_app_8cpp_ade198176253fe8f58cd46dae72aae18e}
+
+\item 
+\hypertarget{_dalitz_fit_app_8cpp_ac410f6555ebc282703695e0831715846}{const Double\-\_\-t {\bfseries P\-I} = 3.\-14159}\label{_dalitz_fit_app_8cpp_ac410f6555ebc282703695e0831715846}
+
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Test-\/\-Application for full fit with simple B\-W-\/dalitz-\/model. This tiny application tests a dalitz-\/fit procedure with a simple resonance model. It uses the simple L\-H-\/estimator \hyperlink{class_min_log_l_h}{Min\-Log\-L\-H}, it reads data via the root-\/reader module \hyperlink{class_root_reader}{Root\-Reader} and uses the intensity provided by the Breit-\/\-Wigner-\/\-Sum physics module Amplitude\-Sum. The optimization of the parameters is done with the Minuit2 module \hyperlink{class_minuit_i_f}{Minuit\-I\-F}. As result the optimized parameters are printed to the terminal. 
+
+\subsection{Function Documentation}
+\hypertarget{_dalitz_fit_app_8cpp_a3c04138a5bfe5d72780bb7e82a18e627}{\index{Dalitz\-Fit\-App.\-cpp@{Dalitz\-Fit\-App.\-cpp}!main@{main}}
+\index{main@{main}!DalitzFitApp.cpp@{Dalitz\-Fit\-App.\-cpp}}
+\subsubsection[{main}]{\setlength{\rightskip}{0pt plus 5cm}int main (
+\begin{DoxyParamCaption}
+\item[{int}]{argc, }
+\item[{char $\ast$$\ast$}]{argv}
+\end{DoxyParamCaption}
+)}}\label{_dalitz_fit_app_8cpp_a3c04138a5bfe5d72780bb7e82a18e627}
+The main function. 

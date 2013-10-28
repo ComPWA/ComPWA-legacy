@@ -38,7 +38,6 @@ RootReader::RootReader(const std::string inRootFile, const bool binned=false, co
 
   fFile->Close();
 }
-
 RootReader::~RootReader(){
   //fFile->Close();
   delete fParticles;

@@ -379,7 +379,6 @@ void ParameterList::make_str() {
 
   out_ = oss.str();
 }
-
 std::string const& ParameterList::to_str() {
   make_str();
   return out_;

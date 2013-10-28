@@ -17,13 +17,6 @@
 #ifndef AMPSUMOFAMPLITUDES
 #define AMPSUMOFAMPLITUDES
 
-#include "RooAbsPdf.h"
-#include "RooRealProxy.h"
-#include "RooCategoryProxy.h"
-#include "RooAbsReal.h"
-#include "RooAbsCategory.h"
-//#include "RooListProxy.h"
-
 #include "Physics/AmplitudeSum/AmpAbsDynamicalFunction.hpp"
 #include "Physics/AmplitudeSum/AmpWigner.hpp"
 
@@ -31,27 +24,31 @@
 #include <memory>
 
 //class TIterator;
-class RooRealVar;
+//class RooRealVar;
  
-class AmpSumOfAmplitudes : public RooAbsPdf {
+class AmpSumOfAmplitudes{
 public:
   AmpSumOfAmplitudes();
-  AmpSumOfAmplitudes(const char *name, const char *title);
+  AmpSumOfAmplitudes(const char *name);
   AmpSumOfAmplitudes(const AmpSumOfAmplitudes& other, const char* name=0) ;
-  virtual TObject* clone(const char* newname) const { return new AmpSumOfAmplitudes(*this,newname); }
   virtual ~AmpSumOfAmplitudes();
 
-  void addBW(std::shared_ptr<AmpAbsDynamicalFunction>, std::shared_ptr<RooRealVar>, std::shared_ptr<RooRealVar>);
-  void addBW(std::shared_ptr<AmpAbsDynamicalFunction>, std::shared_ptr<RooRealVar>, std::shared_ptr<RooRealVar>, std::shared_ptr<AmpWigner>);
+  void addBW(std::shared_ptr<AmpAbsDynamicalFunction>, std::shared_ptr<DoubleParameter>, std::shared_ptr<DoubleParameter>);
+  void addBW(std::shared_ptr<AmpAbsDynamicalFunction>, std::shared_ptr<DoubleParameter>, std::shared_ptr<DoubleParameter>, std::shared_ptr<AmpWigner>);
 
-  Double_t evaluateSlice(RooComplex*, unsigned int, unsigned int) const ;
-  Double_t evaluate() const ;
+  double evaluateSlice(std::complex<double>*, unsigned int, unsigned int) const ;
+  double evaluate() const ;
+  
+  //double getMax() { return maxVal; };
 
 protected:
   std::vector<std::shared_ptr<AmpAbsDynamicalFunction> > _pdfList ;   //  List of component PDFs
-  std::vector<std::shared_ptr<RooRealVar> > _intList;    //  List of relative intensities
-  std::vector<std::shared_ptr<RooRealVar> > _phaseList;  //  List of relative phases
+  std::vector<std::shared_ptr<DoubleParameter> > _intList;    //  List of relative intensities
+  std::vector<std::shared_ptr<DoubleParameter> > _phaseList;  //  List of relative phases
   std::vector<std::shared_ptr<AmpWigner> > _angList ;   //  List of component angular distributions
+
+  double maxVal;
+
 
 };
  

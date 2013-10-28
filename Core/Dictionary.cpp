@@ -11,6 +11,7 @@
 // Contributors:
 //     Mathias Michel - initial API and implementation
 //-------------------------------------------------------------------------------
+
 #include <vector>
 #include <map>
 #include <memory>
@@ -36,7 +37,8 @@ std::string Dictionary::introduce(std::shared_ptr<Data> inData, std::string inNa
     inName="test";//TODO: Generate new name, check available
   }
 
-  //dataInfo tmp(inName, inData, inData->getVariableNames());
+
+  //dataInfo tmp(inName, inData, inData->getVariableNames());//TODO!!
 
   //mData_.push_back( tmp );
 

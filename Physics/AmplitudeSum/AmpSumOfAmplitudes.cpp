@@ -18,37 +18,32 @@
 
 #include <cmath> 
 
-#include "Riostream.h" 
-#include "TMath.h" 
+//#include "Riostream.h"
+//#include "TMath.h"
 
-#include "RooAbsReal.h" 
-#include "RooRealVar.h"
-#include "RooAbsCategory.h" 
-#include "RooLinkedListIter.h"
+//#include "RooAbsReal.h"
+#include "Core/Parameter.hpp"
+//#include "RooAbsCategory.h"
+//#include "RooLinkedListIter.h"
 
 #include "qft++.h"
 
 #include "Physics/AmplitudeSum/AmpSumOfAmplitudes.hpp"
 
-using namespace ROOT;
-
 //ClassImp(AmpSumOfAmplitudes);
 
-AmpSumOfAmplitudes::AmpSumOfAmplitudes() :
-       RooAbsPdf("Empty","Empty")
+AmpSumOfAmplitudes::AmpSumOfAmplitudes()
 {
 
 }
 
- AmpSumOfAmplitudes::AmpSumOfAmplitudes(const char *name, const char *title) :
-   RooAbsPdf(name,title)
+ AmpSumOfAmplitudes::AmpSumOfAmplitudes(const char *name)
  { 
 
  } 
 
 
- AmpSumOfAmplitudes::AmpSumOfAmplitudes(const AmpSumOfAmplitudes& other, const char* name) :  
-   RooAbsPdf(other,name)
+ AmpSumOfAmplitudes::AmpSumOfAmplitudes(const AmpSumOfAmplitudes& other, const char* name)
  { 
 
  } 
@@ -57,62 +52,51 @@ AmpSumOfAmplitudes::AmpSumOfAmplitudes() :
    //something TODO?
  }
 
-void AmpSumOfAmplitudes::addBW(std::shared_ptr<AmpAbsDynamicalFunction> theRes , std::shared_ptr<RooRealVar> r, std::shared_ptr<RooRealVar> phi, std::shared_ptr<AmpWigner> theAng) {
+void AmpSumOfAmplitudes::addBW(std::shared_ptr<AmpAbsDynamicalFunction> theRes , std::shared_ptr<DoubleParameter> r, std::shared_ptr<DoubleParameter> phi, std::shared_ptr<AmpWigner> theAng) {
   _pdfList.push_back(theRes);
   _intList.push_back(r);
   _phaseList.push_back(phi);
   _angList.push_back(theAng);
 }
 
-void AmpSumOfAmplitudes::addBW(std::shared_ptr<AmpAbsDynamicalFunction> theRes , std::shared_ptr<RooRealVar> r, std::shared_ptr<RooRealVar> phi) {
+void AmpSumOfAmplitudes::addBW(std::shared_ptr<AmpAbsDynamicalFunction> theRes , std::shared_ptr<DoubleParameter> r, std::shared_ptr<DoubleParameter> phi) {
   _pdfList.push_back(theRes);
   _intList.push_back(r);
   _phaseList.push_back(phi);
-  /*RooRealVar beta("beta", "mass", 0.);
-  RooRealVar j ("j", "j", 0.);
-  RooRealVar m ("m", "m", 0.);
-  RooRealVar n ("n", "n", 0.) ; 
-  _angList.add(AmpWigner("none", "none", beta, j, m, n));*/
   _angList.push_back(std::shared_ptr<AmpWigner>(new AmpWigner()));
 }
 
 
- Double_t AmpSumOfAmplitudes::evaluate() const
+ double AmpSumOfAmplitudes::evaluate() const
  { 
-   // ENTER EXPRESSION IN TERMS OF VARIABLE ARGUMENTS HERE 
-   RooComplex res;
-
+//   RooComplex res;
+   complex<double> res;
    //std::cout << "res = \t" << res.abs2() << std::endl;
 
    for(unsigned int i=0; i<_pdfList.size(); i++){
-     double a = _intList[i]->getVal();
-     double phi = _phaseList[i]->getVal();
-     RooComplex eiphi (cos(phi), sin(phi));
+     double a = _intList[i]->GetValue();
+     double phi = _phaseList[i]->GetValue();
+     std::complex<double> eiphi(a*cos(phi),a*sin(phi));
 
-     //std::cout << "a = \t" << a << std::endl;
-     //std::cout << "phi = \t" << phi << std::endl;
-     //std::cout << "BW = \t" << _pdfList[i]->evaluate() << std::endl;
-     //std::cout << "AD = \t" << _angList[i]->evaluate() << std::endl;
-
-     res = res + _pdfList[i]->evaluate() * a * eiphi * _angList[i]->evaluate();
+     std::complex<double> twoJplusOne(2*_pdfList[i]->getSpin()+1);
+     res = res + twoJplusOne * _pdfList[i]->evaluate() * eiphi;
+//res = res + twoJplusOne * _pdfList[i]->evaluate() * eiphi * _angList[i]->evaluate();
    }
 
-   //std::cout << "res final = \t" << res.abs2() << std::endl;
-
-   return res.abs2() ; 
+   return ( std::abs(res)*std::abs(res) );
  } 
 
- Double_t AmpSumOfAmplitudes::evaluateSlice(RooComplex* reso, unsigned int nResos, unsigned int subSys=1) const
+ double AmpSumOfAmplitudes::evaluateSlice(std::complex<double>* reso, unsigned int nResos, unsigned int subSys=1) const
  { 
    // ENTER EXPRESSION IN TERMS OF VARIABLE ARGUMENTS HERE 
-   RooComplex res;
+   std::complex<double> res;
 
    int itReso=0, sys=0;
 
    for(unsigned int i=0; i<_pdfList.size(); i++){
-     double a = _intList[i]->getVal();
-     double phi = _phaseList[i]->getVal();
-     RooComplex eiphi (cos(phi), sin(phi));
+     double a = _intList[i]->GetValue();
+     double phi = _phaseList[i]->GetValue();
+     std::complex<double> eiphi (cos(phi), sin(phi));
      if(itReso<3) sys = 0; //TODO: way better!!!
      else if(itReso<5) sys = 1;
      //else sys = 2;
@@ -121,22 +105,22 @@ void AmpSumOfAmplitudes::addBW(std::shared_ptr<AmpAbsDynamicalFunction> theRes ,
      if(_pdfList[i]->isSubSys(subSys))
        res = res + reso[sys] * _angList[i]->evaluate();
      else
-       res = res + _pdfList[i]->evaluate() * a * eiphi * _angList[i]->evaluate();
-
+       res = res + _pdfList[i]->evaluate() * a * eiphi;
+ //res = res + _pdfList[i]->evaluate() * a * eiphi * _angList[i]->evaluate();
      itReso++;
    }
 
-   return res.abs2() ; 
+   return (std::abs(res)*std::abs(res) );
  } 
 
- /*Double_t AmpSumOfAmplitudes::evaluatePhi() const 
+ /*double AmpSumOfAmplitudes::evaluatePhi() const
  { 
    // ENTER EXPRESSION IN TERMS OF VARIABLE ARGUMENTS HERE 
    RooComplex res;
 
    AmpRelBreitWignerRes *pdf;
-   RooRealVar *theInt;
-   RooRealVar *thePhase;
+   DoubleParameter *theInt;
+   DoubleParameter *thePhase;
    AmpWigner *ang;
 
    _pdfIter->Reset();
@@ -149,11 +133,11 @@ void AmpSumOfAmplitudes::addBW(std::shared_ptr<AmpAbsDynamicalFunction> theRes ,
 
 
    while((pdf      = (AmpRelBreitWignerRes*)_pdfIter->Next()) &&
-	 (theInt   = (RooRealVar*)_intIter->Next())        && 
-	 (thePhase = (RooRealVar*)_phaseIter->Next())      &&
+	 (theInt   = (DoubleParameter*)_intIter->Next())        &&
+	 (thePhase = (DoubleParameter*)_phaseIter->Next())      &&
          (ang      = (AmpWigner*)_angIter->Next())  ) {
-     double a = theInt->getVal();
-     double phi = thePhase->getVal();
+     double a = theInt->GetValue();
+     double phi = thePhase->GetValue();
      RooComplex eiphi (cos(phi), sin(phi));
 
      res = res + pdf->evaluate() * a * eiphi * ang->evaluate();

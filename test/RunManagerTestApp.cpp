@@ -60,7 +60,6 @@ int main(int argc, char **argv){
   std::shared_ptr<Optimizer> opti(new MinuitIF(testEsti,par));
   std::shared_ptr<RunManager> run(new RunManager(myReader, testEsti, testBW, opti));
 
-
   std::cout << "Start Fit" << std::endl;
   run->startFit(par);
 

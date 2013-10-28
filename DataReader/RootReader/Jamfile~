@@ -1,0 +1,26 @@
+########### DIFRoot2Part lib #############
+
+local rlibs = [ SHELL "$ROOTSYS/bin/root-config --libs" ] ;
+ROOTLIBS = [ MATCH "(.*)[\n]" : $(rlibs) ] ;
+
+actions rootlibs
+{
+	$(ROOTSYS)/bin/root-config --libs
+}
+
+project :
+	requirements <include>./
+         <include>$(TOP)/Core
+	<include>$(ROOTSYS)/include
+	<include>$(BOOST_BUILD_PATH)/include
+	<cxxflags>-ftemplate-depth-256
+	<cxxflags>-std=c++0x
+	<linkflags>$(ROOTLIBS)
+	<linkflags>$(BOOSTLIBS)
+	;
+
+lib DIFRoot2Part : 
+        [ glob *.cpp ] ;
+
+install dist : DIFRoot2Part : <location>$(TOP)/lib ;
+

@@ -1,10 +1,17 @@
-# files that are ignored by git
+.DS_Store
+*.root
+*.so
+*.o
+*.d
+~*
+setup.sh
+bin/
+lib/
+external
 *.project
 *.cproject
 *.prefs
 .settings/
 test/.settings/
-bin/
-lib/
 DOCU/
-*~
+doc/
