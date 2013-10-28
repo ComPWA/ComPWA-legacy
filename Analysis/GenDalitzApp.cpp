@@ -46,14 +46,14 @@ const unsigned int MaxEvents = 1200;
 
 //constants
 const Double_t M = 1.86486; // GeV/c² (D0)
-const Double_t Br = 0.0; // GeV/c² (width)
-//const Double_t m1 = 0.14; // GeV/c² (K_S^0)
-//const Double_t m2 = 0.14; // GeV/c² (K^-)
-//const Double_t m3 = 0.14; // GeV/c² (K^+)
+//const Double_t Br = 0.0; // GeV/c² (width)
+////const Double_t m1 = 0.14; // GeV/c² (K_S^0)
+////const Double_t m2 = 0.14; // GeV/c² (K^-)
+////const Double_t m3 = 0.14; // GeV/c² (K^+)
 const Double_t m1 = 0.497614; // GeV/c² (K_S^0)
 const Double_t m2 = 0.493677; // GeV/c² (K^-)
 const Double_t m3 = 0.493677; // GeV/c² (K^+)
-const Double_t PI = 3.14159;
+//const Double_t PI = 3.14159;
 
 /************************************************************************************************/
 /**

@@ -5,6 +5,7 @@ path-constant PHYSICS : . ;
 # libPhysics.so will consist of these packages:
 build-project DPKinematics ;
 build-project AmplitudeSum ;
+build-project AmplitudeSum2 ;
 build-project BreitWigner ;
 
 # Build libPhysics.so
@@ -12,6 +13,7 @@ lib Physics :
         [ glob *.cpp ]
         $(PHYSICS)/DPKinematics//DPKinematics
         $(PHYSICS)/AmplitudeSum//AmplitudeSum
+        $(PHYSICS)/AmplitudeSum2//AmplitudeSum2
         $(PHYSICS)/BreitWigner//BreitWigner
         #: <link>static 
 ;

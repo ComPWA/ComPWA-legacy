@@ -34,15 +34,16 @@ public:
 
   virtual void initialise();
   virtual std::complex<double> evaluate() const ;
-//  virtual double evaluate(double x[],int dim, void * param) const;//used for MC integration
   void setDecayMasses(double, double, double, double);
 //  double integral(ParameterList& par) const;
 //  double getMaximum() const{return 1;};
-  double integral() const {return 1;};
+  double integral() const;
   double getSpin() {return _spin;}; //needs to be declared in AmpAbsDynamicalFunction
   inline virtual bool isSubSys(const unsigned int subSys) const{ return (subSys==_subSys); };
 
 protected:
+  virtual double eval(double x[],int dim, void * param) const;//used for MC integration
+
   DoubleParameter _resWidth;
   AmpWigner _wignerD;
 

@@ -19,14 +19,16 @@ project :
         <include>$(QFT)/include
 	    <include>$(BOOST_ROOT)/include
 	    <include>$(MINUIT2)/include
+	    <include>/opt/local/include
 	<linkflags>-L$(BOOST_ROOT)/lib 
 	<linkflags>-L$(QFT)/lib
 	<linkflags>-lqft++
 	<linkflags>$(BOOSTLIBS)
-	#<linkflags>-lgsl
+	<linkflags>-L/opt/local/lib
+	<linkflags>-lgsl
 	;
 
-lib AmplitudeSum : 
+lib AmplitudeSum2 : 
         [ glob *.cpp : *Test.cpp ] 
         $(TOP)/Core//ComPWA
         $(TOP)/Estimator/MinLogLH//MinLogLH 
@@ -35,4 +37,4 @@ lib AmplitudeSum :
         #: <link>static 
 ;
 
-install dist : AmplitudeSum : <location>$(TOP)/lib ;
+install dist : AmplitudeSum2 : <location>$(TOP)/lib ;

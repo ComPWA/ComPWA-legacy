@@ -54,8 +54,8 @@ protected:
 	DoubleParameter _coupling;
 	AmpWigner _wignerD;
 
-	double _massHiddenChannelB; //hidden channel: mass particle B
 	double _massHiddenChannelA;//hidden channel: mass particle A
+	double _massHiddenChannelB; //hidden channel: mass particle B
 
 private:
 	//ClassDef(AmpFlatteRes,1) // Relativistic Breit-Wigner resonance model
