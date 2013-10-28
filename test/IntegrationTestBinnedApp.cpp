@@ -1,3 +1,13 @@
+//-------------------------------------------------------------------------------
+// Copyright (c) 2013 Mathias Michel.
+// All rights reserved. This program and the accompanying materials
+// are made available under the terms of the GNU Public License v3.0
+// which accompanies this distribution, and is available at
+// http://www.gnu.org/licenses/gpl.html
+//
+// Contributors:
+//     Mathias Michel - initial API and implementation
+//-------------------------------------------------------------------------------
 //! Test-Application for full fit with simple modules.
 /*!
  * @file IntegrationTestApp.cpp
@@ -38,29 +48,33 @@
  * The main function.
  */
 int main(int argc, char **argv){
+  std::cout << "  ComPWA Copyright (C) 2013  Mathias Michel " << std::endl;
+  std::cout << "  This program comes with ABSOLUTELY NO WARRANTY; for details see license.txt" << std::endl;
+  std::cout << std::endl;
+
   std::string file="test/2Part-4vecs.root";
   std::cout << "Load Modules" << std::endl;
   std::shared_ptr<Data> myReader(new RootReader(file, true,"data"));
   std::shared_ptr<Amplitude> testBW(new BreitWigner(0.,5.));
-  std::shared_ptr<ControlParameter> testEsti = ChiOneD::createInstance(testBW, myReader);
-  std::shared_ptr<Optimizer> opti(new MinuitIF(testEsti));
-
   // Initiate parameters
   ParameterList par;
   testBW->fillStartParVec(par);
-  par.GetDoubleParameter(0).SetValue(1.7);
-  par.GetDoubleParameter(0).SetValue(0.2);
+  std::shared_ptr<ControlParameter> testEsti = ChiOneD::createInstance(testBW, myReader);
+  std::shared_ptr<Optimizer> opti(new MinuitIF(testEsti, par));
+
+  par.GetDoubleParameter(0)->SetValue(1.7);
+  par.GetDoubleParameter(0)->SetValue(0.2);
 
   std::cout << "Inital par :\t" << std::endl;
-  std::cout << "inital M:\t" << par.GetDoubleParameter(0).GetValue() << std::endl;
-  std::cout << "inital T:\t" << par.GetDoubleParameter(1).GetValue() << std::endl;
+  std::cout << "inital M:\t" << par.GetDoubleParameter(0)->GetValue() << std::endl;
+  std::cout << "inital T:\t" << par.GetDoubleParameter(1)->GetValue() << std::endl;
 
   std::cout << "Start Fit" << std::endl;
   double genResult = opti->exec(par);
 
   std::cout << "Minimized final par :\t" << genResult << std::endl;
-  std::cout << "final M:\t" << par.GetDoubleParameter(0).GetValue() << std::endl;
-  std::cout << "final T:\t" << par.GetDoubleParameter(1).GetValue() << std::endl;
+  std::cout << "final M:\t" << par.GetDoubleParameter(0)->GetValue() << std::endl;
+  std::cout << "final T:\t" << par.GetDoubleParameter(1)->GetValue() << std::endl;
 
   //Create some output
   TH1D* bw = new TH1D("bw","inv. mass of 2 particles",1000,0.,2.4);
@@ -86,8 +100,9 @@ int main(int argc, char **argv){
 
   //BreitWigner *drawBW = (BreitWigner*) (&(*testBW));
   TF1* fitresult = new TF1("fitresult", ((BreitWigner*)testBW.get()), &BreitWigner::drawInt,0.,2.4,3,"PIFBW","intensity");
-  fitresult->FixParameter(0, par.GetDoubleParameter(0).GetValue());
-  fitresult->FixParameter(1, par.GetDoubleParameter(1).GetValue());
+
+  fitresult->FixParameter(0, par.GetDoubleParameter(0)->GetValue());
+  fitresult->FixParameter(1, par.GetDoubleParameter(1)->GetValue());
   //fitresult->FixParameter(2, par[2]->GetValue());
   bw->Fit(fitresult);
 

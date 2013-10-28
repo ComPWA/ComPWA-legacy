@@ -1,3 +1,13 @@
+//-------------------------------------------------------------------------------
+// Copyright (c) 2013 Mathias Michel.
+// All rights reserved. This program and the accompanying materials
+// are made available under the terms of the GNU Public License v3.0
+// which accompanies this distribution, and is available at
+// http://www.gnu.org/licenses/gpl.html
+//
+// Contributors:
+//     Mathias Michel - initial API and implementation
+//-------------------------------------------------------------------------------
 #include <sstream>
 #include <iostream>
 #include <memory>
@@ -8,6 +18,7 @@
 #include "Core/Event.hpp"
 #include "Core/Particle.hpp"
 #include "Core/ParameterList.hpp"
+#include "Core/FunctionTree.hpp"
 
 MinLogLH::MinLogLH(std::shared_ptr<Amplitude> inPIF, std::shared_ptr<Data> inDIF)
   : pPIF_(inPIF), pDIF_(inDIF){
@@ -16,6 +27,16 @@ MinLogLH::MinLogLH(std::shared_ptr<Amplitude> inPIF, std::shared_ptr<Data> inDIF
 
 MinLogLH::MinLogLH(std::shared_ptr<Amplitude> inPIF, std::shared_ptr<Data> inDIF, std::shared_ptr<Data> inPHSP)
   : pPIF_(inPIF), pDIF_(inDIF), pPHSP_(inPHSP){
+
+}
+
+MinLogLH::MinLogLH(std::shared_ptr<FunctionTree> inFcnTree, std::shared_ptr<Data> inDIF)
+  : pFcnTree_(inFcnTree), pDIF_(inDIF){
+
+}
+
+MinLogLH::MinLogLH(std::shared_ptr<FunctionTree> inFcnTree, std::shared_ptr<Data> inDIF, std::shared_ptr<Data> inPHSP)
+  : pFcnTree_(inFcnTree), pDIF_(inDIF), pPHSP_(inPHSP){
 
 }
 
@@ -29,6 +50,20 @@ std::shared_ptr<ControlParameter> MinLogLH::createInstance(std::shared_ptr<Ampli
 std::shared_ptr<ControlParameter> MinLogLH::createInstance(std::shared_ptr<Amplitude> inPIF, std::shared_ptr<Data> inDIF, std::shared_ptr<Data> inPHSP){
   if(!instance_)
     instance_ = std::shared_ptr<ControlParameter>(new MinLogLH(inPIF, inDIF, inPHSP));
+
+  return instance_;
+}
+
+std::shared_ptr<ControlParameter> MinLogLH::createInstance(std::shared_ptr<FunctionTree> inFcnTree, std::shared_ptr<Data> inDIF){
+  if(!instance_)
+    instance_ = std::shared_ptr<ControlParameter>(new MinLogLH(inFcnTree, inDIF));
+
+  return instance_;
+}
+
+std::shared_ptr<ControlParameter> MinLogLH::createInstance(std::shared_ptr<FunctionTree> inFcnTree, std::shared_ptr<Data> inDIF, std::shared_ptr<Data> inPHSP){
+  if(!instance_)
+    instance_ = std::shared_ptr<ControlParameter>(new MinLogLH(inFcnTree, inDIF, inPHSP));
 
   return instance_;
 }
@@ -71,17 +106,35 @@ double MinLogLH::controlParameter(ParameterList& minPar){
         masssqa += (pow(a.E+b.E,2) - pow(a.px+b.px ,2) - pow(a.py+b.py ,2) - pow(a.pz+b.pz ,2));
         masssqb += (pow(a.E+c.E,2) - pow(a.px+c.px ,2) - pow(a.py+c.py ,2) - pow(a.pz+c.pz ,2));
         masssqc += (pow(c.E+b.E,2) - pow(c.px+b.px ,2) - pow(c.py+b.py ,2) - pow(c.pz+b.pz ,2));
-        x.push_back(sqrt(masssqa));
-        x.push_back(sqrt(masssqb));
-        x.push_back(sqrt(masssqc));
+        x.push_back(sqrt(masssqc)); //23
+        x.push_back(sqrt(masssqb)); //13
+        x.push_back(sqrt(masssqa)); //12
 
-        double intens = pPIF_->intensity(x, minPar);
+        double intens = 0;
+        if(pPIF_){
+          ParameterList intensL = pPIF_->intensity(x, minPar);
+          intens = intensL.GetDoubleParameter(0)->GetValue();
+        }else if(pFcnTree_){
+          //actualize inv masses
+          minPar.GetDoubleParameter("ma")->SetValue(x[0]);
+          minPar.GetDoubleParameter("mb")->SetValue(x[1]);
+          minPar.GetDoubleParameter("mc")->SetValue(x[2]);
+          //calculate intensity
+          pFcnTree_->recalculate();
+          std::shared_ptr<DoubleParameter> intensL = std::dynamic_pointer_cast<DoubleParameter>(pFcnTree_->head()->getValue());
+          intens = intensL->GetValue();
+        }else{
+          //TODO: Exception
+          intens=0;
+        }
         if(intens>0){
           norm+=intens;
         }
       }
-      norm/=nPHSPEvts;
-     // norm=log(norm);
+      //norm/=nPHSPEvts;
+      //norm*=pPIF_->volume()/2.;
+      //norm=nEvents*log(norm);
+      //savedNorm=norm;
     }//else{
       //TODO: Exceptions no PHSPMC, try numerical integration?
     //}
@@ -112,7 +165,26 @@ double MinLogLH::controlParameter(ParameterList& minPar){
       masssq += (pow(a.E+b.E,2) - pow(a.px+b.px ,2) - pow(a.py+b.py ,2) - pow(a.pz+b.pz ,2));
       x.push_back(sqrt(masssq));
 
-      double intens = pPIF_->intensity(x, minPar);
+      //double intens = pPIF_->intensity(x, minPar);
+      //ParameterList intensL = pPIF_->intensity(x, minPar);
+      //double intens = intensL.GetDoubleParameter(0).GetValue();
+      double intens = 0;
+      if(pPIF_){
+        ParameterList intensL = pPIF_->intensity(x, minPar);
+        intens = intensL.GetDoubleParameter(0)->GetValue();
+      }else if(pFcnTree_){
+        //actualize inv masses
+        minPar.GetDoubleParameter("ma")->SetValue(x[0]);
+        minPar.GetDoubleParameter("mb")->SetValue(x[1]);
+        minPar.GetDoubleParameter("mc")->SetValue(x[2]);
+        //calculate intensity
+        pFcnTree_->recalculate();
+        std::shared_ptr<DoubleParameter> intensL = std::dynamic_pointer_cast<DoubleParameter>(pFcnTree_->head()->getValue());
+        intens = intensL->GetValue();
+      }else{
+        //TODO: Exception
+        intens=0;
+      }
       if(intens>0){
         lh -= (log(intens/norm));
       }
@@ -134,18 +206,38 @@ double MinLogLH::controlParameter(ParameterList& minPar){
       masssqa += (pow(a.E+b.E,2) - pow(a.px+b.px ,2) - pow(a.py+b.py ,2) - pow(a.pz+b.pz ,2));
       masssqb += (pow(a.E+c.E,2) - pow(a.px+c.px ,2) - pow(a.py+c.py ,2) - pow(a.pz+c.pz ,2));
       masssqc += (pow(c.E+b.E,2) - pow(c.px+b.px ,2) - pow(c.py+b.py ,2) - pow(c.pz+b.pz ,2));
-      x.push_back(sqrt(masssqa));
-      x.push_back(sqrt(masssqb));
-//      x.push_back(sqrt(masssqc));
+      x.push_back(sqrt(masssqc)); //23
+      x.push_back(sqrt(masssqb)); //13
+      x.push_back(sqrt(masssqa)); //12
 
-      double intens = pPIF_->intensity(x, minPar);
+      //double intens = pPIF_->intensity(x, minPar);
+     // ParameterList intensL = pPIF_->intensity(x, minPar);
+      //double intens = intensL.GetDoubleParameter(0).GetValue();
+      double intens = 0;
+      if(pPIF_){
+        ParameterList intensL = pPIF_->intensity(x, minPar);
+        intens = intensL.GetDoubleParameter(0)->GetValue();
+      }else if(pFcnTree_){
+        //actualize inv masses
+        minPar.GetDoubleParameter("ma")->SetValue(x[0]);
+        minPar.GetDoubleParameter("mb")->SetValue(x[1]);
+        minPar.GetDoubleParameter("mc")->SetValue(x[2]);
+        //calculate intensity
+        pFcnTree_->recalculate();
+        std::shared_ptr<DoubleParameter> intensL = std::dynamic_pointer_cast<DoubleParameter>(pFcnTree_->head()->getValue());
+        intens = intensL->GetValue();
+      }else{
+        //TODO: Exception
+        intens=0;
+      }
       if(intens>0){
-        lh -= (log(intens));
+        lh += log10(intens);
       }
 
     }
-    lh/=nEvents;
-    lh += norm;
+    //lh = nEvents/2.*(norm/(nPHSPEvts-1))*(norm/(nPHSPEvts-1)) - lh + nEvents*log10(norm/nPHSPEvts);
+    lh = nEvents*log10(norm/nPHSPEvts) - lh ;
+    //lh -= norm;
     break;
   }
   default:{

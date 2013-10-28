@@ -1,20 +1,21 @@
 ########### Physics Jamfile #############
-import os ;
 path-constant PHYSICS : . ;
 
 # libPhysics.so will consist of these packages:
-build-project DPKinematics ;
 build-project AmplitudeSum ;
-build-project AmplitudeSum2 ;
+build-project DPKinematics ;
 build-project BreitWigner ;
+#build-project BlackScholes ;
+#build-project NeuralNetwork ;
 
 # Build libPhysics.so
 lib Physics : 
         [ glob *.cpp ]
         $(PHYSICS)/DPKinematics//DPKinematics
         $(PHYSICS)/AmplitudeSum//AmplitudeSum
-        $(PHYSICS)/AmplitudeSum2//AmplitudeSum2
         $(PHYSICS)/BreitWigner//BreitWigner
+        #$(PHYSICS)/BlackScholes//BlackScholes
+        #$(PHYSICS)/NeuralNetwork//NeuralNetwork
         #: <link>static 
 ;
 

@@ -1,0 +1,16 @@
+export BOOST_BUILD_PATH=/local/data/michel/workspace/boost_1_48_0/build
+export BOOST_ROOT=/local/data/michel/workspace/boost_1_48_0
+export GENEVA=/local/data/michel/PWA/geneva-v0.9.10/build
+export MINUIT2=/local/data/michel/PWA/Minuit2-5.24.00
+export ROOTSYS=/local/data/michel/fairroot/build
+export ROOTINCLUDE=/local/data/michel/fairroot/build/include/root
+
+
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$GENEVA/lib:$MINUIT2/lib:$ROOTSYS/lib/root:$BOOST_BUILD_PATH/lib:/home/mathias/workspace/nextPWA/lib:/local/home/mathias/workspace/nextPWA/external/qft++/lib/
+
+echo "check libs:"
+echo $LD_LIBRARY_PATH
+
+#prevents minuit vom using multiple threads
+#needed as long as data-reader is not thread-safe
+export OMP_NUM_THREADS=1

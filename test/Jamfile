@@ -37,10 +37,17 @@ lib test :
         $(TOP)/Optimizer//Optimizer 
         : : ;
         
-#exe cx0testApp : 
-        #CX0TestApp.cpp 
-        #test
-        #: ;
+
+exe cx0testApp : 
+        CX0TestApp.cpp 
+        test
+        : ;
+        
+exe treetestApp : 
+        TreeTestApp.cpp 
+        test
+        $(TOP)/Core//ComPWA
+        : ;
         
 exe dataiftestApp : 
         DataIFTestApp.cpp 
@@ -110,6 +117,27 @@ exe integrationtestbinnedApp :
         $(TOP)/Optimizer/Minuit2//Minuit2IF
         : ;
         
+#exe blackscholesApp : 
+#        BlackScholesApp.cpp 
+#        test
+#        $(TOP)/Core//ComPWA
+#        $(TOP)/Estimator/StockLeastSquares//StockLeastSquares 
+#        $(TOP)/Physics/BlackScholes//BlackScholes   
+#        $(TOP)/DataReader/StockReader//StockReader
+#        $(TOP)/Optimizer/Minuit2//Minuit2IF
+#        : ;
+#        
+#exe neuralnetworkApp : 
+#        NeuralNetworkApp.cpp 
+#        test
+#        $(TOP)/Core//ComPWA
+#        $(TOP)/Estimator/StockLeastSquares//StockLeastSquares 
+#        $(TOP)/Physics/NeuralNetwork//NeuralNetwork   
+#        $(TOP)/DataReader/StockReader//StockReader
+#        $(TOP)/Optimizer/Geneva//GenevaIF
+#        $(TOP)/Optimizer/Minuit2//Minuit2IF
+#        : ;
+        
 exe runmanagertestApp : 
         RunManagerTestApp.cpp 
         test
@@ -126,26 +154,37 @@ exe gentwopartApp :
         $(TOP)/Core//ComPWA
         $(TOP)/Physics/BreitWigner//BreitWigner  
         : ;
-         
-exe genPhspApp : 
-		GenPhspApp.cpp
-		test
-        $(TOP)/Core//ComPWA
-        #$(TOP)/Physics/AmplitudeSum//AmplitudeSum  
-        #$(TOP)/DataReader/RootReader
-        #$(TOP)/Estimator/MinLogLH//MinLogLH 
-        #$(TOP)/Optimizer/Minuit2//Minuit2IF
-        $(TOP)/Physics/DPKinematics//DPKinematics
-		: ;         
         
+exe gendalitzApp : 
+        GenDalitzApp.cpp 
+        test
+        $(TOP)/Core//ComPWA
+        $(TOP)/Physics/AmplitudeSum//AmplitudeSum  
+        : ;
+        
+exe dalitzplotApp : 
+        DalitzDataPlotterApp.cpp 
+        test
+        $(TOP)/Core//ComPWA
+        $(TOP)/DataReader/RootReader//RootReader  
+        : ;
+        
+exe dalitzfitApp : 
+        DalitzFitApp.cpp 
+        test
+        $(TOP)/Core//ComPWA
+        $(TOP)/Physics/AmplitudeSum//AmplitudeSum  
+        $(TOP)/DataReader/RootReader//RootReader
+        $(TOP)/Estimator/MinLogLH//MinLogLH 
+        $(TOP)/Optimizer/Minuit2//Minuit2IF
+        : ;
 
+install dist : test : <location>$(TOP)/lib <threading>single ;
+#install dist2 : dalitzfitApp treetestApp cx0testApp dataiftestApp optimizertestApp physicstestApp blackscholesApp neuralnetworkApp : <location>$(TOP)/bin <threading>single ;
+install dist2 : dalitzfitApp treetestApp cx0testApp dataiftestApp optimizertestApp physicstestApp : <location>$(TOP)/bin <threading>single ;
+install dist3 : estimatortestApp integrationtestApp integrationtestbinnedApp runmanagertestApp gentwopartApp gendalitzApp dalitzplotApp : <location>$(TOP)/bin <threading>single ;
 
-#install dist : test : <location>$(TOP)/lib <threading>single ;
-#install dist2 : cx0testApp dataiftestApp optimizertestApp physicstestApp : <location>$(TOP)/bin <threading>single ;
-#install dist2 : dataiftestApp optimizertestApp physicstestApp : <location>$(TOP)/bin <threading>single ;
-#install dist3 : estimatortestApp integrationtestApp integrationtestbinnedApp runmanagertestApp gentwopartApp  : <location>$(TOP)/bin <threading>single ;
-#install my : gendalitzApp : <location>$(TOP)/bin <threading>single ;
+if $(GENEVA) { 
+install dist7 : genevatestApp : <location>$(TOP)/bin ;
+}
 
-#if $(GENEVA) { 
-#install dist7 : genevatestApp : <location>$(TOP)/bin ;
-#}

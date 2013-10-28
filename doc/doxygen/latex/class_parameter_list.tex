@@ -1,0 +1,464 @@
+\hypertarget{class_parameter_list}{\section{Parameter\-List Class Reference}
+\label{class_parameter_list}\index{Parameter\-List@{Parameter\-List}}
+}
+
+
+Internal container representing a parameter list.  
+
+
+
+
+{\ttfamily \#include $<$Parameter\-List.\-hpp$>$}
+
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{class_parameter_list_a81cb788ca476171256c82f0416b584c6}{Parameter\-List} ()
+\begin{DoxyCompactList}\small\item\em Standard constructor with empty parameter vector. \end{DoxyCompactList}\item 
+\hyperlink{class_parameter_list_ab33e6f5f5f766af5ecfb4241be0f4f78}{Parameter\-List} (const std\-::vector$<$ \hyperlink{class_double_parameter}{Double\-Parameter} $>$ \&in\-Vec)
+\begin{DoxyCompactList}\small\item\em Standard constructor with a vector of \hyperlink{class_double_parameter}{Double\-Parameter}. \end{DoxyCompactList}\item 
+\hyperlink{class_parameter_list_a7253d65f60c0b981ea59038b64c1632b}{Parameter\-List} (const std\-::vector$<$ \hyperlink{class_integer_parameter}{Integer\-Parameter} $>$ \&in\-Vec)
+\begin{DoxyCompactList}\small\item\em Standard constructor with a vector of \hyperlink{class_integer_parameter}{Integer\-Parameter}. \end{DoxyCompactList}\item 
+\hyperlink{class_parameter_list_aaeac52b9c62c25950d1d7f3e83ce4213}{Parameter\-List} (const std\-::vector$<$ \hyperlink{class_bool_parameter}{Bool\-Parameter} $>$ \&in\-Vec)
+\begin{DoxyCompactList}\small\item\em Standard constructor with a vector of \hyperlink{class_bool_parameter}{Bool\-Parameter}. \end{DoxyCompactList}\item 
+\hyperlink{class_parameter_list_ad66b91346d298714c5200ffe658d841c}{Parameter\-List} (const std\-::vector$<$ \hyperlink{class_double_parameter}{Double\-Parameter} $>$ \&in\-D, const std\-::vector$<$ \hyperlink{class_integer_parameter}{Integer\-Parameter} $>$ \&in\-I, const std\-::vector$<$ \hyperlink{class_bool_parameter}{Bool\-Parameter} $>$ \&in\-B)
+\begin{DoxyCompactList}\small\item\em Standard constructor with a vector of bool, int and double P\-W\-A\-Parameter. \end{DoxyCompactList}\item 
+\hyperlink{class_parameter_list_a93bfa4961eab456b33f0009e7a5ab1bb}{Parameter\-List} (const \hyperlink{class_parameter_list}{Parameter\-List} \&in)
+\begin{DoxyCompactList}\small\item\em Copy constructor using = operator. \end{DoxyCompactList}\item 
+virtual \hyperlink{class_parameter_list_ad3184442bd4735ef5afbb8f7cd7b8726}{$\sim$\-Parameter\-List} ()
+\begin{DoxyCompactList}\small\item\em Empty Destructor. \end{DoxyCompactList}\item 
+\hypertarget{class_parameter_list_a3f27ba4154586dfb2d4c4c30d576219c}{virtual const unsigned int \hyperlink{class_parameter_list_a3f27ba4154586dfb2d4c4c30d576219c}{Get\-N\-Parameter} () const }\label{class_parameter_list_a3f27ba4154586dfb2d4c4c30d576219c}
+
+\begin{DoxyCompactList}\small\item\em Getter for number of parameter. \end{DoxyCompactList}\item 
+\hypertarget{class_parameter_list_aa626799b903b16e7f6f29f918c626f9e}{virtual const unsigned int \hyperlink{class_parameter_list_aa626799b903b16e7f6f29f918c626f9e}{Get\-N\-Double} () const }\label{class_parameter_list_aa626799b903b16e7f6f29f918c626f9e}
+
+\begin{DoxyCompactList}\small\item\em Getter for number of double parameter. \end{DoxyCompactList}\item 
+\hypertarget{class_parameter_list_a8f9f2b28594a1055ea5f8e920ebcbff7}{virtual const unsigned int \hyperlink{class_parameter_list_a8f9f2b28594a1055ea5f8e920ebcbff7}{Get\-N\-Integer} () const }\label{class_parameter_list_a8f9f2b28594a1055ea5f8e920ebcbff7}
+
+\begin{DoxyCompactList}\small\item\em Getter for number of integer parameter. \end{DoxyCompactList}\item 
+\hypertarget{class_parameter_list_a5c21a1598d5c0bf2f864f4bb10484313}{virtual const unsigned int \hyperlink{class_parameter_list_a5c21a1598d5c0bf2f864f4bb10484313}{Get\-N\-Bool} () const }\label{class_parameter_list_a5c21a1598d5c0bf2f864f4bb10484313}
+
+\begin{DoxyCompactList}\small\item\em Getter for number of boolean parameter. \end{DoxyCompactList}\item 
+virtual \hyperlink{class_double_parameter}{Double\-Parameter} \& \hyperlink{class_parameter_list_a5fd405f70ee9eb625d0ebb1a43e3b126}{Get\-Double\-Parameter} (const unsigned int i)
+\begin{DoxyCompactList}\small\item\em Getter for floating point parameter. \end{DoxyCompactList}\item 
+virtual \hyperlink{class_integer_parameter}{Integer\-Parameter} \& \hyperlink{class_parameter_list_a4a0f112557a3a9fada4aee97118ff1de}{Get\-Integer\-Parameter} (const unsigned int i)
+\begin{DoxyCompactList}\small\item\em Getter for integer parameter. \end{DoxyCompactList}\item 
+virtual \hyperlink{class_bool_parameter}{Bool\-Parameter} \& \hyperlink{class_parameter_list_a3982c7d4706e2115eed776e4b08268fb}{Get\-Bool\-Parameter} (const unsigned int i)
+\begin{DoxyCompactList}\small\item\em Getter for boolean parameter. \end{DoxyCompactList}\item 
+virtual const double \hyperlink{class_parameter_list_a99c664620aa97bc31d1defcf7ab4c927}{Get\-Parameter\-Value} (const unsigned int i) const 
+\begin{DoxyCompactList}\small\item\em Getter for parameter value. \end{DoxyCompactList}\item 
+virtual void \hyperlink{class_parameter_list_ad88a26efd71e1d3d65924500b72ffd61}{Set\-Parameter\-Value} (const unsigned int i, const double in\-Val)
+\begin{DoxyCompactList}\small\item\em Setter for parameter value. \end{DoxyCompactList}\item 
+virtual void \hyperlink{class_parameter_list_afefffdda9cf6dfd97a519baa0e1f6e5b}{Set\-Parameter\-Value} (const unsigned int i, const int in\-Val)
+\begin{DoxyCompactList}\small\item\em Setter for parameter value. \end{DoxyCompactList}\item 
+virtual void \hyperlink{class_parameter_list_a41192da59a56f939d1149a00cadfc6b3}{Set\-Parameter\-Value} (const unsigned int i, const bool in\-Val)
+\begin{DoxyCompactList}\small\item\em Setter for parameter value. \end{DoxyCompactList}\item 
+virtual void \hyperlink{class_parameter_list_a0d5088fbb4fb10a3efea998d1aeee1a3}{Add\-Parameter} (\hyperlink{class_double_parameter}{Double\-Parameter} par)
+\begin{DoxyCompactList}\small\item\em Add floating point parameter. \end{DoxyCompactList}\item 
+virtual void \hyperlink{class_parameter_list_a817d794256d9f2e0f38535c264b2761b}{Add\-Parameter} (\hyperlink{class_integer_parameter}{Integer\-Parameter} par)
+\begin{DoxyCompactList}\small\item\em Add integer parameter. \end{DoxyCompactList}\item 
+virtual void \hyperlink{class_parameter_list_a7fb0ec39de4c17fd0a9d3805673007d4}{Add\-Parameter} (\hyperlink{class_bool_parameter}{Bool\-Parameter} par)
+\begin{DoxyCompactList}\small\item\em Add boolean parameter. \end{DoxyCompactList}\item 
+std\-::string const \& \hyperlink{class_parameter_list_a9ea8f819a48dd707785e2db937736bd5}{to\-\_\-str} () const 
+\begin{DoxyCompactList}\small\item\em A public function returning a string with parameter information. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Protected Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \hyperlink{class_parameter_list_ac93259ed7c23cfcc73e906664ba2159a}{make\-\_\-str} ()
+\begin{DoxyCompactList}\small\item\em A protected function which creates an output string for printing. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Protected Attributes}
+\begin{DoxyCompactItemize}
+\item 
+std\-::vector$<$ \hyperlink{class_double_parameter}{Double\-Parameter} $>$ \hyperlink{class_parameter_list_ae2c308362f7b1f3ea063677d2e28ad3c}{v\-Double\-Par\-\_\-}
+\item 
+std\-::vector$<$ \hyperlink{class_integer_parameter}{Integer\-Parameter} $>$ \hyperlink{class_parameter_list_a9398a16845891a6cf22230771636b439}{v\-Int\-Par\-\_\-}
+\item 
+std\-::vector$<$ \hyperlink{class_bool_parameter}{Bool\-Parameter} $>$ \hyperlink{class_parameter_list_a71da57a577ae374300d2b30c3481bccd}{v\-Bool\-Par\-\_\-}
+\item 
+std\-::string \hyperlink{class_parameter_list_a8091ca235596882df0e06a3fcd5345c6}{out\-\_\-}
+\end{DoxyCompactItemize}
+\subsection*{Friends}
+\begin{DoxyCompactItemize}
+\item 
+std\-::ostream \& \hyperlink{class_parameter_list_a7a23c0f7036c113aed95092096453d65}{operator$<$$<$} (std\-::ostream \&os, const \hyperlink{class_parameter_list}{Parameter\-List} \&p)
+\begin{DoxyCompactList}\small\item\em friend function to stream parameter information to output \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Internal container representing a parameter list. 
+
+\subsection{Constructor \& Destructor Documentation}
+\hypertarget{class_parameter_list_a81cb788ca476171256c82f0416b584c6}{\index{Parameter\-List@{Parameter\-List}!Parameter\-List@{Parameter\-List}}
+\index{Parameter\-List@{Parameter\-List}!ParameterList@{Parameter\-List}}
+\subsubsection[{Parameter\-List}]{\setlength{\rightskip}{0pt plus 5cm}Parameter\-List\-::\-Parameter\-List (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}}\label{class_parameter_list_a81cb788ca476171256c82f0416b584c6}
+
+
+Standard constructor with empty parameter vector. 
+
+Standard constructor without input. The vectors of parameters are empty. \hypertarget{class_parameter_list_ab33e6f5f5f766af5ecfb4241be0f4f78}{\index{Parameter\-List@{Parameter\-List}!Parameter\-List@{Parameter\-List}}
+\index{Parameter\-List@{Parameter\-List}!ParameterList@{Parameter\-List}}
+\subsubsection[{Parameter\-List}]{\setlength{\rightskip}{0pt plus 5cm}Parameter\-List\-::\-Parameter\-List (
+\begin{DoxyParamCaption}
+\item[{const std\-::vector$<$ {\bf Double\-Parameter} $>$ \&}]{in\-Vec}
+\end{DoxyParamCaption}
+)}}\label{class_parameter_list_ab33e6f5f5f766af5ecfb4241be0f4f78}
+
+
+Standard constructor with a vector of \hyperlink{class_double_parameter}{Double\-Parameter}. 
+
+Standard constructor with list of P\-W\-A\-Parameter provided. The vector gets copied to the internal vector. To avoid copying, use the add\-Parameter() functions and empty constructor P\-W\-A\-Parameter\-List. Non-\/double parameter are empty 
+\begin{DoxyParams}{Parameters}
+{\em in\-Vec} & input vector of double parameters \\
+\hline
+\end{DoxyParams}
+\begin{DoxySeeAlso}{See Also}
+add\-Parameter(\-P\-W\-A\-Parameter$<$double$>$\&) 
+\end{DoxySeeAlso}
+\hypertarget{class_parameter_list_a7253d65f60c0b981ea59038b64c1632b}{\index{Parameter\-List@{Parameter\-List}!Parameter\-List@{Parameter\-List}}
+\index{Parameter\-List@{Parameter\-List}!ParameterList@{Parameter\-List}}
+\subsubsection[{Parameter\-List}]{\setlength{\rightskip}{0pt plus 5cm}Parameter\-List\-::\-Parameter\-List (
+\begin{DoxyParamCaption}
+\item[{const std\-::vector$<$ {\bf Integer\-Parameter} $>$ \&}]{in\-Vec}
+\end{DoxyParamCaption}
+)}}\label{class_parameter_list_a7253d65f60c0b981ea59038b64c1632b}
+
+
+Standard constructor with a vector of \hyperlink{class_integer_parameter}{Integer\-Parameter}. 
+
+Standard constructor with list of P\-W\-A\-Parameter provided. The vector gets copied to the internal vector. To avoid copying, use the add\-Parameter() functions and empty constructor P\-W\-A\-Parameter\-List. Non-\/integer parameter are empty 
+\begin{DoxyParams}{Parameters}
+{\em in\-Vec} & input vector of integer parameters \\
+\hline
+\end{DoxyParams}
+\begin{DoxySeeAlso}{See Also}
+add\-Parameter(\-P\-W\-A\-Parameter$<$integer$>$\&) 
+\end{DoxySeeAlso}
+\hypertarget{class_parameter_list_aaeac52b9c62c25950d1d7f3e83ce4213}{\index{Parameter\-List@{Parameter\-List}!Parameter\-List@{Parameter\-List}}
+\index{Parameter\-List@{Parameter\-List}!ParameterList@{Parameter\-List}}
+\subsubsection[{Parameter\-List}]{\setlength{\rightskip}{0pt plus 5cm}Parameter\-List\-::\-Parameter\-List (
+\begin{DoxyParamCaption}
+\item[{const std\-::vector$<$ {\bf Bool\-Parameter} $>$ \&}]{in\-Vec}
+\end{DoxyParamCaption}
+)}}\label{class_parameter_list_aaeac52b9c62c25950d1d7f3e83ce4213}
+
+
+Standard constructor with a vector of \hyperlink{class_bool_parameter}{Bool\-Parameter}. 
+
+Standard constructor with list of P\-W\-A\-Parameter provided. The vector gets copied to the internal vector. To avoid copying, use the add\-Parameter() functions and empty constructor P\-W\-A\-Parameter\-List. Non-\/boolean parameter are empty 
+\begin{DoxyParams}{Parameters}
+{\em in\-Vec} & input vector of boolean parameters \\
+\hline
+\end{DoxyParams}
+\begin{DoxySeeAlso}{See Also}
+add\-Parameter(\-P\-W\-A\-Parameter$<$bool$>$\&) 
+\end{DoxySeeAlso}
+\hypertarget{class_parameter_list_ad66b91346d298714c5200ffe658d841c}{\index{Parameter\-List@{Parameter\-List}!Parameter\-List@{Parameter\-List}}
+\index{Parameter\-List@{Parameter\-List}!ParameterList@{Parameter\-List}}
+\subsubsection[{Parameter\-List}]{\setlength{\rightskip}{0pt plus 5cm}Parameter\-List\-::\-Parameter\-List (
+\begin{DoxyParamCaption}
+\item[{const std\-::vector$<$ {\bf Double\-Parameter} $>$ \&}]{in\-D, }
+\item[{const std\-::vector$<$ {\bf Integer\-Parameter} $>$ \&}]{in\-I, }
+\item[{const std\-::vector$<$ {\bf Bool\-Parameter} $>$ \&}]{in\-B}
+\end{DoxyParamCaption}
+)}}\label{class_parameter_list_ad66b91346d298714c5200ffe658d841c}
+
+
+Standard constructor with a vector of bool, int and double P\-W\-A\-Parameter. 
+
+Standard constructor with list of P\-W\-A\-Parameter provided. The vectors get copied to the internal vectors. To avoid copying, use the add\-Parameter() functions and empty constructor P\-W\-A\-Parameter\-List. 
+\begin{DoxyParams}{Parameters}
+{\em in\-D} & input vector of floating point parameters \\
+\hline
+{\em in\-I} & input vector of integer parameters \\
+\hline
+{\em in\-B} & input vector of boolean parameters \\
+\hline
+\end{DoxyParams}
+\begin{DoxySeeAlso}{See Also}
+add\-Parameter(\-P\-W\-A\-Parameter$<$double$>$\&, P\-W\-A\-Parameter$<$int$>$\&, P\-W\-A\-Parameter$<$bool$>$\&) 
+\end{DoxySeeAlso}
+\hypertarget{class_parameter_list_a93bfa4961eab456b33f0009e7a5ab1bb}{\index{Parameter\-List@{Parameter\-List}!Parameter\-List@{Parameter\-List}}
+\index{Parameter\-List@{Parameter\-List}!ParameterList@{Parameter\-List}}
+\subsubsection[{Parameter\-List}]{\setlength{\rightskip}{0pt plus 5cm}Parameter\-List\-::\-Parameter\-List (
+\begin{DoxyParamCaption}
+\item[{const {\bf Parameter\-List} \&}]{in}
+\end{DoxyParamCaption}
+)}}\label{class_parameter_list_a93bfa4961eab456b33f0009e7a5ab1bb}
+
+
+Copy constructor using = operator. 
+
+Simple copy constructor using the = operator. As this operator is not overloaded in this class, c++ will copy every member variable. As this is a container class, this should be fine. 
+\begin{DoxyParams}{Parameters}
+{\em in} & input P\-W\-A\-Parameter\-List which variables will be copied \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_parameter_list_ad3184442bd4735ef5afbb8f7cd7b8726}{\index{Parameter\-List@{Parameter\-List}!$\sim$\-Parameter\-List@{$\sim$\-Parameter\-List}}
+\index{$\sim$\-Parameter\-List@{$\sim$\-Parameter\-List}!ParameterList@{Parameter\-List}}
+\subsubsection[{$\sim$\-Parameter\-List}]{\setlength{\rightskip}{0pt plus 5cm}Parameter\-List\-::$\sim$\-Parameter\-List (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{class_parameter_list_ad3184442bd4735ef5afbb8f7cd7b8726}
+
+
+Empty Destructor. 
+
+There is nothing to destroy \-:( 
+
+\subsection{Member Function Documentation}
+\hypertarget{class_parameter_list_a0d5088fbb4fb10a3efea998d1aeee1a3}{\index{Parameter\-List@{Parameter\-List}!Add\-Parameter@{Add\-Parameter}}
+\index{Add\-Parameter@{Add\-Parameter}!ParameterList@{Parameter\-List}}
+\subsubsection[{Add\-Parameter}]{\setlength{\rightskip}{0pt plus 5cm}void Parameter\-List\-::\-Add\-Parameter (
+\begin{DoxyParamCaption}
+\item[{{\bf Double\-Parameter}}]{par}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{class_parameter_list_a0d5088fbb4fb10a3efea998d1aeee1a3}
+
+
+Add floating point parameter. 
+
+Adds a floating point parameter to the list 
+\begin{DoxyParams}{Parameters}
+{\em par} & input parameter \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_parameter_list_a817d794256d9f2e0f38535c264b2761b}{\index{Parameter\-List@{Parameter\-List}!Add\-Parameter@{Add\-Parameter}}
+\index{Add\-Parameter@{Add\-Parameter}!ParameterList@{Parameter\-List}}
+\subsubsection[{Add\-Parameter}]{\setlength{\rightskip}{0pt plus 5cm}void Parameter\-List\-::\-Add\-Parameter (
+\begin{DoxyParamCaption}
+\item[{{\bf Integer\-Parameter}}]{par}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{class_parameter_list_a817d794256d9f2e0f38535c264b2761b}
+
+
+Add integer parameter. 
+
+Adds an integer parameter to the list 
+\begin{DoxyParams}{Parameters}
+{\em par} & input parameter \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_parameter_list_a7fb0ec39de4c17fd0a9d3805673007d4}{\index{Parameter\-List@{Parameter\-List}!Add\-Parameter@{Add\-Parameter}}
+\index{Add\-Parameter@{Add\-Parameter}!ParameterList@{Parameter\-List}}
+\subsubsection[{Add\-Parameter}]{\setlength{\rightskip}{0pt plus 5cm}void Parameter\-List\-::\-Add\-Parameter (
+\begin{DoxyParamCaption}
+\item[{{\bf Bool\-Parameter}}]{par}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{class_parameter_list_a7fb0ec39de4c17fd0a9d3805673007d4}
+
+
+Add boolean parameter. 
+
+Adds an boolean parameter to the list 
+\begin{DoxyParams}{Parameters}
+{\em par} & input parameter \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_parameter_list_a3982c7d4706e2115eed776e4b08268fb}{\index{Parameter\-List@{Parameter\-List}!Get\-Bool\-Parameter@{Get\-Bool\-Parameter}}
+\index{Get\-Bool\-Parameter@{Get\-Bool\-Parameter}!ParameterList@{Parameter\-List}}
+\subsubsection[{Get\-Bool\-Parameter}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Bool\-Parameter} \& Parameter\-List\-::\-Get\-Bool\-Parameter (
+\begin{DoxyParamCaption}
+\item[{const unsigned int}]{i}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{class_parameter_list_a3982c7d4706e2115eed776e4b08268fb}
+
+
+Getter for boolean parameter. 
+
+Getter for boolean parameter 
+\begin{DoxyParams}{Parameters}
+{\em i} & input number of parameter to load \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+par output container for loaded parameter 
+\end{DoxyReturn}
+\hypertarget{class_parameter_list_a5fd405f70ee9eb625d0ebb1a43e3b126}{\index{Parameter\-List@{Parameter\-List}!Get\-Double\-Parameter@{Get\-Double\-Parameter}}
+\index{Get\-Double\-Parameter@{Get\-Double\-Parameter}!ParameterList@{Parameter\-List}}
+\subsubsection[{Get\-Double\-Parameter}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Double\-Parameter} \& Parameter\-List\-::\-Get\-Double\-Parameter (
+\begin{DoxyParamCaption}
+\item[{const unsigned int}]{i}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{class_parameter_list_a5fd405f70ee9eb625d0ebb1a43e3b126}
+
+
+Getter for floating point parameter. 
+
+Getter for floating point parameter 
+\begin{DoxyParams}{Parameters}
+{\em i} & input number of parameter to load \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+par output container for loaded parameter 
+\end{DoxyReturn}
+\hypertarget{class_parameter_list_a4a0f112557a3a9fada4aee97118ff1de}{\index{Parameter\-List@{Parameter\-List}!Get\-Integer\-Parameter@{Get\-Integer\-Parameter}}
+\index{Get\-Integer\-Parameter@{Get\-Integer\-Parameter}!ParameterList@{Parameter\-List}}
+\subsubsection[{Get\-Integer\-Parameter}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Integer\-Parameter} \& Parameter\-List\-::\-Get\-Integer\-Parameter (
+\begin{DoxyParamCaption}
+\item[{const unsigned int}]{i}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{class_parameter_list_a4a0f112557a3a9fada4aee97118ff1de}
+
+
+Getter for integer parameter. 
+
+Getter for integer parameter 
+\begin{DoxyParams}{Parameters}
+{\em i} & input number of parameter to load \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+par output container for loaded parameter 
+\end{DoxyReturn}
+\hypertarget{class_parameter_list_a99c664620aa97bc31d1defcf7ab4c927}{\index{Parameter\-List@{Parameter\-List}!Get\-Parameter\-Value@{Get\-Parameter\-Value}}
+\index{Get\-Parameter\-Value@{Get\-Parameter\-Value}!ParameterList@{Parameter\-List}}
+\subsubsection[{Get\-Parameter\-Value}]{\setlength{\rightskip}{0pt plus 5cm}const double Parameter\-List\-::\-Get\-Parameter\-Value (
+\begin{DoxyParamCaption}
+\item[{const unsigned int}]{i}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily [virtual]}}}\label{class_parameter_list_a99c664620aa97bc31d1defcf7ab4c927}
+
+
+Getter for parameter value. 
+
+Getter for parameter value 
+\begin{DoxyParams}{Parameters}
+{\em i} & input number of parameter to load \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+par output container for loaded parameter 
+\end{DoxyReturn}
+\hypertarget{class_parameter_list_ac93259ed7c23cfcc73e906664ba2159a}{\index{Parameter\-List@{Parameter\-List}!make\-\_\-str@{make\-\_\-str}}
+\index{make\-\_\-str@{make\-\_\-str}!ParameterList@{Parameter\-List}}
+\subsubsection[{make\-\_\-str}]{\setlength{\rightskip}{0pt plus 5cm}void Parameter\-List\-::make\-\_\-str (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [protected]}}}\label{class_parameter_list_ac93259ed7c23cfcc73e906664ba2159a}
+
+
+A protected function which creates an output string for printing. 
+
+This function uses all available information about the parameterlist to create a string which will be streamed via the stream operator $<$$<$. \begin{DoxySeeAlso}{See Also}
+operator$<$$<$, \hyperlink{class_parameter_list_a9ea8f819a48dd707785e2db937736bd5}{to\-\_\-str()} 
+\end{DoxySeeAlso}
+\hypertarget{class_parameter_list_ad88a26efd71e1d3d65924500b72ffd61}{\index{Parameter\-List@{Parameter\-List}!Set\-Parameter\-Value@{Set\-Parameter\-Value}}
+\index{Set\-Parameter\-Value@{Set\-Parameter\-Value}!ParameterList@{Parameter\-List}}
+\subsubsection[{Set\-Parameter\-Value}]{\setlength{\rightskip}{0pt plus 5cm}void Parameter\-List\-::\-Set\-Parameter\-Value (
+\begin{DoxyParamCaption}
+\item[{const unsigned int}]{i, }
+\item[{const double}]{in\-Val}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{class_parameter_list_ad88a26efd71e1d3d65924500b72ffd61}
+
+
+Setter for parameter value. 
+
+Setter for parameter value 
+\begin{DoxyParams}{Parameters}
+{\em i} & input number of parameter to load \\
+\hline
+{\em in\-Val} & input floating value for parameter \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_parameter_list_afefffdda9cf6dfd97a519baa0e1f6e5b}{\index{Parameter\-List@{Parameter\-List}!Set\-Parameter\-Value@{Set\-Parameter\-Value}}
+\index{Set\-Parameter\-Value@{Set\-Parameter\-Value}!ParameterList@{Parameter\-List}}
+\subsubsection[{Set\-Parameter\-Value}]{\setlength{\rightskip}{0pt plus 5cm}void Parameter\-List\-::\-Set\-Parameter\-Value (
+\begin{DoxyParamCaption}
+\item[{const unsigned int}]{i, }
+\item[{const int}]{in\-Val}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{class_parameter_list_afefffdda9cf6dfd97a519baa0e1f6e5b}
+
+
+Setter for parameter value. 
+
+Setter for parameter value 
+\begin{DoxyParams}{Parameters}
+{\em i} & input number of parameter to load \\
+\hline
+{\em in\-Val} & input integer value for parameter \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_parameter_list_a41192da59a56f939d1149a00cadfc6b3}{\index{Parameter\-List@{Parameter\-List}!Set\-Parameter\-Value@{Set\-Parameter\-Value}}
+\index{Set\-Parameter\-Value@{Set\-Parameter\-Value}!ParameterList@{Parameter\-List}}
+\subsubsection[{Set\-Parameter\-Value}]{\setlength{\rightskip}{0pt plus 5cm}void Parameter\-List\-::\-Set\-Parameter\-Value (
+\begin{DoxyParamCaption}
+\item[{const unsigned int}]{i, }
+\item[{const bool}]{in\-Val}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{class_parameter_list_a41192da59a56f939d1149a00cadfc6b3}
+
+
+Setter for parameter value. 
+
+Setter for parameter value 
+\begin{DoxyParams}{Parameters}
+{\em i} & input number of parameter to load \\
+\hline
+{\em in\-Val} & input boolean value for parameter \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_parameter_list_a9ea8f819a48dd707785e2db937736bd5}{\index{Parameter\-List@{Parameter\-List}!to\-\_\-str@{to\-\_\-str}}
+\index{to\-\_\-str@{to\-\_\-str}!ParameterList@{Parameter\-List}}
+\subsubsection[{to\-\_\-str}]{\setlength{\rightskip}{0pt plus 5cm}std\-::string const \& Parameter\-List\-::to\-\_\-str (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const}}\label{class_parameter_list_a9ea8f819a48dd707785e2db937736bd5}
+
+
+A public function returning a string with parameter information. 
+
+This function simply returns the member string out\-\_\-, which contains all parameter information. The string gets created using the outstream of the P\-W\-A\-Parameter class. \begin{DoxyReturn}{Returns}
+string with parameter information 
+\end{DoxyReturn}
+\begin{DoxySeeAlso}{See Also}
+operator$<$$<$ 
+\end{DoxySeeAlso}
+
+
+\subsection{Friends And Related Function Documentation}
+\hypertarget{class_parameter_list_a7a23c0f7036c113aed95092096453d65}{\index{Parameter\-List@{Parameter\-List}!operator$<$$<$@{operator$<$$<$}}
+\index{operator$<$$<$@{operator$<$$<$}!ParameterList@{Parameter\-List}}
+\subsubsection[{operator$<$$<$}]{\setlength{\rightskip}{0pt plus 5cm}std\-::ostream\& operator$<$$<$ (
+\begin{DoxyParamCaption}
+\item[{std\-::ostream \&}]{os, }
+\item[{const {\bf Parameter\-List} \&}]{p}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [friend]}}}\label{class_parameter_list_a7a23c0f7036c113aed95092096453d65}
+
+
+friend function to stream parameter information to output 
+
+Declaring the stream-\/operator $<$$<$ as friend allows to stream parameter information to the output as easily as a generic type. The definition of this class has to be outside the namespace of the class. \begin{DoxySeeAlso}{See Also}
+\hyperlink{class_parameter_list_ac93259ed7c23cfcc73e906664ba2159a}{make\-\_\-str()}, \hyperlink{class_parameter_list_a9ea8f819a48dd707785e2db937736bd5}{to\-\_\-str()} 
+\end{DoxySeeAlso}
+
+
+\subsection{Field Documentation}
+\hypertarget{class_parameter_list_a8091ca235596882df0e06a3fcd5345c6}{\index{Parameter\-List@{Parameter\-List}!out\-\_\-@{out\-\_\-}}
+\index{out\-\_\-@{out\-\_\-}!ParameterList@{Parameter\-List}}
+\subsubsection[{out\-\_\-}]{\setlength{\rightskip}{0pt plus 5cm}std\-::string Parameter\-List\-::out\-\_\-\hspace{0.3cm}{\ttfamily [protected]}}}\label{class_parameter_list_a8091ca235596882df0e06a3fcd5345c6}
+Output string to print information \hypertarget{class_parameter_list_a71da57a577ae374300d2b30c3481bccd}{\index{Parameter\-List@{Parameter\-List}!v\-Bool\-Par\-\_\-@{v\-Bool\-Par\-\_\-}}
+\index{v\-Bool\-Par\-\_\-@{v\-Bool\-Par\-\_\-}!ParameterList@{Parameter\-List}}
+\subsubsection[{v\-Bool\-Par\-\_\-}]{\setlength{\rightskip}{0pt plus 5cm}std\-::vector$<${\bf Bool\-Parameter}$>$ Parameter\-List\-::v\-Bool\-Par\-\_\-\hspace{0.3cm}{\ttfamily [protected]}}}\label{class_parameter_list_a71da57a577ae374300d2b30c3481bccd}
+Vector of boolean parameters \hypertarget{class_parameter_list_ae2c308362f7b1f3ea063677d2e28ad3c}{\index{Parameter\-List@{Parameter\-List}!v\-Double\-Par\-\_\-@{v\-Double\-Par\-\_\-}}
+\index{v\-Double\-Par\-\_\-@{v\-Double\-Par\-\_\-}!ParameterList@{Parameter\-List}}
+\subsubsection[{v\-Double\-Par\-\_\-}]{\setlength{\rightskip}{0pt plus 5cm}std\-::vector$<${\bf Double\-Parameter}$>$ Parameter\-List\-::v\-Double\-Par\-\_\-\hspace{0.3cm}{\ttfamily [protected]}}}\label{class_parameter_list_ae2c308362f7b1f3ea063677d2e28ad3c}
+Vector of floating point parameters \hypertarget{class_parameter_list_a9398a16845891a6cf22230771636b439}{\index{Parameter\-List@{Parameter\-List}!v\-Int\-Par\-\_\-@{v\-Int\-Par\-\_\-}}
+\index{v\-Int\-Par\-\_\-@{v\-Int\-Par\-\_\-}!ParameterList@{Parameter\-List}}
+\subsubsection[{v\-Int\-Par\-\_\-}]{\setlength{\rightskip}{0pt plus 5cm}std\-::vector$<${\bf Integer\-Parameter}$>$ Parameter\-List\-::v\-Int\-Par\-\_\-\hspace{0.3cm}{\ttfamily [protected]}}}\label{class_parameter_list_a9398a16845891a6cf22230771636b439}
+Vector of integer parameters 
+
+The documentation for this class was generated from the following files\-:\begin{DoxyCompactItemize}
+\item 
+Core/\hyperlink{_parameter_list_8hpp}{Parameter\-List.\-hpp}\item 
+Core/Parameter\-List.\-cpp\end{DoxyCompactItemize}

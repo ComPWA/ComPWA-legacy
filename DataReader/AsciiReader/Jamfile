@@ -2,16 +2,9 @@
 # @brief
 # This package is a data reader, which reads the data from ascii files
 # @end
-import os ;
-
-local QFTINC = [ os.environ QFT_INCLUDE ] ;
-local QFT = [ os.environ QFT ] ;
 
 project :
 	requirements
-        <include>$(QFTINC)
-	<linkflags>-L$(QFT)/lib
-	<linkflags>-lqft++
 	;
 
 lib AsciiReader : 

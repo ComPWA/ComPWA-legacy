@@ -1,3 +1,13 @@
+//-------------------------------------------------------------------------------
+// Copyright (c) 2013 Mathias Michel.
+// All rights reserved. This program and the accompanying materials
+// are made available under the terms of the GNU Public License v3.0
+// which accompanies this distribution, and is available at
+// http://www.gnu.org/licenses/gpl.html
+//
+// Contributors:
+//     Mathias Michel - initial API and implementation
+//-------------------------------------------------------------------------------
 //! Test-Application of the Optimizer-IF.
 /*!
  * @file OptimizerTestApp.cpp
@@ -36,6 +46,10 @@
  * The main function.
  */
 int main(int argc, char **argv){
+  std::cout << "  ComPWA Copyright (C) 2013  Mathias Michel " << std::endl;
+  std::cout << "  This program comes with ABSOLUTELY NO WARRANTY; for details see license.txt" << std::endl;
+  std::cout << std::endl;
+
   bool iamserver=false;
   if( argc>1 ){
     iamserver=true;
@@ -55,10 +69,10 @@ int main(int argc, char **argv){
     myMinimizer->setClientMode();
 
   ParameterList par;
-  par.AddParameter(DoubleParameter(-50,-100,-5,50));
-  par.AddParameter(DoubleParameter(50,0,100,50));
-  par.AddParameter(DoubleParameter(10,-20,20,10));
-  par.AddParameter(DoubleParameter(-0.1,-0.2,0,0.05));
+  par.AddParameter(std::shared_ptr<DoubleParameter>(new DoubleParameter("p0",-50,-100,-5,50)));
+  par.AddParameter(std::shared_ptr<DoubleParameter>(new DoubleParameter("p1",50,0,100,50)));
+  par.AddParameter(std::shared_ptr<DoubleParameter>(new DoubleParameter("p2",10,-20,20,10)));
+  par.AddParameter(std::shared_ptr<DoubleParameter>(new DoubleParameter("p3",-0.1,-0.2,0,0.05)));
 
   if(iamserver){
     std::cout << "Starting Parameters:" << std::endl;

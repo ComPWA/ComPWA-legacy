@@ -1,13 +1,30 @@
+//-------------------------------------------------------------------------------
+// Copyright (c) 2013 Mathias Michel.
+//
+// This file is part of ComPWA, check license.txt for details
+//
+// All rights reserved. This program and the accompanying materials
+// are made available under the terms of the GNU Public License v3.0
+// which accompanies this distribution, and is available at
+// http://www.gnu.org/licenses/gpl.html
+//
+// Contributors:
+//     Mathias Michel - initial API and implementation
+//-------------------------------------------------------------------------------
 #include <vector>
+#include <string>
 #include "Core/Particle.hpp"
 #include "Core/Event.hpp"
 
-
-Event::Event():fWeight(1.){
+Event::Event():fWeight(1.),fName(""){
 
 }
 
-Event::Event(const double inWeight):fWeight(inWeight){
+Event::Event(const std::string& name):fWeight(1.),fName(name){
+
+}
+
+Event::Event(const double inWeight, const std::string& name=""):fWeight(inWeight),fName(name){
 
 }
 

@@ -1,3 +1,16 @@
+//-------------------------------------------------------------------------------
+// Copyright (c) 2013 Mathias Michel.
+//
+// This file is part of ComPWA, check license.txt for details
+//
+// All rights reserved. This program and the accompanying materials
+// are made available under the terms of the GNU Public License v3.0
+// which accompanies this distribution, and is available at
+// http://www.gnu.org/licenses/gpl.html
+//
+// Contributors:
+//     Mathias Michel - initial API and implementation
+//-------------------------------------------------------------------------------
 //! Physics Interface Base-Class.
 /*! \class Amplitude
  * @file Amplitude.hpp
@@ -16,6 +29,7 @@
 #include <memory>
 
 #include "Core/ParameterList.hpp"
+#include "Core/FunctionTree.hpp"
 
 class Amplitude
 {
@@ -30,15 +44,16 @@ public:
 	{ /* nothing */	}
 
   virtual const double integral(ParameterList& par) =0;
+//virtual const double volume() =0;
 
-  virtual const double intensity(std::vector<double>& x, ParameterList& par) =0;
+  virtual const ParameterList intensity(std::vector<double>& x, ParameterList& par) =0;
 
   virtual const bool fillStartParVec(ParameterList& outPar) =0;
 
-  virtual void printAmps() =0;
-
-  virtual double getMaxVal() =0;
-
+  virtual std::shared_ptr<FunctionTree> functionTree(ParameterList& outPar) {
+    //if not implemented, return NULL-pointer
+    return NULL;
+  }
 
 
 };

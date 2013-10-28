@@ -35,6 +35,9 @@
 
 // Standard header files go here
 #include <iostream>
+#include <string>
+#include <vector>
+#include <map>
 
 // Includes check for correct Boost version(s)
 #include <common/GGlobalDefines.hpp>
@@ -62,6 +65,15 @@ namespace Gem
 {
 namespace Geneva
 {
+
+/*struct namingMapComparator {
+  bool operator() (const boost::shared_ptr<GConstrainedDoubleObject> lhs, const boost::shared_ptr<GConstrainedDoubleObject> rhs) const
+  {
+    //std::cout << "Comperator: " << lhs.get() << "\t" << rhs.get() << std::endl;
+    return lhs<rhs;
+  }
+};*/
+
 /******************************************************************/
 /**
  * This individual searches for the minimum of a 2-dimensional parabola.
@@ -71,7 +83,7 @@ class GStartIndividual :public GParameterSet
 {
 public:
 	/** @brief The default constructor */
-	GStartIndividual(std::shared_ptr<ControlParameter> data, unsigned int parDim, double* val, double* min, double* max, double* err);
+	GStartIndividual(std::shared_ptr<ControlParameter> data, unsigned int parDim, std::string *name, double* val, double* min, double* max, double* err);
 	/** @brief A standard copy constructor */
 	GStartIndividual(const GStartIndividual&);
 	/** @brief The standard destructor */
@@ -83,6 +95,8 @@ public:
 	const GStartIndividual& operator=(const GStartIndividual&);
 
 protected:
+	std::vector<std::string > parNames;
+
 	/** @brief Loads the data of another GStartIndividual */
 	virtual void load_(const GObject*);
 	/** @brief Creates a deep clone of this object */

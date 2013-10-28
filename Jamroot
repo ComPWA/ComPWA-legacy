@@ -1,13 +1,6 @@
 ########### ComPWA Jamroot #############
-import os ; 
+
 path-constant TOP : . ;
-
-#local ONMYMAC = [ os.environ ONMYMAC ] ;
-
-#if $(ONMYMAC) { 
-#using gcc : : /usr/bin/gcc ;
-#using g++ : : /usr/bin/g++ ;
-#}
 
 project :
 	requirements <include>$(TOP)
@@ -21,5 +14,5 @@ build-project Physics ;
 build-project DataReader ; 
 build-project Estimator ;
 build-project Optimizer ;
-build-project Analysis ;
+#build-project Analysis ;
 build-project test ;

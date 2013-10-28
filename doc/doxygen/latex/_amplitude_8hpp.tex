@@ -1,0 +1,15 @@
+\hypertarget{_amplitude_8hpp}{\section{Physics/\-Amplitude.hpp File Reference}
+\label{_amplitude_8hpp}\index{Physics/\-Amplitude.\-hpp@{Physics/\-Amplitude.\-hpp}}
+}
+{\ttfamily \#include $<$vector$>$}\\*
+{\ttfamily \#include $<$memory$>$}\\*
+{\ttfamily \#include \char`\"{}Core/\-Parameter\-List.\-hpp\char`\"{}}\\*
+\subsection*{Data Structures}
+\begin{DoxyCompactItemize}
+\item 
+class \hyperlink{class_amplitude}{Amplitude}
+\begin{DoxyCompactList}\small\item\em Physics Interface Base-\/\-Class. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+This class provides the interface to the model which tries to describe the intensity. As it is pure virtual, one needs at least one implementation to provide an model for the analysis which calculates intensities for an event on basis model parameters. If a new physics-\/model is derived from and fulfills this base-\/class, no change in other modules are necessary to work with the new physics module. 

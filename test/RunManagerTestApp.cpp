@@ -1,3 +1,13 @@
+//-------------------------------------------------------------------------------
+// Copyright (c) 2013 Mathias Michel.
+// All rights reserved. This program and the accompanying materials
+// are made available under the terms of the GNU Public License v3.0
+// which accompanies this distribution, and is available at
+// http://www.gnu.org/licenses/gpl.html
+//
+// Contributors:
+//     Mathias Michel - initial API and implementation
+//-------------------------------------------------------------------------------
 //! Test-Application for fit with simple modules using RunManager.
 /*!
  * @file RunManagerTestApp.cpp
@@ -34,18 +44,21 @@
  * The main function.
  */
 int main(int argc, char **argv){
+  std::cout << "  ComPWA Copyright (C) 2013  Mathias Michel " << std::endl;
+  std::cout << "  This program comes with ABSOLUTELY NO WARRANTY; for details see license.txt" << std::endl;
+  std::cout << std::endl;
+
   std::string file="test/2Part-4vecs.root";
   std::cout << "Load Modules" << std::endl;
   std::shared_ptr<Data> myReader(new RootReader(file, false,"data"));
   std::shared_ptr<Amplitude> testBW(new BreitWigner(0.,5.));
-  std::shared_ptr<ControlParameter> testEsti = MinLogLH::createInstance(testBW, myReader); //TODO: <- should be done by runManager
-  std::shared_ptr<Optimizer> opti(new MinuitIF(testEsti));
-  std::shared_ptr<RunManager> run(new RunManager(myReader, testEsti, testBW, opti));
-
   // Initiate parameters
   ParameterList par;
-  par.AddParameter(DoubleParameter(1.7,0.5,2.5,0.1));
-  par.AddParameter(DoubleParameter(0.2,0.1,0.2,0.01));
+  par.AddParameter(std::shared_ptr<DoubleParameter>(new DoubleParameter("BWPos",1.7,0.5,2.5,0.1)));
+  par.AddParameter(std::shared_ptr<DoubleParameter>(new DoubleParameter("BWWidth",0.2,0.1,0.2,0.01)));
+  std::shared_ptr<ControlParameter> testEsti = MinLogLH::createInstance(testBW, myReader); //TODO: <- should be done by runManager
+  std::shared_ptr<Optimizer> opti(new MinuitIF(testEsti,par));
+  std::shared_ptr<RunManager> run(new RunManager(myReader, testEsti, testBW, opti));
 
   std::cout << "Start Fit" << std::endl;
   run->startFit(par);

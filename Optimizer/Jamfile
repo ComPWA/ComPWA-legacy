@@ -1,15 +1,15 @@
 ########### Optimizer Jamfile #############
 path-constant OPTIMIZER : . ;
 
+# libOptimizer.so will consist of these packages:
 build-project Minuit2 ;
 #build-project Geneva ;
-
-# libOptimizer.so will consist of these packages:
-
 
 # Build libOptimizer.so
 lib Optimizer : 
         [ glob *.cpp ]
+        $(OPTIMIZER)/Minuit2//Minuit2IF
+        #$(OPTIMIZER)/Geneva//GenevaIF
         ;
 
 install dist : Optimizer : <location>$(TOP)/lib ;

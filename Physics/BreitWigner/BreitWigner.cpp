@@ -1,3 +1,13 @@
+//-------------------------------------------------------------------------------
+// Copyright (c) 2013 Mathias Michel.
+// All rights reserved. This program and the accompanying materials
+// are made available under the terms of the GNU Public License v3.0
+// which accompanies this distribution, and is available at
+// http://www.gnu.org/licenses/gpl.html
+//
+// Contributors:
+//     Mathias Michel - initial API and implementation
+//-------------------------------------------------------------------------------
 #include <vector>
 #include <string>
 #include <sstream>
@@ -24,32 +34,42 @@ const double BreitWigner::integral(ParameterList& par){
   double step = (max_-min_)/(double)nSteps;
 
   //TODO: try exceptions, parameter find via name?
-  integral += step*BreitWignerValue(min_, par.GetDoubleParameter(0).GetValue(), par.GetDoubleParameter(1).GetValue())/2.;
+  integral += step*BreitWignerValue(min_, par.GetDoubleParameter(0)->GetValue(), par.GetDoubleParameter(1)->GetValue())/2.;
   for(unsigned int k=1; k<nSteps; k++){
-    integral += step*BreitWignerValue((min_+k*step), par.GetDoubleParameter(0).GetValue(), par.GetDoubleParameter(1).GetValue());
+    integral += step*BreitWignerValue((min_+k*step), par.GetDoubleParameter(0)->GetValue(), par.GetDoubleParameter(1)->GetValue());
   }
-  integral += step*BreitWignerValue(max_, par.GetDoubleParameter(0).GetValue(), par.GetDoubleParameter(1).GetValue())/2.;
+  integral += step*BreitWignerValue(max_, par.GetDoubleParameter(0)->GetValue(), par.GetDoubleParameter(1)->GetValue())/2.;
 
   return integral;
 }
+
+const double BreitWigner::volume(){
+  return 0;
+}
+
 const double BreitWigner::drawInt(double* x, double *p){
   return p[2]*BreitWignerValue(x[0], p[0], p[1]);
 }
 
-const double BreitWigner::intensity(double x, double M, double T){
-  return BreitWignerValue(x, M, T);
+const ParameterList BreitWigner::intensity(double x, double M, double T){
+  ParameterList result;
+  result.AddParameter(std::shared_ptr<DoubleParameter>(new DoubleParameter("BreitWignerResult",BreitWignerValue(x, M, T))));
+  return result;
 }
 
-const double BreitWigner::intensity(std::vector<double>& x, ParameterList& par){
-  return BreitWignerValue(x.at(0), par.GetDoubleParameter(0).GetValue(), par.GetDoubleParameter(1).GetValue());
+const ParameterList BreitWigner::intensity(std::vector<double>& x, ParameterList& par){
+  ParameterList result;
+  double val = BreitWignerValue(x.at(0), par.GetDoubleParameter(0)->GetValue(), par.GetDoubleParameter(1)->GetValue());
+  result.AddParameter(std::shared_ptr<DoubleParameter>(new DoubleParameter("BreitWignerResult",val)));
+  return result;
 }
 
 const bool BreitWigner::fillStartParVec(ParameterList& outPar){
   if(outPar.GetNParameter())
     return false; //already filled ,TODO: exception?
 
-  outPar.AddParameter(DoubleParameter(1.5, 0.5, 2.5, 0.1));
-  outPar.AddParameter(DoubleParameter(0.3, 0.1, 0.5, 0.05));
+  outPar.AddParameter(std::shared_ptr<DoubleParameter>(new DoubleParameter("BreitWignerPosition",1.5, 0.5, 2.5, 0.1)));
+  outPar.AddParameter(std::shared_ptr<DoubleParameter>(new DoubleParameter("BreitWignerWidth",0.3, 0.1, 0.5, 0.05)));
 
   return true;
 }

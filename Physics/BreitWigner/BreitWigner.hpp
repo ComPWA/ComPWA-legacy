@@ -1,3 +1,13 @@
+//-------------------------------------------------------------------------------
+// Copyright (c) 2013 Mathias Michel.
+// All rights reserved. This program and the accompanying materials
+// are made available under the terms of the GNU Public License v3.0
+// which accompanies this distribution, and is available at
+// http://www.gnu.org/licenses/gpl.html
+//
+// Contributors:
+//     Mathias Michel - initial API and implementation
+//-------------------------------------------------------------------------------
 //! Physics Module with simple 1D Breit-Wigner.
 /*! \class BreitWigner
  * @file BreitWigner.hpp
@@ -21,13 +31,12 @@ public:
 
   //For normalization
   virtual const double integral(ParameterList& par);
+  virtual const double volume();
   virtual const double drawInt(double *x, double *p); //For easy usage in a root TF1
-  virtual const double intensity(double x, double M, double T);
-  virtual const double intensity(std::vector<double>& x, ParameterList& par);
+  virtual const ParameterList intensity(double x, double M, double T);
+  virtual const ParameterList intensity(std::vector<double>& x, ParameterList& par);
   virtual const bool fillStartParVec(ParameterList& outPar);
 
-  virtual void printAmps(){return;}
-  virtual double getMaxVal(){return 5;}//TODO: implementation needed
   /** Destructor */
   virtual ~BreitWigner();
 

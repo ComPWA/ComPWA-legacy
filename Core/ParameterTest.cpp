@@ -1,3 +1,16 @@
+//-------------------------------------------------------------------------------
+// Copyright (c) 2013 Mathias Michel.
+//
+// This file is part of ComPWA, check license.txt for details
+//
+// All rights reserved. This program and the accompanying materials
+// are made available under the terms of the GNU Public License v3.0
+// which accompanies this distribution, and is available at
+// http://www.gnu.org/licenses/gpl.html
+//
+// Contributors:
+//     Mathias Michel - initial API and implementation
+//-------------------------------------------------------------------------------
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE Number
 #include <boost/test/unit_test.hpp>
@@ -10,7 +23,7 @@ BOOST_AUTO_TEST_SUITE(ParameterSuite);
 
 BOOST_AUTO_TEST_CASE(BoundsCheck)
 {
-  IntegerParameter parWrong(7,10,5,1);
+  IntegerParameter parWrong("wrongPar",7,10,5,1);
   BOOST_CHECK(!parWrong.HasBounds());
   parWrong.SetMaxValue(-1);
   BOOST_CHECK(!parWrong.HasBounds());
@@ -24,7 +37,7 @@ BOOST_AUTO_TEST_CASE(BoundsCheck)
 
 BOOST_AUTO_TEST_CASE(SetGetCheck)
 {
-  IntegerParameter emptyInt;
+  IntegerParameter emptyInt("emptyIntPar");
   emptyInt.SetValue(7); emptyInt.SetMinMax(0,10); emptyInt.SetError(1);
   BOOST_CHECK_CLOSE(emptyInt.GetValue(), 7., 0.0001);
   BOOST_CHECK_CLOSE(emptyInt.GetMinValue(), 0., 0.0001);
@@ -34,7 +47,7 @@ BOOST_AUTO_TEST_CASE(SetGetCheck)
 
 BOOST_AUTO_TEST_CASE(FixValueCheck)
 {
-  DoubleParameter emptyFloat;
+  DoubleParameter emptyFloat("emptFloatPar");
   emptyFloat.SetValue(7.); emptyFloat.SetMinMax(0.,10.); emptyFloat.SetError(1.);
   BOOST_CHECK(!emptyFloat.IsFixed());
   emptyFloat.SetParameterFixed();
@@ -45,15 +58,15 @@ BOOST_AUTO_TEST_CASE(FixValueCheck)
 
 BOOST_AUTO_TEST_CASE(ConstructorCheck)
 {
-  IntegerParameter emptyInt;
-  DoubleParameter emptyFloat;
-  IntegerParameter parInt(2,0,5,1);
+  IntegerParameter emptyInt("emptyIntPar");
+  DoubleParameter emptyFloat("emptyFloatPar");
+  IntegerParameter parInt("intPar",2,0,5,1);
   IntegerParameter parCopy(parInt);
-  IntegerParameter parWrong(7,10,5,1);
-  std::shared_ptr<IntegerParameter> pParInt(new IntegerParameter(3,0,5,1));
+  IntegerParameter parWrong("wrongPar",7,10,5,1);
+  std::shared_ptr<IntegerParameter> pParInt(new IntegerParameter("intPointerPar",3,0,5,1));
   std::vector<DoubleParameter> vecParInt, vecParIntCopy;
   for(unsigned int par=0; par<10; par++)
-    vecParInt.push_back(DoubleParameter(par,0,10,1));
+    vecParInt.push_back(DoubleParameter(std::string("listPar"+par),par,0,10,1));
   vecParIntCopy = vecParInt; //copy vector
 
   BOOST_CHECK_CLOSE(emptyInt.GetValue(), 0., 0.0001);

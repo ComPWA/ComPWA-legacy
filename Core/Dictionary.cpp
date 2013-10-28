@@ -23,9 +23,8 @@ std::string Dictionary::introduce(std::shared_ptr<Data> inData, std::string inNa
     inName="test";//TODO: Generate new name, check available
   }
 
-  dataInfo tmp(inName, inData, inData->getVariableNames());
-
-  mData_.push_back( tmp );
+  //dataInfo tmp(inName, inData, inData->getVariableNames()); //TODO!!
+//  mData_.push_back( tmp );
 
   return inName;
 }

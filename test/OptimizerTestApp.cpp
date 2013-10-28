@@ -1,3 +1,13 @@
+//-------------------------------------------------------------------------------
+// Copyright (c) 2013 Mathias Michel.
+// All rights reserved. This program and the accompanying materials
+// are made available under the terms of the GNU Public License v3.0
+// which accompanies this distribution, and is available at
+// http://www.gnu.org/licenses/gpl.html
+//
+// Contributors:
+//     Mathias Michel - initial API and implementation
+//-------------------------------------------------------------------------------
 //! Test-Application of the Optimizer-IF.
 /*!
  * @file OptimizerTestApp.cpp
@@ -37,29 +47,34 @@
  * The main function.
  */
 int main(int argc, char **argv){
+  std::cout << "  ComPWA Copyright (C) 2013  Mathias Michel " << std::endl;
+  std::cout << "  This program comes with ABSOLUTELY NO WARRANTY; for details see license.txt" << std::endl;
+  std::cout << std::endl;
+
   std::string whichMinimizer("all");
   double p0=-10., p1=10., p2=1., p3=-0.01, sigma_smear=3;
   // Generate data distribution
   std::shared_ptr<ControlParameter> myFit = PolyFit::createInstance(p0, p1, p2, p3, sigma_smear);
 
+
+  ParameterList par;
+  par.AddParameter(std::shared_ptr<DoubleParameter>(new DoubleParameter("p0",-50,-100,-5,50)));
+  par.AddParameter(std::shared_ptr<DoubleParameter>(new DoubleParameter("p1",50,0,100,50)));
+  par.AddParameter(std::shared_ptr<DoubleParameter>(new DoubleParameter("p2",10,-20,20,10)));
+  par.AddParameter(std::shared_ptr<DoubleParameter>(new DoubleParameter("p3",-0.1,-0.2,0,0.05)));
+
   //--------------------------Minimizer IF --------------------------------------------------------
   std::vector<std::shared_ptr<Optimizer> > myMinimizerList;
   // Add minimizers
   if (whichMinimizer=="Geneva") myMinimizerList.push_back(std::shared_ptr<Optimizer> (new GenevaIF(myFit)));
-  else if (whichMinimizer=="Minuit") myMinimizerList.push_back(std::shared_ptr<Optimizer> (new MinuitIF(myFit)));
+  else if (whichMinimizer=="Minuit") myMinimizerList.push_back(std::shared_ptr<Optimizer> (new MinuitIF(myFit,par)));
   else if (whichMinimizer=="all") {
     myMinimizerList.push_back(std::shared_ptr<Optimizer> (new GenevaIF(myFit)));
-    myMinimizerList.push_back(std::shared_ptr<Optimizer> (new MinuitIF(myFit)));
+    myMinimizerList.push_back(std::shared_ptr<Optimizer> (new MinuitIF(myFit,par)));
   }else{
    std::cout << "Minimizer\t" << whichMinimizer << "\tdoesn't exist" << std::endl;
    return 0;
   }
-
-  ParameterList par;
-  par.AddParameter(DoubleParameter(-50,-100,-5,50));
-  par.AddParameter(DoubleParameter(50,0,100,50));
-  par.AddParameter(DoubleParameter(10,-20,20,10));
-  par.AddParameter(DoubleParameter(-0.1,-0.2,0,0.05));
 
   std::cout << "Starting Parameters:" << std::endl;
   for(unsigned int i=0; i<par.GetNDouble(); i++)
@@ -74,8 +89,10 @@ int main(int argc, char **argv){
     double genResult = minimizer->exec(par);
 
     std::cout << "Minimizer " << Nmin << "\t final par :\t" << genResult << std::endl;
-    for(unsigned int i=0; i<par.GetNDouble(); i++)
-      std::cout << "final par "<< i << ":\t" << par.GetParameterValue(i) << std::endl;
+
+    //for(unsigned int i=0; i<par.GetNDouble(); i++)
+    //  std::cout << "final par "<< i << ":\t" << par.GetParameterValue(i) << std::endl;
+    std::cout << "Final: " << par << std::endl;
     std::cout << "Done ..." << std::endl << std::endl;
   }
 

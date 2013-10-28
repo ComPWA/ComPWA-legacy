@@ -1,3 +1,16 @@
+//-------------------------------------------------------------------------------
+// Copyright (c) 2013 Mathias Michel.
+//
+// This file is part of ComPWA, check license.txt for details
+//
+// All rights reserved. This program and the accompanying materials
+// are made available under the terms of the GNU Public License v3.0
+// which accompanies this distribution, and is available at
+// http://www.gnu.org/licenses/gpl.html
+//
+// Contributors:
+//     Mathias Michel - initial API and implementation
+//-------------------------------------------------------------------------------
 //! Internal container representing a parameter list.
 /*! \class ParameterList
  * @file ParameterList.hpp
@@ -10,9 +23,12 @@
 
 #include <iostream>
 #include <string>
+#include <memory>
 #include <sstream>
 #include <vector>
+#include <map>
 
+#include "Core/AbsParameter.hpp"
 #include "Core/Parameter.hpp"
 #include "Core/Exceptions.hpp"
 
@@ -36,7 +52,7 @@ public:
    * \param inVec input vector of double parameters
    * \sa addParameter(PWAParameter<double>&)
   */
-  ParameterList(const std::vector<DoubleParameter>& inVec);
+  ParameterList(const std::vector<std::shared_ptr<DoubleParameter> >& inVec);
 
   //! Standard constructor with a vector of IntegerParameter
   /*!
@@ -47,7 +63,7 @@ public:
    * \param inVec input vector of integer parameters
    * \sa addParameter(PWAParameter<integer>&)
   */
-  ParameterList(const std::vector<IntegerParameter>& inVec);
+  ParameterList(const std::vector<std::shared_ptr<IntegerParameter> >& inVec);
 
   //! Standard constructor with a vector of BoolParameter
   /*!
@@ -58,7 +74,7 @@ public:
    * \param inVec input vector of boolean parameters
    * \sa addParameter(PWAParameter<bool>&)
   */
-  ParameterList(const std::vector<BoolParameter>& inVec);
+  ParameterList(const std::vector<std::shared_ptr<BoolParameter> >& inVec);
 
   //! Standard constructor with a vector of bool, int and double PWAParameter
   /*!
@@ -70,8 +86,9 @@ public:
    * \param inB input vector of boolean parameters
    * \sa addParameter(PWAParameter<double>&, PWAParameter<int>&, PWAParameter<bool>&)
   */
-  ParameterList(const std::vector<DoubleParameter>& inD,
-      const std::vector<IntegerParameter>& inI, const std::vector<BoolParameter>& inB);
+  ParameterList(const std::vector<std::shared_ptr<DoubleParameter> >& inD,
+      const std::vector<std::shared_ptr<IntegerParameter> >& inI,
+      const std::vector<std::shared_ptr<BoolParameter> >& inB);
 
   //! Copy constructor using = operator
   /*!
@@ -88,6 +105,23 @@ public:
   */
   virtual ~ParameterList();
 
+  //! Getter for abstract parameter
+  /*!
+   * Getter for abstract parameter pointer
+   * \param i input number of parameter to load
+   * \return shared pointer to parameter
+  */
+  virtual std::shared_ptr<AbsParameter> GetParameter(const unsigned int i) ;
+
+  //! Getter for abstract parameter
+  /*!
+   * Getter for abstract parameter pointer
+   * \param parname name of parameter to load
+   * \return shared pointer to parameter
+  */
+  virtual std::shared_ptr<AbsParameter> GetParameter(const std::string parname) ;
+
+
   //! Getter for number of parameter
   virtual const inline unsigned int GetNParameter() const {return (vDoublePar_.size()+vIntPar_.size()+vBoolPar_.size());}
   //! Getter for number of double parameter
@@ -103,7 +137,7 @@ public:
    * \param i input number of parameter to load
    * \return par output container for loaded parameter
   */
-  virtual DoubleParameter& GetDoubleParameter(const unsigned int i) ;
+  virtual std::shared_ptr<DoubleParameter> GetDoubleParameter(const unsigned int i) ;
 
   //! Getter for integer parameter
   /*!
@@ -111,7 +145,7 @@ public:
    * \param i input number of parameter to load
    * \return par output container for loaded parameter
   */
-  virtual IntegerParameter& GetIntegerParameter(const unsigned int i) ;
+  virtual std::shared_ptr<IntegerParameter> GetIntegerParameter(const unsigned int i) ;
 
   //! Getter for boolean parameter
   /*!
@@ -119,7 +153,7 @@ public:
    * \param i input number of parameter to load
    * \return par output container for loaded parameter
   */
-  virtual BoolParameter& GetBoolParameter(const unsigned int i) ;
+  virtual std::shared_ptr<BoolParameter> GetBoolParameter(const unsigned int i) ;
 
   //! Getter for parameter value
   /*!
@@ -128,6 +162,38 @@ public:
    * \return par output container for loaded parameter
   */
   virtual const double GetParameterValue(const unsigned int i) const ;
+
+  //! Getter for floating point parameter
+  /*!
+   * Getter for floating point parameter
+   * \param parname input name of parameter to load
+   * \return par output container for loaded parameter
+  */
+  virtual std::shared_ptr<DoubleParameter> GetDoubleParameter(const std::string parname) ;
+
+  //! Getter for integer parameter
+  /*!
+   * Getter for integer parameter
+   * \param i input number of parameter to load
+   * \return par output container for loaded parameter
+  */
+  virtual std::shared_ptr<IntegerParameter> GetIntegerParameter(const std::string parname) ;
+
+  //! Getter for boolean parameter
+  /*!
+   * Getter for boolean parameter
+   * \param parname input name of parameter to load
+   * \return par output container for loaded parameter
+  */
+  virtual std::shared_ptr<BoolParameter> GetBoolParameter(const std::string parname) ;
+
+  //! Getter for parameter value
+  /*!
+   * Getter for parameter value
+   * \param parname input name of parameter to load
+   * \return par output container for loaded parameter
+  */
+  virtual const double GetParameterValue(const std::string parname) const ;
 
   //! Setter for parameter value
   /*!
@@ -153,27 +219,75 @@ public:
   */
   virtual void SetParameterValue(const unsigned int i, const bool inVal) ;
 
+  //! Add parameter via abstract pointer
+  /*!
+   * Adds a parameter with to be defined type to the list
+   * \param par input parameter
+  */
+  virtual void AddParameter(std::shared_ptr<AbsParameter> par);
 
   //! Add floating point parameter
   /*!
    * Adds a floating point parameter to the list
    * \param par input parameter
   */
-  virtual void AddParameter(DoubleParameter par);
+  virtual void AddParameter(std::shared_ptr<DoubleParameter> par);
 
   //! Add integer parameter
   /*!
    * Adds an integer parameter to the list
    * \param par input parameter
   */
-  virtual void AddParameter(IntegerParameter par);
+  virtual void AddParameter(std::shared_ptr<IntegerParameter> par);
 
   //! Add boolean parameter
   /*!
    * Adds an boolean parameter to the list
    * \param par input parameter
   */
-  virtual void AddParameter(BoolParameter par);
+  virtual void AddParameter(std::shared_ptr<BoolParameter> par);
+
+  //! Remove floating point parameter
+  /*!
+   * Remove a floating point parameter from the list
+   * \param par input parameter
+  */
+  virtual void RemoveDouble(const unsigned int id);
+
+  //! Remove integer parameter
+  /*!
+   * Remove an integer parameter from the list
+   * \param par input parameter
+  */
+  virtual void RemoveInteger(const unsigned int id);
+
+  //! Remove boolean parameter
+  /*!
+   * Remove an boolean parameter from the list
+   * \param par input parameter
+  */
+  virtual void RemoveBool(const unsigned int id);
+
+  //! Remove floating point parameter
+  /*!
+   * Remove a floating point parameter from the list
+   * \param parName parameter name
+  */
+  virtual void RemoveDouble(const std::string parName);
+
+  //! Remove integer parameter
+  /*!
+   * Remove an integer parameter from the list
+   * \param parName parameter name
+  */
+  virtual void RemoveInteger(const std::string parName);
+
+  //! Remove boolean parameter
+  /*!
+   * Remove an boolean parameter from the list
+   * \param parName parameter name
+  */
+  virtual void RemoveBool(const std::string parName);
 
   //! A public function returning a string with parameter information
   /*!
@@ -183,12 +297,15 @@ public:
    * \return string with parameter information
    * \sa operator<<
   */
-  std::string const& to_str() const;
+  std::string const& to_str() ;
 
 protected:
-  std::vector<DoubleParameter> vDoublePar_; /*!< Vector of floating point parameters */
-  std::vector<IntegerParameter> vIntPar_; /*!< Vector of integer parameters */
-  std::vector<BoolParameter> vBoolPar_; /*!< Vector of boolean parameters */
+  std::map<std::string,unsigned int> mDoubleParID_; /*!< Map of floating point parameter ids */
+  std::map<std::string,unsigned int> mIntParID_; /*!< Map of integer parameter ids */
+  std::map<std::string,unsigned int> mBoolParID_; /*!< Map of boolean parameter ids */
+  std::vector<std::shared_ptr<DoubleParameter> > vDoublePar_; /*!< Vector of floating point parameters */
+  std::vector<std::shared_ptr<IntegerParameter> > vIntPar_; /*!< Vector of integer parameters */
+  std::vector<std::shared_ptr<BoolParameter> > vBoolPar_; /*!< Vector of boolean parameters */
   std::string out_; /*!< Output string to print information */
 
   //! A protected function which creates an output string for printing
@@ -206,7 +323,7 @@ protected:
    * of this class has to be outside the namespace of the class.
    * \sa make_str(), to_str()
   */
-  friend std::ostream & operator<<(std::ostream &os, const ParameterList &p);
+  friend std::ostream & operator<<(std::ostream &os, ParameterList &p);
 
 };
 

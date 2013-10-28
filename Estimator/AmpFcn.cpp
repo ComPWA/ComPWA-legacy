@@ -23,15 +23,14 @@ public:
 	virtual double controlParameter(ParameterList& x){
 		if(x.GetNParameter()!=2) return -999;
 		std::vector<double> xx;//convert parameterList to std::vector
-		xx.push_back(x.GetDoubleParameter(0).GetValue());
-		xx.push_back(x.GetDoubleParameter(1).GetValue());
+		xx.push_back(x.GetDoubleParameter(0)->GetValue());
+		xx.push_back(x.GetDoubleParameter(1)->GetValue());
 //		xx.push_back(x.GetDoubleParameter(2).GetValue());
 //		for(unsigned int i=0;i< _par.GetNParameter();i++) std::cout<<_par.GetParameterValue(i)<<std::endl;
 //		std::cout<<"===="<<std::endl;
 //		for(unsigned int i=0;i< xx.size();i++) std::cout<<xx[i]<<std::endl;
-		double result = (-1) * _amp->intensity(xx,_par);
-//		std::cout<<"current result: "<<result<<std::endl;
-		return result;
+		ParameterList result = _amp->intensity(xx,_par);
+		return ( (-1) * result.GetDoubleParameter(0)->GetValue() );
 	};
 protected:
 

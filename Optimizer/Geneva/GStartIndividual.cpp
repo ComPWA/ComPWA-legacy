@@ -46,7 +46,7 @@ namespace Geneva
  * The default constructor. This function will add two double parameters to this individual,
  * each of which has a constrained value range [-10:10].
  */
-GStartIndividual::GStartIndividual(std::shared_ptr<ControlParameter> data, unsigned int parDim, double* val, double* min, double* max, double* err)
+GStartIndividual::GStartIndividual(std::shared_ptr<ControlParameter> data, unsigned int parDim, std::string *name, double* val, double* min, double* max, double* err)
 	: GParameterSet(), theData(data)
 {
 
@@ -69,6 +69,8 @@ GStartIndividual::GStartIndividual(std::shared_ptr<ControlParameter> data, unsig
                 // gbdc_ptr->push_back(gbd_ptr);
                 // gpoc_ptr->push_back(gbd_ptr);
                 this->push_back(gbd_ptr);
+                //parNames.insert( std::pair<boost::shared_ptr<GConstrainedDoubleObject>,std::string>(gbd_ptr,name[i]) );
+                parNames.push_back(name[i]);
         }
 }
 
@@ -79,7 +81,7 @@ GStartIndividual::GStartIndividual(std::shared_ptr<ControlParameter> data, unsig
  * @param cp A copy of another GStartIndividual
  */
 GStartIndividual::GStartIndividual(const GStartIndividual& cp)
-	: GParameterSet(cp)
+	: GParameterSet(cp),parNames(cp.parNames)
 	, theData(ControlParameter::Instance())
 { /* nothing */ }
 
@@ -101,8 +103,12 @@ GStartIndividual::~GStartIndividual()
  */
 bool GStartIndividual::getPar(ParameterList& val){
               GStartIndividual::conversion_iterator<GConstrainedDoubleObject> it(this->end());
+              unsigned int i=0;
               for(it=this->begin(); it!=this->end(); ++it) {
-                val.AddParameter(DoubleParameter((*it)->value(),0.,0.,0.));
+                std::string test;
+                if(i<parNames.size())
+                  test = parNames.at(i);
+                val.AddParameter(std::shared_ptr<DoubleParameter>(new DoubleParameter(test,(*it)->value(),0.,0.,0.)));
               }
               return true;
 }
@@ -161,8 +167,20 @@ double GStartIndividual::fitnessCalculation(){
 
           GStartIndividual::conversion_iterator<GConstrainedDoubleObject> it(this->end());
           ParameterList minPar;
+          unsigned int i=0;
+          //std::cout << "STart" <<std::endl;
           for(it=this->begin(); it!=this->end(); ++it) {
-            minPar.AddParameter(DoubleParameter((*it)->value(),0,0,0));
+              std::string test;
+              if(i<parNames.size())
+                test = parNames.at(i);
+              //std::cout << "ParName: " << test << " Value: "<< (*it)->value() << std::endl;
+              //boost::shared_ptr<GConstrainedDoubleObject> ptr = (*it);
+              //std::cout << "Value: " << (*it)->value() << " Iterator: "<< (*it).get() << std::endl;
+
+            minPar.AddParameter(std::shared_ptr<DoubleParameter>(new DoubleParameter(test,(*it)->value(),0,0,0)));
+            //  minPar.AddParameter(DoubleParameter("test",(*it)->value(),0,0,0));
+
+            i++;
           }
 
           if(!theData){

@@ -1,3 +1,13 @@
+//-------------------------------------------------------------------------------
+// Copyright (c) 2013 Mathias Michel.
+// All rights reserved. This program and the accompanying materials
+// are made available under the terms of the GNU Public License v3.0
+// which accompanies this distribution, and is available at
+// http://www.gnu.org/licenses/gpl.html
+//
+// Contributors:
+//     Mathias Michel - initial API and implementation
+//-------------------------------------------------------------------------------
 #include <sstream>
 #include <iostream>
 #include <memory>
@@ -32,7 +42,9 @@ double ChiOneD::controlParameter(ParameterList& minPar){
 
     std::vector<double> x;
     x.push_back(m12);
-    double intens = pPIF_->intensity(x, minPar);
+    ParameterList intensL = pPIF_->intensity(x, minPar);
+    double intens = intensL.GetDoubleParameter(0)->GetValue();
+    //double intens = pPIF_->intensity(x, minPar);
 
     chi += (weight - intens)*(weight - intens)/(double)nBins; //Just for binned data
   }

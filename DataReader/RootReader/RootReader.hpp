@@ -1,3 +1,13 @@
+//-------------------------------------------------------------------------------
+// Copyright (c) 2013 michel.
+// All rights reserved. This program and the accompanying materials
+// are made available under the terms of the GNU Public License v3.0
+// which accompanies this distribution, and is available at
+// http://www.gnu.org/licenses/gpl.html
+//
+// Contributors:
+//     michel - initial API and implementation
+//-------------------------------------------------------------------------------
 //! Reader for data in Root-files.
 /*! \class RootReader
  * @file RootReader.hpp
@@ -32,9 +42,7 @@ class RootReader : public Data {
 
 public:
   /// Default Constructor (0x0)
-  RootReader();
   RootReader(const std::string inRootFile, const bool binned, const std::string inTreeName);
-  RootReader(TTree* in, const bool binned);
 
   virtual const std::vector<std::string>& getVariableNames();
 

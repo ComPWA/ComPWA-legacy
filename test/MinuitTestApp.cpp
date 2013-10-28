@@ -1,3 +1,13 @@
+//-------------------------------------------------------------------------------
+// Copyright (c) 2013 Mathias Michel.
+// All rights reserved. This program and the accompanying materials
+// are made available under the terms of the GNU Public License v3.0
+// which accompanies this distribution, and is available at
+// http://www.gnu.org/licenses/gpl.html
+//
+// Contributors:
+//     Mathias Michel - initial API and implementation
+//-------------------------------------------------------------------------------
 //! Test-Application of the Minuit2 Optimizer-IF.
 /*!
  * @file MinuitTestApp.cpp
@@ -36,24 +46,28 @@ using namespace std;
  * The main function.
  */
 int main(int argc, char **argv){
+  std::cout << "  ComPWA Copyright (C) 2013  Mathias Michel " << std::endl;
+  std::cout << "  This program comes with ABSOLUTELY NO WARRANTY; for details see license.txt" << std::endl;
+  std::cout << std::endl;
+
   double p0=-10., p1=10., p2=1., p3=-0.01, sigma_smear=3;
 
   // Generate data distribution
   //shared_ptr<ControlParameter> myFit(new PolyFit(p0, p1, p2, p3, sigma_smear));
-  shared_ptr<ControlParameter> myFit = PolyFit::createInstance(p0, p1, p2, p3, sigma_smear);
+  std::shared_ptr<ControlParameter> myFit = PolyFit::createInstance(p0, p1, p2, p3, sigma_smear);
 
   //--------------------------Minimizer IF --------------------------------------------------------
   vector<shared_ptr<Optimizer> > myMinimizerList;
 
-  // Add minimizers
-  myMinimizerList.push_back(shared_ptr<Optimizer> (new MinuitIF(myFit)));
-
   // Initiate parameters
   ParameterList par;
-  par.AddParameter(DoubleParameter(-11,-20,0,3));
-  par.AddParameter(DoubleParameter(9.8,5,15,2));
-  par.AddParameter(DoubleParameter(1.1,0.5,1.5,0.3));
-  par.AddParameter(DoubleParameter(-0.008,-0.02,0,0.005));
+  par.AddParameter(std::shared_ptr<DoubleParameter>(new DoubleParameter("p0",-50,-100,-5,50)));
+  par.AddParameter(std::shared_ptr<DoubleParameter>(new DoubleParameter("p1",50,0,100,50)));
+  par.AddParameter(std::shared_ptr<DoubleParameter>(new DoubleParameter("p2",10,-20,20,10)));
+  par.AddParameter(std::shared_ptr<DoubleParameter>(new DoubleParameter("p3",-0.1,-0.2,0,0.05)));
+
+  // Add minimizers
+  myMinimizerList.push_back(shared_ptr<Optimizer> (new MinuitIF(myFit,par)));
 
   // Loop over minimizers (at the moment this means: Geneva, MinuitIF or Geneva then MinuitIF)
   for(unsigned int Nmin=0; Nmin<myMinimizerList.size(); Nmin++){

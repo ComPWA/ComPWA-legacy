@@ -1,3 +1,13 @@
+//-------------------------------------------------------------------------------
+// Copyright (c) 2013 Mathias Michel.
+// All rights reserved. This program and the accompanying materials
+// are made available under the terms of the GNU Public License v3.0
+// which accompanies this distribution, and is available at
+// http://www.gnu.org/licenses/gpl.html
+//
+// Contributors:
+//     Mathias Michel - initial API and implementation
+//-------------------------------------------------------------------------------
 /*
  * Copyright (C) Gemfony scientific UG (haftungsbeschraenkt)
  *
@@ -30,6 +40,7 @@
 
 // Standard header files go here
 #include <iostream>
+#include <limits>
 
 // Geneva header files go here
 #include "geneva/Go2.hpp"
@@ -76,13 +87,6 @@ const double GenevaIF::exec(ParameterList& par) {
 	//---------------------------------------------------------------------
 	// Initialize a client, if requested
 
-	std::cout << "ClientMode: " << go.clientMode() << std::endl;
-	std::cout << "ParMode: " << go.getParallelizationMode() << std::endl;
-        //std::cout << "ServerMode: " << go.getServerMode() << std::endl; //Dafuq?
-        std::cout << "IP: " << go.getServerIp() << std::endl;
-        std::cout << "Port: " << go.getServerPort() << std::endl;
-
-	//if(!serverMode) {
         if(go.clientMode()) {
 	  std::cout << "Geneva Client waiting for action!" << std::endl;
 	  return go.clientRun();
@@ -94,15 +98,26 @@ const double GenevaIF::exec(ParameterList& par) {
 	//Provide Parameter in Geneva-Style
 	unsigned int NPar = par.GetNDouble(); //just doubles up to now, TODO
 	double val[NPar], min[NPar], max[NPar], err[NPar];
+	std::string names[NPar];
 	for(unsigned int i=0; i<NPar; i++){
-	  val[i] = par.GetDoubleParameter(i).GetValue();
-	  min[i] = par.GetDoubleParameter(i).GetMinValue();
-	  max[i] = par.GetDoubleParameter(i).GetMaxValue();
-	  err[i] = par.GetDoubleParameter(i).GetError();
+	  std::shared_ptr<DoubleParameter> dpar = par.GetDoubleParameter(i);
+	  names[i] = dpar->GetName();
+	  val[i] = dpar->GetValue();
+	  if(dpar->HasBounds()){
+	    min[i] = dpar->GetMinValue();
+	    max[i] = dpar->GetMaxValue();
+	  }else{
+	    max[i] = 1.79768e+307;//std::numeric_limits<double>::max();
+	    min[i] = -1.79768e+307;//-1*max[i];
+	  }
+	  if(dpar->HasError())
+	    err[i] = dpar->GetError();
+	  else
+	    err[i] = val[i];
 	}
 
 	// Make an individual known to the optimizer
-	boost::shared_ptr<GStartIndividual> p(new GStartIndividual(_myData, NPar, val, min, max, err));
+	boost::shared_ptr<GStartIndividual> p(new GStartIndividual(_myData, NPar, names, val, min, max, err));
 	go.push_back(p);
 
 	// Add an evolutionary algorithm to the Go2 class.
@@ -123,7 +138,7 @@ const double GenevaIF::exec(ParameterList& par) {
 	ParameterList resultPar;
 	bestIndividual_ptr->getPar(resultPar);
 	for(unsigned int i=0; i<par.GetNDouble(); i++){  //TODO: better way, no cast or check type
-	  par.GetDoubleParameter(i).SetValue(resultPar.GetDoubleParameter(i).GetValue());
+	  par.GetDoubleParameter(i)->SetValue(resultPar.GetDoubleParameter(i)->GetValue());
 	}
 
 	return result;
