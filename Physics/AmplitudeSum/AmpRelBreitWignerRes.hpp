@@ -7,6 +7,7 @@
 //
 // Contributors:
 //     Mathias Michel - initial API and implementation
+//		Peter Weidenkaff - correct nominator, using dataPoint for data handling
 //-------------------------------------------------------------------------------
 //****************************************************************************
 // Class for defining the relativistic Breit-Wigner resonance model, which

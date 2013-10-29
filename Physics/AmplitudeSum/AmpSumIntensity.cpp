@@ -1,3 +1,14 @@
+//-------------------------------------------------------------------------------
+// Copyright (c) 2013 Mathias Michel.
+// All rights reserved. This program and the accompanying materials
+// are made available under the terms of the GNU Public License v3.0
+// which accompanies this distribution, and is available at
+// http://www.gnu.org/licenses/gpl.html
+//
+// Contributors:
+//     Mathias Michel - initial API and implementation
+//		Peter Weidenkaff - adding flatte type resonance, removing root dependence
+//-------------------------------------------------------------------------------
 
 #include <vector>
 #include <memory>
@@ -64,15 +75,15 @@ void AmpSumIntensity::init(){
 		rr.push_back( std::shared_ptr<DoubleParameter> (new DoubleParameter("rr_"+tmp.m_name,tmp.m_strength) ) );
 		phir.push_back( std::shared_ptr<DoubleParameter> (new DoubleParameter("phir_"+tmp.m_name,tmp.m_phase) ) );
 
-		//		qr.push_back( std::shared_ptr<DoubleParameter> (new DoubleParameter("par1_"+tmp.m_nametmp.m_breakup_mom) ) );
-		//		aj.push_back( std::shared_ptr<IntegerParameter> (new IntegerParameter(tmp.m_spin) ) );
-		//		am.push_back( std::shared_ptr<IntegerParameter> (new IntegerParameter(tmp.m_m) ) );
-		//		an.push_back( std::shared_ptr<IntegerParameter> (new IntegerParameter(tmp.m_n) ) );
+		//qr.push_back( std::shared_ptr<DoubleParameter> (new DoubleParameter("par1_"+tmp.m_nametmp.m_breakup_mom) ) );
+		//aj.push_back( std::shared_ptr<IntegerParameter> (new IntegerParameter(tmp.m_spin) ) );
+		//am.push_back( std::shared_ptr<IntegerParameter> (new IntegerParameter(tmp.m_m) ) );
+		//an.push_back( std::shared_ptr<IntegerParameter> (new IntegerParameter(tmp.m_n) ) );
 
-		//				par1.push_back( std::shared_ptr<DoubleParameter> (new DoubleParameter("par1_"+tmp.m_name,tmp.m_par1) ) );
-		//				par2.push_back( std::shared_ptr<DoubleParameter> (new DoubleParameter("par1_"+tmp.name,tmp.m_par2) ) );
-//		DoubleParameter param1 = new DoubleParameter("par1_"+tmp.m_name,tmp.m_par1);
-//		DoubleParameter param2 = new DoubleParameter("par2_"+tmp.m_name,tmp.m_par2);
+		//par1.push_back( std::shared_ptr<DoubleParameter> (new DoubleParameter("par1_"+tmp.m_name,tmp.m_par1) ) );
+		//par2.push_back( std::shared_ptr<DoubleParameter> (new DoubleParameter("par1_"+tmp.name,tmp.m_par2) ) );
+		//DoubleParameter param1 = new DoubleParameter("par1_"+tmp.m_name,tmp.m_par1);
+		//DoubleParameter param2 = new DoubleParameter("par2_"+tmp.m_name,tmp.m_par2);
 		DoubleParameter param1("par1_"+tmp.m_name,tmp.m_par1);
 		DoubleParameter param2("par2_"+tmp.m_name,tmp.m_par2);
 

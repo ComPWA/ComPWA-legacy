@@ -1,9 +1,13 @@
-/*
- * AmpKinematics.hpp
- *
- *  Created on: Oct 12, 2013
- *      Author: weidenka
- */
+//-------------------------------------------------------------------------------
+// Copyright (c) 2013 Peter Weidenkaff.
+// All rights reserved. This program and the accompanying materials
+// are made available under the terms of the GNU Public License v3.0
+// which accompanies this distribution, and is available at
+// http://www.gnu.org/licenses/gpl.html
+//
+// Contributors:
+//		Peter Weidenkaff - initial API
+//-------------------------------------------------------------------------------
 
 #ifndef AMPKINEMATICS_HPP_
 #define AMPKINEMATICS_HPP_

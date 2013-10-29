@@ -7,6 +7,7 @@
 //
 // Contributors:
 //     Mathias Michel - initial API and implementation
+//		Peter Weidenkaff - adding flatte type resonance, removing root dependence
 //-------------------------------------------------------------------------------
 //****************************************************************************
 // Wrapper to provide intensity of amplitude sum
