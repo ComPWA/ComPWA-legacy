@@ -45,9 +45,9 @@ ampSetup(ini)
 
 AmpSumIntensity::AmpSumIntensity(const double inM, const double inBr, const double in1
 		,const double in2, const double in3, AmplitudeSetup ini) :
-								  _kin(inM, inBr, in1, in2, in3,"","",""),
-								  totAmp("relBWsumAmplitude", "totAmp"),
-								  ampSetup(ini)
+										  _kin(inM, inBr, in1, in2, in3,"","",""),
+										  totAmp("relBWsumAmplitude", "totAmp"),
+										  ampSetup(ini)
 {
 
 	init();
@@ -69,8 +69,12 @@ void AmpSumIntensity::init(){
 		//		am.push_back( std::shared_ptr<IntegerParameter> (new IntegerParameter(tmp.m_m) ) );
 		//		an.push_back( std::shared_ptr<IntegerParameter> (new IntegerParameter(tmp.m_n) ) );
 
-		//		par1.push_back( std::shared_ptr<DoubleParameter> (new DoubleParameter("par1_"+tmp.m_name,tmp.m_par1) ) );
-		//		par2.push_back( std::shared_ptr<DoubleParameter> (new DoubleParameter("par1_"+tmp.name,tmp.m_par2) ) );
+		//				par1.push_back( std::shared_ptr<DoubleParameter> (new DoubleParameter("par1_"+tmp.m_name,tmp.m_par1) ) );
+		//				par2.push_back( std::shared_ptr<DoubleParameter> (new DoubleParameter("par1_"+tmp.name,tmp.m_par2) ) );
+//		DoubleParameter param1 = new DoubleParameter("par1_"+tmp.m_name,tmp.m_par1);
+//		DoubleParameter param2 = new DoubleParameter("par2_"+tmp.m_name,tmp.m_par2);
+		DoubleParameter param1("par1_"+tmp.m_name,tmp.m_par1);
+		DoubleParameter param2("par2_"+tmp.m_name,tmp.m_par2);
 
 		unsigned int subSys = tmp.m_daugtherA + tmp.m_daugtherB;
 
@@ -83,7 +87,7 @@ void AmpSumIntensity::init(){
 		}
 		else if(tmp.m_type=="flatte"){
 			std::shared_ptr<AmpFlatteRes> tmpbw(new AmpFlatteRes(tmp.m_name.c_str(),
-					*mr[last], *gr[last], tmp.m_breakup_mom, *par1[last], *par2[last],0.547853, 0.1396, subSys, tmp.m_spin,tmp.m_m,tmp.m_n) );
+					*mr[last], *gr[last], tmp.m_breakup_mom, param1, param2, 0.547853, 0.1396, subSys, tmp.m_spin,tmp.m_m,tmp.m_n) );
 			//			tmpbw->setBarrierMass(0.547853,0.1396);//a_0->eta pi hidden channel
 			totAmp.addBW(tmpbw, rr.at(last), phir.at(last));
 		}

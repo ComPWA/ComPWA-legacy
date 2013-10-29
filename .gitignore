@@ -4,7 +4,6 @@
 *.o
 *.d
 ~*
-setup.sh
 bin/
 lib/
 external
