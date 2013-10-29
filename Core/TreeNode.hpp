@@ -14,8 +14,8 @@
 //! TreeNode is the interface for elements of the FunctionTree
 /*! \class TreeNode
  * @file TreeNode.hpp
- * This class provides the interface for all kind of elements which later can
- * be used as nodes in the FunctionTree. There needs to be a unique naming
+ * This class acts as a container for a parameter in a function tree. It has a
+ * Strategy to calculate its value and a unique name.
 */
 
 #ifndef _TREENODE_HPP_
@@ -36,7 +36,8 @@ public:
   //! Standard constructor
    /*!
     * Standard constructor using a string the identifying name
-    * /param inName unique name of this node
+    * /param name unique name of this node
+    * /param intResult start value of node
     * /param strat strategy how this node is calculated
     * /param parent pointer to connected upper level node
    */
@@ -45,12 +46,13 @@ public:
   //! Destructor
   ~TreeNode();
 
+  //! Add this node to parents children-list
   void linkParents(){
     for(unsigned int i=0; i<_parents.size(); i++)
       _parents[i]->_children.push_back(shared_from_this());
   }
 
-  //!Check if recalculation is needed
+  //! Check if recalculation is needed
   inline bool needsCalculation(){
     return _changed;
   };
@@ -62,22 +64,28 @@ public:
     //changed=true;
   //};
 
+  //! Trigger flagged to be recalculated
   void Update();
 
+  //! Trigger recalculation
   void recalculate();
 
+  //! Get pointer to node value
   const std::shared_ptr<AbsParameter> getValue(){
     return _value;
   };
 
+  //! Get node name
   const std::string& getName(){
     return _name;
   };
 
+  //! Add link to children list
   void addChild(std::shared_ptr<TreeNode> newChild){
     _children.push_back(newChild);
   };
 
+  //! Add link to parents list
   void addParent(std::shared_ptr<TreeNode> newParent){
     _parents.push_back(newParent);
     newParent->_children.push_back(shared_from_this());
@@ -91,20 +99,22 @@ public:
    */
   //virtual const std::complex<double> getNodeValue() =0; //TODO: complex? Template?
 
+  //! String used to display tree
   std::string to_str(std::string beginning);
 
+  //! Stream-Operator used to display tree
   friend std::ostream & operator<<(std::ostream &os, std::shared_ptr<TreeNode> p);
 
 protected:
-  std::vector<std::shared_ptr<TreeNode> > _parents;
-  std::vector<std::shared_ptr<TreeNode> > _children;
+  std::vector<std::shared_ptr<TreeNode> > _parents; /*!< Link to parents */
+  std::vector<std::shared_ptr<TreeNode> > _children; /*!< Link to children */
 
-  std::shared_ptr<AbsParameter> _value;
+  std::shared_ptr<AbsParameter> _value; /*!< Value of this node */
   std::string _name; /*!< Unique name of this node */
-  bool _changed;
+  bool _changed; /*!< flag if node needs recalculation */
   //std::string childOP;
 
-  std::shared_ptr<Strategy> _strat;
+  std::shared_ptr<Strategy> _strat; /*!< Strategy how node calculates its value */
 };
 
 //std::ostream & operator<<(std::ostream &os, std::shared_ptr<TreeNode> p){
