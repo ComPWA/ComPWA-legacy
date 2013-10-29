@@ -7,6 +7,7 @@
 //
 // Contributors:
 //     Mathias Michel - initial API and implementation
+//     Peter Weidenkaff -  assignment of final state particle masses
 //-------------------------------------------------------------------------------
 //****************************************************************************
 // Class for defining the relativistic Breit-Wigner resonance model, which

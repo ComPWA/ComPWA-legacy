@@ -7,6 +7,7 @@
 //
 // Contributors:
 //     Mathias Michel - initial API and implementation
+//		Peter Weidenkaff - adding parameters for flatte description
 //-------------------------------------------------------------------------------
 //! XML config parser for Amplitude Setup
 /*!
