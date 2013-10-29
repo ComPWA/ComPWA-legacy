@@ -7,7 +7,7 @@
  */
 
 #include "Physics/DPKinematics/DPKinematics.hpp"
-#include "Physics/DPKinematics/dataPoint.hpp"
+#include "Physics/DPKinematics/DataPoint.hpp"
 #include "Physics/DPKinematics/PhysConst.hpp"
 
 void DPKinematics::init(){

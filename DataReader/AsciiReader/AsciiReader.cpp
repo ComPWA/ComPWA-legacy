@@ -18,7 +18,7 @@
 #include <utility>
 
 // 3rd party headers
-#include "external/qft++/include/Tensor.h"
+//#include "external/qft++/include/Tensor.h"
 
 // local headers
 #include "Core/Exceptions.hpp"
