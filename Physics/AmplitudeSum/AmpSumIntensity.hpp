@@ -71,14 +71,14 @@ protected:
 	std::vector<std::shared_ptr<DoubleParameter> > rr;
 	std::vector<std::shared_ptr<DoubleParameter> > phir;
 
-	std::vector<std::shared_ptr<DoubleParameter> > qr;
+//	std::vector<std::shared_ptr<DoubleParameter> > qr;
 
-	std::vector<std::shared_ptr<IntegerParameter> > aj;
-	std::vector<std::shared_ptr<IntegerParameter> > am;
-	std::vector<std::shared_ptr<IntegerParameter> > an;
+//	std::vector<std::shared_ptr<IntegerParameter> > aj;
+//	std::vector<std::shared_ptr<IntegerParameter> > am;
+//	std::vector<std::shared_ptr<IntegerParameter> > an;
 
-	std::vector<std::shared_ptr<DoubleParameter> > par1;
-	std::vector<std::shared_ptr<DoubleParameter> > par2;
+//	std::vector<std::shared_ptr<DoubleParameter> > par1;
+//	std::vector<std::shared_ptr<DoubleParameter> > par2;
 
 	std::vector<std::shared_ptr<AmpWigner> > angd;
 	unsigned int nAmps;

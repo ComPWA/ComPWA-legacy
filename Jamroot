@@ -14,5 +14,4 @@ build-project Physics ;
 build-project DataReader ; 
 build-project Estimator ;
 build-project Optimizer ;
-#build-project Analysis ;
 build-project test ;
