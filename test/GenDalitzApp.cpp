@@ -44,6 +44,8 @@
 #include "Physics/AmplitudeSum/AmplitudeSetup.hpp"
 #include "Core/Parameter.hpp"
 #include "Core/ParameterList.hpp"
+#include "Physics/DPKinematics/DPKinematics.hpp"
+#include "Physics/DPKinematics/DataPoint.hpp"
 
 using namespace std;
 
@@ -71,7 +73,10 @@ int main(int argc, char **argv){
   TRandom3 rando;
 
   //load resonances
-  AmplitudeSetup ini("test/JPSI_ypipi.xml");
+  DPKinematics kin(M,Br,m1,m2,m3,"gamma","pi0","pi0");
+  dataPoint::instance(kin);
+  std::string resoFile="/home/mathias/workspace/nextPWA/test/JPSI_ypipi.xml";
+  AmplitudeSetup ini(resoFile);
   cout << "loaded file " << ini.getFileName() << " with " << ini.getResonances().size() << " resonances:" << endl;
   for(std::vector<Resonance>::iterator reso=ini.getResonances().begin(); reso!=ini.getResonances().end(); reso++){
     cout << endl << "Resonance " << (*reso).m_name << endl;
@@ -85,7 +90,7 @@ int main(int argc, char **argv){
   cout << endl << endl;
 
   //Simple Breit-Wigner Physics-Module setup
-  AmpSumIntensity testBW(M, Br, m1, m2, m3, ini);
+  AmpSumIntensity testBW(kin, ini);
   ParameterList minPar;
   testBW.fillStartParVec(minPar);
  // minPar.AddParameter(DoubleParameter(1.5,0.5,2.5,0.1));
@@ -115,8 +120,8 @@ int main(int argc, char **argv){
 
   TLorentzVector *pGamma,*pPip,*pPim,pPm23,pPm13;
   double weight, m23sq, m13sq, m12sq, maxTest=0;
-  cout << "Start generation of y pi0 pi0 Dalitz" << endl;
-  do{
+  cout << "Einschwingen" << endl;
+  for(unsigned int schwing=0; schwing<10*MaxEvents; schwing++){
       weight = event.Generate();
 
       pGamma = event.GetDecay(0);
@@ -135,10 +140,6 @@ int main(int argc, char **argv){
         m12sq=0.0001;
       }
 
-      TParticle fparticleGam(22,1,0,0,0,0,*pGamma,W);
-      TParticle fparticlePip(211,1,0,0,0,0,*pPip,W);
-      TParticle fparticlePim(-211,1,0,0,0,0,*pPim,W);
-
       //call physics module
       vector<double> x;
       x.push_back(sqrt(m23sq));
@@ -148,30 +149,73 @@ int main(int argc, char **argv){
       double AMPpdf = intensL.GetDoubleParameter(0)->GetValue();
       //double AMPpdf = testBW.intensity(x, minPar);
 
-      double test = rando.Uniform(0,5);
 
       //mb.setVal(m13);
       //double m13pdf = totAmp13.getVal();//fun_combi2->Eval(m13);
       if(maxTest<(weight*AMPpdf))
         maxTest=(weight*AMPpdf);
-      if(i<MaxEvents && test<(weight*AMPpdf)){
-        i++;
-        new((*fEvt)[0]) TParticle(fparticleGam);
-        new((*fEvt)[1]) TParticle(fparticlePip);
-        new((*fEvt)[2]) TParticle(fparticlePim);
 
-        fTree.Fill();
-      }
+  }
 
-      if(mc<MaxEvents && test<weight){
-        mc++;
-        new((*fEvtPHSP)[0]) TParticle(fparticleGam);
-        new((*fEvtPHSP)[1]) TParticle(fparticlePip);
-        new((*fEvtPHSP)[2]) TParticle(fparticlePim);
+    cout << "Start generation of y pi0 pi0 Dalitz" << endl;
+    do{
+        weight = event.Generate();
 
-        fTreePHSP.Fill();
-      }
-  }while(i<MaxEvents || mc<MaxEvents);
+        pGamma = event.GetDecay(0);
+        pPip    = event.GetDecay(1);
+        pPim    = event.GetDecay(2);
+
+        pPm23 = *pPim + *pPip;
+        pPm13 = *pGamma + *pPim;
+
+        m23sq=pPm23.M2(); m13sq=pPm13.M2();
+
+        m12sq=M*M+m1*m1+m2*m2+m3*m3-m13sq-m23sq;
+        if(m12sq<0){
+          //cout << tmpm12_sq << "\t" << M*M << "\t" << m13_sq << "\t" << m23_sq << endl;
+          //continue;
+          m12sq=0.0001;
+        }
+
+        TParticle fparticleGam(22,1,0,0,0,0,*pGamma,W);
+        TParticle fparticlePip(211,1,0,0,0,0,*pPip,W);
+        TParticle fparticlePim(-211,1,0,0,0,0,*pPim,W);
+
+        //call physics module
+        vector<double> x;
+        x.push_back(sqrt(m23sq));
+        x.push_back(sqrt(m13sq));
+        x.push_back(sqrt(m12sq));
+        ParameterList intensL = testBW.intensity(x, minPar);
+        double AMPpdf = intensL.GetDoubleParameter(0)->GetValue();
+        //double AMPpdf = testBW.intensity(x, minPar);
+
+        double test = rando.Uniform(0,1.05*maxTest);
+
+        //mb.setVal(m13);
+        //double m13pdf = totAmp13.getVal();//fun_combi2->Eval(m13);
+        if((1.05*maxTest)<(weight*AMPpdf))
+          cout << "Einschwingen zu kurz!" << endl;
+        if(i<MaxEvents && test<(weight*AMPpdf)){
+          if(!(i%(MaxEvents/100)))
+            cout << (i/(double)MaxEvents*100.) << "% : " << test << " " << (weight*AMPpdf) << endl;
+          i++;
+          new((*fEvt)[0]) TParticle(fparticleGam);
+          new((*fEvt)[1]) TParticle(fparticlePip);
+          new((*fEvt)[2]) TParticle(fparticlePim);
+
+          fTree.Fill();
+        }
+
+        if(mc<MaxEvents && test<weight){
+          mc++;
+          new((*fEvtPHSP)[0]) TParticle(fparticleGam);
+          new((*fEvtPHSP)[1]) TParticle(fparticlePip);
+          new((*fEvtPHSP)[2]) TParticle(fparticlePim);
+
+          fTreePHSP.Fill();
+        }
+    }while(i<MaxEvents || mc<MaxEvents);
 
   fTree.Print();
   fTree.Write();

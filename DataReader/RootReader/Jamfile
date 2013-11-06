@@ -16,6 +16,7 @@ ROOTLIBS = [ MATCH "(.*)[\n]" : $(rlibs) ] ;
 project :
 	requirements
 	<include>$(ROOTSYS)/include
+	<include>$(ROOTSYS)/include/root
 	<include>$(BOOST_ROOT)/include
 	<linkflags>-L$(BOOST_ROOT)/lib
 	<linkflags>$(ROOTLIBS)

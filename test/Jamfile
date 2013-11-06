@@ -18,6 +18,7 @@ project :
 	requirements <include>./
 	    <include>$(TOP)
 		<include>$(ROOTSYS)/include
+		<include>$(ROOTSYS)/include/root
 		<include>$(BOOST_ROOT)/include
 		<include>$(GENEVA)/include
         <include>$(QFT)/include
@@ -30,6 +31,7 @@ project :
 	<linkflags>-lRooFitCore
 	<linkflags>-L$(QFT)/lib
 	<linkflags>-lqft++
+	<linkflags>-lgomp
 	;
 
 lib test : 
@@ -160,6 +162,7 @@ exe gendalitzApp :
         test
         $(TOP)/Core//ComPWA
         $(TOP)/Physics/AmplitudeSum//AmplitudeSum  
+        $(TOP)/Physics/DPKinematics//DPKinematics  
         : ;
         
 exe dalitzplotApp : 

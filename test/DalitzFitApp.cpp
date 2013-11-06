@@ -74,7 +74,8 @@ int main(int argc, char **argv){
   bool useFctTree = false;
 
   std::string file="test/3Part-4vecs.root";
-  AmplitudeSetup ini("test/JPSI_ypipi.xml");
+  std::string resoFile="/home/mathias/workspace/nextPWA/test/JPSI_ypipi.xml";
+  AmplitudeSetup ini(resoFile);
   std::cout << "Load Modules" << std::endl;
   std::shared_ptr<Data> myReader(new RootReader(file, false,"data"));
   std::shared_ptr<Data> myPHSPReader(new RootReader(file, false,"mc"));

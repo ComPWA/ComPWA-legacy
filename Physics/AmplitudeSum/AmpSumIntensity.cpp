@@ -151,12 +151,13 @@ const double AmpSumIntensity::integral(ParameterList& par){
 	//return totAmp.getNorm();//integral;
 }
 const ParameterList AmpSumIntensity::intensity(std::vector<double>& x, ParameterList& par){
-	if(x.size()!=2) {
+	if(x.size()!=3) {
 		std::cout<<"AmpSumIntensity: wrong size of phase space variables!"<<std::endl;
 		exit(1);
 	}
 	dataPoint::instance()->setM(2,3,x[0]);
 	dataPoint::instance()->setM(1,3,x[1]);
+	dataPoint::instance()->setM(1,2,x[1]);
 	return intensity(par);
 }
 const ParameterList AmpSumIntensity::intensity( ParameterList& par){

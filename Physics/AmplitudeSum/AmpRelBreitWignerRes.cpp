@@ -97,9 +97,13 @@ std::complex<double> AmpRelBreitWignerRes::evaluate() const {
 double AmpRelBreitWignerRes::eval(double x[], int dim, void * param) const {
 
 	//set values here
-	dataPoint::instance()->setMsq(4,x[0]);
-	dataPoint::instance()->setMsq(5,x[1]);
-	if( !dataPoint::instance()->DPKin.isWithinDP() ) return 0;
+	dataPoint::instance()->setMsq(5,x[0]);
+	dataPoint::instance()->setMsq(4,x[1]);
+	dataPoint::instance()->setMsq(3,x[2]);
+	if( !dataPoint::instance()->DPKin.isWithinDP() ){
+	  //TODO: add exception
+	  return 0;
+	}
 	return std::abs(evaluate());
 }
 double AmpRelBreitWignerRes::integral() const{
