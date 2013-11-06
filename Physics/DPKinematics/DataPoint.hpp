@@ -62,7 +62,7 @@ public:
 	//! get inv. mass sq. for subsys: 1+2=3, 1+3=4, 2+3=5
 	double getMsq(int subsys);
 	//! get inv. mass sq. of particle a and b
-	double getMsq(int a, int b) {return getM(a+b);};//daughter1 and daughter2
+	double getMsq(int a, int b) {return getMsq(a+b);};//daughter1 and daughter2
 	//! set new kinematics
 	void setKinematics(DPKinematics kin) { DPKin=kin; };
 	//! set inv. mass for subsys: 1+2=3, 1+3=4, 2+3=5

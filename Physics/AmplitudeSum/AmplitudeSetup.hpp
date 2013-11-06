@@ -107,7 +107,7 @@ void AmplitudeSetup::load(const std::string &filename)
 	BOOST_FOREACH( ptree::value_type const& v, pt.get_child("amplitude_setup") ) {
 		if( v.first == "resonance" ) {
 			Resonance f;
-			f.m_reference= v.second.get<std::string>("reference");
+//			f.m_reference= v.second.get<std::string>("reference");
 			f.m_name = v.second.get<std::string>("name");
 			f.m_mass = v.second.get<double>("mass");
 			f.m_mass_min = v.second.get<double>("mass_min");;
@@ -127,7 +127,7 @@ void AmplitudeSetup::load(const std::string &filename)
 		}
 		if( v.first == "resonanceFlatte" ) {
 			ResonanceFlatte f;
-			f.m_reference= v.second.get<std::string>("reference");
+//			f.m_reference= v.second.get<std::string>("reference");
 			f.m_name = v.second.get<std::string>("name");
 			f.m_mass = v.second.get<double>("mass");
 			f.m_mass_min = v.second.get<double>("mass_min");;

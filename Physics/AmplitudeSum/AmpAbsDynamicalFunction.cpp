@@ -35,10 +35,10 @@ AmpAbsDynamicalFunction::~AmpAbsDynamicalFunction()
 double AmpAbsDynamicalFunction::absEvaluate(double x[], size_t dim) const {
 	if(dim!=2) return 0;
 	//set data point: we assume that x[0]=m13 and x[1]=m23
-	double m12 = dataPoint::instance()->DPKin.getThirdVariable(sqrt(x[0]),sqrt(x[1]));
+	double m12sq = dataPoint::instance()->DPKin.getThirdVariableSq(x[0],x[1]);
 	dataPoint::instance()->setMsq(4,x[0]);
 	dataPoint::instance()->setMsq(5,x[1]);
-	dataPoint::instance()->setMsq(3,m12*m12);
+	dataPoint::instance()->setMsq(3,m12sq);
 	if( !dataPoint::instance()->DPKin.isWithinDP() ) return 0;//only integrate over phase space
 	return std::abs(evaluate());
 }

@@ -25,6 +25,20 @@
 
 	<reference>PDG2013</reference>
 	<particle>
+		<ID>22</ID>
+		<name>gamma</name>
+		<mass>
+			<value>0.0</value>
+			<error>
+				<value>0.0</value>
+			</error>
+		</mass>
+		<charge>0</charge>
+		<J>1</J>
+		<P>-1</P>
+		<C>-1</C>
+	</particle>
+	<particle>
 		<ID>221</ID>
 		<name>eta</name>
 		<mass>
@@ -176,6 +190,27 @@
 		<P>-1</P>
 	</particle>
 
+
+	<particle>
+		<ID>443</ID>
+		<name>J/psi</name>
+		<mass>
+			<value>3.096916</value>
+			<error>
+				<value>0.000011</value>
+			</error>
+		</mass>
+		<width>
+			<value>0.0000929</value>
+			<error>
+				<value>0.0000028</value>
+			</error>
+		</width>
+		<charge>0</charge>
+		<J>1</J>
+		<P>-1</P>
+		<C>-1</C>
+	</particle>
 	<particle>
 		<ID>333</ID>
 		<name>phi(1020)</name>

@@ -160,6 +160,7 @@ exe gendalitzApp :
         test
         $(TOP)/Core//ComPWA
         $(TOP)/Physics/AmplitudeSum//AmplitudeSum  
+        $(TOP)/Physics/DPKinematics//DPKinematics
         : ;
         
 exe dalitzplotApp : 
