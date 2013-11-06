@@ -42,6 +42,8 @@ public:
 	double s1min(double s2)const { return s1min(s2,M,m1,m2,m3); };
 	double s1max(double s2)const { return s1max(s2,M,m1,m2,m3); };
 
+	double getMass(unsigned int num);
+	double getMass(std::string name);
 	double M;
 	double Br;
 	double m1, m2, m3;

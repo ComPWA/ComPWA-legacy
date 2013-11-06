@@ -22,30 +22,52 @@ void DPKinematics::init(){
 	m12_min=((m1+m2)); m12_max=((M-m3));
 };
 DPKinematics::DPKinematics(std::string _nameMother, std::string _name1, std::string _name2, std::string _name3):
-						Br(0.0), nameMother(_nameMother), name1(_name1), name2(_name2), name3(_name3)
+										Br(0.0), nameMother(_nameMother), name1(_name1), name2(_name2), name3(_name3)
 {
 	M = PhysConst::instance()->getMass(_nameMother);
 	m1 = PhysConst::instance()->getMass(_name1);
 	m2 = PhysConst::instance()->getMass(_name2);
 	m3 = PhysConst::instance()->getMass(_name3);
-//	std::cout<<M<< " "<<m1<<" " <<m2<<" " <<m3<<std::endl;
+	//	std::cout<<M<< " "<<m1<<" " <<m2<<" " <<m3<<std::endl;
 	init();
 };
 DPKinematics::DPKinematics(double _M, double _Br, double _m1, double _m2, double _m3, std::string _name1, std::string _name2, std::string _name3):
-						M(_M), Br(_Br), m1(_m1), m2(_m2), m3(_m3), name1(_name1), name2(_name2), name3(_name3)
+										M(_M), Br(_Br), m1(_m1), m2(_m2), m3(_m3), name1(_name1), name2(_name2), name3(_name3)
 {
 	init();
 };
+double DPKinematics::getMass(unsigned int num){
+	switch(num){
+	case 0: return M;
+	case 1: return m1;
+	case 2: return m2;
+	case 3: return m3;
+	}
+	std::cout<<"DPKinematics: ERROR: wrong particle requested!"<<std::endl;
+	exit(1);
+	return -999;
+}
+double DPKinematics::getMass(std::string name){
+	if(name==nameMother) return M;
+	if(name==name1) return m1;
+	if(name==name2) return m2;
+	if(name==name3) return m3;
+	std::cout<<"DPKinematics: ERROR: wrong particle requested!"<<std::endl;
+	exit(1);
+	return -999;
+}
+
 DPKinematics::DPKinematics(const DPKinematics& other):
-						M(other.M), Br(other.Br),
-						m1(other.m1), m2(other.m2), m3(other.m3),
-						name1(other.name1), name2(other.name2), name3(other.name3)
+										M(other.M), Br(other.Br),
+										m1(other.m1), m2(other.m2), m3(other.m3),
+										name1(other.name1), name2(other.name2), name3(other.name3)
 {
 	init();
 };
 double DPKinematics::getThirdVariable(double invmass1, double invmass2) const{
 	return sqrt(M*M+m1*m1+m2*m2+m3*m3-invmass1*invmass1-invmass2*invmass2);
 }
+
 bool DPKinematics::isWithinDP() const{
 	/*!
 	 * checks if phase space point lies within the kinematically

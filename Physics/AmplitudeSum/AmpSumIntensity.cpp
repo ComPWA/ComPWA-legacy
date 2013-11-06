@@ -34,6 +34,9 @@
 #include "Physics/AmplitudeSum/AmpSumOfAmplitudes.hpp"
 #include "Physics/AmplitudeSum/AmpSumIntensity.hpp"
 
+#include "Physics/DPKinematics/PhysConst.hpp"
+
+#include "boost/function.hpp"
 /// Default Constructor (0x0)
 AmpSumIntensity::AmpSumIntensity(const DPKinematics kin, AmplitudeSetup ini) :
 _kin(kin),
@@ -45,9 +48,9 @@ ampSetup(ini)
 
 AmpSumIntensity::AmpSumIntensity(const double inM, const double inBr, const double in1
 		,const double in2, const double in3, AmplitudeSetup ini) :
-										  _kin(inM, inBr, in1, in2, in3,"","",""),
-										  totAmp("relBWsumAmplitude", "totAmp"),
-										  ampSetup(ini)
+														  _kin(inM, inBr, in1, in2, in3,"","",""),
+														  totAmp("relBWsumAmplitude", "totAmp"),
+														  ampSetup(ini)
 {
 
 	init();
@@ -64,38 +67,40 @@ void AmpSumIntensity::init(){
 		rr.push_back( std::shared_ptr<DoubleParameter> (new DoubleParameter("rr_"+tmp.m_name,tmp.m_strength) ) );
 		phir.push_back( std::shared_ptr<DoubleParameter> (new DoubleParameter("phir_"+tmp.m_name,tmp.m_phase) ) );
 
-		//		qr.push_back( std::shared_ptr<DoubleParameter> (new DoubleParameter("par1_"+tmp.m_nametmp.m_breakup_mom) ) );
-		//		aj.push_back( std::shared_ptr<IntegerParameter> (new IntegerParameter(tmp.m_spin) ) );
-		//		am.push_back( std::shared_ptr<IntegerParameter> (new IntegerParameter(tmp.m_m) ) );
-		//		an.push_back( std::shared_ptr<IntegerParameter> (new IntegerParameter(tmp.m_n) ) );
+		unsigned int subSys = tmp.m_daugtherA + tmp.m_daugtherB;
 
-		//				par1.push_back( std::shared_ptr<DoubleParameter> (new DoubleParameter("par1_"+tmp.m_name,tmp.m_par1) ) );
-		//				par2.push_back( std::shared_ptr<DoubleParameter> (new DoubleParameter("par1_"+tmp.name,tmp.m_par2) ) );
-//		DoubleParameter param1 = new DoubleParameter("par1_"+tmp.m_name,tmp.m_par1);
-//		DoubleParameter param2 = new DoubleParameter("par2_"+tmp.m_name,tmp.m_par2);
-		DoubleParameter param1("par1_"+tmp.m_name,tmp.m_par1);
-		DoubleParameter param2("par2_"+tmp.m_name,tmp.m_par2);
+		//setup Dynamics
+		unsigned int last = mr.size()-1;
+		std::shared_ptr<AmpRelBreitWignerRes> tmpbw(new AmpRelBreitWignerRes(tmp.m_name.c_str(),
+				*mr[last], *gr[last], tmp.m_mesonRadius, subSys, tmp.m_spin,tmp.m_m,tmp.m_n) );
+		tmpbw->SetNormalization(1/tmpbw->integral());
+		totAmp.addBW(tmpbw, rr.at(last), phir.at(last));
+	}// end loop over resonances
+	for(std::vector<ResonanceFlatte>::iterator reso=ampSetup.getResonancesFlatte().begin(); reso!=ampSetup.getResonancesFlatte().end(); reso++){
+		ResonanceFlatte tmp = (*reso);
+		//setup RooVars
+		namer.push_back(tmp.m_name);
+		mr.push_back( std::shared_ptr<DoubleParameter> (new DoubleParameter("mass_"+tmp.m_name,tmp.m_mass, tmp.m_mass_min, tmp.m_mass_max) ) );
+		gr.push_back( std::shared_ptr<DoubleParameter> (new DoubleParameter("width_"+tmp.m_name,tmp.m_width, tmp.m_width_min, tmp.m_width_max) ) );
+		rr.push_back( std::shared_ptr<DoubleParameter> (new DoubleParameter("rr_"+tmp.m_name,tmp.m_strength) ) );
+		phir.push_back( std::shared_ptr<DoubleParameter> (new DoubleParameter("phir_"+tmp.m_name,tmp.m_phase) ) );
+		DoubleParameter param1("coupling1_"+tmp.m_name,tmp.m_coupling);
+		DoubleParameter param2("coupling2_"+tmp.m_name,tmp.m_couplingHidden);
 
 		unsigned int subSys = tmp.m_daugtherA + tmp.m_daugtherB;
 
 		//setup Dynamics
 		unsigned int last = mr.size()-1;
-		if(tmp.m_type=="relBW"){
-			std::shared_ptr<AmpRelBreitWignerRes> tmpbw(new AmpRelBreitWignerRes(tmp.m_name.c_str(),
-					*mr[last], *gr[last], tmp.m_breakup_mom, subSys, tmp.m_spin,tmp.m_m,tmp.m_n) );
-			totAmp.addBW(tmpbw, rr.at(last), phir.at(last));
-		}
-		else if(tmp.m_type=="flatte"){
-			std::shared_ptr<AmpFlatteRes> tmpbw(new AmpFlatteRes(tmp.m_name.c_str(),
-					*mr[last], *gr[last], tmp.m_breakup_mom, param1, param2, 0.547853, 0.1396, subSys, tmp.m_spin,tmp.m_m,tmp.m_n) );
-			//			tmpbw->setBarrierMass(0.547853,0.1396);//a_0->eta pi hidden channel
-			totAmp.addBW(tmpbw, rr.at(last), phir.at(last));
-		}
-		else {
-			std::cout<<"AmpSumIntensity: wrong type! Type specified: "<<tmp.m_type<<std::endl;
-			exit(1);
-		}
-	}// end loop over resonances
+		std::shared_ptr<AmpFlatteRes> tmpbw(new AmpFlatteRes(tmp.m_name.c_str(),
+				*mr[last], *gr[last], tmp.m_mesonRadius, param1, param2, \
+				PhysConst::instance()->getMass(tmp.m_hiddenParticle1),\
+				PhysConst::instance()->getMass(tmp.m_hiddenParticle2),\
+				subSys, tmp.m_spin,tmp.m_m,tmp.m_n) );
+//		cout<<tmpbw->integral()<<endl;//BUGGGGG
+		tmpbw->SetNormalization(1/tmpbw->integral());
+		totAmp.addBW(tmpbw, rr.at(last), phir.at(last));
+	}// end loop over resonancesFlatte
+//exit(1);
 	nAmps=rr.size();
 	std::cout << "completed setup" << std::endl;
 }

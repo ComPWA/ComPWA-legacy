@@ -13,6 +13,7 @@
 #include <cstdlib>
 #include <math.h>
 class DPKinematics;
+#include "Physics/DPKinematics/DPKinematics.hpp"
 
 class dataPoint
 {

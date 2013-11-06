@@ -52,10 +52,11 @@ public:
 
 	virtual void initialise();
 	virtual std::complex<double> evaluate() const;
-	//  virtual double evaluate(double x[],int dim, void * param) const {return 0;};//used for MC integration
+//	virtual double eval(double x[],size_t dim, void * param) const {return 0;};//used for MC integration
+
 	void setDecayMasses(double, double, double, double);
 	//  double getMaximum() const{return 1;};
-	double integral() const {return 1;};
+//	double integral() const {return 1;};
 	double getSpin() {return _spin;}; //needs to be declared in AmpAbsDynamicalFunction
 	inline virtual bool isSubSys(const unsigned int subSys)const{return (subSys==_subSys);};
 

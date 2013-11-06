@@ -79,7 +79,7 @@ int main(int argc, char **argv){
     cout << "Width = " << (*reso).m_width << " with range " << (*reso).m_width_min << " to " << (*reso).m_width_max << endl;
     cout << "Spin =  " << (*reso).m_spin << " m = " << (*reso).m_m << " n = " << (*reso).m_n << endl;
     cout << "Strength =  " << (*reso).m_strength << " Phase = " << (*reso).m_phase << endl;
-    cout << "Breakupmomentum =  " << (*reso).m_breakup_mom << endl;
+    cout << "Breakupmomentum =  " << (*reso).m_mesonRadius<< endl;
     cout << "DaughterA =  " << (*reso).m_daugtherA << " DaughterB = " << (*reso).m_daugtherB << endl;
   }
   cout << endl << endl;

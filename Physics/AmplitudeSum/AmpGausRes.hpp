@@ -44,9 +44,6 @@ public:
 
   virtual void initialise();
   virtual std::complex<double> evaluate()const;
-  //virtual double evaluate(double x[],int dim, void * param) const {return 0;};//used for MC integration
-  //double getMaximum() const {return 1;};
-  //double integral() const {return 1;};
 
   inline virtual bool isSubSys(const unsigned int subSys)const{return (subSys==_subSys);};
   double getSpin(){return 0;};

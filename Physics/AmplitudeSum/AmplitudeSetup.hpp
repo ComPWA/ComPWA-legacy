@@ -33,19 +33,14 @@
 struct Resonance
 {
 	std::string m_name;
-	//adding type of resonance e.g. couppled channel BW
-	std::string m_type;
 	std::string m_reference;
 	double m_mass; //TODO: struct for borders?
 	double m_mass_min;
 	double m_mass_max;
-	double m_breakup_mom;
+	double m_mesonRadius;
 	double m_width;
 	double m_width_min;
 	double m_width_max;
-	//adding additional parameters for more complex PDF's, e.g. coupled channel BW
-	double m_par1;
-	double m_par2;
 
 	double m_strength;
 	double m_phase;
@@ -56,21 +51,32 @@ struct Resonance
 	unsigned int m_daugtherA; //TODO: better reference
 	unsigned int m_daugtherB; //TODO: better reference
 };
+struct ResonanceFlatte : Resonance
+{
+	double m_coupling;
+	double m_couplingHidden;
+	std::string m_hiddenParticle1;
+	std::string m_hiddenParticle2;
 
+};
 class AmplitudeSetup
 {
 private:
 	std::string m_file;          // ini filename
 	std::vector<Resonance> m_resonances;          // resonances
+	std::vector<ResonanceFlatte> m_resonancesFlatte;          // resonances
 public:
 	AmplitudeSetup(const std::string &filename){load(filename);};
-	AmplitudeSetup(const AmplitudeSetup& other) : m_file(other.m_file), m_resonances(other.m_resonances) {};
+	AmplitudeSetup(const AmplitudeSetup& other) : m_file(other.m_file), \
+			m_resonances(other.m_resonances) , m_resonancesFlatte(other.m_resonancesFlatte){};
 	void load(const std::string &filename);
 	void save(const std::string &filename);
 	~AmplitudeSetup(){};
 
+	inline unsigned int getNResonances() {return m_resonances.size()+m_resonancesFlatte.size(); };
 	inline const std::string & getFileName() const {return m_file;};
 	inline std::vector<Resonance> & getResonances() { return m_resonances; };
+	inline std::vector<ResonanceFlatte> & getResonancesFlatte() { return m_resonancesFlatte; };
 };
 
 // Loads amplitude_setup structure from the specified XML file
@@ -100,18 +106,15 @@ void AmplitudeSetup::load(const std::string &filename)
 	BOOST_FOREACH( ptree::value_type const& v, pt.get_child("amplitude_setup") ) {
 		if( v.first == "resonance" ) {
 			Resonance f;
-			f.m_type = v.second.get<std::string>("type");
 			f.m_reference= v.second.get<std::string>("reference");
 			f.m_name = v.second.get<std::string>("name");
 			f.m_mass = v.second.get<double>("mass");
 			f.m_mass_min = v.second.get<double>("mass_min");;
 			f.m_mass_max = v.second.get<double>("mass_max");;
-			f.m_breakup_mom = v.second.get<double>("breakup_mom");;
+			f.m_mesonRadius= v.second.get<double>("mesonRadius");;
 			f.m_width = v.second.get<double>("width");;
 			f.m_width_min = v.second.get<double>("width_min");;
 			f.m_width_max = v.second.get<double>("width_max");;
-			f.m_par1 = v.second.get<double>("par1");;
-			f.m_par2 = v.second.get<double>("par2");;
 			f.m_strength = v.second.get<double>("strength");;
 			f.m_phase = v.second.get<double>("phase");;
 			f.m_spin = v.second.get<unsigned>("spin");
@@ -121,7 +124,32 @@ void AmplitudeSetup::load(const std::string &filename)
 			f.m_daugtherB = v.second.get<unsigned>("daugtherB");
 			m_resonances.push_back(f);
 		}
+		if( v.first == "resonanceFlatte" ) {
+			ResonanceFlatte f;
+			f.m_reference= v.second.get<std::string>("reference");
+			f.m_name = v.second.get<std::string>("name");
+			f.m_mass = v.second.get<double>("mass");
+			f.m_mass_min = v.second.get<double>("mass_min");;
+			f.m_mass_max = v.second.get<double>("mass_max");;
+			f.m_mesonRadius= v.second.get<double>("mesonRadius");;
+			f.m_width = v.second.get<double>("width");;
+			f.m_width_min = v.second.get<double>("width_min");;
+			f.m_width_max = v.second.get<double>("width_max");;
+			f.m_strength = v.second.get<double>("strength");;
+			f.m_phase = v.second.get<double>("phase");;
+			f.m_spin = v.second.get<unsigned>("spin");
+			f.m_m = v.second.get<unsigned>("m");
+			f.m_n = v.second.get<unsigned>("n");
+			f.m_daugtherA = v.second.get<unsigned>("daugtherA");
+			f.m_daugtherB = v.second.get<unsigned>("daugtherB");
+			f.m_coupling = v.second.get<double>("coupling");
+			f.m_couplingHidden = v.second.get<double>("couplingHidden");
+			f.m_hiddenParticle1 = v.second.get<std::string>("hiddenParticle1");
+			f.m_hiddenParticle2 = v.second.get<std::string>("hiddenParticle2");
+			m_resonancesFlatte.push_back(f);
+		}
 	}
+	return;
 }
 
 // Saves the debug_settings structure to the specified XML file
@@ -145,11 +173,10 @@ void AmplitudeSetup::save(const std::string &filename)
 		//     ptree & node = pt.add("amplitude_setup.resonance", "");
 		pt.add("amplitude_setup.resonance", "");
 		pt.put("name", v.m_name);
-		pt.put("type", v.m_type);
 		pt.put("mass", v.m_mass);
 		pt.put("mass_min", v.m_mass_min);
 		pt.put("mass_max", v.m_mass_max);
-		pt.put("breakup_mom", v.m_breakup_mom);
+		pt.put("mesonRadius", v.m_mesonRadius);
 		pt.put("width", v.m_width);
 		pt.put("width_min", v.m_width_min);
 		pt.put("width_max", v.m_width_max);
@@ -162,6 +189,31 @@ void AmplitudeSetup::save(const std::string &filename)
 		pt.put("daughterB", v.m_daugtherB);
 		//if( !v.valid ) node.put("<xmlattr>.invalid", true);
 	}
+	BOOST_FOREACH( ResonanceFlatte const& v, m_resonancesFlatte ) {
+		//     ptree & node = pt.add("amplitude_setup.resonance", "");
+		pt.add("amplitude_setup.resonanceFlatte", "");
+		pt.put("name", v.m_name);
+		pt.put("mass", v.m_mass);
+		pt.put("mass_min", v.m_mass_min);
+		pt.put("mass_max", v.m_mass_max);
+		pt.put("mesonRadius", v.m_mesonRadius);
+		pt.put("width", v.m_width);
+		pt.put("width_min", v.m_width_min);
+		pt.put("width_max", v.m_width_max);
+		pt.put("coupling", v.m_coupling);
+		pt.put("couplingHidden", v.m_couplingHidden);
+		pt.put("hiddenParticle1", v.m_hiddenParticle1);
+		pt.put("hiddenParticle2", v.m_hiddenParticle2);
+		pt.put("strength", v.m_strength);
+		pt.put("phase", v.m_phase);
+		pt.put("spin", v.m_spin);
+		pt.put("m", v.m_m);
+		pt.put("n", v.m_n);
+		pt.put("daughterA", v.m_daugtherA);
+		pt.put("daughterB", v.m_daugtherB);
+		//if( !v.valid ) node.put("<xmlattr>.invalid", true);
+	}
+
 
 	// Write the property tree to the XML file.
 	write_xml(filename, pt);

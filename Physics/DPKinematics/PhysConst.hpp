@@ -37,11 +37,15 @@ public:
 	std::string getName(int);
 	int getId(std::string);
 
+	double getConstValue(std::string);
+	double getConstError(std::string);
+
 private:
 	PhysConst();
 	~PhysConst(){};
 	PhysConst(PhysConst const&){flag_readFile=1;};
 	static PhysConst* inst;
+	int findConstant(std::string);
 	int findParticle(std::string);
 	int findParticle(int);
 	void readFile();
@@ -55,6 +59,9 @@ private:
 	std::vector<unsigned int> J;
 	std::vector<int> P;
 	std::vector<int> C;
+	std::vector<std::string> nameConst;
+	std::vector<double> valueConst;
+	std::vector<double> errorConst;
 };
 
 

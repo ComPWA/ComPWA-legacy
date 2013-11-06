@@ -3,6 +3,7 @@ import os ;
 
 local BOOST_ROOT = [ os.environ BOOST_ROOT ] ;
 local QFT = [ os.environ QFT ] ;
+local GSL = [ os.environ GSL_ROOT ] ;
 
 BOOSTLIBS = -lboost_date_time -lboost_filesystem -lboost_program_options -lboost_regex -lboost_serialization -lboost_system -lboost_thread -lboost_test_exec_monitor -L$(BOOST_ROOT)/lib ;
 
@@ -13,6 +14,9 @@ project :
 	requirements
         <include>$(QFT)/include
 	    <include>$(BOOST_ROOT)/include
+	    <include>$(GSL)/include
+	<linkflags>-L$(GSL)/lib
+	<linkflags>-lgsl
 	<linkflags>-L$(QFT)/lib
 	<linkflags>-lqft++
 	<linkflags>$(BOOSTLIBS)
