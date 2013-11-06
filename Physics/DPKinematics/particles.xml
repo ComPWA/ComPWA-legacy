@@ -1,9 +1,49 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- particle data file  -->
+<physConstList xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="particleSchema.xsd">
+	<constant>
+		<name>Pi</name>
+		<value>
+			<value>3.141592654</value>
+		</value>
+	</constant>
+	<constant>
+		<name>c</name>
+		<value>
+			<value>299792458</value>
+			<error>
+				<value>0.0</value>
+			</error>
+		</value>
+		<reference>Units[m/s], PDG2013</reference>
+	</constant>
+</physConstList>
+
+<!-- particle data file -->
 <particleList xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:noNamespaceSchemaLocation="particleSchema.xsd">
 
 	<reference>PDG2013</reference>
+	<particle>
+		<ID>221</ID>
+		<name>eta</name>
+		<mass>
+			<value>0.547862</value>
+			<error>
+				<value>0.000018</value>
+			</error>
+		</mass>
+		<width>
+			<value>0.00000131</value>
+			<error>
+				<value>0.00000005</value>
+			</error>
+		</width>
+		<charge>0</charge>
+		<J>0</J>
+		<P>-1</P>
+		<C>+1</C>
+	</particle>
 	<particle>
 		<ID>111</ID>
 		<name>pi0</name>
@@ -46,7 +86,7 @@
 	</particle>
 	<particle>
 		<ID>310</ID>
-		<name>KS_0</name>
+		<name>K_S0</name>
 		<mass>
 			<value>0.497614</value>
 			<error>

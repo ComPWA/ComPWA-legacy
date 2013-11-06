@@ -65,7 +65,7 @@ std::complex<double> AmpGausRes::evaluate() const {
 //  double m  = Double_t(_x);
 	double m = dataPoint::instance()->getM(_subSys);
   
-  std::complex<double> gaus (exp(-1*(m-m0)*(m-m0)/width/width/2.),0);
+  std::complex<double> gaus (_norm * exp(-1*(m-m0)*(m-m0)/width/width/2.),0);
 
   return gaus;
 }

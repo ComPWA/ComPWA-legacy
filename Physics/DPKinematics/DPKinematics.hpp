@@ -56,6 +56,9 @@ public:
 	double s1min(double s2)const { return s1min(s2,M,m1,m2,m3); };
 	double s1max(double s2)const { return s1max(s2,M,m1,m2,m3); };
 
+	double getMass(unsigned int num);
+	//! get mass of paticles
+	double getMass(std::string name);
 	//! mass of decaying particle
 	double M;
 	//! width of decaying particle

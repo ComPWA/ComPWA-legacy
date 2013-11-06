@@ -14,6 +14,7 @@
 #define AMPSUMOFAMPLITUDES
 
 #include "Physics/AmplitudeSum/AmpAbsDynamicalFunction.hpp"
+#include "Physics/AmplitudeSum/AmpRelBreitWignerRes.hpp"
 #include "Physics/AmplitudeSum/AmpWigner.hpp"
 
 #include <vector>
@@ -35,6 +36,7 @@ public:
   double evaluateSlice(std::complex<double>*, unsigned int, unsigned int) const ;
   double evaluate() const ;
   
+  double integrate(AmpRelBreitWignerRes* amp);
   //double getMax() { return maxVal; };
 
 protected:
