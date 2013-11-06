@@ -17,6 +17,7 @@ PhysConst* PhysConst::inst = NULL;
 PhysConst::PhysConst(){
 	//error code
 	id.push_back(-999); name.push_back("error"); mass.push_back(-999); width.push_back(-999); J.push_back(999); P.push_back(false); C.push_back(false);
+	nameConst.push_back("error"); valueConst.push_back(-999); errorConst.push_back(-999);
 
 	pdgFileName = "/Users/weidenka/work/rootAnalysis/ComPWA/Physics/DPKinematics/particles.xml";//TODO: dont hardcode datafile
 
@@ -55,6 +56,9 @@ void PhysConst::readFile(){
 	unsigned int _J;
 	int _P;
 	int _C;
+	double _error;
+	double _value;
+
 
 	BOOST_FOREACH( ptree::value_type const& v, pt.get_child("particleList") ) {
 		_id = -999; _name="error"; _mass=-999; _width=-999; _J=-999; _P=-999; _C=-999;//setting default values
@@ -82,6 +86,20 @@ void PhysConst::readFile(){
 //		std::cout<<"PhysConst DEBUG adding particle: "<<_name<<" mass="<<_mass<<" width="<<_width<<" J=" <<_J<<" P="<<_P<< " C="<<_C<<std::endl;
 	}
 
+	BOOST_FOREACH( ptree::value_type const& v, pt.get_child("physConstList") ) {
+		_name="error"; _error=-999; _value=-999;
+		if( v.first == "constant" ){
+			_name = v.second.get<std::string>("name","error");
+			_value= v.second.get_child("value").get<double>("value",-999);
+			_error= v.second.get_child("value").get<double>("error",-999);
+		}
+		if(_name=="error" && _value==-999 ) continue;
+		nameConst.push_back(_name);
+		valueConst.push_back(_value);
+		errorConst.push_back(_error);
+//		std::cout<<"PhysConst DEBUG adding particle: "<<_name<<" mass="<<_mass<<" width="<<_width<<" J=" <<_J<<" P="<<_P<< " C="<<_C<<std::endl;
+	}
+
 	flag_readFile=0;
 	return;
 }
@@ -90,6 +108,12 @@ int PhysConst::findParticle(int idid){
 	for(unsigned int i=0; i<name.size(); i++){
 		if(id[i]==idid) return i;
 	}
+	return 0; //error particle not found
+}
+int PhysConst::findConstant(std::string nnn){
+	if(flag_readFile) readFile();
+	for(unsigned int i=0; i<nameConst.size(); i++)
+		if(nameConst[i]==nnn) return i;
 	return 0; //error particle not found
 }
 int PhysConst::findParticle(std::string nnn){
@@ -109,3 +133,6 @@ double PhysConst::getWidth(int nnn) 	{ return width[findParticle(nnn)]; } ;
 unsigned int PhysConst::getJ(int nnn) 	{ return J[findParticle(nnn)]; } ;
 bool PhysConst::getP(int nnn) 			{ return P[findParticle(nnn)]; } ;
 bool PhysConst::getC(int nnn) 			{ return C[findParticle(nnn)]; } ;
+
+double PhysConst::getConstValue(std::string nnn)	 	{ return valueConst[findConstant(nnn)]; } ;
+double PhysConst::getConstError(std::string nnn)	 	{ return errorConst[findConstant(nnn)]; } ;

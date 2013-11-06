@@ -36,16 +36,20 @@ public:
 
   virtual void initialise() = 0; 
   virtual std::complex<double> evaluate() const = 0;
-//  virtual double evaluate(double x[],int dim, void * param) const = 0;//used for MC integration
+
   virtual double getSpin() = 0;
   virtual bool isSubSys(const unsigned int) const = 0;
-  virtual double integral() const = 0;
+  virtual double absEvaluate(double x[],size_t dim) const;//used for MC integration
+  virtual double integral() const;
 
   virtual std::string GetName(){ return _name; };
   virtual std::string GetTitle(){ return GetName(); };
+  virtual double GetNormalization(){ return _norm; };
+  virtual void SetNormalization(double n){ _norm=n; };
  
 protected:
   std::string _name;
+  double _norm;
 
 private:
   //ClassDef(AmpAbsDynamicalFunction,1) // Abstract dynamical function

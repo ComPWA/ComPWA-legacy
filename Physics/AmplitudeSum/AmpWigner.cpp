@@ -118,7 +118,7 @@ double AmpWigner::evaluate() const {
 	double result = Wigner_d(j,m,n,beta);
 	if( ( result!=result ) || (beta!=beta)) {
 		std::cout<< "NAN! J="<< _inSpin<<" M="<<_outSpin1<<" N="<<_outSpin2<<" beta="<<beta<<std::endl;
-		std::cout<< "subSys: "<<_subSys<<" ("<<mod<<") "<<invM1 << " " <<invM2<< " cos(beta)="<<(2.*invM2*invM2-locmax_sq-locmin_sq)/(locmax_sq-locmin_sq)<<std::endl;
+		std::cout<< "subSys: "<<_subSys<<" ("<<mod<<") "<<invM1*invM1 << " " <<invM2*invM2<< " cos(beta)="<<(2.*invM2*invM2-locmax_sq-locmin_sq)/(locmax_sq-locmin_sq)<<std::endl;
 		return 0;
 	}
 	//	cout<<"result: "<<result<<endl;

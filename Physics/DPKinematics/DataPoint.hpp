@@ -23,7 +23,8 @@
 
 #include <cstdlib>
 #include <math.h>
-class DPKinematics;//forward declaration
+class DPKinematics;
+#include "Physics/DPKinematics/DPKinematics.hpp"
 
 class dataPoint
 {
