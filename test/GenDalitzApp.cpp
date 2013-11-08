@@ -49,7 +49,7 @@
 
 using namespace std;
 
-const unsigned int MaxEvents = 10000;
+const unsigned int MaxEvents = 100000;
 
 //constants
 const Double_t M = 3.096916; // GeV/c² (J/psi+)
