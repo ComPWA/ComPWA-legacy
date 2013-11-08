@@ -87,7 +87,7 @@ double AmpWigner::evaluate() const {
 	 * For WignerD functions we need one more invariant mass:
 	 */
 	int mod=0;
-	if(_subSys==5) mod=4; //5->3 work also without beta=nan, what is correct?
+	if(_subSys==5) mod=3; //5->3 work also without beta=nan, what is correct?
 	if(_subSys==4) mod=5;
 	if(_subSys==3) mod=5;
 	double invM2 = dataPoint::instance()->getM(mod);
@@ -117,7 +117,9 @@ double AmpWigner::evaluate() const {
 		  break;
 		}
 	  }
-	beta=acos((2.*invM2*invM2-locmax_sq-locmin_sq)/(locmax_sq-locmin_sq));
+	double cosbeta = (2.*invM2*invM2-locmax_sq-locmin_sq)/(locmax_sq-locmin_sq);
+	if( cosbeta > 1 && cosbeta < 1.1) cosbeta=1;
+    beta=acos(cosbeta);
 	//if(_subSys!=5) beta=acos(1);
 
 	//	cout<<"==== "<<_m23<< " "<<_m13<< " "<<invM1<<" " <<invM2<<endl;
@@ -136,8 +138,9 @@ double AmpWigner::evaluate() const {
 	//  cout<<Wigner_d(j,m,n,beta)<<endl;
 	double result = Wigner_d(j,m,n,beta);
 	if( ( result!=result ) || (beta!=beta)) {
+//	std::cout<<dataPoint::instance()->getMsq(2,3)<<" "<<dataPoint::instance()->getMsq(1,3)<<" "<<dataPoint::instance()->getMsq(1,2)<<std::endl;
 		std::cout<< "NAN! J="<< _inSpin<<" M="<<_outSpin1<<" N="<<_outSpin2<<" beta="<<beta<<std::endl;
-		std::cout<< "subSys: "<<_subSys<<" ("<<mod<<") "<<invM1*invM1 << " " <<invM2*invM2<< " cos(beta)="<<(2.*invM2*invM2-locmax_sq-locmin_sq)/(locmax_sq-locmin_sq)<<std::endl;
+		std::cout<< "subSys: "<<_subSys<<" ("<<mod<<") "<<invM1*invM1 << " " <<invM2*invM2<< " cos(beta)="<<cosbeta<<std::endl;
 		return 0;
 	}
 	//	cout<<"result: "<<result<<endl;

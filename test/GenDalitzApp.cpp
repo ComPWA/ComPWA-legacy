@@ -13,7 +13,7 @@
  * @file GenDalitzApp.cpp
  * This application uses the Breit-Wigner-Amplitude-Sum module and a
  * phase-space generator to generate a file with J/Psi -> g pi pi events.
-*/
+ */
 
 // Standard header files go here
 #include <iostream>
@@ -40,6 +40,8 @@
 #include "TRandom3.h"
 
 // Physics Interface header files go here
+#include "Physics/DPKinematics/PhysConst.hpp"
+#include "Physics/DPKinematics/DataPoint.hpp"
 #include "Physics/AmplitudeSum/AmpSumIntensity.hpp"
 #include "Physics/AmplitudeSum/AmplitudeSetup.hpp"
 #include "Core/Parameter.hpp"
@@ -49,16 +51,9 @@
 
 using namespace std;
 
-const unsigned int MaxEvents = 100000;
+const unsigned int MaxEvents = 10000;
 
 //constants
-const Double_t M = 3.096916; // GeV/c² (J/psi+)
-const Double_t Br = 0.000093; // GeV/c² (width)
-const Double_t m1 = 0.; // GeV/c² (gamma)
-const Double_t m2 = 0.139570; // GeV/c² (pi)
-const Double_t m3 = 0.139570; // GeV/c² (pi)
-//const Double_t c = 299792458.; // m/s
-const Double_t PI = 3.14159; // m/s
 
 /************************************************************************************************/
 /**
@@ -72,10 +67,29 @@ int main(int argc, char **argv){
   unsigned int i=0, mc=0;
   TRandom3 rando;
 
+	DPKinematics kin("J/psi","gamma","pi0","pi0");
+	static dataPoint* point = dataPoint::instance(kin);
+
+	/*const double M = kin.getMass("J/psi"); // GeV/c² (J/psi+)
+	const double Br = 0.000093; // GeV/c² (width)
+	const double m1 = kin.getMass("gamma"); // GeV/c² (gamma)
+	const double m2 = kin.getMass("pi0"); // GeV/c² (pi)
+	const double m3 = kin.getMass("pi0"); // GeV/c² (pi)
+	//const double c = 299792458.; // m/s
+	const double PI = PhysConst::instance()->getConstValue("Pi");*/
+
+	const Double_t M = 3.096916; // GeV/c² (J/psi+)
+	const Double_t Br = 0.000093; // GeV/c² (width)
+	const Double_t m1 = 0.; // GeV/c² (gamma)
+	const Double_t m2 = 0.139570; // GeV/c² (pi)
+	const Double_t m3 = 0.139570; // GeV/c² (pi)
+	//const Double_t c = 299792458.; // m/s
+	const Double_t PI = 3.14159; // m/s
+
   //load resonances
-  DPKinematics kin(M,Br,m1,m2,m3,"gamma","pi0","pi0");
-  dataPoint::instance(kin);
-  std::string resoFile="/home/mathias/workspace/nextPWA/test/JPSI_ypipi.xml";
+  //DPKinematics kin(M,Br,m1,m2,m3,"gamma","pi0","pi0");
+  //dataPoint::instance(kin);
+  std::string resoFile="test/JPSI_ypipi.xml";
   AmplitudeSetup ini(resoFile);
   cout << "loaded file " << ini.getFileName() << " with " << ini.getResonances().size() << " resonances:" << endl;
   for(std::vector<Resonance>::iterator reso=ini.getResonances().begin(); reso!=ini.getResonances().end(); reso++){
@@ -121,7 +135,7 @@ int main(int argc, char **argv){
   TGenPhaseSpace event;
   event.SetDecay(W, 3, masses);
 
-  TLorentzVector *pGamma,*pPip,*pPim,pPm23,pPm13;
+  TLorentzVector *pGamma,*pPip,*pPim,pPm23,pPm13,pPm12;
   double weight, m23sq, m13sq, m12sq, maxTest=0;
   cout << "Einschwingen" << endl;
   for(unsigned int schwing=0; schwing<10*MaxEvents; schwing++){
@@ -131,17 +145,19 @@ int main(int argc, char **argv){
       pPip    = event.GetDecay(1);
       pPim    = event.GetDecay(2);
 
-      pPm23 = *pPim + *pPip;
-      pPm13 = *pGamma + *pPim;
+	  pPm23 = *pPim + *pPip;
+	  pPm13 = *pGamma + *pPim;
+	  pPm12 = *pGamma + *pPip;
 
-      m23sq=pPm23.M2(); m13sq=pPm13.M2();
+      m23sq=pPm23.M2(); m13sq=pPm13.M2(); m12sq=pPm12.M2();
 
-      m12sq=M*M+m1*m1+m2*m2+m3*m3-m13sq-m23sq;
-      if(m12sq<0){
-        //cout << tmpm12_sq << "\t" << M*M << "\t" << m13_sq << "\t" << m23_sq << endl;
-        //continue;
-        m12sq=0.0001;
-      }
+      //		m12sq = kin.getThirdVariableSq(m23sq,m13sq);
+      		point->setMsq(3,m12sq); point->setMsq(4,m13sq); point->setMsq(5,m23sq);
+      //		m12sq=M*M+m1*m1+m2*m2+m3*m3-m13sq-m23sq;
+      		if( abs(m12sq-kin.getThirdVariableSq(m23sq,m13sq))>0.01 ){
+      			std::cout<<m12sq<<" "<<kin.getThirdVariableSq(m23sq,m13sq)<<std::endl;
+      			std::cout<<"   " <<m23sq<<" "<<m13sq<<" "<<m12sq<<std::endl;
+      		}
 
       //call physics module
       vector<double> x;
@@ -172,16 +188,17 @@ int main(int argc, char **argv){
 
         pPm23 = *pPim + *pPip;
         pPm13 = *pGamma + *pPim;
+        pPm12 = *pGamma + *pPip;
 
-        m23sq=pPm23.M2(); m13sq=pPm13.M2();
+        m23sq=pPm23.M2(); m13sq=pPm13.M2(); m12sq=pPm12.M2();
 
-        m12sq=M*M+m1*m1+m2*m2+m3*m3-m13sq-m23sq;
-        if(m12sq<0){
-          //cout << tmpm12_sq << "\t" << M*M << "\t" << m13_sq << "\t" << m23_sq << endl;
-          //continue;
-          m12sq=0.0001;
-        }
-
+        //		m12sq = kin.getThirdVariableSq(m23sq,m13sq);
+        		point->setMsq(3,m12sq); point->setMsq(4,m13sq); point->setMsq(5,m23sq);
+        //		m12sq=M*M+m1*m1+m2*m2+m3*m3-m13sq-m23sq;
+          		if( abs(m12sq-kin.getThirdVariableSq(m23sq,m13sq))>0.01 ){
+          			std::cout<<m12sq<<" "<<kin.getThirdVariableSq(m23sq,m13sq)<<std::endl;
+          			std::cout<<"   " <<m23sq<<" "<<m13sq<<" "<<m12sq<<std::endl;
+          		}
         TParticle fparticleGam(22,1,0,0,0,0,*pGamma,W);
         TParticle fparticlePip(211,1,0,0,0,0,*pPip,W);
         TParticle fparticlePim(-211,1,0,0,0,0,*pPim,W);

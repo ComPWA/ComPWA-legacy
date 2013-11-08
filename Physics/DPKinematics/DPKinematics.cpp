@@ -33,6 +33,10 @@ DPKinematics::DPKinematics(std::string _nameMother, std::string _name1, std::str
 	m2 = PhysConst::instance()->getMass(_name2);
 	m3 = PhysConst::instance()->getMass(_name3);
 	//	std::cout<<M<< " "<<m1<<" " <<m2<<" " <<m3<<std::endl;
+	if(M==-999 || m1==-999|| m2==-999|| m3==-999) {
+		std::cout<<"DPKinematics: ERROR: masses not set! EXIT!"<<std::endl;
+		exit(1);
+	}
 	init();
 };
 DPKinematics::DPKinematics(double _M, double _Br, double _m1, double _m2, double _m3, std::string _name1, std::string _name2, std::string _name3):
@@ -68,8 +72,12 @@ DPKinematics::DPKinematics(const DPKinematics& other):
 {
 	init();
 };
-double DPKinematics::getThirdVariable(double invmass1, double invmass2) const{
-	return sqrt(M*M+m1*m1+m2*m2+m3*m3-invmass1*invmass1-invmass2*invmass2);
+double DPKinematics::getThirdVariableSq(double invmass1sq, double invmass2sq) const{
+	/*!
+	 * calculates 3rd invariant mass from the other inv. masses.
+	 */
+//	return sqrt(M*M+m1*m1+m2*m2+m3*m3-invmass1-invmass2);
+	return (M*M+m1*m1+m2*m2+m3*m3-invmass1sq-invmass2sq);
 }
 
 bool DPKinematics::isWithinDP() const{
@@ -84,7 +92,7 @@ bool DPKinematics::isWithinDP() const{
 	return isWithinDP(s1,s2,s3);
 }
 
-bool DPKinematics::isWithinDP(double m23, double m13, double m12) const{
+bool DPKinematics::isWithinDP(double m23sq, double m13sq, double m12sq) const{
 	/*!
 	 * \brief checks if phase space point lies within the kinematically allowed region.
 	 * \param m23 invariant mass of particles 2 and 3
@@ -93,9 +101,9 @@ bool DPKinematics::isWithinDP(double m23, double m13, double m12) const{
 	 *
 	 */
 	//mostly copied from Laura++
-	double e3Cms23 = (m23*m23 - m2*m2 + m3*m3)/(2.0*m23); //energy of part3 in 23 rest frame
+	double e3Cms23 = (m23sq - m2*m2 + m3*m3)/(2.0*sqrt(m23sq)); //energy of part3 in 23 rest frame
 	double p3Cms23 = sqrt(-(m3*m3-e3Cms23*e3Cms23)); //momentum of part3 in 23 rest frame
-	double e1Cms23 = (M*M - m23*m23 - m1*m1)/(2.0*m23); //energy of part1 in 23 rest frame
+	double e1Cms23 = (M*M - m23sq - m1*m1)/(2.0*sqrt(m23sq)); //energy of part1 in 23 rest frame
 	double p1Cms23 = sqrt(-(m1*m1-e1Cms23*e1Cms23)); //momentum of part1 in 23 rest frame
 
 	double term = 2.0*e3Cms23*e1Cms23+ m1*m1 + m3*m3;
@@ -103,7 +111,7 @@ bool DPKinematics::isWithinDP(double m23, double m13, double m12) const{
 	double _m13SqLocMin = term - 2.0*p3Cms23*p1Cms23;
 	double _m13SqLocMax = term + 2.0*p3Cms23*p1Cms23;
 
-	if(m13*m13 >= _m13SqLocMin && m13*m13 <= _m13SqLocMax) return 1;
+	if(m13sq >= _m13SqLocMin && m13sq <= _m13SqLocMax) return 1;
 	return 0;
 }
 

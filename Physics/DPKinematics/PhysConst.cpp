@@ -19,7 +19,7 @@ PhysConst::PhysConst(){
 	id.push_back(-999); name.push_back("error"); mass.push_back(-999); width.push_back(-999); J.push_back(999); P.push_back(false); C.push_back(false);
 	nameConst.push_back("error"); valueConst.push_back(-999); errorConst.push_back(-999);
 
-	pdgFileName = "/Users/weidenka/work/rootAnalysis/ComPWA/Physics/DPKinematics/particles.xml";//TODO: dont hardcode datafile
+	pdgFileName = "Physics/DPKinematics/particles.xml";//TODO: dont hardcode datafile
 
 	flag_readFile=1;
 	return;

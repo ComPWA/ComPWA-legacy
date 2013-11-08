@@ -36,7 +36,7 @@ public:
 	//! Copy constructor
 	DPKinematics(const DPKinematics& other);
 	//! Calculates third dalitz plot variable, e.g f(s1,s2)=s3
-	double getThirdVariable(double, double) const;
+	double getThirdVariableSq(double, double) const;
 	//! checks of data point is within phase space boundaries, data point provided by dataPoint
 	bool isWithinDP() const;
 	//! checks of data point is within phase space boundaries

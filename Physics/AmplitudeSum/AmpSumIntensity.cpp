@@ -63,7 +63,6 @@ AmpSumIntensity::AmpSumIntensity(const double inM, const double inBr, const doub
 														  totAmp("relBWsumAmplitude", "totAmp"),
 														  ampSetup(ini)
 {
-
 	init();
 }
 
@@ -110,7 +109,6 @@ void AmpSumIntensity::init(){
 		tmpbw->SetNormalization(1/tmpbw->integral());
 		totAmp.addBW(tmpbw, rr.at(last), phir.at(last));
 	}// end loop over resonancesFlatte
-//exit(1);
 	nAmps=rr.size();
 	std::cout << "completed setup" << std::endl;
 }
@@ -171,6 +169,7 @@ const ParameterList AmpSumIntensity::intensity( ParameterList& par){
 		phir[i]->SetValue(par.GetDoubleParameter(2*i+1)->GetValue());//fixed
 	}
 
+//	std::cout<<dataPoint::instance()->getMsq(2,3)<<" "<<dataPoint::instance()->getMsq(1,3)<<" "<<dataPoint::instance()->getMsq(1,2)<<std::endl;
 	double AMPpdf = totAmp.evaluate();
 
 	if(AMPpdf!=AMPpdf){
