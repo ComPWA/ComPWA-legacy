@@ -56,23 +56,23 @@ void AmpWigner::initialise()
 {
 	static dataPoint* point = dataPoint::instance();
 	_M=point->DPKin.M;
-	if(_subSys==5){
+	//if(_subSys==5){
 		_m1=point->DPKin.m1;
 		_m2=point->DPKin.m2;
-		_m3=point->DPKin.m3;}
-	if(_subSys==4){
-		_m1=point->DPKin.m2;
-		_m2=point->DPKin.m3;
-		_m3=point->DPKin.m1;}
-	if(_subSys==3){
-		_m1=point->DPKin.m3;
-		_m2=point->DPKin.m2;
-		_m3=point->DPKin.m1;}
+		_m3=point->DPKin.m3;//}
+	//if(_subSys==4){
+		//_m1=point->DPKin.m2;
+		//_m2=point->DPKin.m3;
+		//_m3=point->DPKin.m1;//}
+	//if(_subSys==3){
+		//_m1=point->DPKin.m3;
+		//_m2=point->DPKin.m2;
+		//_m3=point->DPKin.m1;//}
 //	cout<<"AmpWigner DEBUG set masses to m1="<<_m1<< " m2="<<_m2<<" m3=" <<_m3<<endl;
 
 }    
 void AmpWigner::setDecayMasses(double m1, double m2, double m3, double M){
-	_M=M; _m1=m3; _m2=m2; _m3=m1;
+	_M=M; _m1=m1; _m2=m2; _m3=m3;
 	return;
 }
 
@@ -87,9 +87,9 @@ double AmpWigner::evaluate() const {
 	 * For WignerD functions we need one more invariant mass:
 	 */
 	int mod=0;
-	if(_subSys==5) mod=4; //5->3 work also without beta=nan, what is correct?
-	if(_subSys==4) mod=3;
-	if(_subSys==3) mod=4;
+	if(_subSys==5) mod=3; //5->3 work also without beta=nan, what is correct?
+	if(_subSys==4) mod=5;
+	if(_subSys==3) mod=5;
 	double invM2 = dataPoint::instance()->getM(mod);
 
 //	dataPoint* point = dataPoint::instance();
@@ -98,9 +98,30 @@ double AmpWigner::evaluate() const {
 	//	double locmax_sq2 = s2max(_m23*_m23,_M,_m1,_m2,_m3);
 	//	double beta2=acos((2.*_m13*_m13-locmax_sq2-locmin_sq2)/(locmax_sq2-locmin_sq2));
 
-	locmin_sq = s2min(invM1*invM1,_M,_m1,_m2,_m3);
-	locmax_sq = s2max(invM1*invM1,_M,_m1,_m2,_m3);
-	beta=acos((2.*invM2*invM2-locmax_sq-locmin_sq)/(locmax_sq-locmin_sq));
+	  switch(_subSys){
+		case 5:{ //reso in m23
+		  locmin_sq = s2min(invM1*invM1,_M,_m1,_m2,_m3);
+		  locmax_sq = s2max(invM1*invM1,_M,_m1,_m2,_m3);
+		  break;
+		}
+		case 4:{ //reso in m13
+		  locmin_sq = s1min(invM1*invM1,_M,_m1,_m2,_m3);
+		  locmax_sq = s1max(invM1*invM1,_M,_m1,_m2,_m3);
+		  break;
+		}
+		case 3:{ //reso in m12
+		  //return 1;
+		  locmin_sq = s1min(invM1*invM1,_M,_m1,_m3,_m2);
+		  locmax_sq = s1max(invM1*invM1,_M,_m1,_m3,_m2);
+		  //if(beta!=beta) return 1.;
+		  break;
+		}
+	  }
+	double cosbeta = (2.*invM2*invM2-locmax_sq-locmin_sq)/(locmax_sq-locmin_sq);
+	if( cosbeta > 1 && cosbeta < 1.1) cosbeta=1;
+    beta=acos(cosbeta);
+	//if(_subSys!=5) beta=acos(1);
+
 	//	cout<<"==== "<<_m23<< " "<<_m13<< " "<<invM1<<" " <<invM2<<endl;
 	//	cout<< "wwww " <<_subSys<< " "<<mod<<" " <<beta<< " "<<beta2<<endl;
 	//	if(beta!=beta){
@@ -119,7 +140,7 @@ double AmpWigner::evaluate() const {
 	if( ( result!=result ) || (beta!=beta)) {
 //	std::cout<<dataPoint::instance()->getMsq(2,3)<<" "<<dataPoint::instance()->getMsq(1,3)<<" "<<dataPoint::instance()->getMsq(1,2)<<std::endl;
 		std::cout<< "NAN! J="<< _inSpin<<" M="<<_outSpin1<<" N="<<_outSpin2<<" beta="<<beta<<std::endl;
-		std::cout<< "subSys: "<<_subSys<<" ("<<mod<<") "<<invM1*invM1 << " " <<invM2*invM2<< " cos(beta)="<<(2.*invM2*invM2-locmax_sq-locmin_sq)/(locmax_sq-locmin_sq)<<std::endl;
+		std::cout<< "subSys: "<<_subSys<<" ("<<mod<<") "<<invM1*invM1 << " " <<invM2*invM2<< " cos(beta)="<<cosbeta<<std::endl;
 		return 0;
 	}
 	//	cout<<"result: "<<result<<endl;

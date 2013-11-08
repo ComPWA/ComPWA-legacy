@@ -178,20 +178,20 @@ const double AmpSumIntensity::integral(ParameterList& par){
 	//return totAmp.getNorm();//integral;
 }
 const ParameterList AmpSumIntensity::intensity(std::vector<double>& x, ParameterList& par){
-	if(x.size()!=2) {
+	if(x.size()!=3) {
 		std::cout<<"AmpSumIntensity: wrong size of phase space variables!"<<std::endl;
 		exit(1);
 	}
-	dataPoint::instance()->setMsq(2,3,x[0]);
-	dataPoint::instance()->setMsq(1,3,x[1]);
-	dataPoint::instance()->setMsq(1,2,dataPoint::instance()->DPKin.getThirdVariableSq(x[0],x[1]));
+	dataPoint::instance()->setM(2,3,x[0]);
+	dataPoint::instance()->setM(1,3,x[1]);
+	dataPoint::instance()->setM(1,2,x[2]);
 	return intensity(par);
 }
 const ParameterList AmpSumIntensity::intensity( ParameterList& par){
 	//parameters varied by Minimization algorithm
 	for(unsigned int i=0; i<nAmps; i++){
-		rr[i]->SetValue(par.GetDoubleParameter(i)->GetValue());//free
-		phir[i]->SetValue(par.GetDoubleParameter(nAmps+i)->GetValue());//fixed
+		rr[i]->SetValue(par.GetDoubleParameter(2*i)->GetValue());//free
+		phir[i]->SetValue(par.GetDoubleParameter(2*i+1)->GetValue());//fixed
 	}
 
 	//	std::cout<<dataPoint::instance()->getMsq(2,3)<<" "<<dataPoint::instance()->getMsq(1,3)<<" "<<dataPoint::instance()->getMsq(1,2)<<std::endl;
@@ -218,10 +218,10 @@ const bool AmpSumIntensity::fillStartParVec(ParameterList& outPar){
 	return true;
 }
 
-void AmpSumIntensity::printAmps(){
-	cout<<"== Printing amplitudes with current(!) set of parameters:"<<endl;
-	for(unsigned int i=0;i<nAmps;i++){
-		std::cout<<namer[i]<<":	Amplitude: "<<rr[i]->GetValue()<<"+-"<<rr[i]->GetError();
-		std::cout<<"	Phase: "<<phir[i]->GetValue()<<"+-"<<phir[i]->GetError()<<std::endl;
-	}
+std::string AmpSumIntensity::printAmps(){
+	std::stringstream o;
+	o<<"== Printing amplitudes with current(!) set of parameters:"<<endl;
+	for(unsigned int i=0;i<nAmps;i++)
+		o<<namer[i]<<":	Amplitude: "<<rr[i]->GetValue()<<"+-"<<rr[i]->GetError()<<"	Phase: "<<phir[i]->GetValue()<<"+-"<<phir[i]->GetError()<<endl;
+    return o.str();
 }

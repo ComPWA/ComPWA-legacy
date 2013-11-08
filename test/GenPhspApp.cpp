@@ -11,7 +11,7 @@
 #include <math.h>
 #include <TRandom3.h>
 #include <Physics/DPKinematics/DPKinematics.hpp>
-#include <Physics/DPKinematics/dataPoint.hpp>
+#include <Physics/DPKinematics/DataPoint.hpp>
 #include <TH2.h>
 #include <TFile.h>
 using namespace std;

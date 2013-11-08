@@ -367,15 +367,15 @@ void ParameterList::make_str() {
   if(vDoublePar_.size())
     oss << "  " << vDoublePar_.size() << " floating point parameters: " << std::endl;
   for(unsigned int d=0; d< vDoublePar_.size(); d++)
-    oss << vDoublePar_[d] << std::endl;
+    oss << vDoublePar_[d]->GetName() << ": " << vDoublePar_[d]->GetValue() << std::endl;
   if(vIntPar_.size())
     oss << "  " << vIntPar_.size() << " integer parameters: " << std::endl;
   for(unsigned int i=0; i< vIntPar_.size(); i++)
-    oss << vIntPar_[i] << std::endl;
+    oss << vIntPar_[i]->GetName() << ": " << vIntPar_[i]->GetValue() << std::endl;
   if(vBoolPar_.size())
     oss << "  " << vBoolPar_.size() << " boolean parameters: " << std::endl;
   for(unsigned int b=0; b< vBoolPar_.size(); b++)
-    oss << vBoolPar_[b] << std::endl;
+    oss << vBoolPar_[b]->GetName() << ": " << vBoolPar_[b]->GetValue() << std::endl;
 
   out_ = oss.str();
 }

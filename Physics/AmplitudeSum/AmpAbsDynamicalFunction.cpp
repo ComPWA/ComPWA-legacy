@@ -16,7 +16,7 @@
 #include "gsl/gsl_monte_vegas.h"
 
 #include "Physics/DPKinematics/PhysConst.hpp"
-#include "Physics/DPKinematics/dataPoint.hpp"
+#include "Physics/DPKinematics/DataPoint.hpp"
 #include "Physics/AmplitudeSum/AmpAbsDynamicalFunction.hpp"
 
 AmpAbsDynamicalFunction::AmpAbsDynamicalFunction(const char *name) : _name(name), _norm(1.0)

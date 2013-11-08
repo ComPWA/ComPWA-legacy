@@ -18,6 +18,7 @@
 
 #include <vector>
 #include <memory>
+#include <string>
 
 #include "Physics/Amplitude.hpp"
 #include "Core/Parameter.hpp"
@@ -59,7 +60,7 @@ public:
 
 	virtual const bool fillStartParVec(ParameterList& outPar);
 
-	virtual void printAmps();
+	virtual std::string printAmps();
 
 	virtual ~AmpSumIntensity(){};
 

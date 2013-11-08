@@ -1,7 +1,9 @@
 <amplitude_setup>
     <filename>JPSI_ypipi.xml</filename>
-    <resonance>
+       <resonance>
        <name>f0_980</name>
+       <type>relBW</type>
+       <reference>f0_980</reference>
        <mass>0.99</mass>
        <mass_min>0.5</mass_min>
        <mass_max>2.0</mass_max>
@@ -9,6 +11,9 @@
        <width>0.05</width>
        <width_min>0.</width_min>
        <width_max>2.</width_max>
+       <par1>1.</par1>
+       <par2>1.</par2>
+       <mesonRadius>1.</mesonRadius>
        <strength>1.</strength>
        <phase>0.</phase>
        <spin>0</spin>
@@ -19,6 +24,8 @@
     </resonance>
     <resonance>
        <name>f0_1500</name>
+       <type>relBW</type>
+       <reference>f0_1500</reference>
        <mass>1.505</mass>
        <mass_min>1.0</mass_min>
        <mass_max>2.0</mass_max>
@@ -26,6 +33,9 @@
        <width>0.109</width>
        <width_min>0.</width_min>
        <width_max>2.</width_max>
+       <par1>1.</par1>
+       <par2>1.</par2>
+       <mesonRadius>1.</mesonRadius>
        <strength>1.</strength>
        <phase>0.</phase>
        <spin>0</spin>
@@ -36,6 +46,8 @@
     </resonance>
     <resonance>
        <name>f0_1710</name>
+       <type>relBW</type>
+       <reference>f0_1710</reference>
        <mass>1.72</mass>
        <mass_min>1.2</mass_min>
        <mass_max>2.2</mass_max>
@@ -43,6 +55,9 @@
        <width>0.135</width>
        <width_min>0.</width_min>
        <width_max>2.</width_max>
+       <par1>1.</par1>
+       <par2>1.</par2>
+       <mesonRadius>1.</mesonRadius>
        <strength>1.</strength>
        <phase>0.</phase>
        <spin>0</spin>
@@ -53,6 +68,8 @@
     </resonance>
     <resonance>
        <name>f2_1270</name>
+       <type>relBW</type>
+       <reference>f2_1270</reference>
        <mass>1.274</mass>
        <mass_min>0.7</mass_min>
        <mass_max>1.7</mass_max>
@@ -60,7 +77,10 @@
        <width>0.185</width>
        <width_min>0.</width_min>
        <width_max>2.</width_max>
-       <strength>1.</strength>
+       <par1>1.</par1>
+       <par2>1.</par2>
+       <mesonRadius>1.</mesonRadius>
+       <strength>0.5</strength>
        <phase>0.</phase>
        <spin>2</spin>
        <m>0</m>
@@ -70,6 +90,8 @@
     </resonance>
     <resonance>
        <name>f2_1525</name>
+       <type>relBW</type>
+       <reference>f2_1525</reference>
        <mass>1.525</mass>
        <mass_min>1.0</mass_min>
        <mass_max>2.0</mass_max>
@@ -77,7 +99,10 @@
        <width>0.073</width>
        <width_min>0.</width_min>
        <width_max>2.</width_max>
-       <strength>1.</strength>
+       <par1>1.</par1>
+       <par2>1.</par2>
+       <mesonRadius>1.</mesonRadius>
+       <strength>0.5</strength>
        <phase>1.6</phase>
        <spin>2</spin>
        <m>0</m>
@@ -87,6 +112,8 @@
     </resonance>
     <resonance>
        <name>omega</name>
+       <type>relBW</type>
+       <reference>omega</reference>
        <mass>0.783</mass>
        <mass_min>0.5</mass_min>
        <mass_max>1.</mass_max>
@@ -94,7 +121,10 @@
        <width>0.0085</width>
        <width_min>0.</width_min>
        <width_max>2.</width_max>
-       <strength>1.</strength>
+       <par1>1.</par1>
+       <par2>1.</par2>
+       <mesonRadius>1.</mesonRadius>
+       <strength>0.05</strength>
        <phase>0.8</phase>
        <spin>0</spin>
        <m>0</m>
@@ -104,6 +134,8 @@
     </resonance>
     <resonance>
        <name>omega</name>
+       <type>relBW</type>
+       <reference>omega</reference>
        <mass>0.783</mass>
        <mass_min>0.5</mass_min>
        <mass_max>1.</mass_max>
@@ -111,7 +143,10 @@
        <width>0.0085</width>
        <width_min>0.</width_min>
        <width_max>2.</width_max>
-       <strength>1.</strength>
+       <par1>1.</par1>
+       <par2>1.</par2>
+       <mesonRadius>1.</mesonRadius>
+       <strength>0.05</strength>
        <phase>0.8</phase>
        <spin>0</spin>
        <m>0</m>
