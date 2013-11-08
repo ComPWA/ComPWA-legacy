@@ -320,7 +320,7 @@ protected:
   /*!
    * Declaring the stream-operator << as friend allows to stream parameter
    * information to the output as easily as a generic type. The definition
-   * of this class has to be outside the namespace of the class.
+   * of this function has to be outside the namespace of the class.
    * \sa make_str(), to_str()
   */
   friend std::ostream & operator<<(std::ostream &os, ParameterList &p);

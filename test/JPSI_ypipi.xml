@@ -1,6 +1,6 @@
 <amplitude_setup>
     <filename>JPSI_ypipi.xml</filename>
-    <resonance>
+       <resonance>
        <name>f0_980</name>
        <type>relBW</type>
        <reference>f0_980</reference>
@@ -13,6 +13,7 @@
        <width_max>2.</width_max>
        <par1>1.</par1>
        <par2>1.</par2>
+       <mesonRadius>1.</mesonRadius>
        <strength>1.</strength>
        <phase>0.</phase>
        <spin>0</spin>
@@ -34,6 +35,7 @@
        <width_max>2.</width_max>
        <par1>1.</par1>
        <par2>1.</par2>
+       <mesonRadius>1.</mesonRadius>
        <strength>1.</strength>
        <phase>0.</phase>
        <spin>0</spin>
@@ -55,6 +57,7 @@
        <width_max>2.</width_max>
        <par1>1.</par1>
        <par2>1.</par2>
+       <mesonRadius>1.</mesonRadius>
        <strength>1.</strength>
        <phase>0.</phase>
        <spin>0</spin>
@@ -76,6 +79,7 @@
        <width_max>2.</width_max>
        <par1>1.</par1>
        <par2>1.</par2>
+       <mesonRadius>1.</mesonRadius>
        <strength>1.</strength>
        <phase>0.</phase>
        <spin>2</spin>
@@ -97,6 +101,7 @@
        <width_max>2.</width_max>
        <par1>1.</par1>
        <par2>1.</par2>
+       <mesonRadius>1.</mesonRadius>
        <strength>1.</strength>
        <phase>1.6</phase>
        <spin>2</spin>
@@ -118,6 +123,7 @@
        <width_max>2.</width_max>
        <par1>1.</par1>
        <par2>1.</par2>
+       <mesonRadius>1.</mesonRadius>
        <strength>1.</strength>
        <phase>0.8</phase>
        <spin>0</spin>
@@ -139,6 +145,7 @@
        <width_max>2.</width_max>
        <par1>1.</par1>
        <par2>1.</par2>
+       <mesonRadius>1.</mesonRadius>
        <strength>1.</strength>
        <phase>0.8</phase>
        <spin>0</spin>

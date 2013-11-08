@@ -87,6 +87,7 @@ double AmpSumOfAmplitudes::integrate(AmpRelBreitWignerRes* amp){
    complex<double> res;
    //std::cout << "res = \t" << res.abs2() << std::endl;
 
+   //std::cout << "PDFs: ";
    for(unsigned int i=0; i<_pdfList.size(); i++){
      double a = _intList[i]->GetValue();
      double phi = _phaseList[i]->GetValue();
@@ -94,8 +95,10 @@ double AmpSumOfAmplitudes::integrate(AmpRelBreitWignerRes* amp){
 
      std::complex<double> twoJplusOne(2*_pdfList[i]->getSpin()+1);
      res = res + twoJplusOne * _pdfList[i]->evaluate() * eiphi;
+    // std::cout << _pdfList[i]->evaluate() << " ";
 //res = res + twoJplusOne * _pdfList[i]->evaluate() * eiphi * _angList[i]->evaluate();
    }
+   //std::cout << std::endl;
 
    return ( std::abs(res)*std::abs(res) );
  } 

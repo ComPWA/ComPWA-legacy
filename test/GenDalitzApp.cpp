@@ -49,7 +49,7 @@
 
 using namespace std;
 
-const unsigned int MaxEvents = 100000;
+const unsigned int MaxEvents = 10000;
 
 //constants
 const Double_t M = 3.096916; // GeV/c² (J/psi+)
@@ -91,8 +91,11 @@ int main(int argc, char **argv){
 
   //Simple Breit-Wigner Physics-Module setup
   AmpSumIntensity testBW(kin, ini);
+  cout << testBW.printAmps() << endl;
+
   ParameterList minPar;
   testBW.fillStartParVec(minPar);
+  cout << minPar << endl;
  // minPar.AddParameter(DoubleParameter(1.5,0.5,2.5,0.1));
 
   //Output File setup
@@ -157,6 +160,8 @@ int main(int argc, char **argv){
 
   }
 
+  maxTest*=1.1;
+  int outCnt=0, maxCnt=MaxEvents/100;
     cout << "Start generation of y pi0 pi0 Dalitz" << endl;
     do{
         weight = event.Generate();
@@ -190,15 +195,19 @@ int main(int argc, char **argv){
         double AMPpdf = intensL.GetDoubleParameter(0)->GetValue();
         //double AMPpdf = testBW.intensity(x, minPar);
 
-        double test = rando.Uniform(0,1.05*maxTest);
+        double test = rando.Uniform(0,maxTest);
+        double testmc = rando.Uniform(0,1.);
 
         //mb.setVal(m13);
         //double m13pdf = totAmp13.getVal();//fun_combi2->Eval(m13);
-        if((1.05*maxTest)<(weight*AMPpdf))
+        if(maxTest<(weight*AMPpdf))
           cout << "Einschwingen zu kurz!" << endl;
         if(i<MaxEvents && test<(weight*AMPpdf)){
-          if(!(i%(MaxEvents/100)))
+          outCnt++;
+          if(outCnt==maxCnt){
+        	outCnt=0;
             cout << (i/(double)MaxEvents*100.) << "% : " << test << " " << (weight*AMPpdf) << endl;
+          }
           i++;
           new((*fEvt)[0]) TParticle(fparticleGam);
           new((*fEvt)[1]) TParticle(fparticlePip);
@@ -207,7 +216,7 @@ int main(int argc, char **argv){
           fTree.Fill();
         }
 
-        if(mc<MaxEvents && test<weight){
+        if(mc<MaxEvents && testmc<weight){
           mc++;
           new((*fEvtPHSP)[0]) TParticle(fparticleGam);
           new((*fEvtPHSP)[1]) TParticle(fparticlePip);
@@ -216,12 +225,14 @@ int main(int argc, char **argv){
           fTreePHSP.Fill();
         }
     }while(i<MaxEvents || mc<MaxEvents);
+    cout << "100%! Write Data" << endl;
 
   fTree.Print();
   fTree.Write();
   fTreePHSP.Write();
   output.Close();
 
+  cout << testBW.printAmps() << endl;
   cout << "Done ... " << maxTest << endl << endl;
 
   return 0;

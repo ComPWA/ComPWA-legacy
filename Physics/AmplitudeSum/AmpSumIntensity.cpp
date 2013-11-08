@@ -161,14 +161,14 @@ const ParameterList AmpSumIntensity::intensity(std::vector<double>& x, Parameter
 	}
 	dataPoint::instance()->setM(2,3,x[0]);
 	dataPoint::instance()->setM(1,3,x[1]);
-	dataPoint::instance()->setM(1,2,x[1]);
+	dataPoint::instance()->setM(1,2,x[2]);
 	return intensity(par);
 }
 const ParameterList AmpSumIntensity::intensity( ParameterList& par){
 	//parameters varied by Minimization algorithm
 	for(unsigned int i=0; i<nAmps; i++){
-		rr[i]->SetValue(par.GetDoubleParameter(i)->GetValue());//free
-		phir[i]->SetValue(par.GetDoubleParameter(nAmps+i)->GetValue());//fixed
+		rr[i]->SetValue(par.GetDoubleParameter(2*i)->GetValue());//free
+		phir[i]->SetValue(par.GetDoubleParameter(2*i+1)->GetValue());//fixed
 	}
 
 	double AMPpdf = totAmp.evaluate();
@@ -194,8 +194,10 @@ const bool AmpSumIntensity::fillStartParVec(ParameterList& outPar){
 	return true;
 }
 
-void AmpSumIntensity::printAmps(){
-	cout<<"== Printing amplitudes with current(!) set of parameters:"<<endl;
+std::string AmpSumIntensity::printAmps(){
+	std::stringstream o;
+	o<<"== Printing amplitudes with current(!) set of parameters:"<<endl;
 	for(unsigned int i=0;i<nAmps;i++)
-		cout<<namer[i]<<":	Amplitude: "<<rr[i]->GetValue()<<"+-"<<rr[i]->GetError()<<"	Phase: "<<phir[i]->GetValue()<<"+-"<<phir[i]->GetError()<<endl;
+		o<<namer[i]<<":	Amplitude: "<<rr[i]->GetValue()<<"+-"<<rr[i]->GetError()<<"	Phase: "<<phir[i]->GetValue()<<"+-"<<phir[i]->GetError()<<endl;
+    return o.str();
 }

@@ -99,7 +99,7 @@ std::complex<double> AmpRelBreitWignerRes::evaluate() const {
 	}
 	std::complex<double> result;
 	double m = dataPoint::instance()->getM(_subSys);
-	double spinTerm = _wignerD.evaluate();
+	double spinTerm = _wignerD.evaluate(); //spinTerm =1;
 	double Gamma0 = _resWidth.GetValue();
 	double GammaV = Gamma0 * pow(q(m) / q0(), 2.*_spin + 1.) * (_mR / m) * BLres2(m);
 
