@@ -40,7 +40,11 @@ public:
   virtual double getSpin() = 0;
   virtual bool isSubSys(const unsigned int) const = 0;
   virtual double absEvaluate(double x[],size_t dim) const;//used for MC integration
-  virtual double integral() const;
+  virtual double normEvaluate(double x[],size_t dim) const;//used for MC integration
+	//! Calculation integral |resonance|
+  virtual double integralAbs() const;
+	//! Calculation integral |resonance|^2
+  virtual double integralNorm() const;
 
   virtual std::string GetName(){ return _name; };
   virtual std::string GetTitle(){ return GetName(); };

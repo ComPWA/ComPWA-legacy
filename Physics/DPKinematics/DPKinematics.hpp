@@ -26,6 +26,11 @@ class dataPoint;
 
 class DPKinematics
 {
+private:
+	bool _DPareaCalculated;
+	double _DParea;
+	//! calculated dalitz plot area for the given kinematics
+	void calcDParea();
 public:
 	DPKinematics(){};
 	void init();
@@ -41,6 +46,8 @@ public:
 	bool isWithinDP() const;
 	//! checks of data point is within phase space boundaries
 	bool isWithinDP(double m23, double m13, double m12=0) const;
+	//! returns the dalitz plot area for the given kinematics
+	double getDParea();
 
 	double lambda(double x, double y, double z)const;
 	double s2min(double s1, double m0, double m1, double m2, double m3)const;

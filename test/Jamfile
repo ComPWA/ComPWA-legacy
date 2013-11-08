@@ -155,6 +155,13 @@ exe gentwopartApp :
         $(TOP)/Physics/BreitWigner//BreitWigner  
         : ;
         
+exe dpareaTestApp : 
+        DPareaTestApp.cpp 
+        test
+        $(TOP)/Core//ComPWA
+        $(TOP)/Physics/DPKinematics//DPKinematics
+        : ;
+
 exe gendalitzApp : 
         GenDalitzApp.cpp 
         test
@@ -183,7 +190,7 @@ exe dalitzfitApp :
 install dist : test : <location>$(TOP)/lib <threading>single ;
 #install dist2 : dalitzfitApp treetestApp cx0testApp dataiftestApp optimizertestApp physicstestApp blackscholesApp neuralnetworkApp : <location>$(TOP)/bin <threading>single ;
 install dist2 : dalitzfitApp treetestApp cx0testApp dataiftestApp optimizertestApp physicstestApp : <location>$(TOP)/bin <threading>single ;
-install dist3 : estimatortestApp integrationtestApp integrationtestbinnedApp runmanagertestApp gentwopartApp gendalitzApp dalitzplotApp : <location>$(TOP)/bin <threading>single ;
+install dist3 : estimatortestApp integrationtestApp integrationtestbinnedApp runmanagertestApp gentwopartApp gendalitzApp dalitzplotApp dpareaTestApp : <location>$(TOP)/bin <threading>single ;
 
 if $(GENEVA) { 
 install dist7 : genevatestApp : <location>$(TOP)/bin ;

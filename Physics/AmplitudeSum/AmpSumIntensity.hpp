@@ -38,10 +38,17 @@
 class AmpSumIntensity : public Amplitude {
 
 public:
+	enum normalizationStyle {
+		none, /*!< no normaliztion between Amplitudes. */
+		one, /*!< all amplitudes are normalized to one. */
+		entries /*!<all amplitudes are normalized to the number of entries in dalitz plot. */
+	};
 	/// Default Constructor (0x0)
-	AmpSumIntensity(const double inM, const double inBr, const double in1
-			,const double in2, const double in3, AmplitudeSetup ini);
-	AmpSumIntensity(DPKinematics kin, AmplitudeSetup ini);
+	AmpSumIntensity(const double inM, const double inBr, const double in1,
+			const double in2, const double in3, AmplitudeSetup ini, unsigned int entries=9999,
+			normalizationStyle ns=none);
+	AmpSumIntensity(DPKinematics kin, AmplitudeSetup ini, unsigned int entries=9999,
+			normalizationStyle ns=none);
 
 	virtual double getMaxVal() { return 1; };
 
@@ -64,6 +71,9 @@ protected:
 
 	double maxVal;
 
+	normalizationStyle _normStyle;
+	unsigned int _entries;
+	double _dpArea;
 
 	//Resonance Variables
 	std::vector<std::string> namer;
