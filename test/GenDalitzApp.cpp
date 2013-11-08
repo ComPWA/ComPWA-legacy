@@ -203,11 +203,11 @@ int main(int argc, char **argv){
         if(maxTest<(weight*AMPpdf))
           cout << "Einschwingen zu kurz!" << endl;
         if(i<MaxEvents && test<(weight*AMPpdf)){
-          outCnt++;
           if(outCnt==maxCnt){
         	outCnt=0;
             cout << (i/(double)MaxEvents*100.) << "% : " << test << " " << (weight*AMPpdf) << endl;
           }
+          outCnt++;
           i++;
           new((*fEvt)[0]) TParticle(fparticleGam);
           new((*fEvt)[1]) TParticle(fparticlePip);
