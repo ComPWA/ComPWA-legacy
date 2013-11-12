@@ -49,24 +49,32 @@
 
 #include "boost/function.hpp"
 /// Default Constructor (0x0)
-AmpSumIntensity::AmpSumIntensity(const DPKinematics kin, AmplitudeSetup ini) :
+AmpSumIntensity::AmpSumIntensity(const DPKinematics kin, AmplitudeSetup ini, unsigned int entries, normalizationStyle ns) :
 _kin(kin),
 totAmp("relBWsumAmplitude", "totAmp"),
-ampSetup(ini)
+ampSetup(ini),
+_entries(entries),
+_normStyle(ns)
 {
 	init();
 }
 
 AmpSumIntensity::AmpSumIntensity(const double inM, const double inBr, const double in1
-		,const double in2, const double in3, AmplitudeSetup ini) :
-														  _kin(inM, inBr, in1, in2, in3,"","",""),
-														  totAmp("relBWsumAmplitude", "totAmp"),
-														  ampSetup(ini)
+		,const double in2, const double in3, AmplitudeSetup ini, unsigned int entries, normalizationStyle ns) :
+			 _kin(inM, inBr, in1, in2, in3,"","",""),
+			 totAmp("relBWsumAmplitude", "totAmp"),
+			 ampSetup(ini),
+			 _entries(entries),
+_normStyle(ns)
 {
 	init();
 }
 
 void AmpSumIntensity::init(){
+
+	_dpArea = dataPoint::instance()->DPKin.getDParea();
+	std::cout<<"AmpSumIntensity: INFO: number of Entries in dalitz plot set to: "<<_entries<<std::endl;
+	std::cout<<"AmpSumIntensity: INFO: area of phase space: "<<_dpArea<<std::endl;
 
 	for(std::vector<Resonance>::iterator reso=ampSetup.getResonances().begin(); reso!=ampSetup.getResonances().end(); reso++){
 		Resonance tmp = (*reso);
@@ -83,9 +91,19 @@ void AmpSumIntensity::init(){
 		unsigned int last = mr.size()-1;
 		std::shared_ptr<AmpRelBreitWignerRes> tmpbw(new AmpRelBreitWignerRes(tmp.m_name.c_str(),
 				*mr[last], *gr[last], tmp.m_mesonRadius, subSys, tmp.m_spin,tmp.m_m,tmp.m_n) );
-		tmpbw->SetNormalization(1/tmpbw->integral());
 		totAmp.addBW(tmpbw, rr.at(last), phir.at(last));
+
+		//setting normalization between amplitudes
+		double norm=1;
+		if(_normStyle==none) norm=1;
+		else if(_normStyle==one) norm = tmpbw->integralNorm();
+		else if(_normStyle==entries) norm = sqrt(_dpArea*tmpbw->integralNorm()/_entries);
+
+		tmpbw->SetNormalization(1/norm);
+		std::cout<<"AmpSumIntensity: INFO: Normalization constant for "<<tmp.m_name<<": "<<norm<<std::endl;
 	}// end loop over resonances
+
+
 	for(std::vector<ResonanceFlatte>::iterator reso=ampSetup.getResonancesFlatte().begin(); reso!=ampSetup.getResonancesFlatte().end(); reso++){
 		ResonanceFlatte tmp = (*reso);
 		//setup RooVars
@@ -106,9 +124,16 @@ void AmpSumIntensity::init(){
 				PhysConst::instance()->getMass(tmp.m_hiddenParticle1),\
 				PhysConst::instance()->getMass(tmp.m_hiddenParticle2),\
 				subSys, tmp.m_spin,tmp.m_m,tmp.m_n) );
-		tmpbw->SetNormalization(1/tmpbw->integral());
 		totAmp.addBW(tmpbw, rr.at(last), phir.at(last));
+
+		double norm=1;
+		if(_normStyle==none) norm=1;
+		else if(_normStyle==one) norm = tmpbw->integralNorm();
+		else if(_normStyle==entries) norm = sqrt(_dpArea*tmpbw->integralNorm()/_entries);
+		tmpbw->SetNormalization(1/norm);
+		std::cout<<"AmpSumIntensity: INFO: Normalization constant for "<<tmp.m_name<<": "<<norm<<std::endl;
 	}// end loop over resonancesFlatte
+
 	nAmps=rr.size();
 	std::cout << "completed setup" << std::endl;
 }
@@ -169,7 +194,7 @@ const ParameterList AmpSumIntensity::intensity( ParameterList& par){
 		phir[i]->SetValue(par.GetDoubleParameter(2*i+1)->GetValue());//fixed
 	}
 
-//	std::cout<<dataPoint::instance()->getMsq(2,3)<<" "<<dataPoint::instance()->getMsq(1,3)<<" "<<dataPoint::instance()->getMsq(1,2)<<std::endl;
+	//	std::cout<<dataPoint::instance()->getMsq(2,3)<<" "<<dataPoint::instance()->getMsq(1,3)<<" "<<dataPoint::instance()->getMsq(1,2)<<std::endl;
 	double AMPpdf = totAmp.evaluate();
 
 	if(AMPpdf!=AMPpdf){

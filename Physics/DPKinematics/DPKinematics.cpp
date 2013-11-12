@@ -10,6 +10,11 @@
 //     Mathias Michel - kinematic functions
 //-------------------------------------------------------------------------------
 
+#include <stdlib.h>
+#include "gsl/gsl_monte.h"
+#include "gsl/gsl_monte_plain.h"
+#include "gsl/gsl_monte_miser.h"
+#include "gsl/gsl_monte_vegas.h"
 #include "Physics/DPKinematics/DPKinematics.hpp"
 #include "Physics/DPKinematics/DataPoint.hpp"
 #include "Physics/DPKinematics/PhysConst.hpp"
@@ -24,9 +29,11 @@ void DPKinematics::init(){
 	m23_min=((m2+m3)); m23_max=((M-m1));
 	m13_min=((m1+m3)); m13_max=((M-m2));
 	m12_min=((m1+m2)); m12_max=((M-m3));
+	_DPareaCalculated=0;
+
 };
 DPKinematics::DPKinematics(std::string _nameMother, std::string _name1, std::string _name2, std::string _name3):
-										Br(0.0), nameMother(_nameMother), name1(_name1), name2(_name2), name3(_name3)
+																Br(0.0), nameMother(_nameMother), name1(_name1), name2(_name2), name3(_name3)
 {
 	M = PhysConst::instance()->getMass(_nameMother);
 	m1 = PhysConst::instance()->getMass(_name1);
@@ -40,10 +47,55 @@ DPKinematics::DPKinematics(std::string _nameMother, std::string _name1, std::str
 	init();
 };
 DPKinematics::DPKinematics(double _M, double _Br, double _m1, double _m2, double _m3, std::string _name1, std::string _name2, std::string _name3):
-										M(_M), Br(_Br), m1(_m1), m2(_m2), m3(_m3), name1(_name1), name2(_name2), name3(_name3)
+																M(_M), Br(_Br), m1(_m1), m2(_m2), m3(_m3), name1(_name1), name2(_name2), name3(_name3)
 {
 	init();
 };
+//! returns 1 if point is within PHSP otherwise 0
+double phspFunc(double* x, size_t dim, void* param) {
+	if(dim!=2) return 0;
+	DPKinematics* kin =	static_cast<DPKinematics*>(param);
+	double m12sq = kin->getThirdVariableSq(x[0],x[1]);
+	//use MC integration of a step function to obtain the DP area
+	if( kin->isWithinDP(x[1],x[0],m12sq) ) return 1.0;
+	return 0.0;
+};
+
+double DPKinematics::getDParea(){
+	if(!_DPareaCalculated) calcDParea();
+	return _DParea;
+}
+void DPKinematics::calcDParea(){
+
+	//	std::cout<<"DPKinematics: DEBUG: calculating dalitz plot area"<<std::endl;
+	size_t dim=2;
+	double res=0.0, err=0.0;
+
+	//set limits: we assume that x[0]=m13sq and x[1]=m23sq
+	double xLimit_low[2] = {m13_sq_min,m23_sq_min};
+	double xLimit_high[2] = {m13_sq_max,m23_sq_max};
+
+	size_t calls = 100000;
+	gsl_rng_env_setup ();
+	const gsl_rng_type *T = gsl_rng_default; //type of random generator
+	gsl_rng *r = gsl_rng_alloc(T); //random generator
+
+	gsl_monte_function F = {&phspFunc,dim, const_cast<DPKinematics*> (this)};
+
+	/*	Choosing vegas algorithm here, because it is the most accurate:
+	 * 		-> 10^5 calls gives (in my example) an accuracy of 0.03%
+	 * 		 this should be sufficiency for most applications
+	 */
+	gsl_monte_vegas_state *s = gsl_monte_vegas_alloc (dim);
+	gsl_monte_vegas_integrate (&F, xLimit_low, xLimit_high, 2, calls, r,s,&res, &err);
+	gsl_monte_vegas_free(s);
+	std::cout<<"DPKinematics: INFO: Area of dalitz plot form MC integration: "<<res<<"+-"<<err<<" relAcc [%]: "<<100*err/res<<std::endl;
+
+	_DParea=res;
+	_DPareaCalculated=1;
+	return;
+}
+
 double DPKinematics::getMass(unsigned int num){
 	switch(num){
 	case 0: return M;
@@ -66,9 +118,9 @@ double DPKinematics::getMass(std::string name){
 }
 
 DPKinematics::DPKinematics(const DPKinematics& other):
-										M(other.M), Br(other.Br),
-										m1(other.m1), m2(other.m2), m3(other.m3),
-										name1(other.name1), name2(other.name2), name3(other.name3)
+																M(other.M), Br(other.Br),
+																m1(other.m1), m2(other.m2), m3(other.m3),
+																name1(other.name1), name2(other.name2), name3(other.name3)
 {
 	init();
 };
@@ -76,7 +128,7 @@ double DPKinematics::getThirdVariableSq(double invmass1sq, double invmass2sq) co
 	/*!
 	 * calculates 3rd invariant mass from the other inv. masses.
 	 */
-//	return sqrt(M*M+m1*m1+m2*m2+m3*m3-invmass1-invmass2);
+	//	return sqrt(M*M+m1*m1+m2*m2+m3*m3-invmass1-invmass2);
 	return (M*M+m1*m1+m2*m2+m3*m3-invmass1sq-invmass2sq);
 }
 

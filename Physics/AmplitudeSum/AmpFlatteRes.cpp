@@ -92,10 +92,10 @@ std::complex<double> AmpFlatteRes::evaluate() const {
 	double g1 = _couplingHiddenChannel.GetValue();//couppling a0->eta pi
 	double g2 = _coupling.GetValue();//coupling a0->KK
 
-	std::complex<double> denom(_mR.GetValue()*_mR.GetValue() - m*m, -p1*g1*g1-p2*g2*g2);
+	std::complex<double> denom(_mR*_mR - m*m, -p1*g1*g1-p2*g2*g2);
 
 	//	RooComplex result = (RooComplex(g2*g2,0) / denom); //use KK decay channel here
-	std::complex<double> result = (std::complex<double>(_norm * spinTerm * g2,0) / denom); //use KK decay channel here
+	std::complex<double> result = (std::complex<double>(_norm * spinTerm * g2*g2,0) / denom); //use KK decay channel here
 
 	if(result.real()!=result.real()) {std::cout << "RE part NAN" << std::endl; return 0;}
 	if(result.imag()!=result.imag()) {std::cout << "IM part NAN" << std::endl; return 0;}
