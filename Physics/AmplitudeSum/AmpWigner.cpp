@@ -118,7 +118,7 @@ double AmpWigner::evaluate() const {
 		}
 	  }
 	double cosbeta = (2.*invM2*invM2-locmax_sq-locmin_sq)/(locmax_sq-locmin_sq);
-	if( cosbeta > 1 && cosbeta < 1.1) cosbeta=1;
+//	if( cosbeta > 1 && cosbeta < 1.1) cosbeta=1;
     beta=acos(cosbeta);
 	//if(_subSys!=5) beta=acos(1);
 

@@ -92,14 +92,14 @@ void AmpRelBreitWignerRes::setDecayMasses(double ma, double mb, double mc, doubl
 	_wignerD.setDecayMasses(ma, mb, mc, M);
 	return;
 }
-std::complex<double> AmpRelBreitWignerRes::evaluate() const {
+std::complex<double> AmpRelBreitWignerRes::evaluateAmp() const {
 	if(_ma == -999 || _mb == -999 ||_mc == -999 ||_M == -999){
 		std::cout<<"Masses of decay products not set!"<<std::endl;
 		return 0;
 	}
 	std::complex<double> result;
 	double m = dataPoint::instance()->getM(_subSys);
-	double spinTerm = _wignerD.evaluate(); //spinTerm =1;
+//	double spinTerm = evaluateWignerD(); //spinTerm =1;
 	double Gamma0 = _resWidth.GetValue();
 	double GammaV = Gamma0 * pow(q(m) / q0(), 2.*_spin + 1.) * (_mR / m) * BLres2(m);
 
@@ -107,12 +107,15 @@ std::complex<double> AmpRelBreitWignerRes::evaluate() const {
 
 	//	  result = RooComplex(spinTerm*_mR * Gamma0) / denom; //wrong!
 	//  result = RooComplex(spinTerm*BLprime2(m)) / denom;
-	result = std::complex<double>( _norm * spinTerm ) / denom; //Laura++ (old) definition - is this used in DKsKK analysis?
+	result = std::complex<double>( _norm ) / denom; //Laura++ (old) definition - is this used in DKsKK analysis?
 	//	result = RooComplex( spinTerm*sqrt(BLres2(m))*sqrt(BLmother2(m)) ) / denom; //Laura++ (new) definition
 
 	if(result.real()!=result.real()) {std::cout << "RE part NAN" << std::endl;return 0;}
 	if(result.imag()!=result.imag()) {std::cout << "IM part NAN" << std::endl; return 0;}
 	//	std::cout<<result<<std::endl;
 	return result;
+}
+std::complex<double> AmpRelBreitWignerRes::evaluate() const {
+	return evaluateAmp()*evaluateWignerD();
 }
 

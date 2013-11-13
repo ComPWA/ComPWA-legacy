@@ -31,7 +31,7 @@ project :
 	<linkflags>-lRooFitCore
 	<linkflags>-L$(QFT)/lib
 	<linkflags>-lqft++
-	<linkflags>-lgomp
+	#<linkflags>-lgomp
 	;
 
 lib test : 

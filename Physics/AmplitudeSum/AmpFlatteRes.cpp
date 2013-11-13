@@ -77,14 +77,14 @@ void AmpFlatteRes::setBarrierMass(double mBarA, double mBarB) {
 	_massHiddenChannelB = mBarB;
 }
 
-std::complex<double> AmpFlatteRes::evaluate() const {
+std::complex<double> AmpFlatteRes::evaluateAmp() const {
 	if(_massHiddenChannelA<0||_massHiddenChannelA>5||_massHiddenChannelB<0||_massHiddenChannelB>5) {
 		cout<<"Barrier masses not set! Use setBarrierMass() first!"<<endl;
 		return 0;
 	}
 	//	double m0 = Double_t(_m0);
 	double m = dataPoint::instance()->getM(_subSys);
-	double spinTerm = _wignerD.evaluate();
+//	double spinTerm = _wignerD.evaluate();
 //	double m  = Double_t(_x23);
 
 	double p1 = 2*q(m, _massHiddenChannelA,_massHiddenChannelB)/m;//break-up momenta hidden channel (e.g. a0->eta pi)
@@ -95,10 +95,13 @@ std::complex<double> AmpFlatteRes::evaluate() const {
 	std::complex<double> denom(_mR*_mR - m*m, -p1*g1*g1-p2*g2*g2);
 
 	//	RooComplex result = (RooComplex(g2*g2,0) / denom); //use KK decay channel here
-	std::complex<double> result = (std::complex<double>(_norm * spinTerm * g2*g2,0) / denom); //use KK decay channel here
+	std::complex<double> result = (std::complex<double>(_norm * g2*g2,0) / denom); //use KK decay channel here
 
 	if(result.real()!=result.real()) {std::cout << "RE part NAN" << std::endl; return 0;}
 	if(result.imag()!=result.imag()) {std::cout << "IM part NAN" << std::endl; return 0;}
 	return result;
 
+}
+std::complex<double> AmpFlatteRes::evaluate() const {
+	return evaluateAmp()*evaluateWignerD();
 }

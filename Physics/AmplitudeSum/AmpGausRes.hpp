@@ -44,6 +44,8 @@ public:
 
   virtual void initialise();
   virtual std::complex<double> evaluate()const;
+	virtual std::complex<double> evaluateAmp() const;
+	virtual double evaluateWignerD() const { return 1; };
 
   inline virtual bool isSubSys(const unsigned int subSys)const{return (subSys==_subSys);};
   double getSpin(){return 0;};

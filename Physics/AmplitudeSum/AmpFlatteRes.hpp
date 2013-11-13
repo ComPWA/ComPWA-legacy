@@ -53,6 +53,8 @@ public:
 
 	virtual void initialise();
 	virtual std::complex<double> evaluate() const;
+	virtual std::complex<double> evaluateAmp() const;
+	virtual double evaluateWignerD() const { return _wignerD.evaluate(); };
 //	virtual double eval(double x[],size_t dim, void * param) const {return 0;};//used for MC integration
 
 	void setDecayMasses(double, double, double, double);

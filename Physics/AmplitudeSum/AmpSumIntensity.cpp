@@ -96,7 +96,7 @@ void AmpSumIntensity::init(){
 		//setting normalization between amplitudes
 		double norm=1;
 		if(_normStyle==none) norm=1;
-		else if(_normStyle==one) norm = tmpbw->integralNorm();
+		else if(_normStyle==one) norm = sqrt(tmpbw->integralNorm());
 		else if(_normStyle==entries) norm = sqrt(_dpArea*tmpbw->integralNorm()/_entries);
 
 		tmpbw->SetNormalization(1/norm);
@@ -128,7 +128,7 @@ void AmpSumIntensity::init(){
 
 		double norm=1;
 		if(_normStyle==none) norm=1;
-		else if(_normStyle==one) norm = tmpbw->integralNorm();
+		else if(_normStyle==one) norm = sqrt(tmpbw->integralNorm());
 		else if(_normStyle==entries) norm = sqrt(_dpArea*tmpbw->integralNorm()/_entries);
 		tmpbw->SetNormalization(1/norm);
 		std::cout<<"AmpSumIntensity: INFO: Normalization constant for "<<tmp.m_name<<": "<<norm<<std::endl;

@@ -31,6 +31,7 @@ private:
 	double _DParea;
 	//! calculated dalitz plot area for the given kinematics
 	void calcDParea();
+//	std::shared_ptr<DalitzEfficiency> eff;
 public:
 	DPKinematics(){};
 	void init();

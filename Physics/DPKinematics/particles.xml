@@ -1,28 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<physConstList xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:noNamespaceSchemaLocation="particleSchema.xsd">
-	<constant>
-		<name>Pi</name>
-		<value>
-			<value>3.141592654</value>
-		</value>
-	</constant>
-	<constant>
-		<name>c</name>
-		<value>
-			<value>299792458</value>
-			<error>
-				<value>0.0</value>
-			</error>
-		</value>
-		<reference>Units[m/s], PDG2013</reference>
-	</constant>
-</physConstList>
-
 <!-- particle data file -->
 <particleList xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:noNamespaceSchemaLocation="particleSchema.xsd">
-
 	<reference>PDG2013</reference>
 	<particle>
 		<ID>22</ID>

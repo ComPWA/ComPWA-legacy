@@ -36,15 +36,14 @@ public:
 
   virtual void initialise() = 0; 
   virtual std::complex<double> evaluate() const = 0;
+  virtual std::complex<double> evaluateAmp() const = 0;
+  virtual double evaluateWignerD() const = 0;
 
   virtual double getSpin() = 0;
   virtual bool isSubSys(const unsigned int) const = 0;
-  virtual double absEvaluate(double x[],size_t dim) const;//used for MC integration
-  virtual double normEvaluate(double x[],size_t dim) const;//used for MC integration
-	//! Calculation integral |resonance|
-  virtual double integralAbs() const;
+  virtual double evaluate(double x[],size_t dim) const;//used for MC integration
 	//! Calculation integral |resonance|^2
-  virtual double integralNorm() const;
+  virtual double integral() const;
 
   virtual std::string GetName(){ return _name; };
   virtual std::string GetTitle(){ return GetName(); };

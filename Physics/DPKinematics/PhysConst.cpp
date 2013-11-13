@@ -19,13 +19,14 @@ PhysConst::PhysConst(){
 	id.push_back(-999); name.push_back("error"); mass.push_back(-999); width.push_back(-999); J.push_back(999); P.push_back(false); C.push_back(false);
 	nameConst.push_back("error"); valueConst.push_back(-999); errorConst.push_back(-999);
 
-	pdgFileName = "Physics/DPKinematics/particles.xml";//TODO: dont hardcode datafile
+	particleFileName = "Physics/DPKinematics/particles.xml";//TODO: dont hardcode datafile
+	constantFileName = "Physics/DPKinematics/physConstants.xml";//TODO: dont hardcode datafile
 
 	flag_readFile=1;
 	return;
 }
 void PhysConst::readFile(){
-	std::cout<<"PhysConst: reading file with particle information "<<pdgFileName<<std::endl;
+	std::cout<<"PhysConst: reading file with particle information "<<particleFileName<<std::endl;
 
 	// Create an empty property tree object
 	using boost::property_tree::ptree;
@@ -34,7 +35,7 @@ void PhysConst::readFile(){
 
 	// Load the XML file into the property tree. If reading fails
 	// (cannot open file, parse error), an exception is thrown.
-	read_xml(pdgFileName, pt);
+	read_xml(particleFileName, pt);
 
 	// Get the filename and store it in the m_file variable.
 	// Note that we construct the path to the value by separating
@@ -86,6 +87,7 @@ void PhysConst::readFile(){
 //		std::cout<<"PhysConst DEBUG adding particle: "<<_name<<" mass="<<_mass<<" width="<<_width<<" J=" <<_J<<" P="<<_P<< " C="<<_C<<std::endl;
 	}
 
+	read_xml(constantFileName, pt);
 	BOOST_FOREACH( ptree::value_type const& v, pt.get_child("physConstList") ) {
 		_name="error"; _error=-999; _value=-999;
 		if( v.first == "constant" ){
