@@ -51,12 +51,23 @@ public:
 	AmpSumIntensity(DPKinematics kin, AmplitudeSetup ini, unsigned int entries=9999,
 			normalizationStyle ns=none);
 
-	virtual double getMaxVal() { return 1; };
-
+	double evaluate(double x[], size_t dim);
+	//! normalization integral for parameters \par
 	virtual const double integral(ParameterList& par);
+	//! maximum value of amplitude with parameters \par
+	virtual double getMaxVal(ParameterList& par) { return 1; };
 
+	virtual void setNevents(unsigned int n) { _entries=n; };
+	virtual unsigned int getNevents() { return _entries; };
+
+	//! setting new parameterList
+	virtual void setParameterList(ParameterList& par);
+	//! evaluate total amplitude using parameters \par at phsp point \x
 	virtual const ParameterList intensity(std::vector<double>& x, ParameterList& par);
+	//! evaluate total amplitude using parameters \par
 	virtual const ParameterList intensity(ParameterList& par);
+	//! evaluate total amplitude using current set of parameters
+	virtual const ParameterList intensity();
 
 	virtual const bool fillStartParVec(ParameterList& outPar);
 

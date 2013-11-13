@@ -36,6 +36,11 @@
 //#include "Estimator/AmpFcn.cpp"
 //#include "Optimizer/Minuit2/MinuitIF.hpp"
 //#include "Estimator/MinLogLH/MinLogLH.hpp"
+#include <stdlib.h>
+#include "gsl/gsl_monte.h"
+#include "gsl/gsl_monte_plain.h"
+#include "gsl/gsl_monte_miser.h"
+#include "gsl/gsl_monte_vegas.h"
 
 #include "Physics/AmplitudeSum/AmplitudeSetup.hpp"
 #include "Physics/AmplitudeSum/AmpRelBreitWignerRes.hpp"
@@ -61,11 +66,11 @@ _normStyle(ns)
 
 AmpSumIntensity::AmpSumIntensity(const double inM, const double inBr, const double in1
 		,const double in2, const double in3, AmplitudeSetup ini, unsigned int entries, normalizationStyle ns) :
-			 _kin(inM, inBr, in1, in2, in3,"","",""),
-			 totAmp("relBWsumAmplitude", "totAmp"),
-			 ampSetup(ini),
-			 _entries(entries),
-_normStyle(ns)
+					 _kin(inM, inBr, in1, in2, in3,"","",""),
+					 totAmp("relBWsumAmplitude", "totAmp"),
+					 ampSetup(ini),
+					 _entries(entries),
+					 _normStyle(ns)
 {
 	init();
 }
@@ -96,8 +101,8 @@ void AmpSumIntensity::init(){
 		//setting normalization between amplitudes
 		double norm=1;
 		if(_normStyle==none) norm=1;
-		else if(_normStyle==one) norm = sqrt(tmpbw->integralNorm());
-		else if(_normStyle==entries) norm = sqrt(_dpArea*tmpbw->integralNorm()/_entries);
+		else if(_normStyle==one) norm = sqrt(tmpbw->integral());
+		else if(_normStyle==entries) norm = sqrt(_dpArea*tmpbw->integral()/_entries);
 
 		tmpbw->SetNormalization(1/norm);
 		std::cout<<"AmpSumIntensity: INFO: Normalization constant for "<<tmp.m_name<<": "<<norm<<std::endl;
@@ -128,8 +133,8 @@ void AmpSumIntensity::init(){
 
 		double norm=1;
 		if(_normStyle==none) norm=1;
-		else if(_normStyle==one) norm = sqrt(tmpbw->integralNorm());
-		else if(_normStyle==entries) norm = sqrt(_dpArea*tmpbw->integralNorm()/_entries);
+		else if(_normStyle==one) norm = sqrt(tmpbw->integral());
+		else if(_normStyle==entries) norm = sqrt(_dpArea*tmpbw->integral()/_entries);
 		tmpbw->SetNormalization(1/norm);
 		std::cout<<"AmpSumIntensity: INFO: Normalization constant for "<<tmp.m_name<<": "<<norm<<std::endl;
 	}// end loop over resonancesFlatte
@@ -137,63 +142,72 @@ void AmpSumIntensity::init(){
 	nAmps=rr.size();
 	std::cout << "completed setup" << std::endl;
 }
-//double AmpSumIntensity::getMaxVal(){
 
-//	std::cout<< "Calculating maximum value of function..."<<std::endl;
-//	std::shared_ptr<ControlParameter> esti( new AmpFcn(this));
-//	std::shared_ptr<Optimizer> opti(new MinuitIF(esti));
-//	ParameterList parList;
-//	//		parList.AddParameter(DoubleParameter((m23_max-m23_min)/2,m23_min,m23_max,0.001));//Start parameters
-//	//		parList.AddParameter(DoubleParameter((m13_max-m13_max)/2,m13_min,m13_max,0.001));//fit is sensitive to start values
-//	parList.AddParameter(DoubleParameter(1.1,_kin.m23_min,_kin.m23_max,0.001));//Start parameters
-//	parList.AddParameter(DoubleParameter(1.2,_kin.m13_min,_kin.m13_max,0.001));//fit is sensitive to start values
-//	//		std::vector<double> eeee;
-//	//		eeee.push_back(1.08);
-//	//		eeee.push_back(1.23);
-//	//		std::cout<<"intensity before fit: "<<this->intensity(eeee,eee)<<std::endl;
-//	ParameterList eee; this->fillStartParVec(eee);
-//	//  ParameterList startPar; this->fillStartParVec(startPar);
-//	//  for(unsigned int i=0;i<parList.GetNParameter();i++) cout<<parList.GetParameterValue(i)<<endl;
-//	//  for(unsigned int i=0;i<startPar.GetNParameter();i++) cout<<startPar.GetParameterValue(i)<<endl;
-//	maxVal = (-1)*opti->exec(parList);
-////	cout<<"maximum value: "<<maxVal<<endl;
-////	std::cout<<"maximum at: m23="<<ma.getVal()<<" m13="<<mb.getVal()<<" m12="<<mc.getVal()<<std::endl;
-//	return maxVal;
-//	return 1;
-//}
+double AmpSumIntensity::evaluate(double x[], size_t dim) {
+	if(dim!=2) return 0;
+	//set data point: we assume that x[0]=m13 and x[1]=m23
+	double m12sq = dataPoint::instance()->DPKin.getThirdVariableSq(x[0],x[1]);
+	dataPoint::instance()->setMsq(4,x[0]);
+	dataPoint::instance()->setMsq(5,x[1]);
+	dataPoint::instance()->setMsq(3,m12sq);
+	if( !dataPoint::instance()->DPKin.isWithinDP() ) return 0;//only integrate over phase space
+	const ParameterList res = intensity();
+
+	return 1.0;
+}
+double evalWrapperAmpSumIntensity(double* x, size_t dim, void* param) {
+	/* We need a wrapper here because intensity() is a member function of AmpAbsDynamicalFunction
+	 * and can therefore not be referenced. But gsl_monte_function expects a function reference.
+	 * As third parameter we pass the reference to the current instance of AmpAbsDynamicalFunction
+	 */
+	return static_cast<AmpSumIntensity*>(param)->evaluate(x,dim);
+};
 
 const double AmpSumIntensity::integral(ParameterList& par){
-	/*double integral = 1;
-    unsigned int nSteps = 1000000;
-    double stepa = (ma.getMax()-ma.getMin())/(double)nSteps;
-    double stepb = (mb.getMax()-mb.getMin())/(double)nSteps;
+	//double AmpSumIntensity::integral() const{
 
-    //TODO: better approximation
+	//	std::cout<<"AmpRelBreitWignerRes: DEBUG: calculating integral of "<<_name<<" !"<<std::endl;
+	size_t dim=2;
+	double res=0.0, err=0.0;
 
-    for(unsigned int k=1; k<nSteps; k++){
-      integral += step*intensity((ma.getMin()+k*step), par);
-    }*/
+	//set limits: we assume that x[0]=m13sq and x[1]=m23sq
+	double xLimit_low[2] = {dataPoint::instance()->DPKin.m13_sq_min,dataPoint::instance()->DPKin.m23_sq_min};
+	double xLimit_high[2] = {dataPoint::instance()->DPKin.m13_sq_max,dataPoint::instance()->DPKin.m23_sq_max};
+	//	double xLimit_low[2] = {0,0};
+	//	double xLimit_high[2] = {10,10};
+	size_t calls = 100000;
+	gsl_rng_env_setup ();
+	const gsl_rng_type *T = gsl_rng_default; //type of random generator
+	gsl_rng *r = gsl_rng_alloc(T); //random generator
+	gsl_monte_function F = {&evalWrapperAmpSumIntensity,dim, const_cast<AmpSumIntensity*> (this)};
 
-	return 1;
-	//return totAmp.getNorm();//integral;
+	/*	Choosing vegas algorithm here, because it is the most accurate:
+	 * 		-> 10^5 calls gives (in my example) an accuracy of 0.03%
+	 * 		 this should be sufficiency for most applications
+	 */
+	gsl_monte_vegas_state *s = gsl_monte_vegas_alloc (dim);
+	gsl_monte_vegas_integrate (&F, xLimit_low, xLimit_high, 2, calls, r,s,&res, &err);
+	gsl_monte_vegas_free(s);
+	std::cout<<"AmpSumIntensity: INFO: Integration result for amplitude sum: "<<res<<"+-"<<err<<" relAcc [%]: "<<100*err/res<<std::endl;
+
+	return res;
 }
 const ParameterList AmpSumIntensity::intensity(std::vector<double>& x, ParameterList& par){
 	if(x.size()!=3) {
 		std::cout<<"AmpSumIntensity: wrong size of phase space variables!"<<std::endl;
 		exit(1);
 	}
+//	double m12sq = dataPoint::instance()->DPKin.getThirdVariableSq(x[0],x[1]);
 	dataPoint::instance()->setM(2,3,x[0]);
 	dataPoint::instance()->setM(1,3,x[1]);
 	dataPoint::instance()->setM(1,2,x[2]);
 	return intensity(par);
 }
 const ParameterList AmpSumIntensity::intensity( ParameterList& par){
-	//parameters varied by Minimization algorithm
-	for(unsigned int i=0; i<nAmps; i++){
-		rr[i]->SetValue(par.GetDoubleParameter(2*i)->GetValue());//free
-		phir[i]->SetValue(par.GetDoubleParameter(2*i+1)->GetValue());//fixed
-	}
-
+	setParameterList(par);
+	return intensity();
+}
+const ParameterList AmpSumIntensity::intensity(){
 	//	std::cout<<dataPoint::instance()->getMsq(2,3)<<" "<<dataPoint::instance()->getMsq(1,3)<<" "<<dataPoint::instance()->getMsq(1,2)<<std::endl;
 	double AMPpdf = totAmp.evaluate();
 
@@ -206,7 +220,14 @@ const ParameterList AmpSumIntensity::intensity( ParameterList& par){
 	result.AddParameter(std::shared_ptr<DoubleParameter>(new DoubleParameter("AmpSumResult",AMPpdf)));
 	return result;
 }
-
+void AmpSumIntensity::setParameterList(ParameterList& par){
+	//parameters varied by Minimization algorithm
+	for(unsigned int i=0; i<nAmps; i++){
+		rr[i]->SetValue(par.GetDoubleParameter(2*i)->GetValue());//free
+		phir[i]->SetValue(par.GetDoubleParameter(2*i+1)->GetValue());//fixed
+	}
+	return;
+}
 const bool AmpSumIntensity::fillStartParVec(ParameterList& outPar){
 	if(outPar.GetNParameter())
 		return false; //already filled, TODO: exception?
@@ -223,5 +244,5 @@ std::string AmpSumIntensity::printAmps(){
 	o<<"== Printing amplitudes with current(!) set of parameters:"<<endl;
 	for(unsigned int i=0;i<nAmps;i++)
 		o<<namer[i]<<":	Amplitude: "<<rr[i]->GetValue()<<"+-"<<rr[i]->GetError()<<"	Phase: "<<phir[i]->GetValue()<<"+-"<<phir[i]->GetError()<<endl;
-    return o.str();
+	return o.str();
 }
