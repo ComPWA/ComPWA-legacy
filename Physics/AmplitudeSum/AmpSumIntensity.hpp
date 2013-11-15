@@ -41,12 +41,13 @@ class AmpSumIntensity : public Amplitude {
 public:
 	enum normalizationStyle {
 		none, /*!< no normaliztion between Amplitudes. */
-		one, /*!< all amplitudes are normalized to one. */
-		entries /*!<all amplitudes are normalized to the number of entries in dalitz plot. */
+		one, /*!< all amplitudes are normalized to one. The normalization factor is \f$ 1/\sqrt(\int |A|^2)\f$ */
+		entries /*!<all amplitudes are normalized to the number of entries in dalitz plot. The normalization factor is \f$ 1/\sqrt(entries/area * \int |A|^2)\f$*/
 	};
-	/// Default Constructor (0x0)
-	AmpSumIntensity(const double inM, const double inBr, const double in1,
-			const double in2, const double in3, AmplitudeSetup ini, unsigned int entries=9999,
+	//! Default Constructor (0x0)
+	AmpSumIntensity(const double inM, const double inBr, const double in1,const double in2, const double in3,
+			std::string nameM, std::string name1,std::string name2,std::string name3,
+			 AmplitudeSetup ini, unsigned int entries=9999,
 			normalizationStyle ns=none);
 	AmpSumIntensity(DPKinematics kin, AmplitudeSetup ini, unsigned int entries=9999,
 			normalizationStyle ns=none);

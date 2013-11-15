@@ -40,7 +40,9 @@ double AmpAbsDynamicalFunction::evaluate(double x[], size_t dim) const {
 	dataPoint::instance()->setMsq(5,x[1]);
 	dataPoint::instance()->setMsq(3,m12sq);
 	if( !dataPoint::instance()->DPKin.isWithinDP() ) return 0;//only integrate over phase space
-	return std::norm(evaluate()); //integrate over |F|^2
+//	return std::norm(evaluate()); //integrate over |F|^2
+	std::complex<double> res = evaluate();
+	return ( std::abs(res)*std::abs(res) ); //integrate over |F|^2
 }
 double evalWrapper(double* x, size_t dim, void* param) {
 	/* We need a wrapper here because a eval() is a member function of AmpAbsDynamicalFunction

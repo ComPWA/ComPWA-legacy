@@ -38,9 +38,12 @@ public:
 	//! constructor access particles by name
 	DPKinematics(std::string _nameMother, std::string _name1, std::string _name2, std::string _name3);
 	//! constructor with particle masses and names
-	DPKinematics(double _M, double _Br, double _m1, double _m2, double _m3, std::string _name1, std::string _name2, std::string _name3);
+	DPKinematics(double _M, double _Br, double _m1, double _m2, double _m3,
+			std::string _nameMother, std::string _name1, std::string _name2, std::string _name3);
 	//! Copy constructor
 	DPKinematics(const DPKinematics& other);
+	//! calculated the helicity angle
+	double calcHelicityAngle(double invM1sq, double invM2sq, double M, double ma, double mb, double mc);
 	//! Calculates third dalitz plot variable, e.g f(s1,s2)=s3
 	double getThirdVariableSq(double, double) const;
 	//! checks of data point is within phase space boundaries, data point provided by dataPoint
@@ -64,15 +67,24 @@ public:
 	double s1min(double s2)const { return s1min(s2,M,m1,m2,m3); };
 	double s1max(double s2)const { return s1max(s2,M,m1,m2,m3); };
 
+	//! get mass of paticles
 	double getMass(unsigned int num);
 	//! get mass of paticles
 	double getMass(std::string name);
+	//! get spin of decaying particle
+	unsigned int getSpin(unsigned int num);
+	//! get spin of particles
+	unsigned int getSpin(std::string name);
+
 	//! mass of decaying particle
-	double M;
+	double M; unsigned int spinM;
 	//! width of decaying particle
 	double Br;
 	//! masses of final state particles
-	double m1, m2, m3;
+	double m1; unsigned int spin1;
+	double m2; unsigned int spin2;
+	double m3; unsigned int spin3;
+
 	//! names of particles
 	std::string nameMother, name1, name2, name3;
 

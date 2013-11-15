@@ -94,8 +94,8 @@ std::complex<double> AmpFlatteRes::evaluateAmp() const {
 
 	std::complex<double> denom(_mR*_mR - m*m, -p1*g1*g1-p2*g2*g2);
 
-	//	RooComplex result = (RooComplex(g2*g2,0) / denom); //use KK decay channel here
-	std::complex<double> result = (std::complex<double>(_norm * g2*g2,0) / denom); //use KK decay channel here
+//	std::complex<double> result = (std::complex<double>(_norm * g2*g2,0) / denom);//correct definition
+	std::complex<double> result = (std::complex<double>(_norm,0) / denom);//Laura++ (old) definition
 
 	if(result.real()!=result.real()) {std::cout << "RE part NAN" << std::endl; return 0;}
 	if(result.imag()!=result.imag()) {std::cout << "IM part NAN" << std::endl; return 0;}
@@ -103,5 +103,6 @@ std::complex<double> AmpFlatteRes::evaluateAmp() const {
 
 }
 std::complex<double> AmpFlatteRes::evaluate() const {
-	return evaluateAmp()*evaluateWignerD();
+	unsigned int twoJplusOne = (2*_spin+1);
+	return evaluateAmp()*evaluateWignerD()*(double)twoJplusOne;
 }

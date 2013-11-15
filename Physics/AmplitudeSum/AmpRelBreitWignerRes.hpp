@@ -27,7 +27,7 @@
 //#include "TString.h"
 #include "Physics/AmplitudeSum/AmpAbsDynamicalFunction.hpp"
 #include "Physics/AmplitudeSum/AmpKinematics.hpp"
-#include "Physics/AmplitudeSum/AmpWigner.hpp"
+#include "Physics/AmplitudeSum/AmpWigner2.hpp"
 
 class AmpRelBreitWignerRes : public AmpAbsDynamicalFunction, public AmpKinematics {
 public:
@@ -60,7 +60,8 @@ public:
 protected:
 
 	DoubleParameter _resWidth;
-	AmpWigner _wignerD;
+//	AmpWigner _wignerD;
+	AmpWigner2 _wignerD;
 
 private:
 	//ClassDef(AmpRelBreitWignerRes,1) // Relativistic Breit-Wigner resonance model

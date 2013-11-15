@@ -64,13 +64,14 @@ _normStyle(ns)
 	init();
 }
 
-AmpSumIntensity::AmpSumIntensity(const double inM, const double inBr, const double in1
-		,const double in2, const double in3, AmplitudeSetup ini, unsigned int entries, normalizationStyle ns) :
-					 _kin(inM, inBr, in1, in2, in3,"","",""),
-					 totAmp("relBWsumAmplitude", "totAmp"),
-					 ampSetup(ini),
-					 _entries(entries),
-					 _normStyle(ns)
+AmpSumIntensity::AmpSumIntensity(const double inM, const double inBr, const double in1,const double in2, const double in3,
+		std::string nameM, std::string name1,std::string name2,std::string name3,
+		AmplitudeSetup ini, unsigned int entries, normalizationStyle ns) :
+										 _kin(inM, inBr, in1, in2, in3,nameM,name1,name2,name3),
+										 totAmp("relBWsumAmplitude", "totAmp"),
+										 ampSetup(ini),
+										 _entries(entries),
+										 _normStyle(ns)
 {
 	init();
 }
@@ -105,7 +106,7 @@ void AmpSumIntensity::init(){
 		else if(_normStyle==entries) norm = sqrt(_dpArea*tmpbw->integral()/_entries);
 
 		tmpbw->SetNormalization(1/norm);
-		std::cout<<"AmpSumIntensity: INFO: Normalization constant for "<<tmp.m_name<<": "<<norm<<std::endl;
+		std::cout<<"AmpSumIntensity: INFO: Normalization constant for "<<tmp.m_name<<": "<<1/norm<<std::endl;
 	}// end loop over resonances
 
 
@@ -136,7 +137,7 @@ void AmpSumIntensity::init(){
 		else if(_normStyle==one) norm = sqrt(tmpbw->integral());
 		else if(_normStyle==entries) norm = sqrt(_dpArea*tmpbw->integral()/_entries);
 		tmpbw->SetNormalization(1/norm);
-		std::cout<<"AmpSumIntensity: INFO: Normalization constant for "<<tmp.m_name<<": "<<norm<<std::endl;
+		std::cout<<"AmpSumIntensity: INFO: Normalization constant for "<<tmp.m_name<<": "<<1/norm<<std::endl;
 	}// end loop over resonancesFlatte
 
 	nAmps=rr.size();
@@ -151,9 +152,10 @@ double AmpSumIntensity::evaluate(double x[], size_t dim) {
 	dataPoint::instance()->setMsq(5,x[1]);
 	dataPoint::instance()->setMsq(3,m12sq);
 	if( !dataPoint::instance()->DPKin.isWithinDP() ) return 0;//only integrate over phase space
-	const ParameterList res = intensity();
+	ParameterList res = intensity();
 
-	return 1.0;
+	double intens = *res.GetDoubleParameter(0);
+	return intens;
 }
 double evalWrapperAmpSumIntensity(double* x, size_t dim, void* param) {
 	/* We need a wrapper here because intensity() is a member function of AmpAbsDynamicalFunction
@@ -164,9 +166,12 @@ double evalWrapperAmpSumIntensity(double* x, size_t dim, void* param) {
 };
 
 const double AmpSumIntensity::integral(ParameterList& par){
-	//double AmpSumIntensity::integral() const{
 
-	//	std::cout<<"AmpRelBreitWignerRes: DEBUG: calculating integral of "<<_name<<" !"<<std::endl;
+	/*
+	 * integration functionality was tested with a model with only one normalized amplitude.
+	 * The integration result is equal to the amplitude coefficient^2.
+	 */
+
 	size_t dim=2;
 	double res=0.0, err=0.0;
 
@@ -179,14 +184,14 @@ const double AmpSumIntensity::integral(ParameterList& par){
 	gsl_rng_env_setup ();
 	const gsl_rng_type *T = gsl_rng_default; //type of random generator
 	gsl_rng *r = gsl_rng_alloc(T); //random generator
-	gsl_monte_function F = {&evalWrapperAmpSumIntensity,dim, const_cast<AmpSumIntensity*> (this)};
+	gsl_monte_function G = {&evalWrapperAmpSumIntensity,dim, const_cast<AmpSumIntensity*> (this)};
 
 	/*	Choosing vegas algorithm here, because it is the most accurate:
 	 * 		-> 10^5 calls gives (in my example) an accuracy of 0.03%
 	 * 		 this should be sufficiency for most applications
 	 */
 	gsl_monte_vegas_state *s = gsl_monte_vegas_alloc (dim);
-	gsl_monte_vegas_integrate (&F, xLimit_low, xLimit_high, 2, calls, r,s,&res, &err);
+	gsl_monte_vegas_integrate (&G, xLimit_low, xLimit_high, 2, calls, r,s,&res, &err);
 	gsl_monte_vegas_free(s);
 	std::cout<<"AmpSumIntensity: INFO: Integration result for amplitude sum: "<<res<<"+-"<<err<<" relAcc [%]: "<<100*err/res<<std::endl;
 
@@ -197,7 +202,7 @@ const ParameterList AmpSumIntensity::intensity(std::vector<double>& x, Parameter
 		std::cout<<"AmpSumIntensity: wrong size of phase space variables!"<<std::endl;
 		exit(1);
 	}
-//	double m12sq = dataPoint::instance()->DPKin.getThirdVariableSq(x[0],x[1]);
+	//	double m12sq = dataPoint::instance()->DPKin.getThirdVariableSq(x[0],x[1]);
 	dataPoint::instance()->setM(2,3,x[0]);
 	dataPoint::instance()->setM(1,3,x[1]);
 	dataPoint::instance()->setM(1,2,x[2]);

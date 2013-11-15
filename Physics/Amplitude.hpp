@@ -20,7 +20,7 @@
  * basis model parameters. If a new physics-model is derived from and fulfills
  * this base-class, no change in other modules are necessary to work with the new
  * physics module.
-*/
+ */
 
 #ifndef PIFBASE_HPP_
 #define PIFBASE_HPP_
@@ -36,25 +36,28 @@ class Amplitude
 
 public:
 
-  Amplitude()
-	  {
-	  }
+	Amplitude()
+{
+}
 
-  virtual ~Amplitude()
+	virtual ~Amplitude()
 	{ /* nothing */	}
 
-  virtual const double integral(ParameterList& par) =0;
+	virtual void setNevents(unsigned int n)  = 0;
+	virtual unsigned int getNevents()  = 0;
+
+	virtual const double integral(ParameterList& par) =0;
 	virtual double getMaxVal(ParameterList& par) = 0;
-//virtual const double volume() =0;
+	//virtual const double volume() =0;
 
-  virtual const ParameterList intensity(std::vector<double>& x, ParameterList& par) =0;
+	virtual const ParameterList intensity(std::vector<double>& x, ParameterList& par) =0;
 
-  virtual const bool fillStartParVec(ParameterList& outPar) =0;
+	virtual const bool fillStartParVec(ParameterList& outPar) =0;
 
-  virtual std::shared_ptr<FunctionTree> functionTree(ParameterList& outPar) {
-    //if not implemented, return NULL-pointer
-    return NULL;
-  }
+	virtual std::shared_ptr<FunctionTree> functionTree(ParameterList& outPar) {
+		//if not implemented, return NULL-pointer
+		return NULL;
+	}
 
 
 };

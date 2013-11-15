@@ -19,6 +19,61 @@
 #include "Physics/DPKinematics/DataPoint.hpp"
 #include "Physics/DPKinematics/PhysConst.hpp"
 
+double DPKinematics::calcHelicityAngle(double invMassSq23, double invMassSq13, double M, double m1, double m2, double m3){
+	/*
+	 * Calculated the helicity angle of inv. mass of particles 2 and 3.
+	 * The angle is measured between particle 1 and 2! This is our definition!
+	 * The cosine of the angle is returned.
+	 *
+	 */
+	double invMassSq12= getThirdVariableSq(invMassSq23,invMassSq13);
+	double s = invMassSq23;
+	double t = invMassSq13;
+	double u = invMassSq12;
+	double qSq = (s-(M+m1)*(M+m1))*(s-(M-m1)*(M-m1))/(4*s);
+	double qPrimeSq = (s-(m2+m3)*(m2+m3))*(s-(m2-m3)*(m2-m3))/(4*s);
+	double cosAngle = ( s*(t-u)+(M*M-m1*m1)*(m2*m2-m3*m3) )/(4*s*sqrt(qSq)*sqrt(qPrimeSq));
+
+	return cosAngle;
+}
+DPKinematics::DPKinematics(std::string _nameMother, std::string _name1, std::string _name2, std::string _name3):
+																		Br(0.0), nameMother(_nameMother), name1(_name1), name2(_name2), name3(_name3)
+{
+	M = PhysConst::instance()->getMass(_nameMother);
+	m1 = PhysConst::instance()->getMass(_name1);
+	m2 = PhysConst::instance()->getMass(_name2);
+	m3 = PhysConst::instance()->getMass(_name3);
+	spinM = PhysConst::instance()->getJ(_nameMother);
+	spin1 = PhysConst::instance()->getJ(_name1);
+	spin2 = PhysConst::instance()->getJ(_name2);
+	spin3 = PhysConst::instance()->getJ(_name3);
+
+	if(M==-999 || m1==-999|| m2==-999|| m3==-999) {
+		std::cout<<"DPKinematics: ERROR: masses not set! EXIT!"<<std::endl;
+		exit(1);
+	}
+	init();
+};
+DPKinematics::DPKinematics(double _M, double _Br, double _m1, double _m2, double _m3,
+		std::string _nameMother, std::string _name1, std::string _name2, std::string _name3):
+				M(_M), Br(_Br), m1(_m1), m2(_m2), m3(_m3),
+				nameMother(_nameMother), name1(_name1), name2(_name2), name3(_name3)
+{
+
+	spinM = PhysConst::instance()->getJ(_nameMother);
+	spin1 = PhysConst::instance()->getJ(_name1);
+	spin2 = PhysConst::instance()->getJ(_name2);
+	spin3 = PhysConst::instance()->getJ(_name3);
+	init();
+};
+DPKinematics::DPKinematics(const DPKinematics& other):
+				M(other.M), spinM(other.spinM), Br(other.Br),
+				m1(other.m1), m2(other.m2), m3(other.m3),
+				spin1(other.spin1), spin2(other.spin2), spin3(other.spin3),
+				name1(other.name1), name2(other.name2), name3(other.name3)
+{
+	init();
+};
 void DPKinematics::init(){
 	m23_sq_min= ((m2+m3)*(m2+m3));
 	m23_sq_max=((M-m1)*(M-m1));
@@ -31,25 +86,6 @@ void DPKinematics::init(){
 	m12_min=((m1+m2)); m12_max=((M-m3));
 	_DPareaCalculated=0;
 
-};
-DPKinematics::DPKinematics(std::string _nameMother, std::string _name1, std::string _name2, std::string _name3):
-																Br(0.0), nameMother(_nameMother), name1(_name1), name2(_name2), name3(_name3)
-{
-	M = PhysConst::instance()->getMass(_nameMother);
-	m1 = PhysConst::instance()->getMass(_name1);
-	m2 = PhysConst::instance()->getMass(_name2);
-	m3 = PhysConst::instance()->getMass(_name3);
-	//	std::cout<<M<< " "<<m1<<" " <<m2<<" " <<m3<<std::endl;
-	if(M==-999 || m1==-999|| m2==-999|| m3==-999) {
-		std::cout<<"DPKinematics: ERROR: masses not set! EXIT!"<<std::endl;
-		exit(1);
-	}
-	init();
-};
-DPKinematics::DPKinematics(double _M, double _Br, double _m1, double _m2, double _m3, std::string _name1, std::string _name2, std::string _name3):
-																M(_M), Br(_Br), m1(_m1), m2(_m2), m3(_m3), name1(_name1), name2(_name2), name3(_name3)
-{
-	init();
 };
 //! returns 1 if point is within PHSP otherwise 0
 double phspFunc(double* x, size_t dim, void* param) {
@@ -95,6 +131,26 @@ void DPKinematics::calcDParea(){
 	_DPareaCalculated=1;
 	return;
 }
+unsigned int DPKinematics::getSpin(unsigned int num){
+	switch(num){
+	case 0: return spinM;
+	case 1: return spin1;
+	case 2: return spin2;
+	case 3: return spin3;
+	}
+	std::cout<<"DPKinematics: ERROR: wrong particle requested!"<<std::endl;
+	exit(1);
+	return -999;
+}
+unsigned int DPKinematics::getSpin(std::string name){
+	if(name==nameMother) return spinM;
+	if(name==name1) return spin1;
+	if(name==name2) return spin2;
+	if(name==name3) return spin3;
+	std::cout<<"DPKinematics: ERROR: wrong particle requested!"<<std::endl;
+	exit(1);
+	return -999;
+}
 
 double DPKinematics::getMass(unsigned int num){
 	switch(num){
@@ -117,13 +173,6 @@ double DPKinematics::getMass(std::string name){
 	return -999;
 }
 
-DPKinematics::DPKinematics(const DPKinematics& other):
-																M(other.M), Br(other.Br),
-																m1(other.m1), m2(other.m2), m3(other.m3),
-																name1(other.name1), name2(other.name2), name3(other.name3)
-{
-	init();
-};
 double DPKinematics::getThirdVariableSq(double invmass1sq, double invmass2sq) const{
 	/*!
 	 * calculates 3rd invariant mass from the other inv. masses.

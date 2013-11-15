@@ -87,7 +87,7 @@ double AmpWigner::evaluate() const {
 	 * For WignerD functions we need one more invariant mass:
 	 */
 	int mod=0;
-	if(_subSys==5) mod=3; //5->3 work also without beta=nan, what is correct?
+	if(_subSys==5) mod=4; //5->3 work also without beta=nan, for agreement with Laura++ 5->4 is correct
 	if(_subSys==4) mod=5;
 	if(_subSys==3) mod=5;
 	double invM2 = dataPoint::instance()->getM(mod);
