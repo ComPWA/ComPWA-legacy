@@ -37,7 +37,7 @@ using namespace std;
  */
 int main(int argc, char **argv){
 
-	DPKinematics kin(1.0,0.0,0.0,0.0,0.0,"gamma","gamma","gamma");
+	DPKinematics kin(1.0,0.0,0.0,0.0,0.0,"J/psi","gamma","gamma","gamma");
 	double area = kin.getDParea();
 
 	std::cout<<"DPareaApp: Phase space area expected from the decay X-> gamma gamma gamma with M(X)=1.0GeV "\

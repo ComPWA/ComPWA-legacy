@@ -87,7 +87,7 @@ double AmpWigner::evaluate() const {
 	 * For WignerD functions we need one more invariant mass:
 	 */
 	int mod=0;
-	if(_subSys==5) mod=3; //5->3 work also without beta=nan, what is correct?
+	if(_subSys==5) mod=4; //5->3 work also without beta=nan, for agreement with Laura++ 5->4 is correct
 	if(_subSys==4) mod=5;
 	if(_subSys==3) mod=5;
 	double invM2 = dataPoint::instance()->getM(mod);
@@ -125,7 +125,7 @@ double AmpWigner::evaluate() const {
 		}
 	  }
 	double cosbeta = (2.*invM2*invM2-locmax_sq-locmin_sq)/(locmax_sq-locmin_sq);
-	if( cosbeta > 1 && cosbeta < 1.1) cosbeta=1;
+//	if( cosbeta > 1 && cosbeta < 1.1) cosbeta=1;
     beta=acos(cosbeta);
     //beta=acos(altCosTheta);
 	//if(_subSys!=5) beta=acos(1);

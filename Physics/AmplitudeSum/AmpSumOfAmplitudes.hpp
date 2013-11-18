@@ -36,9 +36,6 @@ public:
   double evaluateSlice(std::complex<double>*, unsigned int, unsigned int) const ;
   double evaluate() const ;
   
-  double integrate(AmpRelBreitWignerRes* amp);
-  //double getMax() { return maxVal; };
-
 protected:
   std::vector<std::shared_ptr<AmpAbsDynamicalFunction> > _pdfList ;   //  List of component PDFs
   std::vector<std::shared_ptr<DoubleParameter> > _intList;    //  List of relative intensities

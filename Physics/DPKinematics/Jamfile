@@ -2,13 +2,18 @@
 import os ;
 local BOOST_ROOT = [ os.environ BOOST_ROOT ] ;
 local GSL = [ os.environ GSL_ROOT ] ;
+local ROOTSYS = [ os.environ ROOTSYS ] ;
 
 BOOSTLIBS = -lboost_date_time -lboost_filesystem -lboost_program_options -lboost_regex -lboost_serialization -lboost_system -lboost_thread -lboost_test_exec_monitor ;
+ROOTLIBS = -lCore -lCint -lRIO -lNet -lHist -lGraf -lGraf3d -lGpad -lTree -lRint -lPostscript -lMatrix -lPhysics -lMathCore -lThread -lpthread  -lm -ldl ;
 
 project :
 	requirements
 	    <include>$(BOOST_ROOT)/include
 	    <include>$(GSL)/include
+	    <include>$(ROOTSYS)/include
+	<linkflags>-L$(ROOTSYS)/lib 
+	<linkflags>$(ROOTLIBS)
 	<linkflags>-L$(BOOST_ROOT)/lib 
 	<linkflags>$(BOOSTLIBS)
 	<linkflags>-L$(GSL)/lib

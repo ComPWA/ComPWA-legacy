@@ -27,41 +27,44 @@
 //#include "TString.h"
 #include "Physics/AmplitudeSum/AmpAbsDynamicalFunction.hpp"
 #include "Physics/AmplitudeSum/AmpKinematics.hpp"
-#include "Physics/AmplitudeSum/AmpWigner.hpp"
+#include "Physics/AmplitudeSum/AmpWigner2.hpp"
 
 class AmpRelBreitWignerRes : public AmpAbsDynamicalFunction, public AmpKinematics {
 public:
 
-  AmpRelBreitWignerRes(const char *name,
-		       DoubleParameter& _resMass, DoubleParameter& _resWidth,
-		       double& _radius,
-		       int _subsys,
-               int resSpin, int m, int n
-               ) ;
-  AmpRelBreitWignerRes(const AmpRelBreitWignerRes&, const char*);
-  AmpRelBreitWignerRes(const AmpRelBreitWignerRes&);
+	AmpRelBreitWignerRes(const char *name,
+			DoubleParameter& _resMass, DoubleParameter& _resWidth,
+			double& _radius,
+			int _subsys,
+			int resSpin, int m, int n
+	) ;
+	AmpRelBreitWignerRes(const AmpRelBreitWignerRes&, const char*);
+	AmpRelBreitWignerRes(const AmpRelBreitWignerRes&);
 
-  virtual ~AmpRelBreitWignerRes();
+	virtual ~AmpRelBreitWignerRes();
 
-//  double operator() (double *x, size_t dim, void*);
+	//  double operator() (double *x, size_t dim, void*);
 
-  virtual void initialise();
-  virtual std::complex<double> evaluate() const ;
-//  virtual double eval(double x[],size_t dim, void *param) const;//used for MC integration
-//  double (*eval2)(double x[],size_t dim, void *param);//used for MC integration
+	virtual void initialise();
+	virtual std::complex<double> evaluate() const ;
+	virtual std::complex<double> evaluateAmp() const;
+	virtual double evaluateWignerD() const { return _wignerD.evaluate(); };
+	//  virtual double eval(double x[],size_t dim, void *param) const;//used for MC integration
+	//  double (*eval2)(double x[],size_t dim, void *param);//used for MC integration
 
-  void setDecayMasses(double, double, double, double);
-//  double getMaximum() const{return 1;};
-  double getSpin() {return _spin;}; //needs to be declared in AmpAbsDynamicalFunction
-  inline virtual bool isSubSys(const unsigned int subSys) const{ return (subSys==_subSys); };
+	void setDecayMasses(double, double, double, double);
+	//  double getMaximum() const{return 1;};
+	double getSpin() {return _spin;}; //needs to be declared in AmpAbsDynamicalFunction
+	inline virtual bool isSubSys(const unsigned int subSys) const{ return (subSys==_subSys); };
 
 protected:
 
-  DoubleParameter _resWidth;
-  AmpWigner _wignerD;
+	DoubleParameter _resWidth;
+//	AmpWigner _wignerD;
+	AmpWigner2 _wignerD;
 
 private:
-  //ClassDef(AmpRelBreitWignerRes,1) // Relativistic Breit-Wigner resonance model
+	//ClassDef(AmpRelBreitWignerRes,1) // Relativistic Breit-Wigner resonance model
 
 };
 

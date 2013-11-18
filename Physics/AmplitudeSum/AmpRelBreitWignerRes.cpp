@@ -56,25 +56,26 @@ AmpRelBreitWignerRes::AmpRelBreitWignerRes(const char *name,
 AmpAbsDynamicalFunction(name),
 AmpKinematics(resMass, subSys, resSpin, m, n, AmpKinematics::barrierType(BWPrime), mesonRadius, 1.5),
 _resWidth(resWidth),
-_wignerD(name, resSpin, m, n, subSys)
+//_wignerD(name, resSpin, m, n, subSys)
+_wignerD(subSys, resSpin)
 {
 	initialise();
 }
 
 AmpRelBreitWignerRes::AmpRelBreitWignerRes(const AmpRelBreitWignerRes& other, const char* newname) :
-								  AmpAbsDynamicalFunction(other, newname),
-								  AmpKinematics(other),
-								  _resWidth(other._resWidth),
-								  _wignerD(other._wignerD)
+										  AmpAbsDynamicalFunction(other, newname),
+										  AmpKinematics(other),
+										  _resWidth(other._resWidth),
+										  _wignerD(other._wignerD)
 {
 	initialise();
 }
 
 AmpRelBreitWignerRes::AmpRelBreitWignerRes(const AmpRelBreitWignerRes& other) :
-								  AmpAbsDynamicalFunction(other),
-								  AmpKinematics(other),
-								  _resWidth(other._resWidth),
-								  _wignerD(other._wignerD)
+										  AmpAbsDynamicalFunction(other),
+										  AmpKinematics(other),
+										  _resWidth(other._resWidth),
+										  _wignerD(other._wignerD)
 {
 	initialise();
 }
@@ -89,30 +90,35 @@ void AmpRelBreitWignerRes::initialise()
 
 void AmpRelBreitWignerRes::setDecayMasses(double ma, double mb, double mc, double M){
 	AmpKinematics::setDecayMasses(ma, mb, mc, M);
-	_wignerD.setDecayMasses(ma, mb, mc, M);
+//	_wignerD.setDecayMasses(ma, mb, mc, M);
 	return;
 }
-std::complex<double> AmpRelBreitWignerRes::evaluate() const {
+std::complex<double> AmpRelBreitWignerRes::evaluateAmp() const {
 	if(_ma == -999 || _mb == -999 ||_mc == -999 ||_M == -999){
 		std::cout<<"Masses of decay products not set!"<<std::endl;
 		return 0;
 	}
 	std::complex<double> result;
 	double m = dataPoint::instance()->getM(_subSys);
-	double spinTerm = _wignerD.evaluate(); //spinTerm =1;
+	//	double spinTerm = evaluateWignerD(); //spinTerm =1;
+	double BLWeiss2 = BLres2(m);
+	double qTerm = pow(q(m) / q0(), 2.*_spin + 1.);
 	double Gamma0 = _resWidth.GetValue();
-	double GammaV = Gamma0 * pow(q(m) / q0(), 2.*_spin + 1.) * (_mR / m) * BLres2(m);
-
+	double GammaV = Gamma0 * qTerm * (_mR / m) * BLWeiss2;
 	std::complex<double> denom(_mR*_mR - m*m, -_mR * GammaV);
 
-	//	  result = RooComplex(spinTerm*_mR * Gamma0) / denom; //wrong!
-	//  result = RooComplex(spinTerm*BLprime2(m)) / denom;
-	result = std::complex<double>( _norm * spinTerm ) / denom; //Laura++ (old) definition - is this used in DKsKK analysis?
-	//	result = RooComplex( spinTerm*sqrt(BLres2(m))*sqrt(BLmother2(m)) ) / denom; //Laura++ (new) definition
+	result = std::complex<double>( _norm ) / denom; //Laura++ (old) definition
+//	result = std::complex<double>(_norm*sqrt(BLWeiss2)) / denom;
+//	result = std::complex<double>( _norm*sqrt(BLWeiss2)*sqrt(BLmother2(m)) ) / denom; //Laura++ (new) definition
 
 	if(result.real()!=result.real()) {std::cout << "RE part NAN" << std::endl;return 0;}
 	if(result.imag()!=result.imag()) {std::cout << "IM part NAN" << std::endl; return 0;}
-	//	std::cout<<result<<std::endl;
 	return result;
+}
+std::complex<double> AmpRelBreitWignerRes::evaluate() const {
+//	return evaluateAmp(); //DEBUG
+//	std::cout<<evaluateAmp()<<" "<<evaluateWignerD()<<std::endl;
+	unsigned int twoJplusOne = (2*_spin+1);
+	return evaluateAmp()*evaluateWignerD()*(double)twoJplusOne;
 }
 

@@ -61,27 +61,7 @@ void AmpSumOfAmplitudes::addBW(std::shared_ptr<AmpAbsDynamicalFunction> theRes ,
   _angList.push_back(std::shared_ptr<AmpWigner>(new AmpWigner()));
 }
 
-double AmpSumOfAmplitudes::integrate(AmpRelBreitWignerRes* amp){
-
-	using namespace std::placeholders;
-
-	double x[2]; x[0]=1.3; x[1]=1.3;
-//	auto d = std::bind(&AmpRelBreitWignerRes::eval,*amp,_1,_2,_3);
-//	cout<<d(x,2,0)<<std::endl;
-//	auto d = std::bind(&AmpRelBreitWignerRes::eval,*amp,x,2,0);
-//	cout<<d()<<std::endl;
-
-//	 boost::function<int (int)> f;
-//	X x;
-//	f = std::bind1st(
-//	      std::mem_fun(&X::foo), &x);
-//	f(5); // Call x.foo(5)
-
-//	std::cout<<" " <<sp(this,x,2,0)<<std::endl;
-//	std::cout<<"====12=== "<<bb(x,2,0)<<std::endl;
-//		gsl_monte_function G = {sp,2,0};
-}
- double AmpSumOfAmplitudes::evaluate() const
+double AmpSumOfAmplitudes::evaluate() const
  { 
 //   RooComplex res;
    complex<double> res;
@@ -93,8 +73,10 @@ double AmpSumOfAmplitudes::integrate(AmpRelBreitWignerRes* amp){
      double phi = _phaseList[i]->GetValue();
      std::complex<double> eiphi(a*cos(phi),a*sin(phi));
 
-     std::complex<double> twoJplusOne(2*_pdfList[i]->getSpin()+1);
-     res = res + twoJplusOne * _pdfList[i]->evaluate() * eiphi;
+//     unsigned int twoJplusOne = (2*_pdfList[i]->getSpin()+1);
+//     res = res + (double)twoJplusOne * _pdfList[i]->evaluate() * eiphi;
+     //twoJplusOne in included in evaluate(). We want to include this factor into the normalization of the amplitudes.
+     res = res + _pdfList[i]->evaluate() * eiphi;
     // std::cout << _pdfList[i]->evaluate() << " ";
 //res = res + twoJplusOne * _pdfList[i]->evaluate() * eiphi * _angList[i]->evaluate();
    }
