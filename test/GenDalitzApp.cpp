@@ -67,24 +67,25 @@ int main(int argc, char **argv){
   unsigned int i=0, mc=0;
   TRandom3 rando;
 
-	DPKinematics kin("J/psi","gamma","pi0","pi0");
+	//DPKinematics kin("J/psi","gamma","pi0","pi0");
+	DPKinematics kin("D0","gamma","K-","K+");
 	static dataPoint* point = dataPoint::instance(kin);
 
-	/*const double M = kin.getMass("J/psi"); // GeV/c² (J/psi+)
+	const double M = kin.getMass("D0"); // GeV/c² (J/psi+)
 	const double Br = 0.000093; // GeV/c² (width)
 	const double m1 = kin.getMass("gamma"); // GeV/c² (gamma)
-	const double m2 = kin.getMass("pi0"); // GeV/c² (pi)
-	const double m3 = kin.getMass("pi0"); // GeV/c² (pi)
+	const double m2 = kin.getMass("K-"); // GeV/c² (pi)
+	const double m3 = kin.getMass("K+"); // GeV/c² (pi)
 	//const double c = 299792458.; // m/s
-	const double PI = PhysConst::instance()->getConstValue("Pi");*/
+	const double PI = PhysConst::instance()->getConstValue("Pi");
 
-	const Double_t M = 3.096916; // GeV/c² (J/psi+)
+	/*const Double_t M = 3.096916; // GeV/c² (J/psi+)
 	const Double_t Br = 0.000093; // GeV/c² (width)
 	const Double_t m1 = 0.; // GeV/c² (gamma)
 	const Double_t m2 = 0.139570; // GeV/c² (pi)
 	const Double_t m3 = 0.139570; // GeV/c² (pi)
 	//const Double_t c = 299792458.; // m/s
-	const Double_t PI = 3.14159; // m/s
+	const Double_t PI = 3.14159; // m/s*/
 
   //load resonances
   //DPKinematics kin(M,Br,m1,m2,m3,"gamma","pi0","pi0");
@@ -104,7 +105,7 @@ int main(int argc, char **argv){
   cout << endl << endl;
 
   //Simple Breit-Wigner Physics-Module setup
-  AmpSumIntensity testBW(kin, ini);
+  AmpSumIntensity testBW(kin, ini, MaxEvents, AmpSumIntensity::normalizationStyle::entries);
   cout << testBW.printAmps() << endl;
 
   ParameterList minPar;
