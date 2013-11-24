@@ -10,6 +10,7 @@
 //
 // Contributors:
 //     Mathias Michel - initial API and implementation
+//		Peter Weidenkaff - adding functionality to generate set of events
 //-------------------------------------------------------------------------------
 #include <memory>
 
@@ -35,7 +36,6 @@ RunManager::RunManager(std::shared_ptr<Data> inD, std::shared_ptr<Amplitude> inP
 : eff_(eff), pData_(inD), pPhys_(inP), pOpti_(inO), success_(false),
   validSize(0),validAmplitude(0),validData(0),validOptimizer(0)
 {
-	std::cout<<"!2313"<<std::endl;
 	if(eff && inD && inP && inO){
 		validEfficiency=1;
 		validAmplitude=1;
@@ -48,7 +48,6 @@ RunManager::RunManager( unsigned int size, std::shared_ptr<Amplitude> inP,
 : gen_(gen), eff_(eff), size_(size), pPhys_(inP), success_(false),
   validSize(0),validAmplitude(0),validData(0),validOptimizer(0)
 {
-	std::cout<<"!2313"<<std::endl;
 	if(inP && eff){
 		validEfficiency=1;
 		validAmplitude=1;
@@ -70,17 +69,17 @@ bool RunManager::startFit(ParameterList& inPar){
 	return success_;
 }
 bool RunManager::generate( unsigned int number ) {
-	if( !(validEfficiency==1 && validAmplitude==1 && validSize==1) )
+	if( !(validData==1 && validEfficiency==1 && validAmplitude==1 && validSize==1) )
 		return false;
 
-	if(pData_->getNEvents()>0){
+//	if(pData_->getNEvents()>0){
 		//What do we do if dataset is not empty?
-	}
+//	}
 	ParameterList minPar;
 	pPhys_->fillStartParVec(minPar);
 
 	//initialize random number generator
-	boost::minstd_rand rndGen(0);//what seed should we use here?
+	boost::minstd_rand rndGen(10);//what seed should we use here?
 	boost::uniform_real<> uni_dist(0,1);
 	boost::variate_generator<boost::minstd_rand&, boost::uniform_real<> > uni(rndGen, uni_dist);
 
@@ -89,6 +88,7 @@ bool RunManager::generate( unsigned int number ) {
 	for(unsigned int i=0; i<10000;i++){
 		Event tmp;
 		gen_->generate(tmp);
+		double weight = tmp.getWeight();
 		Particle part1 = tmp.getParticle(0);
 		Particle part2 = tmp.getParticle(1);
 		Particle part3 = tmp.getParticle(2);
@@ -98,9 +98,10 @@ bool RunManager::generate( unsigned int number ) {
 		std::vector<double> x;
 		x.push_back(m23sq);
 		x.push_back(m13sq);
+		x.push_back(m12sq);
 		ParameterList list = pPhys_->intensity(x,minPar);
 		double AMPpdf = *list.GetDoubleParameter(0);
-		if(AMPpdf > genMaxVal) genMaxVal= AMPpdf;
+		if(genMaxVal<(weight*AMPpdf)) genMaxVal= weight*AMPpdf;
 	}
 	genMaxVal=1.5*genMaxVal;
 
@@ -108,10 +109,11 @@ bool RunManager::generate( unsigned int number ) {
 	double maxTest=0;
 	int scale = (int) size_/10;
 	std::cout<<"== Using "<<genMaxVal<< " as maximum value for random number generation!"<<std::endl;
-	std::cout << "Generating MC: ["<<size_<<" events] "<<std::endl;
+	std::cout << "Generating MC: ["<<size_<<" events] ";
 	while( i<size_){
 		Event tmp;
 		gen_->generate(tmp);
+		double weight = tmp.getWeight();
 		Particle part1 = tmp.getParticle(0);
 		Particle part2 = tmp.getParticle(1);
 		Particle part3 = tmp.getParticle(2);
@@ -121,13 +123,14 @@ bool RunManager::generate( unsigned int number ) {
 		std::vector<double> x;
 		x.push_back(m23sq);
 		x.push_back(m13sq);
+		x.push_back(m12sq);
 
 		double ampRnd = uni()*genMaxVal;
 		ParameterList list = pPhys_->intensity(x,minPar);
 		double AMPpdf = *list.GetDoubleParameter(0);
 
-		if(AMPpdf > maxTest ) maxTest = AMPpdf;
-		if(ampRnd>AMPpdf ) continue;
+		if( maxTest < (AMPpdf*weight)) maxTest = AMPpdf;
+		if( ampRnd>(weight*AMPpdf) ) continue;
 		pData_->pushEvent(tmp);
 		i++;
 

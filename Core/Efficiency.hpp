@@ -29,6 +29,10 @@ public:
 	virtual double evaluate() = 0;
 };
 
+/**
+ *  \class UnitEfficiency
+ *  \brief implementation of virtual class efficiency. Efficiency ist constant one allover the PHSP
+ */
 class UnitEfficiency : public Efficiency {
 private:
 public:

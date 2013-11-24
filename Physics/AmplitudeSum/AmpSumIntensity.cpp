@@ -84,9 +84,9 @@ void AmpSumIntensity::init(){
 
 		//setting normalization between amplitudes
 		double norm=1;
-//		if(_normStyle==none) norm=1;
-//		else if(_normStyle==one) norm = sqrt(tmpbw->integral());
-//		else if(_normStyle==entries) norm = sqrt(_dpArea*tmpbw->integral()/_entries);
+		if(_normStyle==none) norm=1;
+		else if(_normStyle==one) norm = sqrt(tmpbw->integral());
+		else if(_normStyle==entries) norm = sqrt(_dpArea*tmpbw->integral()/_entries);
 
 		tmpbw->SetNormalization(1/norm);
 		std::cout<<"AmpSumIntensity: INFO: Normalization constant for "<<tmp.m_name<<": "<<1/norm<<std::endl;
@@ -116,9 +116,9 @@ void AmpSumIntensity::init(){
 		totAmp.addBW(tmpbw, rr.at(last), phir.at(last));
 
 		double norm=1;
-//		if(_normStyle==none) norm=1;
-//		else if(_normStyle==one) norm = sqrt(tmpbw->integral());
-//		else if(_normStyle==entries) norm = sqrt(_dpArea*tmpbw->integral()/_entries);
+		if(_normStyle==none) norm=1;
+		else if(_normStyle==one) norm = sqrt(tmpbw->integral());
+		else if(_normStyle==entries) norm = sqrt(_dpArea*tmpbw->integral()/_entries);
 		tmpbw->SetNormalization(1/norm);
 		std::cout<<"AmpSumIntensity: INFO: Normalization constant for "<<tmp.m_name<<": "<<1/norm<<std::endl;
 	}// end loop over resonancesFlatte
@@ -188,9 +188,9 @@ const ParameterList AmpSumIntensity::intensity(std::vector<double>& x, Parameter
 		exit(1);
 	}
 	//	double m12sq = dataPoint::instance()->DPKin.getThirdVariableSq(x[0],x[1]);
-	dataPoint::instance()->setM(2,3,x[0]);
-	dataPoint::instance()->setM(1,3,x[1]);
-	dataPoint::instance()->setM(1,2,x[2]);
+	dataPoint::instance()->setMsq(2,3,x[0]);
+	dataPoint::instance()->setMsq(1,3,x[1]);
+	dataPoint::instance()->setMsq(1,2,x[2]);
 	return intensity(par);
 }
 const ParameterList AmpSumIntensity::intensity( ParameterList& par){

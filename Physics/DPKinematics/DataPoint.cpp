@@ -32,14 +32,16 @@ double dataPoint::getMsq(int subsys){
 void dataPoint::setMsq(int subsys, double val){
 	switch(subsys){
 	case 3:
-		m12=val; break;
+		m12=val;
+		break;
 	case 4:
 		m13=val;
 		break;
 	case 5:
-		m23=val;break;
+		m23=val;
+		break;
 	default:
-		std::cout<<"DPpoint2 setMsq(): wrosdfasdfsdfng subsys!"<<std::endl;
+		std::cout<<"DPpoint2 setMsq(): wrong subsys!"<<std::endl;
 	}
 	return;
 };

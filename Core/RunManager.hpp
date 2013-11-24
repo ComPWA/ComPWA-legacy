@@ -10,6 +10,7 @@
 //
 // Contributors:
 //     Mathias Michel - initial API and implementation
+//		Peter Weidenkaff - adding functionality to generate set of events
 //-------------------------------------------------------------------------------
 //! Run-Manager for a simple fit.
 /*! \class RunManager
