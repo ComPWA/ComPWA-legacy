@@ -12,6 +12,7 @@
 #define DALITZEFFICIENCY_HPP_
 
 #include <iostream>
+#include <vector>
 /**
  *  \class DalitzEfficiency
  *  \brief Virtual efficiency class
@@ -26,7 +27,7 @@ public:
 
 	virtual ~Efficiency();
 
-	virtual double evaluate() = 0;
+	virtual double evaluate(std::vector<double> x) = 0;
 };
 
 /**
@@ -40,6 +41,6 @@ public:
 		std::cout<<"Efficiency: creating UnitEfficiency!"<<std::endl;
 	};
 	~UnitEfficiency(){};
-	virtual double evaluate() {return 1;};
+	virtual double evaluate(std::vector<double> x) {return 1;};
 };
 #endif /* DALITZEFFICIENCY_HPP_ */

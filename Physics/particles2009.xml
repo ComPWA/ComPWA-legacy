@@ -2,7 +2,7 @@
 <!-- particle data file -->
 <particleList xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:noNamespaceSchemaLocation="particleSchema.xsd">
-	<reference>PDG2013</reference>
+	<reference>PDG2009</reference>
 	<particle>
 		<ID>22</ID>
 		<name>gamma</name>

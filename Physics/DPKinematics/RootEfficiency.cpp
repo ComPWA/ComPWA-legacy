@@ -7,11 +7,11 @@ DalitzHistEfficiency::DalitzHistEfficiency(TH2D* passed, TH2D* total) : effHist(
 }
 DalitzHistEfficiency::DalitzHistEfficiency(const DalitzHistEfficiency&){
 }
-double DalitzHistEfficiency::evaluate(){
+double DalitzHistEfficiency::evaluate(std::vector<double> x){
 	dataPoint* point = dataPoint::instance();
 
-	double m13sq = point->getMsq(4);
-	double m23sq = point->getMsq(5);
+	double m13sq = x[1];
+	double m23sq = x[0];
 
 	TH2D* test = (TH2D*) effHist->GetPassedHistogram();
 	int globalBin = test->FindBin(m23sq,m13sq);

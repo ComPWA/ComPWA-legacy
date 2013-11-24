@@ -48,7 +48,7 @@ public:
 
   virtual const std::vector<std::string>& getVariableNames();
 
-  virtual void writeToFile();
+//  virtual void writeToFile();
   virtual void pushEvent(const Event& evt) {fEvents.push_back(evt);};
   virtual const Event& getEvent(const int);
   virtual const int getBin(const int, double&, double&);

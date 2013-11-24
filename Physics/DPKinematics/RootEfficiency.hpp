@@ -24,7 +24,7 @@ private:
 	std::shared_ptr<TEfficiency> effHist;
 public:
 	//! returns efficiency for current datapoint
-	double evaluate();
+	double evaluate(std::vector<double> x);
 	//! Construct DalitzHistEfficiency from TEfficiency object
 	DalitzHistEfficiency(TEfficiency* eff);
 	//! Construct DalitzHistEfficiency from two TH2 objects for passed and total events

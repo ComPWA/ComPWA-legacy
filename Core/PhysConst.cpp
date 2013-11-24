@@ -19,8 +19,8 @@ PhysConst::PhysConst(){
 	id.push_back(-999); name.push_back("error"); mass.push_back(-999); width.push_back(-999); J.push_back(999); P.push_back(false); C.push_back(false);
 	nameConst.push_back("error"); valueConst.push_back(-999); errorConst.push_back(-999);
 
-	particleFileName = "Physics/DPKinematics/particles.xml";//TODO: dont hardcode datafile
-	constantFileName = "Physics/DPKinematics/physConstants.xml";//TODO: dont hardcode datafile
+	particleFileName = "Physics/particles2013.xml";//TODO: dont hardcode datafile
+	constantFileName = "Physics/physConstants.xml";//TODO: dont hardcode datafile
 
 	flag_readFile=1;
 	return;

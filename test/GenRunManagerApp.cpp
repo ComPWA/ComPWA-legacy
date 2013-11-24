@@ -38,7 +38,7 @@ int main(int argc, char **argv){
 	std::string outFile="gen.root";
 	unsigned int dataSize = 10000;
 	//load resonances
-	AmplitudeSetup ini("/Users/weidenka/work/rootAnalysis/DKsKK/PWA/DKsKK-Laura.xml");
+	AmplitudeSetup ini("test/JPSI_ypipi.xml");
 	cout << "loaded file " << ini.getFileName() << " with " << ini.getResonances().size() << " resonances!" << std::endl;
 	std::shared_ptr<Data> data(new RootReader(outFile, true,"lalelu",false));
 	std::shared_ptr<Generator> gen(new RootGenerator());

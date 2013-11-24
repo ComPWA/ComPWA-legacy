@@ -99,9 +99,10 @@ bool RunManager::generate( unsigned int number ) {
 		x.push_back(m23sq);
 		x.push_back(m13sq);
 		x.push_back(m12sq);
+		double eff  = eff_->evaluate(x);
 		ParameterList list = pPhys_->intensity(x,minPar);
 		double AMPpdf = *list.GetDoubleParameter(0);
-		if(genMaxVal<(weight*AMPpdf)) genMaxVal= weight*AMPpdf;
+		if(genMaxVal<(weight*eff*AMPpdf)) genMaxVal= weight*eff*AMPpdf;
 	}
 	genMaxVal=1.5*genMaxVal;
 
@@ -124,13 +125,14 @@ bool RunManager::generate( unsigned int number ) {
 		x.push_back(m23sq);
 		x.push_back(m13sq);
 		x.push_back(m12sq);
+		double eff  = eff_->evaluate(x);
 
 		double ampRnd = uni()*genMaxVal;
 		ParameterList list = pPhys_->intensity(x,minPar);
 		double AMPpdf = *list.GetDoubleParameter(0);
 
-		if( maxTest < (AMPpdf*weight)) maxTest = AMPpdf;
-		if( ampRnd>(weight*AMPpdf) ) continue;
+		if( maxTest < (AMPpdf*weight*eff)) maxTest = AMPpdf;
+		if( ampRnd>(weight*AMPpdf*eff) ) continue;
 		pData_->pushEvent(tmp);
 		i++;
 
@@ -139,7 +141,7 @@ bool RunManager::generate( unsigned int number ) {
 
 	}
 	//	double t=3;
-	std::cout<<"100%"<<std::endl;
+	std::cout<<std::endl;
 
 	if( maxTest > (int) (0.9*genMaxVal) ) {
 		std::cout<<"==========ATTENTION==========="<<std::endl;

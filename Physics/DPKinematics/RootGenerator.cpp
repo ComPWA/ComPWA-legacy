@@ -13,13 +13,15 @@
 #include <vector>
 #include <string>
 #include <memory>
-#include "Core/Generator.hpp"
+
 #include "TLorentzVector.h"
 #include "TParticle.h"
 #include "TGenPhaseSpace.h"
-#include "Physics/DPKinematics/DalitzKinematics.hpp"
+
+#include "Core/Generator.hpp"
 #include "Core/Event.hpp"
 #include "Core/Particle.hpp"
+#include "Physics/DPKinematics/DalitzKinematics.hpp"
 
 class RootGenerator : public Generator {
 private:

@@ -64,24 +64,22 @@ RootReader::~RootReader(){
 	//delete _myFcn;
 }
 
-void RootReader::writeToFile(){
-	if(_readFlag){
-		std::cout<<"RootReader: trying to write, but RootReader is marked as readonly! Exit!"<<std::endl;
-		exit(1);
-	}
-	fFile = new TFile(fileName.c_str(),"RECREATE");
-	fTree = new TTree(treeName.c_str(),treeName.c_str());
-	TParticle* part = 0;
-	fTree->Branch("Particles","Particles",&part,64000,0);
-
-	//loop
-	for(int i=0; i<=fEvents.size();i++){
-
-
-	}
-
-	return;
-}
+//void RootReader::writeToFile(){
+//	if(_readFlag){
+//		std::cout<<"RootReader: trying to write, but RootReader is marked as readonly! Dont write!"<<std::endl;
+//		return;
+//	}
+//	fFile = new TFile(fileName.c_str(),"RECREATE");
+//	fTree = new TTree(treeName.c_str(),treeName.c_str());
+//	TParticle* part = 0;
+//	fTree->Branch("Particles","Particles",&part,64000,0);
+//	//loop
+//	for(int i=0; i<=fEvents.size();i++){
+//
+//
+//	}
+//	return;
+//}
 const std::vector<std::string>& RootReader::getVariableNames(){
 	if(!fVarNames.size()){ //TODO: init
 		fVarNames.push_back("dataname1");

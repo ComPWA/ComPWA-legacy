@@ -101,9 +101,12 @@ public:
 	double m1; unsigned int spin1;
 	double m2; unsigned int spin2;
 	double m3; unsigned int spin3;
+	double m4; unsigned int spin4;
+	double m5; unsigned int spin5;
+	double m6; unsigned int spin6;
 
 	//! names of particles
-	std::string nameMother, name1, name2, name3;
+	std::string nameMother, name1, name2, name3, name4, name5, name6;
 
 	double m23_sq_min, m23_sq_max;
 	double m13_sq_min, m13_sq_max;
