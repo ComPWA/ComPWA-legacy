@@ -34,33 +34,54 @@ RootReader::RootReader(TTree* tr, const bool binned=false) : fBinned(binned){
 	fFile = 0; //need to do this to avoid seg. violation when destructor is called
 	init();
 }
-RootReader::RootReader(const std::string inRootFile, const bool binned=false, const std::string inTreeName="data")
-:fBinned(binned){
-
-	fFile = new TFile(inRootFile.c_str());
-	fTree = (TTree*) fFile->Get(inTreeName.c_str());
+RootReader::RootReader(const std::string inRootFile, const bool binned,
+		const std::string inTreeName, const bool readFlag)
+:fBinned(binned),_readFlag(readFlag),fileName(inRootFile),treeName(inTreeName){
+std::cout<<"sdfdsf"<<std::endl;
+	fEvent=0;
+	if(!readFlag) return;
+	fFile = new TFile(fileName.c_str());
+	fTree = (TTree*) fFile->Get(treeName.c_str());
 	init();
-//	fParticles = new TClonesArray("TParticle");
-//	fTree->GetBranch("Particles")->SetAutoDelete(false);
-//	fTree->SetBranchAddress("Particles",&fParticles);
-//	fFile->cd();
-//
-//	fmaxEvents=fTree->GetEntries();
-//	fEvent=0;
-//
-//	//if(fBinned)
-//	bin();
-//	storeEvents();
+	//	fParticles = new TClonesArray("TParticle");
+	//	fTree->GetBranch("Particles")->SetAutoDelete(false);
+	//	fTree->SetBranchAddress("Particles",&fParticles);
+	//	fFile->cd();
+	//
+	//	fmaxEvents=fTree->GetEntries();
+	//	fEvent=0;
+	//
+	//	//if(fBinned)
+	//	bin();
+	//	storeEvents();
 
 	fFile->Close();
 }
 RootReader::~RootReader(){
 	//fFile->Close();
-	delete fParticles;
-	delete fFile;
+//	delete fParticles;
+//	delete fFile;
 	//delete _myFcn;
 }
 
+void RootReader::writeToFile(){
+	if(_readFlag){
+		std::cout<<"RootReader: trying to write, but RootReader is marked as readonly! Exit!"<<std::endl;
+		exit(1);
+	}
+	fFile = new TFile(fileName.c_str(),"RECREATE");
+	fTree = new TTree(treeName.c_str(),treeName.c_str());
+	TParticle* part = 0;
+	fTree->Branch("Particles","Particles",&part,64000,0);
+
+	//loop
+	for(int i=0; i<=fEvents.size();i++){
+
+
+	}
+
+	return;
+}
 const std::vector<std::string>& RootReader::getVariableNames(){
 	if(!fVarNames.size()){ //TODO: init
 		fVarNames.push_back("dataname1");

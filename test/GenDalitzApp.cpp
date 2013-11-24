@@ -40,13 +40,13 @@
 #include "TRandom3.h"
 
 // Physics Interface header files go here
-#include "Physics/DPKinematics/PhysConst.hpp"
+#include "Core/PhysConst.hpp"
 #include "Physics/DPKinematics/DataPoint.hpp"
 #include "Physics/AmplitudeSum/AmpSumIntensity.hpp"
 #include "Physics/AmplitudeSum/AmplitudeSetup.hpp"
 #include "Core/Parameter.hpp"
 #include "Core/ParameterList.hpp"
-#include "Physics/DPKinematics/DPKinematics.hpp"
+#include "Physics/DPKinematics/DalitzKinematics.hpp"
 #include "Physics/DPKinematics/DataPoint.hpp"
 
 using namespace std;
@@ -67,8 +67,8 @@ int main(int argc, char **argv){
   unsigned int i=0, mc=0;
   TRandom3 rando;
 
-	DPKinematics kin("J/psi","gamma","pi0","pi0");
-	static dataPoint* point = dataPoint::instance(kin);
+	DalitzKinematics* kin = DalitzKinematics::createInstance("J/psi","gamma","pi0","pi0");
+	static dataPoint* point = dataPoint::instance();
 
 	/*const double M = kin.getMass("J/psi"); // GeV/c² (J/psi+)
 	const double Br = 0.000093; // GeV/c² (width)
@@ -104,7 +104,7 @@ int main(int argc, char **argv){
   cout << endl << endl;
 
   //Simple Breit-Wigner Physics-Module setup
-  AmpSumIntensity testBW(kin, ini);
+  AmpSumIntensity testBW(ini);
   cout << testBW.printAmps() << endl;
 
   ParameterList minPar;
@@ -154,8 +154,8 @@ int main(int argc, char **argv){
       //		m12sq = kin.getThirdVariableSq(m23sq,m13sq);
       		point->setMsq(3,m12sq); point->setMsq(4,m13sq); point->setMsq(5,m23sq);
       //		m12sq=M*M+m1*m1+m2*m2+m3*m3-m13sq-m23sq;
-      		if( abs(m12sq-kin.getThirdVariableSq(m23sq,m13sq))>0.01 ){
-      			std::cout<<m12sq<<" "<<kin.getThirdVariableSq(m23sq,m13sq)<<std::endl;
+      		if( abs(m12sq-kin->getThirdVariableSq(m23sq,m13sq))>0.01 ){
+      			std::cout<<m12sq<<" "<<kin->getThirdVariableSq(m23sq,m13sq)<<std::endl;
       			std::cout<<"   " <<m23sq<<" "<<m13sq<<" "<<m12sq<<std::endl;
       		}
 
@@ -195,8 +195,8 @@ int main(int argc, char **argv){
         //		m12sq = kin.getThirdVariableSq(m23sq,m13sq);
         		point->setMsq(3,m12sq); point->setMsq(4,m13sq); point->setMsq(5,m23sq);
         //		m12sq=M*M+m1*m1+m2*m2+m3*m3-m13sq-m23sq;
-          		if( abs(m12sq-kin.getThirdVariableSq(m23sq,m13sq))>0.01 ){
-          			std::cout<<m12sq<<" "<<kin.getThirdVariableSq(m23sq,m13sq)<<std::endl;
+          		if( abs(m12sq-kin->getThirdVariableSq(m23sq,m13sq))>0.01 ){
+          			std::cout<<m12sq<<" "<<kin->getThirdVariableSq(m23sq,m13sq)<<std::endl;
           			std::cout<<"   " <<m23sq<<" "<<m13sq<<" "<<m12sq<<std::endl;
           		}
         TParticle fparticleGam(22,1,0,0,0,0,*pGamma,W);

@@ -30,21 +30,21 @@ AmpWigner2::AmpWigner2(const AmpWigner2& other, const char* newname) : _resSpin(
 
 void AmpWigner2::initialise()
 {
-	static dataPoint* point = dataPoint::instance();
-	_M=point->DPKin.M;
-	_m1=point->DPKin.m1;
-	_m2=point->DPKin.m2;
-	_m3=point->DPKin.m3;
+	DalitzKinematics* kin = DalitzKinematics::instance();
+	_M=kin->M;
+	_m1=kin->m1;
+	_m2=kin->m2;
+	_m3=kin->m3;
 
-	_spinM = point->DPKin.getSpin(0);
-	_spin1 = point->DPKin.getSpin(1);
-	_spin2 = point->DPKin.getSpin(2);
-	_spin3 = point->DPKin.getSpin(3);
+	_spinM = kin->getSpin(0);
+	_spin1 = kin->getSpin(1);
+	_spin2 = kin->getSpin(2);
+	_spin3 = kin->getSpin(3);
 
 }
 double AmpWigner2::evaluate() const {
 	dataPoint* point = dataPoint::instance();
-	DPKinematics kin = point->DPKin;
+	DalitzKinematics* kin = DalitzKinematics::instance();
 
 	double cosTheta=-999, result=-999;
 	Spin J((int)_resSpin);
@@ -56,15 +56,15 @@ double AmpWigner2::evaluate() const {
 
 	switch(_subSys){
 	case 3:
-		cosTheta = kin.calcHelicityAngle(point->getMsq(3),point->getMsq(4),_M,_m3,_m1,_m2);
+		cosTheta = kin->calcHelicityAngle(point->getMsq(3),point->getMsq(4),_M,_m3,_m1,_m2);
 		in = (int)(_spinM-_spin1); out = (int)(_spin3-_spin2);
 		break;
 	case 4:
-		cosTheta = kin.calcHelicityAngle(point->getMsq(4),point->getMsq(5),_M,_m2,_m1,_m3);
+		cosTheta = kin->calcHelicityAngle(point->getMsq(4),point->getMsq(5),_M,_m2,_m1,_m3);
 		in = (int)(_spinM-_spin2); out = (int)(_spin3-_spin1);
 		break;
 	case 5:
-		cosTheta = kin.calcHelicityAngle(point->getMsq(5),point->getMsq(4),_M,_m1,_m2,_m3);
+		cosTheta = kin->calcHelicityAngle(point->getMsq(5),point->getMsq(4),_M,_m1,_m2,_m3);
 		in = (int)(_spinM-_spin3); out = (int)(_spin1-_spin2);
 		break;
 	default:

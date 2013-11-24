@@ -164,6 +164,15 @@ exe dpareaTestApp :
         $(TOP)/Physics/DPKinematics//DPKinematics
         : ;
 
+exe genRunManager : 
+        GenRunManagerApp.cpp 
+        test
+        $(TOP)/Core//ComPWA
+        $(TOP)/Physics/AmplitudeSum//AmplitudeSum  
+        $(TOP)/DataReader/RootReader//RootReader  
+        $(TOP)/Physics/DPKinematics//DPKinematics  
+        : ;
+
 exe gendalitzApp : 
         GenDalitzApp.cpp 
         test
@@ -192,7 +201,7 @@ exe dalitzfitApp :
 install dist : test : <location>$(TOP)/lib <threading>single ;
 #install dist2 : dalitzfitApp treetestApp cx0testApp dataiftestApp optimizertestApp physicstestApp blackscholesApp neuralnetworkApp : <location>$(TOP)/bin <threading>single ;
 install dist2 : dalitzfitApp treetestApp cx0testApp dataiftestApp optimizertestApp physicstestApp : <location>$(TOP)/bin <threading>single ;
-install dist3 : estimatortestApp integrationtestApp integrationtestbinnedApp runmanagertestApp gentwopartApp gendalitzApp dalitzplotApp dpareaTestApp : <location>$(TOP)/bin <threading>single ;
+install dist3 : estimatortestApp integrationtestApp integrationtestbinnedApp runmanagertestApp gentwopartApp gendalitzApp dalitzplotApp dpareaTestApp genRunManager : <location>$(TOP)/bin <threading>single ;
 
 if $(GENEVA) { 
 install dist7 : genevatestApp : <location>$(TOP)/bin ;

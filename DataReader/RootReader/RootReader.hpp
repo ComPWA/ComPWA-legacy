@@ -43,10 +43,13 @@ class RootReader : public Data {
 public:
   /// Default Constructor (0x0)
   RootReader(TTree* tr, const bool binned);
-  RootReader(const std::string inRootFile, const bool binned, const std::string inTreeName);
+  RootReader(const std::string inRootFile, const bool binned=true, const std::string inTreeName="data", const bool readFlag=true);
+  RootReader(const bool binned=true); //empty dataset
 
   virtual const std::vector<std::string>& getVariableNames();
 
+  virtual void writeToFile();
+  virtual void pushEvent(const Event& evt) {fEvents.push_back(evt); };
   virtual const Event& getEvent(const int);
   virtual const int getBin(const int, double&, double&);
   //virtual const int getEvent(const int, TLorentzVector& , TLorentzVector& , double&);
@@ -59,6 +62,9 @@ public:
 
 protected:
   void init();
+  bool _readFlag;
+  std::string fileName;
+  std::string treeName;
   TFile* fFile;
   TTree* fTree;
   TClonesArray* fParticles;

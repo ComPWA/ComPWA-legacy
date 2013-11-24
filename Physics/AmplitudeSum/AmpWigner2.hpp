@@ -22,7 +22,7 @@
 
 #include <vector>
 
-#include "Physics/DPKinematics/DPKinematics.hpp"
+#include "Physics/DPKinematics/DalitzKinematics.hpp"
 #include "Physics/DPKinematics/DataPoint.hpp"
 
 using namespace std;

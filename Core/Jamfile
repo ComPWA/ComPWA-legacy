@@ -13,7 +13,8 @@ project :
 	;
 
 lib ComPWA : 
-        [ glob *.cpp : *Test.cpp ] ;
+        [ glob *.cpp : *Test.cpp ] 
+        : ;
 
 install dist : ComPWA : <location>$(TOP)/lib ;
 

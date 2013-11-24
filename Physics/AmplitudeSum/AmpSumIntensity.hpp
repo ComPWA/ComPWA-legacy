@@ -33,7 +33,7 @@
 #include "Physics/AmplitudeSum/AmpFlatteRes.hpp"
 #include "Physics/AmplitudeSum/AmpWigner.hpp"
 #include "Physics/AmplitudeSum/AmpSumOfAmplitudes.hpp"
-#include "Physics/DPKinematics/DPKinematics.hpp"
+#include "Physics/DPKinematics/DalitzKinematics.hpp"
 #include "Physics/DPKinematics/DataPoint.hpp"
 
 class AmpSumIntensity : public Amplitude {
@@ -49,7 +49,7 @@ public:
 			std::string nameM, std::string name1,std::string name2,std::string name3,
 			 AmplitudeSetup ini, unsigned int entries=9999,
 			normalizationStyle ns=none);
-	AmpSumIntensity(DPKinematics kin, AmplitudeSetup ini, unsigned int entries=9999,
+	AmpSumIntensity(AmplitudeSetup ini, unsigned int entries=9999,
 			normalizationStyle ns=none);
 
 	double evaluate(double x[], size_t dim);
@@ -78,7 +78,7 @@ public:
 
 protected:
 	void init();
-	const DPKinematics _kin;
+//	const DPKinematics _in;
 	AmpSumOfAmplitudes totAmp;
 	AmplitudeSetup ampSetup;
 

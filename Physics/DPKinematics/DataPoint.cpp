@@ -9,7 +9,7 @@
 //     Peter Weidenkaff - initial API
 //-------------------------------------------------------------------------------
 
-#include "Physics/DPKinematics/DPKinematics.hpp"
+#include "Physics/DPKinematics/DalitzKinematics.hpp"
 #include "Physics/DPKinematics/DataPoint.hpp"
 
 dataPoint* dataPoint::inst = NULL;
@@ -32,16 +32,14 @@ double dataPoint::getMsq(int subsys){
 void dataPoint::setMsq(int subsys, double val){
 	switch(subsys){
 	case 3:
-//		m12.setVal(val);
 		m12=val; break;
 	case 4:
-//		m13.setVal(val);
-		m13=val;break;
+		m13=val;
+		break;
 	case 5:
-//		m23.setVal(val);
 		m23=val;break;
 	default:
-		std::cout<<"DPpoint2 setMsq(): wrong subsys!"<<std::endl;
+		std::cout<<"DPpoint2 setMsq(): wrosdfasdfsdfng subsys!"<<std::endl;
 	}
 	return;
 };

@@ -54,12 +54,12 @@ AmpWigner::~AmpWigner()
 
 void AmpWigner::initialise() 
 {
-	static dataPoint* point = dataPoint::instance();
-	_M=point->DPKin.M;
+	DalitzKinematics* kin= DalitzKinematics::instance();
+	_M=kin->M;
 	//if(_subSys==5){
-		_m1=point->DPKin.m1;
-		_m2=point->DPKin.m2;
-		_m3=point->DPKin.m3;//}
+		_m1=kin->m1;
+		_m2=kin->m2;
+		_m3=kin->m3;//}
 	//if(_subSys==4){
 		//_m1=point->DPKin.m2;
 		//_m2=point->DPKin.m3;

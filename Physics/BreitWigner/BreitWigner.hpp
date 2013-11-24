@@ -37,6 +37,7 @@ public:
 	virtual const double drawInt(double *x, double *p); //For easy usage in a root TF1
 	virtual const ParameterList intensity(double x, double M, double T);
 	virtual const ParameterList intensity(std::vector<double>& x, ParameterList& par);
+	virtual const ParameterList intensity(ParameterList& par) {};
 	virtual const bool fillStartParVec(ParameterList& outPar);
 
 	virtual void setNevents(unsigned int n) { _entries=n; };

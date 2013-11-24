@@ -17,7 +17,7 @@
 using namespace std;
 int main(){
 	TRandom* rand = new TRandom(54339);
-	DPKinematics kin(1.869,0.0,0.497,0.493,0.493,"KS_0","K-","K+");
+	DalitzKinematics kin(1.869,0.0,0.497,0.493,0.493,"KS_0","K-","K+");
 
 	TH2D* hist = new TH2D("hist","hist",100,kin.m23_sq_min,kin.m23_sq_max,100,kin.m13_sq_min,kin.m13_sq_max);
 

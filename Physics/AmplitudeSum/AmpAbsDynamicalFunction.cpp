@@ -15,7 +15,7 @@
 #include "gsl/gsl_monte_miser.h"
 #include "gsl/gsl_monte_vegas.h"
 
-#include "Physics/DPKinematics/PhysConst.hpp"
+#include "Core/PhysConst.hpp"
 #include "Physics/DPKinematics/DataPoint.hpp"
 #include "Physics/AmplitudeSum/AmpAbsDynamicalFunction.hpp"
 
@@ -35,12 +35,11 @@ AmpAbsDynamicalFunction::~AmpAbsDynamicalFunction()
 double AmpAbsDynamicalFunction::evaluate(double x[], size_t dim) const {
 	if(dim!=2) return 0;
 	//set data point: we assume that x[0]=m13 and x[1]=m23
-	double m12sq = dataPoint::instance()->DPKin.getThirdVariableSq(x[0],x[1]);
+	double m12sq = DalitzKinematics::instance()->getThirdVariableSq(x[0],x[1]);
 	dataPoint::instance()->setMsq(4,x[0]);
 	dataPoint::instance()->setMsq(5,x[1]);
 	dataPoint::instance()->setMsq(3,m12sq);
-	if( !dataPoint::instance()->DPKin.isWithinDP() ) return 0;//only integrate over phase space
-//	return std::norm(evaluate()); //integrate over |F|^2
+	if( !DalitzKinematics::instance()->isWithinDP(x[1],x[0],m12sq) ) return 0;//only integrate over phase space
 	std::complex<double> res = evaluate();
 	return ( std::abs(res)*std::abs(res) ); //integrate over |F|^2
 }
@@ -54,28 +53,20 @@ double evalWrapper(double* x, size_t dim, void* param) {
 
 double AmpAbsDynamicalFunction::integral() const{
 
-//	std::cout<<"AmpRelBreitWignerRes: DEBUG: calculating integral of "<<_name<<" !"<<std::endl;
+	std::cout<<"AmpRelBreitWignerRes: DEBUG: calculating integral of "<<_name<<" !"<<std::endl;
 	size_t dim=2;
 	double res=0.0, err=0.0;
 
+	DalitzKinematics* kin = DalitzKinematics::instance();
 	//set limits: we assume that x[0]=m13sq and x[1]=m23sq
-	double xLimit_low[2] = {dataPoint::instance()->DPKin.m13_sq_min,dataPoint::instance()->DPKin.m23_sq_min};
-	double xLimit_high[2] = {dataPoint::instance()->DPKin.m13_sq_max,dataPoint::instance()->DPKin.m23_sq_max};
-//	double xLimit_low[2] = {0,0};
-//	double xLimit_high[2] = {10,10};
+	double xLimit_low[2] = {kin->m13_sq_min,kin->m23_sq_min};
+	double xLimit_high[2] = {kin->m13_sq_max,kin->m23_sq_max};
 	size_t calls = 100000;
 	gsl_rng_env_setup ();
 	const gsl_rng_type *T = gsl_rng_default; //type of random generator
 	gsl_rng *r = gsl_rng_alloc(T); //random generator
 	gsl_monte_function F = {&evalWrapper,dim, const_cast<AmpAbsDynamicalFunction*> (this)};
 //	gsl_monte_function F = {&twoDimGaussian,dim, new int()};//using test function; result should be 1
-
-//	gsl_monte_plain_state *s = gsl_monte_plain_alloc (dim);
-//	gsl_monte_plain_integrate (&F, xLimit_low, xLimit_high, dim, calls, r,s,&res, &err);
-//	gsl_monte_plain_free(s);
-//	gsl_monte_miser_state *s = gsl_monte_miser_alloc (dim);
-//	gsl_monte_miser_integrate (&F, xLimit_low, xLimit_high, dim, calls, r,s,&res, &err);
-//	gsl_monte_miser_free(s);
 
 	/*	Choosing vegas algorithm here, because it is the most accurate:
 	* 		-> 10^5 calls gives (in my example) an accuracy of 0.03%

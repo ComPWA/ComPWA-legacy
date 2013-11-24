@@ -6,7 +6,7 @@
  */
 
 
-#include "Physics/DPKinematics/PhysConst.hpp"
+#include "Core/PhysConst.hpp"
 // Boost header files go here
 #include <boost/foreach.hpp>
 #include <boost/property_tree/ptree.hpp>

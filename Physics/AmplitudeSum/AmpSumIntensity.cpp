@@ -13,23 +13,6 @@
 #include <vector>
 #include <memory>
 
-//#include "RooRealVar.h"
-//#include "RooFormulaVar.h"
-//#include "RooPlot.h"
-//#include "RooCmdArg.h"
-//#include "RooMsgService.h"
-//#include "RooGlobalFunc.h"
-//#include "RooCFunction1Binding.h"
-//#include "RooGaussian.h"
-//#include "RooAddPdf.h"
-//#include "RooDataSet.h"
-//#include "RooDataHist.h"
-//#include "RooFitResult.h"
-//#include "RooComplex.h"
-//#include "RooAbsReal.h"
-//#include "RooAbsArg.h"
-//#include "RooRealProxy.h"
-
 #include "Physics/Amplitude.hpp"
 #include "Core/Parameter.hpp"
 #include "Core/ParameterList.hpp"
@@ -50,12 +33,12 @@
 #include "Physics/AmplitudeSum/AmpSumOfAmplitudes.hpp"
 #include "Physics/AmplitudeSum/AmpSumIntensity.hpp"
 
-#include "Physics/DPKinematics/PhysConst.hpp"
+#include "Core/PhysConst.hpp"
 
 #include "boost/function.hpp"
 /// Default Constructor (0x0)
-AmpSumIntensity::AmpSumIntensity(const DPKinematics kin, AmplitudeSetup ini, unsigned int entries, normalizationStyle ns) :
-_kin(kin),
+AmpSumIntensity::AmpSumIntensity(AmplitudeSetup ini, unsigned int entries, normalizationStyle ns) :
+//_kin(kin),
 totAmp("relBWsumAmplitude", "totAmp"),
 ampSetup(ini),
 _entries(entries),
@@ -67,7 +50,7 @@ _normStyle(ns)
 AmpSumIntensity::AmpSumIntensity(const double inM, const double inBr, const double in1,const double in2, const double in3,
 		std::string nameM, std::string name1,std::string name2,std::string name3,
 		AmplitudeSetup ini, unsigned int entries, normalizationStyle ns) :
-										 _kin(inM, inBr, in1, in2, in3,nameM,name1,name2,name3),
+//										 _kin(inM, inBr, in1, in2, in3,nameM,name1,name2,name3),
 										 totAmp("relBWsumAmplitude", "totAmp"),
 										 ampSetup(ini),
 										 _entries(entries),
@@ -78,7 +61,7 @@ AmpSumIntensity::AmpSumIntensity(const double inM, const double inBr, const doub
 
 void AmpSumIntensity::init(){
 
-	_dpArea = dataPoint::instance()->DPKin.getDParea();
+	_dpArea = DalitzKinematics::instance()->getDParea();
 	std::cout<<"AmpSumIntensity: INFO: number of Entries in dalitz plot set to: "<<_entries<<std::endl;
 	std::cout<<"AmpSumIntensity: INFO: area of phase space: "<<_dpArea<<std::endl;
 
@@ -101,9 +84,9 @@ void AmpSumIntensity::init(){
 
 		//setting normalization between amplitudes
 		double norm=1;
-		if(_normStyle==none) norm=1;
-		else if(_normStyle==one) norm = sqrt(tmpbw->integral());
-		else if(_normStyle==entries) norm = sqrt(_dpArea*tmpbw->integral()/_entries);
+//		if(_normStyle==none) norm=1;
+//		else if(_normStyle==one) norm = sqrt(tmpbw->integral());
+//		else if(_normStyle==entries) norm = sqrt(_dpArea*tmpbw->integral()/_entries);
 
 		tmpbw->SetNormalization(1/norm);
 		std::cout<<"AmpSumIntensity: INFO: Normalization constant for "<<tmp.m_name<<": "<<1/norm<<std::endl;
@@ -133,9 +116,9 @@ void AmpSumIntensity::init(){
 		totAmp.addBW(tmpbw, rr.at(last), phir.at(last));
 
 		double norm=1;
-		if(_normStyle==none) norm=1;
-		else if(_normStyle==one) norm = sqrt(tmpbw->integral());
-		else if(_normStyle==entries) norm = sqrt(_dpArea*tmpbw->integral()/_entries);
+//		if(_normStyle==none) norm=1;
+//		else if(_normStyle==one) norm = sqrt(tmpbw->integral());
+//		else if(_normStyle==entries) norm = sqrt(_dpArea*tmpbw->integral()/_entries);
 		tmpbw->SetNormalization(1/norm);
 		std::cout<<"AmpSumIntensity: INFO: Normalization constant for "<<tmp.m_name<<": "<<1/norm<<std::endl;
 	}// end loop over resonancesFlatte
@@ -147,11 +130,11 @@ void AmpSumIntensity::init(){
 double AmpSumIntensity::evaluate(double x[], size_t dim) {
 	if(dim!=2) return 0;
 	//set data point: we assume that x[0]=m13 and x[1]=m23
-	double m12sq = dataPoint::instance()->DPKin.getThirdVariableSq(x[0],x[1]);
+	double m12sq = DalitzKinematics::instance()->getThirdVariableSq(x[0],x[1]);
 	dataPoint::instance()->setMsq(4,x[0]);
 	dataPoint::instance()->setMsq(5,x[1]);
 	dataPoint::instance()->setMsq(3,m12sq);
-	if( !dataPoint::instance()->DPKin.isWithinDP() ) return 0;//only integrate over phase space
+	if( !DalitzKinematics::instance()->isWithinDP(x[2],x[1],m12sq) ) return 0;//only integrate over phase space
 	ParameterList res = intensity();
 
 	double intens = *res.GetDoubleParameter(0);
@@ -171,13 +154,15 @@ const double AmpSumIntensity::integral(ParameterList& par){
 	 * integration functionality was tested with a model with only one normalized amplitude.
 	 * The integration result is equal to the amplitude coefficient^2.
 	 */
+	return 1;
 
 	size_t dim=2;
 	double res=0.0, err=0.0;
 
 	//set limits: we assume that x[0]=m13sq and x[1]=m23sq
-	double xLimit_low[2] = {dataPoint::instance()->DPKin.m13_sq_min,dataPoint::instance()->DPKin.m23_sq_min};
-	double xLimit_high[2] = {dataPoint::instance()->DPKin.m13_sq_max,dataPoint::instance()->DPKin.m23_sq_max};
+	DalitzKinematics* kin = DalitzKinematics::instance();
+	double xLimit_low[2] = {kin->m13_sq_min,kin->m23_sq_min};
+	double xLimit_high[2] = {kin->m13_sq_max,kin->m23_sq_max};
 	//	double xLimit_low[2] = {0,0};
 	//	double xLimit_high[2] = {10,10};
 	size_t calls = 100000;
