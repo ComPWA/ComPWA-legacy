@@ -11,6 +11,9 @@
 #ifndef ROOTEFFICIENCY_HPP_
 #define ROOTEFFICIENCY_HPP_
 
+#include <vector>
+#include <memory>
+
 #include "TEfficiency.h"
 #include "TH2.h"
 #include "Physics/DPKinematics/DalitzKinematics.hpp"

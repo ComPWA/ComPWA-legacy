@@ -5,6 +5,9 @@
  *      Author: weidenka
  */
 
+#include <stdlib.h>
+#include <sstream>
+#include <string>
 
 #include "Core/PhysConst.hpp"
 // Boost header files go here
@@ -19,8 +22,10 @@ PhysConst::PhysConst(){
 	id.push_back(-999); name.push_back("error"); mass.push_back(-999); width.push_back(-999); J.push_back(999); P.push_back(false); C.push_back(false);
 	nameConst.push_back("error"); valueConst.push_back(-999); errorConst.push_back(-999);
 
-	particleFileName = "Physics/particles2013.xml";//TODO: dont hardcode datafile
-	constantFileName = "Physics/physConstants.xml";//TODO: dont hardcode datafile
+	const char* pPath = getenv("COMPWA_DIR");
+	std::string path = std::string(pPath);
+	particleFileName = path+"/Physics/particles2013.xml";
+	constantFileName = path+"/Physics/physConstants.xml";
 
 	flag_readFile=1;
 	return;

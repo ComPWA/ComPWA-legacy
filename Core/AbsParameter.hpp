@@ -70,7 +70,7 @@ public:
   void Notify(){
     for(std::vector<std::shared_ptr<ParObserver> >::const_iterator iter = oberservingNodes.begin(); iter != oberservingNodes.end(); ++iter)
     {
-        if(*iter != 0)
+        if(*iter != std::shared_ptr<ParObserver>())//Ist das richtig????
         {
             (*iter)->Update();
         }

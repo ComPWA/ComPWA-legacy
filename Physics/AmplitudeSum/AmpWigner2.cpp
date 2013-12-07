@@ -48,24 +48,30 @@ double AmpWigner2::evaluate() const {
 
 	double cosTheta=-999, result=-999;
 	Spin J((int)_resSpin);
+	//	std::cout<<"=="<<J<<" S(M)="<<_spinM <<" S(1)="<<_spin1<<" " <<_spin2<<" "<<_spin3<<std::endl;
 	/*
 	 * \in and \out are the difference in the spins of the ingoing and outgoing particles.
 	 * In literature it is often denoted with mu and muPrime
+	 * !!!! Spin M,N completely wrong! We need to calculate helicities!
 	 */
-	Spin out, in;
+	Spin N, M;
 
 	switch(_subSys){
 	case 3:
-		cosTheta = kin->calcHelicityAngle(point->getMsq(3),point->getMsq(4),_M,_m3,_m1,_m2);
-		in = (int)(_spinM-_spin1); out = (int)(_spin3-_spin2);
+//		cosTheta = kin->calcHelicityAngle(point->getMsq(3),point->getMsq(4),_M,_m3,_m1,_m2);
+		cosTheta = kin->calcHelicityAngle(point->getMsq(3),point->getMsq(5),_M,_m3,_m1,_m2);
+		M = (int)(_spinM-_spin3); N = (int)(_spin1-_spin2);
+		M = 0; N=0;
 		break;
 	case 4:
 		cosTheta = kin->calcHelicityAngle(point->getMsq(4),point->getMsq(5),_M,_m2,_m1,_m3);
-		in = (int)(_spinM-_spin2); out = (int)(_spin3-_spin1);
+		M = (int)(_spinM-_spin1); N = (int)(_spin3-_spin2);
+		M = 0; N=0;
 		break;
 	case 5:
 		cosTheta = kin->calcHelicityAngle(point->getMsq(5),point->getMsq(4),_M,_m1,_m2,_m3);
-		in = (int)(_spinM-_spin3); out = (int)(_spin1-_spin2);
+		M = (int)(_spinM-_spin1); N = (int)(_spin3-_spin2);
+		M = 0; N=0;
 		break;
 	default:
 		std::cout<<"AmpWigner: wrong subSystem! Exit!"<<std::endl; exit(1);
@@ -76,9 +82,10 @@ double AmpWigner2::evaluate() const {
 	 * Calling WignerD function
 	 * Note that Wigner_d depends on the sign of \in and \out. I hope it is correctly assigned.
 	 */
-	result = Wigner_d(J,in,out,theta);
+	result = Wigner_d(J,M,N,theta);
+	//	std::cout<<"++ subSys="<<_subSys<< " J="<<J<<" M="<<M<<" N="<<N<<std::endl;
 	if( ( result!=result ) || (theta!=theta)) {
-		std::cout<< "NAN! J="<< J<<" M="<<out<<" N="<<in<<" beta="<<theta<<std::endl;
+		std::cout<< "NAN! J="<< J<<" M="<<N<<" N="<<M<<" subsys="<<_subSys<<" theta="<<theta<<" cosTheta="<<cosTheta<<" result="<<result<<std::endl;
 		return 0;
 	}
 	return result;

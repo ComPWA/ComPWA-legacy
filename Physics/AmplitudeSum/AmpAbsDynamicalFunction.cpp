@@ -54,7 +54,7 @@ double evalWrapper(double* x, size_t dim, void* param) {
 
 double AmpAbsDynamicalFunction::integral() const{
 
-	std::cout<<"AmpRelBreitWignerRes: DEBUG: calculating integral of "<<_name<<" !"<<std::endl;
+//	std::cout<<"AmpRelBreitWignerRes: DEBUG: calculating integral of "<<_name<<" !"<<std::endl;
 	size_t dim=2;
 	double res=0.0, err=0.0;
 

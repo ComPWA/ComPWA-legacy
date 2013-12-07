@@ -107,7 +107,7 @@ int main(int argc, char **argv) {
 
   //=========  Threads  ==========
   cout << "Threads: " << endl;
-  thread t[num_threads];
+  std::thread t[num_threads];
   //Launch a group of threads
   for (int i = 0; i < num_threads; ++i) {
       t[i] = thread(call_from_thread, i);
