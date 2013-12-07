@@ -7,6 +7,7 @@ local ROOTSYS = [ os.environ ROOTSYS ] ;
 BOOSTLIBS = -lboost_date_time -lboost_filesystem -lboost_program_options -lboost_regex -lboost_serialization -lboost_system -lboost_thread -lboost_test_exec_monitor ;
 ROOTLIBS = -lCore -lCint -lRIO -lNet -lHist -lGraf -lGraf3d -lGpad -lTree -lRint -lPostscript -lMatrix -lPhysics -lMathCore -lThread -lpthread  -lm -ldl ;
 
+echo $(ROOTSYS) ;
 project :
 	requirements
 	    <include>$(BOOST_ROOT)/include

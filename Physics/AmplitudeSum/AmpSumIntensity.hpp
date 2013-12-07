@@ -55,6 +55,8 @@ public:
 	double evaluate(double x[], size_t dim);
 	//! normalization integral for parameters \par
 	virtual const double integral(ParameterList& par);
+	//! normalization integral
+	virtual const double integral();
 	//! maximum value of amplitude with parameters \par
 	virtual double getMaxVal(ParameterList& par) { return 1; };
 

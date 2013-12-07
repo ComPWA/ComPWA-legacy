@@ -57,7 +57,7 @@ public:
 
 	virtual std::shared_ptr<FunctionTree> functionTree(ParameterList& outPar) {
 		//if not implemented, return NULL-pointer
-		return NULL;
+		return std::shared_ptr<FunctionTree>();
 	}
 
 

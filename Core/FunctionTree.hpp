@@ -83,7 +83,7 @@ public:
     //std::shared_ptr<AbsParameter> inter = strat->GetResultContainer();
 
     std::shared_ptr<DoubleParameter> inter(new DoubleParameter("par"+name,0.));
-    std::shared_ptr<TreeNode> newNode(new TreeNode(name, inter, strat, NULL));
+    std::shared_ptr<TreeNode> newNode(new TreeNode(name, inter, strat, std::shared_ptr<TreeNode>()));
     head_ = newNode;
     nodes_.insert(std::pair<std::string, std::shared_ptr<TreeNode> >(name,newNode));
   }
@@ -135,7 +135,7 @@ public:
       leaf->addParent(parentNode);
       //TODO: check if also static?
     }else{
-      leaf = std::shared_ptr<TreeNode>(new TreeNode(name, staticVal, NULL, parentNode));
+      leaf = std::shared_ptr<TreeNode>(new TreeNode(name, staticVal, std::shared_ptr<Strategy>(), parentNode));
       nodes_.insert(std::pair<std::string, std::shared_ptr<TreeNode> >(name,leaf));
       leaf->linkParents();
     }
@@ -167,7 +167,7 @@ public:
     if(exists){
       leaf->addParent(parentNode);
     }else{
-      leaf = std::shared_ptr<TreeNode>(new TreeNode(name, extPar, NULL, parentNode));
+      leaf = std::shared_ptr<TreeNode>(new TreeNode(name, extPar, std::shared_ptr<Strategy>() , parentNode));
       nodes_.insert(std::pair<std::string, std::shared_ptr<TreeNode> >(name,leaf));
       leaf->linkParents();
       extPar->Attach(leaf);

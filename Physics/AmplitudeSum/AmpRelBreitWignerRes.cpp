@@ -116,9 +116,10 @@ std::complex<double> AmpRelBreitWignerRes::evaluateAmp() const {
 	return result;
 }
 std::complex<double> AmpRelBreitWignerRes::evaluate() const {
-//	return evaluateAmp(); //DEBUG
 //	std::cout<<evaluateAmp()<<" "<<evaluateWignerD()<<std::endl;
 	unsigned int twoJplusOne = (2*_spin+1);
+//	return evaluateAmp()*evaluateWignerD(); //DEBUG
+//	return evaluateAmp()*(double)twoJplusOne; //DEBUG
 	return evaluateAmp()*evaluateWignerD()*(double)twoJplusOne;
 }
 

@@ -8,6 +8,7 @@
 // Contributors:
 //     Peter Weidenkaff - initial API
 //     Mathias Michel - kinematic functions
+//		Klaus Goetzen - most of the kin. calculations
 //-------------------------------------------------------------------------------
 
 //! DPKinematics stores kinematic information of a dalitz plot
@@ -21,8 +22,7 @@
 #define DPKINEMATICS_HPP_
 
 #include <iostream>
-//class DPpoint;
-//class dataPoint;
+
 
 class DalitzKinematics
 {
@@ -59,17 +59,24 @@ public:
 		return inst;
 	};
 
+	void phspContour(unsigned int xsys,unsigned int ysys, unsigned int n, double* xcoord, double* ycoord);
 	//! calculated the helicity angle
 	double calcHelicityAngle(double invM1sq, double invM2sq, double M, double ma, double mb, double mc);
 	//! Calculates third dalitz plot variable, e.g f(s1,s2)=s3
 	double getThirdVariableSq(double, double) const;
 	//! checks of data point is within phase space boundaries, data point provided by dataPoint
-//	bool isWithinDP() const;
+	//	bool isWithinDP() const;
 	//! checks of data point is within phase space boundaries
 	bool isWithinDP(double m23, double m13, double m12=0) const;
 	//! returns the dalitz plot area for the given kinematics
 	double getDParea();
 
+	//!maximum value for variable m23=5, m13=4, m12=3
+	double mimax(unsigned int i) const;
+	//!minimum value for variable m23=5, m13=4, m12=3
+	double mimin(unsigned int i) const;
+
+	//these functions are buggy somewhere!
 	double lambda(double x, double y, double z)const;
 	double s2min(double s1, double m0, double m1, double m2, double m3)const;
 	double s2max(double s1, double m0, double m1, double m2, double m3)const;
@@ -83,6 +90,13 @@ public:
 	double s3max(double s1)const { return s3max(s1,M,m1,m2,m3); };
 	double s1min(double s2)const { return s1min(s2,M,m1,m2,m3); };
 	double s1max(double s2)const { return s1max(s2,M,m1,m2,m3); };
+
+	//!calculate energy of particle \partId in rest frame of \sys at the invariant mass \invMass_sys
+	double Estar(unsigned int partId, unsigned int sys, double invMass_sys) const;
+	//!calculate min value of inv. mass \sys given the invariant mass \invMass_sys in \sys
+	double invMassMin(unsigned int sys, unsigned int sys2, double invMass_sys) const;
+	//!calculate max value of inv. mass \sys given the invariant mass \invMass_sys in \sys
+	double invMassMax(unsigned int sys, unsigned int sys2, double invMass_sys) const;
 
 	//! get mass of paticles
 	double getMass(unsigned int num);

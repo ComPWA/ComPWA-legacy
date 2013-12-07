@@ -124,6 +124,7 @@ void AmpSumIntensity::init(){
 	}// end loop over resonancesFlatte
 
 	nAmps=rr.size();
+	integral();
 	std::cout << "completed setup" << std::endl;
 }
 
@@ -134,9 +135,8 @@ double AmpSumIntensity::evaluate(double x[], size_t dim) {
 	dataPoint::instance()->setMsq(4,x[0]);
 	dataPoint::instance()->setMsq(5,x[1]);
 	dataPoint::instance()->setMsq(3,m12sq);
-	if( !DalitzKinematics::instance()->isWithinDP(x[2],x[1],m12sq) ) return 0;//only integrate over phase space
+	if( !DalitzKinematics::instance()->isWithinDP(x[1],x[0],m12sq) ) return 0;//only integrate over phase space
 	ParameterList res = intensity();
-
 	double intens = *res.GetDoubleParameter(0);
 	return intens;
 }
@@ -149,12 +149,15 @@ double evalWrapperAmpSumIntensity(double* x, size_t dim, void* param) {
 };
 
 const double AmpSumIntensity::integral(ParameterList& par){
+	setParameterList(par);
+	return integral();
+}
+const double AmpSumIntensity::integral(){
 
 	/*
 	 * integration functionality was tested with a model with only one normalized amplitude.
 	 * The integration result is equal to the amplitude coefficient^2.
 	 */
-	return 1;
 
 	size_t dim=2;
 	double res=0.0, err=0.0;

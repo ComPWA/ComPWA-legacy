@@ -47,7 +47,9 @@ int main(int argc, char **argv){
 
 
 	RunManager run(dataSize,amp,eff,gen);
+	run.setData(data);
 	run.generate(dataSize);
+	std::cout<<"Data size: "<<data->getNEvents()<<std::endl;
 //	TFile output(outFile.c_str(),"update");
 //	output.SetCompressionLevel(1); //try level 2 also
 //	output.Close(); //clean output file

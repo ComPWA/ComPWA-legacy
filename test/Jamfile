@@ -23,6 +23,7 @@ project :
 		<include>$(GENEVA)/include
         <include>$(QFT)/include
         <include>$(MINUIT2)/include
+        <cxxflags>-pthread
 	<linkflags>-L$(BOOST_ROOT)/lib
 	<linkflags>$(BOOSTLIBS)
 	<linkflags>$(ROOTLIBS)
@@ -40,10 +41,10 @@ lib test :
         : : ;
         
 
-exe cx0testApp : 
-        CX0TestApp.cpp 
-        test
-        : ;
+#exe cx0testApp : 
+#        CX0TestApp.cpp 
+#        test
+#        : ;
         
 exe treetestApp : 
         TreeTestApp.cpp 
@@ -186,6 +187,7 @@ exe dalitzplotApp :
         test
         $(TOP)/Core//ComPWA
         $(TOP)/DataReader/RootReader//RootReader  
+        $(TOP)/Physics/DPKinematics//DPKinematics  
         : ;
         
 exe dalitzfitApp : 
@@ -200,7 +202,7 @@ exe dalitzfitApp :
 
 install dist : test : <location>$(TOP)/lib <threading>single ;
 #install dist2 : dalitzfitApp treetestApp cx0testApp dataiftestApp optimizertestApp physicstestApp blackscholesApp neuralnetworkApp : <location>$(TOP)/bin <threading>single ;
-install dist2 : dalitzfitApp treetestApp cx0testApp dataiftestApp optimizertestApp physicstestApp : <location>$(TOP)/bin <threading>single ;
+install dist2 : dalitzfitApp treetestApp dataiftestApp optimizertestApp physicstestApp : <location>$(TOP)/bin <threading>single ;
 install dist3 : estimatortestApp integrationtestApp integrationtestbinnedApp runmanagertestApp gentwopartApp gendalitzApp dalitzplotApp dpareaTestApp genRunManager : <location>$(TOP)/bin <threading>single ;
 
 if $(GENEVA) { 

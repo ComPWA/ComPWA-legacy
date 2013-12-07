@@ -4,27 +4,26 @@ import os ;
 local MINUIT2 = [ os.environ MINUIT2 ] ;
 local OS = [ os.name ] ;
 
-if $(OS) = LINUX { #UNIX
-   lib Minuit2 : : <file>$(MINUIT2)/lib/libMinuit2.so  : : ;
-} 
-if $(OS) = MACOSX { #OSX
-   lib Minuit2 : : <file>$(MINUIT2)/lib/libMinuit2.dylib  : : ;
-}
-
-local MINUIT2INC = $(MINUIT2)/include ;
-
-ECHO $(MINUIT2INC) ;
+#if $(OS) = LINUX { #UNIX
+#   lib Minuit2 : : <file>$(MINUIT2)/lib/libMinuit2.so  : : ;
+#} 
+#if $(OS) = MACOSX { #OSX
+#   lib Minuit2 : : <file>$(MINUIT2)/lib/libMinuit2.dylib  : : ;
+#}
 
 project :
    requirements <include>./
-		<include>$(MINUIT2INC)
+		<include>$(MINUIT2)/include
+		<linkflags>-L$(MINUIT2)/lib
+		<linkflags>-lMinuit2
 		;
 
 lib Minuit2IF : 
    [ glob *.cpp ] 
    $(TOP)/Core//ComPWA
-   : <use>$(TOP)/Optimizer/Minuit2//Minuit2 <threading>single 
-   : <library>$(TOP)/Optimizer/Minuit2//Minuit2 <threading>single 
+   #was macht das hier?
+ #  : <use>$(TOP)/Optimizer/Minuit2//Minuit2 <threading>single  
+ #  : <library>$(TOP)/Optimizer/Minuit2//Minuit2 <threading>single 
 ;
 
 install dist : Minuit2IF : <location>$(TOP)/lib <threading>single ;

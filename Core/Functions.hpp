@@ -123,7 +123,7 @@ public:
   virtual std::shared_ptr<AbsParameter> execute(const ParameterList& paras){
     if(paras.GetNDouble()!=2){
         throw BadIndex("need exact two parameters");
-        return NULL;
+        return std::shared_ptr<AbsParameter>();
     }
     //return pow(paras[0],paras[1]);
     //ParameterList out;
