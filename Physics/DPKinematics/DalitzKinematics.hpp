@@ -22,6 +22,7 @@
 #define DPKINEMATICS_HPP_
 
 #include <iostream>
+#include <vector>
 
 
 class DalitzKinematics
@@ -44,6 +45,7 @@ private:
 	DalitzKinematics(double _M, double _Br, double _m1, double _m2, double _m3,
 			std::string _nameMother, std::string _name1, std::string _name2, std::string _name3);
 
+	std::vector<std::string> varNames;
 
 
 public:
@@ -59,13 +61,13 @@ public:
 		return inst;
 	};
 
+	unsigned int sizeOfPhsp(){ return 3; }
+	std::vector<std::string> getVarNames(){return varNames;}
 	void phspContour(unsigned int xsys,unsigned int ysys, unsigned int n, double* xcoord, double* ycoord);
 	//! calculated the helicity angle
 	double calcHelicityAngle(double invM1sq, double invM2sq, double M, double ma, double mb, double mc);
 	//! Calculates third dalitz plot variable, e.g f(s1,s2)=s3
 	double getThirdVariableSq(double, double) const;
-	//! checks of data point is within phase space boundaries, data point provided by dataPoint
-	//	bool isWithinDP() const;
 	//! checks of data point is within phase space boundaries
 	bool isWithinDP(double m23, double m13, double m12=0) const;
 	//! returns the dalitz plot area for the given kinematics
@@ -91,11 +93,11 @@ public:
 	double s1min(double s2)const { return s1min(s2,M,m1,m2,m3); };
 	double s1max(double s2)const { return s1max(s2,M,m1,m2,m3); };
 
-	//!calculate energy of particle \partId in rest frame of \sys at the invariant mass \invMass_sys
-	double Estar(unsigned int partId, unsigned int sys, double invMass_sys) const;
-	//!calculate min value of inv. mass \sys given the invariant mass \invMass_sys in \sys
+	//!calculate energy of particle \partId in rest frame of system \sys at the invariant mass \invMass_sys
+	double eiCms(unsigned int partId, unsigned int sys, double invMass_sys) const;
+	//!calculate min value of inv. mass of system \sys given the invariant mass \invMass_sys in system \sys
 	double invMassMin(unsigned int sys, unsigned int sys2, double invMass_sys) const;
-	//!calculate max value of inv. mass \sys given the invariant mass \invMass_sys in \sys
+	//!calculate max value of inv. mass of system \sys given the invariant mass \invMass_sys in system \sys
 	double invMassMax(unsigned int sys, unsigned int sys2, double invMass_sys) const;
 
 	//! get mass of paticles

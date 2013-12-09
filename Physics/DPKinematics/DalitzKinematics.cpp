@@ -31,8 +31,8 @@ double DalitzKinematics::invMassMax(unsigned int sys, unsigned int sys2, double 
 	case 4: part1=3; part2=1;Mfirst=m3; Msecond=m1; break;
 	case 3: part1=1; part2=2;Mfirst=m1; Msecond=m2; break;
 	}
-	double Efirst=Estar(part1,sys2,invMass_sys);
-	double Esecond=Estar(part2,sys2,invMass_sys);
+	double Efirst=eiCms(part1,sys2,invMass_sys);
+	double Esecond=eiCms(part2,sys2,invMass_sys);
 
 	double max=(Efirst+Esecond)*(Efirst+Esecond)-(sqrt(Efirst*Efirst-Mfirst*Mfirst)-sqrt(Esecond*Esecond-Msecond*Msecond))*(sqrt(Efirst*Efirst-Mfirst*Mfirst)-sqrt(Esecond*Esecond-Msecond*Msecond));
 	return max;
@@ -45,13 +45,13 @@ double DalitzKinematics::invMassMin(unsigned int sys, unsigned int sys2, double 
 	case 4: part1=3; part2=1;Mfirst=m3; Msecond=m1; break;
 	case 3: part1=1; part2=2;Mfirst=m1; Msecond=m2; break;
 	}
-	double Efirst=Estar(part1,sys2,invMass_sys);
-	double Esecond=Estar(part2,sys2,invMass_sys);
+	double Efirst=eiCms(part1,sys2,invMass_sys);
+	double Esecond=eiCms(part2,sys2,invMass_sys);
 
 	double min=(Efirst+Esecond)*(Efirst+Esecond)-(sqrt(Efirst*Efirst-Mfirst*Mfirst)+sqrt(Esecond*Esecond-Msecond*Msecond))*(sqrt(Efirst*Efirst-Mfirst*Mfirst)+sqrt(Esecond*Esecond-Msecond*Msecond));
 	return min;
 }
-double DalitzKinematics::Estar(unsigned int partId, unsigned int sys, double invMass_sys) const {
+double DalitzKinematics::eiCms(unsigned int partId, unsigned int sys, double invMass_sys) const {
 	double E1, E2, E3;
 	double mSq = invMass_sys;
 	switch(sys){
@@ -224,6 +224,9 @@ void DalitzKinematics::init(){
 	m13_min=((m1+m3)); m13_max=((M-m2));
 	m12_min=((m1+m2)); m12_max=((M-m3));
 	_DPareaCalculated=0;
+	varNames.push_back("m23sq");
+	varNames.push_back("m13sq");
+	varNames.push_back("m12sq");
 
 };
 //! returns 1 if point is within PHSP otherwise 0

@@ -48,6 +48,7 @@
 #include "Core/ParameterList.hpp"
 #include "Physics/DPKinematics/DalitzKinematics.hpp"
 #include "Physics/DPKinematics/DataPoint.hpp"
+#include "Physics/DPKinematics/DataPoint2.hpp"
 
 using namespace std;
 
@@ -69,6 +70,13 @@ int main(int argc, char **argv){
 
 	DalitzKinematics* kin = DalitzKinematics::createInstance("J/psi","gamma","pi0","pi0");
 	static dataPoint* point = dataPoint::instance();
+
+//	dataPoint2 ppoint;
+//	ppoint.setVal("m23sq",123);
+//	ppoint.setVal("m13sq",23);
+//	ppoint.setVal("m12sq",23232);
+//	std::cout<<ppoint.getVal("m23sq")<< " "<<ppoint.getVal("m13sq")<< " "<<ppoint.getVal("m12sq")<<std::endl;
+//	exit(1);
 
 	/*const double M = kin.getMass("J/psi"); // GeV/c² (J/psi+)
 	const double Br = 0.000093; // GeV/c² (width)

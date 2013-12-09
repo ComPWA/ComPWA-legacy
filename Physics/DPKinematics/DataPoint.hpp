@@ -18,8 +18,8 @@
  *      the framework and can be read by any amplitude class.
  */
 
-#ifndef DPPOINT2_HPP_
-#define DPPOINT2_HPP_
+#ifndef DPPOINT_HPP_
+#define DPPOINT_HPP_
 
 #include <cstdlib>
 #include <math.h>
@@ -43,7 +43,7 @@ public:
 		return inst;
 	};
 	//! checks if point lies within phase space boundaries
-	bool isWithinDP() const{ return DalitzKinematics::instance()->isWithinDP(m23,m13,m12); };
+	bool isWithinPHSP() const{ return DalitzKinematics::instance()->isWithinDP(m23,m13,m12); };
 //	bool isWithinDP() const{ return 1; };
 
 	//! get inv. mass for subsys: 1+2=3, 1+3=4, 2+3=5
@@ -70,4 +70,4 @@ protected:
 };
 
 
-#endif /* DPPOINT2_HPP_ */
+#endif /* DPPOINT_HPP_ */
