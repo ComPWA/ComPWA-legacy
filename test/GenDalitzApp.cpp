@@ -47,7 +47,7 @@
 #include "Core/Parameter.hpp"
 #include "Core/ParameterList.hpp"
 #include "Physics/DPKinematics/DalitzKinematics.hpp"
-#include "Physics/DPKinematics/DataPoint.hpp"
+//#include "Physics/DPKinematics/DataPoint.hpp"
 #include "Physics/DPKinematics/DataPoint2.hpp"
 
 using namespace std;
@@ -71,12 +71,6 @@ int main(int argc, char **argv){
 	DalitzKinematics* kin = DalitzKinematics::createInstance("J/psi","gamma","pi0","pi0");
 	static dataPoint* point = dataPoint::instance();
 
-//	dataPoint2 ppoint;
-//	ppoint.setVal("m23sq",123);
-//	ppoint.setVal("m13sq",23);
-//	ppoint.setVal("m12sq",23232);
-//	std::cout<<ppoint.getVal("m23sq")<< " "<<ppoint.getVal("m13sq")<< " "<<ppoint.getVal("m12sq")<<std::endl;
-//	exit(1);
 
 	/*const double M = kin.getMass("J/psi"); // GeV/c² (J/psi+)
 	const double Br = 0.000093; // GeV/c² (width)
@@ -86,13 +80,13 @@ int main(int argc, char **argv){
 	//const double c = 299792458.; // m/s
 	const double PI = PhysConst::instance()->getConstValue("Pi");*/
 
-	const Double_t M = 3.096916; // GeV/c² (J/psi+)
-	const Double_t Br = 0.000093; // GeV/c² (width)
-	const Double_t m1 = 0.; // GeV/c² (gamma)
-	const Double_t m2 = 0.139570; // GeV/c² (pi)
-	const Double_t m3 = 0.139570; // GeV/c² (pi)
+//	const Double_t M = 3.096916; // GeV/c² (J/psi+)
+//	const Double_t Br = 0.000093; // GeV/c² (width)
+//	const Double_t m1 = 0.; // GeV/c² (gamma)
+//	const Double_t m2 = 0.139570; // GeV/c² (pi)
+//	const Double_t m3 = 0.139570; // GeV/c² (pi)
 	//const Double_t c = 299792458.; // m/s
-	const Double_t PI = 3.14159; // m/s
+//	const Double_t PI = 3.14159; // m/s
 
 	//load resonances
 	//DPKinematics kin(M,Br,m1,m2,m3,"gamma","pi0","pi0");
@@ -106,7 +100,7 @@ int main(int argc, char **argv){
 		cout << "Width = " << (*reso).m_width << " with range " << (*reso).m_width_min << " to " << (*reso).m_width_max << endl;
 		cout << "Spin =  " << (*reso).m_spin << " m = " << (*reso).m_m << " n = " << (*reso).m_n << endl;
 		cout << "Strength =  " << (*reso).m_strength << " Phase = " << (*reso).m_phase << endl;
-		cout << "Breakupmomentum =  " << (*reso).m_mesonRadius<< endl;
+		cout << "mesonRadius=  " << (*reso).m_mesonRadius<< endl;
 		cout << "DaughterA =  " << (*reso).m_daugtherA << " DaughterB = " << (*reso).m_daugtherB << endl;
 	}
 	cout << endl << endl;
@@ -135,10 +129,11 @@ int main(int argc, char **argv){
 	fTreePHSP.Branch("Particles",&fEvtPHSP);
 
 	//Generation
-	TLorentzVector W(0.0, 0.0, 0.0, M);//= beam + target;
+//	TLorentzVector W(0.0, 0.0, 0.0, M);//= beam + target;
+	TLorentzVector W(0.0, 0.0, 0.0, kin->M);//= beam + target;
 
 	//(Momentum, Energy units are Gev/C, GeV)
-	Double_t masses[3] = { m1, m2, m2} ;
+	Double_t masses[3] = { kin->m1, kin->m2, kin->m2} ;
 
 	TGenPhaseSpace event;
 	event.SetDecay(W, 3, masses);
@@ -159,8 +154,8 @@ int main(int argc, char **argv){
 
 		m23sq=pPm23.M2(); m13sq=pPm13.M2(); m12sq=pPm12.M2();
 
-		//		m12sq = kin.getThirdVariableSq(m23sq,m13sq);
-		point->setMsq(3,m12sq); point->setMsq(4,m13sq); point->setMsq(5,m23sq);
+	dataPoint2 dataP; dataP.setVal("m23sq",m23sq);	dataP.setVal("m13sq",m13sq);
+//		point->setMsq(3,m12sq); point->setMsq(4,m13sq); point->setMsq(5,m23sq);
 		//		m12sq=M*M+m1*m1+m2*m2+m3*m3-m13sq-m23sq;
 		if( abs(m12sq-kin->getThirdVariableSq(m23sq,m13sq))>0.01 ){
 			std::cout<<m12sq<<" "<<kin->getThirdVariableSq(m23sq,m13sq)<<std::endl;
@@ -168,11 +163,11 @@ int main(int argc, char **argv){
 		}
 
 		//call physics module
-		vector<double> x;
-		x.push_back(sqrt(m23sq));
-		x.push_back(sqrt(m13sq));
-		x.push_back(sqrt(m12sq));
-		ParameterList intensL = testBW.intensity(x, minPar);
+//		vector<double> x;
+//		x.push_back(sqrt(m23sq));
+//		x.push_back(sqrt(m13sq));
+//		x.push_back(sqrt(m12sq));
+		ParameterList intensL = testBW.intensity(dataP, minPar);
 		double AMPpdf = intensL.GetDoubleParameter(0)->GetValue();
 		//double AMPpdf = testBW.intensity(x, minPar);
 
@@ -200,8 +195,9 @@ int main(int argc, char **argv){
 
 		m23sq=pPm23.M2(); m13sq=pPm13.M2(); m12sq=pPm12.M2();
 
+	dataPoint2 dataP; dataP.setVal("m23sq",m23sq);	dataP.setVal("m13sq",m13sq);
 		//		m12sq = kin.getThirdVariableSq(m23sq,m13sq);
-		point->setMsq(3,m12sq); point->setMsq(4,m13sq); point->setMsq(5,m23sq);
+//		point->setMsq(3,m12sq); point->setMsq(4,m13sq); point->setMsq(5,m23sq);
 		//		m12sq=M*M+m1*m1+m2*m2+m3*m3-m13sq-m23sq;
 		if( abs(m12sq-kin->getThirdVariableSq(m23sq,m13sq))>0.01 ){
 			std::cout<<m12sq<<" "<<kin->getThirdVariableSq(m23sq,m13sq)<<std::endl;
@@ -212,11 +208,11 @@ int main(int argc, char **argv){
 		TParticle fparticlePim(-211,1,0,0,0,0,*pPim,W);
 
 		//call physics module
-		vector<double> x;
-		x.push_back(sqrt(m23sq));
-		x.push_back(sqrt(m13sq));
-		x.push_back(sqrt(m12sq));
-		ParameterList intensL = testBW.intensity(x, minPar);
+//		vector<double> x;
+//		x.push_back(sqrt(m23sq));
+//		x.push_back(sqrt(m13sq));
+//		x.push_back(sqrt(m12sq));
+		ParameterList intensL = testBW.intensity(dataP, minPar);
 		double AMPpdf = intensL.GetDoubleParameter(0)->GetValue();
 		//double AMPpdf = testBW.intensity(x, minPar);
 

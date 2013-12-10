@@ -16,7 +16,6 @@
 #include "gsl/gsl_monte_vegas.h"
 
 #include "Core/PhysConst.hpp"
-#include "Physics/DPKinematics/DataPoint.hpp"
 #include "Physics/DPKinematics/DalitzKinematics.hpp"
 #include "Physics/AmplitudeSum/AmpAbsDynamicalFunction.hpp"
 
@@ -36,12 +35,14 @@ AmpAbsDynamicalFunction::~AmpAbsDynamicalFunction()
 double AmpAbsDynamicalFunction::evaluate(double x[], size_t dim) const {
 	if(dim!=2) return 0;
 	//set data point: we assume that x[0]=m13 and x[1]=m23
+//	dataPoint::instance()->setMsq(4,x[0]);
+//	dataPoint::instance()->setMsq(5,x[1]);
+//	dataPoint::instance()->setMsq(3,m12sq);
+
 	double m12sq = DalitzKinematics::instance()->getThirdVariableSq(x[0],x[1]);
-	dataPoint::instance()->setMsq(4,x[0]);
-	dataPoint::instance()->setMsq(5,x[1]);
-	dataPoint::instance()->setMsq(3,m12sq);
+	dataPoint2 pp; pp.setVal("m23sq",x[1]);pp.setVal("m13sq",x[0]);
 	if( !DalitzKinematics::instance()->isWithinDP(x[1],x[0],m12sq) ) return 0;//only integrate over phase space
-	std::complex<double> res = evaluate();
+	std::complex<double> res = evaluate(pp);
 	return ( std::abs(res)*std::abs(res) ); //integrate over |F|^2
 }
 double evalWrapper(double* x, size_t dim, void* param) {

@@ -34,7 +34,7 @@
 #include "Physics/AmplitudeSum/AmpWigner.hpp"
 #include "Physics/AmplitudeSum/AmpSumOfAmplitudes.hpp"
 #include "Physics/DPKinematics/DalitzKinematics.hpp"
-#include "Physics/DPKinematics/DataPoint.hpp"
+#include "Physics/DPKinematics/DataPoint2.hpp"
 
 class AmpSumIntensity : public Amplitude {
 
@@ -51,6 +51,7 @@ public:
 			normalizationStyle ns=none);
 	AmpSumIntensity(AmplitudeSetup ini, unsigned int entries=9999,
 			normalizationStyle ns=none);
+	AmpSumIntensity(const AmpSumIntensity& other);
 
 	double evaluate(double x[], size_t dim);
 	//! normalization integral for parameters \par
@@ -65,22 +66,24 @@ public:
 
 	//! setting new parameterList
 	virtual void setParameterList(ParameterList& par);
-	//! evaluate total amplitude using parameters \par at phsp point \x
-	virtual const ParameterList intensity(std::vector<double>& x, ParameterList& par);
-	//! evaluate total amplitude using parameters \par
-	virtual const ParameterList intensity(ParameterList& par);
-	//! evaluate total amplitude using current set of parameters
-	virtual const ParameterList intensity();
+	//! evaluate total amplitude using parameters \par at phsp point \point
+	virtual const ParameterList intensity(dataPoint2& point, ParameterList& par);
+	//! evaluate total amplitude using current set of parametersat phsp point \point
+	virtual const ParameterList intensity(dataPoint2& point);
+	virtual const ParameterList intensity(std::vector<double> point, ParameterList& par);
 
 	virtual const bool fillStartParVec(ParameterList& outPar);
 
 	virtual std::string printAmps();
 
 	virtual ~AmpSumIntensity(){};
+	virtual AmpSumIntensity* Clone(){
+		return (new AmpSumIntensity(*this));
+	}
 
 protected:
 	void init();
-//	const DPKinematics _in;
+
 	AmpSumOfAmplitudes totAmp;
 	AmplitudeSetup ampSetup;
 
@@ -89,6 +92,7 @@ protected:
 	normalizationStyle _normStyle;
 	unsigned int _entries;
 	double _dpArea;
+	unsigned int nAmps;
 
 	//Resonance Variables
 	std::vector<std::string> namer;
@@ -106,8 +110,7 @@ protected:
 //	std::vector<std::shared_ptr<DoubleParameter> > par1;
 //	std::vector<std::shared_ptr<DoubleParameter> > par2;
 
-	std::vector<std::shared_ptr<AmpWigner> > angd;
-	unsigned int nAmps;
+//	std::vector<std::shared_ptr<AmpWigner> > angd;
 
 private:
 

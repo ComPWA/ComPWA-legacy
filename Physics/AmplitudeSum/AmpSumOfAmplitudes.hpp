@@ -16,6 +16,7 @@
 #include "Physics/AmplitudeSum/AmpAbsDynamicalFunction.hpp"
 #include "Physics/AmplitudeSum/AmpRelBreitWignerRes.hpp"
 #include "Physics/AmplitudeSum/AmpWigner.hpp"
+#include "Physics/DPKinematics/DataPoint2.hpp"
 
 #include <vector>
 #include <memory>
@@ -33,8 +34,8 @@ public:
   void addBW(std::shared_ptr<AmpAbsDynamicalFunction>, std::shared_ptr<DoubleParameter>, std::shared_ptr<DoubleParameter>);
   void addBW(std::shared_ptr<AmpAbsDynamicalFunction>, std::shared_ptr<DoubleParameter>, std::shared_ptr<DoubleParameter>, std::shared_ptr<AmpWigner>);
 
-  double evaluateSlice(std::complex<double>*, unsigned int, unsigned int) const ;
-  double evaluate() const ;
+  double evaluateSlice(dataPoint2& point,std::complex<double>*, unsigned int, unsigned int) const ;
+  double evaluate(dataPoint2& point) const ;
   
 protected:
   std::vector<std::shared_ptr<AmpAbsDynamicalFunction> > _pdfList ;   //  List of component PDFs

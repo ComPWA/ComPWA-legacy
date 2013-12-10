@@ -34,7 +34,8 @@ AmpFlatteRes::AmpFlatteRes(const char *name,
 		_coupling(coupling),
 		_massHiddenChannelA(massHiddenChannelA),
 		_massHiddenChannelB(massHiddenChannelB),
-		_wignerD(name, resSpin,m,n, subSys)
+		_wignerD(subSys,resSpin)
+//		_wignerD(name, resSpin,m,n, subSys)
 {
 	initialise();
 }
@@ -68,7 +69,7 @@ void AmpFlatteRes::initialise()
 }
   void AmpFlatteRes::setDecayMasses(double ma, double mb, double mc, double M){
 	  AmpKinematics::setDecayMasses(ma, mb, mc, M);
-	  _wignerD.setDecayMasses(ma, mb, mc, M);
+//	  _wignerD.setDecayMasses(ma, mb, mc, M);
 	  return;
   }
 
@@ -77,13 +78,23 @@ void AmpFlatteRes::setBarrierMass(double mBarA, double mBarB) {
 	_massHiddenChannelB = mBarB;
 }
 
-std::complex<double> AmpFlatteRes::evaluateAmp() const {
+std::complex<double> AmpFlatteRes::evaluateAmp(dataPoint2& point) const {
 	if(_massHiddenChannelA<0||_massHiddenChannelA>5||_massHiddenChannelB<0||_massHiddenChannelB>5) {
 		cout<<"Barrier masses not set! Use setBarrierMass() first!"<<endl;
 		return 0;
 	}
 	//	double m0 = Double_t(_m0);
-	double m = dataPoint::instance()->getM(_subSys);
+//	double m = dataPoint::instance()->getM(_subSys);
+	double m23sq = point.getVal("m23sq");
+	double m13sq = point.getVal("m13sq");
+	double m12sq = DalitzKinematics::instance()->getThirdVariableSq(m23sq,m13sq);
+	double m = -999;
+	switch(_subSys){
+	case 3: m=sqrt(m12sq); break;
+	case 4: m=sqrt(m13sq); break;
+	case 5: m=sqrt(m23sq); break;
+	}
+
 //	double spinTerm = _wignerD.evaluate();
 //	double m  = Double_t(_x23);
 
@@ -102,7 +113,7 @@ std::complex<double> AmpFlatteRes::evaluateAmp() const {
 	return result;
 
 }
-std::complex<double> AmpFlatteRes::evaluate() const {
+std::complex<double> AmpFlatteRes::evaluate(dataPoint2& point) const {
 	unsigned int twoJplusOne = (2*_spin+1);
-	return evaluateAmp()*evaluateWignerD()*(double)twoJplusOne;
+	return evaluateAmp(point)*evaluateWignerD(point)*(double)twoJplusOne;
 }

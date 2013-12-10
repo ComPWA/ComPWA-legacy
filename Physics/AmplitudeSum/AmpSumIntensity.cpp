@@ -36,13 +36,19 @@
 #include "Core/PhysConst.hpp"
 
 #include "boost/function.hpp"
+
+
+AmpSumIntensity::AmpSumIntensity(const AmpSumIntensity& other) : nAmps(other.nAmps), _dpArea(other._dpArea),
+_entries(other._entries), _normStyle(other._normStyle),maxVal(other.maxVal),ampSetup(other.ampSetup),totAmp(other.totAmp){
+}
+
 /// Default Constructor (0x0)
 AmpSumIntensity::AmpSumIntensity(AmplitudeSetup ini, unsigned int entries, normalizationStyle ns) :
-//_kin(kin),
-totAmp("relBWsumAmplitude", "totAmp"),
-ampSetup(ini),
-_entries(entries),
-_normStyle(ns)
+		//_kin(kin),
+		totAmp("relBWsumAmplitude", "totAmp"),
+		ampSetup(ini),
+		_entries(entries),
+		_normStyle(ns)
 {
 	init();
 }
@@ -50,11 +56,11 @@ _normStyle(ns)
 AmpSumIntensity::AmpSumIntensity(const double inM, const double inBr, const double in1,const double in2, const double in3,
 		std::string nameM, std::string name1,std::string name2,std::string name3,
 		AmplitudeSetup ini, unsigned int entries, normalizationStyle ns) :
-//										 _kin(inM, inBr, in1, in2, in3,nameM,name1,name2,name3),
-										 totAmp("relBWsumAmplitude", "totAmp"),
-										 ampSetup(ini),
-										 _entries(entries),
-										 _normStyle(ns)
+		//										 _kin(inM, inBr, in1, in2, in3,nameM,name1,name2,name3),
+												 totAmp("relBWsumAmplitude", "totAmp"),
+												 ampSetup(ini),
+												 _entries(entries),
+												 _normStyle(ns)
 {
 	init();
 }
@@ -131,12 +137,10 @@ void AmpSumIntensity::init(){
 double AmpSumIntensity::evaluate(double x[], size_t dim) {
 	if(dim!=2) return 0;
 	//set data point: we assume that x[0]=m13 and x[1]=m23
+	dataPoint2 point; point.setVal("m13sq",x[0]); point.setVal("m23sq",x[1]);
 	double m12sq = DalitzKinematics::instance()->getThirdVariableSq(x[0],x[1]);
-	dataPoint::instance()->setMsq(4,x[0]);
-	dataPoint::instance()->setMsq(5,x[1]);
-	dataPoint::instance()->setMsq(3,m12sq);
 	if( !DalitzKinematics::instance()->isWithinDP(x[1],x[0],m12sq) ) return 0;//only integrate over phase space
-	ParameterList res = intensity();
+	ParameterList res = intensity(point);
 	double intens = *res.GetDoubleParameter(0);
 	return intens;
 }
@@ -185,30 +189,22 @@ const double AmpSumIntensity::integral(){
 
 	return res;
 }
-const ParameterList AmpSumIntensity::intensity(std::vector<double>& x, ParameterList& par){
-	if(x.size()!=3) {
-		std::cout<<"AmpSumIntensity: wrong size of phase space variables!"<<std::endl;
-		exit(1);
-	}
-	//	double m12sq = dataPoint::instance()->DPKin.getThirdVariableSq(x[0],x[1]);
-	dataPoint::instance()->setMsq(2,3,x[0]);
-	dataPoint::instance()->setMsq(1,3,x[1]);
-	dataPoint::instance()->setMsq(1,2,x[2]);
-	return intensity(par);
-}
-const ParameterList AmpSumIntensity::intensity( ParameterList& par){
+const ParameterList AmpSumIntensity::intensity(std::vector<double> point, ParameterList& par){
 	setParameterList(par);
-	return intensity();
+	dataPoint2 dataP; dataP.setVal("m23sq",point[0]); dataP.setVal("m13sq",point[1]);
+	return intensity(dataP);
 }
-const ParameterList AmpSumIntensity::intensity(){
+const ParameterList AmpSumIntensity::intensity(dataPoint2& point, ParameterList& par){
+	setParameterList(par);
+	return intensity(point);
+}
+const ParameterList AmpSumIntensity::intensity(dataPoint2& point){
 	//	std::cout<<dataPoint::instance()->getMsq(2,3)<<" "<<dataPoint::instance()->getMsq(1,3)<<" "<<dataPoint::instance()->getMsq(1,2)<<std::endl;
-	double AMPpdf = totAmp.evaluate();
-
+	double AMPpdf = totAmp.evaluate(point);
 	if(AMPpdf!=AMPpdf){
 		std::cout << "Error AmpSumIntensity: Intensity is not a number!!" << std::endl;
 		exit(1);
 	}
-
 	ParameterList result;
 	result.AddParameter(std::shared_ptr<DoubleParameter>(new DoubleParameter("AmpSumResult",AMPpdf)));
 	return result;

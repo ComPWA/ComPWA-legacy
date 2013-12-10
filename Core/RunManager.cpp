@@ -15,6 +15,8 @@
 #include <memory>
 #include <ctime>
 
+#include <omp.h>
+
 #include <boost/random/linear_congruential.hpp>
 #include <boost/random/uniform_int.hpp>
 #include <boost/random/uniform_real.hpp>
@@ -78,74 +80,99 @@ bool RunManager::generate( unsigned int number ) {
 	ParameterList minPar;
 	pPhys_->fillStartParVec(minPar);
 
-	//initialize random number generator
-	boost::minstd_rand rndGen(std::clock());//TODO: is this seed thread safe?
-	boost::uniform_real<> uni_dist(0,1);
-	boost::variate_generator<boost::minstd_rand&, boost::uniform_real<> > uni(rndGen, uni_dist);
-
-	//Determing an estimate on the maximum of the physics amplitude using 10k events.
+	//Determing an estimate on the maximum of the physics amplitude using 20k events.
 	double genMaxVal=0;
-	for(unsigned int i=0; i<20000;i++){
-		Event tmp;
-		gen_->generate(tmp);
-		double weight = tmp.getWeight();
-		Particle part1 = tmp.getParticle(0);
-		Particle part2 = tmp.getParticle(1);
-		Particle part3 = tmp.getParticle(2);
-		double m23sq = Particle::invariantMass(part2,part3);
-		double m13sq = Particle::invariantMass(part1,part3);
-		double m12sq = Particle::invariantMass(part1,part2);
-		std::vector<double> x;
-		x.push_back(m23sq);
-		x.push_back(m13sq);
-		x.push_back(m12sq);
-		//		double eff  = eff_->evaluate(x);
-		ParameterList list = pPhys_->intensity(x,minPar);
-		double AMPpdf = *list.GetDoubleParameter(0);
-		if(genMaxVal<(weight*AMPpdf)) genMaxVal= weight*AMPpdf;
+#pragma omp parallel shared(genMaxVal)
+	{
+		unsigned int threadId = omp_get_thread_num();
+		unsigned int numThreads = omp_get_num_threads();
+		Generator* genNew = (&(*gen_))->Clone();
+//		genNew->setSeed(std::clock()+omp_get_thread_num());
+		Amplitude* ampNew = (&(*pPhys_))->Clone();
+#pragma omp for
+		for(unsigned int i=0; i<20000;i++){
+			Event tmp;
+			genNew->generate(tmp);
+			double weight = tmp.getWeight();
+			Particle part1 = tmp.getParticle(0);
+			Particle part2 = tmp.getParticle(1);
+			Particle part3 = tmp.getParticle(2);
+			double m23sq = Particle::invariantMass(part2,part3);
+			double m13sq = Particle::invariantMass(part1,part3);
+
+			std::vector<double> x;
+			x.push_back(m23sq);
+			x.push_back(m13sq);
+//			ParameterList list = ampNew->intensity(x,minPar);//not working yet
+#pragma omp critical
+			{
+				ParameterList list = pPhys_->intensity(x,minPar);
+				double AMPpdf = *list.GetDoubleParameter(0);
+				if(genMaxVal<(weight*AMPpdf)) genMaxVal= weight*AMPpdf;
+//				std::cout<<threadId<< i<<" "<<AMPpdf<<std::endl;
+			}
+		}
 	}
 	genMaxVal=2*genMaxVal;//conservative choice
 
-	unsigned int i=0;
 	double maxTest=0;
-	int scale = (int) size_/10;
 	std::cout<<"== Using "<<genMaxVal<< " as maximum value for random number generation!"<<std::endl;
 	std::cout << "Generating MC: ["<<size_<<" events] ";
-	while( i<size_){
-		Event tmp;
-		gen_->generate(tmp);
-		double weight = tmp.getWeight();
-		Particle part1 = tmp.getParticle(0);
-		Particle part2 = tmp.getParticle(1);
-		Particle part3 = tmp.getParticle(2);
-		double m23sq = Particle::invariantMass(part2,part3);
-		double m13sq = Particle::invariantMass(part1,part3);
-		double m12sq = Particle::invariantMass(part1,part2);
-		std::vector<double> x;
-		x.push_back(m23sq);
-		x.push_back(m13sq);
-		x.push_back(m12sq);
-		double eff  = eff_->evaluate(x);
-		//Efficiency is saved to event. Weightng is done when parameters are plotted.
-		tmp.setWeight(eff);
 
-		double ampRnd = uni()*genMaxVal;
-		ParameterList list = pPhys_->intensity(x,minPar);
-		double AMPpdf = *list.GetDoubleParameter(0);
+#pragma omp parallel firstprivate(genMaxVal) shared(maxTest)
+	{
+		unsigned int threadId = omp_get_thread_num();
+		unsigned int numThreads = omp_get_num_threads();
 
-		//		if( maxTest < (AMPpdf*weight*eff)) maxTest = AMPpdf;
-		//		if( ampRnd>(weight*AMPpdf*eff) ) continue;
-		if( maxTest < (AMPpdf*weight)) maxTest = weight*AMPpdf;
-		if( ampRnd > (weight*AMPpdf) ) continue;
-		pData_->pushEvent(tmp);
-		i++;
+		int scale = (int) size_/10/numThreads;
 
-		//progress bar
-		if( (i % scale) == 0) { std::cout<<(i/scale)*10<<"%..."<<std::flush; }
+		Generator* genNew = (&(*gen_))->Clone();
+//		genNew->setSeed(std::clock()+threadId);//setting the seed here makes not sense in cast that TGenPhaseSpace is used, because it uses gRandom
+		//initialize random number generator
+		boost::minstd_rand rndGen2(std::clock()+threadId);//TODO: is this seed thread safe?
+		boost::uniform_real<> uni_dist2(0,1);
+		boost::variate_generator<boost::minstd_rand&, boost::uniform_real<> > uni2(rndGen2, uni_dist2);
+		double AMPpdf;
+#pragma omp for
+		for(unsigned int i=0;i<size_;i++){
+			if(i>0) i--;
+			//	while( i<size_){ //while loops are not supported by openMP
+			Event tmp;
+			genNew->generate(tmp);
+			double weight = tmp.getWeight();
+			Particle part1 = tmp.getParticle(0);
+			Particle part2 = tmp.getParticle(1);
+			Particle part3 = tmp.getParticle(2);
+			double m23sq = Particle::invariantMass(part2,part3);
+			double m13sq = Particle::invariantMass(part1,part3);
+			std::vector<double> x;
+			x.push_back(m23sq);
+			x.push_back(m13sq);
+			double eff  = eff_->evaluate(x);
+			//Efficiency is saved to event. Weighting is done when parameters are plotted.
+			tmp.setWeight(eff);
+
+			double ampRnd = uni2()*genMaxVal;
+			ParameterList list;
+#pragma omp critical
+			{
+				list = pPhys_->intensity(x,minPar);
+				AMPpdf = *list.GetDoubleParameter(0);
+				if( maxTest < (AMPpdf*weight)) maxTest = weight*AMPpdf;
+			}
+			if( ampRnd > (weight*AMPpdf) ) continue;
+			i++;
+#pragma omp critical
+			{
+				pData_->pushEvent(tmp);
+				//progress bar
+				if(threadId==0 &&(i % scale) == 0){ std::cout<<(i/scale)*10<<"%..."<<std::flush; }
+			}
+		}
 	}
-	std::cout<<std::endl;
+	std::cout<<"100%"<<std::endl;
 
-	if( maxTest > (int) (0.9*genMaxVal) ) {
+	if( maxTest > (double) (0.9*genMaxVal) ) {
 		std::cout<<"==========ATTENTION==========="<<std::endl;
 		std::cout<<"== Max value of function is "<<maxTest<<std::endl;
 		std::cout<<"== This is close or above to maximum value of rnd. number generation: "<<genMaxVal<<std::endl;

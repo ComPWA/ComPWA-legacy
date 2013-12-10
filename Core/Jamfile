@@ -8,8 +8,10 @@ BOOSTLIBS = -lboost_date_time -lboost_filesystem -lboost_program_options -lboost
 project :
 	requirements
     <include>$(BOOST_ROOT)/include
+    <cxxflags>-fopenmp
     <linkflags>-L$(BOOST_ROOT)/lib 
 	<linkflags>$(BOOSTLIBS)
+	<linkflags>-lgomp
 	;
 
 lib ComPWA : 

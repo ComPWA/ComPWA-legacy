@@ -33,7 +33,6 @@ private:
 public:
 
 	dataPoint2(dataPoint2 const&){};
-	dataPoint2(std::vector<std::string> names);
 	dataPoint2();
 	~dataPoint2(){};
 	//! checks if point lies within phase space boundaries
@@ -63,9 +62,7 @@ public:
 	void setPoint(std::vector<double> values);
 
 protected:
-	unsigned int size;
 	std::vector<double> var;
-	std::vector<std::string> varNames;
 };
 
 

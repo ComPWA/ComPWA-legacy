@@ -24,6 +24,7 @@
 #include "Core/Parameter.hpp"
 #include <vector>
 #include <complex>
+#include "Physics/DPKinematics/DataPoint2.hpp"
 
 class AmpAbsDynamicalFunction {
 public:
@@ -35,9 +36,9 @@ public:
 
 
   virtual void initialise() = 0; 
-  virtual std::complex<double> evaluate() const = 0;
-  virtual std::complex<double> evaluateAmp() const = 0;
-  virtual double evaluateWignerD() const = 0;
+  virtual std::complex<double> evaluate(dataPoint2& point) const = 0;
+  virtual std::complex<double> evaluateAmp(dataPoint2& point) const = 0;
+  virtual double evaluateWignerD(dataPoint2& point) const = 0;
 
   virtual double getSpin() = 0;
   virtual bool isSubSys(const unsigned int) const = 0;

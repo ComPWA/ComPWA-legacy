@@ -10,6 +10,7 @@ import os ;
 lib BreitWigner : 
         [ glob *.cpp ] 
         $(TOP)/Core//ComPWA
+        $(TOP)/Physics/DPKinematics//DPKinematics
         ;
 
 install dist : BreitWigner : <location>$(TOP)/lib ;

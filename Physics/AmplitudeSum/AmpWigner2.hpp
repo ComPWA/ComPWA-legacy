@@ -23,7 +23,7 @@
 #include <vector>
 
 #include "Physics/DPKinematics/DalitzKinematics.hpp"
-#include "Physics/DPKinematics/DataPoint.hpp"
+#include "Physics/DPKinematics/DataPoint2.hpp"
 
 using namespace std;
 
@@ -35,7 +35,7 @@ public:
 
   virtual ~AmpWigner2() {};
 
-  virtual double evaluate() const;
+  virtual double evaluate(dataPoint2& point) const;
   void setDecayMasses(double, double, double, double);
 
 protected:

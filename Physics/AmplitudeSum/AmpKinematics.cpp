@@ -11,7 +11,6 @@
 
 #include "Physics/AmplitudeSum/AmpKinematics.hpp"
 #include "Physics/DPKinematics/DalitzKinematics.hpp"
-#include "Physics/DPKinematics/DataPoint.hpp"
 
 AmpKinematics::AmpKinematics(const AmpKinematics& other) :
 _M(other._M),
@@ -32,7 +31,7 @@ AmpKinematics::AmpKinematics(DoubleParameter mR, int subSys, int spin, int m, in
 						_mesonRadius(mesonRadius),
 						_motherRadius(motherRadius)
 {
-	static dataPoint* point = dataPoint::instance();
+//	static dataPoint* point = dataPoint::instance();
 	DalitzKinematics* kin = DalitzKinematics::instance();
 	_M=kin->M;
 	if(_subSys==5){

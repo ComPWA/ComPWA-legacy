@@ -29,21 +29,21 @@ AmpWigner::AmpWigner()
 }
 AmpWigner::AmpWigner(const char *name,
 		unsigned int spin, unsigned int m,  unsigned int n,unsigned int subSys) :
-						  _inSpin(spin),
-						  _outSpin1(m),
-						  _outSpin2(n),
-						  _subSys(subSys)
+												  _inSpin(spin),
+												  _outSpin1(m),
+												  _outSpin2(n),
+												  _subSys(subSys)
 {
 	toEvaluate=true;
 	initialise();
 }
 
 AmpWigner::AmpWigner(const AmpWigner& other, const char* newname) :
-						  _inSpin(other._inSpin),
-						  _outSpin1(other._outSpin1),
-						  _outSpin2(other._outSpin2),
-						  _subSys(other._subSys),
-						  toEvaluate(other.toEvaluate)
+												  _inSpin(other._inSpin),
+												  _outSpin1(other._outSpin1),
+												  _outSpin2(other._outSpin2),
+												  _subSys(other._subSys),
+												  toEvaluate(other.toEvaluate)
 {
 	initialise();
 }
@@ -57,18 +57,18 @@ void AmpWigner::initialise()
 	DalitzKinematics* kin= DalitzKinematics::instance();
 	_M=kin->M;
 	//if(_subSys==5){
-		_m1=kin->m1;
-		_m2=kin->m2;
-		_m3=kin->m3;//}
+	_m1=kin->m1;
+	_m2=kin->m2;
+	_m3=kin->m3;//}
 	//if(_subSys==4){
-		//_m1=point->DPKin.m2;
-		//_m2=point->DPKin.m3;
-		//_m3=point->DPKin.m1;//}
+	//_m1=point->DPKin.m2;
+	//_m2=point->DPKin.m3;
+	//_m3=point->DPKin.m1;//}
 	//if(_subSys==3){
-		//_m1=point->DPKin.m3;
-		//_m2=point->DPKin.m2;
-		//_m3=point->DPKin.m1;//}
-//	cout<<"AmpWigner DEBUG set masses to m1="<<_m1<< " m2="<<_m2<<" m3=" <<_m3<<endl;
+	//_m1=point->DPKin.m3;
+	//_m2=point->DPKin.m2;
+	//_m3=point->DPKin.m1;//}
+	//	cout<<"AmpWigner DEBUG set masses to m1="<<_m1<< " m2="<<_m2<<" m3=" <<_m3<<endl;
 
 }    
 void AmpWigner::setDecayMasses(double m1, double m2, double m3, double M){
@@ -76,74 +76,72 @@ void AmpWigner::setDecayMasses(double m1, double m2, double m3, double M){
 	return;
 }
 
-double AmpWigner::evaluate() const {
+double AmpWigner::evaluate(dataPoint2& point) const {
 	if(!toEvaluate) return 1.;
+	DalitzKinematics* kin = DalitzKinematics::instance();
 
 	double locmin_sq, locmax_sq, beta;
 
-//	cout<<"==== "<<_subSys<< " " <<_m1<< " "<<_m2<<" " <<_m3<<endl;
-	double invM1 = dataPoint::instance()->getM(_subSys);
-	/*
-	 * For WignerD functions we need one more invariant mass:
-	 */
-	int mod=0;
-	if(_subSys==5) mod=4; //5->3 work also without beta=nan, for agreement with Laura++ 5->4 is correct
-	if(_subSys==4) mod=5;
-	if(_subSys==3) mod=5;
-	double invM2 = dataPoint::instance()->getM(mod);
+	double m23sq = point.getVal("m23sq");
+	double m13sq = point.getVal("m13sq");
+	double m12sq = DalitzKinematics::instance()->getThirdVariableSq(m23sq,m13sq);
+	double invM1 = -999;
+	double invM2 = -999;
+	switch(_subSys){
+	case 3: {
+		invM1=sqrt(m12sq);
+		invM2=sqrt(m23sq);
+		locmin_sq = kin->invMassMin(5,_subSys,invM1*invM1);
+		locmax_sq = kin->invMassMax(5,_subSys,invM1*invM1);
+		break;
+	}
+	case 4: {
+		invM1=sqrt(m13sq);
+		invM2=sqrt(m12sq);
+		locmin_sq = kin->invMassMin(5,_subSys,invM1*invM1);
+		locmax_sq = kin->invMassMax(5,_subSys,invM1*invM1);
+		break;
+	}
+	case 5: {
+		invM1=sqrt(m23sq);
+		invM2=sqrt(m13sq);
+		locmin_sq = kin->invMassMin(4,_subSys,invM1*invM1);
+		locmax_sq = kin->invMassMax(4,_subSys,invM1*invM1);
+		break;
+	}
+	}
 
-//	dataPoint* point = dataPoint::instance();
-	//	cout<<point->getM(3)<<" " <<point->getM(4)<< " " << point->getM(5)<<endl;
-	//	double locmin_sq2 = s2min(_m23*_m23,_M,_m1,_m2,_m3);
-	//	double locmax_sq2 = s2max(_m23*_m23,_M,_m1,_m2,_m3);
-	//	double beta2=acos((2.*_m13*_m13-locmax_sq2-locmin_sq2)/(locmax_sq2-locmin_sq2));
-
-	  switch(_subSys){
-		case 5:{ //reso in m23
-		  locmin_sq = s2min(invM1*invM1,_M,_m1,_m2,_m3);
-		  locmax_sq = s2max(invM1*invM1,_M,_m1,_m2,_m3);
-		  break;
-		}
-		case 4:{ //reso in m13
-		  locmin_sq = s1min(invM1*invM1,_M,_m1,_m2,_m3);
-		  locmax_sq = s1max(invM1*invM1,_M,_m1,_m2,_m3);
-		  break;
-		}
-		case 3:{ //reso in m12
-		  //return 1;
-		  locmin_sq = s1min(invM1*invM1,_M,_m1,_m3,_m2);
-		  locmax_sq = s1max(invM1*invM1,_M,_m1,_m3,_m2);
-		  //if(beta!=beta) return 1.;
-		  break;
-		}
-	  }
-	double cosbeta = (2.*invM2*invM2-locmax_sq-locmin_sq)/(locmax_sq-locmin_sq);
-//	if( cosbeta > 1 && cosbeta < 1.1) cosbeta=1;
-    beta=acos(cosbeta);
-	//if(_subSys!=5) beta=acos(1);
-
-	//	cout<<"==== "<<_m23<< " "<<_m13<< " "<<invM1<<" " <<invM2<<endl;
-	//	cout<< "wwww " <<_subSys<< " "<<mod<<" " <<beta<< " "<<beta2<<endl;
-	//	if(beta!=beta){
-	//		std::cout<<beta<<std::endl;
-	//		std::cout<<_M<< " "<<_m1<<" " <<_m2<<" " <<_m3<<std::endl;
-	//		std::cout<<(2.*_m13*_m13-locmax_sq-locmin_sq)/(locmax_sq-locmin_sq)<<std::endl;
-	//		std::cout<<_m13<< " " <<_m23<<" " <<locmin_sq << " "<<locmax_sq<<std::endl;
+	//	switch(_subSys){
+	//	case 5:{ //reso in m23
+	//		locmin_sq = s2min(invM1*invM1,_M,_m1,_m2,_m3);
+	//		locmax_sq = s2max(invM1*invM1,_M,_m1,_m2,_m3);
+	//		break;
 	//	}
-	//double locmin_sq = s2min(_y*_y), locmax_sq = s2max(_y*_y);
-	//if( _x*_x>locmax_sq || _x*_x<locmin_sq )
-	//  return 0.;
+	//	case 4:{ //reso in m13
+	//		locmin_sq = s1min(invM1*invM1,_M,_m1,_m2,_m3);
+	//		locmax_sq = s1max(invM1*invM1,_M,_m1,_m2,_m3);
+	//		break;
+	//	}
+	//	case 3:{ //reso in m12
+	//		//return 1;
+	//		locmin_sq = s1min(invM1*invM1,_M,_m1,_m3,_m2);
+	//		locmax_sq = s1max(invM1*invM1,_M,_m1,_m3,_m2);
+	//		//if(beta!=beta) return 1.;
+	//		break;
+	//	}
+	//	}
+	double cosbeta = (2.*invM2*invM2-locmax_sq-locmin_sq)/(locmax_sq-locmin_sq);
+	beta=acos(cosbeta);
 
 	Spin j((double) _inSpin), m((double) _outSpin1), n((double)_outSpin2);
-	//  cout<<Wigner_d(j,m,n,beta)<<endl;
 	double result = Wigner_d(j,m,n,beta);
 	if( ( result!=result ) || (beta!=beta)) {
-//	std::cout<<dataPoint::instance()->getMsq(2,3)<<" "<<dataPoint::instance()->getMsq(1,3)<<" "<<dataPoint::instance()->getMsq(1,2)<<std::endl;
+		std::cout<<"= AmpWigner: "<<std::endl;
 		std::cout<< "NAN! J="<< _inSpin<<" M="<<_outSpin1<<" N="<<_outSpin2<<" beta="<<beta<<std::endl;
-		std::cout<< "subSys: "<<_subSys<<" ("<<mod<<") "<<invM1*invM1 << " " <<invM2*invM2<< " cos(beta)="<<cosbeta<<std::endl;
+		std::cout<< "subSys: "<<_subSys<<" invM1sq="<<invM1*invM1 << " invM2sq=" <<invM2*invM2<< " cos(beta)="<<cosbeta<<std::endl;
 		return 0;
 	}
-	//	cout<<"result: "<<result<<endl;
+//	std::cout<<"===================================="<<std::endl;
 	return result;
 }
 

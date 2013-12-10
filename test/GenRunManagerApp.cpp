@@ -14,17 +14,16 @@
 #include <memory>
 
 // Physics Interface header files go here
-#include "Physics/AmplitudeSum/AmpSumIntensity.hpp"
-#include "Physics/AmplitudeSum/AmplitudeSetup.hpp"
 #include "Core/Parameter.hpp"
 #include "Core/ParameterList.hpp"
+#include "Core/RunManager.hpp"
+#include "Core/Efficiency.hpp"
 #include "DataReader/RootReader/RootReader.hpp"
 
+#include "Physics/AmplitudeSum/AmpSumIntensity.hpp"
+#include "Physics/AmplitudeSum/AmplitudeSetup.hpp"
 #include "Physics/DPKinematics/DalitzKinematics.hpp"
-#include "Core/RunManager.hpp"
-#include "Physics/DPKinematics/DataPoint.hpp"
 #include "Physics/DPKinematics/RootGenerator.cpp"
-#include "Core/Efficiency.hpp"
 
 //#include "PWA/PlotData.hpp"
 

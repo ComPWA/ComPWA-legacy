@@ -14,30 +14,29 @@
 #include "Physics/DPKinematics/DataPoint2.hpp"
 
 dataPoint2::dataPoint2(){
-	varNames = DalitzKinematics::instance()->getVarNames();
-	size=varNames.size();
+	std::vector<std::string> varNames = DalitzKinematics::instance()->getVarNames();
+	unsigned int size = varNames.size();
 	var.reserve(size);
 	return;
 
 }
-dataPoint2::dataPoint2(std::vector<std::string> names): varNames(names){
-	size=varNames.size();
-	var.reserve(size);
-	return;
 
-}
 double dataPoint2::getVal(std::string name){
-	int pos = find(varNames.begin(), varNames.end(), name) - varNames.begin();
+	std::vector<std::string> varNames = DalitzKinematics::instance()->getVarNames();
+	unsigned int size = varNames.size();
+	unsigned int pos = find(varNames.begin(), varNames.end(), name) - varNames.begin();
 	if(pos<0||pos>size-1) {
-		std::cout<<"ERROR: dataPoint2: getVal(): variable with name"<<name<<" not found!"<<std::endl;
+		std::cout<<"ERROR: dataPoint2: getVal(): variable with name "<<name<<" not found!"<<std::endl;
 		return -999;
 	}
 	return getVal(pos);
 }
 void dataPoint2::setVal(std::string name, double val){
-	int pos = find(varNames.begin(), varNames.end(), name) - varNames.begin();
+	std::vector<std::string> varNames = DalitzKinematics::instance()->getVarNames();
+	unsigned int size = varNames.size();
+	unsigned int pos = find(varNames.begin(), varNames.end(), name) - varNames.begin();
 	if(pos<0||pos>size-1) {
-		std::cout<<"ERROR: dataPoint2: setVal(): variable with name"<<name<<" not found!"<<std::endl;
+		std::cout<<"ERROR: dataPoint2: setVal(): variable with name "<<name<<" not found!"<<std::endl;
 		return;
 	}
 	setVal(pos,val);
@@ -61,7 +60,8 @@ double dataPoint2::getVal(unsigned int num){
 	return var[num];
 }
 void dataPoint2::setPoint(std::vector<double> values){
-	if(varNames.size()!=values.size()){
+	unsigned int size = DalitzKinematics::instance()->getVarNames().size();
+	if(size!=values.size()){
 		std::cout<<"ERROR: dataPoint2: setPoint(): vector with phsp point out of range!"<<std::endl;
 		return;
 	}

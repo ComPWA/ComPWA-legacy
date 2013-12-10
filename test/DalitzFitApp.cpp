@@ -53,6 +53,7 @@
 #include "Physics/AmplitudeSum/AmpSumIntensity.hpp"
 #include "Estimator/MinLogLH/MinLogLH.hpp"
 #include "Optimizer/Minuit2/MinuitIF.hpp"
+#include "Physics/DPKinematics/DataPoint2.hpp"
 
 const Double_t M = 3.096916; // GeV/c² (J/psi+)
 const Double_t Br = 0.000093; // GeV/c² (width)
@@ -299,11 +300,12 @@ int main(int argc, char **argv){
         TParticle fparticlePim(-211,1,0,0,0,0,*pPim,W);
 
         //call physics module
-        vector<double> x;
-        x.push_back(sqrt(m23sq));
-        x.push_back(sqrt(m13sq));
-        x.push_back(sqrt(m12sq));
-        ParameterList intensL = amps->intensity(x, paras);
+	dataPoint2 dataP; dataP.setVal("m23sq",m23sq);	dataP.setVal("m13sq",m13sq);
+//        vector<double> x;
+//        x.push_back(sqrt(m23sq));
+//        x.push_back(sqrt(m13sq));
+//        x.push_back(sqrt(m12sq));
+        ParameterList intensL = amps->intensity(dataP, paras);
         double AMPpdf = intensL.GetDoubleParameter(0)->GetValue();
         //double AMPpdf = amps->intensity(x, par);
 

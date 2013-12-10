@@ -22,7 +22,10 @@ private:
 public:
 	Generator(){};
 	virtual ~Generator(){};
-	virtual void generate(Event&)=0;
+	virtual void generate(Event&) = 0;
+	virtual Generator* Clone() = 0;
+	virtual void setSeed(unsigned int) = 0;
+	virtual unsigned int getSeed() = 0;
 
 };
 

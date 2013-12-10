@@ -26,7 +26,6 @@
 //#include "TString.h"
 #include "Physics/AmplitudeSum/AmpAbsDynamicalFunction.hpp"
 #include "Physics/DPKinematics/DalitzKinematics.hpp"
-#include "Physics/DPKinematics/DataPoint.hpp"
 
 using namespace std;
 
@@ -43,9 +42,9 @@ public:
   ~AmpGausRes();
 
   virtual void initialise();
-  virtual std::complex<double> evaluate()const;
-	virtual std::complex<double> evaluateAmp() const;
-	virtual double evaluateWignerD() const { return 1; };
+  virtual std::complex<double> evaluate(dataPoint2& point)const;
+	virtual std::complex<double> evaluateAmp(dataPoint2& point) const;
+	virtual double evaluateWignerD(dataPoint2& point) const { return 1; };
 
   inline virtual bool isSubSys(const unsigned int subSys)const{return (subSys==_subSys);};
   double getSpin(){return 0;};

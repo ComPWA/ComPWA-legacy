@@ -125,6 +125,7 @@ protected:
 	std::shared_ptr<Optimizer> pOpti_; /*!< Pointer to Optimizer-Module */
 	std::shared_ptr<Efficiency> eff_; /*!< Pointer to Optimizer-Module */
 	std::shared_ptr<Generator> gen_; /*!< Pointer to Optimizer-Module */
+	std::shared_ptr<Generator> getGen(){ return gen_;};
 	//TODO: log
 	bool valid_; /*!< setup a valid configuration? */
 	bool success_; /*!< fitting ended successfully? */

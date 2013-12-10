@@ -17,6 +17,7 @@
 #include "TLorentzVector.h"
 #include "TParticle.h"
 #include "TGenPhaseSpace.h"
+#include "TRandom3.h"
 
 #include "Core/Generator.hpp"
 #include "Core/Event.hpp"
@@ -36,6 +37,13 @@ public:
 		event.SetDecay(W, 3, masses);
 	};
 	~RootGenerator(){};
+
+	RootGenerator(const RootGenerator& other):event(other.event){}
+
+	virtual RootGenerator* Clone() {
+		return (new RootGenerator(*this));
+	}
+
 	virtual void generate(Event& evt) {
 		TLorentzVector *p1,*p2,*p3;
 		const double weight = event.Generate();
@@ -50,6 +58,12 @@ public:
 		tmp.addParticle(Particle(p3->X(), p3->Y(), p3->Z(), p3->E()));
 		evt=tmp;
 	}
+
+	void setSeed( unsigned int seed ){
+		gRandom->SetSeed(seed);
+	}
+
+	unsigned int getSeed() { return gRandom->GetSeed(); }
 };
 
 

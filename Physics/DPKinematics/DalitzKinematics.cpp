@@ -226,7 +226,7 @@ void DalitzKinematics::init(){
 	_DPareaCalculated=0;
 	varNames.push_back("m23sq");
 	varNames.push_back("m13sq");
-	varNames.push_back("m12sq");
+//	varNames.push_back("m12sq");
 
 };
 //! returns 1 if point is within PHSP otherwise 0

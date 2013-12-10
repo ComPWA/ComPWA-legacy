@@ -41,6 +41,12 @@ AmpSumOfAmplitudes::AmpSumOfAmplitudes()
  AmpSumOfAmplitudes::AmpSumOfAmplitudes(const AmpSumOfAmplitudes& other, const char* name)
  { 
 
+//  std::vector<std::shared_ptr<AmpAbsDynamicalFunction> > _pdfList ;   //  List of component PDFs
+//  std::vector<std::shared_ptr<DoubleParameter> > _intList;    //  List of relative intensities
+//  std::vector<std::shared_ptr<DoubleParameter> > _phaseList;  //  List of relative phases
+//  std::vector<std::shared_ptr<AmpWigner> > _angList ;   //  List of component angular distributions
+//	std::cout<<"copy   "<<std::endl;
+
  } 
 
  AmpSumOfAmplitudes::~AmpSumOfAmplitudes(){
@@ -61,7 +67,7 @@ void AmpSumOfAmplitudes::addBW(std::shared_ptr<AmpAbsDynamicalFunction> theRes ,
   _angList.push_back(std::shared_ptr<AmpWigner>(new AmpWigner()));
 }
 
-double AmpSumOfAmplitudes::evaluate() const
+double AmpSumOfAmplitudes::evaluate(dataPoint2& point) const
  { 
 //   RooComplex res;
    complex<double> res;
@@ -76,7 +82,7 @@ double AmpSumOfAmplitudes::evaluate() const
 //     unsigned int twoJplusOne = (2*_pdfList[i]->getSpin()+1);
 //     res = res + (double)twoJplusOne * _pdfList[i]->evaluate() * eiphi;
      //twoJplusOne in included in evaluate(). We want to include this factor into the normalization of the amplitudes.
-     res = res + _pdfList[i]->evaluate() * eiphi;
+     res = res + _pdfList[i]->evaluate(point) * eiphi;
     // std::cout << _pdfList[i]->evaluate() << " ";
 //res = res + twoJplusOne * _pdfList[i]->evaluate() * eiphi * _angList[i]->evaluate();
    }
@@ -85,7 +91,7 @@ double AmpSumOfAmplitudes::evaluate() const
    return ( std::abs(res)*std::abs(res) );
  } 
 
- double AmpSumOfAmplitudes::evaluateSlice(std::complex<double>* reso, unsigned int nResos, unsigned int subSys=1) const
+ double AmpSumOfAmplitudes::evaluateSlice(dataPoint2& point, std::complex<double>* reso, unsigned int nResos, unsigned int subSys=1) const
  { 
    // ENTER EXPRESSION IN TERMS OF VARIABLE ARGUMENTS HERE 
    std::complex<double> res;
@@ -102,9 +108,9 @@ double AmpSumOfAmplitudes::evaluate() const
      //sys = itReso;
 
      if(_pdfList[i]->isSubSys(subSys))
-       res = res + reso[sys] * _angList[i]->evaluate();
+       res = res + reso[sys] * _angList[i]->evaluate(point);
      else
-       res = res + _pdfList[i]->evaluate() * a * eiphi;
+       res = res + _pdfList[i]->evaluate(point) * a * eiphi;
  //res = res + _pdfList[i]->evaluate() * a * eiphi * _angList[i]->evaluate();
      itReso++;
    }

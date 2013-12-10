@@ -42,8 +42,8 @@ void AmpWigner2::initialise()
 	_spin3 = kin->getSpin(3);
 
 }
-double AmpWigner2::evaluate() const {
-	dataPoint* point = dataPoint::instance();
+double AmpWigner2::evaluate(dataPoint2& point) const {
+//	dataPoint* point = dataPoint::instance();
 	DalitzKinematics* kin = DalitzKinematics::instance();
 
 	double cosTheta=-999, result=-999;
@@ -55,21 +55,24 @@ double AmpWigner2::evaluate() const {
 	 * !!!! Spin M,N completely wrong! We need to calculate helicities!
 	 */
 	Spin N, M;
+	double m23sq = point.getVal("m23sq");
+	double m13sq = point.getVal("m13sq");
+	double m12sq = DalitzKinematics::instance()->getThirdVariableSq(m23sq,m13sq);
 
 	switch(_subSys){
 	case 3:
 //		cosTheta = kin->calcHelicityAngle(point->getMsq(3),point->getMsq(4),_M,_m3,_m1,_m2);
-		cosTheta = kin->calcHelicityAngle(point->getMsq(3),point->getMsq(5),_M,_m3,_m1,_m2);
+		cosTheta = kin->calcHelicityAngle(m12sq,m23sq,_M,_m3,_m1,_m2);
 		M = (int)(_spinM-_spin3); N = (int)(_spin1-_spin2);
 		M = 0; N=0;
 		break;
 	case 4:
-		cosTheta = kin->calcHelicityAngle(point->getMsq(4),point->getMsq(5),_M,_m2,_m1,_m3);
+		cosTheta = kin->calcHelicityAngle(m13sq,m23sq,_M,_m2,_m1,_m3);
 		M = (int)(_spinM-_spin1); N = (int)(_spin3-_spin2);
 		M = 0; N=0;
 		break;
 	case 5:
-		cosTheta = kin->calcHelicityAngle(point->getMsq(5),point->getMsq(4),_M,_m1,_m2,_m3);
+		cosTheta = kin->calcHelicityAngle(m23sq,m13sq,_M,_m1,_m2,_m3);
 		M = (int)(_spinM-_spin1); N = (int)(_spin3-_spin2);
 		M = 0; N=0;
 		break;
@@ -83,8 +86,9 @@ double AmpWigner2::evaluate() const {
 	 * Note that Wigner_d depends on the sign of \in and \out. I hope it is correctly assigned.
 	 */
 	result = Wigner_d(J,M,N,theta);
-	//	std::cout<<"++ subSys="<<_subSys<< " J="<<J<<" M="<<M<<" N="<<N<<std::endl;
+//		std::cout<<"++ subSys="<<_subSys<< " J="<<J<<" M="<<M<<" N="<<N<<std::endl;
 	if( ( result!=result ) || (theta!=theta)) {
+		std::cout<<"= AmpWigner2: "<<std::endl;
 		std::cout<< "NAN! J="<< J<<" M="<<N<<" N="<<M<<" subsys="<<_subSys<<" theta="<<theta<<" cosTheta="<<cosTheta<<" result="<<result<<std::endl;
 		return 0;
 	}

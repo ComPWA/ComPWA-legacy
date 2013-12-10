@@ -36,19 +36,25 @@ public:
 	virtual const double volume();
 	virtual const double drawInt(double *x, double *p); //For easy usage in a root TF1
 	virtual const ParameterList intensity(double x, double M, double T);
-	virtual const ParameterList intensity(std::vector<double>& x, ParameterList& par);
-	virtual const ParameterList intensity(ParameterList& par) {};
+	virtual const ParameterList intensity(std::vector<double> x, ParameterList& par);
+	virtual const ParameterList intensity(dataPoint2& point, ParameterList& par);
+	virtual const ParameterList intensity(dataPoint2& point);
 	virtual const bool fillStartParVec(ParameterList& outPar);
 
+	virtual void setParameterList(ParameterList& par);
 	virtual void setNevents(unsigned int n) { _entries=n; };
 	virtual unsigned int getNevents() { return _entries; };
 	/** Destructor */
 	virtual ~BreitWigner();
 
+	virtual BreitWigner* Clone() {
+		return new BreitWigner(*this);
+	}
 protected:
 	double min_;
 	double max_;
 	unsigned int _entries;
+	ParameterList params;
 
 private:
 	const double BreitWignerValue(double x, double M, double T);
