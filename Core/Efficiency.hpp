@@ -13,6 +13,9 @@
 
 #include <iostream>
 #include <vector>
+#include <boost/log/trivial.hpp>
+using namespace boost::log;
+
 /**
  *  \class DalitzEfficiency
  *  \brief Virtual efficiency class
@@ -38,7 +41,7 @@ class UnitEfficiency : public Efficiency {
 private:
 public:
 	UnitEfficiency(){
-		std::cout<<"Efficiency: creating UnitEfficiency!"<<std::endl;
+		BOOST_LOG_TRIVIAL(info)<<"Efficiency: creating UnitEfficiency!";
 	};
 	~UnitEfficiency(){};
 	virtual double evaluate(std::vector<double> x) {return 1;};

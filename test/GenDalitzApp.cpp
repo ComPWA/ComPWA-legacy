@@ -27,6 +27,10 @@
 #include <boost/foreach.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
+#include <boost/log/trivial.hpp>
+#include <boost/log/core.hpp>
+#include <boost/log/expressions.hpp>
+using namespace boost::log;
 
 // Root header files go here
 #include "TMath.h"
@@ -61,15 +65,16 @@ const unsigned int MaxEvents = 10000;
  * The main function.
  */
 int main(int argc, char **argv){
-	std::cout << "  ComPWA Copyright (C) 2013  Mathias Michel " << std::endl;
-	std::cout << "  This program comes with ABSOLUTELY NO WARRANTY; for details see license.txt" << std::endl;
-	std::cout << std::endl;
+	boost::log::core::get()->set_filter(trivial::severity >= trivial::info); //setting log level
+	BOOST_LOG_TRIVIAL(info)<< "  ComPWA Copyright (C) 2013  Mathias Michel ";
+	BOOST_LOG_TRIVIAL(info)<< "  This program comes with ABSOLUTELY NO WARRANTY; for details see license.txt";
+	BOOST_LOG_TRIVIAL(info)<<"";
 
 	unsigned int i=0, mc=0;
 	TRandom3 rando;
 
 	DalitzKinematics* kin = DalitzKinematics::createInstance("J/psi","gamma","pi0","pi0");
-	static dataPoint* point = dataPoint::instance();
+//	static dataPoint* point = dataPoint::instance();
 
 
 	/*const double M = kin.getMass("J/psi"); // GeV/c² (J/psi+)

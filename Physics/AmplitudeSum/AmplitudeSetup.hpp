@@ -42,6 +42,7 @@ struct Resonance
 	double m_width;
 	double m_width_min;
 	double m_width_max;
+	double m_norm;
 
 	double m_strength;
 	double m_phase;
@@ -63,6 +64,7 @@ struct ResonanceFlatte : Resonance
 class AmplitudeSetup
 {
 private:
+	std::string m_filePath;
 	std::string m_file;          // ini filename
 	std::vector<Resonance> m_resonances;          // resonances
 	std::vector<ResonanceFlatte> m_resonancesFlatte;          // resonances
@@ -76,6 +78,7 @@ public:
 
 	inline unsigned int getNResonances() {return m_resonances.size()+m_resonancesFlatte.size(); };
 	inline const std::string & getFileName() const {return m_file;};
+	inline const std::string & getFilePath() const {return m_filePath;};
 	inline std::vector<Resonance> & getResonances() { return m_resonances; };
 	inline std::vector<ResonanceFlatte> & getResonancesFlatte() { return m_resonancesFlatte; };
 };
@@ -87,6 +90,7 @@ void AmplitudeSetup::load(const std::string &filename)
 	using boost::property_tree::ptree;
 	ptree pt;
 
+	m_filePath=filename;
 	// Load the XML file into the property tree. If reading fails
 	// (cannot open file, parse error), an exception is thrown.
 	read_xml(filename, pt);
@@ -116,6 +120,7 @@ void AmplitudeSetup::load(const std::string &filename)
 			f.m_width = v.second.get<double>("width");;
 			f.m_width_min = v.second.get<double>("width_min");;
 			f.m_width_max = v.second.get<double>("width_max");;
+			f.m_norm= v.second.get<double>("norm");;
 			f.m_strength = v.second.get<double>("strength");;
 			f.m_phase = v.second.get<double>("phase");;
 			f.m_spin = v.second.get<unsigned>("spin");
@@ -136,6 +141,7 @@ void AmplitudeSetup::load(const std::string &filename)
 			f.m_width = v.second.get<double>("width");;
 			f.m_width_min = v.second.get<double>("width_min");;
 			f.m_width_max = v.second.get<double>("width_max");;
+			f.m_norm= v.second.get<double>("norm");;
 			f.m_strength = v.second.get<double>("strength");;
 			f.m_phase = v.second.get<double>("phase");;
 			f.m_spin = v.second.get<unsigned>("spin");
@@ -181,6 +187,7 @@ void AmplitudeSetup::save(const std::string &filename)
 		pt.put("width", v.m_width);
 		pt.put("width_min", v.m_width_min);
 		pt.put("width_max", v.m_width_max);
+		pt.put("norm",v.m_norm);
 		pt.put("strength", v.m_strength);
 		pt.put("phase", v.m_phase);
 		pt.put("spin", v.m_spin);
@@ -201,6 +208,7 @@ void AmplitudeSetup::save(const std::string &filename)
 		pt.put("width", v.m_width);
 		pt.put("width_min", v.m_width_min);
 		pt.put("width_max", v.m_width_max);
+		pt.put("norm",v.m_norm);
 		pt.put("coupling", v.m_coupling);
 		pt.put("couplingHidden", v.m_couplingHidden);
 		pt.put("hiddenParticle1", v.m_hiddenParticle1);

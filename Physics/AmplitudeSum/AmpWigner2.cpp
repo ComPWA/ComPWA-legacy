@@ -39,7 +39,6 @@ void AmpWigner2::initialise()
 	_spinM = kin->getSpin(0);
 	_spin1 = kin->getSpin(1);
 	_spin2 = kin->getSpin(2);
-	_spin3 = kin->getSpin(3);
 
 }
 double AmpWigner2::evaluate(dataPoint2& point) const {
@@ -48,7 +47,6 @@ double AmpWigner2::evaluate(dataPoint2& point) const {
 
 	double cosTheta=-999, result=-999;
 	Spin J((int)_resSpin);
-	//	std::cout<<"=="<<J<<" S(M)="<<_spinM <<" S(1)="<<_spin1<<" " <<_spin2<<" "<<_spin3<<std::endl;
 	/*
 	 * \in and \out are the difference in the spins of the ingoing and outgoing particles.
 	 * In literature it is often denoted with mu and muPrime
@@ -77,7 +75,7 @@ double AmpWigner2::evaluate(dataPoint2& point) const {
 		M = 0; N=0;
 		break;
 	default:
-		std::cout<<"AmpWigner: wrong subSystem! Exit!"<<std::endl; exit(1);
+		BOOST_LOG_TRIVIAL(fatal)<<"AmpWigner: wrong subSystem! Exit!"; exit(1);
 	}
 	double theta = acos(cosTheta);
 
@@ -86,10 +84,9 @@ double AmpWigner2::evaluate(dataPoint2& point) const {
 	 * Note that Wigner_d depends on the sign of \in and \out. I hope it is correctly assigned.
 	 */
 	result = Wigner_d(J,M,N,theta);
-//		std::cout<<"++ subSys="<<_subSys<< " J="<<J<<" M="<<M<<" N="<<N<<std::endl;
 	if( ( result!=result ) || (theta!=theta)) {
-		std::cout<<"= AmpWigner2: "<<std::endl;
-		std::cout<< "NAN! J="<< J<<" M="<<N<<" N="<<M<<" subsys="<<_subSys<<" theta="<<theta<<" cosTheta="<<cosTheta<<" result="<<result<<std::endl;
+		BOOST_LOG_TRIVIAL(error)<<"= AmpWigner2: ";
+		BOOST_LOG_TRIVIAL(error)<<"NAN! J="<< J<<" M="<<N<<" N="<<M<<" subsys="<<_subSys<<" theta="<<theta<<" cosTheta="<<cosTheta<<" result="<<result;
 		return 0;
 	}
 	return result;

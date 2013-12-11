@@ -37,7 +37,6 @@ RootReader::RootReader(TTree* tr, const bool binned=false) : fBinned(binned){
 RootReader::RootReader(const std::string inRootFile, const bool binned,
 		const std::string inTreeName, const bool readFlag)
 :fBinned(binned),_readFlag(readFlag),fileName(inRootFile),treeName(inTreeName){
-std::cout<<"sdfdsf"<<std::endl;
 	fEvent=0;
 	if(!readFlag) return;
 	fFile = new TFile(fileName.c_str());

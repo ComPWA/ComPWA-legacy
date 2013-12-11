@@ -36,19 +36,22 @@
 #include "Core/PhysConst.hpp"
 
 #include "boost/function.hpp"
+#include <boost/log/trivial.hpp>
+using namespace boost::log;
 
 
 AmpSumIntensity::AmpSumIntensity(const AmpSumIntensity& other) : nAmps(other.nAmps), _dpArea(other._dpArea),
-_entries(other._entries), _normStyle(other._normStyle),maxVal(other.maxVal),ampSetup(other.ampSetup),totAmp(other.totAmp){
+		_entries(other._entries), _normStyle(other._normStyle),maxVal(other.maxVal),ampSetup(other.ampSetup),totAmp(other.totAmp){
 }
 
 /// Default Constructor (0x0)
-AmpSumIntensity::AmpSumIntensity(AmplitudeSetup ini, unsigned int entries, normalizationStyle ns) :
-		//_kin(kin),
-		totAmp("relBWsumAmplitude", "totAmp"),
-		ampSetup(ini),
-		_entries(entries),
-		_normStyle(ns)
+AmpSumIntensity::AmpSumIntensity(AmplitudeSetup ini, unsigned int entries, normalizationStyle ns,double dpArea) :
+						//_kin(kin),
+						totAmp("relBWsumAmplitude", "totAmp"),
+						ampSetup(ini),
+						_entries(entries),
+						_normStyle(ns),
+						_dpArea(dpArea)
 {
 	init();
 }
@@ -56,20 +59,18 @@ AmpSumIntensity::AmpSumIntensity(AmplitudeSetup ini, unsigned int entries, norma
 AmpSumIntensity::AmpSumIntensity(const double inM, const double inBr, const double in1,const double in2, const double in3,
 		std::string nameM, std::string name1,std::string name2,std::string name3,
 		AmplitudeSetup ini, unsigned int entries, normalizationStyle ns) :
-		//										 _kin(inM, inBr, in1, in2, in3,nameM,name1,name2,name3),
-												 totAmp("relBWsumAmplitude", "totAmp"),
-												 ampSetup(ini),
-												 _entries(entries),
-												 _normStyle(ns)
+				totAmp("relBWsumAmplitude", "totAmp"),
+				ampSetup(ini),
+				_entries(entries),
+				_normStyle(ns)
 {
 	init();
 }
 
 void AmpSumIntensity::init(){
-
-	_dpArea = DalitzKinematics::instance()->getDParea();
-	std::cout<<"AmpSumIntensity: INFO: number of Entries in dalitz plot set to: "<<_entries<<std::endl;
-	std::cout<<"AmpSumIntensity: INFO: area of phase space: "<<_dpArea<<std::endl;
+	if(_dpArea==-999) _dpArea = DalitzKinematics::instance()->getDParea();
+	BOOST_LOG_TRIVIAL(info)<<"AmpSumIntensity::init() number of Entries in dalitz plot set to: "<<_entries;
+	BOOST_LOG_TRIVIAL(info)<<"AmpSumIntensity::init() area of phase space: "<<_dpArea;
 
 	for(std::vector<Resonance>::iterator reso=ampSetup.getResonances().begin(); reso!=ampSetup.getResonances().end(); reso++){
 		Resonance tmp = (*reso);
@@ -89,13 +90,13 @@ void AmpSumIntensity::init(){
 		totAmp.addBW(tmpbw, rr.at(last), phir.at(last));
 
 		//setting normalization between amplitudes
-		double norm=1;
-		if(_normStyle==none) norm=1;
-		else if(_normStyle==one) norm = sqrt(tmpbw->integral());
-		else if(_normStyle==entries) norm = sqrt(_dpArea*tmpbw->integral()/_entries);
-
+		double norm=tmp.m_norm;
+		if(norm<0 || 1) {//recalculate normalization
+			norm = normReso(tmpbw);
+			tmp.m_norm = norm;
+		}
 		tmpbw->SetNormalization(1/norm);
-		std::cout<<"AmpSumIntensity: INFO: Normalization constant for "<<tmp.m_name<<": "<<1/norm<<std::endl;
+		BOOST_LOG_TRIVIAL(info)<<"AmpSumIntensity::init() Normalization constant for "<<tmp.m_name<<": "<<1/norm;
 	}// end loop over resonances
 
 
@@ -121,19 +122,28 @@ void AmpSumIntensity::init(){
 				subSys, tmp.m_spin,tmp.m_m,tmp.m_n) );
 		totAmp.addBW(tmpbw, rr.at(last), phir.at(last));
 
-		double norm=1;
-		if(_normStyle==none) norm=1;
-		else if(_normStyle==one) norm = sqrt(tmpbw->integral());
-		else if(_normStyle==entries) norm = sqrt(_dpArea*tmpbw->integral()/_entries);
+		double norm=tmp.m_norm;
+		if(norm<0 || 1) {//recalculate normalization
+			norm = normReso(tmpbw);
+			tmp.m_norm = norm;
+		}
 		tmpbw->SetNormalization(1/norm);
-		std::cout<<"AmpSumIntensity: INFO: Normalization constant for "<<tmp.m_name<<": "<<1/norm<<std::endl;
 	}// end loop over resonancesFlatte
 
+	//	ampSetup.save(ampSetup.getFilePath());
 	nAmps=rr.size();
 	integral();
-	std::cout << "completed setup" << std::endl;
+	BOOST_LOG_TRIVIAL(info)<<"AmpSumIntensity: completed setup!";
 }
+double AmpSumIntensity::normReso(std::shared_ptr<AmpAbsDynamicalFunction> amp){
+	double norm;
+	if(_normStyle==none) norm=1;
+	else if(_normStyle==one) norm = sqrt(amp->integral());
+	else if(_normStyle==entries) norm = sqrt(_dpArea*amp->integral()/_entries);
+	BOOST_LOG_TRIVIAL(debug)<<"AmpSumIntensity: INFO: Normalization constant for "<<amp->GetName()<<": "<<1/norm;
+	return norm;
 
+}
 double AmpSumIntensity::evaluate(double x[], size_t dim) {
 	if(dim!=2) return 0;
 	//set data point: we assume that x[0]=m13 and x[1]=m23
@@ -185,7 +195,7 @@ const double AmpSumIntensity::integral(){
 	gsl_monte_vegas_state *s = gsl_monte_vegas_alloc (dim);
 	gsl_monte_vegas_integrate (&G, xLimit_low, xLimit_high, 2, calls, r,s,&res, &err);
 	gsl_monte_vegas_free(s);
-	std::cout<<"AmpSumIntensity: INFO: Integration result for amplitude sum: "<<res<<"+-"<<err<<" relAcc [%]: "<<100*err/res<<std::endl;
+	BOOST_LOG_TRIVIAL(info)<<"AmpSumIntensity: INFO: Integration result for amplitude sum: "<<res<<"+-"<<err<<" relAcc [%]: "<<100*err/res;
 
 	return res;
 }
@@ -202,7 +212,7 @@ const ParameterList AmpSumIntensity::intensity(dataPoint2& point){
 	//	std::cout<<dataPoint::instance()->getMsq(2,3)<<" "<<dataPoint::instance()->getMsq(1,3)<<" "<<dataPoint::instance()->getMsq(1,2)<<std::endl;
 	double AMPpdf = totAmp.evaluate(point);
 	if(AMPpdf!=AMPpdf){
-		std::cout << "Error AmpSumIntensity: Intensity is not a number!!" << std::endl;
+		BOOST_LOG_TRIVIAL(error)<<"Error AmpSumIntensity: Intensity is not a number!!";
 		exit(1);
 	}
 	ParameterList result;
@@ -230,8 +240,8 @@ const bool AmpSumIntensity::fillStartParVec(ParameterList& outPar){
 
 std::string AmpSumIntensity::printAmps(){
 	std::stringstream o;
-	o<<"== Printing amplitudes with current(!) set of parameters:"<<endl;
+	BOOST_LOG_TRIVIAL(info)<<"== Printing amplitudes with current(!) set of parameters:";
 	for(unsigned int i=0;i<nAmps;i++)
-		o<<namer[i]<<":	Amplitude: "<<rr[i]->GetValue()<<"+-"<<rr[i]->GetError()<<"	Phase: "<<phir[i]->GetValue()<<"+-"<<phir[i]->GetError()<<endl;
+		BOOST_LOG_TRIVIAL(info)<<namer[i]<<":	Amplitude: "<<rr[i]->GetValue()<<"+-"<<rr[i]->GetError()<<"	Phase: "<<phir[i]->GetValue()<<"+-"<<phir[i]->GetError();
 	return o.str();
 }

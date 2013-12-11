@@ -50,7 +50,7 @@ public:
 			 AmplitudeSetup ini, unsigned int entries=9999,
 			normalizationStyle ns=none);
 	AmpSumIntensity(AmplitudeSetup ini, unsigned int entries=9999,
-			normalizationStyle ns=none);
+			normalizationStyle ns=none, double dpArea=-999);
 	AmpSumIntensity(const AmpSumIntensity& other);
 
 	double evaluate(double x[], size_t dim);
@@ -76,6 +76,7 @@ public:
 
 	virtual std::string printAmps();
 
+	double normReso(std::shared_ptr<AmpAbsDynamicalFunction> amp);
 	virtual ~AmpSumIntensity(){};
 	virtual AmpSumIntensity* Clone(){
 		return (new AmpSumIntensity(*this));

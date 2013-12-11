@@ -6,7 +6,7 @@ local QFT = [ os.environ QFT ] ;
 local GSL = [ os.environ GSL_ROOT ] ;
 #local ROOTSYS = [ os.environ ROOTSYS ] ;
 
-BOOSTLIBS = -lboost_date_time -lboost_filesystem -lboost_program_options -lboost_regex -lboost_serialization -lboost_system -lboost_thread -lboost_test_exec_monitor -L$(BOOST_ROOT)/lib ;
+BOOSTLIBS = -lboost_log_setup -lboost_log -lboost_date_time -lboost_filesystem -lboost_program_options -lboost_regex -lboost_serialization -lboost_system -lboost_thread -lboost_test_exec_monitor -L$(BOOST_ROOT)/lib ;
 
 #local rlibs = [ SHELL "$ROOTSYS/bin/root-config --libs" ] ;
 #ROOTLIBS = [ MATCH "(.*)[\n]" : $(rlibs) ] ;

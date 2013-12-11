@@ -22,6 +22,10 @@
 #include <boost/random/uniform_real.hpp>
 #include <boost/random/variate_generator.hpp>
 #include <boost/generator_iterator.hpp>
+#include <boost/log/trivial.hpp>
+//#include <boost/log/core.hpp>
+//#include <boost/log/expressions.hpp>
+#include <boost/progress.hpp>
 
 #include "DataReader/Data.hpp"
 #include "Estimator/Estimator.hpp"
@@ -32,6 +36,8 @@
 #include "Core/Generator.hpp"
 
 #include "Core/RunManager.hpp"
+//#define BOOST_LOG_DYN_LINK 1
+using namespace boost::log;
 
 RunManager::RunManager(std::shared_ptr<Data> inD, std::shared_ptr<Amplitude> inP,
 		std::shared_ptr<Optimizer> inO, std::shared_ptr<Efficiency> eff)
@@ -109,30 +115,29 @@ bool RunManager::generate( unsigned int number ) {
 				ParameterList list = pPhys_->intensity(x,minPar);
 				double AMPpdf = *list.GetDoubleParameter(0);
 				if(genMaxVal<(weight*AMPpdf)) genMaxVal= weight*AMPpdf;
-//				std::cout<<threadId<< i<<" "<<AMPpdf<<std::endl;
 			}
 		}
 	}
 	genMaxVal=2*genMaxVal;//conservative choice
 
 	double maxTest=0;
-	std::cout<<"== Using "<<genMaxVal<< " as maximum value for random number generation!"<<std::endl;
-	std::cout << "Generating MC: ["<<size_<<" events] ";
+	BOOST_LOG_TRIVIAL(info) << "== Using "<<genMaxVal<< " as maximum value for random number generation!";
+	BOOST_LOG_TRIVIAL(info) << "Generating MC: ["<<size_<<" events] ";
 
+	boost::progress_display progressBar(size_); //boost progress bar (thread-safe)
 #pragma omp parallel firstprivate(genMaxVal) shared(maxTest)
 	{
 		unsigned int threadId = omp_get_thread_num();
 		unsigned int numThreads = omp_get_num_threads();
 
-		int scale = (int) size_/10/numThreads;
-
-		Generator* genNew = (&(*gen_))->Clone();
+		Generator* genNew = (&(*gen_))->Clone();//copy generator for every thread
 //		genNew->setSeed(std::clock()+threadId);//setting the seed here makes not sense in cast that TGenPhaseSpace is used, because it uses gRandom
 		//initialize random number generator
 		boost::minstd_rand rndGen2(std::clock()+threadId);//TODO: is this seed thread safe?
 		boost::uniform_real<> uni_dist2(0,1);
 		boost::variate_generator<boost::minstd_rand&, boost::uniform_real<> > uni2(rndGen2, uni_dist2);
 		double AMPpdf;
+
 #pragma omp for
 		for(unsigned int i=0;i<size_;i++){
 			if(i>0) i--;
@@ -156,7 +161,7 @@ bool RunManager::generate( unsigned int number ) {
 			ParameterList list;
 #pragma omp critical
 			{
-				list = pPhys_->intensity(x,minPar);
+				list = pPhys_->intensity(x,minPar);//unfortunatly not thread safe
 				AMPpdf = *list.GetDoubleParameter(0);
 				if( maxTest < (AMPpdf*weight)) maxTest = weight*AMPpdf;
 			}
@@ -164,20 +169,19 @@ bool RunManager::generate( unsigned int number ) {
 			i++;
 #pragma omp critical
 			{
-				pData_->pushEvent(tmp);
-				//progress bar
-				if(threadId==0 &&(i % scale) == 0){ std::cout<<(i/scale)*10<<"%..."<<std::flush; }
+				pData_->pushEvent(tmp);//unfortunatly not thread safe
 			}
+			++progressBar;//progress bar
 		}
 	}
-	std::cout<<"100%"<<std::endl;
+	std::cout<<std::endl;
 
 	if( maxTest > (double) (0.9*genMaxVal) ) {
-		std::cout<<"==========ATTENTION==========="<<std::endl;
-		std::cout<<"== Max value of function is "<<maxTest<<std::endl;
-		std::cout<<"== This is close or above to maximum value of rnd. number generation: "<<genMaxVal<<std::endl;
-		std::cout<<"== Choose higher max value!"<<std::endl;
-		std::cout<<"==========ATTENTION==========="<<std::endl;
+		BOOST_LOG_TRIVIAL(error)<<"==========ATTENTION===========";
+		BOOST_LOG_TRIVIAL(error)<<"== Max value of function is "<<maxTest;
+		BOOST_LOG_TRIVIAL(error)<<"== This is close or above to maximum value of rnd. number generation: "<<genMaxVal;
+		BOOST_LOG_TRIVIAL(error)<<"== Choose higher max value!";
+		BOOST_LOG_TRIVIAL(error)<<"==========ATTENTION===========";
 		return false;
 	}
 

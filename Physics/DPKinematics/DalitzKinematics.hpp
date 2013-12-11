@@ -24,6 +24,10 @@
 #include <iostream>
 #include <vector>
 
+//#include "boost/log/core.hpp"
+//#include "boost/log/expressions.hpp"
+#include <boost/log/trivial.hpp>
+using namespace boost::log;
 
 class DalitzKinematics
 {
@@ -55,7 +59,7 @@ public:
 	}
 	static DalitzKinematics* instance(){
 		if(!inst) {
-			std::cout<<"DPKinematics: ERROR instance not created first!"<<std::endl;
+			BOOST_LOG_TRIVIAL(fatal)<<"DPKinematics: ERROR instance not created first!";
 			return 0;
 		}
 		return inst;

@@ -22,7 +22,6 @@
 #include "gsl/gsl_monte_vegas.h"
 DalitzKinematics* DalitzKinematics::inst = NULL;
 
-
 double DalitzKinematics::invMassMax(unsigned int sys, unsigned int sys2, double invMass_sys) const {
 	unsigned int part1, part2;
 	double Mfirst, Msecond;
@@ -81,7 +80,7 @@ double DalitzKinematics::mimin(unsigned int i) const
 	double result = 0.;
 
 	if(i!=5&&i!=4&&i!=3) {
-		std::cout<<"DalitzKinematics: ERROR: Wrong subsystem! "<<std::endl;
+		BOOST_LOG_TRIVIAL(error)<<"DalitzKinematics: ERROR: Wrong subsystem! ";
 		return -999;
 	}
 	switch (i)
@@ -101,7 +100,7 @@ double DalitzKinematics::mimax(unsigned int i) const
 	double result = 0.;
 
 	if(i!=5&&i!=4&&i!=3) {
-		std::cout<<"DalitzKinematics: ERROR: Wrong subsystem! "<<std::endl;
+		BOOST_LOG_TRIVIAL(error)<<"DalitzKinematics: ERROR: Wrong subsystem! ";
 		return -999;
 	}
 	switch (i)
@@ -121,7 +120,7 @@ void DalitzKinematics::phspContour(unsigned int xsys,unsigned int ysys,unsigned 
 	unsigned int num=n;
 	if(num%2!=0) {
 		num-=1;
-		std::cout<<"DalitzKinematics: INFO: phspContour: setting size to a even number. Assure that the size of your arrays is "<<num*2+1<<"!"<<std::endl;
+		BOOST_LOG_TRIVIAL(info)<<"DalitzKinematics::phspContour(): setting size to a even number. Assure that the size of your arrays is "<<num*2+1<<"!";
 	}
 	//    g->Set(n*2+1);
 	double massminl = mimin(xsys);
@@ -188,7 +187,7 @@ DalitzKinematics::DalitzKinematics(std::string _nameMother, std::string _name1, 
 	spin3 = PhysConst::instance()->getJ(_name3);
 
 	if(M==-999 || m1==-999|| m2==-999|| m3==-999) {
-		std::cout<<"DPKinematics: ERROR: masses not set! EXIT!"<<std::endl;
+		BOOST_LOG_TRIVIAL(error)<<"Masses not set! EXIT!";
 		exit(1);
 	}
 	init();
@@ -246,6 +245,7 @@ double DalitzKinematics::getDParea(){
 void DalitzKinematics::calcDParea(){
 
 	//	std::cout<<"DPKinematics: DEBUG: calculating dalitz plot area"<<std::endl;
+	BOOST_LOG_TRIVIAL(debug)<<"DPKinematics: DEBUG: calculating dalitz plot area";
 	size_t dim=2;
 	double res=0.0, err=0.0;
 
@@ -267,7 +267,7 @@ void DalitzKinematics::calcDParea(){
 	gsl_monte_vegas_state *s = gsl_monte_vegas_alloc (dim);
 	gsl_monte_vegas_integrate (&F, xLimit_low, xLimit_high, 2, calls, r,s,&res, &err);
 	gsl_monte_vegas_free(s);
-	std::cout<<"DPKinematics: INFO: Area of dalitz plot form MC integration: "<<res<<"+-"<<err<<" relAcc [%]: "<<100*err/res<<std::endl;
+	BOOST_LOG_TRIVIAL(debug)<<"DPKinematics: Area of dalitz plot form MC integration: "<<res<<"+-"<<err<<" relAcc [%]: "<<100*err/res;
 
 	_DParea=res;
 	_DPareaCalculated=1;
@@ -280,7 +280,7 @@ unsigned int DalitzKinematics::getSpin(unsigned int num){
 	case 2: return spin2;
 	case 3: return spin3;
 	}
-	std::cout<<"DPKinematics: ERROR: wrong particle requested!"<<std::endl;
+	BOOST_LOG_TRIVIAL(error)<<"DPKinematics: ERROR: wrong particle requested!";
 	exit(1);
 	return -999;
 }
@@ -289,7 +289,7 @@ unsigned int DalitzKinematics::getSpin(std::string name){
 	if(name==name1) return spin1;
 	if(name==name2) return spin2;
 	if(name==name3) return spin3;
-	std::cout<<"DPKinematics: ERROR: wrong particle requested!"<<std::endl;
+	BOOST_LOG_TRIVIAL(error)<<"DPKinematics: wrong particle requested!";
 	exit(1);
 	return -999;
 }
@@ -301,7 +301,7 @@ double DalitzKinematics::getMass(unsigned int num){
 	case 2: return m2;
 	case 3: return m3;
 	}
-	std::cout<<"DPKinematics: ERROR: wrong particle requested!"<<std::endl;
+	BOOST_LOG_TRIVIAL(error)<<"DPKinematics: wrong particle requested!";
 	exit(1);
 	return -999;
 }
@@ -310,7 +310,7 @@ double DalitzKinematics::getMass(std::string name){
 	if(name==name1) return m1;
 	if(name==name2) return m2;
 	if(name==name3) return m3;
-	std::cout<<"DPKinematics: ERROR: wrong particle requested!"<<std::endl;
+	BOOST_LOG_TRIVIAL(error)<<"DPKinematics: wrong particle requested!";
 	exit(1);
 	return -999;
 }
