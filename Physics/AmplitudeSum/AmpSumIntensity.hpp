@@ -48,9 +48,10 @@ public:
 	AmpSumIntensity(const double inM, const double inBr, const double in1,const double in2, const double in3,
 			std::string nameM, std::string name1,std::string name2,std::string name3,
 			 AmplitudeSetup ini, unsigned int entries=9999,
-			normalizationStyle ns=none);
-	AmpSumIntensity(AmplitudeSetup ini, unsigned int entries=9999,
 			normalizationStyle ns=none, double dpArea=-999);
+	AmpSumIntensity(AmplitudeSetup ini, normalizationStyle ns, unsigned int entries=9999,
+			 double dpArea=-999);
+	AmpSumIntensity(AmplitudeSetup ini, unsigned int entries=9999, double dpArea=-999);
 	AmpSumIntensity(const AmpSumIntensity& other);
 
 	double evaluate(double x[], size_t dim);
@@ -84,6 +85,8 @@ public:
 
 protected:
 	void init();
+
+	bool _calcNorm;
 
 	AmpSumOfAmplitudes totAmp;
 	AmplitudeSetup ampSetup;

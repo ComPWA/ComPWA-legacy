@@ -60,7 +60,7 @@ ParameterList::~ParameterList() {
 std::shared_ptr<AbsParameter> ParameterList::GetParameter(const unsigned int i) {
   if( !(i < (vBoolPar_.size()+vIntPar_.size()+vDoublePar_.size()) ) ){
       throw BadParameter("Parameter not in list");
-      return 0;
+      return std::shared_ptr<AbsParameter>();
   }
   if( i < vDoublePar_.size() ) // is in double list
     return vDoublePar_.at(i);
@@ -70,7 +70,7 @@ std::shared_ptr<AbsParameter> ParameterList::GetParameter(const unsigned int i) 
     return vBoolPar_.at(i-vDoublePar_.size()-vIntPar_.size());
 
   throw BadParameter("Parameter not in list");
-  return 0;
+  return std::shared_ptr<AbsParameter>();
 }
 
 std::shared_ptr<AbsParameter> ParameterList::GetParameter(const std::string parname) {
@@ -108,7 +108,7 @@ std::shared_ptr<AbsParameter> ParameterList::GetParameter(const std::string parn
 
 
   throw BadParameter("Parameter not found by name: "+parname);
-  return 0;
+  return std::shared_ptr<AbsParameter>();
 }
 
 std::shared_ptr<DoubleParameter> ParameterList::GetDoubleParameter(const unsigned int i) {

@@ -31,8 +31,12 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 
+#include <boost/log/trivial.hpp>
+using namespace boost::log;
+
 struct Resonance
 {
+	bool m_enable;
 	std::string m_name;
 	std::string m_reference;
 	double m_mass; //TODO: struct for borders?
@@ -68,10 +72,15 @@ private:
 	std::string m_file;          // ini filename
 	std::vector<Resonance> m_resonances;          // resonances
 	std::vector<ResonanceFlatte> m_resonancesFlatte;          // resonances
+
+unsigned int nResEnabled;
+unsigned int nRes;
 public:
-	AmplitudeSetup(const std::string &filename){load(filename);};
-	AmplitudeSetup(const AmplitudeSetup& other) : m_file(other.m_file), \
-			m_resonances(other.m_resonances) , m_resonancesFlatte(other.m_resonancesFlatte){};
+	AmplitudeSetup(const std::string &filename) : nRes(0),nResEnabled(0) { load(filename); };
+	AmplitudeSetup(const AmplitudeSetup& other) : m_file(other.m_file), m_filePath(other.m_filePath),\
+			m_resonances(other.m_resonances) , m_resonancesFlatte(other.m_resonancesFlatte),\
+			nRes(other.nRes),nResEnabled(other.nResEnabled)
+			{};
 	void load(const std::string &filename);
 	void save(const std::string &filename);
 	~AmplitudeSetup(){};
@@ -81,6 +90,9 @@ public:
 	inline const std::string & getFilePath() const {return m_filePath;};
 	inline std::vector<Resonance> & getResonances() { return m_resonances; };
 	inline std::vector<ResonanceFlatte> & getResonancesFlatte() { return m_resonancesFlatte; };
+	inline unsigned int getNRes(){ return nRes; }
+	inline unsigned int getNResEnabled(){ return nResEnabled; }
+
 };
 
 // Loads amplitude_setup structure from the specified XML file
@@ -94,7 +106,6 @@ void AmplitudeSetup::load(const std::string &filename)
 	// Load the XML file into the property tree. If reading fails
 	// (cannot open file, parse error), an exception is thrown.
 	read_xml(filename, pt);
-
 	// Get the filename and store it in the m_file variable.
 	// Note that we construct the path to the value by separating
 	// the individual keys with dots. If dots appear in the keys,
@@ -112,6 +123,7 @@ void AmplitudeSetup::load(const std::string &filename)
 		if( v.first == "resonance" ) {
 			Resonance f;
 //			f.m_reference= v.second.get<std::string>("reference");
+			f.m_enable = v.second.get<bool>("enable");
 			f.m_name = v.second.get<std::string>("name");
 			f.m_mass = v.second.get<double>("mass");
 			f.m_mass_min = v.second.get<double>("mass_min");;
@@ -129,10 +141,13 @@ void AmplitudeSetup::load(const std::string &filename)
 			f.m_daugtherA = v.second.get<unsigned>("daugtherA");
 			f.m_daugtherB = v.second.get<unsigned>("daugtherB");
 			m_resonances.push_back(f);
+			if(f.m_enable) nResEnabled++;
+			nRes++;
 		}
 		if( v.first == "resonanceFlatte" ) {
 			ResonanceFlatte f;
 //			f.m_reference= v.second.get<std::string>("reference");
+			f.m_enable = v.second.get<bool>("enable");
 			f.m_name = v.second.get<std::string>("name");
 			f.m_mass = v.second.get<double>("mass");
 			f.m_mass_min = v.second.get<double>("mass_min");;
@@ -154,8 +169,12 @@ void AmplitudeSetup::load(const std::string &filename)
 			f.m_hiddenParticle1 = v.second.get<std::string>("hiddenParticle1");
 			f.m_hiddenParticle2 = v.second.get<std::string>("hiddenParticle2");
 			m_resonancesFlatte.push_back(f);
+			if(f.m_enable) nResEnabled++;
+			nRes++;
 		}
 	}
+	BOOST_LOG_TRIVIAL(info) << "AmplitudeSetup::load() file " << filename
+			<< " with " << nRes	<< "("<<nResEnabled<<") resonances all(enabled)!";
 	return;
 }
 
@@ -176,51 +195,52 @@ void AmplitudeSetup::save(const std::string &filename)
 	// (i.e. at the front or somewhere in the middle), this can
 	// be achieved using a combination of the insert and put_own
 	// functions.
+
 	BOOST_FOREACH( Resonance const& v, m_resonances ) {
-		//     ptree & node = pt.add("amplitude_setup.resonance", "");
-		pt.add("amplitude_setup.resonance", "");
-		pt.put("name", v.m_name);
-		pt.put("mass", v.m_mass);
-		pt.put("mass_min", v.m_mass_min);
-		pt.put("mass_max", v.m_mass_max);
-		pt.put("mesonRadius", v.m_mesonRadius);
-		pt.put("width", v.m_width);
-		pt.put("width_min", v.m_width_min);
-		pt.put("width_max", v.m_width_max);
-		pt.put("norm",v.m_norm);
-		pt.put("strength", v.m_strength);
-		pt.put("phase", v.m_phase);
-		pt.put("spin", v.m_spin);
-		pt.put("m", v.m_m);
-		pt.put("n", v.m_n);
-		pt.put("daughterA", v.m_daugtherA);
-		pt.put("daughterB", v.m_daugtherB);
-		//if( !v.valid ) node.put("<xmlattr>.invalid", true);
+		ptree & node = pt.add("amplitude_setup.resonance", "");
+		node.put("enable", v.m_enable);
+		node.put("name", v.m_name);
+		node.put("mass", v.m_mass);
+		node.put("mass_min", v.m_mass_min);
+		node.put("mass_max", v.m_mass_max);
+		node.put("mesonRadius", v.m_mesonRadius);
+		node.put("width", v.m_width);
+		node.put("width_min", v.m_width_min);
+		node.put("width_max", v.m_width_max);
+		node.put("norm",v.m_norm);
+		node.put("strength", v.m_strength);
+		node.put("phase", v.m_phase);
+		node.put("spin", v.m_spin);
+		node.put("m", v.m_m);
+		node.put("n", v.m_n);
+		node.put("daugtherA", v.m_daugtherA);
+		node.put("daugtherB", v.m_daugtherB);
+//		//if( !v.valid ) node.put("<xmlattr>.invalid", true);
 	}
 	BOOST_FOREACH( ResonanceFlatte const& v, m_resonancesFlatte ) {
-		//     ptree & node = pt.add("amplitude_setup.resonance", "");
-		pt.add("amplitude_setup.resonanceFlatte", "");
-		pt.put("name", v.m_name);
-		pt.put("mass", v.m_mass);
-		pt.put("mass_min", v.m_mass_min);
-		pt.put("mass_max", v.m_mass_max);
-		pt.put("mesonRadius", v.m_mesonRadius);
-		pt.put("width", v.m_width);
-		pt.put("width_min", v.m_width_min);
-		pt.put("width_max", v.m_width_max);
-		pt.put("norm",v.m_norm);
-		pt.put("coupling", v.m_coupling);
-		pt.put("couplingHidden", v.m_couplingHidden);
-		pt.put("hiddenParticle1", v.m_hiddenParticle1);
-		pt.put("hiddenParticle2", v.m_hiddenParticle2);
-		pt.put("strength", v.m_strength);
-		pt.put("phase", v.m_phase);
-		pt.put("spin", v.m_spin);
-		pt.put("m", v.m_m);
-		pt.put("n", v.m_n);
-		pt.put("daughterA", v.m_daugtherA);
-		pt.put("daughterB", v.m_daugtherB);
-		//if( !v.valid ) node.put("<xmlattr>.invalid", true);
+		ptree & node = pt.add("amplitude_setup.resonance", "");
+		node.put("enable", v.m_enable);
+		node.put("name", v.m_name);
+		node.put("mass", v.m_mass);
+		node.put("mass_min", v.m_mass_min);
+		node.put("mass_max", v.m_mass_max);
+		node.put("mesonRadius", v.m_mesonRadius);
+		node.put("width", v.m_width);
+		node.put("width_min", v.m_width_min);
+		node.put("width_max", v.m_width_max);
+		node.put("norm",v.m_norm);
+		node.put("coupling", v.m_coupling);
+		node.put("couplingHidden", v.m_couplingHidden);
+		node.put("hiddenParticle1", v.m_hiddenParticle1);
+		node.put("hiddenParticle2", v.m_hiddenParticle2);
+		node.put("strength", v.m_strength);
+		node.put("phase", v.m_phase);
+		node.put("spin", v.m_spin);
+		node.put("m", v.m_m);
+		node.put("n", v.m_n);
+		node.put("daugtherA", v.m_daugtherA);
+		node.put("daugtherB", v.m_daugtherB);
+//		//if( !v.valid ) node.put("<xmlattr>.invalid", true);
 	}
 
 

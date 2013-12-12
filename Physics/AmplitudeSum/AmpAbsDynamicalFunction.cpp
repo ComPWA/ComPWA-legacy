@@ -55,7 +55,7 @@ double evalWrapper(double* x, size_t dim, void* param) {
 
 double AmpAbsDynamicalFunction::integral() const{
 
-	BOOST_LOG_TRIVIAL(debug)<<"AmpRelBreitWignerRes::integral() calculating integral of "<<_name<<" !";
+	BOOST_LOG_TRIVIAL(debug)<<"AmpAbsDynamicalFunction::integral() calculating integral of "<<_name<<" !";
 	size_t dim=2;
 	double res=0.0, err=0.0;
 
@@ -77,7 +77,7 @@ double AmpAbsDynamicalFunction::integral() const{
 	gsl_monte_vegas_state *s = gsl_monte_vegas_alloc (dim);
 	gsl_monte_vegas_integrate (&F, xLimit_low, xLimit_high, 2, calls, r,s,&res, &err);
 	gsl_monte_vegas_free(s);
-	BOOST_LOG_TRIVIAL(info)<<"AmpAbsDynamicalFunction::integral() Integration result for |"<<_name<<"|^2: "<<res<<"+-"<<err<<" relAcc [%]: "<<100*err/res;
+	BOOST_LOG_TRIVIAL(debug)<<"AmpAbsDynamicalFunction::integral() Integration result for |"<<_name<<"|^2: "<<res<<"+-"<<err<<" relAcc [%]: "<<100*err/res;
 
 	return res;
 }

@@ -45,35 +45,37 @@ AmpSumIntensity::AmpSumIntensity(const AmpSumIntensity& other) : nAmps(other.nAm
 }
 
 /// Default Constructor (0x0)
-AmpSumIntensity::AmpSumIntensity(AmplitudeSetup ini, unsigned int entries, normalizationStyle ns,double dpArea) :
-						//_kin(kin),
-						totAmp("relBWsumAmplitude", "totAmp"),
-						ampSetup(ini),
-						_entries(entries),
-						_normStyle(ns),
-						_dpArea(dpArea)
+AmpSumIntensity::AmpSumIntensity(AmplitudeSetup ini, normalizationStyle ns, unsigned int entries, double dpArea) :
+						totAmp("relBWsumAmplitude", "totAmp"), ampSetup(ini),
+						_entries(entries), _normStyle(ns), _calcNorm(1), _dpArea(dpArea)
+{
+	init();
+}
+
+AmpSumIntensity::AmpSumIntensity(AmplitudeSetup ini, unsigned int entries, double dpArea) :
+						totAmp("relBWsumAmplitude", "totAmp"), ampSetup(ini),
+						_entries(entries), _normStyle(none), _calcNorm(0), _dpArea(dpArea)
 {
 	init();
 }
 
 AmpSumIntensity::AmpSumIntensity(const double inM, const double inBr, const double in1,const double in2, const double in3,
 		std::string nameM, std::string name1,std::string name2,std::string name3,
-		AmplitudeSetup ini, unsigned int entries, normalizationStyle ns) :
-				totAmp("relBWsumAmplitude", "totAmp"),
-				ampSetup(ini),
-				_entries(entries),
-				_normStyle(ns)
+		AmplitudeSetup ini, unsigned int entries, normalizationStyle ns, double dpArea) :
+				totAmp("relBWsumAmplitude", "totAmp"), ampSetup(ini),
+				_entries(entries), _normStyle(ns), _calcNorm(1),_dpArea(dpArea)
 {
 	init();
 }
 
 void AmpSumIntensity::init(){
 	if(_dpArea==-999) _dpArea = DalitzKinematics::instance()->getDParea();
-	BOOST_LOG_TRIVIAL(info)<<"AmpSumIntensity::init() number of Entries in dalitz plot set to: "<<_entries;
-	BOOST_LOG_TRIVIAL(info)<<"AmpSumIntensity::init() area of phase space: "<<_dpArea;
+	BOOST_LOG_TRIVIAL(debug)<<"AmpSumIntensity::init() number of Entries in dalitz plot set to: "<<_entries;
+	BOOST_LOG_TRIVIAL(debug)<<"AmpSumIntensity::init() area of phase space: "<<_dpArea;
 
 	for(std::vector<Resonance>::iterator reso=ampSetup.getResonances().begin(); reso!=ampSetup.getResonances().end(); reso++){
 		Resonance tmp = (*reso);
+		if(!tmp.m_enable) continue;
 		//setup RooVars
 		namer.push_back(tmp.m_name);
 		mr.push_back( std::shared_ptr<DoubleParameter> (new DoubleParameter("mass_"+tmp.m_name,tmp.m_mass, tmp.m_mass_min, tmp.m_mass_max) ) );
@@ -91,17 +93,17 @@ void AmpSumIntensity::init(){
 
 		//setting normalization between amplitudes
 		double norm=tmp.m_norm;
-		if(norm<0 || 1) {//recalculate normalization
+		if(norm<0 || _calcNorm) {//recalculate normalization
 			norm = normReso(tmpbw);
-			tmp.m_norm = norm;
+			reso->m_norm = norm;//updating normalization
 		}
 		tmpbw->SetNormalization(1/norm);
-		BOOST_LOG_TRIVIAL(info)<<"AmpSumIntensity::init() Normalization constant for "<<tmp.m_name<<": "<<1/norm;
 	}// end loop over resonances
 
 
 	for(std::vector<ResonanceFlatte>::iterator reso=ampSetup.getResonancesFlatte().begin(); reso!=ampSetup.getResonancesFlatte().end(); reso++){
 		ResonanceFlatte tmp = (*reso);
+		if(!tmp.m_enable) continue;
 		//setup RooVars
 		namer.push_back(tmp.m_name);
 		mr.push_back( std::shared_ptr<DoubleParameter> (new DoubleParameter("mass_"+tmp.m_name,tmp.m_mass, tmp.m_mass_min, tmp.m_mass_max) ) );
@@ -123,16 +125,16 @@ void AmpSumIntensity::init(){
 		totAmp.addBW(tmpbw, rr.at(last), phir.at(last));
 
 		double norm=tmp.m_norm;
-		if(norm<0 || 1) {//recalculate normalization
+		if(norm<0 || _calcNorm) {//recalculate normalization
 			norm = normReso(tmpbw);
-			tmp.m_norm = norm;
+			reso->m_norm = norm;//updating normalization
 		}
 		tmpbw->SetNormalization(1/norm);
 	}// end loop over resonancesFlatte
 
-	//	ampSetup.save(ampSetup.getFilePath());
+	ampSetup.save(ampSetup.getFilePath());//save updated information to input file
 	nAmps=rr.size();
-	integral();
+	if(_calcNorm) integral();
 	BOOST_LOG_TRIVIAL(info)<<"AmpSumIntensity: completed setup!";
 }
 double AmpSumIntensity::normReso(std::shared_ptr<AmpAbsDynamicalFunction> amp){
@@ -140,7 +142,7 @@ double AmpSumIntensity::normReso(std::shared_ptr<AmpAbsDynamicalFunction> amp){
 	if(_normStyle==none) norm=1;
 	else if(_normStyle==one) norm = sqrt(amp->integral());
 	else if(_normStyle==entries) norm = sqrt(_dpArea*amp->integral()/_entries);
-	BOOST_LOG_TRIVIAL(debug)<<"AmpSumIntensity: INFO: Normalization constant for "<<amp->GetName()<<": "<<1/norm;
+	BOOST_LOG_TRIVIAL(debug)<<"AmpSumIntensity::normRes Normalization constant for "<<amp->GetName()<<": "<<1/norm;
 	return norm;
 
 }
@@ -195,7 +197,7 @@ const double AmpSumIntensity::integral(){
 	gsl_monte_vegas_state *s = gsl_monte_vegas_alloc (dim);
 	gsl_monte_vegas_integrate (&G, xLimit_low, xLimit_high, 2, calls, r,s,&res, &err);
 	gsl_monte_vegas_free(s);
-	BOOST_LOG_TRIVIAL(info)<<"AmpSumIntensity: INFO: Integration result for amplitude sum: "<<res<<"+-"<<err<<" relAcc [%]: "<<100*err/res;
+	BOOST_LOG_TRIVIAL(info)<<"AmpSumIntensity::integrate() Integration result for amplitude sum: "<<res<<"+-"<<err<<" relAcc [%]: "<<100*err/res;
 
 	return res;
 }
