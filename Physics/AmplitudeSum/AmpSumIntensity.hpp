@@ -60,7 +60,10 @@ public:
 	//! normalization integral
 	virtual const double integral();
 	//! maximum value of amplitude with parameters \par
-	virtual double getMaxVal(ParameterList& par) { return 1; };
+	virtual double getMaxVal();
+	virtual double getMaxVal(ParameterList& par);
+	virtual void calcMaxVal(ParameterList& par);
+	virtual void calcMaxVal();
 
 	virtual void setNevents(unsigned int n) { _entries=n; };
 	virtual unsigned int getNevents() { return _entries; };
@@ -86,8 +89,9 @@ public:
 protected:
 	void init();
 
+	bool _calcMaxFcnVal;
 	bool _calcNorm;
-
+	double _maxFcnVal;
 	AmpSumOfAmplitudes totAmp;
 	AmplitudeSetup ampSetup;
 
