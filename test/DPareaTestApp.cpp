@@ -27,7 +27,6 @@
 
 // Physics Interface header files go here
 #include "Physics/DPKinematics/DalitzKinematics.hpp"
-#include "Physics/DPKinematics/DataPoint.hpp"
 
 using namespace std;
 
@@ -37,7 +36,7 @@ using namespace std;
  */
 int main(int argc, char **argv){
 
-	DalitzKinematics* kin = DalitzKinematics::createInstance("J/psi","gamma","gamma","gamma");
+	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(DalitzKinematics::createInstance("J/psi","gamma","gamma","gamma"));
 	double area = kin->getDParea();
 
 	std::cout<<"DPareaApp: Phase space area expected from the decay X-> gamma gamma gamma with M(X)=1.0GeV "\

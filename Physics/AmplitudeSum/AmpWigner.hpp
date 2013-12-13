@@ -24,7 +24,7 @@
 //#include "RooRealProxy.h"
 //#include "RooAbsReal.h"
 #include "Physics/DPKinematics/DalitzKinematics.hpp"
-#include "Physics/DPKinematics/DataPoint2.hpp"
+#include "Core/DataPoint.hpp"
 
 using namespace std;
 
@@ -41,7 +41,7 @@ public:
 
   virtual inline bool hasDist(){return toEvaluate;};
   virtual void initialise();
-  virtual double evaluate(dataPoint2& point) const;
+  virtual double evaluate(dataPoint& point) const;
   void setDecayMasses(double, double, double, double);
 
 protected:

@@ -24,15 +24,15 @@
 #include <iostream>
 #include <vector>
 
-//#include "boost/log/core.hpp"
-//#include "boost/log/expressions.hpp"
 #include <boost/log/trivial.hpp>
 using namespace boost::log;
 
-class DalitzKinematics
+#include "Core/Kinematics.hpp"
+
+class DalitzKinematics : public Kinematics
 {
 private:
-	static DalitzKinematics* inst;
+//	static DalitzKinematics* inst;
 	bool _DPareaCalculated;
 	double _DParea;
 	//! calculated dalitz plot area for the given kinematics
@@ -49,31 +49,31 @@ private:
 	DalitzKinematics(double _M, double _Br, double _m1, double _m2, double _m3,
 			std::string _nameMother, std::string _name1, std::string _name2, std::string _name3);
 
-	std::vector<std::string> varNames;
+//	std::vector<std::string> varNames;
 
 
 public:
-	static DalitzKinematics* createInstance(std::string _nameMother, std::string _name1, std::string _name2, std::string _name3){
-		inst = new DalitzKinematics(_nameMother, _name1, _name2,_name3);
-		return inst;
+	static Kinematics* createInstance(std::string _nameMother, std::string _name1, std::string _name2, std::string _name3){
+		_inst = new DalitzKinematics(_nameMother, _name1, _name2,_name3);
+		return _inst;
 	}
-	static DalitzKinematics* instance(){
-		if(!inst) {
-			BOOST_LOG_TRIVIAL(fatal)<<"DPKinematics: ERROR instance not created first!";
-			return 0;
-		}
-		return inst;
-	};
+//	static DalitzKinematics* instance(){
+//		if(!inst) {
+//			BOOST_LOG_TRIVIAL(fatal)<<"DPKinematics: ERROR instance not created first!";
+//			return 0;
+//		}
+//		return inst;
+//	};
 
 	unsigned int sizeOfPhsp(){ return 3; }
-	std::vector<std::string> getVarNames(){return varNames;}
+//	std::vector<std::string> getVarNames(){return varNames;}
 	void phspContour(unsigned int xsys,unsigned int ysys, unsigned int n, double* xcoord, double* ycoord);
 	//! calculated the helicity angle
 	double calcHelicityAngle(double invM1sq, double invM2sq, double M, double ma, double mb, double mc);
 	//! Calculates third dalitz plot variable, e.g f(s1,s2)=s3
 	double getThirdVariableSq(double, double) const;
 	//! checks of data point is within phase space boundaries
-	bool isWithinDP(double m23, double m13, double m12=0) const;
+	bool isWithinPhsp(const dataPoint &point) const;
 	//! returns the dalitz plot area for the given kinematics
 	double getDParea();
 

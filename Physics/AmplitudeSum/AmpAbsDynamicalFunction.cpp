@@ -38,10 +38,10 @@ double AmpAbsDynamicalFunction::evaluate(double x[], size_t dim) const {
 //	dataPoint::instance()->setMsq(4,x[0]);
 //	dataPoint::instance()->setMsq(5,x[1]);
 //	dataPoint::instance()->setMsq(3,m12sq);
-
-	double m12sq = DalitzKinematics::instance()->getThirdVariableSq(x[0],x[1]);
-	dataPoint2 pp; pp.setVal("m23sq",x[1]);pp.setVal("m13sq",x[0]);
-	if( !DalitzKinematics::instance()->isWithinDP(x[1],x[0],m12sq) ) return 0;//only integrate over phase space
+	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
+	double m12sq = kin->getThirdVariableSq(x[0],x[1]);
+	dataPoint pp; pp.setVal("m23sq",x[1]);pp.setVal("m13sq",x[0]);
+	if( !kin->isWithinPhsp(pp) ) return 0;//only integrate over phase space
 	std::complex<double> res = evaluate(pp);
 	return ( std::abs(res)*std::abs(res) ); //integrate over |F|^2
 }
@@ -59,7 +59,7 @@ double AmpAbsDynamicalFunction::integral() const{
 	size_t dim=2;
 	double res=0.0, err=0.0;
 
-	DalitzKinematics* kin = DalitzKinematics::instance();
+		DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
 	//set limits: we assume that x[0]=m13sq and x[1]=m23sq
 	double xLimit_low[2] = {kin->m13_sq_min,kin->m23_sq_min};
 	double xLimit_high[2] = {kin->m13_sq_max,kin->m23_sq_max};

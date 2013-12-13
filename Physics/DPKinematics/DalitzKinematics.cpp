@@ -20,7 +20,7 @@
 #include "gsl/gsl_monte_plain.h"
 #include "gsl/gsl_monte_miser.h"
 #include "gsl/gsl_monte_vegas.h"
-DalitzKinematics* DalitzKinematics::inst = NULL;
+//DalitzKinematics* DalitzKinematics::inst = NULL;
 
 double DalitzKinematics::invMassMax(unsigned int sys, unsigned int sys2, double invMass_sys) const {
 	unsigned int part1, part2;
@@ -232,9 +232,10 @@ void DalitzKinematics::init(){
 double phspFunc(double* x, size_t dim, void* param) {
 	if(dim!=2) return 0;
 	DalitzKinematics* kin =	static_cast<DalitzKinematics*>(param);
-	double m12sq = kin->getThirdVariableSq(x[0],x[1]);
+//	double m12sq = kin->getThirdVariableSq(x[0],x[1]);
 	//use MC integration of a step function to obtain the DP area
-	if( kin->isWithinDP(x[1],x[0],m12sq) ) return 1.0;
+	dataPoint pp; pp.setVal("m23sq",x[1]);pp.setVal("m13sq",x[0]);
+	if( kin->isWithinPhsp(pp) ) return 1.0;
 	return 0.0;
 };
 
@@ -335,8 +336,10 @@ double DalitzKinematics::getThirdVariableSq(double invmass1sq, double invmass2sq
 //	return isWithinDP(s1,s2,s3);
 //}
 
-bool DalitzKinematics::isWithinDP(double m23sq, double m13sq, double m12sq) const{
-	if(m12sq==0) m12sq=getThirdVariableSq(m23sq,m12sq);
+bool DalitzKinematics::isWithinPhsp(const dataPoint& point) const{
+	double m23sq = point.getVal("m23sq");
+	double m13sq = point.getVal("m13sq");
+	double m12sq=getThirdVariableSq(m23sq,m13sq);
 	/*!
 	 * \brief checks if phase space point lies within the kinematically allowed region.
 	 * \param m23 invariant mass of particles 2 and 3

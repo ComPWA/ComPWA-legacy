@@ -30,7 +30,7 @@ AmpWigner2::AmpWigner2(const AmpWigner2& other, const char* newname) : _resSpin(
 
 void AmpWigner2::initialise()
 {
-	DalitzKinematics* kin = DalitzKinematics::instance();
+	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
 	_M=kin->M;
 	_m1=kin->m1;
 	_m2=kin->m2;
@@ -41,9 +41,8 @@ void AmpWigner2::initialise()
 	_spin2 = kin->getSpin(2);
 
 }
-double AmpWigner2::evaluate(dataPoint2& point) const {
-//	dataPoint* point = dataPoint::instance();
-	DalitzKinematics* kin = DalitzKinematics::instance();
+double AmpWigner2::evaluate(dataPoint& point) const {
+	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
 
 	double cosTheta=-999, result=-999;
 	Spin J((int)_resSpin);
@@ -55,7 +54,7 @@ double AmpWigner2::evaluate(dataPoint2& point) const {
 	Spin N, M;
 	double m23sq = point.getVal("m23sq");
 	double m13sq = point.getVal("m13sq");
-	double m12sq = DalitzKinematics::instance()->getThirdVariableSq(m23sq,m13sq);
+	double m12sq = kin->getThirdVariableSq(m23sq,m13sq);
 
 	switch(_subSys){
 	case 3:

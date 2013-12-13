@@ -67,7 +67,7 @@ void AmpSumOfAmplitudes::addBW(std::shared_ptr<AmpAbsDynamicalFunction> theRes ,
   _angList.push_back(std::shared_ptr<AmpWigner>(new AmpWigner()));
 }
 
-double AmpSumOfAmplitudes::evaluate(dataPoint2& point) const
+double AmpSumOfAmplitudes::evaluate(dataPoint& point) const
  { 
 //   RooComplex res;
    complex<double> res;
@@ -91,7 +91,7 @@ double AmpSumOfAmplitudes::evaluate(dataPoint2& point) const
    return ( std::abs(res)*std::abs(res) );
  } 
 
- double AmpSumOfAmplitudes::evaluateSlice(dataPoint2& point, std::complex<double>* reso, unsigned int nResos, unsigned int subSys=1) const
+ double AmpSumOfAmplitudes::evaluateSlice(dataPoint& point, std::complex<double>* reso, unsigned int nResos, unsigned int subSys=1) const
  { 
    // ENTER EXPRESSION IN TERMS OF VARIABLE ARGUMENTS HERE 
    std::complex<double> res;
