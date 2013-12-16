@@ -1,13 +1,9 @@
-//-------------------------------------------------------------------------------
-// Copyright (c) 2013 Peter Weidenkaff.
-// All rights reserved. This program and the accompanying materials
-// are made available under the terms of the GNU Public License v3.0
-// which accompanies this distribution, and is available at
-// http://www.gnu.org/licenses/gpl.html
-//
-// Contributors:
-//     Peter Weidenkaff - initial API
-//-------------------------------------------------------------------------------
+/*
+ * RootGenerator.hpp
+ *
+ *  Created on: Nov 23, 2013
+ *      Author: weidenka
+ */
 
 #ifndef ROOTGENERATOR_HPP_
 #define ROOTGENERATOR_HPP_
@@ -33,7 +29,7 @@ private:
 	TGenPhaseSpace event;
 public:
 	RootGenerator(){
-		DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
+		DalitzKinematics* kin = DalitzKinematics::instance();
 		//Generation
 		TLorentzVector W(0.0, 0.0, 0.0, kin->getMass(0));//= beam + target;
 		//(Momentum, Energy units are Gev/C, GeV)

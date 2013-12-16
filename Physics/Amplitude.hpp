@@ -31,7 +31,7 @@
 #include "Core/ParameterList.hpp"
 #include "Core/FunctionTree.hpp"
 
-#include "Core/DataPoint.hpp"
+#include "Physics/DPKinematics/DataPoint2.hpp"
 class Amplitude
 {
 
@@ -51,8 +51,8 @@ public:
 	virtual double getMaxVal(ParameterList& par) = 0;
 	//virtual const double volume() =0;
 
-	virtual const ParameterList intensity(dataPoint& point, ParameterList& par) =0;
-	virtual const ParameterList intensity(dataPoint& point) =0;
+	virtual const ParameterList intensity(dataPoint2& point, ParameterList& par) =0;
+	virtual const ParameterList intensity(dataPoint2& point) =0;
 	virtual const ParameterList intensity(std::vector<double> point, ParameterList& par) =0;
 
 	virtual const bool fillStartParVec(ParameterList& outPar) =0;

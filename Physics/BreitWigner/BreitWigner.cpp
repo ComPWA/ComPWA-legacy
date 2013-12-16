@@ -57,18 +57,18 @@ const ParameterList BreitWigner::intensity(double x, double M, double T){
 	return result;
 }
 
-const ParameterList BreitWigner::intensity(dataPoint& point){
+const ParameterList BreitWigner::intensity(dataPoint2& point){
 	ParameterList result;
 	double val = BreitWignerValue(point.getVal("m23"),params.GetDoubleParameter(0)->GetValue(), params.GetDoubleParameter(1)->GetValue());
 	result.AddParameter(std::shared_ptr<DoubleParameter>(new DoubleParameter("BreitWignerResult",val)));
 	return result;
 }
-const ParameterList BreitWigner::intensity(dataPoint& point, ParameterList& par){
+const ParameterList BreitWigner::intensity(dataPoint2& point, ParameterList& par){
 	setParameterList(par);
 	return intensity(point);
 }
 const ParameterList BreitWigner::intensity(std::vector<double> x, ParameterList& par){
-	dataPoint dataP; dataP.setVal("m23",x[0]); dataP.setVal("m13",x[1]);
+	dataPoint2 dataP; dataP.setVal("m23",x[0]); dataP.setVal("m13",x[1]);
 	return intensity(dataP,par);
 }
 

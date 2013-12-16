@@ -34,7 +34,7 @@
 #include "Physics/AmplitudeSum/AmpWigner.hpp"
 #include "Physics/AmplitudeSum/AmpSumOfAmplitudes.hpp"
 #include "Physics/DPKinematics/DalitzKinematics.hpp"
-#include "Core/DataPoint.hpp"
+#include "Physics/DPKinematics/DataPoint2.hpp"
 
 class AmpSumIntensity : public Amplitude {
 
@@ -68,9 +68,9 @@ public:
 	//! setting new parameterList
 	virtual void setParameterList(ParameterList& par);
 	//! evaluate total amplitude using parameters \par at phsp point \point
-	virtual const ParameterList intensity(dataPoint& point, ParameterList& par);
+	virtual const ParameterList intensity(dataPoint2& point, ParameterList& par);
 	//! evaluate total amplitude using current set of parametersat phsp point \point
-	virtual const ParameterList intensity(dataPoint& point);
+	virtual const ParameterList intensity(dataPoint2& point);
 	virtual const ParameterList intensity(std::vector<double> point, ParameterList& par);
 
 	virtual const bool fillStartParVec(ParameterList& outPar);

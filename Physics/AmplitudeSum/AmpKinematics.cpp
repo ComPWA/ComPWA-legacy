@@ -31,7 +31,8 @@ AmpKinematics::AmpKinematics(DoubleParameter mR, int subSys, int spin, int m, in
 						_mesonRadius(mesonRadius),
 						_motherRadius(motherRadius)
 {
-	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
+//	static dataPoint* point = dataPoint::instance();
+	DalitzKinematics* kin = DalitzKinematics::instance();
 	_M=kin->M;
 	if(_subSys==5){
 		_ma=kin->m3;

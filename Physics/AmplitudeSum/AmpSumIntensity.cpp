@@ -69,8 +69,7 @@ AmpSumIntensity::AmpSumIntensity(const double inM, const double inBr, const doub
 }
 
 void AmpSumIntensity::init(){
-	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
-	if(_dpArea==-999) _dpArea = kin->getDParea();
+	if(_dpArea==-999) _dpArea = DalitzKinematics::instance()->getDParea();
 	BOOST_LOG_TRIVIAL(debug)<<"AmpSumIntensity::init() number of Entries in dalitz plot set to: "<<_entries;
 	BOOST_LOG_TRIVIAL(debug)<<"AmpSumIntensity::init() area of phase space: "<<_dpArea;
 
@@ -149,11 +148,10 @@ double AmpSumIntensity::normReso(std::shared_ptr<AmpAbsDynamicalFunction> amp){
 }
 double AmpSumIntensity::evaluate(double x[], size_t dim) {
 	if(dim!=2) return 0;
-	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
 	//set data point: we assume that x[0]=m13 and x[1]=m23
-	dataPoint point; point.setVal("m13sq",x[0]); point.setVal("m23sq",x[1]);
-	double m12sq = kin->getThirdVariableSq(x[0],x[1]);
-	if( !kin->isWithinPhsp(point) ) return 0;//only integrate over phase space
+	dataPoint2 point; point.setVal("m13sq",x[0]); point.setVal("m23sq",x[1]);
+	double m12sq = DalitzKinematics::instance()->getThirdVariableSq(x[0],x[1]);
+	if( !DalitzKinematics::instance()->isWithinDP(x[1],x[0],m12sq) ) return 0;//only integrate over phase space
 	ParameterList res = intensity(point);
 	double intens = *res.GetDoubleParameter(0);
 	return intens;
@@ -181,7 +179,7 @@ const double AmpSumIntensity::integral(){
 	double res=0.0, err=0.0;
 
 	//set limits: we assume that x[0]=m13sq and x[1]=m23sq
-	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
+	DalitzKinematics* kin = DalitzKinematics::instance();
 	double xLimit_low[2] = {kin->m13_sq_min,kin->m23_sq_min};
 	double xLimit_high[2] = {kin->m13_sq_max,kin->m23_sq_max};
 	//	double xLimit_low[2] = {0,0};
@@ -205,14 +203,14 @@ const double AmpSumIntensity::integral(){
 }
 const ParameterList AmpSumIntensity::intensity(std::vector<double> point, ParameterList& par){
 	setParameterList(par);
-	dataPoint dataP; dataP.setVal("m23sq",point[0]); dataP.setVal("m13sq",point[1]);
+	dataPoint2 dataP; dataP.setVal("m23sq",point[0]); dataP.setVal("m13sq",point[1]);
 	return intensity(dataP);
 }
-const ParameterList AmpSumIntensity::intensity(dataPoint& point, ParameterList& par){
+const ParameterList AmpSumIntensity::intensity(dataPoint2& point, ParameterList& par){
 	setParameterList(par);
 	return intensity(point);
 }
-const ParameterList AmpSumIntensity::intensity(dataPoint& point){
+const ParameterList AmpSumIntensity::intensity(dataPoint2& point){
 	//	std::cout<<dataPoint::instance()->getMsq(2,3)<<" "<<dataPoint::instance()->getMsq(1,3)<<" "<<dataPoint::instance()->getMsq(1,2)<<std::endl;
 	double AMPpdf = totAmp.evaluate(point);
 	if(AMPpdf!=AMPpdf){

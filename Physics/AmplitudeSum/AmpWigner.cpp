@@ -54,7 +54,7 @@ AmpWigner::~AmpWigner()
 
 void AmpWigner::initialise() 
 {
-	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
+	DalitzKinematics* kin= DalitzKinematics::instance();
 	_M=kin->M;
 	//if(_subSys==5){
 	_m1=kin->m1;
@@ -76,15 +76,15 @@ void AmpWigner::setDecayMasses(double m1, double m2, double m3, double M){
 	return;
 }
 
-double AmpWigner::evaluate(dataPoint& point) const {
+double AmpWigner::evaluate(dataPoint2& point) const {
 	if(!toEvaluate) return 1.;
-	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
+	DalitzKinematics* kin = DalitzKinematics::instance();
 
 	double locmin_sq, locmax_sq, beta;
 
 	double m23sq = point.getVal("m23sq");
 	double m13sq = point.getVal("m13sq");
-	double m12sq = kin->getThirdVariableSq(m23sq,m13sq);
+	double m12sq = DalitzKinematics::instance()->getThirdVariableSq(m23sq,m13sq);
 	double invM1 = -999;
 	double invM2 = -999;
 	switch(_subSys){

@@ -57,16 +57,15 @@ void AmpGausRes::initialise()
 {
 }   
 
-std::complex<double> AmpGausRes::evaluateAmp(dataPoint& point) const {
+std::complex<double> AmpGausRes::evaluateAmp(dataPoint2& point) const {
 
 
 	double m0 = _mR.GetValue();
 	double width = _resWidth.GetValue();
 	//  double m  = Double_t(_x);
-	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
 	double m23sq = point.getVal("m23sq");
 	double m13sq = point.getVal("m13sq");
-	double m12sq = kin->getThirdVariableSq(m23sq,m13sq);
+	double m12sq = DalitzKinematics::instance()->getThirdVariableSq(m23sq,m13sq);
 	double m = -999;
 	switch(_subSys){
 	case 3: m=sqrt(m12sq); break;
@@ -78,6 +77,6 @@ std::complex<double> AmpGausRes::evaluateAmp(dataPoint& point) const {
 
 	return gaus;
 }
-std::complex<double> AmpGausRes::evaluate(dataPoint& point) const {
+std::complex<double> AmpGausRes::evaluate(dataPoint2& point) const {
 	return evaluateAmp(point)*evaluateWignerD(point);
 }

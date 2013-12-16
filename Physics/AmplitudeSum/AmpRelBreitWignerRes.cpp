@@ -93,17 +93,16 @@ void AmpRelBreitWignerRes::setDecayMasses(double ma, double mb, double mc, doubl
 //	_wignerD.setDecayMasses(ma, mb, mc, M);
 	return;
 }
-std::complex<double> AmpRelBreitWignerRes::evaluateAmp(dataPoint& point) const {
+std::complex<double> AmpRelBreitWignerRes::evaluateAmp(dataPoint2& point) const {
 	if(_ma == -999 || _mb == -999 ||_mc == -999 ||_M == -999){
 		std::cout<<"Masses of decay products not set!"<<std::endl;
 		return 0;
 	}
 	std::complex<double> result;
 //	double m = dataPoint::instance()->getM(_subSys);
-	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
 	double m23sq = point.getVal("m23sq");
 	double m13sq = point.getVal("m13sq");
-	double m12sq = kin->getThirdVariableSq(m23sq,m13sq);
+	double m12sq = DalitzKinematics::instance()->getThirdVariableSq(m23sq,m13sq);
 	double m = -999;
 	switch(_subSys){
 	case 3: m=sqrt(m12sq); break;
@@ -125,7 +124,7 @@ std::complex<double> AmpRelBreitWignerRes::evaluateAmp(dataPoint& point) const {
 	if(result.imag()!=result.imag()) {std::cout << "IM part NAN" << std::endl; return 0;}
 	return result;
 }
-std::complex<double> AmpRelBreitWignerRes::evaluate(dataPoint& point) const {
+std::complex<double> AmpRelBreitWignerRes::evaluate(dataPoint2& point) const {
 //	std::cout<<evaluateAmp()<<" "<<evaluateWignerD()<<std::endl;
 	unsigned int twoJplusOne = (2*_spin+1);
 //	return evaluateAmp()*evaluateWignerD(); //DEBUG

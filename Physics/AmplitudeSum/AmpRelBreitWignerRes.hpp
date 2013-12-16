@@ -47,9 +47,9 @@ public:
 	//  double operator() (double *x, size_t dim, void*);
 
 	virtual void initialise();
-	virtual std::complex<double> evaluate(dataPoint& point) const ;
-	virtual std::complex<double> evaluateAmp(dataPoint& point) const;
-	virtual double evaluateWignerD(dataPoint& point) const { return _wignerD.evaluate(point); };
+	virtual std::complex<double> evaluate(dataPoint2& point) const ;
+	virtual std::complex<double> evaluateAmp(dataPoint2& point) const;
+	virtual double evaluateWignerD(dataPoint2& point) const { return _wignerD.evaluate(point); };
 	//  virtual double eval(double x[],size_t dim, void *param) const;//used for MC integration
 	//  double (*eval2)(double x[],size_t dim, void *param);//used for MC integration
 

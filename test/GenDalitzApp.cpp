@@ -45,12 +45,14 @@ using namespace boost::log;
 
 // Physics Interface header files go here
 #include "Core/PhysConst.hpp"
+#include "Physics/DPKinematics/DataPoint.hpp"
 #include "Physics/AmplitudeSum/AmpSumIntensity.hpp"
 #include "Physics/AmplitudeSum/AmplitudeSetup.hpp"
 #include "Core/Parameter.hpp"
 #include "Core/ParameterList.hpp"
 #include "Physics/DPKinematics/DalitzKinematics.hpp"
-#include "Core/DataPoint.hpp"
+//#include "Physics/DPKinematics/DataPoint.hpp"
+#include "Physics/DPKinematics/DataPoint2.hpp"
 
 using namespace std;
 
@@ -71,7 +73,7 @@ int main(int argc, char **argv){
 	unsigned int i=0, mc=0;
 	TRandom3 rando;
 
-	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(DalitzKinematics::createInstance("J/psi","gamma","pi0","pi0"));
+	DalitzKinematics* kin = DalitzKinematics::createInstance("J/psi","gamma","pi0","pi0");
 //	static dataPoint* point = dataPoint::instance();
 
 
@@ -157,7 +159,7 @@ int main(int argc, char **argv){
 
 		m23sq=pPm23.M2(); m13sq=pPm13.M2(); m12sq=pPm12.M2();
 
-	dataPoint dataP; dataP.setVal("m23sq",m23sq);	dataP.setVal("m13sq",m13sq);
+	dataPoint2 dataP; dataP.setVal("m23sq",m23sq);	dataP.setVal("m13sq",m13sq);
 //		point->setMsq(3,m12sq); point->setMsq(4,m13sq); point->setMsq(5,m23sq);
 		//		m12sq=M*M+m1*m1+m2*m2+m3*m3-m13sq-m23sq;
 		if( abs(m12sq-kin->getThirdVariableSq(m23sq,m13sq))>0.01 ){
@@ -198,7 +200,7 @@ int main(int argc, char **argv){
 
 		m23sq=pPm23.M2(); m13sq=pPm13.M2(); m12sq=pPm12.M2();
 
-	dataPoint dataP; dataP.setVal("m23sq",m23sq);	dataP.setVal("m13sq",m13sq);
+	dataPoint2 dataP; dataP.setVal("m23sq",m23sq);	dataP.setVal("m13sq",m13sq);
 		//		m12sq = kin.getThirdVariableSq(m23sq,m13sq);
 //		point->setMsq(3,m12sq); point->setMsq(4,m13sq); point->setMsq(5,m23sq);
 		//		m12sq=M*M+m1*m1+m2*m2+m3*m3-m13sq-m23sq;

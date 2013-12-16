@@ -32,7 +32,8 @@
  * The main function.
  */
 int main(int argc, char **argv){
-	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(DalitzKinematics::createInstance("J/psi","gamma","pi0","pi0"));
+//	static dataPoint* point = dataPoint::instance();
+	DalitzKinematics* kin = DalitzKinematics::createInstance("J/psi","gamma","pi0","pi0");
 	std::string outFile="gen.root";
 	unsigned int dataSize = 10000;
 	//load resonances

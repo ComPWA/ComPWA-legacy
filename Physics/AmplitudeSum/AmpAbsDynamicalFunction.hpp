@@ -18,11 +18,13 @@
 #ifndef AMP_ABS_DYNAMICAL_FUNCTION
 #define AMP_ABS_DYNAMICAL_FUNCTION
 
+//#include "TObject.h"
+//#include "RooComplex.h"
+//#include "RooAbsArg.h"
+#include "Core/Parameter.hpp"
 #include <vector>
 #include <complex>
-
-#include "Core/Parameter.hpp"
-#include "Core/DataPoint.hpp"
+#include "Physics/DPKinematics/DataPoint2.hpp"
 
 class AmpAbsDynamicalFunction {
 public:
@@ -34,9 +36,9 @@ public:
 
 
   virtual void initialise() = 0; 
-  virtual std::complex<double> evaluate(dataPoint& point) const = 0;
-  virtual std::complex<double> evaluateAmp(dataPoint& point) const = 0;
-  virtual double evaluateWignerD(dataPoint& point) const = 0;
+  virtual std::complex<double> evaluate(dataPoint2& point) const = 0;
+  virtual std::complex<double> evaluateAmp(dataPoint2& point) const = 0;
+  virtual double evaluateWignerD(dataPoint2& point) const = 0;
 
   virtual double getSpin() = 0;
   virtual bool isSubSys(const unsigned int) const = 0;

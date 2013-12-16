@@ -51,7 +51,7 @@ int main(int argc, char **argv){
 
 	cout << "DataIF Root 3Particles started " << endl << endl;
 
-	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(DalitzKinematics::createInstance("J/psi","gamma","pi0","pi0"));
+	DalitzKinematics* kin = DalitzKinematics::createInstance("J/psi","gamma","pi0","pi0");
 
 	string file = "test/3Part-4vecs.root";
 	RootReader myReader(file, false,"data",true);
@@ -93,21 +93,21 @@ int main(int argc, char **argv){
 	bw23PHSP->GetYaxis()->CenterTitle();
 
 	double xdata[4001]; double ydata[4001];
-	kin->phspContour(3,4,2000,xdata,ydata);
+	DalitzKinematics::instance()->phspContour(3,4,2000,xdata,ydata);
 	TGraph* m12m13_contour = new TGraph(4001,xdata,ydata);
 	m12m13_contour->SetLineColor(kRed);
 	m12m13_contour->SetMarkerColor(kRed);
 	m12m13_contour->SetTitle("phspContour");
 	m12m13_contour->SetName("m12m13_contour");
 	m12m13_contour->SetFillColor(kWhite);
-	kin->phspContour(4,3,2000,xdata,ydata);
+	DalitzKinematics::instance()->phspContour(4,3,2000,xdata,ydata);
 	TGraph* m13m12_contour = new TGraph(4001,xdata,ydata);
 	m13m12_contour->SetLineColor(kRed);
 	m13m12_contour->SetMarkerColor(kRed);
 	m13m12_contour->SetTitle("phspContour");
 	m13m12_contour->SetName("m13m12_contour");
 	m13m12_contour->SetFillColor(kWhite);
-	kin->phspContour(5,3,2000,xdata,ydata);
+	DalitzKinematics::instance()->phspContour(5,3,2000,xdata,ydata);
 	TGraph* m23m12_contour = new TGraph(4001,xdata,ydata);
 	m23m12_contour->SetLineColor(kRed);
 	m23m12_contour->SetMarkerColor(kRed);
