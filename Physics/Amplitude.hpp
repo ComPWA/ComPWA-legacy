@@ -49,6 +49,7 @@ public:
 
 	virtual const double integral(ParameterList& par) =0;
 	virtual double getMaxVal(ParameterList& par) = 0;
+	virtual double getMaxVal() = 0;
 	//virtual const double volume() =0;
 
 	virtual const ParameterList intensity(dataPoint2& point, ParameterList& par) =0;

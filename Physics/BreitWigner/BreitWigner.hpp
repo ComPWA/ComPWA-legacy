@@ -32,6 +32,7 @@ public:
 	//For normalization
 	virtual const double integral(ParameterList& par);
 	virtual double getMaxVal(ParameterList& par) { return 1; };
+	virtual double getMaxVal() { return 1; };
 
 	virtual const double volume();
 	virtual const double drawInt(double *x, double *p); //For easy usage in a root TF1

@@ -12,6 +12,7 @@
 
 #include <vector>
 #include <memory>
+#include <ctime>
 
 #include "Physics/Amplitude.hpp"
 #include "Core/Parameter.hpp"
@@ -35,26 +36,33 @@
 
 #include "Core/PhysConst.hpp"
 
+#include <boost/random/linear_congruential.hpp>
+#include <boost/random/uniform_int.hpp>
+#include <boost/random/uniform_real.hpp>
+#include <boost/random/variate_generator.hpp>
+#include <boost/generator_iterator.hpp>
 #include "boost/function.hpp"
 #include <boost/log/trivial.hpp>
 using namespace boost::log;
 
 
 AmpSumIntensity::AmpSumIntensity(const AmpSumIntensity& other) : nAmps(other.nAmps), _dpArea(other._dpArea),
-		_entries(other._entries), _normStyle(other._normStyle),maxVal(other.maxVal),ampSetup(other.ampSetup),totAmp(other.totAmp){
+		_entries(other._entries), _normStyle(other._normStyle),maxVal(other.maxVal),ampSetup(other.ampSetup),
+		totAmp(other.totAmp), _calcMaxFcnVal(other._calcMaxFcnVal), _maxFcnVal(other._maxFcnVal){
 }
 
-/// Default Constructor (0x0)
 AmpSumIntensity::AmpSumIntensity(AmplitudeSetup ini, normalizationStyle ns, unsigned int entries, double dpArea) :
-						totAmp("relBWsumAmplitude", "totAmp"), ampSetup(ini),
-						_entries(entries), _normStyle(ns), _calcNorm(1), _dpArea(dpArea)
+										totAmp("relBWsumAmplitude", "totAmp"), ampSetup(ini),
+										_entries(entries), _normStyle(ns), _calcNorm(1), _dpArea(dpArea),
+										_calcMaxFcnVal(0)
 {
 	init();
 }
 
 AmpSumIntensity::AmpSumIntensity(AmplitudeSetup ini, unsigned int entries, double dpArea) :
-						totAmp("relBWsumAmplitude", "totAmp"), ampSetup(ini),
-						_entries(entries), _normStyle(none), _calcNorm(0), _dpArea(dpArea)
+										totAmp("relBWsumAmplitude", "totAmp"), ampSetup(ini),
+										_entries(entries), _normStyle(none), _calcNorm(0), _dpArea(dpArea),
+										_calcMaxFcnVal(0)
 {
 	init();
 }
@@ -62,8 +70,9 @@ AmpSumIntensity::AmpSumIntensity(AmplitudeSetup ini, unsigned int entries, doubl
 AmpSumIntensity::AmpSumIntensity(const double inM, const double inBr, const double in1,const double in2, const double in3,
 		std::string nameM, std::string name1,std::string name2,std::string name3,
 		AmplitudeSetup ini, unsigned int entries, normalizationStyle ns, double dpArea) :
-				totAmp("relBWsumAmplitude", "totAmp"), ampSetup(ini),
-				_entries(entries), _normStyle(ns), _calcNorm(1),_dpArea(dpArea)
+								totAmp("relBWsumAmplitude", "totAmp"), ampSetup(ini),
+								_entries(entries), _normStyle(ns), _calcNorm(1),_dpArea(dpArea),
+										_calcMaxFcnVal(0)
 {
 	init();
 }
@@ -137,12 +146,53 @@ void AmpSumIntensity::init(){
 	if(_calcNorm) integral();
 	BOOST_LOG_TRIVIAL(info)<<"AmpSumIntensity: completed setup!";
 }
+double AmpSumIntensity::getMaxVal(){
+	if(!_calcMaxFcnVal) calcMaxVal();
+	return _maxFcnVal;
+}
+double AmpSumIntensity::getMaxVal(ParameterList& par){
+	calcMaxVal(par);
+	return _maxFcnVal;
+}
+void AmpSumIntensity::calcMaxVal(ParameterList& par){
+	setParameterList(par);
+	return calcMaxVal();
+}
+void AmpSumIntensity::calcMaxVal(){
+	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
+	double maxVal=0;
+	double xLimit_low[2] = {kin->m13_sq_min,kin->m23_sq_min};
+	double xLimit_high[2] = {kin->m13_sq_max,kin->m23_sq_max};
+	double maxM23=-999; double maxM13=-999;
+	boost::minstd_rand rndGen2(123);
+	boost::uniform_real<> uni_dist13(xLimit_low[0],xLimit_high[0]);
+	boost::uniform_real<> uni_dist23(xLimit_low[1],xLimit_high[1]);
+	boost::variate_generator<boost::minstd_rand&, boost::uniform_real<> > uni13(rndGen2, uni_dist13);
+	boost::variate_generator<boost::minstd_rand&, boost::uniform_real<> > uni23(rndGen2, uni_dist23);
+	for(unsigned int i=0; i<20000; i++){
+		double m23sq=uni23(); double m13sq=uni13();
+		dataPoint point; point.setVal("m13sq",m13sq); point.setVal("m23sq",m23sq);
+		if( !kin->isWithinPhsp(point) ) { if(i>0) i--; continue; }//only integrate over phase space
+		ParameterList res = intensity(point);
+		double intens = *res.GetDoubleParameter(0);
+		if(intens>maxVal) {
+			maxM23=m23sq; maxM13=m13sq;
+			maxVal=intens;
+		}
+	}
+	_maxFcnVal=maxVal;
+	_calcMaxFcnVal=1;
+	BOOST_LOG_TRIVIAL(info)<<"AmpSumIntensity::calcMaxVal() calculated maximum of amplitude: "
+			<<_maxFcnVal<<" at m23sq="<<maxM23<<"/m13sq="<<maxM13;
+	return ;
+}
 double AmpSumIntensity::normReso(std::shared_ptr<AmpAbsDynamicalFunction> amp){
 	double norm;
 	if(_normStyle==none) norm=1;
 	else if(_normStyle==one) norm = sqrt(amp->integral());
 	else if(_normStyle==entries) norm = sqrt(_dpArea*amp->integral()/_entries);
-	BOOST_LOG_TRIVIAL(debug)<<"AmpSumIntensity::normRes Normalization constant for "<<amp->GetName()<<": "<<1/norm;
+	BOOST_LOG_TRIVIAL(debug)<<"AmpSumIntensity::normRes Normalization constant for "
+			<<amp->GetName()<<": "<<1/norm;
 	return norm;
 
 }
