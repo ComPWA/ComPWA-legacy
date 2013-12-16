@@ -21,6 +21,7 @@ project :
 	#<linkflags>$(ROOTLIBS)
 	<linkflags>-L$(GSL)/lib
 	<linkflags>-lgsl
+    <linkflags>-lgslcblas
 	<linkflags>-L$(QFT)/lib
 	<linkflags>-lqft++
 	<linkflags>$(BOOSTLIBS)
