@@ -24,19 +24,20 @@
 #include <cstdlib>
 #include <math.h>
 #include <vector>
-#include "Physics/DPKinematics/DalitzKinematics.hpp"
+#include "Core/Kinematics.hpp"
+class Kinematics;
 
-class dataPoint2
+class dataPoint
 {
 private:
 
 public:
 
-	dataPoint2(dataPoint2 const&){};
-	dataPoint2();
-	~dataPoint2(){};
+	dataPoint(dataPoint const&){};
+	dataPoint();
+	~dataPoint(){};
 	//! checks if point lies within phase space boundaries
-//	bool isWithinPHSP() const{ return DalitzKinematics::instance()->isWithinDP(m23,m13,m12); };
+//	bool isWithinPhsp() const{ return DalitzKinematics::instance()->isWithinPhsp(this); };
 //
 //	//! get inv. mass for subsys: 1+2=3, 1+3=4, 2+3=5
 //	double getM(int subsys) {return sqrt(getMsq(subsys));};
@@ -56,9 +57,9 @@ public:
 //	void setMsq(int a, int b, double val) { setMsq(a+b, val);};
 
 	void setVal(std::string name, double val);
-	double getVal(std::string name);
+	double getVal(std::string name) const;
 	void setVal(unsigned int num, double val);
-	double getVal(unsigned int num);
+	double getVal(unsigned int num) const;
 	void setPoint(std::vector<double> values);
 
 protected:
