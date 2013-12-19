@@ -56,7 +56,7 @@ using namespace Gem::Geneva;
 
 GenevaIF::GenevaIF(std::shared_ptr<ControlParameter> theData, std::string inConfigFileDir)
   : _myData(theData),configFileDir(inConfigFileDir),parallelizationMode(GO2_DEF_DEFAULPARALLELIZATIONMODE),
-    serMode(GO2_DEF_SERIALIZATIONMODE),clientMode(GO2_DEF_CLIENTMODE),ip(GO2_DEF_IP),port(GO2_DEF_PORT){
+    serMode(Gem::Common::SERIALIZATIONMODE_BINARY),clientMode(false),ip("localhost"),port(0){
 
 }
 
@@ -65,13 +65,13 @@ GenevaIF::~GenevaIF(){
 }
 
 void GenevaIF::setServerMode(){
-  parallelizationMode = Gem::Geneva::PARMODE_BROKERAGE;
+  parallelizationMode = Gem::Geneva::EXECMODE_BROKERAGE;
   serMode = Gem::Common::SERIALIZATIONMODE_BINARY;
   clientMode = false;
 }
 
 void GenevaIF::setClientMode(std::string serverip, unsigned int serverport){
-  parallelizationMode = Gem::Geneva::PARMODE_BROKERAGE;
+  parallelizationMode = Gem::Geneva::EXECMODE_BROKERAGE;
   serMode = Gem::Common::SERIALIZATIONMODE_BINARY;
   clientMode = true;
   ip = serverip;
@@ -79,10 +79,11 @@ void GenevaIF::setClientMode(std::string serverip, unsigned int serverport){
 }
 
 const double GenevaIF::exec(ParameterList& par) {
-	Go2::init();
+	//Go2::init();
 	//Go2 go(argc, argv, configFile);
-	Go2 go( clientMode, serMode, ip, port,
-	    (configFileDir+"Go2.json"), parallelizationMode, GO2_DEF_DEFAULTVERBOSE);
+	//Go2 go( clientMode, serMode, ip, port,
+	 //   (configFileDir+"Go2.json"), parallelizationMode, GO2_DEF_DEFAULTVERBOSE);
+	Go2 go( (configFileDir+"Go2.json"));
 
 	//---------------------------------------------------------------------
 	// Initialize a client, if requested
@@ -132,7 +133,7 @@ const double GenevaIF::exec(ParameterList& par) {
 
 	// Terminate
 	double result = bestIndividual_ptr->getBestKnownFitness();
-	int whattodowiththisidontknow =  go.finalize(); //Go2::finalize();
+	//int whattodowiththisidontknow =  go.finalize(); //Go2::finalize();
 
         //write Parameters back
 	ParameterList resultPar;

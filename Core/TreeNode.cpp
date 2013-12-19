@@ -51,9 +51,10 @@
     for(unsigned int i=0; i<_children.size(); i++){
         if(_children[i]->needsCalculation())
           _children[i]->recalculate();
-        //std::shared_ptr<AbsParameter> para = _children[i]->getValue();
+        std::shared_ptr<AbsParameter> para = _children[i]->getValue();
+        if(!para) std::cout << this->getName() << " " << i << std::endl;
         //para->type();
-        newVals.AddParameter(_children[i]->getValue());
+        newVals.AddParameter(para);
     }  //end children-loop
     _value = _strat->execute(newVals);
     _changed=false;

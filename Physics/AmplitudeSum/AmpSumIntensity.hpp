@@ -23,6 +23,7 @@
 #include "Physics/Amplitude.hpp"
 #include "Core/Parameter.hpp"
 #include "Core/ParameterList.hpp"
+#include "Core/FunctionTree.hpp"
 //#include "Estimator/AmpFcn.cpp"
 //#include "Optimizer/Minuit2/MinuitIF.hpp"
 //#include "Estimator/MinLogLH/MinLogLH.hpp"
@@ -31,7 +32,7 @@
 #include "Physics/AmplitudeSum/AmpRelBreitWignerRes.hpp"
 #include "Physics/AmplitudeSum/AmpGausRes.hpp"
 #include "Physics/AmplitudeSum/AmpFlatteRes.hpp"
-#include "Physics/AmplitudeSum/AmpWigner.hpp"
+#include "Physics/AmplitudeSum/AmpWigner2.hpp"
 #include "Physics/AmplitudeSum/AmpSumOfAmplitudes.hpp"
 #include "Physics/DPKinematics/DalitzKinematics.hpp"
 #include "Core/DataPoint.hpp"
@@ -76,6 +77,8 @@ public:
 	virtual const ParameterList intensity(dataPoint& point);
 	virtual const ParameterList intensity(std::vector<double> point, ParameterList& par);
 
+	virtual std::shared_ptr<FunctionTree> functionTree(ParameterList& outPar);
+
 	virtual const bool fillStartParVec(ParameterList& outPar);
 
 	virtual std::string printAmps();
@@ -94,6 +97,8 @@ protected:
 	double _maxFcnVal;
 	AmpSumOfAmplitudes totAmp;
 	AmplitudeSetup ampSetup;
+	std::shared_ptr<FunctionTree> myTree;
+	std::shared_ptr<ParameterList> treePar;
 
 	double maxVal;
 

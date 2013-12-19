@@ -84,7 +84,7 @@
        <par1>1.</par1>
        <par2>1.</par2>
        <mesonRadius>1.</mesonRadius>
-       <strength>0.2</strength>
+       <strength>1.</strength>
        <phase>0.</phase>
        <spin>2</spin>
        <m>0</m>
@@ -107,7 +107,7 @@
        <par1>1.</par1>
        <par2>1.</par2>
        <mesonRadius>1.</mesonRadius>
-       <strength>0.2</strength>
+       <strength>1.</strength>
        <phase>1.6</phase>
        <spin>2</spin>
        <m>0</m>
@@ -121,7 +121,7 @@
        <reference>omega</reference>
        <mass>0.783</mass>
        <mass_min>0.5</mass_min>
-       <mass_max>1.</mass_max>
+       <mass_max>2.</mass_max>
        <mesonRadius>1.</mesonRadius>
        <width>0.0085</width>
        <width_min>0.</width_min>
@@ -130,9 +130,9 @@
        <par1>1.</par1>
        <par2>1.</par2>
        <mesonRadius>1.</mesonRadius>
-       <strength>0.05</strength>
+       <strength>1.</strength>
        <phase>0.8</phase>
-       <spin>0</spin>
+       <spin>1</spin>
        <m>0</m>
        <n>0</n>
        <daugtherA>1</daugtherA>
@@ -144,7 +144,7 @@
        <reference>omega</reference>
        <mass>0.783</mass>
        <mass_min>0.5</mass_min>
-       <mass_max>1.</mass_max>
+       <mass_max>2.</mass_max>
        <mesonRadius>1.</mesonRadius>
        <width>0.0085</width>
        <width_min>0.</width_min>
@@ -153,9 +153,9 @@
        <par1>1.</par1>
        <par2>1.</par2>
        <mesonRadius>1.</mesonRadius>
-       <strength>0.05</strength>
+       <strength>1.</strength>
        <phase>0.8</phase>
-       <spin>0</spin>
+       <spin>1</spin>
        <m>0</m>
        <n>0</n>
        <daugtherA>1</daugtherA>

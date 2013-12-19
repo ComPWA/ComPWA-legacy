@@ -65,6 +65,10 @@ protected:
   double s3max(double, double, double, double, double)const;
   double s3min(double, double, double, double, double)const;
 
+  double cosTheta(double, double, double)const;
+  double qin(double)const;
+  double qout(double)const;
+
 private:
   //ClassDef(AmpWigner,1) // Wigner_d angular distribution
 

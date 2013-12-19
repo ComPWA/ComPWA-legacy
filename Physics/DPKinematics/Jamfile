@@ -15,10 +15,12 @@ project :
 	    <include>$(BOOST_ROOT)/include
 	    <include>$(GSL)/include
 	    <include>$(ROOTSYS)/include
-	<linkflags>-L$(ROOTSYS)/lib 
-	<linkflags>$(ROOTLIBS)
+	    <include>$(ROOTSYS)/include/root
 	<linkflags>-L$(BOOST_ROOT)/lib 
 	<linkflags>$(BOOSTLIBS)
+	<linkflags>-L$(ROOTSYS)/lib 
+	<linkflags>-L$(ROOTSYS)/lib/root 
+	<linkflags>$(ROOTLIBS)
 	<linkflags>-L$(GSL)/lib
 	<linkflags>-lgsl 
 	<linkflags>-lgslcblas

@@ -35,10 +35,10 @@ MinuitFcn::~MinuitFcn(){
 double MinuitFcn::operator()(const std::vector<double>& x) const{
   //ParameterList par;
   for(unsigned int i=0; i<x.size(); i++){
-    //std::cout << x[i] << " ";
+    std::cout << x[i] << " ";
     //par.AddParameter(DoubleParameter(std::string("tmpPar"+i),x[i]));
       //_parList.SetParameterValue(i,x[i]);
-    std::shared_ptr<DoubleParameter> actPat = _parList.GetDoubleParameter(i);
+    std::shared_ptr<DoubleParameter> actPat = _parList.GetDoubleParameter(_parNames.at(i));
     if(!actPat->IsFixed())
       if(x[i]==x[i])
         actPat->SetValue(x[i]);

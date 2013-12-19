@@ -82,6 +82,61 @@ double AmpWigner::evaluate(dataPoint& point) const {
 
 	double locmin_sq, locmax_sq, beta;
 
+/*
+//	cout<<"==== "<<_subSys<< " " <<_m1<< " "<<_m2<<" " <<_m3<<endl;
+	double invM1 = dataPoint::instance()->getM(_subSys);
+	int mod=0;
+	if(_subSys==5) mod=4; //5->3 work also without beta=nan, for agreement with Laura++ 5->4 is correct
+	if(_subSys==4) mod=5;
+	if(_subSys==3) mod=5;
+	double invM2 = dataPoint::instance()->getM(mod);
+	double altm23_sq = dataPoint::instance()->getM(5); altm23_sq*=altm23_sq;
+	double altm13_sq = dataPoint::instance()->getM(4); altm13_sq*=altm13_sq;
+	double altm12_sq = dataPoint::instance()->getM(3); altm12_sq*=altm12_sq;
+
+//	dataPoint* point = dataPoint::instance();
+	//	cout<<point->getM(3)<<" " <<point->getM(4)<< " " << point->getM(5)<<endl;
+	//	double locmin_sq2 = s2min(_m23*_m23,_M,_m1,_m2,_m3);
+	//	double locmax_sq2 = s2max(_m23*_m23,_M,_m1,_m2,_m3);
+	//	double beta2=acos((2.*_m13*_m13-locmax_sq2-locmin_sq2)/(locmax_sq2-locmin_sq2));
+
+	double altCosTheta=0;
+	  switch(_subSys){
+		case 5:{ //reso in m23
+		  locmin_sq = s2min(invM1*invM1,_M,_m1,_m2,_m3);
+		  locmax_sq = s2max(invM1*invM1,_M,_m1,_m2,_m3);
+		  altCosTheta = cosTheta(altm23_sq,altm12_sq,altm13_sq);
+		  break;
+		}
+		case 4:{ //reso in m13
+		  locmin_sq = s1min(invM1*invM1,_M,_m1,_m2,_m3);
+		  locmax_sq = s1max(invM1*invM1,_M,_m1,_m2,_m3);
+		  altCosTheta = cosTheta(altm13_sq,altm12_sq,altm23_sq);
+		  break;
+		}
+		case 3:{ //reso in m12
+		  //return 1;
+		  locmin_sq = s1min(invM1*invM1,_M,_m1,_m3,_m2);
+		  locmax_sq = s1max(invM1*invM1,_M,_m1,_m3,_m2);
+		  altCosTheta = cosTheta(altm12_sq,altm23_sq,altm13_sq);
+		  //if(beta!=beta) return 1.;
+		  break;
+		}
+	  }
+	double cosbeta = (2.*invM2*invM2-locmax_sq-locmin_sq)/(locmax_sq-locmin_sq);
+//	if( cosbeta > 1 && cosbeta < 1.1) cosbeta=1;
+    beta=acos(cosbeta);
+    //beta=acos(altCosTheta);
+	//if(_subSys!=5) beta=acos(1);
+
+	//	cout<<"==== "<<_m23<< " "<<_m13<< " "<<invM1<<" " <<invM2<<endl;
+	//	cout<< "wwww " <<_subSys<< " "<<mod<<" " <<beta<< " "<<beta2<<endl;
+	//	if(beta!=beta){
+	//		std::cout<<beta<<std::endl;
+	//		std::cout<<_M<< " "<<_m1<<" " <<_m2<<" " <<_m3<<std::endl;
+	//		std::cout<<(2.*_m13*_m13-locmax_sq-locmin_sq)/(locmax_sq-locmin_sq)<<std::endl;
+	//		std::cout<<_m13<< " " <<_m23<<" " <<locmin_sq << " "<<locmax_sq<<std::endl;
+*/
 	double m23sq = point.getVal("m23sq");
 	double m13sq = point.getVal("m13sq");
 	double m12sq = kin->getThirdVariableSq(m23sq,m13sq);
@@ -128,6 +183,7 @@ double AmpWigner::evaluate(dataPoint& point) const {
 	//		locmax_sq = s1max(invM1*invM1,_M,_m1,_m3,_m2);
 	//		//if(beta!=beta) return 1.;
 	//		break;
+
 	//	}
 	//	}
 	double cosbeta = (2.*invM2*invM2-locmax_sq-locmin_sq)/(locmax_sq-locmin_sq);
@@ -145,6 +201,19 @@ double AmpWigner::evaluate(dataPoint& point) const {
 	return result;
 }
 
+double AmpWigner::cosTheta(double s, double t, double u)const{
+  return ( s*(t-u) + (_M*_M-_m1*_m1)*(_m2*_m2-_m3*_m3) )/( 4*s*qin(s)*qout(s) );
+}
+
+double AmpWigner::qin(double s)const{
+  double square = (s-(_M+_m1)*(_M+_m1)) * (s-(_M-_m1)*(_M-_m1)) / (4*s);
+  return sqrt(square);
+}
+
+double AmpWigner::qout(double s)const{
+  double square = (s-(_m2+_m3)*(_m2+_m3)) * (s-(_m2-_m3)*(_m2-_m3)) / (4*s);
+  return sqrt(square);
+}
 
 double AmpWigner::lambda(double x, double y, double z)const{
 	return x*x+y*y+z*z-2.*x*y-2.*x*z-2.*y*z;

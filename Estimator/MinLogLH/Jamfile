@@ -4,6 +4,7 @@ lib MinLogLH :
         [ glob *.cpp ]
         $(TOP)/Core//ComPWA 
         $(TOP)/Optimizer//Optimizer 
+        $(TOP)/Physics//DPKinematics
          ;
 
 install dist : MinLogLH : <location>$(TOP)/lib ;

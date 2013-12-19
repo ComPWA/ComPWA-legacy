@@ -14,6 +14,8 @@
 #include <vector>
 #include <memory>
 
+#include <memory>
+
 #include "TEfficiency.h"
 #include "TH2.h"
 #include "Physics/DPKinematics/DalitzKinematics.hpp"

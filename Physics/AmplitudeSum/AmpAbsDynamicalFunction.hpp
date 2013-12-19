@@ -32,6 +32,22 @@ public:
 
   virtual ~AmpAbsDynamicalFunction();
 
+  //! Implementation of interface for streaming info about the strategy
+  virtual const std::string to_str() const {
+	  return (_name+"rel Breit-Wigner with Wigner_D");
+  }
+
+  //! Implementation of interface for executing a strategy
+ /* virtual std::shared_ptr<AbsParameter> execute(const ParameterList& paras){
+	  std::complex<double> result;
+
+    result = evaluateTree(paras);
+
+    //ParameterList out;
+    // out.AddParameter(DoubleParameter("AddAllResult",result));
+    return std::shared_ptr<AbsParameter>(new ComplexParameter("AddAllResult",result));
+  };*/
+
 
   virtual void initialise() = 0; 
   virtual std::complex<double> evaluate(dataPoint& point) const = 0;
