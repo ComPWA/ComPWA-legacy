@@ -1,9 +1,15 @@
 ########### ComPWA Jamroot #############
 
 path-constant TOP : . ;
+import os ;
+local BOOST_ROOT = [ os.environ BOOST_ROOT ] ;
+
+#BOOSTLIBS = -lboost_log_setup -lboost_log -lboost_date_time -lboost_filesystem -lboost_program_options -lboost_regex -lboost_serialization -lboost_system -lboost_thread -lboost_test_exec_monitor ;
 
 project :
 	requirements <include>$(TOP)
+	<include>$(BOOST_ROOT)/include
+	<define>BOOST_LOG_DYN_LINK
 	<cxxflags>-ftemplate-depth-256
 	<cxxflags>-std=c++0x
 	<linkflags>-lgomp

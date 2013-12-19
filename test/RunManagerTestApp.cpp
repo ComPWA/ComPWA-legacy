@@ -32,10 +32,12 @@
 #include "Physics/BreitWigner/BreitWigner.hpp"
 #include "Estimator/MinLogLH/MinLogLH.hpp"
 #include "Optimizer/Minuit2/MinuitIF.hpp"
+#include "Core/Efficiency.hpp"
 #include "Core/Parameter.hpp"
 #include "Core/ParameterList.hpp"
 #include "Core/RunManager.hpp"
 
+#include "Physics/DPKinematics/RootEfficiency.hpp"
 //Test header files go here
 #include "PolyFit.hpp"
 
@@ -50,7 +52,7 @@ int main(int argc, char **argv){
 
   std::string file="test/2Part-4vecs.root";
   std::cout << "Load Modules" << std::endl;
-  std::shared_ptr<Data> myReader(new RootReader(file, false,"data"));
+  std::shared_ptr<Data> myReader(new RootReader(file, false,"data",true));
   std::shared_ptr<Amplitude> testBW(new BreitWigner(0.,5.));
   // Initiate parameters
   ParameterList par;
@@ -58,7 +60,9 @@ int main(int argc, char **argv){
   par.AddParameter(std::shared_ptr<DoubleParameter>(new DoubleParameter("BWWidth",0.2,0.1,0.2,0.01)));
   std::shared_ptr<ControlParameter> testEsti = MinLogLH::createInstance(testBW, myReader); //TODO: <- should be done by runManager
   std::shared_ptr<Optimizer> opti(new MinuitIF(testEsti,par));
-  std::shared_ptr<RunManager> run(new RunManager(myReader, testEsti, testBW, opti));
+  std::shared_ptr<Efficiency> eff(new UnitEfficiency());
+//  std::shared_ptr<RunManager> run(new RunManager(myReader, testEsti, testBW, opti, eff));
+  std::shared_ptr<RunManager> run(new RunManager(myReader, testBW, opti, eff));
 
   std::cout << "Start Fit" << std::endl;
   run->startFit(par);

@@ -72,22 +72,22 @@ int main(int argc, char **argv) {
 
     //------------SetUp some nodes for R = a * ( b + c * d)----------------
     std::shared_ptr<TreeNode> R =
-        std::shared_ptr<TreeNode>(new TreeNode("R", finalA, mult, NULL));
+        std::shared_ptr<TreeNode>(new TreeNode("R", finalA, mult, std::shared_ptr<TreeNode>()));
     std::shared_ptr<TreeNode> A =
-        std::shared_ptr<TreeNode>(new TreeNode("a", parA, NULL, R));
+        std::shared_ptr<TreeNode>(new TreeNode("a", parA, std::shared_ptr<Strategy>(), R));
     parA->Attach(A);
     std::shared_ptr<TreeNode> BCD =
         std::shared_ptr<TreeNode>(new TreeNode("bcd", interBCD, add, R));
     std::shared_ptr<TreeNode> B =
-        std::shared_ptr<TreeNode>(new TreeNode("b", parB, NULL, BCD));
+        std::shared_ptr<TreeNode>(new TreeNode("b", parB, std::shared_ptr<Strategy>(), BCD));
     parB->Attach(B);
     std::shared_ptr<TreeNode> CD =
         std::shared_ptr<TreeNode>(new TreeNode("cd", interCD, add, BCD));
     std::shared_ptr<TreeNode> C =
-        std::shared_ptr<TreeNode>(new TreeNode("c", parC, NULL, CD));
+        std::shared_ptr<TreeNode>(new TreeNode("c", parC, std::shared_ptr<Strategy>(), CD));
     parC->Attach(C);
     std::shared_ptr<TreeNode> D =
-        std::shared_ptr<TreeNode>(new TreeNode("d", parD, NULL, CD));
+        std::shared_ptr<TreeNode>(new TreeNode("d", parD, std::shared_ptr<Strategy>(), CD));
     parD->Attach(D);
     myTree = std::shared_ptr<FunctionTree>(new FunctionTree(R));
     myTree->addNode(A);

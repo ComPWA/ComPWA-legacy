@@ -8,6 +8,7 @@
 // Contributors:
 //     Peter Weidenkaff - initial API
 //     Mathias Michel - kinematic functions
+//		Klaus Goetzen - most of the kin. calculations
 //-------------------------------------------------------------------------------
 
 //! DPKinematics stores kinematic information of a dalitz plot
@@ -21,38 +22,67 @@
 #define DPKINEMATICS_HPP_
 
 #include <iostream>
-class DPpoint;
-class dataPoint;
+#include <vector>
 
-class DPKinematics
+#include <boost/log/trivial.hpp>
+using namespace boost::log;
+
+#include "Core/Kinematics.hpp"
+
+class DalitzKinematics : public Kinematics
 {
 private:
+//	static DalitzKinematics* inst;
 	bool _DPareaCalculated;
 	double _DParea;
 	//! calculated dalitz plot area for the given kinematics
 	void calcDParea();
-//	std::shared_ptr<DalitzEfficiency> eff;
-public:
-	DPKinematics(){};
 	void init();
-	//! constructor access particles by name
-	DPKinematics(std::string _nameMother, std::string _name1, std::string _name2, std::string _name3);
-	//! constructor with particle masses and names
-	DPKinematics(double _M, double _Br, double _m1, double _m2, double _m3,
-			std::string _nameMother, std::string _name1, std::string _name2, std::string _name3);
+
 	//! Copy constructor
-	DPKinematics(const DPKinematics& other);
+	DalitzKinematics(const DalitzKinematics& other);
+
+	DalitzKinematics(){};
+	//! constructor access particles by name
+	DalitzKinematics(std::string _nameMother, std::string _name1, std::string _name2, std::string _name3);
+	//! constructor with particle masses and names
+	DalitzKinematics(double _M, double _Br, double _m1, double _m2, double _m3,
+			std::string _nameMother, std::string _name1, std::string _name2, std::string _name3);
+
+//	std::vector<std::string> varNames;
+
+
+public:
+	static Kinematics* createInstance(std::string _nameMother, std::string _name1, std::string _name2, std::string _name3){
+		_inst = new DalitzKinematics(_nameMother, _name1, _name2,_name3);
+		return _inst;
+	}
+//	static DalitzKinematics* instance(){
+//		if(!inst) {
+//			BOOST_LOG_TRIVIAL(fatal)<<"DPKinematics: ERROR instance not created first!";
+//			return 0;
+//		}
+//		return inst;
+//	};
+
+	unsigned int sizeOfPhsp(){ return 3; }
+//	std::vector<std::string> getVarNames(){return varNames;}
+	void phspContour(unsigned int xsys,unsigned int ysys, unsigned int n, double* xcoord, double* ycoord);
 	//! calculated the helicity angle
 	double calcHelicityAngle(double invM1sq, double invM2sq, double M, double ma, double mb, double mc);
 	//! Calculates third dalitz plot variable, e.g f(s1,s2)=s3
 	double getThirdVariableSq(double, double) const;
-	//! checks of data point is within phase space boundaries, data point provided by dataPoint
-	bool isWithinDP() const;
 	//! checks of data point is within phase space boundaries
-	bool isWithinDP(double m23, double m13, double m12=0) const;
+	bool isWithinPhsp(const dataPoint &point) const;
 	//! returns the dalitz plot area for the given kinematics
 	double getDParea();
 
+	//!maximum value for variable m23=5, m13=4, m12=3
+	double mimax(unsigned int i) const;
+	//!minimum value for variable m23=5, m13=4, m12=3
+	double mimin(unsigned int i) const;
+
+	//these functions are buggy somewhere!
 	double lambda(double x, double y, double z)const;
 	double s2min(double s1, double m0, double m1, double m2, double m3)const;
 	double s2max(double s1, double m0, double m1, double m2, double m3)const;
@@ -66,6 +96,13 @@ public:
 	double s3max(double s1)const { return s3max(s1,M,m1,m2,m3); };
 	double s1min(double s2)const { return s1min(s2,M,m1,m2,m3); };
 	double s1max(double s2)const { return s1max(s2,M,m1,m2,m3); };
+
+	//!calculate energy of particle \partId in rest frame of system \sys at the invariant mass \invMass_sys
+	double eiCms(unsigned int partId, unsigned int sys, double invMass_sys) const;
+	//!calculate min value of inv. mass of system \sys given the invariant mass \invMass_sys in system \sys
+	double invMassMin(unsigned int sys, unsigned int sys2, double invMass_sys) const;
+	//!calculate max value of inv. mass of system \sys given the invariant mass \invMass_sys in system \sys
+	double invMassMax(unsigned int sys, unsigned int sys2, double invMass_sys) const;
 
 	//! get mass of paticles
 	double getMass(unsigned int num);
@@ -84,9 +121,12 @@ public:
 	double m1; unsigned int spin1;
 	double m2; unsigned int spin2;
 	double m3; unsigned int spin3;
+	double m4; unsigned int spin4;
+	double m5; unsigned int spin5;
+	double m6; unsigned int spin6;
 
 	//! names of particles
-	std::string nameMother, name1, name2, name3;
+	std::string nameMother, name1, name2, name3, name4, name5, name6;
 
 	double m23_sq_min, m23_sq_max;
 	double m13_sq_min, m13_sq_max;

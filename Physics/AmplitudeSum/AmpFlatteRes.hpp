@@ -32,6 +32,7 @@
 #include "Physics/AmplitudeSum/AmpAbsDynamicalFunction.hpp"
 #include "Physics/AmplitudeSum/AmpKinematics.hpp"
 #include "Physics/AmplitudeSum/AmpWigner.hpp"
+#include "Physics/AmplitudeSum/AmpWigner2.hpp"
 
 using namespace std;
 
@@ -52,9 +53,9 @@ public:
 	void setBarrierMass(double, double);
 
 	virtual void initialise();
-	virtual std::complex<double> evaluate() const;
-	virtual std::complex<double> evaluateAmp() const;
-	virtual double evaluateWignerD() const { return _wignerD.evaluate(); };
+	virtual std::complex<double> evaluate(dataPoint& point) const;
+	virtual std::complex<double> evaluateAmp(dataPoint& point) const;
+	virtual double evaluateWignerD(dataPoint& point) const { return _wignerD.evaluate(point); };
 //	virtual double eval(double x[],size_t dim, void * param) const {return 0;};//used for MC integration
 
 	void setDecayMasses(double, double, double, double);
@@ -66,7 +67,8 @@ public:
 protected:
 	DoubleParameter _couplingHiddenChannel;
 	DoubleParameter _coupling;
-	AmpWigner _wignerD;
+//	AmpWigner _wignerD;
+	AmpWigner2 _wignerD;
 
 	double _massHiddenChannelA;//hidden channel: mass particle A
 	double _massHiddenChannelB; //hidden channel: mass particle B

@@ -53,10 +53,7 @@
 #include "Physics/AmplitudeSum/AmpSumIntensity.hpp"
 #include "Estimator/MinLogLH/MinLogLH.hpp"
 #include "Optimizer/Minuit2/MinuitIF.hpp"
-#include "Physics/DPKinematics/DPKinematics.hpp"
-#include "Physics/DPKinematics/DataPoint.hpp"
-
-using namespace std;
+#include "Core/DataPoint.hpp"
 
 const Double_t M = 3.096916; // GeV/c² (J/psi+)
 const Double_t Br = 0.000093; // GeV/c² (width)
@@ -75,9 +72,10 @@ int main(int argc, char **argv){
   std::cout << "  This program comes with ABSOLUTELY NO WARRANTY; for details see license.txt" << std::endl;
   std::cout << std::endl;
 
-	DPKinematics kin("J/psi","gamma","pi0","pi0");
+  DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(DalitzKinematics::createInstance("J/psi","gamma","pi0","pi0"));
+	//DPKinematics kin("J/psi","gamma","pi0","pi0");
 	//DPKinematics kin("D0","gamma","K-","K+");
-	static dataPoint* point = dataPoint::instance(kin);
+	//static dataPoint* point = dataPoint::instance(kin);
 
   bool useFctTree = true;
 
@@ -87,7 +85,7 @@ int main(int argc, char **argv){
   std::cout << "Load Modules" << std::endl;
   std::shared_ptr<Data> myReader(new RootReader(file, false,"data"));
   std::shared_ptr<Data> myPHSPReader(new RootReader(file, false,"mc"));
-  std::shared_ptr<Amplitude> amps(new AmpSumIntensity(kin, ini, myReader->getNEvents(), AmpSumIntensity::normalizationStyle::entries));
+  std::shared_ptr<Amplitude> amps(new AmpSumIntensity(ini, myReader->getNEvents()));
   /*return 0;
   //std::shared_ptr<Amplitude> amps(new AmpSumIntensity(M, Br, m1, m2, m3,"J/psi","gamma","pi0","pi0", ini));
   // Initiate parameters
@@ -356,11 +354,12 @@ int main(int argc, char **argv){
         TParticle fparticlePim(-211,1,0,0,0,0,*pPim,W);
 
         //call physics module
-        vector<double> x;
-        x.push_back(sqrt(m23sq));
-        x.push_back(sqrt(m13sq));
-        x.push_back(sqrt(m12sq));
-        ParameterList intensL = amps->intensity(x, paras);
+	dataPoint dataP; dataP.setVal("m23sq",m23sq);	dataP.setVal("m13sq",m13sq);
+//        vector<double> x;
+//        x.push_back(sqrt(m23sq));
+//        x.push_back(sqrt(m13sq));
+//        x.push_back(sqrt(m12sq));
+        ParameterList intensL = amps->intensity(dataP, paras);
         double AMPpdf = intensL.GetDoubleParameter(0)->GetValue();
         //double AMPpdf = amps->intensity(x, par);
 

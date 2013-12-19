@@ -12,23 +12,7 @@
 
 #include <vector>
 #include <memory>
-
-//#include "RooRealVar.h"
-//#include "RooFormulaVar.h"
-//#include "RooPlot.h"
-//#include "RooCmdArg.h"
-//#include "RooMsgService.h"
-//#include "RooGlobalFunc.h"
-//#include "RooCFunction1Binding.h"
-//#include "RooGaussian.h"
-//#include "RooAddPdf.h"
-//#include "RooDataSet.h"
-//#include "RooDataHist.h"
-//#include "RooFitResult.h"
-//#include "RooComplex.h"
-//#include "RooAbsReal.h"
-//#include "RooAbsArg.h"
-//#include "RooRealProxy.h"
+#include <ctime>
 
 #include "Physics/Amplitude.hpp"
 #include "Core/Parameter.hpp"
@@ -51,38 +35,54 @@
 #include "Physics/AmplitudeSum/AmpSumIntensity.hpp"
 //#include "Physics/AmplitudeSum/AmpSumTree.hpp"
 
-#include "Physics/DPKinematics/PhysConst.hpp"
+#include "Core/PhysConst.hpp"
 
+#include <boost/random/linear_congruential.hpp>
+#include <boost/random/uniform_int.hpp>
+#include <boost/random/uniform_real.hpp>
+#include <boost/random/variate_generator.hpp>
+#include <boost/generator_iterator.hpp>
 #include "boost/function.hpp"
-/// Default Constructor (0x0)
-AmpSumIntensity::AmpSumIntensity(const DPKinematics kin, AmplitudeSetup ini, unsigned int entries, normalizationStyle ns) :
-_kin(kin),
-totAmp("relBWsumAmplitude", "totAmp"),
-ampSetup(ini),
-_entries(entries),
-_normStyle(ns)
+#include <boost/log/trivial.hpp>
+using namespace boost::log;
+
+
+AmpSumIntensity::AmpSumIntensity(const AmpSumIntensity& other) : nAmps(other.nAmps), _dpArea(other._dpArea),
+		_entries(other._entries), _normStyle(other._normStyle),maxVal(other.maxVal),ampSetup(other.ampSetup),
+		totAmp(other.totAmp), _calcMaxFcnVal(other._calcMaxFcnVal), _maxFcnVal(other._maxFcnVal){
+}
+
+AmpSumIntensity::AmpSumIntensity(AmplitudeSetup ini, normalizationStyle ns, unsigned int entries, double dpArea) :
+										totAmp("relBWsumAmplitude", "totAmp"), ampSetup(ini),
+										_entries(entries), _normStyle(ns), _calcNorm(1), _dpArea(dpArea),
+										_calcMaxFcnVal(0)
+{
+	init();
+}
+
+AmpSumIntensity::AmpSumIntensity(AmplitudeSetup ini, unsigned int entries, double dpArea) :
+										totAmp("relBWsumAmplitude", "totAmp"), ampSetup(ini),
+										_entries(entries), _normStyle(none), _calcNorm(0), _dpArea(dpArea),
+										_calcMaxFcnVal(0)
 {
 	init();
 }
 
 AmpSumIntensity::AmpSumIntensity(const double inM, const double inBr, const double in1,const double in2, const double in3,
 		std::string nameM, std::string name1,std::string name2,std::string name3,
-		AmplitudeSetup ini, unsigned int entries, normalizationStyle ns) :
-										 _kin(inM, inBr, in1, in2, in3,nameM,name1,name2,name3),
-										 totAmp("relBWsumAmplitude", "totAmp"),
-										 ampSetup(ini),
-										 _entries(entries),
-										 _normStyle(ns)
+		AmplitudeSetup ini, unsigned int entries, normalizationStyle ns, double dpArea) :
+								totAmp("relBWsumAmplitude", "totAmp"), ampSetup(ini),
+								_entries(entries), _normStyle(ns), _calcNorm(1),_dpArea(dpArea),
+										_calcMaxFcnVal(0)
 {
 	init();
 }
 
 void AmpSumIntensity::init(){
-
-	_dpArea = dataPoint::instance()->DPKin.getDParea();
-	dataPoint* pt = dataPoint::instance();
-	std::cout<<"AmpSumIntensity: INFO: number of Entries in dalitz plot set to: "<<_entries<<std::endl;
-	std::cout<<"AmpSumIntensity: INFO: area of phase space: "<<_dpArea<<std::endl;
+	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
+	if(_dpArea==-999) _dpArea = kin->getDParea();
+	BOOST_LOG_TRIVIAL(debug)<<"AmpSumIntensity::init() number of Entries in dalitz plot set to: "<<_entries;
+	BOOST_LOG_TRIVIAL(debug)<<"AmpSumIntensity::init() area of phase space: "<<_dpArea;
 
     //------------Setup Tree---------------------
     myTree = std::shared_ptr<FunctionTree>(new FunctionTree());
@@ -108,6 +108,7 @@ void AmpSumIntensity::init(){
     //----Add Resonances
 	for(std::vector<Resonance>::iterator reso=ampSetup.getResonances().begin(); reso!=ampSetup.getResonances().end(); reso++){
 		Resonance tmp = (*reso);
+		if(!tmp.m_enable) continue;
 		//setup RooVars
 		namer.push_back(tmp.m_name);
 		mr.push_back( std::shared_ptr<DoubleParameter> (new DoubleParameter("mass_"+tmp.m_name,tmp.m_mass, tmp.m_mass_min, tmp.m_mass_max) ) );
@@ -136,10 +137,10 @@ void AmpSumIntensity::init(){
 		      myTree->createLeaf("m23", m23, "AngD_"+tmp.m_name); //ma TODO
 		      myTree->createLeaf("m13", m13, "AngD_"+tmp.m_name); //mb
 		      myTree->createLeaf("m12", m12, "AngD_"+tmp.m_name); //mc
-		      myTree->createLeaf("M", _kin.M, "AngD_"+tmp.m_name); //M
-		      myTree->createLeaf("m1", _kin.m1, "AngD_"+tmp.m_name); //m1
-		      myTree->createLeaf("m2", _kin.m2, "AngD_"+tmp.m_name); //m2
-		      myTree->createLeaf("m3", _kin.m3, "AngD_"+tmp.m_name); //m3
+		      myTree->createLeaf("M", kin->M, "AngD_"+tmp.m_name); //M
+		      myTree->createLeaf("m1", kin->m1, "AngD_"+tmp.m_name); //m1
+		      myTree->createLeaf("m2", kin->m2, "AngD_"+tmp.m_name); //m2
+		      myTree->createLeaf("m3", kin->m3, "AngD_"+tmp.m_name); //m3
 		     // unsigned int _subSysFlag = Double_t(paras.GetParameterValue("subSysFlag_"+name));
 		      myTree->createLeaf("subSysFlag_"+tmp.m_name, subSys, "AngD_"+tmp.m_name); //subSysFlag
 		      myTree->createLeaf("spin_"+tmp.m_name,tmp.m_spin, "AngD_"+tmp.m_name); //spin
@@ -154,18 +155,18 @@ void AmpSumIntensity::init(){
 		totAmp.addBW(tmpbw, rr.at(last), phir.at(last));
 
 		//setting normalization between amplitudes
-		double norm=1;
-		if(_normStyle==none) norm=1;
-		else if(_normStyle==one) norm = sqrt(tmpbw->integral());
-		else if(_normStyle==entries) norm = sqrt(_dpArea*tmpbw->integral()/_entries);
-
+		double norm=tmp.m_norm;
+		if(norm<0 || _calcNorm) {//recalculate normalization
+			norm = normReso(tmpbw);
+			reso->m_norm = norm;//updating normalization
+		}
 		tmpbw->SetNormalization(1/norm);
-		std::cout<<"AmpSumIntensity: INFO: Normalization constant for "<<tmp.m_name<<": "<<1/norm<<std::endl;
 	}// end loop over resonances
 
 
 	for(std::vector<ResonanceFlatte>::iterator reso=ampSetup.getResonancesFlatte().begin(); reso!=ampSetup.getResonancesFlatte().end(); reso++){
 		ResonanceFlatte tmp = (*reso);
+		if(!tmp.m_enable) continue;
 		//setup RooVars
 		namer.push_back(tmp.m_name);
 		mr.push_back( std::shared_ptr<DoubleParameter> (new DoubleParameter("mass_"+tmp.m_name,tmp.m_mass, tmp.m_mass_min, tmp.m_mass_max) ) );
@@ -186,28 +187,77 @@ void AmpSumIntensity::init(){
 				subSys, tmp.m_spin,tmp.m_m,tmp.m_n) );
 		totAmp.addBW(tmpbw, rr.at(last), phir.at(last));
 
-		double norm=1;
-		if(_normStyle==none) norm=1;
-		else if(_normStyle==one) norm = sqrt(tmpbw->integral());
-		else if(_normStyle==entries) norm = sqrt(_dpArea*tmpbw->integral()/_entries);
+		double norm=tmp.m_norm;
+		if(norm<0 || _calcNorm) {//recalculate normalization
+			norm = normReso(tmpbw);
+			reso->m_norm = norm;//updating normalization
+		}
 		tmpbw->SetNormalization(1/norm);
-		std::cout<<"AmpSumIntensity: INFO: Normalization constant for "<<tmp.m_name<<": "<<1/norm<<std::endl;
 	}// end loop over resonancesFlatte
 
+	ampSetup.save(ampSetup.getFilePath());//save updated information to input file
 	nAmps=rr.size();
-	std::cout << "completed setup" << std::endl;
+	if(_calcNorm) integral();
+	BOOST_LOG_TRIVIAL(info)<<"AmpSumIntensity: completed setup!";
 }
+double AmpSumIntensity::getMaxVal(){
+	if(!_calcMaxFcnVal) calcMaxVal();
+	return _maxFcnVal;
+}
+double AmpSumIntensity::getMaxVal(ParameterList& par){
+	calcMaxVal(par);
+	return _maxFcnVal;
+}
+void AmpSumIntensity::calcMaxVal(ParameterList& par){
+	setParameterList(par);
+	return calcMaxVal();
+}
+void AmpSumIntensity::calcMaxVal(){
+	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
+	double maxVal=0;
+	double xLimit_low[2] = {kin->m13_sq_min,kin->m23_sq_min};
+	double xLimit_high[2] = {kin->m13_sq_max,kin->m23_sq_max};
+	double maxM23=-999; double maxM13=-999;
+	boost::minstd_rand rndGen2(123);
+	boost::uniform_real<> uni_dist13(xLimit_low[0],xLimit_high[0]);
+	boost::uniform_real<> uni_dist23(xLimit_low[1],xLimit_high[1]);
+	boost::variate_generator<boost::minstd_rand&, boost::uniform_real<> > uni13(rndGen2, uni_dist13);
+	boost::variate_generator<boost::minstd_rand&, boost::uniform_real<> > uni23(rndGen2, uni_dist23);
+	for(unsigned int i=0; i<20000; i++){
+		double m23sq=uni23(); double m13sq=uni13();
+		dataPoint point; point.setVal("m13sq",m13sq); point.setVal("m23sq",m23sq);
+		if( !kin->isWithinPhsp(point) ) { if(i>0) i--; continue; }//only integrate over phase space
+		ParameterList res = intensity(point);
+		double intens = *res.GetDoubleParameter(0);
+		if(intens>maxVal) {
+			maxM23=m23sq; maxM13=m13sq;
+			maxVal=intens;
+		}
+	}
+	_maxFcnVal=maxVal;
+	_calcMaxFcnVal=1;
+	BOOST_LOG_TRIVIAL(info)<<"AmpSumIntensity::calcMaxVal() calculated maximum of amplitude: "
+			<<_maxFcnVal<<" at m23sq="<<maxM23<<"/m13sq="<<maxM13;
+	return ;
+}
+double AmpSumIntensity::normReso(std::shared_ptr<AmpAbsDynamicalFunction> amp){
+	double norm;
+	if(_normStyle==none) norm=1;
+	else if(_normStyle==one) norm = sqrt(amp->integral());
+	else if(_normStyle==entries) norm = sqrt(_dpArea*amp->integral()/_entries);
+	BOOST_LOG_TRIVIAL(debug)<<"AmpSumIntensity::normRes Normalization constant for "
+			<<amp->GetName()<<": "<<1/norm;
+	return norm;
 
+}
 double AmpSumIntensity::evaluate(double x[], size_t dim) {
 	if(dim!=2) return 0;
+	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
 	//set data point: we assume that x[0]=m13 and x[1]=m23
-	double m12sq = dataPoint::instance()->DPKin.getThirdVariableSq(x[0],x[1]);
-	dataPoint::instance()->setMsq(4,x[0]);
-	dataPoint::instance()->setMsq(5,x[1]);
-	dataPoint::instance()->setMsq(3,m12sq);
-	if( !dataPoint::instance()->DPKin.isWithinDP() ) return 0;//only integrate over phase space
-	ParameterList res = intensity();
-
+	dataPoint point; point.setVal("m13sq",x[0]); point.setVal("m23sq",x[1]);
+	double m12sq = kin->getThirdVariableSq(x[0],x[1]);
+	if( !kin->isWithinPhsp(point) ) return 0;//only integrate over phase space
+	ParameterList res = intensity(point);
 	double intens = *res.GetDoubleParameter(0);
 	return intens;
 }
@@ -220,6 +270,10 @@ double evalWrapperAmpSumIntensity(double* x, size_t dim, void* param) {
 };
 
 const double AmpSumIntensity::integral(ParameterList& par){
+	setParameterList(par);
+	return integral();
+}
+const double AmpSumIntensity::integral(){
 
 	/*
 	 * integration functionality was tested with a model with only one normalized amplitude.
@@ -230,8 +284,9 @@ const double AmpSumIntensity::integral(ParameterList& par){
 	double res=0.0, err=0.0;
 
 	//set limits: we assume that x[0]=m13sq and x[1]=m23sq
-	double xLimit_low[2] = {dataPoint::instance()->DPKin.m13_sq_min,dataPoint::instance()->DPKin.m23_sq_min};
-	double xLimit_high[2] = {dataPoint::instance()->DPKin.m13_sq_max,dataPoint::instance()->DPKin.m23_sq_max};
+	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
+	double xLimit_low[2] = {kin->m13_sq_min,kin->m23_sq_min};
+	double xLimit_high[2] = {kin->m13_sq_max,kin->m23_sq_max};
 	//	double xLimit_low[2] = {0,0};
 	//	double xLimit_high[2] = {10,10};
 	size_t calls = 100000;
@@ -247,34 +302,26 @@ const double AmpSumIntensity::integral(ParameterList& par){
 	gsl_monte_vegas_state *s = gsl_monte_vegas_alloc (dim);
 	gsl_monte_vegas_integrate (&G, xLimit_low, xLimit_high, 2, calls, r,s,&res, &err);
 	gsl_monte_vegas_free(s);
-	std::cout<<"AmpSumIntensity: INFO: Integration result for amplitude sum: "<<res<<"+-"<<err<<" relAcc [%]: "<<100*err/res<<std::endl;
+	BOOST_LOG_TRIVIAL(info)<<"AmpSumIntensity::integrate() Integration result for amplitude sum: "<<res<<"+-"<<err<<" relAcc [%]: "<<100*err/res;
 
 	return res;
 }
-const ParameterList AmpSumIntensity::intensity(std::vector<double>& x, ParameterList& par){
-	if(x.size()!=3) {
-		std::cout<<"AmpSumIntensity: wrong size of phase space variables!"<<std::endl;
-		exit(1);
-	}
-	//	double m12sq = dataPoint::instance()->DPKin.getThirdVariableSq(x[0],x[1]);
-	dataPoint::instance()->setM(2,3,x[0]);
-	dataPoint::instance()->setM(1,3,x[1]);
-	dataPoint::instance()->setM(1,2,x[2]);
-	return intensity(par);
-}
-const ParameterList AmpSumIntensity::intensity( ParameterList& par){
+const ParameterList AmpSumIntensity::intensity(std::vector<double> point, ParameterList& par){
 	setParameterList(par);
-	return intensity();
+	dataPoint dataP; dataP.setVal("m23sq",point[0]); dataP.setVal("m13sq",point[1]);
+	return intensity(dataP);
 }
-const ParameterList AmpSumIntensity::intensity(){
+const ParameterList AmpSumIntensity::intensity(dataPoint& point, ParameterList& par){
+	setParameterList(par);
+	return intensity(point);
+}
+const ParameterList AmpSumIntensity::intensity(dataPoint& point){
 	//	std::cout<<dataPoint::instance()->getMsq(2,3)<<" "<<dataPoint::instance()->getMsq(1,3)<<" "<<dataPoint::instance()->getMsq(1,2)<<std::endl;
-	double AMPpdf = totAmp.evaluate();
-
+	double AMPpdf = totAmp.evaluate(point);
 	if(AMPpdf!=AMPpdf){
-		std::cout << "Error AmpSumIntensity: Intensity is not a number!!" << std::endl;
+		BOOST_LOG_TRIVIAL(error)<<"Error AmpSumIntensity: Intensity is not a number!!";
 		exit(1);
 	}
-
 	ParameterList result;
 	result.AddParameter(std::shared_ptr<DoubleParameter>(new DoubleParameter("AmpSumResult",AMPpdf)));
 	return result;
@@ -310,8 +357,8 @@ const bool AmpSumIntensity::fillStartParVec(ParameterList& outPar){
 
 std::string AmpSumIntensity::printAmps(){
 	std::stringstream o;
-	o<<"== Printing amplitudes with current(!) set of parameters:"<<endl;
+	BOOST_LOG_TRIVIAL(info)<<"== Printing amplitudes with current(!) set of parameters:";
 	for(unsigned int i=0;i<nAmps;i++)
-		o<<namer[i]<<":	Amplitude: "<<rr[i]->GetValue()<<"+-"<<rr[i]->GetError()<<"	Phase: "<<phir[i]->GetValue()<<"+-"<<phir[i]->GetError()<<endl;
+		BOOST_LOG_TRIVIAL(info)<<namer[i]<<":	Amplitude: "<<rr[i]->GetValue()<<"+-"<<rr[i]->GetError()<<"	Phase: "<<phir[i]->GetValue()<<"+-"<<phir[i]->GetError();
 	return o.str();
 }

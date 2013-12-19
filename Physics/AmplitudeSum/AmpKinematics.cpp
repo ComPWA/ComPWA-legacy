@@ -10,8 +10,7 @@
 //-------------------------------------------------------------------------------
 
 #include "Physics/AmplitudeSum/AmpKinematics.hpp"
-#include "Physics/DPKinematics/DPKinematics.hpp"
-#include "Physics/DPKinematics/DataPoint.hpp"
+#include "Physics/DPKinematics/DalitzKinematics.hpp"
 
 AmpKinematics::AmpKinematics(const AmpKinematics& other) :
 _M(other._M),
@@ -32,20 +31,20 @@ AmpKinematics::AmpKinematics(DoubleParameter mR, int subSys, int spin, int m, in
 						_mesonRadius(mesonRadius),
 						_motherRadius(motherRadius)
 {
-	static dataPoint* point = dataPoint::instance();
-	_M=point->DPKin.M;
+	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
+	_M=kin->M;
 	if(_subSys==5){
-		_ma=point->DPKin.m3;
-		_mb=point->DPKin.m2;
-		_mc=point->DPKin.m1;}
+		_ma=kin->m3;
+		_mb=kin->m2;
+		_mc=kin->m1;}
 	if(_subSys==4){
-		_ma=point->DPKin.m2;
-		_mb=point->DPKin.m1;
-		_mc=point->DPKin.m3;}
+		_ma=kin->m2;
+		_mb=kin->m1;
+		_mc=kin->m3;}
 	if(_subSys==3){
-		_ma=point->DPKin.m2;
-		_mb=point->DPKin.m1;
-		_mc=point->DPKin.m3;}
+		_ma=kin->m2;
+		_mb=kin->m1;
+		_mc=kin->m3;}
 }
 
 AmpKinematics::AmpKinematics(double ma, double mb , double mc, double M, DoubleParameter mR, int subSys, barrierType type, int spin, int m, int n, double mesonR=1.5, double motherR=1.5) :

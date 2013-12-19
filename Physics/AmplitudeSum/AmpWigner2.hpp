@@ -24,12 +24,12 @@
 
 #include "qft++.h"
 
-#include "Physics/DPKinematics/DPKinematics.hpp"
-#include "Physics/DPKinematics/DataPoint.hpp"
 #include "Core/ParameterList.hpp"
 #include "Core/Functions.hpp"
+#include "Physics/DPKinematics/DalitzKinematics.hpp"
+#include "Core/DataPoint.hpp"
 
-using namespace std;
+//using namespace std;
 
 class WignerDStrategy : public Strategy {
 public:
@@ -169,8 +169,8 @@ public:
 
   virtual ~AmpWigner2() {};
 
-  virtual double evaluate() const;
-  //double evaluateTree(const ParameterList& paras, const std::string name) const;
+
+  virtual double evaluate(dataPoint& point) const;
   void setDecayMasses(double, double, double, double);
 
 protected:

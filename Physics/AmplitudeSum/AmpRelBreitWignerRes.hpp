@@ -31,6 +31,8 @@
 #include "Core/Functions.hpp"
 #include "Core/Exceptions.hpp"
 
+//#include "Physics/AmplitudeSum/AmpWigner.hpp"
+
 class BreitWignerStrategy : public Strategy {
 public:
   BreitWignerStrategy(const std::string resonanceName):name(resonanceName){
@@ -139,10 +141,9 @@ public:
 	//  double operator() (double *x, size_t dim, void*);
 
 	virtual void initialise();
-	virtual std::complex<double> evaluate() const ;
-	virtual std::complex<double> evaluateAmp() const;
-	//virtual std::complex<double> evaluateTree(const ParameterList& paras) const;
-	virtual double evaluateWignerD() const { return _wignerD.evaluate(); };
+	virtual std::complex<double> evaluate(dataPoint& point) const ;
+	virtual std::complex<double> evaluateAmp(dataPoint& point) const;
+	virtual double evaluateWignerD(dataPoint& point) const { return _wignerD.evaluate(point); };
 	//  virtual double eval(double x[],size_t dim, void *param) const;//used for MC integration
 	//  double (*eval2)(double x[],size_t dim, void *param);//used for MC integration
 
@@ -153,11 +154,10 @@ public:
 
 protected:
 	DoubleParameter _resWidth;
-//	AmpWigner _wignerD;
 	AmpWigner2 _wignerD;
+//	AmpWigner _wignerD;
 
 private:
-	//ClassDef(AmpRelBreitWignerRes,1) // Relativistic Breit-Wigner resonance model
 
 };
 

@@ -5,12 +5,17 @@
  *      Author: weidenka
  */
 
+#include <stdlib.h>
+#include <sstream>
+#include <string>
 
-#include "Physics/DPKinematics/PhysConst.hpp"
+#include "Core/PhysConst.hpp"
 // Boost header files go here
 #include <boost/foreach.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
+#include <boost/log/trivial.hpp>
+using namespace boost::log;
 
 PhysConst* PhysConst::inst = NULL;
 
@@ -19,14 +24,16 @@ PhysConst::PhysConst(){
 	id.push_back(-999); name.push_back("error"); mass.push_back(-999); width.push_back(-999); J.push_back(999); P.push_back(false); C.push_back(false);
 	nameConst.push_back("error"); valueConst.push_back(-999); errorConst.push_back(-999);
 
-	particleFileName = "Physics/DPKinematics/particles.xml";//TODO: dont hardcode datafile
-	constantFileName = "Physics/DPKinematics/physConstants.xml";//TODO: dont hardcode datafile
+	const char* pPath = getenv("COMPWA_DIR");
+	std::string path = std::string(pPath);
+	particleFileName = path+"/Physics/particles2013.xml";
+	constantFileName = path+"/Physics/physConstants.xml";
 
 	flag_readFile=1;
 	return;
 }
 void PhysConst::readFile(){
-	std::cout<<"PhysConst: reading file with particle information "<<particleFileName<<std::endl;
+	BOOST_LOG_TRIVIAL(info)<<"PhysConst: reading file with particle information "<<particleFileName;
 
 	// Create an empty property tree object
 	using boost::property_tree::ptree;
@@ -84,7 +91,7 @@ void PhysConst::readFile(){
 		J.push_back(_J);
 		P.push_back(_P);
 		C.push_back(_C);
-//		std::cout<<"PhysConst DEBUG adding particle: "<<_name<<" mass="<<_mass<<" width="<<_width<<" J=" <<_J<<" P="<<_P<< " C="<<_C<<std::endl;
+		BOOST_LOG_TRIVIAL(debug)<<"PhysConst adding particle: "<<_name<<" mass="<<_mass<<" width="<<_width<<" J=" <<_J<<" P="<<_P<< " C="<<_C<<std::endl;
 	}
 
 	read_xml(constantFileName, pt);
@@ -99,7 +106,7 @@ void PhysConst::readFile(){
 		nameConst.push_back(_name);
 		valueConst.push_back(_value);
 		errorConst.push_back(_error);
-//		std::cout<<"PhysConst DEBUG adding particle: "<<_name<<" mass="<<_mass<<" width="<<_width<<" J=" <<_J<<" P="<<_P<< " C="<<_C<<std::endl;
+		BOOST_LOG_TRIVIAL(debug)<<"PhysConst adding particle: "<<_name<<" mass="<<_mass<<" width="<<_width<<" J=" <<_J<<" P="<<_P<< " C="<<_C<<std::endl;
 	}
 
 	flag_readFile=0;

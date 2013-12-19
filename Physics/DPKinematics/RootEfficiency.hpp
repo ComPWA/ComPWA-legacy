@@ -8,45 +8,33 @@
 // Contributors:
 //		Peter Weidenkaff -
 //-------------------------------------------------------------------------------
-#ifndef DALITZEFFICIENCY_HPP_
-#define DALITZEFFICIENCY_HPP_
+#ifndef ROOTEFFICIENCY_HPP_
+#define ROOTEFFICIENCY_HPP_
+
+#include <vector>
+#include <memory>
 
 #include <memory>
 
 #include "TEfficiency.h"
 #include "TH2.h"
-/**
- *  \class DalitzEfficiency
- *  \brief Virtual efficiency class
- */
-class DalitzEfficiency{
-private:
-
-public:
-  DalitzEfficiency();
-
-  DalitzEfficiency(const DalitzEfficiency&, const char*);
-
-  virtual ~DalitzEfficiency();
-
-	virtual double evaluate() = 0;
-};
-
+#include "Physics/DPKinematics/DalitzKinematics.hpp"
+#include "Core/Efficiency.hpp"
 /**
  *  \class DalitzHistEfficiency
  *  \brief Efficiency provided by a histogram
  */
-class DalitzHistEfficiency : public DalitzEfficiency {
+class DalitzHistEfficiency : public Efficiency {
 private:
 	std::shared_ptr<TEfficiency> effHist;
 public:
 	//! returns efficiency for current datapoint
-	double evaluate();
+	double evaluate(std::vector<double> x);
 	//! Construct DalitzHistEfficiency from TEfficiency object
 	DalitzHistEfficiency(TEfficiency* eff);
 	//! Construct DalitzHistEfficiency from two TH2 objects for passed and total events
 	DalitzHistEfficiency(TH2D* passed, TH2D* total);
-	DalitzHistEfficiency(const DalitzEfficiency&);
+	DalitzHistEfficiency(const DalitzHistEfficiency&);
 	~DalitzHistEfficiency(){};
 
 };
@@ -54,7 +42,7 @@ public:
  *  \class DalitzPolyEfficiency
  *  \brief Efficiency provided by a polynomial
  */
-class DalitzPolyEfficiency : public DalitzEfficiency {
+class DalitzPolyEfficiency : public Efficiency {
 private:
 
 public:
@@ -64,4 +52,4 @@ public:
 
 };
 
-#endif /* DALITZEFFICIENCY_HPP_ */
+#endif /* ROOTEFFICIENCY_HPP_ */

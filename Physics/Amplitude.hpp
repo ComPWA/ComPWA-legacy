@@ -31,6 +31,7 @@
 #include "Core/ParameterList.hpp"
 #include "Core/FunctionTree.hpp"
 
+#include "Core/DataPoint.hpp"
 class Amplitude
 {
 
@@ -48,15 +49,20 @@ public:
 
 	virtual const double integral(ParameterList& par) =0;
 	virtual double getMaxVal(ParameterList& par) = 0;
+	virtual double getMaxVal() = 0;
 	//virtual const double volume() =0;
 
-	virtual const ParameterList intensity(std::vector<double>& x, ParameterList& par) =0;
+	virtual const ParameterList intensity(dataPoint& point, ParameterList& par) =0;
+	virtual const ParameterList intensity(dataPoint& point) =0;
+	virtual const ParameterList intensity(std::vector<double> point, ParameterList& par) =0;
 
 	virtual const bool fillStartParVec(ParameterList& outPar) =0;
 
+	virtual Amplitude* Clone() = 0;
+
 	virtual std::shared_ptr<FunctionTree> functionTree(ParameterList& outPar) {
 		//if not implemented, return NULL-pointer
-		return NULL;
+		return std::shared_ptr<FunctionTree>();
 	}
 
 

@@ -9,7 +9,7 @@ local QFTINC = [ os.environ QFT_INCLUDE ] ;
 local QFT = [ os.environ QFT ] ;
 local MINUIT2 = [ os.environ MINUIT2 ] ;
 
-BOOSTLIBS = -lboost_date_time -lboost_filesystem -lboost_program_options -lboost_regex -lboost_serialization -lboost_system -lboost_thread -lboost_test_exec_monitor  ;
+BOOSTLIBS = -lboost_log_setup -lboost_log -lboost_date_time -lboost_filesystem -lboost_program_options -lboost_regex -lboost_serialization -lboost_system -lboost_thread -lboost_test_exec_monitor  ;
 
 local rlibs = [ SHELL "$ROOTSYS/bin/root-config --libs" ] ;
 ROOTLIBS = [ MATCH "(.*)[\n]" : $(rlibs) ] ;
@@ -23,6 +23,7 @@ project :
 		<include>$(GENEVA)/include
         <include>$(QFT)/include
         <include>$(MINUIT2)/include
+        <cxxflags>-pthread
 	<linkflags>-L$(BOOST_ROOT)/lib
 	<linkflags>$(BOOSTLIBS)
 	<linkflags>$(ROOTLIBS)
@@ -40,10 +41,10 @@ lib test :
         : : ;
         
 
-exe cx0testApp : 
-        CX0TestApp.cpp 
-        test
-        : ;
+#exe cx0testApp : 
+#        CX0TestApp.cpp 
+#        test
+#        : ;
         
 exe treetestApp : 
         TreeTestApp.cpp 
@@ -164,6 +165,15 @@ exe dpareaTestApp :
         $(TOP)/Physics/DPKinematics//DPKinematics
         : ;
 
+exe genRunManager : 
+        GenRunManagerApp.cpp 
+        test
+        $(TOP)/Core//ComPWA
+        $(TOP)/Physics/AmplitudeSum//AmplitudeSum  
+        $(TOP)/DataReader/RootReader//RootReader  
+        $(TOP)/Physics/DPKinematics//DPKinematics  
+        : ;
+
 exe gendalitzApp : 
         GenDalitzApp.cpp 
         test
@@ -177,6 +187,7 @@ exe dalitzplotApp :
         test
         $(TOP)/Core//ComPWA
         $(TOP)/DataReader/RootReader//RootReader  
+        $(TOP)/Physics/DPKinematics//DPKinematics  
         : ;
         
 exe dalitzfitApp : 
@@ -188,12 +199,13 @@ exe dalitzfitApp :
         $(TOP)/DataReader/RootReader//RootReader
         $(TOP)/Estimator/MinLogLH//MinLogLH 
         $(TOP)/Optimizer/Minuit2//Minuit2IF
+        $(TOP)/Physics/DPKinematics//DPKinematics  
         : ;
 
 install dist : test : <location>$(TOP)/lib <threading>single ;
 #install dist2 : dalitzfitApp treetestApp cx0testApp dataiftestApp optimizertestApp physicstestApp blackscholesApp neuralnetworkApp : <location>$(TOP)/bin <threading>single ;
-install dist2 : dalitzfitApp treetestApp cx0testApp dataiftestApp optimizertestApp physicstestApp : <location>$(TOP)/bin <threading>single ;
-install dist3 : estimatortestApp integrationtestApp integrationtestbinnedApp runmanagertestApp gentwopartApp gendalitzApp dalitzplotApp dpareaTestApp : <location>$(TOP)/bin <threading>single ;
+install dist2 : dalitzfitApp treetestApp dataiftestApp optimizertestApp physicstestApp : <location>$(TOP)/bin <threading>single ;
+install dist3 : estimatortestApp integrationtestApp integrationtestbinnedApp runmanagertestApp gentwopartApp gendalitzApp dalitzplotApp dpareaTestApp genRunManager : <location>$(TOP)/bin <threading>single ;
 
 if $(GENEVA) { 
 install dist7 : genevatestApp : <location>$(TOP)/bin ;

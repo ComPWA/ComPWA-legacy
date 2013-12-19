@@ -42,6 +42,7 @@ public:
 
  // virtual const std::vector<std::string>& getVariableNames() =0;
 
+  virtual void pushEvent(const Event&) =0;
   virtual const Event& getEvent(const int) =0;
   virtual const int getBin(const int, double&, double&) =0; //TODO: BinDataTyp, dynamic dimension
 

@@ -34,8 +34,8 @@
 #include "Physics/AmplitudeSum/AmpFlatteRes.hpp"
 #include "Physics/AmplitudeSum/AmpWigner2.hpp"
 #include "Physics/AmplitudeSum/AmpSumOfAmplitudes.hpp"
-#include "Physics/DPKinematics/DPKinematics.hpp"
-#include "Physics/DPKinematics/DataPoint.hpp"
+#include "Physics/DPKinematics/DalitzKinematics.hpp"
+#include "Core/DataPoint.hpp"
 
 class AmpSumIntensity : public Amplitude {
 
@@ -49,27 +49,33 @@ public:
 	AmpSumIntensity(const double inM, const double inBr, const double in1,const double in2, const double in3,
 			std::string nameM, std::string name1,std::string name2,std::string name3,
 			 AmplitudeSetup ini, unsigned int entries=9999,
-			normalizationStyle ns=none);
-	AmpSumIntensity(DPKinematics kin, AmplitudeSetup ini, unsigned int entries=9999,
-			normalizationStyle ns=none);
+			normalizationStyle ns=none, double dpArea=-999);
+	AmpSumIntensity(AmplitudeSetup ini, normalizationStyle ns, unsigned int entries=9999,
+			 double dpArea=-999);
+	AmpSumIntensity(AmplitudeSetup ini, unsigned int entries=9999, double dpArea=-999);
+	AmpSumIntensity(const AmpSumIntensity& other);
 
 	double evaluate(double x[], size_t dim);
 	//! normalization integral for parameters \par
 	virtual const double integral(ParameterList& par);
+	//! normalization integral
+	virtual const double integral();
 	//! maximum value of amplitude with parameters \par
-	virtual double getMaxVal(ParameterList& par) { return 1; };
+	virtual double getMaxVal();
+	virtual double getMaxVal(ParameterList& par);
+	virtual void calcMaxVal(ParameterList& par);
+	virtual void calcMaxVal();
 
 	virtual void setNevents(unsigned int n) { _entries=n; };
 	virtual unsigned int getNevents() { return _entries; };
 
 	//! setting new parameterList
 	virtual void setParameterList(ParameterList& par);
-	//! evaluate total amplitude using parameters \par at phsp point \x
-	virtual const ParameterList intensity(std::vector<double>& x, ParameterList& par);
-	//! evaluate total amplitude using parameters \par
-	virtual const ParameterList intensity(ParameterList& par);
-	//! evaluate total amplitude using current set of parameters
-	virtual const ParameterList intensity();
+	//! evaluate total amplitude using parameters \par at phsp point \point
+	virtual const ParameterList intensity(dataPoint& point, ParameterList& par);
+	//! evaluate total amplitude using current set of parametersat phsp point \point
+	virtual const ParameterList intensity(dataPoint& point);
+	virtual const ParameterList intensity(std::vector<double> point, ParameterList& par);
 
 	virtual std::shared_ptr<FunctionTree> functionTree(ParameterList& outPar);
 
@@ -77,11 +83,18 @@ public:
 
 	virtual std::string printAmps();
 
+	double normReso(std::shared_ptr<AmpAbsDynamicalFunction> amp);
 	virtual ~AmpSumIntensity(){};
+	virtual AmpSumIntensity* Clone(){
+		return (new AmpSumIntensity(*this));
+	}
 
 protected:
 	void init();
-	const DPKinematics _kin;
+
+	bool _calcMaxFcnVal;
+	bool _calcNorm;
+	double _maxFcnVal;
 	AmpSumOfAmplitudes totAmp;
 	AmplitudeSetup ampSetup;
 	std::shared_ptr<FunctionTree> myTree;
@@ -92,6 +105,7 @@ protected:
 	normalizationStyle _normStyle;
 	unsigned int _entries;
 	double _dpArea;
+	unsigned int nAmps;
 
 	//Resonance Variables
 	std::vector<std::string> namer;
@@ -109,8 +123,7 @@ protected:
 //	std::vector<std::shared_ptr<DoubleParameter> > par1;
 //	std::vector<std::shared_ptr<DoubleParameter> > par2;
 
-	std::vector<std::shared_ptr<AmpWigner> > angd;
-	unsigned int nAmps;
+//	std::vector<std::shared_ptr<AmpWigner> > angd;
 
 private:
 

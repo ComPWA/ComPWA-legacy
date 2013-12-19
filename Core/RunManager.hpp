@@ -10,6 +10,7 @@
 //
 // Contributors:
 //     Mathias Michel - initial API and implementation
+//		Peter Weidenkaff - adding functionality to generate set of events
 //-------------------------------------------------------------------------------
 //! Run-Manager for a simple fit.
 /*! \class RunManager
@@ -17,7 +18,7 @@
  * This class provides a RunManager for simple fits. To use it, you create
  * all modules you want to use and provide them to the RunManger. It checks
  * for compatibility and if set up correctly it starts the fitting procedure.
-*/
+ */
 
 /*! \mainpage ComPWA Documentation
  *
@@ -84,28 +85,52 @@
 #include "Physics/Amplitude.hpp"
 #include "Optimizer/Optimizer.hpp"
 #include "Core/ParameterList.hpp"
+#include "Core/Efficiency.hpp"
+#include "Core/Generator.hpp"
+
+class DalitzKinematics;
 
 class RunManager
 {
 
 public:
 
-  RunManager(std::shared_ptr<Data>, std::shared_ptr<ControlParameter>,
-      std::shared_ptr<Amplitude>, std::shared_ptr<Optimizer>);
+	RunManager() {};
+	RunManager( std::shared_ptr<Data>, std::shared_ptr<Amplitude>, std::shared_ptr<Optimizer>,
+			std::shared_ptr<Efficiency>); //Fit
+	RunManager( unsigned int size, std::shared_ptr<Amplitude>, std::shared_ptr<Efficiency>,
+			std::shared_ptr<Generator>); //Generate
 
-  virtual ~RunManager();
+	virtual ~RunManager();
 
-  virtual bool startFit(ParameterList& );
+
+	virtual void setSize ( unsigned int s){ size_=s; validSize=1; };
+	virtual void setData ( std::shared_ptr<Data> d){ pData_ = d; validData=1; };
+	virtual void setAmplitude ( std::shared_ptr<Amplitude> d){ pPhys_ = d; validAmplitude=1; };
+	virtual void setOptimizer ( std::shared_ptr<Optimizer> d){ pOpti_ = d; validOptimizer=1; };
+	virtual void setEfficiency( std::shared_ptr<Efficiency> d){ eff_= d; validEfficiency=1; };
+
+	virtual bool startFit( ParameterList& );
+	virtual bool generate( unsigned int number );
 
 protected:
-  std::shared_ptr<Data> pData_; /*!< Pointer to Data-Module */
-  std::shared_ptr<ControlParameter> pEsti_; /*!< Pointer to Estimator-Module */
-  std::shared_ptr<Amplitude> pPhys_; /*!< Pointer to Physics-Module */
-  std::shared_ptr<Optimizer> pOpti_; /*!< Pointer to Optimizer-Module */
-  //TODO: log
-  bool valid_; /*!< setup a valid configuration? */
-  bool success_; /*!< fitting ended successfully? */
+	bool validData;
+	bool validAmplitude;
+	bool validOptimizer;
+	bool validSize;
+	bool validEfficiency;
 
+	std::shared_ptr<Data> pData_; /*!< Pointer to Data-Module */
+	std::shared_ptr<Amplitude> pPhys_; /*!< Pointer to Physics-Module */
+	std::shared_ptr<Optimizer> pOpti_; /*!< Pointer to Optimizer-Module */
+	std::shared_ptr<Efficiency> eff_; /*!< Pointer to Optimizer-Module */
+	std::shared_ptr<Generator> gen_; /*!< Pointer to Optimizer-Module */
+	std::shared_ptr<Generator> getGen(){ return gen_;};
+	//TODO: log
+	bool valid_; /*!< setup a valid configuration? */
+	bool success_; /*!< fitting ended successfully? */
+
+	unsigned int size_;
 };
 
 #endif

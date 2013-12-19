@@ -40,6 +40,8 @@ public:
 
   virtual void inline setName(const std::string& name) { fName = name; }
   virtual const inline std::string& getName() { return fName; }
+  virtual double inline getWeight() {return fWeight;};
+  virtual void inline setWeight(double w) { fWeight=w;};
 
   virtual const inline unsigned int getNParticles() { return fParticles.size(); }
   virtual const Particle& getParticle(const unsigned int id);
