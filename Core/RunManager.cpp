@@ -87,46 +87,16 @@ bool RunManager::generate( unsigned int number ) {
 	pPhys_->fillStartParVec(minPar);
 
 	//Determing an estimate on the maximum of the physics amplitude using 20k events.
-	double genMaxVal=2*pPhys_->getMaxVal();
-//	double genMaxVal=0;
-//#pragma omp parallel shared(genMaxVal)
-//	{
-//		unsigned int threadId = omp_get_thread_num();
-//		unsigned int numThreads = omp_get_num_threads();
-//		Generator* genNew = (&(*gen_))->Clone();
-////		genNew->setSeed(std::clock()+omp_get_thread_num());
-//		Amplitude* ampNew = (&(*pPhys_))->Clone();
-//#pragma omp for
-//		for(unsigned int i=0; i<20000;i++){
-//			Event tmp;
-//			genNew->generate(tmp);
-//			double weight = tmp.getWeight();
-//			Particle part1 = tmp.getParticle(0);
-//			Particle part2 = tmp.getParticle(1);
-//			Particle part3 = tmp.getParticle(2);
-//			double m23sq = Particle::invariantMass(part2,part3);
-//			double m13sq = Particle::invariantMass(part1,part3);
-//
-//			std::vector<double> x;
-//			x.push_back(m23sq);
-//			x.push_back(m13sq);
-////			ParameterList list = ampNew->intensity(x,minPar);//not working yet
-//#pragma omp critical
-//			{
-//				ParameterList list = pPhys_->intensity(x,minPar);
-//				double AMPpdf = *list.GetDoubleParameter(0);
-//				if(genMaxVal<(weight*AMPpdf)) genMaxVal= weight*AMPpdf;
-//			}
-//		}
-//	}
-//	genMaxVal=2*genMaxVal;//conservative choice
+//	double genMaxVal=2*pPhys_->getMaxVal();
+	double genMaxVal=pPhys_->getMaxVal();
 
 	double maxTest=0;
+	unsigned int totalCalls=0;
 	BOOST_LOG_TRIVIAL(info) << "== Using "<<genMaxVal<< " as maximum value for random number generation!";
 	BOOST_LOG_TRIVIAL(info) << "Generating MC: ["<<size_<<" events] ";
 
 	boost::progress_display progressBar(size_); //boost progress bar (thread-safe)
-#pragma omp parallel firstprivate(genMaxVal) shared(maxTest)
+#pragma omp parallel firstprivate(genMaxVal) shared(maxTest,totalCalls)
 	{
 		unsigned int threadId = omp_get_thread_num();
 		unsigned int numThreads = omp_get_num_threads();
@@ -145,6 +115,7 @@ bool RunManager::generate( unsigned int number ) {
 			//	while( i<size_){ //while loops are not supported by openMP
 			Event tmp;
 			genNew->generate(tmp);
+			totalCalls++;
 			double weight = tmp.getWeight();
 			Particle part1 = tmp.getParticle(0);
 			Particle part2 = tmp.getParticle(1);
@@ -176,6 +147,9 @@ bool RunManager::generate( unsigned int number ) {
 		}
 	}
 	std::cout<<std::endl;
+	BOOST_LOG_TRIVIAL(info)<<"Max value used in generation: "<<maxTest;
+	BOOST_LOG_TRIVIAL(info)<<"Efficiency of toy MC generation: "<<(double)size_/totalCalls;
+
 
 	if( maxTest > (double) (0.9*genMaxVal) ) {
 		BOOST_LOG_TRIVIAL(error)<<"==========ATTENTION===========";

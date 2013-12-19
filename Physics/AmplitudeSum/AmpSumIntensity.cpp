@@ -170,7 +170,7 @@ void AmpSumIntensity::calcMaxVal(){
 	boost::uniform_real<> uni_dist23(xLimit_low[1],xLimit_high[1]);
 	boost::variate_generator<boost::minstd_rand&, boost::uniform_real<> > uni13(rndGen2, uni_dist13);
 	boost::variate_generator<boost::minstd_rand&, boost::uniform_real<> > uni23(rndGen2, uni_dist23);
-	for(unsigned int i=0; i<20000; i++){
+	for(unsigned int i=0; i<40000; i++){
 		double m23sq=uni23(); double m13sq=uni13();
 		dataPoint point; point.setVal("m13sq",m13sq); point.setVal("m23sq",m23sq);
 		if( !kin->isWithinPhsp(point) ) { if(i>0) i--; continue; }//only integrate over phase space
