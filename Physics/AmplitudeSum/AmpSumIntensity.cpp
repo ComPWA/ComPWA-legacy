@@ -46,9 +46,10 @@
 #include "Physics/AmplitudeSum/AmpRelBreitWignerRes.hpp"
 #include "Physics/AmplitudeSum/AmpGausRes.hpp"
 #include "Physics/AmplitudeSum/AmpFlatteRes.hpp"
-#include "Physics/AmplitudeSum/AmpWigner.hpp"
+#include "Physics/AmplitudeSum/AmpWigner2.hpp"
 #include "Physics/AmplitudeSum/AmpSumOfAmplitudes.hpp"
 #include "Physics/AmplitudeSum/AmpSumIntensity.hpp"
+//#include "Physics/AmplitudeSum/AmpSumTree.hpp"
 
 #include "Physics/DPKinematics/PhysConst.hpp"
 
@@ -79,9 +80,32 @@ AmpSumIntensity::AmpSumIntensity(const double inM, const double inBr, const doub
 void AmpSumIntensity::init(){
 
 	_dpArea = dataPoint::instance()->DPKin.getDParea();
+	dataPoint* pt = dataPoint::instance();
 	std::cout<<"AmpSumIntensity: INFO: number of Entries in dalitz plot set to: "<<_entries<<std::endl;
 	std::cout<<"AmpSumIntensity: INFO: area of phase space: "<<_dpArea<<std::endl;
 
+    //------------Setup Tree---------------------
+    myTree = std::shared_ptr<FunctionTree>(new FunctionTree());
+
+    //------------Setup Tree Pars---------------------
+    std::shared_ptr<DoubleParameter> x = std::shared_ptr<DoubleParameter>(new DoubleParameter("x"));
+    std::shared_ptr<DoubleParameter> m23 = std::shared_ptr<DoubleParameter>(new DoubleParameter("m23"));
+    std::shared_ptr<DoubleParameter> m13 = std::shared_ptr<DoubleParameter>(new DoubleParameter("m13"));
+    std::shared_ptr<DoubleParameter> m12 = std::shared_ptr<DoubleParameter>(new DoubleParameter("m12"));
+    treePar = std::shared_ptr<ParameterList>(new ParameterList());
+    treePar->AddParameter(x);
+    treePar->AddParameter(m23);
+    treePar->AddParameter(m13);
+    treePar->AddParameter(m12);
+
+    //----Strategies needed
+    std::shared_ptr<MultAll> multStrat = std::shared_ptr<MultAll>(new MultAll());
+    std::shared_ptr<AddAll> addStrat = std::shared_ptr<AddAll>(new AddAll());
+
+    //----Add Top Node
+    myTree->createHead("Amplitude", addStrat); //A=Sum{Resos}
+
+    //----Add Resonances
 	for(std::vector<Resonance>::iterator reso=ampSetup.getResonances().begin(); reso!=ampSetup.getResonances().end(); reso++){
 		Resonance tmp = (*reso);
 		//setup RooVars
@@ -91,10 +115,40 @@ void AmpSumIntensity::init(){
 		rr.push_back( std::shared_ptr<DoubleParameter> (new DoubleParameter("rr_"+tmp.m_name,tmp.m_strength) ) );
 		phir.push_back( std::shared_ptr<DoubleParameter> (new DoubleParameter("phir_"+tmp.m_name,tmp.m_phase) ) );
 
-		unsigned int subSys = tmp.m_daugtherA + tmp.m_daugtherB;
+		 //----Add Nodes
+	    std::shared_ptr<BreitWignerStrategy> rbwStrat = std::shared_ptr<BreitWignerStrategy>(new BreitWignerStrategy(tmp.m_name));
+	    std::shared_ptr<WignerDStrategy> angdStrat = std::shared_ptr<WignerDStrategy>(new WignerDStrategy(tmp.m_name));
+	    unsigned int subSys = tmp.m_daugtherA + tmp.m_daugtherB;
+		      unsigned int last = mr.size()-1;
+		      myTree->createNode("Reso_"+tmp.m_name, multStrat, "Amplitude"); //Reso=BW*c*AD
+		      myTree->createNode("RelBW_"+tmp.m_name, rbwStrat, "Reso_"+tmp.m_name); //BW
+		      myTree->createLeaf("Intens_"+tmp.m_name, rr[last], "Reso_"+tmp.m_name); //c
+		      myTree->createNode("AngD_"+tmp.m_name, angdStrat, "Reso_"+tmp.m_name); //AD
+		      //BW Par
+		      myTree->createLeaf("m0_"+tmp.m_name, mr[last]->GetValue(), "RelBW_"+tmp.m_name); //m0
+		      myTree->createLeaf("x", x, "RelBW_"+tmp.m_name); //x
+		      myTree->createLeaf("m23", m23, "RelBW_"+tmp.m_name); //ma TODO
+		      myTree->createLeaf("m13", m13, "RelBW_"+tmp.m_name); //mb
+		      myTree->createLeaf("spin_"+tmp.m_name, tmp.m_spin, "RelBW_"+tmp.m_name); //spin
+		      myTree->createLeaf("d_"+tmp.m_name,  tmp.m_mesonRadius, "RelBW_"+tmp.m_name); //d
+		      myTree->createLeaf("resWidth_"+tmp.m_name, gr[last]->GetValue(), "RelBW_"+tmp.m_name); //resWidth
+		      //AD Par
+		      myTree->createLeaf("m23", m23, "AngD_"+tmp.m_name); //ma TODO
+		      myTree->createLeaf("m13", m13, "AngD_"+tmp.m_name); //mb
+		      myTree->createLeaf("m12", m12, "AngD_"+tmp.m_name); //mc
+		      myTree->createLeaf("M", _kin.M, "AngD_"+tmp.m_name); //M
+		      myTree->createLeaf("m1", _kin.m1, "AngD_"+tmp.m_name); //m1
+		      myTree->createLeaf("m2", _kin.m2, "AngD_"+tmp.m_name); //m2
+		      myTree->createLeaf("m3", _kin.m3, "AngD_"+tmp.m_name); //m3
+		     // unsigned int _subSysFlag = Double_t(paras.GetParameterValue("subSysFlag_"+name));
+		      myTree->createLeaf("subSysFlag_"+tmp.m_name, subSys, "AngD_"+tmp.m_name); //subSysFlag
+		      myTree->createLeaf("spin_"+tmp.m_name,tmp.m_spin, "AngD_"+tmp.m_name); //spin
+		      myTree->createLeaf("m_"+tmp.m_name, tmp.m_m, "AngD_"+tmp.m_name); //OutSpin 1
+		      myTree->createLeaf("n_"+tmp.m_name, tmp.m_n, "AngD_"+tmp.m_name); //OutSpin 2
+
 
 		//setup Dynamics
-		unsigned int last = mr.size()-1;
+		//unsigned int last = mr.size()-1;
 		std::shared_ptr<AmpRelBreitWignerRes> tmpbw(new AmpRelBreitWignerRes(tmp.m_name.c_str(),
 				*mr[last], *gr[last], tmp.m_mesonRadius, subSys, tmp.m_spin,tmp.m_m,tmp.m_n) );
 		totAmp.addBW(tmpbw, rr.at(last), phir.at(last));
@@ -224,6 +278,16 @@ const ParameterList AmpSumIntensity::intensity(){
 	ParameterList result;
 	result.AddParameter(std::shared_ptr<DoubleParameter>(new DoubleParameter("AmpSumResult",AMPpdf)));
 	return result;
+}
+std::shared_ptr<FunctionTree> AmpSumIntensity::functionTree(ParameterList& outPar) {
+  if(outPar.GetNParameter()>0) return NULL;
+  fillStartParVec(outPar);
+  outPar.AddParameter(treePar->GetDoubleParameter("x"));
+  outPar.AddParameter(treePar->GetDoubleParameter("m23"));
+  outPar.AddParameter(treePar->GetDoubleParameter("m13"));
+  outPar.AddParameter(treePar->GetDoubleParameter("m12"));
+
+  return myTree;
 }
 void AmpSumIntensity::setParameterList(ParameterList& par){
 	//parameters varied by Minimization algorithm

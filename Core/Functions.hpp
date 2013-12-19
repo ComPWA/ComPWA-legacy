@@ -64,8 +64,8 @@ public:
   //! Pure Virtual interface for streaming info about the strategy
   virtual const std::string to_str() const =0;
 
-  //! Pure Virtual interface for executing a function
-  virtual std::shared_ptr<AbsParameter> execute(const ParameterList& paras) = 0;
+  //! Pure Virtual interface for executing a strategy
+  virtual std::shared_ptr<AbsParameter> execute(ParameterList& paras) = 0;
 };
 
 class AddAll : public Strategy
@@ -78,7 +78,7 @@ public:
     return "+";
   }
 
-  virtual std::shared_ptr<AbsParameter> execute(const ParameterList& paras){
+  virtual std::shared_ptr<AbsParameter> execute(ParameterList& paras){
     double result = 0;
     for(unsigned int i=0; i<paras.GetNDouble(); i++)
       result+=paras.GetParameterValue(i);
@@ -99,7 +99,7 @@ public:
     return "*";
   }
 
-  virtual std::shared_ptr<AbsParameter> execute(const ParameterList& paras){
+  virtual std::shared_ptr<AbsParameter> execute(ParameterList& paras){
     double result = 1.;
     for(unsigned int i=0; i<paras.GetNDouble(); i++)
       result*=paras.GetParameterValue(i);

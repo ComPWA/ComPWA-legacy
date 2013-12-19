@@ -53,6 +53,10 @@
 #include "Physics/AmplitudeSum/AmpSumIntensity.hpp"
 #include "Estimator/MinLogLH/MinLogLH.hpp"
 #include "Optimizer/Minuit2/MinuitIF.hpp"
+#include "Physics/DPKinematics/DPKinematics.hpp"
+#include "Physics/DPKinematics/DataPoint.hpp"
+
+using namespace std;
 
 const Double_t M = 3.096916; // GeV/c² (J/psi+)
 const Double_t Br = 0.000093; // GeV/c² (width)
@@ -71,7 +75,11 @@ int main(int argc, char **argv){
   std::cout << "  This program comes with ABSOLUTELY NO WARRANTY; for details see license.txt" << std::endl;
   std::cout << std::endl;
 
-  bool useFctTree = false;
+	DPKinematics kin("J/psi","gamma","pi0","pi0");
+	//DPKinematics kin("D0","gamma","K-","K+");
+	static dataPoint* point = dataPoint::instance(kin);
+
+  bool useFctTree = true;
 
   std::string file="test/3Part-4vecs.root";
   std::string resoFile="/home/mathias/workspace/nextPWA/test/JPSI_ypipi.xml";
@@ -79,7 +87,9 @@ int main(int argc, char **argv){
   std::cout << "Load Modules" << std::endl;
   std::shared_ptr<Data> myReader(new RootReader(file, false,"data"));
   std::shared_ptr<Data> myPHSPReader(new RootReader(file, false,"mc"));
-  std::shared_ptr<Amplitude> amps(new AmpSumIntensity(M, Br, m1, m2, m3,"J/psi","gamma","pi0","pi0", ini));
+  std::shared_ptr<Amplitude> amps(new AmpSumIntensity(kin, ini, myReader->getNEvents(), AmpSumIntensity::normalizationStyle::entries));
+  /*return 0;
+  //std::shared_ptr<Amplitude> amps(new AmpSumIntensity(M, Br, m1, m2, m3,"J/psi","gamma","pi0","pi0", ini));
   // Initiate parameters
   ParameterList par;
   std::shared_ptr<ControlParameter> esti;
@@ -100,16 +110,19 @@ int main(int argc, char **argv){
     if(!amps->functionTree(test))
       return 1;
 
+  //return 0;
+
   std::cout << "LH with optimal parameters: " << esti->controlParameter(par) << std::endl;
   double startInt[par.GetNDouble()], optiInt[par.GetNDouble()];
   for(unsigned int i=0; i<par.GetNDouble(); i++){
     std::shared_ptr<DoubleParameter> tmp = par.GetDoubleParameter(i);
     optiInt[i] = tmp->GetValue();
-    if(i<2 || i>5){ //omega's and f0 fixed
+    if(i<2 || i>3){ //omega's and f0 fixed
       tmp->FixParameter(true);
     }else{
-      tmp->SetValue(tmp->GetValue()/((i+1)*7));
+      tmp->SetValue(tmp->GetValue()/((i+1)));
       tmp->SetError(tmp->GetValue());
+      if(!tmp->GetValue()) tmp->SetError(1.);
     }
     startInt[i] = tmp->GetValue();
   }
@@ -267,12 +280,53 @@ int main(int argc, char **argv){
   TGenPhaseSpace event;
   event.SetDecay(W, 3, masses);
 
-  TLorentzVector *pGamma,*pPip,*pPim,pPm23,pPm13;
+  TLorentzVector *pGamma,*pPip,*pPim,pPm23,pPm13,pPm12;
   double weight, m23sq, m13sq, m12sq, maxTest=0;
   ParameterList paras(par);
   if(useFctTree){
     paras.RemoveDouble("ma"); paras.RemoveDouble("mb"); paras.RemoveDouble("mc");
   }
+
+  cout << "Einschwingen" << endl;
+  for(unsigned int schwing=0; schwing<10*myReader->getNEvents(); schwing++){
+      weight = event.Generate();
+
+      pGamma = event.GetDecay(0);
+      pPip    = event.GetDecay(1);
+      pPim    = event.GetDecay(2);
+
+	  pPm23 = *pPim + *pPip;
+	  pPm13 = *pGamma + *pPim;
+	  pPm12 = *pGamma + *pPip;
+
+      m23sq=pPm23.M2(); m13sq=pPm13.M2(); m12sq=pPm12.M2();
+
+      //		m12sq = kin.getThirdVariableSq(m23sq,m13sq);
+      		point->setMsq(3,m12sq); point->setMsq(4,m13sq); point->setMsq(5,m23sq);
+      //		m12sq=M*M+m1*m1+m2*m2+m3*m3-m13sq-m23sq;
+      		if( abs(m12sq-kin.getThirdVariableSq(m23sq,m13sq))>0.01 ){
+      			std::cout<<m12sq<<" "<<kin.getThirdVariableSq(m23sq,m13sq)<<std::endl;
+      			std::cout<<"   " <<m23sq<<" "<<m13sq<<" "<<m12sq<<std::endl;
+      		}
+
+      //call physics module
+      vector<double> x;
+      x.push_back(sqrt(m23sq));
+      x.push_back(sqrt(m13sq));
+      x.push_back(sqrt(m12sq));
+      ParameterList intensL = amps->intensity(x, paras);
+      double AMPpdf = intensL.GetDoubleParameter(0)->GetValue();
+      //double AMPpdf = testBW.intensity(x, minPar);
+
+
+      //mb.setVal(m13);
+      //double m13pdf = totAmp13.getVal();//fun_combi2->Eval(m13);
+      if(maxTest<(weight*AMPpdf))
+        maxTest=(weight*AMPpdf);
+
+  }
+
+  maxTest*=1.1;
   cout << "Start generation of y pi0 pi0 Dalitz Result" << endl;
   unsigned int i = 0;
   do{
@@ -284,15 +338,18 @@ int main(int argc, char **argv){
 
         pPm23 = *pPim + *pPip;
         pPm13 = *pGamma + *pPim;
+        pPm12 = *pGamma + *pPip;
 
-        m23sq=pPm23.M2(); m13sq=pPm13.M2();
+        m23sq=pPm23.M2(); m13sq=pPm13.M2(); m12sq=pPm12.M2();
 
-        m12sq=M*M-m13sq-m23sq;
-        if(m12sq<0){
+        point->setMsq(3,m12sq); point->setMsq(4,m13sq); point->setMsq(5,m23sq);
+
+       // m12sq=M*M-m13sq-m23sq;
+        //if(m12sq<0){
           //cout << tmpm12_sq << "\t" << M*M << "\t" << m13_sq << "\t" << m23_sq << endl;
           //continue;
-          m12sq=0.0001;
-        }
+        //  m12sq=0.0001;
+       // }
 
         TParticle fparticleGam(22,1,0,0,0,0,*pGamma,W);
         TParticle fparticlePip(211,1,0,0,0,0,*pPip,W);
@@ -307,12 +364,12 @@ int main(int argc, char **argv){
         double AMPpdf = intensL.GetDoubleParameter(0)->GetValue();
         //double AMPpdf = amps->intensity(x, par);
 
-        double test = rando.Uniform(0,5);
+        double test = rando.Uniform(0,maxTest);
 
         //mb.setVal(m13);
         //double m13pdf = totAmp13.getVal();//fun_combi2->Eval(m13);
         if(maxTest<(weight*AMPpdf))
-          maxTest=(weight*AMPpdf);
+          cout << "Einschwingen zu kurz!" << endl;
         if(test<(weight*AMPpdf)){
           i++;
 
@@ -348,6 +405,8 @@ int main(int argc, char **argv){
   bw23DIFF->Write();
   output.Write();
   output.Close();
+*/
+  cout << "Done" << endl;
 
   return 0;
 }

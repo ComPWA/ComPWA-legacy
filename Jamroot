@@ -6,7 +6,7 @@ project :
 	requirements <include>$(TOP)
 	<cxxflags>-ftemplate-depth-256
 	<cxxflags>-std=c++0x
-	<cxxflags>-g
+	<linkflags>-lgomp
 	;
 
 # Configure the used packages here:

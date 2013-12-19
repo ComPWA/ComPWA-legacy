@@ -194,7 +194,7 @@ double GStartIndividual::fitnessCalculation(){
 /**
  * Loads all static data needed in client mode.
  */
-void GStartIndividual::loadConstantData(boost::shared_ptr<Gem::Geneva::GIndividual>){
+void GStartIndividual::loadConstantData(boost::shared_ptr<GStartIndividual>){
   std::cout << "Load data" << std::endl;
   theData = ControlParameter::Instance();
 }

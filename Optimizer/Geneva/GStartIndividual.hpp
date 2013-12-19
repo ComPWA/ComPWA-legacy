@@ -102,7 +102,7 @@ protected:
 	/** @brief Creates a deep clone of this object */
 	virtual GObject* clone_() const;
 	/** @brief Loads static data */
-	virtual void loadConstantData(boost::shared_ptr<Gem::Geneva::GIndividual>);
+	virtual void loadConstantData(boost::shared_ptr<GStartIndividual>);
 
 	/** @brief The actual fitness calculation takes place here. */
 	virtual double fitnessCalculation();

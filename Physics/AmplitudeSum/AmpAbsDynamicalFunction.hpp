@@ -25,7 +25,7 @@
 #include <vector>
 #include <complex>
 
-class AmpAbsDynamicalFunction {
+class AmpAbsDynamicalFunction{// : public Strategy{
 public:
   AmpAbsDynamicalFunction(const char *name);
 
@@ -33,10 +33,31 @@ public:
 
   virtual ~AmpAbsDynamicalFunction();
 
+  //! Implementation of interface for streaming info about the strategy
+  virtual const std::string to_str() const {
+	  return (_name+"rel Breit-Wigner with Wigner_D");
+  }
+
+  //! Implementation of interface for executing a strategy
+ /* virtual std::shared_ptr<AbsParameter> execute(const ParameterList& paras){
+	  std::complex<double> result;
+
+    result = evaluateTree(paras);
+
+    //ParameterList out;
+    // out.AddParameter(DoubleParameter("AddAllResult",result));
+    return std::shared_ptr<AbsParameter>(new ComplexParameter("AddAllResult",result));
+  };*/
+
 
   virtual void initialise() = 0; 
   virtual std::complex<double> evaluate() const = 0;
   virtual std::complex<double> evaluateAmp() const = 0;
+  /*virtual std::complex<double> evaluateTree(const ParameterList& paras) const {
+	  //TODO: pure virtual
+	  std::complex<double> blanko;
+	  return blanko;
+  }*/
   virtual double evaluateWignerD() const = 0;
 
   virtual double getSpin() = 0;

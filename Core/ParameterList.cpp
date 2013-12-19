@@ -158,7 +158,7 @@ std::shared_ptr<DoubleParameter> ParameterList::GetDoubleParameter(const std::st
   }
   catch(...)
   {
-      throw BadParameter("Double Parameter not found");
+      throw BadParameter("Double Parameter not found: "+parname);
   };
   return vDoublePar_.at(i);
 }
@@ -170,7 +170,7 @@ std::shared_ptr<IntegerParameter> ParameterList::GetIntegerParameter(const std::
   }
   catch(...)
   {
-      throw BadParameter("Integer Parameter not found");
+      throw BadParameter("Integer Parameter not found: "+parname);
   };
   return vIntPar_.at(i);
 }
@@ -182,7 +182,7 @@ std::shared_ptr<BoolParameter> ParameterList::GetBoolParameter(const std::string
   }
   catch(...)
   {
-      throw BadParameter("Bool Parameter not found");
+      throw BadParameter("Bool Parameter not found: "+parname);
   };
   return vBoolPar_.at(i);
 }

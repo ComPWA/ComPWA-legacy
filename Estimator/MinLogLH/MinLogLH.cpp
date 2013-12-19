@@ -19,6 +19,7 @@
 #include "Core/Particle.hpp"
 #include "Core/ParameterList.hpp"
 #include "Core/FunctionTree.hpp"
+//#include "Physics/DPKinematics/DataPoint.hpp"
 
 MinLogLH::MinLogLH(std::shared_ptr<Amplitude> inPIF, std::shared_ptr<Data> inDIF)
   : pPIF_(inPIF), pDIF_(inDIF){
@@ -74,6 +75,7 @@ MinLogLH::~MinLogLH(){
 
 double MinLogLH::controlParameter(ParameterList& minPar){
   unsigned int nEvents = pDIF_->getNEvents();
+  //static dataPoint* point = dataPoint::instance();
   unsigned int nPHSPEvts=0;
   if(pPHSP_)
     nPHSPEvts = pPHSP_->getNEvents();
@@ -84,6 +86,8 @@ double MinLogLH::controlParameter(ParameterList& minPar){
       //TODO: exception
       return 0;
   }
+
+  //std::cout << "BLA0" << std::endl;
 
 
   double norm = 0;
@@ -106,6 +110,7 @@ double MinLogLH::controlParameter(ParameterList& minPar){
         masssqa += (pow(a.E+b.E,2) - pow(a.px+b.px ,2) - pow(a.py+b.py ,2) - pow(a.pz+b.pz ,2));
         masssqb += (pow(a.E+c.E,2) - pow(a.px+c.px ,2) - pow(a.py+c.py ,2) - pow(a.pz+c.pz ,2));
         masssqc += (pow(c.E+b.E,2) - pow(c.px+b.px ,2) - pow(c.py+b.py ,2) - pow(c.pz+b.pz ,2));
+		//point->setMsq(3,masssqa); point->setMsq(4,masssqb); point->setMsq(5,masssqc);
         x.push_back(sqrt(masssqc)); //23
         x.push_back(sqrt(masssqb)); //13
         x.push_back(sqrt(masssqa)); //12
@@ -116,9 +121,9 @@ double MinLogLH::controlParameter(ParameterList& minPar){
           intens = intensL.GetDoubleParameter(0)->GetValue();
         }else if(pFcnTree_){
           //actualize inv masses
-          minPar.GetDoubleParameter("ma")->SetValue(x[0]);
-          minPar.GetDoubleParameter("mb")->SetValue(x[1]);
-          minPar.GetDoubleParameter("mc")->SetValue(x[2]);
+          minPar.GetDoubleParameter("m23")->SetValue(x[0]);
+          minPar.GetDoubleParameter("m13")->SetValue(x[1]);
+          minPar.GetDoubleParameter("m12")->SetValue(x[2]);
           //calculate intensity
           pFcnTree_->recalculate();
           std::shared_ptr<DoubleParameter> intensL = std::dynamic_pointer_cast<DoubleParameter>(pFcnTree_->head()->getValue());
@@ -146,6 +151,7 @@ double MinLogLH::controlParameter(ParameterList& minPar){
     std::cout << minPar.GetParameterValue(i) << " ";
   }
   std::cout << std::endl;*/
+  //std::cout << "BLA1" << std::endl;
 
   double lh=0; //calculate LH:
   switch(nParts){ //TODO: other cases, better "x" description (selection of particles?)
@@ -245,6 +251,8 @@ double MinLogLH::controlParameter(ParameterList& minPar){
     break;
   }
   }//end switch-case
+
+  //std::cout << "BLA2" << std::endl;
 
   //std::cout << "ControlPar list " << minPar.GetNDouble() <<std::endl;
 

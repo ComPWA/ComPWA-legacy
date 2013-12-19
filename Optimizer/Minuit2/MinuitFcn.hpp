@@ -20,6 +20,8 @@
 
 #include <vector>
 #include <memory>
+#include <string>
+#include <map>
 //#include <boost/shared_ptr.hpp>
 //#include <cassert>
 #include "Minuit2/FCNBase.h"
@@ -42,9 +44,18 @@ public:
 
   double Up() const;
 
+  inline void setNameID(const unsigned int id, const std::string name){
+    _parNames.insert(std::pair<unsigned int,std::string>(id,name));
+  };
+
+  inline std::string parName(const unsigned int id){
+    return _parNames.at(id);
+  };
+
 private:
-  std::shared_ptr<ControlParameter> _myDataPtr;
-  ParameterList& _parList;
+  std::shared_ptr<ControlParameter> _myDataPtr; /*!< pointer to the ControlParameter (e.g. Estimator) */
+  ParameterList& _parList; /*!< List of Parameters the ControlParameter needs */
+  std::map<unsigned int, std::string> _parNames; /*!< mapping of minuit ids to ComPWA names */
 };
   }  // namespace Minuit2
 

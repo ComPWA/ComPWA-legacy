@@ -72,8 +72,8 @@ double AmpKinematics::q0(double ma, double mb) const {
 	double mr = _mR.GetValue();
 
 	if( (mr*mr - mapb*mapb) < 0 ) {
-		std::cout<<"AmpKinematics: Trying to calculate break-up momentum below threshold!"<<std::endl;
-		return 0; //below threshold
+		//std::cout<<"AmpKinematics: Trying to calculate break-up momentum below threshold!"<<std::endl;
+		return 1; //below threshold
 	}
 	return sqrt( (mr*mr - mapb*mapb) * (mr*mr - mamb*mamb)) / (2. * mr );
 }
@@ -82,8 +82,8 @@ double AmpKinematics::q(double x, double ma, double mb) const {
 	double mamb = ma - mb;
 
 	if( (x*x - mapb*mapb) < 0 ) {
-		std::cout<<"AmpKinematics: Trying to calculate break-up momentum below threshold!"<<std::endl;
-		return 0; //below threshold
+		//std::cout<<"AmpKinematics: Trying to calculate break-up momentum below threshold!"<<std::endl;
+		return 1; //below threshold
 	}
 	double result=sqrt( (x*x - mapb*mapb) * (x*x - mamb*mamb) ) / (2. * x );
 //	std::cout<<"ss "<<ma<<" "<<mb<<" "<<x<<" "<<sqrt(x*x/4-ma*ma)<<" " <<result<<std::endl;

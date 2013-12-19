@@ -114,7 +114,7 @@
        <name>omega</name>
        <type>relBW</type>
        <reference>omega</reference>
-       <mass>1.783</mass>
+       <mass>0.783</mass>
        <mass_min>0.5</mass_min>
        <mass_max>2.</mass_max>
        <mesonRadius>1.</mesonRadius>
@@ -124,9 +124,9 @@
        <par1>1.</par1>
        <par2>1.</par2>
        <mesonRadius>1.</mesonRadius>
-       <strength>0.1</strength>
+       <strength>1.</strength>
        <phase>0.8</phase>
-       <spin>0</spin>
+       <spin>1</spin>
        <m>0</m>
        <n>0</n>
        <daugtherA>1</daugtherA>
@@ -136,7 +136,7 @@
        <name>omega</name>
        <type>relBW</type>
        <reference>omega</reference>
-       <mass>1.783</mass>
+       <mass>0.783</mass>
        <mass_min>0.5</mass_min>
        <mass_max>2.</mass_max>
        <mesonRadius>1.</mesonRadius>
@@ -146,9 +146,9 @@
        <par1>1.</par1>
        <par2>1.</par2>
        <mesonRadius>1.</mesonRadius>
-       <strength>0.1</strength>
+       <strength>1.</strength>
        <phase>0.8</phase>
-       <spin>0</spin>
+       <spin>1</spin>
        <m>0</m>
        <n>0</n>
        <daugtherA>1</daugtherA>

@@ -23,6 +23,7 @@
 #include "Physics/Amplitude.hpp"
 #include "Core/Parameter.hpp"
 #include "Core/ParameterList.hpp"
+#include "Core/FunctionTree.hpp"
 //#include "Estimator/AmpFcn.cpp"
 //#include "Optimizer/Minuit2/MinuitIF.hpp"
 //#include "Estimator/MinLogLH/MinLogLH.hpp"
@@ -31,7 +32,7 @@
 #include "Physics/AmplitudeSum/AmpRelBreitWignerRes.hpp"
 #include "Physics/AmplitudeSum/AmpGausRes.hpp"
 #include "Physics/AmplitudeSum/AmpFlatteRes.hpp"
-#include "Physics/AmplitudeSum/AmpWigner.hpp"
+#include "Physics/AmplitudeSum/AmpWigner2.hpp"
 #include "Physics/AmplitudeSum/AmpSumOfAmplitudes.hpp"
 #include "Physics/DPKinematics/DPKinematics.hpp"
 #include "Physics/DPKinematics/DataPoint.hpp"
@@ -70,6 +71,8 @@ public:
 	//! evaluate total amplitude using current set of parameters
 	virtual const ParameterList intensity();
 
+	virtual std::shared_ptr<FunctionTree> functionTree(ParameterList& outPar);
+
 	virtual const bool fillStartParVec(ParameterList& outPar);
 
 	virtual std::string printAmps();
@@ -81,6 +84,8 @@ protected:
 	const DPKinematics _kin;
 	AmpSumOfAmplitudes totAmp;
 	AmplitudeSetup ampSetup;
+	std::shared_ptr<FunctionTree> myTree;
+	std::shared_ptr<ParameterList> treePar;
 
 	double maxVal;
 

@@ -48,12 +48,17 @@ const double MinuitIF::exec(ParameterList& par){
     //try{
       std::shared_ptr<DoubleParameter> actPat = par.GetDoubleParameter(i);
     //}
-    if( actPat->UseBounds() && actPat->HasError() )
+    if( actPat->UseBounds() && actPat->HasError() ){
       upar.Add(actPat->GetName(), actPat->GetValue(), actPat->GetError(), actPat->GetMaxValue(), actPat->GetMinValue());
-    else if( actPat->HasError() )
+    }else if( actPat->HasError() ){
       upar.Add(actPat->GetName(), actPat->GetValue(), actPat->GetError());
-    else
+    }else{
+      //double tmpVal = actPat->GetValue();
+      //if(tmpVal==0 && !actPat->IsFixed()) tmpVal=0.001;
       upar.Add(actPat->GetName(), actPat->GetValue());
+    }
+
+    _myFcn.setNameID(i, actPat->GetName());
 
     if(actPat->IsFixed())
       upar.Fix(actPat->GetName());
@@ -63,7 +68,7 @@ const double MinuitIF::exec(ParameterList& par){
   std::cout <<"start migrad "<< std::endl;
   //for(unsigned int i=0; i<par.GetNDouble(); i++)
  //   std::cout << upar.Parameter(i).Value() << " " << upar.Parameter(i).IsFixed() << std::endl;
-  FunctionMinimum minMin = migrad(200,0.001);//TODO
+  FunctionMinimum minMin = migrad(100,0.001);//TODO
 
  //if(!minMin.IsValid()) {
    //try with higher strategy

@@ -11,6 +11,8 @@
 #ifndef DALITZEFFICIENCY_HPP_
 #define DALITZEFFICIENCY_HPP_
 
+#include <memory>
+
 #include "TEfficiency.h"
 #include "TH2.h"
 /**

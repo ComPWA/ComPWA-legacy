@@ -121,4 +121,28 @@ std::complex<double> AmpRelBreitWignerRes::evaluate() const {
 	unsigned int twoJplusOne = (2*_spin+1);
 	return evaluateAmp()*evaluateWignerD()*(double)twoJplusOne;
 }
+/*std::complex<double> AmpRelBreitWignerRes::evaluateTree(const ParameterList& paras) const {
+    double Gamma0, GammaV;
+    double m0 = double(paras.GetParameterValue("m0_"+_name));
+    double m  = double(paras.GetParameterValue("x_"+_name));
+    double ma = double(paras.GetParameterValue("ma_"+_name));
+    double mb = double(paras.GetParameterValue("mb_"+_name));
+    unsigned int spin = double(paras.GetParameterValue("spin_"+_name));
+    double d = double(paras.GetParameterValue("d_"+_name));
+    double norm = double(paras.GetParameterValue("norm_"+_name));
 
+    Gamma0 = double(paras.GetParameterValue("resWidth_"+_name));
+   // GammaV = Gamma0 * (m0 / m) * pow(q(ma,mb,m) / q0(ma,mb,m0), 2.*spin + 1.)  * BLprime2(ma,mb,m0,m,d,spin);
+	double BLWeiss2 = BLres2(m);
+	double qTerm = pow(q(m) / q0(), 2.*spin + 1.);
+	//double Gamma0 = _resWidth.GetValue();
+	GammaV = Gamma0 * qTerm * (m0 / m) * BLWeiss2;
+	std::complex<double> denom(m0*m0 - m*m, -m0 * GammaV);
+
+    //RooComplex denom = RooComplex(m0*m0 - m*m, -m0 * GammaV);
+    //RooComplex res = RooComplex(m0 * Gamma0) / denom; //TODO: use same functions as over evaluates
+
+    std::complex<double> result = std::complex<double>( norm ) / denom;
+    //std::shared_ptr<ComplexParameter> bw(new ComplexParameter("relBW of "+name, result));
+    return result*_wignerD.evaluateTree(paras,_name);
+}*/

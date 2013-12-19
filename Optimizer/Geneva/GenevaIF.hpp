@@ -67,10 +67,11 @@ public:
 
  protected:
 
- private:
+private:
   std::shared_ptr<ControlParameter> _myData;
   std::string configFileDir;
-  Gem::Geneva::parMode parallelizationMode;
+  //Gem::Geneva::parMode parallelizationMode;
+  Gem::Geneva::execMode parallelizationMode;
   Gem::Common::serializationMode serMode;
   bool clientMode;
   std::string ip;
