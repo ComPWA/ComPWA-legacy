@@ -150,7 +150,6 @@ bool RunManager::generate( unsigned int number ) {
 	BOOST_LOG_TRIVIAL(info)<<"Max value used in generation: "<<maxTest;
 	BOOST_LOG_TRIVIAL(info)<<"Efficiency of toy MC generation: "<<(double)size_/totalCalls;
 
-
 	if( maxTest > (double) (0.9*genMaxVal) ) {
 		BOOST_LOG_TRIVIAL(error)<<"==========ATTENTION===========";
 		BOOST_LOG_TRIVIAL(error)<<"== Max value of function is "<<maxTest;

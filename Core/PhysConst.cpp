@@ -26,7 +26,7 @@ PhysConst::PhysConst(){
 
 	const char* pPath = getenv("COMPWA_DIR");
 	std::string path = std::string(pPath);
-	particleFileName = path+"/Physics/particles2000.xml";
+	particleFileName = path+"/Physics/particles2009.xml";
 	constantFileName = path+"/Physics/physConstants.xml";
 
 	flag_readFile=1;

@@ -106,8 +106,8 @@ std::complex<double> AmpFlatteRes::evaluateAmp(dataPoint& point) const {
 
 	std::complex<double> denom(_mR*_mR - m*m, -p1*g1*g1-p2*g2*g2);
 
-//	std::complex<double> result = (std::complex<double>(_norm * g2*g2,0) / denom);//correct definition
-	std::complex<double> result = (std::complex<double>(_norm,0) / denom);//Laura++ (old) definition
+	std::complex<double> result = (std::complex<double>(_norm * g2*g2,0) / denom);//correct definition
+//	std::complex<double> result = (std::complex<double>(_norm,0) / denom);//Laura++ (old) definition
 
 	if(result.real()!=result.real()) {std::cout << "RE part NAN" << std::endl; return 0;}
 	if(result.imag()!=result.imag()) {std::cout << "IM part NAN" << std::endl; return 0;}
