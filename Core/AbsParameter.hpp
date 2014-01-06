@@ -43,7 +43,7 @@ public:
 
   //! Destructor
   virtual ~AbsParameter(){
-	  std::cout << "GoodBye " << name_ <<std::endl;
+//	  std::cout << "GoodBye " << name_ <<std::endl;
 
   }
 
