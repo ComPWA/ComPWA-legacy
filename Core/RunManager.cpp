@@ -77,6 +77,7 @@ bool RunManager::startFit(ParameterList& inPar){
 	return success_;
 }
 bool RunManager::generate( unsigned int number ) {
+	if(number!=-1) setSize(number);
 	if( !(validData==1 && validEfficiency==1 && validAmplitude==1 && validSize==1) )
 		return false;
 
@@ -159,5 +160,33 @@ bool RunManager::generate( unsigned int number ) {
 		return false;
 	}
 
+	return true;
+};
+bool RunManager::generatePhsp( unsigned int number ) {
+	if( !(validPhsp==1 && validEfficiency==1&& validSize==1) )
+		return false;
+	unsigned int phspSize = number;
+	if(number==-1) phspSize = 10*size_;
+
+	BOOST_LOG_TRIVIAL(info) << "Generating phase-space MC: ["<<phspSize<<" events] ";
+
+	boost::progress_display progressBar(phspSize); //boost progress bar (thread-safe)
+#pragma omp parallel
+	{
+		Generator* genNew = (&(*gen_))->Clone();//copy generator for every thread
+//		genNew->setSeed(std::clock()+threadId);//setting the seed here makes not sense in cast that TGenPhaseSpace is used, because it uses gRandom
+
+#pragma omp for
+		for(unsigned int i=0;i<phspSize;i++){
+			Event tmp;
+			genNew->generate(tmp);
+#pragma omp critical
+			{
+				phspSample_->pushEvent(tmp);//unfortunatly not thread safe
+			}
+			++progressBar;//progress bar
+		}
+	}
+	std::cout<<std::endl;
 	return true;
 };
