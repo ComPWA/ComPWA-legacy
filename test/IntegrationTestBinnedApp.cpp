@@ -70,9 +70,9 @@ int main(int argc, char **argv){
   std::cout << "inital T:\t" << par.GetDoubleParameter(1)->GetValue() << std::endl;
 
   std::cout << "Start Fit" << std::endl;
-  double genResult = opti->exec(par);
+  std::shared_ptr<FitResult> genResult = opti->exec(par);
 
-  std::cout << "Minimized final par :\t" << genResult << std::endl;
+  std::cout << "Minimized final par :\t" << genResult->finalLH << std::endl;
   std::cout << "final M:\t" << par.GetDoubleParameter(0)->GetValue() << std::endl;
   std::cout << "final T:\t" << par.GetDoubleParameter(1)->GetValue() << std::endl;
 

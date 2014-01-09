@@ -16,7 +16,9 @@
 #include <cassert>
 #include <memory>
 #include <iostream>
-
+#include <boost/log/core.hpp>
+#include <boost/log/trivial.hpp>
+using namespace boost::log;
 using namespace ROOT::Minuit2;
 
 MinuitFcn::MinuitFcn(std::shared_ptr<ControlParameter> myData, ParameterList& parList) :
@@ -44,7 +46,7 @@ double MinuitFcn::operator()(const std::vector<double>& x) const{
         actPat->SetValue(x[i]);
   }
   double result=_myDataPtr->controlParameter(_parList);
-  std::cout << "current minimized value:\t"<< result << std::endl;
+  BOOST_LOG_TRIVIAL(debug) << "MinuitFcn: current minimized value:\t"<< result;
 
   return result;
 }

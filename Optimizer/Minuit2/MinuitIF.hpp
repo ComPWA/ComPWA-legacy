@@ -35,7 +35,7 @@ class MinuitIF : public Optimizer {
 public:
   /// Default Constructor (0x0)
   MinuitIF(std::shared_ptr<ControlParameter> theData, ParameterList& par);
-  virtual const double exec(ParameterList& par);
+  virtual std::shared_ptr<FitResult> exec(ParameterList& par);
 
   /** Destructor */
   virtual ~MinuitIF();

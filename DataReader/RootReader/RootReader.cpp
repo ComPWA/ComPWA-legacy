@@ -17,6 +17,7 @@
 #include <vector>
 #include <utility>
 #include "DataReader/RootReader/RootReader.hpp"
+#include "Core/Kinematics.hpp"
 #include "TParticle.h"
 #include <boost/log/trivial.hpp>
 #include <boost/log/core.hpp>
@@ -207,7 +208,7 @@ void RootReader::writeData(){
 	fTree->Branch("weight",&feventWeight,"weight/D");
 	TClonesArray &partArray = *fParticles;
 
-	TLorentzVector motherMomentum(0,0,0,0);//TODO: use Kinematics class to obtain mass of mother particle
+	TLorentzVector motherMomentum(0,0,0,Kinematics::instance()->getMotherMass());
 	for(std::vector<Event>::iterator it=fEvents.begin(); it!=fEvents.end(); it++){
 		fParticles->Clear();
 		feventWeight = (*it).getWeight();

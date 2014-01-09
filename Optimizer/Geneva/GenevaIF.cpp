@@ -78,7 +78,8 @@ void GenevaIF::setClientMode(std::string serverip, unsigned int serverport){
   port = serverport;
 }
 
-const double GenevaIF::exec(ParameterList& par) {
+std::shared_ptr<FitResult> GenevaIF::exec(ParameterList& par) {
+	std::shared_ptr<FitResult> result(new FitResult());
 	//Go2::init();
 	//Go2 go(argc, argv, configFile);
 	//Go2 go( clientMode, serMode, ip, port,
@@ -132,7 +133,9 @@ const double GenevaIF::exec(ParameterList& par) {
 	// Do something with the best result
 
 	// Terminate
-	double result = bestIndividual_ptr->getBestKnownFitness();
+//	double result= bestIndividual_ptr->getBestKnownFitness();
+	double finalValue = bestIndividual_ptr->getBestKnownFitness();
+	result->LH=finalValue;
 	//int whattodowiththisidontknow =  go.finalize(); //Go2::finalize();
 
         //write Parameters back

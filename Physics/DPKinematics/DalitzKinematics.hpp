@@ -113,6 +113,7 @@ public:
 	//! get spin of particles
 	unsigned int getSpin(std::string name);
 
+	double getMotherMass() {return M;};
 	//! mass of decaying particle
 	double M; unsigned int spinM;
 	//! width of decaying particle
