@@ -11,14 +11,26 @@
 #include "Physics/DPKinematics/RootEfficiency.hpp"
 
 DalitzHistEfficiency::DalitzHistEfficiency(TEfficiency* eff) : effHist(new TEfficiency(*eff)){
+	BOOST_LOG_TRIVIAL(debug) << "DalitzHistEfficiency: creating efficiency from existing TEfficiency object!";
 }
 DalitzHistEfficiency::DalitzHistEfficiency(TH2D* passed, TH2D* total) : effHist(new TEfficiency(*passed, *total)){
+	BOOST_LOG_TRIVIAL(debug) << "DalitzHistEfficiency: creating efficiency from two TH2D objects!";
 }
 DalitzHistEfficiency::DalitzHistEfficiency(const DalitzHistEfficiency&){
 }
 double DalitzHistEfficiency::evaluate(std::vector<double> x){
-	double m13sq = x[1];
-	double m23sq = x[0];
+	dataPoint point; point.setVal("m23sq",x[0]); point.setVal("m13sq",x[1]);
+//	double m13sq = x[1];
+//	double m23sq = x[0];
+
+//	TH2D* test = (TH2D*) effHist->GetPassedHistogram();
+//	int globalBin = test->FindBin(m23sq,m13sq);
+//	return effHist->GetEfficiency(globalBin);
+	return evaluate(point);
+}
+double DalitzHistEfficiency::evaluate(dataPoint& point){
+	double m13sq = point.getVal("m13sq");
+	double m23sq = point.getVal("m23sq");
 
 	TH2D* test = (TH2D*) effHist->GetPassedHistogram();
 	int globalBin = test->FindBin(m23sq,m13sq);

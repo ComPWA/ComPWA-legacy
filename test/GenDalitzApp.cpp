@@ -51,6 +51,7 @@ using namespace boost::log;
 #include "Core/ParameterList.hpp"
 #include "Physics/DPKinematics/DalitzKinematics.hpp"
 #include "Core/DataPoint.hpp"
+#include "Core/Efficiency.hpp"
 
 using namespace std;
 
@@ -285,7 +286,7 @@ int main(int argc, char **argv){
 	cout << endl << endl;
 
 	//Simple Breit-Wigner Physics-Module setup
-	AmpSumIntensity testBW(ini);
+	AmpSumIntensity testBW(ini,std::shared_ptr<Efficiency>(new UnitEfficiency()));
 	testBW.printAmps();
 
 	ParameterList minPar;

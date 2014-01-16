@@ -14,6 +14,7 @@
 #include <iostream>
 #include <vector>
 #include <boost/log/trivial.hpp>
+#include "Core/DataPoint.hpp"
 using namespace boost::log;
 
 /**
@@ -31,6 +32,7 @@ public:
 	virtual ~Efficiency();
 
 	virtual double evaluate(std::vector<double> x) = 0;
+	virtual double evaluate(dataPoint& point) = 0;
 };
 
 /**
@@ -45,5 +47,7 @@ public:
 	};
 	~UnitEfficiency(){};
 	virtual double evaluate(std::vector<double> x) {return 1;};
+	virtual double evaluate(dataPoint& point) {return 1;};
 };
+
 #endif /* DALITZEFFICIENCY_HPP_ */

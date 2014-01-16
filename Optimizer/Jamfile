@@ -1,4 +1,5 @@
 ########### Optimizer Jamfile #############
+import os ;
 path-constant OPTIMIZER : . ;
 
 # libOptimizer.so will consist of these packages:

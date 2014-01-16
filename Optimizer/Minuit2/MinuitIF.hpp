@@ -27,6 +27,7 @@
 #include "Optimizer/Optimizer.hpp"
 #include "Core/ParameterList.hpp"
 #include "Optimizer/Minuit2/MinuitFcn.hpp"
+#include "Optimizer/Minuit2/MinuitResult.hpp"
 
 using namespace ROOT::Minuit2;
 

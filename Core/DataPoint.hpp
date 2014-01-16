@@ -25,6 +25,7 @@
 #include <math.h>
 #include <vector>
 #include "Core/Kinematics.hpp"
+#include "Core/Event.hpp"
 class Kinematics;
 
 class dataPoint
@@ -35,6 +36,8 @@ public:
 
 	dataPoint(dataPoint const&){};
 	dataPoint();
+	dataPoint(Event& ev);
+	dataPoint(std::vector<double> vec);
 	~dataPoint(){};
 	//! checks if point lies within phase space boundaries
 //	bool isWithinPhsp() const{ return DalitzKinematics::instance()->isWithinPhsp(this); };
@@ -61,9 +64,13 @@ public:
 	void setVal(unsigned int num, double val);
 	double getVal(unsigned int num) const;
 	void setPoint(std::vector<double> values);
+	void setWeight(double w) { weight=w; };
+	double getWeight() { return weight; };
 
 protected:
+	void init();
 	std::vector<double> var;
+	double weight;
 };
 
 

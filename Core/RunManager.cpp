@@ -80,13 +80,13 @@ std::shared_ptr<FitResult> RunManager::startFit(ParameterList& inPar){
 	unsigned int startTime = clock();
 	std::shared_ptr<FitResult> result = pOpti_->exec(inPar);
 	success_ = true;
-	BOOST_LOG_TRIVIAL(info) << "RunManager: fit end. Final LH="<<result->finalLH<<".";
+	BOOST_LOG_TRIVIAL(info) << "RunManager: fit end. Result ="<<result->getResult()<<".";
 	BOOST_LOG_TRIVIAL(info) << "RunManager: fit time="<<(clock()-startTime)/CLOCKS_PER_SEC/60<<"min.";
 
 	return result;
 }
 bool RunManager::generate( unsigned int number ) {
-	if(number!=-1) setSize(number);
+	if(number>0) setSize(number);
 	if( !(validData && validEfficiency && validAmplitude && validSize && validGenerator) ){
 		BOOST_LOG_TRIVIAL(error)<<"RunManager: generate() requirements not fulfilled";
 		return false;
@@ -131,27 +131,28 @@ bool RunManager::generate( unsigned int number ) {
 			genNew->generate(tmp);
 			totalCalls++;
 			double weight = tmp.getWeight();
-			Particle part1 = tmp.getParticle(0);
-			Particle part2 = tmp.getParticle(1);
-			Particle part3 = tmp.getParticle(2);
-			double m23sq = Particle::invariantMass(part2,part3);
-			double m13sq = Particle::invariantMass(part1,part3);
-			std::vector<double> x;
-			x.push_back(m23sq);
-			x.push_back(m13sq);
-			double eff  = eff_->evaluate(x);
-			//Efficiency is saved to event. Weighting is done when parameters are plotted.
-			tmp.setWeight(eff);
+			tmp.setWeight(1);//reset weight
+//			Particle part1 = tmp.getParticle(0);
+//			Particle part2 = tmp.getParticle(1);
+//			Particle part3 = tmp.getParticle(2);
+//			double m23sq = Particle::invariantMass(part2,part3);
+//			double m13sq = Particle::invariantMass(part1,part3);
+//			std::vector<double> x;
+//			x.push_back(m23sq);
+//			x.push_back(m13sq);
+//			std::cout<<point.getVal("m23sq")<<" "<<x[0]<< " "<<point.getVal("m13sq")<<" "<<x[1]<<std::endl;
+			dataPoint point(tmp);
+			double eff  = eff_->evaluate(point);
 
 			double ampRnd = uni2()*genMaxVal;
 			ParameterList list;
 #pragma omp critical
 			{
-				list = pPhys_->intensity(x,minPar);//unfortunatly not thread safe
+				list = pPhys_->intensity(point,minPar);//unfortunatly not thread safe
 				AMPpdf = *list.GetDoubleParameter(0);
-				if( maxTest < (AMPpdf*weight)) maxTest = weight*AMPpdf;
+				if( maxTest < (AMPpdf*weight*eff)) maxTest = eff*weight*AMPpdf;
 			}
-			if( ampRnd > (weight*AMPpdf) ) continue;
+			if( ampRnd > (weight*AMPpdf*eff) ) continue;
 			i++;
 #pragma omp critical
 			{
@@ -179,8 +180,8 @@ bool RunManager::generate( unsigned int number ) {
 bool RunManager::generatePhsp( unsigned int number ) {
 	if( !(validPhsp==1 && validEfficiency==1&& validSize==1) )
 		return false;
-	unsigned int phspSize = number;
-	if(number==-1) phspSize = 10*size_;
+	unsigned int phspSize = 10*size_;
+	if(number>0) phspSize = number;
 
 	BOOST_LOG_TRIVIAL(info) << "Generating phase-space MC: ["<<phspSize<<" events] ";
 

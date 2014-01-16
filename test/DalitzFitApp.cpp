@@ -54,6 +54,7 @@
 #include "Estimator/MinLogLH/MinLogLH.hpp"
 #include "Optimizer/Minuit2/MinuitIF.hpp"
 #include "Core/DataPoint.hpp"
+#include "Core/Efficiency.hpp"
 
 const Double_t M = 3.096916; // GeV/c² (J/psi+)
 const Double_t Br = 0.000093; // GeV/c² (width)
@@ -85,7 +86,7 @@ int main(int argc, char **argv){
   std::cout << "Load Modules" << std::endl;
   std::shared_ptr<Data> myReader(new RootReader(file, false,"data"));
   std::shared_ptr<Data> myPHSPReader(new RootReader(file, false,"mc"));
-  std::shared_ptr<Amplitude> amps(new AmpSumIntensity(ini, myReader->getNEvents()));
+  std::shared_ptr<Amplitude> amps(new AmpSumIntensity(ini,std::shared_ptr<Efficiency>(new UnitEfficiency()), myReader->getNEvents()));
   /*return 0;
   //std::shared_ptr<Amplitude> amps(new AmpSumIntensity(M, Br, m1, m2, m3,"J/psi","gamma","pi0","pi0", ini));
   // Initiate parameters

@@ -84,6 +84,7 @@
 #include "Estimator/Estimator.hpp"
 #include "Physics/Amplitude.hpp"
 #include "Optimizer/Optimizer.hpp"
+#include "Core/FitResult.hpp"
 #include "Core/ParameterList.hpp"
 #include "Core/Efficiency.hpp"
 #include "Core/Generator.hpp"
@@ -98,14 +99,16 @@ public:
 	RunManager() {};
 	RunManager( std::shared_ptr<Data>, std::shared_ptr<Amplitude>, std::shared_ptr<Optimizer>,
 			std::shared_ptr<Efficiency>); //Fit
+
 	RunManager( unsigned int size, std::shared_ptr<Amplitude>, std::shared_ptr<Efficiency>,
 			std::shared_ptr<Generator>); //Generate
 
 	virtual ~RunManager();
 
 
+	virtual unsigned int getSize (){ return size_; };
 	virtual void setSize ( unsigned int s){ size_=s; validSize=1; };
-	virtual void setData ( std::shared_ptr<Data> d){ pData_ = d; validData=1; setSize(pData_->getNEvents()); };
+	virtual void setData ( std::shared_ptr<Data> d){ pData_ = d; validData=1; setSize(pData_->getNEvents());};
 	virtual void setPhspSample( std::shared_ptr<Data> d){ phspSample_ = d; validPhsp=1; };
 	virtual void setAmplitude ( std::shared_ptr<Amplitude> d){ pPhys_ = d; validAmplitude=1; };
 	virtual void setOptimizer ( std::shared_ptr<Optimizer> d){ pOpti_ = d; validOptimizer=1; };
@@ -113,8 +116,8 @@ public:
 	virtual void setGenerator( std::shared_ptr<Generator> d){ gen_= d; validGenerator=1; };
 
 	virtual std::shared_ptr<FitResult> startFit( ParameterList& );
-	virtual bool generate( unsigned int number=-1 );
-	virtual bool generatePhsp( unsigned int number=-1 );
+	virtual bool generate( unsigned int number=0 );
+	virtual bool generatePhsp( unsigned int number=0 );
 
 protected:
 	bool validData;

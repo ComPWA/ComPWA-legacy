@@ -22,6 +22,17 @@
 #include "gsl/gsl_monte_vegas.h"
 //DalitzKinematics* DalitzKinematics::inst = NULL;
 
+void DalitzKinematics::eventToDataPoint(Event& ev, dataPoint& point){
+	double weight = ev.getWeight();
+	point.setWeight(weight);//reset weight
+	Particle part1 = ev.getParticle(0);
+	Particle part2 = ev.getParticle(1);
+	Particle part3 = ev.getParticle(2);
+	double m23sq = Particle::invariantMass(part2,part3);
+	double m13sq = Particle::invariantMass(part1,part3);
+	point.setVal("m13sq",m13sq); point.setVal("m23sq",m23sq);
+	return;
+}
 double DalitzKinematics::invMassMax(unsigned int sys, unsigned int sys2, double invMass_sys) const {
 	unsigned int part1, part2;
 	double Mfirst, Msecond;
@@ -128,7 +139,7 @@ void DalitzKinematics::phspContour(unsigned int xsys,unsigned int ysys,unsigned 
 
 	double binw = (massmaxl-massminl)/(double)(num);
 
-//	std::cout<<"==== x="<<xsys<<" y="<<ysys<<" "<<massminl<<" "<<massmaxl<<" "<<binw<<std::endl;
+	//	std::cout<<"==== x="<<xsys<<" y="<<ysys<<" "<<massminl<<" "<<massmaxl<<" "<<binw<<std::endl;
 	double ymin,ymax,x;
 	unsigned int i=0;
 
@@ -142,7 +153,7 @@ void DalitzKinematics::phspContour(unsigned int xsys,unsigned int ysys,unsigned 
 
 		xcoord[i]=x; ycoord[i]=ymin;
 		xcoord[num*2-i]=x; ycoord[num*2-i]=ymax;
-//		std::cout<<x<< " "<<i<< " "<<ymin<<" "<<" "<<num*2-i<<" "<<ymax<<std::endl;
+		//		std::cout<<x<< " "<<i<< " "<<ymin<<" "<<" "<<num*2-i<<" "<<ymax<<std::endl;
 	}
 	//adding last datapoint
 	x = i*binw + massminl;
@@ -152,7 +163,7 @@ void DalitzKinematics::phspContour(unsigned int xsys,unsigned int ysys,unsigned 
 	ymin = invMassMin(ysys,xsys,x);
 	ymax = invMassMax(ysys,xsys,x);
 
-//	std::cout<<x<< " "<<i<< " "<<ymin<<" "<<" "<<num*2-i<<" "<<ymax<<std::endl;
+	//	std::cout<<x<< " "<<i<< " "<<ymin<<" "<<" "<<num*2-i<<" "<<ymax<<std::endl;
 	xcoord[i]=x; ycoord[i]=ymin;
 	return;
 }
@@ -175,7 +186,7 @@ double DalitzKinematics::calcHelicityAngle(double invMassSq23, double invMassSq1
 	return cosAngle;
 }
 DalitzKinematics::DalitzKinematics(std::string _nameMother, std::string _name1, std::string _name2, std::string _name3):
-																																										Br(0.0), nameMother(_nameMother), name1(_name1), name2(_name2), name3(_name3)
+																																														Br(0.0), nameMother(_nameMother), name1(_name1), name2(_name2), name3(_name3)
 {
 	M = PhysConst::instance()->getMass(_nameMother);
 	m1 = PhysConst::instance()->getMass(_name1);
@@ -194,8 +205,8 @@ DalitzKinematics::DalitzKinematics(std::string _nameMother, std::string _name1, 
 };
 DalitzKinematics::DalitzKinematics(double _M, double _Br, double _m1, double _m2, double _m3,
 		std::string _nameMother, std::string _name1, std::string _name2, std::string _name3):
-		M(_M), Br(_Br), m1(_m1), m2(_m2), m3(_m3),
-		nameMother(_nameMother), name1(_name1), name2(_name2), name3(_name3)
+						M(_M), Br(_Br), m1(_m1), m2(_m2), m3(_m3),
+						nameMother(_nameMother), name1(_name1), name2(_name2), name3(_name3)
 {
 
 	spinM = PhysConst::instance()->getJ(_nameMother);
@@ -205,10 +216,10 @@ DalitzKinematics::DalitzKinematics(double _M, double _Br, double _m1, double _m2
 	init();
 };
 DalitzKinematics::DalitzKinematics(const DalitzKinematics& other):
-		M(other.M), spinM(other.spinM), Br(other.Br),
-		m1(other.m1), m2(other.m2), m3(other.m3),
-		spin1(other.spin1), spin2(other.spin2), spin3(other.spin3),
-		name1(other.name1), name2(other.name2), name3(other.name3)
+						M(other.M), spinM(other.spinM), Br(other.Br),
+						m1(other.m1), m2(other.m2), m3(other.m3),
+						spin1(other.spin1), spin2(other.spin2), spin3(other.spin3),
+						name1(other.name1), name2(other.name2), name3(other.name3)
 {
 	init();
 };
@@ -225,13 +236,13 @@ void DalitzKinematics::init(){
 	_DPareaCalculated=0;
 	varNames.push_back("m23sq");
 	varNames.push_back("m13sq");
-//	varNames.push_back("m12sq");
+	//	varNames.push_back("m12sq");
 };
 //! returns 1 if point is within PHSP otherwise 0
 double phspFunc(double* x, size_t dim, void* param) {
 	if(dim!=2) return 0;
 	DalitzKinematics* kin =	static_cast<DalitzKinematics*>(param);
-//	double m12sq = kin->getThirdVariableSq(x[0],x[1]);
+	//	double m12sq = kin->getThirdVariableSq(x[0],x[1]);
 	//use MC integration of a step function to obtain the DP area
 	dataPoint pp; pp.setVal("m23sq",x[1]);pp.setVal("m13sq",x[0]);
 	if( kin->isWithinPhsp(pp) ) return 1.0;
@@ -347,23 +358,23 @@ bool DalitzKinematics::isWithinPhsp(const dataPoint& point) const{
 	 *
 	 */
 	//mostly copied from Laura++
-//	double e3Cms23 = (m23sq - m2*m2 + m3*m3)/(2.0*sqrt(m23sq)); //energy of part3 in 23 rest frame
-//	double p3Cms23 = sqrt(-(m3*m3-e3Cms23*e3Cms23)); //momentum of part3 in 23 rest frame
-//	double e1Cms23 = (M*M - m23sq - m1*m1)/(2.0*sqrt(m23sq)); //energy of part1 in 23 rest frame
-//	double p1Cms23 = sqrt(-(m1*m1-e1Cms23*e1Cms23)); //momentum of part1 in 23 rest frame
-//
-//	double term = 2.0*e3Cms23*e1Cms23+ m1*m1 + m3*m3;
-//
-//	double _m13SqLocMin = term - 2.0*p3Cms23*p1Cms23;
-//	double _m13SqLocMax = term + 2.0*p3Cms23*p1Cms23;
+	//	double e3Cms23 = (m23sq - m2*m2 + m3*m3)/(2.0*sqrt(m23sq)); //energy of part3 in 23 rest frame
+	//	double p3Cms23 = sqrt(-(m3*m3-e3Cms23*e3Cms23)); //momentum of part3 in 23 rest frame
+	//	double e1Cms23 = (M*M - m23sq - m1*m1)/(2.0*sqrt(m23sq)); //energy of part1 in 23 rest frame
+	//	double p1Cms23 = sqrt(-(m1*m1-e1Cms23*e1Cms23)); //momentum of part1 in 23 rest frame
+	//
+	//	double term = 2.0*e3Cms23*e1Cms23+ m1*m1 + m3*m3;
+	//
+	//	double _m13SqLocMin = term - 2.0*p3Cms23*p1Cms23;
+	//	double _m13SqLocMax = term + 2.0*p3Cms23*p1Cms23;
 
-//	if(m13sq >= _m13SqLocMin && m13sq <= _m13SqLocMax) return 1;
+	//	if(m13sq >= _m13SqLocMin && m13sq <= _m13SqLocMax) return 1;
 	bool c0=0; bool c1=0; bool c2=0;
 	if(m13sq >= invMassMin(4,5,m23sq) && m13sq <= invMassMax(4,5,m23sq)) c0=1;
 	if(m12sq >= invMassMin(3,5,m23sq) && m12sq <= invMassMax(3,5,m23sq)) c1=1;
 	if(m23sq >= invMassMin(5,4,m13sq) && m23sq <= invMassMax(5,4,m13sq)) c2=1;
-//	if(c0 && c1 && c2) return 1;//slightly different DParea result WHY?
-//	if(c0 && c1) return 1;//same result for DParea as the copied stuff from Laura
+	//	if(c0 && c1 && c2) return 1;//slightly different DParea result WHY?
+	//	if(c0 && c1) return 1;//same result for DParea as the copied stuff from Laura
 	if(c0) return 1;//same result for DParea as the copied stuff from Laura
 	return 0;
 }

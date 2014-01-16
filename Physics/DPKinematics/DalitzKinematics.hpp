@@ -64,6 +64,7 @@ public:
 //		}
 //		return inst;
 //	};
+	void eventToDataPoint(Event& ev, dataPoint& point);
 
 	unsigned int sizeOfPhsp(){ return 3; }
 //	std::vector<std::string> getVarNames(){return varNames;}
