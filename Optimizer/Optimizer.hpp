@@ -28,6 +28,7 @@
 #include <memory>
 
 #include "Core/ParameterList.hpp"
+#include "Core/FitResult.hpp"
 
 class Optimizer
 {
@@ -42,7 +43,7 @@ public:
 	{ /* nothing */	}
 
   // TODO: template <class T> or map?
-  virtual const double exec(ParameterList& par) =0;
+  virtual std::shared_ptr<FitResult> exec(ParameterList& par) =0;
  
 };
 

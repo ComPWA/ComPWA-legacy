@@ -81,7 +81,7 @@ public:
 
 	virtual const bool fillStartParVec(ParameterList& outPar);
 
-	virtual std::string printAmps();
+	virtual void printAmps();
 
 	double normReso(std::shared_ptr<AmpAbsDynamicalFunction> amp);
 	virtual ~AmpSumIntensity(){};

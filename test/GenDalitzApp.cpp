@@ -294,7 +294,7 @@ int main(int argc, char **argv){
 
 	//Simple Breit-Wigner Physics-Module setup
 	AmpSumIntensity testBW(ini);
-	cout << testBW.printAmps() << endl;
+	testBW.printAmps();
 
 	ParameterList minPar;
 	testBW.fillStartParVec(minPar);
@@ -440,7 +440,7 @@ int main(int argc, char **argv){
 	fTreePHSP.Write();
 	output.Close();
 
-	cout << testBW.printAmps() << endl;
+	testBW.printAmps();
 	cout << "Done ... " << maxTest << endl << endl;
 
 	return 0;

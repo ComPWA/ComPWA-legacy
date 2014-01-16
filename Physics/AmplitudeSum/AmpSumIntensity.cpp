@@ -53,17 +53,17 @@ AmpSumIntensity::AmpSumIntensity(const AmpSumIntensity& other) : nAmps(other.nAm
 }
 
 AmpSumIntensity::AmpSumIntensity(AmplitudeSetup ini, normalizationStyle ns, unsigned int entries, double dpArea) :
-										totAmp("relBWsumAmplitude", "totAmp"), ampSetup(ini),
-										_entries(entries), _normStyle(ns), _calcNorm(1), _dpArea(dpArea),
-										_calcMaxFcnVal(0)
+												totAmp("relBWsumAmplitude", "totAmp"), ampSetup(ini),
+												_entries(entries), _normStyle(ns), _calcNorm(1), _dpArea(dpArea),
+												_calcMaxFcnVal(0)
 {
 	init();
 }
 
 AmpSumIntensity::AmpSumIntensity(AmplitudeSetup ini, unsigned int entries, double dpArea) :
-										totAmp("relBWsumAmplitude", "totAmp"), ampSetup(ini),
-										_entries(entries), _normStyle(none), _calcNorm(0), _dpArea(dpArea),
-										_calcMaxFcnVal(0)
+												totAmp("relBWsumAmplitude", "totAmp"), ampSetup(ini),
+												_entries(entries), _normStyle(none), _calcNorm(0), _dpArea(dpArea),
+												_calcMaxFcnVal(0)
 {
 	init();
 }
@@ -71,8 +71,8 @@ AmpSumIntensity::AmpSumIntensity(AmplitudeSetup ini, unsigned int entries, doubl
 AmpSumIntensity::AmpSumIntensity(const double inM, const double inBr, const double in1,const double in2, const double in3,
 		std::string nameM, std::string name1,std::string name2,std::string name3,
 		AmplitudeSetup ini, unsigned int entries, normalizationStyle ns, double dpArea) :
-								totAmp("relBWsumAmplitude", "totAmp"), ampSetup(ini),
-								_entries(entries), _normStyle(ns), _calcNorm(1),_dpArea(dpArea),
+										totAmp("relBWsumAmplitude", "totAmp"), ampSetup(ini),
+										_entries(entries), _normStyle(ns), _calcNorm(1),_dpArea(dpArea),
 										_calcMaxFcnVal(0)
 {
 	init();
@@ -84,28 +84,28 @@ void AmpSumIntensity::init(){
 	BOOST_LOG_TRIVIAL(debug)<<"AmpSumIntensity::init() number of Entries in dalitz plot set to: "<<_entries;
 	BOOST_LOG_TRIVIAL(debug)<<"AmpSumIntensity::init() area of phase space: "<<_dpArea;
 
-    //------------Setup Tree---------------------
-    myTree = std::shared_ptr<FunctionTree>(new FunctionTree());
+	//------------Setup Tree---------------------
+	myTree = std::shared_ptr<FunctionTree>(new FunctionTree());
 
-    //------------Setup Tree Pars---------------------
-    std::shared_ptr<DoubleParameter> x = std::shared_ptr<DoubleParameter>(new DoubleParameter("x"));
-    std::shared_ptr<DoubleParameter> m23 = std::shared_ptr<DoubleParameter>(new DoubleParameter("m23"));
-    std::shared_ptr<DoubleParameter> m13 = std::shared_ptr<DoubleParameter>(new DoubleParameter("m13"));
-    std::shared_ptr<DoubleParameter> m12 = std::shared_ptr<DoubleParameter>(new DoubleParameter("m12"));
-    treePar = std::shared_ptr<ParameterList>(new ParameterList());
-    treePar->AddParameter(x);
-    treePar->AddParameter(m23);
-    treePar->AddParameter(m13);
-    treePar->AddParameter(m12);
+	//------------Setup Tree Pars---------------------
+	std::shared_ptr<DoubleParameter> x = std::shared_ptr<DoubleParameter>(new DoubleParameter("x"));
+	std::shared_ptr<DoubleParameter> m23 = std::shared_ptr<DoubleParameter>(new DoubleParameter("m23"));
+	std::shared_ptr<DoubleParameter> m13 = std::shared_ptr<DoubleParameter>(new DoubleParameter("m13"));
+	std::shared_ptr<DoubleParameter> m12 = std::shared_ptr<DoubleParameter>(new DoubleParameter("m12"));
+	treePar = std::shared_ptr<ParameterList>(new ParameterList());
+	treePar->AddParameter(x);
+	treePar->AddParameter(m23);
+	treePar->AddParameter(m13);
+	treePar->AddParameter(m12);
 
-    //----Strategies needed
-    std::shared_ptr<MultAll> multStrat = std::shared_ptr<MultAll>(new MultAll());
-    std::shared_ptr<AddAll> addStrat = std::shared_ptr<AddAll>(new AddAll());
+	//----Strategies needed
+	std::shared_ptr<MultAll> multStrat = std::shared_ptr<MultAll>(new MultAll());
+	std::shared_ptr<AddAll> addStrat = std::shared_ptr<AddAll>(new AddAll());
 
-    //----Add Top Node
-    myTree->createHead("Amplitude", addStrat); //A=Sum{Resos}
+	//----Add Top Node
+	myTree->createHead("Amplitude", addStrat); //A=Sum{Resos}
 
-    //----Add Resonances
+	//----Add Resonances
 	for(std::vector<Resonance>::iterator reso=ampSetup.getResonances().begin(); reso!=ampSetup.getResonances().end(); reso++){
 		Resonance tmp = (*reso);
 		if(!tmp.m_enable) continue;
@@ -116,36 +116,36 @@ void AmpSumIntensity::init(){
 		rr.push_back( std::shared_ptr<DoubleParameter> (new DoubleParameter("rr_"+tmp.m_name,tmp.m_strength) ) );
 		phir.push_back( std::shared_ptr<DoubleParameter> (new DoubleParameter("phir_"+tmp.m_name,tmp.m_phase) ) );
 
-		 //----Add Nodes
-	    std::shared_ptr<BreitWignerStrategy> rbwStrat = std::shared_ptr<BreitWignerStrategy>(new BreitWignerStrategy(tmp.m_name));
-	    std::shared_ptr<WignerDStrategy> angdStrat = std::shared_ptr<WignerDStrategy>(new WignerDStrategy(tmp.m_name));
-	    unsigned int subSys = tmp.m_daugtherA + tmp.m_daugtherB;
-		      unsigned int last = mr.size()-1;
-		      myTree->createNode("Reso_"+tmp.m_name, multStrat, "Amplitude"); //Reso=BW*c*AD
-		      myTree->createNode("RelBW_"+tmp.m_name, rbwStrat, "Reso_"+tmp.m_name); //BW
-		      myTree->createLeaf("Intens_"+tmp.m_name, rr[last], "Reso_"+tmp.m_name); //c
-		      myTree->createNode("AngD_"+tmp.m_name, angdStrat, "Reso_"+tmp.m_name); //AD
-		      //BW Par
-		      myTree->createLeaf("m0_"+tmp.m_name, mr[last]->GetValue(), "RelBW_"+tmp.m_name); //m0
-		      myTree->createLeaf("x", x, "RelBW_"+tmp.m_name); //x
-		      myTree->createLeaf("m23", m23, "RelBW_"+tmp.m_name); //ma TODO
-		      myTree->createLeaf("m13", m13, "RelBW_"+tmp.m_name); //mb
-		      myTree->createLeaf("spin_"+tmp.m_name, tmp.m_spin, "RelBW_"+tmp.m_name); //spin
-		      myTree->createLeaf("d_"+tmp.m_name,  tmp.m_mesonRadius, "RelBW_"+tmp.m_name); //d
-		      myTree->createLeaf("resWidth_"+tmp.m_name, gr[last]->GetValue(), "RelBW_"+tmp.m_name); //resWidth
-		      //AD Par
-		      myTree->createLeaf("m23", m23, "AngD_"+tmp.m_name); //ma TODO
-		      myTree->createLeaf("m13", m13, "AngD_"+tmp.m_name); //mb
-		      myTree->createLeaf("m12", m12, "AngD_"+tmp.m_name); //mc
-		      myTree->createLeaf("M", kin->M, "AngD_"+tmp.m_name); //M
-		      myTree->createLeaf("m1", kin->m1, "AngD_"+tmp.m_name); //m1
-		      myTree->createLeaf("m2", kin->m2, "AngD_"+tmp.m_name); //m2
-		      myTree->createLeaf("m3", kin->m3, "AngD_"+tmp.m_name); //m3
-		     // unsigned int _subSysFlag = Double_t(paras.GetParameterValue("subSysFlag_"+name));
-		      myTree->createLeaf("subSysFlag_"+tmp.m_name, subSys, "AngD_"+tmp.m_name); //subSysFlag
-		      myTree->createLeaf("spin_"+tmp.m_name,tmp.m_spin, "AngD_"+tmp.m_name); //spin
-		      myTree->createLeaf("m_"+tmp.m_name, tmp.m_m, "AngD_"+tmp.m_name); //OutSpin 1
-		      myTree->createLeaf("n_"+tmp.m_name, tmp.m_n, "AngD_"+tmp.m_name); //OutSpin 2
+		//----Add Nodes
+		std::shared_ptr<BreitWignerStrategy> rbwStrat = std::shared_ptr<BreitWignerStrategy>(new BreitWignerStrategy(tmp.m_name));
+		std::shared_ptr<WignerDStrategy> angdStrat = std::shared_ptr<WignerDStrategy>(new WignerDStrategy(tmp.m_name));
+		unsigned int subSys = tmp.m_daugtherA + tmp.m_daugtherB;
+		unsigned int last = mr.size()-1;
+		myTree->createNode("Reso_"+tmp.m_name, multStrat, "Amplitude"); //Reso=BW*c*AD
+		myTree->createNode("RelBW_"+tmp.m_name, rbwStrat, "Reso_"+tmp.m_name); //BW
+		myTree->createLeaf("Intens_"+tmp.m_name, rr[last], "Reso_"+tmp.m_name); //c
+		myTree->createNode("AngD_"+tmp.m_name, angdStrat, "Reso_"+tmp.m_name); //AD
+		//BW Par
+		myTree->createLeaf("m0_"+tmp.m_name, mr[last]->GetValue(), "RelBW_"+tmp.m_name); //m0
+		myTree->createLeaf("x", x, "RelBW_"+tmp.m_name); //x
+		myTree->createLeaf("m23", m23, "RelBW_"+tmp.m_name); //ma TODO
+		myTree->createLeaf("m13", m13, "RelBW_"+tmp.m_name); //mb
+		myTree->createLeaf("spin_"+tmp.m_name, tmp.m_spin, "RelBW_"+tmp.m_name); //spin
+		myTree->createLeaf("d_"+tmp.m_name,  tmp.m_mesonRadius, "RelBW_"+tmp.m_name); //d
+		myTree->createLeaf("resWidth_"+tmp.m_name, gr[last]->GetValue(), "RelBW_"+tmp.m_name); //resWidth
+		//AD Par
+		myTree->createLeaf("m23", m23, "AngD_"+tmp.m_name); //ma TODO
+		myTree->createLeaf("m13", m13, "AngD_"+tmp.m_name); //mb
+		myTree->createLeaf("m12", m12, "AngD_"+tmp.m_name); //mc
+		myTree->createLeaf("M", kin->M, "AngD_"+tmp.m_name); //M
+		myTree->createLeaf("m1", kin->m1, "AngD_"+tmp.m_name); //m1
+		myTree->createLeaf("m2", kin->m2, "AngD_"+tmp.m_name); //m2
+		myTree->createLeaf("m3", kin->m3, "AngD_"+tmp.m_name); //m3
+		// unsigned int _subSysFlag = Double_t(paras.GetParameterValue("subSysFlag_"+name));
+		myTree->createLeaf("subSysFlag_"+tmp.m_name, subSys, "AngD_"+tmp.m_name); //subSysFlag
+		myTree->createLeaf("spin_"+tmp.m_name,tmp.m_spin, "AngD_"+tmp.m_name); //spin
+		myTree->createLeaf("m_"+tmp.m_name, tmp.m_m, "AngD_"+tmp.m_name); //OutSpin 1
+		myTree->createLeaf("n_"+tmp.m_name, tmp.m_n, "AngD_"+tmp.m_name); //OutSpin 2
 
 
 		//setup Dynamics
@@ -223,7 +223,7 @@ void AmpSumIntensity::calcMaxVal(){
 	boost::uniform_real<> uni_dist23(xLimit_low[1],xLimit_high[1]);
 	boost::variate_generator<boost::minstd_rand&, boost::uniform_real<> > uni13(rndGen2, uni_dist13);
 	boost::variate_generator<boost::minstd_rand&, boost::uniform_real<> > uni23(rndGen2, uni_dist23);
-	for(unsigned int i=0; i<20000; i++){
+	for(unsigned int i=0; i<40000; i++){
 		double m23sq=uni23(); double m13sq=uni13();
 		dataPoint point; point.setVal("m13sq",m13sq); point.setVal("m23sq",m23sq);
 		if( !kin->isWithinPhsp(point) ) { if(i>0) i--; continue; }//only integrate over phase space
@@ -339,8 +339,10 @@ std::shared_ptr<FunctionTree> AmpSumIntensity::functionTree(ParameterList& outPa
 void AmpSumIntensity::setParameterList(ParameterList& par){
 	//parameters varied by Minimization algorithm
 	for(unsigned int i=0; i<nAmps; i++){
-		rr[i]->SetValue(par.GetDoubleParameter(2*i)->GetValue());//free
-		phir[i]->SetValue(par.GetDoubleParameter(2*i+1)->GetValue());//fixed
+		rr[i]->SetValue(par.GetDoubleParameter(2*i)->GetValue());
+		rr[i]->SetError(par.GetDoubleParameter(2*i)->GetError());
+		phir[i]->SetValue(par.GetDoubleParameter(2*i+1)->GetValue());
+		phir[i]->SetError(par.GetDoubleParameter(2*i+1)->GetError());
 	}
 	return;
 }
@@ -355,10 +357,12 @@ const bool AmpSumIntensity::fillStartParVec(ParameterList& outPar){
 	return true;
 }
 
-std::string AmpSumIntensity::printAmps(){
-	std::stringstream o;
-	BOOST_LOG_TRIVIAL(info)<<"== Printing amplitudes with current(!) set of parameters:";
-	for(unsigned int i=0;i<nAmps;i++)
-		BOOST_LOG_TRIVIAL(info)<<namer[i]<<":	Amplitude: "<<rr[i]->GetValue()<<"+-"<<rr[i]->GetError()<<"	Phase: "<<phir[i]->GetValue()<<"+-"<<phir[i]->GetError();
-	return o.str();
+void AmpSumIntensity::printAmps(){
+	BOOST_LOG_TRIVIAL(info)<<"AmpSumIntensity: Printing amplitudes with current(!) set of parameters:";
+	for(unsigned int i=0;i<nAmps;i++){
+		BOOST_LOG_TRIVIAL(info) << namer[i]<<":"
+				<<" Amplitude: "<<rr[i]->GetValue()<<"+-"<<rr[i]->GetError()
+				<<"	Phase: "<<phir[i]->GetValue()<<"+-"<<phir[i]->GetError();
+	}
+	return;
 }

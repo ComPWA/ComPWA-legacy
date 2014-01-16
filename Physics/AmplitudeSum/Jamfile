@@ -16,7 +16,7 @@ project :
         <include>$(QFT)/include
 	    <include>$(BOOST_ROOT)/include
 	    <include>$(GSL)/include
-	    #<include>$(ROOTSYS)/include
+	#<include>$(ROOTSYS)/include
 	#<linkflags>-L$(ROOTSYS)/lib 
 	#<linkflags>$(ROOTLIBS)
 	<linkflags>-L$(GSL)/lib

@@ -16,6 +16,7 @@
 #include <ctime>
 
 #include <omp.h>
+#include <time.h>
 
 #include <boost/random/linear_congruential.hpp>
 #include <boost/random/uniform_int.hpp>
@@ -44,6 +45,7 @@ RunManager::RunManager(std::shared_ptr<Data> inD, std::shared_ptr<Amplitude> inP
 : eff_(eff), pData_(inD), pPhys_(inP), pOpti_(inO), success_(false),
   validSize(0),validAmplitude(0),validData(0),validOptimizer(0)
 {
+	setSize(inD->getNEvents());
 	if(eff && inD && inP && inO){
 		validEfficiency=1;
 		validAmplitude=1;
@@ -67,72 +69,54 @@ RunManager::~RunManager(){
 	/* nothing */
 }
 
-bool RunManager::startFit(ParameterList& inPar){
-	if( !(validEfficiency==1 && validAmplitude==1 && validData==1 && validOptimizer==1) )
-		return false;
-
-	pOpti_->exec(inPar);
+std::shared_ptr<FitResult> RunManager::startFit(ParameterList& inPar){
+	if( !(validEfficiency==1 && validAmplitude==1 && validData==1 && validOptimizer==1) ){
+		BOOST_LOG_TRIVIAL(error) << "RunManager: startFit() requirements not fulfilled!";
+		return std::shared_ptr<FitResult>();
+	}
+	BOOST_LOG_TRIVIAL(info) << "RunManager: Starting fit.";
+	BOOST_LOG_TRIVIAL(info) << "RunManager: Input data contains "<<pData_->getNEvents()<<" events.";
+	//	BOOST_LOG_TRIVIAL(info) << "Initial LH="<<esti->controlParameter(inPar);
+	unsigned int startTime = clock();
+	std::shared_ptr<FitResult> result = pOpti_->exec(inPar);
 	success_ = true;
+	BOOST_LOG_TRIVIAL(info) << "RunManager: fit end. Final LH="<<result->finalLH<<".";
+	BOOST_LOG_TRIVIAL(info) << "RunManager: fit time="<<(clock()-startTime)/CLOCKS_PER_SEC/60<<"min.";
 
-	return success_;
+	return result;
 }
 bool RunManager::generate( unsigned int number ) {
-	if( !(validData==1 && validEfficiency==1 && validAmplitude==1 && validSize==1) )
+	if(number!=-1) setSize(number);
+	if( !(validData && validEfficiency && validAmplitude && validSize && validGenerator) ){
+		BOOST_LOG_TRIVIAL(error)<<"RunManager: generate() requirements not fulfilled";
 		return false;
+	}
 
-	//	if(pData_->getNEvents()>0){
-	//What do we do if dataset is not empty?
-	//	}
+	if(pData_->getNEvents()>0) {
+		BOOST_LOG_TRIVIAL(error)<<"RunManager: generate() dataset not empty! abort!";
+		return false;
+	}
 	ParameterList minPar;
 	pPhys_->fillStartParVec(minPar);
 
 	//Determing an estimate on the maximum of the physics amplitude using 20k events.
-	double genMaxVal=2*pPhys_->getMaxVal();
-//	double genMaxVal=0;
-//#pragma omp parallel shared(genMaxVal)
-//	{
-//		unsigned int threadId = omp_get_thread_num();
-//		unsigned int numThreads = omp_get_num_threads();
-//		Generator* genNew = (&(*gen_))->Clone();
-////		genNew->setSeed(std::clock()+omp_get_thread_num());
-//		Amplitude* ampNew = (&(*pPhys_))->Clone();
-//#pragma omp for
-//		for(unsigned int i=0; i<20000;i++){
-//			Event tmp;
-//			genNew->generate(tmp);
-//			double weight = tmp.getWeight();
-//			Particle part1 = tmp.getParticle(0);
-//			Particle part2 = tmp.getParticle(1);
-//			Particle part3 = tmp.getParticle(2);
-//			double m23sq = Particle::invariantMass(part2,part3);
-//			double m13sq = Particle::invariantMass(part1,part3);
-//
-//			std::vector<double> x;
-//			x.push_back(m23sq);
-//			x.push_back(m13sq);
-////			ParameterList list = ampNew->intensity(x,minPar);//not working yet
-//#pragma omp critical
-//			{
-//				ParameterList list = pPhys_->intensity(x,minPar);
-//				double AMPpdf = *list.GetDoubleParameter(0);
-//				if(genMaxVal<(weight*AMPpdf)) genMaxVal= weight*AMPpdf;
-//			}
-//		}
-//	}
-//	genMaxVal=2*genMaxVal;//conservative choice
+	//	double genMaxVal=2*pPhys_->getMaxVal();
+	double genMaxVal=pPhys_->getMaxVal();
 
 	double maxTest=0;
+	unsigned int totalCalls=0;
 	BOOST_LOG_TRIVIAL(info) << "== Using "<<genMaxVal<< " as maximum value for random number generation!";
 	BOOST_LOG_TRIVIAL(info) << "Generating MC: ["<<size_<<" events] ";
 
+	unsigned int startTime = clock();
 	boost::progress_display progressBar(size_); //boost progress bar (thread-safe)
-#pragma omp parallel firstprivate(genMaxVal) shared(maxTest)
+#pragma omp parallel firstprivate(genMaxVal) shared(maxTest,totalCalls)
 	{
 		unsigned int threadId = omp_get_thread_num();
 		unsigned int numThreads = omp_get_num_threads();
 
 		Generator* genNew = (&(*gen_))->Clone();//copy generator for every thread
-//		genNew->setSeed(std::clock()+threadId);//setting the seed here makes not sense in cast that TGenPhaseSpace is used, because it uses gRandom
+		//		genNew->setSeed(std::clock()+threadId);//setting the seed here makes not sense in cast that TGenPhaseSpace is used, because it uses gRandom
 		//initialize random number generator
 		boost::minstd_rand rndGen2(std::clock()+threadId);//TODO: is this seed thread safe?
 		boost::uniform_real<> uni_dist2(0,1);
@@ -145,6 +129,7 @@ bool RunManager::generate( unsigned int number ) {
 			//	while( i<size_){ //while loops are not supported by openMP
 			Event tmp;
 			genNew->generate(tmp);
+			totalCalls++;
 			double weight = tmp.getWeight();
 			Particle part1 = tmp.getParticle(0);
 			Particle part2 = tmp.getParticle(1);
@@ -176,6 +161,9 @@ bool RunManager::generate( unsigned int number ) {
 		}
 	}
 	std::cout<<std::endl;
+	BOOST_LOG_TRIVIAL(info)<<"Max value used in generation: "<<maxTest;
+	BOOST_LOG_TRIVIAL(info)<<"Efficiency of toy MC generation: "<<(double)size_/totalCalls;
+	BOOST_LOG_TRIVIAL(info) << "RunManager: generate time="<<(clock()-startTime)/CLOCKS_PER_SEC/60<<"min.";
 
 	if( maxTest > (double) (0.9*genMaxVal) ) {
 		BOOST_LOG_TRIVIAL(error)<<"==========ATTENTION===========";
@@ -186,5 +174,33 @@ bool RunManager::generate( unsigned int number ) {
 		return false;
 	}
 
+	return true;
+};
+bool RunManager::generatePhsp( unsigned int number ) {
+	if( !(validPhsp==1 && validEfficiency==1&& validSize==1) )
+		return false;
+	unsigned int phspSize = number;
+	if(number==-1) phspSize = 10*size_;
+
+	BOOST_LOG_TRIVIAL(info) << "Generating phase-space MC: ["<<phspSize<<" events] ";
+
+//	boost::progress_display progressBar(phspSize); //boost progress bar (thread-safe)
+#pragma omp parallel
+	{
+		Generator* genNew = (&(*gen_))->Clone();//copy generator for every thread
+		//		genNew->setSeed(std::clock()+threadId);//setting the seed here makes not sense in cast that TGenPhaseSpace is used, because it uses gRandom
+
+#pragma omp for
+		for(unsigned int i=0;i<phspSize;i++){
+			Event tmp;
+			genNew->generate(tmp);
+#pragma omp critical
+			{
+				phspSample_->pushEvent(tmp);//unfortunatly not thread safe
+			}
+//			++progressBar;//progress bar
+		}
+	}
+	std::cout<<std::endl;
 	return true;
 };

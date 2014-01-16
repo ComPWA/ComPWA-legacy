@@ -57,6 +57,9 @@ public:
 	virtual const ParameterList intensity(std::vector<double> point, ParameterList& par) =0;
 
 	virtual const bool fillStartParVec(ParameterList& outPar) =0;
+	virtual void setParameterList(ParameterList& par) =0;
+
+	virtual void printAmps() = 0;
 
 	virtual Amplitude* Clone() = 0;
 

@@ -17,12 +17,17 @@
 #include <vector>
 #include <utility>
 #include "DataReader/RootReader/RootReader.hpp"
+#include "Core/Kinematics.hpp"
 #include "TParticle.h"
+#include <boost/log/trivial.hpp>
+#include <boost/log/core.hpp>
+using namespace boost::log;
 
-void RootReader::init(){
+void RootReader::read(){
 	fParticles = new TClonesArray("TParticle");
 	fTree->GetBranch("Particles")->SetAutoDelete(false);
 	fTree->SetBranchAddress("Particles",&fParticles);
+	fTree->SetBranchAddress("weight",&feventWeight);
 	fmaxEvents=fTree->GetEntries();
 	fEvent=0;
 	bin();
@@ -32,7 +37,7 @@ void RootReader::init(){
 RootReader::RootReader(TTree* tr, const bool binned=false) : fBinned(binned){
 	fTree = tr;
 	fFile = 0; //need to do this to avoid seg. violation when destructor is called
-	init();
+	read();
 }
 RootReader::RootReader(const std::string inRootFile, const bool binned,
 		const std::string inTreeName, const bool readFlag)
@@ -41,7 +46,7 @@ RootReader::RootReader(const std::string inRootFile, const bool binned,
 	if(!readFlag) return;
 	fFile = new TFile(fileName.c_str());
 	fTree = (TTree*) fFile->Get(treeName.c_str());
-	init();
+	read();
 	//	fParticles = new TClonesArray("TParticle");
 	//	fTree->GetBranch("Particles")->SetAutoDelete(false);
 	//	fTree->SetBranchAddress("Particles",&fParticles);
@@ -58,8 +63,8 @@ RootReader::RootReader(const std::string inRootFile, const bool binned,
 }
 RootReader::~RootReader(){
 	//fFile->Close();
-//	delete fParticles;
-//	delete fFile;
+	//	delete fParticles;
+	//	delete fFile;
 	//delete _myFcn;
 }
 
@@ -184,7 +189,8 @@ void RootReader::storeEvents(){
 			partN = (TParticle*) fParticles->At(part);
 			if(!partN) continue;
 			partN->Momentum(inN);
-			tmp.addParticle(Particle(inN.X(), inN.Y(), inN.Z(), inN.E()));
+			tmp.addParticle(Particle(inN.X(), inN.Y(), inN.Z(), inN.E(),partN->GetPdgCode()));
+			tmp.setWeight(feventWeight);
 		}//particle loop
 
 		fEvents.push_back(tmp);
@@ -192,6 +198,31 @@ void RootReader::storeEvents(){
 
 }
 
+void RootReader::writeData(){
+	BOOST_LOG_TRIVIAL(info) << "RootReader: writing current vector of events to file "<<fileName;
+	TFile* ff = new TFile(fileName.c_str(),"UPDATE");
+	fTree = new TTree(treeName.c_str(),treeName.c_str());
+	unsigned int numPart = fEvents[0].getNParticles();
+	fParticles = new TClonesArray("TParticle",numPart);
+	fTree->Branch("Particles",&fParticles);
+	fTree->Branch("weight",&feventWeight,"weight/D");
+	TClonesArray &partArray = *fParticles;
+
+	TLorentzVector motherMomentum(0,0,0,Kinematics::instance()->getMotherMass());
+	for(std::vector<Event>::iterator it=fEvents.begin(); it!=fEvents.end(); it++){
+		fParticles->Clear();
+		feventWeight = (*it).getWeight();
+		for(unsigned int i=0; i<numPart; i++){
+			const Particle oldParticle = (*it).getParticle(i);
+			TLorentzVector oldMomentum(oldParticle.px,oldParticle.py,oldParticle.pz,oldParticle.E);
+			new(partArray[i]) TParticle(oldParticle.pid,1,0,0,0,0,oldMomentum,motherMomentum);
+		}
+		fTree->Fill();
+	}
+	fTree->Write("",TObject::kOverwrite,0);
+	ff->Close();
+	return;
+}
 
 void RootReader::bin(){
 	double min=-1, max=-1;

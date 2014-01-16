@@ -226,7 +226,6 @@ void DalitzKinematics::init(){
 	varNames.push_back("m23sq");
 	varNames.push_back("m13sq");
 //	varNames.push_back("m12sq");
-
 };
 //! returns 1 if point is within PHSP otherwise 0
 double phspFunc(double* x, size_t dim, void* param) {

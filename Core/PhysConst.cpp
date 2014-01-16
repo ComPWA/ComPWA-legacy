@@ -31,7 +31,7 @@ PhysConst::PhysConst(){
 	}catch(std::logic_error){
 	  BOOST_LOG_TRIVIAL(error)<<"Environment Variable COMPWA_DIR not set?"<<std::endl;
 	}
-	particleFileName = path+"/Physics/particles2013.xml";
+	particleFileName = path+"/Physics/particles2009.xml";
 	constantFileName = path+"/Physics/physConstants.xml";
 
 	flag_readFile=1;

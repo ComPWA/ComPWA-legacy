@@ -196,6 +196,7 @@ void AmplitudeSetup::save(const std::string &filename)
 	// be achieved using a combination of the insert and put_own
 	// functions.
 
+	BOOST_LOG_TRIVIAL(debug) << "AmplitudeSetup: Saving resonences "<<m_resonances.size()<<"x BW and "<<m_resonancesFlatte.size()<<"x flatte!";
 	BOOST_FOREACH( Resonance const& v, m_resonances ) {
 		ptree & node = pt.add("amplitude_setup.resonance", "");
 		node.put("enable", v.m_enable);
@@ -218,7 +219,7 @@ void AmplitudeSetup::save(const std::string &filename)
 //		//if( !v.valid ) node.put("<xmlattr>.invalid", true);
 	}
 	BOOST_FOREACH( ResonanceFlatte const& v, m_resonancesFlatte ) {
-		ptree & node = pt.add("amplitude_setup.resonance", "");
+		ptree & node = pt.add("amplitude_setup.resonanceFlatte", "");
 		node.put("enable", v.m_enable);
 		node.put("name", v.m_name);
 		node.put("mass", v.m_mass);

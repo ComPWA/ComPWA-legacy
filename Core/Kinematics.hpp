@@ -28,6 +28,7 @@ public:
 	std::vector<std::string> getVarNames(){return varNames;}
 	//! checks of data point is within phase space boundaries
 	virtual bool isWithinPhsp(const dataPoint& point) const = 0;
+	virtual double getMotherMass() = 0;
 
 
 protected:

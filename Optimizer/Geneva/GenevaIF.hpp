@@ -57,7 +57,7 @@ class GenevaIF : public Optimizer {
 public:
   /// Default Constructor (0x0)
   GenevaIF(std::shared_ptr<ControlParameter> theData, std::string inConfigFileDir="test/config/");
-  virtual const double exec(ParameterList& par) ;
+  virtual std::shared_ptr<FitResult> exec(ParameterList& par) ;
 
   /** Destructor */
   virtual ~GenevaIF();

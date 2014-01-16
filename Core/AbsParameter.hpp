@@ -44,7 +44,6 @@ public:
   //! Destructor
   virtual ~AbsParameter(){
 	  //std::cout << "GoodBye " << name_ <<std::endl;
-
   }
 
   //! Getter for name of object

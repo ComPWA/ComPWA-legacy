@@ -47,6 +47,7 @@ public:
 	virtual unsigned int getNevents() { return _entries; };
 	/** Destructor */
 	virtual ~BreitWigner();
+	virtual void printAmps() {};
 
 	virtual BreitWigner* Clone() {
 		return new BreitWigner(*this);

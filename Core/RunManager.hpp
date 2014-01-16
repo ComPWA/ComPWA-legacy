@@ -105,22 +105,28 @@ public:
 
 
 	virtual void setSize ( unsigned int s){ size_=s; validSize=1; };
-	virtual void setData ( std::shared_ptr<Data> d){ pData_ = d; validData=1; };
+	virtual void setData ( std::shared_ptr<Data> d){ pData_ = d; validData=1; setSize(pData_->getNEvents()); };
+	virtual void setPhspSample( std::shared_ptr<Data> d){ phspSample_ = d; validPhsp=1; };
 	virtual void setAmplitude ( std::shared_ptr<Amplitude> d){ pPhys_ = d; validAmplitude=1; };
 	virtual void setOptimizer ( std::shared_ptr<Optimizer> d){ pOpti_ = d; validOptimizer=1; };
 	virtual void setEfficiency( std::shared_ptr<Efficiency> d){ eff_= d; validEfficiency=1; };
+	virtual void setGenerator( std::shared_ptr<Generator> d){ gen_= d; validGenerator=1; };
 
-	virtual bool startFit( ParameterList& );
-	virtual bool generate( unsigned int number );
+	virtual std::shared_ptr<FitResult> startFit( ParameterList& );
+	virtual bool generate( unsigned int number=-1 );
+	virtual bool generatePhsp( unsigned int number=-1 );
 
 protected:
 	bool validData;
+	bool validPhsp;
 	bool validAmplitude;
 	bool validOptimizer;
 	bool validSize;
 	bool validEfficiency;
+	bool validGenerator;
 
 	std::shared_ptr<Data> pData_; /*!< Pointer to Data-Module */
+	std::shared_ptr<Data> phspSample_; /*!< Pointer to Data-Module */
 	std::shared_ptr<Amplitude> pPhys_; /*!< Pointer to Physics-Module */
 	std::shared_ptr<Optimizer> pOpti_; /*!< Pointer to Optimizer-Module */
 	std::shared_ptr<Efficiency> eff_; /*!< Pointer to Optimizer-Module */

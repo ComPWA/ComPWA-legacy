@@ -53,6 +53,7 @@ public:
   virtual const Event& getEvent(const int);
   virtual const int getBin(const int, double&, double&);
   //virtual const int getEvent(const int, TLorentzVector& , TLorentzVector& , double&);
+  virtual void writeData();
 
   virtual const unsigned int getNEvents() const {return fEvents.size();};
   virtual const unsigned int getNBins() const {return fmaxBins;};
@@ -61,13 +62,14 @@ public:
   virtual ~RootReader();
 
 protected:
-  void init();
+  void read();
   bool _readFlag;
   std::string fileName;
   std::string treeName;
   TFile* fFile;
   TTree* fTree;
   TClonesArray* fParticles;
+  double feventWeight;
   unsigned int fmaxEvents;
   unsigned int fEvent;
   bool fBinned;
