@@ -270,8 +270,16 @@ int main(int argc, char **argv){
 	//load resonances
 	//DPKinematics kin(M,Br,m1,m2,m3,"gamma","pi0","pi0");
 	//dataPoint::instance(kin);
-	std::string resoFile="test/JPSI_ypipi.xml";
-	AmplitudeSetup ini(resoFile);
+
+	const char* pPath = getenv("COMPWA_DIR");
+	std::string path = "";
+	try{
+	  path = std::string(pPath);
+	}catch(std::logic_error){
+	  BOOST_LOG_TRIVIAL(error)<<"Environment Variable COMPWA_DIR not set?"<<std::endl;
+	}
+	std::string resoFile=path+"/test/JPSI_ypipi.xml";
+	AmplitudeSetup ini(resoFile);return 0;
 	cout << "loaded file " << ini.getFileName() << " with " << ini.getResonances().size() << " resonances:" << endl;
 	for(std::vector<Resonance>::iterator reso=ini.getResonances().begin(); reso!=ini.getResonances().end(); reso++){
 		cout << endl << "Resonance " << (*reso).m_name << endl;

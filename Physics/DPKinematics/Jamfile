@@ -18,7 +18,7 @@ project :
 	    <include>$(ROOTSYS)/include/root
 	<linkflags>-L$(BOOST_ROOT)/lib 
 	<linkflags>$(BOOSTLIBS)
-	<linkflags>-L$(ROOTSYS)/lib 
+	#<linkflags>-L$(ROOTSYS)/lib 
 	<linkflags>-L$(ROOTSYS)/lib/root 
 	<linkflags>$(ROOTLIBS)
 	<linkflags>-L$(GSL)/lib

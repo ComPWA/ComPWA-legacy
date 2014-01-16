@@ -353,7 +353,7 @@ public:
   }
 
   virtual std::shared_ptr<FunctionTree> functionTree(ParameterList& outPar) {
-    if(outPar.GetNParameter()>0) return NULL;
+    if(outPar.GetNParameter()>0) return std::shared_ptr<FunctionTree>();
     fillStartParVec(outPar);
 
     return myTree;

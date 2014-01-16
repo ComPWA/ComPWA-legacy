@@ -19,7 +19,19 @@
 #include "Core/Functions.hpp"
 
   TreeNode::TreeNode(std::string name, std::shared_ptr<AbsParameter> intResult, std::shared_ptr<Strategy> strat, std::shared_ptr<TreeNode> parent)
-    :_value(intResult),_name(name),_changed(true),_strat(strat){
+    :_name(name),_changed(true),_strat(strat){
+	_value.push_back(intResult);
+    if(parent){
+        _parents.push_back(parent);
+        //parent->children.push_back(shared_from_this());
+    }
+  };
+
+  TreeNode::TreeNode(std::string name, std::vector<std::shared_ptr<AbsParameter>>& intResult, std::shared_ptr<Strategy> strat, std::shared_ptr<TreeNode> parent)
+    :_name(name),_changed(true),_strat(strat){
+	for(unsigned int i=0; i<intResult.size(); i++){
+	  _value.push_back(intResult[i]);
+	}
     if(parent){
         _parents.push_back(parent);
         //parent->children.push_back(shared_from_this());
@@ -47,25 +59,62 @@
       _changed=false;
       return;
     }
-    ParameterList newVals;
-    for(unsigned int i=0; i<_children.size(); i++){
-        if(_children[i]->needsCalculation())
-          _children[i]->recalculate();
-        std::shared_ptr<AbsParameter> para = _children[i]->getValue();
-        if(!para) std::cout << this->getName() << " " << i << std::endl;
-        //para->type();
-        newVals.AddParameter(para);
-    }  //end children-loop
-    _value = _strat->execute(newVals);
-    _changed=false;
+
+    if(_value.size()==1){ //i have just one dim, merge everything
+	  ParameterList newVals;
+	  for(unsigned int i=0; i<_children.size(); i++){ //all children
+		for(unsigned int ele=0; ele<_children[i]->getDim(); ele++){ //all dims
+		  if(_children[i]->needsCalculation())
+			_children[i]->recalculate();
+		  std::shared_ptr<AbsParameter> para = _children[i]->getValue(ele);
+		  if(!para) std::cout << this->getName() << " " << i << std::endl;
+		  //para->type();
+		  newVals.AddParameter(para);
+	  	}  //end children-loop
+	  }
+	  _changed=false;
+	  // std::cout << "Values: " << newVals.GetNDouble() << std::endl;
+	  _value[0] = _strat->execute(newVals);
+    }else{ //i have a certain dim, children must fill it
+
+      for(unsigned int ele=0; ele<_value.size(); ele++){
+	    ParameterList newVals;
+	    for(unsigned int i=0; i<_children.size(); i++){
+		  if(!(_children[i]->getDim() == _value.size() || _children[i]->getDim() == 1))
+		    continue; //TODO: exception;
+		  std::shared_ptr<AbsParameter> para;
+
+	      if(_children[i]->needsCalculation())
+		    _children[i]->recalculate();
+
+		  if(_children[i]->getDim()==1)
+		    para = _children[i]->getValue();
+		  else
+		    para = _children[i]->getValue(ele);
+
+		  if(!para) std::cout << this->getName() << " " << i << std::endl;
+		  //para->type();
+		  newVals.AddParameter(para);
+	    }  //end children-loop
+	    _value[ele] = _strat->execute(newVals);
+	    _changed=false;
+	  }//end loop dims
+
+    }//end which dim of this node
   }; //end update()
 
   std::string TreeNode::to_str(std::string beginning = ""){
     std::stringstream oss;
     if(_changed && _children.size())
       oss << beginning << _name << " = ?";
-    else if(_value)
-      oss << beginning << _name << " = " << _value->val_to_str();
+    else{
+      oss << beginning << _name << " = ";
+      for(unsigned int i=0; i<_value.size()-1; i++)
+    	if(_value[i])
+          oss << _value[i]->val_to_str() << ", ";
+      if(_value[_value.size()-1])
+    	  oss << _value[_value.size()-1]->val_to_str();
+    }
     if(_children.size())
       oss << " with " << _children.size() << " children" << std::endl;
     else

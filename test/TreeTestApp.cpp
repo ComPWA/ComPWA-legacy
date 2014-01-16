@@ -121,6 +121,38 @@ int main(int argc, char **argv) {
   std::cout << std::endl << myTree << std::endl << std::endl;
 
 
+  std::cout << std::endl << std::endl ;
+
+  //------------new Tree with more dimensions----------------
+
+  unsigned int nElements = 10;
+  std::shared_ptr<FunctionTree> myTreeMult;
+
+  //------------SetUp the parameters for R = Sum of (a * b)-----------
+  std::vector<std::shared_ptr<AbsParameter>> nVecParA;
+  std::shared_ptr<AbsParameter> nParB(new DoubleParameter("parB",2));
+  for(unsigned int i=0; i<nElements; i++){
+    std::shared_ptr<DoubleParameter> tmpA(new DoubleParameter("parA_"+i,i+1));
+    nVecParA.push_back(tmpA);
+  }
+
+//   if(autonodes){ //Let FunctionTree manage the creation of the tree
+    myTreeMult = std::shared_ptr<FunctionTree>(new FunctionTree());
+    myTreeMult->createHead("R", add);
+    myTreeMult->createNode("ab", mult, "R", nElements);
+    myTreeMult->createLeaf("a", nVecParA, "ab");
+    myTreeMult->createLeaf("b", nParB, "ab");
+
+  // }
+
+   //------------Trigger Calculation----------------
+    myTreeMult->recalculate();
+
+    std::cout << std::endl << "Multitree Setup and calculated R = Sum[a*b] with one leaf containing " << nElements << " elements" << std::endl;
+    std::cout << std::endl << myTreeMult << std::endl << std::endl;
+
+
+
   return 0;
 }
 

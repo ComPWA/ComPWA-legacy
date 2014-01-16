@@ -327,7 +327,7 @@ const ParameterList AmpSumIntensity::intensity(dataPoint& point){
 	return result;
 }
 std::shared_ptr<FunctionTree> AmpSumIntensity::functionTree(ParameterList& outPar) {
-  if(outPar.GetNParameter()>0) return NULL;
+  if(outPar.GetNParameter()>0) return std::shared_ptr<FunctionTree>();
   fillStartParVec(outPar);
   outPar.AddParameter(treePar->GetDoubleParameter("x"));
   outPar.AddParameter(treePar->GetDoubleParameter("m23"));

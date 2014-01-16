@@ -35,13 +35,23 @@ class TreeNode : public std::enable_shared_from_this<TreeNode>, public ParObserv
 public:
   //! Standard constructor
    /*!
-    * Standard constructor using a string the identifying name
+    * Standard constructor for one dimensional tree using a string the identifying name
     * /param name unique name of this node
     * /param intResult start value of node
     * /param strat strategy how this node is calculated
     * /param parent pointer to connected upper level node
    */
   TreeNode(std::string name, std::shared_ptr<AbsParameter> intResult, std::shared_ptr<Strategy> strat, std::shared_ptr<TreeNode> parent);
+
+  //! Standard constructor
+   /*!
+    * Standard constructor for multi-dimensional tree using a string the identifying name
+    * /param name unique name of this node
+    * /param intResult start value of node
+    * /param strat strategy how this node is calculated
+    * /param parent pointer to connected upper level node
+   */
+  TreeNode(std::string name, std::vector<std::shared_ptr<AbsParameter>>& intResult, std::shared_ptr<Strategy> strat, std::shared_ptr<TreeNode> parent);
 
   //! Destructor
   ~TreeNode();
@@ -71,9 +81,20 @@ public:
   void recalculate();
 
   //! Get pointer to node value
-  const std::shared_ptr<AbsParameter> getValue(){
-    return _value;
+  //const std::shared_ptr<AbsParameter> getValue(){
+  //  return _value[0];
+  //};
+
+  //! Get pointer to node value
+  const std::shared_ptr<AbsParameter> getValue(unsigned int ele=0){
+    return _value[ele];
   };
+
+  //! Get dimension
+  const unsigned int getDim(){
+    return _value.size();
+  };
+
 
   //! Get node name
   const std::string& getName(){
@@ -109,7 +130,7 @@ protected:
   std::vector<std::shared_ptr<TreeNode> > _parents; /*!< Link to parents */
   std::vector<std::shared_ptr<TreeNode> > _children; /*!< Link to children */
 
-  std::shared_ptr<AbsParameter> _value; /*!< Value of this node */
+  std::vector<std::shared_ptr<AbsParameter>> _value; /*!< Value of this node */
   std::string _name; /*!< Unique name of this node */
   bool _changed; /*!< flag if node needs recalculation */
   //std::string childOP;
