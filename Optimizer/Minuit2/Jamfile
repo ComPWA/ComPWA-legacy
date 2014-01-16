@@ -8,11 +8,11 @@ BOOSTLIBS = -lboost_log_setup -lboost_log -lboost_date_time -lboost_filesystem -
 
 project :
    requirements <include>./
-	    <include>$(BOOST_ROOT)/include
+	     <include>$(BOOST_ROOT)/include
 		<include>$(MINUIT2)/include
 		<linkflags>-L$(MINUIT2)/lib
 		<linkflags>-lMinuit2
-	<linkflags>$(BOOSTLIBS)
+		<linkflags>$(BOOSTLIBS)
 		;
 
 lib Minuit2IF : 

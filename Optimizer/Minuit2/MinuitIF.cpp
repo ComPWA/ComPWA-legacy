@@ -18,6 +18,7 @@
 #include "Minuit2/MnMigrad.h"
 #include "Minuit2/FunctionMinimum.h"
 #include "Minuit2/MnMinos.h"
+#include "Minuit2/MnHesse.h"
 #include "Minuit2/MnStrategy.h"
 #include "Optimizer/Minuit2/MinuitIF.hpp"
 #include "Core/ParameterList.hpp"
@@ -45,9 +46,8 @@ std::shared_ptr<FitResult> MinuitIF::exec(ParameterList& par){
 	//std::stringstream out;
 
 	unsigned int startTime = clock();
-	std::shared_ptr<FitResult> result(new FitResult());
-	result->initialParameters=ParameterList(par);
-	result->initialLH=-999; //how can i get to initial LH?
+	ParameterList initialPar(par);
+
 	MnUserParameters upar;
 	for(unsigned int i=0; i<par.GetNDouble(); ++i){ //only doubles for minuit
 
@@ -66,60 +66,51 @@ std::shared_ptr<FitResult> MinuitIF::exec(ParameterList& par){
 		}else if( actPat->HasError() ){
 			if(actPat->GetError()!=0) error=actPat->GetError();
 			upar.Add(actPat->GetName(), actPat->GetValue(), error);
-		}else{
-			//double tmpVal = actPat->GetValue();
-			//if(tmpVal==0 && !actPat->IsFixed()) tmpVal=0.001;
+		}else
 			upar.Add(actPat->GetName(), actPat->GetValue(),error);
-		}
 
 		_myFcn.setNameID(i, actPat->GetName());
 
 		if(actPat->IsFixed())
 			upar.Fix(actPat->GetName());
 	}
+	//use MnStrategy class to set all options for the fit
+	MnStrategy strat; //using default strategy
 
-	MnMigrad migrad(_myFcn, upar);
+	//MIGRAD
 	BOOST_LOG_TRIVIAL(info) <<"MinuitIF: starting migrad ";
-	//for(unsigned int i=0; i<par.GetNDouble(); i++)
-	//   std::cout << upar.Parameter(i).Value() << " " << upar.Parameter(i).IsFixed() << std::endl;
-	FunctionMinimum minMin = migrad(100,0.001);//TODO
+	MnMigrad migrad(_myFcn, upar, strat);
+	//	FunctionMinimum minMin = migrad(100,0.001);//(maxfcn,tolerance)
+	FunctionMinimum minMin = migrad();
+	BOOST_LOG_TRIVIAL(info) <<"MinuitIF: migrad finished";
 
-	//if(!minMin.IsValid()) {
-	//try with higher strategy
-	//    std::cout <<"FM is invalid, try with strategy = 2."<< std::endl;
-	//   MnMigrad migrad2(_myFcn, minMin.UserState(), MnStrategy(2));
-	//   minMin = migrad2(10,0.1);//TODO
-	// }
+	//HESSE
+	BOOST_LOG_TRIVIAL(info) <<"MinuitIF: starting hesse";
+	MnHesse hesse(strat);
+	hesse(_myFcn,minMin);//function minimum minMin is updated by hesse
+	BOOST_LOG_TRIVIAL(info) <<"MinuitIF: hesse finished";
+
+	//MINOS
+	BOOST_LOG_TRIVIAL(info) <<"MinuitIF: starting minos";
+	MnMinos minos(_myFcn,minMin,strat);
+	BOOST_LOG_TRIVIAL(info) <<"MinuitIF: minos for parameter 1 ...";
+//	minos(1); //first parameter
+	BOOST_LOG_TRIVIAL(info) <<"MinuitIF: minos finished";
 
 	//save minimzed values
+	MnUserParameterState minState = minMin.UserState();
 	for(unsigned int i=0; i<par.GetNDouble(); ++i){
-		//out.str("");
-		//out << i;
-		// s = out.str();
 		std::shared_ptr<DoubleParameter> actPat = par.GetDoubleParameter(i);
 		if(!actPat->IsFixed()){
-			actPat->SetValue(minMin.UserState().Value(actPat->GetName()));
-			actPat->SetError(minMin.UserState().Error(actPat->GetName()));
+			actPat->SetValue(minState.Value(actPat->GetName()));
+			actPat->SetError(minState.Error(actPat->GetName()));
 		}
 	}
-	std::vector<double> minuitCovM = minMin.UserState().Covariance().Data();//Covariance matrix is empty !?
-//	std::cout<<minuitCovM.size()<<" "<<minMin.UserState().Covariance().size()<<std::endl;
-	unsigned int matrixSize = par.GetNParameter();
-	using namespace boost::numeric::ublas;
-	boost::numeric::ublas::symmetric_matrix<double,boost::numeric::ublas::upper> covMatrix(matrixSize,matrixSize);
-	if(minuitCovM.size()==matrixSize*(matrixSize+1)/2){
-		for (unsigned i = 0; i < covMatrix.size1 (); ++ i)
-			for (unsigned j = i; j < covMatrix.size2 (); ++ j)
-				covMatrix (i, j) = minuitCovM[3*i+j];
-		std::cout << covMatrix << std::endl;
-	} else BOOST_LOG_TRIVIAL(info)<<"MinuitIF: no valid correlation matrix available!";
-	result->cov=covMatrix;
-	result->finalParameters=ParameterList(par);
-	result->finalLH = minMin.Fval();
-	result->edm= minMin.Edm();
-	result->time = (clock()-startTime)/CLOCKS_PER_SEC;
+	std::shared_ptr<FitResult> result(new MinuitResult(minMin));
+	result->setInitialParameters(initialPar);
+	result->setFinalParameters(par);
+	result->setTime((clock()-startTime)/CLOCKS_PER_SEC);
 
-	//	return minMin.Fval();
 	return result;
 }
 

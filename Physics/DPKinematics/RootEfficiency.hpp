@@ -30,6 +30,7 @@ private:
 public:
 	//! returns efficiency for current datapoint
 	double evaluate(std::vector<double> x);
+	double evaluate(dataPoint& point);
 	//! Construct DalitzHistEfficiency from TEfficiency object
 	DalitzHistEfficiency(TEfficiency* eff);
 	//! Construct DalitzHistEfficiency from two TH2 objects for passed and total events

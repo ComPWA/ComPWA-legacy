@@ -35,12 +35,13 @@
 #include "Physics/AmplitudeSum/AmpWigner2.hpp"
 #include "Physics/AmplitudeSum/AmpSumOfAmplitudes.hpp"
 #include "Physics/DPKinematics/DalitzKinematics.hpp"
+#include "Core/Efficiency.hpp"
 #include "Core/DataPoint.hpp"
 
 class AmpSumIntensity : public Amplitude {
 
 public:
-	enum normalizationStyle {
+	enum normStyle {
 		none, /*!< no normaliztion between Amplitudes. */
 		one, /*!< all amplitudes are normalized to one. The normalization factor is \f$ 1/\sqrt(\int |A|^2)\f$ */
 		entries /*!<all amplitudes are normalized to the number of entries in dalitz plot. The normalization factor is \f$ 1/\sqrt(entries/area * \int |A|^2)\f$*/
@@ -49,10 +50,11 @@ public:
 	AmpSumIntensity(const double inM, const double inBr, const double in1,const double in2, const double in3,
 			std::string nameM, std::string name1,std::string name2,std::string name3,
 			 AmplitudeSetup ini, unsigned int entries=9999,
-			normalizationStyle ns=none, double dpArea=-999);
-	AmpSumIntensity(AmplitudeSetup ini, normalizationStyle ns, unsigned int entries=9999,
-			 double dpArea=-999);
-	AmpSumIntensity(AmplitudeSetup ini, unsigned int entries=9999, double dpArea=-999);
+			normStyle ns=none, double dpArea=-999);
+	AmpSumIntensity(AmplitudeSetup ini, normStyle ns, std::shared_ptr<Efficiency> eff=std::shared_ptr<Efficiency>(new UnitEfficiency()),
+			 unsigned int entries=9999, double dpArea=-999);
+	AmpSumIntensity(AmplitudeSetup ini, std::shared_ptr<Efficiency> eff=std::shared_ptr<Efficiency>(new UnitEfficiency()),
+			unsigned int entries=9999, double dpArea=-999);
 	AmpSumIntensity(const AmpSumIntensity& other);
 
 	double evaluate(double x[], size_t dim);
@@ -91,7 +93,7 @@ public:
 
 protected:
 	void init();
-
+	std::shared_ptr<Efficiency> eff_;
 	bool _calcMaxFcnVal;
 	bool _calcNorm;
 	double _maxFcnVal;
@@ -102,7 +104,7 @@ protected:
 
 	double maxVal;
 
-	normalizationStyle _normStyle;
+	normStyle _normStyle;
 	unsigned int _entries;
 	double _dpArea;
 	unsigned int nAmps;

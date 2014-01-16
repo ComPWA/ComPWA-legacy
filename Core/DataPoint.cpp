@@ -13,12 +13,26 @@
 #include "Core/Kinematics.hpp"
 #include "Core/DataPoint.hpp"
 
-dataPoint::dataPoint(){
+void dataPoint::init(){
 	std::vector<std::string> varNames = Kinematics::instance()->getVarNames();
 	unsigned int size = varNames.size();
 	var.reserve(size);
+	weight=1;
 	return;
-
+}
+dataPoint::dataPoint(std::vector<double> vec){
+	init();
+	var=vec;
+	return;
+}
+dataPoint::dataPoint(Event& ev){
+	init();
+	Kinematics::instance()->eventToDataPoint(ev,*this);
+	return;
+}
+dataPoint::dataPoint(){
+	init();
+	return;
 }
 
 double dataPoint::getVal(std::string name) const{

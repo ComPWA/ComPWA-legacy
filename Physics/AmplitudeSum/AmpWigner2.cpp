@@ -74,7 +74,7 @@ double AmpWigner2::evaluate(dataPoint& point) const {
 		M = 0; N=0;
 		break;
 	default:
-		BOOST_LOG_TRIVIAL(fatal)<<"AmpWigner: wrong subSystem! Exit!"; exit(1);
+		BOOST_LOG_TRIVIAL(fatal)<<"AmpWigner2: wrong subSystem! Exit!"; exit(1);
 	}
 	if(cosTheta>1.) cosTheta=1.;
 	if(cosTheta<-1.) cosTheta=-1.;
@@ -86,8 +86,7 @@ double AmpWigner2::evaluate(dataPoint& point) const {
 	 */
 	result = Wigner_d(J,M,N,theta);
 	if( ( result!=result ) || (theta!=theta)) {
-		BOOST_LOG_TRIVIAL(error)<<"= AmpWigner2: ";
-		BOOST_LOG_TRIVIAL(error)<<"NAN! J="<< J<<" M="<<N<<" N="<<M<<" subsys="<<_subSys<<" theta="<<theta<<" cosTheta="<<cosTheta<<" result="<<result;
+		BOOST_LOG_TRIVIAL(error)<<"AmpWigner2: NAN! J="<< J<<" M="<<N<<" N="<<M<<" subsys="<<_subSys<<" theta="<<theta<<" cosTheta="<<cosTheta<<" result="<<result;
 		return 0;
 	}
 	return result;

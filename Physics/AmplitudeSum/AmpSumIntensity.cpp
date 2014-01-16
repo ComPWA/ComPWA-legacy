@@ -52,28 +52,28 @@ AmpSumIntensity::AmpSumIntensity(const AmpSumIntensity& other) : nAmps(other.nAm
 		totAmp(other.totAmp), _calcMaxFcnVal(other._calcMaxFcnVal), _maxFcnVal(other._maxFcnVal){
 }
 
-AmpSumIntensity::AmpSumIntensity(AmplitudeSetup ini, normalizationStyle ns, unsigned int entries, double dpArea) :
-												totAmp("relBWsumAmplitude", "totAmp"), ampSetup(ini),
-												_entries(entries), _normStyle(ns), _calcNorm(1), _dpArea(dpArea),
-												_calcMaxFcnVal(0)
+AmpSumIntensity::AmpSumIntensity(AmplitudeSetup ini, normStyle ns, std::shared_ptr<Efficiency> eff, unsigned int entries, double dpArea) :
+		totAmp("relBWsumAmplitude", "totAmp"), ampSetup(ini),
+		_entries(entries), _normStyle(ns), _calcNorm(1), _dpArea(dpArea),
+		_calcMaxFcnVal(0),eff_(eff)
 {
 	init();
 }
 
-AmpSumIntensity::AmpSumIntensity(AmplitudeSetup ini, unsigned int entries, double dpArea) :
-												totAmp("relBWsumAmplitude", "totAmp"), ampSetup(ini),
-												_entries(entries), _normStyle(none), _calcNorm(0), _dpArea(dpArea),
-												_calcMaxFcnVal(0)
+AmpSumIntensity::AmpSumIntensity(AmplitudeSetup ini, std::shared_ptr<Efficiency> eff, unsigned int entries, double dpArea) :
+		totAmp("relBWsumAmplitude", "totAmp"), ampSetup(ini),
+		_entries(entries), _normStyle(none), _calcNorm(0), _dpArea(dpArea),
+		_calcMaxFcnVal(0),eff_(eff)
 {
 	init();
 }
 
 AmpSumIntensity::AmpSumIntensity(const double inM, const double inBr, const double in1,const double in2, const double in3,
 		std::string nameM, std::string name1,std::string name2,std::string name3,
-		AmplitudeSetup ini, unsigned int entries, normalizationStyle ns, double dpArea) :
-										totAmp("relBWsumAmplitude", "totAmp"), ampSetup(ini),
-										_entries(entries), _normStyle(ns), _calcNorm(1),_dpArea(dpArea),
-										_calcMaxFcnVal(0)
+		AmplitudeSetup ini, unsigned int entries, normStyle ns, double dpArea) :
+		totAmp("relBWsumAmplitude", "totAmp"), ampSetup(ini),
+		_entries(entries), _normStyle(ns), _calcNorm(1),_dpArea(dpArea),
+		_calcMaxFcnVal(0),eff_(std::shared_ptr<Efficiency>(new UnitEfficiency()))
 {
 	init();
 }
@@ -195,7 +195,7 @@ void AmpSumIntensity::init(){
 		tmpbw->SetNormalization(1/norm);
 	}// end loop over resonancesFlatte
 
-	ampSetup.save(ampSetup.getFilePath());//save updated information to input file
+//	ampSetup.save(ampSetup.getFilePath());//save updated information to input file
 	nAmps=rr.size();
 	if(_calcNorm) integral();
 	BOOST_LOG_TRIVIAL(info)<<"AmpSumIntensity: completed setup!";
@@ -322,8 +322,9 @@ const ParameterList AmpSumIntensity::intensity(dataPoint& point){
 		BOOST_LOG_TRIVIAL(error)<<"Error AmpSumIntensity: Intensity is not a number!!";
 		exit(1);
 	}
+	double eff=eff_->evaluate(point);
 	ParameterList result;
-	result.AddParameter(std::shared_ptr<DoubleParameter>(new DoubleParameter("AmpSumResult",AMPpdf)));
+	result.AddParameter(std::shared_ptr<DoubleParameter>(new DoubleParameter("AmpSumResult",AMPpdf*eff)));
 	return result;
 }
 std::shared_ptr<FunctionTree> AmpSumIntensity::functionTree(ParameterList& outPar) {

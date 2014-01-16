@@ -76,7 +76,7 @@ int main(int argc, char **argv){
     // Do the actual minimization
     std::shared_ptr<FitResult> genResult = minimizer->exec(par);
 
-    std::cout << "Minimizer " << Nmin << "\t final par :\t" << genResult->finalLH << std::endl;
+    std::cout << "Minimizer " << Nmin << "\t final par :\t" << genResult << std::endl;
     for(unsigned int i=0; i<par.GetNDouble(); i++)
       std::cout << "final par "<< i << ":\t" << par.GetParameterValue(i) << std::endl;
     std::cout << "Done ..." << std::endl << std::endl;

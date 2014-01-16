@@ -19,6 +19,7 @@
 using namespace boost::log;
 
 #include "Core/DataPoint.hpp"
+#include "Core/Event.hpp"
 class dataPoint;
 
 class Kinematics
@@ -29,6 +30,7 @@ public:
 	//! checks of data point is within phase space boundaries
 	virtual bool isWithinPhsp(const dataPoint& point) const = 0;
 	virtual double getMotherMass() = 0;
+	virtual void eventToDataPoint(Event& ev, dataPoint& point) = 0;
 
 
 protected:
