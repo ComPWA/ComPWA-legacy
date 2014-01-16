@@ -41,6 +41,7 @@
 // Standard header files go here
 #include <iostream>
 #include <limits>
+#include <memory>
 
 // Geneva header files go here
 #include "geneva/Go2.hpp"
@@ -48,6 +49,7 @@
 
 // ComPWA header files go here
 #include "Optimizer/Geneva/GenevaIF.hpp"
+#include "Optimizer/Geneva/GenevaResult.hpp"
 
 // The individual that should be optimized
 #include "Optimizer/Geneva/GStartIndividual.hpp"
@@ -79,7 +81,7 @@ void GenevaIF::setClientMode(std::string serverip, unsigned int serverport){
 }
 
 std::shared_ptr<FitResult> GenevaIF::exec(ParameterList& par) {
-	std::shared_ptr<FitResult> result(new FitResult());
+	std::shared_ptr<GenevaResult> result(new GenevaResult());
 	//Go2::init();
 	//Go2 go(argc, argv, configFile);
 	//Go2 go( clientMode, serMode, ip, port,
@@ -89,9 +91,10 @@ std::shared_ptr<FitResult> GenevaIF::exec(ParameterList& par) {
 	//---------------------------------------------------------------------
 	// Initialize a client, if requested
 
-        if(go.clientMode()) {
+    if(go.clientMode()) {
 	  std::cout << "Geneva Client waiting for action!" << std::endl;
-	  return go.clientRun();
+	  go.clientRun();
+	  return result;
 	}
 
 	//---------------------------------------------------------------------
@@ -134,8 +137,8 @@ std::shared_ptr<FitResult> GenevaIF::exec(ParameterList& par) {
 
 	// Terminate
 //	double result= bestIndividual_ptr->getBestKnownFitness();
-	double finalValue = bestIndividual_ptr->getBestKnownFitness();
-	result->LH=finalValue;
+	//double finalValue = bestIndividual_ptr->getBestKnownFitness();
+	result->setResult(bestIndividual_ptr);
 	//int whattodowiththisidontknow =  go.finalize(); //Go2::finalize();
 
         //write Parameters back

@@ -37,6 +37,7 @@
 #include "Optimizer/Geneva/GenevaIF.hpp"
 #include "Core/ParameterList.hpp"
 #include "Core/Parameter.hpp"
+#include "Core/FitResult.hpp"
 
 // The toy-data to fit to
 #include "test/PolyFit.hpp"
@@ -81,10 +82,10 @@ int main(int argc, char **argv){
     std::cout << std::endl << std::endl << std::endl;
   }
 
-  double genResult = myMinimizer->exec(par);
+  std::shared_ptr<FitResult> genResult = myMinimizer->exec(par);
 
   if(iamserver){
-    std::cout << "Geneva final par :\t" << genResult << std::endl;
+    std::cout << "Geneva final par :\t" << genResult->getResult() << std::endl;
     for(unsigned int i=0; i<par.GetNDouble(); i++)
       std::cout << "final par "<< i << ":\t" << par.GetParameterValue(i) << std::endl;
   }

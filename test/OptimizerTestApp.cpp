@@ -38,6 +38,7 @@
 #include "Optimizer/Geneva/GenevaIF.hpp"
 #include "Core/ParameterList.hpp"
 #include "Core/Parameter.hpp"
+#include "Core/FitResult.hpp"
 
 // The toy-data to fit to
 #include "test/PolyFit.hpp"
@@ -86,9 +87,9 @@ int main(int argc, char **argv){
     // Pointer to one of the used minimizers
     std::shared_ptr<Optimizer> minimizer = myMinimizerList.at(Nmin);
     // Do the actual minimization
-    double genResult = minimizer->exec(par);
+    std::shared_ptr<FitResult> genResult = minimizer->exec(par);
 
-    std::cout << "Minimizer " << Nmin << "\t final par :\t" << genResult << std::endl;
+    std::cout << "Minimizer " << Nmin << "\t final par :\t" << genResult->getResult() << std::endl;
 
     //for(unsigned int i=0; i<par.GetNDouble(); i++)
     //  std::cout << "final par "<< i << ":\t" << par.GetParameterValue(i) << std::endl;
