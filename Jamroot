@@ -13,6 +13,7 @@ project :
 	<cxxflags>-ftemplate-depth-256
 	<cxxflags>-std=c++0x
 	<linkflags>-lgomp
+	<warnings>off
 	;
 
 # Configure the used packages here:

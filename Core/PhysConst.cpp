@@ -25,7 +25,12 @@ PhysConst::PhysConst(){
 	nameConst.push_back("error"); valueConst.push_back(-999); errorConst.push_back(-999);
 
 	const char* pPath = getenv("COMPWA_DIR");
-	std::string path = std::string(pPath);
+	std::string path = "";
+	try{
+	  path = std::string(pPath);
+	}catch(std::logic_error){
+	  BOOST_LOG_TRIVIAL(error)<<"Environment Variable COMPWA_DIR not set?"<<std::endl;
+	}
 	particleFileName = path+"/Physics/particles2009.xml";
 	constantFileName = path+"/Physics/physConstants.xml";
 

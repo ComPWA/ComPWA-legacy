@@ -86,7 +86,7 @@ int main(int argc, char **argv) {
   //========= Raw Strings ==========
   cout << "Raw Strings: " << endl;
   string normal_str = "First line.\nSecond line.\nEnd of message.\n";
-  string raw_str = R"(First line.\nSecond line.\nEnd of message.\n)";
+  string raw_str = "(First line.\nSecond line.\nEnd of message.\n)";
   cout<<normal_str<<endl;
   cout<<raw_str<<endl;
   cout << endl;

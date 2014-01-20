@@ -97,15 +97,26 @@ public:
     * \param parent the parent of this node (for linking)
     * \sa addNode(), createHead(), createLeaf()
    */
-  virtual void createNode(const std::string& name, std::shared_ptr<Strategy> strat, std::string parent){
+  virtual void createNode(const std::string& name, std::shared_ptr<Strategy> strat, std::string parent, unsigned int dim=1){
     //TODO: (type of) parameter from strategy!
     //std::shared_ptr<AbsParameter> inter = strat->GetResultContainer();
+	if(dim==0) return; //TODO: exception
 
-    std::shared_ptr<DoubleParameter> inter(new DoubleParameter("par"+name,0.));
-    std::shared_ptr<TreeNode> parentNode = nodes_.at(parent);
-    std::shared_ptr<TreeNode> newNode(new TreeNode(name, inter, strat, parentNode));
-    nodes_.insert(std::pair<std::string, std::shared_ptr<TreeNode> >(name,newNode));
-    newNode->linkParents();
+	if(dim==1){
+      std::shared_ptr<DoubleParameter> inter(new DoubleParameter("par"+name,0.));
+      std::shared_ptr<TreeNode> parentNode = nodes_.at(parent);
+      std::shared_ptr<TreeNode> newNode(new TreeNode(name, inter, strat, parentNode));
+      nodes_.insert(std::pair<std::string, std::shared_ptr<TreeNode> >(name,newNode));
+      newNode->linkParents();
+	}else{
+      std::vector<std::shared_ptr<AbsParameter>> inter;
+      for(unsigned int i=0; i<dim; i++)
+    	  inter.push_back(std::shared_ptr<DoubleParameter>(new DoubleParameter("par"+name+"_d"+std::to_string((long long unsigned int)i),0.)));
+      std::shared_ptr<TreeNode> parentNode = nodes_.at(parent);
+      std::shared_ptr<TreeNode> newNode(new TreeNode(name, inter, strat, parentNode));
+      nodes_.insert(std::pair<std::string, std::shared_ptr<TreeNode> >(name,newNode));
+      newNode->linkParents();
+	}
   }
 
   //! Create a leaf for the FcnTree
@@ -171,6 +182,40 @@ public:
       nodes_.insert(std::pair<std::string, std::shared_ptr<TreeNode> >(name,leaf));
       leaf->linkParents();
       extPar->Attach(leaf);
+    }
+  }
+
+  //! Create a leaf for the FcnTree with higher dimension
+   /*!
+    * Create and add a node to the function tree if not existing yet
+    * Adds Top-Down-Linking to the node
+    * Attaches the Node as Observer to the external parameter
+    * \param name identifier of node
+    * \param extPar list of parameters this node represents
+    * \param parent the parent of this node (for linking)
+    * \sa addNode(), createHead(), createNode()
+   */
+  virtual void createLeaf(const std::string name, std::vector<std::shared_ptr<AbsParameter>>& extPar, std::string parent){
+    std::shared_ptr<TreeNode> parentNode = nodes_.at(parent);
+    std::shared_ptr<TreeNode> leaf;
+
+    //check if Leaf already exists
+    bool exists = true;
+    if ( nodes_.find( name ) == nodes_.end() ) {
+      exists=false;
+    } else {
+      leaf = nodes_.at(name);
+    }
+
+    //setup connections
+    if(exists){
+      leaf->addParent(parentNode);
+    }else{
+      leaf = std::shared_ptr<TreeNode>(new TreeNode(name, extPar, std::shared_ptr<Strategy>() , parentNode));
+      nodes_.insert(std::pair<std::string, std::shared_ptr<TreeNode> >(name,leaf));
+      leaf->linkParents();
+      for(unsigned int i=0; i<extPar.size(); i++)
+        extPar[i]->Attach(leaf);
     }
   }
 

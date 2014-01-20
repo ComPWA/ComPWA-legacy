@@ -1,6 +1,7 @@
 <amplitude_setup>
     <filename>JPSI_ypipi.xml</filename>
        <resonance>
+       <enable>true</enable>
        <name>f0_980</name>
        <type>relBW</type>
        <reference>f0_980</reference>
@@ -24,6 +25,7 @@
        <daugtherB>3</daugtherB>
     </resonance>
     <resonance>
+       <enable>true</enable>
        <name>f0_1500</name>
        <type>relBW</type>
        <reference>f0_1500</reference>
@@ -47,6 +49,7 @@
        <daugtherB>3</daugtherB>
     </resonance>
     <resonance>
+       <enable>true</enable>
        <name>f0_1710</name>
        <type>relBW</type>
        <reference>f0_1710</reference>
@@ -70,6 +73,7 @@
        <daugtherB>3</daugtherB>
     </resonance>
     <resonance>
+       <enable>true</enable>
        <name>f2_1270</name>
        <type>relBW</type>
        <reference>f2_1270</reference>
@@ -93,6 +97,7 @@
        <daugtherB>3</daugtherB>
     </resonance>
     <resonance>
+       <enable>true</enable>
        <name>f2_1525</name>
        <type>relBW</type>
        <reference>f2_1525</reference>
@@ -116,6 +121,7 @@
        <daugtherB>3</daugtherB>
     </resonance>
     <resonance>
+       <enable>true</enable>
        <name>omega</name>
        <type>relBW</type>
        <reference>omega</reference>
@@ -139,6 +145,7 @@
        <daugtherB>2</daugtherB>
     </resonance>
     <resonance>
+       <enable>true</enable>
        <name>omega</name>
        <type>relBW</type>
        <reference>omega</reference>
