@@ -222,5 +222,6 @@ double MinLogLH::controlParameter(ParameterList& minPar){
 
 	//std::cout << "ControlPar list " << minPar.GetNDouble() <<std::endl;
 
+	if(lh>0) BOOST_LOG_TRIVIAL(error) << "MinLogLH: positive -log(L)!";
 	return lh;
 }

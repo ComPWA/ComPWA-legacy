@@ -41,10 +41,9 @@ int main(int argc, char **argv){
 	std::shared_ptr<Data> data(new RootReader(outFile, true,"lalelu",false));
 	std::shared_ptr<Generator> gen(new RootGenerator());
 	std::shared_ptr<Amplitude> amp(new AmpSumIntensity(ini,std::shared_ptr<Efficiency>(new UnitEfficiency()),dataSize,AmpSumIntensity::normStyle::one));
-	std::shared_ptr<Efficiency> eff(new UnitEfficiency());
 
 
-	RunManager run(dataSize,amp,eff,gen);
+	RunManager run(dataSize,amp,gen);
 	run.setData(data);
 	run.generate(dataSize);
 	std::cout<<"Data size: "<<data->getNEvents()<<std::endl;

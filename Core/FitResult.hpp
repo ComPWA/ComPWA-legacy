@@ -31,10 +31,12 @@
 #include <memory>
 #include <boost/numeric/ublas/symmetric.hpp>
 #include <boost/numeric/ublas/io.hpp>
+#include <boost/log/trivial.hpp>
 
 #include "Core/ParameterList.hpp"
 #include "Core/TableFormater.hpp"
 #include "Core/PhysConst.hpp"
+using namespace boost::log;
 
 class FitResult
 {
@@ -48,7 +50,12 @@ public:
 	virtual double getResult() =0;
 
 	//output
-	virtual void print(){ genOutput(std::cout); };
+	virtual void print(){
+		std::stringstream s;
+		genOutput(s);
+		std::string str = s.str();
+		BOOST_LOG_TRIVIAL(info) << str;
+	};
 	virtual void writeTex(std::string filename) {};
 	virtual void writeText(std::string filename) ;
 	virtual operator double() const =0;

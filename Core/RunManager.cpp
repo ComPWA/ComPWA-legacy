@@ -41,25 +41,23 @@
 using namespace boost::log;
 
 RunManager::RunManager(std::shared_ptr<Data> inD, std::shared_ptr<Amplitude> inP,
-		std::shared_ptr<Optimizer> inO, std::shared_ptr<Efficiency> eff)
-: eff_(eff), pData_(inD), pPhys_(inP), pOpti_(inO), success_(false),
+		std::shared_ptr<Optimizer> inO)
+: pData_(inD), pPhys_(inP), pOpti_(inO), success_(false),
   validSize(0),validAmplitude(0),validData(0),validOptimizer(0)
 {
 	setSize(inD->getNEvents());
-	if(eff && inD && inP && inO){
-		validEfficiency=1;
+	if(inD && inP && inO){
 		validAmplitude=1;
 		validData=1;
 		validOptimizer=1;
 	}
 }
 RunManager::RunManager( unsigned int size, std::shared_ptr<Amplitude> inP,
-		std::shared_ptr<Efficiency> eff, std::shared_ptr<Generator> gen)
-: gen_(gen), eff_(eff), size_(size), pPhys_(inP), success_(false),
+		std::shared_ptr<Generator> gen)
+: gen_(gen), size_(size), pPhys_(inP), success_(false),
   validSize(0),validAmplitude(0),validData(0),validOptimizer(0)
 {
-	if(inP && eff){
-		validEfficiency=1;
+	if(inP ){
 		validAmplitude=1;
 	}
 	validSize=1;
@@ -70,7 +68,7 @@ RunManager::~RunManager(){
 }
 
 std::shared_ptr<FitResult> RunManager::startFit(ParameterList& inPar){
-	if( !(validEfficiency==1 && validAmplitude==1 && validData==1 && validOptimizer==1) ){
+	if( !(validAmplitude==1 && validData==1 && validOptimizer==1) ){
 		BOOST_LOG_TRIVIAL(error) << "RunManager: startFit() requirements not fulfilled!";
 		return std::shared_ptr<FitResult>();
 	}
@@ -87,7 +85,7 @@ std::shared_ptr<FitResult> RunManager::startFit(ParameterList& inPar){
 }
 bool RunManager::generate( unsigned int number ) {
 	if(number>0) setSize(number);
-	if( !(validData && validEfficiency && validAmplitude && validSize && validGenerator) ){
+	if( !(validData && validAmplitude && validSize && validGenerator) ){
 		BOOST_LOG_TRIVIAL(error)<<"RunManager: generate() requirements not fulfilled";
 		return false;
 	}
@@ -142,7 +140,6 @@ bool RunManager::generate( unsigned int number ) {
 //			x.push_back(m13sq);
 //			std::cout<<point.getVal("m23sq")<<" "<<x[0]<< " "<<point.getVal("m13sq")<<" "<<x[1]<<std::endl;
 			dataPoint point(tmp);
-			double eff  = eff_->evaluate(point);
 
 			double ampRnd = uni2()*genMaxVal;
 			ParameterList list;
@@ -150,9 +147,9 @@ bool RunManager::generate( unsigned int number ) {
 			{
 				list = pPhys_->intensity(point,minPar);//unfortunatly not thread safe
 				AMPpdf = *list.GetDoubleParameter(0);
-				if( maxTest < (AMPpdf*weight*eff)) maxTest = eff*weight*AMPpdf;
+				if( maxTest < (AMPpdf*weight)) maxTest = weight*AMPpdf;
 			}
-			if( ampRnd > (weight*AMPpdf*eff) ) continue;
+			if( ampRnd > (weight*AMPpdf) ) continue;
 			i++;
 #pragma omp critical
 			{
@@ -161,9 +158,8 @@ bool RunManager::generate( unsigned int number ) {
 			++progressBar;//progress bar
 		}
 	}
-	std::cout<<std::endl;
-	BOOST_LOG_TRIVIAL(info)<<"Max value used in generation: "<<maxTest;
-	BOOST_LOG_TRIVIAL(info)<<"Efficiency of toy MC generation: "<<(double)size_/totalCalls;
+	BOOST_LOG_TRIVIAL(info) << "Max value used in generation: "<<maxTest;
+	BOOST_LOG_TRIVIAL(info) << "Efficiency of toy MC generation: "<<(double)size_/totalCalls;
 	BOOST_LOG_TRIVIAL(info) << "RunManager: generate time="<<(clock()-startTime)/CLOCKS_PER_SEC/60<<"min.";
 
 	if( maxTest > (double) (0.9*genMaxVal) ) {
@@ -178,7 +174,7 @@ bool RunManager::generate( unsigned int number ) {
 	return true;
 };
 bool RunManager::generatePhsp( unsigned int number ) {
-	if( !(validPhsp==1 && validEfficiency==1&& validSize==1) )
+	if( !(validPhsp==1 && validSize==1) )
 		return false;
 	unsigned int phspSize = 10*size_;
 	if(number>0) phspSize = number;
@@ -202,6 +198,5 @@ bool RunManager::generatePhsp( unsigned int number ) {
 //			++progressBar;//progress bar
 		}
 	}
-	std::cout<<std::endl;
 	return true;
 };
