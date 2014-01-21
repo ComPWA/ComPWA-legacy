@@ -46,14 +46,26 @@ public:
 	};
 	//	friend std::ostream& operator<< (std::ostream &out, FitResult &fitres){ out<<fitres.finalLH; return out;};
 	TableFormater& operator<<(DoubleParameter in){
+		std::stringstream errStr;
 		*out << "| ";
 		if(in.HasError()){
-			unsigned int halfWidth = (unsigned int)(columnWidth[curCol]-2)/2;
-//			std::cout<<"111 "<<halfWidth<<std::endl;
-			*out << std::setw(halfWidth) << in.GetValue() << "+-";
-			*out << std::setw(halfWidth) << in.GetError() << " ";
+			if(in.GetErrorType()==ErrorType::SYM){
+				unsigned int halfWidth = (unsigned int)(columnWidth[curCol]-5)/2;//divide column width
+				*out << std::setw(halfWidth) << in.GetValue();
+				*out << " +- ";
+				*out << std::setw(halfWidth) << *in.GetError() << " ";
+			}
+			if(in.GetErrorType()==ErrorType::ASYM){
+				unsigned int w = (unsigned int)(columnWidth[curCol]-6)/3;//take 1/3 of column width
+				std::shared_ptr<ParError<double>> err = in.GetError();
+				*out << std::setw(w) << in.GetValue() ;
+				*out << " +";
+				*out << std::setw(w) << err->GetErrorHigh();
+				*out << " -";
+				*out << std::setw(w) << err->GetErrorHigh();
+			}
 		} else {
-//			std::cout<<"131 "<<std::endl;
+			//			std::cout<<"131 "<<std::endl;
 			*out << std::setw(columnWidth[curCol]) << in.GetValue() << " ";
 		}
 		curCol++;

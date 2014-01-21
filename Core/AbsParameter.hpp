@@ -19,7 +19,7 @@
  * this class takes over the role of the Subject. Therefore the actual
  * implementations of AbsParameter are the ConcreteSubjects of the
  * observer pattern and the TreeNodes take the role of the observers.
-*/
+ */
 
 #ifndef _ABSPARAMETER_HPP_
 #define _ABSPARAMETER_HPP_
@@ -30,8 +30,94 @@
 #include <memory>
 #include <algorithm>
 #include "Core/ParObserver.hpp"
+#include <fstream>
+#include <boost/serialization/string.hpp>
+#include <boost/serialization/map.hpp>
+#include <boost/archive/xml_oarchive.hpp>
+#include <boost/archive/xml_iarchive.hpp>
+#include <boost/serialization/nvp.hpp>
+#include <boost/serialization/shared_ptr.hpp>
 
 enum ParType { COMPLEX = 1, DOUBLE = 2, INTEGER = 3, BOOL = 4, UNDEFINED = 0};
+enum ErrorType { SYM = 1, ASYM = 2, LHSCAN = 3, NOTDEF = 0};
+
+template <class T> class ParError
+{
+public:
+	ParError(ErrorType t=ErrorType::NOTDEF) : type(t){};
+	virtual ~ParError() {};
+	virtual ErrorType GetType() { return type; };
+	virtual T GetError() =0;
+	virtual T GetErrorLow() =0;
+	virtual T GetErrorHigh() =0;
+	operator T() { return GetError(); }
+private:
+	ErrorType type;
+	friend class boost::serialization::access;
+	template<class archive>
+	void serialize(archive& ar, const unsigned int version)
+	{
+		ar & BOOST_SERIALIZATION_NVP(type);
+	}
+
+};
+BOOST_CLASS_TRACKING(ParError<double>, boost::serialization::track_always)
+BOOST_SERIALIZATION_ASSUME_ABSTRACT(ParError);
+
+template <class T> class SymError : public ParError<T>
+{
+public:
+	SymError() : ParError<T>(ErrorType::SYM), error(0){};
+	SymError(T val) : ParError<T>(ErrorType::SYM), error(val){};
+	virtual T GetError() {return error;}
+	friend std::ostream& operator<<( std::ostream& out, const SymError& b ){
+		return out << "+-" << GetError();
+	}
+
+private:
+	virtual T GetErrorLow() { return error; };
+	virtual T GetErrorHigh() { return error; };
+	T error;
+	friend class boost::serialization::access;
+	template<class archive>
+	void serialize(archive& ar, const unsigned int version)
+	{
+		ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(ParError<T>);
+//		ar & boost::serialization::base_object<ParError>(*this);
+		ar & BOOST_SERIALIZATION_NVP(error);
+	}
+
+};
+BOOST_CLASS_IMPLEMENTATION(SymError<double>,boost::serialization::object_serializable);
+
+template <class T> class AsymError : public ParError<T>
+{
+public:
+	AsymError() : ParError<T>(ErrorType::ASYM), error(std::pair<T,T>(0,0)){};
+	AsymError(std::pair<T,T> val) : ParError<T>(ErrorType::ASYM), error(val){};
+	virtual T GetError() {return (error.first+error.second)/2;}
+	virtual T GetErrorLow() {
+		if(error.first<0) return (-1)*error.first;
+		return error.first;
+	}
+	virtual T GetErrorHigh() {return error.second;}
+	virtual std::pair<T,T> GetLowHigh() {return error;}
+	friend std::ostream& operator<<( std::ostream& out, const AsymError& b ){
+		return out << "+" << GetErrorHigh() << "-"<<GetErrorLow();
+	}
+
+private:
+	std::pair<T,T> error;
+	friend class boost::serialization::access;
+	template<class archive>
+	void serialize(archive& ar, const unsigned int version)
+	{
+		ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(ParError<T>);
+//		ar & boost::serialization::base_object<ParError>(*this);
+		ar & BOOST_SERIALIZATION_NVP(error);
+	}
+};
+BOOST_CLASS_IMPLEMENTATION(AsymError<double> , boost::serialization::object_serializable);
 
 class AbsParameter //: public std::enable_shared_from_this<AbsParameter>
 {
@@ -132,15 +218,30 @@ public:
   }
 
 protected:
-  std::string out_; /*!< Output string to print information */
-  std::string outVal_; /*!< Output string to print only value */
-  std::string name_; /*!< internal name of the parameter */
-  ParType type_; /*!< ParType enum for type of parameter */
+	std::string out_; /*!< Output string to print information */
+	std::string outVal_; /*!< Output string to print only value */
+	std::string name_; /*!< internal name of the parameter */
+	ParType type_; /*!< ParType enum for type of parameter */
+	//  ParError error_;
+	//  bool hasError_; /*!< Is an error defined for this parameter? */
 
-  std::vector<std::shared_ptr<ParObserver> > oberservingNodes; /*!< list of observers, e.g. TreeNodes */
+	std::vector<std::shared_ptr<ParObserver> > oberservingNodes; /*!< list of observers, e.g. TreeNodes */
 
-  //! Interface to fill output string, to be implemented by parameter implementations
-  virtual void make_str() =0;
+	//! Interface to fill output string, to be implemented by parameter implementations
+	virtual void make_str() =0;
+private:
+
+	friend class boost::serialization::access;
+	template<class archive>
+	void serialize(archive& ar, const unsigned int version)
+	{
+		ar & BOOST_SERIALIZATION_NVP(type_);
+		ar & BOOST_SERIALIZATION_NVP(name_);
+		ar & BOOST_SERIALIZATION_NVP(outVal_);
+		ar & BOOST_SERIALIZATION_NVP(out_);
+	}
+
 };
+BOOST_SERIALIZATION_ASSUME_ABSTRACT(AbsParameter);
 
 #endif

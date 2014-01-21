@@ -111,7 +111,7 @@ public:
 	}else{
       std::vector<std::shared_ptr<AbsParameter>> inter;
       for(unsigned int i=0; i<dim; i++)
-    	  inter.push_back(std::shared_ptr<DoubleParameter>(new DoubleParameter("par"+name+"_d"+std::to_string(i),0.)));
+    	  inter.push_back(std::shared_ptr<DoubleParameter>(new DoubleParameter("par"+name+"_d"+std::to_string((long long unsigned int)i),0.)));
       std::shared_ptr<TreeNode> parentNode = nodes_.at(parent);
       std::shared_ptr<TreeNode> newNode(new TreeNode(name, inter, strat, parentNode));
       nodes_.insert(std::pair<std::string, std::shared_ptr<TreeNode> >(name,newNode));

@@ -365,8 +365,8 @@ void AmpSumIntensity::printAmps(){
 	BOOST_LOG_TRIVIAL(info)<<"AmpSumIntensity: Printing amplitudes with current(!) set of parameters:";
 	for(unsigned int i=0;i<nAmps;i++){
 		BOOST_LOG_TRIVIAL(info) << namer[i]<<":"
-				<<" Amplitude: "<<rr[i]->GetValue()<<"+-"<<rr[i]->GetError()
-				<<"	Phase: "<<phir[i]->GetValue()<<"+-"<<phir[i]->GetError();
+				<<" Amplitude: "<<rr[i]->GetValue()<<"+-"<<rr[i]->GetError()->GetError()
+				<<"	Phase: "<<phir[i]->GetValue()<<"+-"<<phir[i]->GetError()->GetError();
 	}
 	return;
 }

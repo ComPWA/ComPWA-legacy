@@ -1,0 +1,9 @@
+<strat class_id="0" tracking_level="0" version="0">
+	<fGradNCyc>3</fGradNCyc>
+	<fGradTlrStp>0.29999999999999999</fGradTlrStp>
+	<fGradTlr>0.050000000000000003</fGradTlr>
+	<fHessNCyc>5</fHessNCyc>
+	<fHessTlrStp>0.29999999999999999</fHessTlrStp>
+	<fHessTlrG2>0.050000000000000003</fHessTlrG2>
+	<fHessGradNCyc>2</fHessGradNCyc>
+</strat>

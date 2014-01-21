@@ -96,7 +96,7 @@ void PhysConst::readFile(){
 		J.push_back(_J);
 		P.push_back(_P);
 		C.push_back(_C);
-		BOOST_LOG_TRIVIAL(debug)<<"PhysConst adding particle: "<<_name<<" mass="<<_mass<<" width="<<_width<<" J=" <<_J<<" P="<<_P<< " C="<<_C<<std::endl;
+		BOOST_LOG_TRIVIAL(debug)<<"PhysConst adding particle: "<<_name<<" mass="<<_mass<<" width="<<_width<<" J=" <<_J<<" P="<<_P<< " C="<<_C;
 	}
 
 	read_xml(constantFileName, pt);
@@ -111,7 +111,7 @@ void PhysConst::readFile(){
 		nameConst.push_back(_name);
 		valueConst.push_back(_value);
 		errorConst.push_back(_error);
-		BOOST_LOG_TRIVIAL(debug)<<"PhysConst adding particle: "<<_name<<" mass="<<_mass<<" width="<<_width<<" J=" <<_J<<" P="<<_P<< " C="<<_C<<std::endl;
+		BOOST_LOG_TRIVIAL(debug)<<"PhysConst adding particle: "<<_name<<" mass="<<_mass<<" width="<<_width<<" J=" <<_J<<" P="<<_P<< " C="<<_C;
 	}
 
 	flag_readFile=0;

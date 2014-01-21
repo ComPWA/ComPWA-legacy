@@ -97,11 +97,8 @@ class RunManager
 public:
 
 	RunManager() {};
-	RunManager( std::shared_ptr<Data>, std::shared_ptr<Amplitude>, std::shared_ptr<Optimizer>,
-			std::shared_ptr<Efficiency>); //Fit
-
-	RunManager( unsigned int size, std::shared_ptr<Amplitude>, std::shared_ptr<Efficiency>,
-			std::shared_ptr<Generator>); //Generate
+	RunManager( std::shared_ptr<Data>, std::shared_ptr<Amplitude>, std::shared_ptr<Optimizer>); //Fit
+	RunManager( unsigned int size, std::shared_ptr<Amplitude>, std::shared_ptr<Generator>); //Generate
 
 	virtual ~RunManager();
 
@@ -112,7 +109,6 @@ public:
 	virtual void setPhspSample( std::shared_ptr<Data> d){ phspSample_ = d; validPhsp=1; };
 	virtual void setAmplitude ( std::shared_ptr<Amplitude> d){ pPhys_ = d; validAmplitude=1; };
 	virtual void setOptimizer ( std::shared_ptr<Optimizer> d){ pOpti_ = d; validOptimizer=1; };
-	virtual void setEfficiency( std::shared_ptr<Efficiency> d){ eff_= d; validEfficiency=1; };
 	virtual void setGenerator( std::shared_ptr<Generator> d){ gen_= d; validGenerator=1; };
 
 	virtual std::shared_ptr<FitResult> startFit( ParameterList& );
@@ -125,14 +121,12 @@ protected:
 	bool validAmplitude;
 	bool validOptimizer;
 	bool validSize;
-	bool validEfficiency;
 	bool validGenerator;
 
 	std::shared_ptr<Data> pData_; /*!< Pointer to Data-Module */
 	std::shared_ptr<Data> phspSample_; /*!< Pointer to Data-Module */
 	std::shared_ptr<Amplitude> pPhys_; /*!< Pointer to Physics-Module */
 	std::shared_ptr<Optimizer> pOpti_; /*!< Pointer to Optimizer-Module */
-	std::shared_ptr<Efficiency> eff_; /*!< Pointer to Optimizer-Module */
 	std::shared_ptr<Generator> gen_; /*!< Pointer to Optimizer-Module */
 	std::shared_ptr<Generator> getGen(){ return gen_;};
 	//TODO: log

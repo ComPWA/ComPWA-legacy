@@ -43,11 +43,9 @@ void MinuitResult::init(FunctionMinimum min){
 		for (unsigned i = 0; i < covMatrix.size1 (); ++ i)
 			for (unsigned j = i; j < covMatrix.size2 (); ++ j){
 				double denom = variance[i]*variance[j];
-				corrMatrix(i,j)=sqrt(covMatrix(i,j)/denom);
+				corrMatrix(i,j) = covMatrix(i,j)/denom;
 			}
 	} else BOOST_LOG_TRIVIAL(error)<<"MinuitResult: no valid correlation matrix available!";
-	std::cout << covMatrix << std::endl;
-	std::cout << corrMatrix << std::endl;
 	cov=covMatrix;
 	corr=corrMatrix;
 	finalLH = minState.Fval();
@@ -88,7 +86,7 @@ void MinuitResult::genOutput(std::ostream& out){
 	tableResult.addColumn("Nr");
 	tableResult.addColumn("Name",15);
 	tableResult.addColumn("Initial Value",20);
-	tableResult.addColumn("Final Value",20);
+	tableResult.addColumn("Final Value",30);
 	if(printTrue) tableResult.addColumn("True Value",10);
 	if(printTrue) tableResult.addColumn("true-final/error",16);
 	tableResult.header();
@@ -101,7 +99,7 @@ void MinuitResult::genOutput(std::ostream& out){
 		if(iniPar->GetName().find("phi")!=string::npos) isAngle=1;//is our Parameter an angle?
 		if(isAngle && !isFixed) outPar->SetValue( shiftAngle(outPar->GetValue()) ); //shift angle to the interval [-pi;pi]
 
-		tableResult << o << iniPar->GetName() << *iniPar ;// |nr.| name| inital| value|
+		tableResult << o << iniPar->GetName() << *iniPar ;// |nr.| name| inital value|
 		if(isFixed) tableResult<<"FIXED";
 		else {
 			tableResult << *outPar;//final value
@@ -114,7 +112,7 @@ void MinuitResult::genOutput(std::ostream& out){
 				continue;
 			}
 			tableResult << *truePar;
-			tableResult << (truePar->GetValue()-outPar->GetValue() )/outPar->GetError();
+			tableResult << (truePar->GetValue()-outPar->GetValue() )/ *outPar->GetError();
 		}
 	}
 	tableResult.footer();
@@ -134,7 +132,8 @@ void MinuitResult::genOutput(std::ostream& out){
 			tableCov << ppp->GetName();
 			for(unsigned int t=0;t<cov.size1();t++) {
 				if(n>=cov.size2()) { tableCov<< " "; continue; }
-				tableCov << cov(n,t);
+				if(t>=n)tableCov << cov(n,t);
+				else tableCov << "";
 			}
 			n++;
 		}
@@ -150,7 +149,8 @@ void MinuitResult::genOutput(std::ostream& out){
 			tableCov << ppp->GetName();
 			for(unsigned int t=0;t<corr.size1();t++) {
 				if(n>=corr.size2()) { tableCov<< " "; continue; }
-				tableCov << corr(n,t);
+				if(t>=n)tableCov << corr(n,t);
+				else tableCov << "";
 			}
 			n++;
 		}
