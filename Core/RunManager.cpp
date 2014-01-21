@@ -99,7 +99,7 @@ bool RunManager::generate( unsigned int number ) {
 
 	//Determing an estimate on the maximum of the physics amplitude using 20k events.
 	//	double genMaxVal=2*pPhys_->getMaxVal();
-	double genMaxVal=pPhys_->getMaxVal();
+	double genMaxVal=pPhys_->getMaxVal(gen_);
 
 	double maxTest=0;
 	unsigned int totalCalls=0;
@@ -114,11 +114,8 @@ bool RunManager::generate( unsigned int number ) {
 		unsigned int numThreads = omp_get_num_threads();
 
 		Generator* genNew = (&(*gen_))->Clone();//copy generator for every thread
+		BOOST_LOG_TRIVIAL(debug) << "Current seed: "<<genNew->getSeed();
 		//		genNew->setSeed(std::clock()+threadId);//setting the seed here makes not sense in cast that TGenPhaseSpace is used, because it uses gRandom
-		//initialize random number generator
-		boost::minstd_rand rndGen2(std::clock()+threadId);//TODO: is this seed thread safe?
-		boost::uniform_real<> uni_dist2(0,1);
-		boost::variate_generator<boost::minstd_rand&, boost::uniform_real<> > uni2(rndGen2, uni_dist2);
 		double AMPpdf;
 
 #pragma omp for
@@ -141,7 +138,7 @@ bool RunManager::generate( unsigned int number ) {
 //			std::cout<<point.getVal("m23sq")<<" "<<x[0]<< " "<<point.getVal("m13sq")<<" "<<x[1]<<std::endl;
 			dataPoint point(tmp);
 
-			double ampRnd = uni2()*genMaxVal;
+			double ampRnd = genNew->getUniform()*genMaxVal;
 			ParameterList list;
 #pragma omp critical
 			{
@@ -157,6 +154,7 @@ bool RunManager::generate( unsigned int number ) {
 			}
 			++progressBar;//progress bar
 		}
+	BOOST_LOG_TRIVIAL(debug) << "Current seed: "<<genNew->getSeed();
 	}
 	BOOST_LOG_TRIVIAL(info) << "Max value used in generation: "<<maxTest;
 	BOOST_LOG_TRIVIAL(info) << "Efficiency of toy MC generation: "<<(double)size_/totalCalls;
@@ -186,6 +184,7 @@ bool RunManager::generatePhsp( unsigned int number ) {
 	{
 		Generator* genNew = (&(*gen_))->Clone();//copy generator for every thread
 		//		genNew->setSeed(std::clock()+threadId);//setting the seed here makes not sense in cast that TGenPhaseSpace is used, because it uses gRandom
+	BOOST_LOG_TRIVIAL(debug) << "Current seed: "<<genNew->getSeed();
 
 #pragma omp for
 		for(unsigned int i=0;i<phspSize;i++){
@@ -197,6 +196,7 @@ bool RunManager::generatePhsp( unsigned int number ) {
 			}
 //			++progressBar;//progress bar
 		}
+	BOOST_LOG_TRIVIAL(debug) << "Current seed: "<<genNew->getSeed();
 	}
 	return true;
 };

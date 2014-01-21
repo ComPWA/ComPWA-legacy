@@ -32,7 +32,9 @@ class RootGenerator : public Generator {
 private:
 	TGenPhaseSpace event;
 public:
-	RootGenerator(){
+	RootGenerator(int seed=-1){
+		gRandom = new TRandom3(0);
+		if(seed!=-1) setSeed(seed);
 		DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
 		//Generation
 		TLorentzVector W(0.0, 0.0, 0.0, kin->getMass(0));//= beam + target;
@@ -68,6 +70,9 @@ public:
 	}
 
 	unsigned int getSeed() { return gRandom->GetSeed(); }
+	double getUniform(){
+		return gRandom->Uniform(0,1);
+	}
 };
 
 

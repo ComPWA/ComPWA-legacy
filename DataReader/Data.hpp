@@ -25,8 +25,10 @@
 
 #include <vector>
 #include <string>
+#include <memory>
 
 #include "Core/Event.hpp"
+#include "Core/Generator.hpp"
 
 class Data
 {
@@ -50,6 +52,7 @@ public:
   virtual const unsigned int getNEvents() const =0;
   virtual const unsigned int getNBins() const =0;
 
+  virtual std::shared_ptr<Data> rndSubSet(unsigned int size, std::shared_ptr<Generator> gen) = 0;
 };
 
 #endif

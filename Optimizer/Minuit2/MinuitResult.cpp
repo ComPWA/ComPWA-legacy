@@ -37,8 +37,12 @@ void MinuitResult::init(FunctionMinimum min){
 				 */
 				unsigned int vecPos = j;
 				for(unsigned int t=1;t<=i;t++) vecPos+=dim-t;
-				covMatrix (i, j) = minuitCovM[vecPos];
-				if(i==j) variance.push_back(sqrt(minuitCovM[vecPos]));
+				double entry = minuitCovM[vecPos];
+				covMatrix (i, j) = entry;
+				if(i==j){
+					if(entry<0) variance.push_back(sqrt((-1)*entry));
+					else variance.push_back(sqrt(entry));
+				}
 			}
 		for (unsigned i = 0; i < covMatrix.size1 (); ++ i)
 			for (unsigned j = i; j < covMatrix.size2 (); ++ j){

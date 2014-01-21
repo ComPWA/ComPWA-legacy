@@ -37,6 +37,7 @@
 #include "Physics/DPKinematics/DalitzKinematics.hpp"
 #include "Core/Efficiency.hpp"
 #include "Core/DataPoint.hpp"
+#include "Core/Generator.hpp"
 
 class AmpSumIntensity : public Amplitude {
 
@@ -63,10 +64,10 @@ public:
 	//! normalization integral
 	virtual const double integral();
 	//! maximum value of amplitude with parameters \par
-	virtual double getMaxVal();
-	virtual double getMaxVal(ParameterList& par);
-	virtual void calcMaxVal(ParameterList& par);
-	virtual void calcMaxVal();
+	virtual double getMaxVal( std::shared_ptr<Generator> gen);
+	virtual double getMaxVal(ParameterList& par, std::shared_ptr<Generator> gen);
+	virtual void calcMaxVal(ParameterList& par ,std::shared_ptr<Generator> gen);
+	virtual void calcMaxVal( std::shared_ptr<Generator> gen);
 
 	virtual void setNevents(unsigned int n) { _entries=n; };
 	virtual unsigned int getNevents() { return _entries; };
