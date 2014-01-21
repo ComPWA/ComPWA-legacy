@@ -70,7 +70,7 @@ void AmpSumOfAmplitudes::addBW(std::shared_ptr<AmpAbsDynamicalFunction> theRes ,
 double AmpSumOfAmplitudes::evaluate(dataPoint& point) const
  { 
 //   RooComplex res;
-   complex<double> res;
+   std::complex<double> res;
    //std::cout << "res = \t" << res.abs2() << std::endl;
 
    //std::cout << "PDFs: ";

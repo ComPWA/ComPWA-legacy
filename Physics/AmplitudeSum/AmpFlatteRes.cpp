@@ -78,7 +78,7 @@ void AmpFlatteRes::setBarrierMass(double mBarA, double mBarB) {
 	_massHiddenChannelB = mBarB;
 }
 
-std::complex<double> AmpFlatteRes::evaluateAmp(dataPoint& point) const {
+std::complex<double> AmpFlatteRes::evaluateAmp(dataPoint& point) {
 	if(_massHiddenChannelA<0||_massHiddenChannelA>5||_massHiddenChannelB<0||_massHiddenChannelB>5) {
 		cout<<"Barrier masses not set! Use setBarrierMass() first!"<<endl;
 		return 0;
@@ -114,7 +114,7 @@ std::complex<double> AmpFlatteRes::evaluateAmp(dataPoint& point) const {
 	return result;
 
 }
-std::complex<double> AmpFlatteRes::evaluate(dataPoint& point) const {
+std::complex<double> AmpFlatteRes::evaluate(dataPoint& point) {
 	unsigned int twoJplusOne = (2*_spin+1);
 	return evaluateAmp(point)*evaluateWignerD(point)*(double)twoJplusOne;
 }

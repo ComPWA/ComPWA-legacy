@@ -79,6 +79,8 @@ AmpSumIntensity::AmpSumIntensity(const double inM, const double inBr, const doub
 }
 
 void AmpSumIntensity::init(){
+	result.AddParameter(std::shared_ptr<DoubleParameter>(new DoubleParameter("AmpSumResult")));
+
 	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
 	if(_dpArea==-999) _dpArea = kin->getDParea();
 	BOOST_LOG_TRIVIAL(debug)<<"AmpSumIntensity::init() number of Entries in dalitz plot set to: "<<_entries;
@@ -306,16 +308,16 @@ const double AmpSumIntensity::integral(){
 
 	return res;
 }
-const ParameterList AmpSumIntensity::intensity(std::vector<double> point, ParameterList& par){
+const ParameterList& AmpSumIntensity::intensity(std::vector<double> point, ParameterList& par){
 	setParameterList(par);
 	dataPoint dataP; dataP.setVal("m23sq",point[0]); dataP.setVal("m13sq",point[1]);
 	return intensity(dataP);
 }
-const ParameterList AmpSumIntensity::intensity(dataPoint& point, ParameterList& par){
+const ParameterList& AmpSumIntensity::intensity(dataPoint& point, ParameterList& par){
 	setParameterList(par);
 	return intensity(point);
 }
-const ParameterList AmpSumIntensity::intensity(dataPoint& point){
+const ParameterList& AmpSumIntensity::intensity(dataPoint& point){
 	//	std::cout<<dataPoint::instance()->getMsq(2,3)<<" "<<dataPoint::instance()->getMsq(1,3)<<" "<<dataPoint::instance()->getMsq(1,2)<<std::endl;
 	double AMPpdf = totAmp.evaluate(point);
 	if(AMPpdf!=AMPpdf){
@@ -323,8 +325,9 @@ const ParameterList AmpSumIntensity::intensity(dataPoint& point){
 		exit(1);
 	}
 	double eff=eff_->evaluate(point);
-	ParameterList result;
-	result.AddParameter(std::shared_ptr<DoubleParameter>(new DoubleParameter("AmpSumResult",AMPpdf*eff)));
+	//ParameterList result;
+	//result.AddParameter(std::shared_ptr<DoubleParameter>(new DoubleParameter("AmpSumResult",AMPpdf*eff)));
+	result.SetParameterValue(0,AMPpdf*eff);
 	return result;
 }
 std::shared_ptr<FunctionTree> AmpSumIntensity::functionTree(ParameterList& outPar) {
