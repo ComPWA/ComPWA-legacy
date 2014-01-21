@@ -12,6 +12,7 @@ project :
 	<define>BOOST_LOG_DYN_LINK
 	<cxxflags>-ftemplate-depth-256
 	<cxxflags>-std=c++0x
+	<linkflags>-pg
 	<linkflags>-lgomp
 	<warnings>off
 	;

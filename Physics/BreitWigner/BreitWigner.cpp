@@ -20,6 +20,7 @@
 using namespace std;
 
 BreitWigner::BreitWigner(const double min, const double max):min_(min),max_(max) {
+	result.AddParameter(std::shared_ptr<DoubleParameter>(new DoubleParameter("BreitWignerResult")));
 	//_myFcn = new MIMinuitFcn(theData);
 }
 
@@ -51,23 +52,25 @@ const double BreitWigner::drawInt(double* x, double *p){
 	return p[2]*BreitWignerValue(x[0], p[0], p[1]);
 }
 
-const ParameterList BreitWigner::intensity(double x, double M, double T){
-	ParameterList result;
-	result.AddParameter(std::shared_ptr<DoubleParameter>(new DoubleParameter("BreitWignerResult",BreitWignerValue(x, M, T))));
+const ParameterList& BreitWigner::intensity(double x, double M, double T){
+	//ParameterList result;
+	//result.AddParameter(std::shared_ptr<DoubleParameter>(new DoubleParameter("BreitWignerResult",BreitWignerValue(x, M, T))));
+	result.SetParameterValue(0,BreitWignerValue(x, M, T));
 	return result;
 }
 
-const ParameterList BreitWigner::intensity(dataPoint& point){
-	ParameterList result;
+const ParameterList& BreitWigner::intensity(dataPoint& point){
+	//ParameterList result;
 	double val = BreitWignerValue(point.getVal("m23"),params.GetDoubleParameter(0)->GetValue(), params.GetDoubleParameter(1)->GetValue());
-	result.AddParameter(std::shared_ptr<DoubleParameter>(new DoubleParameter("BreitWignerResult",val)));
+	//result.AddParameter(std::shared_ptr<DoubleParameter>(new DoubleParameter("BreitWignerResult",val)));
+	result.SetParameterValue(0,val);
 	return result;
 }
-const ParameterList BreitWigner::intensity(dataPoint& point, ParameterList& par){
+const ParameterList& BreitWigner::intensity(dataPoint& point, ParameterList& par){
 	setParameterList(par);
 	return intensity(point);
 }
-const ParameterList BreitWigner::intensity(std::vector<double> x, ParameterList& par){
+const ParameterList& BreitWigner::intensity(std::vector<double> x, ParameterList& par){
 	dataPoint dataP; dataP.setVal("m23",x[0]); dataP.setVal("m13",x[1]);
 	return intensity(dataP,par);
 }

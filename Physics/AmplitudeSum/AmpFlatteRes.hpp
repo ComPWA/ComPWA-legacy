@@ -53,9 +53,9 @@ public:
 	void setBarrierMass(double, double);
 
 	virtual void initialise();
-	virtual std::complex<double> evaluate(dataPoint& point) const;
-	virtual std::complex<double> evaluateAmp(dataPoint& point) const;
-	virtual double evaluateWignerD(dataPoint& point) const { return _wignerD.evaluate(point); };
+	virtual std::complex<double> evaluate(dataPoint& point) ;
+	virtual std::complex<double> evaluateAmp(dataPoint& point) ;
+	virtual double evaluateWignerD(dataPoint& point) { return _wignerD.evaluate(point); };
 //	virtual double eval(double x[],size_t dim, void * param) const {return 0;};//used for MC integration
 
 	void setDecayMasses(double, double, double, double);

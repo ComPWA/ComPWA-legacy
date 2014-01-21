@@ -52,9 +52,9 @@ public:
 	virtual double getMaxVal() = 0;
 	//virtual const double volume() =0;
 
-	virtual const ParameterList intensity(dataPoint& point, ParameterList& par) =0;
-	virtual const ParameterList intensity(dataPoint& point) =0;
-	virtual const ParameterList intensity(std::vector<double> point, ParameterList& par) =0;
+	virtual const ParameterList& intensity(dataPoint& point, ParameterList& par) =0;
+	virtual const ParameterList& intensity(dataPoint& point) =0;
+	virtual const ParameterList& intensity(std::vector<double> point, ParameterList& par) =0;
 
 	virtual const bool fillStartParVec(ParameterList& outPar) =0;
 	virtual void setParameterList(ParameterList& par) =0;
@@ -67,6 +67,9 @@ public:
 		//if not implemented, return NULL-pointer
 		return std::shared_ptr<FunctionTree>();
 	}
+
+protected:
+	ParameterList result;
 
 
 };

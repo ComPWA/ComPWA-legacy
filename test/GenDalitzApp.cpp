@@ -55,7 +55,7 @@ using namespace boost::log;
 
 using namespace std;
 
-const unsigned int MaxEvents = 100000;
+const unsigned int MaxEvents = 100;
 
 //constants
 
@@ -280,7 +280,7 @@ int main(int argc, char **argv){
 	  BOOST_LOG_TRIVIAL(error)<<"Environment Variable COMPWA_DIR not set?"<<std::endl;
 	}
 	std::string resoFile=path+"/test/JPSI_ypipi.xml";
-	AmplitudeSetup ini(resoFile);return 0;
+	AmplitudeSetup ini(resoFile);
 	cout << "loaded file " << ini.getFileName() << " with " << ini.getResonances().size() << " resonances:" << endl;
 	for(std::vector<Resonance>::iterator reso=ini.getResonances().begin(); reso!=ini.getResonances().end(); reso++){
 		cout << endl << "Resonance " << (*reso).m_name << endl;
@@ -327,7 +327,7 @@ int main(int argc, char **argv){
 	event.SetDecay(W, 3, masses);
 
 	TLorentzVector *pGamma,*pPip,*pPim,pPm23,pPm13,pPm12;
-	double weight, m23sq, m13sq, m12sq, maxTest=0;
+	double weight, m23sq, m13sq, m12sq, maxTest=0, m12sqtest;
 	cout << "Einschwingen" << endl;
 	for(unsigned int schwing=0; schwing<10*MaxEvents; schwing++){
 		weight = event.Generate();
@@ -345,8 +345,9 @@ int main(int argc, char **argv){
 	dataPoint dataP; dataP.setVal("m23sq",m23sq);	dataP.setVal("m13sq",m13sq);
 //		point->setMsq(3,m12sq); point->setMsq(4,m13sq); point->setMsq(5,m23sq);
 		//		m12sq=M*M+m1*m1+m2*m2+m3*m3-m13sq-m23sq;
-		if( abs(m12sq-kin->getThirdVariableSq(m23sq,m13sq))>0.01 ){
-			std::cout<<m12sq<<" "<<kin->getThirdVariableSq(m23sq,m13sq)<<std::endl;
+	    m12sqtest = kin->getThirdVariableSq(m23sq,m13sq);
+		if( (m12sq-m12sqtest)>0.01 || (m12sqtest-m12sq)>0.01 ){
+			std::cout<<m12sq<<" "<<m12sqtest<<std::endl;
 			std::cout<<"   " <<m23sq<<" "<<m13sq<<" "<<m12sq<<std::endl;
 		}
 
@@ -355,8 +356,8 @@ int main(int argc, char **argv){
 //		x.push_back(sqrt(m23sq));
 //		x.push_back(sqrt(m13sq));
 //		x.push_back(sqrt(m12sq));
-		ParameterList intensL = testBW.intensity(dataP, minPar);
-		double AMPpdf = intensL.GetDoubleParameter(0)->GetValue();
+		//ParameterList intensL = testBW.intensity(dataP);
+		double AMPpdf = testBW.intensity(dataP).GetParameterValue(0);
 		//double AMPpdf = testBW.intensity(x, minPar);
 
 
@@ -400,8 +401,8 @@ int main(int argc, char **argv){
 //		x.push_back(sqrt(m23sq));
 //		x.push_back(sqrt(m13sq));
 //		x.push_back(sqrt(m12sq));
-		ParameterList intensL = testBW.intensity(dataP, minPar);
-		double AMPpdf = intensL.GetDoubleParameter(0)->GetValue();
+		//ParameterList intensL = testBW.intensity(dataP, minPar);
+		double AMPpdf = testBW.intensity(dataP).GetParameterValue(0);
 		//double AMPpdf = testBW.intensity(x, minPar);
 
 		double test = rando.Uniform(0,maxTest);

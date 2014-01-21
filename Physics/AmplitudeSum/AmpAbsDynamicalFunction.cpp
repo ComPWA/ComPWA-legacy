@@ -32,7 +32,7 @@ AmpAbsDynamicalFunction::~AmpAbsDynamicalFunction()
 {
 }
 
-double AmpAbsDynamicalFunction::evaluate(double x[], size_t dim) const {
+double AmpAbsDynamicalFunction::evaluate(double x[], size_t dim) {
 	if(dim!=2) return 0;
 	//set data point: we assume that x[0]=m13 and x[1]=m23
 //	dataPoint::instance()->setMsq(4,x[0]);

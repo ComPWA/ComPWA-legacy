@@ -61,6 +61,7 @@ public:
 
 	void setVal(std::string name, double val);
 	double getVal(std::string name) const;
+	unsigned int getID(std::string name) const;
 	void setVal(unsigned int num, double val);
 	double getVal(unsigned int num) const;
 	void setPoint(std::vector<double> values);

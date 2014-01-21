@@ -35,6 +35,17 @@ dataPoint::dataPoint(){
 	return;
 }
 
+unsigned int dataPoint::getID(std::string name) const{
+	std::vector<std::string> varNames = Kinematics::instance()->getVarNames();
+	unsigned int size = varNames.size();
+	unsigned int pos = find(varNames.begin(), varNames.end(), name) - varNames.begin();
+	if(pos<0||pos>size-1) {
+		BOOST_LOG_TRIVIAL(error)<<"dataPoint2::getVal(): variable with name "<<name<<" not found!";
+		return 999;
+	}
+	return pos;
+}
+
 double dataPoint::getVal(std::string name) const{
 	std::vector<std::string> varNames = Kinematics::instance()->getVarNames();
 	unsigned int size = varNames.size();

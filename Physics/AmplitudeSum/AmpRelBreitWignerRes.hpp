@@ -141,9 +141,9 @@ public:
 	//  double operator() (double *x, size_t dim, void*);
 
 	virtual void initialise();
-	virtual std::complex<double> evaluate(dataPoint& point) const ;
-	virtual std::complex<double> evaluateAmp(dataPoint& point) const;
-	virtual double evaluateWignerD(dataPoint& point) const { return _wignerD.evaluate(point); };
+	virtual std::complex<double> evaluate(dataPoint& point) ;
+	virtual std::complex<double> evaluateAmp(dataPoint& point);
+	virtual double evaluateWignerD(dataPoint& point) { return _wignerD.evaluate(point); };
 	//  virtual double eval(double x[],size_t dim, void *param) const;//used for MC integration
 	//  double (*eval2)(double x[],size_t dim, void *param);//used for MC integration
 
@@ -155,6 +155,8 @@ public:
 protected:
 	DoubleParameter _resWidth;
 	AmpWigner2 _wignerD;
+	bool foundMasses;
+	unsigned int id23, id13;
 //	AmpWigner _wignerD;
 
 private:

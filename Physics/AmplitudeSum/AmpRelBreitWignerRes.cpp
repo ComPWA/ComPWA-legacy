@@ -57,7 +57,8 @@ AmpAbsDynamicalFunction(name),
 AmpKinematics(resMass, subSys, resSpin, m, n, AmpKinematics::barrierType(BWPrime), mesonRadius, 1.5),
 _resWidth(resWidth),
 //_wignerD(name, resSpin, m, n, subSys)
-_wignerD(subSys, resSpin)
+_wignerD(subSys, resSpin),
+foundMasses(false)
 {
 	initialise();
 }
@@ -93,7 +94,7 @@ void AmpRelBreitWignerRes::setDecayMasses(double ma, double mb, double mc, doubl
 //	_wignerD.setDecayMasses(ma, mb, mc, M);
 	return;
 }
-std::complex<double> AmpRelBreitWignerRes::evaluateAmp(dataPoint& point) const {
+std::complex<double> AmpRelBreitWignerRes::evaluateAmp(dataPoint& point) {
 	if(_ma == -999 || _mb == -999 ||_mc == -999 ||_M == -999){
 		std::cout<<"Masses of decay products not set!"<<std::endl;
 		return 0;
@@ -101,8 +102,13 @@ std::complex<double> AmpRelBreitWignerRes::evaluateAmp(dataPoint& point) const {
 	std::complex<double> result;
 //	double m = dataPoint::instance()->getM(_subSys);
 	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
-	double m23sq = point.getVal("m23sq");
-	double m13sq = point.getVal("m13sq");
+	if(!foundMasses){
+	  id23 = point.getID("m23sq");
+	  id13 = point.getID("m13sq");
+	  foundMasses=true;
+	}
+	double m23sq = point.getVal(id23);
+	double m13sq = point.getVal(id13);
 	double m12sq = kin->getThirdVariableSq(m23sq,m13sq);
 	double m = -999;
 	switch(_subSys){
@@ -125,7 +131,7 @@ std::complex<double> AmpRelBreitWignerRes::evaluateAmp(dataPoint& point) const {
 	if(result.imag()!=result.imag()) {std::cout << "IM part NAN" << std::endl; return 0;}
 	return result;
 }
-std::complex<double> AmpRelBreitWignerRes::evaluate(dataPoint& point) const {
+std::complex<double> AmpRelBreitWignerRes::evaluate(dataPoint& point) {
 //	std::cout<<evaluateAmp()<<" "<<evaluateWignerD()<<std::endl;
 	unsigned int twoJplusOne = (2*_spin+1);
 //	return evaluateAmp()*evaluateWignerD(); //DEBUG
