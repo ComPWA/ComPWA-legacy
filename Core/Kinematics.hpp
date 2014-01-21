@@ -28,7 +28,7 @@ public:
 	static Kinematics* instance();
 	const std::vector<std::string>& getVarNames(){return varNames;}
 	//! checks of data point is within phase space boundaries
-	virtual bool isWithinPhsp(const dataPoint& point) const = 0;
+	virtual bool isWithinPhsp(const dataPoint& point) = 0;
 	virtual double getMotherMass() = 0;
 	virtual void eventToDataPoint(Event& ev, dataPoint& point) = 0;
 

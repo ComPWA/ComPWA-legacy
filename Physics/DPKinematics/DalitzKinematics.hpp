@@ -31,7 +31,10 @@ using namespace boost::log;
 
 class DalitzKinematics : public Kinematics
 {
-private:
+protected:
+	bool massIdsSet;
+	unsigned int id23;
+	unsigned int id13;
 //	static DalitzKinematics* inst;
 	bool _DPareaCalculated;
 	double _DParea;
@@ -42,7 +45,7 @@ private:
 	//! Copy constructor
 	DalitzKinematics(const DalitzKinematics& other);
 
-	DalitzKinematics(){};
+	DalitzKinematics():massIdsSet(false){};
 	//! constructor access particles by name
 	DalitzKinematics(std::string _nameMother, std::string _name1, std::string _name2, std::string _name3);
 	//! constructor with particle masses and names
@@ -74,7 +77,7 @@ public:
 	//! Calculates third dalitz plot variable, e.g f(s1,s2)=s3
 	double getThirdVariableSq(double, double) const;
 	//! checks of data point is within phase space boundaries
-	bool isWithinPhsp(const dataPoint &point) const;
+	bool isWithinPhsp(const dataPoint &point) ;
 	//! returns the dalitz plot area for the given kinematics
 	double getDParea();
 

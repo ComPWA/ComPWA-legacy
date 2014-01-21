@@ -171,10 +171,13 @@ public:
   virtual ~AmpWigner2() {};
 
 
-  virtual double evaluate(dataPoint& point) const;
+  virtual double evaluate(dataPoint& point) ;
   void setDecayMasses(double, double, double, double);
 
 protected:
+  bool massIdsSet;
+  unsigned int id23;
+  unsigned int id13;
 
   virtual void initialise();
 

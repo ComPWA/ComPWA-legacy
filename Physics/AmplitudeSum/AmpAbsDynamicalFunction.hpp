@@ -52,7 +52,7 @@ public:
   virtual void initialise() = 0; 
   virtual std::complex<double> evaluate(dataPoint& point) = 0;
   virtual std::complex<double> evaluateAmp(dataPoint& point) = 0;
-  virtual double evaluateWignerD(dataPoint& point) const = 0;
+  virtual double evaluateWignerD(dataPoint& point) = 0;
 
   virtual double getSpin() = 0;
   virtual bool isSubSys(const unsigned int) const = 0;

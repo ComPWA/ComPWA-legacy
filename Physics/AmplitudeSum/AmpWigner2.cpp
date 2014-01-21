@@ -18,12 +18,12 @@
 
 #include "qft++.h"
 
-AmpWigner2::AmpWigner2(unsigned int subSys, unsigned int resSpin) : _resSpin(resSpin),_subSys(subSys)
+AmpWigner2::AmpWigner2(unsigned int subSys, unsigned int resSpin) : _resSpin(resSpin),_subSys(subSys),massIdsSet(false)
 {
 	initialise();
 }
 
-AmpWigner2::AmpWigner2(const AmpWigner2& other, const char* newname) : _resSpin(other._resSpin),_subSys(other._subSys)
+AmpWigner2::AmpWigner2(const AmpWigner2& other, const char* newname) : _resSpin(other._resSpin),_subSys(other._subSys),massIdsSet(false)
 {
 	initialise();
 }
@@ -41,7 +41,7 @@ void AmpWigner2::initialise()
 	_spin2 = kin->getSpin(2);
 
 }
-double AmpWigner2::evaluate(dataPoint& point) const {
+double AmpWigner2::evaluate(dataPoint& point) {
 	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
 
 	double cosTheta=-999, result=-999;
@@ -52,8 +52,13 @@ double AmpWigner2::evaluate(dataPoint& point) const {
 	 * !!!! Spin M,N completely wrong! We need to calculate helicities!
 	 */
 	Spin N, M;
-	double m23sq = point.getVal("m23sq");
-	double m13sq = point.getVal("m13sq");
+	if(!massIdsSet){
+		id23 = point.getID("m23sq");
+		id13 = point.getID("m13sq");
+		massIdsSet=true;
+	}
+	double m23sq = point.getVal(id23);
+	double m13sq = point.getVal(id13);
 	double m12sq = kin->getThirdVariableSq(m23sq,m13sq);
 
 	switch(_subSys){
