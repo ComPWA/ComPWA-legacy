@@ -202,31 +202,31 @@ void AmpSumIntensity::init(){
 	if(_calcNorm) integral();
 	BOOST_LOG_TRIVIAL(info)<<"AmpSumIntensity: completed setup!";
 }
-double AmpSumIntensity::getMaxVal(){
-	if(!_calcMaxFcnVal) calcMaxVal();
+double AmpSumIntensity::getMaxVal(std::shared_ptr<Generator> gen){
+	if(!_calcMaxFcnVal) calcMaxVal(gen);
 	return _maxFcnVal;
 }
-double AmpSumIntensity::getMaxVal(ParameterList& par){
-	calcMaxVal(par);
+double AmpSumIntensity::getMaxVal(ParameterList& par, std::shared_ptr<Generator> gen){
+	calcMaxVal(par,gen);
 	return _maxFcnVal;
 }
-void AmpSumIntensity::calcMaxVal(ParameterList& par){
+void AmpSumIntensity::calcMaxVal(ParameterList& par, std::shared_ptr<Generator> gen){
 	setParameterList(par);
-	return calcMaxVal();
+	return calcMaxVal(gen);
 }
-void AmpSumIntensity::calcMaxVal(){
+void AmpSumIntensity::calcMaxVal(std::shared_ptr<Generator> gen){
 	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
-	double maxVal=0;
-	double xLimit_low[2] = {kin->m13_sq_min,kin->m23_sq_min};
-	double xLimit_high[2] = {kin->m13_sq_max,kin->m23_sq_max};
-	double maxM23=-999; double maxM13=-999;
-	boost::minstd_rand rndGen2(123);
-	boost::uniform_real<> uni_dist13(xLimit_low[0],xLimit_high[0]);
-	boost::uniform_real<> uni_dist23(xLimit_low[1],xLimit_high[1]);
-	boost::variate_generator<boost::minstd_rand&, boost::uniform_real<> > uni13(rndGen2, uni_dist13);
-	boost::variate_generator<boost::minstd_rand&, boost::uniform_real<> > uni23(rndGen2, uni_dist23);
+//	double xLimit_low[2] = {kin->m13_sq_min,kin->m23_sq_min};
+//	double xLimit_high[2] = {kin->m13_sq_max,kin->m23_sq_max};
+//	boost::minstd_rand rndGen2(123);
+//	boost::uniform_real<> uni_dist13(xLimit_low[0],xLimit_high[0]);
+//	boost::uniform_real<> uni_dist23(xLimit_low[1],xLimit_high[1]);
+//	boost::variate_generator<boost::minstd_rand&, boost::uniform_real<> > uni13(rndGen2, uni_dist13);
+//	boost::variate_generator<boost::minstd_rand&, boost::uniform_real<> > uni23(rndGen2, uni_dist23);
+	double maxM23=-999; double maxM13=-999; double maxVal=0;
 	for(unsigned int i=0; i<40000; i++){
-		double m23sq=uni23(); double m13sq=uni13();
+		double m23sq=gen->getUniform()*(kin->m23_sq_max-kin->m23_sq_min)+kin->m23_sq_min;
+		double m13sq=gen->getUniform()*(kin->m13_sq_max-kin->m13_sq_min)+kin->m13_sq_min;
 		dataPoint point; point.setVal("m13sq",m13sq); point.setVal("m23sq",m23sq);
 		if( !kin->isWithinPhsp(point) ) { if(i>0) i--; continue; }//only integrate over phase space
 		ParameterList res = intensity(point);

@@ -26,6 +26,7 @@ public:
 	virtual Generator* Clone() = 0;
 	virtual void setSeed(unsigned int) = 0;
 	virtual unsigned int getSeed() = 0;
+	virtual double getUniform() = 0;
 
 };
 

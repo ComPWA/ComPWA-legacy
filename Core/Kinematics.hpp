@@ -15,8 +15,7 @@
 #include <vector>
 #include <memory>
 
-#include <boost/log/trivial.hpp>
-using namespace boost::log;
+#include "Core/Logging.hpp"
 
 #include "Core/DataPoint.hpp"
 #include "Core/Event.hpp"

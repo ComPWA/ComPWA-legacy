@@ -95,7 +95,7 @@ template <class T> class AsymError : public ParError<T>
 public:
 	AsymError() : ParError<T>(ErrorType::ASYM), error(std::pair<T,T>(0,0)){};
 	AsymError(std::pair<T,T> val) : ParError<T>(ErrorType::ASYM), error(val){};
-	virtual T GetError() {return (error.first+error.second)/2;}
+	virtual T GetError() {return (GetErrorLow()+GetErrorHigh())/2;}
 	virtual T GetErrorLow() {
 		if(error.first<0) return (-1)*error.first;
 		return error.first;

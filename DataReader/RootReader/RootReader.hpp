@@ -61,6 +61,8 @@ public:
   /** Destructor */
   virtual ~RootReader();
 
+  std::shared_ptr<Data> rndSubSet(unsigned int size, std::shared_ptr<Generator> gen);
+
 protected:
   void read();
   bool _readFlag;

@@ -18,10 +18,34 @@
 #include <utility>
 #include "DataReader/RootReader/RootReader.hpp"
 #include "Core/Kinematics.hpp"
+#include "Core/Generator.hpp"
 #include "TParticle.h"
 #include <boost/log/trivial.hpp>
 #include <boost/log/core.hpp>
 using namespace boost::log;
+
+std::shared_ptr<Data> RootReader::rndSubSet(unsigned int size, std::shared_ptr<Generator> gen){
+	std::shared_ptr<Data> newSample(new RootReader(fileName, true,"test",false));
+	unsigned int totalSize = getNEvents();
+	unsigned int newSize = size;
+	double threshold = (double)newSize/totalSize;
+	/* 1th method: new Sample has exact size, but possibly events are added twice.
+	 * We would have to store all used events in a vector and search the vector at every event -> slow
+	 */
+	//unsigned int t=0;
+	//unsigned int d=0;
+	//while(t<newSize){
+	//	d = (unsigned int) gen->getUniform()*totalSize;
+	//	newSample->pushEvent(fEvents[d]);
+	//	t++;
+	//}
+
+	/* 2nd method: events are added once only, but total size of sample varies with sqrt(N) */
+	unsigned int d=0;
+	for(unsigned int i=0; i<totalSize; i++)
+		if(gen->getUniform()<threshold) newSample->pushEvent(fEvents[i]);
+	return newSample;
+}
 
 void RootReader::read(){
 	fParticles = new TClonesArray("TParticle");
