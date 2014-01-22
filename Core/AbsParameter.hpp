@@ -189,7 +189,7 @@ public:
    * information to the output as easily as a generic type.
    * \sa make_str(), to_str()
   */
-  friend std::ostream& operator<<( std::ostream& out, const AbsParameter& b ){
+  friend std::ostream& operator<<( std::ostream& out, AbsParameter& b ){
     return out << b.to_str();
   }
 
@@ -201,7 +201,8 @@ public:
    * \return string with parameter information
    * \sa operator<<, make_str()
   */
-  virtual std::string const& to_str() const{
+  virtual std::string const& to_str() {
+	make_str();
     return out_;
   }
 
@@ -213,7 +214,8 @@ public:
    * \return string with parameter information
    * \sa make_str()
   */
-  virtual std::string const& val_to_str() const{
+  virtual std::string const& val_to_str() {
+	make_str();
     return outVal_;
   }
 
