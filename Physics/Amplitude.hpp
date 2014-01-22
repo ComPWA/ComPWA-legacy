@@ -61,7 +61,9 @@ public:
 	virtual void setParameterList(ParameterList& par) =0;
 
 	virtual void printAmps() = 0;
+	virtual void printFractions() = 0;
 
+	virtual double getFraction(std::string name) = 0;
 	virtual Amplitude* Clone() = 0;
 
 	virtual std::shared_ptr<FunctionTree> functionTree(ParameterList& outPar) {

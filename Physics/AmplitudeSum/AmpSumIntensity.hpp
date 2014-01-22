@@ -85,6 +85,9 @@ public:
 	virtual const bool fillStartParVec(ParameterList& outPar);
 
 	virtual void printAmps();
+	virtual double getFraction(std::string name) { return totAmp.getFraction(name)/integral(); };
+	virtual double getFraction(unsigned int id) { return totAmp.getFraction(id)/integral(); };
+	virtual void printFractions();
 
 	double normReso(std::shared_ptr<AmpAbsDynamicalFunction> amp);
 	virtual ~AmpSumIntensity(){};

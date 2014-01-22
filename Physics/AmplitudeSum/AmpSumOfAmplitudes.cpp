@@ -32,93 +32,108 @@ AmpSumOfAmplitudes::AmpSumOfAmplitudes()
 
 }
 
- AmpSumOfAmplitudes::AmpSumOfAmplitudes(const char *name)
- { 
+AmpSumOfAmplitudes::AmpSumOfAmplitudes(const char *name)
+{
 
- } 
+}
 
 
- AmpSumOfAmplitudes::AmpSumOfAmplitudes(const AmpSumOfAmplitudes& other, const char* name)
- { 
+AmpSumOfAmplitudes::AmpSumOfAmplitudes(const AmpSumOfAmplitudes& other, const char* name)
+{
 
-//  std::vector<std::shared_ptr<AmpAbsDynamicalFunction> > _pdfList ;   //  List of component PDFs
-//  std::vector<std::shared_ptr<DoubleParameter> > _intList;    //  List of relative intensities
-//  std::vector<std::shared_ptr<DoubleParameter> > _phaseList;  //  List of relative phases
-//  std::vector<std::shared_ptr<AmpWigner> > _angList ;   //  List of component angular distributions
-//	std::cout<<"copy   "<<std::endl;
+	//  std::vector<std::shared_ptr<AmpAbsDynamicalFunction> > _pdfList ;   //  List of component PDFs
+	//  std::vector<std::shared_ptr<DoubleParameter> > _intList;    //  List of relative intensities
+	//  std::vector<std::shared_ptr<DoubleParameter> > _phaseList;  //  List of relative phases
+	//  std::vector<std::shared_ptr<AmpWigner> > _angList ;   //  List of component angular distributions
+	//	std::cout<<"copy   "<<std::endl;
 
- } 
+}
 
- AmpSumOfAmplitudes::~AmpSumOfAmplitudes(){
-   //something TODO?
- }
+AmpSumOfAmplitudes::~AmpSumOfAmplitudes(){
+	//something TODO?
+}
 
 void AmpSumOfAmplitudes::addBW(std::shared_ptr<AmpAbsDynamicalFunction> theRes , std::shared_ptr<DoubleParameter> r, std::shared_ptr<DoubleParameter> phi, std::shared_ptr<AmpWigner> theAng) {
-  _pdfList.push_back(theRes);
-  _intList.push_back(r);
-  _phaseList.push_back(phi);
-  _angList.push_back(theAng);
+	_pdfList.push_back(theRes);
+	_intList.push_back(r);
+	_phaseList.push_back(phi);
+	_angList.push_back(theAng);
 }
 
 void AmpSumOfAmplitudes::addBW(std::shared_ptr<AmpAbsDynamicalFunction> theRes , std::shared_ptr<DoubleParameter> r, std::shared_ptr<DoubleParameter> phi) {
-  _pdfList.push_back(theRes);
-  _intList.push_back(r);
-  _phaseList.push_back(phi);
-  _angList.push_back(std::shared_ptr<AmpWigner>(new AmpWigner()));
+	_pdfList.push_back(theRes);
+	_intList.push_back(r);
+	_phaseList.push_back(phi);
+	_angList.push_back(std::shared_ptr<AmpWigner>(new AmpWigner()));
 }
 
 double AmpSumOfAmplitudes::evaluate(dataPoint& point) const
- { 
-//   RooComplex res;
-   std::complex<double> res;
-   //std::cout << "res = \t" << res.abs2() << std::endl;
+{
+	//   RooComplex res;
+	std::complex<double> res;
+	//std::cout << "res = \t" << res.abs2() << std::endl;
 
-   //std::cout << "PDFs: ";
-   for(unsigned int i=0; i<_pdfList.size(); i++){
-     double a = _intList[i]->GetValue();
-     double phi = _phaseList[i]->GetValue();
-     std::complex<double> eiphi(a*cos(phi),a*sin(phi));
+	//std::cout << "PDFs: ";
+	for(unsigned int i=0; i<_pdfList.size(); i++){
+		double a = _intList[i]->GetValue();
+		double phi = _phaseList[i]->GetValue();
+		std::complex<double> eiphi(a*cos(phi),a*sin(phi));
 
-//     unsigned int twoJplusOne = (2*_pdfList[i]->getSpin()+1);
-//     res = res + (double)twoJplusOne * _pdfList[i]->evaluate() * eiphi;
-     //twoJplusOne in included in evaluate(). We want to include this factor into the normalization of the amplitudes.
-     res = res + _pdfList[i]->evaluate(point) * eiphi;
-    // std::cout << _pdfList[i]->evaluate() << " ";
-//res = res + twoJplusOne * _pdfList[i]->evaluate() * eiphi * _angList[i]->evaluate();
-   }
-   //std::cout << std::endl;
+		//     unsigned int twoJplusOne = (2*_pdfList[i]->getSpin()+1);
+		//     res = res + (double)twoJplusOne * _pdfList[i]->evaluate() * eiphi;
+		//twoJplusOne in included in evaluate(). We want to include this factor into the normalization of the amplitudes.
+		res = res + _pdfList[i]->evaluate(point) * eiphi;
+		// std::cout << _pdfList[i]->evaluate() << " ";
+		//res = res + twoJplusOne * _pdfList[i]->evaluate() * eiphi * _angList[i]->evaluate();
+	}
+	//std::cout << std::endl;
 
-   return ( std::abs(res)*std::abs(res) );
- } 
+	return ( std::abs(res)*std::abs(res) );
+}
+double AmpSumOfAmplitudes::getFraction(std::string name){
+	int id=-1;
+	for(unsigned int i=0; i<_pdfList.size(); i++)
+		if(_pdfList[i]->GetName()==name) id=i;
+	if(id<0) return 0;
+	return getFraction(id);
+}
+double AmpSumOfAmplitudes::getFraction(unsigned int id){
+	double integral = _pdfList[id]->integral();
+	double a = _intList[id]->GetValue();
+	double phi = _phaseList[id]->GetValue();
+	std::complex<double> eiphi(a*cos(phi),a*sin(phi));
+	double coeff = std::abs(eiphi)*std::abs(eiphi);
+	return ( coeff*integral );
+}
 
- double AmpSumOfAmplitudes::evaluateSlice(dataPoint& point, std::complex<double>* reso, unsigned int nResos, unsigned int subSys=1) const
- { 
-   // ENTER EXPRESSION IN TERMS OF VARIABLE ARGUMENTS HERE 
-   std::complex<double> res;
+double AmpSumOfAmplitudes::evaluateSlice(dataPoint& point, std::complex<double>* reso, unsigned int nResos, unsigned int subSys=1) const
+{
+	// ENTER EXPRESSION IN TERMS OF VARIABLE ARGUMENTS HERE
+	std::complex<double> res;
 
-   int itReso=0, sys=0;
+	int itReso=0, sys=0;
 
-   for(unsigned int i=0; i<_pdfList.size(); i++){
-     double a = _intList[i]->GetValue();
-     double phi = _phaseList[i]->GetValue();
-     std::complex<double> eiphi (cos(phi), sin(phi));
-     if(itReso<3) sys = 0; //TODO: way better!!!
-     else if(itReso<5) sys = 1;
-     //else sys = 2;
-     //sys = itReso;
+	for(unsigned int i=0; i<_pdfList.size(); i++){
+		double a = _intList[i]->GetValue();
+		double phi = _phaseList[i]->GetValue();
+		std::complex<double> eiphi (cos(phi), sin(phi));
+		if(itReso<3) sys = 0; //TODO: way better!!!
+		else if(itReso<5) sys = 1;
+		//else sys = 2;
+		//sys = itReso;
 
-     if(_pdfList[i]->isSubSys(subSys))
-       res = res + reso[sys] * _angList[i]->evaluate(point);
-     else
-       res = res + _pdfList[i]->evaluate(point) * a * eiphi;
- //res = res + _pdfList[i]->evaluate() * a * eiphi * _angList[i]->evaluate();
-     itReso++;
-   }
+		if(_pdfList[i]->isSubSys(subSys))
+			res = res + reso[sys] * _angList[i]->evaluate(point);
+		else
+			res = res + _pdfList[i]->evaluate(point) * a * eiphi;
+		//res = res + _pdfList[i]->evaluate() * a * eiphi * _angList[i]->evaluate();
+		itReso++;
+	}
 
-   return (std::abs(res)*std::abs(res) );
- } 
+	return (std::abs(res)*std::abs(res) );
+}
 
- /*double AmpSumOfAmplitudes::evaluatePhi() const
+/*double AmpSumOfAmplitudes::evaluatePhi() const
  { 
    // ENTER EXPRESSION IN TERMS OF VARIABLE ARGUMENTS HERE 
    RooComplex res;
