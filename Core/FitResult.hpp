@@ -58,12 +58,14 @@ public:
 	};
 	virtual void writeTex(std::string filename) {};
 	virtual void writeText(std::string filename) ;
+	virtual void writeSimpleText(std::string filename) ;
 	virtual operator double() const =0;
 	friend std::ostream& operator<< (std::ostream &out, FitResult &fitres){ out<<fitres.getResult(); return out;};
 
 protected:
 	virtual double shiftAngle(double v);
 	virtual void genOutput(std::ostream& out) = 0;
+	virtual void genSimpleOutput(std::ostream& out) = 0;
 
 	double time;
 

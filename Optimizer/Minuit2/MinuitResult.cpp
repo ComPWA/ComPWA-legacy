@@ -74,6 +74,14 @@ void MinuitResult::init(FunctionMinimum min){
 
 }
 
+void MinuitResult::genSimpleOutput(std::ostream& out){
+	for(unsigned int o=0;o<finalParameters.GetNDouble();o++){
+		std::shared_ptr<DoubleParameter> outPar = finalParameters.GetDoubleParameter(o);
+		out<<outPar->GetName()<<" "<<outPar->GetValue()<<" "<<outPar->GetError()->GetError()<<" ";
+	}
+
+	return;
+}
 void MinuitResult::genOutput(std::ostream& out){
 	bool printTrue=0;
 	if(trueParameters.GetNParameter()) printTrue=1;

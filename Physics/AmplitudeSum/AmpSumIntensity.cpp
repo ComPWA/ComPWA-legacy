@@ -385,7 +385,7 @@ void AmpSumIntensity::printFractions(){
 //		if(!(i==totAmp.getNAmps()-1)) outStr << "\n";
 	}
 	outStr<<std::setw(10)<<" "<<"    ==========\n";
-	outStr<<std::setw(10)<<" "<<"     "<<sumfrac;
+	outStr<<std::setw(10)<<" "<<"     "<<sumFrac;
 	BOOST_LOG_TRIVIAL(info)<<outStr.str();
 	return;
 }

@@ -15,6 +15,13 @@ void FitResult::writeText(std::string filename){
 	myfile.close();
 	return;
 };
+void FitResult::writeSimpleText(std::string filename){
+	std::ofstream myfile;
+	myfile.open(filename);
+	genSimpleOutput(myfile);
+	myfile.close();
+	return;
+};
 double FitResult::shiftAngle(double v){
 	double val = v;
 	double twoPi = 2*PhysConst::instance()->getConstValue("Pi");
