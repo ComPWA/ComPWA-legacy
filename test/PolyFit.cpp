@@ -54,6 +54,7 @@ PolyFit::PolyFit(double p0, double p1, double p2, double p3, double sigma) :
 
   // Generate test distribution and smear them with a gaussian
   TRandom randomNumber;
+  randomNumber.SetSeed(1773);
   for(int i=0; i<1000; i++) {
     double tmpXvalue=static_cast<double>((rand() % 10000 + 1)) / 100;
     double tmpYvalue=randomNumber.Gaus(p0 + p1 * tmpXvalue + p2 * tmpXvalue * tmpXvalue + p3 * tmpXvalue * tmpXvalue * tmpXvalue, _sigma);

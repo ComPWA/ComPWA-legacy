@@ -5,6 +5,7 @@ export MINUIT2=/local/data/michel/Minuit2-5.24.00
 export ROOTSYS=/local/data/michel/fairroot/build
 export ROOTINCLUDE=/local/data/michel/fairroot/build/include/root
 export QFT=/local/home/mathias/workspace/qft++
+export COMPWA_DIR=/local/home/mathias/workspace/nextPWA
 
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$GENEVA/lib:$MINUIT2/lib:$ROOTSYS/lib/root:$BOOST_ROOT/lib:/local/home/mathias/workspace/nextPWA/lib:$QFT/lib
 

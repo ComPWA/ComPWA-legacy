@@ -84,7 +84,7 @@ std::shared_ptr<FitResult> MinuitIF::exec(ParameterList& par){
 	//read in xml configuration file for strategy settings
 	const char* pPath = getenv("COMPWA_DIR");
 	std::string path = std::string(pPath);
-	std::ifstream ifs(path+"Optimizer/Minuit2/MinuitStrategy.xml");
+	std::ifstream ifs(path+"/Optimizer/Minuit2/MinuitStrategy.xml");
 	boost::archive::xml_iarchive ia(ifs,boost::archive::no_header);
 	ia >> BOOST_SERIALIZATION_NVP(strat);
 	strat.init();//update parameters of MnStrategy mother class (IMPORTANT!)

@@ -78,16 +78,25 @@ int main(int argc, char **argv){
 	//DPKinematics kin("D0","gamma","K-","K+");
 	//static dataPoint* point = dataPoint::instance(kin);
 
-  bool useFctTree = true;
+  bool useFctTree = false;
 
   std::string file="test/3Part-4vecs.root";
-  std::string resoFile="/home/mathias/workspace/nextPWA/test/JPSI_ypipi.xml";
-  AmplitudeSetup ini(resoFile);
+
+	const char* pPath = getenv("COMPWA_DIR");
+	std::string path = "";
+	try{
+	  path = std::string(pPath);
+	}catch(std::logic_error){
+	  BOOST_LOG_TRIVIAL(error)<<"Environment Variable COMPWA_DIR not set?"<<std::endl;
+	}
+	std::string resoFile=path+"/test/JPSI_ypipi.xml";
+	AmplitudeSetup ini(resoFile);
+
   std::cout << "Load Modules" << std::endl;
   std::shared_ptr<Data> myReader(new RootReader(file, false,"data"));
   std::shared_ptr<Data> myPHSPReader(new RootReader(file, false,"mc"));
   std::shared_ptr<Amplitude> amps(new AmpSumIntensity(ini,std::shared_ptr<Efficiency>(new UnitEfficiency()), myReader->getNEvents()));
-  /*return 0;
+
   //std::shared_ptr<Amplitude> amps(new AmpSumIntensity(M, Br, m1, m2, m3,"J/psi","gamma","pi0","pi0", ini));
   // Initiate parameters
   ParameterList par;
@@ -120,12 +129,14 @@ int main(int argc, char **argv){
       tmp->FixParameter(true);
     }else{
       tmp->SetValue(tmp->GetValue()/((i+1)));
-      tmp->SetError(tmp->GetValue());
-      if(!tmp->GetValue()) tmp->SetError(1.);
+      tmp->SetError(std::shared_ptr<ParError<double>>(new SymError<double>(tmp->GetValue())));
+      if(!tmp->GetValue()) tmp->SetError(std::shared_ptr<ParError<double>>(new SymError<double>(1.)));
     }
     startInt[i] = tmp->GetValue();
   }
   std::cout << "LH with following parameters: " << esti->controlParameter(par) << std::endl;
+
+
 
   for(unsigned int i=0; i<par.GetNDouble(); i++){
       std::cout << par.GetDoubleParameter(i)->GetName() << " = " << par.GetDoubleParameter(i)->GetValue() << std::endl;
@@ -137,8 +148,8 @@ int main(int argc, char **argv){
   //  }
 
   std::cout << "Start Fit" << std::endl;
-  double genResult = opti->exec(par);
-  std::cout << "Final LH = " << genResult << std::endl;
+  std::shared_ptr<FitResult> genResult = opti->exec(par);
+  std::cout << "Final LH = " << genResult->getResult() << std::endl;
 
   std::cout << "Optimierte intensitäten: " << esti->controlParameter(par) << std::endl;
 
@@ -147,7 +158,7 @@ int main(int argc, char **argv){
       std::cout << "   [ start: " << startInt[i] << " ,";
       std::cout << " optimal: " << optiInt[i] << " ]" << std::endl;
   }
-
+/*
   //Plot result
   TH2D* bw12 = new TH2D("bw12","inv. mass-sq of particles 1&2 Generated",1000,0.,10.,1000,0.,10.);
   bw12->GetXaxis()->SetTitle("m_{12}^{2} / GeV^{2}");

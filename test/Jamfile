@@ -59,29 +59,29 @@ exe dataiftestApp :
         $(TOP)/DataReader/RootReader//RootReader  
         : ;
 
-if $(GENEVA) { 
-exe optimizertestApp : 
-        OptimizerTestApp.cpp 
-        test
-        $(TOP)/Core//ComPWA
-        $(TOP)/Optimizer/Minuit2//Minuit2IF
-        $(TOP)/Optimizer/Geneva//GenevaIF  
-        : ;
-
-exe genevatestApp : 
-        GenevaTestApp.cpp 
-        test
-        $(TOP)/Core//ComPWA
-        $(TOP)/Optimizer/Geneva//GenevaIF 
-        : ;
-} else {
+#if $(GENEVA) { 
+#exe optimizertestApp : 
+#        OptimizerTestApp.cpp 
+#        test
+#        $(TOP)/Core//ComPWA
+#        $(TOP)/Optimizer/Minuit2//Minuit2IF
+#        $(TOP)/Optimizer/Geneva//GenevaIF  
+#        : ;
+#
+#exe genevatestApp : 
+#        GenevaTestApp.cpp 
+#        test
+#        $(TOP)/Core//ComPWA
+#        $(TOP)/Optimizer/Geneva//GenevaIF 
+#        : ;
+#} else {
 exe optimizertestApp : 
         MinuitTestApp.cpp 
         test
         $(TOP)/Core//ComPWA
         $(TOP)/Optimizer/Minuit2//Minuit2IF
         : ;
-}
+#}
 
 exe physicstestApp : 
         PhysicsTestApp.cpp 
@@ -210,10 +210,10 @@ exe serializeApp :
 
 install dist : test : <location>$(TOP)/lib <threading>single ;
 #install dist2 : dalitzfitApp treetestApp cx0testApp dataiftestApp optimizertestApp physicstestApp blackscholesApp neuralnetworkApp : <location>$(TOP)/bin <threading>single ;
-#install dist2 : dalitzfitApp treetestApp dataiftestApp optimizertestApp physicstestApp : <location>$(TOP)/bin <threading>single ;
+install dist2 : dalitzfitApp treetestApp dataiftestApp optimizertestApp physicstestApp : <location>$(TOP)/bin <threading>single ;
 install dist3 : estimatortestApp integrationtestApp integrationtestbinnedApp runmanagertestApp gentwopartApp gendalitzApp dalitzplotApp dpareaTestApp genRunManager : <location>$(TOP)/bin <threading>single ;
 
-if $(GENEVA) { 
-install dist7 : genevatestApp : <location>$(TOP)/bin ;
-}
+#if $(GENEVA) { 
+#install dist7 : genevatestApp : <location>$(TOP)/bin ;
+#}
 

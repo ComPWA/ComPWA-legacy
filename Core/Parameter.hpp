@@ -171,7 +171,7 @@ public:
 			return;
 		}
 		val_ = inVal;
-		make_str();
+		//make_str();
 		Notify();
 	}
 	//! Setter for error of parameter
@@ -183,7 +183,7 @@ public:
 			min_ = inMin;
 			max_ = inMax;
 			bounds_ = true;
-			make_str();
+			//make_str();
 		}
 		return valid;
 	}
@@ -202,7 +202,7 @@ public:
 		if(valid){
 			min_ = min;
 			bounds_ = true;
-			make_str();
+			//make_str();
 		}
 		return valid;
 	}
@@ -221,7 +221,7 @@ public:
 		if(valid){
 			max_ = max;
 			bounds_ = true;
-			make_str();
+			//make_str();
 		}
 		return valid;
 	}
@@ -442,7 +442,7 @@ public:
 			return;
 		}
 		val_ = inVal;
-		make_str();
+		//make_str();
 		Notify();
 	}
 	//! Setter for error of parameter
@@ -454,7 +454,7 @@ public:
 			min_ = inMin;
 			max_ = inMax;
 			bounds_ = true;
-			make_str();
+			//make_str();
 		}
 		return valid;
 	}
@@ -473,7 +473,7 @@ public:
 		if(valid){
 			min_ = min;
 			bounds_ = true;
-			make_str();
+			//make_str();
 		}
 		return valid;
 	}
@@ -492,7 +492,7 @@ public:
 		if(valid){
 			max_ = max;
 			bounds_ = true;
-			make_str();
+			//make_str();
 		}
 		return valid;
 	}
@@ -726,7 +726,7 @@ public:
 			return;
 		}
 		val_ = inVal;
-		make_str();
+		//make_str();
 		Notify();
 	}
 	//! Setter for error of parameter
@@ -738,7 +738,7 @@ public:
 			min_ = inMin;
 			max_ = inMax;
 			bounds_ = true;
-			make_str();
+			//make_str();
 		}
 		return valid;
 	}
@@ -757,7 +757,7 @@ public:
 		if(valid){
 			min_ = min;
 			bounds_ = true;
-			make_str();
+			//make_str();
 		}
 		return valid;
 	}
@@ -776,7 +776,7 @@ public:
 		if(valid){
 			max_ = max;
 			bounds_ = true;
-			make_str();
+			//make_str();
 		}
 		return valid;
 	}
@@ -937,7 +937,7 @@ public:
 			return;
 		}
 		val_ = inVal;
-		make_str();
+		//make_str();
 		Notify();
 	}
 	//! Setter for error of parameter

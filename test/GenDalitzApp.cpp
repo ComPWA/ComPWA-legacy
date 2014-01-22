@@ -55,7 +55,7 @@ using namespace boost::log;
 
 using namespace std;
 
-const unsigned int MaxEvents = 100;
+const unsigned int MaxEvents = 1000;
 
 //constants
 
@@ -303,7 +303,7 @@ int main(int argc, char **argv){
 	// minPar.AddParameter(DoubleParameter(1.5,0.5,2.5,0.1));
 
 	//Output File setup
-	TFile output("test/3Part-4vecs.root","recreate");
+	TFile output("test/TEST.root","recreate");
 	output.SetCompressionLevel(1); //try level 2 also
 
 	TTree fTree ("data","Dalitz-Gen");

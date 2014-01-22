@@ -292,28 +292,28 @@ void ParameterList::AddParameter(std::shared_ptr<AbsParameter> par) {
 		break;}
 	}
 	// vDoublePar_.push_back(par);
-	make_str();
+	//make_str();
 }
 
 void ParameterList::AddParameter(std::shared_ptr<DoubleParameter> par) {
 	//TODO check names!
 	vDoublePar_.push_back(par);
 	mDoubleParID_.insert(std::pair<std::string,unsigned int>(par->GetName(),vDoublePar_.size()-1));
-	make_str();
+	//make_str();
 }
 
 void ParameterList::AddParameter(std::shared_ptr<IntegerParameter> par) {
 	//TODO check names!
 	vIntPar_.push_back(par);
 	mIntParID_.insert(std::pair<std::string,unsigned int>(par->GetName(),vIntPar_.size()-1));
-	make_str();
+	//make_str();
 }
 
 void ParameterList::AddParameter(std::shared_ptr<BoolParameter> par) {
 	//TODO check names!
 	vBoolPar_.push_back(par);
 	mBoolParID_.insert(std::pair<std::string,unsigned int>(par->GetName(),vBoolPar_.size()-1));
-	make_str();
+	//make_str();
 }
 
 void ParameterList::RemoveDouble(const unsigned int id){
@@ -322,7 +322,7 @@ void ParameterList::RemoveDouble(const unsigned int id){
 	for (std::map<std::string,unsigned int>::iterator it = mDoubleParID_.begin(); it != mDoubleParID_.end(); ++it )
 		if (it->second == id)
 			mDoubleParID_.erase(it);
-	make_str();
+	//make_str();
 }
 
 void ParameterList::RemoveInteger(const unsigned int id){
@@ -331,7 +331,7 @@ void ParameterList::RemoveInteger(const unsigned int id){
 	for (std::map<std::string,unsigned int>::iterator it = mIntParID_.begin(); it != mIntParID_.end(); ++it )
 		if (it->second == id)
 			mIntParID_.erase(it);
-	make_str();
+	//make_str();
 }
 
 void ParameterList::RemoveBool(const unsigned int id){
@@ -340,7 +340,7 @@ void ParameterList::RemoveBool(const unsigned int id){
 	for (std::map<std::string,unsigned int>::iterator it = mBoolParID_.begin(); it != mBoolParID_.end(); ++it )
 		if (it->second == id)
 			mBoolParID_.erase(it);
-	make_str();
+	//make_str();
 }
 
 void ParameterList::RemoveDouble(const std::string parName){
@@ -348,7 +348,7 @@ void ParameterList::RemoveDouble(const std::string parName){
 	unsigned int id = mDoubleParID_.find(parName)->second;
 	vDoublePar_.erase(vDoublePar_.begin()+id);
 	mDoubleParID_.erase(parName);
-	make_str();
+	//make_str();
 }
 
 void ParameterList::RemoveInteger(const std::string parName){
@@ -356,7 +356,7 @@ void ParameterList::RemoveInteger(const std::string parName){
 	unsigned int id = mIntParID_.find(parName)->second;
 	vIntPar_.erase(vIntPar_.begin()+id);
 	mIntParID_.erase(parName);
-	make_str();
+	//make_str();
 }
 
 void ParameterList::RemoveBool(const std::string parName){
@@ -364,7 +364,7 @@ void ParameterList::RemoveBool(const std::string parName){
 	unsigned int id = mBoolParID_.find(parName)->second;
 	vBoolPar_.erase(vBoolPar_.begin()+id);
 	mBoolParID_.erase(parName);
-	make_str();
+	//make_str();
 }
 
 void ParameterList::make_str() {
