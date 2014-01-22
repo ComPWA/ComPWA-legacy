@@ -202,8 +202,8 @@ public:
    * \sa operator<<, make_str()
   */
   virtual std::string const& to_str() {
-	make_str();
-    return out_;
+	//make_str();
+    return make_str();;
   }
 
   //! A public function returning a string with parameter value
@@ -215,13 +215,13 @@ public:
    * \sa make_str()
   */
   virtual std::string const& val_to_str() {
-	make_str();
-    return outVal_;
+	//make_str();
+    return make_val_str();
   }
 
 protected:
-	std::string out_; /*!< Output string to print information */
-	std::string outVal_; /*!< Output string to print only value */
+	//std::string out_; /*!< Output string to print information */
+	//std::string outVal_; /*!< Output string to print only value */
 	std::string name_; /*!< internal name of the parameter */
 	ParType type_; /*!< ParType enum for type of parameter */
 	//  ParError error_;
@@ -229,8 +229,10 @@ protected:
 
 	std::vector<std::shared_ptr<ParObserver> > oberservingNodes; /*!< list of observers, e.g. TreeNodes */
 
-	//! Interface to fill output string, to be implemented by parameter implementations
-	virtual void make_str() =0;
+	//! Interface to output string, to be implemented by parameter implementations
+	virtual std::string make_str() =0;
+	//! Interface to output value, to be implemented by parameter implementations
+	virtual std::string make_val_str() =0;
 private:
 
 	friend class boost::serialization::access;
@@ -239,8 +241,8 @@ private:
 	{
 		ar & BOOST_SERIALIZATION_NVP(type_);
 		ar & BOOST_SERIALIZATION_NVP(name_);
-		ar & BOOST_SERIALIZATION_NVP(outVal_);
-		ar & BOOST_SERIALIZATION_NVP(out_);
+		//ar & BOOST_SERIALIZATION_NVP(outVal_);
+		//ar & BOOST_SERIALIZATION_NVP(out_);
 	}
 
 };

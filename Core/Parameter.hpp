@@ -46,7 +46,7 @@ public:
 	 */
 	ComplexParameter(std::string inName):AbsParameter(inName,ParType::COMPLEX),val_(0.,0.),min_(0.,0.),max_(0.,0.),err_(0.,0.) {
 		bounds_= usebounds_ = hasError_ = fixed_ = false;
-		make_str();
+		//make_str();
 	}
 
 	//! Standard constructor with a value
@@ -59,7 +59,7 @@ public:
 	 */
 	ComplexParameter(std::string inName, const std::complex<double> value):AbsParameter(inName,ParType::COMPLEX),val_(value),min_(0),max_(0),err_(0){
 		bounds_= usebounds_ = hasError_ = fixed_ = false;
-		make_str();
+		//make_str();
 	}
 
 	//! Standard constructor with value and error
@@ -75,7 +75,7 @@ public:
 	:AbsParameter(inName,ParType::COMPLEX),val_(value),min_(0),max_(0),err_(error){
 		bounds_= usebounds_ = fixed_ = false;
 		hasError_ = true;
-		make_str();
+		//make_str();
 	}
 
 	//! Standard constructor with value and bounds
@@ -97,7 +97,7 @@ public:
 			max_ = max;
 			bounds_ = true;
 		}
-		make_str();
+		//make_str();
 	}
 
 	//! Standard constructor with value, bounds and error
@@ -121,7 +121,7 @@ public:
 			max_ = max;
 			bounds_ = true;
 		}
-		make_str();
+		//make_str();
 	}
 
 	//! Copy constructor using = operator
@@ -271,13 +271,13 @@ protected:
 		return false;
 	}
 
-	//! A protected function which creates an output string for printing
+	//! A protected function which returns an output string for printing
 	/*!
 	 * This function uses all available information about the parameter
 	 * to create a string which will be streamed via the stream operator <<.
 	 * \sa operator<<, to_str(), type()
 	 */
-	virtual void make_str() {
+	virtual std::string make_str() {
 		std::stringstream oss;
 		oss << name_;
 		oss << "\t Val = " << val_;
@@ -286,11 +286,19 @@ protected:
 		if(hasError_)
 			oss << "\t  Err = " << err_;
 		oss << "\t Type = " << TypeName();
-		out_ = oss.str();
+		return oss.str();
+	}
 
+	//! A protected function which returns an output string for printing
+	/*!
+	 * This function uses only the value information about the parameter
+	 * to create a string which will be streamed via the stream operator <<.
+	 * \sa operator<<, make_str()
+	 */
+	virtual std::string make_val_str() {
 		std::stringstream ovs;
 		ovs << val_;
-		outVal_ = ovs.str();
+		return ovs.str();
 	}
 
 };
@@ -311,7 +319,7 @@ public:
 	DoubleParameter(std::string inName):AbsParameter(inName, ParType::DOUBLE),val_(0),min_(0),max_(0),
 	error_(std::shared_ptr<ParError<double>>(new SymError<double>(0))) {
 		bounds_= usebounds_ = hasError_ = fixed_ = false;
-		make_str();
+		//make_str();
 	}
 
 	//! Standard constructor with a value
@@ -325,7 +333,7 @@ public:
 	DoubleParameter(std::string inName, const double value):AbsParameter(inName, ParType::DOUBLE),val_(value),min_(0),max_(0),
 	error_(std::shared_ptr<ParError<double>>(new SymError<double>(0))) {
 		bounds_= usebounds_ = hasError_ = fixed_ = false;
-		make_str();
+		//make_str();
 	}
 
 	//! Standard constructor with value and error
@@ -342,7 +350,7 @@ public:
 	error_(std::shared_ptr<ParError<double>>(new SymError<double>(error))) {
 		bounds_= usebounds_ = fixed_ = false;
 		hasError_ = true;
-		make_str();
+		//make_str();
 	}
 
 	//! Standard constructor with value and bounds
@@ -364,7 +372,7 @@ public:
 			max_ = max;
 			bounds_ = true;
 		}
-		make_str();
+		//make_str();
 	}
 
 	//! Standard constructor with value, bounds and error
@@ -389,7 +397,7 @@ public:
 			max_ = max;
 			bounds_ = true;
 		}
-		make_str();
+		//make_str();
 	}
 
 	//! Copy constructor using = operator
@@ -545,13 +553,13 @@ protected:
 		return false;
 	}
 
-	//! A protected function which creates an output string for printing
+	//! A protected function which returns an output string for printing
 	/*!
 	 * This function uses all available information about the parameter
 	 * to create a string which will be streamed via the stream operator <<.
 	 * \sa operator<<, to_str(), type()
 	 */
-	virtual void make_str() {
+	virtual std::string make_str() {
 		std::stringstream oss;
 		oss << name_;
 		oss << "\t Val = " << val_;
@@ -560,11 +568,19 @@ protected:
 		if(hasError_)
 			oss << "\t  Err = " << *error_;
 		oss << "\t Type = " << TypeName();
-		out_ = oss.str();
+		return oss.str();
+	}
 
+	//! A protected function which returns an output string for printing
+	/*!
+	 * This function uses only the value information about the parameter
+	 * to create a string which will be streamed via the stream operator <<.
+	 * \sa operator<<, make_str()
+	 */
+	virtual std::string make_val_str() {
 		std::stringstream ovs;
 		ovs << val_;
-		outVal_ = ovs.str();
+		return ovs.str();
 	}
 
 private:
@@ -601,7 +617,7 @@ public:
 	 */
 	IntegerParameter(std::string inName):AbsParameter(inName, ParType::INTEGER),val_(0),min_(0),max_(0),err_(0) {
 		bounds_= usebounds_ = hasError_ = fixed_ = false;
-		make_str();
+		//make_str();
 	}
 
 	//! Standard constructor with a value
@@ -614,7 +630,7 @@ public:
 	 */
 	IntegerParameter(std::string inName, const int value):AbsParameter(inName, ParType::INTEGER),val_(value),min_(0),max_(0),err_(0){
 		bounds_= usebounds_ = hasError_ = fixed_ = false;
-		make_str();
+		//make_str();
 	}
 
 	//! Standard constructor with value and error
@@ -630,7 +646,7 @@ public:
 	:AbsParameter(inName, ParType::INTEGER),val_(value),min_(0),max_(0),err_(error){
 		bounds_= usebounds_ = fixed_ = false;
 		hasError_ = true;
-		make_str();
+		//make_str();
 	}
 
 	//! Standard constructor with value and bounds
@@ -652,7 +668,7 @@ public:
 			max_ = max;
 			bounds_ = true;
 		}
-		make_str();
+		//make_str();
 	}
 
 	//! Standard constructor with value, bounds and error
@@ -676,7 +692,7 @@ public:
 			max_ = max;
 			bounds_ = true;
 		}
-		make_str();
+		//make_str();
 	}
 
 	//! Copy constructor using = operator
@@ -828,13 +844,13 @@ protected:
 		return false;
 	}
 
-	//! A protected function which creates an output string for printing
+	//! A protected function which returns an output string for printing
 	/*!
 	 * This function uses all available information about the parameter
 	 * to create a string which will be streamed via the stream operator <<.
 	 * \sa operator<<, to_str(), type()
 	 */
-	virtual void make_str() {
+	virtual std::string make_str() {
 		std::stringstream oss;
 		oss << name_;
 		oss << "\t Val = " << val_;
@@ -843,11 +859,19 @@ protected:
 		if(hasError_)
 			oss << "\t  Err = " << err_;
 		oss << "\t Type = " << TypeName();
-		out_ = oss.str();
+		return oss.str();
+	}
 
+	//! A protected function which returns an output string for printing
+	/*!
+	 * This function uses only the value information about the parameter
+	 * to create a string which will be streamed via the stream operator <<.
+	 * \sa operator<<, make_str()
+	 */
+	virtual std::string make_val_str() {
 		std::stringstream ovs;
 		ovs << val_;
-		outVal_ = ovs.str();
+		return ovs.str();
 	}
 
 };
@@ -866,7 +890,7 @@ public:
 	 */
 	BoolParameter(std::string inName):AbsParameter(inName,ParType::BOOL),val_(0),err_(0) {
 		hasError_ = fixed_ = false;
-		make_str();
+		//make_str();
 	}
 
 	//! Standard constructor with a value
@@ -879,7 +903,7 @@ public:
 	 */
 	BoolParameter(std::string inName, const bool value):AbsParameter(inName,ParType::BOOL),val_(value),err_(0){
 		hasError_ = fixed_ = false;
-		make_str();
+		//make_str();
 	}
 
 	//! Standard constructor with value and error
@@ -895,7 +919,7 @@ public:
 	:AbsParameter(inName,ParType::BOOL),val_(value),err_(error){
 		fixed_ = false;
 		hasError_ = true;
-		make_str();
+		//make_str();
 	}
 
 	//! Copy constructor using = operator
@@ -967,24 +991,32 @@ protected:
 	bool fixed_; /*!< Do you want to keep parameter fixed? */
 	int val_, err_; /*!< Containers of parameter information */
 
-	//! A protected function which creates an output string for printing
+	//! A protected function which returns an output string for printing
 	/*!
 	 * This function uses all available information about the parameter
 	 * to create a string which will be streamed via the stream operator <<.
 	 * \sa operator<<, to_str(), type()
 	 */
-	virtual void make_str() {
+	virtual std::string make_str() {
 		std::stringstream oss;
 		oss << name_;
 		oss << "\t Val = " << val_;
 		if(hasError_)
 			oss << "\t  Err = " << err_;
 		oss << "\t Type = " << TypeName();
-		out_ = oss.str();
+		return oss.str();
+	}
 
+	//! A protected function which returns an output string for printing
+	/*!
+	 * This function uses only the value information about the parameter
+	 * to create a string which will be streamed via the stream operator <<.
+	 * \sa operator<<, make_str()
+	 */
+	virtual std::string make_val_str() {
 		std::stringstream ovs;
 		ovs << val_;
-		outVal_ = ovs.str();
+		return ovs.str();
 	}
 
 };

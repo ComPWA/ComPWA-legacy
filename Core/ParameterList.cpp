@@ -23,22 +23,22 @@
 #include "Core/ParameterList.hpp"
 
 ParameterList::ParameterList(){
-	make_str();
+	//make_str();
 }
 
 ParameterList::ParameterList(const std::vector<std::shared_ptr<DoubleParameter> >& inVec)
 :vDoublePar_(inVec){
-	make_str();
+	//make_str();
 }
 
 ParameterList::ParameterList(const std::vector<std::shared_ptr<IntegerParameter> >& inVec)
 :vIntPar_(inVec){
-	make_str();
+	//make_str();
 }
 
 ParameterList::ParameterList(const std::vector<std::shared_ptr<BoolParameter> >& inVec)
 :vBoolPar_(inVec){
-	make_str();
+	//make_str();
 }
 
 ParameterList::ParameterList(const std::vector<std::shared_ptr<DoubleParameter> >& inD,
@@ -46,7 +46,7 @@ ParameterList::ParameterList(const std::vector<std::shared_ptr<DoubleParameter> 
 		const std::vector<std::shared_ptr<BoolParameter> >& inB)
 :vDoublePar_(inD), vIntPar_(inI), vBoolPar_(inB){
 	//TODO check names!
-	make_str();
+	//make_str();
 }
 
 ParameterList::ParameterList(const ParameterList& in){
