@@ -53,17 +53,17 @@ AmpSumIntensity::AmpSumIntensity(const AmpSumIntensity& other) : nAmps(other.nAm
 }
 
 AmpSumIntensity::AmpSumIntensity(AmplitudeSetup ini, normStyle ns, std::shared_ptr<Efficiency> eff, unsigned int entries, double dpArea) :
-		totAmp("relBWsumAmplitude", "totAmp"), ampSetup(ini),
-		_entries(entries), _normStyle(ns), _calcNorm(1), _dpArea(dpArea),
-		_calcMaxFcnVal(0),eff_(eff)
+				totAmp("relBWsumAmplitude", "totAmp"), ampSetup(ini),
+				_entries(entries), _normStyle(ns), _calcNorm(1), _dpArea(dpArea),
+				_calcMaxFcnVal(0),eff_(eff)
 {
 	init();
 }
 
 AmpSumIntensity::AmpSumIntensity(AmplitudeSetup ini, std::shared_ptr<Efficiency> eff, unsigned int entries, double dpArea) :
-		totAmp("relBWsumAmplitude", "totAmp"), ampSetup(ini),
-		_entries(entries), _normStyle(none), _calcNorm(0), _dpArea(dpArea),
-		_calcMaxFcnVal(0),eff_(eff)
+				totAmp("relBWsumAmplitude", "totAmp"), ampSetup(ini),
+				_entries(entries), _normStyle(none), _calcNorm(0), _dpArea(dpArea),
+				_calcMaxFcnVal(0),eff_(eff)
 {
 	init();
 }
@@ -71,9 +71,9 @@ AmpSumIntensity::AmpSumIntensity(AmplitudeSetup ini, std::shared_ptr<Efficiency>
 AmpSumIntensity::AmpSumIntensity(const double inM, const double inBr, const double in1,const double in2, const double in3,
 		std::string nameM, std::string name1,std::string name2,std::string name3,
 		AmplitudeSetup ini, unsigned int entries, normStyle ns, double dpArea) :
-		totAmp("relBWsumAmplitude", "totAmp"), ampSetup(ini),
-		_entries(entries), _normStyle(ns), _calcNorm(1),_dpArea(dpArea),
-		_calcMaxFcnVal(0),eff_(std::shared_ptr<Efficiency>(new UnitEfficiency()))
+				totAmp("relBWsumAmplitude", "totAmp"), ampSetup(ini),
+				_entries(entries), _normStyle(ns), _calcNorm(1),_dpArea(dpArea),
+				_calcMaxFcnVal(0),eff_(std::shared_ptr<Efficiency>(new UnitEfficiency()))
 {
 	init();
 }
@@ -197,7 +197,7 @@ void AmpSumIntensity::init(){
 		tmpbw->SetNormalization(1/norm);
 	}// end loop over resonancesFlatte
 
-//	ampSetup.save(ampSetup.getFilePath());//save updated information to input file
+	//	ampSetup.save(ampSetup.getFilePath());//save updated information to input file
 	nAmps=rr.size();
 	if(_calcNorm) integral();
 	BOOST_LOG_TRIVIAL(info)<<"AmpSumIntensity: completed setup!";
@@ -216,13 +216,13 @@ void AmpSumIntensity::calcMaxVal(ParameterList& par, std::shared_ptr<Generator> 
 }
 void AmpSumIntensity::calcMaxVal(std::shared_ptr<Generator> gen){
 	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
-//	double xLimit_low[2] = {kin->m13_sq_min,kin->m23_sq_min};
-//	double xLimit_high[2] = {kin->m13_sq_max,kin->m23_sq_max};
-//	boost::minstd_rand rndGen2(123);
-//	boost::uniform_real<> uni_dist13(xLimit_low[0],xLimit_high[0]);
-//	boost::uniform_real<> uni_dist23(xLimit_low[1],xLimit_high[1]);
-//	boost::variate_generator<boost::minstd_rand&, boost::uniform_real<> > uni13(rndGen2, uni_dist13);
-//	boost::variate_generator<boost::minstd_rand&, boost::uniform_real<> > uni23(rndGen2, uni_dist23);
+	//	double xLimit_low[2] = {kin->m13_sq_min,kin->m23_sq_min};
+	//	double xLimit_high[2] = {kin->m13_sq_max,kin->m23_sq_max};
+	//	boost::minstd_rand rndGen2(123);
+	//	boost::uniform_real<> uni_dist13(xLimit_low[0],xLimit_high[0]);
+	//	boost::uniform_real<> uni_dist23(xLimit_low[1],xLimit_high[1]);
+	//	boost::variate_generator<boost::minstd_rand&, boost::uniform_real<> > uni13(rndGen2, uni_dist13);
+	//	boost::variate_generator<boost::minstd_rand&, boost::uniform_real<> > uni23(rndGen2, uni_dist23);
 	double maxM23=-999; double maxM13=-999; double maxVal=0;
 	for(unsigned int i=0; i<40000; i++){
 		double m23sq=gen->getUniform()*(kin->m23_sq_max-kin->m23_sq_min)+kin->m23_sq_min;
@@ -310,7 +310,8 @@ const double AmpSumIntensity::integral(){
 }
 const ParameterList& AmpSumIntensity::intensity(std::vector<double> point, ParameterList& par){
 	setParameterList(par);
-	dataPoint dataP; dataP.setVal("m23sq",point[0]); dataP.setVal("m13sq",point[1]);
+	//	dataPoint dataP; dataP.setVal("m23sq",point[0]); dataP.setVal("m13sq",point[1]);
+	dataPoint dataP; dataP.setVal(0,point[0]); dataP.setVal(1,point[1]);
 	return intensity(dataP);
 }
 const ParameterList& AmpSumIntensity::intensity(dataPoint& point, ParameterList& par){
@@ -331,14 +332,14 @@ const ParameterList& AmpSumIntensity::intensity(dataPoint& point){
 	return result;
 }
 std::shared_ptr<FunctionTree> AmpSumIntensity::functionTree(ParameterList& outPar) {
-  if(outPar.GetNParameter()>0) return std::shared_ptr<FunctionTree>();
-  fillStartParVec(outPar);
-  outPar.AddParameter(treePar->GetDoubleParameter("x"));
-  outPar.AddParameter(treePar->GetDoubleParameter("m23"));
-  outPar.AddParameter(treePar->GetDoubleParameter("m13"));
-  outPar.AddParameter(treePar->GetDoubleParameter("m12"));
+	if(outPar.GetNParameter()>0) return std::shared_ptr<FunctionTree>();
+	fillStartParVec(outPar);
+	outPar.AddParameter(treePar->GetDoubleParameter("x"));
+	outPar.AddParameter(treePar->GetDoubleParameter("m23"));
+	outPar.AddParameter(treePar->GetDoubleParameter("m13"));
+	outPar.AddParameter(treePar->GetDoubleParameter("m12"));
 
-  return myTree;
+	return myTree;
 }
 void AmpSumIntensity::setParameterList(ParameterList& par){
 	//parameters varied by Minimization algorithm
@@ -362,11 +363,29 @@ const bool AmpSumIntensity::fillStartParVec(ParameterList& outPar){
 }
 
 void AmpSumIntensity::printAmps(){
-	BOOST_LOG_TRIVIAL(info)<<"AmpSumIntensity: Printing amplitudes with current(!) set of parameters:";
+	std::stringstream outStr;
+	outStr<<"AmpSumIntensity: Printing amplitudes with current(!) set of parameters:\n";
 	for(unsigned int i=0;i<nAmps;i++){
-		BOOST_LOG_TRIVIAL(info) << namer[i]<<":"
-				<<" Amplitude: "<<rr[i]->GetValue()<<"+-"<<rr[i]->GetError()->GetError()
-				<<"	Phase: "<<phir[i]->GetValue()<<"+-"<<phir[i]->GetError()->GetError();
+		outStr<<std::setw(12)<<totAmp.getAmpName(i)<<": ";
+		outStr<<"Mag = "<<std::setw(6)<<rr[i]->GetValue()<<" +- "<<std::setw(5)<<rr[i]->GetError()->GetError();
+		outStr<<"   Phase = "<<std::setw(6)<<phir[i]->GetValue()<<" +- "<<std::setw(5)<<phir[i]->GetError()->GetError();
+		if(!(i==nAmps-1)) outStr << "\n";
 	}
+	BOOST_LOG_TRIVIAL(info)<<outStr.str();
+	return;
+}
+void AmpSumIntensity::printFractions(){
+	std::stringstream outStr;
+	outStr<<"Fit fractions for all amplitudes: \n";
+	double sumFrac=0;
+	for(unsigned int i=0;i<totAmp.getNAmps();i++){
+		double frac = getFraction(i);
+		sumFrac+=frac;
+		outStr<<std::setw(10)<<totAmp.getAmpName(i)<<":    "<<frac<<"\n";
+//		if(!(i==totAmp.getNAmps()-1)) outStr << "\n";
+	}
+	outStr<<std::setw(10)<<" "<<"    ==========\n";
+	outStr<<std::setw(10)<<" "<<"     "<<sumFrac;
+	BOOST_LOG_TRIVIAL(info)<<outStr.str();
 	return;
 }

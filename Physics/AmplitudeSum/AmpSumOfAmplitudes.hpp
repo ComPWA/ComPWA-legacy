@@ -37,6 +37,10 @@ public:
   double evaluateSlice(dataPoint& point,std::complex<double>*, unsigned int, unsigned int) const ;
   double evaluate(dataPoint& point) const ;
   
+  virtual double getFraction(std::string name);
+  virtual double getFraction(unsigned int id);
+  virtual unsigned int getNAmps() {return _pdfList.size();};
+  virtual std::string getAmpName(unsigned int id) {return _pdfList[id]->GetName();};
 protected:
   std::vector<std::shared_ptr<AmpAbsDynamicalFunction> > _pdfList ;   //  List of component PDFs
   std::vector<std::shared_ptr<DoubleParameter> > _intList;    //  List of relative intensities

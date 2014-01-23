@@ -68,7 +68,9 @@ private:
 	double edm; //estimated distance to minimum
 	boost::numeric::ublas::symmetric_matrix<double,boost::numeric::ublas::upper> cov;
 	boost::numeric::ublas::symmetric_matrix<double,boost::numeric::ublas::upper> corr;
+	std::vector<double> globalCC;
 	void genOutput(std::ostream& out);
+	void genSimpleOutput(std::ostream& out);
 	void init(FunctionMinimum);
 };
 

@@ -48,6 +48,8 @@ public:
 	/** Destructor */
 	virtual ~BreitWigner();
 	virtual void printAmps() {};
+	virtual double getFraction(std::string name) {};
+	virtual void printFractions() {};
 
 	virtual BreitWigner* Clone() {
 		return new BreitWigner(*this);

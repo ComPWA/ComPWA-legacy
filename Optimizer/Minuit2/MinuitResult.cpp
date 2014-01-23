@@ -17,39 +17,46 @@ using namespace boost::log;
 
 void MinuitResult::init(FunctionMinimum min){
 	MnUserParameterState minState = min.UserState();
-	std::vector<double> minuitCovM = minState.Covariance().Data();//Covariance matrix is empty !?
+	MnUserCovariance minuitCovMatrix = minState.Covariance();
+	//	std::vector<double> minuitCovM = minState.Covariance().Data();//Covariance matrix is empty !?
 	using namespace boost::numeric::ublas;
 
+	if(!minState.HasCovariance()){
+		BOOST_LOG_TRIVIAL(error)<<"MinuitResult: no valid correlation matrix available!";
+		return;
+	}
 	/* Size of Minuit covariance vector is given by dim*(dim+1)/2.
 	 * dim is the dimension of the covariance matrix.
 	 * The dimension can therefore be calculated as dim = -0.5+-0.5 sqrt(8*size+1)
 	 */
-	unsigned int dim = -0.5+0.5*sqrt(8*minuitCovM.size()+1);
-
+	unsigned int dim = minuitCovMatrix.Nrow();
+	globalCC = minState.GlobalCC().GlobalCC();
 	symmetric_matrix<double,upper> covMatrix(dim,dim);
 	symmetric_matrix<double,upper> corrMatrix(dim,dim);
 	std::vector<double> variance;
-	if(minuitCovM.size()==dim*(dim+1)/2){
-		for (unsigned i = 0; i < covMatrix.size1 (); ++ i)
-			for (unsigned j = i; j < covMatrix.size2 (); ++ j){
-				/* Calculate position in vector:
-				 * The position is given by: V(i,j)=j+Sum(k=1 -> i){ dim-k }
-				 */
-				unsigned int vecPos = j;
-				for(unsigned int t=1;t<=i;t++) vecPos+=dim-t;
-				double entry = minuitCovM[vecPos];
-				covMatrix (i, j) = entry;
-				if(i==j){
-					if(entry<0) variance.push_back(sqrt((-1)*entry));
-					else variance.push_back(sqrt(entry));
-				}
+	//	if(minuitCovM.size()==dim*(dim+1)/2){
+	for (unsigned i = 0; i < covMatrix.size1 (); ++ i)
+		for (unsigned j = i; j < covMatrix.size2 (); ++ j){
+			/* Calculate position in vector:
+			 * The position is given by: V(i,j)=j+Sum(k=1 -> i){ dim-k }
+			 */
+			//				unsigned int vecPos = j;
+			//				for(unsigned int t=1;t<=i;t++) vecPos+=dim-t;
+			//				vecPos=i+j;
+			double entry = minuitCovMatrix(j,i);
+			covMatrix (i, j) = entry;
+			if(i==j){
+				variance.push_back(sqrt(entry));
+				//					if(entry<0) variance.push_back(sqrt((-1)*entry));
+				//					else variance.push_back(sqrt(entry));
 			}
-		for (unsigned i = 0; i < covMatrix.size1 (); ++ i)
-			for (unsigned j = i; j < covMatrix.size2 (); ++ j){
-				double denom = variance[i]*variance[j];
-				corrMatrix(i,j) = covMatrix(i,j)/denom;
-			}
-	} else BOOST_LOG_TRIVIAL(error)<<"MinuitResult: no valid correlation matrix available!";
+		}
+	for (unsigned i = 0; i < covMatrix.size1 (); ++ i)
+		for (unsigned j = i; j < covMatrix.size2 (); ++ j){
+			double denom = variance[i]*variance[j];
+			corrMatrix(i,j) = covMatrix(i,j)/denom;
+		}
+	//	} else BOOST_LOG_TRIVIAL(error)<<"MinuitResult: no valid correlation matrix available!";
 	cov=covMatrix;
 	corr=corrMatrix;
 	finalLH = minState.Fval();
@@ -67,6 +74,14 @@ void MinuitResult::init(FunctionMinimum min){
 
 }
 
+void MinuitResult::genSimpleOutput(std::ostream& out){
+	for(unsigned int o=0;o<finalParameters.GetNDouble();o++){
+		std::shared_ptr<DoubleParameter> outPar = finalParameters.GetDoubleParameter(o);
+		out<<outPar->GetName()<<" "<<outPar->GetValue()<<" "<<outPar->GetError()->GetError()<<" ";
+	}
+
+	return;
+}
 void MinuitResult::genOutput(std::ostream& out){
 	bool printTrue=0;
 	if(trueParameters.GetNParameter()) printTrue=1;
@@ -144,21 +159,30 @@ void MinuitResult::genOutput(std::ostream& out){
 		tableCov.footer();
 
 		out<<"CORRELATION MATRIX:"<<std::endl;
-		tableCov.header();
+		TableFormater tableCorr(&out);
+		tableCorr.addColumn(" ",15);//add empty first column
+		tableCorr.addColumn("GlobalCC",10);//global correlation coefficient
+		for(unsigned int o=0;o<finalParameters.GetNDouble();o++){
+			std::shared_ptr<DoubleParameter> ppp = finalParameters.GetDoubleParameter(o);
+			if(ppp->IsFixed()) continue;
+			tableCorr.addColumn(ppp->GetName(),15);//add columns in correlation matrix
+		}
+		tableCorr.header();
 		n=0;
 		for(unsigned int o=0;o<finalParameters.GetNDouble();o++){
 			std::shared_ptr<DoubleParameter> ppp = initialParameters.GetDoubleParameter(o);
 			std::shared_ptr<DoubleParameter> ppp2 = finalParameters.GetDoubleParameter(o);
 			if(ppp->IsFixed()) continue;
-			tableCov << ppp->GetName();
+			tableCorr << ppp->GetName();
+			tableCorr << globalCC[o];
 			for(unsigned int t=0;t<corr.size1();t++) {
-				if(n>=corr.size2()) { tableCov<< " "; continue; }
-				if(t>=n)tableCov << corr(n,t);
-				else tableCov << "";
+				if(n>=corr.size2()) { tableCorr<< " "; continue; }
+				if(t>=n)tableCorr << corr(n,t);
+				else tableCorr << "";
 			}
 			n++;
 		}
-		tableCov.footer();
+		tableCorr.footer();
 	}
 
 }
