@@ -43,8 +43,10 @@ double MinuitFcn::operator()(const std::vector<double>& x) const{
 		//_parList.SetParameterValue(i,x[i]);
 		std::shared_ptr<DoubleParameter> actPat = _parList.GetDoubleParameter(_parNames.at(i));
 		if(!actPat->IsFixed())
-			if(x[i]==x[i])
+			if(x[i]==x[i]){
 				actPat->SetValue(x[i]);
+//				std::cout<<_parNames.at(i)<<" "<<x[i]<<std::endl;
+			}
 	}
 	double result=_myDataPtr->controlParameter(_parList);
 	BOOST_LOG_TRIVIAL(debug) << "MinuitFcn: -log(L) = "<< result << " Parameters: "<<paramOut.str();

@@ -82,7 +82,9 @@ void AmpSumIntensity::init(){
 	result.AddParameter(std::shared_ptr<DoubleParameter>(new DoubleParameter("AmpSumResult")));
 
 	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
-	if(_dpArea==-999) _dpArea = kin->getDParea();
+	_dpArea = kin->getPhspVolume();
+//	std::cout<<kin->getPhspVolume()<<std::endl;
+	_calcNorm=1;
 	BOOST_LOG_TRIVIAL(debug)<<"AmpSumIntensity::init() number of Entries in dalitz plot set to: "<<_entries;
 	BOOST_LOG_TRIVIAL(debug)<<"AmpSumIntensity::init() area of phase space: "<<_dpArea;
 
@@ -248,7 +250,7 @@ double AmpSumIntensity::normReso(std::shared_ptr<AmpAbsDynamicalFunction> amp){
 	else if(_normStyle==one) norm = sqrt(amp->integral());
 	else if(_normStyle==entries) norm = sqrt(_dpArea*amp->integral()/_entries);
 	BOOST_LOG_TRIVIAL(debug)<<"AmpSumIntensity::normRes Normalization constant for "
-			<<amp->GetName()<<": "<<1/norm;
+			<<amp->GetName()<<": "<<1.0/norm;
 	return norm;
 
 }
@@ -344,6 +346,8 @@ std::shared_ptr<FunctionTree> AmpSumIntensity::functionTree(ParameterList& outPa
 void AmpSumIntensity::setParameterList(ParameterList& par){
 	//parameters varied by Minimization algorithm
 	for(unsigned int i=0; i<nAmps; i++){
+//		*rr[i] = DoubleParameter(par.GetDoubleParameter(2*i));
+//		*phir[i] = DoubleParameter(par.GetDoubleParameter(2*i+1));
 		rr[i]->SetValue(par.GetDoubleParameter(2*i)->GetValue());
 		rr[i]->SetError(par.GetDoubleParameter(2*i)->GetError());
 		phir[i]->SetValue(par.GetDoubleParameter(2*i+1)->GetValue());

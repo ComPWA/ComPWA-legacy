@@ -79,7 +79,7 @@ public:
 	//! checks of data point is within phase space boundaries
 	bool isWithinPhsp(const dataPoint &point) ;
 	//! returns the dalitz plot area for the given kinematics
-	double getDParea();
+	double getPhspVolume();
 
 	//!maximum value for variable m23=5, m13=4, m12=3
 	double mimax(unsigned int i) const;
