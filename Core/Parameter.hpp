@@ -175,7 +175,7 @@ public:
 		Notify();
 	}
 	//! Setter for error of parameter
-	virtual void SetError(const std::complex<double> inErr) {err_ = inErr; hasError_ = true; make_str();}
+	virtual void SetError(const std::complex<double> inErr) {err_ = inErr; hasError_ = true;} //make_str();}
 	//! Setter for bounds of parameter
 	virtual const bool SetMinMax(const std::complex<double> inMin, const std::complex<double> inMax){
 		bool valid = check_bounds(inMin, inMax);
@@ -454,7 +454,7 @@ public:
 		Notify();
 	}
 	//! Setter for error of parameter
-	virtual void SetError(std::shared_ptr<ParError<double>> err) {error_ = err; hasError_ = true; make_str();}
+	virtual void SetError(std::shared_ptr<ParError<double>> err) {error_ = err; hasError_ = true;} //make_str();}
 	//! Setter for bounds of parameter
 	virtual const bool SetMinMax(const double inMin, const double inMax){
 		bool valid = check_bounds(inMin, inMax);
@@ -746,7 +746,7 @@ public:
 		Notify();
 	}
 	//! Setter for error of parameter
-	virtual void SetError(const int inErr) {err_ = inErr; hasError_ = true; make_str();}
+	virtual void SetError(const int inErr) {err_ = inErr; hasError_ = true;} //make_str();}
 	//! Setter for bounds of parameter
 	virtual const bool SetMinMax(const int inMin, const int inMax){
 		bool valid = check_bounds(inMin, inMax);
@@ -965,7 +965,7 @@ public:
 		Notify();
 	}
 	//! Setter for error of parameter
-	virtual void SetError(const bool inErr) {err_ = inErr; hasError_ = true; make_str();}
+	virtual void SetError(const bool inErr) {err_ = inErr; hasError_ = true;} //make_str();}
 
 	//! Call to fix parameter
 	virtual const inline void SetParameterFixed() {fixed_=true;}
