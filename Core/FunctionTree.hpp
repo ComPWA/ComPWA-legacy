@@ -97,7 +97,7 @@ public:
     * \param parent the parent of this node (for linking)
     * \sa addNode(), createHead(), createLeaf()
    */
-  virtual void createNode(const std::string& name, std::shared_ptr<Strategy> strat, std::string parent, unsigned int dim=1){
+  virtual void createNode(const std::string& name, std::shared_ptr<Strategy> strat, std::string parent, unsigned int dim=1, bool useVec=false){
     //TODO: (type of) parameter from strategy!
     //std::shared_ptr<AbsParameter> inter = strat->GetResultContainer();
 	if(dim==0) return; //TODO: exception
@@ -108,11 +108,20 @@ public:
       std::shared_ptr<TreeNode> newNode(new TreeNode(name, inter, strat, parentNode));
       nodes_.insert(std::pair<std::string, std::shared_ptr<TreeNode> >(name,newNode));
       newNode->linkParents();
-	}else{
+	}else if(useVec){
       std::vector<std::shared_ptr<AbsParameter>> inter;
       for(unsigned int i=0; i<dim; i++)
     	  inter.push_back(std::shared_ptr<DoubleParameter>(new DoubleParameter("par"+name+"_d"+std::to_string((long long unsigned int)i),0.)));
       std::shared_ptr<TreeNode> parentNode = nodes_.at(parent);
+      std::shared_ptr<TreeNode> newNode(new TreeNode(name, inter, strat, parentNode));
+      nodes_.insert(std::pair<std::string, std::shared_ptr<TreeNode> >(name,newNode));
+      newNode->linkParents();
+	}else{
+      std::vector<double> vals;
+      for(unsigned int i=0; i<dim; i++)
+        vals.push_back(0.);
+	  std::shared_ptr<MultiDouble> inter(new MultiDouble("par"+name,vals));
+	  std::shared_ptr<TreeNode> parentNode = nodes_.at(parent);
       std::shared_ptr<TreeNode> newNode(new TreeNode(name, inter, strat, parentNode));
       nodes_.insert(std::pair<std::string, std::shared_ptr<TreeNode> >(name,newNode));
       newNode->linkParents();

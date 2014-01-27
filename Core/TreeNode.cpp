@@ -74,7 +74,10 @@
 	  }
 	  _changed=false;
 	  // std::cout << "Values: " << newVals.GetNDouble() << std::endl;
-	  _value[0] = _strat->execute(newVals);
+	  if(_value[0]->type() == ParType::MDOUBLE)
+	    _value[0] = _strat->execute(newVals, true);
+	  else
+	    _value[0] = _strat->execute(newVals);
     }else{ //i have a certain dim, children must fill it
 
       for(unsigned int ele=0; ele<_value.size(); ele++){
@@ -87,10 +90,11 @@
 	      if(_children[i]->needsCalculation())
 		    _children[i]->recalculate();
 
-		  if(_children[i]->getDim()==1)
+		  if(_children[i]->getDim()==1){
 		    para = _children[i]->getValue();
-		  else
+		  }else{
 		    para = _children[i]->getValue(ele);
+		  }
 
 		  if(!para) std::cout << this->getName() << " " << i << std::endl;
 		  //para->type();

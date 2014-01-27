@@ -42,7 +42,7 @@ public:
     return ("WignerD of "+name);
   }
 
-  virtual std::shared_ptr<AbsParameter> execute(ParameterList& paras) {
+  virtual std::shared_ptr<AbsParameter> execute(ParameterList& paras, bool multi=false) {
 
     double Gamma0, GammaV;
     double _m23 = double(paras.GetParameterValue("m23"));

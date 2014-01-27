@@ -123,7 +123,9 @@ public:
 
 
   //! Getter for number of parameter
-  virtual const inline unsigned int GetNParameter() const {return (vDoublePar_.size()+vIntPar_.size()+vBoolPar_.size());}
+  virtual const inline unsigned int GetNParameter() const {return (vDoublePar_.size()+vIntPar_.size()+vBoolPar_.size()+vMultiDouble_.size());}
+  //! Getter for number of double parameter
+  virtual const inline unsigned int GetNMultiDouble() const {return vMultiDouble_.size();}
   //! Getter for number of double parameter
   virtual const inline unsigned int GetNDouble() const {return vDoublePar_.size();}
   //! Getter for number of integer parameter
@@ -138,6 +140,14 @@ public:
    * \return par output container for loaded parameter
   */
   virtual std::shared_ptr<DoubleParameter> GetDoubleParameter(const unsigned int i) ;
+
+  //! Getter for double list parameter
+  /*!
+   * Getter for double list parameter MultiDouble
+   * \param i input number of parameter to load
+   * \return par output container for loaded parameter
+  */
+  virtual std::shared_ptr<MultiDouble> GetMultiDouble(const unsigned int i) ;
 
   //! Getter for integer parameter
   /*!
@@ -162,6 +172,14 @@ public:
    * \return par output container for loaded parameter
   */
   virtual const double GetParameterValue(const unsigned int i) const ;
+
+  //! Getter for double list parameter
+  /*!
+   * Getter for double list parameter MultiDouble
+   * \param parname input name of parameter to load
+   * \return par output container for loaded parameter
+  */
+  virtual std::shared_ptr<MultiDouble> GetMultiDouble(const std::string parname) ;
 
   //! Getter for floating point parameter
   /*!
@@ -225,6 +243,13 @@ public:
    * \param par input parameter
   */
   virtual void AddParameter(std::shared_ptr<AbsParameter> par);
+
+  //! Add double list parameter
+  /*!
+   * Adds a double parameter MultiDouble to the list
+   * \param par input parameter
+  */
+  virtual void AddParameter(std::shared_ptr<MultiDouble> par);
 
   //! Add floating point parameter
   /*!
@@ -300,9 +325,11 @@ public:
   std::string const& to_str() ;
 
 protected:
+  std::map<std::string,unsigned int> mMultiDoubleID_; /*!< Map of double list parameter ids */
   std::map<std::string,unsigned int> mDoubleParID_; /*!< Map of floating point parameter ids */
   std::map<std::string,unsigned int> mIntParID_; /*!< Map of integer parameter ids */
   std::map<std::string,unsigned int> mBoolParID_; /*!< Map of boolean parameter ids */
+  std::vector<std::shared_ptr<MultiDouble> > vMultiDouble_; /*!< Vector of floating point parameters */
   std::vector<std::shared_ptr<DoubleParameter> > vDoublePar_; /*!< Vector of floating point parameters */
   std::vector<std::shared_ptr<IntegerParameter> > vIntPar_; /*!< Vector of integer parameters */
   std::vector<std::shared_ptr<BoolParameter> > vBoolPar_; /*!< Vector of boolean parameters */

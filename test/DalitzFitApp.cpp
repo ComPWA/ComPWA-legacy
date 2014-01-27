@@ -69,7 +69,7 @@ const Double_t PI = 3.14159; // m/s
  * The main function.
  */
 int main(int argc, char **argv){
-  boost::log::core::get()->set_filter(trivial::severity >= trivial::info); //setting log level
+  boost::log::core::get()->set_filter(trivial::severity >= trivial::debug); //setting log level
   std::cout << "  ComPWA Copyright (C) 2013  Mathias Michel " << std::endl;
   std::cout << "  This program comes with ABSOLUTELY NO WARRANTY; for details see license.txt" << std::endl;
   std::cout << std::endl;
@@ -96,7 +96,7 @@ int main(int argc, char **argv){
   std::cout << "Load Modules" << std::endl;
   std::shared_ptr<Data> myReader(new RootReader(file, false,"data"));
   std::shared_ptr<Data> myPHSPReader(new RootReader(file, false,"mc"));
-  std::shared_ptr<Amplitude> amps(new AmpSumIntensity(ini,std::shared_ptr<Efficiency>(new UnitEfficiency()), myReader->getNEvents()));
+  std::shared_ptr<Amplitude> amps(new AmpSumIntensity(ini, AmpSumIntensity::normStyle::none, std::shared_ptr<Efficiency>(new UnitEfficiency()), myReader->getNEvents()));
 
   //std::shared_ptr<Amplitude> amps(new AmpSumIntensity(M, Br, m1, m2, m3,"J/psi","gamma","pi0","pi0", ini));
   // Initiate parameters
@@ -126,7 +126,7 @@ int main(int argc, char **argv){
   for(unsigned int i=0; i<par.GetNDouble(); i++){
     std::shared_ptr<DoubleParameter> tmp = par.GetDoubleParameter(i);
     optiInt[i] = tmp->GetValue();
-    if(i<2 || i>3){ //omega's and f0 fixed
+    if(i<0 || i>1){ //omega's and f0 fixed
       tmp->FixParameter(true);
     }else{
       tmp->SetValue(tmp->GetValue()/((i+1)));
@@ -159,6 +159,18 @@ int main(int argc, char **argv){
       std::cout << "   [ start: " << startInt[i] << " ,";
       std::cout << " optimal: " << optiInt[i] << " ]" << std::endl;
   }
+
+  AmplitudeSetup iniTrue(resoFile);//put start parameters here
+  std::shared_ptr<Amplitude> trueAmp(new AmpSumIntensity(iniTrue, AmpSumIntensity::normStyle::none, std::shared_ptr<Efficiency>(new UnitEfficiency()), myReader->getNEvents()));
+  ParameterList truePar;
+  trueAmp->fillStartParVec(truePar); //true values
+  genResult->setTrueParameters(truePar);
+  genResult->print();
+  amps->printFractions();
+  genResult->writeText("fitresult.txt");
+  genResult->writeSimpleText("simplefitresult.txt");
+
+
 /*
   //Plot result
   TH2D* bw12 = new TH2D("bw12","inv. mass-sq of particles 1&2 Generated",1000,0.,10.,1000,0.,10.);

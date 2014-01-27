@@ -50,6 +50,9 @@ int main(int argc, char **argv) {
   std::shared_ptr<DoubleParameter> parC(new DoubleParameter("parC",3.));
   std::shared_ptr<DoubleParameter> parD(new DoubleParameter("parD",1.));
 
+ // std::cout << parA << std::endl;
+  //std::cout << " ValToStr: " << parA->val_to_str() << std::endl;
+
   std::shared_ptr<FunctionTree> myTree;
 
   if(autonodes){ //Let FunctionTree manage the creation of the tree
@@ -139,7 +142,7 @@ int main(int argc, char **argv) {
 //   if(autonodes){ //Let FunctionTree manage the creation of the tree
     myTreeMult = std::shared_ptr<FunctionTree>(new FunctionTree());
     myTreeMult->createHead("R", add);
-    myTreeMult->createNode("ab", mult, "R", nElements);
+    myTreeMult->createNode("ab", mult, "R", nElements, true);
     myTreeMult->createLeaf("a", nVecParA, "ab");
     myTreeMult->createLeaf("b", nParB, "ab");
 
@@ -150,6 +153,42 @@ int main(int argc, char **argv) {
 
     std::cout << std::endl << "Multitree Setup and calculated R = Sum[a*b] with one leaf containing " << nElements << " elements" << std::endl;
     std::cout << std::endl << myTreeMult << std::endl << std::endl;
+
+
+
+    //------------new Tree with multiDouble Par----------------
+    nElements = 5;
+    std::shared_ptr<FunctionTree> myTreeMultD;
+
+    //------------SetUp the parameters for R = Sum of (a * b)-----------
+    std::vector<double> nMasses, nPhsp;
+    std::shared_ptr<AbsParameter> mParB(new DoubleParameter("parB",2));
+    std::shared_ptr<AbsParameter> mParD(new DoubleParameter("parD",3));
+    for(unsigned int i=0; i<nElements; i++){
+      //std::shared_ptr<DoubleParameter> tmpA(new DoubleParameter("parA_"+i,i+1));
+      nMasses.push_back(i+1);
+      nPhsp.push_back(2*i+1);
+      nPhsp.push_back(2*i+2);
+    }
+    std::shared_ptr<MultiDouble> mParA(new MultiDouble("parA",nMasses));
+    std::shared_ptr<MultiDouble> mParC(new MultiDouble("parC",nPhsp));
+
+    myTreeMultD = std::shared_ptr<FunctionTree>(new FunctionTree());
+    myTreeMultD->createHead("R", add);
+    myTreeMultD->createNode("Rmass", mult, "R", nElements);
+    myTreeMultD->createNode("ab", mult, "Rmass", nElements, false);
+    myTreeMultD->createLeaf("a", mParA, "ab");
+    myTreeMultD->createLeaf("b", mParB, "ab");
+    myTreeMultD->createNode("Rphsp", add, "Rmass");
+    myTreeMultD->createNode("cd", mult, "Rphsp", nElements*2, false);
+    myTreeMultD->createLeaf("c", mParC, "cd");
+    myTreeMultD->createLeaf("d", mParD, "cd");
+
+    //------------Trigger Calculation----------------
+     myTreeMultD->recalculate();
+
+     std::cout << std::endl << "MultiDouble Setup and calculated R = Sum[a*b] with one leaf containing " << nElements << " elements" << std::endl;
+     std::cout << std::endl << myTreeMultD << std::endl << std::endl;
 
 
 

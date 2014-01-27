@@ -43,7 +43,7 @@ public:
     return ("relativistic BreitWigner of "+name);
   }
 
-  virtual std::shared_ptr<AbsParameter> execute(ParameterList& paras) {
+  virtual std::shared_ptr<AbsParameter> execute(ParameterList& paras, bool multi=false) {
 
     double Gamma0, GammaV, m0, m, ma, mb, d;
     unsigned int spin;
