@@ -31,6 +31,129 @@
 #include "Core/AbsParameter.hpp"
 #include "Core/Exceptions.hpp"
 
+class MultiDouble: public AbsParameter
+{
+
+public:
+
+	//! Standard constructor without information
+	/*!
+	 * Standard constructor with no information provided. Creates parameter
+	 * with value 0 but without bounds or an error.
+	 * \param inName internal string identifier of this parameter
+	 * \sa make_str()
+	 */
+	//MultiDouble(std::string inName):AbsParameter(inName, ParType::MDOUBLE){
+		//make_str();
+	//}
+
+	//! Standard constructor with a value
+	/*!
+	 * Standard constructor with just a value provided. Creates parameter
+	 * with given value but without bounds or an error.
+	 * \param inName internal string identifier of this parameter
+	 * \param values input vector of values of the parameter
+	 * \sa make_str()
+	 */
+	MultiDouble(std::string inName, const std::vector<double>& values):AbsParameter(inName, ParType::MDOUBLE),val_(values) {
+		//make_str();
+	}
+
+	//! Copy constructor using = operator
+	/*!
+	 * Simple copy constructor using the = operator. As this operator is not
+	 * overloaded in this class, c++ will copy every member variable. As this
+	 * is a container class, this should be fine.
+	 * \param in input PWAParameter which variables will be copied
+	 */
+	MultiDouble(const MultiDouble& in):AbsParameter(in.name_, ParType::MDOUBLE){
+	  *this = in;
+//		error_ = std::shared_ptr<ParError<double>>(new ParError<double>(*in.error_));
+	}
+
+	//! Empty Destructor
+	/*!
+	 * There is nothing to destroy :(
+	 */
+	virtual ~MultiDouble() { /* nothing */	}
+
+	//! Getter for number of values in this multipar
+	virtual const inline double GetNValues() const {return val_.size();}
+
+	//! Getter for value of parameter
+	virtual const inline std::vector<double>& GetValues() const {return val_;}
+
+	//! Getter for value of parameter
+	virtual const inline double GetValue(unsigned int i=0) const {if(i>=val_.size()) return 0; return val_[i];}
+
+	//! Getter for FunctionTree support
+	virtual const std::complex<double> getNodeValue(unsigned int i=0){
+		if(i>=val_.size()) return std::complex<double>();
+		return std::complex<double>(val_[i],0.);
+	}
+
+	//! Setter for value of parameter
+	virtual void SetValue(const double inVal, unsigned int i=0) {
+		if(i>=val_.size()) return;
+		val_[i] = inVal;
+		//make_str();
+		Notify();
+	}
+
+protected:
+	virtual const std::string TypeName(){ return "double collection"; }
+	//std::string out_; /*!< Output string to print information */
+	std::vector<double> val_;/*!< Containers of parameter information */
+
+	//! A protected function which returns an output string for printing
+	/*!
+	 * This function uses all available information about the parameter
+	 * to create a string which will be streamed via the stream operator <<.
+	 * \sa operator<<, to_str(), type()
+	 */
+	virtual std::string make_str() {
+		std::stringstream oss;
+		oss << name_;
+		unsigned int max=val_.size();
+		if(max>10) max=10; //display only 10 variables
+		oss << "\t Val = ";
+		for(unsigned int i=0; i<max-1; i++)
+		  oss << val_[i] << ", ";
+		oss << val_[max-1];
+		if(max<val_.size()) oss << " ... ";
+		oss << "\t Type = " << TypeName();
+		return oss.str();
+	}
+
+	//! A protected function which returns an output string for printing
+	/*!
+	 * This function uses only the value information about the parameter
+	 * to create a string which will be streamed via the stream operator <<.
+	 * \sa operator<<, make_str()
+	 */
+	virtual std::string make_val_str() {
+		std::stringstream ovs;
+		unsigned int max=val_.size();
+		if(max>10) max=10; //display only 10 variables
+		for(unsigned int i=0; i<max-1; i++)
+			ovs << val_[i] << ", ";
+		ovs << val_[max-1];
+		if(max<val_.size()) ovs << " ... ";
+		return ovs.str();
+	}
+
+private:
+	friend class boost::serialization::access;
+	template<class archive>
+	void serialize(archive& ar, const unsigned int version)
+	{
+//		ar & boost::serialization::base_object<AbsParameter>(*this);
+//		ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(AbsParameter);
+		ar & BOOST_SERIALIZATION_NVP(val_);
+	}
+};
+BOOST_CLASS_IMPLEMENTATION(MultiDouble,boost::serialization::object_serializable);
+
 
 class ComplexParameter : public AbsParameter
 {

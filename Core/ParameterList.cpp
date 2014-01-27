@@ -50,13 +50,17 @@ ParameterList::ParameterList(const std::vector<std::shared_ptr<DoubleParameter> 
 }
 
 ParameterList::ParameterList(const ParameterList& in){
+	mMultiDoubleID_ = in.mMultiDoubleID_;
 	mDoubleParID_ = in.mDoubleParID_;
 	mIntParID_ = in.mIntParID_;
 	mBoolParID_ = in.mBoolParID_;
 	out_=in.out_;
+	vMultiDouble_.clear();
 	vDoublePar_.clear();
 	vIntPar_.clear();
 	vBoolPar_.clear();
+	for(unsigned int i=0; i<in.GetNMultiDouble();i++)
+		vMultiDouble_.push_back( std::shared_ptr<MultiDouble>(new MultiDouble(*(in.vMultiDouble_[i]))) );
 	for(unsigned int i=0; i<in.GetNDouble();i++)
 		vDoublePar_.push_back( std::shared_ptr<DoubleParameter>(new DoubleParameter(*(in.vDoublePar_[i]))) );
 	for(unsigned int i=0; i<in.GetNInteger();i++)
@@ -70,7 +74,7 @@ ParameterList::~ParameterList() {
 }
 
 std::shared_ptr<AbsParameter> ParameterList::GetParameter(const unsigned int i) {
-	if( !(i < (vBoolPar_.size()+vIntPar_.size()+vDoublePar_.size()) ) ){
+	if( !(i < (vBoolPar_.size()+vIntPar_.size()+vDoublePar_.size()+vMultiDouble_.size()) ) ){
 		throw BadParameter("Parameter not in list");
 		return std::shared_ptr<AbsParameter>();
 	}
@@ -78,8 +82,10 @@ std::shared_ptr<AbsParameter> ParameterList::GetParameter(const unsigned int i) 
 		return vDoublePar_.at(i);
 	else if( i < (vDoublePar_.size()+vIntPar_.size()) ) // is in integer list
 		return vIntPar_.at(i-vDoublePar_.size());
-	else // is in boolean list
+	else if( i < (vDoublePar_.size()+vIntPar_.size()+vBoolPar_.size()) )// is in boolean list
 		return vBoolPar_.at(i-vDoublePar_.size()-vIntPar_.size());
+	else // is in boolean list
+		return vMultiDouble_.at(i-vDoublePar_.size()-vIntPar_.size()-vBoolPar_.size());
 
 	throw BadParameter("Parameter not in list");
 	return std::shared_ptr<AbsParameter>();
@@ -88,6 +94,13 @@ std::shared_ptr<AbsParameter> ParameterList::GetParameter(const unsigned int i) 
 std::shared_ptr<AbsParameter> ParameterList::GetParameter(const std::string parname) {
 	int i=-1;
 
+	try{
+		i=mMultiDoubleID_.at(parname);
+	}
+	catch(...)
+	{
+		i=-1;
+	};
 	try{
 		i=mBoolParID_.at(parname);
 	}
@@ -123,6 +136,14 @@ std::shared_ptr<AbsParameter> ParameterList::GetParameter(const std::string parn
 	return std::shared_ptr<AbsParameter>();
 }
 
+std::shared_ptr<MultiDouble> ParameterList::GetMultiDouble(const unsigned int i) {
+	if( !(i < vMultiDouble_.size()) ){
+		throw BadParameter("Double Parameter not found");
+		//return 0;
+	}
+	return vMultiDouble_.at(i);
+}
+
 std::shared_ptr<DoubleParameter> ParameterList::GetDoubleParameter(const unsigned int i) {
 	if( !(i < vDoublePar_.size()) ){
 		throw BadParameter("Double Parameter not found");
@@ -148,7 +169,7 @@ std::shared_ptr<BoolParameter> ParameterList::GetBoolParameter(const unsigned in
 }
 
 const double ParameterList::GetParameterValue(const unsigned int i) const {
-	if( !(i < (vBoolPar_.size()+vIntPar_.size()+vDoublePar_.size()) ) ){
+	if( !(i < (vBoolPar_.size()+vIntPar_.size()+vDoublePar_.size()+vMultiDouble_.size()) ) ){
 		throw BadParameter("Parameter not in list");
 		return 0;
 	}
@@ -156,11 +177,25 @@ const double ParameterList::GetParameterValue(const unsigned int i) const {
 		return vDoublePar_.at(i)->GetValue();
 	else if( i < (vDoublePar_.size()+vIntPar_.size()) ) // is in integer list
 		return (double) vIntPar_.at(i-vDoublePar_.size())->GetValue();
-	else // is in boolean list
+	else if( i < (vDoublePar_.size()+vIntPar_.size()+vBoolPar_.size()) )// is in boolean list
 		return (double) vBoolPar_.at(i-vDoublePar_.size()-vIntPar_.size())->GetValue();
+	else // is in multidouble list
+		return (double) vMultiDouble_.at(i-vDoublePar_.size()-vIntPar_.size()-vBoolPar_.size())->GetValue();
 
 	throw BadParameter("Parameter not in list");
 	return 0;
+}
+
+std::shared_ptr<MultiDouble> ParameterList::GetMultiDouble(const std::string parname) {
+	unsigned int i=0;
+	try{
+		i=mMultiDoubleID_.at(parname);
+	}
+	catch(...)
+	{
+		throw BadParameter("MultiDouble not found: "+parname);
+	};
+	return vMultiDouble_.at(i);
 }
 
 std::shared_ptr<DoubleParameter> ParameterList::GetDoubleParameter(const std::string parname) {
@@ -271,6 +306,12 @@ void ParameterList::AddParameter(std::shared_ptr<AbsParameter> par) {
 	case ParType::COMPLEX: //TODO
 		//cout << "Easy\n";
 		break;
+	case ParType::MDOUBLE:{
+		std::shared_ptr<MultiDouble> tmp = std::dynamic_pointer_cast<MultiDouble>(par);
+		vMultiDouble_.push_back(tmp);
+		mMultiDoubleID_.insert(std::pair<std::string,unsigned int>(par->GetName(),vMultiDouble_.size()-1));
+		//cout << "Easy\n";
+		break;}
 	case ParType::DOUBLE:{
 		std::shared_ptr<DoubleParameter> tmp = std::dynamic_pointer_cast<DoubleParameter>(par);
 		vDoublePar_.push_back(tmp);
@@ -294,6 +335,14 @@ void ParameterList::AddParameter(std::shared_ptr<AbsParameter> par) {
 	// vDoublePar_.push_back(par);
 	//make_str();
 }
+
+void ParameterList::AddParameter(std::shared_ptr<MultiDouble> par) {
+	//TODO check names!
+	vMultiDouble_.push_back(par);
+	mMultiDoubleID_.insert(std::pair<std::string,unsigned int>(par->GetName(),vMultiDouble_.size()-1));
+	//make_str();
+}
+
 
 void ParameterList::AddParameter(std::shared_ptr<DoubleParameter> par) {
 	//TODO check names!

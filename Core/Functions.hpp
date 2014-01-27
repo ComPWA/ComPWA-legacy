@@ -65,7 +65,7 @@ public:
   virtual const std::string to_str() const =0;
 
   //! Pure Virtual interface for executing a strategy
-  virtual std::shared_ptr<AbsParameter> execute(ParameterList& paras) = 0;
+  virtual std::shared_ptr<AbsParameter> execute(ParameterList& paras, bool multi=false) = 0;
 };
 
 class AddAll : public Strategy
@@ -78,14 +78,41 @@ public:
     return "+";
   }
 
-  virtual std::shared_ptr<AbsParameter> execute(ParameterList& paras){
-    double result = 0;
-    for(unsigned int i=0; i<paras.GetNDouble(); i++)
-      result+=paras.GetParameterValue(i);
+  virtual std::shared_ptr<AbsParameter> execute(ParameterList& paras, bool multi=false){
+	double result = 0.;
 
-    //ParameterList out;
-    // out.AddParameter(DoubleParameter("AddAllResult",result));
-    return std::shared_ptr<AbsParameter>(new DoubleParameter("AddAllResult",result));
+	//MultiDim Paras in input
+	if(paras.GetNMultiDouble()){
+		unsigned int nElements = paras.GetMultiDouble(0)->GetNValues();
+		for(unsigned int i=0; i<paras.GetNDouble(); i++){
+		  result+=paras.GetParameterValue(i);
+		}
+		if(multi){//create multidim output
+		  std::vector<double> results(nElements, result);
+		  for(unsigned int i=0; i<paras.GetNMultiDouble(); i++){
+			std::shared_ptr<MultiDouble> tmp = paras.GetMultiDouble(i);
+			for(unsigned int ele=0; ele<tmp->GetNValues() || ele<nElements; ele++)
+			  results[i] += tmp->GetValue(ele);
+		  }
+		  return std::shared_ptr<AbsParameter>(new MultiDouble("MultAllResult",results));
+		}else{//or collapse multidims
+		  for(unsigned int i=0; i<paras.GetNMultiDouble(); i++){
+			std::shared_ptr<MultiDouble> tmp = paras.GetMultiDouble(i);
+			for(unsigned int ele=0; ele<tmp->GetNValues() || ele<nElements; ele++)
+			  result += tmp->GetValue(ele);
+			}
+		  return std::shared_ptr<AbsParameter>(new DoubleParameter("MultAllResult",result));
+		}//end collapse multidims
+	}//end multidim para treatment
+
+	//only standard parameter
+	for(unsigned int i=0; i<paras.GetNDouble(); i++){
+	  result+=paras.GetParameterValue(i);
+	}
+
+	//ParameterList out;
+	//out.AddParameter(DoubleParameter("MultAllResult",result));
+	return std::shared_ptr<AbsParameter>(new DoubleParameter("MultAllResult",result));
   };
 };
 
@@ -99,10 +126,37 @@ public:
     return "*";
   }
 
-  virtual std::shared_ptr<AbsParameter> execute(ParameterList& paras){
-    double result = 1.;
-    for(unsigned int i=0; i<paras.GetNDouble(); i++)
+  virtual std::shared_ptr<AbsParameter> execute(ParameterList& paras, bool multi=false){
+	double result = 1.;
+
+	//MultiDim Paras in input
+	if(paras.GetNMultiDouble()){
+		unsigned int nElements = paras.GetMultiDouble(0)->GetNValues();
+	    for(unsigned int i=0; i<paras.GetNDouble(); i++){
+	      result*=paras.GetParameterValue(i);
+	    }
+	    if(multi){//create multidim output
+	      std::vector<double> results(nElements, result);
+	      for(unsigned int i=0; i<paras.GetNMultiDouble(); i++){
+	        std::shared_ptr<MultiDouble> tmp = paras.GetMultiDouble(i);
+	        for(unsigned int ele=0; ele<tmp->GetNValues() || ele<nElements; ele++)
+	          results[ele] *= tmp->GetValue(ele);
+	      }
+	      return std::shared_ptr<AbsParameter>(new MultiDouble("MultAllResult",results));
+	    }else{//or collapse multidims
+		  for(unsigned int i=0; i<paras.GetNMultiDouble(); i++){
+		    std::shared_ptr<MultiDouble> tmp = paras.GetMultiDouble(i);
+		    for(unsigned int ele=0; ele<tmp->GetNValues() || ele<nElements; ele++)
+		      result *= tmp->GetValue(ele);
+		    }
+		  return std::shared_ptr<AbsParameter>(new DoubleParameter("MultAllResult",result));
+	    }//end collapse multidims
+	}//end multidim para treatment
+
+    //only standard parameter
+    for(unsigned int i=0; i<paras.GetNDouble(); i++){
       result*=paras.GetParameterValue(i);
+    }
 
     //ParameterList out;
     //out.AddParameter(DoubleParameter("MultAllResult",result));

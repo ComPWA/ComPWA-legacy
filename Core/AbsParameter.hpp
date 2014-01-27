@@ -38,7 +38,7 @@
 #include <boost/serialization/nvp.hpp>
 #include <boost/serialization/shared_ptr.hpp>
 
-enum ParType { COMPLEX = 1, DOUBLE = 2, INTEGER = 3, BOOL = 4, UNDEFINED = 0};
+enum ParType { COMPLEX = 1, DOUBLE = 2, INTEGER = 3, BOOL = 4, MDOUBLE = 5, UNDEFINED = 0};
 enum ErrorType { SYM = 1, ASYM = 2, LHSCAN = 3, NOTDEF = 0};
 
 template <class T> class ParError
@@ -201,9 +201,9 @@ public:
    * \return string with parameter information
    * \sa operator<<, make_str()
   */
-  virtual std::string const& to_str() {
+  virtual std::string to_str() {
 	//make_str();
-    return make_str();;
+    return make_str();
   }
 
   //! A public function returning a string with parameter value
@@ -214,7 +214,7 @@ public:
    * \return string with parameter information
    * \sa make_str()
   */
-  virtual std::string const& val_to_str() {
+  virtual std::string val_to_str() {
 	//make_str();
     return make_val_str();
   }
