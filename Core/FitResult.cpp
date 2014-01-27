@@ -23,9 +23,12 @@ void FitResult::writeSimpleText(std::string filename){
 	return;
 };
 double FitResult::shiftAngle(double v){
-	double val = v;
-	double twoPi = 2*PhysConst::instance()->getConstValue("Pi");
-	while(val> twoPi) val-=twoPi;
-	while(val< -twoPi ) val+=twoPi;
+	double originalVal = v;
+	double val = originalVal;
+	double pi = PhysConst::instance()->getConstValue("Pi");
+	while(val> pi) val-=2*pi;
+	while(val< -pi ) val+=2*pi;
+	if(val!=originalVal)
+		BOOST_LOG_TRIVIAL(info) << "shiftAngle(): shifting parameter from "<<originalVal<< " to "<<val<<"!";
 	return val;
 }

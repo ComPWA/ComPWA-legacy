@@ -122,8 +122,10 @@ void MinuitResult::genOutput(std::ostream& out){
 		std::shared_ptr<DoubleParameter> outPar = finalParameters.GetDoubleParameter(o);
 		bool isFixed = iniPar->IsFixed();
 		bool isAngle=0;
-		if(iniPar->GetName().find("phi")!=string::npos) isAngle=1;//is our Parameter an angle?
-		if(isAngle && !isFixed) outPar->SetValue( shiftAngle(outPar->GetValue()) ); //shift angle to the interval [-pi;pi]
+		if(iniPar->GetName().find("phase")!=string::npos) isAngle=1;//is our Parameter an angle?
+		if(isAngle && !isFixed) {
+			outPar->SetValue( shiftAngle(outPar->GetValue()) ); //shift angle to the interval [-pi;pi]
+		}
 
 		tableResult << o << iniPar->GetName() << *iniPar ;// |nr.| name| inital value|
 		if(isFixed) tableResult<<"FIXED";

@@ -108,6 +108,10 @@ public:
 	//!calculate max value of inv. mass of system \sys given the invariant mass \invMass_sys in system \sys
 	double invMassMax(unsigned int sys, unsigned int sys2, double invMass_sys) const;
 
+	//! returns absolute minimum for variable
+	double getMin(std::string);
+	//! returns absolute maximum for variable
+	double getMax(std::string);
 	//! get mass of paticles
 	double getMass(unsigned int num);
 	//! get mass of paticles

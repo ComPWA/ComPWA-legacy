@@ -22,6 +22,19 @@
 #include "gsl/gsl_monte_vegas.h"
 //DalitzKinematics* DalitzKinematics::inst = NULL;
 
+double DalitzKinematics::getMin(std::string name){
+	if(name=="m13sq") return m13_sq_min;
+	if(name=="m23sq") return m23_sq_min;
+	if(name=="m12sq") return m12_sq_min;
+	return -1;
+}
+double DalitzKinematics::getMax(std::string name){
+	if(name=="m13sq") return m13_sq_max;
+	if(name=="m23sq") return m23_sq_max;
+	if(name=="m12sq") return m12_sq_max;
+	return -1;
+}
+
 void DalitzKinematics::eventToDataPoint(Event& ev, dataPoint& point){
 	double weight = ev.getWeight();
 	point.setWeight(weight);//reset weight
