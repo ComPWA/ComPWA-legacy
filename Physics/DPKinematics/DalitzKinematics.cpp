@@ -249,7 +249,7 @@ double phspFunc(double* x, size_t dim, void* param) {
 	return 0.0;
 };
 
-double DalitzKinematics::getDParea(){
+double DalitzKinematics::getPhspVolume(){
 	if(!_DPareaCalculated) calcDParea();
 	return _DParea;
 }

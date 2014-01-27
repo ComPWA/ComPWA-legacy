@@ -77,8 +77,15 @@ void MinuitResult::init(FunctionMinimum min){
 void MinuitResult::genSimpleOutput(std::ostream& out){
 	for(unsigned int o=0;o<finalParameters.GetNDouble();o++){
 		std::shared_ptr<DoubleParameter> outPar = finalParameters.GetDoubleParameter(o);
-		out<<outPar->GetName()<<" "<<outPar->GetValue()<<" "<<outPar->GetError()->GetError()<<" ";
+		out<<outPar->GetName()<<"/D:"<<outPar->GetName()<<"err/D";
+		if(o!=finalParameters.GetNDouble()) out<<":";
 	}
+	out<<"\n";
+	for(unsigned int o=0;o<finalParameters.GetNDouble();o++){
+		std::shared_ptr<DoubleParameter> outPar = finalParameters.GetDoubleParameter(o);
+		out<<outPar->GetValue()<<" "<<outPar->GetError()->GetError()<<" ";
+	}
+	out<<"\n";
 
 	return;
 }
@@ -139,7 +146,7 @@ void MinuitResult::genOutput(std::ostream& out){
 	if(!hasValidCov) out<<"		*** COVARIANCE MATRIX NOT VALID! ***"<<std::endl;
 	if(!hasAccCov) out<<"		*** COVARIANCE MATRIX NOT ACCURATE! ***"<<std::endl;
 	if(!covPosDef) out<<"		*** COVARIANCE MATRIX NOT POSITIVE DEFINITE! ***"<<std::endl;
-	if(!hesseFailed) out<<"		*** HESSE FAILED! ***"<<std::endl;
+	if(hesseFailed) out<<"		*** HESSE FAILED! ***"<<std::endl;
 	if(hasValidCov){
 		out<<"COVARIANCE MATRIX:"<<std::endl;
 		tableCov.header();

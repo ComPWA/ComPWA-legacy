@@ -51,6 +51,7 @@ private:
 						)
 		);
 		boost::log::core::get()->set_filter(boost::log::trivial::severity >= boost::log::trivial::debug);
+	BOOST_LOG_TRIVIAL(info)<<"Logging: using output filename "<<out;
 	}
 };
 

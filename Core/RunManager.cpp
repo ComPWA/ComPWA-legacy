@@ -98,8 +98,8 @@ bool RunManager::generate( unsigned int number ) {
 	pPhys_->fillStartParVec(minPar);
 
 	//Determing an estimate on the maximum of the physics amplitude using 20k events.
-	//	double genMaxVal=2*pPhys_->getMaxVal();
-	double genMaxVal=pPhys_->getMaxVal(gen_);
+	double genMaxVal=1.3*pPhys_->getMaxVal(gen_);
+//	double genMaxVal=pPhys_->getMaxVal(gen_);
 
 	double maxTest=0;
 	unsigned int totalCalls=0;
@@ -121,23 +121,14 @@ bool RunManager::generate( unsigned int number ) {
 #pragma omp for
 		for(unsigned int i=0;i<size_;i++){
 			if(i>0) i--;
-			//	while( i<size_){ //while loops are not supported by openMP
 			Event tmp;
 			genNew->generate(tmp);
 			totalCalls++;
 			double weight = tmp.getWeight();
+			/* reset weights: the weights are taken into account by hit and miss. The resulting
+			 * sample is therefore unweighted */
 			tmp.setWeight(1);//reset weight
-//			Particle part1 = tmp.getParticle(0);
-//			Particle part2 = tmp.getParticle(1);
-//			Particle part3 = tmp.getParticle(2);
-//			double m23sq = Particle::invariantMass(part2,part3);
-//			double m13sq = Particle::invariantMass(part1,part3);
-//			std::vector<double> x;
-//			x.push_back(m23sq);
-//			x.push_back(m13sq);
-//			std::cout<<point.getVal("m23sq")<<" "<<x[0]<< " "<<point.getVal("m13sq")<<" "<<x[1]<<std::endl;
 			dataPoint point(tmp);
-
 			double ampRnd = genNew->getUniform()*genMaxVal;
 			ParameterList list;
 #pragma omp critical
@@ -188,8 +179,15 @@ bool RunManager::generatePhsp( unsigned int number ) {
 
 #pragma omp for
 		for(unsigned int i=0;i<phspSize;i++){
+			if(i>0) i--;
 			Event tmp;
 			genNew->generate(tmp);
+			double ampRnd = genNew->getUniform();
+			if( ampRnd > tmp.getWeight() ) continue;
+			/* reset weights: the weights are taken into account by hit and miss on the weights.
+			 * The resulting sample is therefore unweighted */
+			tmp.setWeight(1);//reset weight
+			i++;
 #pragma omp critical
 			{
 				phspSample_->pushEvent(tmp);//unfortunatly not thread safe

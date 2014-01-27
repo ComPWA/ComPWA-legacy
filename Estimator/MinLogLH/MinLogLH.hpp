@@ -56,6 +56,7 @@ private:
   std::shared_ptr<FunctionTree> pFcnTree_;
   std::shared_ptr<Data> pDIF_;
   std::shared_ptr<Data> pPHSP_;
+  double phspVolume;
 
 };
 

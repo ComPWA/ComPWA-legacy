@@ -19,25 +19,30 @@
 #include "Core/Particle.hpp"
 #include "Core/ParameterList.hpp"
 #include "Core/FunctionTree.hpp"
+#include "Core/Kinematics.hpp"
 //#include "Physics/DPKinematics/DataPoint.hpp"
 
 MinLogLH::MinLogLH(std::shared_ptr<Amplitude> inPIF, std::shared_ptr<Data> inDIF)
 : pPIF_(inPIF), pDIF_(inDIF){
+phspVolume = Kinematics::instance()->getPhspVolume();
 
 }
 
 MinLogLH::MinLogLH(std::shared_ptr<Amplitude> inPIF, std::shared_ptr<Data> inDIF, std::shared_ptr<Data> inPHSP)
 : pPIF_(inPIF), pDIF_(inDIF), pPHSP_(inPHSP){
+phspVolume = Kinematics::instance()->getPhspVolume();
 
 }
 
 MinLogLH::MinLogLH(std::shared_ptr<FunctionTree> inFcnTree, std::shared_ptr<Data> inDIF)
 : pFcnTree_(inFcnTree), pDIF_(inDIF){
+phspVolume = Kinematics::instance()->getPhspVolume();
 
 }
 
 MinLogLH::MinLogLH(std::shared_ptr<FunctionTree> inFcnTree, std::shared_ptr<Data> inDIF, std::shared_ptr<Data> inPHSP)
 : pFcnTree_(inFcnTree), pDIF_(inDIF), pPHSP_(inPHSP){
+phspVolume = Kinematics::instance()->getPhspVolume();
 
 }
 
@@ -75,7 +80,6 @@ MinLogLH::~MinLogLH(){
 
 double MinLogLH::controlParameter(ParameterList& minPar){
 	unsigned int nEvents = pDIF_->getNEvents();
-	//static dataPoint* point = dataPoint::instance();
 	unsigned int nPHSPEvts=0;
 	if(pPHSP_) nPHSPEvts = pPHSP_->getNEvents();
 	unsigned int nParts = ((Event)pDIF_->getEvent(0)).getNParticles();
@@ -202,13 +206,16 @@ double MinLogLH::controlParameter(ParameterList& minPar){
 			intens=0;
 		}
 		if(intens>0){
-			lh += log10(intens);
+			lh += log(intens);
 			//				std::cout<<"m23sq="<<x[0]<< " m13sq="<<x[1]<< " intens="<<intens<< " lh="<<lh<<std::endl;
 		}
 	}
 	//lh = nEvents/2.*(norm/(nPHSPEvts-1))*(norm/(nPHSPEvts-1)) - lh + nEvents*log10(norm/nPHSPEvts);
-	lh = nEvents*log10(norm/nPHSPEvts) - lh ;
-	//		std::cout<<"final event LH="<<lh<<std::endl;
+//	std::cout.precision(15);
+//	std::cout<<"event LH="<<lh<<" "<<nEvents<< " "<<norm/nPHSPEvts<<std::endl;
+//	std::cout<<"phase space volume: "<<phspVolume<<std::endl;
+	lh = nEvents*log(norm/nPHSPEvts*phspVolume) - lh ;
+//	std::cout<<"LH="<<lh<<std::endl;
 	//lh -= norm;
 //	break;
 	//	}
@@ -222,6 +229,6 @@ double MinLogLH::controlParameter(ParameterList& minPar){
 
 	//std::cout << "ControlPar list " << minPar.GetNDouble() <<std::endl;
 
-	if(lh>0) BOOST_LOG_TRIVIAL(error) << "MinLogLH: positive -log(L)!";
+//	if(lh>0) BOOST_LOG_TRIVIAL(error) << "MinLogLH: positive -log(L)!";
 	return lh;
 }
