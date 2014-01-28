@@ -226,7 +226,7 @@ void AmpSumIntensity::calcMaxVal(std::shared_ptr<Generator> gen){
 	//	boost::variate_generator<boost::minstd_rand&, boost::uniform_real<> > uni13(rndGen2, uni_dist13);
 	//	boost::variate_generator<boost::minstd_rand&, boost::uniform_real<> > uni23(rndGen2, uni_dist23);
 	double maxM23=-999; double maxM13=-999; double maxVal=0;
-	for(unsigned int i=0; i<40000; i++){
+	for(unsigned int i=0; i<100000; i++){
 		double m23sq=gen->getUniform()*(kin->m23_sq_max-kin->m23_sq_min)+kin->m23_sq_min;
 		double m13sq=gen->getUniform()*(kin->m13_sq_max-kin->m13_sq_min)+kin->m13_sq_min;
 		dataPoint point; point.setVal("m13sq",m13sq); point.setVal("m23sq",m23sq);

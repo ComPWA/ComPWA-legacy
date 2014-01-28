@@ -91,7 +91,9 @@ double AmpWigner2::evaluate(dataPoint& point) {
 	 */
 	result = Wigner_d(J,M,N,theta);
 	if( ( result!=result ) || (theta!=theta)) {
-		BOOST_LOG_TRIVIAL(error)<<"AmpWigner2: NAN! J="<< J<<" M="<<N<<" N="<<M<<" subsys="<<_subSys<<" theta="<<theta<<" cosTheta="<<cosTheta<<" result="<<result;
+		BOOST_LOG_TRIVIAL(error)<<"AmpWigner2: NAN! (J,M,N)=("<< J<<","<<M<<","<<N
+				<<") subsys="<<_subSys<<" theta="<<theta<<" cosTheta="<<cosTheta<<" result="<<result
+				<<"point = (m23sq="<<m23sq<<" m13sq="<<m13sq<<" m12sq="<<m12sq<<")";
 		return 0;
 	}
 	return result;

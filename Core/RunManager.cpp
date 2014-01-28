@@ -97,9 +97,8 @@ bool RunManager::generate( unsigned int number ) {
 	ParameterList minPar;
 	pPhys_->fillStartParVec(minPar);
 
-	//Determing an estimate on the maximum of the physics amplitude using 20k events.
-	double genMaxVal=1.3*pPhys_->getMaxVal(gen_);
-//	double genMaxVal=pPhys_->getMaxVal(gen_);
+	//Determing an estimate on the maximum of the physics amplitude using 100k events.
+	double genMaxVal=1.2*pPhys_->getMaxVal(gen_);
 
 	double maxTest=0;
 	unsigned int totalCalls=0;
@@ -151,7 +150,7 @@ bool RunManager::generate( unsigned int number ) {
 	BOOST_LOG_TRIVIAL(info) << "Efficiency of toy MC generation: "<<(double)size_/totalCalls;
 	BOOST_LOG_TRIVIAL(info) << "RunManager: generate time="<<(clock()-startTime)/CLOCKS_PER_SEC/60<<"min.";
 
-	if( maxTest > (double) (0.9*genMaxVal) ) {
+	if( maxTest >= genMaxVal ) {
 		BOOST_LOG_TRIVIAL(error)<<"==========ATTENTION===========";
 		BOOST_LOG_TRIVIAL(error)<<"== Max value of function is "<<maxTest;
 		BOOST_LOG_TRIVIAL(error)<<"== This is close or above to maximum value of rnd. number generation: "<<genMaxVal;
@@ -159,9 +158,9 @@ bool RunManager::generate( unsigned int number ) {
 		BOOST_LOG_TRIVIAL(error)<<"==========ATTENTION===========";
 		return false;
 	}
-
 	return true;
 };
+
 bool RunManager::generatePhsp( unsigned int number ) {
 	if( !(validPhsp==1 && validSize==1) )
 		return false;
