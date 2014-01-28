@@ -53,17 +53,17 @@ AmpSumIntensity::AmpSumIntensity(const AmpSumIntensity& other) : nAmps(other.nAm
 }
 
 AmpSumIntensity::AmpSumIntensity(AmplitudeSetup ini, normStyle ns, std::shared_ptr<Efficiency> eff, unsigned int entries, double dpArea) :
-										totAmp("relBWsumAmplitude", "totAmp"), ampSetup(ini),
-										_entries(entries), _normStyle(ns), _calcNorm(1), _dpArea(dpArea),
-										_calcMaxFcnVal(0),eff_(eff)
+												totAmp("relBWsumAmplitude", "totAmp"), ampSetup(ini),
+												_entries(entries), _normStyle(ns), _calcNorm(1), _dpArea(dpArea),
+												_calcMaxFcnVal(0),eff_(eff)
 {
 	init();
 }
 
 AmpSumIntensity::AmpSumIntensity(AmplitudeSetup ini, std::shared_ptr<Efficiency> eff, unsigned int entries, double dpArea) :
-										totAmp("relBWsumAmplitude", "totAmp"), ampSetup(ini),
-										_entries(entries), _normStyle(none), _calcNorm(0), _dpArea(dpArea),
-										_calcMaxFcnVal(0),eff_(eff)
+												totAmp("relBWsumAmplitude", "totAmp"), ampSetup(ini),
+												_entries(entries), _normStyle(none), _calcNorm(0), _dpArea(dpArea),
+												_calcMaxFcnVal(0),eff_(eff)
 {
 	init();
 }
@@ -71,9 +71,9 @@ AmpSumIntensity::AmpSumIntensity(AmplitudeSetup ini, std::shared_ptr<Efficiency>
 AmpSumIntensity::AmpSumIntensity(const double inM, const double inBr, const double in1,const double in2, const double in3,
 		std::string nameM, std::string name1,std::string name2,std::string name3,
 		AmplitudeSetup ini, unsigned int entries, normStyle ns, double dpArea) :
-										totAmp("relBWsumAmplitude", "totAmp"), ampSetup(ini),
-										_entries(entries), _normStyle(ns), _calcNorm(1),_dpArea(dpArea),
-										_calcMaxFcnVal(0),eff_(std::shared_ptr<Efficiency>(new UnitEfficiency()))
+												totAmp("relBWsumAmplitude", "totAmp"), ampSetup(ini),
+												_entries(entries), _normStyle(ns), _calcNorm(1),_dpArea(dpArea),
+												_calcMaxFcnVal(0),eff_(std::shared_ptr<Efficiency>(new UnitEfficiency()))
 {
 	init();
 }
@@ -321,15 +321,18 @@ const ParameterList& AmpSumIntensity::intensity(dataPoint& point, ParameterList&
 	return intensity(point);
 }
 const ParameterList& AmpSumIntensity::intensity(dataPoint& point){
-	//	std::cout<<dataPoint::instance()->getMsq(2,3)<<" "<<dataPoint::instance()->getMsq(1,3)<<" "<<dataPoint::instance()->getMsq(1,2)<<std::endl;
-	double AMPpdf = totAmp.evaluate(point);
+	double AMPpdf=0;
+	if(Kinematics::instance()->isWithinPhsp(point)) AMPpdf = totAmp.evaluate(point);
+//	else BOOST_LOG_TRIVIAL(error) << "AmpSumIntensity: data point "
+//			<<" (m13sq="<<point.getVal(4)
+//			<<" m23sq="<<point.getVal(5)<<")"
+//			<<" not within phsp! Skip!";//shall we give an error if datapoint is outside phsp?
+
 	if(AMPpdf!=AMPpdf){
 		BOOST_LOG_TRIVIAL(error)<<"Error AmpSumIntensity: Intensity is not a number!!";
-		exit(1);
+		AMPpdf = 0;
 	}
 	double eff=eff_->evaluate(point);
-	//ParameterList result;
-	//result.AddParameter(std::shared_ptr<DoubleParameter>(new DoubleParameter("AmpSumResult",AMPpdf*eff)));
 	result.SetParameterValue(0,AMPpdf*eff);
 	return result;
 }
@@ -346,12 +349,12 @@ std::shared_ptr<FunctionTree> AmpSumIntensity::functionTree(ParameterList& outPa
 void AmpSumIntensity::setParameterList(ParameterList& par){
 	//parameters varied by Minimization algorithm
 	for(unsigned int i=0; i<nAmps; i++){
-		//		*rr[i] = DoubleParameter(par.GetDoubleParameter(2*i));
-		//		*phir[i] = DoubleParameter(par.GetDoubleParameter(2*i+1));
-		rr[i]->SetValue(par.GetDoubleParameter(2*i)->GetValue());
-		rr[i]->SetError(par.GetDoubleParameter(2*i)->GetError());
-		phir[i]->SetValue(par.GetDoubleParameter(2*i+1)->GetValue());
-		phir[i]->SetError(par.GetDoubleParameter(2*i+1)->GetError());
+		*rr[i] = *par.GetDoubleParameter(2*i);
+		*phir[i] = *par.GetDoubleParameter(2*i+1);
+//		rr[i]->SetValue(par.GetDoubleParameter(2*i)->GetValue());
+//		rr[i]->SetError(par.GetDoubleParameter(2*i)->GetError());
+//		phir[i]->SetValue(par.GetDoubleParameter(2*i+1)->GetValue());
+//		phir[i]->SetError(par.GetDoubleParameter(2*i+1)->GetError());
 	}
 	return;
 }

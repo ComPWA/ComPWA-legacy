@@ -75,12 +75,12 @@ void MinuitResult::init(FunctionMinimum min){
 }
 
 void MinuitResult::genSimpleOutput(std::ostream& out){
-	for(unsigned int o=0;o<finalParameters.GetNDouble();o++){
-		std::shared_ptr<DoubleParameter> outPar = finalParameters.GetDoubleParameter(o);
-		out<<outPar->GetName()<<"/D:"<<outPar->GetName()<<"err/D";
-		if(o!=finalParameters.GetNDouble()) out<<":";
-	}
-	out<<"\n";
+//	for(unsigned int o=0;o<finalParameters.GetNDouble();o++){
+//		std::shared_ptr<DoubleParameter> outPar = finalParameters.GetDoubleParameter(o);
+//		out<<outPar->GetName()<<"/D:"<<outPar->GetName()<<"err/D";
+//		if(o!=finalParameters.GetNDouble()-1) out<<":";
+//	}
+//	out<<"\n";
 	for(unsigned int o=0;o<finalParameters.GetNDouble();o++){
 		std::shared_ptr<DoubleParameter> outPar = finalParameters.GetDoubleParameter(o);
 		out<<outPar->GetValue()<<" "<<outPar->GetError()->GetError()<<" ";
