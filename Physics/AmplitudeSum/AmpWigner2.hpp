@@ -93,13 +93,13 @@ public:
               locmin_sq = s1min(_m12*_m12,_M,_m1,_m3,_m2);
               locmax_sq = s1max(_m12*_m12,_M,_m1,_m3,_m2);
               beta=acos((2.*_m23*_m23-locmax_sq-locmin_sq)/(locmax_sq-locmin_sq));
-              if(beta!=beta) return std::shared_ptr<AbsParameter>();
+              if(beta!=beta) return false;
               break;
             }
           }
 
           Spin j(_inSpin), m(_outSpin1), n(_outSpin2);
-          results[ele]=Wigner_d(j,m,n,beta)));
+          results[ele]=Wigner_d(j,m,n,beta);
         }//end element loop
 
         out = std::shared_ptr<AbsParameter>(new MultiDouble("WignerD of "+name+" result",results));
@@ -128,7 +128,7 @@ public:
           locmin_sq = s1min(_m12*_m12,_M,_m1,_m3,_m2);
           locmax_sq = s1max(_m12*_m12,_M,_m1,_m3,_m2);
           beta=acos((2.*_m23*_m23-locmax_sq-locmin_sq)/(locmax_sq-locmin_sq));
-          if(beta!=beta) return std::shared_ptr<AbsParameter>();
+          if(beta!=beta) return false;
           break;
         }
       }

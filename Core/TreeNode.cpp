@@ -74,10 +74,7 @@
 	  }
 	  _changed=false;
 	  // std::cout << "Values: " << newVals.GetNDouble() << std::endl;
-	  if(_value[0]->type() == ParType::MDOUBLE)
-	    _value[0] = _strat->execute(newVals, true);
-	  else
-	    _value[0] = _strat->execute(newVals);
+	  _strat->execute(newVals, _value[0]);
     }else{ //i have a certain dim, children must fill it
 
       for(unsigned int ele=0; ele<_value.size(); ele++){
@@ -100,7 +97,7 @@
 		  //para->type();
 		  newVals.AddParameter(para);
 	    }  //end children-loop
-	    _value[ele] = _strat->execute(newVals);
+	    _strat->execute(newVals, _value[ele]);
 	    _changed=false;
 	  }//end loop dims
 

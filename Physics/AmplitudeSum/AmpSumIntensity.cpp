@@ -182,7 +182,7 @@ void AmpSumIntensity::setupTree(allMasses& theMasses, bool isPhspTree){
   //----Strategies needed
   std::shared_ptr<MultAll> multStrat = std::shared_ptr<MultAll>(new MultAll());
   std::shared_ptr<AddAll> addStrat = std::shared_ptr<AddAll>(new AddAll());
-  std::shared_ptr<Square> sqStrat = std::shared_ptr<Square>(new Square());
+  std::shared_ptr<AbsSquare> sqStrat = std::shared_ptr<AbsSquare>(new AbsSquare());
   std::shared_ptr<LogOf> logStrat = std::shared_ptr<LogOf>(new LogOf());
 
   //----Add Top Node and final operations
