@@ -80,6 +80,7 @@ public:
   }
 
   virtual bool execute(ParameterList& paras, std::shared_ptr<AbsParameter> out){
+    ParType checkType = out->type();
     out = std::shared_ptr<AbsParameter>();
     unsigned int nMC = paras.GetNMultiComplex();
     unsigned int nMD = paras.GetNMultiDouble();
@@ -92,7 +93,7 @@ public:
       return false;
     }
 
-	switch(out->type()){
+	switch(checkType){
 
       case ParType::MCOMPLEX:{
         //output multi complex: treat everything non-complex as real, there must be multi complex input
@@ -242,6 +243,7 @@ public:
   };
 
   virtual bool execute(ParameterList& paras,  std::shared_ptr<AbsParameter> out){
+    ParType checkType = out->type();
     out = std::shared_ptr<AbsParameter>();
     unsigned int nMC = paras.GetNMultiComplex();
     unsigned int nMD = paras.GetNMultiDouble();
@@ -254,7 +256,7 @@ public:
       return false;
     }
 
-    switch(out->type()){
+    switch(checkType){
 
       case ParType::MCOMPLEX:{
         //output multi complex: treat everything non-complex as real, there must be multi complex input
@@ -403,6 +405,7 @@ public:
   };
 
   virtual bool execute(ParameterList& paras, std::shared_ptr<AbsParameter> out){
+    ParType checkType = out->type();
     out = std::shared_ptr<AbsParameter>();
     unsigned int nMC = paras.GetNMultiComplex();
     unsigned int nMD = paras.GetNMultiDouble();
@@ -420,7 +423,7 @@ public:
       return false;
     }
 
-    switch(out->type()){
+    switch(checkType){
 
       case ParType::MDOUBLE:{
         //output multi double: input must be one multi double
@@ -468,6 +471,7 @@ public:
   };
 
   virtual bool execute(ParameterList& paras, std::shared_ptr<AbsParameter> out){
+    ParType checkType = out->type();
     out = std::shared_ptr<AbsParameter>();
     unsigned int nMC = paras.GetNMultiComplex();
     unsigned int nMD = paras.GetNMultiDouble();
@@ -485,7 +489,7 @@ public:
       return false;
     }
 
-    switch(out->type()){
+    switch(checkType){
 
       case ParType::MDOUBLE:{
         //output multi double: input must be multi double or multi complex
@@ -554,6 +558,7 @@ public:
   }
 
   virtual bool execute(ParameterList& paras, std::shared_ptr<AbsParameter> out){
+    ParType checkType = out->type();
     out = std::shared_ptr<AbsParameter>();
     unsigned int nMC = paras.GetNMultiComplex();
     unsigned int nMD = paras.GetNMultiDouble();
@@ -571,7 +576,7 @@ public:
       return false;
     }
 
-    switch(out->type()){
+    switch(checkType){
 
       case ParType::MCOMPLEX:{
         //output multi complex: input must be two multi complex

@@ -43,6 +43,7 @@ public:
   }
 
   virtual bool execute(ParameterList& paras, std::shared_ptr<AbsParameter> out) {
+    ParType checkType = out->type();
     out = std::shared_ptr<AbsParameter>();
 
     double Gamma0, GammaV;
@@ -61,7 +62,7 @@ public:
     double _m23,_m13,_m12;
 
     //MultiDim output, must have multidim Paras in input
-    if(out->type() == ParType::MDOUBLE){
+    if(checkType == ParType::MDOUBLE){
       if(paras.GetNMultiDouble()){
         unsigned int nElements = paras.GetMultiDouble(0)->GetNValues();
         std::shared_ptr<MultiDouble> _pm23 = paras.GetMultiDouble("m23");
@@ -105,7 +106,7 @@ public:
         out = std::shared_ptr<AbsParameter>(new MultiDouble("WignerD of "+name+" result",results));
         return true;
       }
-    }else if(out->type() == ParType::DOUBLE){ //one dim output
+    }else if(checkType == ParType::DOUBLE){ //one dim output
       switch(_subSysFlag){
         _m23 = double(paras.GetParameterValue("m23"));
         _m13 = double(paras.GetParameterValue("m13"));

@@ -44,6 +44,7 @@ public:
   }
 
   virtual bool execute(ParameterList& paras, std::shared_ptr<AbsParameter> out) {
+    ParType checkType = out->type();
     out = std::shared_ptr<AbsParameter>();
 
     double Gamma0, GammaV, m0, d, norm, BLWeiss2, qTerm;
@@ -74,7 +75,7 @@ public:
     res = res / denom;*/
 
     //MultiDim output, must have multidim Paras in input
-    if(out->type() == ParType::MCOMPLEX){
+    if(checkType == ParType::MCOMPLEX){
       if(paras.GetNMultiDouble()){
         unsigned int nElements = paras.GetMultiDouble(0)->GetNValues();
 
