@@ -43,7 +43,8 @@ public:
     return ("relativistic BreitWigner of "+name);
   }
 
-  virtual std::shared_ptr<AbsParameter> execute(ParameterList& paras, bool multi=false) {
+  virtual bool execute(ParameterList& paras, std::shared_ptr<AbsParameter> out) {
+    out = std::shared_ptr<AbsParameter>();
 
     double Gamma0, GammaV, m0, d, norm, BLWeiss2, qTerm;
     unsigned int spin, subSys;
@@ -72,51 +73,52 @@ public:
     std::complex<double> res(m0 * Gamma0);
     res = res / denom;*/
 
-    //MultiDim Paras in input
-    if(paras.GetNMultiDouble()){
+    //MultiDim output, must have multidim Paras in input
+    if(out->type() == ParType::MCOMPLEX){
+      if(paras.GetNMultiDouble()){
         unsigned int nElements = paras.GetMultiDouble(0)->GetNValues();
 
-        if(multi){//create multidim output
-          std::vector<std::complex<double> > results(nElements, std::complex<double>(0.));
-          std::shared_ptr<MultiDouble> mp, map, mbp;
-          switch(subSys){
-            case 3:{ //reso in sys of particles 1&2
-              mp  = (paras.GetMultiDouble("m12"));
-              map  = (paras.GetMultiDouble("m23"));
-              mbp  = (paras.GetMultiDouble("m13"));
-              break;
-            }
-            case 4:{ //reso in sys of particles 1&3
-              mp  = (paras.GetMultiDouble("m13"));
-              map  = (paras.GetMultiDouble("m12"));
-              mbp  = (paras.GetMultiDouble("m23"));
-              break;
-            }
-            case 5:{ //reso in sys of particles 2&3
-              mp  = (paras.GetMultiDouble("m23"));
-              map  = (paras.GetMultiDouble("m13"));
-              mbp  = (paras.GetMultiDouble("m12"));
-              break;
-            }
+        std::vector<std::complex<double> > results(nElements, std::complex<double>(0.));
+        std::shared_ptr<MultiDouble> mp, map, mbp;
+        switch(subSys){
+          case 3:{ //reso in sys of particles 1&2
+            mp  = (paras.GetMultiDouble("m12"));
+            map  = (paras.GetMultiDouble("m23"));
+            mbp  = (paras.GetMultiDouble("m13"));
+            break;
           }
-
-          //calc BW for each point
-          for(unsigned int ele=0; ele<nElements; ele++){
-            BLWeiss2 = BLprime2(map->GetValue(ele),mbp->GetValue(ele),m0,mp->GetValue(ele),d,spin);
-            qTerm = pow(q(map->GetValue(ele),mbp->GetValue(ele),mp->GetValue(ele)) / q0(map->GetValue(ele),mbp->GetValue(ele),m0), 2.*spin + 1.);
-            //double Gamma0 = _resWidth.GetValue();
-            GammaV = Gamma0 * qTerm * (m0 / mp->GetValue(ele)) * BLWeiss2;
-            std::complex<double> denom(m0*m0 - mp->GetValue(ele)*mp->GetValue(ele), -m0 * GammaV);
-
-            results[ele] = (std::complex<double>(norm) / denom); //Laura++ (old) definition*/
+          case 4:{ //reso in sys of particles 1&3
+            mp  = (paras.GetMultiDouble("m13"));
+            map  = (paras.GetMultiDouble("m12"));
+            mbp  = (paras.GetMultiDouble("m23"));
+            break;
           }
+          case 5:{ //reso in sys of particles 2&3
+            mp  = (paras.GetMultiDouble("m23"));
+            map  = (paras.GetMultiDouble("m13"));
+            mbp  = (paras.GetMultiDouble("m12"));
+            break;
+          }
+        }
 
-          return std::shared_ptr<AbsParameter>(new MultiComplex("relBW of "+name,results));
-        }else{//or collapse multidims, not possible for Breit-Wigner
-          //TODO: exception
-          return std::shared_ptr<AbsParameter>();
-        }//end collapse multidims
-    }//end multidim para treatment
+        //calc BW for each point
+        for(unsigned int ele=0; ele<nElements; ele++){
+          BLWeiss2 = BLprime2(map->GetValue(ele),mbp->GetValue(ele),m0,mp->GetValue(ele),d,spin);
+          qTerm = pow(q(map->GetValue(ele),mbp->GetValue(ele),mp->GetValue(ele)) / q0(map->GetValue(ele),mbp->GetValue(ele),m0), 2.*spin + 1.);
+          //double Gamma0 = _resWidth.GetValue();
+          GammaV = Gamma0 * qTerm * (m0 / mp->GetValue(ele)) * BLWeiss2;
+          std::complex<double> denom(m0*m0 - mp->GetValue(ele)*mp->GetValue(ele), -m0 * GammaV);
+
+          results[ele] = (std::complex<double>(norm) / denom); //Laura++ (old) definition*/
+        }
+
+        out = std::shared_ptr<AbsParameter>(new MultiComplex("relBW of "+name,results));
+        return true;
+      }else{ //end multidim para treatment
+        //Todo: exception wrong input
+        return false;
+      }
+    }//end multicomplex output
 
 
     //Only StandardDim Paras in input
@@ -151,8 +153,8 @@ public:
     std::complex<double> result = std::complex<double>(norm) / denom; //Laura++ (old) definition*/
 
     //std::complex<double> result (res.re(),res.im());
-    std::shared_ptr<ComplexParameter> bw(new ComplexParameter("relBW of "+name, result));
-    return bw;
+    out = std::shared_ptr<AbsParameter>(new ComplexParameter("relBW of "+name, result));
+    return true;
   }
 
 protected:
