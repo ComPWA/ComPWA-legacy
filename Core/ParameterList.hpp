@@ -43,6 +43,17 @@ public:
   */
   ParameterList();
 
+  //! Standard constructor with a vector of ComplexParameter
+  /*!
+   * Standard constructor with list of PWAParameter provided. The vector gets
+   * copied to the internal vector. To avoid copying, use the addParameter()
+   * functions and empty constructor PWAParameterList. Non-double parameter
+   * are empty
+   * \param inVec input vector of complex parameters
+   * \sa addParameter(PWAParameter<double>&)
+  */
+  ParameterList(const std::vector<std::shared_ptr<ComplexParameter> >& inVec);
+
   //! Standard constructor with a vector of DoubleParameter
   /*!
    * Standard constructor with list of PWAParameter provided. The vector gets
@@ -76,17 +87,19 @@ public:
   */
   ParameterList(const std::vector<std::shared_ptr<BoolParameter> >& inVec);
 
-  //! Standard constructor with a vector of bool, int and double PWAParameter
+  //! Standard constructor with a vector of bool, int, double and complex PWAParameter
   /*!
    * Standard constructor with list of PWAParameter provided. The vectors get
    * copied to the internal vectors. To avoid copying, use the addParameter()
    * functions and empty constructor PWAParameterList.
+   * \param inC input vector of complex parameters
    * \param inD input vector of floating point parameters
    * \param inI input vector of integer parameters
    * \param inB input vector of boolean parameters
    * \sa addParameter(PWAParameter<double>&, PWAParameter<int>&, PWAParameter<bool>&)
   */
-  ParameterList(const std::vector<std::shared_ptr<DoubleParameter> >& inD,
+  ParameterList(const std::vector<std::shared_ptr<ComplexParameter> >& inC,
+      const std::vector<std::shared_ptr<DoubleParameter> >& inD,
       const std::vector<std::shared_ptr<IntegerParameter> >& inI,
       const std::vector<std::shared_ptr<BoolParameter> >& inB);
 
@@ -123,15 +136,27 @@ public:
 
 
   //! Getter for number of parameter
-  virtual const inline unsigned int GetNParameter() const {return (vDoublePar_.size()+vIntPar_.size()+vBoolPar_.size()+vMultiDouble_.size());}
-  //! Getter for number of double parameter
+  virtual const inline unsigned int GetNParameter() const {return (vDoublePar_.size()+vIntPar_.size()+vBoolPar_.size()+vMultiDouble_.size()+vMultiComplex_.size());}
+  //! Getter for number of multi complex parameter
+  virtual const inline unsigned int GetNMultiComplex() const {return vMultiComplex_.size();}
+  //! Getter for number of multi double parameter
   virtual const inline unsigned int GetNMultiDouble() const {return vMultiDouble_.size();}
+  //! Getter for number of complex parameter
+  virtual const inline unsigned int GetNComplex() const {return vComplexPar_.size();}
   //! Getter for number of double parameter
   virtual const inline unsigned int GetNDouble() const {return vDoublePar_.size();}
   //! Getter for number of integer parameter
   virtual const inline unsigned int GetNInteger() const {return vIntPar_.size();}
   //! Getter for number of boolean parameter
   virtual const inline unsigned int GetNBool() const {return vBoolPar_.size();}
+
+  //! Getter for complex parameter
+  /*!
+   * Getter for complex parameter
+   * \param i input number of parameter to load
+   * \return par output container for loaded parameter
+  */
+  virtual std::shared_ptr<ComplexParameter> GetComplexParameter(const unsigned int i) ;
 
   //! Getter for floating point parameter
   /*!
@@ -148,6 +173,14 @@ public:
    * \return par output container for loaded parameter
   */
   virtual std::shared_ptr<MultiDouble> GetMultiDouble(const unsigned int i) ;
+
+  //! Getter for complex list parameter
+  /*!
+   * Getter for complex list parameter MultiComplex
+   * \param i input number of parameter to load
+   * \return par output container for loaded parameter
+  */
+  virtual std::shared_ptr<MultiComplex> GetMultiComplex(const unsigned int i) ;
 
   //! Getter for integer parameter
   /*!
@@ -173,6 +206,14 @@ public:
   */
   virtual const double GetParameterValue(const unsigned int i) const ;
 
+  //! Getter for complex list parameter
+  /*!
+   * Getter for double list parameter MultiComplex
+   * \param parname input name of parameter to load
+   * \return par output container for loaded parameter
+  */
+  virtual std::shared_ptr<MultiComplex> GetMultiComplex(const std::string parname) ;
+
   //! Getter for double list parameter
   /*!
    * Getter for double list parameter MultiDouble
@@ -180,6 +221,14 @@ public:
    * \return par output container for loaded parameter
   */
   virtual std::shared_ptr<MultiDouble> GetMultiDouble(const std::string parname) ;
+
+  //! Getter for complex parameter
+  /*!
+   * Getter for complex parameter
+   * \param parname input name of parameter to load
+   * \return par output container for loaded parameter
+  */
+  virtual std::shared_ptr<ComplexParameter> GetComplexParameter(const std::string parname) ;
 
   //! Getter for floating point parameter
   /*!
@@ -217,6 +266,14 @@ public:
   /*!
    * Setter for parameter value
    * \param i input number of parameter to load
+   * \param inVal input complex value for parameter
+  */
+  virtual void SetParameterValue(const unsigned int i, const std::complex<double> inVal) ;
+
+  //! Setter for parameter value
+  /*!
+   * Setter for parameter value
+   * \param i input number of parameter to load
    * \param inVal input floating value for parameter
   */
   virtual void SetParameterValue(const unsigned int i, const double inVal) ;
@@ -244,12 +301,26 @@ public:
   */
   virtual void AddParameter(std::shared_ptr<AbsParameter> par);
 
+  //! Add complex list parameter
+  /*!
+   * Adds a complex parameter MultiComplex to the list
+   * \param par input parameter
+  */
+  virtual void AddParameter(std::shared_ptr<MultiComplex> par);
+
   //! Add double list parameter
   /*!
    * Adds a double parameter MultiDouble to the list
    * \param par input parameter
   */
   virtual void AddParameter(std::shared_ptr<MultiDouble> par);
+
+  //! Add complex parameter
+  /*!
+   * Adds a complex parameter to the list
+   * \param par input parameter
+  */
+  virtual void AddParameter(std::shared_ptr<ComplexParameter> par);
 
   //! Add floating point parameter
   /*!
@@ -272,6 +343,13 @@ public:
   */
   virtual void AddParameter(std::shared_ptr<BoolParameter> par);
 
+  //! Remove complex parameter
+  /*!
+   * Remove a complex parameter from the list
+   * \param id of parameter to remove
+  */
+  virtual void RemoveComplex(const unsigned int id);
+
   //! Remove floating point parameter
   /*!
    * Remove a floating point parameter from the list
@@ -292,6 +370,13 @@ public:
    * \param par input parameter
   */
   virtual void RemoveBool(const unsigned int id);
+
+  //! Remove complex parameter
+  /*!
+   * Remove a complex parameter from the list
+   * \param parName parameter name
+  */
+  virtual void RemoveComplex(const std::string parName);
 
   //! Remove floating point parameter
   /*!
@@ -325,11 +410,15 @@ public:
   std::string const& to_str() ;
 
 protected:
+  std::map<std::string,unsigned int> mMultiComplexID_; /*!< Map of complex list parameter ids */
   std::map<std::string,unsigned int> mMultiDoubleID_; /*!< Map of double list parameter ids */
+  std::map<std::string,unsigned int> mComplexParID_; /*!< Map of complex parameter ids */
   std::map<std::string,unsigned int> mDoubleParID_; /*!< Map of floating point parameter ids */
   std::map<std::string,unsigned int> mIntParID_; /*!< Map of integer parameter ids */
   std::map<std::string,unsigned int> mBoolParID_; /*!< Map of boolean parameter ids */
-  std::vector<std::shared_ptr<MultiDouble> > vMultiDouble_; /*!< Vector of floating point parameters */
+  std::vector<std::shared_ptr<MultiComplex> > vMultiComplex_; /*!< Vector of complex parameter lists */
+  std::vector<std::shared_ptr<MultiDouble> > vMultiDouble_; /*!< Vector of floating point parameter lists */
+  std::vector<std::shared_ptr<ComplexParameter> > vComplexPar_; /*!< Vector of complex parameters */
   std::vector<std::shared_ptr<DoubleParameter> > vDoublePar_; /*!< Vector of floating point parameters */
   std::vector<std::shared_ptr<IntegerParameter> > vIntPar_; /*!< Vector of integer parameters */
   std::vector<std::shared_ptr<BoolParameter> > vBoolPar_; /*!< Vector of boolean parameters */

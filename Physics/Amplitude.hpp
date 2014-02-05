@@ -66,10 +66,14 @@ public:
 	virtual double getFraction(std::string name) = 0;
 	virtual Amplitude* Clone() = 0;
 
-	virtual std::shared_ptr<FunctionTree> functionTree(ParameterList& outPar) {
+	virtual std::shared_ptr<FunctionTree> functionTree(allMasses& theMasses) {
 		//if not implemented, return NULL-pointer
 		return std::shared_ptr<FunctionTree>();
 	}
+    virtual std::shared_ptr<FunctionTree> phspTree(allMasses& theMasses) {
+        //if not implemented, return NULL-pointer
+        return std::shared_ptr<FunctionTree>();
+    }
 
 protected:
 	ParameterList result;

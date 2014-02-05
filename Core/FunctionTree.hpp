@@ -27,12 +27,16 @@
 #include <string>
 #include <map>
 
+#include <boost/log/trivial.hpp>
+
 #include "Core/Functions.hpp"
 #include "Core/TreeNode.hpp"
 #include "Core/AbsParameter.hpp"
 #include "Core/Parameter.hpp"
 
 #include "Optimizer/ControlParameter.hpp"
+
+using namespace boost::log;
 
 class FunctionTree //: public ControlParametr
 {
@@ -265,8 +269,57 @@ public:
     return 0;
   }*/
 
+  //! trigger calculation
   void recalculate(){
     head_->recalculate();
+  }
+
+  //! check if Tree functions, create some debug messages if not
+  bool sanityCheck(){
+    bool isSane=true;
+
+    //first fo all: is there a tree?
+    if(!head_){
+      BOOST_LOG_TRIVIAL(debug)<<"This tree has no head!";
+      return false;
+    }
+
+    //some basic infos next
+    BOOST_LOG_TRIVIAL(debug)<<"# of Nodes: "<<nodes_.size();
+
+    //collect all children and parent names
+    std::vector<std::string> childNames, parentNames;
+    getNamesDownward(head_, childNames, parentNames);
+
+    //check if matches with available nodeNames
+    std::vector<std::string> missedChild, missedParent;
+    for(unsigned int i=0; i<childNames.size();i++){
+      try{
+        nodes_.at(childNames[i]);
+      }catch(std::out_of_range()){
+        missedChild.push_back(childNames[i]);
+      }
+    }
+    for(unsigned int i=0; i<parentNames.size();i++){
+      try{
+        nodes_.at(parentNames[i]);
+      }catch(std::out_of_range()){
+        missedParent.push_back(parentNames[i]);
+      }
+    }
+    if(missedChild.size()){
+      for(unsigned int i=0; i<missedChild.size();i++)
+        BOOST_LOG_TRIVIAL(debug)<<"This tree misses a child: "<<missedChild[i];
+      return false;
+    }
+    if(missedParent.size()){
+      for(unsigned int i=0; i<missedParent.size();i++)
+        BOOST_LOG_TRIVIAL(debug)<<"This tree misses a parent: "<<missedParent[i];
+      return false;
+    }
+
+
+    return isSane;
   }
 
   //! friend function to stream parameter information to output
@@ -295,6 +348,18 @@ public:
 protected:
   std::shared_ptr<TreeNode> head_; /*!< the head node storing the absolute result */
   std::map<std::string, std::shared_ptr<TreeNode> > nodes_; /*!< map to store the nodes */
+
+  //! recursive function to get all used NodeNames
+  void getNamesDownward(std::shared_ptr<TreeNode> start, std::vector<std::string>& childNames, std::vector<std::string>& parentNames){
+
+    start->getParentNames(parentNames);
+    start->getChildrenNames(childNames);
+
+    const std::vector<std::shared_ptr<TreeNode> > childs = start->getChildren();
+    for(unsigned int i=0; i<childs.size(); i++)
+      getNamesDownward(childs[i], childNames, parentNames);
+
+  }
 
 };
 

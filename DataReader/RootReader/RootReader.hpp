@@ -27,6 +27,7 @@
 //PWA-Headers
 #include "DataReader/Data.hpp"
 #include "Core/Event.hpp"
+#include "Core/DataPoint.hpp"
 
 //Root-Headers
 #include "TMath.h"
@@ -51,6 +52,7 @@ public:
 //  virtual void writeToFile();
   virtual void pushEvent(const Event& evt) {fEvents.push_back(evt);};
   virtual const Event& getEvent(const int);
+  virtual allMasses getMasses();
   virtual const int getBin(const int, double&, double&);
   //virtual const int getEvent(const int, TLorentzVector& , TLorentzVector& , double&);
   virtual void writeData();

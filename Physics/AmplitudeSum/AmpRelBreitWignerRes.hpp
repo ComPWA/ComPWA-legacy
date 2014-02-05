@@ -45,39 +45,113 @@ public:
 
   virtual std::shared_ptr<AbsParameter> execute(ParameterList& paras, bool multi=false) {
 
-    double Gamma0, GammaV, m0, m, ma, mb, d;
-    unsigned int spin;
+    double Gamma0, GammaV, m0, d, norm, BLWeiss2, qTerm;
+    unsigned int spin, subSys;
     try{
       m0 = double(paras.GetParameterValue("m0_"+name));
     }catch(BadParameter& e){
       m0 = double(paras.GetParameterValue("ParOfNode_m0_"+name));
     }
-
-    /*std::cout << "N Paras: " << paras.GetNParameter() << std::endl;
-    for(unsigned int par=0; par<paras.GetNParameter(); par++ ){
-      std::shared_ptr<AbsParameter> tmp = paras.GetParameter(par);
-      std::cout << "Par " << par << " : " << tmp->GetName() << std::endl;
-    }*/
-
-    m  = double(paras.GetParameterValue("x"));
-    ma = double(paras.GetParameterValue("m23"));
-    mb = double(paras.GetParameterValue("m13"));
     spin = (unsigned int)(paras.GetParameterValue("ParOfNode_spin_"+name));
     d = double(paras.GetParameterValue("ParOfNode_d_"+name));
+    norm = double(paras.GetParameterValue("ParOfNode_norm_"+name));
+    subSys = double(paras.GetParameterValue("ParOfNode_subSysFlag_"+name));
+
+    //m  = double(paras.GetParameterValue("mym")); //TODO: MultiDIM!!!
+   // ma = double(paras.GetParameterValue("ma"));
+   // mb = double(paras.GetParameterValue("mb"));
 
     try{
       Gamma0 = double(paras.GetParameterValue("resWidth_"+name));
     }catch(BadParameter& e){
       Gamma0 = double(paras.GetParameterValue("ParOfNode_resWidth_"+name));
     }
-    GammaV = Gamma0 * (m0 / m) * pow(q(ma,mb,m) / q0(ma,mb,m0), 2.*spin + 1.)  * BLprime2(ma,mb,m0,m,d,spin);
+    /*GammaV = Gamma0 * (m0 / m) * pow(q(ma,mb,m) / q0(ma,mb,m0), 2.*spin + 1.)  * BLprime2(ma,mb,m0,m,d,spin);
 
     std::complex<double> denom(m0*m0 - m*m, -m0 * GammaV);
     std::complex<double> res(m0 * Gamma0);
-    res = res / denom;
+    res = res / denom;*/
+
+    //MultiDim Paras in input
+    if(paras.GetNMultiDouble()){
+        unsigned int nElements = paras.GetMultiDouble(0)->GetNValues();
+
+        if(multi){//create multidim output
+          std::vector<std::complex<double> > results(nElements, std::complex<double>(0.));
+          std::shared_ptr<MultiDouble> mp, map, mbp;
+          switch(subSys){
+            case 3:{ //reso in sys of particles 1&2
+              mp  = (paras.GetMultiDouble("m12"));
+              map  = (paras.GetMultiDouble("m23"));
+              mbp  = (paras.GetMultiDouble("m13"));
+              break;
+            }
+            case 4:{ //reso in sys of particles 1&3
+              mp  = (paras.GetMultiDouble("m13"));
+              map  = (paras.GetMultiDouble("m12"));
+              mbp  = (paras.GetMultiDouble("m23"));
+              break;
+            }
+            case 5:{ //reso in sys of particles 2&3
+              mp  = (paras.GetMultiDouble("m23"));
+              map  = (paras.GetMultiDouble("m13"));
+              mbp  = (paras.GetMultiDouble("m12"));
+              break;
+            }
+          }
+
+          //calc BW for each point
+          for(unsigned int ele=0; ele<nElements; ele++){
+            BLWeiss2 = BLprime2(map->GetValue(ele),mbp->GetValue(ele),m0,mp->GetValue(ele),d,spin);
+            qTerm = pow(q(map->GetValue(ele),mbp->GetValue(ele),mp->GetValue(ele)) / q0(map->GetValue(ele),mbp->GetValue(ele),m0), 2.*spin + 1.);
+            //double Gamma0 = _resWidth.GetValue();
+            GammaV = Gamma0 * qTerm * (m0 / mp->GetValue(ele)) * BLWeiss2;
+            std::complex<double> denom(m0*m0 - mp->GetValue(ele)*mp->GetValue(ele), -m0 * GammaV);
+
+            results[ele] = (std::complex<double>(norm) / denom); //Laura++ (old) definition*/
+          }
+
+          return std::shared_ptr<AbsParameter>(new MultiComplex("relBW of "+name,results));
+        }else{//or collapse multidims, not possible for Breit-Wigner
+          //TODO: exception
+          return std::shared_ptr<AbsParameter>();
+        }//end collapse multidims
+    }//end multidim para treatment
+
+
+    //Only StandardDim Paras in input
+    //  double spinTerm = evaluateWignerD(); //spinTerm =1;
+    double m, ma, mb;
+    switch(subSys){
+      case 3:{ //reso in sys of particles 1&2
+        m  = double(paras.GetParameterValue("m12"));
+        ma  = double(paras.GetParameterValue("m23"));
+        mb  = double(paras.GetParameterValue("m13"));
+        break;
+      }
+      case 4:{ //reso in sys of particles 1&3
+        m  = double(paras.GetParameterValue("m13"));
+        ma  = double(paras.GetParameterValue("m12"));
+        mb  = double(paras.GetParameterValue("m23"));
+        break;
+      }
+      case 5:{ //reso in sys of particles 2&3
+        m  = double(paras.GetParameterValue("m23"));
+        ma  = double(paras.GetParameterValue("m13"));
+        mb  = double(paras.GetParameterValue("m12"));
+        break;
+      }
+    }
+    BLWeiss2 = BLprime2(ma,mb,m0,m,d,spin);
+    qTerm = pow(q(ma,mb,m) / q0(ma,mb,m0), 2.*spin + 1.);
+    //double Gamma0 = _resWidth.GetValue();
+    GammaV = Gamma0 * qTerm * (m0 / m) * BLWeiss2;
+    std::complex<double> denom(m0*m0 - m*m, -m0 * GammaV);
+
+    std::complex<double> result = std::complex<double>(norm) / denom; //Laura++ (old) definition*/
 
     //std::complex<double> result (res.re(),res.im());
-    std::shared_ptr<ComplexParameter> bw(new ComplexParameter("relBW of "+name, res));
+    std::shared_ptr<ComplexParameter> bw(new ComplexParameter("relBW of "+name, result));
     return bw;
   }
 

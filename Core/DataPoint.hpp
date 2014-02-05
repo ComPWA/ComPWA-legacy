@@ -24,9 +24,28 @@
 #include <cstdlib>
 #include <math.h>
 #include <vector>
+#include <map>
 #include "Core/Kinematics.hpp"
 #include "Core/Event.hpp"
 class Kinematics;
+
+struct allMasses
+{
+  unsigned int nInvMasses;
+  unsigned int nEvents;
+  std::map<std::pair<unsigned int, unsigned int>,std::vector<double> > masses_sq;
+
+  allMasses(unsigned int inMasses, unsigned int inEvents, std::vector<std::pair<unsigned int, unsigned int> >& inTup)
+  :nInvMasses(inMasses),nEvents(inEvents){
+    for(unsigned int i=0; i<inTup.size(); i++)
+      masses_sq.insert( std::make_pair( inTup[i], std::vector<double>(inEvents,0.) ) );
+  }
+
+  allMasses()
+  :nInvMasses(0),nEvents(0){
+  }
+
+};
 
 class dataPoint
 {

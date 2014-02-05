@@ -38,8 +38,8 @@ public:
   virtual double controlParameter(ParameterList& minPar);
   static std::shared_ptr<ControlParameter> createInstance(std::shared_ptr<Amplitude>, std::shared_ptr<Data>);
   static std::shared_ptr<ControlParameter> createInstance(std::shared_ptr<Amplitude>, std::shared_ptr<Data>, std::shared_ptr<Data>);
-  static std::shared_ptr<ControlParameter> createInstance(std::shared_ptr<FunctionTree>, std::shared_ptr<Data>);
-  static std::shared_ptr<ControlParameter> createInstance(std::shared_ptr<FunctionTree>, std::shared_ptr<Data>, std::shared_ptr<Data>);
+  static std::shared_ptr<ControlParameter> createInstance(std::shared_ptr<FunctionTree>, unsigned int);
+  static std::shared_ptr<ControlParameter> createInstance(std::shared_ptr<FunctionTree>, std::shared_ptr<FunctionTree>, unsigned int, unsigned int);
 
   /** Destructor */
   virtual ~MinLogLH();
@@ -48,15 +48,18 @@ protected:
   /// Default Constructor (0x0)
   MinLogLH(std::shared_ptr<Amplitude>, std::shared_ptr<Data>);
   MinLogLH(std::shared_ptr<Amplitude>, std::shared_ptr<Data>, std::shared_ptr<Data>);
-  MinLogLH(std::shared_ptr<FunctionTree>, std::shared_ptr<Data>);
-  MinLogLH(std::shared_ptr<FunctionTree>, std::shared_ptr<Data>, std::shared_ptr<Data>);
+  MinLogLH(std::shared_ptr<FunctionTree>, unsigned int);
+  MinLogLH(std::shared_ptr<FunctionTree>, std::shared_ptr<FunctionTree>, unsigned int, unsigned int);
 
 private:
   std::shared_ptr<Amplitude> pPIF_;
-  std::shared_ptr<FunctionTree> pFcnTree_;
+  std::shared_ptr<FunctionTree> pEvtTree_;
+  std::shared_ptr<FunctionTree> pPhspTree_;
   std::shared_ptr<Data> pDIF_;
   std::shared_ptr<Data> pPHSP_;
   double phspVolume;
+  unsigned int nEvts_;
+  unsigned int nPhsp_;
 
 };
 

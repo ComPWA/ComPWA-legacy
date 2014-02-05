@@ -80,7 +80,8 @@ public:
 	virtual const ParameterList& intensity(dataPoint& point);
 	virtual const ParameterList& intensity(std::vector<double> point, ParameterList& par);
 
-	virtual std::shared_ptr<FunctionTree> functionTree(ParameterList& outPar);
+	virtual std::shared_ptr<FunctionTree> functionTree(allMasses& theMasses);
+    virtual std::shared_ptr<FunctionTree> phspTree(allMasses& theMasses);
 
 	virtual const bool fillStartParVec(ParameterList& outPar);
 
@@ -97,6 +98,8 @@ public:
 
 protected:
 	void init();
+	void setupTree(allMasses& theMasses, bool isPhspTree);
+
 	std::shared_ptr<Efficiency> eff_;
 	bool _calcMaxFcnVal;
 	bool _calcNorm;
@@ -104,6 +107,7 @@ protected:
 	AmpSumOfAmplitudes totAmp;
 	AmplitudeSetup ampSetup;
 	std::shared_ptr<FunctionTree> myTree;
+	std::shared_ptr<FunctionTree> myPhspTree;
 	std::shared_ptr<ParameterList> treePar;
 
 	double maxVal;
