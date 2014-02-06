@@ -180,20 +180,24 @@ void AmpSumIntensity::setupTree(allMasses& theMasses, bool isPhspTree){
   treePar->AddParameter(m12);
 
   //----Strategies needed
-  std::shared_ptr<MultAll> multStrat = std::shared_ptr<MultAll>(new MultAll());
-  std::shared_ptr<AddAll> addStrat = std::shared_ptr<AddAll>(new AddAll());
-  std::shared_ptr<AbsSquare> sqStrat = std::shared_ptr<AbsSquare>(new AbsSquare());
-  std::shared_ptr<LogOf> logStrat = std::shared_ptr<LogOf>(new LogOf());
+  std::shared_ptr<MultAll> mmultStrat = std::shared_ptr<MultAll>(new MultAll(ParType::MCOMPLEX));
+  std::shared_ptr<AddAll> maddStrat = std::shared_ptr<AddAll>(new AddAll(ParType::MCOMPLEX));
+  std::shared_ptr<AbsSquare> msqStrat = std::shared_ptr<AbsSquare>(new AbsSquare(ParType::MDOUBLE));
+  std::shared_ptr<LogOf> mlogStrat = std::shared_ptr<LogOf>(new LogOf(ParType::MDOUBLE));
+  std::shared_ptr<MultAll> multStrat = std::shared_ptr<MultAll>(new MultAll(ParType::COMPLEX));
+  std::shared_ptr<AddAll> addStrat = std::shared_ptr<AddAll>(new AddAll(ParType::COMPLEX));
+  std::shared_ptr<AbsSquare> sqStrat = std::shared_ptr<AbsSquare>(new AbsSquare(ParType::DOUBLE));
+  std::shared_ptr<LogOf> logStrat = std::shared_ptr<LogOf>(new LogOf(ParType::DOUBLE));
 
   //----Add Top Node and final operations
-  newTree->createHead("LH", addStrat); //Sum up all events
+  newTree->createHead("LH", addStrat); //Sum up all events, collapse multia
   if(!isPhspTree){ //Data: EvtSum of log of Intens needed
-    newTree->createNode("Log", logStrat, "LH", theMasses.nEvents, false); //log of amp, at each point
-    newTree->createNode("Intens", sqStrat, "Log", theMasses.nEvents, false); //I=A^2, at each point
+    newTree->createNode("Log", mlogStrat, "LH", theMasses.nEvents, false); //log of amp, at each point
+    newTree->createNode("Intens", msqStrat, "Log", theMasses.nEvents, false); //I=A^2, at each point
     newTree->createNode("Amplitude", addStrat, "Intens", theMasses.nEvents, false); //Sum of resonances, at each point
   }else{ //Phsp: PhspSum of Intens needed, log done in LH with other parameters
-    newTree->createNode("Intens", sqStrat, "LH", theMasses.nEvents, false); //I=A^2, at each point
-    newTree->createNode("Amplitude", addStrat, "Intens", theMasses.nEvents, false); //Sum of resonances, at each point
+    newTree->createNode("Intens", msqStrat, "LH", theMasses.nEvents, false); //I=A^2, at each point
+    newTree->createNode("Amplitude", maddStrat, "Intens", theMasses.nEvents, false); //Sum of resonances, at each point
   }
 
   //----Add Resonances
@@ -208,14 +212,15 @@ void AmpSumIntensity::setupTree(allMasses& theMasses, bool isPhspTree){
       phir.push_back( std::shared_ptr<DoubleParameter> (new DoubleParameter("phir_"+tmp.m_name,tmp.m_phase) ) );
 
       //----Add Nodes
-      std::shared_ptr<BreitWignerStrategy> rbwStrat = std::shared_ptr<BreitWignerStrategy>(new BreitWignerStrategy(tmp.m_name));
-      std::shared_ptr<WignerDStrategy> angdStrat = std::shared_ptr<WignerDStrategy>(new WignerDStrategy(tmp.m_name));
+      std::shared_ptr<BreitWignerStrategy> rbwStrat = std::shared_ptr<BreitWignerStrategy>(new BreitWignerStrategy(tmp.m_name,ParType::MCOMPLEX));
+      std::shared_ptr<WignerDStrategy> angdStrat = std::shared_ptr<WignerDStrategy>(new WignerDStrategy(tmp.m_name,ParType::MDOUBLE));
       unsigned int subSys = tmp.m_daugtherA + tmp.m_daugtherB;
       unsigned int last = mr.size()-1;
-      newTree->createNode("Reso_"+tmp.m_name, multStrat, "Amplitude", theMasses.nEvents, false); //Reso=BW*c*AD
-      newTree->createNode("RelBW_"+tmp.m_name, rbwStrat, "Reso_"+tmp.m_name, theMasses.nEvents, false); //BW
+      newTree->createNode("Reso_"+tmp.m_name, mmultStrat, "Amplitude", theMasses.nEvents); //Reso=BW*c*AD
+      newTree->createNode("RelBW_"+tmp.m_name, rbwStrat, "Reso_"+tmp.m_name, theMasses.nEvents); //BW
       newTree->createLeaf("Intens_"+tmp.m_name, rr[last], "Reso_"+tmp.m_name); //c
-      newTree->createNode("AngD_"+tmp.m_name, angdStrat, "Reso_"+tmp.m_name, theMasses.nEvents, false); //AD
+      newTree->createLeaf("Phase_"+tmp.m_name, phir[last], "Reso_"+tmp.m_name); //c
+      newTree->createNode("AngD_"+tmp.m_name, angdStrat, "Reso_"+tmp.m_name, theMasses.nEvents); //AD
       //BW Par
       newTree->createLeaf("m0_"+tmp.m_name, mr[last]->GetValue(), "RelBW_"+tmp.m_name); //m0
       //myTree->createLeaf("x", x, "RelBW_"+tmp.m_name); //x

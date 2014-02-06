@@ -41,8 +41,10 @@ int main(int argc, char **argv) {
   bool autonodes=true;
 
   //------------SetUp some operations for R = a * ( b + c * d)-----------
-  std::shared_ptr<Strategy> add = std::shared_ptr<Strategy>(new AddAll());
-  std::shared_ptr<Strategy> mult = std::shared_ptr<Strategy>(new MultAll());
+  std::shared_ptr<Strategy> add = std::shared_ptr<Strategy>(new AddAll(ParType::DOUBLE));
+  std::shared_ptr<Strategy> mult = std::shared_ptr<Strategy>(new MultAll(ParType::DOUBLE));
+  std::shared_ptr<Strategy> madd = std::shared_ptr<Strategy>(new AddAll(ParType::MDOUBLE));
+  std::shared_ptr<Strategy> mmult = std::shared_ptr<Strategy>(new MultAll(ParType::MDOUBLE));
 
   //------------SetUp the parameters for R = a * ( b + c * d)-----------
   std::shared_ptr<DoubleParameter> parA(new DoubleParameter("parA",5.));
@@ -175,12 +177,12 @@ int main(int argc, char **argv) {
 
     myTreeMultD = std::shared_ptr<FunctionTree>(new FunctionTree());
     myTreeMultD->createHead("R", add);
-    myTreeMultD->createNode("Rmass", mult, "R", nElements);
-    myTreeMultD->createNode("ab", mult, "Rmass", nElements, false);
+    myTreeMultD->createNode("Rmass", mmult, "R", nElements);
+    myTreeMultD->createNode("ab", mmult, "Rmass", nElements, false);
     myTreeMultD->createLeaf("a", mParA, "ab");
     myTreeMultD->createLeaf("b", mParB, "ab");
     myTreeMultD->createNode("Rphsp", add, "Rmass");
-    myTreeMultD->createNode("cd", mult, "Rphsp", nElements*2, false);
+    myTreeMultD->createNode("cd", mmult, "Rphsp", nElements*2, false);
     myTreeMultD->createLeaf("c", mParC, "cd");
     myTreeMultD->createLeaf("d", mParD, "cd");
 

@@ -67,14 +67,16 @@
 		  if(_children[i]->needsCalculation())
 			_children[i]->recalculate();
 		  std::shared_ptr<AbsParameter> para = _children[i]->getValue(ele);
-		  if(!para) std::cout << this->getName() << " " << i << std::endl;
+		  if(!para) std::cout << this->getName() << " child failed: " << i << std::endl;
 		  //para->type();
 		  newVals.AddParameter(para);
 	  	}  //end children-loop
 	  }
 	  _changed=false;
-	  // std::cout << "Values: " << newVals.GetNDouble() << std::endl;
-	  _strat->execute(newVals, _value[0]);
+	  //std::cout << "Values: " << newVals.GetNDouble() << " " << _strat << std::endl;
+	  if(!_strat->execute(newVals, _value[0])) std::cout << this->getName() << " strat failed: " << _strat << std::endl;
+	  //std::cout << "New Val: " << _value[0] << std::endl;
+
     }else{ //i have a certain dim, children must fill it
 
       for(unsigned int ele=0; ele<_value.size(); ele++){

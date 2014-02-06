@@ -34,7 +34,7 @@
 
 class WignerDStrategy : public Strategy {
 public:
-  WignerDStrategy(const std::string resonanceName):name(resonanceName){
+  WignerDStrategy(const std::string resonanceName, ParType in):Strategy(in),name(resonanceName){
     //name = +resonanceName;
   }
 
@@ -42,9 +42,8 @@ public:
     return ("WignerD of "+name);
   }
 
-  virtual bool execute(ParameterList& paras, std::shared_ptr<AbsParameter> out) {
-    ParType checkType = out->type();
-    out = std::shared_ptr<AbsParameter>();
+  virtual bool execute(ParameterList& paras, std::shared_ptr<AbsParameter>& out) {
+    if( checkType != out->type() ) return false;
 
     double Gamma0, GammaV;
     double _M  = double(paras.GetParameterValue("ParOfNode_M"));

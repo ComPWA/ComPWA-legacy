@@ -39,7 +39,7 @@ class Strategy
 {
 public:
   //! Constructor
-  Strategy(){
+  Strategy(ParType in):checkType(in){
   };
 
   //! friend function to stream parameter information to output
@@ -62,26 +62,33 @@ public:
     return out << b.to_str();
   }
 
+  //! Get ParType
+  virtual const ParType OutType() const {
+    return checkType;
+  }
+
   //! Pure Virtual interface for streaming info about the strategy
   virtual const std::string to_str() const =0;
 
   //! Pure Virtual interface for executing a strategy
-  virtual bool execute(ParameterList& paras, std::shared_ptr<AbsParameter> out) = 0;
+  virtual bool execute(ParameterList& paras, std::shared_ptr<AbsParameter>& out) = 0;
+
+protected:
+  ParType checkType;
 };
 
 class AddAll : public Strategy
 {
 public:
-  AddAll(){
+  AddAll(ParType in):Strategy(in){
   };
 
   virtual const std::string to_str() const{
     return "+";
   }
 
-  virtual bool execute(ParameterList& paras, std::shared_ptr<AbsParameter> out){
-    ParType checkType = out->type();
-    out = std::shared_ptr<AbsParameter>();
+  virtual bool execute(ParameterList& paras, std::shared_ptr<AbsParameter>& out){
+    if( checkType != out->type() ) return false;
     unsigned int nMC = paras.GetNMultiComplex();
     unsigned int nMD = paras.GetNMultiDouble();
     unsigned int nC = paras.GetNComplex();
@@ -235,16 +242,16 @@ public:
 class MultAll : public Strategy
 {
 public:
-  MultAll(){
+  MultAll(ParType in):Strategy(in){
   };
 
   virtual const std::string to_str() const{
     return "*";
   };
 
-  virtual bool execute(ParameterList& paras,  std::shared_ptr<AbsParameter> out){
-    ParType checkType = out->type();
-    out = std::shared_ptr<AbsParameter>();
+  virtual bool execute(ParameterList& paras,  std::shared_ptr<AbsParameter>& out){
+    if( checkType != out->type() ) return false;
+
     unsigned int nMC = paras.GetNMultiComplex();
     unsigned int nMD = paras.GetNMultiDouble();
     unsigned int nC = paras.GetNComplex();
@@ -397,16 +404,16 @@ public:
 class LogOf : public Strategy
 {
 public:
-  LogOf(){
+  LogOf(ParType in):Strategy(in){
   };
 
   virtual const std::string to_str() const{
     return "Log";
   };
 
-  virtual bool execute(ParameterList& paras, std::shared_ptr<AbsParameter> out){
-    ParType checkType = out->type();
-    out = std::shared_ptr<AbsParameter>();
+  virtual bool execute(ParameterList& paras, std::shared_ptr<AbsParameter>& out){
+    if( checkType != out->type() ) return false;
+
     unsigned int nMC = paras.GetNMultiComplex();
     unsigned int nMD = paras.GetNMultiDouble();
     unsigned int nC = paras.GetNComplex();
@@ -463,16 +470,16 @@ public:
 class AbsSquare : public Strategy
 {
 public:
-  AbsSquare(){
+  AbsSquare(ParType in):Strategy(in){
   };
 
   virtual const std::string to_str() const{
     return "||^2";
   };
 
-  virtual bool execute(ParameterList& paras, std::shared_ptr<AbsParameter> out){
-    ParType checkType = out->type();
-    out = std::shared_ptr<AbsParameter>();
+  virtual bool execute(ParameterList& paras, std::shared_ptr<AbsParameter>& out){
+    if( checkType != out->type() ) return false;
+
     unsigned int nMC = paras.GetNMultiComplex();
     unsigned int nMD = paras.GetNMultiDouble();
     unsigned int nC = paras.GetNComplex();
@@ -550,16 +557,16 @@ public:
 class Power : public Strategy
 {
 public:
-  Power(){
+  Power(ParType in):Strategy(in){
   };
 
   virtual const std::string to_str() const{
     return "^";
   }
 
-  virtual bool execute(ParameterList& paras, std::shared_ptr<AbsParameter> out){
-    ParType checkType = out->type();
-    out = std::shared_ptr<AbsParameter>();
+  virtual bool execute(ParameterList& paras, std::shared_ptr<AbsParameter>& out){
+    if( checkType != out->type() ) return false;
+
     unsigned int nMC = paras.GetNMultiComplex();
     unsigned int nMD = paras.GetNMultiDouble();
     unsigned int nC = paras.GetNComplex();

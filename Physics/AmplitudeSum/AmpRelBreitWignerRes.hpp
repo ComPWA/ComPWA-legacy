@@ -35,7 +35,7 @@
 
 class BreitWignerStrategy : public Strategy {
 public:
-  BreitWignerStrategy(const std::string resonanceName):name(resonanceName){
+  BreitWignerStrategy(const std::string resonanceName, ParType in):Strategy(in),name(resonanceName){
     //name = +resonanceName;
   }
 
@@ -43,9 +43,8 @@ public:
     return ("relativistic BreitWigner of "+name);
   }
 
-  virtual bool execute(ParameterList& paras, std::shared_ptr<AbsParameter> out) {
-    ParType checkType = out->type();
-    out = std::shared_ptr<AbsParameter>();
+  virtual bool execute(ParameterList& paras, std::shared_ptr<AbsParameter>& out) {
+    if( checkType != out->type() ) return false;
 
     double Gamma0, GammaV, m0, d, norm, BLWeiss2, qTerm;
     unsigned int spin, subSys;
