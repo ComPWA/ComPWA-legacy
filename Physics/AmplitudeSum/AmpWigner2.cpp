@@ -61,20 +61,21 @@ double AmpWigner2::evaluate(dataPoint& point) {
 	double m13sq = point.getVal(id13);
 	double m12sq = kin->getThirdVariableSq(m23sq,m13sq);
 
+	cosTheta = kin->calcHelicityAngle(_subSys, point);
 	switch(_subSys){
 	case 3:
 //		cosTheta = kin->calcHelicityAngle(point->getMsq(3),point->getMsq(4),_M,_m3,_m1,_m2);
-		cosTheta = kin->calcHelicityAngle(m12sq,m23sq,_M,_m3,_m1,_m2);
+//		cosTheta = kin->calcHelicityAngle(m12sq,m23sq,_M,_m3,_m1,_m2);
 		M = (int)(_spinM-_spin3); N = (int)(_spin1-_spin2);
 		M = 0; N=0;
 		break;
 	case 4:
-		cosTheta = kin->calcHelicityAngle(m13sq,m23sq,_M,_m2,_m1,_m3);
+//		cosTheta = kin->calcHelicityAngle(m13sq,m23sq,_M,_m2,_m1,_m3);
 		M = (int)(_spinM-_spin1); N = (int)(_spin3-_spin2);
 		M = 0; N=0;
 		break;
 	case 5:
-		cosTheta = kin->calcHelicityAngle(m23sq,m13sq,_M,_m1,_m2,_m3);
+//		cosTheta = kin->calcHelicityAngle(m23sq,m13sq,_M,_m1,_m2,_m3);
 		M = (int)(_spinM-_spin1); N = (int)(_spin3-_spin2);
 		M = 0; N=0;
 		break;

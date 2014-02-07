@@ -181,7 +181,27 @@ void DalitzKinematics::phspContour(unsigned int xsys,unsigned int ysys,unsigned 
 	return;
 }
 
-double DalitzKinematics::calcHelicityAngle(double invMassSq23, double invMassSq13, double M, double m1, double m2, double m3){
+double DalitzKinematics::calcHelicityAngle(unsigned int sys, dataPoint& point){
+	double cosTheta;
+	double m13sq = point.getVal(1);
+	double m23sq = point.getVal(0);
+	double m12sq = getThirdVariableSq(m23sq,m13sq);
+	switch(sys){
+	case 3:
+		cosTheta = calcHelicityAngle(m12sq,m23sq,M,m3,m1,m2); break;
+	case 4:
+		cosTheta = calcHelicityAngle(m13sq,m23sq,M,m2,m1,m3); break;
+	case 5:
+		cosTheta = calcHelicityAngle(m23sq,m13sq,M,m1,m2,m3); break;
+	default:
+		BOOST_LOG_TRIVIAL(error) <<"DalitzKinematics::calcHelicityAngle() : wrong subsystem selected!";
+		return 0.0;
+	}
+	return cosTheta;
+}
+
+double DalitzKinematics::calcHelicityAngle(double invMassSq23, double invMassSq13, \
+		double M, double mFirst, double mSecond, double mThird){
 	/*
 	 * Calculated the helicity angle of inv. mass of particles 2 and 3.
 	 * The angle is measured between particle 1 and 2! This is our definition!
@@ -192,9 +212,9 @@ double DalitzKinematics::calcHelicityAngle(double invMassSq23, double invMassSq1
 	double s = invMassSq23;
 	double t = invMassSq13;
 	double u = invMassSq12;
-	double qSq = (s-(M+m1)*(M+m1))*(s-(M-m1)*(M-m1))/(4*s);
-	double qPrimeSq = (s-(m2+m3)*(m2+m3))*(s-(m2-m3)*(m2-m3))/(4*s);
-	double cosAngle = ( s*(t-u)+(M*M-m1*m1)*(m2*m2-m3*m3) )/(4*s*sqrt(qSq)*sqrt(qPrimeSq));
+	double qSq = (s-(M+mFirst)*(M+mFirst))*(s-(M-mFirst)*(M-mFirst))/(4*s);
+	double qPrimeSq = (s-(mSecond+mThird)*(mSecond+mThird))*(s-(mSecond-mThird)*(mSecond-mThird))/(4*s);
+	double cosAngle = ( s*(t-u)+(M*M-mFirst*mFirst)*(mSecond*mSecond-mThird*mThird) )/(4*s*sqrt(qSq)*sqrt(qPrimeSq));
 
 	return cosAngle;
 }
