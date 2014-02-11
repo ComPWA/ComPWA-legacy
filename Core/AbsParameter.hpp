@@ -39,7 +39,9 @@
 #include <boost/serialization/shared_ptr.hpp>
 
 enum ParType { COMPLEX = 1, DOUBLE = 2, INTEGER = 3, BOOL = 4, MDOUBLE = 5, MCOMPLEX = 6, UNDEFINED = 0};
+static const char* ParNames[7] = { "UNDEFINED", "COMPLEX", "DOUBLE", "INTEGER", "BOOL", "MDOUBLE", "MCOMPLEX"};
 enum ErrorType { SYM = 1, ASYM = 2, LHSCAN = 3, NOTDEF = 0};
+static const char* ErrorNames[4] = { "NOTDEF", "SYM", "ASYM", "LHSCAN"};
 
 template <class T> class ParError
 {

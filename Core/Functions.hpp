@@ -138,7 +138,7 @@ public:
             results[ele]+=tmp->GetValue(ele);
         }
 
-        out = std::shared_ptr<AbsParameter>(new MultiComplex("AddAllResult",results));
+        out = std::shared_ptr<AbsParameter>(new MultiComplex(out->GetName(),results));
 
         break;
       }//end multi complex
@@ -166,7 +166,7 @@ public:
           for(unsigned int ele=0; ele<tmp->GetNValues(); ele++)
             results[ele]+=tmp->GetValue(ele);
         }
-		out = std::shared_ptr<AbsParameter>(new MultiDouble("AddAllResult",results));
+		out = std::shared_ptr<AbsParameter>(new MultiDouble(out->GetName(),results));
 
 		break;
 	  }//end multi double
@@ -200,7 +200,7 @@ public:
             result+=tmp->GetValue(ele);
         }
 
-        out = std::shared_ptr<AbsParameter>(new ComplexParameter("AddAllResult",result));
+        out = std::shared_ptr<AbsParameter>(new ComplexParameter(out->GetName(),result));
         break;
       }//end complex
 
@@ -223,7 +223,7 @@ public:
             result+=tmp->GetValue(ele);
         }
 
-	    out = std::shared_ptr<AbsParameter>(new DoubleParameter("AddAllResult",result));
+	    out = std::shared_ptr<AbsParameter>(new DoubleParameter(out->GetName(),result));
 	    break;
 	  }//end double
 
@@ -274,7 +274,7 @@ public:
 
         unsigned int nElements = paras.GetMultiComplex(0)->GetNValues();
 
-        std::complex<double> result(0,0);//sum up all 1-dim input
+        std::complex<double> result(1.,0.);//mult up all 1-dim input
         //mult up complex parameter
         for(unsigned int i=0; i<nC; i++){
           result*=paras.GetComplexParameter(i)->GetValue();
@@ -301,7 +301,7 @@ public:
             results[ele]*=tmp->GetValue(ele);
         }
 
-        out = std::shared_ptr<AbsParameter>(new MultiComplex("MultAllResult",results));
+        out = std::shared_ptr<AbsParameter>(new MultiComplex(out->GetName(),results));
 
         break;
       }//end multi complex
@@ -329,7 +329,7 @@ public:
           for(unsigned int ele=0; ele<tmp->GetNValues(); ele++)
             results[ele]*=tmp->GetValue(ele);
         }
-        out = std::shared_ptr<AbsParameter>(new MultiDouble("MultAllResult",results));
+        out = std::shared_ptr<AbsParameter>(new MultiDouble(out->GetName(),results));
 
         break;
       }//end multi double
@@ -363,7 +363,7 @@ public:
             result*=tmp->GetValue(ele);
         }
 
-        out = std::shared_ptr<AbsParameter>(new ComplexParameter("MultAllResult",result));
+        out = std::shared_ptr<AbsParameter>(new ComplexParameter(out->GetName(),result));
         break;
       }//end complex
 
@@ -386,7 +386,7 @@ public:
             result*=tmp->GetValue(ele);
         }
 
-        out = std::shared_ptr<AbsParameter>(new DoubleParameter("MultAllResult",result));
+        out = std::shared_ptr<AbsParameter>(new DoubleParameter(out->GetName(),result));
         break;
       }//end double
 
@@ -445,14 +445,87 @@ public:
         for(unsigned int ele=0; ele<tmp->GetNValues() || ele<nElements; ele++)
           results[ele] = std::log(tmp->GetValue(ele));
 
-        out = std::shared_ptr<AbsParameter>(new MultiDouble("LogResult",results));
+        out = std::shared_ptr<AbsParameter>(new MultiDouble(out->GetName(),results));
 
         break;
       }//end multi double
 
       case ParType::DOUBLE:{
         //output double: log of one double input
-        out = std::shared_ptr<AbsParameter>(new DoubleParameter("LogResult",std::log(paras.GetParameterValue(0))));
+        out = std::shared_ptr<AbsParameter>(new DoubleParameter(out->GetName(),std::log(paras.GetParameterValue(0))));
+        break;
+      }//end double
+
+      default:{
+        //TODO: exception output partype wrong
+        return false;
+      }
+
+    }//end switch
+
+    return true;
+  };
+};
+
+class Complexify : public Strategy
+{
+public:
+  Complexify(ParType in):Strategy(in){
+  };
+
+  virtual const std::string to_str() const{
+    return "MakeComplex";
+  };
+
+  virtual bool execute(ParameterList& paras, std::shared_ptr<AbsParameter>& out){
+    if( checkType != out->type() ) return false;
+
+    unsigned int nMC = paras.GetNMultiComplex();
+    unsigned int nMD = paras.GetNMultiDouble();
+    unsigned int nC = paras.GetNComplex();
+    unsigned int nD = paras.GetNDouble();
+    unsigned int nI = paras.GetNInteger();
+
+    if(nMD+nD==0){
+      //TODO: exception no input
+      return false;
+    }
+    //only one parameter possible
+    if( (nMD+nD)!=2 || (nMC+nC+nI)!=0 ){
+      //TODO: exception wrong input
+      return false;
+    }
+
+    switch(checkType){
+
+      case ParType::MCOMPLEX:{
+        //output multi complex: input must be two multi double
+        if(!(nMD==2)){
+          //TODO: exception wrong input
+          return false;
+        }
+        unsigned int nElements = paras.GetMultiDouble(0)->GetNValues();
+        //fill MultiDouble parameter
+        std::vector<std::complex<double> > results(nElements, (0.,0.));
+        std::shared_ptr<MultiDouble> tmpA = paras.GetMultiDouble(0);
+        std::shared_ptr<MultiDouble> tmpB = paras.GetMultiDouble(1);
+        for(unsigned int ele=0; ele<nElements; ele++)
+          results[ele] = std::complex<double>(tmpA->GetValue(ele),tmpB->GetValue(ele));
+
+        out = std::shared_ptr<AbsParameter>(new MultiComplex(out->GetName(),results));
+
+        break;
+      }//end multi complex
+
+      case ParType::COMPLEX:{
+        //output complex: input must be two double
+        if(!(nD==2)){
+          //TODO: exception wrong input
+          return false;
+        }
+        std::shared_ptr<DoubleParameter> tmpA = paras.GetDoubleParameter(0);
+        std::shared_ptr<DoubleParameter> tmpB = paras.GetDoubleParameter(1);
+        out = std::shared_ptr<AbsParameter>(new ComplexParameter(out->GetName(),std::complex<double>(tmpA->GetValue(),tmpB->GetValue())));
         break;
       }//end double
 
@@ -512,16 +585,16 @@ public:
           for(unsigned int ele=0; ele<nElements; ele++)
             results[ele] = std::norm(tmp->GetValue(ele));
 
-          out = std::shared_ptr<AbsParameter>(new MultiDouble("NSqResult",results));
+          out = std::shared_ptr<AbsParameter>(new MultiDouble(out->GetName(),results));
         }else if(nMC){
-          unsigned int nElements = paras.GetMultiDouble(0)->GetNValues();
+          unsigned int nElements = paras.GetMultiComplex(0)->GetNValues();
           //fill MultiDouble parameter
           std::vector<double> results(nElements, 0.);
           std::shared_ptr<MultiComplex> tmp = paras.GetMultiComplex(0);
           for(unsigned int ele=0; ele<nElements; ele++)
             results[ele] = std::norm(tmp->GetValue(ele));
 
-          out = std::shared_ptr<AbsParameter>(new MultiDouble("NSqResult",results));
+          out = std::shared_ptr<AbsParameter>(new MultiDouble(out->GetName(),results));
         }
 
         break;
@@ -535,10 +608,10 @@ public:
         }
         if(nD){
           std::shared_ptr<DoubleParameter> tmp = paras.GetDoubleParameter(0);
-          out = std::shared_ptr<AbsParameter>(new DoubleParameter("NSqResult",std::norm(tmp->GetValue())));
+          out = std::shared_ptr<AbsParameter>(new DoubleParameter(out->GetName(),std::norm(tmp->GetValue())));
         }else if(nC){
           std::shared_ptr<ComplexParameter> tmp = paras.GetComplexParameter(0);
-          out = std::shared_ptr<AbsParameter>(new DoubleParameter("NSqResult",std::norm(tmp->GetValue())));
+          out = std::shared_ptr<AbsParameter>(new DoubleParameter(out->GetName(),std::norm(tmp->GetValue())));
         }
         break;
       }//end double
@@ -599,7 +672,7 @@ public:
         for(unsigned int ele=0; ele<nElements; ele++)
           results[ele] = std::pow(tmpA->GetValue(ele),tmpB->GetValue(ele));
 
-        out = std::shared_ptr<AbsParameter>(new MultiComplex("PowResult",results));
+        out = std::shared_ptr<AbsParameter>(new MultiComplex(out->GetName(),results));
 
         break;
       }//end multi complex
@@ -618,7 +691,7 @@ public:
         for(unsigned int ele=0; ele<nElements; ele++)
           results[ele] = std::pow(tmpA->GetValue(ele),tmpB->GetValue(ele));
 
-        out = std::shared_ptr<AbsParameter>(new MultiDouble("PowResult",results));
+        out = std::shared_ptr<AbsParameter>(new MultiDouble(out->GetName(),results));
 
         break;
       }//end multi double
@@ -631,7 +704,7 @@ public:
         }
         std::shared_ptr<ComplexParameter> tmpA = paras.GetComplexParameter(0);
         std::shared_ptr<ComplexParameter> tmpB = paras.GetComplexParameter(1);
-        out = std::shared_ptr<AbsParameter>(new ComplexParameter("PowResult",std::pow(tmpA->GetValue(),tmpB->GetValue())));
+        out = std::shared_ptr<AbsParameter>(new ComplexParameter(out->GetName(),std::pow(tmpA->GetValue(),tmpB->GetValue())));
         break;
       }//end double
 
@@ -643,7 +716,7 @@ public:
         }
         std::shared_ptr<DoubleParameter> tmpA = paras.GetDoubleParameter(0);
         std::shared_ptr<DoubleParameter> tmpB = paras.GetDoubleParameter(1);
-        out = std::shared_ptr<AbsParameter>(new DoubleParameter("PowResult",std::pow(tmpA->GetValue(),tmpB->GetValue())));
+        out = std::shared_ptr<AbsParameter>(new DoubleParameter(out->GetName(),std::pow(tmpA->GetValue(),tmpB->GetValue())));
         break;
       }//end double
 

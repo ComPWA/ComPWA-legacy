@@ -18,6 +18,7 @@
 
 #include <vector>
 #include <memory>
+#include <map>
 #include <string>
 
 #include "Physics/Amplitude.hpp"
@@ -119,10 +120,10 @@ protected:
 
 	//Resonance Variables
 	std::vector<std::string> namer;
-	std::vector<std::shared_ptr<DoubleParameter> > mr;
-	std::vector<std::shared_ptr<DoubleParameter> > gr;
-	std::vector<std::shared_ptr<DoubleParameter> > rr;
-	std::vector<std::shared_ptr<DoubleParameter> > phir;
+	std::map<std::string,std::shared_ptr<DoubleParameter> > mr;
+	std::map<std::string,std::shared_ptr<DoubleParameter> > gr;
+	std::map<std::string,std::shared_ptr<DoubleParameter> > rr;
+	std::map<std::string,std::shared_ptr<DoubleParameter> > phir;
 
 //	std::vector<std::shared_ptr<DoubleParameter> > qr;
 

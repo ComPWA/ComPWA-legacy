@@ -94,19 +94,19 @@ void AmpSumIntensity::init(){
 	       if(!tmp.m_enable) continue;
 	       //setup RooVars
 	       namer.push_back(tmp.m_name);
-	       mr.push_back( std::shared_ptr<DoubleParameter> (new DoubleParameter("mass_"+tmp.m_name,tmp.m_mass, tmp.m_mass_min, tmp.m_mass_max) ) );
-	       gr.push_back( std::shared_ptr<DoubleParameter> (new DoubleParameter("width_"+tmp.m_name,tmp.m_width, tmp.m_width_min, tmp.m_width_max) ) );
-	       rr.push_back( std::shared_ptr<DoubleParameter> (new DoubleParameter("rr_"+tmp.m_name,tmp.m_strength) ) );
-	       phir.push_back( std::shared_ptr<DoubleParameter> (new DoubleParameter("phir_"+tmp.m_name,tmp.m_phase) ) );
+	       mr.insert(std::make_pair(tmp.m_name, std::shared_ptr<DoubleParameter> (new DoubleParameter("mass_"+tmp.m_name,tmp.m_mass, tmp.m_mass_min, tmp.m_mass_max) ) ));
+	       gr.insert(std::make_pair(tmp.m_name, std::shared_ptr<DoubleParameter> (new DoubleParameter("width_"+tmp.m_name,tmp.m_width, tmp.m_width_min, tmp.m_width_max) ) ));
+	       rr.insert(std::make_pair(tmp.m_name, std::shared_ptr<DoubleParameter> (new DoubleParameter("rr_"+tmp.m_name,tmp.m_strength) ) ));
+	       phir.insert(std::make_pair(tmp.m_name, std::shared_ptr<DoubleParameter> (new DoubleParameter("phir_"+tmp.m_name,tmp.m_phase) ) ));
 
 	       unsigned int subSys = tmp.m_daugtherA + tmp.m_daugtherB;
-	       unsigned int last = mr.size()-1;
+	       //unsigned int last = mr.size()-1;
 
 	       //setup Dynamics
 	       //unsigned int last = mr.size()-1;
 	       std::shared_ptr<AmpRelBreitWignerRes> tmpbw(new AmpRelBreitWignerRes(tmp.m_name.c_str(),
-	               *mr[last], *gr[last], tmp.m_mesonRadius, subSys, tmp.m_spin,tmp.m_m,tmp.m_n) );
-	       totAmp.addBW(tmpbw, rr.at(last), phir.at(last));
+	               *mr[tmp.m_name], *gr[tmp.m_name], tmp.m_mesonRadius, subSys, tmp.m_spin,tmp.m_m,tmp.m_n) );
+	       totAmp.addBW(tmpbw, rr[tmp.m_name], phir[tmp.m_name]);
 
 	       //setting normalization between amplitudes
 	       double norm=tmp.m_norm;
@@ -123,23 +123,23 @@ void AmpSumIntensity::init(){
 		if(!tmp.m_enable) continue;
 		//setup RooVars
 		namer.push_back(tmp.m_name);
-		mr.push_back( std::shared_ptr<DoubleParameter> (new DoubleParameter("mass_"+tmp.m_name,tmp.m_mass, tmp.m_mass_min, tmp.m_mass_max) ) );
-		gr.push_back( std::shared_ptr<DoubleParameter> (new DoubleParameter("width_"+tmp.m_name,tmp.m_width, tmp.m_width_min, tmp.m_width_max) ) );
-		rr.push_back( std::shared_ptr<DoubleParameter> (new DoubleParameter("rr_"+tmp.m_name,tmp.m_strength) ) );
-		phir.push_back( std::shared_ptr<DoubleParameter> (new DoubleParameter("phir_"+tmp.m_name,tmp.m_phase) ) );
+		mr.insert(std::make_pair(tmp.m_name, std::shared_ptr<DoubleParameter> (new DoubleParameter("mass_"+tmp.m_name,tmp.m_mass, tmp.m_mass_min, tmp.m_mass_max) ) ));
+		gr.insert(std::make_pair(tmp.m_name, std::shared_ptr<DoubleParameter> (new DoubleParameter("width_"+tmp.m_name,tmp.m_width, tmp.m_width_min, tmp.m_width_max) ) ));
+		rr.insert(std::make_pair(tmp.m_name, std::shared_ptr<DoubleParameter> (new DoubleParameter("rr_"+tmp.m_name,tmp.m_strength) ) ));
+		phir.insert(std::make_pair(tmp.m_name, std::shared_ptr<DoubleParameter> (new DoubleParameter("phir_"+tmp.m_name,tmp.m_phase) ) ));
 		DoubleParameter param1("coupling1_"+tmp.m_name,tmp.m_coupling);
 		DoubleParameter param2("coupling2_"+tmp.m_name,tmp.m_couplingHidden);
 
 		unsigned int subSys = tmp.m_daugtherA + tmp.m_daugtherB;
 
 		//setup Dynamics
-		unsigned int last = mr.size()-1;
+		//unsigned int last = mr.size()-1;
 		std::shared_ptr<AmpFlatteRes> tmpbw(new AmpFlatteRes(tmp.m_name.c_str(),
-				*mr[last], *gr[last], tmp.m_mesonRadius, param1, param2, \
+				*mr[tmp.m_name], *gr[tmp.m_name], tmp.m_mesonRadius, param1, param2, \
 				PhysConst::instance()->getMass(tmp.m_hiddenParticle1),\
 				PhysConst::instance()->getMass(tmp.m_hiddenParticle2),\
 				subSys, tmp.m_spin,tmp.m_m,tmp.m_n) );
-		totAmp.addBW(tmpbw, rr.at(last), phir.at(last));
+		totAmp.addBW(tmpbw, rr[tmp.m_name], phir[tmp.m_name]);
 
 		double norm=tmp.m_norm;
 		if(norm<0 || _calcNorm) {//recalculate normalization
@@ -185,16 +185,17 @@ void AmpSumIntensity::setupTree(allMasses& theMasses, bool isPhspTree){
   std::shared_ptr<AbsSquare> msqStrat = std::shared_ptr<AbsSquare>(new AbsSquare(ParType::MDOUBLE));
   std::shared_ptr<LogOf> mlogStrat = std::shared_ptr<LogOf>(new LogOf(ParType::MDOUBLE));
   std::shared_ptr<MultAll> multStrat = std::shared_ptr<MultAll>(new MultAll(ParType::COMPLEX));
-  std::shared_ptr<AddAll> addStrat = std::shared_ptr<AddAll>(new AddAll(ParType::COMPLEX));
+  std::shared_ptr<AddAll> addStrat = std::shared_ptr<AddAll>(new AddAll(ParType::DOUBLE));
   std::shared_ptr<AbsSquare> sqStrat = std::shared_ptr<AbsSquare>(new AbsSquare(ParType::DOUBLE));
   std::shared_ptr<LogOf> logStrat = std::shared_ptr<LogOf>(new LogOf(ParType::DOUBLE));
+  std::shared_ptr<Complexify> complStrat = std::shared_ptr<Complexify>(new Complexify(ParType::COMPLEX));
 
   //----Add Top Node and final operations
   newTree->createHead("LH", addStrat); //Sum up all events, collapse multia
   if(!isPhspTree){ //Data: EvtSum of log of Intens needed
     newTree->createNode("Log", mlogStrat, "LH", theMasses.nEvents, false); //log of amp, at each point
     newTree->createNode("Intens", msqStrat, "Log", theMasses.nEvents, false); //I=A^2, at each point
-    newTree->createNode("Amplitude", addStrat, "Intens", theMasses.nEvents, false); //Sum of resonances, at each point
+    newTree->createNode("Amplitude", maddStrat, "Intens", theMasses.nEvents, false); //Sum of resonances, at each point
   }else{ //Phsp: PhspSum of Intens needed, log done in LH with other parameters
     newTree->createNode("Intens", msqStrat, "LH", theMasses.nEvents, false); //I=A^2, at each point
     newTree->createNode("Amplitude", maddStrat, "Intens", theMasses.nEvents, false); //Sum of resonances, at each point
@@ -205,11 +206,11 @@ void AmpSumIntensity::setupTree(allMasses& theMasses, bool isPhspTree){
       Resonance tmp = (*reso);
       if(!tmp.m_enable) continue;
       //setup RooVars
-      namer.push_back(tmp.m_name);
-      mr.push_back( std::shared_ptr<DoubleParameter> (new DoubleParameter("mass_"+tmp.m_name,tmp.m_mass, tmp.m_mass_min, tmp.m_mass_max) ) );
-      gr.push_back( std::shared_ptr<DoubleParameter> (new DoubleParameter("width_"+tmp.m_name,tmp.m_width, tmp.m_width_min, tmp.m_width_max) ) );
-      rr.push_back( std::shared_ptr<DoubleParameter> (new DoubleParameter("rr_"+tmp.m_name,tmp.m_strength) ) );
-      phir.push_back( std::shared_ptr<DoubleParameter> (new DoubleParameter("phir_"+tmp.m_name,tmp.m_phase) ) );
+      //namer.push_back(tmp.m_name);
+      //mr.push_back( std::shared_ptr<DoubleParameter> (new DoubleParameter("mass_"+tmp.m_name,tmp.m_mass, tmp.m_mass_min, tmp.m_mass_max) ) );
+      //gr.push_back( std::shared_ptr<DoubleParameter> (new DoubleParameter("width_"+tmp.m_name,tmp.m_width, tmp.m_width_min, tmp.m_width_max) ) );
+     // rr.push_back( std::shared_ptr<DoubleParameter> (new DoubleParameter("rr_"+tmp.m_name,tmp.m_strength) ) );
+     // phir.push_back( std::shared_ptr<DoubleParameter> (new DoubleParameter("phir_"+tmp.m_name,tmp.m_phase) ) );
 
       //----Add Nodes
       std::shared_ptr<BreitWignerStrategy> rbwStrat = std::shared_ptr<BreitWignerStrategy>(new BreitWignerStrategy(tmp.m_name,ParType::MCOMPLEX));
@@ -218,11 +219,12 @@ void AmpSumIntensity::setupTree(allMasses& theMasses, bool isPhspTree){
       unsigned int last = mr.size()-1;
       newTree->createNode("Reso_"+tmp.m_name, mmultStrat, "Amplitude", theMasses.nEvents); //Reso=BW*c*AD
       newTree->createNode("RelBW_"+tmp.m_name, rbwStrat, "Reso_"+tmp.m_name, theMasses.nEvents); //BW
-      newTree->createLeaf("Intens_"+tmp.m_name, rr[last], "Reso_"+tmp.m_name); //c
-      newTree->createLeaf("Phase_"+tmp.m_name, phir[last], "Reso_"+tmp.m_name); //c
+      newTree->createNode("C_"+tmp.m_name, complStrat, "Reso_"+tmp.m_name); //c
+      newTree->createLeaf("Intens_"+tmp.m_name, rr[tmp.m_name], "C_"+tmp.m_name); //r
+      newTree->createLeaf("Phase_"+tmp.m_name, phir[tmp.m_name], "C_"+tmp.m_name); //phi
       newTree->createNode("AngD_"+tmp.m_name, angdStrat, "Reso_"+tmp.m_name, theMasses.nEvents); //AD
       //BW Par
-      newTree->createLeaf("m0_"+tmp.m_name, mr[last]->GetValue(), "RelBW_"+tmp.m_name); //m0
+      newTree->createLeaf("m0_"+tmp.m_name, mr[tmp.m_name]->GetValue(), "RelBW_"+tmp.m_name); //m0
       //myTree->createLeaf("x", x, "RelBW_"+tmp.m_name); //x
       /*switch(subSys){
         case 3:{ //reso in sys of particles 1&2
@@ -250,7 +252,7 @@ void AmpSumIntensity::setupTree(allMasses& theMasses, bool isPhspTree){
       newTree->createLeaf("subSysFlag_"+tmp.m_name, subSys, "RelBW_"+tmp.m_name); //subSysFlag
       newTree->createLeaf("spin_"+tmp.m_name, tmp.m_spin, "RelBW_"+tmp.m_name); //spin
       newTree->createLeaf("d_"+tmp.m_name,  tmp.m_mesonRadius, "RelBW_"+tmp.m_name); //d
-      newTree->createLeaf("resWidth_"+tmp.m_name, gr[last]->GetValue(), "RelBW_"+tmp.m_name); //resWidth
+      newTree->createLeaf("resWidth_"+tmp.m_name, gr[tmp.m_name]->GetValue(), "RelBW_"+tmp.m_name); //resWidth
       newTree->createLeaf("norm_"+tmp.m_name, 1., "RelBW_"+tmp.m_name); //Todo: setup norm, manipulate norm?
       //AD Par
       newTree->createLeaf("m23", m23, "AngD_"+tmp.m_name); //ma
@@ -435,20 +437,20 @@ void AmpSumIntensity::setParameterList(ParameterList& par){
 	for(unsigned int i=0; i<nAmps; i++){
 //		*rr[i] = DoubleParameter(par.GetDoubleParameter(2*i));
 //		*phir[i] = DoubleParameter(par.GetDoubleParameter(2*i+1));
-		rr[i]->SetValue(par.GetDoubleParameter(2*i)->GetValue());
-		rr[i]->SetError(par.GetDoubleParameter(2*i)->GetError());
-		phir[i]->SetValue(par.GetDoubleParameter(2*i+1)->GetValue());
-		phir[i]->SetError(par.GetDoubleParameter(2*i+1)->GetError());
+		rr[namer[i]]->SetValue(par.GetDoubleParameter(2*i)->GetValue());
+		rr[namer[i]]->SetError(par.GetDoubleParameter(2*i)->GetError());
+		phir[namer[i]]->SetValue(par.GetDoubleParameter(2*i+1)->GetValue());
+		phir[namer[i]]->SetError(par.GetDoubleParameter(2*i+1)->GetError());
 	}
 	return;
 }
 const bool AmpSumIntensity::fillStartParVec(ParameterList& outPar){
 	if(outPar.GetNParameter())
 		return false; //already filled, TODO: exception?
-	for(unsigned int i=0; i<rr.size();i++){
+	for(unsigned int i=0; i<namer.size();i++){
 		//add strength and phases of the used amplitudes
-		outPar.AddParameter(std::shared_ptr<DoubleParameter>(new DoubleParameter(*rr[i])));
-		outPar.AddParameter(std::shared_ptr<DoubleParameter>(new DoubleParameter(*phir[i])));
+		outPar.AddParameter(rr[namer[i]]);
+		outPar.AddParameter(phir[namer[i]]);
 	}
 	return true;
 }
@@ -458,8 +460,8 @@ void AmpSumIntensity::printAmps(){
 	outStr<<"AmpSumIntensity: Printing amplitudes with current(!) set of parameters:\n";
 	for(unsigned int i=0;i<nAmps;i++){
 		outStr<<std::setw(12)<<totAmp.getAmpName(i)<<": ";
-		outStr<<"Mag = "<<std::setw(6)<<rr[i]->GetValue()<<" +- "<<std::setw(5)<<rr[i]->GetError()->GetError();
-		outStr<<"   Phase = "<<std::setw(6)<<phir[i]->GetValue()<<" +- "<<std::setw(5)<<phir[i]->GetError()->GetError();
+		outStr<<"Mag = "<<std::setw(6)<<rr[namer[i]]->GetValue()<<" +- "<<std::setw(5)<<rr[namer[i]]->GetError()->GetError();
+		outStr<<"   Phase = "<<std::setw(6)<<phir[namer[i]]->GetValue()<<" +- "<<std::setw(5)<<phir[namer[i]]->GetError()->GetError();
 		if(!(i==nAmps-1)) outStr << "\n";
 	}
 	BOOST_LOG_TRIVIAL(info)<<outStr.str();

@@ -43,7 +43,10 @@ public:
   }
 
   virtual bool execute(ParameterList& paras, std::shared_ptr<AbsParameter>& out) {
-    if( checkType != out->type() ) return false;
+    if( checkType != out->type() ) {
+      throw(WrongParType(std::string("Output Type ")+ParNames[out->type()]+std::string(" conflicts expected type ")+ParNames[checkType]+std::string(" of ")+name+" Wigner strat"));
+      return false;
+    }
 
     double Gamma0, GammaV;
     double _M  = double(paras.GetParameterValue("ParOfNode_M"));
@@ -93,16 +96,17 @@ public:
               locmin_sq = s1min(_m12*_m12,_M,_m1,_m3,_m2);
               locmax_sq = s1max(_m12*_m12,_M,_m1,_m3,_m2);
               beta=acos((2.*_m23*_m23-locmax_sq-locmin_sq)/(locmax_sq-locmin_sq));
-              if(beta!=beta) return false;
+              //if(beta!=beta) return false;
               break;
             }
           }
 
+          if(beta!=beta) beta=1.;
           Spin j(_inSpin), m(_outSpin1), n(_outSpin2);
           results[ele]=Wigner_d(j,m,n,beta);
         }//end element loop
 
-        out = std::shared_ptr<AbsParameter>(new MultiDouble("WignerD of "+name+" result",results));
+        out = std::shared_ptr<AbsParameter>(new MultiDouble(out->GetName(),results));
         return true;
       }
     }else if(checkType == ParType::DOUBLE){ //one dim output
@@ -138,7 +142,7 @@ public:
       //  return 0.;
 
       Spin j(_inSpin), m(_outSpin1), n(_outSpin2);
-      out = std::shared_ptr<AbsParameter>(new DoubleParameter("WignerD of "+name+" result",Wigner_d(j,m,n,beta)));
+      out = std::shared_ptr<AbsParameter>(new DoubleParameter(out->GetName(),Wigner_d(j,m,n,beta)));
       return true;
     }else{
       return false;

@@ -44,7 +44,10 @@ public:
   }
 
   virtual bool execute(ParameterList& paras, std::shared_ptr<AbsParameter>& out) {
-    if( checkType != out->type() ) return false;
+    if( checkType != out->type() ) {
+      throw(WrongParType(std::string("Output Type ")+ParNames[out->type()]+std::string(" conflicts expected type ")+ParNames[checkType]+std::string(" of ")+name+" BW strat"));
+      return false;
+    }
 
     double Gamma0, GammaV, m0, d, norm, BLWeiss2, qTerm;
     unsigned int spin, subSys;
@@ -107,15 +110,17 @@ public:
           qTerm = pow(q(map->GetValue(ele),mbp->GetValue(ele),mp->GetValue(ele)) / q0(map->GetValue(ele),mbp->GetValue(ele),m0), 2.*spin + 1.);
           //double Gamma0 = _resWidth.GetValue();
           GammaV = Gamma0 * qTerm * (m0 / mp->GetValue(ele)) * BLWeiss2;
+
           std::complex<double> denom(m0*m0 - mp->GetValue(ele)*mp->GetValue(ele), -m0 * GammaV);
 
           results[ele] = (std::complex<double>(norm) / denom); //Laura++ (old) definition*/
+          if(results[ele].real()!=results[ele].real()) std::cout<<"nan in BW: "<<BLWeiss2<<" "<<m0<<" "<<mp->GetValue(ele)<<" "<<map->GetValue(ele)<<" "<<mbp->GetValue(ele)<<std::endl;
         }
 
-        out = std::shared_ptr<AbsParameter>(new MultiComplex("relBW of "+name,results));
+        out = std::shared_ptr<AbsParameter>(new MultiComplex(out->GetName(),results));
         return true;
       }else{ //end multidim para treatment
-        //Todo: exception wrong input
+        throw(WrongParType("Input MultiDoubles missing in BW strat of "+name));
         return false;
       }
     }//end multicomplex output
@@ -126,21 +131,21 @@ public:
     double m, ma, mb;
     switch(subSys){
       case 3:{ //reso in sys of particles 1&2
-        m  = double(paras.GetParameterValue("m12"));
-        ma  = double(paras.GetParameterValue("m23"));
-        mb  = double(paras.GetParameterValue("m13"));
+        m  = sqrt(double(paras.GetParameterValue("m12")));
+        ma  = sqrt(double(paras.GetParameterValue("m23")));
+        mb  = sqrt(double(paras.GetParameterValue("m13")));
         break;
       }
       case 4:{ //reso in sys of particles 1&3
-        m  = double(paras.GetParameterValue("m13"));
-        ma  = double(paras.GetParameterValue("m12"));
-        mb  = double(paras.GetParameterValue("m23"));
+        m  = sqrt(double(paras.GetParameterValue("m13")));
+        ma  = sqrt(double(paras.GetParameterValue("m12")));
+        mb  = sqrt(double(paras.GetParameterValue("m23")));
         break;
       }
       case 5:{ //reso in sys of particles 2&3
-        m  = double(paras.GetParameterValue("m23"));
-        ma  = double(paras.GetParameterValue("m13"));
-        mb  = double(paras.GetParameterValue("m12"));
+        m  = sqrt(double(paras.GetParameterValue("m23")));
+        ma  = sqrt(double(paras.GetParameterValue("m13")));
+        mb  = sqrt(double(paras.GetParameterValue("m12")));
         break;
       }
     }
@@ -153,7 +158,7 @@ public:
     std::complex<double> result = std::complex<double>(norm) / denom; //Laura++ (old) definition*/
 
     //std::complex<double> result (res.re(),res.im());
-    out = std::shared_ptr<AbsParameter>(new ComplexParameter("relBW of "+name, result));
+    out = std::shared_ptr<AbsParameter>(new ComplexParameter(out->GetName(), result));
     return true;
   }
 
@@ -164,6 +169,11 @@ protected:
     double mapb = ma + mb;
     double mamb = ma - mb;
 
+    if( (m0*m0 - mapb*mapb) < 0 ) {
+        //std::cout<<"AmpKinematics: Trying to calculate break-up momentum below threshold!"<<std::endl;
+        return 1; //below threshold
+    }
+
     return sqrt ( (m0*m0 - mapb*mapb) * (m0*m0 - mamb*mamb) ) / (2. * m0 );
   }
 
@@ -171,13 +181,17 @@ protected:
     double mapb = ma + mb;
     double mamb = ma - mb;
 
+    if( (x*x - mapb*mapb) < 0 ) {
+        //std::cout<<"AmpKinematics: Trying to calculate break-up momentum below threshold!"<<std::endl;
+        return 1; //below threshold
+    }
+
     return sqrt ( (x*x - mapb*mapb) * (x*x - mamb*mamb) ) / (2. * x );
   }
 
-
   // compute part of the Blatt-Weisskopf barrier factor
   //   BLprime = sqrt (F(q0)/F(q))
-  double F(const double& p, const double& d, unsigned int& spin) const {
+ /* double F(const double& p, const double& d, unsigned int& spin) const {
     double retVal = 1;
 
     if (spin == 0)
@@ -189,13 +203,53 @@ protected:
       retVal = (z-3.)*(z-3.) + 9*z;
     }
     return retVal;
-  }
-
+  }*/
 
   // compute square of Blatt-Weisskopf barrier factor
   double BLprime2(const double& ma, const double& mb, const double& m0, const double& x, const double& d, unsigned int& spin) const {
-    //  cout << q0() << " " << q() << "\t" << F(q0()) << " " << F(q()) << endl;
-    return F(q0(ma, mb, m0),d,spin) / F(q(ma, mb, x),d,spin);
+    double t0= q0(ma, mb, m0)*q0(ma, mb, m0) * d*d;
+    double t= q(ma, mb, x)*q(ma, mb, x) * d*d;
+    return FormFactor(t0,t,spin);
+  }
+
+  double FormFactor(double& z0, double& z, unsigned int& spin) const{
+      double nom=0, denom=0;
+      switch(spin){
+      case 0:{
+        return 1.;
+      }
+      case 1:{
+          //if(_type==barrierType::BWPrime){
+          //    nom = 1 + z0;
+          //    denom = 1 + z;
+          //} else if(_type==barrierType::BW){
+              nom = 2*z;
+              denom = 1 + z;
+          //} else {
+           //   std::cout<<"Wrong BLW factor definition: "<<_type<<std::endl;
+           //   return 1;
+          //}
+          break;
+      }
+      case 2:{
+          //if(_type==barrierType::BWPrime){
+         //     nom = (z0-3)*(z0-3)+9*z0;
+         //     denom = (z-3)*(z-3)+9*z;
+         // } else if(_type==barrierType::BW){
+              nom = 13*z*z;
+              denom = (z-3)*(z-3)+9*z;
+         // } else {
+          //    std::cout<<"Wrong BLW factor definition: "<<_type<<std::endl;
+          //    return 1;
+         // }
+         break;
+      }
+      default:{
+          std::cout<<"Wrong spin value! BLW factors only implemented for spin 0,1 and 2! "<<std::endl;
+          return 0;
+      }
+      }
+      return nom/denom;
   }
 
 };

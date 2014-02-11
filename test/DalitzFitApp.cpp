@@ -96,7 +96,7 @@ int main(int argc, char **argv){
   BOOST_LOG_TRIVIAL(info)<< "Load Modules";
   std::shared_ptr<RootReader> myReader(new RootReader(file, false,"data"));
   std::shared_ptr<RootReader> myPHSPReader(new RootReader(file, false,"mc"));
-  std::shared_ptr<Amplitude> amps(new AmpSumIntensity(ini, AmpSumIntensity::normStyle::one, std::shared_ptr<Efficiency>(new UnitEfficiency()), myReader->getNEvents()));
+  std::shared_ptr<Amplitude> amps(new AmpSumIntensity(ini, AmpSumIntensity::normStyle::none, std::shared_ptr<Efficiency>(new UnitEfficiency()), myReader->getNEvents()));
 
   //std::shared_ptr<Amplitude> amps(new AmpSumIntensity(M, Br, m1, m2, m3,"J/psi","gamma","pi0","pi0", ini));
   // Initiate parameters
@@ -127,14 +127,17 @@ int main(int argc, char **argv){
     if(!phspTree->sanityCheck()) return 0;
     BOOST_LOG_TRIVIAL(debug)<<physicsTree<<std::endl;
     BOOST_LOG_TRIVIAL(debug)<<phspTree<<std::endl;
-    physicsTree->recalculate();return 0;
+    physicsTree->recalculate();
     phspTree->recalculate();
+    BOOST_LOG_TRIVIAL(debug)<<physicsTree<<std::endl;
+    BOOST_LOG_TRIVIAL(debug)<<phspTree<<std::endl;
     BOOST_LOG_TRIVIAL(debug)<<"Evt Tree: "<<(std::dynamic_pointer_cast<DoubleParameter>(physicsTree->head()->getValue()))->GetValue();
     BOOST_LOG_TRIVIAL(debug)<<"Phsp Tree: "<<(std::dynamic_pointer_cast<DoubleParameter>(phspTree->head()->getValue()))->GetValue();
     BOOST_LOG_TRIVIAL(info)<<"Trees are set up"<<std::endl;
 
     esti = MinLogLH::createInstance(physicsTree, phspTree, myEvtMasses.nEvents, myPhspMasses.nEvents);
   }
+
   //std::shared_ptr<ControlParameter> esti = MinLogLH::createInstance(amps, myReader, myPHSPReader);
   //std::shared_ptr<Estimator> esti(new MinLogLH(amps, myReader, myPHSPReader));
   std::shared_ptr<Optimizer> opti(new MinuitIF(esti, par));
