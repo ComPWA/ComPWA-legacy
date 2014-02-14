@@ -74,12 +74,16 @@ public:
 	void phspContour(unsigned int xsys,unsigned int ysys, unsigned int n, double* xcoord, double* ycoord);
 	//! calculated the helicity angle
 	double calcHelicityAngle(double invM1sq, double invM2sq, double M, double ma, double mb, double mc);
+	//! calculated the helicity angle
+	double calcHelicityAngle(unsigned int sys,dataPoint& point);
 	//! Calculates third dalitz plot variable, e.g f(s1,s2)=s3
 	double getThirdVariableSq(double, double) const;
 	//! checks of data point is within phase space boundaries
 	bool isWithinPhsp(const dataPoint &point) ;
 	//! returns the dalitz plot area for the given kinematics
 	double getPhspVolume();
+
+	double calculateMoments(unsigned int sys, dataPoint& point, unsigned int n, unsigned int m);
 
 	//!maximum value for variable m23=5, m13=4, m12=3
 	double mimax(unsigned int i) const;

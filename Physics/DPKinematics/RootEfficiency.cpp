@@ -36,3 +36,13 @@ double DalitzHistEfficiency::evaluate(dataPoint& point){
 	int globalBin = test->FindBin(m23sq,m13sq);
 	return effHist->GetEfficiency(globalBin);
 }
+
+double DalitzAngleHistEfficiency::evaluate(dataPoint& point){
+	double m23sq = point.getVal("m23sq");
+	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
+	double angle = kin->calcHelicityAngle(5,point);
+
+	TH2D* test = (TH2D*) effHist->GetPassedHistogram();
+	int globalBin = test->FindBin(m23sq,angle);
+	return effHist->GetEfficiency(globalBin);
+}
