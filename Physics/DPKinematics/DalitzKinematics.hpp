@@ -83,6 +83,7 @@ public:
 	//! returns the dalitz plot area for the given kinematics
 	double getPhspVolume();
 
+	double calculateMoments(unsigned int sys, dataPoint& point, unsigned int n, unsigned int m);
 
 	//!maximum value for variable m23=5, m13=4, m12=3
 	double mimax(unsigned int i) const;

@@ -20,8 +20,20 @@
 #include "gsl/gsl_monte_plain.h"
 #include "gsl/gsl_monte_miser.h"
 #include "gsl/gsl_monte_vegas.h"
-//DalitzKinematics* DalitzKinematics::inst = NULL;
+#include "gsl/gsl_sf_legendre.h"
 
+
+double DalitzKinematics::calculateMoments(unsigned int sys, dataPoint& point, unsigned int n, unsigned int m){
+	double angle = calcHelicityAngle(sys,point);
+	if(angle < -1 || angle > 1 ) {
+		BOOST_LOG_TRIVIAL(error) << "DalitzKinematics::calculateMoments() angle out of range! "<<angle;
+		return -999;
+	}
+//	double val = gsl_sf_legendre_Plm(n,m,angle);
+	double val = gsl_sf_legendre_sphPlm(n,m,angle);//normalized! - which one is correct?
+//	std::cout<<angle<< " "<<val<<std::endl;
+	return val;
+}
 double DalitzKinematics::getMin(std::string name){
 	if(name=="m13sq") return m13_sq_min;
 	if(name=="m23sq") return m23_sq_min;
@@ -43,7 +55,8 @@ void DalitzKinematics::eventToDataPoint(Event& ev, dataPoint& point){
 	Particle part3 = ev.getParticle(2);
 	double m23sq = Particle::invariantMass(part2,part3);
 	double m13sq = Particle::invariantMass(part1,part3);
-	point.setVal("m13sq",m13sq); point.setVal("m23sq",m23sq);
+//	point.setVal("m13sq",m13sq); point.setVal("m23sq",m23sq);
+	point.setVal(1,m13sq); point.setVal(0,m23sq);
 	return;
 }
 double DalitzKinematics::invMassMax(unsigned int sys, unsigned int sys2, double invMass_sys) const {
@@ -203,9 +216,8 @@ double DalitzKinematics::calcHelicityAngle(unsigned int sys, dataPoint& point){
 double DalitzKinematics::calcHelicityAngle(double invMassSq23, double invMassSq13, \
 		double M, double mFirst, double mSecond, double mThird){
 	/*
-	 * Calculated the helicity angle of inv. mass of particles 2 and 3.
-	 * The angle is measured between particle 1 and 2! This is our definition!
-	 * The cosine of the angle is returned.
+	 * Angle definition: assume we want to measure the helicity angle given the inv. mass23sq.
+	 * then the angle is the angle between particle 1 and 2
 	 *
 	 */
 	double invMassSq12= getThirdVariableSq(invMassSq23,invMassSq13);

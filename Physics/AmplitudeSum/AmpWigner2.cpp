@@ -82,8 +82,8 @@ double AmpWigner2::evaluate(dataPoint& point) {
 	default:
 		BOOST_LOG_TRIVIAL(fatal)<<"AmpWigner2: wrong subSystem! Exit!"; exit(1);
 	}
-	if(cosTheta>1.) cosTheta=1.;
-	if(cosTheta<-1.) cosTheta=-1.;
+//	if(cosTheta>1.) cosTheta=1.;
+//	if(cosTheta<-1.) cosTheta=-1.;
 	double theta = acos(cosTheta);
 
 	/*
