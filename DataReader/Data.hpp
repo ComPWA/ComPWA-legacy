@@ -46,7 +46,7 @@ public:
 
   virtual void pushEvent(const Event&) =0;
   virtual void writeData() =0;
-  virtual const Event& getEvent(const int) =0;
+  virtual Event& getEvent(const int) =0;
   virtual const int getBin(const int, double&, double&) =0; //TODO: BinDataTyp, dynamic dimension
 
   virtual const unsigned int getNEvents() const =0;

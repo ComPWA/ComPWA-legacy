@@ -70,6 +70,11 @@ public:
 	virtual void calcMaxVal(ParameterList& par ,std::shared_ptr<Generator> gen);
 	virtual void calcMaxVal( std::shared_ptr<Generator> gen);
 
+    virtual std::complex<double> getFirstAmp(dataPoint& point, ParameterList& par);
+	virtual std::complex<double> getFirstReso(dataPoint& point, ParameterList& par);
+    virtual std::complex<double> getFirstBW(dataPoint& point, ParameterList& par);
+
+
 	virtual void setNevents(unsigned int n) { _entries=n; };
 	virtual unsigned int getNevents() { return _entries; };
 

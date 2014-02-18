@@ -226,26 +226,29 @@ void AmpSumIntensity::setupTree(allMasses& theMasses, bool isPhspTree){
       //BW Par
       newTree->createLeaf("m0_"+tmp.m_name, mr[tmp.m_name]->GetValue(), "RelBW_"+tmp.m_name); //m0
       //myTree->createLeaf("x", x, "RelBW_"+tmp.m_name); //x
-      /*switch(subSys){
+      switch(subSys){
         case 3:{ //reso in sys of particles 1&2
-          newTree->createLeaf("mym", m12, "RelBW_"+tmp.m_name); //m
-          newTree->createLeaf("ma", m23, "RelBW_"+tmp.m_name); //ma
-          newTree->createLeaf("mb", m13, "RelBW_"+tmp.m_name); //mb
+          //newTree->createLeaf("mym_"+tmp.m_name, m12, "RelBW_"+tmp.m_name); //m
+          newTree->createLeaf("ma_"+tmp.m_name, kin->m1, "RelBW_"+tmp.m_name); //ma
+          newTree->createLeaf("mb_"+tmp.m_name, kin->m2, "RelBW_"+tmp.m_name); //mb
           break;
         }
         case 4:{ //reso in sys of particles 1&3
-          newTree->createLeaf("mym", m13, "RelBW_"+tmp.m_name); //m
-          newTree->createLeaf("ma", m12, "RelBW_"+tmp.m_name); //ma
-          newTree->createLeaf("mb", m23, "RelBW_"+tmp.m_name); //mb
+          //newTree->createLeaf("mym_"+tmp.m_name, m13, "RelBW_"+tmp.m_name); //m
+          newTree->createLeaf("ma_"+tmp.m_name, kin->m1, "RelBW_"+tmp.m_name); //ma
+          newTree->createLeaf("mb_"+tmp.m_name, kin->m3, "RelBW_"+tmp.m_name); //mb
           break;
         }
         case 5:{ //reso in sys of particles 2&3
-          newTree->createLeaf("mym", m23, "RelBW_"+tmp.m_name); //m
-          newTree->createLeaf("ma", m13, "RelBW_"+tmp.m_name); //ma
-          newTree->createLeaf("mb", m12, "RelBW_"+tmp.m_name); //mb
+          //newTree->createLeaf("mym_"+tmp.m_name, m23, "RelBW_"+tmp.m_name); //m
+          newTree->createLeaf("ma_"+tmp.m_name, kin->m2, "RelBW_"+tmp.m_name); //ma
+          newTree->createLeaf("mb_"+tmp.m_name, kin->m3, "RelBW_"+tmp.m_name); //mb
           break;
         }
-      }*/
+        default:{
+          BOOST_LOG_TRIVIAL(error)<<"AmpSumIntensity::setupTree(): Subsys not found!!";
+        }
+      }
       newTree->createLeaf("m23", m23, "RelBW_"+tmp.m_name); //ma
       newTree->createLeaf("m13", m13, "RelBW_"+tmp.m_name); //mb
       newTree->createLeaf("m12", m12, "RelBW_"+tmp.m_name); //mc
@@ -383,6 +386,22 @@ const double AmpSumIntensity::integral(){
 
 	return res;
 }
+
+std::complex<double> AmpSumIntensity::getFirstBW(dataPoint& point, ParameterList& par){
+    setParameterList(par);
+    return totAmp.getFirstBW(point);
+}
+
+std::complex<double> AmpSumIntensity::getFirstReso(dataPoint& point, ParameterList& par){
+    setParameterList(par);
+    return totAmp.getFirstReso(point);
+}
+
+std::complex<double> AmpSumIntensity::getFirstAmp(dataPoint& point, ParameterList& par){
+    setParameterList(par);
+    return totAmp.getFirstAmp(point);
+}
+
 const ParameterList& AmpSumIntensity::intensity(std::vector<double> point, ParameterList& par){
 	setParameterList(par);
 	//	dataPoint dataP; dataP.setVal("m23sq",point[0]); dataP.setVal("m13sq",point[1]);
@@ -437,10 +456,14 @@ void AmpSumIntensity::setParameterList(ParameterList& par){
 	for(unsigned int i=0; i<nAmps; i++){
 //		*rr[i] = DoubleParameter(par.GetDoubleParameter(2*i));
 //		*phir[i] = DoubleParameter(par.GetDoubleParameter(2*i+1));
-		rr[namer[i]]->SetValue(par.GetDoubleParameter(2*i)->GetValue());
-		rr[namer[i]]->SetError(par.GetDoubleParameter(2*i)->GetError());
-		phir[namer[i]]->SetValue(par.GetDoubleParameter(2*i+1)->GetValue());
-		phir[namer[i]]->SetError(par.GetDoubleParameter(2*i+1)->GetError());
+	    if(!rr[namer[i]]->IsFixed()){
+		  rr[namer[i]]->SetValue(par.GetDoubleParameter(2*i)->GetValue());
+		  rr[namer[i]]->SetError(par.GetDoubleParameter(2*i)->GetError());
+	    }
+	    if(!phir[namer[i]]->IsFixed()){
+		  phir[namer[i]]->SetValue(par.GetDoubleParameter(2*i+1)->GetValue());
+		  phir[namer[i]]->SetError(par.GetDoubleParameter(2*i+1)->GetError());
+	    }
 	}
 	return;
 }

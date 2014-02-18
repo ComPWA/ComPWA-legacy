@@ -118,10 +118,12 @@ std::complex<double> AmpRelBreitWignerRes::evaluateAmp(dataPoint& point) {
 	}
 	//	double spinTerm = evaluateWignerD(); //spinTerm =1;
 	double BLWeiss2 = BLres2(m);
-	double qTerm = pow(q(m) / q0(), 2.*_spin + 1.);
+	double qTerm = std::pow((q(m) / q0()), (2.*_spin + 1.));
 	double Gamma0 = _resWidth.GetValue();
 	double GammaV = Gamma0 * qTerm * (_mR / m) * BLWeiss2;
 	std::complex<double> denom(_mR*_mR - m*m, -_mR * GammaV);
+
+	if(sqrt(m23sq)==2.84515) std::cout << " DEBUG2 " << q(m) << " " << q0() << std::endl;
 
 	result = std::complex<double>( _norm ) / denom; //Laura++ (old) definition
 //	result = std::complex<double>(_norm*sqrt(BLWeiss2)) / denom;

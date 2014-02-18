@@ -116,7 +116,7 @@ const std::vector<std::string>& RootReader::getVariableNames(){
 	return fVarNames;
 }
 
-const Event& RootReader::getEvent(const int i){
+Event& RootReader::getEvent(const int i){
 	//Event outEvent;
 
 	if(i>=0) {fEvent=i;}

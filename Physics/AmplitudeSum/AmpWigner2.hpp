@@ -77,8 +77,9 @@ public:
           _m23 = double(_pm23->GetValue(ele));
           _m13 = double(_pm13->GetValue(ele));
           _m12 = double(_pm12->GetValue(ele));
+          Spin j(_inSpin), m(_outSpin1), n(_outSpin2);
 
-          switch(_subSysFlag){
+          /*switch(_subSysFlag){
             case 5:{ //reso in m23
               locmin_sq = s2min(_m23*_m23,_M,_m1,_m2,_m3);
               locmax_sq = s2max(_m23*_m23,_M,_m1,_m2,_m3);
@@ -99,10 +100,10 @@ public:
               //if(beta!=beta) return false;
               break;
             }
-          }
-
+          }*/
+          beta = theta(j, _m23, _m13, _m12, _subSysFlag, _M, _m1, _m2, _m3);
           if(beta!=beta) beta=1.;
-          Spin j(_inSpin), m(_outSpin1), n(_outSpin2);
+
           results[ele]=Wigner_d(j,m,n,beta);
         }//end element loop
 
@@ -110,11 +111,12 @@ public:
         return true;
       }
     }else if(checkType == ParType::DOUBLE){ //one dim output
-      switch(_subSysFlag){
-        _m23 = double(paras.GetParameterValue("m23"));
-        _m13 = double(paras.GetParameterValue("m13"));
-        _m12 = double(paras.GetParameterValue("m12"));
+      _m23 = double(paras.GetParameterValue("m23"));
+      _m13 = double(paras.GetParameterValue("m13"));
+      _m12 = double(paras.GetParameterValue("m12"));
+      Spin j(_inSpin), m(_outSpin1), n(_outSpin2);
 
+      /*switch(_subSysFlag){
         case 5:{ //reso in m23
           locmin_sq = s2min(_m23*_m23,_M,_m1,_m2,_m3);
           locmax_sq = s2max(_m23*_m23,_M,_m1,_m2,_m3);
@@ -135,13 +137,14 @@ public:
           if(beta!=beta) return false;
           break;
         }
-      }
+      }*/
 
       //double locmin_sq = s2min(_y*_y), locmax_sq = s2max(_y*_y);
       //if( _x*_x>locmax_sq || _x*_x<locmin_sq )
       //  return 0.;
+      beta = theta(j, _m23, _m13, _m12, _subSysFlag, _M, _m1, _m2, _m3);
+      if(beta!=beta) beta=1.;
 
-      Spin j(_inSpin), m(_outSpin1), n(_outSpin2);
       out = std::shared_ptr<AbsParameter>(new DoubleParameter(out->GetName(),Wigner_d(j,m,n,beta)));
       return true;
     }else{
@@ -151,6 +154,31 @@ public:
 
 protected:
   std::string name;
+
+  double theta(Spin J, double m23sq, double m13sq, double m12sq, unsigned int subSys, const double& M, const double& m1, const double& m2, const double& m3){
+    DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
+
+    double cosTheta=-999;
+
+
+    switch(subSys){
+    case 3:
+//      cosTheta = kin->calcHelicityAngle(point->getMsq(3),point->getMsq(4),_M,_m3,_m1,_m2);
+        cosTheta = kin->calcHelicityAngle(m12sq,m23sq,M,m3,m1,m2);
+        break;
+    case 4:
+        cosTheta = kin->calcHelicityAngle(m13sq,m23sq,M,m2,m1,m3);
+        break;
+    case 5:
+        cosTheta = kin->calcHelicityAngle(m23sq,m13sq,M,m1,m2,m3);
+        break;
+    default:
+        BOOST_LOG_TRIVIAL(fatal)<<"AmpWigner2: wrong subSystem! Exit!"; exit(1);
+    }
+    if(cosTheta>1.) cosTheta=1.;
+    if(cosTheta<-1.) cosTheta=-1.;
+    return std::acos(cosTheta);
+  }
 
   double lambda(double x, double y, double z)const{
     return x*x+y*y+z*z-2.*x*y-2.*x*z-2.*y*z;

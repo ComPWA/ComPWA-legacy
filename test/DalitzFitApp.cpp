@@ -42,6 +42,7 @@
 #include "TRandom3.h"
 
 //Core header files go here
+#include "Core/DataPoint.hpp"
 #include "Core/Event.hpp"
 #include "Core/Particle.hpp"
 #include "Core/Parameter.hpp"
@@ -96,13 +97,14 @@ int main(int argc, char **argv){
   BOOST_LOG_TRIVIAL(info)<< "Load Modules";
   std::shared_ptr<RootReader> myReader(new RootReader(file, false,"data"));
   std::shared_ptr<RootReader> myPHSPReader(new RootReader(file, false,"mc"));
-  std::shared_ptr<Amplitude> amps(new AmpSumIntensity(ini, AmpSumIntensity::normStyle::none, std::shared_ptr<Efficiency>(new UnitEfficiency()), myReader->getNEvents()));
+  std::shared_ptr<AmpSumIntensity> amps(new AmpSumIntensity(ini, AmpSumIntensity::normStyle::none, std::shared_ptr<Efficiency>(new UnitEfficiency()), myReader->getNEvents()));
 
   //std::shared_ptr<Amplitude> amps(new AmpSumIntensity(M, Br, m1, m2, m3,"J/psi","gamma","pi0","pi0", ini));
   // Initiate parameters
   ParameterList par;
   std::shared_ptr<ControlParameter> esti;
   amps->fillStartParVec(par); //perfect startvalues
+  std::shared_ptr<FunctionTree> physicsTree, phspTree;
   if(!useFctTree){//using tree?
     esti = MinLogLH::createInstance(amps, myReader, myPHSPReader);
   }else{
@@ -111,12 +113,12 @@ int main(int argc, char **argv){
     allMasses myPhspMasses(myPHSPReader->getMasses());
     BOOST_LOG_TRIVIAL(debug)<<"EvtMasses: "<< myEvtMasses.nEvents <<" events and "<< myEvtMasses.nInvMasses <<" inv masses";
     BOOST_LOG_TRIVIAL(debug)<<"PHSPMasses: "<< myPhspMasses.nEvents <<" events and "<< myPhspMasses.nInvMasses <<" inv masses";
-    std::shared_ptr<FunctionTree> physicsTree = amps->functionTree(myEvtMasses);
+    physicsTree = amps->functionTree(myEvtMasses);
     if(!physicsTree){
       BOOST_LOG_TRIVIAL(error)<<"Physics Trees not setup correctly, quitting";
       return 0;
     }
-    std::shared_ptr<FunctionTree> phspTree = amps->phspTree(myPhspMasses);
+    phspTree = amps->phspTree(myPhspMasses);
     if(!phspTree){
       BOOST_LOG_TRIVIAL(error)<<"Phsp Trees not setup correctly, quitting";
       return 0;
@@ -125,8 +127,8 @@ int main(int argc, char **argv){
     BOOST_LOG_TRIVIAL(debug)<<"Check Trees: ";
     if(!physicsTree->sanityCheck()) return 0;
     if(!phspTree->sanityCheck()) return 0;
-    BOOST_LOG_TRIVIAL(debug)<<physicsTree<<std::endl;
-    BOOST_LOG_TRIVIAL(debug)<<phspTree<<std::endl;
+    //BOOST_LOG_TRIVIAL(debug)<<physicsTree<<std::endl;
+    //BOOST_LOG_TRIVIAL(debug)<<phspTree<<std::endl;
     physicsTree->recalculate();
     phspTree->recalculate();
     BOOST_LOG_TRIVIAL(debug)<<physicsTree<<std::endl;
@@ -136,6 +138,36 @@ int main(int argc, char **argv){
     BOOST_LOG_TRIVIAL(info)<<"Trees are set up"<<std::endl;
 
     esti = MinLogLH::createInstance(physicsTree, phspTree, myEvtMasses.nEvents, myPhspMasses.nEvents);
+
+    dataPoint myPoint(myReader->getEvent(0));
+    std::shared_ptr<TreeNode> LogNode = (physicsTree->head()->getChildren())[0];
+    std::shared_ptr<TreeNode> IntNode = (LogNode->getChildren())[0];
+    std::shared_ptr<TreeNode> AmpNode = (IntNode->getChildren())[0];
+    std::shared_ptr<TreeNode> ResNode = (AmpNode->getChildren())[0];
+    std::shared_ptr<TreeNode> BWNode = (ResNode->getChildren())[0];
+    std::shared_ptr<TreeNode> ADNode = (ResNode->getChildren())[2];
+
+    std::shared_ptr<MultiComplex> resoChild = std::dynamic_pointer_cast<MultiComplex>( ResNode->getValue() );
+    std::shared_ptr<MultiDouble> intensChild = std::dynamic_pointer_cast<MultiDouble>( IntNode->getValue() );
+    std::shared_ptr<MultiComplex> bwChild = std::dynamic_pointer_cast<MultiComplex>( BWNode->getValue() );
+    std::shared_ptr<MultiDouble> adChild = std::dynamic_pointer_cast<MultiDouble>( ADNode->getValue() );
+    std::shared_ptr<MultiComplex> ampChild = std::dynamic_pointer_cast<MultiComplex>( AmpNode->getValue() );
+
+    BOOST_LOG_TRIVIAL(debug) << "InvMasses first Evt from dataPoint: \t" << myPoint.getVal("m23sq") << " \t " << myPoint.getVal("m13sq");
+    BOOST_LOG_TRIVIAL(debug) << "InvMasses first Evt from allMasses: \t" << (myEvtMasses.masses_sq[std::make_pair(2,3)])[0] << " \t " << (myEvtMasses.masses_sq[std::make_pair(1,3)])[0];
+
+    BOOST_LOG_TRIVIAL(debug) << "First BW first Evt classical: \t" <<  (amps->getFirstBW(myPoint,par));
+    BOOST_LOG_TRIVIAL(debug) << "First BW first Evt from tree: \t" << (bwChild->GetValue()*adChild->GetValue());
+
+    BOOST_LOG_TRIVIAL(debug) << "FirstReso first Evt classical: \t" <<  amps->getFirstReso(myPoint,par);
+    BOOST_LOG_TRIVIAL(debug) << "FirstReso first Evt from tree: \t" << resoChild->GetValue();
+
+    BOOST_LOG_TRIVIAL(debug) << "First Amp first Evt classical: \t" <<  amps->getFirstAmp(myPoint,par);
+    BOOST_LOG_TRIVIAL(debug) << "First Amp first Evt from tree: \t" << ampChild->GetValue();
+
+    BOOST_LOG_TRIVIAL(debug) << "Intensity of first data event classical: \t" << amps->intensity(myPoint,par).GetParameterValue(0);
+    BOOST_LOG_TRIVIAL(debug) << "Intensity of first data event from tree: \t" << intensChild->GetValue();
+    BOOST_LOG_TRIVIAL(debug)<<"Finish checking consistency checks"<<std::endl;
   }
 
   //std::shared_ptr<ControlParameter> esti = MinLogLH::createInstance(amps, myReader, myPHSPReader);
@@ -198,6 +230,9 @@ int main(int argc, char **argv){
   genResult->writeText("fitresult.txt");
   genResult->writeSimpleText("simplefitresult.txt");
 
+
+  BOOST_LOG_TRIVIAL(debug)<<physicsTree<<std::endl;
+  BOOST_LOG_TRIVIAL(debug)<<phspTree<<std::endl;
 
 
   //Plot result

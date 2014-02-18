@@ -195,9 +195,12 @@ double MinLogLH::controlParameter(ParameterList& minPar){
 			intens=0;
 		}
 		if(intens>0){
-			lh += log(intens);
+			lh += std::log(intens);
 			//				std::cout<<"m23sq="<<x[0]<< " m13sq="<<x[1]<< " intens="<<intens<< " lh="<<lh<<std::endl;
 		}
+
+		//if(!evt)
+		//  BOOST_LOG_TRIVIAL(debug) << "First Evt LH: " << lh;
 	  }
 	}else if(pEvtTree_){
       pEvtTree_->recalculate();
@@ -208,7 +211,8 @@ double MinLogLH::controlParameter(ParameterList& minPar){
 //	std::cout.precision(15);
 //	std::cout<<"event LH="<<lh<<" "<<nEvents<< " "<<norm/nPHSPEvts<<std::endl;
 //	std::cout<<"phase space volume: "<<phspVolume<<std::endl;
-	lh = nEvts_*log(norm/nPhsp_*phspVolume) - lh ;
+	BOOST_LOG_TRIVIAL(debug) << "Data Term: " << lh << "\t Phsp Term (wo log): " << norm;
+	lh = nEvts_*std::log(norm/nPhsp_*phspVolume) - lh ;
 //	std::cout<<"LH="<<lh<<std::endl;
 	//lh -= norm;
 //	break;

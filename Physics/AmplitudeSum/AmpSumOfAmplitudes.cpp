@@ -67,6 +67,78 @@ void AmpSumOfAmplitudes::addBW(std::shared_ptr<AmpAbsDynamicalFunction> theRes ,
 	_angList.push_back(std::shared_ptr<AmpWigner>(new AmpWigner()));
 }
 
+std::complex<double> AmpSumOfAmplitudes::getFirstBW(dataPoint& point) const
+{
+    //   RooComplex res;
+    std::complex<double> res;
+    //std::cout << "res = \t" << res.abs2() << std::endl;
+
+    //std::cout << "PDFs: ";
+   // for(unsigned int i=0; i<_pdfList.size(); i++){
+       // double a = _intList[0]->GetValue();
+       // double phi = _phaseList[0]->GetValue();
+       // std::complex<double> eiphi(a*cos(phi),a*sin(phi));
+
+             unsigned int twoJplusOne = (2*_pdfList[0]->getSpin()+1);
+        //     res = res + (double)twoJplusOne * _pdfList[i]->evaluate() * eiphi;
+        //twoJplusOne in included in evaluate(). We want to include this factor into the normalization of the amplitudes.
+        res = (double)twoJplusOne * _pdfList[0]->evaluateAmp(point);
+        // std::cout << _pdfList[i]->evaluate() << " ";
+        //res = res + twoJplusOne * _pdfList[i]->evaluate() * eiphi * _angList[i]->evaluate();
+    //}
+    //std::cout << std::endl;
+
+    return res;
+}
+
+std::complex<double> AmpSumOfAmplitudes::getFirstReso(dataPoint& point) const
+{
+    //   RooComplex res;
+    std::complex<double> res;
+    //std::cout << "res = \t" << res.abs2() << std::endl;
+
+    //std::cout << "PDFs: ";
+   // for(unsigned int i=0; i<_pdfList.size(); i++){
+        double a = _intList[0]->GetValue();
+        double phi = _phaseList[0]->GetValue();
+        std::complex<double> eiphi(a*cos(phi),a*sin(phi));
+
+        //     unsigned int twoJplusOne = (2*_pdfList[i]->getSpin()+1);
+        //     res = res + (double)twoJplusOne * _pdfList[i]->evaluate() * eiphi;
+        //twoJplusOne in included in evaluate(). We want to include this factor into the normalization of the amplitudes.
+        res = _pdfList[0]->evaluate(point) * eiphi;
+        // std::cout << _pdfList[i]->evaluate() << " ";
+        //res = res + twoJplusOne * _pdfList[i]->evaluate() * eiphi * _angList[i]->evaluate();
+    //}
+    //std::cout << std::endl;
+
+    return res;
+}
+
+std::complex<double> AmpSumOfAmplitudes::getFirstAmp(dataPoint& point) const
+{
+    //   RooComplex res;
+    std::complex<double> res;
+    //std::cout << "res = \t" << res.abs2() << std::endl;
+
+    //std::cout << "PDFs: ";
+    for(unsigned int i=0; i<_pdfList.size(); i++){
+        double a = _intList[i]->GetValue();
+        double phi = _phaseList[i]->GetValue();
+        std::complex<double> eiphi(a*cos(phi),a*sin(phi));
+
+        //     unsigned int twoJplusOne = (2*_pdfList[i]->getSpin()+1);
+        //     res = res + (double)twoJplusOne * _pdfList[i]->evaluate() * eiphi;
+        //twoJplusOne in included in evaluate(). We want to include this factor into the normalization of the amplitudes.
+        res = res + _pdfList[i]->evaluate(point) * eiphi;
+        // std::cout << _pdfList[i]->evaluate() << " ";
+        //res = res + twoJplusOne * _pdfList[i]->evaluate() * eiphi * _angList[i]->evaluate();
+    }
+    //std::cout << std::endl;
+
+    return res;
+}
+
 double AmpSumOfAmplitudes::evaluate(dataPoint& point) const
 {
 	//   RooComplex res;
