@@ -54,17 +54,17 @@ AmpSumIntensity::AmpSumIntensity(const AmpSumIntensity& other) : nAmps(other.nAm
 }
 
 AmpSumIntensity::AmpSumIntensity(AmplitudeSetup ini, normStyle ns, std::shared_ptr<Efficiency> eff, unsigned int entries, double dpArea) :
-				totAmp("relBWsumAmplitude", "totAmp"), ampSetup(ini),
-				_entries(entries), _normStyle(ns), _calcNorm(1), _dpArea(dpArea),
-				_calcMaxFcnVal(0),eff_(eff)
+												totAmp("relBWsumAmplitude", "totAmp"), ampSetup(ini),
+												_entries(entries), _normStyle(ns), _calcNorm(1), _dpArea(dpArea),
+												_calcMaxFcnVal(0),eff_(eff)
 {
 	init();
 }
 
 AmpSumIntensity::AmpSumIntensity(AmplitudeSetup ini, std::shared_ptr<Efficiency> eff, unsigned int entries, double dpArea) :
-				totAmp("relBWsumAmplitude", "totAmp"), ampSetup(ini),
-				_entries(entries), _normStyle(none), _calcNorm(0), _dpArea(dpArea),
-				_calcMaxFcnVal(0),eff_(eff)
+												totAmp("relBWsumAmplitude", "totAmp"), ampSetup(ini),
+												_entries(entries), _normStyle(none), _calcNorm(0), _dpArea(dpArea),
+												_calcMaxFcnVal(0),eff_(eff)
 {
 	init();
 }
@@ -72,9 +72,9 @@ AmpSumIntensity::AmpSumIntensity(AmplitudeSetup ini, std::shared_ptr<Efficiency>
 AmpSumIntensity::AmpSumIntensity(const double inM, const double inBr, const double in1,const double in2, const double in3,
 		std::string nameM, std::string name1,std::string name2,std::string name3,
 		AmplitudeSetup ini, unsigned int entries, normStyle ns, double dpArea) :
-				totAmp("relBWsumAmplitude", "totAmp"), ampSetup(ini),
-				_entries(entries), _normStyle(ns), _calcNorm(1),_dpArea(dpArea),
-				_calcMaxFcnVal(0),eff_(std::shared_ptr<Efficiency>(new UnitEfficiency()))
+												totAmp("relBWsumAmplitude", "totAmp"), ampSetup(ini),
+												_entries(entries), _normStyle(ns), _calcNorm(1),_dpArea(dpArea),
+												_calcMaxFcnVal(0),eff_(std::shared_ptr<Efficiency>(new UnitEfficiency()))
 {
 	init();
 }
@@ -96,8 +96,8 @@ void AmpSumIntensity::init(){
 	       namer.push_back(tmp.m_name);
 	       mr.insert(std::make_pair(tmp.m_name, std::shared_ptr<DoubleParameter> (new DoubleParameter("mass_"+tmp.m_name,tmp.m_mass, tmp.m_mass_min, tmp.m_mass_max) ) ));
 	       gr.insert(std::make_pair(tmp.m_name, std::shared_ptr<DoubleParameter> (new DoubleParameter("width_"+tmp.m_name,tmp.m_width, tmp.m_width_min, tmp.m_width_max) ) ));
-	       rr.insert(std::make_pair(tmp.m_name, std::shared_ptr<DoubleParameter> (new DoubleParameter("rr_"+tmp.m_name,tmp.m_strength) ) ));
-	       phir.insert(std::make_pair(tmp.m_name, std::shared_ptr<DoubleParameter> (new DoubleParameter("phir_"+tmp.m_name,tmp.m_phase) ) ));
+	       rr.insert(std::make_pair(tmp.m_name, std::shared_ptr<DoubleParameter> (new DoubleParameter("mag_"+tmp.m_name,tmp.m_strength) ) ));
+	       phir.insert(std::make_pair(tmp.m_name, std::shared_ptr<DoubleParameter> (new DoubleParameter("phase_"+tmp.m_name,tmp.m_phase) ) ));
 
 	       unsigned int subSys = tmp.m_daugtherA + tmp.m_daugtherB;
 	       //unsigned int last = mr.size()-1;
@@ -117,7 +117,6 @@ void AmpSumIntensity::init(){
 	       tmpbw->SetNormalization(1/norm);
 	   }// end loop over resonances
 
-
 	for(std::vector<ResonanceFlatte>::iterator reso=ampSetup.getResonancesFlatte().begin(); reso!=ampSetup.getResonancesFlatte().end(); reso++){
 		ResonanceFlatte tmp = (*reso);
 		if(!tmp.m_enable) continue;
@@ -125,8 +124,8 @@ void AmpSumIntensity::init(){
 		namer.push_back(tmp.m_name);
 		mr.insert(std::make_pair(tmp.m_name, std::shared_ptr<DoubleParameter> (new DoubleParameter("mass_"+tmp.m_name,tmp.m_mass, tmp.m_mass_min, tmp.m_mass_max) ) ));
 		gr.insert(std::make_pair(tmp.m_name, std::shared_ptr<DoubleParameter> (new DoubleParameter("width_"+tmp.m_name,tmp.m_width, tmp.m_width_min, tmp.m_width_max) ) ));
-		rr.insert(std::make_pair(tmp.m_name, std::shared_ptr<DoubleParameter> (new DoubleParameter("rr_"+tmp.m_name,tmp.m_strength) ) ));
-		phir.insert(std::make_pair(tmp.m_name, std::shared_ptr<DoubleParameter> (new DoubleParameter("phir_"+tmp.m_name,tmp.m_phase) ) ));
+		rr.insert(std::make_pair(tmp.m_name, std::shared_ptr<DoubleParameter> (new DoubleParameter("mag_"+tmp.m_name,tmp.m_strength) ) ));
+		phir.insert(std::make_pair(tmp.m_name, std::shared_ptr<DoubleParameter> (new DoubleParameter("phase_"+tmp.m_name,tmp.m_phase) ) ));
 		DoubleParameter param1("coupling1_"+tmp.m_name,tmp.m_coupling);
 		DoubleParameter param2("coupling2_"+tmp.m_name,tmp.m_couplingHidden);
 
@@ -302,7 +301,7 @@ void AmpSumIntensity::calcMaxVal(std::shared_ptr<Generator> gen){
 	//	boost::variate_generator<boost::minstd_rand&, boost::uniform_real<> > uni13(rndGen2, uni_dist13);
 	//	boost::variate_generator<boost::minstd_rand&, boost::uniform_real<> > uni23(rndGen2, uni_dist23);
 	double maxM23=-999; double maxM13=-999; double maxVal=0;
-	for(unsigned int i=0; i<40000; i++){
+	for(unsigned int i=0; i<100000; i++){
 		double m23sq=gen->getUniform()*(kin->m23_sq_max-kin->m23_sq_min)+kin->m23_sq_min;
 		double m13sq=gen->getUniform()*(kin->m13_sq_max-kin->m13_sq_min)+kin->m13_sq_min;
 		dataPoint point; point.setVal("m13sq",m13sq); point.setVal("m23sq",m23sq);
@@ -413,15 +412,18 @@ const ParameterList& AmpSumIntensity::intensity(dataPoint& point, ParameterList&
 	return intensity(point);
 }
 const ParameterList& AmpSumIntensity::intensity(dataPoint& point){
-	//	std::cout<<dataPoint::instance()->getMsq(2,3)<<" "<<dataPoint::instance()->getMsq(1,3)<<" "<<dataPoint::instance()->getMsq(1,2)<<std::endl;
-	double AMPpdf = totAmp.evaluate(point);
+	double AMPpdf=0;
+	if(Kinematics::instance()->isWithinPhsp(point)) AMPpdf = totAmp.evaluate(point);
+//	else BOOST_LOG_TRIVIAL(error) << "AmpSumIntensity: data point "
+//			<<" (m13sq="<<point.getVal(4)
+//			<<" m23sq="<<point.getVal(5)<<")"
+//			<<" not within phsp! Skip!";//shall we give an error if datapoint is outside phsp?
+
 	if(AMPpdf!=AMPpdf){
 		BOOST_LOG_TRIVIAL(error)<<"Error AmpSumIntensity: Intensity is not a number!!";
-		exit(1);
+		AMPpdf = 0;
 	}
 	double eff=eff_->evaluate(point);
-	//ParameterList result;
-	//result.AddParameter(std::shared_ptr<DoubleParameter>(new DoubleParameter("AmpSumResult",AMPpdf*eff)));
 	result.SetParameterValue(0,AMPpdf*eff);
 	return result;
 }
@@ -498,10 +500,63 @@ void AmpSumIntensity::printFractions(){
 		double frac = getFraction(i);
 		sumFrac+=frac;
 		outStr<<std::setw(10)<<totAmp.getAmpName(i)<<":    "<<frac<<"\n";
-//		if(!(i==totAmp.getNAmps()-1)) outStr << "\n";
+		//		if(!(i==totAmp.getNAmps()-1)) outStr << "\n";
 	}
 	outStr<<std::setw(10)<<" "<<"    ==========\n";
 	outStr<<std::setw(10)<<" "<<"     "<<sumFrac;
 	BOOST_LOG_TRIVIAL(info)<<outStr.str();
 	return;
+}
+
+double AmpSumIntensity::getIntValue(std::string var1, double min1, double max1, std::string var2, double min2, double max2){
+	/*
+	 * Integrates in \var1 from \min1 to \max1 and in \var2 from \min2 to \max2.
+	 * Is intended to be used for calculation of bin content.
+	 */
+	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
+	double _min1 = min1;
+	double _min2 = min2;
+	double _max1 = max1;
+	double _max2 = max2;
+	//if(_min1==0) _min1 = kin->GetMin(var1);
+	//if(_max1==0) _min1 = kin->GetMax(var1);
+	if(_min2==0) _min2 = kin->getMin(var2);
+	if(_max2==0) _max2 = kin->getMax(var2);
+	unsigned int dim=2;
+	double res=0.0, err=0.0;
+
+	//set limits: we assume that x[0]=m13sq and x[1]=m23sq
+	double xLimit_low[2];
+	double xLimit_high[2];
+
+	if(var1 == "m13sq" && var2 == "m23sq"){
+		xLimit_low[0] = _min1;
+		xLimit_low[1] = _min2;
+		xLimit_high[0] = _max1;
+		xLimit_high[1] = _max2;
+	}else if(var1 == "m23sq" && var2 == "m13sq"){
+		xLimit_low[0] = _min2;
+		xLimit_low[1] = _min1;
+		xLimit_high[0] = _max2;
+		xLimit_high[1] = _max1;
+	} else {
+		BOOST_LOG_TRIVIAL(error) << "AmpSumIntensity::getIntValue() wrong variables specified!";
+		return -999;
+	}
+
+	size_t calls = 5000;
+	gsl_rng_env_setup ();
+	const gsl_rng_type *T = gsl_rng_default; //type of random generator
+	gsl_rng *r = gsl_rng_alloc(T); //random generator
+	gsl_monte_function G = {&evalWrapperAmpSumIntensity,dim, const_cast<AmpSumIntensity*> (this)};
+
+	/*	Choosing vegas algorithm here, because it is the most accurate:
+	 * 		-> 10^5 calls gives (in my example) an accuracy of 0.03%
+	 * 		 this should be sufficiency for most applications
+	 */
+	gsl_monte_vegas_state *s = gsl_monte_vegas_alloc (dim);
+	gsl_monte_vegas_integrate (&G, xLimit_low, xLimit_high, 2, calls, r,s,&res, &err);
+	gsl_monte_vegas_free(s);
+
+	return res;
 }

@@ -63,7 +63,7 @@ public:
 				*out << " +";
 				*out << std::setw(w) << err->GetErrorHigh();
 				*out << " -";
-				*out << std::setw(w) << err->GetErrorHigh();
+				*out << std::setw(w) << err->GetErrorLow();
 			}
 		} else {
 			//			std::cout<<"131 "<<std::endl;

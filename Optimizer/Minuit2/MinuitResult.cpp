@@ -75,12 +75,12 @@ void MinuitResult::init(FunctionMinimum min){
 }
 
 void MinuitResult::genSimpleOutput(std::ostream& out){
-	for(unsigned int o=0;o<finalParameters.GetNDouble();o++){
-		std::shared_ptr<DoubleParameter> outPar = finalParameters.GetDoubleParameter(o);
-		out<<outPar->GetName()<<"/D:"<<outPar->GetName()<<"err/D";
-		if(o!=finalParameters.GetNDouble()) out<<":";
-	}
-	out<<"\n";
+//	for(unsigned int o=0;o<finalParameters.GetNDouble();o++){
+//		std::shared_ptr<DoubleParameter> outPar = finalParameters.GetDoubleParameter(o);
+//		out<<outPar->GetName()<<"/D:"<<outPar->GetName()<<"err/D";
+//		if(o!=finalParameters.GetNDouble()-1) out<<":";
+//	}
+//	out<<"\n";
 	for(unsigned int o=0;o<finalParameters.GetNDouble();o++){
 		std::shared_ptr<DoubleParameter> outPar = finalParameters.GetDoubleParameter(o);
 		out<<outPar->GetValue()<<" "<<outPar->GetError()->GetError()<<" ";
@@ -122,8 +122,10 @@ void MinuitResult::genOutput(std::ostream& out){
 		std::shared_ptr<DoubleParameter> outPar = finalParameters.GetDoubleParameter(o);
 		bool isFixed = iniPar->IsFixed();
 		bool isAngle=0;
-		if(iniPar->GetName().find("phi")!=string::npos) isAngle=1;//is our Parameter an angle?
-		if(isAngle && !isFixed) outPar->SetValue( shiftAngle(outPar->GetValue()) ); //shift angle to the interval [-pi;pi]
+		if(iniPar->GetName().find("phase")!=string::npos) isAngle=1;//is our Parameter an angle?
+		if(isAngle && !isFixed) {
+			outPar->SetValue( shiftAngle(outPar->GetValue()) ); //shift angle to the interval [-pi;pi]
+		}
 
 		tableResult << o << iniPar->GetName() << *iniPar ;// |nr.| name| inital value|
 		if(isFixed) tableResult<<"FIXED";

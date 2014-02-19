@@ -47,13 +47,17 @@ public:
 	virtual unsigned int getNevents() { return _entries; };
 	/** Destructor */
 	virtual ~BreitWigner();
-	virtual void printAmps() {};
-	virtual double getFraction(std::string name) {};
-	virtual void printFractions() {};
-
 	virtual BreitWigner* Clone() {
 		return new BreitWigner(*this);
 	}
+
+	/* not implemented yet */
+	virtual void printAmps() {};
+	virtual double getFraction(std::string name) {};
+	virtual void printFractions() {};
+	virtual double getIntValue(std::string var1, double min1, double max1, std::string var2, double min2, double max2) {};
+	virtual const double integral() {};
+
 protected:
 	double min_;
 	double max_;

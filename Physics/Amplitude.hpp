@@ -48,6 +48,7 @@ public:
 	virtual void setNevents(unsigned int n)  = 0;
 	virtual unsigned int getNevents()  = 0;
 
+	virtual const double integral() =0;
 	virtual const double integral(ParameterList& par) =0;
 	virtual double getMaxVal(ParameterList& par, std::shared_ptr<Generator> gen) = 0;
 	virtual double getMaxVal(std::shared_ptr<Generator> gen) = 0;
@@ -64,6 +65,7 @@ public:
 	virtual void printFractions() = 0;
 
 	virtual double getFraction(std::string name) = 0;
+	virtual double getIntValue(std::string var1, double min1, double max1, std::string var2, double min2, double max2) = 0;
 	virtual Amplitude* Clone() = 0;
 
 	virtual std::shared_ptr<FunctionTree> functionTree(allMasses& theMasses) {

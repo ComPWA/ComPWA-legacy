@@ -95,6 +95,7 @@ public:
 	virtual double getFraction(std::string name) { return totAmp.getFraction(name)/integral(); };
 	virtual double getFraction(unsigned int id) { return totAmp.getFraction(id)/integral(); };
 	virtual void printFractions();
+	virtual double getIntValue(std::string var1, double min1, double max1, std::string var2, double min2=0, double max2=0);
 
 	double normReso(std::shared_ptr<AmpAbsDynamicalFunction> amp);
 	virtual ~AmpSumIntensity(){};
