@@ -18,6 +18,7 @@
 
 #include <vector>
 #include <memory>
+#include <map>
 #include <string>
 
 #include "Physics/Amplitude.hpp"
@@ -69,6 +70,11 @@ public:
 	virtual void calcMaxVal(ParameterList& par ,std::shared_ptr<Generator> gen);
 	virtual void calcMaxVal( std::shared_ptr<Generator> gen);
 
+    virtual std::complex<double> getFirstAmp(dataPoint& point, ParameterList& par);
+	virtual std::complex<double> getFirstReso(dataPoint& point, ParameterList& par);
+    virtual std::complex<double> getFirstBW(dataPoint& point, ParameterList& par);
+
+
 	virtual void setNevents(unsigned int n) { _entries=n; };
 	virtual unsigned int getNevents() { return _entries; };
 
@@ -80,7 +86,8 @@ public:
 	virtual const ParameterList& intensity(dataPoint& point);
 	virtual const ParameterList& intensity(std::vector<double> point, ParameterList& par);
 
-	virtual std::shared_ptr<FunctionTree> functionTree(ParameterList& outPar);
+	virtual std::shared_ptr<FunctionTree> functionTree(allMasses& theMasses);
+    virtual std::shared_ptr<FunctionTree> phspTree(allMasses& theMasses);
 
 	virtual const bool fillStartParVec(ParameterList& outPar);
 
@@ -98,6 +105,8 @@ public:
 
 protected:
 	void init();
+	void setupTree(allMasses& theMasses, bool isPhspTree);
+
 	std::shared_ptr<Efficiency> eff_;
 	bool _calcMaxFcnVal;
 	bool _calcNorm;
@@ -105,6 +114,7 @@ protected:
 	AmpSumOfAmplitudes totAmp;
 	AmplitudeSetup ampSetup;
 	std::shared_ptr<FunctionTree> myTree;
+	std::shared_ptr<FunctionTree> myPhspTree;
 	std::shared_ptr<ParameterList> treePar;
 
 	double maxVal;
@@ -116,10 +126,10 @@ protected:
 
 	//Resonance Variables
 	std::vector<std::string> namer;
-	std::vector<std::shared_ptr<DoubleParameter> > mr;
-	std::vector<std::shared_ptr<DoubleParameter> > gr;
-	std::vector<std::shared_ptr<DoubleParameter> > rr;
-	std::vector<std::shared_ptr<DoubleParameter> > phir;
+	std::map<std::string,std::shared_ptr<DoubleParameter> > mr;
+	std::map<std::string,std::shared_ptr<DoubleParameter> > gr;
+	std::map<std::string,std::shared_ptr<DoubleParameter> > rr;
+	std::map<std::string,std::shared_ptr<DoubleParameter> > phir;
 
 //	std::vector<std::shared_ptr<DoubleParameter> > qr;
 

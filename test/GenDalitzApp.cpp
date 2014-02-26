@@ -55,7 +55,7 @@ using namespace boost::log;
 
 using namespace std;
 
-const unsigned int MaxEvents = 1000;
+const unsigned int MaxEvents = 100000;
 
 //constants
 
@@ -294,7 +294,9 @@ int main(int argc, char **argv){
 	cout << endl << endl;
 
 	//Simple Breit-Wigner Physics-Module setup
-	AmpSumIntensity testBW(ini,std::shared_ptr<Efficiency>(new UnitEfficiency()));
+	AmpSumIntensity testBW(ini, AmpSumIntensity::normStyle::none, std::shared_ptr<Efficiency>(new UnitEfficiency()), MaxEvents);
+	 // std::shared_ptr<Amplitude> amps(new AmpSumIntensity(ini, AmpSumIntensity::normStyle::one, std::shared_ptr<Efficiency>(new UnitEfficiency()), myReader->getNEvents()));
+
 	testBW.printAmps();
 
 	ParameterList minPar;
@@ -303,7 +305,8 @@ int main(int argc, char **argv){
 	// minPar.AddParameter(DoubleParameter(1.5,0.5,2.5,0.1));
 
 	//Output File setup
-	TFile output("test/TEST.root","recreate");
+	//TFile output("test/TEST.root","recreate");
+	TFile output("test/3Part-4vecs","recreate");
 	output.SetCompressionLevel(1); //try level 2 also
 
 	TTree fTree ("data","Dalitz-Gen");

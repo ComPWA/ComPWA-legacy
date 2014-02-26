@@ -64,7 +64,7 @@ AsciiReader::~AsciiReader() {
   EvtList_.clear();
 }
 
-const Event& AsciiReader::getEvent( const int index ) {
+Event& AsciiReader::getEvent( const int index ) {
   if ( EvtList_.size() <= (unsigned int)index )
     throw BadIndex("Index exceeds max number of events");
 

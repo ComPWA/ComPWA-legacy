@@ -68,10 +68,14 @@ public:
 	virtual double getIntValue(std::string var1, double min1, double max1, std::string var2, double min2, double max2) = 0;
 	virtual Amplitude* Clone() = 0;
 
-	virtual std::shared_ptr<FunctionTree> functionTree(ParameterList& outPar) {
+	virtual std::shared_ptr<FunctionTree> functionTree(allMasses& theMasses) {
 		//if not implemented, return NULL-pointer
 		return std::shared_ptr<FunctionTree>();
 	}
+    virtual std::shared_ptr<FunctionTree> phspTree(allMasses& theMasses) {
+        //if not implemented, return NULL-pointer
+        return std::shared_ptr<FunctionTree>();
+    }
 
 protected:
 	ParameterList result;

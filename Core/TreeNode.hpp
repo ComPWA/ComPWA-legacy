@@ -112,6 +112,23 @@ public:
     newParent->_children.push_back(shared_from_this());
   };
 
+  //! return parents names
+  void getParentNames(std::vector<std::string>& names){
+    for(unsigned int i=0; i<_parents.size(); i++)
+      names.push_back(_parents[i]->getName());
+  };
+
+  //! return children names
+  void getChildrenNames(std::vector<std::string>& names){
+    for(unsigned int i=0; i<_children.size(); i++)
+      names.push_back(_children[i]->getName());
+  };
+
+  //! return children pointer
+  const std::vector<std::shared_ptr<TreeNode> > getChildren(){
+    return _children;
+  };
+
   //! Get value of this node
    /*!
     * pure virtual function inheriting classes must implement to provide a

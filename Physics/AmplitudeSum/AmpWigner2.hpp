@@ -34,7 +34,7 @@
 
 class WignerDStrategy : public Strategy {
 public:
-  WignerDStrategy(const std::string resonanceName):name(resonanceName){
+  WignerDStrategy(const std::string resonanceName, ParType in):Strategy(in),name(resonanceName){
     //name = +resonanceName;
   }
 
@@ -42,12 +42,13 @@ public:
     return ("WignerD of "+name);
   }
 
-  virtual std::shared_ptr<AbsParameter> execute(ParameterList& paras, bool multi=false) {
+  virtual bool execute(ParameterList& paras, std::shared_ptr<AbsParameter>& out) {
+    if( checkType != out->type() ) {
+      throw(WrongParType(std::string("Output Type ")+ParNames[out->type()]+std::string(" conflicts expected type ")+ParNames[checkType]+std::string(" of ")+name+" Wigner strat"));
+      return false;
+    }
 
     double Gamma0, GammaV;
-    double _m23 = double(paras.GetParameterValue("m23"));
-    double _m13 = double(paras.GetParameterValue("m13"));
-    double _m12 = double(paras.GetParameterValue("m12"));
     double _M  = double(paras.GetParameterValue("ParOfNode_M"));
     double _m1 = double(paras.GetParameterValue("ParOfNode_m1"));
     double _m2 = double(paras.GetParameterValue("ParOfNode_m2"));
@@ -60,41 +61,124 @@ public:
     double _outSpin2 = double(paras.GetParameterValue("ParOfNode_n_"+name));
 
     double locmin_sq, locmax_sq, beta;
+    double _m23,_m13,_m12;
 
-    switch(_subSysFlag){
-      case 5:{ //reso in m23
-        locmin_sq = s2min(_m23*_m23,_M,_m1,_m2,_m3);
-        locmax_sq = s2max(_m23*_m23,_M,_m1,_m2,_m3);
-        beta=acos((2.*_m13*_m13-locmax_sq-locmin_sq)/(locmax_sq-locmin_sq));
-        break;
+    //MultiDim output, must have multidim Paras in input
+    if(checkType == ParType::MDOUBLE){
+      if(paras.GetNMultiDouble()){
+        unsigned int nElements = paras.GetMultiDouble(0)->GetNValues();
+        std::shared_ptr<MultiDouble> _pm23 = paras.GetMultiDouble("m23");
+        std::shared_ptr<MultiDouble> _pm13 = paras.GetMultiDouble("m13");
+        std::shared_ptr<MultiDouble> _pm12 = paras.GetMultiDouble("m12");
+
+        std::vector<double> results(nElements, 0.);
+
+        for(unsigned int ele=0; ele<nElements; ele++){
+          _m23 = double(_pm23->GetValue(ele));
+          _m13 = double(_pm13->GetValue(ele));
+          _m12 = double(_pm12->GetValue(ele));
+          Spin j(_inSpin), m(_outSpin1), n(_outSpin2);
+
+          /*switch(_subSysFlag){
+            case 5:{ //reso in m23
+              locmin_sq = s2min(_m23*_m23,_M,_m1,_m2,_m3);
+              locmax_sq = s2max(_m23*_m23,_M,_m1,_m2,_m3);
+              beta=acos((2.*_m13*_m13-locmax_sq-locmin_sq)/(locmax_sq-locmin_sq));
+              break;
+            }
+            case 4:{ //reso in m13
+              locmin_sq = s1min(_m13*_m13,_M,_m1,_m2,_m3);
+              locmax_sq = s1max(_m13*_m13,_M,_m1,_m2,_m3);
+              beta=acos((2.*_m23*_m23-locmax_sq-locmin_sq)/(locmax_sq-locmin_sq));
+              break;
+            }
+            case 3:{ //reso in m12
+              //return 1;
+              locmin_sq = s1min(_m12*_m12,_M,_m1,_m3,_m2);
+              locmax_sq = s1max(_m12*_m12,_M,_m1,_m3,_m2);
+              beta=acos((2.*_m23*_m23-locmax_sq-locmin_sq)/(locmax_sq-locmin_sq));
+              //if(beta!=beta) return false;
+              break;
+            }
+          }*/
+          beta = theta(j, _m23, _m13, _m12, _subSysFlag, _M, _m1, _m2, _m3);
+          if(beta!=beta) beta=1.;
+
+          results[ele]=Wigner_d(j,m,n,beta);
+        }//end element loop
+
+        out = std::shared_ptr<AbsParameter>(new MultiDouble(out->GetName(),results));
+        return true;
       }
-      case 4:{ //reso in m13
-        locmin_sq = s1min(_m13*_m13,_M,_m1,_m2,_m3);
-        locmax_sq = s1max(_m13*_m13,_M,_m1,_m2,_m3);
-        beta=acos((2.*_m23*_m23-locmax_sq-locmin_sq)/(locmax_sq-locmin_sq));
-        break;
-      }
-      case 3:{ //reso in m12
-        //return 1;
-        locmin_sq = s1min(_m12*_m12,_M,_m1,_m3,_m2);
-        locmax_sq = s1max(_m12*_m12,_M,_m1,_m3,_m2);
-        beta=acos((2.*_m23*_m23-locmax_sq-locmin_sq)/(locmax_sq-locmin_sq));
-        if(beta!=beta) return std::shared_ptr<AbsParameter>();
-        break;
-      }
+    }else if(checkType == ParType::DOUBLE){ //one dim output
+      _m23 = double(paras.GetParameterValue("m23"));
+      _m13 = double(paras.GetParameterValue("m13"));
+      _m12 = double(paras.GetParameterValue("m12"));
+      Spin j(_inSpin), m(_outSpin1), n(_outSpin2);
+
+      /*switch(_subSysFlag){
+        case 5:{ //reso in m23
+          locmin_sq = s2min(_m23*_m23,_M,_m1,_m2,_m3);
+          locmax_sq = s2max(_m23*_m23,_M,_m1,_m2,_m3);
+          beta=acos((2.*_m13*_m13-locmax_sq-locmin_sq)/(locmax_sq-locmin_sq));
+          break;
+        }
+        case 4:{ //reso in m13
+          locmin_sq = s1min(_m13*_m13,_M,_m1,_m2,_m3);
+          locmax_sq = s1max(_m13*_m13,_M,_m1,_m2,_m3);
+          beta=acos((2.*_m23*_m23-locmax_sq-locmin_sq)/(locmax_sq-locmin_sq));
+          break;
+        }
+        case 3:{ //reso in m12
+          //return 1;
+          locmin_sq = s1min(_m12*_m12,_M,_m1,_m3,_m2);
+          locmax_sq = s1max(_m12*_m12,_M,_m1,_m3,_m2);
+          beta=acos((2.*_m23*_m23-locmax_sq-locmin_sq)/(locmax_sq-locmin_sq));
+          if(beta!=beta) return false;
+          break;
+        }
+      }*/
+
+      //double locmin_sq = s2min(_y*_y), locmax_sq = s2max(_y*_y);
+      //if( _x*_x>locmax_sq || _x*_x<locmin_sq )
+      //  return 0.;
+      beta = theta(j, _m23, _m13, _m12, _subSysFlag, _M, _m1, _m2, _m3);
+      if(beta!=beta) beta=1.;
+
+      out = std::shared_ptr<AbsParameter>(new DoubleParameter(out->GetName(),Wigner_d(j,m,n,beta)));
+      return true;
+    }else{
+      return false;
     }
-
-    //double locmin_sq = s2min(_y*_y), locmax_sq = s2max(_y*_y);
-    //if( _x*_x>locmax_sq || _x*_x<locmin_sq )
-    //  return 0.;
-
-    Spin j(_inSpin), m(_outSpin1), n(_outSpin2);
-    std::shared_ptr<DoubleParameter> result = std::shared_ptr<DoubleParameter>(new DoubleParameter("WignerD of "+name+" result",Wigner_d(j,m,n,beta)));
-    return result;
   }
 
 protected:
   std::string name;
+
+  double theta(Spin J, double m23sq, double m13sq, double m12sq, unsigned int subSys, const double& M, const double& m1, const double& m2, const double& m3){
+    DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
+
+    double cosTheta=-999;
+
+
+    switch(subSys){
+    case 3:
+//      cosTheta = kin->calcHelicityAngle(point->getMsq(3),point->getMsq(4),_M,_m3,_m1,_m2);
+        cosTheta = kin->calcHelicityAngle(m12sq,m23sq,M,m3,m1,m2);
+        break;
+    case 4:
+        cosTheta = kin->calcHelicityAngle(m13sq,m23sq,M,m2,m1,m3);
+        break;
+    case 5:
+        cosTheta = kin->calcHelicityAngle(m23sq,m13sq,M,m1,m2,m3);
+        break;
+    default:
+        BOOST_LOG_TRIVIAL(fatal)<<"AmpWigner2: wrong subSystem! Exit!"; exit(1);
+    }
+    if(cosTheta>1.) cosTheta=1.;
+    if(cosTheta<-1.) cosTheta=-1.;
+    return std::acos(cosTheta);
+  }
 
   double lambda(double x, double y, double z)const{
     return x*x+y*y+z*z-2.*x*y-2.*x*z-2.*y*z;

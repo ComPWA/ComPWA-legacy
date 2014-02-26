@@ -122,9 +122,9 @@
     </resonance>
     <resonance>
        <enable>true</enable>
-       <name>omega</name>
+       <name>omegaA</name>
        <type>relBW</type>
-       <reference>omega</reference>
+       <reference>omegaB</reference>
        <mass>0.783</mass>
        <mass_min>0.5</mass_min>
        <mass_max>2.</mass_max>
@@ -146,9 +146,9 @@
     </resonance>
     <resonance>
        <enable>true</enable>
-       <name>omega</name>
+       <name>omegaB</name>
        <type>relBW</type>
-       <reference>omega</reference>
+       <reference>omegaB</reference>
        <mass>0.783</mass>
        <mass_min>0.5</mass_min>
        <mass_max>2.</mass_max>

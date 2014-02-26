@@ -36,7 +36,7 @@ public:
   /// Default Constructor (0x0)
   AsciiReader( const std::string inConfigFile, const int particles );
 
-  virtual const Event& getEvent( const int );
+  virtual Event& getEvent( const int );
   virtual const int getBin( const int, double&, double& );
 
   virtual const unsigned int getNEvents() const { return EvtList_.size(); };

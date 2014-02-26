@@ -27,12 +27,16 @@
 #include <string>
 #include <map>
 
+#include <boost/log/trivial.hpp>
+
 #include "Core/Functions.hpp"
 #include "Core/TreeNode.hpp"
 #include "Core/AbsParameter.hpp"
 #include "Core/Parameter.hpp"
 
 #include "Optimizer/ControlParameter.hpp"
+
+using namespace boost::log;
 
 class FunctionTree //: public ControlParametr
 {
@@ -102,30 +106,83 @@ public:
     //std::shared_ptr<AbsParameter> inter = strat->GetResultContainer();
 	if(dim==0) return; //TODO: exception
 
-	if(dim==1){
-      std::shared_ptr<DoubleParameter> inter(new DoubleParameter("par"+name,0.));
-      std::shared_ptr<TreeNode> parentNode = nodes_.at(parent);
-      std::shared_ptr<TreeNode> newNode(new TreeNode(name, inter, strat, parentNode));
-      nodes_.insert(std::pair<std::string, std::shared_ptr<TreeNode> >(name,newNode));
-      newNode->linkParents();
-	}else if(useVec){
-      std::vector<std::shared_ptr<AbsParameter>> inter;
-      for(unsigned int i=0; i<dim; i++)
-    	  inter.push_back(std::shared_ptr<DoubleParameter>(new DoubleParameter("par"+name+"_d"+std::to_string((long long unsigned int)i),0.)));
-      std::shared_ptr<TreeNode> parentNode = nodes_.at(parent);
-      std::shared_ptr<TreeNode> newNode(new TreeNode(name, inter, strat, parentNode));
+	std::vector<std::shared_ptr<AbsParameter>> inter;
+	switch(strat->OutType()){
+      case ParType::MCOMPLEX:{
+        //TODO: error if dim>1
+        std::vector<std::complex<double> > start(dim, (0.,0.));
+        inter.push_back(std::shared_ptr<AbsParameter>(new MultiComplex("par"+name,start)));
+        break;
+      }//end multi complex
+
+      case ParType::MDOUBLE:{
+        //TODO: error if dim>1
+        std::vector<double> start(dim, 0.);
+        inter.push_back(std::shared_ptr<AbsParameter>(new MultiDouble("par"+name,start)));
+        break;
+      }//end multi double
+
+      case ParType::COMPLEX:{
+        std::complex<double> start(0.,0.);
+        if(useVec){
+          for(unsigned int i; i<dim; i++)
+            inter.push_back(std::shared_ptr<AbsParameter>(new ComplexParameter("par"+name,start)));
+        }else{
+          inter.push_back(std::shared_ptr<AbsParameter>(new ComplexParameter("par"+name,start)));
+        }
+        break;
+      }//end complex
+
+      case ParType::DOUBLE:{
+        double start(0.);
+        if(useVec){
+          for(unsigned int i; i<dim; i++)
+            inter.push_back(std::shared_ptr<AbsParameter>(new DoubleParameter("par"+name,start)));
+        }else{
+          inter.push_back(std::shared_ptr<AbsParameter>(new DoubleParameter("par"+name,start)));
+        }
+        break;
+      }//end double
+
+      case ParType::INTEGER:{
+        int start(0);
+        if(useVec){
+          for(unsigned int i; i<dim; i++)
+            inter.push_back(std::shared_ptr<AbsParameter>(new IntegerParameter("par"+name,start)));
+        }else{
+          inter.push_back(std::shared_ptr<AbsParameter>(new IntegerParameter("par"+name,start)));
+        }
+        break;
+      }//end int
+
+      case ParType::BOOL:{
+        bool start=false;
+        if(useVec){
+          for(unsigned int i; i<dim; i++)
+            inter.push_back(std::shared_ptr<AbsParameter>(new BoolParameter("par"+name,start)));
+        }else{
+          inter.push_back(std::shared_ptr<AbsParameter>(new BoolParameter("par"+name,start)));
+        }
+        break;
+      }//end bool
+
+      default:{
+        //TODO: exception output partype wrong
+        return;
+      }
+	}//end switch
+
+    std::shared_ptr<TreeNode> parentNode = nodes_.at(parent);
+	if(dim==1 && !useVec){
+      std::shared_ptr<TreeNode> newNode(new TreeNode(name, inter[0], strat, parentNode));
       nodes_.insert(std::pair<std::string, std::shared_ptr<TreeNode> >(name,newNode));
       newNode->linkParents();
 	}else{
-      std::vector<double> vals;
-      for(unsigned int i=0; i<dim; i++)
-        vals.push_back(0.);
-	  std::shared_ptr<MultiDouble> inter(new MultiDouble("par"+name,vals));
-	  std::shared_ptr<TreeNode> parentNode = nodes_.at(parent);
       std::shared_ptr<TreeNode> newNode(new TreeNode(name, inter, strat, parentNode));
       nodes_.insert(std::pair<std::string, std::shared_ptr<TreeNode> >(name,newNode));
       newNode->linkParents();
 	}
+
   }
 
   //! Create a leaf for the FcnTree
@@ -265,8 +322,57 @@ public:
     return 0;
   }*/
 
+  //! trigger calculation
   void recalculate(){
     head_->recalculate();
+  }
+
+  //! check if Tree functions, create some debug messages if not
+  bool sanityCheck(){
+    bool isSane=true;
+
+    //first fo all: is there a tree?
+    if(!head_){
+      BOOST_LOG_TRIVIAL(debug)<<"This tree has no head!";
+      return false;
+    }
+
+    //some basic infos next
+    BOOST_LOG_TRIVIAL(debug)<<"# of Nodes: "<<nodes_.size();
+
+    //collect all children and parent names
+    std::vector<std::string> childNames, parentNames;
+    getNamesDownward(head_, childNames, parentNames);
+
+    //check if matches with available nodeNames
+    std::vector<std::string> missedChild, missedParent;
+    for(unsigned int i=0; i<childNames.size();i++){
+      try{
+        nodes_.at(childNames[i]);
+      }catch(std::out_of_range()){
+        missedChild.push_back(childNames[i]);
+      }
+    }
+    for(unsigned int i=0; i<parentNames.size();i++){
+      try{
+        nodes_.at(parentNames[i]);
+      }catch(std::out_of_range()){
+        missedParent.push_back(parentNames[i]);
+      }
+    }
+    if(missedChild.size()){
+      for(unsigned int i=0; i<missedChild.size();i++)
+        BOOST_LOG_TRIVIAL(debug)<<"This tree misses a child: "<<missedChild[i];
+      return false;
+    }
+    if(missedParent.size()){
+      for(unsigned int i=0; i<missedParent.size();i++)
+        BOOST_LOG_TRIVIAL(debug)<<"This tree misses a parent: "<<missedParent[i];
+      return false;
+    }
+
+
+    return isSane;
   }
 
   //! friend function to stream parameter information to output
@@ -295,6 +401,18 @@ public:
 protected:
   std::shared_ptr<TreeNode> head_; /*!< the head node storing the absolute result */
   std::map<std::string, std::shared_ptr<TreeNode> > nodes_; /*!< map to store the nodes */
+
+  //! recursive function to get all used NodeNames
+  void getNamesDownward(std::shared_ptr<TreeNode> start, std::vector<std::string>& childNames, std::vector<std::string>& parentNames){
+
+    start->getParentNames(parentNames);
+    start->getChildrenNames(childNames);
+
+    const std::vector<std::shared_ptr<TreeNode> > childs = start->getChildren();
+    for(unsigned int i=0; i<childs.size(); i++)
+      getNamesDownward(childs[i], childNames, parentNames);
+
+  }
 
 };
 

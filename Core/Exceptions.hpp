@@ -119,6 +119,22 @@ public:
   virtual ~ParameterFixed () throw() {}
 };
 
+//------------------------------------------------------------------------------
+//! @class   WrongParType
+//!
+//! @brief   Parameter of wrong type
+//------------------------------------------------------------------------------
+class WrongParType : public Exception {
+public:
+  WrongParType ( const std::string& error = "Parameter type wrong!" ) :
+    Exception(error)
+  {}
+  WrongParType ( const char *error ) :
+    Exception(error)
+  {}
+  virtual ~WrongParType () throw() {}
+};
+
 
 #endif
 

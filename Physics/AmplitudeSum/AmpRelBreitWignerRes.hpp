@@ -35,7 +35,7 @@
 
 class BreitWignerStrategy : public Strategy {
 public:
-  BreitWignerStrategy(const std::string resonanceName):name(resonanceName){
+  BreitWignerStrategy(const std::string resonanceName, ParType in):Strategy(in),name(resonanceName){
     //name = +resonanceName;
   }
 
@@ -43,65 +43,146 @@ public:
     return ("relativistic BreitWigner of "+name);
   }
 
-  virtual std::shared_ptr<AbsParameter> execute(ParameterList& paras, bool multi=false) {
+  virtual bool execute(ParameterList& paras, std::shared_ptr<AbsParameter>& out) {
+    if( checkType != out->type() ) {
+      throw(WrongParType(std::string("Output Type ")+ParNames[out->type()]+std::string(" conflicts expected type ")+ParNames[checkType]+std::string(" of ")+name+" BW strat"));
+      return false;
+    }
 
-    double Gamma0, GammaV, m0, m, ma, mb, d;
-    unsigned int spin;
+    double Gamma0, GammaV, m0, d, norm, BLWeiss2, qTerm;
+    unsigned int spin, subSys;
     try{
       m0 = double(paras.GetParameterValue("m0_"+name));
     }catch(BadParameter& e){
       m0 = double(paras.GetParameterValue("ParOfNode_m0_"+name));
     }
-
-    /*std::cout << "N Paras: " << paras.GetNParameter() << std::endl;
-    for(unsigned int par=0; par<paras.GetNParameter(); par++ ){
-      std::shared_ptr<AbsParameter> tmp = paras.GetParameter(par);
-      std::cout << "Par " << par << " : " << tmp->GetName() << std::endl;
-    }*/
-
-    m  = double(paras.GetParameterValue("x"));
-    ma = double(paras.GetParameterValue("m23"));
-    mb = double(paras.GetParameterValue("m13"));
     spin = (unsigned int)(paras.GetParameterValue("ParOfNode_spin_"+name));
     d = double(paras.GetParameterValue("ParOfNode_d_"+name));
+    norm = double(paras.GetParameterValue("ParOfNode_norm_"+name));
+    subSys = double(paras.GetParameterValue("ParOfNode_subSysFlag_"+name));
+
+    //m  = double(paras.GetParameterValue("mym"));
+    double ma = double(paras.GetParameterValue("ParOfNode_ma_"+name));
+    double mb = double(paras.GetParameterValue("ParOfNode_mb_"+name));
 
     try{
       Gamma0 = double(paras.GetParameterValue("resWidth_"+name));
     }catch(BadParameter& e){
       Gamma0 = double(paras.GetParameterValue("ParOfNode_resWidth_"+name));
     }
-    GammaV = Gamma0 * (m0 / m) * pow(q(ma,mb,m) / q0(ma,mb,m0), 2.*spin + 1.)  * BLprime2(ma,mb,m0,m,d,spin);
+    /*GammaV = Gamma0 * (m0 / m) * pow(q(ma,mb,m) / q0(ma,mb,m0), 2.*spin + 1.)  * BLprime2(ma,mb,m0,m,d,spin);
 
     std::complex<double> denom(m0*m0 - m*m, -m0 * GammaV);
     std::complex<double> res(m0 * Gamma0);
-    res = res / denom;
+    res = res / denom;*/
+
+    //MultiDim output, must have multidim Paras in input
+    if(checkType == ParType::MCOMPLEX){
+      if(paras.GetNMultiDouble()){
+        unsigned int nElements = paras.GetMultiDouble(0)->GetNValues();
+
+        std::vector<std::complex<double> > results(nElements, std::complex<double>(0.));
+        std::shared_ptr<MultiDouble> mp;//=paras.GetMultiDouble("mym_"+name);
+        switch(subSys){
+          case 3:{ //reso in sys of particles 1&2
+            mp  = (paras.GetMultiDouble("m12"));
+            //map  = (paras.GetMultiDouble("m23"));
+           // mbp  = (paras.GetMultiDouble("m13"));
+            break;
+          }
+          case 4:{ //reso in sys of particles 1&3
+            mp  = (paras.GetMultiDouble("m13"));
+           // map  = (paras.GetMultiDouble("m12"));
+           // mbp  = (paras.GetMultiDouble("m23"));
+            break;
+          }
+          case 5:{ //reso in sys of particles 2&3
+            mp  = (paras.GetMultiDouble("m23"));
+           // map  = (paras.GetMultiDouble("m13"));
+           // mbp  = (paras.GetMultiDouble("m12"));
+            break;
+          }
+        }
+
+        //calc BW for each point
+        for(unsigned int ele=0; ele<nElements; ele++){
+          double m = std::sqrt(mp->GetValue(ele));
+          BLWeiss2 = BLprime2(ma,mb,m0,m,d,spin);
+          qTerm = std::pow( ( q(ma,mb,m) / q(ma,mb,m0) ) , (2.*spin + 1.) );
+          //Gamma0 = 1;
+          //if(ele==0) std::cout << " DEBUG  " << q(map->GetValue(ele),mbp->GetValue(ele),mp->GetValue(ele)) << " " << q0(map->GetValue(ele),mbp->GetValue(ele),m0) << std::endl;
+          GammaV = Gamma0 * qTerm * (m0 / m) * BLWeiss2;
+
+          std::complex<double> denom(m0*m0 - m*m, -m0 * GammaV);
+
+          results[ele] = (std::complex<double>(norm*(2*spin+1))) / denom; //Laura++ (old) definition*/
+          if(results[ele].real()!=results[ele].real()) std::cout<<"nan in BW: "<<BLWeiss2<<" "<<m0<<" "<<mp->GetValue(ele)<<" "<<ma<<" "<<mb<<std::endl;
+        }
+
+        //std::vector<std::complex<double> > resultsTMP(nElements, std::complex<double>(1.));
+        out = std::shared_ptr<AbsParameter>(new MultiComplex(out->GetName(),results));
+        return true;
+      }else{ //end multidim para treatment
+        throw(WrongParType("Input MultiDoubles missing in BW strat of "+name));
+        return false;
+      }
+    }//end multicomplex output
+
+
+    //Only StandardDim Paras in input
+    //  double spinTerm = evaluateWignerD(); //spinTerm =1;
+    double m;// = sqrt(paras.GetParameterValue("mym_"+name));
+    switch(subSys){
+      case 3:{ //reso in sys of particles 1&2
+        m  = sqrt(double(paras.GetParameterValue("m12")));
+        //ma  = (double(paras.GetParameterValue("m23")));
+       // mb  = (double(paras.GetParameterValue("m13")));
+        break;
+      }
+      case 4:{ //reso in sys of particles 1&3
+        m  = sqrt(double(paras.GetParameterValue("m13")));
+       // ma  = (double(paras.GetParameterValue("m12")));
+       // mb  = (double(paras.GetParameterValue("m23")));
+        break;
+      }
+      case 5:{ //reso in sys of particles 2&3
+        m  = sqrt(double(paras.GetParameterValue("m23")));
+       // ma  = (double(paras.GetParameterValue("m13")));
+       // mb  = (double(paras.GetParameterValue("m12")));
+        break;
+      }
+    }
+    BLWeiss2 = BLprime2(ma,mb,m0,m,d,spin);
+    qTerm = std::pow(q(ma,mb,m) / q(ma,mb,m0), (2.*spin + 1.));
+    //double Gamma0 = _resWidth.GetValue();
+    GammaV = Gamma0 * qTerm * (m0 / m) * BLWeiss2;
+    std::complex<double> denom(m0*m0 - m*m, -m0 * GammaV);
+
+    std::complex<double> result = std::complex<double>(norm) / denom; //Laura++ (old) definition*/
 
     //std::complex<double> result (res.re(),res.im());
-    std::shared_ptr<ComplexParameter> bw(new ComplexParameter("relBW of "+name, res));
-    return bw;
+    out = std::shared_ptr<AbsParameter>(new ComplexParameter(out->GetName(), result));
+    return true;
   }
 
 protected:
   std::string name;
 
-  double q0(const double& ma, const double& mb, const double& m0) const {
-    double mapb = ma + mb;
-    double mamb = ma - mb;
-
-    return sqrt ( (m0*m0 - mapb*mapb) * (m0*m0 - mamb*mamb) ) / (2. * m0 );
-  }
-
   double q(const double& ma, const double& mb, const double& x) const {
     double mapb = ma + mb;
     double mamb = ma - mb;
 
-    return sqrt ( (x*x - mapb*mapb) * (x*x - mamb*mamb) ) / (2. * x );
-  }
+    if( (x*x - mapb*mapb) < 0 ) {
+        //std::cout<<"AmpKinematics: Trying to calculate break-up momentum below threshold!"<<std::endl;
+        return 1; //below threshold
+    }
 
+    return std::sqrt ( (x*x - mapb*mapb) * (x*x - mamb*mamb) ) / (2. * x );
+  }
 
   // compute part of the Blatt-Weisskopf barrier factor
   //   BLprime = sqrt (F(q0)/F(q))
-  double F(const double& p, const double& d, unsigned int& spin) const {
+ /* double F(const double& p, const double& d, unsigned int& spin) const {
     double retVal = 1;
 
     if (spin == 0)
@@ -113,13 +194,53 @@ protected:
       retVal = (z-3.)*(z-3.) + 9*z;
     }
     return retVal;
-  }
-
+  }*/
 
   // compute square of Blatt-Weisskopf barrier factor
   double BLprime2(const double& ma, const double& mb, const double& m0, const double& x, const double& d, unsigned int& spin) const {
-    //  cout << q0() << " " << q() << "\t" << F(q0()) << " " << F(q()) << endl;
-    return F(q0(ma, mb, m0),d,spin) / F(q(ma, mb, x),d,spin);
+    double t0= q(ma, mb, m0)*q(ma, mb, m0) * d*d;
+    double t= q(ma, mb, x)*q(ma, mb, x) * d*d;
+    return FormFactor(t0,t,spin);
+  }
+
+  double FormFactor(double& z0, double& z, unsigned int& spin) const{
+      double nom=0, denom=0;
+      switch(spin){
+      case 0:{
+        return 1.;
+      }
+      case 1:{
+          //if(_type==barrierType::BWPrime){
+              nom = 1 + z0;
+              denom = 1 + z;
+          //} else if(_type==barrierType::BW){
+           //   nom = 2*z;
+           //   denom = 1 + z;
+          //} else {
+           //   std::cout<<"Wrong BLW factor definition: "<<_type<<std::endl;
+           //   return 1;
+          //}
+          break;
+      }
+      case 2:{
+          //if(_type==barrierType::BWPrime){
+              nom = (z0-3)*(z0-3)+9*z0;
+              denom = (z-3)*(z-3)+9*z;
+         // } else if(_type==barrierType::BW){
+            //  nom = 13*z*z;
+           //   denom = (z-3)*(z-3)+9*z;
+         // } else {
+          //    std::cout<<"Wrong BLW factor definition: "<<_type<<std::endl;
+          //    return 1;
+         // }
+         break;
+      }
+      default:{
+          std::cout<<"Wrong spin value! BLW factors only implemented for spin 0,1 and 2! "<<std::endl;
+          return 0;
+      }
+      }
+      return nom/denom;
   }
 
 };
