@@ -52,6 +52,8 @@ void RootReader::read(){
 	fTree->GetBranch("Particles")->SetAutoDelete(false);
 	fTree->SetBranchAddress("Particles",&fParticles);
 	fTree->SetBranchAddress("weight",&feventWeight);
+	fTree->SetBranchAddress("charge",&fCharge);
+	fTree->SetBranchAddress("flavour",&fFlavour);
 	fmaxEvents=fTree->GetEntries();
 	fEvent=0;
 	bin();
@@ -261,6 +263,8 @@ void RootReader::storeEvents(){
 			partN->Momentum(inN);
 			tmp.addParticle(Particle(inN.X(), inN.Y(), inN.Z(), inN.E(),partN->GetPdgCode()));
 			tmp.setWeight(feventWeight);
+			tmp.setCharge(fCharge);
+			tmp.setFlavour(fFlavour);
 		}//particle loop
 
 		fEvents.push_back(tmp);
@@ -276,12 +280,16 @@ void RootReader::writeData(){
 	fParticles = new TClonesArray("TParticle",numPart);
 	fTree->Branch("Particles",&fParticles);
 	fTree->Branch("weight",&feventWeight,"weight/D");
+	fTree->Branch("charge",&fCharge,"charge/I");
+	fTree->Branch("flavour",&fFlavour,"flavour/I");
 	TClonesArray &partArray = *fParticles;
 
 	TLorentzVector motherMomentum(0,0,0,Kinematics::instance()->getMotherMass());
 	for(std::vector<Event>::iterator it=fEvents.begin(); it!=fEvents.end(); it++){
 		fParticles->Clear();
 		feventWeight = (*it).getWeight();
+		fCharge= (*it).getCharge();
+		fFlavour= (*it).getFlavour();
 		for(unsigned int i=0; i<numPart; i++){
 			const Particle oldParticle = (*it).getParticle(i);
 			TLorentzVector oldMomentum(oldParticle.px,oldParticle.py,oldParticle.pz,oldParticle.E);

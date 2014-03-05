@@ -74,6 +74,8 @@ protected:
   TTree* fTree;
   TClonesArray* fParticles;
   double feventWeight;
+  double fCharge;
+  double fFlavour;
   unsigned int fmaxEvents;
   unsigned int fEvent;
   bool fBinned;

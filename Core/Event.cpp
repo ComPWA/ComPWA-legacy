@@ -20,11 +20,11 @@ Event::Event():fWeight(1.),fName(""){
 
 }
 
-Event::Event(const std::string& name):fWeight(1.),fName(name){
+Event::Event(const std::string& name):fWeight(1.),fName(name),fFlavour(0),fCharge(0){
 
 }
 
-Event::Event(const double inWeight, const std::string& name=""):fWeight(inWeight),fName(name){
+Event::Event(const double inWeight, const std::string& name=""):fWeight(inWeight),fName(name),fFlavour(0),fCharge(0){
 
 }
 
