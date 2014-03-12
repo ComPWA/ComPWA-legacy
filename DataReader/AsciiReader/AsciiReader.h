@@ -27,6 +27,7 @@
 // local headers
 #include "DataReader/Data.hpp"
 #include "Core/Event.hpp"
+#include "Core/DataPoint.hpp"
 
 //_____ D E F I N I T I O N S __________________________________________________
 
@@ -37,6 +38,7 @@ public:
   AsciiReader( const std::string inConfigFile, const int particles );
 
   virtual Event& getEvent( const int );
+  virtual allMasses getMasses();
   virtual const int getBin( const int, double&, double& );
 
   virtual const unsigned int getNEvents() const { return EvtList_.size(); };
