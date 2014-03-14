@@ -177,9 +177,9 @@ allMasses RootReader::getMasses(){
     }
   BOOST_LOG_TRIVIAL(debug)<<"RootReader::getMasses() #invMasses: "<<nMasses;
 
-  allMasses result(nMasses, fmaxEvents, ids);
+  allMasses result(nMasses, fEvents.size(), ids);
   //calc and store inv masses
-  for(unsigned int evt=0; evt<fmaxEvents; evt++){
+  for(unsigned int evt=0; evt<fEvents.size(); evt++){
     Event tmp = fEvents.at(evt);
 
     // Check number of particle in TClonesrray

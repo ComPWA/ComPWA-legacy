@@ -22,37 +22,12 @@
 #include "Physics/AmplitudeSum/AmpRelBreitWignerRes.hpp"
 #include <stdlib.h>
 
-//double integral(AmpRelBreitWignerRes* amp) {
-//	double norm=0;
-//	double res, err;
-//	const gsl_rng_type *T;
-//	gsl_rng *r;
-//
-//	size_t d=2;//dimension of function
-//	//set limits
-//	double xLimit_low[2] = {0.9,0.9};
-//	double xLimit_high[2] = {2.,2.};
-//	boost::function<unsigned int (AmpRelBreitWignerRes*,double*,size_t,void*)> sp;
-//	sp = &AmpRelBreitWignerRes::eval;
-//	gsl_monte_function G = {sp(amp),2,0};
-//	size_t calls = 500000;
-//	gsl_rng_env_setup ();
-//	T = gsl_rng_default;
-//	r=gsl_rng_alloc(T);
-//
-//	gsl_monte_miser_state *s = gsl_monte_miser_alloc (d);
-//	//	gsl_monte_miser_integrate (&G, , xLimit_low, xLimit_high, 2, calls, r,s,&res, &err);
-//	gsl_monte_miser_free(s);
-//	return norm;
-//}
-
 
 AmpRelBreitWignerRes::AmpRelBreitWignerRes(const char *name,
 		DoubleParameter& resMass, DoubleParameter& resWidth,
 		double& mesonRadius, //  meson radius
 		int subSys,
-		int resSpin, int m, int n
-) :
+		int resSpin, int m, int n) :
 AmpAbsDynamicalFunction(name),
 AmpKinematics(resMass, subSys, resSpin, m, n, AmpKinematics::barrierType(BWPrime), mesonRadius, 1.5),
 _resWidth(resWidth),
@@ -64,19 +39,19 @@ foundMasses(false)
 }
 
 AmpRelBreitWignerRes::AmpRelBreitWignerRes(const AmpRelBreitWignerRes& other, const char* newname) :
-										  AmpAbsDynamicalFunction(other, newname),
-										  AmpKinematics(other),
-										  _resWidth(other._resWidth),
-										  _wignerD(other._wignerD)
+												  AmpAbsDynamicalFunction(other, newname),
+												  AmpKinematics(other),
+												  _resWidth(other._resWidth),
+												  _wignerD(other._wignerD)
 {
 	initialise();
 }
 
 AmpRelBreitWignerRes::AmpRelBreitWignerRes(const AmpRelBreitWignerRes& other) :
-										  AmpAbsDynamicalFunction(other),
-										  AmpKinematics(other),
-										  _resWidth(other._resWidth),
-										  _wignerD(other._wignerD)
+												  AmpAbsDynamicalFunction(other),
+												  AmpKinematics(other),
+												  _resWidth(other._resWidth),
+												  _wignerD(other._wignerD)
 {
 	initialise();
 }
@@ -91,7 +66,7 @@ void AmpRelBreitWignerRes::initialise()
 
 void AmpRelBreitWignerRes::setDecayMasses(double ma, double mb, double mc, double M){
 	AmpKinematics::setDecayMasses(ma, mb, mc, M);
-//	_wignerD.setDecayMasses(ma, mb, mc, M);
+	//	_wignerD.setDecayMasses(ma, mb, mc, M);
 	return;
 }
 std::complex<double> AmpRelBreitWignerRes::evaluateAmp(dataPoint& point) {
@@ -100,46 +75,55 @@ std::complex<double> AmpRelBreitWignerRes::evaluateAmp(dataPoint& point) {
 		return 0;
 	}
 	std::complex<double> result;
-//	double m = dataPoint::instance()->getM(_subSys);
 	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
 	if(!foundMasses){
-	  id23 = point.getID("m23sq");
-	  id13 = point.getID("m13sq");
-	  foundMasses=true;
+		id23 = point.getID("m23sq");
+		id13 = point.getID("m13sq");
+		foundMasses=true;
 	}
 	double m23sq = point.getVal(id23);
 	double m13sq = point.getVal(id13);
 	double m12sq = kin->getThirdVariableSq(m23sq,m13sq);
-	double m = -999;
+	double mSq = -999;
 	switch(_subSys){
-	case 3: m=sqrt(m12sq); break;
-	case 4: m=sqrt(m13sq); break;
-	case 5: m=sqrt(m23sq); break;
+	case 3: mSq=(m12sq); break;
+	case 4: mSq=(m13sq); break;
+	case 5: mSq=(m23sq); break;
 	}
-	//	double spinTerm = evaluateWignerD(); //spinTerm =1;
-	double BLWeiss2 = BLres2(m);
-	double qTerm = std::pow((q(m) / q0()), (2.*_spin + 1.));
-	double Gamma0 = _resWidth.GetValue();
-	double GammaV = Gamma0 * qTerm * (_mR / m) * BLWeiss2;
-	std::complex<double> denom(_mR*_mR - m*m, -_mR * GammaV);
+//		double BLWeiss2 = BLres2(sqrt(mSq));
+//		double qTerm = std::pow((q(sqrt(mSq)) / q0()), (2.*_spin + 1.));
+//		double Gamma0 = _resWidth.GetValue();
+//		double GammaV = Gamma0 * qTerm * (_mR / sqrt(mSq)) * BLWeiss2;
+//		std::complex<double> denom(_mR*_mR - mSq, -_mR * GammaV);
+//
+//		if(sqrt(m23sq)==2.84515) std::cout << " DEBUG2 " << q(m) << " " << q0() << std::endl;
+//
+//		result = std::complex<double>( _norm ) / denom; //Laura++ (old) definition
+//	//	result = std::complex<double>(_norm*sqrt(BLWeiss2)) / denom;
+//	//	result = std::complex<double>( _norm*sqrt(BLWeiss2)*sqrt(BLmother2(m)) ) / denom; //Laura++ (new) definition
+//
+//		if(result.real()!=result.real()) {std::cout << "RE part NAN" << std::endl;return 0;}
+//		if(result.imag()!=result.imag()) {std::cout << "IM part NAN" << std::endl; return 0;}
+//		return result;
+	return dynamicalFunction(mSq,_mR,_ma,_mb,_resWidth.GetValue(),_spin,_mesonRadius);
+}
+std::complex<double> AmpRelBreitWignerRes::dynamicalFunction(double mSq, double mR, double ma, double mb, double gamma0, unsigned int J, double mesonRadius){
+	double m = sqrt(mSq);
+	double BLWeiss2 = AmpKinematics::BlattWeiss(m,mR,ma,mb,J,mesonRadius);
+	double qTerm = std::pow((qValue(m,ma,mb) / qValue(mR,ma,mb)), (2.*J+ 1.));
+	double GammaV = gamma0 * qTerm * (mR / m) * BLWeiss2;
+	std::complex<double> denom(mR*mR - m*m, -mR * GammaV);
 
-	if(sqrt(m23sq)==2.84515) std::cout << " DEBUG2 " << q(m) << " " << q0() << std::endl;
+	std::complex<double> result = std::complex<double>( (2.*J+1.) ) / denom; //Laura++ (old) definition
+	//	result = std::complex<double>(_norm*sqrt(BLWeiss2)) / denom;
+	//	result = std::complex<double>( _norm*sqrt(BLWeiss2)*sqrt(BLmother2(m)) ) / denom; //Laura++ (new) definition
 
-	result = std::complex<double>( _norm ) / denom; //Laura++ (old) definition
-//	result = std::complex<double>(_norm*sqrt(BLWeiss2)) / denom;
-//	result = std::complex<double>( _norm*sqrt(BLWeiss2)*sqrt(BLmother2(m)) ) / denom; //Laura++ (new) definition
+	if(result.real()!=result.real() || result.imag()!=result.imag())
+		std::cout<<"nan in BW: "<<BLWeiss2<<" "<<mR<<" "<<mSq<<" "<<ma<<" "<<mb<<std::endl;
 
-	if(result.real()!=result.real()) {std::cout << "RE part NAN" << std::endl;return 0;}
-	if(result.imag()!=result.imag()) {std::cout << "IM part NAN" << std::endl; return 0;}
 	return result;
 }
-std::complex<double> AmpRelBreitWignerRes::evaluate(dataPoint& point) {
-//	std::cout<<evaluateAmp()<<" "<<evaluateWignerD()<<std::endl;
-	unsigned int twoJplusOne = (2*_spin+1);
-//	return evaluateAmp()*evaluateWignerD(); //DEBUG
-//	return evaluateAmp()*(double)twoJplusOne; //DEBUG
-	return evaluateAmp(point)*evaluateWignerD(point)*(double)twoJplusOne;
-}
+
 /*std::complex<double> AmpRelBreitWignerRes::evaluateTree(const ParameterList& paras) const {
     double Gamma0, GammaV;
     double m0 = double(paras.GetParameterValue("m0_"+_name));

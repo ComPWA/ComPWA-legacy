@@ -68,10 +68,6 @@ RunManager::~RunManager(){
 }
 
 std::shared_ptr<FitResult> RunManager::startFit(ParameterList& inPar){
-	if( !(validAmplitude==1 && validData==1 && validOptimizer==1) ){
-		BOOST_LOG_TRIVIAL(error) << "RunManager: startFit() requirements not fulfilled!";
-		return std::shared_ptr<FitResult>();
-	}
 	BOOST_LOG_TRIVIAL(info) << "RunManager: Starting fit.";
 	BOOST_LOG_TRIVIAL(info) << "RunManager: Input data contains "<<pData_->getNEvents()<<" events.";
 	//	BOOST_LOG_TRIVIAL(info) << "Initial LH="<<esti->controlParameter(inPar);

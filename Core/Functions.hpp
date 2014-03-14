@@ -34,6 +34,7 @@
 #include "Core/ParameterList.hpp"
 #include "Core/Parameter.hpp"
 #include "Core/AbsParameter.hpp"
+#include "Core/DataPoint.hpp"
 
 class Strategy
 {
@@ -77,6 +78,101 @@ protected:
   ParType checkType;
 };
 
+class Inverse : public Strategy
+{
+public:
+  Inverse(ParType in):Strategy(in){
+  };
+
+  virtual const std::string to_str() const{
+    return "+";
+  }
+
+  virtual bool execute(ParameterList& paras, std::shared_ptr<AbsParameter>& out){
+    if( checkType != out->type() ) return false;
+    unsigned int nMC = paras.GetNMultiComplex();
+    unsigned int nMD = paras.GetNMultiDouble();
+    unsigned int nC = paras.GetNComplex();
+    unsigned int nD = paras.GetNDouble();
+    unsigned int nI = paras.GetNInteger();
+
+    if(nMC+nC!=0){
+      //TODO: can't handle complex numbers
+      return false;
+    }
+    if(nMC+nD+nI!=1 ){
+      //TODO: exception too many variables
+      return false;
+    }
+
+	switch(checkType){
+      case ParType::DOUBLE:{
+    	  double var = paras.GetParameterValue(0);
+    	  if(var==0){
+    		  out = std::shared_ptr<AbsParameter>(new DoubleParameter( out->GetName(),0 ));
+    		  //TODO: exception dividion by 0
+    		  BOOST_LOG_TRIVIAL(error) << "Inverse strategy: division by 0";
+    	  } else
+    		  out = std::shared_ptr<AbsParameter>(new DoubleParameter( out->GetName(),1/var ));
+//    	  std::cout<<"Strategy Inverse (DOUBLE) "<<1/var<<std::endl;
+        break;
+      }//end double
+	  default:{
+	    //TODO: exception output partype wrong
+	    return false;
+	  }
+	}//end switch
+	return true;
+  }//end execute
+};
+
+class SquareRoot : public Strategy
+{
+public:
+  SquareRoot(ParType in):Strategy(in){
+  };
+
+  virtual const std::string to_str() const{
+    return "+";
+  }
+
+  virtual bool execute(ParameterList& paras, std::shared_ptr<AbsParameter>& out){
+    if( checkType != out->type() ) return false;
+    unsigned int nMC = paras.GetNMultiComplex();
+    unsigned int nMD = paras.GetNMultiDouble();
+    unsigned int nC = paras.GetNComplex();
+    unsigned int nD = paras.GetNDouble();
+    unsigned int nI = paras.GetNInteger();
+
+    if(nMC+nC!=0){
+      //TODO: can't handle complex numbers
+      return false;
+    }
+    if(nMD+nD+nI!=1 ){
+      //TODO: exception too many variables
+      return false;
+    }
+
+	switch(checkType){
+      case ParType::DOUBLE:{
+    	  double var = paras.GetParameterValue(0);
+    	  if(var<0){
+    		  out = std::shared_ptr<AbsParameter>(new DoubleParameter( out->GetName(),-1 ));
+    		  //TODO: exception argument <0
+    		  BOOST_LOG_TRIVIAL(error) << "SquareRoot strategy: argument < 0! return -1";
+    	  } else
+    		  out = std::shared_ptr<AbsParameter>(new DoubleParameter( out->GetName(),sqrt(var) ));
+//    	  std::cout<<"Strategy SquareRoot (DOUBLE) "<<sqrt(var)<<std::endl;
+        break;
+      }//end double
+	  default:{
+	    //TODO: exception output partype wrong
+	    return false;
+	  }
+	}//end switch
+	return true;
+  }//end execute
+};
 class AddAll : public Strategy
 {
 public:
@@ -201,6 +297,7 @@ public:
         }
 
         out = std::shared_ptr<AbsParameter>(new ComplexParameter(out->GetName(),result));
+//        std::cout<<"Strategy AddAll (COMPLEX) "<<result<<std::endl;
         break;
       }//end complex
 
@@ -223,6 +320,7 @@ public:
             result+=tmp->GetValue(ele);
         }
 
+//        std::cout<<"Strategy AddAll (DOUBLE) "<<result<<std::endl;
 	    out = std::shared_ptr<AbsParameter>(new DoubleParameter(out->GetName(),result));
 	    break;
 	  }//end double
@@ -336,7 +434,7 @@ public:
 
       case ParType::COMPLEX:{
         //output complex: collapse everything non-complex as real-part
-        std::complex<double> result(0,0);
+        std::complex<double> result(1.,0);
 
         //mult up complex parameter
         for(unsigned int i=0; i<nC; i++){
@@ -387,6 +485,7 @@ public:
         }
 
         out = std::shared_ptr<AbsParameter>(new DoubleParameter(out->GetName(),result));
+//          std::cout<<"Strategy MultAll (DOUBLE) "<<result<<std::endl;
         break;
       }//end double
 
@@ -612,6 +711,7 @@ public:
         }else if(nC){
           std::shared_ptr<ComplexParameter> tmp = paras.GetComplexParameter(0);
           out = std::shared_ptr<AbsParameter>(new DoubleParameter(out->GetName(),std::norm(tmp->GetValue())));
+//          std::cout<<"Strategy AbsSquare (DOUBLE) "<<std::norm(tmp->GetValue())<<std::endl;
         }
         break;
       }//end double

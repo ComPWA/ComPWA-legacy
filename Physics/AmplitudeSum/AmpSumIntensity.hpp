@@ -86,8 +86,9 @@ public:
 	virtual const ParameterList& intensity(dataPoint& point);
 	virtual const ParameterList& intensity(std::vector<double> point, ParameterList& par);
 
-	virtual std::shared_ptr<FunctionTree> functionTree(allMasses& theMasses);
-    virtual std::shared_ptr<FunctionTree> phspTree(allMasses& theMasses);
+//	virtual std::shared_ptr<FunctionTree> functionTree(allMasses& theMasses);
+	virtual std::shared_ptr<FunctionTree> functionTree(allMasses& theMasses, allMasses& thePHSPMasses);
+    virtual std::shared_ptr<FunctionTree> phspTree(allMasses& thePHSPMasses);
 
 	virtual const bool fillStartParVec(ParameterList& outPar);
 
@@ -105,7 +106,12 @@ public:
 
 protected:
 	void init();
-	void setupTree(allMasses& theMasses, bool isPhspTree);
+//	void setupTree(allMasses& theMasses, bool isPhspTree);
+	void setupTree(allMasses& thePHSPMasses){
+		allMasses dummyMass;
+		setupTree(thePHSPMasses, dummyMass);
+	}
+	void setupTree(allMasses& theMasses, allMasses& thePHSPMasses);
 
 	std::shared_ptr<Efficiency> eff_;
 	bool _calcMaxFcnVal;

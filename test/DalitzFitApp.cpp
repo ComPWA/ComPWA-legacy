@@ -113,7 +113,7 @@ int main(int argc, char **argv){
     allMasses myPhspMasses(myPHSPReader->getMasses());
     BOOST_LOG_TRIVIAL(debug)<<"EvtMasses: "<< myEvtMasses.nEvents <<" events and "<< myEvtMasses.nInvMasses <<" inv masses";
     BOOST_LOG_TRIVIAL(debug)<<"PHSPMasses: "<< myPhspMasses.nEvents <<" events and "<< myPhspMasses.nInvMasses <<" inv masses";
-    physicsTree = amps->functionTree(myEvtMasses);
+    physicsTree = amps->functionTree(myPhspMasses,myEvtMasses);
     if(!physicsTree){
       BOOST_LOG_TRIVIAL(error)<<"Physics Trees not setup correctly, quitting";
       return 0;

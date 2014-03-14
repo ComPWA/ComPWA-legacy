@@ -32,29 +32,32 @@ AmpAbsDynamicalFunction::~AmpAbsDynamicalFunction()
 {
 }
 
-double AmpAbsDynamicalFunction::evaluate(double x[], size_t dim) {
-	if(dim!=2) return 0;
-	//set data point: we assume that x[0]=m13 and x[1]=m23
-//	dataPoint::instance()->setMsq(4,x[0]);
-//	dataPoint::instance()->setMsq(5,x[1]);
-//	dataPoint::instance()->setMsq(3,m12sq);
-	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
-	double m12sq = kin->getThirdVariableSq(x[0],x[1]);
-	dataPoint pp; pp.setVal("m23sq",x[1]);pp.setVal("m13sq",x[0]);
-	if( !kin->isWithinPhsp(pp) ) return 0;//only integrate over phase space
-	std::complex<double> res = evaluate(pp);
-	return ( std::abs(res)*std::abs(res) ); //integrate over |F|^2
-}
+//double AmpAbsDynamicalFunction::evaluate(double x[], size_t dim) {
+//	if(dim!=2) return 0;
+//	//set data point: we assume that x[0]=m13 and x[1]=m23
+//	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
+//	double m12sq = kin->getThirdVariableSq(x[0],x[1]);
+//	dataPoint pp; pp.setVal("m23sq",x[1]);pp.setVal("m13sq",x[0]);
+//	if( !kin->isWithinPhsp(pp) ) return 0;//only integrate over phase space
+//	std::complex<double> res = evaluate(pp);
+//	return ( std::abs(res)*std::abs(res) ); //integrate over |F|^2
+//}
 double evalWrapper(double* x, size_t dim, void* param) {
 	/* We need a wrapper here because a eval() is a member function of AmpAbsDynamicalFunction
 	 * and can therefore not be referenced. But gsl_monte_function expects a function reference.
 	 * As third parameter we pass the reference to the current instance of AmpAbsDynamicalFunction
 	 */
-	return static_cast<AmpAbsDynamicalFunction*>(param)->evaluate(x,dim);
+	if(dim!=2) return 0;
+	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
+	double m12sq = kin->getThirdVariableSq(x[0],x[1]);
+	dataPoint pp; pp.setVal("m23sq",x[1]);pp.setVal("m13sq",x[0]);
+	if( !kin->isWithinPhsp(pp) ) return 0;//only integrate over phase space
+	std::complex<double> res = static_cast<AmpAbsDynamicalFunction*>(param)->evaluate(pp);
+	return ( std::abs(res)*std::abs(res) ); //integrate over |F|^2
+//	return static_cast<AmpAbsDynamicalFunction*>(param)->evaluate(x,dim);
 };
 
 double AmpAbsDynamicalFunction::integral() const{
-
 	BOOST_LOG_TRIVIAL(debug)<<"AmpAbsDynamicalFunction::integral() calculating integral of "<<_name<<" !";
 	size_t dim=2;
 	double res=0.0, err=0.0;
