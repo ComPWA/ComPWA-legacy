@@ -264,9 +264,6 @@ void AmpSumIntensity::setupTree(allMasses& theMasses, allMasses& thePHSPMasses){
 		newTree->createNode("PhspReso_"+tmp.m_name, mmultStrat, "AbsVal_"+tmp.m_name); //PhspReso = BW_phsp * AngD_phsp
 		newTree->createNode("NormBW_"+tmp.m_name, rbwPhspStrat, "PhspReso_"+tmp.m_name, thePHSPMasses.nEvents); //BW
 		newTree->createNode("NormAngD_"+tmp.m_name, angdPhspStrat, "PhspReso_"+tmp.m_name, thePHSPMasses.nEvents); //AD
-		//BW Par
-		newTree->createLeaf("m0_"+tmp.m_name, mr[tmp.m_name]->GetValue(), "RelBW_"+tmp.m_name); //m0
-		newTree->createLeaf("m0_"+tmp.m_name, mr[tmp.m_name]->GetValue(), "NormBW_"+tmp.m_name); //m0
 		//myTree->createLeaf("x", x, "RelBW_"+tmp.m_name); //x
 		switch(subSys){
 		case 3:{ //reso in sys of particles 1&2
@@ -297,6 +294,7 @@ void AmpSumIntensity::setupTree(allMasses& theMasses, allMasses& thePHSPMasses){
 			BOOST_LOG_TRIVIAL(error)<<"AmpSumIntensity::setupTree(): Subsys not found!!";
 		}
 		}
+		newTree->createLeaf("m0_"+tmp.m_name, mr[tmp.m_name]->GetValue(), "RelBW_"+tmp.m_name); //m0
 		newTree->createLeaf("m23", m23, "RelBW_"+tmp.m_name); //ma
 		newTree->createLeaf("m13", m13, "RelBW_"+tmp.m_name); //mb
 		newTree->createLeaf("m12", m12, "RelBW_"+tmp.m_name); //mc
@@ -306,6 +304,7 @@ void AmpSumIntensity::setupTree(allMasses& theMasses, allMasses& thePHSPMasses){
 		newTree->createLeaf("resWidth_"+tmp.m_name, gr[tmp.m_name]->GetValue(), "RelBW_"+tmp.m_name); //resWidth
 		newTree->createLeaf("norm_"+tmp.m_name, 1., "RelBW_"+tmp.m_name); //Todo: setup norm, manipulate norm?
 		//normBW
+		newTree->createLeaf("m0_"+tmp.m_name, mr[tmp.m_name]->GetValue(), "NormBW_"+tmp.m_name); //m0
 		newTree->createLeaf("m23_phsp", m23_phsp, "NormBW_"+tmp.m_name); //ma
 		newTree->createLeaf("m13_phsp", m13_phsp, "NormBW_"+tmp.m_name); //mb
 		newTree->createLeaf("m12_phsp", m12_phsp, "NormBW_"+tmp.m_name); //mc
@@ -322,7 +321,6 @@ void AmpSumIntensity::setupTree(allMasses& theMasses, allMasses& thePHSPMasses){
 		newTree->createLeaf("m1", kin->m1, "AngD_"+tmp.m_name); //m1
 		newTree->createLeaf("m2", kin->m2, "AngD_"+tmp.m_name); //m2
 		newTree->createLeaf("m3", kin->m3, "AngD_"+tmp.m_name); //m3
-		// unsigned int _subSysFlag = Double_t(paras.GetParameterValue("subSysFlag_"+name));
 		newTree->createLeaf("subSysFlag_"+tmp.m_name, subSys, "AngD_"+tmp.m_name); //subSysFlag
 		newTree->createLeaf("spin_"+tmp.m_name,tmp.m_spin, "AngD_"+tmp.m_name); //spin
 		newTree->createLeaf("m_"+tmp.m_name, tmp.m_m, "AngD_"+tmp.m_name); //OutSpin 1
@@ -335,7 +333,6 @@ void AmpSumIntensity::setupTree(allMasses& theMasses, allMasses& thePHSPMasses){
 		newTree->createLeaf("m1", kin->m1, "NormAngD_"+tmp.m_name); //m1
 		newTree->createLeaf("m2", kin->m2, "NormAngD_"+tmp.m_name); //m2
 		newTree->createLeaf("m3", kin->m3, "NormAngD_"+tmp.m_name); //m3
-		// unsigned int _subSysFlag = Double_t(paras.GetParameterValue("subSysFlag_"+name));
 		newTree->createLeaf("subSysFlag_"+tmp.m_name, subSys, "NormAngD_"+tmp.m_name); //subSysFlag
 		newTree->createLeaf("spin_"+tmp.m_name,tmp.m_spin, "NormAngD_"+tmp.m_name); //spin
 		newTree->createLeaf("m_"+tmp.m_name, tmp.m_m, "NormAngD_"+tmp.m_name); //OutSpin 1
@@ -392,13 +389,12 @@ void AmpSumIntensity::calcMaxVal(std::shared_ptr<Generator> gen){
 }
 double AmpSumIntensity::normReso(std::shared_ptr<AmpAbsDynamicalFunction> amp){
 	double norm;
-	if(_normStyle==none) norm=1;
+	if(_normStyle==none) norm=1.;
 	else if(_normStyle==one) norm = sqrt(amp->integral());
 	else if(_normStyle==entries) norm = sqrt(_dpArea*amp->integral()/_entries);
 	BOOST_LOG_TRIVIAL(debug)<<"AmpSumIntensity::normRes Normalization constant for "
 			<<amp->GetName()<<": "<<1.0/norm;
 	return norm;
-
 }
 double AmpSumIntensity::evaluate(double x[], size_t dim) {
 	if(dim!=2) return 0;

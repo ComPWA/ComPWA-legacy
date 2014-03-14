@@ -49,7 +49,7 @@ public:
 
 	static std::complex<double> dynamicalFunction(double mSq, double mR, double ma, double mb, double gamma0, unsigned int J, double mesonRadius);
 	virtual void initialise();
-	virtual std::complex<double> evaluate(dataPoint& point) { return evaluateAmp(point)*evaluateWignerD(point); }
+	virtual std::complex<double> evaluate(dataPoint& point) { return evaluateAmp(point)*evaluateWignerD(point)*_norm; }
 	virtual std::complex<double> evaluateAmp(dataPoint& point);
 	virtual double evaluateWignerD(dataPoint& point) { return _wignerD.evaluate(point); };
 	//  virtual double eval(double x[],size_t dim, void *param) const;//used for MC integration
