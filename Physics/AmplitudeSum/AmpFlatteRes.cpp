@@ -24,7 +24,7 @@
 AmpFlatteRes::AmpFlatteRes(const char *name,
 		DoubleParameter& resMass, DoubleParameter& resWidth,
 		double& mesonRadius, ///  meson radius
-		DoubleParameter& couplingHidden, DoubleParameter& coupling,
+		DoubleParameter& coupling, DoubleParameter& couplingHidden,
 		double massHiddenChannelA, double massHiddenChannelB,
 		int subSys, ///  meson radius
 		int resSpin, int m, int n) :
@@ -41,21 +41,21 @@ AmpFlatteRes::AmpFlatteRes(const char *name,
 }
 
 AmpFlatteRes::AmpFlatteRes(const AmpFlatteRes& other, const char* newname) :
-		  AmpAbsDynamicalFunction(other, newname),
-		  AmpKinematics(other),
-		  _couplingHiddenChannel(other._couplingHiddenChannel),
-		  _coupling(other._coupling),
-		  _wignerD(other._wignerD)
+						  AmpAbsDynamicalFunction(other, newname),
+						  AmpKinematics(other),
+						  _couplingHiddenChannel(other._couplingHiddenChannel),
+						  _coupling(other._coupling),
+						  _wignerD(other._wignerD)
 {
 	initialise();
 }
 
 AmpFlatteRes::AmpFlatteRes(const AmpFlatteRes& other) :
-		  AmpAbsDynamicalFunction(other),
-		  AmpKinematics(other),
-		  _couplingHiddenChannel(other._couplingHiddenChannel),
-		  _coupling(other._coupling),
-		  _wignerD(other._wignerD)
+						  AmpAbsDynamicalFunction(other),
+						  AmpKinematics(other),
+						  _couplingHiddenChannel(other._couplingHiddenChannel),
+						  _coupling(other._coupling),
+						  _wignerD(other._wignerD)
 {
 	initialise();
 }
@@ -67,11 +67,11 @@ AmpFlatteRes::~AmpFlatteRes()
 void AmpFlatteRes::initialise() 
 {
 }
-  void AmpFlatteRes::setDecayMasses(double ma, double mb, double mc, double M){
-	  AmpKinematics::setDecayMasses(ma, mb, mc, M);
-//	  _wignerD.setDecayMasses(ma, mb, mc, M);
-	  return;
-  }
+void AmpFlatteRes::setDecayMasses(double ma, double mb, double mc, double M){
+	AmpKinematics::setDecayMasses(ma, mb, mc, M);
+	//	  _wignerD.setDecayMasses(ma, mb, mc, M);
+	return;
+}
 
 void AmpFlatteRes::setBarrierMass(double mBarA, double mBarB) {
 	_massHiddenChannelA = mBarA;
@@ -83,38 +83,51 @@ std::complex<double> AmpFlatteRes::evaluateAmp(dataPoint& point) {
 		cout<<"Barrier masses not set! Use setBarrierMass() first!"<<endl;
 		return 0;
 	}
-	//	double m0 = Double_t(_m0);
-//	double m = dataPoint::instance()->getM(_subSys);
 	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
 	double m23sq = point.getVal("m23sq");
 	double m13sq = point.getVal("m13sq");
 	double m12sq = kin->getThirdVariableSq(m23sq,m13sq);
-	double m = -999;
+	double mSq = -999;
 	switch(_subSys){
-	case 3: m=sqrt(m12sq); break;
-	case 4: m=sqrt(m13sq); break;
-	case 5: m=sqrt(m23sq); break;
+	case 3: mSq=(m12sq); break;
+	case 4: mSq=(m13sq); break;
+	case 5: mSq=(m23sq); break;
 	}
+	double g1 = _coupling.GetValue();//coupling a0->KK
+	double g2 = _couplingHiddenChannel.GetValue();//couppling a0->eta pi
 
-//	double spinTerm = _wignerD.evaluate();
-//	double m  = Double_t(_x23);
+	//Calculate dynamics
+	//	double p1 = 2*q(sqrt(mSq), _ma,_mb)/sqrt(mSq);//break-up momenta decay channel (e.g. a0->KK)
+	//	double p2 = 2*q(sqrt(mSq), _massHiddenChannelA,_massHiddenChannelB)/sqrt(mSq);//break-up momenta hidden channel (e.g. a0->eta pi)
+	//
+	//	std::complex<double> denom(_mR*_mR - mSq, -p1*g1*g1-p2*g2*g2);
+	//
+	//	std::complex<double> result = (std::complex<double>( (2*_spin+1) * g1*g1 , 0 ) / denom);//correct definition
+	//	//	std::complex<double> result = (std::complex<double>( (2*_spin+1) , 0) / denom);//Laura++ (old) definition
+	//
+	//	if(result.real()!=result.real()) {std::cout << "RE part NAN" << std::endl; return 0;}
+	//	if(result.imag()!=result.imag()) {std::cout << "IM part NAN" << std::endl; return 0;}
+	//	return result;
 
-	double p1 = 2*q(m, _massHiddenChannelA,_massHiddenChannelB)/m;//break-up momenta hidden channel (e.g. a0->eta pi)
-	double p2 = 2*q(m, _ma,_mb)/m;//break-up momenta decay channel (e.g. a0->KK)
-	double g1 = _couplingHiddenChannel.GetValue();//couppling a0->eta pi
-	double g2 = _coupling.GetValue();//coupling a0->KK
+	return dynamicalFunction(mSq,_mR,_ma,_mb,g1, _massHiddenChannelA,_massHiddenChannelB,g2,_spin);
 
-	std::complex<double> denom(_mR*_mR - m*m, -p1*g1*g1-p2*g2*g2);
+}
+std::complex<double> AmpFlatteRes::dynamicalFunction(double mSq, double mR, double ma, double mb, double coupling,
+		double mHiddenA, double mHiddenB, double couplingHidden,unsigned int J ){
 
-	std::complex<double> result = (std::complex<double>(_norm * g2*g2,0) / denom);//correct definition
-//	std::complex<double> result = (std::complex<double>(_norm,0) / denom);//Laura++ (old) definition
+	double p1 = 2*AmpKinematics::qValue(sqrt(mSq), ma,mb)/sqrt(mSq);//break-up momenta decay channel (e.g. a0->KK)
+	double p2 = 2*AmpKinematics::qValue(sqrt(mSq), mHiddenA,mHiddenB)/sqrt(mSq);//break-up momenta hidden channel (e.g. a0->eta pi)
+	double g1 = coupling;//coupling a0->KK
+	double g2 = couplingHidden;//couppling a0->eta pi
+
+	std::complex<double> denom(mR*mR - mSq, -p1*g1*g1-p2*g2*g2);
+
+	std::complex<double> result = (std::complex<double>( (2*J+1) * g1*g1 , 0 ) / denom);//correct definition
+	//	std::complex<double> result = (std::complex<double>( (2*J+1) , 0) / denom);//Laura++ (old) definition
 
 	if(result.real()!=result.real()) {std::cout << "RE part NAN" << std::endl; return 0;}
 	if(result.imag()!=result.imag()) {std::cout << "IM part NAN" << std::endl; return 0;}
+//	std::cout<<"================= m="<<mSq<<" r="<<result<<" p1="<<p1<<" p2="<<p2<<" g1="<<g1<<" g2="<<g2<<" J="<<J<< std::endl;
 	return result;
 
-}
-std::complex<double> AmpFlatteRes::evaluate(dataPoint& point) {
-	unsigned int twoJplusOne = (2*_spin+1);
-	return evaluateAmp(point)*evaluateWignerD(point)*(double)twoJplusOne;
 }
