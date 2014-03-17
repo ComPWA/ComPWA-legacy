@@ -8,13 +8,14 @@
 // Contributors:
 //		Peter Weidenkaff -
 //-------------------------------------------------------------------------------
-#ifndef DALITZEFFICIENCY_HPP_
-#define DALITZEFFICIENCY_HPP_
+#ifndef EFFICIENCY_HPP_
+#define EFFICIENCY_HPP_
 
 #include <iostream>
 #include <vector>
 #include <boost/log/trivial.hpp>
-#include "Core/DataPoint.hpp"
+//#include "Core/DataPoint.hpp"
+class dataPoint;
 using namespace boost::log;
 
 /**
@@ -26,8 +27,6 @@ private:
 
 public:
 	Efficiency();
-
-//	DalitzEfficiency(const DalitzEfficiency&, const char*);
 
 	virtual ~Efficiency();
 
@@ -50,4 +49,4 @@ public:
 	virtual double evaluate(dataPoint& point) {return 1;};
 };
 
-#endif /* DALITZEFFICIENCY_HPP_ */
+#endif /* EFFICIENCY_HPP_ */

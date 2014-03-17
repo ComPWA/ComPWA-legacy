@@ -9,6 +9,7 @@
 //     Peter Weidenkaff -
 //-------------------------------------------------------------------------------
 #include "Physics/DPKinematics/RootEfficiency.hpp"
+#include "Core/DataPoint.hpp"
 
 DalitzHistEfficiency::DalitzHistEfficiency(TEfficiency* eff) : effHist(new TEfficiency(*eff)){
 	BOOST_LOG_TRIVIAL(debug) << "DalitzHistEfficiency: creating efficiency from existing TEfficiency object!";

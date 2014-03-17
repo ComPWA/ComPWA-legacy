@@ -192,14 +192,15 @@ void AmpSumIntensity::setupTree(allMasses& theMasses, allMasses& thePHSPMasses){
 	std::shared_ptr<MultiDouble> m23 = std::shared_ptr<MultiDouble>( new MultiDouble("m23",theMasses.masses_sq.at( std::make_pair(2,3) )) );
 	std::shared_ptr<MultiDouble> m13 = std::shared_ptr<MultiDouble>( new MultiDouble("m13",theMasses.masses_sq.at( std::make_pair(1,3) )) );
 	std::shared_ptr<MultiDouble> m12 = std::shared_ptr<MultiDouble>( new MultiDouble("m12",theMasses.masses_sq.at( std::make_pair(1,2) )) );
+	std::shared_ptr<MultiDouble> eff = std::shared_ptr<MultiDouble>( new MultiDouble("eff",theMasses.eff) );
 	std::shared_ptr<MultiDouble> m23_phsp = std::shared_ptr<MultiDouble>( new MultiDouble("m23_phsp",thePHSPMasses.masses_sq.at( std::make_pair(2,3) )) );
 	std::shared_ptr<MultiDouble> m13_phsp = std::shared_ptr<MultiDouble>( new MultiDouble("m13_phsp",thePHSPMasses.masses_sq.at( std::make_pair(1,3) )) );
 	std::shared_ptr<MultiDouble> m12_phsp = std::shared_ptr<MultiDouble>( new MultiDouble("m12_phsp",thePHSPMasses.masses_sq.at( std::make_pair(1,2) )) );
-	treePar = std::shared_ptr<ParameterList>(new ParameterList());
+//	treePar = std::shared_ptr<ParameterList>(new ParameterList());
 	//treePar->AddParameter(x);
-	treePar->AddParameter(m23);
-	treePar->AddParameter(m13);
-	treePar->AddParameter(m12);
+//	treePar->AddParameter(m23);
+//	treePar->AddParameter(m13);
+//	treePar->AddParameter(m12);
 
 	//----Strategies needed
 	std::shared_ptr<MultAll> mmultStrat = std::shared_ptr<MultAll>(new MultAll(ParType::MCOMPLEX));
@@ -221,10 +222,14 @@ void AmpSumIntensity::setupTree(allMasses& theMasses, allMasses& thePHSPMasses){
 	if(!isPhspTree){ //Data: EvtSum of log of Intens needed
 		newTree->createNode("Log", mlogStrat, "LH", theMasses.nEvents, false); //log of amp, at each point
 		newTree->createNode("Intens", msqStrat, "Log", theMasses.nEvents, false); //I=A^2, at each point
-		newTree->createNode("Amplitude", maddStrat, "Intens", theMasses.nEvents, false); //Sum of resonances, at each point
+		newTree->createNode("AmplitudeEff", mmultStrat, "Intens", theMasses.nEvents, false); //Sum of resonances, at each point
+		newTree->createLeaf("eff", eff, "AmplitudeEff"); //efficiency
+		newTree->createNode("Amplitude", maddStrat, "AmplitudeEff", theMasses.nEvents, false); //Sum of resonances, at each point
 	}else{ //Phsp: PhspSum of Intens needed, log done in LH with other parameters
 		newTree->createNode("Intens", msqStrat, "LH", theMasses.nEvents, false); //I=A^2, at each point
-		newTree->createNode("Amplitude", maddStrat, "Intens", theMasses.nEvents, false); //Sum of resonances, at each point
+		newTree->createNode("AmplitudeEff", mmultStrat, "Intens", theMasses.nEvents, false); //Sum of resonances, at each point
+		newTree->createLeaf("eff", eff, "AmplitudeEff"); //efficiency
+		newTree->createNode("Amplitude", maddStrat, "AmplitudeEff", theMasses.nEvents, false); //Sum of resonances, at each point
 	}
 
 	//----Add Resonances
@@ -258,7 +263,6 @@ void AmpSumIntensity::setupTree(allMasses& theMasses, allMasses& thePHSPMasses){
 		newTree->createNode("PhspReso_"+tmp.m_name, mmultStrat, "AbsVal_"+tmp.m_name); //PhspReso = BW_phsp * AngD_phsp
 		newTree->createNode("NormBW_"+tmp.m_name, rbwPhspStrat, "PhspReso_"+tmp.m_name, thePHSPMasses.nEvents); //BW
 		newTree->createNode("NormAngD_"+tmp.m_name, angdPhspStrat, "PhspReso_"+tmp.m_name, thePHSPMasses.nEvents); //AD
-		//myTree->createLeaf("x", x, "RelBW_"+tmp.m_name); //x
 		switch(subSys){
 		case 3:{ //reso in sys of particles 1&2
 			//newTree->createLeaf("mym_"+tmp.m_name, m12, "RelBW_"+tmp.m_name); //m
