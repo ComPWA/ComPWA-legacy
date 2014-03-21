@@ -83,7 +83,7 @@ public:
 			return false;
 		}
 
-		double Gamma0, GammaV, m0, d;
+		double Gamma0, m0, d;
 		unsigned int spin, subSys;
 		try{
 			m0 = double(paras.GetParameterValue("m0_"+name));
@@ -289,7 +289,7 @@ public:
 			return false;
 		}
 
-		double Gamma0, GammaV, m0, d;
+		double Gamma0, m0, d;
 		unsigned int spin, subSys;
 		try{
 			m0 = double(paras.GetParameterValue("m0_"+name));

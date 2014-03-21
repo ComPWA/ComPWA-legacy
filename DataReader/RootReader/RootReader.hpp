@@ -56,6 +56,7 @@ public:
   virtual const int getBin(const int, double&, double&);
   //virtual const int getEvent(const int, TLorentzVector& , TLorentzVector& , double&);
   virtual void writeData();
+  virtual void Clear();
 
   virtual const unsigned int getNEvents() const {return fEvents.size();};
   virtual const unsigned int getNBins() const {return fmaxBins;};

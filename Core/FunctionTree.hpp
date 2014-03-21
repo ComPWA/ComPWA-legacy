@@ -110,7 +110,7 @@ public:
 	switch(strat->OutType()){
       case ParType::MCOMPLEX:{
         //TODO: error if dim>1
-        std::vector<std::complex<double> > start(dim, (0.,0.));
+        std::vector<std::complex<double> > start(dim, std::complex<double>(0.,0.));
         inter.push_back(std::shared_ptr<AbsParameter>(new MultiComplex("par"+name,start)));
         break;
       }//end multi complex

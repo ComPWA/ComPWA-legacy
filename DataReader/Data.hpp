@@ -50,6 +50,7 @@ public:
   virtual Event& getEvent(const int) =0;
   virtual allMasses getMasses() = 0;
   virtual const int getBin(const int, double&, double&) =0; //TODO: BinDataTyp, dynamic dimension
+  virtual void Clear() = 0;
 
   virtual const unsigned int getNEvents() const =0;
   virtual const unsigned int getNBins() const =0;

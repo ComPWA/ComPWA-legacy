@@ -41,11 +41,14 @@ using namespace boost::log;
 class FitResult
 {
 public:
-	FitResult() {};
+	FitResult():time(0){};
 	virtual ~FitResult() {};
 	void setInitialParameters(ParameterList iniPars){ initialParameters=iniPars; }
 	void setFinalParameters(ParameterList finPars){ finalParameters=finPars; }
 	void setTrueParameters(ParameterList truePars){ trueParameters=truePars; }
+	ParameterList getInitialParameters(){ return initialParameters; }
+	ParameterList getFinalParameters(){ return finalParameters; }
+	ParameterList getTrueParameters(){ return trueParameters; }
 	void setTime(double t){ time = t; }
 	virtual double getResult() =0;
 

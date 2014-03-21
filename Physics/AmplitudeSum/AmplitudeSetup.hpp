@@ -68,19 +68,19 @@ struct ResonanceFlatte : Resonance
 class AmplitudeSetup
 {
 private:
-	std::string m_filePath;
+	unsigned int nRes;
+	unsigned int nResEnabled;
 	std::string m_file;          // ini filename
+	std::string m_filePath;
 	std::vector<Resonance> m_resonances;          // resonances
 	std::vector<ResonanceFlatte> m_resonancesFlatte;          // resonances
 
-unsigned int nResEnabled;
-unsigned int nRes;
+
 public:
 	AmplitudeSetup(const std::string &filename) : nRes(0),nResEnabled(0) { load(filename); };
-	AmplitudeSetup(const AmplitudeSetup& other) : m_file(other.m_file), m_filePath(other.m_filePath),\
-			m_resonances(other.m_resonances) , m_resonancesFlatte(other.m_resonancesFlatte),\
-			nRes(other.nRes),nResEnabled(other.nResEnabled)
-			{};
+	AmplitudeSetup(const AmplitudeSetup& other) : nRes(other.nRes),nResEnabled(other.nResEnabled),
+			m_file(other.m_file), m_filePath(other.m_filePath),\
+			m_resonances(other.m_resonances) , m_resonancesFlatte(other.m_resonancesFlatte){};
 	void load(const std::string &filename);
 	void save(const std::string &filename);
 	~AmplitudeSetup(){};

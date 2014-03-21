@@ -102,7 +102,7 @@ bool RunManager::generate( unsigned int number ) {
 	BOOST_LOG_TRIVIAL(info) << "Generating MC: ["<<size_<<" events] ";
 
 	unsigned int startTime = clock();
-	boost::progress_display progressBar(size_); //boost progress bar (thread-safe)
+//	boost::progress_display progressBar(size_); //boost progress bar (thread-safe)
 #pragma omp parallel firstprivate(genMaxVal) shared(maxTest,totalCalls)
 	{
 		unsigned int threadId = omp_get_thread_num();
@@ -138,7 +138,7 @@ bool RunManager::generate( unsigned int number ) {
 			{
 				pData_->pushEvent(tmp);//unfortunatly not thread safe
 			}
-			++progressBar;//progress bar
+//			++progressBar;//progress bar
 		}
 	BOOST_LOG_TRIVIAL(debug) << "Current seed: "<<genNew->getSeed();
 	}
@@ -158,7 +158,7 @@ bool RunManager::generate( unsigned int number ) {
 };
 
 bool RunManager::generatePhsp( unsigned int number ) {
-	if( !(validPhsp==1 && validSize==1) )
+	if( !(validPhsp==1) )
 		return false;
 	unsigned int phspSize = 10*size_;
 	if(number>0) phspSize = number;

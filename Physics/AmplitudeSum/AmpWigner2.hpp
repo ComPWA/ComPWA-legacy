@@ -102,7 +102,6 @@ public:
       return false;
     }
 
-    double Gamma0, GammaV;
     double _M  = double(paras.GetParameterValue("ParOfNode_M"));
     double _m1 = double(paras.GetParameterValue("ParOfNode_m1"));
     double _m2 = double(paras.GetParameterValue("ParOfNode_m2"));
@@ -114,7 +113,7 @@ public:
     double _outSpin1 = double(paras.GetParameterValue("ParOfNode_m_"+name));
     double _outSpin2 = double(paras.GetParameterValue("ParOfNode_n_"+name));
 
-    double locmin_sq, locmax_sq, beta;
+    double beta;
     double _m23,_m13,_m12;
 
     //MultiDim output, must have multidim Paras in input

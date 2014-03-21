@@ -42,6 +42,7 @@ public:
   //! Constructor
   Strategy(ParType in):checkType(in){
   };
+  virtual ~Strategy(){}
 
   //! friend function to stream parameter information to output
   /*!
@@ -83,6 +84,7 @@ class Inverse : public Strategy
 public:
   Inverse(ParType in):Strategy(in){
   };
+  virtual ~Inverse() {};
 
   virtual const std::string to_str() const{
     return "+";
@@ -100,7 +102,7 @@ public:
       //TODO: can't handle complex numbers
       return false;
     }
-    if(nMC+nD+nI!=1 ){
+    if(nMD+nD+nI!=1 ){
       //TODO: exception too many variables
       return false;
     }
@@ -131,6 +133,7 @@ class SquareRoot : public Strategy
 public:
   SquareRoot(ParType in):Strategy(in){
   };
+  virtual ~SquareRoot(){}
 
   virtual const std::string to_str() const{
     return "+";
@@ -178,6 +181,7 @@ class AddAll : public Strategy
 public:
   AddAll(ParType in):Strategy(in){
   };
+  virtual ~AddAll(){}
 
   virtual const std::string to_str() const{
     return "+";
@@ -342,6 +346,7 @@ class MultAll : public Strategy
 public:
   MultAll(ParType in):Strategy(in){
   };
+  virtual ~MultAll(){}
 
   virtual const std::string to_str() const{
     return "*";
@@ -505,6 +510,7 @@ class LogOf : public Strategy
 public:
   LogOf(ParType in):Strategy(in){
   };
+  virtual ~LogOf(){};
 
   virtual const std::string to_str() const{
     return "Log";
@@ -513,11 +519,11 @@ public:
   virtual bool execute(ParameterList& paras, std::shared_ptr<AbsParameter>& out){
     if( checkType != out->type() ) return false;
 
-    unsigned int nMC = paras.GetNMultiComplex();
+//    unsigned int nMC = paras.GetNMultiComplex();
     unsigned int nMD = paras.GetNMultiDouble();
-    unsigned int nC = paras.GetNComplex();
+//    unsigned int nC = paras.GetNComplex();
     unsigned int nD = paras.GetNDouble();
-    unsigned int nI = paras.GetNInteger();
+//    unsigned int nI = paras.GetNInteger();
 
     if(nMD+nD==0){
       //TODO: exception no input
@@ -571,6 +577,7 @@ class Complexify : public Strategy
 public:
   Complexify(ParType in):Strategy(in){
   };
+  virtual ~Complexify(){}
 
   virtual const std::string to_str() const{
     return "MakeComplex";
@@ -605,11 +612,12 @@ public:
         }
         unsigned int nElements = paras.GetMultiDouble(0)->GetNValues();
         //fill MultiDouble parameter
-        std::vector<std::complex<double> > results(nElements, (0.,0.));
+        std::vector<std::complex<double> > results(nElements, std::complex<double>(0.,0.));
         std::shared_ptr<MultiDouble> tmpA = paras.GetMultiDouble(0);
         std::shared_ptr<MultiDouble> tmpB = paras.GetMultiDouble(1);
         for(unsigned int ele=0; ele<nElements; ele++)
-          results[ele] = std::complex<double>(tmpA->GetValue(ele)*std::cos(tmpB->GetValue(ele)),tmpA->GetValue(ele)*std::sin(tmpB->GetValue(ele)));//a*cos(phi),a*sin(phi)
+          results[ele] = std::complex<double>(tmpA->GetValue(ele)*std::cos(tmpB->GetValue(ele)),
+        		  tmpA->GetValue(ele)*std::sin(tmpB->GetValue(ele)));//a*cos(phi),a*sin(phi)
 
         out = std::shared_ptr<AbsParameter>(new MultiComplex(out->GetName(),results));
 
@@ -624,7 +632,8 @@ public:
         }
         double tmpA = paras.GetDoubleParameter(0)->GetValue();
         double tmpB = paras.GetDoubleParameter(1)->GetValue();
-        out = std::shared_ptr<AbsParameter>(new ComplexParameter(out->GetName(),std::complex<double>(tmpA*std::cos(tmpB),tmpA*std::sin(tmpB))));
+        out = std::shared_ptr<AbsParameter>(new ComplexParameter(out->GetName(),
+        		std::complex<double>(tmpA*std::cos(tmpB),tmpA*std::sin(tmpB))));
         break;
       }//end double
 
@@ -644,6 +653,7 @@ class AbsSquare : public Strategy
 public:
   AbsSquare(ParType in):Strategy(in){
   };
+  virtual ~AbsSquare(){}
 
   virtual const std::string to_str() const{
     return "||^2";
@@ -732,6 +742,7 @@ class Power : public Strategy
 public:
   Power(ParType in):Strategy(in){
   };
+  virtual ~Power(){}
 
   virtual const std::string to_str() const{
     return "^";
@@ -766,7 +777,7 @@ public:
         }
         unsigned int nElements = paras.GetMultiComplex(0)->GetNValues();
         //fill MultiDouble parameter
-        std::vector<std::complex<double> > results(nElements, (0.,0.));
+        std::vector<std::complex<double> > results(nElements, std::complex<double>(0.,0.));
         std::shared_ptr<MultiComplex> tmpA = paras.GetMultiComplex(0);
         std::shared_ptr<MultiComplex> tmpB = paras.GetMultiComplex(1);
         for(unsigned int ele=0; ele<nElements; ele++)

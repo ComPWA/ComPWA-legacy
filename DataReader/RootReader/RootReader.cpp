@@ -24,6 +24,10 @@
 #include <boost/log/core.hpp>
 using namespace boost::log;
 
+void RootReader::Clear(){
+	fEvents.clear();
+	fmaxEvents=fEvents.size();
+}
 std::shared_ptr<Data> RootReader::rndSubSet(unsigned int size, std::shared_ptr<Generator> gen){
 	std::shared_ptr<Data> newSample(new RootReader(fileName, true,"test",false));
 	unsigned int totalSize = getNEvents();

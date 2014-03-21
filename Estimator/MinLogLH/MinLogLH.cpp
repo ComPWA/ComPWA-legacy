@@ -24,28 +24,43 @@
 
 MinLogLH::MinLogLH(std::shared_ptr<Amplitude> inPIF, std::shared_ptr<Data> inDIF)
 : pPIF_(inPIF), pDIF_(inDIF), nEvts_(0), nPhsp_(0){
-phspVolume = Kinematics::instance()->getPhspVolume();
-nEvts_ = pDIF_->getNEvents();
+	phspVolume = Kinematics::instance()->getPhspVolume();
+	nEvts_ = pDIF_->getNEvents();
 
 }
 
 MinLogLH::MinLogLH(std::shared_ptr<Amplitude> inPIF, std::shared_ptr<Data> inDIF, std::shared_ptr<Data> inPHSP)
 : pPIF_(inPIF), pDIF_(inDIF), pPHSP_(inPHSP), nEvts_(0), nPhsp_(0){
-phspVolume = Kinematics::instance()->getPhspVolume();
-nEvts_ = pDIF_->getNEvents();
-nPhsp_ = inPHSP->getNEvents();
+	phspVolume = Kinematics::instance()->getPhspVolume();
+	nEvts_ = pDIF_->getNEvents();
+	nPhsp_ = inPHSP->getNEvents();
 }
 
 MinLogLH::MinLogLH(std::shared_ptr<FunctionTree> inEvtTree, unsigned int inNEvts)
 : pEvtTree_(inEvtTree), nEvts_(inNEvts), nPhsp_(0){
-phspVolume = Kinematics::instance()->getPhspVolume();
+	phspVolume = Kinematics::instance()->getPhspVolume();
 
 }
 
 MinLogLH::MinLogLH(std::shared_ptr<FunctionTree> inEvtTree, std::shared_ptr<FunctionTree> inPhspTree, unsigned int inNEvts, unsigned int inNPhsp)
 : pEvtTree_(inEvtTree), pPhspTree_(inPhspTree), nEvts_(inNEvts), nPhsp_(inNPhsp){
-phspVolume = Kinematics::instance()->getPhspVolume();
+	phspVolume = Kinematics::instance()->getPhspVolume();
 
+}
+
+void MinLogLH::setTree(std::shared_ptr<FunctionTree> inEvtTree, unsigned int inNEvts){
+	pEvtTree_=inEvtTree;
+	nEvts_=inNEvts;
+	pPhspTree_=std::shared_ptr<FunctionTree>();
+	nPhsp_=0;
+	return;
+}
+void MinLogLH::setTree(std::shared_ptr<FunctionTree> inEvtTree, std::shared_ptr<FunctionTree> inPhspTree, unsigned int inNEvts, unsigned int inNPhsp){
+	pEvtTree_=inEvtTree;
+	nEvts_=inNEvts;
+	pPhspTree_=inPhspTree;
+	nPhsp_=inNPhsp;
+	phspVolume = Kinematics::instance()->getPhspVolume();
 }
 
 std::shared_ptr<ControlParameter> MinLogLH::createInstance(std::shared_ptr<Amplitude> inPIF, std::shared_ptr<Data> inDIF){
@@ -118,11 +133,11 @@ double MinLogLH::controlParameter(ParameterList& minPar){
 		//norm=nEvents*log(norm);
 		//savedNorm=norm;
 	}else if(pPhspTree_){
-      pPhspTree_->recalculate();
-      std::shared_ptr<DoubleParameter> intensL = std::dynamic_pointer_cast<DoubleParameter>(pPhspTree_->head()->getValue());
-      norm = intensL->GetValue();
-    }else{
-	  norm=pPIF_->integral(minPar);
+		pPhspTree_->recalculate();
+		std::shared_ptr<DoubleParameter> intensL = std::dynamic_pointer_cast<DoubleParameter>(pPhspTree_->head()->getValue());
+		norm = intensL->GetValue();
+	}else{
+		norm=pPIF_->integral(minPar);
 	}
 	//	}
 
@@ -182,40 +197,40 @@ double MinLogLH::controlParameter(ParameterList& minPar){
 	//	}
 	//	case 3:{
 	if(pDIF_ && pPIF_){
-	  for(unsigned int evt = 0; evt < nEvts_; evt++){
-		Event theEvent(pDIF_->getEvent(evt));
-		dataPoint point(theEvent);
+		for(unsigned int evt = 0; evt < nEvts_; evt++){
+			Event theEvent(pDIF_->getEvent(evt));
+			dataPoint point(theEvent);
 
-		double intens = 0;
-		if(pPIF_){
-			ParameterList intensL = pPIF_->intensity(point, minPar);
-			intens = intensL.GetDoubleParameter(0)->GetValue();
-		}else{
-			//TODO: Exception
-			intens=0;
-		}
-		if(intens>0){
-			lh += std::log(intens);
-			//				std::cout<<"m23sq="<<x[0]<< " m13sq="<<x[1]<< " intens="<<intens<< " lh="<<lh<<std::endl;
-		}
+			double intens = 0;
+			if(pPIF_){
+				ParameterList intensL = pPIF_->intensity(point, minPar);
+				intens = intensL.GetDoubleParameter(0)->GetValue();
+			}else{
+				//TODO: Exception
+				intens=0;
+			}
+			if(intens>0){
+				lh += std::log(intens);
+				//				std::cout<<"m23sq="<<x[0]<< " m13sq="<<x[1]<< " intens="<<intens<< " lh="<<lh<<std::endl;
+			}
 
-		//if(!evt)
-		//  BOOST_LOG_TRIVIAL(debug) << "First Evt LH: " << lh;
-	  }
+			//if(!evt)
+			//  BOOST_LOG_TRIVIAL(debug) << "First Evt LH: " << lh;
+		}
 	}else if(pEvtTree_){
-      pEvtTree_->recalculate();
-      std::shared_ptr<DoubleParameter> intensL = std::dynamic_pointer_cast<DoubleParameter>(pEvtTree_->head()->getValue());
-      lh = intensL->GetValue();
+		pEvtTree_->recalculate();
+		std::shared_ptr<DoubleParameter> intensL = std::dynamic_pointer_cast<DoubleParameter>(pEvtTree_->head()->getValue());
+		lh = intensL->GetValue();
 	}
 	//lh = nEvents/2.*(norm/(nPHSPEvts-1))*(norm/(nPHSPEvts-1)) - lh + nEvents*log10(norm/nPHSPEvts);
-//	std::cout.precision(15);
-//	std::cout<<"event LH="<<lh<<" "<<nEvents<< " "<<norm/nPHSPEvts<<std::endl;
-//	std::cout<<"phase space volume: "<<phspVolume<<std::endl;
+	//	std::cout.precision(15);
+	//	std::cout<<"event LH="<<lh<<" "<<nEvents<< " "<<norm/nPHSPEvts<<std::endl;
+	//	std::cout<<"phase space volume: "<<phspVolume<<std::endl;
 	BOOST_LOG_TRIVIAL(debug) << "Data Term: " << lh << "\t Phsp Term (wo log): " << norm;
 	lh = nEvts_*std::log(norm/nPhsp_*phspVolume) - lh ;
-//	std::cout<<"LH="<<lh<<std::endl;
+	//	std::cout<<"LH="<<lh<<std::endl;
 	//lh -= norm;
-//	break;
+	//	break;
 	//	}
 	//	default:{
 	//TODO: exception "i dont know how to handle this data"
@@ -227,6 +242,6 @@ double MinLogLH::controlParameter(ParameterList& minPar){
 
 	//std::cout << "ControlPar list " << minPar.GetNDouble() <<std::endl;
 
-//	if(lh>0) BOOST_LOG_TRIVIAL(error) << "MinLogLH: positive -log(L)!";
+	//	if(lh>0) BOOST_LOG_TRIVIAL(error) << "MinLogLH: positive -log(L)!";
 	return lh;
 }

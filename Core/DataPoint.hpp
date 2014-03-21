@@ -52,7 +52,7 @@ public:
 			/*
 			 * we need to use sqrt(eff) here because in the current
 			 * implementation the Amplitude value is squared after multiplication with the efficiency
-			 * /
+			 */
 			eff.at(i) = sqrt(value);
 //			std::cout<<effObj->evaluate(data)<<std::endl;
 		}
@@ -111,6 +111,4 @@ protected:
 	std::vector<double> var;
 	double weight;
 };
-
-
-#endif /* DPPOINT2_HPP_ */
+#endif /*DPPOINT2_HPP_*/

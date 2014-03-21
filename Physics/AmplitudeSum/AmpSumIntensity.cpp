@@ -178,7 +178,6 @@ void AmpSumIntensity::setupTree(allMasses& theMasses, allMasses& thePHSPMasses){
 	_calcNorm=1;
 	bool isPhspTree = (thePHSPMasses.nEvents==0) ? 1 : 0;
 	if(isPhspTree) thePHSPMasses = theMasses;
-	std::cout<<isPhspTree<<" "<<theMasses.nEvents<<" " <<thePHSPMasses.nEvents<<std::endl;
 	if(!isPhspTree)
 		BOOST_LOG_TRIVIAL(debug)<<"AmpSumIntensity::setupTree() start setting up data Tree";
 	else
@@ -636,6 +635,17 @@ std::shared_ptr<FunctionTree> AmpSumIntensity::phspTree(allMasses& thePHSPMasses
 	else setupTree(thePHSPMasses);
 
 	return myPhspTree;
+}
+void AmpSumIntensity::copyParameterList(ParameterList& outPar){
+	if(outPar.GetNParameter())
+		return; //already filled, TODO: exception?
+	for(unsigned int i=0; i<namer.size();i++){
+		//add strength and phases of the used amplitudes
+		outPar.AddParameter(std::shared_ptr<DoubleParameter>(new DoubleParameter(*rr[namer[i]])));
+		outPar.AddParameter(std::shared_ptr<DoubleParameter>(new DoubleParameter(*phir[namer[i]])));
+	}
+	return;
+
 }
 void AmpSumIntensity::setParameterList(ParameterList& par){
 	//parameters varied by Minimization algorithm
