@@ -32,7 +32,7 @@ public:
 
   Event(const std::string& name);
 
-  Event(const double inWeight, const std::string& name);
+  Event(const double inWeight, const std::string& name, const double inEff = 1.);
 
   virtual void addParticle(Particle inParticle);
 
@@ -46,6 +46,8 @@ public:
   virtual void inline setFlavour(int fl) { fFlavour = fl;};
   virtual int inline getCharge() {return fCharge;};
   virtual void inline setCharge(int ch) { fCharge = ch;};
+  virtual double inline getEfficiency() {return fEff;};
+  virtual void inline setEfficiency(double eff) { fEff = eff;};
 
   virtual const inline unsigned int getNParticles() { return fParticles.size(); }
   virtual const Particle& getParticle(const unsigned int id);
@@ -53,6 +55,7 @@ public:
 protected:
   std::vector<Particle> fParticles;
   double fWeight;
+  double fEff;
   std::string fName;
   int fFlavour; //1 -> particle, 0 -> unknown, -1 anti-particle
   int fCharge;

@@ -26,7 +26,6 @@ using namespace boost::log;
 
 void RootReader::Clear(){
 	fEvents.clear();
-	fmaxEvents=fEvents.size();
 }
 std::shared_ptr<Data> RootReader::rndSubSet(unsigned int size, std::shared_ptr<Generator> gen){
 	std::shared_ptr<Data> newSample(new RootReader(fileName, true,"test",false));
@@ -55,11 +54,11 @@ void RootReader::read(){
 	fParticles = new TClonesArray("TParticle");
 	fTree->GetBranch("Particles")->SetAutoDelete(false);
 	fTree->SetBranchAddress("Particles",&fParticles);
+	fTree->SetBranchAddress("eff",&feventEff);
 	fTree->SetBranchAddress("weight",&feventWeight);
 	fTree->SetBranchAddress("charge",&fCharge);
 	fTree->SetBranchAddress("flavour",&fFlavour);
-	fmaxEvents=fTree->GetEntries();
-	fEvent=0;
+//	fEvent=0;
 	bin();
 	storeEvents();
 
@@ -72,7 +71,7 @@ RootReader::RootReader(TTree* tr, const bool binned=false) : fBinned(binned){
 RootReader::RootReader(const std::string inRootFile, const bool binned,
 		const std::string inTreeName, const bool readFlag)
 :fBinned(binned),_readFlag(readFlag),fileName(inRootFile),treeName(inTreeName){
-	fEvent=0;
+//	fEvent=0;
 	if(!readFlag) return;
 	fFile = new TFile(fileName.c_str());
 	fTree = (TTree*) fFile->Get(treeName.c_str());
@@ -125,8 +124,8 @@ const std::vector<std::string>& RootReader::getVariableNames(){
 Event& RootReader::getEvent(const int i){
 	//Event outEvent;
 
-	if(i>=0) {fEvent=i;}
-	else {fEvent++;}
+//	if(i>=0) {fEvent=i;}
+//	else {fEvent++;}
 
 	return fEvents.at(i);
 
@@ -167,49 +166,45 @@ Event& RootReader::getEvent(const int i){
 }
 
 allMasses RootReader::getMasses(){
-  if(!fEvents.size()) return allMasses();
-  unsigned int nParts = fEvents.at(0).getNParticles();
-  BOOST_LOG_TRIVIAL(debug)<<"RootReader::getMasses() #particles: "<<nParts;
+	if(!fEvents.size()) return allMasses();
+	unsigned int nParts = fEvents.at(0).getNParticles();
+	BOOST_LOG_TRIVIAL(debug)<<"RootReader::getMasses() #particles: "<<nParts;
 
-  //determine invMass combinations
-  unsigned int nMasses=0;
-  std::vector<std::pair<unsigned int, unsigned int> > ids;
-  for(unsigned int i=0; i<nParts; i++)
-    for(unsigned int j=i+1; j<nParts; j++){
-      nMasses++;
-      ids.push_back(std::make_pair(i+1,j+1));
-    }
-  BOOST_LOG_TRIVIAL(debug)<<"RootReader::getMasses() #invMasses: "<<nMasses;
+	//determine invMass combinations
+	unsigned int nMasses=0;
+	std::vector<std::pair<unsigned int, unsigned int> > ids;
+	for(unsigned int i=0; i<nParts; i++)
+		for(unsigned int j=i+1; j<nParts; j++){
+			nMasses++;
+			ids.push_back(std::make_pair(i+1,j+1));
+		}
+	BOOST_LOG_TRIVIAL(debug)<<"RootReader::getMasses() #invMasses: "<<nMasses;
 
-  allMasses result(nMasses, fEvents.size(), ids);
-  //calc and store inv masses
-  for(unsigned int evt=0; evt<fEvents.size(); evt++){
-    Event tmp = fEvents.at(evt);
+	allMasses result(nMasses, fEvents.size(), ids);
+	//calc and store inv masses
+	for(unsigned int evt=0; evt<fEvents.size(); evt++){
+		Event tmp = fEvents.at(evt);
 
-    // Check number of particle in TClonesrray
-    if( nParts != tmp.getNParticles() ){
-      result.nEvents--;
-      continue;
-    }
+		// Check number of particle in TClonesrray
+		if( nParts != tmp.getNParticles() ){
+			result.nEvents--;
+			continue;
+		}
+		result.eff.at(evt) = tmp.getEfficiency();
+		result.weight.at(evt) = tmp.getWeight();
 
-    for(unsigned int pa=0; pa<nParts; pa++){
-      for(unsigned int pb=pa+1; pb<nParts; pb++){
-        const Particle &inA(tmp.getParticle(pa));
-        const Particle &inB(tmp.getParticle(pb));
-        double mymass_sq = inA.invariantMass(inB);
+		for(unsigned int pa=0; pa<nParts; pa++){
+			for(unsigned int pb=pa+1; pb<nParts; pb++){
+				const Particle &inA(tmp.getParticle(pa));
+				const Particle &inB(tmp.getParticle(pb));
+				double mymass_sq = inA.invariantMass(inB);
+				(result.masses_sq.at(std::make_pair(pa+1,pb+1))).at(evt) = mymass_sq;
+			}//particle loop B
+		}//particle loop A
 
-        (result.masses_sq.at(std::make_pair(pa+1,pb+1))).at(evt) = mymass_sq;
+	}//event loop
 
-        //tmp.addParticle(Particle(inN.X(), inN.Y(), inN.Z(), inN.E(),partN->GetPdgCode()));
-        //tmp.setWeight(feventWeight); //Todo: weight? what weight? lets wait...
-
-
-      }//particle loop B
-    }//particle loop A
-
-  }//event loop
-
-  return result;
+	return result;
 }
 
 const int RootReader::getBin(const int i, double& m12, double& weight){
@@ -250,7 +245,7 @@ const int RootReader::getBin(const int i, double& m12, double& weight){
 
 void RootReader::storeEvents(){
 
-	for(unsigned int evt=0; evt<fmaxEvents; evt++){
+	for(unsigned int evt=0; evt<fTree->GetEntries(); evt++){
 		Event tmp;
 		fParticles->Clear();
 		fTree->GetEntry(evt);
@@ -266,10 +261,11 @@ void RootReader::storeEvents(){
 			if(!partN) continue;
 			partN->Momentum(inN);
 			tmp.addParticle(Particle(inN.X(), inN.Y(), inN.Z(), inN.E(),partN->GetPdgCode()));
-			tmp.setWeight(feventWeight);
-			tmp.setCharge(fCharge);
-			tmp.setFlavour(fFlavour);
 		}//particle loop
+		tmp.setWeight(feventWeight);
+		tmp.setCharge(fCharge);
+		tmp.setFlavour(fFlavour);
+		tmp.setEfficiency(feventEff);
 
 		fEvents.push_back(tmp);
 	}//event loop
@@ -284,6 +280,7 @@ void RootReader::writeData(){
 	fParticles = new TClonesArray("TParticle",numPart);
 	fTree->Branch("Particles",&fParticles);
 	fTree->Branch("weight",&feventWeight,"weight/D");
+	fTree->Branch("eff",&feventEff,"weight/D");
 	fTree->Branch("charge",&fCharge,"charge/I");
 	fTree->Branch("flavour",&fFlavour,"flavour/I");
 	TClonesArray &partArray = *fParticles;
@@ -294,6 +291,7 @@ void RootReader::writeData(){
 		feventWeight = (*it).getWeight();
 		fCharge= (*it).getCharge();
 		fFlavour= (*it).getFlavour();
+		feventEff = (*it).getEfficiency();
 		for(unsigned int i=0; i<numPart; i++){
 			const Particle oldParticle = (*it).getParticle(i);
 			TLorentzVector oldMomentum(oldParticle.px,oldParticle.py,oldParticle.pz,oldParticle.E);
@@ -324,7 +322,7 @@ void RootReader::bin(){
 	min = max = inm12;
 
 	//find min and max
-	for(unsigned int evt=1; evt<fmaxEvents; evt++){
+	for(unsigned int evt=1; evt<fTree->GetEntries(); evt++){
 		fTree->GetEntry(evt);
 		unsigned int nParts = fParticles->GetEntriesFast();
 		if(nParts!=2) return;

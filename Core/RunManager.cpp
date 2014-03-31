@@ -122,7 +122,10 @@ bool RunManager::generate( unsigned int number ) {
 			double weight = tmp.getWeight();
 			/* reset weights: the weights are taken into account by hit and miss. The resulting
 			 * sample is therefore unweighted */
-			tmp.setWeight(1);//reset weight
+			tmp.setWeight(1.);//reset weight
+			tmp.setEfficiency(1.);//reset weight
+			//set charge
+			//set flavour
 			dataPoint point(tmp);
 			double ampRnd = genNew->getUniform()*genMaxVal;
 			ParameterList list;
@@ -181,7 +184,10 @@ bool RunManager::generatePhsp( unsigned int number ) {
 			if( ampRnd > tmp.getWeight() ) continue;
 			/* reset weights: the weights are taken into account by hit and miss on the weights.
 			 * The resulting sample is therefore unweighted */
-			tmp.setWeight(1);//reset weight
+			tmp.setWeight(1.);//reset weight
+			tmp.setEfficiency(1.);
+			//charge
+			//flavour
 			i++;
 #pragma omp critical
 			{

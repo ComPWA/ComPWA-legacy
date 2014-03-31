@@ -44,11 +44,15 @@ public:
   virtual const unsigned int getNEvents() const { return EvtList_.size(); };
   virtual const unsigned int getNBins() const {return fmaxBins_;};
 
+  virtual std::vector<Event> getEvents() {return EvtList_; }
+  virtual void Add(Data& otherSample){ EvtList_.insert(EvtList_.end(),otherSample.getEvents().begin(),otherSample.getEvents().end()); }
+
   /** Destructor */
   virtual ~AsciiReader();
 
   virtual std::shared_ptr<Data> rndSubSet(unsigned int size, std::shared_ptr<Generator> gen) {
-	  return std::shared_ptr<Data>();}
+	  return std::shared_ptr<Data>();
+  }
 protected:
 
 private:

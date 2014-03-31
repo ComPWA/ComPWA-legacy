@@ -192,6 +192,7 @@ void AmpSumIntensity::setupTree(allMasses& theMasses, allMasses& thePHSPMasses){
 	std::shared_ptr<MultiDouble> m13 = std::shared_ptr<MultiDouble>( new MultiDouble("m13",theMasses.masses_sq.at( std::make_pair(1,3) )) );
 	std::shared_ptr<MultiDouble> m12 = std::shared_ptr<MultiDouble>( new MultiDouble("m12",theMasses.masses_sq.at( std::make_pair(1,2) )) );
 	std::shared_ptr<MultiDouble> eff = std::shared_ptr<MultiDouble>( new MultiDouble("eff",theMasses.eff) );
+	std::shared_ptr<MultiDouble> weight = std::shared_ptr<MultiDouble>( new MultiDouble("weight",theMasses.weight) );
 	std::shared_ptr<MultiDouble> m23_phsp = std::shared_ptr<MultiDouble>( new MultiDouble("m23_phsp",thePHSPMasses.masses_sq.at( std::make_pair(2,3) )) );
 	std::shared_ptr<MultiDouble> m13_phsp = std::shared_ptr<MultiDouble>( new MultiDouble("m13_phsp",thePHSPMasses.masses_sq.at( std::make_pair(1,3) )) );
 	std::shared_ptr<MultiDouble> m12_phsp = std::shared_ptr<MultiDouble>( new MultiDouble("m12_phsp",thePHSPMasses.masses_sq.at( std::make_pair(1,2) )) );
@@ -221,7 +222,7 @@ void AmpSumIntensity::setupTree(allMasses& theMasses, allMasses& thePHSPMasses){
 	if(!isPhspTree){ //Data: EvtSum of log of Intens needed
 		newTree->createNode("Log", mlogStrat, "LH", theMasses.nEvents, false); //log of amp, at each point
 		newTree->createNode("Intens", msqStrat, "Log", theMasses.nEvents, false); //I=A^2, at each point
-		newTree->createNode("AmplitudeEff", mmultStrat, "Intens", theMasses.nEvents, false); //Sum of resonances, at each point
+		newTree->createNode("AmplitudeEff", mmultStrat, "Intens", theMasses.nEvents, false); //Sum of resonances * efficiency
 		newTree->createLeaf("eff", eff, "AmplitudeEff"); //efficiency
 		newTree->createNode("Amplitude", maddStrat, "AmplitudeEff", theMasses.nEvents, false); //Sum of resonances, at each point
 	}else{ //Phsp: PhspSum of Intens needed, log done in LH with other parameters

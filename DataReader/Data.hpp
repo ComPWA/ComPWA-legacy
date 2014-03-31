@@ -51,6 +51,8 @@ public:
   virtual allMasses getMasses() = 0;
   virtual const int getBin(const int, double&, double&) =0; //TODO: BinDataTyp, dynamic dimension
   virtual void Clear() = 0;
+  virtual std::vector<Event> getEvents() = 0;
+  virtual void Add(Data& otherSample) = 0;
 
   virtual const unsigned int getNEvents() const =0;
   virtual const unsigned int getNBins() const =0;

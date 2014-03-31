@@ -37,6 +37,7 @@ public:
 		for(unsigned int i=0; i<inTup.size(); i++)
 			masses_sq.insert( std::make_pair( inTup[i], std::vector<double>(inEvents,0.) ) );
 		eff = std::vector<double>(nEvents,1.);
+		weight = std::vector<double>(nEvents,1.);
 	}
 
 	allMasses():nInvMasses(0),nEvents(0) {}
@@ -51,9 +52,11 @@ public:
 //			else value = 1/value;
 			/*
 			 * we need to use sqrt(eff) here because in the current
-			 * implementation the Amplitude value is squared after multiplication with the efficiency
+			 * implementation the Amplitude value is squared after
+			 * multiplication with the efficiency
 			 */
 			eff.at(i) = sqrt(value);
+			if(value==0) eff.at(i) = 0.001;
 //			std::cout<<effObj->evaluate(data)<<std::endl;
 		}
 		return;
@@ -61,6 +64,7 @@ public:
 
 	std::map<std::pair<unsigned int, unsigned int>,std::vector<double> > masses_sq;
 	std::vector<double> eff;
+	std::vector<double> weight;
 	unsigned int nInvMasses;
 	unsigned int nEvents;
 
