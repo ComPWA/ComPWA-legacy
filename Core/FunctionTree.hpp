@@ -333,7 +333,7 @@ public:
 
     //first fo all: is there a tree?
     if(!head_){
-      BOOST_LOG_TRIVIAL(debug)<<"This tree has no head!";
+      BOOST_LOG_TRIVIAL(error)<<"This tree has no head!";
       return false;
     }
 

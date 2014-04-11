@@ -223,7 +223,7 @@ void AmpSumIntensity::setupTree(allMasses& theMasses, bool isPhspTree){
       newTree->createLeaf("Phase_"+tmp.m_name, phir[tmp.m_name], "C_"+tmp.m_name); //phi
       newTree->createNode("AngD_"+tmp.m_name, angdStrat, "Reso_"+tmp.m_name, theMasses.nEvents); //AD
       //BW Par
-      newTree->createLeaf("m0_"+tmp.m_name, mr[tmp.m_name]->GetValue(), "RelBW_"+tmp.m_name); //m0
+      newTree->createLeaf("m0_"+tmp.m_name, mr[tmp.m_name], "RelBW_"+tmp.m_name); //m0
       //myTree->createLeaf("x", x, "RelBW_"+tmp.m_name); //x
       switch(subSys){
         case 3:{ //reso in sys of particles 1&2
@@ -254,7 +254,7 @@ void AmpSumIntensity::setupTree(allMasses& theMasses, bool isPhspTree){
       newTree->createLeaf("subSysFlag_"+tmp.m_name, subSys, "RelBW_"+tmp.m_name); //subSysFlag
       newTree->createLeaf("spin_"+tmp.m_name, tmp.m_spin, "RelBW_"+tmp.m_name); //spin
       newTree->createLeaf("d_"+tmp.m_name,  tmp.m_mesonRadius, "RelBW_"+tmp.m_name); //d
-      newTree->createLeaf("resWidth_"+tmp.m_name, gr[tmp.m_name]->GetValue(), "RelBW_"+tmp.m_name); //resWidth
+      newTree->createLeaf("resWidth_"+tmp.m_name, gr[tmp.m_name], "RelBW_"+tmp.m_name); //resWidth
       newTree->createLeaf("norm_"+tmp.m_name, 1., "RelBW_"+tmp.m_name); //Todo: setup norm, manipulate norm?
       //AD Par
       newTree->createLeaf("m23", m23, "AngD_"+tmp.m_name); //ma
@@ -459,7 +459,7 @@ void AmpSumIntensity::setParameterList(ParameterList& par){
 //		*rr[i] = DoubleParameter(par.GetDoubleParameter(2*i));
 //		*phir[i] = DoubleParameter(par.GetDoubleParameter(2*i+1));
 	    if(!rr[namer[i]]->IsFixed()){
-		  rr[namer[i]]->SetValue(par.GetDoubleParameter(2*i)->GetValue());
+	      rr[namer[i]]->SetValue(par.GetDoubleParameter(2*i)->GetValue());
 		  rr[namer[i]]->SetError(par.GetDoubleParameter(2*i)->GetError());
 	    }
 	    if(!phir[namer[i]]->IsFixed()){

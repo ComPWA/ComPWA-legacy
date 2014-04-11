@@ -24,7 +24,7 @@ _motherRadius(other._motherRadius)
 {
 
 };
-AmpKinematics::AmpKinematics(DoubleParameter mR, int subSys, int spin, int m, int n, barrierType type, double mesonRadius=1.5, double motherRadius=1.5) :
+AmpKinematics::AmpKinematics(DoubleParameter& mR, int subSys, int spin, int m, int n, barrierType type, double mesonRadius=1.5, double motherRadius=1.5) :
 						_M(-999), _mR(mR),_subSys(subSys),
 						_type(type),
 						_spin(spin),_m(m),_n(n),
@@ -47,7 +47,7 @@ AmpKinematics::AmpKinematics(DoubleParameter mR, int subSys, int spin, int m, in
 		_mc=kin->m3;}
 }
 
-AmpKinematics::AmpKinematics(double ma, double mb , double mc, double M, DoubleParameter mR, int subSys, barrierType type, int spin, int m, int n, double mesonR=1.5, double motherR=1.5) :
+AmpKinematics::AmpKinematics(double ma, double mb , double mc, double M, DoubleParameter& mR, int subSys, barrierType type, int spin, int m, int n, double mesonR=1.5, double motherR=1.5) :
 						_ma(ma), _mb(mb), _mc(mc), _M(M),
 						_mR(mR),_subSys(subSys),
 						_type(type),

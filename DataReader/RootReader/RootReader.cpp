@@ -160,8 +160,9 @@ Event& RootReader::getEvent(const int i){
 	//return outEvent;
 }
 
-allMasses RootReader::getMasses(){
+allMasses RootReader::getMasses(const unsigned int startEvent, unsigned int nEvents){
   if(!fEvents.size()) return allMasses();
+  if(!nEvents) nEvents = fmaxEvents;
   unsigned int nParts = fEvents.at(0).getNParticles();
   BOOST_LOG_TRIVIAL(debug)<<"RootReader::getMasses() #particles: "<<nParts;
 
@@ -175,9 +176,13 @@ allMasses RootReader::getMasses(){
     }
   BOOST_LOG_TRIVIAL(debug)<<"RootReader::getMasses() #invMasses: "<<nMasses;
 
-  allMasses result(nMasses, fmaxEvents, ids);
+  if(startEvent+nEvents>fmaxEvents){
+    nEvents = fmaxEvents - startEvent;
+    //Todo: Exception
+  }
+  allMasses result(nMasses, nEvents, ids);
   //calc and store inv masses
-  for(unsigned int evt=0; evt<fmaxEvents; evt++){
+  for(unsigned int evt=startEvent; evt<startEvent+nEvents; evt++){
     Event tmp = fEvents.at(evt);
 
     // Check number of particle in TClonesrray
@@ -192,7 +197,7 @@ allMasses RootReader::getMasses(){
         const Particle &inB(tmp.getParticle(pb));
         double mymass_sq = inA.invariantMass(inB);
 
-        (result.masses_sq.at(std::make_pair(pa+1,pb+1))).at(evt) = mymass_sq;
+        (result.masses_sq.at(std::make_pair(pa+1,pb+1))).at(evt-startEvent) = mymass_sq;
 
         //tmp.addParticle(Particle(inN.X(), inN.Y(), inN.Z(), inN.E(),partN->GetPdgCode()));
         //tmp.setWeight(feventWeight); //Todo: weight? what weight? lets wait...

@@ -52,7 +52,7 @@ public:
 //  virtual void writeToFile();
   virtual void pushEvent(const Event& evt) {fEvents.push_back(evt);};
   virtual Event& getEvent(const int);
-  virtual allMasses getMasses();
+  virtual allMasses getMasses(const unsigned int startEvent=0, unsigned int nEvents=0);
   virtual const int getBin(const int, double&, double&);
   //virtual const int getEvent(const int, TLorentzVector& , TLorentzVector& , double&);
   virtual void writeData();
