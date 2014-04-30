@@ -54,17 +54,17 @@ AmpSumIntensity::AmpSumIntensity(const AmpSumIntensity& other) : nAmps(other.nAm
 }
 
 AmpSumIntensity::AmpSumIntensity(AmplitudeSetup ini, normStyle ns, std::shared_ptr<Efficiency> eff, unsigned int entries, double dpArea) :
-														totAmp("relBWsumAmplitude", "totAmp"), ampSetup(ini),
-														_entries(entries), _normStyle(ns), _calcNorm(1), _dpArea(dpArea),
-														_calcMaxFcnVal(0),eff_(eff)
+																totAmp("relBWsumAmplitude", "totAmp"), ampSetup(ini),
+																_entries(entries), _normStyle(ns), _calcNorm(1), _dpArea(dpArea),
+																_calcMaxFcnVal(0),eff_(eff)
 {
 	init();
 }
 
 AmpSumIntensity::AmpSumIntensity(AmplitudeSetup ini, std::shared_ptr<Efficiency> eff, unsigned int entries, double dpArea) :
-														totAmp("relBWsumAmplitude", "totAmp"), ampSetup(ini),
-														_entries(entries), _normStyle(none), _calcNorm(0), _dpArea(dpArea),
-														_calcMaxFcnVal(0),eff_(eff)
+																totAmp("relBWsumAmplitude", "totAmp"), ampSetup(ini),
+																_entries(entries), _normStyle(none), _calcNorm(0), _dpArea(dpArea),
+																_calcMaxFcnVal(0),eff_(eff)
 {
 	init();
 }
@@ -72,9 +72,9 @@ AmpSumIntensity::AmpSumIntensity(AmplitudeSetup ini, std::shared_ptr<Efficiency>
 AmpSumIntensity::AmpSumIntensity(const double inM, const double inBr, const double in1,const double in2, const double in3,
 		std::string nameM, std::string name1,std::string name2,std::string name3,
 		AmplitudeSetup ini, unsigned int entries, normStyle ns, double dpArea) :
-														totAmp("relBWsumAmplitude", "totAmp"), ampSetup(ini),
-														_entries(entries), _normStyle(ns), _calcNorm(1),_dpArea(dpArea),
-														_calcMaxFcnVal(0),eff_(std::shared_ptr<Efficiency>(new UnitEfficiency()))
+																totAmp("relBWsumAmplitude", "totAmp"), ampSetup(ini),
+																_entries(entries), _normStyle(ns), _calcNorm(1),_dpArea(dpArea),
+																_calcMaxFcnVal(0),eff_(std::shared_ptr<Efficiency>(new UnitEfficiency()))
 {
 	init();
 }
@@ -150,7 +150,7 @@ void AmpSumIntensity::init(){
 
 	//	ampSetup.save(ampSetup.getFilePath());//save updated information to input file
 	nAmps=rr.size();
-//	if(_calcNorm) integral();
+	//	if(_calcNorm) integral();
 	BOOST_LOG_TRIVIAL(info)<<"AmpSumIntensity: completed setup!";
 }
 //class NormStrategy : public Strategy {
@@ -168,6 +168,7 @@ void AmpSumIntensity::init(){
 //}
 
 void AmpSumIntensity::setupTree(allMasses& theMasses, allMasses& thePHSPMasses){
+		BOOST_LOG_TRIVIAL(debug) << "AmpSumIntensity::setupTree() generating new tree!";
 	if(theMasses.nEvents==0){
 		BOOST_LOG_TRIVIAL(error) << "AmpSumIntensity: sample empty!";
 		return;
@@ -187,7 +188,7 @@ void AmpSumIntensity::setupTree(allMasses& theMasses, allMasses& thePHSPMasses){
 	std::shared_ptr<FunctionTree> newTree = std::shared_ptr<FunctionTree>(new FunctionTree());
 
 	//------------Setup Tree Pars---------------------
-	//std::shared_ptr<DoubleParameter> x = std::shared_ptr<DoubleParameter>(new DoubleParameter("x"));
+	std::shared_ptr<DoubleParameter> x = std::shared_ptr<DoubleParameter>(new DoubleParameter("x"));
 	std::shared_ptr<MultiDouble> m23 = std::shared_ptr<MultiDouble>( new MultiDouble("m23",theMasses.masses_sq.at( std::make_pair(2,3) )) );
 	std::shared_ptr<MultiDouble> m13 = std::shared_ptr<MultiDouble>( new MultiDouble("m13",theMasses.masses_sq.at( std::make_pair(1,3) )) );
 	std::shared_ptr<MultiDouble> m12 = std::shared_ptr<MultiDouble>( new MultiDouble("m12",theMasses.masses_sq.at( std::make_pair(1,2) )) );
@@ -196,11 +197,11 @@ void AmpSumIntensity::setupTree(allMasses& theMasses, allMasses& thePHSPMasses){
 	std::shared_ptr<MultiDouble> m23_phsp = std::shared_ptr<MultiDouble>( new MultiDouble("m23_phsp",thePHSPMasses.masses_sq.at( std::make_pair(2,3) )) );
 	std::shared_ptr<MultiDouble> m13_phsp = std::shared_ptr<MultiDouble>( new MultiDouble("m13_phsp",thePHSPMasses.masses_sq.at( std::make_pair(1,3) )) );
 	std::shared_ptr<MultiDouble> m12_phsp = std::shared_ptr<MultiDouble>( new MultiDouble("m12_phsp",thePHSPMasses.masses_sq.at( std::make_pair(1,2) )) );
-//	treePar = std::shared_ptr<ParameterList>(new ParameterList());
+	//	treePar = std::shared_ptr<ParameterList>(new ParameterList());
 	//treePar->AddParameter(x);
-//	treePar->AddParameter(m23);
-//	treePar->AddParameter(m13);
-//	treePar->AddParameter(m12);
+	//	treePar->AddParameter(m23);
+	//	treePar->AddParameter(m13);
+	//	treePar->AddParameter(m12);
 
 	//----Strategies needed
 	std::shared_ptr<MultAll> mmultStrat = std::shared_ptr<MultAll>(new MultAll(ParType::MCOMPLEX));
@@ -244,7 +245,7 @@ void AmpSumIntensity::setupTree(allMasses& theMasses, allMasses& thePHSPMasses){
 		std::shared_ptr<WignerDStrategy> angdStrat = std::shared_ptr<WignerDStrategy>(new WignerDStrategy(tmp.m_name,ParType::MDOUBLE));
 		std::shared_ptr<WignerDphspStrategy> angdPhspStrat = std::shared_ptr<WignerDphspStrategy>(new WignerDphspStrategy(tmp.m_name,ParType::MDOUBLE));
 		unsigned int subSys = tmp.m_daugtherA + tmp.m_daugtherB;
-//		unsigned int last = mr.size()-1;
+		//		unsigned int last = mr.size()-1;
 		newTree->createNode("Reso_"+tmp.m_name, mmultStrat, "Amplitude", theMasses.nEvents); //Reso=BW*C_*AD*N_
 		newTree->createNode("RelBW_"+tmp.m_name, rbwStrat, "Reso_"+tmp.m_name, theMasses.nEvents); //BW
 		newTree->createNode("C_"+tmp.m_name, complStrat, "Reso_"+tmp.m_name); //c
@@ -351,7 +352,7 @@ void AmpSumIntensity::setupTree(allMasses& theMasses, allMasses& thePHSPMasses){
 		std::shared_ptr<WignerDStrategy> angdStrat = std::shared_ptr<WignerDStrategy>(new WignerDStrategy(tmp.m_name,ParType::MDOUBLE));
 		std::shared_ptr<WignerDphspStrategy> angdPhspStrat = std::shared_ptr<WignerDphspStrategy>(new WignerDphspStrategy(tmp.m_name,ParType::MDOUBLE));
 		unsigned int subSys = tmp.m_daugtherA + tmp.m_daugtherB;
-//		unsigned int last = mr.size()-1;
+		//		unsigned int last = mr.size()-1;
 		newTree->createNode("Reso_"+tmp.m_name, mmultStrat, "Amplitude", theMasses.nEvents); //Reso=BW*C_*AD*N_
 		newTree->createNode("FlatteRes_"+tmp.m_name, flatteStrat, "Reso_"+tmp.m_name, theMasses.nEvents); //BW
 		newTree->createNode("C_"+tmp.m_name, complStrat, "Reso_"+tmp.m_name); //c

@@ -43,24 +43,22 @@ using namespace boost::log;
 RunManager::RunManager(std::shared_ptr<Data> inD, std::shared_ptr<Amplitude> inP,
 		std::shared_ptr<Optimizer> inO)
 : pData_(inD), pPhys_(inP), pOpti_(inO), success_(false),
-  validSize(0),validAmplitude(0),validData(0),validOptimizer(0)
+  validAmplitude(0),validOptimizer(0)
 {
 	setSize(inD->getNEvents());
 	if(inD && inP && inO){
 		validAmplitude=1;
-		validData=1;
 		validOptimizer=1;
 	}
 }
 RunManager::RunManager( unsigned int size, std::shared_ptr<Amplitude> inP,
 		std::shared_ptr<Generator> gen)
 : gen_(gen), size_(size), pPhys_(inP), success_(false),
-  validSize(0),validAmplitude(0),validData(0),validOptimizer(0)
+  validAmplitude(0),validOptimizer(0)
 {
 	if(inP ){
 		validAmplitude=1;
 	}
-	validSize=1;
 }
 
 RunManager::~RunManager(){
@@ -81,7 +79,7 @@ std::shared_ptr<FitResult> RunManager::startFit(ParameterList& inPar){
 }
 bool RunManager::generate( unsigned int number ) {
 	if(number>0) setSize(number);
-	if( !(validData && validAmplitude && validSize && validGenerator) ){
+	if( !(pData_ && validAmplitude && validGenerator) ){
 		BOOST_LOG_TRIVIAL(error)<<"RunManager: generate() requirements not fulfilled";
 		return false;
 	}
