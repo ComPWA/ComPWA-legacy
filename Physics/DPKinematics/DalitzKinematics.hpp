@@ -60,20 +60,13 @@ public:
 		_inst = new DalitzKinematics(_nameMother, _name1, _name2,_name3);
 		return _inst;
 	}
-//	static DalitzKinematics* instance(){
-//		if(!inst) {
-//			BOOST_LOG_TRIVIAL(fatal)<<"DPKinematics: ERROR instance not created first!";
-//			return 0;
-//		}
-//		return inst;
-//	};
 	void eventToDataPoint(Event& ev, dataPoint& point);
 
 	unsigned int sizeOfPhsp(){ return 3; }
 //	std::vector<std::string> getVarNames(){return varNames;}
 	void phspContour(unsigned int xsys,unsigned int ysys, unsigned int n, double* xcoord, double* ycoord);
 	//! calculated the helicity angle
-	double calcHelicityAngle(double invM1sq, double invM2sq, double M, double ma, double mb, double mc);
+	double calcHelicityAngle(double invMassSq23, double invMassSq13, double M, double ma, double mb, double mc);
 	//! calculated the helicity angle
 	double calcHelicityAngle(unsigned int sys,dataPoint& point);
 	//! Calculates third dalitz plot variable, e.g f(s1,s2)=s3

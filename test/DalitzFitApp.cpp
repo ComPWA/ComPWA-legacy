@@ -386,7 +386,7 @@ int main(int argc, char **argv){
 	  pPm12 = *pGamma + *pPip;
 
       m23sq=pPm23.M2(); m13sq=pPm13.M2(); m12sq=pPm12.M2();
-      dataPoint dataP; dataP.setVal("m23sq",m23sq);   dataP.setVal("m13sq",m13sq);
+      dataPoint dataP; dataP.setVal(0,m23sq);   dataP.setVal(1,m13sq);
 
       //		m12sq = kin.getThirdVariableSq(m23sq,m13sq);
       		//point->setMsq(3,m12sq); point->setMsq(4,m13sq); point->setMsq(5,m23sq);
@@ -430,7 +430,7 @@ int main(int argc, char **argv){
 
         m23sq=pPm23.M2(); m13sq=pPm13.M2(); m12sq=pPm12.M2();
 
-        dataPoint dataP; dataP.setVal("m23sq",m23sq);   dataP.setVal("m13sq",m13sq);
+        dataPoint dataP; dataP.setVal(0,m23sq);   dataP.setVal(1,m13sq);
 
        // m12sq=M*M-m13sq-m23sq;
         //if(m12sq<0){

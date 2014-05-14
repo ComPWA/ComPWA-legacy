@@ -150,15 +150,12 @@ double AmpSumOfAmplitudes::evaluate(dataPoint& point) const
 		double a = _intList[i]->GetValue();
 		double phi = _phaseList[i]->GetValue();
 		std::complex<double> eiphi(a*cos(phi),a*sin(phi));
+		double twoJplusOne = (2*_pdfList[i]->getSpin()+1);
+		double norm = _pdfList[i]->GetNormalization();
 
-		//     unsigned int twoJplusOne = (2*_pdfList[i]->getSpin()+1);
-		//     res = res + (double)twoJplusOne * _pdfList[i]->evaluate() * eiphi;
-		//twoJplusOne in included in evaluate(). We want to include this factor into the normalization of the amplitudes.
-		res = res + _pdfList[i]->evaluate(point) * eiphi;
-		// std::cout << _pdfList[i]->evaluate() << " ";
-		//res = res + twoJplusOne * _pdfList[i]->evaluate() * eiphi * _angList[i]->evaluate();
+		//evaluate() = norm*evalAmp()*evalWignerD()
+		res = res + twoJplusOne * _pdfList[i]->evaluate(point) * eiphi;
 	}
-	//std::cout << std::endl;
 
 	return ( std::abs(res)*std::abs(res) );
 }

@@ -119,9 +119,9 @@ public:
 				std::vector<std::complex<double> > results(nElements, std::complex<double>(0.));
 				std::shared_ptr<MultiDouble> mp;//=paras.GetMultiDouble("mym_"+name);
 				switch(subSys){
-				case 3:{ mp  = (paras.GetMultiDouble("m12")); break; }
-				case 4:{ mp  = (paras.GetMultiDouble("m13")); break; }
-				case 5:{ mp  = (paras.GetMultiDouble("m23")); break; }
+				case 3:{ mp  = (paras.GetMultiDouble("m12sq")); break; }
+				case 4:{ mp  = (paras.GetMultiDouble("m13sq")); break; }
+				case 5:{ mp  = (paras.GetMultiDouble("m23sq")); break; }
 				}
 
 				//calc BW for each point
@@ -143,9 +143,9 @@ public:
 
 		double mSq;// = sqrt(paras.GetParameterValue("mym_"+name));
 		switch(subSys){
-		case 3:{ mSq  = (double(paras.GetParameterValue("m12"))); break; }
-		case 4:{ mSq  = (double(paras.GetParameterValue("m13"))); break; }
-		case 5:{ mSq  = (double(paras.GetParameterValue("m23"))); break; }
+		case 3:{ mSq  = (double(paras.GetParameterValue("m12sq"))); break; }
+		case 4:{ mSq  = (double(paras.GetParameterValue("m13sq"))); break; }
+		case 5:{ mSq  = (double(paras.GetParameterValue("m23sq"))); break; }
 		}
 
 		std::complex<double> result = AmpFlatteRes::dynamicalFunction(mSq,m0,ma,mb,coupling,mHiddenA,mHiddenB,couplingHidden,spin);
@@ -197,9 +197,9 @@ public:
 				std::vector<std::complex<double> > results(nElements, std::complex<double>(0.));
 				std::shared_ptr<MultiDouble> mp;//=paras.GetMultiDouble("mym_"+name);
 				switch(subSys){
-				case 3:{ mp  = (paras.GetMultiDouble("m12_phsp")); break; }
-				case 4:{ mp  = (paras.GetMultiDouble("m13_phsp")); break; }
-				case 5:{ mp  = (paras.GetMultiDouble("m23_phsp")); break; }
+				case 3:{ mp  = (paras.GetMultiDouble("m12sq_phsp")); break; }
+				case 4:{ mp  = (paras.GetMultiDouble("m13sq_phsp")); break; }
+				case 5:{ mp  = (paras.GetMultiDouble("m23sq_phsp")); break; }
 				}
 
 				//calc BW for each point
@@ -219,9 +219,9 @@ public:
 
 		double mSq;// = sqrt(paras.GetParameterValue("mym_"+name));
 		switch(subSys){
-		case 3:{ mSq  = (double(paras.GetParameterValue("m12_phsp"))); break; }
-		case 4:{ mSq  = (double(paras.GetParameterValue("m13_phsp"))); break; }
-		case 5:{ mSq  = (double(paras.GetParameterValue("m23_phsp"))); break; }
+		case 3:{ mSq  = (double(paras.GetParameterValue("m12sq_phsp"))); break; }
+		case 4:{ mSq  = (double(paras.GetParameterValue("m13sq_phsp"))); break; }
+		case 5:{ mSq  = (double(paras.GetParameterValue("m23sq_phsp"))); break; }
 		}
 
 		std::complex<double> result = AmpFlatteRes::dynamicalFunction(mSq,m0,ma,mb,coupling,mHiddenA,mHiddenB,couplingHidden,spin);

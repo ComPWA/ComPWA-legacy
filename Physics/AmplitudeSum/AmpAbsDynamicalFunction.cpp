@@ -49,10 +49,11 @@ double evalWrapper(double* x, size_t dim, void* param) {
 	 */
 	if(dim!=2) return 0;
 	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
-	double m12sq = kin->getThirdVariableSq(x[0],x[1]);
-	dataPoint pp; pp.setVal("m23sq",x[1]);pp.setVal("m13sq",x[0]);
+//	double m12sq = kin->getThirdVariableSq(x[0],x[1]);
+	dataPoint pp; pp.setVal(0,x[1]);pp.setVal(1,x[0]);
 	if( !kin->isWithinPhsp(pp) ) return 0;//only integrate over phase space
-	std::complex<double> res = static_cast<AmpAbsDynamicalFunction*>(param)->evaluate(pp);
+	std::complex<double> res = static_cast<AmpAbsDynamicalFunction*>(param)->evaluateAmp(pp);
+	res = res * static_cast<AmpAbsDynamicalFunction*>(param)->evaluateWignerD(pp);
 	return ( std::abs(res)*std::abs(res) ); //integrate over |F|^2
 //	return static_cast<AmpAbsDynamicalFunction*>(param)->evaluate(x,dim);
 };

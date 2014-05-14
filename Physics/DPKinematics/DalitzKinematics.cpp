@@ -200,17 +200,23 @@ double DalitzKinematics::calcHelicityAngle(unsigned int sys, dataPoint& point){
 	double m13sq = point.getVal(1);
 	double m23sq = point.getVal(0);
 	double m12sq = getThirdVariableSq(m23sq,m13sq);
+	//I have no idea how we should define the angles!
 	switch(sys){
 	case 3:
-		cosTheta = calcHelicityAngle(m12sq,m23sq,M,m3,m1,m2); break;
+		cosTheta = calcHelicityAngle(m12sq,m23sq,M,m3,m1,m2); break;//angle between 3 and 1 ->GOOD
+//		cosTheta = calcHelicityAngle(m12sq,m23sq,M,m3,m2,m1); break;//angle between 3 and 2 ->GOOD
 	case 4:
-		cosTheta = calcHelicityAngle(m13sq,m23sq,M,m2,m1,m3); break;
+		cosTheta = calcHelicityAngle(m13sq,m23sq,M,m2,m1,m3); break;//angle between 2 and 1 ->GOOD
+//		cosTheta = calcHelicityAngle(m13sq,m23sq,M,m2,m3,m1); break;//angle between 2 and 3 ->ERROR
 	case 5:
-		cosTheta = calcHelicityAngle(m23sq,m13sq,M,m1,m2,m3); break;
+		cosTheta = calcHelicityAngle(m23sq,m13sq,M,m1,m2,m3); break;//angle between 1 and 2 ->GOOD
+//		cosTheta = calcHelicityAngle(m23sq,m13sq,M,m1,m3,m2); break;//angle between 1 and 3 ->GOOD
 	default:
 		BOOST_LOG_TRIVIAL(error) <<"DalitzKinematics::calcHelicityAngle() : wrong subsystem selected!";
 		return 0.0;
 	}
+//	    if(cosTheta>1.) cosTheta=1.;
+//	    if(cosTheta<-1.) cosTheta=-1.;
 	return cosTheta;
 }
 
@@ -290,7 +296,7 @@ double phspFunc(double* x, size_t dim, void* param) {
 	DalitzKinematics* kin =	static_cast<DalitzKinematics*>(param);
 	//	double m12sq = kin->getThirdVariableSq(x[0],x[1]);
 	//use MC integration of a step function to obtain the DP area
-	dataPoint pp; pp.setVal("m23sq",x[1]);pp.setVal("m13sq",x[0]);
+	dataPoint pp; pp.setVal(0,x[1]);pp.setVal(1,x[0]);
 	if( kin->isWithinPhsp(pp) ) return 1.0;
 	return 0.0;
 };

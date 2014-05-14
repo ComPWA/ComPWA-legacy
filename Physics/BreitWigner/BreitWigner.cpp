@@ -71,7 +71,8 @@ const ParameterList& BreitWigner::intensity(dataPoint& point, ParameterList& par
 	return intensity(point);
 }
 const ParameterList& BreitWigner::intensity(std::vector<double> x, ParameterList& par){
-	dataPoint dataP; dataP.setVal("m23",x[0]); dataP.setVal("m13",x[1]);
+	//assmue that x[0]=mass23sq;
+	dataPoint dataP; dataP.setVal(0,x[0]); dataP.setVal(1,x[1]);
 	return intensity(dataP,par);
 }
 

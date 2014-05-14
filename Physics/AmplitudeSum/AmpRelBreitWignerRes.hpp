@@ -49,7 +49,7 @@ public:
 
 	static std::complex<double> dynamicalFunction(double mSq, double mR, double ma, double mb, double gamma0, unsigned int J, double mesonRadius);
 	virtual void initialise();
-	virtual std::complex<double> evaluate(dataPoint& point) { return evaluateAmp(point)*evaluateWignerD(point)*_norm; }
+	virtual std::complex<double> evaluate(dataPoint& point) { return _norm*evaluateAmp(point)*evaluateWignerD(point); }
 	virtual std::complex<double> evaluateAmp(dataPoint& point);
 	virtual double evaluateWignerD(dataPoint& point) { return _wignerD.evaluate(point); };
 	//  virtual double eval(double x[],size_t dim, void *param) const;//used for MC integration
@@ -119,19 +119,19 @@ public:
 				std::shared_ptr<MultiDouble> mp;//=paras.GetMultiDouble("mym_"+name);
 				switch(subSys){
 				case 3:{ //reso in sys of particles 1&2
-					mp  = (paras.GetMultiDouble("m12"));
+					mp  = (paras.GetMultiDouble("m12sq"));
 					//map  = (paras.GetMultiDouble("m23"));
 					// mbp  = (paras.GetMultiDouble("m13"));
 					break;
 				}
 				case 4:{ //reso in sys of particles 1&3
-					mp  = (paras.GetMultiDouble("m13"));
+					mp  = (paras.GetMultiDouble("m13sq"));
 					// map  = (paras.GetMultiDouble("m12"));
 					// mbp  = (paras.GetMultiDouble("m23"));
 					break;
 				}
 				case 5:{ //reso in sys of particles 2&3
-					mp  = (paras.GetMultiDouble("m23"));
+					mp  = (paras.GetMultiDouble("m23sq"));
 					// map  = (paras.GetMultiDouble("m13"));
 					// mbp  = (paras.GetMultiDouble("m12"));
 					break;
@@ -169,19 +169,19 @@ public:
 		double mSq;// = sqrt(paras.GetParameterValue("mym_"+name));
 		switch(subSys){
 		case 3:{ //reso in sys of particles 1&2
-			mSq  = (double(paras.GetParameterValue("m12")));
+			mSq  = (double(paras.GetParameterValue("m12sq")));
 			//ma  = (double(paras.GetParameterValue("m23")));
 			// mb  = (double(paras.GetParameterValue("m13")));
 			break;
 		}
 		case 4:{ //reso in sys of particles 1&3
-			mSq  = (double(paras.GetParameterValue("m13")));
+			mSq  = (double(paras.GetParameterValue("m13sq")));
 			// ma  = (double(paras.GetParameterValue("m12")));
 			// mb  = (double(paras.GetParameterValue("m23")));
 			break;
 		}
 		case 5:{ //reso in sys of particles 2&3
-			mSq  = (double(paras.GetParameterValue("m23")));
+			mSq  = (double(paras.GetParameterValue("m23sq")));
 			// ma  = (double(paras.GetParameterValue("m13")));
 			// mb  = (double(paras.GetParameterValue("m12")));
 			break;
@@ -325,19 +325,19 @@ public:
 				std::shared_ptr<MultiDouble> mp;//=paras.GetMultiDouble("mym_"+name);
 				switch(subSys){
 				case 3:{ //reso in sys of particles 1&2
-					mp  = (paras.GetMultiDouble("m12_phsp"));
+					mp  = (paras.GetMultiDouble("m12sq_phsp"));
 					//map  = (paras.GetMultiDouble("m23"));
 					// mbp  = (paras.GetMultiDouble("m13"));
 					break;
 				}
 				case 4:{ //reso in sys of particles 1&3
-					mp  = (paras.GetMultiDouble("m13_phsp"));
+					mp  = (paras.GetMultiDouble("m13sq_phsp"));
 					// map  = (paras.GetMultiDouble("m12"));
 					// mbp  = (paras.GetMultiDouble("m23"));
 					break;
 				}
 				case 5:{ //reso in sys of particles 2&3
-					mp  = (paras.GetMultiDouble("m23_phsp"));
+					mp  = (paras.GetMultiDouble("m23sq_phsp"));
 					// map  = (paras.GetMultiDouble("m13"));
 					// mbp  = (paras.GetMultiDouble("m12"));
 					break;
@@ -374,19 +374,19 @@ public:
 		double mSq;// = sqrt(paras.GetParameterValue("mym_"+name));
 		switch(subSys){
 		case 3:{ //reso in sys of particles 1&2
-			mSq  = (double(paras.GetParameterValue("m12_phsp")));
+			mSq  = (double(paras.GetParameterValue("m12sq_phsp")));
 			//ma  = (double(paras.GetParameterValue("m23")));
 			// mb  = (double(paras.GetParameterValue("m13")));
 			break;
 		}
 		case 4:{ //reso in sys of particles 1&3
-			mSq  = (double(paras.GetParameterValue("m13_phsp")));
+			mSq  = (double(paras.GetParameterValue("m13sq_phsp")));
 			// ma  = (double(paras.GetParameterValue("m12")));
 			// mb  = (double(paras.GetParameterValue("m23")));
 			break;
 		}
 		case 5:{ //reso in sys of particles 2&3
-			mSq  = (double(paras.GetParameterValue("m23_phsp")));
+			mSq  = (double(paras.GetParameterValue("m23sq_phsp")));
 			// ma  = (double(paras.GetParameterValue("m13")));
 			// mb  = (double(paras.GetParameterValue("m12")));
 			break;

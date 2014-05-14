@@ -122,8 +122,8 @@ std::complex<double> AmpFlatteRes::dynamicalFunction(double mSq, double mR, doub
 
 	std::complex<double> denom(mR*mR - mSq, -p1*g1*g1-p2*g2*g2);
 
-	std::complex<double> result = (std::complex<double>( (2*J+1) * g1*g1 , 0 ) / denom);//correct definition
-	//	std::complex<double> result = (std::complex<double>( (2*J+1) , 0) / denom);//Laura++ (old) definition
+	std::complex<double> result = (std::complex<double>( g1*g1 , 0 ) / denom);//correct definition
+//		std::complex<double> result = (std::complex<double>( 1 , 0) / denom);//Laura++ (old) definition
 
 	if(result.real()!=result.real()) {std::cout << "RE part NAN" << std::endl; return 0;}
 	if(result.imag()!=result.imag()) {std::cout << "IM part NAN" << std::endl; return 0;}
