@@ -61,7 +61,7 @@ double AmpWigner2::evaluate(dataPoint& point) {
 	double m13sq = point.getVal(id13);
 	double m12sq = kin->getThirdVariableSq(m23sq,m13sq);
 
-	cosTheta = kin->calcHelicityAngle(_subSys, point);
+	cosTheta = kin->helicityAngle(_subSys, point);
 	switch(_subSys){
 	case 3:
 //		cosTheta = kin->calcHelicityAngle(point->getMsq(3),point->getMsq(4),_M,_m3,_m1,_m2);

@@ -67,7 +67,7 @@ double AmpAbsDynamicalFunction::integral() const{
 	//set limits: we assume that x[0]=m13sq and x[1]=m23sq
 	double xLimit_low[2] = {kin->m13_sq_min,kin->m23_sq_min};
 	double xLimit_high[2] = {kin->m13_sq_max,kin->m23_sq_max};
-	size_t calls = 100000;
+	size_t calls = 1000000;
 	gsl_rng_env_setup ();
 	const gsl_rng_type *T = gsl_rng_default; //type of random generator
 	gsl_rng *r = gsl_rng_alloc(T); //random generator

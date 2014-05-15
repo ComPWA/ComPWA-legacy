@@ -160,7 +160,7 @@ public:
 					//          beta = AmpWigner2::theta(j, _m23, _m13, _m12, _subSysFlag, _M, _m1, _m2, _m3);
 					dataPoint point; point.setVal(0,_m23); point.setVal(1,_m13);
 					DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
-					beta = std::acos(kin->calcHelicityAngle(_subSysFlag, point));
+					beta = std::acos(kin->helicityAngle(_subSysFlag, point));
 					if(beta!=beta) beta=1.;
 
 					results[ele]=(2*j+1)*Wigner_d(j,m,n,beta);
@@ -204,7 +204,7 @@ public:
 			//      beta = AmpWigner2::theta(j, _m23, _m13, _m12, _subSysFlag, _M, _m1, _m2, _m3);
 			dataPoint point; point.setVal(0,_m23); point.setVal(1,_m13);
 			DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
-			beta = std::acos(kin->calcHelicityAngle(_subSysFlag, point));
+			beta = std::acos(kin->helicityAngle(_subSysFlag, point));
 			if(beta!=beta) beta=1.;
 
 			out = std::shared_ptr<AbsParameter>(new DoubleParameter(out->GetName(),(2*j+1)*Wigner_d(j,m,n,beta)));
@@ -328,7 +328,7 @@ public:
 
 					dataPoint point; point.setVal(0,_m23); point.setVal(1,_m13);
 					DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
-					double beta = std::acos(kin->calcHelicityAngle(_subSysFlag, point));
+					double beta = std::acos(kin->helicityAngle(_subSysFlag, point));
 					//          double beta = AmpWigner2::theta(j, _m23, _m13, _m12, _subSysFlag, _M, _m1, _m2, _m3);
 					if(beta!=beta) beta=1.;
 
@@ -344,7 +344,7 @@ public:
 			Spin j(_inSpin), m(_outSpin1), n(_outSpin2);
 			dataPoint point; point.setVal(0,_m23); point.setVal(1,_m13);
 			DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
-			double beta = std::acos(kin->calcHelicityAngle(_subSysFlag, point));
+			double beta = std::acos(kin->helicityAngle(_subSysFlag, point));
 			//      double beta = AmpWigner2::theta(j, _m23, _m13, _m12, _subSysFlag, _M, _m1, _m2, _m3);
 			if(beta!=beta) beta=1.;
 			out = std::shared_ptr<AbsParameter>(new DoubleParameter(out->GetName(),Wigner_d(j,m,n,beta)));
