@@ -554,7 +554,7 @@ const double AmpSumIntensity::integral(){
 	double xLimit_high[2] = {kin->m13_sq_max,kin->m23_sq_max};
 	//	double xLimit_low[2] = {0,0};
 	//	double xLimit_high[2] = {10,10};
-	size_t calls = 1000000;
+	size_t calls = 100000;
 	gsl_rng_env_setup ();
 	const gsl_rng_type *T = gsl_rng_default; //type of random generator
 	gsl_rng *r = gsl_rng_alloc(T); //random generator

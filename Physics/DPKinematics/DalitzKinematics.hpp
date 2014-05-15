@@ -84,6 +84,7 @@ public:
 	/**
 	 * \brief Calculates the scattering angle.
 	 *
+	 * Function obsolete!
 	 * Calculates the scattering angle given the invariant masses @param s and @param t.
 	 * The angle is measured between the spectator particle @param mSpec and particle @param m.
 	 * @param mSecond is the third particle of the decay
