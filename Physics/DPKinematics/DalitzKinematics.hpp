@@ -81,6 +81,8 @@ public:
 	 * versus daughter 1 in [13] and versus 3 in [23]
 	 */
 	double helicityAngle(unsigned int sys, double invMassSq23, double invMassSq13);
+	//! Helicity angle for subSystem sys at dataPoint point.
+	double helicityAngle(unsigned int sys,dataPoint& point);
 	/**
 	 * \brief Calculates the scattering angle.
 	 *
@@ -88,12 +90,14 @@ public:
 	 * Calculates the scattering angle given the invariant masses @param s and @param t.
 	 * The angle is measured between the spectator particle @param mSpec and particle @param m.
 	 * @param mSecond is the third particle of the decay
-	 * When masses for scatteringAngle() are set correctly both functions are equivalent
+	 * You should set the masses as follows:
+	 * (m12sq,m23sq,M,m3,m1,m2); for subsystem 3
+	 * (m13sq,m12sq,M,m2,m3,m1); for subsystem 4
+	 * (m23sq,m13sq,M,m1,m2,m3); for subsystem 5
+	 * When masses for scatteringAngle() are set correctly both functions are equivalent.
 	 * \return cos(helicityAngle)
 	 */
 	double scatteringAngle(double s, double t, double M, double mSpec, double mSecond, double m);
-	//! Helicity angle for subSystem sys at dataPoint point.
-	double helicityAngle(unsigned int sys,dataPoint& point);
 	//! Calculates third dalitz plot variable, e.g f(s1,s2)=s3
 	double getThirdVariableSq(double, double) const;
 	//! Checks if data point is within phase space boundaries
@@ -146,28 +150,28 @@ public:
 	double getMotherMass() {return M;};
 
 	std::string nameMother;//! name of mother particle
+	double Msq; //! mass squared of mother particle
 	double M; //! mass of mother particle
 	unsigned int spinM;//! spin of mother particle
 	double Br;//! width of decaying particle
 
 	std::string name1;//! name of daughter 1
+	double mSq1; //! masse squared of daughter 1
 	double m1; //! masses of daughter 1
 	unsigned int spin1; //! spin of daughter 1
 	std::string name2;//! name of daughter 2
+	double mSq2; //! masse squared of daughter 2
 	double m2; //! masses of daughter 2
 	unsigned int spin2;//! spin of daughter 2
 	std::string name3;//! name of daughter 3
+	double mSq3; //! masse squared of daughter 3
 	double m3; //! masses of daughter 3
 	unsigned int spin3;//! spin of daughter 3
 	std::string name4;
+	double mSq4; //! masse squared of daughter 4
 	double m4;
 	unsigned int spin4;
-	std::string name5;
-	double m5;
-	unsigned int spin5;
-	std::string name6;
-	double m6;
-	unsigned int spin6;
+
 
 	double m23_sq_min; //!minimum value of m23sq
 	double m23_sq_max;//!maximum value of m23sq

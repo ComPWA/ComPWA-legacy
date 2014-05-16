@@ -84,8 +84,8 @@ std::complex<double> AmpFlatteRes::evaluateAmp(dataPoint& point) {
 		return 0;
 	}
 	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
-	double m23sq = point.getVal("m23sq");
-	double m13sq = point.getVal("m13sq");
+	double m23sq = point.getVal(0);
+	double m13sq = point.getVal(1);
 	double m12sq = kin->getThirdVariableSq(m23sq,m13sq);
 	double mSq = -999;
 	switch(_subSys){

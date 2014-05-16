@@ -89,29 +89,33 @@ double DalitzKinematics::invMassMin(unsigned int sys, unsigned int sys2, double 
 	return min;
 }
 double DalitzKinematics::eiCms(unsigned int partId, unsigned int sys, double invMass_sys) const {
-	double E1, E2, E3;
-	double mSq = invMass_sys;
+	double E;
+	double m = sqrt(invMass_sys);
 	switch(sys){
 	case 3:
-		E1 = (mSq-m2*m2+m1*m1)/(2*sqrt(mSq));
-		E2 = (mSq-m1*m1+m2*m2)/(2*sqrt(mSq));
-		E3 =-(mSq-M*M+m3*m3)/(2*sqrt(mSq));	break;
+		switch(partId){
+		case 1: E = (invMass_sys-mSq2+mSq1)/(2*m);break;
+		case 2: E = (invMass_sys-mSq1+mSq2)/(2*m);break;
+		case 3: E =-(invMass_sys-Msq+mSq3)/(2*m);	break;
+		}
+		break;
 	case 4:
-		E1 = (mSq-m3*m3+m1*m1)/(2*sqrt(mSq));
-		E2 =-(mSq-M*M+m2*m2)/(2*sqrt(mSq));
-		E3 = (mSq-m1*m1+m3*m3)/(2*sqrt(mSq)); break;
+		switch(partId){
+		case 1: E = (invMass_sys-mSq3+mSq1)/(2*m);break;
+		case 2: E =-(invMass_sys-Msq+mSq2)/(2*m);break;
+		case 3: E = (invMass_sys-mSq1+mSq3)/(2*m); break;
+		}
+		break;
 	case 5:
-		E1 =-(mSq-M*M+m1*m1)/(2*sqrt(mSq));
-		E2 = (mSq-m3*m3+m2*m2)/(2*sqrt(mSq));
-		E3 = (mSq-m2*m2+m3*m3)/(2*sqrt(mSq)); break;
+		switch(partId){
+		case 1: E =-(invMass_sys-Msq+mSq1)/(2*m);break;
+		case 2: E = (invMass_sys-mSq3+mSq2)/(2*m);break;
+		case 3: E = (invMass_sys-mSq2+mSq3)/(2*m); break;
+		}
+		break;
 	}
-	double Estar=-999;
-	switch(partId){
-	case 1: Estar=E1; break;
-	case 2: Estar=E2; break;
-	case 3: Estar=E3; break;
-	}
-	return Estar;
+
+	return E;
 }
 double DalitzKinematics::mimin(unsigned int i) const
 {
@@ -314,6 +318,11 @@ void DalitzKinematics::init(){
 	varNames.push_back("m23sq");
 	varNames.push_back("m13sq");
 	//	varNames.push_back("m12sq");
+	Msq = M*M;
+	mSq1 = m1*m1;
+	mSq2 = m2*m2;
+	mSq3 = m3*m3;
+	mSq4 = m4*m4;
 };
 //! returns 1 if point is within PHSP otherwise 0
 double phspFunc(double* x, size_t dim, void* param) {
@@ -408,7 +417,7 @@ double DalitzKinematics::getThirdVariableSq(double invmass1sq, double invmass2sq
 	 * calculates 3rd invariant mass from the other inv. masses.
 	 */
 	//	return sqrt(M*M+m1*m1+m2*m2+m3*m3-invmass1-invmass2);
-	return (M*M+m1*m1+m2*m2+m3*m3-invmass1sq-invmass2sq);
+	return (Msq+mSq1+mSq2+mSq3-invmass1sq-invmass2sq);
 }
 
 bool DalitzKinematics::isWithinPhsp(const dataPoint& point) {

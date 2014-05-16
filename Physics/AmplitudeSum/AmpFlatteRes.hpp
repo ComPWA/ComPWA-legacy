@@ -59,7 +59,10 @@ public:
 	virtual void initialise();
 	std::complex<double> evaluate(dataPoint& point) { return ( _norm*evaluateAmp(point)*evaluateWignerD(point) ); }
 	virtual std::complex<double> evaluateAmp(dataPoint& point) ;
-	virtual double evaluateWignerD(dataPoint& point) { return _wignerD.evaluate(point); };
+	virtual double evaluateWignerD(dataPoint& point) {
+		if(_spin==0) return 1.0;//save some computing time
+		return _wignerD.evaluate(point);
+	};
 
 	void setDecayMasses(double, double, double, double);
 	double getSpin() {return _spin;}; //needs to be declared in AmpAbsDynamicalFunction

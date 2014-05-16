@@ -42,7 +42,8 @@ double DalitzHistEfficiency::evaluate(dataPoint& point){
 }
 
 double DalitzAngleHistEfficiency::evaluate(dataPoint& point){
-	double m23sq = point.getVal("m23sq");
+//	double m23sq = point.getVal("m23sq");
+	double m23sq = point.getVal(0);
 	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
 	double angle = kin->helicityAngle(5,point);
 
