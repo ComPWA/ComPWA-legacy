@@ -253,9 +253,13 @@ double DalitzKinematics::helicityAngle(unsigned int sys, double invMassSq23, dou
 		pCms = sqrt(eCms*eCms-m*m);
 		pSpecCms = sqrt(eSpecCms*eSpecCms-mSpec*mSpec);
 		break;
-	case 5://angle versus particle 3
-		m = m3; mSpec = m1; invMsqSys = invMassSq23; invMsqSecond=invMassSq13;
-		eCms = eiCms(3,sys,invMsqSys);
+	case 5:
+		//angle versus particle 3
+//		m = m3; mSpec = m1; invMsqSys = invMassSq23; invMsqSecond=invMassSq13;
+//		eCms = eiCms(3,sys,invMsqSys);
+		//angle versus particle 2
+		m = m2; mSpec = m1; invMsqSys = invMassSq23; invMsqSecond=invMassSq12;
+		eCms = eiCms(2,sys,invMsqSys);
 		eSpecCms = eiCms(1,sys,invMsqSys);
 		pCms = sqrt(eCms*eCms-m*m);
 		pSpecCms = sqrt(eSpecCms*eSpecCms-mSpec*mSpec);

@@ -86,8 +86,7 @@ double AmpWigner2::evaluate(dataPoint& point) {
 //	if(cosTheta<-1.) cosTheta=-1.;
 	double theta = acos(cosTheta);
 
-	/*
-	 * Calling WignerD function
+	/* Calling WignerD function
 	 * Note that Wigner_d depends on the sign of \in and \out. I hope it is correctly assigned.
 	 */
 	result = Wigner_d(J,M,N,theta);

@@ -32,16 +32,6 @@ AmpAbsDynamicalFunction::~AmpAbsDynamicalFunction()
 {
 }
 
-//double AmpAbsDynamicalFunction::evaluate(double x[], size_t dim) {
-//	if(dim!=2) return 0;
-//	//set data point: we assume that x[0]=m13 and x[1]=m23
-//	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
-//	double m12sq = kin->getThirdVariableSq(x[0],x[1]);
-//	dataPoint pp; pp.setVal("m23sq",x[1]);pp.setVal("m13sq",x[0]);
-//	if( !kin->isWithinPhsp(pp) ) return 0;//only integrate over phase space
-//	std::complex<double> res = evaluate(pp);
-//	return ( std::abs(res)*std::abs(res) ); //integrate over |F|^2
-//}
 double evalWrapper(double* x, size_t dim, void* param) {
 	/* We need a wrapper here because a eval() is a member function of AmpAbsDynamicalFunction
 	 * and can therefore not be referenced. But gsl_monte_function expects a function reference.
@@ -53,7 +43,7 @@ double evalWrapper(double* x, size_t dim, void* param) {
 	dataPoint pp; pp.setVal(0,x[1]);pp.setVal(1,x[0]);
 	if( !kin->isWithinPhsp(pp) ) return 0;//only integrate over phase space
 	std::complex<double> res = static_cast<AmpAbsDynamicalFunction*>(param)->evaluateAmp(pp);
-	res = res * static_cast<AmpAbsDynamicalFunction*>(param)->evaluateWignerD(pp);//do we have to include the angular distribution in normalization?
+//	res = res * static_cast<AmpAbsDynamicalFunction*>(param)->evaluateWignerD(pp);//do we have to include the angular distribution in normalization?
 	return ( std::abs(res)*std::abs(res) ); //integrate over |F|^2
 //	return static_cast<AmpAbsDynamicalFunction*>(param)->evaluate(x,dim);
 };

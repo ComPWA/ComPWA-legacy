@@ -94,7 +94,6 @@ public:
 		}
 		spin = (unsigned int)(paras.GetParameterValue("ParOfNode_spin_"+name));
 		d = double(paras.GetParameterValue("ParOfNode_d_"+name));
-		//		norm = double(paras.GetParameterValue("ParOfNode_norm_"+name));
 		subSys = double(paras.GetParameterValue("ParOfNode_subSysFlag_"+name));
 
 		//m  = double(paras.GetParameterValue("mym"));
@@ -206,17 +205,17 @@ public:
 protected:
 	std::string name;
 
-	double q(const double& ma, const double& mb, const double& x) const {
-		double mapb = ma + mb;
-		double mamb = ma - mb;
-
-		if( (x*x - mapb*mapb) < 0 ) {
-			//std::cout<<"AmpKinematics: Trying to calculate break-up momentum below threshold!"<<std::endl;
-			return 1; //below threshold
-		}
-
-		return std::sqrt ( (x*x - mapb*mapb) * (x*x - mamb*mamb) ) / (2. * x );
-	}
+//	double q(const double& ma, const double& mb, const double& x) const {
+//		double mapb = ma + mb;
+//		double mamb = ma - mb;
+//
+//		if( (x*x - mapb*mapb) < 0 ) {
+//			//std::cout<<"AmpKinematics: Trying to calculate break-up momentum below threshold!"<<std::endl;
+//			return 1; //below threshold
+//		}
+//
+//		return std::sqrt ( (x*x - mapb*mapb) * (x*x - mamb*mamb) ) / (2. * x );
+//	}
 
 	// compute part of the Blatt-Weisskopf barrier factor
 	//   BLprime = sqrt (F(q0)/F(q))
@@ -235,51 +234,51 @@ protected:
   }*/
 
 	// compute square of Blatt-Weisskopf barrier factor
-	double BLprime2(const double& ma, const double& mb, const double& m0, const double& x, const double& d, unsigned int& spin) const {
-		double t0= q(ma, mb, m0)*q(ma, mb, m0) * d*d;
-		double t= q(ma, mb, x)*q(ma, mb, x) * d*d;
-		return FormFactor(t0,t,spin);
-	}
-
-	double FormFactor(double& z0, double& z, unsigned int& spin) const{
-		double nom=0, denom=0;
-		switch(spin){
-		case 0:{
-			return 1.;
-		}
-		case 1:{
-			//if(_type==barrierType::BWPrime){
-			nom = 1 + z0;
-			denom = 1 + z;
-			//} else if(_type==barrierType::BW){
-			//   nom = 2*z;
-			//   denom = 1 + z;
-			//} else {
-			//   std::cout<<"Wrong BLW factor definition: "<<_type<<std::endl;
-			//   return 1;
-			//}
-			break;
-		}
-		case 2:{
-			//if(_type==barrierType::BWPrime){
-			nom = (z0-3)*(z0-3)+9*z0;
-			denom = (z-3)*(z-3)+9*z;
-			// } else if(_type==barrierType::BW){
-			//  nom = 13*z*z;
-			//   denom = (z-3)*(z-3)+9*z;
-			// } else {
-			//    std::cout<<"Wrong BLW factor definition: "<<_type<<std::endl;
-			//    return 1;
-			// }
-			break;
-		}
-		default:{
-			std::cout<<"Wrong spin value! BLW factors only implemented for spin 0,1 and 2! "<<std::endl;
-			return 0;
-		}
-		}
-		return nom/denom;
-	}
+//	double BLprime2(const double& ma, const double& mb, const double& m0, const double& x, const double& d, unsigned int& spin) const {
+//		double t0= q(ma, mb, m0)*q(ma, mb, m0) * d*d;
+//		double t= q(ma, mb, x)*q(ma, mb, x) * d*d;
+//		return FormFactor(t0,t,spin);
+//	}
+//
+//	double FormFactor(double& z0, double& z, unsigned int& spin) const{
+//		double nom=0, denom=0;
+//		switch(spin){
+//		case 0:{
+//			return 1.;
+//		}
+//		case 1:{
+//			//if(_type==barrierType::BWPrime){
+//			nom = 1 + z0;
+//			denom = 1 + z;
+//			//} else if(_type==barrierType::BW){
+//			//   nom = 2*z;
+//			//   denom = 1 + z;
+//			//} else {
+//			//   std::cout<<"Wrong BLW factor definition: "<<_type<<std::endl;
+//			//   return 1;
+//			//}
+//			break;
+//		}
+//		case 2:{
+//			//if(_type==barrierType::BWPrime){
+//			nom = (z0-3)*(z0-3)+9*z0;
+//			denom = (z-3)*(z-3)+9*z;
+//			// } else if(_type==barrierType::BW){
+//			//  nom = 13*z*z;
+//			//   denom = (z-3)*(z-3)+9*z;
+//			// } else {
+//			//    std::cout<<"Wrong BLW factor definition: "<<_type<<std::endl;
+//			//    return 1;
+//			// }
+//			break;
+//		}
+//		default:{
+//			std::cout<<"Wrong spin value! BLW factors only implemented for spin 0,1 and 2! "<<std::endl;
+//			return 0;
+//		}
+//		}
+//		return nom/denom;
+//	}
 
 };
 class BreitWignerPhspStrategy : public BreitWignerStrategy {
@@ -300,7 +299,6 @@ public:
 		}
 		spin = (unsigned int)(paras.GetParameterValue("ParOfNode_spin_"+name));
 		d = double(paras.GetParameterValue("ParOfNode_d_"+name));
-		//		norm = double(paras.GetParameterValue("ParOfNode_norm_"+name));
 		subSys = double(paras.GetParameterValue("ParOfNode_subSysFlag_"+name));
 
 		//m  = double(paras.GetParameterValue("mym"));

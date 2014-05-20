@@ -77,8 +77,8 @@ public:
 	 * \brief Calculates the helicity angle.
 	 *
 	 * Calculates the helicity angle for subsystem @param sys given the invariant masses
-	 * @param invMass23sq and @param invMass23sq. The angle is measured versus daughter 2 in system [23],
-	 * versus daughter 1 in [13] and versus 3 in [23]
+	 * @param invMass23sq and @param invMass23sq. The angle is measured versus daughter 2 in system [12],
+	 * versus daughter 1 in [13] and versus 2 in [23]
 	 */
 	double helicityAngle(unsigned int sys, double invMassSq23, double invMassSq13);
 	//! Helicity angle for subSystem sys at dataPoint point.
