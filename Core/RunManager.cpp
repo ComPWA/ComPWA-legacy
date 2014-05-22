@@ -30,7 +30,6 @@
 
 #include "DataReader/Data.hpp"
 #include "Estimator/Estimator.hpp"
-#include "Physics/Amplitude.hpp"
 #include "Optimizer/Optimizer.hpp"
 #include "Core/ParameterList.hpp"
 #include "Core/Event.hpp"

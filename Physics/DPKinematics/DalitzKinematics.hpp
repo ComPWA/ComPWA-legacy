@@ -106,10 +106,10 @@ public:
 	double getPhspVolume();
 	//! Calculated momenta n,m using legendre polynomials
 	double calculateMoments(unsigned int sys, dataPoint& point, unsigned int n, unsigned int m);
-	//!maximum value for variable m23=5, m13=4, m12=3
-	double mimax(unsigned int i) const;
-	//!minimum value for variable m23=5, m13=4, m12=3
-	double mimin(unsigned int i) const;
+	//!maximum value for invariant mass squared: m23sq=5, m13sq=4, m12sq=3
+	double mimax(unsigned int sys) const;
+	//!minimum value for invariant mass squared: m23sq=5, m13sq=4, m12sq=3
+	double mimin(unsigned int sys) const;
 
 	//these functions are buggy somewhere!
 	double lambda(double x, double y, double z)const;

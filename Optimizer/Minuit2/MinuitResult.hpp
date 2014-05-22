@@ -29,7 +29,8 @@
 #include <iostream>
 #include <fstream>
 #include <memory>
-#include <boost/numeric/ublas/symmetric.hpp>
+//#include <boost/numeric/ublas/symmetric.hpp>
+#include <boost/numeric/ublas/matrix.hpp>
 #include <boost/numeric/ublas/io.hpp>
 
 #include "Core/ParameterList.hpp"
@@ -45,13 +46,14 @@ class MinuitResult : public FitResult
 {
 public:
 	MinuitResult() {};
-	MinuitResult(FunctionMinimum result) { init(result);	}
+	MinuitResult(FunctionMinimum result) { init(result); }
 	void setResult(FunctionMinimum result){ init(result); }
+	void setAmplitude(std::shared_ptr<Amplitude> newAmp);
 	operator double() const { return finalLH; };
 	double getResult(){return finalLH;}
+	void fractions(std::ostream& out);
 
 private:
-
 	bool isValid; //result valid
 	bool covPosDef; //covariance matrix pos.-def.
 	bool hasValidParameters; //valid parameters
@@ -68,6 +70,8 @@ private:
 	double edm; //estimated distance to minimum
 	boost::numeric::ublas::symmetric_matrix<double,boost::numeric::ublas::upper> cov;
 	boost::numeric::ublas::symmetric_matrix<double,boost::numeric::ublas::upper> corr;
+	boost::numeric::ublas::matrix<double> fracError;
+	std::vector<double> variance;
 	std::vector<double> globalCC;
 	void genOutput(std::ostream& out);
 	void genSimpleOutput(std::ostream& out);

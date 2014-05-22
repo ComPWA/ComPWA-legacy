@@ -14,7 +14,6 @@
 #include <memory>
 #include <ctime>
 
-#include "Physics/Amplitude.hpp"
 #include "Core/Functions.hpp"
 #include "Core/Parameter.hpp"
 #include "Core/ParameterList.hpp"
@@ -336,7 +335,7 @@ void AmpSumIntensity::setupTree(allMasses& theMasses, allMasses& thePHSPMasses){
 		std::shared_ptr<FlatteStrategy> flatteStrat = std::shared_ptr<FlatteStrategy>(new FlatteStrategy(tmp.m_name,ParType::MCOMPLEX));
 		std::shared_ptr<FlattePhspStrategy> flattePhspStrat = std::shared_ptr<FlattePhspStrategy>(new FlattePhspStrategy(tmp.m_name,ParType::MCOMPLEX));
 		std::shared_ptr<WignerDStrategy> angdStrat = std::shared_ptr<WignerDStrategy>(new WignerDStrategy(tmp.m_name,ParType::MDOUBLE));
-		std::shared_ptr<WignerDphspStrategy> angdPhspStrat = std::shared_ptr<WignerDphspStrategy>(new WignerDphspStrategy(tmp.m_name,ParType::MDOUBLE));
+//		std::shared_ptr<WignerDphspStrategy> angdPhspStrat = std::shared_ptr<WignerDphspStrategy>(new WignerDphspStrategy(tmp.m_name,ParType::MDOUBLE));
 		unsigned int subSys = tmp.m_daugtherA + tmp.m_daugtherB;
 		newTree->createNode("Reso_"+tmp.m_name, mmultStrat, "Amplitude", theMasses.nEvents); //Reso=BW*C_*AD*N_
 		newTree->createNode("Flatte_"+tmp.m_name, mmultStrat , "Reso_"+tmp.m_name, theMasses.nEvents); //BW
@@ -509,9 +508,7 @@ const double AmpSumIntensity::integral(ParameterList& par){
 	return integral();
 }
 const double AmpSumIntensity::integral(){
-
-	/*
-	 * integration functionality was tested with a model with only one normalized amplitude.
+	/* Integration functionality was tested with a model with only one normalized amplitude.
 	 * The integration result is equal to the amplitude coefficient^2.
 	 */
 

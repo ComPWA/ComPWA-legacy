@@ -15,6 +15,7 @@
 
 // --CLASS DESCRIPTION [MODEL] --
 // Class for defining Wigner_d angular distributions
+//--->OBSOLETE<----
 
 #ifndef AMPWIGNER
 #define AMPWIGNER

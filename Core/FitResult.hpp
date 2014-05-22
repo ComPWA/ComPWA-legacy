@@ -33,6 +33,7 @@
 #include <boost/numeric/ublas/io.hpp>
 #include <boost/log/trivial.hpp>
 
+#include "Core/Amplitude.hpp"
 #include "Core/ParameterList.hpp"
 #include "Core/TableFormater.hpp"
 #include "Core/PhysConst.hpp"
@@ -46,6 +47,7 @@ public:
 	void setInitialParameters(ParameterList iniPars){ initialParameters=iniPars; }
 	void setFinalParameters(ParameterList finPars){ finalParameters=finPars; }
 	void setTrueParameters(ParameterList truePars){ trueParameters=truePars; }
+	void setAmplitude(std::shared_ptr<Amplitude> newAmp) { _amp = newAmp; }
 	ParameterList getInitialParameters(){ return initialParameters; }
 	ParameterList getFinalParameters(){ return finalParameters; }
 	ParameterList getTrueParameters(){ return trueParameters; }
@@ -75,6 +77,7 @@ protected:
 	ParameterList initialParameters;
 	ParameterList finalParameters;
 	ParameterList trueParameters;
+	std::shared_ptr<Amplitude> _amp;
 };
 
 

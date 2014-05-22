@@ -33,23 +33,12 @@ void MinuitResult::init(FunctionMinimum min){
 	globalCC = minState.GlobalCC().GlobalCC();
 	symmetric_matrix<double,upper> covMatrix(dim,dim);
 	symmetric_matrix<double,upper> corrMatrix(dim,dim);
-	std::vector<double> variance;
 	//	if(minuitCovM.size()==dim*(dim+1)/2){
 	for (unsigned i = 0; i < covMatrix.size1 (); ++ i)
 		for (unsigned j = i; j < covMatrix.size2 (); ++ j){
-			/* Calculate position in vector:
-			 * The position is given by: V(i,j)=j+Sum(k=1 -> i){ dim-k }
-			 */
-			//				unsigned int vecPos = j;
-			//				for(unsigned int t=1;t<=i;t++) vecPos+=dim-t;
-			//				vecPos=i+j;
 			double entry = minuitCovMatrix(j,i);
 			covMatrix (i, j) = entry;
-			if(i==j){
-				variance.push_back(sqrt(entry));
-				//					if(entry<0) variance.push_back(sqrt((-1)*entry));
-				//					else variance.push_back(sqrt(entry));
-			}
+			if(i==j) variance.push_back(sqrt(entry));
 		}
 	for (unsigned i = 0; i < covMatrix.size1 (); ++ i)
 		for (unsigned j = i; j < covMatrix.size2 (); ++ j){
@@ -75,17 +64,63 @@ void MinuitResult::init(FunctionMinimum min){
 }
 
 void MinuitResult::genSimpleOutput(std::ostream& out){
-//	for(unsigned int o=0;o<finalParameters.GetNDouble();o++){
-//		std::shared_ptr<DoubleParameter> outPar = finalParameters.GetDoubleParameter(o);
-//		out<<outPar->GetName()<<"/D:"<<outPar->GetName()<<"err/D";
-//		if(o!=finalParameters.GetNDouble()-1) out<<":";
-//	}
-//	out<<"\n";
+	//	for(unsigned int o=0;o<finalParameters.GetNDouble();o++){
+	//		std::shared_ptr<DoubleParameter> outPar = finalParameters.GetDoubleParameter(o);
+	//		out<<outPar->GetName()<<"/D:"<<outPar->GetName()<<"err/D";
+	//		if(o!=finalParameters.GetNDouble()-1) out<<":";
+	//	}
+	//	out<<"\n";
 	for(unsigned int o=0;o<finalParameters.GetNDouble();o++){
 		std::shared_ptr<DoubleParameter> outPar = finalParameters.GetDoubleParameter(o);
 		out<<outPar->GetValue()<<" "<<outPar->GetError()->GetError()<<" ";
 	}
 	out<<"\n";
+
+	return;
+}
+void MinuitResult::setAmplitude(std::shared_ptr<Amplitude> newAmp){ _amp=newAmp; }
+
+void MinuitResult::fractions(std::ostream& out){
+	if(!_amp) {
+		//		BOOST_LOG_TRIVIAL(error) << "MinuitResult::calculateFractions() | no amplitude set, can't calculate fractions!";
+		return;
+	}
+	unsigned int nRes = _amp->getNumberOfResonances();
+	std::cout<<nRes<<std::endl;
+	fracError = boost::numeric::ublas::matrix<double>(nRes,2);
+	double norm = _amp->integral();
+	double sum = 0;
+	double sumErrorSq = 0;
+	unsigned int pos = 0;
+	for(unsigned int i=0;i<nRes; i++){ //fill matrix
+		double resonanceInt = _amp->getTotalIntegral(i); //fit fraction of amplitude
+		std::string parName = "mag_"+_amp->getNameOfResonance(i); //name of magnitude parameter
+		std::shared_ptr<DoubleParameter> magPar = finalParameters.GetDoubleParameter(parName);
+		double mag = magPar->GetValue(); //value of magnitude
+		double magError;
+		if(magPar->IsFixed()) magError = 0.0;
+		else{
+			magError = variance.at(pos*2); //error on magnitude
+			pos++;//we have to skip fixed variables
+		}
+		fracError(i,0) = mag*mag*resonanceInt/norm; // f= |A|^2 * intRes/totalInt
+		fracError(i,1) = 2*mag*resonanceInt/norm*magError; // sigma_fraction = 2*|A| intRes/totalInt * sigma_A
+		sum += fracError(i,0);
+		sumErrorSq += fracError(i,1)*fracError(i,1);
+		std::cout<<parName<<" "<<mag<<"+-"<<magError<<" "<<resonanceInt<<" "<<norm<<std::endl;
+	}
+	//print matrix
+	TableFormater fracTable(&out);
+	fracTable.addColumn("Resonance",15);//add empty first column
+	fracTable.addColumn("Fraction",15);//add empty first column
+	fracTable.addColumn("Error",15);//add empty first column
+	out<<"FIT FRACTIONS:"<<std::endl;
+	fracTable.header();
+	for(unsigned int i=0;i<nRes; ++i)
+		fracTable << _amp->getNameOfResonance(i) << fracError(i,0) << fracError(i,1);
+	fracTable.delim();
+	fracTable << "Total" << sum << sqrt(sumErrorSq);
+	fracTable.footer();
 
 	return;
 }
@@ -193,5 +228,7 @@ void MinuitResult::genOutput(std::ostream& out){
 		}
 		tableCorr.footer();
 	}
+	fractions(out); //calculate and print fractions if amplitude is set
 
+	return;
 }

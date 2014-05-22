@@ -25,7 +25,7 @@
 
 //PWA-Header
 #include "Estimator/Estimator.hpp"
-#include "Physics/Amplitude.hpp"
+#include "Core/Amplitude.hpp"
 #include "DataReader/Data.hpp"
 #include "Core/Event.hpp"
 #include "Core/ParameterList.hpp"

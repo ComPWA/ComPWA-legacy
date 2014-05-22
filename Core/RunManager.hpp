@@ -82,7 +82,7 @@
 
 #include "DataReader/Data.hpp"
 #include "Estimator/Estimator.hpp"
-#include "Physics/Amplitude.hpp"
+#include "Core/Amplitude.hpp"
 #include "Optimizer/Optimizer.hpp"
 #include "Core/FitResult.hpp"
 #include "Core/ParameterList.hpp"

@@ -69,83 +69,76 @@ void AmpSumOfAmplitudes::addBW(std::shared_ptr<AmpAbsDynamicalFunction> theRes ,
 
 std::complex<double> AmpSumOfAmplitudes::getFirstBW(dataPoint& point) const
 {
-    //   RooComplex res;
-    std::complex<double> res;
-    //std::cout << "res = \t" << res.abs2() << std::endl;
-
-    //std::cout << "PDFs: ";
-   // for(unsigned int i=0; i<_pdfList.size(); i++){
-       // double a = _intList[0]->GetValue();
-       // double phi = _phaseList[0]->GetValue();
-       // std::complex<double> eiphi(a*cos(phi),a*sin(phi));
-
-             unsigned int twoJplusOne = (2*_pdfList[0]->getSpin()+1);
-        //     res = res + (double)twoJplusOne * _pdfList[i]->evaluate() * eiphi;
-        //twoJplusOne in included in evaluate(). We want to include this factor into the normalization of the amplitudes.
-        res = (double)twoJplusOne * _pdfList[0]->evaluateAmp(point);
-        // std::cout << _pdfList[i]->evaluate() << " ";
-        //res = res + twoJplusOne * _pdfList[i]->evaluate() * eiphi * _angList[i]->evaluate();
-    //}
-    //std::cout << std::endl;
-
-    return res;
-}
-
-std::complex<double> AmpSumOfAmplitudes::getFirstReso(dataPoint& point) const
-{
-    //   RooComplex res;
-    std::complex<double> res;
-    //std::cout << "res = \t" << res.abs2() << std::endl;
-
-    //std::cout << "PDFs: ";
-   // for(unsigned int i=0; i<_pdfList.size(); i++){
-        double a = _intList[0]->GetValue();
-        double phi = _phaseList[0]->GetValue();
-        std::complex<double> eiphi(a*cos(phi),a*sin(phi));
-
-        //     unsigned int twoJplusOne = (2*_pdfList[i]->getSpin()+1);
-        //     res = res + (double)twoJplusOne * _pdfList[i]->evaluate() * eiphi;
-        //twoJplusOne in included in evaluate(). We want to include this factor into the normalization of the amplitudes.
-        res = _pdfList[0]->evaluate(point) * eiphi;
-        // std::cout << _pdfList[i]->evaluate() << " ";
-        //res = res + twoJplusOne * _pdfList[i]->evaluate() * eiphi * _angList[i]->evaluate();
-    //}
-    //std::cout << std::endl;
-
-    return res;
-}
-
-std::complex<double> AmpSumOfAmplitudes::getFirstAmp(dataPoint& point) const
-{
-    //   RooComplex res;
-    std::complex<double> res;
-    //std::cout << "res = \t" << res.abs2() << std::endl;
-
-    //std::cout << "PDFs: ";
-    for(unsigned int i=0; i<_pdfList.size(); i++){
-        double a = _intList[i]->GetValue();
-        double phi = _phaseList[i]->GetValue();
-        std::complex<double> eiphi(a*cos(phi),a*sin(phi));
-
-        //     unsigned int twoJplusOne = (2*_pdfList[i]->getSpin()+1);
-        //     res = res + (double)twoJplusOne * _pdfList[i]->evaluate() * eiphi;
-        //twoJplusOne in included in evaluate(). We want to include this factor into the normalization of the amplitudes.
-        res = res + _pdfList[i]->evaluate(point) * eiphi;
-        // std::cout << _pdfList[i]->evaluate() << " ";
-        //res = res + twoJplusOne * _pdfList[i]->evaluate() * eiphi * _angList[i]->evaluate();
-    }
-    //std::cout << std::endl;
-
-    return res;
-}
-
-double AmpSumOfAmplitudes::evaluate(dataPoint& point) const
-{
 	//   RooComplex res;
 	std::complex<double> res;
 	//std::cout << "res = \t" << res.abs2() << std::endl;
 
 	//std::cout << "PDFs: ";
+	// for(unsigned int i=0; i<_pdfList.size(); i++){
+	// double a = _intList[0]->GetValue();
+	// double phi = _phaseList[0]->GetValue();
+	// std::complex<double> eiphi(a*cos(phi),a*sin(phi));
+
+	unsigned int twoJplusOne = (2*_pdfList[0]->getSpin()+1);
+	//     res = res + (double)twoJplusOne * _pdfList[i]->evaluate() * eiphi;
+	//twoJplusOne in included in evaluate(). We want to include this factor into the normalization of the amplitudes.
+	res = (double)twoJplusOne * _pdfList[0]->evaluateAmp(point);
+	// std::cout << _pdfList[i]->evaluate() << " ";
+	//res = res + twoJplusOne * _pdfList[i]->evaluate() * eiphi * _angList[i]->evaluate();
+	//}
+	//std::cout << std::endl;
+
+	return res;
+}
+
+std::complex<double> AmpSumOfAmplitudes::getFirstReso(dataPoint& point) const
+{
+	std::complex<double> res;
+	//std::cout << "res = \t" << res.abs2() << std::endl;
+
+	//std::cout << "PDFs: ";
+	// for(unsigned int i=0; i<_pdfList.size(); i++){
+	double a = _intList[0]->GetValue();
+	double phi = _phaseList[0]->GetValue();
+	std::complex<double> eiphi(a*cos(phi),a*sin(phi));
+
+	double twoJplusOne = (2*_pdfList[0]->getSpin()+1);
+	//     res = res + (double)twoJplusOne * _pdfList[i]->evaluate() * eiphi;
+	res = twoJplusOne * _pdfList[0]->evaluate(point) * eiphi;
+	// std::cout << _pdfList[i]->evaluate() << " ";
+	//res = res + twoJplusOne * _pdfList[i]->evaluate() * eiphi * _angList[i]->evaluate();
+	//}
+	//std::cout << std::endl;
+
+	return res;
+}
+
+std::complex<double> AmpSumOfAmplitudes::getFirstAmp(dataPoint& point) const
+{
+	std::complex<double> res;
+	//std::cout << "res = \t" << res.abs2() << std::endl;
+
+	//std::cout << "PDFs: ";
+	for(unsigned int i=0; i<_pdfList.size(); i++){
+		double a = _intList[i]->GetValue();
+		double phi = _phaseList[i]->GetValue();
+		std::complex<double> eiphi(a*cos(phi),a*sin(phi));
+
+		double twoJplusOne = (2*_pdfList[i]->getSpin()+1);
+		//     res = res + (double)twoJplusOne * _pdfList[i]->evaluate() * eiphi;
+		res = res + twoJplusOne * _pdfList[i]->evaluate(point) * eiphi;
+		// std::cout << _pdfList[i]->evaluate() << " ";
+		//res = res + twoJplusOne * _pdfList[i]->evaluate() * eiphi * _angList[i]->evaluate();
+	}
+	//std::cout << std::endl;
+
+	return res;
+}
+
+double AmpSumOfAmplitudes::evaluate(dataPoint& point) const
+{
+	std::complex<double> res;
+
 	for(unsigned int i=0; i<_pdfList.size(); i++){
 		double a = _intList[i]->GetValue();
 		double phi = _phaseList[i]->GetValue();
@@ -155,24 +148,38 @@ double AmpSumOfAmplitudes::evaluate(dataPoint& point) const
 
 		//evaluate() = norm*evalAmp()*evalWignerD()
 		res = res + twoJplusOne * _pdfList[i]->evaluate(point) * eiphi;
+//		res = res + _pdfList[i]->evaluate(point) * eiphi;
 	}
 
 	return ( std::abs(res)*std::abs(res) );
 }
-double AmpSumOfAmplitudes::getFraction(std::string name){
+double AmpSumOfAmplitudes::getUnormalizedFraction(std::string name){
 	int id=-1;
 	for(unsigned int i=0; i<_pdfList.size(); i++)
 		if(_pdfList[i]->GetName()==name) id=i;
 	if(id<0) return 0;
-	return getFraction(id);
+	return getUnormalizedFraction(id);
 }
-double AmpSumOfAmplitudes::getFraction(unsigned int id){
-	double integral = _pdfList[id]->integral();
+double AmpSumOfAmplitudes::getUnormalizedFraction(unsigned int id){
+	double integral = _pdfList[id]->totalIntegral(); //integral over amplitude id: |amp*WignerD|^2
 	double a = _intList[id]->GetValue();
 	double phi = _phaseList[id]->GetValue();
 	std::complex<double> eiphi(a*cos(phi),a*sin(phi));
 	double coeff = std::abs(eiphi)*std::abs(eiphi);
 	return ( coeff*integral );
+}
+double AmpSumOfAmplitudes::getTotalIntegral(std::string name){
+	int id=-1;
+	for(unsigned int i=0; i<_pdfList.size(); i++)
+		if(_pdfList[i]->GetName()==name) id=i;
+	if(id<0) return 0;
+	return getTotalIntegral(id);
+}
+double AmpSumOfAmplitudes::getTotalIntegral(unsigned int id){
+	std::cout<<"asdfasdfadfs"<<std::endl;
+	unsigned int twoJplusOne = 2*_pdfList[id]->getSpin()+1;
+	return ( _pdfList[id]->totalIntegral()*twoJplusOne );
+//	return ( _pdfList[id]->totalIntegral() );
 }
 
 double AmpSumOfAmplitudes::evaluateSlice(dataPoint& point, std::complex<double>* reso, unsigned int nResos, unsigned int subSys=1) const

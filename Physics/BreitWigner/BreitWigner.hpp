@@ -20,7 +20,7 @@
 
 #include <vector>
 #include <memory>
-#include "Physics/Amplitude.hpp"
+#include "Core/Amplitude.hpp"
 #include "Core/ParameterList.hpp"
 
 class BreitWigner : public Amplitude {
@@ -53,7 +53,8 @@ public:
 
 	/* not implemented yet */
 	virtual void printAmps() {};
-	virtual double getFraction(std::string name) {};
+	virtual double getFraction(unsigned int id) { return 1.;};
+	virtual double getFraction(std::string name) { return 1.;};
 	virtual void printFractions() {};
 	virtual double getIntValue(std::string var1, double min1, double max1, std::string var2, double min2, double max2) {};
 	virtual const double integral() {};
