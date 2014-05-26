@@ -168,7 +168,7 @@ Event& RootReader::getEvent(const int i){
 allMasses RootReader::getMasses(){
 	if(!fEvents.size()) return allMasses();
 	unsigned int nParts = fEvents.at(0).getNParticles();
-	BOOST_LOG_TRIVIAL(debug)<<"RootReader::getMasses() #particles: "<<nParts;
+//	BOOST_LOG_TRIVIAL(debug)<<"RootReader::getMasses() #particles: "<<nParts;
 
 	//determine invMass combinations
 	unsigned int nMasses=0;
@@ -178,32 +178,48 @@ allMasses RootReader::getMasses(){
 			nMasses++;
 			ids.push_back(std::make_pair(i+1,j+1));
 		}
-	BOOST_LOG_TRIVIAL(debug)<<"RootReader::getMasses() #invMasses: "<<nMasses;
+//	BOOST_LOG_TRIVIAL(debug)<<"RootReader::getMasses() #invMasses: "<<nMasses;
 
-	allMasses result(nMasses, fEvents.size(), ids);
+	unsigned int nSkipped =0; //count events which are outside PHSP boundary
+	unsigned int nFilled=0; //count events which are outside PHSP boundary
+
+//	allMasses result(nMasses, fEvents.size(), ids);
+	allMasses result(nMasses, ids);
 	//calc and store inv masses
 	for(unsigned int evt=0; evt<fEvents.size(); evt++){
-		Event tmp = fEvents.at(evt);
+		if( result.Fill(fEvents.at(evt)) ) nFilled++;
+		else nSkipped++;
 
-		// Check number of particle in TClonesrray
-		if( nParts != tmp.getNParticles() ){
-			result.nEvents--;
-			continue;
-		}
-		result.eff.at(evt) = tmp.getEfficiency();
-		result.weight.at(evt) = tmp.getWeight();
-
-		for(unsigned int pa=0; pa<nParts; pa++){
-			for(unsigned int pb=pa+1; pb<nParts; pb++){
-				const Particle &inA(tmp.getParticle(pa));
-				const Particle &inB(tmp.getParticle(pb));
-				double mymass_sq = inA.invariantMass(inB);
-				(result.masses_sq.at(std::make_pair(pa+1,pb+1))).at(evt) = mymass_sq;
-			}//particle loop B
-		}//particle loop A
+//		Event tmp = fEvents.at(evt);
+//		dataPoint point(tmp);
+//
+//		// Check number of particle in TClonesrray and if event is within PHSP boundary
+//		if( nParts != tmp.getNParticles()  || !Kinematics::instance()->isWithinPhsp(point)){
+//			nSkipped++;
+////			result.nEvents--;
+//			continue;
+//		}
+////		result.eff.at(evt) = tmp.getEfficiency();
+////		result.weight.at(evt) = tmp.getWeight();
+//		result.eff.push_back(tmp.getEfficiency());
+//		result.weight.push_back(tmp.getWeight());
+//
+//		for(unsigned int pa=0; pa<nParts; pa++){
+//			for(unsigned int pb=pa+1; pb<nParts; pb++){
+//				const Particle &inA(tmp.getParticle(pa));
+//				const Particle &inB(tmp.getParticle(pb));
+//				double mymass_sq = inA.invariantMass(inB);
+////				(result.masses_sq.at(std::make_pair(pa+1,pb+1))).at(evt) = mymass_sq;
+//				(result.masses_sq.at(std::make_pair(pa+1,pb+1))).push_back(mymass_sq);
+//			}//particle loop B
+//		}//particle loop A
+//		result.nEvents++;
+//		nFilled++;
 
 	}//event loop
+	BOOST_LOG_TRIVIAL(debug)<<"RootReader::getMasses() "<<nSkipped<<"("<<(double)nSkipped/fEvents.size()*100<<"%) data points are outside the PHSP boundary. We skip these points!";
 
+//	std::cout<<"after      "<<result.masses_sq.at(std::make_pair(2,3)).size()<<std::endl;
 	return result;
 }
 

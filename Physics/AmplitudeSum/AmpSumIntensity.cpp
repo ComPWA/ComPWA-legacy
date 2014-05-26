@@ -178,16 +178,15 @@ void AmpSumIntensity::setupTree(allMasses& theMasses, allMasses& thePHSPMasses){
 	_calcNorm=1;
 	bool isPhspTree = (thePHSPMasses.nEvents==0) ? 1 : 0;
 	if(isPhspTree) thePHSPMasses = theMasses;
-	if(!isPhspTree)
+	if(!isPhspTree){
 		BOOST_LOG_TRIVIAL(debug)<<"AmpSumIntensity::setupTree() start setting up data Tree";
-	else
+	}else{
 		BOOST_LOG_TRIVIAL(debug)<<"AmpSumIntensity::setupTree() start setting up phsp Tree";
+	}
 
 	//------------Setup Tree---------------------
 	std::shared_ptr<FunctionTree> newTree = std::shared_ptr<FunctionTree>(new FunctionTree());
-
 	//------------Setup Tree Pars---------------------
-	std::shared_ptr<DoubleParameter> x = std::shared_ptr<DoubleParameter>(new DoubleParameter("x"));
 	std::shared_ptr<MultiDouble> m23sq = std::shared_ptr<MultiDouble>( new MultiDouble("m23sq",theMasses.masses_sq.at( std::make_pair(2,3) )) );
 	std::shared_ptr<MultiDouble> m13sq = std::shared_ptr<MultiDouble>( new MultiDouble("m13sq",theMasses.masses_sq.at( std::make_pair(1,3) )) );
 	std::shared_ptr<MultiDouble> m12sq = std::shared_ptr<MultiDouble>( new MultiDouble("m12sq",theMasses.masses_sq.at( std::make_pair(1,2) )) );

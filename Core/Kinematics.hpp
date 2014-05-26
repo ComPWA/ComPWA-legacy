@@ -24,12 +24,17 @@ class dataPoint;
 class Kinematics
 {
 public:
+	//! singleton pattern
 	static Kinematics* instance();
+	//! vector with names of variables, e.g. vec[0]=m23sq, vec[1]=m13sq
 	const std::vector<std::string>& getVarNames(){return varNames;}
 	//! checks of data point is within phase space boundaries
 	virtual bool isWithinPhsp(const dataPoint& point) = 0;
+	//! mass of mother particle
 	virtual double getMotherMass() = 0;
+	//! calculated the PHSP volume of the current decay by MC integration
 	virtual double getPhspVolume() = 0;
+	//! converts Event to dataPoint
 	virtual void eventToDataPoint(Event& ev, dataPoint& point) = 0;
 
 

@@ -32,24 +32,51 @@
 class allMasses
 {
 public:
+	/**Constructor
+	 *
+	 * @param inMasses number of variables 3 for 3-body decay
+	 * @param inTup combinations for inv masses (e.g (2,3), (1,3), (1,2))
+	 */
+	allMasses(unsigned int inMasses, std::vector<std::pair<unsigned int, unsigned int> >& inTup) :
+		nInvMasses(inMasses),nEvents(0) {
+		for(unsigned int i=0; i<inTup.size(); i++){
+			std::cout<<inTup[i].first<<" "<<inTup[i].second<<std::endl;
+			masses_sq.insert( std::make_pair( inTup[i], std::vector<double>() ) );
+		}
+	}
+
+
+	/**Constructor
+	 * additionally allocates memory, if number of events is known.
+	 *
+	 * @param inMasses number of variables 3 for 3-body decay
+	 * @param inEvents number of events to reserve memory for
+	 * @param inTup combinations for inv masses (e.g (2,3), (1,3), (1,2))
+	 */
 	allMasses(unsigned int inMasses, unsigned int inEvents, std::vector<std::pair<unsigned int, unsigned int> >& inTup)
 	:nInvMasses(inMasses),nEvents(inEvents){
+		//alocate memory in advance
 		for(unsigned int i=0; i<inTup.size(); i++)
 			masses_sq.insert( std::make_pair( inTup[i], std::vector<double>(inEvents,0.) ) );
 		eff = std::vector<double>(nEvents,1.);
 		weight = std::vector<double>(nEvents,1.);
 	}
 
+	//!Standard constructor
 	allMasses():nInvMasses(0),nEvents(0) {}
 
+	//! Fill event
+	bool Fill(Event &evt);
 	void setEfficiency(std::shared_ptr<Efficiency> effObj){
+		unsigned int nEvents = masses_sq.size();
+		eff = std::vector<double>(nEvents,1.);
 		for(unsigned int i=0; i<nEvents;i++){
 			std::vector<double> data;
 			data.push_back(masses_sq.at( std::make_pair(2,3) )[i]);
 			data.push_back(masses_sq.at( std::make_pair(1,3) )[i]);
 			double value  = effObj->evaluate(data);
-//			if(value <= 0) value = 0;
-//			else value = 1/value;
+			//			if(value <= 0) value = 0;
+			//			else value = 1/value;
 			/*
 			 * we need to use sqrt(eff) here because in the current
 			 * implementation the Amplitude value is squared after
@@ -57,7 +84,7 @@ public:
 			 */
 			eff.at(i) = sqrt(value);
 			if(value==0) eff.at(i) = 0.001;
-//			std::cout<<effObj->evaluate(data)<<std::endl;
+			//			std::cout<<effObj->evaluate(data)<<std::endl;
 		}
 		return;
 	}
@@ -65,8 +92,8 @@ public:
 	std::map<std::pair<unsigned int, unsigned int>,std::vector<double> > masses_sq;
 	std::vector<double> eff;
 	std::vector<double> weight;
-	unsigned int nInvMasses;
 	unsigned int nEvents;
+	unsigned int nInvMasses;
 
 };
 
@@ -114,5 +141,6 @@ protected:
 	void init();
 	std::vector<double> var;
 	double weight;
+	friend std::ostream & operator<<(std::ostream &os, dataPoint &p);
 };
 #endif /*DPPOINT2_HPP_*/
