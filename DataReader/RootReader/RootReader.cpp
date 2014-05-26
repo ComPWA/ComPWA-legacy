@@ -30,8 +30,7 @@ void RootReader::Clear(){
 std::shared_ptr<Data> RootReader::rndSubSet(unsigned int size, std::shared_ptr<Generator> gen){
 	std::shared_ptr<Data> newSample(new RootReader(fileName, true,"test",false));
 	unsigned int totalSize = getNEvents();
-	unsigned int newSize = size;
-	double threshold = (double)newSize/totalSize;
+	unsigned int newSize = totalSize;
 	/* 1th method: new Sample has exact size, but possibly events are added twice.
 	 * We would have to store all used events in a vector and search the vector at every event -> slow
 	 */
@@ -44,9 +43,17 @@ std::shared_ptr<Data> RootReader::rndSubSet(unsigned int size, std::shared_ptr<G
 	//}
 
 	/* 2nd method: events are added once only, but total size of sample varies with sqrt(N) */
-	unsigned int d=0;
-	for(unsigned int i=0; i<totalSize; i++)
-		if(gen->getUniform()<threshold) newSample->pushEvent(fEvents[i]);
+	for(unsigned int i=0; i<totalSize; i++){//count how many events are not within PHSP
+		dataPoint point(fEvents[i]);
+		if(!Kinematics::instance()->isWithinPhsp(point)) newSize--;
+	}
+	double threshold = (double)size/newSize; //calculate threshold
+	for(unsigned int i=0; i<totalSize; i++){
+		dataPoint point(fEvents[i]);
+		if(!Kinematics::instance()->isWithinPhsp(point)) continue;
+		if(gen->getUniform()<threshold)
+			newSample->pushEvent(fEvents[i]);
+	}
 	return newSample;
 }
 
@@ -58,7 +65,7 @@ void RootReader::read(){
 	fTree->SetBranchAddress("weight",&feventWeight);
 	fTree->SetBranchAddress("charge",&fCharge);
 	fTree->SetBranchAddress("flavour",&fFlavour);
-//	fEvent=0;
+	//	fEvent=0;
 	bin();
 	storeEvents();
 
@@ -71,7 +78,7 @@ RootReader::RootReader(TTree* tr, const bool binned=false) : fBinned(binned){
 RootReader::RootReader(const std::string inRootFile, const bool binned,
 		const std::string inTreeName, const bool readFlag)
 :fBinned(binned),_readFlag(readFlag),fileName(inRootFile),treeName(inTreeName){
-//	fEvent=0;
+	//	fEvent=0;
 	if(!readFlag) return;
 	fFile = new TFile(fileName.c_str());
 	fTree = (TTree*) fFile->Get(treeName.c_str());
@@ -124,8 +131,8 @@ const std::vector<std::string>& RootReader::getVariableNames(){
 Event& RootReader::getEvent(const int i){
 	//Event outEvent;
 
-//	if(i>=0) {fEvent=i;}
-//	else {fEvent++;}
+	//	if(i>=0) {fEvent=i;}
+	//	else {fEvent++;}
 
 	return fEvents.at(i);
 
@@ -168,7 +175,7 @@ Event& RootReader::getEvent(const int i){
 allMasses RootReader::getMasses(){
 	if(!fEvents.size()) return allMasses();
 	unsigned int nParts = fEvents.at(0).getNParticles();
-//	BOOST_LOG_TRIVIAL(debug)<<"RootReader::getMasses() #particles: "<<nParts;
+	//	BOOST_LOG_TRIVIAL(debug)<<"RootReader::getMasses() #particles: "<<nParts;
 
 	//determine invMass combinations
 	unsigned int nMasses=0;
@@ -178,48 +185,48 @@ allMasses RootReader::getMasses(){
 			nMasses++;
 			ids.push_back(std::make_pair(i+1,j+1));
 		}
-//	BOOST_LOG_TRIVIAL(debug)<<"RootReader::getMasses() #invMasses: "<<nMasses;
+	//	BOOST_LOG_TRIVIAL(debug)<<"RootReader::getMasses() #invMasses: "<<nMasses;
 
 	unsigned int nSkipped =0; //count events which are outside PHSP boundary
 	unsigned int nFilled=0; //count events which are outside PHSP boundary
 
-//	allMasses result(nMasses, fEvents.size(), ids);
+	//	allMasses result(nMasses, fEvents.size(), ids);
 	allMasses result(nMasses, ids);
 	//calc and store inv masses
 	for(unsigned int evt=0; evt<fEvents.size(); evt++){
 		if( result.Fill(fEvents.at(evt)) ) nFilled++;
 		else nSkipped++;
 
-//		Event tmp = fEvents.at(evt);
-//		dataPoint point(tmp);
-//
-//		// Check number of particle in TClonesrray and if event is within PHSP boundary
-//		if( nParts != tmp.getNParticles()  || !Kinematics::instance()->isWithinPhsp(point)){
-//			nSkipped++;
-////			result.nEvents--;
-//			continue;
-//		}
-////		result.eff.at(evt) = tmp.getEfficiency();
-////		result.weight.at(evt) = tmp.getWeight();
-//		result.eff.push_back(tmp.getEfficiency());
-//		result.weight.push_back(tmp.getWeight());
-//
-//		for(unsigned int pa=0; pa<nParts; pa++){
-//			for(unsigned int pb=pa+1; pb<nParts; pb++){
-//				const Particle &inA(tmp.getParticle(pa));
-//				const Particle &inB(tmp.getParticle(pb));
-//				double mymass_sq = inA.invariantMass(inB);
-////				(result.masses_sq.at(std::make_pair(pa+1,pb+1))).at(evt) = mymass_sq;
-//				(result.masses_sq.at(std::make_pair(pa+1,pb+1))).push_back(mymass_sq);
-//			}//particle loop B
-//		}//particle loop A
-//		result.nEvents++;
-//		nFilled++;
+		//		Event tmp = fEvents.at(evt);
+		//		dataPoint point(tmp);
+		//
+		//		// Check number of particle in TClonesrray and if event is within PHSP boundary
+		//		if( nParts != tmp.getNParticles()  || !Kinematics::instance()->isWithinPhsp(point)){
+		//			nSkipped++;
+		////			result.nEvents--;
+		//			continue;
+		//		}
+		////		result.eff.at(evt) = tmp.getEfficiency();
+		////		result.weight.at(evt) = tmp.getWeight();
+		//		result.eff.push_back(tmp.getEfficiency());
+		//		result.weight.push_back(tmp.getWeight());
+		//
+		//		for(unsigned int pa=0; pa<nParts; pa++){
+		//			for(unsigned int pb=pa+1; pb<nParts; pb++){
+		//				const Particle &inA(tmp.getParticle(pa));
+		//				const Particle &inB(tmp.getParticle(pb));
+		//				double mymass_sq = inA.invariantMass(inB);
+		////				(result.masses_sq.at(std::make_pair(pa+1,pb+1))).at(evt) = mymass_sq;
+		//				(result.masses_sq.at(std::make_pair(pa+1,pb+1))).push_back(mymass_sq);
+		//			}//particle loop B
+		//		}//particle loop A
+		//		result.nEvents++;
+		//		nFilled++;
 
 	}//event loop
 	BOOST_LOG_TRIVIAL(debug)<<"RootReader::getMasses() "<<nSkipped<<"("<<(double)nSkipped/fEvents.size()*100<<"%) data points are outside the PHSP boundary. We skip these points!";
 
-//	std::cout<<"after      "<<result.masses_sq.at(std::make_pair(2,3)).size()<<std::endl;
+	//	std::cout<<"after      "<<result.masses_sq.at(std::make_pair(2,3)).size()<<std::endl;
 	return result;
 }
 

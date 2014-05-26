@@ -39,10 +39,8 @@ public:
 	 */
 	allMasses(unsigned int inMasses, std::vector<std::pair<unsigned int, unsigned int> >& inTup) :
 		nInvMasses(inMasses),nEvents(0) {
-		for(unsigned int i=0; i<inTup.size(); i++){
-			std::cout<<inTup[i].first<<" "<<inTup[i].second<<std::endl;
+		for(unsigned int i=0; i<inTup.size(); i++)
 			masses_sq.insert( std::make_pair( inTup[i], std::vector<double>() ) );
-		}
 	}
 
 
