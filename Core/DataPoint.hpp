@@ -65,8 +65,9 @@ public:
 
 	//! Fill event
 	bool Fill(Event &evt);
+	//! add efficiency value from \param effObj to every event in masses_sq
 	void setEfficiency(std::shared_ptr<Efficiency> effObj){
-		unsigned int nEvents = masses_sq.size();
+		unsigned int nEvents = masses_sq.at(std::make_pair(2,3)).size();
 		eff = std::vector<double>(nEvents,1.);
 		for(unsigned int i=0; i<nEvents;i++){
 			std::vector<double> data;
