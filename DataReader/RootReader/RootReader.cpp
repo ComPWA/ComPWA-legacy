@@ -196,7 +196,7 @@ allMasses RootReader::getMasses(const unsigned int startEvent, unsigned int nEve
   unsigned int nSkipped =0; //count events which are outside PHSP boundary
   unsigned int nFilled=0; //count events which are outside PHSP boundary
 
-  allMasses result(nMasses, nEvents, ids);
+  allMasses result(nMasses, ids);
   //calc and store inv masses
   for(unsigned int evt=startEvent; evt<startEvent+nEvents; evt++){
     //Event tmp = fEvents.at(evt);

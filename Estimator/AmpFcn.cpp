@@ -4,7 +4,7 @@
 
 //#include <bits/shared_ptr.h>
 
-#include "../Physics/Amplitude.hpp"
+#include "../Core/Amplitude.hpp"
 #include "Estimator.hpp"
 
 class ParameterList;
