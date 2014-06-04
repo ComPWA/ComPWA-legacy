@@ -68,10 +68,6 @@ RunManager::~RunManager(){
 }
 
 std::shared_ptr<FitResult> RunManager::startFit(ParameterList& inPar){
-	if( !(validAmplitude==1 && validData==1 && validOptimizer==1) ){
-		BOOST_LOG_TRIVIAL(error) << "RunManager: startFit() requirements not fulfilled!";
-		return std::shared_ptr<FitResult>();
-	}
 	BOOST_LOG_TRIVIAL(info) << "RunManager: Starting fit.";
 	BOOST_LOG_TRIVIAL(info) << "RunManager: Input data contains "<<pData_->getNEvents()<<" events.";
 	//	BOOST_LOG_TRIVIAL(info) << "Initial LH="<<esti->controlParameter(inPar);
@@ -86,7 +82,8 @@ std::shared_ptr<FitResult> RunManager::startFit(ParameterList& inPar){
 bool RunManager::generate( unsigned int number ) {
 	if(number>0) setSize(number);
 	if( !(validData && validAmplitude && validSize && validGenerator) ){
-		BOOST_LOG_TRIVIAL(error)<<"RunManager: generate() requirements not fulfilled";
+		BOOST_LOG_TRIVIAL(error)<<"RunManager: generate() requirements not fulfilled (Data,Amp,Size,Gen)";
+		BOOST_LOG_TRIVIAL(error)<<" "<<validData<<" "<<validAmplitude<<" "<<validSize<<" "<<validGenerator;
 		return false;
 	}
 
@@ -106,8 +103,8 @@ bool RunManager::generate( unsigned int number ) {
 	BOOST_LOG_TRIVIAL(info) << "Generating MC: ["<<size_<<" events] ";
 
 	unsigned int startTime = clock();
-	boost::progress_display progressBar(size_); //boost progress bar (thread-safe)
-#pragma omp parallel firstprivate(genMaxVal) shared(maxTest,totalCalls)
+//	boost::progress_display progressBar(size_); //boost progress bar (thread-safe)
+//#pragma omp parallel firstprivate(genMaxVal) shared(maxTest,totalCalls)
 	{
 		unsigned int threadId = omp_get_thread_num();
 		unsigned int numThreads = omp_get_num_threads();
@@ -117,20 +114,28 @@ bool RunManager::generate( unsigned int number ) {
 		//		genNew->setSeed(std::clock()+threadId);//setting the seed here makes not sense in cast that TGenPhaseSpace is used, because it uses gRandom
 		double AMPpdf;
 
-#pragma omp for
+//#pragma omp for
+		unsigned int cnt=0;
 		for(unsigned int i=0;i<size_;i++){
 			if(i>0) i--;
+			if(i%1000==0 && cnt!=i) {
+			  cnt=i;
+			  BOOST_LOG_TRIVIAL(debug) << "Current event: "<<i;
+			}
 			Event tmp;
 			genNew->generate(tmp);
 			totalCalls++;
 			double weight = tmp.getWeight();
 			/* reset weights: the weights are taken into account by hit and miss. The resulting
 			 * sample is therefore unweighted */
-			tmp.setWeight(1);//reset weight
+			tmp.setWeight(1.);//reset weight
+			tmp.setEfficiency(1.);//reset weight
+			//set charge
+			//set flavour
 			dataPoint point(tmp);
 			double ampRnd = genNew->getUniform()*genMaxVal;
 			ParameterList list;
-#pragma omp critical
+//#pragma omp critical
 			{
 				list = pPhys_->intensity(point,minPar);//unfortunatly not thread safe
 				AMPpdf = *list.GetDoubleParameter(0);
@@ -138,11 +143,11 @@ bool RunManager::generate( unsigned int number ) {
 			}
 			if( ampRnd > (weight*AMPpdf) ) continue;
 			i++;
-#pragma omp critical
+//#pragma omp critical
 			{
 				pData_->pushEvent(tmp);//unfortunatly not thread safe
 			}
-			++progressBar;//progress bar
+//			++progressBar;//progress bar
 		}
 	BOOST_LOG_TRIVIAL(debug) << "Current seed: "<<genNew->getSeed();
 	}
@@ -162,7 +167,7 @@ bool RunManager::generate( unsigned int number ) {
 };
 
 bool RunManager::generatePhsp( unsigned int number ) {
-	if( !(validPhsp==1 && validSize==1) )
+	if( !(validPhsp==1) )
 		return false;
 	unsigned int phspSize = 10*size_;
 	if(number>0) phspSize = number;
@@ -185,7 +190,10 @@ bool RunManager::generatePhsp( unsigned int number ) {
 			if( ampRnd > tmp.getWeight() ) continue;
 			/* reset weights: the weights are taken into account by hit and miss on the weights.
 			 * The resulting sample is therefore unweighted */
-			tmp.setWeight(1);//reset weight
+			tmp.setWeight(1.);//reset weight
+			tmp.setEfficiency(1.);
+			//charge
+			//flavour
 			i++;
 #pragma omp critical
 			{

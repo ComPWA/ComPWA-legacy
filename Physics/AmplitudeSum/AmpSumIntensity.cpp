@@ -54,17 +54,17 @@ AmpSumIntensity::AmpSumIntensity(const AmpSumIntensity& other) : nAmps(other.nAm
 }
 
 AmpSumIntensity::AmpSumIntensity(AmplitudeSetup ini, normStyle ns, std::shared_ptr<Efficiency> eff, unsigned int entries, double dpArea) :
-												totAmp("relBWsumAmplitude", "totAmp"), ampSetup(ini),
-												_entries(entries), _normStyle(ns), _calcNorm(1), _dpArea(dpArea),
-												_calcMaxFcnVal(0),eff_(eff)
+														totAmp("relBWsumAmplitude", "totAmp"), ampSetup(ini),
+														_entries(entries), _normStyle(ns), _calcNorm(1), _dpArea(dpArea),
+														_calcMaxFcnVal(0),eff_(eff)
 {
 	init();
 }
 
 AmpSumIntensity::AmpSumIntensity(AmplitudeSetup ini, std::shared_ptr<Efficiency> eff, unsigned int entries, double dpArea) :
-												totAmp("relBWsumAmplitude", "totAmp"), ampSetup(ini),
-												_entries(entries), _normStyle(none), _calcNorm(0), _dpArea(dpArea),
-												_calcMaxFcnVal(0),eff_(eff)
+														totAmp("relBWsumAmplitude", "totAmp"), ampSetup(ini),
+														_entries(entries), _normStyle(none), _calcNorm(0), _dpArea(dpArea),
+														_calcMaxFcnVal(0),eff_(eff)
 {
 	init();
 }
@@ -72,9 +72,9 @@ AmpSumIntensity::AmpSumIntensity(AmplitudeSetup ini, std::shared_ptr<Efficiency>
 AmpSumIntensity::AmpSumIntensity(const double inM, const double inBr, const double in1,const double in2, const double in3,
 		std::string nameM, std::string name1,std::string name2,std::string name3,
 		AmplitudeSetup ini, unsigned int entries, normStyle ns, double dpArea) :
-												totAmp("relBWsumAmplitude", "totAmp"), ampSetup(ini),
-												_entries(entries), _normStyle(ns), _calcNorm(1),_dpArea(dpArea),
-												_calcMaxFcnVal(0),eff_(std::shared_ptr<Efficiency>(new UnitEfficiency()))
+														totAmp("relBWsumAmplitude", "totAmp"), ampSetup(ini),
+														_entries(entries), _normStyle(ns), _calcNorm(1),_dpArea(dpArea),
+														_calcMaxFcnVal(0),eff_(std::shared_ptr<Efficiency>(new UnitEfficiency()))
 {
 	init();
 }
@@ -82,40 +82,42 @@ AmpSumIntensity::AmpSumIntensity(const double inM, const double inBr, const doub
 void AmpSumIntensity::init(){
 	result.AddParameter(std::shared_ptr<DoubleParameter>(new DoubleParameter("AmpSumResult")));
 
-	  DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
-	  _dpArea = kin->getPhspVolume();
-	  //  std::cout<<kin->getPhspVolume()<<std::endl;
-	  _calcNorm=1;
-	  BOOST_LOG_TRIVIAL(debug)<<"AmpSumIntensity::init() number of Entries in dalitz plot set to: "<<_entries;
-	  BOOST_LOG_TRIVIAL(debug)<<"AmpSumIntensity::init() area of phase space: "<<_dpArea;
+	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
+	_dpArea = kin->getPhspVolume();
+	//  std::cout<<kin->getPhspVolume()<<std::endl;
+	_calcNorm=1;
+	if(_normStyle==normStyle::none) _calcNorm=0;
+	BOOST_LOG_TRIVIAL(debug)<<"AmpSumIntensity::init() number of Entries in dalitz plot set to: "<<_entries;
+	BOOST_LOG_TRIVIAL(debug)<<"AmpSumIntensity::init() area of phase space: "<<_dpArea;
 
-	  for(std::vector<Resonance>::iterator reso=ampSetup.getResonances().begin(); reso!=ampSetup.getResonances().end(); reso++){
-	       Resonance tmp = (*reso);
-	       if(!tmp.m_enable) continue;
-	       //setup RooVars
-	       namer.push_back(tmp.m_name);
-	       mr.insert(std::make_pair(tmp.m_name, std::shared_ptr<DoubleParameter> (new DoubleParameter("mass_"+tmp.m_name,tmp.m_mass, tmp.m_mass_min, tmp.m_mass_max) ) ));
-	       gr.insert(std::make_pair(tmp.m_name, std::shared_ptr<DoubleParameter> (new DoubleParameter("width_"+tmp.m_name,tmp.m_width, tmp.m_width_min, tmp.m_width_max) ) ));
-	       rr.insert(std::make_pair(tmp.m_name, std::shared_ptr<DoubleParameter> (new DoubleParameter("mag_"+tmp.m_name,tmp.m_strength) ) ));
-	       phir.insert(std::make_pair(tmp.m_name, std::shared_ptr<DoubleParameter> (new DoubleParameter("phase_"+tmp.m_name,tmp.m_phase) ) ));
+	for(std::vector<Resonance>::iterator reso=ampSetup.getResonances().begin(); reso!=ampSetup.getResonances().end(); reso++){
+		Resonance tmp = (*reso);
+		if(!tmp.m_enable) continue;
+		//setup RooVars
+		namer.push_back(tmp.m_name);
+		mr.insert(std::make_pair(tmp.m_name, std::shared_ptr<DoubleParameter> (new DoubleParameter("mass_"+tmp.m_name,tmp.m_mass, tmp.m_mass_min, tmp.m_mass_max) ) ));
+		gr.insert(std::make_pair(tmp.m_name, std::shared_ptr<DoubleParameter> (new DoubleParameter("width_"+tmp.m_name,tmp.m_width, tmp.m_width_min, tmp.m_width_max) ) ));
+		rr.insert(std::make_pair(tmp.m_name, std::shared_ptr<DoubleParameter> (new DoubleParameter("mag_"+tmp.m_name,tmp.m_strength) ) ));
+		phir.insert(std::make_pair(tmp.m_name, std::shared_ptr<DoubleParameter> (new DoubleParameter("phase_"+tmp.m_name,tmp.m_phase) ) ));
 
-	       unsigned int subSys = tmp.m_daugtherA + tmp.m_daugtherB;
-	       //unsigned int last = mr.size()-1;
+		unsigned int subSys = tmp.m_daugtherA + tmp.m_daugtherB;
+		//unsigned int last = mr.size()-1;
 
-	       //setup Dynamics
-	       //unsigned int last = mr.size()-1;
-	       std::shared_ptr<AmpRelBreitWignerRes> tmpbw(new AmpRelBreitWignerRes(tmp.m_name.c_str(),
-	               *mr[tmp.m_name], *gr[tmp.m_name], tmp.m_mesonRadius, subSys, tmp.m_spin,tmp.m_m,tmp.m_n) );
-	       totAmp.addBW(tmpbw, rr[tmp.m_name], phir[tmp.m_name]);
+		//setup Dynamics
+		//unsigned int last = mr.size()-1;
+		std::shared_ptr<AmpRelBreitWignerRes> tmpbw(new AmpRelBreitWignerRes(tmp.m_name.c_str(),
+				*mr[tmp.m_name], *gr[tmp.m_name], tmp.m_mesonRadius, subSys, tmp.m_spin,tmp.m_m,tmp.m_n) );
+		std::shared_ptr<AmpWigner2> tmpaw(new AmpWigner2(subSys, tmp.m_spin));
+		totAmp.addBW(tmpbw, rr[tmp.m_name], phir[tmp.m_name], tmpaw);
 
-	       //setting normalization between amplitudes
-	       double norm=tmp.m_norm;
-	       if(norm<0 || _calcNorm) {//recalculate normalization
-	           norm = normReso(tmpbw);
-	           reso->m_norm = norm;//updating normalization
-	       }
-	       tmpbw->SetNormalization(1/norm);
-	   }// end loop over resonances
+		//setting normalization between amplitudes
+		double norm=tmp.m_norm;
+		if(norm<0 || _calcNorm) {//recalculate normalization
+			norm = normReso(tmpbw);
+			reso->m_norm = norm;//updating normalization
+		}
+		tmpbw->SetNormalization(1/norm);
+	}// end loop over resonances
 
 	for(std::vector<ResonanceFlatte>::iterator reso=ampSetup.getResonancesFlatte().begin(); reso!=ampSetup.getResonancesFlatte().end(); reso++){
 		ResonanceFlatte tmp = (*reso);
@@ -126,15 +128,15 @@ void AmpSumIntensity::init(){
 		gr.insert(std::make_pair(tmp.m_name, std::shared_ptr<DoubleParameter> (new DoubleParameter("width_"+tmp.m_name,tmp.m_width, tmp.m_width_min, tmp.m_width_max) ) ));
 		rr.insert(std::make_pair(tmp.m_name, std::shared_ptr<DoubleParameter> (new DoubleParameter("mag_"+tmp.m_name,tmp.m_strength) ) ));
 		phir.insert(std::make_pair(tmp.m_name, std::shared_ptr<DoubleParameter> (new DoubleParameter("phase_"+tmp.m_name,tmp.m_phase) ) ));
-		DoubleParameter param1("coupling1_"+tmp.m_name,tmp.m_coupling);
-		DoubleParameter param2("coupling2_"+tmp.m_name,tmp.m_couplingHidden);
+		DoubleParameter coupling("coupling_"+tmp.m_name,tmp.m_coupling);
+		DoubleParameter couplingHidden("couplingHidden_"+tmp.m_name,tmp.m_couplingHidden);
 
 		unsigned int subSys = tmp.m_daugtherA + tmp.m_daugtherB;
 
 		//setup Dynamics
 		//unsigned int last = mr.size()-1;
 		std::shared_ptr<AmpFlatteRes> tmpbw(new AmpFlatteRes(tmp.m_name.c_str(),
-				*mr[tmp.m_name], *gr[tmp.m_name], tmp.m_mesonRadius, param1, param2, \
+				*mr[tmp.m_name], *gr[tmp.m_name], tmp.m_mesonRadius, coupling, couplingHidden, \
 				PhysConst::instance()->getMass(tmp.m_hiddenParticle1),\
 				PhysConst::instance()->getMass(tmp.m_hiddenParticle2),\
 				subSys, tmp.m_spin,tmp.m_m,tmp.m_n) );
@@ -145,135 +147,335 @@ void AmpSumIntensity::init(){
 			norm = normReso(tmpbw);
 			reso->m_norm = norm;//updating normalization
 		}
-		tmpbw->SetNormalization(1/norm);
+		tmpbw->SetNormalization(1./norm);
 	}// end loop over resonancesFlatte
 
 	//	ampSetup.save(ampSetup.getFilePath());//save updated information to input file
 	nAmps=rr.size();
-	if(_calcNorm) integral();
+//	if(_calcNorm) integral();
 	BOOST_LOG_TRIVIAL(info)<<"AmpSumIntensity: completed setup!";
 }
+//class NormStrategy : public Strategy {
+//public:
+//	NormStrategy(const std::string resonanceName, ParType in):Strategy(in),name(resonanceName){
+//		//name = +resonanceName;
+//	}
+//	virtual bool execute(ParameterList& paras, std::shared_ptr<AbsParameter>& out) {
+//		switch(checkType){
+//		case ParType::COMPLEX:{}
+//		case ParType::DOUBLE:{}
+//
+//		}
+//	}
+//}
 
-void AmpSumIntensity::setupTree(allMasses& theMasses, bool isPhspTree){
-  DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
-  _dpArea = kin->getPhspVolume();
-  //  std::cout<<kin->getPhspVolume()<<std::endl;
-  _calcNorm=1;
-  if(!isPhspTree)
-    BOOST_LOG_TRIVIAL(debug)<<"AmpSumIntensity::setupTree() start setting up data Tree";
-  else
-    BOOST_LOG_TRIVIAL(debug)<<"AmpSumIntensity::setupTree() start setting up phsp Tree";
+void AmpSumIntensity::setupTree(allMasses& theMasses, allMasses& thePHSPMasses){
+	if(theMasses.nEvents==0){
+		BOOST_LOG_TRIVIAL(error) << "AmpSumIntensity: sample empty!";
+		return;
+	}
+	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
+	_dpArea = kin->getPhspVolume();
+	//  std::cout<<kin->getPhspVolume()<<std::endl;
+	_calcNorm=1;
+	if(_normStyle==normStyle::none) _calcNorm=0;
+	bool isPhspTree = (thePHSPMasses.nEvents==0) ? 1 : 0;
+	if(isPhspTree) thePHSPMasses = theMasses;
+	if(!isPhspTree)
+		BOOST_LOG_TRIVIAL(debug)<<"AmpSumIntensity::setupTree() start setting up data Tree";
+	else
+		BOOST_LOG_TRIVIAL(debug)<<"AmpSumIntensity::setupTree() start setting up phsp Tree";
 
-  //------------Setup Tree---------------------
-  std::shared_ptr<FunctionTree> newTree = std::shared_ptr<FunctionTree>(new FunctionTree());
+	//------------Setup Tree---------------------
+	std::shared_ptr<FunctionTree> newTree = std::shared_ptr<FunctionTree>(new FunctionTree());
 
-  //------------Setup Tree Pars---------------------
-  //std::shared_ptr<DoubleParameter> x = std::shared_ptr<DoubleParameter>(new DoubleParameter("x"));
-  std::shared_ptr<MultiDouble> m23 = std::shared_ptr<MultiDouble>( new MultiDouble("m23",theMasses.masses_sq.at( std::make_pair(2,3) )) );
-  std::shared_ptr<MultiDouble> m13 = std::shared_ptr<MultiDouble>( new MultiDouble("m13",theMasses.masses_sq.at( std::make_pair(1,3) )) );
-  std::shared_ptr<MultiDouble> m12 = std::shared_ptr<MultiDouble>( new MultiDouble("m12",theMasses.masses_sq.at( std::make_pair(1,2) )) );
-  treePar = std::shared_ptr<ParameterList>(new ParameterList());
-  //treePar->AddParameter(x);
-  treePar->AddParameter(m23);
-  treePar->AddParameter(m13);
-  treePar->AddParameter(m12);
+	//------------Setup Tree Pars---------------------
+	//std::shared_ptr<DoubleParameter> x = std::shared_ptr<DoubleParameter>(new DoubleParameter("x"));
+	std::shared_ptr<MultiDouble> m23 = std::shared_ptr<MultiDouble>( new MultiDouble("m23",theMasses.masses_sq.at( std::make_pair(2,3) )) );
+	std::shared_ptr<MultiDouble> m13 = std::shared_ptr<MultiDouble>( new MultiDouble("m13",theMasses.masses_sq.at( std::make_pair(1,3) )) );
+	std::shared_ptr<MultiDouble> m12 = std::shared_ptr<MultiDouble>( new MultiDouble("m12",theMasses.masses_sq.at( std::make_pair(1,2) )) );
+	std::shared_ptr<MultiDouble> eff = std::shared_ptr<MultiDouble>( new MultiDouble("eff",theMasses.eff) );
+	std::shared_ptr<MultiDouble> weight = std::shared_ptr<MultiDouble>( new MultiDouble("weight",theMasses.weight) );
+	std::shared_ptr<MultiDouble> m23_phsp = std::shared_ptr<MultiDouble>( new MultiDouble("m23_phsp",thePHSPMasses.masses_sq.at( std::make_pair(2,3) )) );
+	std::shared_ptr<MultiDouble> m13_phsp = std::shared_ptr<MultiDouble>( new MultiDouble("m13_phsp",thePHSPMasses.masses_sq.at( std::make_pair(1,3) )) );
+	std::shared_ptr<MultiDouble> m12_phsp = std::shared_ptr<MultiDouble>( new MultiDouble("m12_phsp",thePHSPMasses.masses_sq.at( std::make_pair(1,2) )) );
+//	treePar = std::shared_ptr<ParameterList>(new ParameterList());
+	//treePar->AddParameter(x);
+//	treePar->AddParameter(m23);
+//	treePar->AddParameter(m13);
+//	treePar->AddParameter(m12);
 
-  //----Strategies needed
-  std::shared_ptr<MultAll> mmultStrat = std::shared_ptr<MultAll>(new MultAll(ParType::MCOMPLEX));
-  std::shared_ptr<AddAll> maddStrat = std::shared_ptr<AddAll>(new AddAll(ParType::MCOMPLEX));
-  std::shared_ptr<AbsSquare> msqStrat = std::shared_ptr<AbsSquare>(new AbsSquare(ParType::MDOUBLE));
-  std::shared_ptr<LogOf> mlogStrat = std::shared_ptr<LogOf>(new LogOf(ParType::MDOUBLE));
-  std::shared_ptr<MultAll> multStrat = std::shared_ptr<MultAll>(new MultAll(ParType::COMPLEX));
-  std::shared_ptr<AddAll> addStrat = std::shared_ptr<AddAll>(new AddAll(ParType::DOUBLE));
-  std::shared_ptr<AbsSquare> sqStrat = std::shared_ptr<AbsSquare>(new AbsSquare(ParType::DOUBLE));
-  std::shared_ptr<LogOf> logStrat = std::shared_ptr<LogOf>(new LogOf(ParType::DOUBLE));
-  std::shared_ptr<Complexify> complStrat = std::shared_ptr<Complexify>(new Complexify(ParType::COMPLEX));
+	//----Strategies needed
+	std::shared_ptr<MultAll> mmultStrat = std::shared_ptr<MultAll>(new MultAll(ParType::MCOMPLEX));
+	std::shared_ptr<AddAll> maddStrat = std::shared_ptr<AddAll>(new AddAll(ParType::MCOMPLEX));
+	std::shared_ptr<AbsSquare> msqStrat = std::shared_ptr<AbsSquare>(new AbsSquare(ParType::MDOUBLE));
+	std::shared_ptr<LogOf> mlogStrat = std::shared_ptr<LogOf>(new LogOf(ParType::MDOUBLE));
+	std::shared_ptr<MultAll> multStrat = std::shared_ptr<MultAll>(new MultAll(ParType::COMPLEX));
+	std::shared_ptr<MultAll> multDStrat = std::shared_ptr<MultAll>(new MultAll(ParType::DOUBLE));
+	std::shared_ptr<AddAll> addStrat = std::shared_ptr<AddAll>(new AddAll(ParType::DOUBLE));
+	std::shared_ptr<AddAll> addComplexStrat = std::shared_ptr<AddAll>(new AddAll(ParType::COMPLEX));
+	std::shared_ptr<AbsSquare> sqStrat = std::shared_ptr<AbsSquare>(new AbsSquare(ParType::DOUBLE));
+	std::shared_ptr<LogOf> logStrat = std::shared_ptr<LogOf>(new LogOf(ParType::DOUBLE));
+	std::shared_ptr<Complexify> complStrat = std::shared_ptr<Complexify>(new Complexify(ParType::COMPLEX));
+	std::shared_ptr<Inverse> invStrat = std::shared_ptr<Inverse>(new Inverse(ParType::DOUBLE));
+	std::shared_ptr<SquareRoot> sqRootStrat = std::shared_ptr<SquareRoot>(new SquareRoot(ParType::DOUBLE));
 
-  //----Add Top Node and final operations
-  newTree->createHead("LH", addStrat); //Sum up all events, collapse multia
-  if(!isPhspTree){ //Data: EvtSum of log of Intens needed
-    newTree->createNode("Log", mlogStrat, "LH", theMasses.nEvents, false); //log of amp, at each point
-    newTree->createNode("Intens", msqStrat, "Log", theMasses.nEvents, false); //I=A^2, at each point
-    newTree->createNode("Amplitude", maddStrat, "Intens", theMasses.nEvents, false); //Sum of resonances, at each point
-  }else{ //Phsp: PhspSum of Intens needed, log done in LH with other parameters
-    newTree->createNode("Intens", msqStrat, "LH", theMasses.nEvents, false); //I=A^2, at each point
-    newTree->createNode("Amplitude", maddStrat, "Intens", theMasses.nEvents, false); //Sum of resonances, at each point
-  }
+	//----Add Top Node and final operations
+	newTree->createHead("LH", addStrat); //Sum up all events, collapse multia
+	if(!isPhspTree){ //Data: EvtSum of log of Intens needed
+		newTree->createNode("Log", mlogStrat, "LH", theMasses.nEvents, false); //log of amp, at each point
+		newTree->createNode("Intens", msqStrat, "Log", theMasses.nEvents, false); //I=A^2, at each point
+		newTree->createNode("AmplitudeEff", mmultStrat, "Intens", theMasses.nEvents, false); //Sum of resonances * efficiency
+		newTree->createLeaf("eff", eff, "AmplitudeEff"); //efficiency
+		newTree->createNode("Amplitude", maddStrat, "AmplitudeEff", theMasses.nEvents, false); //Sum of resonances, at each point
+	}else{ //Phsp: PhspSum of Intens needed, log done in LH with other parameters
+		newTree->createNode("Intens", msqStrat, "LH", theMasses.nEvents, false); //I=A^2, at each point
+		newTree->createNode("AmplitudeEff", mmultStrat, "Intens", theMasses.nEvents, false); //Sum of resonances, at each point
+		newTree->createLeaf("eff", eff, "AmplitudeEff"); //efficiency
+		newTree->createNode("Amplitude", maddStrat, "AmplitudeEff", theMasses.nEvents, false); //Sum of resonances, at each point
+	}
 
-  //----Add Resonances
-  for(std::vector<Resonance>::iterator reso=ampSetup.getResonances().begin(); reso!=ampSetup.getResonances().end(); reso++){
-      Resonance tmp = (*reso);
-      if(!tmp.m_enable) continue;
-      //setup RooVars
-      //namer.push_back(tmp.m_name);
-      //mr.push_back( std::shared_ptr<DoubleParameter> (new DoubleParameter("mass_"+tmp.m_name,tmp.m_mass, tmp.m_mass_min, tmp.m_mass_max) ) );
-      //gr.push_back( std::shared_ptr<DoubleParameter> (new DoubleParameter("width_"+tmp.m_name,tmp.m_width, tmp.m_width_min, tmp.m_width_max) ) );
-     // rr.push_back( std::shared_ptr<DoubleParameter> (new DoubleParameter("rr_"+tmp.m_name,tmp.m_strength) ) );
-     // phir.push_back( std::shared_ptr<DoubleParameter> (new DoubleParameter("phir_"+tmp.m_name,tmp.m_phase) ) );
+	//----Add Resonances
+	for(std::vector<Resonance>::iterator reso=ampSetup.getResonances().begin(); reso!=ampSetup.getResonances().end(); reso++){
+		Resonance tmp = (*reso);
+		if(!tmp.m_enable) continue;
+		BOOST_LOG_TRIVIAL(debug) << "AmpSumIntensity::setupTree() adding "<<tmp.m_name<<" (BW) to tree.";
 
-      //----Add Nodes
-      std::shared_ptr<BreitWignerStrategy> rbwStrat = std::shared_ptr<BreitWignerStrategy>(new BreitWignerStrategy(tmp.m_name,ParType::MCOMPLEX));
-      std::shared_ptr<WignerDStrategy> angdStrat = std::shared_ptr<WignerDStrategy>(new WignerDStrategy(tmp.m_name,ParType::MDOUBLE));
-      unsigned int subSys = tmp.m_daugtherA + tmp.m_daugtherB;
-      unsigned int last = mr.size()-1;
-      newTree->createNode("Reso_"+tmp.m_name, mmultStrat, "Amplitude", theMasses.nEvents); //Reso=BW*c*AD
-      newTree->createNode("RelBW_"+tmp.m_name, rbwStrat, "Reso_"+tmp.m_name, theMasses.nEvents); //BW
-      newTree->createNode("C_"+tmp.m_name, complStrat, "Reso_"+tmp.m_name); //c
-      newTree->createLeaf("Intens_"+tmp.m_name, rr[tmp.m_name], "C_"+tmp.m_name); //r
-      newTree->createLeaf("Phase_"+tmp.m_name, phir[tmp.m_name], "C_"+tmp.m_name); //phi
-      newTree->createNode("AngD_"+tmp.m_name, angdStrat, "Reso_"+tmp.m_name, theMasses.nEvents); //AD
-      //BW Par
-      newTree->createLeaf("m0_"+tmp.m_name, mr[tmp.m_name], "RelBW_"+tmp.m_name); //m0
-      //myTree->createLeaf("x", x, "RelBW_"+tmp.m_name); //x
-      switch(subSys){
-        case 3:{ //reso in sys of particles 1&2
-          //newTree->createLeaf("mym_"+tmp.m_name, m12, "RelBW_"+tmp.m_name); //m
-          newTree->createLeaf("ma_"+tmp.m_name, kin->m1, "RelBW_"+tmp.m_name); //ma
-          newTree->createLeaf("mb_"+tmp.m_name, kin->m2, "RelBW_"+tmp.m_name); //mb
-          break;
-        }
-        case 4:{ //reso in sys of particles 1&3
-          //newTree->createLeaf("mym_"+tmp.m_name, m13, "RelBW_"+tmp.m_name); //m
-          newTree->createLeaf("ma_"+tmp.m_name, kin->m1, "RelBW_"+tmp.m_name); //ma
-          newTree->createLeaf("mb_"+tmp.m_name, kin->m3, "RelBW_"+tmp.m_name); //mb
-          break;
-        }
-        case 5:{ //reso in sys of particles 2&3
-          //newTree->createLeaf("mym_"+tmp.m_name, m23, "RelBW_"+tmp.m_name); //m
-          newTree->createLeaf("ma_"+tmp.m_name, kin->m2, "RelBW_"+tmp.m_name); //ma
-          newTree->createLeaf("mb_"+tmp.m_name, kin->m3, "RelBW_"+tmp.m_name); //mb
-          break;
-        }
-        default:{
-          BOOST_LOG_TRIVIAL(error)<<"AmpSumIntensity::setupTree(): Subsys not found!!";
-        }
-      }
-      newTree->createLeaf("m23", m23, "RelBW_"+tmp.m_name); //ma
-      newTree->createLeaf("m13", m13, "RelBW_"+tmp.m_name); //mb
-      newTree->createLeaf("m12", m12, "RelBW_"+tmp.m_name); //mc
-      newTree->createLeaf("subSysFlag_"+tmp.m_name, subSys, "RelBW_"+tmp.m_name); //subSysFlag
-      newTree->createLeaf("spin_"+tmp.m_name, tmp.m_spin, "RelBW_"+tmp.m_name); //spin
-      newTree->createLeaf("d_"+tmp.m_name,  tmp.m_mesonRadius, "RelBW_"+tmp.m_name); //d
-      newTree->createLeaf("resWidth_"+tmp.m_name, gr[tmp.m_name], "RelBW_"+tmp.m_name); //resWidth
-      newTree->createLeaf("norm_"+tmp.m_name, 1., "RelBW_"+tmp.m_name); //Todo: setup norm, manipulate norm?
-      //AD Par
-      newTree->createLeaf("m23", m23, "AngD_"+tmp.m_name); //ma
-      newTree->createLeaf("m13", m13, "AngD_"+tmp.m_name); //mb
-      newTree->createLeaf("m12", m12, "AngD_"+tmp.m_name); //mc
-      newTree->createLeaf("M", kin->M, "AngD_"+tmp.m_name); //M
-      newTree->createLeaf("m1", kin->m1, "AngD_"+tmp.m_name); //m1
-      newTree->createLeaf("m2", kin->m2, "AngD_"+tmp.m_name); //m2
-      newTree->createLeaf("m3", kin->m3, "AngD_"+tmp.m_name); //m3
-      // unsigned int _subSysFlag = Double_t(paras.GetParameterValue("subSysFlag_"+name));
-      newTree->createLeaf("subSysFlag_"+tmp.m_name, subSys, "AngD_"+tmp.m_name); //subSysFlag
-      newTree->createLeaf("spin_"+tmp.m_name,tmp.m_spin, "AngD_"+tmp.m_name); //spin
-      newTree->createLeaf("m_"+tmp.m_name, tmp.m_m, "AngD_"+tmp.m_name); //OutSpin 1
-      newTree->createLeaf("n_"+tmp.m_name, tmp.m_n, "AngD_"+tmp.m_name); //OutSpin 2
+		//----Add Nodes
+		std::shared_ptr<BreitWignerStrategy> rbwStrat = std::shared_ptr<BreitWignerStrategy>(new BreitWignerStrategy(tmp.m_name,ParType::MCOMPLEX));
+		std::shared_ptr<BreitWignerPhspStrategy> rbwPhspStrat = std::shared_ptr<BreitWignerPhspStrategy>(new BreitWignerPhspStrategy(tmp.m_name,ParType::MCOMPLEX));
+		std::shared_ptr<WignerDStrategy> angdStrat = std::shared_ptr<WignerDStrategy>(new WignerDStrategy(tmp.m_name,ParType::MDOUBLE));
+		std::shared_ptr<WignerDphspStrategy> angdPhspStrat = std::shared_ptr<WignerDphspStrategy>(new WignerDphspStrategy(tmp.m_name,ParType::MDOUBLE));
+		unsigned int subSys = tmp.m_daugtherA + tmp.m_daugtherB;
+//		unsigned int last = mr.size()-1;
+		newTree->createNode("Reso_"+tmp.m_name, mmultStrat, "Amplitude", theMasses.nEvents); //Reso=BW*C_*AD*N_
+		newTree->createNode("RelBW_"+tmp.m_name, rbwStrat, "Reso_"+tmp.m_name, theMasses.nEvents); //BW
+		newTree->createNode("C_"+tmp.m_name, complStrat, "Reso_"+tmp.m_name); //c
+		newTree->createLeaf("Intens_"+tmp.m_name, rr[tmp.m_name], "C_"+tmp.m_name); //r
+		newTree->createLeaf("Phase_"+tmp.m_name, phir[tmp.m_name], "C_"+tmp.m_name); //phi
+		newTree->createNode("AngD_"+tmp.m_name, angdStrat, "Reso_"+tmp.m_name, theMasses.nEvents); //AD
 
-  }// end loop over resonances
+		//adding nodes and leafs for calculation of normalization
+		if(_normStyle==none){
+		  newTree->createLeaf("N_"+tmp.m_name, 1., "Reso_"+tmp.m_name);
+		}else{
+          newTree->createNode("N_"+tmp.m_name, sqRootStrat, "Reso_"+tmp.m_name); //N = sqrt(NSq)
+          newTree->createNode("NSq_"+tmp.m_name, multDStrat, "N_"+tmp.m_name); //NSq = N_phspMC * 1/PhspVolume * 1/Sum(|A|^2)
+          newTree->createLeaf("PhspSize_"+tmp.m_name, thePHSPMasses.nEvents, "NSq_"+tmp.m_name); // N_phspMC
+          newTree->createLeaf("PhspVolume_"+tmp.m_name, 1/_dpArea, "NSq_"+tmp.m_name); // 1/PhspVolume
+          newTree->createNode("InvSum_"+tmp.m_name, invStrat, "NSq_"+tmp.m_name); //1/Sum(|A|^2)
+          newTree->createNode("Sum_"+tmp.m_name, addStrat, "InvSum_"+tmp.m_name); //Sum(|A|^2)
+          newTree->createNode("AbsVal_"+tmp.m_name, msqStrat, "Sum_"+tmp.m_name); //|A_i|^2
+          newTree->createNode("PhspReso_"+tmp.m_name, mmultStrat, "AbsVal_"+tmp.m_name); //PhspReso = BW_phsp * AngD_phsp
+          newTree->createNode("NormBW_"+tmp.m_name, rbwPhspStrat, "PhspReso_"+tmp.m_name, thePHSPMasses.nEvents); //BW
+          newTree->createNode("NormAngD_"+tmp.m_name, angdPhspStrat, "PhspReso_"+tmp.m_name, thePHSPMasses.nEvents); //AD
+		}
+		switch(subSys){
+		case 3:{ //reso in sys of particles 1&2
+			//newTree->createLeaf("mym_"+tmp.m_name, m12, "RelBW_"+tmp.m_name); //m
+			newTree->createLeaf("ma_"+tmp.m_name, kin->m1, "RelBW_"+tmp.m_name); //ma
+			newTree->createLeaf("mb_"+tmp.m_name, kin->m2, "RelBW_"+tmp.m_name); //mb
+			if(_normStyle!=none){
+			  newTree->createLeaf("ma_"+tmp.m_name, kin->m1, "NormBW_"+tmp.m_name); //ma
+			  newTree->createLeaf("mb_"+tmp.m_name, kin->m2, "NormBW_"+tmp.m_name); //mb
+			}
+			break;
+		}
+		case 4:{ //reso in sys of particles 1&3
+			//newTree->createLeaf("mym_"+tmp.m_name, m13, "RelBW_"+tmp.m_name); //m
+			newTree->createLeaf("ma_"+tmp.m_name, kin->m1, "RelBW_"+tmp.m_name); //ma
+			newTree->createLeaf("mb_"+tmp.m_name, kin->m3, "RelBW_"+tmp.m_name); //mb
+            if(_normStyle!=none){
+			newTree->createLeaf("ma_"+tmp.m_name, kin->m1, "NormBW_"+tmp.m_name); //ma
+			newTree->createLeaf("mb_"+tmp.m_name, kin->m3, "NormBW_"+tmp.m_name); //mb
+            }
+			break;
+		}
+		case 5:{ //reso in sys of particles 2&3
+			//newTree->createLeaf("mym_"+tmp.m_name, m23, "RelBW_"+tmp.m_name); //m
+			newTree->createLeaf("ma_"+tmp.m_name, kin->m2, "RelBW_"+tmp.m_name); //ma
+			newTree->createLeaf("mb_"+tmp.m_name, kin->m3, "RelBW_"+tmp.m_name); //mb
+            if(_normStyle!=none){
+			  newTree->createLeaf("ma_"+tmp.m_name, kin->m2, "NormBW_"+tmp.m_name); //ma
+			  newTree->createLeaf("mb_"+tmp.m_name, kin->m3, "NormBW_"+tmp.m_name); //mb
+            }
+			break;
+		}
+		default:{
+			BOOST_LOG_TRIVIAL(error)<<"AmpSumIntensity::setupTree(): Subsys not found!!";
+		}
+		}
+		newTree->createLeaf("m0_"+tmp.m_name, mr[tmp.m_name], "RelBW_"+tmp.m_name); //m0
+		newTree->createLeaf("m23", m23, "RelBW_"+tmp.m_name); //ma
+		newTree->createLeaf("m13", m13, "RelBW_"+tmp.m_name); //mb
+		newTree->createLeaf("m12", m12, "RelBW_"+tmp.m_name); //mc
+		newTree->createLeaf("subSysFlag_"+tmp.m_name, subSys, "RelBW_"+tmp.m_name); //subSysFlag
+		newTree->createLeaf("spin_"+tmp.m_name, tmp.m_spin, "RelBW_"+tmp.m_name); //spin
+		newTree->createLeaf("d_"+tmp.m_name,  tmp.m_mesonRadius, "RelBW_"+tmp.m_name); //d
+		newTree->createLeaf("resWidth_"+tmp.m_name, gr[tmp.m_name], "RelBW_"+tmp.m_name); //resWidth
+		newTree->createLeaf("norm_"+tmp.m_name, 1., "RelBW_"+tmp.m_name); //Todo: setup norm, manipulate norm?
 
-  if(isPhspTree) myPhspTree=newTree;
-  else myTree=newTree;
+		//normBW
+		if(_normStyle!=none){
+		  newTree->createLeaf("m0_"+tmp.m_name, mr[tmp.m_name], "NormBW_"+tmp.m_name); //m0
+		  newTree->createLeaf("m23_phsp", m23_phsp, "NormBW_"+tmp.m_name); //ma
+		  newTree->createLeaf("m13_phsp", m13_phsp, "NormBW_"+tmp.m_name); //mb
+		  newTree->createLeaf("m12_phsp", m12_phsp, "NormBW_"+tmp.m_name); //mc
+		  newTree->createLeaf("subSysFlag_"+tmp.m_name, subSys, "NormBW_"+tmp.m_name); //subSysFlag
+		  newTree->createLeaf("spin_"+tmp.m_name, tmp.m_spin, "NormBW_"+tmp.m_name); //spin
+		  newTree->createLeaf("d_"+tmp.m_name,  tmp.m_mesonRadius, "NormBW_"+tmp.m_name); //d
+		  newTree->createLeaf("resWidth_"+tmp.m_name, gr[tmp.m_name], "NormBW_"+tmp.m_name); //resWidth
+		  newTree->createLeaf("norm_"+tmp.m_name, 1., "NormBW_"+tmp.m_name); //Todo: setup norm, manipulate norm?
+		}
+		//AD Par
+		newTree->createLeaf("m23", m23, "AngD_"+tmp.m_name); //ma
+		newTree->createLeaf("m13", m13, "AngD_"+tmp.m_name); //mb
+		newTree->createLeaf("m12", m12, "AngD_"+tmp.m_name); //mc
+		newTree->createLeaf("M", kin->M, "AngD_"+tmp.m_name); //M
+		newTree->createLeaf("m1", kin->m1, "AngD_"+tmp.m_name); //m1
+		newTree->createLeaf("m2", kin->m2, "AngD_"+tmp.m_name); //m2
+		newTree->createLeaf("m3", kin->m3, "AngD_"+tmp.m_name); //m3
+		newTree->createLeaf("subSysFlag_"+tmp.m_name, subSys, "AngD_"+tmp.m_name); //subSysFlag
+		newTree->createLeaf("spin_"+tmp.m_name,tmp.m_spin, "AngD_"+tmp.m_name); //spin
+		newTree->createLeaf("m_"+tmp.m_name, tmp.m_m, "AngD_"+tmp.m_name); //OutSpin 1
+		newTree->createLeaf("n_"+tmp.m_name, tmp.m_n, "AngD_"+tmp.m_name); //OutSpin 2
+		//AD Par (PHSP)
+		if(_normStyle!=none){
+		  newTree->createLeaf("m23_phsp", m23_phsp, "NormAngD_"+tmp.m_name); //ma
+		  newTree->createLeaf("m13_phsp", m13_phsp, "NormAngD_"+tmp.m_name); //mb
+		  newTree->createLeaf("m12_phsp", m12_phsp, "NormAngD_"+tmp.m_name); //mc
+		  newTree->createLeaf("M", kin->M, "NormAngD_"+tmp.m_name); //M
+	  	  newTree->createLeaf("m1", kin->m1, "NormAngD_"+tmp.m_name); //m1
+		  newTree->createLeaf("m2", kin->m2, "NormAngD_"+tmp.m_name); //m2
+	      newTree->createLeaf("m3", kin->m3, "NormAngD_"+tmp.m_name); //m3
+		  newTree->createLeaf("subSysFlag_"+tmp.m_name, subSys, "NormAngD_"+tmp.m_name); //subSysFlag
+		  newTree->createLeaf("spin_"+tmp.m_name,tmp.m_spin, "NormAngD_"+tmp.m_name); //spin
+		  newTree->createLeaf("m_"+tmp.m_name, tmp.m_m, "NormAngD_"+tmp.m_name); //OutSpin 1
+		  newTree->createLeaf("n_"+tmp.m_name, tmp.m_n, "NormAngD_"+tmp.m_name); //OutSpin 2
+		}
+
+	}// end loop over resonances
+
+
+	for(std::vector<ResonanceFlatte>::iterator reso=ampSetup.getResonancesFlatte().begin(); reso!=ampSetup.getResonancesFlatte().end(); reso++){
+		ResonanceFlatte tmp = (*reso);
+		if(!tmp.m_enable) continue;
+		BOOST_LOG_TRIVIAL(debug) << "AmpSumIntensity::setupTree() adding "<<tmp.m_name<<" (Flatte) to tree.";
+
+		//----Add Nodes
+		std::shared_ptr<FlatteStrategy> flatteStrat = std::shared_ptr<FlatteStrategy>(new FlatteStrategy(tmp.m_name,ParType::MCOMPLEX));
+		std::shared_ptr<FlattePhspStrategy> flattePhspStrat = std::shared_ptr<FlattePhspStrategy>(new FlattePhspStrategy(tmp.m_name,ParType::MCOMPLEX));
+		std::shared_ptr<WignerDStrategy> angdStrat = std::shared_ptr<WignerDStrategy>(new WignerDStrategy(tmp.m_name,ParType::MDOUBLE));
+		std::shared_ptr<WignerDphspStrategy> angdPhspStrat = std::shared_ptr<WignerDphspStrategy>(new WignerDphspStrategy(tmp.m_name,ParType::MDOUBLE));
+		unsigned int subSys = tmp.m_daugtherA + tmp.m_daugtherB;
+//		unsigned int last = mr.size()-1;
+		newTree->createNode("Reso_"+tmp.m_name, mmultStrat, "Amplitude", theMasses.nEvents); //Reso=BW*C_*AD*N_
+		newTree->createNode("FlatteRes_"+tmp.m_name, flatteStrat, "Reso_"+tmp.m_name, theMasses.nEvents); //BW
+		newTree->createNode("C_"+tmp.m_name, complStrat, "Reso_"+tmp.m_name); //c
+		newTree->createLeaf("Intens_"+tmp.m_name, rr[tmp.m_name], "C_"+tmp.m_name); //r
+		newTree->createLeaf("Phase_"+tmp.m_name, phir[tmp.m_name], "C_"+tmp.m_name); //phi
+		newTree->createNode("AngD_"+tmp.m_name, angdStrat, "Reso_"+tmp.m_name, theMasses.nEvents); //AD
+
+		//adding nodes and leafs for calculation of normalization
+		newTree->createNode("N_"+tmp.m_name, sqRootStrat, "Reso_"+tmp.m_name); //N = sqrt(NSq)
+		newTree->createNode("NSq_"+tmp.m_name, multDStrat, "N_"+tmp.m_name); //NSq = N_phspMC * 1/PhspVolume * 1/Sum(|A|^2)
+		newTree->createLeaf("PhspSize_"+tmp.m_name, thePHSPMasses.nEvents, "NSq_"+tmp.m_name); // N_phspMC
+		newTree->createLeaf("PhspVolume_"+tmp.m_name, 1/_dpArea, "NSq_"+tmp.m_name); // 1/PhspVolume
+		newTree->createNode("InvSum_"+tmp.m_name, invStrat, "NSq_"+tmp.m_name); //1/Sum(|A|^2)
+		newTree->createNode("Sum_"+tmp.m_name, addStrat, "InvSum_"+tmp.m_name); //Sum(|A|^2)
+		newTree->createNode("AbsVal_"+tmp.m_name, msqStrat, "Sum_"+tmp.m_name); //|A_i|^2
+		newTree->createNode("PhspReso_"+tmp.m_name, mmultStrat, "AbsVal_"+tmp.m_name); //PhspReso = BW_phsp * AngD_phsp
+		newTree->createNode("NormFlatte_"+tmp.m_name, flattePhspStrat, "PhspReso_"+tmp.m_name, thePHSPMasses.nEvents); //BW
+		newTree->createNode("NormAngD_"+tmp.m_name, angdPhspStrat, "PhspReso_"+tmp.m_name, thePHSPMasses.nEvents); //AD
+		switch(subSys){
+		case 3:{ //reso in sys of particles 1&2
+			//newTree->createLeaf("mym_"+tmp.m_name, m12, "RelBW_"+tmp.m_name); //m
+			newTree->createLeaf("ma_"+tmp.m_name, kin->m1, "FlatteRes_"+tmp.m_name); //ma
+			newTree->createLeaf("mb_"+tmp.m_name, kin->m2, "FlatteRes_"+tmp.m_name); //mb
+			newTree->createLeaf("ma_"+tmp.m_name, kin->m1, "NormFlatte_"+tmp.m_name); //ma
+			newTree->createLeaf("mb_"+tmp.m_name, kin->m2, "NormFlatte_"+tmp.m_name); //mb
+			break;
+		}
+		case 4:{ //reso in sys of particles 1&3
+			//newTree->createLeaf("mym_"+tmp.m_name, m13, "FlatteRes_"+tmp.m_name); //m
+			newTree->createLeaf("ma_"+tmp.m_name, kin->m1, "FlatteRes_"+tmp.m_name); //ma
+			newTree->createLeaf("mb_"+tmp.m_name, kin->m3, "FlatteRes_"+tmp.m_name); //mb
+			newTree->createLeaf("ma_"+tmp.m_name, kin->m1, "NormFlatte_"+tmp.m_name); //ma
+			newTree->createLeaf("mb_"+tmp.m_name, kin->m3, "NormFlatte_"+tmp.m_name); //mb
+			break;
+		}
+		case 5:{ //reso in sys of particles 2&3
+			//newTree->createLeaf("mym_"+tmp.m_name, m23, "FlatteRes_"+tmp.m_name); //m
+			newTree->createLeaf("ma_"+tmp.m_name, kin->m2, "FlatteRes_"+tmp.m_name); //ma
+			newTree->createLeaf("mb_"+tmp.m_name, kin->m3, "FlatteRes_"+tmp.m_name); //mb
+			newTree->createLeaf("ma_"+tmp.m_name, kin->m2, "NormFlatte_"+tmp.m_name); //ma
+			newTree->createLeaf("mb_"+tmp.m_name, kin->m3, "NormFlatte_"+tmp.m_name); //mb
+			break;
+		}
+		default:{
+			BOOST_LOG_TRIVIAL(error)<<"AmpSumIntensity::setupTree(): Subsys not found!!";
+		}
+		}
+
+		newTree->createLeaf("m0_"+tmp.m_name, mr[tmp.m_name], "FlatteRes_"+tmp.m_name); //m0
+		newTree->createLeaf("m23", m23, "FlatteRes_"+tmp.m_name); //ma
+		newTree->createLeaf("m13", m13, "FlatteRes_"+tmp.m_name); //mb
+		newTree->createLeaf("m12", m12, "FlatteRes_"+tmp.m_name); //mc
+		newTree->createLeaf("subSysFlag_"+tmp.m_name, subSys, "FlatteRes_"+tmp.m_name); //subSysFlag
+		newTree->createLeaf("spin_"+tmp.m_name, tmp.m_spin, "FlatteRes_"+tmp.m_name); //spin
+		newTree->createLeaf("d_"+tmp.m_name,  tmp.m_mesonRadius, "FlatteRes_"+tmp.m_name); //d
+		newTree->createLeaf("norm_"+tmp.m_name, 1., "FlatteRes_"+tmp.m_name); //Todo: setup norm, manipulate norm?
+		newTree->createLeaf("mHiddenA_"+tmp.m_name, \
+				PhysConst::instance()->getMass(tmp.m_hiddenParticle1), "FlatteRes_"+tmp.m_name);
+		newTree->createLeaf("mHiddenB_"+tmp.m_name, \
+				PhysConst::instance()->getMass(tmp.m_hiddenParticle2), "FlatteRes_"+tmp.m_name);
+		newTree->createLeaf("coupling_"+tmp.m_name, tmp.m_coupling, "FlatteRes_"+tmp.m_name);
+		newTree->createLeaf("couplingHidden_"+tmp.m_name, tmp.m_couplingHidden, "FlatteRes_"+tmp.m_name);
+
+		//normBW
+		newTree->createLeaf("m0_"+tmp.m_name, mr[tmp.m_name], "NormFlatte_"+tmp.m_name); //m0
+		newTree->createLeaf("m23_phsp", m23_phsp, "NormFlatte_"+tmp.m_name); //ma
+		newTree->createLeaf("m13_phsp", m13_phsp, "NormFlatte_"+tmp.m_name); //mb
+		newTree->createLeaf("m12_phsp", m12_phsp, "NormFlatte_"+tmp.m_name); //mc
+		newTree->createLeaf("subSysFlag_"+tmp.m_name, subSys, "NormFlatte_"+tmp.m_name); //subSysFlag
+		newTree->createLeaf("spin_"+tmp.m_name, tmp.m_spin, "NormFlatte_"+tmp.m_name); //spin
+		newTree->createLeaf("d_"+tmp.m_name,  tmp.m_mesonRadius, "NormFlatte_"+tmp.m_name); //d
+		newTree->createLeaf("norm_"+tmp.m_name, 1., "NormFlatte_"+tmp.m_name); //Todo: setup norm, manipulate norm?
+		newTree->createLeaf("mHiddenA_"+tmp.m_name, \
+				PhysConst::instance()->getMass(tmp.m_hiddenParticle1), "NormFlatte_"+tmp.m_name);
+		newTree->createLeaf("mHiddenB_"+tmp.m_name, \
+				PhysConst::instance()->getMass(tmp.m_hiddenParticle2), "NormFlatte_"+tmp.m_name);
+		newTree->createLeaf("coupling_"+tmp.m_name, tmp.m_coupling, "NormFlatte_"+tmp.m_name);
+		newTree->createLeaf("couplingHidden_"+tmp.m_name, tmp.m_couplingHidden, "NormFlatte_"+tmp.m_name);
+
+		//AD Par
+		newTree->createLeaf("m23", m23, "AngD_"+tmp.m_name); //ma
+		newTree->createLeaf("m13", m13, "AngD_"+tmp.m_name); //mb
+		newTree->createLeaf("m12", m12, "AngD_"+tmp.m_name); //mc
+		newTree->createLeaf("M", kin->M, "AngD_"+tmp.m_name); //M
+		newTree->createLeaf("m1", kin->m1, "AngD_"+tmp.m_name); //m1
+		newTree->createLeaf("m2", kin->m2, "AngD_"+tmp.m_name); //m2
+		newTree->createLeaf("m3", kin->m3, "AngD_"+tmp.m_name); //m3
+		newTree->createLeaf("subSysFlag_"+tmp.m_name, subSys, "AngD_"+tmp.m_name); //subSysFlag
+		newTree->createLeaf("spin_"+tmp.m_name,tmp.m_spin, "AngD_"+tmp.m_name); //spin
+		newTree->createLeaf("m_"+tmp.m_name, tmp.m_m, "AngD_"+tmp.m_name); //OutSpin 1
+		newTree->createLeaf("n_"+tmp.m_name, tmp.m_n, "AngD_"+tmp.m_name); //OutSpin 2
+		//AD Par (PHSP)
+		newTree->createLeaf("m23_phsp", m23_phsp, "NormAngD_"+tmp.m_name); //ma
+		newTree->createLeaf("m13_phsp", m13_phsp, "NormAngD_"+tmp.m_name); //mb
+		newTree->createLeaf("m12_phsp", m12_phsp, "NormAngD_"+tmp.m_name); //mc
+		newTree->createLeaf("M", kin->M, "NormAngD_"+tmp.m_name); //M
+		newTree->createLeaf("m1", kin->m1, "NormAngD_"+tmp.m_name); //m1
+		newTree->createLeaf("m2", kin->m2, "NormAngD_"+tmp.m_name); //m2
+		newTree->createLeaf("m3", kin->m3, "NormAngD_"+tmp.m_name); //m3
+		newTree->createLeaf("subSysFlag_"+tmp.m_name, subSys, "NormAngD_"+tmp.m_name); //subSysFlag
+		newTree->createLeaf("spin_"+tmp.m_name,tmp.m_spin, "NormAngD_"+tmp.m_name); //spin
+		newTree->createLeaf("m_"+tmp.m_name, tmp.m_m, "NormAngD_"+tmp.m_name); //OutSpin 1
+		newTree->createLeaf("n_"+tmp.m_name, tmp.m_n, "NormAngD_"+tmp.m_name); //OutSpin 2
+
+	}
+	if(isPhspTree) myPhspTree=newTree;
+	else myTree=newTree;
 }
 
 double AmpSumIntensity::getMaxVal(std::shared_ptr<Generator> gen){
@@ -321,13 +523,12 @@ void AmpSumIntensity::calcMaxVal(std::shared_ptr<Generator> gen){
 }
 double AmpSumIntensity::normReso(std::shared_ptr<AmpAbsDynamicalFunction> amp){
 	double norm;
-	if(_normStyle==none) norm=1;
+	if(_normStyle==none) norm=amp->GetNormalization();
 	else if(_normStyle==one) norm = sqrt(amp->integral());
 	else if(_normStyle==entries) norm = sqrt(_dpArea*amp->integral()/_entries);
 	BOOST_LOG_TRIVIAL(debug)<<"AmpSumIntensity::normRes Normalization constant for "
 			<<amp->GetName()<<": "<<1.0/norm;
 	return norm;
-
 }
 double AmpSumIntensity::evaluate(double x[], size_t dim) {
 	if(dim!=2) return 0;
@@ -387,18 +588,33 @@ const double AmpSumIntensity::integral(){
 }
 
 std::complex<double> AmpSumIntensity::getFirstBW(dataPoint& point, ParameterList& par){
-    setParameterList(par);
-    return totAmp.getFirstBW(point);
+	setParameterList(par);
+	return totAmp.getFirstBW(point);
 }
 
 std::complex<double> AmpSumIntensity::getFirstReso(dataPoint& point, ParameterList& par){
-    setParameterList(par);
-    return totAmp.getFirstReso(point);
+	setParameterList(par);
+	return totAmp.getFirstReso(point);
 }
 
 std::complex<double> AmpSumIntensity::getFirstAmp(dataPoint& point, ParameterList& par){
+	setParameterList(par);
+	return totAmp.getFirstAmp(point);
+}
+
+const double AmpSumIntensity::sliceIntensity(dataPoint& dataP, ParameterList& par,std::complex<double>* reso, unsigned int nResos){
     setParameterList(par);
-    return totAmp.getFirstAmp(point);
+    //  dataPoint dataP; dataP.setVal("m23sq",point[0]); dataP.setVal("m13sq",point[1]);
+    //dataPoint dataP; dataP.setVal(0,point[0]); dataP.setVal(1,point[1]);
+
+    double AMPpdf=0;
+    if(Kinematics::instance()->isWithinPhsp(dataP)) AMPpdf = totAmp.evaluateSlice(dataP, reso, nResos,5);
+    if(AMPpdf!=AMPpdf){
+        BOOST_LOG_TRIVIAL(error)<<"Error AmpSumIntensity: Intensity is not a number!!";
+        AMPpdf = 0;
+    }
+    double eff=eff_->evaluate(dataP);
+    return AMPpdf*eff;
 }
 
 const ParameterList& AmpSumIntensity::intensity(std::vector<double> point, ParameterList& par){
@@ -414,10 +630,10 @@ const ParameterList& AmpSumIntensity::intensity(dataPoint& point, ParameterList&
 const ParameterList& AmpSumIntensity::intensity(dataPoint& point){
 	double AMPpdf=0;
 	if(Kinematics::instance()->isWithinPhsp(point)) AMPpdf = totAmp.evaluate(point);
-//	else BOOST_LOG_TRIVIAL(error) << "AmpSumIntensity: data point "
-//			<<" (m13sq="<<point.getVal(4)
-//			<<" m23sq="<<point.getVal(5)<<")"
-//			<<" not within phsp! Skip!";//shall we give an error if datapoint is outside phsp?
+	//	else BOOST_LOG_TRIVIAL(error) << "AmpSumIntensity: data point "
+	//			<<" (m13sq="<<point.getVal(4)
+	//			<<" m23sq="<<point.getVal(5)<<")"
+	//			<<" not within phsp! Skip!";//shall we give an error if datapoint is outside phsp?
 
 	if(AMPpdf!=AMPpdf){
 		BOOST_LOG_TRIVIAL(error)<<"Error AmpSumIntensity: Intensity is not a number!!";
@@ -427,7 +643,7 @@ const ParameterList& AmpSumIntensity::intensity(dataPoint& point){
 	result.SetParameterValue(0,AMPpdf*eff);
 	return result;
 }
-std::shared_ptr<FunctionTree> AmpSumIntensity::functionTree(allMasses& theMasses) {
+std::shared_ptr<FunctionTree> AmpSumIntensity::functionTree(allMasses& thePHSPMasses, allMasses& theMasses) {
 	/*if(outPar.GetNParameter()>0) return std::shared_ptr<FunctionTree>();
 	fillStartParVec(outPar);
 	//outPar.AddParameter(treePar->GetDoubleParameter("x"));
@@ -436,24 +652,35 @@ std::shared_ptr<FunctionTree> AmpSumIntensity::functionTree(allMasses& theMasses
 	outPar.AddParameter(treePar->GetDoubleParameter("m12"));*/
 
 	if(myTree) return myTree;
-	else setupTree(theMasses, false);
+	else setupTree(theMasses, thePHSPMasses);
 
 	return myTree;
 }
-std::shared_ptr<FunctionTree> AmpSumIntensity::phspTree(allMasses& theMasses) {
-    /*if(outPar.GetNParameter()>0) return std::shared_ptr<FunctionTree>();
+std::shared_ptr<FunctionTree> AmpSumIntensity::phspTree(allMasses& thePHSPMasses) {
+	/*if(outPar.GetNParameter()>0) return std::shared_ptr<FunctionTree>();
     fillStartParVec(outPar);
     //outPar.AddParameter(treePar->GetDoubleParameter("x"));
     outPar.AddParameter(treePar->GetDoubleParameter("m23"));
     outPar.AddParameter(treePar->GetDoubleParameter("m13"));
     outPar.AddParameter(treePar->GetDoubleParameter("m12"));*/
 
-    if(myPhspTree) return myPhspTree;
-    else setupTree(theMasses, true);
+	if(myPhspTree) return myPhspTree;
+	else setupTree(thePHSPMasses);
 
-    return myPhspTree;
+	return myPhspTree;
 }
-void AmpSumIntensity::setParameterList(ParameterList& par){
+void AmpSumIntensity::copyParameterList(ParameterList& outPar){
+	if(outPar.GetNParameter())
+		return; //already filled, TODO: exception?
+	for(unsigned int i=0; i<namer.size();i++){
+		//add strength and phases of the used amplitudes
+		outPar.AddParameter(std::shared_ptr<DoubleParameter>(new DoubleParameter(*rr[namer[i]])));
+		outPar.AddParameter(std::shared_ptr<DoubleParameter>(new DoubleParameter(*phir[namer[i]])));
+	}
+	return;
+
+}
+/*void AmpSumIntensity::setParameterList(ParameterList& par){
 	//parameters varied by Minimization algorithm
 	for(unsigned int i=0; i<nAmps; i++){
 //		*rr[i] = DoubleParameter(par.GetDoubleParameter(2*i));
@@ -478,6 +705,42 @@ const bool AmpSumIntensity::fillStartParVec(ParameterList& outPar){
 		outPar.AddParameter(phir[namer[i]]);
 	}
 	return true;
+}*/
+void AmpSumIntensity::setParameterList(ParameterList& par){
+    //parameters varied by Minimization algorithm
+    for(unsigned int i=0; i<nAmps; i++){
+//      *rr[i] = DoubleParameter(par.GetDoubleParameter(2*i));
+//      *phir[i] = DoubleParameter(par.GetDoubleParameter(2*i+1));
+        if(!mr[namer[i]]->IsFixed()){
+          mr[namer[i]]->SetValue(par.GetDoubleParameter(4*i)->GetValue());
+          mr[namer[i]]->SetError(par.GetDoubleParameter(4*i)->GetError());
+        }
+        if(!gr[namer[i]]->IsFixed()){
+          gr[namer[i]]->SetValue(par.GetDoubleParameter(4*i+1)->GetValue());
+          gr[namer[i]]->SetError(par.GetDoubleParameter(4*i+1)->GetError());
+        }
+        if(!rr[namer[i]]->IsFixed()){
+          rr[namer[i]]->SetValue(par.GetDoubleParameter(4*i+2)->GetValue());
+          rr[namer[i]]->SetError(par.GetDoubleParameter(4*i+2)->GetError());
+        }
+        if(!phir[namer[i]]->IsFixed()){
+          phir[namer[i]]->SetValue(par.GetDoubleParameter(4*i+3)->GetValue());
+          phir[namer[i]]->SetError(par.GetDoubleParameter(4*i+3)->GetError());
+        }
+    }
+    return;
+}
+const bool AmpSumIntensity::fillStartParVec(ParameterList& outPar){
+    if(outPar.GetNParameter())
+        return false; //already filled, TODO: exception?
+    for(unsigned int i=0; i<namer.size();i++){
+        //add strength and phases of the used amplitudes
+        outPar.AddParameter(mr[namer[i]]);
+        outPar.AddParameter(gr[namer[i]]);
+        outPar.AddParameter(rr[namer[i]]);
+        outPar.AddParameter(phir[namer[i]]);
+    }
+    return true;
 }
 
 void AmpSumIntensity::printAmps(){

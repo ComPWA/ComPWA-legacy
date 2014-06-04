@@ -183,7 +183,8 @@ void MinuitResult::genOutput(std::ostream& out){
 			std::shared_ptr<DoubleParameter> ppp2 = finalParameters.GetDoubleParameter(o);
 			if(ppp->IsFixed()) continue;
 			tableCorr << ppp->GetName();
-			tableCorr << globalCC[o]; //TODO: check if emtpy (don't know how this happened, but it did :)
+			if(globalCC.size()>o)
+			  tableCorr << globalCC[o]; //TODO: check if emtpy (don't know how this happened, but it did :)
 			for(unsigned int t=0;t<corr.size1();t++) {
 				if(n>=corr.size2()) { tableCorr<< " "; continue; }
 				if(t>=n)tableCorr << corr(n,t);

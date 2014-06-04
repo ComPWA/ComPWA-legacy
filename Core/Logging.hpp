@@ -22,39 +22,14 @@
 #include <boost/date_time/posix_time/posix_time.hpp>
 
 //using namespace boost::log;
-
-
 class Logging
 {
 public:
-	Logging(std::string outFileName="output.log"){ init(outFileName); };
+	Logging(std::string outFileName="output.log",
+			boost::log::trivial::severity_level minLevel=boost::log::trivial::debug){
+		init(outFileName,minLevel);
+	};
 private:
-	void init(std::string out){
-		boost::log::add_common_attributes();
-		boost::log::add_file_log( boost::log::keywords::file_name=out,
-				//			keywords::format="(%LineID%) [%TimeStamp%][%Severity%]: %Message%"
-				boost::log::keywords::format =
-						(
-								boost::log::expressions::stream
-								<< boost::log::expressions::format_date_time< boost::posix_time::ptime >("TimeStamp", "%Y-%m-%d %H:%M:%S")
-								<< " [" << boost::log::trivial::severity<< "] : "
-								<< boost::log::expressions::smessage
-						)
-		);
-		boost::log::add_console_log(std::cout,
-				boost::log::keywords::format =
-						(
-								boost::log::expressions::stream
-								<< boost::log::expressions::format_date_time< boost::posix_time::ptime >("TimeStamp", "%H:%M:%S")
-								<< " [" << std::setw(7) << boost::log::trivial::severity<< "] : "
-								<< boost::log::expressions::smessage
-						)
-		);
-		boost::log::core::get()->set_filter(boost::log::trivial::severity >= boost::log::trivial::debug);
-	BOOST_LOG_TRIVIAL(info)<<"Logging: using output filename "<<out;
-	}
+	void init(std::string out,boost::log::trivial::severity_level minLevel);
 };
-
-
-
 #endif /* LOGGING_HPP_ */

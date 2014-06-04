@@ -65,7 +65,7 @@ const Double_t m3 = 0.139570; // GeV/c² (pi)
 //const Double_t c = 299792458.; // m/s
 const Double_t PI = 3.14159; // m/s
 
-unsigned int nFitEvents=1;
+unsigned int nFitEvents=100000-1;
 unsigned int nStartEvent=0;
 
 /************************************************************************************************/
@@ -83,7 +83,7 @@ int main(int argc, char **argv){
 	//DPKinematics kin("D0","gamma","K-","K+");
 	//static dataPoint* point = dataPoint::instance(kin);
 
-  bool useFctTree = true, resultGen = false;
+  bool useFctTree = true, resultGen = true;
 
   std::string file="test/3Part-4vecs.root";
 
@@ -116,7 +116,7 @@ int main(int argc, char **argv){
     allMasses myPhspMasses(myPHSPReader->getMasses(nStartEvent,nFitEvents));
     BOOST_LOG_TRIVIAL(debug)<<"EvtMasses: "<< myEvtMasses.nEvents <<" events and "<< myEvtMasses.nInvMasses <<" inv masses";
     BOOST_LOG_TRIVIAL(debug)<<"PHSPMasses: "<< myPhspMasses.nEvents <<" events and "<< myPhspMasses.nInvMasses <<" inv masses";
-    physicsTree = amps->functionTree(myEvtMasses);
+    physicsTree = amps->functionTree(myPhspMasses,myEvtMasses);
     if(!physicsTree){
       BOOST_LOG_TRIVIAL(error)<<"Physics Trees not setup correctly, quitting";
       return 0;
@@ -145,7 +145,8 @@ int main(int argc, char **argv){
     dataPoint myPoint(myReader->getEvent(0));
     std::shared_ptr<TreeNode> LogNode = (physicsTree->head()->getChildren())[0];
     std::shared_ptr<TreeNode> IntNode = (LogNode->getChildren())[0];
-    std::shared_ptr<TreeNode> AmpNode = (IntNode->getChildren())[0];
+    std::shared_ptr<TreeNode> AmpNodeEff = (IntNode->getChildren())[0];
+    std::shared_ptr<TreeNode> AmpNode = (AmpNodeEff->getChildren())[1];
     std::shared_ptr<TreeNode> ResNode = (AmpNode->getChildren())[0];
     std::shared_ptr<TreeNode> BWNode = (ResNode->getChildren())[0];
     std::shared_ptr<TreeNode> ADNode = (ResNode->getChildren())[2];
@@ -189,11 +190,11 @@ int main(int argc, char **argv){
   for(unsigned int i=0; i<par.GetNDouble(); i++){
     std::shared_ptr<DoubleParameter> tmp = par.GetDoubleParameter(i);
     optiInt[i] = tmp->GetValue();
-   // if(i<0 || i>9 || i%2==1){ //omega's and f0 fixed
-    if(i<2 || i>3 || i%2==1){ //omega's and f0 fixed
+    if(i<0 || i>19 /*|| i%4==2 || i%4==3 */){ //omega's and f0 fixed
+   // if(i<2 || i>3 || i%2==1){ //omega's and f0 fixed
       tmp->FixParameter(true);
     }else{
-      tmp->SetValue(tmp->GetValue()/((i+1)));
+      tmp->SetValue(tmp->GetValue());///((i+1)));
       tmp->SetError(std::shared_ptr<ParError<double>>(new SymError<double>(tmp->GetValue())));
       if(!tmp->GetValue()) tmp->SetError(std::shared_ptr<ParError<double>>(new SymError<double>(1.)));
     }

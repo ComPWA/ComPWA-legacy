@@ -14,6 +14,7 @@
 #include "Physics/DPKinematics/DalitzKinematics.hpp"
 //#include "Physics/DPKinematics/DataPoint.hpp"
 #include "Core/PhysConst.hpp"
+#include "Core/DataPoint.hpp"
 
 #include <stdlib.h>
 #include "gsl/gsl_monte.h"

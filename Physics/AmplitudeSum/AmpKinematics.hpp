@@ -31,12 +31,17 @@ public:
 	void setBarrierType(int) { };
 	void setBarrierRadi(double mesonRadius, double motherRadius) {_mesonRadius=mesonRadius; _motherRadius=motherRadius; };
 
-	double q0(double, double) const;
-	double q0()  const { return q0( _ma, _mb ); };
-	double q(double, double, double)  const;
-	double q(double x)  const { return q(x, _ma, _mb); };
-	double BLres2(double x) const;
-	double BLmother2(double x) const;
+	static double qValue(double, double, double);
+	static double FormFactor(double z0, double z,unsigned int spin);
+	static double BlattWeiss(double x, double mR, double ma, double mb, double spin, double mesonRadius);
+
+	double q0()  const { return qValue(_mR, _ma, _mb ); };
+//	double q(double, double, double)  const;
+	double q(double x)  const { return qValue(x, _ma, _mb); };
+	double q(double x,double ma, double mb)  const { return qValue(x, ma, mb); };
+	double BLres2(double x) const { return BlattWeiss(x,_mR,_ma,_mb,_spin,_mesonRadius); }
+	double BLmother2(double x) const { return BlattWeiss(x,_mR,_ma,_mb,_spin,_motherRadius); }//is the spin correct here, or do we need to spin of mother particle?
+//	double BLmother2(double x) const;
 
 	double getResMass() {return _mR.GetValue();};
 //	double getSpin() {return _spin;}; //needs to be declared in AmpAbsDynamicalFunction
@@ -54,7 +59,6 @@ protected:
 	double _mesonRadius, _motherRadius;
 
 private:
-	double FormFactor(double z0, double z) const;
 };
 
 #endif /* AMPKINEMATICS_HPP_ */

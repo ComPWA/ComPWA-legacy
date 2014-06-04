@@ -1,7 +1,7 @@
 <amplitude_setup>
     <filename>JPSI_ypipi.xml</filename>
        <resonance>
-       <enable>false</enable>
+       <enable>true</enable>
        <name>f0_980</name>
        <type>relBW</type>
        <reference>f0_980</reference>
@@ -25,7 +25,7 @@
        <daugtherB>3</daugtherB>
     </resonance>
     <resonance>
-       <enable>false</enable>
+       <enable>true</enable>
        <name>f0_1500</name>
        <type>relBW</type>
        <reference>f0_1500</reference>
@@ -49,7 +49,7 @@
        <daugtherB>3</daugtherB>
     </resonance>
     <resonance>
-       <enable>false</enable>
+       <enable>true</enable>
        <name>f0_1710</name>
        <type>relBW</type>
        <reference>f0_1710</reference>
@@ -73,7 +73,7 @@
        <daugtherB>3</daugtherB>
     </resonance>
     <resonance>
-       <enable>false</enable>
+       <enable>true</enable>
        <name>f2_1270</name>
        <type>relBW</type>
        <reference>f2_1270</reference>
@@ -97,7 +97,7 @@
        <daugtherB>3</daugtherB>
     </resonance>
     <resonance>
-       <enable>false</enable>
+       <enable>true</enable>
        <name>f2_1525</name>
        <type>relBW</type>
        <reference>f2_1525</reference>
@@ -132,7 +132,7 @@
        <width>0.0085</width>
        <width_min>0.</width_min>
        <width_max>2.</width_max>
-		<norm>1</norm>
+		<norm>3</norm>
        <par1>1.</par1>
        <par2>1.</par2>
        <mesonRadius>1.</mesonRadius>
@@ -145,7 +145,7 @@
        <daugtherB>2</daugtherB>
     </resonance>
     <resonance>
-       <enable>false</enable>
+       <enable>true</enable>
        <name>omegaB</name>
        <type>relBW</type>
        <reference>omegaB</reference>
@@ -156,7 +156,7 @@
        <width>0.0085</width>
        <width_min>0.</width_min>
        <width_max>2.</width_max>
-		<norm>1</norm>
+		<norm>3</norm>
        <par1>1.</par1>
        <par2>1.</par2>
        <mesonRadius>1.</mesonRadius>

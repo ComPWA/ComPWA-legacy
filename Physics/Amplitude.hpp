@@ -60,6 +60,9 @@ public:
 
 	virtual const bool fillStartParVec(ParameterList& outPar) =0;
 	virtual void setParameterList(ParameterList& par) =0;
+	virtual void copyParameterList(ParameterList& par) {
+		return;
+	}
 
 	virtual void printAmps() = 0;
 	virtual void printFractions() = 0;
@@ -68,9 +71,13 @@ public:
 	virtual double getIntValue(std::string var1, double min1, double max1, std::string var2, double min2, double max2) = 0;
 	virtual Amplitude* Clone() = 0;
 
-	virtual std::shared_ptr<FunctionTree> functionTree(allMasses& theMasses) {
+	virtual std::shared_ptr<FunctionTree> functionTree(allMasses& theMasses, allMasses& thePHSPMasses) {
 		//if not implemented, return NULL-pointer
 		return std::shared_ptr<FunctionTree>();
+	}
+	virtual void resetTree() {
+		//if not implemented, return NULL-pointer
+		return;
 	}
     virtual std::shared_ptr<FunctionTree> phspTree(allMasses& theMasses) {
         //if not implemented, return NULL-pointer

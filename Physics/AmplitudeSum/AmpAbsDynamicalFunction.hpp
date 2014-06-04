@@ -56,7 +56,7 @@ public:
 
   virtual double getSpin() = 0;
   virtual bool isSubSys(const unsigned int) const = 0;
-  virtual double evaluate(double x[],size_t dim) ;//used for MC integration
+//  virtual double evaluate(double x[],size_t dim) ;//used for MC integration
 	//! Calculation integral |resonance|^2
   virtual double integral() const;
 

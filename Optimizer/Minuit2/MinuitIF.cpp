@@ -51,6 +51,7 @@ std::shared_ptr<FitResult> MinuitIF::exec(ParameterList& par){
 	ParameterList initialPar(par);
 
 	MnUserParameters upar;
+	BOOST_LOG_TRIVIAL(debug) << "Parameters used: "<<par.GetNDouble();
 	for(unsigned int i=0; i<par.GetNDouble(); ++i){ //only doubles for minuit
 
 		//out.str("");

@@ -55,7 +55,7 @@ using namespace boost::log;
 
 using namespace std;
 
-const unsigned int MaxEvents = 10;
+const unsigned int MaxEvents = 100000;
 
 //constants
 

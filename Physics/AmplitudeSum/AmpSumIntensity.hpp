@@ -80,14 +80,22 @@ public:
 
 	//! setting new parameterList
 	virtual void setParameterList(ParameterList& par);
+	//! fill ParameterList with copied shared_ptr
+	void copyParameterList(ParameterList& par);
 	//! evaluate total amplitude using parameters \par at phsp point \point
 	virtual const ParameterList& intensity(dataPoint& point, ParameterList& par);
 	//! evaluate total amplitude using current set of parametersat phsp point \point
 	virtual const ParameterList& intensity(dataPoint& point);
 	virtual const ParameterList& intensity(std::vector<double> point, ParameterList& par);
+	virtual const double sliceIntensity(dataPoint& dataP, ParameterList& par,std::complex<double>* reso, unsigned int nResos);
 
-	virtual std::shared_ptr<FunctionTree> functionTree(allMasses& theMasses);
-    virtual std::shared_ptr<FunctionTree> phspTree(allMasses& theMasses);
+//	virtual std::shared_ptr<FunctionTree> functionTree(allMasses& theMasses);
+	virtual std::shared_ptr<FunctionTree> functionTree(allMasses& theMasses, allMasses& thePHSPMasses);
+    virtual std::shared_ptr<FunctionTree> phspTree(allMasses& thePHSPMasses);
+    virtual void resetTree(){
+        myTree = std::shared_ptr<FunctionTree>();
+        myPhspTree = std::shared_ptr<FunctionTree>();
+    }
 
 	virtual const bool fillStartParVec(ParameterList& outPar);
 
@@ -105,7 +113,12 @@ public:
 
 protected:
 	void init();
-	void setupTree(allMasses& theMasses, bool isPhspTree);
+//	void setupTree(allMasses& theMasses, bool isPhspTree);
+	void setupTree(allMasses& thePHSPMasses){
+		allMasses dummyMass;
+		setupTree(thePHSPMasses, dummyMass);
+	}
+	void setupTree(allMasses& theMasses, allMasses& thePHSPMasses);
 
 	std::shared_ptr<Efficiency> eff_;
 	bool _calcMaxFcnVal;
@@ -115,7 +128,7 @@ protected:
 	AmplitudeSetup ampSetup;
 	std::shared_ptr<FunctionTree> myTree;
 	std::shared_ptr<FunctionTree> myPhspTree;
-	std::shared_ptr<ParameterList> treePar;
+//	std::shared_ptr<ParameterList> treePar;
 
 	double maxVal;
 

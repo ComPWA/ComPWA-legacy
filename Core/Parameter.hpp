@@ -849,7 +849,7 @@ private:
 //		ar & BOOST_SERIALIZATION_NVP(error_);
 	}
 };
-BOOST_CLASS_IMPLEMENTATION(DoubleParameter,boost::serialization::object_serializable);
+//BOOST_CLASS_IMPLEMENTATION(DoubleParameter,boost::serialization::object_serializable);
 
 class IntegerParameter : public AbsParameter
 {

@@ -63,8 +63,8 @@ private:
 	}
 
 };
-BOOST_CLASS_TRACKING(ParError<double>, boost::serialization::track_always)
-BOOST_SERIALIZATION_ASSUME_ABSTRACT(ParError);
+//BOOST_CLASS_TRACKING(ParError<double>, boost::serialization::track_always)
+//BOOST_SERIALIZATION_ASSUME_ABSTRACT(ParError);
 
 template <class T> class SymError : public ParError<T>
 {
@@ -84,13 +84,14 @@ private:
 	template<class archive>
 	void serialize(archive& ar, const unsigned int version)
 	{
-		ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(ParError<T>);
-//		ar & boost::serialization::base_object<ParError>(*this);
+		typedef ParError<T> parError;
+		ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(parError);
+		//		ar & boost::serialization::base_object<ParError>(*this);
 		ar & BOOST_SERIALIZATION_NVP(error);
 	}
 
 };
-BOOST_CLASS_IMPLEMENTATION(SymError<double>,boost::serialization::object_serializable);
+//BOOST_CLASS_IMPLEMENTATION(SymError<double>,boost::serialization::object_serializable);
 
 template <class T> class AsymError : public ParError<T>
 {
@@ -114,120 +115,124 @@ private:
 	template<class archive>
 	void serialize(archive& ar, const unsigned int version)
 	{
-		ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(ParError<T>);
-//		ar & boost::serialization::base_object<ParError>(*this);
+		typedef ParError<T> parError;
+		ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(parError);
+		//		ar & boost::serialization::base_object<ParError>(*this);
 		ar & BOOST_SERIALIZATION_NVP(error);
 	}
 };
-BOOST_CLASS_IMPLEMENTATION(AsymError<double> , boost::serialization::object_serializable);
+//BOOST_CLASS_IMPLEMENTATION(AsymError<double> , boost::serialization::object_serializable);
 
 class AbsParameter //: public std::enable_shared_from_this<AbsParameter>
 {
 public:
-  //! Constructor with name of parameter and optional type
-  AbsParameter(std::string name, ParType type=ParType::UNDEFINED):name_(name), type_(type){
+	//! Constructor with name of parameter and optional type
+	AbsParameter(std::string name, ParType type=ParType::UNDEFINED):name_(name), type_(type){
 
-  }
+	}
 
-  //! Destructor
-  virtual ~AbsParameter(){
-	  //std::cout << "GoodBye " << name_ <<std::endl;
-  }
+	//! Destructor
+	virtual ~AbsParameter(){
+		//std::cout << "GoodBye " << name_ <<std::endl;
+	}
 
-  //! Getter for name of object
-  virtual const std::string& GetName(){
-    return name_;
-  }
+	//! Getter for name of object
+	virtual const std::string& GetName(){
+		return name_;
+	}
 
-  //! Getter for type of object
-  virtual const ParType type(){
-    return type_;
-  }
+	//! Getter for type of object
+	virtual const ParType type(){
+		return type_;
+	}
 
-  //! Getter for typename of object, to be defined by the actual implementation
-  virtual const std::string TypeName()=0;
+	//! Getter for typename of object, to be defined by the actual implementation
+	virtual const std::string TypeName()=0;
 
-  //Observer Pattern Functions
+	//Observer Pattern Functions
 
-  //! Attaches a new TreeNode as Observer
-  void Attach(std::shared_ptr<ParObserver> newObserver){
-    oberservingNodes.push_back(newObserver);;
-  }
+	//! Attaches a new TreeNode as Observer
+	void Attach(std::shared_ptr<ParObserver> newObserver){
+		oberservingNodes.push_back(newObserver);;
+	}
 
-  //! Removes TreeNodes not needed as Observer anymore
-  void Detach(std::shared_ptr<ParObserver> obsoleteObserver){
-    oberservingNodes.erase(std::remove(oberservingNodes.begin(), oberservingNodes.end(), obsoleteObserver), oberservingNodes.end());
-  }
+	//! Removes TreeNodes not needed as Observer anymore
+	void Detach(std::shared_ptr<ParObserver> obsoleteObserver){
+		oberservingNodes.erase(std::remove(oberservingNodes.begin(), oberservingNodes.end(), obsoleteObserver), oberservingNodes.end());
+	}
 
-  //! Notify all observing TreeNodes that parameter changed
-  void Notify(){
-    for(std::vector<std::shared_ptr<ParObserver> >::const_iterator iter = oberservingNodes.begin(); iter != oberservingNodes.end(); ++iter)
-    {
-        if(*iter != std::shared_ptr<ParObserver>())//Ist das richtig????
-        {
-            (*iter)->Update();
-        }
-    }
-  }
+	//! Notify all observing TreeNodes that parameter changed
+	void Notify(){
+		for(std::vector<std::shared_ptr<ParObserver> >::const_iterator iter = oberservingNodes.begin(); iter != oberservingNodes.end(); ++iter)
+		{
+			if(*iter != std::shared_ptr<ParObserver>())//Ist das richtig????
+			{
+				(*iter)->Update();
+			}
+		}
+	}
 
-  //! Return shared_pointer pointing to this Parameter
-  //std::shared_ptr<AbsParameter> getptr() {
-  //    return shared_from_this();
-  //}
+	//! Return shared_pointer pointing to this Parameter
+	//std::shared_ptr<AbsParameter> getptr() {
+	//    return shared_from_this();
+	//}
 
-  //! friend function to stream parameter information to output
-  /*!
-   * Declaring the stream-operator << as friend allows to stream parameter
-   * information to the output as easily as a generic type.
-   * \sa make_str(), to_str()
-  */
-  friend std::ostream& operator<<( std::ostream& out, std::shared_ptr<AbsParameter> b ){
-    return out << b->to_str();
-  }
+	//! friend function to stream parameter information to output
+	/*!
+	 * Declaring the stream-operator << as friend allows to stream parameter
+	 * information to the output as easily as a generic type.
+	 * \sa make_str(), to_str()
+	 */
+	friend std::ostream& operator<<( std::ostream& out, std::shared_ptr<AbsParameter> b ){
+		return out << b->to_str();
+	}
 
-  //! friend function to stream parameter information to output
-  /*!
-   * Declaring the stream-operator << as friend allows to stream parameter
-   * information to the output as easily as a generic type.
-   * \sa make_str(), to_str()
-  */
-  friend std::ostream& operator<<( std::ostream& out, AbsParameter& b ){
-    return out << b.to_str();
-  }
+	//! friend function to stream parameter information to output
+	/*!
+	 * Declaring the stream-operator << as friend allows to stream parameter
+	 * information to the output as easily as a generic type.
+	 * \sa make_str(), to_str()
+	 */
+	friend std::ostream& operator<<( std::ostream& out, AbsParameter& b ){
+		return out << b.to_str();
+	}
 
-  //! A public function returning a string with parameter information
-  /*!
-   * This function simply returns the member string out_, which contains
-   * all parameter information. The string gets rebuild with every change
-   * of the parameter.
-   * \return string with parameter information
-   * \sa operator<<, make_str()
-  */
-  virtual std::string to_str() {
-	//make_str();
-    return make_str();
-  }
+	//! A public function returning a string with parameter information
+	/*!
+	 * This function simply returns the member string out_, which contains
+	 * all parameter information. The string gets rebuild with every change
+	 * of the parameter.
+	 * \return string with parameter information
+	 * \sa operator<<, make_str()
+	 */
+	virtual std::string to_str() {
+		//make_str();
+		return make_str();
+	}
 
-  //! A public function returning a string with parameter value
-  /*!
-   * This function simply returns the member string outVal_, which contains
-   * the parameter value. The string gets rebuild with every change
-   * of the parameter.
-   * \return string with parameter information
-   * \sa make_str()
-  */
-  virtual std::string val_to_str() {
-	//make_str();
-    return make_val_str();
-  }
+	//! A public function returning a string with parameter value
+	/*!
+	 * This function simply returns the member string outVal_, which contains
+	 * the parameter value. The string gets rebuild with every change
+	 * of the parameter.
+	 * \return string with parameter information
+	 * \sa make_str()
+	 */
+	virtual std::string val_to_str() {
+		//make_str();
+		return make_val_str();
+	}
+	//  virtual bool isFixed() { return isFixed_; }
+	//  virtual void setFix(bool f) { isFixed_ = f; }
 
 protected:
 	//std::string out_; /*!< Output string to print information */
 	//std::string outVal_; /*!< Output string to print only value */
 	std::string name_; /*!< internal name of the parameter */
 	ParType type_; /*!< ParType enum for type of parameter */
-	//  ParError error_;
-	//  bool hasError_; /*!< Is an error defined for this parameter? */
+	//bool isFixed_;
+	//ParError error_;
+	//bool hasError_; /*!< Is an error defined for this parameter? */
 
 	std::vector<std::shared_ptr<ParObserver> > oberservingNodes; /*!< list of observers, e.g. TreeNodes */
 
@@ -241,10 +246,9 @@ private:
 	template<class archive>
 	void serialize(archive& ar, const unsigned int version)
 	{
-		ar & BOOST_SERIALIZATION_NVP(type_);
 		ar & BOOST_SERIALIZATION_NVP(name_);
-		//ar & BOOST_SERIALIZATION_NVP(outVal_);
-		//ar & BOOST_SERIALIZATION_NVP(out_);
+		ar & BOOST_SERIALIZATION_NVP(type_);
+		//		ar & BOOST_SERIALIZATION_NVP(isFixed_);
 	}
 
 };

@@ -29,6 +29,7 @@
 
 #include "Core/Event.hpp"
 #include "Core/Generator.hpp"
+#include "Core/DataPoint.hpp"
 
 class Data
 {
@@ -47,7 +48,11 @@ public:
   virtual void pushEvent(const Event&) =0;
   virtual void writeData() =0;
   virtual Event& getEvent(const int) =0;
+  virtual allMasses getMasses(const unsigned int startEvent=0, unsigned int nEvents=0) = 0;
   virtual const int getBin(const int, double&, double&) =0; //TODO: BinDataTyp, dynamic dimension
+  virtual void Clear() = 0;
+  virtual std::vector<Event> getEvents() = 0;
+  virtual void Add(Data& otherSample) = 0;
 
   virtual const unsigned int getNEvents() const =0;
   virtual const unsigned int getNBins() const =0;

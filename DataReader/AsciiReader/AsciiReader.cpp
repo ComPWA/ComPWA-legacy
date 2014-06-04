@@ -64,6 +64,51 @@ AsciiReader::~AsciiReader() {
   EvtList_.clear();
 }
 
+allMasses AsciiReader::getMasses(){
+  if(!EvtList_.size()) return allMasses();
+  unsigned int nParts = EvtList_.at(0).getNParticles();
+  BOOST_LOG_TRIVIAL(debug)<<"RootReader::getMasses() #particles: "<<nParts;
+
+  //determine invMass combinations
+  unsigned int nMasses=0;
+  std::vector<std::pair<unsigned int, unsigned int> > ids;
+  for(unsigned int i=0; i<nParts; i++)
+    for(unsigned int j=i+1; j<nParts; j++){
+      nMasses++;
+      ids.push_back(std::make_pair(i+1,j+1));
+    }
+  BOOST_LOG_TRIVIAL(debug)<<"AsciiReader::getMasses() #invMasses: "<<nMasses;
+
+  allMasses result(nMasses, EvtList_.size(), ids);
+  //calc and store inv masses
+  for(unsigned int evt=0; evt<EvtList_.size(); evt++){
+    Event tmp = EvtList_.at(evt);
+
+    // Check number of particle in TClonesrray
+    if( nParts != tmp.getNParticles() ){
+      result.nEvents--;
+      continue;
+    }
+
+    for(unsigned int pa=0; pa<nParts; pa++){
+      for(unsigned int pb=pa+1; pb<nParts; pb++){
+        const Particle &inA(tmp.getParticle(pa));
+        const Particle &inB(tmp.getParticle(pb));
+        double mymass_sq = inA.invariantMass(inB);
+
+        (result.masses_sq.at(std::make_pair(pa+1,pb+1))).at(evt) = mymass_sq;
+
+        //tmp.addParticle(Particle(inN.X(), inN.Y(), inN.Z(), inN.E(),partN->GetPdgCode()));
+        //tmp.setWeight(feventWeight); //Todo: weight? what weight? lets wait...
+
+
+      }//particle loop B
+    }//particle loop A
+
+  }//event loop
+
+  return result;
+}
 Event& AsciiReader::getEvent( const int index ) {
   if ( EvtList_.size() <= (unsigned int)index )
     throw BadIndex("Index exceeds max number of events");

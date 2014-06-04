@@ -14,7 +14,7 @@
  * This class calculates a simple -log(LH) of a intensity and a dataset.
  * Data and Model are provided in the constructor using the Amplitude and Data
  * interfaces. The class itself fulfills the Estimator interface.
-*/
+ */
 
 #ifndef _MINLOGLH_HPP
 #define _MINLOGLH_HPP
@@ -34,6 +34,8 @@
 class MinLogLH : public Estimator {
 
 public:
+	virtual void setTree(std::shared_ptr<FunctionTree>, unsigned int);
+	virtual void setTree(std::shared_ptr<FunctionTree>, std::shared_ptr<FunctionTree>, unsigned int, unsigned int);
 
   virtual double controlParameter(ParameterList& minPar);
   static std::shared_ptr<ControlParameter> createInstance(std::shared_ptr<Amplitude>, std::shared_ptr<Data>, unsigned int startEvent=0, unsigned int nEvents=0);
@@ -41,8 +43,8 @@ public:
   static std::shared_ptr<ControlParameter> createInstance(std::shared_ptr<FunctionTree>, unsigned int);
   static std::shared_ptr<ControlParameter> createInstance(std::shared_ptr<FunctionTree>, std::shared_ptr<FunctionTree>, unsigned int, unsigned int);
 
-  /** Destructor */
-  virtual ~MinLogLH();
+	/** Destructor */
+	virtual ~MinLogLH();
 
 protected:
   /// Default Constructor (0x0)
