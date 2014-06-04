@@ -137,8 +137,10 @@ double AmpWigner::evaluate(dataPoint& point) const {
 	//		std::cout<<(2.*_m13*_m13-locmax_sq-locmin_sq)/(locmax_sq-locmin_sq)<<std::endl;
 	//		std::cout<<_m13<< " " <<_m23<<" " <<locmin_sq << " "<<locmax_sq<<std::endl;
 */
-	double m23sq = point.getVal("m23sq");
-	double m13sq = point.getVal("m13sq");
+//	double m23sq = point.getVal("m23sq");
+//	double m13sq = point.getVal("m13sq");
+	double m23sq = point.getVal(0);
+	double m13sq = point.getVal(1);
 	double m12sq = kin->getThirdVariableSq(m23sq,m13sq);
 	double invM1 = -999;
 	double invM2 = -999;

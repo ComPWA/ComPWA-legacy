@@ -82,7 +82,7 @@
 
 #include "DataReader/Data.hpp"
 #include "Estimator/Estimator.hpp"
-#include "Physics/Amplitude.hpp"
+#include "Core/Amplitude.hpp"
 #include "Optimizer/Optimizer.hpp"
 #include "Core/FitResult.hpp"
 #include "Core/ParameterList.hpp"
@@ -96,7 +96,7 @@ class RunManager
 
 public:
 
-	RunManager() {};
+	RunManager():size_(0) {};
 	RunManager( std::shared_ptr<Data>, std::shared_ptr<Amplitude>, std::shared_ptr<Optimizer>); //Fit
 	RunManager( unsigned int size, std::shared_ptr<Amplitude>, std::shared_ptr<Generator>); //Generate
 
@@ -104,8 +104,8 @@ public:
 
 
 	virtual unsigned int getSize (){ return size_; };
-	virtual void setSize ( unsigned int s){ size_=s; validSize=1; };
-	virtual void setData ( std::shared_ptr<Data> d){ pData_ = d; validData=1; setSize(pData_->getNEvents());};
+	virtual void setSize ( unsigned int s){ size_=s; };
+	virtual void setData ( std::shared_ptr<Data> d){ pData_ = d; };
 	virtual void setPhspSample( std::shared_ptr<Data> d){ phspSample_ = d; validPhsp=1; };
 	virtual void setAmplitude ( std::shared_ptr<Amplitude> d){ pPhys_ = d; validAmplitude=1; };
 	virtual void setOptimizer ( std::shared_ptr<Optimizer> d){ pOpti_ = d; validOptimizer=1; };

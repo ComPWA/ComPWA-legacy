@@ -60,6 +60,10 @@ public:
 
   //! Destructor
   virtual ~FunctionTree(){
+	  for(std::map<std::string, std::shared_ptr<TreeNode> >::iterator iter = nodes_.begin(); iter != nodes_.end(); ++iter){
+		  iter->second->deleteLinks();
+	  }
+
     //;
   }
 

@@ -115,7 +115,7 @@ std::complex<double> AmpRelBreitWignerRes::dynamicalFunction(double mSq, double 
 	double GammaV = gamma0 * qTerm * (mR / m) * BLWeiss2;
 	std::complex<double> denom(mR*mR - m*m, -mR * GammaV);
 
-	std::complex<double> result = std::complex<double>( (2.*J+1.) ) / denom; //Laura++ (old) definition
+	std::complex<double> result = std::complex<double>( 1. ,0 ) / denom; //Laura++ (old) definition
 	//	result = std::complex<double>( (2.*J+1.)*sqrt(BLWeiss2) ) / denom;
 	//	result = std::complex<double>( (2.*J+1.)*sqrt(BLWeiss2)*sqrt(BLmother2(m)) ) / denom; //Laura++ (new) definition
 

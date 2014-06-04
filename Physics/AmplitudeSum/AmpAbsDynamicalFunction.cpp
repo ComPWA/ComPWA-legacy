@@ -32,29 +32,18 @@ AmpAbsDynamicalFunction::~AmpAbsDynamicalFunction()
 {
 }
 
-//double AmpAbsDynamicalFunction::evaluate(double x[], size_t dim) {
-//	if(dim!=2) return 0;
-//	//set data point: we assume that x[0]=m13 and x[1]=m23
-//	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
-//	double m12sq = kin->getThirdVariableSq(x[0],x[1]);
-//	dataPoint pp; pp.setVal("m23sq",x[1]);pp.setVal("m13sq",x[0]);
-//	if( !kin->isWithinPhsp(pp) ) return 0;//only integrate over phase space
-//	std::complex<double> res = evaluate(pp);
-//	return ( std::abs(res)*std::abs(res) ); //integrate over |F|^2
-//}
-double evalWrapper(double* x, size_t dim, void* param) {
+double evalAmp(double* x, size_t dim, void* param) {
 	/* We need a wrapper here because a eval() is a member function of AmpAbsDynamicalFunction
 	 * and can therefore not be referenced. But gsl_monte_function expects a function reference.
 	 * As third parameter we pass the reference to the current instance of AmpAbsDynamicalFunction
 	 */
 	if(dim!=2) return 0;
 	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
-	double m12sq = kin->getThirdVariableSq(x[0],x[1]);
-	dataPoint pp; pp.setVal("m23sq",x[1]);pp.setVal("m13sq",x[0]);
+	dataPoint pp; pp.setVal(0,x[1]);pp.setVal(1,x[0]);
 	if( !kin->isWithinPhsp(pp) ) return 0;//only integrate over phase space
-	std::complex<double> res = static_cast<AmpAbsDynamicalFunction*>(param)->evaluate(pp);
+	std::complex<double> res = static_cast<AmpAbsDynamicalFunction*>(param)->evaluateAmp(pp);
+//	res = res* static_cast<AmpAbsDynamicalFunction*>(param)->evaluateWignerD(pp);
 	return ( std::abs(res)*std::abs(res) ); //integrate over |F|^2
-//	return static_cast<AmpAbsDynamicalFunction*>(param)->evaluate(x,dim);
 };
 
 double AmpAbsDynamicalFunction::integral() const{
@@ -62,7 +51,7 @@ double AmpAbsDynamicalFunction::integral() const{
 	size_t dim=2;
 	double res=0.0, err=0.0;
 
-		DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
+	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
 	//set limits: we assume that x[0]=m13sq and x[1]=m23sq
 	double xLimit_low[2] = {kin->m13_sq_min,kin->m23_sq_min};
 	double xLimit_high[2] = {kin->m13_sq_max,kin->m23_sq_max};
@@ -70,7 +59,7 @@ double AmpAbsDynamicalFunction::integral() const{
 	gsl_rng_env_setup ();
 	const gsl_rng_type *T = gsl_rng_default; //type of random generator
 	gsl_rng *r = gsl_rng_alloc(T); //random generator
-	gsl_monte_function F = {&evalWrapper,dim, const_cast<AmpAbsDynamicalFunction*> (this)};
+	gsl_monte_function F = {&evalAmp,dim, const_cast<AmpAbsDynamicalFunction*> (this)};
 //	gsl_monte_function F = {&twoDimGaussian,dim, new int()};//using test function; result should be 1
 
 	/*	Choosing vegas algorithm here, because it is the most accurate:
@@ -83,7 +72,49 @@ double AmpAbsDynamicalFunction::integral() const{
 	BOOST_LOG_TRIVIAL(debug)<<"AmpAbsDynamicalFunction::integral() Integration result for |"<<_name<<"|^2: "<<res<<"+-"<<err<<" relAcc [%]: "<<100*err/res;
 
 	return res;
-}
+};
+
+double eval(double* x, size_t dim, void* param) {
+	/* We need a wrapper here because a eval() is a member function of AmpAbsDynamicalFunction
+	 * and can therefore not be referenced. But gsl_monte_function expects a function reference.
+	 * As third parameter we pass the reference to the current instance of AmpAbsDynamicalFunction
+	 */
+	if(dim!=2) return 0;
+	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
+	dataPoint pp; pp.setVal(0,x[1]);pp.setVal(1,x[0]);
+	if( !kin->isWithinPhsp(pp) ) return 0;//only integrate over phase space
+	std::complex<double> res = static_cast<AmpAbsDynamicalFunction*>(param)->evaluate(pp);
+//	res = res / static_cast<AmpAbsDynamicalFunction*>(param)->evaluateWignerD(pp);
+	return ( std::abs(res)*std::abs(res) ); //integrate over |F|^2
+};
+
+double AmpAbsDynamicalFunction::totalIntegral() const{
+	BOOST_LOG_TRIVIAL(debug)<<"AmpAbsDynamicalFunction::totalIntegral() calculating integral of "<<_name<<" !";
+	size_t dim=2;
+	double res=0.0, err=0.0;
+
+	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
+	//set limits: we assume that x[0]=m13sq and x[1]=m23sq
+	double xLimit_low[2] = {kin->m13_sq_min,kin->m23_sq_min};
+	double xLimit_high[2] = {kin->m13_sq_max,kin->m23_sq_max};
+	size_t calls = 100000;
+	gsl_rng_env_setup ();
+	const gsl_rng_type *T = gsl_rng_default; //type of random generator
+	gsl_rng *r = gsl_rng_alloc(T); //random generator
+	gsl_monte_function F = {&eval,dim, const_cast<AmpAbsDynamicalFunction*> (this)};
+
+	/*	Choosing vegas algorithm here, because it is the most accurate:
+	* 		-> 10^5 calls gives (in my example) an accuracy of 0.03%
+	* 		 this should be sufficiency for most applications
+	*/
+	gsl_monte_vegas_state *s = gsl_monte_vegas_alloc (dim);
+	gsl_monte_vegas_integrate (&F, xLimit_low, xLimit_high, 2, calls, r,s,&res, &err);
+	gsl_monte_vegas_free(s);
+	BOOST_LOG_TRIVIAL(debug)<<"AmpAbsDynamicalFunction::totalIntegral() result for |"<<_name<<"|^2: "<<res<<"+-"<<err<<" relAcc [%]: "<<100*err/res;
+
+	return res;
+};
+
 double twoDimGaussian(double* z, size_t dim, void *param){
 	if(dim!=2) return 0;
 	/* test environment for numeric integration:

@@ -51,14 +51,19 @@ public:
 
   virtual void initialise() = 0; 
   virtual std::complex<double> evaluate(dataPoint& point) = 0;
+  //! value of dynamical amplitude at \param point
   virtual std::complex<double> evaluateAmp(dataPoint& point) = 0;
+  //! value of WignerD amplitude at \param point
   virtual double evaluateWignerD(dataPoint& point) = 0;
 
+  //! Get resonance spin
   virtual double getSpin() = 0;
+  //! check subsystem of resonance
   virtual bool isSubSys(const unsigned int) const = 0;
-//  virtual double evaluate(double x[],size_t dim) ;//used for MC integration
-	//! Calculation integral |resonance|^2
+  //! Calculation integral |dynamical amplitude|^2
   virtual double integral() const;
+  //! Calculation integral |dynamical amplitude * WignerD|^2
+  virtual double totalIntegral() const;
 
   virtual std::string GetName(){ return _name; };
   virtual std::string GetTitle(){ return GetName(); };
@@ -70,7 +75,6 @@ protected:
   double _norm;
 
 private:
-  //ClassDef(AmpAbsDynamicalFunction,1) // Abstract dynamical function
 
 };
 

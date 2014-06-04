@@ -84,8 +84,8 @@ std::complex<double> AmpFlatteRes::evaluateAmp(dataPoint& point) {
 		return 0;
 	}
 	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
-	double m23sq = point.getVal("m23sq");
-	double m13sq = point.getVal("m13sq");
+	double m23sq = point.getVal(0);
+	double m13sq = point.getVal(1);
 	double m12sq = kin->getThirdVariableSq(m23sq,m13sq);
 	double mSq = -999;
 	switch(_subSys){
@@ -122,8 +122,8 @@ std::complex<double> AmpFlatteRes::dynamicalFunction(double mSq, double mR, doub
 
 	std::complex<double> denom(mR*mR - mSq, -p1*g1*g1-p2*g2*g2);
 
-	std::complex<double> result = (std::complex<double>( (2*J+1) * g1*g1 , 0 ) / denom);//correct definition
-	//	std::complex<double> result = (std::complex<double>( (2*J+1) , 0) / denom);//Laura++ (old) definition
+	std::complex<double> result = (std::complex<double>( g1*g1 , 0 ) / denom);//correct definition
+//		std::complex<double> result = (std::complex<double>( 1 , 0) / denom);//Laura++ (old) definition
 
 	if(result.real()!=result.real()) {std::cout << "RE part NAN" << std::endl; return 0;}
 	if(result.imag()!=result.imag()) {std::cout << "IM part NAN" << std::endl; return 0;}

@@ -93,3 +93,31 @@ void dataPoint::setPoint(std::vector<double> values){
 	var=std::vector<double>(values);
 	return;
 }
+std::ostream & operator<<(std::ostream &os, dataPoint &p){
+	std::vector<std::string> varNames = Kinematics::instance()->getVarNames();
+	os << varNames[0] << "="<<p.getVal(0)<< " | "<<varNames[1]<<"="<<p.getVal(1);
+	return os;
+}
+
+
+
+bool allMasses::Fill(Event &evt){
+	dataPoint point(evt);
+	// Check number of particle in TClonesrray and if event is within PHSP boundary
+	if( nInvMasses != evt.getNParticles()  || !Kinematics::instance()->isWithinPhsp(point))
+		return 0;
+	eff.push_back(evt.getEfficiency());
+	weight.push_back(evt.getWeight());
+
+	for(unsigned int pa=0; pa<nInvMasses; pa++){
+		for(unsigned int pb=pa+1; pb<nInvMasses; pb++){
+			const Particle &inA(evt.getParticle(pa));
+			const Particle &inB(evt.getParticle(pb));
+			double mymass_sq = inA.invariantMass(inB);
+			(masses_sq.at(std::make_pair(pa+1,pb+1))).push_back(mymass_sq);
+//			std::cout<<"adding "<<pa+1<<"/"<<pb+1<<" m="<<mymass_sq<<std::endl;
+		}//particle loop B
+	}//particle loop A
+	nEvents++;
+	return 1;
+}

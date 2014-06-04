@@ -20,7 +20,8 @@ DalitzHistEfficiency::DalitzHistEfficiency(TH2D* passed, TH2D* total) : effHist(
 DalitzHistEfficiency::DalitzHistEfficiency(const DalitzHistEfficiency&){
 }
 double DalitzHistEfficiency::evaluate(std::vector<double> x){
-	dataPoint point; point.setVal("m23sq",x[0]); point.setVal("m13sq",x[1]);
+	//we assume that x[1]=m13sq and x[0]=m23sq
+	dataPoint point; point.setVal(0,x[0]); point.setVal(1,x[1]);
 //	double m13sq = x[1];
 //	double m23sq = x[0];
 
@@ -30,8 +31,10 @@ double DalitzHistEfficiency::evaluate(std::vector<double> x){
 	return evaluate(point);
 }
 double DalitzHistEfficiency::evaluate(dataPoint& point){
-	double m13sq = point.getVal("m13sq");
-	double m23sq = point.getVal("m23sq");
+//	double m13sq = point.getVal("m13sq");
+//	double m23sq = point.getVal("m23sq");
+	double m13sq = point.getVal(1);
+	double m23sq = point.getVal(0);
 
 	TH2D* test = (TH2D*) effHist->GetPassedHistogram();
 	int globalBin = test->FindBin(m23sq,m13sq);
@@ -39,9 +42,10 @@ double DalitzHistEfficiency::evaluate(dataPoint& point){
 }
 
 double DalitzAngleHistEfficiency::evaluate(dataPoint& point){
-	double m23sq = point.getVal("m23sq");
+//	double m23sq = point.getVal("m23sq");
+	double m23sq = point.getVal(0);
 	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
-	double angle = kin->calcHelicityAngle(5,point);
+	double angle = kin->helicityAngle(5,point);
 
 	TH2D* test = (TH2D*) effHist->GetPassedHistogram();
 	int globalBin = test->FindBin(m23sq,angle);

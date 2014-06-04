@@ -51,7 +51,6 @@ AmpKinematics::AmpKinematics(double ma, double mb , double mc, double M, DoubleP
 				_ma(ma), _mb(mb), _mc(mc), _M(M), _mR(mR),_subSys(subSys), _type(type),
 				_spin(spin),_m(m),_n(n), _mesonRadius(mesonR), _motherRadius(motherR)
 {
-
 };
 
 void AmpKinematics::setDecayMasses(double ma, double mb, double mc, double M) {
@@ -63,13 +62,15 @@ void AmpKinematics::setDecayMasses(double ma, double mb, double mc, double M) {
 double AmpKinematics::qValue(double x, double ma, double mb){
 	double mapb = ma + mb;
 	double mamb = ma - mb;
+	double xSq =x*x;
+	double t1 = xSq - mapb*mapb;
+	double t2 = xSq - mamb*mamb;
 
-	if( (x*x - mapb*mapb) < 0 ) {
+	if( t1 < 0 ) {
 		//std::cout<<"AmpKinematics: Trying to calculate break-up momentum below threshold!"<<std::endl;
 		return 1; //below threshold
 	}
-	double result=sqrt( (x*x - mapb*mapb) * (x*x - mamb*mamb) ) / (2. * x );
-	//	std::cout<<"ss "<<ma<<" "<<mb<<" "<<x<<" "<<sqrt(x*x/4-ma*ma)<<" " <<result<<std::endl;
+	double result=sqrt( t1 * t2 ) / (2. * x );
 	return result;
 
 }
@@ -106,8 +107,10 @@ double AmpKinematics::qValue(double x, double ma, double mb){
 //	return FormFactor(t0,t);
 //}
 double AmpKinematics::BlattWeiss(double x, double mR, double ma, double mb, double spin, double mesonRadius){
-	double t0= qValue(mR,ma,mb)*qValue(mR,ma,mb) * mesonRadius*mesonRadius;
-	double t= qValue(x,ma,mb)*qValue(x,ma,mb) * mesonRadius*mesonRadius;
+	double qR = qValue(mR,ma,mb);
+	double qX = qValue(x,ma,mb);
+	double t0= qR*qR * mesonRadius*mesonRadius;
+	double t=  qX*qX* mesonRadius*mesonRadius;
 	return FormFactor(t0,t,spin);
 }
 //double AmpKinematics::BLmother2(double x) const {

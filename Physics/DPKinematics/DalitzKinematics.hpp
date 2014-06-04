@@ -35,60 +35,81 @@ protected:
 	bool massIdsSet;
 	unsigned int id23;
 	unsigned int id13;
-//	static DalitzKinematics* inst;
-	bool _DPareaCalculated;
-	double _DParea;
+	bool _DPareaCalculated;	//! is phsp area already calculated?
+	double _DParea;	//! phsp area
 	//! calculated dalitz plot area for the given kinematics
 	void calcDParea();
+	//! initialization
 	void init();
 
 	//! Copy constructor
 	DalitzKinematics(const DalitzKinematics& other);
 
+	//! default constructor
 	DalitzKinematics():massIdsSet(false){};
-	//! constructor access particles by name
+	//! constructor access particles by name, masses etc are obtained from PhysConst singleton
 	DalitzKinematics(std::string _nameMother, std::string _name1, std::string _name2, std::string _name3);
-	//! constructor with particle masses and names
+	//! constructor with particle masses and names, independent from PhysConst
 	DalitzKinematics(double _M, double _Br, double _m1, double _m2, double _m3,
 			std::string _nameMother, std::string _name1, std::string _name2, std::string _name3);
-
-//	std::vector<std::string> varNames;
-
 
 public:
 	static Kinematics* createInstance(std::string _nameMother, std::string _name1, std::string _name2, std::string _name3){
 		_inst = new DalitzKinematics(_nameMother, _name1, _name2,_name3);
 		return _inst;
 	}
-//	static DalitzKinematics* instance(){
-//		if(!inst) {
-//			BOOST_LOG_TRIVIAL(fatal)<<"DPKinematics: ERROR instance not created first!";
-//			return 0;
-//		}
-//		return inst;
-//	};
+	//! Event to dataPoint conversion
 	void eventToDataPoint(Event& ev, dataPoint& point);
 
-	unsigned int sizeOfPhsp(){ return 3; }
-//	std::vector<std::string> getVarNames(){return varNames;}
+	/**
+	 * \brief Generate contour of phsp boundary
+	 *
+	 * @param xsys Which subsystem should be plotted on x?
+	 * @param ysys Which subsystem should be plotted on y?
+	 * @param n Number of points
+	 * @param xcoord array with x values
+	 * @param ycoord array with y values
+	 *
+	 * The allocated size of the arrays should be n+1.
+	 */
 	void phspContour(unsigned int xsys,unsigned int ysys, unsigned int n, double* xcoord, double* ycoord);
-	//! calculated the helicity angle
-	double calcHelicityAngle(double invM1sq, double invM2sq, double M, double ma, double mb, double mc);
-	//! calculated the helicity angle
-	double calcHelicityAngle(unsigned int sys,dataPoint& point);
+	/**
+	 * \brief Calculates the helicity angle.
+	 *
+	 * Calculates the helicity angle for subsystem @param sys given the invariant masses
+	 * @param invMass23sq and @param invMass23sq. The angle is measured versus daughter 2 in system [12],
+	 * versus daughter 1 in [13] and versus 2 in [23]
+	 */
+	double helicityAngle(unsigned int sys, double invMassSq23, double invMassSq13);
+	//! Helicity angle for subSystem sys at dataPoint point.
+	double helicityAngle(unsigned int sys,dataPoint& point);
+	/**
+	 * \brief Calculates the scattering angle.
+	 *
+	 * Function obsolete!
+	 * Calculates the scattering angle given the invariant masses @param s and @param t.
+	 * The angle is measured between the spectator particle @param mSpec and particle @param m.
+	 * @param mSecond is the third particle of the decay
+	 * You should set the masses as follows:
+	 * (m12sq,m23sq,M,m3,m1,m2); for subsystem 3
+	 * (m13sq,m12sq,M,m2,m3,m1); for subsystem 4
+	 * (m23sq,m13sq,M,m1,m2,m3); for subsystem 5
+	 * When masses for scatteringAngle() are set correctly both functions are equivalent.
+	 * \return cos(helicityAngle)
+	 */
+	double scatteringAngle(double s, double t, double M, double mSpec, double mSecond, double m);
 	//! Calculates third dalitz plot variable, e.g f(s1,s2)=s3
 	double getThirdVariableSq(double, double) const;
-	//! checks of data point is within phase space boundaries
+	//! Checks if data point is within phase space boundaries
 	bool isWithinPhsp(const dataPoint &point) ;
-	//! returns the dalitz plot area for the given kinematics
+	//! Returns the dalitz plot area for the given kinematics
 	double getPhspVolume();
-
+	//! Calculated momenta n,m using legendre polynomials
 	double calculateMoments(unsigned int sys, dataPoint& point, unsigned int n, unsigned int m);
-
-	//!maximum value for variable m23=5, m13=4, m12=3
-	double mimax(unsigned int i) const;
-	//!minimum value for variable m23=5, m13=4, m12=3
-	double mimin(unsigned int i) const;
+	//!maximum value for invariant mass squared: m23sq=5, m13sq=4, m12sq=3
+	double mimax(unsigned int sys) const;
+	//!minimum value for invariant mass squared: m23sq=5, m13sq=4, m12sq=3
+	double mimin(unsigned int sys) const;
 
 	//these functions are buggy somewhere!
 	double lambda(double x, double y, double z)const;
@@ -105,11 +126,11 @@ public:
 	double s1min(double s2)const { return s1min(s2,M,m1,m2,m3); };
 	double s1max(double s2)const { return s1max(s2,M,m1,m2,m3); };
 
-	//!calculate energy of particle \partId in rest frame of system \sys at the invariant mass \invMass_sys
+	//!calculate energy of particle partId in rest frame of system sys at the invariant mass invMass_sys
 	double eiCms(unsigned int partId, unsigned int sys, double invMass_sys) const;
-	//!calculate min value of inv. mass of system \sys given the invariant mass \invMass_sys in system \sys
+	//!calculate min value of inv. mass of system sys2 given the invariant mass invMass_sys in system sys
 	double invMassMin(unsigned int sys, unsigned int sys2, double invMass_sys) const;
-	//!calculate max value of inv. mass of system \sys given the invariant mass \invMass_sys in system \sys
+	//!calculate max value of inv. mass of system sys2 given the invariant mass invMass_sys in system sys
 	double invMassMax(unsigned int sys, unsigned int sys2, double invMass_sys) const;
 
 	//! returns absolute minimum for variable
@@ -125,28 +146,45 @@ public:
 	//! get spin of particles
 	unsigned int getSpin(std::string name);
 
+	//! mass of mother particle
 	double getMotherMass() {return M;};
-	//! mass of decaying particle
-	double M; unsigned int spinM;
-	//! width of decaying particle
-	double Br;
-	//! masses of final state particles
-	double m1; unsigned int spin1;
-	double m2; unsigned int spin2;
-	double m3; unsigned int spin3;
-	double m4; unsigned int spin4;
-	double m5; unsigned int spin5;
-	double m6; unsigned int spin6;
 
-	//! names of particles
-	std::string nameMother, name1, name2, name3, name4, name5, name6;
+	std::string nameMother;//! name of mother particle
+	double Msq; //! mass squared of mother particle
+	double M; //! mass of mother particle
+	unsigned int spinM;//! spin of mother particle
+	double Br;//! width of decaying particle
 
-	double m23_sq_min, m23_sq_max;
-	double m13_sq_min, m13_sq_max;
-	double m12_sq_min, m12_sq_max;
-	double m23_min, m23_max;
-	double m13_min, m13_max;
-	double m12_min, m12_max;
+	std::string name1;//! name of daughter 1
+	double mSq1; //! masse squared of daughter 1
+	double m1; //! masses of daughter 1
+	unsigned int spin1; //! spin of daughter 1
+	std::string name2;//! name of daughter 2
+	double mSq2; //! masse squared of daughter 2
+	double m2; //! masses of daughter 2
+	unsigned int spin2;//! spin of daughter 2
+	std::string name3;//! name of daughter 3
+	double mSq3; //! masse squared of daughter 3
+	double m3; //! masses of daughter 3
+	unsigned int spin3;//! spin of daughter 3
+	std::string name4;
+	double mSq4; //! masse squared of daughter 4
+	double m4;
+	unsigned int spin4;
+
+
+	double m23_sq_min; //!minimum value of m23sq
+	double m23_sq_max;//!maximum value of m23sq
+	double m13_sq_min;//!minimum value of m13sq
+	double m13_sq_max;//!maximum value of m13sq
+	double m12_sq_min;//!minimum value of m12sq
+	double m12_sq_max;//!maximum value of m12sq
+	double m23_min; //!minimum value of m23sq
+	double m23_max;//!maximum value of m23sq
+	double m13_min; //!minimum value of m13sq
+	double m13_max;//!maximum value of m13sq
+	double m12_min; //!minimum value of m12sq
+	double m12_max;//!maximum value of m12sq
 
 };
 

@@ -21,7 +21,7 @@
 #include <map>
 #include <string>
 
-#include "Physics/Amplitude.hpp"
+#include "Core/Amplitude.hpp"
 #include "Core/Parameter.hpp"
 #include "Core/ParameterList.hpp"
 #include "Core/FunctionTree.hpp"
@@ -89,35 +89,71 @@ public:
 	virtual const ParameterList& intensity(std::vector<double> point, ParameterList& par);
 	virtual const double sliceIntensity(dataPoint& dataP, ParameterList& par,std::complex<double>* reso, unsigned int nResos);
 
-//	virtual std::shared_ptr<FunctionTree> functionTree(allMasses& theMasses);
 	virtual std::shared_ptr<FunctionTree> functionTree(allMasses& theMasses, allMasses& thePHSPMasses);
     virtual std::shared_ptr<FunctionTree> phspTree(allMasses& thePHSPMasses);
+    //! reset trees
     virtual void resetTree(){
         myTree = std::shared_ptr<FunctionTree>();
         myPhspTree = std::shared_ptr<FunctionTree>();
     }
-
+    //! fill internal parameter list with (start) parameter
 	virtual const bool fillStartParVec(ParameterList& outPar);
-
+	//! print overview over all amplitudes
 	virtual void printAmps();
-	virtual double getFraction(std::string name) { return totAmp.getFraction(name)/integral(); };
-	virtual double getFraction(unsigned int id) { return totAmp.getFraction(id)/integral(); };
+	//! get magnitude of resonance \param name
+	virtual double getMagnitude(std::string name) {
+		unsigned int id=getIdOfResonance(name);
+		return rr[namer[id]]->GetValue();
+	};
+	//! convert resonance \param name to id
+	unsigned int getIdOfResonance(std::string name){
+		for(unsigned int i=0; i<nAmps; i++)	if(namer[i]==name) return i;
+	}
+	//! convert resonance \param id to name
+	std::string getNameOfResonance(unsigned int id){ return namer[id]; }
+	//! get magnitude of resonance \param id
+	virtual double getMagnitude(unsigned int id) { return rr[namer[id]]->GetValue(); };
+	//! get total integral for resonance \param id
+	virtual double getTotalIntegral(unsigned int id) { return totAmp.getTotalIntegral(id); };
+	//! get total integral for resonance \param name
+	virtual double getTotalIntegral(std::string name) { return totAmp.getTotalIntegral(name); };
+	//! get fit fraction for resonance \param name
+	virtual double getFraction(std::string name) { return totAmp.getUnormalizedFraction(name)/integral(); };
+	//! get fit fraction for resonance \param id
+	virtual double getFraction(unsigned int id) { return totAmp.getUnormalizedFraction(id)/integral(); };
+	//! print all fit fractions; fitting errors are not available here
 	virtual void printFractions();
+	/** Calculate partial integral over amplitude
+	 *
+	 * Currently only integration over m23sq and m13sq is supported
+	 * @param var1 first integration variables, choose m23sq or m13sq
+	 * @param min1 min of first integration variable
+	 * @param max1 min of first integration variable
+	 * @param var2 second integration variables, choose m23sq or m13sq
+	 * @param min2 min of second integration variable
+	 * @param max2 max of second integration variable
+	 * @return
+	 */
 	virtual double getIntValue(std::string var1, double min1, double max1, std::string var2, double min2=0, double max2=0);
-
+	//! \return Number of resonances
+	virtual unsigned int getNumberOfResonances() { return totAmp.getNAmps(); }
+	//! calculate normalization of resonance \param amp
 	double normReso(std::shared_ptr<AmpAbsDynamicalFunction> amp);
+	//! Destructor
 	virtual ~AmpSumIntensity(){};
+	//! Clone function
 	virtual AmpSumIntensity* Clone(){
 		return (new AmpSumIntensity(*this));
 	}
 
 protected:
 	void init();
-//	void setupTree(allMasses& theMasses, bool isPhspTree);
+	//! intialize PHSP tree
 	void setupTree(allMasses& thePHSPMasses){
 		allMasses dummyMass;
 		setupTree(thePHSPMasses, dummyMass);
 	}
+	//! intialize PHSP and normal tree
 	void setupTree(allMasses& theMasses, allMasses& thePHSPMasses);
 
 	std::shared_ptr<Efficiency> eff_;

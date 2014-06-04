@@ -38,9 +38,7 @@ class Amplitude
 
 public:
 
-	Amplitude()
-{
-}
+	Amplitude(){}
 
 	virtual ~Amplitude()
 	{ /* nothing */	}
@@ -60,14 +58,24 @@ public:
 
 	virtual const bool fillStartParVec(ParameterList& outPar) =0;
 	virtual void setParameterList(ParameterList& par) =0;
-	virtual void copyParameterList(ParameterList& par) {
-		return;
-	}
+	virtual void copyParameterList(ParameterList& par) {}
 
 	virtual void printAmps() = 0;
 	virtual void printFractions() = 0;
+	virtual unsigned int getNumberOfResonances() { return 0; }
 
+	//! get total integral for resonance \param id
+	virtual double getTotalIntegral(unsigned int id) {  };
+	//! get total integral for resonance \param name
+	virtual double getTotalIntegral(std::string name) {  };
+	//! convert resonance \param name to id
+	virtual unsigned int getIdOfResonance(std::string name){}
+	//! convert resonance \param id to name
+	virtual std::string getNameOfResonance(unsigned int id){}
+	virtual double getMagnitude(std::string name) {};
+	virtual double getMagnitude(unsigned int id) {};
 	virtual double getFraction(std::string name) = 0;
+	virtual double getFraction(unsigned int id) = 0;
 	virtual double getIntValue(std::string var1, double min1, double max1, std::string var2, double min2, double max2) = 0;
 	virtual Amplitude* Clone() = 0;
 

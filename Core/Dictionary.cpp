@@ -20,7 +20,7 @@
 #include "Core/Parameter.hpp"
 #include "Core/ParameterList.hpp"
 #include "DataReader/Data.hpp"
-#include "Physics/Amplitude.hpp"
+#include "Core/Amplitude.hpp"
 
 #include "Core/Dictionary.hpp"
 

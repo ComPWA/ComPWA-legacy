@@ -30,8 +30,7 @@ void RootReader::Clear(){
 std::shared_ptr<Data> RootReader::rndSubSet(unsigned int size, std::shared_ptr<Generator> gen){
 	std::shared_ptr<Data> newSample(new RootReader(fileName, true,"test",false));
 	unsigned int totalSize = getNEvents();
-	unsigned int newSize = size;
-	double threshold = (double)newSize/totalSize;
+	unsigned int newSize = totalSize;
 	/* 1th method: new Sample has exact size, but possibly events are added twice.
 	 * We would have to store all used events in a vector and search the vector at every event -> slow
 	 */
@@ -44,9 +43,17 @@ std::shared_ptr<Data> RootReader::rndSubSet(unsigned int size, std::shared_ptr<G
 	//}
 
 	/* 2nd method: events are added once only, but total size of sample varies with sqrt(N) */
-	unsigned int d=0;
-	for(unsigned int i=0; i<totalSize; i++)
-		if(gen->getUniform()<threshold) newSample->pushEvent(fEvents[i]);
+	for(unsigned int i=0; i<totalSize; i++){//count how many events are not within PHSP
+		dataPoint point(fEvents[i]);
+		if(!Kinematics::instance()->isWithinPhsp(point)) newSize--;
+	}
+	double threshold = (double)size/newSize; //calculate threshold
+	for(unsigned int i=0; i<totalSize; i++){
+		dataPoint point(fEvents[i]);
+		if(!Kinematics::instance()->isWithinPhsp(point)) continue;
+		if(gen->getUniform()<threshold)
+			newSample->pushEvent(fEvents[i]);
+	}
 	return newSample;
 }
 
@@ -58,7 +65,7 @@ void RootReader::read(){
 	fTree->SetBranchAddress("weight",&feventWeight);
 	fTree->SetBranchAddress("charge",&fCharge);
 	fTree->SetBranchAddress("flavour",&fFlavour);
-//	fEvent=0;
+	//	fEvent=0;
 	bin();
 	storeEvents();
 
@@ -71,7 +78,7 @@ RootReader::RootReader(TTree* tr, const bool binned=false) : fBinned(binned){
 RootReader::RootReader(const std::string inRootFile, const bool binned,
 		const std::string inTreeName, const bool readFlag)
 :fBinned(binned),_readFlag(readFlag),fileName(inRootFile),treeName(inTreeName){
-//	fEvent=0;
+	//	fEvent=0;
 	if(!readFlag) return;
 	fFile = new TFile(fileName.c_str());
 	fTree = (TTree*) fFile->Get(treeName.c_str());
@@ -124,8 +131,8 @@ const std::vector<std::string>& RootReader::getVariableNames(){
 Event& RootReader::getEvent(const int i){
 	//Event outEvent;
 
-//	if(i>=0) {fEvent=i;}
-//	else {fEvent++;}
+	//	if(i>=0) {fEvent=i;}
+	//	else {fEvent++;}
 
 	return fEvents.at(i);
 
@@ -185,18 +192,25 @@ allMasses RootReader::getMasses(const unsigned int startEvent, unsigned int nEve
     nEvents = fmaxEvents - startEvent;
     //Todo: Exception
   }
+
+  unsigned int nSkipped =0; //count events which are outside PHSP boundary
+  unsigned int nFilled=0; //count events which are outside PHSP boundary
+
   allMasses result(nMasses, nEvents, ids);
   //calc and store inv masses
   for(unsigned int evt=startEvent; evt<startEvent+nEvents; evt++){
-    Event tmp = fEvents.at(evt);
+    //Event tmp = fEvents.at(evt);
+
+    if( result.Fill(fEvents.at(evt)) ) nFilled++;
+    else nSkipped++;
 
     // Check number of particle in TClonesrray
-    if( nParts != tmp.getNParticles() ){
-      result.nEvents--;
-      continue;
-    }
+    //if( nParts != tmp.getNParticles() ){
+    //  result.nEvents--;
+   //   continue;
+   // }
 
-    result.eff.at(evt) = tmp.getEfficiency();
+  /*  result.eff.at(evt) = tmp.getEfficiency();
     result.weight.at(evt) = tmp.getWeight();
 
     for(unsigned int pa=0; pa<nParts; pa++){
@@ -212,10 +226,12 @@ allMasses RootReader::getMasses(const unsigned int startEvent, unsigned int nEve
 
 
 			}//particle loop B
-		}//particle loop A
+		}//particle loop A*/
 
 	}//event loop
+	BOOST_LOG_TRIVIAL(debug)<<"RootReader::getMasses() "<<nSkipped<<"("<<(double)nSkipped/fEvents.size()*100<<"%) data points are outside the PHSP boundary. We skip these points!";
 
+	//	std::cout<<"after      "<<result.masses_sq.at(std::make_pair(2,3)).size()<<std::endl;
 	return result;
 }
 

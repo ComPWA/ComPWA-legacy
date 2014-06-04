@@ -129,6 +129,15 @@ public:
     return _children;
   };
 
+  //! delete children & parent pointer
+  const void deleteLinks(){
+    _children.clear();
+    _parents.clear();
+    for(unsigned int i=0; i<_value.size(); i++){
+    	_value[i]->Detach(shared_from_this());
+    }
+  };
+
   //! Get value of this node
    /*!
     * pure virtual function inheriting classes must implement to provide a

@@ -64,8 +64,10 @@ std::complex<double> AmpGausRes::evaluateAmp(dataPoint& point) const {
 	double width = _resWidth.GetValue();
 	//  double m  = Double_t(_x);
 	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
-	double m23sq = point.getVal("m23sq");
-	double m13sq = point.getVal("m13sq");
+//	double m23sq = point.getVal("m23sq");
+//	double m13sq = point.getVal("m13sq");
+	double m23sq = point.getVal(0);
+	double m13sq = point.getVal(1);
 	double m12sq = kin->getThirdVariableSq(m23sq,m13sq);
 	double m = -999;
 	switch(_subSys){

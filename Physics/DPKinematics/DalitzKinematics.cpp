@@ -25,14 +25,14 @@
 
 
 double DalitzKinematics::calculateMoments(unsigned int sys, dataPoint& point, unsigned int n, unsigned int m){
-	double angle = calcHelicityAngle(sys,point);
+	double angle = helicityAngle(sys,point);
 	if(angle < -1 || angle > 1 ) {
 		BOOST_LOG_TRIVIAL(error) << "DalitzKinematics::calculateMoments() angle out of range! "<<angle;
 		return -999;
 	}
-//	double val = gsl_sf_legendre_Plm(n,m,angle);
+	//	double val = gsl_sf_legendre_Plm(n,m,angle);
 	double val = gsl_sf_legendre_sphPlm(n,m,angle);//normalized! - which one is correct?
-//	std::cout<<angle<< " "<<val<<std::endl;
+	//	std::cout<<angle<< " "<<val<<std::endl;
 	return val;
 }
 double DalitzKinematics::getMin(std::string name){
@@ -56,7 +56,7 @@ void DalitzKinematics::eventToDataPoint(Event& ev, dataPoint& point){
 	Particle part3 = ev.getParticle(2);
 	double m23sq = Particle::invariantMass(part2,part3);
 	double m13sq = Particle::invariantMass(part1,part3);
-//	point.setVal("m13sq",m13sq); point.setVal("m23sq",m23sq);
+	//	point.setVal("m13sq",m13sq); point.setVal("m23sq",m23sq);
 	point.setVal(1,m13sq); point.setVal(0,m23sq);
 	return;
 }
@@ -89,29 +89,33 @@ double DalitzKinematics::invMassMin(unsigned int sys, unsigned int sys2, double 
 	return min;
 }
 double DalitzKinematics::eiCms(unsigned int partId, unsigned int sys, double invMass_sys) const {
-	double E1, E2, E3;
-	double mSq = invMass_sys;
+	double E;
+	double m = sqrt(invMass_sys);
 	switch(sys){
-	case 5:
-		E1 =-(mSq-M*M+m1*m1)/(2*sqrt(mSq));
-		E2 = (mSq-m3*m3+m2*m2)/(2*sqrt(mSq));
-		E3 = (mSq-m2*m2+m3*m3)/(2*sqrt(mSq)); break;
-	case 4:
-		E1 = (mSq-m1*m1+m3*m3)/(2*sqrt(mSq));
-		E2 =-(mSq-M*M+m2*m2)/(2*sqrt(mSq));
-		E3 = (mSq-m3*m3+m1*m1)/(2*sqrt(mSq)); break;
 	case 3:
-		E1 = (mSq-m2*m2+m1*m1)/(2*sqrt(mSq));
-		E2 = (mSq-m1*m1+m2*m2)/(2*sqrt(mSq));
-		E3 =-(mSq-M*M+m3*m3)/(2*sqrt(mSq));	break;
+		switch(partId){
+		case 1: E = (invMass_sys-mSq2+mSq1)/(2*m);break;
+		case 2: E = (invMass_sys-mSq1+mSq2)/(2*m);break;
+		case 3: E =-(invMass_sys-Msq+mSq3)/(2*m);	break;
+		}
+		break;
+	case 4:
+		switch(partId){
+		case 1: E = (invMass_sys-mSq3+mSq1)/(2*m);break;
+		case 2: E =-(invMass_sys-Msq+mSq2)/(2*m);break;
+		case 3: E = (invMass_sys-mSq1+mSq3)/(2*m); break;
+		}
+		break;
+	case 5:
+		switch(partId){
+		case 1: E =-(invMass_sys-Msq+mSq1)/(2*m);break;
+		case 2: E = (invMass_sys-mSq3+mSq2)/(2*m);break;
+		case 3: E = (invMass_sys-mSq2+mSq3)/(2*m); break;
+		}
+		break;
 	}
-	double Estar=-999;
-	switch(partId){
-	case 1: Estar=E1; break;
-	case 2: Estar=E2; break;
-	case 3: Estar=E3; break;
-	}
-	return Estar;
+
+	return E;
 }
 double DalitzKinematics::mimin(unsigned int i) const
 {
@@ -195,44 +199,79 @@ void DalitzKinematics::phspContour(unsigned int xsys,unsigned int ysys,unsigned 
 	return;
 }
 
-double DalitzKinematics::calcHelicityAngle(unsigned int sys, dataPoint& point){
-	double cosTheta;
-	double m13sq = point.getVal(1);
-	double m23sq = point.getVal(0);
-	double m12sq = getThirdVariableSq(m23sq,m13sq);
-	switch(sys){
-	case 3:
-		cosTheta = calcHelicityAngle(m12sq,m23sq,M,m3,m1,m2); break;
-	case 4:
-		cosTheta = calcHelicityAngle(m13sq,m23sq,M,m2,m1,m3); break;
-	case 5:
-		cosTheta = calcHelicityAngle(m23sq,m13sq,M,m1,m2,m3); break;
-	default:
-		BOOST_LOG_TRIVIAL(error) <<"DalitzKinematics::calcHelicityAngle() : wrong subsystem selected!";
-		return 0.0;
-	}
-	return cosTheta;
+double DalitzKinematics::helicityAngle(unsigned int sys, dataPoint& point){
+	return helicityAngle(sys,point.getVal(0),point.getVal(1));
 }
+//double DalitzKinematics::calcHelicityAngle(unsigned int sys, dataPoint& point){
+//	double cosTheta;
+//	double cosTheta_test;
+//	double m13sq = point.getVal(1);
+//	double m23sq = point.getVal(0);
+//	double m12sq = getThirdVariableSq(m23sq,m13sq);
+//	//I have no idea how we should define the angles!
+//	switch(sys){
+//	case 3://angle versus K-
+//		cosTheta = scatteringAngle(m12sq,m23sq,M,m3,m1,m2); break;//angle versus particle 2
+//	case 4://angle versus K_S0
+//		cosTheta = scatteringAngle(m13sq,m12sq,M,m2,m3,m1); break;//angle versus particle 1
+//	case 5:
+//		cosTheta = scatteringAngle(m23sq,m13sq,M,m1,m2,m3); break;//angle versus particle 3
+//	default://angle versus K+
+//		BOOST_LOG_TRIVIAL(error) <<"DalitzKinematics::calcHelicityAngle() : wrong subsystem selected!";
+//		return 0.0;
+//	}
+//	//	    if(cosTheta>1.) cosTheta=1.;
+//	//	    if(cosTheta<-1.) cosTheta=-1.;
+//	return cosTheta;
+//}
 
-double DalitzKinematics::calcHelicityAngle(double invMassSq23, double invMassSq13, \
-		double M, double mFirst, double mSecond, double mThird){
-	/*
-	 * Angle definition: assume we want to measure the helicity angle given the inv. mass23sq.
-	 * then the angle is the angle between particle 1 and 2
-	 *
-	 */
-	double invMassSq12= getThirdVariableSq(invMassSq23,invMassSq13);
-	double s = invMassSq23;
-	double t = invMassSq13;
-	double u = invMassSq12;
-	double qSq = (s-(M+mFirst)*(M+mFirst))*(s-(M-mFirst)*(M-mFirst))/(4*s);
-	double qPrimeSq = (s-(mSecond+mThird)*(mSecond+mThird))*(s-(mSecond-mThird)*(mSecond-mThird))/(4*s);
-	double cosAngle = ( s*(t-u)+(M*M-mFirst*mFirst)*(mSecond*mSecond-mThird*mThird) )/(4*s*sqrt(qSq)*sqrt(qPrimeSq));
+double DalitzKinematics::scatteringAngle(double s, double t, \
+		double M, double mSpec, double mSecond, double m){
+	double u = getThirdVariableSq(s,t);
+	double qSq = (s-(M+mSpec)*(M+mSpec))*(s-(M-mSpec)*(M-mSpec))/(4*s);
+	double qPrimeSq = (s-(mSecond+m)*(mSecond+m))*(s-(mSecond-m)*(mSecond-m))/(4*s);
+	double cosAngle = ( s*(t-u)+(M*M-mSpec*mSpec)*(mSecond*mSecond-m*m) )/(4*s*sqrt(qSq)*sqrt(qPrimeSq));
 
 	return cosAngle;
 }
+double DalitzKinematics::helicityAngle(unsigned int sys, double invMassSq23, double invMassSq13){
+	double invMassSq12= getThirdVariableSq(invMassSq23,invMassSq13);
+	double invMsqSys, invMsqSecond;
+	double m, mSpec, eCms, eSpecCms, pCms, pSpecCms, cosAngle;
+	switch(sys){
+	case 3://angle versus particle 2
+		m = m2; mSpec = m3; invMsqSys = invMassSq12; invMsqSecond=invMassSq23;
+		eCms = eiCms(2,sys,invMsqSys);
+		eSpecCms = eiCms(3,sys,invMsqSys);
+		pCms = sqrt(eCms*eCms-m*m);
+		pSpecCms = sqrt(eSpecCms*eSpecCms-mSpec*mSpec);
+		break;
+	case 4://angle versus particle 1
+		m = m1; mSpec = m2; invMsqSys = invMassSq13; invMsqSecond=invMassSq12;
+		eCms = eiCms(1,sys,invMsqSys);
+		eSpecCms = eiCms(2,sys,invMsqSys);
+		pCms = sqrt(eCms*eCms-m*m);
+		pSpecCms = sqrt(eSpecCms*eSpecCms-mSpec*mSpec);
+		break;
+	case 5:
+		//angle versus particle 3
+//		m = m3; mSpec = m1; invMsqSys = invMassSq23; invMsqSecond=invMassSq13;
+//		eCms = eiCms(3,sys,invMsqSys);
+		//angle versus particle 2
+		m = m2; mSpec = m1; invMsqSys = invMassSq23; invMsqSecond=invMassSq12;
+		eCms = eiCms(2,sys,invMsqSys);
+		eSpecCms = eiCms(1,sys,invMsqSys);
+		pCms = sqrt(eCms*eCms-m*m);
+		pSpecCms = sqrt(eSpecCms*eSpecCms-mSpec*mSpec);
+		break;
+	}
+	cosAngle = -(invMsqSecond-m*m-mSpec*mSpec-2*eCms*eSpecCms)/(2*pCms*pSpecCms);
+
+	return cosAngle;
+}
+
 DalitzKinematics::DalitzKinematics(std::string _nameMother, std::string _name1, std::string _name2, std::string _name3):
-		Br(0.0), nameMother(_nameMother), name1(_name1), name2(_name2), name3(_name3), massIdsSet(false)
+										Br(0.0), nameMother(_nameMother), name1(_name1), name2(_name2), name3(_name3), massIdsSet(false)
 {
 	M = PhysConst::instance()->getMass(_nameMother);
 	m1 = PhysConst::instance()->getMass(_name1);
@@ -251,8 +290,8 @@ DalitzKinematics::DalitzKinematics(std::string _nameMother, std::string _name1, 
 };
 DalitzKinematics::DalitzKinematics(double _M, double _Br, double _m1, double _m2, double _m3,
 		std::string _nameMother, std::string _name1, std::string _name2, std::string _name3):
-						M(_M), Br(_Br), m1(_m1), m2(_m2), m3(_m3),
-						nameMother(_nameMother), name1(_name1), name2(_name2), name3(_name3), massIdsSet(false)
+														M(_M), Br(_Br), m1(_m1), m2(_m2), m3(_m3),
+														nameMother(_nameMother), name1(_name1), name2(_name2), name3(_name3), massIdsSet(false)
 {
 
 	spinM = PhysConst::instance()->getJ(_nameMother);
@@ -262,10 +301,10 @@ DalitzKinematics::DalitzKinematics(double _M, double _Br, double _m1, double _m2
 	init();
 };
 DalitzKinematics::DalitzKinematics(const DalitzKinematics& other):
-						M(other.M), spinM(other.spinM), Br(other.Br),
-						m1(other.m1), m2(other.m2), m3(other.m3),
-						spin1(other.spin1), spin2(other.spin2), spin3(other.spin3),
-						name1(other.name1), name2(other.name2), name3(other.name3), massIdsSet(false)
+														M(other.M), spinM(other.spinM), Br(other.Br),
+														m1(other.m1), m2(other.m2), m3(other.m3),
+														spin1(other.spin1), spin2(other.spin2), spin3(other.spin3),
+														name1(other.name1), name2(other.name2), name3(other.name3), massIdsSet(false)
 {
 	init();
 };
@@ -283,6 +322,11 @@ void DalitzKinematics::init(){
 	varNames.push_back("m23sq");
 	varNames.push_back("m13sq");
 	//	varNames.push_back("m12sq");
+	Msq = M*M;
+	mSq1 = m1*m1;
+	mSq2 = m2*m2;
+	mSq3 = m3*m3;
+	mSq4 = m4*m4;
 };
 //! returns 1 if point is within PHSP otherwise 0
 double phspFunc(double* x, size_t dim, void* param) {
@@ -290,7 +334,7 @@ double phspFunc(double* x, size_t dim, void* param) {
 	DalitzKinematics* kin =	static_cast<DalitzKinematics*>(param);
 	//	double m12sq = kin->getThirdVariableSq(x[0],x[1]);
 	//use MC integration of a step function to obtain the DP area
-	dataPoint pp; pp.setVal("m23sq",x[1]);pp.setVal("m13sq",x[0]);
+	dataPoint pp; pp.setVal(0,x[1]);pp.setVal(1,x[0]);
 	if( kin->isWithinPhsp(pp) ) return 1.0;
 	return 0.0;
 };
@@ -377,26 +421,14 @@ double DalitzKinematics::getThirdVariableSq(double invmass1sq, double invmass2sq
 	 * calculates 3rd invariant mass from the other inv. masses.
 	 */
 	//	return sqrt(M*M+m1*m1+m2*m2+m3*m3-invmass1-invmass2);
-	return (M*M+m1*m1+m2*m2+m3*m3-invmass1sq-invmass2sq);
+	return (Msq+mSq1+mSq2+mSq3-invmass1sq-invmass2sq);
 }
-
-//bool DPKinematics::isWithinDP() const{
-//	/*!
-//	 * checks if phase space point lies within the kinematically
-//	 * allowed region. Point is taken from dataPoint singleton.
-//	 */
-//	static dataPoint* point = dataPoint::instance();
-//	double s1 = point->getMsq(2,3);
-//	double s2 = point->getMsq(1,3);
-//	double s3 = point->getMsq(1,2);
-//	return isWithinDP(s1,s2,s3);
-//}
 
 bool DalitzKinematics::isWithinPhsp(const dataPoint& point) {
 	if(!massIdsSet){
-	  id23 = point.getID("m23sq");
-	  id13 = point.getID("m13sq");
-	  massIdsSet = true;
+		id23 = point.getID("m23sq");
+		id13 = point.getID("m13sq");
+		massIdsSet = true;
 	}
 	double m23sq = point.getVal(id23);
 	double m13sq = point.getVal(id13);
