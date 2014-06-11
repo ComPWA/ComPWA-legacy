@@ -224,7 +224,10 @@ allMasses RootReader::getMasses(){
 		//		nFilled++;
 
 	}//event loop
-	BOOST_LOG_TRIVIAL(debug)<<"RootReader::getMasses() "<<nSkipped<<"("<<(double)nSkipped/fEvents.size()*100<<"%) data points are outside the PHSP boundary. We skip these points!";
+	if(nSkipped)
+		BOOST_LOG_TRIVIAL(debug)<<"RootReader::getMasses() "<<nSkipped
+		<<"("<<(double)nSkipped/fEvents.size()*100<<"%) data points are "
+				"outside the PHSP boundary. We skip these points!";
 
 	//	std::cout<<"after      "<<result.masses_sq.at(std::make_pair(2,3)).size()<<std::endl;
 	return result;

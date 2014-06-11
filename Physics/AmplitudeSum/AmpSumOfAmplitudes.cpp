@@ -178,8 +178,8 @@ double AmpSumOfAmplitudes::getTotalIntegral(std::string name){
 double AmpSumOfAmplitudes::getTotalIntegral(unsigned int id){
 	std::cout<<"asdfasdfadfs"<<std::endl;
 	unsigned int twoJplusOne = 2*_pdfList[id]->getSpin()+1;
-	return ( _pdfList[id]->totalIntegral()*twoJplusOne );
-//	return ( _pdfList[id]->totalIntegral() );
+//	return ( _pdfList[id]->totalIntegral()*twoJplusOne );
+	return ( _pdfList[id]->totalIntegral() );
 }
 
 double AmpSumOfAmplitudes::evaluateSlice(dataPoint& point, std::complex<double>* reso, unsigned int nResos, unsigned int subSys=1) const

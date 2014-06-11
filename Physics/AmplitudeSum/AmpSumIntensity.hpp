@@ -45,16 +45,20 @@ class AmpSumIntensity : public Amplitude {
 public:
 	enum normStyle {
 		none, /*!< no normaliztion between Amplitudes. */
-		one, /*!< all amplitudes are normalized to one. The normalization factor is \f$ 1/\sqrt(\int |A|^2)\f$ */
-		entries /*!<all amplitudes are normalized to the number of entries in dalitz plot. The normalization factor is \f$ 1/\sqrt(entries/area * \int |A|^2)\f$*/
+		/*!< all amplitudes are normalized to one.
+		 *  The normalization factor is \f$ 1/\sqrt(\int |A|^2)\f$ */
+		one,
+		/*!<all amplitudes are normalized to the number of entries in dalitz plot.
+		 *  The normalization factor is \f$ 1/\sqrt(entries/area * \int |A|^2)\f$*/
+		entries
 	};
 	//! Default Constructor (0x0)
 	AmpSumIntensity(const double inM, const double inBr, const double in1,const double in2, const double in3,
 			std::string nameM, std::string name1,std::string name2,std::string name3,
-			 AmplitudeSetup ini, unsigned int entries=9999,
+			AmplitudeSetup ini, unsigned int entries=9999,
 			normStyle ns=none, double dpArea=-999);
 	AmpSumIntensity(AmplitudeSetup ini, normStyle ns, std::shared_ptr<Efficiency> eff=std::shared_ptr<Efficiency>(new UnitEfficiency()),
-			 unsigned int entries=9999, double dpArea=-999);
+			unsigned int entries=9999, double dpArea=-999);
 	AmpSumIntensity(AmplitudeSetup ini, std::shared_ptr<Efficiency> eff=std::shared_ptr<Efficiency>(new UnitEfficiency()),
 			unsigned int entries=9999, double dpArea=-999);
 	AmpSumIntensity(const AmpSumIntensity& other);
@@ -64,15 +68,14 @@ public:
 	virtual const double integral(ParameterList& par);
 	//! normalization integral
 	virtual const double integral();
-	//! maximum value of amplitude with parameters \par
+	//! get maximum value of amplitude with current parameters
 	virtual double getMaxVal( std::shared_ptr<Generator> gen);
+	//! get maximum value of amplitude with parameters \par
 	virtual double getMaxVal(ParameterList& par, std::shared_ptr<Generator> gen);
-	virtual void calcMaxVal(ParameterList& par ,std::shared_ptr<Generator> gen);
-	virtual void calcMaxVal( std::shared_ptr<Generator> gen);
 
-    virtual std::complex<double> getFirstAmp(dataPoint& point, ParameterList& par);
+	virtual std::complex<double> getFirstAmp(dataPoint& point, ParameterList& par);
 	virtual std::complex<double> getFirstReso(dataPoint& point, ParameterList& par);
-    virtual std::complex<double> getFirstBW(dataPoint& point, ParameterList& par);
+	virtual std::complex<double> getFirstBW(dataPoint& point, ParameterList& par);
 
 
 	virtual void setNevents(unsigned int n) { _entries=n; };
@@ -84,18 +87,55 @@ public:
 	void copyParameterList(ParameterList& par);
 	//! evaluate total amplitude using parameters \par at phsp point \point
 	virtual const ParameterList& intensity(dataPoint& point, ParameterList& par);
-	//! evaluate total amplitude using current set of parametersat phsp point \point
+	//! evaluate total amplitude using current set of parameters at phsp point \point. Amplitude is multiplied with efficiency of datapoint.
 	virtual const ParameterList& intensity(dataPoint& point);
+	//! evaluate total amplitude using current set of parameters at phsp point \point. No efficiency correction.
+	virtual const ParameterList& intensityNoEff(dataPoint& point);
+	//! evaluate total amplitude using current set of parameters at phsp point \point. Amplitude is multiplied with efficiency of datapoint.
 	virtual const ParameterList& intensity(std::vector<double> point, ParameterList& par);
 
-	virtual std::shared_ptr<FunctionTree> functionTree(allMasses& theMasses, allMasses& thePHSPMasses);
-    virtual std::shared_ptr<FunctionTree> phspTree(allMasses& thePHSPMasses);
-    //! reset trees
-    virtual void resetTree(){
-        myTree = std::shared_ptr<FunctionTree>();
-        myPhspTree = std::shared_ptr<FunctionTree>();
-    }
-    //! fill internal parameter list with (start) parameter
+	/* EFFICIENCY IN TREE:
+	 * The efficiency is a constant factor in the likelihood and therefore drops in the deviation.
+	 * So we dont need to correct the intensity for the efficiency of the datapoint. But it is still
+	 * included in the normalization. There are two ways to include the efficiency in the normalization:
+	 * 1) A sample of flat toy phsp points is used. We assume that its efficiency is correctly filled.
+	 * The intensity in every single point is calculated and summed up. The efficiency in every datapoint
+	 * is usually parametrized by a efficiency histogram.
+	 * In that case set useEff=1. It is the default case.
+	 * 2) Unbinned efficiency: A sample of flat phsp points is used, but we calculate the intensity
+	 * only on accepted points and sum up. Set useEff=0 in that case.
+	 * In both cases the phsp sample used for the physics tree needs to be a toy sample.
+	 * This is used to calculate the normalization of the resonances. Only the
+	 * tree used for normalization can use a sample with accepted events!
+	 */
+	/** Setup physics tree.
+	 * the @param thePHSPMasses needs to be toy phsp sample. It is used to normalize the amplitudes.
+	 *
+	 * @param theMasses data sample
+	 * @param toyPhspSample Sample with flat toy phsp events.
+	 * @return shared_ptr of physics tree
+	 */
+	virtual std::shared_ptr<FunctionTree> functionTree(allMasses& theMasses, allMasses& toyPhspSample);
+	/** Setup phspTree for normalization of the likelihood.
+	 * This method implements an unbinned efficiency approach.
+	 *
+	 * @param accPhspSample Sample of accepted MC events. Should come from a flat PHSP sample.
+	 * @param toyPhspSample Sample with flat toy phsp events.
+	 * @return shared_ptr of PHSP tree
+	 */
+	virtual std::shared_ptr<FunctionTree> phspTree(allMasses& accPhspSample, allMasses& toyPhspSample);
+	/** Setup phspTree for normalization of the likelihood.
+	 *
+	 * @param toyPhspSample Sample with flat toy phsp events. It is assumed that efficiency vector is filled!
+	 * @return shared_ptr of PHSP tree
+	 */
+	virtual std::shared_ptr<FunctionTree> phspTree(allMasses& toyPhspSample);
+	//! reset trees
+	virtual void resetTree(){
+		myTree = std::shared_ptr<FunctionTree>();
+		myPhspTree = std::shared_ptr<FunctionTree>();
+	}
+	//! fill internal parameter list with (start) parameter
 	virtual const bool fillStartParVec(ParameterList& outPar);
 	//! print overview over all amplitudes
 	virtual void printAmps();
@@ -147,13 +187,19 @@ public:
 
 protected:
 	void init();
-	//! intialize PHSP tree
-	void setupTree(allMasses& thePHSPMasses){
-		allMasses dummyMass;
-		setupTree(thePHSPMasses, dummyMass);
-	}
-	//! intialize PHSP and normal tree
-	void setupTree(allMasses& theMasses, allMasses& thePHSPMasses);
+	/**Initialize function tree
+	 *
+	 * @param theMasses data sample
+	 * @param toyPhspSample sample of flat toy MC events for normalization of the resonances
+	 * @param opt Which tree should be created? "data" data Tree, "norm" normalization tree
+	 * with efficiency corrected toy phsp sample or "normAcc" normalization tree with sample
+	 * of accepted flat phsp events
+	 */
+	void setupTree(allMasses& theMasses, allMasses& toyPhspSample, std::string opt);
+	//! calculate maximum value of amplitude with parameters \par
+	virtual void calcMaxVal(ParameterList& par ,std::shared_ptr<Generator> gen);
+	//! calculate maximum value of amplitude with current parameters
+	virtual void calcMaxVal( std::shared_ptr<Generator> gen);
 
 	std::shared_ptr<Efficiency> eff_;
 	bool _calcMaxFcnVal;
@@ -163,7 +209,7 @@ protected:
 	AmplitudeSetup ampSetup;
 	std::shared_ptr<FunctionTree> myTree;
 	std::shared_ptr<FunctionTree> myPhspTree;
-//	std::shared_ptr<ParameterList> treePar;
+	//	std::shared_ptr<ParameterList> treePar;
 
 	double maxVal;
 
@@ -178,17 +224,6 @@ protected:
 	std::map<std::string,std::shared_ptr<DoubleParameter> > gr;
 	std::map<std::string,std::shared_ptr<DoubleParameter> > rr;
 	std::map<std::string,std::shared_ptr<DoubleParameter> > phir;
-
-//	std::vector<std::shared_ptr<DoubleParameter> > qr;
-
-//	std::vector<std::shared_ptr<IntegerParameter> > aj;
-//	std::vector<std::shared_ptr<IntegerParameter> > am;
-//	std::vector<std::shared_ptr<IntegerParameter> > an;
-
-//	std::vector<std::shared_ptr<DoubleParameter> > par1;
-//	std::vector<std::shared_ptr<DoubleParameter> > par2;
-
-//	std::vector<std::shared_ptr<AmpWigner> > angd;
 
 private:
 

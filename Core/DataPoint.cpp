@@ -108,6 +108,7 @@ bool allMasses::Fill(Event &evt){
 		return 0;
 	eff.push_back(evt.getEfficiency());
 	weight.push_back(evt.getWeight());
+	sumWeight+=evt.getWeight();
 
 	for(unsigned int pa=0; pa<nInvMasses; pa++){
 		for(unsigned int pb=pa+1; pb<nInvMasses; pb++){
@@ -119,5 +120,6 @@ bool allMasses::Fill(Event &evt){
 		}//particle loop B
 	}//particle loop A
 	nEvents++;
+	reWeight = (double)nEvents/sumWeight;
 	return 1;
 }

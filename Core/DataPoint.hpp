@@ -59,12 +59,19 @@ public:
 		eff = std::vector<double>(nEvents,1.);
 		weight = std::vector<double>(nEvents,1.);
 	}
+	//! get reweighting factor for weights
+	double getReWeight(){ return reWeight; };
 
 	//!Standard constructor
 	allMasses():nInvMasses(0),nEvents(0) {}
 
 	//! Fill event
 	bool Fill(Event &evt);
+	//! add constant efficiency value @param constEff to every event in masses_sq
+	void setEfficiency(double constEff){
+		unsigned int nEvents = masses_sq.at(std::make_pair(2,3)).size();
+		eff = std::vector<double>(nEvents,constEff);
+	}
 	//! add efficiency value from \param effObj to every event in masses_sq
 	void setEfficiency(std::shared_ptr<Efficiency> effObj){
 		unsigned int nEvents = masses_sq.at(std::make_pair(2,3)).size();
@@ -91,6 +98,8 @@ public:
 	std::map<std::pair<unsigned int, unsigned int>,std::vector<double> > masses_sq;
 	std::vector<double> eff;
 	std::vector<double> weight;
+	double sumWeight;//! sum of all weights
+	double reWeight;//! reweighting factor for event weights, so that these are 1 in average
 	unsigned int nEvents;
 	unsigned int nInvMasses;
 

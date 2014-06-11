@@ -84,7 +84,7 @@ double eval(double* x, size_t dim, void* param) {
 	dataPoint pp; pp.setVal(0,x[1]);pp.setVal(1,x[0]);
 	if( !kin->isWithinPhsp(pp) ) return 0;//only integrate over phase space
 	std::complex<double> res = static_cast<AmpAbsDynamicalFunction*>(param)->evaluate(pp);
-//	res = res / static_cast<AmpAbsDynamicalFunction*>(param)->evaluateWignerD(pp);
+	res = res / static_cast<AmpAbsDynamicalFunction*>(param)->evaluateWignerD(pp);
 	return ( std::abs(res)*std::abs(res) ); //integrate over |F|^2
 };
 

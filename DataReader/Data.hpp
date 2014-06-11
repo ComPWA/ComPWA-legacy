@@ -18,7 +18,7 @@
  * one needs at least one implementation to provide data for the other modules. If
  * a new reader is derived from and fulfills this base-class, no change in other
  * modules are necessary to work with the new dataset.
-*/
+ */
 
 #ifndef DATA_HPP_
 #define DATA_HPP_
@@ -36,28 +36,30 @@ class Data
 
 public:
 
-  Data()
-	  {
-	  }
+	Data()
+{
+}
 
-  virtual ~Data()
+	virtual ~Data()
 	{ /* nothing */	}
 
- // virtual const std::vector<std::string>& getVariableNames() =0;
+	// virtual const std::vector<std::string>& getVariableNames() =0;
 
-  virtual void pushEvent(const Event&) =0;
-  virtual void writeData() =0;
-  virtual Event& getEvent(const int) =0;
-  virtual allMasses getMasses() = 0;
-  virtual const int getBin(const int, double&, double&) =0; //TODO: BinDataTyp, dynamic dimension
-  virtual void Clear() = 0;
-  virtual std::vector<Event> getEvents() = 0;
-  virtual void Add(Data& otherSample) = 0;
+	virtual void pushEvent(const Event&) =0;
+	virtual void writeData() =0;
+	virtual Event& getEvent(const int) =0;
+	virtual allMasses getMasses() = 0;
+	virtual const int getBin(const int, double&, double&) =0; //TODO: BinDataTyp, dynamic dimension
+	virtual void Clear() = 0;
+	virtual std::vector<Event> getEvents() = 0;
+	virtual void Add(Data& otherSample) = 0;
 
-  virtual const unsigned int getNEvents() const =0;
-  virtual const unsigned int getNBins() const =0;
+	//! select only first @param newSize events from full sample
+	virtual void reduce(unsigned int newSize) = 0;
+	virtual const unsigned int getNEvents() const =0;
+	virtual const unsigned int getNBins() const =0;
 
-  virtual std::shared_ptr<Data> rndSubSet(unsigned int size, std::shared_ptr<Generator> gen) = 0;
+	virtual std::shared_ptr<Data> rndSubSet(unsigned int size, std::shared_ptr<Generator> gen) = 0;
 };
 
 #endif

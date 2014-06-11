@@ -66,6 +66,14 @@ public:
 	/** Destructor */
 	virtual ~RootReader();
 
+	//! select only first @param newSize events from full sample
+	virtual void reduce(unsigned int newSize){
+		if(newSize >= fEvents.size()) {
+			BOOST_LOG_TRIVIAL(error) << "RooReader::reduce() requested size too large, cant reduce sample!";
+			return;
+		}
+		fEvents.resize(newSize);
+	}
 	std::shared_ptr<Data> rndSubSet(unsigned int size, std::shared_ptr<Generator> gen);
 
 protected:
