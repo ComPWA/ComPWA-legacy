@@ -54,17 +54,17 @@ AmpSumIntensity::AmpSumIntensity(const AmpSumIntensity& other) : nAmps(other.nAm
 }
 
 AmpSumIntensity::AmpSumIntensity(AmplitudeSetup ini, normStyle ns, std::shared_ptr<Efficiency> eff, unsigned int entries, double dpArea) :
-																						totAmp("relBWsumAmplitude", "totAmp"), ampSetup(ini),
-																						_entries(entries), _normStyle(ns), _calcNorm(1), _dpArea(dpArea),
-																						_calcMaxFcnVal(0),eff_(eff)
+																												totAmp("relBWsumAmplitude", "totAmp"), ampSetup(ini),
+																												_entries(entries), _normStyle(ns), _calcNorm(1), _dpArea(dpArea),
+																												_calcMaxFcnVal(0),eff_(eff)
 {
 	init();
 }
 
 AmpSumIntensity::AmpSumIntensity(AmplitudeSetup ini, std::shared_ptr<Efficiency> eff, unsigned int entries, double dpArea) :
-																						totAmp("relBWsumAmplitude", "totAmp"), ampSetup(ini),
-																						_entries(entries), _normStyle(none), _calcNorm(0), _dpArea(dpArea),
-																						_calcMaxFcnVal(0),eff_(eff)
+																												totAmp("relBWsumAmplitude", "totAmp"), ampSetup(ini),
+																												_entries(entries), _normStyle(none), _calcNorm(0), _dpArea(dpArea),
+																												_calcMaxFcnVal(0),eff_(eff)
 {
 	init();
 }
@@ -72,9 +72,9 @@ AmpSumIntensity::AmpSumIntensity(AmplitudeSetup ini, std::shared_ptr<Efficiency>
 AmpSumIntensity::AmpSumIntensity(const double inM, const double inBr, const double in1,const double in2, const double in3,
 		std::string nameM, std::string name1,std::string name2,std::string name3,
 		AmplitudeSetup ini, unsigned int entries, normStyle ns, double dpArea) :
-																						totAmp("relBWsumAmplitude", "totAmp"), ampSetup(ini),
-																						_entries(entries), _normStyle(ns), _calcNorm(1),_dpArea(dpArea),
-																						_calcMaxFcnVal(0),eff_(std::shared_ptr<Efficiency>(new UnitEfficiency()))
+																												totAmp("relBWsumAmplitude", "totAmp"), ampSetup(ini),
+																												_entries(entries), _normStyle(ns), _calcNorm(1),_dpArea(dpArea),
+																												_calcMaxFcnVal(0),eff_(std::shared_ptr<Efficiency>(new UnitEfficiency()))
 {
 	init();
 }
@@ -86,6 +86,7 @@ void AmpSumIntensity::init(){
 	_dpArea = kin->getPhspVolume();
 	//  std::cout<<kin->getPhspVolume()<<std::endl;
 	_calcNorm=1;
+	if(_normStyle==normStyle::none) _calcNorm=0;
 	BOOST_LOG_TRIVIAL(debug)<<"AmpSumIntensity::init() number of Entries in dalitz plot set to: "<<_entries;
 	BOOST_LOG_TRIVIAL(debug)<<"AmpSumIntensity::init() area of phase space: "<<_dpArea;
 
@@ -106,6 +107,8 @@ void AmpSumIntensity::init(){
 		//unsigned int last = mr.size()-1;
 		std::shared_ptr<AmpRelBreitWignerRes> tmpbw(new AmpRelBreitWignerRes(tmp.m_name.c_str(),
 				*mr[tmp.m_name], *gr[tmp.m_name], tmp.m_mesonRadius, subSys, tmp.m_spin,tmp.m_m,tmp.m_n) );
+//		std::shared_ptr<AmpWigner2> tmpaw(new AmpWigner2(subSys, tmp.m_spin));
+//		totAmp.addBW(tmpbw, rr[tmp.m_name], phir[tmp.m_name], tmpaw);
 		totAmp.addBW(tmpbw, rr[tmp.m_name], phir[tmp.m_name]);
 
 		//setting normalization between amplitudes
@@ -145,7 +148,7 @@ void AmpSumIntensity::init(){
 			norm = normReso(tmpbw);
 			reso->m_norm = norm;//updating normalization
 		}
-		tmpbw->SetNormalization(1/norm);
+		tmpbw->SetNormalization(1./norm);
 	}// end loop over resonancesFlatte
 
 	//	ampSetup.save(ampSetup.getFilePath());//save updated information to input file
@@ -175,7 +178,6 @@ void AmpSumIntensity::setupTree(allMasses& theMasses, allMasses& toyPhspSample, 
 	}
 	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
 	_dpArea = kin->getPhspVolume();
-	_calcNorm=1;
 
 	if( opt == "data" ){
 		BOOST_LOG_TRIVIAL(debug)<<"AmpSumIntensity::setupTree() setting up data Tree";
@@ -278,48 +280,58 @@ void AmpSumIntensity::setupTree(allMasses& theMasses, allMasses& toyPhspSample, 
 		newTree->createLeaf("m_"+tmp.m_name, tmp.m_m, "AngD_"+tmp.m_name); //OutSpin 1
 		newTree->createLeaf("n_"+tmp.m_name, tmp.m_n, "AngD_"+tmp.m_name); //OutSpin 2
 
-		//Normalization parameter for dynamical amplitude
-		newTree->createNode("N_"+tmp.m_name, sqRootStrat, "BW_"+tmp.m_name); //N = sqrt(NSq)
-		newTree->createNode("NSq_"+tmp.m_name, multDStrat, "N_"+tmp.m_name); //NSq = N_phspMC * 1/PhspVolume * 1/Sum(|A|^2)
-		newTree->createLeaf("PhspSize_"+tmp.m_name, toyPhspSample.nEvents, "NSq_"+tmp.m_name); // N_phspMC
-		newTree->createLeaf("PhspVolume_"+tmp.m_name, 1/_dpArea, "NSq_"+tmp.m_name); // 1/PhspVolume
-		newTree->createNode("InvSum_"+tmp.m_name, invStrat, "NSq_"+tmp.m_name); //1/Sum(|A|^2)
-		newTree->createNode("Sum_"+tmp.m_name, addStrat, "InvSum_"+tmp.m_name); //Sum(|A|^2)
-		newTree->createNode("AbsVal_"+tmp.m_name, msqStrat, "Sum_"+tmp.m_name); //|A_i|^2
-		//Breit-Wigner (Normalization)
-		newTree->createNode("NormBW_"+tmp.m_name, rbwPhspStrat, "AbsVal_"+tmp.m_name, toyPhspSample.nEvents); //BW
-		newTree->createLeaf("m0_"+tmp.m_name, mr[tmp.m_name]->GetValue(), "NormBW_"+tmp.m_name); //m0
-		newTree->createLeaf("m23sq_phsp", m23sq_phsp, "NormBW_"+tmp.m_name); //ma
-		newTree->createLeaf("m13sq_phsp", m13sq_phsp, "NormBW_"+tmp.m_name); //mb
-		newTree->createLeaf("m12sq_phsp", m12sq_phsp, "NormBW_"+tmp.m_name); //mc
-		newTree->createLeaf("subSysFlag_"+tmp.m_name, subSys, "NormBW_"+tmp.m_name); //subSysFlag
-		newTree->createLeaf("spin_"+tmp.m_name, tmp.m_spin, "NormBW_"+tmp.m_name); //spin
-		newTree->createLeaf("d_"+tmp.m_name,  tmp.m_mesonRadius, "NormBW_"+tmp.m_name); //d
-		newTree->createLeaf("resWidth_"+tmp.m_name, gr[tmp.m_name]->GetValue(), "NormBW_"+tmp.m_name); //resWidth
-
+		//adding nodes and leafs for calculation of normalization
+		if(_normStyle==normStyle::none){
+			newTree->createLeaf("N_"+tmp.m_name, 1., "BW_"+tmp.m_name);
+		}else{
+			//Normalization parameter for dynamical amplitude
+			newTree->createNode("N_"+tmp.m_name, sqRootStrat, "BW_"+tmp.m_name); //N = sqrt(NSq)
+			newTree->createNode("NSq_"+tmp.m_name, multDStrat, "N_"+tmp.m_name); //NSq = N_phspMC * 1/PhspVolume * 1/Sum(|A|^2)
+			newTree->createLeaf("PhspSize_"+tmp.m_name, toyPhspSample.nEvents, "NSq_"+tmp.m_name); // N_phspMC
+			newTree->createLeaf("PhspVolume_"+tmp.m_name, 1/_dpArea, "NSq_"+tmp.m_name); // 1/PhspVolume
+			newTree->createNode("InvSum_"+tmp.m_name, invStrat, "NSq_"+tmp.m_name); //1/Sum(|A|^2)
+			newTree->createNode("Sum_"+tmp.m_name, addStrat, "InvSum_"+tmp.m_name); //Sum(|A|^2)
+			newTree->createNode("AbsVal_"+tmp.m_name, msqStrat, "Sum_"+tmp.m_name); //|A_i|^2
+			//Breit-Wigner (Normalization)
+			newTree->createNode("NormBW_"+tmp.m_name, rbwPhspStrat, "AbsVal_"+tmp.m_name, toyPhspSample.nEvents); //BW
+			newTree->createLeaf("m0_"+tmp.m_name, mr[tmp.m_name]->GetValue(), "NormBW_"+tmp.m_name); //m0
+			newTree->createLeaf("m23sq_phsp", m23sq_phsp, "NormBW_"+tmp.m_name); //ma
+			newTree->createLeaf("m13sq_phsp", m13sq_phsp, "NormBW_"+tmp.m_name); //mb
+			newTree->createLeaf("m12sq_phsp", m12sq_phsp, "NormBW_"+tmp.m_name); //mc
+			newTree->createLeaf("subSysFlag_"+tmp.m_name, subSys, "NormBW_"+tmp.m_name); //subSysFlag
+			newTree->createLeaf("spin_"+tmp.m_name, tmp.m_spin, "NormBW_"+tmp.m_name); //spin
+			newTree->createLeaf("d_"+tmp.m_name,  tmp.m_mesonRadius, "NormBW_"+tmp.m_name); //d
+			newTree->createLeaf("resWidth_"+tmp.m_name, gr[tmp.m_name]->GetValue(), "NormBW_"+tmp.m_name); //resWidth
+		}
 		switch(subSys){
 		case 3:{ //reso in sys of particles 1&2
 			//newTree->createLeaf("mym_"+tmp.m_name, m12, "RelBW_"+tmp.m_name); //m
 			newTree->createLeaf("ma_"+tmp.m_name, kin->m1, "RelBW_"+tmp.m_name); //ma
 			newTree->createLeaf("mb_"+tmp.m_name, kin->m2, "RelBW_"+tmp.m_name); //mb
-			newTree->createLeaf("ma_"+tmp.m_name, kin->m1, "NormBW_"+tmp.m_name); //ma
-			newTree->createLeaf("mb_"+tmp.m_name, kin->m2, "NormBW_"+tmp.m_name); //mb
+			if(_normStyle!=normStyle::none){
+				newTree->createLeaf("ma_"+tmp.m_name, kin->m1, "NormBW_"+tmp.m_name); //ma
+				newTree->createLeaf("mb_"+tmp.m_name, kin->m2, "NormBW_"+tmp.m_name); //mb
+			}
 			break;
 		}
 		case 4:{ //reso in sys of particles 1&3
 			//newTree->createLeaf("mym_"+tmp.m_name, m13, "RelBW_"+tmp.m_name); //m
 			newTree->createLeaf("ma_"+tmp.m_name, kin->m1, "RelBW_"+tmp.m_name); //ma
 			newTree->createLeaf("mb_"+tmp.m_name, kin->m3, "RelBW_"+tmp.m_name); //mb
-			newTree->createLeaf("ma_"+tmp.m_name, kin->m1, "NormBW_"+tmp.m_name); //ma
-			newTree->createLeaf("mb_"+tmp.m_name, kin->m3, "NormBW_"+tmp.m_name); //mb
+			if(_normStyle!=normStyle::none){
+				newTree->createLeaf("ma_"+tmp.m_name, kin->m1, "NormBW_"+tmp.m_name); //ma
+				newTree->createLeaf("mb_"+tmp.m_name, kin->m3, "NormBW_"+tmp.m_name); //mb
+			}
 			break;
 		}
 		case 5:{ //reso in sys of particles 2&3
 			//newTree->createLeaf("mym_"+tmp.m_name, m23, "RelBW_"+tmp.m_name); //m
 			newTree->createLeaf("ma_"+tmp.m_name, kin->m2, "RelBW_"+tmp.m_name); //ma
 			newTree->createLeaf("mb_"+tmp.m_name, kin->m3, "RelBW_"+tmp.m_name); //mb
-			newTree->createLeaf("ma_"+tmp.m_name, kin->m2, "NormBW_"+tmp.m_name); //ma
-			newTree->createLeaf("mb_"+tmp.m_name, kin->m3, "NormBW_"+tmp.m_name); //mb
+			if(_normStyle!=normStyle::none){
+				newTree->createLeaf("ma_"+tmp.m_name, kin->m2, "NormBW_"+tmp.m_name); //ma
+				newTree->createLeaf("mb_"+tmp.m_name, kin->m3, "NormBW_"+tmp.m_name); //mb
+			}
 			break;
 		}
 		default:{
@@ -327,7 +339,6 @@ void AmpSumIntensity::setupTree(allMasses& theMasses, allMasses& toyPhspSample, 
 		}
 		}
 	}// end loop over resonances
-
 
 	for(std::vector<ResonanceFlatte>::iterator reso=ampSetup.getResonancesFlatte().begin(); reso!=ampSetup.getResonancesFlatte().end(); reso++){
 		ResonanceFlatte tmp = (*reso);
@@ -376,59 +387,68 @@ void AmpSumIntensity::setupTree(allMasses& theMasses, allMasses& toyPhspSample, 
 		newTree->createLeaf("n_"+tmp.m_name, tmp.m_n, "AngD_"+tmp.m_name); //OutSpin 2
 
 		//Normalization
-		newTree->createNode("N_"+tmp.m_name, sqRootStrat, "Flatte_"+tmp.m_name); //N = sqrt(NSq)
-		newTree->createNode("NSq_"+tmp.m_name, multDStrat, "N_"+tmp.m_name); //NSq = N_phspMC * 1/PhspVolume * 1/Sum(|A|^2)
-		newTree->createLeaf("PhspSize_"+tmp.m_name, toyPhspSample.nEvents, "NSq_"+tmp.m_name); // N_phspMC
-		newTree->createLeaf("PhspVolume_"+tmp.m_name, 1/_dpArea, "NSq_"+tmp.m_name); // 1/PhspVolume
-		newTree->createNode("InvSum_"+tmp.m_name, invStrat, "NSq_"+tmp.m_name); //1/Sum(|A|^2)
-		newTree->createNode("Sum_"+tmp.m_name, addStrat, "InvSum_"+tmp.m_name); //Sum(|A|^2)
-		newTree->createNode("AbsVal_"+tmp.m_name, msqStrat, "Sum_"+tmp.m_name); //|A_i|^2
-		newTree->createNode("NormFlatte_"+tmp.m_name, flattePhspStrat, "AbsVal_"+tmp.m_name, toyPhspSample.nEvents); //BW
-		//Flatte (Normalization)
-		newTree->createLeaf("m0_"+tmp.m_name, mr[tmp.m_name]->GetValue(), "NormFlatte_"+tmp.m_name); //m0
-		newTree->createLeaf("m23sq_phsp", m23sq_phsp, "NormFlatte_"+tmp.m_name); //ma
-		newTree->createLeaf("m13sq_phsp", m13sq_phsp, "NormFlatte_"+tmp.m_name); //mb
-		newTree->createLeaf("m12sq_phsp", m12sq_phsp, "NormFlatte_"+tmp.m_name); //mc
-		newTree->createLeaf("subSysFlag_"+tmp.m_name, subSys, "NormFlatte_"+tmp.m_name); //subSysFlag
-		newTree->createLeaf("spin_"+tmp.m_name, tmp.m_spin, "NormFlatte_"+tmp.m_name); //spin
-		newTree->createLeaf("d_"+tmp.m_name,  tmp.m_mesonRadius, "NormFlatte_"+tmp.m_name); //d
-		newTree->createLeaf("mHiddenA_"+tmp.m_name, \
-				PhysConst::instance()->getMass(tmp.m_hiddenParticle1), "NormFlatte_"+tmp.m_name);
-		newTree->createLeaf("mHiddenB_"+tmp.m_name, \
-				PhysConst::instance()->getMass(tmp.m_hiddenParticle2), "NormFlatte_"+tmp.m_name);
-		newTree->createLeaf("coupling_"+tmp.m_name, tmp.m_coupling, "NormFlatte_"+tmp.m_name);
-		newTree->createLeaf("couplingHidden_"+tmp.m_name, tmp.m_couplingHidden, "NormFlatte_"+tmp.m_name);
+		if(_normStyle!=normStyle::none){
+			newTree->createNode("N_"+tmp.m_name, sqRootStrat, "Flatte_"+tmp.m_name); //N = sqrt(NSq)
+			newTree->createNode("NSq_"+tmp.m_name, multDStrat, "N_"+tmp.m_name); //NSq = N_phspMC * 1/PhspVolume * 1/Sum(|A|^2)
+			newTree->createLeaf("PhspSize_"+tmp.m_name, toyPhspSample.nEvents, "NSq_"+tmp.m_name); // N_phspMC
+			newTree->createLeaf("PhspVolume_"+tmp.m_name, 1/_dpArea, "NSq_"+tmp.m_name); // 1/PhspVolume
+			newTree->createNode("InvSum_"+tmp.m_name, invStrat, "NSq_"+tmp.m_name); //1/Sum(|A|^2)
+			newTree->createNode("Sum_"+tmp.m_name, addStrat, "InvSum_"+tmp.m_name); //Sum(|A|^2)
+			newTree->createNode("AbsVal_"+tmp.m_name, msqStrat, "Sum_"+tmp.m_name); //|A_i|^2
+			newTree->createNode("NormFlatte_"+tmp.m_name, flattePhspStrat, "AbsVal_"+tmp.m_name, toyPhspSample.nEvents); //BW
+			//Flatte (Normalization)
+			newTree->createLeaf("m0_"+tmp.m_name, mr[tmp.m_name]->GetValue(), "NormFlatte_"+tmp.m_name); //m0
+			newTree->createLeaf("m23sq_phsp", m23sq_phsp, "NormFlatte_"+tmp.m_name); //ma
+			newTree->createLeaf("m13sq_phsp", m13sq_phsp, "NormFlatte_"+tmp.m_name); //mb
+			newTree->createLeaf("m12sq_phsp", m12sq_phsp, "NormFlatte_"+tmp.m_name); //mc
+			newTree->createLeaf("subSysFlag_"+tmp.m_name, subSys, "NormFlatte_"+tmp.m_name); //subSysFlag
+			newTree->createLeaf("spin_"+tmp.m_name, tmp.m_spin, "NormFlatte_"+tmp.m_name); //spin
+			newTree->createLeaf("d_"+tmp.m_name,  tmp.m_mesonRadius, "NormFlatte_"+tmp.m_name); //d
+			newTree->createLeaf("mHiddenA_"+tmp.m_name, \
+					PhysConst::instance()->getMass(tmp.m_hiddenParticle1), "NormFlatte_"+tmp.m_name);
+			newTree->createLeaf("mHiddenB_"+tmp.m_name, \
+					PhysConst::instance()->getMass(tmp.m_hiddenParticle2), "NormFlatte_"+tmp.m_name);
+			newTree->createLeaf("coupling_"+tmp.m_name, tmp.m_coupling, "NormFlatte_"+tmp.m_name);
+			newTree->createLeaf("couplingHidden_"+tmp.m_name, tmp.m_couplingHidden, "NormFlatte_"+tmp.m_name);
+		} else {
+			newTree->createLeaf("N_"+tmp.m_name, 1., "Flatte_"+tmp.m_name);
+		}
 
 		switch(subSys){
 		case 3:{ //reso in sys of particles 1&2
 			//newTree->createLeaf("mym_"+tmp.m_name, m12, "RelBW_"+tmp.m_name); //m
 			newTree->createLeaf("ma_"+tmp.m_name, kin->m1, "FlatteRes_"+tmp.m_name); //ma
 			newTree->createLeaf("mb_"+tmp.m_name, kin->m2, "FlatteRes_"+tmp.m_name); //mb
-			newTree->createLeaf("ma_"+tmp.m_name, kin->m1, "NormFlatte_"+tmp.m_name); //ma
-			newTree->createLeaf("mb_"+tmp.m_name, kin->m2, "NormFlatte_"+tmp.m_name); //mb
+			if(_normStyle!=normStyle::none){
+				newTree->createLeaf("ma_"+tmp.m_name, kin->m1, "NormFlatte_"+tmp.m_name); //ma
+				newTree->createLeaf("mb_"+tmp.m_name, kin->m2, "NormFlatte_"+tmp.m_name); //mb
+			}
 			break;
 		}
 		case 4:{ //reso in sys of particles 1&3
 			//newTree->createLeaf("mym_"+tmp.m_name, m13, "FlatteRes_"+tmp.m_name); //m
 			newTree->createLeaf("ma_"+tmp.m_name, kin->m1, "FlatteRes_"+tmp.m_name); //ma
 			newTree->createLeaf("mb_"+tmp.m_name, kin->m3, "FlatteRes_"+tmp.m_name); //mb
-			newTree->createLeaf("ma_"+tmp.m_name, kin->m1, "NormFlatte_"+tmp.m_name); //ma
-			newTree->createLeaf("mb_"+tmp.m_name, kin->m3, "NormFlatte_"+tmp.m_name); //mb
+			if(_normStyle!=normStyle::none){
+				newTree->createLeaf("ma_"+tmp.m_name, kin->m1, "NormFlatte_"+tmp.m_name); //ma
+				newTree->createLeaf("mb_"+tmp.m_name, kin->m3, "NormFlatte_"+tmp.m_name); //mb
+			}
 			break;
 		}
 		case 5:{ //reso in sys of particles 2&3
 			//newTree->createLeaf("mym_"+tmp.m_name, m23, "FlatteRes_"+tmp.m_name); //m
 			newTree->createLeaf("ma_"+tmp.m_name, kin->m2, "FlatteRes_"+tmp.m_name); //ma
 			newTree->createLeaf("mb_"+tmp.m_name, kin->m3, "FlatteRes_"+tmp.m_name); //mb
-			newTree->createLeaf("ma_"+tmp.m_name, kin->m2, "NormFlatte_"+tmp.m_name); //ma
-			newTree->createLeaf("mb_"+tmp.m_name, kin->m3, "NormFlatte_"+tmp.m_name); //mb
+			if(_normStyle!=normStyle::none){
+				newTree->createLeaf("ma_"+tmp.m_name, kin->m2, "NormFlatte_"+tmp.m_name); //ma
+				newTree->createLeaf("mb_"+tmp.m_name, kin->m3, "NormFlatte_"+tmp.m_name); //mb
+			}
 			break;
 		}
 		default:{
 			BOOST_LOG_TRIVIAL(error)<<"AmpSumIntensity::setupTree(): Subsys not found!!";
 		}
 		}
-
 	}
 	if( opt == "data") myTree=newTree;
 	else if( opt == "norm" || opt == "normAcc") myPhspTree=newTree;
@@ -500,7 +520,7 @@ void AmpSumIntensity::calcMaxVal(std::shared_ptr<Generator> gen){
 }
 double AmpSumIntensity::normReso(std::shared_ptr<AmpAbsDynamicalFunction> amp){
 	double norm;
-	if(_normStyle==none) norm=1.;
+	if(_normStyle==none) norm=amp->GetNormalization();
 	else if(_normStyle==one) norm = sqrt(amp->integral());
 	else if(_normStyle==entries) norm = sqrt(_dpArea*amp->integral()/_entries);
 	BOOST_LOG_TRIVIAL(debug)<<"AmpSumIntensity::normRes Normalization constant for "
@@ -577,6 +597,21 @@ std::complex<double> AmpSumIntensity::getFirstAmp(dataPoint& point, ParameterLis
 	return totAmp.getFirstAmp(point);
 }
 
+const double AmpSumIntensity::sliceIntensity(dataPoint& dataP, ParameterList& par,std::complex<double>* reso, unsigned int nResos){
+	setParameterList(par);
+	//  dataPoint dataP; dataP.setVal("m23sq",point[0]); dataP.setVal("m13sq",point[1]);
+	//dataPoint dataP; dataP.setVal(0,point[0]); dataP.setVal(1,point[1]);
+
+	double AMPpdf=0;
+	if(Kinematics::instance()->isWithinPhsp(dataP)) AMPpdf = totAmp.evaluateSlice(dataP, reso, nResos,5);
+	if(AMPpdf!=AMPpdf){
+		BOOST_LOG_TRIVIAL(error)<<"Error AmpSumIntensity: Intensity is not a number!!";
+		AMPpdf = 0;
+	}
+	double eff=eff_->evaluate(dataP);
+	return AMPpdf*eff;
+}
+
 const ParameterList& AmpSumIntensity::intensity(std::vector<double> point, ParameterList& par){
 	setParameterList(par);
 	dataPoint dataP; dataP.setVal(0,point[0]); dataP.setVal(1,point[1]);
@@ -621,18 +656,52 @@ void AmpSumIntensity::copyParameterList(ParameterList& outPar){
 	return;
 
 }
+/*void AmpSumIntensity::setParameterList(ParameterList& par){
+	//parameters varied by Minimization algorithm
+	for(unsigned int i=0; i<nAmps; i++){
+//		*rr[i] = DoubleParameter(par.GetDoubleParameter(2*i));
+//		*phir[i] = DoubleParameter(par.GetDoubleParameter(2*i+1));
+	    if(!rr[namer[i]]->IsFixed()){
+	      rr[namer[i]]->SetValue(par.GetDoubleParameter(2*i)->GetValue());
+		  rr[namer[i]]->SetError(par.GetDoubleParameter(2*i)->GetError());
+	    }
+	    if(!phir[namer[i]]->IsFixed()){
+		  phir[namer[i]]->SetValue(par.GetDoubleParameter(2*i+1)->GetValue());
+		  phir[namer[i]]->SetError(par.GetDoubleParameter(2*i+1)->GetError());
+	    }
+	}
+	return;
+}
+const bool AmpSumIntensity::fillStartParVec(ParameterList& outPar){
+	if(outPar.GetNParameter())
+		return false; //already filled, TODO: exception?
+	for(unsigned int i=0; i<namer.size();i++){
+		//add strength and phases of the used amplitudes
+		outPar.AddParameter(rr[namer[i]]);
+		outPar.AddParameter(phir[namer[i]]);
+	}
+	return true;
+}*/
 void AmpSumIntensity::setParameterList(ParameterList& par){
 	//parameters varied by Minimization algorithm
 	for(unsigned int i=0; i<nAmps; i++){
-		//		*rr[i] = DoubleParameter(par.GetDoubleParameter(2*i));
-		//		*phir[i] = DoubleParameter(par.GetDoubleParameter(2*i+1));
+		//      *rr[i] = DoubleParameter(par.GetDoubleParameter(2*i));
+		//      *phir[i] = DoubleParameter(par.GetDoubleParameter(2*i+1));
+		if(!mr[namer[i]]->IsFixed()){
+			mr[namer[i]]->SetValue(par.GetDoubleParameter(4*i)->GetValue());
+			mr[namer[i]]->SetError(par.GetDoubleParameter(4*i)->GetError());
+		}
+		if(!gr[namer[i]]->IsFixed()){
+			gr[namer[i]]->SetValue(par.GetDoubleParameter(4*i+1)->GetValue());
+			gr[namer[i]]->SetError(par.GetDoubleParameter(4*i+1)->GetError());
+		}
 		if(!rr[namer[i]]->IsFixed()){
-			rr[namer[i]]->SetValue(par.GetDoubleParameter(2*i)->GetValue());
-			rr[namer[i]]->SetError(par.GetDoubleParameter(2*i)->GetError());
+			rr[namer[i]]->SetValue(par.GetDoubleParameter(4*i+2)->GetValue());
+			rr[namer[i]]->SetError(par.GetDoubleParameter(4*i+2)->GetError());
 		}
 		if(!phir[namer[i]]->IsFixed()){
-			phir[namer[i]]->SetValue(par.GetDoubleParameter(2*i+1)->GetValue());
-			phir[namer[i]]->SetError(par.GetDoubleParameter(2*i+1)->GetError());
+			phir[namer[i]]->SetValue(par.GetDoubleParameter(4*i+3)->GetValue());
+			phir[namer[i]]->SetError(par.GetDoubleParameter(4*i+3)->GetError());
 		}
 	}
 	return;
@@ -642,6 +711,8 @@ const bool AmpSumIntensity::fillStartParVec(ParameterList& outPar){
 		return false; //already filled, TODO: exception?
 	for(unsigned int i=0; i<namer.size();i++){
 		//add strength and phases of the used amplitudes
+		outPar.AddParameter(mr[namer[i]]);
+		outPar.AddParameter(gr[namer[i]]);
 		outPar.AddParameter(rr[namer[i]]);
 		outPar.AddParameter(phir[namer[i]]);
 	}

@@ -172,56 +172,61 @@ Event& RootReader::getEvent(const int i){
 	//return outEvent;
 }
 
-allMasses RootReader::getMasses(){
-	if(!fEvents.size()) return allMasses();
-	unsigned int nParts = fEvents.at(0).getNParticles();
-	//	BOOST_LOG_TRIVIAL(debug)<<"RootReader::getMasses() #particles: "<<nParts;
+allMasses RootReader::getMasses(const unsigned int startEvent, unsigned int nEvents){
+  if(!fEvents.size()) return allMasses();
+  if(!nEvents) nEvents = fEvents.size();
+  unsigned int nParts = fEvents.at(0).getNParticles();
+  BOOST_LOG_TRIVIAL(debug)<<"RootReader::getMasses() #particles: "<<nParts;
 
-	//determine invMass combinations
-	unsigned int nMasses=0;
-	std::vector<std::pair<unsigned int, unsigned int> > ids;
-	for(unsigned int i=0; i<nParts; i++)
-		for(unsigned int j=i+1; j<nParts; j++){
-			nMasses++;
-			ids.push_back(std::make_pair(i+1,j+1));
-		}
-	//	BOOST_LOG_TRIVIAL(debug)<<"RootReader::getMasses() #invMasses: "<<nMasses;
+  //determine invMass combinations
+  unsigned int nMasses=0;
+  std::vector<std::pair<unsigned int, unsigned int> > ids;
+  for(unsigned int i=0; i<nParts; i++)
+    for(unsigned int j=i+1; j<nParts; j++){
+      nMasses++;
+      ids.push_back(std::make_pair(i+1,j+1));
+    }
+  BOOST_LOG_TRIVIAL(debug)<<"RootReader::getMasses() #invMasses: "<<nMasses;
 
-	unsigned int nSkipped =0; //count events which are outside PHSP boundary
-	unsigned int nFilled=0; //count events which are outside PHSP boundary
+  if(startEvent+nEvents>fEvents.size()){
+    nEvents = fEvents.size() - startEvent;
+    //Todo: Exception
+  }
 
-	//	allMasses result(nMasses, fEvents.size(), ids);
-	allMasses result(nMasses, ids);
-	//calc and store inv masses
-	for(unsigned int evt=0; evt<fEvents.size(); evt++){
-		if( result.Fill(fEvents.at(evt)) ) nFilled++;
-		else nSkipped++;
+  unsigned int nSkipped =0; //count events which are outside PHSP boundary
+  unsigned int nFilled=0; //count events which are outside PHSP boundary
 
-		//		Event tmp = fEvents.at(evt);
-		//		dataPoint point(tmp);
-		//
-		//		// Check number of particle in TClonesrray and if event is within PHSP boundary
-		//		if( nParts != tmp.getNParticles()  || !Kinematics::instance()->isWithinPhsp(point)){
-		//			nSkipped++;
-		////			result.nEvents--;
-		//			continue;
-		//		}
-		////		result.eff.at(evt) = tmp.getEfficiency();
-		////		result.weight.at(evt) = tmp.getWeight();
-		//		result.eff.push_back(tmp.getEfficiency());
-		//		result.weight.push_back(tmp.getWeight());
-		//
-		//		for(unsigned int pa=0; pa<nParts; pa++){
-		//			for(unsigned int pb=pa+1; pb<nParts; pb++){
-		//				const Particle &inA(tmp.getParticle(pa));
-		//				const Particle &inB(tmp.getParticle(pb));
-		//				double mymass_sq = inA.invariantMass(inB);
-		////				(result.masses_sq.at(std::make_pair(pa+1,pb+1))).at(evt) = mymass_sq;
-		//				(result.masses_sq.at(std::make_pair(pa+1,pb+1))).push_back(mymass_sq);
-		//			}//particle loop B
-		//		}//particle loop A
-		//		result.nEvents++;
-		//		nFilled++;
+  allMasses result(nMasses, ids);
+  //calc and store inv masses
+  for(unsigned int evt=startEvent; evt<startEvent+nEvents; evt++){
+    //Event tmp = fEvents.at(evt);
+
+    if( result.Fill(fEvents.at(evt)) ) nFilled++;
+    else nSkipped++;
+
+    // Check number of particle in TClonesrray
+    //if( nParts != tmp.getNParticles() ){
+    //  result.nEvents--;
+   //   continue;
+   // }
+
+  /*  result.eff.at(evt) = tmp.getEfficiency();
+    result.weight.at(evt) = tmp.getWeight();
+
+    for(unsigned int pa=0; pa<nParts; pa++){
+      for(unsigned int pb=pa+1; pb<nParts; pb++){
+        const Particle &inA(tmp.getParticle(pa));
+        const Particle &inB(tmp.getParticle(pb));
+        double mymass_sq = inA.invariantMass(inB);
+
+        (result.masses_sq.at(std::make_pair(pa+1,pb+1))).at(evt-startEvent) = mymass_sq;
+
+        //tmp.addParticle(Particle(inN.X(), inN.Y(), inN.Z(), inN.E(),partN->GetPdgCode()));
+        //tmp.setWeight(feventWeight); //Todo: weight? what weight? lets wait...
+
+
+			}//particle loop B
+		}//particle loop A*/
 
 	}//event loop
 	if(nSkipped)
@@ -327,6 +332,7 @@ void RootReader::writeData(){
 	}
 	fTree->Write("",TObject::kOverwrite,0);
 	ff->Close();
+	delete ff;
 	return;
 }
 

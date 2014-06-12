@@ -65,6 +65,9 @@ const Double_t m3 = 0.139570; // GeV/c² (pi)
 //const Double_t c = 299792458.; // m/s
 const Double_t PI = 3.14159; // m/s
 
+unsigned int nFitEvents=100000-1;
+unsigned int nStartEvent=0;
+
 /************************************************************************************************/
 /**
  * The main function.
@@ -80,7 +83,7 @@ int main(int argc, char **argv){
 	//DPKinematics kin("D0","gamma","K-","K+");
 	//static dataPoint* point = dataPoint::instance(kin);
 
-  bool useFctTree = true;
+  bool useFctTree = true, resultGen = true;
 
   std::string file="test/3Part-4vecs.root";
 
@@ -97,7 +100,7 @@ int main(int argc, char **argv){
   BOOST_LOG_TRIVIAL(info)<< "Load Modules";
   std::shared_ptr<RootReader> myReader(new RootReader(file, false,"data"));
   std::shared_ptr<RootReader> myPHSPReader(new RootReader(file, false,"mc"));
-  std::shared_ptr<AmpSumIntensity> amps(new AmpSumIntensity(ini, AmpSumIntensity::normStyle::none, std::shared_ptr<Efficiency>(new UnitEfficiency()), myReader->getNEvents()));
+  std::shared_ptr<AmpSumIntensity> amps(new AmpSumIntensity(ini, AmpSumIntensity::normStyle::none, std::shared_ptr<Efficiency>(new UnitEfficiency()), nFitEvents));
 
   //std::shared_ptr<Amplitude> amps(new AmpSumIntensity(M, Br, m1, m2, m3,"J/psi","gamma","pi0","pi0", ini));
   // Initiate parameters
@@ -106,11 +109,11 @@ int main(int argc, char **argv){
   amps->fillStartParVec(par); //perfect startvalues
   std::shared_ptr<FunctionTree> physicsTree, phspTree;
   if(!useFctTree){//using tree?
-    esti = MinLogLH::createInstance(amps, myReader, myPHSPReader);
+    esti = MinLogLH::createInstance(amps, myReader, myPHSPReader, nStartEvent, nFitEvents);
   }else{
     BOOST_LOG_TRIVIAL(debug)<<"allMasses: try to get MassContainer...";
-    allMasses myEvtMasses(myReader->getMasses());
-    allMasses myPhspMasses(myPHSPReader->getMasses());
+    allMasses myEvtMasses(myReader->getMasses(nStartEvent,nFitEvents));
+    allMasses myPhspMasses(myPHSPReader->getMasses(nStartEvent,nFitEvents));
     BOOST_LOG_TRIVIAL(debug)<<"EvtMasses: "<< myEvtMasses.nEvents <<" events and "<< myEvtMasses.nInvMasses <<" inv masses";
     BOOST_LOG_TRIVIAL(debug)<<"PHSPMasses: "<< myPhspMasses.nEvents <<" events and "<< myPhspMasses.nInvMasses <<" inv masses";
     physicsTree = amps->functionTree(myPhspMasses,myEvtMasses);
@@ -127,8 +130,8 @@ int main(int argc, char **argv){
     BOOST_LOG_TRIVIAL(debug)<<"Check Trees: ";
     if(!physicsTree->sanityCheck()) return 0;
     if(!phspTree->sanityCheck()) return 0;
-    //BOOST_LOG_TRIVIAL(debug)<<physicsTree<<std::endl;
-    //BOOST_LOG_TRIVIAL(debug)<<phspTree<<std::endl;
+    //BOOST_LOG_TRIVIAL(info)<<physicsTree<<std::endl;
+    //BOOST_LOG_TRIVIAL(info)<<phspTree<<std::endl;
     physicsTree->recalculate();
     phspTree->recalculate();
     BOOST_LOG_TRIVIAL(debug)<<physicsTree<<std::endl;
@@ -142,7 +145,8 @@ int main(int argc, char **argv){
     dataPoint myPoint(myReader->getEvent(0));
     std::shared_ptr<TreeNode> LogNode = (physicsTree->head()->getChildren())[0];
     std::shared_ptr<TreeNode> IntNode = (LogNode->getChildren())[0];
-    std::shared_ptr<TreeNode> AmpNode = (IntNode->getChildren())[0];
+    std::shared_ptr<TreeNode> AmpNodeEff = (IntNode->getChildren())[0];
+    std::shared_ptr<TreeNode> AmpNode = (AmpNodeEff->getChildren())[1];
     std::shared_ptr<TreeNode> ResNode = (AmpNode->getChildren())[0];
     std::shared_ptr<TreeNode> BWNode = (ResNode->getChildren())[0];
     std::shared_ptr<TreeNode> ADNode = (ResNode->getChildren())[2];
@@ -167,7 +171,7 @@ int main(int argc, char **argv){
 
     BOOST_LOG_TRIVIAL(debug) << "Intensity of first data event classical: \t" << amps->intensity(myPoint,par).GetParameterValue(0);
     BOOST_LOG_TRIVIAL(debug) << "Intensity of first data event from tree: \t" << intensChild->GetValue();
-    BOOST_LOG_TRIVIAL(debug)<<"Finish checking consistency checks"<<std::endl;
+    BOOST_LOG_TRIVIAL(debug)<<"Finish consistency checks"<<std::endl;
   }
 
   //std::shared_ptr<ControlParameter> esti = MinLogLH::createInstance(amps, myReader, myPHSPReader);
@@ -186,21 +190,19 @@ int main(int argc, char **argv){
   for(unsigned int i=0; i<par.GetNDouble(); i++){
     std::shared_ptr<DoubleParameter> tmp = par.GetDoubleParameter(i);
     optiInt[i] = tmp->GetValue();
-    if(i<0 || i>9 || i%2==1){ //omega's and f0 fixed
+    if(i<0 || i>19 /*|| i%4==2 || i%4==3 */){ //omega's and f0 fixed
+   // if(i<2 || i>3 || i%2==1){ //omega's and f0 fixed
       tmp->FixParameter(true);
     }else{
-      tmp->SetValue(tmp->GetValue()/((i+1)));
+      tmp->SetValue(tmp->GetValue());///((i+1)));
       tmp->SetError(std::shared_ptr<ParError<double>>(new SymError<double>(tmp->GetValue())));
       if(!tmp->GetValue()) tmp->SetError(std::shared_ptr<ParError<double>>(new SymError<double>(1.)));
     }
     startInt[i] = tmp->GetValue();
   }
   BOOST_LOG_TRIVIAL(info) << "LH with following parameters: " << esti->controlParameter(par);
-
-
-
   for(unsigned int i=0; i<par.GetNDouble(); i++){
-      std::cout << par.GetDoubleParameter(i)->GetName() << " = " << par.GetDoubleParameter(i)->GetValue() << std::endl;
+    BOOST_LOG_TRIVIAL(info) << par.GetDoubleParameter(i)->GetName() << " = " << par.GetDoubleParameter(i)->GetValue();
   }
 
  // std::cout << "Fixing 5 of 7 parameters " << std::endl;
@@ -208,16 +210,14 @@ int main(int argc, char **argv){
   //    par.GetDoubleParameter(i).FixParameter(true);
   //  }
 
-  std::cout << "Start Fit" << std::endl;
+  BOOST_LOG_TRIVIAL(info) << "Start Fit";
   std::shared_ptr<FitResult> genResult = opti->exec(par);
-  std::cout << "Final LH = " << genResult->getResult() << std::endl;
+  BOOST_LOG_TRIVIAL(info) << "Final LH = " << genResult->getResult();
 
-  std::cout << "Optimierte intensitäten: " << esti->controlParameter(par) << std::endl;
-
+  BOOST_LOG_TRIVIAL(info) << "Optimierte intensitäten: " << esti->controlParameter(par);
   for(unsigned int i=0; i<par.GetNDouble(); i++){
-      std::cout << par.GetDoubleParameter(i)->GetName() << " = " << par.GetDoubleParameter(i)->GetValue();
-      std::cout << "   [ start: " << startInt[i] << " ,";
-      std::cout << " optimal: " << optiInt[i] << " ]" << std::endl;
+    BOOST_LOG_TRIVIAL(info) << par.GetDoubleParameter(i)->GetName() << " = " << par.GetDoubleParameter(i)->GetValue()
+       << "   [ start: " << startInt[i] << " ," << " optimal: " << optiInt[i] << " ]";
   }
 
   AmplitudeSetup iniTrue(resoFile);//put start parameters here
@@ -230,10 +230,12 @@ int main(int argc, char **argv){
   genResult->writeText("fitresult.txt");
   genResult->writeSimpleText("simplefitresult.txt");
 
+  if(useFctTree){
+    BOOST_LOG_TRIVIAL(debug)<<physicsTree<<std::endl;
+    BOOST_LOG_TRIVIAL(debug)<<phspTree<<std::endl;
+  }
 
-  BOOST_LOG_TRIVIAL(debug)<<physicsTree<<std::endl;
-  BOOST_LOG_TRIVIAL(debug)<<phspTree<<std::endl;
-
+  if(!resultGen) return 0;
 
   //Plot result
   TH2D* bw12 = new TH2D("bw12","inv. mass-sq of particles 1&2 Generated",1000,0.,10.,1000,0.,10.);
@@ -373,8 +375,10 @@ int main(int argc, char **argv){
     paras.RemoveDouble("ma"); paras.RemoveDouble("mb"); paras.RemoveDouble("mc");
   }
 
-  cout << "Einschwingen" << endl;
-  for(unsigned int schwing=0; schwing<10*myReader->getNEvents(); schwing++){
+  BOOST_LOG_TRIVIAL(info) << "Einschwingen";
+  unsigned int schwingFactor = 10;
+  if(myReader->getNEvents()<1000) schwingFactor = 1000;
+  for(unsigned int schwing=0; schwing<schwingFactor*myReader->getNEvents(); schwing++){
       weight = event.Generate();
 
       pGamma = event.GetDecay(0);
@@ -415,7 +419,7 @@ int main(int argc, char **argv){
   }
 
   maxTest*=1.1;
-  cout << "Start generation of y pi0 pi0 Dalitz Result" << endl;
+  BOOST_LOG_TRIVIAL(info) << "Start generation of y pi0 pi0 Dalitz Result";
   unsigned int i = 0;
   do{
         weight = event.Generate();
@@ -494,7 +498,7 @@ int main(int argc, char **argv){
   output.Write();
   output.Close();
 
-  cout << "Done" << endl;
+  BOOST_LOG_TRIVIAL(info) << "Done";
 
   return 0;
 }

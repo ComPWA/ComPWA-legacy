@@ -48,7 +48,7 @@ public:
 	virtual void pushEvent(const Event&) =0;
 	virtual void writeData() =0;
 	virtual Event& getEvent(const int) =0;
-	virtual allMasses getMasses() = 0;
+	virtual allMasses getMasses(const unsigned int startEvent=0, unsigned int nEvents=0) = 0;
 	virtual const int getBin(const int, double&, double&) =0; //TODO: BinDataTyp, dynamic dimension
 	virtual void Clear() = 0;
 	virtual std::vector<Event> getEvents() = 0;

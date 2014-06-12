@@ -612,7 +612,8 @@ public:
 	 * \sa make_str(), check_bounds()
 	 */
 	DoubleParameter(std::string inName, const double value, const double min, const double max)
-	:AbsParameter(inName, ParType::DOUBLE),val_(value),min_(0),max_(0){
+	:AbsParameter(inName, ParType::DOUBLE),val_(value),min_(0),max_(0),
+	 error_(std::shared_ptr<ParError<double>>(new SymError<double>(0))){
 		bounds_= usebounds_ = hasError_ = fixed_ = false;
 		if (check_bounds(min, max)){
 			min_ = min;

@@ -104,8 +104,9 @@ std::complex<double> AmpRelBreitWignerRes::evaluateAmp(dataPoint& point) {
 //
 //		if(result.real()!=result.real()) {std::cout << "RE part NAN" << std::endl;return 0;}
 //		if(result.imag()!=result.imag()) {std::cout << "IM part NAN" << std::endl; return 0;}
+	    //if(_mR==0.783) {std::cout << "Omega Norm " << _norm << std::endl; return 0;}
 //		return result;
-	return dynamicalFunction(mSq,_mR,_ma,_mb,_resWidth.GetValue(),_spin,_mesonRadius);
+	return (dynamicalFunction(mSq,_mR,_ma,_mb,_resWidth.GetValue(),_spin,_mesonRadius)*_norm);
 }
 std::complex<double> AmpRelBreitWignerRes::dynamicalFunction(double mSq, double mR, double ma, double mb, double gamma0, unsigned int J, double mesonRadius){
 	double m = sqrt(mSq);
@@ -118,8 +119,10 @@ std::complex<double> AmpRelBreitWignerRes::dynamicalFunction(double mSq, double 
 	//	result = std::complex<double>( (2.*J+1.)*sqrt(BLWeiss2) ) / denom;
 	//	result = std::complex<double>( (2.*J+1.)*sqrt(BLWeiss2)*sqrt(BLmother2(m)) ) / denom; //Laura++ (new) definition
 
-	if(result.real()!=result.real() || result.imag()!=result.imag())
+	if(result.real()!=result.real() || result.imag()!=result.imag()){
 		std::cout<<"nan in BW: "<<BLWeiss2<<" "<<mR<<" "<<mSq<<" "<<ma<<" "<<mb<<std::endl;
+		return 0;
+	}
 
 	return result;
 }

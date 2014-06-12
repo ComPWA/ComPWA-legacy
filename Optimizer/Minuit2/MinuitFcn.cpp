@@ -38,13 +38,13 @@ double MinuitFcn::operator()(const std::vector<double>& x) const{
 	//ParameterList par;
 	std::ostringstream paramOut;
 	for(unsigned int i=0; i<x.size(); i++){
-		paramOut << x[i] << " ";
 		//par.AddParameter(DoubleParameter(std::string("tmpPar"+i),x[i]));
 		//_parList.SetParameterValue(i,x[i]);
 		std::shared_ptr<DoubleParameter> actPat = _parList.GetDoubleParameter(_parNames.at(i));
 		if(!actPat->IsFixed())
 			if(x[i]==x[i]){
 				actPat->SetValue(x[i]);
+				paramOut << x[i] << " ";//print only free parameters
 //				std::cout<<_parNames.at(i)<<" "<<x[i]<<std::endl;
 			}
 	}

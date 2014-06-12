@@ -132,7 +132,7 @@
        <width>0.0085</width>
        <width_min>0.</width_min>
        <width_max>2.</width_max>
-		<norm>1</norm>
+		<norm>3</norm>
        <par1>1.</par1>
        <par2>1.</par2>
        <mesonRadius>1.</mesonRadius>
@@ -156,7 +156,7 @@
        <width>0.0085</width>
        <width_min>0.</width_min>
        <width_max>2.</width_max>
-		<norm>1</norm>
+		<norm>3</norm>
        <par1>1.</par1>
        <par2>1.</par2>
        <mesonRadius>1.</mesonRadius>

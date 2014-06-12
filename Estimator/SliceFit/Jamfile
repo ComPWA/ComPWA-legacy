@@ -1,6 +1,7 @@
 ########### SliceFit lib #############
 import os ;
 
+local QFT = [ os.environ QFT ] ;
 local ROOTSYS = [ os.environ ROOTSYS ] ;
 local ROOTINC = [ os.environ ROOTINCLUDE ] ;
 
@@ -10,13 +11,18 @@ ROOTLIBS = [ MATCH "(.*)[\n]" : $(rlibs) ] ;
 project :
 	requirements
 	<include>$(ROOTINC)
+	<include>$(QFT)/include
 	<linkflags>$(ROOTLIBS)
 	<linkflags>-lEG
+	<linkflags>-L$(QFT)/lib
+	<linkflags>-lqft++
 	;
 
 lib SliceFit : 
         [ glob *.cpp ]
         $(TOP)/Core//ComPWA 
+        $(TOP)/Optimizer//Optimizer 
+        $(TOP)/Physics//DPKinematics
          ;
 
 install dist : SliceFit : <location>$(TOP)/lib ;

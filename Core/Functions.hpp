@@ -556,6 +556,10 @@ public:
       }//end multi double
 
       case ParType::DOUBLE:{
+        if(!nD){
+          //TODO: exception wrong input
+          return false;
+        }
         //output double: log of one double input
         out = std::shared_ptr<AbsParameter>(new DoubleParameter(out->GetName(),std::log(paras.GetParameterValue(0))));
         break;

@@ -61,7 +61,7 @@ public:
 	inline virtual bool isSubSys(const unsigned int subSys) const{ return (subSys==_subSys); };
 
 protected:
-	DoubleParameter _resWidth;
+	DoubleParameter& _resWidth;
 	AmpWigner2 _wignerD;
 	bool foundMasses;
 	unsigned int id23, id13;
@@ -88,7 +88,7 @@ public:
 		double Gamma0, m0, d;
 		unsigned int spin, subSys;
 		try{
-			m0 = double(paras.GetParameterValue("m0_"+name));
+			m0 = double(paras.GetParameterValue("mass_"+name));
 		}catch(BadParameter& e){
 			m0 = double(paras.GetParameterValue("ParOfNode_m0_"+name));
 		}
@@ -101,7 +101,7 @@ public:
 		double mb = double(paras.GetParameterValue("ParOfNode_mb_"+name));
 
 		try{
-			Gamma0 = double(paras.GetParameterValue("resWidth_"+name));
+			Gamma0 = double(paras.GetParameterValue("width_"+name));
 		}catch(BadParameter& e){
 			Gamma0 = double(paras.GetParameterValue("ParOfNode_resWidth_"+name));
 		}

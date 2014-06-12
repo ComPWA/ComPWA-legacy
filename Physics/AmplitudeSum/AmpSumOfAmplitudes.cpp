@@ -53,7 +53,7 @@ AmpSumOfAmplitudes::~AmpSumOfAmplitudes(){
 	//something TODO?
 }
 
-void AmpSumOfAmplitudes::addBW(std::shared_ptr<AmpAbsDynamicalFunction> theRes , std::shared_ptr<DoubleParameter> r, std::shared_ptr<DoubleParameter> phi, std::shared_ptr<AmpWigner> theAng) {
+void AmpSumOfAmplitudes::addBW(std::shared_ptr<AmpAbsDynamicalFunction> theRes , std::shared_ptr<DoubleParameter> r, std::shared_ptr<DoubleParameter> phi, std::shared_ptr<AmpWigner2> theAng) {
 	_pdfList.push_back(theRes);
 	_intList.push_back(r);
 	_phaseList.push_back(phi);
@@ -64,7 +64,7 @@ void AmpSumOfAmplitudes::addBW(std::shared_ptr<AmpAbsDynamicalFunction> theRes ,
 	_pdfList.push_back(theRes);
 	_intList.push_back(r);
 	_phaseList.push_back(phi);
-	_angList.push_back(std::shared_ptr<AmpWigner>(new AmpWigner()));
+	_angList.push_back(std::shared_ptr<AmpWigner2>(new AmpWigner2(0,0)));
 }
 
 std::complex<double> AmpSumOfAmplitudes::getFirstBW(dataPoint& point) const
@@ -182,28 +182,39 @@ double AmpSumOfAmplitudes::getTotalIntegral(unsigned int id){
 	return ( _pdfList[id]->totalIntegral() );
 }
 
-double AmpSumOfAmplitudes::evaluateSlice(dataPoint& point, std::complex<double>* reso, unsigned int nResos, unsigned int subSys=1) const
+double AmpSumOfAmplitudes::evaluateSlice(dataPoint& point, std::complex<double>* reso, unsigned int nResos, unsigned int subSys=5) const
 {
 	// ENTER EXPRESSION IN TERMS OF VARIABLE ARGUMENTS HERE
 	std::complex<double> res;
 
-	int itReso=0, sys=0;
+	int sys=0;
+
+	//std::cout<< "DEBUG Point " << point.getVal("m23sq") << " " << point.getVal("m13sq") << " " << reso[0] << " " << reso[1] << std::endl;
+
+	bool used[nResos];
+	for(unsigned int i=0; i<nResos; i++) used[i]=false;
 
 	for(unsigned int i=0; i<_pdfList.size(); i++){
 		double a = _intList[i]->GetValue();
 		double phi = _phaseList[i]->GetValue();
 		std::complex<double> eiphi (cos(phi), sin(phi));
-		if(itReso<3) sys = 0; //TODO: way better!!!
-		else if(itReso<5) sys = 1;
-		//else sys = 2;
+		if(i<3) sys = 0; //TODO: way better!!!
+		else if(i<5) sys = 1;
+		else sys = 2;
 		//sys = itReso;
 
-		if(_pdfList[i]->isSubSys(subSys))
+		//std::cout<< "DEBUG Reso " << i << " spinsys " << sys << " " << _pdfList[i]->isSubSys(subSys) << " use " << used[sys] << std::endl;
+
+		if(_pdfList[i]->isSubSys(subSys)){
+		  if(!used[sys]){
 			res = res + reso[sys] * _angList[i]->evaluate(point);
-		else
+			used[sys]=true;
+		  }
+		}else{
 			res = res + _pdfList[i]->evaluate(point) * a * eiphi;
+		}
 		//res = res + _pdfList[i]->evaluate() * a * eiphi * _angList[i]->evaluate();
-		itReso++;
+		//itReso++;
 	}
 
 	return (std::abs(res)*std::abs(res) );

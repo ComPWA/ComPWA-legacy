@@ -49,14 +49,14 @@ public:
 
 	virtual const std::vector<std::string>& getVariableNames();
 
-	//  virtual void writeToFile();
-	virtual void pushEvent(const Event& evt) {fEvents.push_back(evt);};
-	virtual Event& getEvent(const int);
-	virtual allMasses getMasses();
-	virtual const int getBin(const int, double&, double&);
-	//virtual const int getEvent(const int, TLorentzVector& , TLorentzVector& , double&);
-	virtual void writeData();
-	virtual void Clear();
+//  virtual void writeToFile();
+    virtual void pushEvent(const Event& evt) {fEvents.push_back(evt);};
+    virtual Event& getEvent(const int);
+    virtual allMasses getMasses(const unsigned int startEvent=0, unsigned int nEvents=0);
+    virtual const int getBin(const int, double&, double&);
+    //virtual const int getEvent(const int, TLorentzVector& , TLorentzVector& , double&);
+    virtual void writeData();
+    virtual void Clear();
 
 	virtual const unsigned int getNEvents() const {return fEvents.size();};
 	virtual const unsigned int getNBins() const {return fmaxBins;};
@@ -99,6 +99,7 @@ protected:
 	//storage of events
 	std::vector<std::string> fVarNames;
 	std::vector<Event> fEvents;
+//	unsigned int fmaxEvents;
 	//  unsigned int fEvent;
 
 	virtual void storeEvents();

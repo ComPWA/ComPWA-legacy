@@ -93,21 +93,8 @@ public:
 	virtual const ParameterList& intensityNoEff(dataPoint& point);
 	//! evaluate total amplitude using current set of parameters at phsp point \point. Amplitude is multiplied with efficiency of datapoint.
 	virtual const ParameterList& intensity(std::vector<double> point, ParameterList& par);
+	virtual const double sliceIntensity(dataPoint& dataP, ParameterList& par,std::complex<double>* reso, unsigned int nResos);
 
-	/* EFFICIENCY IN TREE:
-	 * The efficiency is a constant factor in the likelihood and therefore drops in the deviation.
-	 * So we dont need to correct the intensity for the efficiency of the datapoint. But it is still
-	 * included in the normalization. There are two ways to include the efficiency in the normalization:
-	 * 1) A sample of flat toy phsp points is used. We assume that its efficiency is correctly filled.
-	 * The intensity in every single point is calculated and summed up. The efficiency in every datapoint
-	 * is usually parametrized by a efficiency histogram.
-	 * In that case set useEff=1. It is the default case.
-	 * 2) Unbinned efficiency: A sample of flat phsp points is used, but we calculate the intensity
-	 * only on accepted points and sum up. Set useEff=0 in that case.
-	 * In both cases the phsp sample used for the physics tree needs to be a toy sample.
-	 * This is used to calculate the normalization of the resonances. Only the
-	 * tree used for normalization can use a sample with accepted events!
-	 */
 	/** Setup physics tree.
 	 * the @param thePHSPMasses needs to be toy phsp sample. It is used to normalize the amplitudes.
 	 *

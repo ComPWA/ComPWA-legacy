@@ -78,6 +78,7 @@ std::shared_ptr<FitResult> RunManager::startFit(ParameterList& inPar){
 }
 bool RunManager::generate( unsigned int number ) {
 	if(number>0) setSize(number);
+
 	if( !(pData_ && validAmplitude && validGenerator) ){
 		BOOST_LOG_TRIVIAL(error)<<"RunManager: generate() requirements not fulfilled";
 		return false;
@@ -100,7 +101,7 @@ bool RunManager::generate( unsigned int number ) {
 
 	unsigned int startTime = clock();
 //	boost::progress_display progressBar(size_); //boost progress bar (thread-safe)
-#pragma omp parallel firstprivate(genMaxVal) shared(maxTest,totalCalls)
+//#pragma omp parallel firstprivate(genMaxVal) shared(maxTest,totalCalls)
 	{
 		unsigned int threadId = omp_get_thread_num();
 		unsigned int numThreads = omp_get_num_threads();
@@ -110,9 +111,14 @@ bool RunManager::generate( unsigned int number ) {
 		//		genNew->setSeed(std::clock()+threadId);//setting the seed here makes not sense in cast that TGenPhaseSpace is used, because it uses gRandom
 		double AMPpdf;
 
-#pragma omp for
+//#pragma omp for
+		unsigned int cnt=0;
 		for(unsigned int i=0;i<size_;i++){
 			if(i>0) i--;
+			if(i%1000==0 && cnt!=i) {
+			  cnt=i;
+			  BOOST_LOG_TRIVIAL(debug) << "Current event: "<<i;
+			}
 			Event tmp;
 			genNew->generate(tmp);
 			totalCalls++;
@@ -126,7 +132,7 @@ bool RunManager::generate( unsigned int number ) {
 			dataPoint point(tmp);
 			double ampRnd = genNew->getUniform()*genMaxVal;
 			ParameterList list;
-#pragma omp critical
+//#pragma omp critical
 			{
 				list = pPhys_->intensity(point,minPar);//unfortunatly not thread safe
 				AMPpdf = *list.GetDoubleParameter(0);
@@ -134,7 +140,7 @@ bool RunManager::generate( unsigned int number ) {
 			}
 			if( ampRnd > (weight*AMPpdf) ) continue;
 			i++;
-#pragma omp critical
+//#pragma omp critical
 			{
 				pData_->pushEvent(tmp);//unfortunatly not thread safe
 			}
