@@ -48,6 +48,7 @@ void MinuitResult::init(FunctionMinimum min){
 	//	} else BOOST_LOG_TRIVIAL(error)<<"MinuitResult: no valid correlation matrix available!";
 	cov=covMatrix;
 	corr=corrMatrix;
+	initialLH = -1;
 	finalLH = minState.Fval();
 	edm= minState.Edm();
 	isValid = min.IsValid();
@@ -124,8 +125,12 @@ void MinuitResult::fractions(std::ostream& out){
 
 	return;
 }
-void MinuitResult::genOutput(std::ostream& out){
+void MinuitResult::genOutput(std::ostream& out, std::string opt){
 	bool printTrue=0;
+	bool printParam=1, printCorrMatrix=1, printCovMatrix=1;
+	if(opt=="P") {//print only parameters
+		printCorrMatrix=0; printCovMatrix=0;
+	}
 	if(trueParameters.GetNParameter()) printTrue=1;
 	TableFormater tableCov(&out);
 	tableCov.addColumn(" ",15);//add empty first column
@@ -142,92 +147,97 @@ void MinuitResult::genOutput(std::ostream& out){
 	out<<std::endl;
 
 	if(!hasValidParameters) out<<"		*** NO VALID SET OF PARAMETERS! ***"<<std::endl;
-	out<<"PARAMETERS:"<<std::endl;
-	TableFormater tableResult(&out);
-	tableResult.addColumn("Nr");
-	tableResult.addColumn("Name",15);
-	tableResult.addColumn("Initial Value",20);
-	tableResult.addColumn("Final Value",30);
-	if(printTrue) tableResult.addColumn("True Value",10);
-	if(printTrue) tableResult.addColumn("true-final/error",16);
-	tableResult.header();
+	if(printParam){
+		out<<"PARAMETERS:"<<std::endl;
+		TableFormater tableResult(&out);
+		tableResult.addColumn("Nr");
+		tableResult.addColumn("Name",15);
+		tableResult.addColumn("Initial Value",20);
+		tableResult.addColumn("Final Value",30);
+		if(printTrue) tableResult.addColumn("True Value",10);
+		if(printTrue) tableResult.addColumn("true-final/error",16);
+		tableResult.header();
 
-	for(unsigned int o=0;o<finalParameters.GetNDouble();o++){
-		std::shared_ptr<DoubleParameter> iniPar = initialParameters.GetDoubleParameter(o);
-		std::shared_ptr<DoubleParameter> outPar = finalParameters.GetDoubleParameter(o);
-		bool isFixed = iniPar->IsFixed();
-		bool isAngle=0;
-		if(iniPar->GetName().find("phase")!=string::npos) isAngle=1;//is our Parameter an angle?
-		if(isAngle && !isFixed) {
-			outPar->SetValue( shiftAngle(outPar->GetValue()) ); //shift angle to the interval [-pi;pi]
-		}
-
-		tableResult << o << iniPar->GetName() << *iniPar ;// |nr.| name| inital value|
-		if(isFixed) tableResult<<"FIXED";
-		else {
-			tableResult << *outPar;//final value
-			tableCov.addColumn(iniPar->GetName(),15);//add columns in covariance matrix
-		}
-		if(printTrue){
-			std::shared_ptr<DoubleParameter> truePar = trueParameters.GetDoubleParameter(iniPar->GetName());
-			if(!truePar) {
-				tableResult << "not found"<< " - ";
-				continue;
+		for(unsigned int o=0;o<finalParameters.GetNDouble();o++){
+			std::shared_ptr<DoubleParameter> iniPar = initialParameters.GetDoubleParameter(o);
+			std::shared_ptr<DoubleParameter> outPar = finalParameters.GetDoubleParameter(o);
+			bool isFixed = iniPar->IsFixed();
+			bool isAngle=0;
+			if(iniPar->GetName().find("phase")!=string::npos) isAngle=1;//is our Parameter an angle?
+			if(isAngle && !isFixed) {
+				outPar->SetValue( shiftAngle(outPar->GetValue()) ); //shift angle to the interval [-pi;pi]
 			}
-			tableResult << *truePar;
-			tableResult << (truePar->GetValue()-outPar->GetValue() )/ *outPar->GetError();
+
+			tableResult << o << iniPar->GetName() << *iniPar ;// |nr.| name| inital value|
+			if(isFixed) tableResult<<"FIXED";
+			else {
+				tableResult << *outPar;//final value
+				tableCov.addColumn(iniPar->GetName(),15);//add columns in covariance matrix
+			}
+			if(printTrue){
+				std::shared_ptr<DoubleParameter> truePar = trueParameters.GetDoubleParameter(iniPar->GetName());
+				if(!truePar) {
+					tableResult << "not found"<< " - ";
+					continue;
+				}
+				tableResult << *truePar;
+				tableResult << (truePar->GetValue()-outPar->GetValue() )/ *outPar->GetError();
+			}
 		}
+		tableResult.footer();
 	}
-	tableResult.footer();
 
 	if(!hasValidCov) out<<"		*** COVARIANCE MATRIX NOT VALID! ***"<<std::endl;
 	if(!hasAccCov) out<<"		*** COVARIANCE MATRIX NOT ACCURATE! ***"<<std::endl;
 	if(!covPosDef) out<<"		*** COVARIANCE MATRIX NOT POSITIVE DEFINITE! ***"<<std::endl;
 	if(hesseFailed) out<<"		*** HESSE FAILED! ***"<<std::endl;
 	if(hasValidCov){
-		out<<"COVARIANCE MATRIX:"<<std::endl;
-		tableCov.header();
 		unsigned int n=0;
-		for(unsigned int o=0;o<finalParameters.GetNDouble();o++){
-			std::shared_ptr<DoubleParameter> ppp = initialParameters.GetDoubleParameter(o);
-			std::shared_ptr<DoubleParameter> ppp2 = finalParameters.GetDoubleParameter(o);
-			if(ppp->IsFixed()) continue;
-			tableCov << ppp->GetName();
-			for(unsigned int t=0;t<cov.size1();t++) {
-				if(n>=cov.size2()) { tableCov<< " "; continue; }
-				if(t>=n)tableCov << cov(n,t);
-				else tableCov << "";
+		if(printCovMatrix){
+			out<<"COVARIANCE MATRIX:"<<std::endl;
+			tableCov.header();
+			for(unsigned int o=0;o<finalParameters.GetNDouble();o++){
+				std::shared_ptr<DoubleParameter> ppp = initialParameters.GetDoubleParameter(o);
+				std::shared_ptr<DoubleParameter> ppp2 = finalParameters.GetDoubleParameter(o);
+				if(ppp->IsFixed()) continue;
+				tableCov << ppp->GetName();
+				for(unsigned int t=0;t<cov.size1();t++) {
+					if(n>=cov.size2()) { tableCov<< " "; continue; }
+					if(t>=n)tableCov << cov(n,t);
+					else tableCov << "";
+				}
+				n++;
 			}
-			n++;
+			tableCov.footer();
 		}
-		tableCov.footer();
-
-		out<<"CORRELATION MATRIX:"<<std::endl;
-		TableFormater tableCorr(&out);
-		tableCorr.addColumn(" ",15);//add empty first column
-		tableCorr.addColumn("GlobalCC",10);//global correlation coefficient
-		for(unsigned int o=0;o<finalParameters.GetNDouble();o++){
-			std::shared_ptr<DoubleParameter> ppp = finalParameters.GetDoubleParameter(o);
-			if(ppp->IsFixed()) continue;
-			tableCorr.addColumn(ppp->GetName(),15);//add columns in correlation matrix
-		}
-		tableCorr.header();
-		n=0;
-		for(unsigned int o=0;o<finalParameters.GetNDouble();o++){
-			std::shared_ptr<DoubleParameter> ppp = initialParameters.GetDoubleParameter(o);
-			std::shared_ptr<DoubleParameter> ppp2 = finalParameters.GetDoubleParameter(o);
-			if(ppp->IsFixed()) continue;
-			tableCorr << ppp->GetName();
-			if(globalCC.size()>o)
-			  tableCorr << globalCC[o]; //TODO: check if emtpy (don't know how this happened, but it did :)
-			for(unsigned int t=0;t<corr.size1();t++) {
-				if(n>=corr.size2()) { tableCorr<< " "; continue; }
-				if(t>=n)tableCorr << corr(n,t);
-				else tableCorr << "";
+		if(printCorrMatrix){
+			out<<"CORRELATION MATRIX:"<<std::endl;
+			TableFormater tableCorr(&out);
+			tableCorr.addColumn(" ",15);//add empty first column
+			tableCorr.addColumn("GlobalCC",10);//global correlation coefficient
+			for(unsigned int o=0;o<finalParameters.GetNDouble();o++){
+				std::shared_ptr<DoubleParameter> ppp = finalParameters.GetDoubleParameter(o);
+				if(ppp->IsFixed()) continue;
+				tableCorr.addColumn(ppp->GetName(),15);//add columns in correlation matrix
 			}
-			n++;
+			tableCorr.header();
+			n=0;
+			for(unsigned int o=0;o<finalParameters.GetNDouble();o++){
+				std::shared_ptr<DoubleParameter> ppp = initialParameters.GetDoubleParameter(o);
+				std::shared_ptr<DoubleParameter> ppp2 = finalParameters.GetDoubleParameter(o);
+				if(ppp->IsFixed()) continue;
+				tableCorr << ppp->GetName();
+				if(globalCC.size()>o)
+					tableCorr << globalCC[o]; //TODO: check if emtpy (don't know how this happened, but it did :)
+				for(unsigned int t=0;t<corr.size1();t++) {
+					if(n>=corr.size2()) { tableCorr<< " "; continue; }
+					if(t>=n)tableCorr << corr(n,t);
+					else tableCorr << "";
+				}
+				n++;
+			}
+			tableCorr.footer();
 		}
-		tableCorr.footer();
 	}
 	fractions(out); //calculate and print fractions if amplitude is set
 

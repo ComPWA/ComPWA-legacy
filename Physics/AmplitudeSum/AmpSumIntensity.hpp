@@ -47,20 +47,17 @@ public:
 		none, /*!< no normaliztion between Amplitudes. */
 		/*!< all amplitudes are normalized to one.
 		 *  The normalization factor is \f$ 1/\sqrt(\int |A|^2)\f$ */
-		one,
-		/*!<all amplitudes are normalized to the number of entries in dalitz plot.
-		 *  The normalization factor is \f$ 1/\sqrt(entries/area * \int |A|^2)\f$*/
-		entries
+		one
+
 	};
 	//! Default Constructor (0x0)
 	AmpSumIntensity(const double inM, const double inBr, const double in1,const double in2, const double in3,
 			std::string nameM, std::string name1,std::string name2,std::string name3,
-			AmplitudeSetup ini, unsigned int entries=9999,
-			normStyle ns=none, double dpArea=-999);
+			AmplitudeSetup ini,	normStyle ns=none);
 	AmpSumIntensity(AmplitudeSetup ini, normStyle ns, std::shared_ptr<Efficiency> eff=std::shared_ptr<Efficiency>(new UnitEfficiency()),
-			unsigned int entries=9999, double dpArea=-999);
+			unsigned int nCalls=100000);
 	AmpSumIntensity(AmplitudeSetup ini, std::shared_ptr<Efficiency> eff=std::shared_ptr<Efficiency>(new UnitEfficiency()),
-			unsigned int entries=9999, double dpArea=-999);
+			unsigned int nCalls=100000);
 	AmpSumIntensity(const AmpSumIntensity& other);
 
 	double evaluate(double x[], size_t dim);
@@ -126,19 +123,26 @@ public:
 	virtual const bool fillStartParVec(ParameterList& outPar);
 	//! print overview over all amplitudes
 	virtual void printAmps();
-	//! get magnitude of resonance \param name
-	virtual double getMagnitude(std::string name) {
-		unsigned int id=getIdOfResonance(name);
-		return rr[namer[id]]->GetValue();
-	};
 	//! convert resonance \param name to id
 	unsigned int getIdOfResonance(std::string name){
 		for(unsigned int i=0; i<nAmps; i++)	if(namer[i]==name) return i;
 	}
 	//! convert resonance \param id to name
 	std::string getNameOfResonance(unsigned int id){ return namer[id]; }
+	//! get magnitude of resonance \param name
+	virtual double getMagnitude(std::string name) {
+		unsigned int id=getIdOfResonance(name);
+		return rr[namer[id]]->GetValue();
+	};
 	//! get magnitude of resonance \param id
 	virtual double getMagnitude(unsigned int id) { return rr[namer[id]]->GetValue(); };
+	//! get phase of resonance \param name
+	virtual double getPhase(std::string name) {
+		unsigned int id=getIdOfResonance(name);
+		return phir[namer[id]]->GetValue();
+	};
+	//! get phase of resonance \param id
+	virtual double getPhase(unsigned int id) { return phir[namer[id]]->GetValue(); };
 	//! get total integral for resonance \param id
 	virtual double getTotalIntegral(unsigned int id) { return totAmp.getTotalIntegral(id); };
 	//! get total integral for resonance \param name
@@ -147,6 +151,10 @@ public:
 	virtual double getFraction(std::string name) { return totAmp.getUnormalizedFraction(name)/integral(); };
 	//! get fit fraction for resonance \param id
 	virtual double getFraction(unsigned int id) { return totAmp.getUnormalizedFraction(id)/integral(); };
+	//! get resonance by @param name
+	virtual std::shared_ptr<AmpAbsDynamicalFunction> getResonance(std::string name) { return totAmp.getResonance(name); };
+	//! get resonance by @param id
+	virtual std::shared_ptr<AmpAbsDynamicalFunction> getResonance(unsigned int id) { return totAmp.getResonance(id); };
 	//! print all fit fractions; fitting errors are not available here
 	virtual void printFractions();
 	/** Calculate partial integral over amplitude
@@ -211,6 +219,8 @@ protected:
 	std::map<std::string,std::shared_ptr<DoubleParameter> > gr;
 	std::map<std::string,std::shared_ptr<DoubleParameter> > rr;
 	std::map<std::string,std::shared_ptr<DoubleParameter> > phir;
+
+	unsigned int _nCalls; //! precision for numeric integration
 
 private:
 

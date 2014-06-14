@@ -49,32 +49,32 @@ using namespace boost::log;
 
 
 AmpSumIntensity::AmpSumIntensity(const AmpSumIntensity& other) : nAmps(other.nAmps), _dpArea(other._dpArea),
-		_entries(other._entries), _normStyle(other._normStyle),maxVal(other.maxVal),ampSetup(other.ampSetup),
-		totAmp(other.totAmp), _calcMaxFcnVal(other._calcMaxFcnVal), _maxFcnVal(other._maxFcnVal){
+		_normStyle(other._normStyle),maxVal(other.maxVal),ampSetup(other.ampSetup),
+		totAmp(other.totAmp), _calcMaxFcnVal(other._calcMaxFcnVal), _maxFcnVal(other._maxFcnVal),_nCalls(other._nCalls){
 }
 
-AmpSumIntensity::AmpSumIntensity(AmplitudeSetup ini, normStyle ns, std::shared_ptr<Efficiency> eff, unsigned int entries, double dpArea) :
-																												totAmp("relBWsumAmplitude", "totAmp"), ampSetup(ini),
-																												_entries(entries), _normStyle(ns), _calcNorm(1), _dpArea(dpArea),
-																												_calcMaxFcnVal(0),eff_(eff)
+AmpSumIntensity::AmpSumIntensity(AmplitudeSetup ini, normStyle ns, std::shared_ptr<Efficiency> eff,unsigned int nCalls) :
+	totAmp("relBWsumAmplitude", "totAmp"), ampSetup(ini),
+	_normStyle(ns), _calcNorm(1), _dpArea(1.),
+	_calcMaxFcnVal(0),eff_(eff),_nCalls(nCalls)
 {
 	init();
 }
 
-AmpSumIntensity::AmpSumIntensity(AmplitudeSetup ini, std::shared_ptr<Efficiency> eff, unsigned int entries, double dpArea) :
-																												totAmp("relBWsumAmplitude", "totAmp"), ampSetup(ini),
-																												_entries(entries), _normStyle(none), _calcNorm(0), _dpArea(dpArea),
-																												_calcMaxFcnVal(0),eff_(eff)
+AmpSumIntensity::AmpSumIntensity(AmplitudeSetup ini, std::shared_ptr<Efficiency> eff,unsigned int nCalls) :
+	totAmp("relBWsumAmplitude", "totAmp"), ampSetup(ini),
+	_normStyle(none), _calcNorm(0), _dpArea(1.),
+	_calcMaxFcnVal(0),eff_(eff),_nCalls(nCalls)
 {
 	init();
 }
 
 AmpSumIntensity::AmpSumIntensity(const double inM, const double inBr, const double in1,const double in2, const double in3,
 		std::string nameM, std::string name1,std::string name2,std::string name3,
-		AmplitudeSetup ini, unsigned int entries, normStyle ns, double dpArea) :
-																												totAmp("relBWsumAmplitude", "totAmp"), ampSetup(ini),
-																												_entries(entries), _normStyle(ns), _calcNorm(1),_dpArea(dpArea),
-																												_calcMaxFcnVal(0),eff_(std::shared_ptr<Efficiency>(new UnitEfficiency()))
+		AmplitudeSetup ini, normStyle ns) :
+	totAmp("relBWsumAmplitude", "totAmp"), ampSetup(ini),
+	_normStyle(ns), _calcNorm(1),_dpArea(1.),
+	_calcMaxFcnVal(0),eff_(std::shared_ptr<Efficiency>(new UnitEfficiency())),_nCalls(100000)
 {
 	init();
 }
@@ -521,8 +521,7 @@ void AmpSumIntensity::calcMaxVal(std::shared_ptr<Generator> gen){
 double AmpSumIntensity::normReso(std::shared_ptr<AmpAbsDynamicalFunction> amp){
 	double norm;
 	if(_normStyle==none) norm=amp->GetNormalization();
-	else if(_normStyle==one) norm = sqrt(amp->integral());
-	else if(_normStyle==entries) norm = sqrt(_dpArea*amp->integral()/_entries);
+	else if(_normStyle==one) norm = sqrt(amp->integral(_nCalls));
 	BOOST_LOG_TRIVIAL(debug)<<"AmpSumIntensity::normRes Normalization constant for "
 			<<amp->GetName()<<": "<<1.0/norm;
 	return norm;
@@ -564,7 +563,6 @@ const double AmpSumIntensity::integral(){
 	double xLimit_high[2] = {kin->m13_sq_max,kin->m23_sq_max};
 	//	double xLimit_low[2] = {0,0};
 	//	double xLimit_high[2] = {10,10};
-	size_t calls = 100000;
 	gsl_rng_env_setup ();
 	const gsl_rng_type *T = gsl_rng_default; //type of random generator
 	gsl_rng *r = gsl_rng_alloc(T); //random generator
@@ -575,7 +573,7 @@ const double AmpSumIntensity::integral(){
 	 * 		 this should be sufficiency for most applications
 	 */
 	gsl_monte_vegas_state *s = gsl_monte_vegas_alloc (dim);
-	gsl_monte_vegas_integrate (&G, xLimit_low, xLimit_high, 2, calls, r,s,&res, &err);
+	gsl_monte_vegas_integrate (&G, xLimit_low, xLimit_high, 2, _nCalls, r,s,&res, &err);
 	gsl_monte_vegas_free(s);
 	BOOST_LOG_TRIVIAL(info)<<"AmpSumIntensity::integrate() Integration result for amplitude sum: "<<res<<"+-"<<err<<" relAcc [%]: "<<100*err/res;
 

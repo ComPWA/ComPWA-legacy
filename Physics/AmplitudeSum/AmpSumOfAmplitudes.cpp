@@ -10,22 +10,13 @@
 //-------------------------------------------------------------------------------
 #include <cmath> 
 
-//#include "Riostream.h"
-//#include "TMath.h"
-
-//#include "RooAbsReal.h"
 #include "Core/Parameter.hpp"
-//#include "RooAbsCategory.h"
-//#include "RooLinkedListIter.h"
-//#include "boost/function.hpp"
-//#include "boost/bind.hpp"
 #include <functional>
 
 #include "qft++.h"
 
 #include "Physics/AmplitudeSum/AmpSumOfAmplitudes.hpp"
 
-//ClassImp(AmpSumOfAmplitudes);
 
 AmpSumOfAmplitudes::AmpSumOfAmplitudes()
 {
@@ -147,11 +138,11 @@ double AmpSumOfAmplitudes::evaluate(dataPoint& point) const
 		double norm = _pdfList[i]->GetNormalization();
 
 		//evaluate() = norm*evalAmp()*evalWignerD()
-		res = res + twoJplusOne * _pdfList[i]->evaluate(point) * eiphi;
-//		res = res + _pdfList[i]->evaluate(point) * eiphi;
+		//res = res + twoJplusOne * _pdfList[i]->evaluate(point) * eiphi;
+		res = res + _pdfList[i]->evaluate(point) * eiphi;//adding factor 2J+1 to AmpWigner2 -> consistency with tree
 	}
-
-	return ( std::abs(res)*std::abs(res) );
+	double absRes = std::abs(res);
+	return ( absRes*absRes ); //return |A|^2
 }
 double AmpSumOfAmplitudes::getUnormalizedFraction(std::string name){
 	int id=-1;
@@ -159,6 +150,13 @@ double AmpSumOfAmplitudes::getUnormalizedFraction(std::string name){
 		if(_pdfList[i]->GetName()==name) id=i;
 	if(id<0) return 0;
 	return getUnormalizedFraction(id);
+}
+std::shared_ptr<AmpAbsDynamicalFunction> AmpSumOfAmplitudes::getResonance(std::string name){
+	int id=-1;
+	for(unsigned int i=0; i<_pdfList.size(); i++)
+		if(_pdfList[i]->GetName()==name) id=i;
+	if(id<0) return std::shared_ptr<AmpAbsDynamicalFunction>();
+	return getResonance(id);
 }
 double AmpSumOfAmplitudes::getUnormalizedFraction(unsigned int id){
 	double integral = _pdfList[id]->totalIntegral(); //integral over amplitude id: |amp*WignerD|^2
@@ -176,7 +174,6 @@ double AmpSumOfAmplitudes::getTotalIntegral(std::string name){
 	return getTotalIntegral(id);
 }
 double AmpSumOfAmplitudes::getTotalIntegral(unsigned int id){
-	std::cout<<"asdfasdfadfs"<<std::endl;
 	unsigned int twoJplusOne = 2*_pdfList[id]->getSpin()+1;
 //	return ( _pdfList[id]->totalIntegral()*twoJplusOne );
 	return ( _pdfList[id]->totalIntegral() );

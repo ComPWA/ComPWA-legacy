@@ -89,7 +89,7 @@ double AmpWigner2::evaluate(dataPoint& point) {
 	/* Calling WignerD function
 	 * Note that Wigner_d depends on the sign of \in and \out. I hope it is correctly assigned.
 	 */
-	result = Wigner_d(J,M,N,theta);
+	result = (2*J+1)*Wigner_d(J,M,N,theta);
 	if( ( result!=result ) || (theta!=theta)) {
 		BOOST_LOG_TRIVIAL(error)<<"AmpWigner2: NAN! (J,M,N)=("<< J<<","<<M<<","<<N
 				<<") subsys="<<_subSys<<" theta="<<theta<<" cosTheta="<<cosTheta<<" result="<<result

@@ -28,30 +28,30 @@ AmpRelBreitWignerRes::AmpRelBreitWignerRes(const char *name,
 		double& mesonRadius, //  meson radius
 		int subSys,
 		int resSpin, int m, int n) :
-AmpAbsDynamicalFunction(name),
-AmpKinematics(resMass, subSys, resSpin, m, n, AmpKinematics::barrierType(BWPrime), mesonRadius, 1.5),
-_resWidth(resWidth),
-//_wignerD(name, resSpin, m, n, subSys)
-_wignerD(subSys, resSpin),
-foundMasses(false)
+		AmpAbsDynamicalFunction(name),
+		AmpKinematics(resMass, subSys, resSpin, m, n, AmpKinematics::barrierType(BWPrime), mesonRadius, 1.5),
+		_resWidth(resWidth),
+		//_wignerD(name, resSpin, m, n, subSys)
+		_wignerD(subSys, resSpin),
+		foundMasses(false)
 {
 	initialise();
 }
 
 AmpRelBreitWignerRes::AmpRelBreitWignerRes(const AmpRelBreitWignerRes& other, const char* newname) :
-												  AmpAbsDynamicalFunction(other, newname),
-												  AmpKinematics(other),
-												  _resWidth(other._resWidth),
-												  _wignerD(other._wignerD)
+														  AmpAbsDynamicalFunction(other, newname),
+														  AmpKinematics(other),
+														  _resWidth(other._resWidth),
+														  _wignerD(other._wignerD)
 {
 	initialise();
 }
 
 AmpRelBreitWignerRes::AmpRelBreitWignerRes(const AmpRelBreitWignerRes& other) :
-												  AmpAbsDynamicalFunction(other),
-												  AmpKinematics(other),
-												  _resWidth(other._resWidth),
-												  _wignerD(other._wignerD)
+														  AmpAbsDynamicalFunction(other),
+														  AmpKinematics(other),
+														  _resWidth(other._resWidth),
+														  _wignerD(other._wignerD)
 {
 	initialise();
 }
@@ -90,23 +90,25 @@ std::complex<double> AmpRelBreitWignerRes::evaluateAmp(dataPoint& point) {
 	case 4: mSq=(m13sq); break;
 	case 5: mSq=(m23sq); break;
 	}
-//		double BLWeiss2 = BLres2(sqrt(mSq));
-//		double qTerm = std::pow((q(sqrt(mSq)) / q0()), (2.*_spin + 1.));
-//		double Gamma0 = _resWidth.GetValue();
-//		double GammaV = Gamma0 * qTerm * (_mR / sqrt(mSq)) * BLWeiss2;
-//		std::complex<double> denom(_mR*_mR - mSq, -_mR * GammaV);
-//
-//		if(sqrt(m23sq)==2.84515) std::cout << " DEBUG2 " << q(m) << " " << q0() << std::endl;
-//
-//		result = std::complex<double>( _norm ) / denom; //Laura++ (old) definition
-//	//	result = std::complex<double>(_norm*sqrt(BLWeiss2)) / denom;
-//	//	result = std::complex<double>( _norm*sqrt(BLWeiss2)*sqrt(BLmother2(m)) ) / denom; //Laura++ (new) definition
-//
-//		if(result.real()!=result.real()) {std::cout << "RE part NAN" << std::endl;return 0;}
-//		if(result.imag()!=result.imag()) {std::cout << "IM part NAN" << std::endl; return 0;}
-	    //if(_mR==0.783) {std::cout << "Omega Norm " << _norm << std::endl; return 0;}
-//		return result;
-	return (dynamicalFunction(mSq,_mR,_ma,_mb,_resWidth.GetValue(),_spin,_mesonRadius)*_norm);
+	//		double BLWeiss2 = BLres2(sqrt(mSq));
+	//		double qTerm = std::pow((q(sqrt(mSq)) / q0()), (2.*_spin + 1.));
+	//		double Gamma0 = _resWidth.GetValue();
+	//		double GammaV = Gamma0 * qTerm * (_mR / sqrt(mSq)) * BLWeiss2;
+	//		std::complex<double> denom(_mR*_mR - mSq, -_mR * GammaV);
+	//
+	//		if(sqrt(m23sq)==2.84515) std::cout << " DEBUG2 " << q(m) << " " << q0() << std::endl;
+	//
+	//		result = std::complex<double>( _norm ) / denom; //Laura++ (old) definition
+	//	//	result = std::complex<double>(_norm*sqrt(BLWeiss2)) / denom;
+	//	//	result = std::complex<double>( _norm*sqrt(BLWeiss2)*sqrt(BLmother2(m)) ) / denom; //Laura++ (new) definition
+	//
+	//		if(result.real()!=result.real()) {std::cout << "RE part NAN" << std::endl;return 0;}
+	//		if(result.imag()!=result.imag()) {std::cout << "IM part NAN" << std::endl; return 0;}
+	//if(_mR==0.783) {std::cout << "Omega Norm " << _norm << std::endl; return 0;}
+	//		return result;
+
+	//	return (dynamicalFunction(mSq,_mR,_ma,_mb,_resWidth.GetValue(),_spin,_mesonRadius)*_norm);
+	return dynamicalFunction(mSq,_mR,_ma,_mb,_resWidth.GetValue(),_spin,_mesonRadius);
 }
 std::complex<double> AmpRelBreitWignerRes::dynamicalFunction(double mSq, double mR, double ma, double mb, double gamma0, unsigned int J, double mesonRadius){
 	double m = sqrt(mSq);
@@ -123,7 +125,6 @@ std::complex<double> AmpRelBreitWignerRes::dynamicalFunction(double mSq, double 
 		std::cout<<"nan in BW: "<<BLWeiss2<<" "<<mR<<" "<<mSq<<" "<<ma<<" "<<mb<<std::endl;
 		return 0;
 	}
-
 	return result;
 }
 

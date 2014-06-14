@@ -54,6 +54,7 @@ public:
 
 	virtual const ParameterList& intensity(dataPoint& point, ParameterList& par) =0;
 	virtual const ParameterList& intensity(dataPoint& point) =0;
+	virtual const ParameterList& intensityNoEff(dataPoint& point) =0;
 	virtual const ParameterList& intensity(std::vector<double> point, ParameterList& par) =0;
 
 	virtual const bool fillStartParVec(ParameterList& outPar) =0;
@@ -74,6 +75,8 @@ public:
 	virtual std::string getNameOfResonance(unsigned int id){}
 	virtual double getMagnitude(std::string name) {};
 	virtual double getMagnitude(unsigned int id) {};
+	virtual double getPhase(std::string name) {};
+	virtual double getPhase(unsigned int id) {};
 	virtual double getFraction(std::string name) = 0;
 	virtual double getFraction(unsigned int id) = 0;
 	virtual double getIntValue(std::string var1, double min1, double max1, std::string var2, double min2, double max2) = 0;

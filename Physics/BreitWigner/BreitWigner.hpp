@@ -40,6 +40,7 @@ public:
 	virtual const ParameterList& intensity(std::vector<double> x, ParameterList& par);
 	virtual const ParameterList& intensity(dataPoint& point, ParameterList& par);
 	virtual const ParameterList& intensity(dataPoint& point);
+	virtual const ParameterList& intensityNoEff(dataPoint& point){ return intensity(point); };
 	virtual const bool fillStartParVec(ParameterList& outPar);
 
 	virtual void setParameterList(ParameterList& par);

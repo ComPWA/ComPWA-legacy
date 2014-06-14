@@ -61,7 +61,7 @@ public:
   //! check subsystem of resonance
   virtual bool isSubSys(const unsigned int) const = 0;
   //! Calculation integral |dynamical amplitude|^2
-  virtual double integral() const;
+  virtual double integral(unsigned int nCalls=100000) const;
   //! Calculation integral |dynamical amplitude * WignerD|^2
   virtual double totalIntegral() const;
 

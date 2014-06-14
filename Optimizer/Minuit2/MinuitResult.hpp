@@ -48,6 +48,7 @@ public:
 	MinuitResult() {};
 	MinuitResult(FunctionMinimum result) { init(result); }
 	void setResult(FunctionMinimum result){ init(result); }
+	void setInitialLH(double iniLH){ initialLH = iniLH; }
 	void setAmplitude(std::shared_ptr<Amplitude> newAmp);
 	operator double() const { return finalLH; };
 	double getResult(){return finalLH;}
@@ -73,7 +74,7 @@ private:
 	boost::numeric::ublas::matrix<double> fracError;
 	std::vector<double> variance;
 	std::vector<double> globalCC;
-	void genOutput(std::ostream& out);
+	void genOutput(std::ostream& out,std::string opt="");
 	void genSimpleOutput(std::ostream& out);
 	void init(FunctionMinimum);
 };

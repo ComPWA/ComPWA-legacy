@@ -52,7 +52,7 @@ public:
 
 protected:
 	double _ma, _mb, _mc, _M;
-	DoubleParameter& _mR;
+	DoubleParameter _mR;
 	unsigned int _subSys;
 	barrierType _type;
 	unsigned int _spin; int _m; int _n;

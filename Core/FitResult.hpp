@@ -48,16 +48,18 @@ public:
 	void setFinalParameters(ParameterList finPars){ finalParameters=finPars; }
 	void setTrueParameters(ParameterList truePars){ trueParameters=truePars; }
 	void setAmplitude(std::shared_ptr<Amplitude> newAmp) { _amp = newAmp; }
+	void setInitialLH(double iniLH){ }
 	ParameterList getInitialParameters(){ return initialParameters; }
 	ParameterList getFinalParameters(){ return finalParameters; }
 	ParameterList getTrueParameters(){ return trueParameters; }
 	void setTime(double t){ time = t; }
+	double getTime(){ return time; }
 	virtual double getResult() =0;
 
 	//output
-	virtual void print(){
+	virtual void print(std::string opt=""){
 		std::stringstream s;
-		genOutput(s);
+		genOutput(s,opt);
 		std::string str = s.str();
 		BOOST_LOG_TRIVIAL(info) << str;
 	};
@@ -69,7 +71,7 @@ public:
 
 protected:
 	virtual double shiftAngle(double v);
-	virtual void genOutput(std::ostream& out) = 0;
+	virtual void genOutput(std::ostream& out,std::string opt="") = 0;
 	virtual void genSimpleOutput(std::ostream& out) = 0;
 
 	double time;

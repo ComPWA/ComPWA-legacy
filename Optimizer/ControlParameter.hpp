@@ -34,6 +34,8 @@ public:
 
   virtual double controlParameter(ParameterList& minPar) =0;
 
+  virtual void resetInstance() { instance_ = std::shared_ptr<ControlParameter>(); };
+
 protected:
   static std::shared_ptr<ControlParameter> instance_;
 

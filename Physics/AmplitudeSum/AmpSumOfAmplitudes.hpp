@@ -44,6 +44,8 @@ public:
   virtual double getTotalIntegral(unsigned int id);
   virtual double getUnormalizedFraction(std::string name);
   virtual double getUnormalizedFraction(unsigned int id);
+  virtual std::shared_ptr<AmpAbsDynamicalFunction> getResonance(std::string name);
+  virtual std::shared_ptr<AmpAbsDynamicalFunction> getResonance(unsigned int id){ return _pdfList[id]; }
   virtual unsigned int getNAmps() {return _pdfList.size();};
   virtual std::string getAmpName(unsigned int id) {return _pdfList[id]->GetName();};
 protected:

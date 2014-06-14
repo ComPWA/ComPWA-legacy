@@ -46,7 +46,7 @@ double evalAmp(double* x, size_t dim, void* param) {
 	return ( std::abs(res)*std::abs(res) ); //integrate over |F|^2
 };
 
-double AmpAbsDynamicalFunction::integral() const{
+double AmpAbsDynamicalFunction::integral(unsigned int nCalls) const{
 	BOOST_LOG_TRIVIAL(debug)<<"AmpAbsDynamicalFunction::integral() calculating integral of "<<_name<<" !";
 	size_t dim=2;
 	double res=0.0, err=0.0;
@@ -55,7 +55,6 @@ double AmpAbsDynamicalFunction::integral() const{
 	//set limits: we assume that x[0]=m13sq and x[1]=m23sq
 	double xLimit_low[2] = {kin->m13_sq_min,kin->m23_sq_min};
 	double xLimit_high[2] = {kin->m13_sq_max,kin->m23_sq_max};
-	size_t calls = 100000;
 	gsl_rng_env_setup ();
 	const gsl_rng_type *T = gsl_rng_default; //type of random generator
 	gsl_rng *r = gsl_rng_alloc(T); //random generator
@@ -67,7 +66,7 @@ double AmpAbsDynamicalFunction::integral() const{
 	* 		 this should be sufficiency for most applications
 	*/
 	gsl_monte_vegas_state *s = gsl_monte_vegas_alloc (dim);
-	gsl_monte_vegas_integrate (&F, xLimit_low, xLimit_high, 2, calls, r,s,&res, &err);
+	gsl_monte_vegas_integrate (&F, xLimit_low, xLimit_high, 2, nCalls, r,s,&res, &err);
 	gsl_monte_vegas_free(s);
 	BOOST_LOG_TRIVIAL(debug)<<"AmpAbsDynamicalFunction::integral() Integration result for |"<<_name<<"|^2: "<<res<<"+-"<<err<<" relAcc [%]: "<<100*err/res;
 
