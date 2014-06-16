@@ -87,7 +87,6 @@ void MinuitResult::fractions(std::ostream& out){
 		return;
 	}
 	unsigned int nRes = _amp->getNumberOfResonances();
-	std::cout<<nRes<<std::endl;
 	fracError = boost::numeric::ublas::matrix<double>(nRes,2);
 	double norm = _amp->integral();
 	double sum = 0;
@@ -153,9 +152,9 @@ void MinuitResult::genOutput(std::ostream& out, std::string opt){
 		tableResult.addColumn("Nr");
 		tableResult.addColumn("Name",15);
 		tableResult.addColumn("Initial Value",20);
-		tableResult.addColumn("Final Value",30);
-		if(printTrue) tableResult.addColumn("True Value",10);
-		if(printTrue) tableResult.addColumn("true-final/error",16);
+		tableResult.addColumn("Final Value",26);
+		if(printTrue) tableResult.addColumn("True Value",18);
+		if(printTrue) tableResult.addColumn("Deviation",12);
 		tableResult.header();
 
 		for(unsigned int o=0;o<finalParameters.GetNDouble();o++){
@@ -227,8 +226,8 @@ void MinuitResult::genOutput(std::ostream& out, std::string opt){
 				std::shared_ptr<DoubleParameter> ppp2 = finalParameters.GetDoubleParameter(o);
 				if(ppp->IsFixed()) continue;
 				tableCorr << ppp->GetName();
-				if(globalCC.size()>o)
-					tableCorr << globalCC[o]; //TODO: check if emtpy (don't know how this happened, but it did :)
+//				if(globalCC.size()>o)
+					tableCorr << globalCC[n]; //TODO: check if emtpy (don't know how this happened, but it did :)
 				for(unsigned int t=0;t<corr.size1();t++) {
 					if(n>=corr.size2()) { tableCorr<< " "; continue; }
 					if(t>=n)tableCorr << corr(n,t);

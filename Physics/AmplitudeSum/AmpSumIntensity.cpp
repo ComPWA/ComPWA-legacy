@@ -533,7 +533,7 @@ double AmpSumIntensity::evaluate(double x[], size_t dim) {
 	dataPoint point; point.setVal(1,x[0]); point.setVal(0,x[1]);
 	//	double m12sq = kin->getThirdVariableSq(x[0],x[1]);
 	if( !kin->isWithinPhsp(point) ) return 0;//only integrate over phase space
-	ParameterList res = intensity(point);
+	ParameterList res = intensityNoEff(point);
 	double intens = *res.GetDoubleParameter(0);
 	return intens;
 }

@@ -50,14 +50,14 @@ public:
 		*out << "| ";
 		if(in.HasError()){
 			if(in.GetErrorType()==ErrorType::SYM){
-				unsigned int halfWidth = (unsigned int)(columnWidth[curCol]-5)/2;//divide column width
+				unsigned int halfWidth = (unsigned int)(columnWidth[curCol]-4)/2;//divide column width
 				*out << std::setw(halfWidth) << in.GetValue();
 				*out << " +- ";
 				*out << std::setw(halfWidth) << *in.GetError() << " ";
 			}
 			if(in.GetErrorType()==ErrorType::ASYM){
 				unsigned int w = (unsigned int)(columnWidth[curCol]-6)/3;//take 1/3 of column width
-				std::cout<<"Column width="<<w<<std::endl;
+//				std::cout<<"Column width="<<w<<std::endl;
 				std::shared_ptr<ParError<double>> err = in.GetError();
 				*out << std::setw(w) << in.GetValue() ;
 				*out << " +";
@@ -66,7 +66,6 @@ public:
 				*out << std::setw(w) << err->GetErrorLow();
 			}
 		} else {
-			//			std::cout<<"131 "<<std::endl;
 			*out << std::setw(columnWidth[curCol]) << in.GetValue() << " ";
 		}
 		curCol++;

@@ -43,10 +43,13 @@ static const char* ParNames[7] = { "UNDEFINED", "COMPLEX", "DOUBLE", "INTEGER", 
 enum ErrorType { SYM = 1, ASYM = 2, LHSCAN = 3, NOTDEF = 0};
 static const char* ErrorNames[4] = { "NOTDEF", "SYM", "ASYM", "LHSCAN"};
 
-template <class T> class ParError
+template <class T>
+class ParError
 {
 public:
 	ParError(ErrorType t=ErrorType::NOTDEF) : type(t){};
+	virtual ParError* Clone() const = 0;
+	virtual ParError* Create() const = 0;
 	virtual ~ParError() {};
 	virtual ErrorType GetType() { return type; };
 	virtual T GetError() =0;
@@ -66,11 +69,19 @@ private:
 //BOOST_CLASS_TRACKING(ParError<double>, boost::serialization::track_always)
 //BOOST_SERIALIZATION_ASSUME_ABSTRACT(ParError);
 
-template <class T> class SymError : public ParError<T>
+template <class T>
+class SymError : public ParError<T>
 {
 public:
 	SymError() : ParError<T>(ErrorType::SYM), error(0){};
 	SymError(T val) : ParError<T>(ErrorType::SYM), error(val){};
+	virtual ParError<T>* Clone() const {
+		return new SymError(static_cast<SymError>(*this));
+	}
+	virtual ParError<T>* Create() const {
+		return new SymError();
+	}
+
 	virtual T GetError() {return error;}
 	friend std::ostream& operator<<( std::ostream& out, const SymError& b ){
 		return out << "+-" << GetError();
@@ -93,11 +104,19 @@ private:
 };
 //BOOST_CLASS_IMPLEMENTATION(SymError<double>,boost::serialization::object_serializable);
 
-template <class T> class AsymError : public ParError<T>
+template <class T>
+class AsymError : public ParError<T>
 {
 public:
 	AsymError() : ParError<T>(ErrorType::ASYM), error(std::pair<T,T>(0,0)){};
 	AsymError(std::pair<T,T> val) : ParError<T>(ErrorType::ASYM), error(val){};
+	virtual ParError<T>* Clone() const {
+		return new AsymError(static_cast<AsymError>(*this));
+	}
+	virtual ParError<T>* Create() const {
+		return new AsymError();
+	}
+
 	virtual T GetError() {return (GetErrorLow()+GetErrorHigh())/2;}
 	virtual T GetErrorLow() {
 		if(error.first<0) return (-1)*error.first;

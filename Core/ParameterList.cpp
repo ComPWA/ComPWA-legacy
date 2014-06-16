@@ -592,7 +592,7 @@ void ParameterList::make_str() {
 	if(vDoublePar_.size())
 		oss << "  " << vDoublePar_.size() << " floating point parameters: " << std::endl;
 	for(unsigned int d=0; d< vDoublePar_.size(); d++)
-		oss << vDoublePar_[d]->GetName() << ": " << vDoublePar_[d]->GetValue() << " fixed="<<vDoublePar_[d]->IsFixed()<<std::endl;
+		oss << vDoublePar_[d]->GetName() << ": " << vDoublePar_[d]->GetValue() << " fixed="<<vDoublePar_[d]->IsFixed()<<" hasError? "<<vDoublePar_[d]->HasError()<<std::endl;
 	if(vIntPar_.size())
 		oss << "  " << vIntPar_.size() << " integer parameters: " << std::endl;
 	for(unsigned int i=0; i< vIntPar_.size(); i++)

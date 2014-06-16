@@ -36,121 +36,121 @@ class MultiComplex: public AbsParameter
 
 public:
 
-    //! Standard constructor without information
-    /*!
-     * Standard constructor with no information provided. Creates parameter
-     * with value 0 but without bounds or an error.
-     * \param inName internal string identifier of this parameter
-     * \sa make_str()
-     */
-    //MultiComplex(std::string inName):AbsParameter(inName, ParType::MDOUBLE){
-        //make_str();
-    //}
+	//! Standard constructor without information
+	/*!
+	 * Standard constructor with no information provided. Creates parameter
+	 * with value 0 but without bounds or an error.
+	 * \param inName internal string identifier of this parameter
+	 * \sa make_str()
+	 */
+	//MultiComplex(std::string inName):AbsParameter(inName, ParType::MDOUBLE){
+	//make_str();
+	//}
 
-    //! Standard constructor with a value
-    /*!
-     * Standard constructor with just a value provided. Creates parameter
-     * with given value but without bounds or an error.
-     * \param inName internal string identifier of this parameter
-     * \param values input vector of values of the parameter
-     * \sa make_str()
-     */
-    MultiComplex(std::string inName, const std::vector<std::complex<double> >& values):AbsParameter(inName, ParType::MCOMPLEX),val_(values) {
-        //make_str();
-    }
+	//! Standard constructor with a value
+	/*!
+	 * Standard constructor with just a value provided. Creates parameter
+	 * with given value but without bounds or an error.
+	 * \param inName internal string identifier of this parameter
+	 * \param values input vector of values of the parameter
+	 * \sa make_str()
+	 */
+	MultiComplex(std::string inName, const std::vector<std::complex<double> >& values):AbsParameter(inName, ParType::MCOMPLEX),val_(values) {
+		//make_str();
+	}
 
-    //! Copy constructor using = operator
-    /*!
-     * Simple copy constructor using the = operator. As this operator is not
-     * overloaded in this class, c++ will copy every member variable. As this
-     * is a container class, this should be fine.
-     * \param in input PWAParameter which variables will be copied
-     */
-    MultiComplex(const MultiComplex& in):AbsParameter(in.name_, ParType::MCOMPLEX){
-      *this = in;
-//      error_ = std::shared_ptr<ParError<double>>(new ParError<double>(*in.error_));
-    }
+	//! Copy constructor using = operator
+	/*!
+	 * Simple copy constructor using the = operator. As this operator is not
+	 * overloaded in this class, c++ will copy every member variable. As this
+	 * is a container class, this should be fine.
+	 * \param in input PWAParameter which variables will be copied
+	 */
+	MultiComplex(const MultiComplex& in):AbsParameter(in.name_, ParType::MCOMPLEX){
+		*this = in;
+		//      error_ = std::shared_ptr<ParError<double>>(new ParError<double>(*in.error_));
+	}
 
-    //! Empty Destructor
-    /*!
-     * There is nothing to destroy :(
-     */
-    virtual ~MultiComplex() { /* nothing */  }
+	//! Empty Destructor
+	/*!
+	 * There is nothing to destroy :(
+	 */
+	virtual ~MultiComplex() { /* nothing */  }
 
-    //! Getter for number of values in this multipar
-    virtual const inline double GetNValues() const {return val_.size();}
+	//! Getter for number of values in this multipar
+	virtual const inline double GetNValues() const {return val_.size();}
 
-    //! Getter for value of parameter
-    virtual const inline std::vector<std::complex<double> >& GetValues() const {return val_;}
+	//! Getter for value of parameter
+	virtual const inline std::vector<std::complex<double> >& GetValues() const {return val_;}
 
-    //! Getter for value of parameter
-    virtual const inline std::complex<double> GetValue(unsigned int i=0) const {if(i>=val_.size()) return 0; return val_[i];}
+	//! Getter for value of parameter
+	virtual const inline std::complex<double> GetValue(unsigned int i=0) const {if(i>=val_.size()) return 0; return val_[i];}
 
-    //! Getter for FunctionTree support
-    virtual const std::complex<double> getNodeValue(unsigned int i=0){
-        if(i>=val_.size()) return std::complex<double>();
-        return val_[i];
-    }
+	//! Getter for FunctionTree support
+	virtual const std::complex<double> getNodeValue(unsigned int i=0){
+		if(i>=val_.size()) return std::complex<double>();
+		return val_[i];
+	}
 
-    //! Setter for value of parameter
-    virtual void SetValue(const std::complex<double> inVal, unsigned int i=0) {
-        if(i>=val_.size()) return;
-        val_[i] = inVal;
-        //make_str();
-        Notify();
-    }
+	//! Setter for value of parameter
+	virtual void SetValue(const std::complex<double> inVal, unsigned int i=0) {
+		if(i>=val_.size()) return;
+		val_[i] = inVal;
+		//make_str();
+		Notify();
+	}
 
 protected:
-    virtual const std::string TypeName(){ return "complex collection"; }
-    //std::string out_; /*!< Output string to print information */
-    std::vector<std::complex<double> > val_;/*!< Containers of parameter information */
+	virtual const std::string TypeName(){ return "complex collection"; }
+	//std::string out_; /*!< Output string to print information */
+	std::vector<std::complex<double> > val_;/*!< Containers of parameter information */
 
-    //! A protected function which returns an output string for printing
-    /*!
-     * This function uses all available information about the parameter
-     * to create a string which will be streamed via the stream operator <<.
-     * \sa operator<<, to_str(), type()
-     */
-    virtual std::string make_str() {
-        std::stringstream oss;
-        oss << name_;
-        unsigned int max=val_.size();
-        if(max>10) max=10; //display only 10 variables
-        oss << "\t Val = ";
-        for(unsigned int i=0; i<max-1; i++)
-          oss << val_[i] << ", ";
-        oss << val_[max-1];
-        if(max<val_.size()) oss << " ... ";
-        oss << "\t Type = " << TypeName();
-        return oss.str();
-    }
+	//! A protected function which returns an output string for printing
+	/*!
+	 * This function uses all available information about the parameter
+	 * to create a string which will be streamed via the stream operator <<.
+	 * \sa operator<<, to_str(), type()
+	 */
+	virtual std::string make_str() {
+		std::stringstream oss;
+		oss << name_;
+		unsigned int max=val_.size();
+		if(max>10) max=10; //display only 10 variables
+		oss << "\t Val = ";
+		for(unsigned int i=0; i<max-1; i++)
+			oss << val_[i] << ", ";
+		oss << val_[max-1];
+		if(max<val_.size()) oss << " ... ";
+		oss << "\t Type = " << TypeName();
+		return oss.str();
+	}
 
-    //! A protected function which returns an output string for printing
-    /*!
-     * This function uses only the value information about the parameter
-     * to create a string which will be streamed via the stream operator <<.
-     * \sa operator<<, make_str()
-     */
-    virtual std::string make_val_str() {
-        std::stringstream ovs;
-        unsigned int max=val_.size();
-        if(max>10) max=10; //display only 10 variables
-        for(unsigned int i=0; i<max-1; i++)
-            ovs << val_[i] << ", ";
-        ovs << val_[max-1];
-        if(max<val_.size()) ovs << " ... ";
-        return ovs.str();
-    }
+	//! A protected function which returns an output string for printing
+	/*!
+	 * This function uses only the value information about the parameter
+	 * to create a string which will be streamed via the stream operator <<.
+	 * \sa operator<<, make_str()
+	 */
+	virtual std::string make_val_str() {
+		std::stringstream ovs;
+		unsigned int max=val_.size();
+		if(max>10) max=10; //display only 10 variables
+		for(unsigned int i=0; i<max-1; i++)
+			ovs << val_[i] << ", ";
+		ovs << val_[max-1];
+		if(max<val_.size()) ovs << " ... ";
+		return ovs.str();
+	}
 
 private:
-    friend class boost::serialization::access;
-    template<class archive>
-    void serialize(archive& ar, const unsigned int version)
-    {
-//      ar & boost::serialization::base_object<AbsParameter>(*this);
-//      ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(AbsParameter);
-        ar & BOOST_SERIALIZATION_NVP(val_);
-    }
+	friend class boost::serialization::access;
+	template<class archive>
+	void serialize(archive& ar, const unsigned int version)
+	{
+		//      ar & boost::serialization::base_object<AbsParameter>(*this);
+		//      ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(AbsParameter);
+		ar & BOOST_SERIALIZATION_NVP(val_);
+	}
 };
 BOOST_CLASS_IMPLEMENTATION(MultiComplex,boost::serialization::object_serializable);
 
@@ -168,7 +168,7 @@ public:
 	 * \sa make_str()
 	 */
 	//MultiDouble(std::string inName):AbsParameter(inName, ParType::MDOUBLE){
-		//make_str();
+	//make_str();
 	//}
 
 	//! Standard constructor with a value
@@ -191,8 +191,8 @@ public:
 	 * \param in input PWAParameter which variables will be copied
 	 */
 	MultiDouble(const MultiDouble& in):AbsParameter(in.name_, ParType::MDOUBLE){
-	  *this = in;
-//		error_ = std::shared_ptr<ParError<double>>(new ParError<double>(*in.error_));
+		*this = in;
+		//		error_ = std::shared_ptr<ParError<double>>(new ParError<double>(*in.error_));
 	}
 
 	//! Empty Destructor
@@ -242,7 +242,7 @@ protected:
 		if(max>10) max=10; //display only 10 variables
 		oss << "\t Val = ";
 		for(unsigned int i=0; i<max-1; i++)
-		  oss << val_[i] << ", ";
+			oss << val_[i] << ", ";
 		oss << val_[max-1];
 		if(max<val_.size()) oss << " ... ";
 		oss << "\t Type = " << TypeName();
@@ -271,8 +271,8 @@ private:
 	template<class archive>
 	void serialize(archive& ar, const unsigned int version)
 	{
-//		ar & boost::serialization::base_object<AbsParameter>(*this);
-//		ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(AbsParameter);
+		//		ar & boost::serialization::base_object<AbsParameter>(*this);
+		//		ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(AbsParameter);
 		ar & BOOST_SERIALIZATION_NVP(val_);
 	}
 };
@@ -564,8 +564,8 @@ public:
 	 * \sa make_str()
 	 */
 	DoubleParameter(std::string inName):AbsParameter(inName, ParType::DOUBLE),val_(0),min_(0),max_(0),
-	error_(std::shared_ptr<ParError<double>>(new SymError<double>(0))) {
-		bounds_= usebounds_ = hasError_ = fixed_ = false;
+	error_(std::shared_ptr<ParError<double> >()) {
+		bounds_= usebounds_ = fixed_ = false;
 		//make_str();
 	}
 
@@ -578,8 +578,8 @@ public:
 	 * \sa make_str()
 	 */
 	DoubleParameter(std::string inName, const double value):AbsParameter(inName, ParType::DOUBLE),val_(value),min_(0),max_(0),
-	error_(std::shared_ptr<ParError<double>>(new SymError<double>(0))) {
-		bounds_= usebounds_ = hasError_ = fixed_ = false;
+			error_(std::shared_ptr<ParError<double> >()) {
+		bounds_= usebounds_ = fixed_ = false;
 		//make_str();
 	}
 
@@ -594,9 +594,8 @@ public:
 	 */
 	DoubleParameter(std::string inName, const double value, const double error)
 	:AbsParameter(inName, ParType::DOUBLE),val_(value),min_(0),max_(0),
-	error_(std::shared_ptr<ParError<double>>(new SymError<double>(error))) {
+	 error_(std::shared_ptr<ParError<double> >(new SymError<double>(error))) {
 		bounds_= usebounds_ = fixed_ = false;
-		hasError_ = true;
 		//make_str();
 	}
 
@@ -613,8 +612,8 @@ public:
 	 */
 	DoubleParameter(std::string inName, const double value, const double min, const double max)
 	:AbsParameter(inName, ParType::DOUBLE),val_(value),min_(0),max_(0),
-	 error_(std::shared_ptr<ParError<double>>(new SymError<double>(0))){
-		bounds_= usebounds_ = hasError_ = fixed_ = false;
+	 error_(std::shared_ptr<ParError<double> >()){
+		bounds_= usebounds_ = fixed_ = false;
 		if (check_bounds(min, max)){
 			min_ = min;
 			max_ = max;
@@ -637,15 +636,25 @@ public:
 	 */
 	DoubleParameter(std::string inName, const double value, const double min, const double max, const double error)
 	:AbsParameter(inName, ParType::DOUBLE),val_(value),min_(0),max_(0),
-	error_(std::shared_ptr<ParError<double>>(new SymError<double>(error))) {
+	 error_(std::shared_ptr<ParError<double>>(new SymError<double>(error))) {
 		bounds_= usebounds_ = fixed_ = false;
-		hasError_ = true;
 		if (check_bounds(min, max)){
 			min_ = min;
 			max_ = max;
 			bounds_ = true;
 		}
 		//make_str();
+	}
+
+	/** Copy constructor using
+	 * error shared_ptr is cloned. Other parameters copied.
+	 * \param in input PWAParameter which variables will be copied
+	 */
+	DoubleParameter(const DoubleParameter& in):AbsParameter(in),out_(in.out_),bounds_(in.bounds_),
+			usebounds_(in.usebounds_), fixed_(in.fixed_), val_(in.val_), min_(in.min_),	max_(in.max_)
+	{
+		if(in.HasError()) error_ = std::shared_ptr<ParError<double> >(in.error_->Clone());
+		else error_ = std::shared_ptr<ParError<double> >();
 	}
 
 	//! Copy constructor using = operator
@@ -655,10 +664,9 @@ public:
 	 * is a container class, this should be fine.
 	 * \param in input PWAParameter which variables will be copied
 	 */
-	DoubleParameter(const DoubleParameter& in):AbsParameter(in.name_, ParType::DOUBLE){
-		*this = in;
-//		error_ = std::shared_ptr<ParError<double>>(new ParError<double>(*in.error_));
-	}
+	//	DoubleParameter(const DoubleParameter& in):AbsParameter(in.name_, ParType::DOUBLE){
+	//		*this = in;
+	//}
 
 	//! Empty Destructor
 	/*!
@@ -671,7 +679,7 @@ public:
 	//! Check if bounds should be used
 	virtual const inline bool UseBounds() const {if(bounds_)return usebounds_; return false;}
 	//! Check if parameter has an error
-	virtual const inline bool HasError() const {return hasError_;}
+	virtual const inline bool HasError() const {if(error_) return 1; return 0;}
 	//! Check if parameter is fixed
 	virtual const inline bool IsFixed() const {return fixed_;}
 
@@ -682,8 +690,10 @@ public:
 	//! Getter for upper bound of parameter
 	virtual const inline double GetMaxValue() const {return max_;}
 	//! Getter for error of parameter
-//	virtual const inline double GetError() const {return err_;}
+	//virtual const inline double GetError() const {return err_;}
+	//! Getter for error of parameter
 	virtual std::shared_ptr<ParError<double>> GetError() const {return error_;}
+	//! Getter for type of parameter error
 	virtual ErrorType GetErrorType() const {return error_->GetType();}
 
 	//! Getter for FunctionTree support
@@ -702,7 +712,7 @@ public:
 		Notify();
 	}
 	//! Setter for error of parameter
-	virtual void SetError(std::shared_ptr<ParError<double>> err) {error_ = err; hasError_ = true;} //make_str();}
+	virtual void SetError(std::shared_ptr<ParError<double>> err) {error_ = err; } //make_str();}
 	//! Setter for bounds of parameter
 	virtual const bool SetMinMax(const double inMin, const double inMax){
 		bool valid = check_bounds(inMin, inMax);
@@ -779,8 +789,8 @@ protected:
 	bool usebounds_; /*!< Do you want to restrict your parameter? */
 	bool fixed_; /*!< Do you want to keep parameter fixed? */
 	double val_, min_, max_;/*!< Containers of parameter information */
-//	double err_;
-	bool hasError_;
+	//	double err_;
+//	bool hasError_;
 	std::shared_ptr<ParError<double>> error_;
 
 	//! A protected function to check if bounds are valid
@@ -813,7 +823,7 @@ protected:
 		oss << "\t Val = " << val_;
 		if(bounds_)
 			oss << "\t  Min-Max = " << min_ << " to " << max_;
-		if(hasError_)
+		if(HasError())
 			oss << "\t  Err = " << *error_;
 		oss << "\t Type = " << TypeName();
 		return oss.str();
@@ -836,17 +846,17 @@ private:
 	template<class archive>
 	void serialize(archive& ar, const unsigned int version)
 	{
-//		ar & boost::serialization::base_object<AbsParameter>(*this);
-//		ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(AbsParameter);
+		//		ar & boost::serialization::base_object<AbsParameter>(*this);
+		//		ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(AbsParameter);
 		ar & BOOST_SERIALIZATION_NVP(bounds_);
 		ar & BOOST_SERIALIZATION_NVP(usebounds_);
 		ar & BOOST_SERIALIZATION_NVP(fixed_);
 		ar & BOOST_SERIALIZATION_NVP(val_);
 		ar & BOOST_SERIALIZATION_NVP(min_);
 		ar & BOOST_SERIALIZATION_NVP(max_);
-//		ar & BOOST_SERIALIZATION_NVP(err_);
-		ar & BOOST_SERIALIZATION_NVP(hasError_);
-//		ar & BOOST_SERIALIZATION_NVP(error_);
+		//		ar & BOOST_SERIALIZATION_NVP(err_);
+//		ar & BOOST_SERIALIZATION_NVP(hasError_);
+		//		ar & BOOST_SERIALIZATION_NVP(error_);
 	}
 };
 //BOOST_CLASS_IMPLEMENTATION(DoubleParameter,boost::serialization::object_serializable);
