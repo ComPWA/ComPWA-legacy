@@ -3,14 +3,14 @@ import os ;
 
 local QFT = [ os.environ QFT ] ;
 local ROOTSYS = [ os.environ ROOTSYS ] ;
-local ROOTINC = [ os.environ ROOTINCLUDE ] ;
+#local ROOTINC = [ os.environ ROOTINCLUDE ] ;
 
 local rlibs = [ SHELL "$ROOTSYS/bin/root-config --libs" ] ;
 ROOTLIBS = [ MATCH "(.*)[\n]" : $(rlibs) ] ;
 
 project :
 	requirements
-	<include>$(ROOTINC)
+	<include>$(ROOTSYS)/include
 	<include>$(QFT)/include
 	<linkflags>$(ROOTLIBS)
 	<linkflags>-lEG
