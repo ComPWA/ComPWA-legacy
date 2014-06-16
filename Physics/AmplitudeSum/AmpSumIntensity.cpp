@@ -647,7 +647,8 @@ void AmpSumIntensity::copyParameterList(ParameterList& outPar){
 	if(outPar.GetNParameter())
 		return; //already filled, TODO: exception?
 	for(unsigned int i=0; i<namer.size();i++){
-		//add strength and phases of the used amplitudes
+		outPar.AddParameter(std::shared_ptr<DoubleParameter>(new DoubleParameter(*mr[namer[i]])));
+		outPar.AddParameter(std::shared_ptr<DoubleParameter>(new DoubleParameter(*gr[namer[i]])));
 		outPar.AddParameter(std::shared_ptr<DoubleParameter>(new DoubleParameter(*rr[namer[i]])));
 		outPar.AddParameter(std::shared_ptr<DoubleParameter>(new DoubleParameter(*phir[namer[i]])));
 	}

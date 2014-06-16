@@ -10,6 +10,7 @@ ROOTLIBS = [ MATCH "(.*)[\n]" : $(rlibs) ] ;
 
 project :
 	requirements
+	#<include>$(ROOTINC)
 	<include>$(ROOTSYS)/include
 	<include>$(QFT)/include
 	<linkflags>$(ROOTLIBS)
