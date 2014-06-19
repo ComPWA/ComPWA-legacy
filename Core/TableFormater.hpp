@@ -13,10 +13,10 @@
 #include <string>
 #include <sstream>
 #include <cmath>
+#include <string>
 
-//#include <boost/spirit/include/karma.hpp>
-//using namespace boost::spirit::karma;
 using namespace std;
+
 
 class TableFormater {
 
@@ -44,43 +44,56 @@ public:
 		totalWidth+=length+3;
 		columnTitle.push_back(title);
 	};
-	//	friend std::ostream& operator<< (std::ostream &out, FitResult &fitres){ out<<fitres.finalLH; return out;};
+
+	void trimString(std::string& src){
+		//remove  all final zeros
+		char chr = '0';
+//		std::string::size_type pos =  src.find_first_not_of(chr,0);
+//		if(pos-1 > 0)
+//			src.erase(0,pos-1);
+		std::string::size_type pos2 =  src.find_last_not_of(chr,src.length());
+		if(pos2+1 < src.length() )
+			src.erase(pos2+1,src.length());
+	}
 	TableFormater& operator<<(DoubleParameter in){
 		std::stringstream errStr;
-		*out << "| ";
+		if(curCol==0) *out << "| ";
+		else *out << " | ";
 		if(in.HasError()){
+			std::string tmp;
 			if(in.GetErrorType()==ErrorType::SYM){
-				unsigned int halfWidth = (unsigned int)(columnWidth[curCol]-4)/2;//divide column width
+				unsigned int halfWidth = (unsigned int)(columnWidth[curCol])/2;//divide column width
 				*out << std::setw(halfWidth) << in.GetValue();
-				*out << " +- ";
-				*out << std::setw(halfWidth) << *in.GetError() << " ";
+				tmp = " +-"+std::to_string((long double) in.GetError()->GetError()); trimString(tmp);
+				*out << std::setw(halfWidth) << tmp;
 			}
 			if(in.GetErrorType()==ErrorType::ASYM){
-				unsigned int w = (unsigned int)(columnWidth[curCol]-6)/3;//take 1/3 of column width
-//				std::cout<<"Column width="<<w<<std::endl;
+				unsigned int w = (unsigned int)(columnWidth[curCol])/3;//take 1/3 of column width
 				std::shared_ptr<ParError<double>> err = in.GetError();
-				*out << std::setw(w) << in.GetValue() ;
-				*out << " +";
-				*out << std::setw(w) << err->GetErrorHigh();
-				*out << " -";
-				*out << std::setw(w) << err->GetErrorLow();
+				tmp = std::to_string((long double) in.GetValue()); trimString(tmp);
+				*out << std::setw(w) << tmp;
+				tmp = "+"+std::to_string((long double) err->GetErrorHigh());trimString(tmp);
+				*out << std::setw(w) << tmp;
+				tmp = "-"+std::to_string((long double) err->GetErrorLow());trimString(tmp);
+				*out << std::setw(w) << tmp;
 			}
 		} else {
-			*out << std::setw(columnWidth[curCol]) << in.GetValue() << " ";
+			*out << std::setw(columnWidth[curCol]) << in.GetValue();
 		}
 		curCol++;
 		if(curCol==columnWidth.size()) {
-			*out<<"|"<<std::endl;
+			*out<<" |"<<std::endl;
 			curRow++; curCol=0;
-			//			delim();
 		}
 		return *this;
 	};
 	template<typename T> TableFormater& operator<<(T in){
-		*out << "| " <<std::setw(columnWidth[curCol]) << in <<" ";
+		if(curCol==0) *out << "| ";
+		else *out << " | ";
+		*out << std::setw(columnWidth[curCol]) << in;
 		curCol++;
 		if(curCol==columnWidth.size()) {
-			*out<<"|"<<std::endl;
+			*out<<" |"<<std::endl;
 			curRow++; curCol=0;
 			//			delim();
 		}

@@ -174,9 +174,9 @@ double AmpSumOfAmplitudes::getTotalIntegral(std::string name){
 	return getTotalIntegral(id);
 }
 double AmpSumOfAmplitudes::getTotalIntegral(unsigned int id){
-	unsigned int twoJplusOne = 2*_pdfList[id]->getSpin()+1;
+//	unsigned int twoJplusOne = 2*_pdfList[id]->getSpin()+1;
 //	return ( _pdfList[id]->totalIntegral()*twoJplusOne );
-	return ( _pdfList[id]->totalIntegral() );
+	return ( _pdfList[id]->totalIntegral() ); //2J+1 is already in AmpWigner2
 }
 
 double AmpSumOfAmplitudes::evaluateSlice(dataPoint& point, std::complex<double>* reso, unsigned int nResos, unsigned int subSys=5) const

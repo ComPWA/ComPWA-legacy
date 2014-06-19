@@ -95,14 +95,11 @@ void MinuitResult::fractions(std::ostream& out){
 	for(unsigned int i=0;i<nRes; i++){ //fill matrix
 		double resonanceInt = _amp->getTotalIntegral(i); //fit fraction of amplitude
 		std::string parName = "mag_"+_amp->getNameOfResonance(i); //name of magnitude parameter
+//		std::shared_ptr<DoubleParameter> magPar = trueParameters.GetDoubleParameter(parName);
 		std::shared_ptr<DoubleParameter> magPar = finalParameters.GetDoubleParameter(parName);
 		double mag = magPar->GetValue(); //value of magnitude
-		double magError;
-		if(magPar->IsFixed()) magError = 0.0;
-		else{
-			magError = variance.at(pos*2); //error on magnitude
-			pos++;//we have to skip fixed variables
-		}
+		double magError = 0.0;
+		if(magPar->HasError()) magError = magPar->GetError()->GetError();
 		fracError(i,0) = mag*mag*resonanceInt/norm; // f= |A|^2 * intRes/totalInt
 		fracError(i,1) = 2*mag*resonanceInt/norm*magError; // sigma_fraction = 2*|A| intRes/totalInt * sigma_A
 		sum += fracError(i,0);
@@ -147,19 +144,24 @@ void MinuitResult::genOutput(std::ostream& out, std::string opt){
 
 	if(!hasValidParameters) out<<"		*** NO VALID SET OF PARAMETERS! ***"<<std::endl;
 	if(printParam){
+		unsigned int parErrorWidth = 22;
+		for(unsigned int o=0;o<finalParameters.GetNDouble();o++)
+			if(finalParameters.GetDoubleParameter(o)->GetErrorType()==ErrorType::ASYM) parErrorWidth=33;
+
 		out<<"PARAMETERS:"<<std::endl;
 		TableFormater tableResult(&out);
 		tableResult.addColumn("Nr");
 		tableResult.addColumn("Name",15);
-		tableResult.addColumn("Initial Value",20);
-		tableResult.addColumn("Final Value",26);
-		if(printTrue) tableResult.addColumn("True Value",18);
-		if(printTrue) tableResult.addColumn("Deviation",12);
+		tableResult.addColumn("Initial Value",parErrorWidth);
+		tableResult.addColumn("Final Value",parErrorWidth);
+		if(printTrue) tableResult.addColumn("True Value",13);
+		if(printTrue) tableResult.addColumn("Deviation",13);
 		tableResult.header();
 
 		for(unsigned int o=0;o<finalParameters.GetNDouble();o++){
 			std::shared_ptr<DoubleParameter> iniPar = initialParameters.GetDoubleParameter(o);
 			std::shared_ptr<DoubleParameter> outPar = finalParameters.GetDoubleParameter(o);
+			ErrorType errorType = outPar->GetErrorType();
 			bool isFixed = iniPar->IsFixed();
 			bool isAngle=0;
 			if(iniPar->GetName().find("phase")!=string::npos) isAngle=1;//is our Parameter an angle?
@@ -180,7 +182,14 @@ void MinuitResult::genOutput(std::ostream& out, std::string opt){
 					continue;
 				}
 				tableResult << *truePar;
-				tableResult << (truePar->GetValue()-outPar->GetValue() )/ *outPar->GetError();
+				double pull = (truePar->GetValue()-outPar->GetValue() );
+				if( errorType == ErrorType::ASYM && pull < 0)
+					pull /= outPar->GetError()->GetErrorLow();
+				else if( errorType == ErrorType::ASYM && pull > 0)
+					pull /= outPar->GetError()->GetErrorHigh();
+				else
+					pull /= outPar->GetError()->GetError();
+				tableResult << pull;
 			}
 		}
 		tableResult.footer();
