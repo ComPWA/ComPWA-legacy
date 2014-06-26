@@ -24,14 +24,14 @@
 
 MinLogLH::MinLogLH(std::shared_ptr<Amplitude> inPIF, std::shared_ptr<Data> inDIF, unsigned int startEvent, unsigned int nEvents)
 : pPIF_(inPIF), pDIF_(inDIF), nEvts_(0), nPhsp_(0), nStartEvt_(startEvent), nUseEvt_(nEvents){
-	phspVolume = Kinematics::instance()->getPhspVolume();
+	//	phspVolume = Kinematics::instance()->getPhspVolume();
 	nEvts_ = pDIF_->getNEvents();
 	if( !(startEvent+nUseEvt_<=nEvts_) ) nUseEvt_ = nEvts_-startEvent;
 }
 
 MinLogLH::MinLogLH(std::shared_ptr<Amplitude> inPIF, std::shared_ptr<Data> inDIF, std::shared_ptr<Data> inPHSP, unsigned int startEvent, unsigned int nEvents)
 : pPIF_(inPIF), pDIF_(inDIF), pPHSP_(inPHSP), nEvts_(0), nPhsp_(0), nStartEvt_(startEvent), nUseEvt_(nEvents){
-	phspVolume = Kinematics::instance()->getPhspVolume();
+	//	phspVolume = Kinematics::instance()->getPhspVolume();
 	nEvts_ = pDIF_->getNEvents();
 	nPhsp_ = inPHSP->getNEvents();
 	if(!nUseEvt_) nUseEvt_ = nEvts_-startEvent;
@@ -41,12 +41,12 @@ MinLogLH::MinLogLH(std::shared_ptr<Amplitude> inPIF, std::shared_ptr<Data> inDIF
 
 MinLogLH::MinLogLH(std::shared_ptr<FunctionTree> inEvtTree, unsigned int inNEvts)
 : pEvtTree_(inEvtTree), nEvts_(inNEvts), nPhsp_(0), nStartEvt_(0), nUseEvt_(inNEvts){
-	phspVolume = Kinematics::instance()->getPhspVolume();
+	//	phspVolume = Kinematics::instance()->getPhspVolume();
 }
 
 MinLogLH::MinLogLH(std::shared_ptr<FunctionTree> inEvtTree, std::shared_ptr<FunctionTree> inPhspTree, unsigned int inNEvts)
 : pEvtTree_(inEvtTree), pPhspTree_(inPhspTree), nEvts_(inNEvts), nPhsp_(0), nStartEvt_(0), nUseEvt_(inNEvts){
-	phspVolume = Kinematics::instance()->getPhspVolume();
+	//	phspVolume = Kinematics::instance()->getPhspVolume();
 
 }
 
@@ -63,7 +63,23 @@ void MinLogLH::setTree(std::shared_ptr<FunctionTree> inEvtTree, std::shared_ptr<
 	nUseEvt_=inNEvts;
 	pPhspTree_=inPhspTree;
 	nPhsp_=0;
-	phspVolume = Kinematics::instance()->getPhspVolume();
+	//	phspVolume = Kinematics::instance()->getPhspVolume();
+}
+void MinLogLH::setAmplitude(std::shared_ptr<Amplitude> inPIF, std::shared_ptr<Data> inDIF, std::shared_ptr<Data> inPHSP, unsigned int startEvent, unsigned int nEvents){
+	pPIF_ = inPIF;
+	pDIF_=inDIF;
+	pPHSP_=inPHSP;
+	//nEvts_=0;
+	//nPhsp_=0;
+	nStartEvt_= startEvent;
+	nUseEvt_= nEvents;
+	//	phspVolume = Kinematics::instance()->getPhspVolume();
+	nEvts_ = pDIF_->getNEvents();
+	nPhsp_ = inPHSP->getNEvents();
+	if(!nUseEvt_) nUseEvt_ = nEvts_-startEvent;
+	if(!(startEvent+nUseEvt_<=nEvts_)) nUseEvt_ = nEvts_-startEvent;
+	if(!(startEvent+nUseEvt_<=nPhsp_)) nUseEvt_ = nPhsp_-startEvent;
+	return;
 }
 
 std::shared_ptr<ControlParameter> MinLogLH::createInstance(std::shared_ptr<Amplitude> inPIF, std::shared_ptr<Data> inDIF, unsigned int startEvent, unsigned int nEvents){
@@ -105,7 +121,7 @@ double MinLogLH::controlParameter(ParameterList& minPar){
 	//Calculate normalization
 	double norm = 0;
 	if(pPHSP_&& pPIF_){//norm by phasespace monte-carlo
-//		for(unsigned int phsp=nStartEvt_; phsp<nUseEvt_+nStartEvt_; phsp++){//TODO: needs review
+		//		for(unsigned int phsp=nStartEvt_; phsp<nUseEvt_+nStartEvt_; phsp++){//TODO: needs review
 		for(unsigned int phsp=0; phsp<nPhsp_; phsp++){
 			Event theEvent(pPHSP_->getEvent(phsp));
 			if(theEvent.getNParticles()!=3) continue;
@@ -154,7 +170,7 @@ double MinLogLH::controlParameter(ParameterList& minPar){
 	//	std::cout<<"event LH="<<lh<<" "<<nUseEvt_<< " "<<norm/nUseEvt_<<std::endl;
 
 	BOOST_LOG_TRIVIAL(debug) << "Data Term: " << lh << "\t Phsp Term (wo log): " << norm;
-//	lh = nUseEvt_*std::log(norm/nUseEvt_*phspVolume) - lh ;
+	//	lh = nUseEvt_*std::log(norm/nUseEvt_*phspVolume) - lh ;
 	lh = nUseEvt_*std::log(norm) - lh ;//other factors are constant and drop in deviation, so we can ignore them
 
 	return lh; //return -logLH

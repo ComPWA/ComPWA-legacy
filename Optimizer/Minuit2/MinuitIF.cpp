@@ -116,7 +116,6 @@ std::shared_ptr<FitResult> MinuitIF::exec(ParameterList& par){
 	BOOST_LOG_TRIVIAL(info) <<"MinuitIF: hesse finished";
 
 	//MINOS
-	BOOST_LOG_TRIVIAL(info) <<"MinuitIF: starting minos";
 	MnMinos minos(_myFcn,minMin,strat);
 
 	//save minimzed values
@@ -136,7 +135,6 @@ std::shared_ptr<FitResult> MinuitIF::exec(ParameterList& par){
 				actPat->SetError(std::shared_ptr<ParError<double>>(new SymError<double>(minState.Error(actPat->GetName()))));
 		}
 	}
-	BOOST_LOG_TRIVIAL(info) <<"MinuitIF: minos finished";
 
 	std::shared_ptr<FitResult> result(new MinuitResult(minMin));
 	result->setInitialParameters(initialPar);

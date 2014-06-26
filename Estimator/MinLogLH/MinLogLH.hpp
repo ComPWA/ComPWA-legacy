@@ -36,6 +36,7 @@ class MinLogLH : public Estimator {
 public:
 	virtual void setTree(std::shared_ptr<FunctionTree>, unsigned int);
 	virtual void setTree(std::shared_ptr<FunctionTree>, std::shared_ptr<FunctionTree>, unsigned int);
+	virtual void setAmplitude(std::shared_ptr<Amplitude>, std::shared_ptr<Data>, std::shared_ptr<Data>, unsigned int startEvent=0, unsigned int nEvents=0);
 
   virtual double controlParameter(ParameterList& minPar);
   static std::shared_ptr<ControlParameter> createInstance(std::shared_ptr<Amplitude>, std::shared_ptr<Data>, unsigned int startEvent=0, unsigned int nEvents=0);
