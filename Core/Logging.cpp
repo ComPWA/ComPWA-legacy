@@ -32,3 +32,7 @@ void Logging::init(std::string out,boost::log::trivial::severity_level minLevel)
 	boost::log::core::get()->set_filter(boost::log::trivial::severity >= minLevel);
 	BOOST_LOG_TRIVIAL(info)<<"Logging: using output filename: "<<out<<", Severity level: "<<minLevel;
 }
+void Logging::setLogLevel(boost::log::trivial::severity_level minLevel){
+	boost::log::core::get()->set_filter(boost::log::trivial::severity >= minLevel);
+	BOOST_LOG_TRIVIAL(info)<<"New severity level: "<<minLevel;
+}

@@ -140,7 +140,7 @@ int main(int argc, char **argv){
     BOOST_LOG_TRIVIAL(debug)<<"Phsp Tree: "<<(std::dynamic_pointer_cast<DoubleParameter>(phspTree->head()->getValue()))->GetValue();
     BOOST_LOG_TRIVIAL(info)<<"Trees are set up"<<std::endl;
 
-    esti = MinLogLH::createInstance(physicsTree, phspTree, myEvtMasses.nEvents, myPhspMasses.nEvents);
+    esti = MinLogLH::createInstance(physicsTree, phspTree, myEvtMasses.nEvents);
 
     dataPoint myPoint(myReader->getEvent(0));
     std::shared_ptr<TreeNode> LogNode = (physicsTree->head()->getChildren())[0];

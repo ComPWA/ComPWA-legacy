@@ -68,11 +68,9 @@ std::shared_ptr<FitResult> RunManager::startFit(ParameterList& inPar){
 	BOOST_LOG_TRIVIAL(info) << "RunManager: Starting fit.";
 	BOOST_LOG_TRIVIAL(info) << "RunManager: Input data contains "<<pData_->getNEvents()<<" events.";
 	//	BOOST_LOG_TRIVIAL(info) << "Initial LH="<<esti->controlParameter(inPar);
-	unsigned int startTime = clock();
 	std::shared_ptr<FitResult> result = pOpti_->exec(inPar);
 	success_ = true;
 	BOOST_LOG_TRIVIAL(info) << "RunManager: fit end. Result ="<<result->getResult()<<".";
-	BOOST_LOG_TRIVIAL(info) << "RunManager: fit time="<<(clock()-startTime)/CLOCKS_PER_SEC/60<<"min.";
 
 	return result;
 }

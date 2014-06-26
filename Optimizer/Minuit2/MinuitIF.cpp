@@ -30,6 +30,7 @@
 #include <boost/numeric/ublas/io.hpp>
 #include <boost/log/core.hpp>
 #include <boost/log/trivial.hpp>
+#include <boost/timer.hpp>
 using namespace boost::log;
 using namespace ROOT::Minuit2;
 
@@ -44,10 +45,7 @@ MinuitIF::~MinuitIF(){
 
 //const double MinuitIF::exec(ParameterList& par){
 std::shared_ptr<FitResult> MinuitIF::exec(ParameterList& par){
-	//std::string s;
-	//std::stringstream out;
-
-	unsigned int startTime = clock();
+	boost::timer time;
 	ParameterList initialPar(par);
 
 	MnUserParameters upar;
@@ -143,7 +141,7 @@ std::shared_ptr<FitResult> MinuitIF::exec(ParameterList& par){
 	std::shared_ptr<FitResult> result(new MinuitResult(minMin));
 	result->setInitialParameters(initialPar);
 	result->setFinalParameters(par);
-	result->setTime((clock()-startTime)/CLOCKS_PER_SEC);
+	result->setTime(time.elapsed());
 
 	return result;
 }

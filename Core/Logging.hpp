@@ -29,6 +29,7 @@ public:
 			boost::log::trivial::severity_level minLevel=boost::log::trivial::debug){
 		init(outFileName,minLevel);
 	};
+	void setLogLevel(boost::log::trivial::severity_level minLevel);
 private:
 	void init(std::string out,boost::log::trivial::severity_level minLevel);
 };

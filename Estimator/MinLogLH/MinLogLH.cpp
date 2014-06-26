@@ -44,8 +44,8 @@ MinLogLH::MinLogLH(std::shared_ptr<FunctionTree> inEvtTree, unsigned int inNEvts
 	phspVolume = Kinematics::instance()->getPhspVolume();
 }
 
-MinLogLH::MinLogLH(std::shared_ptr<FunctionTree> inEvtTree, std::shared_ptr<FunctionTree> inPhspTree, unsigned int inNEvts, unsigned int inNPhsp)
-: pEvtTree_(inEvtTree), pPhspTree_(inPhspTree), nEvts_(inNEvts), nPhsp_(inNPhsp), nStartEvt_(0), nUseEvt_(inNEvts){
+MinLogLH::MinLogLH(std::shared_ptr<FunctionTree> inEvtTree, std::shared_ptr<FunctionTree> inPhspTree, unsigned int inNEvts)
+: pEvtTree_(inEvtTree), pPhspTree_(inPhspTree), nEvts_(inNEvts), nPhsp_(0), nStartEvt_(0), nUseEvt_(inNEvts){
 	phspVolume = Kinematics::instance()->getPhspVolume();
 
 }
@@ -57,12 +57,12 @@ void MinLogLH::setTree(std::shared_ptr<FunctionTree> inEvtTree, unsigned int inN
 	nPhsp_=0;
 	return;
 }
-void MinLogLH::setTree(std::shared_ptr<FunctionTree> inEvtTree, std::shared_ptr<FunctionTree> inPhspTree, unsigned int inNEvts, unsigned int inNPhsp){
+void MinLogLH::setTree(std::shared_ptr<FunctionTree> inEvtTree, std::shared_ptr<FunctionTree> inPhspTree, unsigned int inNEvts){
 	pEvtTree_=inEvtTree;
 	nEvts_=inNEvts;
 	nUseEvt_=inNEvts;
 	pPhspTree_=inPhspTree;
-	nPhsp_=inNPhsp;
+	nPhsp_=0;
 	phspVolume = Kinematics::instance()->getPhspVolume();
 }
 
@@ -87,9 +87,9 @@ std::shared_ptr<ControlParameter> MinLogLH::createInstance(std::shared_ptr<Funct
 	return instance_;
 }
 
-std::shared_ptr<ControlParameter> MinLogLH::createInstance(std::shared_ptr<FunctionTree> inEvtTree, std::shared_ptr<FunctionTree> inPhspTree, unsigned int inNEvts, unsigned int inNPhsp){
+std::shared_ptr<ControlParameter> MinLogLH::createInstance(std::shared_ptr<FunctionTree> inEvtTree, std::shared_ptr<FunctionTree> inPhspTree, unsigned int inNEvts){
 	if(!instance_)
-		instance_ = std::shared_ptr<ControlParameter>(new MinLogLH(inEvtTree, inPhspTree, inNEvts, inNPhsp));
+		instance_ = std::shared_ptr<ControlParameter>(new MinLogLH(inEvtTree, inPhspTree, inNEvts));
 
 	return instance_;
 }

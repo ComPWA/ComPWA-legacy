@@ -174,7 +174,7 @@ int main(int argc, char **argv){
 	BOOST_LOG_TRIVIAL(info)<<"Fit model file: "<<fitModelFile ;
 
 	//======================= TREE FIT =============================
-	std::shared_ptr<ControlParameter> esti(MinLogLH::createInstance(physicsTree, phspTree, myEvtMasses.nEvents, myToyPhspMasses.nEvents));
+	std::shared_ptr<ControlParameter> esti(MinLogLH::createInstance(physicsTree, phspTree, myEvtMasses.nEvents));
 	double initialLHTree = esti->controlParameter(fitParTree);
 	std::shared_ptr<Optimizer> optiTree(new MinuitIF(esti, fitParTree));
 	run.setOptimizer(optiTree);
