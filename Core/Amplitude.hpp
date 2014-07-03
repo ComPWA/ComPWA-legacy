@@ -77,6 +77,8 @@ public:
 	virtual double getMagnitude(unsigned int id) {};
 	virtual double getPhase(std::string name) {};
 	virtual double getPhase(unsigned int id) {};
+	virtual double getSpin(std::string name) {};
+	virtual double getSpin(unsigned int id) {};
 	virtual double getFraction(std::string name) = 0;
 	virtual double getFraction(unsigned int id) = 0;
 	virtual double getIntValue(std::string var1, double min1, double max1, std::string var2, double min2, double max2) = 0;
@@ -90,14 +92,20 @@ public:
 		//if not implemented, return NULL-pointer
 		return;
 	}
-    virtual std::shared_ptr<FunctionTree> phspTree(allMasses& accPhspSample, allMasses& toyPhspSample) {
-        //if not implemented, return NULL-pointer
-        return std::shared_ptr<FunctionTree>();
-    }
-    virtual std::shared_ptr<FunctionTree> phspTree(allMasses& toyPhspSample) {
-        //if not implemented, return NULL-pointer
-        return std::shared_ptr<FunctionTree>();
-    }
+	virtual std::shared_ptr<FunctionTree> phspTree(allMasses& accPhspSample, allMasses& toyPhspSample) {
+		//if not implemented, return NULL-pointer
+		return std::shared_ptr<FunctionTree>();
+	}
+	virtual std::shared_ptr<FunctionTree> phspTree(allMasses& toyPhspSample) {
+		//if not implemented, return NULL-pointer
+		return std::shared_ptr<FunctionTree>();
+	}
+	//! Check of tree is available
+	virtual bool hasTree(){ return 0; }
+	//! Getter function for function tree
+	virtual std::shared_ptr<FunctionTree> getTree(){ return std::shared_ptr<FunctionTree>(); }
+	//! Getter function for phsp tree
+	virtual std::shared_ptr<FunctionTree> getPhspTree(){ return std::shared_ptr<FunctionTree>(); }
 
 protected:
 	ParameterList result;

@@ -151,6 +151,16 @@ double AmpSumOfAmplitudes::getUnormalizedFraction(std::string name){
 	if(id<0) return 0;
 	return getUnormalizedFraction(id);
 }
+double AmpSumOfAmplitudes::getSpin(std::string name){
+	int id=-1;
+	for(unsigned int i=0; i<_pdfList.size(); i++)
+		if(_pdfList[i]->GetName()==name) id=i;
+	if(id<0) return 0;
+	return getSpin(id);
+}
+double AmpSumOfAmplitudes::getSpin(unsigned int id){
+	return _pdfList[id]->getSpin();
+}
 std::shared_ptr<AmpAbsDynamicalFunction> AmpSumOfAmplitudes::getResonance(std::string name){
 	int id=-1;
 	for(unsigned int i=0; i<_pdfList.size(); i++)
@@ -174,9 +184,8 @@ double AmpSumOfAmplitudes::getTotalIntegral(std::string name){
 	return getTotalIntegral(id);
 }
 double AmpSumOfAmplitudes::getTotalIntegral(unsigned int id){
-//	unsigned int twoJplusOne = 2*_pdfList[id]->getSpin()+1;
-//	return ( _pdfList[id]->totalIntegral()*twoJplusOne );
-	return ( _pdfList[id]->totalIntegral() ); //2J+1 is already in AmpWigner2
+//	return ( _pdfList[id]->totalIntegral() ); //2J+1 is already in AmpWigner2
+	return ( 2*_pdfList[id]->getSpin()+1); //assume that amplitude is normalized, save some cpu time
 }
 
 double AmpSumOfAmplitudes::evaluateSlice(dataPoint& point, std::complex<double>* reso, unsigned int nResos, unsigned int subSys=5) const

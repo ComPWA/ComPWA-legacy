@@ -122,17 +122,24 @@ std::shared_ptr<FitResult> MinuitIF::exec(ParameterList& par){
 	MnUserParameterState minState = minMin.UserState();
 	for(unsigned int i=0; i<par.GetNDouble(); ++i){
 		std::shared_ptr<DoubleParameter> actPat = par.GetDoubleParameter(i);
+		double valueMigrad, value;
 		if(!actPat->IsFixed()){
-			actPat->SetValue(minState.Value(actPat->GetName()));
 			bool useMinos = 0;
+			valueMigrad = minState.Value(actPat->GetName());
+			value= valueMigrad;
 			if(actPat->GetErrorType()==ErrorType::ASYM) useMinos=1;
 			if(useMinos){
 				BOOST_LOG_TRIVIAL(info) <<"MinuitIF: minos for parameter "<<i<< "...";
 				MinosError err = minos.Minos(i);
 				std::pair<double,double> assymErrors = err();//lower = pair.first, upper= pair.second
 				actPat->SetError( std::shared_ptr<ParError<double>>(new AsymError<double>(assymErrors)) );
+				value= minState.Value(actPat->GetName());
 			} else
 				actPat->SetError(std::shared_ptr<ParError<double>>(new SymError<double>(minState.Error(actPat->GetName()))));
+			actPat->SetValue(value);
+			if(abs(valueMigrad-value) > 0.000001)
+				BOOST_LOG_TRIVIAL(info) <<"MinuitIF: new minimum found by MINOS. Parameter "
+				<<actPat->GetName()<<" shifted from "<<valueMigrad<<" to "<<value<<".";
 		}
 	}
 

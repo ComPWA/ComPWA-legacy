@@ -114,6 +114,15 @@ public:
 	 * @return shared_ptr of PHSP tree
 	 */
 	virtual std::shared_ptr<FunctionTree> phspTree(allMasses& toyPhspSample);
+	//! Check of tree is available
+	virtual bool hasTree(){
+		if(myTree && myPhspTree) return 1;
+		return 0;
+	}
+	//! Getter function for function tree
+	virtual std::shared_ptr<FunctionTree> getTree(){ return myTree; }
+	//! Getter function for phsp tree
+	virtual std::shared_ptr<FunctionTree> getPhspTree(){ return myPhspTree; }
 	//! reset trees
 	virtual void resetTree(){
 		myTree = std::shared_ptr<FunctionTree>();

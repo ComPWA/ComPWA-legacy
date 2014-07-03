@@ -40,6 +40,8 @@
 #include "Minuit2/MnUserParameterState.h"
 #include "Minuit2/FunctionMinimum.h"
 
+#include <gsl/gsl_rng.h>
+
 using namespace ROOT::Minuit2;
 
 class MinuitResult : public FitResult
@@ -49,10 +51,37 @@ public:
 	MinuitResult(FunctionMinimum result) { init(result); }
 	void setResult(FunctionMinimum result){ init(result); }
 	void setInitialLH(double iniLH){ initialLH = iniLH; }
+	//! Setting amplitude. This is necessary to calculate fit errors.
 	void setAmplitude(std::shared_ptr<Amplitude> newAmp);
+	void setUseCorrelatedErrors(bool s) { useCorrelatedErrors = s; }
 	operator double() const { return finalLH; };
+	//! Return final likelihood value
 	double getResult(){return finalLH;}
+	//!Generate output stream with fit result table
 	void fractions(std::ostream& out);
+	/** Calculate fit fractions.
+	 * Fractions are calculated using the formular:
+	 * \f[
+	 *  f_i = \frac{|c_i|^2 \int A_i A_i^*}{\int \sum c_l c_m^* A_l A_m}
+	 * \f]
+	 * The \f$c_i\f$ complex coefficienct of the amplitude and the denominatior is the integral over
+	 * the whole amplitude.
+	 *
+	 * @param frac result with fit fractions for the single resonances
+	 */
+	void calcFraction(std::vector<double>& frac);
+	/** Calculate errors on fit result
+	 * Set @param assumeUnCorrelatedErrors to assume that the error of the fit parameter only depends
+	 * on the error of the magnitude. The error of normalization due the the fit error on magnitudes
+	 * and phases is ignored.
+	 * If we want to calculate the errors correctly we have to generate a set of fit parameters that
+	 * are smeard by a multidimensional gaussian and the covariance matrix of the fit. For every set
+	 * we calculate the fit frations and calculate its mean. The can be a very time consuming method,
+	 * especially if the function tree is not used.
+	 *
+	 * @param fracError result with errors
+	 */
+	void calcFractionError(std::vector<double>& fracError);
 
 private:
 	bool isValid; //result valid
@@ -62,6 +91,11 @@ private:
 	bool hasAccCov; //accurate covariance
 	bool hasReachedCallLimit; //call limit reached
 	bool hesseFailed; //hesse failed
+	//! number of resonances in amplitude
+	unsigned int nRes;
+
+	gsl_rng* r;//! GSL random generator, used for multivariate gauss
+	bool useCorrelatedErrors;
 
 	double errorDef;
 	unsigned int nFcn;
@@ -74,6 +108,7 @@ private:
 	boost::numeric::ublas::matrix<double> fracError;
 	std::vector<double> variance;
 	std::vector<double> globalCC;
+	void smearParameterList(ParameterList&);
 	void genOutput(std::ostream& out,std::string opt="");
 	void genSimpleOutput(std::ostream& out);
 	void init(FunctionMinimum);
