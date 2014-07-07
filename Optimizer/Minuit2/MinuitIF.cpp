@@ -46,7 +46,7 @@ MinuitIF::~MinuitIF(){
 //const double MinuitIF::exec(ParameterList& par){
 std::shared_ptr<FitResult> MinuitIF::exec(ParameterList& par){
 	boost::timer time;
-	ParameterList initialPar(par);
+	ParameterList initialParList(par);
 
 	MnUserParameters upar;
 	BOOST_LOG_TRIVIAL(debug) << "Parameters used: "<<par.GetNDouble();
@@ -77,7 +77,7 @@ std::shared_ptr<FitResult> MinuitIF::exec(ParameterList& par){
 	}
 
 	//use MnStrategy class to set all options for the fit
-//	MnStrategy strat; //using default strategy = 1
+	//	MnStrategy strat; //using default strategy = 1
 	MinuitStrategy strat;//using default strategy = 1
 
 	//read in xml configuration file for strategy settings
@@ -89,11 +89,12 @@ std::shared_ptr<FitResult> MinuitIF::exec(ParameterList& par){
 	strat.init();//update parameters of MnStrategy mother class (IMPORTANT!)
 	ifs.close();
 	//write strategy settings
-//	std::ofstream ofs(path+"Optimizer/Minuit2/test.xml");
-//	boost::archive::xml_oarchive oa(ofs,boost::archive::no_header);
-//	oa << BOOST_SERIALIZATION_NVP(strat);
-//	ofs.close();
-	BOOST_LOG_TRIVIAL(debug) << "Minuit strategy parameters: (from "<<path+"Optimizer/Minuit2/MinuitStrategy.xml"<<")";
+	//	std::ofstream ofs(path+"Optimizer/Minuit2/test.xml");
+	//	boost::archive::xml_oarchive oa(ofs,boost::archive::no_header);
+	//	oa << BOOST_SERIALIZATION_NVP(strat);
+	//	ofs.close();
+	BOOST_LOG_TRIVIAL(debug) << "Minuit strategy parameters: (from "<<
+			path+"Optimizer/Minuit2/MinuitStrategy.xml"<<")";
 	BOOST_LOG_TRIVIAL(debug) << "Gradient number of steps: "<<strat.GradientNCycles();
 	BOOST_LOG_TRIVIAL(debug) << "Gradient step tolerance: "<<strat.GradientStepTolerance();
 	BOOST_LOG_TRIVIAL(debug) << "Gradient tolerance: "<<strat.GradientTolerance();
@@ -118,34 +119,45 @@ std::shared_ptr<FitResult> MinuitIF::exec(ParameterList& par){
 	//MINOS
 	MnMinos minos(_myFcn,minMin,strat);
 
+	//we copy parameters here because minos can still change the parameterList par
+	ParameterList finalParList(par);
 	//save minimzed values
 	MnUserParameterState minState = minMin.UserState();
-	for(unsigned int i=0; i<par.GetNDouble(); ++i){
-		std::shared_ptr<DoubleParameter> actPat = par.GetDoubleParameter(i);
-		double valueMigrad, value;
-		if(!actPat->IsFixed()){
-			bool useMinos = 0;
-			valueMigrad = minState.Value(actPat->GetName());
-			value= valueMigrad;
-			if(actPat->GetErrorType()==ErrorType::ASYM) useMinos=1;
-			if(useMinos){
+	for(unsigned int i=0; i<finalParList.GetNDouble(); ++i){
+		std::shared_ptr<DoubleParameter> finalPar = finalParList.GetDoubleParameter(i);
+		if(!finalPar->IsFixed()){
+			finalPar->SetValue(minState.Value(finalPar->GetName()));
+			if(finalPar->GetErrorType()==ErrorType::ASYM){ //asymmetric errors -> run minos
 				BOOST_LOG_TRIVIAL(info) <<"MinuitIF: minos for parameter "<<i<< "...";
 				MinosError err = minos.Minos(i);
 				std::pair<double,double> assymErrors = err();//lower = pair.first, upper= pair.second
-				actPat->SetError( std::shared_ptr<ParError<double>>(new AsymError<double>(assymErrors)) );
-				value= minState.Value(actPat->GetName());
-			} else
-				actPat->SetError(std::shared_ptr<ParError<double>>(new SymError<double>(minState.Error(actPat->GetName()))));
-			actPat->SetValue(value);
-			if(abs(valueMigrad-value) > 0.000001)
-				BOOST_LOG_TRIVIAL(info) <<"MinuitIF: new minimum found by MINOS. Parameter "
-				<<actPat->GetName()<<" shifted from "<<valueMigrad<<" to "<<value<<".";
+				finalPar->SetError( std::shared_ptr<ParError<double>>(new AsymError<double>(assymErrors)) );
+			} else if(finalPar->GetErrorType()==ErrorType::SYM) {//symmetric errors -> migrad error
+				finalPar->SetError(std::shared_ptr<ParError<double>>(
+						new SymError<double>(minState.Error(finalPar->GetName()))));
+			} else {
+				BOOST_LOG_TRIVIAL(error)<< "MinuitIF: requesting error type "<<finalPar->GetErrorType()<<". No idea what to do here!";
+				exit(1);
+			}
 		}
 	}
+	std::cout<<"34234748 ";
+	for(unsigned int i=0; i<finalParList.GetNDouble(); ++i){
+		std::shared_ptr<DoubleParameter> finalPar = finalParList.GetDoubleParameter(i);
+		if(!finalPar->IsFixed()){
+			std::cout<<finalPar->GetName()
+							<<" "<<minState.Value(finalPar->GetName())
+							<<" "<<finalPar->GetValue()
+							<<" "<<minState.Error(finalPar->GetName())
+							<<" "<<finalPar->GetError()->GetErrorLow()
+							<<" "<<finalPar->GetError()->GetErrorHigh()<<" ";
+		}
+	}
+	std::cout<<std::endl;
 
 	std::shared_ptr<FitResult> result(new MinuitResult(minMin));
-	result->setInitialParameters(initialPar);
-	result->setFinalParameters(par);
+	result->setInitialParameters(initialParList);
+	result->setFinalParameters(finalParList);
 	result->setTime(time.elapsed());
 
 	return result;
