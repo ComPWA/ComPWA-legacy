@@ -66,19 +66,19 @@ public:
 	virtual unsigned int getNumberOfResonances() { return 0; }
 
 	//! get total integral for resonance \param id
-	virtual double getTotalIntegral(unsigned int id) {  };
+	virtual double getTotalIntegral(unsigned int id) { return -999; };
 	//! get total integral for resonance \param name
-	virtual double getTotalIntegral(std::string name) {  };
+	virtual double getTotalIntegral(std::string name) { return -999; };
 	//! convert resonance \param name to id
-	virtual unsigned int getIdOfResonance(std::string name){}
+	virtual unsigned int getIdOfResonance(std::string name){ return 0;}
 	//! convert resonance \param id to name
-	virtual std::string getNameOfResonance(unsigned int id){}
-	virtual double getMagnitude(std::string name) {};
-	virtual double getMagnitude(unsigned int id) {};
-	virtual double getPhase(std::string name) {};
-	virtual double getPhase(unsigned int id) {};
-	virtual double getSpin(std::string name) {};
-	virtual double getSpin(unsigned int id) {};
+	virtual std::string getNameOfResonance(unsigned int id){ return std::string("muh");}
+	virtual double getMagnitude(std::string name) {return -999;};
+	virtual double getMagnitude(unsigned int id) {return -999;};
+	virtual double getPhase(std::string name) {return -999;};
+	virtual double getPhase(unsigned int id) {return -999;};
+	virtual double getSpin(std::string name) {return -999;};
+	virtual double getSpin(unsigned int id) {return -999;};
 	virtual double getFraction(std::string name) = 0;
 	virtual double getFraction(unsigned int id) = 0;
 	virtual double getIntValue(std::string var1, double min1, double max1, std::string var2, double min2, double max2) = 0;

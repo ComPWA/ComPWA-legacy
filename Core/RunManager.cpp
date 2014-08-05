@@ -61,7 +61,7 @@ RunManager::RunManager( unsigned int size, std::shared_ptr<Amplitude> inP,
 }
 
 RunManager::~RunManager(){
-	/* nothing */
+	BOOST_LOG_TRIVIAL(info) << "~RunManager: Last seed: "<<gen_->getSeed();
 }
 
 std::shared_ptr<FitResult> RunManager::startFit(ParameterList& inPar){
