@@ -184,6 +184,41 @@ public:
 		}
 		return std::complex<double>(-999,0);
 	}
+	/** Return vector of values of certain child node
+	 * We go recursively through out tree to find the specified node and the vector of its contents.
+	 * In cast the nodes doesn't have multiple values with return a vector of the size 1.
+	 *
+	 * @param name node specifier
+	 * @return current vector of values of node
+	 */
+	virtual std::vector<double> getChildMultiDoubleValue(std::string name) const{
+		std::vector<double> ret;
+		if(!_children.size()) {
+			return ret;
+		}
+		for(unsigned int i=0; i<_children.size(); i++){
+			if(_children[i]->getName()==name){
+//				if(_children[i]->getValue()->type() == ParType::DOUBLE){
+//					ret.push_back((std::dynamic_pointer_cast<DoubleParameter>(_children[i]->getValue(0)))->GetValue());
+//					return ret;
+//				}
+//				if(_children[i]->getValue()->type() == ParType::COMPLEX)
+//					return std::complex<double>((std::dynamic_pointer_cast<ComplexParameter>(_children[i]->getValue(0)))->GetValue());
+//				if(_children[i]->getValue()->type() == ParType::INTEGER)
+//					return std::complex<double>((std::dynamic_pointer_cast<IntegerParameter>(_children[i]->getValue(0)))->GetValue(),0);
+//				if(_children[i]->getValue()->type() == ParType::BOOL)
+//					return std::complex<double>((std::dynamic_pointer_cast<BoolParameter>(_children[i]->getValue(0)))->GetValue(),0);
+				if(_children[i]->getValue()->type() == ParType::MDOUBLE)
+					return std::dynamic_pointer_cast<MultiDouble>(_children[i]->getValue(0))->GetValues();
+			}
+			else {
+				ret = _children[i]->getChildMultiDoubleValue(name);
+				if(ret.size()>0) return ret;
+				else continue;
+			}
+		}
+		return ret;
+	}
 
 	//! Stream-Operator used to display tree
 	friend std::ostream & operator<<(std::ostream &os, std::shared_ptr<TreeNode> p);

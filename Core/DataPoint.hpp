@@ -65,6 +65,10 @@ public:
 	//!Standard constructor
 	allMasses():nInvMasses(0),nEvents(0) {}
 
+	//! reset weight vector to one
+	void resetWeights(){
+		weight = std::vector<double>(nEvents,1.);
+	}
 	//! Fill event
 	bool Fill(Event &evt);
 	//! add constant efficiency value @param constEff to every event in masses_sq

@@ -76,6 +76,8 @@ public:
 	}
 	std::shared_ptr<Data> rndSubSet(unsigned int size, std::shared_ptr<Generator> gen);
 
+	void resetWeights(double w=1.);
+
 protected:
 	void read();
 	bool _readFlag;
