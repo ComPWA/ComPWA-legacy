@@ -186,7 +186,7 @@ void MinuitResult::calcFractionError(std::vector<double>& fracError){
 			double phspVolume = Kinematics::instance()->getPhspVolume();
 			/*We need the intensity over the PHSP without efficiency correction. Therefore we
 			 * access node 'Amplitude' and sum up its values.*/
-			std::shared_ptr<TreeNode> amplitudeNode = _amp->getPhspTree()->head()->getChildren().at(0)->getChildren().at(0)->getChildren().at(1);
+			std::shared_ptr<TreeNode> amplitudeNode = _amp->getPhspTree()->head()->getChildren().at(0)->getChildren().at(0);
 			if(amplitudeNode->getName()!="Amplitude") {
 				BOOST_LOG_TRIVIAL(error)<<"calcFraction: we expect node 'Amplitude' at that position,"
 						" but found node "<<amplitudeNode->getName()<<". Probably the structure of the tree has changed!";
@@ -226,7 +226,7 @@ void MinuitResult::calcFraction(std::vector<double>& frac){
 		double phspVolume = Kinematics::instance()->getPhspVolume();
 		/*We need the intensity over the PHSP without efficiency correction. Therefore we
 		 * access node 'Amplitude' and sum up its values.*/
-		std::shared_ptr<TreeNode> amplitudeNode = _amp->getPhspTree()->head()->getChildren().at(0)->getChildren().at(0)->getChildren().at(1);
+		std::shared_ptr<TreeNode> amplitudeNode = _amp->getPhspTree()->head()->getChildren().at(0)->getChildren().at(0);
 		if(amplitudeNode->getName()!="Amplitude") {
 			BOOST_LOG_TRIVIAL(error)<<"calcFraction: we expect node 'Amplitude' at that position,"
 					" but found node "<<amplitudeNode->getName()<<". Probably the structure of the tree has changed!";
