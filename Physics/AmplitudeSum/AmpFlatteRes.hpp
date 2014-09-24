@@ -7,7 +7,7 @@
 //
 // Contributors:
 //     Mathias Michel - initial API and implementation
-//		Peter Weidenkaff - adding correct couplings
+//		Peter Weidenkaff - adding correct g1s
 //-------------------------------------------------------------------------------
 //****************************************************************************
 // Class for defining the relativistic Breit-Wigner resonance model, which
@@ -39,10 +39,11 @@ using namespace std;
 class AmpFlatteRes : public AmpAbsDynamicalFunction, public AmpKinematics {
 public:
 	AmpFlatteRes(const char *name,
-			DoubleParameter& resMass, DoubleParameter& resWidth,
-			double& mesonRadius,
-			DoubleParameter& coupling, DoubleParameter& couplingHidden,
-			double _massHiddenChannelA, double _massHiddenChannelB,
+			DoubleParameter& resMass,
+			DoubleParameter& mesonRadius,
+			DoubleParameter& motherRadius,
+			DoubleParameter& g1, DoubleParameter& g2,
+			double _g2_partA, double _g2_partB,
 			int _subsys, int resSpin, int m, int n) ;
 
 	AmpFlatteRes(const AmpFlatteRes&, const char*);
@@ -53,8 +54,8 @@ public:
 	void setBarrierMass(double, double);
 
 	//static function for dynamic part
-	static std::complex<double> dynamicalFunction(double mSq, double mR, double ma, double mb, double coupling,
-		double mHiddenA, double mHiddenB, double couplingHidden,unsigned int J);
+	static std::complex<double> dynamicalFunction(double mSq, double mR, double ma, double mb, double g1,
+			double mHiddenA, double mHiddenB, double g2,unsigned int J);
 
 	virtual void initialise();
 	std::complex<double> evaluate(dataPoint& point) { return ( _norm*evaluateAmp(point)*evaluateWignerD(point) ); }
@@ -67,15 +68,15 @@ public:
 	void setDecayMasses(double, double, double, double);
 	double getSpin() {return _spin;}; //needs to be declared in AmpAbsDynamicalFunction
 	inline virtual bool isSubSys(const unsigned int subSys)const{return (subSys==_subSys);};
+	unsigned int getNParams(){ return nParams;}
 
 protected:
-	DoubleParameter _couplingHiddenChannel;
-	DoubleParameter _coupling;
-//	AmpWigner _wignerD;
 	AmpWigner2 _wignerD;
+	unsigned int nParams;
 
-	double _massHiddenChannelA;//hidden channel: mass particle A
-	double _massHiddenChannelB; //hidden channel: mass particle B
+	double _g2_partA;//hidden channel: mass particle A
+	double _g2_partB; //hidden channel: mass particle B
+	DoubleParameter _g2, _g1;
 
 private:
 	//ClassDef(AmpFlatteRes,1) // Relativistic Breit-Wigner resonance model
@@ -95,24 +96,78 @@ public:
 			return false;
 		}
 
-		double m0, d;
+		double m0, d, ma, mb, g1, g2, mHiddenA, mHiddenB;
 		unsigned int spin, subSys;
+		//Get parameters from ParameterList -
+		//enclosing in try...catch for the case that names of nodes have changed
 		try{
 			m0 = double(paras.GetParameterValue("m0_"+name));
 		}catch(BadParameter& e){
-			m0 = double(paras.GetParameterValue("ParOfNode_m0_"+name));
+			BOOST_LOG_TRIVIAL(error) <<"FlatteStrategy: can't find parameter m0_"+name;
+			throw;
 		}
-		spin = (unsigned int)(paras.GetParameterValue("ParOfNode_spin_"+name));
-		d = double(paras.GetParameterValue("ParOfNode_d_"+name));
+		try{
+			spin = (unsigned int)(paras.GetParameterValue("ParOfNode_spin_"+name));
+		}catch(BadParameter& e){
+			BOOST_LOG_TRIVIAL(error) <<"FlatteStrategy: can't find parameter ParOfNode_spin_"+name;
+			throw;
+		}
+		try{
+			d = double(paras.GetParameterValue("d_"+name));
+		}catch(BadParameter& e){
+			BOOST_LOG_TRIVIAL(error) <<"FlatteStrategy: can't find parameter d_"+name;
+			throw;
+		}
 		//		norm = double(paras.GetParameterValue("ParOfNode_norm_"+name));
-		subSys = double(paras.GetParameterValue("ParOfNode_subSysFlag_"+name));
+		try{
+			subSys = double(paras.GetParameterValue("ParOfNode_subSysFlag_"+name));
+		}catch(BadParameter& e){
+			BOOST_LOG_TRIVIAL(error) <<"FlatteStrategy: can't find parameter ParOfNode_subSysFlag_"+name;
+			throw;
+		}
 
-		double ma = double(paras.GetParameterValue("ParOfNode_ma_"+name));
-		double mb = double(paras.GetParameterValue("ParOfNode_mb_"+name));
-		double mHiddenA = double(paras.GetParameterValue("ParOfNode_mHiddenA_"+name));
-		double mHiddenB = double(paras.GetParameterValue("ParOfNode_mHiddenB_"+name));
-		double coupling = double(paras.GetParameterValue("ParOfNode_coupling_"+name));
-		double couplingHidden = double(paras.GetParameterValue("ParOfNode_couplingHidden_"+name));
+		try{
+			ma = double(paras.GetParameterValue("ParOfNode_ma_"+name));
+		}catch(BadParameter& e){
+			BOOST_LOG_TRIVIAL(error) <<"FlatteStrategy: can't find parameter ParOfNode_ma_"+name;
+			throw;
+		}
+
+		try{
+			mb = double(paras.GetParameterValue("ParOfNode_mb_"+name));
+		}catch(BadParameter& e){
+			BOOST_LOG_TRIVIAL(error) <<"FlatteStrategy: can't find parameter ParOfNode_mb_"+name;
+			throw;
+		}
+		try{
+			mHiddenA = double(paras.GetParameterValue("ParOfNode_mHiddenA_"+name));
+		}catch(BadParameter& e){
+			BOOST_LOG_TRIVIAL(error) <<"FlatteStrategy: can't find parameter ParOfNode_mHiddenA_"+name;
+			throw;
+		}
+		try{
+			mHiddenB = double(paras.GetParameterValue("ParOfNode_mHiddenB_"+name));
+		}catch(BadParameter& e){
+			BOOST_LOG_TRIVIAL(error) <<"FlatteStrategy: can't find parameter ParOfNode_mHiddenB_"+name;
+			throw;
+		}
+		try{
+			g1 = double(paras.GetParameterValue("g1_"+name));
+		}catch(BadParameter& e){
+			try{
+				g1 = double(paras.GetParameterValue("g1_a_0"));//special case for peter's channel
+			}catch(BadParameter& e){
+				BOOST_LOG_TRIVIAL(error) <<"FlatteStrategy: can't find parameter g1_"+name;
+				BOOST_LOG_TRIVIAL(error) <<"FlatteStrategy: can't find parameter g1_a_0";
+				throw;
+			}
+		}
+		try{
+			g2 = double(paras.GetParameterValue("g2_"+name));
+		}catch(BadParameter& e){
+			BOOST_LOG_TRIVIAL(error) <<"FlatteStrategy: can't find parameter g2_"+name;
+			throw;
+		}
 
 		//MultiDim output, must have multidim Paras in input
 		if(checkType == ParType::MCOMPLEX){
@@ -130,7 +185,7 @@ public:
 				//calc BW for each point
 				for(unsigned int ele=0; ele<nElements; ele++){
 					double mSq = (mp->GetValue(ele));
-					results[ele] = AmpFlatteRes::dynamicalFunction(mSq,m0,ma,mb,coupling,mHiddenA,mHiddenB,couplingHidden,spin);
+					results[ele] = AmpFlatteRes::dynamicalFunction(mSq,m0,ma,mb,g1,mHiddenA,mHiddenB,g2,spin);
 					//					if(ele<10) std::cout<<"Strategy BWrel "<<results[ele]<<std::endl;
 				}
 
@@ -151,7 +206,7 @@ public:
 		case 5:{ mSq  = (double(paras.GetParameterValue("m23sq"))); break; }
 		}
 
-		std::complex<double> result = AmpFlatteRes::dynamicalFunction(mSq,m0,ma,mb,coupling,mHiddenA,mHiddenB,couplingHidden,spin);
+		std::complex<double> result = AmpFlatteRes::dynamicalFunction(mSq,m0,ma,mb,g1,mHiddenA,mHiddenB,g2,spin);
 		out = std::shared_ptr<AbsParameter>(new ComplexParameter(out->GetName(), result));
 		return true;
 	}
@@ -172,25 +227,77 @@ public:
 			return false;
 		}
 
-		double m0, d;
+		double m0, d, ma, mb, g1, g2, mHiddenA, mHiddenB;
 		unsigned int spin, subSys;
+
+		//Get parameters from ParameterList -
+		//enclosing in try...catch for the case that names of nodes have changed
 		try{
 			m0 = double(paras.GetParameterValue("m0_"+name));
 		}catch(BadParameter& e){
-			m0 = double(paras.GetParameterValue("ParOfNode_m0_"+name));
+			BOOST_LOG_TRIVIAL(error) <<"FlattePhspStrategy: can't find parameter m0_"+name;
+			throw;
 		}
-		spin = (unsigned int)(paras.GetParameterValue("ParOfNode_spin_"+name));
-		d = double(paras.GetParameterValue("ParOfNode_d_"+name));
-		//		norm = double(paras.GetParameterValue("ParOfNode_norm_"+name));
-		subSys = double(paras.GetParameterValue("ParOfNode_subSysFlag_"+name));
+		try{
+			spin = (unsigned int)(paras.GetParameterValue("ParOfNode_spin_"+name));
+		}catch(BadParameter& e){
+			BOOST_LOG_TRIVIAL(error) <<"FlattePhspStrategy: can't find parameter ParOfNode_spin_"+name;
+			throw;
+		}
+		try{
+			d = double(paras.GetParameterValue("d_"+name));
+		}catch(BadParameter& e){
+			BOOST_LOG_TRIVIAL(error) <<"FlattePhspStrategy: can't find parameter d_"+name;
+			throw;
+		}
+		try{
+			subSys = double(paras.GetParameterValue("ParOfNode_subSysFlag_"+name));
+		}catch(BadParameter& e){
+			BOOST_LOG_TRIVIAL(error) <<"FlattePhspStrategy: can't find parameter ParOfNode_subSysFlag_"+name;
+			throw;
+		}
+		try{
+			ma = double(paras.GetParameterValue("ParOfNode_ma_"+name));
+		}catch(BadParameter& e){
+			BOOST_LOG_TRIVIAL(error) <<"FlattePhspStrategy: can't find parameter ParOfNode_ma_"+name;
+			throw;
+		}
+		try{
+			mb = double(paras.GetParameterValue("ParOfNode_mb_"+name));
+		}catch(BadParameter& e){
+			BOOST_LOG_TRIVIAL(error) <<"FlattePhspStrategy: can't find parameter ParOfNode_mb_"+name;
+			throw;
+		}
+		try{
+			mHiddenA = double(paras.GetParameterValue("ParOfNode_mHiddenA_"+name));
+		}catch(BadParameter& e){
+			BOOST_LOG_TRIVIAL(error) <<"FlattePhspStrategy: can't find parameter ParOfNode_mHiddenA_"+name;
+			throw;
+		}
+		try{
+			mHiddenB = double(paras.GetParameterValue("ParOfNode_mHiddenB_"+name));
+		}catch(BadParameter& e){
+			BOOST_LOG_TRIVIAL(error) <<"FlattePhspStrategy: can't find parameter ParOfNode_mHiddenB_"+name;
+			throw;
+		}
+		try{
+			g1 = double(paras.GetParameterValue("g1_"+name));
+		}catch(BadParameter& e){
+			try{
+				g1 = double(paras.GetParameterValue("g1_a_0"));
+			}catch(BadParameter& e){
+				BOOST_LOG_TRIVIAL(error) <<"FlatteStrategy: can't find parameter g1_"+name;
+				BOOST_LOG_TRIVIAL(error) <<"FlatteStrategy: can't find parameter g1_a_0";
+				throw;
+			}
+		}
+		try{
+			g2 = double(paras.GetParameterValue("g2_"+name));
+		}catch(BadParameter& e){
+			BOOST_LOG_TRIVIAL(error) <<"FlattePhspStrategy: can't find parameter g2_"+name;
+			throw;
+		}
 
-		//m  = double(paras.GetParameterValue("mym"));
-		double ma = double(paras.GetParameterValue("ParOfNode_ma_"+name));
-		double mb = double(paras.GetParameterValue("ParOfNode_mb_"+name));
-		double mHiddenA = double(paras.GetParameterValue("ParOfNode_mHiddenA_"+name));
-		double mHiddenB = double(paras.GetParameterValue("ParOfNode_mHiddenB_"+name));
-		double coupling = double(paras.GetParameterValue("ParOfNode_coupling_"+name));
-		double couplingHidden = double(paras.GetParameterValue("ParOfNode_couplingHidden_"+name));
 
 		//MultiDim output, must have multidim Paras in input
 		if(checkType == ParType::MCOMPLEX){
@@ -208,7 +315,7 @@ public:
 				//calc BW for each point
 				for(unsigned int ele=0; ele<nElements; ele++){
 					double mSq = (mp->GetValue(ele));
-					results[ele] = AmpFlatteRes::dynamicalFunction(mSq,m0,ma,mb,coupling,mHiddenA,mHiddenB,couplingHidden,spin);
+					results[ele] = AmpFlatteRes::dynamicalFunction(mSq,m0,ma,mb,g1,mHiddenA,mHiddenB,g2,spin);
 					//					if(ele<10) std::cout<<"Strategy BWrel "<<results[ele]<<std::endl;
 				}
 				out = std::shared_ptr<AbsParameter>(new MultiComplex(out->GetName(),results));
@@ -227,7 +334,7 @@ public:
 		case 5:{ mSq  = (double(paras.GetParameterValue("m23sq_phsp"))); break; }
 		}
 
-		std::complex<double> result = AmpFlatteRes::dynamicalFunction(mSq,m0,ma,mb,coupling,mHiddenA,mHiddenB,couplingHidden,spin);
+		std::complex<double> result = AmpFlatteRes::dynamicalFunction(mSq,m0,ma,mb,g1,mHiddenA,mHiddenB,g2,spin);
 		out = std::shared_ptr<AbsParameter>(new ComplexParameter(out->GetName(), result));
 		return true;
 	}

@@ -150,6 +150,24 @@ public:
 	std::string to_str(std::string beginning);
 
 
+	/** Return Node of tree
+	 * We go recursively through the tree to find the specified node and return a shared_ptr of it
+	 *
+	 * @param name node specifier
+	 * @return pointer to node
+	 */
+	virtual std::shared_ptr<TreeNode> getChildNode(std::string name) const{
+		std::shared_ptr<TreeNode> node;
+		if(!_children.size()) node = std::shared_ptr<TreeNode>();
+		for(unsigned int i=0; i<_children.size(); i++){
+			if(_children.at(i)->getName()==name){
+				return _children.at(i);
+			} else
+				node = _children.at(i)->getChildNode(name);
+				if(node) return node;
+		}
+		return node;
+	}
 	/** Return value of certain child node
 	 * We go recursively through out tree to find the specified node and return its value. In case
 	 * of a node with multiple values we return the first one. Currently we assume that the variable

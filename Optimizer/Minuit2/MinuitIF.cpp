@@ -141,19 +141,19 @@ std::shared_ptr<FitResult> MinuitIF::exec(ParameterList& par){
 			}
 		}
 	}
-	std::cout<<"34234748 ";
-	for(unsigned int i=0; i<finalParList.GetNDouble(); ++i){
-		std::shared_ptr<DoubleParameter> finalPar = finalParList.GetDoubleParameter(i);
-		if(!finalPar->IsFixed()){
-			std::cout<<finalPar->GetName()
-							<<" "<<minState.Value(finalPar->GetName())
-							<<" "<<finalPar->GetValue()
-							<<" "<<minState.Error(finalPar->GetName())
-							<<" "<<finalPar->GetError()->GetErrorLow()
-							<<" "<<finalPar->GetError()->GetErrorHigh()<<" ";
-		}
-	}
-	std::cout<<std::endl;
+//	std::cout<<"34234748 ";
+//	for(unsigned int i=0; i<finalParList.GetNDouble(); ++i){
+//		std::shared_ptr<DoubleParameter> finalPar = finalParList.GetDoubleParameter(i);
+//		if(!finalPar->IsFixed()){
+//			std::cout<<finalPar->GetName()
+//							<<" "<<minState.Value(finalPar->GetName())
+//							<<" "<<finalPar->GetValue()
+//							<<" "<<minState.Error(finalPar->GetName())
+//							<<" "<<finalPar->GetError()->GetErrorLow()
+//							<<" "<<finalPar->GetError()->GetErrorHigh()<<" ";
+//		}
+//	}
+//	std::cout<<std::endl;
 
 	std::shared_ptr<FitResult> result(new MinuitResult(minMin));
 	result->setInitialParameters(initialParList);

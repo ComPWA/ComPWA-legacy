@@ -19,8 +19,10 @@
 class AmpKinematics{
 public:
 	enum barrierType{BWPrime,BW,none};
-	AmpKinematics(DoubleParameter&,int, int, int, int, barrierType, double, double);
-	AmpKinematics(double, double, double, double, DoubleParameter&, int, barrierType, int, int, int, double, double);
+	AmpKinematics(DoubleParameter& mR,int subSys, int spin, int m, int n, barrierType type,
+			DoubleParameter& mesonRadius,DoubleParameter& motherRadius);
+	AmpKinematics(double ma, double mb, double mc, double M, DoubleParameter& mR, int subSys, barrierType type,
+			int spin, int m, int n, DoubleParameter& mesonR, DoubleParameter& motherR);
 	AmpKinematics(const AmpKinematics& other);
 	virtual ~AmpKinematics(){};
 
@@ -29,26 +31,28 @@ public:
 	double EtoP(double e){return 1;};
 	virtual void setDecayMasses(double, double, double, double);
 	void setBarrierType(int) { };
-	void setBarrierRadi(double mesonRadius, double motherRadius) {_mesonRadius=mesonRadius; _motherRadius=motherRadius; };
+	void setBarrierRadi(double mesonRadius, double motherRadius) {
+		_mesonRadius.SetValue(mesonRadius); _motherRadius.SetValue(motherRadius);
+	};
 
 	static double qValue(double, double, double);
 	static double FormFactor(double z0, double z,unsigned int spin);
 	static double BlattWeiss(double x, double mR, double ma, double mb, double spin, double mesonRadius);
 
-	double q0()  const { return qValue(_mR, _ma, _mb ); };
+	double q0()  const { return qValue(_mR.GetValue(), _ma, _mb ); };
 //	double q(double, double, double)  const;
 	double q(double x)  const { return qValue(x, _ma, _mb); };
 	double q(double x,double ma, double mb)  const { return qValue(x, ma, mb); };
-	double BLres2(double x) const { return BlattWeiss(x,_mR,_ma,_mb,_spin,_mesonRadius); }
-	double BLmother2(double x) const { return BlattWeiss(x,_mR,_ma,_mb,_spin,_motherRadius); }//is the spin correct here, or do we need to spin of mother particle?
+	double BLres2(double x) const { return BlattWeiss(x,_mR.GetValue(),_ma,_mb,_spin,_mesonRadius.GetValue()); }
+	double BLmother2(double x) const { return BlattWeiss(x,_mR.GetValue(),_ma,_mb,_spin,_motherRadius.GetValue()); }//is the spin correct here, or do we need to spin of mother particle?
 //	double BLmother2(double x) const;
 
 	double getResMass() {return _mR.GetValue();};
 //	double getSpin() {return _spin;}; //needs to be declared in AmpAbsDynamicalFunction
 	double getM() {return _m;};
 	double getN() {return _n;};
-	double getMesonRadius() {return _mesonRadius;};
-	double getMotherRadius() {return _motherRadius;};
+	double getMesonRadius() {return _mesonRadius.GetValue();};
+	double getMotherRadius() {return _motherRadius.GetValue();};
 
 protected:
 	double _ma, _mb, _mc, _M;
@@ -56,7 +60,7 @@ protected:
 	unsigned int _subSys;
 	barrierType _type;
 	unsigned int _spin; int _m; int _n;
-	double _mesonRadius, _motherRadius;
+	DoubleParameter _mesonRadius, _motherRadius;
 
 private:
 };

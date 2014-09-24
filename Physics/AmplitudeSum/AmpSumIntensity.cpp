@@ -14,6 +14,7 @@
 #include <memory>
 #include <ctime>
 #include <exception>
+#include <stdexcept>
 
 #include "Core/Functions.hpp"
 #include "Core/Parameter.hpp"
@@ -90,26 +91,53 @@ void AmpSumIntensity::init(){
 	BOOST_LOG_TRIVIAL(debug)<<"AmpSumIntensity::init() number of Entries in dalitz plot set to: "<<_entries;
 	BOOST_LOG_TRIVIAL(debug)<<"AmpSumIntensity::init() area of phase space: "<<_dpArea;
 
+	params.push_back( std::shared_ptr<DoubleParameter> (
+			new DoubleParameter("motherRadius",1.5) ));
+	(*params.begin())->FixParameter(1);
+	/* For peter's analysis the a_0+ and a_00 share the same coupling. To implement
+	 * this in the model, we have to do the following work-a-round.
+	 * Don't forget to adjust the iterator 'paramsPos', if you comment out that line
+	 *  */
+	params.push_back( std::shared_ptr<DoubleParameter> (
+			new DoubleParameter("g1_a_0",0.464) ));//
+
 	for(std::vector<Resonance>::iterator reso=ampSetup.getResonances().begin(); reso!=ampSetup.getResonances().end(); reso++){
 		Resonance tmp = (*reso);
 		if(!tmp.m_enable) continue;
 		//setup RooVars
 		namer.push_back(tmp.m_name);
-		mr.insert(std::make_pair(tmp.m_name, std::shared_ptr<DoubleParameter> (new DoubleParameter("mass_"+tmp.m_name,tmp.m_mass, tmp.m_mass_min, tmp.m_mass_max) ) ));
-		gr.insert(std::make_pair(tmp.m_name, std::shared_ptr<DoubleParameter> (new DoubleParameter("width_"+tmp.m_name,tmp.m_width, tmp.m_width_min, tmp.m_width_max) ) ));
-		rr.insert(std::make_pair(tmp.m_name, std::shared_ptr<DoubleParameter> (new DoubleParameter("mag_"+tmp.m_name,tmp.m_strength) ) ));
-		phir.insert(std::make_pair(tmp.m_name, std::shared_ptr<DoubleParameter> (new DoubleParameter("phase_"+tmp.m_name,tmp.m_phase) ) ));
-
 		unsigned int subSys = tmp.m_daugtherA + tmp.m_daugtherB;
-		//unsigned int last = mr.size()-1;
+		params.push_back( std::shared_ptr<DoubleParameter> (
+				new DoubleParameter("mag_"+tmp.m_name,tmp.m_strength) ) );
+		params.push_back( std::shared_ptr<DoubleParameter> (
+				new DoubleParameter("phase_"+tmp.m_name,tmp.m_phase) ) );
+		params.push_back( std::shared_ptr<DoubleParameter> (
+				new DoubleParameter("m0_"+tmp.m_name,tmp.m_mass, tmp.m_mass_min, tmp.m_mass_max) ) );
+		params.push_back( std::shared_ptr<DoubleParameter> (
+				new DoubleParameter("width_"+tmp.m_name,tmp.m_width, tmp.m_width_min, tmp.m_width_max) ) );
+		params.push_back( std::shared_ptr<DoubleParameter> (
+				new DoubleParameter("d_"+tmp.m_name,tmp.m_mesonRadius) ) );
+//		std::shared_ptr<DoubleParameter> dd = std::shared_ptr<DoubleParameter> (
+//				new DoubleParameter("radius_"+tmp.m_name,tmp.m_mesonRadius) );
 
-		//setup Dynamics
-		//unsigned int last = mr.size()-1;
+		std::vector<std::shared_ptr<DoubleParameter> >::iterator magItr = params.end()-5;
+		std::vector<std::shared_ptr<DoubleParameter> >::iterator phaseItr = params.end()-4;
+		std::vector<std::shared_ptr<DoubleParameter> >::iterator massItr = params.end()-3;
+		std::vector<std::shared_ptr<DoubleParameter> >::iterator widthItr = params.end()-2;
+		std::vector<std::shared_ptr<DoubleParameter> >::iterator radiusItr = params.end()-1;
+
+//		mr.insert(std::make_pair(tmp.m_name, std::shared_ptr<DoubleParameter> (new DoubleParameter("mass_"+tmp.m_name,tmp.m_mass, tmp.m_mass_min, tmp.m_mass_max) ) ));
+//		gr.insert(std::make_pair(tmp.m_name, std::shared_ptr<DoubleParameter> (new DoubleParameter("width_"+tmp.m_name,tmp.m_width, tmp.m_width_min, tmp.m_width_max) ) ));
+//		rr.insert(std::make_pair(tmp.m_name, std::shared_ptr<DoubleParameter> (new DoubleParameter("mag_"+tmp.m_name,tmp.m_strength) ) ));
+//		phir.insert(std::make_pair(tmp.m_name, std::shared_ptr<DoubleParameter> (new DoubleParameter("phase_"+tmp.m_name,tmp.m_phase) ) ));
+//		std::shared_ptr<AmpRelBreitWignerRes> tmpbw(new AmpRelBreitWignerRes(tmp.m_name.c_str(),
+//				*mr[tmp.m_name], *gr[tmp.m_name], tmp.m_mesonRadius, subSys, tmp.m_spin,tmp.m_m,tmp.m_n) );
+//		totAmp.addBW(tmpbw, rr[tmp.m_name], phir[tmp.m_name]);
+
+		std::string sd;
 		std::shared_ptr<AmpRelBreitWignerRes> tmpbw(new AmpRelBreitWignerRes(tmp.m_name.c_str(),
-				*mr[tmp.m_name], *gr[tmp.m_name], tmp.m_mesonRadius, subSys, tmp.m_spin,tmp.m_m,tmp.m_n) );
-//		std::shared_ptr<AmpWigner2> tmpaw(new AmpWigner2(subSys, tmp.m_spin));
-//		totAmp.addBW(tmpbw, rr[tmp.m_name], phir[tmp.m_name], tmpaw);
-		totAmp.addBW(tmpbw, rr[tmp.m_name], phir[tmp.m_name]);
+				*(*massItr), *(*widthItr), *(*radiusItr), *(*params.begin()), subSys, tmp.m_spin,tmp.m_m,tmp.m_n) );
+		totAmp.addBW(tmpbw, *magItr, *phaseItr);
 
 		//setting normalization between amplitudes
 		double norm=tmp.m_norm;
@@ -125,23 +153,44 @@ void AmpSumIntensity::init(){
 		if(!tmp.m_enable) continue;
 		//setup RooVars
 		namer.push_back(tmp.m_name);
-		mr.insert(std::make_pair(tmp.m_name, std::shared_ptr<DoubleParameter> (new DoubleParameter("mass_"+tmp.m_name,tmp.m_mass, tmp.m_mass_min, tmp.m_mass_max) ) ));
-		gr.insert(std::make_pair(tmp.m_name, std::shared_ptr<DoubleParameter> (new DoubleParameter("width_"+tmp.m_name,tmp.m_width, tmp.m_width_min, tmp.m_width_max) ) ));
-		rr.insert(std::make_pair(tmp.m_name, std::shared_ptr<DoubleParameter> (new DoubleParameter("mag_"+tmp.m_name,tmp.m_strength) ) ));
-		phir.insert(std::make_pair(tmp.m_name, std::shared_ptr<DoubleParameter> (new DoubleParameter("phase_"+tmp.m_name,tmp.m_phase) ) ));
-		DoubleParameter coupling("coupling_"+tmp.m_name,tmp.m_coupling);
-		DoubleParameter couplingHidden("couplingHidden_"+tmp.m_name,tmp.m_couplingHidden);
-
 		unsigned int subSys = tmp.m_daugtherA + tmp.m_daugtherB;
+		params.push_back( std::shared_ptr<DoubleParameter> (new DoubleParameter("mag_"+tmp.m_name,tmp.m_strength) ) );
+		params.push_back( std::shared_ptr<DoubleParameter> (new DoubleParameter("phase_"+tmp.m_name,tmp.m_phase) ) );
+		params.push_back( std::shared_ptr<DoubleParameter> (new DoubleParameter("m0_"+tmp.m_name,tmp.m_mass, tmp.m_mass_min, tmp.m_mass_max)  ));
+		params.push_back( std::shared_ptr<DoubleParameter> (new DoubleParameter("g1_"+tmp.m_name,tmp.m_g1) ) );
+		params.push_back( std::shared_ptr<DoubleParameter> (new DoubleParameter("g2_"+tmp.m_name,tmp.m_g2) ) );
 
-		//setup Dynamics
-		//unsigned int last = mr.size()-1;
+		params.push_back( std::shared_ptr<DoubleParameter> (
+				new DoubleParameter("d_"+tmp.m_name,tmp.m_mesonRadius) ) );
+
+		std::vector<std::shared_ptr<DoubleParameter> >::iterator magItr = params.end()-6;
+		std::vector<std::shared_ptr<DoubleParameter> >::iterator phaseItr = params.end()-5;
+		std::vector<std::shared_ptr<DoubleParameter> >::iterator massItr = params.end()-4;
+//		std::vector<std::shared_ptr<DoubleParameter> >::iterator g1Itr = params.end()-3;
+		std::vector<std::shared_ptr<DoubleParameter> >::iterator g1Itr = params.begin()+1; //use global parameter
+		std::vector<std::shared_ptr<DoubleParameter> >::iterator g2Itr = params.end()-2;
+		std::vector<std::shared_ptr<DoubleParameter> >::iterator radiusItr = params.end()-1;
+
+//		mr.insert(std::make_pair(tmp.m_name, std::shared_ptr<DoubleParameter> (new DoubleParameter("mass_"+tmp.m_name,tmp.m_mass, tmp.m_mass_min, tmp.m_mass_max) ) ));
+//		gr.insert(std::make_pair(tmp.m_name, std::shared_ptr<DoubleParameter> (new DoubleParameter("width_"+tmp.m_name,tmp.m_width, tmp.m_width_min, tmp.m_width_max) ) ));
+//		rr.insert(std::make_pair(tmp.m_name, std::shared_ptr<DoubleParameter> (new DoubleParameter("mag_"+tmp.m_name,tmp.m_strength) ) ));
+//		phir.insert(std::make_pair(tmp.m_name, std::shared_ptr<DoubleParameter> (new DoubleParameter("phase_"+tmp.m_name,tmp.m_phase) ) ));
+//		DoubleParameter g1("g1_"+tmp.m_name,tmp.m_g1);
+//		DoubleParameter g2("g2_"+tmp.m_name,tmp.m_g2);
+//		std::shared_ptr<AmpFlatteRes> tmpbw(new AmpFlatteRes(tmp.m_name.c_str(),
+//				*mr[tmp.m_name], *gr[tmp.m_name], tmp.m_mesonRadius, g1, g2, \
+//				PhysConst::instance()->getMass(tmp.m_g2_part1),\
+//				PhysConst::instance()->getMass(tmp.m_g2_part2),\
+//				subSys, tmp.m_spin,tmp.m_m,tmp.m_n) );
+//		totAmp.addBW(tmpbw, rr[tmp.m_name], phir[tmp.m_name]);
+
 		std::shared_ptr<AmpFlatteRes> tmpbw(new AmpFlatteRes(tmp.m_name.c_str(),
-				*mr[tmp.m_name], *gr[tmp.m_name], tmp.m_mesonRadius, coupling, couplingHidden, \
-				PhysConst::instance()->getMass(tmp.m_hiddenParticle1),\
-				PhysConst::instance()->getMass(tmp.m_hiddenParticle2),\
+				*(*massItr), *(*radiusItr), *(*params.begin()),*(*g1Itr), *(*g2Itr), \
+				PhysConst::instance()->getMass(tmp.m_g2_part1),\
+				PhysConst::instance()->getMass(tmp.m_g2_part2),\
 				subSys, tmp.m_spin,tmp.m_m,tmp.m_n) );
-		totAmp.addBW(tmpbw, rr[tmp.m_name], phir[tmp.m_name]);
+
+		totAmp.addBW(tmpbw, *magItr, *phaseItr);
 
 		double norm=tmp.m_norm;
 		if(norm<0 || _calcNorm) {//recalculate normalization
@@ -152,7 +201,7 @@ void AmpSumIntensity::init(){
 	}// end loop over resonancesFlatte
 
 	//	ampSetup.save(ampSetup.getFilePath());//save updated information to input file
-	nAmps=rr.size();
+	nAmps=namer.size();
 	//	if(_calcNorm) integral();
 	BOOST_LOG_TRIVIAL(info)<<"AmpSumIntensity: completed setup!";
 }
@@ -241,6 +290,8 @@ void AmpSumIntensity::setupTree(allMasses& theMasses, allMasses& toyPhspSample, 
 		newTree->createNode("Amplitude", maddStrat, "Intens", theMasses.nEvents, false); //Sum of resonances, at each point
 	} else throw(std::logic_error("Error in setupTree()! Wrong option!"));
 
+	std::vector<std::shared_ptr<DoubleParameter> >::iterator paramsPos = params.begin()+2;
+
 	//----Add Resonances
 	for(std::vector<Resonance>::iterator reso=ampSetup.getResonances().begin(); reso!=ampSetup.getResonances().end(); reso++){
 		Resonance tmp = (*reso);
@@ -256,20 +307,21 @@ void AmpSumIntensity::setupTree(allMasses& theMasses, allMasses& toyPhspSample, 
 		newTree->createNode("Reso_"+tmp.m_name, mmultStrat, "Amplitude", theMasses.nEvents); //Reso=BW*C_*AD*N_
 		newTree->createNode("BW_"+tmp.m_name, mmultStrat , "Reso_"+tmp.m_name, theMasses.nEvents); //BW
 		newTree->createNode("RelBW_"+tmp.m_name, rbwStrat, "BW_"+tmp.m_name, theMasses.nEvents); //BW
-		newTree->createNode("C_"+tmp.m_name, complStrat, "Reso_"+tmp.m_name); //c
-		newTree->createLeaf("Intens_"+tmp.m_name, rr[tmp.m_name], "C_"+tmp.m_name); //r
-		newTree->createLeaf("Phase_"+tmp.m_name, phir[tmp.m_name], "C_"+tmp.m_name); //phi
+		newTree->createNode("C_"+tmp.m_name, complStrat, "Reso_"+tmp.m_name); //m0c
+		newTree->createLeaf("Intens_"+tmp.m_name, *paramsPos, "C_"+tmp.m_name); //r
+		newTree->createLeaf("Phase_"+tmp.m_name, *(paramsPos+1), "C_"+tmp.m_name); //phi
 		newTree->createNode("AngD_"+tmp.m_name, angdStrat, "Reso_"+tmp.m_name, theMasses.nEvents); //AD
 
 		//Breit-Wigner
-		newTree->createLeaf("m0_"+tmp.m_name, mr[tmp.m_name]->GetValue(), "RelBW_"+tmp.m_name); //m0
+		newTree->createLeaf("m0_"+tmp.m_name, *(paramsPos+2), "RelBW_"+tmp.m_name); //m0
 		newTree->createLeaf("m23sq", m23sq, "RelBW_"+tmp.m_name); //ma
 		newTree->createLeaf("m13sq", m13sq, "RelBW_"+tmp.m_name); //mb
 		newTree->createLeaf("m12sq", m12sq, "RelBW_"+tmp.m_name); //mc
 		newTree->createLeaf("subSysFlag_"+tmp.m_name, subSys, "RelBW_"+tmp.m_name); //subSysFlag
 		newTree->createLeaf("spin_"+tmp.m_name, tmp.m_spin, "RelBW_"+tmp.m_name); //spin
-		newTree->createLeaf("d_"+tmp.m_name,  tmp.m_mesonRadius, "RelBW_"+tmp.m_name); //d
-		newTree->createLeaf("resWidth_"+tmp.m_name, gr[tmp.m_name]->GetValue(), "RelBW_"+tmp.m_name); //resWidth
+		newTree->createLeaf("d_"+tmp.m_name, *(paramsPos+4) , "RelBW_"+tmp.m_name); //d
+//		newTree->createLeaf("d_"+tmp.m_name, tmp.m_mesonRadius , "RelBW_"+tmp.m_name); //d
+		newTree->createLeaf("width_"+tmp.m_name, *(paramsPos+3), "RelBW_"+tmp.m_name); //resWidth
 		//Angular distribution
 		newTree->createLeaf("m23sq", m23sq, "AngD_"+tmp.m_name); //ma
 		newTree->createLeaf("m13sq", m13sq, "AngD_"+tmp.m_name); //mb
@@ -297,14 +349,14 @@ void AmpSumIntensity::setupTree(allMasses& theMasses, allMasses& toyPhspSample, 
 			newTree->createNode("AbsVal_"+tmp.m_name, msqStrat, "Sum_"+tmp.m_name); //|A_i|^2
 			//Breit-Wigner (Normalization)
 			newTree->createNode("NormBW_"+tmp.m_name, rbwPhspStrat, "AbsVal_"+tmp.m_name, toyPhspSample.nEvents); //BW
-			newTree->createLeaf("m0_"+tmp.m_name, mr[tmp.m_name]->GetValue(), "NormBW_"+tmp.m_name); //m0
+			newTree->createLeaf("m0_"+tmp.m_name, *(paramsPos+2), "NormBW_"+tmp.m_name); //m0
 			newTree->createLeaf("m23sq_phsp", m23sq_phsp, "NormBW_"+tmp.m_name); //ma
 			newTree->createLeaf("m13sq_phsp", m13sq_phsp, "NormBW_"+tmp.m_name); //mb
 			newTree->createLeaf("m12sq_phsp", m12sq_phsp, "NormBW_"+tmp.m_name); //mc
 			newTree->createLeaf("subSysFlag_"+tmp.m_name, subSys, "NormBW_"+tmp.m_name); //subSysFlag
 			newTree->createLeaf("spin_"+tmp.m_name, tmp.m_spin, "NormBW_"+tmp.m_name); //spin
-			newTree->createLeaf("d_"+tmp.m_name,  tmp.m_mesonRadius, "NormBW_"+tmp.m_name); //d
-			newTree->createLeaf("resWidth_"+tmp.m_name, gr[tmp.m_name]->GetValue(), "NormBW_"+tmp.m_name); //resWidth
+			newTree->createLeaf("d_"+tmp.m_name, *(paramsPos+4) , "NormBW_"+tmp.m_name); //d
+			newTree->createLeaf("width_"+tmp.m_name, *(paramsPos+3), "NormBW_"+tmp.m_name); //resWidth
 		}
 		switch(subSys){
 		case 3:{ //reso in sys of particles 1&2
@@ -341,6 +393,7 @@ void AmpSumIntensity::setupTree(allMasses& theMasses, allMasses& toyPhspSample, 
 			BOOST_LOG_TRIVIAL(error)<<"AmpSumIntensity::setupTree(): Subsys not found!!";
 		}
 		}
+		paramsPos += 5;
 	}// end loop over resonances
 
 	for(std::vector<ResonanceFlatte>::iterator reso=ampSetup.getResonancesFlatte().begin(); reso!=ampSetup.getResonancesFlatte().end(); reso++){
@@ -358,24 +411,25 @@ void AmpSumIntensity::setupTree(allMasses& theMasses, allMasses& toyPhspSample, 
 		newTree->createNode("Flatte_"+tmp.m_name, mmultStrat , "Reso_"+tmp.m_name, theMasses.nEvents); //BW
 		newTree->createNode("FlatteRes_"+tmp.m_name, flatteStrat, "Flatte_"+tmp.m_name, theMasses.nEvents); //BW
 		newTree->createNode("C_"+tmp.m_name, complStrat, "Reso_"+tmp.m_name); //c
-		newTree->createLeaf("Intens_"+tmp.m_name, rr[tmp.m_name], "C_"+tmp.m_name); //r
-		newTree->createLeaf("Phase_"+tmp.m_name, phir[tmp.m_name], "C_"+tmp.m_name); //phi
+		newTree->createLeaf("Intens_"+tmp.m_name, *paramsPos, "C_"+tmp.m_name); //r
+		newTree->createLeaf("Phase_"+tmp.m_name, *(paramsPos+1), "C_"+tmp.m_name); //phi
 		newTree->createNode("AngD_"+tmp.m_name, angdStrat, "Reso_"+tmp.m_name, theMasses.nEvents); //AD
 
 		//Flatte
-		newTree->createLeaf("m0_"+tmp.m_name, mr[tmp.m_name]->GetValue(), "FlatteRes_"+tmp.m_name); //m0
+		newTree->createLeaf("m0_"+tmp.m_name, *(paramsPos+2), "FlatteRes_"+tmp.m_name); //m0
 		newTree->createLeaf("m23sq", m23sq, "FlatteRes_"+tmp.m_name); //ma
 		newTree->createLeaf("m13sq", m13sq, "FlatteRes_"+tmp.m_name); //mb
 		newTree->createLeaf("m12sq", m12sq, "FlatteRes_"+tmp.m_name); //mc
 		newTree->createLeaf("subSysFlag_"+tmp.m_name, subSys, "FlatteRes_"+tmp.m_name); //subSysFlag
 		newTree->createLeaf("spin_"+tmp.m_name, tmp.m_spin, "FlatteRes_"+tmp.m_name); //spin
-		newTree->createLeaf("d_"+tmp.m_name,  tmp.m_mesonRadius, "FlatteRes_"+tmp.m_name); //d
+		newTree->createLeaf("d_"+tmp.m_name, *(paramsPos+5) , "FlatteRes_"+tmp.m_name); //d
 		newTree->createLeaf("mHiddenA_"+tmp.m_name, \
-				PhysConst::instance()->getMass(tmp.m_hiddenParticle1), "FlatteRes_"+tmp.m_name);
+				PhysConst::instance()->getMass(tmp.m_g2_part1), "FlatteRes_"+tmp.m_name);
 		newTree->createLeaf("mHiddenB_"+tmp.m_name, \
-				PhysConst::instance()->getMass(tmp.m_hiddenParticle2), "FlatteRes_"+tmp.m_name);
-		newTree->createLeaf("coupling_"+tmp.m_name, tmp.m_coupling, "FlatteRes_"+tmp.m_name);
-		newTree->createLeaf("couplingHidden_"+tmp.m_name, tmp.m_couplingHidden, "FlatteRes_"+tmp.m_name);
+				PhysConst::instance()->getMass(tmp.m_g2_part2), "FlatteRes_"+tmp.m_name);
+//		newTree->createLeaf("g1_"+tmp.m_name, *(paramsPos+3), "FlatteRes_"+tmp.m_name);
+		newTree->createLeaf("g1_"+tmp.m_name, params.at(1), "FlatteRes_"+tmp.m_name);
+		newTree->createLeaf("g2_"+tmp.m_name, *(paramsPos+4), "FlatteRes_"+tmp.m_name);
 		//Angular distribution
 		newTree->createLeaf("m23sq", m23sq, "AngD_"+tmp.m_name); //ma
 		newTree->createLeaf("m13sq", m13sq, "AngD_"+tmp.m_name); //mb
@@ -400,19 +454,19 @@ void AmpSumIntensity::setupTree(allMasses& theMasses, allMasses& toyPhspSample, 
 			newTree->createNode("AbsVal_"+tmp.m_name, msqStrat, "Sum_"+tmp.m_name); //|A_i|^2
 			newTree->createNode("NormFlatte_"+tmp.m_name, flattePhspStrat, "AbsVal_"+tmp.m_name, toyPhspSample.nEvents); //BW
 			//Flatte (Normalization)
-			newTree->createLeaf("m0_"+tmp.m_name, mr[tmp.m_name]->GetValue(), "NormFlatte_"+tmp.m_name); //m0
+			newTree->createLeaf("m0_"+tmp.m_name, *(paramsPos+2), "NormFlatte_"+tmp.m_name); //m0
 			newTree->createLeaf("m23sq_phsp", m23sq_phsp, "NormFlatte_"+tmp.m_name); //ma
 			newTree->createLeaf("m13sq_phsp", m13sq_phsp, "NormFlatte_"+tmp.m_name); //mb
 			newTree->createLeaf("m12sq_phsp", m12sq_phsp, "NormFlatte_"+tmp.m_name); //mc
 			newTree->createLeaf("subSysFlag_"+tmp.m_name, subSys, "NormFlatte_"+tmp.m_name); //subSysFlag
 			newTree->createLeaf("spin_"+tmp.m_name, tmp.m_spin, "NormFlatte_"+tmp.m_name); //spin
-			newTree->createLeaf("d_"+tmp.m_name,  tmp.m_mesonRadius, "NormFlatte_"+tmp.m_name); //d
+			newTree->createLeaf("d_"+tmp.m_name,  *(paramsPos+5), "NormFlatte_"+tmp.m_name); //d
 			newTree->createLeaf("mHiddenA_"+tmp.m_name, \
-					PhysConst::instance()->getMass(tmp.m_hiddenParticle1), "NormFlatte_"+tmp.m_name);
+					PhysConst::instance()->getMass(tmp.m_g2_part1), "NormFlatte_"+tmp.m_name);
 			newTree->createLeaf("mHiddenB_"+tmp.m_name, \
-					PhysConst::instance()->getMass(tmp.m_hiddenParticle2), "NormFlatte_"+tmp.m_name);
-			newTree->createLeaf("coupling_"+tmp.m_name, tmp.m_coupling, "NormFlatte_"+tmp.m_name);
-			newTree->createLeaf("couplingHidden_"+tmp.m_name, tmp.m_couplingHidden, "NormFlatte_"+tmp.m_name);
+					PhysConst::instance()->getMass(tmp.m_g2_part2), "NormFlatte_"+tmp.m_name);
+			newTree->createLeaf("g1_"+tmp.m_name, *(paramsPos+3), "NormFlatte_"+tmp.m_name);
+			newTree->createLeaf("g2_"+tmp.m_name, *(paramsPos+4), "NormFlatte_"+tmp.m_name);
 		} else {
 			newTree->createLeaf("N_"+tmp.m_name, 1., "Flatte_"+tmp.m_name);
 		}
@@ -452,6 +506,7 @@ void AmpSumIntensity::setupTree(allMasses& theMasses, allMasses& toyPhspSample, 
 			BOOST_LOG_TRIVIAL(error)<<"AmpSumIntensity::setupTree(): Subsys not found!!";
 		}
 		}
+		paramsPos += 6;
 	}
 	if( opt == "data") myTree=newTree;
 	else if( opt == "norm" || opt == "normAcc") myPhspTree=newTree;
@@ -494,13 +549,7 @@ void AmpSumIntensity::calcMaxVal(ParameterList& par, std::shared_ptr<Generator> 
 
 void AmpSumIntensity::calcMaxVal(std::shared_ptr<Generator> gen){
 	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
-	//	double xLimit_low[2] = {kin->m13_sq_min,kin->m23_sq_min};
-	//	double xLimit_high[2] = {kin->m13_sq_max,kin->m23_sq_max};
-	//	boost::minstd_rand rndGen2(123);
-	//	boost::uniform_real<> uni_dist13(xLimit_low[0],xLimit_high[0]);
-	//	boost::uniform_real<> uni_dist23(xLimit_low[1],xLimit_high[1]);
-	//	boost::variate_generator<boost::minstd_rand&, boost::uniform_real<> > uni13(rndGen2, uni_dist13);
-	//	boost::variate_generator<boost::minstd_rand&, boost::uniform_real<> > uni23(rndGen2, uni_dist23);
+
 	double maxM23=-999; double maxM13=-999; double maxVal=0;
 	for(unsigned int i=0; i<100000; i++){
 		double m23sq=gen->getUniform()*(kin->m23_sq_max-kin->m23_sq_min)+kin->m23_sq_min;
@@ -556,7 +605,6 @@ const double AmpSumIntensity::integral(){
 	/* Integration functionality was tested with a model with only one normalized amplitude.
 	 * The integration result is equal to the amplitude coefficient^2.
 	 */
-
 	size_t dim=2;
 	double res=0.0, err=0.0;
 
@@ -648,13 +696,16 @@ const ParameterList& AmpSumIntensity::intensity(dataPoint& point){
 }
 void AmpSumIntensity::copyParameterList(ParameterList& outPar){
 	if(outPar.GetNParameter())
-		return; //already filled, TODO: exception?
-	for(unsigned int i=0; i<namer.size();i++){
-		outPar.AddParameter(std::shared_ptr<DoubleParameter>(new DoubleParameter(*mr[namer[i]])));
-		outPar.AddParameter(std::shared_ptr<DoubleParameter>(new DoubleParameter(*gr[namer[i]])));
-		outPar.AddParameter(std::shared_ptr<DoubleParameter>(new DoubleParameter(*rr[namer[i]])));
-		outPar.AddParameter(std::shared_ptr<DoubleParameter>(new DoubleParameter(*phir[namer[i]])));
-	}
+		throw std::runtime_error("copyParameterList(): input list not empty");
+	for(unsigned int i=0; i<params.size();i++)
+		outPar.AddParameter(std::shared_ptr<DoubleParameter>(new DoubleParameter(*(params.at(i)))) );
+
+//	for(unsigned int i=0; i<namer.size();i++){
+//		outPar.AddParameter(std::shared_ptr<DoubleParameter>(new DoubleParameter(*mr[namer[i]])));
+//		outPar.AddParameter(std::shared_ptr<DoubleParameter>(new DoubleParameter(*gr[namer[i]])));
+//		outPar.AddParameter(std::shared_ptr<DoubleParameter>(new DoubleParameter(*rr[namer[i]])));
+//		outPar.AddParameter(std::shared_ptr<DoubleParameter>(new DoubleParameter(*phir[namer[i]])));
+//	}
 	return;
 
 }
@@ -686,50 +737,81 @@ const bool AmpSumIntensity::fillStartParVec(ParameterList& outPar){
 }*/
 void AmpSumIntensity::setParameterList(ParameterList& par){
 	//parameters varied by Minimization algorithm
-	for(unsigned int i=0; i<nAmps; i++){
-		//      *rr[i] = DoubleParameter(par.GetDoubleParameter(2*i));
-		//      *phir[i] = DoubleParameter(par.GetDoubleParameter(2*i+1));
-		if(!mr[namer[i]]->IsFixed()){
-			mr[namer[i]]->SetValue(par.GetDoubleParameter(4*i)->GetValue());
-			mr[namer[i]]->SetError(par.GetDoubleParameter(4*i)->GetError());
-		}
-		if(!gr[namer[i]]->IsFixed()){
-			gr[namer[i]]->SetValue(par.GetDoubleParameter(4*i+1)->GetValue());
-			gr[namer[i]]->SetError(par.GetDoubleParameter(4*i+1)->GetError());
-		}
-		if(!rr[namer[i]]->IsFixed()){
-			rr[namer[i]]->SetValue(par.GetDoubleParameter(4*i+2)->GetValue());
-			rr[namer[i]]->SetError(par.GetDoubleParameter(4*i+2)->GetError());
-		}
-		if(!phir[namer[i]]->IsFixed()){
-			phir[namer[i]]->SetValue(par.GetDoubleParameter(4*i+3)->GetValue());
-			phir[namer[i]]->SetError(par.GetDoubleParameter(4*i+3)->GetError());
+	if(par.GetNDouble()!=params.size())
+		throw std::runtime_error("setParameterList(): size of parameter lists don't match");
+	for(unsigned int i=0; i<par.GetNDouble();i++){
+		if(!params.at(i)->IsFixed()){
+			params.at(i)->SetValue(par.GetDoubleParameter(i)->GetValue());
+			params.at(i)->SetError(par.GetDoubleParameter(i)->GetError());
 		}
 	}
+//	for(unsigned int i=0; i<nAmps; i++){
+//		//      *rr[i] = DoubleParameter(par.GetDoubleParameter(2*i));
+//		//      *phir[i] = DoubleParameter(par.GetDoubleParameter(2*i+1));
+//		if(!mr[namer[i]]->IsFixed()){
+//			mr[namer[i]]->SetValue(par.GetDoubleParameter(4*i)->GetValue());
+//			mr[namer[i]]->SetError(par.GetDoubleParameter(4*i)->GetError());
+//		}
+//		if(!gr[namer[i]]->IsFixed()){
+//			gr[namer[i]]->SetValue(par.GetDoubleParameter(4*i+1)->GetValue());
+//			gr[namer[i]]->SetError(par.GetDoubleParameter(4*i+1)->GetError());
+//		}
+//		if(!rr[namer[i]]->IsFixed()){
+//			rr[namer[i]]->SetValue(par.GetDoubleParameter(4*i+2)->GetValue());
+//			rr[namer[i]]->SetError(par.GetDoubleParameter(4*i+2)->GetError());
+//		}
+//		if(!phir[namer[i]]->IsFixed()){
+//			phir[namer[i]]->SetValue(par.GetDoubleParameter(4*i+3)->GetValue());
+//			phir[namer[i]]->SetError(par.GetDoubleParameter(4*i+3)->GetError());
+//		}
+//	}
 	return;
 }
 const bool AmpSumIntensity::fillStartParVec(ParameterList& outPar){
 	if(outPar.GetNParameter())
-		return false; //already filled, TODO: exception?
-	for(unsigned int i=0; i<namer.size();i++){
-		//add strength and phases of the used amplitudes
-		outPar.AddParameter(mr[namer[i]]);
-		outPar.AddParameter(gr[namer[i]]);
-		outPar.AddParameter(rr[namer[i]]);
-		outPar.AddParameter(phir[namer[i]]);
-	}
+		throw std::runtime_error("fillStartParVec(): input list not empty");
+//	if(outPar.GetNParameter())
+//		return false; //already filled, TODO: exception?
+	for(unsigned int i=0; i<params.size();i++)
+		outPar.AddParameter(params.at(i) );
+//	for(unsigned int i=0; i<namer.size();i++){
+//		//add strength and phases of the used amplitudes
+//		outPar.AddParameter(mr[namer[i]]);
+//		outPar.AddParameter(gr[namer[i]]);
+//		outPar.AddParameter(rr[namer[i]]);
+//		outPar.AddParameter(phir[namer[i]]);
+//	}
 	return true;
 }
 
 void AmpSumIntensity::printAmps(){
 	std::stringstream outStr;
 	outStr<<"AmpSumIntensity: Printing amplitudes with current(!) set of parameters:\n";
-	for(unsigned int i=0;i<nAmps;i++){
-		outStr<<std::setw(12)<<totAmp.getAmpName(i)<<": ";
-		outStr<<"Mag = "<<std::setw(6)<<rr[namer[i]]->GetValue()<<" +- "<<std::setw(5)<<rr[namer[i]]->GetError()->GetError();
-		outStr<<"   Phase = "<<std::setw(6)<<phir[namer[i]]->GetValue()<<" +- "<<std::setw(5)<<phir[namer[i]]->GetError()->GetError();
-		if(!(i==nAmps-1)) outStr << "\n";
+	std::vector<std::shared_ptr<DoubleParameter> >::iterator it = params.begin();
+	unsigned int n=0;
+	for(;it!=params.end();++it){
+		std::string tmp = (*it)->GetName();
+		//we want to print the name of the resonance before its parameters are printed
+		std::size_t found = tmp.find("mag");
+		if(found!=std::string::npos){
+			outStr<<"-------- "<<namer[n]<<" ---------\n";
+			n++;
+		}
+		outStr<<tmp<<" = "<<(*it)->GetValue();
+		if((*it)->HasError())
+			outStr<<"+-"<<(*it)->GetError()->GetError();
+		if((*it)->HasBounds())
+			outStr<<" ["<<(*it)->GetMinValue()<<";"<<(*it)->GetMaxValue()<<"]";
+		if((*it)->IsFixed())
+			outStr<<" FIXED";
+		outStr<<"\n";
 	}
+//	for(unsigned int i=0;i<nAmps;i++){
+//		outStr<<std::setw(12)<<totAmp.getAmpName(i)<<": ";
+//		outStr<<"Mag = "<<std::setw(6)<<rr[namer[i]]->GetValue()<<" +- "<<std::setw(5)<<rr[namer[i]]->GetError()->GetError();
+//		outStr<<"   Phase = "<<std::setw(6)<<phir[namer[i]]->GetValue()<<" +- "<<std::setw(5)<<phir[namer[i]]->GetError()->GetError();
+//		if(!(i==nAmps-1)) outStr << "\n";
+//	}
 	BOOST_LOG_TRIVIAL(info)<<outStr.str();
 	return;
 }

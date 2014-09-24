@@ -153,9 +153,9 @@ void MinuitResult::calcFractionError(std::vector<double>& fracError){
 			std::vector<double> tmp;
 			calcFraction(tmp);
 			fracVect.push_back(tmp);
-//			std::cout<<"adsfasd ";
-//			for(unsigned int i=0; i<tmp.size();i++) std::cout<<tmp.at(i)<<" ";
-//			std::cout<<std::endl;
+			//			std::cout<<"adsfasd ";
+			//			for(unsigned int i=0; i<tmp.size();i++) std::cout<<tmp.at(i)<<" ";
+			//			std::cout<<std::endl;
 		}
 		//Calculate standart deviation
 		for(unsigned int o=0;o<nRes;o++){
@@ -186,11 +186,17 @@ void MinuitResult::calcFractionError(std::vector<double>& fracError){
 			double phspVolume = Kinematics::instance()->getPhspVolume();
 			/*We need the intensity over the PHSP without efficiency correction. Therefore we
 			 * access node 'Amplitude' and sum up its values.*/
-			std::shared_ptr<TreeNode> amplitudeNode = _amp->getPhspTree()->head()->getChildren().at(0)->getChildren().at(0);
+			//			std::shared_ptr<TreeNode> amplitudeNode = _amp->getPhspTree()->head()->getChildren().at(0)->getChildren().at(0);
+			std::shared_ptr<TreeNode> amplitudeNode = _amp->getPhspTree()->head()->getChildNode("Amplitude");
+			if(!amplitudeNode){
+				BOOST_LOG_TRIVIAL(error)<<"MinuitResult::calcFractionError() : Can't find node 'Amplitude' in tree!";
+				throw BadParameter("Node not found!");
+			}
+
 			if(amplitudeNode->getName()!="Amplitude") {
-				BOOST_LOG_TRIVIAL(error)<<"calcFraction: we expect node 'Amplitude' at that position,"
+				BOOST_LOG_TRIVIAL(error)<<"MinuitResult::calcFractionError() : we expect node 'Amplitude' at that position,"
 						" but found node "<<amplitudeNode->getName()<<". Probably the structure of the tree has changed!";
-				return;
+				throw BadParameter("Node not found!");
 			}
 			std::shared_ptr<MultiComplex> normPar = std::dynamic_pointer_cast<MultiComplex>(amplitudeNode->getValue());//node 'Amplitude'
 			unsigned int numPhspEvents = normPar->GetNValues();
@@ -226,12 +232,19 @@ void MinuitResult::calcFraction(std::vector<double>& frac){
 		double phspVolume = Kinematics::instance()->getPhspVolume();
 		/*We need the intensity over the PHSP without efficiency correction. Therefore we
 		 * access node 'Amplitude' and sum up its values.*/
-		std::shared_ptr<TreeNode> amplitudeNode = _amp->getPhspTree()->head()->getChildren().at(0)->getChildren().at(0);
-		if(amplitudeNode->getName()!="Amplitude") {
-			BOOST_LOG_TRIVIAL(error)<<"calcFraction: we expect node 'Amplitude' at that position,"
-					" but found node "<<amplitudeNode->getName()<<". Probably the structure of the tree has changed!";
-			return;
+//		std::shared_ptr<TreeNode> amplitudeNode = _amp->getPhspTree()->head()->getChildren().at(0)->getChildren().at(0);
+//		std::shared_ptr<TreeNode> amplitudeNode = _amp->getPhspTree()->head()->getChildNode("Amplitude");
+		std::shared_ptr<TreeNode> amplitudeNode(_amp->getPhspTree()->head()->getChildNode("Amplitude"));
+		if(!amplitudeNode){
+			BOOST_LOG_TRIVIAL(error)<<"MinuitResult::calcFraction() : Can't find node 'Amplitude' in tree!";
+			throw BadParameter("Node not found!");
 		}
+		if(amplitudeNode->getName()!="Amplitude") {
+			BOOST_LOG_TRIVIAL(error)<<"MinuitResult::calcFraction() : we expect node 'Amplitude' at that position,"
+					" but found node "<<amplitudeNode->getName()<<". Probably the structure of the tree has changed!";
+			throw BadParameter("Node not found!");
+		}
+
 		std::shared_ptr<MultiComplex> normPar = std::dynamic_pointer_cast<MultiComplex>(amplitudeNode->getValue());//node 'Amplitude'
 		unsigned int numPhspEvents = normPar->GetNValues();
 		for(unsigned int i=0; i<numPhspEvents;i++)

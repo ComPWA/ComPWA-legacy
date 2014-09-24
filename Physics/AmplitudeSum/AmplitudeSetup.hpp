@@ -59,10 +59,10 @@ struct Resonance
 };
 struct ResonanceFlatte : Resonance
 {
-	double m_coupling;
-	double m_couplingHidden;
-	std::string m_hiddenParticle1;
-	std::string m_hiddenParticle2;
+	double m_g1;
+	double m_g2;
+	std::string m_g2_part1;
+	std::string m_g2_part2;
 
 };
 class AmplitudeSetup

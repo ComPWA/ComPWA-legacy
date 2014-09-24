@@ -25,15 +25,17 @@
 
 AmpRelBreitWignerRes::AmpRelBreitWignerRes(const char *name,
 		DoubleParameter& resMass, DoubleParameter& resWidth,
-		double& mesonRadius, //  meson radius
+		DoubleParameter& mesonRadius, DoubleParameter& motherRadius,
 		int subSys,
 		int resSpin, int m, int n) :
 		AmpAbsDynamicalFunction(name),
-		AmpKinematics(resMass, subSys, resSpin, m, n, AmpKinematics::barrierType(BWPrime), mesonRadius, 1.5),
+		AmpKinematics(resMass, subSys, resSpin, m, n, AmpKinematics::barrierType(BWPrime),
+				mesonRadius, motherRadius),
 		_resWidth(resWidth),
 		//_wignerD(name, resSpin, m, n, subSys)
 		_wignerD(subSys, resSpin),
-		foundMasses(false)
+		foundMasses(false),
+		nParams(6)
 {
 	initialise();
 }
@@ -108,7 +110,7 @@ std::complex<double> AmpRelBreitWignerRes::evaluateAmp(dataPoint& point) {
 	//		return result;
 
 	//	return (dynamicalFunction(mSq,_mR,_ma,_mb,_resWidth.GetValue(),_spin,_mesonRadius)*_norm);
-	return dynamicalFunction(mSq,_mR,_ma,_mb,_resWidth.GetValue(),_spin,_mesonRadius);
+	return dynamicalFunction(mSq,_mR.GetValue(),_ma,_mb,_resWidth.GetValue(),_spin,_mesonRadius);
 }
 std::complex<double> AmpRelBreitWignerRes::dynamicalFunction(double mSq, double mR, double ma, double mb, double gamma0, unsigned int J, double mesonRadius){
 	double m = sqrt(mSq);

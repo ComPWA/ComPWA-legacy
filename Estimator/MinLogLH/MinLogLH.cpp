@@ -206,7 +206,7 @@ double MinLogLH::controlParameter(ParameterList& minPar){
 		return 0;
 	}
 
-	BOOST_LOG_TRIVIAL(debug) << "Data Term: " << lh << "\t Phsp Term (wo log): " << norm;
+//	BOOST_LOG_TRIVIAL(debug) << "Data Term: " << lh << "\t Phsp Term (wo log): " << norm;
 //	lh = nUseEvt_*std::log(norm) - lh ;//other factors are constant and drop in deviation, so we can ignore them
 	lh = sumOfWeights*std::log(norm) - lh ;//other factors are constant and drop in deviation, so we can ignore them
 

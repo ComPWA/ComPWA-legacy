@@ -6,12 +6,9 @@
 // http://www.gnu.org/licenses/gpl.html
 //
 // Contributors:
-//     Mathias Michel - initial API and implementation
+//     	Mathias Michel - initial API and implementation
 //		Peter Weidenkaff - adding flatte type resonance, removing root dependence
 //-------------------------------------------------------------------------------
-//****************************************************************************
-// Wrapper to provide intensity of amplitude sum
-//****************************************************************************
 
 #ifndef _AMPSUMINTENSITY_HPP
 #define _AMPSUMINTENSITY_HPP
@@ -73,7 +70,6 @@ public:
 	virtual std::complex<double> getFirstAmp(dataPoint& point, ParameterList& par);
 	virtual std::complex<double> getFirstReso(dataPoint& point, ParameterList& par);
 	virtual std::complex<double> getFirstBW(dataPoint& point, ParameterList& par);
-
 
 	virtual void setNevents(unsigned int n) { _entries=n; };
 	virtual unsigned int getNevents() { return _entries; };
@@ -140,18 +136,18 @@ public:
 	std::string getNameOfResonance(unsigned int id){ return namer[id]; }
 	//! get magnitude of resonance \param name
 	virtual double getMagnitude(std::string name) {
-		unsigned int id=getIdOfResonance(name);
-		return rr[namer[id]]->GetValue();
+		std::vector<std::shared_ptr<DoubleParameter> >::iterator it= params.begin();
+		for(;it!=params.end();++it)
+			if((*it)->GetName()=="mag_"+name) return (*it)->GetValue();
+		return -999;
 	};
-	//! get magnitude of resonance \param id
-	virtual double getMagnitude(unsigned int id) { return rr[namer[id]]->GetValue(); };
 	//! get phase of resonance \param name
 	virtual double getPhase(std::string name) {
-		unsigned int id=getIdOfResonance(name);
-		return phir[namer[id]]->GetValue();
+		std::vector<std::shared_ptr<DoubleParameter> >::iterator it= params.begin();
+		for(;it!=params.end();++it)
+			if((*it)->GetName()=="phase_"+name) return (*it)->GetValue();
+		return -999;
 	};
-	//! get phase of resonance \param id
-	virtual double getPhase(unsigned int id) { return phir[namer[id]]->GetValue(); };
 	//! get total integral for resonance \param id
 	virtual double getTotalIntegral(unsigned int id) { return totAmp.getTotalIntegral(id); };
 	//! get total integral for resonance \param name
@@ -224,10 +220,11 @@ protected:
 
 	//Resonance Variables
 	std::vector<std::string> namer;
-	std::map<std::string,std::shared_ptr<DoubleParameter> > mr;
-	std::map<std::string,std::shared_ptr<DoubleParameter> > gr;
-	std::map<std::string,std::shared_ptr<DoubleParameter> > rr;
-	std::map<std::string,std::shared_ptr<DoubleParameter> > phir;
+//	std::map<std::string,std::shared_ptr<DoubleParameter> > mr;
+//	std::map<std::string,std::shared_ptr<DoubleParameter> > gr;
+//	std::map<std::string,std::shared_ptr<DoubleParameter> > rr;
+//	std::map<std::string,std::shared_ptr<DoubleParameter> > phir;
+	std::vector<std::shared_ptr<DoubleParameter> > params;
 
 	unsigned int _nCalls; //! precision for numeric integration
 

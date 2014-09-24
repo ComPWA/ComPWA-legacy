@@ -50,10 +50,10 @@
 		<width_min>0</width_min>
 		<width_max>2</width_max>
 		<norm>-1</norm>
-		<coupling>0.464</coupling>
-		<couplingHidden>0.324</couplingHidden>
-		<hiddenParticle1>eta</hiddenParticle1>
-		<hiddenParticle2>pi+</hiddenParticle2>
+		<g1>0.464</g1>
+		<g2>0.324</g2>
+		<g2_part1>eta</g2_part1>
+		<g2_part2>pi+</g2_part2>
 		<strength>0.46</strength>
 		<phase>-2.693</phase>
 		<spin>0</spin>
@@ -73,10 +73,10 @@
 		<width_min>2</width_min>
 		<width_max>0</width_max>
 		<norm>-1</norm>
-		<coupling>0.464</coupling>
-		<couplingHidden>0.324</couplingHidden>
-		<hiddenParticle1>eta</hiddenParticle1>
-		<hiddenParticle2>pi+</hiddenParticle2>
+		<g1>0.464</g1>
+		<g2>0.324</g2>
+		<g2_part1>eta</g2_part1>
+		<g2_part2>pi+</g2_part2>
 		<strength>1</strength>
 		<phase>0</phase>
 		<spin>0</spin>

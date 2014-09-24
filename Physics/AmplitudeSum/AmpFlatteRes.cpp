@@ -7,7 +7,7 @@
 //
 // Contributors:
 //     Mathias Michel - initial API and implementation
-//		Peter Weidenkaff - adding correct couplings
+//		Peter Weidenkaff - adding correct g1s
 //-------------------------------------------------------------------------------
 //****************************************************************************
 // Class for defining the relativistic Breit-Wigner resonance model, which
@@ -20,22 +20,23 @@
 
 #include <cmath>
 #include "Physics/AmplitudeSum/AmpFlatteRes.hpp"
-//#include "RooRealVar.h"
 AmpFlatteRes::AmpFlatteRes(const char *name,
-		DoubleParameter& resMass, DoubleParameter& resWidth,
-		double& mesonRadius, ///  meson radius
-		DoubleParameter& coupling, DoubleParameter& couplingHidden,
-		double massHiddenChannelA, double massHiddenChannelB,
+		DoubleParameter& resMass,
+		DoubleParameter& mesonRadius, //  meson radius
+		DoubleParameter& motherRadius, //  mother radius
+		DoubleParameter& g1, DoubleParameter& g2,
+		double g2_partA, double g2_partB,
 		int subSys, ///  meson radius
 		int resSpin, int m, int n) :
 		AmpAbsDynamicalFunction(name),
-		AmpKinematics(resMass, subSys, resSpin, m, n, AmpKinematics::barrierType(BWPrime), mesonRadius, 1.5),
-		_couplingHiddenChannel(couplingHidden),
-		_coupling(coupling),
-		_massHiddenChannelA(massHiddenChannelA),
-		_massHiddenChannelB(massHiddenChannelB),
-		_wignerD(subSys,resSpin)
-//		_wignerD(name, resSpin,m,n, subSys)
+		AmpKinematics(resMass, subSys, resSpin, m, n, AmpKinematics::barrierType(BWPrime),
+				mesonRadius, motherRadius),
+		_g2(g2),
+		_g1(g1),
+		_g2_partA(g2_partA),
+		_g2_partB(g2_partB),
+		_wignerD(subSys,resSpin),
+		nParams(5)
 {
 	initialise();
 }
@@ -43,8 +44,8 @@ AmpFlatteRes::AmpFlatteRes(const char *name,
 AmpFlatteRes::AmpFlatteRes(const AmpFlatteRes& other, const char* newname) :
 						  AmpAbsDynamicalFunction(other, newname),
 						  AmpKinematics(other),
-						  _couplingHiddenChannel(other._couplingHiddenChannel),
-						  _coupling(other._coupling),
+						  _g2(other._g2),
+						  _g1(other._g1),
 						  _wignerD(other._wignerD)
 {
 	initialise();
@@ -53,8 +54,8 @@ AmpFlatteRes::AmpFlatteRes(const AmpFlatteRes& other, const char* newname) :
 AmpFlatteRes::AmpFlatteRes(const AmpFlatteRes& other) :
 						  AmpAbsDynamicalFunction(other),
 						  AmpKinematics(other),
-						  _couplingHiddenChannel(other._couplingHiddenChannel),
-						  _coupling(other._coupling),
+						  _g2(other._g2),
+						  _g1(other._g1),
 						  _wignerD(other._wignerD)
 {
 	initialise();
@@ -74,12 +75,12 @@ void AmpFlatteRes::setDecayMasses(double ma, double mb, double mc, double M){
 }
 
 void AmpFlatteRes::setBarrierMass(double mBarA, double mBarB) {
-	_massHiddenChannelA = mBarA;
-	_massHiddenChannelB = mBarB;
+	_g2_partA = mBarA;
+	_g2_partB = mBarB;
 }
 
 std::complex<double> AmpFlatteRes::evaluateAmp(dataPoint& point) {
-	if(_massHiddenChannelA<0||_massHiddenChannelA>5||_massHiddenChannelB<0||_massHiddenChannelB>5) {
+	if(_g2_partA<0||_g2_partA>5||_g2_partB<0||_g2_partB>5) {
 		cout<<"Barrier masses not set! Use setBarrierMass() first!"<<endl;
 		return 0;
 	}
@@ -93,12 +94,12 @@ std::complex<double> AmpFlatteRes::evaluateAmp(dataPoint& point) {
 	case 4: mSq=(m13sq); break;
 	case 5: mSq=(m23sq); break;
 	}
-	double g1 = _coupling.GetValue();//coupling a0->KK
-	double g2 = _couplingHiddenChannel.GetValue();//couppling a0->eta pi
+	double g1 = _g1.GetValue();//g1 a0->KK
+	double g2 = _g2.GetValue();//couppling a0->eta pi
 
 	//Calculate dynamics
 	//	double p1 = 2*q(sqrt(mSq), _ma,_mb)/sqrt(mSq);//break-up momenta decay channel (e.g. a0->KK)
-	//	double p2 = 2*q(sqrt(mSq), _massHiddenChannelA,_massHiddenChannelB)/sqrt(mSq);//break-up momenta hidden channel (e.g. a0->eta pi)
+	//	double p2 = 2*q(sqrt(mSq), _g2_partA,_g2_partB)/sqrt(mSq);//break-up momenta hidden channel (e.g. a0->eta pi)
 	//
 	//	std::complex<double> denom(_mR*_mR - mSq, -p1*g1*g1-p2*g2*g2);
 	//
@@ -109,16 +110,16 @@ std::complex<double> AmpFlatteRes::evaluateAmp(dataPoint& point) {
 	//	if(result.imag()!=result.imag()) {std::cout << "IM part NAN" << std::endl; return 0;}
 	//	return result;
 
-	return dynamicalFunction(mSq,_mR,_ma,_mb,g1, _massHiddenChannelA,_massHiddenChannelB,g2,_spin);
+	return dynamicalFunction(mSq,_mR.GetValue(),_ma,_mb,g1, _g2_partA,_g2_partB,g2,_spin);
 
 }
-std::complex<double> AmpFlatteRes::dynamicalFunction(double mSq, double mR, double ma, double mb, double coupling,
-		double mHiddenA, double mHiddenB, double couplingHidden,unsigned int J ){
+std::complex<double> AmpFlatteRes::dynamicalFunction(double mSq, double mR, double ma, double mb, double g1,
+		double mHiddenA, double mHiddenB, double g2,unsigned int J ){
 
 	double p1 = 2*AmpKinematics::qValue(sqrt(mSq), ma,mb)/sqrt(mSq);//break-up momenta decay channel (e.g. a0->KK)
 	double p2 = 2*AmpKinematics::qValue(sqrt(mSq), mHiddenA,mHiddenB)/sqrt(mSq);//break-up momenta hidden channel (e.g. a0->eta pi)
-	double g1 = coupling;//coupling a0->KK
-	double g2 = couplingHidden;//couppling a0->eta pi
+//	double g1 = g1;//g1 a0->KK
+//	double g2 = g2;//couppling a0->eta pi
 
 	std::complex<double> denom(mR*mR - mSq, -p1*g1*g1-p2*g2*g2);
 

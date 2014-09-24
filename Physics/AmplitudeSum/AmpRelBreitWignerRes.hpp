@@ -36,7 +36,7 @@ public:
 
 	AmpRelBreitWignerRes(const char *name,
 			DoubleParameter& _resMass, DoubleParameter& _resWidth,
-			double& _radius,
+			DoubleParameter& _radius,DoubleParameter& _motherRadius,
 			int _subsys,
 			int resSpin, int m, int n
 	) ;
@@ -59,12 +59,14 @@ public:
 	void setDecayMasses(double, double, double, double);
 	double getSpin() {return _spin;}; //needs to be declared in AmpAbsDynamicalFunction
 	inline virtual bool isSubSys(const unsigned int subSys) const{ return (subSys==_subSys); };
+	unsigned int getNParams(){ return nParams;}
 
 protected:
 	DoubleParameter& _resWidth;
 	AmpWigner2 _wignerD;
 	bool foundMasses;
 	unsigned int id23, id13;
+	unsigned int nParams;
 	//	AmpWigner _wignerD;
 
 private:
@@ -85,25 +87,53 @@ public:
 			return false;
 		}
 
-		double Gamma0, m0, d;
+		double Gamma0, m0, d, ma, mb;
 		unsigned int spin, subSys;
+		//Get parameters from ParameterList -
+		//enclosing in try...catch for the case that names of nodes have changed
 		try{
-			m0 = double(paras.GetParameterValue("mass_"+name));
+			m0 = double(paras.GetParameterValue("m0_"+name));
 		}catch(BadParameter& e){
-			m0 = double(paras.GetParameterValue("ParOfNode_m0_"+name));
+			BOOST_LOG_TRIVIAL(error) <<"BreitWignerStrategy: can't find parameter m0_"+name;
+			throw;
 		}
-		spin = (unsigned int)(paras.GetParameterValue("ParOfNode_spin_"+name));
-		d = double(paras.GetParameterValue("ParOfNode_d_"+name));
-		subSys = double(paras.GetParameterValue("ParOfNode_subSysFlag_"+name));
-
-		//m  = double(paras.GetParameterValue("mym"));
-		double ma = double(paras.GetParameterValue("ParOfNode_ma_"+name));
-		double mb = double(paras.GetParameterValue("ParOfNode_mb_"+name));
+		try{
+			spin = (unsigned int)(paras.GetParameterValue("ParOfNode_spin_"+name));
+		}catch(BadParameter& e){
+			BOOST_LOG_TRIVIAL(error) <<"BreitWignerStrategy: can't find parameter ParOfNode_spin_"+name;
+			throw;
+		}
+		try{
+			d = double(paras.GetParameterValue("d_"+name));
+		}catch(BadParameter& e){
+			std::cout<<paras<<std::endl;
+			BOOST_LOG_TRIVIAL(error) <<"----BreitWignerStrategy: can't find parameter d_"+name;
+			throw;
+		}
+		try{
+			subSys = double(paras.GetParameterValue("ParOfNode_subSysFlag_"+name));
+		}catch(BadParameter& e){
+			BOOST_LOG_TRIVIAL(error) <<"BreitWignerStrategy: can't find parameter ParOfNode_subSysFlag_"+name;
+			throw;
+		}
+		try{
+			ma = double(paras.GetParameterValue("ParOfNode_ma_"+name));
+		}catch(BadParameter& e){
+			BOOST_LOG_TRIVIAL(error) <<"BreitWignerStrategy: can't find parameter ParOfNode_ma_"+name;
+			throw;
+		}
+		try{
+			mb = double(paras.GetParameterValue("ParOfNode_mb_"+name));
+		}catch(BadParameter& e){
+			BOOST_LOG_TRIVIAL(error) <<"BreitWignerStrategy: can't find parameter ParOfNode_mb_"+name;
+			throw;
+		}
 
 		try{
 			Gamma0 = double(paras.GetParameterValue("width_"+name));
 		}catch(BadParameter& e){
-			Gamma0 = double(paras.GetParameterValue("ParOfNode_resWidth_"+name));
+			BOOST_LOG_TRIVIAL(error) <<"BreitWignerStrategy: can't find parameter width_"+name;
+			throw;
 		}
 		/*GammaV = Gamma0 * (m0 / m) * pow(q(ma,mb,m) / q0(ma,mb,m0), 2.*spin + 1.)  * BLprime2(ma,mb,m0,m,d,spin);
 
@@ -142,17 +172,17 @@ public:
 				//calc BW for each point
 				for(unsigned int ele=0; ele<nElements; ele++){
 					double mSq = (mp->GetValue(ele));
-//					double norm =1.0;
-//					double BLWeiss2 = BLprime2(ma,mb,m0,sqrt(mSq),d,spin);
-//					double qTerm = std::pow( ( q(ma,mb,sqrt(mSq)) / q(ma,mb,m0) ) , (2.*spin + 1.) );
-//					//Gamma0 = 1;
-//					//if(ele==0) std::cout << " DEBUG  " << q(map->GetValue(ele),mbp->GetValue(ele),mp->GetValue(ele)) << " " << q0(map->GetValue(ele),mbp->GetValue(ele),m0) << std::endl;
-//					GammaV = Gamma0 * qTerm * (m0 / sqrt(mSq)) * BLWeiss2;
-//					std::complex<double> denom(m0*m0 - mSq, -m0 * GammaV);
-//					results[ele] = (std::complex<double>(norm*(2*spin+1))) / denom; //Laura++ (old) definition*/
+					//					double norm =1.0;
+					//					double BLWeiss2 = BLprime2(ma,mb,m0,sqrt(mSq),d,spin);
+					//					double qTerm = std::pow( ( q(ma,mb,sqrt(mSq)) / q(ma,mb,m0) ) , (2.*spin + 1.) );
+					//					//Gamma0 = 1;
+					//					//if(ele==0) std::cout << " DEBUG  " << q(map->GetValue(ele),mbp->GetValue(ele),mp->GetValue(ele)) << " " << q0(map->GetValue(ele),mbp->GetValue(ele),m0) << std::endl;
+					//					GammaV = Gamma0 * qTerm * (m0 / sqrt(mSq)) * BLWeiss2;
+					//					std::complex<double> denom(m0*m0 - mSq, -m0 * GammaV);
+					//					results[ele] = (std::complex<double>(norm*(2*spin+1))) / denom; //Laura++ (old) definition*/
 
 					results[ele] = AmpRelBreitWignerRes::dynamicalFunction(mSq,m0,ma,mb,Gamma0,spin,d);
-//					if(ele<10) std::cout<<"Strategy BWrel "<<results[ele]<<std::endl;
+					//					if(ele<10) std::cout<<"Strategy BWrel "<<results[ele]<<std::endl;
 				}
 
 				//std::vector<std::complex<double> > resultsTMP(nElements, std::complex<double>(1.));
@@ -205,17 +235,17 @@ public:
 protected:
 	std::string name;
 
-//	double q(const double& ma, const double& mb, const double& x) const {
-//		double mapb = ma + mb;
-//		double mamb = ma - mb;
-//
-//		if( (x*x - mapb*mapb) < 0 ) {
-//			//std::cout<<"AmpKinematics: Trying to calculate break-up momentum below threshold!"<<std::endl;
-//			return 1; //below threshold
-//		}
-//
-//		return std::sqrt ( (x*x - mapb*mapb) * (x*x - mamb*mamb) ) / (2. * x );
-//	}
+	//	double q(const double& ma, const double& mb, const double& x) const {
+	//		double mapb = ma + mb;
+	//		double mamb = ma - mb;
+	//
+	//		if( (x*x - mapb*mapb) < 0 ) {
+	//			//std::cout<<"AmpKinematics: Trying to calculate break-up momentum below threshold!"<<std::endl;
+	//			return 1; //below threshold
+	//		}
+	//
+	//		return std::sqrt ( (x*x - mapb*mapb) * (x*x - mamb*mamb) ) / (2. * x );
+	//	}
 
 	// compute part of the Blatt-Weisskopf barrier factor
 	//   BLprime = sqrt (F(q0)/F(q))
@@ -234,51 +264,51 @@ protected:
   }*/
 
 	// compute square of Blatt-Weisskopf barrier factor
-//	double BLprime2(const double& ma, const double& mb, const double& m0, const double& x, const double& d, unsigned int& spin) const {
-//		double t0= q(ma, mb, m0)*q(ma, mb, m0) * d*d;
-//		double t= q(ma, mb, x)*q(ma, mb, x) * d*d;
-//		return FormFactor(t0,t,spin);
-//	}
-//
-//	double FormFactor(double& z0, double& z, unsigned int& spin) const{
-//		double nom=0, denom=0;
-//		switch(spin){
-//		case 0:{
-//			return 1.;
-//		}
-//		case 1:{
-//			//if(_type==barrierType::BWPrime){
-//			nom = 1 + z0;
-//			denom = 1 + z;
-//			//} else if(_type==barrierType::BW){
-//			//   nom = 2*z;
-//			//   denom = 1 + z;
-//			//} else {
-//			//   std::cout<<"Wrong BLW factor definition: "<<_type<<std::endl;
-//			//   return 1;
-//			//}
-//			break;
-//		}
-//		case 2:{
-//			//if(_type==barrierType::BWPrime){
-//			nom = (z0-3)*(z0-3)+9*z0;
-//			denom = (z-3)*(z-3)+9*z;
-//			// } else if(_type==barrierType::BW){
-//			//  nom = 13*z*z;
-//			//   denom = (z-3)*(z-3)+9*z;
-//			// } else {
-//			//    std::cout<<"Wrong BLW factor definition: "<<_type<<std::endl;
-//			//    return 1;
-//			// }
-//			break;
-//		}
-//		default:{
-//			std::cout<<"Wrong spin value! BLW factors only implemented for spin 0,1 and 2! "<<std::endl;
-//			return 0;
-//		}
-//		}
-//		return nom/denom;
-//	}
+	//	double BLprime2(const double& ma, const double& mb, const double& m0, const double& x, const double& d, unsigned int& spin) const {
+	//		double t0= q(ma, mb, m0)*q(ma, mb, m0) * d*d;
+	//		double t= q(ma, mb, x)*q(ma, mb, x) * d*d;
+	//		return FormFactor(t0,t,spin);
+	//	}
+	//
+	//	double FormFactor(double& z0, double& z, unsigned int& spin) const{
+	//		double nom=0, denom=0;
+	//		switch(spin){
+	//		case 0:{
+	//			return 1.;
+	//		}
+	//		case 1:{
+	//			//if(_type==barrierType::BWPrime){
+	//			nom = 1 + z0;
+	//			denom = 1 + z;
+	//			//} else if(_type==barrierType::BW){
+	//			//   nom = 2*z;
+	//			//   denom = 1 + z;
+	//			//} else {
+	//			//   std::cout<<"Wrong BLW factor definition: "<<_type<<std::endl;
+	//			//   return 1;
+	//			//}
+	//			break;
+	//		}
+	//		case 2:{
+	//			//if(_type==barrierType::BWPrime){
+	//			nom = (z0-3)*(z0-3)+9*z0;
+	//			denom = (z-3)*(z-3)+9*z;
+	//			// } else if(_type==barrierType::BW){
+	//			//  nom = 13*z*z;
+	//			//   denom = (z-3)*(z-3)+9*z;
+	//			// } else {
+	//			//    std::cout<<"Wrong BLW factor definition: "<<_type<<std::endl;
+	//			//    return 1;
+	//			// }
+	//			break;
+	//		}
+	//		default:{
+	//			std::cout<<"Wrong spin value! BLW factors only implemented for spin 0,1 and 2! "<<std::endl;
+	//			return 0;
+	//		}
+	//		}
+	//		return nom/denom;
+	//	}
 
 };
 class BreitWignerPhspStrategy : public BreitWignerStrategy {
@@ -290,25 +320,51 @@ public:
 			return false;
 		}
 
-		double Gamma0, m0, d;
+		double Gamma0, m0, d, ma, mb;
 		unsigned int spin, subSys;
+		//Get parameters from ParameterList -
+		//enclosing in try...catch for the case that names of nodes have changed
 		try{
 			m0 = double(paras.GetParameterValue("m0_"+name));
 		}catch(BadParameter& e){
-			m0 = double(paras.GetParameterValue("ParOfNode_m0_"+name));
+			BOOST_LOG_TRIVIAL(error) <<"BreitWignerPhspStrategy: can't find parameter m0_"+name;
+			throw;
 		}
-		spin = (unsigned int)(paras.GetParameterValue("ParOfNode_spin_"+name));
-		d = double(paras.GetParameterValue("ParOfNode_d_"+name));
-		subSys = double(paras.GetParameterValue("ParOfNode_subSysFlag_"+name));
-
-		//m  = double(paras.GetParameterValue("mym"));
-		double ma = double(paras.GetParameterValue("ParOfNode_ma_"+name));
-		double mb = double(paras.GetParameterValue("ParOfNode_mb_"+name));
-
 		try{
-			Gamma0 = double(paras.GetParameterValue("resWidth_"+name));
+		spin = (unsigned int)(paras.GetParameterValue("ParOfNode_spin_"+name));
 		}catch(BadParameter& e){
-			Gamma0 = double(paras.GetParameterValue("ParOfNode_resWidth_"+name));
+			BOOST_LOG_TRIVIAL(error) <<"BreitWignerPhspStrategy: can't find parameter ParOfNode_spin_"+name;
+			throw;
+		}
+		try{
+		d = double(paras.GetParameterValue("d_"+name));
+		}catch(BadParameter& e){
+			BOOST_LOG_TRIVIAL(error) <<"BreitWignerPhspStrategy: can't find parameter d_"+name;
+			throw;
+		}
+		try{
+		subSys = double(paras.GetParameterValue("ParOfNode_subSysFlag_"+name));
+		}catch(BadParameter& e){
+			BOOST_LOG_TRIVIAL(error) <<"BreitWignerPhspStrategy: can't find parameter ParOfNode_subSysFlag_"+name;
+			throw;
+		}
+		try{
+		ma = double(paras.GetParameterValue("ParOfNode_ma_"+name));
+		}catch(BadParameter& e){
+			BOOST_LOG_TRIVIAL(error) <<"BreitWignerPhspStrategy: can't find parameter ParOfNode_ma_"+name;
+			throw;
+		}
+		try{
+		mb = double(paras.GetParameterValue("ParOfNode_mb_"+name));
+		}catch(BadParameter& e){
+			BOOST_LOG_TRIVIAL(error) <<"BreitWignerPhspStrategy: can't find parameter ParOfNode_mb_"+name;
+			throw;
+		}
+		try{
+			Gamma0 = double(paras.GetParameterValue("width_"+name));
+		}catch(BadParameter& e){
+			BOOST_LOG_TRIVIAL(error) <<"BreitWignerPhspStrategy: can't find parameter width_"+name;
+			throw;
 		}
 		/*GammaV = Gamma0 * (m0 / m) * pow(q(ma,mb,m) / q0(ma,mb,m0), 2.*spin + 1.)  * BLprime2(ma,mb,m0,m,d,spin);
 
@@ -357,7 +413,7 @@ public:
 					//
 					//          results[ele] = (std::complex<double>(norm*(2*spin+1))) / denom; //Laura++ (old) definition*/
 					results[ele] = AmpRelBreitWignerRes::dynamicalFunction(mSq,m0,ma,mb,Gamma0,spin,d);
-//					if(ele<10) std::cout<<"Strategy BWrelPHSP ("<<ele<<"/"<<nElements<<") "<<results[ele]<<std::endl;
+					//					if(ele<10) std::cout<<"Strategy BWrelPHSP ("<<ele<<"/"<<nElements<<") "<<results[ele]<<std::endl;
 				}
 				//std::vector<std::complex<double> > resultsTMP(nElements, std::complex<double>(1.));
 				out = std::shared_ptr<AbsParameter>(new MultiComplex(out->GetName(),results));
