@@ -18,6 +18,7 @@ project :
 	<linkflags>-L$(GSL)/lib
 	<linkflags>-lgsl
      <linkflags>-lgslcblas
+     <linkflags>-lboost_chrono
 		;
 
 lib Minuit2IF : 

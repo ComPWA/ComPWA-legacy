@@ -95,6 +95,7 @@ public:
 	//! Setter for value of parameter
 	virtual void SetValue(const std::complex<double> inVal, unsigned int i=0) {
 		if(i>=val_.size()) return;
+		if(val_[i]==inVal) return;
 		val_[i] = inVal;
 		//make_str();
 		Notify();
@@ -219,6 +220,7 @@ public:
 	//! Setter for value of parameter
 	virtual void SetValue(const double inVal, unsigned int i=0) {
 		if(i>=val_.size()) return;
+		if(val_[i]==inVal) return;
 		val_[i] = inVal;
 		//make_str();
 		Notify();
@@ -417,6 +419,7 @@ public:
 			throw ParameterFixed();
 			return;
 		}
+		if(val_==inVal) return;
 		val_ = inVal;
 		//make_str();
 		Notify();
@@ -707,6 +710,12 @@ public:
 			throw ParameterFixed();
 			return;
 		}
+		/*Call notify only if value has changed! Otherwise tree is
+		 * recalcuted also in case where current parameter is not changed
+		 */
+//		if(abs(val_-inVal) < 0.0000001) return;
+		if(val_==inVal) return;
+
 		val_ = inVal;
 		//make_str();
 		Notify();
@@ -999,6 +1008,7 @@ public:
 			throw ParameterFixed();
 			return;
 		}
+		if(val_==inVal) return;
 		val_ = inVal;
 		//make_str();
 		Notify();
@@ -1218,6 +1228,7 @@ public:
 			throw ParameterFixed();
 			return;
 		}
+		if(val_==inVal) return;
 		val_ = inVal;
 		//make_str();
 		Notify();

@@ -18,6 +18,8 @@
 #include <iostream>
 #include <boost/log/core.hpp>
 #include <boost/log/trivial.hpp>
+#include <boost/chrono.hpp>
+#include <cmath>
 using namespace boost::log;
 using namespace ROOT::Minuit2;
 
@@ -48,8 +50,12 @@ double MinuitFcn::operator()(const std::vector<double>& x) const{
 //				std::cout<<_parNames.at(i)<<" "<<x[i]<<std::endl;
 			}
 	}
+	boost::chrono::system_clock::time_point start = boost::chrono::system_clock::now();
 	double result=_myDataPtr->controlParameter(_parList);
-	BOOST_LOG_TRIVIAL(debug) << "MinuitFcn: -log(L) = "<< result << " Parameters: "<<paramOut.str();
+	boost::chrono::duration<double> sec = boost::chrono::system_clock::now() - start;
+	BOOST_LOG_TRIVIAL(debug) <<std::setprecision(5)<< "MinuitFcn: -log(L) = "<< result
+			<<" Parameters: "<<paramOut.str()
+			<<" Time: "<<sec.count()<<"s";
 
 	return result;
 }
