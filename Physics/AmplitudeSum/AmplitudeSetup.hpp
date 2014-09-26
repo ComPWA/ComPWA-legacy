@@ -40,16 +40,24 @@ struct Resonance
 	std::string m_name;
 	std::string m_reference;
 	double m_mass; //TODO: struct for borders?
+	bool m_mass_fix;
 	double m_mass_min;
 	double m_mass_max;
-	double m_mesonRadius;
 	double m_width;
+	bool m_width_fix;
 	double m_width_min;
 	double m_width_max;
-	double m_norm;
 
 	double m_strength;
+	bool m_strength_fix;
+	double m_strength_min;
+	double m_strength_max;
 	double m_phase;
+	bool m_phase_fix;
+	double m_phase_min;
+	double m_phase_max;
+
+	double m_mesonRadius;
 	unsigned int m_spin;
 	unsigned int m_m;
 	unsigned int m_n;
@@ -57,9 +65,36 @@ struct Resonance
 	unsigned int m_daugtherA; //TODO: better reference
 	unsigned int m_daugtherB; //TODO: better reference
 };
-struct ResonanceFlatte : Resonance
+struct ResonanceFlatte
 {
+	bool m_enable;
+	std::string m_name;
+	std::string m_reference;
+	double m_mass; //TODO: struct for borders?
+	bool m_mass_fix;
+	double m_mass_min;
+	double m_mass_max;
+
+	double m_strength;
+	bool m_strength_fix;
+	double m_strength_min;
+	double m_strength_max;
+	double m_phase;
+	bool m_phase_fix;
+	double m_phase_min;
+	double m_phase_max;
+
+	double m_mesonRadius;
+	unsigned int m_spin;
+	unsigned int m_m;
+	unsigned int m_n;
+
+	unsigned int m_daugtherA; //TODO: better reference
+	unsigned int m_daugtherB; //TODO: better reference
 	double m_g1;
+	double m_g1_fix;
+	double m_g1_min;
+	double m_g1_max;
 	double m_g2;
 	std::string m_g2_part1;
 	std::string m_g2_part2;

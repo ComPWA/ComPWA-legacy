@@ -108,15 +108,20 @@ void AmpSumIntensity::init(){
 		namer.push_back(tmp.m_name);
 		unsigned int subSys = tmp.m_daugtherA + tmp.m_daugtherB;
 		params.push_back( std::shared_ptr<DoubleParameter> (
-				new DoubleParameter("mag_"+tmp.m_name,tmp.m_strength) ) );
+				new DoubleParameter("mag_"+tmp.m_name,tmp.m_strength,tmp.m_strength_min,tmp.m_strength_max) ) );
+		params.back()->FixParameter(tmp.m_strength_fix);
 		params.push_back( std::shared_ptr<DoubleParameter> (
-				new DoubleParameter("phase_"+tmp.m_name,tmp.m_phase) ) );
+				new DoubleParameter("phase_"+tmp.m_name,tmp.m_phase,tmp.m_phase_min,tmp.m_phase_max) ) );
+		params.back()->FixParameter(tmp.m_phase_fix);
 		params.push_back( std::shared_ptr<DoubleParameter> (
 				new DoubleParameter("m0_"+tmp.m_name,tmp.m_mass, tmp.m_mass_min, tmp.m_mass_max) ) );
+		params.back()->FixParameter(tmp.m_mass_fix);
 		params.push_back( std::shared_ptr<DoubleParameter> (
 				new DoubleParameter("width_"+tmp.m_name,tmp.m_width, tmp.m_width_min, tmp.m_width_max) ) );
+		params.back()->FixParameter(tmp.m_width_fix);
 		params.push_back( std::shared_ptr<DoubleParameter> (
 				new DoubleParameter("d_"+tmp.m_name,tmp.m_mesonRadius) ) );
+		params.back()->FixParameter(1);
 //		std::shared_ptr<DoubleParameter> dd = std::shared_ptr<DoubleParameter> (
 //				new DoubleParameter("radius_"+tmp.m_name,tmp.m_mesonRadius) );
 
@@ -140,10 +145,11 @@ void AmpSumIntensity::init(){
 		totAmp.addBW(tmpbw, *magItr, *phaseItr);
 
 		//setting normalization between amplitudes
-		double norm=tmp.m_norm;
+		double norm=1.0;
+//		double norm=tmp.m_norm;
 		if(norm<0 || _calcNorm) {//recalculate normalization
 			norm = normReso(tmpbw);
-			reso->m_norm = norm;//updating normalization
+//			reso->m_norm = norm;//updating normalization
 		}
 		tmpbw->SetNormalization(1/norm);
 	}// end loop over resonances
@@ -154,14 +160,24 @@ void AmpSumIntensity::init(){
 		//setup RooVars
 		namer.push_back(tmp.m_name);
 		unsigned int subSys = tmp.m_daugtherA + tmp.m_daugtherB;
-		params.push_back( std::shared_ptr<DoubleParameter> (new DoubleParameter("mag_"+tmp.m_name,tmp.m_strength) ) );
-		params.push_back( std::shared_ptr<DoubleParameter> (new DoubleParameter("phase_"+tmp.m_name,tmp.m_phase) ) );
-		params.push_back( std::shared_ptr<DoubleParameter> (new DoubleParameter("m0_"+tmp.m_name,tmp.m_mass, tmp.m_mass_min, tmp.m_mass_max)  ));
-		params.push_back( std::shared_ptr<DoubleParameter> (new DoubleParameter("g1_"+tmp.m_name,tmp.m_g1) ) );
-		params.push_back( std::shared_ptr<DoubleParameter> (new DoubleParameter("g2_"+tmp.m_name,tmp.m_g2) ) );
-
+		params.push_back( std::shared_ptr<DoubleParameter> (
+				new DoubleParameter("mag_"+tmp.m_name,tmp.m_strength,tmp.m_strength_min,tmp.m_strength_max) ) );
+		params.back()->FixParameter(tmp.m_strength_fix);
+		params.push_back( std::shared_ptr<DoubleParameter> (
+				new DoubleParameter("phase_"+tmp.m_name,tmp.m_phase,tmp.m_phase_min,tmp.m_phase_max) ) );
+		params.back()->FixParameter(tmp.m_phase_fix);
+		params.push_back( std::shared_ptr<DoubleParameter> (
+				new DoubleParameter("m0_"+tmp.m_name,tmp.m_mass, tmp.m_mass_min, tmp.m_mass_max)  ));
+		params.back()->FixParameter(tmp.m_mass_fix);
+		params.push_back( std::shared_ptr<DoubleParameter> (
+				new DoubleParameter("g1_"+tmp.m_name,tmp.m_g1,tmp.m_g1_min,tmp.m_g1_max) ) );
+		params.back()->FixParameter(tmp.m_g1_fix);
+		params.push_back( std::shared_ptr<DoubleParameter> (
+				new DoubleParameter("g2_"+tmp.m_name,tmp.m_g2) ) );
+		params.back()->FixParameter(1);
 		params.push_back( std::shared_ptr<DoubleParameter> (
 				new DoubleParameter("d_"+tmp.m_name,tmp.m_mesonRadius) ) );
+		params.back()->FixParameter(1);
 
 		std::vector<std::shared_ptr<DoubleParameter> >::iterator magItr = params.end()-6;
 		std::vector<std::shared_ptr<DoubleParameter> >::iterator phaseItr = params.end()-5;
@@ -192,10 +208,11 @@ void AmpSumIntensity::init(){
 
 		totAmp.addBW(tmpbw, *magItr, *phaseItr);
 
-		double norm=tmp.m_norm;
+//		double norm=tmp.m_norm;
+		double norm=1.0;
 		if(norm<0 || _calcNorm) {//recalculate normalization
 			norm = normReso(tmpbw);
-			reso->m_norm = norm;//updating normalization
+//			reso->m_norm = norm;//updating normalization
 		}
 		tmpbw->SetNormalization(1./norm);
 	}// end loop over resonancesFlatte
