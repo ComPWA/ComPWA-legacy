@@ -78,7 +78,9 @@ private:
 
 	bool flag_readFile;
 	std::string particleFileName;
+	std::string particleDefaultFileName;
 	std::string constantFileName;
+	std::string constantDefaultFileName;
 	std::vector<std::string> name;//TODO: use a particle class to store information
 	std::vector<int> id;
 	std::vector<double> mass;

@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <sstream>
 #include <string>
+#include <exception>
 
 #include "Core/PhysConst.hpp"
 // Boost header files go here
@@ -27,18 +28,19 @@ PhysConst::PhysConst(){
 	const char* pPath = getenv("COMPWA_DIR");
 	std::string path = "";
 	try{
-	  path = std::string(pPath);
+		path = std::string(pPath);
 	}catch(std::logic_error){
-	  BOOST_LOG_TRIVIAL(error)<<"Environment Variable COMPWA_DIR not set?"<<std::endl;
+		BOOST_LOG_TRIVIAL(error)<<"Environment Variable COMPWA_DIR not set?"<<std::endl;
 	}
 	particleFileName = path+"/Physics/particles.xml";
+	particleDefaultFileName = path+"/Physics/particlesDefault.xml";
 	constantFileName = path+"/Physics/physConstants.xml";
+	constantDefaultFileName = path+"/Physics/physDefaultConstants.xml";
 
 	flag_readFile=1;
 	return;
 }
 void PhysConst::readFile(){
-	BOOST_LOG_TRIVIAL(info)<<"PhysConst: reading file with particle information "<<particleFileName;
 
 	// Create an empty property tree object
 	using boost::property_tree::ptree;
@@ -47,7 +49,20 @@ void PhysConst::readFile(){
 
 	// Load the XML file into the property tree. If reading fails
 	// (cannot open file, parse error), an exception is thrown.
-	read_xml(particleFileName, pt);
+	//		read_xml(particleFileName, pt);
+	//first check if particles.xml existsheck if file exists
+	if (FILE *file = std::fopen(particleFileName.c_str(), "r")) {
+		fclose(file);
+		read_xml(particleFileName, pt);
+		BOOST_LOG_TRIVIAL(info) << "PhysConst: reading particle file "<<particleFileName;
+		//Otherwise try to load default file
+	}else if (FILE *file = std::fopen(particleDefaultFileName.c_str(), "r")) {
+		fclose(file);
+		read_xml(particleDefaultFileName, pt);
+		BOOST_LOG_TRIVIAL(info) << "PhysConst: reading particles default file "<<particleDefaultFileName;
+	} else {
+		throw std::runtime_error("Could not open default particle file!");
+	}
 
 	// Get the filename and store it in the m_file variable.
 	// Note that we construct the path to the value by separating
@@ -99,7 +114,20 @@ void PhysConst::readFile(){
 		BOOST_LOG_TRIVIAL(debug)<<"PhysConst adding particle: "<<_name<<" mass="<<_mass<<" width="<<_width<<" J=" <<_J<<" P="<<_P<< " C="<<_C;
 	}
 
-	read_xml(constantFileName, pt);
+	//Reading XML file with physics constants
+	if (FILE *file = std::fopen(constantFileName.c_str(), "r")) {
+		fclose(file);
+		read_xml(constantFileName, pt);
+		BOOST_LOG_TRIVIAL(info) << "PhysConst: reading file with physical constants"<<constantFileName;
+		//Otherwise try to load default file
+	}else if (FILE *file = std::fopen(constantDefaultFileName.c_str(), "r")) {
+		fclose(file);
+		read_xml(constantDefaultFileName, pt);
+		BOOST_LOG_TRIVIAL(info) << "PhysConst: reading default file with physical constants"<<constantDefaultFileName;
+	} else {
+		throw std::runtime_error("Could not open default constants file!");
+	}
+//	read_xml(constantFileName, pt);
 	BOOST_FOREACH( ptree::value_type const& v, pt.get_child("physConstList") ) {
 		_name="error"; _error=-999; _value=-999;
 		if( v.first == "constant" ){

@@ -12,5 +12,7 @@ external
 *.prefs
 .settings/
 test/.settings/
+Physics/particles.xml
+Physics/physConstants.xml
 DOCU/
 doc/

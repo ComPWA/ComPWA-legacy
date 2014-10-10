@@ -15,18 +15,12 @@
 #include <ctime>
 #include <exception>
 #include <stdexcept>
+#include <stdlib.h>
 
+#include "Core/PhysConst.hpp"
 #include "Core/Functions.hpp"
 #include "Core/Parameter.hpp"
 #include "Core/ParameterList.hpp"
-//#include "Estimator/AmpFcn.cpp"
-//#include "Optimizer/Minuit2/MinuitIF.hpp"
-//#include "Estimator/MinLogLH/MinLogLH.hpp"
-#include <stdlib.h>
-#include "gsl/gsl_monte.h"
-#include "gsl/gsl_monte_plain.h"
-#include "gsl/gsl_monte_miser.h"
-#include "gsl/gsl_monte_vegas.h"
 
 #include "Physics/AmplitudeSum/AmplitudeSetup.hpp"
 #include "Physics/AmplitudeSum/AmpRelBreitWignerRes.hpp"
@@ -35,10 +29,11 @@
 #include "Physics/AmplitudeSum/AmpWigner2.hpp"
 #include "Physics/AmplitudeSum/AmpSumOfAmplitudes.hpp"
 #include "Physics/AmplitudeSum/AmpSumIntensity.hpp"
-//#include "Physics/AmplitudeSum/AmpSumTree.hpp"
 
-#include "Core/PhysConst.hpp"
-
+#include "gsl/gsl_monte.h"
+#include "gsl/gsl_monte_plain.h"
+#include "gsl/gsl_monte_miser.h"
+#include "gsl/gsl_monte_vegas.h"
 #include <boost/random/linear_congruential.hpp>
 #include <boost/random/uniform_int.hpp>
 #include <boost/random/uniform_real.hpp>
