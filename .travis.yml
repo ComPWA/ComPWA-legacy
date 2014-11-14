@@ -1,0 +1,45 @@
+language: cpp
+compiler:
+  - gcc
+before_install:
+  - if [ $TRAVIS_OS_NAME == linux ]; then sudo apt-get install -y gcc boost root; fi
+  - wget http://www-meg.phys.cmu.edu/williams/qft++/qft++.v1.tar.gz -0 /tmp/qft++.tar.gz
+  - tar xf /tmp/qft++.tar.gz
+  - cd /tmp/qft++/src
+  - wget https://raw.githubusercontent.com/ComPWA/ComPWA/gh-pages/patches/qft++.patch
+  - patch -p0 < qft++.patch
+  - make
+  - cd /tmp
+  - wget https://launchpad.net/geneva/trunk/1.4/+download/geneva-v1.4.0.tgz
+  - tar xf geneva-v1.4.0.tgz
+  - cd geneva-v1.4.0
+  - export geneva_root=/tmp/geneva_1_4_0/build
+  - cmake . -DCMAKE_INSTALL_PREFIX="${geneva_root}" -DBOOST_ROOT="${BOOST_ROOT}" -DBOOST_INCLUDEDIR="${BOOST_ROOT}/include/boost" -DBOOST_LIBRARYDIR="${BOOST_ROOT}/lib"
+  - make -j4
+  - make install
+  - cd /tmp
+  - wget http://www.cern.ch/mathlibs/sw/5_34_14/Minuit2/Minuit2-5.34.14.tar.gz
+  - tar xf Minuit2-5.34.14.tar.gz
+  - cd Minuit2-5.34.14
+  - ./configure --prefix=/tmp/Minuit2-5.34.14/build
+  - make
+  - make install
+before_script:
+  - export export COMPWA_DIR=$PWD
+  - export PWA_LIBS=$COMPWA_DIR/lib
+  - export QFT=/tmp/qft++
+  - export GENEVA=/tmp/geneva_1_4_0/build
+  - export MINUIT2=/tmp/Minuit2-5.34.14/build
+  - export BOOST_BUILD_PATH=$BOOST_ROOT/share/boost-build
+  - export PATH=$BOOST_ROOT/bin:$ROOTSYS/bin:$PATH
+  - export LD_LIBRARY_PATH=$GENEVA/lib:$ROOTSYS/lib/root:$MINUIT2/lib:$BOOST_ROOT/lib:$PWA_LIBS:$QFT/lib:$LD_LIBRARY_PATH 
+  - export OMP_NUM_THREADS=1
+script:
+  - bjam
+branches:
+  only:
+    - master
+env:
+  - LANG="en_US.UTF-8"
+os:
+  - linux
