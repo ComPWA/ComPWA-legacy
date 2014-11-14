@@ -6,7 +6,7 @@ before_install:
   - wget http://www-meg.phys.cmu.edu/williams/qft++/qft++.v1.tar.gz -0 /tmp/qft++.tar.gz
   - tar xf /tmp/qft++.tar.gz
   - cd /tmp/qft++/src
-  - wget https://raw.githubusercontent.com/ComPWA/ComPWA/gh-pages/patches/qft++.patch
+  - wget --no-check-certificate https://raw.githubusercontent.com/ComPWA/ComPWA/gh-pages/patches/qft++.patch
   - patch -p0 < qft++.patch
   - make
   - cd /tmp
