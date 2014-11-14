@@ -13,7 +13,7 @@ boost_root=${install_path}/boost_1_55_0
 mkdir ${boost_root}
 
 ./bootstrap.sh --prefix=${boost_root}
-./b2 -j ${numproc} cxxflags=-std=c++0x install
+./b2 -j$numproc cxxflags=-std=c++0x install
 
 #install boost_build
 cd tools/build/v2
@@ -50,7 +50,7 @@ cd root
  
 ./configure --prefix=${root_root} --etcdir=${root_root}/etc --enable-cxx11 --enable-fftw3 --enable-mathmore --enable-minuit2 --enable-python --enable-roofit --enable-tmva
 
-make -j{$numproc}
+make -j$numproc
 make install
 }
 
