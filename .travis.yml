@@ -3,7 +3,7 @@ compiler:
   - gcc
 before_install:
   - if [ $TRAVIS_OS_NAME == linux ]; then sudo apt-get install -y x11-common libx11-6 x11-utils libX11-dev libgsl0-dev libxpm-dev libxft-dev libjpeg-dev libtiff4-dev libgmp3-dev libpng12-dev libxext-dev; fi
-  - ./install_externals /tmp
+  - ./install_externals.sh /tmp
 before_script:
   - export export COMPWA_DIR=$PWD
   - export PWA_LIBS=$COMPWA_DIR/lib
