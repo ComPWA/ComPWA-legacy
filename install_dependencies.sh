@@ -4,7 +4,7 @@
 function install_boost {
 cd ${temp_workdir}
 
-wget http://sourceforge.net/projects/boost/files/boost/1.55.0/boost_1_55_0.tar.gz/download -0 ${temp_workdir}/boost_1_55_0.tar.gz
+wget http://sourceforge.net/projects/boost/files/boost/1.55.0/boost_1_55_0.tar.gz/download -O ${temp_workdir}/boost_1_55_0.tar.gz
 
 tar xf boost_1_55_0.tar.gz
 
@@ -25,7 +25,7 @@ cd tools/build/v2
 function install_geneva {
 cd ${temp_workdir}
 
-wget https://launchpad.net/geneva/trunk/1.4/+download/geneva-v1.4.0.tgz -0 ${temp_workdir}/geneva-v1.4.0.tgz
+wget https://launchpad.net/geneva/trunk/1.4/+download/geneva-v1.4.0.tgz -O ${temp_workdir}/geneva-v1.4.0.tgz
 
 tar xf geneva-v1.4.0.tgz
 
@@ -41,7 +41,7 @@ make install
 function install_root {
 cd ${temp_workdir}
 
-wget ftp://root.cern.ch/root/root_v5.34.23.source.tar.gz -0 ${temp_workdir}/root_v5.34.23.source.tar.gz
+wget ftp://root.cern.ch/root/root_v5.34.23.source.tar.gz -O ${temp_workdir}/root_v5.34.23.source.tar.gz
 
 tar xf root_v5.34.23.source.tar.gz
 
@@ -58,12 +58,12 @@ make install
 function install_qftpp {
 cd ${temp_workdir}
 
-wget http://www-meg.phys.cmu.edu/williams/qft++/qft++.v1.tar.gz -0 ${temp_workdir}/qft++.v1.tar.gz
+wget http://www-meg.phys.cmu.edu/williams/qft++/qft++.v1.tar.gz -O ${temp_workdir}/qft++.v1.tar.gz
 
 tar xf qft++.v1.tar.gz
 
 cd qft++/src
-wget --no-check-certificate https://raw.githubusercontent.com/ComPWA/ComPWA/gh-pages/patches/qft++.patch -0 ${temp_workdir}/qft++/src/qft++.patch
+wget --no-check-certificate https://raw.githubusercontent.com/ComPWA/ComPWA/gh-pages/patches/qft++.patch -O ${temp_workdir}/qft++/src/qft++.patch
 patch -p0 < qft++.patch
 rm qft++.patch
 make
@@ -77,7 +77,7 @@ mv qft++ ${install_path}/.
 function install_minuit2 {
 cd ${temp_workdir}
 
-wget http://www.cern.ch/mathlibs/sw/5_34_14/Minuit2/Minuit2-5.34.14.tar.gz -0 ${temp_workdir}/Minuit2-5.34.14.tar.gz
+wget http://www.cern.ch/mathlibs/sw/5_34_14/Minuit2/Minuit2-5.34.14.tar.gz -O ${temp_workdir}/Minuit2-5.34.14.tar.gz
 
 tar xf Minuit2-5.34.14.tar.gz
 
