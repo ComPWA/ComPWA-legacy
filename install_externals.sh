@@ -1,4 +1,4 @@
-#! /bin/sh
+#!/bin/bash
 
 #set to the install path of your choice and remove the return statement below
 #make sure that you have write access in that directory
