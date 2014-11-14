@@ -2,7 +2,7 @@ language: cpp
 compiler:
   - gcc
 before_install:
-  - if [ $TRAVIS_OS_NAME == linux ]; then sudo apt-get install -y gcc boost root; fi
+  - if [ $TRAVIS_OS_NAME == linux ]; then sudo apt-get install -y boost-build libboost-all-dev; fi
   - wget http://www-meg.phys.cmu.edu/williams/qft++/qft++.v1.tar.gz -0 /tmp/qft++.tar.gz
   - tar xf /tmp/qft++.tar.gz
   - cd /tmp/qft++/src
@@ -23,6 +23,14 @@ before_install:
   - cd Minuit2-5.34.14
   - ./configure --prefix=/tmp/Minuit2-5.34.14/build
   - make
+  - make install
+  - cd /tmp
+  - wget ftp://root.cern.ch/root/root_v5.34.23.source.tar.gz
+  - tar xf root_v5.34.23.source.tar.gz
+  - ROOTSYS=${install_path}/root_v5.34.23/build
+  - cd root
+  - ./configure --prefix=${ROOTSYS} --etcdir=${ROOTSYS}/etc --enable-cxx11
+  - make -j2
   - make install
 before_script:
   - export export COMPWA_DIR=$PWD
