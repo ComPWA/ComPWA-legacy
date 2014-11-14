@@ -2,36 +2,8 @@ language: cpp
 compiler:
   - gcc
 before_install:
-  - if [ $TRAVIS_OS_NAME == linux ]; then sudo apt-get install -y boost-build libboost-all-dev; fi
-  - wget http://www-meg.phys.cmu.edu/williams/qft++/qft++.v1.tar.gz -0 /tmp/qft++.tar.gz
-  - tar xf /tmp/qft++.tar.gz
-  - cd /tmp/qft++/src
-  - wget --no-check-certificate https://raw.githubusercontent.com/ComPWA/ComPWA/gh-pages/patches/qft++.patch
-  - patch -p0 < qft++.patch
-  - make
-  - cd /tmp
-  - wget https://launchpad.net/geneva/trunk/1.4/+download/geneva-v1.4.0.tgz
-  - tar xf geneva-v1.4.0.tgz
-  - cd geneva-v1.4.0
-  - export geneva_root=/tmp/geneva_1_4_0/build
-  - cmake . -DCMAKE_INSTALL_PREFIX="${geneva_root}" -DBOOST_ROOT="${BOOST_ROOT}" -DBOOST_INCLUDEDIR="${BOOST_ROOT}/include/boost" -DBOOST_LIBRARYDIR="${BOOST_ROOT}/lib"
-  - make -j4
-  - make install
-  - cd /tmp
-  - wget http://www.cern.ch/mathlibs/sw/5_34_14/Minuit2/Minuit2-5.34.14.tar.gz
-  - tar xf Minuit2-5.34.14.tar.gz
-  - cd Minuit2-5.34.14
-  - ./configure --prefix=/tmp/Minuit2-5.34.14/build
-  - make
-  - make install
-  - cd /tmp
-  - wget ftp://root.cern.ch/root/root_v5.34.23.source.tar.gz
-  - tar xf root_v5.34.23.source.tar.gz
-  - ROOTSYS=${install_path}/root_v5.34.23/build
-  - cd root
-  - ./configure --prefix=${ROOTSYS} --etcdir=${ROOTSYS}/etc --enable-cxx11
-  - make -j2
-  - make install
+  - if [ $TRAVIS_OS_NAME == linux ]; then sudo apt-get install -y x11-common libx11-6 x11-utils libX11-dev libgsl0-dev libxpm-dev libxft-dev libjpeg-dev libtiff4-dev libgmp3-dev libpng12-dev libxext-dev; fi
+  - ./install_externals /tmp
 before_script:
   - export export COMPWA_DIR=$PWD
   - export PWA_LIBS=$COMPWA_DIR/lib
