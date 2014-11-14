@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 function check_install_dir {
   if [ ! -d "${install_path}" ]; then
