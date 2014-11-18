@@ -13,6 +13,7 @@ project :
 	<include>$(ROOTINC)
 	<include>$(ROOTSYS)/include
 	<include>$(QFT)/include
+	<linkflags>-L$(ROOTSYS)/lib/root
 	<linkflags>$(ROOTLIBS)
 	<linkflags>-lEG
 	<linkflags>-L$(QFT)/lib
