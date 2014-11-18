@@ -26,6 +26,7 @@ project :
         <cxxflags>-pthread
 	<linkflags>-L$(BOOST_ROOT)/lib
 	<linkflags>$(BOOSTLIBS)
+	<linkflags>-L$(ROOTSYS)/lib/root
 	<linkflags>$(ROOTLIBS)
 	<linkflags>-lEG
 	<linkflags>-lRooFit
