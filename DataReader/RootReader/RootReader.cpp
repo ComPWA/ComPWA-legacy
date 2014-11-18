@@ -128,7 +128,7 @@ const std::vector<std::string>& RootReader::getVariableNames(){
 	return fVarNames;
 }
 void RootReader::resetWeights(double w){
-	for(unsigned int i; i<fEvents.size(); i++)
+	for(unsigned int i=0; i<fEvents.size(); i++)
 		fEvents.at(i).setWeight(w);
 	return;
 }

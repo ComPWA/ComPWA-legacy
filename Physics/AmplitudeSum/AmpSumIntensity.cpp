@@ -94,7 +94,9 @@ void AmpSumIntensity::init(){
 	 * Don't forget to adjust the iterator 'paramsPos', if you comment out that line
 	 *  */
 	params.push_back( std::shared_ptr<DoubleParameter> (
-			new DoubleParameter("g1_a_0",0.464) ));//
+			new DoubleParameter("g1_a_0",0.464) ));
+//	params.push_back( std::shared_ptr<DoubleParameter> (
+//			new DoubleParameter("g1_a_0",0.53751) ));//
 
 	for(std::vector<Resonance>::iterator reso=ampSetup.getResonances().begin(); reso!=ampSetup.getResonances().end(); reso++){
 		Resonance tmp = (*reso);
