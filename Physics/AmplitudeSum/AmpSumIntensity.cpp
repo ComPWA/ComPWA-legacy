@@ -93,8 +93,8 @@ void AmpSumIntensity::init(){
 	 * this in the model, we have to do the following work-a-round.
 	 * Don't forget to adjust the iterator 'paramsPos', if you comment out that line
 	 *  */
-	params.push_back( std::shared_ptr<DoubleParameter> (
-			new DoubleParameter("g1_a_0",0.464) ));
+//	params.push_back( std::shared_ptr<DoubleParameter> (
+//			new DoubleParameter("g1_a_0",0.464) ));
 //	params.push_back( std::shared_ptr<DoubleParameter> (
 //			new DoubleParameter("g1_a_0",0.53751) ));//
 
@@ -179,8 +179,8 @@ void AmpSumIntensity::init(){
 		std::vector<std::shared_ptr<DoubleParameter> >::iterator magItr = params.end()-6;
 		std::vector<std::shared_ptr<DoubleParameter> >::iterator phaseItr = params.end()-5;
 		std::vector<std::shared_ptr<DoubleParameter> >::iterator massItr = params.end()-4;
-//		std::vector<std::shared_ptr<DoubleParameter> >::iterator g1Itr = params.end()-3;
-		std::vector<std::shared_ptr<DoubleParameter> >::iterator g1Itr = params.begin()+1; //use global parameter
+		std::vector<std::shared_ptr<DoubleParameter> >::iterator g1Itr = params.end()-3;
+//		std::vector<std::shared_ptr<DoubleParameter> >::iterator g1Itr = params.begin()+1; //use global parameter
 		std::vector<std::shared_ptr<DoubleParameter> >::iterator g2Itr = params.end()-2;
 		std::vector<std::shared_ptr<DoubleParameter> >::iterator radiusItr = params.end()-1;
 
@@ -304,7 +304,8 @@ void AmpSumIntensity::setupTree(allMasses& theMasses, allMasses& toyPhspSample, 
 		newTree->createNode("Amplitude", maddStrat, "Intens", theMasses.nEvents, false); //Sum of resonances, at each point
 	} else throw(std::logic_error("Error in setupTree()! Wrong option!"));
 
-	std::vector<std::shared_ptr<DoubleParameter> >::iterator paramsPos = params.begin()+2;
+	std::vector<std::shared_ptr<DoubleParameter> >::iterator paramsPos = params.begin()+1;
+//	std::vector<std::shared_ptr<DoubleParameter> >::iterator paramsPos = params.begin()+2;//use global parameter for g1
 
 	//----Add Resonances
 	for(std::vector<Resonance>::iterator reso=ampSetup.getResonances().begin(); reso!=ampSetup.getResonances().end(); reso++){
@@ -441,8 +442,8 @@ void AmpSumIntensity::setupTree(allMasses& theMasses, allMasses& toyPhspSample, 
 				PhysConst::instance()->getMass(tmp.m_g2_part1), "FlatteRes_"+tmp.m_name);
 		newTree->createLeaf("mHiddenB_"+tmp.m_name, \
 				PhysConst::instance()->getMass(tmp.m_g2_part2), "FlatteRes_"+tmp.m_name);
-//		newTree->createLeaf("g1_"+tmp.m_name, *(paramsPos+3), "FlatteRes_"+tmp.m_name);
-		newTree->createLeaf("g1_"+tmp.m_name, params.at(1), "FlatteRes_"+tmp.m_name);
+		newTree->createLeaf("g1_"+tmp.m_name, *(paramsPos+3), "FlatteRes_"+tmp.m_name);
+//		newTree->createLeaf("g1_"+tmp.m_name, params.at(1), "FlatteRes_"+tmp.m_name);
 		newTree->createLeaf("g2_"+tmp.m_name, *(paramsPos+4), "FlatteRes_"+tmp.m_name);
 		//Angular distribution
 		newTree->createLeaf("m23sq", m23sq, "AngD_"+tmp.m_name); //ma
