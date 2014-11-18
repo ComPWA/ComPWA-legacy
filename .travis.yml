@@ -4,13 +4,13 @@ compiler:
 before_install:
   - if [ $TRAVIS_OS_NAME == linux ]; then sudo apt-get install -y x11-common libx11-6 x11-utils libX11-dev libgsl0-dev libxpm-dev libxft-dev libjpeg-dev libtiff4-dev libgmp3-dev libpng12-dev libxext-dev build-essential g++; fi
   - wget https://github.com/ComPWA/ComPWA/raw/gh-pages/travis_ci_external_binaries/compwa_externals.tar.gzip -O /tmp/compwa_externals.tar.gzip
-  - tar xfv /tmp/compwa_externals.tar.gzip -C /tmp
+  - tar xf /tmp/compwa_externals.tar.gzip -C /tmp
 before_script:
   - export export COMPWA_DIR=$PWD
   - export PWA_LIBS=$COMPWA_DIR/lib
   - export QFT=/tmp/qft++
-  - export GENEVA=/tmp/geneva_1_4_0/build
-  - export MINUIT2=/tmp/Minuit2-5.34.14/build
+  - export GENEVA=/tmp/geneva_1_4_0
+  - export MINUIT2=/tmp/Minuit2-5.34.14
   - export BOOST_ROOT=/tmp/boost_1_55_0
   - export BOOST_BUILD_PATH=$BOOST_ROOT/share/boost-build
   - export ROOTSYS=/tmp/root_v5.34.23
