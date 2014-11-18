@@ -19,6 +19,9 @@ mkdir ${boost_root}
 cd tools/build/v2
 ./bootstrap.sh
 ./b2 install --prefix=${boost_root}
+
+LD_LIBRARY_PATH=${boost_root}/lib:${LD_LIBRARY_PATH}
+PATH=${boost_root}/bin:$PATH
 }
 
 #install geneva --------------------------------------------------------------------------
@@ -35,6 +38,8 @@ geneva_root=${install_path}/geneva_1_4_0
 cmake . -DCMAKE_CXX_COMPILER=${compiler_path} -DCMAKE_INSTALL_PREFIX="${geneva_root}" -DBOOST_ROOT="${boost_root}" -DBOOST_INCLUDEDIR="${boost_root}/include/boost" -DBOOST_LIBRARYDIR="${boost_root}/lib"
 make -j$numproc
 make install
+
+LD_LIBRARY_PATH=${geneva_root}/lib:${LD_LIBRARY_PATH}
 }
 
 #install root --------------------------------------------------------------------------
@@ -52,6 +57,8 @@ cd root
 
 make -j$numproc
 make install
+
+LD_LIBRARY_PATH=${root_root}/lib/root:${LD_LIBRARY_PATH}
 }
 
 #install qft++ --------------------------------------------------------------------------
