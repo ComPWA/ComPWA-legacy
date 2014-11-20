@@ -6,10 +6,12 @@
        <type>relBW</type>
        <reference>f0_980</reference>
        <mass>0.99</mass>
+       <mass_fix>1</mass_fix>
        <mass_min>0.5</mass_min>
        <mass_max>2.0</mass_max>
        <mesonRadius>1.</mesonRadius>
        <width>0.05</width>
+       <width_fix>1</width_fix>
        <width_min>0.</width_min>
        <width_max>2.</width_max>
 		<norm>1</norm>
@@ -17,7 +19,13 @@
        <par2>1.</par2>
        <mesonRadius>1.</mesonRadius>
        <strength>1.</strength>
+       <strength_fix>0</strength_fix>
+       <strength_min>0</strength_min>
+       <strength_max>2</strength_max>
        <phase>0.</phase>
+       <phase_fix>0</phase_fix>
+       <phase_min>-100</phase_min>
+       <phase_max>100</phase_max>
        <spin>0</spin>
        <m>0</m>
        <n>0</n>
@@ -30,10 +38,12 @@
        <type>relBW</type>
        <reference>f0_1500</reference>
        <mass>1.505</mass>
+       <mass_fix>1</mass_fix>
        <mass_min>1.0</mass_min>
        <mass_max>2.0</mass_max>
        <mesonRadius>1.</mesonRadius>
        <width>0.109</width>
+       <width_fix>1</width_fix>
        <width_min>0.</width_min>
        <width_max>2.</width_max>
 		<norm>1</norm>
@@ -41,7 +51,13 @@
        <par2>1.</par2>
        <mesonRadius>1.</mesonRadius>
        <strength>1.</strength>
+       <strength_fix>0</strength_fix>
+       <strength_min>0</strength_min>
+       <strength_max>2</strength_max>
        <phase>0.</phase>
+       <phase_fix>0</phase_fix>
+       <phase_min>-100</phase_min>
+       <phase_max>100</phase_max>
        <spin>0</spin>
        <m>0</m>
        <n>0</n>
@@ -54,10 +70,12 @@
        <type>relBW</type>
        <reference>f0_1710</reference>
        <mass>1.72</mass>
+       <mass_fix>1</mass_fix>
        <mass_min>1.2</mass_min>
        <mass_max>2.2</mass_max>
        <mesonRadius>1.</mesonRadius>
        <width>0.135</width>
+       <width_fix>1</width_fix>
        <width_min>0.</width_min>
        <width_max>2.</width_max>
 		<norm>1</norm>
@@ -65,7 +83,13 @@
        <par2>1.</par2>
        <mesonRadius>1.</mesonRadius>
        <strength>1.</strength>
+       <strength_fix>0</strength_fix>
+       <strength_min>0</strength_min>
+       <strength_max>2</strength_max>
        <phase>0.</phase>
+       <phase_fix>0</phase_fix>
+       <phase_min>-100</phase_min>
+       <phase_max>100</phase_max>
        <spin>0</spin>
        <m>0</m>
        <n>0</n>
@@ -78,10 +102,12 @@
        <type>relBW</type>
        <reference>f2_1270</reference>
        <mass>1.274</mass>
+       <mass_fix>1</mass_fix>
        <mass_min>0.7</mass_min>
        <mass_max>1.7</mass_max>
        <mesonRadius>1.</mesonRadius>
        <width>0.185</width>
+       <width_fix>1</width_fix>
        <width_min>0.</width_min>
        <width_max>2.</width_max>
 		<norm>1</norm>
@@ -89,7 +115,13 @@
        <par2>1.</par2>
        <mesonRadius>1.</mesonRadius>
        <strength>1.</strength>
+       <strength_fix>0</strength_fix>
+       <strength_min>0</strength_min>
+       <strength_max>2</strength_max>
        <phase>0.</phase>
+       <phase_fix>0</phase_fix>
+       <phase_min>-100</phase_min>
+       <phase_max>100</phase_max>
        <spin>2</spin>
        <m>0</m>
        <n>0</n>
@@ -102,10 +134,12 @@
        <type>relBW</type>
        <reference>f2_1525</reference>
        <mass>1.525</mass>
+       <mass_fix>1</mass_fix>
        <mass_min>1.0</mass_min>
        <mass_max>2.0</mass_max>
        <mesonRadius>1.</mesonRadius>
        <width>0.073</width>
+       <width_fix>1</width_fix>
        <width_min>0.</width_min>
        <width_max>2.</width_max>
 		<norm>1</norm>
@@ -113,7 +147,13 @@
        <par2>1.</par2>
        <mesonRadius>1.</mesonRadius>
        <strength>1.</strength>
+       <strength_fix>0</strength_fix>
+       <strength_min>0</strength_min>
+       <strength_max>2</strength_max>
        <phase>1.6</phase>
+       <phase_fix>0</phase_fix>
+       <phase_min>-100</phase_min>
+       <phase_max>100</phase_max>
        <spin>2</spin>
        <m>0</m>
        <n>0</n>
@@ -126,10 +166,12 @@
        <type>relBW</type>
        <reference>omegaB</reference>
        <mass>0.783</mass>
+       <mass_fix>1</mass_fix>
        <mass_min>0.5</mass_min>
        <mass_max>2.</mass_max>
        <mesonRadius>1.</mesonRadius>
        <width>0.0085</width>
+       <width_fix>1</width_fix>
        <width_min>0.</width_min>
        <width_max>2.</width_max>
 		<norm>3</norm>
@@ -137,7 +179,13 @@
        <par2>1.</par2>
        <mesonRadius>1.</mesonRadius>
        <strength>1.</strength>
+       <strength_fix>0</strength_fix>
+       <strength_min>0</strength_min>
+       <strength_max>2</strength_max>
        <phase>0.8</phase>
+       <phase_fix>0</phase_fix>
+       <phase_min>-100</phase_min>
+       <phase_max>100</phase_max>
        <spin>1</spin>
        <m>0</m>
        <n>0</n>
@@ -150,10 +198,12 @@
        <type>relBW</type>
        <reference>omegaB</reference>
        <mass>0.783</mass>
+       <mass_fix>1</mass_fix>
        <mass_min>0.5</mass_min>
        <mass_max>2.</mass_max>
        <mesonRadius>1.</mesonRadius>
        <width>0.0085</width>
+       <width_fix>1</width_fix>
        <width_min>0.</width_min>
        <width_max>2.</width_max>
 		<norm>3</norm>
@@ -161,7 +211,13 @@
        <par2>1.</par2>
        <mesonRadius>1.</mesonRadius>
        <strength>1.</strength>
+       <strength_fix>0</strength_fix>
+       <strength_min>0</strength_min>
+       <strength_max>2</strength_max>
        <phase>0.8</phase>
+       <phase_fix>0</phase_fix>
+       <phase_min>-100</phase_min>
+       <phase_max>100</phase_max>
        <spin>1</spin>
        <m>0</m>
        <n>0</n>
