@@ -20,7 +20,6 @@
 #include "Core/ParameterList.hpp"
 #include "Core/FunctionTree.hpp"
 #include "Core/Kinematics.hpp"
-//#include "Physics/DPKinematics/DataPoint.hpp"
 
 void MinLogLH::calcSumOfWeights(){
 	sumOfWeights=0;

@@ -9,7 +9,6 @@ BOOSTLIBS = -lboost_log_setup -lboost_log -lboost_date_time -lboost_filesystem -
 local rlibs = [ SHELL "$ROOTSYS/bin/root-config --libs" ] ;
 ROOTLIBS = [ MATCH "(.*)[\n]" : $(rlibs) ] ;
 
-echo $(ROOTSYS) ;
 project :
 	requirements
 	    <include>$(BOOST_ROOT)/include
@@ -26,6 +25,11 @@ project :
 	<linkflags>-lgslcblas
 	;
 
+make $(TOP)/Physics/DPKinematics/libDPKinematicsDict.cpp : $(DPKINEMATICS)/SimpleEfficiency.hpp $(DPKINEMATICS)/libDPKinematicsLinkDef.hpp : @genDict ;
+actions genDict
+{
+    rootcint -f $(<) -c -I$(COMPWA) $(>)
+}
 
 lib DPKinematics : 
         [ glob *.cpp ] 
