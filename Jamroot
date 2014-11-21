@@ -12,7 +12,8 @@ project :
 	<define>BOOST_LOG_DYN_LINK
 	<cxxflags>-ftemplate-depth-256
 	<cxxflags>-std=c++0x
-	#<linkflags>-pg
+	<cxxflags>-DBOOST_SPIRIT_USE_PHOENIX_V3
+        #<linkflags>-pg
 	<linkflags>-lgomp
 	<linkflags>$(BOOSTLIBS)
 	<warnings>off
