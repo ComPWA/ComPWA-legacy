@@ -6,7 +6,7 @@ local QFTINC = [ os.environ QFT_INCLUDE ] ;
 local QFT = [ os.environ QFT ] ;
 local MINUIT2 = [ os.environ MINUIT2 ] ;
 
-local rlibs = [ SHELL "$ROOTSYS/bin/root-config --evelibs" ] ;
+local rlibs = [ SHELL "$ROOTSYS/bin/root-config --libs" ] ;
 ROOTLIBS = [ MATCH "(.*)[\n]" : $(rlibs) ] ;
 
 project :
@@ -19,9 +19,9 @@ project :
         <cxxflags>-pthread
 	<linkflags>-L$(ROOT_LIB_PATH)
 	<linkflags>$(ROOTLIBS)
-	#<linkflags>-lEG
-	#<linkflags>-lRooFit
-	#<linkflags>-lRooFitCore
+	<linkflags>-lEG
+	<linkflags>-lRooFit
+	<linkflags>-lRooFitCore
 	<linkflags>-L$(QFT)/lib
 	<linkflags>-lqft++
 	#<linkflags>-lgomp
