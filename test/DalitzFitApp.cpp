@@ -83,7 +83,7 @@ int main(int argc, char **argv){
 	//DPKinematics kin("D0","gamma","K-","K+");
 	//static dataPoint* point = dataPoint::instance(kin);
 
-  bool useFctTree = true, resultGen = true;
+  bool useFctTree = false, resultGen = true;
 
   std::string file="test/3Part-4vecs.root";
 

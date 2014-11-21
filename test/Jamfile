@@ -2,35 +2,26 @@
 import os ;
 
 local GENEVA = [ os.environ GENEVA ] ;
-local ROOTSYS = [ os.environ ROOTSYS ] ;
-local ROOTINC = [ os.environ ROOTINCLUDE ] ;
-local BOOST_ROOT = [ os.environ BOOST_ROOT ] ;
 local QFTINC = [ os.environ QFT_INCLUDE ] ;
 local QFT = [ os.environ QFT ] ;
 local MINUIT2 = [ os.environ MINUIT2 ] ;
 
-BOOSTLIBS = -lboost_log_setup -lboost_log -lboost_date_time -lboost_filesystem -lboost_program_options -lboost_regex -lboost_serialization -lboost_system -lboost_thread -lboost_test_exec_monitor  ;
-
-local rlibs = [ SHELL "$ROOTSYS/bin/root-config --libs" ] ;
+local rlibs = [ SHELL "$ROOTSYS/bin/root-config --evelibs" ] ;
 ROOTLIBS = [ MATCH "(.*)[\n]" : $(rlibs) ] ;
 
 project :
 	requirements <include>./
 	    <include>$(TOP)
-		<include>$(ROOTSYS)/include
-		<include>$(ROOTSYS)/include/root
-		<include>$(BOOST_ROOT)/include
+		<include>$(ROOT_INC_PATH)
 		<include>$(GENEVA)/include
         <include>$(QFT)/include
         <include>$(MINUIT2)/include
         <cxxflags>-pthread
-	<linkflags>-L$(BOOST_ROOT)/lib
-	<linkflags>$(BOOSTLIBS)
-	<linkflags>-L$(ROOTSYS)/lib/root
+	<linkflags>-L$(ROOT_LIB_PATH)
 	<linkflags>$(ROOTLIBS)
-	<linkflags>-lEG
-	<linkflags>-lRooFit
-	<linkflags>-lRooFitCore
+	#<linkflags>-lEG
+	#<linkflags>-lRooFit
+	#<linkflags>-lRooFitCore
 	<linkflags>-L$(QFT)/lib
 	<linkflags>-lqft++
 	#<linkflags>-lgomp
@@ -60,29 +51,29 @@ exe dataiftestApp :
         $(TOP)/DataReader/RootReader//RootReader  
         : ;
 
-#if $(GENEVA) { 
-#exe optimizertestApp : 
-#        OptimizerTestApp.cpp 
-#        test
-#        $(TOP)/Core//ComPWA
-#        $(TOP)/Optimizer/Minuit2//Minuit2IF
-#        $(TOP)/Optimizer/Geneva//GenevaIF  
-#        : ;
-#
+if $(GENEVA) { 
+exe optimizertestApp : 
+        OptimizerTestApp.cpp 
+        test
+        $(TOP)/Core//ComPWA
+        $(TOP)/Optimizer/Minuit2//Minuit2IF
+        $(TOP)/Optimizer/Geneva//GenevaIF  
+        : ;
+
 #exe genevatestApp : 
 #        GenevaTestApp.cpp 
 #        test
 #        $(TOP)/Core//ComPWA
 #        $(TOP)/Optimizer/Geneva//GenevaIF 
 #        : ;
-#} else {
+} else {
 exe optimizertestApp : 
         MinuitTestApp.cpp 
         test
         $(TOP)/Core//ComPWA
         $(TOP)/Optimizer/Minuit2//Minuit2IF
         : ;
-#}
+}
 
 exe physicstestApp : 
         PhysicsTestApp.cpp 

@@ -110,7 +110,6 @@ private:
 	std::vector<double> globalCC;
 	void smearParameterList(ParameterList&);
 	void genOutput(std::ostream& out,std::string opt="");
-	void genSimpleOutput(std::ostream& out);
 	void init(FunctionMinimum);
 };
 

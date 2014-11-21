@@ -8,13 +8,13 @@ using namespace boost::log;
 
 
 void GenevaResult::init(boost::shared_ptr<Gem::Geneva::GStartIndividual> min){
-	finalLH = min->getBestKnownFitness();
+	finalLH = min->getBestCase();
     //ToDO: extract more info
 	return;
 
 }
 
-void GenevaResult::genOutput(std::ostream& out){
+void GenevaResult::genOutput(std::ostream& out, std::string opt){
 	bool printTrue=0;
 	if(trueParameters.GetNParameter()) printTrue=1;
 	TableFormater tableCov(&out);

@@ -4,7 +4,31 @@ path-constant TOP : . ;
 path-constant PHYSICS : Physics ;
 path-constant DPKINEMATICS : Physics/DPKinematics ;
 import os ;
+import path ;
 local BOOST_ROOT = [ os.environ BOOST_ROOT ] ;
+local ROOTSYS = [ os.environ ROOTSYS ] ;
+
+local FOUND_ROOT_TOBJECT_HEADER = [ path.exists $(ROOTSYS)/include/TObject.h ] ;
+
+if ($(FOUND_ROOT_TOBJECT_HEADER))
+{
+  constant ROOT_INC_PATH : $(ROOTSYS)/include ;
+  constant ROOT_LIB_PATH : $(ROOTSYS)/lib ;
+}
+else
+{ 
+  local FOUND_ROOT_TOBJECT_HEADER = [ path.exists $(ROOTSYS)/include/root/TObject.h ] ;
+  constant ROOT_INC_PATH : $(ROOTSYS)/include/root ;
+  constant ROOT_LIB_PATH : $(ROOTSYS)/lib/root ;
+}
+
+if (!$(FOUND_ROOT_TOBJECT_HEADER))
+{
+  echo "WARNING: ROOT environment is not set up correctly! Please ensure ROOTSYS points to a valid ROOT installation" ;
+}
+
+echo "Using $(ROOT_INC_PATH) as ROOT include path!" ;
+echo "Using $(ROOT_LIB_PATH) as ROOT library path!" ;
 
 BOOSTLIBS = -lboost_log_setup -lboost_log -lboost_date_time -lboost_filesystem -lboost_program_options -lboost_regex -lboost_serialization -lboost_system -lboost_thread -lboost_test_exec_monitor -L$(BOOST_ROOT)/lib ;
 
@@ -15,8 +39,6 @@ project :
 	<cxxflags>-ftemplate-depth-256
 	<cxxflags>-std=c++0x
 	<cxxflags>-DBOOST_SPIRIT_USE_PHOENIX_V3
-        #<linkflags>-pg
-	<linkflags>-lgomp
 	<linkflags>$(BOOSTLIBS)
 	<warnings>off
 	;

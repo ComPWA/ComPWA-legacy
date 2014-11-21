@@ -72,7 +72,7 @@ public:
 protected:
 	virtual double shiftAngle(double v);
 	virtual void genOutput(std::ostream& out,std::string opt="") = 0;
-	virtual void genSimpleOutput(std::ostream& out) = 0;
+	virtual void genSimpleOutput(std::ostream& out);
 
 	double time;
 

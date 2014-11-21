@@ -95,15 +95,6 @@ void MinuitResult::init(FunctionMinimum min){
 
 }
 
-void MinuitResult::genSimpleOutput(std::ostream& out){
-	for(unsigned int o=0;o<finalParameters.GetNDouble();o++){
-		std::shared_ptr<DoubleParameter> outPar = finalParameters.GetDoubleParameter(o);
-		out<<outPar->GetValue()<<" "<<outPar->GetError()->GetError()<<" ";
-	}
-	out<<"\n";
-
-	return;
-}
 void MinuitResult::setAmplitude(std::shared_ptr<Amplitude> newAmp){
 	_amp=newAmp;
 	nRes=_amp->getNumberOfResonances();

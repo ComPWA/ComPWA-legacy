@@ -2,9 +2,6 @@
 import os ;
 
 local GENEVA = [ os.environ GENEVA ] ;
-local BOOST_ROOT = [ os.environ BOOST_ROOT ] ;
-
-BOOSTLIBS = -lboost_date_time -lboost_filesystem -lboost_program_options -lboost_regex -lboost_serialization -lboost_system -lboost_thread -lboost_test_exec_monitor -L$(BOOST_ROOT)/lib ;
 
 lib Geneva : :  <file>$(GENEVA)/lib/libgemfony-common.so
                 <file>$(GENEVA)/lib/libgemfony-courtier.so
@@ -16,9 +13,7 @@ lib Geneva : :  <file>$(GENEVA)/lib/libgemfony-common.so
 
 project :
 	requirements 
-	  <include>$(BOOST_ROOT)/include
 	  <include>$(GENEVA)/include
-	  <linkflags>$(BOOSTLIBS)
 	;
 
 lib GenevaIF : 

@@ -65,7 +65,7 @@ private:
 	//boost::numeric::ublas::symmetric_matrix<double,boost::numeric::ublas::upper> cov;
 	//boost::numeric::ublas::symmetric_matrix<double,boost::numeric::ublas::upper> corr;
 
-	void genOutput(std::ostream& out);
+	void genOutput(std::ostream& out, std::string opt="");
 	void init(boost::shared_ptr<Gem::Geneva::GStartIndividual> min);
 };
 

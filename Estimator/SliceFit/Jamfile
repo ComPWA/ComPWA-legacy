@@ -2,20 +2,16 @@
 import os ;
 
 local QFT = [ os.environ QFT ] ;
-local ROOTSYS = [ os.environ ROOTSYS ] ;
-local ROOTINC = [ os.environ ROOTINCLUDE ] ;
 
-local rlibs = [ SHELL "$ROOTSYS/bin/root-config --libs" ] ;
+local rlibs = [ SHELL "$ROOTSYS/bin/root-config --evelibs" ] ;
 ROOTLIBS = [ MATCH "(.*)[\n]" : $(rlibs) ] ;
 
 project :
 	requirements
-	<include>$(ROOTINC)
-	<include>$(ROOTSYS)/include
+	<include>$(ROOT_INC_PATH)
 	<include>$(QFT)/include
-	<linkflags>-L$(ROOTSYS)/lib/root
+	<linkflags>-L$(ROOT_LIB_PATH)
 	<linkflags>$(ROOTLIBS)
-	<linkflags>-lEG
 	<linkflags>-L$(QFT)/lib
 	<linkflags>-lqft++
 	;
