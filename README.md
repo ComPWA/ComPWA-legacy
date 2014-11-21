@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/ComPWA/ComPWA.svg?branch=master)](https://travis-ci.org/ComPWA/ComPWA)
+
 ComPWA
 ======
 
