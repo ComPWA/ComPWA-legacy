@@ -16,3 +16,7 @@ Physics/particles.xml
 Physics/physConstants.xml
 DOCU/
 doc/
+*Dict.hpp
+*Dict.h
+*Dict.cxx
+*Dict.cpp

@@ -1,6 +1,8 @@
 ########### ComPWA Jamroot #############
 
 path-constant TOP : . ;
+path-constant PHYSICS : Physics ;
+path-constant DPKINEMATICS : Physics/DPKinematics ;
 import os ;
 local BOOST_ROOT = [ os.environ BOOST_ROOT ] ;
 
