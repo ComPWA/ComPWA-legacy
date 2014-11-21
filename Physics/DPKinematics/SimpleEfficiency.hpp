@@ -8,10 +8,6 @@
 // Contributors:
 //     Peter Weidenkaff -
 //-------------------------------------------------------------------------------
-/*! \class SimpleEfficiency
- * @file SimpleEfficiency.hpp
- * Implementation of an efficiency class. Similar functionality to TEfficiency
- */
 
 #ifndef SIMPLEEFFICIENCY_HPP_
 #define SIMPLEEFFICIENCY_HPP_
@@ -19,16 +15,25 @@
 #include <vector>
 #include <memory>
 
+/*! \class SimpleEfficiency
+ * @file SimpleEfficiency.hpp
+ * Implementation of an efficiency class. Similar functionality to TEfficiency
+ */
 class SimpleEfficiency : public TNamed
 {
 public:
 	~SimpleEfficiency();
+	//!Contruct from two TH1 histrograms
 	SimpleEfficiency(const TH1& passed, const TH1& total);
+	//!Contruct from two TH1 histrograms and specify name and title of object
 	SimpleEfficiency(TString name, TString title, const TH1& passed, const TH1& total);
 	SimpleEfficiency():passedHist(NULL),totalHist(NULL),effHist(NULL){};
 	SimpleEfficiency(const SimpleEfficiency&);
+	//! return total efficiency
 	double GetTotalEfficiency() { return totalEff; };
+	//! return error of total efficiency
 	double GetTotalEfficiencyError() { return totalEff_error; };
+	//! return efficiency of globalBin
 	double GetEfficiency(int globalBin);
 	double GetEfficiencyError(int globalBin);
 	double GetEfficiencyErrorLow(int globalBin) { return GetEfficiencyError(globalBin); };
