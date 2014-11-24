@@ -21,7 +21,8 @@ project :
 make libDPKinematicsDict.cpp : SimpleEfficiency.hpp libDPKinematicsLinkDef.hpp : @genDict ;
 actions genDict
 {
-    rootcint -f $(<) -c -I$(COMPWA) -I$(ROOT_INC_PATH) $(>)
+	echo "Generating root dictionary for DPKinematics..." ;
+	rootcint -f $(<) -c $(>)
 }
 
 lib DPKinematics : 
