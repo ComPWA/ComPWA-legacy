@@ -14,6 +14,12 @@ lib Geneva : :  <file>$(GENEVA)/lib/libgemfony-common.so
 project :
 	requirements 
 	  <include>$(GENEVA)/include
+          <linkflags>-L$(GENEVA)/lib
+          <linkflags>-lgemfony-geneva
+          <linkflags>-lgemfony-geneva-individuals
+          <linkflags>-lgemfony-courtier
+          <linkflags>-lgemfony-hap
+          <linkflags>-lgemfony-common
 	;
 
 lib GenevaIF : 

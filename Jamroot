@@ -10,19 +10,19 @@ local ROOTSYS = [ os.environ ROOTSYS ] ;
 
 local FOUND_ROOT_TOBJECT_HEADER = [ path.exists $(ROOTSYS)/include/TObject.h ] ;
 
-if ($(FOUND_ROOT_TOBJECT_HEADER))
+if $(FOUND_ROOT_TOBJECT_HEADER)
 {
   constant ROOT_INC_PATH : $(ROOTSYS)/include ;
   constant ROOT_LIB_PATH : $(ROOTSYS)/lib ;
 }
 else
 { 
-  local FOUND_ROOT_TOBJECT_HEADER = [ path.exists $(ROOTSYS)/include/root/TObject.h ] ;
+  FOUND_ROOT_TOBJECT_HEADER = [ path.exists $(ROOTSYS)/include/root/TObject.h ] ;
   constant ROOT_INC_PATH : $(ROOTSYS)/include/root ;
   constant ROOT_LIB_PATH : $(ROOTSYS)/lib/root ;
 }
 
-if (!$(FOUND_ROOT_TOBJECT_HEADER))
+if true != $(FOUND_ROOT_TOBJECT_HEADER)
 {
   echo "WARNING: ROOT environment is not set up correctly! Please ensure ROOTSYS points to a valid ROOT installation" ;
 }
