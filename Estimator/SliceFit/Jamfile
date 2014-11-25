@@ -3,7 +3,7 @@ import os ;
 
 local QFT = [ os.environ QFT ] ;
 
-local rlibs = [ SHELL "$ROOTSYS/bin/root-config --evelibs" ] ;
+local rlibs = [ SHELL "$ROOTSYS/bin/root-config --libs" ] ;
 ROOTLIBS = [ MATCH "(.*)[\n]" : $(rlibs) ] ;
 
 project :
@@ -12,6 +12,7 @@ project :
 	<include>$(QFT)/include
 	<linkflags>-L$(ROOT_LIB_PATH)
 	<linkflags>$(ROOTLIBS)
+	<linkflags>-lEG
 	<linkflags>-L$(QFT)/lib
 	<linkflags>-lqft++
 	;
