@@ -189,7 +189,9 @@ exe compareTreeAmpApp :
         $(TOP)/Core//ComPWA
         $(TOP)/Physics/AmplitudeSum//AmplitudeSum  
         $(TOP)/DataReader/RootReader//RootReader  
+        $(TOP)/Optimizer//Optimizer
         $(TOP)/Estimator/MinLogLH//MinLogLH 
+        $(TOP)/Estimator/MinLogLHbkg//MinLogLHbkg
         $(TOP)/Optimizer/Minuit2//Minuit2IF
         $(TOP)/Physics/DPKinematics//DPKinematics  
         : ;
@@ -209,6 +211,7 @@ exe dalitzfitApp :
         $(TOP)/Physics/AmplitudeSum//AmplitudeSum
         $(TOP)/Physics/DPKinematics//DPKinematics  
         $(TOP)/DataReader/RootReader//RootReader
+        $(TOP)/Estimator/MinLogLHbkg//MinLogLHbkg
         $(TOP)/Estimator/MinLogLH//MinLogLH 
         $(TOP)/Optimizer/Minuit2//Minuit2IF
         : ;

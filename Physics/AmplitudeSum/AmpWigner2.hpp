@@ -209,9 +209,8 @@ public:
 
 			out = std::shared_ptr<AbsParameter>(new DoubleParameter(out->GetName(),(2*j+1)*Wigner_d(j,m,n,beta)));
 			return true;
-		}else{
-			return false;
 		}
+		return false;
 	}
 
 protected:

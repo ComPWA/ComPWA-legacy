@@ -45,6 +45,7 @@
 #include "DataReader/RootReader/RootReader.hpp"
 #include "Physics/AmplitudeSum/AmpSumIntensity.hpp"
 #include "Estimator/MinLogLH/MinLogLH.hpp"
+#include "Estimator/MinLogLHbkg/MinLogLHbkg.hpp"
 #include "Optimizer/Minuit2/MinuitIF.hpp"
 #include "Physics/DPKinematics/RootEfficiency.cpp"
 #include "Physics/DPKinematics/RootGenerator.cpp"
@@ -71,9 +72,7 @@ int main(int argc, char **argv){
 	RunManager run;
 	run.setGenerator(gen);
 	//======================= DATA =============================
-	allMasses myToyPhspMasses, myEvtMasses;
-
-	unsigned int numEvents = 300;//data size to be generated
+	unsigned int numEvents = 1000;//data size to be generated
 	std::shared_ptr<Data> inputData(new RootReader("out.root", false,"data",false)); //empty file: run generation before fit
 
 	//======================= EFFICIENCY =============================
@@ -98,31 +97,12 @@ int main(int argc, char **argv){
 	run.setPhspSample(toyPhspData);
 	if( !toyPhspData->getNEvents() ) {
 		run.generatePhsp(mcPrecision);
-		myToyPhspMasses = allMasses(toyPhspData->getMasses());
-		myToyPhspMasses.setEfficiency(eff); //set efficiency for all datapoints
 	}
 
 	run.setData(inputData);
 	if( !inputData->getNEvents() ) {
 		run.generate(numEvents);
-		myEvtMasses = allMasses(inputData->getMasses());
 	}
-
-	//setup trees
-	std::shared_ptr<FunctionTree> physicsTree = fitAmpTree->functionTree(myEvtMasses,myToyPhspMasses);
-	if(!physicsTree){
-		BOOST_LOG_TRIVIAL(error)<<"Physics Trees not setup correctly, quitting";
-		return 0;
-	}
-	//	std::shared_ptr<FunctionTree> phspTree = fitAmpTree->phspTree(myPhspMasses,myToyPhspMasses);//unbinned efficiency
-	std::shared_ptr<FunctionTree> phspTree = fitAmpTree->phspTree(myToyPhspMasses); //binned efficiency
-	if(!phspTree){
-		BOOST_LOG_TRIVIAL(error)<<"Phsp Trees not setup correctly, quitting";
-		return 0;
-	}
-	BOOST_LOG_TRIVIAL(debug)<<"Check Trees: ";
-	if(!physicsTree->sanityCheck()) return 0;
-	if(!phspTree->sanityCheck()) return 0;
 
 	//======================= PARAMETERS =============================
 	ParameterList fitPar;
@@ -132,37 +112,10 @@ int main(int argc, char **argv){
 	ParameterList truePar;
 	trueAmp->fillStartParVec(truePar); //true values
 
-	for(unsigned int i=0; i<fitParTree.GetNDouble(); i++){
+	for(unsigned int i=0; i<fitParTree.GetNDouble(); i++)
 		fitParTree.GetDoubleParameter(i)->SetError( std::shared_ptr<ParError<double>>(new SymError<double>(.1)) );
-	}
-
-	fitParTree.GetDoubleParameter("mag_a_0(980)0")->FixParameter(1);
-	fitParTree.GetDoubleParameter("phase_a_0(980)0")->FixParameter(1);
-
-	fitParTree.GetDoubleParameter("mass_a_0(980)0")->FixParameter(1);
-	fitParTree.GetDoubleParameter("width_a_0(980)0")->FixParameter(1);
-	fitParTree.GetDoubleParameter("mass_a_0(980)+")->FixParameter(1);
-	fitParTree.GetDoubleParameter("width_a_0(980)+")->FixParameter(1);
-	fitParTree.GetDoubleParameter("mass_phi(1020)")->FixParameter(1);
-	fitParTree.GetDoubleParameter("width_phi(1020)")->FixParameter(1);
-	fitParTree.GetDoubleParameter("mass_f_0(1400)")->FixParameter(1);
-	fitParTree.GetDoubleParameter("width_f_0(1400)")->FixParameter(1);
-
-	for(unsigned int i=0; i<fitPar.GetNDouble(); i++){
+	for(unsigned int i=0; i<fitPar.GetNDouble(); i++)
 		fitPar.GetDoubleParameter(i)->SetError( std::shared_ptr<ParError<double>>(new SymError<double>(.1)) );
-	}
-
-	fitPar.GetDoubleParameter("mag_a_0(980)0")->FixParameter(1);
-	fitPar.GetDoubleParameter("phase_a_0(980)0")->FixParameter(1);
-
-	fitPar.GetDoubleParameter("mass_a_0(980)0")->FixParameter(1);
-	fitPar.GetDoubleParameter("width_a_0(980)0")->FixParameter(1);
-	fitPar.GetDoubleParameter("mass_a_0(980)+")->FixParameter(1);
-	fitPar.GetDoubleParameter("width_a_0(980)+")->FixParameter(1);
-	fitPar.GetDoubleParameter("mass_phi(1020)")->FixParameter(1);
-	fitPar.GetDoubleParameter("width_phi(1020)")->FixParameter(1);
-	fitPar.GetDoubleParameter("mass_f_0(1400)")->FixParameter(1);
-	fitPar.GetDoubleParameter("width_f_0(1400)")->FixParameter(1);
 
 	fitAmpTree->setParameterList(fitParTree);
 	fitAmp->setParameterList(fitPar);
@@ -174,14 +127,15 @@ int main(int argc, char **argv){
 	BOOST_LOG_TRIVIAL(info)<<"Fit model file: "<<fitModelFile ;
 
 	//======================= TREE FIT =============================
-	std::shared_ptr<ControlParameter> esti(MinLogLH::createInstance(physicsTree, phspTree, myEvtMasses.nEvents));
+	std::shared_ptr<ControlParameter> esti(MinLogLHbkg::createInstance(fitAmp, inputData, toyPhspData));
+	MinLogLHbkg* minLog = dynamic_cast<MinLogLHbkg*>(&*(esti->Instance()));
+	minLog->setUseFunctionTree(1);
+	std::shared_ptr<FunctionTree> physicsTree = minLog->getTree();
 	double initialLHTree = esti->controlParameter(fitParTree);
 	std::shared_ptr<Optimizer> optiTree(new MinuitIF(esti, fitParTree));
 	run.setOptimizer(optiTree);
 
-	BOOST_LOG_TRIVIAL(info)<<physicsTree<<std::endl;
-	BOOST_LOG_TRIVIAL(info)<<phspTree<<std::endl;
-
+	std::cout<<physicsTree<<std::endl;
 
 	//======================= Compare tree and amplitude =============================
 	std::shared_ptr<AmpRelBreitWignerRes> phiRes = std::dynamic_pointer_cast<AmpRelBreitWignerRes>(fitAmpPtr->getResonance("phi(1020)"));
@@ -196,32 +150,35 @@ int main(int argc, char **argv){
 	dataPoint point(inputData->getEvent(0)); //first datapoint in sample
 	ParameterList intens = fitAmpPtr->intensity(point);
 
+	/*the tree contains multiple node with the same names. We search for node 'Intens' first and
+	* afterwards for the resonance.*/
+	std::shared_ptr<TreeNode> intensNode = physicsTree->head()->getChildNode("Intens");
 	BOOST_LOG_TRIVIAL(info) <<"===========================================";
 	BOOST_LOG_TRIVIAL(info) <<"Compare values: (use first event of data sample) TREE/AMPLITUDE";
 	BOOST_LOG_TRIVIAL(info) <<"===========================================";
-	BOOST_LOG_TRIVIAL(info) <<"Intensity: "<<physicsTree->head()->getChildValue("Intens").real()
+	BOOST_LOG_TRIVIAL(info) <<"Intensity: "<<intensNode ->getChildValue("Intens").real()
 			<<"/"<<*intens.GetDoubleParameter(0);
 	BOOST_LOG_TRIVIAL(info) <<"================= phi(1020) ==========================";
-	BOOST_LOG_TRIVIAL(info) <<"Reso_phi(1020): "<<physicsTree->head()->getChildValue("Reso_phi(1020)")
+	BOOST_LOG_TRIVIAL(info) <<"Reso_phi(1020): "<<intensNode->getChildValue("Reso_phi(1020)")
 			<<"/"<<phiRes->evaluate(point)*phiCoeff;
-	BOOST_LOG_TRIVIAL(info) <<"BW_phi(1020): "<<physicsTree->head()->getChildValue("BW_phi(1020)")
+	BOOST_LOG_TRIVIAL(info) <<"BW_phi(1020): "<<intensNode->getChildValue("BW_phi(1020)")
 			<<"/"<<phiRes->evaluateAmp(point)*phiRes->GetNormalization();
-	BOOST_LOG_TRIVIAL(info) <<"N_phi(1020): "<<physicsTree->head()->getChildValue("N_phi(1020)").real()
+	BOOST_LOG_TRIVIAL(info) <<"N_phi(1020): "<<intensNode->getChildValue("N_phi(1020)").real()
 			<<"/"<<phiRes->GetNormalization();
-	BOOST_LOG_TRIVIAL(info) <<"RelBW_phi(1020): "<<physicsTree->head()->getChildValue("RelBW_phi(1020)")
+	BOOST_LOG_TRIVIAL(info) <<"RelBW_phi(1020): "<<intensNode->getChildValue("RelBW_phi(1020)")
 			<<"/"<<phiRes->evaluateAmp(point);
-	BOOST_LOG_TRIVIAL(info) <<"AngD_phi(1020): "<<physicsTree->head()->getChildValue("AngD_phi(1020)").real()
+	BOOST_LOG_TRIVIAL(info) <<"AngD_phi(1020): "<<intensNode->getChildValue("AngD_phi(1020)").real()
 			<<"/"<<phiRes->evaluateWignerD(point);
 	BOOST_LOG_TRIVIAL(info) <<"================= a_0(980)0 ==========================";
-	BOOST_LOG_TRIVIAL(info) <<"Reso_a_0(980)0: "<<physicsTree->head()->getChildValue("Reso_a_0(980)0")
+	BOOST_LOG_TRIVIAL(info) <<"Reso_a_0(980)0: "<<intensNode->getChildValue("Reso_a_0(980)0")
 			<<"/"<<a0Res->evaluate(point)*a0Coeff;
-	BOOST_LOG_TRIVIAL(info) <<"Flatte_a_0(980)0: "<<physicsTree->head()->getChildValue("Flatte_a_0(980)0")
+	BOOST_LOG_TRIVIAL(info) <<"Flatte_a_0(980)0: "<<intensNode->getChildValue("Flatte_a_0(980)0")
 			<<"/"<<a0Res->evaluateAmp(point)*a0Res->GetNormalization();
-	BOOST_LOG_TRIVIAL(info) <<"N_a_0(980)0: "<<physicsTree->head()->getChildValue("N_a_0(980)0").real()
+	BOOST_LOG_TRIVIAL(info) <<"N_a_0(980)0: "<<intensNode->getChildValue("N_a_0(980)0").real()
 			<<"/"<<a0Res->GetNormalization();
-	BOOST_LOG_TRIVIAL(info) <<"FlatteRes_a_0(980)0: "<<physicsTree->head()->getChildValue("FlatteRes_a_0(980)0")
+	BOOST_LOG_TRIVIAL(info) <<"FlatteRes_a_0(980)0: "<<intensNode->getChildValue("FlatteRes_a_0(980)0")
 			<<"/"<<a0Res->evaluateAmp(point);
-	BOOST_LOG_TRIVIAL(info) <<"AngD_a_0(980)0: "<<physicsTree->head()->getChildValue("AngD_a_0(980)0").real()
+	BOOST_LOG_TRIVIAL(info) <<"AngD_a_0(980)0: "<<intensNode->getChildValue("AngD_a_0(980)0").real()
 			<<"/"<<a0Res->evaluateWignerD(point);
 	BOOST_LOG_TRIVIAL(info) <<"===========================================";
 

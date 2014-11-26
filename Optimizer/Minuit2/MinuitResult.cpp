@@ -37,6 +37,16 @@ int multivariateGaussian(const gsl_rng *rnd, const int vecSize, const gsl_vector
 	return 0;
 }
 
+MinuitResult::MinuitResult(std::shared_ptr<ControlParameter> esti, FunctionMinimum result) {
+	estimator = std::static_pointer_cast<Estimator>(esti);
+	_amp=estimator->getAmplitude();
+	init(result);
+}
+void MinuitResult::setResult(std::shared_ptr<ControlParameter> esti,FunctionMinimum result){
+	estimator = std::static_pointer_cast<Estimator>(esti);
+	_amp=estimator->getAmplitude();
+	init(result);
+}
 
 void MinuitResult::init(FunctionMinimum min){
 	nRes = 0;
@@ -104,11 +114,11 @@ void MinuitResult::genSimpleOutput(std::ostream& out){
 
 	return;
 }
-void MinuitResult::setAmplitude(std::shared_ptr<Amplitude> newAmp){
-	_amp=newAmp;
-	nRes=_amp->getNumberOfResonances();
-	return;
-}
+//void MinuitResult::setAmplitude(std::shared_ptr<Amplitude> newAmp){
+//	_amp=newAmp;
+//	nRes=_amp->getNumberOfResonances();
+//	return;
+//}
 
 void  MinuitResult::smearParameterList(ParameterList& newParList){
 	unsigned int nFree = 0;
@@ -180,24 +190,20 @@ void MinuitResult::calcFractionError(std::vector<double>& fracError){
 		BOOST_LOG_TRIVIAL(info) << "Calculating errors of fit fractions assuming that parameters "
 				"are uncorrelated and that neglecting the error from normalization!";
 		double norm = 0.0;
-		if(!_amp->hasTree()) norm = _amp->integral();
+		if(!estimator->hasTree()) norm = _amp->integral();
 		else {//if we have a tree, use it. Much faster especially in case of correlated errors in calcFractionError()
-			_amp->getPhspTree()->recalculate();
+			std::shared_ptr<FunctionTree> tree = estimator->getTree();
+			tree->recalculate();
 			double phspVolume = Kinematics::instance()->getPhspVolume();
 			/*We need the intensity over the PHSP without efficiency correction. Therefore we
 			 * access node 'Amplitude' and sum up its values.*/
 			//			std::shared_ptr<TreeNode> amplitudeNode = _amp->getPhspTree()->head()->getChildren().at(0)->getChildren().at(0);
-			std::shared_ptr<TreeNode> amplitudeNode = _amp->getPhspTree()->head()->getChildNode("Amplitude");
+			std::shared_ptr<TreeNode> amplitudeNode = tree->head()->getChildNode("Amplitude_Phsp");
 			if(!amplitudeNode){
-				BOOST_LOG_TRIVIAL(error)<<"MinuitResult::calcFractionError() : Can't find node 'Amplitude' in tree!";
+				BOOST_LOG_TRIVIAL(error)<<"MinuitResult::calcFractionError() : Can't find node 'Amplitude_Phsp' in tree!";
 				throw BadParameter("Node not found!");
 			}
 
-			if(amplitudeNode->getName()!="Amplitude") {
-				BOOST_LOG_TRIVIAL(error)<<"MinuitResult::calcFractionError() : we expect node 'Amplitude' at that position,"
-						" but found node "<<amplitudeNode->getName()<<". Probably the structure of the tree has changed!";
-				throw BadParameter("Node not found!");
-			}
 			std::shared_ptr<MultiComplex> normPar = std::dynamic_pointer_cast<MultiComplex>(amplitudeNode->getValue());//node 'Amplitude'
 			unsigned int numPhspEvents = normPar->GetNValues();
 			for(unsigned int i=0; i<numPhspEvents;i++)
@@ -226,22 +232,18 @@ void MinuitResult::calcFraction(std::vector<double>& frac){
 	double norm = 1.36286;
 	ParameterList currentPar;
 	_amp->fillStartParVec(currentPar);
-	if(!_amp->hasTree()) norm = _amp->integral();
+	if(!estimator->hasTree()) norm = _amp->integral();
 	else {//if we have a tree, use it. Much faster especially in case of correlated errors in calcFractionError()
-		_amp->getPhspTree()->recalculate();
+		std::shared_ptr<FunctionTree> tree = estimator->getTree();
+		tree->recalculate();
 		double phspVolume = Kinematics::instance()->getPhspVolume();
 		/*We need the intensity over the PHSP without efficiency correction. Therefore we
 		 * access node 'Amplitude' and sum up its values.*/
-//		std::shared_ptr<TreeNode> amplitudeNode = _amp->getPhspTree()->head()->getChildren().at(0)->getChildren().at(0);
-//		std::shared_ptr<TreeNode> amplitudeNode = _amp->getPhspTree()->head()->getChildNode("Amplitude");
-		std::shared_ptr<TreeNode> amplitudeNode(_amp->getPhspTree()->head()->getChildNode("Amplitude"));
+//		std::shared_ptr<TreeNode> amplitudeNode = tree->head()->getChildren().at(0)->getChildren().at(0);
+//		std::shared_ptr<TreeNode> amplitudeNode = tree->head()->getChildNode("Amplitude_Phsp");
+		std::shared_ptr<TreeNode> amplitudeNode = tree->head()->getChildNode("Amplitude_Phsp");
 		if(!amplitudeNode){
 			BOOST_LOG_TRIVIAL(error)<<"MinuitResult::calcFraction() : Can't find node 'Amplitude' in tree!";
-			throw BadParameter("Node not found!");
-		}
-		if(amplitudeNode->getName()!="Amplitude") {
-			BOOST_LOG_TRIVIAL(error)<<"MinuitResult::calcFraction() : we expect node 'Amplitude' at that position,"
-					" but found node "<<amplitudeNode->getName()<<". Probably the structure of the tree has changed!";
 			throw BadParameter("Node not found!");
 		}
 
@@ -251,8 +253,8 @@ void MinuitResult::calcFraction(std::vector<double>& frac){
 			norm+=abs(normPar->GetValue(i))*abs(normPar->GetValue(i));
 
 		norm = norm*phspVolume/numPhspEvents; //correct calculation of normalization
-		//std::cout<<"Amplitude normalization: "<<norm<<std::endl;
-		//		std::cout<<norm<<" "<<phspVolume<<" "<<numPhspEvents<<std::endl;
+//		std::cout<<"Amplitude normalization: "<<norm<<std::endl;
+//				std::cout<<norm<<" "<<phspVolume<<" "<<numPhspEvents<<std::endl;
 	}
 	nRes=_amp->getNumberOfResonances();
 	for(unsigned int i=0;i<nRes; i++){ //fill matrix

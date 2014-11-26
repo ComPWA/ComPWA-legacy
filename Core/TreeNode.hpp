@@ -95,7 +95,6 @@ public:
 		return _value.size();
 	};
 
-
 	//! Get node name
 	const std::string& getName(){
 		return _name;
@@ -146,8 +145,10 @@ public:
 	 */
 	//virtual const std::complex<double> getNodeValue() =0; //TODO: complex? Template?
 
-	//! String used to display tree
-	std::string to_str(std::string beginning);
+	/*! String used to display tree
+	 *\param lv print down to level lv, if lv=-1 print to whole tree, if lv=0 print current node only
+	 */
+	std::string to_str(int lv=-1, std::string beginning="");
 
 
 	/** Return Node of tree
@@ -240,6 +241,10 @@ public:
 
 	//! Stream-Operator used to display tree
 	friend std::ostream & operator<<(std::ostream &os, std::shared_ptr<TreeNode> p);
+	/*! Print structure of tree and its values
+	 * \param lv Print down to level lv, lv=-1 print the whole tree
+	 */
+	std::string print(unsigned int lv=-1);
 
 protected:
 	std::vector<std::shared_ptr<TreeNode> > _parents; /*!< Link to parents */

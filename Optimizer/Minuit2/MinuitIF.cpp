@@ -34,13 +34,14 @@
 using namespace boost::log;
 using namespace ROOT::Minuit2;
 
-MinuitIF::MinuitIF(std::shared_ptr<ControlParameter> theData, ParameterList& par) : _myFcn(theData, par){
-	//_myFcn = new MIMinuitFcn(theData);
+MinuitIF::MinuitIF(std::shared_ptr<ControlParameter> esti, ParameterList& par) :
+		_myFcn(esti, par), estimator(esti)
+{
+
 }
 
 MinuitIF::~MinuitIF(){
-	//std::cout << "MinuitIF::~MinuitIF: I'll be back" << std::endl;
-	//delete _myFcn;
+
 }
 
 //const double MinuitIF::exec(ParameterList& par){
@@ -141,21 +142,8 @@ std::shared_ptr<FitResult> MinuitIF::exec(ParameterList& par){
 			}
 		}
 	}
-//	std::cout<<"34234748 ";
-//	for(unsigned int i=0; i<finalParList.GetNDouble(); ++i){
-//		std::shared_ptr<DoubleParameter> finalPar = finalParList.GetDoubleParameter(i);
-//		if(!finalPar->IsFixed()){
-//			std::cout<<finalPar->GetName()
-//							<<" "<<minState.Value(finalPar->GetName())
-//							<<" "<<finalPar->GetValue()
-//							<<" "<<minState.Error(finalPar->GetName())
-//							<<" "<<finalPar->GetError()->GetErrorLow()
-//							<<" "<<finalPar->GetError()->GetErrorHigh()<<" ";
-//		}
-//	}
-//	std::cout<<std::endl;
 
-	std::shared_ptr<FitResult> result(new MinuitResult(minMin));
+	std::shared_ptr<FitResult> result(new MinuitResult(estimator, minMin));
 	result->setInitialParameters(initialParList);
 	result->setFinalParameters(finalParList);
 	result->setTime(time.elapsed());

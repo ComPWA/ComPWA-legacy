@@ -185,6 +185,7 @@ double MinLogLH::controlParameter(ParameterList& minPar){
 	//Calculate likelihood
 	double lh=0; //calculate LH:
 	if(pDIF_ && pPIF_){//amplitude and datasample
+		double f = 1.0;
 		for(unsigned int evt = nStartEvt_; evt<nUseEvt_+nStartEvt_; evt++){
 			Event theEvent(pDIF_->getEvent(evt));
 			dataPoint point(theEvent);
@@ -193,12 +194,18 @@ double MinLogLH::controlParameter(ParameterList& minPar){
 			 *therefore we drop it here to be consistent with the tree */
 			ParameterList intensL = pPIF_->intensityNoEff(point);
 			intens = intensL.GetDoubleParameter(0)->GetValue();
-			if(intens>0) lh += std::log(intens)*theEvent.getWeight();
+//			if(intens>0) lh += std::log(intens)*theEvent.getWeight();
+			if(intens>0) lh += std::log( f*intens/norm+(1-f) )*theEvent.getWeight();
 		}
+//		lh = sumOfWeights*std::log(norm) - lh ;//other factors are constant and drop in deviation, so we can ignore them
+//		lh = std::log(norm) - lh/sumOfWeights ;//other factors are constant and drop in deviation, so we can ignore them
+		lh = (-1)*nUseEvt_/sumOfWeights*lh ;//other factors are constant and drop in deviation, so we can ignore them
 	}else if(pEvtTree_){//tree
 		pEvtTree_->recalculate();
 		std::shared_ptr<DoubleParameter> intensL = std::dynamic_pointer_cast<DoubleParameter>(pEvtTree_->head()->getValue());
 		lh = intensL->GetValue();
+//		lh = sumOfWeights*std::log(norm) - lh ;//other factors are constant and drop in deviation, so we can ignore them
+		lh = std::log(norm)*nUseEvt_ - lh*nUseEvt_/sumOfWeights ;//other factors are constant and drop in deviation, so we can ignore them
 	}else{
 		BOOST_LOG_TRIVIAL(error)<< "MinLogLH::controlParameter() : no tree and no amplitude given. Can't calculate LH!";
 		//TODO: Exception
@@ -207,7 +214,7 @@ double MinLogLH::controlParameter(ParameterList& minPar){
 
 //	BOOST_LOG_TRIVIAL(debug) << "Data Term: " << lh << "\t Phsp Term (wo log): " << norm;
 //	lh = nUseEvt_*std::log(norm) - lh ;//other factors are constant and drop in deviation, so we can ignore them
-	lh = sumOfWeights*std::log(norm) - lh ;//other factors are constant and drop in deviation, so we can ignore them
+//	lh = sumOfWeights*std::log(norm) - lh ;//other factors are constant and drop in deviation, so we can ignore them
 
 	return lh; //return -logLH
 }

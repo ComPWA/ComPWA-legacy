@@ -47,7 +47,6 @@ public:
 	void setInitialParameters(ParameterList iniPars){ initialParameters=iniPars; }
 	void setFinalParameters(ParameterList finPars){ finalParameters=finPars; }
 	void setTrueParameters(ParameterList truePars){ trueParameters=truePars; }
-	void setAmplitude(std::shared_ptr<Amplitude> newAmp) { _amp = newAmp; }
 	void setInitialLH(double iniLH){ }
 	ParameterList getInitialParameters(){ return initialParameters; }
 	ParameterList getFinalParameters(){ return finalParameters; }

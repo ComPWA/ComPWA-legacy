@@ -30,6 +30,7 @@
 
 #include "Core/ParameterList.hpp"
 #include "Core/FunctionTree.hpp"
+#include "DataReader/Data.hpp"
 
 #include "Core/DataPoint.hpp"
 #include "Core/Generator.hpp"
@@ -70,7 +71,7 @@ public:
 	//! get total integral for resonance \param name
 	virtual double getTotalIntegral(std::string name) { return -999; };
 	//! convert resonance \param name to id
-	virtual unsigned int getIdOfResonance(std::string name){ return 0;}
+	virtual int getIdOfResonance(std::string name){ return 0;}
 	//! convert resonance \param id to name
 	virtual std::string getNameOfResonance(unsigned int id){ return std::string("muh");}
 	virtual double getMagnitude(std::string name) {return -999;};
@@ -84,28 +85,12 @@ public:
 	virtual double getIntValue(std::string var1, double min1, double max1, std::string var2, double min2, double max2) = 0;
 	virtual Amplitude* Clone() = 0;
 
-	virtual std::shared_ptr<FunctionTree> functionTree(allMasses& theMasses, allMasses& toyPhspSample) {
-		//if not implemented, return NULL-pointer
-		return std::shared_ptr<FunctionTree>();
-	}
-	virtual void resetTree() {
-		//if not implemented, return NULL-pointer
-		return;
-	}
-	virtual std::shared_ptr<FunctionTree> phspTree(allMasses& accPhspSample, allMasses& toyPhspSample) {
-		//if not implemented, return NULL-pointer
-		return std::shared_ptr<FunctionTree>();
-	}
-	virtual std::shared_ptr<FunctionTree> phspTree(allMasses& toyPhspSample) {
-		//if not implemented, return NULL-pointer
-		return std::shared_ptr<FunctionTree>();
-	}
 	//! Check of tree is available
 	virtual bool hasTree(){ return 0; }
-	//! Getter function for function tree
-	virtual std::shared_ptr<FunctionTree> getTree(){ return std::shared_ptr<FunctionTree>(); }
-	//! Getter function for phsp tree
-	virtual std::shared_ptr<FunctionTree> getPhspTree(){ return std::shared_ptr<FunctionTree>(); }
+	//! Getter function for basic amp tree
+	virtual std::shared_ptr<FunctionTree> getAmpTree(allMasses&,allMasses&, std::string){
+		return std::shared_ptr<FunctionTree>();
+	}
 
 protected:
 	ParameterList result;

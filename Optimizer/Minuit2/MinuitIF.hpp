@@ -43,7 +43,7 @@ class MinuitIF : public Optimizer {
 
 public:
 	/// Default Constructor (0x0)
-	MinuitIF(std::shared_ptr<ControlParameter> theData, ParameterList& par);
+	MinuitIF(std::shared_ptr<ControlParameter> esti, ParameterList& par);
 	virtual std::shared_ptr<FitResult> exec(ParameterList& par);
 
 	/** Destructor */
@@ -53,6 +53,7 @@ protected:
 
 private:
 	MinuitFcn _myFcn;
+	std::shared_ptr<ControlParameter> estimator;
 	// vector<string> paramNames;
 };
 class MinuitStrategy : public MnStrategy
