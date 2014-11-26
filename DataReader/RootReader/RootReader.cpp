@@ -27,6 +27,13 @@ using namespace boost::log;
 void RootReader::Clear(){
 	fEvents.clear();
 }
+void RootReader::setEfficiency(std::shared_ptr<Efficiency> eff){
+  for(unsigned int evt=0; evt<fEvents.size(); evt++){
+	  dataPoint e(fEvents.at(evt));
+	  fEvents.at(evt).setEfficiency(eff->evaluate(e));
+  }
+}
+
 std::shared_ptr<Data> RootReader::rndSubSet(unsigned int size, std::shared_ptr<Generator> gen){
 	std::shared_ptr<Data> newSample(new RootReader(fileName, true,"test",false));
 	unsigned int totalSize = getNEvents();

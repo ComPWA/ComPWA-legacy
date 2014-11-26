@@ -79,6 +79,9 @@ public:
 	}
 	std::shared_ptr<Data> rndSubSet(unsigned int size, std::shared_ptr<Generator> gen);
 
+	//! Pass efficiency object, calculate efficiency for every event and store its value in fEvents
+	void setEfficiency(std::shared_ptr<Efficiency> eff);
+
 	void resetWeights(double w=1.);
 
 protected:

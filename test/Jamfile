@@ -211,6 +211,7 @@ exe dalitzfitApp :
         $(TOP)/Physics/AmplitudeSum//AmplitudeSum
         $(TOP)/Physics/DPKinematics//DPKinematics  
         $(TOP)/DataReader/RootReader//RootReader
+        $(TOP)/Optimizer//Optimizer
         $(TOP)/Estimator/MinLogLHbkg//MinLogLHbkg
         $(TOP)/Estimator/MinLogLH//MinLogLH 
         $(TOP)/Optimizer/Minuit2//Minuit2IF
