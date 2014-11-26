@@ -143,6 +143,8 @@ void MinLogLHbkg::iniLHtree(){
 				"using toy sample and assume that efficiency values are saved for every event!";
 		//Efficiency values of toy phsp sample
 		eff = std::shared_ptr<MultiDouble>( new MultiDouble("eff",mPhspSample.eff) ); //only needed for opt == "norm"
+		std::cout<<eff->to_str()<<std::endl;
+		std::cout<<phspSample->getEvent(0).getEfficiency()<<std::endl;
 		signalPhspTree->createNode("AmplitudeEff", mmultStrat, "IntensPhsp", mPhspSample.nEvents, false); //Sum of resonances, at each point
 		signalPhspTree->createLeaf("eff", eff, "AmplitudeEff"); //efficiency
 		signalPhspTree->insertTree(signalPhspTree_amp, "AmplitudeEff"); //Sum of resonances, at each point

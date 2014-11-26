@@ -81,17 +81,16 @@ public:
 	virtual void setAmplitude(std::shared_ptr<Amplitude> amp_, std::shared_ptr<Data> data_,
 			std::shared_ptr<Data> phspSample_, std::shared_ptr<Data> accSample_,
 			unsigned int startEvent=0, unsigned int nEvents=0, bool useFuncTr=0, double sigFrac=1.);
-
+	//! Check if tree for LH calculation is available
 	virtual bool hasTree() { return useFunctionTree; }
-
+	//! Get FunctionTree for LH calculation. Check first if its available using MinLogLHbkg::hasTree().
 	virtual std::shared_ptr<FunctionTree> getTree() {
 		if(!useFunctionTree)
 			throw std::runtime_error("MinLogLHbkg::getTree() you requested a tree which was not constructed!");
 		return physicsTree;
 	}
-
+	//! Get Amplitude
 	virtual std::shared_ptr<Amplitude> getAmplitude() { return amp; }
-
 	//! Destructor
 	virtual ~MinLogLHbkg() { };
 	//! Should we try to use the function tree? Function tree needs to be implemented in Amplitude

@@ -30,7 +30,14 @@ void RootReader::Clear(){
 void RootReader::setEfficiency(std::shared_ptr<Efficiency> eff){
   for(unsigned int evt=0; evt<fEvents.size(); evt++){
 	  dataPoint e(fEvents.at(evt));
-	  fEvents.at(evt).setEfficiency(eff->evaluate(e));
+	  double val = eff->evaluate(e);
+//	  std::cout<<val<<std::endl;
+	  fEvents.at(evt).setEfficiency(val);
+  }
+}
+void RootReader::resetEfficiency(double e){
+  for(unsigned int evt=0; evt<fEvents.size(); evt++){
+	  fEvents.at(evt).setEfficiency(e);
   }
 }
 
