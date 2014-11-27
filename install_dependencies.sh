@@ -51,12 +51,13 @@ wget ftp://root.cern.ch/root/root_v5.34.23.source.tar.gz -O ${temp_workdir}/root
 tar xf root_v5.34.23.source.tar.gz
 
 root_root=${install_path}/root_v5.34.23
-cd root
- 
-./configure --prefix=${root_root} --etcdir=${root_root}/etc --enable-cxx11 --enable-fftw3 --enable-mathmore --enable-minuit2 --enable-python --enable-roofit --enable-tmva
+mkdir ${root_root}
+cd ${root_root}
+
+${temp_workdir}/root/configure --enable-cxx11 --enable-fftw3 --enable-mathmore --enable-minuit2 --enable-python --enable-roofit --enable-tmva
 
 make -j$numproc
-make install
+make clean
 
 LD_LIBRARY_PATH=${root_root}/lib/root:${LD_LIBRARY_PATH}
 }

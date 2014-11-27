@@ -35,7 +35,5 @@ install_minuit2
 cd ${install_path}
 rm -rf temp
 
-#export paths (this should be done in a config script of compwa or the users bashrc etc)
-echo "Installation is finished! Please add the following path to your environment variables:"
-echo "export PATH=${boost_root}/bin:$ROOTSYS/bin:\$PATH"
-echo "export LD_LIBRARY_PATH=${geneva_root}/lib:${boost_root}/lib:$ROOTSYS/lib:\$LD_LIBRARY_PATH"
+echo "Installation is finished! Please run a script setting the correct environment "
+echo "variables to the installed external libraries in order for COMPWA to build correctly!"

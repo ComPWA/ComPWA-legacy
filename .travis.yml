@@ -8,7 +8,7 @@ before_install:
   - wget https://github.com/ComPWA/ComPWA/raw/gh-pages/travis_ci_external_binaries/compwa_externals_root.tar.gzip -O /tmp/compwa_externals_root.tar.gzip
   - tar xf /tmp/compwa_externals_root.tar.gzip -C /tmp
 before_script:
-  - export export COMPWA_DIR=$PWD
+  - export COMPWA_DIR=$PWD
   - export PWA_LIBS=$COMPWA_DIR/lib
   - export QFT=/tmp/qft++
   - export GENEVA=/tmp/geneva_1_4_0
