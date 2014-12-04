@@ -66,6 +66,7 @@ public:
 
 	virtual std::shared_ptr<Data> rndSubSet(unsigned int size, std::shared_ptr<Generator> gen) = 0;
 	virtual void resetWeights(double w=1.) = 0;
+	virtual bool hasWeights() = 0;
 };
 
 #endif

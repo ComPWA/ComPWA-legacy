@@ -74,7 +74,8 @@ AmpSumIntensity::AmpSumIntensity(const double inM, const double inBr, const doub
 		AmplitudeSetup ini, normStyle ns) :
 					totAmp("relBWsumAmplitude"), ampSetup(ini),
 					_normStyle(ns), _calcNorm(1),_dpArea(1.),
-					_calcMaxFcnVal(0),eff_(std::shared_ptr<Efficiency>(new UnitEfficiency())),signalFraction(1.),_nCalls(100000)
+					_calcMaxFcnVal(0),eff_(std::shared_ptr<Efficiency>(new UnitEfficiency())),
+					signalFraction(1.),_nCalls(100000)
 {
 	init();
 }
@@ -85,7 +86,6 @@ void AmpSumIntensity::init(){
 	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
 	_calcNorm=1;
 	if(_normStyle==normStyle::none) _calcNorm=0;
-	BOOST_LOG_TRIVIAL(debug)<<"AmpSumIntensity::init() number of Entries in dalitz plot set to: "<<_entries;
 	BOOST_LOG_TRIVIAL(debug)<<"AmpSumIntensity::init() signal fraction: "<<signalFraction;
 
 	params.push_back( std::shared_ptr<DoubleParameter> (
@@ -302,7 +302,7 @@ std::shared_ptr<FunctionTree> AmpSumIntensity::setupBasicTree(
 		}else{
 			//Normalization parameter for dynamical amplitude
 			newTree->createNode("N_"+tmp.m_name, sqRootStrat, "BW_"+tmp.m_name); //N = sqrt(NSq)
-			newTree->createNode("NSq_"+tmp.m_name, multDStrat, "N_"+tmp.m_name); //NSq = N_phspMC * 1/PhspVolume * 1/Sum(|A|^2)
+			newTree->createNode("NSq_"+tmp.m_name, multDStrat, "N_"+tmp.m_name); //NSq = (PhspVolume/N_phspMC * Sum(|A|^2))^-1
 			newTree->createLeaf("PhspSize_"+tmp.m_name, toyPhspSample.nEvents, "NSq_"+tmp.m_name); // N_phspMC
 			newTree->createLeaf("PhspVolume_"+tmp.m_name, 1/_dpArea, "NSq_"+tmp.m_name); // 1/PhspVolume
 			newTree->createNode("InvSum_"+tmp.m_name, invStrat, "NSq_"+tmp.m_name); //1/Sum(|A|^2)

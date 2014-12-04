@@ -24,21 +24,33 @@
 #include <boost/log/core.hpp>
 using namespace boost::log;
 
+
+bool RootReader::hasWeights(){
+	bool has=0;
+	for(unsigned int evt=0; evt<fEvents.size(); evt++){
+		if(fEvents.at(evt).getWeight()!=1.) {
+			has=1;
+			break;
+		}
+	}
+	return has;
+}
+
 void RootReader::Clear(){
 	fEvents.clear();
 }
 void RootReader::setEfficiency(std::shared_ptr<Efficiency> eff){
-  for(unsigned int evt=0; evt<fEvents.size(); evt++){
-	  dataPoint e(fEvents.at(evt));
-	  double val = eff->evaluate(e);
-//	  std::cout<<val<<std::endl;
-	  fEvents.at(evt).setEfficiency(val);
-  }
+	for(unsigned int evt=0; evt<fEvents.size(); evt++){
+		dataPoint e(fEvents.at(evt));
+		double val = eff->evaluate(e);
+		//	  std::cout<<val<<std::endl;
+		fEvents.at(evt).setEfficiency(val);
+	}
 }
 void RootReader::resetEfficiency(double e){
-  for(unsigned int evt=0; evt<fEvents.size(); evt++){
-	  fEvents.at(evt).setEfficiency(e);
-  }
+	for(unsigned int evt=0; evt<fEvents.size(); evt++){
+		fEvents.at(evt).setEfficiency(e);
+	}
 }
 
 std::shared_ptr<Data> RootReader::rndSubSet(unsigned int size, std::shared_ptr<Generator> gen){
@@ -192,44 +204,44 @@ Event& RootReader::getEvent(const int i){
 }
 
 allMasses RootReader::getMasses(const unsigned int startEvent, unsigned int nEvents){
-  if(!fEvents.size()) return allMasses();
-  if(!nEvents) nEvents = fEvents.size();
-  unsigned int nParts = fEvents.at(0).getNParticles();
-  BOOST_LOG_TRIVIAL(debug)<<"RootReader::getMasses() #particles: "<<nParts;
+	if(!fEvents.size()) return allMasses();
+	if(!nEvents) nEvents = fEvents.size();
+	unsigned int nParts = fEvents.at(0).getNParticles();
+	BOOST_LOG_TRIVIAL(debug)<<"RootReader::getMasses() #particles: "<<nParts;
 
-  //determine invMass combinations
-  unsigned int nMasses=0;
-  std::vector<std::pair<unsigned int, unsigned int> > ids;
-  for(unsigned int i=0; i<nParts; i++)
-    for(unsigned int j=i+1; j<nParts; j++){
-      nMasses++;
-      ids.push_back(std::make_pair(i+1,j+1));
-    }
-  BOOST_LOG_TRIVIAL(debug)<<"RootReader::getMasses() #invMasses: "<<nMasses;
+	//determine invMass combinations
+	unsigned int nMasses=0;
+	std::vector<std::pair<unsigned int, unsigned int> > ids;
+	for(unsigned int i=0; i<nParts; i++)
+		for(unsigned int j=i+1; j<nParts; j++){
+			nMasses++;
+			ids.push_back(std::make_pair(i+1,j+1));
+		}
+	BOOST_LOG_TRIVIAL(debug)<<"RootReader::getMasses() #invMasses: "<<nMasses;
 
-  if(startEvent+nEvents>fEvents.size()){
-    nEvents = fEvents.size() - startEvent;
-    //Todo: Exception
-  }
+	if(startEvent+nEvents>fEvents.size()){
+		nEvents = fEvents.size() - startEvent;
+		//Todo: Exception
+	}
 
-  unsigned int nSkipped =0; //count events which are outside PHSP boundary
-  unsigned int nFilled=0; //count events which are outside PHSP boundary
+	unsigned int nSkipped =0; //count events which are outside PHSP boundary
+	unsigned int nFilled=0; //count events which are outside PHSP boundary
 
-  allMasses result(nMasses, ids);
-  //calc and store inv masses
-  for(unsigned int evt=startEvent; evt<startEvent+nEvents; evt++){
-    //Event tmp = fEvents.at(evt);
+	allMasses result(nMasses, ids);
+	//calc and store inv masses
+	for(unsigned int evt=startEvent; evt<startEvent+nEvents; evt++){
+		//Event tmp = fEvents.at(evt);
 
-    if( result.Fill(fEvents.at(evt)) ) nFilled++;
-    else nSkipped++;
+		if( result.Fill(fEvents.at(evt)) ) nFilled++;
+		else nSkipped++;
 
-    // Check number of particle in TClonesrray
-    //if( nParts != tmp.getNParticles() ){
-    //  result.nEvents--;
-   //   continue;
-   // }
+		// Check number of particle in TClonesrray
+		//if( nParts != tmp.getNParticles() ){
+		//  result.nEvents--;
+		//   continue;
+		// }
 
-  /*  result.eff.at(evt) = tmp.getEfficiency();
+		/*  result.eff.at(evt) = tmp.getEfficiency();
     result.weight.at(evt) = tmp.getWeight();
 
     for(unsigned int pa=0; pa<nParts; pa++){
@@ -251,7 +263,7 @@ allMasses RootReader::getMasses(const unsigned int startEvent, unsigned int nEve
 	if(nSkipped)
 		BOOST_LOG_TRIVIAL(debug)<<"RootReader::getMasses() "<<nSkipped
 		<<"("<<(double)nSkipped/fEvents.size()*100<<"%) data points are "
-				"outside the PHSP boundary. We skip these points!";
+		"outside the PHSP boundary. We skip these points!";
 
 	//	std::cout<<"after      "<<result.masses_sq.at(std::make_pair(2,3)).size()<<std::endl;
 	return result;

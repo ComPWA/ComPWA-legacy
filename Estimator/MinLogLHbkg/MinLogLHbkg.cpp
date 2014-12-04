@@ -14,6 +14,7 @@
 #include <memory>
 #include <vector>
 #include <cmath>
+#include <exception>
 
 #include "Estimator/MinLogLHbkg/MinLogLHbkg.hpp"
 #include "Core/Event.hpp"
@@ -34,9 +35,10 @@ MinLogLHbkg::MinLogLHbkg(std::shared_ptr<Amplitude> amp_, std::shared_ptr<Data> 
 	if(!(startEvent+nUseEvt_<=nEvts_)) nUseEvt_ = nEvts_-startEvent;
 	if(!(startEvent+nUseEvt_<=nPhsp_)) nUseEvt_ = nPhsp_-startEvent;
 	mData = data->getMasses();
+	if(data->hasWeights() && signalFraction!=1.)
+		throw std::runtime_error("MinLogLHbkg::MinLogLhbkg() data sample has weights and signal fraction is !=1. That makes no sense!");
 	mPhspSample = phspSample->getMasses();
 	if(accSample) mAccSample = accSample->getMasses();
-//	signalFraction = amp->getSignalFraction();
 	BOOST_LOG_TRIVIAL(debug)<<"MinLogLHbkg: fraction of signal is set to "<<signalFraction<<".";
 	calcSumOfWeights();
 }
@@ -84,6 +86,8 @@ void MinLogLHbkg::setAmplitude(std::shared_ptr<Amplitude> amp_, std::shared_ptr<
 	signalFraction = sigFrac;
 	useFunctionTree = 0;//ensure that iniLHtree is executed
 	setUseFunctionTree(useFuncTr);
+	if(data->hasWeights() && signalFraction!=1.)
+		throw std::runtime_error("MinLogLHbkg::MinLogLhbkg() data sample has weights and signal fraction !=1. That makes no sense!");
 	calcSumOfWeights();
 	return;
 }
@@ -132,7 +136,11 @@ void MinLogLHbkg::iniLHtree(){
 	//====== PHSP tree for LH normalization
 	signalPhspTree = std::shared_ptr<FunctionTree>(new FunctionTree());
 	signalPhspTree->createHead("invNormLH", invStrat);// 1/normLH
-	signalPhspTree->createNode("normLH", addStrat,"invNormLH"); // normLH = \sum_{evPHSP} |T_{evPHSP}|^2
+	signalPhspTree->createNode("normFactor", multDStrat, "invNormLH"); // normLH = phspVolume/N_{mc} |T_{evPHSP}|^2
+	signalPhspTree->createLeaf("phspVolume", Kinematics::instance()->getPhspVolume(), "normFactor");
+	signalPhspTree->createNode("InvNmc", invStrat, "normFactor");
+	signalPhspTree->createLeaf("Nmc", mPhspSample.nEvents, "InvNmc");
+	signalPhspTree->createNode("sumAmp", addStrat,"normFactor"); // sumAmp = \sum_{evPHSP} |T_{evPHSP}|^2
 	std::shared_ptr<MultiDouble> eff;
 
 	//Which kind of efficiency correction should be used?
@@ -143,8 +151,6 @@ void MinLogLHbkg::iniLHtree(){
 				"using toy sample and assume that efficiency values are saved for every event!";
 		//Efficiency values of toy phsp sample
 		eff = std::shared_ptr<MultiDouble>( new MultiDouble("eff",mPhspSample.eff) ); //only needed for opt == "norm"
-		std::cout<<eff->to_str()<<std::endl;
-		std::cout<<phspSample->getEvent(0).getEfficiency()<<std::endl;
 		signalPhspTree->createNode("AmplitudeEff", mmultStrat, "IntensPhsp", mPhspSample.nEvents, false); //Sum of resonances, at each point
 		signalPhspTree->createLeaf("eff", eff, "AmplitudeEff"); //efficiency
 		signalPhspTree->insertTree(signalPhspTree_amp, "AmplitudeEff"); //Sum of resonances, at each point

@@ -70,9 +70,6 @@ public:
 	virtual std::complex<double> getFirstReso(dataPoint& point, ParameterList& par);
 	virtual std::complex<double> getFirstBW(dataPoint& point, ParameterList& par);
 
-	virtual void setNevents(unsigned int n) { _entries=n; };
-	virtual unsigned int getNevents() { return _entries; };
-
 	//! setting new parameterList
 	virtual void setParameterList(ParameterList& par);
 	//! fill ParameterList with copied shared_ptr
@@ -182,16 +179,10 @@ protected:
 	double _maxFcnVal;
 	AmpSumOfAmplitudes totAmp;
 	AmplitudeSetup ampSetup;
-//	std::shared_ptr<FunctionTree> physicsTree;
-//	std::shared_ptr<FunctionTree> physicsTree_basic;
-//	std::shared_ptr<FunctionTree> phspTree;
-//	std::shared_ptr<FunctionTree> phspTree_basic;
-	//	std::shared_ptr<ParameterList> treePar;
 
 	double maxVal;
 
 	normStyle _normStyle;
-	unsigned int _entries;
 	double _dpArea;
 	unsigned int nAmps;
 	double signalFraction;

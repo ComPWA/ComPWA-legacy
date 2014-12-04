@@ -85,6 +85,8 @@ public:
 	void resetEfficiency(double e=1.);
 	//! Reset weights
 	void resetWeights(double w=1.);
+	//! Weights set?
+	bool hasWeights();
 
 protected:
 	void read();

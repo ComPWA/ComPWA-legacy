@@ -344,9 +344,6 @@ double DalitzKinematics::getPhspVolume(){
 	return _DParea;
 }
 void DalitzKinematics::calcDParea(){
-
-	//	std::cout<<"DPKinematics: DEBUG: calculating dalitz plot area"<<std::endl;
-	BOOST_LOG_TRIVIAL(debug)<<"DPKinematics: DEBUG: calculating dalitz plot area";
 	size_t dim=2;
 	double res=0.0, err=0.0;
 
@@ -354,7 +351,7 @@ void DalitzKinematics::calcDParea(){
 	double xLimit_low[2] = {m13_sq_min,m23_sq_min};
 	double xLimit_high[2] = {m13_sq_max,m23_sq_max};
 
-	size_t calls = 1000000;
+	size_t calls = 2000000;
 	gsl_rng_env_setup ();
 	const gsl_rng_type *T = gsl_rng_default; //type of random generator
 	gsl_rng *r = gsl_rng_alloc(T); //random generator
@@ -364,11 +361,11 @@ void DalitzKinematics::calcDParea(){
 	gsl_monte_vegas_state *s = gsl_monte_vegas_alloc (dim);
 	gsl_monte_vegas_integrate (&F, xLimit_low, xLimit_high, 2, calls, r,s,&res, &err);
 	gsl_monte_vegas_free(s);
-	BOOST_LOG_TRIVIAL(debug)<<"DPKinematics: Area of dalitz plot form MC integration: "<<res<<"+-"<<err<<" relAcc [%]: "<<100*err/res;
+	BOOST_LOG_TRIVIAL(debug)<<"DPKinematics::calcDParea() Dalitz plot area (MC integration): "
+			<<"("<<res<<"+-"<<err<<") GeV^4 relAcc [%]: "<<100*err/res;
 
 	_DParea=res;
 	_DPareaCalculated=1;
-	BOOST_LOG_TRIVIAL(debug)<<"DalitzKinematics::calcDParea() area of phase space: "<<_DParea;
 	return;
 }
 unsigned int DalitzKinematics::getSpin(unsigned int num){
