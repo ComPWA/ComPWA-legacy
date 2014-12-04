@@ -73,8 +73,7 @@ public:
 	 * The allocated size of the arrays should be n+1.
 	 */
 	void phspContour(unsigned int xsys,unsigned int ysys, unsigned int n, double* xcoord, double* ycoord);
-	/**
-	 * \brief Calculates the helicity angle.
+	/*! Calculates the helicity angle.
 	 *
 	 * Calculates the helicity angle for subsystem @param sys given the invariant masses
 	 * @param invMass23sq and @param invMass23sq. The angle is measured versus daughter 2 in system [12],

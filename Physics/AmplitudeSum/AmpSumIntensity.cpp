@@ -83,12 +83,9 @@ void AmpSumIntensity::init(){
 	result.AddParameter(std::shared_ptr<DoubleParameter>(new DoubleParameter("AmpSumResult")));
 
 	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
-	_dpArea = kin->getPhspVolume();
-	//  std::cout<<kin->getPhspVolume()<<std::endl;
 	_calcNorm=1;
 	if(_normStyle==normStyle::none) _calcNorm=0;
 	BOOST_LOG_TRIVIAL(debug)<<"AmpSumIntensity::init() number of Entries in dalitz plot set to: "<<_entries;
-	BOOST_LOG_TRIVIAL(debug)<<"AmpSumIntensity::init() area of phase space: "<<_dpArea;
 	BOOST_LOG_TRIVIAL(debug)<<"AmpSumIntensity::init() signal fraction: "<<signalFraction;
 
 	params.push_back( std::shared_ptr<DoubleParameter> (
