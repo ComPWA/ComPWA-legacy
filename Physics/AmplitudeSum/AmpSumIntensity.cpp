@@ -594,7 +594,7 @@ void AmpSumIntensity::calcMaxVal(std::shared_ptr<Generator> gen){
 	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
 
 	double maxM23=-999; double maxM13=-999; double maxVal=0;
-	for(unsigned int i=0; i<100000; i++){
+	for(unsigned int i=0; i<2000000; i++){
 		double m23sq=gen->getUniform()*(kin->m23_sq_max-kin->m23_sq_min)+kin->m23_sq_min;
 		double m13sq=gen->getUniform()*(kin->m13_sq_max-kin->m13_sq_min)+kin->m13_sq_min;
 		//		dataPoint point; point.setVal("m13sq",m13sq); point.setVal("m23sq",m23sq);
