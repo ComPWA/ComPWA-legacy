@@ -207,7 +207,6 @@ allMasses RootReader::getMasses(const unsigned int startEvent, unsigned int nEve
 	if(!fEvents.size()) return allMasses();
 	if(!nEvents) nEvents = fEvents.size();
 	unsigned int nParts = fEvents.at(0).getNParticles();
-	BOOST_LOG_TRIVIAL(debug)<<"RootReader::getMasses() #particles: "<<nParts;
 
 	//determine invMass combinations
 	unsigned int nMasses=0;
@@ -217,7 +216,6 @@ allMasses RootReader::getMasses(const unsigned int startEvent, unsigned int nEve
 			nMasses++;
 			ids.push_back(std::make_pair(i+1,j+1));
 		}
-	BOOST_LOG_TRIVIAL(debug)<<"RootReader::getMasses() #invMasses: "<<nMasses;
 
 	if(startEvent+nEvents>fEvents.size()){
 		nEvents = fEvents.size() - startEvent;

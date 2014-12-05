@@ -359,7 +359,12 @@ void MinuitResult::genOutput(std::ostream& out, std::string opt){
 					continue;
 				}
 				tableResult << *truePar;
+				double pi = PhysConst::instance()->getConstValue("Pi");
 				double pull = (truePar->GetValue()-outPar->GetValue() );
+				if(isAngle && !isFixed) { //shift pull by 2*pi if that reduces the deviation
+					while( pull<0 && pull<-pi) pull+=2*pi;
+					while( pull>0 && pull>pi) pull-=2*pi;
+				}
 				if( errorType == ErrorType::ASYM && pull < 0)
 					pull /= outPar->GetError()->GetErrorLow();
 				else if( errorType == ErrorType::ASYM && pull > 0)

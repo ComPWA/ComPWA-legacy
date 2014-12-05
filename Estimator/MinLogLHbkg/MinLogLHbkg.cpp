@@ -146,7 +146,7 @@ void MinLogLHbkg::iniLHtree(){
 	//Which kind of efficiency correction should be used?
 	if(!accSample) {//binned
 		signalPhspTree_amp = amp->getAmpTree(mPhspSample,mPhspSample,"_Phsp");
-		signalPhspTree->createNode("IntensPhsp", msqStrat, "normLH", mPhspSample.nEvents, false); //|T_{ev}|^2
+		signalPhspTree->createNode("IntensPhsp", msqStrat, "sumAmp", mPhspSample.nEvents, false); //|T_{ev}|^2
 		BOOST_LOG_TRIVIAL(debug)<<"MinLogLHbkg::iniLHTree() setting up normalization tree, "
 				"using toy sample and assume that efficiency values are saved for every event!";
 		//Efficiency values of toy phsp sample
@@ -156,7 +156,7 @@ void MinLogLHbkg::iniLHtree(){
 		signalPhspTree->insertTree(signalPhspTree_amp, "AmplitudeEff"); //Sum of resonances, at each point
 	}
 	else {//unbinned
-		signalPhspTree->createNode("IntensPhsp", msqStrat, "normLH", mAccSample.nEvents, false); //|T_{ev}|^2
+		signalPhspTree->createNode("IntensPhsp", msqStrat, "sumAmp", mAccSample.nEvents, false); //|T_{ev}|^2
 		signalPhspTree_amp = amp->getAmpTree(mAccSample,mPhspSample,"_Phsp");
 		BOOST_LOG_TRIVIAL(debug)<<"MinLogLHbkg::iniLHTree() setting up normalization tree, "
 				"using sample of accepted phsp events for efficiency correction!";
