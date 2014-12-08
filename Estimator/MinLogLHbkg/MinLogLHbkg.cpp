@@ -136,11 +136,12 @@ void MinLogLHbkg::iniLHtree(){
 	//====== PHSP tree for LH normalization
 	signalPhspTree = std::shared_ptr<FunctionTree>(new FunctionTree());
 	signalPhspTree->createHead("invNormLH", invStrat);// 1/normLH
-	signalPhspTree->createNode("normFactor", multDStrat, "invNormLH"); // normLH = phspVolume/N_{mc} |T_{evPHSP}|^2
-	signalPhspTree->createLeaf("phspVolume", Kinematics::instance()->getPhspVolume(), "normFactor");
-	signalPhspTree->createNode("InvNmc", invStrat, "normFactor");
-	signalPhspTree->createLeaf("Nmc", mPhspSample.nEvents, "InvNmc");
-	signalPhspTree->createNode("sumAmp", addStrat,"normFactor"); // sumAmp = \sum_{evPHSP} |T_{evPHSP}|^2
+//	signalPhspTree->createNode("normFactor", multDStrat, "invNormLH"); // normLH = phspVolume/N_{mc} |T_{evPHSP}|^2
+//	signalPhspTree->createLeaf("phspVolume", Kinematics::instance()->getPhspVolume(), "normFactor");
+//	signalPhspTree->createLeaf("InvNmc", 1/ ( (double) mPhspSample.nEvents), "normFactor");
+//	signalPhspTree->createNode("sumAmp", addStrat,"normFactor"); // sumAmp = \sum_{evPHSP} |T_{evPHSP}|^2
+
+	signalPhspTree->createNode("sumAmp", addStrat,"invNormLH"); // sumAmp = \sum_{evPHSP} |T_{evPHSP}|^2
 	std::shared_ptr<MultiDouble> eff;
 
 	//Which kind of efficiency correction should be used?
