@@ -104,7 +104,7 @@ int main(int argc, char **argv){
 	myReader->resetWeights(); //setting weights to 1
 	std::shared_ptr<RootReader> myPHSPReader(new RootReader(file, false,"mc"));
 	myPHSPReader->setEfficiency( shared_ptr<Efficiency>(new UnitEfficiency()) ); //setting efficiency to 1
-	std::shared_ptr<AmpSumIntensity> amps(new AmpSumIntensity(ini, AmpSumIntensity::normStyle::none, std::shared_ptr<Efficiency>(new UnitEfficiency()), nFitEvents));
+	std::shared_ptr<AmpSumIntensity> amps(new AmpSumIntensity(ini, AmpSumIntensity::normStyle::one, std::shared_ptr<Efficiency>(new UnitEfficiency()), nFitEvents));
 
 	//std::shared_ptr<Amplitude> amps(new AmpSumIntensity(M, Br, m1, m2, m3,"J/psi","gamma","pi0","pi0", ini));
 	// Initiate parameters
@@ -197,7 +197,8 @@ int main(int argc, char **argv){
 	//return 0;
 
 	BOOST_LOG_TRIVIAL(info) << "LH with optimal parameters: " << esti->controlParameter(par);
-	if(tree) std::cout<<tree<<std::endl;
+	if(tree) BOOST_LOG_TRIVIAL(info)<<tree;
+	exit(1);
 	double startInt[par.GetNDouble()], optiInt[par.GetNDouble()];
 	for(unsigned int i=0; i<par.GetNDouble(); i++){
 		std::shared_ptr<DoubleParameter> tmp = par.GetDoubleParameter(i);
@@ -233,7 +234,7 @@ int main(int argc, char **argv){
 	}
 
 	AmplitudeSetup iniTrue(resoFile);//put start parameters here
-	std::shared_ptr<Amplitude> trueAmp(new AmpSumIntensity(iniTrue, AmpSumIntensity::normStyle::none, std::shared_ptr<Efficiency>(new UnitEfficiency()), myReader->getNEvents()));
+	std::shared_ptr<Amplitude> trueAmp(new AmpSumIntensity(iniTrue, AmpSumIntensity::normStyle::one, std::shared_ptr<Efficiency>(new UnitEfficiency()), myReader->getNEvents()));
 	ParameterList truePar;
 	trueAmp->fillStartParVec(truePar); //true values
 	genResult->setTrueParameters(truePar);
