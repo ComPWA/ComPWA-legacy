@@ -179,7 +179,7 @@ void MinLogLHbkg::iniLHtree(){
 	/* Setup basic tree
 	 * head node is 'Amplitude' which contains the complex amplitude values for each event in sample
 	 */
-	signalTree_amp = amp->getAmpTree(mData,mPhspSample,"");
+	signalTree_amp = amp->getAmpTree(mData,mPhspSample,"data");
 	//------------Setup Tree Pars---------------------
 	std::shared_ptr<MultiDouble> weight = std::shared_ptr<MultiDouble>( new MultiDouble("weight",mData.weight) );
 

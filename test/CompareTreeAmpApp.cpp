@@ -153,10 +153,11 @@ int main(int argc, char **argv){
 	/*the tree contains multiple node with the same names. We search for node 'Intens' first and
 	* afterwards for the resonance.*/
 	std::shared_ptr<TreeNode> intensNode = physicsTree->head()->getChildNode("Intens");
+	MultiDouble* intensValue = dynamic_cast<MultiDouble*>( &*(intensNode->getValue()) );
 	BOOST_LOG_TRIVIAL(info) <<"===========================================";
 	BOOST_LOG_TRIVIAL(info) <<"Compare values: (use first event of data sample) TREE/AMPLITUDE";
 	BOOST_LOG_TRIVIAL(info) <<"===========================================";
-	BOOST_LOG_TRIVIAL(info) <<"Intensity: "<<intensNode ->getChildValue("Intens").real()
+	BOOST_LOG_TRIVIAL(info) <<"Intensity: "<<intensValue->GetValue(0)
 			<<"/"<<*intens.GetDoubleParameter(0);
 	BOOST_LOG_TRIVIAL(info) <<"================= phi(1020) ==========================";
 	BOOST_LOG_TRIVIAL(info) <<"Reso_phi(1020): "<<intensNode->getChildValue("Reso_phi(1020)")
