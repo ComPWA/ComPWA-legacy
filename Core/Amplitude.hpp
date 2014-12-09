@@ -89,6 +89,30 @@ public:
 		return std::shared_ptr<FunctionTree>();
 	}
 
+
+	/* OBSOLETE SECTION ONLY FOR TESTING */
+	virtual std::shared_ptr<FunctionTree> functionTree(allMasses& theMasses, allMasses& toyPhspSample) {
+		//if not implemented, return NULL-pointer
+		return std::shared_ptr<FunctionTree>();
+	}
+	virtual void resetTree() {
+		//if not implemented, return NULL-pointer
+		return;
+	}
+	virtual std::shared_ptr<FunctionTree> phspTree(allMasses& accPhspSample, allMasses& toyPhspSample) {
+		//if not implemented, return NULL-pointer
+		return std::shared_ptr<FunctionTree>();
+	}
+	virtual std::shared_ptr<FunctionTree> phspTree(allMasses& toyPhspSample) {
+		//if not implemented, return NULL-pointer
+		return std::shared_ptr<FunctionTree>();
+	}
+	//! Getter function for function tree
+	virtual std::shared_ptr<FunctionTree> getTree(){ return std::shared_ptr<FunctionTree>(); }
+	//! Getter function for phsp tree
+	virtual std::shared_ptr<FunctionTree> getPhspTree(){ return std::shared_ptr<FunctionTree>(); }
+	/* OBSOLETE SECTION ONLY FOR TESTING */
+
 protected:
 	ParameterList result;
 
