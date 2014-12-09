@@ -136,18 +136,18 @@ void MinLogLHbkg::iniLHtree(){
 	//====== PHSP tree for LH normalization
 	signalPhspTree = std::shared_ptr<FunctionTree>(new FunctionTree());
 	signalPhspTree->createHead("invNormLH", invStrat);// 1/normLH
-//	signalPhspTree->createNode("normFactor", multDStrat, "invNormLH"); // normLH = phspVolume/N_{mc} |T_{evPHSP}|^2
-//	signalPhspTree->createLeaf("phspVolume", Kinematics::instance()->getPhspVolume(), "normFactor");
-//	signalPhspTree->createLeaf("InvNmc", 1/ ( (double) mPhspSample.nEvents), "normFactor");
-//	signalPhspTree->createNode("sumAmp", addStrat,"normFactor"); // sumAmp = \sum_{evPHSP} |T_{evPHSP}|^2
+	signalPhspTree->createNode("normFactor", multDStrat, "invNormLH"); // normLH = phspVolume/N_{mc} |T_{evPHSP}|^2
+	signalPhspTree->createLeaf("phspVolume", Kinematics::instance()->getPhspVolume(), "normFactor");
+	signalPhspTree->createNode("sumAmp", addStrat,"normFactor"); // sumAmp = \sum_{evPHSP} |T_{evPHSP}|^2
 
-	signalPhspTree->createNode("sumAmp", addStrat,"invNormLH"); // sumAmp = \sum_{evPHSP} |T_{evPHSP}|^2
+//	signalPhspTree->createNode("sumAmp", addStrat,"invNormLH"); // sumAmp = \sum_{evPHSP} |T_{evPHSP}|^2
 	std::shared_ptr<MultiDouble> eff;
 
 	//Which kind of efficiency correction should be used?
 	if(!accSample) {//binned
 		signalPhspTree_amp = amp->getAmpTree(mPhspSample,mPhspSample,"_Phsp");
 		signalPhspTree->createNode("IntensPhsp", msqStrat, "sumAmp", mPhspSample.nEvents, false); //|T_{ev}|^2
+		signalPhspTree->createLeaf("InvNmc", 1/ ( (double) mPhspSample.nEvents), "normFactor");
 		BOOST_LOG_TRIVIAL(debug)<<"MinLogLHbkg::iniLHTree() setting up normalization tree, "
 				"using toy sample and assume that efficiency values are saved for every event!";
 		//Efficiency values of toy phsp sample
@@ -158,6 +158,7 @@ void MinLogLHbkg::iniLHtree(){
 	}
 	else {//unbinned
 		signalPhspTree->createNode("IntensPhsp", msqStrat, "sumAmp", mAccSample.nEvents, false); //|T_{ev}|^2
+		signalPhspTree->createLeaf("InvNmc", 1/ ( (double) mAccSample.nEvents), "normFactor");
 		signalPhspTree_amp = amp->getAmpTree(mAccSample,mPhspSample,"_Phsp");
 		BOOST_LOG_TRIVIAL(debug)<<"MinLogLHbkg::iniLHTree() setting up normalization tree, "
 				"using sample of accepted phsp events for efficiency correction!";
