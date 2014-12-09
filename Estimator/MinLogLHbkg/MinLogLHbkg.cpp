@@ -146,15 +146,16 @@ void MinLogLHbkg::iniLHtree(){
 	//Which kind of efficiency correction should be used?
 	if(!accSample) {//binned
 		signalPhspTree_amp = amp->getAmpTree(mPhspSample,mPhspSample,"_Phsp");
-		signalPhspTree->createNode("IntensPhsp", msqStrat, "sumAmp", mPhspSample.nEvents, false); //|T_{ev}|^2
+		eff = std::shared_ptr<MultiDouble>( new MultiDouble("eff",mPhspSample.eff) ); //only needed for opt == "norm"
 		signalPhspTree->createLeaf("InvNmc", 1/ ( (double) mPhspSample.nEvents), "normFactor");
+
+		signalPhspTree->createNode("IntensPhspEff", mmultDStrat, "sumAmp", mPhspSample.nEvents, false); //|T_{ev}|^2
+		signalPhspTree->createLeaf("eff", eff, "IntensPhspEff"); //efficiency
+		signalPhspTree->createNode("IntensPhsp", msqStrat, "IntensPhspEff", mPhspSample.nEvents, false); //|T_{ev}|^2
 		BOOST_LOG_TRIVIAL(debug)<<"MinLogLHbkg::iniLHTree() setting up normalization tree, "
 				"using toy sample and assume that efficiency values are saved for every event!";
 		//Efficiency values of toy phsp sample
-		eff = std::shared_ptr<MultiDouble>( new MultiDouble("eff",mPhspSample.eff) ); //only needed for opt == "norm"
-		signalPhspTree->createNode("AmplitudeEff", mmultStrat, "IntensPhsp", mPhspSample.nEvents, false); //Sum of resonances, at each point
-		signalPhspTree->createLeaf("eff", eff, "AmplitudeEff"); //efficiency
-		signalPhspTree->insertTree(signalPhspTree_amp, "AmplitudeEff"); //Sum of resonances, at each point
+		signalPhspTree->insertTree(signalPhspTree_amp, "IntensPhsp"); //Sum of resonances, at each point
 	}
 	else {//unbinned
 		signalPhspTree->createNode("IntensPhsp", msqStrat, "sumAmp", mAccSample.nEvents, false); //|T_{ev}|^2
@@ -203,6 +204,7 @@ void MinLogLHbkg::iniLHtree(){
 	physicsTree->createNode("Intens", msqStrat, "normIntens", mData.nEvents, false);
 	physicsTree->insertTree(signalTree_amp,"Intens");
 
+	physicsTree->recalculate();
 	BOOST_LOG_TRIVIAL(debug) << std::endl << physicsTree;
 	if(!physicsTree->sanityCheck()) {
 		throw std::runtime_error("MinLogLHbkg::iniLHtree() tree has structural problems. Sanity check not passed!");
