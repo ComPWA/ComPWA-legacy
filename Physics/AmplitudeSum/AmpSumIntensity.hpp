@@ -50,10 +50,10 @@ public:
 			AmplitudeSetup ini,	normStyle ns=none);
 	AmpSumIntensity(AmplitudeSetup ini, normStyle ns,
 			std::shared_ptr<Efficiency> eff=std::shared_ptr<Efficiency>(new UnitEfficiency()),
-			unsigned int nCalls=100000, double signalFrac=1.);
+			unsigned int nCalls=1000000);
 	AmpSumIntensity(AmplitudeSetup ini,
 			std::shared_ptr<Efficiency> eff=std::shared_ptr<Efficiency>(new UnitEfficiency()),
-			unsigned int nCalls=100000, double signalFrac=1.);
+			unsigned int nCalls=1000000);
 	AmpSumIntensity(const AmpSumIntensity& other);
 
 	double evaluate(double x[], size_t dim);
@@ -220,7 +220,6 @@ protected:
 	normStyle _normStyle;
 	double _dpArea;
 	unsigned int nAmps;
-	double signalFraction;
 
 	//Resonance Variables
 	std::vector<std::string> namer;

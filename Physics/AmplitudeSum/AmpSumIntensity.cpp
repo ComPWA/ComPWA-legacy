@@ -47,23 +47,23 @@ using namespace boost::log;
 AmpSumIntensity::AmpSumIntensity(const AmpSumIntensity& other) : nAmps(other.nAmps), _dpArea(other._dpArea),
 		_normStyle(other._normStyle),maxVal(other.maxVal),ampSetup(other.ampSetup),
 		totAmp(other.totAmp), _calcMaxFcnVal(other._calcMaxFcnVal), _maxFcnVal(other._maxFcnVal),
-		signalFraction(other.signalFraction),_nCalls(other._nCalls){
+		_nCalls(other._nCalls){
 }
 
 AmpSumIntensity::AmpSumIntensity(AmplitudeSetup ini, normStyle ns, std::shared_ptr<Efficiency> eff,
-		unsigned int nCalls, double signalFrac) :
+		unsigned int nCalls) :
 							totAmp("relBWsumAmplitude"), ampSetup(ini),
 							_normStyle(ns), _calcNorm(1), _dpArea(1.),
-							_calcMaxFcnVal(0),eff_(eff),signalFraction(signalFrac),_nCalls(nCalls)
+							_calcMaxFcnVal(0),eff_(eff),_nCalls(nCalls)
 {
 	init();
 }
 
 AmpSumIntensity::AmpSumIntensity(AmplitudeSetup ini, std::shared_ptr<Efficiency> eff,
-		unsigned int nCalls, double signalFrac) :
+		unsigned int nCalls) :
 							totAmp("relBWsumAmplitude"), ampSetup(ini),
 							_normStyle(none), _calcNorm(0), _dpArea(1.),
-							_calcMaxFcnVal(0),eff_(eff),signalFraction(signalFrac),_nCalls(nCalls)
+							_calcMaxFcnVal(0),eff_(eff),_nCalls(nCalls)
 {
 	init();
 }
@@ -75,7 +75,7 @@ AmpSumIntensity::AmpSumIntensity(const double inM, const double inBr, const doub
 							totAmp("relBWsumAmplitude"), ampSetup(ini),
 							_normStyle(ns), _calcNorm(1),_dpArea(1.),
 							_calcMaxFcnVal(0),eff_(std::shared_ptr<Efficiency>(new UnitEfficiency())),
-							signalFraction(1.),_nCalls(100000)
+							_nCalls(1000000)
 {
 	init();
 }
@@ -86,7 +86,6 @@ void AmpSumIntensity::init(){
 	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
 	_calcNorm=1;
 	if(_normStyle==normStyle::none) _calcNorm=0;
-	BOOST_LOG_TRIVIAL(debug)<<"AmpSumIntensity::init() signal fraction: "<<signalFraction;
 
 	params.push_back( std::shared_ptr<DoubleParameter> (
 			new DoubleParameter("motherRadius",1.5) ));
@@ -594,7 +593,7 @@ void AmpSumIntensity::calcMaxVal(std::shared_ptr<Generator> gen){
 	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
 
 	double maxM23=-999; double maxM13=-999; double maxVal=0;
-	for(unsigned int i=0; i<2000000; i++){
+	for(unsigned int i=0; i<_nCalls; i++){
 		double m23sq=gen->getUniform()*(kin->m23_sq_max-kin->m23_sq_min)+kin->m23_sq_min;
 		double m13sq=gen->getUniform()*(kin->m13_sq_max-kin->m13_sq_min)+kin->m13_sq_min;
 		//		dataPoint point; point.setVal("m13sq",m13sq); point.setVal("m23sq",m23sq);
