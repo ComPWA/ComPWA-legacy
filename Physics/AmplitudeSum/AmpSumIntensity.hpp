@@ -44,19 +44,20 @@ public:
 		one
 
 	};
-	//! Default Constructor (0x0)
-	AmpSumIntensity(const double inM, const double inBr, const double in1,const double in2, const double in3,
-			std::string nameM, std::string name1,std::string name2,std::string name3,
-			AmplitudeSetup ini,	normStyle ns=none);
 	AmpSumIntensity(AmplitudeSetup ini, normStyle ns,
-			std::shared_ptr<Efficiency> eff=std::shared_ptr<Efficiency>(new UnitEfficiency()),
-			unsigned int nCalls=1000000);
+			std::shared_ptr<Efficiency> eff, unsigned int nCalls);
 	AmpSumIntensity(AmplitudeSetup ini,
-			std::shared_ptr<Efficiency> eff=std::shared_ptr<Efficiency>(new UnitEfficiency()),
-			unsigned int nCalls=1000000);
+			std::shared_ptr<Efficiency> eff, unsigned int nCalls);
 	AmpSumIntensity(const AmpSumIntensity& other);
 
+	//! wrapper function for function value times efficiency at point x
+	double evaluateEff(double x[], size_t dim);
+	//! wrapper function for function value at point x
 	double evaluate(double x[], size_t dim);
+	//! normalization integral for parameters \par
+	virtual const double normalization(ParameterList& par);
+	//! normalization integral
+	virtual const double normalization();
 	//! normalization integral for parameters \par
 	virtual const double integral(ParameterList& par);
 	//! normalization integral
@@ -191,7 +192,7 @@ public:
 
 protected:
 	void init();
-	/**Initialize function tree
+	/**Setup Basic Tree
 	 *
 	 * @param theMasses data sample
 	 * @param toyPhspSample sample of flat toy MC events for normalization of the resonances
@@ -199,9 +200,6 @@ protected:
 	 * with efficiency corrected toy phsp sample or "normAcc" normalization tree with sample
 	 * of accepted flat phsp events
 	 */
-	//	void setupTree(allMasses& theMasses, allMasses& toyPhspSample, std::string opt);
-	//	void setupPhspTree(allMasses& theMasses, allMasses& toyPhspSample, std::string opt);
-	//	void setupPhysicsTree(allMasses& theMasses, allMasses& toyPhspSample);
 	std::shared_ptr<FunctionTree> setupBasicTree(allMasses& theMasses,allMasses& toyPhspSample, std::string suffix="");
 	//! calculate maximum value of amplitude with parameters \par
 	virtual void calcMaxVal(ParameterList& par ,std::shared_ptr<Generator> gen);

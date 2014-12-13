@@ -68,6 +68,23 @@ public:
 	static std::shared_ptr<ControlParameter> createInstance(std::shared_ptr<Amplitude> amp_,
 			std::shared_ptr<Data> data_, std::shared_ptr<Data> phspSample_,std::shared_ptr<Data> accSample_,
 			unsigned int startEvent=0, unsigned int nEvents=0, double sigFrac=1.);
+	/** Create instance of MinLogLHbkg.
+	 * An unbinned efficiency correction is applied using #accSample_.
+	 *
+	 * @param amp_ amplitude
+	 * @param bkg_ background description amplitude
+	 * @param data_ data sample
+	 * @param phspSample_ phsp sample for normalization
+	 * @param accSample_ sample of efficiency applied phsp events for unbinned efficiency correction
+	 * @param startEvent use #data_ from that position on
+	 * @param nEvents number of events to process
+	 * @param sigFrac signal fraction in data sample
+	 * @return std::shared_ptr<Data> of existing instance or newly created instance
+	 */
+	static std::shared_ptr<ControlParameter> createInstance(std::shared_ptr<Amplitude> amp_,std::shared_ptr<Amplitude> bkg_,
+			std::shared_ptr<Data> data_, std::shared_ptr<Data> phspSample_,std::shared_ptr<Data> accSample_,
+			unsigned int startEvent, unsigned int nEvents, double sigFrac);
+
 	/** Set new amplitude to existing instance
 	 *
 	 * @param amp_ amplitude
@@ -81,6 +98,21 @@ public:
 	virtual void setAmplitude(std::shared_ptr<Amplitude> amp_, std::shared_ptr<Data> data_,
 			std::shared_ptr<Data> phspSample_, std::shared_ptr<Data> accSample_,
 			unsigned int startEvent=0, unsigned int nEvents=0, bool useFuncTr=0, double sigFrac=1.);
+	/** Set new amplitude to existing instance
+	 *
+	 * @param amp_ amplitude
+	 * @param bkg_ amplitude
+	 * @param data_ data sample
+	 * @param phspSample_ phsp sample for normalization
+	 * @param accSample_ sample of efficiency applied phsp events for unbinned efficiency correction
+	 * @param startEvent use #data_ from that position on
+	 * @param nEvents number of events to process
+	 * @param useFuncTr use FunctionTree yes/no?
+	 */
+	virtual void setAmplitude(std::shared_ptr<Amplitude> amp_, std::shared_ptr<Amplitude> bkg_,std::shared_ptr<Data> data_,
+			std::shared_ptr<Data> phspSample_, std::shared_ptr<Data> accSample_,
+			unsigned int startEvent=0, unsigned int nEvents=0, bool useFuncTr=0, double sigFrac=1.);
+
 	//! Check if tree for LH calculation is available
 	virtual bool hasTree() { return useFunctionTree; }
 	//! Get FunctionTree for LH calculation. Check first if its available using MinLogLHbkg::hasTree().
@@ -100,7 +132,7 @@ protected:
 	//! Default Constructor
 	MinLogLHbkg() { };
 	//! Constructor
-	MinLogLHbkg(std::shared_ptr<Amplitude> amp, std::shared_ptr<Data> data_,
+	MinLogLHbkg(std::shared_ptr<Amplitude> amp_, std::shared_ptr<Amplitude> bkg_,std::shared_ptr<Data> data_,
 			std::shared_ptr<Data> phspSample_, std::shared_ptr<Data> accSample_,
 			unsigned int startEvent, unsigned int nEvents, double sigFrac=1.);
 	//! Uses ampTree and creates a tree that calculates the full LH
@@ -116,14 +148,18 @@ private:
 	std::shared_ptr<Amplitude> amp;
 	//! FunctionTree calculation the LH normalizaton
 	std::shared_ptr<FunctionTree> signalPhspTree;
-	//! Amplitude tree from #amp with invariant mass from data sample
+	//! Signal amplitude tree from #amp with invariant mass from data sample
 	std::shared_ptr<FunctionTree> signalTree_amp;
-	//! Amplitude tree from #amp with invariant masses from phsp/acc sample
+	//! Signal amplitude tree from #amp with invariant masses from phsp/acc sample
 	std::shared_ptr<FunctionTree> signalPhspTree_amp;
-
-	//! Background decay model (not implemented yet)
+	//! Background amplitude
 	std::shared_ptr<Amplitude> ampBkg;
+	//! FunctionTree calculation of background normalization
 	std::shared_ptr<FunctionTree> bkgPhspTree;
+	//! Background amplitude tree from #ampBkg with invariant mass from data sample
+	std::shared_ptr<FunctionTree> bkgTree_amp;
+	//! Background amplitude tree from #ampBkg with invariant masses from phsp/acc sample
+	std::shared_ptr<FunctionTree> bkgPhspTree_amp;
 
 	//! Data sample
 	std::shared_ptr<Data> data;

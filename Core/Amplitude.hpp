@@ -71,14 +71,14 @@ public:
 	virtual int getIdOfResonance(std::string name){ return 0;}
 	//! convert resonance \param id to name
 	virtual std::string getNameOfResonance(unsigned int id){ return std::string("muh");}
-	virtual double getMagnitude(std::string name) {return -999;};
-	virtual double getMagnitude(unsigned int id) {return -999;};
-	virtual double getPhase(std::string name) {return -999;};
-	virtual double getPhase(unsigned int id) {return -999;};
-	virtual double getSpin(std::string name) {return -999;};
-	virtual double getSpin(unsigned int id) {return -999;};
-	virtual double getFraction(std::string name) = 0;
-	virtual double getFraction(unsigned int id) = 0;
+//	virtual double getMagnitude(std::string name) {return -999;};
+//	virtual double getMagnitude(unsigned int id) {return -999;};
+//	virtual double getPhase(std::string name) {return -999;};
+//	virtual double getPhase(unsigned int id) {return -999;};
+//	virtual double getSpin(std::string name) {return -999;};
+//	virtual double getSpin(unsigned int id) {return -999;};
+//	virtual double getFraction(std::string name) = 0;
+//	virtual double getFraction(unsigned int id) = 0;
 	virtual double getIntValue(std::string var1, double min1, double max1, std::string var2, double min2, double max2) = 0;
 	virtual Amplitude* Clone() = 0;
 

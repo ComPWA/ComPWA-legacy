@@ -134,7 +134,10 @@ bool RunManager::generate( unsigned int number ) {
 			{
 				list = pPhys_->intensity(point,minPar);//unfortunatly not thread safe
 				AMPpdf = *list.GetDoubleParameter(0);
-				if( maxTest < (AMPpdf*weight)) maxTest = weight*AMPpdf;
+//				if( maxTest < (AMPpdf*weight)) maxTest = weight*AMPpdf;
+				if( genMaxVal< (AMPpdf*weight))
+					throw std::runtime_error("RunManager: error in HitMiss procedure. "
+							"Maximum value of random number generation smaller then amplitude maximum!");
 			}
 			if( ampRnd > (weight*AMPpdf) ) continue;
 			i++;

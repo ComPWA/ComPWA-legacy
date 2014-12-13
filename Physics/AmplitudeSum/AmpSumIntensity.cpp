@@ -68,18 +68,6 @@ AmpSumIntensity::AmpSumIntensity(AmplitudeSetup ini, std::shared_ptr<Efficiency>
 	init();
 }
 
-AmpSumIntensity::AmpSumIntensity(const double inM, const double inBr, const double in1,
-		const double in2, const double in3,	std::string nameM,
-		std::string name1,std::string name2,std::string name3,
-		AmplitudeSetup ini, normStyle ns) :
-							totAmp("relBWsumAmplitude"), ampSetup(ini),
-							_normStyle(ns), _calcNorm(1),_dpArea(1.),
-							_calcMaxFcnVal(0),eff_(std::shared_ptr<Efficiency>(new UnitEfficiency())),
-							_nCalls(1000000)
-{
-	init();
-}
-
 void AmpSumIntensity::init(){
 	result.AddParameter(std::shared_ptr<DoubleParameter>(new DoubleParameter("AmpSumResult")));
 
@@ -620,6 +608,7 @@ double AmpSumIntensity::normReso(std::shared_ptr<AmpAbsDynamicalFunction> amp){
 			<<amp->GetName()<<": "<<1.0/norm;
 	return norm;
 }
+/* Calculation amplitude integral (excluding efficiency) */
 double AmpSumIntensity::evaluate(double x[], size_t dim) {
 	if(dim!=2) return 0;
 	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
@@ -638,7 +627,6 @@ double evalWrapperAmpSumIntensity(double* x, size_t dim, void* param) {
 	 */
 	return static_cast<AmpSumIntensity*>(param)->evaluate(x,dim);
 };
-
 const double AmpSumIntensity::integral(ParameterList& par){
 	setParameterList(par);
 	return integral();
@@ -660,6 +648,58 @@ const double AmpSumIntensity::integral(){
 	const gsl_rng_type *T = gsl_rng_default; //type of random generator
 	gsl_rng *r = gsl_rng_alloc(T); //random generator
 	gsl_monte_function G = {&evalWrapperAmpSumIntensity,dim, const_cast<AmpSumIntensity*> (this)};
+
+	/*	Choosing vegas algorithm here, because it is the most accurate:
+	 * 		-> 10^5 calls gives (in my example) an accuracy of 0.03%
+	 * 		 this should be sufficiency for most applications
+	 */
+	gsl_monte_vegas_state *s = gsl_monte_vegas_alloc (dim);
+	gsl_monte_vegas_integrate (&G, xLimit_low, xLimit_high, 2, _nCalls, r,s,&res, &err);
+	gsl_monte_vegas_free(s);
+	BOOST_LOG_TRIVIAL(info)<<"AmpSumIntensity::integrate() Integration result for amplitude sum: "<<res<<"+-"<<err<<" relAcc [%]: "<<100*err/res;
+
+	return res;
+}
+/* Calculation amplitude normalization (including efficiency) */
+double AmpSumIntensity::evaluateEff(double x[], size_t dim) {
+	if(dim!=2) return 0;
+	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
+	//set data point: we assume that x[0]=m13 and x[1]=m23
+	dataPoint point; point.setVal(1,x[0]); point.setVal(0,x[1]);
+	if( !kin->isWithinPhsp(point) ) return 0;//only integrate over phase space
+	ParameterList res = intensity(point);
+	double intens = *res.GetDoubleParameter(0);
+	return intens;
+}
+double evalWrapperAmpSumIntensityEff(double* x, size_t dim, void* param) {
+	/* We need a wrapper here because intensity() is a member function of AmpAbsDynamicalFunction
+	 * and can therefore not be referenced. But gsl_monte_function expects a function reference.
+	 * As third parameter we pass the reference to the current instance of AmpAbsDynamicalFunction
+	 */
+	return static_cast<AmpSumIntensity*>(param)->evaluateEff(x,dim);
+};
+
+const double AmpSumIntensity::normalization(ParameterList& par){
+	setParameterList(par);
+	return integral();
+}
+const double AmpSumIntensity::normalization(){
+	/* Integration functionality was tested with a model with only one normalized amplitude.
+	 * The integration result is equal to the amplitude coefficient^2.
+	 */
+	size_t dim=2;
+	double res=0.0, err=0.0;
+
+	//set limits: we assume that x[0]=m13sq and x[1]=m23sq
+	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
+	double xLimit_low[2] = {kin->m13_sq_min,kin->m23_sq_min};
+	double xLimit_high[2] = {kin->m13_sq_max,kin->m23_sq_max};
+	//	double xLimit_low[2] = {0,0};
+	//	double xLimit_high[2] = {10,10};
+	gsl_rng_env_setup ();
+	const gsl_rng_type *T = gsl_rng_default; //type of random generator
+	gsl_rng *r = gsl_rng_alloc(T); //random generator
+	gsl_monte_function G = {&evalWrapperAmpSumIntensityEff,dim, const_cast<AmpSumIntensity*> (this)};
 
 	/*	Choosing vegas algorithm here, because it is the most accurate:
 	 * 		-> 10^5 calls gives (in my example) an accuracy of 0.03%
