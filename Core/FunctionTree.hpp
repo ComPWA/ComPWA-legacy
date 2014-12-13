@@ -110,18 +110,18 @@ public:
 			throw std::runtime_error("FunctionTree::createNode() head node already exists!");
 		createLeaf(name,extPar,"");
 	}
-	//! Create head node of FcnTree
-	/*!
-	 * Create head node as a leaf.
-	 * \param name identifier of node
-	 * \param strat Strategy with which the node calculates its value
-	 * \sa addNode(), createNode(), createLeaf()
-	 */
-	virtual void createHead(const std::string& name, std::shared_ptr<AbsParameter> extPar){
-		if( head_ )//if head exists throw exception
-			throw std::runtime_error("FunctionTree::createNode() head node already exists!");
-		createLeaf(name,extPar,"");
-	}
+//	//! Create head node of FcnTree
+//	/*!
+//	 * Create head node as a leaf.
+//	 * \param name identifier of node
+//	 * \param strat Strategy with which the node calculates its value
+//	 * \sa addNode(), createNode(), createLeaf()
+//	 */
+//	virtual void createHead(const std::string& name, std::shared_ptr<AbsParameter> extPar){
+//		if( head_ )//if head exists throw exception
+//			throw std::runtime_error("FunctionTree::createNode() head node already exists!");
+//		createLeaf(name,extPar,"");
+//	}
 
 
 	//! Add an existing node to FunctionTree
