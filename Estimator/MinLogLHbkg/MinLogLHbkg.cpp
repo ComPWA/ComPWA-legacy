@@ -45,6 +45,16 @@ MinLogLHbkg::MinLogLHbkg(std::shared_ptr<Amplitude> amp_, std::shared_ptr<Amplit
 		throw std::runtime_error("MinLogLHbkg::MinLogLHbkg() a signal fraction smaller 1 was set"
 				" but no background description given. If you want to assume a flat background, "
 				"pass a Physics//Background//FlatBackground object!");
+
+	//reset all trees before generating new trees; saves a lot of virtual memory
+	signalPhspTree = std::shared_ptr<FunctionTree>();
+	signalTree_amp = std::shared_ptr<FunctionTree>();
+	signalPhspTree_amp = std::shared_ptr<FunctionTree>();
+	bkgPhspTree = std::shared_ptr<FunctionTree>();
+	bkgTree_amp = std::shared_ptr<FunctionTree>();
+	bkgPhspTree_amp = std::shared_ptr<FunctionTree>();
+
+	return;
 }
 
 std::shared_ptr<ControlParameter> MinLogLHbkg::createInstance(std::shared_ptr<Amplitude> amp_,
@@ -109,6 +119,15 @@ void MinLogLHbkg::setAmplitude(std::shared_ptr<Amplitude> amp_, std::shared_ptr<
 				" but no background description given. If you want to assume a flat background, "
 				"pass a Physics//Background//FlatBackground object!");
 	if(signalFraction==1 && !ampBkg) ampBkg = std::shared_ptr<Amplitude>();
+
+	//reset all trees before generating new trees; saves a lot of virtual memory
+	signalPhspTree = std::shared_ptr<FunctionTree>();
+	signalTree_amp = std::shared_ptr<FunctionTree>();
+	signalPhspTree_amp = std::shared_ptr<FunctionTree>();
+	bkgPhspTree = std::shared_ptr<FunctionTree>();
+	bkgTree_amp = std::shared_ptr<FunctionTree>();
+	bkgPhspTree_amp = std::shared_ptr<FunctionTree>();
+
 	return;
 }
 void MinLogLHbkg::setAmplitude(std::shared_ptr<Amplitude> amp_, std::shared_ptr<Amplitude> bkg_,std::shared_ptr<Data> data_,
@@ -134,6 +153,14 @@ void MinLogLHbkg::setUseFunctionTree(bool t) {
 }
 
 void MinLogLHbkg::iniLHtree(){
+	//reset all trees before generating new trees; saves a lot of virtual memory
+	signalPhspTree = std::shared_ptr<FunctionTree>();
+	signalTree_amp = std::shared_ptr<FunctionTree>();
+	signalPhspTree_amp = std::shared_ptr<FunctionTree>();
+	bkgPhspTree = std::shared_ptr<FunctionTree>();
+	bkgTree_amp = std::shared_ptr<FunctionTree>();
+	bkgPhspTree_amp = std::shared_ptr<FunctionTree>();
+
 	BOOST_LOG_TRIVIAL(debug) << "MinLogLHbkg::iniLHtree() constructing the LH tree";
 
 	if(useFunctionTree) return;
@@ -193,31 +220,33 @@ void MinLogLHbkg::iniLHtree(){
 		signalPhspTree->insertTree(signalPhspTree_amp, "IntensPhsp"); //Sum of resonances, at each point
 	}
 	//=== Background normalization
-	bkgPhspTree = std::shared_ptr<FunctionTree>(new FunctionTree());
-	bkgPhspTree->createHead("invBkgNormLH", invStrat);// 1/normLH
-	bkgPhspTree->createNode("normFactor", multDStrat, "invBkgNormLH"); // normLH = phspVolume/N_{mc} |T_{evPHSP}|^2
-	bkgPhspTree->createLeaf("phspVolume", Kinematics::instance()->getPhspVolume(), "normFactor");
-	bkgPhspTree->createNode("sumAmp", addStrat,"normFactor"); // sumAmp = \sum_{evPHSP} |T_{evPHSP}|^2
-	if(!accSample) {//binned
-		bkgPhspTree_amp = ampBkg->getAmpTree(mPhspSample,mPhspSample,"_Phsp");
-		eff = std::shared_ptr<MultiDouble>( new MultiDouble("eff",mPhspSample.eff) );
-		bkgPhspTree->createLeaf("InvNmc", 1/ ( (double) mPhspSample.nEvents), "normFactor");
+	if(ampBkg){
+		bkgPhspTree = std::shared_ptr<FunctionTree>(new FunctionTree());
+		bkgPhspTree->createHead("invBkgNormLH", invStrat);// 1/normLH
+		bkgPhspTree->createNode("normFactor", multDStrat, "invBkgNormLH"); // normLH = phspVolume/N_{mc} |T_{evPHSP}|^2
+		bkgPhspTree->createLeaf("phspVolume", Kinematics::instance()->getPhspVolume(), "normFactor");
+		bkgPhspTree->createNode("sumAmp", addStrat,"normFactor"); // sumAmp = \sum_{evPHSP} |T_{evPHSP}|^2
+		if(!accSample) {//binned
+			bkgPhspTree_amp = ampBkg->getAmpTree(mPhspSample,mPhspSample,"_Phsp");
+			eff = std::shared_ptr<MultiDouble>( new MultiDouble("eff",mPhspSample.eff) );
+			bkgPhspTree->createLeaf("InvNmc", 1/ ( (double) mPhspSample.nEvents), "normFactor");
 
-		bkgPhspTree->createNode("IntensPhspEff", mmultDStrat, "sumAmp", mPhspSample.nEvents, false); //|T_{ev}|^2
-		bkgPhspTree->createLeaf("eff", eff, "IntensPhspEff"); //efficiency
-		bkgPhspTree->createNode("IntensPhsp", msqStrat, "IntensPhspEff", mPhspSample.nEvents, false); //|T_{ev}|^2
-		BOOST_LOG_TRIVIAL(debug)<<"MinLogLHbkg::iniLHTree() setting up tree for background normalization, "
-				"using toy sample and assume that efficiency values are saved for every event!";
-		//Efficiency values of toy phsp sample
-		bkgPhspTree->insertTree(bkgPhspTree_amp, "IntensPhsp"); //Sum of resonances, at each point
-	}
-	else {//unbinned
-		bkgPhspTree->createNode("IntensPhsp", msqStrat, "sumAmp", mAccSample.nEvents, false); //|T_{ev}|^2
-		bkgPhspTree->createLeaf("InvNmc", 1/ ( (double) mAccSample.nEvents), "normFactor");
-		bkgPhspTree_amp = amp->getAmpTree(mAccSample,mPhspSample,"_Phsp");
-		BOOST_LOG_TRIVIAL(debug)<<"MinLogLHbkg::iniLHTree() setting up tree for background normalization, "
-				"using sample of accepted phsp events for efficiency correction!";
-		bkgPhspTree->insertTree(bkgPhspTree_amp, "IntensPhsp"); //Sum of resonances, at each point
+			bkgPhspTree->createNode("IntensPhspEff", mmultDStrat, "sumAmp", mPhspSample.nEvents, false); //|T_{ev}|^2
+			bkgPhspTree->createLeaf("eff", eff, "IntensPhspEff"); //efficiency
+			bkgPhspTree->createNode("IntensPhsp", msqStrat, "IntensPhspEff", mPhspSample.nEvents, false); //|T_{ev}|^2
+			BOOST_LOG_TRIVIAL(debug)<<"MinLogLHbkg::iniLHTree() setting up tree for background normalization, "
+					"using toy sample and assume that efficiency values are saved for every event!";
+			//Efficiency values of toy phsp sample
+			bkgPhspTree->insertTree(bkgPhspTree_amp, "IntensPhsp"); //Sum of resonances, at each point
+		}
+		else {//unbinned
+			bkgPhspTree->createNode("IntensPhsp", msqStrat, "sumAmp", mAccSample.nEvents, false); //|T_{ev}|^2
+			bkgPhspTree->createLeaf("InvNmc", 1/ ( (double) mAccSample.nEvents), "normFactor");
+			bkgPhspTree_amp = amp->getAmpTree(mAccSample,mPhspSample,"_Phsp");
+			BOOST_LOG_TRIVIAL(debug)<<"MinLogLHbkg::iniLHTree() setting up tree for background normalization, "
+					"using sample of accepted phsp events for efficiency correction!";
+			bkgPhspTree->insertTree(bkgPhspTree_amp, "IntensPhsp"); //Sum of resonances, at each point
+		}
 	}
 
 	BOOST_LOG_TRIVIAL(debug)<<"MinLogLHbkg::iniLHTree() construction LH tree";
@@ -237,7 +266,6 @@ void MinLogLHbkg::iniLHtree(){
 	 * head node is 'Amplitude' which contains the complex amplitude values for each event in sample
 	 */
 	signalTree_amp = amp->getAmpTree(mData,mPhspSample,"data");
-	bkgTree_amp= ampBkg->getAmpTree(mData,mPhspSample,"data");
 	//------------Setup Tree Pars---------------------
 	std::shared_ptr<MultiDouble> weight = std::shared_ptr<MultiDouble>( new MultiDouble("weight",mData.weight) );
 
@@ -262,9 +290,12 @@ void MinLogLHbkg::iniLHtree(){
 	//background term
 	physicsTree->createNode("normBkg", mmultDStrat, "addBkgSignal", mData.nEvents, false);// x=f_{bkg}|T|^2/norm_{LH}
 	physicsTree->createLeaf("OneMinusBkgFrac", (1-signalFraction), "normBkg");
-	physicsTree->insertTree(bkgPhspTree, "normBkg"); //provides 1/normLH
-	physicsTree->createNode("IntensBkg", msqStrat, "normBkg", mData.nEvents, false);
-	physicsTree->insertTree(bkgTree_amp,"IntensBkg");
+	if(ampBkg){
+		bkgTree_amp= ampBkg->getAmpTree(mData,mPhspSample,"data");
+		physicsTree->insertTree(bkgPhspTree, "normBkg"); //provides 1/normLH
+		physicsTree->createNode("IntensBkg", msqStrat, "normBkg", mData.nEvents, false);
+		physicsTree->insertTree(bkgTree_amp,"IntensBkg");
+	}
 
 	physicsTree->recalculate();
 	BOOST_LOG_TRIVIAL(debug) << std::endl << physicsTree;

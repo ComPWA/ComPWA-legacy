@@ -63,7 +63,7 @@ int main(int argc, char **argv){
 	int seed = 3041; //default seed
 
 	unsigned int mcPrecision = 100000; //number of calls for numeric integration and number of events for phsp integration
-	Logging log("log-compareTreeAmp.txt",boost::log::trivial::info); //initialize logging
+	Logging log("log-compareTreeAmp.txt",boost::log::trivial::debug); //initialize logging
 	//initialize kinematics of decay
 	DalitzKinematics::createInstance("D0","K_S0","K-","K+");//setup kinematics
 	//initialize random generator
@@ -98,6 +98,7 @@ int main(int argc, char **argv){
 	if( !toyPhspData->getNEvents() ) {
 		run.generatePhsp(mcPrecision);
 	}
+	toyPhspData->setEfficiency(eff);
 
 	run.setData(inputData);
 	if( !inputData->getNEvents() ) {
@@ -158,14 +159,16 @@ int main(int argc, char **argv){
 	BOOST_LOG_TRIVIAL(info) <<"Compare values: (use first event of data sample) TREE/AMPLITUDE";
 	BOOST_LOG_TRIVIAL(info) <<"===========================================";
 	BOOST_LOG_TRIVIAL(info) <<"Intensity: "<<intensValue->GetValue(0)
-			<<"/"<<*intens.GetDoubleParameter(0);
+			<<"/"<<*intens.GetDoubleParameter(0)
+			<<" = "<<intensValue->GetValue(0) / *intens.GetDoubleParameter(0);
 	BOOST_LOG_TRIVIAL(info) <<"================= phi(1020) ==========================";
 	BOOST_LOG_TRIVIAL(info) <<"Reso_phi(1020): "<<intensNode->getChildValue("Reso_phi(1020)")
 			<<"/"<<phiRes->evaluate(point)*phiCoeff;
 	BOOST_LOG_TRIVIAL(info) <<"BW_phi(1020): "<<intensNode->getChildValue("BW_phi(1020)")
 			<<"/"<<phiRes->evaluateAmp(point)*phiRes->GetNormalization();
 	BOOST_LOG_TRIVIAL(info) <<"N_phi(1020): "<<intensNode->getChildValue("N_phi(1020)").real()
-			<<"/"<<phiRes->GetNormalization();
+			<<"/"<<phiRes->GetNormalization()
+			<<" = "<<intensNode->getChildValue("N_phi(1020)").real()/phiRes->GetNormalization();
 	BOOST_LOG_TRIVIAL(info) <<"RelBW_phi(1020): "<<intensNode->getChildValue("RelBW_phi(1020)")
 			<<"/"<<phiRes->evaluateAmp(point);
 	BOOST_LOG_TRIVIAL(info) <<"AngD_phi(1020): "<<intensNode->getChildValue("AngD_phi(1020)").real()
