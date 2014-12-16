@@ -62,7 +62,7 @@ using namespace std;
 int main(int argc, char **argv){
 	int seed = 3041; //default seed
 
-	unsigned int mcPrecision = 100000; //number of calls for numeric integration and number of events for phsp integration
+	unsigned int mcPrecision = 1000000; //number of calls for numeric integration and number of events for phsp integration
 	Logging log("log-compareTreeAmp.txt",boost::log::trivial::debug); //initialize logging
 	//initialize kinematics of decay
 	DalitzKinematics::createInstance("D0","K_S0","K-","K+");//setup kinematics
@@ -113,6 +113,9 @@ int main(int argc, char **argv){
 	ParameterList truePar;
 	trueAmp->fillStartParVec(truePar); //true values
 
+//	fitParTree.GetDoubleParameter("g1_a_0")->FixParameter(1);
+//	fitPar.GetDoubleParameter("g1_a_0")->FixParameter(1);
+
 	for(unsigned int i=0; i<fitParTree.GetNDouble(); i++)
 		fitParTree.GetDoubleParameter(i)->SetError( std::shared_ptr<ParError<double>>(new SymError<double>(.1)) );
 	for(unsigned int i=0; i<fitPar.GetNDouble(); i++)
@@ -120,7 +123,6 @@ int main(int argc, char **argv){
 
 	fitAmpTree->setParameterList(fitParTree);
 	fitAmp->setParameterList(fitPar);
-//	std::cout<<fitPar<<std::endl;
 	fitAmp->printAmps();
 
 	BOOST_LOG_TRIVIAL(info)<<"Entries in data file: "<<inputData->getNEvents();
@@ -128,15 +130,13 @@ int main(int argc, char **argv){
 	BOOST_LOG_TRIVIAL(info)<<"Fit model file: "<<fitModelFile ;
 
 	//======================= TREE FIT =============================
-	std::shared_ptr<ControlParameter> esti(MinLogLHbkg::createInstance(fitAmp, inputData, toyPhspData));
+	std::shared_ptr<ControlParameter> esti(MinLogLHbkg::createInstance(fitAmpTree, inputData, toyPhspData));
 	MinLogLHbkg* minLog = dynamic_cast<MinLogLHbkg*>(&*(esti->Instance()));
 	minLog->setUseFunctionTree(1);
 	std::shared_ptr<FunctionTree> physicsTree = minLog->getTree();
 	double initialLHTree = esti->controlParameter(fitParTree);
 	std::shared_ptr<Optimizer> optiTree(new MinuitIF(esti, fitParTree));
 	run.setOptimizer(optiTree);
-
-	std::cout<<physicsTree<<std::endl;
 
 	//======================= Compare tree and amplitude =============================
 	std::shared_ptr<AmpRelBreitWignerRes> phiRes = std::dynamic_pointer_cast<AmpRelBreitWignerRes>(fitAmpPtr->getResonance("phi(1020)"));
@@ -148,7 +148,7 @@ int main(int argc, char **argv){
 	double a0phase = fitAmpPtr->getPhase("a_0(980)0");
 	std::complex<double> a0Coeff(a0mag*cos(a0phase),a0mag*sin(a0phase));
 
-	dataPoint point(inputData->getEvent(0)); //first datapoint in sample
+	dataPoint point(inputData->getEvent(0)); //first data point in sample
 	ParameterList intens = fitAmpPtr->intensity(point);
 
 	/*the tree contains multiple node with the same names. We search for node 'Intens' first and
@@ -192,8 +192,11 @@ int main(int argc, char **argv){
 
 	//======================= AMPLITUDE FIT =============================
 	esti->resetInstance();
-	esti = std::shared_ptr<ControlParameter>(MinLogLH::createInstance(fitAmp, inputData, toyPhspData));
+	esti = std::shared_ptr<ControlParameter>(MinLogLHbkg::createInstance(fitAmp, inputData, toyPhspData));
 	double initialLH = esti->controlParameter(fitPar);
+	BOOST_LOG_TRIVIAL(info) <<"Initial likelihood: "<<initialLHTree<< "/"<<initialLH
+			<< " Deviation = "<<initialLHTree-initialLH;
+
 	std::shared_ptr<Optimizer> opti(new MinuitIF(esti, fitPar));
 	run.setOptimizer(opti);
 
@@ -207,9 +210,12 @@ int main(int argc, char **argv){
 	BOOST_LOG_TRIVIAL(info) <<"AMPLITUDE fit result:";
 	result->print("P");
 	BOOST_LOG_TRIVIAL(info) <<"Comparison TREE/AMPLITUDE:";
-	BOOST_LOG_TRIVIAL(info) <<"Timings[s]: "<<resultTree->getTime()<<"/"<<result->getTime();
-	BOOST_LOG_TRIVIAL(info) <<"Initial likelihood: "<<initialLHTree<< "/"<<initialLH << " Deviation = "<<initialLHTree-initialLH;
-	BOOST_LOG_TRIVIAL(info) <<"Final likelihood: "<<finalLHTree<< "/"<<finalLH<< " Deviation = "<<finalLHTree-finalLH;
+	BOOST_LOG_TRIVIAL(info) <<"Timings[s]: "<<resultTree->getTime()<<"/"<<result->getTime()
+			<<"="<<resultTree->getTime()/result->getTime();
+	BOOST_LOG_TRIVIAL(info) <<"Initial likelihood: "<<initialLHTree<< "/"<<initialLH
+			<< " Deviation = "<<initialLHTree-initialLH;
+	BOOST_LOG_TRIVIAL(info) <<"Final likelihood: "<<finalLHTree<< "/"<<finalLH
+			<< " Deviation = "<<finalLHTree-finalLH;
 
 
 	BOOST_LOG_TRIVIAL(info) << "FINISHED!";

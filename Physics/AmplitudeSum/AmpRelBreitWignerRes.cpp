@@ -24,15 +24,14 @@
 
 
 AmpRelBreitWignerRes::AmpRelBreitWignerRes(const char *name,
-		DoubleParameter& resMass, DoubleParameter& resWidth,
-		DoubleParameter& mesonRadius, DoubleParameter& motherRadius,
+		std::shared_ptr<DoubleParameter> resMass, std::shared_ptr<DoubleParameter> resWidth,
+		std::shared_ptr<DoubleParameter> mesonRadius, std::shared_ptr<DoubleParameter> motherRadius,
 		int subSys,
 		int resSpin, int m, int n) :
 		AmpAbsDynamicalFunction(name),
 		AmpKinematics(resMass, subSys, resSpin, m, n, AmpKinematics::barrierType(BWPrime),
 				mesonRadius, motherRadius),
 		_resWidth(resWidth),
-		//_wignerD(name, resSpin, m, n, subSys)
 		_wignerD(subSys, resSpin),
 		foundMasses(false),
 		nParams(6)
@@ -76,41 +75,20 @@ std::complex<double> AmpRelBreitWignerRes::evaluateAmp(dataPoint& point) {
 		std::cout<<"Masses of decay products not set!"<<std::endl;
 		return 0;
 	}
-	std::complex<double> result;
 	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
 	if(!foundMasses){
 		id23 = point.getID("m23sq");
 		id13 = point.getID("m13sq");
 		foundMasses=true;
 	}
-	double m23sq = point.getVal(id23);
-	double m13sq = point.getVal(id13);
-	double m12sq = kin->getThirdVariableSq(m23sq,m13sq);
 	double mSq = -999;
 	switch(_subSys){
-	case 3: mSq=(m12sq); break;
-	case 4: mSq=(m13sq); break;
-	case 5: mSq=(m23sq); break;
+	case 3: mSq=kin->getThirdVariableSq(point.getVal(id23),point.getVal(id13)); break;
+	case 4: mSq=point.getVal(id13); break;
+	case 5: mSq=point.getVal(id23); break;
 	}
-	//		double BLWeiss2 = BLres2(sqrt(mSq));
-	//		double qTerm = std::pow((q(sqrt(mSq)) / q0()), (2.*_spin + 1.));
-	//		double Gamma0 = _resWidth.GetValue();
-	//		double GammaV = Gamma0 * qTerm * (_mR / sqrt(mSq)) * BLWeiss2;
-	//		std::complex<double> denom(_mR*_mR - mSq, -_mR * GammaV);
-	//
-	//		if(sqrt(m23sq)==2.84515) std::cout << " DEBUG2 " << q(m) << " " << q0() << std::endl;
-	//
-	//		result = std::complex<double>( _norm ) / denom; //Laura++ (old) definition
-	//	//	result = std::complex<double>(_norm*sqrt(BLWeiss2)) / denom;
-	//	//	result = std::complex<double>( _norm*sqrt(BLWeiss2)*sqrt(BLmother2(m)) ) / denom; //Laura++ (new) definition
-	//
-	//		if(result.real()!=result.real()) {std::cout << "RE part NAN" << std::endl;return 0;}
-	//		if(result.imag()!=result.imag()) {std::cout << "IM part NAN" << std::endl; return 0;}
-	//if(_mR==0.783) {std::cout << "Omega Norm " << _norm << std::endl; return 0;}
-	//		return result;
 
-	//	return (dynamicalFunction(mSq,_mR,_ma,_mb,_resWidth.GetValue(),_spin,_mesonRadius)*_norm);
-	return dynamicalFunction(mSq,_mR.GetValue(),_ma,_mb,_resWidth.GetValue(),_spin,_mesonRadius);
+	return dynamicalFunction(mSq,_mR->GetValue(),_ma,_mb,_resWidth->GetValue(),_spin,_mesonRadius->GetValue());
 }
 std::complex<double> AmpRelBreitWignerRes::dynamicalFunction(double mSq, double mR, double ma, double mb, double gamma0, unsigned int J, double mesonRadius){
 	double m = sqrt(mSq);

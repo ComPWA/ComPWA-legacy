@@ -52,7 +52,7 @@ public:
 	 */
 	static std::shared_ptr<ControlParameter> createInstance(std::shared_ptr<Amplitude> amp_,
 			std::shared_ptr<Data> data_, std::shared_ptr<Data> phspSample_,
-			unsigned int startEvent=0, unsigned int nEvents=0, double sigFrac=1.);
+			unsigned int startEvent=0, unsigned int nEvents=0);
 	/** Create instance of MinLogLHbkg.
 	 * An unbinned efficiency correction is applied using #accSample_.
 	 *
@@ -67,7 +67,7 @@ public:
 	 */
 	static std::shared_ptr<ControlParameter> createInstance(std::shared_ptr<Amplitude> amp_,
 			std::shared_ptr<Data> data_, std::shared_ptr<Data> phspSample_,std::shared_ptr<Data> accSample_,
-			unsigned int startEvent=0, unsigned int nEvents=0, double sigFrac=1.);
+			unsigned int startEvent=0, unsigned int nEvents=0);
 	/** Create instance of MinLogLHbkg.
 	 * An unbinned efficiency correction is applied using #accSample_.
 	 *

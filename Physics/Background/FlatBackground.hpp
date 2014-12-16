@@ -14,7 +14,9 @@
 class FlatBackground : public Amplitude
 {
 public:
-	FlatBackground(std::shared_ptr<Efficiency> eff, unsigned int nCalls) : eff_(eff), _nCalls(nCalls) {}
+	FlatBackground(std::shared_ptr<Efficiency> eff, unsigned int nCalls) : eff_(eff), _nCalls(nCalls) {
+		result.AddParameter(std::shared_ptr<DoubleParameter>(new DoubleParameter("AmpSumResult")));
+	}
 
 	//! wrapper function for amplitude value including efficiency
 	double evaluateEff(double x[], size_t dim);

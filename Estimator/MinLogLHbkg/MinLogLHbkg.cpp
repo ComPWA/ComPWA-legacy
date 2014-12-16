@@ -59,11 +59,11 @@ MinLogLHbkg::MinLogLHbkg(std::shared_ptr<Amplitude> amp_, std::shared_ptr<Amplit
 
 std::shared_ptr<ControlParameter> MinLogLHbkg::createInstance(std::shared_ptr<Amplitude> amp_,
 		std::shared_ptr<Data> data_, std::shared_ptr<Data> phspSample_,
-		unsigned int startEvent, unsigned int nEvents, double sigFrac){
+		unsigned int startEvent, unsigned int nEvents){
 	if(!instance_){
 		std::shared_ptr<Data> accSample_ = std::shared_ptr<Data>();
 		instance_ = std::shared_ptr<ControlParameter>(new MinLogLHbkg(
-				amp_, std::shared_ptr<Amplitude>(), data_, phspSample_, accSample_, startEvent, nEvents, sigFrac) );
+				amp_, std::shared_ptr<Amplitude>(), data_, phspSample_, accSample_, startEvent, nEvents, 1.0 ) );
 		BOOST_LOG_TRIVIAL(debug)<<"MinLogLHbkg: creating instance from amplitude and dataset!";
 	}
 	return instance_;
@@ -71,11 +71,11 @@ std::shared_ptr<ControlParameter> MinLogLHbkg::createInstance(std::shared_ptr<Am
 
 std::shared_ptr<ControlParameter> MinLogLHbkg::createInstance(std::shared_ptr<Amplitude> amp_,
 		std::shared_ptr<Data> data_, std::shared_ptr<Data> phspSample_,std::shared_ptr<Data> accSample_,
-		unsigned int startEvent, unsigned int nEvents, double sigFrac){
+		unsigned int startEvent, unsigned int nEvents){
 
 	if(!instance_){
 		instance_ = std::shared_ptr<ControlParameter>(new MinLogLHbkg(
-				amp_, std::shared_ptr<Amplitude>(), data_, phspSample_, accSample_, startEvent, nEvents, sigFrac) );
+				amp_, std::shared_ptr<Amplitude>(), data_, phspSample_, accSample_, startEvent, nEvents, 1.) );
 	}
 	return instance_;
 }
@@ -288,9 +288,9 @@ void MinLogLHbkg::iniLHtree(){
 	physicsTree->createNode("Intens", msqStrat, "normIntens", mData.nEvents, false);
 	physicsTree->insertTree(signalTree_amp,"Intens");
 	//background term
-	physicsTree->createNode("normBkg", mmultDStrat, "addBkgSignal", mData.nEvents, false);// x=f_{bkg}|T|^2/norm_{LH}
-	physicsTree->createLeaf("OneMinusBkgFrac", (1-signalFraction), "normBkg");
 	if(ampBkg){
+		physicsTree->createNode("normBkg", mmultDStrat, "addBkgSignal", mData.nEvents, false);// x=f_{bkg}|T|^2/norm_{LH}
+		physicsTree->createLeaf("OneMinusBkgFrac", (1-signalFraction), "normBkg");
 		bkgTree_amp= ampBkg->getAmpTree(mData,mPhspSample,"data");
 		physicsTree->insertTree(bkgPhspTree, "normBkg"); //provides 1/normLH
 		physicsTree->createNode("IntensBkg", msqStrat, "normBkg", mData.nEvents, false);
@@ -310,9 +310,10 @@ void MinLogLHbkg::iniLHtree(){
 double MinLogLHbkg::controlParameter(ParameterList& minPar){
 	amp->setParameterList(minPar); //setting new parameters
 
-	double lh=0, norm=0, normBkg=0;
+	double lh=0;
 	if(!useFunctionTree){
 		//Calculate normalization
+		double norm=0, normBkg=0;
 		for(unsigned int phsp=0; phsp<nPhsp_; phsp++){ //loop over phspSample
 			Event theEvent(phspSample->getEvent(phsp));
 			if(theEvent.getNParticles()!=3) continue;
@@ -330,9 +331,12 @@ double MinLogLHbkg::controlParameter(ParameterList& minPar){
 			}
 			if(intensBkg>0) normBkg+=intensBkg;
 		}
+		normBkg = normBkg * Kinematics::instance()->getPhspVolume()/nPhsp_;
 		if(normBkg==0) normBkg=1;
+		norm = norm * Kinematics::instance()->getPhspVolume()/nPhsp_;
 		if(norm==0) norm=1;
-		//Calculate -logLH
+		//Calculate \Sum_{ev} log()
+		double sumLog=0;
 		for(unsigned int evt = nStartEvt_; evt<nUseEvt_+nStartEvt_; evt++){//loop over data sample
 			Event theEvent(data->getEvent(evt));
 			dataPoint point(theEvent);
@@ -347,16 +351,16 @@ double MinLogLHbkg::controlParameter(ParameterList& minPar){
 			}else{
 				intensBkg = 0;
 			}
-			if(intens>0) lh += std::log( signalFraction*intens/norm+(1-signalFraction)*intensBkg )*theEvent.getWeight();
+			if(intens>0) sumLog += std::log( signalFraction*intens/norm+(1-signalFraction)*intensBkg/normBkg )*theEvent.getWeight();
 		}
-		lh = (-1)*nUseEvt_/sumOfWeights*lh ;//other factors are constant and drop in deviation, so we can ignore them
+//		std::cout<<"1 "<<sumLog<<std::endl;
+		lh = (-1)*((double)nUseEvt_)/sumOfWeights*sumLog ;
+//		std::cout<<"2 "<<lh<<std::endl;
 	} else {
 		physicsTree->recalculate();
 		std::shared_ptr<DoubleParameter> logLH = std::dynamic_pointer_cast<DoubleParameter>(
 				physicsTree->head()->getValue() );
 		lh = logLH->GetValue();
 	}
-	//BOOST_LOG_TRIVIAL(debug) << "-logLH: " << lh ;
-
 	return lh; //return -logLH
 }
