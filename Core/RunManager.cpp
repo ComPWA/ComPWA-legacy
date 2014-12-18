@@ -149,18 +149,18 @@ bool RunManager::generate( unsigned int number ) {
 		}
 	BOOST_LOG_TRIVIAL(debug) << "Current seed: "<<genNew->getSeed();
 	}
-	BOOST_LOG_TRIVIAL(info) << "Max value used in generation: "<<maxTest;
+//	BOOST_LOG_TRIVIAL(info) << "Max value used in generation: "<<maxTest;
 	BOOST_LOG_TRIVIAL(info) << "Efficiency of toy MC generation: "<<(double)size_/totalCalls;
 	BOOST_LOG_TRIVIAL(info) << "RunManager: generate time="<<(clock()-startTime)/CLOCKS_PER_SEC/60<<"min.";
 
-	if( maxTest >= genMaxVal ) {
-		BOOST_LOG_TRIVIAL(error)<<"==========ATTENTION===========";
-		BOOST_LOG_TRIVIAL(error)<<"== Max value of function is "<<maxTest;
-		BOOST_LOG_TRIVIAL(error)<<"== This is close or above to maximum value of rnd. number generation: "<<genMaxVal;
-		BOOST_LOG_TRIVIAL(error)<<"== Choose higher max value!";
-		BOOST_LOG_TRIVIAL(error)<<"==========ATTENTION===========";
-		return false;
-	}
+//	if( maxTest >= genMaxVal ) {
+//		BOOST_LOG_TRIVIAL(error)<<"==========ATTENTION===========";
+//		BOOST_LOG_TRIVIAL(error)<<"== Max value of function is "<<maxTest;
+//		BOOST_LOG_TRIVIAL(error)<<"== This is close or above to maximum value of rnd. number generation: "<<genMaxVal;
+//		BOOST_LOG_TRIVIAL(error)<<"== Choose higher max value!";
+//		BOOST_LOG_TRIVIAL(error)<<"==========ATTENTION===========";
+//		return false;
+//	}
 	return true;
 };
 

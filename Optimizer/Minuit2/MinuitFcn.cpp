@@ -53,7 +53,7 @@ double MinuitFcn::operator()(const std::vector<double>& x) const{
 	boost::chrono::system_clock::time_point start = boost::chrono::system_clock::now();
 	double result=_myDataPtr->controlParameter(_parList);
 	boost::chrono::duration<double> sec = boost::chrono::system_clock::now() - start;
-	BOOST_LOG_TRIVIAL(debug) <<std::setprecision(5)<< "MinuitFcn: -log(L) = "<< result
+	BOOST_LOG_TRIVIAL(debug) <<std::setprecision(7)<< "MinuitFcn: -log(L) = "<< result
 			<<" Parameters: "<<paramOut.str()
 			<<" Time: "<<sec.count()<<"s";
 

@@ -46,6 +46,8 @@ public:
 
 	virtual const double integral() =0;
 	virtual const double integral(ParameterList& par) =0;
+	virtual const double normalization() =0;
+	virtual const double normalization(ParameterList& par) =0;
 	virtual double getMaxVal(ParameterList& par, std::shared_ptr<Generator> gen) = 0;
 	virtual double getMaxVal(std::shared_ptr<Generator> gen) = 0;
 	//virtual const double volume() =0;
