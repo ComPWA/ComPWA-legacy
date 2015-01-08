@@ -93,39 +93,44 @@ class DalitzKinematics;
 
 class RunManager
 {
-
 public:
 
-	RunManager():size_(0) {};
+	RunManager();
 	RunManager( std::shared_ptr<Data>, std::shared_ptr<Amplitude>, std::shared_ptr<Optimizer>); //Fit
 	RunManager( unsigned int size, std::shared_ptr<Amplitude>, std::shared_ptr<Generator>); //Generate
 
 	virtual ~RunManager();
 
-
 	virtual unsigned int getSize (){ return size_; };
 	virtual void setSize ( unsigned int s){ size_=s; };
+	virtual void setBkgSize ( unsigned int s){ bkgSize_=s; };
 	virtual void setData ( std::shared_ptr<Data> d){ pData_ = d; };
+	virtual void setBackground ( std::shared_ptr<Data> d){ sampleBkg_ = d; };
 	virtual void setPhspSample( std::shared_ptr<Data> d){ phspSample_ = d; validPhsp=1; };
 	virtual void setAmplitude ( std::shared_ptr<Amplitude> d){ pPhys_ = d; validAmplitude=1; };
+	virtual void setBkgAmplitude ( std::shared_ptr<Amplitude> d){ ampBkg_ = d; validBackground=1; };
 	virtual void setOptimizer ( std::shared_ptr<Optimizer> d){ pOpti_ = d; validOptimizer=1; };
 	virtual void setGenerator( std::shared_ptr<Generator> d){ gen_= d; validGenerator=1; };
 
 	virtual std::shared_ptr<FitResult> startFit( ParameterList& );
-	virtual bool generate( unsigned int number=0 );
-	virtual bool generatePhsp( unsigned int number=0 );
+	virtual bool generate ( unsigned int number=0 );
+	virtual bool generatePhsp ( unsigned int number=0 );
+	virtual bool generateBkg ( unsigned int number=0 );
 
 protected:
 	bool validData;
 	bool validPhsp;
 	bool validAmplitude;
+	bool validBackground;
 	bool validOptimizer;
 	bool validSize;
 	bool validGenerator;
 
 	std::shared_ptr<Data> pData_; /*!< Pointer to Data-Module */
+	std::shared_ptr<Data> sampleBkg_; /*!< Pointer to Data-Module */
 	std::shared_ptr<Data> phspSample_; /*!< Pointer to Data-Module */
 	std::shared_ptr<Amplitude> pPhys_; /*!< Pointer to Physics-Module */
+	std::shared_ptr<Amplitude> ampBkg_; /*!< Pointer to Physics-Module */
 	std::shared_ptr<Optimizer> pOpti_; /*!< Pointer to Optimizer-Module */
 	std::shared_ptr<Generator> gen_; /*!< Pointer to Optimizer-Module */
 	std::shared_ptr<Generator> getGen(){ return gen_;};
@@ -134,6 +139,7 @@ protected:
 	bool success_; /*!< fitting ended successfully? */
 
 	unsigned int size_;
+	unsigned int bkgSize_;
 };
 
 #endif
