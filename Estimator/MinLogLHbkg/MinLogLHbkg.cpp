@@ -27,7 +27,8 @@ MinLogLHbkg::MinLogLHbkg(std::shared_ptr<Amplitude> amp_, std::shared_ptr<Amplit
 		std::shared_ptr<Data> phspSample_,std::shared_ptr<Data> accSample_,
 		unsigned int startEvent, unsigned int nEvents, double sigFrac) :
 		amp(amp_), ampBkg(bkg_),data(data_), phspSample(phspSample_),accSample(accSample_), nEvts_(0), nPhsp_(0),
-		nStartEvt_(startEvent), nUseEvt_(nEvents), useFunctionTree(0), signalFraction(sigFrac){
+		nStartEvt_(startEvent), nUseEvt_(nEvents), useFunctionTree(0), signalFraction(sigFrac), accSampleEff(0)
+{
 	BOOST_LOG_TRIVIAL(debug)<<"MinLogLHbkg: Constructing instance!";
 	nEvts_ = data->getNEvents();
 	nPhsp_ = phspSample->getNEvents();
@@ -38,7 +39,12 @@ MinLogLHbkg::MinLogLHbkg(std::shared_ptr<Amplitude> amp_, std::shared_ptr<Amplit
 	if(data->hasWeights() && signalFraction!=1.)
 		throw std::runtime_error("MinLogLHbkg::MinLogLhbkg() data sample has weights and signal fraction is !=1. That makes no sense!");
 	mPhspSample = phspSample->getMasses();
-	if(accSample) mAccSample = accSample->getMasses();
+	if(accSample){
+		mAccSample = accSample->getMasses();
+		//we assume that the total efficiency of the sample is stored as efficiency of each event
+		accSampleEff = mAccSample.eff.at(0);
+		BOOST_LOG_TRIVIAL(info)<<"MinLogLHbkg::MinLogLHbkg() total efficiency of unbinned correction sample is set to "<<accSampleEff;
+	}
 	BOOST_LOG_TRIVIAL(debug)<<"MinLogLHbkg: fraction of signal is set to "<<signalFraction<<".";
 	calcSumOfWeights();
 	if(signalFraction!=1 && !ampBkg)
@@ -106,7 +112,13 @@ void MinLogLHbkg::setAmplitude(std::shared_ptr<Amplitude> amp_, std::shared_ptr<
 	if(!(startEvent+nUseEvt_<=nPhsp_)) nUseEvt_ = nPhsp_-startEvent;
 	mData = data->getMasses();
 	mPhspSample = phspSample->getMasses();
-	if(accSample) mAccSample = accSample->getMasses();
+	if(accSample){
+		mAccSample = accSample->getMasses();
+		//we assume that the total efficiency of the sample is stored as efficiency of each event
+		accSampleEff = mAccSample.eff.at(0);
+		BOOST_LOG_TRIVIAL(info)<<"MinLogLHbkg::MinLogLHbkg() total efficiency of unbinned correction sample is set to "<<accSampleEff;
+	}
+
 	signalFraction = sigFrac;
 	useFunctionTree = 0;//ensure that iniLHtree is executed
 	setUseFunctionTree(useFuncTr);
@@ -193,9 +205,9 @@ void MinLogLHbkg::iniLHtree(){
 	signalPhspTree = std::shared_ptr<FunctionTree>(new FunctionTree());
 	signalPhspTree->createHead("invNormLH", invStrat);// 1/normLH
 	signalPhspTree->createNode("normFactor", multDStrat, "invNormLH"); // normLH = phspVolume/N_{mc} |T_{evPHSP}|^2
-	signalPhspTree->createLeaf("phspVolume", Kinematics::instance()->getPhspVolume(), "normFactor");
 	signalPhspTree->createNode("sumAmp", addStrat,"normFactor"); // sumAmp = \sum_{evPHSP} |T_{evPHSP}|^2
 	std::shared_ptr<MultiDouble> eff;
+	signalPhspTree->createLeaf("phspVolume", Kinematics::instance()->getPhspVolume(), "normFactor");
 
 	//Which kind of efficiency correction should be used?
 	if(!accSample) {//binned
@@ -213,7 +225,8 @@ void MinLogLHbkg::iniLHtree(){
 	}
 	else {//unbinned
 		signalPhspTree->createNode("IntensPhsp", msqStrat, "sumAmp", mAccSample.nEvents, false); //|T_{ev}|^2
-		signalPhspTree->createLeaf("InvNmc", 1/ ( (double) mAccSample.nEvents), "normFactor");
+//		std::cout<<mAccSample.nEvents<< " "<<accSampleEff<<" "<<(double) mAccSample.nEvents/accSampleEff<<std::endl;
+		signalPhspTree->createLeaf("InvNmc", 1/ ( (double) mAccSample.nEvents/accSampleEff ), "normFactor");
 		signalPhspTree_amp = amp->getAmpTree(mAccSample,mPhspSample,"_Phsp");
 		BOOST_LOG_TRIVIAL(debug)<<"MinLogLHbkg::iniLHTree() setting up normalization tree, "
 				"using sample of accepted phsp events for efficiency correction!";
@@ -224,8 +237,8 @@ void MinLogLHbkg::iniLHtree(){
 		bkgPhspTree = std::shared_ptr<FunctionTree>(new FunctionTree());
 		bkgPhspTree->createHead("invBkgNormLH", invStrat);// 1/normLH
 		bkgPhspTree->createNode("normFactor", multDStrat, "invBkgNormLH"); // normLH = phspVolume/N_{mc} |T_{evPHSP}|^2
-		bkgPhspTree->createLeaf("phspVolume", Kinematics::instance()->getPhspVolume(), "normFactor");
 		bkgPhspTree->createNode("sumAmp", addStrat,"normFactor"); // sumAmp = \sum_{evPHSP} |T_{evPHSP}|^2
+		bkgPhspTree->createLeaf("phspVolume", Kinematics::instance()->getPhspVolume(), "normFactor");
 		if(!accSample) {//binned
 			bkgPhspTree_amp = ampBkg->getAmpTree(mPhspSample,mPhspSample,"_Phsp");
 			eff = std::shared_ptr<MultiDouble>( new MultiDouble("eff",mPhspSample.eff) );
@@ -241,7 +254,7 @@ void MinLogLHbkg::iniLHtree(){
 		}
 		else {//unbinned
 			bkgPhspTree->createNode("IntensPhsp", msqStrat, "sumAmp", mAccSample.nEvents, false); //|T_{ev}|^2
-			bkgPhspTree->createLeaf("InvNmc", 1/ ( (double) mAccSample.nEvents), "normFactor");
+			bkgPhspTree->createLeaf("InvNmc", 1/ ( (double) mAccSample.nEvents/accSampleEff), "normFactor");
 			bkgPhspTree_amp = amp->getAmpTree(mAccSample,mPhspSample,"_Phsp");
 			BOOST_LOG_TRIVIAL(debug)<<"MinLogLHbkg::iniLHTree() setting up tree for background normalization, "
 					"using sample of accepted phsp events for efficiency correction!";

@@ -167,6 +167,8 @@ private:
 	std::shared_ptr<Data> phspSample;
 	//! Phsp with applied efficency for unbinned efficiency correction
 	std::shared_ptr<Data> accSample;
+	//! Total efficiency of phsp with applied efficency. This is used to calculated to number of generated events.
+	double accSampleEff;
 	//! Data sample
 	allMasses mData;
 	//! Phsp sample for normalization
