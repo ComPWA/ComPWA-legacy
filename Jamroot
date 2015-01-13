@@ -44,9 +44,9 @@ project :
 	;
 
 # Configure the used packages here:
-build-project Core ; 
+build-project Core ;
 build-project Physics ;
-build-project DataReader ; 
+build-project DataReader ;
 build-project Estimator ;
 build-project Optimizer ;
 build-project test ;
