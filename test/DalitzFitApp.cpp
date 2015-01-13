@@ -53,7 +53,6 @@
 #include "DataReader/RootReader/RootReader.hpp"
 #include "Physics/AmplitudeSum/AmpSumIntensity.hpp"
 #include "Estimator/MinLogLH/MinLogLH.hpp"
-#include "Estimator/MinLogLHbkg/MinLogLHbkg.hpp"
 #include "Optimizer/Minuit2/MinuitIF.hpp"
 #include "Core/DataPoint.hpp"
 #include "Core/Efficiency.hpp"
@@ -111,8 +110,8 @@ int main(int argc, char **argv){
 	ParameterList par;
 	std::shared_ptr<ControlParameter> esti;
 	amps->fillStartParVec(par); //perfect startvalues
-	esti = MinLogLHbkg::createInstance(amps, myReader, myPHSPReader, nStartEvent, nFitEvents);
-	MinLogLHbkg* contrPar = dynamic_cast<MinLogLHbkg*>(&*(esti->Instance()));
+	esti = MinLogLH::createInstance(amps, myReader, myPHSPReader, nStartEvent, nFitEvents);
+	MinLogLH* contrPar = dynamic_cast<MinLogLH*>(&*(esti->Instance()));
 	if(useFctTree) contrPar->setUseFunctionTree(1);
 	std::shared_ptr<FunctionTree> tree = contrPar->getTree();
 

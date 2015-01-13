@@ -45,7 +45,6 @@
 #include "DataReader/RootReader/RootReader.hpp"
 #include "Physics/AmplitudeSum/AmpSumIntensity.hpp"
 #include "Estimator/MinLogLH/MinLogLH.hpp"
-#include "Estimator/MinLogLHbkg/MinLogLHbkg.hpp"
 #include "Optimizer/Minuit2/MinuitIF.hpp"
 #include "Physics/DPKinematics/RootEfficiency.cpp"
 #include "Physics/DPKinematics/RootGenerator.cpp"
@@ -130,8 +129,8 @@ int main(int argc, char **argv){
 	BOOST_LOG_TRIVIAL(info)<<"Fit model file: "<<fitModelFile ;
 
 	//======================= TREE FIT =============================
-	std::shared_ptr<ControlParameter> esti(MinLogLHbkg::createInstance(fitAmpTree, inputData, toyPhspData));
-	MinLogLHbkg* minLog = dynamic_cast<MinLogLHbkg*>(&*(esti->Instance()));
+	std::shared_ptr<ControlParameter> esti(MinLogLH::createInstance(fitAmpTree, inputData, toyPhspData));
+	MinLogLH* minLog = dynamic_cast<MinLogLH*>(&*(esti->Instance()));
 	minLog->setUseFunctionTree(1);
 	std::shared_ptr<FunctionTree> physicsTree = minLog->getTree();
 	double initialLHTree = esti->controlParameter(fitParTree);
@@ -192,7 +191,7 @@ int main(int argc, char **argv){
 
 	//======================= AMPLITUDE FIT =============================
 	esti->resetInstance();
-	esti = std::shared_ptr<ControlParameter>(MinLogLHbkg::createInstance(fitAmp, inputData, toyPhspData));
+	esti = std::shared_ptr<ControlParameter>(MinLogLH::createInstance(fitAmp, inputData, toyPhspData));
 	double initialLH = esti->controlParameter(fitPar);
 	BOOST_LOG_TRIVIAL(info) <<"Initial likelihood: "<<initialLHTree<< "/"<<initialLH
 			<< " Deviation = "<<initialLHTree-initialLH;
