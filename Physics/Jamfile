@@ -5,7 +5,7 @@ path-constant PHYSICS : . ;
 build-project AmplitudeSum ;
 build-project DPKinematics ;
 build-project BreitWigner ;
-build-project Background ;
+#build-project Background ;
 
 # Build libPhysics.so
 lib Physics : 
