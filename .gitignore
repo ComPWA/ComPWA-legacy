@@ -20,3 +20,4 @@ doc/
 *Dict.h
 *Dict.cxx
 *Dict.cpp
+build.cfg

@@ -101,15 +101,15 @@ void MinuitResult::init(FunctionMinimum min){
 
 }
 
-void MinuitResult::genSimpleOutput(std::ostream& out){
-	for(unsigned int o=0;o<finalParameters.GetNDouble();o++){
-		std::shared_ptr<DoubleParameter> outPar = finalParameters.GetDoubleParameter(o);
-		out<<outPar->GetValue()<<" "<<outPar->GetError()->GetError()<<" ";
-	}
-	out<<"\n";
-
-	return;
-}
+//void MinuitResult::genSimpleOutput(std::ostream& out){
+//	for(unsigned int o=0;o<finalParameters.GetNDouble();o++){
+//		std::shared_ptr<DoubleParameter> outPar = finalParameters.GetDoubleParameter(o);
+//		out<<outPar->GetValue()<<" "<<outPar->GetError()->GetError()<<" ";
+//	}
+//	out<<"\n";
+//
+//	return;
+//}
 
 void  MinuitResult::smearParameterList(ParameterList& newParList){
 	unsigned int nFree = 0;
