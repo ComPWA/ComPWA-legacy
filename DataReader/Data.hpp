@@ -59,8 +59,14 @@ public:
 	virtual const unsigned int getNEvents() const =0;
 	virtual const unsigned int getNBins() const =0;
 
+	//! Set efficiency value for all stored events. Efficiency is taken from Efficiency object.
+	virtual void setEfficiency(std::shared_ptr<Efficiency> eff) { };
+	//! Reset effciencies of all events
+	virtual void resetEfficiency(double e=1.) { };
+
 	virtual std::shared_ptr<Data> rndSubSet(unsigned int size, std::shared_ptr<Generator> gen) = 0;
 	virtual void resetWeights(double w=1.) = 0;
+	virtual bool hasWeights() = 0;
 };
 
 #endif

@@ -22,9 +22,6 @@
 #include "Core/Parameter.hpp"
 #include "Core/ParameterList.hpp"
 #include "Core/FunctionTree.hpp"
-//#include "Estimator/AmpFcn.cpp"
-//#include "Optimizer/Minuit2/MinuitIF.hpp"
-//#include "Estimator/MinLogLH/MinLogLH.hpp"
 
 #include "Physics/AmplitudeSum/AmplitudeSetup.hpp"
 #include "Physics/AmplitudeSum/AmpRelBreitWignerRes.hpp"
@@ -47,17 +44,20 @@ public:
 		one
 
 	};
-	//! Default Constructor (0x0)
-	AmpSumIntensity(const double inM, const double inBr, const double in1,const double in2, const double in3,
-			std::string nameM, std::string name1,std::string name2,std::string name3,
-			AmplitudeSetup ini,	normStyle ns=none);
-	AmpSumIntensity(AmplitudeSetup ini, normStyle ns, std::shared_ptr<Efficiency> eff=std::shared_ptr<Efficiency>(new UnitEfficiency()),
-			unsigned int nCalls=100000);
-	AmpSumIntensity(AmplitudeSetup ini, std::shared_ptr<Efficiency> eff=std::shared_ptr<Efficiency>(new UnitEfficiency()),
-			unsigned int nCalls=100000);
+	AmpSumIntensity(AmplitudeSetup ini, normStyle ns,
+			std::shared_ptr<Efficiency> eff, unsigned int nCalls);
+	AmpSumIntensity(AmplitudeSetup ini,
+			std::shared_ptr<Efficiency> eff, unsigned int nCalls);
 	AmpSumIntensity(const AmpSumIntensity& other);
 
+	//! wrapper function for function value times efficiency at point x
+	double evaluateEff(double x[], size_t dim);
+	//! wrapper function for function value at point x
 	double evaluate(double x[], size_t dim);
+	//! normalization integral for parameters \par
+	virtual const double normalization(ParameterList& par);
+	//! normalization integral
+	virtual const double normalization();
 	//! normalization integral for parameters \par
 	virtual const double integral(ParameterList& par);
 	//! normalization integral
@@ -70,9 +70,6 @@ public:
 	virtual std::complex<double> getFirstAmp(dataPoint& point, ParameterList& par);
 	virtual std::complex<double> getFirstReso(dataPoint& point, ParameterList& par);
 	virtual std::complex<double> getFirstBW(dataPoint& point, ParameterList& par);
-
-	virtual void setNevents(unsigned int n) { _entries=n; };
-	virtual unsigned int getNevents() { return _entries; };
 
 	//! setting new parameterList
 	virtual void setParameterList(ParameterList& par);
@@ -88,65 +85,40 @@ public:
 	virtual const ParameterList& intensity(std::vector<double> point, ParameterList& par);
 	virtual const double sliceIntensity(dataPoint& dataP, ParameterList& par,std::complex<double>* reso, unsigned int nResos);
 
-	/** Setup physics tree.
-	 * the @param thePHSPMasses needs to be toy phsp sample. It is used to normalize the amplitudes.
-	 *
-	 * @param theMasses data sample
-	 * @param toyPhspSample Sample with flat toy phsp events.
-	 * @return shared_ptr of physics tree
-	 */
-	virtual std::shared_ptr<FunctionTree> functionTree(allMasses& theMasses, allMasses& toyPhspSample);
-	/** Setup phspTree for normalization of the likelihood.
-	 * This method implements an unbinned efficiency approach.
-	 *
-	 * @param accPhspSample Sample of accepted MC events. Should come from a flat PHSP sample.
-	 * @param toyPhspSample Sample with flat toy phsp events.
-	 * @return shared_ptr of PHSP tree
-	 */
-	virtual std::shared_ptr<FunctionTree> phspTree(allMasses& accPhspSample, allMasses& toyPhspSample);
-	/** Setup phspTree for normalization of the likelihood.
-	 *
-	 * @param toyPhspSample Sample with flat toy phsp events. It is assumed that efficiency vector is filled!
-	 * @return shared_ptr of PHSP tree
-	 */
-	virtual std::shared_ptr<FunctionTree> phspTree(allMasses& toyPhspSample);
 	//! Check of tree is available
 	virtual bool hasTree(){
-		if(myTree && myPhspTree) return 1;
-		return 0;
+		return 1;
 	}
 	//! Getter function for function tree
-	virtual std::shared_ptr<FunctionTree> getTree(){ return myTree; }
-	//! Getter function for phsp tree
-	virtual std::shared_ptr<FunctionTree> getPhspTree(){ return myPhspTree; }
-	//! reset trees
-	virtual void resetTree(){
-		myTree = std::shared_ptr<FunctionTree>();
-		myPhspTree = std::shared_ptr<FunctionTree>();
+	virtual std::shared_ptr<FunctionTree> getAmpTree(allMasses& theMasses,allMasses& toyPhspSample, std::string suffix=""){
+		return setupBasicTree(theMasses,toyPhspSample, suffix);
 	}
 	//! fill internal parameter list with (start) parameter
 	virtual const bool fillStartParVec(ParameterList& outPar);
 	//! print overview over all amplitudes
 	virtual void printAmps();
 	//! convert resonance \param name to id
-	unsigned int getIdOfResonance(std::string name){
+	int getIdOfResonance(std::string name){
 		for(unsigned int i=0; i<nAmps; i++)	if(namer[i]==name) return i;
+		return -1;
 	}
 	//! convert resonance \param id to name
 	std::string getNameOfResonance(unsigned int id){ return namer[id]; }
 	//! get magnitude of resonance \param name
 	virtual double getMagnitude(std::string name) {
-		std::vector<std::shared_ptr<DoubleParameter> >::iterator it= params.begin();
-		for(;it!=params.end();++it)
-			if((*it)->GetName()=="mag_"+name) return (*it)->GetValue();
-		return -999;
+//		std::vector<std::shared_ptr<DoubleParameter> >::iterator it= params.begin();
+//		for(;it!=params.end();++it)
+//			if((*it)->GetName()=="mag_"+name) return (*it)->GetValue();
+//		return -999;
+		return params.GetDoubleParameter("mag_"+name)->GetValue();
 	};
 	//! get phase of resonance \param name
 	virtual double getPhase(std::string name) {
-		std::vector<std::shared_ptr<DoubleParameter> >::iterator it= params.begin();
-		for(;it!=params.end();++it)
-			if((*it)->GetName()=="phase_"+name) return (*it)->GetValue();
-		return -999;
+//		std::vector<std::shared_ptr<DoubleParameter> >::iterator it= params.begin();
+//		for(;it!=params.end();++it)
+//			if((*it)->GetName()=="phase_"+name) return (*it)->GetValue();
+//		return -999;
+		return params.GetDoubleParameter("phase_"+name)->GetValue();
 	};
 	//! get total integral for resonance \param id
 	virtual double getTotalIntegral(unsigned int id) { return totAmp.getTotalIntegral(id); };
@@ -185,9 +157,44 @@ public:
 		return (new AmpSumIntensity(*this));
 	}
 
+	/* OBSOLETE SECTION ONLY FOR TESTING */
+	///** Setup physics tree.
+	// * the @param thePHSPMasses needs to be toy phsp sample. It is used to normalize the amplitudes.
+	// *
+	// * @param theMasses data sample
+	// * @param toyPhspSample Sample with flat toy phsp events.
+	// * @return shared_ptr of physics tree
+	// */
+	//virtual std::shared_ptr<FunctionTree> functionTree(allMasses& theMasses, allMasses& toyPhspSample);
+	///** Setup phspTree for normalization of the likelihood.
+	// * This method implements an unbinned efficiency approach.
+	// *
+	// * @param accPhspSample Sample of accepted MC events. Should come from a flat PHSP sample.
+	// * @param toyPhspSample Sample with flat toy phsp events.
+	// * @return shared_ptr of PHSP tree
+	// */
+	//virtual std::shared_ptr<FunctionTree> phspTree(allMasses& accPhspSample, allMasses& toyPhspSample);
+	///** Setup phspTree for normalization of the likelihood.
+	// *
+	// * @param toyPhspSample Sample with flat toy phsp events. It is assumed that efficiency vector is filled!
+	// * @return shared_ptr of PHSP tree
+	// */
+	//virtual std::shared_ptr<FunctionTree> phspTree(allMasses& toyPhspSample);
+	////! Getter function for function tree
+	//virtual std::shared_ptr<FunctionTree> getTree(){ return myTree; }
+	////! Getter function for phsp tree
+	//virtual std::shared_ptr<FunctionTree> getPhspTree(){ return myPhspTree; }
+	////! reset trees
+	//virtual void resetTree(){
+	//	myTree = std::shared_ptr<FunctionTree>();
+	//	myPhspTree = std::shared_ptr<FunctionTree>();
+	//}
+	void setupTree(allMasses& theMasses, allMasses& toyPhspSample, std::string opt);
+	/* OBSOLETE SECTION ONLY FOR TESTING */
+
 protected:
 	void init();
-	/**Initialize function tree
+	/**Setup Basic Tree
 	 *
 	 * @param theMasses data sample
 	 * @param toyPhspSample sample of flat toy MC events for normalization of the resonances
@@ -195,7 +202,7 @@ protected:
 	 * with efficiency corrected toy phsp sample or "normAcc" normalization tree with sample
 	 * of accepted flat phsp events
 	 */
-	void setupTree(allMasses& theMasses, allMasses& toyPhspSample, std::string opt);
+	std::shared_ptr<FunctionTree> setupBasicTree(allMasses& theMasses,allMasses& toyPhspSample, std::string suffix="");
 	//! calculate maximum value of amplitude with parameters \par
 	virtual void calcMaxVal(ParameterList& par ,std::shared_ptr<Generator> gen);
 	//! calculate maximum value of amplitude with current parameters
@@ -207,26 +214,24 @@ protected:
 	double _maxFcnVal;
 	AmpSumOfAmplitudes totAmp;
 	AmplitudeSetup ampSetup;
-	std::shared_ptr<FunctionTree> myTree;
-	std::shared_ptr<FunctionTree> myPhspTree;
-	//	std::shared_ptr<ParameterList> treePar;
 
 	double maxVal;
 
 	normStyle _normStyle;
-	unsigned int _entries;
 	double _dpArea;
 	unsigned int nAmps;
 
 	//Resonance Variables
 	std::vector<std::string> namer;
-//	std::map<std::string,std::shared_ptr<DoubleParameter> > mr;
-//	std::map<std::string,std::shared_ptr<DoubleParameter> > gr;
-//	std::map<std::string,std::shared_ptr<DoubleParameter> > rr;
-//	std::map<std::string,std::shared_ptr<DoubleParameter> > phir;
-	std::vector<std::shared_ptr<DoubleParameter> > params;
+//	std::vector<std::shared_ptr<DoubleParameter> > params;
+	ParameterList params;
 
 	unsigned int _nCalls; //! precision for numeric integration
+
+	/* OBSOLETE SECTION ONLY FOR TESTING */
+//	std::shared_ptr<FunctionTree> myTree;
+//	std::shared_ptr<FunctionTree> myPhspTree;
+	/* OBSOLETE SECTION ONLY FOR TESTING */
 
 private:
 

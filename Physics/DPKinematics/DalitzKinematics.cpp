@@ -344,9 +344,6 @@ double DalitzKinematics::getPhspVolume(){
 	return _DParea;
 }
 void DalitzKinematics::calcDParea(){
-
-	//	std::cout<<"DPKinematics: DEBUG: calculating dalitz plot area"<<std::endl;
-	BOOST_LOG_TRIVIAL(debug)<<"DPKinematics: DEBUG: calculating dalitz plot area";
 	size_t dim=2;
 	double res=0.0, err=0.0;
 
@@ -354,21 +351,18 @@ void DalitzKinematics::calcDParea(){
 	double xLimit_low[2] = {m13_sq_min,m23_sq_min};
 	double xLimit_high[2] = {m13_sq_max,m23_sq_max};
 
-	size_t calls = 100000;
+	size_t calls = 2000000;
 	gsl_rng_env_setup ();
 	const gsl_rng_type *T = gsl_rng_default; //type of random generator
 	gsl_rng *r = gsl_rng_alloc(T); //random generator
 
 	gsl_monte_function F = {&phspFunc,dim, const_cast<DalitzKinematics*> (this)};
 
-	/*	Choosing vegas algorithm here, because it is the most accurate:
-	 * 		-> 10^5 calls gives (in my example) an accuracy of 0.03%
-	 * 		 this should be sufficiency for most applications
-	 */
 	gsl_monte_vegas_state *s = gsl_monte_vegas_alloc (dim);
 	gsl_monte_vegas_integrate (&F, xLimit_low, xLimit_high, 2, calls, r,s,&res, &err);
 	gsl_monte_vegas_free(s);
-	BOOST_LOG_TRIVIAL(debug)<<"DPKinematics: Area of dalitz plot form MC integration: "<<res<<"+-"<<err<<" relAcc [%]: "<<100*err/res;
+	BOOST_LOG_TRIVIAL(debug)<<"DPKinematics::calcDParea() Dalitz plot area (MC integration): "
+			<<"("<<res<<"+-"<<err<<") GeV^4 relAcc [%]: "<<100*err/res;
 
 	_DParea=res;
 	_DPareaCalculated=1;
@@ -433,25 +427,7 @@ bool DalitzKinematics::isWithinPhsp(const dataPoint& point) {
 	double m23sq = point.getVal(id23);
 	double m13sq = point.getVal(id13);
 	double m12sq=getThirdVariableSq(m23sq,m13sq);
-	/*!
-	 * \brief checks if phase space point lies within the kinematically allowed region.
-	 * \param m23 invariant mass of particles 2 and 3
-	 * \param m13 invariant mass of particles 2 and 3
-	 * \param m12 invariant mass of particles 2 and 3
-	 *
-	 */
-	//mostly copied from Laura++
-	//	double e3Cms23 = (m23sq - m2*m2 + m3*m3)/(2.0*sqrt(m23sq)); //energy of part3 in 23 rest frame
-	//	double p3Cms23 = sqrt(-(m3*m3-e3Cms23*e3Cms23)); //momentum of part3 in 23 rest frame
-	//	double e1Cms23 = (M*M - m23sq - m1*m1)/(2.0*sqrt(m23sq)); //energy of part1 in 23 rest frame
-	//	double p1Cms23 = sqrt(-(m1*m1-e1Cms23*e1Cms23)); //momentum of part1 in 23 rest frame
-	//
-	//	double term = 2.0*e3Cms23*e1Cms23+ m1*m1 + m3*m3;
-	//
-	//	double _m13SqLocMin = term - 2.0*p3Cms23*p1Cms23;
-	//	double _m13SqLocMax = term + 2.0*p3Cms23*p1Cms23;
 
-	//	if(m13sq >= _m13SqLocMin && m13sq <= _m13SqLocMax) return 1;
 	bool c0=0; bool c1=0; bool c2=0;
 	if(m13sq >= invMassMin(4,5,m23sq) && m13sq <= invMassMax(4,5,m23sq)) c0=1;
 	if(m12sq >= invMassMin(3,5,m23sq) && m12sq <= invMassMax(3,5,m23sq)) c1=1;
@@ -466,14 +442,10 @@ double DalitzKinematics::lambda(double x, double y, double z)const{
 	return x*x+y*y+z*z-2.*x*y-2.*x*z-2.*y*z;
 }
 
-double DalitzKinematics::s2min(double s1, double m0, double m1, double m2, double m3)const
-{
+double DalitzKinematics::s2min(double s1, double m0, double m1, double m2, double m3) const {
 	double s      = m0*m0;
 	double lamterm = sqrt( lambda(s1,s,m1*m1) ) * sqrt( lambda(s1, m2*m2, m3*m3) );
-
-	double result  = m1*m1 + m3*m3 + ( (s-s1-m1*m1)*(s1-m2*m2+m3*m3) - lamterm )/(2.*s1);
-
-	return result;
+	return m1*m1 + m3*m3 + ( (s-s1-m1*m1)*(s1-m2*m2+m3*m3) - lamterm )/(2.*s1);
 }
 
 double DalitzKinematics::s2max(double s1, double m0, double m1, double m2, double m3)const

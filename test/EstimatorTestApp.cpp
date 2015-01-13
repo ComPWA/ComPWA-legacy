@@ -51,7 +51,7 @@ int main(int argc, char **argv){
 //  shared_ptr<BreitWigner> testBW(new BreitWigner(0.,5.));
   shared_ptr<Amplitude> testBW(new BreitWigner(0.,5.));
 
-  shared_ptr<ControlParameter> testEsti = MinLogLH::createInstance(testBW, myReader);
+  shared_ptr<ControlParameter> testEsti = MinLogLH::createInstance(testBW, myReader, std::shared_ptr<Data>(), std::shared_ptr<Data>());
   //if(!testEsti) return 0;
   ParameterList minPar;
   testBW->fillStartParVec(minPar);

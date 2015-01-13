@@ -104,8 +104,8 @@ public:
 	std::vector<double> weight;
 	double sumWeight;//! sum of all weights
 	double reWeight;//! reweighting factor for event weights, so that these are 1 in average
-	unsigned int nEvents;
 	unsigned int nInvMasses;
+	unsigned int nEvents;
 
 };
 

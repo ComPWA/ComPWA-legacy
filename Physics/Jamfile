@@ -5,18 +5,15 @@ path-constant PHYSICS : . ;
 build-project AmplitudeSum ;
 build-project DPKinematics ;
 build-project BreitWigner ;
-#build-project BlackScholes ;
-#build-project NeuralNetwork ;
+build-project Background ;
 
 # Build libPhysics.so
 lib Physics : 
         [ glob *.cpp ]
         $(PHYSICS)/DPKinematics//DPKinematics
         $(PHYSICS)/AmplitudeSum//AmplitudeSum
+        $(PHYSICS)/Background//Background
         $(PHYSICS)/BreitWigner//BreitWigner
-        #$(PHYSICS)/BlackScholes//BlackScholes
-        #$(PHYSICS)/NeuralNetwork//NeuralNetwork
-        #: <link>static 
 ;
 
 install dist : Physics : <location>$(TOP)/lib ;

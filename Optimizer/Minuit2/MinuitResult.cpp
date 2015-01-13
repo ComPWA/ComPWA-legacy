@@ -37,41 +37,47 @@ int multivariateGaussian(const gsl_rng *rnd, const int vecSize, const gsl_vector
 	return 0;
 }
 
+MinuitResult::MinuitResult(std::shared_ptr<ControlParameter> esti, FunctionMinimum result) : useCorrelatedErrors(0){
+	estimator = std::static_pointer_cast<Estimator>(esti);
+	_amp=estimator->getAmplitude();
+	init(result);
+}
+void MinuitResult::setResult(std::shared_ptr<ControlParameter> esti,FunctionMinimum result){
+	estimator = std::static_pointer_cast<Estimator>(esti);
+	_amp=estimator->getAmplitude();
+	init(result);
+}
 
 void MinuitResult::init(FunctionMinimum min){
 	nRes = 0;
 	MnUserParameterState minState = min.UserState();
-	MnUserCovariance minuitCovMatrix = minState.Covariance();
-	//	std::vector<double> minuitCovM = minState.Covariance().Data();//Covariance matrix is empty !?
 	using namespace boost::numeric::ublas;
 
-	if(!minState.HasCovariance()){
-		BOOST_LOG_TRIVIAL(error)<<"MinuitResult: no valid correlation matrix available!";
-		return;
-	}
-	/* Size of Minuit covariance vector is given by dim*(dim+1)/2.
-	 * dim is the dimension of the covariance matrix.
-	 * The dimension can therefore be calculated as dim = -0.5+-0.5 sqrt(8*size+1)
-	 */
-	unsigned int dim = minuitCovMatrix.Nrow();
-	globalCC = minState.GlobalCC().GlobalCC();
-	symmetric_matrix<double,upper> covMatrix(dim,dim);
-	symmetric_matrix<double,upper> corrMatrix(dim,dim);
-	//	if(minuitCovM.size()==dim*(dim+1)/2){
-	for (unsigned i = 0; i < covMatrix.size1 (); ++ i)
-		for (unsigned j = i; j < covMatrix.size2 (); ++ j){
-			double entry = minuitCovMatrix(j,i);
-			covMatrix (i, j) = entry;
-			if(i==j) variance.push_back(sqrt(entry));
-		}
-	for (unsigned i = 0; i < covMatrix.size1 (); ++ i)
-		for (unsigned j = i; j < covMatrix.size2 (); ++ j){
-			double denom = variance[i]*variance[j];
-			corrMatrix(i,j) = covMatrix(i,j)/denom;
-		}
-	//	} else BOOST_LOG_TRIVIAL(error)<<"MinuitResult: no valid correlation matrix available!";
-	cov=covMatrix;
-	corr=corrMatrix;
+	if(minState.HasCovariance()){
+		MnUserCovariance minuitCovMatrix = minState.Covariance();
+		/* Size of Minuit covariance vector is given by dim*(dim+1)/2.
+		 * dim is the dimension of the covariance matrix.
+		 * The dimension can therefore be calculated as dim = -0.5+-0.5 sqrt(8*size+1)
+		 */
+		unsigned int dim = minuitCovMatrix.Nrow();
+		globalCC = minState.GlobalCC().GlobalCC();
+		symmetric_matrix<double,upper> covMatrix(dim,dim);
+		symmetric_matrix<double,upper> corrMatrix(dim,dim);
+		//	if(minuitCovM.size()==dim*(dim+1)/2){
+		for (unsigned i = 0; i < covMatrix.size1 (); ++ i)
+			for (unsigned j = i; j < covMatrix.size2 (); ++ j){
+				double entry = minuitCovMatrix(j,i);
+				covMatrix (i, j) = entry;
+				if(i==j) variance.push_back(sqrt(entry));
+			}
+		for (unsigned i = 0; i < covMatrix.size1 (); ++ i)
+			for (unsigned j = i; j < covMatrix.size2 (); ++ j){
+				double denom = variance[i]*variance[j];
+				corrMatrix(i,j) = covMatrix(i,j)/denom;
+			}
+		cov=covMatrix;
+		corr=corrMatrix;
+	} else BOOST_LOG_TRIVIAL(error)<<"MinuitResult: no valid correlation matrix available!";
 	initialLH = -1;
 	finalLH = minState.Fval();
 	edm= minState.Edm();
@@ -95,9 +101,13 @@ void MinuitResult::init(FunctionMinimum min){
 
 }
 
-void MinuitResult::setAmplitude(std::shared_ptr<Amplitude> newAmp){
-	_amp=newAmp;
-	nRes=_amp->getNumberOfResonances();
+void MinuitResult::genSimpleOutput(std::ostream& out){
+	for(unsigned int o=0;o<finalParameters.GetNDouble();o++){
+		std::shared_ptr<DoubleParameter> outPar = finalParameters.GetDoubleParameter(o);
+		out<<outPar->GetValue()<<" "<<outPar->GetError()->GetError()<<" ";
+	}
+	out<<"\n";
+
 	return;
 }
 
@@ -144,9 +154,7 @@ void MinuitResult::calcFractionError(std::vector<double>& fracError){
 			std::vector<double> tmp;
 			calcFraction(tmp);
 			fracVect.push_back(tmp);
-			//			std::cout<<"adsfasd ";
 			//			for(unsigned int i=0; i<tmp.size();i++) std::cout<<tmp.at(i)<<" ";
-			//			std::cout<<std::endl;
 		}
 		//Calculate standart deviation
 		for(unsigned int o=0;o<nRes;o++){
@@ -171,24 +179,20 @@ void MinuitResult::calcFractionError(std::vector<double>& fracError){
 		BOOST_LOG_TRIVIAL(info) << "Calculating errors of fit fractions assuming that parameters "
 				"are uncorrelated and that neglecting the error from normalization!";
 		double norm = 0.0;
-		if(!_amp->hasTree()) norm = _amp->integral();
+		if(!estimator->hasTree()) norm = _amp->integral();
 		else {//if we have a tree, use it. Much faster especially in case of correlated errors in calcFractionError()
-			_amp->getPhspTree()->recalculate();
+			std::shared_ptr<FunctionTree> tree = estimator->getTree();
+			tree->recalculate();
 			double phspVolume = Kinematics::instance()->getPhspVolume();
 			/*We need the intensity over the PHSP without efficiency correction. Therefore we
 			 * access node 'Amplitude' and sum up its values.*/
 			//			std::shared_ptr<TreeNode> amplitudeNode = _amp->getPhspTree()->head()->getChildren().at(0)->getChildren().at(0);
-			std::shared_ptr<TreeNode> amplitudeNode = _amp->getPhspTree()->head()->getChildNode("Amplitude");
+			std::shared_ptr<TreeNode> amplitudeNode = tree->head()->getChildNode("Amplitude_Phsp");
 			if(!amplitudeNode){
-				BOOST_LOG_TRIVIAL(error)<<"MinuitResult::calcFractionError() : Can't find node 'Amplitude' in tree!";
+				BOOST_LOG_TRIVIAL(error)<<"MinuitResult::calcFractionError() : Can't find node 'Amplitude_Phsp' in tree!";
 				throw BadParameter("Node not found!");
 			}
 
-			if(amplitudeNode->getName()!="Amplitude") {
-				BOOST_LOG_TRIVIAL(error)<<"MinuitResult::calcFractionError() : we expect node 'Amplitude' at that position,"
-						" but found node "<<amplitudeNode->getName()<<". Probably the structure of the tree has changed!";
-				throw BadParameter("Node not found!");
-			}
 			std::shared_ptr<MultiComplex> normPar = std::dynamic_pointer_cast<MultiComplex>(amplitudeNode->getValue());//node 'Amplitude'
 			unsigned int numPhspEvents = normPar->GetNValues();
 			for(unsigned int i=0; i<numPhspEvents;i++)
@@ -217,22 +221,18 @@ void MinuitResult::calcFraction(std::vector<double>& frac){
 	double norm = 1.36286;
 	ParameterList currentPar;
 	_amp->fillStartParVec(currentPar);
-	if(!_amp->hasTree()) norm = _amp->integral();
+	if(!estimator->hasTree()) norm = _amp->integral();
 	else {//if we have a tree, use it. Much faster especially in case of correlated errors in calcFractionError()
-		_amp->getPhspTree()->recalculate();
+		std::shared_ptr<FunctionTree> tree = estimator->getTree();
+		tree->recalculate();
 		double phspVolume = Kinematics::instance()->getPhspVolume();
 		/*We need the intensity over the PHSP without efficiency correction. Therefore we
 		 * access node 'Amplitude' and sum up its values.*/
-//		std::shared_ptr<TreeNode> amplitudeNode = _amp->getPhspTree()->head()->getChildren().at(0)->getChildren().at(0);
-//		std::shared_ptr<TreeNode> amplitudeNode = _amp->getPhspTree()->head()->getChildNode("Amplitude");
-		std::shared_ptr<TreeNode> amplitudeNode(_amp->getPhspTree()->head()->getChildNode("Amplitude"));
+		//		std::shared_ptr<TreeNode> amplitudeNode = tree->head()->getChildren().at(0)->getChildren().at(0);
+		//		std::shared_ptr<TreeNode> amplitudeNode = tree->head()->getChildNode("Amplitude_Phsp");
+		std::shared_ptr<TreeNode> amplitudeNode = tree->head()->getChildNode("Amplitude_Phsp");
 		if(!amplitudeNode){
 			BOOST_LOG_TRIVIAL(error)<<"MinuitResult::calcFraction() : Can't find node 'Amplitude' in tree!";
-			throw BadParameter("Node not found!");
-		}
-		if(amplitudeNode->getName()!="Amplitude") {
-			BOOST_LOG_TRIVIAL(error)<<"MinuitResult::calcFraction() : we expect node 'Amplitude' at that position,"
-					" but found node "<<amplitudeNode->getName()<<". Probably the structure of the tree has changed!";
 			throw BadParameter("Node not found!");
 		}
 
@@ -242,8 +242,8 @@ void MinuitResult::calcFraction(std::vector<double>& frac){
 			norm+=abs(normPar->GetValue(i))*abs(normPar->GetValue(i));
 
 		norm = norm*phspVolume/numPhspEvents; //correct calculation of normalization
-		//std::cout<<"Amplitude normalization: "<<norm<<std::endl;
-		//		std::cout<<norm<<" "<<phspVolume<<" "<<numPhspEvents<<std::endl;
+		//		std::cout<<"Amplitude normalization: "<<norm<<std::endl;
+		//				std::cout<<norm<<" "<<phspVolume<<" "<<numPhspEvents<<std::endl;
 	}
 	nRes=_amp->getNumberOfResonances();
 	for(unsigned int i=0;i<nRes; i++){ //fill matrix
@@ -348,7 +348,12 @@ void MinuitResult::genOutput(std::ostream& out, std::string opt){
 					continue;
 				}
 				tableResult << *truePar;
+				double pi = PhysConst::instance()->getConstValue("Pi");
 				double pull = (truePar->GetValue()-outPar->GetValue() );
+				if(isAngle && !isFixed) { //shift pull by 2*pi if that reduces the deviation
+					while( pull<0 && pull<-pi) pull+=2*pi;
+					while( pull>0 && pull>pi) pull-=2*pi;
+				}
 				if( errorType == ErrorType::ASYM && pull < 0)
 					pull /= outPar->GetError()->GetErrorLow();
 				else if( errorType == ErrorType::ASYM && pull > 0)

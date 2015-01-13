@@ -39,10 +39,10 @@ using namespace std;
 class AmpFlatteRes : public AmpAbsDynamicalFunction, public AmpKinematics {
 public:
 	AmpFlatteRes(const char *name,
-			DoubleParameter& resMass,
-			DoubleParameter& mesonRadius,
-			DoubleParameter& motherRadius,
-			DoubleParameter& g1, DoubleParameter& g2,
+			std::shared_ptr<DoubleParameter> resMass,
+			std::shared_ptr<DoubleParameter> mesonRadius,
+			std::shared_ptr<DoubleParameter> motherRadius,
+			std::shared_ptr<DoubleParameter> g1, std::shared_ptr<DoubleParameter> g2,
 			double _g2_partA, double _g2_partB,
 			int _subsys, int resSpin, int m, int n) ;
 
@@ -57,7 +57,7 @@ public:
 	static std::complex<double> dynamicalFunction(double mSq, double mR, double ma, double mb, double g1,
 			double mHiddenA, double mHiddenB, double g2,unsigned int J);
 
-	virtual void initialise();
+	virtual void initialise() { };
 	std::complex<double> evaluate(dataPoint& point) { return ( _norm*evaluateAmp(point)*evaluateWignerD(point) ); }
 	virtual std::complex<double> evaluateAmp(dataPoint& point) ;
 	virtual double evaluateWignerD(dataPoint& point) {
@@ -76,11 +76,9 @@ protected:
 
 	double _g2_partA;//hidden channel: mass particle A
 	double _g2_partB; //hidden channel: mass particle B
-	DoubleParameter _g2, _g1;
-
-private:
-	//ClassDef(AmpFlatteRes,1) // Relativistic Breit-Wigner resonance model
-
+	std::shared_ptr<DoubleParameter> _g2, _g1;
+	bool foundMasses;
+	unsigned int id23, id13;
 };
 
 

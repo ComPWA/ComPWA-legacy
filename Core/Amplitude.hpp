@@ -30,6 +30,7 @@
 
 #include "Core/ParameterList.hpp"
 #include "Core/FunctionTree.hpp"
+#include "DataReader/Data.hpp"
 
 #include "Core/DataPoint.hpp"
 #include "Core/Generator.hpp"
@@ -43,11 +44,10 @@ public:
 	virtual ~Amplitude()
 	{ /* nothing */	}
 
-	virtual void setNevents(unsigned int n)  = 0;
-	virtual unsigned int getNevents()  = 0;
-
 	virtual const double integral() =0;
 	virtual const double integral(ParameterList& par) =0;
+	virtual const double normalization() =0;
+	virtual const double normalization(ParameterList& par) =0;
 	virtual double getMaxVal(ParameterList& par, std::shared_ptr<Generator> gen) = 0;
 	virtual double getMaxVal(std::shared_ptr<Generator> gen) = 0;
 	//virtual const double volume() =0;
@@ -70,20 +70,29 @@ public:
 	//! get total integral for resonance \param name
 	virtual double getTotalIntegral(std::string name) { return -999; };
 	//! convert resonance \param name to id
-	virtual unsigned int getIdOfResonance(std::string name){ return 0;}
+	virtual int getIdOfResonance(std::string name){ return 0;}
 	//! convert resonance \param id to name
 	virtual std::string getNameOfResonance(unsigned int id){ return std::string("muh");}
-	virtual double getMagnitude(std::string name) {return -999;};
-	virtual double getMagnitude(unsigned int id) {return -999;};
-	virtual double getPhase(std::string name) {return -999;};
-	virtual double getPhase(unsigned int id) {return -999;};
-	virtual double getSpin(std::string name) {return -999;};
-	virtual double getSpin(unsigned int id) {return -999;};
-	virtual double getFraction(std::string name) = 0;
-	virtual double getFraction(unsigned int id) = 0;
+//	virtual double getMagnitude(std::string name) {return -999;};
+//	virtual double getMagnitude(unsigned int id) {return -999;};
+//	virtual double getPhase(std::string name) {return -999;};
+//	virtual double getPhase(unsigned int id) {return -999;};
+//	virtual double getSpin(std::string name) {return -999;};
+//	virtual double getSpin(unsigned int id) {return -999;};
+//	virtual double getFraction(std::string name) = 0;
+//	virtual double getFraction(unsigned int id) = 0;
 	virtual double getIntValue(std::string var1, double min1, double max1, std::string var2, double min2, double max2) = 0;
 	virtual Amplitude* Clone() = 0;
 
+	//! Check of tree is available
+	virtual bool hasTree(){ return 0; }
+	//! Getter function for basic amp tree
+	virtual std::shared_ptr<FunctionTree> getAmpTree(allMasses&,allMasses&, std::string){
+		return std::shared_ptr<FunctionTree>();
+	}
+
+
+	/* OBSOLETE SECTION ONLY FOR TESTING */
 	virtual std::shared_ptr<FunctionTree> functionTree(allMasses& theMasses, allMasses& toyPhspSample) {
 		//if not implemented, return NULL-pointer
 		return std::shared_ptr<FunctionTree>();
@@ -100,12 +109,11 @@ public:
 		//if not implemented, return NULL-pointer
 		return std::shared_ptr<FunctionTree>();
 	}
-	//! Check of tree is available
-	virtual bool hasTree(){ return 0; }
 	//! Getter function for function tree
 	virtual std::shared_ptr<FunctionTree> getTree(){ return std::shared_ptr<FunctionTree>(); }
 	//! Getter function for phsp tree
 	virtual std::shared_ptr<FunctionTree> getPhspTree(){ return std::shared_ptr<FunctionTree>(); }
+	/* OBSOLETE SECTION ONLY FOR TESTING */
 
 protected:
 	ParameterList result;

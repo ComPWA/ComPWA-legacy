@@ -37,6 +37,7 @@
 #include "Core/TableFormater.hpp"
 #include "Core/PhysConst.hpp"
 #include "Core/FitResult.hpp"
+#include "Estimator/Estimator.hpp"
 #include "Minuit2/MnUserParameterState.h"
 #include "Minuit2/FunctionMinimum.h"
 
@@ -48,12 +49,10 @@ class MinuitResult : public FitResult
 {
 public:
 	MinuitResult() {};
-	MinuitResult(FunctionMinimum result) { init(result); }
-	void setResult(FunctionMinimum result){ init(result); }
+	MinuitResult(std::shared_ptr<ControlParameter> esti, FunctionMinimum result);
+	void setResult(std::shared_ptr<ControlParameter> esti,FunctionMinimum result);
 	void setInitialLH(double iniLH){ initialLH = iniLH; }
-	//! Setting amplitude. This is necessary to calculate fit errors.
-	void setAmplitude(std::shared_ptr<Amplitude> newAmp);
-	void setUseCorrelatedErrors(bool s) { useCorrelatedErrors = s; }
+	//! Convert to double and return final LH values
 	operator double() const { return finalLH; };
 	//! Return final likelihood value
 	double getResult(){return finalLH;}
@@ -82,6 +81,8 @@ public:
 	 * @param fracError result with errors
 	 */
 	void calcFractionError(std::vector<double>& fracError);
+	//! Enable correct error estimation for fit fractions. Very time consuming!
+	void setUseCorrelatedErrors(bool s) { useCorrelatedErrors = s; }
 
 private:
 	bool isValid; //result valid
@@ -111,6 +112,7 @@ private:
 	void smearParameterList(ParameterList&);
 	void genOutput(std::ostream& out,std::string opt="");
 	void init(FunctionMinimum);
+	std::shared_ptr<Estimator> estimator;
 };
 
 #endif

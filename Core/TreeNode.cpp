@@ -106,7 +106,7 @@
     }//end which dim of this node
   }; //end update()
 
-  std::string TreeNode::to_str(std::string beginning = ""){
+  std::string TreeNode::to_str(int lv, std::string beginning){
     std::stringstream oss;
     if(_changed && _children.size())
       oss << beginning << _name << " = ?";
@@ -123,14 +123,19 @@
     else
       oss << std::endl;
 
+    if(lv==0) return oss.str();
     for(unsigned int i=0; i<_children.size(); i++){
       //oss << " -> ";
-      oss << _children[i]->to_str(beginning+" -> ");
+      oss << _children[i]->to_str(lv-1,beginning+" -> ");
     }
     return oss.str();
   };
 
+  std::string TreeNode::print(unsigned int lv){
+	  return to_str(lv);
+  }
+
 
 std::ostream & operator<<(std::ostream &os, std::shared_ptr<TreeNode> p){
-  return os << p->to_str();
+  return os << p->to_str(-1);
 }

@@ -1,6 +1,7 @@
-########### AmplitudeSum lib #############
+########### Background lib #############
 import os ;
 
+local BOOST_ROOT = [ os.environ BOOST_ROOT ] ;
 local QFT = [ os.environ QFT ] ;
 local GSL = [ os.environ GSL_ROOT ] ;
 
@@ -8,7 +9,7 @@ BOOSTLIBS = -lboost_log_setup -lboost_log -lboost_date_time -lboost_filesystem -
 
 project :
 	requirements
-        <include>$(QFT)/include
+         <include>$(QFT)/include
 	    <include>$(BOOST_ROOT)/include
 	    <include>$(GSL)/include
 	<linkflags>-L$(GSL)/lib
@@ -16,12 +17,13 @@ project :
      <linkflags>-lgslcblas
 	<linkflags>-L$(QFT)/lib
 	<linkflags>-lqft++
+	<linkflags>$(BOOSTLIBS)
 	;
 
-lib AmplitudeSum : 
-        [ glob *.cpp : *Test.cpp ] 
+lib Background : 
+        [ glob *.cpp ] 
         $(TOP)/Core//ComPWA
         $(PHYSICS)/DPKinematics//DPKinematics
         ;
 
-install dist : AmplitudeSum : <location>$(TOP)/lib ;
+install dist : Background : <location>$(TOP)/lib ;

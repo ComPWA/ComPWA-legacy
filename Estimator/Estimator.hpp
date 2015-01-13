@@ -30,6 +30,8 @@
 
 #include "Optimizer/ControlParameter.hpp"
 #include "Core/ParameterList.hpp"
+#include "Core/FunctionTree.hpp"
+#include "Core/Amplitude.hpp"
 
 class Estimator : public ControlParameter
 {
@@ -38,6 +40,12 @@ public:
   //static std::shared_ptr<Estimator> Instance();
 
   virtual double controlParameter(ParameterList& minPar) = 0;
+
+  virtual bool hasTree() {return 0;}
+
+  virtual std::shared_ptr<FunctionTree> getTree() { return std::shared_ptr<FunctionTree>(); }
+
+  virtual std::shared_ptr<Amplitude> getAmplitude() { return std::shared_ptr<Amplitude>(); }
 
 protected:
     //static std::shared_ptr<Estimator> instance_;
