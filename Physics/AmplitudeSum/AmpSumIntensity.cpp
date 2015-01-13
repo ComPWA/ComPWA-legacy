@@ -351,8 +351,8 @@ std::shared_ptr<FunctionTree> AmpSumIntensity::setupBasicTree(
 				PhysConst::instance()->getMass(tmp.m_g2_part1), "FlatteRes_"+tmp.m_name);
 		newTree->createLeaf("mHiddenB_"+tmp.m_name, \
 				PhysConst::instance()->getMass(tmp.m_g2_part2), "FlatteRes_"+tmp.m_name);
-		newTree->createLeaf("g1_a_0", params.GetDoubleParameter("g1_a_0"), "FlatteRes_"+tmp.m_name);//use global parameter g1_a0 (asdfef)
-//		newTree->createLeaf("g1_a_0", params.GetDoubleParameter("g1_"+name), "FlatteRes_"+tmp.m_name);//use local parameter g1_a0
+//		newTree->createLeaf("g1_a_0", params.GetDoubleParameter("g1_a_0"), "FlatteRes_"+tmp.m_name);//use global parameter g1_a0 (asdfef)
+		newTree->createLeaf("g1_a_0", params.GetDoubleParameter("g1_"+name), "FlatteRes_"+tmp.m_name);//use local parameter g1_a0
 		newTree->createLeaf("g2_"+tmp.m_name, params.GetDoubleParameter("g2_"+name), "FlatteRes_"+tmp.m_name);
 		//Angular distribution
 		newTree->createLeaf("m23sq", m23sq, "AngD_"+tmp.m_name); //ma
@@ -389,9 +389,8 @@ std::shared_ptr<FunctionTree> AmpSumIntensity::setupBasicTree(
 					PhysConst::instance()->getMass(tmp.m_g2_part1), "NormFlatte_"+tmp.m_name);
 			newTree->createLeaf("mHiddenB_"+tmp.m_name, \
 					PhysConst::instance()->getMass(tmp.m_g2_part2), "NormFlatte_"+tmp.m_name);
-//			newTree->createLeaf("g1_"+tmp.m_name, *(paramsPos+3), "NormFlatte_"+tmp.m_name);
-			newTree->createLeaf("g1_a_0", params.GetDoubleParameter("g1_a_0"), "NormFlatte_"+tmp.m_name);//use global parameter g1_a0 (asdfef)
-//			newTree->createLeaf("g1_a_0", params.GetDoubleParameter("g1_"+name), "NormFlatte_"+tmp.m_name);//use local parameter g1_a0
+//			newTree->createLeaf("g1_a_0", params.GetDoubleParameter("g1_a_0"), "NormFlatte_"+tmp.m_name);//use global parameter g1_a0 (asdfef)
+			newTree->createLeaf("g1_a_0", params.GetDoubleParameter("g1_"+name), "NormFlatte_"+tmp.m_name);//use local parameter g1_a0
 			newTree->createLeaf("g2_"+tmp.m_name, params.GetDoubleParameter("g2_"+name), "NormFlatte_"+tmp.m_name);
 		} else {
 			newTree->createLeaf("N_"+tmp.m_name, 1., "Flatte_"+tmp.m_name);
