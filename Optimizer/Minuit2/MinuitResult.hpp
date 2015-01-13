@@ -109,6 +109,7 @@ private:
 	boost::numeric::ublas::matrix<double> fracError;
 	std::vector<double> variance;
 	std::vector<double> globalCC;
+	void genSimpleOutput(std::ostream& out);
 	void smearParameterList(ParameterList&);
 	void genOutput(std::ostream& out,std::string opt="");
 	void init(FunctionMinimum);
