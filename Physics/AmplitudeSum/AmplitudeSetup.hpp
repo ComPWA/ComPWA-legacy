@@ -100,6 +100,19 @@ struct ResonanceFlatte
 	std::string m_g2_part2;
 
 };
+struct nonResonant
+{
+	bool m_enable;
+	std::string m_name;
+	double m_strength;
+	bool m_strength_fix;
+	double m_strength_min;
+	double m_strength_max;
+	double m_phase;
+	bool m_phase_fix;
+	double m_phase_min;
+	double m_phase_max;
+};
 class AmplitudeSetup
 {
 private:
@@ -109,13 +122,16 @@ private:
 	std::string m_filePath;
 	std::vector<Resonance> m_resonances;          // resonances
 	std::vector<ResonanceFlatte> m_resonancesFlatte;          // resonances
+	std::vector<nonResonant> m_nonResonant;
 
 
 public:
-	AmplitudeSetup(const std::string &filename) : nRes(0),nResEnabled(0) { load(filename); };
+	AmplitudeSetup();
+	AmplitudeSetup(const std::string &filename);
 	AmplitudeSetup(const AmplitudeSetup& other) : nRes(other.nRes),nResEnabled(other.nResEnabled),
 			m_file(other.m_file), m_filePath(other.m_filePath),\
-			m_resonances(other.m_resonances) , m_resonancesFlatte(other.m_resonancesFlatte){};
+			m_resonances(other.m_resonances) , m_resonancesFlatte(other.m_resonancesFlatte),
+			m_nonResonant(other.m_nonResonant){};
 	void load(const std::string &filename);
 	void save(const std::string &filename);
 	~AmplitudeSetup(){};
@@ -125,6 +141,7 @@ public:
 	inline const std::string & getFilePath() const {return m_filePath;};
 	inline std::vector<Resonance> & getResonances() { return m_resonances; };
 	inline std::vector<ResonanceFlatte> & getResonancesFlatte() { return m_resonancesFlatte; };
+	inline std::vector<nonResonant> & getNonResonant() { return m_nonResonant; };
 	inline unsigned int getNRes(){ return nRes; }
 	inline unsigned int getNResEnabled(){ return nResEnabled; }
 

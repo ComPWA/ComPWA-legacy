@@ -32,7 +32,6 @@ AmpRelBreitWignerRes::AmpRelBreitWignerRes(const char *name,
 		AmpKinematics(resMass, subSys, resSpin, m, n, AmpKinematics::barrierType(BWPrime),
 				mesonRadius, motherRadius),
 		_resWidth(resWidth),
-		_wignerD(subSys, resSpin),
 		foundMasses(false),
 		nParams(6)
 {
@@ -42,8 +41,7 @@ AmpRelBreitWignerRes::AmpRelBreitWignerRes(const char *name,
 AmpRelBreitWignerRes::AmpRelBreitWignerRes(const AmpRelBreitWignerRes& other, const char* newname) :
 														  AmpAbsDynamicalFunction(other, newname),
 														  AmpKinematics(other),
-														  _resWidth(other._resWidth),
-														  _wignerD(other._wignerD)
+														  _resWidth(other._resWidth)
 {
 	initialise();
 }
@@ -51,8 +49,7 @@ AmpRelBreitWignerRes::AmpRelBreitWignerRes(const AmpRelBreitWignerRes& other, co
 AmpRelBreitWignerRes::AmpRelBreitWignerRes(const AmpRelBreitWignerRes& other) :
 														  AmpAbsDynamicalFunction(other),
 														  AmpKinematics(other),
-														  _resWidth(other._resWidth),
-														  _wignerD(other._wignerD)
+														  _resWidth(other._resWidth)
 {
 	initialise();
 }

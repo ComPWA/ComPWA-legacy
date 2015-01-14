@@ -5,10 +5,45 @@
  *      Author: weidenka
  */
 
-
-
-
 #include "Physics/AmplitudeSum/AmplitudeSetup.hpp"
+
+AmplitudeSetup::AmplitudeSetup() : nRes(0),nResEnabled(0) {
+	BOOST_LOG_TRIVIAL(debug) << "AmplitudeSetup::AmplitudeSetup() no filename passed. "
+			"Creating AmplitudeSetup with a non resonant component only!";
+	nonResonant tmp;
+	tmp.m_name=="nonRes";
+	tmp.m_strength=1.0;
+	tmp.m_strength_fix=1.0;
+	tmp.m_strength_min=0.0;
+	tmp.m_strength_max=2.0;
+	tmp.m_phase = 0.0;
+	tmp.m_phase_fix=1.0;
+	tmp.m_phase_min=-100;
+	tmp.m_phase_max=100;
+	tmp.m_enable=1;
+	m_nonResonant.push_back(tmp);
+};
+
+AmplitudeSetup::AmplitudeSetup(const std::string &filename) : nRes(0),nResEnabled(0) {
+	if(filename=="") {
+		BOOST_LOG_TRIVIAL(debug) << "AmplitudeSetup::AmplitudeSetup() no filename passed. "
+				"Creating AmplitudeSetup with a non resonant component only!";
+		nonResonant tmp;
+		tmp.m_name=="nonRes";
+		tmp.m_strength=1.0;
+		tmp.m_strength_fix=1.0;
+		tmp.m_strength_min=0.0;
+		tmp.m_strength_max=2.0;
+		tmp.m_phase = 0.0;
+		tmp.m_phase_fix=1.0;
+		tmp.m_phase_min=-100;
+		tmp.m_phase_max=100;
+		tmp.m_enable=1;
+		m_nonResonant.push_back(tmp);
+		return;
+	}
+	load(filename);
+};
 
 // Loads amplitude_setup structure from the specified XML file
 void AmplitudeSetup::load(const std::string &filename)
@@ -37,7 +72,7 @@ void AmplitudeSetup::load(const std::string &filename)
 	BOOST_FOREACH( ptree::value_type const& v, pt.get_child("amplitude_setup") ) {
 		if( v.first == "resonance" ) {
 			Resonance f;
-//			f.m_reference= v.second.get<std::string>("reference");
+			//			f.m_reference= v.second.get<std::string>("reference");
 			f.m_enable = v.second.get<bool>("enable");
 			f.m_name = v.second.get<std::string>("name");
 			f.m_mass = v.second.get<double>("mass");
@@ -68,7 +103,7 @@ void AmplitudeSetup::load(const std::string &filename)
 		}
 		if( v.first == "resonanceFlatte" ) {
 			ResonanceFlatte f;
-//			f.m_reference= v.second.get<std::string>("reference");
+			//			f.m_reference= v.second.get<std::string>("reference");
 			f.m_enable = v.second.get<bool>("enable");
 			f.m_name = v.second.get<std::string>("name");
 			f.m_mass = v.second.get<double>("mass");
@@ -100,6 +135,22 @@ void AmplitudeSetup::load(const std::string &filename)
 			if(f.m_enable) nResEnabled++;
 			nRes++;
 		}
+		if( v.first == "nonResonant" ) {
+			nonResonant f;
+			f.m_enable = v.second.get<bool>("enable");
+			f.m_name = v.second.get<std::string>("name");
+			f.m_strength = v.second.get<double>("strength");;
+			f.m_strength_fix = v.second.get<bool>("strength_fix");;
+			f.m_strength_min = v.second.get<double>("strength_min");;
+			f.m_strength_max = v.second.get<double>("strength_max");;
+			f.m_phase = v.second.get<double>("phase");;
+			f.m_phase_fix = v.second.get<bool>("phase_fix");;
+			f.m_phase_min = v.second.get<double>("phase_min");;
+			f.m_phase_max = v.second.get<double>("phase_max");;
+			m_nonResonant.push_back(f);
+			if(f.m_enable) nResEnabled++;
+			nRes++;
+		}
 	}
 	BOOST_LOG_TRIVIAL(info) << "AmplitudeSetup::load() file " << filename
 			<< " with " << nRes	<< "("<<nResEnabled<<") resonances all(enabled)!";
@@ -125,6 +176,19 @@ void AmplitudeSetup::save(const std::string &filename)
 	// functions.
 
 	BOOST_LOG_TRIVIAL(debug) << "AmplitudeSetup: Saving resonences "<<m_resonances.size()<<"x BW and "<<m_resonancesFlatte.size()<<"x flatte!";
+	BOOST_FOREACH( nonResonant const& v, m_nonResonant) {
+		ptree & node = pt.add("amplitude_setup.nonResonant", "");
+		node.put("enable", v.m_enable);
+		node.put("name", v.m_name);
+		node.put("strength", v.m_strength);
+		node.put("strength_fix", v.m_strength_fix);
+		node.put("strength_min", v.m_strength_min);
+		node.put("strength_max", v.m_strength_max);
+		node.put("phase", v.m_phase);
+		node.put("phase_fix", v.m_phase_fix);
+		node.put("phase_min", v.m_phase_min);
+		node.put("phase_max", v.m_phase_max);
+	}
 	BOOST_FOREACH( Resonance const& v, m_resonances ) {
 		ptree & node = pt.add("amplitude_setup.resonance", "");
 		node.put("enable", v.m_enable);
@@ -181,8 +245,8 @@ void AmplitudeSetup::save(const std::string &filename)
 		node.put("g2", v.m_g2);
 		node.put("g2_part1", v.m_g2_part1);
 		node.put("g2_part2", v.m_g2_part2);
-
 	}
+
 
 
 	// Write the property tree to the XML file.

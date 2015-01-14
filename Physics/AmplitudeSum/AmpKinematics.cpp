@@ -20,7 +20,8 @@ _spin(other._spin),
 _m(other._m),
 _n(other._n),
 _mesonRadius(other._mesonRadius),
-_motherRadius(other._motherRadius)
+_motherRadius(other._motherRadius),
+_wignerD(other._wignerD)
 {
 
 };
@@ -28,7 +29,7 @@ _motherRadius(other._motherRadius)
 AmpKinematics::AmpKinematics(std::shared_ptr<DoubleParameter> mR, int subSys, int spin, int m, int n,
 		barrierType type, std::shared_ptr<DoubleParameter> mesonRadius, std::shared_ptr<DoubleParameter> motherRadius) :
 		_M(-999), _mR(mR),_subSys(subSys), _type(type), _spin(spin),_m(m),_n(n),
-		_mesonRadius(mesonRadius), _motherRadius(motherRadius)
+		_mesonRadius(mesonRadius), _motherRadius(motherRadius), _wignerD(subSys,spin)
 {
 	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
 	_M=kin->M;
@@ -45,13 +46,6 @@ AmpKinematics::AmpKinematics(std::shared_ptr<DoubleParameter> mR, int subSys, in
 		_mb=kin->m1;
 		_mc=kin->m3;}
 }
-
-//AmpKinematics::AmpKinematics(double ma, double mb , double mc, double M, DoubleParameter& mR,
-//		int subSys, barrierType type, int spin, int m, int n, DoubleParameter& mesonR, DoubleParameter& motherR) :
-//				_ma(ma), _mb(mb), _mc(mc), _M(M), _mR(mR),_subSys(subSys), _type(type),
-//				_spin(spin),_m(m),_n(n), _mesonRadius(mesonR), _motherRadius(motherR)
-//{
-//};
 
 void AmpKinematics::setDecayMasses(double ma, double mb, double mc, double M) {
 	_ma = ma;

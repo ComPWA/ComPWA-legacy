@@ -15,6 +15,7 @@
 #include <math.h>
 #include <iostream>
 #include "Core/Parameter.hpp"
+#include "Physics/AmplitudeSum/AmpWigner2.hpp"
 
 class AmpKinematics{
 public:
@@ -54,6 +55,12 @@ public:
 	double getMesonRadius() {return _mesonRadius->GetValue();};
 	double getMotherRadius() {return _motherRadius->GetValue();};
 
+	inline virtual bool isSubSys(const unsigned int subSys) const{ return (subSys==_subSys); };
+	virtual double evaluateWignerD(dataPoint& point) {
+		if(_spin==0) return 1.0;//save some computing time
+		return _wignerD.evaluate(point);
+	};
+
 protected:
 	double _ma, _mb, _mc, _M;
 	//! resonance mass
@@ -62,6 +69,7 @@ protected:
 	barrierType _type;
 	unsigned int _spin; int _m; int _n;
 	std::shared_ptr<DoubleParameter> _mesonRadius, _motherRadius;
+	AmpWigner2 _wignerD;
 
 private:
 };

@@ -48,21 +48,20 @@ public:
 
 	static std::complex<double> dynamicalFunction(double mSq, double mR, double ma, double mb, double gamma0, unsigned int J, double mesonRadius);
 	virtual void initialise();
-	virtual std::complex<double> evaluate(dataPoint& point) { return _norm*evaluateAmp(point)*evaluateWignerD(point); }
+	virtual std::complex<double> evaluate(dataPoint& point) { return _norm*evaluateAmp(point)*evaluateWignerD(point); };
 	virtual std::complex<double> evaluateAmp(dataPoint& point);
-	virtual double evaluateWignerD(dataPoint& point) {
-		if(_spin==0) return 1.0;//save some computing time
-		return _wignerD.evaluate(point);
-	};
+//	virtual double evaluateWignerD(dataPoint& point) {
+//		if(_spin==0) return 1.0;//save some computing time
+//		return _wignerD.evaluate(point);
+//	};
 
 	void setDecayMasses(double, double, double, double);
 	double getSpin() {return _spin;}; //needs to be declared in AmpAbsDynamicalFunction
-	inline virtual bool isSubSys(const unsigned int subSys) const{ return (subSys==_subSys); };
 	unsigned int getNParams(){ return nParams;}
 
 protected:
 	std::shared_ptr<DoubleParameter> _resWidth;
-	AmpWigner2 _wignerD;
+//	AmpWigner2 _wignerD;
 	bool foundMasses;
 	unsigned int id23, id13;
 	unsigned int nParams;
