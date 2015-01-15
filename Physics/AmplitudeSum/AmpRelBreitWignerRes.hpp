@@ -23,13 +23,12 @@
 
 #include <vector>
 
-//#include "TObject.h"
-//#include "TString.h"
+#include "Core/Functions.hpp"
+#include "Core/Exceptions.hpp"
 #include "Physics/AmplitudeSum/AmpAbsDynamicalFunction.hpp"
 #include "Physics/AmplitudeSum/AmpKinematics.hpp"
 #include "Physics/AmplitudeSum/AmpWigner2.hpp"
-#include "Core/Functions.hpp"
-#include "Core/Exceptions.hpp"
+#include "Physics/AmplitudeSum/NonResonant.hpp"
 
 class AmpRelBreitWignerRes : public AmpAbsDynamicalFunction, public AmpKinematics {
 public:
@@ -43,8 +42,6 @@ public:
 	AmpRelBreitWignerRes(const AmpRelBreitWignerRes&);
 
 	virtual ~AmpRelBreitWignerRes();
-
-	//  double operator() (double *x, size_t dim, void*);
 
 	static std::complex<double> dynamicalFunction(double mSq, double mR, double ma, double mb, double gamma0, unsigned int J, double mesonRadius);
 	virtual void initialise();
@@ -66,8 +63,66 @@ protected:
 	unsigned int id23, id13;
 	unsigned int nParams;
 
-private:
+};
 
+class BreitWignerConf : public basicConf
+{
+public:
+	BreitWignerConf(const boost::property_tree::ptree &pt_) : basicConf(pt_){
+		m_mass= pt_.get<double>("mass");
+		m_mass_fix= pt_.get<bool>("mass_fix");
+		m_mass_min= pt_.get<double>("mass_min");
+		m_mass_max= pt_.get<double>("mass_max");
+		m_width= pt_.get<double>("width");
+		m_width_fix= pt_.get<bool>("width_fix");
+		m_width_min= pt_.get<double>("width_min");
+		m_width_max= pt_.get<double>("width_max");
+		m_mesonRadius= pt_.get<double>("mesonRadius");
+		m_spin= pt_.get<unsigned int>("spin");
+		m_m= pt_.get<unsigned int>("m");
+		m_n= pt_.get<unsigned int>("n");
+		m_daughterA= pt_.get<unsigned int>("daughterA");
+		m_daughterB= pt_.get<unsigned int>("daughterB");
+	}
+	virtual void put(boost::property_tree::ptree &pt_){
+		basicConf::put(pt_);
+		pt_.put("mass", m_mass);
+		pt_.put("mass_fix", m_mass_fix);
+		pt_.put("mass_min", m_mass_min);
+		pt_.put("mass_max", m_mass_max);
+		pt_.put("width", m_width);
+		pt_.put("width_fix", m_width_fix);
+		pt_.put("width_min", m_width_min);
+		pt_.put("width_max", m_width_max);
+		pt_.put("mesonRadius", m_mesonRadius);
+		pt_.put("spin", m_spin);
+		pt_.put("m", m_m);
+		pt_.put("n", m_n);
+		pt_.put("daughterA", m_daughterA);
+		pt_.put("daughterB", m_daughterB);
+	}
+	virtual void update(ParameterList par){
+		basicConf::update(par);
+		m_mass= par.GetDoubleParameter("m0_"+m_name)->GetValue();
+		m_width= par.GetDoubleParameter("width_"+m_name)->GetValue();
+	}
+
+	double m_mass;
+	bool m_mass_fix;
+	double m_mass_min;
+	double m_mass_max;
+	double m_width;
+	bool m_width_fix;
+	double m_width_min;
+	double m_width_max;
+
+	double m_mesonRadius;
+	unsigned int m_spin;
+	unsigned int m_m;
+	unsigned int m_n;
+
+	unsigned int m_daughterA;
+	unsigned int m_daughterB;
 };
 
 class BreitWignerStrategy : public Strategy {

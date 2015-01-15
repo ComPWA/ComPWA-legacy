@@ -8,10 +8,14 @@
 #ifndef NONRESONANT_HPP_
 #define NONRESONANT_HPP_
 
+#include <boost/property_tree/ptree.hpp>
+
 #include "Core/DataPoint.hpp"
 #include "Core/Parameter.hpp"
 #include "Physics/AmplitudeSum/AmpAbsDynamicalFunction.hpp"
 #include "Physics/AmplitudeSum/AmpKinematics.hpp"
+
+using boost::property_tree::ptree;
 
 class NonResonant : public AmpAbsDynamicalFunction {
 public:
@@ -34,7 +38,8 @@ protected:
 
 class NonResonantStrategy : public Strategy {
 public:
-	NonResonantStrategy(const std::string resonanceName, ParType in):Strategy(in),name(resonanceName){}
+	NonResonantStrategy(const std::string resonanceName, ParType in):Strategy(in),name(resonanceName){
+	}
 
 	virtual const std::string to_str() const {
 		return ("NonResonant "+name);
@@ -68,6 +73,51 @@ public:
 
 protected:
 	std::string name;
+};
+
+class basicConf
+{
+public:
+	basicConf(){}
+	basicConf(const boost::property_tree::ptree &pt_){
+		m_enable = pt_.get<bool>("enable");
+		m_name= pt_.get<std::string>("name");
+		m_strength= pt_.get<double>("strength");
+		m_strength_fix = pt_.get<bool>("strength_fix");
+		m_strength_min= pt_.get<double>("strength_min");
+		m_strength_max= pt_.get<double>("strength_max");
+		m_phase= pt_.get<double>("phase");
+		m_phase_fix= pt_.get<bool>("phase_fix");
+		m_phase_min= pt_.get<double>("phase_min");
+		m_phase_max= pt_.get<double>("phase_max");
+	}
+	virtual void put(boost::property_tree::ptree &pt_){
+		pt_.put("enable", m_enable);
+		pt_.put("name", m_name);
+		pt_.put("strength", m_strength);
+		pt_.put("strength_fix", m_strength_fix);
+		pt_.put("strength_min", m_strength_min);
+		pt_.put("strength_max", m_strength_max);
+		pt_.put("phase", m_phase);
+		pt_.put("phase_fix", m_phase_fix);
+		pt_.put("phase_min", m_phase_min);
+		pt_.put("phase_max", m_phase_max);
+	}
+	virtual void update(ParameterList par){
+		m_strength= par.GetDoubleParameter("mag_"+m_name)->GetValue();
+		m_phase = par.GetDoubleParameter("phase_"+m_name)->GetValue();
+	}
+	//protected:
+	bool m_enable;
+	std::string m_name;
+	double m_strength;
+	bool m_strength_fix;
+	double m_strength_min;
+	double m_strength_max;
+	double m_phase;
+	bool m_phase_fix;
+	double m_phase_min;
+	double m_phase_max;
 };
 
 

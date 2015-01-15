@@ -30,120 +30,48 @@
 #include <boost/foreach.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
-
 #include <boost/log/trivial.hpp>
+
+#include "Core/ParameterList.hpp"
+#include "Physics/AmplitudeSum/NonResonant.hpp"
+#include "Physics/AmplitudeSum/AmpRelBreitWignerRes.hpp"
+#include "Physics/AmplitudeSum/AmpFlatteRes.hpp"
+
 using namespace boost::log;
+using boost::property_tree::ptree;
 
-struct Resonance
-{
-	bool m_enable;
-	std::string m_name;
-	std::string m_reference;
-	double m_mass; //TODO: struct for borders?
-	bool m_mass_fix;
-	double m_mass_min;
-	double m_mass_max;
-	double m_width;
-	bool m_width_fix;
-	double m_width_min;
-	double m_width_max;
-
-	double m_strength;
-	bool m_strength_fix;
-	double m_strength_min;
-	double m_strength_max;
-	double m_phase;
-	bool m_phase_fix;
-	double m_phase_min;
-	double m_phase_max;
-
-	double m_mesonRadius;
-	unsigned int m_spin;
-	unsigned int m_m;
-	unsigned int m_n;
-
-	unsigned int m_daugtherA; //TODO: better reference
-	unsigned int m_daugtherB; //TODO: better reference
-};
-struct ResonanceFlatte
-{
-	bool m_enable;
-	std::string m_name;
-	std::string m_reference;
-	double m_mass; //TODO: struct for borders?
-	bool m_mass_fix;
-	double m_mass_min;
-	double m_mass_max;
-
-	double m_strength;
-	bool m_strength_fix;
-	double m_strength_min;
-	double m_strength_max;
-	double m_phase;
-	bool m_phase_fix;
-	double m_phase_min;
-	double m_phase_max;
-
-	double m_mesonRadius;
-	unsigned int m_spin;
-	unsigned int m_m;
-	unsigned int m_n;
-
-	unsigned int m_daugtherA; //TODO: better reference
-	unsigned int m_daugtherB; //TODO: better reference
-	double m_g1;
-	double m_g1_fix;
-	double m_g1_min;
-	double m_g1_max;
-	double m_g2;
-	std::string m_g2_part1;
-	std::string m_g2_part2;
-
-};
-struct nonResonant
-{
-	bool m_enable;
-	std::string m_name;
-	double m_strength;
-	bool m_strength_fix;
-	double m_strength_min;
-	double m_strength_max;
-	double m_phase;
-	bool m_phase_fix;
-	double m_phase_min;
-	double m_phase_max;
-};
 class AmplitudeSetup
 {
 private:
-	unsigned int nRes;
-	unsigned int nResEnabled;
 	std::string m_file;          // ini filename
 	std::string m_filePath;
-	std::vector<Resonance> m_resonances;          // resonances
-	std::vector<ResonanceFlatte> m_resonancesFlatte;          // resonances
-	std::vector<nonResonant> m_nonResonant;
+	std::vector<BreitWignerConf> m_breitWigner;          // resonances
+	std::vector<FlatteConf> m_flatte;          // resonances
+	std::vector<basicConf> m_nonRes;
+	boost::property_tree::ptree pt;
 
 
 public:
 	AmplitudeSetup();
 	AmplitudeSetup(const std::string &filename);
-	AmplitudeSetup(const AmplitudeSetup& other) : nRes(other.nRes),nResEnabled(other.nResEnabled),
-			m_file(other.m_file), m_filePath(other.m_filePath),\
-			m_resonances(other.m_resonances) , m_resonancesFlatte(other.m_resonancesFlatte),
-			m_nonResonant(other.m_nonResonant){};
 	void load(const std::string &filename);
 	void save(const std::string &filename);
 	~AmplitudeSetup(){};
+	void update(ParameterList par){
+		for(std::vector<BreitWignerConf>::iterator reso=getBreitWigner().begin(); reso!=getBreitWigner().end(); reso++)
+			(*reso).update(par);
+		for(std::vector<FlatteConf>::iterator reso=getFlatte().begin(); reso!=getFlatte().end(); reso++)
+			(*reso).update(par);
+		for(std::vector<basicConf>::iterator reso=getNonRes().begin(); reso!=getNonRes().end(); reso++)
+			(*reso).update(par);
+	}
 
-	inline unsigned int getNResonances() {return m_resonances.size()+m_resonancesFlatte.size(); };
+	inline unsigned int getNres() {return m_breitWigner.size()+m_flatte.size()+m_nonRes.size(); };
 	inline const std::string & getFileName() const {return m_file;};
 	inline const std::string & getFilePath() const {return m_filePath;};
-	inline std::vector<Resonance> & getResonances() { return m_resonances; };
-	inline std::vector<ResonanceFlatte> & getResonancesFlatte() { return m_resonancesFlatte; };
-	inline std::vector<nonResonant> & getNonResonant() { return m_nonResonant; };
-	inline unsigned int getNRes(){ return nRes; }
-	inline unsigned int getNResEnabled(){ return nResEnabled; }
+	inline std::vector<BreitWignerConf> & getBreitWigner() { return m_breitWigner; };
+	inline std::vector<FlatteConf> & getFlatte() { return m_flatte; };
+	inline std::vector<basicConf> & getNonRes() { return m_nonRes; };
 
 };
 #endif

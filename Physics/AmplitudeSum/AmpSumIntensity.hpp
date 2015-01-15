@@ -106,32 +106,36 @@ public:
 	std::string getNameOfResonance(unsigned int id){ return namer[id]; }
 	//! get magnitude of resonance \param name
 	virtual double getMagnitude(std::string name) {
-//		std::vector<std::shared_ptr<DoubleParameter> >::iterator it= params.begin();
-//		for(;it!=params.end();++it)
-//			if((*it)->GetName()=="mag_"+name) return (*it)->GetValue();
-//		return -999;
 		return params.GetDoubleParameter("mag_"+name)->GetValue();
 	};
 	//! get phase of resonance \param name
 	virtual double getPhase(std::string name) {
-//		std::vector<std::shared_ptr<DoubleParameter> >::iterator it= params.begin();
-//		for(;it!=params.end();++it)
-//			if((*it)->GetName()=="phase_"+name) return (*it)->GetValue();
-//		return -999;
 		return params.GetDoubleParameter("phase_"+name)->GetValue();
 	};
 	//! get total integral for resonance \param id
-	virtual double getTotalIntegral(unsigned int id) { return totAmp.getTotalIntegral(id); };
+	virtual double getTotalIntegral(unsigned int id) {
+		return totAmp.getTotalIntegral(id);
+	};
 	//! get total integral for resonance \param name
-	virtual double getTotalIntegral(std::string name) { return totAmp.getTotalIntegral(name); };
+	virtual double getTotalIntegral(std::string name) {
+		return totAmp.getTotalIntegral(name);
+	};
 	//! get fit fraction for resonance \param name
-	virtual double getFraction(std::string name) { return totAmp.getUnormalizedFraction(name)/integral(); };
+	virtual double getFraction(std::string name) {
+		return totAmp.getUnormalizedFraction(name)/integral();
+	};
 	//! get fit fraction for resonance \param id
-	virtual double getFraction(unsigned int id) { return totAmp.getUnormalizedFraction(id)/integral(); };
+	virtual double getFraction(unsigned int id) {
+		return totAmp.getUnormalizedFraction(id)/integral();
+	};
 	//! get resonance by @param name
-	virtual std::shared_ptr<AmpAbsDynamicalFunction> getResonance(std::string name) { return totAmp.getResonance(name); };
+	virtual std::shared_ptr<AmpAbsDynamicalFunction> getResonance(std::string name) {
+		return totAmp.getResonance(name);
+	};
 	//! get resonance by @param id
-	virtual std::shared_ptr<AmpAbsDynamicalFunction> getResonance(unsigned int id) { return totAmp.getResonance(id); };
+	virtual std::shared_ptr<AmpAbsDynamicalFunction> getResonance(unsigned int id) {
+		return totAmp.getResonance(id);
+	};
 	//! print all fit fractions; fitting errors are not available here
 	virtual void printFractions();
 	/** Calculate partial integral over amplitude
@@ -155,6 +159,15 @@ public:
 	//! Clone function
 	virtual AmpSumIntensity* Clone(){
 		return (new AmpSumIntensity(*this));
+	}
+	/*!Get AmplitudeSetup
+	 * AmpltidueSetup object is updated with current parameters and a pointer is returned.
+	 *
+	 * @return AmplitudeSetup
+	 */
+	AmplitudeSetup* GetAmplitudeSetup() {
+		updateAmplitudeSetup();
+		return &ampSetup;
 	}
 
 protected:
@@ -186,17 +199,11 @@ protected:
 	double _dpArea;
 	unsigned int nAmps;
 
-	//Resonance Variables
 	std::vector<std::string> namer;
-//	std::vector<std::shared_ptr<DoubleParameter> > params;
 	ParameterList params;
 
+	void updateAmplitudeSetup();
 	unsigned int _nCalls; //! precision for numeric integration
-
-	/* OBSOLETE SECTION ONLY FOR TESTING */
-//	std::shared_ptr<FunctionTree> myTree;
-//	std::shared_ptr<FunctionTree> myPhspTree;
-	/* OBSOLETE SECTION ONLY FOR TESTING */
 
 private:
 

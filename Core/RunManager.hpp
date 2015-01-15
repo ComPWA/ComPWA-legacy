@@ -107,8 +107,8 @@ public:
 	virtual void setData ( std::shared_ptr<Data> d){ pData_ = d; };
 	virtual void setBackground ( std::shared_ptr<Data> d){ sampleBkg_ = d; };
 	virtual void setPhspSample( std::shared_ptr<Data> d){ phspSample_ = d; validPhsp=1; };
-	virtual void setAmplitude ( std::shared_ptr<Amplitude> d){ pPhys_ = d; validAmplitude=1; };
-	virtual void setBkgAmplitude ( std::shared_ptr<Amplitude> d){ ampBkg_ = d; validBackground=1; };
+	virtual void setAmplitude ( std::shared_ptr<Amplitude> d){ pPhys_ = d; if(d) validAmplitude=1; };
+	virtual void setBkgAmplitude ( std::shared_ptr<Amplitude> d){ ampBkg_ = d; if(d) validBackground=1; };
 	virtual void setOptimizer ( std::shared_ptr<Optimizer> d){ pOpti_ = d; validOptimizer=1; };
 	virtual void setGenerator( std::shared_ptr<Generator> d){ gen_= d; validGenerator=1; };
 

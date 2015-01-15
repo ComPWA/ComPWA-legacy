@@ -23,16 +23,11 @@
 
 #include <vector>
 
-//#include "TObject.h"
-//#include "TString.h"
-//#include "RooComplex.h"
-//#include "RooAbsReal.h"
-//#include "RooAbsArg.h"
-//#include "RooRealProxy.h"
 #include "Physics/AmplitudeSum/AmpAbsDynamicalFunction.hpp"
 #include "Physics/AmplitudeSum/AmpKinematics.hpp"
 #include "Physics/AmplitudeSum/AmpWigner.hpp"
 #include "Physics/AmplitudeSum/AmpWigner2.hpp"
+#include "Physics/AmplitudeSum/NonResonant.hpp"
 
 using namespace std;
 
@@ -79,6 +74,76 @@ protected:
 	std::shared_ptr<DoubleParameter> _g2, _g1;
 	bool foundMasses;
 	unsigned int id23, id13;
+};
+
+class FlatteConf : public basicConf
+{
+public:
+	FlatteConf(const boost::property_tree::ptree &pt_) : basicConf(pt_){
+		m_mass= pt_.get<double>("mass");
+		m_mass_fix= pt_.get<bool>("mass_fix");
+		m_mass_min= pt_.get<double>("mass_min");
+		m_mass_max= pt_.get<double>("mass_max");
+		m_mesonRadius= pt_.get<double>("mesonRadius");
+		m_spin= pt_.get<unsigned int>("spin");
+		m_m= pt_.get<unsigned int>("m");
+		m_n= pt_.get<unsigned int>("n");
+		m_daughterA= pt_.get<unsigned int>("daughterA");
+		m_daughterB= pt_.get<unsigned int>("daughterB");
+		m_g1= pt_.get<double>("g1");
+		m_g1_fix= pt_.get<bool>("g1_fix");
+		m_g1_min= pt_.get<double>("g1_min");
+		m_g1_max= pt_.get<double>("g1_max");
+		m_g2= pt_.get<double>("g2");
+		m_g2_part1= pt_.get<std::string>("g2_part1");
+		m_g2_part2= pt_.get<std::string>("g2_part2");
+
+	}
+	virtual void put(boost::property_tree::ptree &pt_){
+		basicConf::put(pt_);
+		pt_.put("mass", m_mass);
+		pt_.put("mass_fix", m_mass_fix);
+		pt_.put("mass_min", m_mass_min);
+		pt_.put("mass_max", m_mass_max);
+		pt_.put("mesonRadius", m_mesonRadius);
+		pt_.put("spin", m_spin);
+		pt_.put("m", m_m);
+		pt_.put("n", m_n);
+		pt_.put("daughterA", m_daughterA);
+		pt_.put("daughterB", m_daughterB);
+		pt_.put("g1", m_g1);
+		pt_.put("g1_fix", m_g1_fix);
+		pt_.put("g1_min", m_g1_min);
+		pt_.put("g1_max", m_g1_max);
+		pt_.put("g2", m_g2);
+		pt_.put("g2_part1", m_g2_part1);
+		pt_.put("g2_part2", m_g2_part2);
+	}
+	virtual void update(ParameterList par){
+		basicConf::update(par);
+		m_mass= par.GetDoubleParameter("m0_"+m_name)->GetValue();
+		m_g1= par.GetDoubleParameter("g1_"+m_name)->GetValue();
+		m_g2= par.GetDoubleParameter("g2_"+m_name)->GetValue();
+	}
+	double m_mass;
+	bool m_mass_fix;
+	double m_mass_min;
+	double m_mass_max;
+
+	double m_mesonRadius;
+	unsigned int m_spin;
+	unsigned int m_m;
+	unsigned int m_n;
+
+	unsigned int m_daughterA; //TODO: better reference
+	unsigned int m_daughterB; //TODO: better reference
+	double m_g1;
+	double m_g1_fix;
+	double m_g1_min;
+	double m_g1_max;
+	double m_g2;
+	std::string m_g2_part1;
+	std::string m_g2_part2;
 };
 
 

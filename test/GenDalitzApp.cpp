@@ -281,15 +281,15 @@ int main(int argc, char **argv){
 	}
 	std::string resoFile=path+"/test/JPSI_ypipi.xml";
 	AmplitudeSetup ini(resoFile);
-	cout << "loaded file " << ini.getFileName() << " with " << ini.getResonances().size() << " resonances:" << endl;
-	for(std::vector<Resonance>::iterator reso=ini.getResonances().begin(); reso!=ini.getResonances().end(); reso++){
+	cout << "loaded file " << ini.getFileName() << " with " << ini.getBreitWigner().size() << " resonances:" << endl;
+	for(std::vector<BreitWignerConf>::iterator reso=ini.getBreitWigner().begin(); reso!=ini.getBreitWigner().end(); reso++){
 		cout << endl << "Resonance " << (*reso).m_name << endl;
 		cout << "Mass =  " << (*reso).m_mass << " with range " << (*reso).m_mass_min << " to " << (*reso).m_mass_max << endl;
 		cout << "Width = " << (*reso).m_width << " with range " << (*reso).m_width_min << " to " << (*reso).m_width_max << endl;
 		cout << "Spin =  " << (*reso).m_spin << " m = " << (*reso).m_m << " n = " << (*reso).m_n << endl;
 		cout << "Strength =  " << (*reso).m_strength << " Phase = " << (*reso).m_phase << endl;
 		cout << "mesonRadius=  " << (*reso).m_mesonRadius<< endl;
-		cout << "DaughterA =  " << (*reso).m_daugtherA << " DaughterB = " << (*reso).m_daugtherB << endl;
+		cout << "DaughterA =  " << (*reso).m_daughterA << " DaughterB = " << (*reso).m_daughterB << endl;
 	}
 	cout << endl << endl;
 

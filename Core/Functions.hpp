@@ -672,24 +672,19 @@ public:
     unsigned int nD = paras.GetNDouble();
     unsigned int nI = paras.GetNInteger();
 
-    if(nMC+nMD+nD+nI+nC==0){
-      //TODO: exception no input
-      return false;
-    }
+    if(nMC+nMD+nD+nI+nC==0)
+    	throw std::runtime_error("AbsSquare Strategy: Input parameter list is empty!");
+
     //only one parameter possible
-    if( (nMC+nMD+nD+nI+nC)>1 ){
-      //TODO: exception wrong input
-      return false;
-    }
+    if( (nMC+nMD+nD+nI+nC)>1 )
+    	throw std::runtime_error("AbsSquare Strategy: More then one type of parameter in input!");
+
 
     switch(checkType){
-
       case ParType::MDOUBLE:{
         //output multi double: input must be multi double or multi complex
-        if(!nMD && !nMC){
-          //TODO: exception wrong input
-          return false;
-        }
+        if(!nMD && !nMC)
+        	throw std::runtime_error("AbsSquare Strategy: Requested output is MDOUBLE but no MDOUBLE or MCOMPLEX was given as input!");
         if(nMD){
           unsigned int nElements = paras.GetMultiDouble(0)->GetNValues();
           //fill MultiDouble parameter
@@ -715,10 +710,8 @@ public:
 
       case ParType::DOUBLE:{
         //output double: norm of one double or complex input
-        if(!nD && !nC){
-          //TODO: exception wrong input
-          return false;
-        }
+        if(!nD && !nC)
+        	throw std::runtime_error("AbsSquare Strategy: Requested output is DOUBLE but no DOUBLE or COMPLEX was given as input!");
         if(nD){
           std::shared_ptr<DoubleParameter> tmp = paras.GetDoubleParameter(0);
           out = std::shared_ptr<AbsParameter>(new DoubleParameter(out->GetName(),std::norm(tmp->GetValue())));

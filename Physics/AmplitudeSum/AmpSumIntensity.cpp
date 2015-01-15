@@ -88,12 +88,12 @@ void AmpSumIntensity::init(){
 			new DoubleParameter("g1_a_0",0.464) )); //(asdfef)
 	params.GetDoubleParameter(0)->SetParameterFixed();
 
-	for(std::vector<Resonance>::iterator reso=ampSetup.getResonances().begin(); reso!=ampSetup.getResonances().end(); reso++){
-		Resonance tmp = (*reso);
+	for(std::vector<BreitWignerConf>::iterator reso=ampSetup.getBreitWigner().begin(); reso!=ampSetup.getBreitWigner().end(); reso++){
+		BreitWignerConf tmp = (*reso);
 		if(!tmp.m_enable) continue;
 		std::string name = tmp.m_name;
 		namer.push_back(name);
-		unsigned int subSys = tmp.m_daugtherA + tmp.m_daugtherB;
+		unsigned int subSys = tmp.m_daughterA + tmp.m_daughterB;
 		params.AddParameter( std::shared_ptr<DoubleParameter> (
 				new DoubleParameter("mag_"+name,tmp.m_strength,tmp.m_strength_min,tmp.m_strength_max) ) );
 		params.GetDoubleParameter("mag_"+name)->FixParameter(tmp.m_strength_fix);
@@ -125,12 +125,12 @@ void AmpSumIntensity::init(){
 		tmpbw->SetNormalization(1/norm);
 	}// end loop over resonances
 
-	for(std::vector<ResonanceFlatte>::iterator reso=ampSetup.getResonancesFlatte().begin(); reso!=ampSetup.getResonancesFlatte().end(); reso++){
-		ResonanceFlatte tmp = (*reso);
+	for(std::vector<FlatteConf>::iterator reso=ampSetup.getFlatte().begin(); reso!=ampSetup.getFlatte().end(); reso++){
+		FlatteConf tmp = (*reso);
 		if(!tmp.m_enable) continue;
 		std::string name = tmp.m_name;
 		namer.push_back(name);
-		unsigned int subSys = tmp.m_daugtherA + tmp.m_daugtherB;
+		unsigned int subSys = tmp.m_daughterA + tmp.m_daughterB;
 		params.AddParameter( std::shared_ptr<DoubleParameter> (
 				new DoubleParameter("mag_"+name,tmp.m_strength,tmp.m_strength_min,tmp.m_strength_max) ) );
 		params.GetDoubleParameter("mag_"+name)->FixParameter(tmp.m_strength_fix);
@@ -165,8 +165,8 @@ void AmpSumIntensity::init(){
 		if(norm<0 || _calcNorm)	norm = normReso(tmpbw);
 		tmpbw->SetNormalization(1./norm);
 	}// end loop over resonancesFlatte
-	for(std::vector<nonResonant>::iterator reso=ampSetup.getNonResonant().begin(); reso!=ampSetup.getNonResonant().end(); reso++){
-		nonResonant tmp = (*reso);
+	for(std::vector<basicConf>::iterator reso=ampSetup.getNonRes().begin(); reso!=ampSetup.getNonRes().end(); reso++){
+		basicConf tmp = (*reso);
 		if(!tmp.m_enable) continue;
 		std::string name = tmp.m_name;
 		namer.push_back(name);
@@ -206,52 +206,82 @@ std::shared_ptr<FunctionTree> AmpSumIntensity::setupBasicTree(
 	_dpArea = kin->getPhspVolume();
 
 	//------------Setup Tree---------------------
-	std::shared_ptr<FunctionTree> newTree = std::shared_ptr<FunctionTree>(new FunctionTree());
+	std::shared_ptr<FunctionTree> newTree(new FunctionTree());
 	//------------Setup Tree Pars---------------------
-	std::shared_ptr<MultiDouble> m23sq = std::shared_ptr<MultiDouble>( new MultiDouble("m23sq",theMasses.masses_sq.at( std::make_pair(2,3) )) );
-	std::shared_ptr<MultiDouble> m13sq = std::shared_ptr<MultiDouble>( new MultiDouble("m13sq",theMasses.masses_sq.at( std::make_pair(1,3) )) );
-	std::shared_ptr<MultiDouble> m12sq = std::shared_ptr<MultiDouble>( new MultiDouble("m12sq",theMasses.masses_sq.at( std::make_pair(1,2) )) );
-	std::shared_ptr<MultiDouble> m23sq_phsp = std::shared_ptr<MultiDouble>( new MultiDouble("m23sq_phsp",toyPhspSample.masses_sq.at( std::make_pair(2,3) )) );
-	std::shared_ptr<MultiDouble> m13sq_phsp = std::shared_ptr<MultiDouble>( new MultiDouble("m13sq_phsp",toyPhspSample.masses_sq.at( std::make_pair(1,3) )) );
-	std::shared_ptr<MultiDouble> m12sq_phsp = std::shared_ptr<MultiDouble>( new MultiDouble("m12sq_phsp",toyPhspSample.masses_sq.at( std::make_pair(1,2) )) );
+	std::shared_ptr<MultiDouble> m23sq( new MultiDouble("m23sq",theMasses.masses_sq.at( std::make_pair(2,3) )) );
+	std::shared_ptr<MultiDouble> m13sq( new MultiDouble("m13sq",theMasses.masses_sq.at( std::make_pair(1,3) )) );
+	std::shared_ptr<MultiDouble> m12sq( new MultiDouble("m12sq",theMasses.masses_sq.at( std::make_pair(1,2) )) );
+	std::shared_ptr<MultiDouble> m23sq_phsp( new MultiDouble("m23sq_phsp",toyPhspSample.masses_sq.at( std::make_pair(2,3) )) );
+	std::shared_ptr<MultiDouble> m13sq_phsp( new MultiDouble("m13sq_phsp",toyPhspSample.masses_sq.at( std::make_pair(1,3) )) );
+	std::shared_ptr<MultiDouble> m12sq_phsp( new MultiDouble("m12sq_phsp",toyPhspSample.masses_sq.at( std::make_pair(1,2) )) );
 
 	//----Strategies needed
-	std::shared_ptr<MultAll> mmultStrat = std::shared_ptr<MultAll>(new MultAll(ParType::MCOMPLEX));
-	std::shared_ptr<MultAll> mmultDStrat = std::shared_ptr<MultAll>(new MultAll(ParType::MDOUBLE));
-	std::shared_ptr<AddAll> maddStrat = std::shared_ptr<AddAll>(new AddAll(ParType::MCOMPLEX));
-	std::shared_ptr<AbsSquare> msqStrat = std::shared_ptr<AbsSquare>(new AbsSquare(ParType::MDOUBLE));
-	std::shared_ptr<LogOf> mlogStrat = std::shared_ptr<LogOf>(new LogOf(ParType::MDOUBLE));
-	std::shared_ptr<MultAll> multStrat = std::shared_ptr<MultAll>(new MultAll(ParType::COMPLEX));
-	std::shared_ptr<MultAll> multDStrat = std::shared_ptr<MultAll>(new MultAll(ParType::DOUBLE));
-	std::shared_ptr<AddAll> addStrat = std::shared_ptr<AddAll>(new AddAll(ParType::DOUBLE));
-	std::shared_ptr<AddAll> addComplexStrat = std::shared_ptr<AddAll>(new AddAll(ParType::COMPLEX));
-	std::shared_ptr<AbsSquare> sqStrat = std::shared_ptr<AbsSquare>(new AbsSquare(ParType::DOUBLE));
-	std::shared_ptr<LogOf> logStrat = std::shared_ptr<LogOf>(new LogOf(ParType::DOUBLE));
-	std::shared_ptr<Complexify> complStrat = std::shared_ptr<Complexify>(new Complexify(ParType::COMPLEX));
-	std::shared_ptr<Inverse> invStrat = std::shared_ptr<Inverse>(new Inverse(ParType::DOUBLE));
-	std::shared_ptr<SquareRoot> sqRootStrat = std::shared_ptr<SquareRoot>(new SquareRoot(ParType::DOUBLE));
+	std::shared_ptr<MultAll> mmultStrat(new MultAll(ParType::MCOMPLEX));
+	std::shared_ptr<MultAll> mmultDStrat(new MultAll(ParType::MDOUBLE));
+	std::shared_ptr<AddAll> maddStrat(new AddAll(ParType::MCOMPLEX));
+	std::shared_ptr<AbsSquare> msqStrat(new AbsSquare(ParType::MDOUBLE));
+	std::shared_ptr<LogOf> mlogStrat(new LogOf(ParType::MDOUBLE));
+	std::shared_ptr<MultAll> multStrat(new MultAll(ParType::COMPLEX));
+	std::shared_ptr<MultAll> multDStrat(new MultAll(ParType::DOUBLE));
+	std::shared_ptr<AddAll> addStrat(new AddAll(ParType::DOUBLE));
+	std::shared_ptr<AddAll> addComplexStrat(new AddAll(ParType::COMPLEX));
+	std::shared_ptr<AbsSquare> sqStrat(new AbsSquare(ParType::DOUBLE));
+	std::shared_ptr<LogOf> logStrat(new LogOf(ParType::DOUBLE));
+	std::shared_ptr<Complexify> complStrat(new Complexify(ParType::COMPLEX));
+	std::shared_ptr<Inverse> invStrat(new Inverse(ParType::DOUBLE));
+	std::shared_ptr<SquareRoot> sqRootStrat(new SquareRoot(ParType::DOUBLE));
 
 	newTree->createHead("Amplitude"+suffix, maddStrat, theMasses.nEvents);
 
-	//----Add Resonances
-	for(std::vector<Resonance>::iterator reso=ampSetup.getResonances().begin(); reso!=ampSetup.getResonances().end(); reso++){
-		Resonance tmp = (*reso);
+	//----Adding Non Resonant
+	for(std::vector<basicConf>::iterator reso=ampSetup.getNonRes().begin();
+			reso!=ampSetup.getNonRes().end(); reso++){
+		basicConf tmp = (*reso);
+		std::string name = tmp.m_name;
+		if(!tmp.m_enable) continue;
+		BOOST_LOG_TRIVIAL(debug) << "AmpSumIntensity::setupTree() adding "<<tmp.m_name<<" (non-resonant) to tree.";
+		std::shared_ptr<NonResonantStrategy> nonResStrat(new NonResonantStrategy(tmp.m_name,ParType::MCOMPLEX));
+
+		newTree->createNode("Reso_"+tmp.m_name, mmultStrat, "Amplitude"+suffix, theMasses.nEvents); //Reso=C*N*nonReso
+		newTree->createNode("C_"+tmp.m_name, complStrat, "Reso_"+tmp.m_name); //c=r*exp(phi)
+		newTree->createLeaf("Intens_"+tmp.m_name, params.GetDoubleParameter("mag_"+name), "C_"+tmp.m_name); //r
+		newTree->createLeaf("Phase_"+tmp.m_name, params.GetDoubleParameter("phase_"+name), "C_"+tmp.m_name); //phi
+
+		std::shared_ptr<MultiComplex> unitVec(
+				new MultiComplex("unit",std::vector<std::complex<double> >(theMasses.nEvents, std::complex<double>(1,0))) );
+
+		newTree->createLeaf("NonRes_"+tmp.m_name, unitVec, "Reso_"+tmp.m_name); //nonReso
+		//adding nodes and leafs for calculation of normalization
+		if(_normStyle==normStyle::none){
+			newTree->createLeaf("N_"+tmp.m_name, 1., "Reso_"+tmp.m_name);
+		}else{
+			newTree->createNode("N_"+tmp.m_name, sqRootStrat, "Reso_"+tmp.m_name); //N = sqrt(NSq)
+			newTree->createNode("NSq_"+tmp.m_name, multDStrat, "N_"+tmp.m_name); //NSq = (PhspVolume/N_phspMC * Sum(|A|^2))^-1
+			newTree->createLeaf("PhspSize_"+tmp.m_name, toyPhspSample.nEvents, "NSq_"+tmp.m_name); // N_phspMC
+			newTree->createLeaf("PhspVolume_"+tmp.m_name, 1/_dpArea, "NSq_"+tmp.m_name); // 1/PhspVolume
+			newTree->createNode("InvSum_"+tmp.m_name, invStrat, "NSq_"+tmp.m_name); //1/Sum(|A|^2)
+			newTree->createNode("Sum_"+tmp.m_name, addStrat, "InvSum_"+tmp.m_name); //Sum(|A|^2)
+			newTree->createNode("AbsVal_"+tmp.m_name, msqStrat, "Sum_"+tmp.m_name); //|A_i|^2
+			std::shared_ptr<MultiComplex> unitVec2(
+					new MultiComplex("unit",std::vector<std::complex<double> >(toyPhspSample.nEvents, std::complex<double>(1,0))) );
+			newTree->createLeaf("NormNonRes_"+tmp.m_name, unitVec2, "AbsVal_"+tmp.m_name); //BW
+		}
+	}
+
+	//----Adding Breit-Wigner
+	for(std::vector<BreitWignerConf>::iterator reso=ampSetup.getBreitWigner().begin();
+			reso!=ampSetup.getBreitWigner().end(); reso++){
+		BreitWignerConf tmp = (*reso);
 		std::string name = tmp.m_name;
 		if(!tmp.m_enable) continue;
 		BOOST_LOG_TRIVIAL(debug) << "AmpSumIntensity::setupTree() adding "<<tmp.m_name<<" (BW) to tree.";
 
 		//----Add Nodes
-		std::shared_ptr<BreitWignerStrategy> rbwStrat =
-				std::shared_ptr<BreitWignerStrategy>(
-						new BreitWignerStrategy(tmp.m_name,ParType::MCOMPLEX) );
-		std::shared_ptr<BreitWignerPhspStrategy> rbwPhspStrat =
-				std::shared_ptr<BreitWignerPhspStrategy>(
-						new BreitWignerPhspStrategy(tmp.m_name,ParType::MCOMPLEX) );
-		std::shared_ptr<WignerDStrategy> angdStrat =
-				std::shared_ptr<WignerDStrategy>(
-						new WignerDStrategy(tmp.m_name,ParType::MDOUBLE) );
+		std::shared_ptr<BreitWignerStrategy> rbwStrat( new BreitWignerStrategy(tmp.m_name,ParType::MCOMPLEX) );
+		std::shared_ptr<BreitWignerPhspStrategy> rbwPhspStrat( new BreitWignerPhspStrategy(tmp.m_name,ParType::MCOMPLEX) );
+		std::shared_ptr<WignerDStrategy> angdStrat(	new WignerDStrategy(tmp.m_name,ParType::MDOUBLE) );
 
-		unsigned int subSys = tmp.m_daugtherA + tmp.m_daugtherB;
+		unsigned int subSys = tmp.m_daughterA + tmp.m_daughterB;
 		newTree->createNode("Reso_"+tmp.m_name, mmultStrat, "Amplitude"+suffix, theMasses.nEvents); //Reso=BW*C_*AD*N_
 		newTree->createNode("BW_"+tmp.m_name, mmultStrat , "Reso_"+tmp.m_name, theMasses.nEvents); //BW
 		newTree->createNode("RelBW_"+tmp.m_name, rbwStrat, "BW_"+tmp.m_name, theMasses.nEvents); //BW
@@ -341,18 +371,18 @@ std::shared_ptr<FunctionTree> AmpSumIntensity::setupBasicTree(
 		}
 	}// end loop over resonances
 
-	for(std::vector<ResonanceFlatte>::iterator reso=ampSetup.getResonancesFlatte().begin(); reso!=ampSetup.getResonancesFlatte().end(); reso++){
-		ResonanceFlatte tmp = (*reso);
+	for(std::vector<FlatteConf>::iterator reso=ampSetup.getFlatte().begin(); reso!=ampSetup.getFlatte().end(); reso++){
+		FlatteConf tmp = (*reso);
 		std::string name = tmp.m_name;
 		if(!tmp.m_enable) continue;
 		BOOST_LOG_TRIVIAL(debug) << "AmpSumIntensity::setupBasicTree() adding "<<tmp.m_name<<" (Flatte) to tree.";
 
 		//----Add Nodes
-		std::shared_ptr<FlatteStrategy> flatteStrat = std::shared_ptr<FlatteStrategy>(new FlatteStrategy(tmp.m_name,ParType::MCOMPLEX));
-		std::shared_ptr<FlattePhspStrategy> flattePhspStrat = std::shared_ptr<FlattePhspStrategy>(new FlattePhspStrategy(tmp.m_name,ParType::MCOMPLEX));
-		std::shared_ptr<WignerDStrategy> angdStrat = std::shared_ptr<WignerDStrategy>(new WignerDStrategy(tmp.m_name,ParType::MDOUBLE));
-		//		std::shared_ptr<WignerDphspStrategy> angdPhspStrat = std::shared_ptr<WignerDphspStrategy>(new WignerDphspStrategy(tmp.m_name,ParType::MDOUBLE));
-		unsigned int subSys = tmp.m_daugtherA + tmp.m_daugtherB;
+		std::shared_ptr<FlatteStrategy> flatteStrat(new FlatteStrategy(tmp.m_name,ParType::MCOMPLEX));
+		std::shared_ptr<FlattePhspStrategy> flattePhspStrat(new FlattePhspStrategy(tmp.m_name,ParType::MCOMPLEX));
+		std::shared_ptr<WignerDStrategy> angdStrat(	new WignerDStrategy(tmp.m_name,ParType::MDOUBLE) );
+
+		unsigned int subSys = tmp.m_daughterA + tmp.m_daughterB;
 		newTree->createNode("Reso_"+tmp.m_name, mmultStrat, "Amplitude"+suffix, theMasses.nEvents); //Reso=BW*C_*AD*N_
 		newTree->createNode("Flatte_"+tmp.m_name, mmultStrat , "Reso_"+tmp.m_name, theMasses.nEvents); //BW
 		newTree->createNode("FlatteRes_"+tmp.m_name, flatteStrat, "Flatte_"+tmp.m_name, theMasses.nEvents); //BW
@@ -457,6 +487,11 @@ std::shared_ptr<FunctionTree> AmpSumIntensity::setupBasicTree(
 	BOOST_LOG_TRIVIAL(error)<<"AmpSumIntensity::setupBasicTree(): tree constructed!!";
 	return newTree;
 }
+
+void AmpSumIntensity::updateAmplitudeSetup(){
+	ampSetup.update(params);
+	return;
+};
 
 double AmpSumIntensity::getMaxVal(std::shared_ptr<Generator> gen){
 	if(!_calcMaxFcnVal) calcMaxVal(gen);
