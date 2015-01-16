@@ -110,6 +110,8 @@ RootReader::RootReader(const std::string inRootFile, const bool binned,
 	if(fFile->IsZombie())
 		throw std::runtime_error("RootReader::RootReader() can't open data file: "+inRootFile);
 	fTree = (TTree*) fFile->Get(treeName.c_str());
+	if(!fTree)
+		throw std::runtime_error("RootReader::RootReader() Tree \""+treeName+"\" can not be opened can't from file "+inRootFile+"! ");
 	read();
 	//	fParticles = new TClonesArray("TParticle");
 	//	fTree->GetBranch("Particles")->SetAutoDelete(false);
