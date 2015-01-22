@@ -38,9 +38,9 @@ project :
 	<define>BOOST_LOG_DYN_LINK
 	<cxxflags>-ftemplate-depth-256
 	<cxxflags>-std=c++0x
-	<cxxflags>-fopenmp
 	<cxxflags>-DBOOST_SPIRIT_USE_PHOENIX_V3
 	<linkflags>$(BOOSTLIBS)
+	<linkflags>-fopenmp
 	<warnings>off
 	;
 
