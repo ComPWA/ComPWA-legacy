@@ -42,10 +42,16 @@
 class RootReader : public Data {
 
 public:
-	/// Default Constructor (0x0)
+	//! Default Constructor: Empty object, can be filled
+	RootReader();
 	RootReader(TTree* tr, const bool binned);
-	RootReader(const std::string inRootFile, const bool binned=true, const std::string inTreeName="data", const bool readFlag=true);
-	RootReader(const bool binned=true); //empty dataset
+	/*! Read constructor.
+	 *
+	 * @param inRootFile Input file name
+	 * @param inTreeName Name of tree in input file
+	 * @param binned	 Create binning
+	 */
+	RootReader(const std::string inRootFile, const std::string inTreeName="data", const bool binned=false);
 
 	virtual const std::vector<std::string>& getVariableNames();
 
@@ -55,7 +61,7 @@ public:
     virtual allMasses getMasses(const unsigned int startEvent=0, unsigned int nEvents=0);
     virtual const int getBin(const int, double&, double&);
     //virtual const int getEvent(const int, TLorentzVector& , TLorentzVector& , double&);
-    virtual void writeData();
+    virtual void writeData(std::string file="",std::string trName="");
     virtual void Clear();
 
 	virtual const unsigned int getNEvents() const {return fEvents.size();};

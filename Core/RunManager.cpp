@@ -32,31 +32,21 @@
 #include "Core/ParameterList.hpp"
 #include "Core/Event.hpp"
 #include "Core/Generator.hpp"
+#include "Core/ProgressBar.hpp"
 
 #include "Core/RunManager.hpp"
 using namespace boost::log;
 
-RunManager::RunManager() : success_(false), validAmplitude(0), validOptimizer(0),
-		validBackground(0), validGenerator(0), size_(0), bkgSize_(0)
+RunManager::RunManager()
 {
 }
 RunManager::RunManager(std::shared_ptr<Data> inD, std::shared_ptr<Amplitude> inP,
-		std::shared_ptr<Optimizer> inO) : pData_(inD), pPhys_(inP), pOpti_(inO), success_(false),
-  validAmplitude(0), validOptimizer(0), validBackground(0), bkgSize_(0)
+		std::shared_ptr<Optimizer> inO) : sampleData_(inD), amp_(inP), opti_(inO)
 {
-	setSize(inD->getNEvents());
-	if(inD && inP && inO){
-		validAmplitude=1;
-		validOptimizer=1;
-	}
 }
 RunManager::RunManager( unsigned int size, std::shared_ptr<Amplitude> inP,
-		std::shared_ptr<Generator> gen) : gen_(gen), size_(size), pPhys_(inP), success_(false),
-  validAmplitude(0), validOptimizer(0), validBackground(0), bkgSize_(0)
+		std::shared_ptr<Generator> gen) : gen_(gen),  amp_(inP)
 {
-	if(inP ){
-		validAmplitude=1;
-	}
 }
 
 RunManager::~RunManager(){
@@ -65,42 +55,38 @@ RunManager::~RunManager(){
 
 std::shared_ptr<FitResult> RunManager::startFit(ParameterList& inPar){
 	BOOST_LOG_TRIVIAL(info) << "RunManager: Starting fit.";
-	BOOST_LOG_TRIVIAL(info) << "RunManager: Input data contains "<<pData_->getNEvents()<<" events.";
-	std::shared_ptr<FitResult> result = pOpti_->exec(inPar);
-	success_ = true;
+	BOOST_LOG_TRIVIAL(info) << "RunManager: Input data contains "<<sampleData_->getNEvents()<<" events.";
+	std::shared_ptr<FitResult> result = opti_->exec(inPar);
 	BOOST_LOG_TRIVIAL(info) << "RunManager: fit end. Result ="<<result->getResult()<<".";
 
 	return result;
 }
 bool RunManager::generate( unsigned int number ) {
-	if(number>0) setSize(number);
-
-	if( !(pData_ && validAmplitude && validGenerator) )
+	if(number==0) return 0;
+	if(!(gen_ && amp_))
 		throw std::runtime_error("RunManager: generate() requirements not fulfilled");
-	if(pData_->getNEvents()>0)
+	if(!sampleData_)
+		throw std::runtime_error("RunManager: generate() not sample set");
+	if(sampleData_->getNEvents()>0)
 		throw std::runtime_error("RunManager: generate() dataset not empty! abort!");
 
 	//Determing an estimate on the maximum of the physics amplitude using 100k events.
-	double genMaxVal=1.2*pPhys_->getMaxVal(gen_);
+	double genMaxVal=1.2*amp_->getMaxVal(gen_);
 
-	unsigned int totalCalls=0;
-	BOOST_LOG_TRIVIAL(info) << "Generating MC: ["<<size_<<" events] ";
-	BOOST_LOG_TRIVIAL(info) << "== Using "<<genMaxVal<< " as maximum value for random number generation!";
+	BOOST_LOG_TRIVIAL(info) << "Generating MC: ["<<number<<" events] ";
+	BOOST_LOG_TRIVIAL(info) << "Using "<<genMaxVal<< " as maximum value for random number generation!";
 
 	unsigned int startTime = clock();
 
 	Generator* genNew = (&(*gen_))->Clone();//copy generator for every thread
 	double AMPpdf;
 
-	unsigned int cnt=0;
-	for(unsigned int i=0;i<size_;i++){
-		if(i>0) i--;
-		if(i%1000==0 && cnt!=i) {
-			cnt=i;
-			BOOST_LOG_TRIVIAL(debug) << "Current event: "<<i;
-		}
-		Event tmp;
-		genNew->generate(tmp);
+	unsigned int phspSize = samplePhsp_->getNEvents();
+	unsigned int totalCalls=0;
+	unsigned int acceptedEvents=0;
+	progressBar bar(number);
+	for(unsigned int i=0;i<phspSize;i++){
+		Event tmp = samplePhsp_->getEvent(i);
 		totalCalls++;
 		double weight = tmp.getWeight();
 		/* reset weights: the weights are taken into account by hit and miss. The resulting
@@ -110,48 +96,48 @@ bool RunManager::generate( unsigned int number ) {
 		dataPoint point(tmp);
 		double ampRnd = genNew->getUniform()*genMaxVal;
 		ParameterList list;
-		list = pPhys_->intensity(point);//unfortunatly not thread safe
+		list = amp_->intensity(point);//unfortunatly not thread safe
 		AMPpdf = *list.GetDoubleParameter(0);
 		if( genMaxVal< (AMPpdf*weight))
 			throw std::runtime_error("RunManager: error in HitMiss procedure. "
 					"Maximum value of random number generation smaller then amplitude maximum!");
 		if( ampRnd > (weight*AMPpdf) ) continue;
-		i++;
-		pData_->pushEvent(tmp);//Unfortunately not thread safe
+		sampleData_->pushEvent(tmp);//Unfortunately not thread safe
+		acceptedEvents++;
+		bar.nextEvent();
+		if(acceptedEvents>=number) i=phspSize; //continue if we have a sufficienct number of events
 	}
-//	BOOST_LOG_TRIVIAL(info) << "Efficiency of toy MC generation: "<<(double)size_/totalCalls;
+	if(sampleData_->getNEvents()<number)
+		BOOST_LOG_TRIVIAL(error) << "RunManager::generate() not able to generate "<<number<<" events. "
+				"Phsp sample too small. Current size of sample is now "<<sampleData_->getNEvents();
+//	BOOST_LOG_TRIVIAL(info) << "Efficiency of toy MC generation: "<<(double)number/totalCalls;
 //	BOOST_LOG_TRIVIAL(info) << "RunManager: generate time="<<(clock()-startTime)/CLOCKS_PER_SEC/60<<"min.";
 
 	return true;
 };
 bool RunManager::generateBkg( unsigned int number ) {
-	if(number>0) setBkgSize(number);
-	if(!bkgSize_) return true;
-
-	if( !(ampBkg_ && validBackground && validGenerator) )
+	if(number==0) return 0;
+	if( !(ampBkg_ && gen_) )
 		throw std::runtime_error("RunManager: generateBkg() requirements not fulfilled");
+	if(!sampleBkg_)
+		throw std::runtime_error("RunManager: generateBkg() not background sample set");
 	if(sampleBkg_->getNEvents()>0)
 		throw std::runtime_error("RunManager: generateBkg() dataset not empty! abort!");
 	//Determing an estimate on the maximum of the physics amplitude using 100k events.
 	double genMaxVal=1.2*ampBkg_->getMaxVal(gen_);
 
 	unsigned int totalCalls=0;
-	BOOST_LOG_TRIVIAL(info) << "Generating background MC: ["<<bkgSize_<<" events] ";
+	BOOST_LOG_TRIVIAL(info) << "Generating background MC: ["<<number<<" events] ";
 
 	unsigned int startTime = clock();
 
 	Generator* genNew = (&(*gen_))->Clone();//copy generator for every thread
 	double AMPpdf;
 
-	unsigned int cnt=0;
-	for(unsigned int i=0;i<bkgSize_;i++){
-		if(i>0) i--;
-		if(i%1000==0 && cnt!=i) {
-			cnt=i;
-			BOOST_LOG_TRIVIAL(debug) << "Current event: "<<i;
-		}
-		Event tmp;
-		genNew->generate(tmp);
+	unsigned int phspSize = samplePhsp_->getNEvents();
+	progressBar bar(number);
+	for(unsigned int i=0;i<phspSize;i++){
+		Event tmp = samplePhsp_->getEvent(i);
 		totalCalls++;
 		double weight = tmp.getWeight();
 		/* reset weights: the weights are taken into account by hit and miss. The resulting
@@ -167,25 +153,30 @@ bool RunManager::generateBkg( unsigned int number ) {
 			throw std::runtime_error("RunManager: error in HitMiss procedure. "
 					"Maximum value of random number generation smaller then amplitude maximum!");
 		if( ampRnd > (weight*AMPpdf) ) continue;
-		i++;
 		sampleBkg_->pushEvent(tmp);//unfortunatly not thread safe
+		bar.nextEvent();
+		if(i>=number) i=phspSize; //continue if we have a sufficienct number of events
 	}
-//	BOOST_LOG_TRIVIAL(info) << "RunManager: generate background time="<<(clock()-startTime)/CLOCKS_PER_SEC/60<<"min.";
+	if(sampleData_->getNEvents()<number)
+		BOOST_LOG_TRIVIAL(error) << "RunManager::generateBkg() not able to generate "<<number<<" events. "
+				"Phsp sample too small. Current size of sample is now "<<sampleBkg_->getNEvents();
 
 	return true;
 };
 
 bool RunManager::generatePhsp( unsigned int number ) {
-	if( !(validPhsp==1) )
-		return false;
-	unsigned int phspSize = 10*size_;
-	if(number>0) phspSize = number;
+	if(number==0) return 0;
+	if(!samplePhsp_)
+		throw std::runtime_error("RunManager: generatePhsp() not phsp sample set");
+	if(samplePhsp_->getNEvents()>0)
+		throw std::runtime_error("RunManager: generatePhsp() dataset not empty! abort!");
 
-	BOOST_LOG_TRIVIAL(info) << "Generating phase-space MC: ["<<phspSize<<" events] ";
+	BOOST_LOG_TRIVIAL(info) << "Generating phase-space MC: ["<<number<<" events] ";
 
 	Generator* genNew = (&(*gen_))->Clone();//copy generator for every thread
 
-	for(unsigned int i=0;i<phspSize;i++){
+	progressBar bar(number);
+	for(unsigned int i=0;i<number;i++){
 		if(i>0) i--;
 		Event tmp;
 		genNew->generate(tmp);
@@ -196,7 +187,8 @@ bool RunManager::generatePhsp( unsigned int number ) {
 		tmp.setWeight(1.);//reset weight
 		tmp.setEfficiency(1.);
 		i++;
-		phspSample_->pushEvent(tmp);//unfortunatly not thread safe
+		samplePhsp_->pushEvent(tmp);//unfortunatly not thread safe
+		bar.nextEvent();
 	}
 	return true;
 };

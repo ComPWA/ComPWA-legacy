@@ -101,45 +101,34 @@ public:
 
 	virtual ~RunManager();
 
-	virtual unsigned int getSize (){ return size_; };
-	virtual void setSize ( unsigned int s){ size_=s; };
-	virtual void setBkgSize ( unsigned int s){ bkgSize_=s; };
-	virtual void setData ( std::shared_ptr<Data> d){ pData_ = d; };
+	virtual void setData ( std::shared_ptr<Data> d){ sampleData_ = d; };
+	virtual std::shared_ptr<Data> getData (){ return sampleData_; };
 	virtual void setBackground ( std::shared_ptr<Data> d){ sampleBkg_ = d; };
-	virtual void setPhspSample( std::shared_ptr<Data> d){ phspSample_ = d; validPhsp=1; };
-	virtual void setAmplitude ( std::shared_ptr<Amplitude> d){ pPhys_ = d; if(d) validAmplitude=1; };
-	virtual void setBkgAmplitude ( std::shared_ptr<Amplitude> d){ ampBkg_ = d; if(d) validBackground=1; };
-	virtual void setOptimizer ( std::shared_ptr<Optimizer> d){ pOpti_ = d; validOptimizer=1; };
-	virtual void setGenerator( std::shared_ptr<Generator> d){ gen_= d; validGenerator=1; };
+	virtual std::shared_ptr<Data> getBackground (){ return sampleBkg_; };
+	virtual void setPhspSample( std::shared_ptr<Data> d){ samplePhsp_ = d; };
+	virtual std::shared_ptr<Data> getPhspSample(){ return samplePhsp_; };
+	virtual void setAmplitude ( std::shared_ptr<Amplitude> d){ amp_ = d; };
+	virtual std::shared_ptr<Amplitude> getAmplitude (){ return amp_; };
+	virtual void setBkgAmplitude ( std::shared_ptr<Amplitude> d){ ampBkg_ = d; };
+	virtual std::shared_ptr<Amplitude> getBkgAmplitude(){ return ampBkg_; };
+	virtual void setOptimizer ( std::shared_ptr<Optimizer> d){ opti_ = d; };
+	virtual std::shared_ptr<Optimizer> getOptimizer (){ return opti_; };
+	virtual void setGenerator( std::shared_ptr<Generator> d){ gen_= d; };
+	virtual std::shared_ptr<Generator> getGenerator(){ return gen_; };
 
 	virtual std::shared_ptr<FitResult> startFit( ParameterList& );
-	virtual bool generate ( unsigned int number=0 );
-	virtual bool generatePhsp ( unsigned int number=0 );
-	virtual bool generateBkg ( unsigned int number=0 );
+	virtual bool generate ( unsigned int number );
+	virtual bool generatePhsp ( unsigned int number );
+	virtual bool generateBkg ( unsigned int number );
 
 protected:
-	bool validData;
-	bool validPhsp;
-	bool validAmplitude;
-	bool validBackground;
-	bool validOptimizer;
-	bool validSize;
-	bool validGenerator;
-
-	std::shared_ptr<Data> pData_; /*!< Pointer to Data-Module */
-	std::shared_ptr<Data> sampleBkg_; /*!< Pointer to Data-Module */
-	std::shared_ptr<Data> phspSample_; /*!< Pointer to Data-Module */
-	std::shared_ptr<Amplitude> pPhys_; /*!< Pointer to Physics-Module */
-	std::shared_ptr<Amplitude> ampBkg_; /*!< Pointer to Physics-Module */
-	std::shared_ptr<Optimizer> pOpti_; /*!< Pointer to Optimizer-Module */
-	std::shared_ptr<Generator> gen_; /*!< Pointer to Optimizer-Module */
-	std::shared_ptr<Generator> getGen(){ return gen_;};
-	//TODO: log
-	bool valid_; /*!< setup a valid configuration? */
-	bool success_; /*!< fitting ended successfully? */
-
-	unsigned int size_;
-	unsigned int bkgSize_;
+	std::shared_ptr<Data> sampleData_; /*!< Pointer to data sample */
+	std::shared_ptr<Data> sampleBkg_; /*!< Pointer to background sample */
+	std::shared_ptr<Data> samplePhsp_; /*!< Pointer to phsp sample */
+	std::shared_ptr<Amplitude> amp_; /*!< Pointer to signal model */
+	std::shared_ptr<Amplitude> ampBkg_; /*!< Pointer to background model */
+	std::shared_ptr<Optimizer> opti_; /*!< Pointer to Optimizer-Module */
+	std::shared_ptr<Generator> gen_; /*!< Pointer to Generator-Module */
 };
 
 #endif

@@ -47,7 +47,7 @@ int main(int argc, char **argv){
 
   string file="test/2Part-4vecs.root";
   //RootReader myReader("test/2Part-4vecs.root");
-  shared_ptr<RootReader> myReader(new RootReader(file, true,"data"));
+  shared_ptr<RootReader> myReader(new RootReader(file, "data",true));
 //  shared_ptr<BreitWigner> testBW(new BreitWigner(0.,5.));
   shared_ptr<Amplitude> testBW(new BreitWigner(0.,5.));
 

@@ -53,6 +53,8 @@ public:
   virtual std::shared_ptr<Data> rndSubSet(unsigned int size, std::shared_ptr<Generator> gen) {
 	  return std::shared_ptr<Data>();
   }
+  virtual void writeData(std::string file="", std::string trName="") { };
+
 protected:
 
 private:

@@ -72,7 +72,7 @@ int main(int argc, char **argv){
 	run.setGenerator(gen);
 	//======================= DATA =============================
 	unsigned int numEvents = 1000;//data size to be generated
-	std::shared_ptr<Data> inputData(new RootReader("out.root", false,"data",false)); //empty file: run generation before fit
+	std::shared_ptr<Data> inputData(new RootReader()); //empty file: run generation before fit
 
 	//======================= EFFICIENCY =============================
 	std::shared_ptr<Efficiency> eff(new UnitEfficiency());
@@ -92,7 +92,7 @@ int main(int argc, char **argv){
 	std::shared_ptr<Amplitude> fitAmpTree(fitAmpTreePtr);
 
 	run.setAmplitude(trueAmp);//set true model here for generation
-	std::shared_ptr<Data> toyPhspData(new RootReader("out.root", false,"mc",false));//empty phsp sample
+	std::shared_ptr<Data> toyPhspData(new RootReader());//empty phsp sample
 	run.setPhspSample(toyPhspData);
 	if( !toyPhspData->getNEvents() ) {
 		run.generatePhsp(mcPrecision);
