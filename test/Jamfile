@@ -48,27 +48,27 @@ exe dataiftestApp :
         DataIFTestApp.cpp 
         test
         $(TOP)/Core//ComPWA
-        $(TOP)/DataReader/RootReader//RootReader  
+        $(TOP)/DataReader/RootReader//RootReader
         : ;
 
 if $(GENEVA) { 
 exe optimizertestApp : 
-        OptimizerTestApp.cpp 
+        OptimizerTestApp.cpp
         test
         $(TOP)/Core//ComPWA
         $(TOP)/Optimizer/Minuit2//Minuit2IF
-        $(TOP)/Optimizer/Geneva//GenevaIF  
+        $(TOP)/Optimizer/Geneva//GenevaIF
         : ;
 
 #exe genevatestApp : 
 #        GenevaTestApp.cpp 
 #        test
 #        $(TOP)/Core//ComPWA
-#        $(TOP)/Optimizer/Geneva//GenevaIF 
+#        $(TOP)/Optimizer/Geneva//GenevaIF
 #        : ;
 } else {
 exe optimizertestApp : 
-        MinuitTestApp.cpp 
+        MinuitTestApp.cpp
         test
         $(TOP)/Core//ComPWA
         $(TOP)/Optimizer/Minuit2//Minuit2IF
@@ -79,25 +79,25 @@ exe physicstestApp :
         PhysicsTestApp.cpp 
         test
         $(TOP)/Core//ComPWA
-        $(TOP)/Physics/BreitWigner//BreitWigner  
+        $(TOP)/Physics/BreitWigner//BreitWigner
         : ;
         
 exe estimatortestApp : 
         EstimatorTestApp.cpp 
         test
         $(TOP)/Core//ComPWA
-        $(TOP)/Estimator/MinLogLH//MinLogLH 
-        $(TOP)/Estimator/ChiOneD//ChiOneD 
-        $(TOP)/Physics/BreitWigner//BreitWigner  
+        $(TOP)/Estimator/MinLogLH//MinLogLH
+        $(TOP)/Estimator/ChiOneD//ChiOneD
+        $(TOP)/Physics/BreitWigner//BreitWigner
         $(TOP)/DataReader/RootReader//RootReader
         : ;
         
 exe integrationtestApp : 
-        IntegrationTestApp.cpp 
+        IntegrationTestApp.cpp
         test
         $(TOP)/Core//ComPWA
-        $(TOP)/Estimator/MinLogLH//MinLogLH 
-        $(TOP)/Physics/BreitWigner//BreitWigner   
+        $(TOP)/Estimator/MinLogLH//MinLogLH
+        $(TOP)/Physics/BreitWigner//BreitWigner
         $(TOP)/DataReader/RootReader//RootReader
         $(TOP)/Optimizer/Minuit2//Minuit2IF
         : ;
@@ -199,10 +199,10 @@ exe dalitzfitApp :
         test
         $(TOP)/Core//ComPWA
         $(TOP)/Physics/AmplitudeSum//AmplitudeSum
-        $(TOP)/Physics/DPKinematics//DPKinematics  
+        $(TOP)/Physics/DPKinematics//DPKinematics
         $(TOP)/DataReader/RootReader//RootReader
         $(TOP)/Optimizer//Optimizer
-        $(TOP)/Estimator/MinLogLH//MinLogLH 
+        $(TOP)/Estimator/MinLogLH//MinLogLH
         $(TOP)/Optimizer/Minuit2//Minuit2IF
         : ;
         
@@ -211,11 +211,11 @@ exe slicefitApp :
         test
         $(TOP)/Core//ComPWA
         $(TOP)/Physics/AmplitudeSum//AmplitudeSum
-        $(TOP)/Physics/DPKinematics//DPKinematics  
+        $(TOP)/Physics/DPKinematics//DPKinematics
         $(TOP)/DataReader/RootReader//RootReader
         $(TOP)/Estimator/SliceFit//SliceFit
         $(TOP)/Optimizer/Minuit2//Minuit2IF
-        $(TOP)/Physics/DPKinematics//DPKinematics  
+        $(TOP)/Physics/DPKinematics//DPKinematics
         : ;
 
 exe serializeApp : 
