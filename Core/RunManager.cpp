@@ -135,6 +135,7 @@ bool RunManager::generateBkg( unsigned int number ) {
 	double AMPpdf;
 
 	unsigned int phspSize = samplePhsp_->getNEvents();
+	unsigned int acceptedEvents=0;
 	progressBar bar(number);
 	for(unsigned int i=0;i<phspSize;i++){
 		Event tmp = samplePhsp_->getEvent(i);
@@ -154,8 +155,9 @@ bool RunManager::generateBkg( unsigned int number ) {
 					"Maximum value of random number generation smaller then amplitude maximum!");
 		if( ampRnd > (weight*AMPpdf) ) continue;
 		sampleBkg_->pushEvent(tmp);//unfortunatly not thread safe
+		acceptedEvents++;
 		bar.nextEvent();
-		if(i>=number) i=phspSize; //continue if we have a sufficienct number of events
+		if(acceptedEvents>=number) i=phspSize; //continue if we have a sufficienct number of events
 	}
 	if(sampleData_->getNEvents()<number)
 		BOOST_LOG_TRIVIAL(error) << "RunManager::generateBkg() not able to generate "<<number<<" events. "
