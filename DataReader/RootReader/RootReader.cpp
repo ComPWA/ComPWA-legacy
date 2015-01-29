@@ -35,7 +35,7 @@ RootReader::RootReader(TTree* tr, const bool binned=false) : fBinned(binned){
 }
 
 RootReader::RootReader(const std::string inRootFile, const std::string inTreeName, const bool binned) :
-		fBinned(binned),fileName(inRootFile),treeName(inTreeName){
+				fBinned(binned),fileName(inRootFile),treeName(inTreeName){
 	fFile = new TFile(fileName.c_str());
 	if(fFile->IsZombie())
 		throw std::runtime_error("RootReader::RootReader() can't open data file: "+inRootFile);
@@ -68,7 +68,6 @@ void RootReader::setEfficiency(std::shared_ptr<Efficiency> eff){
 	for(unsigned int evt=0; evt<fEvents.size(); evt++){
 		dataPoint e(fEvents.at(evt));
 		double val = eff->evaluate(e);
-		//	  std::cout<<val<<std::endl;
 		fEvents.at(evt).setEfficiency(val);
 	}
 }
@@ -335,4 +334,11 @@ void RootReader::bin(){
 		fBins[bin].second += 1.;
 	}
 
+}
+
+std::vector<dataPoint> RootReader::getDataPoints() {
+	std::vector<dataPoint> vecPoint;
+	for(int i=0; i<fEvents.size(); i++)
+		vecPoint.push_back(dataPoint(fEvents.at(i)));
+	return vecPoint;
 }

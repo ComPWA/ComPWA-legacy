@@ -114,10 +114,11 @@ class dataPoint
 private:
 
 public:
-
-	dataPoint(dataPoint const&){};
+	//! Default constructor
 	dataPoint();
+	//! Construct dataPoint from Event
 	dataPoint(Event& ev);
+	//! Construct dataPoint from vector of invariant masses
 	dataPoint(std::vector<double> vec);
 	~dataPoint(){};
 

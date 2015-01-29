@@ -81,12 +81,21 @@ bool RunManager::generate( unsigned int number ) {
 	Generator* genNew = (&(*gen_))->Clone();//copy generator for every thread
 	double AMPpdf;
 
-	unsigned int phspSize = samplePhsp_->getNEvents();
+	unsigned int limit;
 	unsigned int totalCalls=0;
 	unsigned int acceptedEvents=0;
+	if(samplePhsp_){
+		std::cout<<"1231312313123jfsj"<<std::endl;
+		limit = samplePhsp_->getNEvents();
+	} else
+		limit = 100000000;//set large limit, should never be reached
+	Event tmp;
 	progressBar bar(number);
-	for(unsigned int i=0;i<phspSize;i++){
-		Event tmp = samplePhsp_->getEvent(i);
+	for(unsigned int i=0;i<limit;i++){
+		if(samplePhsp_)//if phsp sample is set -> use it
+			tmp = samplePhsp_->getEvent(i);
+		else //otherwise generate event
+			genNew->generate(tmp);
 		totalCalls++;
 		double weight = tmp.getWeight();
 		/* reset weights: the weights are taken into account by hit and miss. The resulting
@@ -105,7 +114,7 @@ bool RunManager::generate( unsigned int number ) {
 		sampleData_->pushEvent(tmp);//Unfortunately not thread safe
 		acceptedEvents++;
 		bar.nextEvent();
-		if(acceptedEvents>=number) i=phspSize; //continue if we have a sufficienct number of events
+		if(acceptedEvents>=number) i=limit; //continue if we have a sufficienct number of events
 	}
 	if(sampleData_->getNEvents()<number)
 		BOOST_LOG_TRIVIAL(error) << "RunManager::generate() not able to generate "<<number<<" events. "
@@ -120,7 +129,7 @@ bool RunManager::generateBkg( unsigned int number ) {
 	if( !(ampBkg_ && gen_) )
 		throw std::runtime_error("RunManager: generateBkg() requirements not fulfilled");
 	if(!sampleBkg_)
-		throw std::runtime_error("RunManager: generateBkg() not background sample set");
+		throw std::runtime_error("RunManager: generateBkg() no background sample set");
 	if(sampleBkg_->getNEvents()>0)
 		throw std::runtime_error("RunManager: generateBkg() dataset not empty! abort!");
 	//Determing an estimate on the maximum of the physics amplitude using 100k events.
@@ -134,11 +143,20 @@ bool RunManager::generateBkg( unsigned int number ) {
 	Generator* genNew = (&(*gen_))->Clone();//copy generator for every thread
 	double AMPpdf;
 
-	unsigned int phspSize = samplePhsp_->getNEvents();
+	unsigned int limit;
 	unsigned int acceptedEvents=0;
+	if(samplePhsp_){
+		std::cout<<"1231312313123jfsj"<<std::endl;
+		limit = samplePhsp_->getNEvents();
+	} else
+		limit = 100000000; //set large limit, should never be reached
+	Event tmp;
 	progressBar bar(number);
-	for(unsigned int i=0;i<phspSize;i++){
-		Event tmp = samplePhsp_->getEvent(i);
+	for(unsigned int i=0;i<limit;i++){
+		if(samplePhsp_)//if phsp sample is set -> use it
+			tmp = samplePhsp_->getEvent(i);
+		else //otherwise generate event
+			gen_->generate(tmp);
 		totalCalls++;
 		double weight = tmp.getWeight();
 		/* reset weights: the weights are taken into account by hit and miss. The resulting
@@ -157,7 +175,7 @@ bool RunManager::generateBkg( unsigned int number ) {
 		sampleBkg_->pushEvent(tmp);//unfortunatly not thread safe
 		acceptedEvents++;
 		bar.nextEvent();
-		if(acceptedEvents>=number) i=phspSize; //continue if we have a sufficienct number of events
+		if(acceptedEvents>=number) i=limit; //continue if we have a sufficienct number of events
 	}
 	if(sampleData_->getNEvents()<number)
 		BOOST_LOG_TRIVIAL(error) << "RunManager::generateBkg() not able to generate "<<number<<" events. "

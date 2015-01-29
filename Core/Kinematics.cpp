@@ -12,15 +12,49 @@
 #include <boost/log/trivial.hpp>
 using namespace boost::log;
 
+#include "Core/DataPoint.hpp"
 #include "Core/Kinematics.hpp"
+#include "Core/PhysConst.hpp"
 
 Kinematics* Kinematics::instance(){
 	if(!_inst) {
-//		BOOST_LOG_TRIVAIL(fatal)<<"Kinematics::instance() no instance available. you have to create one first";
-				exit(1);
+		throw std::runtime_error("No instance of Kinematics created! Create one first!");
 	}
 
 	return Kinematics::_inst;
 }
 
 Kinematics* Kinematics::_inst = 0;
+
+TwoBodyKinematics::TwoBodyKinematics(std::string _nameMother, std::string _name1, std::string _name2,
+		double deltaMassWindow){
+	M = PhysConst::instance()->getMass(_nameMother);
+	m1 = PhysConst::instance()->getMass(_name1);
+	m2 = PhysConst::instance()->getMass(_name2);
+	spinM = PhysConst::instance()->getJ(_nameMother);
+	spin1 = PhysConst::instance()->getJ(_name1);
+	spin2 = PhysConst::instance()->getJ(_name2);
+
+	if(M==-999 || m1==-999|| m2==-999)
+		throw std::runtime_error("TwoBodyKinematics(): Masses not set!");
+	mass_min=((M-deltaMassWindow)); mass_max=((M+deltaMassWindow));
+	mass_sq_max = mass_max*mass_max;
+	mass_sq_min = mass_min*mass_max;
+	varNames.push_back("msq");
+
+}
+void TwoBodyKinematics::init(){
+}
+bool TwoBodyKinematics::isWithinPhsp(const dataPoint& point){
+	if(point.getVal(0)>=mass_min && point.getVal(0)<=mass_max) return 1;
+	return 0;
+}
+void TwoBodyKinematics::eventToDataPoint(Event& ev, dataPoint& point){
+	double weight = ev.getWeight();
+	point.setWeight(weight);//reset weight
+	Particle part1 = ev.getParticle(0);
+	Particle part2 = ev.getParticle(1);
+	double msq = Particle::invariantMass(part1,part2);
+	point.setVal(0,msq);
+	return;
+}

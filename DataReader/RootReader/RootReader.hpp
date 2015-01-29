@@ -68,6 +68,7 @@ public:
 	virtual const unsigned int getNBins() const {return fmaxBins;};
 
 	virtual std::vector<Event> getEvents() {return fEvents; }
+	virtual std::vector<dataPoint> getDataPoints();
 	virtual void Add(Data& otherSample){
 		std::vector<Event> otherEvents = otherSample.getEvents();
 		fEvents.insert(fEvents.end(), otherEvents.begin(), otherEvents.end());

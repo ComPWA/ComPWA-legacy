@@ -14,23 +14,22 @@
 #include "Core/DataPoint.hpp"
 
 void dataPoint::init(){
-	std::vector<std::string> varNames = Kinematics::instance()->getVarNames();
-	unsigned int size = varNames.size();
-	var.reserve(size);
-	weight=1;
-	return;
+	var = std::vector<double>(Kinematics::instance()->getVarNames().size(), 0);
 }
-dataPoint::dataPoint(std::vector<double> vec){
+
+dataPoint::dataPoint(std::vector<double> vec) : weight(1.){
 	init();
+	if(Kinematics::instance()->getVarNames().size() != vec.size())
+		throw std::runtime_error("dataPoint::dataPoint() vector has wrong length!");
 	var=vec;
 	return;
 }
-dataPoint::dataPoint(Event& ev){
+dataPoint::dataPoint(Event& ev): weight(1.){
 	init();
 	Kinematics::instance()->eventToDataPoint(ev,*this);
 	return;
 }
-dataPoint::dataPoint(){
+dataPoint::dataPoint(): weight(1.){
 	init();
 	return;
 }
@@ -40,7 +39,7 @@ unsigned int dataPoint::getID(std::string name) const{
 	unsigned int size = varNames.size();
 	unsigned int pos = find(varNames.begin(), varNames.end(), name) - varNames.begin();
 	if(pos<0||pos>size-1) {
-		BOOST_LOG_TRIVIAL(error)<<"dataPoint2::getVal(): variable with name "<<name<<" not found!";
+		BOOST_LOG_TRIVIAL(error)<<"dataPoint::getVal(): variable with name "<<name<<" not found!";
 		return 999;
 	}
 	return pos;
@@ -51,7 +50,7 @@ double dataPoint::getVal(std::string name) const{
 	unsigned int size = varNames.size();
 	unsigned int pos = find(varNames.begin(), varNames.end(), name) - varNames.begin();
 	if(pos<0||pos>size-1) {
-		BOOST_LOG_TRIVIAL(error)<<"dataPoint2::getVal(): variable with name "<<name<<" not found!";
+		BOOST_LOG_TRIVIAL(error)<<"dataPoint::getVal(): variable with name "<<name<<" not found!";
 		return -999;
 	}
 	return getVal(pos);
@@ -61,45 +60,43 @@ void dataPoint::setVal(std::string name, double val){
 	unsigned int size = varNames.size();
 	unsigned int pos = find(varNames.begin(), varNames.end(), name) - varNames.begin();
 	if(pos<0||pos>size-1) {
-		BOOST_LOG_TRIVIAL(error)<<"dataPoint2::getVal(): variable with name "<<name<<" not found!";
+		BOOST_LOG_TRIVIAL(error)<<"dataPoint::setVal(): variable with name "<<name<<" not found!";
 		return;
 	}
 	setVal(pos,val);
 	return;
 }
 void dataPoint::setVal(unsigned int num, double val){
-
-	if(var.size()>num+1){
-		BOOST_LOG_TRIVIAL(error)<<"dataPoint2::setVal(): index for variable out of range!";
-		return;
+	try{
+		var.at(num)=val;
+	} catch (...) {
+		BOOST_LOG_TRIVIAL(error)<<"dataPoint::setVal(): cannot access index "<<num<<"!";
+		throw;
 	}
-	var[num]=val;
 	return;
 }
 double dataPoint::getVal(unsigned int num) const{
-
-	if(var.size()>num+1){
-		BOOST_LOG_TRIVIAL(error)<<"dataPoint2::getVal(): index for variable out of range!";
-		return 0;
+	double rt;
+	try{
+		rt = var.at(num);
+	} catch (...) {
+		BOOST_LOG_TRIVIAL(error)<<"dataPoint::getVal(): cannot access index "<<num<<"!";
+		throw;
 	}
-	return var[num];
+	return rt;
 }
 void dataPoint::setPoint(std::vector<double> values){
-	unsigned int size = Kinematics::instance()->getVarNames().size();
-	if(size!=values.size()){
-		BOOST_LOG_TRIVIAL(error)<<"dataPoint2::setPoint(): vector with phsp point out of range!";
-		return;
-	}
+	if(Kinematics::instance()->getVarNames().size() != values.size())
+		throw std::runtime_error("dataPoint::setPoint() vector has wrong length!");
 	var=std::vector<double>(values);
 	return;
 }
 std::ostream & operator<<(std::ostream &os, dataPoint &p){
 	std::vector<std::string> varNames = Kinematics::instance()->getVarNames();
-	os << varNames[0] << "="<<p.getVal(0)<< " | "<<varNames[1]<<"="<<p.getVal(1);
+	for(int i=0; i<varNames.size(); i++)
+		os << varNames.at(i) << "="<<p.getVal(i)<<" ";
 	return os;
 }
-
-
 
 bool allMasses::Fill(Event &evt){
 	dataPoint point(evt);
