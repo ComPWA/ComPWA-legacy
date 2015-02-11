@@ -748,7 +748,7 @@ void AmpSumIntensity::printAmps(){
 		}
 		outStr<<p->GetName()<<" = "<<p->GetValue();
 		if(p->HasError())
-			outStr<<"+-"<<p->GetError()->GetError();
+			outStr<<"+-"<<p->GetError();
 		if(p->HasBounds())
 			outStr<<" ["<<p->GetMinValue()<<";"<<p->GetMaxValue()<<"]";
 		if(p->IsFixed())

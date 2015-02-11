@@ -116,9 +116,9 @@ int main(int argc, char **argv){
 //	fitPar.GetDoubleParameter("g1_a_0")->FixParameter(1);
 
 	for(unsigned int i=0; i<fitParTree.GetNDouble(); i++)
-		fitParTree.GetDoubleParameter(i)->SetError( std::shared_ptr<ParError<double>>(new SymError<double>(.1)) );
+		fitParTree.GetDoubleParameter(i)->SetError(.1);
 	for(unsigned int i=0; i<fitPar.GetNDouble(); i++)
-		fitPar.GetDoubleParameter(i)->SetError( std::shared_ptr<ParError<double>>(new SymError<double>(.1)) );
+		fitPar.GetDoubleParameter(i)->SetError(.1);
 
 	fitAmpTree->setParameterList(fitParTree);
 	fitAmp->setParameterList(fitPar);

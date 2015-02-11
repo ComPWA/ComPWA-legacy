@@ -104,7 +104,7 @@ void MinuitResult::init(FunctionMinimum min){
 void MinuitResult::genSimpleOutput(std::ostream& out){
 	for(unsigned int o=0;o<finalParameters.GetNDouble();o++){
 		std::shared_ptr<DoubleParameter> outPar = finalParameters.GetDoubleParameter(o);
-		out<<outPar->GetValue()<<" "<<outPar->GetError()->GetError()<<" ";
+		out<<outPar->GetValue()<<" "<<outPar->GetError()<<" ";
 	}
 	out<<"\n";
 
@@ -208,7 +208,7 @@ void MinuitResult::calcFractionError(std::vector<double>& fracError){
 			std::shared_ptr<DoubleParameter> magPar = finalParameters.GetDoubleParameter(parName);
 			double mag = magPar->GetValue(); //value of magnitude
 			double magError = 0.0;
-			if(magPar->HasError()) magError = magPar->GetError()->GetError();
+			if(magPar->HasError()) magError = magPar->GetError();
 			if(magPar->IsFixed()) fracError.push_back(0.);
 			else fracError.push_back(2*mag*resonanceInt/norm * magError); // sigma_fraction = 2*|A| intRes/totalInt * sigma_A
 			//			std::cout<<2*mag*resonanceInt/norm * magError<<std::endl;
@@ -355,11 +355,11 @@ void MinuitResult::genOutput(std::ostream& out, std::string opt){
 					while( pull>0 && pull>pi) pull-=2*pi;
 				}
 				if( errorType == ErrorType::ASYM && pull < 0)
-					pull /= outPar->GetError()->GetErrorLow();
+					pull /= outPar->GetErrorLow();
 				else if( errorType == ErrorType::ASYM && pull > 0)
-					pull /= outPar->GetError()->GetErrorHigh();
+					pull /= outPar->GetErrorHigh();
 				else
-					pull /= outPar->GetError()->GetError();
+					pull /= outPar->GetError();
 				tableResult << pull;
 			}
 		}

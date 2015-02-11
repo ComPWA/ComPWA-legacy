@@ -84,10 +84,9 @@ bool RunManager::generate( unsigned int number ) {
 	unsigned int limit;
 	unsigned int totalCalls=0;
 	unsigned int acceptedEvents=0;
-	if(samplePhsp_){
-		std::cout<<"1231312313123jfsj"<<std::endl;
+	if(samplePhsp_)
 		limit = samplePhsp_->getNEvents();
-	} else
+	else
 		limit = 100000000;//set large limit, should never be reached
 	Event tmp;
 	progressBar bar(number);

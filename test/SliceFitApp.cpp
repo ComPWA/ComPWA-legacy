@@ -125,10 +125,10 @@ int main(int argc, char **argv){
    // tmpE->FixParameter(true);
     //tmpB->FixParameter(true);
     //tmpD->FixParameter(true);
-    tmpB->SetError(std::shared_ptr<ParError<double>>(new SymError<double>(1.)));
-    tmpC->SetError(std::shared_ptr<ParError<double>>(new SymError<double>(1.)));
-    tmpD->SetError(std::shared_ptr<ParError<double>>(new SymError<double>(1.)));
-    tmpE->SetError(std::shared_ptr<ParError<double>>(new SymError<double>(1.)));
+    tmpB->SetError(1.);
+    tmpC->SetError(1.);
+    tmpD->SetError(1.);
+    tmpE->SetError(1.);
     slicePars.AddParameter(tmpA);
     slicePars.AddParameter(tmpB);
     slicePars.AddParameter(tmpC);
@@ -207,7 +207,7 @@ int main(int argc, char **argv){
       std::shared_ptr<DoubleParameter> tmp = slicePars.GetDoubleParameter(i);
       if(!tmp->IsFixed()){
         tmp->SetValue(1.);
-        tmp->SetError(std::shared_ptr<ParError<double>>(new SymError<double>(tmp->GetValue())));
+        tmp->SetError(tmp->GetValue());
       }
     }
 

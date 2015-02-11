@@ -24,123 +24,25 @@
 #ifndef _ABSPARAMETER_HPP_
 #define _ABSPARAMETER_HPP_
 
-
 #include <string>
 #include <vector>
 #include <memory>
 #include <algorithm>
-#include "Core/ParObserver.hpp"
 #include <fstream>
+
 #include <boost/serialization/string.hpp>
 #include <boost/serialization/map.hpp>
-#include <boost/archive/xml_oarchive.hpp>
-#include <boost/archive/xml_iarchive.hpp>
 #include <boost/serialization/nvp.hpp>
 #include <boost/serialization/shared_ptr.hpp>
+#include <boost/serialization/serialization.hpp>
+
+
+#include "Core/ParObserver.hpp"
+//#include "Core/ParameterError.hpp"
+
 
 enum ParType { COMPLEX = 1, DOUBLE = 2, INTEGER = 3, BOOL = 4, MDOUBLE = 5, MCOMPLEX = 6, UNDEFINED = 0};
 static const char* ParNames[7] = { "UNDEFINED", "COMPLEX", "DOUBLE", "INTEGER", "BOOL", "MDOUBLE", "MCOMPLEX"};
-enum ErrorType { SYM = 1, ASYM = 2, LHSCAN = 3, NOTDEF = 0};
-static const char* ErrorNames[4] = { "NOTDEF", "SYM", "ASYM", "LHSCAN"};
-
-template <class T>
-class ParError
-{
-public:
-	ParError(ErrorType t=ErrorType::NOTDEF) : type(t){};
-	virtual ParError* Clone() const = 0;
-	virtual ParError* Create() const = 0;
-	virtual ~ParError() {};
-	virtual ErrorType GetType() { return type; };
-	virtual T GetError() =0;
-	virtual T GetErrorLow() =0;
-	virtual T GetErrorHigh() =0;
-	operator T() { return GetError(); }
-private:
-	ErrorType type;
-	friend class boost::serialization::access;
-	template<class archive>
-	void serialize(archive& ar, const unsigned int version)
-	{
-		ar & BOOST_SERIALIZATION_NVP(type);
-	}
-
-};
-//BOOST_CLASS_TRACKING(ParError<double>, boost::serialization::track_always)
-//BOOST_SERIALIZATION_ASSUME_ABSTRACT(ParError);
-
-template <class T>
-class SymError : public ParError<T>
-{
-public:
-	SymError() : ParError<T>(ErrorType::SYM), error(0){};
-	SymError(T val) : ParError<T>(ErrorType::SYM), error(val){};
-	virtual ParError<T>* Clone() const {
-		return new SymError(static_cast<SymError>(*this));
-	}
-	virtual ParError<T>* Create() const {
-		return new SymError();
-	}
-
-	virtual T GetError() {return error;}
-	friend std::ostream& operator<<( std::ostream& out, const SymError& b ){
-		return out << "+-" << GetError();
-	}
-
-private:
-	virtual T GetErrorLow() { return error; };
-	virtual T GetErrorHigh() { return error; };
-	T error;
-	friend class boost::serialization::access;
-	template<class archive>
-	void serialize(archive& ar, const unsigned int version)
-	{
-		typedef ParError<T> parError;
-		ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(parError);
-		//		ar & boost::serialization::base_object<ParError>(*this);
-		ar & BOOST_SERIALIZATION_NVP(error);
-	}
-
-};
-//BOOST_CLASS_IMPLEMENTATION(SymError<double>,boost::serialization::object_serializable);
-
-template <class T>
-class AsymError : public ParError<T>
-{
-public:
-	AsymError() : ParError<T>(ErrorType::ASYM), error(std::pair<T,T>(0,0)){};
-	AsymError(std::pair<T,T> val) : ParError<T>(ErrorType::ASYM), error(val){};
-	virtual ParError<T>* Clone() const {
-		return new AsymError(static_cast<AsymError>(*this));
-	}
-	virtual ParError<T>* Create() const {
-		return new AsymError();
-	}
-
-	virtual T GetError() {return (GetErrorLow()+GetErrorHigh())/2;}
-	virtual T GetErrorLow() {
-		if(error.first<0) return (-1)*error.first;
-		return error.first;
-	}
-	virtual T GetErrorHigh() {return error.second;}
-	virtual std::pair<T,T> GetLowHigh() {return error;}
-	friend std::ostream& operator<<( std::ostream& out, const AsymError& b ){
-		return out << "+" << GetErrorHigh() << "-"<<GetErrorLow();
-	}
-
-private:
-	std::pair<T,T> error;
-	friend class boost::serialization::access;
-	template<class archive>
-	void serialize(archive& ar, const unsigned int version)
-	{
-		typedef ParError<T> parError;
-		ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(parError);
-		//		ar & boost::serialization::base_object<ParError>(*this);
-		ar & BOOST_SERIALIZATION_NVP(error);
-	}
-};
-//BOOST_CLASS_IMPLEMENTATION(AsymError<double> , boost::serialization::object_serializable);
 
 class AbsParameter //: public std::enable_shared_from_this<AbsParameter>
 {
@@ -241,36 +143,27 @@ public:
 		//make_str();
 		return make_val_str();
 	}
-	//  virtual bool isFixed() { return isFixed_; }
-	//  virtual void setFix(bool f) { isFixed_ = f; }
 
 protected:
-	//std::string out_; /*!< Output string to print information */
-	//std::string outVal_; /*!< Output string to print only value */
 	std::string name_; /*!< internal name of the parameter */
 	ParType type_; /*!< ParType enum for type of parameter */
-	//bool isFixed_;
-	//ParError error_;
-	//bool hasError_; /*!< Is an error defined for this parameter? */
 
 	std::vector<std::shared_ptr<ParObserver> > oberservingNodes; /*!< list of observers, e.g. TreeNodes */
-
 	//! Interface to output string, to be implemented by parameter implementations
 	virtual std::string make_str() =0;
 	//! Interface to output value, to be implemented by parameter implementations
 	virtual std::string make_val_str() =0;
-private:
 
+private:
 	friend class boost::serialization::access;
 	template<class archive>
 	void serialize(archive& ar, const unsigned int version)
 	{
 		ar & BOOST_SERIALIZATION_NVP(name_);
 		ar & BOOST_SERIALIZATION_NVP(type_);
-		//		ar & BOOST_SERIALIZATION_NVP(isFixed_);
 	}
 
 };
-BOOST_SERIALIZATION_ASSUME_ABSTRACT(AbsParameter);
+//BOOST_SERIALIZATION_ASSUME_ABSTRACT(AbsParameter)
 
 #endif

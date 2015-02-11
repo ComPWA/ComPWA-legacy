@@ -207,8 +207,8 @@ int main(int argc, char **argv){
 			tmp->FixParameter(true);
 		}else{
 			tmp->SetValue(tmp->GetValue());///((i+1)));
-			tmp->SetError(std::shared_ptr<ParError<double>>(new SymError<double>(tmp->GetValue())));
-			if(!tmp->GetValue()) tmp->SetError(std::shared_ptr<ParError<double>>(new SymError<double>(1.)));
+			tmp->SetError(tmp->GetValue());
+			if(!tmp->GetValue()) tmp->SetError(1.);
 		}
 		startInt[i] = tmp->GetValue();
 	}

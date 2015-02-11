@@ -5,124 +5,62 @@
  *      Author: weidenka
  */
 #include "Core/Parameter.hpp"
+#include "Core/ParameterList.hpp"
 #include <sstream>
 #include <boost/serialization/serialization.hpp>
 #include <boost/archive/text_iarchive.hpp>
 #include <boost/serialization/export.hpp>
 #include <boost/archive/archive_exception.hpp>
 
+#include <boost/archive/xml_oarchive.hpp>
+#include <boost/archive/xml_iarchive.hpp>
 
-template <class T> class classOne
-{
-public:
-	classOne(){};
-	classOne(T val) : st(val){};
-	virtual ~classOne() {};
-	virtual double GetError() {return 1;}
-protected:
-	T st;
-private:
-	friend class boost::serialization::access;
-	template<class archive>
-	void serialize(archive& ar, const unsigned int version)
-	{
-		ar & BOOST_SERIALIZATION_NVP(st);
-	}
-
-};
-BOOST_SERIALIZATION_ASSUME_ABSTRACT(classOne);
-
-template <class T> class classTwo : public classOne<T>
-{
-public:
-	virtual ~classTwo() {};
-	classTwo(T val) : classOne<T>(val), error(val){};
-	virtual T GetError() {return error;};
-	classTwo() : classOne<T>(.5), error(1.0){};
-
-private:
-	T error;
-	friend class boost::serialization::access;
-	template<class archive>
-	void serialize(archive& ar, const unsigned int version)
-	{
-		typedef classOne<T> baseClass;
-		ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(baseClass);
-		ar & BOOST_SERIALIZATION_NVP(error);
-	}
-
-};
-//BOOST_CLASS_EXPORT_GUID(classTwo, "classTwo")
-//BOOST_CLASS_IMPLEMENTATION(classTwo<double>,boost::serialization::object_serializable);
-//BOOST_CLASS_TRACKING(classTwo<double>, boost::serialization::track_always)
+using namespace boost::serialization;
 
 int main(int argc, char** argv){
-	//===== serilization of DoubleParameter
-	DoubleParameter par("test",2.5,0.0,5.0,0.5);
-	DoubleParameter parIn("dsfa");
-	AsymError<double> parErr(std::pair<double,double>(1.0,2.0));
-//	par.SetError(std::shared_ptr<ParError<double>>(new AsymError<double>(std::pair<double,double>(1.0,2.0))));
 
-	std::ofstream ofs2("test.xml");
-	boost::archive::xml_oarchive oa2(ofs2);
-	oa2 << BOOST_SERIALIZATION_NVP(par);
-
-	std::ifstream ifs("test.xml");
+	std::cout<<"Testing boost::serialization"<<std::endl;
+	//Serialize a DoubleParameter
+	DoubleParameter p1("test",2.5,0.0,5.0,0.5);
+	p1.SetErrorType(ErrorType::ASYM);
+	p1.SetError(0.5,1.3);
+	DoubleParameter p1In;
+	std::ofstream ofs("DoublePar.xml");
+	boost::archive::xml_oarchive oa(ofs);
+	oa << make_nvp("DoublePar", p1);
+	ofs.close();
+	std::ifstream ifs("DoublePar.xml");
 	boost::archive::xml_iarchive ia(ifs);
-	ia >> BOOST_SERIALIZATION_NVP(parIn);
-	std::cout<<parIn<<std::endl;
+	ia >> make_nvp("DoublePar", p1In);
 	ifs.close();
-
-	//===== serialization of error
-//	std::cout<<"SymError: writing"<<std::endl;
-//	SymError<double> err(2.1);
-//	oa2 << BOOST_SERIALIZATION_NVP(err);
-//	std::cout<<"ASymError: writing"<<std::endl;
-//	AsymError<double> errA(std::pair<double,double>(1.0,2.0));
-//	oa2 << BOOST_SERIALIZATION_NVP(errA);
-//
-//	ofs2.close();
-//	std::ifstream ifs2("test.xml");
-//	boost::archive::xml_iarchive ia2(ifs2);
-//
-//	SymError<double> errIn(1.0);
-//	AsymError<double> errAin(std::pair<double,double>(1.0,2.0));
-//
-//	std::cout<<"SymError: reading"<<std::endl;
-//	ia2 >> BOOST_SERIALIZATION_NVP(errIn);
-//	std::cout<<errIn.GetError()<<std::endl;
-//
-//	std::cout<<"ASymError: reading"<<std::endl;
-//	ia2 >> BOOST_SERIALIZATION_NVP(errAin);
-//	std::cout<<errAin.GetError()<<std::endl;
-//	ifs2.close();
-
-	//	classTwo<double> ch2;
-	//	std::ofstream ofs3("test2.xml");
-	//	boost::archive::xml_oarchive oa3(ofs3);
-	//	std::cout<<"Write to file..."<<std::endl;
-	//	oa3 << BOOST_SERIALIZATION_NVP(ch2);
-	//	ofs3.close();
-	//
-	//	classTwo<double> chIn;
-	//	std::ifstream ifs3("test2.xml");
-	//	boost::archive::xml_iarchive ia3(ifs3);
-	//	std::cout<<"Read from file..."<<std::endl;
-	//	ia3 >> BOOST_SERIALIZATION_NVP(chIn);
-	//	ifs3.close();
-	//		std::cout<<chIn.GetError()<<std::endl;
+	std::cout<<"Serialization of DoubleParameter: value="<<p1In.GetValue()<<std::endl;
 
 
-	//	MyChild ch2;
-	//	ch2.setID(3);
-	//	std::ofstream ofs2("test2.xml");
-	//	boost::archive::xml_oarchive oa2(ofs2);
-	//	oa2 << BOOST_SERIALIZATION_NVP(ch2);
-	//	ofs2.close();
-	//	std::ifstream ifs2("test2.xml");
-	//	boost::archive::xml_iarchive ia2(ifs2);
-	//	ia2 >> BOOST_SERIALIZATION_NVP(ch2);
-	//	ifs2.close();
+	//Serialize a ParameterList
+	std::shared_ptr<DoubleParameter> p3(new DoubleParameter("test2",1.5,0.0,5.0,0.5));
+	ParameterList list, list2;
+	list.AddParameter(p3);
+	std::ofstream ofs3("ParList.xml");
+	boost::archive::xml_oarchive oa3(ofs3);
+	oa3 << boost::serialization::make_nvp("ParList", list);
+	ofs3.close();
+	std::ifstream ifs3("ParList.xml");
+	boost::archive::xml_iarchive ia3(ifs3);
+	ia3 >> boost::serialization::make_nvp("ParList", list2);
+	std::cout<<"Serialization of ParameterList: NDouble="<<list2.GetNDouble()<<std::endl;
+
+	//Serialize a std::shared_ptr<DoubleParameter>
+	std::shared_ptr<DoubleParameter> p2(new DoubleParameter("test2",1.5,0.0,5.0,0.5));
+	std::shared_ptr<DoubleParameter> p2In;
+	std::ofstream ofs2("ShrDoublePar.xml");
+	boost::archive::xml_oarchive oa2(ofs2);
+	oa2 << boost::serialization::make_nvp("ShrDoublePar", p2);
+	ofs2.close();
+	std::ifstream ifs2("ShrDoublePar.xml");
+	boost::archive::xml_iarchive ia2(ifs2);
+	ia2 >> boost::serialization::make_nvp("ShrDoublePar", p2In);
+	std::cout<<"Serialization of std::shared_ptr<DoubleParameter>: name=" << p2In->GetName()<< " value="<<p2In->GetValue()<<std::endl;
+
 	return 0;
 }
 

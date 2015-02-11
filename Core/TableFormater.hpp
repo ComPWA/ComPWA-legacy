@@ -64,17 +64,16 @@ public:
 			if(in.GetErrorType()==ErrorType::SYM){
 				unsigned int halfWidth = (unsigned int)(columnWidth[curCol])/2;//divide column width
 				*out << std::setw(halfWidth) << in.GetValue();
-				tmp = " +-"+std::to_string((long double) in.GetError()->GetError()); trimString(tmp);
+				tmp = " +-"+std::to_string((long double) in.GetError()); trimString(tmp);
 				*out << std::setw(halfWidth) << tmp;
 			}
 			if(in.GetErrorType()==ErrorType::ASYM){
 				unsigned int w = (unsigned int)(columnWidth[curCol])/3;//take 1/3 of column width
-				std::shared_ptr<ParError<double>> err = in.GetError();
 				tmp = std::to_string((long double) in.GetValue()); trimString(tmp);
 				*out << std::setw(w) << tmp;
-				tmp = "+"+std::to_string((long double) err->GetErrorHigh());trimString(tmp);
+				tmp = "+"+std::to_string((long double) in.GetErrorHigh());trimString(tmp);
 				*out << std::setw(w) << tmp;
-				tmp = "-"+std::to_string((long double) err->GetErrorLow());trimString(tmp);
+				tmp = "-"+std::to_string((long double) in.GetErrorLow());trimString(tmp);
 				*out << std::setw(w) << tmp;
 			}
 		} else {

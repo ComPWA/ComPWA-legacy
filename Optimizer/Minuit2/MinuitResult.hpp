@@ -58,29 +58,6 @@ public:
 	double getResult(){return finalLH;}
 	//!Generate output stream with fit result table
 	void fractions(std::ostream& out);
-	/** Calculate fit fractions.
-	 * Fractions are calculated using the formular:
-	 * \f[
-	 *  f_i = \frac{|c_i|^2 \int A_i A_i^*}{\int \sum c_l c_m^* A_l A_m}
-	 * \f]
-	 * The \f$c_i\f$ complex coefficienct of the amplitude and the denominatior is the integral over
-	 * the whole amplitude.
-	 *
-	 * @param frac result with fit fractions for the single resonances
-	 */
-	void calcFraction(std::vector<double>& frac);
-	/** Calculate errors on fit result
-	 * Set @param assumeUnCorrelatedErrors to assume that the error of the fit parameter only depends
-	 * on the error of the magnitude. The error of normalization due the the fit error on magnitudes
-	 * and phases is ignored.
-	 * If we want to calculate the errors correctly we have to generate a set of fit parameters that
-	 * are smeard by a multidimensional gaussian and the covariance matrix of the fit. For every set
-	 * we calculate the fit frations and calculate its mean. The can be a very time consuming method,
-	 * especially if the function tree is not used.
-	 *
-	 * @param fracError result with errors
-	 */
-	void calcFractionError(std::vector<double>& fracError);
 	//! Enable correct error estimation for fit fractions. Very time consuming!
 	void setUseCorrelatedErrors(bool s) { useCorrelatedErrors = s; }
 
@@ -114,6 +91,30 @@ private:
 	void genOutput(std::ostream& out,std::string opt="");
 	void init(FunctionMinimum);
 	std::shared_ptr<Estimator> estimator;
+
+	/** Calculate fit fractions.
+	 * Fractions are calculated using the formular:
+	 * \f[
+	 *  f_i = \frac{|c_i|^2 \int A_i A_i^*}{\int \sum c_l c_m^* A_l A_m}
+	 * \f]
+	 * The \f$c_i\f$ complex coefficienct of the amplitude and the denominatior is the integral over
+	 * the whole amplitude.
+	 *
+	 * @param frac result with fit fractions for the single resonances
+	 */
+	void calcFraction(std::vector<double>& frac);
+	/** Calculate errors on fit result
+	 * Set @param assumeUnCorrelatedErrors to assume that the error of the fit parameter only depends
+	 * on the error of the magnitude. The error of normalization due the the fit error on magnitudes
+	 * and phases is ignored.
+	 * If we want to calculate the errors correctly we have to generate a set of fit parameters that
+	 * are smeard by a multidimensional gaussian and the covariance matrix of the fit. For every set
+	 * we calculate the fit frations and calculate its mean. The can be a very time consuming method,
+	 * especially if the function tree is not used.
+	 *
+	 * @param fracError result with errors
+	 */
+	void calcFractionError(std::vector<double>& fracError);
 };
 
 #endif
