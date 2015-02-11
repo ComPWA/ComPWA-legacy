@@ -720,7 +720,7 @@ public:
 	//! Setter for type of parameter error
 	virtual void SetErrorType(ErrorType t) { errorType=t; }
 	//! Getter for parameter error. In case of assymetric errors the average errror is returned.
-	virtual double GetError() const {return std::abs(GetErrorHigh()-GetErrorLow())/2;}
+	virtual double GetError() const {return (GetErrorHigh()+GetErrorLow())/2;}
 	//! Getter for upper error of parameter
 	virtual double GetErrorHigh() const {return errorHigh;}
 	//! Getter for lower error of parameter
@@ -728,7 +728,7 @@ public:
 	//! Setter for upper error of parameter
 	virtual void SetErrorHigh(double errHigh) { errorHigh=errHigh;}
 	//! Setter for lower error of parameter
-	virtual void SetErrorLow(double errLow) { errorLow=errLow;}
+	virtual void SetErrorLow(double errLow) { errorLow=std::abs(errLow);}
 	//! Setter for low/high error of parameter
 	virtual void SetError(double errLow, double errHigh) {
 		errorType=ErrorType::ASYM;

@@ -258,6 +258,55 @@ public:
 	 */
 	virtual std::shared_ptr<BoolParameter> GetBoolParameter(const std::string parname) ;
 
+
+	//! Getter for complex parameter
+	/*!
+	 * Getter for complex parameter
+	 * \param i input number of parameter to load
+	 * \return par output container for loaded parameter
+	 */
+	virtual std::vector<std::shared_ptr<ComplexParameter> > GetComplexParameters() { return vComplexPar_; }
+
+	//! Getter for floating point parameter
+	/*!
+	 * Getter for floating point parameter
+	 * \param i input number of parameter to load
+	 * \return par output container for loaded parameter
+	 */
+	virtual std::vector<std::shared_ptr<DoubleParameter> > GetDoubleParameters() { return vDoublePar_; }
+
+	//! Getter for double list parameter
+	/*!
+	 * Getter for double list parameter MultiDouble
+	 * \param i input number of parameter to load
+	 * \return par output container for loaded parameter
+	 */
+	virtual std::vector<std::shared_ptr<MultiDouble> > GetMultiDoubles() { return vMultiDouble_; }
+
+	//! Getter for complex list parameter
+	/*!
+	 * Getter for complex list parameter MultiComplex
+	 * \param i input number of parameter to load
+	 * \return par output container for loaded parameter
+	 */
+	virtual std::vector<std::shared_ptr<MultiComplex> > GetMultiComplexs() { return vMultiComplex_; }
+
+	//! Getter for integer parameter
+	/*!
+	 * Getter for integer parameter
+	 * \param i input number of parameter to load
+	 * \return par output container for loaded parameter
+	 */
+	virtual std::vector<std::shared_ptr<IntegerParameter> > GetIntegerParameters() { return vIntPar_; }
+
+	//! Getter for boolean parameter
+	/*!
+	 * Getter for boolean parameter
+	 * \param i input number of parameter to load
+	 * \return par output container for loaded parameter
+	 */
+	virtual std::vector<std::shared_ptr<BoolParameter> > GetBoolParameters() { return vBoolPar_; }
+
 	//! Getter for parameter value
 	/*!
 	 * Getter for parameter value
@@ -412,6 +461,9 @@ public:
 	 * \sa operator<<
 	 */
 	std::string const& to_str() ;
+
+	//! Append ParameterList to (*this). Shared_ptr are not(!) deep copied
+	virtual void Append(ParameterList& addList);
 
 protected:
 	std::map<std::string,unsigned int> mMultiComplexID_; /*!< Map of complex list parameter ids */

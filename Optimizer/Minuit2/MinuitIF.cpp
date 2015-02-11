@@ -125,10 +125,8 @@ std::shared_ptr<FitResult> MinuitIF::exec(ParameterList& par){
 				finalPar->SetError( assymErrors.first, assymErrors.second );
 			} else if(finalPar->GetErrorType()==ErrorType::SYM) {//symmetric errors -> migrad error
 				finalPar->SetError(minState.Error(finalPar->GetName()));
-			} else {
-				BOOST_LOG_TRIVIAL(error)<< "MinuitIF: requesting error type "<<finalPar->GetErrorType()<<". No idea what to do here!";
-				exit(1);
-			}
+			} else
+				throw std::runtime_error("MinuitIF::exec() unknown error type: "+to_string(finalPar->GetErrorType()));
 		}
 	}
 

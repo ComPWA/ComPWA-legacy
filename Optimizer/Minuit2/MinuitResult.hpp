@@ -37,6 +37,7 @@
 #include "Core/TableFormater.hpp"
 #include "Core/PhysConst.hpp"
 #include "Core/FitResult.hpp"
+#include "Core/Logging.hpp"
 #include "Estimator/Estimator.hpp"
 #include "Minuit2/MnUserParameterState.h"
 #include "Minuit2/FunctionMinimum.h"
@@ -56,12 +57,21 @@ public:
 	operator double() const { return finalLH; };
 	//! Return final likelihood value
 	double getResult(){return finalLH;}
-	//!Generate output stream with fit result table
-	void fractions(std::ostream& out);
 	//! Enable correct error estimation for fit fractions. Very time consuming!
 	void setUseCorrelatedErrors(bool s) { useCorrelatedErrors = s; }
+	//! Getter function for fractions list. Make sure that fractions are calculated beforehand.
+	ParameterList& GetFractions() {	return fractionList; }
+	/** Calculate fit fractions and its errors.
+	 * Result is stored in fractionList!
+	 */
+	void calcFraction();
+	//! Write list of fit parameters and list of fitfractions to XML file @filename
+	virtual void writeXML(std::string filename);
 
 private:
+	void init(FunctionMinimum);
+	std::shared_ptr<Estimator> estimator;
+	//====== MINUIT FIT RESULT =======
 	bool isValid; //result valid
 	bool covPosDef; //covariance matrix pos.-def.
 	bool hasValidParameters; //valid parameters
@@ -69,12 +79,6 @@ private:
 	bool hasAccCov; //accurate covariance
 	bool hasReachedCallLimit; //call limit reached
 	bool hesseFailed; //hesse failed
-	//! number of resonances in amplitude
-	unsigned int nRes;
-
-	gsl_rng* r;//! GSL random generator, used for multivariate gauss
-	bool useCorrelatedErrors;
-
 	double errorDef;
 	unsigned int nFcn;
 	double initialLH;
@@ -83,14 +87,22 @@ private:
 	double edm; //estimated distance to minimum
 	boost::numeric::ublas::symmetric_matrix<double,boost::numeric::ublas::upper> cov;
 	boost::numeric::ublas::symmetric_matrix<double,boost::numeric::ublas::upper> corr;
-	boost::numeric::ublas::matrix<double> fracError;
 	std::vector<double> variance;
 	std::vector<double> globalCC;
+
+	gsl_rng* r;//! GSL random generator, used for multivariate gauss
+	//! Should we calcualte fit fraction errors accurately?
+	bool useCorrelatedErrors;
+	//! number of resonances in amplitude
+	unsigned int nRes;
+
+	//====== OUTPUT =====
+	//! Simplified fit result output
 	void genSimpleOutput(std::ostream& out);
-	void smearParameterList(ParameterList&);
+	//! Full fit result output
 	void genOutput(std::ostream& out,std::string opt="");
-	void init(FunctionMinimum);
-	std::shared_ptr<Estimator> estimator;
+	//! Table with fit fractions
+	void fractions(std::ostream& out);
 
 	/** Calculate fit fractions.
 	 * Fractions are calculated using the formular:
@@ -100,9 +112,9 @@ private:
 	 * The \f$c_i\f$ complex coefficienct of the amplitude and the denominatior is the integral over
 	 * the whole amplitude.
 	 *
-	 * @param frac result with fit fractions for the single resonances
+	 * @param parList result with fit fractions for the single resonances
 	 */
-	void calcFraction(std::vector<double>& frac);
+	void calcFraction(ParameterList& parList);
 	/** Calculate errors on fit result
 	 * Set @param assumeUnCorrelatedErrors to assume that the error of the fit parameter only depends
 	 * on the error of the magnitude. The error of normalization due the the fit error on magnitudes
@@ -114,7 +126,11 @@ private:
 	 *
 	 * @param fracError result with errors
 	 */
-	void calcFractionError(std::vector<double>& fracError);
+	void calcFractionError();
+	//! Smear ParameterList with a multidimensional gaussian and the cov matrix from the fit
+	void smearParameterList(ParameterList&);
+	//! List with fit fractions and errors
+	ParameterList fractionList;
 };
 
 #endif
