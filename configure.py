@@ -121,8 +121,11 @@ jamroot_data = readJamfile(jamroot_path)
 disableAllModules(jamroot_data)
 writeJamfile(jamroot_path, jamroot_data)
 
-#read config file 
-readConfig('build.cfg')
+#read config file
+config_filename='build.cfg'
+if not os.path.isfile(config_filename):
+    config_filename='build-default.cfg'
+readConfig(config_filename)
 
 #check user build request with available modules and add to modules_to_build dict
 fillModulesToBuildDictionary()

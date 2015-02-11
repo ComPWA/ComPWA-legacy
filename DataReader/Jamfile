@@ -2,16 +2,22 @@
 path-constant DATAREADER : . ;
 
 # libDataReader.so will consist of these packages:
-build-project RootReader ;
-build-project AsciiReader ;
-#build-project StockReader ;
+
+sources = [ glob *.cpp ] ;
+if $(build_RootReader)
+{
+	build-project RootReader ;
+	sources = $(sources) $(DATAREADER)/RootReader//RootReader ;
+}
+if $(build_AsciiReader)
+{
+	build-project AsciiReader ;
+	sources = $(sources) $(DATAREADER)/AsciiReader//AsciiReader ;
+}
 
 # Build libDataReader.so
 lib DataReader : 
-        [ glob *.cpp ]
-        $(DATAREADER)/RootReader//RootReader
-        $(DATAREADER)/AsciiReader//AsciiReader
-        #$(DATAREADER)/StockReader//StockReader
+        $(sources)
         ;
 
 install dist : DataReader : <location>$(TOP)/lib ;

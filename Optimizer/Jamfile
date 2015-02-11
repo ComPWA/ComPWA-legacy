@@ -2,15 +2,23 @@
 import os ;
 path-constant OPTIMIZER : . ;
 
-# libOptimizer.so will consist of these packages:
-build-project Minuit2 ;
-#build-project Geneva ;
-
 # Build libOptimizer.so
-lib Optimizer : 
-		[ glob *.cpp ]
-		$(OPTIMIZER)/Minuit2//Minuit2IF
-		#$(OPTIMIZER)/Geneva//GenevaIF
+sources = [ glob *.cpp ] ;
+if $(build_Minuit2)
+{
+	build-project Minuit2 ;
+	sources = $(sources) $(OPTIMIZER)/Minuit2//Minuit2IF ;
+}
+
+
+if $(build_Geneva)
+{
+	build-project Geneva ;
+	sources = $(sources) $(OPTIMIZER)/Geneva//GenevaIF ;
+}
+
+lib Optimizer :
+		$(sources)
 		;
 
 install dist : Optimizer : <location>$(TOP)/lib ;
