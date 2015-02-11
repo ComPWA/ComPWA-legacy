@@ -11,11 +11,11 @@ if $(build_Minuit2)
 }
 
 
-if $(build_Geneva)
-{
-	build-project Geneva ;
-	sources = $(sources) $(OPTIMIZER)/Geneva//GenevaIF ;
-}
+#if $(build_Geneva)
+#{
+#	build-project Geneva ;
+#	sources = $(sources) $(OPTIMIZER)/Geneva//GenevaIF ;
+#}
 
 lib Optimizer :
 		$(sources)
