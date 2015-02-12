@@ -126,7 +126,7 @@ std::shared_ptr<FitResult> MinuitIF::exec(ParameterList& par){
 			} else if(finalPar->GetErrorType()==ErrorType::SYM) {//symmetric errors -> migrad error
 				finalPar->SetError(minState.Error(finalPar->GetName()));
 			} else
-				throw std::runtime_error("MinuitIF::exec() unknown error type: "+to_string(finalPar->GetErrorType()));
+				throw std::runtime_error("MinuitIF::exec() unknown error type: "+std::to_string((long long int)finalPar->GetErrorType()));
 		}
 	}
 
