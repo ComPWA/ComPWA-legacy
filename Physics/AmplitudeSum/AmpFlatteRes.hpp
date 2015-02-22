@@ -121,9 +121,11 @@ public:
 	}
 	virtual void update(ParameterList par){
 		basicConf::update(par);
+		try{// only update parameters if they are found in list
 		m_mass= par.GetDoubleParameter("m0_"+m_name)->GetValue();
 		m_g1= par.GetDoubleParameter("g1_"+m_name)->GetValue();
 		m_g2= par.GetDoubleParameter("g2_"+m_name)->GetValue();
+		} catch (BadParameter b) { }
 	}
 	double m_mass;
 	bool m_mass_fix;

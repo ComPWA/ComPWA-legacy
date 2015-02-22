@@ -103,8 +103,10 @@ public:
 	}
 	virtual void update(ParameterList par){
 		basicConf::update(par);
-		m_mass= par.GetDoubleParameter("m0_"+m_name)->GetValue();
-		m_width= par.GetDoubleParameter("width_"+m_name)->GetValue();
+		try{// only update parameters if they are found in list
+			m_mass= par.GetDoubleParameter("m0_"+m_name)->GetValue();
+			m_width= par.GetDoubleParameter("width_"+m_name)->GetValue();
+		} catch (BadParameter b) { }
 	}
 
 	double m_mass;

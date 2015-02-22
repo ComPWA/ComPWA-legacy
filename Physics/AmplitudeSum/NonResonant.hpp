@@ -104,8 +104,10 @@ public:
 		pt_.put("phase_max", m_phase_max);
 	}
 	virtual void update(ParameterList par){
-		m_strength= par.GetDoubleParameter("mag_"+m_name)->GetValue();
-		m_phase = par.GetDoubleParameter("phase_"+m_name)->GetValue();
+		try{// only update parameters if they are found in list
+			m_strength= par.GetDoubleParameter("mag_"+m_name)->GetValue();
+			m_phase = par.GetDoubleParameter("phase_"+m_name)->GetValue();
+		} catch (BadParameter b) { }
 	}
 	//protected:
 	bool m_enable;
