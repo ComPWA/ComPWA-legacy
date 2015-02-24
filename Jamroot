@@ -48,7 +48,7 @@ project :
 # disabling/enabling the appropriate subprojects. Of course the appropriate if statements have to be inserted around build-project rules
 # and library sources etc...
 
-constant build_test : 1 ;
+constant build_test : 0 ;
 
 constant build_Physics : 1 ;
 constant build_AmplitudeSum : 1 ;
@@ -66,22 +66,22 @@ constant build_SliceFit : 1 ;
 
 constant build_Optimizer : 1 ;
 constant build_Minuit2 : 1 ;
-constant build_Geneva : 1 ;
+constant build_Geneva : 0 ;
 
 # core should always be built
 build-project Core ;
-if $(build_test) {
+if $(build_test) && $(build_test) != 0 {
   build-project test ;
 }
-if $(build_Physics) {
+if $(build_Physics) && $(build_Physics) != 0 {
   build-project Physics ;
 }
-if $(build_DataReader) {
+if $(build_DataReader) && $(build_DataReader) != 0 {
   build-project DataReader ;
 }
-if $(build_Estimator) {
+if $(build_Estimator) && $(build_Estimator) != 0 {
   build-project Estimator ;
 }
-if $(build_Optimizer) {
+if $(build_Optimizer) && $(build_Optimizer) != 0 {
   build-project Optimizer ;
 }
