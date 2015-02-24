@@ -34,7 +34,6 @@ AmpFlatteRes::AmpFlatteRes(const char *name,
 		_g2(g2), _g1(g1),
 		_g2_partA(g2_partA), _g2_partB(g2_partB),
 		foundMasses(false),
-		_wignerD(subSys,resSpin),
 		nParams(5)
 {
 }
@@ -43,8 +42,7 @@ AmpFlatteRes::AmpFlatteRes(const AmpFlatteRes& other, const char* newname) :
 						  AmpAbsDynamicalFunction(other, newname),
 						  AmpKinematics(other),
 						  _g2(other._g2),
-						  _g1(other._g1),
-						  _wignerD(other._wignerD)
+						  _g1(other._g1)
 {
 }
 
@@ -52,8 +50,7 @@ AmpFlatteRes::AmpFlatteRes(const AmpFlatteRes& other) :
 						  AmpAbsDynamicalFunction(other),
 						  AmpKinematics(other),
 						  _g2(other._g2),
-						  _g1(other._g1),
-						  _wignerD(other._wignerD)
+						  _g1(other._g1)
 {
 }
 

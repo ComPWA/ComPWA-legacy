@@ -37,6 +37,7 @@
 #include "Core/TableFormater.hpp"
 #include "Core/PhysConst.hpp"
 #include "Core/FitResult.hpp"
+#include "Core/Logging.hpp"
 #include "Estimator/Estimator.hpp"
 #include "Minuit2/MnUserParameterState.h"
 #include "Minuit2/FunctionMinimum.h"
@@ -56,8 +57,53 @@ public:
 	operator double() const { return finalLH; };
 	//! Return final likelihood value
 	double getResult(){return finalLH;}
-	//!Generate output stream with fit result table
+	//! Enable correct error estimation for fit fractions. Very time consuming!
+	void setUseCorrelatedErrors(bool s) { useCorrelatedErrors = s; }
+	//! Getter function for fractions list. Make sure that fractions are calculated beforehand.
+	ParameterList& GetFractions() {	return fractionList; }
+	/** Calculate fit fractions and its errors.
+	 * Result is stored in fractionList!
+	 */
+	void calcFraction();
+	//! Write list of fit parameters and list of fitfractions to XML file @filename
+	virtual void writeXML(std::string filename);
+
+private:
+	void init(FunctionMinimum);
+	std::shared_ptr<Estimator> estimator;
+	//====== MINUIT FIT RESULT =======
+	bool isValid; //result valid
+	bool covPosDef; //covariance matrix pos.-def.
+	bool hasValidParameters; //valid parameters
+	bool hasValidCov; //valid covariance
+	bool hasAccCov; //accurate covariance
+	bool hasReachedCallLimit; //call limit reached
+	bool hesseFailed; //hesse failed
+	double errorDef;
+	unsigned int nFcn;
+	double initialLH;
+	double finalLH;
+	double exitCode;
+	double edm; //estimated distance to minimum
+	boost::numeric::ublas::symmetric_matrix<double,boost::numeric::ublas::upper> cov;
+	boost::numeric::ublas::symmetric_matrix<double,boost::numeric::ublas::upper> corr;
+	std::vector<double> variance;
+	std::vector<double> globalCC;
+
+	gsl_rng* r;//! GSL random generator, used for multivariate gauss
+	//! Should we calcualte fit fraction errors accurately?
+	bool useCorrelatedErrors;
+	//! number of resonances in amplitude
+	unsigned int nRes;
+
+	//====== OUTPUT =====
+	//! Simplified fit result output
+	void genSimpleOutput(std::ostream& out);
+	//! Full fit result output
+	void genOutput(std::ostream& out,std::string opt="");
+	//! Table with fit fractions
 	void fractions(std::ostream& out);
+
 	/** Calculate fit fractions.
 	 * Fractions are calculated using the formular:
 	 * \f[
@@ -66,9 +112,9 @@ public:
 	 * The \f$c_i\f$ complex coefficienct of the amplitude and the denominatior is the integral over
 	 * the whole amplitude.
 	 *
-	 * @param frac result with fit fractions for the single resonances
+	 * @param parList result with fit fractions for the single resonances
 	 */
-	void calcFraction(std::vector<double>& frac);
+	void calcFraction(ParameterList& parList);
 	/** Calculate errors on fit result
 	 * Set @param assumeUnCorrelatedErrors to assume that the error of the fit parameter only depends
 	 * on the error of the magnitude. The error of normalization due the the fit error on magnitudes
@@ -80,40 +126,11 @@ public:
 	 *
 	 * @param fracError result with errors
 	 */
-	void calcFractionError(std::vector<double>& fracError);
-	//! Enable correct error estimation for fit fractions. Very time consuming!
-	void setUseCorrelatedErrors(bool s) { useCorrelatedErrors = s; }
-
-private:
-	bool isValid; //result valid
-	bool covPosDef; //covariance matrix pos.-def.
-	bool hasValidParameters; //valid parameters
-	bool hasValidCov; //valid covariance
-	bool hasAccCov; //accurate covariance
-	bool hasReachedCallLimit; //call limit reached
-	bool hesseFailed; //hesse failed
-	//! number of resonances in amplitude
-	unsigned int nRes;
-
-	gsl_rng* r;//! GSL random generator, used for multivariate gauss
-	bool useCorrelatedErrors;
-
-	double errorDef;
-	unsigned int nFcn;
-	double initialLH;
-	double finalLH;
-	double exitCode;
-	double edm; //estimated distance to minimum
-	boost::numeric::ublas::symmetric_matrix<double,boost::numeric::ublas::upper> cov;
-	boost::numeric::ublas::symmetric_matrix<double,boost::numeric::ublas::upper> corr;
-	boost::numeric::ublas::matrix<double> fracError;
-	std::vector<double> variance;
-	std::vector<double> globalCC;
-	void genSimpleOutput(std::ostream& out);
+	void calcFractionError();
+	//! Smear ParameterList with a multidimensional gaussian and the cov matrix from the fit
 	void smearParameterList(ParameterList&);
-	void genOutput(std::ostream& out,std::string opt="");
-	void init(FunctionMinimum);
-	std::shared_ptr<Estimator> estimator;
+	//! List with fit fractions and errors
+	ParameterList fractionList;
 };
 
 #endif

@@ -37,9 +37,9 @@ int main(int argc, char **argv){
 	unsigned int dataSize = 100000;
 	//load resonances
 	AmplitudeSetup ini("test/JPSI_ypipi.xml");
-	cout << "loaded file " << ini.getFileName() << " with " << ini.getResonances().size() << " resonances!" << std::endl;
-	std::shared_ptr<Data> data(new RootReader(outFile, true,"data",false));
-	std::shared_ptr<Data> phsp(new RootReader(outFile, true,"mc",false));
+	cout << "loaded file " << ini.getFileName() << " with " << ini.getBreitWigner().size() << " resonances!" << std::endl;
+	std::shared_ptr<Data> data(new RootReader(outFile, "data",true));
+	std::shared_ptr<Data> phsp(new RootReader(outFile, "mc",true));
 	std::shared_ptr<Generator> gen(new RootGenerator());
 	std::shared_ptr<Amplitude> amp(new AmpSumIntensity(ini,std::shared_ptr<Efficiency>(new UnitEfficiency()),AmpSumIntensity::normStyle::none));
 

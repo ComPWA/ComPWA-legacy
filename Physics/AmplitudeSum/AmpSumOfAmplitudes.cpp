@@ -211,7 +211,7 @@ double AmpSumOfAmplitudes::evaluateSlice(dataPoint& point, std::complex<double>*
 
 		//std::cout<< "DEBUG Reso " << i << " spinsys " << sys << " " << _pdfList[i]->isSubSys(subSys) << " use " << used[sys] << std::endl;
 
-		if(_pdfList[i]->isSubSys(subSys)){
+		if(dynamic_cast<AmpKinematics*>(&*(_pdfList[i]))->isSubSys(subSys)){
 		  if(!used[sys]){
 			res = res + reso[sys] * _angList[i]->evaluate(point);
 			used[sys]=true;

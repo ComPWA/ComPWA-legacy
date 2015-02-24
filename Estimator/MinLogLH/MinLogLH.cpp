@@ -255,7 +255,7 @@ void MinLogLH::iniLHtree(){
 		else {//unbinned
 			bkgPhspTree->createNode("IntensPhsp", msqStrat, "sumAmp", mAccSample.nEvents, false); //|T_{ev}|^2
 			bkgPhspTree->createLeaf("InvNmc", 1/ ( (double) mAccSample.nEvents/accSampleEff), "normFactor");
-			bkgPhspTree_amp = amp->getAmpTree(mAccSample,mPhspSample,"_Phsp");
+			bkgPhspTree_amp = ampBkg->getAmpTree(mAccSample,mPhspSample,"_Phsp");
 			BOOST_LOG_TRIVIAL(debug)<<"MinLogLH::iniLHTree() setting up tree for background normalization, "
 					"using sample of accepted phsp events for efficiency correction!";
 			bkgPhspTree->insertTree(bkgPhspTree_amp, "IntensPhsp"); //Sum of resonances, at each point

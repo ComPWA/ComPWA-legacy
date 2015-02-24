@@ -5,22 +5,57 @@
  *      Author: weidenka
  */
 
-
-
-
 #include "Physics/AmplitudeSum/AmplitudeSetup.hpp"
+
+AmplitudeSetup::AmplitudeSetup() {
+	BOOST_LOG_TRIVIAL(debug) << "AmplitudeSetup::AmplitudeSetup() no filename passed. "
+			"Creating AmplitudeSetup with a non resonant component only!";
+	basicConf tmp;
+	tmp.m_name=="nonRes";
+	tmp.m_strength=1.0;
+	tmp.m_strength_fix=1.0;
+	tmp.m_strength_min=0.0;
+	tmp.m_strength_max=2.0;
+	tmp.m_phase = 0.0;
+	tmp.m_phase_fix=1.0;
+	tmp.m_phase_min=-100;
+	tmp.m_phase_max=100;
+	tmp.m_enable=1;
+	m_nonRes.push_back(tmp);
+};
+
+AmplitudeSetup::AmplitudeSetup(const std::string &filename) {
+	if(filename=="") {
+		BOOST_LOG_TRIVIAL(debug) << "AmplitudeSetup::AmplitudeSetup() no filename passed. "
+				"Creating AmplitudeSetup with a non resonant component only!";
+		basicConf tmp;
+		tmp.m_name=="nonRes";
+		tmp.m_strength=1.0;
+		tmp.m_strength_fix=1.0;
+		tmp.m_strength_min=0.0;
+		tmp.m_strength_max=2.0;
+		tmp.m_phase = 0.0;
+		tmp.m_phase_fix=1.0;
+		tmp.m_phase_min=-100;
+		tmp.m_phase_max=100;
+		tmp.m_enable=1;
+		m_nonRes.push_back(tmp);
+		return;
+	}
+	load(filename);
+};
 
 // Loads amplitude_setup structure from the specified XML file
 void AmplitudeSetup::load(const std::string &filename)
 {
 	// Create an empty property tree object
 	using boost::property_tree::ptree;
-	ptree pt;
+	//	ptree pt;
 
 	m_filePath=filename;
 	// Load the XML file into the property tree. If reading fails
 	// (cannot open file, parse error), an exception is thrown.
-	read_xml(filename, pt);
+	read_xml(filename, pt, boost::property_tree::xml_parser::trim_whitespace);
 	// Get the filename and store it in the m_file variable.
 	// Note that we construct the path to the value by separating
 	// the individual keys with dots. If dots appear in the keys,
@@ -35,86 +70,26 @@ void AmplitudeSetup::load(const std::string &filename)
 	// at the specified path; if there is no such child, it throws.
 	// Property tree iterators are models of BidirectionalIterator.
 	BOOST_FOREACH( ptree::value_type const& v, pt.get_child("amplitude_setup") ) {
-		if( v.first == "resonance" ) {
-			Resonance f;
-//			f.m_reference= v.second.get<std::string>("reference");
-			f.m_enable = v.second.get<bool>("enable");
-			f.m_name = v.second.get<std::string>("name");
-			f.m_mass = v.second.get<double>("mass");
-			f.m_mass_fix = v.second.get<bool>("mass_fix");;
-			f.m_mass_min = v.second.get<double>("mass_min");;
-			f.m_mass_max = v.second.get<double>("mass_max");;
-			f.m_width = v.second.get<double>("width");;
-			f.m_width_fix = v.second.get<bool>("width_fix");;
-			f.m_width_min = v.second.get<double>("width_min");;
-			f.m_width_max = v.second.get<double>("width_max");;
-			f.m_strength = v.second.get<double>("strength");;
-			f.m_strength_fix = v.second.get<bool>("strength_fix");;
-			f.m_strength_min = v.second.get<double>("strength_min");;
-			f.m_strength_max = v.second.get<double>("strength_max");;
-			f.m_phase = v.second.get<double>("phase");;
-			f.m_phase_fix = v.second.get<bool>("phase_fix");;
-			f.m_phase_min = v.second.get<double>("phase_min");;
-			f.m_phase_max = v.second.get<double>("phase_max");;
-			f.m_mesonRadius= v.second.get<double>("mesonRadius");;
-			f.m_spin = v.second.get<unsigned>("spin");
-			f.m_m = v.second.get<unsigned>("m");
-			f.m_n = v.second.get<unsigned>("n");
-			f.m_daugtherA = v.second.get<unsigned>("daugtherA");
-			f.m_daugtherB = v.second.get<unsigned>("daugtherB");
-			m_resonances.push_back(f);
-			if(f.m_enable) nResEnabled++;
-			nRes++;
-		}
-		if( v.first == "resonanceFlatte" ) {
-			ResonanceFlatte f;
-//			f.m_reference= v.second.get<std::string>("reference");
-			f.m_enable = v.second.get<bool>("enable");
-			f.m_name = v.second.get<std::string>("name");
-			f.m_mass = v.second.get<double>("mass");
-			f.m_mass_fix = v.second.get<bool>("mass_fix");;
-			f.m_mass_min = v.second.get<double>("mass_min");;
-			f.m_mass_max = v.second.get<double>("mass_max");;
-			f.m_strength = v.second.get<double>("strength");;
-			f.m_strength_fix = v.second.get<bool>("strength_fix");;
-			f.m_strength_min = v.second.get<double>("strength_min");;
-			f.m_strength_max = v.second.get<double>("strength_max");;
-			f.m_phase = v.second.get<double>("phase");;
-			f.m_phase_fix = v.second.get<bool>("phase_fix");;
-			f.m_phase_min = v.second.get<double>("phase_min");;
-			f.m_phase_max = v.second.get<double>("phase_max");;
-			f.m_mesonRadius= v.second.get<double>("mesonRadius");;
-			f.m_spin = v.second.get<unsigned>("spin");
-			f.m_m = v.second.get<unsigned>("m");
-			f.m_n = v.second.get<unsigned>("n");
-			f.m_daugtherA = v.second.get<unsigned>("daugtherA");
-			f.m_daugtherB = v.second.get<unsigned>("daugtherB");
-			f.m_g1 = v.second.get<double>("g1");
-			f.m_g1_fix = v.second.get<bool>("g1_fix");;
-			f.m_g1_min = v.second.get<double>("g1_min");;
-			f.m_g1_max = v.second.get<double>("g1_max");;
-			f.m_g2 = v.second.get<double>("g2");
-			f.m_g2_part1 = v.second.get<std::string>("g2_part1");
-			f.m_g2_part2 = v.second.get<std::string>("g2_part2");
-			m_resonancesFlatte.push_back(f);
-			if(f.m_enable) nResEnabled++;
-			nRes++;
-		}
+		if( v.first == "BreitWigner" ) {
+			m_breitWigner.push_back(BreitWignerConf(v.second));
+		} else if( v.first == "Flatte" ) {
+			m_flatte.push_back(FlatteConf(v.second));
+		} else if( v.first == "nonRes" ) {
+			m_nonRes.push_back(basicConf(v.second));
+		} else if( v.first == "filename") {
+		} else
+			throw std::runtime_error("AmpltiudeSetup::load() unknown type of resonance: "+v.first);
 	}
 	BOOST_LOG_TRIVIAL(info) << "AmplitudeSetup::load() file " << filename
-			<< " with " << nRes	<< "("<<nResEnabled<<") resonances all(enabled)!";
+			<< " with " << getNres() <<" resonances!";
 	return;
 }
 
 // Saves the debug_settings structure to the specified XML file
 void AmplitudeSetup::save(const std::string &filename)
 {
-	// Create an empty property tree object
-	using boost::property_tree::ptree;
-	ptree pt;
-
 	// Put log filename in property tree
-	pt.put("amplitude_setup.filename", m_file);
+	pt.put("amplitude_setup.filename", filename);
 
 	// Iterate over the modules in the set and put them in the
 	// property tree. Note that the put function places the new
@@ -123,68 +98,38 @@ void AmplitudeSetup::save(const std::string &filename)
 	// (i.e. at the front or somewhere in the middle), this can
 	// be achieved using a combination of the insert and put_own
 	// functions.
-
-	BOOST_LOG_TRIVIAL(debug) << "AmplitudeSetup: Saving resonences "<<m_resonances.size()<<"x BW and "<<m_resonancesFlatte.size()<<"x flatte!";
-	BOOST_FOREACH( Resonance const& v, m_resonances ) {
-		ptree & node = pt.add("amplitude_setup.resonance", "");
-		node.put("enable", v.m_enable);
-		node.put("name", v.m_name);
-		node.put("mass", v.m_mass);
-		node.put("mass_fix", v.m_mass_fix);
-		node.put("mass_min", v.m_mass_min);
-		node.put("mass_max", v.m_mass_max);
-		node.put("width", v.m_width);
-		node.put("width_fix", v.m_width_fix);
-		node.put("width_min", v.m_width_min);
-		node.put("width_max", v.m_width_max);
-		node.put("strength", v.m_strength);
-		node.put("strength_fix", v.m_strength_fix);
-		node.put("strength_min", v.m_strength_min);
-		node.put("strength_max", v.m_strength_max);
-		node.put("phase", v.m_phase);
-		node.put("phase_fix", v.m_phase_fix);
-		node.put("phase_min", v.m_phase_min);
-		node.put("phase_max", v.m_phase_max);
-		node.put("mesonRadius", v.m_mesonRadius);
-		node.put("spin", v.m_spin);
-		node.put("m", v.m_m);
-		node.put("n", v.m_n);
-		node.put("daugtherA", v.m_daugtherA);
-		node.put("daugtherB", v.m_daugtherB);
+	BOOST_LOG_TRIVIAL(debug) << "AmplitudeSetup: Saving resonances to "<<filename;
+	BOOST_FOREACH( ptree::value_type &v, pt.get_child("amplitude_setup") ) {
+		if( v.first == "BreitWigner" ) {
+			std::string name = v.second.get<std::string>("name");
+			int id = -1;
+			for(unsigned int i=0; i<m_breitWigner.size(); i++){
+				if(m_breitWigner.at(i).m_name==name) id=i;
+			}
+			if(id==-1) continue;
+			m_breitWigner.at(id).put(v.second);
+		}
+		if( v.first == "Flatte" ) {
+			std::string name = v.second.get<std::string>("name");
+			int id = -1;
+			for(unsigned int i=0; i<m_flatte.size(); i++){
+				if(m_flatte.at(i).m_name==name) id=i;
+			}
+			if(id==-1) continue;
+			m_flatte.at(id).put(v.second);
+		}
+		if( v.first == "nonRes" ) {
+			std::string name = v.second.get<std::string>("name");
+			int id = -1;
+			for(unsigned int i=0; i<m_nonRes.size(); i++){
+				if(m_nonRes.at(i).m_name==name) id=i;
+			}
+			if(id==-1) continue;
+			m_nonRes.at(id).put(v.second);
+		}
 	}
-	BOOST_FOREACH( ResonanceFlatte const& v, m_resonancesFlatte ) {
-		ptree & node = pt.add("amplitude_setup.resonanceFlatte", "");
-		node.put("enable", v.m_enable);
-		node.put("name", v.m_name);
-		node.put("mass", v.m_mass);
-		node.put("mass_fix", v.m_mass_fix);
-		node.put("mass_min", v.m_mass_min);
-		node.put("mass_max", v.m_mass_max);
-		node.put("strength", v.m_strength);
-		node.put("strength_fix", v.m_strength_fix);
-		node.put("strength_min", v.m_strength_min);
-		node.put("strength_max", v.m_strength_max);
-		node.put("phase", v.m_phase);
-		node.put("phase_fix", v.m_phase_fix);
-		node.put("phase_min", v.m_phase_min);
-		node.put("phase_max", v.m_phase_max);
-		node.put("mesonRadius", v.m_mesonRadius);
-		node.put("spin", v.m_spin);
-		node.put("m", v.m_m);
-		node.put("n", v.m_n);
-		node.put("daugtherA", v.m_daugtherA);
-		node.put("daugtherB", v.m_daugtherB);
-		node.put("g1", v.m_g1);
-		node.put("g1_fix", v.m_g1_fix);
-		node.put("g1_min", v.m_g1_min);
-		node.put("g1_max", v.m_g1_max);
-		node.put("g2", v.m_g2);
-		node.put("g2_part1", v.m_g2_part1);
-		node.put("g2_part2", v.m_g2_part2);
-
-	}
-
-
+	boost::property_tree::xml_writer_settings<char> settings('\t', 1);//new line at the end
 	// Write the property tree to the XML file.
-	write_xml(filename, pt);
+	write_xml(filename, pt,std::locale(), settings);
+	return;
 }

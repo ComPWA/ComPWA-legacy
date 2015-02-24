@@ -106,32 +106,36 @@ public:
 	std::string getNameOfResonance(unsigned int id){ return namer[id]; }
 	//! get magnitude of resonance \param name
 	virtual double getMagnitude(std::string name) {
-//		std::vector<std::shared_ptr<DoubleParameter> >::iterator it= params.begin();
-//		for(;it!=params.end();++it)
-//			if((*it)->GetName()=="mag_"+name) return (*it)->GetValue();
-//		return -999;
 		return params.GetDoubleParameter("mag_"+name)->GetValue();
 	};
 	//! get phase of resonance \param name
 	virtual double getPhase(std::string name) {
-//		std::vector<std::shared_ptr<DoubleParameter> >::iterator it= params.begin();
-//		for(;it!=params.end();++it)
-//			if((*it)->GetName()=="phase_"+name) return (*it)->GetValue();
-//		return -999;
 		return params.GetDoubleParameter("phase_"+name)->GetValue();
 	};
 	//! get total integral for resonance \param id
-	virtual double getTotalIntegral(unsigned int id) { return totAmp.getTotalIntegral(id); };
+	virtual double getTotalIntegral(unsigned int id) {
+		return totAmp.getTotalIntegral(id);
+	};
 	//! get total integral for resonance \param name
-	virtual double getTotalIntegral(std::string name) { return totAmp.getTotalIntegral(name); };
+	virtual double getTotalIntegral(std::string name) {
+		return totAmp.getTotalIntegral(name);
+	};
 	//! get fit fraction for resonance \param name
-	virtual double getFraction(std::string name) { return totAmp.getUnormalizedFraction(name)/integral(); };
+	virtual double getFraction(std::string name) {
+		return totAmp.getUnormalizedFraction(name)/integral();
+	};
 	//! get fit fraction for resonance \param id
-	virtual double getFraction(unsigned int id) { return totAmp.getUnormalizedFraction(id)/integral(); };
+	virtual double getFraction(unsigned int id) {
+		return totAmp.getUnormalizedFraction(id)/integral();
+	};
 	//! get resonance by @param name
-	virtual std::shared_ptr<AmpAbsDynamicalFunction> getResonance(std::string name) { return totAmp.getResonance(name); };
+	virtual std::shared_ptr<AmpAbsDynamicalFunction> getResonance(std::string name) {
+		return totAmp.getResonance(name);
+	};
 	//! get resonance by @param id
-	virtual std::shared_ptr<AmpAbsDynamicalFunction> getResonance(unsigned int id) { return totAmp.getResonance(id); };
+	virtual std::shared_ptr<AmpAbsDynamicalFunction> getResonance(unsigned int id) {
+		return totAmp.getResonance(id);
+	};
 	//! print all fit fractions; fitting errors are not available here
 	virtual void printFractions();
 	/** Calculate partial integral over amplitude
@@ -156,41 +160,15 @@ public:
 	virtual AmpSumIntensity* Clone(){
 		return (new AmpSumIntensity(*this));
 	}
-
-	/* OBSOLETE SECTION ONLY FOR TESTING */
-	///** Setup physics tree.
-	// * the @param thePHSPMasses needs to be toy phsp sample. It is used to normalize the amplitudes.
-	// *
-	// * @param theMasses data sample
-	// * @param toyPhspSample Sample with flat toy phsp events.
-	// * @return shared_ptr of physics tree
-	// */
-	//virtual std::shared_ptr<FunctionTree> functionTree(allMasses& theMasses, allMasses& toyPhspSample);
-	///** Setup phspTree for normalization of the likelihood.
-	// * This method implements an unbinned efficiency approach.
-	// *
-	// * @param accPhspSample Sample of accepted MC events. Should come from a flat PHSP sample.
-	// * @param toyPhspSample Sample with flat toy phsp events.
-	// * @return shared_ptr of PHSP tree
-	// */
-	//virtual std::shared_ptr<FunctionTree> phspTree(allMasses& accPhspSample, allMasses& toyPhspSample);
-	///** Setup phspTree for normalization of the likelihood.
-	// *
-	// * @param toyPhspSample Sample with flat toy phsp events. It is assumed that efficiency vector is filled!
-	// * @return shared_ptr of PHSP tree
-	// */
-	//virtual std::shared_ptr<FunctionTree> phspTree(allMasses& toyPhspSample);
-	////! Getter function for function tree
-	//virtual std::shared_ptr<FunctionTree> getTree(){ return myTree; }
-	////! Getter function for phsp tree
-	//virtual std::shared_ptr<FunctionTree> getPhspTree(){ return myPhspTree; }
-	////! reset trees
-	//virtual void resetTree(){
-	//	myTree = std::shared_ptr<FunctionTree>();
-	//	myPhspTree = std::shared_ptr<FunctionTree>();
-	//}
-	void setupTree(allMasses& theMasses, allMasses& toyPhspSample, std::string opt);
-	/* OBSOLETE SECTION ONLY FOR TESTING */
+	/*!Get AmplitudeSetup
+	 * AmpltidueSetup object is updated with current parameters and a pointer is returned.
+	 *
+	 * @return AmplitudeSetup
+	 */
+	AmplitudeSetup* GetAmplitudeSetup() {
+		updateAmplitudeSetup();
+		return &ampSetup;
+	}
 
 protected:
 	void init();
@@ -221,17 +199,11 @@ protected:
 	double _dpArea;
 	unsigned int nAmps;
 
-	//Resonance Variables
 	std::vector<std::string> namer;
-//	std::vector<std::shared_ptr<DoubleParameter> > params;
 	ParameterList params;
 
+	void updateAmplitudeSetup();
 	unsigned int _nCalls; //! precision for numeric integration
-
-	/* OBSOLETE SECTION ONLY FOR TESTING */
-//	std::shared_ptr<FunctionTree> myTree;
-//	std::shared_ptr<FunctionTree> myPhspTree;
-	/* OBSOLETE SECTION ONLY FOR TESTING */
 
 private:
 

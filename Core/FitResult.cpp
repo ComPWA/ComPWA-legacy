@@ -36,7 +36,7 @@ double FitResult::shiftAngle(double v){
 void FitResult::genSimpleOutput(std::ostream& out){
 	for(unsigned int o=0;o<finalParameters.GetNDouble();o++){
 		std::shared_ptr<DoubleParameter> outPar = finalParameters.GetDoubleParameter(o);
-		out<<outPar->GetValue()<<" "<<outPar->GetError()->GetError()<<" ";
+		out<<outPar->GetValue()<<" "<<outPar->GetError()<<" ";
 	}
 	out<<"\n";
 

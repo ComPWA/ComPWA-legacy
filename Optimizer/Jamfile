@@ -10,7 +10,6 @@ if $(build_Minuit2) && $(build_Minuit2) != 0
 	sources = $(sources) $(OPTIMIZER)/Minuit2//Minuit2IF ;
 }
 
-
 if $(build_Geneva) && $(build_Geneva) != 0
 {
 	build-project Geneva ;

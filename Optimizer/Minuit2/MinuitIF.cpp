@@ -44,7 +44,6 @@ MinuitIF::~MinuitIF(){
 
 }
 
-//const double MinuitIF::exec(ParameterList& par){
 std::shared_ptr<FitResult> MinuitIF::exec(ParameterList& par){
 	boost::timer time;
 	ParameterList initialParList(par);
@@ -52,22 +51,13 @@ std::shared_ptr<FitResult> MinuitIF::exec(ParameterList& par){
 	MnUserParameters upar;
 	BOOST_LOG_TRIVIAL(debug) << "Parameters used: "<<par.GetNDouble();
 	for(unsigned int i=0; i<par.GetNDouble(); ++i){ //only doubles for minuit
-
-		//out.str("");
-		//out << i;
-		//s = out.str();
-
-		//use as much information as possible: (just bounds but no error not supported by minuit)
-		//try{
 		std::shared_ptr<DoubleParameter> actPat = par.GetDoubleParameter(i);
-		//}
-		double error = 0.01;//if no error is set or error set to 0 we use a default error, otherwise minuit treads this parameter as fixed
-		if( actPat->UseBounds() && actPat->HasError() ){
-			if(actPat->GetError()!=0) error=*actPat->GetError();
+		//if no error is set or error set to 0 we use a default error, otherwise minuit treads this parameter as fixed
+		double error = actPat->GetError();
+		if(error<=0) error = 0.01;
+
+		if( actPat->UseBounds() ){
 			upar.Add(actPat->GetName(), actPat->GetValue(), error, actPat->GetMaxValue(), actPat->GetMinValue());
-		}else if( actPat->HasError() ){
-			if(actPat->GetError()!=0) error=*actPat->GetError();
-			upar.Add(actPat->GetName(), actPat->GetValue(), error);
 		}else
 			upar.Add(actPat->GetName(), actPat->GetValue(),error);
 
@@ -132,14 +122,11 @@ std::shared_ptr<FitResult> MinuitIF::exec(ParameterList& par){
 				BOOST_LOG_TRIVIAL(info) <<"MinuitIF: minos for parameter "<<i<< "...";
 				MinosError err = minos.Minos(i);
 				std::pair<double,double> assymErrors = err();//lower = pair.first, upper= pair.second
-				finalPar->SetError( std::shared_ptr<ParError<double>>(new AsymError<double>(assymErrors)) );
+				finalPar->SetError( assymErrors.first, assymErrors.second );
 			} else if(finalPar->GetErrorType()==ErrorType::SYM) {//symmetric errors -> migrad error
-				finalPar->SetError(std::shared_ptr<ParError<double>>(
-						new SymError<double>(minState.Error(finalPar->GetName()))));
-			} else {
-				BOOST_LOG_TRIVIAL(error)<< "MinuitIF: requesting error type "<<finalPar->GetErrorType()<<". No idea what to do here!";
-				exit(1);
-			}
+				finalPar->SetError(minState.Error(finalPar->GetName()));
+			} else
+				throw std::runtime_error("MinuitIF::exec() unknown error type: "+std::to_string((long long int)finalPar->GetErrorType()));
 		}
 	}
 

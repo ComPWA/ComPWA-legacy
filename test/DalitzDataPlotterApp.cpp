@@ -54,7 +54,7 @@ int main(int argc, char **argv){
 	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(DalitzKinematics::createInstance("J/psi","gamma","pi0","pi0"));
 
 	string file = "test/3Part-4vecs.root";
-	RootReader myReader(file, false,"data",true);
+	RootReader myReader(file, "data",false);
 	unsigned int maxEvents = myReader.getNEvents();
 	double masssq12, masssq13, masssq23;
 	TH2D* bw12 = new TH2D("bw12","inv. mass-sq of particles 1&2",1000,0.,10.,1000,0.,10.);

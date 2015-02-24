@@ -33,33 +33,17 @@ public:
   virtual ~AmpAbsDynamicalFunction();
 
   //! Implementation of interface for streaming info about the strategy
-  virtual const std::string to_str() const {
-	  return (_name+"rel Breit-Wigner with Wigner_D");
-  }
-
-  //! Implementation of interface for executing a strategy
- /* virtual std::shared_ptr<AbsParameter> execute(const ParameterList& paras){
-	  std::complex<double> result;
-
-    result = evaluateTree(paras);
-
-    //ParameterList out;
-    // out.AddParameter(DoubleParameter("AddAllResult",result));
-    return std::shared_ptr<AbsParameter>(new ComplexParameter("AddAllResult",result));
-  };*/
-
-
+  virtual const std::string to_str() const { return (_name); }
   virtual void initialise() = 0; 
+  //! value of resonance at \param point
   virtual std::complex<double> evaluate(dataPoint& point) = 0;
   //! value of dynamical amplitude at \param point
   virtual std::complex<double> evaluateAmp(dataPoint& point) = 0;
   //! value of WignerD amplitude at \param point
-  virtual double evaluateWignerD(dataPoint& point) = 0;
+//  virtual double evaluateWignerD(dataPoint& point) = 0;
 
   //! Get resonance spin
   virtual double getSpin() = 0;
-  //! check subsystem of resonance
-  virtual bool isSubSys(const unsigned int) const = 0;
   //! Calculation integral |dynamical amplitude|^2
   virtual double integral(unsigned int nCalls) const;
   //! Calculation integral |dynamical amplitude * WignerD|^2

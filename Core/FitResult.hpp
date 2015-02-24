@@ -63,6 +63,7 @@ public:
 		BOOST_LOG_TRIVIAL(info) << str;
 	};
 	virtual void writeTex(std::string filename) {};
+	virtual void writeXML(std::string filename) {};
 	virtual void writeText(std::string filename) ;
 	virtual void writeSimpleText(std::string filename) ;
 	virtual operator double() const =0;

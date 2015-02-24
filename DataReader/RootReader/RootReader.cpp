@@ -24,6 +24,31 @@
 #include <boost/log/core.hpp>
 using namespace boost::log;
 
+RootReader::RootReader(){
+	fFile = 0; //need to do this to avoid seg. violation when destructor is called
+}
+
+RootReader::RootReader(TTree* tr, const bool binned=false) : fBinned(binned){
+	fTree = tr;
+	fFile = 0; //need to do this to avoid seg. violation when destructor is called
+	read();
+}
+
+RootReader::RootReader(const std::string inRootFile, const std::string inTreeName, const bool binned) :
+				fBinned(binned),fileName(inRootFile),treeName(inTreeName){
+	fFile = new TFile(fileName.c_str());
+	if(fFile->IsZombie())
+		throw std::runtime_error("RootReader::RootReader() can't open data file: "+inRootFile);
+	fTree = (TTree*) fFile->Get(treeName.c_str());
+	if(!fTree)
+		throw std::runtime_error("RootReader::RootReader() Tree \""+treeName+"\" can not be opened can't from file "+inRootFile+"! ");
+	read();
+	fFile->Close();
+}
+
+RootReader::~RootReader(){
+
+}
 
 bool RootReader::hasWeights(){
 	bool has=0;
@@ -43,7 +68,6 @@ void RootReader::setEfficiency(std::shared_ptr<Efficiency> eff){
 	for(unsigned int evt=0; evt<fEvents.size(); evt++){
 		dataPoint e(fEvents.at(evt));
 		double val = eff->evaluate(e);
-		//	  std::cout<<val<<std::endl;
 		fEvents.at(evt).setEfficiency(val);
 	}
 }
@@ -54,19 +78,18 @@ void RootReader::resetEfficiency(double e){
 }
 
 std::shared_ptr<Data> RootReader::rndSubSet(unsigned int size, std::shared_ptr<Generator> gen){
-	std::shared_ptr<Data> newSample(new RootReader(fileName, true,"test",false));
+	std::shared_ptr<Data> newSample(new RootReader());
 	unsigned int totalSize = getNEvents();
 	unsigned int newSize = totalSize;
 	/* 1th method: new Sample has exact size, but possibly events are added twice.
-	 * We would have to store all used events in a vector and search the vector at every event -> slow
-	 */
-	//unsigned int t=0;
-	//unsigned int d=0;
-	//while(t<newSize){
-	//	d = (unsigned int) gen->getUniform()*totalSize;
-	//	newSample->pushEvent(fEvents[d]);
-	//	t++;
-	//}
+	 * We would have to store all used events in a vector and search the vector at every event -> slow */
+	/*unsigned int t=0;
+	unsigned int d=0;
+	while(t<newSize){
+		d = (unsigned int) gen->getUniform()*totalSize;
+		newSample->pushEvent(fEvents[d]);
+		t++;
+	}*/
 
 	/* 2nd method: events are added once only, but total size of sample varies with sqrt(N) */
 	for(unsigned int i=0; i<totalSize; i++){//count how many events are not within PHSP
@@ -96,56 +119,7 @@ void RootReader::read(){
 	storeEvents();
 
 }
-RootReader::RootReader(TTree* tr, const bool binned=false) : fBinned(binned){
-	fTree = tr;
-	fFile = 0; //need to do this to avoid seg. violation when destructor is called
-	read();
-}
-RootReader::RootReader(const std::string inRootFile, const bool binned,
-		const std::string inTreeName, const bool readFlag)
-:fBinned(binned),_readFlag(readFlag),fileName(inRootFile),treeName(inTreeName){
-	//	fEvent=0;
-	if(!readFlag) return;
-	fFile = new TFile(fileName.c_str());
-	fTree = (TTree*) fFile->Get(treeName.c_str());
-	read();
-	//	fParticles = new TClonesArray("TParticle");
-	//	fTree->GetBranch("Particles")->SetAutoDelete(false);
-	//	fTree->SetBranchAddress("Particles",&fParticles);
-	//	fFile->cd();
-	//
-	//	fmaxEvents=fTree->GetEntries();
-	//	fEvent=0;
-	//
-	//	//if(fBinned)
-	//	bin();
-	//	storeEvents();
 
-	fFile->Close();
-}
-RootReader::~RootReader(){
-	//fFile->Close();
-	//	delete fParticles;
-	//	delete fFile;
-	//delete _myFcn;
-}
-
-//void RootReader::writeToFile(){
-//	if(_readFlag){
-//		std::cout<<"RootReader: trying to write, but RootReader is marked as readonly! Dont write!"<<std::endl;
-//		return;
-//	}
-//	fFile = new TFile(fileName.c_str(),"RECREATE");
-//	fTree = new TTree(treeName.c_str(),treeName.c_str());
-//	TParticle* part = 0;
-//	fTree->Branch("Particles","Particles",&part,64000,0);
-//	//loop
-//	for(int i=0; i<=fEvents.size();i++){
-//
-//
-//	}
-//	return;
-//}
 const std::vector<std::string>& RootReader::getVariableNames(){
 	if(!fVarNames.size()){ //TODO: init
 		fVarNames.push_back("dataname1");
@@ -160,47 +134,7 @@ void RootReader::resetWeights(double w){
 }
 
 Event& RootReader::getEvent(const int i){
-	//Event outEvent;
-
-	//	if(i>=0) {fEvent=i;}
-	//	else {fEvent++;}
-
 	return fEvents.at(i);
-
-	/*fParticles->Clear();
-  fTree->GetEntry(fEvent);
-
-  // Get number of particle in TClonesrray
-  unsigned int nParts = fParticles->GetEntriesFast();
-
-  TParticle* partN;
-  TLorentzVector inN;
-  for(unsigned int part=0; part<nParts; part++){
-    partN = 0;
-    partN = (TParticle*) fParticles->At(part);
-    if(!partN) continue;
-    partN->Momentum(inN);
-    outEvent.addParticle(Particle(inN.X(), inN.Y(), inN.Z(), inN.E()));
-  }
-
-  if(nParts!=2) return 0;
-
-  TParticle* part1 = (TParticle*) fParticles->At(0); //pip
-  TParticle* part2 = (TParticle*) fParticles->At(1); //pim
-  if(!part1 || !part2) return 0;
-  TLorentzVector in1, in2;
-  part1->Momentum(in1);
-  part2->Momentum(in2);
-  std::vector<Particle> out;
-  out.push_back(Particle(in1.X(), in1.Y(), in1.Z(), in1.E()));
-  out.push_back(Particle(in2.X(), in2.Y(), in2.Z(), in2.E()));
-
-  //shared_ptr<Event> tmp(new Event());
-  //inEvent = make_shared<Event>();
-  for(unsigned int part=0; part<out.size(); part++)
-    inEvent.addParticle(out.at(part));*/
-
-	//return outEvent;
 }
 
 allMasses RootReader::getMasses(const unsigned int startEvent, unsigned int nEvents){
@@ -276,35 +210,7 @@ const int RootReader::getBin(const int i, double& m12, double& weight){
 	return 1;
 }
 
-/*const int RootReader::getEvent(const int i,TLorentzVector& in1, TLorentzVector& in2, double& inm12){
-
-  //TLorentzVector pPip,pPim,pPm12;
-  //TLorentzVector V(0,0,0,0);
-  //double m12sq;
-
-  //fFile->cd();
-  //TRandom3 rando;
-  if(i>=0) {fEvent=i;}
-  else {fEvent++;}
-  fTree->GetEntry(fEvent);
-  // Get number of particle in TClonesrray
-  unsigned int nParts = fParticles->GetEntriesFast();
-  if(nParts!=2) return -1;
-
-  TParticle* part1 = (TParticle*) fParticles->At(0); //pip
-  TParticle* part2 = (TParticle*) fParticles->At(1); //pim
-  if(!part1 || !part2) return 0;
-  part1->Momentum(in1);
-  part2->Momentum(in2);
-
-  //cout << part2->Energy() << endl;
-  inm12=(in1+in2).Mag2();
-
-  return 1;
-}*/
-
 void RootReader::storeEvents(){
-
 	for(unsigned int evt=0; evt<fTree->GetEntries(); evt++){
 		Event tmp;
 		fParticles->Clear();
@@ -329,12 +235,16 @@ void RootReader::storeEvents(){
 
 		fEvents.push_back(tmp);
 	}//event loop
-
 }
 
-void RootReader::writeData(){
+void RootReader::writeData(std::string file, std::string trName){
+	if(file!="") fileName=file;
+	if(trName!="") treeName=trName;
 	BOOST_LOG_TRIVIAL(info) << "RootReader: writing current vector of events to file "<<fileName;
-	TFile* ff = new TFile(fileName.c_str(),"UPDATE");
+	TFile* fFile = new TFile(fileName.c_str(),"UPDATE");
+	if(fFile->IsZombie())
+		throw std::runtime_error("RootReader::RootReader() can't open data file: "+fileName);
+
 	fTree = new TTree(treeName.c_str(),treeName.c_str());
 	unsigned int numPart = fEvents[0].getNParticles();
 	fParticles = new TClonesArray("TParticle",numPart);
@@ -360,8 +270,7 @@ void RootReader::writeData(){
 		fTree->Fill();
 	}
 	fTree->Write("",TObject::kOverwrite,0);
-	ff->Close();
-	delete ff;
+	fFile->Close();
 	return;
 }
 
@@ -425,4 +334,11 @@ void RootReader::bin(){
 		fBins[bin].second += 1.;
 	}
 
+}
+
+std::vector<dataPoint> RootReader::getDataPoints() {
+	std::vector<dataPoint> vecPoint;
+	for(int i=0; i<fEvents.size(); i++)
+		vecPoint.push_back(dataPoint(fEvents.at(i)));
+	return vecPoint;
 }
