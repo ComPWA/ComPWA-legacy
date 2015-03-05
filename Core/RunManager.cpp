@@ -118,7 +118,7 @@ bool RunManager::generate( unsigned int number ) {
 	if(sampleData_->getNEvents()<number)
 		BOOST_LOG_TRIVIAL(error) << "RunManager::generate() not able to generate "<<number<<" events. "
 				"Phsp sample too small. Current size of sample is now "<<sampleData_->getNEvents();
-//	BOOST_LOG_TRIVIAL(info) << "Efficiency of toy MC generation: "<<(double)number/totalCalls;
+	BOOST_LOG_TRIVIAL(info) << "Efficiency of toy MC generation: "<<(double)sampleData_->getNEvents()/totalCalls;
 //	BOOST_LOG_TRIVIAL(info) << "RunManager: generate time="<<(clock()-startTime)/CLOCKS_PER_SEC/60<<"min.";
 
 	return true;
@@ -145,7 +145,6 @@ bool RunManager::generateBkg( unsigned int number ) {
 	unsigned int limit;
 	unsigned int acceptedEvents=0;
 	if(samplePhsp_){
-		std::cout<<"1231312313123jfsj"<<std::endl;
 		limit = samplePhsp_->getNEvents();
 	} else
 		limit = 100000000; //set large limit, should never be reached
@@ -179,6 +178,7 @@ bool RunManager::generateBkg( unsigned int number ) {
 	if(sampleData_->getNEvents()<number)
 		BOOST_LOG_TRIVIAL(error) << "RunManager::generateBkg() not able to generate "<<number<<" events. "
 				"Phsp sample too small. Current size of sample is now "<<sampleBkg_->getNEvents();
+	BOOST_LOG_TRIVIAL(info) << "Efficiency of toy MC generation: "<<(double)sampleData_->getNEvents()/totalCalls;
 
 	return true;
 };

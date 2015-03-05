@@ -45,7 +45,7 @@ SimpleEfficiency::SimpleEfficiency(const TH1& passed, const TH1& total){
 	passedHist = (TH1*) passed.Clone();
 	totalHist = (TH1*) total.Clone();
 	effHist = (TH1*) passed.Clone();
-	effHist->Sumw2();
+//	effHist->Sumw2();
 	effHist->Divide(totalHist);
 	TH1::AddDirectory(bStatus);
 
@@ -65,8 +65,8 @@ SimpleEfficiency::SimpleEfficiency(TString name, TString title,const TH1& passed
 	passedHist = (TH1*) passed.Clone(title+" (passed)");
 	totalHist = (TH1*) total.Clone(title+" (total)");
 	effHist = (TH1*) passed.Clone(title+" (eff)");
-	effHist->Sumw2();
-	effHist->Divide(totalHist);
+//	effHist->Sumw2();
+//	effHist->Divide(totalHist);
 	TH1::AddDirectory(bStatus);
 
 	//	totalEff = (double)passed->GetEntries()/total->GetEntries();
