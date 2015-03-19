@@ -1,6 +1,6 @@
 <amplitude_setup>
     <filename>JPSI_ypipi.xml</filename>
-       <resonance>
+       <BreitWigner>
        <enable>true</enable>
        <name>f0_980</name>
        <type>relBW</type>
@@ -29,10 +29,10 @@
        <spin>0</spin>
        <m>0</m>
        <n>0</n>
-       <daugtherA>2</daugtherA>
-       <daugtherB>3</daugtherB>
-    </resonance>
-    <resonance>
+       <daughterA>2</daughterA>
+       <daughterB>3</daughterB>
+    </BreitWigner>
+    <BreitWigner>
        <enable>true</enable>
        <name>f0_1500</name>
        <type>relBW</type>
@@ -61,10 +61,10 @@
        <spin>0</spin>
        <m>0</m>
        <n>0</n>
-       <daugtherA>2</daugtherA>
-       <daugtherB>3</daugtherB>
-    </resonance>
-    <resonance>
+       <daughterA>2</daughterA>
+       <daughterB>3</daughterB>
+    </BreitWigner>
+    <BreitWigner>
        <enable>true</enable>
        <name>f0_1710</name>
        <type>relBW</type>
@@ -93,10 +93,10 @@
        <spin>0</spin>
        <m>0</m>
        <n>0</n>
-       <daugtherA>2</daugtherA>
-       <daugtherB>3</daugtherB>
-    </resonance>
-    <resonance>
+       <daughterA>2</daughterA>
+       <daughterB>3</daughterB>
+    </BreitWigner>
+    <BreitWigner>
        <enable>true</enable>
        <name>f2_1270</name>
        <type>relBW</type>
@@ -125,10 +125,10 @@
        <spin>2</spin>
        <m>0</m>
        <n>0</n>
-       <daugtherA>2</daugtherA>
-       <daugtherB>3</daugtherB>
-    </resonance>
-    <resonance>
+       <daughterA>2</daughterA>
+       <daughterB>3</daughterB>
+    </BreitWigner>
+    <BreitWigner>
        <enable>true</enable>
        <name>f2_1525</name>
        <type>relBW</type>
@@ -157,10 +157,10 @@
        <spin>2</spin>
        <m>0</m>
        <n>0</n>
-       <daugtherA>2</daugtherA>
-       <daugtherB>3</daugtherB>
-    </resonance>
-    <resonance>
+       <daughterA>2</daughterA>
+       <daughterB>3</daughterB>
+    </BreitWigner>
+    <BreitWigner>
        <enable>true</enable>
        <name>omegaA</name>
        <type>relBW</type>
@@ -189,10 +189,10 @@
        <spin>1</spin>
        <m>0</m>
        <n>0</n>
-       <daugtherA>1</daugtherA>
-       <daugtherB>2</daugtherB>
-    </resonance>
-    <resonance>
+       <daughterA>1</daughterA>
+       <daughterB>2</daughterB>
+    </BreitWigner>
+    <BreitWigner>
        <enable>true</enable>
        <name>omegaB</name>
        <type>relBW</type>
@@ -221,7 +221,7 @@
        <spin>1</spin>
        <m>0</m>
        <n>0</n>
-       <daugtherA>1</daugtherA>
-       <daugtherB>3</daugtherB>
-    </resonance>
+       <daughterA>1</daughterA>
+       <daughterB>3</daughterB>
+    </BreitWigner>
 </amplitude_setup>

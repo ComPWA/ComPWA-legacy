@@ -35,7 +35,7 @@ tar xf geneva-v1.4.0.tgz
 cd geneva-v1.4.0
 geneva_root=${install_path}/geneva_1_4_0
 
-cmake . -DCMAKE_CXX_COMPILER=${compiler_path} -DCMAKE_INSTALL_PREFIX="${geneva_root}" -DBOOST_ROOT="${boost_root}" -DBOOST_INCLUDEDIR="${boost_root}/include/boost" -DBOOST_LIBRARYDIR="${boost_root}/lib"
+cmake . -DCMAKE_CXX_COMPILER=${compiler_path} -DCMAKE_INSTALL_PREFIX="${geneva_root}" -DBoost_NO_SYSTEM_PATHS=TRUE -DBoost_NO_BOOST_CMAKE=TRUE -DBOOST_ROOT="${boost_root}" -DBOOST_INCLUDEDIR="${boost_root}/include/boost" -DBOOST_LIBRARYDIR="${boost_root}/lib"
 make -j$numproc
 make install
 
