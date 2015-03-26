@@ -39,5 +39,6 @@ double SimpleAngleEfficiency::evaluate(dataPoint& point){
 	TH1* test = (TH1*) effHist->GetPassedHistogram();
 	int globalBin = test->FindBin(m23sq,angle);
 	double eff = effHist->GetEfficiency(globalBin);
+//	std::cout<<globalBin<<" m="<<m23sq<<" theta="<<angle<<" ->"<<eff<<std::endl;
 	return eff;
 }

@@ -59,6 +59,12 @@ public:
 	double getResult(){return finalLH;}
 	//! Enable correct error estimation for fit fractions. Very time consuming!
 	void setUseCorrelatedErrors(bool s) { useCorrelatedErrors = s; }
+	//! Use tree for calculation of fit fractions
+	void setUseTree(bool s) {
+		if(!_amp || !_amp->hasTree())
+			throw std::runtime_error("MinuitResult::setUseTree() | amplitude has no tree!");
+		useTree = s;
+	}
 	//! Getter function for fractions list. Make sure that fractions are calculated beforehand.
 	ParameterList& GetFractions() {	return fractionList; }
 	/** Calculate fit fractions and its errors.
@@ -93,6 +99,8 @@ private:
 	gsl_rng* r;//! GSL random generator, used for multivariate gauss
 	//! Should we calcualte fit fraction errors accurately?
 	bool useCorrelatedErrors;
+	//! calculate fractions using tree (if available)
+	bool useTree;
 	//! number of resonances in amplitude
 	unsigned int nRes;
 

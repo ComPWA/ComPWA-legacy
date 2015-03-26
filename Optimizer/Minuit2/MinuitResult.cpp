@@ -101,6 +101,7 @@ void MinuitResult::init(FunctionMinimum min){
 	r = gsl_rng_alloc (T);
 
 	useCorrelatedErrors=0;
+	if(_amp->hasTree()) setUseTree(1);
 	return;
 
 }
@@ -115,7 +116,7 @@ void MinuitResult::genSimpleOutput(std::ostream& out){
 	return;
 }
 
-void  MinuitResult::smearParameterList(ParameterList& newParList){
+void MinuitResult::smearParameterList(ParameterList& newParList){
 	unsigned int nFree = 0;
 	for(unsigned int o=0;o<finalParameters.GetNDouble();o++)
 		if(!finalParameters.GetDoubleParameter(o)->IsFixed()) nFree++;
@@ -237,33 +238,36 @@ void MinuitResult::calcFraction(ParameterList& parList){
 	if(parList.GetNDouble())
 		throw std::runtime_error("MinuitResult::calcFractions() | ParameterList not empty!");
 
-	double norm = 1.36286;
+	double norm =-1;
 	ParameterList currentPar;
 	_amp->fillStartParVec(currentPar);
-	if(!estimator->hasTree()) norm = _amp->integral();
+	if(!useTree) norm = _amp->integral();
 	else {//if we have a tree, use it. Much faster especially in case of correlated errors in calcFractionError()
 		std::shared_ptr<FunctionTree> tree = estimator->getTree();
 		tree->recalculate();
 		double phspVolume = Kinematics::instance()->getPhspVolume();
 		/*We need the intensity over the PHSP without efficiency correction. Therefore we
 		 * access node 'Amplitude' and sum up its values.*/
-		//		std::shared_ptr<TreeNode> amplitudeNode = tree->head()->getChildren().at(0)->getChildren().at(0);
-		//		std::shared_ptr<TreeNode> amplitudeNode = tree->head()->getChildNode("Amplitude_Phsp");
 		std::shared_ptr<TreeNode> amplitudeNode = tree->head()->getChildNode("Amplitude_Phsp");
+		double normEff = tree->head()->getChildValue("normFactor").real();
+		BOOST_LOG_TRIVIAL(info)<<"MinuitResult::calcFraction() norm*eff="<<normEff;
 		if(!amplitudeNode){
 			BOOST_LOG_TRIVIAL(error)<<"MinuitResult::calcFraction() : Can't find node 'Amplitude' in tree!";
 			throw BadParameter("Node not found!");
 		}
-
 		std::shared_ptr<MultiComplex> normPar = std::dynamic_pointer_cast<MultiComplex>(amplitudeNode->getValue());//node 'Amplitude'
 		unsigned int numPhspEvents = normPar->GetNValues();
 		for(unsigned int i=0; i<numPhspEvents;i++)
 			norm+=abs(normPar->GetValue(i))*abs(normPar->GetValue(i));
-
 		norm = norm*phspVolume/numPhspEvents; //correct calculation of normalization
+//		norm = amplitudeNode->getValue();
+
 		//		std::cout<<"Amplitude normalization: "<<norm<<std::endl;
 		//				std::cout<<norm<<" "<<phspVolume<<" "<<numPhspEvents<<std::endl;
 	}
+	if(norm<0)
+		throw std::runtime_error("MinuitResult::calcFraction() normalization can't be calculated");
+	BOOST_LOG_TRIVIAL(info)<<"MinuitResult::calcFraction() norm="<<norm;
 	nRes=_amp->getNumberOfResonances();
 	for(unsigned int i=0;i<nRes; i++){ //fill matrix
 		double resonanceInt = 1.0;
