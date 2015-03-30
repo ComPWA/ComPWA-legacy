@@ -24,7 +24,7 @@
 #include <boost/archive/xml_iarchive.hpp>
 
 #include "Optimizer/Minuit2/MinuitResult.hpp"
-#include "Core/progressBar.hpp"
+#include "Core/ProgressBar.hpp"
 
 using namespace boost::log;
 
