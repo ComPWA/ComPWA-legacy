@@ -50,6 +50,8 @@ public:
 			std::shared_ptr<Efficiency> eff, unsigned int nCalls);
 	AmpSumIntensity(const AmpSumIntensity& other);
 
+	//! set efficiency
+	virtual void setEfficiency(std::shared_ptr<Efficiency> eff) { eff_ = eff; };
 	//! wrapper function for function value times efficiency at point x
 	double evaluateEff(double x[], size_t dim);
 	//! wrapper function for function value at point x

@@ -62,7 +62,7 @@ public:
 		std::string str = s.str();
 		BOOST_LOG_TRIVIAL(info) << str;
 	};
-	virtual void writeTex(std::string filename) {};
+	virtual void writeTeX(std::string filename) {};
 	virtual void writeXML(std::string filename) {};
 	virtual void writeText(std::string filename) ;
 	virtual void writeSimpleText(std::string filename) ;

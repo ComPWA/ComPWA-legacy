@@ -73,6 +73,8 @@ public:
 	void calcFraction();
 	//! Write list of fit parameters and list of fitfractions to XML file @filename
 	virtual void writeXML(std::string filename);
+	//! Write fit parameters, fit fractions and cov matrix as TeX to file @filename
+	virtual void writeTeX(std::string filename);
 
 private:
 	void init(FunctionMinimum);
@@ -109,9 +111,14 @@ private:
 	void genSimpleOutput(std::ostream& out);
 	//! Full fit result output
 	void genOutput(std::ostream& out,std::string opt="");
+	//! Table with fit parameters
+	void printFitParameters(TableFormater* parTable);
 	//! Table with fit fractions
-	void fractions(std::ostream& out);
-
+	void printFitFractions(TableFormater* fracTable);
+	//! Table with correlation matrix
+	void printCorrelationMatrix(TableFormater* fracTable);
+	//! Table with covariance matrix
+	void printCovarianceMatrix(TableFormater* fracTable);
 	/** Calculate fit fractions.
 	 * Fractions are calculated using the formular:
 	 * \f[

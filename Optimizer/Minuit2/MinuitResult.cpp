@@ -24,6 +24,7 @@
 #include <boost/archive/xml_iarchive.hpp>
 
 #include "Optimizer/Minuit2/MinuitResult.hpp"
+#include "Core/progressBar.hpp"
 
 using namespace boost::log;
 
@@ -154,7 +155,9 @@ void MinuitResult::calcFractionError(){
 		unsigned int numberOfSets = 1000;
 		BOOST_LOG_TRIVIAL(info) << "Calculating errors of fit fractions using "<<numberOfSets<<" sets of parameters...";
 		std::vector<ParameterList> fracVect;
+		progressBar bar(numberOfSets);
 		for(unsigned int i=0; i<numberOfSets; i++){
+			bar.nextEvent();
 			ParameterList newPar; smearParameterList(newPar);
 			_amp->setParameterList(newPar);//smear all free parameters according to cov matrix
 			ParameterList tmp;
@@ -224,6 +227,7 @@ void MinuitResult::calcFractionError(){
 	}
 	return;
 }
+
 void MinuitResult::calcFraction() {
 	if(!fractionList.GetNDouble()) {
 		calcFraction(fractionList);
@@ -260,7 +264,7 @@ void MinuitResult::calcFraction(ParameterList& parList){
 		for(unsigned int i=0; i<numPhspEvents;i++)
 			norm+=abs(normPar->GetValue(i))*abs(normPar->GetValue(i));
 		norm = norm*phspVolume/numPhspEvents; //correct calculation of normalization
-//		norm = amplitudeNode->getValue();
+		//		norm = amplitudeNode->getValue();
 
 		//		std::cout<<"Amplitude normalization: "<<norm<<std::endl;
 		//				std::cout<<norm<<" "<<phspVolume<<" "<<numPhspEvents<<std::endl;
@@ -282,7 +286,6 @@ void MinuitResult::calcFraction(ParameterList& parList){
 	return;
 }
 
-
 void MinuitResult::genOutput(std::ostream& out, std::string opt){
 	bool printTrue=0;
 	bool printParam=1, printCorrMatrix=1, printCovMatrix=1;
@@ -290,8 +293,6 @@ void MinuitResult::genOutput(std::ostream& out, std::string opt){
 		printCorrMatrix=0; printCovMatrix=0;
 	}
 	if(trueParameters.GetNParameter()) printTrue=1;
-	TableFormater tableCov(&out);
-	tableCov.addColumn(" ",15);//add empty first column
 	out<<std::endl;
 	out<<"--------------FIT RESULT----------------"<<std::endl;
 	if(!isValid) out<<"		*** FIT RESULT NOT VALID! ***"<<std::endl;
@@ -306,60 +307,9 @@ void MinuitResult::genOutput(std::ostream& out, std::string opt){
 
 	if(!hasValidParameters) out<<"		*** NO VALID SET OF PARAMETERS! ***"<<std::endl;
 	if(printParam){
-		unsigned int parErrorWidth = 22;
-		for(unsigned int o=0;o<finalParameters.GetNDouble();o++)
-			if(finalParameters.GetDoubleParameter(o)->GetErrorType()==ErrorType::ASYM) parErrorWidth=33;
-
 		out<<"PARAMETERS:"<<std::endl;
-		TableFormater tableResult(&out);
-		tableResult.addColumn("Nr");
-		tableResult.addColumn("Name",15);
-		tableResult.addColumn("Initial Value",parErrorWidth);
-		tableResult.addColumn("Final Value",parErrorWidth);
-		if(printTrue) tableResult.addColumn("True Value",13);
-		if(printTrue) tableResult.addColumn("Deviation",13);
-		tableResult.header();
-
-		for(unsigned int o=0;o<finalParameters.GetNDouble();o++){
-			std::shared_ptr<DoubleParameter> iniPar = initialParameters.GetDoubleParameter(o);
-			std::shared_ptr<DoubleParameter> outPar = finalParameters.GetDoubleParameter(o);
-			ErrorType errorType = outPar->GetErrorType();
-			bool isFixed = iniPar->IsFixed();
-			bool isAngle=0;
-			if(iniPar->GetName().find("phase")!=string::npos) isAngle=1;//is our Parameter an angle?
-			if(isAngle && !isFixed) {
-				outPar->SetValue( shiftAngle(outPar->GetValue()) ); //shift angle to the interval [-pi;pi]
-			}
-
-			tableResult << o << iniPar->GetName() << *iniPar ;// |nr.| name| inital value|
-			if(isFixed) tableResult<<"FIXED";
-			else {
-				tableResult << *outPar;//final value
-				tableCov.addColumn(iniPar->GetName(),15);//add columns in covariance matrix
-			}
-			if(printTrue){
-				std::shared_ptr<DoubleParameter> truePar = trueParameters.GetDoubleParameter(iniPar->GetName());
-				if(!truePar) {
-					tableResult << "not found"<< " - ";
-					continue;
-				}
-				tableResult << *truePar;
-				double pi = PhysConst::instance()->getConstValue("Pi");
-				double pull = (truePar->GetValue()-outPar->GetValue() );
-				if(isAngle && !isFixed) { //shift pull by 2*pi if that reduces the deviation
-					while( pull<0 && pull<-pi) pull+=2*pi;
-					while( pull>0 && pull>pi) pull-=2*pi;
-				}
-				if( errorType == ErrorType::ASYM && pull < 0)
-					pull /= outPar->GetErrorLow();
-				else if( errorType == ErrorType::ASYM && pull > 0)
-					pull /= outPar->GetErrorHigh();
-				else
-					pull /= outPar->GetError();
-				tableResult << pull;
-			}
-		}
-		tableResult.footer();
+		TableFormater* tableResult = new TableFormater(&out);
+		printFitParameters(tableResult);
 	}
 
 	if(!hasValidCov) out<<"		*** COVARIANCE MATRIX NOT VALID! ***"<<std::endl;
@@ -370,84 +320,190 @@ void MinuitResult::genOutput(std::ostream& out, std::string opt){
 		unsigned int n=0;
 		if(printCovMatrix){
 			out<<"COVARIANCE MATRIX:"<<std::endl;
-			tableCov.header();
-			for(unsigned int o=0;o<finalParameters.GetNDouble();o++){
-				std::shared_ptr<DoubleParameter> ppp = initialParameters.GetDoubleParameter(o);
-				std::shared_ptr<DoubleParameter> ppp2 = finalParameters.GetDoubleParameter(o);
-				if(ppp->IsFixed()) continue;
-				tableCov << ppp->GetName();
-				for(unsigned int t=0;t<cov.size1();t++) {
-					if(n>=cov.size2()) { tableCov<< " "; continue; }
-					if(t>=n)tableCov << cov(n,t);
-					else tableCov << "";
-				}
-				n++;
-			}
-			tableCov.footer();
+			TableFormater* tableCov = new TableFormater(&out);
+			printCorrelationMatrix(tableCov);
 		}
 		if(printCorrMatrix){
 			out<<"CORRELATION MATRIX:"<<std::endl;
-			TableFormater tableCorr(&out);
-			tableCorr.addColumn(" ",15);//add empty first column
-			tableCorr.addColumn("GlobalCC",10);//global correlation coefficient
-			for(unsigned int o=0;o<finalParameters.GetNDouble();o++){
-				std::shared_ptr<DoubleParameter> ppp = finalParameters.GetDoubleParameter(o);
-				if(ppp->IsFixed()) continue;
-				tableCorr.addColumn(ppp->GetName(),15);//add columns in correlation matrix
-			}
-			tableCorr.header();
-			n=0;
-			for(unsigned int o=0;o<finalParameters.GetNDouble();o++){
-				std::shared_ptr<DoubleParameter> ppp = initialParameters.GetDoubleParameter(o);
-				std::shared_ptr<DoubleParameter> ppp2 = finalParameters.GetDoubleParameter(o);
-				if(ppp->IsFixed()) continue;
-				tableCorr << ppp->GetName();
-				//				if(globalCC.size()>o)
-				tableCorr << globalCC[n]; //TODO: check if emtpy (don't know how this happened, but it did :)
-				for(unsigned int t=0;t<corr.size1();t++) {
-					if(n>=corr.size2()) { tableCorr<< " "; continue; }
-					if(t>=n)tableCorr << corr(n,t);
-					else tableCorr << "";
-				}
-				n++;
-			}
-			tableCorr.footer();
+			TableFormater* tableCorr = new TableFormater(&out);
+			printCorrelationMatrix(tableCorr);
 		}
 	}
-	fractions(out); //calculate and print fractions if amplitude is set
+	out<<"FIT FRACTIONS:"<<std::endl;
+	TableFormater* fracTable = new TableFormater(&out);
+	printFitFractions(fracTable); //calculate and print fractions if amplitude is set
+	return;
+}
+//! Table with fit parameters
+void MinuitResult::printFitParameters(TableFormater* tableResult){
+	bool printTrue=0;
+	if(trueParameters.GetNParameter()) printTrue=1;
+	unsigned int parErrorWidth = 22;
+	for(unsigned int o=0;o<finalParameters.GetNDouble();o++)
+		if(finalParameters.GetDoubleParameter(o)->GetErrorType()==ErrorType::ASYM) parErrorWidth=33;
+
+	tableResult->addColumn("Nr");
+	tableResult->addColumn("Name",15);
+	tableResult->addColumn("Initial Value",parErrorWidth);
+	tableResult->addColumn("Final Value",parErrorWidth);
+	if(printTrue) tableResult->addColumn("True Value",13);
+	if(printTrue) tableResult->addColumn("Deviation",13);
+	tableResult->header();
+
+	for(unsigned int o=0;o<finalParameters.GetNDouble();o++){
+		std::shared_ptr<DoubleParameter> iniPar = initialParameters.GetDoubleParameter(o);
+		std::shared_ptr<DoubleParameter> outPar = finalParameters.GetDoubleParameter(o);
+		ErrorType errorType = outPar->GetErrorType();
+		bool isFixed = iniPar->IsFixed();
+		bool isAngle=0;
+		if(iniPar->GetName().find("phase")!=string::npos) isAngle=1;//is our Parameter an angle?
+		if(isAngle && !isFixed) {
+			outPar->SetValue( shiftAngle(outPar->GetValue()) ); //shift angle to the interval [-pi;pi]
+		}
+
+		*tableResult << o << iniPar->GetName() << *iniPar ;// |nr.| name| inital value|
+		if(isFixed) *tableResult<<"FIXED";
+		else {
+			*tableResult << *outPar;//final value
+			//				tableCov.addColumn(iniPar->GetName(),15);//add columns in covariance matrix
+		}
+		if(printTrue){
+			std::shared_ptr<DoubleParameter> truePar = trueParameters.GetDoubleParameter(iniPar->GetName());
+			if(!truePar) {
+				*tableResult << "not found"<< " - ";
+				continue;
+			}
+			*tableResult << *truePar;
+			double pi = PhysConst::instance()->getConstValue("Pi");
+			double pull = (truePar->GetValue()-outPar->GetValue() );
+			if(isAngle && !isFixed) { //shift pull by 2*pi if that reduces the deviation
+				while( pull<0 && pull<-pi) pull+=2*pi;
+				while( pull>0 && pull>pi) pull-=2*pi;
+			}
+			if( errorType == ErrorType::ASYM && pull < 0)
+				pull /= outPar->GetErrorLow();
+			else if( errorType == ErrorType::ASYM && pull > 0)
+				pull /= outPar->GetErrorHigh();
+			else
+				pull /= outPar->GetError();
+			*tableResult << pull;
+		}
+	}
+	tableResult->footer();
 
 	return;
 }
 
-void MinuitResult::fractions(std::ostream& out){
+void MinuitResult::printFitFractions(TableFormater* fracTable){
 	BOOST_LOG_TRIVIAL(info) << "Calculating fit fractions...";
 	calcFraction();
 	double sum, sumErrorSq;
 
 	//print matrix
-	TableFormater fracTable(&out);
-	fracTable.addColumn("Resonance",15);//add empty first column
-	fracTable.addColumn("Fraction",15);//add empty first column
-	fracTable.addColumn("Error",15);//add empty first column
-	out<<"FIT FRACTIONS:"<<std::endl;
-	fracTable.header();
+	fracTable->addColumn("Resonance",15);//add empty first column
+	fracTable->addColumn("Fraction",15);//add empty first column
+	fracTable->addColumn("Error",15);//add empty first column
+	fracTable->header();
 	for(unsigned int i=0;i<fractionList.GetNDouble(); ++i){
 		std::shared_ptr<DoubleParameter> tmpPar = fractionList.GetDoubleParameter(i);
-		fracTable << tmpPar->GetName() << tmpPar->GetValue() << tmpPar->GetError(); //assume symmetric errors here
-		sum+=tmpPar->GetValue();
-		sumErrorSq+=tmpPar->GetError()*tmpPar->GetError();
+		*fracTable << tmpPar->GetName() << tmpPar->GetValue() << tmpPar->GetError(); //assume symmetric errors here
+		sum += tmpPar->GetValue();
+		sumErrorSq += tmpPar->GetError()*tmpPar->GetError();
 	}
-	fracTable.delim();
-	fracTable << "Total" << sum << sqrt(sumErrorSq);
-	fracTable.footer();
+	fracTable->delim();
+	*fracTable << "Total" << sum << sqrt(sumErrorSq);
+	fracTable->footer();
 
 	return;
 }
+//! Table with correlation matrix
+void MinuitResult::printCorrelationMatrix(TableFormater* tableCorr){
+	if(!hasValidCov) return;
+	tableCorr->addColumn(" ",15);//add empty first column
+	tableCorr->addColumn("GlobalCC",10);//global correlation coefficient
+	for(unsigned int o=0;o<finalParameters.GetNDouble();o++){
+		std::shared_ptr<DoubleParameter> ppp = finalParameters.GetDoubleParameter(o);
+		if(ppp->IsFixed()) continue;
+		tableCorr->addColumn(ppp->GetName(),15);//add columns in correlation matrix
+	}
+
+	tableCorr->header();
+	unsigned int n=0;
+	for(unsigned int o=0;o<finalParameters.GetNDouble();o++){
+		std::shared_ptr<DoubleParameter> ppp = initialParameters.GetDoubleParameter(o);
+		std::shared_ptr<DoubleParameter> ppp2 = finalParameters.GetDoubleParameter(o);
+		if(ppp->IsFixed()) continue;
+		*tableCorr << ppp->GetName();
+		//				if(globalCC.size()>o)
+		*tableCorr << globalCC[n]; //TODO: check if emtpy (don't know how this happened, but it did :)
+		for(unsigned int t=0;t<corr.size1();t++) {
+			if(n>=corr.size2()) { *tableCorr<< " "; continue; }
+			if(t>=n)*tableCorr << corr(n,t);
+			else *tableCorr << "";
+		}
+		n++;
+	}
+	tableCorr->footer();
+	return;
+}
+//! Table with covariance matrix
+void MinuitResult::printCovarianceMatrix(TableFormater* tableCov){
+	if(!hasValidCov) return;
+	tableCov->addColumn(" ",15);//add empty first column
+	tableCov->addColumn("GlobalCC",10);//global correlation coefficient
+	for(unsigned int o=0;o<finalParameters.GetNDouble();o++){
+		std::shared_ptr<DoubleParameter> ppp = finalParameters.GetDoubleParameter(o);
+		if(ppp->IsFixed()) continue;
+		tableCov->addColumn(ppp->GetName(),15);//add columns in correlation matrix
+	}
+	//add columns first
+	for(unsigned int o=0;o<finalParameters.GetNDouble();o++){
+		if(!finalParameters.GetDoubleParameter(o)->IsFixed())
+			tableCov->addColumn(finalParameters.GetDoubleParameter(o)->GetName(),15);//add columns in covariance matrix
+	}
+
+	unsigned int n=0;
+	tableCov->header();
+	for(unsigned int o=0;o<finalParameters.GetNDouble();o++){
+		std::shared_ptr<DoubleParameter> ppp = initialParameters.GetDoubleParameter(o);
+		std::shared_ptr<DoubleParameter> ppp2 = finalParameters.GetDoubleParameter(o);
+		if(ppp->IsFixed()) continue;
+		*tableCov << ppp->GetName();
+		for(unsigned int t=0;t<cov.size1();t++) {
+			if(n>=cov.size2()) { *tableCov<< " "; continue; }
+			if(t>=n) *tableCov << cov(n,t);
+			else *tableCov << "";
+		}
+		n++;
+	}
+	tableCov->footer();
+	return;
+}
+
 void MinuitResult::writeXML(std::string filename){
 	std::ofstream ofs(filename);
 	boost::archive::xml_oarchive oa(ofs);
 	oa << boost::serialization::make_nvp("FitParameters", finalParameters);
 	oa << boost::serialization::make_nvp("FitFractions", fractionList);
 	ofs.close();
+	return;
+}
+
+void MinuitResult::writeTeX(std::string filename){
+	std::ofstream out(filename);
+	bool printTrue=0;
+	if(trueParameters.GetNParameter()) printTrue=1;
+	TableFormater* tableResult = new TexTableFormater(&out);
+	printFitParameters(tableResult);
+	if(hasValidCov){
+		unsigned int n=0;
+		TableFormater* tableCov = new TexTableFormater(&out);
+		printCorrelationMatrix(tableCov);
+		TableFormater* tableCorr = new TexTableFormater(&out);
+		printCorrelationMatrix(tableCorr);
+	}
+	TableFormater* fracTable = new TexTableFormater(&out);
+	printFitFractions(fracTable); //calculate and print fractions if amplitude is set
+	out.close();
 	return;
 }

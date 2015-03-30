@@ -33,6 +33,7 @@
 #include "DataReader/Data.hpp"
 
 #include "Core/DataPoint.hpp"
+#include "Core/Efficiency.hpp"
 #include "Core/Generator.hpp"
 class Amplitude
 {
@@ -44,6 +45,8 @@ public:
 	virtual ~Amplitude()
 	{ /* nothing */	}
 
+	//! set efficiency
+	virtual void setEfficiency(std::shared_ptr<Efficiency> eff) {};
 	virtual const double integral() =0;
 	virtual const double integral(ParameterList& par) =0;
 	virtual const double normalization() =0;
