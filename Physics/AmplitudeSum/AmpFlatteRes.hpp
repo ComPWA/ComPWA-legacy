@@ -40,13 +40,7 @@ public:
 			std::shared_ptr<DoubleParameter> g1, std::shared_ptr<DoubleParameter> g2,
 			double _g2_partA, double _g2_partB,
 			int _subsys, int resSpin, int m, int n) ;
-
-	AmpFlatteRes(const AmpFlatteRes&, const char*);
-	AmpFlatteRes(const AmpFlatteRes&);
-
 	virtual ~AmpFlatteRes();
-
-	void setBarrierMass(double, double);
 
 	//static function for dynamic part
 	static std::complex<double> dynamicalFunction(double mSq, double mR, double ma, double mb, double g1,
@@ -55,20 +49,12 @@ public:
 	virtual void initialise() { };
 	std::complex<double> evaluate(dataPoint& point) { return ( _norm*evaluateAmp(point)*evaluateWignerD(point) ); }
 	virtual std::complex<double> evaluateAmp(dataPoint& point) ;
-//	virtual double evaluateWignerD(dataPoint& point) {
-//		if(_spin==0) return 1.0;//save some computing time
-//		return _wignerD.evaluate(point);
-//	};
 
-	void setDecayMasses(double, double, double, double);
 	double getSpin() {return _spin;}; //needs to be declared in AmpAbsDynamicalFunction
-//	inline virtual bool isSubSys(const unsigned int subSys)const{return (subSys==_subSys);};
 	unsigned int getNParams(){ return nParams;}
 
 protected:
-//	AmpWigner2 _wignerD;
 	unsigned int nParams;
-
 	double _g2_partA;//hidden channel: mass particle A
 	double _g2_partB; //hidden channel: mass particle B
 	std::shared_ptr<DoubleParameter> _g2, _g1;

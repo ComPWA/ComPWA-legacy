@@ -38,21 +38,27 @@ public:
 			std::shared_ptr<DoubleParameter> _radius, std::shared_ptr<DoubleParameter> _motherRadius,
 			int _subsys, int resSpin, int m, int n
 	) ;
-	AmpRelBreitWignerRes(const AmpRelBreitWignerRes&, const char*);
-	AmpRelBreitWignerRes(const AmpRelBreitWignerRes&);
-
 	virtual ~AmpRelBreitWignerRes();
-
-	static std::complex<double> dynamicalFunction(double mSq, double mR, double ma, double mb, double gamma0, unsigned int J, double mesonRadius);
 	virtual void initialise();
+	/** Breit-Wigner function
+	 *
+	 * The dynamical function implemented here is taken from PDG2014 (Eq.47-22) for
+	 * the one channel case.
+	 * @J is angular momentum between A&B. In case A&B have spin 0 this is the spin for the resonace.
+	 *
+	 * @param mSq Invariant mass
+	 * @param mR Resonance mass
+	 * @param ma Mass particle A
+	 * @param mb Mass particle B
+	 * @param width  Width of resonance
+	 * @param J Angular momentum between A&B
+	 * @param mesonRadius Scale of interaction range
+	 * @return
+	 */
+	static std::complex<double> dynamicalFunction(double mSq, double mR, double ma, double mb, double width, unsigned int J, double mesonRadius);
 	virtual std::complex<double> evaluate(dataPoint& point) { return _norm*evaluateAmp(point)*evaluateWignerD(point); };
 	virtual std::complex<double> evaluateAmp(dataPoint& point);
-//	virtual double evaluateWignerD(dataPoint& point) {
-//		if(_spin==0) return 1.0;//save some computing time
-//		return _wignerD.evaluate(point);
-//	};
 
-	void setDecayMasses(double, double, double, double);
 	double getSpin() {return _spin;}; //needs to be declared in AmpAbsDynamicalFunction
 	unsigned int getNParams(){ return nParams;}
 

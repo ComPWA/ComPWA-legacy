@@ -19,53 +19,23 @@
 // includes the use of Blatt-Weisskopf barrier factors.
 
 #include <cmath>
+#include <math.h>
 #include "Physics/AmplitudeSum/AmpFlatteRes.hpp"
 AmpFlatteRes::AmpFlatteRes(const char *name,
 		std::shared_ptr<DoubleParameter> resMass,
 		std::shared_ptr<DoubleParameter> mesonRadius, //  meson radius
 		std::shared_ptr<DoubleParameter> motherRadius, //  mother radius
 		std::shared_ptr<DoubleParameter> g1, std::shared_ptr<DoubleParameter> g2,
-		double g2_partA, double g2_partB,
-		int subSys, ///  meson radius
-		int resSpin, int m, int n) :
+		double g2_partA, double g2_partB, int subSys, int resSpin, int m, int n) :
 		AmpAbsDynamicalFunction(name),
-		AmpKinematics(resMass, subSys, resSpin, m, n, AmpKinematics::barrierType(BWPrime),
-				mesonRadius, motherRadius),
-		_g2(g2), _g1(g1),
-		_g2_partA(g2_partA), _g2_partB(g2_partB),
-		foundMasses(false),
-		nParams(5)
-{
-}
-
-AmpFlatteRes::AmpFlatteRes(const AmpFlatteRes& other, const char* newname) :
-						  AmpAbsDynamicalFunction(other, newname),
-						  AmpKinematics(other),
-						  _g2(other._g2),
-						  _g1(other._g1)
-{
-}
-
-AmpFlatteRes::AmpFlatteRes(const AmpFlatteRes& other) :
-						  AmpAbsDynamicalFunction(other),
-						  AmpKinematics(other),
-						  _g2(other._g2),
-						  _g1(other._g1)
+		AmpKinematics(resMass, subSys, resSpin, m, n, mesonRadius, motherRadius),
+		_g2(g2), _g1(g1), _g2_partA(g2_partA), _g2_partB(g2_partB),
+		foundMasses(false),	nParams(5)
 {
 }
 
 AmpFlatteRes::~AmpFlatteRes() 
 {
-}
-
-void AmpFlatteRes::setDecayMasses(double ma, double mb, double mc, double M){
-	AmpKinematics::setDecayMasses(ma, mb, mc, M);
-	return;
-}
-
-void AmpFlatteRes::setBarrierMass(double mBarA, double mBarB) {
-	_g2_partA = mBarA;
-	_g2_partB = mBarB;
 }
 
 std::complex<double> AmpFlatteRes::evaluateAmp(dataPoint& point) {
@@ -89,16 +59,47 @@ std::complex<double> AmpFlatteRes::evaluateAmp(dataPoint& point) {
 
 	return dynamicalFunction(mSq,_mR->GetValue(),_ma,_mb,_g1->GetValue(), _g2_partA,_g2_partB,_g2->GetValue(),_spin);
 }
-std::complex<double> AmpFlatteRes::dynamicalFunction(double mSq, double mR, double ma, double mb, double g1,
-		double mHiddenA, double mHiddenB, double g2,unsigned int J ){
-	double p1 = 2*AmpKinematics::qValue(sqrt(mSq), ma,mb)/sqrt(mSq);//break-up momenta decay channel (e.g. a0->KK)
-	double p2 = 2*AmpKinematics::qValue(sqrt(mSq), mHiddenA,mHiddenB)/sqrt(mSq);//break-up momenta hidden channel (e.g. a0->eta pi)
+std::complex<double> AmpFlatteRes::dynamicalFunction(double mSq, double mR,
+		double massA1, double massA2, double gA,
+		double massB1, double massB2, double gB,
+		unsigned int J ){
+	double sqrtS = sqrt(mSq);
+	double den = 8*M_PI*sqrtS; //use Pi value of math.h
 
-	std::complex<double> denom(mR*mR - mSq, -p1*g1*g1-p2*g2*g2);
+	double mesonRadius = 1.5;//TODO: pass this as argument
 
-	std::complex<double> result = (std::complex<double>( g1*g1 , 0 ) / denom);
+	//channel A - signal channel
+	//break-up momentum
+	double pA = AmpKinematics::qValue(sqrtS, massA1,massA2) / den;
+	double barrierA = AmpKinematics::FormFactor(sqrtS,mR,massA1,massA2,J,mesonRadius)/AmpKinematics::FormFactor(mR,mR,massA1,massA2,J,mesonRadius);
+	double qTermA = std::pow((qValue(sqrtS,massA1,massA2) / qValue(mR,massA1,massA2)), (2.*J+ 1.));
+	//convert coupling to partial width of channel A
+	double gammaA = couplingToWidth(mSq,mR,gA,massA1,massA2,J,mesonRadius);
+	double termA = gammaA*qTermA*barrierA*barrierA;
+	//channel B - hidden channel
+	//break-up momentum
+	double pB = AmpKinematics::qValue(sqrtS, massB1,massB2) / den;
+	double barrierB = AmpKinematics::FormFactor(sqrtS,mR,massB1,massB2,J,1.5)/AmpKinematics::FormFactor(mR,mR,massB1,massB2,J,1.5);
+	double qTermB = std::pow((qValue(sqrtS,massB1,massB2) / qValue(mR,massB1,massB2)), (2.*J+ 1.));
+	//convert coupling to partial width of channel B
+	double gammaB = couplingToWidth(mSq,mR,gB,massB1,massB2,J,mesonRadius);
+	double termB = gammaB*qTermB*barrierB*barrierB;
 
-	if(result.real()!=result.real()) {std::cout << "RE part NAN" << std::endl; return 0;}
-	if(result.imag()!=result.imag()) {std::cout << "IM part NAN" << std::endl; return 0;}
+	//Coupling constant from production reaction. In case of a particle decay the production
+	//coupling doesn't depend in energy since the CM energy is in the (RC) system fixed to the
+	//mass of the decaying particle
+	double g_production = 1;
+
+	//old approach
+//	std::complex<double> denom( mR*mR - mSq, -pA*gA*gA-pB*gB*gB );
+	//new approach
+	std::complex<double> denom( mR*mR - mSq, (-1)*sqrtS*(termA + termB) );
+	//std::cout<<denom<<" "<<denom2<<" "<<barrierA<< " "<<barrierB<<std::endl;
+	std::complex<double> result = (std::complex<double>( gA*g_production , 0 ) / denom);
+
+	if(result.real()!=result.real() || result.imag()!=result.imag()){
+		std::cout<<"nan in Flatte: "<<barrierA<<" "<<mR<<" "<<mSq<<" "<<massA1<<" "<<massA2<<std::endl;
+		return 0;
+	}
 	return result;
 }
