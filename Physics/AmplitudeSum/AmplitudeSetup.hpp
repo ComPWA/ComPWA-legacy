@@ -36,6 +36,7 @@
 #include "Physics/AmplitudeSum/NonResonant.hpp"
 #include "Physics/AmplitudeSum/AmpRelBreitWignerRes.hpp"
 #include "Physics/AmplitudeSum/AmpFlatteRes.hpp"
+#include "Physics/AmplitudeSum/AmpFlatteRes3Ch.hpp"
 
 using namespace boost::log;
 using boost::property_tree::ptree;
@@ -47,6 +48,7 @@ private:
 	std::string m_filePath;
 	std::vector<BreitWignerConf> m_breitWigner;          // resonances
 	std::vector<FlatteConf> m_flatte;          // resonances
+	std::vector<Flatte3ChConf> m_flatte3ch;          // resonances
 	std::vector<basicConf> m_nonRes;
 	boost::property_tree::ptree pt;
 
@@ -62,6 +64,8 @@ public:
 			(*reso).update(par);
 		for(std::vector<FlatteConf>::iterator reso=getFlatte().begin(); reso!=getFlatte().end(); reso++)
 			(*reso).update(par);
+		for(std::vector<Flatte3ChConf>::iterator reso=getFlatte3Ch().begin(); reso!=getFlatte3Ch().end(); reso++)
+			(*reso).update(par);
 		for(std::vector<basicConf>::iterator reso=getNonRes().begin(); reso!=getNonRes().end(); reso++)
 			(*reso).update(par);
 	}
@@ -71,6 +75,7 @@ public:
 	inline const std::string & getFilePath() const {return m_filePath;};
 	inline std::vector<BreitWignerConf> & getBreitWigner() { return m_breitWigner; };
 	inline std::vector<FlatteConf> & getFlatte() { return m_flatte; };
+	inline std::vector<Flatte3ChConf> & getFlatte3Ch() { return m_flatte3ch; };
 	inline std::vector<basicConf> & getNonRes() { return m_nonRes; };
 
 };

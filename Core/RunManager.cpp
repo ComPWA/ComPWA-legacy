@@ -61,8 +61,9 @@ std::shared_ptr<FitResult> RunManager::startFit(ParameterList& inPar){
 
 	return result;
 }
-bool RunManager::generate( unsigned int number ) {
-	if(number==0) return 0;
+bool RunManager::generate( int number ) {
+	if(number < 0)
+		throw std::runtime_error("RunManager: generate() negative number of events: "+std::to_string((long double)number));
 	if(!(gen_ && amp_))
 		throw std::runtime_error("RunManager: generate() requirements not fulfilled");
 	if(!sampleData_)
@@ -123,7 +124,7 @@ bool RunManager::generate( unsigned int number ) {
 
 	return true;
 };
-bool RunManager::generateBkg( unsigned int number ) {
+bool RunManager::generateBkg( int number ) {
 	if(number==0) return 0;
 	if( !(ampBkg_ && gen_) )
 		throw std::runtime_error("RunManager: generateBkg() requirements not fulfilled");
@@ -183,7 +184,7 @@ bool RunManager::generateBkg( unsigned int number ) {
 	return true;
 };
 
-bool RunManager::generatePhsp( unsigned int number ) {
+bool RunManager::generatePhsp( int number ) {
 	if(number==0) return 0;
 	if(!samplePhsp_)
 		throw std::runtime_error("RunManager: generatePhsp() not phsp sample set");

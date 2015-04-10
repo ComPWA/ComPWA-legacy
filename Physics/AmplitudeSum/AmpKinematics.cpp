@@ -12,24 +12,10 @@
 #include "Physics/AmplitudeSum/AmpKinematics.hpp"
 #include "Physics/DPKinematics/DalitzKinematics.hpp"
 
-AmpKinematics::AmpKinematics(const AmpKinematics& other) :
-_M(other._M),
-_mR(other._mR),
-_type(other._type),
-_spin(other._spin),
-_m(other._m),
-_n(other._n),
-_mesonRadius(other._mesonRadius),
-_motherRadius(other._motherRadius),
-_wignerD(other._wignerD)
-{
-
-};
-
 AmpKinematics::AmpKinematics(std::shared_ptr<DoubleParameter> mR, int subSys, int spin, int m, int n,
-		barrierType type, std::shared_ptr<DoubleParameter> mesonRadius, std::shared_ptr<DoubleParameter> motherRadius) :
-		_M(-999), _mR(mR),_subSys(subSys), _type(type), _spin(spin),_m(m),_n(n),
-		_mesonRadius(mesonRadius), _motherRadius(motherRadius), _wignerD(subSys,spin)
+		std::shared_ptr<DoubleParameter> mesonRadius, std::shared_ptr<DoubleParameter> motherRadius) :
+				_M(-999), _mR(mR),_subSys(subSys), _spin(spin),_m(m),_n(n),
+				_mesonRadius(mesonRadius), _motherRadius(motherRadius), _wignerD(subSys,spin)
 {
 	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
 	_M=kin->M;
@@ -47,64 +33,81 @@ AmpKinematics::AmpKinematics(std::shared_ptr<DoubleParameter> mR, int subSys, in
 		_mc=kin->m3;}
 }
 
-void AmpKinematics::setDecayMasses(double ma, double mb, double mc, double M) {
-	_ma = ma;
-	_mb = mb;
-	_mc = mc;
-	_M = M;
-}
-double AmpKinematics::qValue(double x, double ma, double mb){
+std::complex<double> AmpKinematics::qValue(double sqrtS, double ma, double mb){
 	double mapb = ma + mb;
 	double mamb = ma - mb;
-	double xSq =x*x;
+	double xSq = sqrtS*sqrtS;
 	double t1 = xSq - mapb*mapb;
 	double t2 = xSq - mamb*mamb;
-
-	if( t1 < 0 ) {
-		//std::cout<<"AmpKinematics: Trying to calculate break-up momentum below threshold!"<<std::endl;
-		return 1; //below threshold
-	}
-	double result=sqrt( t1 * t2 ) / (2. * x );
-	return result;
-
-}
-double AmpKinematics::BlattWeiss(double x, double mR, double ma, double mb, double spin, double mesonRadius){
-	double qR = qValue(mR,ma,mb);
-	double qX = qValue(x,ma,mb);
-	double t0= qR*qR * mesonRadius*mesonRadius;
-	double t=  qX*qX* mesonRadius*mesonRadius;
-	return FormFactor(t0,t,spin);
+	std::complex<double> s( sqrt(std::complex<double>(t1*t2,0)) / (2*sqrtS) );
+//	if(s.imag())
+//		std::cout<<"qValue: "<<t1*t2<<" "<<2*sqrtS<<" "<<s<<std::endl;
+	return s;
 }
 
-double AmpKinematics::FormFactor(double z0, double z,unsigned int spin){
-	double nom=0, denom=0;
+double AmpKinematics::FormFactor(double sqrtS, double mR, double ma, double mb, double spin, double mesonRadius){
+	//Blatt-Weisskopt form factors with normalization F(x=mR) = 1.
+	//Reference: S.U.Chung Annalen der Physik 4(1995) 404-430
 	if (spin == 0) return 1;
-	else if (spin == 1){
-		//		if(_type==barrierType::BWPrime){
-		nom = 1 + z0;
-		denom = 1 + z;
-		//		} else if(_type==barrierType::BW){
-		//			nom = 2*z;
-		//			denom = 1 + z;
-		//		} else {
-		//			std::cout<<"Wrong BLW factor definition: "<<_type<<std::endl;
-		//			return 1;
-		//		}
+	std::complex<double> q = qValue(sqrtS,ma,mb);
+	//z = q / (interaction range). For the interaction range we assume 1/mesonRadius
+	double z = std::norm(q)*mesonRadius*mesonRadius;
+
+	double nom=0, denom=0;
+	if (spin == 1){
+		return( sqrt(2*z/(z+1)) );
 	}
 	else if (spin == 2) {
-		//		if(_type==barrierType::BWPrime){
-		nom = (z0-3)*(z0-3)+9*z0;
-		denom = (z-3)*(z-3)+9*z;
-		//		} else if(_type==barrierType::BW){
-		//			nom = 13*z*z;
-		//			denom = (z-3)*(z-3)+9*z;
-		//		} else {
-		//			std::cout<<"Wrong BLW factor definition: "<<_type<<std::endl;
-		//			return 1;
-		//		}
+		return ( sqrt( 13*z*z/( (z-3)*(z-3)+9*z ) ) );
+	}
+	else if (spin == 3) {
+		return ( sqrt( 277*z*z*z/( z*(z-15)*(z-15) + 9*(2*z-5) ) ) );
+	}
+	else if (spin == 4) {
+		return ( sqrt( 12746*z*z*z*z/( (z*z-45*z+105)*(z*z-45*z+105) + 25*z*(2*z-21)*(2*z-21) ) ) );
 	}
 	else{
-		std::cout<<"Wrong spin value! BLW factors only implemented for spin 0,1 and 2! "<<std::endl;
+		std::cout<<"Wrong spin value! BLW factors only implemented for spin 0-4! "<<std::endl;
 	}
-	return nom/denom;
+	return 0;
+}
+double AmpKinematics::phspFactor(double sqrtS, double ma, double mb){
+	std::complex<double> phsp = qValue(sqrtS,ma,mb) / (8*M_PI*sqrtS);
+	if(phsp.imag())
+		return 0;
+	return phsp.real();
+}
+
+double AmpKinematics::widthToCoupling(double mSq, double mR, double width,
+		double ma, double mb, double spin, double mesonRadius){
+	double sqrtS = sqrt(mSq);
+
+	//calculate gammaA(s_R)
+	double ffR = FormFactor(mR,mR,ma,mb,spin,mesonRadius);
+	std::complex<double> qR = std::pow(qValue(mR,ma,mb),spin);
+	//calculate phsp factor
+	double rho = phspFactor(sqrtS,ma,mb);
+	std::complex<double> denom = (std::pow(qR,spin)*ffR*sqrt(rho));
+	std::complex<double> result = std::complex<double>(sqrt(mR*width), 0) / denom;
+	if(result.imag()) //is a complex coupling a physical solution?
+		throw std::runtime_error("AmpKinematics::widthToCoupling| coupling has an imaginary part of"
+				+std::to_string((long double) result.imag())
+	+" sqrtS="+std::to_string((long double) sqrtS)
+	+" mR="+std::to_string((long double) mR)
+	+" width="+std::to_string((long double) width)
+	+" ma="+std::to_string((long double) ma)
+	+" mb="+std::to_string((long double) mb));
+	return result.real();
+}
+
+double AmpKinematics::couplingToWidth(double mSq, double mR, double g,
+		double ma, double mb, double spin, double mesonRadius){
+	double sqrtM = sqrt(mSq);
+	//calculate gammaA(s_R)
+	double ffR = FormFactor(mR,mR,ma,mb,spin,mesonRadius);
+	std::complex<double> qR = std::pow(qValue(mR,ma,mb),spin);
+	std::complex<double> gammaA = ffR*qR;
+	//calculate phsp factor
+	double rho = phspFactor(sqrtM,ma,mb);
+	return ( std::norm(gammaA)*g*g*rho / mR );
 }

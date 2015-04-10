@@ -117,9 +117,9 @@ public:
 	virtual std::shared_ptr<Generator> getGenerator(){ return gen_; };
 
 	virtual std::shared_ptr<FitResult> startFit( ParameterList& );
-	virtual bool generate ( unsigned int number );
-	virtual bool generatePhsp ( unsigned int number );
-	virtual bool generateBkg ( unsigned int number );
+	virtual bool generate ( int number );
+	virtual bool generatePhsp ( int number );
+	virtual bool generateBkg ( int number );
 
 protected:
 	std::shared_ptr<Data> sampleData_; /*!< Pointer to data sample */
