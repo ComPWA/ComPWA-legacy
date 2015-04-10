@@ -64,7 +64,7 @@ public:
 	 * @param mb mass particle B
 	 * @return |break-up momentum|
 	 */
-	static double qValue(double sqrtS, double ma, double mb);
+	static std::complex<double> qValue(double sqrtS, double ma, double mb);
 	/** Two body phsp factor
 	 *
 	 * From PDG2014 Eqn.47-2
@@ -76,9 +76,9 @@ public:
 	static double phspFactor(double sqrtS, double ma, double mb);
 	static double FormFactor(double sqrtS, double mR, double ma, double mb, double spin, double mesonRadius);
 
-	double q0()  const { return qValue(_mR->GetValue(), _ma, _mb ); };
-	double q(double x)  const { return qValue(x, _ma, _mb); };
-	double q(double x,double ma, double mb)  const { return qValue(x, ma, mb); };
+	std::complex<double> q0()  const { return qValue(_mR->GetValue(), _ma, _mb ); };
+	std::complex<double> q(double x)  const { return qValue(x, _ma, _mb); };
+	std::complex<double> q(double x,double ma, double mb)  const { return qValue(x, ma, mb); };
 
 	double getResMass() {return _mR->GetValue();};
 //	double getSpin() {return _spin;}; //needs to be declared in AmpAbsDynamicalFunction

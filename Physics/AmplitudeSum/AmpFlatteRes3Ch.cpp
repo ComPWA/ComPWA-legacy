@@ -20,27 +20,35 @@
 
 #include <cmath>
 #include <math.h>
+#include "Physics/AmplitudeSum/AmpFlatteRes3Ch.hpp"
 #include "Physics/AmplitudeSum/AmpFlatteRes.hpp"
-AmpFlatteRes::AmpFlatteRes(const char *name,
+
+AmpFlatteRes3Ch::AmpFlatteRes3Ch(const char *name,
 		std::shared_ptr<DoubleParameter> resMass,
 		std::shared_ptr<DoubleParameter> mesonRadius, //  meson radius
 		std::shared_ptr<DoubleParameter> motherRadius, //  mother radius
-		std::shared_ptr<DoubleParameter> g1, std::shared_ptr<DoubleParameter> g2,
-		double g2_partA, double g2_partB, int subSys, int resSpin, int m, int n, double resRadius) :
+		std::shared_ptr<DoubleParameter> g1,
+		std::shared_ptr<DoubleParameter> g2, double g2_partA, double g2_partB,
+		std::shared_ptr<DoubleParameter> g3, double g3_partA, double g3_partB,
+		int subSys, int resSpin, int m, int n, double resRadius) :
 		AmpAbsDynamicalFunction(name),
-		AmpKinematics(resMass, subSys, resSpin, m, n, mesonRadius, motherRadius),
-		_g2(g2), _g1(g1), _g2_partA(g2_partA), _g2_partB(g2_partB), mesonRadius(resRadius),
-		foundMasses(false),	nParams(5)
+		AmpKinematics(resMass, subSys, resSpin, m, n, mesonRadius, motherRadius), _g1(g1),
+		_g2(g2),_g2_partA(g2_partA), _g2_partB(g2_partB),
+		_g3(g3),_g3_partA(g3_partA), _g3_partB(g3_partB),
+		mesonRadius(resRadius),	foundMasses(false),	nParams(5)
 {
 	if(_g2_partA<0||_g2_partA>5||_g2_partB<0||_g2_partB>5)
 		throw std::runtime_error("AmpFlatteRes3Ch::evaluateAmp | particle masses for second channel not set!");
+	if(_g3_partA<0||_g3_partA>5||_g3_partB<0||_g3_partB>5)
+		throw std::runtime_error("AmpFlatteRes3Ch::evaluateAmp | particle masses for third channel not set!");
 }
 
-AmpFlatteRes::~AmpFlatteRes() 
+AmpFlatteRes3Ch::~AmpFlatteRes3Ch()
 {
 }
 
-std::complex<double> AmpFlatteRes::evaluateAmp(dataPoint& point) {
+std::complex<double> AmpFlatteRes3Ch::evaluateAmp(dataPoint& point) {
+
 	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
 	if(!foundMasses){
 		id23 = point.getID("m23sq");
@@ -55,16 +63,18 @@ std::complex<double> AmpFlatteRes::evaluateAmp(dataPoint& point) {
 	case 5: mSq=(point.getVal(0)); break;
 	}
 
-	return dynamicalFunction(mSq,_mR->GetValue(),_ma,_mb,_g1->GetValue(), _g2_partA,_g2_partB,_g2->GetValue(),_spin,mesonRadius);
+	return dynamicalFunction(mSq,_mR->GetValue(),_ma,_mb,_g1->GetValue(),
+			_g2_partA,_g2_partB,_g2->GetValue(),
+			_g3_partA,_g3_partB,_g3->GetValue(),
+			_spin,mesonRadius);
 }
-std::complex<double> AmpFlatteRes::dynamicalFunction(double mSq, double mR,
+std::complex<double> AmpFlatteRes3Ch::dynamicalFunction(double mSq, double mR,
 		double massA1, double massA2, double gA,
-		double massB1, double massB2, double couplingRatio,
+		double massB1, double massB2, double couplingRatioB,
+		double massC1, double massC2, double couplingRatioC,
 		unsigned int J, double mesonRadius ){
 	double sqrtS = sqrt(mSq);
 	double den = 8*M_PI*sqrtS; //use Pi value of math.h
-
-//	double mesonRadius = 1.5;//TODO: pass this as argument
 
 	//channel A - signal channel
 	//break-up momentum
@@ -83,11 +93,24 @@ std::complex<double> AmpFlatteRes::dynamicalFunction(double mSq, double mR,
 	double barrierB = AmpKinematics::FormFactor(sqrtS,mR,massB1,massB2,J,1.5)/AmpKinematics::FormFactor(mR,mR,massB1,massB2,J,1.5);
 	std::complex<double> qTermB = std::pow((qValue(sqrtS,massB1,massB2) / qValue(mR,massB1,massB2)), (2.*J+ 1.));
 	//we expect that the ratio (gA/gB)^2
-	double gB = sqrt(gA*gA/couplingRatio);
+	double gB = sqrt(gA*gA/couplingRatioB);
+	//	std::cout<<gA<< " "<<gB<<" "<<couplingRatio<<std::endl;
 	//convert coupling to partial width of channel B
 	double gammaB = couplingToWidth(mSq,mR,gB,massB1,massB2,J,mesonRadius);
 	//std::complex<double> termB = gammaB*qTermB*barrierB*barrierB;
 	std::complex<double> termB = gammaB*barrierB*barrierB;
+
+	//channel C - hidden channel
+	//break-up momentum
+	std::complex<double> pC = AmpKinematics::qValue(sqrtS, massC1,massC2) / den;
+	double barrierC = AmpKinematics::FormFactor(sqrtS,mR,massC1,massC2,J,1.5)/AmpKinematics::FormFactor(mR,mR,massC1,massC2,J,1.5);
+	std::complex<double> qTermC = std::pow((qValue(sqrtS,massC1,massC2) / qValue(mR,massC1,massC2)), (2.*J+ 1.));
+	//we expect that the ratio (gA/gC)^2
+	double gC = sqrt(gA*gA/couplingRatioC);
+	//convert coupling to partial width of channel C
+	double gammaC = couplingToWidth(mSq,mR,gC,massC1,massC2,J,mesonRadius);
+	//std::complex<double> termC = gammaC*qTermC*barrierC*barrierC;
+	std::complex<double> termC = gammaC*barrierC*barrierC;
 
 	//Coupling constant from production reaction. In case of a particle decay the production
 	//coupling doesn't depend in energy since the CM energy is in the (RC) system fixed to the
@@ -95,13 +118,12 @@ std::complex<double> AmpFlatteRes::dynamicalFunction(double mSq, double mR,
 	double g_production = 1;
 
 	//-- old approach
-	//	std::complex<double> denom( mR*mR - mSq,
-	//			(-1)*(pA.real()*gA*gA + pB.real()*gB*gB) );
+	//std::complex<double> denom( mR*mR - mSq, -pA*gA*gA-pB*gB*gB );
 
 	//-- new approach - for spin 0 resonances in the imaginary part of the denominator the term qTerm
 	//is added, compared to the old formula
-	std::complex<double> denom( mR*mR - mSq + sqrtS*(termA.imag() + termB.imag()),
-			(-1)*sqrtS*(termA.real() + termB.real()) );
+	std::complex<double> denom( mR*mR - mSq + sqrtS*(termA.imag() + termB.imag() + termC.imag()),
+			(-1)*sqrtS*(termA.real() + termB.real()+ termC.real()) );
 	std::complex<double> result = std::complex<double>(gA*g_production,0) / denom;
 
 	if(result.real()!=result.real() || result.imag()!=result.imag()){
@@ -111,13 +133,13 @@ std::complex<double> AmpFlatteRes::dynamicalFunction(double mSq, double mR,
 	return result;
 }
 
-bool FlatteStrategy::execute(ParameterList& paras, std::shared_ptr<AbsParameter>& out) {
+bool Flatte3ChStrategy::execute(ParameterList& paras, std::shared_ptr<AbsParameter>& out) {
 	if( checkType != out->type() ) {
 		throw(WrongParType(std::string("Output Type ")+ParNames[out->type()]+std::string(" conflicts expected type ")+ParNames[checkType]+std::string(" of ")+name+" BW strat"));
 		return false;
 	}
 
-	double m0, d, ma, mb, g1, g2, mHiddenA, mHiddenB;
+	double m0, d, ma, mb, g1, gB, massB1, massB2, gC, massC1, massC2;
 	unsigned int spin, mesonRadius, subSys;
 	//Get parameters from ParameterList -
 	//enclosing in try...catch for the case that names of nodes have changed
@@ -159,23 +181,10 @@ bool FlatteStrategy::execute(ParameterList& paras, std::shared_ptr<AbsParameter>
 		BOOST_LOG_TRIVIAL(error) <<"FlatteStrategy: can't find parameter ParOfNode_ma_"+name;
 		throw;
 	}
-
 	try{
 		mb = double(paras.GetParameterValue("ParOfNode_mb_"+name));
 	}catch(BadParameter& e){
 		BOOST_LOG_TRIVIAL(error) <<"FlatteStrategy: can't find parameter ParOfNode_mb_"+name;
-		throw;
-	}
-	try{
-		mHiddenA = double(paras.GetParameterValue("ParOfNode_mHiddenA_"+name));
-	}catch(BadParameter& e){
-		BOOST_LOG_TRIVIAL(error) <<"FlatteStrategy: can't find parameter ParOfNode_mHiddenA_"+name;
-		throw;
-	}
-	try{
-		mHiddenB = double(paras.GetParameterValue("ParOfNode_mHiddenB_"+name));
-	}catch(BadParameter& e){
-		BOOST_LOG_TRIVIAL(error) <<"FlatteStrategy: can't find parameter ParOfNode_mHiddenB_"+name;
 		throw;
 	}
 	try{
@@ -190,12 +199,41 @@ bool FlatteStrategy::execute(ParameterList& paras, std::shared_ptr<AbsParameter>
 		}
 	}
 	try{
-		g2 = double(paras.GetParameterValue("g2_"+name));
+		massB1 = double(paras.GetParameterValue("ParOfNode_massB1_"+name));
+	}catch(BadParameter& e){
+		BOOST_LOG_TRIVIAL(error) <<"FlatteStrategy: can't find parameter ParOfNode_massB1_"+name;
+		throw;
+	}
+	try{
+		massB2 = double(paras.GetParameterValue("ParOfNode_massB2_"+name));
+	}catch(BadParameter& e){
+		BOOST_LOG_TRIVIAL(error) <<"FlatteStrategy: can't find parameter ParOfNode_massB2_"+name;
+		throw;
+	}
+	try{
+		gB = double(paras.GetParameterValue("g2_"+name));
 	}catch(BadParameter& e){
 		BOOST_LOG_TRIVIAL(error) <<"FlatteStrategy: can't find parameter g2_"+name;
 		throw;
 	}
-
+	try{
+		massC1 = double(paras.GetParameterValue("ParOfNode_massC1_"+name));
+	}catch(BadParameter& e){
+		BOOST_LOG_TRIVIAL(error) <<"FlatteStrategy: can't find parameter ParOfNode_massC1_"+name;
+		throw;
+	}
+	try{
+		massC2 = double(paras.GetParameterValue("ParOfNode_massC2_"+name));
+	}catch(BadParameter& e){
+		BOOST_LOG_TRIVIAL(error) <<"FlatteStrategy: can't find parameter ParOfNode_massC2"+name;
+		throw;
+	}
+	try{
+		gC = double(paras.GetParameterValue("g3_"+name));
+	}catch(BadParameter& e){
+		BOOST_LOG_TRIVIAL(error) <<"FlatteStrategy: can't find parameter g3_"+name;
+		throw;
+	}
 	//MultiDim output, must have multidim Paras in input
 	if(checkType == ParType::MCOMPLEX){
 		if(paras.GetNMultiDouble()){
@@ -212,7 +250,10 @@ bool FlatteStrategy::execute(ParameterList& paras, std::shared_ptr<AbsParameter>
 			//calc BW for each point
 			for(unsigned int ele=0; ele<nElements; ele++){
 				double mSq = (mp->GetValue(ele));
-				results[ele] = AmpFlatteRes::dynamicalFunction(mSq,m0,ma,mb,g1,mHiddenA,mHiddenB,g2,spin,mesonRadius);
+				results[ele] = AmpFlatteRes3Ch::dynamicalFunction(mSq,m0,ma,mb,g1,
+						massB1,massB2,gB,
+						massC1,massC2,gC,
+						spin,mesonRadius);
 				//					if(ele<10) std::cout<<"Strategy BWrel "<<results[ele]<<std::endl;
 			}
 
@@ -233,18 +274,21 @@ bool FlatteStrategy::execute(ParameterList& paras, std::shared_ptr<AbsParameter>
 	case 5:{ mSq  = (double(paras.GetParameterValue("m23sq"))); break; }
 	}
 
-	std::complex<double> result = AmpFlatteRes::dynamicalFunction(mSq,m0,ma,mb,g1,mHiddenA,mHiddenB,g2,spin,mesonRadius);
+	std::complex<double> result = AmpFlatteRes3Ch::dynamicalFunction(mSq,m0,ma,mb,g1,
+			massB1,massB2,gB,
+			massC1,massC2,gC,
+			spin,mesonRadius);
 	out = std::shared_ptr<AbsParameter>(new ComplexParameter(out->GetName(), result));
 	return true;
 }
 
-bool FlattePhspStrategy::execute(ParameterList& paras, std::shared_ptr<AbsParameter>& out) {
+bool Flatte3ChPhspStrategy::execute(ParameterList& paras, std::shared_ptr<AbsParameter>& out) {
 	if( checkType != out->type() ) {
 		throw(WrongParType(std::string("Output Type ")+ParNames[out->type()]+std::string(" conflicts expected type ")+ParNames[checkType]+std::string(" of ")+name+" BW strat"));
 		return false;
 	}
 
-	double m0, d, ma, mb, g1, g2, mHiddenA, mHiddenB;
+	double m0, d, ma, mb, g1, gB, massB1, massB2, gC, massC1, massC2;
 	unsigned int spin, subSys, mesonRadius;
 
 	//Get parameters from ParameterList -
@@ -292,18 +336,6 @@ bool FlattePhspStrategy::execute(ParameterList& paras, std::shared_ptr<AbsParame
 		throw;
 	}
 	try{
-		mHiddenA = double(paras.GetParameterValue("ParOfNode_mHiddenA_"+name));
-	}catch(BadParameter& e){
-		BOOST_LOG_TRIVIAL(error) <<"FlattePhspStrategy: can't find parameter ParOfNode_mHiddenA_"+name;
-		throw;
-	}
-	try{
-		mHiddenB = double(paras.GetParameterValue("ParOfNode_mHiddenB_"+name));
-	}catch(BadParameter& e){
-		BOOST_LOG_TRIVIAL(error) <<"FlattePhspStrategy: can't find parameter ParOfNode_mHiddenB_"+name;
-		throw;
-	}
-	try{
 		g1 = double(paras.GetParameterValue("g1_"+name));
 	}catch(BadParameter& e){
 		try{
@@ -315,9 +347,39 @@ bool FlattePhspStrategy::execute(ParameterList& paras, std::shared_ptr<AbsParame
 		}
 	}
 	try{
-		g2 = double(paras.GetParameterValue("g2_"+name));
+		massB1 = double(paras.GetParameterValue("ParOfNode_massB1_"+name));
+	}catch(BadParameter& e){
+		BOOST_LOG_TRIVIAL(error) <<"FlattePhspStrategy: can't find parameter ParOfNode_massB1_"+name;
+		throw;
+	}
+	try{
+		massB2 = double(paras.GetParameterValue("ParOfNode_massB2_"+name));
+	}catch(BadParameter& e){
+		BOOST_LOG_TRIVIAL(error) <<"FlattePhspStrategy: can't find parameter ParOfNode_massB2_"+name;
+		throw;
+	}
+	try{
+		gB = double(paras.GetParameterValue("g2_"+name));
 	}catch(BadParameter& e){
 		BOOST_LOG_TRIVIAL(error) <<"FlattePhspStrategy: can't find parameter g2_"+name;
+		throw;
+	}
+	try{
+		massC1 = double(paras.GetParameterValue("ParOfNode_massC1_"+name));
+	}catch(BadParameter& e){
+		BOOST_LOG_TRIVIAL(error) <<"FlattePhspStrategy: can't find parameter ParOfNode_massC1_"+name;
+		throw;
+	}
+	try{
+		massC2 = double(paras.GetParameterValue("ParOfNode_massC2_"+name));
+	}catch(BadParameter& e){
+		BOOST_LOG_TRIVIAL(error) <<"FlattePhspStrategy: can't find parameter ParOfNode_massC2_"+name;
+		throw;
+	}
+	try{
+		gC = double(paras.GetParameterValue("g3_"+name));
+	}catch(BadParameter& e){
+		BOOST_LOG_TRIVIAL(error) <<"FlattePhspStrategy: can't find parameter g3_"+name;
 		throw;
 	}
 
@@ -338,7 +400,10 @@ bool FlattePhspStrategy::execute(ParameterList& paras, std::shared_ptr<AbsParame
 			//calc BW for each point
 			for(unsigned int ele=0; ele<nElements; ele++){
 				double mSq = (mp->GetValue(ele));
-				results[ele] = AmpFlatteRes::dynamicalFunction(mSq,m0,ma,mb,g1,mHiddenA,mHiddenB,g2,spin,mesonRadius);
+				results[ele] = AmpFlatteRes3Ch::dynamicalFunction(mSq,m0,ma,mb,g1,
+						massB1,massB2,gB,
+						massC1,massC2,gC,
+						spin,mesonRadius);
 				//					if(ele<10) std::cout<<"Strategy BWrel "<<results[ele]<<std::endl;
 			}
 			out = std::shared_ptr<AbsParameter>(new MultiComplex(out->GetName(),results));
@@ -357,7 +422,29 @@ bool FlattePhspStrategy::execute(ParameterList& paras, std::shared_ptr<AbsParame
 	case 5:{ mSq  = (double(paras.GetParameterValue("m23sq_phsp"))); break; }
 	}
 
-	std::complex<double> result = AmpFlatteRes::dynamicalFunction(mSq,m0,ma,mb,g1,mHiddenA,mHiddenB,g2,spin,mesonRadius);
+	std::complex<double> result = AmpFlatteRes3Ch::dynamicalFunction(mSq,m0,ma,mb,g1,
+			massB1,massB2,gB,
+			massC1,massC2,gC,
+			spin,mesonRadius);
 	out = std::shared_ptr<AbsParameter>(new ComplexParameter(out->GetName(), result));
 	return true;
 }
+
+Flatte3ChConf::Flatte3ChConf(const boost::property_tree::ptree &pt_) : FlatteConf(pt_){
+	m_g3= pt_.get<double>("g3");
+	m_g3_part1= pt_.get<std::string>("g3_part1");
+	m_g3_part2= pt_.get<std::string>("g3_part2");
+}
+void Flatte3ChConf::put(boost::property_tree::ptree &pt_){
+	FlatteConf::put(pt_);
+	pt_.put("g3", m_g3);
+	pt_.put("g3_part1", m_g3_part1);
+	pt_.put("g3_part2", m_g3_part2);
+}
+void Flatte3ChConf::update(ParameterList par){
+	FlatteConf::update(par);
+	try{// only update parameters if they are found in list
+		m_g3= par.GetDoubleParameter("g3_"+m_name)->GetValue();
+	} catch (BadParameter b) { }
+}
+

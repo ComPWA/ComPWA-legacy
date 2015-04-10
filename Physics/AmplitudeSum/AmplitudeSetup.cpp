@@ -74,6 +74,8 @@ void AmplitudeSetup::load(const std::string &filename)
 			m_breitWigner.push_back(BreitWignerConf(v.second));
 		} else if( v.first == "Flatte" ) {
 			m_flatte.push_back(FlatteConf(v.second));
+		} else if( v.first == "Flatte3Ch" ) {
+			m_flatte3ch.push_back(Flatte3ChConf(v.second));
 		} else if( v.first == "nonRes" ) {
 			m_nonRes.push_back(basicConf(v.second));
 		} else if( v.first == "filename") {
@@ -117,6 +119,15 @@ void AmplitudeSetup::save(const std::string &filename)
 			}
 			if(id==-1) continue;
 			m_flatte.at(id).put(v.second);
+		}
+		if( v.first == "Flatte3Ch" ) {
+			std::string name = v.second.get<std::string>("name");
+			int id = -1;
+			for(unsigned int i=0; i<m_flatte3ch.size(); i++){
+				if(m_flatte3ch.at(i).m_name==name) id=i;
+			}
+			if(id==-1) continue;
+			m_flatte3ch.at(id).put(v.second);
 		}
 		if( v.first == "nonRes" ) {
 			std::string name = v.second.get<std::string>("name");

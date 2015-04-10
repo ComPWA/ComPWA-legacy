@@ -78,6 +78,7 @@ protected:
 class basicConf
 {
 public:
+	virtual ~basicConf(){};
 	basicConf(){}
 	basicConf(const boost::property_tree::ptree &pt_){
 		m_enable = pt_.get<bool>("enable");

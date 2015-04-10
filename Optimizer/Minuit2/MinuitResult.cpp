@@ -253,10 +253,8 @@ void MinuitResult::calcFraction(ParameterList& parList){
 		/*We need the intensity over the PHSP without efficiency correction. Therefore we
 		 * access node 'Amplitude' and sum up its values.*/
 		std::shared_ptr<TreeNode> amplitudeNode = tree->head()->getChildNode("Amplitude_Phsp");
-		double normEff = tree->head()->getChildValue("normFactor").real();
-		BOOST_LOG_TRIVIAL(info)<<"MinuitResult::calcFraction() norm*eff="<<normEff;
 		if(!amplitudeNode){
-			BOOST_LOG_TRIVIAL(error)<<"MinuitResult::calcFraction() : Can't find node 'Amplitude' in tree!";
+			BOOST_LOG_TRIVIAL(error)<<"MinuitResult::calcFraction() : Can't find node 'Amplitude_Phsp' in tree!";
 			throw BadParameter("Node not found!");
 		}
 		std::shared_ptr<MultiComplex> normPar = std::dynamic_pointer_cast<MultiComplex>(amplitudeNode->getValue());//node 'Amplitude'
@@ -264,10 +262,6 @@ void MinuitResult::calcFraction(ParameterList& parList){
 		for(unsigned int i=0; i<numPhspEvents;i++)
 			norm+=abs(normPar->GetValue(i))*abs(normPar->GetValue(i));
 		norm = norm*phspVolume/numPhspEvents; //correct calculation of normalization
-		//		norm = amplitudeNode->getValue();
-
-		//		std::cout<<"Amplitude normalization: "<<norm<<std::endl;
-		//				std::cout<<norm<<" "<<phspVolume<<" "<<numPhspEvents<<std::endl;
 	}
 	if(norm<0)
 		throw std::runtime_error("MinuitResult::calcFraction() normalization can't be calculated");
