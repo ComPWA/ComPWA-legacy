@@ -73,8 +73,11 @@ double AmpKinematics::FormFactor(double sqrtS, double mR, double ma, double mb, 
 }
 double AmpKinematics::phspFactor(double sqrtS, double ma, double mb){
 	std::complex<double> phsp = qValue(sqrtS,ma,mb) / (8*M_PI*sqrtS);
-	if(phsp.imag())
-		return 0;
+	if(phsp.imag()){
+//		BOOST_LOG_TRIVIAL(error)<<"sqrtS="<<sqrtS<<" ma="<<ma<<" mb="<<mb<<" rho="<<rho;
+//		throw std::runtime_error("AmpKinematics::phspFactor| PHSP factor not real!");
+		return 0; //set phsp factor to 0 below threshold
+	}
 	return phsp.real();
 }
 
@@ -84,19 +87,20 @@ double AmpKinematics::widthToCoupling(double mSq, double mR, double width,
 
 	//calculate gammaA(s_R)
 	double ffR = FormFactor(mR,mR,ma,mb,spin,mesonRadius);
-	std::complex<double> qR = std::pow(qValue(mR,ma,mb),spin);
+	std::complex<double> qR = qValue(mR,ma,mb);
 	//calculate phsp factor
 	double rho = phspFactor(sqrtS,ma,mb);
+	if(!rho) {
+		BOOST_LOG_TRIVIAL(error)<<"AmpKinematics::widthToCoupling() | Found event below threshold! This should not happen!"
+				<<"mSq="<<mSq<<" mR="<<mR<<" width="<<width<<" massA="<<ma<<" massB="<<mb<<" spin="<<spin;
+		return 0;
+	}
 	std::complex<double> denom = (std::pow(qR,spin)*ffR*sqrt(rho));
 	std::complex<double> result = std::complex<double>(sqrt(mR*width), 0) / denom;
-	if(result.imag()) //is a complex coupling a physical solution?
-		throw std::runtime_error("AmpKinematics::widthToCoupling| coupling has an imaginary part of"
-				+std::to_string((long double) result.imag())
-	+" sqrtS="+std::to_string((long double) sqrtS)
-	+" mR="+std::to_string((long double) mR)
-	+" width="+std::to_string((long double) width)
-	+" ma="+std::to_string((long double) ma)
-	+" mb="+std::to_string((long double) mb));
+	if(result.imag()){ //is a complex coupling a physical solution?
+		BOOST_LOG_TRIVIAL(error)<<"sqrtS="<<sqrtS<<" mR="<<mR<<" ma="<<ma<<" mb="<<mb<<" rho="<<rho;
+		throw std::runtime_error("AmpKinematics::widthToCoupling| coupling not real!");
+	}
 	return result.real();
 }
 

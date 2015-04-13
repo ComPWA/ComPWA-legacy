@@ -196,10 +196,6 @@ void AmpSumIntensity::init(){
 				new DoubleParameter("d_"+name,tmp.m_mesonRadius) ) );
 		params.GetDoubleParameter("d_"+name)->FixParameter(1);
 
-		std::cout<<PhysConst::instance()->getMass(tmp.m_g2_part1)<<" ";
-		std::cout<<PhysConst::instance()->getMass(tmp.m_g2_part2)<<" ";
-		std::cout<<PhysConst::instance()->getMass(tmp.m_g3_part1)<<" ";
-		std::cout<<PhysConst::instance()->getMass(tmp.m_g3_part2)<<std::endl;
 		std::shared_ptr<AmpFlatteRes3Ch> tmpbw(new AmpFlatteRes3Ch(name.c_str(),
 				params.GetDoubleParameter("m0_"+name), params.GetDoubleParameter("d_"+name),
 				params.GetDoubleParameter("motherRadius"),
@@ -247,7 +243,7 @@ void AmpSumIntensity::init(){
 std::shared_ptr<FunctionTree> AmpSumIntensity::setupBasicTree(
 		allMasses& theMasses,allMasses& toyPhspSample,std::string suffix)
 {
-	BOOST_LOG_TRIVIAL(debug) << "AmpSumIntensity::setupTree() generating new tree!";
+	BOOST_LOG_TRIVIAL(debug) << "AmpSumIntensity::setupBasicTree() generating new tree!";
 	if(theMasses.nEvents==0){
 		BOOST_LOG_TRIVIAL(error) << "AmpSumIntensity::setupBasicTree() data sample empty!";
 		return std::shared_ptr<FunctionTree>();
@@ -293,7 +289,7 @@ std::shared_ptr<FunctionTree> AmpSumIntensity::setupBasicTree(
 		basicConf tmp = (*reso);
 		std::string name = tmp.m_name;
 		if(!tmp.m_enable) continue;
-		BOOST_LOG_TRIVIAL(debug) << "AmpSumIntensity::setupTree() adding "<<tmp.m_name<<" (non-resonant) to tree.";
+		BOOST_LOG_TRIVIAL(debug) << "AmpSumIntensity::setupBasicTree() adding "<<tmp.m_name<<" (non-resonant) to tree.";
 		std::shared_ptr<NonResonantStrategy> nonResStrat(new NonResonantStrategy(tmp.m_name,ParType::MCOMPLEX));
 
 		newTree->createNode("Reso_"+tmp.m_name, mmultStrat, "Amplitude"+suffix, theMasses.nEvents); //Reso=C*N*nonReso
@@ -328,7 +324,7 @@ std::shared_ptr<FunctionTree> AmpSumIntensity::setupBasicTree(
 		BreitWignerConf tmp = (*reso);
 		std::string name = tmp.m_name;
 		if(!tmp.m_enable) continue;
-		BOOST_LOG_TRIVIAL(debug) << "AmpSumIntensity::setupTree() adding "<<tmp.m_name<<" (BW) to tree.";
+		BOOST_LOG_TRIVIAL(debug) << "AmpSumIntensity::setupBasicTree() adding "<<tmp.m_name<<" (BW) to tree.";
 
 		//----Add Nodes
 		std::shared_ptr<BreitWignerStrategy> rbwStrat( new BreitWignerStrategy(tmp.m_name,ParType::MCOMPLEX) );
