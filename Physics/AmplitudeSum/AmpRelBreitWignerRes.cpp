@@ -79,7 +79,7 @@ std::complex<double> AmpRelBreitWignerRes::dynamicalFunction(double mSq, double 
 	double g_production = 1;
 
 	//	std::complex<double> denom(mR*mR - mSq, (-1)*sqrtS*(width*qTerm*barrier*barrier));
-	std::complex<double> denom(mR*mR - mSq + sqrtS*qTerm.imag(), (-1)*sqrtS*(width*qTerm.real()*barrier*barrier) );
+	std::complex<double> denom(mR*mR - mSq + sqrtS*(width*qTerm.imag()*barrier*barrier), (-1)*sqrtS*(width*qTerm.real()*barrier*barrier) );
 	std::complex<double> result = std::complex<double>(g_final*g_production,0) / denom;
 
 	if(result.real()!=result.real() || result.imag()!=result.imag()){
