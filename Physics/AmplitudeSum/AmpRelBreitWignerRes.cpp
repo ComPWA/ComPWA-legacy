@@ -69,7 +69,7 @@ std::complex<double> AmpRelBreitWignerRes::dynamicalFunction(double mSq, double 
 	double sqrtS = sqrt(mSq);
 
 	double barrier = AmpKinematics::FormFactor(sqrtS,mR,ma,mb,J,mesonRadius)/AmpKinematics::FormFactor(mR,mR,ma,mb,J,mesonRadius);
-	std::complex<double> qTerm = std::pow((qValue(sqrtS,ma,mb) / qValue(mR,ma,mb)), (2.*J+ 1.));
+	std::complex<double> qTerm = std::pow((qValue(sqrtS,ma,mb) / qValue(mR,ma,mb)), (2*J+ 1));
 	//Calculate coupling constant to final state
 	double g_final = widthToCoupling(mSq,mR,width,ma,mb,J,mesonRadius);
 
@@ -78,9 +78,15 @@ std::complex<double> AmpRelBreitWignerRes::dynamicalFunction(double mSq, double 
 	//mass of the decaying particle
 	double g_production = 1;
 
-	//	std::complex<double> denom(mR*mR - mSq, (-1)*sqrtS*(width*qTerm*barrier*barrier));
-	std::complex<double> denom(mR*mR - mSq + sqrtS*(width*qTerm.imag()*barrier*barrier), (-1)*sqrtS*(width*qTerm.real()*barrier*barrier) );
-	std::complex<double> result = std::complex<double>(g_final*g_production,0) / denom;
+	//-- Old approach
+	//std::complex<double> denom(mR*mR - mSq + mR*(width*qTerm.imag()*barrier*barrier), (-1)*mR*(width*qTerm.real()*(mR/sqrtS)*barrier*barrier) );
+	std::complex<double> denom(mR*mR - mSq, (-1)*mR*(width*qTerm.real()*(mR/sqrtS)*barrier*barrier) );
+	//-- New approach
+	//std::complex<double> denom(mR*mR - mSq + sqrtS*(width*qTerm.imag()*barrier*barrier), (-1)*sqrtS*(width*qTerm.real()*barrier*barrier) );
+	//std::complex<double> denom(mR*mR - mSq , (-1)*sqrtS*(width*qTerm.real()*barrier*barrier) );
+
+	//std::complex<double> result = std::complex<double>(g_final*g_production,0) / denom;
+	std::complex<double> result = std::complex<double>(1,0) / denom; //OLD
 
 	if(result.real()!=result.real() || result.imag()!=result.imag()){
 		std::cout<<"nan in BW: "<<barrier<<" "<<mR<<" "<<mSq<<" "<<ma<<" "<<mb<<std::endl;

@@ -118,7 +118,8 @@ std::complex<double> AmpFlatteRes3Ch::dynamicalFunction(double mSq, double mR,
 	double g_production = 1;
 
 	//-- old approach
-	//std::complex<double> denom( mR*mR - mSq, -pA*gA*gA-pB*gB*gB );
+	//std::complex<double> denom( mR*mR - mSq + (rhoA.imag()*gA*gA + rhoB.imag()*gB*gB),
+		  //(-1)*(rhoA.real()*gA*gA + rhoB.real()*gB*gB) );
 
 	//-- new approach - for spin 0 resonances in the imaginary part of the denominator the term qTerm
 	//is added, compared to the old formula
