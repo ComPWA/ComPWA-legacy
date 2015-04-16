@@ -68,7 +68,7 @@ std::complex<double> AmpFlatteRes::dynamicalFunction(double mSq, double mR,
 
 	//channel A - signal channel
 	//break-up momentum
-	std::complex<double> pA = AmpKinematics::qValue(sqrtS, massA1,massA2) / den;
+	std::complex<double> rhoA = AmpKinematics::qValue(sqrtS, massA1,massA2) / den;
 	double barrierA = AmpKinematics::FormFactor(sqrtS,mR,massA1,massA2,J,mesonRadius)/AmpKinematics::FormFactor(mR,mR,massA1,massA2,J,mesonRadius);
 	std::complex<double> qTermA = std::pow((qValue(sqrtS,massA1,massA2) / qValue(mR,massA1,massA2)), (2.*J+ 1.));
 	//convert coupling to partial width of channel A
@@ -79,7 +79,7 @@ std::complex<double> AmpFlatteRes::dynamicalFunction(double mSq, double mR,
 
 	//channel B - hidden channel
 	//break-up momentum
-	std::complex<double> pB = AmpKinematics::qValue(sqrtS, massB1,massB2) / den;
+	std::complex<double> rhoB = AmpKinematics::qValue(sqrtS, massB1,massB2) / den;
 	double barrierB = AmpKinematics::FormFactor(sqrtS,mR,massB1,massB2,J,1.5)/AmpKinematics::FormFactor(mR,mR,massB1,massB2,J,1.5);
 	std::complex<double> qTermB = std::pow((qValue(sqrtS,massB1,massB2) / qValue(mR,massB1,massB2)), (2.*J+ 1.));
 	//we expect that the ratio (gA/gB)^2
@@ -95,13 +95,13 @@ std::complex<double> AmpFlatteRes::dynamicalFunction(double mSq, double mR,
 	double g_production = 1;
 
 	//-- old approach
-	//	std::complex<double> denom( mR*mR - mSq,
-	//			(-1)*(pA.real()*gA*gA + pB.real()*gB*gB) );
+	std::complex<double> denom( mR*mR - mSq + (rhoA.imag()*gA*gA + rhoB.imag()*gB*gB),
+		  (-1)*(rhoA.real()*gA*gA + rhoB.real()*gB*gB) );
 
 	//-- new approach - for spin 0 resonances in the imaginary part of the denominator the term qTerm
 	//is added, compared to the old formula
-	std::complex<double> denom( mR*mR - mSq + sqrtS*(termA.imag() + termB.imag()),
-			(-1)*sqrtS*(termA.real() + termB.real()) );
+	//std::complex<double> denom( mR*mR - mSq + sqrtS*(termA.imag() + termB.imag()),
+			//(-1)*sqrtS*(termA.real() + termB.real()) );
 	std::complex<double> result = std::complex<double>(gA*g_production,0) / denom;
 
 	if(result.real()!=result.real() || result.imag()!=result.imag()){

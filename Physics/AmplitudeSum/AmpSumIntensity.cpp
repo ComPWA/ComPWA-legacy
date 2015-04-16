@@ -86,7 +86,7 @@ void AmpSumIntensity::init(){
 	 * Search for "(asdfef)" to find all positions that have to be adjusted
 	 */
 	params.AddParameter( std::shared_ptr<DoubleParameter> (
-			new DoubleParameter("g1_a_0",2.15) )); //(asdfef)
+			new DoubleParameter("g1_a_0",2.82) )); //(asdfef)
 //	params.AddParameter( std::shared_ptr<DoubleParameter> (
 //			new DoubleParameter("g1_a_0",2.15,0.,2.5) )); //(asdfef)
 	params.GetDoubleParameter(0)->SetParameterFixed();
