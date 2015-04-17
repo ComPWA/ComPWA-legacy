@@ -74,7 +74,7 @@ public:
 	 * @return
 	 */
 	static double phspFactor(double sqrtS, double ma, double mb);
-	static double FormFactor(double sqrtS, double mR, double ma, double mb, double spin, double mesonRadius);
+	static double FormFactor(double sqrtS, double ma, double mb, double spin, double mesonRadius);
 
 	std::complex<double> q0()  const { return qValue(_mR->GetValue(), _ma, _mb ); };
 	std::complex<double> q(double x)  const { return qValue(x, _ma, _mb); };

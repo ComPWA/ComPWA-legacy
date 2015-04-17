@@ -44,14 +44,15 @@ class RootReader : public Data {
 public:
 	//! Default Constructor: Empty object, can be filled
 	RootReader();
-	RootReader(TTree* tr, const bool binned);
+	RootReader(TTree* tr, int size=-1 , const bool binned=false);
 	/*! Read constructor.
 	 *
 	 * @param inRootFile Input file name
 	 * @param inTreeName Name of tree in input file
+	 * @param size 		Number of events to read in
 	 * @param binned	 Create binning
 	 */
-	RootReader(const std::string inRootFile, const std::string inTreeName="data", const bool binned=false);
+	RootReader(const std::string inRootFile, const std::string inTreeName="data", int size=-1, const bool binned=false);
 
 	virtual const std::vector<std::string>& getVariableNames();
 
@@ -97,6 +98,7 @@ public:
 
 protected:
 	void read();
+	int readSize;
 	bool _readFlag;
 
 	//input tree

@@ -68,7 +68,7 @@ std::complex<double> AmpRelBreitWignerRes::evaluateAmp(dataPoint& point) {
 std::complex<double> AmpRelBreitWignerRes::dynamicalFunction(double mSq, double mR, double ma, double mb, double width, unsigned int J, double mesonRadius){
 	double sqrtS = sqrt(mSq);
 
-	double barrier = AmpKinematics::FormFactor(sqrtS,mR,ma,mb,J,mesonRadius)/AmpKinematics::FormFactor(mR,mR,ma,mb,J,mesonRadius);
+	double barrier = AmpKinematics::FormFactor(sqrtS,ma,mb,J,mesonRadius)/AmpKinematics::FormFactor(mR,ma,mb,J,mesonRadius);
 	std::complex<double> qTerm = std::pow((qValue(sqrtS,ma,mb) / qValue(mR,ma,mb)), (2*J+ 1));
 	//Calculate coupling constant to final state
 	double g_final = widthToCoupling(mSq,mR,width,ma,mb,J,mesonRadius);

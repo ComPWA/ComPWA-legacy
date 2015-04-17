@@ -74,57 +74,56 @@ std::complex<double> AmpFlatteRes3Ch::dynamicalFunction(double mSq, double mR,
 		double massC1, double massC2, double couplingRatioC,
 		unsigned int J, double mesonRadius ){
 	double sqrtS = sqrt(mSq);
-	double den = 8*M_PI*sqrtS; //use Pi value of math.h
 
 	//channel A - signal channel
 	//break-up momentum
-	std::complex<double> pA = AmpKinematics::qValue(sqrtS, massA1,massA2) / den;
-	double barrierA = AmpKinematics::FormFactor(sqrtS,mR,massA1,massA2,J,mesonRadius)/AmpKinematics::FormFactor(mR,mR,massA1,massA2,J,mesonRadius);
-	std::complex<double> qTermA = std::pow((qValue(sqrtS,massA1,massA2) / qValue(mR,massA1,massA2)), (2.*J+ 1.));
+	double pA = AmpKinematics::phspFactor(sqrtS, massA1, massA2);
+	double barrierA = AmpKinematics::FormFactor(sqrtS,massA1,massA2,J,mesonRadius)/AmpKinematics::FormFactor(mR,massA1,massA2,J,mesonRadius);
+	//std::complex<double> qTermA = std::pow((qValue(sqrtS,massA1,massA2) / qValue(mR,massA1,massA2)), (2.*J+ 1.));
 	//convert coupling to partial width of channel A
 	double gammaA = couplingToWidth(mSq,mR,gA,massA1,massA2,J,mesonRadius);
 	//including the factor qTermA, as suggested by PDG, leads to an amplitude that doesn't converge.
 	//std::complex<double> termA = gammaA*qTermA*barrierA*barrierA;
-	std::complex<double> termA = gammaA*barrierA*barrierA;
+	double termA = gammaA*barrierA*barrierA;
 
 	//channel B - hidden channel
 	//break-up momentum
-	std::complex<double> pB = AmpKinematics::qValue(sqrtS, massB1,massB2) / den;
-	double barrierB = AmpKinematics::FormFactor(sqrtS,mR,massB1,massB2,J,1.5)/AmpKinematics::FormFactor(mR,mR,massB1,massB2,J,1.5);
-	std::complex<double> qTermB = std::pow((qValue(sqrtS,massB1,massB2) / qValue(mR,massB1,massB2)), (2.*J+ 1.));
+	double pB = AmpKinematics::phspFactor(sqrtS, massB1, massB2);
+	double barrierB = AmpKinematics::FormFactor(sqrtS,massB1,massB2,J,1.5)/AmpKinematics::FormFactor(mR,massB1,massB2,J,1.5);
+	//std::complex<double> qTermB = std::pow((qValue(sqrtS,massB1,massB2) / qValue(mR,massB1,massB2)), (2.*J+ 1.));
 	//we expect that the ratio (gA/gB)^2
-	double gB = sqrt(gA*gA/couplingRatioB);
+	//double gB = sqrt(gA*gA/couplingRatioB);
+	double gB = couplingRatioB;
 	//	std::cout<<gA<< " "<<gB<<" "<<couplingRatio<<std::endl;
 	//convert coupling to partial width of channel B
 	double gammaB = couplingToWidth(mSq,mR,gB,massB1,massB2,J,mesonRadius);
 	//std::complex<double> termB = gammaB*qTermB*barrierB*barrierB;
-	std::complex<double> termB = gammaB*barrierB*barrierB;
+	double termB = gammaB*barrierB*barrierB;
 
 	//channel C - hidden channel
 	//break-up momentum
-	std::complex<double> pC = AmpKinematics::qValue(sqrtS, massC1,massC2) / den;
-	double barrierC = AmpKinematics::FormFactor(sqrtS,mR,massC1,massC2,J,1.5)/AmpKinematics::FormFactor(mR,mR,massC1,massC2,J,1.5);
-	std::complex<double> qTermC = std::pow((qValue(sqrtS,massC1,massC2) / qValue(mR,massC1,massC2)), (2.*J+ 1.));
+	double pC = AmpKinematics::phspFactor(sqrtS, massC1, massC2);
+	double barrierC = AmpKinematics::FormFactor(sqrtS,massC1,massC2,J,1.5)/AmpKinematics::FormFactor(mR,massC1,massC2,J,1.5);
+	//std::complex<double> qTermC = std::pow((qValue(sqrtS,massC1,massC2) / qValue(mR,massC1,massC2)), (2.*J+ 1.));
 	//we expect that the ratio (gA/gC)^2
-	double gC = sqrt(gA*gA/couplingRatioC);
+	//double gC = sqrt(gA*gA/couplingRatioC);
+	double gC = couplingRatioC;
 	//convert coupling to partial width of channel C
 	double gammaC = couplingToWidth(mSq,mR,gC,massC1,massC2,J,mesonRadius);
 	//std::complex<double> termC = gammaC*qTermC*barrierC*barrierC;
-	std::complex<double> termC = gammaC*barrierC*barrierC;
+	double termC = gammaC*barrierC*barrierC;
 
 	//Coupling constant from production reaction. In case of a particle decay the production
 	//coupling doesn't depend in energy since the CM energy is in the (RC) system fixed to the
 	//mass of the decaying particle
 	double g_production = 1;
 
-	//-- old approach
-	//std::complex<double> denom( mR*mR - mSq + (rhoA.imag()*gA*gA + rhoB.imag()*gB*gB),
-		  //(-1)*(rhoA.real()*gA*gA + rhoB.real()*gB*gB) );
-
+	//-- old approach(BaBar)
+	//std::complex<double> denom( mR*mR - mSq, (-1)*(rhoA*gA*gA + rhoB*gB*gB + rhoC*gC*gC) );
 	//-- new approach - for spin 0 resonances in the imaginary part of the denominator the term qTerm
 	//is added, compared to the old formula
-	std::complex<double> denom( mR*mR - mSq + sqrtS*(termA.imag() + termB.imag() + termC.imag()),
-			(-1)*sqrtS*(termA.real() + termB.real()+ termC.real()) );
+	std::complex<double> denom( mR*mR - mSq, (-1)*sqrtS*(termA + termB+ termC) );
+
 	std::complex<double> result = std::complex<double>(gA*g_production,0) / denom;
 
 	if(result.real()!=result.real() || result.imag()!=result.imag()){
@@ -214,8 +213,13 @@ bool Flatte3ChStrategy::execute(ParameterList& paras, std::shared_ptr<AbsParamet
 	try{
 		gB = double(paras.GetParameterValue("g2_"+name));
 	}catch(BadParameter& e){
-		BOOST_LOG_TRIVIAL(error) <<"FlatteStrategy: can't find parameter g2_"+name;
-		throw;
+		try{
+			gB = double(paras.GetParameterValue("g1_a_0"));//special case for peter's channel
+		}catch(BadParameter& e){
+			BOOST_LOG_TRIVIAL(error) <<"FlatteStrategy: can't find parameter g1_"+name;
+			BOOST_LOG_TRIVIAL(error) <<"FlatteStrategy: can't find parameter g1_a_0";
+			throw;
+		}
 	}
 	try{
 		massC1 = double(paras.GetParameterValue("ParOfNode_massC1_"+name));
@@ -362,8 +366,13 @@ bool Flatte3ChPhspStrategy::execute(ParameterList& paras, std::shared_ptr<AbsPar
 	try{
 		gB = double(paras.GetParameterValue("g2_"+name));
 	}catch(BadParameter& e){
-		BOOST_LOG_TRIVIAL(error) <<"FlattePhspStrategy: can't find parameter g2_"+name;
-		throw;
+		try{
+			gB = double(paras.GetParameterValue("g1_a_0"));//special case for peter's channel
+		}catch(BadParameter& e){
+			BOOST_LOG_TRIVIAL(error) <<"FlatteStrategy: can't find parameter g1_"+name;
+			BOOST_LOG_TRIVIAL(error) <<"FlatteStrategy: can't find parameter g1_a_0";
+			throw;
+		}
 	}
 	try{
 		massC1 = double(paras.GetParameterValue("ParOfNode_massC1_"+name));

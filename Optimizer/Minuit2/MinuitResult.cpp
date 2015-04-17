@@ -265,7 +265,7 @@ void MinuitResult::calcFraction(ParameterList& parList){
 	}
 	if(norm<0)
 		throw std::runtime_error("MinuitResult::calcFraction() normalization can't be calculated");
-	BOOST_LOG_TRIVIAL(info)<<"MinuitResult::calcFraction() norm="<<norm;
+	//BOOST_LOG_TRIVIAL(info)<<"MinuitResult::calcFraction() norm="<<norm;
 	nRes=_amp->getNumberOfResonances();
 	for(unsigned int i=0;i<nRes; i++){ //fill matrix
 		double resonanceInt = 1.0;
