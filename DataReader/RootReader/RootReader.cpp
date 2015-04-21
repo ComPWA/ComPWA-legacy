@@ -76,136 +76,128 @@ void RootReader::resetEfficiency(double e){
 		fEvents.at(evt).setEfficiency(e);
 	}
 }
+void RootReader::reduce(unsigned int newSize){
+   if(newSize >= fEvents.size()) {
+	  BOOST_LOG_TRIVIAL(error) << "RooReader::reduce() requested size too large, cant reduce sample!";
+	  return;
+   }
+   fEvents.resize(newSize);
+}
 
+void RootReader::reduceToPhsp(){
+   std::vector<Event> tmp;
+   for(unsigned int evt=0; evt<fEvents.size(); evt++){
+	  dataPoint p(fEvents.at(evt));
+	  if(Kinematics::instance()->isWithinPhsp(p))
+		 tmp.push_back(fEvents.at(evt));
+   }
+   BOOST_LOG_TRIVIAL(info)<<"RootReader::reduceToPhsp() | remove all events outside PHSP boundary from data sample.";
+   BOOST_LOG_TRIVIAL(info)<<"RootReader::reduceToPhsp() | "<<tmp.size()<<" from "<<fEvents.size()<<"("<<((double)tmp.size())/fEvents.size()*100 <<"%) were removed.";
+   fEvents = tmp;
+   return;
+}
 std::shared_ptr<Data> RootReader::rndSubSet(unsigned int size, std::shared_ptr<Generator> gen){
-	std::shared_ptr<Data> newSample(new RootReader());
-	unsigned int totalSize = getNEvents();
-	unsigned int newSize = totalSize;
-	/* 1th method: new Sample has exact size, but possibly events are added twice.
-	 * We would have to store all used events in a vector and search the vector at every event -> slow */
-	/*unsigned int t=0;
-	unsigned int d=0;
-	while(t<newSize){
-		d = (unsigned int) gen->getUniform()*totalSize;
-		newSample->pushEvent(fEvents[d]);
-		t++;
-	}*/
+   std::shared_ptr<Data> newSample(new RootReader());
+   unsigned int totalSize = getNEvents();
+   unsigned int newSize = totalSize;
+   /* 1th method: new Sample has exact size, but possibly events are added twice.
+	* We would have to store all used events in a vector and search the vector at every event -> slow */
+   /*unsigned int t=0;
+	 unsigned int d=0;
+	 while(t<newSize){
+	 d = (unsigned int) gen->getUniform()*totalSize;
+	 newSample->pushEvent(fEvents[d]);
+	 t++;
+	 }*/
 
-	/* 2nd method: events are added once only, but total size of sample varies with sqrt(N) */
-	for(unsigned int i=0; i<totalSize; i++){//count how many events are not within PHSP
-		dataPoint point(fEvents[i]);
-		if(!Kinematics::instance()->isWithinPhsp(point)) newSize--;
-	}
-	double threshold = (double)size/newSize; //calculate threshold
-	for(unsigned int i=0; i<totalSize; i++){
-		dataPoint point(fEvents[i]);
-		if(!Kinematics::instance()->isWithinPhsp(point)) continue;
-		if(gen->getUniform()<threshold)
-			newSample->pushEvent(fEvents[i]);
-	}
-	return newSample;
+   /* 2nd method: events are added once only, but total size of sample varies with sqrt(N) */
+   for(unsigned int i=0; i<totalSize; i++){//count how many events are not within PHSP
+	  dataPoint point(fEvents[i]);
+	  if(!Kinematics::instance()->isWithinPhsp(point)) newSize--;
+   }
+   double threshold = (double)size/newSize; //calculate threshold
+   for(unsigned int i=0; i<totalSize; i++){
+	  dataPoint point(fEvents[i]);
+	  if(!Kinematics::instance()->isWithinPhsp(point)) continue;
+	  if(gen->getUniform()<threshold)
+		 newSample->pushEvent(fEvents[i]);
+   }
+   return newSample;
 }
 
 void RootReader::read(){
-	fParticles = new TClonesArray("TParticle");
-	fTree->GetBranch("Particles")->SetAutoDelete(false);
-	fTree->SetBranchAddress("Particles",&fParticles);
-	fTree->SetBranchAddress("eff",&feventEff);
-	fTree->SetBranchAddress("weight",&feventWeight);
-	fTree->SetBranchAddress("charge",&fCharge);
-	fTree->SetBranchAddress("flavour",&fFlavour);
-	//	fEvent=0;
-	bin();
-	storeEvents();
+   fParticles = new TClonesArray("TParticle");
+   fTree->GetBranch("Particles")->SetAutoDelete(false);
+   fTree->SetBranchAddress("Particles",&fParticles);
+   fTree->SetBranchAddress("eff",&feventEff);
+   fTree->SetBranchAddress("weight",&feventWeight);
+   fTree->SetBranchAddress("charge",&fCharge);
+   fTree->SetBranchAddress("flavour",&fFlavour);
+   //	fEvent=0;
+   bin();
+   storeEvents();
 
 }
 
 const std::vector<std::string>& RootReader::getVariableNames(){
-	if(!fVarNames.size()){ //TODO: init
-		fVarNames.push_back("dataname1");
-		fVarNames.push_back("dataname2");
-	}
-	return fVarNames;
+   if(!fVarNames.size()){ //TODO: init
+	  fVarNames.push_back("dataname1");
+	  fVarNames.push_back("dataname2");
+   }
+   return fVarNames;
 }
 void RootReader::resetWeights(double w){
-	for(unsigned int i=0; i<fEvents.size(); i++)
-		fEvents.at(i).setWeight(w);
-	return;
+   for(unsigned int i=0; i<fEvents.size(); i++)
+	  fEvents.at(i).setWeight(w);
+   return;
 }
 
 Event& RootReader::getEvent(const int i){
-	return fEvents.at(i);
+   return fEvents.at(i);
 }
 
 allMasses RootReader::getMasses(const unsigned int startEvent, unsigned int nEvents){
-	if(!fEvents.size()) return allMasses();
-	if(!nEvents) nEvents = fEvents.size();
-	unsigned int nParts = fEvents.at(0).getNParticles();
+   if(!fEvents.size()) return allMasses();
+   if(!nEvents) nEvents = fEvents.size();
+   unsigned int nParts = fEvents.at(0).getNParticles();
 
-	//determine invMass combinations
-	unsigned int nMasses=0;
-	std::vector<std::pair<unsigned int, unsigned int> > ids;
-	for(unsigned int i=0; i<nParts; i++)
-		for(unsigned int j=i+1; j<nParts; j++){
-			nMasses++;
-			ids.push_back(std::make_pair(i+1,j+1));
-		}
+   //determine invMass combinations
+   unsigned int nMasses=0;
+   std::vector<std::pair<unsigned int, unsigned int> > ids;
+   for(unsigned int i=0; i<nParts; i++)
+	  for(unsigned int j=i+1; j<nParts; j++){
+		 nMasses++;
+		 ids.push_back(std::make_pair(i+1,j+1));
+	  }
 
-	if(startEvent+nEvents>fEvents.size()){
-		nEvents = fEvents.size() - startEvent;
-		//Todo: Exception
-	}
+   if(startEvent+nEvents>fEvents.size()){
+	  nEvents = fEvents.size() - startEvent;
+	  //Todo: Exception
+   }
 
-	unsigned int nSkipped =0; //count events which are outside PHSP boundary
-	unsigned int nFilled=0; //count events which are outside PHSP boundary
+   unsigned int nSkipped =0; //count events which are outside PHSP boundary
+   unsigned int nFilled=0; //count events which are outside PHSP boundary
 
-	allMasses result(nMasses, ids);
-	//calc and store inv masses
-	for(unsigned int evt=startEvent; evt<startEvent+nEvents; evt++){
-		//Event tmp = fEvents.at(evt);
+   allMasses result(nMasses, ids);
+   //calc and store inv masses
+   for(unsigned int evt=startEvent; evt<startEvent+nEvents; evt++){
+	  if( result.Fill(fEvents.at(evt)) ) nFilled++;
+	  else nSkipped++;
+   }
+   if(nSkipped)
+	  BOOST_LOG_TRIVIAL(debug)<<"RootReader::getMasses() "<<nSkipped
+		 <<"("<<(double)nSkipped/fEvents.size()*100<<"%) data points are "
+		 "outside the PHSP boundary. We skip these points!";
 
-		if( result.Fill(fEvents.at(evt)) ) nFilled++;
-		else nSkipped++;
-
-		// Check number of particle in TClonesrray
-		//if( nParts != tmp.getNParticles() ){
-		//  result.nEvents--;
-		//   continue;
-		// }
-
-		/*  result.eff.at(evt) = tmp.getEfficiency();
-    result.weight.at(evt) = tmp.getWeight();
-
-    for(unsigned int pa=0; pa<nParts; pa++){
-      for(unsigned int pb=pa+1; pb<nParts; pb++){
-        const Particle &inA(tmp.getParticle(pa));
-        const Particle &inB(tmp.getParticle(pb));
-        double mymass_sq = inA.invariantMass(inB);
-
-        (result.masses_sq.at(std::make_pair(pa+1,pb+1))).at(evt-startEvent) = mymass_sq;
-
-        //tmp.addParticle(Particle(inN.X(), inN.Y(), inN.Z(), inN.E(),partN->GetPdgCode()));
-        //tmp.setWeight(feventWeight); //Todo: weight? what weight? lets wait...
-
-
-			}//particle loop B
-		}//particle loop A*/
-
-	}//event loop
-	if(nSkipped)
-		BOOST_LOG_TRIVIAL(debug)<<"RootReader::getMasses() "<<nSkipped
-		<<"("<<(double)nSkipped/fEvents.size()*100<<"%) data points are "
-		"outside the PHSP boundary. We skip these points!";
-
-	//	std::cout<<"after      "<<result.masses_sq.at(std::make_pair(2,3)).size()<<std::endl;
-	return result;
+   //	std::cout<<"after      "<<result.masses_sq.at(std::make_pair(2,3)).size()<<std::endl;
+   return result;
 }
 
 const int RootReader::getBin(const int i, double& m12, double& weight){
-	if(!fBinned) return -1;
+   if(!fBinned) return -1;
 
-	m12 = fBins[i].first;
-	weight = fBins[i].second;
+   m12 = fBins[i].first;
+   weight = fBins[i].second;
 
 	return 1;
 }

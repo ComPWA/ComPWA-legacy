@@ -74,17 +74,13 @@ public:
 		std::vector<Event> otherEvents = otherSample.getEvents();
 		fEvents.insert(fEvents.end(), otherEvents.begin(), otherEvents.end());
 	}
-	/** Destructor */
+	//! Destructor
 	virtual ~RootReader();
-
-	//! select only first @param newSize events from full sample
-	virtual void reduce(unsigned int newSize){
-		if(newSize >= fEvents.size()) {
-			BOOST_LOG_TRIVIAL(error) << "RooReader::reduce() requested size too large, cant reduce sample!";
-			return;
-		}
-		fEvents.resize(newSize);
-	}
+	//! Remove all events outside PHSP
+	virtual void reduceToPhsp();
+	//! Select only first @param newSize events from full sample
+	virtual void reduce(unsigned int newSize);
+	//! Select random subset of events
 	std::shared_ptr<Data> rndSubSet(unsigned int size, std::shared_ptr<Generator> gen);
 
 	//! Set efficiency value for all stored events. Efficiency is taken from Efficiency object.
