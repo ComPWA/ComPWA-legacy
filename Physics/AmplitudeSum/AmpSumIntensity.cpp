@@ -676,7 +676,7 @@ const double AmpSumIntensity::sliceIntensity(dataPoint& dataP, ParameterList& pa
 
 const ParameterList& AmpSumIntensity::intensity(std::vector<double> point, ParameterList& par){
 	setParameterList(par);
-	dataPoint dataP; dataP.setVal(0,point[0]); dataP.setVal(1,point[1]);
+	dataPoint dataP(point);
 	return intensity(dataP);
 }
 const ParameterList& AmpSumIntensity::intensity(dataPoint& point, ParameterList& par){
