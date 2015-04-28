@@ -9,33 +9,25 @@
 //   Stefan Pflueger - initial API and implementation
 //-------------------------------------------------------------------------------
 
-#ifndef HELICITYAMPLITUDE_HPP_
-#define HELICITYAMPLITUDE_HPP_
+#ifndef HELICITYDECAYTREE_HPP_
+#define HELICITYDECAYTREE_HPP_
 
 #include "HelicityStateDefinitions.hpp"
-#include "AbstractDynamicalFunction.hpp"
-
-#include <complex>
 
 namespace HelicityFormalism {
 
-class HelicityAmplitude {
-  ParticleState initial_state_;
-  ParticleStatePair final_state_;
-
-  std::shared_ptr<AbstractDynamicalFunction> dynamics_function_;
-
-  double spin_factor_;
+class HelicityDecayTree {
+  std::vector<ParticleState> nodes_;
+  std::vector<std::pair<unsigned int, IndexPair> > links_;
 
 public:
-  HelicityAmplitude(const ParticleState& initial_state,
-      const ParticleStatePair& final_state);
-  virtual ~HelicityAmplitude();
+  HelicityDecayTree();
+  virtual ~HelicityDecayTree();
 
-  void init();
-
-  std::complex<double> evaluate(const Vector4<double>& boosted_4vector) const;
+  void createDecay(const ParticleState& mother,
+      const ParticleStatePair& daughters);
 };
 
 } /* namespace HelicityFormalism */
-#endif /* HELICITYAMPLITUDE_HPP_ */
+
+#endif /* HELICITYDECAYTREE_HPP_ */
