@@ -18,6 +18,7 @@ namespace HelicityFormalism {
 HelicityAmplitude::HelicityAmplitude(const ParticleState& initial_state,
     const ParticleStatePair& final_state) :
     initial_state_(initial_state), final_state_(final_state) {
+  init();
 }
 
 HelicityAmplitude::~HelicityAmplitude() {

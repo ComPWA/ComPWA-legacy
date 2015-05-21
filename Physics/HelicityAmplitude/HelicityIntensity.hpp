@@ -12,15 +12,20 @@
 #ifndef HELICITYINTENSITY_HPP_
 #define HELICITYINTENSITY_HPP_
 
+#include "HelicityAmplitudeTree.hpp"
+
 #include "Core/Amplitude.hpp"
+#include "Core/Efficiency.hpp"
 
 namespace HelicityFormalism {
 
 class HelicityIntensity: public Amplitude {
-	std::vector<HelicityAmplitudeTree> amplitudes;
-	std::shared_ptr<Efficiency> efficiency;
+	std::vector<HelicityAmplitudeTree> amplitude_trees_;
+	std::vector<HelicityKinematicBoostTree> kinematics_trees_;
+	std::shared_ptr<Efficiency> efficiency_;
 
-	ParameterList params;
+	ParameterList params_;
+
 public:
 	HelicityIntensity();
 	virtual ~HelicityIntensity();

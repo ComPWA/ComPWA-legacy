@@ -12,6 +12,11 @@
 #ifndef HELICITYAMPLITUDETREE_HPP_
 #define HELICITYAMPLITUDETREE_HPP_
 
+#include "HelicityAmplitude.hpp"
+#include "HelicityKinematicBoostTree.hpp"
+
+#include <vector>
+
 namespace HelicityFormalism {
 
 class HelicityAmplitudeTree {

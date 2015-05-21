@@ -12,6 +12,10 @@
 #ifndef HELICITYKINEMATICBOOSTTREE_HPP_
 #define HELICITYKINEMATICBOOSTTREE_HPP_
 
+#include "HelicityDecayTree.hpp"
+
+#include "Core/DataPoint.hpp"
+
 namespace HelicityFormalism {
 
 class HelicityKinematicBoostTree {

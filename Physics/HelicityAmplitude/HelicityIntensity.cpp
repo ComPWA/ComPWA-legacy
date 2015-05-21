@@ -22,6 +22,27 @@ HelicityIntensity::~HelicityIntensity() {
 	// TODO Auto-generated destructor stub
 }
 
+
+const double HelicityIntensity::integral() {
+
+}
+const double HelicityIntensity::integral(ParameterList& par) {
+
+}
+const double HelicityIntensity::normalization() {
+
+}
+const double HelicityIntensity::normalization(ParameterList& par) {
+
+}
+double HelicityIntensity::getMaxVal(ParameterList& par, std::shared_ptr<Generator> gen) {
+
+}
+double HelicityIntensity::getMaxVal(std::shared_ptr<Generator> gen) {
+
+}
+
+
 const ParameterList& HelicityIntensity::intensity(std::vector<double> point,
 		ParameterList& par) {
 	setParameterList(par);
@@ -38,8 +59,8 @@ const ParameterList& HelicityIntensity::intensity(dataPoint& point,
 const ParameterList& HelicityIntensity::intensityNoEff(dataPoint& point) {
 	std::complex<double> intensity = 0;
 	if (Kinematics::instance()->isWithinPhsp(point)) {
-		for (unsigned int i = 0; i < amplitudes.size(); ++i) {
-			intensity += amplitudes[i].evaluate(point);
+		for (unsigned int i = 0; i < amplitude_trees_.size(); ++i) {
+			intensity += amplitude_trees_[i].evaluate(kinematics_trees_[i]);
 		}
 		intensity = pow(std::abs(intensity), 2.0);
 	}
@@ -54,28 +75,39 @@ const ParameterList& HelicityIntensity::intensityNoEff(dataPoint& point) {
 
 const ParameterList& HelicityIntensity::intensity(dataPoint& point) {
 	intensityNoEff(point);
-	double eff = efficiency->evaluate(point);
+	double eff = efficiency_->evaluate(point);
 	result.SetParameterValue(0, result.GetDoubleParameter(0)->GetValue() * eff);
 	return result;
 }
 
 const bool HelicityIntensity::fillStartParVec(ParameterList& outPar){
-	outPar = ParameterList(params);
+	outPar = ParameterList(params_);
 	return true;
 }
 
 void HelicityIntensity::setParameterList(ParameterList& par){
 	//parameters varied by Minimization algorithm
-	if(par.GetNDouble()!=params.GetNDouble())
+	if(par.GetNDouble()!=params_.GetNDouble())
 		throw std::runtime_error("setParameterList(): size of parameter lists don't match");
-	for(unsigned int i=0; i<params.GetNDouble(); i++){
-		std::shared_ptr<DoubleParameter> p = params.GetDoubleParameter(i);
+	for(unsigned int i=0; i<params_.GetNDouble(); i++){
+		std::shared_ptr<DoubleParameter> p = params_.GetDoubleParameter(i);
 		if(!p->IsFixed()){
 			p->SetValue(par.GetDoubleParameter(i)->GetValue());
 			p->SetError(par.GetDoubleParameter(i)->GetError());
 		}
 	}
 	return;
+}
+
+void HelicityIntensity::printAmps() {
+
+}
+void HelicityIntensity::printFractions() {
+
+}
+
+Amplitude* HelicityIntensity::Clone() {
+
 }
 
 } /* namespace HelicityFormalism */

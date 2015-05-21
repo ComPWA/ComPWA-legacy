@@ -15,6 +15,7 @@
 #include "HelicityStateDefinitions.hpp"
 #include "AbstractDynamicalFunction.hpp"
 
+#include <memory>
 #include <complex>
 
 namespace HelicityFormalism {
