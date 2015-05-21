@@ -10,6 +10,7 @@
 //-------------------------------------------------------------------------------
 
 #include <algorithm>
+#include <stdexcept>
 
 #include "HelicityDecayConfiguration.hpp"
 
