@@ -39,7 +39,7 @@ public:
 	 * @param mb mass of particle b
 	 * @return
 	 */
-	static double widthToCoupling(double mSq, double mR, double width, double ma, double mb, double spin, double mesonRadius);
+	static std::complex<double> widthToCoupling(double mSq, double mR, double width, double ma, double mb, double spin, double mesonRadius);
 	/** Convert coupling to width
 	 *
 	 * Convert coupling to channel (@ma,@mb) to partial width. Only valid for narrow, isolated resonances.
@@ -54,7 +54,17 @@ public:
 	 * @param mb mass of particle b
 	 * @return
 	 */
-	static double couplingToWidth(double mSq, double mR, double g, double ma, double mb, double spin, double mesonRadius);
+	static std::complex<double> couplingToWidth(double mSq, double mR, double g, double ma, double mb, double spin, double mesonRadius);
+	/** Calculate Break-up momentum squared
+	 *
+	 * Calculate Break-up momentum at energy @sqrtS for particles with masses @ma and @mb.
+	 * From PDG2014 Eq.46-20a. Below threshold the function is analytically continued.
+	 * @param sqrtS center-of-mass energy
+	 * @param ma mass particle A
+	 * @param mb mass particle B
+	 * @return |break-up momentum|
+	 */
+	static double qSqValue(double sqrtS, double ma, double mb);
 	/** Calculate Break-up momentum
 	 *
 	 * Calculate Break-up momentum at energy @sqrtS for particles with masses @ma and @mb.
@@ -73,12 +83,8 @@ public:
 	 * @param mb Mass of particle B
 	 * @return
 	 */
-	static double phspFactor(double sqrtS, double ma, double mb);
+	static std::complex<double> phspFactor(double sqrtS, double ma, double mb);
 	static double FormFactor(double sqrtS, double ma, double mb, double spin, double mesonRadius);
-
-	std::complex<double> q0()  const { return qValue(_mR->GetValue(), _ma, _mb ); };
-	std::complex<double> q(double x)  const { return qValue(x, _ma, _mb); };
-	std::complex<double> q(double x,double ma, double mb)  const { return qValue(x, ma, mb); };
 
 	double getResMass() {return _mR->GetValue();};
 //	double getSpin() {return _spin;}; //needs to be declared in AmpAbsDynamicalFunction

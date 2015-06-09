@@ -65,30 +65,28 @@ std::complex<double> AmpFlatteRes::dynamicalFunction(double mSq, double mR,
 
 	//channel A - signal channel
 	//break-up momentum
-	double rhoA = AmpKinematics::phspFactor(sqrtS, massA1, massA2);
+//	std::complex<double> rhoA = AmpKinematics::phspFactor(sqrtS, massA1, massA2);
 	double barrierA = AmpKinematics::FormFactor(sqrtS,massA1,massA2,J,mesonRadius)/AmpKinematics::FormFactor(mR,massA1,massA2,J,mesonRadius);
 	//std::complex<double> qTermA = std::pow((qValue(sqrtS,massA1,massA2) / qValue(mR,massA1,massA2)), (2.*J+ 1.));
+//	std::complex<double> qTermA = std::pow((phspFactor(sqrtS,massA1,massA2) / phspFactor(mR,massA1,massA2))*mR/sqrtS, (2*J+ 1));
 	//convert coupling to partial width of channel A
-	double gammaA = couplingToWidth(mSq,mR,gA,massA1,massA2,J,mesonRadius);
+	std::complex<double> gammaA = couplingToWidth(mSq,mR,gA,massA1,massA2,J,mesonRadius);
 	//including the factor qTermA, as suggested by PDG, leads to an amplitude that doesn't converge.
-	//std::complex<double> termA = gammaA*qTermA*barrierA*barrierA;
-	double termA = gammaA*barrierA*barrierA;
+	std::complex<double> termA = gammaA*barrierA*barrierA;
 
 	//channel B - hidden channel
 	//break-up momentum
-	double rhoB = AmpKinematics::phspFactor(sqrtS, massB1, massB2);
+//	std::complex<double> rhoB = AmpKinematics::phspFactor(sqrtS, massB1, massB2);
 	double barrierB = AmpKinematics::FormFactor(sqrtS,massB1,massB2,J,1.5)/AmpKinematics::FormFactor(mR,massB1,massB2,J,1.5);
 	//std::complex<double> qTermB = std::pow((qValue(sqrtS,massB1,massB2) / qValue(mR,massB1,massB2)), (2.*J+ 1.));
-	//we expect that the ratio (gA/gB)^2
-	//double gB = sqrt(gA*gA/couplingRatio);
+//	std::complex<double> qTermB = std::pow((phspFactor(sqrtS,massB1,massB2) / phspFactor(mR,massB1,massB2))*mR/sqrtS, (2*J+ 1));
 	double gB = couplingRatio; 
 	//convert coupling to partial width of channel B
-	double gammaB = couplingToWidth(mSq,mR,gB,massB1,massB2,J,mesonRadius);
-	//std::complex<double> termB = gammaB*qTermB*barrierB*barrierB;
-	double termB = gammaB*barrierB*barrierB;
+	std::complex<double> gammaB = couplingToWidth(mSq,mR,gB,massB1,massB2,J,mesonRadius);
+	std::complex<double> termB = gammaB*barrierB*barrierB;
 
 	//Coupling constant from production reaction. In case of a particle decay the production
-	//coupling doesn't depend in energy since the CM energy is in the (RC) system fixed to the
+	//coupling doesn't depend on energy since the CM energy is in the (RC) system fixed to the
 	//mass of the decaying particle
 	double g_production = 1;
 
@@ -97,11 +95,12 @@ std::complex<double> AmpFlatteRes::dynamicalFunction(double mSq, double mR,
 	//std::complex<double> result = std::complex<double>(gA,0) / denom;
 	//-- new approach - for spin 0 resonances in the imaginary part of the denominator the term qTerm
 	//is added, compared to the old formula
-	std::complex<double> denom( mR*mR - mSq, (-1)*sqrtS*(termA + termB) );
+	std::complex<double> denom = std::complex<double>( mR*mR - mSq,0) + (-1)*sqrtS*(termA + termB);
 	std::complex<double> result = std::complex<double>(gA*g_production,0) / denom;
 
 	if(result.real()!=result.real() || result.imag()!=result.imag()){
-		std::cout<<"nan in Flatte: "<<barrierA<<" "<<mR<<" "<<mSq<<" "<<massA1<<" "<<massA2<<std::endl;
+		std::cout<<"AmpFlatteRes::dynamicalFunction() | "<<barrierA<<" "<<mR<<" "<<mSq
+				<<" "<<massA1<<" "<<massA2<<std::endl;
 		return 0;
 	}
 	return result;
