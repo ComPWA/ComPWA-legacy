@@ -127,7 +127,6 @@ public:
 	 * \sa operator<<, make_str()
 	 */
 	virtual std::string to_str() {
-		//make_str();
 		return make_str();
 	}
 
@@ -140,7 +139,6 @@ public:
 	 * \sa make_str()
 	 */
 	virtual std::string val_to_str() {
-		//make_str();
 		return make_val_str();
 	}
 

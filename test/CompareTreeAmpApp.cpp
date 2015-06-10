@@ -139,12 +139,12 @@ int main(int argc, char **argv){
 
 	//======================= Compare tree and amplitude =============================
 	std::shared_ptr<AmpRelBreitWignerRes> phiRes = std::dynamic_pointer_cast<AmpRelBreitWignerRes>(fitAmpPtr->getResonance("phi(1020)"));
-	double phimag = fitAmpPtr->getMagnitude("phi(1020)");
-	double phiphase = fitAmpPtr->getPhase("phi(1020)");
+	double phimag = fitAmpPtr->getAmpMagnitude("phi(1020)");
+	double phiphase = fitAmpPtr->getAmpPhase("phi(1020)");
 	std::complex<double> phiCoeff(phimag*cos(phiphase),phimag*sin(phiphase));
 	std::shared_ptr<AmpFlatteRes> a0Res = std::dynamic_pointer_cast<AmpFlatteRes>(fitAmpPtr->getResonance("a_0(980)0"));
-	double a0mag = fitAmpPtr->getMagnitude("a_0(980)0");
-	double a0phase = fitAmpPtr->getPhase("a_0(980)0");
+	double a0mag = fitAmpPtr->getAmpMagnitude("a_0(980)0");
+	double a0phase = fitAmpPtr->getAmpPhase("a_0(980)0");
 	std::complex<double> a0Coeff(a0mag*cos(a0phase),a0mag*sin(a0phase));
 
 	dataPoint point(inputData->getEvent(0)); //first data point in sample

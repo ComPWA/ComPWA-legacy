@@ -47,6 +47,7 @@ MinuitResult::MinuitResult(std::shared_ptr<ControlParameter> esti, FunctionMinim
 	_amp=estimator->getAmplitude();
 	init(result);
 }
+
 void MinuitResult::setResult(std::shared_ptr<ControlParameter> esti,FunctionMinimum result){
 	estimator = std::static_pointer_cast<Estimator>(esti);
 	_amp=estimator->getAmplitude();
@@ -146,8 +147,9 @@ void MinuitResult::smearParameterList(ParameterList& newParList){
 		t++;
 	}
 }
+
 void MinuitResult::calcFractionError(){
-	if(!fractionList.GetNDouble())
+	if(fractionList.GetNDouble() != _amp->getNumberOfResonances())
 		throw std::runtime_error("MinuitResult::calcFractionError() parameterList empty! Calculate fit fractions first!");
 	nRes=fractionList.GetNDouble();
 	if(useCorrelatedErrors){
@@ -182,48 +184,6 @@ void MinuitResult::calcFractionError(){
 		//			for(unsigned int i=0; i<fracError.size();i++) std::cout<<fracError.at(i)<<" ";
 		//			std::cout<<std::endl;
 		_amp->setParameterList(finalParameters); //set correct fit result
-	} else {
-		/* As a simple case we assume that the normalization integral doesn't have an error */
-		BOOST_LOG_TRIVIAL(info) << "Calculating errors of fit fractions assuming that parameters "
-				"are uncorrelated and that neglecting the error from normalization!";
-		double norm = 0.0;
-		if(!estimator->hasTree()) norm = _amp->integral();
-		else {//if we have a tree, use it. Much faster especially in case of correlated errors in calcFractionError()
-			std::shared_ptr<FunctionTree> tree = estimator->getTree();
-			tree->recalculate();
-			double phspVolume = Kinematics::instance()->getPhspVolume();
-			/*We need the intensity over the PHSP without efficiency correction. Therefore we
-			 * access node 'Amplitude' and sum up its values.*/
-			//			std::shared_ptr<TreeNode> amplitudeNode = _amp->getPhspTree()->head()->getChildren().at(0)->getChildren().at(0);
-			std::shared_ptr<TreeNode> amplitudeNode = tree->head()->getChildNode("Amplitude_Phsp");
-			if(!amplitudeNode){
-				BOOST_LOG_TRIVIAL(error)<<"MinuitResult::calcFractionError() : Can't find node 'Amplitude_Phsp' in tree!";
-				throw BadParameter("Node not found!");
-			}
-
-			std::shared_ptr<MultiComplex> normPar = std::dynamic_pointer_cast<MultiComplex>(amplitudeNode->getValue());//node 'Amplitude'
-			unsigned int numPhspEvents = normPar->GetNValues();
-			for(unsigned int i=0; i<numPhspEvents;i++)
-				norm+=abs(normPar->GetValue(i))*abs(normPar->GetValue(i));
-
-			norm = norm*phspVolume/numPhspEvents; //correct calculation of normalization
-		}
-
-		for(unsigned int i=0;i<nRes; i++){ //fill matrix
-			double resonanceInt = _amp->getTotalIntegral(i); //fit fraction of amplitude
-			std::string parName = "mag_"+_amp->getNameOfResonance(i); //name of magnitude parameter
-			//		std::shared_ptr<DoubleParameter> magPar = trueParameters.GetDoubleParameter(parName);
-			std::shared_ptr<DoubleParameter> magPar = finalParameters.GetDoubleParameter(parName);
-			double mag = magPar->GetValue(); //value of magnitude
-			double magError = 0.0;
-			if(magPar->HasError()) magError = magPar->GetError();
-			//			if(magPar->IsFixed()) fracError.push_back(0.);
-			//			else fracError.push_back(2*mag*resonanceInt/norm * magError); // sigma_fraction = 2*|A| intRes/totalInt * sigma_A
-			if(magPar->IsFixed())
-				fractionList.GetDoubleParameter(i)->SetError(0.);
-			else
-				fractionList.GetDoubleParameter(i)->SetError(2*mag*resonanceInt/norm * magError);
-		}
 	}
 	return;
 }
@@ -245,37 +205,39 @@ void MinuitResult::calcFraction(ParameterList& parList){
 	double norm =-1;
 	ParameterList currentPar;
 	_amp->fillStartParVec(currentPar);
-	if(!useTree) norm = _amp->integral();
-	else {//if we have a tree, use it. Much faster especially in case of correlated errors in calcFractionError()
-		std::shared_ptr<FunctionTree> tree = estimator->getTree();
-		tree->recalculate();
-		double phspVolume = Kinematics::instance()->getPhspVolume();
-		/*We need the intensity over the PHSP without efficiency correction. Therefore we
-		 * access node 'Amplitude' and sum up its values.*/
-		std::shared_ptr<TreeNode> amplitudeNode = tree->head()->getChildNode("Amplitude_Phsp");
-		if(!amplitudeNode){
-			BOOST_LOG_TRIVIAL(error)<<"MinuitResult::calcFraction() : Can't find node 'Amplitude_Phsp' in tree!";
-			throw BadParameter("Node not found!");
-		}
-		std::shared_ptr<MultiComplex> normPar = std::dynamic_pointer_cast<MultiComplex>(amplitudeNode->getValue());//node 'Amplitude'
-		unsigned int numPhspEvents = normPar->GetNValues();
-		for(unsigned int i=0; i<numPhspEvents;i++)
-			norm+=abs(normPar->GetValue(i))*abs(normPar->GetValue(i));
-		norm = norm*phspVolume/numPhspEvents; //correct calculation of normalization
-	}
+	//	if(!useTree) norm = _amp->integral();
+	//	else {//if we have a tree, use it. Much faster especially in case of correlated errors in calcFractionError()
+	//		std::shared_ptr<FunctionTree> tree = estimator->getTree();
+	//		tree->recalculate();
+	//		double phspVolume = Kinematics::instance()->getPhspVolume();
+	//		/*We need the intensity over the PHSP without efficiency correction. Therefore we
+	//		 * access node 'Amplitude' and sum up its values.*/
+	//		std::shared_ptr<TreeNode> amplitudeNode = tree->head()->getChildNode("Amplitude_Phsp");
+	//		if(!amplitudeNode){
+	//			BOOST_LOG_TRIVIAL(error)<<"MinuitResult::calcFraction() : Can't find node 'Amplitude_Phsp' in tree!";
+	//			throw BadParameter("Node not found!");
+	//		}
+	//		std::shared_ptr<MultiComplex> normPar = std::dynamic_pointer_cast<MultiComplex>(amplitudeNode->getValue());//node 'Amplitude'
+	//		unsigned int numPhspEvents = normPar->GetNValues();
+	//		for(unsigned int i=0; i<numPhspEvents;i++)
+	//			norm+=std::norm(normPar->GetValue(i));
+	//		norm = norm*phspVolume/numPhspEvents; //correct calculation of normalization
+	//	}
+
+	//in case of unbinned efficiency correction to tree does not provide an integral w/o efficiency correction
+	norm = _amp->integral();
 	if(norm<0)
 		throw std::runtime_error("MinuitResult::calcFraction() normalization can't be calculated");
-	//BOOST_LOG_TRIVIAL(info)<<"MinuitResult::calcFraction() norm="<<norm;
+	BOOST_LOG_TRIVIAL(debug)<<"MinuitResult::calcFraction() norm="<<norm;
 	nRes=_amp->getNumberOfResonances();
 	for(unsigned int i=0;i<nRes; i++){ //fill matrix
-		double resonanceInt = 1.0;
-		resonanceInt = _amp->getTotalIntegral(i);//this is simply the factor 2J+1, because the resonance is already normalized
+		double resInt= _amp->getAmpIntegral(i);//this is simply the factor 2J+1, because the resonance is already normalized
 		std::string resName = _amp->getNameOfResonance(i);
-		std::string parName = "mag_"+resName; //name of magnitude parameter
-		std::shared_ptr<DoubleParameter> magPar = currentPar.GetDoubleParameter(parName);
+		std::shared_ptr<DoubleParameter> magPar = currentPar.GetDoubleParameter("mag_"+resName);
 		double mag = magPar->GetValue(); //value of magnitude
-		double frac = mag*mag*resonanceInt/norm;// f= |A|^2 * intRes/totalInt
-		parList.AddParameter(std::shared_ptr<DoubleParameter>(new DoubleParameter(resName+"_FF",frac)));
+		double magError = magPar->GetError(); //value of magnitude
+		parList.AddParameter(std::shared_ptr<DoubleParameter>(
+				new DoubleParameter(resName+"_FF", mag*mag*resInt/norm, 2*mag*resInt/norm * magError)) );
 	}
 	return;
 }
@@ -292,11 +254,21 @@ void MinuitResult::genOutput(std::ostream& out, std::string opt){
 	if(!isValid) out<<"		*** FIT RESULT NOT VALID! ***"<<std::endl;
 	out<<"Initial Likelihood: "<<initialLH<<std::endl;
 	out<<"Final Likelihood: "<<finalLH<<std::endl;
+
 	out<<"Estimated distance to minimumn: "<<edm<<std::endl;
 	out<<"Error definition: "<<errorDef<<std::endl;
 	out<<"Number of calls: "<<nFcn<<std::endl;
 	if(hasReachedCallLimit) out<<"		*** LIMIT OF MAX CALLS REACHED! ***"<<std::endl;
 	out<<"CPU Time : "<<time/60<<"min"<<std::endl;
+	out<<std::endl;
+	/*
+	 * The Akaike (AIC) and Bayesian (BIC) information criteria are described in
+	 * Schwarz, Anals of Statistics 6 No.2: 461-464 (1978)
+	 * and
+	 * IEEE Transacrions on Automatic Control 19, No.6:716-723 (1974)
+	 */
+	out<<"AIC: "<<finalLH-estimator->calcPenalty()+2*_amp->getNumberOfResonances()<<std::endl;
+	out<<"BIC: "<<finalLH-estimator->calcPenalty()+_amp->getNumberOfResonances()*std::log(estimator->getNEvents())<<std::endl;
 	out<<std::endl;
 
 	if(!hasValidParameters) out<<"		*** NO VALID SET OF PARAMETERS! ***"<<std::endl;
@@ -328,7 +300,7 @@ void MinuitResult::genOutput(std::ostream& out, std::string opt){
 	printFitFractions(fracTable); //calculate and print fractions if amplitude is set
 	return;
 }
-//! Table with fit parameters
+
 void MinuitResult::printFitParameters(TableFormater* tableResult){
 	bool printTrue=0;
 	if(trueParameters.GetNParameter()) printTrue=1;
@@ -410,7 +382,7 @@ void MinuitResult::printFitFractions(TableFormater* fracTable){
 
 	return;
 }
-//! Table with correlation matrix
+
 void MinuitResult::printCorrelationMatrix(TableFormater* tableCorr){
 	if(!hasValidCov) return;
 	tableCorr->addColumn(" ",15);//add empty first column
@@ -440,7 +412,7 @@ void MinuitResult::printCorrelationMatrix(TableFormater* tableCorr){
 	tableCorr->footer();
 	return;
 }
-//! Table with covariance matrix
+
 void MinuitResult::printCovarianceMatrix(TableFormater* tableCov){
 	if(!hasValidCov) return;
 	tableCov->addColumn(" ",15);//add empty first column

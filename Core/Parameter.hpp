@@ -44,10 +44,8 @@ public:
 	 * Standard constructor with no information provided. Creates parameter
 	 * with value 0 but without bounds or an error.
 	 * \param inName internal string identifier of this parameter
-	 * \sa make_str()
 	 */
 	//MultiComplex(std::string inName):AbsParameter(inName, ParType::MDOUBLE){
-	//make_str();
 	//}
 
 	//! Standard constructor with a value
@@ -56,10 +54,8 @@ public:
 	 * with given value but without bounds or an error.
 	 * \param inName internal string identifier of this parameter
 	 * \param values input vector of values of the parameter
-	 * \sa make_str()
 	 */
 	MultiComplex(std::string inName, const std::vector<std::complex<double> >& values):AbsParameter(inName, ParType::MCOMPLEX),val_(values) {
-		//make_str();
 	}
 
 	//! Copy constructor using = operator
@@ -100,7 +96,6 @@ public:
 		if(i>=val_.size()) return;
 		if(val_[i]==inVal) return;
 		val_[i] = inVal;
-		//make_str();
 		Notify();
 	}
 
@@ -119,7 +114,7 @@ protected:
 		std::stringstream oss;
 		oss << name_;
 		unsigned int max=val_.size();
-		if(max>10) max=10; //display only 10 variables
+		if(max>5) max=5; //display only 5 variables
 		oss << "\t Val = ";
 		for(unsigned int i=0; i<max-1; i++)
 			oss << val_[i] << ", ";
@@ -138,7 +133,7 @@ protected:
 	virtual std::string make_val_str() {
 		std::stringstream ovs;
 		unsigned int max=val_.size();
-		if(max>10) max=10; //display only 10 variables
+		if(max>3) max=3; //display only 10 variables
 		for(unsigned int i=0; i<max-1; i++)
 			ovs << val_[i] << ", ";
 		ovs << val_[max-1];
@@ -161,10 +156,8 @@ public:
 	 * Standard constructor with no information provided. Creates parameter
 	 * with value 0 but without bounds or an error.
 	 * \param inName internal string identifier of this parameter
-	 * \sa make_str()
 	 */
 	//MultiDouble(std::string inName):AbsParameter(inName, ParType::MDOUBLE){
-	//make_str();
 	//}
 
 	//! Standard constructor with a value
@@ -173,10 +166,8 @@ public:
 	 * with given value but without bounds or an error.
 	 * \param inName internal string identifier of this parameter
 	 * \param values input vector of values of the parameter
-	 * \sa make_str()
 	 */
 	MultiDouble(std::string inName, const std::vector<double>& values):AbsParameter(inName, ParType::MDOUBLE),val_(values) {
-		//make_str();
 	}
 
 	//! Copy constructor using = operator
@@ -217,7 +208,6 @@ public:
 		if(i>=val_.size()) return;
 		if(val_[i]==inVal) return;
 		val_[i] = inVal;
-		//make_str();
 		Notify();
 	}
 
@@ -236,7 +226,7 @@ protected:
 		std::stringstream oss;
 		oss << name_;
 		unsigned int max=val_.size();
-		if(max>10) max=10; //display only 10 variables
+		if(max>5) max=5; //display only 10 variables
 		oss << "\t Val = ";
 		for(unsigned int i=0; i<max-1; i++)
 			oss << val_[i] << ", ";
@@ -255,7 +245,7 @@ protected:
 	virtual std::string make_val_str() {
 		std::stringstream ovs;
 		unsigned int max=val_.size();
-		if(max>10) max=10; //display only 10 variables
+		if(max>5) max=5; //display only 5 variables
 		for(unsigned int i=0; i<max-1; i++)
 			ovs << val_[i] << ", ";
 		ovs << val_[max-1];
@@ -277,11 +267,9 @@ public:
 	 * Standard constructor with just a name provided. Creates parameter
 	 * with value 0 but without bounds or an error.
 	 * \param inName internal string identifier of this parameter
-	 * \sa make_str()
 	 */
 	ComplexParameter(std::string inName):AbsParameter(inName,ParType::COMPLEX),val_(0.,0.),min_(0.,0.),max_(0.,0.),err_(0.,0.) {
 		bounds_= usebounds_ = hasError_ = fixed_ = false;
-		//make_str();
 	}
 
 	//! Standard constructor with a value
@@ -290,11 +278,9 @@ public:
 	 * with given value but without bounds or an error.
 	 * \param inName internal string identifier of this parameter
 	 * \param value input value of the parameter
-	 * \sa make_str()
 	 */
 	ComplexParameter(std::string inName, const std::complex<double> value):AbsParameter(inName,ParType::COMPLEX),val_(value),min_(0,0),max_(0,0),err_(0,0){
 		bounds_= usebounds_ = hasError_ = fixed_ = false;
-		//make_str();
 	}
 
 	//! Standard constructor with value and error
@@ -304,13 +290,11 @@ public:
 	 * \param inName internal string identifier of this parameter
 	 * \param value input value of the parameter
 	 * \param error input error of the parameter
-	 * \sa make_str()
 	 */
 	ComplexParameter(std::string inName, const std::complex<double> value, const std::complex<double> error)
 	:AbsParameter(inName,ParType::COMPLEX),val_(value),min_(0,0),max_(0,0),err_(error){
 		bounds_= usebounds_ = fixed_ = false;
 		hasError_ = true;
-		//make_str();
 	}
 
 	//! Standard constructor with value and bounds
@@ -322,7 +306,7 @@ public:
 	 * \param value input value of the parameter
 	 * \param min input lower bound
 	 * \param max input upper bound
-	 * \sa make_str(), check_bounds()
+	 * \sa check_bounds()
 	 */
 	ComplexParameter(std::string inName, const std::complex<double> value, const std::complex<double> min, const std::complex<double> max)
 	:AbsParameter(inName,ParType::COMPLEX),val_(value),min_(0,0),max_(0,0),err_(0,0){
@@ -332,7 +316,6 @@ public:
 			max_ = max;
 			bounds_ = true;
 		}
-		//make_str();
 	}
 
 	//! Standard constructor with value, bounds and error
@@ -345,7 +328,7 @@ public:
 	 * \param min input lower bound
 	 * \param max input upper bound
 	 * \param error input error of the parameter
-	 * \sa make_str(), check_bounds()
+	 * \sa check_bounds()
 	 */
 	ComplexParameter(std::string inName, const std::complex<double> value, const std::complex<double> min, const std::complex<double> max, const std::complex<double> error)
 	:AbsParameter(inName,ParType::COMPLEX),val_(value),min_(0,0),max_(0,0),err_(error){
@@ -356,7 +339,6 @@ public:
 			max_ = max;
 			bounds_ = true;
 		}
-		//make_str();
 	}
 
 	//! Copy constructor using = operator
@@ -407,7 +389,6 @@ public:
 		}
 		if(val_==inVal) return;
 		val_ = inVal;
-		//make_str();
 		Notify();
 	}
 	//! Setter for error of parameter
@@ -419,7 +400,6 @@ public:
 			min_ = inMin;
 			max_ = inMax;
 			bounds_ = true;
-			//make_str();
 		}
 		return valid;
 	}
@@ -438,7 +418,6 @@ public:
 		if(valid){
 			min_ = min;
 			bounds_ = true;
-			//make_str();
 		}
 		return valid;
 	}
@@ -457,7 +436,6 @@ public:
 		if(valid){
 			max_ = max;
 			bounds_ = true;
-			//make_str();
 		}
 		return valid;
 	}
@@ -550,12 +528,10 @@ public:
 	 * Standard constructor with no information provided. Creates parameter
 	 * with value 0 but without bounds or an error.
 	 * \param inName internal string identifier of this parameter
-	 * \sa make_str()
 	 */
 	DoubleParameter(std::string inName=""):AbsParameter(inName, ParType::DOUBLE),fixed_(0),val_(0),min_(0),max_(0),
 	errorType(ErrorType::SYM),errorLow(0),errorHigh(0) {
 		bounds_= usebounds_ = false;
-		//make_str();
 	}
 
 	//! Standard constructor with a value
@@ -564,12 +540,10 @@ public:
 	 * with given value but without bounds or an error.
 	 * \param inName internal string identifier of this parameter
 	 * \param value input value of the parameter
-	 * \sa make_str()
 	 */
 	DoubleParameter(std::string inName, const double value):AbsParameter(inName, ParType::DOUBLE),fixed_(0),val_(value),min_(0),max_(0),
 			errorType(ErrorType::SYM),errorLow(0),errorHigh(0) {
 		bounds_= usebounds_ = false;
-		//make_str();
 	}
 
 	//! Standard constructor with value and error
@@ -579,7 +553,6 @@ public:
 	 * \param inName internal string identifier of this parameter
 	 * \param value input value of the parameter
 	 * \param error input error of the parameter
-	 * \sa make_str()
 	 */
 	DoubleParameter(std::string inName, const double value, const double error)
 	:AbsParameter(inName, ParType::DOUBLE),fixed_(0),val_(value),min_(0),max_(0),errorType(ErrorType::SYM),errorLow(error),errorHigh(error)
@@ -596,7 +569,7 @@ public:
 	 * \param value input value of the parameter
 	 * \param min input lower bound
 	 * \param max input upper bound
-	 * \sa make_str(), check_bounds()
+	 * \sa check_bounds()
 	 */
 	DoubleParameter(std::string inName, const double value, const double min, const double max)
 	:AbsParameter(inName, ParType::DOUBLE),fixed_(0),val_(value),min_(0),max_(0),errorType(ErrorType::SYM),errorLow(0),errorHigh(0)
@@ -615,7 +588,7 @@ public:
 	 * \param min input lower bound
 	 * \param max input upper bound
 	 * \param error input error of the parameter
-	 * \sa make_str(), check_bounds()
+	 * \sa check_bounds()
 	 */
 	DoubleParameter(std::string inName, const double value, const double min, const double max, const double error)
 	:AbsParameter(inName, ParType::DOUBLE),fixed_(0),val_(value),min_(0),max_(0),errorType(ErrorType::SYM),errorLow(error),errorHigh(error)
@@ -841,11 +814,9 @@ public:
 	 * Standard constructor with no information provided. Creates parameter
 	 * with value 0 but without bounds or an error.
 	 * \param inName internal string identifier of this parameter
-	 * \sa make_str()
 	 */
 	IntegerParameter(std::string inName):AbsParameter(inName, ParType::INTEGER),val_(0),min_(0),max_(0),err_(0) {
 		bounds_= usebounds_ = hasError_ = fixed_ = false;
-		//make_str();
 	}
 
 	//! Standard constructor with a value
@@ -854,11 +825,9 @@ public:
 	 * with given value but without bounds or an error.
 	 * \param inName internal string identifier of this parameter
 	 * \param value input value of the parameter
-	 * \sa make_str()
 	 */
 	IntegerParameter(std::string inName, const int value):AbsParameter(inName, ParType::INTEGER),val_(value),min_(0),max_(0),err_(0){
 		bounds_= usebounds_ = hasError_ = fixed_ = false;
-		//make_str();
 	}
 
 	//! Standard constructor with value and error
@@ -868,13 +837,11 @@ public:
 	 * \param inName internal string identifier of this parameter
 	 * \param value input value of the parameter
 	 * \param error input error of the parameter
-	 * \sa make_str()
 	 */
 	IntegerParameter(std::string inName, const int value, const int error)
 	:AbsParameter(inName, ParType::INTEGER),val_(value),min_(0),max_(0),err_(error){
 		bounds_= usebounds_ = fixed_ = false;
 		hasError_ = true;
-		//make_str();
 	}
 
 	//! Standard constructor with value and bounds
@@ -886,7 +853,7 @@ public:
 	 * \param value input value of the parameter
 	 * \param min input lower bound
 	 * \param max input upper bound
-	 * \sa make_str(), check_bounds()
+	 * \sa check_bounds()
 	 */
 	IntegerParameter(std::string inName, const int value, const int min, const int max)
 	:AbsParameter(inName, ParType::INTEGER),val_(value),min_(0),max_(0),err_(0){
@@ -896,7 +863,6 @@ public:
 			max_ = max;
 			bounds_ = true;
 		}
-		//make_str();
 	}
 
 	//! Standard constructor with value, bounds and error
@@ -909,7 +875,7 @@ public:
 	 * \param min input lower bound
 	 * \param max input upper bound
 	 * \param error input error of the parameter
-	 * \sa make_str(), check_bounds()
+	 * \sa check_bounds()
 	 */
 	IntegerParameter(std::string inName, const int value, const int min, const int max, const int error)
 	:AbsParameter(inName, ParType::INTEGER),val_(value),min_(0),max_(0),err_(error){
@@ -920,7 +886,6 @@ public:
 			max_ = max;
 			bounds_ = true;
 		}
-		//make_str();
 	}
 
 	//! Copy constructor using = operator
@@ -971,7 +936,6 @@ public:
 		}
 		if(val_==inVal) return;
 		val_ = inVal;
-		//make_str();
 		Notify();
 	}
 	//! Setter for error of parameter
@@ -983,7 +947,6 @@ public:
 			min_ = inMin;
 			max_ = inMax;
 			bounds_ = true;
-			//make_str();
 		}
 		return valid;
 	}
@@ -1002,7 +965,6 @@ public:
 		if(valid){
 			min_ = min;
 			bounds_ = true;
-			//make_str();
 		}
 		return valid;
 	}
@@ -1021,7 +983,6 @@ public:
 		if(valid){
 			max_ = max;
 			bounds_ = true;
-			//make_str();
 		}
 		return valid;
 	}
@@ -1115,11 +1076,9 @@ public:
 	 * Standard constructor with no information provided. Creates parameter
 	 * with value 0 but without bounds or an error.
 	 * \param inName internal string identifier of this parameter
-	 * \sa make_str()
 	 */
 	BoolParameter(std::string inName):AbsParameter(inName,ParType::BOOL),val_(0),err_(0) {
 		hasError_ = fixed_ = false;
-		//make_str();
 	}
 
 	//! Standard constructor with a value
@@ -1128,11 +1087,9 @@ public:
 	 * with given value but without bounds or an error.
 	 * \param inName internal string identifier of this parameter
 	 * \param value input value of the parameter
-	 * \sa make_str()
 	 */
 	BoolParameter(std::string inName, const bool value):AbsParameter(inName,ParType::BOOL),val_(value),err_(0){
 		hasError_ = fixed_ = false;
-		//make_str();
 	}
 
 	//! Standard constructor with value and error
@@ -1142,13 +1099,11 @@ public:
 	 * \param inName internal string identifier of this parameter
 	 * \param value input value of the parameter
 	 * \param error input error of the parameter
-	 * \sa make_str()
 	 */
 	BoolParameter(std::string inName, const bool value, const bool error)
 	:AbsParameter(inName,ParType::BOOL),val_(value),err_(error){
 		fixed_ = false;
 		hasError_ = true;
-		//make_str();
 	}
 
 	//! Copy constructor using = operator
@@ -1191,7 +1146,6 @@ public:
 		}
 		if(val_==inVal) return;
 		val_ = inVal;
-		//make_str();
 		Notify();
 	}
 	//! Setter for error of parameter

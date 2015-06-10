@@ -126,7 +126,18 @@ public:
 	//! Destructor
 	virtual ~MinLogLH() { };
 	//! Should we try to use the function tree? Function tree needs to be implemented in Amplitude
-	void setUseFunctionTree(bool t);
+	virtual void setUseFunctionTree(bool t);
+	//! Set scale of penalty term
+	virtual void setPenaltyScale(double sc);
+	//! Get scale of penalty term
+	virtual double getPenaltyScale() { return penaltyLambda; }
+	/** Calculate penalty term
+	 * A penalty term can be added to the LH to punish unnecessary complexity of amplitudes in
+	 * minimization. The strength of this term can be set via MinLogLH::setPenaltyScale(double).
+	 * A detailed description of the approach can be found in arXiv:1505.05133 */
+	virtual double calcPenalty();
+	//! Get number of events in data set
+	virtual int getNEvents() { return nEvts_; }
 
 protected:
 	//! Default Constructor
@@ -191,6 +202,8 @@ private:
 	//! Fraction of signal in data sample
 	double signalFraction;
 
+	//! Scale of penalty term
+	double penaltyLambda;
 };
 
 #endif /* _MINLOGLHBKG_HPP */

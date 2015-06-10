@@ -39,15 +39,13 @@ public:
   virtual std::complex<double> evaluate(dataPoint& point) = 0;
   //! value of dynamical amplitude at \param point
   virtual std::complex<double> evaluateAmp(dataPoint& point) = 0;
-  //! value of WignerD amplitude at \param point
-//  virtual double evaluateWignerD(dataPoint& point) = 0;
 
   //! Get resonance spin
   virtual double getSpin() = 0;
   //! Calculation integral |dynamical amplitude|^2
   virtual double integral(unsigned int nCalls) const;
   //! Calculation integral |dynamical amplitude * WignerD|^2
-  virtual double totalIntegral() const;
+  virtual double totalIntegral(unsigned int nCalls) const;
 
   virtual std::string GetName(){ return _name; };
   virtual std::string GetTitle(){ return GetName(); };

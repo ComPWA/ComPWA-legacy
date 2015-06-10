@@ -45,6 +45,8 @@ public:
 	virtual ~Amplitude()
 	{ /* nothing */	}
 
+	virtual Amplitude* Clone() = 0;
+
 	//! set efficiency
 	virtual void setEfficiency(std::shared_ptr<Efficiency> eff) {};
 	virtual const double integral() =0;
@@ -53,7 +55,6 @@ public:
 	virtual const double normalization(ParameterList& par) =0;
 	virtual double getMaxVal(ParameterList& par, std::shared_ptr<Generator> gen) = 0;
 	virtual double getMaxVal(std::shared_ptr<Generator> gen) = 0;
-	//virtual const double volume() =0;
 
 	virtual const ParameterList& intensity(dataPoint& point, ParameterList& par) =0;
 	virtual const ParameterList& intensity(dataPoint& point) =0;
@@ -66,57 +67,47 @@ public:
 
 	virtual void printAmps() = 0;
 	virtual void printFractions() = 0;
-	virtual unsigned int getNumberOfResonances() { return 0; }
 
-	//! get total integral for resonance \param id
-	virtual double getTotalIntegral(unsigned int id) { return -999; };
-	//! get total integral for resonance \param name
-	virtual double getTotalIntegral(std::string name) { return -999; };
+	/** Integral value of amplitude in certain boundary
+	 * Used for plotting a projection of a function in \p var1 in bin [\p min1, \p min2]. In this
+	 * case we have to integrate over an other variable \p var2
+	 * @param var1 first variable
+	 * @param min1 minimal value of first variable
+	 * @param max1 maximal value of first variable
+	 * @param var2 second variable
+	 * @param min2 minimal value of second variable
+	 * @param max2 maximal value of second variable
+	 * @return
+	 */
+	virtual double getIntValue(std::string var1, double min1, double max1, std::string var2, double min2, double max2) = 0;
+
+	//---------- get resonance parameters -------------
+	//! Number of resonances
+	virtual unsigned int getNumberOfResonances() { return 0; }
 	//! convert resonance \param name to id
 	virtual int getIdOfResonance(std::string name){ return 0;}
 	//! convert resonance \param id to name
 	virtual std::string getNameOfResonance(unsigned int id){ return std::string("muh");}
-//	virtual double getMagnitude(std::string name) {return -999;};
-//	virtual double getMagnitude(unsigned int id) {return -999;};
-//	virtual double getPhase(std::string name) {return -999;};
-//	virtual double getPhase(unsigned int id) {return -999;};
-//	virtual double getSpin(std::string name) {return -999;};
-//	virtual double getSpin(unsigned int id) {return -999;};
-//	virtual double getFraction(std::string name) = 0;
-//	virtual double getFraction(unsigned int id) = 0;
-	virtual double getIntValue(std::string var1, double min1, double max1, std::string var2, double min2, double max2) = 0;
-	virtual Amplitude* Clone() = 0;
+	//! get total integral for resonance \param id
+	virtual double getAmpIntegral(unsigned int id) { return -999; };
+	//! get total integral for resonance \param name
+	virtual double getAmpIntegral(std::string name) { return -999; };
+	//! Get magnitude of resonance name
+	virtual double getAmpMagnitude(std::string name) {return -999;};
+	//! Get magnitude of resonance id
+	virtual double getAmpMagnitude(unsigned int id) {return -999;};
+	//! Get phase of resonance name
+	virtual double getAmpPhase(std::string name) {return -999;};
+	//! Get phase of resonance id
+	virtual double getAmpPhase(unsigned int id) {return -999;};
 
+	//---------- related to FunctionTree -------------
 	//! Check of tree is available
 	virtual bool hasTree(){ return 0; }
 	//! Getter function for basic amp tree
 	virtual std::shared_ptr<FunctionTree> getAmpTree(allMasses&,allMasses&, std::string){
 		return std::shared_ptr<FunctionTree>();
 	}
-
-
-	/* OBSOLETE SECTION ONLY FOR TESTING */
-	virtual std::shared_ptr<FunctionTree> functionTree(allMasses& theMasses, allMasses& toyPhspSample) {
-		//if not implemented, return NULL-pointer
-		return std::shared_ptr<FunctionTree>();
-	}
-	virtual void resetTree() {
-		//if not implemented, return NULL-pointer
-		return;
-	}
-	virtual std::shared_ptr<FunctionTree> phspTree(allMasses& accPhspSample, allMasses& toyPhspSample) {
-		//if not implemented, return NULL-pointer
-		return std::shared_ptr<FunctionTree>();
-	}
-	virtual std::shared_ptr<FunctionTree> phspTree(allMasses& toyPhspSample) {
-		//if not implemented, return NULL-pointer
-		return std::shared_ptr<FunctionTree>();
-	}
-	//! Getter function for function tree
-	virtual std::shared_ptr<FunctionTree> getTree(){ return std::shared_ptr<FunctionTree>(); }
-	//! Getter function for phsp tree
-	virtual std::shared_ptr<FunctionTree> getPhspTree(){ return std::shared_ptr<FunctionTree>(); }
-	/* OBSOLETE SECTION ONLY FOR TESTING */
 
 protected:
 	ParameterList result;
