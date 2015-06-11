@@ -46,16 +46,16 @@
 using namespace boost::log;
 
 
-AmpSumIntensity::AmpSumIntensity(const AmpSumIntensity& other) : nAmps(other.nAmps), _dpArea(other._dpArea),
-		_normStyle(other._normStyle),maxVal(other.maxVal),ampSetup(other.ampSetup),
-		totAmp(other.totAmp), _calcMaxFcnVal(other._calcMaxFcnVal), _maxFcnVal(other._maxFcnVal),
-		_nCalls(other._nCalls){
-}
+//AmpSumIntensity::AmpSumIntensity(const AmpSumIntensity& other) : _normStyle(other._normStyle),
+//		maxVal(other.maxVal),ampSetup(other.ampSetup),
+//		totAmp(other.totAmp), _calcMaxFcnVal(other._calcMaxFcnVal), _maxFcnVal(other._maxFcnVal),
+//		_nCalls(other._nCalls){
+//}
 
 AmpSumIntensity::AmpSumIntensity(AmplitudeSetup ini, normStyle ns, std::shared_ptr<Efficiency> eff,
 		unsigned int nCalls) :
 							totAmp("relBWsumAmplitude"), ampSetup(ini),
-							_normStyle(ns), _calcNorm(1), _dpArea(1.),
+							_normStyle(ns), _calcNorm(1),
 							_calcMaxFcnVal(0),eff_(eff),_nCalls(nCalls)
 {
 	init();
@@ -64,7 +64,7 @@ AmpSumIntensity::AmpSumIntensity(AmplitudeSetup ini, normStyle ns, std::shared_p
 AmpSumIntensity::AmpSumIntensity(AmplitudeSetup ini, std::shared_ptr<Efficiency> eff,
 		unsigned int nCalls) :
 							totAmp("relBWsumAmplitude"), ampSetup(ini),
-							_normStyle(none), _calcNorm(0), _dpArea(1.),
+							_normStyle(none), _calcNorm(0),
 							_calcMaxFcnVal(0),eff_(eff),_nCalls(nCalls)
 {
 	init();
@@ -97,7 +97,6 @@ void AmpSumIntensity::init(){
 		BreitWignerConf tmp = (*reso);
 		if(!tmp.m_enable) continue;
 		std::string name = tmp.m_name;
-		namer.push_back(name);
 		unsigned int subSys = tmp.m_daughterA + tmp.m_daughterB;
 		params.AddParameter( std::shared_ptr<DoubleParameter> (
 				new DoubleParameter("mag_"+name,tmp.m_strength,tmp.m_strength_min,tmp.m_strength_max) ) );
@@ -134,7 +133,6 @@ void AmpSumIntensity::init(){
 		FlatteConf tmp = (*reso);
 		if(!tmp.m_enable) continue;
 		std::string name = tmp.m_name;
-		namer.push_back(name);
 		unsigned int subSys = tmp.m_daughterA + tmp.m_daughterB;
 		params.AddParameter( std::shared_ptr<DoubleParameter> (
 				new DoubleParameter("mag_"+name,tmp.m_strength,tmp.m_strength_min,tmp.m_strength_max) ) );
@@ -181,7 +179,6 @@ void AmpSumIntensity::init(){
 		Flatte3ChConf tmp = (*reso);
 		if(!tmp.m_enable) continue;
 		std::string name = tmp.m_name;
-		namer.push_back(name);
 		unsigned int subSys = tmp.m_daughterA + tmp.m_daughterB;
 		params.AddParameter( std::shared_ptr<DoubleParameter> (
 				new DoubleParameter("mag_"+name,tmp.m_strength,tmp.m_strength_min,tmp.m_strength_max) ) );
@@ -236,7 +233,6 @@ void AmpSumIntensity::init(){
 	   basicConf tmp = (*reso);
 	   if(!tmp.m_enable) continue;
 	   std::string name = tmp.m_name;
-	   namer.push_back(name);
 	   params.AddParameter( std::shared_ptr<DoubleParameter> (
 				new DoubleParameter("mag_"+name,tmp.m_strength,tmp.m_strength_min,tmp.m_strength_max) ) );
 	   params.GetDoubleParameter("mag_"+name)->FixParameter(tmp.m_strength_fix);
@@ -256,7 +252,6 @@ void AmpSumIntensity::init(){
 	BOOST_LOG_TRIVIAL(info) << "AmpSumIntensity::init() | setting parameter g1_a_0 to "
 	   <<params.GetDoubleParameter("g1_a_0")->GetValue();
 
-	nAmps=namer.size();
 	BOOST_LOG_TRIVIAL(info)<<"AmpSumIntensity: completed setup!";
 }
 
@@ -273,7 +268,7 @@ std::shared_ptr<FunctionTree> AmpSumIntensity::setupBasicTree(
 	  return std::shared_ptr<FunctionTree>();
    }
    DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
-   _dpArea = kin->getPhspVolume();
+   double phspVol = kin->getPhspVolume();
 
    //------------Setup Tree---------------------
    std::shared_ptr<FunctionTree> newTree(new FunctionTree());
@@ -328,7 +323,7 @@ std::shared_ptr<FunctionTree> AmpSumIntensity::setupBasicTree(
 		 newTree->createNode("N_"+tmp.m_name, sqRootStrat, "Reso_"+tmp.m_name); //N = sqrt(NSq)
 		 newTree->createNode("NSq_"+tmp.m_name, multDStrat, "N_"+tmp.m_name); //NSq = (PhspVolume/N_phspMC * Sum(|A|^2))^-1
 		 newTree->createLeaf("PhspSize_"+tmp.m_name, toyPhspSample.nEvents, "NSq_"+tmp.m_name); // N_phspMC
-		 newTree->createLeaf("PhspVolume_"+tmp.m_name, 1/_dpArea, "NSq_"+tmp.m_name); // 1/PhspVolume
+		 newTree->createLeaf("PhspVolume_"+tmp.m_name, 1/phspVol, "NSq_"+tmp.m_name); // 1/PhspVolume
 		 newTree->createNode("InvSum_"+tmp.m_name, invStrat, "NSq_"+tmp.m_name); //1/Sum(|A|^2)
 		 newTree->createNode("Sum_"+tmp.m_name, addStrat, "InvSum_"+tmp.m_name); //Sum(|A|^2)
 		 newTree->createNode("AbsVal_"+tmp.m_name, msqStrat, "Sum_"+tmp.m_name); //|A_i|^2
@@ -390,7 +385,7 @@ std::shared_ptr<FunctionTree> AmpSumIntensity::setupBasicTree(
 		 newTree->createNode("N_"+tmp.m_name, sqRootStrat, "BW_"+tmp.m_name); //N = sqrt(NSq)
 		 newTree->createNode("NSq_"+tmp.m_name, multDStrat, "N_"+tmp.m_name); //NSq = (PhspVolume/N_phspMC * Sum(|A|^2))^-1
 		 newTree->createLeaf("PhspSize_"+tmp.m_name, toyPhspSample.nEvents, "NSq_"+tmp.m_name); // N_phspMC
-		 newTree->createLeaf("PhspVolume_"+tmp.m_name, 1/_dpArea, "NSq_"+tmp.m_name); // 1/PhspVolume
+		 newTree->createLeaf("PhspVolume_"+tmp.m_name, 1/phspVol, "NSq_"+tmp.m_name); // 1/PhspVolume
 		 newTree->createNode("InvSum_"+tmp.m_name, invStrat, "NSq_"+tmp.m_name); //1/Sum(|A|^2)
 		 newTree->createNode("Sum_"+tmp.m_name, addStrat, "InvSum_"+tmp.m_name); //Sum(|A|^2)
 		 newTree->createNode("AbsVal_"+tmp.m_name, msqStrat, "Sum_"+tmp.m_name); //|A_i|^2
@@ -497,7 +492,7 @@ std::shared_ptr<FunctionTree> AmpSumIntensity::setupBasicTree(
 		 newTree->createNode("N_"+tmp.m_name, sqRootStrat, "Flatte_"+tmp.m_name); //N = sqrt(NSq)
 		 newTree->createNode("NSq_"+tmp.m_name, multDStrat, "N_"+tmp.m_name); //NSq = N_phspMC * 1/PhspVolume * 1/Sum(|A|^2)
 		 newTree->createLeaf("PhspSize_"+tmp.m_name, toyPhspSample.nEvents, "NSq_"+tmp.m_name); // N_phspMC
-		 newTree->createLeaf("PhspVolume_"+tmp.m_name, 1/_dpArea, "NSq_"+tmp.m_name); // 1/PhspVolume
+		 newTree->createLeaf("PhspVolume_"+tmp.m_name, 1/phspVol, "NSq_"+tmp.m_name); // 1/PhspVolume
 		 newTree->createNode("InvSum_"+tmp.m_name, invStrat, "NSq_"+tmp.m_name); //1/Sum(|A|^2)
 		 newTree->createNode("Sum_"+tmp.m_name, addStrat, "InvSum_"+tmp.m_name); //Sum(|A|^2)
 		 newTree->createNode("AbsVal_"+tmp.m_name, msqStrat, "Sum_"+tmp.m_name); //|A_i|^2
@@ -624,7 +619,7 @@ std::shared_ptr<FunctionTree> AmpSumIntensity::setupBasicTree(
 		 newTree->createNode("N_"+tmp.m_name, sqRootStrat, "Flatte_"+tmp.m_name); //N = sqrt(NSq)
 		 newTree->createNode("NSq_"+tmp.m_name, multDStrat, "N_"+tmp.m_name); //NSq = N_phspMC * 1/PhspVolume * 1/Sum(|A|^2)
 		 newTree->createLeaf("PhspSize_"+tmp.m_name, toyPhspSample.nEvents, "NSq_"+tmp.m_name); // N_phspMC
-		 newTree->createLeaf("PhspVolume_"+tmp.m_name, 1/_dpArea, "NSq_"+tmp.m_name); // 1/PhspVolume
+		 newTree->createLeaf("PhspVolume_"+tmp.m_name, 1/phspVol, "NSq_"+tmp.m_name); // 1/PhspVolume
 		 newTree->createNode("InvSum_"+tmp.m_name, invStrat, "NSq_"+tmp.m_name); //1/Sum(|A|^2)
 		 newTree->createNode("Sum_"+tmp.m_name, addStrat, "InvSum_"+tmp.m_name); //Sum(|A|^2)
 		 newTree->createNode("AbsVal_"+tmp.m_name, msqStrat, "Sum_"+tmp.m_name); //|A_i|^2
@@ -955,7 +950,7 @@ void AmpSumIntensity::printAmps(){
 	  std::string tmp = p->GetName();
 	  std::size_t found = tmp.find("mag");
 	  if(found!=std::string::npos){
-		 outStr<<"-------- "<<namer[n]<<" ---------\n";
+		 outStr<<"-------- "<<totAmp.getAmpName(n)<<" ---------\n";
 		 n++;
 	  }
 	  outStr<<p->GetName()<<" = "<<p->GetValue();
@@ -975,8 +970,8 @@ void AmpSumIntensity::printFractions(){
    std::stringstream outStr;
    outStr<<"Fit fractions for all amplitudes: \n";
    double sumFrac=0;
-   for(unsigned int i=0;i<totAmp.getNAmps();i++){
-	  double frac = getFraction(i);
+   for(unsigned int i=0;i<totAmp.getNumberOfResonances();i++){
+	  double frac = getAmpFraction(i);
 	  sumFrac+=frac;
 	  outStr<<std::setw(10)<<totAmp.getAmpName(i)<<":    "<<frac<<"\n";
 	  //		if(!(i==totAmp.getNAmps()-1)) outStr << "\n";

@@ -92,7 +92,7 @@ void RootReader::reduceToPhsp(){
 		 tmp.push_back(fEvents.at(evt));
    }
    BOOST_LOG_TRIVIAL(info)<<"RootReader::reduceToPhsp() | remove all events outside PHSP boundary from data sample.";
-   BOOST_LOG_TRIVIAL(info)<<"RootReader::reduceToPhsp() | "<<tmp.size()<<" from "<<fEvents.size()<<"("<<((double)tmp.size())/fEvents.size()*100 <<"%) were removed.";
+   BOOST_LOG_TRIVIAL(info)<<"RootReader::reduceToPhsp() | "<<tmp.size()<<" from "<<fEvents.size()<<"("<<((double)tmp.size())/fEvents.size()*100 <<"%) were kept.";
    fEvents = tmp;
    return;
 }
