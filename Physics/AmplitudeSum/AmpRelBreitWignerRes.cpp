@@ -66,6 +66,7 @@ std::complex<double> AmpRelBreitWignerRes::evaluateAmp(dataPoint& point) {
 	return dynamicalFunction(mSq,_mR->GetValue(),_ma,_mb,_resWidth->GetValue(),_spin,_mesonRadius->GetValue());
 }
 std::complex<double> AmpRelBreitWignerRes::dynamicalFunction(double mSq, double mR, double ma, double mb, double width, unsigned int J, double mesonRadius){
+	std::complex<double> i(0,1);
 	double sqrtS = sqrt(mSq);
 
 	double barrier = AmpKinematics::FormFactor(sqrtS,ma,mb,J,mesonRadius)/AmpKinematics::FormFactor(mR,ma,mb,J,mesonRadius);
@@ -80,13 +81,15 @@ std::complex<double> AmpRelBreitWignerRes::dynamicalFunction(double mSq, double 
 
 	//-- Old approach
 	//std::complex<double> denom(mR*mR - mSq + mR*(width*qTerm.imag()*barrier*barrier), (-1)*mR*(width*qTerm.real()*(mR/sqrtS)*barrier*barrier) );
-	std::complex<double> denom(mR*mR - mSq, (-1)*mR*(width*qTerm.real()*(mR/sqrtS)*barrier*barrier) );
+	//std::complex<double> denom(mR*mR - mSq, (-1)*mR*(width*qTerm.real()*(mR/sqrtS)*barrier*barrier) );
+	//std::complex<double> result = std::complex<double>(1,0) / denom; //OLD
 	//-- New approach
 	//std::complex<double> denom(mR*mR - mSq + sqrtS*(width*qTerm.imag()*barrier*barrier), (-1)*sqrtS*(width*qTerm.real()*barrier*barrier) );
 	//std::complex<double> denom(mR*mR - mSq , (-1)*sqrtS*(width*qTerm.real()*barrier*barrier) );
+	std::complex<double> denom = std::complex<double>( mR*mR - mSq,0) + (-1.0)*i*sqrtS*(width*qTerm*barrier);
+//	std::cout<<mR<<" "<<mSq<<" "<<qTerm<<std::endl;
 
 	std::complex<double> result = g_final*g_production / denom;
-//	std::complex<double> result = std::complex<double>(1,0) / denom; //OLD
 
 	if(result.real()!=result.real() || result.imag()!=result.imag()){
 		std::cout<<"AmpRelBreitWignerRes::dynamicalFunction() | "<<barrier<<" "<<mR<<" "<<mSq

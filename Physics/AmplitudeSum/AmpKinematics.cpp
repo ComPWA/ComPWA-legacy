@@ -14,8 +14,8 @@
 
 AmpKinematics::AmpKinematics(std::shared_ptr<DoubleParameter> mR, int subSys, int spin, int m, int n,
 		std::shared_ptr<DoubleParameter> mesonRadius, std::shared_ptr<DoubleParameter> motherRadius) :
-				_M(-999), _mR(mR),_subSys(subSys), _spin(spin),_m(m),_n(n),
-				_mesonRadius(mesonRadius), _motherRadius(motherRadius), _wignerD(subSys,spin)
+		_M(-999), _mR(mR),_subSys(subSys), _spin(spin),_m(m),_n(n),
+		_mesonRadius(mesonRadius), _motherRadius(motherRadius), _wignerD(subSys,spin)
 {
 	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
 	_M=kin->M;
@@ -39,10 +39,10 @@ double AmpKinematics::qSqValue(double sqrtS, double ma, double mb){
 	double xSq = sqrtS*sqrtS;
 	double t1 = xSq - mapb*mapb;
 	double t2 = xSq - mamb*mamb;
-	return ( t1*t2/(2*sqrtS) );
+	return ( t1*t2/(4*xSq) );
 }
 std::complex<double> AmpKinematics::qValue(double sqrtS, double ma, double mb){
-//	std::complex<double> result( sqrt( qSqValue(sqrtS,ma,mb) ) ); //complex sqrt!
+	//std::complex<double> result( sqrt( qSqValue(sqrtS,ma,mb) ) ); //complex sqrt!
 	std::complex<double> result = phspFactor(sqrtS,ma,mb)*8.0*M_PI*sqrtS; //calculate from phsp factor
 	if(result.real()!=result.real() || result.imag()!=result.imag()){
 		std::cout<<"AmpKinematics::qValue() | NaN! sqrtS="<<sqrtS<<" ma="<<ma<<" mb="<<mb<<std::endl;
@@ -51,13 +51,16 @@ std::complex<double> AmpKinematics::qValue(double sqrtS, double ma, double mb){
 }
 
 double AmpKinematics::FormFactor(double sqrtS,double ma, double mb, double spin, double mesonRadius){
+	if (spin == 0) return 1;
 	//Blatt-Weisskopt form factors with normalization F(x=mR) = 1.
 	//Reference: S.U.Chung Annalen der Physik 4(1995) 404-430
-	if (spin == 0) return 1;
 	//z = q / (interaction range). For the interaction range we assume 1/mesonRadius
 	double z = qSqValue(sqrtS,ma,mb)*mesonRadius*mesonRadius;
+	/* Events below threshold
+	 * What should we do if event is below threshold? Shouldn't influence in
+	 * practise because resonances at threshold don't have spin(?) */
+	z = abs(z);
 
-	double nom=0, denom=0;
 	if (spin == 1){
 		return( sqrt(2*z/(z+1)) );
 	}
@@ -76,74 +79,59 @@ double AmpKinematics::FormFactor(double sqrtS,double ma, double mb, double spin,
 	return 0;
 }
 
-//double AmpKinematics::FormFactor(double sqrtS, double mR, double ma, double mb, double spin, double mesonRadius){
-   ////FormFactors used by BaBar
-	//if (spin == 0) return 1;
-	//std::complex<double> q = qValue(sqrtS,ma,mb);
-	////z = q / (interaction range). For the interaction range we assume 1/mesonRadius
-	//double z = std::norm(q)*mesonRadius*mesonRadius;
-
-	//if (spin == 1){
-		//return( sqrt(1/(1+z)) );
-	//} else if (spin == 2) {
-		//return (z-3)*(z-3)+9*z;
-	//} else{
-		//std::cout<<"Wrong spin value! BLW factors only implemented for spin 0-4! "<<std::endl;
-	//}
-	//return 0;
-//}
-
 std::complex<double> AmpKinematics::phspFactor(double sqrtS, double ma, double mb){
 	double s = sqrtS*sqrtS;
-	double q = sqrt(abs(qSqValue(sqrtS,ma,mb)));
-	std::complex<double> rho;
-	//rho = q / (0.5*sqrtS); //BaBar definition
-	//rho = sqrt(std::complex<double>(qSqValue(sqrtS,ma,mb))) / (8*M_PI*sqrtS); //PDG definition
-	//rho = q / (8*M_PI*sqrtS); //PDG definition
-
-	//Correct analytic continuation
-	std::complex<double> one(1,0);
 	std::complex<double> i(0,1);
-	if( s<0 ){ //below 0
-		rho = -q/M_PI*std::log(std::abs((one+q)/(one-q)));
-	} else if( 0<s && s<(ma+mb)*(ma+mb) ){ //below threshold
-		rho = -2.0*q/M_PI * atan(one/q);
+	std::complex<double> rho;
+	std::complex<double> rhoOld;
+
+	// == Two types of analytic continuation
+	// 1) Complex sqrt
+	//rhoOld = sqrt(std::complex<double>(qSqValue(sqrtS,ma,mb))) / (8*M_PI*sqrtS); //PDG definition
+	//rhoOld = sqrt(std::complex<double>(qSqValue(sqrtS,ma,mb))) / (0.5*sqrtS); //BaBar definition
+	//return rhoOld; //complex sqrt
+
+	/* 2) Correct analytic continuation
+	 * proper analytic continuation (PDG 2014 - Resonances (47.2.2))
+	 * I'm not sure of this is correct for the case of two different masses ma and mb.
+	 * Furthermore we divide by the factor 16*Pi*Sqrt[s]). This is more or less arbitrary
+	 * and not mentioned in the reference, but it leads to a good agreement between both
+	 * approaches.
+	 */
+	double q = std::sqrt( std::abs(qSqValue(sqrtS,ma,mb)*4/s) );
+	if( s<=0 ){ //below 0
+		rho = -q/M_PI*std::log(std::abs((1+q)/(1-q)));
+	} else if( 0<s && s<=(ma+mb)*(ma+mb) ){ //below threshold
+		rho = ( -2.0*q/M_PI * atan(1/q) ) / (i*16.0*M_PI*sqrtS);
 	} else if( (ma+mb)*(ma+mb)<s ){//above threshold
-		rho = -q/M_PI*log(abs((one+q)/(one-q)))+i*q;
+		rho = ( -q/M_PI*log( abs((1+q)/(1-q)) )+i*q ) / (i*16.0*M_PI*sqrtS);
 	} else
-		throw std::runtime_error("AmpKinematics::phspFactor| This shouldn't happen!");
+		throw std::runtime_error("AmpKinematics::phspFactor| phspFactor not defined at sqrtS = "
+				+std::to_string(sqrtS));
 
 	if(rho.real()!=rho.real() || rho.imag()!=rho.imag()){
 		std::cout<<"AmpKinematics::phspFactor() | NaN! sqrtS="<<sqrtS<<" ma="<<ma<<" mb="<<mb<<std::endl;
 	}
-	return rho;
+	return rho; //correct analytical continuation
 }
 
 std::complex<double> AmpKinematics::widthToCoupling(double mSq, double mR, double width,
-		double ma, double mb, double spin, double mesonRadius){
+		double ma, double mb, double spin, double mesonRadius)
+{
 	double sqrtS = sqrt(mSq);
-
 	//calculate gammaA(s_R)
 	double ffR = FormFactor(mR,ma,mb,spin,mesonRadius);
 	std::complex<double> qR = qValue(mR,ma,mb);
 	//calculate phsp factor
 	std::complex<double> rho = phspFactor(sqrtS,ma,mb);
-//	if(!rho) {
-//		BOOST_LOG_TRIVIAL(error)<<"AmpKinematics::widthToCoupling() | Found event below threshold! This should not happen!"
-//				<<"mSq="<<mSq<<" mR="<<mR<<" width="<<width<<" massA="<<ma<<" massB="<<mb<<" spin="<<spin;
-//		return 0;
-//	}
 	std::complex<double> denom = std::pow(qR,spin)*ffR*sqrt(rho);
 	std::complex<double> result = std::complex<double>(sqrt(mR*width), 0) / denom;
-//	if(result.imag()){ //is a complex coupling a physical solution?
-//		BOOST_LOG_TRIVIAL(error)<<"sqrtS="<<sqrtS<<" mR="<<mR<<" ma="<<ma<<" mb="<<mb<<" rho="<<rho;
-//		throw std::runtime_error("AmpKinematics::widthToCoupling| coupling not real!");
-//	}
 	return result;
 }
 
 std::complex<double> AmpKinematics::couplingToWidth(double mSq, double mR, double g,
-		double ma, double mb, double spin, double mesonRadius){
+		double ma, double mb, double spin, double mesonRadius)
+{
 	double sqrtM = sqrt(mSq);
 	//calculate gammaA(s_R)
 	double ffR = FormFactor(mR,ma,mb,spin,mesonRadius);

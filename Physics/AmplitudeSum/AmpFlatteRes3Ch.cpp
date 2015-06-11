@@ -73,6 +73,7 @@ std::complex<double> AmpFlatteRes3Ch::dynamicalFunction(double mSq, double mR,
 		double massB1, double massB2, double couplingRatioB,
 		double massC1, double massC2, double couplingRatioC,
 		unsigned int J, double mesonRadius ){
+	std::complex<double> i(0,1);
 	double sqrtS = sqrt(mSq);
 
 	//channel A - signal channel
@@ -118,7 +119,7 @@ std::complex<double> AmpFlatteRes3Ch::dynamicalFunction(double mSq, double mR,
 	//std::complex<double> denom( mR*mR - mSq, (-1)*(rhoA*gA*gA + rhoB*gB*gB + rhoC*gC*gC) );
 	//-- new approach - for spin 0 resonances in the imaginary part of the denominator the term qTerm
 	//is added, compared to the old formula
-	std::complex<double> denom = std::complex<double>( mR*mR - mSq,0) + (-1)*sqrtS*(termA + termB+ termC);
+	std::complex<double> denom = std::complex<double>( mR*mR - mSq,0) + (-1.0)*i*sqrtS*(termA + termB+ termC);
 
 	std::complex<double> result = std::complex<double>(gA*g_production,0) / denom;
 
