@@ -66,10 +66,10 @@ std::complex<double> AmpFlatteRes::dynamicalFunction(double mSq, double mR,
 
 	//channel A - signal channel
 	//break-up momentum
-//	std::complex<double> rhoA = AmpKinematics::phspFactor(sqrtS, massA1, massA2);
+	//	std::complex<double> rhoA = AmpKinematics::phspFactor(sqrtS, massA1, massA2);
 	double barrierA = AmpKinematics::FormFactor(sqrtS,massA1,massA2,J,mesonRadius)/AmpKinematics::FormFactor(mR,massA1,massA2,J,mesonRadius);
 	//std::complex<double> qTermA = std::pow((qValue(sqrtS,massA1,massA2) / qValue(mR,massA1,massA2)), (2.*J+ 1.));
-//	std::complex<double> qTermA = std::pow((phspFactor(sqrtS,massA1,massA2) / phspFactor(mR,massA1,massA2))*mR/sqrtS, (2*J+ 1));
+	//	std::complex<double> qTermA = std::pow((phspFactor(sqrtS,massA1,massA2) / phspFactor(mR,massA1,massA2))*mR/sqrtS, (2*J+ 1));
 	//convert coupling to partial width of channel A
 	std::complex<double> gammaA = couplingToWidth(mSq,mR,gA,massA1,massA2,J,mesonRadius);
 	//including the factor qTermA, as suggested by PDG, leads to an amplitude that doesn't converge.
@@ -77,10 +77,10 @@ std::complex<double> AmpFlatteRes::dynamicalFunction(double mSq, double mR,
 
 	//channel B - hidden channel
 	//break-up momentum
-//	std::complex<double> rhoB = AmpKinematics::phspFactor(sqrtS, massB1, massB2);
+	//	std::complex<double> rhoB = AmpKinematics::phspFactor(sqrtS, massB1, massB2);
 	double barrierB = AmpKinematics::FormFactor(sqrtS,massB1,massB2,J,1.5)/AmpKinematics::FormFactor(mR,massB1,massB2,J,1.5);
 	//std::complex<double> qTermB = std::pow((qValue(sqrtS,massB1,massB2) / qValue(mR,massB1,massB2)), (2.*J+ 1.));
-//	std::complex<double> qTermB = std::pow((phspFactor(sqrtS,massB1,massB2) / phspFactor(mR,massB1,massB2))*mR/sqrtS, (2*J+ 1));
+	//	std::complex<double> qTermB = std::pow((phspFactor(sqrtS,massB1,massB2) / phspFactor(mR,massB1,massB2))*mR/sqrtS, (2*J+ 1));
 	double gB = couplingRatio; 
 	//convert coupling to partial width of channel B
 	std::complex<double> gammaB = couplingToWidth(mSq,mR,gB,massB1,massB2,J,mesonRadius);
@@ -106,6 +106,71 @@ std::complex<double> AmpFlatteRes::dynamicalFunction(double mSq, double mR,
 	}
 	return result;
 }
+
+FlatteConf::FlatteConf(const boost::property_tree::ptree &pt_) : basicConf(pt_){
+	m_mass= pt_.get<double>("mass");
+	m_mass_fix= pt_.get<bool>("mass_fix");
+	m_mass_min= pt_.get<double>("mass_min");
+	m_mass_max= pt_.get<double>("mass_max");
+	m_mesonRadius= pt_.get<double>("mesonRadius");
+	m_spin= pt_.get<unsigned int>("spin");
+	m_m= pt_.get<unsigned int>("m");
+	m_n= pt_.get<unsigned int>("n");
+	m_daughterA= pt_.get<unsigned int>("daughterA");
+	m_daughterB= pt_.get<unsigned int>("daughterB");
+	m_g1= pt_.get<double>("g1");
+	m_g1_fix= pt_.get<bool>("g1_fix");
+	m_g1_min= pt_.get<double>("g1_min");
+	m_g1_max= pt_.get<double>("g1_max");
+	m_g2= pt_.get<double>("g2");
+	m_g2_part1= pt_.get<std::string>("g2_part1");
+	m_g2_part2= pt_.get<std::string>("g2_part2");
+
+}
+void FlatteConf::put(boost::property_tree::ptree &pt_){
+	basicConf::put(pt_);
+	pt_.put("mass", m_mass);
+	pt_.put("mass_fix", m_mass_fix);
+	pt_.put("mass_min", m_mass_min);
+	pt_.put("mass_max", m_mass_max);
+	pt_.put("mesonRadius", m_mesonRadius);
+	pt_.put("spin", m_spin);
+	pt_.put("m", m_m);
+	pt_.put("n", m_n);
+	pt_.put("daughterA", m_daughterA);
+	pt_.put("daughterB", m_daughterB);
+	pt_.put("g1", m_g1);
+	pt_.put("g1_fix", m_g1_fix);
+	pt_.put("g1_min", m_g1_min);
+	pt_.put("g1_max", m_g1_max);
+	pt_.put("g2", m_g2);
+	pt_.put("g2_part1", m_g2_part1);
+	pt_.put("g2_part2", m_g2_part2);
+}
+void FlatteConf::update(ParameterList par){
+	basicConf::update(par);
+	try{// only update parameters if they are found in list
+		m_mass= par.GetDoubleParameter("m0_"+m_name)->GetValue();
+	} catch (BadParameter b) {//do nothing if parameter is not found
+	}
+	try{// only update parameters if they are found in list
+	  if(m_name.find("a_0(980)") == 0)
+		m_g1= par.GetDoubleParameter("g1_a_0")->GetValue();
+	  else
+		m_g1= par.GetDoubleParameter("g1_"+m_name)->GetValue();
+	} catch (BadParameter b) {
+//		try{// only update parameters if they are found in list
+//			m_g1= par.GetDoubleParameter("g1_a_0")->GetValue();
+//		} catch (BadParameter b) {//do nothing if parameter is not found
+//		}
+	}
+	try{// only update parameters if they are found in list
+		m_g2= par.GetDoubleParameter("g2_"+m_name)->GetValue();
+	} catch (BadParameter b) {//do nothing if parameter is not found
+	}
+}
+
+
 
 bool FlatteStrategy::execute(ParameterList& paras, std::shared_ptr<AbsParameter>& out) {
 	if( checkType != out->type() ) {

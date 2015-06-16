@@ -106,11 +106,11 @@ int main(int argc, char **argv){
 
 	//======================= PARAMETERS =============================
 	ParameterList fitPar;
-	fitAmp->fillStartParVec(fitPar);
+	fitAmp->copyParameterList(fitPar);
 	ParameterList fitParTree;
-	fitAmpTree->fillStartParVec(fitParTree);
+	fitAmpTree->copyParameterList(fitParTree);
 	ParameterList truePar;
-	trueAmp->fillStartParVec(truePar); //true values
+	trueAmp->copyParameterList(truePar); //true values
 
 //	fitParTree.GetDoubleParameter("g1_a_0")->FixParameter(1);
 //	fitPar.GetDoubleParameter("g1_a_0")->FixParameter(1);

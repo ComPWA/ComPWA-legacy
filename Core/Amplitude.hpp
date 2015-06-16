@@ -61,9 +61,8 @@ public:
 	virtual const ParameterList& intensityNoEff(dataPoint& point) =0;
 	virtual const ParameterList& intensity(std::vector<double> point, ParameterList& par) =0;
 
-	virtual const bool fillStartParVec(ParameterList& outPar) =0;
 	virtual void setParameterList(ParameterList& par) =0;
-	virtual void copyParameterList(ParameterList& par) {}
+	virtual bool copyParameterList(ParameterList& par) =0;
 
 	virtual void printAmps() = 0;
 	virtual void printFractions() = 0;

@@ -75,6 +75,8 @@ public:
 	virtual void writeXML(std::string filename);
 	//! Write fit parameters, fit fractions and cov matrix as TeX to file @filename
 	virtual void writeTeX(std::string filename);
+	//! Any errors during minimization?
+	virtual bool hasFailed();
 
 private:
 	void init(FunctionMinimum);

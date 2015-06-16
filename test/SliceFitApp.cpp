@@ -106,7 +106,7 @@ int main(int argc, char **argv){
   // Initiate parameters
   ParameterList par;
   std::shared_ptr<SliceFit> esti;
-  amps->fillStartParVec(par); //perfect startvalues
+  amps->copyParameterList(par); //perfect startvalues
   esti = std::static_pointer_cast<SliceFit>(SliceFit::createInstance(amps, myReader, myPHSPReader, par, nStartEvent, nFitEvents));
 
 

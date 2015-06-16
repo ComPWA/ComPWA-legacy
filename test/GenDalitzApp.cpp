@@ -322,7 +322,7 @@ int main(int argc, char **argv) {
 	testBW.printAmps();
 
 	ParameterList minPar;
-	testBW.fillStartParVec(minPar);
+	testBW.copyParameterList(minPar);
 	cout << minPar << endl;
 	// minPar.AddParameter(DoubleParameter(1.5,0.5,2.5,0.1));
 

@@ -22,7 +22,6 @@ int main(int argc, char** argv){
 	std::cout<<"Testing boost::serialization"<<std::endl;
 	//Serialize a DoubleParameter
 	DoubleParameter p1("test",2.5,0.0,5.0,0.5);
-	p1.SetErrorType(ErrorType::ASYM);
 	p1.SetError(0.5,1.3);
 	DoubleParameter p1In;
 	std::ofstream ofs("DoublePar.xml");

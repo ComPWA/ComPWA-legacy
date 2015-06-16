@@ -60,7 +60,7 @@ int main(int argc, char **argv){
 
   // Initiate parameters
   ParameterList par;
-  testBW->fillStartParVec(par);
+  testBW->copyParameterList(par);
   std::shared_ptr<ControlParameter> testEsti = MinLogLH::createInstance(testBW, myReader, std::shared_ptr<Data>(), std::shared_ptr<Data>());
   std::shared_ptr<Optimizer> opti(new MinuitIF(testEsti, par));
 

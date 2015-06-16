@@ -204,7 +204,7 @@ void MinuitResult::calcFraction(ParameterList& parList){
 
 	double norm =-1;
 	ParameterList currentPar;
-	_amp->fillStartParVec(currentPar);
+	_amp->copyParameterList(currentPar);
 	//	if(!useTree) norm = _amp->integral();
 	//	else {//if we have a tree, use it. Much faster especially in case of correlated errors in calcFractionError()
 	//		std::shared_ptr<FunctionTree> tree = estimator->getTree();
@@ -235,7 +235,8 @@ void MinuitResult::calcFraction(ParameterList& parList){
 		std::string resName = _amp->getNameOfResonance(i);
 		std::shared_ptr<DoubleParameter> magPar = currentPar.GetDoubleParameter("mag_"+resName);
 		double mag = magPar->GetValue(); //value of magnitude
-		double magError = magPar->GetError(); //value of magnitude
+		double magError = 0;
+		if(magPar->HasError()) magError = magPar->GetError(); //error of magnitude
 		parList.AddParameter(std::shared_ptr<DoubleParameter>(
 				new DoubleParameter(resName+"_FF", mag*mag*resInt/norm, 2*mag*resInt/norm * magError)) );
 	}
@@ -251,7 +252,8 @@ void MinuitResult::genOutput(std::ostream& out, std::string opt){
 	if(trueParameters.GetNParameter()) printTrue=1;
 	out<<std::endl;
 	out<<"--------------FIT RESULT----------------"<<std::endl;
-	if(!isValid) out<<"		*** FIT RESULT NOT VALID! ***"<<std::endl;
+	if(!isValid) out<<"		*** MINIMUM NOT VALID! ***"<<std::endl;
+	out<<std::setprecision(10);
 	out<<"Initial Likelihood: "<<initialLH<<std::endl;
 	out<<"Final Likelihood: "<<finalLH<<std::endl;
 
@@ -270,6 +272,7 @@ void MinuitResult::genOutput(std::ostream& out, std::string opt){
 	out<<"AIC: "<<finalLH-estimator->calcPenalty()+2*_amp->getNumberOfResonances()<<std::endl;
 	out<<"BIC: "<<finalLH-estimator->calcPenalty()+_amp->getNumberOfResonances()*std::log(estimator->getNEvents())<<std::endl;
 	out<<std::endl;
+	out<<std::setprecision(5);
 
 	if(!hasValidParameters) out<<"		*** NO VALID SET OF PARAMETERS! ***"<<std::endl;
 	if(printParam){
@@ -369,15 +372,19 @@ void MinuitResult::printFitFractions(TableFormater* fracTable){
 	fracTable->addColumn("Resonance",15);//add empty first column
 	fracTable->addColumn("Fraction",15);//add empty first column
 	fracTable->addColumn("Error",15);//add empty first column
+	fracTable->addColumn("Significance",15);//add empty first column
 	fracTable->header();
 	for(unsigned int i=0;i<fractionList.GetNDouble(); ++i){
 		std::shared_ptr<DoubleParameter> tmpPar = fractionList.GetDoubleParameter(i);
-		*fracTable << tmpPar->GetName() << tmpPar->GetValue() << tmpPar->GetError(); //assume symmetric errors here
+		*fracTable << tmpPar->GetName()
+				<< tmpPar->GetValue()
+				<< tmpPar->GetError() //assume symmetric errors here
+				<< std::abs(tmpPar->GetValue()/tmpPar->GetError());
 		sum += tmpPar->GetValue();
 		sumErrorSq += tmpPar->GetError()*tmpPar->GetError();
 	}
 	fracTable->delim();
-	*fracTable << "Total" << sum << sqrt(sumErrorSq);
+	*fracTable << "Total" << sum << sqrt(sumErrorSq) << " ";
 	fracTable->footer();
 
 	return;
@@ -472,4 +479,16 @@ void MinuitResult::writeTeX(std::string filename){
 	printFitFractions(fracTable); //calculate and print fractions if amplitude is set
 	out.close();
 	return;
+}
+bool MinuitResult::hasFailed(){
+	bool failed=0;
+	if(!isValid) failed=1;
+//	if(!covPosDef) failed=1;
+//	if(!hasValidParameters) failed=1;
+//	if(!hasValidCov) failed=1;
+//	if(!hasAccCov) failed=1;
+//	if(hasReachedCallLimit) failed=1;
+//	if(hesseFailed) failed=1;
+
+	return failed;
 }

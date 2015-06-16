@@ -22,17 +22,13 @@
 #include "Core/Parameter.hpp"
 #include "Core/ParameterList.hpp"
 #include "Core/FunctionTree.hpp"
-
-#include "Physics/AmplitudeSum/AmplitudeSetup.hpp"
-#include "Physics/AmplitudeSum/AmpRelBreitWignerRes.hpp"
-#include "Physics/AmplitudeSum/AmpGausRes.hpp"
-#include "Physics/AmplitudeSum/AmpFlatteRes.hpp"
-#include "Physics/AmplitudeSum/AmpWigner2.hpp"
-#include "Physics/AmplitudeSum/AmpSumOfAmplitudes.hpp"
-#include "Physics/DPKinematics/DalitzKinematics.hpp"
 #include "Core/Efficiency.hpp"
 #include "Core/DataPoint.hpp"
 #include "Core/Generator.hpp"
+
+#include "Physics/AmplitudeSum/AmplitudeSetup.hpp"
+#include "Physics/AmplitudeSum/AmpSumOfAmplitudes.hpp"
+#include "Physics/DPKinematics/DalitzKinematics.hpp"
 
 class AmpSumIntensity : public Amplitude {
 
@@ -81,8 +77,6 @@ public:
 
 	//! setting new parameterList
 	virtual void setParameterList(ParameterList& par);
-	//! fill ParameterList with copied shared_ptr
-	void copyParameterList(ParameterList& par);
 	//! evaluate total amplitude using parameters \par at phsp point \point
 	virtual const ParameterList& intensity(dataPoint& point, ParameterList& par);
 	//! evaluate total amplitude using current set of parameters at phsp point \point. Amplitude is multiplied with efficiency of datapoint.
@@ -94,7 +88,7 @@ public:
 	virtual const double sliceIntensity(dataPoint& dataP, ParameterList& par,std::complex<double>* reso, unsigned int nResos);
 
 	//! fill internal parameter list with (start) parameter
-	virtual const bool fillStartParVec(ParameterList& outPar);
+	virtual bool copyParameterList(ParameterList& outPar);
 	//! print overview over all amplitudes
 	virtual void printAmps();
 	//! print all fit fractions; fitting errors are not available here

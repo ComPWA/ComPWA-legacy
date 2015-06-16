@@ -46,7 +46,7 @@ int main(int argc, char **argv){
   ParameterList par;
   //par.push_back(shared_ptr<PWAParameter>(new PWAGenericPar<double>(1.5, 0.5, 2.5, 0.1)));
  // par.push_back(shared_ptr<PWAParameter>(new PWAGenericPar<double>(0.3, 0.1, 0.5, 0.05)));
-  testBW->fillStartParVec(par);
+  testBW->copyParameterList(par);
   ParameterList intensL = testBW->intensity(x, par);
   double BWpdf = intensL.GetDoubleParameter(0)->GetValue();
   cout << "BreitWigner Intensity: " << BWpdf << endl;

@@ -33,7 +33,7 @@ public:
 	virtual const ParameterList& intensityNoEff(dataPoint& point);
 	virtual const ParameterList& intensity(std::vector<double> point, ParameterList& par);
 
-	virtual const bool fillStartParVec(ParameterList& outPar) { return 0; };
+	virtual bool copyParameterList(ParameterList& outPar) { return 0; };
 	virtual void setParameterList(ParameterList& par) {};
 
 	//! Check of tree is available

@@ -452,7 +452,17 @@ void Flatte3ChConf::put(boost::property_tree::ptree &pt_){
 void Flatte3ChConf::update(ParameterList par){
 	FlatteConf::update(par);
 	try{// only update parameters if they are found in list
-		m_g3= par.GetDoubleParameter("g3_"+m_name)->GetValue();
-	} catch (BadParameter b) { }
-}
+	  if(m_name.find("a_0(980)") == 0)
+		m_g2= par.GetDoubleParameter("g1_a_0")->GetValue();
+	  else
+		m_g2= par.GetDoubleParameter("g2_"+m_name)->GetValue();
+	} catch (BadParameter b) { //do nothing if parameter is not found
 
+	}
+	try{// only update parameters if they are found in list
+		m_g3= par.GetDoubleParameter("g3_"+m_name)->GetValue();
+	} catch (BadParameter b) {
+//		BOOST_LOG_TRIVIAL(error) <<"FlatteConf::update() | coupling g3 not found in parameter list!";
+//		throw;
+	}
+}

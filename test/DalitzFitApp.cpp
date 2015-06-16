@@ -142,7 +142,7 @@ int main(int argc, char **argv) {
 	// Initiate parameters
 	ParameterList par;
 	std::shared_ptr<ControlParameter> esti;
-	amps->fillStartParVec(par); //perfect startvalues
+	amps->copyParameterList(par); //perfect startvalues
 	esti = MinLogLH::createInstance(amps, myReader, myPHSPReader, nStartEvent,
 			nFitEvents);
 	MinLogLH* contrPar = dynamic_cast<MinLogLH*>(&*(esti->Instance()));
