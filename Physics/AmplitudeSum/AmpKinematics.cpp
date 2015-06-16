@@ -107,7 +107,7 @@ std::complex<double> AmpKinematics::phspFactor(double sqrtS, double ma, double m
 		rho = ( -q/M_PI*log( abs((1+q)/(1-q)) )+i*q ) / (i*16.0*M_PI*sqrtS);
 	} else
 		throw std::runtime_error("AmpKinematics::phspFactor| phspFactor not defined at sqrtS = "
-				+std::to_string(sqrtS));
+				+std::to_string((long double)sqrtS));
 
 	if(rho.real()!=rho.real() || rho.imag()!=rho.imag()){
 		std::cout<<"AmpKinematics::phspFactor() | NaN! sqrtS="<<sqrtS<<" ma="<<ma<<" mb="<<mb<<std::endl;
