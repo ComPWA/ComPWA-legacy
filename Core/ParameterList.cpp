@@ -385,7 +385,7 @@ const double ParameterList::GetParameterValue(const std::string parname) const {
 
 void ParameterList::SetParameterValue(const unsigned int i, const std::complex<double> inVal) {
 	if( !(i < vComplexPar_.size() ) ){
-		throw BadParameter("Parameter not in double list");
+		throw BadParameter("Parameter not in complex list");
 		return ;
 	}
 	(vComplexPar_.at(i))->SetValue(inVal);

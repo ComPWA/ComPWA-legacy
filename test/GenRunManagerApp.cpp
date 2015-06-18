@@ -13,6 +13,7 @@
 #include <string>
 #include <memory>
 
+#include "../Physics/DPKinematics/RootGenerator.hpp"
 // Physics Interface header files go here
 #include "Core/Parameter.hpp"
 #include "Core/ParameterList.hpp"
@@ -23,7 +24,6 @@
 #include "Physics/AmplitudeSum/AmpSumIntensity.hpp"
 #include "Physics/AmplitudeSum/AmplitudeSetup.hpp"
 #include "Physics/DPKinematics/DalitzKinematics.hpp"
-#include "Physics/DPKinematics/RootGenerator.cpp"
 
 //#include "PWA/PlotData.hpp"
 

@@ -103,7 +103,7 @@ void MinuitResult::init(FunctionMinimum min){
 	r = gsl_rng_alloc (T);
 
 	useCorrelatedErrors=0;
-	if(_amp->hasTree()) setUseTree(1);
+	if(_amp && _amp->hasTree()) setUseTree(1);
 	return;
 
 }

@@ -41,10 +41,6 @@ protected:
 	void calcDParea();
 	//! initialization
 	void init();
-
-	//! Copy constructor
-	DalitzKinematics(const DalitzKinematics& other);
-
 	//! default constructor
 	DalitzKinematics():massIdsSet(false){};
 	//! constructor access particles by name, masses etc are obtained from PhysConst singleton

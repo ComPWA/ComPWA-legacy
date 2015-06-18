@@ -9,7 +9,7 @@
         "comment": "Determines the number of threads simultaneously running",
         "comment": "evaluations in multi-threaded mode. 0 means \"automatic\"",
         "default": "0",
-        "value": "2"
+        "value": "1"
     },
     "firstTimeOut":
     {

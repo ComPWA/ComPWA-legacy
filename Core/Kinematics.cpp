@@ -27,14 +27,14 @@ Kinematics* Kinematics::instance(){
 Kinematics* Kinematics::_inst = 0;
 
 TwoBodyKinematics::TwoBodyKinematics(std::string _nameMother, std::string _name1, std::string _name2,
-		double deltaMassWindow){
+		double deltaMassWindow) {
+	nPart = 2;
 	M = PhysConst::instance()->getMass(_nameMother);
 	m1 = PhysConst::instance()->getMass(_name1);
 	m2 = PhysConst::instance()->getMass(_name2);
 	spinM = PhysConst::instance()->getJ(_nameMother);
 	spin1 = PhysConst::instance()->getJ(_name1);
 	spin2 = PhysConst::instance()->getJ(_name2);
-
 	if(M==-999 || m1==-999|| m2==-999)
 		throw std::runtime_error("TwoBodyKinematics(): Masses not set!");
 	mass_min=((M-deltaMassWindow)); mass_max=((M+deltaMassWindow));
@@ -42,11 +42,13 @@ TwoBodyKinematics::TwoBodyKinematics(std::string _nameMother, std::string _name1
 	mass_sq_min = mass_min*mass_max;
 	varNames.push_back("msq");
 
+	init();
 }
 void TwoBodyKinematics::init(){
 }
 bool TwoBodyKinematics::isWithinPhsp(const dataPoint& point){
-	if(point.getVal(0)>=mass_min && point.getVal(0)<=mass_max) return 1;
+	return 1;
+	if(point.getVal(0)>=mass_sq_min && point.getVal(0)<=mass_sq_max) return 1;
 	return 0;
 }
 void TwoBodyKinematics::eventToDataPoint(Event& ev, dataPoint& point){
@@ -58,3 +60,20 @@ void TwoBodyKinematics::eventToDataPoint(Event& ev, dataPoint& point){
 	point.setVal(0,msq);
 	return;
 }
+//! get mass of particles
+double TwoBodyKinematics::getMass(unsigned int num){
+	if(num==0) return M;
+	if(num==1) return m1;
+	if(num==2) return m2;
+	throw std::runtime_error("TwoBodyKinematics::getMass(int) | wrong particle requested!");
+	return -999;
+}
+//! get mass of paticles
+double TwoBodyKinematics::getMass(std::string name){
+	if(name==nameMother) return M;
+	if(name==name1) return m1;
+	if(name==name2) return m2;
+	throw std::runtime_error("TwoBodyKinematics::getMass(int) | wrong particle "+name+" requested!");
+	return -999;
+}
+

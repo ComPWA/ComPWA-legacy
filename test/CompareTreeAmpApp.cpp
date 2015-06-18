@@ -32,6 +32,7 @@
 #include "TLorentzVector.h"
 #include "TH2D.h"
 
+#include "../Physics/DPKinematics/RootGenerator.hpp"
 //Core header files go here
 #include "Core/Event.hpp"
 #include "Core/Particle.hpp"
@@ -47,7 +48,6 @@
 #include "Estimator/MinLogLH/MinLogLH.hpp"
 #include "Optimizer/Minuit2/MinuitIF.hpp"
 #include "Physics/DPKinematics/RootEfficiency.cpp"
-#include "Physics/DPKinematics/RootGenerator.cpp"
 #include "Core/TableFormater.hpp"
 #include "Core/AbsParameter.hpp"
 #include "Core/Logging.hpp"

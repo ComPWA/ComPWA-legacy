@@ -131,7 +131,7 @@ void AmpSumIntensity::init(){
 			tmpbw = std::shared_ptr<AmpFlatteRes>(new AmpFlatteRes(name.c_str(),
 					params.GetDoubleParameter("m0_"+name), params.GetDoubleParameter("d_"+name),
 					params.GetDoubleParameter("motherRadius"),
-					//				params.GetDoubleParameter("g1_"+name),params.GetDoubleParameter("g2_"+name),
+					//params.GetDoubleParameter("g1_"+name),params.GetDoubleParameter("g2_"+name),
 					params.GetDoubleParameter("g1_a_0"),
 					params.GetDoubleParameter("g2_"+name),
 					PhysConst::instance()->getMass(tmp.m_g2_part1),

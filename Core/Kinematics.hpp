@@ -35,9 +35,18 @@ public:
 	virtual double getPhspVolume() = 0;
 	//! converts Event to dataPoint
 	virtual void eventToDataPoint(Event& ev, dataPoint& point) = 0;
+	//! get mass of particles
+	virtual double getMass(unsigned int num) = 0;
+	//! get mass of paticles
+	virtual double getMass(std::string name) = 0;
+	//! Get number of particles
+	virtual unsigned int getNumberOfParticles() { return nPart; }
+	//! Get number of variables
+	virtual unsigned int getNumberOfVariables() { return varNames.size(); }
 
 
 protected:
+	unsigned int nPart;
 	std::vector<std::string> varNames;
 	static Kinematics* _inst;
 	Kinematics() {};
@@ -50,8 +59,8 @@ class TwoBodyKinematics : public Kinematics
 public:
 	TwoBodyKinematics(std::string _nameMother, std::string _name1, std::string _name2, double deltaMassWindow=0.5);
 	void init();
-	static Kinematics* createInstance(std::string _nameMother, std::string _name1, std::string _name2){
-		_inst = new TwoBodyKinematics(_nameMother, _name1, _name2);
+	static Kinematics* createInstance(std::string _nameMother, std::string _name1, std::string _name2, double massWindow=0.5){
+		_inst = new TwoBodyKinematics(_nameMother, _name1, _name2, massWindow);
 		return _inst;
 	}
 	//! checks of data point is within phase space boundaries
@@ -62,6 +71,10 @@ public:
 	virtual double getPhspVolume() { return (mass_max-mass_min); }
 	//! converts Event to dataPoint
 	virtual void eventToDataPoint(Event& ev, dataPoint& point);
+	//! get mass of particles
+	virtual double getMass(unsigned int num);
+	//! get mass of paticles
+	virtual double getMass(std::string name);
 
 protected:
 	std::string nameMother;//! name of mother particle

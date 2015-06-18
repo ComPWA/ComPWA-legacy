@@ -3,14 +3,6 @@ import os ;
 
 local GENEVA = [ os.environ GENEVA ] ;
 
-#lib Geneva : :  <file>$(GENEVA)/lib/libgemfony-common.dylib
-#				<file>$(GENEVA)/lib/libgemfony-courtier.dylib
-#				<file>$(GENEVA)/lib/libgemfony-geneva-individuals.dylib
-#				<file>$(GENEVA)/lib/libgemfony-geneva.dylib
-#				<file>$(GENEVA)/lib/libgemfony-hap.dylib
-#				: : ;
-               
-
 project :
 	requirements <include>./
 	  <include>$(GENEVA)/include
@@ -25,8 +17,6 @@ project :
 lib GenevaIF : 
         [ glob *.cpp ] 
         $(TOP)/Core//ComPWA
-        #: <use>$(TOP)/Optimizer/Geneva//Geneva
-        #: <library>$(TOP)/Optimizer/Geneva//Geneva
         ;
 
 install dist : GenevaIF : <location>$(TOP)/lib ;

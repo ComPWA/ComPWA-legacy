@@ -225,7 +225,6 @@ void MinLogLH::iniLHtree(){
 	}
 	else {//unbinned
 		signalPhspTree->createNode("IntensPhsp", msqStrat, "sumAmp", mAccSample.nEvents, false); //|T_{ev}|^2
-		//		std::cout<<mAccSample.nEvents<< " "<<accSampleEff<<" "<<(double) mAccSample.nEvents/accSampleEff<<std::endl;
 		signalPhspTree->createLeaf("InvNmc", 1/ ( (double) mAccSample.nEvents/accSampleEff ), "normFactor");
 		signalPhspTree_amp = amp->getAmpTree(mAccSample,mPhspSample,"_Phsp");
 		BOOST_LOG_TRIVIAL(debug)<<"MinLogLH::iniLHTree() setting up normalization tree, "
@@ -339,7 +338,6 @@ double MinLogLH::controlParameter(ParameterList& minPar){
 		double norm=0, normBkg=0;
 		for(unsigned int phsp=0; phsp<nPhsp_; phsp++){ //loop over phspSample
 			Event theEvent(phspSample->getEvent(phsp));
-			if(theEvent.getNParticles()!=3) continue;
 			dataPoint point(theEvent);
 			double intens = 0, intensBkg = 0;
 			ParameterList intensL = amp->intensity(point);
@@ -377,7 +375,7 @@ double MinLogLH::controlParameter(ParameterList& minPar){
 			}
 			if(intens>0) sumLog += std::log( signalFraction*intens/norm+(1-signalFraction)*intensBkg/normBkg )*theEvent.getWeight();
 		}
-		lh = (-1)*((double)nUseEvt_)/sumOfWeights*sumLog ;
+		lh = (-1)*((double)nUseEvt_)/sumOfWeights*sumLog + calcPenalty();
 	} else {
 		BOOST_LOG_TRIVIAL(debug)<<"MinLogLH::controlParameter() Norm="<<physicsTree->head()->getChildValue("normFactor");
 		physicsTree->recalculate();

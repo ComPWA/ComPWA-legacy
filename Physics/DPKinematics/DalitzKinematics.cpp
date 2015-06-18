@@ -24,9 +24,12 @@
 #include "gsl/gsl_sf_legendre.h"
 
 
-DalitzKinematics::DalitzKinematics(std::string _nameMother, std::string _name1, std::string _name2, std::string _name3):
-										Br(0.0), nameMother(_nameMother), name1(_name1), name2(_name2), name3(_name3), massIdsSet(false)
+DalitzKinematics::DalitzKinematics(std::string _nameMother,
+		std::string _name1, std::string _name2, std::string _name3) :
+		Br(0.0), nameMother(_nameMother),
+		name1(_name1), name2(_name2), name3(_name3), massIdsSet(false)
 {
+	nPart = 3;
 	M = PhysConst::instance()->getMass(_nameMother);
 	m1 = PhysConst::instance()->getMass(_name1);
 	m2 = PhysConst::instance()->getMass(_name2);
@@ -40,7 +43,8 @@ DalitzKinematics::DalitzKinematics(std::string _nameMother, std::string _name1, 
 		BOOST_LOG_TRIVIAL(error)<<"Masses not set! EXIT!";
 		exit(1);
 	}
-	BOOST_LOG_TRIVIAL(info) << " DalitzKinematics::DalitzKinematics() | Setting up decay "<<_nameMother<<"->"<<_name1<<" "<<_name2<<" "<<_name3;
+	BOOST_LOG_TRIVIAL(info) << " DalitzKinematics::DalitzKinematics() | Setting up decay "
+			<<_nameMother<<"->"<<_name1<<" "<<_name2<<" "<<_name3;
 	init();
 };
 DalitzKinematics::DalitzKinematics(double _M, double _Br, double _m1, double _m2, double _m3,
@@ -49,20 +53,14 @@ DalitzKinematics::DalitzKinematics(double _M, double _Br, double _m1, double _m2
 		nameMother(_nameMother), name1(_name1), name2(_name2), name3(_name3), massIdsSet(false)
 {
 
+	nPart = 3;
 	spinM = PhysConst::instance()->getJ(_nameMother);
 	spin1 = PhysConst::instance()->getJ(_name1);
 	spin2 = PhysConst::instance()->getJ(_name2);
 	spin3 = PhysConst::instance()->getJ(_name3);
 	init();
 };
-DalitzKinematics::DalitzKinematics(const DalitzKinematics& other):
-		M(other.M), spinM(other.spinM), Br(other.Br),
-		m1(other.m1), m2(other.m2), m3(other.m3),
-		spin1(other.spin1), spin2(other.spin2), spin3(other.spin3),
-		name1(other.name1), name2(other.name2), name3(other.name3), massIdsSet(false)
-{
-	init();
-};
+
 void DalitzKinematics::init(){
 	m23_sq_min= ((m2+m3)*(m2+m3));
 	m23_sq_max=((M-m1)*(M-m1));
