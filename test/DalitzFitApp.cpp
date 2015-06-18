@@ -322,7 +322,11 @@ int main(int argc, char **argv) {
 	bw23->GetYaxis()->SetTitle("#");
 	bw23->GetYaxis()->CenterTitle();
 
+<<<<<<< HEAD
 	RootReader myReaderPHSP(input_file_path, "mc");
+=======
+	RootReader myReaderPHSP(input_file_path, "mc", false);
+>>>>>>> 9acf78150076083baf35a7c759e08a655bd7d004
 	unsigned int maxEventsPHSP = myReaderPHSP.getNEvents();
 	//double masssq12PHSP, masssq13PHSP, masssq23PHSP;
 	TH2D* bw12PHSP = new TH2D("bw12PHSP", "inv. mass-sq of particles 1&2 PHSP",

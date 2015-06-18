@@ -4,22 +4,22 @@ path-constant ESTIMATOR : . ;
 # libEstimator.so will consist of these packages:
 
 sources = [ glob *.cpp ] ;
-if $(build_ChiOneD)
+if $(build_ChiOneD) && $(build_ChiOneD) != 0
 {
 	build-project ChiOneD ;
 	sources = $(sources) $(ESTIMATOR)/ChiOneD//ChiOneD ;
 }
-if $(build_MinLogLH)
+if $(build_MinLogLH) && $(build_MinLogLH) != 0
 {
 	build-project MinLogLH ;
 	sources = $(sources) $(ESTIMATOR)/MinLogLH//MinLogLH ;
 }
-if $(build_MinLogLHbkg)
+if $(build_MinLogLHbkg) && $(build_MinLogLHbkg) != 0
 {
 	build-project MinLogLHbkg ;
 	sources = $(sources) $(ESTIMATOR)/MinLogLHbkg//MinLogLHbkg ;
 }
-if $(build_SliceFit)
+if $(build_SliceFit) && $(build_SliceFit) != 0
 {
 	build-project SliceFit ;
 	sources = $(sources) $(ESTIMATOR)/SliceFit//SliceFit ;

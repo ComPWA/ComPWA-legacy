@@ -4,12 +4,12 @@ path-constant DATAREADER : . ;
 # libDataReader.so will consist of these packages:
 
 sources = [ glob *.cpp ] ;
-if $(build_RootReader)
+if $(build_RootReader) && $(build_RootReader) != 0
 {
 	build-project RootReader ;
 	sources = $(sources) $(DATAREADER)/RootReader//RootReader ;
 }
-if $(build_AsciiReader)
+if $(build_AsciiReader) && $(build_AsciiReader) != 0
 {
 	build-project AsciiReader ;
 	sources = $(sources) $(DATAREADER)/AsciiReader//AsciiReader ;

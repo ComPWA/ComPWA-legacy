@@ -4,18 +4,17 @@ path-constant OPTIMIZER : . ;
 
 # Build libOptimizer.so
 sources = [ glob *.cpp ] ;
-if $(build_Minuit2)
+if $(build_Minuit2) && $(build_Minuit2) != 0
 {
 	build-project Minuit2 ;
 	sources = $(sources) $(OPTIMIZER)/Minuit2//Minuit2IF ;
 }
 
-
-#if $(build_Geneva)
-#{
-#	build-project Geneva ;
-#	sources = $(sources) $(OPTIMIZER)/Geneva//GenevaIF ;
-#}
+if $(build_Geneva) && $(build_Geneva) != 0
+{
+	build-project Geneva ;
+	sources = $(sources) $(OPTIMIZER)/Geneva//GenevaIF ;
+}
 
 lib Optimizer :
 		$(sources)

@@ -17,6 +17,9 @@ check_compiler
 cd ${install_path}
 mkdir temp
 temp_workdir=${install_path}/temp
+#we need an absolute path for wget, so generate that now
+cd ${temp_workdir}
+temp_workdir=$PWD
 
 # determine number of processors (use 1 less for building)
 if [ ! $numproc ]; then
