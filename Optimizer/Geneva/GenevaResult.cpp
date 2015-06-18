@@ -1,17 +1,10 @@
-#include <boost/numeric/ublas/symmetric.hpp>
-#include <boost/numeric/ublas/io.hpp>
-#include <boost/log/core.hpp>
-#include <boost/log/trivial.hpp>
-using namespace boost::log;
-
 #include "Optimizer/Geneva/GenevaResult.hpp"
-
+#include "Core/Logging.hpp"
 
 void GenevaResult::init(boost::shared_ptr<Gem::Geneva::GStartIndividual> min){
 	finalLH = min->getBestCase();
     //ToDO: extract more info
 	return;
-
 }
 
 void GenevaResult::genOutput(std::ostream& out, std::string opt){

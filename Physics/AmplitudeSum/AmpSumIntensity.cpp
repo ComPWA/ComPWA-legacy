@@ -298,7 +298,7 @@ std::shared_ptr<FunctionTree> AmpSumIntensity::setupBasicTree(
 		basicConf tmp = (*reso);
 		std::string name = tmp.m_name;
 		if(!tmp.m_enable) continue;
-		BOOST_LOG_TRIVIAL(debug) << "AmpSumIntensity::setupBasicTree() adding "<<tmp.m_name<<" (non-resonant) to tree.";
+		BOOST_LOG_TRIVIAL(info) << "AmpSumIntensity::setupBasicTree() adding "<<tmp.m_name<<" (non-resonant) to tree.";
 		std::shared_ptr<NonResonantStrategy> nonResStrat(new NonResonantStrategy(tmp.m_name,ParType::MCOMPLEX));
 
 		newTree->createNode("Reso_"+tmp.m_name, mmultStrat, "Amplitude"+suffix, theMasses.nEvents); //Reso=C*N*nonReso
@@ -333,7 +333,7 @@ std::shared_ptr<FunctionTree> AmpSumIntensity::setupBasicTree(
 		BreitWignerConf tmp = (*reso);
 		std::string name = tmp.m_name;
 		if(!tmp.m_enable) continue;
-		BOOST_LOG_TRIVIAL(debug) << "AmpSumIntensity::setupBasicTree() adding "<<tmp.m_name<<" (BW) to tree.";
+		BOOST_LOG_TRIVIAL(info) << "AmpSumIntensity::setupBasicTree() adding "<<tmp.m_name<<" (BW) to tree.";
 
 		//----Add Nodes
 		std::shared_ptr<BreitWignerStrategy> rbwStrat( new BreitWignerStrategy(tmp.m_name,ParType::MCOMPLEX) );
@@ -434,7 +434,7 @@ std::shared_ptr<FunctionTree> AmpSumIntensity::setupBasicTree(
 		FlatteConf tmp = (*reso);
 		std::string name = tmp.m_name;
 		if(!tmp.m_enable) continue;
-		BOOST_LOG_TRIVIAL(debug) << "AmpSumIntensity::setupBasicTree() adding "<<tmp.m_name<<" (Flatte) to tree.";
+		BOOST_LOG_TRIVIAL(info) << "AmpSumIntensity::setupBasicTree() adding "<<tmp.m_name<<" (Flatte) to tree.";
 
 		//----Add Nodes
 		std::shared_ptr<FlatteStrategy> flatteStrat(new FlatteStrategy(tmp.m_name,ParType::MCOMPLEX));
@@ -553,7 +553,7 @@ std::shared_ptr<FunctionTree> AmpSumIntensity::setupBasicTree(
 		Flatte3ChConf tmp = (*reso);
 		std::string name = tmp.m_name;
 		if(!tmp.m_enable) continue;
-		BOOST_LOG_TRIVIAL(debug) << "AmpSumIntensity::setupBasicTree() adding "<<tmp.m_name<<" (Flatte3Ch) to tree.";
+		BOOST_LOG_TRIVIAL(info) << "AmpSumIntensity::setupBasicTree() adding "<<tmp.m_name<<" (Flatte3Ch) to tree.";
 
 		//----Add Nodes
 		std::shared_ptr<Flatte3ChStrategy> flatteStrat(new Flatte3ChStrategy(tmp.m_name,ParType::MCOMPLEX));

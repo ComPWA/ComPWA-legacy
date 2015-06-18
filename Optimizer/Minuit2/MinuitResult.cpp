@@ -262,17 +262,13 @@ void MinuitResult::genOutput(std::ostream& out, std::string opt){
 	out<<"Number of calls: "<<nFcn<<std::endl;
 	if(hasReachedCallLimit) out<<"		*** LIMIT OF MAX CALLS REACHED! ***"<<std::endl;
 	out<<"CPU Time : "<<time/60<<"min"<<std::endl;
-	out<<std::endl;
+	out<<std::setprecision(5)<<std::endl;
 	/*
 	 * The Akaike (AIC) and Bayesian (BIC) information criteria are described in
 	 * Schwarz, Anals of Statistics 6 No.2: 461-464 (1978)
 	 * and
 	 * IEEE Transacrions on Automatic Control 19, No.6:716-723 (1974)
 	 */
-	out<<"AIC: "<<finalLH-estimator->calcPenalty()+2*_amp->getNumberOfResonances()<<std::endl;
-	out<<"BIC: "<<finalLH-estimator->calcPenalty()+_amp->getNumberOfResonances()*std::log(estimator->getNEvents())<<std::endl;
-	out<<std::endl;
-	out<<std::setprecision(5);
 
 	if(!hasValidParameters) out<<"		*** NO VALID SET OF PARAMETERS! ***"<<std::endl;
 	if(printParam){
@@ -301,7 +297,35 @@ void MinuitResult::genOutput(std::ostream& out, std::string opt){
 	out<<"FIT FRACTIONS:"<<std::endl;
 	TableFormater* fracTable = new TableFormater(&out);
 	printFitFractions(fracTable); //calculate and print fractions if amplitude is set
+
+	double penalty = estimator->calcPenalty();
+	out<<std::setprecision(10);
+	out<<"FinalLH w/o penalty: "<<finalLH-penalty<<std::endl;
+	out<<"AIC: "<<calcAIC()<<std::endl;
+	out<<"BIC: "<<calcBIC()<<std::endl;
+	out<<std::endl;
+	out<<std::setprecision(5);
+
 	return;
+}
+
+double MinuitResult::calcAIC(){
+	if(!fractionList.GetNDouble()) calcFraction();
+	double r=0;
+	for(int i=0; i<fractionList.GetNDouble(); i++){
+		double val = fractionList.GetDoubleParameter(i)->GetValue();
+		if(val > 0.001) r+=val;
+	}
+	return (finalLH+2*r);
+}
+double MinuitResult::calcBIC(){
+	if(!fractionList.GetNDouble()) calcFraction();
+	double r=0;
+	for(int i=0; i<fractionList.GetNDouble(); i++){
+		double val = fractionList.GetDoubleParameter(i)->GetValue();
+		if(val > 0.001) r+=val;
+	}
+	return (finalLH+r*std::log(estimator->getNEvents()));
 }
 
 void MinuitResult::printFitParameters(TableFormater* tableResult){

@@ -146,6 +146,10 @@ private:
 	void calcFractionError();
 	//! Smear ParameterList with a multidimensional gaussian and the cov matrix from the fit
 	void smearParameterList(ParameterList&);
+	//! Calculate information criterion AIC
+	double calcAIC();
+	//! Calculate information criterion BIC
+	double calcBIC();
 	//! List with fit fractions and errors
 	ParameterList fractionList;
 };

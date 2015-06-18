@@ -116,7 +116,7 @@ std::shared_ptr<FitResult> GenevaIF::exec(ParameterList& par) {
 	    min[i] = -1.79768e+307;//-1*max[i];
 	  }
 	  if(dpar->HasError())
-	    err[i] = dpar->GetError()->GetError();
+	    err[i] = dpar->GetError();
 	  else
 	    err[i] = val[i];
 	}
