@@ -9,11 +9,7 @@
         "comment": "Determines the number of threads simultaneously running",
         "comment": "evaluations in multi-threaded mode. 0 means \"automatic\"",
         "default": "0",
-<<<<<<< HEAD
         "value": "2"
-=======
-        "value": "3"
->>>>>>> ea0fdc1c268ee21cb421f34e5a356069d259935d
     },
     "firstTimeOut":
     {
@@ -62,11 +58,7 @@
         "comment": "The maximum allowed number of iterations",
         "comment": "[GOptimizationAlgorithmT<ind_type>]",
         "default": "1000",
-<<<<<<< HEAD
         "value": "10000"
-=======
-        "value": "100"
->>>>>>> ea0fdc1c268ee21cb421f34e5a356069d259935d
     },
     "maxStallIteration":
     {

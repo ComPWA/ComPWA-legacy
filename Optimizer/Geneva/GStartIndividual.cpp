@@ -40,6 +40,11 @@ namespace Gem
 {
 namespace Geneva
 {
+//GStartIndividual::GStartIndividual() : GParameterSet(),theData(ControlParameter::Instance())
+//        		{       /* nothing */ }
+GStartIndividual::GStartIndividual() : GParameterSet(),theData()
+        		{       /* nothing */ }
+
 
 /********************************************************************************************/
 /**
@@ -80,9 +85,13 @@ GStartIndividual::GStartIndividual(std::shared_ptr<ControlParameter> data, unsig
  *
  * @param cp A copy of another GStartIndividual
  */
+//GStartIndividual::GStartIndividual(const GStartIndividual& cp)
+//	: GParameterSet(cp),parNames(cp.parNames)
+//	, theData(ControlParameter::Instance())
+//{ /* nothing */ }
 GStartIndividual::GStartIndividual(const GStartIndividual& cp)
 	: GParameterSet(cp),parNames(cp.parNames)
-	, theData(ControlParameter::Instance())
+	, theData()
 { /* nothing */ }
 
 /********************************************************************************************/
@@ -196,7 +205,7 @@ double GStartIndividual::fitnessCalculation(){
  */
 void GStartIndividual::loadConstantData(boost::shared_ptr<GStartIndividual>){
   std::cout << "Load data" << std::endl;
-  theData = ControlParameter::Instance();
+  //  theData = ControlParameter::Instance();
 }
 
 /********************************************************************************************/

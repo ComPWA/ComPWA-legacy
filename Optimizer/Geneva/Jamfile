@@ -3,16 +3,16 @@ import os ;
 
 local GENEVA = [ os.environ GENEVA ] ;
 
-#lib Geneva : :  <file>$(GENEVA)/lib/libgemfony-common.so
-				#<file>$(GENEVA)/lib/libgemfony-courtier.so
-				#<file>$(GENEVA)/lib/libgemfony-geneva-individuals.so
-				#<file>$(GENEVA)/lib/libgemfony-geneva.so
-				#<file>$(GENEVA)/lib/libgemfony-hap.so
-				#: : ;
+#lib Geneva : :  <file>$(GENEVA)/lib/libgemfony-common.dylib
+#				<file>$(GENEVA)/lib/libgemfony-courtier.dylib
+#				<file>$(GENEVA)/lib/libgemfony-geneva-individuals.dylib
+#				<file>$(GENEVA)/lib/libgemfony-geneva.dylib
+#				<file>$(GENEVA)/lib/libgemfony-hap.dylib
+#				: : ;
                
 
 project :
-	requirements 
+	requirements <include>./
 	  <include>$(GENEVA)/include
           <linkflags>-L$(GENEVA)/lib
           <linkflags>-lgemfony-geneva

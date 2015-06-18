@@ -7,10 +7,10 @@ local GSL = [ os.environ GSL_ROOT ] ;
 
 project :
    requirements <include>./
-		<include>$(MINUIT2)/include
+	<include>$(MINUIT2)/include
 	<include>$(GSL)/include
-		<linkflags>-L$(MINUIT2)/lib
-		<linkflags>-lMinuit2
+	<linkflags>-L$(MINUIT2)/lib
+	<linkflags>-lMinuit2
 	<linkflags>-L$(GSL)/lib
 	<linkflags>-lgsl
      <linkflags>-lgslcblas
