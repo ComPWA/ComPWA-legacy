@@ -912,7 +912,7 @@ const ParameterList& AmpSumIntensity::intensity(dataPoint& point){
 void AmpSumIntensity::setParameterList(ParameterList& par){
 	//parameters varied by Minimization algorithm
 	if(par.GetNDouble()!=params.GetNDouble())
-		throw std::runtime_error("setParameterList(): size of parameter lists don't match");
+		throw std::runtime_error("AmpSumIntensity::setParameterList(): size of parameter lists don't match");
 	//Should we compared the parameter names? String comparison is slow
 	for(unsigned int i=0; i<params.GetNDouble(); i++)
 		params.GetDoubleParameter(i)->UpdateParameter(par.GetDoubleParameter(i));
