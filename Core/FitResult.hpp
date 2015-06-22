@@ -62,6 +62,8 @@ public:
 		std::string str = s.str();
 		BOOST_LOG_TRIVIAL(info) << str;
 	};
+	//! Table with fit parameters
+	virtual void printFitParameters(TableFormater* tableResult);
 	virtual void writeTeX(std::string filename) {};
 	virtual void writeXML(std::string filename) {};
 	virtual void writeText(std::string filename) ;

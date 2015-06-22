@@ -35,7 +35,9 @@ protected:
 	Double_t* masses;
 public:
 	RootGenerator(int seed=-1) ;
-	~RootGenerator(){};
+	~RootGenerator(){
+		delete[] masses;
+	};
 
 	virtual RootGenerator* Clone();
 	virtual void generate(Event& evt);

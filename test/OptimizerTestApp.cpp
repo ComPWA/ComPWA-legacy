@@ -62,16 +62,22 @@ int main(int argc, char **argv){
 	RunManager run;
 	run.setGenerator(gen);
 
-	DoubleParameter mass("mean",1.864,1.8,2.0,0.1);
-	DoubleParameter width("width",0.005,0,0.01,0.001);
-	ParameterList par;
+	DoubleParameter true_mass("mean",1.865,1.5,2.0,0.1);
+	DoubleParameter true_width("width",0.004,0,0.1,0.01);
+	DoubleParameter mass("mean",1.8,1.5,2.0,0.1);
+	DoubleParameter width("width",0.05,0,0.1,0.01);
+	ParameterList truePar, fitPar, initialPar;
+	std::shared_ptr<Amplitude> truegaus(new GaussAmp("gaus",true_mass,true_width));
+	truegaus->copyParameterList(truePar);
 	std::shared_ptr<Amplitude> gaus(new GaussAmp("gaus",mass,width));
-	gaus->copyParameterList(par);
-	run.setAmplitude(gaus);
+	gaus->copyParameterList(fitPar);
+	gaus->copyParameterList(initialPar);
 
+	run.setAmplitude(truegaus);
 	std::shared_ptr<Data> toyData(new RootReader());
 	run.setData(toyData);
 	run.generate(1000);
+	run.setAmplitude(gaus);
 
 	std::shared_ptr<Data> toyPhsp(new RootReader());
 	run.setPhspSample(toyPhsp);
@@ -80,27 +86,25 @@ int main(int argc, char **argv){
 	std::shared_ptr<ControlParameter> myFit(MinLogLH::createInstance( gaus, toyData, toyPhsp ));
 
 	//--------------------------Minimizer IF --------------------------------------------------------
-	GenevaIF* genIF = new GenevaIF(myFit);
-//  if( argc>1 ){
-//    std::cout << "I am the Geneva Server:" << std::endl;
-//  }else{
-//    std::cout << "I am a Geneva Client:" << std::endl;
-//  }
-//	genIF->setServerMode();
-	genIF->setClientMode();
-	std::shared_ptr<Optimizer> geneva_opti(genIF);
-	std::shared_ptr<Optimizer> minuit_opti(new MinuitIF(myFit,par));
+	std::shared_ptr<Optimizer> geneva_opti(new GenevaIF(myFit));
+	std::shared_ptr<Optimizer> minuit_opti(new MinuitIF(myFit,fitPar));
 
 	BOOST_LOG_TRIVIAL(info) << "Starting Parameters:";
-	BOOST_LOG_TRIVIAL(info) << par.to_str();
+	BOOST_LOG_TRIVIAL(info) << fitPar.to_str();
 	BOOST_LOG_TRIVIAL(info) << "Running Geneva optimizer:";
-	std::shared_ptr<FitResult> geneva_result = geneva_opti->exec(par);
+	std::shared_ptr<FitResult> geneva_result = geneva_opti->exec(fitPar);
+	geneva_result->setInitialParameters(initialPar);
+	geneva_result->setTrueParameters(truePar);
 	std::shared_ptr<Data> geneva_fit(new RootReader());
 	run.setData(geneva_fit);
 	run.generate(1000);
 
+	gaus->copyParameterList(initialPar);
+
 	BOOST_LOG_TRIVIAL(info) << "Running Minuit optimizer:";
-	std::shared_ptr<FitResult> minuit_result = minuit_opti->exec(par);
+	std::shared_ptr<FitResult> minuit_result = minuit_opti->exec(fitPar);
+	minuit_result->setInitialParameters(initialPar);
+	minuit_result->setTrueParameters(truePar);
 	std::shared_ptr<Data> minuit_fit(new RootReader());
 	run.setData(minuit_fit);
 	run.generate(1000);

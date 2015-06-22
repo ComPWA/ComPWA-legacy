@@ -107,19 +107,19 @@ public:
 	double mimin(unsigned int sys) const;
 
 	//these functions are buggy somewhere!
-	double lambda(double x, double y, double z)const;
-	double s2min(double s1, double m0, double m1, double m2, double m3)const;
-	double s2max(double s1, double m0, double m1, double m2, double m3)const;
-	double s3min(double s1, double m0, double m1, double m2, double m3)const;
-	double s3max(double s1, double m0, double m1, double m2, double m3)const;
-	double s1min(double s2, double m0, double m1, double m2, double m3)const;
-	double s1max(double s2, double m0, double m1, double m2, double m3)const;
-	double s2min(double s1)const { return s2min(s1,M,m1,m2,m3); };
-	double s2max(double s1)const { return s2max(s1,M,m1,m2,m3); };
-	double s3min(double s1)const { return s3min(s1,M,m1,m2,m3); };
-	double s3max(double s1)const { return s3max(s1,M,m1,m2,m3); };
-	double s1min(double s2)const { return s1min(s2,M,m1,m2,m3); };
-	double s1max(double s2)const { return s1max(s2,M,m1,m2,m3); };
+	//	double lambda(double x, double y, double z)const;
+	//	double s2min(double s1, double m0, double m1, double m2, double m3)const;
+	//	double s2max(double s1, double m0, double m1, double m2, double m3)const;
+	//	double s3min(double s1, double m0, double m1, double m2, double m3)const;
+	//	double s3max(double s1, double m0, double m1, double m2, double m3)const;
+	//	double s1min(double s2, double m0, double m1, double m2, double m3)const;
+	//	double s1max(double s2, double m0, double m1, double m2, double m3)const;
+	//	double s2min(double s1)const { return s2min(s1,M,m1,m2,m3); };
+	//	double s2max(double s1)const { return s2max(s1,M,m1,m2,m3); };
+	//	double s3min(double s1)const { return s3min(s1,M,m1,m2,m3); };
+	//	double s3max(double s1)const { return s3max(s1,M,m1,m2,m3); };
+	//	double s1min(double s2)const { return s1min(s2,M,m1,m2,m3); };
+	//	double s1max(double s2)const { return s1max(s2,M,m1,m2,m3); };
 
 	//!calculate energy of particle partId in rest frame of system sys at the invariant mass invMass_sys
 	double eiCms(unsigned int partId, unsigned int sys, double invMass_sys) const;

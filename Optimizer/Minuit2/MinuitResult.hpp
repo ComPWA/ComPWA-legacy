@@ -78,7 +78,6 @@ public:
 	//! Any errors during minimization?
 	virtual bool hasFailed();
 
-private:
 	void init(FunctionMinimum);
 	std::shared_ptr<Estimator> estimator;
 	//====== MINUIT FIT RESULT =======
@@ -114,7 +113,7 @@ private:
 	//! Full fit result output
 	void genOutput(std::ostream& out,std::string opt="");
 	//! Table with fit parameters
-	void printFitParameters(TableFormater* parTable);
+	//	void printFitParameters(TableFormater* parTable);
 	//! Table with fit fractions
 	void printFitFractions(TableFormater* fracTable);
 	//! Table with correlation matrix

@@ -175,7 +175,7 @@ std::shared_ptr<AbsParameter> ParameterList::GetParameter(const std::string parn
 
 std::shared_ptr<MultiComplex> ParameterList::GetMultiComplex(const unsigned int i) {
 	if( !(i < vMultiComplex_.size()) ){
-		throw BadParameter("Double Parameter not found");
+		throw BadParameter("Double Parameter not found: "+std::to_string((double long)i));
 		//return 0;
 	}
 	return vMultiComplex_.at(i);
@@ -183,7 +183,7 @@ std::shared_ptr<MultiComplex> ParameterList::GetMultiComplex(const unsigned int 
 
 std::shared_ptr<MultiDouble> ParameterList::GetMultiDouble(const unsigned int i) {
 	if( !(i < vMultiDouble_.size()) ){
-		throw BadParameter("Double Parameter not found");
+		throw BadParameter("Double Parameter not found: "+std::to_string((double long)i));
 		//return 0;
 	}
 	return vMultiDouble_.at(i);
@@ -191,7 +191,7 @@ std::shared_ptr<MultiDouble> ParameterList::GetMultiDouble(const unsigned int i)
 
 std::shared_ptr<ComplexParameter> ParameterList::GetComplexParameter(const unsigned int i) {
 	if( !(i < vComplexPar_.size()) ){
-		throw BadParameter("Complex Parameter not found");
+		throw BadParameter("Complex Parameter not found: "+std::to_string((double long)i));
 		//return 0;
 	}
 	return vComplexPar_.at(i);
@@ -199,7 +199,7 @@ std::shared_ptr<ComplexParameter> ParameterList::GetComplexParameter(const unsig
 
 std::shared_ptr<DoubleParameter> ParameterList::GetDoubleParameter(const unsigned int i) {
 	if( !(i < vDoublePar_.size()) ){
-		throw BadParameter("Double Parameter not found");
+		throw BadParameter("Double Parameter not found: "+std::to_string((double long)i));
 		//return 0;
 	}
 	return vDoublePar_.at(i);
@@ -207,7 +207,7 @@ std::shared_ptr<DoubleParameter> ParameterList::GetDoubleParameter(const unsigne
 
 std::shared_ptr<IntegerParameter> ParameterList::GetIntegerParameter(const unsigned int i) {
 	if( !(i < vIntPar_.size()) ){
-		throw BadParameter("Integer Parameter not found");
+		throw BadParameter("Integer Parameter not found: "+std::to_string((double long)i));
 		//return 0;
 	}
 	return vIntPar_.at(i);
@@ -215,7 +215,7 @@ std::shared_ptr<IntegerParameter> ParameterList::GetIntegerParameter(const unsig
 
 std::shared_ptr<BoolParameter> ParameterList::GetBoolParameter(const unsigned int i) {
 	if( !(i < vBoolPar_.size()) ){
-		throw BadParameter("Bool Parameter not found");
+		throw BadParameter("Bool Parameter not found: "+std::to_string((double long)i));
 		//return 0;
 	}
 	return vBoolPar_.at(i);

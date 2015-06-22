@@ -57,7 +57,7 @@
 using namespace Gem::Geneva;
 
 GenevaIF::GenevaIF(std::shared_ptr<ControlParameter> theData, std::string inConfigFileDir)
-  : _myData(theData),configFileDir(inConfigFileDir),parallelizationMode(GO2_DEF_DEFAULPARALLELIZATIONMODE),
+  : _myData(theData),configFileDir(inConfigFileDir),parallelizationMode(EXECMODE_SERIAL),
     serMode(Gem::Common::SERIALIZATIONMODE_BINARY),clientMode(false),ip("localhost"),port(0){
 
 }

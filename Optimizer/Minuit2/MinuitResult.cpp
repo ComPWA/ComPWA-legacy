@@ -251,7 +251,7 @@ void MinuitResult::genOutput(std::ostream& out, std::string opt){
 	}
 	if(trueParameters.GetNParameter()) printTrue=1;
 	out<<std::endl;
-	out<<"--------------FIT RESULT----------------"<<std::endl;
+	out<<"--------------MINUIT2 FIT RESULT----------------"<<std::endl;
 	if(!isValid) out<<"		*** MINIMUM NOT VALID! ***"<<std::endl;
 	out<<std::setprecision(10);
 	out<<"Initial Likelihood: "<<initialLH<<std::endl;
@@ -263,12 +263,7 @@ void MinuitResult::genOutput(std::ostream& out, std::string opt){
 	if(hasReachedCallLimit) out<<"		*** LIMIT OF MAX CALLS REACHED! ***"<<std::endl;
 	out<<"CPU Time : "<<time/60<<"min"<<std::endl;
 	out<<std::setprecision(5)<<std::endl;
-	/*
-	 * The Akaike (AIC) and Bayesian (BIC) information criteria are described in
-	 * Schwarz, Anals of Statistics 6 No.2: 461-464 (1978)
-	 * and
-	 * IEEE Transacrions on Automatic Control 19, No.6:716-723 (1974)
-	 */
+
 
 	if(!hasValidParameters) out<<"		*** NO VALID SET OF PARAMETERS! ***"<<std::endl;
 	if(printParam){
@@ -301,6 +296,10 @@ void MinuitResult::genOutput(std::ostream& out, std::string opt){
 	double penalty = estimator->calcPenalty();
 	out<<std::setprecision(10);
 	out<<"FinalLH w/o penalty: "<<finalLH-penalty<<std::endl;
+	/* The Akaike (AIC) and Bayesian (BIC) information criteria are described in
+	 * Schwarz, Anals of Statistics 6 No.2: 461-464 (1978)
+	 * and
+	 * IEEE Transacrions on Automatic Control 19, No.6:716-723 (1974) */
 	out<<"AIC: "<<calcAIC()<<std::endl;
 	out<<"BIC: "<<calcBIC()<<std::endl;
 	out<<std::endl;
@@ -326,65 +325,6 @@ double MinuitResult::calcBIC(){
 		if(val > 0.001) r+=val;
 	}
 	return (finalLH+r*std::log(estimator->getNEvents()));
-}
-
-void MinuitResult::printFitParameters(TableFormater* tableResult){
-	bool printTrue=0;
-	if(trueParameters.GetNParameter()) printTrue=1;
-	unsigned int parErrorWidth = 22;
-	for(unsigned int o=0;o<finalParameters.GetNDouble();o++)
-		if(finalParameters.GetDoubleParameter(o)->GetErrorType()==ErrorType::ASYM) parErrorWidth=33;
-
-	tableResult->addColumn("Nr");
-	tableResult->addColumn("Name",15);
-	tableResult->addColumn("Initial Value",parErrorWidth);
-	tableResult->addColumn("Final Value",parErrorWidth);
-	if(printTrue) tableResult->addColumn("True Value",13);
-	if(printTrue) tableResult->addColumn("Deviation",13);
-	tableResult->header();
-
-	for(unsigned int o=0;o<finalParameters.GetNDouble();o++){
-		std::shared_ptr<DoubleParameter> iniPar = initialParameters.GetDoubleParameter(o);
-		std::shared_ptr<DoubleParameter> outPar = finalParameters.GetDoubleParameter(o);
-		ErrorType errorType = outPar->GetErrorType();
-		bool isFixed = iniPar->IsFixed();
-		bool isAngle=0;
-		if(iniPar->GetName().find("phase")!=string::npos) isAngle=1;//is our Parameter an angle?
-		if(isAngle && !isFixed) {
-			outPar->SetValue( shiftAngle(outPar->GetValue()) ); //shift angle to the interval [-pi;pi]
-		}
-
-		*tableResult << o << iniPar->GetName() << *iniPar ;// |nr.| name| inital value|
-		if(isFixed) *tableResult<<"FIXED";
-		else {
-			*tableResult << *outPar;//final value
-			//				tableCov.addColumn(iniPar->GetName(),15);//add columns in covariance matrix
-		}
-		if(printTrue){
-			std::shared_ptr<DoubleParameter> truePar = trueParameters.GetDoubleParameter(iniPar->GetName());
-			if(!truePar) {
-				*tableResult << "not found"<< " - ";
-				continue;
-			}
-			*tableResult << *truePar;
-			double pi = PhysConst::instance()->getConstValue("Pi");
-			double pull = (truePar->GetValue()-outPar->GetValue() );
-			if(isAngle && !isFixed) { //shift pull by 2*pi if that reduces the deviation
-				while( pull<0 && pull<-pi) pull+=2*pi;
-				while( pull>0 && pull>pi) pull-=2*pi;
-			}
-			if( errorType == ErrorType::ASYM && pull < 0)
-				pull /= outPar->GetErrorLow();
-			else if( errorType == ErrorType::ASYM && pull > 0)
-				pull /= outPar->GetErrorHigh();
-			else
-				pull /= outPar->GetError();
-			*tableResult << pull;
-		}
-	}
-	tableResult->footer();
-
-	return;
 }
 
 void MinuitResult::printFitFractions(TableFormater* fracTable){

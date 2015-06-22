@@ -21,8 +21,8 @@ RootGenerator::RootGenerator(int seed){
 				" state! There are no degrees of freedom!";
 	masses = new Double_t[nPart];
 	TLorentzVector W(0.0, 0.0, 0.0, kin->getMotherMass());//= beam + target;
-	for(unsigned int t=1; t<=nPart; t++){ // particle 0 is mother particle
-		masses[t] = kin->getMass(t);
+	for(unsigned int t=0; t<nPart; t++){ // particle 0 is mother particle
+		masses[t] = kin->getMass(t+1);
 	}
 	event.SetDecay(W, nPart, masses);
 };
@@ -40,7 +40,7 @@ void RootGenerator::generate(Event& evt) {
 		tmp.addParticle(Particle(p->X(), p->Y(), p->Z(), p->E()));
 	}
 	evt=tmp;
-//	dataPoint p(tmp); std::cout<<"-"<<p.getVal(0)<<std::endl;
+	//dataPoint p(tmp); std::cout<<"-"<<p.getVal(0)<<std::endl;
 	return;
 }
 

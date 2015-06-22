@@ -57,8 +57,8 @@
     {
         "comment": "The maximum allowed number of iterations",
         "comment": "[GOptimizationAlgorithmT<ind_type>]",
-        "default": "1000",
-        "value": "10000"
+        "default": "100",
+        "value": "30"
     },
     "maxStallIteration":
     {
@@ -147,7 +147,7 @@
             "comment": "The total size of the population",
             "comment": " [GBaseEA]",
             "default": "100",
-            "value": "100"
+            "value": "30"
         },
         "nParents":
         {

@@ -91,6 +91,7 @@ public:
 
 	bool getPar(ParameterList& val);
 
+
 	/** @brief A standard assignment operator */
 	const GStartIndividual& operator=(const GStartIndividual&);
 

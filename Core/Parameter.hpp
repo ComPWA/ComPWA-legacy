@@ -600,6 +600,9 @@ public:
 		bounds_= usebounds_ = false;
 		SetMinMax(min,max);
 	}
+	DoubleParameter(const DoubleParameter& in):AbsParameter(in.name_, ParType::DOUBLE){
+		*this = in;
+	}
 	//! Empty Destructor
 	virtual ~DoubleParameter() { /* nothing */	}
 
@@ -678,7 +681,9 @@ public:
 		SetMinValue(min);
 		SetMaxValue(max);
 		if(!bounds_)
-			throw std::runtime_error("DoubleParameter::SetMinMaxValue() bounds not valid!:");
+			throw std::runtime_error("DoubleParameter::SetMinMaxValue() bounds not valid: ["
+					+std::to_string((long double)min)+";"
+					+std::to_string((long double)max)+"]!");
 	}
 	/*! Setter for lower bound
 	 * Setter for lower bound of the parameter. If a check for valid bounds
@@ -690,7 +695,9 @@ public:
 	 */
 	virtual void SetMinValue(const double min) {
 		min_ = min;
-		if(check_bounds(min_, max_))
+		if(!check_bounds(min_, max_))
+			bounds_ = usebounds_ = false;
+		else
 			bounds_ = usebounds_ = true;
 	}
 	/*! Setter for upper bound
@@ -703,7 +710,9 @@ public:
 	 */
 	virtual void SetMaxValue(const double max) {
 		max_ = max;
-		if(check_bounds(min_, max_))
+		if(!check_bounds(min_, max_))
+			bounds_ = usebounds_ = false;
+		else
 			bounds_ = usebounds_ = true;
 	}
 	//====== PARAMETER ERROR ========

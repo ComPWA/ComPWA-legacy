@@ -40,30 +40,13 @@
 class GenevaResult : public FitResult
 {
 public:
-	GenevaResult() {};
-	//GenevaResult(boost::shared_ptr<Gem::Geneva::GStartIndividual> result) { init(result);	}
+	GenevaResult() : finalLH(0) {};
 	void setResult(boost::shared_ptr<Gem::Geneva::GStartIndividual> result){ init(result); }
 	operator double() const { return finalLH; };
-	double getResult(){return finalLH;}
+	double getResult(){ return finalLH; }
 
-private:
-
-	//bool isValid; //result valid
-	//bool covPosDef; //covariance matrix pos.-def.
-	//bool hasValidParameters; //valid parameters
-	//bool hasValidCov; //valid covariance
-	//bool hasAccCov; //accurate covariance
-	//bool hasReachedCallLimit; //call limit reached
-	//bool hesseFailed; //hesse failed
-
-	//double errorDef;
-	//unsigned int nFcn;
-	//double initialLH;
+protected:
 	double finalLH;
-	//double exitCode;
-	//double edm; //estimated distance to minimum
-	//boost::numeric::ublas::symmetric_matrix<double,boost::numeric::ublas::upper> cov;
-	//boost::numeric::ublas::symmetric_matrix<double,boost::numeric::ublas::upper> corr;
 
 	void genOutput(std::ostream& out, std::string opt="");
 	void init(boost::shared_ptr<Gem::Geneva::GStartIndividual> min);
