@@ -79,7 +79,7 @@ std::complex<double> AmpSumOfAmplitudes::getFirstReso(dataPoint& point) const
 
 	//std::cout << "PDFs: ";
 	// for(unsigned int i=0; i<_pdfList.size(); i++){
-	double a = _intList[0]->GetValue();
+	double a = std::abs(_intList[0]->GetValue());
 	double phi = _phaseList[0]->GetValue();
 	std::complex<double> eiphi(a*cos(phi),a*sin(phi));
 

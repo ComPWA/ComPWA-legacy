@@ -82,6 +82,7 @@ void FitResult::printFitParameters(TableFormater* tableResult){
 		if(outPar->GetName().find("phase")!=string::npos) isAngle=1;//is our Parameter an angle?
 		if(isAngle && !isFixed) {
 			outPar->SetValue( shiftAngle(outPar->GetValue()) ); //shift angle to the interval [-pi;pi]
+			if(printInitial) iniPar->SetValue( shiftAngle(iniPar->GetValue()) );
 		}
 
 		*tableResult << o << outPar->GetName();

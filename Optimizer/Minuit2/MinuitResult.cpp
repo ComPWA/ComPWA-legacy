@@ -205,24 +205,6 @@ void MinuitResult::calcFraction(ParameterList& parList){
 	double norm =-1;
 	ParameterList currentPar;
 	_amp->copyParameterList(currentPar);
-	//	if(!useTree) norm = _amp->integral();
-	//	else {//if we have a tree, use it. Much faster especially in case of correlated errors in calcFractionError()
-	//		std::shared_ptr<FunctionTree> tree = estimator->getTree();
-	//		tree->recalculate();
-	//		double phspVolume = Kinematics::instance()->getPhspVolume();
-	//		/*We need the intensity over the PHSP without efficiency correction. Therefore we
-	//		 * access node 'Amplitude' and sum up its values.*/
-	//		std::shared_ptr<TreeNode> amplitudeNode = tree->head()->getChildNode("Amplitude_Phsp");
-	//		if(!amplitudeNode){
-	//			BOOST_LOG_TRIVIAL(error)<<"MinuitResult::calcFraction() : Can't find node 'Amplitude_Phsp' in tree!";
-	//			throw BadParameter("Node not found!");
-	//		}
-	//		std::shared_ptr<MultiComplex> normPar = std::dynamic_pointer_cast<MultiComplex>(amplitudeNode->getValue());//node 'Amplitude'
-	//		unsigned int numPhspEvents = normPar->GetNValues();
-	//		for(unsigned int i=0; i<numPhspEvents;i++)
-	//			norm+=std::norm(normPar->GetValue(i));
-	//		norm = norm*phspVolume/numPhspEvents; //correct calculation of normalization
-	//	}
 
 	//in case of unbinned efficiency correction to tree does not provide an integral w/o efficiency correction
 	norm = _amp->integral();
@@ -234,7 +216,7 @@ void MinuitResult::calcFraction(ParameterList& parList){
 		double resInt= _amp->getAmpIntegral(i);//this is simply the factor 2J+1, because the resonance is already normalized
 		std::string resName = _amp->getNameOfResonance(i);
 		std::shared_ptr<DoubleParameter> magPar = currentPar.GetDoubleParameter("mag_"+resName);
-		double mag = magPar->GetValue(); //value of magnitude
+		double mag = std::abs(magPar->GetValue()); //value of magnitude
 		double magError = 0;
 		if(magPar->HasError()) magError = magPar->GetError(); //error of magnitude
 		parList.AddParameter(std::shared_ptr<DoubleParameter>(
