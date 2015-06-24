@@ -48,7 +48,7 @@ double shiftAngle(double v){
 
 
 MinuitIF::MinuitIF(std::shared_ptr<ControlParameter> esti, ParameterList& par) :
-		_myFcn(esti, par), estimator(esti)
+						_myFcn(esti, par), estimator(esti)
 {
 
 }
@@ -113,12 +113,26 @@ std::shared_ptr<FitResult> MinuitIF::exec(ParameterList& par){
 	BOOST_LOG_TRIVIAL(debug) << "Hesse G2 tolerance: "<<strat.HessianG2Tolerance();
 
 	//MIGRAD
-	BOOST_LOG_TRIVIAL(info) <<"MinuitIF::exec() | starting migrad ";
 	MnMigrad migrad(_myFcn, upar, strat);
-	//	FunctionMinimum minMin = migrad(100,0.001);//(maxfcn,tolerance)
-	FunctionMinimum minMin = migrad();
+	double maxfcn = 0.0;
+	double tolerance = 0.1;
+	BOOST_LOG_TRIVIAL(info) <<"MinuitIF::exec() | Starting migrad: "
+			"maxCalls="<<maxfcn<<" tolerance="<<tolerance;
+	/*Minimize the function MnMigrad()(maxfcn, tolerance)
+	      @param maxfcn : max number of function calls (if = 0) default is used which is set to
+	                     200 + 100 * npar + 5 * npar**2
+	      @param tolerance : value used for terminating iteration procedure.
+	             For example, MIGRAD will stop iterating when edm (expected distance from minimum) will be:
+	             edm < tolerance * 10**-3
+	             Default value of tolerance used is 0.1*/
+	FunctionMinimum minMin = migrad(maxfcn,tolerance);//(maxfcn,tolerance)
 	BOOST_LOG_TRIVIAL(info) <<"MinuitIF::exec() | migrad finished! Minimum is valid = "
 			<<minMin.IsValid();
+//	if(!minMin.IsValid()) {
+//		BOOST_LOG_TRIVIAL(info) <<"MinuitIF::exec() | minimum not valid! Current LH="<<minMin.Fval();
+//		BOOST_LOG_TRIVIAL(info) <<"MinuitIF::exec() | Run migrad again!";
+//		minMin = migrad();
+//	}
 
 	//HESSE
 	MnHesse hesse(strat);
@@ -128,7 +142,7 @@ std::shared_ptr<FitResult> MinuitIF::exec(ParameterList& par){
 		BOOST_LOG_TRIVIAL(info) <<"MinuitIF::exec() | hesse finished";
 	} else
 		BOOST_LOG_TRIVIAL(info) <<"MinuitIF::exec() | migrad failed to find minimum! "
-				"We skip hesse and minos!";
+		"We skip hesse and minos!";
 
 	//MINOS
 	MnMinos minos(_myFcn,minMin,strat);

@@ -26,6 +26,8 @@
 #include <memory>
 
 #include "Core/ParameterList.hpp"
+#include "Core/FunctionTree.hpp"
+#include "Core/Amplitude.hpp"
 
 class ControlParameter{
 
@@ -36,20 +38,17 @@ public:
 
   virtual void resetInstance() { instance_ = std::shared_ptr<ControlParameter>(); };
 
+  virtual std::shared_ptr<FunctionTree> getTree() { return std::shared_ptr<FunctionTree>(); }
+
+  virtual std::shared_ptr<Amplitude> getAmplitude() { return std::shared_ptr<Amplitude>(); }
+
 protected:
   static std::shared_ptr<ControlParameter> instance_;
-
+std::shared_ptr<FunctionTree> f;
   ControlParameter(){
   }
 
   virtual ~ControlParameter(){ /* nothing */	}
  
 };
-
-/*std::shared_ptr<ControlParameter> ControlParameter::Instance() {
-    return ControlParameter::instance_;
-}
-
-std::shared_ptr<ControlParameter> ControlParameter::instance_ = 0;*/
-
 #endif

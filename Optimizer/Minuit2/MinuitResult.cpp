@@ -93,6 +93,7 @@ void MinuitResult::init(FunctionMinimum min){
 	hasValidCov = min.HasValidCovariance();
 	hasAccCov = min.HasAccurateCovar();
 	hasReachedCallLimit = min.HasReachedCallLimit();
+	edmAboveMax = min.IsAboveMaxEdm();
 	hesseFailed = min.HesseFailed();
 	errorDef = min.Up();
 	nFcn = min.NFcn();
@@ -188,43 +189,6 @@ void MinuitResult::calcFractionError(){
 	return;
 }
 
-void MinuitResult::calcFraction() {
-	if(!fractionList.GetNDouble()) {
-		calcFraction(fractionList);
-		calcFractionError();
-	} else
-		BOOST_LOG_TRIVIAL(warning) << "MinuitResult::calcFractions() fractions already calculated. Skip!";
-}
-
-void MinuitResult::calcFraction(ParameterList& parList){
-	if(!_amp)
-		throw std::runtime_error("MinuitResult::calcFractions() | no amplitude set, can't calculate fractions!");
-	if(parList.GetNDouble())
-		throw std::runtime_error("MinuitResult::calcFractions() | ParameterList not empty!");
-
-	double norm =-1;
-	ParameterList currentPar;
-	_amp->copyParameterList(currentPar);
-
-	//in case of unbinned efficiency correction to tree does not provide an integral w/o efficiency correction
-	norm = _amp->integral();
-	if(norm<0)
-		throw std::runtime_error("MinuitResult::calcFraction() normalization can't be calculated");
-	BOOST_LOG_TRIVIAL(debug)<<"MinuitResult::calcFraction() norm="<<norm;
-	nRes=_amp->getNumberOfResonances();
-	for(unsigned int i=0;i<nRes; i++){ //fill matrix
-		double resInt= _amp->getAmpIntegral(i);//this is simply the factor 2J+1, because the resonance is already normalized
-		std::string resName = _amp->getNameOfResonance(i);
-		std::shared_ptr<DoubleParameter> magPar = currentPar.GetDoubleParameter("mag_"+resName);
-		double mag = std::abs(magPar->GetValue()); //value of magnitude
-		double magError = 0;
-		if(magPar->HasError()) magError = magPar->GetError(); //error of magnitude
-		parList.AddParameter(std::shared_ptr<DoubleParameter>(
-				new DoubleParameter(resName+"_FF", mag*mag*resInt/norm, 2*mag*resInt/norm * magError)) );
-	}
-	return;
-}
-
 void MinuitResult::genOutput(std::ostream& out, std::string opt){
 	bool printTrue=0;
 	bool printParam=1, printCorrMatrix=1, printCovMatrix=1;
@@ -240,6 +204,7 @@ void MinuitResult::genOutput(std::ostream& out, std::string opt){
 	out<<"Final Likelihood: "<<finalLH<<std::endl;
 
 	out<<"Estimated distance to minimumn: "<<edm<<std::endl;
+	if(edmAboveMax) out<<"		*** EDM IS ABOVE MAXIMUM! ***"<<std::endl;
 	out<<"Error definition: "<<errorDef<<std::endl;
 	out<<"Number of calls: "<<nFcn<<std::endl;
 	if(hasReachedCallLimit) out<<"		*** LIMIT OF MAX CALLS REACHED! ***"<<std::endl;
@@ -299,6 +264,7 @@ double MinuitResult::calcAIC(){
 	}
 	return (finalLH+2*r);
 }
+
 double MinuitResult::calcBIC(){
 	if(!fractionList.GetNDouble()) calcFraction();
 	double r=0;
@@ -307,33 +273,6 @@ double MinuitResult::calcBIC(){
 		if(val > 0.001) r+=val;
 	}
 	return (finalLH+r*std::log(estimator->getNEvents()));
-}
-
-void MinuitResult::printFitFractions(TableFormater* fracTable){
-	BOOST_LOG_TRIVIAL(info) << "Calculating fit fractions...";
-	calcFraction();
-	double sum, sumErrorSq;
-
-	//print matrix
-	fracTable->addColumn("Resonance",15);//add empty first column
-	fracTable->addColumn("Fraction",15);//add empty first column
-	fracTable->addColumn("Error",15);//add empty first column
-	fracTable->addColumn("Significance",15);//add empty first column
-	fracTable->header();
-	for(unsigned int i=0;i<fractionList.GetNDouble(); ++i){
-		std::shared_ptr<DoubleParameter> tmpPar = fractionList.GetDoubleParameter(i);
-		*fracTable << tmpPar->GetName()
-				<< tmpPar->GetValue()
-				<< tmpPar->GetError() //assume symmetric errors here
-				<< std::abs(tmpPar->GetValue()/tmpPar->GetError());
-		sum += tmpPar->GetValue();
-		sumErrorSq += tmpPar->GetError()*tmpPar->GetError();
-	}
-	fracTable->delim();
-	*fracTable << "Total" << sum << sqrt(sumErrorSq) << " ";
-	fracTable->footer();
-
-	return;
 }
 
 void MinuitResult::printCorrelationMatrix(TableFormater* tableCorr){
@@ -426,6 +365,7 @@ void MinuitResult::writeTeX(std::string filename){
 	out.close();
 	return;
 }
+
 bool MinuitResult::hasFailed(){
 	bool failed=0;
 	if(!isValid) failed=1;

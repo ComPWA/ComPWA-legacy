@@ -65,12 +65,7 @@ public:
 			throw std::runtime_error("MinuitResult::setUseTree() | amplitude has no tree!");
 		useTree = s;
 	}
-	//! Getter function for fractions list. Make sure that fractions are calculated beforehand.
-	ParameterList& GetFractions() {	return fractionList; }
-	/** Calculate fit fractions and its errors.
-	 * Result is stored in fractionList!
-	 */
-	void calcFraction();
+
 	//! Write list of fit parameters and list of fitfractions to XML file @filename
 	virtual void writeXML(std::string filename);
 	//! Write fit parameters, fit fractions and cov matrix as TeX to file @filename
@@ -87,6 +82,7 @@ public:
 	bool hasValidCov; //valid covariance
 	bool hasAccCov; //accurate covariance
 	bool hasReachedCallLimit; //call limit reached
+	bool edmAboveMax;
 	bool hesseFailed; //hesse failed
 	double errorDef;
 	unsigned int nFcn;
@@ -107,30 +103,7 @@ public:
 	//! number of resonances in amplitude
 	unsigned int nRes;
 
-	//====== OUTPUT =====
-	//! Simplified fit result output
-	void genSimpleOutput(std::ostream& out);
-	//! Full fit result output
-	void genOutput(std::ostream& out,std::string opt="");
-	//! Table with fit parameters
-	//	void printFitParameters(TableFormater* parTable);
-	//! Table with fit fractions
-	void printFitFractions(TableFormater* fracTable);
-	//! Table with correlation matrix
-	void printCorrelationMatrix(TableFormater* fracTable);
-	//! Table with covariance matrix
-	void printCovarianceMatrix(TableFormater* fracTable);
-	/** Calculate fit fractions.
-	 * Fractions are calculated using the formular:
-	 * \f[
-	 *  f_i = \frac{|c_i|^2 \int A_i A_i^*}{\int \sum c_l c_m^* A_l A_m}
-	 * \f]
-	 * The \f$c_i\f$ complex coefficienct of the amplitude and the denominatior is the integral over
-	 * the whole amplitude.
-	 *
-	 * @param parList result with fit fractions for the single resonances
-	 */
-	void calcFraction(ParameterList& parList);
+
 	/** Calculate errors on fit result
 	 * Set @param assumeUnCorrelatedErrors to assume that the error of the fit parameter only depends
 	 * on the error of the magnitude. The error of normalization due the the fit error on magnitudes
@@ -142,15 +115,23 @@ public:
 	 *
 	 * @param fracError result with errors
 	 */
-	void calcFractionError();
+	virtual void calcFractionError();
+	//====== OUTPUT =====
+	//! Simplified fit result output
+	void genSimpleOutput(std::ostream& out);
+	//! Full fit result output
+	void genOutput(std::ostream& out,std::string opt="");
+	//! Table with correlation matrix
+	void printCorrelationMatrix(TableFormater* fracTable);
+	//! Table with covariance matrix
+	void printCovarianceMatrix(TableFormater* fracTable);
+
 	//! Smear ParameterList with a multidimensional gaussian and the cov matrix from the fit
 	void smearParameterList(ParameterList&);
 	//! Calculate information criterion AIC
 	double calcAIC();
 	//! Calculate information criterion BIC
 	double calcBIC();
-	//! List with fit fractions and errors
-	ParameterList fractionList;
 };
 
 #endif

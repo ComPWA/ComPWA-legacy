@@ -44,16 +44,34 @@ class FitResult
 public:
 	FitResult():time(0){};
 	virtual ~FitResult() {};
-	void setInitialParameters(ParameterList iniPars){ initialParameters=iniPars; }
-	void setFinalParameters(ParameterList finPars){ finalParameters=finPars; }
-	void setTrueParameters(ParameterList truePars){ trueParameters=truePars; }
-	void setInitialLH(double iniLH){ }
-	ParameterList getInitialParameters(){ return initialParameters; }
-	ParameterList getFinalParameters(){ return finalParameters; }
-	ParameterList getTrueParameters(){ return trueParameters; }
-	void setTime(double t){ time = t; }
-	double getTime(){ return time; }
+	//! Set amplitude
+	virtual void setAmplitude(std::shared_ptr<Amplitude> a) { _amp = a; }
+	//! Set list of initial parameters
+	virtual void setInitialParameters(ParameterList iniPars){ initialParameters=iniPars; }
+	//! Set list of final fit parameters
+	virtual void setFinalParameters(ParameterList finPars){ finalParameters=finPars; }
+	//! Set list of true parameters
+	virtual void setTrueParameters(ParameterList truePars){ trueParameters=truePars; }
+	//! Set value of likelihood with initial parameter
+	virtual void setInitialLH(double iniLH){ }
+	//! Get list of initial parameters
+	virtual ParameterList getInitialParameters(){ return initialParameters; }
+	//! Get list of final fit parameters
+	virtual ParameterList getFinalParameters(){ return finalParameters; }
+	//! Get list of true parameters
+	virtual ParameterList getTrueParameters(){ return trueParameters; }
+	//! Set processing time for minimization
+	virtual void setTime(double t){ time = t; }
+	//! Get processing time for minimization
+	virtual double getTime(){ return time; }
+	//! Get fit result (e.g. likelihood or chi2)
 	virtual double getResult() =0;
+	//! Table with fit parameters
+	virtual void printFitParameters(TableFormater* tableResult);
+	//! Table with fit fractions
+	virtual void printFitFractions(TableFormater* fracTable);
+	//! Getter function for fractions list. Make sure that fractions are calculated beforehand.
+	virtual ParameterList& GetFractions() {	return fractionList; }
 
 	//output
 	virtual void print(std::string opt=""){
@@ -62,8 +80,6 @@ public:
 		std::string str = s.str();
 		BOOST_LOG_TRIVIAL(info) << str;
 	};
-	//! Table with fit parameters
-	virtual void printFitParameters(TableFormater* tableResult);
 	virtual void writeTeX(std::string filename) {};
 	virtual void writeXML(std::string filename) {};
 	virtual void writeText(std::string filename) ;
@@ -71,7 +87,7 @@ public:
 	virtual operator double() const =0;
 	friend std::ostream& operator<< (std::ostream &out, FitResult &fitres){ out<<fitres.getResult(); return out;};
 	//! Any errors during minimization?
-	virtual bool hasFailed(){};
+	virtual bool hasFailed(){ return 0; };
 
 protected:
 	virtual double shiftAngle(double v);
@@ -84,6 +100,24 @@ protected:
 	ParameterList finalParameters;
 	ParameterList trueParameters;
 	std::shared_ptr<Amplitude> _amp;
+
+	//! Calculate fit fractions and its errors.
+	virtual void calcFraction();
+	/** Calculate fit fractions.
+	 * Fractions are calculated using the formular:
+	 * \f[
+	 *  f_i = \frac{|c_i|^2 \int A_i A_i^*}{\int \sum c_l c_m^* A_l A_m}
+	 * \f]
+	 * The \f$c_i\f$ complex coefficienct of the amplitude and the denominatior is the integral over
+	 * the whole amplitude.
+	 *
+	 * @param parList result with fit fractions for the single resonances
+	 */
+	virtual void calcFraction(ParameterList& parList);
+	//! Calculate errors on fit result
+	virtual void calcFractionError() {};
+	//! List with fit fractions and errors
+	ParameterList fractionList;
 };
 
 

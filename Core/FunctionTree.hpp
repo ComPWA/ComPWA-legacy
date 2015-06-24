@@ -34,7 +34,7 @@
 #include "Core/AbsParameter.hpp"
 #include "Core/Parameter.hpp"
 
-#include "Optimizer/ControlParameter.hpp"
+//#include "Optimizer/ControlParameter.hpp"
 
 using namespace boost::log;
 

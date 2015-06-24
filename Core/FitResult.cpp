@@ -4,10 +4,8 @@
  *  Created on: Jan 15, 2014
  *      Author: weidenka
  */
-
-
-
 #include "Core/FitResult.hpp"
+
 void FitResult::writeText(std::string filename){
 	std::ofstream myfile;
 	myfile.open(filename);
@@ -15,6 +13,7 @@ void FitResult::writeText(std::string filename){
 	myfile.close();
 	return;
 };
+
 void FitResult::writeSimpleText(std::string filename){
 	std::ofstream myfile;
 	myfile.open(filename);
@@ -22,6 +21,7 @@ void FitResult::writeSimpleText(std::string filename){
 	myfile.close();
 	return;
 };
+
 double FitResult::shiftAngle(double v){
 	double originalVal = v;
 	double val = originalVal;
@@ -42,6 +42,7 @@ void FitResult::genSimpleOutput(std::ostream& out){
 
 	return;
 }
+
 void FitResult::printFitParameters(TableFormater* tableResult){
 	bool printTrue=0, printInitial=0;
 	if(trueParameters.GetNParameter()) printTrue=1;
@@ -119,5 +120,69 @@ void FitResult::printFitParameters(TableFormater* tableResult){
 	}
 	tableResult->footer();
 
+	return;
+}
+
+void FitResult::printFitFractions(TableFormater* fracTable){
+	BOOST_LOG_TRIVIAL(info) << "Calculating fit fractions...";
+	calcFraction();
+	double sum, sumErrorSq;
+
+	//print matrix
+	fracTable->addColumn("Resonance",15);//add empty first column
+	fracTable->addColumn("Fraction",15);//add empty first column
+	fracTable->addColumn("Error",15);//add empty first column
+	fracTable->addColumn("Significance",15);//add empty first column
+	fracTable->header();
+	for(unsigned int i=0;i<fractionList.GetNDouble(); ++i){
+		std::shared_ptr<DoubleParameter> tmpPar = fractionList.GetDoubleParameter(i);
+		*fracTable << tmpPar->GetName()
+				<< tmpPar->GetValue()
+				<< tmpPar->GetError() //assume symmetric errors here
+				<< std::abs(tmpPar->GetValue()/tmpPar->GetError());
+		sum += tmpPar->GetValue();
+		sumErrorSq += tmpPar->GetError()*tmpPar->GetError();
+	}
+	fracTable->delim();
+	*fracTable << "Total" << sum << sqrt(sumErrorSq) << " ";
+	fracTable->footer();
+
+	return;
+}
+
+void FitResult::calcFraction() {
+	if(!fractionList.GetNDouble()) {
+		calcFraction(fractionList);
+		calcFractionError();
+	} else
+		BOOST_LOG_TRIVIAL(warning) << "FitResult::calcFractions() fractions already calculated. Skip!";
+}
+
+void FitResult::calcFraction(ParameterList& parList){
+	if(!_amp)
+		throw std::runtime_error("FitResult::calcFractions() | no amplitude set, can't calculate fractions!");
+	if(parList.GetNDouble())
+		throw std::runtime_error("FitResult::calcFractions() | ParameterList not empty!");
+
+	double norm =-1;
+	ParameterList currentPar;
+	_amp->copyParameterList(currentPar);
+
+	//in case of unbinned efficiency correction to tree does not provide an integral w/o efficiency correction
+	norm = _amp->integral();
+	if(norm<0)
+		throw std::runtime_error("FitResult::calcFraction() normalization can't be calculated");
+	BOOST_LOG_TRIVIAL(debug)<<"FitResult::calcFraction() norm="<<norm;
+	int nRes=_amp->getNumberOfResonances();
+	for(unsigned int i=0;i<nRes; i++){ //fill matrix
+		double resInt= _amp->getAmpIntegral(i);//this is simply the factor 2J+1, because the resonance is already normalized
+		std::string resName = _amp->getNameOfResonance(i);
+		std::shared_ptr<DoubleParameter> magPar = currentPar.GetDoubleParameter("mag_"+resName);
+		double mag = std::abs(magPar->GetValue()); //value of magnitude
+		double magError = 0;
+		if(magPar->HasError()) magError = magPar->GetError(); //error of magnitude
+		parList.AddParameter(std::shared_ptr<DoubleParameter>(
+				new DoubleParameter(resName+"_FF", mag*mag*resInt/norm, 2*mag*resInt/norm * magError)) );
+	}
 	return;
 }
