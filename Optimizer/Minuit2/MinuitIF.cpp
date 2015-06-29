@@ -63,7 +63,7 @@ std::shared_ptr<FitResult> MinuitIF::exec(ParameterList& par){
 	ParameterList initialParList(par);
 
 	MnUserParameters upar;
-	BOOST_LOG_TRIVIAL(debug) << "MinuitIF::exec() | Number of parameters: "<<par.GetNDouble();
+	int freePars = 0;
 	for(unsigned int i=0; i<par.GetNDouble(); ++i){ //only doubles for minuit
 		std::shared_ptr<DoubleParameter> actPat = par.GetDoubleParameter(i);
 		//if no error is set or error set to 0 we use a default error,
@@ -81,9 +81,13 @@ std::shared_ptr<FitResult> MinuitIF::exec(ParameterList& par){
 
 		_myFcn.setNameID(i, actPat->GetName());
 
+		if(!actPat->IsFixed())
+			freePars++;
 		if(actPat->IsFixed())
 			upar.Fix(actPat->GetName());
 	}
+	BOOST_LOG_TRIVIAL(info) << "MinuitIF::exec() | Number of parameters (free): "
+			<<par.GetNDouble()<<" ("<<freePars<<")";
 
 	//use MnStrategy class to set all options for the fit
 	//	MnStrategy strat; //using default strategy = 1

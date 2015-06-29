@@ -185,6 +185,18 @@ exe compareTreeAmpApp :
         $(TOP)/Physics/DPKinematics//DPKinematics  
         : ;
 
+exe lhNormalizationTestApp : 
+        LHNormalizationTestApp.cpp 
+        test
+        $(TOP)/Core//ComPWA
+        $(TOP)/Physics/AmplitudeSum//AmplitudeSum  
+        $(TOP)/DataReader/RootReader//RootReader  
+        $(TOP)/Optimizer//Optimizer
+        $(TOP)/Estimator/MinLogLH//MinLogLH 
+        $(TOP)/Optimizer/Minuit2//Minuit2IF
+        $(TOP)/Physics/DPKinematics//DPKinematics  
+        : ;
+
 exe dalitzplotApp : 
         DalitzDataPlotterApp.cpp 
         test
@@ -234,7 +246,7 @@ install dist : test : <location>$(TOP)/lib <threading>single ;
 install dist2 : compareTreeAmpApp dalitzfitApp slicefitApp treetestApp dataiftestApp optimizertestApp physicstestApp : <location>$(TOP)/bin <threading>single ;
 install dist3 : estimatortestApp integrationtestApp integrationtestbinnedApp runmanagertestApp gentwopartApp gendalitzApp dalitzplotApp serializeApp dpareaTestApp genRunManager : <location>$(TOP)/bin <threading>single ;
 
-install dist4 : helicityDecayTreeTestApp : <location>$(TOP)/bin <threading>single ;
+install dist4 : helicityDecayTreeTestApp lhNormalizationTestApp : <location>$(TOP)/bin <threading>single ;
 
 #if $(GENEVA) { 
 #install dist7 : genevatestApp : <location>$(TOP)/bin ;

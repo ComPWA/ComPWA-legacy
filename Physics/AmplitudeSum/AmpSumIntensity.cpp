@@ -813,7 +813,7 @@ double evalWrapperAmpSumIntensityEff(double* x, size_t dim, void* param) {
 
 const double AmpSumIntensity::normalization(ParameterList& par){
 	setParameterList(par);
-	return integral();
+	return normalization();
 }
 const double AmpSumIntensity::normalization(){
 	/* Integration functionality was tested with a model with only one normalized amplitude.

@@ -10,6 +10,7 @@
 //
 // Contributors:
 //     Mathias Michel - initial API and implementation
+//		Peter Weidenkaff - adding UnitAmp
 //-------------------------------------------------------------------------------
 //! Physics Interface Base-Class.
 /*! \class Amplitude
@@ -213,4 +214,105 @@ protected:
 
 
 };
+
+/**! UnitAmp
+ *
+ * Example implementation of Amplitude with the function value 1.0 at all points in PHSP. It is used
+ * to test the likelihood normalization.
+ */
+class UnitAmp : public Amplitude
+{
+public:
+	UnitAmp() : eff_(std::shared_ptr<Efficiency>(new UnitEfficiency())){
+		result.AddParameter(std::shared_ptr<DoubleParameter>(new DoubleParameter("AmpSumResult")));
+	}
+
+	virtual ~UnitAmp()	{ /* nothing */	}
+
+	virtual Amplitude* Clone() {;
+	return (new UnitAmp(*this));
+	}
+
+	//! set efficiency
+	virtual void setEfficiency(std::shared_ptr<Efficiency> eff) { eff_ = eff; }
+	virtual const double integral() {
+		return Kinematics::instance()->getPhspVolume();
+	}
+	virtual const double integral(ParameterList& par) { return integral(); }
+	virtual const double normalization() {
+		BOOST_LOG_TRIVIAL(info) << "UnitAmp::normalization() | normalization not implemented!";
+		return 1;
+	}
+	virtual const double normalization(ParameterList& par) { return normalization(); }
+	virtual double getMaxVal(ParameterList& par, std::shared_ptr<Generator> gen) { return 1; }
+	virtual double getMaxVal(std::shared_ptr<Generator> gen) { return 1; }
+
+	virtual const ParameterList& intensity(dataPoint& point, ParameterList& par) {
+		return intensity(point);
+	}
+	virtual const ParameterList& intensity(dataPoint& point) {
+		result.SetParameterValue(0,eff_->evaluate(point));
+		return result;
+	}
+	virtual const ParameterList& intensityNoEff(dataPoint& point) {
+		result.SetParameterValue(0,1.0);
+		return result;
+	}
+	virtual const ParameterList& intensity(std::vector<double> point, ParameterList& par){
+		dataPoint dataP(point);
+		return intensity(dataP);
+	}
+
+	virtual void setParameterList(ParameterList& par) { }
+	virtual bool copyParameterList(ParameterList& par) { return 1; }
+
+	virtual void printAmps() { }
+	virtual void printFractions() { }
+
+	virtual double getIntValue(std::string var1, double min1, double max1,
+			std::string var2, double min2, double max2) { return 0; }
+
+	//---------- related to FunctionTree -------------
+	//! Check of tree is available
+	virtual bool hasTree(){ return 1; }
+	//! Getter function for basic amp tree
+	virtual std::shared_ptr<FunctionTree> getAmpTree(allMasses& theMasses,
+			allMasses& toyPhspSample, std::string suffix){
+		return setupBasicTree(theMasses,toyPhspSample, suffix);
+	}
+
+protected:
+	std::shared_ptr<Efficiency> eff_;
+
+	/**Setup Basic Tree
+	 *
+	 * @param theMasses data sample
+	 * @param toyPhspSample sample of flat toy MC events for normalization of the resonances
+	 * @param opt Which tree should be created? "data" data Tree, "norm" normalization tree
+	 * with efficiency corrected toy phsp sample or "normAcc" normalization tree with sample
+	 * of accepted flat phsp events
+	 */
+	std::shared_ptr<FunctionTree> setupBasicTree(allMasses& theMasses,
+			allMasses& toyPhspSample, std::string suffix="") {
+		BOOST_LOG_TRIVIAL(debug) << "UnitAmp::setupBasicTree() generating new tree!";
+		if(theMasses.nEvents==0){
+			BOOST_LOG_TRIVIAL(error) << "UnitAmp::setupBasicTree() data sample empty!";
+			return std::shared_ptr<FunctionTree>();
+		}
+		std::shared_ptr<FunctionTree> newTree(new FunctionTree());
+		//std::shared_ptr<MultAll> mmultDStrat(new MultAll(ParType::MDOUBLE));
+
+		std::vector<double> oneVec(theMasses.nEvents, 1.0);
+		std::shared_ptr<MultiDouble> one(new MultiDouble("one",oneVec));
+		newTree->createHead("Amplitude"+suffix, one);
+//		newTree->createHead("Amplitude"+suffix, 3.0);
+//		if(!newTree->head()){
+//			std::cout<<"asfdasfasdfas"<<std::endl;
+//			exit(1);
+//		}
+		std::cout<<newTree->head()->to_str(10)<<std::endl;
+		return newTree;
+	}
+};
+
 #endif

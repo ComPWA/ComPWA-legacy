@@ -107,21 +107,21 @@ public:
 	 */
 	virtual void createHead(const std::string& name, const double extPar){
 		if( head_ )//if head exists throw exception
-			throw std::runtime_error("FunctionTree::createNode() head node already exists!");
+			throw std::runtime_error("FunctionTree::createNode() | head node already exists!");
 		createLeaf(name,extPar,"");
 	}
-//	//! Create head node of FcnTree
-//	/*!
-//	 * Create head node as a leaf.
-//	 * \param name identifier of node
-//	 * \param strat Strategy with which the node calculates its value
-//	 * \sa addNode(), createNode(), createLeaf()
-//	 */
-//	virtual void createHead(const std::string& name, std::shared_ptr<AbsParameter> extPar){
-//		if( head_ )//if head exists throw exception
-//			throw std::runtime_error("FunctionTree::createNode() head node already exists!");
-//		createLeaf(name,extPar,"");
-//	}
+	//! Create head node of FcnTree
+	/*!
+	 * Create head node as a leaf.
+	 * \param name identifier of node
+	 * \param strat Strategy with which the node calculates its value
+	 * \sa addNode(), createNode(), createLeaf()
+	 */
+	virtual void createHead(const std::string& name, std::shared_ptr<AbsParameter> extPar){
+		if( head_ )//if head exists throw exception
+			throw std::runtime_error("FunctionTree::createNode() | head node already exists!");
+		createLeaf(name,extPar,"");
+	}
 
 
 	//! Add an existing node to FunctionTree
@@ -277,6 +277,9 @@ public:
 	 * \sa addNode(), createHead(), createNode()
 	 */
 	virtual void createLeaf(const std::string name, const double extPar, std::string parent){
+		if(parent=="" && head_)
+			throw std::runtime_error("FunctionTree::createNode() | head node already exists!");
+
 		std::shared_ptr<TreeNode> parentNode;
 		if(parent=="")//is this a head node?
 			parentNode = std::shared_ptr<TreeNode>();
@@ -302,6 +305,7 @@ public:
 			leaf = std::shared_ptr<TreeNode>(new TreeNode(name, staticVal, std::shared_ptr<Strategy>(), parentNode));
 			nodes_.insert(std::pair<std::string, std::shared_ptr<TreeNode> >(name,leaf));
 			leaf->linkParents();
+			if(parent=="") head_ = leaf; //if we created a head redirect pointer
 		}
 	}
 
@@ -316,12 +320,14 @@ public:
 	 * \sa addNode(), createHead(), createNode()
 	 */
 	virtual void createLeaf(const std::string name, std::shared_ptr<AbsParameter> extPar, std::string parent){
+		if(parent=="" && head_)
+			throw std::runtime_error("FunctionTree::createNode() | head node already exists!");
+
 		std::shared_ptr<TreeNode> parentNode;
 		if(parent=="")//is this a head node?
 			parentNode = std::shared_ptr<TreeNode>();
 		else
 			parentNode = nodes_.at(parent);
-//		std::shared_ptr<TreeNode> parentNode = nodes_.at(parent);
 		std::shared_ptr<TreeNode> leaf;
 
 		//check if Leaf already exists
@@ -340,6 +346,7 @@ public:
 			nodes_.insert(std::pair<std::string, std::shared_ptr<TreeNode> >(name,leaf));
 			leaf->linkParents();
 			extPar->Attach(leaf);
+			if(parent=="") head_ = leaf; //if we created a head redirect pointer
 		}
 	}
 

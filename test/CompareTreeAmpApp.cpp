@@ -61,12 +61,13 @@ using namespace std;
 int main(int argc, char **argv){
 	int seed = 3041; //default seed
 
-	unsigned int mcPrecision = 1000000; //number of calls for numeric integration and number of events for phsp integration
+	//number of calls for numeric integration and number of events for phsp integration
+	unsigned int mcPrecision = 100000;
 	Logging log("log-compareTreeAmp.txt",boost::log::trivial::debug); //initialize logging
 	//initialize kinematics of decay
 	DalitzKinematics::createInstance("D0","K_S0","K-","K+");//setup kinematics
 	//initialize random generator
-	std::shared_ptr<Generator> gen = std::shared_ptr<Generator>(new RootGenerator(seed));//initialize random generator
+	std::shared_ptr<Generator> gen = std::shared_ptr<Generator>(new RootGenerator(seed));
 
 	RunManager run;
 	run.setGenerator(gen);
@@ -81,14 +82,15 @@ int main(int argc, char **argv){
 	//true amplitude model
 	std::string trueModelFile = "test/CompareTreeAmp-model.xml";
 	AmplitudeSetup iniTrue(trueModelFile);//put start parameters here
-	std::shared_ptr<Amplitude> trueAmp( new AmpSumIntensity(iniTrue, AmpSumIntensity::normStyle::one, eff, mcPrecision) );
+	std::shared_ptr<Amplitude> trueAmp( new AmpSumIntensity(iniTrue,
+			AmpSumIntensity::normStyle::one, eff, mcPrecision) );
 	//fit amplitude model
 	std::string fitModelFile = trueModelFile;
 	AmplitudeSetup ini(fitModelFile);//put start parameters here
 	AmplitudeSetup iniTree(fitModelFile);//put start parameters here
-	AmpSumIntensity* fitAmpPtr = new AmpSumIntensity(ini, AmpSumIntensity::normStyle::one, eff, mcPrecision);
+	AmpSumIntensity* fitAmpPtr = new AmpSumIntensity(ini, eff, mcPrecision);
 	std::shared_ptr<Amplitude> fitAmp(fitAmpPtr);
-	AmpSumIntensity* fitAmpTreePtr = new AmpSumIntensity(iniTree, AmpSumIntensity::normStyle::one, eff, mcPrecision);
+	AmpSumIntensity* fitAmpTreePtr = new AmpSumIntensity(iniTree, eff, mcPrecision);
 	std::shared_ptr<Amplitude> fitAmpTree(fitAmpTreePtr);
 
 	run.setAmplitude(trueAmp);//set true model here for generation
@@ -133,6 +135,7 @@ int main(int argc, char **argv){
 	MinLogLH* minLog = dynamic_cast<MinLogLH*>(&*(esti->Instance()));
 	minLog->setUseFunctionTree(1);
 	std::shared_ptr<FunctionTree> physicsTree = minLog->getTree();
+	BOOST_LOG_TRIVIAL(debug) << physicsTree->head()->to_str(10);
 	double initialLHTree = esti->controlParameter(fitParTree);
 	std::shared_ptr<Optimizer> optiTree(new MinuitIF(esti, fitParTree));
 	run.setOptimizer(optiTree);
@@ -142,10 +145,14 @@ int main(int argc, char **argv){
 	double phimag = fitAmpPtr->getAmpMagnitude("phi(1020)");
 	double phiphase = fitAmpPtr->getAmpPhase("phi(1020)");
 	std::complex<double> phiCoeff(phimag*cos(phiphase),phimag*sin(phiphase));
-	std::shared_ptr<AmpFlatteRes> a0Res = std::dynamic_pointer_cast<AmpFlatteRes>(fitAmpPtr->getResonance("a_0(980)0"));
+	std::shared_ptr<AmpFlatteRes3Ch> a0Res = std::dynamic_pointer_cast<AmpFlatteRes3Ch>(fitAmpPtr->getResonance("a_0(980)0"));
 	double a0mag = fitAmpPtr->getAmpMagnitude("a_0(980)0");
 	double a0phase = fitAmpPtr->getAmpPhase("a_0(980)0");
 	std::complex<double> a0Coeff(a0mag*cos(a0phase),a0mag*sin(a0phase));
+	std::shared_ptr<AmpFlatteRes> aplusRes = std::dynamic_pointer_cast<AmpFlatteRes>(fitAmpPtr->getResonance("a_0(980)+"));
+	double aplusmag = fitAmpPtr->getAmpMagnitude("a_0(980)+");
+	double aplusphase = fitAmpPtr->getAmpPhase("a_0(980)+");
+	std::complex<double> aplusCoeff(aplusmag*cos(aplusphase),aplusmag*sin(aplusphase));
 
 	dataPoint point(inputData->getEvent(0)); //first data point in sample
 	ParameterList intens = fitAmpPtr->intensity(point);
@@ -154,6 +161,8 @@ int main(int argc, char **argv){
 	* afterwards for the resonance.*/
 	std::shared_ptr<TreeNode> intensNode = physicsTree->head()->getChildNode("Intens");
 	MultiDouble* intensValue = dynamic_cast<MultiDouble*>( &*(intensNode->getValue()) );
+
+	std::cout<<std::setprecision(8)<<std::endl;
 	BOOST_LOG_TRIVIAL(info) <<"===========================================";
 	BOOST_LOG_TRIVIAL(info) <<"Compare values: (use first event of data sample) TREE/AMPLITUDE";
 	BOOST_LOG_TRIVIAL(info) <<"===========================================";
@@ -161,30 +170,40 @@ int main(int argc, char **argv){
 			<<"/"<<*intens.GetDoubleParameter(0)
 			<<" = "<<intensValue->GetValue(0) / *intens.GetDoubleParameter(0);
 	BOOST_LOG_TRIVIAL(info) <<"================= phi(1020) ==========================";
-	BOOST_LOG_TRIVIAL(info) <<"Reso_phi(1020): "<<intensNode->getChildValue("Reso_phi(1020)")
+	BOOST_LOG_TRIVIAL(info) <<"Reso_phi(1020): "<<intensNode->getChildSingleValue("Reso_phi(1020)")
 			<<"/"<<phiRes->evaluate(point)*phiCoeff;
-	BOOST_LOG_TRIVIAL(info) <<"BW_phi(1020): "<<intensNode->getChildValue("BW_phi(1020)")
+	BOOST_LOG_TRIVIAL(info) <<"BW_phi(1020): "<<intensNode->getChildSingleValue("BW_phi(1020)")
 			<<"/"<<phiRes->evaluateAmp(point)*phiRes->GetNormalization();
-	BOOST_LOG_TRIVIAL(info) <<"N_phi(1020): "<<intensNode->getChildValue("N_phi(1020)").real()
+	BOOST_LOG_TRIVIAL(info) <<"N_phi(1020): "<<intensNode->getChildSingleValue("N_phi(1020)").real()
 			<<"/"<<phiRes->GetNormalization()
-			<<" = "<<intensNode->getChildValue("N_phi(1020)").real()/phiRes->GetNormalization();
-	BOOST_LOG_TRIVIAL(info) <<"RelBW_phi(1020): "<<intensNode->getChildValue("RelBW_phi(1020)")
+			<<" = "<<intensNode->getChildSingleValue("N_phi(1020)").real()/phiRes->GetNormalization();
+	BOOST_LOG_TRIVIAL(info) <<"RelBW_phi(1020): "<<intensNode->getChildSingleValue("RelBW_phi(1020)")
 			<<"/"<<phiRes->evaluateAmp(point);
-	BOOST_LOG_TRIVIAL(info) <<"AngD_phi(1020): "<<intensNode->getChildValue("AngD_phi(1020)").real()
+	BOOST_LOG_TRIVIAL(info) <<"AngD_phi(1020): "<<intensNode->getChildSingleValue("AngD_phi(1020)").real()
 			<<"/"<<phiRes->evaluateWignerD(point);
 	BOOST_LOG_TRIVIAL(info) <<"================= a_0(980)0 ==========================";
-	BOOST_LOG_TRIVIAL(info) <<"Reso_a_0(980)0: "<<intensNode->getChildValue("Reso_a_0(980)0")
+	BOOST_LOG_TRIVIAL(info) <<"Reso_a_0(980)0: "<<intensNode->getChildSingleValue("Reso_a_0(980)0")
 			<<"/"<<a0Res->evaluate(point)*a0Coeff;
-	BOOST_LOG_TRIVIAL(info) <<"Flatte_a_0(980)0: "<<intensNode->getChildValue("Flatte_a_0(980)0")
+	BOOST_LOG_TRIVIAL(info) <<"Flatte_a_0(980)0: "<<intensNode->getChildSingleValue("Flatte_a_0(980)0")
 			<<"/"<<a0Res->evaluateAmp(point)*a0Res->GetNormalization();
-	BOOST_LOG_TRIVIAL(info) <<"N_a_0(980)0: "<<intensNode->getChildValue("N_a_0(980)0").real()
+	BOOST_LOG_TRIVIAL(info) <<"N_a_0(980)0: "<<intensNode->getChildSingleValue("N_a_0(980)0").real()
 			<<"/"<<a0Res->GetNormalization();
-	BOOST_LOG_TRIVIAL(info) <<"FlatteRes_a_0(980)0: "<<intensNode->getChildValue("FlatteRes_a_0(980)0")
+	BOOST_LOG_TRIVIAL(info) <<"FlatteRes_a_0(980)0: "<<intensNode->getChildSingleValue("FlatteRes_a_0(980)0")
 			<<"/"<<a0Res->evaluateAmp(point);
-	BOOST_LOG_TRIVIAL(info) <<"AngD_a_0(980)0: "<<intensNode->getChildValue("AngD_a_0(980)0").real()
+	BOOST_LOG_TRIVIAL(info) <<"AngD_a_0(980)0: "<<intensNode->getChildSingleValue("AngD_a_0(980)0").real()
 			<<"/"<<a0Res->evaluateWignerD(point);
+	BOOST_LOG_TRIVIAL(info) <<"================= a_0(980)+ ==========================";
+	BOOST_LOG_TRIVIAL(info) <<"Reso_a_0(980)+: "<<intensNode->getChildSingleValue("Reso_a_0(980)+")
+			<<"/"<<aplusRes->evaluate(point)*aplusCoeff;
+	BOOST_LOG_TRIVIAL(info) <<"Flatte_a_0(980)+: "<<intensNode->getChildSingleValue("Flatte_a_0(980)+")
+			<<"/"<<aplusRes->evaluateAmp(point)*aplusRes->GetNormalization();
+	BOOST_LOG_TRIVIAL(info) <<"N_a_0(980)+: "<<intensNode->getChildSingleValue("N_a_0(980)+").real()
+			<<"/"<<aplusRes->GetNormalization();
+	BOOST_LOG_TRIVIAL(info) <<"FlatteRes_a_0(980)+: "<<intensNode->getChildSingleValue("FlatteRes_a_0(980)+")
+			<<"/"<<aplusRes->evaluateAmp(point);
+	BOOST_LOG_TRIVIAL(info) <<"AngD_a_0(980)+: "<<intensNode->getChildSingleValue("AngD_a_0(980)+").real()
+			<<"/"<<aplusRes->evaluateWignerD(point);
 	BOOST_LOG_TRIVIAL(info) <<"===========================================";
-
 	std::shared_ptr<FitResult> resultTree = run.startFit(fitParTree);
 	double finalLHTree = resultTree->getResult();
 	resultTree->setTrueParameters(truePar);//set true parameters
