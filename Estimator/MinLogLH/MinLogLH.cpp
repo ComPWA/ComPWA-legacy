@@ -184,21 +184,36 @@ void MinLogLH::iniLHtree(){
 	}
 
 	//----Strategies needed
-	std::shared_ptr<MultAll> mmultStrat = std::shared_ptr<MultAll>(new MultAll(ParType::MCOMPLEX));
-	std::shared_ptr<MultAll> mmultDStrat = std::shared_ptr<MultAll>(new MultAll(ParType::MDOUBLE));
-	std::shared_ptr<AddAll> multiDoubleAddStrat = std::shared_ptr<AddAll>(new AddAll(ParType::MDOUBLE));
-	std::shared_ptr<AddAll> multiComplexAddStrat = std::shared_ptr<AddAll>(new AddAll(ParType::MCOMPLEX));
-	std::shared_ptr<AbsSquare> msqStrat = std::shared_ptr<AbsSquare>(new AbsSquare(ParType::MDOUBLE));
-	std::shared_ptr<LogOf> mlogStrat = std::shared_ptr<LogOf>(new LogOf(ParType::MDOUBLE));
-	std::shared_ptr<MultAll> multStrat = std::shared_ptr<MultAll>(new MultAll(ParType::COMPLEX));
-	std::shared_ptr<MultAll> multDStrat = std::shared_ptr<MultAll>(new MultAll(ParType::DOUBLE));
-	std::shared_ptr<AddAll> addStrat = std::shared_ptr<AddAll>(new AddAll(ParType::DOUBLE));
-	std::shared_ptr<AddAll> addComplexStrat = std::shared_ptr<AddAll>(new AddAll(ParType::COMPLEX));
-	std::shared_ptr<AbsSquare> sqStrat = std::shared_ptr<AbsSquare>(new AbsSquare(ParType::DOUBLE));
-	std::shared_ptr<LogOf> logStrat = std::shared_ptr<LogOf>(new LogOf(ParType::DOUBLE));
-	std::shared_ptr<Complexify> complStrat = std::shared_ptr<Complexify>(new Complexify(ParType::COMPLEX));
-	std::shared_ptr<Inverse> invStrat = std::shared_ptr<Inverse>(new Inverse(ParType::DOUBLE));
-	std::shared_ptr<SquareRoot> sqRootStrat = std::shared_ptr<SquareRoot>(new SquareRoot(ParType::DOUBLE));
+	std::shared_ptr<Strategy> mmultStrat(new MultAll(ParType::MCOMPLEX));
+	std::shared_ptr<Strategy> mmultDStrat(new MultAll(ParType::MDOUBLE));
+	std::shared_ptr<Strategy> multiDoubleAddStrat(new AddAll(ParType::MDOUBLE));
+	std::shared_ptr<Strategy> multiComplexAddStrat(new AddAll(ParType::MCOMPLEX));
+	std::shared_ptr<Strategy> msqStrat(new AbsSquare(ParType::MDOUBLE));
+	std::shared_ptr<Strategy> mlogStrat(new LogOf(ParType::MDOUBLE));
+	std::shared_ptr<Strategy> multStrat(new MultAll(ParType::COMPLEX));
+	std::shared_ptr<Strategy> multDStrat(new MultAll(ParType::DOUBLE));
+	std::shared_ptr<Strategy> addStrat(new AddAll(ParType::DOUBLE));
+	std::shared_ptr<Strategy> addComplexStrat(new AddAll(ParType::COMPLEX));
+	std::shared_ptr<Strategy> sqStrat(new AbsSquare(ParType::DOUBLE));
+	std::shared_ptr<Strategy> logStrat(new LogOf(ParType::DOUBLE));
+	std::shared_ptr<Strategy> complStrat(new Complexify(ParType::COMPLEX));
+	std::shared_ptr<Strategy> invStrat(new Inverse(ParType::DOUBLE));
+	//std::shared_ptr<SquareRoot> sqRootStrat = std::shared_ptr<SquareRoot>(new SquareRoot(ParType::DOUBLE));
+	//std::shared_ptr<MultAll> mmultStrat = std::shared_ptr<MultAll>(new MultAll(ParType::MCOMPLEX));
+	//std::shared_ptr<MultAll> mmultDStrat = std::shared_ptr<MultAll>(new MultAll(ParType::MDOUBLE));
+	//std::shared_ptr<AddAll> multiDoubleAddStrat = std::shared_ptr<AddAll>(new AddAll(ParType::MDOUBLE));
+	//std::shared_ptr<AddAll> multiComplexAddStrat = std::shared_ptr<AddAll>(new AddAll(ParType::MCOMPLEX));
+	//std::shared_ptr<AbsSquare> msqStrat = std::shared_ptr<AbsSquare>(new AbsSquare(ParType::MDOUBLE));
+	//std::shared_ptr<LogOf> mlogStrat = std::shared_ptr<LogOf>(new LogOf(ParType::MDOUBLE));
+	//std::shared_ptr<MultAll> multStrat = std::shared_ptr<MultAll>(new MultAll(ParType::COMPLEX));
+	//std::shared_ptr<MultAll> multDStrat = std::shared_ptr<MultAll>(new MultAll(ParType::DOUBLE));
+	//std::shared_ptr<AddAll> addStrat = std::shared_ptr<AddAll>(new AddAll(ParType::DOUBLE));
+	//std::shared_ptr<AddAll> addComplexStrat = std::shared_ptr<AddAll>(new AddAll(ParType::COMPLEX));
+	//std::shared_ptr<AbsSquare> sqStrat = std::shared_ptr<AbsSquare>(new AbsSquare(ParType::DOUBLE));
+	//std::shared_ptr<LogOf> logStrat = std::shared_ptr<LogOf>(new LogOf(ParType::DOUBLE));
+	//std::shared_ptr<Complexify> complStrat = std::shared_ptr<Complexify>(new Complexify(ParType::COMPLEX));
+	//std::shared_ptr<Inverse> invStrat = std::shared_ptr<Inverse>(new Inverse(ParType::DOUBLE));
+	//std::shared_ptr<SquareRoot> sqRootStrat = std::shared_ptr<SquareRoot>(new SquareRoot(ParType::DOUBLE));
 
 	BOOST_LOG_TRIVIAL(debug)<<"MinLogLH::iniLHTree() construction normalization tree";
 	//=== Signal normalization

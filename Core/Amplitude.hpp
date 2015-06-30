@@ -303,7 +303,7 @@ protected:
 		//std::shared_ptr<MultAll> mmultDStrat(new MultAll(ParType::MDOUBLE));
 
 		std::vector<double> oneVec(theMasses.nEvents, 1.0);
-		std::shared_ptr<MultiDouble> one(new MultiDouble("one",oneVec));
+		std::shared_ptr<AbsParameter> one(new MultiDouble("one",oneVec));
 		newTree->createHead("Amplitude"+suffix, one);
 //		newTree->createHead("Amplitude"+suffix, 3.0);
 //		if(!newTree->head()){
