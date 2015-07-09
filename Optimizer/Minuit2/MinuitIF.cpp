@@ -164,11 +164,12 @@ std::shared_ptr<FitResult> MinuitIF::exec(ParameterList& par){
 			finalPar->SetValue(val);
 			if(finalPar->GetErrorType()==ErrorType::ASYM){
 				if(!minMin.IsValid()){ //skip minos and fill symmetic errors
+				BOOST_LOG_TRIVIAL(info) <<"MinuitIF::exec() | skip minos for parameter "<<i<< "...";
 					finalPar->SetError(minState.Error(finalPar->GetName()));
 					continue;
 				}
 				//asymmetric errors -> run minos
-				BOOST_LOG_TRIVIAL(info) <<"MinuitIF::exec() | minos for parameter "<<i<< "...";
+				BOOST_LOG_TRIVIAL(info) <<"MinuitIF::exec() | run minos for parameter "<<i<< "...";
 				MinosError err = minos.Minos(i);
 				//lower = pair.first, upper= pair.second
 				std::pair<double,double> assymErrors = err();
@@ -177,7 +178,7 @@ std::shared_ptr<FitResult> MinuitIF::exec(ParameterList& par){
 				//symmetric errors -> migrad/hesse error
 				finalPar->SetError(minState.Error(finalPar->GetName()));
 			} else
-				throw std::runtime_error("MinuitIF::exec() | unknown error type: "
+				throw std::runtime_error("MinuitIF::exec() | unknown error type of parameter: "
 						+std::to_string((long long int)finalPar->GetErrorType()));
 		}
 	}
