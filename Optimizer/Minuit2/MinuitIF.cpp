@@ -162,7 +162,11 @@ std::shared_ptr<FitResult> MinuitIF::exec(ParameterList& par){
 			if(finalPar->GetName().find("phase") != finalPar->GetName().npos)
 				val =  shiftAngle(val);
 			finalPar->SetValue(val);
-			if(finalPar->GetErrorType()==ErrorType::ASYM && minMin.IsValid()){
+			if(finalPar->GetErrorType()==ErrorType::ASYM){
+				if(!minMin.IsValid()){ //skip minos and fill symmetic errors
+					finalPar->SetError(minState.Error(finalPar->GetName()));
+					continue;
+				}
 				//asymmetric errors -> run minos
 				BOOST_LOG_TRIVIAL(info) <<"MinuitIF::exec() | minos for parameter "<<i<< "...";
 				MinosError err = minos.Minos(i);
