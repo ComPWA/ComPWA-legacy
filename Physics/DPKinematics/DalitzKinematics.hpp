@@ -35,8 +35,8 @@ protected:
 	bool massIdsSet;
 	unsigned int id23;
 	unsigned int id13;
-	bool _DPareaCalculated;	//! is phsp area already calculated?
-	double _DParea;	//! phsp area
+	bool DPareaCalculated_;	//! is phsp area already calculated?
+	double DParea_;	//! phsp area
 	//! calculated dalitz plot area for the given kinematics
 	void calcDParea();
 	//! initialization
@@ -51,11 +51,12 @@ protected:
 
 public:
 	static Kinematics* createInstance(std::string _nameMother, std::string _name1, std::string _name2, std::string _name3){
-		_inst = new DalitzKinematics(_nameMother, _name1, _name2,_name3);
-		return _inst;
+		if(0 == inst_)
+	    inst_ = new DalitzKinematics(_nameMother, _name1, _name2,_name3);
+		return inst_;
 	}
 	//! Event to dataPoint conversion
-	void eventToDataPoint(Event& ev, dataPoint& point);
+	void eventToDataPoint(Event& ev, dataPoint& point) const;
 
 	/**
 	 * \brief Generate contour of phsp boundary
@@ -96,7 +97,7 @@ public:
 	//! Calculates third dalitz plot variable, e.g f(s1,s2)=s3
 	double getThirdVariableSq(double, double) const;
 	//! Checks if data point is within phase space boundaries
-	bool isWithinPhsp(const dataPoint &point) ;
+	bool isWithinPhsp(const dataPoint &point);
 	//! Returns the dalitz plot area for the given kinematics
 	double getPhspVolume();
 	//! Calculated momenta n,m using legendre polynomials
@@ -133,16 +134,16 @@ public:
 	//! returns absolute maximum for variable
 	double getMax(std::string);
 	//! get mass of paticles
-	double getMass(unsigned int num);
+	double getMass(unsigned int num) const;
 	//! get mass of paticles
-	double getMass(std::string name);
+	double getMass(std::string name) const;
 	//! get spin of decaying particle
 	unsigned int getSpin(unsigned int num);
 	//! get spin of particles
 	unsigned int getSpin(std::string name);
 
 	//! mass of mother particle
-	double getMotherMass() {return M;};
+	double getMotherMass() const {return M;};
 
 	std::string nameMother;//! name of mother particle
 	double Msq; //! mass squared of mother particle

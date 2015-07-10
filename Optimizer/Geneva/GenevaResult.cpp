@@ -2,7 +2,7 @@
 #include "Core/Logging.hpp"
 
 void GenevaResult::init(boost::shared_ptr<Gem::Geneva::GStartIndividual> min){
-	finalLH = min->getBestKnownFitness();
+	finalLH = min->getBestCase();
 	min->getPar(finalParameters);
     //ToDO: extract more info
 	return;

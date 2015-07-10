@@ -29,7 +29,7 @@ DalitzKinematics::DalitzKinematics(std::string _nameMother,
 		Br(0.0), nameMother(_nameMother),
 		name1(_name1), name2(_name2), name3(_name3), massIdsSet(false)
 {
-	nPart = 3;
+	number_of_particles_ = 3;
 	M = PhysConst::instance()->getMass(_nameMother);
 	m1 = PhysConst::instance()->getMass(_name1);
 	m2 = PhysConst::instance()->getMass(_name2);
@@ -53,7 +53,7 @@ DalitzKinematics::DalitzKinematics(double _M, double _Br, double _m1, double _m2
 		nameMother(_nameMother), name1(_name1), name2(_name2), name3(_name3), massIdsSet(false)
 {
 
-	nPart = 3;
+	number_of_particles_ = 3;
 	spinM = PhysConst::instance()->getJ(_nameMother);
 	spin1 = PhysConst::instance()->getJ(_name1);
 	spin2 = PhysConst::instance()->getJ(_name2);
@@ -77,9 +77,9 @@ void DalitzKinematics::init(){
 	mSq3 = m3*m3;
 	mSq4 = m4*m4;
 	
-	_DPareaCalculated=0;
-	varNames.push_back("m23sq");
-	varNames.push_back("m13sq");
+	DPareaCalculated_=0;
+	variable_names_.push_back("m23sq");
+	variable_names_.push_back("m13sq");
 	//	varNames.push_back("m12sq");
 	
 	BOOST_LOG_TRIVIAL(debug) << "PHSP boundaries:";
@@ -113,7 +113,7 @@ double DalitzKinematics::getMax(std::string name){
 	return -1;
 }
 
-void DalitzKinematics::eventToDataPoint(Event& ev, dataPoint& point){
+void DalitzKinematics::eventToDataPoint(Event& ev, dataPoint& point) const {
 	double weight = ev.getWeight();
 	point.setWeight(weight);//reset weight
 	Particle part1 = ev.getParticle(0);
@@ -346,11 +346,11 @@ double phspFunc(double* x, size_t dim, void* param) {
 	return 0.0;
 };
 
-double DalitzKinematics::getPhspVolume(){
-	if(!_DPareaCalculated) calcDParea();
-	return _DParea;
+double DalitzKinematics::getPhspVolume() {
+	if(!DPareaCalculated_) calcDParea();
+	return DParea_;
 }
-void DalitzKinematics::calcDParea(){
+void DalitzKinematics::calcDParea() {
 	size_t dim=2;
 	double res=0.0, err=0.0;
 
@@ -371,8 +371,8 @@ void DalitzKinematics::calcDParea(){
 	BOOST_LOG_TRIVIAL(debug)<<"DPKinematics::calcDParea() Dalitz plot area (MC integration): "
 			<<"("<<res<<"+-"<<err<<") GeV^4 relAcc [%]: "<<100*err/res;
 
-	_DParea=res;
-	_DPareaCalculated=1;
+	DParea_=res;
+	DPareaCalculated_=1;
 	return;
 }
 unsigned int DalitzKinematics::getSpin(unsigned int num){
@@ -393,7 +393,7 @@ unsigned int DalitzKinematics::getSpin(std::string name){
 	throw std::runtime_error("DPKinematics::getSpin(string) | Wrong particle "+name+" requested!");
 }
 
-double DalitzKinematics::getMass(unsigned int num){
+double DalitzKinematics::getMass(unsigned int num) const {
 	switch(num){
 	case 0: return M;
 	case 1: return m1;
@@ -402,7 +402,7 @@ double DalitzKinematics::getMass(unsigned int num){
 	}
 	throw std::runtime_error("DPKinematics::getMass(int) | Wrong particle requested!");
 }
-double DalitzKinematics::getMass(std::string name){
+double DalitzKinematics::getMass(std::string name) const {
 	if(name==nameMother) return M;
 	if(name==name1) return m1;
 	if(name==name2) return m2;
