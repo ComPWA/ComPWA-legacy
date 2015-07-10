@@ -24,6 +24,71 @@
 #include "gsl/gsl_sf_legendre.h"
 
 
+DalitzKinematics::DalitzKinematics(std::string _nameMother,
+		std::string _name1, std::string _name2, std::string _name3) :
+		Br(0.0), nameMother(_nameMother),
+		name1(_name1), name2(_name2), name3(_name3), massIdsSet(false)
+{
+	number_of_particles_ = 3;
+	M = PhysConst::instance()->getMass(_nameMother);
+	m1 = PhysConst::instance()->getMass(_name1);
+	m2 = PhysConst::instance()->getMass(_name2);
+	m3 = PhysConst::instance()->getMass(_name3);
+	spinM = PhysConst::instance()->getJ(_nameMother);
+	spin1 = PhysConst::instance()->getJ(_name1);
+	spin2 = PhysConst::instance()->getJ(_name2);
+	spin3 = PhysConst::instance()->getJ(_name3);
+
+	if(M==-999 || m1==-999|| m2==-999|| m3==-999) {
+		BOOST_LOG_TRIVIAL(error)<<"Masses not set! EXIT!";
+		exit(1);
+	}
+	BOOST_LOG_TRIVIAL(info) << " DalitzKinematics::DalitzKinematics() | Setting up decay "
+			<<_nameMother<<"->"<<_name1<<" "<<_name2<<" "<<_name3;
+	init();
+};
+DalitzKinematics::DalitzKinematics(double _M, double _Br, double _m1, double _m2, double _m3,
+		std::string _nameMother, std::string _name1, std::string _name2, std::string _name3):
+		M(_M), Br(_Br), m1(_m1), m2(_m2), m3(_m3),
+		nameMother(_nameMother), name1(_name1), name2(_name2), name3(_name3), massIdsSet(false)
+{
+
+	number_of_particles_ = 3;
+	spinM = PhysConst::instance()->getJ(_nameMother);
+	spin1 = PhysConst::instance()->getJ(_name1);
+	spin2 = PhysConst::instance()->getJ(_name2);
+	spin3 = PhysConst::instance()->getJ(_name3);
+	init();
+};
+
+void DalitzKinematics::init(){
+	m23_sq_min= ((m2+m3)*(m2+m3));
+	m23_sq_max=((M-m1)*(M-m1));
+	m13_sq_min=((m1+m3)*(m1+m3));
+	m13_sq_max=((M-m2)*(M-m2));
+	m12_sq_min=((m1+m2)*(m1+m2));
+	m12_sq_max=((M-m3)*(M-m3));
+	m23_min=((m2+m3)); m23_max=((M-m1));
+	m13_min=((m1+m3)); m13_max=((M-m2));
+	m12_min=((m1+m2)); m12_max=((M-m3));
+	Msq = M*M;
+	mSq1 = m1*m1;
+	mSq2 = m2*m2;
+	mSq3 = m3*m3;
+	mSq4 = m4*m4;
+	
+	DPareaCalculated_=0;
+	variable_names_.push_back("m23sq");
+	variable_names_.push_back("m13sq");
+	//	varNames.push_back("m12sq");
+	
+	BOOST_LOG_TRIVIAL(debug) << "PHSP boundaries:";
+	BOOST_LOG_TRIVIAL(debug) << " "<<m23_min<<" < m23 < "<<m23_max<< " | "<<m23_sq_min<<" < m23sq < "<<m23_sq_max;
+	BOOST_LOG_TRIVIAL(debug) << " "<<m13_min<<" < m13 < "<<m13_max<< " | "<<m13_sq_min<<" < m13sq < "<<m13_sq_max;
+	BOOST_LOG_TRIVIAL(debug) << " "<<m12_min<<" < m12 < "<<m12_max<< " | "<<m12_sq_min<<" < m12sq < "<<m12_sq_max;
+
+	return;
+};
 double DalitzKinematics::calculateMoments(unsigned int sys, dataPoint& point, unsigned int n, unsigned int m){
 	double angle = helicityAngle(sys,point);
 	if(angle < -1 || angle > 1 ) {
@@ -48,7 +113,7 @@ double DalitzKinematics::getMax(std::string name){
 	return -1;
 }
 
-void DalitzKinematics::eventToDataPoint(Event& ev, dataPoint& point){
+void DalitzKinematics::eventToDataPoint(Event& ev, dataPoint& point) const {
 	double weight = ev.getWeight();
 	point.setWeight(weight);//reset weight
 	Particle part1 = ev.getParticle(0);
@@ -270,64 +335,6 @@ double DalitzKinematics::helicityAngle(unsigned int sys, double invMassSq23, dou
 	return cosAngle;
 }
 
-DalitzKinematics::DalitzKinematics(std::string _nameMother, std::string _name1, std::string _name2, std::string _name3):
-										Br(0.0), nameMother(_nameMother), name1(_name1), name2(_name2), name3(_name3), massIdsSet(false)
-{
-	M = PhysConst::instance()->getMass(_nameMother);
-	m1 = PhysConst::instance()->getMass(_name1);
-	m2 = PhysConst::instance()->getMass(_name2);
-	m3 = PhysConst::instance()->getMass(_name3);
-	spinM = PhysConst::instance()->getJ(_nameMother);
-	spin1 = PhysConst::instance()->getJ(_name1);
-	spin2 = PhysConst::instance()->getJ(_name2);
-	spin3 = PhysConst::instance()->getJ(_name3);
-
-	if(M==-999 || m1==-999|| m2==-999|| m3==-999) {
-		BOOST_LOG_TRIVIAL(error)<<"Masses not set! EXIT!";
-		exit(1);
-	}
-	init();
-};
-DalitzKinematics::DalitzKinematics(double _M, double _Br, double _m1, double _m2, double _m3,
-		std::string _nameMother, std::string _name1, std::string _name2, std::string _name3):
-														M(_M), Br(_Br), m1(_m1), m2(_m2), m3(_m3),
-														nameMother(_nameMother), name1(_name1), name2(_name2), name3(_name3), massIdsSet(false)
-{
-
-	spinM = PhysConst::instance()->getJ(_nameMother);
-	spin1 = PhysConst::instance()->getJ(_name1);
-	spin2 = PhysConst::instance()->getJ(_name2);
-	spin3 = PhysConst::instance()->getJ(_name3);
-	init();
-};
-DalitzKinematics::DalitzKinematics(const DalitzKinematics& other):
-														M(other.M), spinM(other.spinM), Br(other.Br),
-														m1(other.m1), m2(other.m2), m3(other.m3),
-														spin1(other.spin1), spin2(other.spin2), spin3(other.spin3),
-														name1(other.name1), name2(other.name2), name3(other.name3), massIdsSet(false)
-{
-	init();
-};
-void DalitzKinematics::init(){
-	m23_sq_min= ((m2+m3)*(m2+m3));
-	m23_sq_max=((M-m1)*(M-m1));
-	m13_sq_min=((m1+m3)*(m1+m3));
-	m13_sq_max=((M-m2)*(M-m2));
-	m12_sq_min=((m1+m2)*(m1+m2));
-	m12_sq_max=((M-m3)*(M-m3));
-	m23_min=((m2+m3)); m23_max=((M-m1));
-	m13_min=((m1+m3)); m13_max=((M-m2));
-	m12_min=((m1+m2)); m12_max=((M-m3));
-	_DPareaCalculated=0;
-	varNames.push_back("m23sq");
-	varNames.push_back("m13sq");
-	//	varNames.push_back("m12sq");
-	Msq = M*M;
-	mSq1 = m1*m1;
-	mSq2 = m2*m2;
-	mSq3 = m3*m3;
-	mSq4 = m4*m4;
-};
 //! returns 1 if point is within PHSP otherwise 0
 double phspFunc(double* x, size_t dim, void* param) {
 	if(dim!=2) return 0;
@@ -339,11 +346,11 @@ double phspFunc(double* x, size_t dim, void* param) {
 	return 0.0;
 };
 
-double DalitzKinematics::getPhspVolume(){
-	if(!_DPareaCalculated) calcDParea();
-	return _DParea;
+double DalitzKinematics::getPhspVolume() {
+	if(!DPareaCalculated_) calcDParea();
+	return DParea_;
 }
-void DalitzKinematics::calcDParea(){
+void DalitzKinematics::calcDParea() {
 	size_t dim=2;
 	double res=0.0, err=0.0;
 
@@ -364,8 +371,8 @@ void DalitzKinematics::calcDParea(){
 	BOOST_LOG_TRIVIAL(debug)<<"DPKinematics::calcDParea() Dalitz plot area (MC integration): "
 			<<"("<<res<<"+-"<<err<<") GeV^4 relAcc [%]: "<<100*err/res;
 
-	_DParea=res;
-	_DPareaCalculated=1;
+	DParea_=res;
+	DPareaCalculated_=1;
 	return;
 }
 unsigned int DalitzKinematics::getSpin(unsigned int num){
@@ -375,8 +382,7 @@ unsigned int DalitzKinematics::getSpin(unsigned int num){
 	case 2: return spin2;
 	case 3: return spin3;
 	}
-	BOOST_LOG_TRIVIAL(error)<<"DPKinematics: ERROR: wrong particle requested!";
-	exit(1);
+	throw std::runtime_error("DPKinematics::getSpin(int) | Wrong particle requested!");
 	return -999;
 }
 unsigned int DalitzKinematics::getSpin(std::string name){
@@ -384,30 +390,24 @@ unsigned int DalitzKinematics::getSpin(std::string name){
 	if(name==name1) return spin1;
 	if(name==name2) return spin2;
 	if(name==name3) return spin3;
-	BOOST_LOG_TRIVIAL(error)<<"DPKinematics: wrong particle requested!";
-	exit(1);
-	return -999;
+	throw std::runtime_error("DPKinematics::getSpin(string) | Wrong particle "+name+" requested!");
 }
 
-double DalitzKinematics::getMass(unsigned int num){
+double DalitzKinematics::getMass(unsigned int num) const {
 	switch(num){
 	case 0: return M;
 	case 1: return m1;
 	case 2: return m2;
 	case 3: return m3;
 	}
-	BOOST_LOG_TRIVIAL(error)<<"DPKinematics: wrong particle requested!";
-	exit(1);
-	return -999;
+	throw std::runtime_error("DPKinematics::getMass(int) | Wrong particle requested!");
 }
-double DalitzKinematics::getMass(std::string name){
+double DalitzKinematics::getMass(std::string name) const {
 	if(name==nameMother) return M;
 	if(name==name1) return m1;
 	if(name==name2) return m2;
 	if(name==name3) return m3;
-	BOOST_LOG_TRIVIAL(error)<<"DPKinematics: wrong particle requested!";
-	exit(1);
-	return -999;
+	throw std::runtime_error("DPKinematics::getMass(string) | Wrong particle "+name+" requested!");
 }
 
 double DalitzKinematics::getThirdVariableSq(double invmass1sq, double invmass2sq) const{
@@ -432,68 +432,68 @@ bool DalitzKinematics::isWithinPhsp(const dataPoint& point) {
 	if(m13sq >= invMassMin(4,5,m23sq) && m13sq <= invMassMax(4,5,m23sq)) c0=1;
 	if(m12sq >= invMassMin(3,5,m23sq) && m12sq <= invMassMax(3,5,m23sq)) c1=1;
 	if(m23sq >= invMassMin(5,4,m13sq) && m23sq <= invMassMax(5,4,m13sq)) c2=1;
-	//	if(c0 && c1 && c2) return 1;//slightly different DParea result WHY?
-	//	if(c0 && c1) return 1;//same result for DParea as the copied stuff from Laura
-	if(c0) return 1;//same result for DParea as the copied stuff from Laura
+	if(c0 && c1 && c2) return 1;
+	//if(c0 && c1) return 1;
+	//if(c0) return 1;
 	return 0;
 }
 
-double DalitzKinematics::lambda(double x, double y, double z)const{
-	return x*x+y*y+z*z-2.*x*y-2.*x*z-2.*y*z;
-}
+//double DalitzKinematics::lambda(double x, double y, double z)const{
+//	return x*x+y*y+z*z-2.*x*y-2.*x*z-2.*y*z;
+//}
 
-double DalitzKinematics::s2min(double s1, double m0, double m1, double m2, double m3) const {
-	double s      = m0*m0;
-	double lamterm = sqrt( lambda(s1,s,m1*m1) ) * sqrt( lambda(s1, m2*m2, m3*m3) );
-	return m1*m1 + m3*m3 + ( (s-s1-m1*m1)*(s1-m2*m2+m3*m3) - lamterm )/(2.*s1);
-}
-
-double DalitzKinematics::s2max(double s1, double m0, double m1, double m2, double m3)const
-{
-	double s      = m0*m0;
-	double lamterm = sqrt( lambda(s1,s,m1*m1) ) * sqrt( lambda(s1, m2*m2, m3*m3) );
-
-	double result  = m1*m1 + m3*m3 + ( (s-s1-m1*m1)*(s1-m2*m2+m3*m3) + lamterm )/(2.*s1);
-
-	return result;
-}
-
-double DalitzKinematics::s3min(double s1, double m0, double m1, double m2, double m3)const
-{
-	double s      = m0*m0;
-	double lamterm = sqrt( lambda(s1,s,m1*m1) ) * sqrt( lambda(s1, m3*m3, m1*m1) );
-
-	double result  = m1*m1 + m2*m2 + ( (s-s1-m1*m1)*(s1-m1*m1+m2*m2) - lamterm )/(2.*s1);
-
-	return result;
-}
-
-double DalitzKinematics::s3max(double s1, double m0, double m1, double m2, double m3)const
-{
-	double s      = m0*m0;
-	double lamterm = sqrt( lambda(s1,s,m1*m1) ) * sqrt( lambda(s1, m3*m3, m1*m1) );
-
-	double result  = m1*m1 + m2*m2 + ( (s-s1-m1*m1)*(s1-m1*m1+m3*m3) + lamterm )/(2.*s1);
-
-	return result;
-}
-
-double DalitzKinematics::s1min(double s2, double m0, double m1, double m2, double m3)const
-{
-	double s      = m0*m0;
-	double lamterm = sqrt( lambda(s2,s,m2*m2) ) * sqrt( lambda(s2, m3*m3, m1*m1) );
-
-	double result  = m2*m2 + m3*m3 + ( (s-s2-m2*m2)*(s2-m1*m1+m3*m3) - lamterm )/(2.*s2);
-
-	return result;
-}
-
-double DalitzKinematics::s1max(double s2, double m0, double m1, double m2, double m3)const
-{
-	double s      = m0*m0;
-	double lamterm = sqrt( lambda(s2,s,m2*m2) ) * sqrt( lambda(s2, m1*m1, m3*m3) );
-
-	double result  = m2*m2 + m3*m3 + ( (s-s2-m2*m2)*(s2-m1*m1+m3*m3) + lamterm )/(2.*s2);
-
-	return result;
-}
+//double DalitzKinematics::s2min(double s1, double m0, double m1, double m2, double m3) const {
+//	double s      = m0*m0;
+//	double lamterm = sqrt( lambda(s1,s,m1*m1) ) * sqrt( lambda(s1, m2*m2, m3*m3) );
+//	return m1*m1 + m3*m3 + ( (s-s1-m1*m1)*(s1-m2*m2+m3*m3) - lamterm )/(2.*s1);
+//}
+//
+//double DalitzKinematics::s2max(double s1, double m0, double m1, double m2, double m3)const
+//{
+//	double s      = m0*m0;
+//	double lamterm = sqrt( lambda(s1,s,m1*m1) ) * sqrt( lambda(s1, m2*m2, m3*m3) );
+//
+//	double result  = m1*m1 + m3*m3 + ( (s-s1-m1*m1)*(s1-m2*m2+m3*m3) + lamterm )/(2.*s1);
+//
+//	return result;
+//}
+//
+//double DalitzKinematics::s3min(double s1, double m0, double m1, double m2, double m3)const
+//{
+//	double s      = m0*m0;
+//	double lamterm = sqrt( lambda(s1,s,m1*m1) ) * sqrt( lambda(s1, m3*m3, m1*m1) );
+//
+//	double result  = m1*m1 + m2*m2 + ( (s-s1-m1*m1)*(s1-m1*m1+m2*m2) - lamterm )/(2.*s1);
+//
+//	return result;
+//}
+//
+//double DalitzKinematics::s3max(double s1, double m0, double m1, double m2, double m3)const
+//{
+//	double s      = m0*m0;
+//	double lamterm = sqrt( lambda(s1,s,m1*m1) ) * sqrt( lambda(s1, m3*m3, m1*m1) );
+//
+//	double result  = m1*m1 + m2*m2 + ( (s-s1-m1*m1)*(s1-m1*m1+m3*m3) + lamterm )/(2.*s1);
+//
+//	return result;
+//}
+//
+//double DalitzKinematics::s1min(double s2, double m0, double m1, double m2, double m3)const
+//{
+//	double s      = m0*m0;
+//	double lamterm = sqrt( lambda(s2,s,m2*m2) ) * sqrt( lambda(s2, m3*m3, m1*m1) );
+//
+//	double result  = m2*m2 + m3*m3 + ( (s-s2-m2*m2)*(s2-m1*m1+m3*m3) - lamterm )/(2.*s2);
+//
+//	return result;
+//}
+//
+//double DalitzKinematics::s1max(double s2, double m0, double m1, double m2, double m3)const
+//{
+//	double s      = m0*m0;
+//	double lamterm = sqrt( lambda(s2,s,m2*m2) ) * sqrt( lambda(s2, m1*m1, m3*m3) );
+//
+//	double result  = m2*m2 + m3*m3 + ( (s-s2-m2*m2)*(s2-m1*m1+m3*m3) + lamterm )/(2.*s2);
+//
+//	return result;
+//}
