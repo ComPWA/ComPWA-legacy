@@ -84,6 +84,8 @@ public:
 
   void clearCurrentGrownNodes();
 
+  const HelicityTree& getHelicityDecayTree() const;
+
   std::vector<ParticleState> getLowestLeaves() const;
 
   boost::graph_traits<HelicityTree>::vertex_descriptor addVertex(

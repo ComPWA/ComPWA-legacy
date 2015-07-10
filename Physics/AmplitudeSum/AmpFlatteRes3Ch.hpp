@@ -18,29 +18,25 @@
 // Class for defining the relativistic Breit-Wigner resonance model, which
 // includes the use of Blatt-Weisskopf barrier factors.
 
-#ifndef AMP_FLATTE_RES
-#define AMP_FLATTE_RES
+#ifndef AMP_FLATTE3CH_RES
+#define AMP_FLATTE3CH_RES
 
 #include <vector>
-
-#include "Physics/AmplitudeSum/AmpAbsDynamicalFunction.hpp"
-#include "Physics/AmplitudeSum/AmpKinematics.hpp"
-#include "Physics/AmplitudeSum/AmpWigner.hpp"
-#include "Physics/AmplitudeSum/AmpWigner2.hpp"
-#include "Physics/AmplitudeSum/NonResonant.hpp"
+#include "Physics/AmplitudeSum/AmpFlatteRes.hpp"
 
 using namespace std;
 
-class AmpFlatteRes : public AmpAbsDynamicalFunction, public AmpKinematics {
+class AmpFlatteRes3Ch : public AmpAbsDynamicalFunction, public AmpKinematics {
 public:
-	AmpFlatteRes(const char *name,
+	AmpFlatteRes3Ch(const char *name,
 			std::shared_ptr<DoubleParameter> resMass,
 			std::shared_ptr<DoubleParameter> mesonRadius,
 			std::shared_ptr<DoubleParameter> motherRadius,
-			std::shared_ptr<DoubleParameter> g1, std::shared_ptr<DoubleParameter> g2,
-			double _g2_partA, double _g2_partB,
+			std::shared_ptr<DoubleParameter> g1,
+			std::shared_ptr<DoubleParameter> g2, double _g2_partA, double _g2_partB,
+			std::shared_ptr<DoubleParameter> g3, double _g3_partA, double _g3_partB,
 			int _subsys, int resSpin, int m, int n, double resRadius) ;
-	virtual ~AmpFlatteRes();
+	virtual ~AmpFlatteRes3Ch();
 
 	/** Dynamical function for two coupled channel approach
 	 *
@@ -59,6 +55,7 @@ public:
 	static std::complex<double> dynamicalFunction(double mSq, double mR,
 			double massA1, double massA2, double gA,
 			double massB1, double massB2, double gB,
+			double massC1, double massC2, double gC,
 			unsigned int J, double mesonRadius);
 
 	virtual void initialise() { };
@@ -72,55 +69,42 @@ protected:
 	unsigned int nParams;
 	double _g2_partA;//hidden channel: mass particle A
 	double _g2_partB; //hidden channel: mass particle B
-	std::shared_ptr<DoubleParameter> _g2, _g1;
+	double _g3_partA;//hidden channel: mass particle A
+	double _g3_partB; //hidden channel: mass particle B
+	std::shared_ptr<DoubleParameter> _g3, _g2, _g1;
 	bool foundMasses;
 	unsigned int id23, id13;
 	double mesonRadius;
 };
 
-class FlatteConf : public basicConf
+class Flatte3ChConf : public FlatteConf
 {
 public:
-	virtual ~FlatteConf() { }
-	FlatteConf(const boost::property_tree::ptree &pt_);
+	virtual ~Flatte3ChConf() { }
+	Flatte3ChConf(const boost::property_tree::ptree &pt_);
 	virtual void put(boost::property_tree::ptree &pt_);
 	virtual void update(ParameterList par);
 
-	double m_mass;
-	bool m_mass_fix;
-	double m_mass_min;
-	double m_mass_max;
-
-	double m_mesonRadius;
-	unsigned int m_spin;
-	unsigned int m_m;
-	unsigned int m_n;
-
-	unsigned int m_daughterA; //TODO: better reference
-	unsigned int m_daughterB; //TODO: better reference
-	double m_g1;
-	double m_g1_fix;
-	double m_g1_min;
-	double m_g1_max;
-	double m_g2;
-	std::string m_g2_part1;
-	std::string m_g2_part2;
+	double m_g3;
+	std::string m_g3_part1;
+	std::string m_g3_part2;
 };
 
-class FlatteStrategy : public Strategy {
+
+class Flatte3ChStrategy : public Strategy {
 public:
-	FlatteStrategy(const std::string resonanceName, ParType in):Strategy(in),name(resonanceName){}
-	virtual const std::string to_str() const { return ("flatte amplitude of "+name); }
+	Flatte3ChStrategy(const std::string resonanceName, ParType in):Strategy(in),name(resonanceName){}
+	virtual const std::string to_str() const { return ("flatte3Ch amplitude of "+name); }
 	virtual bool execute(ParameterList& paras, std::shared_ptr<AbsParameter>& out);
 
 protected:
 	std::string name;
 };
 
-class FlattePhspStrategy : public Strategy {
+class Flatte3ChPhspStrategy : public Strategy {
 public:
-	FlattePhspStrategy(const std::string resonanceName, ParType in):Strategy(in),name(resonanceName){}
-	virtual const std::string to_str() const { return ("flatte amplitude of "+name); }
+	Flatte3ChPhspStrategy(const std::string resonanceName, ParType in):Strategy(in),name(resonanceName){}
+	virtual const std::string to_str() const { return ("flatte3Ch amplitude of "+name); }
 	virtual bool execute(ParameterList& paras, std::shared_ptr<AbsParameter>& out);
 
 protected:

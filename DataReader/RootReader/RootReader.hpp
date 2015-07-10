@@ -44,14 +44,15 @@ class RootReader : public Data {
 public:
 	//! Default Constructor: Empty object, can be filled
 	RootReader();
-	RootReader(TTree* tr, const bool binned);
+	RootReader(TTree* tr, int size=-1 , const bool binned=false);
 	/*! Read constructor.
 	 *
 	 * @param inRootFile Input file name
 	 * @param inTreeName Name of tree in input file
+	 * @param size 		Number of events to read in
 	 * @param binned	 Create binning
 	 */
-	RootReader(const std::string inRootFile, const std::string inTreeName="data", const bool binned=false);
+	RootReader(const std::string inRootFile, const std::string inTreeName="data", int size=-1, const bool binned=false);
 
 	virtual const std::vector<std::string>& getVariableNames();
 
@@ -73,17 +74,13 @@ public:
 		std::vector<Event> otherEvents = otherSample.getEvents();
 		fEvents.insert(fEvents.end(), otherEvents.begin(), otherEvents.end());
 	}
-	/** Destructor */
+	//! Destructor
 	virtual ~RootReader();
-
-	//! select only first @param newSize events from full sample
-	virtual void reduce(unsigned int newSize){
-		if(newSize >= fEvents.size()) {
-			BOOST_LOG_TRIVIAL(error) << "RooReader::reduce() requested size too large, cant reduce sample!";
-			return;
-		}
-		fEvents.resize(newSize);
-	}
+	//! Remove all events outside PHSP
+	virtual void reduceToPhsp();
+	//! Select only first @param newSize events from full sample
+	virtual void reduce(unsigned int newSize);
+	//! Select random subset of events
 	std::shared_ptr<Data> rndSubSet(unsigned int size, std::shared_ptr<Generator> gen);
 
 	//! Set efficiency value for all stored events. Efficiency is taken from Efficiency object.
@@ -97,6 +94,7 @@ public:
 
 protected:
 	void read();
+	int readSize;
 	bool _readFlag;
 
 	//input tree

@@ -59,6 +59,12 @@ public:
 	double getResult(){return finalLH;}
 	//! Enable correct error estimation for fit fractions. Very time consuming!
 	void setUseCorrelatedErrors(bool s) { useCorrelatedErrors = s; }
+	//! Use tree for calculation of fit fractions
+	void setUseTree(bool s) {
+		if(!_amp || !_amp->hasTree())
+			throw std::runtime_error("MinuitResult::setUseTree() | amplitude has no tree!");
+		useTree = s;
+	}
 	//! Getter function for fractions list. Make sure that fractions are calculated beforehand.
 	ParameterList& GetFractions() {	return fractionList; }
 	/** Calculate fit fractions and its errors.
@@ -67,8 +73,11 @@ public:
 	void calcFraction();
 	//! Write list of fit parameters and list of fitfractions to XML file @filename
 	virtual void writeXML(std::string filename);
+	//! Write fit parameters, fit fractions and cov matrix as TeX to file @filename
+	virtual void writeTeX(std::string filename);
+	//! Any errors during minimization?
+	virtual bool hasFailed();
 
-private:
 	void init(FunctionMinimum);
 	std::shared_ptr<Estimator> estimator;
 	//====== MINUIT FIT RESULT =======
@@ -93,6 +102,8 @@ private:
 	gsl_rng* r;//! GSL random generator, used for multivariate gauss
 	//! Should we calcualte fit fraction errors accurately?
 	bool useCorrelatedErrors;
+	//! calculate fractions using tree (if available)
+	bool useTree;
 	//! number of resonances in amplitude
 	unsigned int nRes;
 
@@ -101,9 +112,14 @@ private:
 	void genSimpleOutput(std::ostream& out);
 	//! Full fit result output
 	void genOutput(std::ostream& out,std::string opt="");
+	//! Table with fit parameters
+	//	void printFitParameters(TableFormater* parTable);
 	//! Table with fit fractions
-	void fractions(std::ostream& out);
-
+	void printFitFractions(TableFormater* fracTable);
+	//! Table with correlation matrix
+	void printCorrelationMatrix(TableFormater* fracTable);
+	//! Table with covariance matrix
+	void printCovarianceMatrix(TableFormater* fracTable);
 	/** Calculate fit fractions.
 	 * Fractions are calculated using the formular:
 	 * \f[
@@ -129,6 +145,10 @@ private:
 	void calcFractionError();
 	//! Smear ParameterList with a multidimensional gaussian and the cov matrix from the fit
 	void smearParameterList(ParameterList&);
+	//! Calculate information criterion AIC
+	double calcAIC();
+	//! Calculate information criterion BIC
+	double calcBIC();
 	//! List with fit fractions and errors
 	ParameterList fractionList;
 };

@@ -1,5 +1,6 @@
 ########### DPKinematics lib #############
 import os ;
+path-constant DPKINEMATICS : . ;
 local GSL = [ os.environ GSL_ROOT ] ;
 
 #ROOTLIBS = -lCore -lCint -lRIO -lNet -lHist -lGraf -lGraf3d -lGpad -lTree -lRint -lPostscript -lMatrix -lPhysics -lMathCore -lThread -lpthread  -lm -ldl ;
@@ -10,7 +11,6 @@ project :
 	requirements
 	    <include>$(GSL)/include
 	    <include>$(ROOT_INC_PATH)
-	#<linkflags>-L$(ROOTSYS)/lib 
 	<linkflags>-L$(ROOT_LIB_PATH) 
 	<linkflags>$(ROOTLIBS)
 	<linkflags>-L$(GSL)/lib
@@ -18,6 +18,8 @@ project :
 	<linkflags>-lgslcblas
 	;
 
+#the dictionary file are generated in bin/<version>/<release>/. 
+#The path of the SimpleEfficiency.hpp must be adjusted in libDPKinematicsDict.h!
 make libDPKinematicsDict.cpp : SimpleEfficiency.hpp libDPKinematicsLinkDef.hpp : @genDict ;
 actions genDict
 {

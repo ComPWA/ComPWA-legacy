@@ -73,7 +73,7 @@ int main(int argc, char **argv){
 	bw23->GetXaxis()->CenterTitle();
 	bw23->GetYaxis()->CenterTitle();
 
-	RootReader myReaderPHSP(file, false,"mc");
+	RootReader myReaderPHSP(file, "mc");
 	unsigned int maxEventsPHSP = myReaderPHSP.getNEvents();
 	//double masssq12PHSP, masssq13PHSP, masssq23PHSP;
 	TH2D* bw12PHSP = new TH2D("bw12PHSP","inv. mass-sq of particles 1&2 PHSP",1000,0.,10.,1000,0.,10.);

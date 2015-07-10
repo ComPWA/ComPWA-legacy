@@ -21,9 +21,6 @@
 #include <vector>
 #include <memory>
 
-//class TIterator;
-//class RooRealVar;
- 
 class AmpSumOfAmplitudes{
 public:
   AmpSumOfAmplitudes();
@@ -40,25 +37,54 @@ public:
   std::complex<double> getFirstAmp(dataPoint& point) const ;
   double evaluate(dataPoint& point) const ;
   
-  virtual double getTotalIntegral(std::string name);
-  virtual double getTotalIntegral(unsigned int id);
-  virtual double getUnormalizedFraction(std::string name);
-  virtual double getUnormalizedFraction(unsigned int id);
-  virtual double getSpin(std::string name);
+  //! Get resonance by name
+  virtual std::shared_ptr<AmpAbsDynamicalFunction> getResonance(std::string name){
+	  return _pdfList.at(getAmpId(name));
+  }
+  //! Get resonance by ID
+  virtual std::shared_ptr<AmpAbsDynamicalFunction> getResonance(unsigned int id){
+	  return _pdfList.at(id);
+  }
+  //! Get number of resonances
+  virtual unsigned int getNumberOfResonances() {return _pdfList.size();};
+  //! Get name of amplitude id
+  virtual std::string getAmpName(unsigned int id) {return _pdfList.at(id)->GetName();};
+  //! Get ID of amplitude name
+  virtual int getAmpId(std::string name);
+  //! Get intensity of amplitude id
+  virtual double getAmpMagnitude(unsigned int id) { return _intList.at(id)->GetValue(); }
+  //! Get phase of amplitude id
+  virtual double getAmpPhase(unsigned int id) { return _phaseList.at(id)->GetValue(); }
+  //! Get intensity of amplitude name
+  virtual double getAmpMagnitude(std::string name) { return _intList.at(getAmpId(name))->GetValue(); }
+  //! Get phase of amplitude id
+  virtual double getAmpPhase(std::string name) { return _phaseList.at(getAmpId(name))->GetValue(); }
+  //! Get spin of amplitude name
+  virtual double getSpin(std::string name){
+	  return getSpin(getAmpId(name));
+  }
+  //! Get spin of amplitude ID
   virtual double getSpin(unsigned int id);
-  virtual std::shared_ptr<AmpAbsDynamicalFunction> getResonance(std::string name);
-  virtual std::shared_ptr<AmpAbsDynamicalFunction> getResonance(unsigned int id){ return _pdfList[id]; }
-  virtual unsigned int getNAmps() {return _pdfList.size();};
-  virtual std::string getAmpName(unsigned int id) {return _pdfList[id]->GetName();};
+  //! Get integral of amplitude name
+  virtual double getAmpIntegral(std::string name){
+	  return getAmpIntegral(getAmpId(name));
+  }
+  //! Get integral of amplitude ID
+  virtual double getAmpIntegral(unsigned int id);
+  //! Get |r|^2 Int(Amp) by name
+  virtual double getAmpStrength(std::string name){
+	  return getAmpStrength(getAmpId(name));
+  }
+  //! Get |r|^2 Int(Amp) by ID
+  virtual double getAmpStrength(unsigned int id);
+
 protected:
+  //! Vector with resonances
   std::vector<std::shared_ptr<AmpAbsDynamicalFunction> > _pdfList ;   //  List of component PDFs
+  //! Vector with magnitudes of resonances
   std::vector<std::shared_ptr<DoubleParameter> > _intList;    //  List of relative intensities
+  //! Vector with phases of resonances
   std::vector<std::shared_ptr<DoubleParameter> > _phaseList;  //  List of relative phases
-  std::vector<std::shared_ptr<AmpWigner2> > _angList ;   //  List of component angular distributions
-
-  double maxVal;
-
-
 };
  
 #endif

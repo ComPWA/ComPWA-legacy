@@ -48,7 +48,7 @@ public:
 	virtual const ParameterList& intensity(dataPoint& point, ParameterList& par);
 	virtual const ParameterList& intensity(dataPoint& point);
 	virtual const ParameterList& intensityNoEff(dataPoint& point){ return intensity(point); };
-	virtual const bool fillStartParVec(ParameterList& outPar);
+	virtual bool copyParameterList(ParameterList& outPar);
 
 	virtual void setParameterList(ParameterList& par);
 	virtual void setNevents(unsigned int n) { _entries=n; };

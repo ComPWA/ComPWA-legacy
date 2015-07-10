@@ -27,12 +27,14 @@
 
 #include <vector>
 #include <memory>
+#include <math.h>
 
 #include "Core/ParameterList.hpp"
 #include "Core/FunctionTree.hpp"
 #include "DataReader/Data.hpp"
 
 #include "Core/DataPoint.hpp"
+#include "Core/Efficiency.hpp"
 #include "Core/Generator.hpp"
 class Amplitude
 {
@@ -44,46 +46,62 @@ public:
 	virtual ~Amplitude()
 	{ /* nothing */	}
 
+	virtual Amplitude* Clone() = 0;
+
+	//! set efficiency
+	virtual void setEfficiency(std::shared_ptr<Efficiency> eff) {};
 	virtual const double integral() =0;
 	virtual const double integral(ParameterList& par) =0;
 	virtual const double normalization() =0;
 	virtual const double normalization(ParameterList& par) =0;
 	virtual double getMaxVal(ParameterList& par, std::shared_ptr<Generator> gen) = 0;
 	virtual double getMaxVal(std::shared_ptr<Generator> gen) = 0;
-	//virtual const double volume() =0;
 
 	virtual const ParameterList& intensity(dataPoint& point, ParameterList& par) =0;
 	virtual const ParameterList& intensity(dataPoint& point) =0;
 	virtual const ParameterList& intensityNoEff(dataPoint& point) =0;
 	virtual const ParameterList& intensity(std::vector<double> point, ParameterList& par) =0;
 
-	virtual const bool fillStartParVec(ParameterList& outPar) =0;
 	virtual void setParameterList(ParameterList& par) =0;
-	virtual void copyParameterList(ParameterList& par) {}
+	virtual bool copyParameterList(ParameterList& par) =0;
 
 	virtual void printAmps() = 0;
 	virtual void printFractions() = 0;
-	virtual unsigned int getNumberOfResonances() { return 0; }
 
-	//! get total integral for resonance \param id
-	virtual double getTotalIntegral(unsigned int id) { return -999; };
-	//! get total integral for resonance \param name
-	virtual double getTotalIntegral(std::string name) { return -999; };
+	/** Integral value of amplitude in certain boundary
+	 * Used for plotting a projection of a function in \p var1 in bin [\p min1, \p min2]. In this
+	 * case we have to integrate over an other variable \p var2
+	 * @param var1 first variable
+	 * @param min1 minimal value of first variable
+	 * @param max1 maximal value of first variable
+	 * @param var2 second variable
+	 * @param min2 minimal value of second variable
+	 * @param max2 maximal value of second variable
+	 * @return
+	 */
+	virtual double getIntValue(std::string var1, double min1, double max1, std::string var2, double min2, double max2) = 0;
+
+	//---------- get resonance parameters -------------
+	//! Number of resonances
+	virtual unsigned int getNumberOfResonances() { return 0; }
 	//! convert resonance \param name to id
 	virtual int getIdOfResonance(std::string name){ return 0;}
 	//! convert resonance \param id to name
 	virtual std::string getNameOfResonance(unsigned int id){ return std::string("muh");}
-//	virtual double getMagnitude(std::string name) {return -999;};
-//	virtual double getMagnitude(unsigned int id) {return -999;};
-//	virtual double getPhase(std::string name) {return -999;};
-//	virtual double getPhase(unsigned int id) {return -999;};
-//	virtual double getSpin(std::string name) {return -999;};
-//	virtual double getSpin(unsigned int id) {return -999;};
-//	virtual double getFraction(std::string name) = 0;
-//	virtual double getFraction(unsigned int id) = 0;
-	virtual double getIntValue(std::string var1, double min1, double max1, std::string var2, double min2, double max2) = 0;
-	virtual Amplitude* Clone() = 0;
+	//! get total integral for resonance \param id
+	virtual double getAmpIntegral(unsigned int id) { return -999; };
+	//! get total integral for resonance \param name
+	virtual double getAmpIntegral(std::string name) { return -999; };
+	//! Get magnitude of resonance name
+	virtual double getAmpMagnitude(std::string name) {return -999;};
+	//! Get magnitude of resonance id
+	virtual double getAmpMagnitude(unsigned int id) {return -999;};
+	//! Get phase of resonance name
+	virtual double getAmpPhase(std::string name) {return -999;};
+	//! Get phase of resonance id
+	virtual double getAmpPhase(unsigned int id) {return -999;};
 
+	//---------- related to FunctionTree -------------
 	//! Check of tree is available
 	virtual bool hasTree(){ return 0; }
 	//! Getter function for basic amp tree
@@ -91,34 +109,108 @@ public:
 		return std::shared_ptr<FunctionTree>();
 	}
 
-
-	/* OBSOLETE SECTION ONLY FOR TESTING */
-	virtual std::shared_ptr<FunctionTree> functionTree(allMasses& theMasses, allMasses& toyPhspSample) {
-		//if not implemented, return NULL-pointer
-		return std::shared_ptr<FunctionTree>();
-	}
-	virtual void resetTree() {
-		//if not implemented, return NULL-pointer
-		return;
-	}
-	virtual std::shared_ptr<FunctionTree> phspTree(allMasses& accPhspSample, allMasses& toyPhspSample) {
-		//if not implemented, return NULL-pointer
-		return std::shared_ptr<FunctionTree>();
-	}
-	virtual std::shared_ptr<FunctionTree> phspTree(allMasses& toyPhspSample) {
-		//if not implemented, return NULL-pointer
-		return std::shared_ptr<FunctionTree>();
-	}
-	//! Getter function for function tree
-	virtual std::shared_ptr<FunctionTree> getTree(){ return std::shared_ptr<FunctionTree>(); }
-	//! Getter function for phsp tree
-	virtual std::shared_ptr<FunctionTree> getPhspTree(){ return std::shared_ptr<FunctionTree>(); }
-	/* OBSOLETE SECTION ONLY FOR TESTING */
-
 protected:
 	ParameterList result;
 
 
 };
 
+class GaussAmp : public Amplitude
+{
+public:
+	GaussAmp(const char *name, DoubleParameter _resMass, DoubleParameter _resWidth){
+		params.AddParameter(std::shared_ptr<DoubleParameter>(new DoubleParameter(_resMass)));
+		params.AddParameter(std::shared_ptr<DoubleParameter>(new DoubleParameter(_resWidth)));
+		initialise();
+	}
+
+	GaussAmp(const char *name, double _resMass, double _resWidth){
+		params.AddParameter(std::shared_ptr<DoubleParameter>(new DoubleParameter("mass",_resMass)));
+		params.AddParameter(std::shared_ptr<DoubleParameter>(new DoubleParameter("width",_resWidth)));
+		initialise();
+	}
+	virtual void initialise() {
+		result.AddParameter(std::shared_ptr<DoubleParameter>(new DoubleParameter("GaussAmpResult")));
+		if(Kinematics::instance()->getVarNames().size()!=1)
+			throw std::runtime_error("GaussAmp::initialize() | this amplitude is for two body decays only!");
+	};
+	//! Clone function
+	virtual GaussAmp* Clone(){
+		return (new GaussAmp(*this));
+	}
+	virtual bool copyParameterList(ParameterList& outPar){
+		outPar = ParameterList(params);
+		return true;
+	}
+
+	virtual double getIntValue(std::string var1, double min1, double max1,
+			std::string var2, double min2, double max2) { return 0; }
+	/**! Integral from -inf to inf
+	 * @return
+	 */
+	virtual const double integral(){
+		return (params.GetDoubleParameter(1)->GetValue() * std::sqrt(2*M_PI));
+	}
+	virtual const double integral(ParameterList& par){
+		setParameterList(par);
+		return integral();
+	}
+	virtual const double normalization() { return integral(); }
+	virtual const double normalization(ParameterList& par){
+		setParameterList(par);
+		return normalization();
+	}
+	virtual double getMaxVal(ParameterList& par, std::shared_ptr<Generator> gen){
+		setParameterList(par);
+		return getMaxVal(gen);
+	}
+	virtual double getMaxVal(std::shared_ptr<Generator> gen){
+		double mass = params.GetDoubleParameter(0)->GetValue();
+		std::vector<double> m; m.push_back(mass*mass);
+		dataPoint p(m);
+		intensity(p);
+		return (result.GetParameterValue(0));
+	}
+	virtual const ParameterList& intensity(dataPoint& point, ParameterList& par){
+		setParameterList(par);
+		return intensity(point);
+	}
+	virtual const ParameterList& intensity(dataPoint& point) {
+		double mass = params.GetDoubleParameter(0)->GetValue();
+		double width = params.GetDoubleParameter(1)->GetValue();
+		double sqrtS = std::sqrt(point.getVal(0));
+
+		std::complex<double> gaus(std::exp(-1*(sqrtS-mass)*(sqrtS-mass)/width/width/2.),0);
+		if(gaus.real() != gaus.real())
+			BOOST_LOG_TRIVIAL(error)<<"GaussAmp::intensity() | result NaN!";
+		result.SetParameterValue(0,std::norm(gaus));
+		return result;
+	}
+	virtual const ParameterList& intensityNoEff(dataPoint& point){ return intensity(point); }
+	virtual const ParameterList& intensity(std::vector<double> point, ParameterList& par){
+		setParameterList(par);
+		dataPoint dataP(point);
+		return intensity(dataP);
+	}
+	void setParameterList(ParameterList& par){
+		//parameters varied by Minimization algorithm
+		if(par.GetNDouble()!=params.GetNDouble())
+			throw std::runtime_error("setParameterList(): size of parameter lists don't match");
+		//Should we compared the parameter names? String comparison is slow
+		for(unsigned int i=0; i<params.GetNDouble(); i++)
+			params.GetDoubleParameter(i)->UpdateParameter(par.GetDoubleParameter(i));
+		return;
+	}
+
+	virtual void printAmps() { };
+	virtual void printFractions() { };
+
+protected:
+	std::string _name;
+	ParameterList params;
+	//	std::shared_ptr<DoubleParameter> _mR;
+	//	std::shared_ptr<DoubleParameter> _resWidth;
+
+
+};
 #endif

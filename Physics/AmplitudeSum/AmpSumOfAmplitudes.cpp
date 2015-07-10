@@ -8,15 +8,8 @@
 // Contributors:
 //     Mathias Michel - initial API and implementation
 //-------------------------------------------------------------------------------
-#include <cmath> 
-
 #include "Core/Parameter.hpp"
-#include <functional>
-
-#include "qft++.h"
-
 #include "Physics/AmplitudeSum/AmpSumOfAmplitudes.hpp"
-
 
 AmpSumOfAmplitudes::AmpSumOfAmplitudes()
 {
@@ -27,7 +20,6 @@ AmpSumOfAmplitudes::AmpSumOfAmplitudes(const char *name)
 {
 
 }
-
 
 AmpSumOfAmplitudes::AmpSumOfAmplitudes(const AmpSumOfAmplitudes& other, const char* name)
 {
@@ -48,14 +40,12 @@ void AmpSumOfAmplitudes::addBW(std::shared_ptr<AmpAbsDynamicalFunction> theRes ,
 	_pdfList.push_back(theRes);
 	_intList.push_back(r);
 	_phaseList.push_back(phi);
-	_angList.push_back(theAng);
 }
 
 void AmpSumOfAmplitudes::addBW(std::shared_ptr<AmpAbsDynamicalFunction> theRes , std::shared_ptr<DoubleParameter> r, std::shared_ptr<DoubleParameter> phi) {
 	_pdfList.push_back(theRes);
 	_intList.push_back(r);
 	_phaseList.push_back(phi);
-	_angList.push_back(std::shared_ptr<AmpWigner2>(new AmpWigner2(0,0)));
 }
 
 std::complex<double> AmpSumOfAmplitudes::getFirstBW(dataPoint& point) const
@@ -129,63 +119,35 @@ std::complex<double> AmpSumOfAmplitudes::getFirstAmp(dataPoint& point) const
 double AmpSumOfAmplitudes::evaluate(dataPoint& point) const
 {
 	std::complex<double> res;
-
 	for(unsigned int i=0; i<_pdfList.size(); i++){
 		double a = _intList[i]->GetValue();
 		double phi = _phaseList[i]->GetValue();
 		std::complex<double> eiphi(a*cos(phi),a*sin(phi));
-		double twoJplusOne = (2*_pdfList[i]->getSpin()+1);
-		double norm = _pdfList[i]->GetNormalization();
-
-		//evaluate() = norm*evalAmp()*evalWignerD()
-		//res = res + twoJplusOne * _pdfList[i]->evaluate(point) * eiphi;
 		res = res + _pdfList[i]->evaluate(point) * eiphi;//adding factor 2J+1 to AmpWigner2 -> consistency with tree
 	}
-	double absRes = std::abs(res);
-	return ( absRes*absRes ); //return |A|^2
+	return ( std::norm(res) ); //return |A|^2
 }
-double AmpSumOfAmplitudes::getUnormalizedFraction(std::string name){
-	int id=-1;
-	for(unsigned int i=0; i<_pdfList.size(); i++)
-		if(_pdfList[i]->GetName()==name) id=i;
-	if(id<0) return 0;
-	return getUnormalizedFraction(id);
-}
-double AmpSumOfAmplitudes::getSpin(std::string name){
-	int id=-1;
-	for(unsigned int i=0; i<_pdfList.size(); i++)
-		if(_pdfList[i]->GetName()==name) id=i;
-	if(id<0) return 0;
-	return getSpin(id);
-}
+
 double AmpSumOfAmplitudes::getSpin(unsigned int id){
 	return _pdfList[id]->getSpin();
 }
-std::shared_ptr<AmpAbsDynamicalFunction> AmpSumOfAmplitudes::getResonance(std::string name){
-	int id=-1;
-	for(unsigned int i=0; i<_pdfList.size(); i++)
-		if(_pdfList[i]->GetName()==name) id=i;
-	if(id<0) return std::shared_ptr<AmpAbsDynamicalFunction>();
-	return getResonance(id);
+
+double AmpSumOfAmplitudes::getAmpStrength(unsigned int id){
+	double integral = getAmpIntegral(id);
+	double mag = _intList[id]->GetValue();
+	return ( mag*mag*integral );
 }
-double AmpSumOfAmplitudes::getUnormalizedFraction(unsigned int id){
-	double integral = _pdfList[id]->totalIntegral(); //integral over amplitude id: |amp*WignerD|^2
-	double a = _intList[id]->GetValue();
-	double phi = _phaseList[id]->GetValue();
-	std::complex<double> eiphi(a*cos(phi),a*sin(phi));
-	double coeff = std::abs(eiphi)*std::abs(eiphi);
-	return ( coeff*integral );
-}
-double AmpSumOfAmplitudes::getTotalIntegral(std::string name){
-	int id=-1;
-	for(unsigned int i=0; i<_pdfList.size(); i++)
-		if(_pdfList[i]->GetName()==name) id=i;
-	if(id<0) return 0;
-	return getTotalIntegral(id);
-}
-double AmpSumOfAmplitudes::getTotalIntegral(unsigned int id){
+
+double AmpSumOfAmplitudes::getAmpIntegral(unsigned int id){
 //	return ( _pdfList[id]->totalIntegral() ); //2J+1 is already in AmpWigner2
 	return ( 2*_pdfList[id]->getSpin()+1); //assume that amplitude is normalized, save some cpu time
+}
+
+int AmpSumOfAmplitudes::getAmpId(std::string name) {
+	for(unsigned int i=0; i< _pdfList.size(); i++)
+		if(_pdfList.at(i)->GetName()==name) return i;
+	BOOST_LOG_TRIVIAL(error) << "AmpSumOfAmplitudes::getAmpId() | amplitude with name "<<name<<" not found in list!";
+	return -999;
 }
 
 double AmpSumOfAmplitudes::evaluateSlice(dataPoint& point, std::complex<double>* reso, unsigned int nResos, unsigned int subSys=5) const
@@ -213,7 +175,7 @@ double AmpSumOfAmplitudes::evaluateSlice(dataPoint& point, std::complex<double>*
 
 		if(dynamic_cast<AmpKinematics*>(&*(_pdfList[i]))->isSubSys(subSys)){
 		  if(!used[sys]){
-			res = res + reso[sys] * _angList[i]->evaluate(point);
+			res = res + reso[sys] * dynamic_cast<AmpKinematics*>(&*(_pdfList[i]))->evaluateWignerD(point);
 			used[sys]=true;
 		  }
 		}else{
@@ -225,37 +187,3 @@ double AmpSumOfAmplitudes::evaluateSlice(dataPoint& point, std::complex<double>*
 
 	return (std::abs(res)*std::abs(res) );
 }
-
-/*double AmpSumOfAmplitudes::evaluatePhi() const
- { 
-   // ENTER EXPRESSION IN TERMS OF VARIABLE ARGUMENTS HERE 
-   RooComplex res;
-
-   AmpRelBreitWignerRes *pdf;
-   DoubleParameter *theInt;
-   DoubleParameter *thePhase;
-   AmpWigner *ang;
-
-   _pdfIter->Reset();
-   _intIter->Reset();
-   _phaseIter->Reset();
-   _angIter->Reset();
-
-   //   TIterator* _pdfIter = _pdfList.createIterator() ;
-   //   AmpRelBreitWignerRes *pdf;
-
-
-   while((pdf      = (AmpRelBreitWignerRes*)_pdfIter->Next()) &&
-	 (theInt   = (DoubleParameter*)_intIter->Next())        &&
-	 (thePhase = (DoubleParameter*)_phaseIter->Next())      &&
-         (ang      = (AmpWigner*)_angIter->Next())  ) {
-     double a = theInt->GetValue();
-     double phi = thePhase->GetValue();
-     RooComplex eiphi (cos(phi), sin(phi));
-
-     res = res + pdf->evaluate() * a * eiphi * ang->evaluate();
-   }
-
-   return atan2(res.im(),res.re()); 
- } */
-

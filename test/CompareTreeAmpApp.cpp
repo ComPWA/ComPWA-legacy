@@ -32,6 +32,7 @@
 #include "TLorentzVector.h"
 #include "TH2D.h"
 
+#include "../Physics/DPKinematics/RootGenerator.hpp"
 //Core header files go here
 #include "Core/Event.hpp"
 #include "Core/Particle.hpp"
@@ -47,7 +48,6 @@
 #include "Estimator/MinLogLH/MinLogLH.hpp"
 #include "Optimizer/Minuit2/MinuitIF.hpp"
 #include "Physics/DPKinematics/RootEfficiency.cpp"
-#include "Physics/DPKinematics/RootGenerator.cpp"
 #include "Core/TableFormater.hpp"
 #include "Core/AbsParameter.hpp"
 #include "Core/Logging.hpp"
@@ -106,11 +106,11 @@ int main(int argc, char **argv){
 
 	//======================= PARAMETERS =============================
 	ParameterList fitPar;
-	fitAmp->fillStartParVec(fitPar);
+	fitAmp->copyParameterList(fitPar);
 	ParameterList fitParTree;
-	fitAmpTree->fillStartParVec(fitParTree);
+	fitAmpTree->copyParameterList(fitParTree);
 	ParameterList truePar;
-	trueAmp->fillStartParVec(truePar); //true values
+	trueAmp->copyParameterList(truePar); //true values
 
 //	fitParTree.GetDoubleParameter("g1_a_0")->FixParameter(1);
 //	fitPar.GetDoubleParameter("g1_a_0")->FixParameter(1);
@@ -139,12 +139,12 @@ int main(int argc, char **argv){
 
 	//======================= Compare tree and amplitude =============================
 	std::shared_ptr<AmpRelBreitWignerRes> phiRes = std::dynamic_pointer_cast<AmpRelBreitWignerRes>(fitAmpPtr->getResonance("phi(1020)"));
-	double phimag = fitAmpPtr->getMagnitude("phi(1020)");
-	double phiphase = fitAmpPtr->getPhase("phi(1020)");
+	double phimag = fitAmpPtr->getAmpMagnitude("phi(1020)");
+	double phiphase = fitAmpPtr->getAmpPhase("phi(1020)");
 	std::complex<double> phiCoeff(phimag*cos(phiphase),phimag*sin(phiphase));
 	std::shared_ptr<AmpFlatteRes> a0Res = std::dynamic_pointer_cast<AmpFlatteRes>(fitAmpPtr->getResonance("a_0(980)0"));
-	double a0mag = fitAmpPtr->getMagnitude("a_0(980)0");
-	double a0phase = fitAmpPtr->getPhase("a_0(980)0");
+	double a0mag = fitAmpPtr->getAmpMagnitude("a_0(980)0");
+	double a0phase = fitAmpPtr->getAmpPhase("a_0(980)0");
 	std::complex<double> a0Coeff(a0mag*cos(a0phase),a0mag*sin(a0phase));
 
 	dataPoint point(inputData->getEvent(0)); //first data point in sample

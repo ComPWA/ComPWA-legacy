@@ -19,9 +19,9 @@ project :
 
 lib SliceFit : 
         [ glob *.cpp ]
-        $(TOP)/Core//ComPWA 
-        $(TOP)/Optimizer//Optimizer 
         $(TOP)/Physics//DPKinematics
+        $(TOP)/Optimizer//Optimizer 
+        $(TOP)/Core//ComPWA 
          ;
 
 install dist : SliceFit : <location>$(TOP)/lib ;

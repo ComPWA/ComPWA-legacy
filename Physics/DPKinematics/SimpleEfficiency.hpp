@@ -51,6 +51,6 @@ protected:
 	Double_t totalEff;
 	Double_t totalEff_error;
 
-	ClassDef(SimpleEfficiency, 2);
+	ClassDef(SimpleEfficiency, 3);
 };
 #endif /* SIMPLEEFFICIENCY_HPP_ */

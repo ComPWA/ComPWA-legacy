@@ -54,21 +54,20 @@ public:
 
 	//! Destructor
 	virtual ~AbsParameter(){
-		//std::cout << "GoodBye " << name_ <<std::endl;
 	}
 
 	//! Getter for name of object
-	virtual const std::string& GetName(){
+	virtual const std::string& GetName() const{
 		return name_;
 	}
 
 	//! Getter for type of object
-	virtual const ParType type(){
+	virtual ParType type() const{
 		return type_;
 	}
 
 	//! Getter for typename of object, to be defined by the actual implementation
-	virtual const std::string TypeName()=0;
+	virtual std::string TypeName() const=0;
 
 	//Observer Pattern Functions
 
@@ -127,7 +126,6 @@ public:
 	 * \sa operator<<, make_str()
 	 */
 	virtual std::string to_str() {
-		//make_str();
 		return make_str();
 	}
 
@@ -140,7 +138,6 @@ public:
 	 * \sa make_str()
 	 */
 	virtual std::string val_to_str() {
-		//make_str();
 		return make_val_str();
 	}
 

@@ -58,7 +58,7 @@ int main(int argc, char **argv){
   std::shared_ptr<Amplitude> testBW(new BreitWigner(0.,5.));
   // Initiate parameters
   ParameterList par;
-  testBW->fillStartParVec(par);
+  testBW->copyParameterList(par);
   std::shared_ptr<ControlParameter> testEsti = ChiOneD::createInstance(testBW, myReader);
   std::shared_ptr<Optimizer> opti(new MinuitIF(testEsti, par));
 

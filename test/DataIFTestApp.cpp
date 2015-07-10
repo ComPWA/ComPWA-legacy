@@ -51,7 +51,7 @@ int main(int argc, char **argv){
     cout << "DataIF Root 2Particles started " << endl << endl;
 
     string file = "test/2Part-4vecs.root";
-    RootReader myReader(file, false,"data");
+    RootReader myReader(file,"data");
     unsigned int maxEvents = myReader.getNEvents();
     double masssq;
     TH1D* bw = new TH1D("bw","inv. mass of 2 particles",1000,0.,2.4);

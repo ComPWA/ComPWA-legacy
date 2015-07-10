@@ -99,14 +99,14 @@ int main(int argc, char **argv){
 	AmplitudeSetup ini(resoFile);
 
   BOOST_LOG_TRIVIAL(info)<< "Load Modules";
-  std::shared_ptr<RootReader> myReader(new RootReader(file, false,"data"));
-  std::shared_ptr<RootReader> myPHSPReader(new RootReader(file, false,"mc"));
+  std::shared_ptr<RootReader> myReader(new RootReader(file, "data"));
+  std::shared_ptr<RootReader> myPHSPReader(new RootReader(file, "mc"));
   std::shared_ptr<AmpSumIntensity> amps(new AmpSumIntensity(ini, AmpSumIntensity::normStyle::none, std::shared_ptr<Efficiency>(new UnitEfficiency()), nFitEvents));
 
   // Initiate parameters
   ParameterList par;
   std::shared_ptr<SliceFit> esti;
-  amps->fillStartParVec(par); //perfect startvalues
+  amps->copyParameterList(par); //perfect startvalues
   esti = std::static_pointer_cast<SliceFit>(SliceFit::createInstance(amps, myReader, myPHSPReader, par, nStartEvent, nFitEvents));
 
 

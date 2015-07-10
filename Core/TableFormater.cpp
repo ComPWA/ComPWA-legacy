@@ -70,7 +70,7 @@ TableFormater& TableFormater::operator<<(DoubleParameter in){
 //====== TexTableFormater =========
 TexTableFormater::TexTableFormater(std::ostream* output) : TableFormater(output){
 	sep = "&";
-	pm = "\\pm";
+	pm = "$\\pm$";
 	firstSep = "";
 	lastSep = "\\\\";
 }
@@ -79,8 +79,8 @@ void TexTableFormater::footer() {
 	delim();
 	delim();
 	*out <<"\\end{tabular}"<<endl;
-	//	*out <<"\label{...}"<<endl;
-	//	*out <<"\caption{...}"<<endl;
+//	*out <<"\label{...}"<<endl;
+//	*out <<"\caption{...}"<<endl;
 
 };
 void TexTableFormater::header() {

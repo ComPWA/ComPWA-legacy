@@ -61,8 +61,9 @@ std::shared_ptr<FitResult> RunManager::startFit(ParameterList& inPar){
 
 	return result;
 }
-bool RunManager::generate( unsigned int number ) {
-	if(number==0) return 0;
+bool RunManager::generate( int number ) {
+	if(number < 0)
+		throw std::runtime_error("RunManager: generate() negative number of events: "+std::to_string((long double)number));
 	if(!(gen_ && amp_))
 		throw std::runtime_error("RunManager: generate() requirements not fulfilled");
 	if(!sampleData_)
@@ -118,12 +119,12 @@ bool RunManager::generate( unsigned int number ) {
 	if(sampleData_->getNEvents()<number)
 		BOOST_LOG_TRIVIAL(error) << "RunManager::generate() not able to generate "<<number<<" events. "
 				"Phsp sample too small. Current size of sample is now "<<sampleData_->getNEvents();
-//	BOOST_LOG_TRIVIAL(info) << "Efficiency of toy MC generation: "<<(double)number/totalCalls;
+	BOOST_LOG_TRIVIAL(info) << "Efficiency of toy MC generation: "<<(double)sampleData_->getNEvents()/totalCalls;
 //	BOOST_LOG_TRIVIAL(info) << "RunManager: generate time="<<(clock()-startTime)/CLOCKS_PER_SEC/60<<"min.";
 
 	return true;
 };
-bool RunManager::generateBkg( unsigned int number ) {
+bool RunManager::generateBkg( int number ) {
 	if(number==0) return 0;
 	if( !(ampBkg_ && gen_) )
 		throw std::runtime_error("RunManager: generateBkg() requirements not fulfilled");
@@ -145,7 +146,6 @@ bool RunManager::generateBkg( unsigned int number ) {
 	unsigned int limit;
 	unsigned int acceptedEvents=0;
 	if(samplePhsp_){
-		std::cout<<"1231312313123jfsj"<<std::endl;
 		limit = samplePhsp_->getNEvents();
 	} else
 		limit = 100000000; //set large limit, should never be reached
@@ -179,11 +179,12 @@ bool RunManager::generateBkg( unsigned int number ) {
 	if(sampleData_->getNEvents()<number)
 		BOOST_LOG_TRIVIAL(error) << "RunManager::generateBkg() not able to generate "<<number<<" events. "
 				"Phsp sample too small. Current size of sample is now "<<sampleBkg_->getNEvents();
+	BOOST_LOG_TRIVIAL(info) << "Efficiency of toy MC generation: "<<(double)sampleData_->getNEvents()/totalCalls;
 
 	return true;
 };
 
-bool RunManager::generatePhsp( unsigned int number ) {
+bool RunManager::generatePhsp( int number ) {
 	if(number==0) return 0;
 	if(!samplePhsp_)
 		throw std::runtime_error("RunManager: generatePhsp() not phsp sample set");

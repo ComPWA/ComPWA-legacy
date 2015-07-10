@@ -59,8 +59,14 @@ public:
 	//! get particle id by particle name
 	int getId(std::string);
 
-	double getConstValue(std::string);
-	double getConstError(std::string);
+	//! Get value of physical constant at position @pos
+	double getConstValue(int pos);
+	//! Get error of physical constant at position @pos
+	double getConstError(int pos);
+	//! Get value of physical constant @name
+	double getConstValue(std::string name);
+	//! Get error of physical constant @name
+	double getConstError(std::string name);
 
 private:
 	//standart constructor, destructor and copy constructor are declared private, so that they are

@@ -128,10 +128,10 @@ int main(int argc, char **argv) {
 
 	BOOST_LOG_TRIVIAL(info)<< "Load Modules";
 	std::shared_ptr<RootReader> myReader(
-			new RootReader(input_file_path, "data", false));
+			new RootReader(input_file_path, "data"));
 	myReader->resetWeights(); //setting weights to 1
 	std::shared_ptr<RootReader> myPHSPReader(
-			new RootReader(input_file_path, "mc", false));
+			new RootReader(input_file_path, "mc"));
 	myPHSPReader->setEfficiency(shared_ptr<Efficiency>(new UnitEfficiency())); //setting efficiency to 1
 	std::shared_ptr<AmpSumIntensity> amps(
 			new AmpSumIntensity(ini, AmpSumIntensity::normStyle::none,
@@ -142,7 +142,7 @@ int main(int argc, char **argv) {
 	// Initiate parameters
 	ParameterList par;
 	std::shared_ptr<ControlParameter> esti;
-	amps->fillStartParVec(par); //perfect startvalues
+	amps->copyParameterList(par); //perfect startvalues
 	esti = MinLogLH::createInstance(amps, myReader, myPHSPReader, nStartEvent,
 			nFitEvents);
 	MinLogLH* contrPar = dynamic_cast<MinLogLH*>(&*(esti->Instance()));
@@ -322,7 +322,7 @@ int main(int argc, char **argv) {
 	bw23->GetYaxis()->SetTitle("#");
 	bw23->GetYaxis()->CenterTitle();
 
-	RootReader myReaderPHSP(input_file_path, "mc", false);
+	RootReader myReaderPHSP(input_file_path, "mc");
 	unsigned int maxEventsPHSP = myReaderPHSP.getNEvents();
 	//double masssq12PHSP, masssq13PHSP, masssq23PHSP;
 	TH2D* bw12PHSP = new TH2D("bw12PHSP", "inv. mass-sq of particles 1&2 PHSP",

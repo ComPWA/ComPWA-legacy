@@ -27,7 +27,7 @@ MinLogLH::MinLogLH(std::shared_ptr<Amplitude> amp_, std::shared_ptr<Amplitude> b
 		std::shared_ptr<Data> phspSample_,std::shared_ptr<Data> accSample_,
 		unsigned int startEvent, unsigned int nEvents, double sigFrac) :
 		amp(amp_), ampBkg(bkg_),data(data_), phspSample(phspSample_),accSample(accSample_), nEvts_(0), nPhsp_(0),
-		nStartEvt_(startEvent), nUseEvt_(nEvents), useFunctionTree(0), signalFraction(sigFrac), accSampleEff(0)
+		nStartEvt_(startEvent), nUseEvt_(nEvents), useFunctionTree(0), signalFraction(sigFrac), accSampleEff(0), penaltyLambda(0.0)
 {
 	BOOST_LOG_TRIVIAL(debug)<<"MinLogLH: Constructing instance!";
 	nEvts_ = data->getNEvents();
@@ -225,7 +225,6 @@ void MinLogLH::iniLHtree(){
 	}
 	else {//unbinned
 		signalPhspTree->createNode("IntensPhsp", msqStrat, "sumAmp", mAccSample.nEvents, false); //|T_{ev}|^2
-//		std::cout<<mAccSample.nEvents<< " "<<accSampleEff<<" "<<(double) mAccSample.nEvents/accSampleEff<<std::endl;
 		signalPhspTree->createLeaf("InvNmc", 1/ ( (double) mAccSample.nEvents/accSampleEff ), "normFactor");
 		signalPhspTree_amp = amp->getAmpTree(mAccSample,mPhspSample,"_Phsp");
 		BOOST_LOG_TRIVIAL(debug)<<"MinLogLH::iniLHTree() setting up normalization tree, "
@@ -309,15 +308,26 @@ void MinLogLH::iniLHtree(){
 		physicsTree->createNode("IntensBkg", msqStrat, "normBkg", mData.nEvents, false);
 		physicsTree->insertTree(bkgTree_amp,"IntensBkg");
 	}
-
 	physicsTree->recalculate();
-	BOOST_LOG_TRIVIAL(debug) << std::endl << physicsTree;
+//	std::string treeString = physicsTree->head()->to_str(10);
+//	BOOST_LOG_TRIVIAL(debug) << std::endl << treeString;
 	if(!physicsTree->sanityCheck()) {
 		throw std::runtime_error("MinLogLH::iniLHtree() tree has structural problems. Sanity check not passed!");
 	}
 	BOOST_LOG_TRIVIAL(debug) <<"MinLogLH::iniLHtree() construction of LH tree finished!";
 	useFunctionTree=1;
 	return;
+}
+
+double MinLogLH::calcPenalty(){
+	if(penaltyLambda<=0) return 0; //penalty term disabled
+	double magSum = 0;
+	for(unsigned int i=0;i<amp->getNumberOfResonances(); i++){
+		magSum += amp->getAmpMagnitude(i);
+	}
+	BOOST_LOG_TRIVIAL(debug) << "MinLogLH::calcPenalty() | Adding penalty term to LH: "
+			<<penaltyLambda*magSum;
+	return (penaltyLambda*magSum);
 }
 
 double MinLogLH::controlParameter(ParameterList& minPar){
@@ -329,7 +339,6 @@ double MinLogLH::controlParameter(ParameterList& minPar){
 		double norm=0, normBkg=0;
 		for(unsigned int phsp=0; phsp<nPhsp_; phsp++){ //loop over phspSample
 			Event theEvent(phspSample->getEvent(phsp));
-			if(theEvent.getNParticles()!=3) continue;
 			dataPoint point(theEvent);
 			double intens = 0, intensBkg = 0;
 			ParameterList intensL = amp->intensity(point);
@@ -347,6 +356,7 @@ double MinLogLH::controlParameter(ParameterList& minPar){
 		normBkg = normBkg * Kinematics::instance()->getPhspVolume()/nPhsp_;
 		if(normBkg==0) normBkg=1;
 		norm = norm * Kinematics::instance()->getPhspVolume()/nPhsp_;
+		//BOOST_LOG_TRIVIAL(debug)<<"MinLogLH::controlParameter() Norm="<<norm;
 		if(norm==0) norm=1;
 		//Calculate \Sum_{ev} log()
 		double sumLog=0;
@@ -364,16 +374,27 @@ double MinLogLH::controlParameter(ParameterList& minPar){
 			}else{
 				intensBkg = 0;
 			}
-			if(intens>0) sumLog += std::log( signalFraction*intens/norm+(1-signalFraction)*intensBkg/normBkg )*theEvent.getWeight();
+			if(intens>0) sumLog += std::log(
+					signalFraction*intens/norm+(1-signalFraction)*intensBkg/normBkg )*theEvent.getWeight();
 		}
-//		std::cout<<"1 "<<sumLog<<std::endl;
-		lh = (-1)*((double)nUseEvt_)/sumOfWeights*sumLog ;
-//		std::cout<<"2 "<<lh<<std::endl;
+		lh = (-1)*((double)nUseEvt_)/sumOfWeights*sumLog + calcPenalty();
 	} else {
+		//BOOST_LOG_TRIVIAL(debug)<<"MinLogLH::controlParameter() Norm="
+		//		<<physicsTree->head()->getChildValue("normFactor");
 		physicsTree->recalculate();
 		std::shared_ptr<DoubleParameter> logLH = std::dynamic_pointer_cast<DoubleParameter>(
 				physicsTree->head()->getValue() );
 		lh = logLH->GetValue();
 	}
+	lh += calcPenalty();
 	return lh; //return -logLH
+}
+
+void MinLogLH::setPenaltyScale(double sc) {
+	if(sc < 0){
+		BOOST_LOG_TRIVIAL(info) << "MinLogLH::setPenaltyScale | penalty scale cannot be negative!";
+		return;
+	}
+	BOOST_LOG_TRIVIAL(info) << "MinLogLH::setPenaltyScale | Setting scale of penalty term to "<<sc;
+	penaltyLambda = sc;
 }

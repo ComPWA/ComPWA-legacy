@@ -62,12 +62,16 @@ public:
 		std::string str = s.str();
 		BOOST_LOG_TRIVIAL(info) << str;
 	};
-	virtual void writeTex(std::string filename) {};
+	//! Table with fit parameters
+	virtual void printFitParameters(TableFormater* tableResult);
+	virtual void writeTeX(std::string filename) {};
 	virtual void writeXML(std::string filename) {};
 	virtual void writeText(std::string filename) ;
 	virtual void writeSimpleText(std::string filename) ;
 	virtual operator double() const =0;
 	friend std::ostream& operator<< (std::ostream &out, FitResult &fitres){ out<<fitres.getResult(); return out;};
+	//! Any errors during minimization?
+	virtual bool hasFailed(){};
 
 protected:
 	virtual double shiftAngle(double v);

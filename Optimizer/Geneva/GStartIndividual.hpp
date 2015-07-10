@@ -91,6 +91,7 @@ public:
 
 	bool getPar(ParameterList& val);
 
+
 	/** @brief A standard assignment operator */
 	const GStartIndividual& operator=(const GStartIndividual&);
 
@@ -113,8 +114,7 @@ private:
          * The default constructor. Intentionally private and empty, as it is only needed for
          * serialization purposes.
          */
-	GStartIndividual() : GParameterSet(),theData(ControlParameter::Instance())
-        {       /* nothing */ }
+	GStartIndividual();
 
         /********************************************************************************************/
         // You can add other variables here. Do not forget to serialize them if necessary

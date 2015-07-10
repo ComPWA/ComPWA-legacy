@@ -76,7 +76,7 @@ const ParameterList& BreitWigner::intensity(std::vector<double> x, ParameterList
 	return intensity(dataP,par);
 }
 
-const bool BreitWigner::fillStartParVec(ParameterList& outPar){
+bool BreitWigner::copyParameterList(ParameterList& outPar){
 	if(outPar.GetNParameter())
 		return false; //already filled ,TODO: exception?
 

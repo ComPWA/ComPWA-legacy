@@ -25,6 +25,7 @@
 #include "Optimizer/Minuit2/MinuitIF.hpp"
 #include "Core/ParameterList.hpp"
 #include "Core/Parameter.hpp"
+#include "Core/FitResult.hpp"
 
 #include <boost/numeric/ublas/symmetric.hpp>
 #include <boost/numeric/ublas/io.hpp>
@@ -34,13 +35,26 @@
 using namespace boost::log;
 using namespace ROOT::Minuit2;
 
+double shiftAngle(double v){
+	double originalVal = v;
+	double val = originalVal;
+	double pi = PhysConst::instance()->getConstValue("Pi");
+	while(val> pi) val-=2*pi;
+	while(val< -pi ) val+=2*pi;
+	if(val!=originalVal)
+		BOOST_LOG_TRIVIAL(info) << "shiftAngle(): shifting parameter from "<<originalVal<< " to "<<val<<"!";
+	return val;
+}
+
+
 MinuitIF::MinuitIF(std::shared_ptr<ControlParameter> esti, ParameterList& par) :
 		_myFcn(esti, par), estimator(esti)
 {
 
 }
 
-MinuitIF::~MinuitIF(){
+MinuitIF::~MinuitIF()
+{
 
 }
 
@@ -49,15 +63,19 @@ std::shared_ptr<FitResult> MinuitIF::exec(ParameterList& par){
 	ParameterList initialParList(par);
 
 	MnUserParameters upar;
-	BOOST_LOG_TRIVIAL(debug) << "Parameters used: "<<par.GetNDouble();
+	BOOST_LOG_TRIVIAL(debug) << "MinuitIF::exec() | Number of parameters: "<<par.GetNDouble();
 	for(unsigned int i=0; i<par.GetNDouble(); ++i){ //only doubles for minuit
 		std::shared_ptr<DoubleParameter> actPat = par.GetDoubleParameter(i);
-		//if no error is set or error set to 0 we use a default error, otherwise minuit treads this parameter as fixed
+		//if no error is set or error set to 0 we use a default error,
+		//otherwise minuit treads this parameter as fixed
 		double error = actPat->GetError();
 		if(error<=0) error = 0.01;
+		if(!actPat->IsFixed() && actPat->GetName().find("phase") != actPat->GetName().npos)
+			actPat->SetValue( shiftAngle(actPat->GetValue()) );
 
 		if( actPat->UseBounds() ){
-			upar.Add(actPat->GetName(), actPat->GetValue(), error, actPat->GetMaxValue(), actPat->GetMinValue());
+			upar.Add(actPat->GetName(), actPat->GetValue(), error,
+					actPat->GetMaxValue(), actPat->GetMinValue());
 		}else
 			upar.Add(actPat->GetName(), actPat->GetValue(),error);
 
@@ -95,17 +113,22 @@ std::shared_ptr<FitResult> MinuitIF::exec(ParameterList& par){
 	BOOST_LOG_TRIVIAL(debug) << "Hesse G2 tolerance: "<<strat.HessianG2Tolerance();
 
 	//MIGRAD
-	BOOST_LOG_TRIVIAL(info) <<"MinuitIF: starting migrad ";
+	BOOST_LOG_TRIVIAL(info) <<"MinuitIF::exec() | starting migrad ";
 	MnMigrad migrad(_myFcn, upar, strat);
 	//	FunctionMinimum minMin = migrad(100,0.001);//(maxfcn,tolerance)
 	FunctionMinimum minMin = migrad();
-	BOOST_LOG_TRIVIAL(info) <<"MinuitIF: migrad finished";
+	BOOST_LOG_TRIVIAL(info) <<"MinuitIF::exec() | migrad finished! Minimum is valid = "
+			<<minMin.IsValid();
 
 	//HESSE
-	BOOST_LOG_TRIVIAL(info) <<"MinuitIF: starting hesse";
 	MnHesse hesse(strat);
-	hesse(_myFcn,minMin);//function minimum minMin is updated by hesse
-	BOOST_LOG_TRIVIAL(info) <<"MinuitIF: hesse finished";
+	if(minMin.IsValid()) {
+		BOOST_LOG_TRIVIAL(info) <<"MinuitIF::exec() | starting hesse";
+		hesse(_myFcn,minMin);//function minimum minMin is updated by hesse
+		BOOST_LOG_TRIVIAL(info) <<"MinuitIF::exec() | hesse finished";
+	} else
+		BOOST_LOG_TRIVIAL(info) <<"MinuitIF::exec() | migrad failed to find minimum! "
+				"We skip hesse and minos!";
 
 	//MINOS
 	MnMinos minos(_myFcn,minMin,strat);
@@ -117,16 +140,23 @@ std::shared_ptr<FitResult> MinuitIF::exec(ParameterList& par){
 	for(unsigned int i=0; i<finalParList.GetNDouble(); ++i){
 		std::shared_ptr<DoubleParameter> finalPar = finalParList.GetDoubleParameter(i);
 		if(!finalPar->IsFixed()){
-			finalPar->SetValue(minState.Value(finalPar->GetName()));
-			if(finalPar->GetErrorType()==ErrorType::ASYM){ //asymmetric errors -> run minos
-				BOOST_LOG_TRIVIAL(info) <<"MinuitIF: minos for parameter "<<i<< "...";
+			double val=minState.Value(finalPar->GetName());
+			if(finalPar->GetName().find("phase") != finalPar->GetName().npos)
+				val =  shiftAngle(val);
+			finalPar->SetValue(val);
+			if(finalPar->GetErrorType()==ErrorType::ASYM && minMin.IsValid()){
+				//asymmetric errors -> run minos
+				BOOST_LOG_TRIVIAL(info) <<"MinuitIF::exec() | minos for parameter "<<i<< "...";
 				MinosError err = minos.Minos(i);
-				std::pair<double,double> assymErrors = err();//lower = pair.first, upper= pair.second
+				//lower = pair.first, upper= pair.second
+				std::pair<double,double> assymErrors = err();
 				finalPar->SetError( assymErrors.first, assymErrors.second );
-			} else if(finalPar->GetErrorType()==ErrorType::SYM) {//symmetric errors -> migrad error
+			} else if(finalPar->GetErrorType()==ErrorType::SYM) {
+				//symmetric errors -> migrad/hesse error
 				finalPar->SetError(minState.Error(finalPar->GetName()));
 			} else
-				throw std::runtime_error("MinuitIF::exec() unknown error type: "+std::to_string((long long int)finalPar->GetErrorType()));
+				throw std::runtime_error("MinuitIF::exec() | unknown error type: "
+						+std::to_string((long long int)finalPar->GetErrorType()));
 		}
 	}
 
