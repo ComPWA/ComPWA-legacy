@@ -17,6 +17,7 @@
 #include <vector>
 #include <string>
 #include <memory>
+#include <stdexcept>
 
 #include "TLorentzVector.h"
 #include "TParticle.h"

@@ -16,10 +16,14 @@
 #include <memory>
 #include <vector>
 #include <utility>
+#include <stdexcept>
+
 #include "DataReader/RootReader/RootReader.hpp"
 #include "Core/Kinematics.hpp"
 #include "Core/Generator.hpp"
+
 #include "TParticle.h"
+
 #include <boost/log/trivial.hpp>
 #include <boost/log/core.hpp>
 using namespace boost::log;

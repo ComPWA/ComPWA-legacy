@@ -5,6 +5,8 @@
  *      Author: weidenka
  */
 
+#include <stdexcept>
+
 #include "Physics/DPKinematics/RootGenerator.hpp"
 #include "Core/DataPoint.hpp"
 

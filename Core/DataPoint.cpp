@@ -10,6 +10,8 @@
 //-------------------------------------------------------------------------------
 
 #include <algorithm>
+#include <stdexcept>
+
 #include "Core/Kinematics.hpp"
 #include "Core/DataPoint.hpp"
 
