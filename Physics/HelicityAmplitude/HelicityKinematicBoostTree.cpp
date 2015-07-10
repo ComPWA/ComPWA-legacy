@@ -32,6 +32,30 @@ void HelicityKinematicBoostTree::constructBoostingTree(
 
 }
 
+/**
+ * Calculates the boosted 4 vector of the first particle from the two body decay
+ * in the helicity formalism.
+ */
+/*Vector4 determineBoostedKinematicVariables(
+    std::pair<Vector4, Vector4> two_body_state, Vector4 mother) {
+
+  // define particle 1 of the two body decay
+  PolVector particle1_4vector;
+  particle1_4vector.SetP4(two_body_state.first);
+  // define the two body state
+  PolVector two_body_4vector;
+  two_body_4vector.SetP4(two_body_state.first + two_body_state.second);
+  // boost particle1 into the rest frame of the two body state
+  particle1_4vector.Boost(two_body_rest_frame.GetP4());
+  // then boost the two body state into the rest frame of its mother
+  two_body_4vector.Boost(mother);
+  // now determine the theta and phi values of the boosted particle1 vector
+  // with respect to the boosted two body state
+
+
+
+}*/
+
 const Vector4<double>& HelicityKinematicBoostTree::getBoosted4Vector(
     unsigned int node_index) const {
   return boosted_4vectors_[node_index];

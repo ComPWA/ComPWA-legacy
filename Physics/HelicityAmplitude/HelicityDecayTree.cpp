@@ -53,6 +53,10 @@ void HelicityDecayTree::clearCurrentGrownNodes() {
   currently_grown_nodes_.clear();
 }
 
+const HelicityTree& HelicityDecayTree::getHelicityDecayTree() const {
+  return decay_tree_;
+}
+
 std::vector<ParticleState> HelicityDecayTree::getLowestLeaves() const {
   return currently_grown_nodes_;
 }

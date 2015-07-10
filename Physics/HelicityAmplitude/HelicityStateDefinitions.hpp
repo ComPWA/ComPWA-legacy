@@ -16,17 +16,6 @@
 
 namespace HelicityFormalism {
 
-struct Helicity4Vector {
-  Vector4<double> total_momentum_;
-
-  void boostIntoCMSOf(const Vector4<double>& mother_state) {
-    PolVector state_vector;
-    state_vector.SetP4(total_momentum_, total_momentum_.Mass());
-    state_vector.Boost(mother_state);
-    total_momentum_ = state_vector.GetP4();
-  }
-};
-
 struct ParticleState {
   int particle_id_;
   std::string name_;

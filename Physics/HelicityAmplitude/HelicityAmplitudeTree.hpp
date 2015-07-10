@@ -20,8 +20,9 @@
 namespace HelicityFormalism {
 
 class HelicityAmplitudeTree {
+  friend class HelicityAmplitudeTreeFactory;
+
   std::vector<std::shared_ptr<HelicityAmplitude> > amplitude_nodes_;
-  std::vector<std::shared_ptr<Helicity4Vector> > boost_vector_nodes_;
   std::vector<IndexPair> links_;
 
   struct HelicityComparator {

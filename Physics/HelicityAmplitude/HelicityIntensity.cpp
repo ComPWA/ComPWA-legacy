@@ -59,6 +59,9 @@ const ParameterList& HelicityIntensity::intensity(dataPoint& point,
 const ParameterList& HelicityIntensity::intensityNoEff(dataPoint& point) {
 	std::complex<double> intensity = 0;
 	if (Kinematics::instance()->isWithinPhsp(point)) {
+	  //convert the data point into the boosted 4 vectors!
+
+
 		for (unsigned int i = 0; i < amplitude_trees_.size(); ++i) {
 			intensity += amplitude_trees_[i].evaluate(kinematics_trees_[i]);
 		}
