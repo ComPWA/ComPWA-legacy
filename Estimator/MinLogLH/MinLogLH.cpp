@@ -353,30 +353,30 @@ double MinLogLH::controlParameter(ParameterList& minPar){
 	if(!useFunctionTree){
 		//Calculate normalization
 		double norm=0, normBkg=0;
-		//for(unsigned int phsp=0; phsp<nPhsp_; phsp++){ //loop over phspSample
-		//	Event theEvent(phspSample->getEvent(phsp));
-		//	dataPoint point(theEvent);
-		//	double intens = 0, intensBkg = 0;
-		//	ParameterList intensL = amp->intensity(point);
-		//	intens = intensL.GetDoubleParameter(0)->GetValue();
-		//	if(intens>0) norm+=intens;
-		//
-		//	if(ampBkg){
-		//		ParameterList intensB = ampBkg->intensity(point);
-		//		intensBkg = intensB.GetDoubleParameter(0)->GetValue();
-		//	}else{
-		//		intensBkg = 0;
-		//	}
-		//	if(intensBkg>0) normBkg+=intensBkg;
-		//}
-		//normBkg = normBkg * Kinematics::instance()->getPhspVolume()/nPhsp_;
-		//if(normBkg==0) normBkg=1;
-		//norm = norm * Kinematics::instance()->getPhspVolume()/nPhsp_;
+		for(unsigned int phsp=0; phsp<nPhsp_; phsp++){ //loop over phspSample
+			Event theEvent(phspSample->getEvent(phsp));
+			dataPoint point(theEvent);
+			double intens = 0, intensBkg = 0;
+			ParameterList intensL = amp->intensity(point);
+			intens = intensL.GetDoubleParameter(0)->GetValue();
+			if(intens>0) norm+=intens;
 
-		//Use internal amplitude integration
-		if(ampBkg) normBkg=ampBkg->normalization();
-		else normBkg=1;
-		norm = amp->normalization();
+			if(ampBkg){
+				ParameterList intensB = ampBkg->intensity(point);
+				intensBkg = intensB.GetDoubleParameter(0)->GetValue();
+			}else{
+				intensBkg = 0;
+			}
+			if(intensBkg>0) normBkg+=intensBkg;
+		}
+		normBkg = normBkg * Kinematics::instance()->getPhspVolume()/nPhsp_;
+		if(normBkg==0) normBkg=1;
+		norm = norm * Kinematics::instance()->getPhspVolume()/nPhsp_;
+
+		//Use internal amplitude integration - no unbinned efficiency correction possible
+		//if(ampBkg) normBkg=ampBkg->normalization();
+		//else normBkg=1;
+		//norm = amp->normalization();
 
 		if(norm==0) norm=1;
 		//Calculate \Sum_{ev} log()
