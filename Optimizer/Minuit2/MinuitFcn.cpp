@@ -8,18 +8,17 @@
 // Contributors:
 //     Mathias Michel - initial API and implementation
 //-------------------------------------------------------------------------------
-#include "Optimizer/Minuit2/MinuitFcn.hpp"
-#include "Optimizer/ControlParameter.hpp"
-#include "Core/ParameterList.hpp"
-#include "Core/Parameter.hpp"
-//#include "ErrLogger/ErrLogger.hh"
 #include <cassert>
 #include <memory>
 #include <iostream>
-#include <boost/log/core.hpp>
-#include <boost/log/trivial.hpp>
-#include <boost/chrono.hpp>
 #include <cmath>
+
+#include <boost/chrono.hpp>
+
+#include "Core/ParameterList.hpp"
+#include "Core/Parameter.hpp"
+#include "Optimizer/Minuit2/MinuitFcn.hpp"
+#include "Optimizer/ControlParameter.hpp"
 using namespace boost::log;
 using namespace ROOT::Minuit2;
 
@@ -56,7 +55,8 @@ double MinuitFcn::operator()(const std::vector<double>& x) const{
 	BOOST_LOG_TRIVIAL(debug) << std::setprecision(10)
 	<< "MinuitFcn: -log(L) = "<< result
 	<< std::setprecision(4)
-	<<" Time: "<<sec.count()<<"s"<<std::endl
+	<<" Time: "<<sec.count()<<"s"
+	<<" nCalls: "<<_myDataPtr->nCalls()<<std::endl
 	<<" Parameters: "<<paramOut.str();
 
 	return result;

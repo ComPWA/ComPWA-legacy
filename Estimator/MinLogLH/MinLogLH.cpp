@@ -60,6 +60,7 @@ MinLogLH::MinLogLH(std::shared_ptr<Amplitude> amp_, std::shared_ptr<Amplitude> b
 	bkgTree_amp = std::shared_ptr<FunctionTree>();
 	bkgPhspTree_amp = std::shared_ptr<FunctionTree>();
 
+	calls=0;//member of ControlParameter
 	return;
 }
 
@@ -324,8 +325,8 @@ void MinLogLH::iniLHtree(){
 		physicsTree->insertTree(bkgTree_amp,"IntensBkg");
 	}
 	physicsTree->recalculate();
-//	std::string treeString = physicsTree->head()->to_str(10);
-//	BOOST_LOG_TRIVIAL(debug) << std::endl << treeString;
+	//	std::string treeString = physicsTree->head()->to_str(10);
+	//	BOOST_LOG_TRIVIAL(debug) << std::endl << treeString;
 	if(!physicsTree->sanityCheck()) {
 		throw std::runtime_error("MinLogLH::iniLHtree() tree has structural problems. Sanity check not passed!");
 	}
@@ -352,26 +353,31 @@ double MinLogLH::controlParameter(ParameterList& minPar){
 	if(!useFunctionTree){
 		//Calculate normalization
 		double norm=0, normBkg=0;
-		for(unsigned int phsp=0; phsp<nPhsp_; phsp++){ //loop over phspSample
-			Event theEvent(phspSample->getEvent(phsp));
-			dataPoint point(theEvent);
-			double intens = 0, intensBkg = 0;
-			ParameterList intensL = amp->intensity(point);
-			intens = intensL.GetDoubleParameter(0)->GetValue();
-			if(intens>0) norm+=intens;
+		//for(unsigned int phsp=0; phsp<nPhsp_; phsp++){ //loop over phspSample
+		//	Event theEvent(phspSample->getEvent(phsp));
+		//	dataPoint point(theEvent);
+		//	double intens = 0, intensBkg = 0;
+		//	ParameterList intensL = amp->intensity(point);
+		//	intens = intensL.GetDoubleParameter(0)->GetValue();
+		//	if(intens>0) norm+=intens;
+		//
+		//	if(ampBkg){
+		//		ParameterList intensB = ampBkg->intensity(point);
+		//		intensBkg = intensB.GetDoubleParameter(0)->GetValue();
+		//	}else{
+		//		intensBkg = 0;
+		//	}
+		//	if(intensBkg>0) normBkg+=intensBkg;
+		//}
+		//normBkg = normBkg * Kinematics::instance()->getPhspVolume()/nPhsp_;
+		//if(normBkg==0) normBkg=1;
+		//norm = norm * Kinematics::instance()->getPhspVolume()/nPhsp_;
 
-			if(ampBkg){
-				ParameterList intensB = ampBkg->intensity(point);
-				intensBkg = intensB.GetDoubleParameter(0)->GetValue();
-			}else{
-				intensBkg = 0;
-			}
-			if(intensBkg>0) normBkg+=intensBkg;
-		}
-		normBkg = normBkg * Kinematics::instance()->getPhspVolume()/nPhsp_;
-		if(normBkg==0) normBkg=1;
-		norm = norm * Kinematics::instance()->getPhspVolume()/nPhsp_;
-		//BOOST_LOG_TRIVIAL(debug)<<"MinLogLH::controlParameter() Norm="<<norm;
+		//Use internal amplitude integration
+		if(ampBkg) normBkg=ampBkg->normalization();
+		else normBkg=1;
+		norm = amp->normalization();
+
 		if(norm==0) norm=1;
 		//Calculate \Sum_{ev} log()
 		double sumLog=0;
@@ -394,14 +400,13 @@ double MinLogLH::controlParameter(ParameterList& minPar){
 		}
 		lh = (-1)*((double)nUseEvt_)/sumOfWeights*sumLog + calcPenalty();
 	} else {
-		//BOOST_LOG_TRIVIAL(debug)<<"MinLogLH::controlParameter() Norm="
-		//		<<physicsTree->head()->getChildValue("normFactor");
 		physicsTree->recalculate();
 		std::shared_ptr<DoubleParameter> logLH = std::dynamic_pointer_cast<DoubleParameter>(
 				physicsTree->head()->getValue() );
 		lh = logLH->GetValue();
 	}
 	lh += calcPenalty();
+	calls++;
 	return lh; //return -logLH
 }
 

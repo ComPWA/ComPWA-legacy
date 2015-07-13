@@ -42,13 +42,13 @@ public:
 
   virtual std::shared_ptr<Amplitude> getAmplitude() { return std::shared_ptr<Amplitude>(); }
 
+  virtual int nCalls() { return calls; }
 protected:
   static std::shared_ptr<ControlParameter> instance_;
-std::shared_ptr<FunctionTree> f;
-  ControlParameter(){
-  }
-
+  std::shared_ptr<FunctionTree> f;
+  ControlParameter(){  /* nothing */ }
   virtual ~ControlParameter(){ /* nothing */	}
+  int calls;
  
 };
 #endif

@@ -60,6 +60,7 @@ public:
 	TwoBodyKinematics(std::string _nameMother, std::string _name1, std::string _name2, double deltaMassWindow=0.5);
 	void init();
 	static Kinematics* createInstance(std::string _nameMother, std::string _name1, std::string _name2, double massWindow=0.5){
+		if(_inst) return _inst;
 		_inst = new TwoBodyKinematics(_nameMother, _name1, _name2, massWindow);
 		return _inst;
 	}
