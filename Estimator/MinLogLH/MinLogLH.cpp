@@ -352,14 +352,18 @@ double MinLogLH::controlParameter(ParameterList& minPar){
 	double lh=0;
 	if(!useFunctionTree){
 		//Calculate normalization
-		double norm=0, normBkg=0;
+		double vol = Kinematics::instance()->getPhspVolume();
+		double norm=0, normSq=0, normBkg=0;
 		for(unsigned int phsp=0; phsp<nPhsp_; phsp++){ //loop over phspSample
 			Event theEvent(phspSample->getEvent(phsp));
 			dataPoint point(theEvent);
 			double intens = 0, intensBkg = 0;
 			ParameterList intensL = amp->intensity(point);
 			intens = intensL.GetDoubleParameter(0)->GetValue();
-			if(intens>0) norm+=intens;
+			if(intens>0) {
+				norm+=intens;
+				normSq+=intens*intens;
+			}
 
 			if(ampBkg){
 				ParameterList intensB = ampBkg->intensity(point);
@@ -369,9 +373,13 @@ double MinLogLH::controlParameter(ParameterList& minPar){
 			}
 			if(intensBkg>0) normBkg+=intensBkg;
 		}
-		normBkg = normBkg * Kinematics::instance()->getPhspVolume()/nPhsp_;
+		normBkg = normBkg * vol/nPhsp_;
 		if(normBkg==0) normBkg=1;
-		norm = norm * Kinematics::instance()->getPhspVolume()/nPhsp_;
+		norm = norm * vol/nPhsp_;
+		//Approximate error of integration, see (Numerical Recipes Vol3, p398, Eq. 7.7.1)
+		double normError = sqrt( ( vol*vol*normSq/nPhsp_ - norm*norm) / nPhsp_ );
+		BOOST_LOG_TRIVIAL(info) << "MinLogLH::controlParameter() | signal amplitude normalization: "
+				<<norm<<"+-"<<normError<<" ("<<normError/norm*100<<"%)";
 
 		//Use internal amplitude integration - no unbinned efficiency correction possible
 		//if(ampBkg) normBkg=ampBkg->normalization();
