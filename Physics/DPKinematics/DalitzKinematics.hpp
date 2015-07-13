@@ -51,6 +51,7 @@ protected:
 
 public:
 	static Kinematics* createInstance(std::string _nameMother, std::string _name1, std::string _name2, std::string _name3){
+		if(_inst) return _inst;
 		_inst = new DalitzKinematics(_nameMother, _name1, _name2,_name3);
 		return _inst;
 	}

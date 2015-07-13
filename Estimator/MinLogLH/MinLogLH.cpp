@@ -60,6 +60,7 @@ MinLogLH::MinLogLH(std::shared_ptr<Amplitude> amp_, std::shared_ptr<Amplitude> b
 	bkgTree_amp = std::shared_ptr<FunctionTree>();
 	bkgPhspTree_amp = std::shared_ptr<FunctionTree>();
 
+	calls=0;//member of ControlParameter
 	return;
 }
 
@@ -402,6 +403,7 @@ double MinLogLH::controlParameter(ParameterList& minPar){
 		lh = logLH->GetValue();
 	}
 	lh += calcPenalty();
+	calls++;
 	return lh; //return -logLH
 }
 
