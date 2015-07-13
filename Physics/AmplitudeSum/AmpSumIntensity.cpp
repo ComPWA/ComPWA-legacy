@@ -788,7 +788,8 @@ const double AmpSumIntensity::integral(){
 	gsl_monte_vegas_state *s = gsl_monte_vegas_alloc (dim);
 	gsl_monte_vegas_integrate (&G, xLimit_low, xLimit_high, 2, _nCalls, r,s,&res, &err);
 	gsl_monte_vegas_free(s);
-	//BOOST_LOG_TRIVIAL(info)<<"AmpSumIntensity::integrate() Integration result for amplitude sum: "<<res<<"+-"<<err<<" relAcc [%]: "<<100*err/res;
+	BOOST_LOG_TRIVIAL(info)<<"AmpSumIntensity::integrate() Integration result for amplitude sum: "
+	   <<res<<"+-"<<err<<" relAcc [%]: "<<100*err/res;
 
 	return res;
 }
@@ -840,7 +841,8 @@ const double AmpSumIntensity::normalization(){
 	gsl_monte_vegas_state *s = gsl_monte_vegas_alloc (dim);
 	gsl_monte_vegas_integrate (&G, xLimit_low, xLimit_high, 2, _nCalls, r,s,&res, &err);
 	gsl_monte_vegas_free(s);
-	BOOST_LOG_TRIVIAL(info)<<"AmpSumIntensity::normalization() Integration result for amplitude sum: "<<res<<"+-"<<err<<" relAcc [%]: "<<100*err/res;
+	BOOST_LOG_TRIVIAL(info)<<"AmpSumIntensity::normalization() Integration result for amplitude sum: "
+	   <<res<<"+-"<<err<<" relAcc [%]: "<<100*err/res;
 
 	return res;
 }
