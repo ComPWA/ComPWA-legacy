@@ -260,7 +260,7 @@ double MinuitResult::calcAIC(){
 	double r=0;
 	for(int i=0; i<fractionList.GetNDouble(); i++){
 		double val = fractionList.GetDoubleParameter(i)->GetValue();
-		if(val > 0.001) r+=val;
+		if(val > 0.001) r++;
 	}
 	return (finalLH+2*r);
 }
@@ -270,7 +270,7 @@ double MinuitResult::calcBIC(){
 	double r=0;
 	for(int i=0; i<fractionList.GetNDouble(); i++){
 		double val = fractionList.GetDoubleParameter(i)->GetValue();
-		if(val > 0.001) r+=val;
+		if(val > 0.001) r++;
 	}
 	return (finalLH+r*std::log(estimator->getNEvents()));
 }
