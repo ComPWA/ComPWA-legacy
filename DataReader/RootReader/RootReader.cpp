@@ -335,3 +335,8 @@ std::vector<dataPoint> RootReader::getDataPoints() {
 		vecPoint.push_back(dataPoint(fEvents.at(i)));
 	return vecPoint;
 }
+
+void RootReader::setResolution(std::shared_ptr<Resolution> res){
+	for(int i=0; i<fEvents.size(); i++)
+		res->resolution(fEvents.at(i));
+}

@@ -39,7 +39,6 @@ public:
 			int _subsys, int resSpin, int m, int n
 	) ;
 	virtual ~AmpRelBreitWignerRes();
-	virtual void initialise();
 	/** Breit-Wigner function
 	 *
 	 * The dynamical function implemented here is taken from PDG2014 (Eq.47-22) for
@@ -55,8 +54,10 @@ public:
 	 * @param mesonRadius Scale of interaction range
 	 * @return
 	 */
-	static std::complex<double> dynamicalFunction(double mSq, double mR, double ma, double mb, double width, unsigned int J, double mesonRadius);
-	virtual std::complex<double> evaluate(dataPoint& point) { return _norm*evaluateAmp(point)*evaluateWignerD(point); };
+	static std::complex<double> dynamicalFunction(double mSq, double mR, double ma, double mb,
+			double width, unsigned int J, double mesonRadius);
+
+	virtual std::complex<double> evaluate(dataPoint& point);
 	virtual std::complex<double> evaluateAmp(dataPoint& point);
 
 	double getSpin() {return _spin;}; //needs to be declared in AmpAbsDynamicalFunction
@@ -64,10 +65,10 @@ public:
 
 protected:
 	std::shared_ptr<DoubleParameter> _resWidth;
-//	AmpWigner2 _wignerD;
 	bool foundMasses;
 	unsigned int id23, id13;
 	unsigned int nParams;
+	double tmp_mass, tmp_width;
 
 };
 

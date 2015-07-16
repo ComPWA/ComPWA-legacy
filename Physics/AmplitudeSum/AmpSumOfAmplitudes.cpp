@@ -21,17 +21,6 @@ AmpSumOfAmplitudes::AmpSumOfAmplitudes(const char *name)
 
 }
 
-AmpSumOfAmplitudes::AmpSumOfAmplitudes(const AmpSumOfAmplitudes& other, const char* name)
-{
-
-	//  std::vector<std::shared_ptr<AmpAbsDynamicalFunction> > _pdfList ;   //  List of component PDFs
-	//  std::vector<std::shared_ptr<DoubleParameter> > _intList;    //  List of relative intensities
-	//  std::vector<std::shared_ptr<DoubleParameter> > _phaseList;  //  List of relative phases
-	//  std::vector<std::shared_ptr<AmpWigner> > _angList ;   //  List of component angular distributions
-	//	std::cout<<"copy   "<<std::endl;
-
-}
-
 AmpSumOfAmplitudes::~AmpSumOfAmplitudes(){
 	//something TODO?
 }
@@ -101,7 +90,7 @@ std::complex<double> AmpSumOfAmplitudes::getFirstAmp(dataPoint& point) const
 
 	//std::cout << "PDFs: ";
 	for(unsigned int i=0; i<_pdfList.size(); i++){
-		double a = _intList[i]->GetValue();
+		double a = std::abs(_intList[i]->GetValue());
 		double phi = _phaseList[i]->GetValue();
 		std::complex<double> eiphi(a*cos(phi),a*sin(phi));
 
@@ -120,7 +109,7 @@ double AmpSumOfAmplitudes::evaluate(dataPoint& point) const
 {
 	std::complex<double> res;
 	for(unsigned int i=0; i<_pdfList.size(); i++){
-		double a = _intList[i]->GetValue();
+		double a = std::abs(_intList[i]->GetValue());
 		double phi = _phaseList[i]->GetValue();
 		std::complex<double> eiphi(a*cos(phi),a*sin(phi));
 		res = res + _pdfList[i]->evaluate(point) * eiphi;//adding factor 2J+1 to AmpWigner2 -> consistency with tree
@@ -139,8 +128,8 @@ double AmpSumOfAmplitudes::getAmpStrength(unsigned int id){
 }
 
 double AmpSumOfAmplitudes::getAmpIntegral(unsigned int id){
-//	return ( _pdfList[id]->totalIntegral() ); //2J+1 is already in AmpWigner2
-	return ( 2*_pdfList[id]->getSpin()+1); //assume that amplitude is normalized, save some cpu time
+	double n = 2*_pdfList[id]->getSpin()+1; //assume that amplitude is normalized, save some cpu time
+	return n*n;
 }
 
 int AmpSumOfAmplitudes::getAmpId(std::string name) {

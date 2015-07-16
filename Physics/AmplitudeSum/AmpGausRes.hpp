@@ -34,12 +34,10 @@ public:
 			DoubleParameter& _resMass, DoubleParameter& _resWidth,
 			int _subsys) ;
 
-	AmpGausRes(const AmpGausRes&, const char*);
 	AmpGausRes(const AmpGausRes&);
 
 	~AmpGausRes();
 
-	virtual void initialise();
 	virtual std::complex<double> evaluate(dataPoint& point);
 	virtual std::complex<double> evaluateAmp(dataPoint& point);
 	virtual double evaluateWignerD(dataPoint& point) const { return 1; };

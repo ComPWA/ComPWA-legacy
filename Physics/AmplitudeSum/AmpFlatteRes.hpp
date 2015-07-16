@@ -25,7 +25,6 @@
 
 #include "Physics/AmplitudeSum/AmpAbsDynamicalFunction.hpp"
 #include "Physics/AmplitudeSum/AmpKinematics.hpp"
-#include "Physics/AmplitudeSum/AmpWigner.hpp"
 #include "Physics/AmplitudeSum/AmpWigner2.hpp"
 #include "Physics/AmplitudeSum/NonResonant.hpp"
 
@@ -45,14 +44,14 @@ public:
 	/** Dynamical function for two coupled channel approach
 	 *
 	 * @param mSq center-of-mass energy^2 (=s)
-	 * @param mR mass of resonaces
+	 * @param mR mass of resonances
 	 * @param massA1 mass of first particle of signal channel
 	 * @param massA2 mass of second particle of signal channel
 	 * @param gA coupling constant for signal channel
 	 * @param massB1 mass of first particle of second channel
 	 * @param massB2 mass of second particle of second channel
-	 * @param gB coupling constant for secondchannel
-	 * @param J resonace spin
+	 * @param gB coupling constant for second channel
+	 * @param J resonance spin
 	 * @param mesonRadius 1/interaction length (needed for barrier factors)
 	 * @return
 	 */
@@ -61,8 +60,7 @@ public:
 			double massB1, double massB2, double gB,
 			unsigned int J, double mesonRadius);
 
-	virtual void initialise() { };
-	std::complex<double> evaluate(dataPoint& point) { return ( _norm*evaluateAmp(point)*evaluateWignerD(point) ); }
+	std::complex<double> evaluate(dataPoint& point);
 	virtual std::complex<double> evaluateAmp(dataPoint& point) ;
 
 	double getSpin() {return _spin;}; //needs to be declared in AmpAbsDynamicalFunction
@@ -73,6 +71,7 @@ protected:
 	double _g2_partA;//hidden channel: mass particle A
 	double _g2_partB; //hidden channel: mass particle B
 	std::shared_ptr<DoubleParameter> _g2, _g1;
+	double tmp_g2, tmp_g1, tmp_mass;
 	bool foundMasses;
 	unsigned int id23, id13;
 	double mesonRadius;

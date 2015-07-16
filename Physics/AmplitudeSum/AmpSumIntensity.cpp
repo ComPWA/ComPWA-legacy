@@ -27,7 +27,7 @@
 AmpSumIntensity::AmpSumIntensity(AmplitudeSetup ini, normStyle ns, std::shared_ptr<Efficiency> eff,
 		unsigned int nCalls) :
 									totAmp("relBWsumAmplitude"), ampSetup(ini),
-									_normStyle(ns), _calcNorm(1),
+									_normStyle(ns),
 									_calcMaxFcnVal(0),eff_(eff),_nCalls(nCalls)
 {
 	init();
@@ -36,7 +36,7 @@ AmpSumIntensity::AmpSumIntensity(AmplitudeSetup ini, normStyle ns, std::shared_p
 AmpSumIntensity::AmpSumIntensity(AmplitudeSetup ini, std::shared_ptr<Efficiency> eff,
 		unsigned int nCalls) :
 									totAmp("relBWsumAmplitude"), ampSetup(ini),
-									_normStyle(none), _calcNorm(0),
+									_normStyle(none),
 									_calcMaxFcnVal(0),eff_(eff),_nCalls(nCalls)
 {
 	init();
@@ -46,8 +46,6 @@ void AmpSumIntensity::init(){
 	result.AddParameter(std::shared_ptr<DoubleParameter>(new DoubleParameter("AmpSumResult")));
 
 	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
-	_calcNorm=1;
-	if(_normStyle==normStyle::none) _calcNorm=0;
 
 	params.AddParameter( std::shared_ptr<DoubleParameter> (
 			new DoubleParameter("motherRadius",1.5) ));
@@ -93,12 +91,8 @@ void AmpSumIntensity::init(){
 				subSys, tmp.m_spin,tmp.m_m,tmp.m_n) );
 		totAmp.addBW(tmpbw, params.GetDoubleParameter("mag_"+name), params.GetDoubleParameter("phase_"+name));
 
-		//setting normalization between amplitudes
-		double norm=1.0;
-		if(norm<0 || _calcNorm) {//recalculate normalization
-			norm = normReso(tmpbw);
-		}
-		tmpbw->SetNormalization(1/norm);
+		//Disable normalization?
+		if(_normStyle==normStyle::none) tmpbw->SetNormalization(-1);
 	}// end loop over resonances
 
 	for(std::vector<FlatteConf>::iterator reso=ampSetup.getFlatte().begin(); reso!=ampSetup.getFlatte().end(); reso++){
@@ -151,10 +145,9 @@ void AmpSumIntensity::init(){
 					subSys, tmp.m_spin,tmp.m_m,tmp.m_n,tmp.m_mesonRadius) );
 		}
 		totAmp.addBW(tmpbw, params.GetDoubleParameter("mag_"+name), params.GetDoubleParameter("phase_"+name));
+		//Disable normalization?
+		if(_normStyle==normStyle::none) tmpbw->SetNormalization(-1);
 
-		double norm=1.0;
-		if(norm<0 || _calcNorm)	norm = normReso(tmpbw);
-		tmpbw->SetNormalization(1./norm);
 	}// end loop over resonancesFlatte
 	for(std::vector<Flatte3ChConf>::iterator reso=ampSetup.getFlatte3Ch().begin(); reso!=ampSetup.getFlatte3Ch().end(); reso++){
 		Flatte3ChConf tmp = (*reso);
@@ -217,10 +210,9 @@ void AmpSumIntensity::init(){
 		}
 
 		totAmp.addBW(tmpbw, params.GetDoubleParameter("mag_"+name), params.GetDoubleParameter("phase_"+name));
+		//Disable normalization?
+		if(_normStyle==normStyle::none) tmpbw->SetNormalization(-1);
 
-		double norm=1.0;
-		if(norm<0 || _calcNorm)	norm = normReso(tmpbw);
-		tmpbw->SetNormalization(1./norm);
 	}// end loop over resonancesFlatte
 
 	for(std::vector<basicConf>::iterator reso=ampSetup.getNonRes().begin(); reso!=ampSetup.getNonRes().end(); reso++){
@@ -237,10 +229,9 @@ void AmpSumIntensity::init(){
 		std::shared_ptr<NonResonant> tmpNonRes( new NonResonant(name.c_str()) );
 
 		totAmp.addBW(tmpNonRes, params.GetDoubleParameter("mag_"+name), params.GetDoubleParameter("phase_"+name));
+		//Disable normalization?
+		if(_normStyle==normStyle::none) tmpNonRes->SetNormalization(-1);
 
-		double norm=1.0;
-		if(norm<0 || _calcNorm)	norm = normReso(tmpNonRes);
-		tmpNonRes->SetNormalization(1./norm);
 	}// end loop over resonancesFlatte
 
 	BOOST_LOG_TRIVIAL(info) << "AmpSumIntensity::init() | setting parameter g1_a_0 to "
@@ -731,14 +722,6 @@ void AmpSumIntensity::calcMaxVal(std::shared_ptr<Generator> gen){
 	BOOST_LOG_TRIVIAL(info)<<"AmpSumIntensity::calcMaxVal() calculated maximum of amplitude: "
 			<<_maxFcnVal<<" at m23sq="<<maxM23<<"/m13sq="<<maxM13;
 	return ;
-}
-double AmpSumIntensity::normReso(std::shared_ptr<AmpAbsDynamicalFunction> amp){
-	double norm;
-	if(_normStyle==none) norm=amp->GetNormalization();
-	else if(_normStyle==one) norm = sqrt(amp->integral(_nCalls));
-	BOOST_LOG_TRIVIAL(debug)<<"AmpSumIntensity::normRes Normalization constant for "
-			<<amp->GetName()<<": "<<1.0/norm;
-	return norm;
 }
 double AmpSumIntensity::evaluate(double x[], size_t dim) {
 	/* Calculation amplitude integral (excluding efficiency) */

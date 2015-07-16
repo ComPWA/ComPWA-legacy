@@ -46,6 +46,17 @@ AmpFlatteRes3Ch::AmpFlatteRes3Ch(const char *name,
 AmpFlatteRes3Ch::~AmpFlatteRes3Ch()
 {
 }
+std::complex<double> AmpFlatteRes3Ch::evaluate(dataPoint& point) {
+	if(_mR->GetValue() != tmp_mass || _g1->GetValue()!=tmp_g1 || _g2->GetValue()!=tmp_g2 || _g3->GetValue()!=tmp_g3 ) {
+		SetModified();
+		tmp_mass = _mR->GetValue();
+		tmp_g1 = _g1->GetValue();
+		tmp_g2 = _g2->GetValue();
+		tmp_g3 = _g3->GetValue();
+	}
+
+	return ( GetNormalization()*evaluateAmp(point)*evaluateWignerD(point) );
+}
 
 std::complex<double> AmpFlatteRes3Ch::evaluateAmp(dataPoint& point) {
 
@@ -78,10 +89,10 @@ std::complex<double> AmpFlatteRes3Ch::dynamicalFunction(double mSq, double mR,
 
 	//channel A - signal channel
 	//break-up momentum
-//	std::complex<double> pA = AmpKinematics::phspFactor(sqrtS, massA1, massA2);
+	//	std::complex<double> pA = AmpKinematics::phspFactor(sqrtS, massA1, massA2);
 	double barrierA = AmpKinematics::FormFactor(sqrtS,massA1,massA2,J,mesonRadius)/AmpKinematics::FormFactor(mR,massA1,massA2,J,mesonRadius);
 	//std::complex<double> qTermA = std::pow((qValue(sqrtS,massA1,massA2) / qValue(mR,massA1,massA2)), (2.*J+ 1.));
-//	std::complex<double> qTermA = std::pow((phspFactor(sqrtS,massA1,massA2) / phspFactor(mR,massA1,massA2))*mR/sqrtS, (2*J+ 1));
+	//	std::complex<double> qTermA = std::pow((phspFactor(sqrtS,massA1,massA2) / phspFactor(mR,massA1,massA2))*mR/sqrtS, (2*J+ 1));
 	//convert coupling to partial width of channel A
 	std::complex<double> gammaA = couplingToWidth(mSq,mR,gA,massA1,massA2,J,mesonRadius);
 	//including the factor qTermA, as suggested by PDG, leads to an amplitude that doesn't converge.
@@ -89,10 +100,10 @@ std::complex<double> AmpFlatteRes3Ch::dynamicalFunction(double mSq, double mR,
 
 	//channel B - hidden channel
 	//break-up momentum
-//	std::complex<double> pB = AmpKinematics::phspFactor(sqrtS, massB1, massB2);
+	//	std::complex<double> pB = AmpKinematics::phspFactor(sqrtS, massB1, massB2);
 	double barrierB = AmpKinematics::FormFactor(sqrtS,massB1,massB2,J,1.5)/AmpKinematics::FormFactor(mR,massB1,massB2,J,1.5);
 	//std::complex<double> qTermB = std::pow((qValue(sqrtS,massB1,massB2) / qValue(mR,massB1,massB2)), (2.*J+ 1.));
-//	std::complex<double> qTermB = std::pow((phspFactor(sqrtS,massB1,massB2) / phspFactor(mR,massB1,massB2))*mR/sqrtS, (2*J+ 1));
+	//	std::complex<double> qTermB = std::pow((phspFactor(sqrtS,massB1,massB2) / phspFactor(mR,massB1,massB2))*mR/sqrtS, (2*J+ 1));
 	double gB = couplingRatioB;
 	//	std::cout<<gA<< " "<<gB<<" "<<couplingRatio<<std::endl;
 	//convert coupling to partial width of channel B
@@ -101,10 +112,10 @@ std::complex<double> AmpFlatteRes3Ch::dynamicalFunction(double mSq, double mR,
 
 	//channel C - hidden channel
 	//break-up momentum
-//	std::complex<double> pC = AmpKinematics::phspFactor(sqrtS, massC1, massC2);
+	//	std::complex<double> pC = AmpKinematics::phspFactor(sqrtS, massC1, massC2);
 	double barrierC = AmpKinematics::FormFactor(sqrtS,massC1,massC2,J,1.5)/AmpKinematics::FormFactor(mR,massC1,massC2,J,1.5);
 	//std::complex<double> qTermC = std::pow((qValue(sqrtS,massC1,massC2) / qValue(mR,massC1,massC2)), (2.*J+ 1.));
-//	std::complex<double> qTermC = std::pow((phspFactor(sqrtS,massC1,massC2) / phspFactor(mR,massC1,massC2))*mR/sqrtS, (2*J+ 1));
+	//	std::complex<double> qTermC = std::pow((phspFactor(sqrtS,massC1,massC2) / phspFactor(mR,massC1,massC2))*mR/sqrtS, (2*J+ 1));
 	double gC = couplingRatioC;
 	//convert coupling to partial width of channel C
 	std::complex<double> gammaC = couplingToWidth(mSq,mR,gC,massC1,massC2,J,mesonRadius);
@@ -452,17 +463,17 @@ void Flatte3ChConf::put(boost::property_tree::ptree &pt_){
 void Flatte3ChConf::update(ParameterList par){
 	FlatteConf::update(par);
 	try{// only update parameters if they are found in list
-	  if(m_name.find("a_0(980)") == 0)
-		m_g2= par.GetDoubleParameter("g1_a_0")->GetValue();
-	  else
-		m_g2= par.GetDoubleParameter("g2_"+m_name)->GetValue();
+		if(m_name.find("a_0(980)") == 0)
+			m_g2= par.GetDoubleParameter("g1_a_0")->GetValue();
+		else
+			m_g2= par.GetDoubleParameter("g2_"+m_name)->GetValue();
 	} catch (BadParameter b) { //do nothing if parameter is not found
 
 	}
 	try{// only update parameters if they are found in list
 		m_g3= par.GetDoubleParameter("g3_"+m_name)->GetValue();
 	} catch (BadParameter b) {
-//		BOOST_LOG_TRIVIAL(error) <<"FlatteConf::update() | coupling g3 not found in parameter list!";
-//		throw;
+		//		BOOST_LOG_TRIVIAL(error) <<"FlatteConf::update() | coupling g3 not found in parameter list!";
+		//		throw;
 	}
 }

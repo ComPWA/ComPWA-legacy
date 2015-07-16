@@ -58,8 +58,7 @@ public:
 			double massC1, double massC2, double gC,
 			unsigned int J, double mesonRadius);
 
-	virtual void initialise() { };
-	std::complex<double> evaluate(dataPoint& point) { return ( _norm*evaluateAmp(point)*evaluateWignerD(point) ); }
+	std::complex<double> evaluate(dataPoint& point);
 	virtual std::complex<double> evaluateAmp(dataPoint& point) ;
 
 	double getSpin() {return _spin;}; //needs to be declared in AmpAbsDynamicalFunction
@@ -72,6 +71,7 @@ protected:
 	double _g3_partA;//hidden channel: mass particle A
 	double _g3_partB; //hidden channel: mass particle B
 	std::shared_ptr<DoubleParameter> _g3, _g2, _g1;
+	double tmp_g3, tmp_g2, tmp_g1, tmp_mass;
 	bool foundMasses;
 	unsigned int id23, id13;
 	double mesonRadius;

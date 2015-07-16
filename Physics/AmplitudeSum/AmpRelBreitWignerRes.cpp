@@ -33,16 +33,20 @@ AmpRelBreitWignerRes::AmpRelBreitWignerRes(const char *name,
 		_resWidth(resWidth),
 		foundMasses(false),
 		nParams(6)
-{
-	initialise();
-}
+{ }
 
 AmpRelBreitWignerRes::~AmpRelBreitWignerRes() 
 {
 }
 
-void AmpRelBreitWignerRes::initialise() 
-{
+std::complex<double> AmpRelBreitWignerRes::evaluate(dataPoint& point) {
+	//do we have to recalculate the normalization?
+	if(_mR->GetValue() != tmp_mass || _resWidth->GetValue() != tmp_width) {
+		SetModified();
+		tmp_mass = _mR->GetValue();
+		tmp_width = _resWidth->GetValue();
+	}
+	return ( GetNormalization()*evaluateAmp(point)*evaluateWignerD(point));
 }
 
 std::complex<double> AmpRelBreitWignerRes::evaluateAmp(dataPoint& point) {

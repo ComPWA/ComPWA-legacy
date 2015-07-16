@@ -175,7 +175,8 @@ void FitResult::calcFraction(ParameterList& parList){
 	BOOST_LOG_TRIVIAL(debug)<<"FitResult::calcFraction() norm="<<norm;
 	int nRes=_amp->getNumberOfResonances();
 	for(unsigned int i=0;i<nRes; i++){ //fill matrix
-		double resInt= _amp->getAmpIntegral(i);//this is simply the factor 2J+1, because the resonance is already normalized
+		//this is simply the factor 2J+1, because the resonance is already normalized
+		double resInt= _amp->getAmpIntegral(i);
 		std::string resName = _amp->getNameOfResonance(i);
 		std::shared_ptr<DoubleParameter> magPar = currentPar.GetDoubleParameter("mag_"+resName);
 		double mag = std::abs(magPar->GetValue()); //value of magnitude

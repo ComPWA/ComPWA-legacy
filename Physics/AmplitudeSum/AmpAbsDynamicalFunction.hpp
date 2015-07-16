@@ -24,17 +24,16 @@
 #include "Core/Parameter.hpp"
 #include "Core/DataPoint.hpp"
 
-class AmpAbsDynamicalFunction {
-public:
-  AmpAbsDynamicalFunction(const char *name);
+class AmpAbsDynamicalFunction
+{
 
-  AmpAbsDynamicalFunction(const AmpAbsDynamicalFunction&, const char*);
+public:
+  AmpAbsDynamicalFunction(const char *name, int nCalls=30000);
 
   virtual ~AmpAbsDynamicalFunction();
 
   //! Implementation of interface for streaming info about the strategy
   virtual const std::string to_str() const { return (_name); }
-  virtual void initialise() = 0; 
   //! value of resonance at \param point
   virtual std::complex<double> evaluate(dataPoint& point) = 0;
   //! value of dynamical amplitude at \param point
@@ -43,20 +42,26 @@ public:
   //! Get resonance spin
   virtual double getSpin() = 0;
   //! Calculation integral |dynamical amplitude|^2
-  virtual double integral(unsigned int nCalls) const;
+  virtual double integral();
   //! Calculation integral |dynamical amplitude * WignerD|^2
-  virtual double totalIntegral(unsigned int nCalls) const;
+  virtual double totalIntegral() const;
 
   virtual std::string GetName(){ return _name; };
   virtual std::string GetTitle(){ return GetName(); };
-  virtual double GetNormalization(){ return _norm; };
+  //! Get current normalization
+  virtual double GetNormalization();
+  //! Set normalization manually. Setting to values <0 disables normalization
   virtual void SetNormalization(double n){ _norm=n; };
  
+  virtual void SetModified() { modified=1; }
+
 protected:
   std::string _name;
-  double _norm;
+  int _nCalls;
 
 private:
+  double _norm;
+  bool modified;
 
 };
 

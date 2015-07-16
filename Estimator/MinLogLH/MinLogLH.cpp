@@ -199,22 +199,6 @@ void MinLogLH::iniLHtree(){
 	std::shared_ptr<Strategy> logStrat(new LogOf(ParType::DOUBLE));
 	std::shared_ptr<Strategy> complStrat(new Complexify(ParType::COMPLEX));
 	std::shared_ptr<Strategy> invStrat(new Inverse(ParType::DOUBLE));
-	//std::shared_ptr<SquareRoot> sqRootStrat = std::shared_ptr<SquareRoot>(new SquareRoot(ParType::DOUBLE));
-	//std::shared_ptr<MultAll> mmultStrat = std::shared_ptr<MultAll>(new MultAll(ParType::MCOMPLEX));
-	//std::shared_ptr<MultAll> mmultDStrat = std::shared_ptr<MultAll>(new MultAll(ParType::MDOUBLE));
-	//std::shared_ptr<AddAll> multiDoubleAddStrat = std::shared_ptr<AddAll>(new AddAll(ParType::MDOUBLE));
-	//std::shared_ptr<AddAll> multiComplexAddStrat = std::shared_ptr<AddAll>(new AddAll(ParType::MCOMPLEX));
-	//std::shared_ptr<AbsSquare> msqStrat = std::shared_ptr<AbsSquare>(new AbsSquare(ParType::MDOUBLE));
-	//std::shared_ptr<LogOf> mlogStrat = std::shared_ptr<LogOf>(new LogOf(ParType::MDOUBLE));
-	//std::shared_ptr<MultAll> multStrat = std::shared_ptr<MultAll>(new MultAll(ParType::COMPLEX));
-	//std::shared_ptr<MultAll> multDStrat = std::shared_ptr<MultAll>(new MultAll(ParType::DOUBLE));
-	//std::shared_ptr<AddAll> addStrat = std::shared_ptr<AddAll>(new AddAll(ParType::DOUBLE));
-	//std::shared_ptr<AddAll> addComplexStrat = std::shared_ptr<AddAll>(new AddAll(ParType::COMPLEX));
-	//std::shared_ptr<AbsSquare> sqStrat = std::shared_ptr<AbsSquare>(new AbsSquare(ParType::DOUBLE));
-	//std::shared_ptr<LogOf> logStrat = std::shared_ptr<LogOf>(new LogOf(ParType::DOUBLE));
-	//std::shared_ptr<Complexify> complStrat = std::shared_ptr<Complexify>(new Complexify(ParType::COMPLEX));
-	//std::shared_ptr<Inverse> invStrat = std::shared_ptr<Inverse>(new Inverse(ParType::DOUBLE));
-	//std::shared_ptr<SquareRoot> sqRootStrat = std::shared_ptr<SquareRoot>(new SquareRoot(ParType::DOUBLE));
 
 	BOOST_LOG_TRIVIAL(debug)<<"MinLogLH::iniLHTree() construction normalization tree";
 	//=== Signal normalization
@@ -339,7 +323,8 @@ double MinLogLH::calcPenalty(){
 	if(penaltyLambda<=0) return 0; //penalty term disabled
 	double magSum = 0;
 	for(unsigned int i=0;i<amp->getNumberOfResonances(); i++){
-		magSum += amp->getAmpMagnitude(i);
+		//magSum += amp->getAmpMagnitude(i);
+		magSum += amp->getAmpMagnitude(i)*std::sqrt(amp->getAmpIntegral(i));
 	}
 	BOOST_LOG_TRIVIAL(debug) << "MinLogLH::calcPenalty() | Adding penalty term to LH: "
 			<<penaltyLambda*magSum;
@@ -354,8 +339,12 @@ double MinLogLH::controlParameter(ParameterList& minPar){
 		//Calculate normalization
 		double vol = Kinematics::instance()->getPhspVolume();
 		double norm=0, normSq=0, normBkg=0;
-		for(unsigned int phsp=0; phsp<nPhsp_; phsp++){ //loop over phspSample
-			Event theEvent(phspSample->getEvent(phsp));
+		std::shared_ptr<Data> sam;
+		if(accSample) sam=accSample;
+		else sam=phspSample;
+		int sam_size = sam->getNEvents();
+		for(unsigned int phsp=0; phsp<sam_size; phsp++){ //loop over phspSample
+			Event theEvent(sam->getEvent(phsp));
 			dataPoint point(theEvent);
 			double intens = 0, intensBkg = 0;
 			ParameterList intensL = amp->intensity(point);
@@ -373,13 +362,13 @@ double MinLogLH::controlParameter(ParameterList& minPar){
 			}
 			if(intensBkg>0) normBkg+=intensBkg;
 		}
-		normBkg = normBkg * vol/nPhsp_;
+		normBkg = normBkg * vol/sam_size;
 		if(normBkg==0) normBkg=1;
-		norm = norm * vol/nPhsp_;
+		norm = norm * vol/sam_size;
 		//Approximate error of integration, see (Numerical Recipes Vol3, p398, Eq. 7.7.1)
-		double normError = sqrt( ( vol*vol*normSq/nPhsp_ - norm*norm) / nPhsp_ );
-		BOOST_LOG_TRIVIAL(info) << "MinLogLH::controlParameter() | signal amplitude normalization: "
-				<<norm<<"+-"<<normError<<" ("<<normError/norm*100<<"%)";
+		double normError = sqrt( ( vol*vol*normSq/sam_size - norm*norm) / sam_size);
+		//		BOOST_LOG_TRIVIAL(info) << "MinLogLH::controlParameter() | signal amplitude normalization: "
+		//				<<norm<<"+-"<<normError<<" ("<<normError/norm*100<<"%)";
 
 		//Use internal amplitude integration - no unbinned efficiency correction possible
 		//if(ampBkg) normBkg=ampBkg->normalization();

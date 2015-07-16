@@ -83,6 +83,9 @@ public:
 	//! Select random subset of events
 	std::shared_ptr<Data> rndSubSet(unsigned int size, std::shared_ptr<Generator> gen);
 
+	//! Add resolution to all stored events
+	void setResolution(std::shared_ptr<Resolution> res);
+
 	//! Set efficiency value for all stored events. Efficiency is taken from Efficiency object.
 	void setEfficiency(std::shared_ptr<Efficiency> eff);
 	//! Reset effciencies of all events
@@ -116,8 +119,6 @@ protected:
 	//storage of events
 	std::vector<std::string> fVarNames;
 	std::vector<Event> fEvents;
-//	unsigned int fmaxEvents;
-	//  unsigned int fEvent;
 
 	virtual void storeEvents();
 	virtual void bin();

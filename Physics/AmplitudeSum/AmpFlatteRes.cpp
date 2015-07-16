@@ -40,6 +40,16 @@ AmpFlatteRes::~AmpFlatteRes()
 {
 }
 
+std::complex<double> AmpFlatteRes::evaluate(dataPoint& point) {
+	if(_mR->GetValue() != tmp_mass || _g1->GetValue()!=tmp_g1 || _g2->GetValue()!=tmp_g2 ) {
+		SetModified();
+		tmp_mass = _mR->GetValue();
+		tmp_g1 = _g1->GetValue();
+		tmp_g2 = _g2->GetValue();
+	}
+	return ( GetNormalization()*evaluateAmp(point)*evaluateWignerD(point) );
+}
+
 std::complex<double> AmpFlatteRes::evaluateAmp(dataPoint& point) {
 	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
 	if(!foundMasses){
@@ -154,15 +164,15 @@ void FlatteConf::update(ParameterList par){
 	} catch (BadParameter b) {//do nothing if parameter is not found
 	}
 	try{// only update parameters if they are found in list
-	  if(m_name.find("a_0(980)") == 0)
-		m_g1= par.GetDoubleParameter("g1_a_0")->GetValue();
-	  else
-		m_g1= par.GetDoubleParameter("g1_"+m_name)->GetValue();
+		if(m_name.find("a_0(980)") == 0)
+			m_g1= par.GetDoubleParameter("g1_a_0")->GetValue();
+		else
+			m_g1= par.GetDoubleParameter("g1_"+m_name)->GetValue();
 	} catch (BadParameter b) {
-//		try{// only update parameters if they are found in list
-//			m_g1= par.GetDoubleParameter("g1_a_0")->GetValue();
-//		} catch (BadParameter b) {//do nothing if parameter is not found
-//		}
+		//		try{// only update parameters if they are found in list
+		//			m_g1= par.GetDoubleParameter("g1_a_0")->GetValue();
+		//		} catch (BadParameter b) {//do nothing if parameter is not found
+		//		}
 	}
 	try{// only update parameters if they are found in list
 		m_g2= par.GetDoubleParameter("g2_"+m_name)->GetValue();

@@ -40,14 +40,14 @@ public:
 
   virtual void inline setName(const std::string& name) { fName = name; }
   virtual const inline std::string& getName() { return fName; }
-  virtual double inline getWeight() {return fWeight;};
-  virtual void inline setWeight(double w) { fWeight=w;};
-  virtual int inline getFlavour() {return fFlavour;};
-  virtual void inline setFlavour(int fl) { fFlavour = fl;};
-  virtual int inline getCharge() {return fCharge;};
-  virtual void inline setCharge(int ch) { fCharge = ch;};
-  virtual double inline getEfficiency() {return fEff;};
-  virtual void inline setEfficiency(double eff) { fEff = eff;};
+  virtual double inline getWeight() {return fWeight;}
+  virtual void inline setWeight(double w) { fWeight=w;}
+  virtual int inline getFlavour() {return fFlavour;}
+  virtual void inline setFlavour(int fl) { fFlavour = fl;}
+  virtual int inline getCharge() {return fCharge;}
+  virtual void inline setCharge(int ch) { fCharge = ch;}
+  virtual double inline getEfficiency() {return fEff;}
+  virtual void inline setEfficiency(double eff) { fEff = eff;}
 
   virtual const inline unsigned int getNParticles() { return fParticles.size(); }
   virtual const Particle& getParticle(const unsigned int id);
@@ -59,8 +59,6 @@ protected:
   std::string fName;
   int fFlavour; //1 -> particle, 0 -> unknown, -1 anti-particle
   int fCharge;
-  //Particle fParticleB;
-  //TODO: other event info?
 
 };
 

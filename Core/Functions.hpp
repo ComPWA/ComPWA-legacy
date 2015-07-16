@@ -617,11 +617,11 @@ public:
 			unsigned int nElements = paras.GetMultiDouble(0)->GetNValues();
 			//fill MultiDouble parameter
 			std::vector<std::complex<double> > results(nElements, std::complex<double>(0.,0.));
-			std::shared_ptr<MultiDouble> tmpA = paras.GetMultiDouble(0);
-			std::shared_ptr<MultiDouble> tmpB = paras.GetMultiDouble(1);
+			std::shared_ptr<MultiDouble> ma = paras.GetMultiDouble(0);
+			std::shared_ptr<MultiDouble> mphi = paras.GetMultiDouble(1);
 			for(unsigned int ele=0; ele<nElements; ele++)
-				results[ele] = std::complex<double>(std::abs(tmpA->GetValue(ele))*std::cos(tmpB->GetValue(ele)),
-						std::abs(tmpA->GetValue(ele))*std::sin(tmpB->GetValue(ele)));//a*cos(phi),a*sin(phi)
+				results[ele] = std::complex<double>(std::abs(ma->GetValue(ele))*std::cos(mphi->GetValue(ele)),
+						std::abs(ma->GetValue(ele))*std::sin(mphi->GetValue(ele)));//a*cos(phi),a*sin(phi)
 
 			out = std::shared_ptr<AbsParameter>(new MultiComplex(out->GetName(),results));
 
@@ -634,10 +634,10 @@ public:
 				//TODO: exception wrong input
 				return false;
 			}
-			double tmpA = std::abs(paras.GetDoubleParameter(0)->GetValue());
-			double tmpB = paras.GetDoubleParameter(1)->GetValue();
+			double a = std::abs(paras.GetDoubleParameter(0)->GetValue());
+			double phi = paras.GetDoubleParameter(1)->GetValue();
 			out = std::shared_ptr<AbsParameter>(new ComplexParameter(out->GetName(),
-					std::complex<double>(tmpA*std::cos(tmpB),tmpA*std::sin(tmpB))));
+					std::complex<double>(a*std::cos(phi),a*std::sin(phi))));
 			break;
 		}//end double
 

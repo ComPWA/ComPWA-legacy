@@ -22,7 +22,10 @@ public:
 	NonResonant(std::string name);
 	virtual void initialise() { };
 	//! value at \param point
-	virtual std::complex<double> evaluate(dataPoint& point) { return _norm*evaluateAmp(point); };
+	virtual std::complex<double> evaluate(dataPoint& point) {
+		if(GetNormalization()<0) return evaluateAmp(point); //normalization is disabled
+		return (1/Kinematics::instance()->getPhspVolume())*evaluateAmp(point);
+	}
 	//! value of dynamical amplitude at \param point
 	virtual std::complex<double> evaluateAmp(dataPoint& point) { return 1;} ;
 	//! value of WignerD amplitude at \param point

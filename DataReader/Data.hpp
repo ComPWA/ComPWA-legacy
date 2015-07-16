@@ -30,6 +30,7 @@
 #include "Core/Event.hpp"
 #include "Core/Generator.hpp"
 #include "Core/DataPoint.hpp"
+#include "Core/Resolution.hpp"
 
 class Data
 {
@@ -56,6 +57,9 @@ public:
 	virtual void reduce(unsigned int newSize) = 0;
 	//! Select random subset of events
 	virtual std::shared_ptr<Data> rndSubSet(unsigned int size, std::shared_ptr<Generator> gen) = 0;
+
+	//! Add resolution to all stored events
+	void setResolution(std::shared_ptr<Resolution> res) { };
 
 	//! Set efficiency value for all stored events. Efficiency is taken from Efficiency object.
 	virtual void setEfficiency(std::shared_ptr<Efficiency> eff) { };

@@ -18,14 +18,12 @@
 #include "Core/PhysConst.hpp"
 #include "Physics/DPKinematics/DalitzKinematics.hpp"
 #include "Physics/AmplitudeSum/AmpAbsDynamicalFunction.hpp"
+#include "Physics/AmplitudeSum/AmpKinematics.hpp"
 
-AmpAbsDynamicalFunction::AmpAbsDynamicalFunction(const char *name) : _name(name), _norm(1.0)
+AmpAbsDynamicalFunction::AmpAbsDynamicalFunction(const char *name, int nCalls) :
+_name(name), _norm(1.0), modified(1), _nCalls(nCalls)
 {
 
-}
-
-AmpAbsDynamicalFunction::AmpAbsDynamicalFunction(const AmpAbsDynamicalFunction& other, const char* newname)
-{
 }
 
 AmpAbsDynamicalFunction::~AmpAbsDynamicalFunction() 
@@ -45,8 +43,7 @@ double evalAmp(double* x, size_t dim, void* param) {
 	return ( std::norm(res) ); //integrate over |F|^2
 };
 
-double AmpAbsDynamicalFunction::integral(unsigned int nCalls) const{
-	BOOST_LOG_TRIVIAL(debug)<<"AmpAbsDynamicalFunction::integral() calculating integral of "<<_name<<" !";
+double AmpAbsDynamicalFunction::integral(){
 	size_t dim=2;
 	double res=0.0, err=0.0;
 
@@ -65,15 +62,23 @@ double AmpAbsDynamicalFunction::integral(unsigned int nCalls) const{
 	* 		 this should be sufficiency for most applications
 	*/
 	gsl_monte_vegas_state *s = gsl_monte_vegas_alloc (dim);
-	gsl_monte_vegas_integrate (&F, xLimit_low, xLimit_high, 2, nCalls, r,s,&res, &err);
+	gsl_monte_vegas_integrate (&F, xLimit_low, xLimit_high, 2, _nCalls, r,s,&res, &err);
 	gsl_monte_vegas_free(s);
-	BOOST_LOG_TRIVIAL(debug)<<"AmpAbsDynamicalFunction::integral() Integration result for |"<<_name<<"|^2: "<<res<<"+-"<<err<<" relAcc [%]: "<<100*err/res;
+//	BOOST_LOG_TRIVIAL(debug)<<"AmpAbsDynamicalFunction::integral() Integration result for |"
+//			<<_name<<"|^2: "<<res<<"+-"<<err<<" relAcc [%]: "<<100*err/res;
 
 	return res;
 };
+double AmpAbsDynamicalFunction::GetNormalization(){
+	if(_norm<0) return 1.0; //normalization is disabled
+	if(!modified) return _norm;
+	_norm = 1/sqrt(integral());
+	modified=0;
+	return _norm;
+};
 
 double eval(double* x, size_t dim, void* param) {
-	/* We need a wrapper here because a eval() is a member function of AmpAbsDynamicalFunction
+	/* We need a wrapper here because evaluate() is a member function of AmpAbsDynamicalFunction
 	 * and can therefore not be referenced. But gsl_monte_function expects a function reference.
 	 * As third parameter we pass the reference to the current instance of AmpAbsDynamicalFunction
 	 */
@@ -85,7 +90,7 @@ double eval(double* x, size_t dim, void* param) {
 	return ( std::norm(res) ); //integrate over |F|^2
 };
 
-double AmpAbsDynamicalFunction::totalIntegral(unsigned int nCalls) const{
+double AmpAbsDynamicalFunction::totalIntegral() const{
 	BOOST_LOG_TRIVIAL(debug)<<"AmpAbsDynamicalFunction::totalIntegral() calculating integral of "<<_name<<" !";
 	size_t dim=2;
 	double res=0.0, err=0.0;
@@ -104,7 +109,7 @@ double AmpAbsDynamicalFunction::totalIntegral(unsigned int nCalls) const{
 	* 		 this should be sufficiency for most applications
 	*/
 	gsl_monte_vegas_state *s = gsl_monte_vegas_alloc (dim);
-	gsl_monte_vegas_integrate (&F, xLimit_low, xLimit_high, 2, nCalls, r,s,&res, &err);
+	gsl_monte_vegas_integrate (&F, xLimit_low, xLimit_high, 2, _nCalls, r,s,&res, &err);
 	gsl_monte_vegas_free(s);
 	BOOST_LOG_TRIVIAL(debug)<<"AmpAbsDynamicalFunction::totalIntegral() result for |"<<_name<<"|^2: "<<res<<"+-"<<err<<" relAcc [%]: "<<100*err/res;
 

@@ -27,18 +27,8 @@ AmpGausRes::AmpGausRes(const char *name,
 		_mR(resMass), _resWidth(resWidth),
 		_subSys(subSys)
 {
-	initialise();
 }
 
-
-AmpGausRes::AmpGausRes(const AmpGausRes& other, const char* newname) :
-		  AmpAbsDynamicalFunction(other, newname),
-		  _mR(other._mR),
-		  _resWidth(other._resWidth),
-		  _subSys(other._subSys)
-{
-	initialise();
-}
 
 AmpGausRes::AmpGausRes(const AmpGausRes& other) :
 		  AmpAbsDynamicalFunction(other),
@@ -46,16 +36,11 @@ AmpGausRes::AmpGausRes(const AmpGausRes& other) :
 		  _resWidth(other._resWidth),
 		  _subSys(other._subSys)
 {
-	initialise();
 }
 
 AmpGausRes::~AmpGausRes() 
 {
 }
-
-void AmpGausRes::initialise() 
-{
-}   
 
 std::complex<double> AmpGausRes::evaluateAmp(dataPoint& point){
 
@@ -76,7 +61,7 @@ std::complex<double> AmpGausRes::evaluateAmp(dataPoint& point){
 	case 5: m=sqrt(m23sq); break;
 	}
 
-	std::complex<double> gaus (_norm * exp(-1*(m-m0)*(m-m0)/width/width/2.),0);
+	std::complex<double> gaus (GetNormalization() * exp(-1*(m-m0)*(m-m0)/width/width/2.),0);
 
 	return gaus;
 }

@@ -25,7 +25,6 @@ class AmpSumOfAmplitudes{
 public:
   AmpSumOfAmplitudes();
   AmpSumOfAmplitudes(const char *name);
-  AmpSumOfAmplitudes(const AmpSumOfAmplitudes& other, const char* name=0) ;
   virtual ~AmpSumOfAmplitudes();
 
   void addBW(std::shared_ptr<AmpAbsDynamicalFunction>, std::shared_ptr<DoubleParameter>, std::shared_ptr<DoubleParameter>);
@@ -56,7 +55,9 @@ public:
   //! Get phase of amplitude id
   virtual double getAmpPhase(unsigned int id) { return _phaseList.at(id)->GetValue(); }
   //! Get intensity of amplitude name
-  virtual double getAmpMagnitude(std::string name) { return _intList.at(getAmpId(name))->GetValue(); }
+  virtual double getAmpMagnitude(std::string name) {
+	  return std::abs(_intList.at(getAmpId(name))->GetValue());
+  }
   //! Get phase of amplitude id
   virtual double getAmpPhase(std::string name) { return _phaseList.at(getAmpId(name))->GetValue(); }
   //! Get spin of amplitude name

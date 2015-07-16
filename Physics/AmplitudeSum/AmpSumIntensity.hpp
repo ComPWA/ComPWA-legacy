@@ -169,12 +169,9 @@ protected:
 	virtual void calcMaxVal(ParameterList& par ,std::shared_ptr<Generator> gen);
 	//! calculate maximum value of amplitude with current parameters
 	virtual void calcMaxVal( std::shared_ptr<Generator> gen);
-	//! calculate normalization of resonance \param amp
-	double normReso(std::shared_ptr<AmpAbsDynamicalFunction> amp);
 
 	std::shared_ptr<Efficiency> eff_;
 	bool _calcMaxFcnVal;
-	bool _calcNorm;
 	double _maxFcnVal;
 	AmpSumOfAmplitudes totAmp;
 	AmplitudeSetup ampSetup;

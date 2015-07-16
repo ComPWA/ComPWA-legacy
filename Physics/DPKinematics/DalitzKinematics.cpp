@@ -331,6 +331,13 @@ double DalitzKinematics::helicityAngle(unsigned int sys, double invMassSq23, dou
 		break;
 	}
 	cosAngle = -(invMsqSecond-m*m-mSpec*mSpec-2*eCms*eSpecCms)/(2*pCms*pSpecCms);
+	if(cosAngle>1 ||cosAngle<-1){
+		throw std::runtime_error("DalitzKinematics::helicityAngle() | "
+				"scattering angle out of range! Datapoint beyond phsp? angle="
+				+std::to_string((long double) cosAngle)
+		+" m23sq="+std::to_string((long double) invMassSq23)
+		+" m13sq="+std::to_string((long double) invMassSq13) );
+	}
 
 	return cosAngle;
 }
