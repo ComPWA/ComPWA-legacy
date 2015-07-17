@@ -33,6 +33,11 @@ class HelicityDecayTree {
 
   std::vector<ParticleState> currently_grown_nodes_;
 
+  boost::graph_traits<HelicityTree>::vertex_descriptor current_vertex_;
+
+  boost::graph_traits<HelicityTree>::vertex_descriptor top_level_vertex_;
+  std::vector<boost::graph_traits<HelicityTree>::vertex_descriptor> decay_vertex_list_;
+
   struct CycleDetector: public boost::dfs_visitor<> {
     CycleDetector(bool& has_cycle) :
         has_cycle_(has_cycle) {
@@ -60,13 +65,25 @@ class HelicityDecayTree {
     bool& has_cycle_;
   };
 
+  /*struct FinalStateParticleFinder: public boost::dfs_visitor<> {
+   FinalStateParticleFinder() {
+   }
+
+   template<class Vertex, class Graph>
+   void finish_vertex(v, g) {
+   final_state_vertices_.push_back(v);
+   }
+
+   std::vector<boost::graph_traits<HelicityTree>::vertex_descriptor> final_state_vertices_;
+   };*/
+
   struct VertexWriter {
     VertexWriter(const HelicityTree& graph) :
         graph_(graph) {
     }
     void operator()(std::ostream& out,
         HelicityTree::vertex_descriptor v) const {
-      out << "[label=\"" << graph_[v].name_<<"\"]";
+      out << "[label=\"" << graph_[v].name_ << "\"]";
     }
   private:
     const HelicityTree& graph_;
@@ -85,6 +102,10 @@ public:
   void clearCurrentGrownNodes();
 
   const HelicityTree& getHelicityDecayTree() const;
+
+  void determineListOfDecayVertices();
+  std::vector<
+      boost::graph_traits<HelicityFormalism::HelicityTree>::vertex_descriptor>& getDecayVertexList() const;
 
   std::vector<ParticleState> getLowestLeaves() const;
 

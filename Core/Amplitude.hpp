@@ -57,9 +57,9 @@ public:
 	virtual double getMaxVal(ParameterList& par, std::shared_ptr<Generator> gen) = 0;
 	virtual double getMaxVal(std::shared_ptr<Generator> gen) = 0;
 
-	virtual const ParameterList& intensity(dataPoint& point, ParameterList& par) =0;
-	virtual const ParameterList& intensity(dataPoint& point) =0;
-	virtual const ParameterList& intensityNoEff(dataPoint& point) =0;
+	virtual const ParameterList& intensity(const dataPoint& point, ParameterList& par) =0;
+	virtual const ParameterList& intensity(const dataPoint& point) =0;
+	virtual const ParameterList& intensityNoEff(const dataPoint& point) =0;
 	virtual const ParameterList& intensity(std::vector<double> point, ParameterList& par) =0;
 
 	virtual void setParameterList(ParameterList& par) =0;

@@ -35,7 +35,7 @@ public:
 
   void init();
 
-  std::complex<double> evaluate(const Vector4<double>& boosted_4vector) const;
+  std::complex<double> evaluate(const HelicityAngles& helicity_angles) const;
 };
 
 } /* namespace HelicityFormalism */

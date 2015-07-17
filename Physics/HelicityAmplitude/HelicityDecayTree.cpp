@@ -61,6 +61,36 @@ std::vector<ParticleState> HelicityDecayTree::getLowestLeaves() const {
   return currently_grown_nodes_;
 }
 
+void HelicityDecayTree::determineListOfDecayVertices() {
+  std::pair<boost::graph_traits<HelicityTree>::vertex_iterator,
+      boost::graph_traits<HelicityTree>::vertex_iterator> vp;
+
+  for (vp = vertices(decay_tree_); vp.first != vp.second; ++vp.first) {
+    // if we have 1 or more edges going out of this vertex its a decay vertex
+    if (0 < out_degree(vp.first, decay_tree_))
+      decay_vertex_list_.push_back(vp.first);
+  }
+}
+
+const std::vector<
+    boost::graph_traits<HelicityFormalism::HelicityTree>::vertex_descriptor>& HelicityDecayTree::getDecayVertexList() const {
+  return decay_vertex_list_;
+}
+
+void HelicityDecayTree::createDecay(const ParticleState &mother,
+    const ParticleStatePair &daughters) {
+// check if the particles already exist as vertices with addVertex()
+// if so return vertex descriptor for this vertex, if not create a new
+  boost::graph_traits<HelicityTree>::vertex_descriptor mother_vertex =
+      addVertex(mother);
+// then make the correct inserts into the tree
+  boost::add_edge(mother_vertex, addVertex(daughters.first), decay_tree_);
+  boost::add_edge(mother_vertex, addVertex(daughters.second), decay_tree_);
+
+  currently_grown_nodes_.push_back(daughters.first);
+  currently_grown_nodes_.push_back(daughters.second);
+}
+
 boost::graph_traits<HelicityFormalism::HelicityTree>::vertex_descriptor HelicityDecayTree::addVertex(
     const ParticleState& particle) {
   boost::graph_traits<HelicityTree>::vertex_descriptor return_vertex;
@@ -80,22 +110,8 @@ boost::graph_traits<HelicityFormalism::HelicityTree>::vertex_descriptor Helicity
   return return_vertex;
 }
 
-void HelicityDecayTree::createDecay(const ParticleState &mother,
-    const ParticleStatePair &daughters) {
-  // check if the particles already exist as vertices with addVertex()
-  // if so return vertex descriptor for this vertex, if not create a new
-  boost::graph_traits<HelicityTree>::vertex_descriptor mother_vertex =
-      addVertex(mother);
-  // then make the correct inserts into the tree
-  boost::add_edge(mother_vertex, addVertex(daughters.first), decay_tree_);
-  boost::add_edge(mother_vertex, addVertex(daughters.second), decay_tree_);
-
-  currently_grown_nodes_.push_back(daughters.first);
-  currently_grown_nodes_.push_back(daughters.second);
-}
-
 void HelicityDecayTree::print(std::ostream& os) const {
-  // boost::associative_property_map<IndexNameMap> propmapIndex(index_label_map);
+// boost::associative_property_map<IndexNameMap> propmapIndex(index_label_map);
   VertexWriter vertex_writer(decay_tree_);
   write_graphviz(os, decay_tree_, vertex_writer);
 }

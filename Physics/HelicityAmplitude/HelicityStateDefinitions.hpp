@@ -16,6 +16,11 @@
 
 namespace HelicityFormalism {
 
+struct HelicityAngles {
+  double theta_;
+  double phi_;
+};
+
 struct ParticleState {
   int particle_id_;
   std::string name_;

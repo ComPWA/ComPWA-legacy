@@ -20,12 +20,13 @@
 namespace HelicityFormalism {
 
 typedef std::map<unsigned int,
-    std::pair<std::vector<unsigned int>, std::vector<unsigned int> > > DecayTopology;
+    std::pair<std::vector<unsigned int>, std::vector<unsigned int> > > ParticleIndexDecayTree;
 
 class ParticleStateIDComparator {
-  unsigned int particle_id_ ;
+  unsigned int particle_id_;
 public:
-  ParticleStateIDComparator(unsigned int particle_id) : particle_id_(particle_id) {
+  ParticleStateIDComparator(unsigned int particle_id) :
+      particle_id_(particle_id) {
   }
   bool operator()(const ParticleState& ps) const {
     return ps.particle_id_ == particle_id_;
@@ -38,8 +39,11 @@ class HelicityDecayConfiguration {
   std::vector<ParticleState> particles_;
   std::vector<unsigned int> final_state_particles_;
   std::vector<unsigned int> intermediate_state_particles_;
-  std::vector<DecayTopology> decay_topologies_;
-  DecayTopology current_decay_topology_;
+  std::map<ParticleIndexDecayTree, ParticleIndexDecayTree> decay_topology_concrete_decay_tree_mapping_;
+  ParticleIndexDecayTree current_concrete_decay_tree_;
+
+  ParticleIndexDecayTree convertConcreteDecayTreeToDecayTopology(
+      const ParticleIndexDecayTree& concrete_decay_tree);
 
 public:
   HelicityDecayConfiguration();
@@ -50,8 +54,7 @@ public:
       const ParticleState &intermediate_state_particle);
   void addCurrentDecayTopologyToList();
 
-  unsigned int convertParticleIDToListIndex(
-      unsigned int particle_id) const;
+  unsigned int convertParticleIDToListIndex(unsigned int particle_id) const;
 
   std::vector<unsigned int> convertParticleIDListToIndexList(
       const std::vector<unsigned int>& particle_id_list) const;

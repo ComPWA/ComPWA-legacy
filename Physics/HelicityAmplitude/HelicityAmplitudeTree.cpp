@@ -23,35 +23,48 @@ HelicityAmplitudeTree::~HelicityAmplitudeTree() {
 }
 
 std::complex<double> HelicityAmplitudeTree::evaluate(
-    const HelicityKinematicBoostTree& boosted_4vectors) const {
+    const std::vector<HelicityAngles>& helicity_angles) const {
   std::complex<double> result(0.0, 0.0);
-  if (amplitude_nodes_.size() > 0) {
-    // look for links of that node
-    result = evaluateIntermediateNode(0, boosted_4vectors);
+  // loop over the list of concrete versions of sequential decays
+  for (unsigned int sequential_decay_index = 0;
+      sequential_decay_index < amplitude_nodes_.size();
+      ++sequential_decay_index) {
+    std::complex<double> sequential_decay_result(1.0, 0.0);
+    // loop over all the decay amplitudes within each sequential decay
+    for (unsigned int i = 0;
+        i < sequential_decay_amplitude_list_[sequential_decay_index].size();
+        ++i) {
+      // the results for each amplitude evaluation are multiplied to the sequential decay result
+      sequential_decay_result *=
+          sequential_decay_amplitude_list_[sequential_decay_index][i]->evaluate(
+              helicity_angles[i]);
+    }
+    // the sequential decay results are just added
+    result += sequential_decay_result;
   }
   return result;
 }
 
-std::complex<double> HelicityAmplitudeTree::evaluateIntermediateNode(
-    unsigned int node_index,
-    const HelicityKinematicBoostTree& boosted_4vectors) const {
-  std::complex<double> result(0.0, 0.0);
+/*std::complex<double> HelicityAmplitudeTree::evaluateIntermediateNode(
+ unsigned int node_index,
+ const std::vector<HelicityAngles>& helicity_angles) const {
+ std::complex<double> result(0.0, 0.0);
 
-  // if this node has links evaluate them first
-  if (links_.size() > node_index) {
-    // now evaluate them
-    result = evaluateIntermediateNode(links_[node_index].first,
-        boosted_4vectors);
-    result *= evaluateIntermediateNode(links_[node_index].second,
-        boosted_4vectors);
-  }
-  else {
-    // then use that coordinate system to calculate the amplitude for this decay
-    result = amplitude_nodes_[node_index]->evaluate(
-        boosted_4vectors.getBoosted4Vector(node_index));
-  }
+ // if this node has links evaluate them first
+ if (links_.size() > node_index) {
+ // now evaluate them
+ result = evaluateIntermediateNode(links_[node_index].first,
+ helicity_angles);
+ result *= evaluateIntermediateNode(links_[node_index].second,
+ helicity_angles);
+ }
+ else {
+ // then use that coordinate system to calculate the amplitude for this decay
+ result = amplitude_nodes_[node_index]->evaluate(
+ helicity_angles[node_index]);
+ }
 
-  return result;
-}
+ return result;
+ }*/
 
 } /* namespace HelicityFormalism */

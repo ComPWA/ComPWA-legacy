@@ -29,11 +29,9 @@ void HelicityAmplitude::init() {
 }
 
 std::complex<double> HelicityAmplitude::evaluate(
-    const Vector4<double>& boosted_4vector) const {
-  // temp copy of phi to avoid the recalculation
-  double phi(boosted_4vector.Phi());
+    const HelicityAngles& helicity_angles) const {
   return spin_factor_
-      * Wigner_D(phi, boosted_4vector.Theta(), -phi, initial_state_.J_, initial_state_.M_,
+      * Wigner_D(helicity_angles.phi_, helicity_angles.theta_, -helicity_angles.phi_, initial_state_.J_, initial_state_.M_,
           final_state_.first.M_ - final_state_.second.M_)
       * dynamics_function_->evaluate();
 }

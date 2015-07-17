@@ -22,6 +22,15 @@ HelicityDecayConfiguration::HelicityDecayConfiguration() {
 HelicityDecayConfiguration::~HelicityDecayConfiguration() {
 }
 
+ParticleIndexDecayTree HelicityDecayConfiguration::convertConcreteDecayTreeToDecayTopology(
+    const ParticleIndexDecayTree& concrete_decay_tree) {
+  ParticleIndexDecayTree::const_iterator decay_node;
+
+  for (decay_node = concrete_decay_tree.begin();
+      decay_node != concrete_decay_tree.end(); ++decay_node) {
+  }
+}
+
 void HelicityDecayConfiguration::addFinalStateParticle(
     const ParticleState &final_state_particle) {
   if (std::find(particles_.begin(), particles_.end(), final_state_particle)
@@ -71,7 +80,8 @@ std::vector<unsigned int> HelicityDecayConfiguration::convertParticleIDListToInd
 void HelicityDecayConfiguration::addDecayToCurrentDecayTopology(
     unsigned int mother_state_id,
     std::pair<std::vector<unsigned int>, std::vector<unsigned int> > &daughter_states) {
-  unsigned int mother_state_index = convertParticleIDToListIndex(mother_state_id);
+  unsigned int mother_state_index = convertParticleIDToListIndex(
+      mother_state_id);
   current_decay_topology_[mother_state_index].first =
       convertParticleIDListToIndexList(daughter_states.first);
   current_decay_topology_[mother_state_index].second =

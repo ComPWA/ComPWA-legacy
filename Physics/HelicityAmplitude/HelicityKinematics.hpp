@@ -17,9 +17,28 @@
 namespace HelicityFormalism {
 
 class HelicityKinematics: public Kinematics {
-public:
-  HelicityKinematics();
+  std::vector<std::vector<ParticleState> > decay_trees_;
+
+  bool is_PS_area_calculated_;
+  double PS_area_;
+
+  HelicityKinematics(const std::vector<HelicityDecayTree>& decay_trees);
   virtual ~HelicityKinematics();
+
+  // delete methods to ensure that there will only be one instance
+  HelicityKinematics(const HelicityKinematics&) = delete;
+  void operator=(const HelicityKinematics&) = delete;
+
+  void calculatePSArea();
+  Vector4 determineBoostedKinematicVariables(
+      std::pair<Vector4, Vector4> two_body_state, Vector4 mother);
+
+public:
+  static Kinematics* createInstance(const std::vector<HelicityDecayTree>& decay_trees) {
+    if (0 == inst_)
+      inst_ = new HelicityKinematics(decay_tree);
+    return inst_;
+  }
 
   bool isWithinPhsp(const dataPoint& point) const;
   double getMotherMass() const;

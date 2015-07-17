@@ -13,19 +13,20 @@
 #define HELICITYAMPLITUDETREE_HPP_
 
 #include "HelicityAmplitude.hpp"
-#include "HelicityKinematicBoostTree.hpp"
 
 #include <vector>
 
 namespace HelicityFormalism {
 
+typedef std::vector<std::shared_ptr<HelicityAmplitude> > SequentialDecayAmplitude;
+
 class HelicityAmplitudeTree {
   friend class HelicityAmplitudeTreeFactory;
 
-  std::vector<std::shared_ptr<HelicityAmplitude> > amplitude_nodes_;
-  std::vector<IndexPair> links_;
+  std::vector<SequentialDecayAmplitude> sequential_decay_amplitude_list_;
+ // std::vector<IndexPair> links_;
 
-  struct HelicityComparator {
+  /*struct HelicityComparator {
     std::shared_ptr<HelicityAmplitude> reference_;
 
     HelicityComparator(std::shared_ptr<HelicityAmplitude> reference) :
@@ -35,17 +36,17 @@ class HelicityAmplitudeTree {
     bool linkForAmplitude(std::shared_ptr<HelicityAmplitude> test_element) {
       return test_element.get() == reference_.get();
     }
-  };
+  };*/
 
-  std::complex<double> evaluateIntermediateNode(unsigned int node_index,
-      const HelicityKinematicBoostTree& boosted_4vectors) const;
+ // std::complex<double> evaluateIntermediateNode(unsigned int node_index,
+ //     const std::vector<HelicityAngles>& helicity_angles) const;
 
 public:
   HelicityAmplitudeTree();
   virtual ~HelicityAmplitudeTree();
 
   std::complex<double> evaluate(
-      const HelicityKinematicBoostTree& boosted_4vectors) const;
+      const std::vector<HelicityAngles>& helicity_angles) const;
 };
 
 } /* namespace HelicityFormalism */

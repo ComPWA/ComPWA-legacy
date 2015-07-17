@@ -21,7 +21,7 @@ namespace HelicityFormalism {
 
 class HelicityIntensity: public Amplitude {
 	std::vector<HelicityAmplitudeTree> amplitude_trees_;
-	std::vector<HelicityKinematicBoostTree> kinematics_trees_;
+	//std::vector<HelicityDecayTree> decay_trees_;
 	std::shared_ptr<Efficiency> efficiency_;
 
 	ParameterList params_;
@@ -37,9 +37,9 @@ public:
 	double getMaxVal(ParameterList& par, std::shared_ptr<Generator> gen);
 	double getMaxVal(std::shared_ptr<Generator> gen);
 
-	const ParameterList& intensity(dataPoint& point, ParameterList& par);
-	const ParameterList& intensity(dataPoint& point);
-	const ParameterList& intensityNoEff(dataPoint& point);
+	const ParameterList& intensity(const dataPoint& point, ParameterList& par);
+	const ParameterList& intensity(const dataPoint& point);
+	const ParameterList& intensityNoEff(const dataPoint& point);
 	const ParameterList& intensity(std::vector<double> point,
 			ParameterList& par);
 
