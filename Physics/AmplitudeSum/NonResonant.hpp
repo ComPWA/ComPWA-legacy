@@ -13,13 +13,15 @@
 #include "Core/DataPoint.hpp"
 #include "Core/Parameter.hpp"
 #include "Physics/AmplitudeSum/AmpAbsDynamicalFunction.hpp"
-#include "Physics/AmplitudeSum/AmpKinematics.hpp"
 
 using boost::property_tree::ptree;
 
 class NonResonant : public AmpAbsDynamicalFunction {
 public:
-	NonResonant(std::string name);
+	NonResonant(const char *name,
+			std::shared_ptr<DoubleParameter> mag, std::shared_ptr<DoubleParameter> phase,
+			int nCalls=30000, normStyle nS=normStyle::one) ;
+
 	virtual void initialise() { };
 	//! value at \param point
 	virtual std::complex<double> evaluate(dataPoint& point) {
@@ -27,7 +29,7 @@ public:
 		return (1/Kinematics::instance()->getPhspVolume())*evaluateAmp(point);
 	}
 	//! value of dynamical amplitude at \param point
-	virtual std::complex<double> evaluateAmp(dataPoint& point) { return 1;} ;
+	virtual std::complex<double> evaluateAmp(dataPoint& point) { return dynamicalFunction();}
 	//! value of WignerD amplitude at \param point
 	virtual double evaluateWignerD(dataPoint& point) { return 1;} ;
 
@@ -35,48 +37,51 @@ public:
 	virtual double getSpin() { return 0;};
 
 	static std::complex<double> dynamicalFunction();
+
+	virtual std::shared_ptr<FunctionTree> setupTree(
+			allMasses& theMasses,allMasses& toyPhspSample,std::string suffix, ParameterList& params);
 protected:
 
 };
 
-class NonResonantStrategy : public Strategy {
-public:
-	NonResonantStrategy(const std::string resonanceName, ParType in):Strategy(in),name(resonanceName){
-	}
-
-	virtual const std::string to_str() const {
-		return ("NonResonant "+name);
-	}
-
-	virtual bool execute(ParameterList& paras, std::shared_ptr<AbsParameter>& out) {
-		if( checkType != out->type() ) {
-			throw(WrongParType(std::string("Output Type ")+ParNames[out->type()]+std::string(" conflicts expected type ")+ParNames[checkType]+std::string(" of ")+name+" BW strat"));
-			return false;
-		}
-		//MultiDim output, must have multidim Paras in input
-		if(checkType == ParType::MCOMPLEX){
-			if(paras.GetNMultiDouble()){
-				unsigned int nElements = paras.GetMultiDouble(0)->GetNValues();
-				std::vector<std::complex<double> > results(nElements, std::complex<double>(0.));
-				for(unsigned int ele=0; ele<nElements; ele++){
-					results[ele] = NonResonant::dynamicalFunction();
-				}
-				out = std::shared_ptr<AbsParameter>(new MultiComplex(out->GetName(),results));
-				return true;
-			}else{ //end multidim para treatment
-				throw(WrongParType("Input MultiDoubles missing in BW strat of "+name));
-				return false;
-			}
-		}
-
-		std::complex<double> result = NonResonant::dynamicalFunction();
-		out = std::shared_ptr<AbsParameter>(new ComplexParameter(out->GetName(), result));
-		return true;
-	}
-
-protected:
-	std::string name;
-};
+//class NonResonantStrategy : public Strategy {
+//public:
+//	NonResonantStrategy(const std::string resonanceName, ParType in):Strategy(in),name(resonanceName){
+//	}
+//
+//	virtual const std::string to_str() const {
+//		return ("NonResonant "+name);
+//	}
+//
+//	virtual bool execute(ParameterList& paras, std::shared_ptr<AbsParameter>& out) {
+//		if( checkType != out->type() ) {
+//			throw(WrongParType(std::string("Output Type ")+ParNames[out->type()]+std::string(" conflicts expected type ")+ParNames[checkType]+std::string(" of ")+name+" BW strat"));
+//			return false;
+//		}
+//		//MultiDim output, must have multidim Paras in input
+//		if(checkType == ParType::MCOMPLEX){
+//			if(paras.GetNMultiDouble()){
+//				unsigned int nElements = paras.GetMultiDouble(0)->GetNValues();
+//				std::vector<std::complex<double> > results(nElements, std::complex<double>(0.));
+//				for(unsigned int ele=0; ele<nElements; ele++){
+//					results[ele] = NonResonant::dynamicalFunction();
+//				}
+//				out = std::shared_ptr<AbsParameter>(new MultiComplex(out->GetName(),results));
+//				return true;
+//			}else{ //end multidim para treatment
+//				throw(WrongParType("Input MultiDoubles missing in BW strat of "+name));
+//				return false;
+//			}
+//		}
+//
+//		std::complex<double> result = NonResonant::dynamicalFunction();
+//		out = std::shared_ptr<AbsParameter>(new ComplexParameter(out->GetName(), result));
+//		return true;
+//	}
+//
+//protected:
+//	std::string name;
+//};
 
 class basicConf
 {

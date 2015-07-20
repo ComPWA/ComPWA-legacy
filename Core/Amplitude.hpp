@@ -84,29 +84,29 @@ public:
 
 	//---------- get resonance parameters -------------
 	//! Number of resonances
-	virtual unsigned int getNumberOfResonances() { return 0; }
+	virtual unsigned int GetNumberOfResonances() { return 0; }
 	//! convert resonance \param name to id
-	virtual int getIdOfResonance(std::string name){ return 0;}
+	virtual int GetIdOfResonance(std::string name){ return 0;}
 	//! convert resonance \param id to name
-	virtual std::string getNameOfResonance(unsigned int id){ return std::string("muh");}
+	virtual std::string GetNameOfResonance(unsigned int id){ return std::string("muh");}
 	//! get total integral for resonance \param id
-	virtual double getAmpIntegral(unsigned int id) { return -999; };
+	virtual double GetIntegral(unsigned int id) { return -999; };
 	//! get total integral for resonance \param name
-	virtual double getAmpIntegral(std::string name) { return -999; };
+	virtual double GetIntegral(std::string name) { return -999; };
 	//! Get magnitude of resonance name
-	virtual double getAmpMagnitude(std::string name) {return -999;};
+	virtual double GetMagnitude(std::string name) {return -999;};
 	//! Get magnitude of resonance id
-	virtual double getAmpMagnitude(unsigned int id) {return -999;};
+	virtual double GetMagnitude(unsigned int id) {return -999;};
 	//! Get phase of resonance name
-	virtual double getAmpPhase(std::string name) {return -999;};
+	virtual double GetPhase(std::string name) {return -999;};
 	//! Get phase of resonance id
-	virtual double getAmpPhase(unsigned int id) {return -999;};
+	virtual double GetPhase(unsigned int id) {return -999;};
 
 	//---------- related to FunctionTree -------------
 	//! Check of tree is available
 	virtual bool hasTree(){ return 0; }
 	//! Getter function for basic amp tree
-	virtual std::shared_ptr<FunctionTree> getAmpTree(allMasses&,allMasses&, std::string){
+	virtual std::shared_ptr<FunctionTree> GetTree(allMasses&,allMasses&, std::string){
 		return std::shared_ptr<FunctionTree>();
 	}
 

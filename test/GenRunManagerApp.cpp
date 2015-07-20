@@ -41,7 +41,8 @@ int main(int argc, char **argv){
 	std::shared_ptr<Data> data(new RootReader(outFile, "data",true));
 	std::shared_ptr<Data> phsp(new RootReader(outFile, "mc",true));
 	std::shared_ptr<Generator> gen(new RootGenerator());
-	std::shared_ptr<Amplitude> amp(new AmpSumIntensity(ini,std::shared_ptr<Efficiency>(new UnitEfficiency()),AmpSumIntensity::normStyle::none));
+	std::shared_ptr<Amplitude> amp(new AmpSumIntensity(
+			ini,std::shared_ptr<Efficiency>(new UnitEfficiency()),normStyle::none));
 
 	RunManager run(dataSize,amp,gen);
 	run.setGenerator(gen);

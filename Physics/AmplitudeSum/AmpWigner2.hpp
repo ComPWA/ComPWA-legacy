@@ -57,4 +57,16 @@ protected:
 	std::string name;
 };
 
+class WignerDPhspStrategy : public Strategy {
+public:
+	WignerDPhspStrategy(const std::string resonanceName, ParType in):Strategy(in),name(resonanceName){ }
+
+	virtual const std::string to_str() const { return ("WignerD of "+name);	}
+
+	virtual bool execute(ParameterList& paras, std::shared_ptr<AbsParameter>& out);
+
+protected:
+	std::string name;
+};
+
 #endif

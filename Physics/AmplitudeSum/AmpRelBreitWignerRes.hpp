@@ -25,19 +25,22 @@
 
 #include "Core/Functions.hpp"
 #include "Core/Exceptions.hpp"
+#include "Core/FunctionTree.hpp"
 #include "Physics/AmplitudeSum/AmpAbsDynamicalFunction.hpp"
-#include "Physics/AmplitudeSum/AmpKinematics.hpp"
 #include "Physics/AmplitudeSum/AmpWigner2.hpp"
 #include "Physics/AmplitudeSum/NonResonant.hpp"
 
-class AmpRelBreitWignerRes : public AmpAbsDynamicalFunction, public AmpKinematics {
+class AmpRelBreitWignerRes : public AmpAbsDynamicalFunction {
 public:
 
 	AmpRelBreitWignerRes(const char *name,
-			std::shared_ptr<DoubleParameter> _resMass, std::shared_ptr<DoubleParameter> _resWidth,
-			std::shared_ptr<DoubleParameter> _radius, std::shared_ptr<DoubleParameter> _motherRadius,
-			int _subsys, int resSpin, int m, int n
-	) ;
+			std::shared_ptr<DoubleParameter> mag, std::shared_ptr<DoubleParameter> phase,
+			std::shared_ptr<DoubleParameter> mass, int subSys, Spin spin, Spin m, Spin n,
+			std::shared_ptr<DoubleParameter> width,
+			std::shared_ptr<DoubleParameter> mesonRadius,
+			std::shared_ptr<DoubleParameter> motherRadius,
+			int nCalls=30000, normStyle nS=normStyle::one) ;
+
 	virtual ~AmpRelBreitWignerRes();
 	/** Breit-Wigner function
 	 *
@@ -57,19 +60,17 @@ public:
 	static std::complex<double> dynamicalFunction(double mSq, double mR, double ma, double mb,
 			double width, unsigned int J, double mesonRadius);
 
-	virtual std::complex<double> evaluate(dataPoint& point);
+//	virtual std::complex<double> evaluate(dataPoint& point);
 	virtual std::complex<double> evaluateAmp(dataPoint& point);
 
-	double getSpin() {return _spin;}; //needs to be declared in AmpAbsDynamicalFunction
 	unsigned int getNParams(){ return nParams;}
 
+	virtual std::shared_ptr<FunctionTree> setupTree(
+			allMasses& theMasses,allMasses& toyPhspSample,std::string suffix, ParameterList& params);
 protected:
-	std::shared_ptr<DoubleParameter> _resWidth;
-	bool foundMasses;
-	unsigned int id23, id13;
+	std::shared_ptr<DoubleParameter> _width;
+	double tmp_width;
 	unsigned int nParams;
-	double tmp_mass, tmp_width;
-
 };
 
 class BreitWignerConf : public basicConf
@@ -126,9 +127,9 @@ public:
 	double m_width_max;
 
 	double m_mesonRadius;
-	unsigned int m_spin;
-	unsigned int m_m;
-	unsigned int m_n;
+	int m_spin;
+	int m_m;
+	int m_n;
 
 	unsigned int m_daughterA;
 	unsigned int m_daughterB;

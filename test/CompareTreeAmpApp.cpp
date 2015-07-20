@@ -83,7 +83,7 @@ int main(int argc, char **argv){
 	std::string trueModelFile = "test/CompareTreeAmp-model.xml";
 	AmplitudeSetup iniTrue(trueModelFile);//put start parameters here
 	std::shared_ptr<Amplitude> trueAmp( new AmpSumIntensity(iniTrue,
-			AmpSumIntensity::normStyle::one, eff, mcPrecision) );
+			normStyle::one, eff, mcPrecision) );
 	//fit amplitude model
 	std::string fitModelFile = trueModelFile;
 	AmplitudeSetup ini(fitModelFile);//put start parameters here
@@ -141,17 +141,17 @@ int main(int argc, char **argv){
 	run.setOptimizer(optiTree);
 
 	//======================= Compare tree and amplitude =============================
-	std::shared_ptr<AmpRelBreitWignerRes> phiRes = std::dynamic_pointer_cast<AmpRelBreitWignerRes>(fitAmpPtr->getResonance("phi(1020)"));
-	double phimag = fitAmpPtr->getAmpMagnitude("phi(1020)");
-	double phiphase = fitAmpPtr->getAmpPhase("phi(1020)");
+	std::shared_ptr<AmpRelBreitWignerRes> phiRes = std::dynamic_pointer_cast<AmpRelBreitWignerRes>(fitAmpPtr->GetResonance("phi(1020)"));
+	double phimag = fitAmpPtr->GetMagnitude("phi(1020)");
+	double phiphase = fitAmpPtr->GetPhase("phi(1020)");
 	std::complex<double> phiCoeff(phimag*cos(phiphase),phimag*sin(phiphase));
-	std::shared_ptr<AmpFlatteRes3Ch> a0Res = std::dynamic_pointer_cast<AmpFlatteRes3Ch>(fitAmpPtr->getResonance("a_0(980)0"));
-	double a0mag = fitAmpPtr->getAmpMagnitude("a_0(980)0");
-	double a0phase = fitAmpPtr->getAmpPhase("a_0(980)0");
+	std::shared_ptr<AmpFlatteRes3Ch> a0Res = std::dynamic_pointer_cast<AmpFlatteRes3Ch>(fitAmpPtr->GetResonance("a_0(980)0"));
+	double a0mag = fitAmpPtr->GetMagnitude("a_0(980)0");
+	double a0phase = fitAmpPtr->GetPhase("a_0(980)0");
 	std::complex<double> a0Coeff(a0mag*cos(a0phase),a0mag*sin(a0phase));
-	std::shared_ptr<AmpFlatteRes> aplusRes = std::dynamic_pointer_cast<AmpFlatteRes>(fitAmpPtr->getResonance("a_0(980)+"));
-	double aplusmag = fitAmpPtr->getAmpMagnitude("a_0(980)+");
-	double aplusphase = fitAmpPtr->getAmpPhase("a_0(980)+");
+	std::shared_ptr<AmpFlatteRes> aplusRes = std::dynamic_pointer_cast<AmpFlatteRes>(fitAmpPtr->GetResonance("a_0(980)+"));
+	double aplusmag = fitAmpPtr->GetMagnitude("a_0(980)+");
+	double aplusphase = fitAmpPtr->GetPhase("a_0(980)+");
 	std::complex<double> aplusCoeff(aplusmag*cos(aplusphase),aplusmag*sin(aplusphase));
 
 	dataPoint point(inputData->getEvent(0)); //first data point in sample

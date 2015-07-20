@@ -150,7 +150,7 @@ void MinuitResult::smearParameterList(ParameterList& newParList){
 }
 
 void MinuitResult::calcFractionError(){
-	if(fractionList.GetNDouble() != _amp->getNumberOfResonances())
+	if(fractionList.GetNDouble() != _amp->GetNumberOfResonances())
 		throw std::runtime_error("MinuitResult::calcFractionError() parameterList empty! Calculate fit fractions first!");
 	nRes=fractionList.GetNDouble();
 	if(useCorrelatedErrors){

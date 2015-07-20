@@ -134,7 +134,7 @@ int main(int argc, char **argv) {
 			new RootReader(input_file_path, "mc"));
 	myPHSPReader->setEfficiency(shared_ptr<Efficiency>(new UnitEfficiency())); //setting efficiency to 1
 	std::shared_ptr<AmpSumIntensity> amps(
-			new AmpSumIntensity(ini, AmpSumIntensity::normStyle::none,
+			new AmpSumIntensity(ini, normStyle::none,
 					std::shared_ptr<Efficiency>(new UnitEfficiency()),
 					nFitEvents));
 

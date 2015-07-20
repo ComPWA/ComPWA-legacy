@@ -24,21 +24,21 @@
 #include <vector>
 
 #include "Physics/AmplitudeSum/AmpAbsDynamicalFunction.hpp"
-#include "Physics/AmplitudeSum/AmpKinematics.hpp"
 #include "Physics/AmplitudeSum/AmpWigner2.hpp"
 #include "Physics/AmplitudeSum/NonResonant.hpp"
 
 using namespace std;
 
-class AmpFlatteRes : public AmpAbsDynamicalFunction, public AmpKinematics {
+
+class AmpFlatteRes : public AmpAbsDynamicalFunction {
 public:
 	AmpFlatteRes(const char *name,
-			std::shared_ptr<DoubleParameter> resMass,
+			std::shared_ptr<DoubleParameter> mag, std::shared_ptr<DoubleParameter> phase,
+			std::shared_ptr<DoubleParameter> mass, int subSys, Spin spin, Spin m, Spin n,
 			std::shared_ptr<DoubleParameter> mesonRadius,
 			std::shared_ptr<DoubleParameter> motherRadius,
 			std::shared_ptr<DoubleParameter> g1, std::shared_ptr<DoubleParameter> g2,
-			double _g2_partA, double _g2_partB,
-			int _subsys, int resSpin, int m, int n, double resRadius) ;
+			double g2_partA, double g2_partB, int nCalls=30000, normStyle nS=normStyle::one) ;
 	virtual ~AmpFlatteRes();
 
 	/** Dynamical function for two coupled channel approach
@@ -60,20 +60,20 @@ public:
 			double massB1, double massB2, double gB,
 			unsigned int J, double mesonRadius);
 
-	std::complex<double> evaluate(dataPoint& point);
+	//	std::complex<double> evaluate(dataPoint& point);
 	virtual std::complex<double> evaluateAmp(dataPoint& point) ;
 
 	double getSpin() {return _spin;}; //needs to be declared in AmpAbsDynamicalFunction
 	unsigned int getNParams(){ return nParams;}
 
+	virtual std::shared_ptr<FunctionTree> setupTree(
+			allMasses& theMasses,allMasses& toyPhspSample,std::string suffix, ParameterList& params);
 protected:
 	unsigned int nParams;
 	double _g2_partA;//hidden channel: mass particle A
 	double _g2_partB; //hidden channel: mass particle B
 	std::shared_ptr<DoubleParameter> _g2, _g1;
 	double tmp_g2, tmp_g1, tmp_mass;
-	bool foundMasses;
-	unsigned int id23, id13;
 	double mesonRadius;
 };
 
@@ -91,9 +91,9 @@ public:
 	double m_mass_max;
 
 	double m_mesonRadius;
-	unsigned int m_spin;
-	unsigned int m_m;
-	unsigned int m_n;
+	int m_spin;
+	int m_m;
+	int m_n;
 
 	unsigned int m_daughterA; //TODO: better reference
 	unsigned int m_daughterB; //TODO: better reference

@@ -21,22 +21,14 @@
 #include "Physics/AmplitudeSum/AmpGausRes.hpp"
 
 AmpGausRes::AmpGausRes(const char *name,
-		DoubleParameter& resMass, DoubleParameter& resWidth,
-		int subSys) :
-		AmpAbsDynamicalFunction(name),
-		_mR(resMass), _resWidth(resWidth),
-		_subSys(subSys)
-{
-}
+		std::shared_ptr<DoubleParameter> mag, std::shared_ptr<DoubleParameter> phase,
+		std::shared_ptr<DoubleParameter> mass, int subSys,
+		std::shared_ptr<DoubleParameter> width, int nCalls, normStyle nS) :
+		AmpAbsDynamicalFunction(name, mag, phase, mass, subSys,
+				Spin(0), Spin(0), Spin(0), nCalls, nS),
+				_width(width)
+{ }
 
-
-AmpGausRes::AmpGausRes(const AmpGausRes& other) :
-		  AmpAbsDynamicalFunction(other),
-		  _mR(other._mR),
-		  _resWidth(other._resWidth),
-		  _subSys(other._subSys)
-{
-}
 
 AmpGausRes::~AmpGausRes() 
 {
@@ -45,12 +37,12 @@ AmpGausRes::~AmpGausRes()
 std::complex<double> AmpGausRes::evaluateAmp(dataPoint& point){
 
 
-	double m0 = _mR.GetValue();
-	double width = _resWidth.GetValue();
+	double m0 = _mass->GetValue();
+	double width = _width->GetValue();
 	//  double m  = Double_t(_x);
 	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
-//	double m23sq = point.getVal("m23sq");
-//	double m13sq = point.getVal("m13sq");
+	//	double m23sq = point.getVal("m23sq");
+	//	double m13sq = point.getVal("m13sq");
 	double m23sq = point.getVal(0);
 	double m13sq = point.getVal(1);
 	double m12sq = kin->getThirdVariableSq(m23sq,m13sq);

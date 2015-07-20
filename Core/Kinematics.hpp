@@ -44,7 +44,36 @@ public:
 	//! Get number of variables
 	virtual unsigned int getNumberOfVariables() { return varNames.size(); }
 
-
+	/** Calculate Break-up momentum squared
+	 *
+	 * Calculate Break-up momentum at energy @sqrtS for particles with masses @ma and @mb.
+	 * From PDG2014 Eq.46-20a. Below threshold the function is analytically continued.
+	 * @param sqrtS center-of-mass energy
+	 * @param ma mass particle A
+	 * @param mb mass particle B
+	 * @return |break-up momentum|
+	 */
+	static double qSqValue(double sqrtS, double ma, double mb);
+	/** Calculate Break-up momentum
+	 *
+	 * Calculate Break-up momentum at energy @sqrtS for particles with masses @ma and @mb.
+	 * From PDG2014 Eq.46-20a. Below threshold the function is analytically continued.
+	 * @param sqrtS center-of-mass energy
+	 * @param ma mass particle A
+	 * @param mb mass particle B
+	 * @return |break-up momentum|
+	 */
+	static std::complex<double> qValue(double sqrtS, double ma, double mb);
+	/** Two body phsp factor
+	 *
+	 * From PDG2014 Eqn.47-2
+	 * @param sqrtS invariant mass of particles A and B
+	 * @param ma Mass of particle A
+	 * @param mb Mass of particle B
+	 * @return
+	 */
+	static std::complex<double> phspFactor(double sqrtS, double ma, double mb);
+	static double FormFactor(double sqrtS, double ma, double mb, double spin, double mesonRadius);
 protected:
 	unsigned int nPart;
 	std::vector<std::string> varNames;

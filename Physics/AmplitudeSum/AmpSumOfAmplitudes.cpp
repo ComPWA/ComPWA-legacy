@@ -162,9 +162,9 @@ double AmpSumOfAmplitudes::evaluateSlice(dataPoint& point, std::complex<double>*
 
 		//std::cout<< "DEBUG Reso " << i << " spinsys " << sys << " " << _pdfList[i]->isSubSys(subSys) << " use " << used[sys] << std::endl;
 
-		if(dynamic_cast<AmpKinematics*>(&*(_pdfList[i]))->isSubSys(subSys)){
+		if(_pdfList[i]->isSubSys(subSys)){
 		  if(!used[sys]){
-			res = res + reso[sys] * dynamic_cast<AmpKinematics*>(&*(_pdfList[i]))->evaluateWignerD(point);
+			res = res + reso[sys] * _pdfList[i]->evaluateWignerD(point);
 			used[sys]=true;
 		  }
 		}else{

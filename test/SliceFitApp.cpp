@@ -101,7 +101,7 @@ int main(int argc, char **argv){
   BOOST_LOG_TRIVIAL(info)<< "Load Modules";
   std::shared_ptr<RootReader> myReader(new RootReader(file, "data"));
   std::shared_ptr<RootReader> myPHSPReader(new RootReader(file, "mc"));
-  std::shared_ptr<AmpSumIntensity> amps(new AmpSumIntensity(ini, AmpSumIntensity::normStyle::none, std::shared_ptr<Efficiency>(new UnitEfficiency()), nFitEvents));
+  std::shared_ptr<AmpSumIntensity> amps(new AmpSumIntensity(ini, normStyle::none, std::shared_ptr<Efficiency>(new UnitEfficiency()), nFitEvents));
 
   // Initiate parameters
   ParameterList par;

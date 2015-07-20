@@ -26,6 +26,7 @@
 #include "Core/DataPoint.hpp"
 #include "Core/Generator.hpp"
 
+#include "Physics/AmplitudeSum/AmpAbsDynamicalFunction.hpp"
 #include "Physics/AmplitudeSum/AmplitudeSetup.hpp"
 #include "Physics/AmplitudeSum/AmpSumOfAmplitudes.hpp"
 #include "Physics/DPKinematics/DalitzKinematics.hpp"
@@ -33,18 +34,11 @@
 class AmpSumIntensity : public Amplitude {
 
 public:
-	enum normStyle {
-		none, /*!< no normaliztion between Amplitudes. */
-		/*!< all amplitudes are normalized to one.
-		 *  The normalization factor is \f$ 1/\sqrt(\int |A|^2)\f$ */
-		one
 
-	};
 	AmpSumIntensity(AmplitudeSetup ini, normStyle ns,
 			std::shared_ptr<Efficiency> eff, unsigned int nCalls);
 	AmpSumIntensity(AmplitudeSetup ini,
 			std::shared_ptr<Efficiency> eff, unsigned int nCalls);
-//	AmpSumIntensity(const AmpSumIntensity& other);
 	//! Destructor
 	virtual ~AmpSumIntensity(){ /* nothing */ };
 	//! Clone function
@@ -70,10 +64,6 @@ public:
 	virtual double getMaxVal( std::shared_ptr<Generator> gen);
 	//! get maximum value of amplitude with parameters \par
 	virtual double getMaxVal(ParameterList& par, std::shared_ptr<Generator> gen);
-
-	virtual std::complex<double> getFirstAmp(dataPoint& point, ParameterList& par);
-	virtual std::complex<double> getFirstReso(dataPoint& point, ParameterList& par);
-	virtual std::complex<double> getFirstBW(dataPoint& point, ParameterList& par);
 
 	//! setting new parameterList
 	virtual void setParameterList(ParameterList& par);
@@ -104,84 +94,77 @@ public:
 	 * @param max2 max of second integration variable
 	 * @return
 	 */
-	virtual double getIntValue(std::string var1, double min1, double max1, std::string var2, double min2=0, double max2=0);
+	virtual double getIntValue(std::string var1, double min1, double max1,
+			std::string var2, double min2=0, double max2=0);
 
 	//---------- get resonance parameters -------------
 	//! \return Number of resonances
-	virtual unsigned int getNumberOfResonances() { return totAmp.getNumberOfResonances(); }
+	virtual unsigned int GetNumberOfResonances();
 	//! convert resonance \param name to id
-	int getIdOfResonance(std::string name){ return totAmp.getAmpId(name); }
+	int GetIdOfResonance(std::string name);
 	//! convert resonance \param id to name
-	std::string getNameOfResonance(unsigned int id){ return totAmp.getAmpName(id); }
+	std::string GetNameOfResonance(unsigned int id);
 	//! get magnitude of resonance \param name
-	virtual double getAmpMagnitude(std::string name) { return totAmp.getAmpMagnitude(name); };
+	virtual double GetMagnitude(std::string name);
 	//! get magnitude of resonance \param ID
-	virtual double getAmpMagnitude(unsigned int id) { return totAmp.getAmpMagnitude(id); };
+	virtual double GetMagnitude(unsigned int id);
 	//! get phase of resonance \param name
-	virtual double getAmpPhase(std::string name) { return totAmp.getAmpPhase(name); };
+	virtual double GetPhase(std::string name);
 	//! get phase of resonance \param ID
-	virtual double getAmpPhase(unsigned int id) { return totAmp.getAmpPhase(id); };
+	virtual double GetPhase(unsigned int id);
 	//! get total integral for resonance \param name
-	virtual double getAmpIntegral(std::string name) { return totAmp.getAmpIntegral(name); };
+	virtual double GetIntegral(std::string name);
 	//! get total integral for resonance \param id
-	virtual double getAmpIntegral(unsigned int id) { return totAmp.getAmpIntegral(id); };
+	virtual double GetIntegral(unsigned int id);
 	//! get fit fraction for resonance \param name
-	virtual double getAmpFraction(std::string name) {
-		return totAmp.getAmpStrength(name)/integral();
-	};
+	virtual double GetFraction(std::string name);
 	//! get fit fraction for resonance \param id
-	virtual double getAmpFraction(unsigned int id) {
-		return totAmp.getAmpStrength(id)/integral();
-	};
+	virtual double GetFraction(unsigned int id);
 	//! get resonance by @param name
-	virtual std::shared_ptr<AmpAbsDynamicalFunction> getResonance(std::string name) {
-		return totAmp.getResonance(name);
-	};
+	virtual std::shared_ptr<AmpAbsDynamicalFunction> GetResonance(std::string name);
 	//! get resonance by @param id
-	virtual std::shared_ptr<AmpAbsDynamicalFunction> getResonance(unsigned int id) {
-		return totAmp.getResonance(id);
-	};
-	//! Get pointer to amplitude sum
-	AmpSumOfAmplitudes* getAmpSum(){ return &totAmp; }
-
-
+	virtual std::shared_ptr<AmpAbsDynamicalFunction> GetResonance(unsigned int id);
 	/*!Get AmplitudeSetup
 	 * AmpltidueSetup object is updated with current parameters and a pointer is returned.
 	 *
 	 * @return AmplitudeSetup
 	 */
-	AmplitudeSetup* GetAmplitudeSetup() {
-		updateAmplitudeSetup();
-		return &ampSetup;
-	}
+	AmplitudeSetup* GetAmplitudeSetup();
 
 	//---------- related to FunctionTree -------------
 	//! Check of tree is available
 	virtual bool hasTree(){	return 1; }
 	//! Getter function for function tree
-	virtual std::shared_ptr<FunctionTree> getAmpTree(allMasses& theMasses,allMasses& toyPhspSample, std::string suffix=""){
+	virtual std::shared_ptr<FunctionTree> GetTree(allMasses& theMasses,allMasses& toyPhspSample,
+			std::string suffix=""){
 		return setupBasicTree(theMasses,toyPhspSample, suffix);
 	}
 
 protected:
+	//! Initialize amplitude sum from amplitude setup
 	void init();
+	//! Maximum value of amplitude. Necessary for event generation.
+	double _maxFcnVal;
+	//! Is amplitude maximum already calculated?
+	bool _calcMaxFcnVal;
 	//! calculate maximum value of amplitude with parameters \par
 	virtual void calcMaxVal(ParameterList& par ,std::shared_ptr<Generator> gen);
 	//! calculate maximum value of amplitude with current parameters
 	virtual void calcMaxVal( std::shared_ptr<Generator> gen);
-
+	//! Efficiency object
 	std::shared_ptr<Efficiency> eff_;
-	bool _calcMaxFcnVal;
-	double _maxFcnVal;
-	AmpSumOfAmplitudes totAmp;
+	//! List of resonances
+	std::vector<std::shared_ptr<AmpAbsDynamicalFunction> > resoList;
+	//! Amplitude setup
 	AmplitudeSetup ampSetup;
-
-	double maxVal;
+	//! Type of normalization
 	normStyle _normStyle;
+	//! List of parameters
 	ParameterList params;
-
+	//! Update amplitude setup with current parameters
 	void updateAmplitudeSetup();
-	unsigned int _nCalls; //! precision for numeric integration
+	//! precision for numeric integration
+	unsigned int _nCalls;
 
 	//---------- related to FunctionTree -------------
 	/**Setup Basic Tree
@@ -192,7 +175,8 @@ protected:
 	 * with efficiency corrected toy phsp sample or "normAcc" normalization tree with sample
 	 * of accepted flat phsp events
 	 */
-	std::shared_ptr<FunctionTree> setupBasicTree(allMasses& theMasses,allMasses& toyPhspSample, std::string suffix="");
+	std::shared_ptr<FunctionTree> setupBasicTree(allMasses& theMasses,allMasses& toyPhspSample,
+			std::string suffix="");
 
 private:
 

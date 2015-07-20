@@ -21,16 +21,20 @@
 #include <cmath>
 #include <math.h>
 #include "Physics/AmplitudeSum/AmpFlatteRes.hpp"
+
+
 AmpFlatteRes::AmpFlatteRes(const char *name,
-		std::shared_ptr<DoubleParameter> resMass,
-		std::shared_ptr<DoubleParameter> mesonRadius, //  meson radius
-		std::shared_ptr<DoubleParameter> motherRadius, //  mother radius
-		std::shared_ptr<DoubleParameter> g1, std::shared_ptr<DoubleParameter> g2,
-		double g2_partA, double g2_partB, int subSys, int resSpin, int m, int n, double resRadius) :
-		AmpAbsDynamicalFunction(name),
-		AmpKinematics(resMass, subSys, resSpin, m, n, mesonRadius, motherRadius),
-		_g2(g2), _g1(g1), _g2_partA(g2_partA), _g2_partB(g2_partB), mesonRadius(resRadius),
-		foundMasses(false),	nParams(5)
+			std::shared_ptr<DoubleParameter> mag, std::shared_ptr<DoubleParameter> phase,
+			std::shared_ptr<DoubleParameter> mass, int subSys, Spin spin, Spin m, Spin n,
+			std::shared_ptr<DoubleParameter> mesonRadius,
+			std::shared_ptr<DoubleParameter> motherRadius,
+			std::shared_ptr<DoubleParameter> g1,
+			std::shared_ptr<DoubleParameter> g2, double g2_partA, double g2_partB,
+			int nCalls, normStyle nS) :
+		AmpAbsDynamicalFunction(name, mag, phase, mass, subSys, spin, m, n,
+				mesonRadius, motherRadius, nCalls, nS),
+		_g2(g2), _g1(g1), _g2_partA(g2_partA), _g2_partB(g2_partB),
+		nParams(5)
 {
 	if(_g2_partA<0||_g2_partA>5||_g2_partB<0||_g2_partB>5)
 		throw std::runtime_error("AmpFlatteRes3Ch::evaluateAmp | particle masses for second channel not set!");
@@ -40,23 +44,18 @@ AmpFlatteRes::~AmpFlatteRes()
 {
 }
 
-std::complex<double> AmpFlatteRes::evaluate(dataPoint& point) {
-	if(_mR->GetValue() != tmp_mass || _g1->GetValue()!=tmp_g1 || _g2->GetValue()!=tmp_g2 ) {
+//std::complex<double> AmpFlatteRes::evaluate(dataPoint& point) {
+//	return AmpAbsDynamicalFunction::evaluate(point);
+//}
+
+std::complex<double> AmpFlatteRes::evaluateAmp(dataPoint& point) {
+	if( _g1->GetValue()!=tmp_g1 || _g2->GetValue()!=tmp_g2 ) {
 		SetModified();
-		tmp_mass = _mR->GetValue();
 		tmp_g1 = _g1->GetValue();
 		tmp_g2 = _g2->GetValue();
 	}
-	return ( GetNormalization()*evaluateAmp(point)*evaluateWignerD(point) );
-}
 
-std::complex<double> AmpFlatteRes::evaluateAmp(dataPoint& point) {
 	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
-	if(!foundMasses){
-		id23 = point.getID("m23sq");
-		id13 = point.getID("m13sq");
-		foundMasses=true;
-	}
 	double mSq=-999;
 	switch(_subSys){
 	case 3:
@@ -65,7 +64,9 @@ std::complex<double> AmpFlatteRes::evaluateAmp(dataPoint& point) {
 	case 5: mSq=(point.getVal(0)); break;
 	}
 
-	return dynamicalFunction(mSq,_mR->GetValue(),_ma,_mb,_g1->GetValue(), _g2_partA,_g2_partB,_g2->GetValue(),_spin,mesonRadius);
+	return dynamicalFunction(mSq,_mass->GetValue(),
+			_ma,_mb,_g1->GetValue(),
+			_g2_partA,_g2_partB,_g2->GetValue(),_spin,mesonRadius);
 }
 std::complex<double> AmpFlatteRes::dynamicalFunction(double mSq, double mR,
 		double massA1, double massA2, double gA,
@@ -76,8 +77,8 @@ std::complex<double> AmpFlatteRes::dynamicalFunction(double mSq, double mR,
 
 	//channel A - signal channel
 	//break-up momentum
-	//	std::complex<double> rhoA = AmpKinematics::phspFactor(sqrtS, massA1, massA2);
-	double barrierA = AmpKinematics::FormFactor(sqrtS,massA1,massA2,J,mesonRadius)/AmpKinematics::FormFactor(mR,massA1,massA2,J,mesonRadius);
+	//	std::complex<double> rhoA = Kinematics::phspFactor(sqrtS, massA1, massA2);
+	double barrierA = Kinematics::FormFactor(sqrtS,massA1,massA2,J,mesonRadius)/Kinematics::FormFactor(mR,massA1,massA2,J,mesonRadius);
 	//std::complex<double> qTermA = std::pow((qValue(sqrtS,massA1,massA2) / qValue(mR,massA1,massA2)), (2.*J+ 1.));
 	//	std::complex<double> qTermA = std::pow((phspFactor(sqrtS,massA1,massA2) / phspFactor(mR,massA1,massA2))*mR/sqrtS, (2*J+ 1));
 	//convert coupling to partial width of channel A
@@ -87,8 +88,8 @@ std::complex<double> AmpFlatteRes::dynamicalFunction(double mSq, double mR,
 
 	//channel B - hidden channel
 	//break-up momentum
-	//	std::complex<double> rhoB = AmpKinematics::phspFactor(sqrtS, massB1, massB2);
-	double barrierB = AmpKinematics::FormFactor(sqrtS,massB1,massB2,J,1.5)/AmpKinematics::FormFactor(mR,massB1,massB2,J,1.5);
+	//	std::complex<double> rhoB = Kinematics::phspFactor(sqrtS, massB1, massB2);
+	double barrierB = Kinematics::FormFactor(sqrtS,massB1,massB2,J,1.5)/Kinematics::FormFactor(mR,massB1,massB2,J,1.5);
 	//std::complex<double> qTermB = std::pow((qValue(sqrtS,massB1,massB2) / qValue(mR,massB1,massB2)), (2.*J+ 1.));
 	//	std::complex<double> qTermB = std::pow((phspFactor(sqrtS,massB1,massB2) / phspFactor(mR,massB1,massB2))*mR/sqrtS, (2*J+ 1));
 	double gB = couplingRatio; 
@@ -116,6 +117,175 @@ std::complex<double> AmpFlatteRes::dynamicalFunction(double mSq, double mR,
 	}
 	return result;
 }
+
+
+std::shared_ptr<FunctionTree> AmpFlatteRes::setupTree(
+		allMasses& theMasses,allMasses& toyPhspSample,std::string suffix, ParameterList& params){
+
+	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
+	double phspVol = kin->getPhspVolume();
+	BOOST_LOG_TRIVIAL(info) << "AmpFlatteRes::setupBasicTree() | "<<_name;
+	//------------Setup Tree---------------------
+	std::shared_ptr<FunctionTree> newTree(new FunctionTree());
+	//------------Setup Tree Pars---------------------
+	std::shared_ptr<MultiDouble> m23sq( new MultiDouble("m23sq",theMasses.masses_sq.at( std::make_pair(2,3) )) );
+	std::shared_ptr<MultiDouble> m13sq( new MultiDouble("m13sq",theMasses.masses_sq.at( std::make_pair(1,3) )) );
+	std::shared_ptr<MultiDouble> m12sq( new MultiDouble("m12sq",theMasses.masses_sq.at( std::make_pair(1,2) )) );
+	std::shared_ptr<MultiDouble> m23sq_phsp( new MultiDouble("m23sq_phsp",toyPhspSample.masses_sq.at( std::make_pair(2,3) )) );
+	std::shared_ptr<MultiDouble> m13sq_phsp( new MultiDouble("m13sq_phsp",toyPhspSample.masses_sq.at( std::make_pair(1,3) )) );
+	std::shared_ptr<MultiDouble> m12sq_phsp( new MultiDouble("m12sq_phsp",toyPhspSample.masses_sq.at( std::make_pair(1,2) )) );
+
+	//----Strategies needed
+	std::shared_ptr<MultAll> mmultStrat(new MultAll(ParType::MCOMPLEX));
+	std::shared_ptr<MultAll> mmultDStrat(new MultAll(ParType::MDOUBLE));
+	std::shared_ptr<AddAll> maddStrat(new AddAll(ParType::MCOMPLEX));
+	std::shared_ptr<AbsSquare> msqStrat(new AbsSquare(ParType::MDOUBLE));
+	std::shared_ptr<LogOf> mlogStrat(new LogOf(ParType::MDOUBLE));
+	std::shared_ptr<MultAll> multStrat(new MultAll(ParType::COMPLEX));
+	std::shared_ptr<MultAll> multDStrat(new MultAll(ParType::DOUBLE));
+	std::shared_ptr<AddAll> addStrat(new AddAll(ParType::DOUBLE));
+	std::shared_ptr<AddAll> addComplexStrat(new AddAll(ParType::COMPLEX));
+	std::shared_ptr<AbsSquare> sqStrat(new AbsSquare(ParType::DOUBLE));
+	std::shared_ptr<LogOf> logStrat(new LogOf(ParType::DOUBLE));
+	std::shared_ptr<Complexify> complStrat(new Complexify(ParType::COMPLEX));
+	std::shared_ptr<Inverse> invStrat(new Inverse(ParType::DOUBLE));
+	std::shared_ptr<SquareRoot> sqRootStrat(new SquareRoot(ParType::DOUBLE));
+
+	//----Add Nodes
+	std::shared_ptr<WignerDStrategy> angdStrat(	new WignerDStrategy(_name,ParType::MDOUBLE) );
+	std::shared_ptr<WignerDPhspStrategy> angdPhspStrat(	new WignerDPhspStrategy(_name,ParType::MDOUBLE) );
+	std::shared_ptr<FlatteStrategy> flatteStrat(new FlatteStrategy(_name,ParType::MCOMPLEX));
+	std::shared_ptr<FlattePhspStrategy> flattePhspStrat(new FlattePhspStrategy(_name,ParType::MCOMPLEX));
+
+	newTree->createHead("Reso_"+_name, mmultStrat, theMasses.nEvents); //Reso=BW*C_*AD*N_
+
+	newTree->createNode("Flatte_"+_name, mmultStrat , "Reso_"+_name, theMasses.nEvents); //BW
+	newTree->createNode("FlatteRes_"+_name, flatteStrat, "Flatte_"+_name, theMasses.nEvents); //BW
+	newTree->createNode("C_"+_name, complStrat, "Reso_"+_name); //c
+	newTree->createLeaf("Intens_"+_name, params.GetDoubleParameter("mag_"+_name), "C_"+_name); //r
+	newTree->createLeaf("Phase_"+_name, params.GetDoubleParameter("phase_"+_name), "C_"+_name); //phi
+	newTree->createNode("AngD_"+_name, angdStrat, "Reso_"+_name, theMasses.nEvents); //AD
+
+	//Flatte
+	newTree->createLeaf("m0_"+_name, params.GetDoubleParameter("m0_"+_name), "FlatteRes_"+_name); //m0
+	newTree->createLeaf("m23sq", m23sq, "FlatteRes_"+_name); //ma
+	newTree->createLeaf("m13sq", m13sq, "FlatteRes_"+_name); //mb
+	newTree->createLeaf("m12sq", m12sq, "FlatteRes_"+_name); //mc
+	newTree->createLeaf("subSysFlag_"+_name, _subSys, "FlatteRes_"+_name); //_subSysFlag
+	newTree->createLeaf("spin_"+_name, _spin, "FlatteRes_"+_name); //spin
+	newTree->createLeaf("mesonRadius_"+_name, mesonRadius, "FlatteRes_"+_name); //resonance radius
+	newTree->createLeaf("d_"+_name, params.GetDoubleParameter("d_"+_name) , "FlatteRes_"+_name); //d
+	newTree->createLeaf("mHiddenA_"+_name, \
+			PhysConst::instance()->getMass(_g2_partA), "FlatteRes_"+_name);
+	newTree->createLeaf("mHiddenB_"+_name, \
+			PhysConst::instance()->getMass(_g2_partB), "FlatteRes_"+_name);
+	if(_name.find("a_0") != _name.npos)
+		newTree->createLeaf("g1_a_0", params.GetDoubleParameter("g1_a_0"), "FlatteRes_"+_name);//use global parameter g1_a0 (asdfef)
+	else
+		newTree->createLeaf("g1_"+_name, params.GetDoubleParameter("g1_"+_name), "FlatteRes_"+_name);//use local parameter g1_a0
+	newTree->createLeaf("g2_"+_name, params.GetDoubleParameter("g2_"+_name), "FlatteRes_"+_name);
+	//Angular distribution
+	newTree->createLeaf("m23sq", m23sq, "AngD_"+_name); //ma
+	newTree->createLeaf("m13sq", m13sq, "AngD_"+_name); //mb
+	newTree->createLeaf("m12sq", m12sq, "AngD_"+_name); //mc
+	newTree->createLeaf("M", kin->M, "AngD_"+_name); //M
+	newTree->createLeaf("m1", kin->m1, "AngD_"+_name); //m1
+	newTree->createLeaf("m2", kin->m2, "AngD_"+_name); //m2
+	newTree->createLeaf("m3", kin->m3, "AngD_"+_name); //m3
+	newTree->createLeaf("subSysFlag_"+_name, _subSys, "AngD_"+_name); //_subSysFlag
+	newTree->createLeaf("spin_"+_name,_spin, "AngD_"+_name); //spin
+	newTree->createLeaf("m_"+_name, 0, "AngD_"+_name); //OutSpin 1
+	newTree->createLeaf("n_"+_name, 0, "AngD_"+_name); //OutSpin 2
+
+	//Normalization
+	if(_normStyle!=normStyle::none){
+		newTree->createNode("N_"+_name, sqRootStrat, "Flatte_"+_name); //N = sqrt(NSq)
+		newTree->createNode("NSq_"+_name, multDStrat, "N_"+_name); //NSq = N_phspMC * 1/PhspVolume * 1/Sum(|A|^2)
+		newTree->createLeaf("PhspSize_"+_name, toyPhspSample.nEvents, "NSq_"+_name); // N_phspMC
+		newTree->createLeaf("PhspVolume_"+_name, 1/phspVol, "NSq_"+_name); // 1/PhspVolume
+		newTree->createNode("InvSum_"+_name, invStrat, "NSq_"+_name); //1/Sum(|A|^2)
+		newTree->createNode("Sum_"+_name, addStrat, "InvSum_"+_name); //Sum(|A|^2)
+		newTree->createNode("AbsVal_"+_name, msqStrat, "Sum_"+_name); //|A_i|^2
+		newTree->createNode("NormReso_"+_name, mmultStrat, "AbsVal_"+_name, toyPhspSample.nEvents); //BW
+
+		//Flatte (Normalization)
+		newTree->createNode("NormFlatte_"+_name, flattePhspStrat, "NormReso_"+_name, toyPhspSample.nEvents); //BW
+		newTree->createLeaf("m0_"+_name, params.GetDoubleParameter("m0_"+_name), "NormFlatte_"+_name); //m0
+		newTree->createLeaf("m23sq_phsp", m23sq_phsp, "NormFlatte_"+_name); //ma
+		newTree->createLeaf("m13sq_phsp", m13sq_phsp, "NormFlatte_"+_name); //mb
+		newTree->createLeaf("m12sq_phsp", m12sq_phsp, "NormFlatte_"+_name); //mc
+		newTree->createLeaf("subSysFlag_"+_name, _subSys, "NormFlatte_"+_name); //_subSysFlag
+		newTree->createLeaf("spin_"+_name, _spin, "NormFlatte_"+_name); //spin
+		newTree->createLeaf("mesonRadius_"+_name, mesonRadius, "NormFlatte_"+_name); //spin
+		newTree->createLeaf("d_"+_name,  params.GetDoubleParameter("d_"+_name), "NormFlatte_"+_name); //d
+		newTree->createLeaf("mHiddenA_"+_name, \
+				PhysConst::instance()->getMass(_g2_partA), "NormFlatte_"+_name);
+		newTree->createLeaf("mHiddenB_"+_name, \
+				PhysConst::instance()->getMass(_g2_partB), "NormFlatte_"+_name);
+		if(_name.find("a_0(980)") != _name.npos)
+			newTree->createLeaf("g1_a_0", params.GetDoubleParameter("g1_a_0"), "NormFlatte_"+_name);//use global parameter g1_a0 (asdfef)
+		else
+			newTree->createLeaf("g1_"+_name, params.GetDoubleParameter("g1_"+_name), "NormFlatte_"+_name);//use local parameter g1_a0
+		newTree->createLeaf("g2_"+_name, params.GetDoubleParameter("g2_"+_name), "NormFlatte_"+_name);
+
+			//Angular distribution (Normalization)
+		newTree->createNode("NormAngD_"+_name, angdPhspStrat, "NormReso_"+_name, toyPhspSample.nEvents); //AD
+		newTree->createLeaf("m23sq_phsp", m23sq_phsp, "NormAngD_"+_name); //ma
+		newTree->createLeaf("m13sq_phsp", m13sq_phsp, "NormAngD_"+_name); //mb
+		newTree->createLeaf("m12sq_phsp", m12sq_phsp, "NormAngD_"+_name); //mc
+		newTree->createLeaf("M", kin->M, "NormAngD_"+_name); //M
+		newTree->createLeaf("m1", kin->m1, "NormAngD_"+_name); //m1
+		newTree->createLeaf("m2", kin->m2, "NormAngD_"+_name); //m2
+		newTree->createLeaf("m3", kin->m3, "NormAngD_"+_name); //m3
+		newTree->createLeaf("subSysFlag_"+_name, _subSys, "NormAngD_"+_name); //subSysFlag
+		newTree->createLeaf("spin_"+_name,_spin, "NormAngD_"+_name); //spin
+		newTree->createLeaf("m_"+_name, 0, "NormAngD_"+_name); //OutSpin 1
+		newTree->createLeaf("n_"+_name, 0, "NormAngD_"+_name); //OutSpin 2
+	} else {
+		newTree->createLeaf("N_"+_name, 1., "Flatte_"+_name);
+	}
+
+	switch(_subSys){
+	case 3:{ //reso in sys of particles 1&2
+		//newTree->createLeaf("mym_"+_name, m12, "RelBW_"+_name); //m
+		newTree->createLeaf("ma_"+_name, kin->m1, "FlatteRes_"+_name); //ma
+		newTree->createLeaf("mb_"+_name, kin->m2, "FlatteRes_"+_name); //mb
+		if(_normStyle!=normStyle::none){
+			newTree->createLeaf("ma_"+_name, kin->m1, "NormFlatte_"+_name); //ma
+			newTree->createLeaf("mb_"+_name, kin->m2, "NormFlatte_"+_name); //mb
+		}
+		break;
+	}
+	case 4:{ //reso in sys of particles 1&3
+		//newTree->createLeaf("mym_"+_name, m13, "FlatteRes_"+_name); //m
+		newTree->createLeaf("ma_"+_name, kin->m1, "FlatteRes_"+_name); //ma
+		newTree->createLeaf("mb_"+_name, kin->m3, "FlatteRes_"+_name); //mb
+		if(_normStyle!=normStyle::none){
+			newTree->createLeaf("ma_"+_name, kin->m1, "NormFlatte_"+_name); //ma
+			newTree->createLeaf("mb_"+_name, kin->m3, "NormFlatte_"+_name); //mb
+		}
+		break;
+	}
+	case 5:{ //reso in sys of particles 2&3
+		//newTree->createLeaf("mym_"+_name, m23, "FlatteRes_"+_name); //m
+		newTree->createLeaf("ma_"+_name, kin->m2, "FlatteRes_"+_name); //ma
+		newTree->createLeaf("mb_"+_name, kin->m3, "FlatteRes_"+_name); //mb
+		if(_normStyle!=normStyle::none){
+			newTree->createLeaf("ma_"+_name, kin->m2, "NormFlatte_"+_name); //ma
+			newTree->createLeaf("mb_"+_name, kin->m3, "NormFlatte_"+_name); //mb
+		}
+		break;
+	}
+	default:{
+		BOOST_LOG_TRIVIAL(error)<<"AmpSumIntensity::setupBasicTree(): Subsys not found!!";
+	}
+	}
+
+
+	return newTree;
+}
+
+
 
 FlatteConf::FlatteConf(const boost::property_tree::ptree &pt_) : basicConf(pt_){
 	m_mass= pt_.get<double>("mass");

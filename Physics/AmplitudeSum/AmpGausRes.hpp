@@ -31,8 +31,10 @@ class AmpGausRes : public AmpAbsDynamicalFunction  {
 public:
 
 	AmpGausRes(const char *name,
-			DoubleParameter& _resMass, DoubleParameter& _resWidth,
-			int _subsys) ;
+			std::shared_ptr<DoubleParameter> mag, std::shared_ptr<DoubleParameter> phase,
+			std::shared_ptr<DoubleParameter> mass, int subSys,
+			std::shared_ptr<DoubleParameter> width,
+			int nCalls=30000, normStyle nS=normStyle::one) ;
 
 	AmpGausRes(const AmpGausRes&);
 
@@ -46,12 +48,7 @@ public:
 	double getSpin(){return 0;};
 
 protected:
-	DoubleParameter _mR;
-	DoubleParameter _resWidth;
-
-	unsigned int _subSys;
-
-private:
+	std::shared_ptr<DoubleParameter> _width;
 
 };
 

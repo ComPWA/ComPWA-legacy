@@ -211,7 +211,7 @@ void MinLogLH::iniLHtree(){
 
 	//Which kind of efficiency correction should be used?
 	if(!accSample) {//binned
-		signalPhspTree_amp = amp->getAmpTree(mPhspSample,mPhspSample,"_Phsp");
+		signalPhspTree_amp = amp->GetTree(mPhspSample,mPhspSample,"_Phsp");
 		eff = std::shared_ptr<MultiDouble>( new MultiDouble("eff",mPhspSample.eff) );
 		signalPhspTree->createLeaf("InvNmc", 1/ ( (double) mPhspSample.nEvents), "normFactor");
 
@@ -226,7 +226,7 @@ void MinLogLH::iniLHtree(){
 	else {//unbinned
 		signalPhspTree->createNode("IntensPhsp", msqStrat, "sumAmp", mAccSample.nEvents, false); //|T_{ev}|^2
 		signalPhspTree->createLeaf("InvNmc", 1/ ( (double) mAccSample.nEvents/accSampleEff ), "normFactor");
-		signalPhspTree_amp = amp->getAmpTree(mAccSample,mPhspSample,"_Phsp");
+		signalPhspTree_amp = amp->GetTree(mAccSample,mPhspSample,"_Phsp");
 		BOOST_LOG_TRIVIAL(debug)<<"MinLogLH::iniLHTree() setting up normalization tree, "
 				"using sample of accepted phsp events for efficiency correction!";
 		signalPhspTree->insertTree(signalPhspTree_amp, "IntensPhsp"); //Sum of resonances, at each point
@@ -239,7 +239,7 @@ void MinLogLH::iniLHtree(){
 		bkgPhspTree->createNode("sumAmp", addStrat,"normFactor"); // sumAmp = \sum_{evPHSP} |T_{evPHSP}|^2
 		bkgPhspTree->createLeaf("phspVolume", Kinematics::instance()->getPhspVolume(), "normFactor");
 		if(!accSample) {//binned
-			bkgPhspTree_amp = ampBkg->getAmpTree(mPhspSample,mPhspSample,"_Phsp");
+			bkgPhspTree_amp = ampBkg->GetTree(mPhspSample,mPhspSample,"_Phsp");
 			eff = std::shared_ptr<MultiDouble>( new MultiDouble("eff",mPhspSample.eff) );
 			bkgPhspTree->createLeaf("InvNmc", 1/ ( (double) mPhspSample.nEvents), "normFactor");
 
@@ -254,7 +254,7 @@ void MinLogLH::iniLHtree(){
 		else {//unbinned
 			bkgPhspTree->createNode("IntensPhsp", msqStrat, "sumAmp", mAccSample.nEvents, false); //|T_{ev}|^2
 			bkgPhspTree->createLeaf("InvNmc", 1/ ( (double) mAccSample.nEvents/accSampleEff), "normFactor");
-			bkgPhspTree_amp = ampBkg->getAmpTree(mAccSample,mPhspSample,"_Phsp");
+			bkgPhspTree_amp = ampBkg->GetTree(mAccSample,mPhspSample,"_Phsp");
 			BOOST_LOG_TRIVIAL(debug)<<"MinLogLH::iniLHTree() setting up tree for background normalization, "
 					"using sample of accepted phsp events for efficiency correction!";
 			bkgPhspTree->insertTree(bkgPhspTree_amp, "IntensPhsp"); //Sum of resonances, at each point
@@ -277,7 +277,7 @@ void MinLogLH::iniLHtree(){
 	/* Setup basic tree
 	 * head node is 'Amplitude' which contains the complex amplitude values for each event in sample
 	 */
-	signalTree_amp = amp->getAmpTree(mData,mPhspSample,"data");
+	signalTree_amp = amp->GetTree(mData,mPhspSample,"data");
 	//------------Setup Tree Pars---------------------
 	std::shared_ptr<MultiDouble> weight = std::shared_ptr<MultiDouble>( new MultiDouble("weight",mData.weight) );
 
@@ -303,7 +303,7 @@ void MinLogLH::iniLHtree(){
 	if(ampBkg){
 		physicsTree->createNode("normBkg", mmultDStrat, "addBkgSignal", mData.nEvents, false);// x=f_{bkg}|T|^2/norm_{LH}
 		physicsTree->createLeaf("OneMinusBkgFrac", (1-signalFraction), "normBkg");
-		bkgTree_amp= ampBkg->getAmpTree(mData,mPhspSample,"data");
+		bkgTree_amp= ampBkg->GetTree(mData,mPhspSample,"data");
 		physicsTree->insertTree(bkgPhspTree, "normBkg"); //provides 1/normLH
 		physicsTree->createNode("IntensBkg", msqStrat, "normBkg", mData.nEvents, false);
 		physicsTree->insertTree(bkgTree_amp,"IntensBkg");
@@ -322,9 +322,9 @@ void MinLogLH::iniLHtree(){
 double MinLogLH::calcPenalty(){
 	if(penaltyLambda<=0) return 0; //penalty term disabled
 	double magSum = 0;
-	for(unsigned int i=0;i<amp->getNumberOfResonances(); i++){
+	for(unsigned int i=0;i<amp->GetNumberOfResonances(); i++){
 		//magSum += amp->getAmpMagnitude(i);
-		magSum += amp->getAmpMagnitude(i)*std::sqrt(amp->getAmpIntegral(i));
+		magSum += amp->GetMagnitude(i)*std::sqrt(amp->GetIntegral(i));
 	}
 	BOOST_LOG_TRIVIAL(debug) << "MinLogLH::calcPenalty() | Adding penalty term to LH: "
 			<<penaltyLambda*magSum;

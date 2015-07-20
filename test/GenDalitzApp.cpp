@@ -315,7 +315,7 @@ int main(int argc, char **argv) {
 	cout << endl << endl;
 
 	//Simple Breit-Wigner Physics-Module setup
-	AmpSumIntensity testBW(ini, AmpSumIntensity::normStyle::none,
+	AmpSumIntensity testBW(ini, normStyle::none,
 			std::shared_ptr<Efficiency>(new UnitEfficiency()), MaxEvents);
 	// std::shared_ptr<Amplitude> amps(new AmpSumIntensity(ini, AmpSumIntensity::normStyle::one, std::shared_ptr<Efficiency>(new UnitEfficiency()), myReader->getNEvents()));
 

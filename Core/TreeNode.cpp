@@ -119,14 +119,14 @@ std::string TreeNode::to_str(int lv, std::string beginning){
 			oss << _value[_value.size()-1]->val_to_str();
 	}
 	if(_children.size())
-		oss << " with " << _children.size() << " children" << std::endl;
+		oss << " (" << _children.size() << " children/"<<_value.size()<<" values)" << std::endl;
 	else
 		oss << std::endl;
 
 	if(lv==0) return oss.str();
 	for(unsigned int i=0; i<_children.size(); i++){
 		//oss << " -> ";
-		oss << _children[i]->to_str(lv-1,beginning+" -> ");
+		oss << _children.at(i)->to_str(lv-1,beginning+". ");
 	}
 	return oss.str();
 };
