@@ -28,7 +28,6 @@
 
 #include "Physics/AmplitudeSum/AmpAbsDynamicalFunction.hpp"
 #include "Physics/AmplitudeSum/AmplitudeSetup.hpp"
-#include "Physics/AmplitudeSum/AmpSumOfAmplitudes.hpp"
 #include "Physics/DPKinematics/DalitzKinematics.hpp"
 
 class AmpSumIntensity : public Amplitude {
