@@ -326,8 +326,8 @@ double MinLogLH::calcPenalty(){
 		//magSum += amp->getAmpMagnitude(i);
 		magSum += amp->GetMagnitude(i)*std::sqrt(amp->GetIntegral(i));
 	}
-	BOOST_LOG_TRIVIAL(debug) << "MinLogLH::calcPenalty() | Adding penalty term to LH: "
-			<<penaltyLambda*magSum;
+//	BOOST_LOG_TRIVIAL(debug) << "MinLogLH::calcPenalty() | Adding penalty term to LH: "
+//			<<penaltyLambda*magSum;
 	return (penaltyLambda*magSum);
 }
 
@@ -395,7 +395,7 @@ double MinLogLH::controlParameter(ParameterList& minPar){
 			if(intens>0) sumLog += std::log(
 					signalFraction*intens/norm+(1-signalFraction)*intensBkg/normBkg )*theEvent.getWeight();
 		}
-		lh = (-1)*((double)nUseEvt_)/sumOfWeights*sumLog + calcPenalty();
+		lh = (-1)*((double)nUseEvt_)/sumOfWeights*sumLog;
 	} else {
 		physicsTree->recalculate();
 		std::shared_ptr<DoubleParameter> logLH = std::dynamic_pointer_cast<DoubleParameter>(

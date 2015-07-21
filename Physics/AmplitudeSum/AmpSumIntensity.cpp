@@ -626,10 +626,9 @@ double AmpSumIntensity::GetIntegral(unsigned int id) {
 	if(id < 0 || id > resoList.size() )
 		throw std::runtime_error("AmpSumIntensity::getAmpIntegral() | "
 				"Invalid resonance ID! Resonance not found?");
-	std::cout<<(2*resoList.at(id)->getSpin()+1)<<" "<<resoList.at(id)->totalIntegral()<<std::endl;
 	//hard code normalization here to save cpu time
-	//return (2*resoList.at(id)->getSpin())*(2*resoList.at(id)->getSpin());
-	return resoList.at(id)->totalIntegral(); //recalculate integral for each call
+	return 1;
+	//return resoList.at(id)->totalIntegral(); //recalculate integral for each call
 }
 
 double AmpSumIntensity::GetFraction(std::string name) {
