@@ -16,11 +16,11 @@
 #include "Core/Particle.hpp"
 #include "Core/Event.hpp"
 
-Event::Event():fWeight(1.),fName(""){
+Event::Event():fWeight(1.),fName(""),fFlavour(0),fCharge(0),fEff(1.){
 
 }
 
-Event::Event(const std::string& name):fWeight(1.),fName(name),fFlavour(0),fCharge(0){
+Event::Event(const std::string& name):fWeight(1.),fName(name),fFlavour(0),fCharge(0),fEff(1.){
 
 }
 

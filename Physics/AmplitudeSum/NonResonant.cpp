@@ -72,5 +72,5 @@ std::shared_ptr<FunctionTree> NonResonant::setupTree(
 						toyPhspSample.nEvents, std::complex<double>(1,0))) );
 		newTree->createLeaf("NormNonRes_"+_name, unitVec2, "AbsVal_"+_name); //BW
 	}
-
+	return newTree;
 }
