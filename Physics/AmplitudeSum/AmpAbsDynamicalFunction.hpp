@@ -63,7 +63,10 @@ public:
 	};
 	//! Calculation integral |dynamical amplitude|^2
 	virtual double integral();
-	//! Calculation integral |dynamical amplitude * WignerD|^2
+	/** Calculation integral |c * dynamical amplitude * WignerD|^2
+	 * Used to check the correct normalization of the amplitude. Should always be 1.
+	 * @return
+	 */
 	virtual double totalIntegral() const;
 
 	//! Get current normalization. In case that resonance parameters has change, it is recalculated.

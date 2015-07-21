@@ -62,7 +62,7 @@ int main(int argc, char **argv){
 	int seed = 3041; //default seed
 
 	//number of calls for numeric integration and number of events for phsp integration
-	unsigned int mcPrecision = 100000;
+	unsigned int mcPrecision = 1000000;
 	Logging log("log-compareTreeAmp.txt",boost::log::trivial::debug); //initialize logging
 	//initialize kinematics of decay
 	DalitzKinematics::createInstance("D0","K_S0","K-","K+");//setup kinematics
@@ -72,7 +72,7 @@ int main(int argc, char **argv){
 	RunManager run;
 	run.setGenerator(gen);
 	//======================= DATA =============================
-	unsigned int numEvents = 1000;//data size to be generated
+	unsigned int numEvents = 10000;//data size to be generated
 	std::shared_ptr<Data> inputData(new RootReader()); //empty file: run generation before fit
 
 	//======================= EFFICIENCY =============================
@@ -88,9 +88,9 @@ int main(int argc, char **argv){
 	std::string fitModelFile = trueModelFile;
 	AmplitudeSetup ini(fitModelFile);//put start parameters here
 	AmplitudeSetup iniTree(fitModelFile);//put start parameters here
-	AmpSumIntensity* fitAmpPtr = new AmpSumIntensity(ini, eff, mcPrecision);
+	AmpSumIntensity* fitAmpPtr = new AmpSumIntensity(ini, normStyle::one, eff, mcPrecision);
 	std::shared_ptr<Amplitude> fitAmp(fitAmpPtr);
-	AmpSumIntensity* fitAmpTreePtr = new AmpSumIntensity(iniTree, eff, mcPrecision);
+	AmpSumIntensity* fitAmpTreePtr = new AmpSumIntensity(iniTree, normStyle::one, eff, mcPrecision);
 	std::shared_ptr<Amplitude> fitAmpTree(fitAmpTreePtr);
 
 	run.setAmplitude(trueAmp);//set true model here for generation
@@ -135,7 +135,7 @@ int main(int argc, char **argv){
 	MinLogLH* minLog = dynamic_cast<MinLogLH*>(&*(esti->Instance()));
 	minLog->setUseFunctionTree(1);
 	std::shared_ptr<FunctionTree> physicsTree = minLog->getTree();
-	BOOST_LOG_TRIVIAL(debug) << physicsTree->head()->to_str(10);
+	BOOST_LOG_TRIVIAL(debug) << physicsTree->head()->to_str(20);
 	double initialLHTree = esti->controlParameter(fitParTree);
 	std::shared_ptr<Optimizer> optiTree(new MinuitIF(esti, fitParTree));
 	run.setOptimizer(optiTree);
@@ -162,6 +162,7 @@ int main(int argc, char **argv){
 	std::shared_ptr<TreeNode> intensNode = physicsTree->head()->getChildNode("Intens");
 	MultiDouble* intensValue = dynamic_cast<MultiDouble*>( &*(intensNode->getValue()) );
 
+	BOOST_LOG_TRIVIAL(info) <<" Total integral of phi(1020) "<<phiRes->totalIntegral();
 	std::cout<<std::setprecision(8)<<std::endl;
 	BOOST_LOG_TRIVIAL(info) <<"===========================================";
 	BOOST_LOG_TRIVIAL(info) <<"Compare values: (use first event of data sample) TREE/AMPLITUDE";
@@ -171,7 +172,7 @@ int main(int argc, char **argv){
 			<<" = "<<intensValue->GetValue(0) / *intens.GetDoubleParameter(0);
 	BOOST_LOG_TRIVIAL(info) <<"================= phi(1020) ==========================";
 	BOOST_LOG_TRIVIAL(info) <<"Reso_phi(1020): "<<intensNode->getChildSingleValue("Reso_phi(1020)")
-			<<"/"<<phiRes->evaluate(point)*phiCoeff;
+			<<"/"<<phiRes->evaluate(point);
 	BOOST_LOG_TRIVIAL(info) <<"BW_phi(1020): "<<intensNode->getChildSingleValue("BW_phi(1020)")
 			<<"/"<<phiRes->evaluateAmp(point)*phiRes->GetNormalization();
 	BOOST_LOG_TRIVIAL(info) <<"N_phi(1020): "<<intensNode->getChildSingleValue("N_phi(1020)").real()
@@ -183,7 +184,7 @@ int main(int argc, char **argv){
 			<<"/"<<phiRes->evaluateWignerD(point);
 	BOOST_LOG_TRIVIAL(info) <<"================= a_0(980)0 ==========================";
 	BOOST_LOG_TRIVIAL(info) <<"Reso_a_0(980)0: "<<intensNode->getChildSingleValue("Reso_a_0(980)0")
-			<<"/"<<a0Res->evaluate(point)*a0Coeff;
+			<<"/"<<a0Res->evaluate(point);
 	BOOST_LOG_TRIVIAL(info) <<"Flatte_a_0(980)0: "<<intensNode->getChildSingleValue("Flatte_a_0(980)0")
 			<<"/"<<a0Res->evaluateAmp(point)*a0Res->GetNormalization();
 	BOOST_LOG_TRIVIAL(info) <<"N_a_0(980)0: "<<intensNode->getChildSingleValue("N_a_0(980)0").real()
@@ -194,7 +195,7 @@ int main(int argc, char **argv){
 			<<"/"<<a0Res->evaluateWignerD(point);
 	BOOST_LOG_TRIVIAL(info) <<"================= a_0(980)+ ==========================";
 	BOOST_LOG_TRIVIAL(info) <<"Reso_a_0(980)+: "<<intensNode->getChildSingleValue("Reso_a_0(980)+")
-			<<"/"<<aplusRes->evaluate(point)*aplusCoeff;
+			<<"/"<<aplusRes->evaluate(point);
 	BOOST_LOG_TRIVIAL(info) <<"Flatte_a_0(980)+: "<<intensNode->getChildSingleValue("Flatte_a_0(980)+")
 			<<"/"<<aplusRes->evaluateAmp(point)*aplusRes->GetNormalization();
 	BOOST_LOG_TRIVIAL(info) <<"N_a_0(980)+: "<<intensNode->getChildSingleValue("N_a_0(980)+").real()

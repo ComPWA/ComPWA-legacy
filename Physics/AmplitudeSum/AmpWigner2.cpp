@@ -31,8 +31,8 @@ double AmpWigner2::dynamicalFunction(int J, int mu, int muPrime, double cosTheta
 	 * ordinary Legendre polynomials. We normalize the square of these to one by the pre factor
 	 * sqrt(2J+1). The factor was obtained by trial and error. No idea for why thats the
 	 * normalization.  */
-	//	double norm = sqrt(2*J+1);
-	double norm = 1;
+	double norm = 1/sqrt(2*J+1);
+	//	double norm = 1;
 	if(J==0) return norm; //assure that angular term is properly normalized
 	if(cosTheta>1 ||cosTheta<-1)
 		throw std::runtime_error( "AmpWigner2::dynamicalFunction() | "

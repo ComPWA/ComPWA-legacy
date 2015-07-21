@@ -175,10 +175,8 @@ std::shared_ptr<FunctionTree> AmpFlatteRes::setupTree(
 	newTree->createLeaf("spin_"+_name, _spin, "FlatteRes_"+_name); //spin
 	newTree->createLeaf("mesonRadius_"+_name, mesonRadius, "FlatteRes_"+_name); //resonance radius
 	newTree->createLeaf("d_"+_name, params.GetDoubleParameter("d_"+_name) , "FlatteRes_"+_name); //d
-	newTree->createLeaf("mHiddenA_"+_name, \
-			PhysConst::instance()->getMass(_g2_partA), "FlatteRes_"+_name);
-	newTree->createLeaf("mHiddenB_"+_name, \
-			PhysConst::instance()->getMass(_g2_partB), "FlatteRes_"+_name);
+	newTree->createLeaf("mHiddenA_"+_name, _g2_partA, "FlatteRes_"+_name);
+	newTree->createLeaf("mHiddenB_"+_name, _g2_partB, "FlatteRes_"+_name);
 	if(_name.find("a_0") != _name.npos)
 		newTree->createLeaf("g1_a_0", params.GetDoubleParameter("g1_a_0"), "FlatteRes_"+_name);//use global parameter g1_a0 (asdfef)
 	else
@@ -218,10 +216,8 @@ std::shared_ptr<FunctionTree> AmpFlatteRes::setupTree(
 		newTree->createLeaf("spin_"+_name, _spin, "NormFlatte_"+_name); //spin
 		newTree->createLeaf("mesonRadius_"+_name, mesonRadius, "NormFlatte_"+_name); //spin
 		newTree->createLeaf("d_"+_name,  params.GetDoubleParameter("d_"+_name), "NormFlatte_"+_name); //d
-		newTree->createLeaf("mHiddenA_"+_name, \
-				PhysConst::instance()->getMass(_g2_partA), "NormFlatte_"+_name);
-		newTree->createLeaf("mHiddenB_"+_name, \
-				PhysConst::instance()->getMass(_g2_partB), "NormFlatte_"+_name);
+		newTree->createLeaf("mHiddenA_"+_name, _g2_partA, "NormFlatte_"+_name);
+		newTree->createLeaf("mHiddenB_"+_name, _g2_partB, "NormFlatte_"+_name);
 		if(_name.find("a_0(980)") != _name.npos)
 			newTree->createLeaf("g1_a_0", params.GetDoubleParameter("g1_a_0"), "NormFlatte_"+_name);//use global parameter g1_a0 (asdfef)
 		else
