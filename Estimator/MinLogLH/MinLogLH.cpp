@@ -400,7 +400,7 @@ double MinLogLH::controlParameter(ParameterList& minPar){
 				physicsTree->head()->getValue() );
 		lh = logLH->GetValue();
 	}
-	lh -= calcPenalty();
+	lh += calcPenalty();
 	calls++;
 	return lh; //return -logLH
 }

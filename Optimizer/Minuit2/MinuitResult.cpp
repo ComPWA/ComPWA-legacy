@@ -253,11 +253,19 @@ void MinuitResult::genOutput(std::ostream& out, std::string opt){
 	out<<"BIC: "<<calcBIC()-penalty<<std::endl;
 	double r=0;
 	for(int i=0; i<fractionList.GetNDouble(); i++){
-		double val = fractionList.GetDoubleParameter(i)->GetValue();
+		double val = std::abs(fractionList.GetDoubleParameter(i)->GetValue());
 		if(val > 0.001) r++;
 	}
 	out<<"Number of Resonances > 10^-3: "<<r<<std::endl;
 
+	double sumMag;
+	for(unsigned int i=0;i<_amp->GetNumberOfResonances(); i++){ //fill matrix
+		//double resInt= _amp->GetIntegral(i);
+		std::string resName = _amp->GetNameOfResonance(i);
+		std::shared_ptr<DoubleParameter> magPar = finalParameters.GetDoubleParameter("mag_"+resName);
+		sumMag+= std::abs(magPar->GetValue()); //value of magnitude
+	}
+	out<<"Sum of magnitudes: "<<sumMag<<std::endl;
 	out<<std::endl;
 	out<<std::setprecision(5);
 
