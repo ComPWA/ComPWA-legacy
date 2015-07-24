@@ -242,13 +242,22 @@ void MinuitResult::genOutput(std::ostream& out, std::string opt){
 
 	double penalty = estimator->calcPenalty();
 	out<<std::setprecision(10);
+	out<<"Final penalty term: "<<penalty<<std::endl;
 	out<<"FinalLH w/o penalty: "<<finalLH-penalty<<std::endl;
+	out<<"FinalLH w/ penalty: "<<finalLH<<std::endl;
 	/* The Akaike (AIC) and Bayesian (BIC) information criteria are described in
 	 * Schwarz, Anals of Statistics 6 No.2: 461-464 (1978)
 	 * and
 	 * IEEE Transacrions on Automatic Control 19, No.6:716-723 (1974) */
-	out<<"AIC: "<<calcAIC()<<std::endl;
-	out<<"BIC: "<<calcBIC()<<std::endl;
+	out<<"AIC: "<<calcAIC()-penalty<<std::endl;
+	out<<"BIC: "<<calcBIC()-penalty<<std::endl;
+	double r=0;
+	for(int i=0; i<fractionList.GetNDouble(); i++){
+		double val = fractionList.GetDoubleParameter(i)->GetValue();
+		if(val > 0.001) r++;
+	}
+	out<<"Number of Resonances > 10^-3: "<<r<<std::endl;
+
 	out<<std::endl;
 	out<<std::setprecision(5);
 
