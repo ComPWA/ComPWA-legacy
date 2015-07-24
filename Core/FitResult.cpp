@@ -42,6 +42,10 @@ void FitResult::genSimpleOutput(std::ostream& out){
 
 	return;
 }
+void FitResult::setFinalParameters(ParameterList finPars){
+	finalParameters=finPars;
+	_amp->setParameterList(finalParameters); //update parameters in amplitude
+}
 
 void FitResult::printFitParameters(TableFormater* tableResult){
 	bool printTrue=0, printInitial=0;
@@ -165,8 +169,6 @@ void FitResult::calcFraction(ParameterList& parList){
 		throw std::runtime_error("FitResult::calcFractions() | ParameterList not empty!");
 
 	double norm =-1;
-	ParameterList currentPar;
-	_amp->copyParameterList(currentPar);
 
 	//in case of unbinned efficiency correction to tree does not provide an integral w/o efficiency correction
 	norm = _amp->integral();
@@ -177,7 +179,7 @@ void FitResult::calcFraction(ParameterList& parList){
 	for(unsigned int i=0;i<nRes; i++){ //fill matrix
 		double resInt= _amp->GetIntegral(i);
 		std::string resName = _amp->GetNameOfResonance(i);
-		std::shared_ptr<DoubleParameter> magPar = currentPar.GetDoubleParameter("mag_"+resName);
+		std::shared_ptr<DoubleParameter> magPar = finalParameters.GetDoubleParameter("mag_"+resName);
 		double mag = std::abs(magPar->GetValue()); //value of magnitude
 		double magError = 0;
 		std::cout<<resName<<" "<<norm<<" "<<resInt<<" "<<mag<<" "<<magError<<std::endl;

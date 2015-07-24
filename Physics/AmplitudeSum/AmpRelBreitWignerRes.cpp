@@ -138,8 +138,7 @@ std::shared_ptr<FunctionTree> AmpRelBreitWignerRes::setupTree(
 
 	newTree->createHead("Reso_"+_name, mmultStrat, theMasses.nEvents); //Reso=BW*C_*AD*N_
 
-	newTree->createNode("BW_"+_name, mmultStrat , "Reso_"+_name, theMasses.nEvents); //BW
-	newTree->createNode("RelBW_"+_name, rbwStrat, "BW_"+_name, theMasses.nEvents); //BW
+	newTree->createNode("RelBW_"+_name, rbwStrat, "Reso_"+_name, theMasses.nEvents); //BW
 	newTree->createNode("C_"+_name, complStrat, "Reso_"+_name); //m0c
 	newTree->createLeaf("Intens_"+_name, params.GetDoubleParameter("mag_"+_name), "C_"+_name); //r
 	newTree->createLeaf("Phase_"+_name, params.GetDoubleParameter("phase_"+_name), "C_"+_name); //phi
@@ -169,10 +168,10 @@ std::shared_ptr<FunctionTree> AmpRelBreitWignerRes::setupTree(
 
 	//adding nodes and leafs for calculation of normalization
 	if(_normStyle==normStyle::none){
-		newTree->createLeaf("N_"+_name, 1., "BW_"+_name);
+		newTree->createLeaf("N_"+_name, 1., "Reso_"+_name);
 	}else{
 		//Normalization parameter for dynamical amplitude
-		newTree->createNode("N_"+_name, sqRootStrat, "BW_"+_name); //N = sqrt(NSq)
+		newTree->createNode("N_"+_name, sqRootStrat, "Reso_"+_name); //N = sqrt(NSq)
 		newTree->createNode("NSq_"+_name, multDStrat, "N_"+_name); //NSq = (PhspVolume/N_phspMC * Sum(|A|^2))^-1
 		newTree->createLeaf("PhspSize_"+_name, toyPhspSample.nEvents, "NSq_"+_name); // N_phspMC
 		newTree->createLeaf("PhspVolume_"+_name, 1/phspVol, "NSq_"+_name); // 1/PhspVolume

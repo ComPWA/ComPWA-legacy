@@ -178,8 +178,7 @@ std::shared_ptr<FunctionTree> AmpFlatteRes3Ch::setupTree(
 
 	newTree->createHead("Reso_"+_name, mmultStrat, theMasses.nEvents); //Reso=BW*C_*AD*N_
 
-	newTree->createNode("Flatte_"+_name, mmultStrat , "Reso_"+_name, theMasses.nEvents); //BW
-	newTree->createNode("FlatteRes_"+_name, flatteStrat, "Flatte_"+_name, theMasses.nEvents); //BW
+	newTree->createNode("FlatteRes_"+_name, flatteStrat, "Reso_"+_name, theMasses.nEvents); //BW
 	newTree->createNode("C_"+_name, complStrat, "Reso_"+_name); //c
 	newTree->createLeaf("Intens_"+_name, params.GetDoubleParameter("mag_"+_name), "C_"+_name); //r
 	newTree->createLeaf("Phase_"+_name, params.GetDoubleParameter("phase_"+_name), "C_"+_name); //phi
@@ -222,7 +221,7 @@ std::shared_ptr<FunctionTree> AmpFlatteRes3Ch::setupTree(
 
 	//Normalization
 	if(_normStyle!=normStyle::none){
-		newTree->createNode("N_"+_name, sqRootStrat, "Flatte_"+_name); //N = sqrt(NSq)
+		newTree->createNode("N_"+_name, sqRootStrat, "Reso_"+_name); //N = sqrt(NSq)
 		newTree->createNode("NSq_"+_name, multDStrat, "N_"+_name); //NSq = N_phspMC * 1/PhspVolume * 1/Sum(|A|^2)
 		newTree->createLeaf("PhspSize_"+_name, toyPhspSample.nEvents, "NSq_"+_name); // N_phspMC
 		newTree->createLeaf("PhspVolume_"+_name, 1/phspVol, "NSq_"+_name); // 1/PhspVolume
@@ -269,7 +268,7 @@ std::shared_ptr<FunctionTree> AmpFlatteRes3Ch::setupTree(
 		newTree->createLeaf("m_"+_name, 0, "NormAngD_"+_name); //OutSpin 1
 		newTree->createLeaf("n_"+_name, 0, "NormAngD_"+_name); //OutSpin 2
 	} else {
-		newTree->createLeaf("N_"+_name, 1., "Flatte_"+_name);
+		newTree->createLeaf("N_"+_name, 1., "Reso_"+_name);
 	}
 
 	switch(_subSys){

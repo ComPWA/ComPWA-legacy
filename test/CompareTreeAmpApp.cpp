@@ -62,7 +62,7 @@ int main(int argc, char **argv){
 	int seed = 3041; //default seed
 
 	//number of calls for numeric integration and number of events for phsp integration
-	unsigned int mcPrecision = 1000000;
+	unsigned int mcPrecision = 100000;
 	Logging log("log-compareTreeAmp.txt",boost::log::trivial::debug); //initialize logging
 	//initialize kinematics of decay
 	DalitzKinematics::createInstance("D0","K_S0","K-","K+");//setup kinematics
@@ -83,14 +83,14 @@ int main(int argc, char **argv){
 	std::string trueModelFile = "test/CompareTreeAmp-model.xml";
 	AmplitudeSetup iniTrue(trueModelFile);//put start parameters here
 	std::shared_ptr<Amplitude> trueAmp( new AmpSumIntensity(iniTrue,
-			normStyle::one, eff, mcPrecision) );
+			normStyle::one, eff, 1000000) );
 	//fit amplitude model
 	std::string fitModelFile = trueModelFile;
 	AmplitudeSetup ini(fitModelFile);//put start parameters here
 	AmplitudeSetup iniTree(fitModelFile);//put start parameters here
-	AmpSumIntensity* fitAmpPtr = new AmpSumIntensity(ini, normStyle::one, eff, mcPrecision);
+	AmpSumIntensity* fitAmpPtr = new AmpSumIntensity(ini, normStyle::one, eff, 30000);
 	std::shared_ptr<Amplitude> fitAmp(fitAmpPtr);
-	AmpSumIntensity* fitAmpTreePtr = new AmpSumIntensity(iniTree, normStyle::one, eff, mcPrecision);
+	AmpSumIntensity* fitAmpTreePtr = new AmpSumIntensity(iniTree, normStyle::one, eff, 100000);
 	std::shared_ptr<Amplitude> fitAmpTree(fitAmpTreePtr);
 
 	run.setAmplitude(trueAmp);//set true model here for generation
@@ -173,8 +173,8 @@ int main(int argc, char **argv){
 	BOOST_LOG_TRIVIAL(info) <<"================= phi(1020) ==========================";
 	BOOST_LOG_TRIVIAL(info) <<"Reso_phi(1020): "<<intensNode->getChildSingleValue("Reso_phi(1020)")
 			<<"/"<<phiRes->evaluate(point);
-	BOOST_LOG_TRIVIAL(info) <<"BW_phi(1020): "<<intensNode->getChildSingleValue("BW_phi(1020)")
-			<<"/"<<phiRes->evaluateAmp(point)*phiRes->GetNormalization();
+//	BOOST_LOG_TRIVIAL(info) <<"BW_phi(1020): "<<intensNode->getChildSingleValue("BW_phi(1020)")
+//			<<"/"<<phiRes->evaluateAmp(point)*phiRes->GetNormalization();
 	BOOST_LOG_TRIVIAL(info) <<"N_phi(1020): "<<intensNode->getChildSingleValue("N_phi(1020)").real()
 			<<"/"<<phiRes->GetNormalization()
 			<<" = "<<intensNode->getChildSingleValue("N_phi(1020)").real()/phiRes->GetNormalization();
@@ -185,8 +185,8 @@ int main(int argc, char **argv){
 	BOOST_LOG_TRIVIAL(info) <<"================= a_0(980)0 ==========================";
 	BOOST_LOG_TRIVIAL(info) <<"Reso_a_0(980)0: "<<intensNode->getChildSingleValue("Reso_a_0(980)0")
 			<<"/"<<a0Res->evaluate(point);
-	BOOST_LOG_TRIVIAL(info) <<"Flatte_a_0(980)0: "<<intensNode->getChildSingleValue("Flatte_a_0(980)0")
-			<<"/"<<a0Res->evaluateAmp(point)*a0Res->GetNormalization();
+//	BOOST_LOG_TRIVIAL(info) <<"Flatte_a_0(980)0: "<<intensNode->getChildSingleValue("Flatte_a_0(980)0")
+//			<<"/"<<a0Res->evaluateAmp(point)*a0Res->GetNormalization();
 	BOOST_LOG_TRIVIAL(info) <<"N_a_0(980)0: "<<intensNode->getChildSingleValue("N_a_0(980)0").real()
 			<<"/"<<a0Res->GetNormalization();
 	BOOST_LOG_TRIVIAL(info) <<"FlatteRes_a_0(980)0: "<<intensNode->getChildSingleValue("FlatteRes_a_0(980)0")
@@ -196,8 +196,8 @@ int main(int argc, char **argv){
 	BOOST_LOG_TRIVIAL(info) <<"================= a_0(980)+ ==========================";
 	BOOST_LOG_TRIVIAL(info) <<"Reso_a_0(980)+: "<<intensNode->getChildSingleValue("Reso_a_0(980)+")
 			<<"/"<<aplusRes->evaluate(point);
-	BOOST_LOG_TRIVIAL(info) <<"Flatte_a_0(980)+: "<<intensNode->getChildSingleValue("Flatte_a_0(980)+")
-			<<"/"<<aplusRes->evaluateAmp(point)*aplusRes->GetNormalization();
+//	BOOST_LOG_TRIVIAL(info) <<"Flatte_a_0(980)+: "<<intensNode->getChildSingleValue("Flatte_a_0(980)+")
+//			<<"/"<<aplusRes->evaluateAmp(point)*aplusRes->GetNormalization();
 	BOOST_LOG_TRIVIAL(info) <<"N_a_0(980)+: "<<intensNode->getChildSingleValue("N_a_0(980)+").real()
 			<<"/"<<aplusRes->GetNormalization();
 	BOOST_LOG_TRIVIAL(info) <<"FlatteRes_a_0(980)+: "<<intensNode->getChildSingleValue("FlatteRes_a_0(980)+")
@@ -232,9 +232,9 @@ int main(int argc, char **argv){
 	BOOST_LOG_TRIVIAL(info) <<"Timings[s]: "<<resultTree->getTime()<<"/"<<result->getTime()
 			<<"="<<resultTree->getTime()/result->getTime();
 	BOOST_LOG_TRIVIAL(info) <<"Initial likelihood: "<<initialLHTree<< "/"<<initialLH
-			<< " Deviation = "<<initialLHTree-initialLH;
+			<< " Deviation = "<<initialLHTree/initialLH;
 	BOOST_LOG_TRIVIAL(info) <<"Final likelihood: "<<finalLHTree<< "/"<<finalLH
-			<< " Deviation = "<<finalLHTree-finalLH;
+			<< " Deviation = "<<finalLHTree/finalLH;
 
 
 	BOOST_LOG_TRIVIAL(info) << "FINISHED!";

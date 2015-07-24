@@ -324,7 +324,7 @@ double MinLogLH::calcPenalty(){
 	double magSum = 0;
 	for(unsigned int i=0;i<amp->GetNumberOfResonances(); i++){
 		//magSum += amp->getAmpMagnitude(i);
-		magSum += amp->GetMagnitude(i)*std::sqrt(amp->GetIntegral(i));
+		magSum += std::abs(amp->GetMagnitude(i))*std::sqrt(amp->GetIntegral(i));
 	}
 //	BOOST_LOG_TRIVIAL(debug) << "MinLogLH::calcPenalty() | Adding penalty term to LH: "
 //			<<penaltyLambda*magSum;
@@ -339,41 +339,39 @@ double MinLogLH::controlParameter(ParameterList& minPar){
 		//Calculate normalization
 		double vol = Kinematics::instance()->getPhspVolume();
 		double norm=0, normSq=0, normBkg=0;
-		std::shared_ptr<Data> sam;
-		if(accSample) sam=accSample;
-		else sam=phspSample;
-		int sam_size = sam->getNEvents();
-		for(unsigned int phsp=0; phsp<sam_size; phsp++){ //loop over phspSample
-			Event theEvent(sam->getEvent(phsp));
-			dataPoint point(theEvent);
-			double intens = 0, intensBkg = 0;
-			ParameterList intensL = amp->intensity(point);
-			intens = intensL.GetDoubleParameter(0)->GetValue();
-			if(intens>0) {
-				norm+=intens;
-				normSq+=intens*intens;
-			}
-
-			if(ampBkg){
-				ParameterList intensB = ampBkg->intensity(point);
-				intensBkg = intensB.GetDoubleParameter(0)->GetValue();
-			}else{
-				intensBkg = 0;
-			}
-			if(intensBkg>0) normBkg+=intensBkg;
-		}
-		normBkg = normBkg * vol/sam_size;
-		if(normBkg==0) normBkg=1;
-		norm = norm * vol/sam_size;
-		//Approximate error of integration, see (Numerical Recipes Vol3, p398, Eq. 7.7.1)
-		double normError = sqrt( ( vol*vol*normSq/sam_size - norm*norm) / sam_size);
-		//		BOOST_LOG_TRIVIAL(info) << "MinLogLH::controlParameter() | signal amplitude normalization: "
-		//				<<norm<<"+-"<<normError<<" ("<<normError/norm*100<<"%)";
+		//		std::shared_ptr<Data> sam;
+		//		if(accSample) sam=accSample;
+		//		else sam=phspSample;
+		//		int sam_size = sam->getNEvents();
+		//		for(unsigned int phsp=0; phsp<sam_size; phsp++){ //loop over phspSample
+		//			Event theEvent(sam->getEvent(phsp));
+		//			dataPoint point(theEvent);
+		//			double intens = 0, intensBkg = 0;
+		//			ParameterList intensL = amp->intensity(point);
+		//			intens = intensL.GetDoubleParameter(0)->GetValue();
+		//			if(intens>0) {
+		//				norm+=intens;
+		//				normSq+=intens*intens;
+		//			}
+		//
+		//			if(ampBkg){
+		//				ParameterList intensB = ampBkg->intensity(point);
+		//				intensBkg = intensB.GetDoubleParameter(0)->GetValue();
+		//			}else{
+		//				intensBkg = 0;
+		//			}
+		//			if(intensBkg>0) normBkg+=intensBkg;
+		//		}
+		//		normBkg = normBkg * vol/sam_size;
+		//		if(normBkg==0) normBkg=1;
+		//		norm = norm * vol/sam_size;
+		//		//Approximate error of integration, see (Numerical Recipes Vol3, p398, Eq. 7.7.1)
+		//		double normError = sqrt( ( vol*vol*normSq/sam_size - norm*norm) / sam_size);
 
 		//Use internal amplitude integration - no unbinned efficiency correction possible
-		//if(ampBkg) normBkg=ampBkg->normalization();
-		//else normBkg=1;
-		//norm = amp->normalization();
+		if(ampBkg) normBkg=ampBkg->normalization();
+		else normBkg=1;
+		norm = amp->normalization();
 
 		if(norm==0) norm=1;
 		//Calculate \Sum_{ev} log()
@@ -402,7 +400,7 @@ double MinLogLH::controlParameter(ParameterList& minPar){
 				physicsTree->head()->getValue() );
 		lh = logLH->GetValue();
 	}
-	lh += calcPenalty();
+	lh -= calcPenalty();
 	calls++;
 	return lh; //return -logLH
 }

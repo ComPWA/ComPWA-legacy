@@ -49,7 +49,7 @@ public:
 	//! Set list of initial parameters
 	virtual void setInitialParameters(ParameterList iniPars){ initialParameters=iniPars; }
 	//! Set list of final fit parameters
-	virtual void setFinalParameters(ParameterList finPars){ finalParameters=finPars; }
+	virtual void setFinalParameters(ParameterList finPars);
 	//! Set list of true parameters
 	virtual void setTrueParameters(ParameterList truePars){ trueParameters=truePars; }
 	//! Set value of likelihood with initial parameter
