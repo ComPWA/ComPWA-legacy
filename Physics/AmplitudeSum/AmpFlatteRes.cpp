@@ -38,6 +38,10 @@ AmpFlatteRes::AmpFlatteRes(const char *name,
 {
 	if(_g2_partA<0||_g2_partA>5||_g2_partB<0||_g2_partB>5)
 		throw std::runtime_error("AmpFlatteRes3Ch::evaluateAmp | particle masses for second channel not set!");
+
+	//setting default normalization
+	_norm = 1/sqrt(this->integral());
+	modified=0;
 }
 
 AmpFlatteRes::~AmpFlatteRes() 

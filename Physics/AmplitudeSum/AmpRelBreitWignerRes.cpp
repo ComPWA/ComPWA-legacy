@@ -32,7 +32,11 @@ AmpRelBreitWignerRes::AmpRelBreitWignerRes(const char *name,
 		AmpAbsDynamicalFunction(name, mag, phase, mass, subSys, spin, m, n,
 				mesonRadius, motherRadius, nCalls, nS),
 				_width(width)
-{ }
+{
+	//setting default normalization
+	_norm = 1/sqrt(this->integral());
+	modified=0;
+}
 
 AmpRelBreitWignerRes::~AmpRelBreitWignerRes() 
 {

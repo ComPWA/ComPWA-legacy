@@ -31,8 +31,8 @@ double AmpWigner2::dynamicalFunction(int J, int mu, int muPrime, double cosTheta
 	 * ordinary Legendre polynomials. We normalize the square of these to one by the pre factor
 	 * sqrt(2J+1). The factor was obtained by trial and error. No idea for why thats the
 	 * normalization.  */
-	double norm = 1/sqrt(2*J+1);
-	//	double norm = 1;
+//	double norm = 1/sqrt(2*J+1);
+	double norm = 1;
 	if(J==0) return norm; //assure that angular term is properly normalized
 	if(cosTheta>1 ||cosTheta<-1)
 		throw std::runtime_error( "AmpWigner2::dynamicalFunction() | "
@@ -123,10 +123,9 @@ bool WignerDPhspStrategy::execute(ParameterList& paras, std::shared_ptr<AbsParam
 				_m13 = double(_pm13->GetValue(ele));
 				dataPoint point; point.setVal(0,_m23); point.setVal(1,_m13);
 				double theta = acos(kin->helicityAngle(_subSysFlag, point));
-				//results[ele]=(2*_inSpin+1)*
-				//		Wigner_d(Spin(_inSpin),Spin(_outSpin1),Spin(_outSpin2),theta);
 				results[ele]=AmpWigner2::dynamicalFunction(
 						_inSpin,_outSpin1,_outSpin2,kin->helicityAngle(_subSysFlag, point));
+//				results[ele]=1;
 			}//end element loop
 			out = std::shared_ptr<AbsParameter>(new MultiDouble(out->GetName(),results));
 			return true;

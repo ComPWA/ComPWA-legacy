@@ -92,6 +92,8 @@ double evalAmp(double* x, size_t dim, void* param) {
 	dataPoint pp; pp.setVal(0,x[1]);pp.setVal(1,x[0]);
 	if( !kin->isWithinPhsp(pp) ) return 0;//only integrate over phase space
 	std::complex<double> res = static_cast<AmpAbsDynamicalFunction*>(param)->evaluateAmp(pp);
+	//include angular distribution in normalization
+	res *= static_cast<AmpAbsDynamicalFunction*>(param)->evaluateWignerD(pp);
 	return ( std::norm(res) ); //integrate over |F|^2
 }
 
@@ -116,14 +118,15 @@ double AmpAbsDynamicalFunction::integral(){
 	gsl_monte_vegas_state *s = gsl_monte_vegas_alloc (dim);
 	gsl_monte_vegas_integrate (&F, xLimit_low, xLimit_high, 2, _nCalls, r,s,&res, &err);
 	gsl_monte_vegas_free(s);
-//	BOOST_LOG_TRIVIAL(debug)<<"AmpAbsDynamicalFunction::integral() Integration result for |"
-//			<<_name<<"|^2: "<<res<<"+-"<<err<<" relAcc [%]: "<<100*err/res;
+	BOOST_LOG_TRIVIAL(debug)<<"AmpAbsDynamicalFunction::integral() Integration result for |"
+			<<_name<<"|^2: "<<res<<"+-"<<err<<" relAcc [%]: "<<100*err/res;
 
 	return res;
 }
 
 double AmpAbsDynamicalFunction::GetNormalization(){
 	if(_norm<0) return 1.0; //normalization is disabled
+	//	return _norm; //disable recalculation of normalization
 	if(!modified) return _norm;
 	_norm = 1/sqrt(integral());
 	modified=0;
