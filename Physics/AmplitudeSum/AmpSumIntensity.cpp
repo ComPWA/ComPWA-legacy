@@ -33,7 +33,7 @@ AmpSumIntensity::AmpSumIntensity(AmplitudeSetup ini, normStyle ns, std::shared_p
 
 AmpSumIntensity::AmpSumIntensity(AmplitudeSetup ini, std::shared_ptr<Efficiency> eff,
 		unsigned int nCalls) :
-												ampSetup(ini), _normStyle(none), _calcMaxFcnVal(0), eff_(eff), _nCalls(nCalls)
+						ampSetup(ini), _normStyle(none), _calcMaxFcnVal(0), eff_(eff), _nCalls(nCalls)
 {
 	init();
 }
@@ -47,20 +47,15 @@ void AmpSumIntensity::init(){
 			new DoubleParameter("motherRadius",1.5) ));
 	params.GetDoubleParameter("motherRadius")->FixParameter(1); //we should add this to Kinematics
 	/* For peter's analysis the a_0+ and a_00 share the same coupling. To implement
-	 * this in the model, we have to do the following work-a-round.
-	 * Don't forget to adjust the iterator 'paramsPos' and 'g1Itr', if you comment out that line.
-	 * Search for "(asdfef)" to find all positions that have to be adjusted
+	 * this in the model, we have to do the following work-a-round. Comment out the following line
+	 * if you don't want to connect the parameters.
 	 */
 	params.AddParameter( std::shared_ptr<DoubleParameter> (
-			new DoubleParameter("g1_a_0",2.0) )); //default value (asdfef)
-	//params.AddParameter( std::shared_ptr<DoubleParameter> (
-	//new DoubleParameter("g1_a_0",3.34348) )); //BaBar value (asdfef)
-	//params.AddParameter( std::shared_ptr<DoubleParameter> (
-	//new DoubleParameter("g1_a_0",2.16) )); //Our value (asdfef)
-	params.GetDoubleParameter(0)->SetParameterFixed();
+			new DoubleParameter("g1_a_0",2.0) )); //default - overwritten by other values for g1
 
 	std::shared_ptr<AmpAbsDynamicalFunction> tmpRes;
-	for(std::vector<BreitWignerConf>::iterator reso=ampSetup.getBreitWigner().begin(); reso!=ampSetup.getBreitWigner().end(); reso++){
+	for(std::vector<BreitWignerConf>::iterator reso=ampSetup.getBreitWigner().begin();
+			reso!=ampSetup.getBreitWigner().end(); reso++){
 		BreitWignerConf tmp = (*reso);
 		if(!tmp.m_enable) continue;
 		std::string name = tmp.m_name;
@@ -83,7 +78,8 @@ void AmpSumIntensity::init(){
 
 		tmpRes = std::shared_ptr<AmpAbsDynamicalFunction>( new AmpRelBreitWignerRes(name.c_str(),
 				params.GetDoubleParameter("mag_"+name), params.GetDoubleParameter("phase_"+name),
-				params.GetDoubleParameter("m0_"+name), subSys, Spin(tmp.m_spin), Spin(tmp.m_m), Spin(tmp.m_n),
+				params.GetDoubleParameter("m0_"+name), subSys,
+				Spin(tmp.m_spin), Spin(tmp.m_m), Spin(tmp.m_n),
 				params.GetDoubleParameter("width_"+name),
 				params.GetDoubleParameter("d_"+name),
 				params.GetDoubleParameter("motherRadius"),
@@ -94,7 +90,8 @@ void AmpSumIntensity::init(){
 		if(_normStyle==normStyle::none) tmpRes->SetNormalization(-1);
 	}// end loop over resonances
 
-	for(std::vector<FlatteConf>::iterator reso=ampSetup.getFlatte().begin(); reso!=ampSetup.getFlatte().end(); reso++){
+	for(std::vector<FlatteConf>::iterator reso=ampSetup.getFlatte().begin();
+			reso!=ampSetup.getFlatte().end(); reso++){
 		FlatteConf tmp = (*reso);
 		if(!tmp.m_enable) continue;
 		std::string name = tmp.m_name;
@@ -115,7 +112,9 @@ void AmpSumIntensity::init(){
 				new DoubleParameter("d_"+name,tmp.m_mesonRadius) ) );
 		params.GetDoubleParameter("d_"+name)->FixParameter(1);
 
-		if(tmp.m_name.find("a_0") != tmp.m_name.npos){
+		//		if(tmp.m_name.find("a_0") != tmp.m_name.npos){
+		//		if(0){
+		try{
 			params.GetDoubleParameter("g1_a_0")->FixParameter(0);
 			params.GetDoubleParameter("g1_a_0")->SetValue(tmp.m_g1);
 			params.GetDoubleParameter("g1_a_0")->SetMinMax(tmp.m_g1_min, tmp.m_g1_max);
@@ -129,7 +128,8 @@ void AmpSumIntensity::init(){
 					PhysConst::instance()->getMass(tmp.m_g2_part1),
 					PhysConst::instance()->getMass(tmp.m_g2_part2),
 					_nCalls, _normStyle) );
-		}else{
+			//		}else{
+		} catch(BadParameter& e) {
 			params.AddParameter( std::shared_ptr<DoubleParameter> (
 					new DoubleParameter("g1_"+name,tmp.m_g1,tmp.m_g1_min,tmp.m_g1_max) ) );
 			params.GetDoubleParameter("g1_"+name)->FixParameter(tmp.m_g1_fix);
@@ -169,7 +169,9 @@ void AmpSumIntensity::init(){
 				new DoubleParameter("d_"+name,tmp.m_mesonRadius) ) );
 		params.GetDoubleParameter("d_"+name)->FixParameter(1);
 
-		if(tmp.m_name.find("a_0") != tmp.m_name.npos){
+		//		if(tmp.m_name.find("a_0") != tmp.m_name.npos){
+		//		if(0){
+		try{
 			params.GetDoubleParameter("g1_a_0")->FixParameter(0);
 			params.GetDoubleParameter("g1_a_0")->SetValue(tmp.m_g1);
 			params.GetDoubleParameter("g1_a_0")->SetMinMax(tmp.m_g1_min, tmp.m_g1_max);
@@ -188,13 +190,14 @@ void AmpSumIntensity::init(){
 					PhysConst::instance()->getMass(tmp.m_g3_part1),
 					PhysConst::instance()->getMass(tmp.m_g3_part2),
 					_nCalls, _normStyle) );
-		}else{
+			//		}else{
+		} catch(BadParameter& e) {
 			params.AddParameter( std::shared_ptr<DoubleParameter> (
 					new DoubleParameter("g1_"+name,tmp.m_g1,tmp.m_g1_min,tmp.m_g1_max) ) );
 			params.GetDoubleParameter("g1_"+name)->FixParameter(tmp.m_g1_fix);
-			params.AddParameter( std::shared_ptr<DoubleParameter> (
-					new DoubleParameter("g2_"+name,tmp.m_g2) ) );
-			params.GetDoubleParameter("g2_"+name)->FixParameter(1);
+			//			params.AddParameter( std::shared_ptr<DoubleParameter> (
+			//					new DoubleParameter("g2_"+name,tmp.m_g2) ) );
+			//			params.GetDoubleParameter("g2_"+name)->FixParameter(1);
 			tmpRes = std::shared_ptr<AmpAbsDynamicalFunction>(new AmpFlatteRes3Ch(name.c_str(),
 					params.GetDoubleParameter("mag_"+name), params.GetDoubleParameter("phase_"+name),
 					params.GetDoubleParameter("m0_"+name), subSys, Spin(tmp.m_spin), Spin(tmp.m_m), Spin(tmp.m_n),
@@ -235,12 +238,7 @@ void AmpSumIntensity::init(){
 		if(_normStyle==normStyle::none) tmpRes->SetNormalization(-1);
 
 	}// end loop over resonancesFlatte
-
-	BOOST_LOG_TRIVIAL(info) << "AmpSumIntensity::init() | setting parameter g1_a_0 to "
-			<<params.GetDoubleParameter("g1_a_0")->GetValue();
-
 	BOOST_LOG_TRIVIAL(info)<<"AmpSumIntensity: completed setup!";
-
 	return;
 }
 

@@ -24,17 +24,17 @@
 
 
 AmpFlatteRes::AmpFlatteRes(const char *name,
-			std::shared_ptr<DoubleParameter> mag, std::shared_ptr<DoubleParameter> phase,
-			std::shared_ptr<DoubleParameter> mass, int subSys, Spin spin, Spin m, Spin n,
-			std::shared_ptr<DoubleParameter> mesonRadius,
-			std::shared_ptr<DoubleParameter> motherRadius,
-			std::shared_ptr<DoubleParameter> g1,
-			std::shared_ptr<DoubleParameter> g2, double g2_partA, double g2_partB,
-			int nCalls, normStyle nS) :
+		std::shared_ptr<DoubleParameter> mag, std::shared_ptr<DoubleParameter> phase,
+		std::shared_ptr<DoubleParameter> mass, int subSys, Spin spin, Spin m, Spin n,
+		std::shared_ptr<DoubleParameter> mesonRadius,
+		std::shared_ptr<DoubleParameter> motherRadius,
+		std::shared_ptr<DoubleParameter> g1,
+		std::shared_ptr<DoubleParameter> g2, double g2_partA, double g2_partB,
+		int nCalls, normStyle nS) :
 		AmpAbsDynamicalFunction(name, mag, phase, mass, subSys, spin, m, n,
 				mesonRadius, motherRadius, nCalls, nS),
-		_g2(g2), _g1(g1), _g2_partA(g2_partA), _g2_partB(g2_partB),
-		nParams(5)
+				_g2(g2), _g1(g1), _g2_partA(g2_partA), _g2_partB(g2_partB),
+				nParams(5)
 {
 	if(_g2_partA<0||_g2_partA>5||_g2_partB<0||_g2_partB>5)
 		throw std::runtime_error("AmpFlatteRes3Ch::evaluateAmp | particle masses for second channel not set!");
@@ -180,9 +180,13 @@ std::shared_ptr<FunctionTree> AmpFlatteRes::setupTree(
 	newTree->createLeaf("d_"+_name, params.GetDoubleParameter("d_"+_name) , "FlatteRes_"+_name); //d
 	newTree->createLeaf("mHiddenA_"+_name, _g2_partA, "FlatteRes_"+_name);
 	newTree->createLeaf("mHiddenB_"+_name, _g2_partB, "FlatteRes_"+_name);
-	if(_name.find("a_0") != _name.npos)
-		newTree->createLeaf("g1_a_0", params.GetDoubleParameter("g1_a_0"), "FlatteRes_"+_name);//use global parameter g1_a0 (asdfef)
-	else
+	if(_name.find("a_0") != _name.npos) {
+		try {
+			newTree->createLeaf("g1_a_0", params.GetDoubleParameter("g1_a_0"), "FlatteRes_"+_name);//use global parameter g1_a0 (asdfef)
+		} catch (BadParameter& e) {
+			newTree->createLeaf("g1_"+_name, params.GetDoubleParameter("g1_"+_name), "FlatteRes_"+_name);//use local parameter g1_a0
+		}
+	} else
 		newTree->createLeaf("g1_"+_name, params.GetDoubleParameter("g1_"+_name), "FlatteRes_"+_name);//use local parameter g1_a0
 	newTree->createLeaf("g2_"+_name, params.GetDoubleParameter("g2_"+_name), "FlatteRes_"+_name);
 	//Angular distribution
@@ -221,13 +225,17 @@ std::shared_ptr<FunctionTree> AmpFlatteRes::setupTree(
 		newTree->createLeaf("d_"+_name,  params.GetDoubleParameter("d_"+_name), "NormFlatte_"+_name); //d
 		newTree->createLeaf("mHiddenA_"+_name, _g2_partA, "NormFlatte_"+_name);
 		newTree->createLeaf("mHiddenB_"+_name, _g2_partB, "NormFlatte_"+_name);
-		if(_name.find("a_0(980)") != _name.npos)
-			newTree->createLeaf("g1_a_0", params.GetDoubleParameter("g1_a_0"), "NormFlatte_"+_name);//use global parameter g1_a0 (asdfef)
-		else
+		if(_name.find("a_0(980)") != _name.npos){
+			try {
+				newTree->createLeaf("g1_a_0", params.GetDoubleParameter("g1_a_0"), "NormFlatte_"+_name);//use global parameter g1_a0 (asdfef)
+			} catch (BadParameter& e) {
+				newTree->createLeaf("g1_"+_name, params.GetDoubleParameter("g1_"+_name), "NormFlatte_"+_name);//use local parameter g1_a0
+			}
+		} else
 			newTree->createLeaf("g1_"+_name, params.GetDoubleParameter("g1_"+_name), "NormFlatte_"+_name);//use local parameter g1_a0
 		newTree->createLeaf("g2_"+_name, params.GetDoubleParameter("g2_"+_name), "NormFlatte_"+_name);
 
-			//Angular distribution (Normalization)
+		//Angular distribution (Normalization)
 		newTree->createNode("NormAngD_"+_name, angdPhspStrat, "NormReso_"+_name, toyPhspSample.nEvents); //AD
 		newTree->createLeaf("m23sq_phsp", m23sq_phsp, "NormAngD_"+_name); //ma
 		newTree->createLeaf("m13sq_phsp", m13sq_phsp, "NormAngD_"+_name); //mb
@@ -334,7 +342,11 @@ void FlatteConf::update(ParameterList par){
 	}
 	try{// only update parameters if they are found in list
 		if(m_name.find("a_0(980)") == 0)
-			m_g1= par.GetDoubleParameter("g1_a_0")->GetValue();
+			try{
+				m_g1= par.GetDoubleParameter("g1_a_0")->GetValue();
+			} catch(BadParameter& e){
+				m_g1= par.GetDoubleParameter("g1_"+m_name)->GetValue();
+			}
 		else
 			m_g1= par.GetDoubleParameter("g1_"+m_name)->GetValue();
 	} catch (BadParameter b) {

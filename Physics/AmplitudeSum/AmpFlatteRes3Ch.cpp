@@ -82,8 +82,8 @@ std::complex<double> AmpFlatteRes3Ch::evaluateAmp(dataPoint& point) {
 
 std::complex<double> AmpFlatteRes3Ch::dynamicalFunction(double mSq, double mR,
 		double massA1, double massA2, double gA,
-		double massB1, double massB2, double couplingRatioB,
-		double massC1, double massC2, double couplingRatioC,
+		double massB1, double massB2, double couplingB,
+		double massC1, double massC2, double couplingC,
 		unsigned int J, double mesonRadius ){
 	std::complex<double> i(0,1);
 	double sqrtS = sqrt(mSq);
@@ -105,7 +105,7 @@ std::complex<double> AmpFlatteRes3Ch::dynamicalFunction(double mSq, double mR,
 	double barrierB = Kinematics::FormFactor(sqrtS,massB1,massB2,J,1.5)/Kinematics::FormFactor(mR,massB1,massB2,J,1.5);
 	//std::complex<double> qTermB = std::pow((qValue(sqrtS,massB1,massB2) / qValue(mR,massB1,massB2)), (2.*J+ 1.));
 	//	std::complex<double> qTermB = std::pow((phspFactor(sqrtS,massB1,massB2) / phspFactor(mR,massB1,massB2))*mR/sqrtS, (2*J+ 1));
-	double gB = couplingRatioB;
+	double gB = couplingB;
 	//	std::cout<<gA<< " "<<gB<<" "<<couplingRatio<<std::endl;
 	//convert coupling to partial width of channel B
 	std::complex<double> gammaB = couplingToWidth(mSq,mR,gB,massB1,massB2,J,mesonRadius);
@@ -117,7 +117,7 @@ std::complex<double> AmpFlatteRes3Ch::dynamicalFunction(double mSq, double mR,
 	double barrierC = Kinematics::FormFactor(sqrtS,massC1,massC2,J,1.5)/Kinematics::FormFactor(mR,massC1,massC2,J,1.5);
 	//std::complex<double> qTermC = std::pow((qValue(sqrtS,massC1,massC2) / qValue(mR,massC1,massC2)), (2.*J+ 1.));
 	//	std::complex<double> qTermC = std::pow((phspFactor(sqrtS,massC1,massC2) / phspFactor(mR,massC1,massC2))*mR/sqrtS, (2*J+ 1));
-	double gC = couplingRatioC;
+	double gC = couplingC;
 	//convert coupling to partial width of channel C
 	std::complex<double> gammaC = couplingToWidth(mSq,mR,gC,massC1,massC2,J,mesonRadius);
 	std::complex<double> termC = gammaC*barrierC*barrierC;
@@ -197,15 +197,23 @@ std::shared_ptr<FunctionTree> AmpFlatteRes3Ch::setupTree(
 	newTree->createLeaf("spin_"+_name, _spin, "FlatteRes_"+_name); //spin
 	newTree->createLeaf("mesonRadius_"+_name, mesonRadius, "FlatteRes_"+_name); //resonance radius
 	newTree->createLeaf("d_"+_name, params.GetDoubleParameter("d_"+_name) , "FlatteRes_"+_name); //d
-	if(_name.find("a_0(980)") != _name.npos)
-		newTree->createLeaf("g1_a_0", params.GetDoubleParameter("g1_a_0"), "FlatteRes_"+_name);//use global parameter g1_a0 (asdfef)
-	else
+	if(_name.find("a_0(980)") != _name.npos){
+		try {
+			newTree->createLeaf("g1_a_0", params.GetDoubleParameter("g1_a_0"), "FlatteRes_"+_name);//use global parameter g1_a0 (asdfef)
+		} catch (BadParameter& e) {
+			newTree->createLeaf("g1_"+_name, params.GetDoubleParameter("g1_"+_name), "FlatteRes_"+_name);//use local parameter g1_a0
+		}
+	} else
 		newTree->createLeaf("g1_"+_name, params.GetDoubleParameter("g1_"+_name), "FlatteRes_"+_name);//use local parameter g1_a0
 	newTree->createLeaf("massB1_"+_name, _g2_partA, "FlatteRes_"+_name);
 	newTree->createLeaf("massB2_"+_name, _g2_partB, "FlatteRes_"+_name);
-	if(_name.find("a_0(980)") != _name.npos)
-		newTree->createLeaf("g1_a_0", params.GetDoubleParameter("g1_a_0"), "FlatteRes_"+_name);//use global parameter g1_a0 (asdfef)
-	else
+	if(_name.find("a_0(980)") != _name.npos){
+		try {
+			newTree->createLeaf("g1_a_0", params.GetDoubleParameter("g1_a_0"), "FlatteRes_"+_name);//use global parameter g1_a0 (asdfef)
+		} catch (BadParameter& e) {
+			newTree->createLeaf("g1_"+_name, params.GetDoubleParameter("g1_"+_name), "FlatteRes_"+_name);
+		}
+	} else
 		newTree->createLeaf("g2_"+_name, params.GetDoubleParameter("g2_"+_name), "FlatteRes_"+_name);
 	newTree->createLeaf("massC1_"+_name, _g3_partA, "FlatteRes_"+_name);
 	newTree->createLeaf("massC2_"+_name, _g3_partB, "FlatteRes_"+_name);
@@ -244,16 +252,25 @@ std::shared_ptr<FunctionTree> AmpFlatteRes3Ch::setupTree(
 		newTree->createLeaf("spin_"+_name, _spin, "NormFlatte_"+_name); //spin
 		newTree->createLeaf("mesonRadius_"+_name, _mesonRadius, "NormFlatte_"+_name); //spin
 		newTree->createLeaf("d_"+_name,  params.GetDoubleParameter("d_"+_name), "NormFlatte_"+_name); //d
-		if(_name.find("a_0(980)") != _name.npos)
-			newTree->createLeaf("g1_a_0", params.GetDoubleParameter("g1_a_0"), "NormFlatte_"+_name);//use global parameter g1_a0 (asdfef)
-		else
+		if(_name.find("a_0(980)") != _name.npos){
+			try {
+				newTree->createLeaf("g1_a_0", params.GetDoubleParameter("g1_a_0"), "NormFlatte_"+_name);//use global parameter g1_a0 (asdfef)
+			} catch (BadParameter& e) {
+				newTree->createLeaf("g1_"+_name, params.GetDoubleParameter("g1_"+_name), "NormFlatte_"+_name);//use local parameter g1_a0
+			}
+		} else
 			newTree->createLeaf("g1_"+_name, params.GetDoubleParameter("g1_"+_name), "NormFlatte_"+_name);//use local parameter g1_a0
 		newTree->createLeaf("massB1_"+_name, _g2_partA, "NormFlatte_"+_name);
 		newTree->createLeaf("massB2_"+_name, _g2_partB, "NormFlatte_"+_name);
-		if(_name.find("a_0(980)") != _name.npos)
-			newTree->createLeaf("g1_a_0", params.GetDoubleParameter("g1_a_0"), "NormFlatte_"+_name);//use global parameter g1_a0 (asdfef)
-		else
+		if(_name.find("a_0(980)") != _name.npos){
+			try {
+				newTree->createLeaf("g1_a_0", params.GetDoubleParameter("g1_a_0"), "NormFlatte_"+_name);//use global parameter g1_a0 (asdfef)
+			} catch (BadParameter& e) {
+				newTree->createLeaf("g1_"+_name, params.GetDoubleParameter("g1_"+_name), "NormFlatte_"+_name);
+			}
+		} else
 			newTree->createLeaf("g2_"+_name, params.GetDoubleParameter("g2_"+_name), "NormFlatte_"+_name);
+
 		newTree->createLeaf("massC1_"+_name, _g3_partA, "NormFlatte_"+_name);
 		newTree->createLeaf("massC2_"+_name, _g3_partB, "NormFlatte_"+_name);
 		newTree->createLeaf("g3_"+_name, params.GetDoubleParameter("g3_"+_name), "NormFlatte_"+_name);
@@ -396,11 +413,16 @@ bool Flatte3ChStrategy::execute(ParameterList& paras, std::shared_ptr<AbsParamet
 		gB = double(paras.GetParameterValue("g2_"+name));
 	}catch(BadParameter& e){
 		try{
-			gB = double(paras.GetParameterValue("g1_a_0"));//special case for peter's channel
+			gB = double(paras.GetParameterValue("g1_"+name));//special case for peter's channel
 		}catch(BadParameter& e){
-			BOOST_LOG_TRIVIAL(error) <<"FlatteStrategy: can't find parameter g1_"+name;
-			BOOST_LOG_TRIVIAL(error) <<"FlatteStrategy: can't find parameter g1_a_0";
-			throw;
+			try{
+				gB = double(paras.GetParameterValue("g1_a_0"));//special case for peter's channel
+			}catch(BadParameter& e){
+				BOOST_LOG_TRIVIAL(error) <<"FlatteStrategy: can't find parameter g2_"+name;
+				BOOST_LOG_TRIVIAL(error) <<"FlatteStrategy: can't find parameter g1_"+name;
+				BOOST_LOG_TRIVIAL(error) <<"FlatteStrategy: can't find parameter g1_a_0";
+				throw;
+			}
 		}
 	}
 	try{
@@ -549,11 +571,16 @@ bool Flatte3ChPhspStrategy::execute(ParameterList& paras, std::shared_ptr<AbsPar
 		gB = double(paras.GetParameterValue("g2_"+name));
 	}catch(BadParameter& e){
 		try{
-			gB = double(paras.GetParameterValue("g1_a_0"));//special case for peter's channel
+			gB = double(paras.GetParameterValue("g1_"+name));//special case for peter's channel
 		}catch(BadParameter& e){
-			BOOST_LOG_TRIVIAL(error) <<"FlatteStrategy: can't find parameter g1_"+name;
-			BOOST_LOG_TRIVIAL(error) <<"FlatteStrategy: can't find parameter g1_a_0";
-			throw;
+			try{
+				gB = double(paras.GetParameterValue("g1_a_0"));//special case for peter's channel
+			}catch(BadParameter& e){
+				BOOST_LOG_TRIVIAL(error) <<"FlattePhspStrategy: can't find parameter g2_"+name;
+				BOOST_LOG_TRIVIAL(error) <<"FlattePhspStrategy: can't find parameter g1_"+name;
+				BOOST_LOG_TRIVIAL(error) <<"FlattePhspStrategy: can't find parameter g1_a_0";
+				throw;
+			}
 		}
 	}
 	try{
