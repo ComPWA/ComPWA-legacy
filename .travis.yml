@@ -9,9 +9,9 @@ addons:
     - x11-common
     - libx11-6
     - x11-utils
-    - libX11-dev
+    - libx11-dev
     - libgsl0-dev
-    - libxpm-dev
+    - libxpm4
     - libxft-dev
     - libjpeg-dev
     - libtiff4-dev
