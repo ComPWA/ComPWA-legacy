@@ -60,17 +60,13 @@ public:
 	static std::complex<double> dynamicalFunction(double mSq, double mR, double ma, double mb,
 			double width, unsigned int J, double mesonRadius);
 
-//	virtual std::complex<double> evaluate(dataPoint& point);
 	virtual std::complex<double> evaluateAmp(dataPoint& point);
-
-	unsigned int getNParams(){ return nParams;}
 
 	virtual std::shared_ptr<FunctionTree> setupTree(
 			allMasses& theMasses,allMasses& toyPhspSample,std::string suffix, ParameterList& params);
 protected:
 	std::shared_ptr<DoubleParameter> _width;
 	double tmp_width;
-	unsigned int nParams;
 };
 
 class BreitWignerConf : public basicConf

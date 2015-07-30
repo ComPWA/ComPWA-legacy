@@ -52,6 +52,8 @@ void AmpSumIntensity::init(){
 	 */
 	params.AddParameter( std::shared_ptr<DoubleParameter> (
 			new DoubleParameter("g1_a_0",2.0) )); //default - overwritten by other values for g1
+	params.AddParameter( std::shared_ptr<DoubleParameter> (
+			new DoubleParameter("g2_a_0",2.0) )); //default - overwritten by other values for g2
 
 	std::shared_ptr<AmpAbsDynamicalFunction> tmpRes;
 	for(std::vector<BreitWignerConf>::iterator reso=ampSetup.getBreitWigner().begin();
@@ -106,33 +108,35 @@ void AmpSumIntensity::init(){
 				new DoubleParameter("m0_"+name,tmp.m_mass, tmp.m_mass_min, tmp.m_mass_max)  ));
 		params.GetDoubleParameter("m0_"+name)->FixParameter(tmp.m_mass_fix);
 		params.AddParameter( std::shared_ptr<DoubleParameter> (
-				new DoubleParameter("g2_"+name,tmp.m_g2) ) );
-		params.GetDoubleParameter("g2_"+name)->FixParameter(1);
-		params.AddParameter( std::shared_ptr<DoubleParameter> (
 				new DoubleParameter("d_"+name,tmp.m_mesonRadius) ) );
 		params.GetDoubleParameter("d_"+name)->FixParameter(1);
 
-		//		if(tmp.m_name.find("a_0") != tmp.m_name.npos){
-		//		if(0){
 		try{
 			params.GetDoubleParameter("g1_a_0")->FixParameter(0);
 			params.GetDoubleParameter("g1_a_0")->SetValue(tmp.m_g1);
 			params.GetDoubleParameter("g1_a_0")->SetMinMax(tmp.m_g1_min, tmp.m_g1_max);
 			params.GetDoubleParameter("g1_a_0")->FixParameter(tmp.m_g1_fix);
+			params.GetDoubleParameter("g2_a_0")->FixParameter(0);
+			params.GetDoubleParameter("g2_a_0")->SetValue(tmp.m_g1);
+			params.GetDoubleParameter("g2_a_0")->SetMinMax(tmp.m_g1_min, tmp.m_g1_max);
+			params.GetDoubleParameter("g2_a_0")->FixParameter(tmp.m_g1_fix);
 			tmpRes = std::shared_ptr<AmpAbsDynamicalFunction>(new AmpFlatteRes(name.c_str(),
 					params.GetDoubleParameter("mag_"+name), params.GetDoubleParameter("phase_"+name),
 					params.GetDoubleParameter("m0_"+name), subSys, Spin(tmp.m_spin), Spin(tmp.m_m), Spin(tmp.m_n),
 					params.GetDoubleParameter("d_"+name),
 					params.GetDoubleParameter("motherRadius"),
-					params.GetDoubleParameter("g1_a_0"), params.GetDoubleParameter("g2_"+name),
+					params.GetDoubleParameter("g1_a_0"), params.GetDoubleParameter("g2_a_0"),
 					PhysConst::instance()->getMass(tmp.m_g2_part1),
 					PhysConst::instance()->getMass(tmp.m_g2_part2),
 					_nCalls, _normStyle) );
-			//		}else{
 		} catch(BadParameter& e) {
 			params.AddParameter( std::shared_ptr<DoubleParameter> (
 					new DoubleParameter("g1_"+name,tmp.m_g1,tmp.m_g1_min,tmp.m_g1_max) ) );
 			params.GetDoubleParameter("g1_"+name)->FixParameter(tmp.m_g1_fix);
+			params.AddParameter( std::shared_ptr<DoubleParameter> (
+					new DoubleParameter("g2_"+name,tmp.m_g2,tmp.m_g2_min,tmp.m_g2_max) ) );
+			params.GetDoubleParameter("g2_"+name)->FixParameter(tmp.m_g1_fix);
+
 			tmpRes = std::shared_ptr<AmpAbsDynamicalFunction>(new AmpFlatteRes(name.c_str(),
 					params.GetDoubleParameter("mag_"+name), params.GetDoubleParameter("phase_"+name),
 					params.GetDoubleParameter("m0_"+name), subSys, Spin(tmp.m_spin), Spin(tmp.m_m), Spin(tmp.m_n),
@@ -163,9 +167,6 @@ void AmpSumIntensity::init(){
 				new DoubleParameter("m0_"+name,tmp.m_mass, tmp.m_mass_min, tmp.m_mass_max)  ));
 		params.GetDoubleParameter("m0_"+name)->FixParameter(tmp.m_mass_fix);
 		params.AddParameter( std::shared_ptr<DoubleParameter> (
-				new DoubleParameter("g3_"+name,tmp.m_g3) ) );
-		params.GetDoubleParameter("g3_"+name)->FixParameter(1);
-		params.AddParameter( std::shared_ptr<DoubleParameter> (
 				new DoubleParameter("d_"+name,tmp.m_mesonRadius) ) );
 		params.GetDoubleParameter("d_"+name)->FixParameter(1);
 
@@ -176,6 +177,10 @@ void AmpSumIntensity::init(){
 			params.GetDoubleParameter("g1_a_0")->SetValue(tmp.m_g1);
 			params.GetDoubleParameter("g1_a_0")->SetMinMax(tmp.m_g1_min, tmp.m_g1_max);
 			params.GetDoubleParameter("g1_a_0")->FixParameter(tmp.m_g1_fix);
+			params.GetDoubleParameter("g2_a_0")->FixParameter(0);
+			params.GetDoubleParameter("g2_a_0")->SetValue(tmp.m_g2);
+			params.GetDoubleParameter("g2_a_0")->SetMinMax(tmp.m_g2_min, tmp.m_g2_max);
+			params.GetDoubleParameter("g2_a_0")->FixParameter(tmp.m_g2_fix);
 
 			tmpRes = std::shared_ptr<AmpAbsDynamicalFunction>(new AmpFlatteRes3Ch(name.c_str(),
 					params.GetDoubleParameter("mag_"+name), params.GetDoubleParameter("phase_"+name),
@@ -183,10 +188,10 @@ void AmpSumIntensity::init(){
 					params.GetDoubleParameter("d_"+name),
 					params.GetDoubleParameter("motherRadius"),
 					params.GetDoubleParameter("g1_a_0"),
-					params.GetDoubleParameter("g1_a_0"),
+					params.GetDoubleParameter("g2_a_0"),
 					PhysConst::instance()->getMass(tmp.m_g2_part1),
 					PhysConst::instance()->getMass(tmp.m_g2_part2),
-					params.GetDoubleParameter("g3_"+name),
+					params.GetDoubleParameter("g1_a_0"),
 					PhysConst::instance()->getMass(tmp.m_g3_part1),
 					PhysConst::instance()->getMass(tmp.m_g3_part2),
 					_nCalls, _normStyle) );
@@ -195,19 +200,20 @@ void AmpSumIntensity::init(){
 			params.AddParameter( std::shared_ptr<DoubleParameter> (
 					new DoubleParameter("g1_"+name,tmp.m_g1,tmp.m_g1_min,tmp.m_g1_max) ) );
 			params.GetDoubleParameter("g1_"+name)->FixParameter(tmp.m_g1_fix);
-			//			params.AddParameter( std::shared_ptr<DoubleParameter> (
-			//					new DoubleParameter("g2_"+name,tmp.m_g2) ) );
-			//			params.GetDoubleParameter("g2_"+name)->FixParameter(1);
+			params.AddParameter( std::shared_ptr<DoubleParameter> (
+					new DoubleParameter("g2_"+name,tmp.m_g2) ) );
+			params.GetDoubleParameter("g2_"+name)->FixParameter(tmp.m_g2_fix);
+
 			tmpRes = std::shared_ptr<AmpAbsDynamicalFunction>(new AmpFlatteRes3Ch(name.c_str(),
 					params.GetDoubleParameter("mag_"+name), params.GetDoubleParameter("phase_"+name),
 					params.GetDoubleParameter("m0_"+name), subSys, Spin(tmp.m_spin), Spin(tmp.m_m), Spin(tmp.m_n),
 					params.GetDoubleParameter("d_"+name),
 					params.GetDoubleParameter("motherRadius"),
 					params.GetDoubleParameter("g1_"+name),
-					params.GetDoubleParameter("g1_"+name),
+					params.GetDoubleParameter("g2_"+name),
 					PhysConst::instance()->getMass(tmp.m_g2_part1),
 					PhysConst::instance()->getMass(tmp.m_g2_part2),
-					params.GetDoubleParameter("g3_"+name),
+					params.GetDoubleParameter("g1_"+name),
 					PhysConst::instance()->getMass(tmp.m_g3_part1),
 					PhysConst::instance()->getMass(tmp.m_g3_part2),
 					_nCalls, _normStyle) );

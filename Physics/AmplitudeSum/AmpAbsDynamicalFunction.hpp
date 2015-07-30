@@ -144,9 +144,13 @@ protected:
 	std::string _name;
 	//! Precision of MC integration
 	int _nCalls;
+	//! Type of resonance normalization
 	normStyle _normStyle;
+	//! Resonance magnitude
 	std::shared_ptr<DoubleParameter> _mag;
+	//! Resonance phase
 	std::shared_ptr<DoubleParameter> _phase;
+	//! Masses
 	double _ma, _mb, _mc, _M;
 	//! Resonance mass
 	std::shared_ptr<DoubleParameter> _mass;

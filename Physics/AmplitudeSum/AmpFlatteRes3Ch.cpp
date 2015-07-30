@@ -36,8 +36,7 @@ AmpFlatteRes3Ch::AmpFlatteRes3Ch(const char *name,
 				mesonRadius, motherRadius, nCalls, nS),
 				_g1(g1),
 				_g2(g2),_g2_partA(g2_partA), _g2_partB(g2_partB),
-				_g3(g3),_g3_partA(g3_partA), _g3_partB(g3_partB),
-				nParams(5)
+				_g3(g3),_g3_partA(g3_partA), _g3_partB(g3_partB)
 {
 	if(_g2_partA<0||_g2_partA>5||_g2_partB<0||_g2_partB>5)
 		throw std::runtime_error("AmpFlatteRes3Ch::evaluateAmp | particle masses for second channel not set!");
@@ -90,10 +89,7 @@ std::complex<double> AmpFlatteRes3Ch::dynamicalFunction(double mSq, double mR,
 
 	//channel A - signal channel
 	//break-up momentum
-	//	std::complex<double> pA = AmpKinematics::phspFactor(sqrtS, massA1, massA2);
 	double barrierA = Kinematics::FormFactor(sqrtS,massA1,massA2,J,mesonRadius)/Kinematics::FormFactor(mR,massA1,massA2,J,mesonRadius);
-	//std::complex<double> qTermA = std::pow((qValue(sqrtS,massA1,massA2) / qValue(mR,massA1,massA2)), (2.*J+ 1.));
-	//	std::complex<double> qTermA = std::pow((phspFactor(sqrtS,massA1,massA2) / phspFactor(mR,massA1,massA2))*mR/sqrtS, (2*J+ 1));
 	//convert coupling to partial width of channel A
 	std::complex<double> gammaA = couplingToWidth(mSq,mR,gA,massA1,massA2,J,mesonRadius);
 	//including the factor qTermA, as suggested by PDG, leads to an amplitude that doesn't converge.
@@ -101,22 +97,15 @@ std::complex<double> AmpFlatteRes3Ch::dynamicalFunction(double mSq, double mR,
 
 	//channel B - hidden channel
 	//break-up momentum
-	//	std::complex<double> pB = AmpKinematics::phspFactor(sqrtS, massB1, massB2);
 	double barrierB = Kinematics::FormFactor(sqrtS,massB1,massB2,J,1.5)/Kinematics::FormFactor(mR,massB1,massB2,J,1.5);
-	//std::complex<double> qTermB = std::pow((qValue(sqrtS,massB1,massB2) / qValue(mR,massB1,massB2)), (2.*J+ 1.));
-	//	std::complex<double> qTermB = std::pow((phspFactor(sqrtS,massB1,massB2) / phspFactor(mR,massB1,massB2))*mR/sqrtS, (2*J+ 1));
 	double gB = couplingB;
-	//	std::cout<<gA<< " "<<gB<<" "<<couplingRatio<<std::endl;
 	//convert coupling to partial width of channel B
 	std::complex<double> gammaB = couplingToWidth(mSq,mR,gB,massB1,massB2,J,mesonRadius);
 	std::complex<double> termB = gammaB*barrierB*barrierB;
 
 	//channel C - hidden channel
 	//break-up momentum
-	//	std::complex<double> pC = Kinematics::phspFactor(sqrtS, massC1, massC2);
 	double barrierC = Kinematics::FormFactor(sqrtS,massC1,massC2,J,1.5)/Kinematics::FormFactor(mR,massC1,massC2,J,1.5);
-	//std::complex<double> qTermC = std::pow((qValue(sqrtS,massC1,massC2) / qValue(mR,massC1,massC2)), (2.*J+ 1.));
-	//	std::complex<double> qTermC = std::pow((phspFactor(sqrtS,massC1,massC2) / phspFactor(mR,massC1,massC2))*mR/sqrtS, (2*J+ 1));
 	double gC = couplingC;
 	//convert coupling to partial width of channel C
 	std::complex<double> gammaC = couplingToWidth(mSq,mR,gC,massC1,massC2,J,mesonRadius);
@@ -203,21 +192,25 @@ std::shared_ptr<FunctionTree> AmpFlatteRes3Ch::setupTree(
 		} catch (BadParameter& e) {
 			newTree->createLeaf("g1_"+_name, params.GetDoubleParameter("g1_"+_name), "FlatteRes_"+_name);//use local parameter g1_a0
 		}
-	} else
-		newTree->createLeaf("g1_"+_name, params.GetDoubleParameter("g1_"+_name), "FlatteRes_"+_name);//use local parameter g1_a0
+		try {
+			newTree->createLeaf("g2_a_0", params.GetDoubleParameter("g2_a_0"), "FlatteRes_"+_name);//use global parameter g1_a0 (asdfef)
+		} catch (BadParameter& e) {
+			newTree->createLeaf("g2_"+_name, params.GetDoubleParameter("g2_"+_name), "FlatteRes_"+_name);
+		}
+		try {
+			newTree->createLeaf("g3_a_0", params.GetDoubleParameter("g1_a_0"), "FlatteRes_"+_name);//use global parameter g1_a0 (asdfef)
+		} catch (BadParameter& e) {
+			newTree->createLeaf("g3_"+_name, params.GetDoubleParameter("g1_"+_name), "FlatteRes_"+_name);
+		}
+	} else {
+		newTree->createLeaf("g1_"+_name, params.GetDoubleParameter("g1_"+_name), "FlatteRes_"+_name);
+		newTree->createLeaf("g2_"+_name, params.GetDoubleParameter("g2_"+_name), "FlatteRes_"+_name);
+		newTree->createLeaf("g3_"+_name, params.GetDoubleParameter("g3_"+_name), "FlatteRes_"+_name);
+	}
 	newTree->createLeaf("massB1_"+_name, _g2_partA, "FlatteRes_"+_name);
 	newTree->createLeaf("massB2_"+_name, _g2_partB, "FlatteRes_"+_name);
-	if(_name.find("a_0(980)") != _name.npos){
-		try {
-			newTree->createLeaf("g1_a_0", params.GetDoubleParameter("g1_a_0"), "FlatteRes_"+_name);//use global parameter g1_a0 (asdfef)
-		} catch (BadParameter& e) {
-			newTree->createLeaf("g1_"+_name, params.GetDoubleParameter("g1_"+_name), "FlatteRes_"+_name);
-		}
-	} else
-		newTree->createLeaf("g2_"+_name, params.GetDoubleParameter("g2_"+_name), "FlatteRes_"+_name);
 	newTree->createLeaf("massC1_"+_name, _g3_partA, "FlatteRes_"+_name);
 	newTree->createLeaf("massC2_"+_name, _g3_partB, "FlatteRes_"+_name);
-	newTree->createLeaf("g3_"+_name, params.GetDoubleParameter("g3_"+_name), "FlatteRes_"+_name);
 	//Angular distribution
 	newTree->createLeaf("m23sq", m23sq, "AngD_"+_name); //ma
 	newTree->createLeaf("m13sq", m13sq, "AngD_"+_name); //mb
@@ -258,22 +251,26 @@ std::shared_ptr<FunctionTree> AmpFlatteRes3Ch::setupTree(
 			} catch (BadParameter& e) {
 				newTree->createLeaf("g1_"+_name, params.GetDoubleParameter("g1_"+_name), "NormFlatte_"+_name);//use local parameter g1_a0
 			}
-		} else
+			try {
+				newTree->createLeaf("g2_a_0", params.GetDoubleParameter("g2_a_0"), "NormFlatte_"+_name);//use global parameter g1_a0 (asdfef)
+			} catch (BadParameter& e) {
+				newTree->createLeaf("g2_"+_name, params.GetDoubleParameter("g2_"+_name), "NormFlatte_"+_name);
+			}
+			try {
+				newTree->createLeaf("g3_a_0", params.GetDoubleParameter("g1_a_0"), "NormFlatte_"+_name);//use global parameter g1_a0 (asdfef)
+			} catch (BadParameter& e) {
+				newTree->createLeaf("g3_"+_name, params.GetDoubleParameter("g1_"+_name), "NormFlatte_"+_name);
+			}
+		} else {
 			newTree->createLeaf("g1_"+_name, params.GetDoubleParameter("g1_"+_name), "NormFlatte_"+_name);//use local parameter g1_a0
+			newTree->createLeaf("g2_"+_name, params.GetDoubleParameter("g2_"+_name), "NormFlatte_"+_name);
+			newTree->createLeaf("g3_"+_name, params.GetDoubleParameter("g3_"+_name), "NormFlatte_"+_name);
+		}
+
 		newTree->createLeaf("massB1_"+_name, _g2_partA, "NormFlatte_"+_name);
 		newTree->createLeaf("massB2_"+_name, _g2_partB, "NormFlatte_"+_name);
-		if(_name.find("a_0(980)") != _name.npos){
-			try {
-				newTree->createLeaf("g1_a_0", params.GetDoubleParameter("g1_a_0"), "NormFlatte_"+_name);//use global parameter g1_a0 (asdfef)
-			} catch (BadParameter& e) {
-				newTree->createLeaf("g1_"+_name, params.GetDoubleParameter("g1_"+_name), "NormFlatte_"+_name);
-			}
-		} else
-			newTree->createLeaf("g2_"+_name, params.GetDoubleParameter("g2_"+_name), "NormFlatte_"+_name);
-
 		newTree->createLeaf("massC1_"+_name, _g3_partA, "NormFlatte_"+_name);
 		newTree->createLeaf("massC2_"+_name, _g3_partB, "NormFlatte_"+_name);
-		newTree->createLeaf("g3_"+_name, params.GetDoubleParameter("g3_"+_name), "NormFlatte_"+_name);
 
 		//Angular distribution (Normalization)
 		newTree->createNode("NormAngD_"+_name, angdPhspStrat, "NormReso_"+_name, toyPhspSample.nEvents); //AD
@@ -387,13 +384,13 @@ bool Flatte3ChStrategy::execute(ParameterList& paras, std::shared_ptr<AbsParamet
 		throw;
 	}
 	try{
-		g1 = double(paras.GetParameterValue("g1_"+name));
+		g1 = double(paras.GetParameterValue("g1_a_0"));//special case for peter's channel
 	}catch(BadParameter& e){
 		try{
-			g1 = double(paras.GetParameterValue("g1_a_0"));//special case for peter's channel
+			g1 = double(paras.GetParameterValue("g1_"+name));
 		}catch(BadParameter& e){
-			BOOST_LOG_TRIVIAL(error) <<"FlatteStrategy: can't find parameter g1_"+name;
 			BOOST_LOG_TRIVIAL(error) <<"FlatteStrategy: can't find parameter g1_a_0";
+			BOOST_LOG_TRIVIAL(error) <<"FlatteStrategy: can't find parameter g1_"+name;
 			throw;
 		}
 	}
@@ -410,19 +407,14 @@ bool Flatte3ChStrategy::execute(ParameterList& paras, std::shared_ptr<AbsParamet
 		throw;
 	}
 	try{
-		gB = double(paras.GetParameterValue("g2_"+name));
+		gB = double(paras.GetParameterValue("g2_a_0"));//special case for peter's channel
 	}catch(BadParameter& e){
 		try{
-			gB = double(paras.GetParameterValue("g1_"+name));//special case for peter's channel
+			gB = double(paras.GetParameterValue("g2_"+name));
 		}catch(BadParameter& e){
-			try{
-				gB = double(paras.GetParameterValue("g1_a_0"));//special case for peter's channel
-			}catch(BadParameter& e){
-				BOOST_LOG_TRIVIAL(error) <<"FlatteStrategy: can't find parameter g2_"+name;
-				BOOST_LOG_TRIVIAL(error) <<"FlatteStrategy: can't find parameter g1_"+name;
-				BOOST_LOG_TRIVIAL(error) <<"FlatteStrategy: can't find parameter g1_a_0";
-				throw;
-			}
+			BOOST_LOG_TRIVIAL(error) <<"FlatteStrategy: can't find parameter g2_a_0";
+			BOOST_LOG_TRIVIAL(error) <<"FlatteStrategy: can't find parameter g2_"+name;
+			throw;
 		}
 	}
 	try{
@@ -440,9 +432,20 @@ bool Flatte3ChStrategy::execute(ParameterList& paras, std::shared_ptr<AbsParamet
 	try{
 		gC = double(paras.GetParameterValue("g3_"+name));
 	}catch(BadParameter& e){
-		BOOST_LOG_TRIVIAL(error) <<"FlatteStrategy: can't find parameter g3_"+name;
-		throw;
+		try{
+			gC = double(paras.GetParameterValue("g1_a_0"));
+		}catch(BadParameter& e){
+			try{
+				gC = double(paras.GetParameterValue("g1_"+name));
+			}catch(BadParameter& e){
+				BOOST_LOG_TRIVIAL(error) <<"FlattePhspStrategy: can't find parameter g3_"+name;
+				BOOST_LOG_TRIVIAL(error) <<"FlattePhspStrategy: can't find parameter g1_a_0";
+				BOOST_LOG_TRIVIAL(error) <<"FlattePhspStrategy: can't find parameter g1_"+name;
+				throw;
+			}
+		}
 	}
+
 	//MultiDim output, must have multidim Paras in input
 	if(checkType == ParType::MCOMPLEX){
 		if(paras.GetNMultiDouble()){
@@ -545,13 +548,13 @@ bool Flatte3ChPhspStrategy::execute(ParameterList& paras, std::shared_ptr<AbsPar
 		throw;
 	}
 	try{
-		g1 = double(paras.GetParameterValue("g1_"+name));
+		g1 = double(paras.GetParameterValue("g1_a_0"));
 	}catch(BadParameter& e){
 		try{
-			g1 = double(paras.GetParameterValue("g1_a_0"));
+			g1 = double(paras.GetParameterValue("g1_"+name));
 		}catch(BadParameter& e){
-			BOOST_LOG_TRIVIAL(error) <<"FlatteStrategy: can't find parameter g1_"+name;
 			BOOST_LOG_TRIVIAL(error) <<"FlatteStrategy: can't find parameter g1_a_0";
+			BOOST_LOG_TRIVIAL(error) <<"FlatteStrategy: can't find parameter g1_"+name;
 			throw;
 		}
 	}
@@ -568,19 +571,14 @@ bool Flatte3ChPhspStrategy::execute(ParameterList& paras, std::shared_ptr<AbsPar
 		throw;
 	}
 	try{
-		gB = double(paras.GetParameterValue("g2_"+name));
+		gB = double(paras.GetParameterValue("g2_a_0"));//special case for peter's channel
 	}catch(BadParameter& e){
 		try{
-			gB = double(paras.GetParameterValue("g1_"+name));//special case for peter's channel
+			gB = double(paras.GetParameterValue("g2_"+name));
 		}catch(BadParameter& e){
-			try{
-				gB = double(paras.GetParameterValue("g1_a_0"));//special case for peter's channel
-			}catch(BadParameter& e){
-				BOOST_LOG_TRIVIAL(error) <<"FlattePhspStrategy: can't find parameter g2_"+name;
-				BOOST_LOG_TRIVIAL(error) <<"FlattePhspStrategy: can't find parameter g1_"+name;
-				BOOST_LOG_TRIVIAL(error) <<"FlattePhspStrategy: can't find parameter g1_a_0";
-				throw;
-			}
+			BOOST_LOG_TRIVIAL(error) <<"FlattePhspStrategy: can't find parameter g2_a_0";
+			BOOST_LOG_TRIVIAL(error) <<"FlattePhspStrategy: can't find parameter g2_"+name;
+			throw;
 		}
 	}
 	try{
@@ -598,10 +596,19 @@ bool Flatte3ChPhspStrategy::execute(ParameterList& paras, std::shared_ptr<AbsPar
 	try{
 		gC = double(paras.GetParameterValue("g3_"+name));
 	}catch(BadParameter& e){
-		BOOST_LOG_TRIVIAL(error) <<"FlattePhspStrategy: can't find parameter g3_"+name;
-		throw;
+		try{
+			gC = double(paras.GetParameterValue("g1_a_0"));
+		}catch(BadParameter& e){
+			try{
+				gC = double(paras.GetParameterValue("g1_"+name));
+			}catch(BadParameter& e){
+				BOOST_LOG_TRIVIAL(error) <<"FlattePhspStrategy: can't find parameter g3_"+name;
+				BOOST_LOG_TRIVIAL(error) <<"FlattePhspStrategy: can't find parameter g1_a_0";
+				BOOST_LOG_TRIVIAL(error) <<"FlattePhspStrategy: can't find parameter g1_"+name;
+				throw;
+			}
+		}
 	}
-
 
 	//MultiDim output, must have multidim Paras in input
 	if(checkType == ParType::MCOMPLEX){
@@ -651,29 +658,42 @@ bool Flatte3ChPhspStrategy::execute(ParameterList& paras, std::shared_ptr<AbsPar
 
 Flatte3ChConf::Flatte3ChConf(const boost::property_tree::ptree &pt_) : FlatteConf(pt_){
 	m_g3= pt_.get<double>("g3");
+	m_g3_fix= pt_.get<bool>("g3_fix");
+	m_g3_min= pt_.get<double>("g3_min");
+	m_g3_max= pt_.get<double>("g3_max");
 	m_g3_part1= pt_.get<std::string>("g3_part1");
 	m_g3_part2= pt_.get<std::string>("g3_part2");
 }
 void Flatte3ChConf::put(boost::property_tree::ptree &pt_){
 	FlatteConf::put(pt_);
 	pt_.put("g3", m_g3);
+	pt_.put("g3_fix", m_g3_fix);
+	pt_.put("g3_min", m_g3_min);
+	pt_.put("g3_max", m_g3_max);
 	pt_.put("g3_part1", m_g3_part1);
 	pt_.put("g3_part2", m_g3_part2);
 }
 void Flatte3ChConf::update(ParameterList par){
 	FlatteConf::update(par);
-	try{// only update parameters if they are found in list
-		if(m_name.find("a_0(980)") == 0)
-			m_g2= par.GetDoubleParameter("g1_a_0")->GetValue();
-		else
-			m_g2= par.GetDoubleParameter("g2_"+m_name)->GetValue();
-	} catch (BadParameter b) { //do nothing if parameter is not found
 
+	std::shared_ptr<DoubleParameter> p;
+	if(m_name.find("a_0(980)") == 0) {
+		try{// only update parameters if they are found in list
+			p = par.GetDoubleParameter("g1_a_0");
+		} catch (BadParameter b) {
+			try{// only update parameters if they are found in list
+				p = par.GetDoubleParameter("g1_"+m_name);
+			} catch (BadParameter b) { }
+		}
+	} else {
+		try{// only update parameters if they are found in list
+			p = par.GetDoubleParameter("g3_"+m_name);
+		} catch (BadParameter b) { }
 	}
-	try{// only update parameters if they are found in list
-		m_g3= par.GetDoubleParameter("g3_"+m_name)->GetValue();
-	} catch (BadParameter b) {
-		//		BOOST_LOG_TRIVIAL(error) <<"FlatteConf::update() | coupling g3 not found in parameter list!";
-		//		throw;
-	}
+	m_g3 = p->GetValue();
+	m_g3_fix = p->IsFixed();
+	m_g3_min = p->GetMinValue();
+	m_g3_max = p->GetMaxValue();
+
+	return;
 }

@@ -328,7 +328,7 @@ double MinLogLH::calcPenalty(){
 	}
 //	BOOST_LOG_TRIVIAL(debug) << "MinLogLH::calcPenalty() | Adding penalty term to LH: "
 //			<<penaltyLambda*magSum;
-	return (penaltyLambda*magSum);
+	return (penaltyLambda*magSum/amp->integral());
 }
 
 double MinLogLH::controlParameter(ParameterList& minPar){

@@ -62,16 +62,11 @@ public:
 			double massC1, double massC2, double gC,
 			unsigned int J, double mesonRadius);
 
-//	std::complex<double> evaluate(dataPoint& point);
 	virtual std::complex<double> evaluateAmp(dataPoint& point) ;
-
-	double getSpin() {return _spin;}; //needs to be declared in AmpAbsDynamicalFunction
-	unsigned int getNParams(){ return nParams;}
 
 	virtual std::shared_ptr<FunctionTree> setupTree(
 			allMasses& theMasses,allMasses& toyPhspSample,std::string suffix, ParameterList& params);
 protected:
-	unsigned int nParams;
 	double _g2_partA;//hidden channel: mass particle A
 	double _g2_partB; //hidden channel: mass particle B
 	double _g3_partA;//hidden channel: mass particle A
@@ -90,6 +85,9 @@ public:
 	virtual void update(ParameterList par);
 
 	double m_g3;
+	double m_g3_fix;
+	double m_g3_min;
+	double m_g3_max;
 	std::string m_g3_part1;
 	std::string m_g3_part2;
 };
