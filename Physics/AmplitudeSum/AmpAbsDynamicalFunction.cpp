@@ -35,11 +35,11 @@ AmpAbsDynamicalFunction::AmpAbsDynamicalFunction(const char *name,
 		std::shared_ptr<DoubleParameter> mag, std::shared_ptr<DoubleParameter> phase,
 		std::shared_ptr<DoubleParameter> mass, int subSys, Spin spin, Spin m, Spin n,
 		int nCalls, normStyle nS) :
-				_name(name), _mag(mag), _phase(phase), _mass(mass), _subSys(subSys), _spin(spin),
-				_m(m), _n(n),
-				_mesonRadius(std::make_shared<DoubleParameter>(name, 1.0)),
-				_motherRadius(std::make_shared<DoubleParameter>(name, 1.0)),
-				_nCalls(nCalls), _normStyle(nS), _norm(1.0), modified(1), _wignerD(subSys, spin)
+								_name(name), _mag(mag), _phase(phase), _mass(mass), _subSys(subSys), _spin(spin),
+								_m(m), _n(n),
+								_mesonRadius(std::make_shared<DoubleParameter>(name, 1.0)),
+								_motherRadius(std::make_shared<DoubleParameter>(name, 1.0)),
+								_nCalls(nCalls), _normStyle(nS), _norm(1.0), modified(1), _wignerD(subSys, spin)
 {
 	initialize();
 }
@@ -66,20 +66,21 @@ AmpAbsDynamicalFunction::~AmpAbsDynamicalFunction()
 {
 }
 
+std::complex<double> AmpAbsDynamicalFunction::GetCoefficient() {
+	return std::complex<double>(
+			std::abs(_mag->GetValue())*cos(_phase->GetValue()),
+			std::abs(_mag->GetValue())*sin(_phase->GetValue())
+	);
+}
+
 std::complex<double> AmpAbsDynamicalFunction::evaluate(dataPoint& point){
 	if(_mass->GetValue() != tmp_mass){
 		SetModified();
 		tmp_mass = _mass->GetValue();
 	}
-
-	double a = std::abs(_mag->GetValue());
-	double phi = _phase->GetValue();
-	std::complex<double> eiphi(a*cos(phi),a*sin(phi));
 	std::complex<double> res = evaluateAmp(point);
 	double ang = evaluateWignerD(point);
-	double norm = GetNormalization();
-
-	return (eiphi*norm*res*ang);
+	return (GetCoefficient()*GetNormalization()*res*ang);
 }
 
 double evalAmp(double* x, size_t dim, void* param) {
@@ -168,7 +169,7 @@ double AmpAbsDynamicalFunction::totalIntegral() const{
 	gsl_monte_vegas_state *s = gsl_monte_vegas_alloc (dim);
 	gsl_monte_vegas_integrate (&F, xLimit_low, xLimit_high, 2, _nCalls, r,s,&res, &err);
 	gsl_monte_vegas_free(s);
-//	BOOST_LOG_TRIVIAL(debug)<<"AmpAbsDynamicalFunction::totalIntegral() result for |"<<_name<<"|^2: "<<res<<"+-"<<err<<" relAcc [%]: "<<100*err/res;
+	//	BOOST_LOG_TRIVIAL(debug)<<"AmpAbsDynamicalFunction::totalIntegral() result for |"<<_name<<"|^2: "<<res<<"+-"<<err<<" relAcc [%]: "<<100*err/res;
 
 	return res;
 }

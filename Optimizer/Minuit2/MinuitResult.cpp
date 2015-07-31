@@ -266,6 +266,30 @@ void MinuitResult::genOutput(std::ostream& out, std::string opt){
 		sumMag+= std::abs(magPar->GetValue()); //value of magnitude
 	}
 	out<<"Sum of magnitudes: "<<sumMag<<std::endl;
+
+	out<<std::endl;
+	out<<"INTERFERENCE terms: "<<std::endl;
+	TableFormater* tableInterf = new TableFormater(&out);
+	tableInterf->addColumn("Nr 1");
+	tableInterf->addColumn("Nr 2");
+	tableInterf->addColumn("Name 1",15);
+	tableInterf->addColumn("Name 2",15);
+	tableInterf->addColumn("Value",15);
+	tableInterf->header();
+	double sumInfTerms = 0;
+	for(int i=0; i<_amp->GetNumberOfResonances(); i++)
+		for(int j=i; j<_amp->GetNumberOfResonances(); j++){
+			*tableInterf << i << j;
+			*tableInterf << _amp->GetNameOfResonance(i);
+			*tableInterf << _amp->GetNameOfResonance(j);
+			double inf = _amp->interferenceIntegral(i,j);
+			*tableInterf << inf;
+			sumInfTerms+=inf;
+		}
+	tableInterf->delim();
+	*tableInterf<<" "<<" "<<" "<<"Sum: "<<sumInfTerms;
+	tableInterf->footer();
+
 	out<<std::endl;
 	out<<std::setprecision(5);
 

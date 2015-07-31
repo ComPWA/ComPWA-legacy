@@ -51,11 +51,19 @@ public:
 
 	//! set efficiency
 	virtual void setEfficiency(std::shared_ptr<Efficiency> eff) {};
+	//! calculate integral of amplitude intensity. This integral excludes efficiency correction
 	virtual const double integral() =0;
+	//! calculate integral of amplitude intensity. Sets parameter list first.
 	virtual const double integral(ParameterList& par) =0;
+	//! get (interference) integral for resonances \param id1 and \param id2
+	virtual const double interferenceIntegral(unsigned int id1, unsigned int id2) { return -999; };
+	//! calculate normalization of amplitude intensity. This includes efficiency correction
 	virtual const double normalization() =0;
+	//! calculate normalization of amplitude intensity. Sets parameter list first.
 	virtual const double normalization(ParameterList& par) =0;
+	//! get maximum value of amplitude
 	virtual double getMaxVal(ParameterList& par, std::shared_ptr<Generator> gen) = 0;
+	//! get maximum value of amplitude
 	virtual double getMaxVal(std::shared_ptr<Generator> gen) = 0;
 
 	virtual const ParameterList& intensity(dataPoint& point, ParameterList& par) =0;

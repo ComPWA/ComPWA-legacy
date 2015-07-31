@@ -33,7 +33,7 @@ AmpSumIntensity::AmpSumIntensity(AmplitudeSetup ini, normStyle ns, std::shared_p
 
 AmpSumIntensity::AmpSumIntensity(AmplitudeSetup ini, std::shared_ptr<Efficiency> eff,
 		unsigned int nCalls) :
-						ampSetup(ini), _normStyle(none), _calcMaxFcnVal(0), eff_(eff), _nCalls(nCalls)
+								ampSetup(ini), _normStyle(none), _calcMaxFcnVal(0), eff_(eff), _nCalls(nCalls)
 {
 	init();
 }
@@ -379,6 +379,64 @@ const double AmpSumIntensity::integral(){
 
 	return res;
 }
+double interferenceIntegralWrapper(double* x, size_t dim, void* param) {
+	/* Calculation amplitude integral (excluding efficiency) */
+	if(dim!=2) return 0;
+	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
+	dataPoint point; point.setVal(1,x[0]); point.setVal(0,x[1]);
+	if( !kin->isWithinPhsp(point) ) return 0;//only integrate over phase space
+
+	AmpSumIntensity* amp = static_cast<AmpSumIntensity*>(param);
+	std::shared_ptr<AmpAbsDynamicalFunction> amp1 = amp->GetResonance(amp->getFirstRes());
+	std::shared_ptr<AmpAbsDynamicalFunction> amp2 = amp->GetResonance(amp->getSecondRes());
+	std::complex<double> val1 = amp1->evaluate(point);
+	std::complex<double> val2 = amp2->evaluate(point);
+
+//	if(amp->getFirstRes() != amp->getSecondRes())
+//		std::cout<<(val1*std::conj(val2)).real()
+//		<<" "<<(val2*std::conj(val1)).real()
+//		<< " "<<std::norm(val1)
+//		<< " "<<std::norm(val2)<<std::endl;
+	double intens = (val1*std::conj(val2)).real();
+	if(amp->getFirstRes() == amp->getSecondRes()) return intens;
+	return 2*intens;
+};
+
+const double AmpSumIntensity::interferenceIntegral(unsigned int a, unsigned int b){
+	assert( GetNumberOfResonances() > a );
+	assert( GetNumberOfResonances() > b );
+	firstRes = a; secondRes = b;
+
+	/* Integration functionality was tested with a model with only one normalized amplitude.
+	 * The integration result is equal to the amplitude coefficient^2.
+	 */
+	size_t dim=2;
+	double res=0.0, err=0.0;
+
+	//set limits: we assume that x[0]=m13sq and x[1]=m23sq
+	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
+	double xLimit_low[2] = {kin->m13_sq_min,kin->m23_sq_min};
+	double xLimit_high[2] = {kin->m13_sq_max,kin->m23_sq_max};
+	//	double xLimit_low[2] = {0,0};
+	//	double xLimit_high[2] = {10,10};
+	gsl_rng_env_setup ();
+	const gsl_rng_type *T = gsl_rng_default; //type of random generator
+	gsl_rng *r = gsl_rng_alloc(T); //random generator
+	gsl_monte_function G = {&interferenceIntegralWrapper,dim, const_cast<AmpSumIntensity*> (this)};
+
+	/*	Choosing vegas algorithm here, because it is the most accurate:
+	 * 		-> 10^5 calls gives (in my example) an accuracy of 0.03%
+	 * 		 this should be sufficiency for most applications
+	 */
+	gsl_monte_vegas_state *s = gsl_monte_vegas_alloc (dim);
+	gsl_monte_vegas_integrate (&G, xLimit_low, xLimit_high, 2, _nCalls, r,s,&res, &err);
+	gsl_monte_vegas_free(s);
+	BOOST_LOG_TRIVIAL(info)<<"AmpSumIntensity::interferenceIntegrate() Interference term "
+			"of "<<a<<" and "<<b<<" : "<<res<<"+-"<<err<<" relAcc [%]: "<<100*err/res;
+
+	return res;
+}
+
 double AmpSumIntensity::evaluateEff(double x[], size_t dim) {
 	/* Calculation amplitude normalization (including efficiency) */
 	if(dim!=2) return 0;

@@ -59,6 +59,8 @@ public:
 	virtual const double integral(ParameterList& par);
 	//! normalization integral (includes calculated efficiency)
 	virtual const double integral();
+	//! calculate interference integral between two amplitudes
+	virtual const double interferenceIntegral(unsigned int a, unsigned int b);
 	//! get maximum value of amplitude with current parameters
 	virtual double getMaxVal( std::shared_ptr<Generator> gen);
 	//! get maximum value of amplitude with parameters \par
@@ -138,6 +140,8 @@ public:
 			std::string suffix=""){
 		return setupBasicTree(theMasses,toyPhspSample, suffix);
 	}
+	int getFirstRes() { return firstRes; }
+	int getSecondRes() { return secondRes; }
 
 protected:
 	//! Initialize amplitude sum from amplitude setup
@@ -177,6 +181,7 @@ protected:
 	std::shared_ptr<FunctionTree> setupBasicTree(allMasses& theMasses,allMasses& toyPhspSample,
 			std::string suffix="");
 
+	int firstRes, secondRes;
 private:
 
 

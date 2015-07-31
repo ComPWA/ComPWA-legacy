@@ -84,6 +84,8 @@ public:
 	virtual std::string GetName(){ return _name; }
 	//! Set resonance name
 	virtual void SetName(std::string n){ _name = n; }
+	//! Get coefficient
+	virtual std::complex<double> GetCoefficient();
 	//! Get magnitude
 	virtual double GetMagnitude() { return _mag->GetValue(); };
 	//! Get phase
