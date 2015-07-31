@@ -23,15 +23,12 @@ public:
 			int nCalls=30000, normStyle nS=normStyle::one) ;
 
 	virtual void initialise() { };
-	//! value at \param point
-	virtual std::complex<double> evaluate(dataPoint& point) {
-		if(GetNormalization()<0) return evaluateAmp(point); //normalization is disabled
-		return (1/Kinematics::instance()->getPhspVolume())*evaluateAmp(point);
-	}
 	//! value of dynamical amplitude at \param point
 	virtual std::complex<double> evaluateAmp(dataPoint& point) { return dynamicalFunction();}
 	//! value of WignerD amplitude at \param point
 	virtual double evaluateWignerD(dataPoint& point) { return 1;} ;
+	//!Integral
+	virtual double integral() { return 1/sqrt(Kinematics::instance()->getPhspVolume()); }
 
 	static std::complex<double> dynamicalFunction();
 

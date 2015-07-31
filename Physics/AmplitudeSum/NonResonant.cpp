@@ -53,7 +53,8 @@ std::shared_ptr<FunctionTree> NonResonant::setupTree(
 	newTree->createLeaf("Phase_"+_name, params.GetDoubleParameter("phase_"+_name), "C_"+_name); //phi
 
 	std::shared_ptr<MultiComplex> unitVec(
-			new MultiComplex("unit",std::vector<std::complex<double> >(theMasses.nEvents, std::complex<double>(1,0))) );
+			new MultiComplex("unit",std::vector<std::complex<double> >(
+					theMasses.nEvents, std::complex<double>(1,0))) );
 
 	newTree->createLeaf("NonRes_"+_name, unitVec, "Reso_"+_name); //nonReso
 	//adding nodes and leafs for calculation of normalization
