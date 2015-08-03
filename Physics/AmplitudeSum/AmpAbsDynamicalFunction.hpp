@@ -42,11 +42,13 @@ public:
 			std::shared_ptr<DoubleParameter> mass, int subsys, Spin spin, Spin m, Spin n,
 			std::shared_ptr<DoubleParameter> mesonR, //  meson radius
 			std::shared_ptr<DoubleParameter> motherR, //  mother radius
+			formFactorType type = formFactorType::BlattWeisskopf,
 			int nCalls=30000, normStyle nS=normStyle::one);
 
 	AmpAbsDynamicalFunction(const char *name,
 			std::shared_ptr<DoubleParameter> mag, std::shared_ptr<DoubleParameter> phase,
 			std::shared_ptr<DoubleParameter> mass, int subsys, Spin spin, Spin m, Spin n,
+			formFactorType type = formFactorType::BlattWeisskopf,
 			int nCalls=30000, normStyle nS=normStyle::one);
 
 	virtual ~AmpAbsDynamicalFunction();
@@ -123,7 +125,8 @@ public:
 	 * @param mb mass of particle b
 	 * @return
 	 */
-	static std::complex<double> widthToCoupling(double mSq, double mR, double width, double ma, double mb, double spin, double mesonRadius);
+	static std::complex<double> widthToCoupling(double mSq, double mR, double width, double ma,
+			double mb, double spin, double mesonRadius, formFactorType type = formFactorType::BlattWeisskopf);
 	/** Convert coupling to width
 	 *
 	 * Convert coupling to channel (@ma,@mb) to partial width. Only valid for narrow, isolated resonances.
@@ -138,7 +141,8 @@ public:
 	 * @param mb mass of particle b
 	 * @return
 	 */
-	static std::complex<double> couplingToWidth(double mSq, double mR, double g, double ma, double mb, double spin, double mesonRadius);
+	static std::complex<double> couplingToWidth(double mSq, double mR, double g, double ma,
+			double mb, double spin, double mesonRadius, formFactorType type = formFactorType::BlattWeisskopf);
 
 protected:
 	void initialize();
@@ -163,6 +167,8 @@ protected:
 	Spin _spin, _m, _n;
 	//! Barrier radi for resonance and mother particle
 	std::shared_ptr<DoubleParameter> _mesonRadius, _motherRadius;
+	//!Form factor type
+	formFactorType ffType;
 
 	AmpWigner2 _wignerD;
 	double _norm;

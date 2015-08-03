@@ -38,6 +38,7 @@ public:
 			std::shared_ptr<DoubleParameter> g1,
 			std::shared_ptr<DoubleParameter> g2, double g2_partA, double g2_partB,
 			std::shared_ptr<DoubleParameter> g3, double g3_partA, double g3_partB,
+			formFactorType type = formFactorType::CrystalBarrel,
 			int nCalls=30000, normStyle nS=normStyle::one) ;
 
 	virtual ~AmpFlatteRes3Ch();
@@ -60,7 +61,7 @@ public:
 			double massA1, double massA2, double gA,
 			double massB1, double massB2, double gB,
 			double massC1, double massC2, double gC,
-			unsigned int J, double mesonRadius);
+			unsigned int J, double mesonRadius, formFactorType ffType=formFactorType::CrystalBarrel );
 
 	virtual std::complex<double> evaluateAmp(dataPoint& point) ;
 

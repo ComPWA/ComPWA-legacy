@@ -38,7 +38,9 @@ public:
 			std::shared_ptr<DoubleParameter> mesonRadius,
 			std::shared_ptr<DoubleParameter> motherRadius,
 			std::shared_ptr<DoubleParameter> g1, std::shared_ptr<DoubleParameter> g2,
-			double g2_partA, double g2_partB, int nCalls=30000, normStyle nS=normStyle::one) ;
+			double g2_partA, double g2_partB,
+			formFactorType type = formFactorType::CrystalBarrel,
+			int nCalls=30000, normStyle nS=normStyle::one) ;
 	virtual ~AmpFlatteRes();
 
 	/** Dynamical function for two coupled channel approach
@@ -58,7 +60,7 @@ public:
 	static std::complex<double> dynamicalFunction(double mSq, double mR,
 			double massA1, double massA2, double gA,
 			double massB1, double massB2, double gB,
-			unsigned int J, double mesonRadius);
+			unsigned int J, double mesonRadius, formFactorType ffType=formFactorType::CrystalBarrel);
 
 	virtual std::complex<double> evaluateAmp(dataPoint& point) ;
 

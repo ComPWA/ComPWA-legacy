@@ -54,6 +54,11 @@ public:
 		m_phase_fix= pt_.get<bool>("phase_fix");
 		m_phase_min= pt_.get<double>("phase_min");
 		m_phase_max= pt_.get<double>("phase_max");
+		try{
+			m_ffType= pt_.get<int>("FormFactorType");
+		} catch (...) {
+			m_ffType = 1;
+		}
 	}
 	virtual void put(boost::property_tree::ptree &pt_){
 		pt_.put("enable", m_enable);
@@ -66,6 +71,7 @@ public:
 		pt_.put("phase_fix", m_phase_fix);
 		pt_.put("phase_min", m_phase_min);
 		pt_.put("phase_max", m_phase_max);
+		pt_.put("FormFactorType", m_ffType);
 	}
 	virtual void update(ParameterList par){
 		try{// only update parameters if they are found in list
@@ -77,6 +83,7 @@ public:
 			m_phase_fix= par.GetDoubleParameter("phase_"+m_name)->IsFixed();
 			m_phase_min= par.GetDoubleParameter("phase_"+m_name)->GetMinValue();
 			m_phase_max= par.GetDoubleParameter("phase_"+m_name)->GetMaxValue();
+			m_ffType= par.GetDoubleParameter("ffType_"+m_name)->GetMaxValue();
 		} catch (BadParameter b) { }
 	}
 	//protected:
@@ -90,6 +97,7 @@ public:
 	bool m_phase_fix;
 	double m_phase_min;
 	double m_phase_max;
+	int m_ffType;
 };
 
 

@@ -24,9 +24,10 @@ AmpAbsDynamicalFunction::AmpAbsDynamicalFunction(const char *name,
 		std::shared_ptr<DoubleParameter> mass, int subSys, Spin spin, Spin m, Spin n,
 		std::shared_ptr<DoubleParameter> mesonR, //  meson radius
 		std::shared_ptr<DoubleParameter> motherR, //  mother radius
+		formFactorType type,
 		int nCalls, normStyle nS) :
 		_name(name), _mag(mag), _phase(phase), _mass(mass), _subSys(subSys), _spin(spin),
-		_m(m), _n(n), _mesonRadius(mesonR), _motherRadius(motherR),  _nCalls(nCalls),
+		_m(m), _n(n), _mesonRadius(mesonR), _motherRadius(motherR), ffType(type), _nCalls(nCalls),
 		_normStyle(nS), _norm(1.0), modified(1), _wignerD(subSys, spin)
 {
 	initialize();
@@ -34,12 +35,13 @@ AmpAbsDynamicalFunction::AmpAbsDynamicalFunction(const char *name,
 AmpAbsDynamicalFunction::AmpAbsDynamicalFunction(const char *name,
 		std::shared_ptr<DoubleParameter> mag, std::shared_ptr<DoubleParameter> phase,
 		std::shared_ptr<DoubleParameter> mass, int subSys, Spin spin, Spin m, Spin n,
+		formFactorType type,
 		int nCalls, normStyle nS) :
-								_name(name), _mag(mag), _phase(phase), _mass(mass), _subSys(subSys), _spin(spin),
-								_m(m), _n(n),
-								_mesonRadius(std::make_shared<DoubleParameter>(name, 1.0)),
-								_motherRadius(std::make_shared<DoubleParameter>(name, 1.0)),
-								_nCalls(nCalls), _normStyle(nS), _norm(1.0), modified(1), _wignerD(subSys, spin)
+			_name(name), _mag(mag), _phase(phase), _mass(mass), _subSys(subSys), _spin(spin),
+			_m(m), _n(n),
+			_mesonRadius(std::make_shared<DoubleParameter>(name, 1.0)),
+			_motherRadius(std::make_shared<DoubleParameter>(name, 1.0)), ffType(type),
+			_nCalls(nCalls), _normStyle(nS), _norm(1.0), modified(1), _wignerD(subSys, spin)
 {
 	initialize();
 }
@@ -175,11 +177,11 @@ double AmpAbsDynamicalFunction::totalIntegral() const{
 }
 
 std::complex<double> AmpAbsDynamicalFunction::widthToCoupling(double mSq, double mR, double width,
-		double ma, double mb, double spin, double mesonRadius)
+		double ma, double mb, double spin, double mesonRadius, formFactorType type)
 {
 	double sqrtS = sqrt(mSq);
 	//calculate gammaA(s_R)
-	double ffR = Kinematics::FormFactor(mR,ma,mb,spin,mesonRadius);
+	double ffR = Kinematics::FormFactor(mR,ma,mb,spin,mesonRadius,type);
 	std::complex<double> qR = Kinematics::qValue(mR,ma,mb);
 	//calculate phsp factor
 	std::complex<double> rho = Kinematics::phspFactor(sqrtS,ma,mb);
@@ -189,11 +191,11 @@ std::complex<double> AmpAbsDynamicalFunction::widthToCoupling(double mSq, double
 }
 
 std::complex<double> AmpAbsDynamicalFunction::couplingToWidth(double mSq, double mR, double g,
-		double ma, double mb, double spin, double mesonRadius)
+		double ma, double mb, double spin, double mesonRadius, formFactorType type)
 {
 	double sqrtM = sqrt(mSq);
 	//calculate gammaA(s_R)
-	double ffR = Kinematics::FormFactor(mR,ma,mb,spin,mesonRadius);
+	double ffR = Kinematics::FormFactor(mR,ma,mb,spin,mesonRadius,type);
 	std::complex<double> qR = std::pow(Kinematics::qValue(mR,ma,mb),spin);
 	std::complex<double> gammaA = ffR*qR;
 	//calculate phsp factor

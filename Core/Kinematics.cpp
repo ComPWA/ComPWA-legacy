@@ -94,38 +94,52 @@ std::complex<double> Kinematics::qValue(double sqrtS, double ma, double mb){
 	return result;
 }
 
-double Kinematics::FormFactor(double sqrtS, double ma, double mb, double spin, double mesonRadius){
-	if(mesonRadius==0) return 1;
-	//if (spin == 0) {
-	//	double alpha = mesonRadius*mesonRadius/6;
-	//	return std::exp(-alpha*Kinematics::qSqValue(sqrtS,ma,mb));
-	//}
-	if (spin == 0) return 1;
+double Kinematics::FormFactor(double sqrtS, double ma, double mb, double spin, double mesonRadius,
+		formFactorType type){
+	if(mesonRadius==0) return 1; //disable form factors
+	if(type == formFactorType::noFormFactor) return 1; //disable form factors
+
+	//From factor for a0(980) used by Crystal Barrel Phys.Rev.D78-074023
+	if(type == formFactorType::CrystalBarrel){
+		if (spin == 0) {
+			double alpha = mesonRadius*mesonRadius/6;
+			return std::exp(-alpha*Kinematics::qSqValue(sqrtS,ma,mb));
+		}
+		else
+			throw std::runtime_error("Kinematics::FormFactor() | Form factors of type "
+					+std::string(formFactorTypeString[type]) + " are implemented for spin 0 only!");
+	}
 
 	//Blatt-Weisskopt form factors with normalization F(x=mR) = 1.
 	//Reference: S.U.Chung Annalen der Physik 4(1995) 404-430
 	//z = q / (interaction range). For the interaction range we assume 1/mesonRadius
-	double z = Kinematics::qSqValue(sqrtS,ma,mb)*mesonRadius*mesonRadius;
-	/* Events below threshold
-	 * What should we do if event is below threshold? Shouldn't really influence the result
-	 * because resonances at threshold don't have spin(?) */
-	z = std::abs(z);
+	if(type == formFactorType::BlattWeisskopf){
+		if (spin == 0) return 1;
+		double z = Kinematics::qSqValue(sqrtS,ma,mb)*mesonRadius*mesonRadius;
+		/* Events below threshold
+		 * What should we do if event is below threshold? Shouldn't really influence the result
+		 * because resonances at threshold don't have spin(?) */
+		z = std::abs(z);
 
-	if (spin == 1){
-		return( sqrt(2*z/(z+1)) );
+		if (spin == 1){
+			return( sqrt(2*z/(z+1)) );
+		}
+		else if (spin == 2) {
+			return ( sqrt( 13*z*z/( (z-3)*(z-3)+9*z ) ) );
+		}
+		else if (spin == 3) {
+			return ( sqrt( 277*z*z*z/( z*(z-15)*(z-15) + 9*(2*z-5) ) ) );
+		}
+		else if (spin == 4) {
+			return ( sqrt( 12746*z*z*z*z/( (z*z-45*z+105)*(z*z-45*z+105) + 25*z*(2*z-21)*(2*z-21) ) ) );
+		}
+		else
+			throw std::runtime_error("Kinematics::FormFactor() | Form factors of type "
+					+std::string(formFactorTypeString[type]) + " are implemented for spins up to 4!");
 	}
-	else if (spin == 2) {
-		return ( sqrt( 13*z*z/( (z-3)*(z-3)+9*z ) ) );
-	}
-	else if (spin == 3) {
-		return ( sqrt( 277*z*z*z/( z*(z-15)*(z-15) + 9*(2*z-5) ) ) );
-	}
-	else if (spin == 4) {
-		return ( sqrt( 12746*z*z*z*z/( (z*z-45*z+105)*(z*z-45*z+105) + 25*z*(2*z-21)*(2*z-21) ) ) );
-	}
-	else
-		throw std::runtime_error("Kinematics::FormFactor() | Form factors only implemented for spins uo to 4!");
-	std::cout<<"we should never reach this point!"<<std::endl;
+	throw std::runtime_error("Kinematics::FormFactor() | Form factor type "+std::to_string(type)+
+			" not specified!");
+
 	return 0;
 }
 

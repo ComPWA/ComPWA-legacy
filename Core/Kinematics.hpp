@@ -20,6 +20,13 @@
 #include "Core/Event.hpp"
 class dataPoint;
 
+static const char * formFactorTypeString[] = { "noFormFactor", "BlattWeisskopf", "CrystalBarrel" };
+enum formFactorType{
+	noFormFactor = 0,
+	BlattWeisskopf = 1,
+	CrystalBarrel = 2
+};
+
 class Kinematics
 {
 public:
@@ -73,7 +80,10 @@ public:
 	 * @return
 	 */
 	static std::complex<double> phspFactor(double sqrtS, double ma, double mb);
-	static double FormFactor(double sqrtS, double ma, double mb, double spin, double mesonRadius);
+	//! Calculate form factor
+	static double FormFactor(double sqrtS, double ma, double mb, double spin, double mesonRadius,
+			formFactorType type=formFactorType::BlattWeisskopf);
+
 protected:
 	unsigned int nPart;
 	std::vector<std::string> varNames;

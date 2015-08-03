@@ -33,7 +33,7 @@ AmpSumIntensity::AmpSumIntensity(AmplitudeSetup ini, normStyle ns, std::shared_p
 
 AmpSumIntensity::AmpSumIntensity(AmplitudeSetup ini, std::shared_ptr<Efficiency> eff,
 		unsigned int nCalls) :
-								ampSetup(ini), _normStyle(none), _calcMaxFcnVal(0), eff_(eff), _nCalls(nCalls)
+		ampSetup(ini), _normStyle(none), _calcMaxFcnVal(0), eff_(eff), _nCalls(nCalls)
 {
 	init();
 }
@@ -77,6 +77,9 @@ void AmpSumIntensity::init(){
 		params.AddParameter( std::shared_ptr<DoubleParameter> (
 				new DoubleParameter("d_"+name,tmp.m_mesonRadius) ) );
 		params.GetDoubleParameter("d_"+name)->FixParameter(1);
+		params.AddParameter( std::shared_ptr<DoubleParameter> (
+				new DoubleParameter("ffType_"+name,tmp.m_ffType) ) );
+		params.GetDoubleParameter("ffType_"+name)->FixParameter(1);
 
 		tmpRes = std::shared_ptr<AmpAbsDynamicalFunction>( new AmpRelBreitWignerRes(name.c_str(),
 				params.GetDoubleParameter("mag_"+name), params.GetDoubleParameter("phase_"+name),
@@ -85,6 +88,7 @@ void AmpSumIntensity::init(){
 				params.GetDoubleParameter("width_"+name),
 				params.GetDoubleParameter("d_"+name),
 				params.GetDoubleParameter("motherRadius"),
+				formFactorType(params.GetDoubleParameter("ffType_"+name)->GetValue()),
 				_nCalls, _normStyle) );
 		resoList.push_back(tmpRes);
 
@@ -110,6 +114,9 @@ void AmpSumIntensity::init(){
 		params.AddParameter( std::shared_ptr<DoubleParameter> (
 				new DoubleParameter("d_"+name,tmp.m_mesonRadius) ) );
 		params.GetDoubleParameter("d_"+name)->FixParameter(1);
+		params.AddParameter( std::shared_ptr<DoubleParameter> (
+				new DoubleParameter("ffType_"+name,tmp.m_ffType) ) );
+		params.GetDoubleParameter("ffType_"+name)->FixParameter(1);
 
 		try{
 			params.GetDoubleParameter("g1_a_0")->FixParameter(0);
@@ -128,6 +135,7 @@ void AmpSumIntensity::init(){
 					params.GetDoubleParameter("g1_a_0"), params.GetDoubleParameter("g2_a_0"),
 					PhysConst::instance()->getMass(tmp.m_g2_part1),
 					PhysConst::instance()->getMass(tmp.m_g2_part2),
+					formFactorType(params.GetDoubleParameter("ffType_"+name)->GetValue()),
 					_nCalls, _normStyle) );
 		} catch(BadParameter& e) {
 			params.AddParameter( std::shared_ptr<DoubleParameter> (
@@ -145,6 +153,7 @@ void AmpSumIntensity::init(){
 					params.GetDoubleParameter("g1_"+name), params.GetDoubleParameter("g2_"+name),
 					PhysConst::instance()->getMass(tmp.m_g2_part1),
 					PhysConst::instance()->getMass(tmp.m_g2_part2),
+					formFactorType(params.GetDoubleParameter("ffType_"+name)->GetValue()),
 					_nCalls, _normStyle) );
 		}
 		resoList.push_back(tmpRes);
@@ -169,6 +178,9 @@ void AmpSumIntensity::init(){
 		params.AddParameter( std::shared_ptr<DoubleParameter> (
 				new DoubleParameter("d_"+name,tmp.m_mesonRadius) ) );
 		params.GetDoubleParameter("d_"+name)->FixParameter(1);
+		params.AddParameter( std::shared_ptr<DoubleParameter> (
+				new DoubleParameter("ffType_"+name,tmp.m_ffType) ) );
+		params.GetDoubleParameter("ffType_"+name)->FixParameter(1);
 
 		//		if(tmp.m_name.find("a_0") != tmp.m_name.npos){
 		//		if(0){
@@ -194,6 +206,7 @@ void AmpSumIntensity::init(){
 					params.GetDoubleParameter("g1_a_0"),
 					PhysConst::instance()->getMass(tmp.m_g3_part1),
 					PhysConst::instance()->getMass(tmp.m_g3_part2),
+					formFactorType(params.GetDoubleParameter("ffType_"+name)->GetValue()),
 					_nCalls, _normStyle) );
 			//		}else{
 		} catch(BadParameter& e) {
@@ -216,6 +229,7 @@ void AmpSumIntensity::init(){
 					params.GetDoubleParameter("g1_"+name),
 					PhysConst::instance()->getMass(tmp.m_g3_part1),
 					PhysConst::instance()->getMass(tmp.m_g3_part2),
+					formFactorType(params.GetDoubleParameter("ffType_"+name)->GetValue()),
 					_nCalls, _normStyle) );
 		}
 		resoList.push_back(tmpRes);

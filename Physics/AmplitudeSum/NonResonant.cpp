@@ -12,7 +12,8 @@ NonResonant::NonResonant(const char *name,
 		std::shared_ptr<DoubleParameter> mag, std::shared_ptr<DoubleParameter> phase,
 		int nCalls, normStyle nS) :
 		AmpAbsDynamicalFunction(name,mag, phase,
-				std::make_shared<DoubleParameter>("mass", 0.0), 1, Spin(0), Spin(0), Spin(0), nCalls, nS)
+				std::make_shared<DoubleParameter>("mass", 0.0), 1, Spin(0), Spin(0), Spin(0),
+				formFactorType::noFormFactor, nCalls, nS)
 {
 }
 

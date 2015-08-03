@@ -25,7 +25,7 @@ AmpGausRes::AmpGausRes(const char *name,
 		std::shared_ptr<DoubleParameter> mass, int subSys,
 		std::shared_ptr<DoubleParameter> width, int nCalls, normStyle nS) :
 		AmpAbsDynamicalFunction(name, mag, phase, mass, subSys,
-				Spin(0), Spin(0), Spin(0), nCalls, nS),
+				Spin(0), Spin(0), Spin(0), formFactorType::noFormFactor, nCalls, nS),
 				_width(width)
 { }
 
