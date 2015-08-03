@@ -76,7 +76,7 @@ std::complex<double> AmpFlatteRes3Ch::evaluateAmp(dataPoint& point) {
 	return dynamicalFunction(mSq,_mass->GetValue(),_ma,_mb,_g1->GetValue(),
 			_g2_partA,_g2_partB,_g2->GetValue(),
 			_g3_partA,_g3_partB,_g3->GetValue(),
-			_spin,mesonRadius);
+			_spin,_mesonRadius->GetValue());
 }
 
 std::complex<double> AmpFlatteRes3Ch::dynamicalFunction(double mSq, double mR,
@@ -90,6 +90,7 @@ std::complex<double> AmpFlatteRes3Ch::dynamicalFunction(double mSq, double mR,
 	//channel A - signal channel
 	//break-up momentum
 	double barrierA = Kinematics::FormFactor(sqrtS,massA1,massA2,J,mesonRadius)/Kinematics::FormFactor(mR,massA1,massA2,J,mesonRadius);
+	barrierA=1;
 	//convert coupling to partial width of channel A
 	std::complex<double> gammaA = couplingToWidth(mSq,mR,gA,massA1,massA2,J,mesonRadius);
 	//including the factor qTermA, as suggested by PDG, leads to an amplitude that doesn't converge.
@@ -97,7 +98,8 @@ std::complex<double> AmpFlatteRes3Ch::dynamicalFunction(double mSq, double mR,
 
 	//channel B - hidden channel
 	//break-up momentum
-	double barrierB = Kinematics::FormFactor(sqrtS,massB1,massB2,J,1.5)/Kinematics::FormFactor(mR,massB1,massB2,J,1.5);
+	double barrierB = Kinematics::FormFactor(sqrtS,massB1,massB2,J,mesonRadius)/Kinematics::FormFactor(mR,massB1,massB2,J,mesonRadius);
+	barrierB=1;
 	double gB = couplingB;
 	//convert coupling to partial width of channel B
 	std::complex<double> gammaB = couplingToWidth(mSq,mR,gB,massB1,massB2,J,mesonRadius);
@@ -105,7 +107,8 @@ std::complex<double> AmpFlatteRes3Ch::dynamicalFunction(double mSq, double mR,
 
 	//channel C - hidden channel
 	//break-up momentum
-	double barrierC = Kinematics::FormFactor(sqrtS,massC1,massC2,J,1.5)/Kinematics::FormFactor(mR,massC1,massC2,J,1.5);
+	double barrierC = Kinematics::FormFactor(sqrtS,massC1,massC2,J,mesonRadius)/Kinematics::FormFactor(mR,massC1,massC2,J,mesonRadius);
+	barrierC=1;
 	double gC = couplingC;
 	//convert coupling to partial width of channel C
 	std::complex<double> gammaC = couplingToWidth(mSq,mR,gC,massC1,massC2,J,mesonRadius);
@@ -184,7 +187,6 @@ std::shared_ptr<FunctionTree> AmpFlatteRes3Ch::setupTree(
 	newTree->createLeaf("m12sq", m12sq, "FlatteRes_"+_name); //mc
 	newTree->createLeaf("subSysFlag_"+_name, _subSys, "FlatteRes_"+_name); //subSysFlag
 	newTree->createLeaf("spin_"+_name, _spin, "FlatteRes_"+_name); //spin
-	newTree->createLeaf("mesonRadius_"+_name, mesonRadius, "FlatteRes_"+_name); //resonance radius
 	newTree->createLeaf("d_"+_name, params.GetDoubleParameter("d_"+_name) , "FlatteRes_"+_name); //d
 	if(_name.find("a_0(980)") != _name.npos){
 		try {
@@ -243,7 +245,6 @@ std::shared_ptr<FunctionTree> AmpFlatteRes3Ch::setupTree(
 		newTree->createLeaf("m12sq_phsp", m12sq_phsp, "NormFlatte_"+_name); //mc
 		newTree->createLeaf("subSysFlag_"+_name, _subSys, "NormFlatte_"+_name); //subSysFlag
 		newTree->createLeaf("spin_"+_name, _spin, "NormFlatte_"+_name); //spin
-		newTree->createLeaf("mesonRadius_"+_name, _mesonRadius, "NormFlatte_"+_name); //spin
 		newTree->createLeaf("d_"+_name,  params.GetDoubleParameter("d_"+_name), "NormFlatte_"+_name); //d
 		if(_name.find("a_0(980)") != _name.npos){
 			try {
@@ -336,7 +337,7 @@ bool Flatte3ChStrategy::execute(ParameterList& paras, std::shared_ptr<AbsParamet
 	}
 
 	double m0, d, ma, mb, g1, gB, massB1, massB2, gC, massC1, massC2;
-	unsigned int spin, mesonRadius, subSys;
+	unsigned int spin, subSys;
 	//Get parameters from ParameterList -
 	//enclosing in try...catch for the case that names of nodes have changed
 	try{
@@ -349,12 +350,6 @@ bool Flatte3ChStrategy::execute(ParameterList& paras, std::shared_ptr<AbsParamet
 		spin = (unsigned int)(paras.GetParameterValue("ParOfNode_spin_"+name));
 	}catch(BadParameter& e){
 		BOOST_LOG_TRIVIAL(error) <<"FlatteStrategy: can't find parameter ParOfNode_spin_"+name;
-		throw;
-	}
-	try{
-		mesonRadius = (double)(paras.GetParameterValue("ParOfNode_mesonRadius_"+name));
-	}catch(BadParameter& e){
-		BOOST_LOG_TRIVIAL(error) <<"FlatteStrategy: can't find parameter ParOfNode_mesonRadius_"+name;
 		throw;
 	}
 	try{
@@ -465,7 +460,7 @@ bool Flatte3ChStrategy::execute(ParameterList& paras, std::shared_ptr<AbsParamet
 				results[ele] = AmpFlatteRes3Ch::dynamicalFunction(mSq,m0,ma,mb,g1,
 						massB1,massB2,gB,
 						massC1,massC2,gC,
-						spin,mesonRadius);
+						spin,d);
 				//					if(ele<10) std::cout<<"Strategy BWrel "<<results[ele]<<std::endl;
 			}
 
@@ -489,7 +484,7 @@ bool Flatte3ChStrategy::execute(ParameterList& paras, std::shared_ptr<AbsParamet
 	std::complex<double> result = AmpFlatteRes3Ch::dynamicalFunction(mSq,m0,ma,mb,g1,
 			massB1,massB2,gB,
 			massC1,massC2,gC,
-			spin,mesonRadius);
+			spin,d);
 	out = std::shared_ptr<AbsParameter>(new ComplexParameter(out->GetName(), result));
 	return true;
 }
@@ -501,7 +496,7 @@ bool Flatte3ChPhspStrategy::execute(ParameterList& paras, std::shared_ptr<AbsPar
 	}
 
 	double m0, d, ma, mb, g1, gB, massB1, massB2, gC, massC1, massC2;
-	unsigned int spin, subSys, mesonRadius;
+	unsigned int spin, subSys;
 
 	//Get parameters from ParameterList -
 	//enclosing in try...catch for the case that names of nodes have changed
@@ -515,12 +510,6 @@ bool Flatte3ChPhspStrategy::execute(ParameterList& paras, std::shared_ptr<AbsPar
 		spin = (unsigned int)(paras.GetParameterValue("ParOfNode_spin_"+name));
 	}catch(BadParameter& e){
 		BOOST_LOG_TRIVIAL(error) <<"FlattePhspStrategy: can't find parameter ParOfNode_spin_"+name;
-		throw;
-	}
-	try{
-		mesonRadius = (double)(paras.GetParameterValue("ParOfNode_mesonRadius_"+name));
-	}catch(BadParameter& e){
-		BOOST_LOG_TRIVIAL(error) <<"FlatteStrategy: can't find parameter ParOfNode_mesonRadius_"+name;
 		throw;
 	}
 	try{
@@ -629,7 +618,7 @@ bool Flatte3ChPhspStrategy::execute(ParameterList& paras, std::shared_ptr<AbsPar
 				results[ele] = AmpFlatteRes3Ch::dynamicalFunction(mSq,m0,ma,mb,g1,
 						massB1,massB2,gB,
 						massC1,massC2,gC,
-						spin,mesonRadius);
+						spin,d);
 				//					if(ele<10) std::cout<<"Strategy BWrel "<<results[ele]<<std::endl;
 			}
 			out = std::shared_ptr<AbsParameter>(new MultiComplex(out->GetName(),results));
@@ -651,7 +640,7 @@ bool Flatte3ChPhspStrategy::execute(ParameterList& paras, std::shared_ptr<AbsPar
 	std::complex<double> result = AmpFlatteRes3Ch::dynamicalFunction(mSq,m0,ma,mb,g1,
 			massB1,massB2,gB,
 			massC1,massC2,gC,
-			spin,mesonRadius);
+			spin,d);
 	out = std::shared_ptr<AbsParameter>(new ComplexParameter(out->GetName(), result));
 	return true;
 }

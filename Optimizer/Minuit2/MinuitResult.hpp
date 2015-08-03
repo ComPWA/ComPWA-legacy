@@ -29,7 +29,6 @@
 #include <iostream>
 #include <fstream>
 #include <memory>
-//#include <boost/numeric/ublas/symmetric.hpp>
 #include <boost/numeric/ublas/matrix.hpp>
 #include <boost/numeric/ublas/io.hpp>
 
@@ -60,21 +59,31 @@ public:
 	//! Enable correct error estimation for fit fractions. Very time consuming!
 	void setUseCorrelatedErrors(bool s) { useCorrelatedErrors = s; }
 	//! Use tree for calculation of fit fractions
-	void setUseTree(bool s) {
-		if(!_amp || !_amp->hasTree())
-			throw std::runtime_error("MinuitResult::setUseTree() | amplitude has no tree!");
-		useTree = s;
-	}
-
+	void setUseTree(bool s);
+	//! Set calculation of interference terms
+	void setCalcInterference(bool b) { calcInterference = b; }
 	//! Write list of fit parameters and list of fitfractions to XML file @filename
 	virtual void writeXML(std::string filename);
 	//! Write fit parameters, fit fractions and cov matrix as TeX to file @filename
 	virtual void writeTeX(std::string filename);
 	//! Any errors during minimization?
 	virtual bool hasFailed();
-
+	//! Initialize result with Minuit2::FunctionMinimum
 	void init(FunctionMinimum);
+
+protected:
 	std::shared_ptr<Estimator> estimator;
+	//! GSL random generator, used for multivariate gauss
+	gsl_rng* r;
+	//! Calculate interference terms
+	bool calcInterference;
+	//! Should we calcualte fit fraction errors accurately?
+	bool useCorrelatedErrors;
+	//! calculate fractions using tree (if available)
+	bool useTree;
+	//! number of resonances in amplitude
+	unsigned int nRes;
+
 	//====== MINUIT FIT RESULT =======
 	bool isValid; //result valid
 	bool covPosDef; //covariance matrix pos.-def.
@@ -94,15 +103,15 @@ public:
 	boost::numeric::ublas::symmetric_matrix<double,boost::numeric::ublas::upper> corr;
 	std::vector<double> variance;
 	std::vector<double> globalCC;
-
-	gsl_rng* r;//! GSL random generator, used for multivariate gauss
-	//! Should we calcualte fit fraction errors accurately?
-	bool useCorrelatedErrors;
-	//! calculate fractions using tree (if available)
-	bool useTree;
-	//! number of resonances in amplitude
-	unsigned int nRes;
-
+	//====== OUTPUT =====
+	//! Simplified fit result output
+	void genSimpleOutput(std::ostream& out);
+	//! Full fit result output
+	void genOutput(std::ostream& out,std::string opt="");
+	//! Table with correlation matrix
+	void printCorrelationMatrix(TableFormater* fracTable);
+	//! Table with covariance matrix
+	void printCovarianceMatrix(TableFormater* fracTable);
 
 	/** Calculate errors on fit result
 	 * Set @param assumeUnCorrelatedErrors to assume that the error of the fit parameter only depends
@@ -116,22 +125,13 @@ public:
 	 * @param fracError result with errors
 	 */
 	virtual void calcFractionError();
-	//====== OUTPUT =====
-	//! Simplified fit result output
-	void genSimpleOutput(std::ostream& out);
-	//! Full fit result output
-	void genOutput(std::ostream& out,std::string opt="");
-	//! Table with correlation matrix
-	void printCorrelationMatrix(TableFormater* fracTable);
-	//! Table with covariance matrix
-	void printCovarianceMatrix(TableFormater* fracTable);
-
 	//! Smear ParameterList with a multidimensional gaussian and the cov matrix from the fit
 	void smearParameterList(ParameterList&);
 	//! Calculate information criterion AIC
 	double calcAIC();
 	//! Calculate information criterion BIC
 	double calcBIC();
+
 };
 
 #endif

@@ -69,7 +69,6 @@ protected:
 	double _g2_partB; //hidden channel: mass particle B
 	std::shared_ptr<DoubleParameter> _g2, _g1;
 	double tmp_g2, tmp_g1, tmp_mass;
-	double mesonRadius;
 };
 
 class FlatteConf : public basicConf

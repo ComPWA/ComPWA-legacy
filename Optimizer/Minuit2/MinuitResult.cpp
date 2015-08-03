@@ -42,7 +42,8 @@ int multivariateGaussian(const gsl_rng *rnd, const int vecSize, const gsl_vector
 	return 0;
 }
 
-MinuitResult::MinuitResult(std::shared_ptr<ControlParameter> esti, FunctionMinimum result) : useCorrelatedErrors(0){
+MinuitResult::MinuitResult(std::shared_ptr<ControlParameter> esti, FunctionMinimum result) :
+				useCorrelatedErrors(0), calcInterference(0), useTree(0) {
 	estimator = std::static_pointer_cast<Estimator>(esti);
 	_amp=estimator->getAmplitude();
 	init(result);
@@ -107,6 +108,11 @@ void MinuitResult::init(FunctionMinimum min){
 	if(_amp && _amp->hasTree()) setUseTree(1);
 	return;
 
+}
+void MinuitResult::setUseTree(bool s) {
+	if(!_amp || !_amp->hasTree())
+		throw std::runtime_error("MinuitResult::setUseTree() | amplitude has no tree!");
+	useTree = s;
 }
 
 void MinuitResult::genSimpleOutput(std::ostream& out){
@@ -268,31 +274,32 @@ void MinuitResult::genOutput(std::ostream& out, std::string opt){
 	out<<"Sum of magnitudes: "<<sumMag<<std::endl;
 
 	out<<std::endl;
-	out<<"INTERFERENCE terms: "<<std::endl;
-	TableFormater* tableInterf = new TableFormater(&out);
-	tableInterf->addColumn("Nr 1");
-	tableInterf->addColumn("Nr 2");
-	tableInterf->addColumn("Name 1",15);
-	tableInterf->addColumn("Name 2",15);
-	tableInterf->addColumn("Value",15);
-	tableInterf->header();
-	double sumInfTerms = 0;
-	for(int i=0; i<_amp->GetNumberOfResonances(); i++)
-		for(int j=i; j<_amp->GetNumberOfResonances(); j++){
-			*tableInterf << i << j;
-			*tableInterf << _amp->GetNameOfResonance(i);
-			*tableInterf << _amp->GetNameOfResonance(j);
-			double inf = _amp->interferenceIntegral(i,j);
-			*tableInterf << inf;
-			sumInfTerms+=inf;
-		}
-	tableInterf->delim();
-	*tableInterf<<" "<<" "<<" "<<"Sum: "<<sumInfTerms;
-	tableInterf->footer();
+	if(calcInterference){
+		out<<"INTERFERENCE terms: "<<std::endl;
+		TableFormater* tableInterf = new TableFormater(&out);
+		tableInterf->addColumn("Nr 1");
+		tableInterf->addColumn("Nr 2");
+		tableInterf->addColumn("Name 1",15);
+		tableInterf->addColumn("Name 2",15);
+		tableInterf->addColumn("Value",15);
+		tableInterf->header();
+		double sumInfTerms = 0;
+		for(int i=0; i<_amp->GetNumberOfResonances(); i++)
+			for(int j=i; j<_amp->GetNumberOfResonances(); j++){
+				*tableInterf << i << j;
+				*tableInterf << _amp->GetNameOfResonance(i);
+				*tableInterf << _amp->GetNameOfResonance(j);
+				double inf = _amp->interferenceIntegral(i,j);
+				*tableInterf << inf;
+				sumInfTerms+=inf;
+			}
+		tableInterf->delim();
+		*tableInterf<<" "<<" "<<" "<<"Sum: "<<sumInfTerms;
+		tableInterf->footer();
+		out<<std::endl;
+	}
 
-	out<<std::endl;
-	out<<std::setprecision(5);
-
+	out<<std::setprecision(5);//reset cout precision
 	return;
 }
 
@@ -410,12 +417,12 @@ void MinuitResult::writeTeX(std::string filename){
 bool MinuitResult::hasFailed(){
 	bool failed=0;
 	if(!isValid) failed=1;
-//	if(!covPosDef) failed=1;
-//	if(!hasValidParameters) failed=1;
-//	if(!hasValidCov) failed=1;
-//	if(!hasAccCov) failed=1;
-//	if(hasReachedCallLimit) failed=1;
-//	if(hesseFailed) failed=1;
+	//	if(!covPosDef) failed=1;
+	//	if(!hasValidParameters) failed=1;
+	//	if(!hasValidCov) failed=1;
+	//	if(!hasAccCov) failed=1;
+	//	if(hasReachedCallLimit) failed=1;
+	//	if(hesseFailed) failed=1;
 
 	return failed;
 }
