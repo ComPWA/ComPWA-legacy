@@ -83,8 +83,10 @@ public:
 			m_phase_fix= par.GetDoubleParameter("phase_"+m_name)->IsFixed();
 			m_phase_min= par.GetDoubleParameter("phase_"+m_name)->GetMinValue();
 			m_phase_max= par.GetDoubleParameter("phase_"+m_name)->GetMaxValue();
-			m_ffType= par.GetDoubleParameter("ffType_"+m_name)->GetMaxValue();
-		} catch (BadParameter b) { }
+			m_ffType= par.GetDoubleParameter("ffType_"+m_name)->GetValue();
+		} catch (BadParameter b) {
+			//BOOST_LOG_TRIVIAL(error)<<"basicConf::update() | one or more parameters haven't been found!";
+		}
 	}
 	//protected:
 	bool m_enable;
