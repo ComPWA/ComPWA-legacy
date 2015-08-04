@@ -137,7 +137,7 @@ double Kinematics::FormFactor(double sqrtS, double ma, double mb, double spin, d
 			throw std::runtime_error("Kinematics::FormFactor() | Form factors of type "
 					+std::string(formFactorTypeString[type]) + " are implemented for spins up to 4!");
 	}
-	throw std::runtime_error("Kinematics::FormFactor() | Form factor type "+std::to_string(type)+
+	throw std::runtime_error("Kinematics::FormFactor() | Form factor type "+std::to_string((long long int)type)+
 			" not specified!");
 
 	return 0;

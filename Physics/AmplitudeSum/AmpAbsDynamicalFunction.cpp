@@ -152,6 +152,9 @@ double eval(double* x, size_t dim, void* param) {
 }
 
 double AmpAbsDynamicalFunction::totalIntegral() const{
+   //Save CPU time
+   return 1;
+
 	size_t dim=2;
 	double res=0.0, err=0.0;
 

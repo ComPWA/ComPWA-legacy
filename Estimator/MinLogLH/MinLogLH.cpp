@@ -326,9 +326,8 @@ double MinLogLH::calcPenalty(){
 		//magSum += amp->getAmpMagnitude(i);
 		magSum += std::abs(amp->GetMagnitude(i))*std::sqrt(amp->GetIntegral(i));
 	}
-//	BOOST_LOG_TRIVIAL(debug) << "MinLogLH::calcPenalty() | Adding penalty term to LH: "
-//			<<penaltyLambda*magSum;
 	return (penaltyLambda*magSum/amp->integral());
+	//return (penaltyLambda*magSum);
 }
 
 double MinLogLH::controlParameter(ParameterList& minPar){
