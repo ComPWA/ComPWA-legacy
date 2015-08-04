@@ -99,11 +99,13 @@ double Kinematics::FormFactor(double sqrtS, double ma, double mb, double spin, d
 	if(mesonRadius==0) return 1; //disable form factors
 	if(type == formFactorType::noFormFactor) return 1; //disable form factors
 
+//	double qSq = std::norm(Kinematics::qValue(sqrtS,ma,mb));
+	double qSq = Kinematics::qSqValue(sqrtS,ma,mb);
 	//From factor for a0(980) used by Crystal Barrel Phys.Rev.D78-074023
 	if(type == formFactorType::CrystalBarrel){
 		if (spin == 0) {
 			double alpha = mesonRadius*mesonRadius/6;
-			return std::exp(-alpha*Kinematics::qSqValue(sqrtS,ma,mb));
+			return std::exp(-alpha*qSq);
 		}
 		else
 			throw std::runtime_error("Kinematics::FormFactor() | Form factors of type "
@@ -115,7 +117,7 @@ double Kinematics::FormFactor(double sqrtS, double ma, double mb, double spin, d
 	//z = q / (interaction range). For the interaction range we assume 1/mesonRadius
 	if(type == formFactorType::BlattWeisskopf){
 		if (spin == 0) return 1;
-		double z = Kinematics::qSqValue(sqrtS,ma,mb)*mesonRadius*mesonRadius;
+		double z = qSq*mesonRadius*mesonRadius;
 		/* Events below threshold
 		 * What should we do if event is below threshold? Shouldn't really influence the result
 		 * because resonances at threshold don't have spin(?) */

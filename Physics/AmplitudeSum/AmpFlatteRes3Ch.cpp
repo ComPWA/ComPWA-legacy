@@ -89,34 +89,49 @@ std::complex<double> AmpFlatteRes3Ch::dynamicalFunction(double mSq, double mR,
 	double sqrtS = sqrt(mSq);
 
 	//channel A - signal channel
+	std:complex<double> gammaA, qTermA, termA;
+	double barrierA;
 	//break-up momentum
-	double barrierA = Kinematics::FormFactor(sqrtS,massA1,massA2,J,mesonRadius, ffType)/
+	barrierA = Kinematics::FormFactor(sqrtS,massA1,massA2,J,mesonRadius, ffType)/
 			Kinematics::FormFactor(mR,massA1,massA2,J,mesonRadius, ffType);
 	barrierA=1;
 	//convert coupling to partial width of channel A
-	std::complex<double> gammaA = couplingToWidth(mSq,mR,gA,massA1,massA2,J,mesonRadius, ffType);
+	gammaA = couplingToWidth(mSq,mR,gA,massA1,massA2,J,mesonRadius, ffType);
 	//including the factor qTermA, as suggested by PDG, leads to an amplitude that doesn't converge.
-	std::complex<double> termA = gammaA*barrierA*barrierA;
+	//	qTermA = Kinematics::qValue(sqrtS,massA1,massA2) / Kinematics::qValue(mR,massA1,massA2);
+	qTermA = std::complex<double>(1,0);
+	termA = gammaA*barrierA*barrierA*std::pow(qTermA,(double)2*J+1);
+
+//	std::cout<<qTermA<<" "<<Kinematics::qValue(sqrtS,massA1,massA2)
+//	<<" "<<Kinematics::qValue(mR,massA1,massA2)<<std::endl;
 
 	//channel B - hidden channel
+	std::complex<double> gammaB, qTermB, termB;
+	double barrierB, gB;
 	//break-up momentum
-	double barrierB = Kinematics::FormFactor(sqrtS,massB1,massB2,J,mesonRadius, ffType)/
+	barrierB = Kinematics::FormFactor(sqrtS,massB1,massB2,J,mesonRadius, ffType)/
 			Kinematics::FormFactor(mR,massB1,massB2,J,mesonRadius, ffType);
 	barrierB=1;
-	double gB = couplingB;
+	gB = couplingB;
 	//convert coupling to partial width of channel B
-	std::complex<double> gammaB = couplingToWidth(mSq,mR,gB,massB1,massB2,J,mesonRadius, ffType);
-	std::complex<double> termB = gammaB*barrierB*barrierB;
+	gammaB = couplingToWidth(mSq,mR,gB,massB1,massB2,J,mesonRadius, ffType);
+	//	qTermB = Kinematics::qValue(sqrtS,massB1,massB2) / Kinematics::qValue(mR,massB1,massB2);
+	qTermB = std::complex<double>(1,0);
+	termB = gammaB*barrierB*barrierB*std::pow(qTermB,(double)2*J+1);
 
 	//channel C - hidden channel
+	std::complex<double> gammaC, qTermC, termC;
+	double barrierC, gC;
 	//break-up momentum
-	double barrierC = Kinematics::FormFactor(sqrtS,massC1,massC2,J,mesonRadius, ffType)/
+	barrierC = Kinematics::FormFactor(sqrtS,massC1,massC2,J,mesonRadius, ffType)/
 			Kinematics::FormFactor(mR,massC1,massC2,J,mesonRadius, ffType);
 	barrierC=1;
-	double gC = couplingC;
+	gC = couplingC;
 	//convert coupling to partial width of channel C
-	std::complex<double> gammaC = couplingToWidth(mSq,mR,gC,massC1,massC2,J,mesonRadius, ffType);
-	std::complex<double> termC = gammaC*barrierC*barrierC;
+	gammaC = couplingToWidth(mSq,mR,gC,massC1,massC2,J,mesonRadius, ffType);
+	//	qTermC = Kinematics::qValue(sqrtS,massC1,massC2) / Kinematics::qValue(mR,massC1,massC2);
+	qTermC = std::complex<double>(1,0);
+	termC = gammaC*barrierC*barrierC*std::pow(qTermC,(double)2*J+1);
 
 	//Coupling constant from production reaction. In case of a particle decay the production
 	//coupling doesn't depend in energy since the CM energy is in the (RC) system fixed to the

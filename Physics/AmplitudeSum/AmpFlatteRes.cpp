@@ -20,6 +20,7 @@
 
 #include <cmath>
 #include <math.h>
+#include <complex>
 #include "Physics/AmplitudeSum/AmpFlatteRes.hpp"
 
 
@@ -80,22 +81,30 @@ std::complex<double> AmpFlatteRes::dynamicalFunction(double mSq, double mR,
 	double sqrtS = sqrt(mSq);
 
 	//channel A - signal channel
-	double barrierA = Kinematics::FormFactor(sqrtS,massA1,massA2,J,mesonRadius, ffType)/
+	std:complex<double> gammaA, qTermA, termA;
+	double barrierA;
+	barrierA = Kinematics::FormFactor(sqrtS,massA1,massA2,J,mesonRadius, ffType)/
 			Kinematics::FormFactor(mR,massA1,massA2,J,mesonRadius, ffType);
 	barrierA=1;
 	//convert coupling to partial width of channel A
-	std::complex<double> gammaA = couplingToWidth(mSq,mR,gA,massA1,massA2,J,mesonRadius, ffType);
+	gammaA = couplingToWidth(mSq,mR,gA,massA1,massA2,J,mesonRadius, ffType);
 	//including the factor qTermA, as suggested by PDG, leads to an amplitude that doesn't converge.
-	std::complex<double> termA = gammaA*barrierA*barrierA;
+	//	qTermA = Kinematics::qValue(sqrtS,massA1,massA2) / Kinematics::qValue(mR,massA1,massA2);
+	qTermA = std::complex<double>(1,0);
+	termA = gammaA*barrierA*barrierA*std::pow(qTermA,(double)2*J+1);
 
 	//channel B - hidden channel
-	double barrierB = Kinematics::FormFactor(sqrtS,massB1,massB2,J,mesonRadius, ffType)/
+	std::complex<double> gammaB, qTermB, termB;
+	double barrierB, gB;
+	barrierB = Kinematics::FormFactor(sqrtS,massB1,massB2,J,mesonRadius, ffType)/
 			Kinematics::FormFactor(mR,massB1,massB2,J,mesonRadius, ffType);
 	barrierB=1;
-	double gB = couplingRatio; 
+	gB = couplingRatio;
 	//convert coupling to partial width of channel B
-	std::complex<double> gammaB = couplingToWidth(mSq,mR,gB,massB1,massB2,J,mesonRadius, ffType);
-	std::complex<double> termB = gammaB*barrierB*barrierB;
+	gammaB = couplingToWidth(mSq,mR,gB,massB1,massB2,J,mesonRadius, ffType);
+	//	qTermB = Kinematics::qValue(sqrtS,massB1,massB2) / Kinematics::qValue(mR,massB1,massB2);
+	qTermB = std::complex<double>(1,0);
+	termB = gammaB*barrierB*barrierB*std::pow(qTermB,(double)2*J+1);
 
 	//Coupling constant from production reaction. In case of a particle decay the production
 	//coupling doesn't depend on energy since the CM energy is in the (RC) system fixed to the
