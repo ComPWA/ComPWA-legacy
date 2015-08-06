@@ -108,6 +108,7 @@ public:
 		pt_.put("daughterB", m_daughterB);
 	}
 	virtual void update(ParameterList par){
+		if(!m_enable) return;
 		basicConf::update(par);
 		try{// only update parameters if they are found in list
 			m_mass= par.GetDoubleParameter("m0_"+m_name)->GetValue();

@@ -94,16 +94,15 @@ std::complex<double> AmpFlatteRes3Ch::dynamicalFunction(double mSq, double mR,
 	//break-up momentum
 	barrierA = Kinematics::FormFactor(sqrtS,massA1,massA2,J,mesonRadius, ffType)/
 			Kinematics::FormFactor(mR,massA1,massA2,J,mesonRadius, ffType);
-	barrierA=1;
 	//convert coupling to partial width of channel A
 	gammaA = couplingToWidth(mSq,mR,gA,massA1,massA2,J,mesonRadius, ffType);
 	//including the factor qTermA, as suggested by PDG, leads to an amplitude that doesn't converge.
-	//	qTermA = Kinematics::qValue(sqrtS,massA1,massA2) / Kinematics::qValue(mR,massA1,massA2);
+	//		qTermA = Kinematics::qValue(sqrtS,massA1,massA2) / Kinematics::qValue(mR,massA1,massA2);
 	qTermA = std::complex<double>(1,0);
 	termA = gammaA*barrierA*barrierA*std::pow(qTermA,(double)2*J+1);
 
-//	std::cout<<qTermA<<" "<<Kinematics::qValue(sqrtS,massA1,massA2)
-//	<<" "<<Kinematics::qValue(mR,massA1,massA2)<<std::endl;
+	//	std::cout<<qTermA<<" "<<Kinematics::qValue(sqrtS,massA1,massA2)
+	//	<<" "<<Kinematics::qValue(mR,massA1,massA2)<<std::endl;
 
 	//channel B - hidden channel
 	std::complex<double> gammaB, qTermB, termB;
@@ -111,11 +110,10 @@ std::complex<double> AmpFlatteRes3Ch::dynamicalFunction(double mSq, double mR,
 	//break-up momentum
 	barrierB = Kinematics::FormFactor(sqrtS,massB1,massB2,J,mesonRadius, ffType)/
 			Kinematics::FormFactor(mR,massB1,massB2,J,mesonRadius, ffType);
-	barrierB=1;
 	gB = couplingB;
 	//convert coupling to partial width of channel B
 	gammaB = couplingToWidth(mSq,mR,gB,massB1,massB2,J,mesonRadius, ffType);
-	//	qTermB = Kinematics::qValue(sqrtS,massB1,massB2) / Kinematics::qValue(mR,massB1,massB2);
+	//		qTermB = Kinematics::qValue(sqrtS,massB1,massB2) / Kinematics::qValue(mR,massB1,massB2);
 	qTermB = std::complex<double>(1,0);
 	termB = gammaB*barrierB*barrierB*std::pow(qTermB,(double)2*J+1);
 
@@ -125,11 +123,10 @@ std::complex<double> AmpFlatteRes3Ch::dynamicalFunction(double mSq, double mR,
 	//break-up momentum
 	barrierC = Kinematics::FormFactor(sqrtS,massC1,massC2,J,mesonRadius, ffType)/
 			Kinematics::FormFactor(mR,massC1,massC2,J,mesonRadius, ffType);
-	barrierC=1;
 	gC = couplingC;
 	//convert coupling to partial width of channel C
 	gammaC = couplingToWidth(mSq,mR,gC,massC1,massC2,J,mesonRadius, ffType);
-	//	qTermC = Kinematics::qValue(sqrtS,massC1,massC2) / Kinematics::qValue(mR,massC1,massC2);
+	//		qTermC = Kinematics::qValue(sqrtS,massC1,massC2) / Kinematics::qValue(mR,massC1,massC2);
 	qTermC = std::complex<double>(1,0);
 	termC = gammaC*barrierC*barrierC*std::pow(qTermC,(double)2*J+1);
 
@@ -227,7 +224,11 @@ std::shared_ptr<FunctionTree> AmpFlatteRes3Ch::setupTree(
 	} else {
 		newTree->createLeaf("g1_"+_name, params.GetDoubleParameter("g1_"+_name), "FlatteRes_"+_name);
 		newTree->createLeaf("g2_"+_name, params.GetDoubleParameter("g2_"+_name), "FlatteRes_"+_name);
-		newTree->createLeaf("g3_"+_name, params.GetDoubleParameter("g3_"+_name), "FlatteRes_"+_name);
+		try {
+			newTree->createLeaf("g3_"+_name, params.GetDoubleParameter("g3_"+_name), "FlatteRes_"+_name);
+		} catch (BadParameter& e) {
+			newTree->createLeaf("g3_"+_name, params.GetDoubleParameter("g1_"+_name), "FlatteRes_"+_name);
+		}
 	}
 	newTree->createLeaf("massB1_"+_name, _g2_partA, "FlatteRes_"+_name);
 	newTree->createLeaf("massB2_"+_name, _g2_partB, "FlatteRes_"+_name);
@@ -286,7 +287,11 @@ std::shared_ptr<FunctionTree> AmpFlatteRes3Ch::setupTree(
 		} else {
 			newTree->createLeaf("g1_"+_name, params.GetDoubleParameter("g1_"+_name), "NormFlatte_"+_name);//use local parameter g1_a0
 			newTree->createLeaf("g2_"+_name, params.GetDoubleParameter("g2_"+_name), "NormFlatte_"+_name);
-			newTree->createLeaf("g3_"+_name, params.GetDoubleParameter("g3_"+_name), "NormFlatte_"+_name);
+			try {
+				newTree->createLeaf("g3_"+_name, params.GetDoubleParameter("g3_"+_name), "NormFlatte_"+_name);
+			} catch (BadParameter& e) {
+				newTree->createLeaf("g3_"+_name, params.GetDoubleParameter("g1_"+_name), "NormFlatte_"+_name);
+			}
 		}
 
 		newTree->createLeaf("massB1_"+_name, _g2_partA, "NormFlatte_"+_name);
@@ -694,21 +699,28 @@ void Flatte3ChConf::put(boost::property_tree::ptree &pt_){
 	pt_.put("g3_part2", m_g3_part2);
 }
 void Flatte3ChConf::update(ParameterList par){
+	if(!m_enable) return;
 	FlatteConf::update(par);
 
 	std::shared_ptr<DoubleParameter> p;
-	if(m_name.find("a_0(980)") == 0) {
+	if(m_name.find("a_0(980)") != m_name.npos) {
 		try{// only update parameters if they are found in list
 			p = par.GetDoubleParameter("g1_a_0");
 		} catch (BadParameter b) {
 			try{// only update parameters if they are found in list
 				p = par.GetDoubleParameter("g1_"+m_name);
-			} catch (BadParameter b) { }
+			} catch (BadParameter b) {
+			}
 		}
 	} else {
 		try{// only update parameters if they are found in list
 			p = par.GetDoubleParameter("g3_"+m_name);
-		} catch (BadParameter b) { }
+		} catch (BadParameter b) {
+			try{// only update parameters if they are found in list
+				p = par.GetDoubleParameter("g1_"+m_name);
+			} catch (BadParameter b) {
+			}
+		}
 	}
 	m_g3 = p->GetValue();
 	m_g3_fix = p->IsFixed();

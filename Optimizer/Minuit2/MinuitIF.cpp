@@ -132,11 +132,9 @@ std::shared_ptr<FitResult> MinuitIF::exec(ParameterList& par){
 	FunctionMinimum minMin = migrad(maxfcn,tolerance);//(maxfcn,tolerance)
 	BOOST_LOG_TRIVIAL(info) <<"MinuitIF::exec() | migrad finished! Minimum is valid = "
 			<<minMin.IsValid();
-//	if(!minMin.IsValid()) {
-//		BOOST_LOG_TRIVIAL(info) <<"MinuitIF::exec() | minimum not valid! Current LH="<<minMin.Fval();
-//		BOOST_LOG_TRIVIAL(info) <<"MinuitIF::exec() | Run migrad again!";
-//		minMin = migrad();
-//	}
+
+	//we copy parameters here because minos and hesse can still change the parameterList par
+	ParameterList finalParList(par);
 
 	//HESSE
 	MnHesse hesse(strat);
@@ -148,11 +146,10 @@ std::shared_ptr<FitResult> MinuitIF::exec(ParameterList& par){
 		BOOST_LOG_TRIVIAL(info) <<"MinuitIF::exec() | migrad failed to find minimum! "
 		"We skip hesse and minos!";
 
+	std::cout<<"Parameters after hesse: "<<par<<std::endl;
 	//MINOS
 	MnMinos minos(_myFcn,minMin,strat);
 
-	//we copy parameters here because minos can still change the parameterList par
-	ParameterList finalParList(par);
 	//save minimzed values
 	MnUserParameterState minState = minMin.UserState();
 	for(unsigned int i=0; i<finalParList.GetNDouble(); ++i){

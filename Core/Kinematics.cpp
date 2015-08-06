@@ -99,8 +99,8 @@ double Kinematics::FormFactor(double sqrtS, double ma, double mb, double spin, d
 	if(mesonRadius==0) return 1; //disable form factors
 	if(type == formFactorType::noFormFactor) return 1; //disable form factors
 
-//	double qSq = std::norm(Kinematics::qValue(sqrtS,ma,mb));
-	double qSq = Kinematics::qSqValue(sqrtS,ma,mb);
+	double qSq = std::norm(Kinematics::qValue(sqrtS,ma,mb));
+//	double qSq = Kinematics::qSqValue(sqrtS,ma,mb);
 	//From factor for a0(980) used by Crystal Barrel Phys.Rev.D78-074023
 	if(type == formFactorType::CrystalBarrel){
 		if (spin == 0) {

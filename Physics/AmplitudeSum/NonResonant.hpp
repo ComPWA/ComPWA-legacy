@@ -74,6 +74,7 @@ public:
 		pt_.put("FormFactorType", m_ffType);
 	}
 	virtual void update(ParameterList par){
+		if(!m_enable) return;
 		try{// only update parameters if they are found in list
 			m_strength= par.GetDoubleParameter("mag_"+m_name)->GetValue();
 			m_strength_fix= par.GetDoubleParameter("mag_"+m_name)->IsFixed();

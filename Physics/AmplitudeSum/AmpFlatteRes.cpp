@@ -85,11 +85,10 @@ std::complex<double> AmpFlatteRes::dynamicalFunction(double mSq, double mR,
 	double barrierA;
 	barrierA = Kinematics::FormFactor(sqrtS,massA1,massA2,J,mesonRadius, ffType)/
 			Kinematics::FormFactor(mR,massA1,massA2,J,mesonRadius, ffType);
-	barrierA=1;
 	//convert coupling to partial width of channel A
 	gammaA = couplingToWidth(mSq,mR,gA,massA1,massA2,J,mesonRadius, ffType);
 	//including the factor qTermA, as suggested by PDG, leads to an amplitude that doesn't converge.
-	//	qTermA = Kinematics::qValue(sqrtS,massA1,massA2) / Kinematics::qValue(mR,massA1,massA2);
+//		qTermA = Kinematics::qValue(sqrtS,massA1,massA2) / Kinematics::qValue(mR,massA1,massA2);
 	qTermA = std::complex<double>(1,0);
 	termA = gammaA*barrierA*barrierA*std::pow(qTermA,(double)2*J+1);
 
@@ -98,11 +97,10 @@ std::complex<double> AmpFlatteRes::dynamicalFunction(double mSq, double mR,
 	double barrierB, gB;
 	barrierB = Kinematics::FormFactor(sqrtS,massB1,massB2,J,mesonRadius, ffType)/
 			Kinematics::FormFactor(mR,massB1,massB2,J,mesonRadius, ffType);
-	barrierB=1;
 	gB = couplingRatio;
 	//convert coupling to partial width of channel B
 	gammaB = couplingToWidth(mSq,mR,gB,massB1,massB2,J,mesonRadius, ffType);
-	//	qTermB = Kinematics::qValue(sqrtS,massB1,massB2) / Kinematics::qValue(mR,massB1,massB2);
+//		qTermB = Kinematics::qValue(sqrtS,massB1,massB2) / Kinematics::qValue(mR,massB1,massB2);
 	qTermB = std::complex<double>(1,0);
 	termB = gammaB*barrierB*barrierB*std::pow(qTermB,(double)2*J+1);
 
@@ -363,6 +361,7 @@ void FlatteConf::put(boost::property_tree::ptree &pt_){
 }
 
 void FlatteConf::update(ParameterList par){
+	if(!m_enable) return;
 	basicConf::update(par);
 	try{// only update parameters if they are found in list
 		m_mass= par.GetDoubleParameter("m0_"+m_name)->GetValue();
@@ -373,7 +372,7 @@ void FlatteConf::update(ParameterList par){
 
 	std::shared_ptr<DoubleParameter> p;
 	std::shared_ptr<DoubleParameter> p2;
-	if(m_name.find("a_0(980)") == 0) {
+	if(m_name.find("a_0(980)") != m_name.npos) {
 		try{
 			p = par.GetDoubleParameter("g1_a_0");
 		} catch(BadParameter& e){
