@@ -45,7 +45,7 @@ void AmpRelBreitWignerRes::initialise()
 {
 }
 
-std::complex<double> AmpRelBreitWignerRes::evaluateAmp(dataPoint& point) {
+std::complex<double> AmpRelBreitWignerRes::evaluateAmp(const dataPoint& point) {
 	if(_ma == -999 || _mb == -999 ||_mc == -999 ||_M == -999){
 		std::cout<<"Masses of decay products not set!"<<std::endl;
 		return 0;

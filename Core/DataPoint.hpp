@@ -122,6 +122,8 @@ public:
 	dataPoint(std::vector<double> vec);
 	~dataPoint(){};
 
+	void reset(unsigned int size);
+
 	//! Set value of coordinate name
 	void setVal(std::string name, double val);
 	//! Set value of coordinate num

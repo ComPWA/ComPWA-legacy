@@ -12,17 +12,17 @@
 #include <boost/graph/connected_components.hpp>
 #include <boost/graph/graphviz.hpp>
 
-#include "HelicityDecayTree.hpp"
+#include "DecayTree.hpp"
 
 namespace HelicityFormalism {
 
-HelicityDecayTree::HelicityDecayTree() {
+DecayTree::DecayTree() {
 }
 
-HelicityDecayTree::~HelicityDecayTree() {
+DecayTree::~DecayTree() {
 }
 
-bool HelicityDecayTree::isDisconnected() const {
+bool DecayTree::isDisconnected() const {
   unsigned int total_vertices = num_vertices(decay_tree_);
   std::vector<int> component(total_vertices);
   unsigned int connected_vertices = connected_components(decay_tree_,
@@ -30,14 +30,14 @@ bool HelicityDecayTree::isDisconnected() const {
   return total_vertices != connected_vertices;
 }
 
-bool HelicityDecayTree::hasCycles() const {
+bool DecayTree::hasCycles() const {
   bool has_cycle(false);
   CycleDetector vis(has_cycle);
   boost::depth_first_search(decay_tree_, boost::visitor(vis));
   return has_cycle;
 }
 
-bool HelicityDecayTree::isDecayTreeValid() const {
+bool DecayTree::isDecayTreeValid() const {
   if (hasCycles()) {
     throw std::runtime_error(
         "The decay tree has a cyclic dependency, meaning the tree is corrupted. Please fix the configuration file and rerun!");
@@ -49,35 +49,35 @@ bool HelicityDecayTree::isDecayTreeValid() const {
   return true;
 }
 
-void HelicityDecayTree::clearCurrentGrownNodes() {
+void DecayTree::clearCurrentGrownNodes() {
   currently_grown_nodes_.clear();
 }
 
-const HelicityTree& HelicityDecayTree::getHelicityDecayTree() const {
+const HelicityTree& DecayTree::getHelicityDecayTree() const {
   return decay_tree_;
 }
 
-std::vector<ParticleState> HelicityDecayTree::getLowestLeaves() const {
+std::vector<ParticleState> DecayTree::getLowestLeaves() const {
   return currently_grown_nodes_;
 }
 
-void HelicityDecayTree::determineListOfDecayVertices() {
+void DecayTree::determineListOfDecayVertices() {
   std::pair<boost::graph_traits<HelicityTree>::vertex_iterator,
       boost::graph_traits<HelicityTree>::vertex_iterator> vp;
 
   for (vp = vertices(decay_tree_); vp.first != vp.second; ++vp.first) {
     // if we have 1 or more edges going out of this vertex its a decay vertex
-    if (0 < out_degree(vp.first, decay_tree_))
-      decay_vertex_list_.push_back(vp.first);
+    if (0 < out_degree(*vp.first, decay_tree_))
+      decay_vertex_list_.push_back(*vp.first);
   }
 }
 
 const std::vector<
-    boost::graph_traits<HelicityFormalism::HelicityTree>::vertex_descriptor>& HelicityDecayTree::getDecayVertexList() const {
+    boost::graph_traits<HelicityFormalism::HelicityTree>::vertex_descriptor>& DecayTree::getDecayVertexList() const {
   return decay_vertex_list_;
 }
 
-void HelicityDecayTree::createDecay(const ParticleState &mother,
+void DecayTree::createDecay(const ParticleState &mother,
     const ParticleStatePair &daughters) {
 // check if the particles already exist as vertices with addVertex()
 // if so return vertex descriptor for this vertex, if not create a new
@@ -91,7 +91,7 @@ void HelicityDecayTree::createDecay(const ParticleState &mother,
   currently_grown_nodes_.push_back(daughters.second);
 }
 
-boost::graph_traits<HelicityFormalism::HelicityTree>::vertex_descriptor HelicityDecayTree::addVertex(
+boost::graph_traits<HelicityFormalism::HelicityTree>::vertex_descriptor DecayTree::addVertex(
     const ParticleState& particle) {
   boost::graph_traits<HelicityTree>::vertex_descriptor return_vertex;
   boost::graph_traits<HelicityTree>::vertex_iterator vi, vi_end, next;
@@ -110,7 +110,7 @@ boost::graph_traits<HelicityFormalism::HelicityTree>::vertex_descriptor Helicity
   return return_vertex;
 }
 
-void HelicityDecayTree::print(std::ostream& os) const {
+void DecayTree::print(std::ostream& os) const {
 // boost::associative_property_map<IndexNameMap> propmapIndex(index_label_map);
   VertexWriter vertex_writer(decay_tree_);
   write_graphviz(os, decay_tree_, vertex_writer);

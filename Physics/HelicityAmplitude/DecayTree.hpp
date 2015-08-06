@@ -9,10 +9,10 @@
 //   Stefan Pflueger - initial API and implementation
 //-------------------------------------------------------------------------------
 
-#ifndef HELICITYDECAYTREE_HPP_
-#define HELICITYDECAYTREE_HPP_
+#ifndef PHYSICS_HELICITYAMPLITUDE_DECAYTREE_HPP_
+#define PHYSICS_HELICITYAMPLITUDE_DECAYTREE_HPP_
 
-#include "HelicityStateDefinitions.hpp"
+#include "ParticleStateDefinitions.hpp"
 
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/depth_first_search.hpp>
@@ -28,7 +28,7 @@ namespace HelicityFormalism {
 typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::directedS,
     ParticleState> HelicityTree;
 
-class HelicityDecayTree {
+class DecayTree {
   HelicityTree decay_tree_;
 
   std::vector<ParticleState> currently_grown_nodes_;
@@ -90,8 +90,8 @@ class HelicityDecayTree {
   };
 
 public:
-  HelicityDecayTree();
-  virtual ~HelicityDecayTree();
+  DecayTree();
+  virtual ~DecayTree();
 
   bool isDisconnected() const;
 
@@ -104,7 +104,7 @@ public:
   const HelicityTree& getHelicityDecayTree() const;
 
   void determineListOfDecayVertices();
-  std::vector<
+  const std::vector<
       boost::graph_traits<HelicityFormalism::HelicityTree>::vertex_descriptor>& getDecayVertexList() const;
 
   std::vector<ParticleState> getLowestLeaves() const;
@@ -116,8 +116,9 @@ public:
       const ParticleStatePair &daughters);
 
   void print(std::ostream& os) const;
+
 };
 
 } /* namespace HelicityFormalism */
 
-#endif /* HELICITYDECAYTREE_HPP_ */
+#endif /* PHYSICS_HELICITYAMPLITUDE_DECAYTREE_HPP_ */

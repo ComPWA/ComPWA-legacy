@@ -77,7 +77,6 @@ void DalitzKinematics::init(){
 	mSq3 = m3*m3;
 	mSq4 = m4*m4;
 	
-	DPareaCalculated_=0;
 	variable_names_.push_back("m23sq");
 	variable_names_.push_back("m13sq");
 	//	varNames.push_back("m12sq");
@@ -113,9 +112,7 @@ double DalitzKinematics::getMax(std::string name){
 	return -1;
 }
 
-void DalitzKinematics::eventToDataPoint(Event& ev, dataPoint& point) const {
-	double weight = ev.getWeight();
-	point.setWeight(weight);//reset weight
+void DalitzKinematics::translateEventToDataPoint(const Event& ev, dataPoint& point) const {
 	Particle part1 = ev.getParticle(0);
 	Particle part2 = ev.getParticle(1);
 	Particle part3 = ev.getParticle(2);
@@ -264,7 +261,7 @@ void DalitzKinematics::phspContour(unsigned int xsys,unsigned int ysys,unsigned 
 	return;
 }
 
-double DalitzKinematics::helicityAngle(unsigned int sys, dataPoint& point){
+double DalitzKinematics::helicityAngle(unsigned int sys, const dataPoint& point){
 	return helicityAngle(sys,point.getVal(0),point.getVal(1));
 }
 //double DalitzKinematics::calcHelicityAngle(unsigned int sys, dataPoint& point){
@@ -346,11 +343,7 @@ double phspFunc(double* x, size_t dim, void* param) {
 	return 0.0;
 };
 
-double DalitzKinematics::getPhspVolume() {
-	if(!DPareaCalculated_) calcDParea();
-	return DParea_;
-}
-void DalitzKinematics::calcDParea() {
+double DalitzKinematics::calculatePSArea() {
 	size_t dim=2;
 	double res=0.0, err=0.0;
 
@@ -371,9 +364,7 @@ void DalitzKinematics::calcDParea() {
 	BOOST_LOG_TRIVIAL(debug)<<"DPKinematics::calcDParea() Dalitz plot area (MC integration): "
 			<<"("<<res<<"+-"<<err<<") GeV^4 relAcc [%]: "<<100*err/res;
 
-	DParea_=res;
-	DPareaCalculated_=1;
-	return;
+	return res;
 }
 unsigned int DalitzKinematics::getSpin(unsigned int num){
 	switch(num){

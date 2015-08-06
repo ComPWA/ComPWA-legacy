@@ -40,7 +40,7 @@ AmpFlatteRes::~AmpFlatteRes()
 {
 }
 
-std::complex<double> AmpFlatteRes::evaluateAmp(dataPoint& point) {
+std::complex<double> AmpFlatteRes::evaluateAmp(const dataPoint& point) {
 	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
 	if(!foundMasses){
 		id23 = point.getID("m23sq");

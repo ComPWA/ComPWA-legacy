@@ -880,11 +880,11 @@ const ParameterList& AmpSumIntensity::intensity(std::vector<double> point, Param
 	dataPoint dataP(point);
 	return intensity(dataP);
 }
-const ParameterList& AmpSumIntensity::intensity(dataPoint& point, ParameterList& par){
+const ParameterList& AmpSumIntensity::intensity(const dataPoint& point, ParameterList& par){
 	setParameterList(par);
 	return intensity(point);
 }
-const ParameterList& AmpSumIntensity::intensityNoEff(dataPoint& point){
+const ParameterList& AmpSumIntensity::intensityNoEff(const dataPoint& point){
 	double AMPpdf=0;
 	if(Kinematics::instance()->isWithinPhsp(point)) AMPpdf = totAmp.evaluate(point);
 
@@ -895,7 +895,7 @@ const ParameterList& AmpSumIntensity::intensityNoEff(dataPoint& point){
 	result.SetParameterValue(0,AMPpdf);
 	return result;
 }
-const ParameterList& AmpSumIntensity::intensity(dataPoint& point){
+const ParameterList& AmpSumIntensity::intensity(const dataPoint& point){
 	double AMPpdf=0;
 	if(Kinematics::instance()->isWithinPhsp(point)) AMPpdf = totAmp.evaluate(point);
 

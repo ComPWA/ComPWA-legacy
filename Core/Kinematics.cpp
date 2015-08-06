@@ -12,6 +12,8 @@
 #include <stdexcept>
 
 #include "Core/Kinematics.hpp"
+#include "Core/DataPoint.hpp"
+#include "Core/Event.hpp"
 
 Kinematics* Kinematics::instance() {
   if (!inst_) {
@@ -24,9 +26,25 @@ Kinematics* Kinematics::instance() {
 
 Kinematics* Kinematics::inst_ = 0;
 
-Kinematics::Kinematics() {
+Kinematics::Kinematics() :
+    is_PS_area_calculated_(false), PS_area_(0.0) {
 }
 
 Kinematics::~Kinematics() {
 }
 
+//! calculated the PHSP volume of the current decay by MC integration
+double Kinematics::getPhspVolume() {
+  if (!is_PS_area_calculated_)
+    PS_area_ = calculatePSArea();
+  return PS_area_;
+}
+
+//! converts Event to dataPoint
+void Kinematics::eventToDataPoint(Event& ev, dataPoint& point) const {
+  // set event weight as data point weight first
+  double weight = ev.getWeight();
+  point.setWeight(weight);
+  // now do the actual transformation
+  translateEventToDataPoint(ev, point);
+}

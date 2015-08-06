@@ -39,7 +39,7 @@ public:
 
 	virtual ~AmpWigner2() {};
 
-	virtual double evaluate(dataPoint& point) ;
+	virtual double evaluate(const dataPoint& point) ;
 	void setDecayMasses(double, double, double, double);
 	//  static double theta(Spin J, double m23sq, double m13sq, double m12sq, unsigned int subSys, const double& M, const double& m1, const double& m2, const double& m3){
 	//    double cosTheta=-999;

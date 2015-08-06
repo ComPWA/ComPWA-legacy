@@ -116,7 +116,7 @@ std::complex<double> AmpSumOfAmplitudes::getFirstAmp(dataPoint& point) const
 	return res;
 }
 
-double AmpSumOfAmplitudes::evaluate(dataPoint& point) const
+double AmpSumOfAmplitudes::evaluate(const dataPoint& point) const
 {
 	std::complex<double> res;
 	for(unsigned int i=0; i<_pdfList.size(); i++){

@@ -59,8 +59,8 @@ public:
 			unsigned int J, double mesonRadius);
 
 	virtual void initialise() { };
-	std::complex<double> evaluate(dataPoint& point) { return ( _norm*evaluateAmp(point)*evaluateWignerD(point) ); }
-	virtual std::complex<double> evaluateAmp(dataPoint& point) ;
+	std::complex<double> evaluate(const dataPoint& point) { return ( _norm*evaluateAmp(point)*evaluateWignerD(point) ); }
+	virtual std::complex<double> evaluateAmp(const dataPoint& point) ;
 
 	double getSpin() {return _spin;}; //needs to be declared in AmpAbsDynamicalFunction
 	unsigned int getNParams(){ return nParams;}

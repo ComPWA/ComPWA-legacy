@@ -49,8 +49,8 @@ public:
   virtual double inline getEfficiency() {return fEff;};
   virtual void inline setEfficiency(double eff) { fEff = eff;};
 
-  virtual const inline unsigned int getNParticles() { return fParticles.size(); }
-  virtual const Particle& getParticle(const unsigned int id);
+  virtual const inline unsigned int getNParticles() const { return fParticles.size(); }
+  virtual const Particle& getParticle(const unsigned int id) const;
 
 protected:
   std::vector<Particle> fParticles;

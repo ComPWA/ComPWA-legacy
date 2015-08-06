@@ -41,7 +41,7 @@ void AmpWigner2::initialise()
 	_spin2 = kin->getSpin(2);
 
 }
-double AmpWigner2::evaluate(dataPoint& point) {
+double AmpWigner2::evaluate(const dataPoint& point) {
 	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
 
 	double cosTheta=-999, result=-999;

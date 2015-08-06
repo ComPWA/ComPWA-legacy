@@ -94,7 +94,7 @@ public:
 	double getMotherRadius() {return _motherRadius->GetValue();};
 
 	inline virtual bool isSubSys(const unsigned int subSys) const{ return (subSys==_subSys); };
-	virtual double evaluateWignerD(dataPoint& point) {
+	virtual double evaluateWignerD(const dataPoint& point) {
 		if(_spin==0) return 1.0;//save some computing time
 		return _wignerD.evaluate(point);
 	};

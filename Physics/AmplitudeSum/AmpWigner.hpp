@@ -42,7 +42,7 @@ public:
 
   virtual inline bool hasDist(){return toEvaluate;};
   virtual void initialise();
-  virtual double evaluate(dataPoint& point) const;
+  virtual double evaluate(const dataPoint& point) const;
   void setDecayMasses(double, double, double, double);
 
 protected:

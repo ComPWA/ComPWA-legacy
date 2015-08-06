@@ -35,7 +35,7 @@ public:
   std::complex<double> getFirstBW(dataPoint& point) const ;
   std::complex<double> getFirstReso(dataPoint& point) const ;
   std::complex<double> getFirstAmp(dataPoint& point) const ;
-  double evaluate(dataPoint& point) const ;
+  double evaluate(const dataPoint& point) const ;
   
   //! Get resonance by name
   virtual std::shared_ptr<AmpAbsDynamicalFunction> getResonance(std::string name){

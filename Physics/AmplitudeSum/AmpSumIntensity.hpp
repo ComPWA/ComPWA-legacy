@@ -78,11 +78,11 @@ public:
 	//! setting new parameterList
 	virtual void setParameterList(ParameterList& par);
 	//! evaluate total amplitude using parameters \par at phsp point \point
-	virtual const ParameterList& intensity(dataPoint& point, ParameterList& par);
+	virtual const ParameterList& intensity(const dataPoint& point, ParameterList& par);
 	//! evaluate total amplitude using current set of parameters at phsp point \point. Amplitude is multiplied with efficiency of datapoint.
-	virtual const ParameterList& intensity(dataPoint& point);
+	virtual const ParameterList& intensity(const dataPoint& point);
 	//! evaluate total amplitude using current set of parameters at phsp point \point. No efficiency correction.
-	virtual const ParameterList& intensityNoEff(dataPoint& point);
+	virtual const ParameterList& intensityNoEff(const dataPoint& point);
 	//! evaluate total amplitude using current set of parameters at phsp point \point. Amplitude is multiplied with efficiency of datapoint.
 	virtual const ParameterList& intensity(std::vector<double> point, ParameterList& par);
 	virtual const double sliceIntensity(dataPoint& dataP, ParameterList& par,std::complex<double>* reso, unsigned int nResos);

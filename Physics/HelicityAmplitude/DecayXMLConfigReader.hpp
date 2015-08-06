@@ -9,17 +9,17 @@
 //   Stefan Pflueger - initial API and implementation
 //-------------------------------------------------------------------------------
 
-#ifndef HELICITYDECAYXMLCONFIGREADER_HPP_
-#define HELICITYDECAYXMLCONFIGREADER_HPP_
-
-#include "HelicityDecayConfiguration.hpp"
+#ifndef PHYSICS_HELICITYAMPLITUDE_DECAYXMLCONFIGREADER_HPP_
+#define PHYSICS_HELICITYAMPLITUDE_DECAYXMLCONFIGREADER_HPP_
 
 #include <boost/property_tree/ptree.hpp>
 
+#include "DecayConfiguration.hpp"
+
 namespace HelicityFormalism {
 
-class HelicityDecayXMLConfigReader {
-  HelicityDecayConfiguration &decay_configuration_;
+class DecayXMLConfigReader {
+  DecayConfiguration &decay_configuration_;
 
   boost::property_tree::ptree pt_;
 
@@ -27,12 +27,12 @@ class HelicityDecayXMLConfigReader {
       const boost::property_tree::ptree &pt) const;
 
 public:
-  HelicityDecayXMLConfigReader(HelicityDecayConfiguration &decay_configuration);
-  virtual ~HelicityDecayXMLConfigReader();
+  DecayXMLConfigReader(DecayConfiguration &decay_configuration);
+  virtual ~DecayXMLConfigReader();
 
   void readConfig(const std::string &filename);
 };
 
 } /* namespace HelicityFormalism */
 
-#endif /* HELICITYDECAYXMLCONFIGREADER_HPP_ */
+#endif /* PHYSICS_HELICITYAMPLITUDE_DECAYXMLCONFIGREADER_HPP_ */

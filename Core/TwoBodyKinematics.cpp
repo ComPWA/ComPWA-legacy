@@ -43,9 +43,7 @@ bool TwoBodyKinematics::isWithinPhsp(const dataPoint& point) {
     return 1;
   return 0;
 }
-void TwoBodyKinematics::eventToDataPoint(Event& ev, dataPoint& point) const {
-  double weight = ev.getWeight();
-  point.setWeight(weight);    //reset weight
+void TwoBodyKinematics::translateEventToDataPoint(const Event& ev, dataPoint& point) const {
   Particle part1 = ev.getParticle(0);
   Particle part2 = ev.getParticle(1);
   double msq = Particle::invariantMass(part1, part2);

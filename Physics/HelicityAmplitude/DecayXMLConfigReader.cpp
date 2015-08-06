@@ -9,7 +9,7 @@
 //   Stefan Pflueger - initial API and implementation
 //-------------------------------------------------------------------------------
 
-#include "HelicityDecayXMLConfigReader.hpp"
+#include "DecayXMLConfigReader.hpp"
 
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/foreach.hpp>
@@ -18,15 +18,15 @@ namespace HelicityFormalism {
 
 using boost::property_tree::ptree;
 
-HelicityDecayXMLConfigReader::HelicityDecayXMLConfigReader(
-    HelicityDecayConfiguration &decay_configuration) :
+DecayXMLConfigReader::DecayXMLConfigReader(
+    DecayConfiguration &decay_configuration) :
     decay_configuration_(decay_configuration) {
 }
 
-HelicityDecayXMLConfigReader::~HelicityDecayXMLConfigReader() {
+DecayXMLConfigReader::~DecayXMLConfigReader() {
 }
 
-std::vector<unsigned int> HelicityDecayXMLConfigReader::parseIDList(
+std::vector<unsigned int> DecayXMLConfigReader::parseIDList(
     const boost::property_tree::ptree &pt) const {
   std::vector<unsigned int> ids;
   BOOST_FOREACH(ptree::value_type const &id_list_item, pt.get_child("id_list")){
@@ -35,7 +35,7 @@ std::vector<unsigned int> HelicityDecayXMLConfigReader::parseIDList(
   return ids;
 }
 
-void HelicityDecayXMLConfigReader::readConfig(const std::string &filename) {
+void DecayXMLConfigReader::readConfig(const std::string &filename) {
   // Create an empty property tree object
 
   // Load the XML file into the property tree. If reading fails
@@ -56,17 +56,17 @@ void HelicityDecayXMLConfigReader::readConfig(const std::string &filename) {
   // Property tree iterators are models of BidirectionalIterator.
   BOOST_FOREACH(ptree::value_type const& v, pt_.get_child("FinalState")){
   ParticleState ps;
-  ps.J_ = 0;
-  ps.M_ = 0;
-  ps.particle_id_ = v.second.get<unsigned int>("id");
+  ps.helicity_state_information.J_ = 0;
+  ps.helicity_state_information.M_ = 0;
+  ps.id_ = v.second.get<unsigned int>("id");
   ps.name_ = v.second.get<std::string>("name");
   decay_configuration_.addFinalStateParticle(ps);
 }
   BOOST_FOREACH(ptree::value_type const& v, pt_.get_child("IntermediateStates")){
   ParticleState ps;
-  ps.J_ = 0;
-  ps.M_ = 0;
-  ps.particle_id_ = v.second.get<unsigned int>("id");
+  ps.helicity_state_information.J_ = 0;
+  ps.helicity_state_information.M_ = 0;
+  ps.id_ = v.second.get<unsigned int>("id");
   ps.name_ = v.second.get<std::string>("name");
   decay_configuration_.addFinalStateParticle(ps);
   decay_configuration_.addIntermediateStateParticle(ps);
@@ -79,10 +79,10 @@ void HelicityDecayXMLConfigReader::readConfig(const std::string &filename) {
     std::vector<unsigned int> daughter_2_ids = parseIDList(two_body_decay.second.get_child("daughter_2_ids"));
     std::pair<std::vector<unsigned int>, std::vector<unsigned int> > daughter_ids = std::make_pair(daughter_1_ids, daughter_2_ids);
     for(unsigned int i = 0; i < mother_ids.size(); ++i) {
-      decay_configuration_.addDecayToCurrentDecayTopology(mother_ids[i], daughter_ids);
+      decay_configuration_.addDecayToCurrentDecayTree(mother_ids[i], daughter_ids);
     }
   }
-  decay_configuration_.addCurrentDecayTopologyToList();
+  decay_configuration_.addCurrentDecayTreeToList();
 }
 
 }

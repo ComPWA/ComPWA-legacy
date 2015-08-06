@@ -57,7 +57,7 @@ void AmpGausRes::initialise()
 {
 }   
 
-std::complex<double> AmpGausRes::evaluateAmp(dataPoint& point){
+std::complex<double> AmpGausRes::evaluateAmp(const dataPoint& point){
 
 
 	double m0 = _mR.GetValue();
@@ -80,6 +80,6 @@ std::complex<double> AmpGausRes::evaluateAmp(dataPoint& point){
 
 	return gaus;
 }
-std::complex<double> AmpGausRes::evaluate(dataPoint& point){
+std::complex<double> AmpGausRes::evaluate(const dataPoint& point){
 	return evaluateAmp(point)*evaluateWignerD(point);
 }

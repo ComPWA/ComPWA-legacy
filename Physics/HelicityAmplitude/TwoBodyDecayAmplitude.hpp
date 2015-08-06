@@ -9,10 +9,10 @@
 //   Stefan Pflueger - initial API and implementation
 //-------------------------------------------------------------------------------
 
-#ifndef HELICITYAMPLITUDE_HPP_
-#define HELICITYAMPLITUDE_HPP_
+#ifndef PHYSICS_HELICITYAMPLITUDE_TWOBODYDECAYAMPLITUDE_HPP_
+#define PHYSICS_HELICITYAMPLITUDE_TWOBODYDECAYAMPLITUDE_HPP_
 
-#include "HelicityStateDefinitions.hpp"
+#include "ParticleStateDefinitions.hpp"
 #include "AbstractDynamicalFunction.hpp"
 
 #include <memory>
@@ -20,23 +20,19 @@
 
 namespace HelicityFormalism {
 
-class HelicityAmplitude {
-  ParticleState initial_state_;
-  ParticleStatePair final_state_;
-
-  std::shared_ptr<AbstractDynamicalFunction> dynamics_function_;
+class TwoBodyDecayAmplitude {
+  TwoBodyDecayInformation decay_info_;
 
   double spin_factor_;
 
 public:
-  HelicityAmplitude(const ParticleState& initial_state,
-      const ParticleStatePair& final_state);
-  virtual ~HelicityAmplitude();
+  TwoBodyDecayAmplitude(const TwoBodyDecayInformation& decay_info);
+  virtual ~TwoBodyDecayAmplitude();
 
   void init();
 
-  std::complex<double> evaluate(const HelicityAngles& helicity_angles) const;
+  std::complex<double> evaluate(const KinematicVariables& helicity_angles) const;
 };
 
 } /* namespace HelicityFormalism */
-#endif /* HELICITYAMPLITUDE_HPP_ */
+#endif /* PHYSICS_HELICITYAMPLITUDE_TWOBODYDECAYAMPLITUDE_HPP_ */

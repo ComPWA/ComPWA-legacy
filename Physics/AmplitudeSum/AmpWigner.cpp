@@ -76,7 +76,7 @@ void AmpWigner::setDecayMasses(double m1, double m2, double m3, double M){
 	return;
 }
 
-double AmpWigner::evaluate(dataPoint& point) const {
+double AmpWigner::evaluate(const dataPoint& point) const {
 	if(!toEvaluate) return 1.;
 	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
 

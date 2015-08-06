@@ -36,9 +36,9 @@ public:
   virtual const std::string to_str() const { return (_name); }
   virtual void initialise() = 0; 
   //! value of resonance at \param point
-  virtual std::complex<double> evaluate(dataPoint& point) = 0;
+  virtual std::complex<double> evaluate(const dataPoint& point) = 0;
   //! value of dynamical amplitude at \param point
-  virtual std::complex<double> evaluateAmp(dataPoint& point) = 0;
+  virtual std::complex<double> evaluateAmp(const dataPoint& point) = 0;
 
   //! Get resonance spin
   virtual double getSpin() = 0;

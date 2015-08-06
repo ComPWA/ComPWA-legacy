@@ -45,9 +45,9 @@ public:
 	virtual const double drawInt(double *x, double *p); //For easy usage in a root TF1
 	virtual const ParameterList& intensity(double x, double M, double T);
 	virtual const ParameterList& intensity(std::vector<double> x, ParameterList& par);
-	virtual const ParameterList& intensity(dataPoint& point, ParameterList& par);
-	virtual const ParameterList& intensity(dataPoint& point);
-	virtual const ParameterList& intensityNoEff(dataPoint& point){ return intensity(point); };
+	virtual const ParameterList& intensity(const dataPoint& point, ParameterList& par);
+	virtual const ParameterList& intensity(const dataPoint& point);
+	virtual const ParameterList& intensityNoEff(const dataPoint& point){ return intensity(point); };
 	virtual bool copyParameterList(ParameterList& outPar);
 
 	virtual void setParameterList(ParameterList& par);

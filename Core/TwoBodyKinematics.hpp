@@ -31,12 +31,12 @@ public:
   virtual double getMotherMass() const {
     return M;
   }
-  //! calculated the PHSP volume of the current decay by MC integration
-  virtual double getPhspVolume() {
+  //! calculate phase space area with simple interval
+  virtual double calculatePSArea() {
     return (mass_max - mass_min);
   }
   //! converts Event to dataPoint
-  virtual void eventToDataPoint(Event& ev, dataPoint& point) const;
+  void translateEventToDataPoint(const Event& ev, dataPoint& point) const;
   //! get mass of particles
   virtual double getMass(unsigned int num) const;
   //! get mass of paticles

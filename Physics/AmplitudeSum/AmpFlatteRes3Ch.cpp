@@ -47,7 +47,7 @@ AmpFlatteRes3Ch::~AmpFlatteRes3Ch()
 {
 }
 
-std::complex<double> AmpFlatteRes3Ch::evaluateAmp(dataPoint& point) {
+std::complex<double> AmpFlatteRes3Ch::evaluateAmp(const dataPoint& point) {
 
 	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
 	if(!foundMasses){

@@ -9,45 +9,95 @@
 //   Stefan Pflueger - initial API and implementation
 //-------------------------------------------------------------------------------
 
-#ifndef HELICITYKINEMATICS_HPP_
-#define HELICITYKINEMATICS_HPP_
+#ifndef PHYSICS_HELICITYAMPLITUDE_HELICITYKINEMATICS_HPP_
+#define PHYSICS_HELICITYAMPLITUDE_HELICITYKINEMATICS_HPP_
 
 #include "Core/Kinematics.hpp"
+
+#include "ParticleStateDefinitions.hpp"
+
+class Particle;
 
 namespace HelicityFormalism {
 
 class HelicityKinematics: public Kinematics {
-  std::vector<std::vector<ParticleState> > decay_trees_;
+  // this has the decay information of the topology amplitudes
+  std::vector<DecayTopology> decay_topologies_;
 
-  bool is_PS_area_calculated_;
-  double PS_area_;
+  // ---------------------------------------------------------------------
+  // the following containers are only filled once, during the
+  // initialization step and are relevant for the data point calculations
+  // ---------------------------------------------------------------------
+  // one entry for each occuring cms combination
+  std::vector<IndexList> unique_occurring_decay_event_fs_index_lists_;
+  // one entry for each occuring decay into two definite cms products
+  std::vector<TwoBodyDecayIndices> unique_occurring_decay_product_index_list_links_;
 
-  HelicityKinematics(const std::vector<HelicityDecayTree>& decay_trees);
+  // outer vector: one entry for each decay topology
+  // inner vector: one entry for each final state particle grouping combination
+  // (can be more than one for indistinguishable fs particles)
+  // IndexList: list of indices to the value of the data point used in the
+  // evaluation of the topology amplitudes
+  std::vector<std::vector<IndexList> > topology_amplitude_data_point_index_lists_;
+  // ---------------------------------------------------------------------
+
+  HelicityKinematics();
   virtual ~HelicityKinematics();
 
   // delete methods to ensure that there will only be one instance
   HelicityKinematics(const HelicityKinematics&) = delete;
   void operator=(const HelicityKinematics&) = delete;
 
-  void calculatePSArea();
-  Vector4 determineBoostedKinematicVariables(
-      std::pair<Vector4, Vector4> two_body_state, Vector4 mother);
+  std::vector<ParticleState> createFSParticleList() const;
+
+  IndexList createDataPointIndexListForTopology(const DecayTopology& topology,
+      const ParticleStateEventFSMapping& fs_particle_mapping);
+
+  unsigned int convertAndStoreParticleList(
+      const std::vector<ParticleState>& particle_list,
+      const ParticleStateEventFSMapping& fs_particle_mapping);
+
+  IndexList convertParticleListToEventIndexList(
+      const std::vector<ParticleState>& particle_list,
+      const ParticleStateEventFSMapping& fs_particle_mapping) const;
+
+  std::vector<Vector4<double> > createRequired4Vectors(
+      const Event& event) const;
+
+  void addParticleToCMS4Vector(const Particle& event_particle,
+      Vector4<double>& cms_4vector) const;
+
+  void fillPointWithBoostedKinematicVariables(dataPoint& point,
+      const std::vector<Vector4<double> >& unique_occurring_cms_4vectors,
+      const TwoBodyDecayIndices& two_body_state_indices,
+      unsigned int &data_point_fill_position) const;
+
+protected:
+  double calculatePSArea();
+  //! Event to dataPoint conversion
+  void translateEventToDataPoint(const Event& event, dataPoint& point) const;
 
 public:
-  static Kinematics* createInstance(const std::vector<HelicityDecayTree>& decay_trees) {
-    if (0 == inst_)
-      inst_ = new HelicityKinematics(decay_tree);
+  static Kinematics* createInstance() {
+    if (0 == inst_) {
+      inst_ = new HelicityKinematics();
+    }
     return inst_;
   }
 
-  bool isWithinPhsp(const dataPoint& point) const;
+  void setDecayTopologies(const std::vector<DecayTopology>& decay_topologies);
+
+  void init(const Event& event);
+
+  std::vector<std::vector<IndexList> > getTopologyAmplitudeDataPointIndexLists() const;
+
+  bool isWithinPhsp(const dataPoint& point);
   double getMotherMass() const;
   double getPhspVolume() const;
-  void eventToDataPoint(Event& ev, dataPoint& point) const;
   double getMass(unsigned int num) const;
   double getMass(std::string name) const;
 };
 
 } /* namespace HelicityFormalism */
 
-#endif /* HELICITYKINEMATICS_HPP_ */
+#endif /* PHYSICS_HELICITYAMPLITUDE_HELICITYKINEMATICS_HPP_ */

@@ -40,9 +40,9 @@ public:
 	~AmpGausRes();
 
 	virtual void initialise();
-	virtual std::complex<double> evaluate(dataPoint& point);
-	virtual std::complex<double> evaluateAmp(dataPoint& point);
-	virtual double evaluateWignerD(dataPoint& point) const { return 1; };
+	virtual std::complex<double> evaluate(const dataPoint& point);
+	virtual std::complex<double> evaluateAmp(const dataPoint& point);
+	virtual double evaluateWignerD(const dataPoint& point) const { return 1; };
 
 	inline virtual bool isSubSys(const unsigned int subSys)const{return (subSys==_subSys);};
 	double getSpin(){return 0;};

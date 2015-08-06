@@ -12,26 +12,17 @@
 #include <algorithm>
 #include <stdexcept>
 
-#include "HelicityDecayConfiguration.hpp"
+#include "DecayConfiguration.hpp"
 
 namespace HelicityFormalism {
 
-HelicityDecayConfiguration::HelicityDecayConfiguration() {
+DecayConfiguration::DecayConfiguration() {
 }
 
-HelicityDecayConfiguration::~HelicityDecayConfiguration() {
+DecayConfiguration::~DecayConfiguration() {
 }
 
-ParticleIndexDecayTree HelicityDecayConfiguration::convertConcreteDecayTreeToDecayTopology(
-    const ParticleIndexDecayTree& concrete_decay_tree) {
-  ParticleIndexDecayTree::const_iterator decay_node;
-
-  for (decay_node = concrete_decay_tree.begin();
-      decay_node != concrete_decay_tree.end(); ++decay_node) {
-  }
-}
-
-void HelicityDecayConfiguration::addFinalStateParticle(
+void DecayConfiguration::addFinalStateParticle(
     const ParticleState &final_state_particle) {
   if (std::find(particles_.begin(), particles_.end(), final_state_particle)
       == particles_.end()) {
@@ -40,7 +31,7 @@ void HelicityDecayConfiguration::addFinalStateParticle(
   }
 }
 
-void HelicityDecayConfiguration::addIntermediateStateParticle(
+void DecayConfiguration::addIntermediateStateParticle(
     const ParticleState &intermediate_state_particle) {
   if (std::find(particles_.begin(), particles_.end(),
       intermediate_state_particle) == particles_.end()) {
@@ -49,12 +40,12 @@ void HelicityDecayConfiguration::addIntermediateStateParticle(
   }
 }
 
-void HelicityDecayConfiguration::addCurrentDecayTopologyToList() {
-  decay_topologies_.push_back(current_decay_topology_);
-  current_decay_topology_.clear();
+void DecayConfiguration::addCurrentDecayTreeToList() {
+  concrete_decay_trees_.push_back(current_concrete_decay_tree_);
+  concrete_decay_trees_.clear();
 }
 
-unsigned int HelicityDecayConfiguration::convertParticleIDToListIndex(
+unsigned int DecayConfiguration::convertParticleIDToListIndex(
     unsigned int particle_id) const {
   ParticleStateIDComparator ps_comparator(particle_id);
   std::vector<ParticleState>::const_iterator found_particle = std::find_if(
@@ -68,7 +59,7 @@ unsigned int HelicityDecayConfiguration::convertParticleIDToListIndex(
   }
 }
 
-std::vector<unsigned int> HelicityDecayConfiguration::convertParticleIDListToIndexList(
+std::vector<unsigned int> DecayConfiguration::convertParticleIDListToIndexList(
     const std::vector<unsigned int>& particle_id_list) const {
   std::vector<unsigned int> index_list;
   for (unsigned int i = 0; i < particle_id_list.size(); ++i) {
@@ -77,14 +68,14 @@ std::vector<unsigned int> HelicityDecayConfiguration::convertParticleIDListToInd
   return index_list;
 }
 
-void HelicityDecayConfiguration::addDecayToCurrentDecayTopology(
+void DecayConfiguration::addDecayToCurrentDecayTree(
     unsigned int mother_state_id,
     std::pair<std::vector<unsigned int>, std::vector<unsigned int> > &daughter_states) {
   unsigned int mother_state_index = convertParticleIDToListIndex(
       mother_state_id);
-  current_decay_topology_[mother_state_index].first =
+  current_concrete_decay_tree_[mother_state_index].first =
       convertParticleIDListToIndexList(daughter_states.first);
-  current_decay_topology_[mother_state_index].second =
+  current_concrete_decay_tree_[mother_state_index].second =
       convertParticleIDListToIndexList(daughter_states.second);
 }
 

@@ -171,11 +171,11 @@ public:
 		intensity(p);
 		return (result.GetParameterValue(0));
 	}
-	virtual const ParameterList& intensity(dataPoint& point, ParameterList& par){
+	virtual const ParameterList& intensity(const dataPoint& point, ParameterList& par){
 		setParameterList(par);
 		return intensity(point);
 	}
-	virtual const ParameterList& intensity(dataPoint& point) {
+	virtual const ParameterList& intensity(const dataPoint& point) {
 		double mass = params.GetDoubleParameter(0)->GetValue();
 		double width = params.GetDoubleParameter(1)->GetValue();
 		double sqrtS = std::sqrt(point.getVal(0));
@@ -186,7 +186,7 @@ public:
 		result.SetParameterValue(0,std::norm(gaus));
 		return result;
 	}
-	virtual const ParameterList& intensityNoEff(dataPoint& point){ return intensity(point); }
+	virtual const ParameterList& intensityNoEff(const dataPoint& point){ return intensity(point); }
 	virtual const ParameterList& intensity(std::vector<double> point, ParameterList& par){
 		setParameterList(par);
 		dataPoint dataP(point);

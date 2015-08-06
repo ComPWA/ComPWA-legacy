@@ -32,9 +32,9 @@ public:
   //! mass of mother particle
   virtual double getMotherMass() const = 0;
   //! calculated the PHSP volume of the current decay by MC integration
-  virtual double getPhspVolume() = 0;
+  virtual double getPhspVolume();
   //! converts Event to dataPoint
-  virtual void eventToDataPoint(Event& ev, dataPoint& point) const = 0;
+  virtual void eventToDataPoint(Event& ev, dataPoint& point) const;
   //! get mass of particles
   virtual double getMass(unsigned int num) const = 0;
   //! get mass of paticles
@@ -51,10 +51,16 @@ public:
 protected:
   static Kinematics* inst_;
 
+  bool is_PS_area_calculated_;
+  double PS_area_;
+
   unsigned int number_of_particles_;
   std::vector<std::string> variable_names_;
   Kinematics();
   virtual ~Kinematics();
+
+  virtual double calculatePSArea() =0;
+  virtual void translateEventToDataPoint(const Event& ev, dataPoint& point) const =0;
 
   // delete methods to ensure that there will only be one instance
   Kinematics(const Kinematics&) = delete;

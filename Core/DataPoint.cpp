@@ -36,6 +36,11 @@ dataPoint::dataPoint(): weight(1.){
 	return;
 }
 
+void dataPoint::reset(unsigned int size) {
+  var = std::vector<double>(size);
+}
+
+
 unsigned int dataPoint::getID(std::string name) const{
 	std::vector<std::string> varNames = Kinematics::instance()->getVarNames();
 	unsigned int size = varNames.size();

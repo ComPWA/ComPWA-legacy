@@ -22,9 +22,9 @@ public:
 	NonResonant(std::string name);
 	virtual void initialise() { };
 	//! value at \param point
-	virtual std::complex<double> evaluate(dataPoint& point) { return _norm*evaluateAmp(point); };
+	virtual std::complex<double> evaluate(const dataPoint& point) { return _norm*evaluateAmp(point); };
 	//! value of dynamical amplitude at \param point
-	virtual std::complex<double> evaluateAmp(dataPoint& point) { return 1;} ;
+	virtual std::complex<double> evaluateAmp(const dataPoint& point) { return 1;} ;
 	//! value of WignerD amplitude at \param point
 	virtual double evaluateWignerD(dataPoint& point) { return 1;} ;
 

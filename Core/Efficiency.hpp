@@ -31,7 +31,7 @@ public:
 	virtual ~Efficiency();
 
 	virtual double evaluate(std::vector<double> x) = 0;
-	virtual double evaluate(dataPoint& point) = 0;
+	virtual double evaluate(const dataPoint& point) = 0;
 };
 
 /**
@@ -46,7 +46,7 @@ public:
 	};
 	~UnitEfficiency(){};
 	virtual double evaluate(std::vector<double> x) {return 1;};
-	virtual double evaluate(dataPoint& point) {return 1;};
+	virtual double evaluate(const dataPoint& point) {return 1;};
 };
 
 #endif /* EFFICIENCY_HPP_ */

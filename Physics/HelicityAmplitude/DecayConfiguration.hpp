@@ -9,10 +9,10 @@
 //   Stefan Pflueger - initial API and implementation
 //-------------------------------------------------------------------------------
 
-#ifndef HELICITYDECAYCONFIGURATION_HPP_
-#define HELICITYDECAYCONFIGURATION_HPP_
+#ifndef PHYSICS_HELICITYAMPLITUDE_DECAYCONFIGURATION_HPP_
+#define PHYSICS_HELICITYAMPLITUDE_DECAYCONFIGURATION_HPP_
 
-#include "HelicityStateDefinitions.hpp"
+#include "ParticleStateDefinitions.hpp"
 
 #include <map>
 #include <vector>
@@ -29,40 +29,39 @@ public:
       particle_id_(particle_id) {
   }
   bool operator()(const ParticleState& ps) const {
-    return ps.particle_id_ == particle_id_;
+    return ps.id_ == particle_id_;
   }
 };
 
-class HelicityDecayConfiguration {
-  friend class HelicityDecayTreeFactory;
+class DecayConfiguration {
+  friend class DecayTreeFactory;
 
   std::vector<ParticleState> particles_;
   std::vector<unsigned int> final_state_particles_;
   std::vector<unsigned int> intermediate_state_particles_;
-  std::map<ParticleIndexDecayTree, ParticleIndexDecayTree> decay_topology_concrete_decay_tree_mapping_;
+
+  std::vector<ParticleIndexDecayTree> concrete_decay_trees_;
+
   ParticleIndexDecayTree current_concrete_decay_tree_;
 
-  ParticleIndexDecayTree convertConcreteDecayTreeToDecayTopology(
-      const ParticleIndexDecayTree& concrete_decay_tree);
-
 public:
-  HelicityDecayConfiguration();
-  virtual ~HelicityDecayConfiguration();
+  DecayConfiguration();
+  virtual ~DecayConfiguration();
 
   void addFinalStateParticle(const ParticleState &final_state_particle);
   void addIntermediateStateParticle(
       const ParticleState &intermediate_state_particle);
-  void addCurrentDecayTopologyToList();
+  void addCurrentDecayTreeToList();
 
   unsigned int convertParticleIDToListIndex(unsigned int particle_id) const;
 
   std::vector<unsigned int> convertParticleIDListToIndexList(
       const std::vector<unsigned int>& particle_id_list) const;
 
-  void addDecayToCurrentDecayTopology(unsigned int mother_state_id,
+  void addDecayToCurrentDecayTree(unsigned int mother_state_id,
       std::pair<std::vector<unsigned int>, std::vector<unsigned int> > &daughter_states);
 };
 
 } /* namespace HelicityFormalism */
 
-#endif /* HELICITYDECAYCONFIGURATION_HPP_ */
+#endif /* PHYSICS_HELICITYAMPLITUDE_DECAYCONFIGURATION_HPP_ */

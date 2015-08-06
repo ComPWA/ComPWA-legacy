@@ -35,10 +35,9 @@ protected:
 	bool massIdsSet;
 	unsigned int id23;
 	unsigned int id13;
-	bool DPareaCalculated_;	//! is phsp area already calculated?
-	double DParea_;	//! phsp area
+
 	//! calculated dalitz plot area for the given kinematics
-	void calcDParea();
+	double calculatePSArea();
 	//! initialization
 	void init();
 	//! default constructor
@@ -49,14 +48,15 @@ protected:
 	DalitzKinematics(double _M, double _Br, double _m1, double _m2, double _m3,
 			std::string _nameMother, std::string _name1, std::string _name2, std::string _name3);
 
+  //! Event to dataPoint conversion
+  void translateEventToDataPoint(const Event& ev, dataPoint& point) const;
+
 public:
 	static Kinematics* createInstance(std::string _nameMother, std::string _name1, std::string _name2, std::string _name3){
 		if(0 == inst_)
 	    inst_ = new DalitzKinematics(_nameMother, _name1, _name2,_name3);
 		return inst_;
 	}
-	//! Event to dataPoint conversion
-	void eventToDataPoint(Event& ev, dataPoint& point) const;
 
 	/**
 	 * \brief Generate contour of phsp boundary
@@ -78,7 +78,7 @@ public:
 	 */
 	double helicityAngle(unsigned int sys, double invMassSq23, double invMassSq13);
 	//! Helicity angle for subSystem sys at dataPoint point.
-	double helicityAngle(unsigned int sys,dataPoint& point);
+	double helicityAngle(unsigned int sys, const dataPoint& point);
 	/**
 	 * \brief Calculates the scattering angle.
 	 *
@@ -98,8 +98,6 @@ public:
 	double getThirdVariableSq(double, double) const;
 	//! Checks if data point is within phase space boundaries
 	bool isWithinPhsp(const dataPoint &point);
-	//! Returns the dalitz plot area for the given kinematics
-	double getPhspVolume();
 	//! Calculated momenta n,m using legendre polynomials
 	double calculateMoments(unsigned int sys, dataPoint& point, unsigned int n, unsigned int m);
 	//!maximum value for invariant mass squared: m23sq=5, m13sq=4, m12sq=3

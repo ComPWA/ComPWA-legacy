@@ -34,7 +34,7 @@ void Event::addParticle(Particle inParticle){
 
 Event::~Event() { /* nothing */	}
 
-const Particle& Event::getParticle(const unsigned int id){
+const Particle& Event::getParticle(const unsigned int id) const{
   if(id>=getNParticles()){
     //TODO Exception
     return Particle();
