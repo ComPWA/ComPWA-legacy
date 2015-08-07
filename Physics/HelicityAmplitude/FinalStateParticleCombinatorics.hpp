@@ -20,8 +20,6 @@ class Event;
 
 namespace HelicityFormalism {
 
-typedef std::vector<IndexPair> EventFinalStateTopology;
-
 /**
  * This class takes care of the combinatorics that may arise due to
  * indistinguishable final state particles. Its task is to calculate possible
@@ -45,9 +43,9 @@ typedef std::vector<IndexPair> EventFinalStateTopology;
 class FinalStateParticleCombinatorics {
   // one entry for each unique link of a helicity fs particle
   // to an event fs particle
-  ParticleStateEventFSMapping distinguishable_fs_particle_mapping_;
+  IndexMapping distinguishable_fs_particle_mapping_;
 
-  std::vector<ParticleStateEventFSMapping> fs_particle_mapping_combinations_;
+  std::vector<IndexMapping> fs_particle_mapping_combinations_;
 
   struct NotInListIndexFilter {
     const std::vector<unsigned int>& list_;
@@ -108,7 +106,7 @@ class FinalStateParticleCombinatorics {
       std::vector<unsigned int>& event_final_state_particle_index_pool) const;
 
   void extendParticleMappings(
-      const ParticleStateEventFSMapping& current_mapping,
+      const IndexMapping& current_mapping,
       std::vector<ParticleState> remaining_final_state_particle_pool,
       const Event& event,
       const std::vector<unsigned int>& remaining_event_final_state_particle_index_pool);
@@ -122,7 +120,7 @@ public:
   void init(const std::vector<ParticleState>& fs_particle_list,
       const Event &event);
 
-  std::vector<ParticleStateEventFSMapping> getUniqueParticleMappingsSubsetForTopology(
+  std::vector<IndexMapping> getUniqueParticleMappingsSubsetForTopology(
       const DecayTopology& topology) const;
 };
 

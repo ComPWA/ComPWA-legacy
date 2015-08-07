@@ -51,15 +51,15 @@ class HelicityKinematics: public Kinematics {
   std::vector<ParticleState> createFSParticleList() const;
 
   IndexList createDataPointIndexListForTopology(const DecayTopology& topology,
-      const ParticleStateEventFSMapping& fs_particle_mapping);
+      const IndexMapping& fs_particle_mapping);
 
   unsigned int convertAndStoreParticleList(
       const std::vector<ParticleState>& particle_list,
-      const ParticleStateEventFSMapping& fs_particle_mapping);
+      const IndexMapping& fs_particle_mapping);
 
   IndexList convertParticleListToEventIndexList(
       const std::vector<ParticleState>& particle_list,
-      const ParticleStateEventFSMapping& fs_particle_mapping) const;
+      const IndexMapping& fs_particle_mapping) const;
 
   std::vector<Vector4<double> > createRequired4Vectors(
       const Event& event) const;

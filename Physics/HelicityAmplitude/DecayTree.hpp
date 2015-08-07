@@ -113,7 +113,7 @@ public:
       const ParticleState& particle);
 
   void createDecay(const ParticleState &mother,
-      const ParticleStatePair &daughters);
+      const std::vector<ParticleState> &daughters);
 
   void print(std::ostream& os) const;
 

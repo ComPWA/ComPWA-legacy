@@ -78,17 +78,16 @@ const std::vector<
 }
 
 void DecayTree::createDecay(const ParticleState &mother,
-    const ParticleStatePair &daughters) {
+    const std::vector<ParticleState> &daughters) {
 // check if the particles already exist as vertices with addVertex()
 // if so return vertex descriptor for this vertex, if not create a new
   boost::graph_traits<HelicityTree>::vertex_descriptor mother_vertex =
       addVertex(mother);
-// then make the correct inserts into the tree
-  boost::add_edge(mother_vertex, addVertex(daughters.first), decay_tree_);
-  boost::add_edge(mother_vertex, addVertex(daughters.second), decay_tree_);
-
-  currently_grown_nodes_.push_back(daughters.first);
-  currently_grown_nodes_.push_back(daughters.second);
+  // then make the correct inserts into the tree
+  for (unsigned int i = 0; i < daughters.size(); ++i) {
+    boost::add_edge(mother_vertex, addVertex(daughters[i]), decay_tree_);
+    currently_grown_nodes_.push_back(daughters[i]);
+  }
 }
 
 boost::graph_traits<HelicityFormalism::HelicityTree>::vertex_descriptor DecayTree::addVertex(

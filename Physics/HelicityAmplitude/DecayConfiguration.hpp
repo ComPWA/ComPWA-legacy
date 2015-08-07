@@ -19,8 +19,7 @@
 
 namespace HelicityFormalism {
 
-typedef std::map<unsigned int,
-    std::pair<std::vector<unsigned int>, std::vector<unsigned int> > > ParticleIndexDecayTree;
+typedef std::map<unsigned int, std::vector<std::vector<unsigned int> > > ParticleIndexDecayTree;
 
 class ParticleStateIDComparator {
   unsigned int particle_id_;
@@ -59,7 +58,7 @@ public:
       const std::vector<unsigned int>& particle_id_list) const;
 
   void addDecayToCurrentDecayTree(unsigned int mother_state_id,
-      std::pair<std::vector<unsigned int>, std::vector<unsigned int> > &daughter_states);
+      std::vector<std::vector<unsigned int> > &daughter_states);
 };
 
 } /* namespace HelicityFormalism */

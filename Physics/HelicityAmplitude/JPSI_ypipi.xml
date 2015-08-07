@@ -1,4 +1,4 @@
-<amplitude_setup>
+<DecayTreeSetup>
 
 	<FinalState>
 		<Particle>
@@ -244,8 +244,8 @@
 
 	<DecayTrees>
 		<DecayTree>
-			<TwoBodyDecay>
-				<particle_ids>
+			<DecayNode>
+				<mother>
 					<id_list>
 						<item>4</item>
 						<item>5</item>
@@ -253,78 +253,86 @@
 						<item>7</item>
 						<item>8</item>
 					</id_list>
-				</particle_ids>
-				<daughter_1_ids>
-					<id_list>
-						<item>2</item>
-					</id_list>
-				</daughter_1_ids>
-				<daughter_2_ids>
-					<id_list>
-						<item>3</item>
-					</id_list>
-				</daughter_2_ids>
-			</TwoBodyDecay>
-			<TwoBodyDecay>
-				<particle_ids>
+				</mother>
+				<daughters>
+					<daughter>
+						<id_list>
+							<item>2</item>
+						</id_list>
+					</daughter>
+					<daughter>
+						<id_list>
+							<item>3</item>
+						</id_list>
+					</daughter>
+				</daughters>
+			</DecayNode>
+			<DecayNode>
+				<mother>
 					<id_list>
 						<item>10</item>
 					</id_list>
-				</particle_ids>
-				<daughter_1_ids>
-					<id_list>
-						<item>1</item>
-					</id_list>
-				</daughter_1_ids>
-				<daughter_2_ids>
-					<id_list>
-						<item>4</item>
-						<item>5</item>
-						<item>6</item>
-						<item>7</item>
-						<item>8</item>
-					</id_list>
-				</daughter_2_ids>
-			</TwoBodyDecay>
+				</mother>
+				<daughters>
+					<daughter>
+						<id_list>
+							<item>1</item>
+						</id_list>
+					</daughter>
+					<daughter>
+						<id_list>
+							<item>4</item>
+							<item>5</item>
+							<item>6</item>
+							<item>7</item>
+							<item>8</item>
+						</id_list>
+					</daughter>
+				</daughters>
+			</DecayNode>
 		</DecayTree>
 		<DecayTree>
-			<TwoBodyDecay>
-				<particle_ids>
+			<DecayNode>
+				<mother>
 					<id_list>
 						<item>9</item>
 					</id_list>
-				</particle_ids>
-				<daughter_1_ids>
-					<id_list>
-						<item>1</item>
-					</id_list>
-				</daughter_1_ids>
-				<daughter_2_ids>
-					<id_list>
-						<item>2</item>
-						<item>3</item>
-					</id_list>
-				</daughter_2_ids>
-			</TwoBodyDecay>
-			<TwoBodyDecay>
-				<particle_ids>
+				</mother>
+				<daughters>
+					<daughter>
+						<id_list>
+							<item>1</item>
+						</id_list>
+					</daughter>
+					<daughter>
+						<id_list>
+							<item>2</item>
+							<item>3</item>
+						</id_list>
+					</daughter>
+				</daughters>
+			</DecayNode>
+			<DecayNode>
+				<mother>
 					<id_list>
 						<item>10</item>
 					</id_list>
-				</particle_ids>
-				<daughter_1_ids>
-					<id_list>
-						<item>9</item>
-					</id_list>
-				</daughter_1_ids>
-				<daughter_2_ids>
-					<id_list>
-						<item>2</item>
-						<item>3</item>
-					</id_list>
-				</daughter_2_ids>
-			</TwoBodyDecay>
+				</mother>
+				<daughters>
+					<daughter>
+						<id_list>
+							<item>9</item>
+						</id_list>
+					</daughter>
+					<daughter>
+						<id_list>
+							<item>2</item>
+							<item>3</item>
+						</id_list>
+					</daughter>
+				</daughters>
+			</DecayNode>
 		</DecayTree>
 	</DecayTrees>
 
-</amplitude_setup>
+</DecayTreeSetup>

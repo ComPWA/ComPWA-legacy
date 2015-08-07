@@ -78,7 +78,7 @@ void HelicityKinematics::init(const Event& event) {
   for (decay_topology_iter = decay_topologies_.begin();
       decay_topology_iter != decay_topologies_.end(); ++decay_topology_iter) {
 
-    std::vector<ParticleStateEventFSMapping> mappings =
+    std::vector<IndexMapping> mappings =
         fsp_combinatorics.getUniqueParticleMappingsSubsetForTopology(
             *decay_topology_iter);
 
@@ -116,7 +116,7 @@ std::vector<ParticleState> HelicityKinematics::createFSParticleList() const {
 
 IndexList HelicityKinematics::createDataPointIndexListForTopology(
     const DecayTopology& topology,
-    const ParticleStateEventFSMapping& fs_particle_mapping) {
+    const IndexMapping& fs_particle_mapping) {
 
   IndexList topology_amplitude_data_point_index_list;
   // loop through the decay topology
@@ -167,7 +167,7 @@ IndexList HelicityKinematics::createDataPointIndexListForTopology(
 
 unsigned int HelicityKinematics::convertAndStoreParticleList(
     const std::vector<ParticleState>& particle_list,
-    const ParticleStateEventFSMapping& fs_particle_mapping) {
+    const IndexMapping& fs_particle_mapping) {
 
   IndexList event_particle_index_list = convertParticleListToEventIndexList(
       particle_list, fs_particle_mapping);
@@ -189,7 +189,7 @@ unsigned int HelicityKinematics::convertAndStoreParticleList(
 
 IndexList HelicityKinematics::convertParticleListToEventIndexList(
     const std::vector<ParticleState>& particle_list,
-    const ParticleStateEventFSMapping& fs_particle_mapping) const {
+    const IndexMapping& fs_particle_mapping) const {
   IndexList event_particle_index_list;
   event_particle_index_list.reserve(particle_list.size());
   for (auto particle_iter = particle_list.begin();

@@ -18,12 +18,9 @@
 namespace HelicityFormalism {
 
 FinalStateParticleCombinatorics::FinalStateParticleCombinatorics() {
-  // TODO Auto-generated constructor stub
-
 }
 
 FinalStateParticleCombinatorics::~FinalStateParticleCombinatorics() {
-  // TODO Auto-generated destructor stub
 }
 
 void FinalStateParticleCombinatorics::init(
@@ -85,7 +82,7 @@ void FinalStateParticleCombinatorics::createAllParticleMappings(
       event_final_state_particle_index_pool);
 
   // initialize the starting mapping with the distinguishable particle mapping
-  ParticleStateEventFSMapping start_mapping(
+  IndexMapping start_mapping(
       distinguishable_fs_particle_mapping_);
 
   // then start the recursive filling algorithm with these filtered particle pools
@@ -97,7 +94,7 @@ void FinalStateParticleCombinatorics::removeDistinguishableParticles(
     std::vector<ParticleState>& fs_particle_pool,
     std::vector<unsigned int>& event_final_state_particle_index_pool) const {
 
-  ParticleStateEventFSMapping::const_iterator mapping_link_iter;
+  IndexMapping::const_iterator mapping_link_iter;
   for (mapping_link_iter = distinguishable_fs_particle_mapping_.begin();
       mapping_link_iter != distinguishable_fs_particle_mapping_.end();
       ++mapping_link_iter) {
@@ -110,7 +107,7 @@ void FinalStateParticleCombinatorics::removeDistinguishableParticles(
 }
 
 void FinalStateParticleCombinatorics::extendParticleMappings(
-    const ParticleStateEventFSMapping& current_mapping,
+    const IndexMapping& current_mapping,
     std::vector<ParticleState> remaining_final_state_particle_pool,
     const Event& event,
     const std::vector<unsigned int>& remaining_event_final_state_particle_index_pool) {
@@ -129,10 +126,10 @@ void FinalStateParticleCombinatorics::extendParticleMappings(
 
     //extend the current mappings
     std::vector<
-        std::pair<ParticleStateEventFSMapping, std::vector<unsigned int> > > extended_mapping_stripped_pool_pairs;
+        std::pair<IndexMapping, std::vector<unsigned int> > > extended_mapping_stripped_pool_pairs;
 
     for (unsigned int i = 0; i < event_fs_candidates.size(); ++i) {
-      ParticleStateEventFSMapping extended_mapping(current_mapping);
+      IndexMapping extended_mapping(current_mapping);
 
       extended_mapping[ps.id_] = event_fs_candidates[i];
 
@@ -171,7 +168,7 @@ std::vector<unsigned int> FinalStateParticleCombinatorics::getPossibleEventParti
   return index_list;
 }
 
-std::vector<ParticleStateEventFSMapping> FinalStateParticleCombinatorics::getUniqueParticleMappingsSubsetForTopology(
+std::vector<IndexMapping> FinalStateParticleCombinatorics::getUniqueParticleMappingsSubsetForTopology(
     const DecayTopology& topology) const {
 
 }

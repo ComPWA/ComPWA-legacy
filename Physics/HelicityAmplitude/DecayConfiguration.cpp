@@ -70,13 +70,13 @@ std::vector<unsigned int> DecayConfiguration::convertParticleIDListToIndexList(
 
 void DecayConfiguration::addDecayToCurrentDecayTree(
     unsigned int mother_state_id,
-    std::pair<std::vector<unsigned int>, std::vector<unsigned int> > &daughter_states) {
+    std::vector<std::vector<unsigned int> > &daughter_states) {
   unsigned int mother_state_index = convertParticleIDToListIndex(
       mother_state_id);
-  current_concrete_decay_tree_[mother_state_index].first =
-      convertParticleIDListToIndexList(daughter_states.first);
-  current_concrete_decay_tree_[mother_state_index].second =
-      convertParticleIDListToIndexList(daughter_states.second);
+  for (unsigned int i = 0; i < daughter_states.size(); ++i) {
+    current_concrete_decay_tree_[mother_state_index].push_back(
+        convertParticleIDListToIndexList(daughter_states[i]));
+  }
 }
 
 } /* namespace HelicityFormalism */

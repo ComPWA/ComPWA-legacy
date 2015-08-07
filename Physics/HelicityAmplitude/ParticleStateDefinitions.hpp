@@ -28,11 +28,11 @@ struct KinematicVariables {
   }
 };
 
-struct HelicityState {
+struct SpinState {
   Spin J_;
   Spin M_;
 
-  bool operator==(const HelicityState &rhs) const {
+  bool operator==(const SpinState &rhs) const {
     if (this->J_.Numerator() != rhs.J_.Numerator())
       return false;
     if (this->J_.Denominator() != rhs.J_.Denominator())
@@ -44,11 +44,11 @@ struct HelicityState {
 
     return true;
   }
-  bool operator!=(const HelicityState &rhs) const {
+  bool operator!=(const SpinState &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator<(const HelicityState &rhs) const {
+  bool operator<(const SpinState &rhs) const {
     if (this->J_.Numerator() > rhs.J_.Numerator())
       return false;
     else if (this->J_.Numerator() < rhs.J_.Numerator())
@@ -66,7 +66,7 @@ struct HelicityState {
 
     return true;
   }
-  bool operator>(const HelicityState &rhs) const {
+  bool operator>(const SpinState &rhs) const {
     return (rhs < *this);
   }
 };
@@ -75,7 +75,7 @@ struct ParticleState {
   unsigned int id_;
   int particle_id_;
   std::string name_;
-  HelicityState helicity_state_information;
+  SpinState helicity_state_information;
 
   bool operator==(const ParticleState &rhs) const {
     if (this->id_ != rhs.id_)
@@ -131,11 +131,11 @@ struct ParticleStateIDComparison {
   }
 };
 
-typedef std::pair<HelicityState, HelicityState> HelicityStatePair;
-typedef std::pair<ParticleState, ParticleState> ParticleStatePair;
+typedef std::pair<SpinState, SpinState> SpinStatePair;
+
 typedef std::vector<unsigned int> IndexList;
 typedef std::pair<unsigned int, unsigned int> IndexPair;
-typedef std::map<unsigned int, unsigned int> ParticleStateEventFSMapping;
+typedef std::map<unsigned int, unsigned int> IndexMapping;
 
 struct TwoBodyDecayIndices {
   unsigned int mother_index_;
@@ -164,8 +164,8 @@ struct TwoBodyDecayIndices {
 };
 
 struct TwoBodyDecayInformation {
-  HelicityState initial_state_;
-  HelicityStatePair final_state_;
+  SpinState initial_state_;
+  SpinStatePair final_state_;
 
   bool operator<(const TwoBodyDecayInformation &rhs) const {
     if (this->initial_state_ > rhs.initial_state_)

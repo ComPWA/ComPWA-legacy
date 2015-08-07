@@ -22,33 +22,36 @@ DecayTreeFactory::DecayTreeFactory(
 DecayTreeFactory::~DecayTreeFactory() {
 }
 
-bool DecayTreeFactory::isNodeADaughter(
-    ParticleIndexDecayTree::const_iterator& node,
-    const std::vector<unsigned int>& list_of_daughters) const {
-  for (unsigned int daugther_index = 0;
-      daugther_index != list_of_daughters.size(); ++daugther_index) {
-    if (list_of_daughters[daugther_index] == node->first)
-      return true;
-  }
-  return false;
-}
+std::vector<DecayTree> DecayTreeFactory::createDecayTrees() const {
+  std::vector<DecayTree> decay_trees;
 
-bool DecayTreeFactory::isNodeADaughterInTopology(
-    ParticleIndexDecayTree::const_iterator& node,
-    const ParticleIndexDecayTree& decay_topology) const {
-  bool is_daughter(false);
-  ParticleIndexDecayTree::const_iterator other_decay_node;
-  // check if this index appears in any of the daughter lists if not this is our top node
-  for (other_decay_node = decay_topology.begin();
-      other_decay_node != decay_topology.end(); ++other_decay_node) {
-    is_daughter = isNodeADaughter(node, other_decay_node->second.first);
-    if (is_daughter)
-      break;
-    is_daughter = isNodeADaughter(node, other_decay_node->second.second);
-    if (is_daughter)
-      break;
+  // loop over the decay trees of the configuration
+  std::vector<ParticleIndexDecayTree>::const_iterator decay_topology_iter;
+  for (decay_topology_iter = decay_configuration_.concrete_decay_trees_.begin();
+      decay_topology_iter != decay_configuration_.concrete_decay_trees_.end();
+      ++decay_topology_iter) {
+
+    // determine top node in the current topology
+    ParticleIndexDecayTree::const_iterator top_node = determineTopNode(
+        *decay_topology_iter);
+
+    // then start the recursive tree builder algorithm with that node
+    // set seeds
+    std::vector<DecayTree> temp_decay_tree_list = createDecayTreeSeedList(
+        top_node);
+
+    // grow trees as much as possible
+    while (canDecayTreesGrow(temp_decay_tree_list, *decay_topology_iter)) {
+      temp_decay_tree_list = growNextDecayTreeLayer(temp_decay_tree_list,
+          *decay_topology_iter);
+    }
+
+    // and simply add the list of constructed trees to the full decay tree list
+    decay_trees.insert(decay_trees.begin(), temp_decay_tree_list.begin(),
+        temp_decay_tree_list.end());
   }
-  return is_daughter;
+
+  return decay_trees;
 }
 
 ParticleIndexDecayTree::const_iterator DecayTreeFactory::determineTopNode(
@@ -74,6 +77,150 @@ ParticleIndexDecayTree::const_iterator DecayTreeFactory::determineTopNode(
         "The decay topology does not have any top node, meaning the topology is corrupted. Please fix the configuration file and rerun!");
   // otherwise return here
   return candidates[0];
+}
+
+bool DecayTreeFactory::isNodeADaughterInTopology(
+    ParticleIndexDecayTree::const_iterator& node,
+    const ParticleIndexDecayTree& decay_topology) const {
+  bool is_daughter(false);
+  ParticleIndexDecayTree::const_iterator other_decay_node;
+  // check if this index appears in any of the daughter lists if not this is our top node
+  for (other_decay_node = decay_topology.begin();
+      other_decay_node != decay_topology.end(); ++other_decay_node) {
+    std::vector<std::vector<unsigned int> >::const_iterator daughter_id_list_iter;
+    for (daughter_id_list_iter = other_decay_node->second.begin();
+        daughter_id_list_iter != other_decay_node->second.end();
+        ++daughter_id_list_iter) {
+      is_daughter = isNodeADaughter(node, *daughter_id_list_iter);
+      if (is_daughter)
+        break;
+    }
+  }
+  return is_daughter;
+}
+
+bool DecayTreeFactory::isNodeADaughter(
+    ParticleIndexDecayTree::const_iterator& node,
+    const std::vector<unsigned int>& list_of_daughters) const {
+  for (unsigned int daugther_index = 0;
+      daugther_index != list_of_daughters.size(); ++daugther_index) {
+    if (list_of_daughters[daugther_index] == node->first)
+      return true;
+  }
+  return false;
+}
+
+std::vector<DecayTree> DecayTreeFactory::createDecayTreeSeedList(
+    ParticleIndexDecayTree::const_iterator & top_node_iter) const {
+  std::vector<DecayTree> decay_trees;
+
+  std::vector<std::vector<ParticleState> > decay_daughters_combinations =
+      makeDaughterCombinations(top_node_iter->second);
+
+  removeUndistinguishableCombinations(decay_daughters_combinations);
+
+  for (unsigned int i = 0; i < decay_daughters_combinations.size(); ++i) {
+    DecayTree temp_tree;
+    temp_tree.createDecay(decay_configuration_.particles_[top_node_iter->first],
+        decay_daughters_combinations[i]);
+    decay_trees.push_back(temp_tree);
+  }
+  return decay_trees;
+}
+
+std::vector<std::vector<ParticleState> > DecayTreeFactory::makeDaughterCombinations(
+    std::vector<std::vector<unsigned int> > particle_index_lists) const {
+  std::vector<std::vector<ParticleState> > decay_daughters_combination_list;
+
+  if (particle_index_lists.size() > 0) {
+    std::vector<ParticleState> initial_particle_list;
+
+    std::vector<unsigned int> current_particle_index_list(
+        particle_index_lists.back());
+    particle_index_lists.pop_back();
+
+    for (unsigned int i = 0; i < current_particle_index_list.size(); ++i) {
+      initial_particle_list.push_back(
+          decay_configuration_.particles_[current_particle_index_list[i]]);
+    }
+
+    extendDaughterCombinations(particle_index_lists, initial_particle_list,
+        decay_daughters_combination_list);
+  }
+
+  return decay_daughters_combination_list;
+}
+
+void DecayTreeFactory::extendDaughterCombinations(
+    std::vector<std::vector<unsigned int> > remaining_particle_index_lists,
+    const std::vector<ParticleState>& decay_daughters_combination,
+    std::vector<std::vector<ParticleState> >& decay_daughters_combination_list) const {
+
+  if (remaining_particle_index_lists.size() > 0) {
+    std::vector<unsigned int> current_particle_index_list(
+        remaining_particle_index_lists.back());
+    remaining_particle_index_lists.pop_back();
+
+    for (unsigned int i = 0; i < current_particle_index_list.size(); ++i) {
+      std::vector<ParticleState> current_particle_list(
+          decay_daughters_combination);
+
+      const ParticleState &particle =
+          decay_configuration_.particles_[current_particle_index_list[i]];
+      if (isParticleValidForCombination(particle, current_particle_list)) {
+        current_particle_list.push_back(particle);
+
+        extendDaughterCombinations(remaining_particle_index_lists,
+            current_particle_list, decay_daughters_combination_list);
+      }
+    }
+  }
+  else {
+    decay_daughters_combination_list.push_back(decay_daughters_combination);
+  }
+}
+
+bool DecayTreeFactory::isParticleValidForCombination(
+    const ParticleState& particle,
+    const std::vector<ParticleState>& combination) const {
+  // if we find a particle with the same particle id in the list as the
+  // reference particle, this will be not valid
+  if (std::find_if(combination.begin(), combination.end(),
+      ParticleStateIDComparison(particle.id_)) != combination.end()) {
+    return false;
+  }
+}
+
+void DecayTreeFactory::removeUndistinguishableCombinations(
+    std::vector<std::vector<ParticleState> >& decay_daughters_combination_lists) const {
+  std::map<std::vector<unsigned int>, std::vector<ParticleState> > unique_combinations;
+  for (unsigned int i = 0; i < decay_daughters_combination_lists.size(); ++i) {
+    std::vector<unsigned int> particle_id_combinations = convertToPIDList(
+        decay_daughters_combination_lists[i]);
+
+    if (unique_combinations.find(particle_id_combinations)
+        != unique_combinations.end()) {
+      unique_combinations[particle_id_combinations] =
+          decay_daughters_combination_lists[i];
+    }
+  }
+
+  decay_daughters_combination_lists.clear();
+  for (auto unique_combination_iter = unique_combinations.begin();
+      unique_combination_iter != unique_combinations.end();
+      ++unique_combination_iter) {
+    decay_daughters_combination_lists.push_back(
+        unique_combination_iter->second);
+  }
+}
+
+std::vector<unsigned int> DecayTreeFactory::convertToPIDList(
+    const std::vector<ParticleState>& particle_list) const {
+  std::vector<unsigned int> pid_list;
+  for (unsigned int i = 0; i < particle_list.size(); ++i) {
+    pid_list.push_back(particle_list[i].particle_id_);
+  }
+  return pid_list;
 }
 
 bool DecayTreeFactory::canDecayTreesGrow(
@@ -102,36 +249,6 @@ bool DecayTreeFactory::canDecayTreesGrow(
     }
   }
   return has_nodes_to_grow;
-}
-
-std::vector<DecayTree> DecayTreeFactory::growSingleLeafOnDecayTrees(
-    const std::vector<DecayTree>& decay_trees,
-    ParticleIndexDecayTree::const_iterator& single_decay) const {
-  std::vector<DecayTree> new_decay_trees;
-
-  // loop over the decay trees
-  std::vector<DecayTree>::const_iterator decay_tree;
-  for (decay_tree = decay_trees.begin(); decay_tree != decay_trees.end();
-      ++decay_tree) {
-    const ParticleState& particle =
-        decay_configuration_.particles_[single_decay->first];
-    for (unsigned int daugther_1_index = 0;
-        daugther_1_index != single_decay->second.first.size();
-        ++daugther_1_index) {
-      for (unsigned int daugther_2_index = 0;
-          daugther_2_index != single_decay->second.second.size();
-          ++daugther_2_index) {
-        DecayTree temp_tree(*decay_tree);
-        temp_tree.createDecay(
-            decay_configuration_.particles_[single_decay->first],
-            std::make_pair(
-                decay_configuration_.particles_[single_decay->second.first[daugther_1_index]],
-                decay_configuration_.particles_[single_decay->second.second[daugther_2_index]]));
-        new_decay_trees.push_back(temp_tree);
-      }
-    }
-  }
-  return new_decay_trees;
 }
 
 std::vector<DecayTree> DecayTreeFactory::growNextDecayTreeLayer(
@@ -169,57 +286,30 @@ std::vector<DecayTree> DecayTreeFactory::growNextDecayTreeLayer(
   return new_decay_trees;
 }
 
-std::vector<DecayTree> DecayTreeFactory::createDecayTreeSeedList(
-    ParticleIndexDecayTree::const_iterator & top_node_iter) const {
-  std::vector<DecayTree> decay_trees;
-  for (unsigned int daugther_1_index = 0;
-      daugther_1_index != top_node_iter->second.first.size();
-      ++daugther_1_index) {
-    for (unsigned int daugther_2_index = 0;
-        daugther_2_index != top_node_iter->second.second.size();
-        ++daugther_2_index) {
+std::vector<DecayTree> DecayTreeFactory::growSingleLeafOnDecayTrees(
+    const std::vector<DecayTree>& decay_trees,
+    ParticleIndexDecayTree::const_iterator& single_decay) const {
+  std::vector<DecayTree> new_decay_trees;
+
+  // loop over the decay trees
+  std::vector<DecayTree>::const_iterator decay_tree;
+  for (decay_tree = decay_trees.begin(); decay_tree != decay_trees.end();
+      ++decay_tree) {
+    const ParticleState& mother =
+        decay_configuration_.particles_[single_decay->first];
+
+    std::vector<std::vector<ParticleState> > decay_daughters_combinations =
+        makeDaughterCombinations(single_decay->second);
+
+    for (unsigned int i = 0; i < decay_daughters_combinations.size(); ++i) {
       DecayTree temp_tree;
       temp_tree.createDecay(
-          decay_configuration_.particles_[top_node_iter->first],
-          std::make_pair(
-              decay_configuration_.particles_[top_node_iter->second.first[daugther_1_index]],
-              decay_configuration_.particles_[top_node_iter->second.second[daugther_2_index]]));
-      decay_trees.push_back(temp_tree);
+          decay_configuration_.particles_[single_decay->first],
+          decay_daughters_combinations[i]);
+      new_decay_trees.push_back(temp_tree);
     }
   }
-  return decay_trees;
-}
-
-std::vector<DecayTree> DecayTreeFactory::createDecayTrees() const {
-  std::vector<DecayTree> decay_trees;
-
-  // loop over the decay trees of the configuration
-  std::vector<ParticleIndexDecayTree>::const_iterator decay_topology_iter;
-  for (decay_topology_iter = decay_configuration_.concrete_decay_trees_.begin();
-      decay_topology_iter != decay_configuration_.concrete_decay_trees_.end();
-      ++decay_topology_iter) {
-
-    // determine top node in the current topology
-    ParticleIndexDecayTree::const_iterator top_node = determineTopNode(
-        *decay_topology_iter);
-
-    // then start the recursive tree builder algorithm with that node
-    // set seeds
-    std::vector<DecayTree> temp_decay_tree_list =
-        createDecayTreeSeedList(top_node);
-
-    // grow trees as much as possible
-    while (canDecayTreesGrow(temp_decay_tree_list, *decay_topology_iter)) {
-      temp_decay_tree_list = growNextDecayTreeLayer(temp_decay_tree_list,
-          *decay_topology_iter);
-    }
-
-    // and simply add the list of constructed trees to the full decay tree list
-    decay_trees.insert(decay_trees.begin(), temp_decay_tree_list.begin(),
-        temp_decay_tree_list.end());
-  }
-
-  return decay_trees;
+  return new_decay_trees;
 }
 
 } /* namespace HelicityFormalism */
