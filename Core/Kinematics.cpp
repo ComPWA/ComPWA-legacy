@@ -148,14 +148,13 @@ double Kinematics::FormFactor(double sqrtS, double ma, double mb, double spin, d
 std::complex<double> Kinematics::phspFactor(double sqrtS, double ma, double mb){
 	double s = sqrtS*sqrtS;
 	std::complex<double> i(0,1);
-	std::complex<double> rho;
-	std::complex<double> rhoOld;
 
 	// == Two types of analytic continuation
 	// 1) Complex sqrt
-	//rhoOld = sqrt(std::complex<double>(qSqValue(sqrtS,ma,mb))) / (8*M_PI*sqrtS); //PDG definition
-	//rhoOld = sqrt(std::complex<double>(qSqValue(sqrtS,ma,mb))) / (0.5*sqrtS); //BaBar definition
-	//return rhoOld; //complex sqrt
+	//	std::complex<double> rhoOld;
+	//	rhoOld = sqrt(std::complex<double>(qSqValue(sqrtS,ma,mb))) / (8*M_PI*sqrtS); //PDG definition
+	//	rhoOld = sqrt(std::complex<double>(qSqValue(sqrtS,ma,mb))) / (0.5*sqrtS); //BaBar definition
+	//	return rhoOld; //complex sqrt
 
 	/* 2) Correct analytic continuation
 	 * proper analytic continuation (PDG 2014 - Resonances (47.2.2))
@@ -164,6 +163,7 @@ std::complex<double> Kinematics::phspFactor(double sqrtS, double ma, double mb){
 	 * and not mentioned in the reference, but it leads to a good agreement between both
 	 * approaches.
 	 */
+	std::complex<double> rho;
 	double q = std::sqrt( std::abs(Kinematics::qSqValue(sqrtS,ma,mb)*4/s) );
 	if( s<=0 ){ //below 0
 		rho = -q/M_PI*std::log(std::abs((1+q)/(1-q)));
