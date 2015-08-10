@@ -43,12 +43,6 @@ class DecayTreeFactory {
   bool isParticleValidForCombination(const ParticleState& particle,
       const std::vector<ParticleState>& combination) const;
 
-  void removeUndistinguishableCombinations(
-      std::vector<std::vector<ParticleState> >& decay_daughters_combination_lists) const;
-
-  std::vector<unsigned int> convertToPIDList(
-      const std::vector<ParticleState>& particle_list) const;
-
   bool canDecayTreesGrow(const std::vector<DecayTree>& decay_trees,
       const ParticleIndexDecayTree& decay_topology) const;
 
@@ -59,6 +53,14 @@ class DecayTreeFactory {
   std::vector<DecayTree> growSingleLeafOnDecayTrees(
       const std::vector<DecayTree>& decay_trees,
       ParticleIndexDecayTree::const_iterator& single_decay) const;
+
+  void removeFaultyDecayTrees(std::vector<DecayTree>& decay_tree_list) const;
+
+  void removeUndistinguishableCombinations(
+      std::vector<DecayTree>& decay_tree_list) const;
+
+  std::vector<std::string> convertToUniqueNameList(
+      const DecayTree& decay_tree) const;
 
 public:
   DecayTreeFactory(const DecayConfiguration& decay_configuration);

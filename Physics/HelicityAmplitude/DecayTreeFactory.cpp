@@ -46,6 +46,8 @@ std::vector<DecayTree> DecayTreeFactory::createDecayTrees() const {
           *decay_topology_iter);
     }
 
+    removeFaultyDecayTrees(temp_decay_tree_list);
+
     // and simply add the list of constructed trees to the full decay tree list
     decay_trees.insert(decay_trees.begin(), temp_decay_tree_list.begin(),
         temp_decay_tree_list.end());
@@ -117,8 +119,6 @@ std::vector<DecayTree> DecayTreeFactory::createDecayTreeSeedList(
   std::vector<std::vector<ParticleState> > decay_daughters_combinations =
       makeDaughterCombinations(top_node_iter->second);
 
-  removeUndistinguishableCombinations(decay_daughters_combinations);
-
   for (unsigned int i = 0; i < decay_daughters_combinations.size(); ++i) {
     DecayTree temp_tree;
     temp_tree.createDecay(decay_configuration_.particles_[top_node_iter->first],
@@ -133,19 +133,18 @@ std::vector<std::vector<ParticleState> > DecayTreeFactory::makeDaughterCombinati
   std::vector<std::vector<ParticleState> > decay_daughters_combination_list;
 
   if (particle_index_lists.size() > 0) {
-    std::vector<ParticleState> initial_particle_list;
-
     std::vector<unsigned int> current_particle_index_list(
         particle_index_lists.back());
     particle_index_lists.pop_back();
 
     for (unsigned int i = 0; i < current_particle_index_list.size(); ++i) {
+      std::vector<ParticleState> initial_particle_list;
       initial_particle_list.push_back(
           decay_configuration_.particles_[current_particle_index_list[i]]);
-    }
 
-    extendDaughterCombinations(particle_index_lists, initial_particle_list,
-        decay_daughters_combination_list);
+      extendDaughterCombinations(particle_index_lists, initial_particle_list,
+          decay_daughters_combination_list);
+    }
   }
 
   return decay_daughters_combination_list;
@@ -167,6 +166,7 @@ void DecayTreeFactory::extendDaughterCombinations(
 
       const ParticleState &particle =
           decay_configuration_.particles_[current_particle_index_list[i]];
+
       if (isParticleValidForCombination(particle, current_particle_list)) {
         current_particle_list.push_back(particle);
 
@@ -189,38 +189,7 @@ bool DecayTreeFactory::isParticleValidForCombination(
       ParticleStateIDComparison(particle.id_)) != combination.end()) {
     return false;
   }
-}
-
-void DecayTreeFactory::removeUndistinguishableCombinations(
-    std::vector<std::vector<ParticleState> >& decay_daughters_combination_lists) const {
-  std::map<std::vector<unsigned int>, std::vector<ParticleState> > unique_combinations;
-  for (unsigned int i = 0; i < decay_daughters_combination_lists.size(); ++i) {
-    std::vector<unsigned int> particle_id_combinations = convertToPIDList(
-        decay_daughters_combination_lists[i]);
-
-    if (unique_combinations.find(particle_id_combinations)
-        != unique_combinations.end()) {
-      unique_combinations[particle_id_combinations] =
-          decay_daughters_combination_lists[i];
-    }
-  }
-
-  decay_daughters_combination_lists.clear();
-  for (auto unique_combination_iter = unique_combinations.begin();
-      unique_combination_iter != unique_combinations.end();
-      ++unique_combination_iter) {
-    decay_daughters_combination_lists.push_back(
-        unique_combination_iter->second);
-  }
-}
-
-std::vector<unsigned int> DecayTreeFactory::convertToPIDList(
-    const std::vector<ParticleState>& particle_list) const {
-  std::vector<unsigned int> pid_list;
-  for (unsigned int i = 0; i < particle_list.size(); ++i) {
-    pid_list.push_back(particle_list[i].particle_id_);
-  }
-  return pid_list;
+  return true;
 }
 
 bool DecayTreeFactory::canDecayTreesGrow(
@@ -256,7 +225,7 @@ std::vector<DecayTree> DecayTreeFactory::growNextDecayTreeLayer(
     const ParticleIndexDecayTree& decay_topology) const {
   std::vector<DecayTree> new_decay_trees;
 
-// loop over the decay trees
+  // loop over the decay trees
   std::vector<DecayTree>::const_iterator decay_tree;
   for (decay_tree = decay_trees.begin(); decay_tree != decay_trees.end();
       ++decay_tree) {
@@ -272,8 +241,8 @@ std::vector<DecayTree> DecayTreeFactory::growNextDecayTreeLayer(
       std::vector<ParticleState>::const_iterator particle = std::find(
           decay_configuration_.particles_.begin(),
           decay_configuration_.particles_.end(), list_of_leaves[leaf_index]);
-      unsigned int particle_index = std::distance(
-          decay_configuration_.particles_.begin(), particle);
+      unsigned int particle_index = particle
+          - decay_configuration_.particles_.begin();
       ParticleIndexDecayTree::const_iterator found_decay = decay_topology.find(
           particle_index);
       if (found_decay != decay_topology.end()) {
@@ -302,7 +271,7 @@ std::vector<DecayTree> DecayTreeFactory::growSingleLeafOnDecayTrees(
         makeDaughterCombinations(single_decay->second);
 
     for (unsigned int i = 0; i < decay_daughters_combinations.size(); ++i) {
-      DecayTree temp_tree;
+      DecayTree temp_tree(*decay_tree);
       temp_tree.createDecay(
           decay_configuration_.particles_[single_decay->first],
           decay_daughters_combinations[i]);
@@ -310,6 +279,56 @@ std::vector<DecayTree> DecayTreeFactory::growSingleLeafOnDecayTrees(
     }
   }
   return new_decay_trees;
+}
+
+void DecayTreeFactory::removeFaultyDecayTrees(
+    std::vector<DecayTree>& decay_tree_list) const {
+  std::vector<DecayTree> good_decay_trees;
+  good_decay_trees.reserve(decay_tree_list.size());
+
+  for (unsigned int i = 0; i < decay_tree_list.size(); ++i) {
+    if (!decay_tree_list[i].hasCycles() && !decay_tree_list[i].hasCycles()) {
+      good_decay_trees.push_back(decay_tree_list[i]);
+    }
+  }
+
+  removeUndistinguishableCombinations(good_decay_trees);
+  decay_tree_list = good_decay_trees;
+}
+
+void DecayTreeFactory::removeUndistinguishableCombinations(
+    std::vector<DecayTree>& decay_tree_list) const {
+  std::map<std::vector<std::string>, DecayTree> unique_combinations;
+  for (unsigned int i = 0; i < decay_tree_list.size(); ++i) {
+    std::vector<std::string> particle_id_combinations = convertToUniqueNameList(
+        decay_tree_list[i]);
+
+    if (unique_combinations.find(particle_id_combinations)
+        == unique_combinations.end()) {
+      unique_combinations[particle_id_combinations] = decay_tree_list[i];
+    }
+  }
+
+  decay_tree_list.clear();
+  for (auto unique_combination_iter = unique_combinations.begin();
+      unique_combination_iter != unique_combinations.end();
+      ++unique_combination_iter) {
+    decay_tree_list.push_back(unique_combination_iter->second);
+  }
+}
+
+std::vector<std::string> DecayTreeFactory::convertToUniqueNameList(
+    const DecayTree& decay_tree) const {
+  std::vector<std::string> name_list;
+
+  std::pair<boost::graph_traits<HelicityTree>::vertex_iterator,
+      boost::graph_traits<HelicityTree>::vertex_iterator> vp;
+  for (vp = vertices(decay_tree.getHelicityDecayTree()); vp.first != vp.second;
+      ++vp.first) {
+    name_list.push_back(decay_tree.getHelicityDecayTree()[*vp.first].name_);
+  }
+  std::sort(name_list.begin(), name_list.end());
+  return name_list;
 }
 
 } /* namespace HelicityFormalism */

@@ -77,7 +77,7 @@ void DecayXMLConfigReader::readConfig(const std::string &filename) {
       std::vector<unsigned int> mother_ids = parseIDList(decay_node.second.get_child("mother"));
       std::vector<std::vector<unsigned int> > daughters_id_lists;
       BOOST_FOREACH(ptree::value_type const& daugthers, decay_node.second.get_child("daughters")) {
-        daughters_id_lists.push_back(parseIDList(daugthers.second.get_child("daughter")));
+        daughters_id_lists.push_back(parseIDList(daugthers.second));
       }
       for(unsigned int i = 0; i < mother_ids.size(); ++i) {
         decay_configuration_.addDecayToCurrentDecayTree(mother_ids[i], daughters_id_lists);

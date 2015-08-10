@@ -42,7 +42,7 @@ void DecayConfiguration::addIntermediateStateParticle(
 
 void DecayConfiguration::addCurrentDecayTreeToList() {
   concrete_decay_trees_.push_back(current_concrete_decay_tree_);
-  concrete_decay_trees_.clear();
+  current_concrete_decay_tree_.clear();
 }
 
 unsigned int DecayConfiguration::convertParticleIDToListIndex(
@@ -73,6 +73,7 @@ void DecayConfiguration::addDecayToCurrentDecayTree(
     std::vector<std::vector<unsigned int> > &daughter_states) {
   unsigned int mother_state_index = convertParticleIDToListIndex(
       mother_state_id);
+
   for (unsigned int i = 0; i < daughter_states.size(); ++i) {
     current_concrete_decay_tree_[mother_state_index].push_back(
         convertParticleIDListToIndexList(daughter_states[i]));

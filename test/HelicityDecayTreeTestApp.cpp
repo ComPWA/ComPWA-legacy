@@ -18,23 +18,28 @@ int main(int argc, char **argv) {
       << std::endl;
   std::cout << std::endl;
 
+  std::string input_config_file("Physics/HelicityAmplitude/JPSI_ypipi.xml");
+  std::string output_file("graph.dot");
+
   HelicityFormalism::DecayConfiguration decay_configuration;
   HelicityFormalism::DecayXMLConfigReader xml_reader(decay_configuration);
-  xml_reader.readConfig("Physics/HelicityAmplitude/JPSI_ypipi.xml");
+  xml_reader.readConfig(input_config_file);
 
   HelicityFormalism::DecayTreeFactory decay_tree_factory(decay_configuration);
 
   std::vector<HelicityFormalism::DecayTree> decay_trees =
       decay_tree_factory.createDecayTrees();
 
-  std::ofstream dot("graph.dot");
+  std::cout << "created " << decay_trees.size() << " decay trees from "
+      << input_config_file << " config file!" << std::endl;
+  std::cout << "printing to " << output_file << " output file" << std::endl;
+
+  std::ofstream dot(output_file);
 
   std::vector<HelicityFormalism::DecayTree>::iterator decay_tree;
   for (decay_tree = decay_trees.begin(); decay_tree != decay_trees.end();
       ++decay_tree) {
-    if (!decay_tree->hasCycles()) {
-      decay_tree->print(dot);
-    }
+    decay_tree->print(dot);
   }
 
   return 0;
