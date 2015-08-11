@@ -92,17 +92,22 @@ bool RunManager::generate( int number ) {
 	Event tmp;
 	progressBar bar(number);
 	for(unsigned int i=0;i<limit;i++){
-		if(samplePhsp_)//if phsp sample is set -> use it
+		dataPoint point;
+		if(samplePhsp_){ //if phsp sample is set -> use it
 			tmp = samplePhsp_->getEvent(i);
-		else //otherwise generate event
+			point = dataPoint(tmp);
+			if(!Kinematics::instance()->isWithinPhsp(point))
+				continue;
+		} else {//otherwise generate event
 			genNew->generate(tmp);
+			point = dataPoint(tmp);
+		}
 		totalCalls++;
 		double weight = tmp.getWeight();
 		/* reset weights: the weights are taken into account by hit and miss. The resulting
 		 * sample is therefore unweighted */
 		tmp.setWeight(1.);//reset weight
 		tmp.setEfficiency(1.);//reset weight
-		dataPoint point(tmp);
 		double ampRnd = genNew->getUniform()*genMaxVal;
 		ParameterList list;
 		list = amp_->intensity(point);//unfortunatly not thread safe
