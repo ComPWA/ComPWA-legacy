@@ -56,24 +56,23 @@ public:
 
 	virtual const std::vector<std::string>& getVariableNames();
 
-//  virtual void writeToFile();
     virtual void pushEvent(const Event& evt) {fEvents.push_back(evt);};
     virtual Event& getEvent(const int);
     virtual allMasses getMasses(const unsigned int startEvent=0, unsigned int nEvents=0);
     virtual const int getBin(const int, double&, double&);
-    //virtual const int getEvent(const int, TLorentzVector& , TLorentzVector& , double&);
     virtual void writeData(std::string file="",std::string trName="");
     virtual void Clear();
 
+    //! Number of events
 	virtual const unsigned int getNEvents() const {return fEvents.size();};
+    //! Number of bins
 	virtual const unsigned int getNBins() const {return fmaxBins;};
-
+    //! Get sample as vector of events
 	virtual std::vector<Event> getEvents() {return fEvents; }
+	//! Get sample as vector of dataPoints
 	virtual std::vector<dataPoint> getDataPoints();
-	virtual void Add(Data& otherSample){
-		std::vector<Event> otherEvents = otherSample.getEvents();
-		fEvents.insert(fEvents.end(), otherEvents.begin(), otherEvents.end());
-	}
+	//! Append other sample
+	virtual void Add(Data& otherSample);
 	//! Destructor
 	virtual ~RootReader();
 	//! Remove all events outside PHSP

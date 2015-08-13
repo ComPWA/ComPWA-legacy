@@ -117,20 +117,21 @@ void MinLogLH::setAmplitude(std::shared_ptr<Amplitude> amp_, std::shared_ptr<Dat
 		mAccSample = accSample->getMasses();
 		//we assume that the total efficiency of the sample is stored as efficiency of each event
 		accSampleEff = mAccSample.eff.at(0);
-		BOOST_LOG_TRIVIAL(info)<<"MinLogLH::MinLogLH() total efficiency of unbinned correction sample is set to "<<accSampleEff;
+		BOOST_LOG_TRIVIAL(info)<<"MinLogLH::MinLogLH() total efficiency of unbinned correction "
+				"sample is set to "<<accSampleEff;
 	}
 
 	signalFraction = sigFrac;
 	useFunctionTree = 0;//ensure that iniLHtree is executed
 	setUseFunctionTree(useFuncTr);
 	if(data->hasWeights() && signalFraction!=1.)
-		throw std::runtime_error("MinLogLH::MinLogLhbkg() data sample has weights and signal fraction !=1. That makes no sense!");
+		throw std::runtime_error("MinLogLH::MinLogLhbkg() data sample has weights and "
+				"signal fraction !=1. That makes no sense!");
 	calcSumOfWeights();
 
 	if(signalFraction!=1 && !ampBkg)
-		throw std::runtime_error("MinLogLH::setAmplitude() a signal fraction smaller 1 was set"
-				" but no background description given. If you want to assume a flat background, "
-				"pass a Physics//Background//FlatBackground object!");
+		throw std::runtime_error("MinLogLH::setAmplitude() a signal fraction != 1 was set"
+				" but no background description given. You should add at least a flat background!");
 	if(signalFraction==1 && !ampBkg) ampBkg = std::shared_ptr<Amplitude>();
 
 	//reset all trees before generating new trees; saves a lot of virtual memory
@@ -143,8 +144,8 @@ void MinLogLH::setAmplitude(std::shared_ptr<Amplitude> amp_, std::shared_ptr<Dat
 
 	return;
 }
-void MinLogLH::setAmplitude(std::shared_ptr<Amplitude> amp_, std::shared_ptr<Amplitude> bkg_,std::shared_ptr<Data> data_,
-		std::shared_ptr<Data> phspSample_, std::shared_ptr<Data> accSample_,
+void MinLogLH::setAmplitude(std::shared_ptr<Amplitude> amp_, std::shared_ptr<Amplitude> bkg_,
+		std::shared_ptr<Data> data_, std::shared_ptr<Data> phspSample_, std::shared_ptr<Data> accSample_,
 		unsigned int startEvent, unsigned int nEvents, bool useFuncTr, double sigFrac){
 	ampBkg=bkg_;
 	return setAmplitude(amp_,data_,phspSample_,accSample_,startEvent,nEvents,useFuncTr,sigFrac);
@@ -156,7 +157,8 @@ void MinLogLH::calcSumOfWeights(){
 		Event theEvent(data->getEvent(evt));
 		sumOfWeights += theEvent.getWeight();
 	}
-	BOOST_LOG_TRIVIAL(info)<<"MinLogLH: for current data set: numEvents = "<<nUseEvt_<<" sumOfWeights="<<sumOfWeights<< " for current data set.";
+	BOOST_LOG_TRIVIAL(info)<<"MinLogLH: for current data set: numEvents = "
+			<<nUseEvt_<<" sumOfWeights="<<sumOfWeights<< " for current data set.";
 	return;
 }
 

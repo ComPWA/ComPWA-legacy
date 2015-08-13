@@ -146,7 +146,6 @@ std::shared_ptr<FitResult> MinuitIF::exec(ParameterList& par){
 		BOOST_LOG_TRIVIAL(info) <<"MinuitIF::exec() | migrad failed to find minimum! "
 		"We skip hesse and minos!";
 
-	std::cout<<"Parameters after hesse: "<<par<<std::endl;
 	//MINOS
 	MnMinos minos(_myFcn,minMin,strat);
 
