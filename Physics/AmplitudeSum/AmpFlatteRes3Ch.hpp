@@ -43,6 +43,12 @@ public:
 
 	virtual ~AmpFlatteRes3Ch();
 
+	//! Get resonance width
+	double GetWidth() {
+		return std::abs( couplingToWidth(_mass->GetValue(),_mass->GetValue(), _g1->GetValue(),
+			_ma, _mb, _spin, _mesonRadius->GetValue(), ffType) );
+	}
+
 	/** Dynamical function for two coupled channel approach
 	 *
 	 * @param mSq center-of-mass energy^2 (=s)

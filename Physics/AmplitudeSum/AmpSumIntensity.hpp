@@ -125,6 +125,8 @@ public:
 	virtual std::shared_ptr<AmpAbsDynamicalFunction> GetResonance(std::string name);
 	//! get resonance by @param id
 	virtual std::shared_ptr<AmpAbsDynamicalFunction> GetResonance(unsigned int id);
+	//! Average width of all resonances
+	virtual double averageWidth();
 	/*!Get AmplitudeSetup
 	 * AmpltidueSetup object is updated with current parameters and a pointer is returned.
 	 *

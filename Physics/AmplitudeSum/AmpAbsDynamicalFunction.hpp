@@ -93,19 +93,21 @@ public:
 	//! Get phase
 	virtual double GetPhase() { return _phase->GetValue(); };
 	//! Get resonance mass
-	double GetMass() {return _mass->GetValue();};
+	virtual double GetMass() {return _mass->GetValue();};
+	//! Get resonance width
+	virtual double GetWidth() = 0;
 	//! Get resonance spin
 	virtual double getSpin() { return _spin; }
-	double GetM() {return _m;};
-	double GetN() {return _n;};
+	virtual double GetM() {return _m;};
+	virtual double GetN() {return _n;};
 	//! Get resonance meson radius
-	double GetMesonRadius() {return _mesonRadius->GetValue();};
+	virtual double GetMesonRadius() { return _mesonRadius->GetValue(); }
 	//! Set resonance mother meson radius
-	void SetMesonRadius(double r) {	_mesonRadius->SetValue(r); }
+	virtual void SetMesonRadius(double r) {	_mesonRadius->SetValue(r); }
 	//! Get resonance mother meson radius
-	double GetMotherRadius() {return _motherRadius->GetValue();};
+	virtual double GetMotherRadius() { return _motherRadius->GetValue(); }
 	//! Set resonance mother meson radius
-	void SetMotherRadius(double r) {	_motherRadius->SetValue(r); }
+	virtual void SetMotherRadius(double r) { _motherRadius->SetValue(r); }
 
 	inline virtual bool isSubSys(const unsigned int subSys) const{ return (subSys==_subSys); };
 	//	virtual std::shared_ptr<FunctionTree> setupTree(

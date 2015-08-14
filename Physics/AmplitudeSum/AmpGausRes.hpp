@@ -40,6 +40,9 @@ public:
 
 	~AmpGausRes();
 
+	//! Get resonance width
+	double GetWidth() { return _width->GetValue(); }
+
 	virtual std::complex<double> evaluate(dataPoint& point);
 	virtual std::complex<double> evaluateAmp(dataPoint& point);
 	virtual double evaluateWignerD(dataPoint& point) const { return 1; };

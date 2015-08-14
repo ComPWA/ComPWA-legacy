@@ -23,6 +23,8 @@ public:
 			int nCalls=30000, normStyle nS=normStyle::one) ;
 
 	virtual void initialise() { };
+	//! Get resonance width
+	virtual double GetWidth() { return 0; }
 	//! value of dynamical amplitude at \param point
 	virtual std::complex<double> evaluateAmp(dataPoint& point) { return dynamicalFunction();}
 	//! value of WignerD amplitude at \param point

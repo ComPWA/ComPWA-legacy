@@ -736,3 +736,14 @@ AmplitudeSetup* AmpSumIntensity::GetAmplitudeSetup() {
 	updateAmplitudeSetup();
 	return &ampSetup;
 }
+
+double AmpSumIntensity::averageWidth(){
+	double avWidth = 0;
+	double sum = 0;
+	for(int i=0; i<resoList.size(); i++){
+		avWidth += std::norm(resoList.at(i)->GetMagnitude())*resoList.at(i)->GetWidth();
+		sum += std::norm(resoList.at(i)->GetMagnitude());
+	}
+	avWidth /= sum;
+	return avWidth;
+}

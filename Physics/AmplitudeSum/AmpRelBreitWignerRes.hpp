@@ -43,6 +43,8 @@ public:
 			int nCalls=30000, normStyle nS=normStyle::one) ;
 
 	virtual ~AmpRelBreitWignerRes();
+	//! Get resonance width
+	double GetWidth() { return _width->GetValue(); }
 	/** Breit-Wigner function
 	 *
 	 * The dynamical function implemented here is taken from PDG2014 (Eq.47-22) for
