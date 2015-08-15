@@ -52,8 +52,10 @@ void AmpSumIntensity::init(){
 	 */
 	params.AddParameter( std::shared_ptr<DoubleParameter> (
 			new DoubleParameter("g1_a_0",2.0) )); //default - overwritten by other values for g1
+	params.GetDoubleParameter("g1_a_0")->FixParameter(1);
 	params.AddParameter( std::shared_ptr<DoubleParameter> (
 			new DoubleParameter("g2_a_0",2.0) )); //default - overwritten by other values for g2
+	params.GetDoubleParameter("g2_a_0")->FixParameter(1);
 
 	std::shared_ptr<AmpAbsDynamicalFunction> tmpRes;
 	for(std::vector<BreitWignerConf>::iterator reso=ampSetup.getBreitWigner().begin();
