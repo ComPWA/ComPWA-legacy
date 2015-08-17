@@ -27,7 +27,7 @@ public:
   ParticleStateIDComparator(unsigned int particle_id) :
       particle_id_(particle_id) {
   }
-  bool operator()(const ParticleState& ps) const {
+  bool operator()(const ParticleStateInfo& ps) const {
     return ps.id_ == particle_id_;
   }
 };
@@ -35,7 +35,7 @@ public:
 class DecayConfiguration {
   friend class DecayTreeFactory;
 
-  std::vector<ParticleState> particles_;
+  std::vector<ParticleStateInfo> particles_;
   std::vector<unsigned int> final_state_particles_;
   std::vector<unsigned int> intermediate_state_particles_;
 
@@ -47,9 +47,9 @@ public:
   DecayConfiguration();
   virtual ~DecayConfiguration();
 
-  void addFinalStateParticle(const ParticleState &final_state_particle);
+  void addFinalStateParticle(const ParticleStateInfo &final_state_particle);
   void addIntermediateStateParticle(
-      const ParticleState &intermediate_state_particle);
+      const ParticleStateInfo &intermediate_state_particle);
   void addCurrentDecayTreeToList();
 
   unsigned int convertParticleIDToListIndex(unsigned int particle_id) const;

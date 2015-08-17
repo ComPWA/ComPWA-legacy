@@ -13,7 +13,6 @@
 #define PHYSICS_HELICITYAMPLITUDE_TWOBODYDECAYAMPLITUDE_HPP_
 
 #include "ParticleStateDefinitions.hpp"
-#include "AbstractDynamicalFunction.hpp"
 
 #include <memory>
 #include <complex>
@@ -21,17 +20,17 @@
 namespace HelicityFormalism {
 
 class TwoBodyDecayAmplitude {
-  TwoBodyDecayInformation decay_info_;
+  TwoBodyDecaySpinInformation decay_info_;
 
   double spin_factor_;
 
 public:
-  TwoBodyDecayAmplitude(const TwoBodyDecayInformation& decay_info);
+  TwoBodyDecayAmplitude(const TwoBodyDecaySpinInformation& decay_info);
   virtual ~TwoBodyDecayAmplitude();
 
   void init();
 
-  std::complex<double> evaluate(const KinematicVariables& helicity_angles) const;
+  std::complex<double> evaluate(const HelicityAngles& helicity_angles) const;
 };
 
 } /* namespace HelicityFormalism */

@@ -32,16 +32,16 @@ class DecayTreeFactory {
   std::vector<DecayTree> createDecayTreeSeedList(
       ParticleIndexDecayTree::const_iterator& top_node_iter) const;
 
-  std::vector<std::vector<ParticleState> > makeDaughterCombinations(
+  std::vector<std::vector<ParticleStateInfo> > makeDaughterCombinations(
       std::vector<std::vector<unsigned int> > particle_index_lists) const;
 
   void extendDaughterCombinations(
       std::vector<std::vector<unsigned int> > remaining_particle_index_lists,
-      const std::vector<ParticleState>& decay_daughters_combination,
-      std::vector<std::vector<ParticleState> >& decay_daughters_combination_list) const;
+      const std::vector<ParticleStateInfo>& decay_daughters_combination,
+      std::vector<std::vector<ParticleStateInfo> >& decay_daughters_combination_list) const;
 
-  bool isParticleValidForCombination(const ParticleState& particle,
-      const std::vector<ParticleState>& combination) const;
+  bool isParticleValidForCombination(const ParticleStateInfo& particle,
+      const std::vector<ParticleStateInfo>& combination) const;
 
   bool canDecayTreesGrow(const std::vector<DecayTree>& decay_trees,
       const ParticleIndexDecayTree& decay_topology) const;

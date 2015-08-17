@@ -1,10 +1,10 @@
-########### HelicityAmplitude lib #############
+########### DynamicalDecayFunctions lib #############
 import os ;
 
 local QFT = [ os.environ QFT ] ;
 local GSL = [ os.environ GSL_ROOT ] ;
 
-BOOSTLIBS = -lboost_log_setup -lboost_log -lboost_date_time -lboost_serialization -lboost_system -lboost_thread -lboost_test_exec_monitor -L$(BOOST_ROOT)/lib ;
+BOOSTLIBS = -lboost_log_setup -lboost_log -lboost_serialization -lboost_system -lboost_thread -lboost_test_exec_monitor -L$(BOOST_ROOT)/lib ;
 
 project :
 	requirements
@@ -18,10 +18,9 @@ project :
 	<linkflags>-lqft++
 	;
 
-lib HelicityAmplitude : 
+lib DynamicalDecayFunctions : 
         [ glob *.cpp : ] 
         $(TOP)/Core//ComPWA
-        $(TOP)/Physics/DynamicalDecayFunctions//DynamicalDecayFunctions
         ;
 
-install dist : HelicityAmplitude : <location>$(TOP)/lib ;
+install dist : DynamicalDecayFunctions : <location>$(TOP)/lib ;

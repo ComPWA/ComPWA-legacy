@@ -19,7 +19,7 @@
 		<Particle>
 			<id>4</id>
 			<name>f0_980</name>
-			<BreitWigner>
+			<DynamicalFunction>
 				<type>relBW</type>
 				<reference>f0_980</reference>
 				<mass>0.99</mass>
@@ -46,12 +46,12 @@
 				<spin>0</spin>
 				<m>0</m>
 				<n>0</n>
-			</BreitWigner>
+			</DynamicalFunction>
 		</Particle>
 		<Particle>
 			<id>5</id>
 			<name>f0_1500</name>
-			<BreitWigner>
+			<DynamicalFunction>
 				<type>relBW</type>
 				<reference>f0_1500</reference>
 				<mass>1.505</mass>
@@ -78,12 +78,12 @@
 				<spin>0</spin>
 				<m>0</m>
 				<n>0</n>
-			</BreitWigner>
+			</DynamicalFunction>
 		</Particle>
 		<Particle>
 			<id>6</id>
 			<name>f0_1710</name>
-			<BreitWigner>
+			<DynamicalFunction>
 				<type>relBW</type>
 				<reference>f0_1710</reference>
 				<mass>1.72</mass>
@@ -110,12 +110,12 @@
 				<spin>0</spin>
 				<m>0</m>
 				<n>0</n>
-			</BreitWigner>
+			</DynamicalFunction>
 		</Particle>
 		<Particle>
 			<id>7</id>
 			<name>f2_1270</name>
-			<BreitWigner>
+			<DynamicalFunction>
 				<type>relBW</type>
 				<reference>f2_1270</reference>
 				<mass>1.274</mass>
@@ -142,12 +142,12 @@
 				<spin>2</spin>
 				<m>0</m>
 				<n>0</n>
-			</BreitWigner>
+			</DynamicalFunction>
 		</Particle>
 		<Particle>
 			<id>8</id>
 			<name>f2_1525</name>
-			<BreitWigner>
+			<DynamicalFunction>
 				<type>relBW</type>
 				<reference>f2_1525</reference>
 				<mass>1.525</mass>
@@ -174,12 +174,12 @@
 				<spin>2</spin>
 				<m>0</m>
 				<n>0</n>
-			</BreitWigner>
+			</DynamicalFunction>
 		</Particle>
 		<Particle>
 			<id>9</id>
 			<name>omega</name>
-			<BreitWigner>
+			<DynamicalFunction>
 				<type>relBW</type>
 				<reference>omega</reference>
 				<mass>0.783</mass>
@@ -206,12 +206,12 @@
 				<spin>1</spin>
 				<m>0</m>
 				<n>0</n>
-			</BreitWigner>
+			</DynamicalFunction>
 		</Particle>
 		<Particle>
 			<id>10</id>
 			<name>jpsi</name>
-			<BreitWigner>
+			<DynamicalFunction>
 				<type>relBW</type>
 				<reference>jpsi</reference>
 				<mass>3.097</mass>
@@ -238,7 +238,7 @@
 				<spin>1</spin>
 				<m>0</m>
 				<n>0</n>
-			</BreitWigner>
+			</DynamicalFunction>
 		</Particle>
 	</IntermediateStates>
 

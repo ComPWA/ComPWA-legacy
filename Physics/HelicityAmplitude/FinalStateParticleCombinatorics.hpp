@@ -90,34 +90,34 @@ class FinalStateParticleCombinatorics {
   };
 
   void createDistinguishableParticleMapping(
-      const std::vector<ParticleState>& fs_particle_list, const Event& event);
+      const std::vector<ParticleStateInfo>& fs_particle_list, const Event& event);
 
-  bool isEventParticleMatchUniqueForParticle(const ParticleState& fs_particle,
+  bool isEventParticleMatchUniqueForParticle(const ParticleStateInfo& fs_particle,
       const Event& ev) const;
 
-  unsigned int getEventParticleIndex(const ParticleState& particle_state,
+  unsigned int getEventParticleIndex(const ParticleStateInfo& particle_state,
       const Event& event) const;
 
   void createAllParticleMappings(
-      std::vector<ParticleState> final_state_particle_pool, const Event& event);
+      std::vector<ParticleStateInfo> final_state_particle_pool, const Event& event);
 
   void removeDistinguishableParticles(
-      std::vector<ParticleState>& fs_particle_pool,
+      std::vector<ParticleStateInfo>& fs_particle_pool,
       std::vector<unsigned int>& event_final_state_particle_index_pool) const;
 
   void extendParticleMappings(
       const IndexMapping& current_mapping,
-      std::vector<ParticleState> remaining_final_state_particle_pool,
+      std::vector<ParticleStateInfo> remaining_final_state_particle_pool,
       const Event& event,
       const std::vector<unsigned int>& remaining_event_final_state_particle_index_pool);
 
   std::vector<unsigned int> getPossibleEventParticleIndicesForParticleState(
-      const ParticleState& particle_state, const Event& event) const;
+      const ParticleStateInfo& particle_state, const Event& event) const;
 public:
   FinalStateParticleCombinatorics();
   virtual ~FinalStateParticleCombinatorics();
 
-  void init(const std::vector<ParticleState>& fs_particle_list,
+  void init(const std::vector<ParticleStateInfo>& fs_particle_list,
       const Event &event);
 
   std::vector<IndexMapping> getUniqueParticleMappingsSubsetForTopology(

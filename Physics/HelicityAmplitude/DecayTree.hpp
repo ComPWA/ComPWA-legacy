@@ -26,12 +26,12 @@ namespace HelicityFormalism {
  * The ParticleStates are used as the vertex property values.
  */
 typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::directedS,
-    ParticleState> HelicityTree;
+    ParticleStateInfo> HelicityTree;
 
 class DecayTree {
   HelicityTree decay_tree_;
 
-  std::vector<ParticleState> currently_grown_nodes_;
+  std::vector<ParticleStateInfo> currently_grown_nodes_;
 
   boost::graph_traits<HelicityTree>::vertex_descriptor current_vertex_;
 
@@ -63,6 +63,32 @@ class DecayTree {
   protected:
     std::map<unsigned int, unsigned int> vertex_counter_;
     bool& has_cycle_;
+  };
+
+  struct GetVertexDecendants: public boost::dfs_visitor<> {
+    GetVertexDecendants(std::vector<unsigned int>& decendant_list,
+        const boost::graph_traits<HelicityTree>::vertex_descriptor& vertex) :
+        decendant_list_(decendant_list), vertex_(vertex), write_vertex_(false) {
+    }
+
+    template<class Vertex, class Graph>
+    void discover_vertex(Vertex v, Graph&) {
+      if (write_vertex_)
+        decendant_list_.push_back(v);
+      if (v == vertex_)
+        write_vertex_ = true;
+    }
+
+    template<class Vertex, class Graph>
+    void finish_vertex(Vertex v, Graph&) {
+      if (v == vertex_)
+        write_vertex_ = false;
+    }
+
+  protected:
+    bool write_vertex_;
+    const boost::graph_traits<HelicityTree>::vertex_descriptor& vertex_;
+    std::vector<unsigned int>& decendant_list_;
   };
 
   /*struct FinalStateParticleFinder: public boost::dfs_visitor<> {
@@ -107,13 +133,16 @@ public:
   const std::vector<
       boost::graph_traits<HelicityFormalism::HelicityTree>::vertex_descriptor>& getDecayVertexList() const;
 
-  std::vector<ParticleState> getLowestLeaves() const;
+  std::vector<ParticleStateInfo> getLowestLeaves() const;
 
   boost::graph_traits<HelicityTree>::vertex_descriptor addVertex(
-      const ParticleState& particle);
+      const ParticleStateInfo& particle);
 
-  void createDecay(const ParticleState &mother,
-      const std::vector<ParticleState> &daughters);
+  void createDecay(const ParticleStateInfo &mother,
+      const std::vector<ParticleStateInfo> &daughters);
+
+  std::vector<std::vector<ParticleStateInfo> > createDecayProductsFinalStateParticleLists(
+      const boost::graph_traits<HelicityFormalism::HelicityTree>::vertex_descriptor& vertex) const;
 
   void print(std::ostream& os) const;
 

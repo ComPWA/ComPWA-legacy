@@ -14,25 +14,28 @@
 
 #include <set>
 
-#include <qft++.h>
+#include "boost/property_tree/ptree.hpp"
+
+#include "qft++.h"
 
 namespace HelicityFormalism {
 
-struct KinematicVariables {
-  double invariant_mass_squared_;
+typedef boost::property_tree::ptree DynamicalInfo;
+
+struct HelicityAngles {
   double theta_;
   double phi_;
 
-  KinematicVariables(double invariant_mass_squared, double theta, double phi) :
-      invariant_mass_squared_(invariant_mass_squared), theta_(theta), phi_(phi) {
+  HelicityAngles(double theta, double phi) :
+      theta_(theta), phi_(phi) {
   }
 };
 
-struct SpinState {
+struct SpinInfo {
   Spin J_;
   Spin M_;
 
-  bool operator==(const SpinState &rhs) const {
+  bool operator==(const SpinInfo &rhs) const {
     if (this->J_.Numerator() != rhs.J_.Numerator())
       return false;
     if (this->J_.Denominator() != rhs.J_.Denominator())
@@ -44,11 +47,11 @@ struct SpinState {
 
     return true;
   }
-  bool operator!=(const SpinState &rhs) const {
+  bool operator!=(const SpinInfo &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator<(const SpinState &rhs) const {
+  bool operator<(const SpinInfo &rhs) const {
     if (this->J_.Numerator() > rhs.J_.Numerator())
       return false;
     else if (this->J_.Numerator() < rhs.J_.Numerator())
@@ -66,31 +69,32 @@ struct SpinState {
 
     return true;
   }
-  bool operator>(const SpinState &rhs) const {
+  bool operator>(const SpinInfo &rhs) const {
     return (rhs < *this);
   }
 };
 
-struct ParticleState {
+struct ParticleStateInfo {
   unsigned int id_;
   int particle_id_;
   std::string name_;
-  SpinState helicity_state_information;
+  SpinInfo spin_information_;
+  DynamicalInfo dynamical_information_;
 
-  bool operator==(const ParticleState &rhs) const {
+  bool operator==(const ParticleStateInfo &rhs) const {
     if (this->id_ != rhs.id_)
       return false;
     if (this->particle_id_ != rhs.particle_id_)
       return false;
     if (this->name_ != rhs.name_)
       return false;
-    if (this->helicity_state_information != rhs.helicity_state_information)
+    if (this->spin_information_ != rhs.spin_information_)
       return false;
 
     return true;
   }
 
-  bool operator<(const ParticleState &rhs) const {
+  bool operator<(const ParticleStateInfo &rhs) const {
     if (this->id_ > rhs.id_)
       return false;
     else if (this->id_ < rhs.id_)
@@ -103,12 +107,12 @@ struct ParticleState {
       return false;
     else if (this->name_ < rhs.name_)
       return true;
-    if (this->helicity_state_information > rhs.helicity_state_information)
+    if (this->spin_information_ > rhs.spin_information_)
       return false;
 
     return true;
   }
-  bool operator>(const ParticleState &rhs) const {
+  bool operator>(const ParticleStateInfo &rhs) const {
     return (rhs < *this);
   }
 };
@@ -122,16 +126,17 @@ struct ParticleStateIDComparison {
       ps_id_(ps_id) {
   }
 
-  bool operator()(const ParticleState& ps) {
+  bool operator()(const ParticleStateInfo& ps) {
     return ps.id_ == ps_id_;
   }
 
-  bool operator()(const ParticleState& lhs, const ParticleState& rhs) {
+  bool operator()(const ParticleStateInfo& lhs, const ParticleStateInfo& rhs) {
     return lhs.id_ < rhs.id_;
   }
 };
 
-typedef std::pair<SpinState, SpinState> SpinStatePair;
+typedef std::pair<SpinInfo, SpinInfo> SpinInfoPair;
+typedef std::pair<DynamicalInfo, DynamicalInfo> DynamicalInfoPair;
 
 typedef std::vector<unsigned int> IndexList;
 typedef std::pair<unsigned int, unsigned int> IndexPair;
@@ -163,11 +168,11 @@ struct TwoBodyDecayIndices {
 
 };
 
-struct TwoBodyDecayInformation {
-  SpinState initial_state_;
-  SpinStatePair final_state_;
+struct TwoBodyDecaySpinInformation {
+  SpinInfo initial_state_;
+  SpinInfoPair final_state_;
 
-  bool operator<(const TwoBodyDecayInformation &rhs) const {
+  bool operator<(const TwoBodyDecaySpinInformation &rhs) const {
     if (this->initial_state_ > rhs.initial_state_)
       return false;
     else if (this->initial_state_ < rhs.initial_state_)
@@ -177,11 +182,56 @@ struct TwoBodyDecayInformation {
 
     return true;
   }
+
+  bool operator>(const TwoBodyDecaySpinInformation &rhs) const {
+    return (rhs < *this);
+  }
+};
+
+struct TwoBodyDecayDynamicalInformation {
+  DynamicalInfo initial_state_;
+
+  bool operator<(const TwoBodyDecayDynamicalInformation &rhs) const {
+    if (generateMap(this->initial_state_) > generateMap(rhs.initial_state_))
+      return false;
+
+    return true;
+  }
+
+  bool operator>(const TwoBodyDecayDynamicalInformation &rhs) const {
+    return (rhs < *this);
+  }
+
+  std::map<std::string, std::string> generateMap(
+      const DynamicalInfo& tree) const {
+    std::map<std::string, std::string> return_map;
+    DynamicalInfo::const_iterator tree_iter;
+    for (tree_iter = tree.begin(); tree_iter != tree.end(); ++tree_iter) {
+      return_map[tree_iter->first] = tree_iter->second.get_value<std::string>();
+    }
+    return return_map;
+  }
+};
+
+struct TwoBodyDecayInformation {
+  TwoBodyDecaySpinInformation spin_info_;
+  TwoBodyDecayDynamicalInformation dynamical_info_;
+
+  bool operator<(const TwoBodyDecayInformation &rhs) const {
+    if (this->spin_info_ > rhs.spin_info_)
+      return false;
+    else if (this->spin_info_ < rhs.spin_info_)
+      return true;
+    if (this->dynamical_info_ > rhs.dynamical_info_)
+      return false;
+
+    return true;
+  }
 };
 
 struct DecayTopology {
   // set of final state particle lists corresponding to particle states
-  std::vector<std::vector<ParticleState> > final_state_content_lists_;
+  std::vector<std::vector<ParticleStateInfo> > final_state_content_lists_;
 
   std::vector<TwoBodyDecayIndices> decay_node_infos_;
 

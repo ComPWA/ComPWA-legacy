@@ -23,7 +23,7 @@ DecayConfiguration::~DecayConfiguration() {
 }
 
 void DecayConfiguration::addFinalStateParticle(
-    const ParticleState &final_state_particle) {
+    const ParticleStateInfo &final_state_particle) {
   if (std::find(particles_.begin(), particles_.end(), final_state_particle)
       == particles_.end()) {
     particles_.push_back(final_state_particle);
@@ -32,7 +32,7 @@ void DecayConfiguration::addFinalStateParticle(
 }
 
 void DecayConfiguration::addIntermediateStateParticle(
-    const ParticleState &intermediate_state_particle) {
+    const ParticleStateInfo &intermediate_state_particle) {
   if (std::find(particles_.begin(), particles_.end(),
       intermediate_state_particle) == particles_.end()) {
     particles_.push_back(intermediate_state_particle);
@@ -48,7 +48,7 @@ void DecayConfiguration::addCurrentDecayTreeToList() {
 unsigned int DecayConfiguration::convertParticleIDToListIndex(
     unsigned int particle_id) const {
   ParticleStateIDComparator ps_comparator(particle_id);
-  std::vector<ParticleState>::const_iterator found_particle = std::find_if(
+  std::vector<ParticleStateInfo>::const_iterator found_particle = std::find_if(
       particles_.begin(), particles_.end(), ps_comparator);
   if (found_particle != particles_.end()) {
     return std::distance(particles_.begin(), found_particle);

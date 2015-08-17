@@ -94,13 +94,13 @@ void HelicityKinematics::init(const Event& event) {
   }
 }
 
-std::vector<ParticleState> HelicityKinematics::createFSParticleList() const {
-  std::vector<ParticleState> final_state_particle_pool;
+std::vector<ParticleStateInfo> HelicityKinematics::createFSParticleList() const {
+  std::vector<ParticleStateInfo> final_state_particle_pool;
   // just take the first topology (all should have the same fs particle content)
   if (decay_topologies_.size() > 0) {
     const DecayTopology& decay_topology = decay_topologies_.front();
 
-    std::set<ParticleState> temp_particle_set;
+    std::set<ParticleStateInfo> temp_particle_set;
 
     for (auto final_state_particle_lists_iter =
         decay_topology.final_state_content_lists_.begin();
@@ -166,7 +166,7 @@ IndexList HelicityKinematics::createDataPointIndexListForTopology(
 }
 
 unsigned int HelicityKinematics::convertAndStoreParticleList(
-    const std::vector<ParticleState>& particle_list,
+    const std::vector<ParticleStateInfo>& particle_list,
     const IndexMapping& fs_particle_mapping) {
 
   IndexList event_particle_index_list = convertParticleListToEventIndexList(
@@ -188,7 +188,7 @@ unsigned int HelicityKinematics::convertAndStoreParticleList(
 }
 
 IndexList HelicityKinematics::convertParticleListToEventIndexList(
-    const std::vector<ParticleState>& particle_list,
+    const std::vector<ParticleStateInfo>& particle_list,
     const IndexMapping& fs_particle_mapping) const {
   IndexList event_particle_index_list;
   event_particle_index_list.reserve(particle_list.size());
@@ -269,18 +269,22 @@ void HelicityKinematics::fillPointWithBoostedKinematicVariables(
     dataPoint& point,
     const std::vector<Vector4<double> >& unique_occurring_cms_4vectors,
     const TwoBodyDecayIndices& two_body_state_indices,
-    unsigned int &data_point_fill_position) const {
-  // define particle 1 of the two body decay
+    unsigned int& data_point_fill_position) const {
+  // define particle products of the two body decay
   Vector4<double> particle1_4vector(
       unique_occurring_cms_4vectors[two_body_state_indices.decay_products_.first]);
+  Vector4<double> particle2_4vector(
+      unique_occurring_cms_4vectors[two_body_state_indices.decay_products_.second]);
   // define the two body state
   Vector4<double> decaying_state(
       unique_occurring_cms_4vectors[two_body_state_indices.decay_products_.first]
           + unique_occurring_cms_4vectors[two_body_state_indices.decay_products_.second]);
 
   // at first add the invariant mass squared to the data point
-  point.setVal(data_point_fill_position, decaying_state.Mass2());
-  ++data_point_fill_position;
+  point.setVal(data_point_fill_position++, decaying_state.Mass2());
+  // then add the invariant masses of the daughters
+  point.setVal(data_point_fill_position++, particle1_4vector.Mass());
+  point.setVal(data_point_fill_position++, particle2_4vector.Mass());
 
   // boost particle1 into the rest frame of the two body state
   particle1_4vector.Boost(decaying_state);
@@ -300,10 +304,8 @@ void HelicityKinematics::fillPointWithBoostedKinematicVariables(
         -rotation_phi);
   }
   // now just get the theta and phi angles of the boosted particle 1
-  point.setVal(data_point_fill_position, particle1_4vector.Theta());
-  ++data_point_fill_position;
-  point.setVal(data_point_fill_position, particle1_4vector.Phi());
-  ++data_point_fill_position;
+  point.setVal(data_point_fill_position++, particle1_4vector.Theta());
+  point.setVal(data_point_fill_position++, particle1_4vector.Phi());
 }
 
 std::vector<std::vector<IndexList> > HelicityKinematics::getTopologyAmplitudeDataPointIndexLists() const {

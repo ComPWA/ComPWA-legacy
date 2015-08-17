@@ -30,9 +30,20 @@ std::vector<unsigned int> DecayXMLConfigReader::parseIDList(
     const boost::property_tree::ptree &pt) const {
   std::vector<unsigned int> ids;
   BOOST_FOREACH(ptree::value_type const &id_list_item, pt.get_child("id_list")){
-    ids.push_back(id_list_item.second.get<unsigned int>(""));
-  }
+  ids.push_back(id_list_item.second.get<unsigned int>(""));
+}
   return ids;
+}
+
+ParticleStateInfo DecayXMLConfigReader::parseParticleState(
+    const boost::property_tree::ptree &pt) const {
+  ParticleStateInfo ps;
+  ps.spin_information_.J_ = 0;
+  ps.spin_information_.M_ = 0;
+  ps.id_ = pt.get<unsigned int>("id");
+  ps.name_ = pt.get<std::string>("name");
+  ps.dynamical_information_ = pt.get_child("DynamicalFunction");
+  return ps;
 }
 
 void DecayXMLConfigReader::readConfig(const std::string &filename) {
@@ -54,25 +65,14 @@ void DecayXMLConfigReader::readConfig(const std::string &filename) {
   // The get_child() function returns a reference to the child
   // at the specified path; if there is no such child, it throws.
   // Property tree iterators are models of BidirectionalIterator.
-  BOOST_FOREACH(ptree::value_type const& v, pt_.get_child("FinalState")) {
-    ParticleState ps;
-    ps.helicity_state_information.J_ = 0;
-    ps.helicity_state_information.M_ = 0;
-    ps.id_ = v.second.get<unsigned int>("id");
-    ps.name_ = v.second.get<std::string>("name");
-    decay_configuration_.addFinalStateParticle(ps);
+  BOOST_FOREACH(ptree::value_type const& v, pt_.get_child("FinalState")){
+    decay_configuration_.addFinalStateParticle(parseParticleState(v.second));
   }
-  BOOST_FOREACH(ptree::value_type const& v, pt_.get_child("IntermediateStates")) {
-    ParticleState ps;
-    ps.helicity_state_information.J_ = 0;
-    ps.helicity_state_information.M_ = 0;
-    ps.id_ = v.second.get<unsigned int>("id");
-    ps.name_ = v.second.get<std::string>("name");
-    decay_configuration_.addFinalStateParticle(ps);
-    decay_configuration_.addIntermediateStateParticle(ps);
+  BOOST_FOREACH(ptree::value_type const& v, pt_.get_child("IntermediateStates")){
+    decay_configuration_.addIntermediateStateParticle(parseParticleState(v.second));
   }
 
-  BOOST_FOREACH(ptree::value_type const& decay_tree, pt_.get_child("DecayTrees")) {
+  BOOST_FOREACH(ptree::value_type const& decay_tree, pt_.get_child("DecayTrees")){
     BOOST_FOREACH(ptree::value_type const& decay_node, decay_tree.second) {
       std::vector<unsigned int> mother_ids = parseIDList(decay_node.second.get_child("mother"));
       std::vector<std::vector<unsigned int> > daughters_id_lists;

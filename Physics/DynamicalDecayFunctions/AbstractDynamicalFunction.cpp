@@ -9,21 +9,21 @@
 //   Stefan Pflueger - initial API and implementation
 //----------------------------------------------------------------------------------
 
-#ifndef ABSTRACTDYNAMICALFUNCTION_HPP_
-#define ABSTRACTDYNAMICALFUNCTION_HPP_
+#include "AbstractDynamicalFunction.hpp"
 
-#include <complex>
+namespace DynamicalFunctions {
 
-namespace HelicityFormalism {
+AbstractDynamicalFunction::AbstractDynamicalFunction() {
+  // TODO Auto-generated constructor stub
 
-class AbstractDynamicalFunction {
-public:
-  AbstractDynamicalFunction();
-  virtual ~AbstractDynamicalFunction();
+}
 
-  virtual std::complex<double> evaluate() const =0;
-};
+AbstractDynamicalFunction::~AbstractDynamicalFunction() {
+  // TODO Auto-generated destructor stub
+}
 
-} /* namespace HelicityFormalism */
+const ParameterList& AbstractDynamicalFunction::getParameterList() const {
+  return parameter_list_;
+}
 
-#endif /* ABSTRACTDYNAMICALFUNCTION_HPP_ */
+} /* namespace DynamicalFunctions */

@@ -24,11 +24,8 @@ class CoherentAmplitude: public Amplitude {
   //std::vector<HelicityDecayTree> decay_trees_;
   std::shared_ptr<Efficiency> efficiency_;
 
-  ParameterList params_;
+  ParameterList parameters_;
   std::vector<std::vector<IndexList> > data_point_index_lists_;
-
-  std::vector<KinematicVariables> createKinematicVariablesFromDataPoint(
-      const dataPoint& point) const;
 
 public:
   CoherentAmplitude(const std::vector<TopologyAmplitude>& amplitude_trees);

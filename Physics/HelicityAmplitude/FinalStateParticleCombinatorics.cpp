@@ -24,14 +24,14 @@ FinalStateParticleCombinatorics::~FinalStateParticleCombinatorics() {
 }
 
 void FinalStateParticleCombinatorics::init(
-    const std::vector<ParticleState>& fs_particle_list, const Event& event) {
+    const std::vector<ParticleStateInfo>& fs_particle_list, const Event& event) {
   createDistinguishableParticleMapping(fs_particle_list, event);
 
   createAllParticleMappings(fs_particle_list, event);
 }
 
 void FinalStateParticleCombinatorics::createDistinguishableParticleMapping(
-    const std::vector<ParticleState>& fs_particle_list, const Event& event) {
+    const std::vector<ParticleStateInfo>& fs_particle_list, const Event& event) {
   for (auto fs_particle_iter = fs_particle_list.begin();
       fs_particle_iter != fs_particle_list.end(); ++fs_particle_iter) {
     if (isEventParticleMatchUniqueForParticle(*fs_particle_iter, event)) {
@@ -42,7 +42,7 @@ void FinalStateParticleCombinatorics::createDistinguishableParticleMapping(
 }
 
 bool FinalStateParticleCombinatorics::isEventParticleMatchUniqueForParticle(
-    const ParticleState& fs_particle, const Event& event) const {
+    const ParticleStateInfo& fs_particle, const Event& event) const {
   unsigned int match_counter(0);
   for (unsigned int i = 0; i < event.getNParticles(); ++i) {
     if (event.getParticle(i).pid == fs_particle.particle_id_)
@@ -56,7 +56,7 @@ bool FinalStateParticleCombinatorics::isEventParticleMatchUniqueForParticle(
 }
 
 unsigned int FinalStateParticleCombinatorics::getEventParticleIndex(
-    const ParticleState& particle_state, const Event& event) const {
+    const ParticleStateInfo& particle_state, const Event& event) const {
   for (unsigned int i = 0; i < event.getNParticles(); ++i) {
     if (event.getParticle(i).pid == particle_state.particle_id_)
       return i;
@@ -70,7 +70,7 @@ unsigned int FinalStateParticleCombinatorics::getEventParticleIndex(
 }
 
 void FinalStateParticleCombinatorics::createAllParticleMappings(
-    std::vector<ParticleState> final_state_particle_pool, const Event& event) {
+    std::vector<ParticleStateInfo> final_state_particle_pool, const Event& event) {
 
   // create event particle index pool
   std::vector<unsigned int> event_final_state_particle_index_pool;
@@ -91,7 +91,7 @@ void FinalStateParticleCombinatorics::createAllParticleMappings(
 }
 
 void FinalStateParticleCombinatorics::removeDistinguishableParticles(
-    std::vector<ParticleState>& fs_particle_pool,
+    std::vector<ParticleStateInfo>& fs_particle_pool,
     std::vector<unsigned int>& event_final_state_particle_index_pool) const {
 
   IndexMapping::const_iterator mapping_link_iter;
@@ -108,12 +108,12 @@ void FinalStateParticleCombinatorics::removeDistinguishableParticles(
 
 void FinalStateParticleCombinatorics::extendParticleMappings(
     const IndexMapping& current_mapping,
-    std::vector<ParticleState> remaining_final_state_particle_pool,
+    std::vector<ParticleStateInfo> remaining_final_state_particle_pool,
     const Event& event,
     const std::vector<unsigned int>& remaining_event_final_state_particle_index_pool) {
 
   if (remaining_final_state_particle_pool.size() > 0) {
-    const ParticleState &ps = remaining_final_state_particle_pool.back();
+    const ParticleStateInfo &ps = remaining_final_state_particle_pool.back();
     remaining_final_state_particle_pool.pop_back();
 
     // first get all candidates for the particle
@@ -159,7 +159,7 @@ void FinalStateParticleCombinatorics::extendParticleMappings(
 }
 
 std::vector<unsigned int> FinalStateParticleCombinatorics::getPossibleEventParticleIndicesForParticleState(
-    const ParticleState& particle_state, const Event& event) const {
+    const ParticleStateInfo& particle_state, const Event& event) const {
   std::vector<unsigned int> index_list;
   for (unsigned int i = 0; i < event.getNParticles(); ++i) {
     if (event.getParticle(i).pid == particle_state.particle_id_)

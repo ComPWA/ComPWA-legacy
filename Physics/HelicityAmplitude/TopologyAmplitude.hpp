@@ -12,15 +12,19 @@
 #ifndef PHYSICS_HELICITYAMPLITUDE_TOPOLOGYAMPLITUDE_HPP_
 #define PHYSICS_HELICITYAMPLITUDE_TOPOLOGYAMPLITUDE_HPP_
 
+#include <vector>
+
 #include "TwoBodyDecayAmplitude.hpp"
 
-#include <vector>
+#include "Physics/DynamicalDecayFunctions/AbstractDynamicalFunction.hpp"
+
+class dataPoint;
 
 namespace HelicityFormalism {
 
 typedef std::vector<
     std::pair<std::shared_ptr<TwoBodyDecayAmplitude>,
-        std::shared_ptr<AbstractDynamicalFunction> > > SequentialTwoBodyDecayAmplitude;
+        std::shared_ptr<DynamicalFunctions::AbstractDynamicalFunction> > > SequentialTwoBodyDecayAmplitude;
 
 /**
  * This class defines the full amplitude constructed of all decay amplitudes
@@ -36,9 +40,11 @@ public:
   TopologyAmplitude();
   virtual ~TopologyAmplitude();
 
-  std::complex<double> evaluate(
-      const std::vector<KinematicVariables>& helicity_angles,
+  std::complex<double> evaluate(const dataPoint& point,
       const IndexList& evaluation_index_list) const;
+
+  std::vector<HelicityAngles> extractHelicityFromDataPoint(
+      const dataPoint& point) const;
 };
 
 } /* namespace HelicityFormalism */

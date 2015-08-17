@@ -19,6 +19,9 @@ CoherentAmplitude::CoherentAmplitude(
     const std::vector<TopologyAmplitude>& amplitude_trees) :
     topology_amplitudes_(amplitude_trees) {
 
+  for(unsigned int i = 0; i < topology_amplitudes_.size(); ++i) {
+    // TODO: parameters_ add = topology_amplitudes_[i].sequential_decay_amplitude_list_[j].getParameterList()
+  }
 }
 
 CoherentAmplitude::~CoherentAmplitude() {
@@ -83,8 +86,6 @@ const ParameterList& CoherentAmplitude::intensityNoEff(const dataPoint& point) {
     // that we pass to the topology amplitudes
     // here the ordering has to be identical to the one in the data point
     // since the index lists refer to variable positions in the data point
-    std::vector<KinematicVariables> kinematic_variables =
-        createKinematicVariablesFromDataPoint(point);
     for (unsigned int i = 0; i < topology_amplitudes_.size(); ++i) {
       // get the correct helicity angles from the dataPoint
       const std::vector<IndexList> &topology_data_index_lists =
@@ -93,7 +94,7 @@ const ParameterList& CoherentAmplitude::intensityNoEff(const dataPoint& point) {
           final_state_combination_index < topology_data_index_lists.size();
           ++final_state_combination_index) {
 
-        intensity += topology_amplitudes_[i].evaluate(kinematic_variables,
+        intensity += topology_amplitudes_[i].evaluate(point,
             topology_data_index_lists[final_state_combination_index]);
       }
     }
@@ -108,13 +109,6 @@ const ParameterList& CoherentAmplitude::intensityNoEff(const dataPoint& point) {
   return result;
 }
 
-std::vector<KinematicVariables> CoherentAmplitude::createKinematicVariablesFromDataPoint(
-    const dataPoint& point) const {
-  std::vector<KinematicVariables> kinematic_variables;
-
-  return kinematic_variables;
-}
-
 const ParameterList& CoherentAmplitude::intensity(const dataPoint& point) {
   intensityNoEff(point);
   double eff = efficiency_->evaluate(point);
@@ -123,17 +117,17 @@ const ParameterList& CoherentAmplitude::intensity(const dataPoint& point) {
 }
 
 const bool CoherentAmplitude::fillStartParVec(ParameterList& outPar) {
-  outPar = ParameterList(params_);
+  outPar = ParameterList(parameters_);
   return true;
 }
 
 void CoherentAmplitude::setParameterList(ParameterList& par) {
   //parameters varied by Minimization algorithm
-  if (par.GetNDouble() != params_.GetNDouble())
+  if (par.GetNDouble() != parameters_.GetNDouble())
     throw std::runtime_error(
         "setParameterList(): size of parameter lists don't match");
-  for (unsigned int i = 0; i < params_.GetNDouble(); i++) {
-    std::shared_ptr<DoubleParameter> p = params_.GetDoubleParameter(i);
+  for (unsigned int i = 0; i < parameters_.GetNDouble(); i++) {
+    std::shared_ptr<DoubleParameter> p = parameters_.GetDoubleParameter(i);
     if (!p->IsFixed()) {
       p->SetValue(par.GetDoubleParameter(i)->GetValue());
       p->SetError(par.GetDoubleParameter(i)->GetError());

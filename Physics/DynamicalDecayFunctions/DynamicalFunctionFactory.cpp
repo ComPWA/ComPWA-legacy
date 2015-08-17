@@ -7,19 +7,24 @@
 //
 // Contributors:
 //   Stefan Pflueger - initial API and implementation
-//----------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------
 
-#include "AbstractDynamicalFunction.hpp"
+#include "DynamicalFunctionFactory.hpp"
 
-namespace HelicityFormalism {
+namespace DynamicalFunctions {
 
-AbstractDynamicalFunction::AbstractDynamicalFunction() {
+DynamicalFunctionFactory::DynamicalFunctionFactory() {
   // TODO Auto-generated constructor stub
 
 }
 
-AbstractDynamicalFunction::~AbstractDynamicalFunction() {
+DynamicalFunctionFactory::~DynamicalFunctionFactory() {
   // TODO Auto-generated destructor stub
 }
 
-} /* namespace HelicityFormalism */
+std::shared_ptr<AbstractDynamicalFunction> DynamicalFunctionFactory::generateDynamicalFunction(
+    const HelicityFormalism::TwoBodyDecayInformation& state_info) const {
+
+}
+
+} /* namespace DynamicalFunctions */

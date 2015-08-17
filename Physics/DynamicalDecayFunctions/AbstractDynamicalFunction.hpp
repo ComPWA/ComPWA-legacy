@@ -1,0 +1,40 @@
+//-------------------------------------------------------------------------------
+// Copyright (c) 2013 Stefan Pflueger.
+// All rights reserved. This program and the accompanying materials
+// are made available under the terms of the GNU Public License v3.0
+// which accompanies this distribution, and is available at
+// http://www.gnu.org/licenses/gpl.html
+//
+// Contributors:
+//   Stefan Pflueger - initial API and implementation
+//----------------------------------------------------------------------------------
+
+#ifndef PHYSICS_HELICITYAMPLITUDE_ABSTRACTDYNAMICALFUNCTION_HPP_
+#define PHYSICS_HELICITYAMPLITUDE_ABSTRACTDYNAMICALFUNCTION_HPP_
+
+#include <complex>
+
+#include "Core/ParameterList.hpp"
+
+class dataPoint;
+
+namespace DynamicalFunctions {
+
+class AbstractDynamicalFunction {
+protected:
+  ParameterList parameter_list_;
+public:
+  AbstractDynamicalFunction();
+  virtual ~AbstractDynamicalFunction();
+
+  virtual void initialiseParameters() =0;
+
+  virtual std::complex<double> evaluate(const dataPoint& point,
+      unsigned int evaluation_index) const =0;
+
+  const ParameterList& getParameterList() const;
+};
+
+} /* namespace DynamicalFunctions */
+
+#endif /* PHYSICS_HELICITYAMPLITUDE_ABSTRACTDYNAMICALFUNCTION_HPP_ */

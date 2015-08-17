@@ -26,6 +26,8 @@ class DecayXMLConfigReader {
   std::vector<unsigned int> parseIDList(
       const boost::property_tree::ptree &pt) const;
 
+  ParticleStateInfo parseParticleState(const boost::property_tree::ptree &pt) const;
+
 public:
   DecayXMLConfigReader(DecayConfiguration &decay_configuration);
   virtual ~DecayXMLConfigReader();

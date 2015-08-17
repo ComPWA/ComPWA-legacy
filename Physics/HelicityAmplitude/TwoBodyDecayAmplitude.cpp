@@ -16,7 +16,7 @@
 namespace HelicityFormalism {
 
 TwoBodyDecayAmplitude::TwoBodyDecayAmplitude(
-    const TwoBodyDecayInformation& decay_info) :
+    const TwoBodyDecaySpinInformation& decay_info) :
     decay_info_(decay_info) {
   init();
 }
@@ -29,10 +29,10 @@ void TwoBodyDecayAmplitude::init() {
 }
 
 std::complex<double> TwoBodyDecayAmplitude::evaluate(
-    const KinematicVariables& kinematic_variables) const {
+    const HelicityAngles& helicity_angles) const {
   return spin_factor_
-      * Wigner_D(kinematic_variables.phi_, kinematic_variables.theta_,
-          -kinematic_variables.phi_, decay_info_.initial_state_.J_,
+      * Wigner_D(helicity_angles.phi_, helicity_angles.theta_,
+          -helicity_angles.phi_, decay_info_.initial_state_.J_,
           decay_info_.initial_state_.M_,
           decay_info_.final_state_.first.M_
               - decay_info_.final_state_.second.M_);

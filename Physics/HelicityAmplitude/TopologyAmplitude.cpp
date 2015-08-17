@@ -9,6 +9,8 @@
 //   Stefan Pflueger - initial API and implementation
 //-------------------------------------------------------------------------------
 
+#include "Core/DataPoint.hpp"
+
 #include "TopologyAmplitude.hpp"
 
 namespace HelicityFormalism {
@@ -22,10 +24,13 @@ TopologyAmplitude::~TopologyAmplitude() {
   // TODO Auto-generated destructor stub
 }
 
-std::complex<double> TopologyAmplitude::evaluate(
-    const std::vector<KinematicVariables>& kinematic_variables,
+std::complex<double> TopologyAmplitude::evaluate(const dataPoint& point,
     const IndexList& evaluation_index_list) const {
   std::complex<double> result(0.0, 0.0);
+
+  const std::vector<HelicityAngles>& kinematic_variables =
+      extractHelicityFromDataPoint(point);
+
   // loop over the list of concrete versions of sequential decays
   for (unsigned int sequential_decay_index = 0;
       sequential_decay_index < sequential_decay_amplitude_list_.size();
@@ -37,17 +42,25 @@ std::complex<double> TopologyAmplitude::evaluate(
             < sequential_decay_amplitude_list_[sequential_decay_index].size();
         ++two_body_decay_index) {
       // the results for each amplitude evaluation are multiplied to the sequential decay result
-      const KinematicVariables& single_decay_kinematic_variables =
+      const HelicityAngles& single_decay_helicity_angles =
           kinematic_variables[evaluation_index_list[two_body_decay_index]];
       sequential_decay_result *=
           sequential_decay_amplitude_list_[sequential_decay_index][two_body_decay_index].first->evaluate(
-              single_decay_kinematic_variables)
-              * sequential_decay_amplitude_list_[sequential_decay_index][two_body_decay_index].second->evaluate();
+              single_decay_helicity_angles)
+              * sequential_decay_amplitude_list_[sequential_decay_index][two_body_decay_index].second->evaluate(
+                  point, evaluation_index_list[two_body_decay_index]);
     }
     // the sequential decay results are just added
     result += sequential_decay_result;
   }
   return result;
+}
+
+std::vector<HelicityAngles> TopologyAmplitude::extractHelicityFromDataPoint(
+    const dataPoint& point) const {
+  std::vector<HelicityAngles> kinematic_variables;
+
+  return kinematic_variables;
 }
 
 } /* namespace HelicityFormalism */

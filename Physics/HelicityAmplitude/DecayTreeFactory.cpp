@@ -116,7 +116,7 @@ std::vector<DecayTree> DecayTreeFactory::createDecayTreeSeedList(
     ParticleIndexDecayTree::const_iterator & top_node_iter) const {
   std::vector<DecayTree> decay_trees;
 
-  std::vector<std::vector<ParticleState> > decay_daughters_combinations =
+  std::vector<std::vector<ParticleStateInfo> > decay_daughters_combinations =
       makeDaughterCombinations(top_node_iter->second);
 
   for (unsigned int i = 0; i < decay_daughters_combinations.size(); ++i) {
@@ -128,9 +128,9 @@ std::vector<DecayTree> DecayTreeFactory::createDecayTreeSeedList(
   return decay_trees;
 }
 
-std::vector<std::vector<ParticleState> > DecayTreeFactory::makeDaughterCombinations(
+std::vector<std::vector<ParticleStateInfo> > DecayTreeFactory::makeDaughterCombinations(
     std::vector<std::vector<unsigned int> > particle_index_lists) const {
-  std::vector<std::vector<ParticleState> > decay_daughters_combination_list;
+  std::vector<std::vector<ParticleStateInfo> > decay_daughters_combination_list;
 
   if (particle_index_lists.size() > 0) {
     std::vector<unsigned int> current_particle_index_list(
@@ -138,7 +138,7 @@ std::vector<std::vector<ParticleState> > DecayTreeFactory::makeDaughterCombinati
     particle_index_lists.pop_back();
 
     for (unsigned int i = 0; i < current_particle_index_list.size(); ++i) {
-      std::vector<ParticleState> initial_particle_list;
+      std::vector<ParticleStateInfo> initial_particle_list;
       initial_particle_list.push_back(
           decay_configuration_.particles_[current_particle_index_list[i]]);
 
@@ -152,8 +152,8 @@ std::vector<std::vector<ParticleState> > DecayTreeFactory::makeDaughterCombinati
 
 void DecayTreeFactory::extendDaughterCombinations(
     std::vector<std::vector<unsigned int> > remaining_particle_index_lists,
-    const std::vector<ParticleState>& decay_daughters_combination,
-    std::vector<std::vector<ParticleState> >& decay_daughters_combination_list) const {
+    const std::vector<ParticleStateInfo>& decay_daughters_combination,
+    std::vector<std::vector<ParticleStateInfo> >& decay_daughters_combination_list) const {
 
   if (remaining_particle_index_lists.size() > 0) {
     std::vector<unsigned int> current_particle_index_list(
@@ -161,10 +161,10 @@ void DecayTreeFactory::extendDaughterCombinations(
     remaining_particle_index_lists.pop_back();
 
     for (unsigned int i = 0; i < current_particle_index_list.size(); ++i) {
-      std::vector<ParticleState> current_particle_list(
+      std::vector<ParticleStateInfo> current_particle_list(
           decay_daughters_combination);
 
-      const ParticleState &particle =
+      const ParticleStateInfo &particle =
           decay_configuration_.particles_[current_particle_index_list[i]];
 
       if (isParticleValidForCombination(particle, current_particle_list)) {
@@ -181,8 +181,8 @@ void DecayTreeFactory::extendDaughterCombinations(
 }
 
 bool DecayTreeFactory::isParticleValidForCombination(
-    const ParticleState& particle,
-    const std::vector<ParticleState>& combination) const {
+    const ParticleStateInfo& particle,
+    const std::vector<ParticleStateInfo>& combination) const {
   // if we find a particle with the same particle id in the list as the
   // reference particle, this will be not valid
   if (std::find_if(combination.begin(), combination.end(),
@@ -203,11 +203,11 @@ bool DecayTreeFactory::canDecayTreesGrow(
       ++decay_tree) {
     // check if there are decays available for the current leaves
 
-    std::vector<ParticleState> list_of_leaves = decay_tree->getLowestLeaves();
+    std::vector<ParticleStateInfo> list_of_leaves = decay_tree->getLowestLeaves();
 
     for (unsigned int leaf_index = 0; leaf_index < list_of_leaves.size();
         ++leaf_index) {
-      std::vector<ParticleState>::const_iterator particle = std::find(
+      std::vector<ParticleStateInfo>::const_iterator particle = std::find(
           decay_configuration_.particles_.begin(),
           decay_configuration_.particles_.end(), list_of_leaves[leaf_index]);
       ParticleIndexDecayTree::const_iterator found_decay = decay_topology.find(
@@ -230,7 +230,7 @@ std::vector<DecayTree> DecayTreeFactory::growNextDecayTreeLayer(
   for (decay_tree = decay_trees.begin(); decay_tree != decay_trees.end();
       ++decay_tree) {
     // check if there are decays available for the current leaves
-    std::vector<ParticleState> list_of_leaves = decay_tree->getLowestLeaves();
+    std::vector<ParticleStateInfo> list_of_leaves = decay_tree->getLowestLeaves();
     // TODO: this is bad practice but works right now... clear the list
     std::vector<DecayTree> temp_trees;
     temp_trees.push_back(*decay_tree);
@@ -238,7 +238,7 @@ std::vector<DecayTree> DecayTreeFactory::growNextDecayTreeLayer(
 
     for (unsigned int leaf_index = 0; leaf_index < list_of_leaves.size();
         ++leaf_index) {
-      std::vector<ParticleState>::const_iterator particle = std::find(
+      std::vector<ParticleStateInfo>::const_iterator particle = std::find(
           decay_configuration_.particles_.begin(),
           decay_configuration_.particles_.end(), list_of_leaves[leaf_index]);
       unsigned int particle_index = particle
@@ -264,10 +264,10 @@ std::vector<DecayTree> DecayTreeFactory::growSingleLeafOnDecayTrees(
   std::vector<DecayTree>::const_iterator decay_tree;
   for (decay_tree = decay_trees.begin(); decay_tree != decay_trees.end();
       ++decay_tree) {
-    const ParticleState& mother =
+    const ParticleStateInfo& mother =
         decay_configuration_.particles_[single_decay->first];
 
-    std::vector<std::vector<ParticleState> > decay_daughters_combinations =
+    std::vector<std::vector<ParticleStateInfo> > decay_daughters_combinations =
         makeDaughterCombinations(single_decay->second);
 
     for (unsigned int i = 0; i < decay_daughters_combinations.size(); ++i) {

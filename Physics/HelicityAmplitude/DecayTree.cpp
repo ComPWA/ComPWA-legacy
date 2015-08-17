@@ -57,7 +57,7 @@ const HelicityTree& DecayTree::getHelicityDecayTree() const {
   return decay_tree_;
 }
 
-std::vector<ParticleState> DecayTree::getLowestLeaves() const {
+std::vector<ParticleStateInfo> DecayTree::getLowestLeaves() const {
   return currently_grown_nodes_;
 }
 
@@ -77,8 +77,8 @@ const std::vector<
   return decay_vertex_list_;
 }
 
-void DecayTree::createDecay(const ParticleState &mother,
-    const std::vector<ParticleState> &daughters) {
+void DecayTree::createDecay(const ParticleStateInfo &mother,
+    const std::vector<ParticleStateInfo> &daughters) {
 // check if the particles already exist as vertices with addVertex()
 // if so return vertex descriptor for this vertex, if not create a new
   boost::graph_traits<HelicityTree>::vertex_descriptor mother_vertex =
@@ -91,7 +91,7 @@ void DecayTree::createDecay(const ParticleState &mother,
 }
 
 boost::graph_traits<HelicityFormalism::HelicityTree>::vertex_descriptor DecayTree::addVertex(
-    const ParticleState& particle) {
+    const ParticleStateInfo& particle) {
   boost::graph_traits<HelicityTree>::vertex_descriptor return_vertex;
   boost::graph_traits<HelicityTree>::vertex_iterator vi, vi_end, next;
   tie(vi, vi_end) = vertices(decay_tree_);
@@ -107,6 +107,35 @@ boost::graph_traits<HelicityFormalism::HelicityTree>::vertex_descriptor DecayTre
     decay_tree_[return_vertex] = particle;
   }
   return return_vertex;
+}
+
+std::vector<std::vector<ParticleStateInfo> > DecayTree::createDecayProductsFinalStateParticleLists(
+    const boost::graph_traits<HelicityFormalism::HelicityTree>::vertex_descriptor& vertex) const {
+
+  std::vector<std::vector<ParticleStateInfo> > return_vector;
+
+  std::pair<boost::graph_traits<HelicityTree>::out_edge_iterator,
+      boost::graph_traits<HelicityTree>::out_edge_iterator> ep;
+
+  ep = boost::out_edges(vertex, decay_tree_);
+
+  unsigned final_state_particle_counter = 0;
+  while (ep.first != ep.second) {
+    std::vector<unsigned int> complete_decendant_list;
+
+    GetVertexDecendants vis(complete_decendant_list, vertex);
+    boost::depth_first_search(decay_tree_, boost::visitor(vis));
+
+    std::vector<ParticleStateInfo> fs_particle_list;
+    fs_particle_list.reserve(complete_decendant_list.size());
+    for(unsigned int i = 0; i < complete_decendant_list.size(); ++i) {
+      fs_particle_list.push_back(decay_tree_[complete_decendant_list[i]]);
+    }
+
+    std::sort(fs_particle_list.begin(), fs_particle_list.end());
+    return_vector.push_back(fs_particle_list);
+  }
+  return return_vector;
 }
 
 void DecayTree::print(std::ostream& os) const {
