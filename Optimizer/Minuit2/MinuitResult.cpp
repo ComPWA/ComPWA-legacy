@@ -161,7 +161,7 @@ void MinuitResult::calcFractionError(){
 	nRes=fractionList.GetNDouble();
 	if(useCorrelatedErrors){
 		/* Exact error calculation */
-		unsigned int numberOfSets = 1000;
+		unsigned int numberOfSets = 200;
 		BOOST_LOG_TRIVIAL(info) << "Calculating errors of fit fractions using "<<numberOfSets<<" sets of parameters...";
 		std::vector<ParameterList> fracVect;
 		progressBar bar(numberOfSets);
