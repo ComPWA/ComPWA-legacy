@@ -117,8 +117,34 @@ public:
 	virtual std::shared_ptr<Generator> getGenerator(){ return gen_; };
 
 	virtual std::shared_ptr<FitResult> startFit( ParameterList& );
-	virtual bool generate ( int number );
+
+	/**Generate phase space events by Hit&Miss
+	 *
+	 * @param number Number of events to generate
+	 * @return
+	 */
 	virtual bool generatePhsp ( int number );
+
+	/**Generate signal events by Hit&Miss
+	 * 1) In case no phsp sample is set and the @param number is larger zero, phsp events
+	 * are generated on the fly.
+	 * 2) In case a phsp sample is set and @param number is smaller zero, the whole sample
+	 * is used for event generation.
+	 *
+	 * @param number Number of events to generate
+	 * @return
+	 */
+	virtual bool generate ( int number );
+
+	/**Generate background events by Hit&Miss
+	 * 1) In case no phsp sample is set and the @param number is larger zero, phsp events
+	 * are generated on the fly.
+	 * 2) In case a phsp sample is set and @param number is smaller zero, the whole sample
+	 * is used for event generation.
+	 *
+	 * @param number Number of events to generate
+	 * @return
+	 */
 	virtual bool generateBkg ( int number );
 
 protected:

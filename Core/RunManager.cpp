@@ -62,8 +62,9 @@ std::shared_ptr<FitResult> RunManager::startFit(ParameterList& inPar){
 	return result;
 }
 bool RunManager::generate( int number ) {
-	if(number < 0)
-		throw std::runtime_error("RunManager: generate() negative number of events: "+std::to_string((long double)number));
+	if(number <= 0 && !samplePhsp_)
+		throw std::runtime_error("RunManager: generate() negative number of events: "
+				+std::to_string((long double)number)+". And no phsp sample given!");
 	if(!(gen_ && amp_))
 		throw std::runtime_error("RunManager: generate() requirements not fulfilled");
 	if(!sampleData_)
@@ -74,8 +75,12 @@ bool RunManager::generate( int number ) {
 	//Determing an estimate on the maximum of the physics amplitude using 100k events.
 	double genMaxVal=1.2*amp_->getMaxVal(gen_);
 
-	BOOST_LOG_TRIVIAL(info) << "Generating MC: ["<<number<<" events] ";
-	BOOST_LOG_TRIVIAL(info) << "Using "<<genMaxVal<< " as maximum value for random number generation!";
+	if(number>0)
+		BOOST_LOG_TRIVIAL(info) << "Generating MC: "<<number<<" events. "
+				"Maximum amplitude value: "<<genMaxVal;
+	else
+		BOOST_LOG_TRIVIAL(info) << "Generating MC using the whole phsp sample. "
+				"Maximum amplitude value: "<<genMaxVal;
 
 	unsigned int startTime = clock();
 
@@ -91,6 +96,7 @@ bool RunManager::generate( int number ) {
 		limit = 100000000;//set large limit, should never be reached
 	Event tmp;
 	progressBar bar(number);
+	if(number<=0) bar = progressBar(limit);
 	for(unsigned int i=0;i<limit;i++){
 		dataPoint point;
 		if(samplePhsp_){ //if phsp sample is set -> use it
@@ -98,6 +104,7 @@ bool RunManager::generate( int number ) {
 		} else {//otherwise generate event
 			genNew->generate(tmp);
 		}
+		if(number<=0) bar.nextEvent();
 		double weight = tmp.getWeight();
 		/* reset weights: the weights are taken into account by hit and miss. The resulting
 		 * sample is therefore unweighted */
@@ -118,7 +125,7 @@ bool RunManager::generate( int number ) {
 		if( ampRnd > (weight*AMPpdf) ) continue;
 		sampleData_->pushEvent(tmp);//Unfortunately not thread safe
 		acceptedEvents++;
-		bar.nextEvent();
+		if(number>0) bar.nextEvent();
 		if(acceptedEvents>=number) i=limit; //continue if we have a sufficienct number of events
 	}
 	if(sampleData_->getNEvents()<number)
@@ -130,7 +137,9 @@ bool RunManager::generate( int number ) {
 	return true;
 };
 bool RunManager::generateBkg( int number ) {
-	if(number==0) return 0;
+	if(number <= 0 && !samplePhsp_)
+		throw std::runtime_error("RunManager: generateBkg() negative number of events: "
+				+std::to_string((long double)number)+". And no phsp sample given!");
 	if( !(ampBkg_ && gen_) )
 		throw std::runtime_error("RunManager: generateBkg() requirements not fulfilled");
 	if(!sampleBkg_)
@@ -156,6 +165,7 @@ bool RunManager::generateBkg( int number ) {
 		limit = 100000000; //set large limit, should never be reached
 	Event tmp;
 	progressBar bar(number);
+	if(number<=0) bar = progressBar(limit);
 	for(unsigned int i=0;i<limit;i++){
 		dataPoint point;
 		if(samplePhsp_){ //if phsp sample is set -> use it
@@ -163,6 +173,7 @@ bool RunManager::generateBkg( int number ) {
 		} else {//otherwise generate event
 			genNew->generate(tmp);
 		}
+		if(number<=0) bar.nextEvent();
 		double weight = tmp.getWeight();
 		/* reset weights: the weights are taken into account by hit and miss. The resulting
 		 * sample is therefore unweighted */
@@ -183,7 +194,7 @@ bool RunManager::generateBkg( int number ) {
 		if( ampRnd > (weight*AMPpdf) ) continue;
 		sampleBkg_->pushEvent(tmp);//unfortunatly not thread safe
 		acceptedEvents++;
-		bar.nextEvent();
+		if(number>0) bar.nextEvent();
 		if(acceptedEvents>=number) i=limit; //continue if we have a sufficienct number of events
 	}
 	if(sampleData_->getNEvents()<number)
