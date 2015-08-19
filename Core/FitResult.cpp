@@ -182,7 +182,6 @@ void FitResult::calcFraction(ParameterList& parList){
 		std::shared_ptr<DoubleParameter> magPar = finalParameters.GetDoubleParameter("mag_"+resName);
 		double mag = std::abs(magPar->GetValue()); //value of magnitude
 		double magError = 0;
-		std::cout<<resName<<" "<<norm<<" "<<resInt<<" "<<mag<<" "<<magError<<std::endl;
 		if(magPar->HasError()) magError = magPar->GetError(); //error of magnitude
 		parList.AddParameter(std::shared_ptr<DoubleParameter>(
 				new DoubleParameter(resName+"_FF", mag*mag*resInt/norm, 2*mag*resInt/norm * magError)) );
