@@ -404,7 +404,7 @@ void MinuitResult::writeTeX(std::string filename){
 	if(hasValidCov){
 		unsigned int n=0;
 		TableFormater* tableCov = new TexTableFormater(&out);
-		printCorrelationMatrix(tableCov);
+		printCovarianceMatrix(tableCov);
 		TableFormater* tableCorr = new TexTableFormater(&out);
 		printCorrelationMatrix(tableCorr);
 	}
