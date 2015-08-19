@@ -57,7 +57,7 @@ public:
 	//! Return final likelihood value
 	double getResult(){return finalLH;}
 	//! Enable correct error estimation for fit fractions. Very time consuming!
-	void setUseCorrelatedErrors(bool s) { useCorrelatedErrors = s; }
+	void setUseCorrelatedErrors(bool s, int nSets=200);
 	//! Use tree for calculation of fit fractions
 	void setUseTree(bool s);
 	//! Set calculation of interference terms
@@ -125,6 +125,8 @@ protected:
 	 * @param fracError result with errors
 	 */
 	virtual void calcFractionError();
+	//! Number of parameter sets that are used to propagate the cov matrix through the normalization
+	unsigned int correlatedErrors_numberOfSets;
 	//! Smear ParameterList with a multidimensional gaussian and the cov matrix from the fit
 	void smearParameterList(ParameterList&);
 	//! Calculate information criterion AIC

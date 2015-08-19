@@ -43,7 +43,8 @@ int multivariateGaussian(const gsl_rng *rnd, const int vecSize, const gsl_vector
 }
 
 MinuitResult::MinuitResult(std::shared_ptr<ControlParameter> esti, FunctionMinimum result) :
-				useCorrelatedErrors(0), calcInterference(0), useTree(0) {
+				useCorrelatedErrors(0), calcInterference(0), useTree(0),
+				correlatedErrors_numberOfSets(200){
 	estimator = std::static_pointer_cast<Estimator>(esti);
 	_amp=estimator->getAmplitude();
 	init(result);
@@ -155,17 +156,24 @@ void MinuitResult::smearParameterList(ParameterList& newParList){
 	}
 }
 
+void MinuitResult::setUseCorrelatedErrors(bool s, int nSets) {
+	useCorrelatedErrors = s;
+	if(nSets <= 0)
+		throw std::runtime_error(
+				"MinuitResult::setUseCorrelatedErrors() | nSets <=0. That makes no sense!");
+	correlatedErrors_numberOfSets = nSets;
+	return;
+}
 void MinuitResult::calcFractionError(){
 	if(fractionList.GetNDouble() != _amp->GetNumberOfResonances())
 		throw std::runtime_error("MinuitResult::calcFractionError() parameterList empty! Calculate fit fractions first!");
 	nRes=fractionList.GetNDouble();
-	if(useCorrelatedErrors){
-		/* Exact error calculation */
-		unsigned int numberOfSets = 200;
-		BOOST_LOG_TRIVIAL(info) << "Calculating errors of fit fractions using "<<numberOfSets<<" sets of parameters...";
+	if(useCorrelatedErrors){/* Exact error calculation */
+		BOOST_LOG_TRIVIAL(info) << "Calculating errors of fit fractions using "
+				<<correlatedErrors_numberOfSets<<" sets of parameters...";
 		std::vector<ParameterList> fracVect;
-		progressBar bar(numberOfSets);
-		for(unsigned int i=0; i<numberOfSets; i++){
+		progressBar bar(correlatedErrors_numberOfSets);
+		for(unsigned int i=0; i<correlatedErrors_numberOfSets; i++){
 			bar.nextEvent();
 			ParameterList newPar; smearParameterList(newPar);
 			_amp->setParameterList(newPar);//smear all free parameters according to cov matrix
@@ -187,9 +195,6 @@ void MinuitResult::calcFractionError(){
 			stdev = std::sqrt(sqSum - mean*mean); //this is crosscecked with the RMS of the distribution
 			fractionList.GetDoubleParameter(o)->SetError(stdev);
 		}
-		//		std::cout<<"frac error: ";
-		//			for(unsigned int i=0; i<fracError.size();i++) std::cout<<fracError.at(i)<<" ";
-		//			std::cout<<std::endl;
 		_amp->setParameterList(finalParameters); //set correct fit result
 	}
 	return;
