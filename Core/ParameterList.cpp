@@ -83,7 +83,7 @@ ParameterList::~ParameterList() {
 	/* nothing */
 }
 
-std::shared_ptr<AbsParameter> ParameterList::GetParameter(const unsigned int i) {
+std::shared_ptr<AbsParameter> ParameterList::GetParameter(const unsigned int i) const {
 	if( !(i < (vBoolPar_.size()+vIntPar_.size()+vDoublePar_.size()+vComplexPar_.size()+vMultiDouble_.size()+vMultiComplex_.size()) ) ){
 		throw BadParameter("Parameter not in list");
 		return std::shared_ptr<AbsParameter>();
@@ -105,7 +105,7 @@ std::shared_ptr<AbsParameter> ParameterList::GetParameter(const unsigned int i) 
 	return std::shared_ptr<AbsParameter>();
 }
 
-std::shared_ptr<AbsParameter> ParameterList::GetParameter(const std::string parname) {
+std::shared_ptr<AbsParameter> ParameterList::GetParameter(const std::string parname) const {
 	int i=-1;
 
 	try{
@@ -612,7 +612,7 @@ std::string const& ParameterList::to_str() {
 std::ostream & operator<<(std::ostream &os, ParameterList &p){
 	return os << p.to_str();
 }
-void ParameterList::Append(ParameterList& addList){
+void ParameterList::Append(const ParameterList& addList){
 	for(int i=0; i<addList.GetNParameter(); i++ )
 		AddParameter(addList.GetParameter(i));
 }

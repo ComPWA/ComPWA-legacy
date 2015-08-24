@@ -128,7 +128,7 @@ public:
 	 * \param i input number of parameter to load
 	 * \return shared pointer to parameter
 	 */
-	virtual std::shared_ptr<AbsParameter> GetParameter(const unsigned int i) ;
+	virtual std::shared_ptr<AbsParameter> GetParameter(const unsigned int i) const;
 
 	//! Getter for abstract parameter
 	/*!
@@ -136,7 +136,7 @@ public:
 	 * \param parname name of parameter to load
 	 * \return shared pointer to parameter
 	 */
-	virtual std::shared_ptr<AbsParameter> GetParameter(const std::string parname) ;
+	virtual std::shared_ptr<AbsParameter> GetParameter(const std::string parname) const;
 
 
 	//! Getter for number of parameter
@@ -463,7 +463,7 @@ public:
 	std::string const& to_str() ;
 
 	//! Append ParameterList to (*this). Shared_ptr are not(!) deep copied
-	virtual void Append(ParameterList& addList);
+	virtual void Append(const ParameterList& addList);
 
 protected:
 	std::map<std::string,unsigned int> mMultiComplexID_; /*!< Map of complex list parameter ids */
