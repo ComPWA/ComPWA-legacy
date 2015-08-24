@@ -31,6 +31,8 @@ public:
   CoherentAmplitude(const std::vector<TopologyAmplitude>& amplitude_trees);
   virtual ~CoherentAmplitude();
 
+  void registerTopologyAmplitudeParameters();
+
   void init(const Event& event);
 
   const double integral();

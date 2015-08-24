@@ -22,6 +22,10 @@ namespace DynamicalFunctions {
 class DynamicalFunctionFactory {
   std::map<HelicityFormalism::TwoBodyDecayInformation,
       std::shared_ptr<AbstractDynamicalFunction> > dynamical_function_list_;
+
+  std::shared_ptr<AbstractDynamicalFunction> generateRelativisiticBreitWigner(
+      const HelicityFormalism::TwoBodyDecayInformation& state_info) const;
+
 public:
   DynamicalFunctionFactory();
   virtual ~DynamicalFunctionFactory();

@@ -9,7 +9,8 @@
 //   Stefan Pflueger - initial API and implementation
 //-------------------------------------------------------------------------------
 
-#include "DynamicalFunctionFactory.hpp"
+#include "Physics/DynamicalDecayFunctions/DynamicalFunctionFactory.hpp"
+#include "Physics/DynamicalDecayFunctions/TwoBodyDecay/RelativisticBreitWigner.hpp"
 
 namespace DynamicalFunctions {
 
@@ -22,9 +23,20 @@ DynamicalFunctionFactory::~DynamicalFunctionFactory() {
   // TODO Auto-generated destructor stub
 }
 
+std::shared_ptr<AbstractDynamicalFunction> DynamicalFunctionFactory::generateRelativisiticBreitWigner(
+    const HelicityFormalism::TwoBodyDecayInformation& state_info) const {
+
+  std::shared_ptr<RelativisticBreitWigner> rel_bw(new RelativisticBreitWigner(state_info.spin_info_.initial_state_.J_));
+  rel_bw->initialiseParameters(state_info.dynamical_info_.initial_state_);
+  return rel_bw;
+}
+
 std::shared_ptr<AbstractDynamicalFunction> DynamicalFunctionFactory::generateDynamicalFunction(
     const HelicityFormalism::TwoBodyDecayInformation& state_info) const {
 
+  if(state_info.dynamical_info_.initial_state_.get<std::string>("type") == "relBW") {
+    return generateRelativisiticBreitWigner(state_info);
+  }
 }
 
 } /* namespace DynamicalFunctions */

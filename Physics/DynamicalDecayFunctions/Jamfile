@@ -19,7 +19,8 @@ project :
 	;
 
 lib DynamicalDecayFunctions : 
-        [ glob *.cpp : ] 
+        [ glob *.cpp : ]
+        [ glob TwoBodyDecay/*.cpp : ]
         $(TOP)/Core//ComPWA
         ;
 

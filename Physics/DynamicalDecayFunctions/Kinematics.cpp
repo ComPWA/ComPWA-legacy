@@ -39,7 +39,7 @@ std::complex<double> Kinematics::qValue(double sqrtS, double ma, double mb){
 
 double Kinematics::FormFactor(double sqrtS,double ma, double mb, double spin, double mesonRadius){
 	if (spin == 0) return 1;
-	//Blatt-Weisskopt form factors with normalization F(x=mR) = 1.
+	//Blatt-Weisskopf form factors with normalization F(x=mR) = 1.
 	//Reference: S.U.Chung Annalen der Physik 4(1995) 404-430
 	//z = q / (interaction range). For the interaction range we assume 1/mesonRadius
 	double z = qSqValue(sqrtS,ma,mb)*mesonRadius*mesonRadius;

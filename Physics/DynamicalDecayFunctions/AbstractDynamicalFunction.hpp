@@ -14,6 +14,8 @@
 
 #include <complex>
 
+#include "boost/property_tree/ptree_fwd.hpp"
+
 #include "Core/ParameterList.hpp"
 
 class dataPoint;
@@ -27,7 +29,7 @@ public:
   AbstractDynamicalFunction();
   virtual ~AbstractDynamicalFunction();
 
-  virtual void initialiseParameters() =0;
+  virtual void initialiseParameters(const boost::property_tree::ptree& parameter_info) =0;
 
   virtual std::complex<double> evaluate(const dataPoint& point,
       unsigned int evaluation_index) const =0;

@@ -12,34 +12,55 @@
 #include "CoherentAmplitude.hpp"
 #include "HelicityKinematics.hpp"
 
-
 namespace HelicityFormalism {
 
 CoherentAmplitude::CoherentAmplitude(
     const std::vector<TopologyAmplitude>& amplitude_trees) :
     topology_amplitudes_(amplitude_trees) {
 
-  for(unsigned int i = 0; i < topology_amplitudes_.size(); ++i) {
-    // TODO: parameters_ add = topology_amplitudes_[i].sequential_decay_amplitude_list_[j].getParameterList()
-  }
+  registerTopologyAmplitudeParameters();
 }
 
 CoherentAmplitude::~CoherentAmplitude() {
 }
 
+void CoherentAmplitude::registerTopologyAmplitudeParameters() {
+  for (unsigned int topology_amplitude_index = 0;
+      topology_amplitude_index < topology_amplitudes_.size();
+      ++topology_amplitude_index) {
+
+    const std::vector<SequentialTwoBodyDecayAmplitude>& sequential_decay_list =
+        topology_amplitudes_[topology_amplitude_index].getSequentialDecayList();
+
+    std::vector<SequentialTwoBodyDecayAmplitude>::const_iterator sequential_decay_iter;
+
+    for (sequential_decay_iter = sequential_decay_list.begin();
+        sequential_decay_iter != sequential_decay_list.end();
+        ++sequential_decay_iter) {
+
+      SequentialTwoBodyDecayAmplitude::const_iterator decay_node_iter;
+
+      for (decay_node_iter = sequential_decay_iter->begin();
+          decay_node_iter != sequential_decay_iter->end(); ++decay_node_iter) {
+        parameters_.Append(decay_node_iter->second->getParameterList());
+      }
+    }
+  }
+}
+
 void CoherentAmplitude::init(const Event& event) {
-  // TODO: I have to cast the kinematics instance to a helicity kinematics.
-  // This is pretty bad practice... I really don't get the point behind the
-  // singleton kinematics class...
-  // If you do not instanciate a different type of kinematics class beforehand
-  // you are fine, but otherwise we are in deep shit.
+// TODO: I have to cast the kinematics instance to a helicity kinematics.
+// This is pretty bad practice... I really don't get the point behind the
+// singleton kinematics class...
+// If you do not instanciate a different type of kinematics class beforehand
+// you are fine, but otherwise we are in deep shit.
   HelicityKinematics* kinematics =
       (HelicityKinematics*) HelicityKinematics::createInstance();
 
-  // initialize the kinematics class first
+// initialize the kinematics class first
   kinematics->init(event);
-  // now get the index lists that tell the topology amplitudes which
-  // data point variables to use in their evaluation
+// now get the index lists that tell the topology amplitudes which
+// data point variables to use in their evaluation
   data_point_index_lists_ =
       kinematics->getTopologyAmplitudeDataPointIndexLists();
 }
@@ -122,7 +143,7 @@ const bool CoherentAmplitude::fillStartParVec(ParameterList& outPar) {
 }
 
 void CoherentAmplitude::setParameterList(ParameterList& par) {
-  //parameters varied by Minimization algorithm
+//parameters varied by Minimization algorithm
   if (par.GetNDouble() != parameters_.GetNDouble())
     throw std::runtime_error(
         "setParameterList(): size of parameter lists don't match");
@@ -143,7 +164,7 @@ void CoherentAmplitude::printFractions() {
 
 }
 
-Amplitude* CoherentAmplitude::Clone() {
+Amplitude * CoherentAmplitude::Clone() {
 }
 
 } /* namespace HelicityFormalism */

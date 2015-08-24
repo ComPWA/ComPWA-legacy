@@ -45,6 +45,8 @@ public:
 
   std::vector<HelicityAngles> extractHelicityFromDataPoint(
       const dataPoint& point) const;
+
+  const std::vector<SequentialTwoBodyDecayAmplitude>& getSequentialDecayList() const;
 };
 
 } /* namespace HelicityFormalism */

@@ -63,4 +63,8 @@ std::vector<HelicityAngles> TopologyAmplitude::extractHelicityFromDataPoint(
   return kinematic_variables;
 }
 
+const std::vector<SequentialTwoBodyDecayAmplitude>& TopologyAmplitude::getSequentialDecayList() const {
+  return sequential_decay_amplitude_list_;
+}
+
 } /* namespace HelicityFormalism */

@@ -20,6 +20,10 @@
 
 #include <cmath>
 
+#include "boost/property_tree/ptree.hpp"
+
+#include "qft++.h"
+
 #include "Physics/DynamicalDecayFunctions/TwoBodyDecay/RelativisticBreitWigner.hpp"
 #include "Physics/DynamicalDecayFunctions/Kinematics.hpp"
 
@@ -38,11 +42,29 @@ RelativisticBreitWigner::RelativisticBreitWigner(const Spin& J) :
 RelativisticBreitWigner::~RelativisticBreitWigner() {
 }
 
-void RelativisticBreitWigner::initialiseParameters() {
+void RelativisticBreitWigner::initialiseParameters(
+    const boost::property_tree::ptree& parameter_info) {
+  resonance_mass_->SetValue(parameter_info.get<double>("mass"));
+  if(parameter_info.get<bool>("mass_fix"))
+    resonance_mass_->SetParameterFixed();
+  else
+    resonance_mass_->SetParameterFree();
+  resonance_mass_->SetMinValue(parameter_info.get<double>("mass_min"));
+  resonance_mass_->SetMaxValue(parameter_info.get<double>("mass_max"));
+
+  resonance_width_->SetValue(parameter_info.get<double>("width"));
+  if(parameter_info.get<bool>("width_fix"))
+    resonance_width_->SetParameterFixed();
+  else
+    resonance_width_->SetParameterFree();
+  resonance_width_->SetMinValue(parameter_info.get<double>("width_min"));
+  resonance_width_->SetMaxValue(parameter_info.get<double>("width_max"));
+
+  meson_radius_->SetValue(parameter_info.get<double>("mesonRadius"));
 }
 
 std::complex<double> RelativisticBreitWigner::evaluate(const dataPoint& point,
-    unsigned int evaluation_index) {
+    unsigned int evaluation_index) const {
 
   double mSq = point.getVal(evaluation_index++);
   double ma = point.getVal(evaluation_index++);

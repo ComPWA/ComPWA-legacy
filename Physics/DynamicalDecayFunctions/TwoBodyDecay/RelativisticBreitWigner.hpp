@@ -27,6 +27,8 @@
 #include "Core/Exceptions.hpp"
 #include "Physics/DynamicalDecayFunctions/AbstractDynamicalFunction.hpp"
 
+class Spin;
+
 namespace DynamicalFunctions {
 
 /**
@@ -54,10 +56,10 @@ public:
   RelativisticBreitWigner(const Spin& J);
   virtual ~RelativisticBreitWigner();
 
-  void initialiseParameters();
+  void initialiseParameters(const boost::property_tree::ptree& parameter_info);
 
   std::complex<double> evaluate(const dataPoint& point,
-      unsigned int evaluation_index);
+      unsigned int evaluation_index) const;
 
 private:
   std::shared_ptr<DoubleParameter> resonance_width_;
