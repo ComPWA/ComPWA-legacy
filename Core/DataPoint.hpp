@@ -124,6 +124,10 @@ public:
 
 	void reset(unsigned int size);
 
+	unsigned int size() const {
+	  return var.size();
+	}
+
 	//! Set value of coordinate name
 	void setVal(std::string name, double val);
 	//! Set value of coordinate num
