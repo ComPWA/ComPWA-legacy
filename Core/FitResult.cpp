@@ -83,11 +83,16 @@ void FitResult::printFitParameters(TableFormater* tableResult){
 		}
 		ErrorType errorType = outPar->GetErrorType();
 		bool isFixed = outPar->IsFixed();
-		bool isAngle=0;
+		bool isAngle=0, isMag=0;
 		if(outPar->GetName().find("phase")!=string::npos) isAngle=1;//is our Parameter an angle?
+		if(outPar->GetName().find("mag")!=string::npos) isMag=1;//is our Parameter an angle?
 		if(isAngle && !isFixed) {
 			outPar->SetValue( shiftAngle(outPar->GetValue()) ); //shift angle to the interval [-pi;pi]
 			if(printInitial) iniPar->SetValue( shiftAngle(iniPar->GetValue()) );
+		}
+		if(isMag&& !isFixed) {
+			outPar->SetValue( std::abs(outPar->GetValue()) ); //abs value of parameter is magnitude
+			if(printInitial) iniPar->SetValue( std::abs(iniPar->GetValue()) );
 		}
 
 		*tableResult << o << outPar->GetName();
