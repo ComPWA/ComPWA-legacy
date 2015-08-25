@@ -144,7 +144,7 @@ void MinuitResult::smearParameterList(ParameterList& newParList){
 			gsl_matrix_set(gslCov,i,j,cov(i,j));
 
 	gsl_vector* newPar = gsl_vector_alloc(nFree);
-	multivariateGaussian(r, nFree,oldPar,gslCov,newPar);//generate set of smeared parameters
+	multivariateGaussian( r, nFree, oldPar, gslCov, newPar );//generate set of smeared parameters
 
 	newParList = ParameterList(finalParameters); //deep copy of finalParameters
 	t=0;
@@ -181,7 +181,7 @@ void MinuitResult::calcFractionError(){
 			calcFraction(tmp);
 			fracVect.push_back(tmp);
 		}
-		//Calculate standart deviation
+		//Calculate standard deviation
 		for(unsigned int o=0;o<nRes;o++){
 			double mean=0, sqSum=0., stdev=0;
 			for(unsigned int i=0; i<fracVect.size();i++){
@@ -192,7 +192,7 @@ void MinuitResult::calcFractionError(){
 			unsigned int s = fracVect.size();
 			sqSum /= s;
 			mean /= s;
-			stdev = std::sqrt(sqSum - mean*mean); //this is crosscecked with the RMS of the distribution
+			stdev = std::sqrt(sqSum - mean*mean); //this is cross-checked with the RMS of the distribution
 			fractionList.GetDoubleParameter(o)->SetError(stdev);
 		}
 		_amp->setParameterList(finalParameters); //set correct fit result
@@ -239,7 +239,7 @@ void MinuitResult::genOutput(std::ostream& out, std::string opt){
 		if(printCovMatrix){
 			out<<"COVARIANCE MATRIX:"<<std::endl;
 			TableFormater* tableCov = new TableFormater(&out);
-			printCorrelationMatrix(tableCov);
+			printCovarianceMatrix(tableCov);
 		}
 		if(printCorrMatrix){
 			out<<"CORRELATION MATRIX:"<<std::endl;
