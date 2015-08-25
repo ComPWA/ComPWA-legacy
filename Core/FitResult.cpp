@@ -92,7 +92,8 @@ void FitResult::printFitParameters(TableFormater* tableResult){
 		}
 		if(isMag&& !isFixed) {
 			outPar->SetValue( std::abs(outPar->GetValue()) ); //abs value of parameter is magnitude
-			if(printInitial) iniPar->SetValue( std::abs(iniPar->GetValue()) );
+			//if(printInitial) iniPar->SetValue( std::abs(iniPar->GetValue()) );
+			if(printTrue) truePar->SetValue( std::abs(truePar->GetValue()) );
 		}
 
 		*tableResult << o << outPar->GetName();

@@ -7,6 +7,25 @@
 
 #include "Physics/AmplitudeSum/AmplitudeSetup.hpp"
 
+//Expands '~' in file path to user directory
+std::string expand_user(std::string p) {
+	std::string path = p;
+	if (not path.empty() and path[0] == '~') {
+		assert(path.size() == 1 or path[1] == '/');  // or other error handling
+		char const* home = getenv("HOME");
+		if( home || home==getenv("USERPROFILE") ) {
+			path.replace(0, 1, home);
+		} else {
+			char const *hdrive = getenv("HOMEDRIVE"),
+					*hpath = getenv("HOMEPATH");
+			assert(hdrive);  // or other error handling
+			assert(hpath);
+			path.replace(0, 1, std::string(hdrive) + hpath);
+		}
+	}
+	return path;
+}
+
 AmplitudeSetup::AmplitudeSetup() {
 	BOOST_LOG_TRIVIAL(debug) << "AmplitudeSetup::AmplitudeSetup() no filename passed. "
 			"Creating AmplitudeSetup with a non resonant component only!";
@@ -52,10 +71,10 @@ void AmplitudeSetup::load(const std::string &filename)
 	using boost::property_tree::ptree;
 	//	ptree pt;
 
-	m_filePath=filename;
+	m_filePath=expand_user(filename);
 	// Load the XML file into the property tree. If reading fails
 	// (cannot open file, parse error), an exception is thrown.
-	read_xml(filename, pt, boost::property_tree::xml_parser::trim_whitespace);
+	read_xml(m_filePath, pt, boost::property_tree::xml_parser::trim_whitespace);
 	// Get the filename and store it in the m_file variable.
 	// Note that we construct the path to the value by separating
 	// the individual keys with dots. If dots appear in the keys,
@@ -82,7 +101,7 @@ void AmplitudeSetup::load(const std::string &filename)
 		} else
 			throw std::runtime_error("AmpltiudeSetup::load() unknown type of resonance: "+v.first);
 	}
-	BOOST_LOG_TRIVIAL(info) << "AmplitudeSetup::load() file " << filename
+	BOOST_LOG_TRIVIAL(info) << "AmplitudeSetup::load() file " << m_filePath
 			<< " with " << getNres() <<" resonances!";
 	return;
 }
@@ -90,8 +109,9 @@ void AmplitudeSetup::load(const std::string &filename)
 // Saves the debug_settings structure to the specified XML file
 void AmplitudeSetup::save(const std::string &filename)
 {
+	std::string path = expand_user(filename);
 	// Put log filename in property tree
-	pt.put("amplitude_setup.filename", filename);
+	pt.put("amplitude_setup.filename", path);
 
 	// Iterate over the modules in the set and put them in the
 	// property tree. Note that the put function places the new
@@ -100,7 +120,7 @@ void AmplitudeSetup::save(const std::string &filename)
 	// (i.e. at the front or somewhere in the middle), this can
 	// be achieved using a combination of the insert and put_own
 	// functions.
-	BOOST_LOG_TRIVIAL(debug) << "AmplitudeSetup: Saving resonances to "<<filename;
+	BOOST_LOG_TRIVIAL(debug) << "AmplitudeSetup: Saving resonances to "<<path;
 	BOOST_FOREACH( ptree::value_type &v, pt.get_child("amplitude_setup") ) {
 		if( v.first == "BreitWigner" ) {
 			std::string name = v.second.get<std::string>("name");
@@ -141,6 +161,6 @@ void AmplitudeSetup::save(const std::string &filename)
 	}
 	boost::property_tree::xml_writer_settings<char> settings('\t', 1);//new line at the end
 	// Write the property tree to the XML file.
-	write_xml(filename, pt,std::locale(), settings);
+	write_xml(path, pt,std::locale(), settings);
 	return;
 }
