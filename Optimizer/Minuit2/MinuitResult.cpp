@@ -165,6 +165,7 @@ void MinuitResult::setUseCorrelatedErrors(bool s, int nSets) {
 	return;
 }
 void MinuitResult::calcFractionError(){
+	std::cout<<"calcFractionError"<<std::endl;
 	if(fractionList.GetNDouble() != _amp->GetNumberOfResonances())
 		throw std::runtime_error("MinuitResult::calcFractionError() parameterList empty! Calculate fit fractions first!");
 	nRes=fractionList.GetNDouble();
@@ -197,6 +198,7 @@ void MinuitResult::calcFractionError(){
 		}
 		_amp->setParameterList(finalParameters); //set correct fit result
 	}
+	std::cout<<"calcFractionError"<<std::endl;
 	return;
 }
 

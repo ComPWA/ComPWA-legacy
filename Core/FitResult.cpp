@@ -48,6 +48,7 @@ void FitResult::setFinalParameters(ParameterList finPars){
 }
 
 void FitResult::printFitParameters(TableFormater* tableResult){
+	std::cout<<"printFitParameters"<<std::endl;
 	bool printTrue=0, printInitial=0;
 	if(trueParameters.GetNParameter()) printTrue=1;
 	if(initialParameters.GetNParameter()) printInitial=1;
@@ -65,15 +66,6 @@ void FitResult::printFitParameters(TableFormater* tableResult){
 
 	std::shared_ptr<DoubleParameter> iniPar, outPar, truePar;
 	for(unsigned int o=0;o<finalParameters.GetNDouble();o++){
-		if(printInitial){
-			try{
-				iniPar = initialParameters.GetDoubleParameter(o);
-			} catch (BadParameter& bad){
-				BOOST_LOG_TRIVIAL(error) << "FitResult::printFitParameters() | "
-						"can't access parameter of initial parameter list!";
-				throw;
-			}
-		}
 		try{
 			outPar = finalParameters.GetDoubleParameter(o);
 		} catch (BadParameter& bad){
@@ -81,6 +73,26 @@ void FitResult::printFitParameters(TableFormater* tableResult){
 					"can't access parameter of final parameter list!";
 			throw;
 		}
+		if(printInitial){
+			try{
+				iniPar = initialParameters.GetDoubleParameter(outPar->GetName());
+			} catch (BadParameter& bad){
+				BOOST_LOG_TRIVIAL(error) << "FitResult::printFitParameters() | "
+						"can't access parameter of initial parameter list!";
+				throw;
+			}
+		}
+		if(printTrue){
+			try{
+				truePar = trueParameters.GetDoubleParameter(outPar->GetName());
+			} catch (BadParameter& bad){
+				BOOST_LOG_TRIVIAL(error) << "FitResult::printFitParameters() | "
+						"can't access parameter of true parameter list!";
+				*tableResult << "not found"<< " - ";
+				throw;
+			}
+		}
+
 		ErrorType errorType = outPar->GetErrorType();
 		bool isFixed = outPar->IsFixed();
 		bool isAngle=0, isMag=0;
@@ -89,10 +101,11 @@ void FitResult::printFitParameters(TableFormater* tableResult){
 		if(isAngle && !isFixed) {
 			outPar->SetValue( shiftAngle(outPar->GetValue()) ); //shift angle to the interval [-pi;pi]
 			if(printInitial) iniPar->SetValue( shiftAngle(iniPar->GetValue()) );
+			if(printTrue) truePar->SetValue( shiftAngle(truePar->GetValue()) );
 		}
-		if(isMag&& !isFixed) {
+		if(isMag && !isFixed) {
 			outPar->SetValue( std::abs(outPar->GetValue()) ); //abs value of parameter is magnitude
-			//if(printInitial) iniPar->SetValue( std::abs(iniPar->GetValue()) );
+			if(printInitial) iniPar->SetValue( std::abs(iniPar->GetValue()) );
 			if(printTrue) truePar->SetValue( std::abs(truePar->GetValue()) );
 		}
 
@@ -102,14 +115,6 @@ void FitResult::printFitParameters(TableFormater* tableResult){
 		else
 			*tableResult << *outPar;//final value
 		if(printTrue){
-			try{
-				truePar = trueParameters.GetDoubleParameter(outPar->GetName());
-			} catch (BadParameter& bad){
-				BOOST_LOG_TRIVIAL(error) << "FitResult::printFitParameters() | "
-						"can't access parameter of true parameter list!";
-				*tableResult << "not found"<< " - ";
-				continue;
-			}
 			*tableResult << *truePar;
 			double pi = PhysConst::instance()->getConstValue("Pi");
 			double pull = (truePar->GetValue()-outPar->GetValue() );
@@ -130,6 +135,7 @@ void FitResult::printFitParameters(TableFormater* tableResult){
 	}
 	tableResult->footer();
 
+	std::cout<<"printFitParameters"<<std::endl;
 	return;
 }
 
