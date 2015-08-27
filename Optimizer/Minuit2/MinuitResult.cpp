@@ -28,7 +28,8 @@
 
 using namespace boost::log;
 
-int multivariateGaussian(const gsl_rng *rnd, const int vecSize, const gsl_vector *in, const gsl_matrix *cov, gsl_vector *res){
+int multivariateGaussian(const gsl_rng *rnd, const int vecSize, const gsl_vector *in,
+		const gsl_matrix *cov, gsl_vector *res){
 	gsl_matrix *tmpM= gsl_matrix_alloc(vecSize,vecSize);
 	gsl_matrix_memcpy(tmpM,cov);
 	gsl_linalg_cholesky_decomp(tmpM);
@@ -174,6 +175,8 @@ void MinuitResult::calcFractionError(){
 				<<correlatedErrors_numberOfSets<<" sets of parameters...";
 		std::vector<ParameterList> fracVect;
 		progressBar bar(correlatedErrors_numberOfSets);
+		ofstream myfile;
+		myfile.open ("fraction.txt");
 		for(unsigned int i=0; i<correlatedErrors_numberOfSets; i++){
 			bar.nextEvent();
 			ParameterList newPar; smearParameterList(newPar);
@@ -187,9 +190,11 @@ void MinuitResult::calcFractionError(){
 			double mean=0, sqSum=0., stdev=0;
 			for(unsigned int i=0; i<fracVect.size();i++){
 				double tmp = fracVect.at(i).GetDoubleParameter(o)->GetValue();
+				myfile << tmp << " ";
 				mean += tmp;
 				sqSum += tmp*tmp;
 			}
+			myfile << std::endl;
 			unsigned int s = fracVect.size();
 			sqSum /= s;
 			mean /= s;
@@ -197,6 +202,7 @@ void MinuitResult::calcFractionError(){
 			fractionList.GetDoubleParameter(o)->SetError(stdev);
 		}
 		_amp->setParameterList(finalParameters); //set correct fit result
+		myfile.close();
 	}
 	std::cout<<"calcFractionError"<<std::endl;
 	return;

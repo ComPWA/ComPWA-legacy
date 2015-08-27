@@ -18,6 +18,8 @@ if $(build_AsciiReader) && $(build_AsciiReader) != 0
 # Build libDataReader.so
 lib DataReader : 
         $(sources)
+        [ glob *.cpp : *Test.cpp ] 
+        $(TOP)/Core//ComPWA  
         ;
 
 install dist : DataReader : <location>$(TOP)/lib ;

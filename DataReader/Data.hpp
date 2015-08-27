@@ -31,6 +31,7 @@
 #include "Core/Generator.hpp"
 #include "Core/DataPoint.hpp"
 #include "Core/Resolution.hpp"
+#include "DataReader/DataCorrection.hpp"
 
 class Data
 {
@@ -51,6 +52,8 @@ public:
 	virtual const unsigned int getNBins() const =0;
 	virtual const int getBin(const int, double&, double&) =0; //TODO: BinDataTyp, dynamic dimension
 
+	//! Set correction table
+    virtual void applyCorrection(DataCorrection& corr) =0;
 	//! Remove all events outside PHSP
 	virtual void reduceToPhsp() {};
 	//! Select only first @param newSize events from full sample

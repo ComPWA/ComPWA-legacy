@@ -20,6 +20,7 @@
 #include "Core/Kinematics.hpp"
 #include "Core/Generator.hpp"
 #include "TParticle.h"
+#include "TParticlePDG.h"
 #include <boost/log/trivial.hpp>
 #include <boost/log/core.hpp>
 using namespace boost::log;
@@ -219,7 +220,11 @@ void RootReader::storeEvents(){
 			partN = (TParticle*) fParticles->At(part);
 			if(!partN) continue;
 			partN->Momentum(inN);
-			tmp.addParticle(Particle(inN.X(), inN.Y(), inN.Z(), inN.E(),partN->GetPdgCode()));
+			int charge = partN->GetPDG()->Charge();
+			if(charge != 0) charge /= std::abs(charge);
+			tmp.addParticle(
+					Particle( inN.X(), inN.Y(), inN.Z(), inN.E(), partN->GetPdgCode(), charge )
+			);
 		}//particle loop
 		tmp.setWeight(feventWeight);
 		tmp.setCharge(fCharge);
@@ -344,5 +349,17 @@ void RootReader::setResolution(std::shared_ptr<Resolution> res){
 void RootReader::Add(Data& otherSample){
 	std::vector<Event> otherEvents = otherSample.getEvents();
 	fEvents.insert(fEvents.end(), otherEvents.begin(), otherEvents.end());
+	return;
+}
+void RootReader::applyCorrection(DataCorrection& corr){
+	double sumWeightSq=0;
+	for(int i=0; i<fEvents.size(); i++){
+		double w = corr.getCorrection(fEvents.at(i));
+		sumWeightSq += w*w;
+		double oldW = fEvents.at(i).getWeight();
+		fEvents.at(i).setWeight(w*oldW);
+	}
+	BOOST_LOG_TRIVIAL(info)<<"RootReader::applyCorrection() | Sample corrected! "
+			"Sum of weights squared is "<<sumWeightSq;
 	return;
 }

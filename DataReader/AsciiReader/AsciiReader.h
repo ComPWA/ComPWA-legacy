@@ -44,6 +44,8 @@ public:
   virtual const unsigned int getNEvents() const { return EvtList_.size(); };
   virtual const unsigned int getNBins() const {return fmaxBins_;};
 
+  //! Set correction table
+  virtual void applyCorrection(DataCorrection& corr) { };
   virtual std::vector<Event> getEvents() {return EvtList_; }
   virtual void Add(Data& otherSample){ EvtList_.insert(EvtList_.end(),otherSample.getEvents().begin(),otherSample.getEvents().end()); }
 

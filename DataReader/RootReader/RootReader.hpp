@@ -25,9 +25,10 @@
 #include <utility>
 
 //PWA-Headers
-#include "DataReader/Data.hpp"
 #include "Core/Event.hpp"
 #include "Core/DataPoint.hpp"
+#include "DataReader/Data.hpp"
+#include "DataReader/DataCorrection.hpp"
 
 //Root-Headers
 #include "TMath.h"
@@ -52,7 +53,8 @@ public:
 	 * @param size 		Number of events to read in
 	 * @param binned	 Create binning
 	 */
-	RootReader(const std::string inRootFile, const std::string inTreeName="data", int size=-1, const bool binned=false);
+	RootReader(const std::string inRootFile, const std::string inTreeName="data",
+			int size=-1, const bool binned=false);
 
 	virtual const std::vector<std::string>& getVariableNames();
 
@@ -63,6 +65,7 @@ public:
     virtual void writeData(std::string file="",std::string trName="");
     virtual void Clear();
 
+    virtual void applyCorrection(DataCorrection& corr);
     //! Number of events
 	virtual const unsigned int getNEvents() const {return fEvents.size();};
     //! Number of bins
