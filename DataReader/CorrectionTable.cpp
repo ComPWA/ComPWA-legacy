@@ -4,12 +4,40 @@
  *  Created on: Feb 27, 2015
  *      Author: weidenka
  */
-#include <boost/log/core.hpp>
-#include <boost/log/trivial.hpp>
+#include <string>
+#include <ostream>
 
+#include "Core/Logging.hpp"
+#include "Core/TableFormater.hpp"
 #include "DataReader/CorrectionTable.hpp"
 
 void CorrectionTable::Print() const{
+	if(sys.size() == 0 && antiSys.size() == 0) return; //don't print if empty
+	std::stringstream out;
+	TableFormater table(&out);
+	table.addColumn("Bin",12);//add empty first column
+	table.addColumn("Particle",20);//global correlation coefficient
+	table.addColumn("anti-Particle",20);//global correlation coefficient
+	table.addColumn("Neutral/Average",20);//global correlation coefficient
+	table.header();
+	for(unsigned int i=0; i<bins.size(); i++){
+		std::stringstream strBin; strBin << bins.at(i).first << " - " << bins.at(i).second;
+		table << strBin.str();
+		std::stringstream strCor;
+		strCor << GetValue(+1,bins.at(i).second);
+//				<< " +- " <<GetError(+1,bins.at(i).second);
+		table << strCor.str();
+		std::stringstream strAntiCor;
+		strAntiCor << GetValue(-1,bins.at(i).second);
+//				<< " +- " <<GetError(-1,bins.at(i).second);
+		table << strAntiCor.str();
+		std::stringstream strAvg;
+		strAvg << GetValue(0,bins.at(i).second);
+//				<< " +- " <<GetError(0,bins.at(i).second);
+		table << strAvg.str();
+	}
+	table.footer();
+	BOOST_LOG_TRIVIAL(info) << "CorrectionTable::Print() | "<<title << std::endl << out.str();
 
 }
 void CorrectionTable::SetSystematics(std::vector<double> b, std::vector<double> bError ){
@@ -83,7 +111,7 @@ double CorrectionTable::GetError(int charge, double momentum) const{
 	if(binNumber<0)
 		throw std::runtime_error("momentumSys::GetError() no bin found for momentum value "
 				+ std::to_string((long double)momentum)+"!");
-	if(charge<0)//D0->K0bar K+K-
+	if(charge>0)//D0->K0bar K+K-
 		return sysError[binNumber];
 	else if(charge<0)//D0->K0bar K+K-
 		return antiSysError[binNumber];

@@ -9,8 +9,8 @@
 #include "Core/Kinematics.hpp"
 #include "DataReader/DataCorrection.hpp"
 
-MomentumCorrection::MomentumCorrection(std::vector<CorrectionTable> inCorr) :
-corrections(inCorr)
+MomentumCorrection::MomentumCorrection(std::vector<CorrectionTable> inCorr, std::string t) :
+corrections(inCorr), title(t)
 {
 	if( corrections.size() != Kinematics::instance()->getNumberOfParticles() )
 		throw std::runtime_error("RootCorrection::RootCorrection() | Number of histograms is "
@@ -32,4 +32,11 @@ double MomentumCorrection::getCorrection(Event& ev){
 		w *= corr;
 	}
 	return w;
+}
+
+void MomentumCorrection::Print() const{
+	BOOST_LOG_TRIVIAL(info)<<"MomentumCorrection::Print() | "<<title;
+	for(int i=0; i < corrections.size(); i++)
+		corrections.at(i).Print();
+	return;
 }

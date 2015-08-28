@@ -17,7 +17,7 @@
 class CorrectionTable
 {
 public:
-	CorrectionTable(){ }
+	CorrectionTable(std::string t="") : title(t){ }
 
 	~CorrectionTable() { }
 
@@ -119,8 +119,14 @@ public:
 
 	//! Print table
 	void Print() const;
+	//! Get title
+	std::string GetTitle() { return title; }
+	//! Set title
+	void SetTitle( std::string t ) { title=t; }
 
 protected:
+	//! Title
+	std::string title;
 	//! invert e_mc/e_data-1 to e_data/e_mc-1
 	static double inverse(double x);
 	//! Calculate error for inversion e_mc/e_data-1 to e_data/e_mc-1
