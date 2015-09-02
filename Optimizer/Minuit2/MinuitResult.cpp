@@ -17,14 +17,13 @@
 
 #include <boost/numeric/ublas/symmetric.hpp>
 #include <boost/numeric/ublas/io.hpp>
-#include <boost/log/core.hpp>
-#include <boost/log/trivial.hpp>
 #include <boost/random/normal_distribution.hpp>
 #include <boost/archive/xml_oarchive.hpp>
 #include <boost/archive/xml_iarchive.hpp>
 
-#include "Optimizer/Minuit2/MinuitResult.hpp"
 #include "Core/ProgressBar.hpp"
+#include "Core/Logging.hpp"
+#include "Optimizer/Minuit2/MinuitResult.hpp"
 
 using namespace boost::log;
 
@@ -44,8 +43,8 @@ int multivariateGaussian(const gsl_rng *rnd, const int vecSize, const gsl_vector
 }
 
 MinuitResult::MinuitResult(std::shared_ptr<ControlParameter> esti, FunctionMinimum result) :
-				useCorrelatedErrors(0), calcInterference(0), useTree(0),
-				correlatedErrors_numberOfSets(200){
+						useCorrelatedErrors(0), calcInterference(0), useTree(0),
+						correlatedErrors_numberOfSets(200){
 	estimator = std::static_pointer_cast<Estimator>(esti);
 	_amp=estimator->getAmplitude();
 	init(result);
@@ -175,8 +174,7 @@ void MinuitResult::calcFractionError(){
 				<<correlatedErrors_numberOfSets<<" sets of parameters...";
 		std::vector<ParameterList> fracVect;
 		progressBar bar(correlatedErrors_numberOfSets);
-		ofstream myfile;
-		myfile.open ("fraction.txt");
+		ofstream outFraction; outFraction.open ("corrErrorsPar.txt");
 		for(unsigned int i=0; i<correlatedErrors_numberOfSets; i++){
 			bar.nextEvent();
 			ParameterList newPar; smearParameterList(newPar);
@@ -184,17 +182,33 @@ void MinuitResult::calcFractionError(){
 			ParameterList tmp;
 			calcFraction(tmp);
 			fracVect.push_back(tmp);
+
+			if(i==0){
+				for(int t=0; t<newPar.GetNDouble(); t++){
+					if( newPar.GetDoubleParameter(t)->IsFixed()) continue;
+					outFraction << newPar.GetDoubleParameter(t)->GetName()<<":";
+				}
+				for(int t=0; t<tmp.GetNDouble(); t++)
+					outFraction << tmp.GetDoubleParameter(t)->GetName()<<":";
+				outFraction << std::endl;
+			}
+			for(int t=0; t<newPar.GetNDouble(); t++){
+				if( newPar.GetDoubleParameter(t)->IsFixed()) continue;
+				outFraction << newPar.GetDoubleParameter(t)->GetValue()<<" ";
+			}
+			for(int t=0; t<tmp.GetNDouble(); t++)
+				outFraction << tmp.GetDoubleParameter(t)->GetValue()<<" ";
+			outFraction << std::endl;
 		}
+		outFraction.close();
 		//Calculate standard deviation
 		for(unsigned int o=0;o<nRes;o++){
 			double mean=0, sqSum=0., stdev=0;
 			for(unsigned int i=0; i<fracVect.size();i++){
 				double tmp = fracVect.at(i).GetDoubleParameter(o)->GetValue();
-				myfile << tmp << " ";
 				mean += tmp;
 				sqSum += tmp*tmp;
 			}
-			myfile << std::endl;
 			unsigned int s = fracVect.size();
 			sqSum /= s;
 			mean /= s;
@@ -202,7 +216,6 @@ void MinuitResult::calcFractionError(){
 			fractionList.GetDoubleParameter(o)->SetError(stdev);
 		}
 		_amp->setParameterList(finalParameters); //set correct fit result
-		myfile.close();
 	}
 	std::cout<<"calcFractionError"<<std::endl;
 	return;
