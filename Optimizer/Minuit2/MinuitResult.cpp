@@ -359,15 +359,13 @@ void MinuitResult::printCorrelationMatrix(TableFormater* tableCorr){
 		tableCorr->addColumn(ppp->GetName(),15);//add columns in correlation matrix
 	}
 
-	tableCorr->header();
 	unsigned int n=0;
+	tableCorr->header();
 	for(unsigned int o=0;o<finalParameters.GetNDouble();o++){
-		std::shared_ptr<DoubleParameter> ppp = initialParameters.GetDoubleParameter(o);
-		std::shared_ptr<DoubleParameter> ppp2 = finalParameters.GetDoubleParameter(o);
+		std::shared_ptr<DoubleParameter> ppp = finalParameters.GetDoubleParameter(o);
 		if(ppp->IsFixed()) continue;
 		*tableCorr << ppp->GetName();
-		//				if(globalCC.size()>o)
-		*tableCorr << globalCC[n]; //TODO: check if emtpy (don't know how this happened, but it did :)
+		*tableCorr << globalCC.at(n); //TODO: check if emtpy (don't know how this happened, but it did :)
 		for(unsigned int t=0;t<corr.size1();t++) {
 			if(n>=corr.size2()) { *tableCorr<< " "; continue; }
 			if(t>=n)*tableCorr << corr(n,t);
@@ -381,24 +379,17 @@ void MinuitResult::printCorrelationMatrix(TableFormater* tableCorr){
 
 void MinuitResult::printCovarianceMatrix(TableFormater* tableCov){
 	if(!hasValidCov) return;
-	tableCov->addColumn(" ",15);//add empty first column
-	tableCov->addColumn("GlobalCC",10);//global correlation coefficient
-	for(unsigned int o=0;o<finalParameters.GetNDouble();o++){
-		std::shared_ptr<DoubleParameter> ppp = finalParameters.GetDoubleParameter(o);
-		if(ppp->IsFixed()) continue;
-		tableCov->addColumn(ppp->GetName(),15);//add columns in correlation matrix
-	}
+	tableCov->addColumn(" ",17);//add empty first column
 	//add columns first
 	for(unsigned int o=0;o<finalParameters.GetNDouble();o++){
 		if(!finalParameters.GetDoubleParameter(o)->IsFixed())
-			tableCov->addColumn(finalParameters.GetDoubleParameter(o)->GetName(),15);//add columns in covariance matrix
+			tableCov->addColumn(finalParameters.GetDoubleParameter(o)->GetName(),17);
 	}
 
 	unsigned int n=0;
 	tableCov->header();
 	for(unsigned int o=0;o<finalParameters.GetNDouble();o++){
-		std::shared_ptr<DoubleParameter> ppp = initialParameters.GetDoubleParameter(o);
-		std::shared_ptr<DoubleParameter> ppp2 = finalParameters.GetDoubleParameter(o);
+		std::shared_ptr<DoubleParameter> ppp = finalParameters.GetDoubleParameter(o);
 		if(ppp->IsFixed()) continue;
 		*tableCov << ppp->GetName();
 		for(unsigned int t=0;t<cov.size1();t++) {
