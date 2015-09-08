@@ -48,7 +48,6 @@ void FitResult::setFinalParameters(ParameterList finPars){
 }
 
 void FitResult::printFitParameters(TableFormater* tableResult){
-	std::cout<<"printFitParameters"<<std::endl;
 	bool printTrue=0, printInitial=0;
 	if(trueParameters.GetNParameter()) printTrue=1;
 	if(initialParameters.GetNParameter()) printInitial=1;
