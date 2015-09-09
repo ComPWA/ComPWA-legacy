@@ -15,7 +15,6 @@
 #include <memory>
 #include <ctime>
 
-#include <omp.h>
 #include <time.h>
 
 #include <boost/random/linear_congruential.hpp>
@@ -62,148 +61,102 @@ std::shared_ptr<FitResult> RunManager::startFit(ParameterList& inPar){
 	return result;
 }
 bool RunManager::generate( int number ) {
-	if(number <= 0 && !samplePhsp_)
-		throw std::runtime_error("RunManager: generate() negative number of events: "
-				+std::to_string((long double)number)+". And no phsp sample given!");
-	if(!(gen_ && amp_))
-		throw std::runtime_error("RunManager: generate() requirements not fulfilled");
-	if(!sampleData_)
-		throw std::runtime_error("RunManager: generate() not sample set");
-	if(sampleData_->getNEvents()>0)
-		throw std::runtime_error("RunManager: generate() dataset not empty! abort!");
+	BOOST_LOG_TRIVIAL(info) << "RunManager::generate() | generating "<<number<<" signal events!";
+	return gen( number, gen_, amp_, sampleData_, samplePhsp_, sampleTruePhsp_ );
+}
 
-	//Determing an estimate on the maximum of the physics amplitude using 100k events.
-	double genMaxVal=1.2*amp_->getMaxVal(gen_);
-
-	if(number>0)
-		BOOST_LOG_TRIVIAL(info) << "Generating MC: "<<number<<" events. "
-				"Maximum amplitude value: "<<genMaxVal;
-	else
-		BOOST_LOG_TRIVIAL(info) << "Generating MC using the whole phsp sample. "
-				"Maximum amplitude value: "<<genMaxVal;
-
-	unsigned int startTime = clock();
-
-	Generator* genNew = (&(*gen_))->Clone();//copy generator for every thread
-	double AMPpdf;
-
-	unsigned int limit;
-	unsigned int totalCalls=0;
-	unsigned int acceptedEvents=0;
-	if(samplePhsp_)
-		limit = samplePhsp_->getNEvents();
-	else
-		limit = 100000000;//set large limit, should never be reached
-	Event tmp;
-	progressBar bar(number);
-	if(number<=0) bar = progressBar(limit);
-	for(unsigned int i=0;i<limit;i++){
-		dataPoint point;
-		if(samplePhsp_){ //if phsp sample is set -> use it
-			tmp = samplePhsp_->getEvent(i);
-		} else {//otherwise generate event
-			genNew->generate(tmp);
-		}
-		if(number<=0) bar.nextEvent();
-		double weight = tmp.getWeight();
-		/* reset weights: the weights are taken into account by hit and miss. The resulting
-		 * sample is therefore unweighted */
-		tmp.setWeight(1.);//reset weight
-		tmp.setEfficiency(1.);//reset weight
-		point = dataPoint(tmp);
-		if(!Kinematics::instance()->isWithinPhsp(point))
-			continue;
-
-		totalCalls++;
-		double ampRnd = genNew->getUniform()*genMaxVal;
-		ParameterList list;
-		list = amp_->intensity(point);//unfortunatly not thread safe
-		AMPpdf = *list.GetDoubleParameter(0);
-		if( genMaxVal< (AMPpdf*weight))
-			throw std::runtime_error("RunManager: error in HitMiss procedure. "
-					"Maximum value of random number generation smaller then amplitude maximum!");
-		if( ampRnd > (weight*AMPpdf) ) continue;
-		sampleData_->pushEvent(tmp);//Unfortunately not thread safe
-		acceptedEvents++;
-		if(number>0) bar.nextEvent();
-		if(acceptedEvents>=number) i=limit; //continue if we have a sufficienct number of events
-	}
-	if(sampleData_->getNEvents()<number)
-		BOOST_LOG_TRIVIAL(error) << "RunManager::generate() not able to generate "<<number<<" events. "
-				"Phsp sample too small. Current size of sample is now "<<sampleData_->getNEvents();
-	BOOST_LOG_TRIVIAL(info) << "Efficiency of toy MC generation: "<<(double)sampleData_->getNEvents()/totalCalls;
-//	BOOST_LOG_TRIVIAL(info) << "RunManager: generate time="<<(clock()-startTime)/CLOCKS_PER_SEC/60<<"min.";
-
-	return true;
-};
 bool RunManager::generateBkg( int number ) {
-	if(number <= 0 && !samplePhsp_)
-		throw std::runtime_error("RunManager: generateBkg() negative number of events: "
+	BOOST_LOG_TRIVIAL(info) << "RunManager::generateBkg() | generating "<<number<<" background events!";
+	return gen( number, gen_, ampBkg_, sampleBkg_, samplePhsp_, sampleTruePhsp_);
+}
+
+bool RunManager::gen( int number, std::shared_ptr<Generator> gen, std::shared_ptr<Amplitude> amp,
+		std::shared_ptr<Data> data, std::shared_ptr<Data> phsp, std::shared_ptr<Data> phspTrue){
+
+	if(number == 0) return 0;
+
+	//Doing some checks
+	if(number < 0 && !phsp)
+		throw std::runtime_error("RunManager: gen() negative number of events: "
 				+std::to_string((long double)number)+". And no phsp sample given!");
-	if( !(ampBkg_ && gen_) )
-		throw std::runtime_error("RunManager: generateBkg() requirements not fulfilled");
-	if(!sampleBkg_)
-		throw std::runtime_error("RunManager: generateBkg() no background sample set");
-	if(sampleBkg_->getNEvents()>0)
-		throw std::runtime_error("RunManager: generateBkg() dataset not empty! abort!");
+	if( !amp )
+		throw std::runtime_error("RunManager: gen() amplitude not valid");
+	if( !gen )
+		throw std::runtime_error("RunManager: gen() generator not valid");
+	if( !data )
+		throw std::runtime_error("RunManager: gen() sample not valid");
+	if( data->getNEvents() > 0 )
+		throw std::runtime_error("RunManager: gen() sample not empty!");
+	if( phspTrue && !phsp )
+		throw std::runtime_error("RunManager: gen() We have a sample of true phsp events, "
+				"but no phsp sample!");
+	if( phspTrue && phspTrue->getNEvents() != phsp->getNEvents() )
+		throw std::runtime_error("RunManager: gen() We have a sample of true phsp events, "
+				"but the sample size doesn't match that one of the phsp sample!");
+
 	//Determing an estimate on the maximum of the physics amplitude using 100k events.
-	double genMaxVal=1.2*ampBkg_->getMaxVal(gen_);
+	double genMaxVal = 1.2*amp->getMaxVal(gen);
 
 	unsigned int totalCalls=0;
-	BOOST_LOG_TRIVIAL(info) << "Generating background MC: ["<<number<<" events] ";
-
 	unsigned int startTime = clock();
-
-	Generator* genNew = (&(*gen_))->Clone();//copy generator for every thread
 	double AMPpdf;
 
 	unsigned int limit;
 	unsigned int acceptedEvents=0;
-	if(samplePhsp_){
-		limit = samplePhsp_->getNEvents();
+	if(phsp){
+		limit = phsp->getNEvents();
 	} else
 		limit = 100000000; //set large limit, should never be reached
-	Event tmp;
+
+	Event tmpFill; //event that we fill into generated sample
+	Event tmpAmp; //event that is used to evalutate amplitude
 	progressBar bar(number);
 	if(number<=0) bar = progressBar(limit);
 	for(unsigned int i=0;i<limit;i++){
-		dataPoint point;
-		if(samplePhsp_){ //if phsp sample is set -> use it
-			tmp = samplePhsp_->getEvent(i);
+		if(phsp && phspTrue) { //phsp and true sample is set
+			tmpAmp = phspTrue->getEvent(i);
+			tmpFill = phsp->getEvent(i);
+		} else if(phsp) {//phsp sample is set
+			tmpFill = phsp->getEvent(i);
+			tmpAmp = tmpFill;
 		} else {//otherwise generate event
-			genNew->generate(tmp);
+			gen->generate(tmpFill);
+			tmpAmp = tmpFill;
 		}
 		if(number<=0) bar.nextEvent();
-		double weight = tmp.getWeight();
-		/* reset weights: the weights are taken into account by hit and miss. The resulting
-		 * sample is therefore unweighted */
-		tmp.setWeight(1.);//reset weight
-		tmp.setEfficiency(1.);//reset weight
-		point = dataPoint(tmp);
-		if(!Kinematics::instance()->isWithinPhsp(point))
-			continue;
+		double weight = tmpAmp.getWeight();
+		dataPoint point(tmpAmp);
+		if(!Kinematics::instance()->isWithinPhsp(point)) continue;
 
 		totalCalls++;
-		double ampRnd = genNew->getUniform()*genMaxVal;
+		double ampRnd = gen->getUniform()*genMaxVal;
 		ParameterList list;
-		list = ampBkg_->intensity(point);//unfortunatly not thread safe
+		list = amp->intensity(point);//unfortunatly not thread safe
 		AMPpdf = *list.GetDoubleParameter(0);
 		if( genMaxVal< (AMPpdf*weight))
 			throw std::runtime_error("RunManager: error in HitMiss procedure. "
 					"Maximum value of random number generation smaller then amplitude maximum!");
 		if( ampRnd > (weight*AMPpdf) ) continue;
-		sampleBkg_->pushEvent(tmp);//unfortunatly not thread safe
+
+		//Fill event to sample
+		/* reset weights: the weights are taken into account by hit and miss. The resulting
+		 * sample is therefore unweighted */
+		tmpFill.setWeight(1.);//reset weight
+		tmpFill.setEfficiency(1.);//reset weight
+		data->pushEvent(tmpFill);//unfortunatly not thread safe
+
+		//some statistics
 		acceptedEvents++;
 		if(number>0) bar.nextEvent();
-		if(acceptedEvents>=number) i=limit; //continue if we have a sufficienct number of events
+		if(acceptedEvents>=number) i=limit; //break if we have a sufficienct number of events
 	}
-	if(sampleData_->getNEvents()<number)
-		BOOST_LOG_TRIVIAL(error) << "RunManager::generateBkg() not able to generate "<<number<<" events. "
-				"Phsp sample too small. Current size of sample is now "<<sampleBkg_->getNEvents();
-	BOOST_LOG_TRIVIAL(info) << "Efficiency of toy MC generation: "<<(double)sampleData_->getNEvents()/totalCalls;
+	if(data->getNEvents()<number)
+		BOOST_LOG_TRIVIAL(error) << "RunManager::gen() not able to generate "<<number<<" events. "
+				"Phsp sample too small. Current size of sample is now "<<data->getNEvents();
+	BOOST_LOG_TRIVIAL(info) << "Efficiency of toy MC generation: "<<(double)data->getNEvents()/totalCalls;
 
 	return true;
-};
+}
 
 bool RunManager::generatePhsp( int number ) {
 	if(number==0) return 0;
@@ -214,14 +167,12 @@ bool RunManager::generatePhsp( int number ) {
 
 	BOOST_LOG_TRIVIAL(info) << "Generating phase-space MC: ["<<number<<" events] ";
 
-	Generator* genNew = (&(*gen_))->Clone();//copy generator for every thread
-
 	progressBar bar(number);
 	for(unsigned int i=0;i<number;i++){
 		if(i>0) i--;
 		Event tmp;
-		genNew->generate(tmp);
-		double ampRnd = genNew->getUniform();
+		gen_->generate(tmp);
+		double ampRnd = gen_->getUniform();
 		if( ampRnd > tmp.getWeight() ) continue;
 		/* reset weights: the weights are taken into account by hit and miss on the weights.
 		 * The resulting sample is therefore unweighted */
@@ -232,4 +183,4 @@ bool RunManager::generatePhsp( int number ) {
 		bar.nextEvent();
 	}
 	return true;
-};
+}

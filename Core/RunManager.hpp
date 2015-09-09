@@ -105,8 +105,14 @@ public:
 	virtual std::shared_ptr<Data> getData (){ return sampleData_; };
 	virtual void setBackground ( std::shared_ptr<Data> d){ sampleBkg_ = d; };
 	virtual std::shared_ptr<Data> getBackground (){ return sampleBkg_; };
-	virtual void setPhspSample( std::shared_ptr<Data> d){ samplePhsp_ = d; };
+	virtual void setPhspSample( std::shared_ptr<Data> phsp,
+			std::shared_ptr<Data> truePhsp = std::shared_ptr<Data>()){
+		samplePhsp_ = phsp;
+		sampleTruePhsp_ = truePhsp;
+	};
 	virtual std::shared_ptr<Data> getPhspSample(){ return samplePhsp_; };
+	virtual void setTruePhspSample( std::shared_ptr<Data> d){ sampleTruePhsp_ = d; };
+	virtual std::shared_ptr<Data> getTruePhspSample(){ return sampleTruePhsp_; };
 	virtual void setAmplitude ( std::shared_ptr<Amplitude> d){ amp_ = d; };
 	virtual std::shared_ptr<Amplitude> getAmplitude (){ return amp_; };
 	virtual void setBkgAmplitude ( std::shared_ptr<Amplitude> d){ ampBkg_ = d; };
@@ -148,9 +154,16 @@ public:
 	virtual bool generateBkg ( int number );
 
 protected:
+	static bool gen( int number, std::shared_ptr<Generator> gen,
+			std::shared_ptr<Amplitude> amp, std::shared_ptr<Data> data,
+			std::shared_ptr<Data> phsp = std::shared_ptr<Data>(),
+			std::shared_ptr<Data> phspTrue = std::shared_ptr<Data>()
+			);
+
 	std::shared_ptr<Data> sampleData_; /*!< Pointer to data sample */
 	std::shared_ptr<Data> sampleBkg_; /*!< Pointer to background sample */
 	std::shared_ptr<Data> samplePhsp_; /*!< Pointer to phsp sample */
+	std::shared_ptr<Data> sampleTruePhsp_; /*!< Pointer to true phsp sample */
 	std::shared_ptr<Amplitude> amp_; /*!< Pointer to signal model */
 	std::shared_ptr<Amplitude> ampBkg_; /*!< Pointer to background model */
 	std::shared_ptr<Optimizer> opti_; /*!< Pointer to Optimizer-Module */
