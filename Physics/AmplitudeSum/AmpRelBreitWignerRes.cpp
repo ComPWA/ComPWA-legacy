@@ -34,9 +34,12 @@ AmpRelBreitWignerRes::AmpRelBreitWignerRes(const char *name,
 				mesonRadius, motherRadius, type, nCalls, nS),
 				_width(width)
 {
+	if( _width->GetValue() != tmp_width) {
+		SetModified();
+		tmp_width = _width->GetValue();
+	}
 	//setting default normalization
-	_norm = 1/sqrt(this->integral());
-	modified=0;
+	GetNormalization();
 }
 
 AmpRelBreitWignerRes::~AmpRelBreitWignerRes() 

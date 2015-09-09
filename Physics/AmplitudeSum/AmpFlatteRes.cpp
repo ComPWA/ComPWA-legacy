@@ -40,18 +40,18 @@ AmpFlatteRes::AmpFlatteRes(const char *name,
 	if(_g2_partA<0||_g2_partA>5||_g2_partB<0||_g2_partB>5)
 		throw std::runtime_error("AmpFlatteRes3Ch::evaluateAmp | particle masses for second channel not set!");
 
+	if( _g1->GetValue()!=tmp_g1 || _g2->GetValue()!=tmp_g2 ) {
+		SetModified();
+		tmp_g1 = _g1->GetValue();
+		tmp_g2 = _g2->GetValue();
+	}
 	//setting default normalization
-	_norm = 1/sqrt(this->integral());
-	modified=0;
+	GetNormalization();
 }
 
 AmpFlatteRes::~AmpFlatteRes() 
 {
 }
-
-//std::complex<double> AmpFlatteRes::evaluate(dataPoint& point) {
-//	return AmpAbsDynamicalFunction::evaluate(point);
-//}
 
 std::complex<double> AmpFlatteRes::evaluateAmp(dataPoint& point) {
 	if( _g1->GetValue()!=tmp_g1 || _g2->GetValue()!=tmp_g2 ) {

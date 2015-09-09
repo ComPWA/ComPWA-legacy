@@ -44,9 +44,15 @@ AmpFlatteRes3Ch::AmpFlatteRes3Ch(const char *name,
 	if(_g3_partA<0||_g3_partA>5||_g3_partB<0||_g3_partB>5)
 		throw std::runtime_error("AmpFlatteRes3Ch::evaluateAmp | particle masses for third channel not set!");
 
+	if( _g1->GetValue()!=tmp_g1 || _g2->GetValue()!=tmp_g2 || _g3->GetValue()!=tmp_g3 ) {
+		SetModified();
+		tmp_g1 = _g1->GetValue();
+		tmp_g2 = _g2->GetValue();
+		tmp_g3 = _g3->GetValue();
+	}
+
 	//setting default normalization
-	_norm = 1/sqrt(this->integral());
-	modified=0;
+	GetNormalization();
 }
 
 AmpFlatteRes3Ch::~AmpFlatteRes3Ch()

@@ -62,6 +62,11 @@ void AmpAbsDynamicalFunction::initialize()
 		_ma=kin->m2;
 		_mb=kin->m1;
 		_mc=kin->m3;}
+
+	if(_mass->GetValue() != tmp_mass){
+		SetModified();
+		tmp_mass = _mass->GetValue();
+	}
 }
 
 AmpAbsDynamicalFunction::~AmpAbsDynamicalFunction() 

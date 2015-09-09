@@ -127,9 +127,9 @@ void AmpSumIntensity::init(){
 			params.GetDoubleParameter("g1_a_0")->SetMinMax(tmp.m_g1_min, tmp.m_g1_max);
 			params.GetDoubleParameter("g1_a_0")->FixParameter(tmp.m_g1_fix);
 			params.GetDoubleParameter("g2_a_0")->FixParameter(0);
-			params.GetDoubleParameter("g2_a_0")->SetValue(tmp.m_g1);
-			params.GetDoubleParameter("g2_a_0")->SetMinMax(tmp.m_g1_min, tmp.m_g1_max);
-			params.GetDoubleParameter("g2_a_0")->FixParameter(tmp.m_g1_fix);
+			params.GetDoubleParameter("g2_a_0")->SetValue(tmp.m_g2);
+			params.GetDoubleParameter("g2_a_0")->SetMinMax(tmp.m_g2_min, tmp.m_g2_max);
+			params.GetDoubleParameter("g2_a_0")->FixParameter(tmp.m_g2_fix);
 			tmpRes = std::shared_ptr<AmpAbsDynamicalFunction>(new AmpFlatteRes(name.c_str(),
 					params.GetDoubleParameter("mag_"+name), params.GetDoubleParameter("phase_"+name),
 					params.GetDoubleParameter("m0_"+name), subSys,
