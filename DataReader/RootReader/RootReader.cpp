@@ -29,14 +29,14 @@ RootReader::RootReader(){
 	fFile = 0; //need to do this to avoid seg. violation when destructor is called
 }
 
-RootReader::RootReader(TTree* tr, int size, const bool binned) : readSize(size), fBinned(binned){
+RootReader::RootReader(TTree* tr, int size, const bool binned) : readSize(size), fBinned(binned), maxWeight(0.0){
 	fTree = tr;
 	fFile = 0; //need to do this to avoid seg. violation when destructor is called
 	read();
 }
 
 RootReader::RootReader(const std::string inRootFile, const std::string inTreeName, int size, const bool binned) :
-						fBinned(binned),fileName(inRootFile),treeName(inTreeName),readSize(size){
+						fBinned(binned),fileName(inRootFile),treeName(inTreeName),readSize(size), maxWeight(0.0){
 	fFile = new TFile(fileName.c_str());
 	if(fFile->IsZombie())
 		throw std::runtime_error("RootReader::RootReader() can't open data file: "+inRootFile);
@@ -126,6 +126,11 @@ std::shared_ptr<Data> RootReader::rndSubSet(unsigned int size, std::shared_ptr<G
 	return newSample;
 }
 
+void RootReader::pushEvent(const Event& evt) {
+	fEvents.push_back(evt);
+	if( evt.getWeight() > maxWeight ) maxWeight = evt.getWeight();
+}
+
 void RootReader::read(){
 	fParticles = new TClonesArray("TParticle");
 	fTree->GetBranch("Particles")->SetAutoDelete(false);
@@ -150,8 +155,11 @@ const std::vector<std::string>& RootReader::getVariableNames(){
 void RootReader::resetWeights(double w){
 	for(unsigned int i=0; i<fEvents.size(); i++)
 		fEvents.at(i).setWeight(w);
+	maxWeight=w;
 	return;
 }
+
+double RootReader::getMaxWeight() const { return maxWeight; }
 
 Event& RootReader::getEvent(const int i){
 	return fEvents.at(i);
@@ -232,6 +240,7 @@ void RootReader::storeEvents(){
 		tmp.setEfficiency(feventEff);
 
 		fEvents.push_back(tmp);
+		if(feventWeight > maxWeight) maxWeight = feventWeight;
 	}//event loop
 }
 
@@ -349,14 +358,18 @@ void RootReader::setResolution(std::shared_ptr<Resolution> res){
 void RootReader::Add(Data& otherSample){
 	std::vector<Event> otherEvents = otherSample.getEvents();
 	fEvents.insert(fEvents.end(), otherEvents.begin(), otherEvents.end());
+	if(otherSample.getMaxWeight() > maxWeight) maxWeight = otherSample.getMaxWeight();
 	return;
 }
 void RootReader::applyCorrection(DataCorrection& corr){
 	double sumWeightSq=0;
 	for(int i=0; i<fEvents.size(); i++){
 		double w = corr.getCorrection(fEvents.at(i));
+		if( w < 0 )
+			throw std::runtime_error("RootReader::applyCorrection() | negative weight!");
 		sumWeightSq += w*w;
 		double oldW = fEvents.at(i).getWeight();
+		if(w*oldW > maxWeight) maxWeight = w*oldW;
 		fEvents.at(i).setWeight(w*oldW);
 	}
 	BOOST_LOG_TRIVIAL(info)<<"RootReader::applyCorrection() | Sample corrected! "

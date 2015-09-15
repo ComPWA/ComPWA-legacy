@@ -58,7 +58,7 @@ public:
 
 	virtual const std::vector<std::string>& getVariableNames();
 
-    virtual void pushEvent(const Event& evt) {fEvents.push_back(evt);};
+    virtual void pushEvent(const Event& evt);
     virtual Event& getEvent(const int);
     virtual allMasses getMasses(const unsigned int startEvent=0, unsigned int nEvents=0);
     virtual const int getBin(const int, double&, double&);
@@ -94,6 +94,8 @@ public:
 	void resetEfficiency(double e=1.);
 	//! Reset weights
 	void resetWeights(double w=1.);
+	//! Get maximum weight
+	double getMaxWeight() const;
 	//! Weights set?
 	bool hasWeights();
 
@@ -121,6 +123,7 @@ protected:
 	//storage of events
 	std::vector<std::string> fVarNames;
 	std::vector<Event> fEvents;
+	double maxWeight;
 
 	virtual void storeEvents();
 	virtual void bin();

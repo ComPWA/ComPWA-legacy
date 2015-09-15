@@ -94,8 +94,13 @@ bool RunManager::gen( int number, std::shared_ptr<Generator> gen, std::shared_pt
 		throw std::runtime_error("RunManager: gen() We have a sample of true phsp events, "
 				"but the sample size doesn't match that one of the phsp sample!");
 
-	//Determing an estimate on the maximum of the physics amplitude using 100k events.
-	double genMaxVal = 1.2*amp->getMaxVal(gen);
+	double maxSampleWeight = phsp->getMaxWeight();
+	if(phspTrue && phspTrue->getMaxWeight()>maxSampleWeight) maxSampleWeight = phspTrue->getMaxWeight();
+
+	/* Maximum value for random number generation. We introduce an arbitray factor of 1.2 to make sure
+	 * that the maximum value is never reached.
+	 */
+	double generationMaxValue = 1.2*amp->getMaxVal(gen)*maxSampleWeight;
 
 	unsigned int totalCalls=0;
 	unsigned int startTime = clock();
@@ -108,32 +113,36 @@ bool RunManager::gen( int number, std::shared_ptr<Generator> gen, std::shared_pt
 	} else
 		limit = 100000000; //set large limit, should never be reached
 
-	Event tmpFill; //event that we fill into generated sample
-	Event tmpAmp; //event that is used to evalutate amplitude
+	Event evt; //event that we fill into generated sample
+	Event evtTrue; //event that is used to evalutate amplitude
 	progressBar bar(number);
 	if(number<=0) bar = progressBar(limit);
 	for(unsigned int i=0;i<limit;i++){
 		if(phsp && phspTrue) { //phsp and true sample is set
-			tmpAmp = phspTrue->getEvent(i);
-			tmpFill = phsp->getEvent(i);
+			evtTrue = phspTrue->getEvent(i);
+			evt = phsp->getEvent(i);
 		} else if(phsp) {//phsp sample is set
-			tmpFill = phsp->getEvent(i);
-			tmpAmp = tmpFill;
+			evt = phsp->getEvent(i);
+			evtTrue = evt;
 		} else {//otherwise generate event
-			gen->generate(tmpFill);
-			tmpAmp = tmpFill;
+			gen->generate(evt);
+			evtTrue = evt;
 		}
 		if(number<=0) bar.nextEvent();
-		double weight = tmpAmp.getWeight();
-		dataPoint point(tmpAmp);
+
+		//use reconstructed position for weights
+		double weight = evt.getWeight();
+
+		//use true position for amplitude value
+		dataPoint point(evtTrue);
 		if(!Kinematics::instance()->isWithinPhsp(point)) continue;
 
 		totalCalls++;
-		double ampRnd = gen->getUniform()*genMaxVal;
+		double ampRnd = gen->getUniform()*generationMaxValue;
 		ParameterList list;
 		list = amp->intensity(point);//unfortunatly not thread safe
 		AMPpdf = *list.GetDoubleParameter(0);
-		if( genMaxVal< (AMPpdf*weight))
+		if( generationMaxValue< (AMPpdf*weight))
 			throw std::runtime_error("RunManager: error in HitMiss procedure. "
 					"Maximum value of random number generation smaller then amplitude maximum!");
 		if( ampRnd > (weight*AMPpdf) ) continue;
@@ -141,9 +150,9 @@ bool RunManager::gen( int number, std::shared_ptr<Generator> gen, std::shared_pt
 		//Fill event to sample
 		/* reset weights: the weights are taken into account by hit and miss. The resulting
 		 * sample is therefore unweighted */
-		tmpFill.setWeight(1.);//reset weight
-		tmpFill.setEfficiency(1.);//reset weight
-		data->pushEvent(tmpFill);//unfortunatly not thread safe
+		evt.setWeight(1.);//reset weight
+		evt.setEfficiency(1.);//reset weight
+		data->pushEvent(evt);//unfortunatly not thread safe
 
 		//some statistics
 		acceptedEvents++;

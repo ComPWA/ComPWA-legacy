@@ -69,6 +69,7 @@ public:
 	//! Reset effciencies of all events
 	virtual void resetEfficiency(double e=1.) { };
 
+	virtual double getMaxWeight() const { return 1.0; }
 	virtual void resetWeights(double w=1.) = 0;
 	virtual bool hasWeights() = 0;
 	virtual void Clear() = 0;
