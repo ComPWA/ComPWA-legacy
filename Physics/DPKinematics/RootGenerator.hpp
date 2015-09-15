@@ -44,6 +44,7 @@ public:
 	virtual void setSeed( unsigned int seed );
 	virtual unsigned int getSeed();
 	virtual double getUniform();
+	virtual double getGaussDist(double mu, double sigma);
 	virtual TGenPhaseSpace* getGenerator() { return &event; }
 };
 

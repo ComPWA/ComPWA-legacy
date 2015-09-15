@@ -40,7 +40,6 @@ void RootGenerator::generate(Event& evt) {
 		tmp.addParticle(Particle(p->X(), p->Y(), p->Z(), p->E()));
 	}
 	evt=tmp;
-	//dataPoint p(tmp); std::cout<<"-"<<p.getVal(0)<<std::endl;
 	return;
 }
 
@@ -48,7 +47,15 @@ void RootGenerator::setSeed( unsigned int seed ){
 	gRandom->SetSeed(seed);
 }
 
-unsigned int RootGenerator::getSeed() { return gRandom->GetSeed(); }
+unsigned int RootGenerator::getSeed() {
+	return gRandom->GetSeed();
+}
+
+
+double RootGenerator::getGaussDist(double mu, double sigma){
+	return gRandom->Gaus(mu,sigma);
+}
+
 double RootGenerator::getUniform(){
 	return gRandom->Uniform(0,1);
 }
@@ -56,7 +63,6 @@ double RootGenerator::getUniform(){
 void UniformTwoBodyGenerator::generate(Event& evt){
 	double s = RootGenerator::getUniform()*(maxSq-minSq)+minSq;
 	TLorentzVector W(0.0, 0.0, 0.0, sqrt(s));//= beam + target;
-//	std::cout<<"generate at s="<<s<<std::endl;
 	RootGenerator::getGenerator()->SetDecay(W, nPart, masses);
 	RootGenerator::generate(evt);
 }
