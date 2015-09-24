@@ -204,7 +204,6 @@ std::shared_ptr<FunctionTree> AmpFlatteRes3Ch::setupTree(
 	newTree->createNode("AngD_"+_name, angdStrat, "Reso_"+_name, theMasses.nEvents); //AD
 
 	//Flatte
-	newTree->createLeaf("m0_"+_name, params.GetDoubleParameter("m0_"+_name), "FlatteRes_"+_name); //m0
 	newTree->createLeaf("m23sq", m23sq, "FlatteRes_"+_name); //ma
 	newTree->createLeaf("m13sq", m13sq, "FlatteRes_"+_name); //mb
 	newTree->createLeaf("m12sq", m12sq, "FlatteRes_"+_name); //mc
@@ -213,6 +212,11 @@ std::shared_ptr<FunctionTree> AmpFlatteRes3Ch::setupTree(
 	newTree->createLeaf("d_"+_name, params.GetDoubleParameter("d_"+_name) , "FlatteRes_"+_name); //d
 	newTree->createLeaf("ffType_"+_name, ffType , "FlatteRes_"+_name); //d
 	if(_name.find("a_0(980)") != _name.npos){
+		try {
+			newTree->createLeaf("m0_a_0", params.GetDoubleParameter("m0_a_0"), "FlatteRes_"+_name);//use global parameter g1_a0 (asdfef)
+		} catch (BadParameter& e) {
+			newTree->createLeaf("m0_"+_name, params.GetDoubleParameter("m0_"+_name), "FlatteRes_"+_name);//use local parameter g1_a0
+		}
 		try {
 			newTree->createLeaf("g1_a_0", params.GetDoubleParameter("g1_a_0"), "FlatteRes_"+_name);//use global parameter g1_a0 (asdfef)
 		} catch (BadParameter& e) {
@@ -229,6 +233,7 @@ std::shared_ptr<FunctionTree> AmpFlatteRes3Ch::setupTree(
 			newTree->createLeaf("g3_"+_name, params.GetDoubleParameter("g1_"+_name), "FlatteRes_"+_name);
 		}
 	} else {
+		newTree->createLeaf("m0_"+_name, params.GetDoubleParameter("m0_"+_name), "FlatteRes_"+_name); //m0
 		newTree->createLeaf("g1_"+_name, params.GetDoubleParameter("g1_"+_name), "FlatteRes_"+_name);
 		newTree->createLeaf("g2_"+_name, params.GetDoubleParameter("g2_"+_name), "FlatteRes_"+_name);
 		try {
@@ -267,7 +272,6 @@ std::shared_ptr<FunctionTree> AmpFlatteRes3Ch::setupTree(
 
 		//Flatte (Normalization)
 		newTree->createNode("NormFlatte_"+_name, flattePhspStrat, "NormReso_"+_name, toyPhspSample.nEvents); //BW
-		newTree->createLeaf("m0_"+_name, params.GetDoubleParameter("m0_"+_name), "NormFlatte_"+_name); //m0
 		newTree->createLeaf("m23sq_phsp", m23sq_phsp, "NormFlatte_"+_name); //ma
 		newTree->createLeaf("m13sq_phsp", m13sq_phsp, "NormFlatte_"+_name); //mb
 		newTree->createLeaf("m12sq_phsp", m12sq_phsp, "NormFlatte_"+_name); //mc
@@ -276,6 +280,11 @@ std::shared_ptr<FunctionTree> AmpFlatteRes3Ch::setupTree(
 		newTree->createLeaf("d_"+_name,  params.GetDoubleParameter("d_"+_name), "NormFlatte_"+_name); //d
 		newTree->createLeaf("ffType_"+_name, ffType , "NormFlatte_"+_name); //d
 		if(_name.find("a_0(980)") != _name.npos){
+			try {
+				newTree->createLeaf("m0_a_0", params.GetDoubleParameter("m0_a_0"), "NormFlatte_"+_name);//use global parameter m0_a0 (asdfef)
+			} catch (BadParameter& e) {
+				newTree->createLeaf("m0_"+_name, params.GetDoubleParameter("m0_"+_name), "NormFlatte_"+_name);//use local parameter m0_a0
+			}
 			try {
 				newTree->createLeaf("g1_a_0", params.GetDoubleParameter("g1_a_0"), "NormFlatte_"+_name);//use global parameter g1_a0 (asdfef)
 			} catch (BadParameter& e) {
@@ -292,6 +301,7 @@ std::shared_ptr<FunctionTree> AmpFlatteRes3Ch::setupTree(
 				newTree->createLeaf("g3_"+_name, params.GetDoubleParameter("g1_"+_name), "NormFlatte_"+_name);
 			}
 		} else {
+			newTree->createLeaf("m0_"+_name, params.GetDoubleParameter("m0_"+_name), "NormFlatte_"+_name); //m0
 			newTree->createLeaf("g1_"+_name, params.GetDoubleParameter("g1_"+_name), "NormFlatte_"+_name);//use local parameter g1_a0
 			newTree->createLeaf("g2_"+_name, params.GetDoubleParameter("g2_"+_name), "NormFlatte_"+_name);
 			try {
@@ -375,47 +385,52 @@ bool Flatte3ChStrategy::execute(ParameterList& paras, std::shared_ptr<AbsParamet
 	//Get parameters from ParameterList -
 	//enclosing in try...catch for the case that names of nodes have changed
 	try{
-		m0 = double(paras.GetParameterValue("m0_"+name));
+		m0 = double(paras.GetParameterValue("m0_a_0"));//special case for peter's channel
 	}catch(BadParameter& e){
-		BOOST_LOG_TRIVIAL(error) <<"FlatteStrategy: can't find parameter m0_"+name;
-		throw;
+		try{
+			m0 = double(paras.GetParameterValue("m0_"+name));
+		}catch(BadParameter& e){
+			BOOST_LOG_TRIVIAL(error) <<"Flatte3ChStrategy: can't find parameter m0_a_0";
+			BOOST_LOG_TRIVIAL(error) <<"Flatte3ChStrategy: can't find parameter m0_"+name;
+			throw;
+		}
 	}
 	try{
 		spin = (unsigned int)(paras.GetParameterValue("ParOfNode_spin_"+name));
 	}catch(BadParameter& e){
-		BOOST_LOG_TRIVIAL(error) <<"FlatteStrategy: can't find parameter ParOfNode_spin_"+name;
+		BOOST_LOG_TRIVIAL(error) <<"Flatte3ChStrategy: can't find parameter ParOfNode_spin_"+name;
 		throw;
 	}
 	try{
 		d = double(paras.GetParameterValue("d_"+name));
 	}catch(BadParameter& e){
-		BOOST_LOG_TRIVIAL(error) <<"FlatteStrategy: can't find parameter d_"+name;
+		BOOST_LOG_TRIVIAL(error) <<"Flatte3ChStrategy: can't find parameter d_"+name;
 		throw;
 	}
 	try{
 		ffType = double(paras.GetParameterValue("ParOfNode_ffType_"+name));
 	}catch(BadParameter& e){
-		BOOST_LOG_TRIVIAL(error) <<"FlatteStrategy: can't find parameter ffType_"+name;
+		BOOST_LOG_TRIVIAL(error) <<"Flatte3ChStrategy: can't find parameter ffType_"+name;
 		throw;
 	}
 	//		norm = double(paras.GetParameterValue("ParOfNode_norm_"+name));
 	try{
 		subSys = double(paras.GetParameterValue("ParOfNode_subSysFlag_"+name));
 	}catch(BadParameter& e){
-		BOOST_LOG_TRIVIAL(error) <<"FlatteStrategy: can't find parameter ParOfNode_subSysFlag_"+name;
+		BOOST_LOG_TRIVIAL(error) <<"Flatte3ChStrategy: can't find parameter ParOfNode_subSysFlag_"+name;
 		throw;
 	}
 
 	try{
 		ma = double(paras.GetParameterValue("ParOfNode_ma_"+name));
 	}catch(BadParameter& e){
-		BOOST_LOG_TRIVIAL(error) <<"FlatteStrategy: can't find parameter ParOfNode_ma_"+name;
+		BOOST_LOG_TRIVIAL(error) <<"Flatte3ChStrategy: can't find parameter ParOfNode_ma_"+name;
 		throw;
 	}
 	try{
 		mb = double(paras.GetParameterValue("ParOfNode_mb_"+name));
 	}catch(BadParameter& e){
-		BOOST_LOG_TRIVIAL(error) <<"FlatteStrategy: can't find parameter ParOfNode_mb_"+name;
+		BOOST_LOG_TRIVIAL(error) <<"Flatte3ChStrategy: can't find parameter ParOfNode_mb_"+name;
 		throw;
 	}
 	try{
@@ -424,21 +439,21 @@ bool Flatte3ChStrategy::execute(ParameterList& paras, std::shared_ptr<AbsParamet
 		try{
 			g1 = double(paras.GetParameterValue("g1_"+name));
 		}catch(BadParameter& e){
-			BOOST_LOG_TRIVIAL(error) <<"FlatteStrategy: can't find parameter g1_a_0";
-			BOOST_LOG_TRIVIAL(error) <<"FlatteStrategy: can't find parameter g1_"+name;
+			BOOST_LOG_TRIVIAL(error) <<"Flatte3ChStrategy: can't find parameter g1_a_0";
+			BOOST_LOG_TRIVIAL(error) <<"Flatte3ChStrategy: can't find parameter g1_"+name;
 			throw;
 		}
 	}
 	try{
 		massB1 = double(paras.GetParameterValue("ParOfNode_massB1_"+name));
 	}catch(BadParameter& e){
-		BOOST_LOG_TRIVIAL(error) <<"FlatteStrategy: can't find parameter ParOfNode_massB1_"+name;
+		BOOST_LOG_TRIVIAL(error) <<"Flatte3ChStrategy: can't find parameter ParOfNode_massB1_"+name;
 		throw;
 	}
 	try{
 		massB2 = double(paras.GetParameterValue("ParOfNode_massB2_"+name));
 	}catch(BadParameter& e){
-		BOOST_LOG_TRIVIAL(error) <<"FlatteStrategy: can't find parameter ParOfNode_massB2_"+name;
+		BOOST_LOG_TRIVIAL(error) <<"Flatte3ChStrategy: can't find parameter ParOfNode_massB2_"+name;
 		throw;
 	}
 	try{
@@ -447,21 +462,21 @@ bool Flatte3ChStrategy::execute(ParameterList& paras, std::shared_ptr<AbsParamet
 		try{
 			gB = double(paras.GetParameterValue("g2_"+name));
 		}catch(BadParameter& e){
-			BOOST_LOG_TRIVIAL(error) <<"FlatteStrategy: can't find parameter g2_a_0";
-			BOOST_LOG_TRIVIAL(error) <<"FlatteStrategy: can't find parameter g2_"+name;
+			BOOST_LOG_TRIVIAL(error) <<"Flatte3ChStrategy: can't find parameter g2_a_0";
+			BOOST_LOG_TRIVIAL(error) <<"Flatte3ChStrategy: can't find parameter g2_"+name;
 			throw;
 		}
 	}
 	try{
 		massC1 = double(paras.GetParameterValue("ParOfNode_massC1_"+name));
 	}catch(BadParameter& e){
-		BOOST_LOG_TRIVIAL(error) <<"FlatteStrategy: can't find parameter ParOfNode_massC1_"+name;
+		BOOST_LOG_TRIVIAL(error) <<"Flatte3ChStrategy: can't find parameter ParOfNode_massC1_"+name;
 		throw;
 	}
 	try{
 		massC2 = double(paras.GetParameterValue("ParOfNode_massC2_"+name));
 	}catch(BadParameter& e){
-		BOOST_LOG_TRIVIAL(error) <<"FlatteStrategy: can't find parameter ParOfNode_massC2"+name;
+		BOOST_LOG_TRIVIAL(error) <<"Flatte3ChStrategy: can't find parameter ParOfNode_massC2"+name;
 		throw;
 	}
 	try{
@@ -473,9 +488,9 @@ bool Flatte3ChStrategy::execute(ParameterList& paras, std::shared_ptr<AbsParamet
 			try{
 				gC = double(paras.GetParameterValue("g1_"+name));
 			}catch(BadParameter& e){
-				BOOST_LOG_TRIVIAL(error) <<"FlattePhspStrategy: can't find parameter g3_"+name;
-				BOOST_LOG_TRIVIAL(error) <<"FlattePhspStrategy: can't find parameter g1_a_0";
-				BOOST_LOG_TRIVIAL(error) <<"FlattePhspStrategy: can't find parameter g1_"+name;
+				BOOST_LOG_TRIVIAL(error) <<"Flatte3ChPhspStrategy: can't find parameter g3_"+name;
+				BOOST_LOG_TRIVIAL(error) <<"Flatte3ChPhspStrategy: can't find parameter g1_a_0";
+				BOOST_LOG_TRIVIAL(error) <<"Flatte3ChPhspStrategy: can't find parameter g1_"+name;
 				throw;
 			}
 		}
@@ -539,46 +554,51 @@ bool Flatte3ChPhspStrategy::execute(ParameterList& paras, std::shared_ptr<AbsPar
 	//Get parameters from ParameterList -
 	//enclosing in try...catch for the case that names of nodes have changed
 	try{
-		m0 = double(paras.GetParameterValue("m0_"+name));
+		m0 = double(paras.GetParameterValue("m0_a_0"));//special case for peter's channel
 	}catch(BadParameter& e){
-		BOOST_LOG_TRIVIAL(error) <<"FlattePhspStrategy: can't find parameter m0_"+name;
-		throw;
+		try{
+			m0 = double(paras.GetParameterValue("m0_"+name));
+		}catch(BadParameter& e){
+			BOOST_LOG_TRIVIAL(error) <<"Flatte3ChPhspStrategy: can't find parameter m0_a_0";
+			BOOST_LOG_TRIVIAL(error) <<"Flatte3ChPhspStrategy: can't find parameter m0_"+name;
+			throw;
+		}
 	}
 	try{
 		spin = (unsigned int)(paras.GetParameterValue("ParOfNode_spin_"+name));
 	}catch(BadParameter& e){
-		BOOST_LOG_TRIVIAL(error) <<"FlattePhspStrategy: can't find parameter ParOfNode_spin_"+name;
+		BOOST_LOG_TRIVIAL(error) <<"Flatte3ChPhspStrategy: can't find parameter ParOfNode_spin_"+name;
 		throw;
 	}
 	try{
 		d = double(paras.GetParameterValue("d_"+name));
 	}catch(BadParameter& e){
-		BOOST_LOG_TRIVIAL(error) <<"FlattePhspStrategy: can't find parameter d_"+name;
+		BOOST_LOG_TRIVIAL(error) <<"Flatte3ChPhspStrategy: can't find parameter d_"+name;
 		throw;
 	}
 	try{
 		ffType = double(paras.GetParameterValue("ParOfNode_ffType_"+name));
 	}catch(BadParameter& e){
-		BOOST_LOG_TRIVIAL(error) <<"FlatteStrategy: can't find parameter ffType_"+name;
+		BOOST_LOG_TRIVIAL(error) <<"Flatte3ChStrategy: can't find parameter ffType_"+name;
 		throw;
 	}
 
 	try{
 		subSys = double(paras.GetParameterValue("ParOfNode_subSysFlag_"+name));
 	}catch(BadParameter& e){
-		BOOST_LOG_TRIVIAL(error) <<"FlattePhspStrategy: can't find parameter ParOfNode_subSysFlag_"+name;
+		BOOST_LOG_TRIVIAL(error) <<"Flatte3ChPhspStrategy: can't find parameter ParOfNode_subSysFlag_"+name;
 		throw;
 	}
 	try{
 		ma = double(paras.GetParameterValue("ParOfNode_ma_"+name));
 	}catch(BadParameter& e){
-		BOOST_LOG_TRIVIAL(error) <<"FlattePhspStrategy: can't find parameter ParOfNode_ma_"+name;
+		BOOST_LOG_TRIVIAL(error) <<"Flatte3ChPhspStrategy: can't find parameter ParOfNode_ma_"+name;
 		throw;
 	}
 	try{
 		mb = double(paras.GetParameterValue("ParOfNode_mb_"+name));
 	}catch(BadParameter& e){
-		BOOST_LOG_TRIVIAL(error) <<"FlattePhspStrategy: can't find parameter ParOfNode_mb_"+name;
+		BOOST_LOG_TRIVIAL(error) <<"Flatte3ChPhspStrategy: can't find parameter ParOfNode_mb_"+name;
 		throw;
 	}
 	try{
@@ -587,21 +607,21 @@ bool Flatte3ChPhspStrategy::execute(ParameterList& paras, std::shared_ptr<AbsPar
 		try{
 			g1 = double(paras.GetParameterValue("g1_"+name));
 		}catch(BadParameter& e){
-			BOOST_LOG_TRIVIAL(error) <<"FlatteStrategy: can't find parameter g1_a_0";
-			BOOST_LOG_TRIVIAL(error) <<"FlatteStrategy: can't find parameter g1_"+name;
+			BOOST_LOG_TRIVIAL(error) <<"Flatte3ChStrategy: can't find parameter g1_a_0";
+			BOOST_LOG_TRIVIAL(error) <<"Flatte3ChStrategy: can't find parameter g1_"+name;
 			throw;
 		}
 	}
 	try{
 		massB1 = double(paras.GetParameterValue("ParOfNode_massB1_"+name));
 	}catch(BadParameter& e){
-		BOOST_LOG_TRIVIAL(error) <<"FlattePhspStrategy: can't find parameter ParOfNode_massB1_"+name;
+		BOOST_LOG_TRIVIAL(error) <<"Flatte3ChPhspStrategy: can't find parameter ParOfNode_massB1_"+name;
 		throw;
 	}
 	try{
 		massB2 = double(paras.GetParameterValue("ParOfNode_massB2_"+name));
 	}catch(BadParameter& e){
-		BOOST_LOG_TRIVIAL(error) <<"FlattePhspStrategy: can't find parameter ParOfNode_massB2_"+name;
+		BOOST_LOG_TRIVIAL(error) <<"Flatte3ChPhspStrategy: can't find parameter ParOfNode_massB2_"+name;
 		throw;
 	}
 	try{
@@ -610,21 +630,21 @@ bool Flatte3ChPhspStrategy::execute(ParameterList& paras, std::shared_ptr<AbsPar
 		try{
 			gB = double(paras.GetParameterValue("g2_"+name));
 		}catch(BadParameter& e){
-			BOOST_LOG_TRIVIAL(error) <<"FlattePhspStrategy: can't find parameter g2_a_0";
-			BOOST_LOG_TRIVIAL(error) <<"FlattePhspStrategy: can't find parameter g2_"+name;
+			BOOST_LOG_TRIVIAL(error) <<"Flatte3ChPhspStrategy: can't find parameter g2_a_0";
+			BOOST_LOG_TRIVIAL(error) <<"Flatte3ChPhspStrategy: can't find parameter g2_"+name;
 			throw;
 		}
 	}
 	try{
 		massC1 = double(paras.GetParameterValue("ParOfNode_massC1_"+name));
 	}catch(BadParameter& e){
-		BOOST_LOG_TRIVIAL(error) <<"FlattePhspStrategy: can't find parameter ParOfNode_massC1_"+name;
+		BOOST_LOG_TRIVIAL(error) <<"Flatte3ChPhspStrategy: can't find parameter ParOfNode_massC1_"+name;
 		throw;
 	}
 	try{
 		massC2 = double(paras.GetParameterValue("ParOfNode_massC2_"+name));
 	}catch(BadParameter& e){
-		BOOST_LOG_TRIVIAL(error) <<"FlattePhspStrategy: can't find parameter ParOfNode_massC2_"+name;
+		BOOST_LOG_TRIVIAL(error) <<"Flatte3ChPhspStrategy: can't find parameter ParOfNode_massC2_"+name;
 		throw;
 	}
 	try{
@@ -636,9 +656,9 @@ bool Flatte3ChPhspStrategy::execute(ParameterList& paras, std::shared_ptr<AbsPar
 			try{
 				gC = double(paras.GetParameterValue("g1_"+name));
 			}catch(BadParameter& e){
-				BOOST_LOG_TRIVIAL(error) <<"FlattePhspStrategy: can't find parameter g3_"+name;
-				BOOST_LOG_TRIVIAL(error) <<"FlattePhspStrategy: can't find parameter g1_a_0";
-				BOOST_LOG_TRIVIAL(error) <<"FlattePhspStrategy: can't find parameter g1_"+name;
+				BOOST_LOG_TRIVIAL(error) <<"Flatte3ChPhspStrategy: can't find parameter g3_"+name;
+				BOOST_LOG_TRIVIAL(error) <<"Flatte3ChPhspStrategy: can't find parameter g1_a_0";
+				BOOST_LOG_TRIVIAL(error) <<"Flatte3ChPhspStrategy: can't find parameter g1_"+name;
 				throw;
 			}
 		}

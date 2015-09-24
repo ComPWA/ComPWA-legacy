@@ -33,7 +33,7 @@ AmpSumIntensity::AmpSumIntensity(AmplitudeSetup ini, normStyle ns, std::shared_p
 
 AmpSumIntensity::AmpSumIntensity(AmplitudeSetup ini, std::shared_ptr<Efficiency> eff,
 		unsigned int nCalls) :
-		ampSetup(ini), _normStyle(none), _calcMaxFcnVal(0), eff_(eff), _nCalls(nCalls)
+				ampSetup(ini), _normStyle(none), _calcMaxFcnVal(0), eff_(eff), _nCalls(nCalls)
 {
 	init();
 }
@@ -56,6 +56,9 @@ void AmpSumIntensity::init(){
 	params.AddParameter( std::shared_ptr<DoubleParameter> (
 			new DoubleParameter("g2_a_0",2.0) )); //default - overwritten by other values for g2
 	params.GetDoubleParameter("g2_a_0")->FixParameter(1);
+	params.AddParameter( std::shared_ptr<DoubleParameter> (
+			new DoubleParameter("m0_a_0",2.0) )); //default - overwritten by other values for g2
+	params.GetDoubleParameter("m0_a_0")->FixParameter(1);
 
 	std::shared_ptr<AmpAbsDynamicalFunction> tmpRes;
 	for(std::vector<BreitWignerConf>::iterator reso=ampSetup.getBreitWigner().begin();
@@ -111,9 +114,6 @@ void AmpSumIntensity::init(){
 				new DoubleParameter("phase_"+name,tmp.m_phase,tmp.m_phase_min,tmp.m_phase_max) ) );
 		params.GetDoubleParameter("phase_"+name)->FixParameter(tmp.m_phase_fix);
 		params.AddParameter( std::shared_ptr<DoubleParameter> (
-				new DoubleParameter("m0_"+name,tmp.m_mass, tmp.m_mass_min, tmp.m_mass_max)  ));
-		params.GetDoubleParameter("m0_"+name)->FixParameter(tmp.m_mass_fix);
-		params.AddParameter( std::shared_ptr<DoubleParameter> (
 				new DoubleParameter("d_"+name,tmp.m_mesonRadius) ) );
 		params.GetDoubleParameter("d_"+name)->FixParameter(1);
 		params.AddParameter( std::shared_ptr<DoubleParameter> (
@@ -122,6 +122,10 @@ void AmpSumIntensity::init(){
 
 		try{
 			if(tmp.m_name.find("a_0(980)") == tmp.m_name.npos) throw BadParameter("not an a_0(980)!");
+			params.GetDoubleParameter("m0_a_0")->FixParameter(0);
+			params.GetDoubleParameter("m0_a_0")->SetValue(tmp.m_mass);
+			params.GetDoubleParameter("m0_a_0")->SetMinMax(tmp.m_mass_min, tmp.m_mass_max);
+			params.GetDoubleParameter("m0_a_0")->FixParameter(tmp.m_mass_fix);
 			params.GetDoubleParameter("g1_a_0")->FixParameter(0);
 			params.GetDoubleParameter("g1_a_0")->SetValue(tmp.m_g1);
 			params.GetDoubleParameter("g1_a_0")->SetMinMax(tmp.m_g1_min, tmp.m_g1_max);
@@ -132,7 +136,7 @@ void AmpSumIntensity::init(){
 			params.GetDoubleParameter("g2_a_0")->FixParameter(tmp.m_g2_fix);
 			tmpRes = std::shared_ptr<AmpAbsDynamicalFunction>(new AmpFlatteRes(name.c_str(),
 					params.GetDoubleParameter("mag_"+name), params.GetDoubleParameter("phase_"+name),
-					params.GetDoubleParameter("m0_"+name), subSys,
+					params.GetDoubleParameter("m0_a_0"), subSys,
 					Spin(tmp.m_spin), Spin(tmp.m_m), Spin(tmp.m_n),
 					params.GetDoubleParameter("d_"+name),
 					params.GetDoubleParameter("motherRadius"),
@@ -142,6 +146,9 @@ void AmpSumIntensity::init(){
 					formFactorType(params.GetDoubleParameter("ffType_"+name)->GetValue()),
 					_nCalls, _normStyle) );
 		} catch(BadParameter& e) {
+			params.AddParameter( std::shared_ptr<DoubleParameter> (
+					new DoubleParameter("m0_"+name,tmp.m_mass, tmp.m_mass_min, tmp.m_mass_max)  ));
+			params.GetDoubleParameter("m0_"+name)->FixParameter(tmp.m_mass_fix);
 			params.AddParameter( std::shared_ptr<DoubleParameter> (
 					new DoubleParameter("g1_"+name,tmp.m_g1,tmp.m_g1_min,tmp.m_g1_max) ) );
 			params.GetDoubleParameter("g1_"+name)->FixParameter(tmp.m_g1_fix);
@@ -179,9 +186,6 @@ void AmpSumIntensity::init(){
 				new DoubleParameter("phase_"+name,tmp.m_phase,tmp.m_phase_min,tmp.m_phase_max) ) );
 		params.GetDoubleParameter("phase_"+name)->FixParameter(tmp.m_phase_fix);
 		params.AddParameter( std::shared_ptr<DoubleParameter> (
-				new DoubleParameter("m0_"+name,tmp.m_mass, tmp.m_mass_min, tmp.m_mass_max)  ));
-		params.GetDoubleParameter("m0_"+name)->FixParameter(tmp.m_mass_fix);
-		params.AddParameter( std::shared_ptr<DoubleParameter> (
 				new DoubleParameter("d_"+name,tmp.m_mesonRadius) ) );
 		params.GetDoubleParameter("d_"+name)->FixParameter(1);
 		params.AddParameter( std::shared_ptr<DoubleParameter> (
@@ -190,6 +194,10 @@ void AmpSumIntensity::init(){
 
 		try{
 			if(tmp.m_name.find("a_0(980)") == tmp.m_name.npos) throw BadParameter("not an a_0(980)!");
+			params.GetDoubleParameter("m0_a_0")->FixParameter(0);
+			params.GetDoubleParameter("m0_a_0")->SetValue(tmp.m_mass);
+			params.GetDoubleParameter("m0_a_0")->SetMinMax(tmp.m_mass_min, tmp.m_mass_max);
+			params.GetDoubleParameter("m0_a_0")->FixParameter(tmp.m_mass_fix);
 			params.GetDoubleParameter("g1_a_0")->FixParameter(0);
 			params.GetDoubleParameter("g1_a_0")->SetValue(tmp.m_g1);
 			params.GetDoubleParameter("g1_a_0")->SetMinMax(tmp.m_g1_min, tmp.m_g1_max);
@@ -201,7 +209,7 @@ void AmpSumIntensity::init(){
 
 			tmpRes = std::shared_ptr<AmpAbsDynamicalFunction>(new AmpFlatteRes3Ch(name.c_str(),
 					params.GetDoubleParameter("mag_"+name), params.GetDoubleParameter("phase_"+name),
-					params.GetDoubleParameter("m0_"+name), subSys,
+					params.GetDoubleParameter("m0_a_0"), subSys,
 					Spin(tmp.m_spin), Spin(tmp.m_m), Spin(tmp.m_n),
 					params.GetDoubleParameter("d_"+name),
 					params.GetDoubleParameter("motherRadius"),
@@ -215,6 +223,9 @@ void AmpSumIntensity::init(){
 					formFactorType(params.GetDoubleParameter("ffType_"+name)->GetValue()),
 					_nCalls, _normStyle) );
 		} catch(BadParameter& e) {
+			params.AddParameter( std::shared_ptr<DoubleParameter> (
+					new DoubleParameter("m0_"+name,tmp.m_mass, tmp.m_mass_min, tmp.m_mass_max)  ));
+			params.GetDoubleParameter("m0_"+name)->FixParameter(tmp.m_mass_fix);
 			params.AddParameter( std::shared_ptr<DoubleParameter> (
 					new DoubleParameter("g1_"+name,tmp.m_g1,tmp.m_g1_min,tmp.m_g1_max) ) );
 			params.GetDoubleParameter("g1_"+name)->FixParameter(tmp.m_g1_fix);
@@ -411,11 +422,11 @@ double interferenceIntegralWrapper(double* x, size_t dim, void* param) {
 	std::complex<double> val1 = amp1->evaluate(point);
 	std::complex<double> val2 = amp2->evaluate(point);
 
-//	if(amp->getFirstRes() != amp->getSecondRes())
-//		std::cout<<(val1*std::conj(val2)).real()
-//		<<" "<<(val2*std::conj(val1)).real()
-//		<< " "<<std::norm(val1)
-//		<< " "<<std::norm(val2)<<std::endl;
+	//	if(amp->getFirstRes() != amp->getSecondRes())
+	//		std::cout<<(val1*std::conj(val2)).real()
+	//		<<" "<<(val2*std::conj(val1)).real()
+	//		<< " "<<std::norm(val1)
+	//		<< " "<<std::norm(val2)<<std::endl;
 	double intens = (val1*std::conj(val2)).real();
 	if(amp->getFirstRes() == amp->getSecondRes()) return intens;
 	return 2*intens;
