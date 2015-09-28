@@ -113,7 +113,7 @@ void MinuitResult::genSimpleOutput(std::ostream& out){
 	return;
 }
 
-void MinuitResult::smearParameterList(ParameterList& newParList){
+void MinuitResult::smearParameterList(const gsl_rng *rnd, ParameterList& newParList){
 	unsigned int nFree = 0;
 	for(unsigned int o=0;o<finalParameters.GetNDouble();o++)
 		if(!finalParameters.GetDoubleParameter(o)->IsFixed()) nFree++;
@@ -132,12 +132,7 @@ void MinuitResult::smearParameterList(ParameterList& newParList){
 
 	gsl_vector* newPar = gsl_vector_alloc(nFree);
 
-	const gsl_rng_type * T;
-	gsl_rng_env_setup();
-	T = gsl_rng_default;
-	gsl_rng* r = gsl_rng_alloc (T);
-
-	multivariateGaussian( r, nFree, oldPar, gslCov, newPar );//generate set of smeared parameters
+	multivariateGaussian( rnd, nFree, oldPar, gslCov, newPar );//generate set of smeared parameters
 
 	newParList = ParameterList(finalParameters); //deep copy of finalParameters
 	t=0;
@@ -159,17 +154,23 @@ void MinuitResult::setUseCorrelatedErrors(bool s, int nSets) {
 }
 void MinuitResult::calcFractionError(){
 	if(fractionList.GetNDouble() != _amp->GetNumberOfResonances())
-		throw std::runtime_error("MinuitResult::calcFractionError() parameterList empty! Calculate fit fractions first!");
+		throw std::runtime_error("MinuitResult::calcFractionError() fraction list not valid!");
 	nRes=fractionList.GetNDouble();
 	if(useCorrelatedErrors){/* Exact error calculation */
 		BOOST_LOG_TRIVIAL(info) << "Calculating errors of fit fractions using "
 				<<correlatedErrors_numberOfSets<<" sets of parameters...";
+
+		const gsl_rng_type * T;
+		gsl_rng_env_setup();
+		T = gsl_rng_default;
+		gsl_rng* r = gsl_rng_alloc (T);
+
 		std::vector<ParameterList> fracVect;
 		progressBar bar(correlatedErrors_numberOfSets);
 		ofstream outFraction; outFraction.open ("corrErrorsPar.txt");
 		for(unsigned int i=0; i<correlatedErrors_numberOfSets; i++){
 			bar.nextEvent();
-			ParameterList newPar; smearParameterList(newPar);
+			ParameterList newPar; smearParameterList(r, newPar);
 			_amp->setParameterList(newPar);//smear all free parameters according to cov matrix
 			ParameterList tmp;
 			calcFraction(tmp);

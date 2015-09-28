@@ -50,6 +50,8 @@ public:
 	virtual ~FitResult() {};
 	//! Set amplitude
 	virtual void setAmplitude(std::shared_ptr<Amplitude> a) { _amp = a; }
+	//! Set fraction list
+	virtual void setFractions(ParameterList ini){ fractionList=ini; }
 	//! Set list of initial parameters
 	virtual void setInitialParameters(ParameterList iniPars){ initialParameters=iniPars; }
 	//! Set list of final fit parameters
@@ -75,7 +77,7 @@ public:
 	//! Table with fit fractions
 	virtual void printFitFractions(TableFormater* fracTable);
 	//! Getter function for fractions list. Make sure that fractions are calculated beforehand.
-	virtual ParameterList& GetFractions() {	return fractionList; }
+	virtual ParameterList& getFractions() {	return fractionList; }
 
 	//output
 	virtual void print(std::string opt=""){
@@ -137,6 +139,7 @@ private:
 		ar & BOOST_SERIALIZATION_NVP(initialParameters);
 		ar & BOOST_SERIALIZATION_NVP(finalParameters);
 		ar & BOOST_SERIALIZATION_NVP(trueParameters);
+		ar & BOOST_SERIALIZATION_NVP(fractionList);
 	}
 };
 BOOST_SERIALIZATION_ASSUME_ABSTRACT( FitResult );

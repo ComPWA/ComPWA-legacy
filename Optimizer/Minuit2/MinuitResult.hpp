@@ -133,7 +133,7 @@ protected:
 	//! Number of parameter sets that are used to propagate the cov matrix through the normalization
 	unsigned int correlatedErrors_numberOfSets;
 	//! Smear ParameterList with a multidimensional gaussian and the cov matrix from the fit
-	void smearParameterList(ParameterList&);
+	void smearParameterList(const gsl_rng *rnd, ParameterList&);
 	//! Calculate information criterion AIC
 	double calcAIC();
 	//! Calculate information criterion BIC
