@@ -27,7 +27,6 @@
 #include "Optimizer/Optimizer.hpp"
 #include "Core/ParameterList.hpp"
 #include "Optimizer/Minuit2/MinuitFcn.hpp"
-#include "Optimizer/Minuit2/MinuitResult.hpp"
 #include "Minuit2/MnStrategy.h"
 #include <fstream>
 #include <boost/serialization/string.hpp>

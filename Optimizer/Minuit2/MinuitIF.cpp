@@ -23,14 +23,13 @@
 #include "Minuit2/MnPrint.h"
 #include "Minuit2/MinosError.h"
 #include "Optimizer/Minuit2/MinuitIF.hpp"
+#include "Optimizer/Minuit2/MinuitResult.hpp"
 #include "Core/ParameterList.hpp"
 #include "Core/Parameter.hpp"
 #include "Core/FitResult.hpp"
 
 #include <boost/numeric/ublas/symmetric.hpp>
 #include <boost/numeric/ublas/io.hpp>
-#include <boost/log/core.hpp>
-#include <boost/log/trivial.hpp>
 #include <boost/timer.hpp>
 using namespace boost::log;
 using namespace ROOT::Minuit2;

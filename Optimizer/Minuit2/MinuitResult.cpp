@@ -15,11 +15,7 @@
 #include <gsl/gsl_blas.h>
 #include <gsl/gsl_linalg.h>
 
-#include <boost/numeric/ublas/symmetric.hpp>
-#include <boost/numeric/ublas/io.hpp>
-#include <boost/random/normal_distribution.hpp>
 #include <boost/archive/xml_oarchive.hpp>
-#include <boost/archive/xml_iarchive.hpp>
 
 #include "Core/ProgressBar.hpp"
 #include "Core/Logging.hpp"
@@ -45,21 +41,24 @@ int multivariateGaussian(const gsl_rng *rnd, const int vecSize, const gsl_vector
 MinuitResult::MinuitResult(std::shared_ptr<ControlParameter> esti, FunctionMinimum result) :
 						useCorrelatedErrors(0), calcInterference(0), useTree(0),
 						correlatedErrors_numberOfSets(200){
-	estimator = std::static_pointer_cast<Estimator>(esti);
-	_amp=estimator->getAmplitude();
+	std::shared_ptr<Estimator> est = std::static_pointer_cast<Estimator>(esti);
+	_amp = est->getAmplitude();
+	penalty = est->calcPenalty();
+	nEvents = est->getNEvents();
 	init(result);
 }
 
 void MinuitResult::setResult(std::shared_ptr<ControlParameter> esti,FunctionMinimum result){
-	estimator = std::static_pointer_cast<Estimator>(esti);
-	_amp=estimator->getAmplitude();
+	std::shared_ptr<Estimator> est = std::static_pointer_cast<Estimator>(esti);
+	_amp = est->getAmplitude();
+	penalty = est->calcPenalty();
+	nEvents = est->getNEvents();
 	init(result);
 }
 
 void MinuitResult::init(FunctionMinimum min){
 	nRes = 0;
 	MnUserParameterState minState = min.UserState();
-	using namespace boost::numeric::ublas;
 
 	if(minState.HasCovariance()){
 		MnUserCovariance minuitCovMatrix = minState.Covariance();
@@ -67,24 +66,17 @@ void MinuitResult::init(FunctionMinimum min){
 		 * dim is the dimension of the covariance matrix.
 		 * The dimension can therefore be calculated as dim = -0.5+-0.5 sqrt(8*size+1)
 		 */
-		unsigned int dim = minuitCovMatrix.Nrow();
+		nFreeParameter = minuitCovMatrix.Nrow();
 		globalCC = minState.GlobalCC().GlobalCC();
-		symmetric_matrix<double,upper> covMatrix(dim,dim);
-		symmetric_matrix<double,upper> corrMatrix(dim,dim);
-		//	if(minuitCovM.size()==dim*(dim+1)/2){
-		for (unsigned i = 0; i < covMatrix.size1 (); ++ i)
-			for (unsigned j = i; j < covMatrix.size2 (); ++ j){
-				double entry = minuitCovMatrix(j,i);
-				covMatrix (i, j) = entry;
-				if(i==j) variance.push_back(sqrt(entry));
-			}
-		for (unsigned i = 0; i < covMatrix.size1 (); ++ i)
-			for (unsigned j = i; j < covMatrix.size2 (); ++ j){
-				double denom = variance[i]*variance[j];
-				corrMatrix(i,j) = covMatrix(i,j)/denom;
-			}
-		cov=covMatrix;
-		corr=corrMatrix;
+		cov = std::vector<std::vector<double>>(nFreeParameter,std::vector<double>(nFreeParameter));
+		corr = std::vector<std::vector<double>>(nFreeParameter,std::vector<double>(nFreeParameter));
+		for (unsigned i = 0; i < nFreeParameter; ++i)
+			for (unsigned j = i; j < nFreeParameter; ++j)
+				cov.at(i).at(j) = minuitCovMatrix(j,i);
+		for (unsigned i = 0; i < nFreeParameter; ++i)
+			for (unsigned j = i; j < nFreeParameter; ++j)
+				corr.at(i).at(j) = cov.at(i).at(j) / sqrt( cov.at(i).at(i) * cov.at(j).at(j) );
+
 	} else BOOST_LOG_TRIVIAL(error)<<"MinuitResult: no valid correlation matrix available!";
 	initialLH = -1;
 	finalLH = minState.Fval();
@@ -100,12 +92,7 @@ void MinuitResult::init(FunctionMinimum min){
 	errorDef = min.Up();
 	nFcn = min.NFcn();
 
-	const gsl_rng_type * T;
-	gsl_rng_env_setup();
-	T = gsl_rng_default;
-	r = gsl_rng_alloc (T);
 
-	useCorrelatedErrors=0;
 	if(_amp && _amp->hasTree()) setUseTree(1);
 	return;
 
@@ -139,11 +126,17 @@ void MinuitResult::smearParameterList(ParameterList& newParList){
 		t++;
 	}
 	gsl_matrix* gslCov = gsl_matrix_alloc(nFree,nFree);
-	for(unsigned int i=0; i<cov.size1();i++)
-		for(unsigned int j=0; j<cov.size2();j++)
-			gsl_matrix_set(gslCov,i,j,cov(i,j));
+	for(unsigned int i=0; i<cov.size();i++)
+		for(unsigned int j=0; j<cov.at(0).size();j++)
+			gsl_matrix_set(gslCov,i,j,cov.at(i).at(j));
 
 	gsl_vector* newPar = gsl_vector_alloc(nFree);
+
+	const gsl_rng_type * T;
+	gsl_rng_env_setup();
+	T = gsl_rng_default;
+	gsl_rng* r = gsl_rng_alloc (T);
+
 	multivariateGaussian( r, nFree, oldPar, gslCov, newPar );//generate set of smeared parameters
 
 	newParList = ParameterList(finalParameters); //deep copy of finalParameters
@@ -151,7 +144,7 @@ void MinuitResult::smearParameterList(ParameterList& newParList){
 	for(unsigned int o=0;o<newParList.GetNDouble();o++){
 		std::shared_ptr<DoubleParameter> outPar = newParList.GetDoubleParameter(o);
 		if(outPar->IsFixed()) continue;
-		outPar->SetValue(newPar->data[t]);//set floating values to smeard values
+		outPar->SetValue(newPar->data[t]);//set floating values to smeared values
 		t++;
 	}
 }
@@ -165,7 +158,6 @@ void MinuitResult::setUseCorrelatedErrors(bool s, int nSets) {
 	return;
 }
 void MinuitResult::calcFractionError(){
-	std::cout<<"calcFractionError"<<std::endl;
 	if(fractionList.GetNDouble() != _amp->GetNumberOfResonances())
 		throw std::runtime_error("MinuitResult::calcFractionError() parameterList empty! Calculate fit fractions first!");
 	nRes=fractionList.GetNDouble();
@@ -217,7 +209,6 @@ void MinuitResult::calcFractionError(){
 		}
 		_amp->setParameterList(finalParameters); //set correct fit result
 	}
-	std::cout<<"calcFractionError"<<std::endl;
 	return;
 }
 
@@ -272,7 +263,6 @@ void MinuitResult::genOutput(std::ostream& out, std::string opt){
 	TableFormater* fracTable = new TableFormater(&out);
 	printFitFractions(fracTable); //calculate and print fractions if amplitude is set
 
-	double penalty = estimator->calcPenalty();
 	out<<std::setprecision(10);
 	out<<"Final penalty term: "<<penalty<<std::endl;
 	out<<"FinalLH w/o penalty: "<<finalLH-penalty<<std::endl;
@@ -346,7 +336,7 @@ double MinuitResult::calcBIC(){
 		double val = fractionList.GetDoubleParameter(i)->GetValue();
 		if(val > 0.001) r++;
 	}
-	return (finalLH+r*std::log(estimator->getNEvents()));
+	return (finalLH+r*std::log(nEvents));
 }
 
 void MinuitResult::printCorrelationMatrix(TableFormater* tableCorr){
@@ -366,9 +356,9 @@ void MinuitResult::printCorrelationMatrix(TableFormater* tableCorr){
 		if(ppp->IsFixed()) continue;
 		*tableCorr << ppp->GetName();
 		*tableCorr << globalCC.at(n); //TODO: check if emtpy (don't know how this happened, but it did :)
-		for(unsigned int t=0;t<corr.size1();t++) {
-			if(n>=corr.size2()) { *tableCorr<< " "; continue; }
-			if(t>=n)*tableCorr << corr(n,t);
+		for(unsigned int t=0;t<corr.size();t++) {
+			if(n>=corr.at(0).size()) { *tableCorr<< " "; continue; }
+			if(t>=n)*tableCorr << corr.at(n).at(t);
 			else *tableCorr << "";
 		}
 		n++;
@@ -392,9 +382,9 @@ void MinuitResult::printCovarianceMatrix(TableFormater* tableCov){
 		std::shared_ptr<DoubleParameter> ppp = finalParameters.GetDoubleParameter(o);
 		if(ppp->IsFixed()) continue;
 		*tableCov << ppp->GetName();
-		for(unsigned int t=0;t<cov.size1();t++) {
-			if(n>=cov.size2()) { *tableCov<< " "; continue; }
-			if(t>=n) *tableCov << cov(n,t);
+		for(unsigned int t=0;t<cov.size();t++) {
+			if(n>=cov.at(0).size()) { *tableCov<< " "; continue; }
+			if(t>=n) *tableCov << cov.at(n).at(t);
 			else *tableCov << "";
 		}
 		n++;

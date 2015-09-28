@@ -504,6 +504,8 @@ private:
 	{
 		using namespace boost::serialization;
 		ar & make_nvp("DoubleParameters",vDoublePar_); //currently only DoubleParameters can be serialized
+		ar & make_nvp("DoubleParametersID",mDoubleParID_);
+		ar & make_nvp("OutString",out_);
 	}
 };
 

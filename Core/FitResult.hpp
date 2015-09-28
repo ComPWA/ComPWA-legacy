@@ -31,7 +31,11 @@
 #include <memory>
 #include <boost/numeric/ublas/symmetric.hpp>
 #include <boost/numeric/ublas/io.hpp>
-#include <boost/log/trivial.hpp>
+#include <boost/serialization/serialization.hpp>
+#include <boost/serialization/nvp.hpp>
+#include <boost/serialization/vector.hpp>
+#include <boost/serialization/assume_abstract.hpp>
+#include <boost/serialization/export.hpp>
 
 #include "Core/Amplitude.hpp"
 #include "Core/ParameterList.hpp"
@@ -94,11 +98,15 @@ protected:
 	virtual void genOutput(std::ostream& out,std::string opt="") = 0;
 	virtual void genSimpleOutput(std::ostream& out);
 
+	//! Time for minimization
 	double time;
-
+	//! Initial list of parameters
 	ParameterList initialParameters;
+	//! Final list of parameters
 	ParameterList finalParameters;
+	//! True list of parameters
 	ParameterList trueParameters;
+	//! Fit amplitude (can't be serialized)
 	std::shared_ptr<Amplitude> _amp;
 
 	//! Calculate fit fractions and its errors.
@@ -118,7 +126,19 @@ protected:
 	virtual void calcFractionError() {};
 	//! List with fit fractions and errors
 	ParameterList fractionList;
-};
 
+
+private:
+	friend class boost::serialization::access;
+	template<class archive>
+	void serialize(archive& ar, const unsigned int version)
+	{
+		ar & BOOST_SERIALIZATION_NVP(time);
+		ar & BOOST_SERIALIZATION_NVP(initialParameters);
+		ar & BOOST_SERIALIZATION_NVP(finalParameters);
+		ar & BOOST_SERIALIZATION_NVP(trueParameters);
+	}
+};
+BOOST_SERIALIZATION_ASSUME_ABSTRACT( FitResult );
 
 #endif

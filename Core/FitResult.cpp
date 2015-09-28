@@ -77,7 +77,7 @@ void FitResult::printFitParameters(TableFormater* tableResult){
 				iniPar = initialParameters.GetDoubleParameter(outPar->GetName());
 			} catch (BadParameter& bad){
 				BOOST_LOG_TRIVIAL(error) << "FitResult::printFitParameters() | "
-						"can't access parameter of initial parameter list!";
+						"can't access parameter '"<<outPar->GetName()<<"' of initial parameter list!";
 				throw;
 			}
 		}
@@ -86,7 +86,7 @@ void FitResult::printFitParameters(TableFormater* tableResult){
 				truePar = trueParameters.GetDoubleParameter(outPar->GetName());
 			} catch (BadParameter& bad){
 				BOOST_LOG_TRIVIAL(error) << "FitResult::printFitParameters() | "
-						"can't access parameter of true parameter list!";
+						"can't access parameter '"<<outPar->GetName()<<"' of true parameter list!";
 				*tableResult << "not found"<< " - ";
 				throw;
 			}
@@ -134,7 +134,6 @@ void FitResult::printFitParameters(TableFormater* tableResult){
 	}
 	tableResult->footer();
 
-	std::cout<<"printFitParameters"<<std::endl;
 	return;
 }
 

@@ -29,7 +29,6 @@
 #include <iostream>
 #include <fstream>
 #include <memory>
-#include <boost/numeric/ublas/matrix.hpp>
 #include <boost/numeric/ublas/io.hpp>
 
 #include "Core/ParameterList.hpp"
@@ -56,6 +55,8 @@ public:
 	operator double() const { return finalLH; };
 	//! Return final likelihood value
 	double getResult(){return finalLH;}
+	//! Set amplitude
+	void setAmplitude(std::shared_ptr<Amplitude> a) { _amp = a; }
 	//! Enable correct error estimation for fit fractions. Very time consuming!
 	void setUseCorrelatedErrors(bool s, int nSets=200);
 	//! Use tree for calculation of fit fractions
@@ -72,9 +73,6 @@ public:
 	void init(FunctionMinimum);
 
 protected:
-	std::shared_ptr<Estimator> estimator;
-	//! GSL random generator, used for multivariate gauss
-	gsl_rng* r;
 	//! Calculate interference terms
 	bool calcInterference;
 	//! Should we calcualte fit fraction errors accurately?
@@ -84,6 +82,10 @@ protected:
 	//! number of resonances in amplitude
 	unsigned int nRes;
 
+	//! Number of floating parameters
+	int nFreeParameter;
+	//! Number of events
+	int nEvents;
 	//====== MINUIT FIT RESULT =======
 	bool isValid; //result valid
 	bool covPosDef; //covariance matrix pos.-def.
@@ -97,12 +99,15 @@ protected:
 	unsigned int nFcn;
 	double initialLH;
 	double finalLH;
-	double exitCode;
+	double penalty;
 	double edm; //estimated distance to minimum
-	boost::numeric::ublas::symmetric_matrix<double,boost::numeric::ublas::upper> cov;
-	boost::numeric::ublas::symmetric_matrix<double,boost::numeric::ublas::upper> corr;
-	std::vector<double> variance;
+	//! Covariance matrix
+	std::vector<std::vector<double> > cov;
+	//! Correlation matrix
+	std::vector<std::vector<double> > corr;
+	//! Global correlation coefficients
 	std::vector<double> globalCC;
+
 	//====== OUTPUT =====
 	//! Simplified fit result output
 	void genSimpleOutput(std::ostream& out);
@@ -133,7 +138,38 @@ protected:
 	double calcAIC();
 	//! Calculate information criterion BIC
 	double calcBIC();
-
+private:
+	friend class boost::serialization::access;
+	template<class archive>
+	void serialize(archive& ar, const unsigned int version)
+	{
+		using namespace boost::serialization;
+		ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(FitResult);
+		ar & BOOST_SERIALIZATION_NVP(calcInterference);
+		ar & BOOST_SERIALIZATION_NVP(useCorrelatedErrors);
+		ar & BOOST_SERIALIZATION_NVP(useTree);
+		ar & BOOST_SERIALIZATION_NVP(nRes);
+		ar & BOOST_SERIALIZATION_NVP(isValid);
+		ar & BOOST_SERIALIZATION_NVP(covPosDef);
+		ar & BOOST_SERIALIZATION_NVP(hasValidParameters);
+		ar & BOOST_SERIALIZATION_NVP(hasValidCov);
+		ar & BOOST_SERIALIZATION_NVP(hasAccCov);
+		ar & BOOST_SERIALIZATION_NVP(hasReachedCallLimit);
+		ar & BOOST_SERIALIZATION_NVP(edmAboveMax);
+		ar & BOOST_SERIALIZATION_NVP(hesseFailed);
+		ar & BOOST_SERIALIZATION_NVP(errorDef);
+		ar & BOOST_SERIALIZATION_NVP(nFcn);
+		ar & BOOST_SERIALIZATION_NVP(initialLH);
+		ar & BOOST_SERIALIZATION_NVP(finalLH);
+		ar & BOOST_SERIALIZATION_NVP(penalty);
+		ar & BOOST_SERIALIZATION_NVP(nEvents);
+		ar & BOOST_SERIALIZATION_NVP(edm);
+		ar & BOOST_SERIALIZATION_NVP(cov);
+		ar & BOOST_SERIALIZATION_NVP(corr);
+		ar & BOOST_SERIALIZATION_NVP(globalCC);
+		ar & BOOST_SERIALIZATION_NVP(nFreeParameter);
+	}
 };
+
 
 #endif
