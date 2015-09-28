@@ -179,22 +179,27 @@ void FitResult::calcFraction(ParameterList& parList){
 		throw std::runtime_error("FitResult::calcFractions() | ParameterList not empty!");
 
 	double norm =-1;
+	ParameterList cList;
+	_amp->copyParameterList(cList);
 
 	//in case of unbinned efficiency correction to tree does not provide an integral w/o efficiency correction
 	norm = _amp->integral();
 	if(norm<0)
 		throw std::runtime_error("FitResult::calcFraction() normalization can't be calculated");
 	BOOST_LOG_TRIVIAL(debug)<<"FitResult::calcFraction() norm="<<norm;
+	std::cout<<"qwerty "<<norm<<" ";
 	int nRes=_amp->GetNumberOfResonances();
 	for(unsigned int i=0;i<nRes; i++){ //fill matrix
 		double resInt= _amp->GetIntegral(i);
 		std::string resName = _amp->GetNameOfResonance(i);
-		std::shared_ptr<DoubleParameter> magPar = finalParameters.GetDoubleParameter("mag_"+resName);
+		std::shared_ptr<DoubleParameter> magPar = cList.GetDoubleParameter("mag_"+resName);
 		double mag = std::abs(magPar->GetValue()); //value of magnitude
 		double magError = 0;
 		if(magPar->HasError()) magError = magPar->GetError(); //error of magnitude
 		parList.AddParameter(std::shared_ptr<DoubleParameter>(
 				new DoubleParameter(resName+"_FF", mag*mag*resInt/norm, 2*mag*resInt/norm * magError)) );
+		std::cout<<resName<<" -> "<<mag*mag*resInt/norm<<"("<<mag*mag<<") ";
 	}
+	std::cout<<std::endl;
 	return;
 }

@@ -128,7 +128,7 @@ void MinuitResult::smearParameterList(const gsl_rng *rnd, ParameterList& newParL
 	gsl_matrix* gslCov = gsl_matrix_alloc(nFree,nFree);
 	for(unsigned int i=0; i<cov.size();i++)
 		for(unsigned int j=0; j<cov.at(0).size();j++)
-			gsl_matrix_set(gslCov,i,j,cov.at(i).at(j));
+			gsl_matrix_set(gslCov,i,j,2*cov.at(i).at(j));
 
 	gsl_vector* newPar = gsl_vector_alloc(nFree);
 
@@ -176,6 +176,7 @@ void MinuitResult::calcFractionError(){
 			calcFraction(tmp);
 			fracVect.push_back(tmp);
 
+			//DEBUGGING
 			if(i==0){
 				for(int t=0; t<newPar.GetNDouble(); t++){
 					if( newPar.GetDoubleParameter(t)->IsFixed()) continue;
