@@ -1,30 +1,22 @@
 ########### test apps #############
-import os ;
-
-local GENEVA = [ os.environ GENEVA ] ;
-local QFTINC = [ os.environ QFT_INCLUDE ] ;
-local QFT = [ os.environ QFT ] ;
-local MINUIT2 = [ os.environ MINUIT2 ] ;
-
 local rlibs = [ SHELL "$ROOTSYS/bin/root-config --libs" ] ;
 ROOTLIBS = [ MATCH "(.*)[\n]" : $(rlibs) ] ;
 
-project :
-	requirements <include>./
-	    <include>$(TOP)
-		<include>$(ROOT_INC_PATH)
-		<include>$(GENEVA)/include
-        <include>$(QFT)/include
-        <include>$(MINUIT2)/include
-        <cxxflags>-pthread
-	<linkflags>-L$(ROOT_LIB_PATH)
+project ComPWA/test : requirements 
+     <cxxflags>-pthread
+	<include>.
+	<include>$(GENEVA)/include
+     <include>$(QFT)/include
+     <include>$(MINUIT2)/include
+
+	<include>$(ROOT_INC_PATH)
 	<linkflags>$(ROOTLIBS)
 	<linkflags>-lEG
 	<linkflags>-lRooFit
 	<linkflags>-lRooFitCore
+
 	<linkflags>-L$(QFT)/lib
 	<linkflags>-lqft++
-	#<linkflags>-lgomp
 	;
 
 lib test : 

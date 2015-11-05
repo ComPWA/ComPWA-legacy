@@ -3,8 +3,8 @@ import os ;
 
 project :
 	requirements
-    <cxxflags>-fopenmp
-	<linkflags>-lgomp
+    #<cxxflags>-fopenmp
+	#<linkflags>-lgomp
 	;
 
 lib ComPWA : 

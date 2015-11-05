@@ -1,28 +1,14 @@
 ########### Minuit2IF lib #############
-import os ;
 
-local MINUIT2 = [ os.environ MINUIT2 ] ;
-local OS = [ os.name ] ;
-local GSL = [ os.environ GSL_ROOT ] ;
-
-project :
-   requirements <include>./
-	<include>$(MINUIT2)/include
-	<include>$(GSL)/include
-	<linkflags>-L$(MINUIT2)/lib
-	<linkflags>-lMinuit2
-	<linkflags>-L$(GSL)/lib
-	<linkflags>-lgsl
-     <linkflags>-lgslcblas
-     <linkflags>-lboost_chrono
-		;
-
-lib Minuit2IF : 
-   [ glob *.cpp ] 
-   $(TOP)/Core//ComPWA
-   #was macht das hier?
- #  : <use>$(TOP)/Optimizer/Minuit2//Minuit2 <threading>single  
- #  : <library>$(TOP)/Optimizer/Minuit2//Minuit2 <threading>single 
+lib Minuit2IF : [ glob *.cpp ] 
+	: <include>$(GSL)/include
+		<linkflags>-L$(GSL)/lib
+		<linkflags>-lgsl
+     	<linkflags>-lgslcblas
+		<include>$(MINUIT2)/include
+		<linkflags>-L$(MINUIT2)/lib
+		<linkflags>-lMinuit2
+		<linkflags>-lboost_chrono
 ;
 
 install dist : Minuit2IF : <location>$(TOP)/lib <threading>single ;

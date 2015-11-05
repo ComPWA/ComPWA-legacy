@@ -1,22 +1,5 @@
 ########### AsciiReader lib #############
-# @brief
-# This package is a data reader, which reads the data from ascii files
-# @end
-import os ;
-local QFTINC = [ os.environ QFT_INCLUDE ] ;
-local QFT = [ os.environ QFT ] ;
-
-project :
-	requirements
-        <include>$(QFT)/include
-        <linkflags>-L$(QFT)/lib
-        <linkflags>-lqft++
-	;
-
-lib AsciiReader : 
-        [ glob *.cpp : *Test.cpp ] 
-        $(TOP)/Core//ComPWA  
-        ;
+lib AsciiReader : [ glob *.cpp : *Test.cpp ] $(TOP)/Core//ComPWA ;
         
 #using testing ;
 #lib boost_unit_test_framework ;

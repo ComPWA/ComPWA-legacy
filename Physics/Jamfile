@@ -1,38 +1,47 @@
 ########### Physics Jamfile #############
 path-constant PHYSICS : . ;
 
-# libPhysics.so will consist of these packages:
+project ComPWA/Physics 
+	: requirements
+		<library>$(TOP)/Core//ComPWA
+		<include>$(GSL)/include
+		<linkflags>-L$(GSL)/lib
+		<linkflags>-lgsl
+     	<linkflags>-lgslcblas
+     	<include>$(QFT)/include
+		<linkflags>-L$(QFT)/lib
+		<linkflags>-lqft++
+;
 
-sources = [ glob *.cpp ] ;
+# libPhysics.so will consist of these packages:
+#sources = [ glob *.cpp ] ;
 if $(build_AmplitudeSum) && $(build_AmplitudeSum) != 0
 {
 	build-project AmplitudeSum ;
-	sources = $(sources) $(PHYSICS)/AmplitudeSum//AmplitudeSum ;
+	#sources = $(sources) $(PHYSICS)/AmplitudeSum//AmplitudeSum ;
 }
 if $(build_DPKinematics) && $(build_DPKinematics) != 0
 {
 	build-project DPKinematics ;
-	sources = $(sources) $(PHYSICS)/DPKinematics//DPKinematics ;
+	#sources = $(sources) $(PHYSICS)/DPKinematics//DPKinematics ;
 }
 if $(build_BreitWigner) && $(build_BreitWigner) != 0
 {
 	build-project BreitWigner ;
-	sources = $(sources) $(PHYSICS)/BreitWigner//BreitWigner ;
+	#sources = $(sources) $(PHYSICS)/BreitWigner//BreitWigner ;
 }
 if $(build_Background) && $(build_Background) != 0
 {
 	build-project Background ;
-	sources = $(sources) $(PHYSICS)/Background//Background ;
+	#sources = $(sources) $(PHYSICS)/Background//Background ;
 }
 if $(build_HelicityAmplitude) && $(build_HelicityAmplitude) != 0
 {
 	build-project HelicityAmplitude ;
-	sources = $(sources) $(PHYSICS)/HelicityAmplitude//HelicityAmplitude ;
+	#sources = $(sources) $(PHYSICS)/HelicityAmplitude//HelicityAmplitude ;
 }
 
 # Build libPhysics.so
-lib Physics : 
-        $(sources)
-;
+lib Physics : [ glob *.cpp ] ;
 
 install dist : Physics : <location>$(TOP)/lib ;
