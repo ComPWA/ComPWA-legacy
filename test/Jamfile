@@ -9,6 +9,10 @@ project ComPWA/test : requirements
      <include>$(QFT)/include
      <include>$(MINUIT2)/include
 
+     <library>/boost//program_options
+     <library>/boost//filesystem
+     <library>/boost//serialization
+
 	<include>$(ROOT_INC_PATH)
 	<linkflags>$(ROOTLIBS)
 	<linkflags>-lEG

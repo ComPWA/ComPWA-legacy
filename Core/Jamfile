@@ -1,15 +1,17 @@
 ########### ComPWA Core lib #############
 import os ;
 
-project :
-	requirements
-    #<cxxflags>-fopenmp
-	#<linkflags>-lgomp
-	;
+project Core :	;
 
-lib ComPWA : 
-        [ glob *.cpp : *Test.cpp ] 
-        : ;
+lib ComPWA : [ glob *.cpp : *Test.cpp ]
+    : <library>/boost//serialization
+      <library>/boost//thread
+      <library>/boost//system
+      #<library>/boost//log
+      #<library>/boost//log_setup
+      <linkflags>-lboost_log_setup
+;
+
 
 install dist : ComPWA : <location>$(TOP)/lib ;
 

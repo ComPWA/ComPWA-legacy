@@ -8,7 +8,8 @@ lib Minuit2IF : [ glob *.cpp ]
 		<include>$(MINUIT2)/include
 		<linkflags>-L$(MINUIT2)/lib
 		<linkflags>-lMinuit2
-		<linkflags>-lboost_chrono
+ 	     <library>/boost//chrono
+     	<library>/boost//serialization
 ;
 
 install dist : Minuit2IF : <location>$(TOP)/lib <threading>single ;

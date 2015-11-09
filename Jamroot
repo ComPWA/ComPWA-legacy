@@ -16,22 +16,48 @@ path-constant BOOST_ROOT : [ os.environ BOOST_ROOT ] ;
 path-constant QFT : [ os.environ QFT ] ;
 path-constant GSL : [ os.environ GSL_ROOT ] ;
 
-BOOSTLIBS = -lboost_log_setup -lboost_log -lboost_date_time -lboost_filesystem 
--lboost_program_options -lboost_regex -lboost_serialization -lboost_system 
--lboost_thread -lboost_test_exec_monitor 
--L$(BOOST_ROOT)/lib ;
+#BOOSTLIBS = -lboost_log_setup -lboost_log -lboost_date_time -lboost_filesystem 
+#-lboost_program_options -lboost_regex -lboost_serialization -lboost_system 
+#-lboost_thread -lboost_test_exec_monitor 
+#-L$(BOOST_ROOT)/lib ;
 
-project ComPWA : requirements 
-	<include>.
-	<define>BOOST_LOG_DYN_LINK
-	<cxxflags>-ftemplate-depth-256
-	<cxxflags>-std=c++0x
-	<cxxflags>-DBOOST_SPIRIT_USE_PHOENIX_V3
+#Specify boost library
+import boost ;
+using boost : 1.54 :
+    <include>$(BOOST_ROOT)/include
+    <library>$(BOOST_ROOT)/lib
+    <layout>system
+;
+#boost.use-project 1.54 ; #specify boost version
+boost.use-project ;
 
-	<include>$(BOOST_ROOT)/include
-	<linkflags>$(BOOSTLIBS)
-	<warnings>off
-	;
+
+project ComPWA 
+	: requirements 
+	  <include>.
+	  <define>BOOST_LOG_DYN_LINK
+	  <cxxflags>-ftemplate-depth-256
+	  <cxxflags>-std=c++11
+	  <cxxflags>-DBOOST_SPIRIT_USE_PHOENIX_V3
+	  <warnings>off
+
+	  #<include>$(BOOST_ROOT)/include
+	  #<linkflags>$(BOOSTLIBS)
+
+       <library>/boost//system
+       #<library>/boost #link all boost libraries
+       #Logging is needed by all libraries
+       #<library>/boost//log #No idea why this doesn't work
+       <linkflags>-lboost_log
+
+    : usage-requirements #flags are automatically added to depended projects
+      <include>.
+    #  <search>lib/
+      <define>BOOST_LOG_DYN_LINK
+      <cxxflags>-std=c++11
+      <cxxflags>-DBOOST_SPIRIT_USE_PHOENIX_V3
+      
+;
 
 # This is the layout of the complete project tree. The configure.py script will comment/uncomment the following constant definitions
 # disabling/enabling the appropriate subprojects. Of course the appropriate if statements have to be inserted around build-project rules
@@ -56,14 +82,7 @@ constant build_SliceFit : 1 ;
 
 constant build_Optimizer : 1 ;
 constant build_Minuit2 : 1 ;
-	path-constant MINUIT2 : [ os.environ MINUIT2 ] ;
-if $(build_Minuit2) && $(build_Minuit2) != 0 {
-	path-constant MINUIT2 : [ os.environ MINUIT2 ] ;
-}
 constant build_Geneva : 0 ;
-if $(build_Geneva) && $(build_Geneva) != 0 {
-	path-constant GENEVA : [ os.environ GENEVA ] ;
-}
 
 # core should always be built
 build-project Core ;
@@ -81,4 +100,10 @@ if $(build_Estimator) && $(build_Estimator) != 0 {
 }
 if $(build_Optimizer) && $(build_Optimizer) != 0 {
   build-project Optimizer ;
+  if $(build_Minuit2) && $(build_Minuit2) != 0 {
+	path-constant MINUIT2 : [ os.environ MINUIT2 ] ;
+  }
+  if $(build_Geneva) && $(build_Geneva) != 0 {
+	path-constant GENEVA : [ os.environ GENEVA ] ;
+  }
 }
