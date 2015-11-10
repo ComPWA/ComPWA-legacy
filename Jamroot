@@ -40,7 +40,10 @@ project ComPWA
 	  <cxxflags>-std=c++11
 	  <cxxflags>-DBOOST_SPIRIT_USE_PHOENIX_V3
 	  <warnings>off
-
+	  #Static linking of std lib. In case that different 
+	  #compiler versions are used we are on the safe side
+	  <linkflags>-static-libgcc 
+	  <linkflags>-static-libstdc++
 	  #<include>$(BOOST_ROOT)/include
 	  #<linkflags>$(BOOSTLIBS)
 
