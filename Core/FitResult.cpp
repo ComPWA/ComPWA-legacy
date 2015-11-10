@@ -187,7 +187,6 @@ void FitResult::calcFraction(ParameterList& parList){
 	if(norm<0)
 		throw std::runtime_error("FitResult::calcFraction() normalization can't be calculated");
 	BOOST_LOG_TRIVIAL(debug)<<"FitResult::calcFraction() norm="<<norm;
-	std::cout<<"qwerty "<<norm<<" ";
 	int nRes=_amp->GetNumberOfResonances();
 	for(unsigned int i=0;i<nRes; i++){ //fill matrix
 		double resInt= _amp->GetIntegral(i);
@@ -198,8 +197,6 @@ void FitResult::calcFraction(ParameterList& parList){
 		if(magPar->HasError()) magError = magPar->GetError(); //error of magnitude
 		parList.AddParameter(std::shared_ptr<DoubleParameter>(
 				new DoubleParameter(resName+"_FF", mag*mag*resInt/norm, 2*mag*resInt/norm * magError)) );
-		std::cout<<resName<<" -> "<<mag*mag*resInt/norm<<"("<<mag*mag<<") ";
 	}
-	std::cout<<std::endl;
 	return;
 }

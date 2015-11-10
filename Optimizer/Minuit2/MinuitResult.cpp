@@ -167,7 +167,7 @@ void MinuitResult::calcFractionError(){
 
 		std::vector<ParameterList> fracVect;
 		progressBar bar(correlatedErrors_numberOfSets);
-		ofstream outFraction; outFraction.open ("corrErrorsPar.txt");
+		stringstream outFraction;
 		for(unsigned int i=0; i<correlatedErrors_numberOfSets; i++){
 			bar.nextEvent();
 			ParameterList newPar; smearParameterList(r, newPar);
@@ -194,7 +194,7 @@ void MinuitResult::calcFractionError(){
 				outFraction << tmp.GetDoubleParameter(t)->GetValue()<<" ";
 			outFraction << std::endl;
 		}
-		outFraction.close();
+		BOOST_LOG_TRIVIAL(info)<<" ------- "<<outFraction.str();
 		//Calculate standard deviation
 		for(unsigned int o=0;o<nRes;o++){
 			double mean=0, sqSum=0., stdev=0;
