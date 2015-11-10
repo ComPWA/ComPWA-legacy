@@ -1,23 +1,26 @@
 ########### Optimizer Jamfile #############
-import os ;
 path-constant OPTIMIZER : . ;
 
+project ComPWA/Optimizer
+	: requirements 
+		<include>./
+   		<library>$(TOP)/Core//ComPWA
+;
+
 # Build libOptimizer.so
-sources = [ glob *.cpp ] ;
+#sources = [ glob *.cpp ] ;
 if $(build_Minuit2) && $(build_Minuit2) != 0
 {
 	build-project Minuit2 ;
-	sources = $(sources) $(OPTIMIZER)/Minuit2//Minuit2IF ;
+	#sources = $(sources) [ glob Minuit2/*.cpp ] ;
 }
 
 if $(build_Geneva) && $(build_Geneva) != 0
 {
 	build-project Geneva ;
-	sources = $(sources) $(OPTIMIZER)/Geneva//GenevaIF ;
+	#sources = $(sources) [ glob Geneva/*.cpp ] ;
 }
 
-lib Optimizer :
-		$(sources)
-		;
+lib Optimizer : [ glob *.cpp ] ;
 
 install dist : Optimizer : <location>$(TOP)/lib ;
