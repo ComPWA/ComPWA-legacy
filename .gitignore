@@ -4,6 +4,7 @@
 *.o
 *.d
 ~*
+boost.jam
 bin/
 lib/
 external

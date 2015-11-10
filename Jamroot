@@ -50,6 +50,7 @@ project ComPWA
        #<library>/boost//log #No idea why this doesn't work
        <linkflags>-lboost_log
 
+	: default-build release
     : usage-requirements #flags are automatically added to depended projects
       <include>.
     #  <search>lib/
