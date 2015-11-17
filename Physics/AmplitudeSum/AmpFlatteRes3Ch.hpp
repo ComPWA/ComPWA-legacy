@@ -22,6 +22,7 @@
 #define AMP_FLATTE3CH_RES
 
 #include <vector>
+#include <cmath>
 #include "Physics/AmplitudeSum/AmpFlatteRes.hpp"
 
 using namespace std;

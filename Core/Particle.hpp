@@ -22,7 +22,8 @@
 #define _PARTICLE_HPP_
 
 #include <vector>
-#include <math.h>
+#include <cmath>
+#include <iostream>
 #include <stdexcept>
 
 struct Particle
@@ -35,16 +36,14 @@ struct Particle
     :px(inPx),py(inPy),pz(inPz),E(inE),pid(inpid),charge(c){
   }
 
-//  Particle(const Particle& inParticle)
-//    :px(inParticle.px),py(inParticle.py),pz(inParticle.pz),E(inParticle.E),pid(inParticle.pid){
-//  }
-
   inline double invariantMass(const Particle& inParticle) const {
-    return (pow(E+inParticle.E,2)-pow(px+inParticle.px ,2)-pow(py+inParticle.py ,2)-pow(pz+inParticle.pz ,2));
+    return (std::pow(E+inParticle.E,2)-std::pow(px+inParticle.px ,2)
+    -std::pow(py+inParticle.py ,2)-std::pow(pz+inParticle.pz ,2));
   }
 
   static double invariantMass(const Particle& inPa, const Particle& inPb) {
-    return (pow(inPa.E+inPb.E,2)-pow(inPa.px+inPb.px ,2)-pow(inPa.py+inPb.py ,2)-pow(inPa.pz+inPb.pz ,2));
+    return (std::pow(inPa.E+inPb.E,2)-std::pow(inPa.px+inPb.px ,2)
+    -std::pow(inPa.py+inPb.py ,2)-std::pow(inPa.pz+inPb.pz ,2));
   }
 
   //!Get magnitude of three momentum
@@ -60,7 +59,7 @@ struct Particle
   virtual const inline void setCharge(int _c) {
 	  if( _c != -1 && _c!=0 && _c !=+1)
 		  throw std::runtime_error("Particle::setCharge() | "
-				  +std::to_string((long long int) _c)+" is not a valid charge value!");
+				  +std::to_string(_c)+" is not a valid charge value!");
 	  charge=_c;
   }
   virtual const inline double getPx() const {return px;}
@@ -69,6 +68,8 @@ struct Particle
   virtual const inline double getE() const {return E;}
   virtual const inline int getPid() const {return pid;}
   virtual const inline int getCharge() const {return charge;}
+
+  friend std::ostream& operator<< (std::ostream& stream, const Particle& p);
 
 //protected:
   double px, py, pz, E;

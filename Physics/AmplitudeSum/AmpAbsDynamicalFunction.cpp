@@ -75,8 +75,8 @@ AmpAbsDynamicalFunction::~AmpAbsDynamicalFunction()
 
 std::complex<double> AmpAbsDynamicalFunction::GetCoefficient() {
 	return std::complex<double>(
-			std::abs(_mag->GetValue())*cos(_phase->GetValue()),
-			std::abs(_mag->GetValue())*sin(_phase->GetValue())
+			std::fabs(_mag->GetValue())*cos(_phase->GetValue()),
+			std::fabs(_mag->GetValue())*sin(_phase->GetValue())
 	);
 }
 

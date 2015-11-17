@@ -51,6 +51,14 @@ RootReader::~RootReader(){
 
 }
 
+RootReader* RootReader::Clone() const{
+	return new RootReader(*this);
+}
+
+RootReader* RootReader::EmptyClone() const{
+	return new RootReader();
+}
+
 bool RootReader::hasWeights(){
 	bool has=0;
 	for(unsigned int evt=0; evt<fEvents.size(); evt++){
@@ -97,34 +105,35 @@ void RootReader::reduceToPhsp(){
 	fEvents = tmp;
 	return;
 }
-std::shared_ptr<Data> RootReader::rndSubSet(unsigned int size, std::shared_ptr<Generator> gen){
-	std::shared_ptr<Data> newSample(new RootReader());
-	unsigned int totalSize = getNEvents();
-	unsigned int newSize = totalSize;
-	/* 1th method: new Sample has exact size, but possibly events are added twice.
-	 * We would have to store all used events in a vector and search the vector at every event -> slow */
-	/*unsigned int t=0;
-	 unsigned int d=0;
-	 while(t<newSize){
-	 d = (unsigned int) gen->getUniform()*totalSize;
-	 newSample->pushEvent(fEvents[d]);
-	 t++;
-	 }*/
-
-	/* 2nd method: events are added once only, but total size of sample varies with sqrt(N) */
-	for(unsigned int i=0; i<totalSize; i++){//count how many events are not within PHSP
-		dataPoint point(fEvents[i]);
-		if(!Kinematics::instance()->isWithinPhsp(point)) newSize--;
-	}
-	double threshold = (double)size/newSize; //calculate threshold
-	for(unsigned int i=0; i<totalSize; i++){
-		dataPoint point(fEvents[i]);
-		if(!Kinematics::instance()->isWithinPhsp(point)) continue;
-		if(gen->getUniform()<threshold)
-			newSample->pushEvent(fEvents[i]);
-	}
-	return newSample;
-}
+//std::shared_ptr<Data> RootReader::rndSubSet(unsigned int size, std::shared_ptr<Generator> gen){
+//	std::shared_ptr<Data> newSample(new RootReader());
+//	unsigned int totalSize = getNEvents();
+//	unsigned int newSize = totalSize;
+//	/* 1th method: new Sample has exact size, but possibly events are added twice.
+//	 * We would have to store all used events in a vector and search the vector at every event -> slow */
+//	/*unsigned int t=0;
+//	 unsigned int d=0;
+//	 while(t<newSize){
+//	 d = (unsigned int) gen->getUniform()*totalSize;
+//	 newSample->pushEvent(fEvents[d]);
+//	 t++;
+//	 }*/
+//
+//	/* 2nd method: events are added once only, but total size of sample varies with sqrt(N) */
+//	for(unsigned int i=0; i<totalSize; i++){//count how many events are not within PHSP
+//		dataPoint point(fEvents[i]);
+//		if(!Kinematics::instance()->isWithinPhsp(point)) newSize--;
+//	}
+//	double threshold = (double)size/newSize; //calculate threshold
+//	for(unsigned int i=0; i<totalSize; i++){
+//		dataPoint point(fEvents[i]);
+//		double rnd = gen->getUniform(); //get new random number for each(!) event
+//		if(!Kinematics::instance()->isWithinPhsp(point)) continue;
+//		if(rnd<threshold)
+//			newSample->pushEvent(fEvents[i]);
+//	}
+//	return newSample;
+//}
 
 void RootReader::pushEvent(const Event& evt) {
 	fEvents.push_back(evt);
@@ -229,7 +238,7 @@ void RootReader::storeEvents(){
 			if(!partN) continue;
 			partN->Momentum(inN);
 			int charge = partN->GetPDG()->Charge();
-			if(charge != 0) charge /= std::abs(charge);
+			if(charge != 0) charge /= std::fabs(charge);
 			tmp.addParticle(
 					Particle( inN.X(), inN.Y(), inN.Z(), inN.E(), partN->GetPdgCode(), charge )
 			);
@@ -376,3 +385,4 @@ void RootReader::applyCorrection(DataCorrection& corr){
 			"Sum of weights squared is "<<sumWeightSq;
 	return;
 }
+

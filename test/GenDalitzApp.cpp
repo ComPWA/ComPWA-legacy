@@ -433,7 +433,7 @@ int main(int argc, char **argv) {
 		//		m12sq = kin.getThirdVariableSq(m23sq,m13sq);
 //		point->setMsq(3,m12sq); point->setMsq(4,m13sq); point->setMsq(5,m23sq);
 		//		m12sq=M*M+m1*m1+m2*m2+m3*m3-m13sq-m23sq;
-		if (abs(m12sq - kin->getThirdVariableSq(m23sq, m13sq)) > 0.01) {
+		if (std::fabs(m12sq - kin->getThirdVariableSq(m23sq, m13sq)) > 0.01) {
 			std::cout << m12sq << " " << kin->getThirdVariableSq(m23sq, m13sq)
 					<< std::endl;
 			std::cout << "   " << m23sq << " " << m13sq << " " << m12sq

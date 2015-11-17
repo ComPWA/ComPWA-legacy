@@ -121,7 +121,7 @@ double Kinematics::FormFactor(double sqrtS, double ma, double mb, double spin, d
 		/* Events below threshold
 		 * What should we do if event is below threshold? Shouldn't really influence the result
 		 * because resonances at threshold don't have spin(?) */
-		z = std::abs(z);
+		z = std::fabs(z);
 
 		if (spin == 1){
 			return( sqrt(2*z/(z+1)) );
@@ -164,13 +164,13 @@ std::complex<double> Kinematics::phspFactor(double sqrtS, double ma, double mb){
 	 * approaches.
 	 */
 	std::complex<double> rho;
-	double q = std::sqrt( std::abs(Kinematics::qSqValue(sqrtS,ma,mb)*4/s) );
+	double q = std::sqrt( std::fabs(Kinematics::qSqValue(sqrtS,ma,mb)*4/s) );
 	if( s<=0 ){ //below 0
-		rho = -q/M_PI*std::log(std::abs((1+q)/(1-q)));
+		rho = -q/M_PI*std::log(std::fabs((1+q)/(1-q)));
 	} else if( 0<s && s<=(ma+mb)*(ma+mb) ){ //below threshold
 		rho = ( -2.0*q/M_PI * atan(1/q) ) / (i*16.0*M_PI*sqrtS);
 	} else if( (ma+mb)*(ma+mb)<s ){//above threshold
-		rho = ( -q/M_PI*log( std::abs((1+q)/(1-q)) )+i*q ) / (i*16.0*M_PI*sqrtS);
+		rho = ( -q/M_PI*log( std::fabs((1+q)/(1-q)) )+i*q ) / (i*16.0*M_PI*sqrtS);
 	} else
 		throw std::runtime_error("AmpKinematics::phspFactor| phspFactor not defined at sqrtS = "
 				+std::to_string((long double)sqrtS));

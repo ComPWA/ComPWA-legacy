@@ -103,9 +103,9 @@ void FitResult::printFitParameters(TableFormater* tableResult){
 			if(printTrue) truePar->SetValue( shiftAngle(truePar->GetValue()) );
 		}
 		if(isMag && !isFixed) {
-			outPar->SetValue( std::abs(outPar->GetValue()) ); //abs value of parameter is magnitude
-			if(printInitial) iniPar->SetValue( std::abs(iniPar->GetValue()) );
-			if(printTrue) truePar->SetValue( std::abs(truePar->GetValue()) );
+			outPar->SetValue( std::fabs(outPar->GetValue()) ); //abs value of parameter is magnitude
+			if(printInitial) iniPar->SetValue( std::fabs(iniPar->GetValue()) );
+			if(printTrue) truePar->SetValue( std::fabs(truePar->GetValue()) );
 		}
 
 		*tableResult << o << outPar->GetName();
@@ -153,7 +153,7 @@ void FitResult::printFitFractions(TableFormater* fracTable){
 		*fracTable << tmpPar->GetName()
 				<< tmpPar->GetValue()
 				<< tmpPar->GetError() //assume symmetric errors here
-				<< std::abs(tmpPar->GetValue()/tmpPar->GetError());
+				<< std::fabs(tmpPar->GetValue()/tmpPar->GetError());
 		sum += tmpPar->GetValue();
 		sumErrorSq += tmpPar->GetError()*tmpPar->GetError();
 	}
@@ -192,7 +192,7 @@ void FitResult::calcFraction(ParameterList& parList){
 		double resInt= _amp->GetIntegral(i);
 		std::string resName = _amp->GetNameOfResonance(i);
 		std::shared_ptr<DoubleParameter> magPar = cList.GetDoubleParameter("mag_"+resName);
-		double mag = std::abs(magPar->GetValue()); //value of magnitude
+		double mag = std::fabs(magPar->GetValue()); //value of magnitude
 		double magError = 0;
 		if(magPar->HasError()) magError = magPar->GetError(); //error of magnitude
 		parList.AddParameter(std::shared_ptr<DoubleParameter>(

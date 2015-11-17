@@ -37,6 +37,8 @@ public:
   /// Default Constructor (0x0)
   AsciiReader( const std::string inConfigFile, const int particles );
 
+  virtual AsciiReader* Clone() const;
+  virtual AsciiReader* EmptyClone() const;
   virtual Event& getEvent( const int );
   virtual allMasses getMasses();
   virtual const int getBin( const int, double&, double& );
@@ -52,9 +54,6 @@ public:
   /** Destructor */
   virtual ~AsciiReader();
 
-  virtual std::shared_ptr<Data> rndSubSet(unsigned int size, std::shared_ptr<Generator> gen) {
-	  return std::shared_ptr<Data>();
-  }
   virtual void writeData(std::string file="", std::string trName="") { };
 
 protected:

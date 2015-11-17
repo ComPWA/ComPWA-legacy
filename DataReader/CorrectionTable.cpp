@@ -174,7 +174,7 @@ double CorrectionTable::inverse(double x){
 //! Calculate error for inversion e_mc/e_data-1 to e_data/e_mc-1
 double CorrectionTable::inverseError(double x, double xErr){
 	if(x==-999 || x==-1) return -999;
-	return std::abs(-1/((x+1)*(x+1)) * xErr);
+	return std::fabs(-1/((x+1)*(x+1)) * xErr);
 }
 int CorrectionTable::findBin(double momentum) const {
 	for(unsigned int i=0; i<bins.size(); i++){

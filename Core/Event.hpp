@@ -23,6 +23,7 @@
 
 #include <vector>
 #include <string>
+#include <iostream>
 #include "Core/Particle.hpp"
 
 class Event{
@@ -51,6 +52,8 @@ public:
 
   virtual const inline unsigned int getNParticles() const { return fParticles.size(); }
   virtual const Particle& getParticle(const unsigned int id);
+
+  friend std::ostream& operator<< (std::ostream& stream, const Event& ev);
 
 protected:
   std::vector<Particle> fParticles;

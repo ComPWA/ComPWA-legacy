@@ -60,6 +60,21 @@ std::shared_ptr<FitResult> RunManager::startFit(ParameterList& inPar){
 
 	return result;
 }
+
+void RunManager::setPhspSample( std::shared_ptr<Data> phsp, std::shared_ptr<Data> truePhsp){
+	if(truePhsp && truePhsp->getNEvents() != phsp->getNEvents())
+		throw std::runtime_error("RunManager::setPhspSample() | "
+				"Reconstructed sample and true sample have not the same size!");
+	samplePhsp_ = phsp;
+	sampleTruePhsp_ = truePhsp;
+}
+void RunManager::setTruePhspSample( std::shared_ptr<Data> truePhsp){
+	if(truePhsp && samplePhsp_ && truePhsp->getNEvents() != samplePhsp_->getNEvents())
+		throw std::runtime_error("RunManager::setPhspSample() | "
+				"Reconstructed sample and true sample have not the same size!");
+	sampleTruePhsp_ = truePhsp;
+};
+
 bool RunManager::generate( int number ) {
 	BOOST_LOG_TRIVIAL(info) << "RunManager::generate() | generating "<<number<<" signal events!";
 	return gen( number, gen_, amp_, sampleData_, samplePhsp_, sampleTruePhsp_ );
@@ -97,7 +112,7 @@ bool RunManager::gen( int number, std::shared_ptr<Generator> gen, std::shared_pt
 	double maxSampleWeight = phsp->getMaxWeight();
 	if(phspTrue && phspTrue->getMaxWeight()>maxSampleWeight) maxSampleWeight = phspTrue->getMaxWeight();
 
-	/* Maximum value for random number generation. We introduce an arbitray factor of 1.2 to make sure
+	/* Maximum value for random number generation. We introduce an arbitrary factor of 1.2 to make sure
 	 * that the maximum value is never reached.
 	 */
 	double generationMaxValue = 1.2*amp->getMaxVal(gen)*maxSampleWeight;

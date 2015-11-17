@@ -56,6 +56,8 @@ public:
 	RootReader(const std::string inRootFile, const std::string inTreeName="data",
 			int size=-1, const bool binned=false);
 
+	virtual RootReader* Clone() const;
+	virtual RootReader* EmptyClone() const;
 	virtual const std::vector<std::string>& getVariableNames();
 
     virtual void pushEvent(const Event& evt);
@@ -83,7 +85,7 @@ public:
 	//! Select only first @param newSize events from full sample
 	virtual void reduce(unsigned int newSize);
 	//! Select random subset of events
-	std::shared_ptr<Data> rndSubSet(unsigned int size, std::shared_ptr<Generator> gen);
+//	std::shared_ptr<Data> rndSubSet(unsigned int size, std::shared_ptr<Generator> gen);
 
 	//! Add resolution to all stored events
 	void setResolution(std::shared_ptr<Resolution> res);

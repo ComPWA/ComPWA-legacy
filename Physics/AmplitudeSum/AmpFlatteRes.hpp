@@ -22,6 +22,7 @@
 #define AMP_FLATTE_RES
 
 #include <vector>
+#include <cmath>
 
 #include "Physics/AmplitudeSum/AmpAbsDynamicalFunction.hpp"
 #include "Physics/AmplitudeSum/AmpWigner2.hpp"

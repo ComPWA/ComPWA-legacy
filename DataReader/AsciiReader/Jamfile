@@ -1,5 +1,5 @@
 ########### AsciiReader lib #############
-lib AsciiReader : [ glob *.cpp : *Test.cpp ] $(TOP)/Core//ComPWA ;
+lib AsciiReader : [ glob *.cpp : *Test.cpp ] $(TOP)/DataReader//DataReader $(TOP)/Core//ComPWA ;
         
 #using testing ;
 #lib boost_unit_test_framework ;

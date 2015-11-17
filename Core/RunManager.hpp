@@ -106,12 +106,9 @@ public:
 	virtual void setBackground ( std::shared_ptr<Data> d){ sampleBkg_ = d; };
 	virtual std::shared_ptr<Data> getBackground (){ return sampleBkg_; };
 	virtual void setPhspSample( std::shared_ptr<Data> phsp,
-			std::shared_ptr<Data> truePhsp = std::shared_ptr<Data>()){
-		samplePhsp_ = phsp;
-		sampleTruePhsp_ = truePhsp;
-	};
+			std::shared_ptr<Data> truePhsp = std::shared_ptr<Data>());
 	virtual std::shared_ptr<Data> getPhspSample(){ return samplePhsp_; };
-	virtual void setTruePhspSample( std::shared_ptr<Data> d){ sampleTruePhsp_ = d; };
+	virtual void setTruePhspSample( std::shared_ptr<Data> );
 	virtual std::shared_ptr<Data> getTruePhspSample(){ return sampleTruePhsp_; };
 	virtual void setAmplitude ( std::shared_ptr<Amplitude> d){ amp_ = d; };
 	virtual std::shared_ptr<Amplitude> getAmplitude (){ return amp_; };

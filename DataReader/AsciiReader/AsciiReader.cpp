@@ -63,6 +63,14 @@ AsciiReader::AsciiReader( const std::string inConfigFile, const int particles  )
 AsciiReader::~AsciiReader() {
   EvtList_.clear();
 }
+AsciiReader* AsciiReader::Clone() const{
+	//TODO: implement virtual functions and uncomment the following
+	//	return new AsciiReader(*this);
+//	return new AsciiReader();
+}
+AsciiReader* AsciiReader::EmptyClone() const{
+//	return new AsciiReader();
+}
 
 allMasses AsciiReader::getMasses(){
   if(!EvtList_.size()) return allMasses();

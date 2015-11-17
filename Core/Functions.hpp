@@ -620,8 +620,8 @@ public:
 			std::shared_ptr<MultiDouble> ma = paras.GetMultiDouble(0);
 			std::shared_ptr<MultiDouble> mphi = paras.GetMultiDouble(1);
 			for(unsigned int ele=0; ele<nElements; ele++)
-				results[ele] = std::complex<double>(std::abs(ma->GetValue(ele))*std::cos(mphi->GetValue(ele)),
-						std::abs(ma->GetValue(ele))*std::sin(mphi->GetValue(ele)));//a*cos(phi),a*sin(phi)
+				results[ele] = std::complex<double>(std::fabs(ma->GetValue(ele))*std::cos(mphi->GetValue(ele)),
+						std::fabs(ma->GetValue(ele))*std::sin(mphi->GetValue(ele)));//a*cos(phi),a*sin(phi)
 
 			out = std::shared_ptr<AbsParameter>(new MultiComplex(out->GetName(),results));
 
@@ -634,7 +634,7 @@ public:
 				//TODO: exception wrong input
 				return false;
 			}
-			double a = std::abs(paras.GetDoubleParameter(0)->GetValue());
+			double a = std::fabs(paras.GetDoubleParameter(0)->GetValue());
 			double phi = paras.GetDoubleParameter(1)->GetValue();
 			out = std::shared_ptr<AbsParameter>(new ComplexParameter(out->GetName(),
 					std::complex<double>(a*std::cos(phi),a*std::sin(phi))));

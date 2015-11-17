@@ -28,6 +28,7 @@
 #include <sstream>
 #include <complex>
 #include <stdexcept>
+#include <cmath>
 
 #include "Core/AbsParameter.hpp"
 #include "Core/Exceptions.hpp"
@@ -671,7 +672,7 @@ public:
 		/*Call notify only if value has changed! Otherwise tree is
 		 * recalculated also in case where current parameter is not changed
 		 */
-		//if(abs(val_-inVal) < 0.0000001) return;
+		//if(std::fabs(val_-inVal) < 0.0000001) return;
 		if(val_==inVal) return;
 		val_ = inVal;
 		Notify();
@@ -800,7 +801,7 @@ protected:
 	//! Setter for upper error of parameter
 	virtual void SetErrorHigh(double errHigh) { errorHigh=errHigh;}
 	//! Setter for lower error of parameter
-	virtual void SetErrorLow(double errLow) { errorLow=std::abs(errLow);}
+	virtual void SetErrorLow(double errLow) { errorLow=std::fabs(errLow);}
 	//! Setter for type of parameter error
 	virtual void SetErrorType(ErrorType t) { errorType=t; }
 

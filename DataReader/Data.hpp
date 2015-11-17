@@ -41,6 +41,8 @@ public:
 	Data(){ }
 	virtual ~Data()	{ /* nothing */	}
 
+	virtual Data* Clone() const = 0;
+	virtual Data* EmptyClone() const = 0;
 	virtual void Add(Data& otherSample) = 0;
 	virtual void pushEvent(const Event&) =0;
 
@@ -59,7 +61,7 @@ public:
 	//! Select only first @param newSize events from full sample
 	virtual void reduce(unsigned int newSize) = 0;
 	//! Select random subset of events
-	virtual std::shared_ptr<Data> rndSubSet(unsigned int size, std::shared_ptr<Generator> gen) = 0;
+	virtual std::shared_ptr<Data> rndSubSet(unsigned int size, std::shared_ptr<Generator> gen);
 
 	//! Add resolution to all stored events
 	void setResolution(std::shared_ptr<Resolution> res) { };
@@ -75,6 +77,26 @@ public:
 	virtual void Clear() = 0;
 
 	virtual void writeData(std::string file="", std::string trName="") =0;
+
 };
+
+//===== DATASET OPERATIONS
+
+/** Select random sub sample of data sets
+ * A hit&miss procedure is applied to the first sample to select a random set of events. In case an
+ * event of the first sample is added to the output sample, an event from the second sample is also
+ * added to the corresponding output sample. This function can be used for two sample that are in sync.
+ * E.g. a sample with reconstructed values and a sample with the corresponding true values
+ * We expect that @out1 and @out2 are pointers to empty samples.
+ *
+ * @param size size of sub sample
+ * @param gen generator
+ * @param in1 input sample 1
+ * @param in2 input sample 2
+ * @param out1 output sub sample from sample 1
+ * @param out2 output sub sample from sample 2
+ */
+void rndReduceSet(unsigned int size, std::shared_ptr<Generator> gen,
+		Data* in1, Data* out1, Data* in2=NULL, Data* out2=NULL);
 
 #endif

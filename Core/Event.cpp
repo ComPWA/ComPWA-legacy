@@ -41,3 +41,13 @@ const Particle& Event::getParticle(const unsigned int id){
   }
   return fParticles.at(id);
 }
+
+std::ostream& operator<< (std::ostream& stream, const Event& ev){
+	stream<< "Event name="<<ev.fName<<" weight="<<ev.fWeight<<" efficiency="<<ev.fEff
+			<<" flavour="<<ev.fFlavour<<" charge="<<ev.fCharge<<std::endl;
+	stream<< " Printing particles (N="<<ev.fParticles.size()<<"):"<<std::endl;
+	for(auto i: ev.fParticles)
+		stream<<i<<std::endl;
+
+	return stream;
+}
