@@ -9,7 +9,6 @@ void rndReduceSet(unsigned int size, std::shared_ptr<Generator> gen,
 	if( out1->getNEvents() )
 		throw std::runtime_error("rndSubSet() | First output sample not empty!");
 	if(in2){
-		std::cout<<in1->getNEvents() <<" "<< in2->getNEvents()<<std::endl;
 		if(in1->getNEvents() != in2->getNEvents())
 			throw std::runtime_error("rndSubSet() | Samples have different event count!");
 		if(!out2)
@@ -45,8 +44,6 @@ void rndReduceSet(unsigned int size, std::shared_ptr<Generator> gen,
 			if(in2) out2->pushEvent(in2->getEvent(i));
 		}
 	}
-	std::cout<<out1->getNEvents()<<std::endl;
-	std::cout<<"asdfasdfasfasdfsdfasdfsad"<<std::endl;
 	return;
 }
 
