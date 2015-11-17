@@ -38,8 +38,8 @@ project ComPWA
 	  
 	  #Static linking of std lib. In case that different 
 	  #compiler versions are used we are on the safe side
-	  <linkflags>-static-libgcc 
-	  <linkflags>-static-libstdc++
+	  <toolset>gcc:<linkflags>-static-libgcc 
+	  <toolset>gcc:<linkflags>-static-libstdc++
 
       <library>/boost//system
       #<library>/boost #link all boost libraries
