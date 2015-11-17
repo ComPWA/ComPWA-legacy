@@ -55,6 +55,7 @@ constant build_AmplitudeSum : 1 ;
 constant build_DPKinematics : 1 ;
 constant build_BreitWigner : 1 ;
 constant build_HelicityAmplitude : 1 ;
+constant build_DynamicalDecayFunctions : 1 ;
 
 constant build_DataReader : 1 ;
 constant build_RootReader : 1 ;

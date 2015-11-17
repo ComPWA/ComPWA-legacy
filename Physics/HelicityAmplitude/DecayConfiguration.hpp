@@ -12,14 +12,19 @@
 #ifndef PHYSICS_HELICITYAMPLITUDE_DECAYCONFIGURATION_HPP_
 #define PHYSICS_HELICITYAMPLITUDE_DECAYCONFIGURATION_HPP_
 
-#include "ParticleStateDefinitions.hpp"
-
 #include <map>
 #include <vector>
 
+#include "Physics/HelicityAmplitude/ParticleStateDefinitions.hpp"
+
 namespace HelicityFormalism {
 
-typedef std::map<unsigned int, std::vector<std::vector<unsigned int> > > ParticleIndexDecayTree;
+struct DecayProductsInfo {
+  std::vector<unsigned int> particle_indices_;
+  boost::property_tree::ptree decay_strength_info_and_phase_;
+};
+
+typedef std::map<unsigned int, std::vector<DecayProductsInfo> > ParticleIndexDecayTree;
 
 class ParticleStateIDComparator {
   unsigned int particle_id_;
@@ -28,7 +33,7 @@ public:
       particle_id_(particle_id) {
   }
   bool operator()(const ParticleStateInfo& ps) const {
-    return ps.id_ == particle_id_;
+    return ps.id_information_.id_ == particle_id_;
   }
 };
 
@@ -36,8 +41,6 @@ class DecayConfiguration {
   friend class DecayTreeFactory;
 
   std::vector<ParticleStateInfo> particles_;
-  std::vector<unsigned int> final_state_particles_;
-  std::vector<unsigned int> intermediate_state_particles_;
 
   std::vector<ParticleIndexDecayTree> concrete_decay_trees_;
 
@@ -47,18 +50,18 @@ public:
   DecayConfiguration();
   virtual ~DecayConfiguration();
 
-  void addFinalStateParticle(const ParticleStateInfo &final_state_particle);
-  void addIntermediateStateParticle(
-      const ParticleStateInfo &intermediate_state_particle);
   void addCurrentDecayTreeToList();
 
-  unsigned int convertParticleIDToListIndex(unsigned int particle_id) const;
+  void addDecayToCurrentDecayTree(const ParticleStateInfo& mother,
+      const std::vector<ParticleStateInfo>& daughter_states,
+      const boost::property_tree::ptree& decay_strength_info_and_phase);
 
-  std::vector<unsigned int> convertParticleIDListToIndexList(
-      const std::vector<unsigned int>& particle_id_list) const;
+  std::vector<unsigned int> addParticlesToList(
+      const std::vector<ParticleStateInfo>& particle_list);
 
-  void addDecayToCurrentDecayTree(unsigned int mother_state_id,
-      std::vector<std::vector<unsigned int> > &daughter_states);
+  unsigned int addParticleToList(ParticleStateInfo particle);
+
+  void setRemainingParticleProperties(ParticleStateInfo& particle) const;
 };
 
 } /* namespace HelicityFormalism */

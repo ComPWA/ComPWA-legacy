@@ -22,9 +22,14 @@ class dataPoint;
 
 namespace HelicityFormalism {
 
-typedef std::vector<
-    std::pair<std::shared_ptr<TwoBodyDecayAmplitude>,
-        std::shared_ptr<DynamicalFunctions::AbstractDynamicalFunction> > > SequentialTwoBodyDecayAmplitude;
+typedef std::pair<std::shared_ptr<TwoBodyDecayAmplitude>,
+    std::shared_ptr<DynamicalFunctions::AbstractDynamicalFunction> > FullTwoBodyDecayAmplitude;
+
+struct SequentialTwoBodyDecayAmplitude {
+  std::shared_ptr<DoubleParameter> strength_;
+  std::shared_ptr<DoubleParameter> phase_;
+  std::vector<FullTwoBodyDecayAmplitude> full_decay_amplitude_chain_list_;
+};
 
 /**
  * This class defines the full amplitude constructed of all decay amplitudes
@@ -42,9 +47,6 @@ public:
 
   std::complex<double> evaluate(const dataPoint& point,
       const IndexList& evaluation_index_list) const;
-
-  std::vector<HelicityAngles> extractHelicityFromDataPoint(
-      const dataPoint& point) const;
 
   const std::vector<SequentialTwoBodyDecayAmplitude>& getSequentialDecayList() const;
 };

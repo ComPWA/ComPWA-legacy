@@ -27,6 +27,9 @@ public:
   const std::vector<std::string>& getVarNames() const {
     return variable_names_;
   }
+
+  unsigned int getVariableIndex(std::string name) const;
+
   //! checks of data point is within phase space boundaries
   virtual bool isWithinPhsp(const dataPoint& point) = 0;
   //! mass of mother particle

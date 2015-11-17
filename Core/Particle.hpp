@@ -48,6 +48,10 @@ struct Particle
     return (pow(inPa.E+inPb.E,2)-pow(inPa.px+inPb.px ,2)-pow(inPa.py+inPb.py ,2)-pow(inPa.pz+inPb.pz ,2));
   }
 
+  inline double getMassSquare() const {
+    return E*E-px*px-py*py-pz*pz;
+  }
+
  /* virtual const inline double getPx() const {return px;}
   virtual const inline double getPy() const {return py;}
   virtual const inline double getPz() const {return pz;}

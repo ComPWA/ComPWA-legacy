@@ -16,7 +16,8 @@ namespace HelicityFormalism {
 
 CoherentAmplitude::CoherentAmplitude(
     const std::vector<TopologyAmplitude>& amplitude_trees) :
-    topology_amplitudes_(amplitude_trees) {
+    topology_amplitudes_(amplitude_trees), wasMaxAmplitudeValueCalculated_(
+        false), maxAmplitudeValue_(0.0) {
 
   registerTopologyAmplitudeParameters();
 }
@@ -38,10 +39,16 @@ void CoherentAmplitude::registerTopologyAmplitudeParameters() {
         sequential_decay_iter != sequential_decay_list.end();
         ++sequential_decay_iter) {
 
-      SequentialTwoBodyDecayAmplitude::const_iterator decay_node_iter;
+      parameters_.AddParameter(sequential_decay_iter->strength_);
+      parameters_.AddParameter(sequential_decay_iter->phase_);
 
-      for (decay_node_iter = sequential_decay_iter->begin();
-          decay_node_iter != sequential_decay_iter->end(); ++decay_node_iter) {
+      std::vector<FullTwoBodyDecayAmplitude>::const_iterator decay_node_iter;
+
+      for (decay_node_iter =
+          sequential_decay_iter->full_decay_amplitude_chain_list_.begin();
+          decay_node_iter
+              != sequential_decay_iter->full_decay_amplitude_chain_list_.end();
+          ++decay_node_iter) {
         parameters_.Append(decay_node_iter->second->getParameterList());
       }
     }
@@ -52,17 +59,22 @@ void CoherentAmplitude::init(const Event& event) {
 // TODO: I have to cast the kinematics instance to a helicity kinematics.
 // This is pretty bad practice... I really don't get the point behind the
 // singleton kinematics class...
-// If you do not instanciate a different type of kinematics class beforehand
+// If you do not instantiate a different type of kinematics class beforehand
 // you are fine, but otherwise we are in deep shit.
   HelicityKinematics* kinematics =
       (HelicityKinematics*) HelicityKinematics::createInstance();
 
 // initialize the kinematics class first
-  kinematics->init(event);
+//  kinematics->init(event);
 // now get the index lists that tell the topology amplitudes which
 // data point variables to use in their evaluation
   data_point_index_lists_ =
       kinematics->getTopologyAmplitudeDataPointIndexLists();
+
+  // and initialize parameter at position 0 in the result objects as result
+  std::shared_ptr<DoubleParameter> result_value(
+      new DoubleParameter("coherent_amp"));
+  result.AddParameter(result_value);
 }
 
 const double CoherentAmplitude::integral() {
@@ -79,10 +91,42 @@ const double CoherentAmplitude::normalization(ParameterList& par) {
 }
 double CoherentAmplitude::getMaxVal(ParameterList& par,
     std::shared_ptr<Generator> gen) {
-
+  setParameterList(par);
+  return getMaxVal(gen);
 }
 double CoherentAmplitude::getMaxVal(std::shared_ptr<Generator> gen) {
+  if (!wasMaxAmplitudeValueCalculated_) {
+    HelicityKinematics* kin =
+        dynamic_cast<HelicityKinematics*>(Kinematics::instance());
 
+    Event event;
+    double maxVal = 0;
+    for (unsigned int i = 0; i < 100000; i++) {
+      //create event
+      gen->generate(event);
+      dataPoint point;
+      kin->eventToDataPoint(event, point);
+
+      if (!kin->isWithinPhsp(point)) {
+        if (i > 0)
+          i--;
+        continue;
+      }    //only integrate over phase space
+      ParameterList res = intensity(point);
+      double intens = *res.GetDoubleParameter(0);
+      if (intens > maxVal) {
+        maxVal = intens;
+      }
+    }
+
+    maxAmplitudeValue_ = maxVal;
+    wasMaxAmplitudeValueCalculated_ = true;
+
+    BOOST_LOG_TRIVIAL(info)<<"AmpSumIntensity::calcMaxVal() calculated maximum of amplitude: "
+    <<maxAmplitudeValue_;
+  }
+
+  return maxAmplitudeValue_;
 }
 
 const ParameterList& CoherentAmplitude::intensity(std::vector<double> point,
@@ -99,10 +143,10 @@ const ParameterList& CoherentAmplitude::intensity(const dataPoint& point,
 }
 
 const ParameterList& CoherentAmplitude::intensityNoEff(const dataPoint& point) {
-  std::complex<double> intensity = 0;
+  std::complex<double> coherent_amplitude = 0;
+  double intensity(0.0);
   HelicityKinematics::instance();
   if (Kinematics::instance()->isWithinPhsp(point)) {
-
     // at first we have to create a vector of the kinematic variables
     // that we pass to the topology amplitudes
     // here the ordering has to be identical to the one in the data point
@@ -114,12 +158,11 @@ const ParameterList& CoherentAmplitude::intensityNoEff(const dataPoint& point) {
       for (unsigned int final_state_combination_index = 0;
           final_state_combination_index < topology_data_index_lists.size();
           ++final_state_combination_index) {
-
-        intensity += topology_amplitudes_[i].evaluate(point,
+        coherent_amplitude += topology_amplitudes_[i].evaluate(point,
             topology_data_index_lists[final_state_combination_index]);
       }
     }
-    intensity = pow(std::abs(intensity), 2.0);
+    intensity = pow(std::abs(coherent_amplitude), 2.0);
   }
 
   if (intensity != intensity) {
@@ -132,8 +175,10 @@ const ParameterList& CoherentAmplitude::intensityNoEff(const dataPoint& point) {
 
 const ParameterList& CoherentAmplitude::intensity(const dataPoint& point) {
   intensityNoEff(point);
-  double eff = efficiency_->evaluate(point);
-  result.SetParameterValue(0, result.GetDoubleParameter(0)->GetValue() * eff);
+  if (0 != efficiency_.get()) {
+    double eff = efficiency_->evaluate(point);
+    result.SetParameterValue(0, result.GetDoubleParameter(0)->GetValue() * eff);
+  }
   return result;
 }
 
@@ -155,6 +200,16 @@ void CoherentAmplitude::setParameterList(ParameterList& par) {
     }
   }
   return;
+}
+
+bool CoherentAmplitude::copyParameterList(ParameterList& par) {
+  par = parameters_;
+  return true;
+}
+
+double CoherentAmplitude::getIntValue(std::string var1, double min1,
+    double max1, std::string var2, double min2, double max2) {
+  return 0.0;
 }
 
 void CoherentAmplitude::printAmps() {

@@ -160,7 +160,7 @@ public:
 	 * \param i input number of parameter to load
 	 * \return par output container for loaded parameter
 	 */
-	virtual std::shared_ptr<ComplexParameter> GetComplexParameter(const unsigned int i) ;
+	virtual std::shared_ptr<ComplexParameter> GetComplexParameter(const unsigned int i) const;
 
 	//! Getter for floating point parameter
 	/*!
@@ -168,7 +168,7 @@ public:
 	 * \param i input number of parameter to load
 	 * \return par output container for loaded parameter
 	 */
-	virtual std::shared_ptr<DoubleParameter> GetDoubleParameter(const unsigned int i) ;
+	virtual std::shared_ptr<DoubleParameter> GetDoubleParameter(const unsigned int i) const;
 
 	//! Getter for double list parameter
 	/*!
@@ -176,7 +176,7 @@ public:
 	 * \param i input number of parameter to load
 	 * \return par output container for loaded parameter
 	 */
-	virtual std::shared_ptr<MultiDouble> GetMultiDouble(const unsigned int i) ;
+	virtual std::shared_ptr<MultiDouble> GetMultiDouble(const unsigned int i) const;
 
 	//! Getter for complex list parameter
 	/*!
@@ -184,7 +184,7 @@ public:
 	 * \param i input number of parameter to load
 	 * \return par output container for loaded parameter
 	 */
-	virtual std::shared_ptr<MultiComplex> GetMultiComplex(const unsigned int i) ;
+	virtual std::shared_ptr<MultiComplex> GetMultiComplex(const unsigned int i) const;
 
 	//! Getter for integer parameter
 	/*!
@@ -192,7 +192,7 @@ public:
 	 * \param i input number of parameter to load
 	 * \return par output container for loaded parameter
 	 */
-	virtual std::shared_ptr<IntegerParameter> GetIntegerParameter(const unsigned int i) ;
+	virtual std::shared_ptr<IntegerParameter> GetIntegerParameter(const unsigned int i) const;
 
 	//! Getter for boolean parameter
 	/*!
@@ -200,7 +200,7 @@ public:
 	 * \param i input number of parameter to load
 	 * \return par output container for loaded parameter
 	 */
-	virtual std::shared_ptr<BoolParameter> GetBoolParameter(const unsigned int i) ;
+	virtual std::shared_ptr<BoolParameter> GetBoolParameter(const unsigned int i) const;
 
 	//! Getter for parameter value
 	/*!
@@ -216,7 +216,7 @@ public:
 	 * \param parname input name of parameter to load
 	 * \return par output container for loaded parameter
 	 */
-	virtual std::shared_ptr<MultiComplex> GetMultiComplex(const std::string parname) ;
+	virtual std::shared_ptr<MultiComplex> GetMultiComplex(const std::string parname) const;
 
 	//! Getter for double list parameter
 	/*!
@@ -224,7 +224,7 @@ public:
 	 * \param parname input name of parameter to load
 	 * \return par output container for loaded parameter
 	 */
-	virtual std::shared_ptr<MultiDouble> GetMultiDouble(const std::string parname) ;
+	virtual std::shared_ptr<MultiDouble> GetMultiDouble(const std::string parname) const;
 
 	//! Getter for complex parameter
 	/*!
@@ -232,7 +232,7 @@ public:
 	 * \param parname input name of parameter to load
 	 * \return par output container for loaded parameter
 	 */
-	virtual std::shared_ptr<ComplexParameter> GetComplexParameter(const std::string parname) ;
+	virtual std::shared_ptr<ComplexParameter> GetComplexParameter(const std::string parname) const;
 
 	//! Getter for floating point parameter
 	/*!
@@ -240,7 +240,7 @@ public:
 	 * \param parname input name of parameter to load
 	 * \return par output container for loaded parameter
 	 */
-	virtual std::shared_ptr<DoubleParameter> GetDoubleParameter(const std::string parname) ;
+	virtual std::shared_ptr<DoubleParameter> GetDoubleParameter(const std::string parname) const;
 
 	//! Getter for integer parameter
 	/*!
@@ -248,7 +248,7 @@ public:
 	 * \param i input number of parameter to load
 	 * \return par output container for loaded parameter
 	 */
-	virtual std::shared_ptr<IntegerParameter> GetIntegerParameter(const std::string parname) ;
+	virtual std::shared_ptr<IntegerParameter> GetIntegerParameter(const std::string parname) const;
 
 	//! Getter for boolean parameter
 	/*!
@@ -256,7 +256,7 @@ public:
 	 * \param parname input name of parameter to load
 	 * \return par output container for loaded parameter
 	 */
-	virtual std::shared_ptr<BoolParameter> GetBoolParameter(const std::string parname) ;
+	virtual std::shared_ptr<BoolParameter> GetBoolParameter(const std::string parname) const;
 
 
 	//! Getter for complex parameter
@@ -265,7 +265,7 @@ public:
 	 * \param i input number of parameter to load
 	 * \return par output container for loaded parameter
 	 */
-	virtual std::vector<std::shared_ptr<ComplexParameter> > GetComplexParameters() { return vComplexPar_; }
+	virtual std::vector<std::shared_ptr<ComplexParameter> > GetComplexParameters() const { return vComplexPar_; }
 
 	//! Getter for floating point parameter
 	/*!
@@ -273,7 +273,7 @@ public:
 	 * \param i input number of parameter to load
 	 * \return par output container for loaded parameter
 	 */
-	virtual std::vector<std::shared_ptr<DoubleParameter> > GetDoubleParameters() { return vDoublePar_; }
+	virtual std::vector<std::shared_ptr<DoubleParameter> > GetDoubleParameters() const { return vDoublePar_; }
 
 	//! Getter for double list parameter
 	/*!
@@ -281,7 +281,7 @@ public:
 	 * \param i input number of parameter to load
 	 * \return par output container for loaded parameter
 	 */
-	virtual std::vector<std::shared_ptr<MultiDouble> > GetMultiDoubles() { return vMultiDouble_; }
+	virtual std::vector<std::shared_ptr<MultiDouble> > GetMultiDoubles() const { return vMultiDouble_; }
 
 	//! Getter for complex list parameter
 	/*!
@@ -289,7 +289,7 @@ public:
 	 * \param i input number of parameter to load
 	 * \return par output container for loaded parameter
 	 */
-	virtual std::vector<std::shared_ptr<MultiComplex> > GetMultiComplexs() { return vMultiComplex_; }
+	virtual std::vector<std::shared_ptr<MultiComplex> > GetMultiComplexs() const { return vMultiComplex_; }
 
 	//! Getter for integer parameter
 	/*!
@@ -297,7 +297,7 @@ public:
 	 * \param i input number of parameter to load
 	 * \return par output container for loaded parameter
 	 */
-	virtual std::vector<std::shared_ptr<IntegerParameter> > GetIntegerParameters() { return vIntPar_; }
+	virtual std::vector<std::shared_ptr<IntegerParameter> > GetIntegerParameters() const { return vIntPar_; }
 
 	//! Getter for boolean parameter
 	/*!
@@ -305,7 +305,7 @@ public:
 	 * \param i input number of parameter to load
 	 * \return par output container for loaded parameter
 	 */
-	virtual std::vector<std::shared_ptr<BoolParameter> > GetBoolParameters() { return vBoolPar_; }
+	virtual std::vector<std::shared_ptr<BoolParameter> > GetBoolParameters() const { return vBoolPar_; }
 
 	//! Getter for parameter value
 	/*!

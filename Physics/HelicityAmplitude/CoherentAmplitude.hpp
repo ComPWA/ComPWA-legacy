@@ -27,6 +27,10 @@ class CoherentAmplitude: public Amplitude {
   ParameterList parameters_;
   std::vector<std::vector<IndexList> > data_point_index_lists_;
 
+
+  bool wasMaxAmplitudeValueCalculated_;
+  double maxAmplitudeValue_;
+
 public:
   CoherentAmplitude(const std::vector<TopologyAmplitude>& amplitude_trees);
   virtual ~CoherentAmplitude();
@@ -49,6 +53,10 @@ public:
 
   const bool fillStartParVec(ParameterList& outPar);
   void setParameterList(ParameterList& par);
+  bool copyParameterList(ParameterList& par);
+
+  double getIntValue(std::string var1, double min1, double max1,
+      std::string var2, double min2, double max2);
 
   void printAmps();
   void printFractions();

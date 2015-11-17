@@ -56,7 +56,8 @@ public:
   RelativisticBreitWigner(const Spin& J);
   virtual ~RelativisticBreitWigner();
 
-  void initialiseParameters(const boost::property_tree::ptree& parameter_info);
+  void initialiseParameters(const boost::property_tree::ptree& parameter_info,
+      const ParameterList& external_parameters);
 
   std::complex<double> evaluate(const dataPoint& point,
       unsigned int evaluation_index) const;
@@ -64,8 +65,12 @@ public:
 private:
   std::shared_ptr<DoubleParameter> resonance_width_;
   std::shared_ptr<DoubleParameter> resonance_mass_;
+  std::shared_ptr<DoubleParameter> daughter1_mass_;
+  std::shared_ptr<DoubleParameter> daughter2_mass_;
   std::shared_ptr<DoubleParameter> meson_radius_;
   Spin J_;
+
+  unsigned int index_cms_mass_squared_;
 };
 
 }

@@ -9,15 +9,18 @@
 //   Stefan Pflueger - initial API and implementation
 //-------------------------------------------------------------------------------
 
-#include "TwoBodyDecayAmplitude.hpp"
-
 #include <cmath>
+
+#include "Core/DataPoint.hpp"
+#include "Core/Kinematics.hpp"
+#include "Physics/HelicityAmplitude/TwoBodyDecayAmplitude.hpp"
 
 namespace HelicityFormalism {
 
 TwoBodyDecayAmplitude::TwoBodyDecayAmplitude(
     const TwoBodyDecaySpinInformation& decay_info) :
-    decay_info_(decay_info) {
+    decay_info_(decay_info), spin_factor_(1.0), index_theta_helicity_angle_(0), index_phi_helicity_angle_(
+        0) {
   init();
 }
 
@@ -25,14 +28,21 @@ TwoBodyDecayAmplitude::~TwoBodyDecayAmplitude() {
 }
 
 void TwoBodyDecayAmplitude::init() {
-  spin_factor_ = sqrt((2 * decay_info_.initial_state_.J_ + 1) / (4 * M_PI));
+  spin_factor_ = sqrt((2.0 * decay_info_.initial_state_.J_ + 1) / (4.0 * M_PI));
+
+  index_theta_helicity_angle_ = Kinematics::instance()->getVariableIndex(
+      "helicity_angle_theta");
+  index_phi_helicity_angle_ = Kinematics::instance()->getVariableIndex(
+      "helicity_angle_phi");
 }
 
-std::complex<double> TwoBodyDecayAmplitude::evaluate(
-    const HelicityAngles& helicity_angles) const {
+std::complex<double> TwoBodyDecayAmplitude::evaluate(const dataPoint& point,
+    unsigned int evaluation_index) const {
+  double theta(point.getVal(evaluation_index + index_theta_helicity_angle_));
+  double phi(point.getVal(evaluation_index + index_phi_helicity_angle_));
+
   return spin_factor_
-      * Wigner_D(helicity_angles.phi_, helicity_angles.theta_,
-          -helicity_angles.phi_, decay_info_.initial_state_.J_,
+      * Wigner_D(phi, theta, -phi, decay_info_.initial_state_.J_,
           decay_info_.initial_state_.M_,
           decay_info_.final_state_.first.M_
               - decay_info_.final_state_.second.M_);

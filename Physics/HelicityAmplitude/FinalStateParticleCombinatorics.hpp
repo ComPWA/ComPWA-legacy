@@ -89,39 +89,93 @@ class FinalStateParticleCombinatorics {
     }
   };
 
-  void createDistinguishableParticleMapping(
-      const std::vector<ParticleStateInfo>& fs_particle_list, const Event& event);
+  struct UniqueMappingAccumulatorForTopology {
+    const TwoBodyDecayTopology& topology_;
+    std::vector<IndexMapping> current_unique_mappings_;
 
-  bool isEventParticleMatchUniqueForParticle(const ParticleStateInfo& fs_particle,
+    UniqueMappingAccumulatorForTopology(const TwoBodyDecayTopology& topology) :
+        topology_(topology) {
+    }
+
+    void addMappingIfUnique(const IndexMapping& mapping) {
+      bool add_mapping(true);
+
+      // loop over current mappings
+      for (unsigned int i = 0; i < current_unique_mappings_.size(); ++i) {
+        // now for each final state content list compare the outcome
+        // of the current mapping and the reference
+        std::vector<std::vector<IDInfo> >::const_iterator final_state_content_id_list;
+
+        bool mappings_identical(true);
+        for (final_state_content_id_list =
+            topology_.final_state_content_id_lists_.begin();
+            final_state_content_id_list
+                != topology_.final_state_content_id_lists_.end();
+            ++final_state_content_id_list) {
+
+          if (createFinalStateMappedList(*final_state_content_id_list,
+              current_unique_mappings_[i])
+              != createFinalStateMappedList(*final_state_content_id_list,
+                  mapping)) {
+            mappings_identical = false;
+            break;
+          }
+        }
+        if (!mappings_identical) {
+          break;
+        }
+        else {
+          add_mapping = false;
+          break;
+        }
+      }
+
+      if (add_mapping)
+        current_unique_mappings_.push_back(mapping);
+    }
+
+    std::set<unsigned int> createFinalStateMappedList(
+        const std::vector<IDInfo>& fs_info_list, const IndexMapping& mapping) {
+
+      std::set<unsigned int> fs_mapped_list;
+      for (unsigned int i = 0; i < fs_info_list.size(); ++i) {
+        fs_mapped_list.insert(mapping.at(fs_info_list[i].id_));
+      }
+
+      return fs_mapped_list;
+    }
+  };
+
+  void createDistinguishableParticleMapping(
+      const std::vector<IDInfo>& fs_particle_list, const Event& event);
+
+  bool isEventParticleMatchUniqueForParticle(const IDInfo& fs_particle,
       const Event& ev) const;
 
-  unsigned int getEventParticleIndex(const ParticleStateInfo& particle_state,
+  unsigned int getEventParticleIndex(const IDInfo& particle_state,
       const Event& event) const;
 
-  void createAllParticleMappings(
-      std::vector<ParticleStateInfo> final_state_particle_pool, const Event& event);
+  void createAllParticleMappings(std::vector<IDInfo> final_state_particle_pool,
+      const Event& event);
 
-  void removeDistinguishableParticles(
-      std::vector<ParticleStateInfo>& fs_particle_pool,
+  void removeDistinguishableParticles(std::vector<IDInfo>& fs_particle_pool,
       std::vector<unsigned int>& event_final_state_particle_index_pool) const;
 
-  void extendParticleMappings(
-      const IndexMapping& current_mapping,
-      std::vector<ParticleStateInfo> remaining_final_state_particle_pool,
+  void extendParticleMappings(const IndexMapping& current_mapping,
+      std::vector<IDInfo> remaining_final_state_particle_pool,
       const Event& event,
       const std::vector<unsigned int>& remaining_event_final_state_particle_index_pool);
 
   std::vector<unsigned int> getPossibleEventParticleIndicesForParticleState(
-      const ParticleStateInfo& particle_state, const Event& event) const;
+      const IDInfo& particle_state, const Event& event) const;
 public:
   FinalStateParticleCombinatorics();
   virtual ~FinalStateParticleCombinatorics();
 
-  void init(const std::vector<ParticleStateInfo>& fs_particle_list,
-      const Event &event);
+  void init(const std::vector<IDInfo>& fs_particle_list, const Event &event);
 
   std::vector<IndexMapping> getUniqueParticleMappingsSubsetForTopology(
-      const DecayTopology& topology) const;
+      const TwoBodyDecayTopology& topology) const;
 };
 
 } /* namespace HelicityFormalism */

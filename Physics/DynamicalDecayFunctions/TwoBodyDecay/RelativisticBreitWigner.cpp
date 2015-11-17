@@ -24,6 +24,7 @@
 
 #include "qft++.h"
 
+#include "Core/Kinematics.hpp"
 #include "Physics/DynamicalDecayFunctions/TwoBodyDecay/RelativisticBreitWigner.hpp"
 #include "Physics/DynamicalDecayFunctions/Kinematics.hpp"
 
@@ -34,18 +35,22 @@ RelativisticBreitWigner::RelativisticBreitWigner(const Spin& J) :
         new DoubleParameter("mass")), meson_radius_(
         new DoubleParameter("meson_radius")), J_(J) {
 
-  parameter_list_.AddParameter(resonance_width_);
   parameter_list_.AddParameter(resonance_mass_);
+  parameter_list_.AddParameter(resonance_width_);
   parameter_list_.AddParameter(meson_radius_);
+
+  index_cms_mass_squared_ = ::Kinematics::instance()->getVariableIndex(
+      "cms_mass_squared");
 }
 
 RelativisticBreitWigner::~RelativisticBreitWigner() {
 }
 
 void RelativisticBreitWigner::initialiseParameters(
-    const boost::property_tree::ptree& parameter_info) {
+    const boost::property_tree::ptree& parameter_info,
+    const ParameterList& external_parameters) {
   resonance_mass_->SetValue(parameter_info.get<double>("mass"));
-  if(parameter_info.get<bool>("mass_fix"))
+  if (parameter_info.get<bool>("mass_fix"))
     resonance_mass_->SetParameterFixed();
   else
     resonance_mass_->SetParameterFree();
@@ -53,7 +58,7 @@ void RelativisticBreitWigner::initialiseParameters(
   resonance_mass_->SetMaxValue(parameter_info.get<double>("mass_max"));
 
   resonance_width_->SetValue(parameter_info.get<double>("width"));
-  if(parameter_info.get<bool>("width_fix"))
+  if (parameter_info.get<bool>("width_fix"))
     resonance_width_->SetParameterFixed();
   else
     resonance_width_->SetParameterFree();
@@ -61,23 +66,33 @@ void RelativisticBreitWigner::initialiseParameters(
   resonance_width_->SetMaxValue(parameter_info.get<double>("width_max"));
 
   meson_radius_->SetValue(parameter_info.get<double>("mesonRadius"));
+
+  // try to extract daughter masses from external parameters
+  daughter1_mass_ = external_parameters.GetDoubleParameter("daughter1_mass");
+  daughter2_mass_ = external_parameters.GetDoubleParameter("daughter2_mass");
 }
 
 std::complex<double> RelativisticBreitWigner::evaluate(const dataPoint& point,
     unsigned int evaluation_index) const {
 
-  double mSq = point.getVal(evaluation_index++);
-  double ma = point.getVal(evaluation_index++);
-  double mb = point.getVal(evaluation_index++);
+  // std::cout<<"evaluation_index "<<evaluation_index<<std::endl;
+
+  double mSq = point.getVal(evaluation_index + index_cms_mass_squared_);
+  //double ma = point.getVal(++evaluation_index);
+  //double mb = point.getVal(++evaluation_index);
 
   double mR = resonance_mass_->GetValue();
   double width = resonance_width_->GetValue();
+  double ma = daughter1_mass_->GetValue();
+  double mb = daughter2_mass_->GetValue();
   unsigned int J(J_.Numerator() / J_.Denominator());
   double mesonRadius = meson_radius_->GetValue();
 
   std::complex<double> i(0, 1);
   double sqrtS = sqrt(mSq);
 
+  // std::cout << Kinematics::FormFactor(sqrtS, ma, mb, J, mesonRadius) << "  "
+  //     << Kinematics::FormFactor(mR, ma, mb, J, mesonRadius) << std::endl;
   double barrier = Kinematics::FormFactor(sqrtS, ma, mb, J, mesonRadius)
       / Kinematics::FormFactor(mR, ma, mb, J, mesonRadius);
   std::complex<double> qTerm = std::pow(
@@ -96,6 +111,13 @@ std::complex<double> RelativisticBreitWigner::evaluate(const dataPoint& point,
       + (-1.0) * i * sqrtS * (width * qTerm * barrier);
 
   std::complex<double> result = g_final * g_production / denom;
+
+  /* if (std::abs(result) > 1e2) {
+   std::cout << "values: " << sqrtS << " " << mR << " " << ma << " " << mb
+   << " " << J << " " << mesonRadius << std::endl;
+   std::cout << "result: " << result << " = " << g_final << " * "
+   << g_production << " / " << denom << std::endl;
+   }*/
 
   if (result.real() != result.real() || result.imag() != result.imag()) {
     std::cout << "RelativisticBreitWigner::evaluate() | " << barrier << " "

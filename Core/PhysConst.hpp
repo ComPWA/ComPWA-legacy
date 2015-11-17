@@ -34,6 +34,9 @@ public:
 		if(!inst) inst = new PhysConst();
 		return inst;
 	}
+
+  bool particleExists(std::string nnn);
+
 	//! get particle mass by id
 	double getMass(int);
 	//! get particle mass by name

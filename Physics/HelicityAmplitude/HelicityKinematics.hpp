@@ -22,7 +22,7 @@ namespace HelicityFormalism {
 
 class HelicityKinematics: public Kinematics {
   // this has the decay information of the topology amplitudes
-  std::vector<DecayTopology> decay_topologies_;
+  std::vector<TwoBodyDecayTopology> decay_topologies_;
 
   // ---------------------------------------------------------------------
   // the following containers are only filled once, during the
@@ -39,7 +39,16 @@ class HelicityKinematics: public Kinematics {
   // IndexList: list of indices to the value of the data point used in the
   // evaluation of the topology amplitudes
   std::vector<std::vector<IndexList> > topology_amplitude_data_point_index_lists_;
+
+  // kinematic variables index locations for one individual set
+  std::map<std::string, unsigned int> kinematic_variable_to_index_mapping;
   // ---------------------------------------------------------------------
+
+  // storage of particle masses for standard kinematics interface
+  // this looks a bit strange to me and could probably be solved otherwise
+  std::vector<std::string> particle_names_;
+  std::vector<double> masses_;
+  double mother_mass_;
 
   HelicityKinematics();
   virtual ~HelicityKinematics();
@@ -48,17 +57,17 @@ class HelicityKinematics: public Kinematics {
   HelicityKinematics(const HelicityKinematics&) = delete;
   void operator=(const HelicityKinematics&) = delete;
 
-  std::vector<ParticleStateInfo> createFSParticleList() const;
+  std::vector<IDInfo> createFSParticleList() const;
 
-  IndexList createDataPointIndexListForTopology(const DecayTopology& topology,
+  IndexList createDataPointIndexListForTopology(const TwoBodyDecayTopology& topology,
       const IndexMapping& fs_particle_mapping);
 
   unsigned int convertAndStoreParticleList(
-      const std::vector<ParticleStateInfo>& particle_list,
+      const std::vector<IDInfo>& particle_list,
       const IndexMapping& fs_particle_mapping);
 
   IndexList convertParticleListToEventIndexList(
-      const std::vector<ParticleStateInfo>& particle_list,
+      const std::vector<IDInfo>& particle_list,
       const IndexMapping& fs_particle_mapping) const;
 
   std::vector<Vector4<double> > createRequired4Vectors(
@@ -85,7 +94,7 @@ public:
     return inst_;
   }
 
-  void setDecayTopologies(const std::vector<DecayTopology>& decay_topologies);
+  void setDecayTopologies(const std::vector<TwoBodyDecayTopology>& decay_topologies);
 
   void init(const Event& event);
 

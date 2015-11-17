@@ -40,38 +40,15 @@ void dataPoint::reset(unsigned int size) {
   var = std::vector<double>(size);
 }
 
-
 unsigned int dataPoint::getID(std::string name) const{
-	std::vector<std::string> varNames = Kinematics::instance()->getVarNames();
-	unsigned int size = varNames.size();
-	unsigned int pos = find(varNames.begin(), varNames.end(), name) - varNames.begin();
-	if(pos<0||pos>size-1) {
-		BOOST_LOG_TRIVIAL(error)<<"dataPoint::getVal(): variable with name "<<name<<" not found!";
-		return 999;
-	}
-	return pos;
+  return Kinematics::instance()->getVariableIndex(name);
 }
 
 double dataPoint::getVal(std::string name) const{
-	std::vector<std::string> varNames = Kinematics::instance()->getVarNames();
-	unsigned int size = varNames.size();
-	unsigned int pos = find(varNames.begin(), varNames.end(), name) - varNames.begin();
-	if(pos<0||pos>size-1) {
-		BOOST_LOG_TRIVIAL(error)<<"dataPoint::getVal(): variable with name "<<name<<" not found!";
-		return -999;
-	}
-	return getVal(pos);
+	return getVal(getID(name));
 }
 void dataPoint::setVal(std::string name, double val){
-	std::vector<std::string> varNames = Kinematics::instance()->getVarNames();
-	unsigned int size = varNames.size();
-	unsigned int pos = find(varNames.begin(), varNames.end(), name) - varNames.begin();
-	if(pos<0||pos>size-1) {
-		BOOST_LOG_TRIVIAL(error)<<"dataPoint::setVal(): variable with name "<<name<<" not found!";
-		return;
-	}
-	setVal(pos,val);
-	return;
+	setVal(getID(name),val);
 }
 void dataPoint::setVal(unsigned int num, double val){
 	try{
@@ -83,14 +60,15 @@ void dataPoint::setVal(unsigned int num, double val){
 	return;
 }
 double dataPoint::getVal(unsigned int num) const{
-	double rt;
+  return var[num];
+	/*double rt;
 	try{
 		rt = var.at(num);
 	} catch (...) {
 		BOOST_LOG_TRIVIAL(error)<<"dataPoint::getVal(): cannot access index "<<num<<"!";
 		throw;
 	}
-	return rt;
+	return rt;*/
 }
 void dataPoint::setPoint(std::vector<double> values){
 	if(Kinematics::instance()->getVarNames().size() != values.size())

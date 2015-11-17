@@ -24,14 +24,16 @@ class DynamicalFunctionFactory {
       std::shared_ptr<AbstractDynamicalFunction> > dynamical_function_list_;
 
   std::shared_ptr<AbstractDynamicalFunction> generateRelativisiticBreitWigner(
-      const HelicityFormalism::TwoBodyDecayInformation& state_info) const;
+      const HelicityFormalism::TwoBodyDecayInformation& state_info,
+      const ParameterList& external_parameters);
 
 public:
   DynamicalFunctionFactory();
   virtual ~DynamicalFunctionFactory();
 
   std::shared_ptr<AbstractDynamicalFunction> generateDynamicalFunction(
-      const HelicityFormalism::TwoBodyDecayInformation& state_info) const;
+      const HelicityFormalism::TwoBodyDecayInformation& state_info,
+      const ParameterList& external_parameters);
 };
 
 } /* namespace DynamicalFunctions */

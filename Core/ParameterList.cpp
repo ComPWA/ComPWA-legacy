@@ -173,7 +173,7 @@ std::shared_ptr<AbsParameter> ParameterList::GetParameter(const std::string parn
 	return std::shared_ptr<AbsParameter>();
 }
 
-std::shared_ptr<MultiComplex> ParameterList::GetMultiComplex(const unsigned int i) {
+std::shared_ptr<MultiComplex> ParameterList::GetMultiComplex(const unsigned int i) const {
 	if( !(i < vMultiComplex_.size()) ){
 		throw BadParameter("Double Parameter not found: "+std::to_string((double long)i));
 		//return 0;
@@ -181,7 +181,7 @@ std::shared_ptr<MultiComplex> ParameterList::GetMultiComplex(const unsigned int 
 	return vMultiComplex_.at(i);
 }
 
-std::shared_ptr<MultiDouble> ParameterList::GetMultiDouble(const unsigned int i) {
+std::shared_ptr<MultiDouble> ParameterList::GetMultiDouble(const unsigned int i) const {
 	if( !(i < vMultiDouble_.size()) ){
 		throw BadParameter("Double Parameter not found: "+std::to_string((double long)i));
 		//return 0;
@@ -189,7 +189,7 @@ std::shared_ptr<MultiDouble> ParameterList::GetMultiDouble(const unsigned int i)
 	return vMultiDouble_.at(i);
 }
 
-std::shared_ptr<ComplexParameter> ParameterList::GetComplexParameter(const unsigned int i) {
+std::shared_ptr<ComplexParameter> ParameterList::GetComplexParameter(const unsigned int i) const {
 	if( !(i < vComplexPar_.size()) ){
 		throw BadParameter("Complex Parameter not found: "+std::to_string((double long)i));
 		//return 0;
@@ -197,7 +197,7 @@ std::shared_ptr<ComplexParameter> ParameterList::GetComplexParameter(const unsig
 	return vComplexPar_.at(i);
 }
 
-std::shared_ptr<DoubleParameter> ParameterList::GetDoubleParameter(const unsigned int i) {
+std::shared_ptr<DoubleParameter> ParameterList::GetDoubleParameter(const unsigned int i) const {
 	if( !(i < vDoublePar_.size()) ){
 		throw BadParameter("Double Parameter not found: "+std::to_string((double long)i));
 		//return 0;
@@ -205,7 +205,7 @@ std::shared_ptr<DoubleParameter> ParameterList::GetDoubleParameter(const unsigne
 	return vDoublePar_.at(i);
 }
 
-std::shared_ptr<IntegerParameter> ParameterList::GetIntegerParameter(const unsigned int i) {
+std::shared_ptr<IntegerParameter> ParameterList::GetIntegerParameter(const unsigned int i) const {
 	if( !(i < vIntPar_.size()) ){
 		throw BadParameter("Integer Parameter not found: "+std::to_string((double long)i));
 		//return 0;
@@ -213,7 +213,7 @@ std::shared_ptr<IntegerParameter> ParameterList::GetIntegerParameter(const unsig
 	return vIntPar_.at(i);
 }
 
-std::shared_ptr<BoolParameter> ParameterList::GetBoolParameter(const unsigned int i) {
+std::shared_ptr<BoolParameter> ParameterList::GetBoolParameter(const unsigned int i) const {
 	if( !(i < vBoolPar_.size()) ){
 		throw BadParameter("Bool Parameter not found: "+std::to_string((double long)i));
 		//return 0;
@@ -243,7 +243,7 @@ const double ParameterList::GetParameterValue(const unsigned int i) const {
 	return 0;
 }
 
-std::shared_ptr<MultiComplex> ParameterList::GetMultiComplex(const std::string parname) {
+std::shared_ptr<MultiComplex> ParameterList::GetMultiComplex(const std::string parname) const {
 	unsigned int i=0;
 	try{
 		i=mMultiComplexID_.at(parname);
@@ -255,7 +255,7 @@ std::shared_ptr<MultiComplex> ParameterList::GetMultiComplex(const std::string p
 	return vMultiComplex_.at(i);
 }
 
-std::shared_ptr<MultiDouble> ParameterList::GetMultiDouble(const std::string parname) {
+std::shared_ptr<MultiDouble> ParameterList::GetMultiDouble(const std::string parname) const {
 	unsigned int i=0;
 	try{
 		i=mMultiDoubleID_.at(parname);
@@ -267,7 +267,7 @@ std::shared_ptr<MultiDouble> ParameterList::GetMultiDouble(const std::string par
 	return vMultiDouble_.at(i);
 }
 
-std::shared_ptr<ComplexParameter> ParameterList::GetComplexParameter(const std::string parname) {
+std::shared_ptr<ComplexParameter> ParameterList::GetComplexParameter(const std::string parname) const {
 	unsigned int i=0;
 	try{
 		i=mComplexParID_.at(parname);
@@ -279,7 +279,7 @@ std::shared_ptr<ComplexParameter> ParameterList::GetComplexParameter(const std::
 	return vComplexPar_.at(i);
 }
 
-std::shared_ptr<DoubleParameter> ParameterList::GetDoubleParameter(const std::string parname) {
+std::shared_ptr<DoubleParameter> ParameterList::GetDoubleParameter(const std::string parname) const {
 	unsigned int i=0;
 	try{
 		i=mDoubleParID_.at(parname);
@@ -291,7 +291,7 @@ std::shared_ptr<DoubleParameter> ParameterList::GetDoubleParameter(const std::st
 	return vDoublePar_.at(i);
 }
 
-std::shared_ptr<IntegerParameter> ParameterList::GetIntegerParameter(const std::string parname) {
+std::shared_ptr<IntegerParameter> ParameterList::GetIntegerParameter(const std::string parname) const {
 	unsigned int i=0;
 	try{
 		i=mIntParID_.at(parname);
@@ -303,7 +303,7 @@ std::shared_ptr<IntegerParameter> ParameterList::GetIntegerParameter(const std::
 	return vIntPar_.at(i);
 }
 
-std::shared_ptr<BoolParameter> ParameterList::GetBoolParameter(const std::string parname) {
+std::shared_ptr<BoolParameter> ParameterList::GetBoolParameter(const std::string parname) const {
 	unsigned int i=0;
 	try{
 		i=mBoolParID_.at(parname);

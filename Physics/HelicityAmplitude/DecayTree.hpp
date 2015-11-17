@@ -12,12 +12,40 @@
 #ifndef PHYSICS_HELICITYAMPLITUDE_DECAYTREE_HPP_
 #define PHYSICS_HELICITYAMPLITUDE_DECAYTREE_HPP_
 
+#include "boost/graph/adjacency_list.hpp"
+#include "boost/graph/depth_first_search.hpp"
+#include "boost/property_tree/ptree_fwd.hpp"
+
 #include "ParticleStateDefinitions.hpp"
 
-#include <boost/graph/adjacency_list.hpp>
-#include <boost/graph/depth_first_search.hpp>
-
 namespace HelicityFormalism {
+
+struct DecayNode {
+  ParticleStateInfo state_info_;
+  boost::property_tree::ptree strength_and_phase_;
+
+  bool operator==(const DecayNode &rhs) const {
+    if (this->state_info_ != rhs.state_info_)
+      return false;
+
+    return true;
+  }
+  bool operator!=(const DecayNode &rhs) const {
+    return !((*this) == rhs);
+  }
+
+  bool operator<(const DecayNode &rhs) const {
+    if (this->state_info_ > rhs.state_info_)
+      return false;
+    else if (this->state_info_ < rhs.state_info_)
+      return true;
+
+    return true;
+  }
+  bool operator>(const DecayNode &rhs) const {
+    return (rhs < *this);
+  }
+};
 
 /**
  * Definition of our decay tree structure. We want a std::vector (vecS) as storage
@@ -26,12 +54,12 @@ namespace HelicityFormalism {
  * The ParticleStates are used as the vertex property values.
  */
 typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::directedS,
-    ParticleStateInfo> HelicityTree;
+    DecayNode> HelicityTree;
 
 class DecayTree {
   HelicityTree decay_tree_;
 
-  std::vector<ParticleStateInfo> currently_grown_nodes_;
+  std::vector<DecayNode> currently_grown_nodes_;
 
   boost::graph_traits<HelicityTree>::vertex_descriptor current_vertex_;
 
@@ -65,6 +93,20 @@ class DecayTree {
     bool& has_cycle_;
   };
 
+  struct ConnectedVertexDetector: public boost::dfs_visitor<> {
+    ConnectedVertexDetector(unsigned int& connected) :
+        connected_(connected) {
+    }
+
+    template<class Vertex, class Graph>
+    void discover_vertex(Vertex v, Graph&) {
+      ++connected_;
+    }
+
+  protected:
+    unsigned int& connected_;
+  };
+
   struct GetVertexDecendants: public boost::dfs_visitor<> {
     GetVertexDecendants(std::vector<unsigned int>& decendant_list,
         const boost::graph_traits<HelicityTree>::vertex_descriptor& vertex) :
@@ -72,23 +114,77 @@ class DecayTree {
     }
 
     template<class Vertex, class Graph>
-    void discover_vertex(Vertex v, Graph&) {
-      if (write_vertex_)
-        decendant_list_.push_back(v);
+    void discover_vertex(Vertex v, Graph& g) {
+      //if (write_vertex_)
+      //  decendant_list_.push_back(v);
       if (v == vertex_)
         write_vertex_ = true;
+      if (write_vertex_)
+        current_vertex_ = v;
     }
 
     template<class Vertex, class Graph>
-    void finish_vertex(Vertex v, Graph&) {
+    void finish_vertex(Vertex v, Graph& g) {
+      if (write_vertex_ && v == current_vertex_)
+        decendant_list_.push_back(v);
       if (v == vertex_)
         write_vertex_ = false;
     }
 
   protected:
     bool write_vertex_;
+    boost::graph_traits<HelicityTree>::vertex_descriptor current_vertex_;
     const boost::graph_traits<HelicityTree>::vertex_descriptor& vertex_;
     std::vector<unsigned int>& decendant_list_;
+  };
+
+  struct GetAscendingVertexList: public boost::dfs_visitor<> {
+    GetAscendingVertexList(
+        std::vector<boost::graph_traits<HelicityTree>::vertex_descriptor>& vertices,
+        bool with_leaves = true) :
+        decendant_level(0), with_leaves_(with_leaves), vertices_(vertices) {
+    }
+
+    void finish_up() {
+      std::list<boost::graph_traits<HelicityTree>::vertex_descriptor> sorted_list_of_vertices;
+      for (auto iter = level_sorted_vertices_.begin();
+          iter != level_sorted_vertices_.end(); ++iter) {
+        sorted_list_of_vertices.insert(sorted_list_of_vertices.begin(),
+            iter->second.begin(), iter->second.end());
+      }
+      vertices_.clear();
+      vertices_.reserve(sorted_list_of_vertices.size());
+      for (auto iter = sorted_list_of_vertices.begin();
+          iter != sorted_list_of_vertices.end(); ++iter) {
+        vertices_.push_back(*iter);
+      }
+    }
+
+    template<class Vertex, class Graph>
+    void discover_vertex(Vertex v, Graph& g) {
+      ++decendant_level;
+      increased_level = true;
+    }
+
+    template<class Vertex, class Graph>
+    void finish_vertex(Vertex v, Graph& g) {
+      --decendant_level;
+      if (with_leaves_ || !increased_level) {
+        level_sorted_vertices_[decendant_level].push_back(v);
+      }
+      increased_level = false;
+      if (decendant_level == 0) {
+        finish_up();
+      }
+    }
+
+  protected:
+    unsigned int decendant_level;
+    bool increased_level;
+    bool with_leaves_;
+    std::vector<boost::graph_traits<HelicityTree>::vertex_descriptor>& vertices_;
+    std::map<unsigned int,
+        std::vector<boost::graph_traits<HelicityTree>::vertex_descriptor> > level_sorted_vertices_;
   };
 
   /*struct FinalStateParticleFinder: public boost::dfs_visitor<> {
@@ -109,7 +205,9 @@ class DecayTree {
     }
     void operator()(std::ostream& out,
         HelicityTree::vertex_descriptor v) const {
-      out << "[label=\"" << graph_[v].name_ << "\"]";
+      out << "[label=\"" << graph_[v].state_info_.id_information_.name_ << " ("
+          << graph_[v].state_info_.spin_information_.J_ << ","
+          << graph_[v].state_info_.spin_information_.M_ << ") \"]";
     }
   private:
     const HelicityTree& graph_;
@@ -127,21 +225,30 @@ public:
 
   void clearCurrentGrownNodes();
 
+  //const boost::property_tree::ptree& getGlobalInfoPropertyTree() const;
+
   const HelicityTree& getHelicityDecayTree() const;
 
   void determineListOfDecayVertices();
   const std::vector<
       boost::graph_traits<HelicityFormalism::HelicityTree>::vertex_descriptor>& getDecayVertexList() const;
 
-  std::vector<ParticleStateInfo> getLowestLeaves() const;
+  std::vector<
+      boost::graph_traits<HelicityFormalism::HelicityTree>::vertex_descriptor> getDecayNodesList() const;
+
+  std::vector<DecayNode> getLowestLeaves() const;
+
+  std::vector<DecayNode> getLeaves() const;
+
+  boost::graph_traits<HelicityTree>::vertex_descriptor getTopNode() const;
 
   boost::graph_traits<HelicityTree>::vertex_descriptor addVertex(
-      const ParticleStateInfo& particle);
+      const DecayNode& node);
 
-  void createDecay(const ParticleStateInfo &mother,
+  void createDecay(const DecayNode &mother,
       const std::vector<ParticleStateInfo> &daughters);
 
-  std::vector<std::vector<ParticleStateInfo> > createDecayProductsFinalStateParticleLists(
+  std::vector<IDInfo> createDecayProductsFinalStateParticleLists(
       const boost::graph_traits<HelicityFormalism::HelicityTree>::vertex_descriptor& vertex) const;
 
   void print(std::ostream& os) const;

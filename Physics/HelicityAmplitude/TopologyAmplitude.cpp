@@ -17,7 +17,6 @@ namespace HelicityFormalism {
 
 TopologyAmplitude::TopologyAmplitude() {
   // TODO Auto-generated constructor stub
-
 }
 
 TopologyAmplitude::~TopologyAmplitude() {
@@ -28,27 +27,47 @@ std::complex<double> TopologyAmplitude::evaluate(const dataPoint& point,
     const IndexList& evaluation_index_list) const {
   std::complex<double> result(0.0, 0.0);
 
-  const std::vector<HelicityAngles>& kinematic_variables =
-      extractHelicityFromDataPoint(point);
+  /*std::cout << "sequential decays in this topology amp: "
+      << sequential_decay_amplitude_list_.size() << std::endl;*/
 
   // loop over the list of concrete versions of sequential decays
   for (unsigned int sequential_decay_index = 0;
       sequential_decay_index < sequential_decay_amplitude_list_.size();
       ++sequential_decay_index) {
-    std::complex<double> sequential_decay_result(1.0, 0.0);
+    std::complex<double> sequential_decay_result(
+        std::polar(
+            sequential_decay_amplitude_list_[sequential_decay_index].strength_->GetValue(),
+            sequential_decay_amplitude_list_[sequential_decay_index].phase_->GetValue()));
+
+    /*std::cout << "two body decays in this seq amp: "
+        << sequential_decay_amplitude_list_[sequential_decay_index].full_decay_amplitude_chain_list_.size()
+        << std::endl;*/
+
     // loop over all the decay amplitudes within each sequential decay
     for (unsigned int two_body_decay_index = 0;
         two_body_decay_index
-            < sequential_decay_amplitude_list_[sequential_decay_index].size();
+            < sequential_decay_amplitude_list_[sequential_decay_index].full_decay_amplitude_chain_list_.size();
         ++two_body_decay_index) {
       // the results for each amplitude evaluation are multiplied to the sequential decay result
-      const HelicityAngles& single_decay_helicity_angles =
-          kinematic_variables[evaluation_index_list[two_body_decay_index]];
-      sequential_decay_result *=
-          sequential_decay_amplitude_list_[sequential_decay_index][two_body_decay_index].first->evaluate(
-              single_decay_helicity_angles)
-              * sequential_decay_amplitude_list_[sequential_decay_index][two_body_decay_index].second->evaluate(
-                  point, evaluation_index_list[two_body_decay_index]);
+
+      std::complex<double> angular_part =
+          sequential_decay_amplitude_list_[sequential_decay_index].full_decay_amplitude_chain_list_[two_body_decay_index].first->evaluate(
+              point, evaluation_index_list[two_body_decay_index]);
+
+      std::complex<double> dynamical_part =
+          sequential_decay_amplitude_list_[sequential_decay_index].full_decay_amplitude_chain_list_[two_body_decay_index].second->evaluate(
+              point, evaluation_index_list[two_body_decay_index]);
+
+      /*std::cout << sequential_decay_result << " = " << angular_part << " * "
+          << dynamical_part << std::endl;*/
+
+      sequential_decay_result *= angular_part * dynamical_part;
+
+      //std::cout << sequential_decay_result << std::endl;
+      /* sequential_decay_amplitude_list_[sequential_decay_index].full_decay_amplitude_chain_list_[two_body_decay_index].first->evaluate(
+       single_decay_helicity_angles)
+       * sequential_decay_amplitude_list_[sequential_decay_index].full_decay_amplitude_chain_list_[two_body_decay_index].second->evaluate(
+       point, evaluation_index_list[two_body_decay_index]);*/
     }
     // the sequential decay results are just added
     result += sequential_decay_result;
@@ -56,12 +75,6 @@ std::complex<double> TopologyAmplitude::evaluate(const dataPoint& point,
   return result;
 }
 
-std::vector<HelicityAngles> TopologyAmplitude::extractHelicityFromDataPoint(
-    const dataPoint& point) const {
-  std::vector<HelicityAngles> kinematic_variables;
-
-  return kinematic_variables;
-}
 
 const std::vector<SequentialTwoBodyDecayAmplitude>& TopologyAmplitude::getSequentialDecayList() const {
   return sequential_decay_amplitude_list_;

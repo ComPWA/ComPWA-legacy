@@ -172,7 +172,7 @@
 
 	<particle>
 		<ID>443</ID>
-		<name>J/psi</name>
+		<name>jpsi</name>
 		<mass>
 			<value>3.0969</value>
 			<error>
@@ -209,6 +209,46 @@
 		<J>1</J>
 		<P>-1</P>
 	</particle>
+	
+	<particle>
+		<ID>9010221</ID>
+		<name>f0_980</name>
+		<mass>
+			<value>0.98</value>
+			<error>
+				<value>0.0</value>
+			</error>
+		</mass>
+		<width>
+			<value>0.35</value>
+			<error>
+				<value>0.0</value>
+			</error>
+		</width>
+		<charge>0</charge>
+		<J>0</J>
+		<P>+1</P>
+	</particle>
+	<particle>
+		<ID>225</ID>
+		<name>f2_1270</name>
+		<mass>
+			<value>1.275</value>
+			<error>
+				<value>0.0</value>
+			</error>
+		</mass>
+		<width>
+			<value>0.185</value>
+			<error>
+				<value>0.0</value>
+			</error>
+		</width>
+		<charge>0</charge>
+		<J>2</J>
+		<P>+1</P>
+	</particle>
+	
 	<particle>
 		<ID>30221</ID>
 		<name>f0(1370)</name>

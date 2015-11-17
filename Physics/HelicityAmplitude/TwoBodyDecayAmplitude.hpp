@@ -14,8 +14,9 @@
 
 #include "ParticleStateDefinitions.hpp"
 
-#include <memory>
 #include <complex>
+
+class dataPoint;
 
 namespace HelicityFormalism {
 
@@ -24,13 +25,17 @@ class TwoBodyDecayAmplitude {
 
   double spin_factor_;
 
+  unsigned int index_theta_helicity_angle_;
+  unsigned int index_phi_helicity_angle_;
+
 public:
   TwoBodyDecayAmplitude(const TwoBodyDecaySpinInformation& decay_info);
   virtual ~TwoBodyDecayAmplitude();
 
   void init();
 
-  std::complex<double> evaluate(const HelicityAngles& helicity_angles) const;
+  std::complex<double> evaluate(const dataPoint& point,
+      unsigned int evaluation_index) const;
 };
 
 } /* namespace HelicityFormalism */
