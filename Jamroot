@@ -35,11 +35,18 @@ project ComPWA
 	  <cxxflags>-std=c++11
 	  <cxxflags>-DBOOST_SPIRIT_USE_PHOENIX_V3
 	  <warnings>off
+	  
+	  #Static linking of std lib. In case that different 
+	  #compiler versions are used we are on the safe side
+	  <linkflags>-static-libgcc 
+	  <linkflags>-static-libstdc++
 
-       #Logging is needed by all libraries
-       #<library>/boost//log #No idea why this doesn't work
-       <linkflags>-lboost_log
-       <library>/boost//system
+      <library>/boost//system
+      #<library>/boost #link all boost libraries
+      #Logging is needed by all libraries
+      #<library>/boost//log #No idea why this doesn't work
+      <linkflags>-lboost_log
+      <library>/boost//system
 
     : default-build release
     : usage-requirements #flags are automatically added to depended projects
