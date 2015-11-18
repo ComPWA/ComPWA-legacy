@@ -16,7 +16,7 @@
 #include "TH2D.h"
 #include "TCanvas.h"
 
-#include "Physics/DPKinematics/RootGenerator.hpp"
+#include "DataReader/RootGenerator/RootGenerator.hpp"
 // Physics Interface header files go here
 #include "Core/Parameter.hpp"
 #include "Core/ParameterList.hpp"

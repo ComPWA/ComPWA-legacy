@@ -37,9 +37,9 @@
 #include "Core/Logging.hpp"
 #include "Core/RunManager.hpp"
 #include "Core/TwoBodyKinematics.hpp"
+#include "DataReader/RootGenerator/RootGenerator.hpp"
 #include "DataReader/RootReader/RootReader.hpp"
 #include "Estimator/MinLogLH/MinLogLH.hpp"
-#include "Physics/DPKinematics/RootGenerator.hpp"
 
 #include "Core/Amplitude.hpp"
 

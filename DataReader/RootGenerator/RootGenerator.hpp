@@ -8,9 +8,16 @@
 // Contributors:
 //     Peter Weidenkaff - initial API
 //-------------------------------------------------------------------------------
+//! Class to generate 4-Vectors.
+/*!
+ * @file RootGen.hpp
+ * This application uses arbitrary Amplitude implementations and the root
+ * phase-space generator to generate a root-file with 4-Vectors distributed
+ * according the given amplitude model.
+*/
 
-#ifndef ROOTGENERATOR_HPP_
-#define ROOTGENERATOR_HPP_
+#ifndef DATAREADER_ROOTGENERATOR_HPP_
+#define DATAREADER_ROOTGENERATOR_HPP_
 
 #include <iostream>
 #include <sstream>
@@ -26,8 +33,9 @@
 
 #include "Core/Generator.hpp"
 #include "Core/Event.hpp"
-#include "Core/Particle.hpp"
-#include "Physics/DPKinematics/DalitzKinematics.hpp"
+#include "Core/Kinematics.hpp"
+
+class Event;
 
 class RootGenerator : public Generator {
 protected:
@@ -65,5 +73,5 @@ protected:
 
 };
 
-#endif /* ROOTGENERATOR_HPP_ */
+#endif /* DATAREADER_ROOTGENERATOR_HPP_ */
 

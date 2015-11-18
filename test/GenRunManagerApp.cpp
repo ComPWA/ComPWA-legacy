@@ -13,13 +13,13 @@
 #include <string>
 #include <memory>
 
-#include "../Physics/DPKinematics/RootGenerator.hpp"
 // Physics Interface header files go here
 #include "Core/Parameter.hpp"
 #include "Core/ParameterList.hpp"
 #include "Core/RunManager.hpp"
 #include "Core/Efficiency.hpp"
 #include "DataReader/RootReader/RootReader.hpp"
+#include "DataReader/RootGenerator/RootGenerator.hpp"
 
 #include "Physics/AmplitudeSum/AmpSumIntensity.hpp"
 #include "Physics/AmplitudeSum/AmplitudeSetup.hpp"

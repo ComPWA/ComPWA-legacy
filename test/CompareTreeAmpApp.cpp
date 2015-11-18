@@ -32,7 +32,6 @@
 #include "TLorentzVector.h"
 #include "TH2D.h"
 
-#include "../Physics/DPKinematics/RootGenerator.hpp"
 //Core header files go here
 #include "Core/Event.hpp"
 #include "Core/Particle.hpp"
@@ -44,6 +43,7 @@
 
 // ComPWA header files go here
 #include "DataReader/RootReader/RootReader.hpp"
+#include "DataReader/RootGenerator/RootGenerator.hpp"
 #include "Physics/AmplitudeSum/AmpSumIntensity.hpp"
 #include "Estimator/MinLogLH/MinLogLH.hpp"
 #include "Optimizer/Minuit2/MinuitIF.hpp"

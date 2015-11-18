@@ -61,7 +61,7 @@ exe optimizertestApp :
         $(TOP)/Estimator/MinLogLH//MinLogLH
         $(TOP)/Optimizer/Minuit2//Minuit2IF
         $(TOP)/Optimizer/Geneva//GenevaIF
-        $(TOP)/Physics/DPKinematics//DPKinematics
+        $(TOP)/DataReader/RootGenerator//RootGenerator
         : ;
 } else {
 exe optimizertestApp : 
@@ -71,7 +71,7 @@ exe optimizertestApp :
         $(TOP)/Estimator/MinLogLH//MinLogLH
         $(TOP)/Optimizer/Minuit2//Minuit2IF
         $(TOP)/DataReader/RootReader//RootReader
-        $(TOP)/Physics/DPKinematics//DPKinematics
+        $(TOP)/DataReader/RootGenerator//RootGenerator
         : ;
 }
 
@@ -163,7 +163,8 @@ exe genRunManager :
         $(TOP)/Core//ComPWA
         $(TOP)/Physics/AmplitudeSum//AmplitudeSum  
         $(TOP)/DataReader/RootReader//RootReader  
-        $(TOP)/Physics/DPKinematics//DPKinematics  
+        $(TOP)/DataReader/RootGenerator//RootGenerator
+	$(TOP)/Physics/DPKinematics//DPKinematics
         : ;
 
 exe gendalitzApp : 
@@ -183,7 +184,8 @@ exe compareTreeAmpApp :
         $(TOP)/Optimizer//Optimizer
         $(TOP)/Estimator/MinLogLH//MinLogLH 
         $(TOP)/Optimizer/Minuit2//Minuit2IF
-        $(TOP)/Physics/DPKinematics//DPKinematics  
+        $(TOP)/DataReader/RootGenerator//RootGenerator
+	$(TOP)/Physics/DPKinematics//DPKinematics 
         : ;
 
 exe dalitzplotApp : 
@@ -232,8 +234,8 @@ exe helicityAmplitudeTreeTestApp :
 exe helicityCoherentAmplitudeEventGenApp : 
         HelicityCoherentAmplitudeEventGenApp.cpp 
         $(TOP)/Core//ComPWA
-        $(TOP)/DataReader//DataReader
-        $(TOP)/Physics/DPKinematics//DPKinematics
+        $(TOP)/DataReader//RootReader
+	$(TOP)/DataReader//RootGenerator
         $(TOP)/Physics/HelicityAmplitude//HelicityAmplitude
         : ;  
 
