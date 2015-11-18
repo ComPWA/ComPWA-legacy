@@ -7,6 +7,7 @@ lib ComPWA : [ glob *.cpp : *Test.cpp ]
     : <library>/boost//serialization
       <library>/boost//thread
       <library>/boost//system
+      <library>/boost//date_time
       #<library>/boost//log
       #<library>/boost//log_setup
       <linkflags>-lboost_log_setup
