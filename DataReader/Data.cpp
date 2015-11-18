@@ -44,6 +44,8 @@ void rndReduceSet(unsigned int size, std::shared_ptr<Generator> gen,
 			if(in2) out2->pushEvent(in2->getEvent(i));
 		}
 	}
+	assert(out1->getNEvents() == out2->getNEvents());
+	BOOST_LOG_TRIVIAL(debug) << "DataReader::rndReduceSet() | sample size reduced to "<<out1->getNEvents();
 	return;
 }
 
