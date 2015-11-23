@@ -1,13 +1,8 @@
 ########### GenevaIF lib #############
 lib GenevaIF : [ glob *.cpp ] 
 	: requirements
-	  	<include>$(GENEVA)/include
-          <linkflags>-L$(GENEVA)/lib
-          <linkflags>-lgemfony-geneva
-          <linkflags>-lgemfony-geneva-individuals
-          <linkflags>-lgemfony-courtier
-          <linkflags>-lgemfony-hap
-          <linkflags>-lgemfony-common
+	  <library>/geneva
+	
 ;
 
 install dist : GenevaIF : <location>$(TOP)/lib ;

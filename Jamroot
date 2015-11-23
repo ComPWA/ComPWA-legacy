@@ -4,20 +4,9 @@ import path ;
 
 path-constant TOP : . ;
 
-path-constant ROOTSYS : [ os.environ ROOTSYS ] ;
-local rootlibdir = [ SHELL "$(ROOTSYS)/bin/root-config --libdir" ] ;
-local rootlibs = [ SHELL "$(ROOTSYS)/bin/root-config --libs" ] ;
-local rootincdir = [ SHELL "$(ROOTSYS)/bin/root-config --incdir" ] ;
-constant ROOT_INC_PATH : [ MATCH "(.*)[\n]" : $(rootincdir) ] ;
-constant ROOT_LIB_PATH : [ MATCH "(.*)[\n]" : $(rootlibdir) ] ;
-constant ROOTLIBS : [ MATCH "(.*)[\n]" : $(rootlibs) ] ;
-
-path-constant BOOST_ROOT : [ os.environ BOOST_ROOT ] ;
-path-constant QFT : [ os.environ QFT ] ;
-path-constant GSL : [ os.environ GSL_ROOT ] ;
-
-#Specify boost library
+# -------- Configure BOOST
 import boost ;
+local BOOST_ROOT = [ os.environ BOOST_ROOT ] ;
 using boost : 1.54 :
     <include>$(BOOST_ROOT)/include
     <library>$(BOOST_ROOT)/lib
@@ -26,11 +15,60 @@ using boost : 1.54 :
 #boost.use-project 1.54 ; #specify boost version
 boost.use-project ;
 
+# -------- Configure ROOT
+import root ;
+local ROOTSYS = [ os.environ ROOTSYS ] ;
+local rootlibdir = [ SHELL "$(ROOTSYS)/bin/root-config --libdir" ] ;
+local rootlibs = [ SHELL "$(ROOTSYS)/bin/root-config --libs" ] ;
+local rootincdir = [ SHELL "$(ROOTSYS)/bin/root-config --incdir" ] ;
+local ROOT_INC_PATH = [ MATCH "(.*)[\n]" : $(rootincdir) ] ;
+local ROOT_LIB_PATH = [ MATCH "(.*)[\n]" : $(rootlibdir) ] ;
+#local ROOTLIBS = [ MATCH "(.*)[\n]" : $(rootlibs) ] ;
+using root : :
+    <include>$(ROOT_INC_PATH)
+    <library>$(ROOT_LIB_PATH)
+;
+root.use-project ;
 
+# -------- Configure GSL
+local GSL_ROOT = [ os.environ GSL_ROOT ] ;
+import gsl ;
+using gsl : :
+    <include>$(GSL_ROOT)/include
+    <library>$(GSL_ROOT)/lib
+;
+gsl.use-project ;
+#lib gsl : : <name>gsl <search>$(GSL)/lib : : <include>$(GSL)/include ; 
+#explicit gsl ;
+#lib gslcblas : : <name>gslcblas <search>$(GSL)/lib : : <include>$(GSL)/include ; 
+#explicit gslcblas ;
+
+# -------- Configure QFT
+local QFT_ROOT = [ os.environ QFT ] ;
+lib qft++ : : <name>qft++ <search>$(QFT_ROOT)/lib : : <include>$(QFT_ROOT)/include ; 
+
+# -------- Configure MINUIT2
+local MINUIT2_ROOT = [ os.environ ROOTSYS ] ;
+import minuit2 ;
+using minuit2 : :
+    <include>$(ROOT_INC_PATH)
+    <library>$(ROOT_LIB_PATH)
+;
+minuit2.use-project ;
+
+# -------- Configure GENEVA
+local GENEVA_ROOT = [ os.environ GENEVA ] ;
+import geneva ;
+using geneva : :
+    <include>$(GENEVA_ROOT)/include
+    <library>$(GENEVA_ROOT)/lib
+;
+#genva.use-project ;
+
+# ---------- ComPWA ----------------
 project ComPWA 
 	: requirements 
 	  <include>.
-	  <define>BOOST_LOG_DYN_LINK
 	  <cxxflags>-ftemplate-depth-256
 	  <cxxflags>-std=c++11
 	  <cxxflags>-DBOOST_SPIRIT_USE_PHOENIX_V3
@@ -42,16 +80,11 @@ project ComPWA
 	  <toolset>gcc:<linkflags>-static-libstdc++
 
       <library>/boost//system
-      #<library>/boost #link all boost libraries
-      #Logging is needed by all libraries
-      #<library>/boost//log #No idea why this doesn't work
-      <linkflags>-lboost_log
-      <library>/boost//system
+      <library>/boost//log #Logging is needed by all libraries
 
     : default-build release
     : usage-requirements #flags are automatically added to depended projects
       <include>.
-      #<search>lib/ #causes strange errors
       <define>BOOST_LOG_DYN_LINK
       <cxxflags>-std=c++11
       <cxxflags>-DBOOST_SPIRIT_USE_PHOENIX_V3
@@ -106,3 +139,6 @@ if $(build_Optimizer) && $(build_Optimizer) != 0 {
 	path-constant GENEVA : [ os.environ GENEVA ] ;
   }
 }
+
+#Build documentation module
+build-project doc ;

@@ -1,0 +1,91 @@
+# ---------------------------------------------------------------------------
+#  Copyright (c) 2013 Kyle Lutz <kyle.r.lutz@gmail.com>
+# 
+#  Distributed under the Boost Software License, Version 1.0
+#  See accompanying file LICENSE_1_0.txt or copy at
+#  http://www.boost.org/LICENSE_1_0.txt
+#
+# ---------------------------------------------------------------------------
+
+#project  ;
+#import boostbook : boostbook ; 
+import toolset ;
+import set ;
+toolset.using doxygen ;
+import doxygen : doxygen ;
+
+doxygen dox : Parameter.hpp ;
+#boostbook any : any.doxygen ;
+
+doxygen date_time_autodoc :
+    Parameter.hpp :
+        <doxygen:param>ENABLE_PREPROCESSING=NO
+        <xsl:param>boost.doxygen.reftitle="Date Time Reference"
+        <doxygen.doxproc.title>"Date Time Reference"
+        <doxygen.doxproc.id>"date_time_reference"
+    ;
+
+#project ComPWA/doc ;
+#import boostbook ; 
+#import doxygen ;
+
+#doxygen doxy : $(TOP)/Core/Parameter.hpp ;
+#	: [ glob ../Core/*.hpp ]
+#	  [ glob ../DataReader/*.hpp ]
+#	  [ glob ../Estimator/*.hpp ]
+#	  [ glob ../Optimizer/*.hpp ]
+#	  [ glob ../Physics/*.hpp ]
+#	  [ glob ../test/*.hpp ]
+#	;
+#boostbook bb : doxy ;
+
+
+#project ComPWA/doc ;
+##import boostbook : boostbook ; 
+#import doxygen : doxygen ;
+#
+#
+##import quickbook ;
+##import boostbook ;
+##import doxygen ;
+##import modules ;
+#
+##doxygen any.doxygen : ../../../boost/any.hpp ;
+#doxygen autodoc
+#	:
+#	  $(TOP)/Core/Parameter.hpp
+#    	  [ glob $(TOP)/Core/*.hpp ]
+#  	:
+#    #<doxygen:param>QUIET=NO
+#    #<doxygen:param>WARNINGS=YES
+#    #<doxygen:param>WARN_IF_DOC_ERROR=YES
+#    #<doxygen:param>EXTRACT_ALL=NO
+#    #<doxygen:param>EXTRACT_PRIVATE=NO
+#    #<doxygen:param>HIDE_UNDOC_MEMBERS=YES
+#    #<doxygen:param>HIDE_UNDOC_CLASSES=YES
+#    #<doxygen:param>EXPAND_ONLY_PREDEF=YES
+#    #<doxygen:param>SORT_MEMBER_DOCS=NO
+#    #<doxygen:param>TAB_SIZE=4
+#    #<doxygen:param>EXAMPLE_PATH=../
+#    #<doxygen:param>PREDEFINED=BOOST_COMPUTE_DOXYGEN_INVOKED
+#    #<doxygen:param>"ALIASES= \\
+#    #  internal_=\"INTERNAL ONLY\" \\
+#    #  opencl_ref{1}=\"<a href=\"http://www.khronos.org/registry/cl/sdk/1.2/docs/man/xhtml/\\1.html\">\\1()</a>\" \\
+#    #  see_opencl_ref{1}=\"See the documentation for \\opencl_ref{\\1} for more information.\" \\
+#    #  opencl2_ref{1}=\"<a href=\"http://www.khronos.org/registry/cl/sdk/2.0/docs/man/xhtml/\\1.html\">\\1()</a>\" \\
+#    #  see_opencl2_ref{1}=\"See the documentation for \\opencl2_ref{\\1} for more information.\" \\
+#    #  opencl_version_warning{2}=\"\\warning This method is only available if the OpenCL version is \\1.\\2 or later.\" \\
+#    #  "
+#    #<xsl:param>"boost.doxygen.reftitle=Header Reference"
+#  ;
+#
+##xml compute : compute.qbk : ;
+#
+##boostbook standalone
+##    :
+##      compute
+##    :
+##      <xsl:param>html.stylesheet=boostbook.css
+##      <dependency>autodoc
+##    ;
+##boostbook boostdoc : autodoc ;

@@ -3,9 +3,7 @@ path-constant DATAREADER : . ;
 
 project ComPWA/DataReader 
 	: requirements
-		<include>$(ROOT_INC_PATH)
-		<linkflags>$(ROOTLIBS)
-		<linkflags>-lEG
+	  <library>/root
 ;
 
 sources = [ glob *.cpp : *.Test.cpp ] ;

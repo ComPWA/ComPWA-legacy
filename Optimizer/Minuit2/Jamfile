@@ -1,15 +1,10 @@
 ########### Minuit2IF lib #############
 
 lib Minuit2IF : [ glob *.cpp ] 
-	: <include>$(GSL)/include
-		<linkflags>-L$(GSL)/lib
-		<linkflags>-lgsl
-     	<linkflags>-lgslcblas
-		<include>$(MINUIT2)/include
-		<linkflags>-L$(MINUIT2)/lib
-		<linkflags>-lMinuit2
- 	     <library>/boost//chrono
-     	<library>/boost//serialization
+	: <library>/minuit2
+ 	  <library>/boost//chrono
+       <library>/boost//serialization
+    	  <library>/gsl
 ;
 
 install dist : Minuit2IF : <location>$(TOP)/lib <threading>single ;

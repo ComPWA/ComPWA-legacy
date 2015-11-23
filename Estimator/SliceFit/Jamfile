@@ -1,8 +1,6 @@
 ########### SliceFit lib #############
 lib SliceFit : [ glob *.cpp ]	
-	: <include>$(QFT)/include
-		<linkflags>-L$(QFT)/lib
-		<linkflags>-lqft++
+	: <library>$(TOP)//qft++
 ;
 
 install dist : SliceFit : <location>$(TOP)/lib ;

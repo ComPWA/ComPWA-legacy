@@ -4,7 +4,6 @@
 *.o
 *.d
 ~*
-boost.jam
 bin/
 lib/
 external
@@ -15,8 +14,7 @@ external
 test/.settings/
 Physics/particles.xml
 Physics/physConstants.xml
-DOCU/
-doc/
+doc/doxygen/
 *Dict.hpp
 *Dict.h
 *Dict.cxx

@@ -3,7 +3,7 @@ path-constant OPTIMIZER : . ;
 
 project ComPWA/Optimizer
 	: requirements 
-		<include>./
+		<include>.
    		<library>$(TOP)/Core//ComPWA
 ;
 

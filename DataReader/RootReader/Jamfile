@@ -3,10 +3,11 @@
 # This package is a data reader, which reads the data from root files
 # @end
 
-#local rlibs = [ SHELL "$ROOTSYS/bin/root-config --libs" ] ;
-#ROOTLIBS = [ MATCH "(.*)[\n]" : $(rlibs) ] ;
-
-lib RootReader : [ glob *.cpp : *Test.cpp ] $(TOP)/DataReader//DataReader $(TOP)/Core//ComPWA ;
+lib RootReader 
+	: [ glob *.cpp : *Test.cpp ] 
+	  $(TOP)/DataReader//DataReader 
+	  $(TOP)/Core//ComPWA
+	;
         
 #using testing ;
 #lib boost_unit_test_framework ;

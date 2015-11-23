@@ -14,6 +14,9 @@
 #include <sstream>
 #include <iostream>
 #include <memory>
+
+#include <boost/timer.hpp>
+
 #include "Minuit2/MnUserParameters.h"
 #include "Minuit2/MnMigrad.h"
 #include "Minuit2/FunctionMinimum.h"
@@ -22,17 +25,11 @@
 #include "Minuit2/MnStrategy.h"
 #include "Minuit2/MnPrint.h"
 #include "Minuit2/MinosError.h"
+
 #include "Optimizer/Minuit2/MinuitIF.hpp"
-#include "Optimizer/Minuit2/MinuitResult.hpp"
 #include "Core/ParameterList.hpp"
 #include "Core/Parameter.hpp"
 #include "Core/FitResult.hpp"
-
-#include <boost/numeric/ublas/symmetric.hpp>
-#include <boost/numeric/ublas/io.hpp>
-#include <boost/timer.hpp>
-using namespace boost::log;
-using namespace ROOT::Minuit2;
 
 double shiftAngle(double v){
 	double originalVal = v;

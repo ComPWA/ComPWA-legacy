@@ -6,11 +6,8 @@ project ComPWA/Estimator
 		<library>$(TOP)/Core//ComPWA 
 		<library>$(TOP)/Optimizer//Optimizer 
 		<library>$(TOP)/Physics//DPKinematics
-		<include>$(ROOT_INC_PATH)
-		<linkflags>$(ROOTLIBS)
-		<include>$(QFT)/include
-		<linkflags>-L$(QFT)/lib
-		<linkflags>-lqft++
+	  	<library>/root
+	  	<library>$(TOP)//qft++
 ;
 
 # libEstimator.so will consist of these packages:

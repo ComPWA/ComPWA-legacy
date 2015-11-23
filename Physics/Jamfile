@@ -4,14 +4,9 @@ path-constant PHYSICS : . ;
 project ComPWA/Physics 
 	: requirements
 		<library>$(TOP)/Core//ComPWA
-		<include>$(GSL)/include
-		<linkflags>-L$(GSL)/lib
-		<linkflags>-lgsl
-     	<linkflags>-lgslcblas
-     	<include>$(QFT)/include
-		<linkflags>-L$(QFT)/lib
-		<linkflags>-lqft++
-;
+		<library>/gsl
+		<library>$(TOP)//qft++
+	;
 
 # libPhysics.so will consist of these packages:
 #sources = [ glob *.cpp ] ;

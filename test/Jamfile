@@ -1,26 +1,18 @@
 ########### test apps #############
-local rlibs = [ SHELL "$ROOTSYS/bin/root-config --libs" ] ;
-ROOTLIBS = [ MATCH "(.*)[\n]" : $(rlibs) ] ;
 
-project ComPWA/test : requirements 
-     <cxxflags>-pthread
-	<include>.
-	<include>$(GENEVA)/include
-     <include>$(QFT)/include
-     <include>$(MINUIT2)/include
+project ComPWA/test 
+	: requirements 
+	  <include>.
 
-     <library>/boost//program_options
-     <library>/boost//filesystem
-     <library>/boost//serialization
+       <library>/boost//program_options
+       <library>/boost//filesystem
+       <library>/boost//serialization
 
-	<include>$(ROOT_INC_PATH)
-	<linkflags>$(ROOTLIBS)
-	<linkflags>-lEG
-	<linkflags>-lRooFit
-	<linkflags>-lRooFitCore
+	  <library>/root
+	  <linkflags>-lRooFit
+	  <linkflags>-lRooFitCore
 
-	<linkflags>-L$(QFT)/lib
-	<linkflags>-lqft++
+	  <library>$(TOP)//qft++
 	;
 
 lib test : 
@@ -231,18 +223,49 @@ exe helicityDecayTreeTestApp :
         $(TOP)/Physics/HelicityAmplitude//HelicityAmplitude
         : ;
 
-exe serializeApp : 
-        SerializationApp.cpp 
-        test
-        $(TOP)/Core//ComPWA
-        : ;
+exe serializeApp 
+	: SerializationApp.cpp 
+       test
+       $(TOP)/Core//ComPWA
+     : ;
+        
+exe multiVariateGaussianTestApp 
+	: MultiVariateGaussianTestApp.cpp  
+	  test 
+	: <library>/gsl 
+	  <library>/root
+	;
 
-install dist : test : <location>$(TOP)/lib <threading>single ;
-#install dist2 : dalitzfitApp treetestApp cx0testApp dataiftestApp optimizertestApp physicstestApp blackscholesApp neuralnetworkApp : <location>$(TOP)/bin <threading>single ;
-install dist2 : compareTreeAmpApp dalitzfitApp slicefitApp treetestApp dataiftestApp optimizertestApp physicstestApp : <location>$(TOP)/bin <threading>single ;
-install dist3 : estimatortestApp integrationtestApp integrationtestbinnedApp runmanagertestApp gentwopartApp gendalitzApp dalitzplotApp serializeApp dpareaTestApp genRunManager : <location>$(TOP)/bin <threading>single ;
+install dist 
+	: test 
+	: <threading>single
+	  <variant>release:<location>$(TOP)lib/
+       <variant>debug:<location>$(TOP)/lib/debug ;
 
-install dist4 : helicityDecayTreeTestApp lhNormalizationTestApp : <location>$(TOP)/bin <threading>single ;
+install dist2 
+	: compareTreeAmpApp 
+	  dalitzfitApp 
+	  slicefitApp 
+	  treetestApp 
+	  dataiftestApp 
+	  optimizertestApp 
+	  physicstestApp 
+	  estimatortestApp 
+	  integrationtestApp 
+	  integrationtestbinnedApp 
+	  runmanagertestApp 
+	  gentwopartApp 
+	  gendalitzApp 
+	  dalitzplotApp 
+	  serializeApp 
+	  dpareaTestApp 
+	  genRunManager 
+	  helicityDecayTreeTestApp 
+	  lhNormalizationTestApp
+	  multiVariateGaussianTestApp
+	: <threading>single
+	  <variant>release:<location>$(TOP)/bin
+       <variant>debug:<location>$(TOP)/bin/debug ;
 
 #if $(GENEVA) { 
 #install dist7 : genevatestApp : <location>$(TOP)/bin ;
