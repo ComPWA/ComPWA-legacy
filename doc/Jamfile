@@ -1,5 +1,7 @@
 # Jamfile for automatic code documentation
 # Does not work for some reason
+# Author: Peter Weidenkaff
+
 import toolset ;
 import set ;
 toolset.using doxygen ;
@@ -8,12 +10,13 @@ import doxygen : doxygen ;
 
 project ComPWA/doc ;
 
-doxygen doxy : $(TOP)/Core/Parameter.hpp ;
+doxygen dd
 	: [ glob ../Core/*.hpp ]
 	  [ glob ../DataReader/*.hpp ]
 	  [ glob ../Estimator/*.hpp ]
 	  [ glob ../Optimizer/*.hpp ]
 	  [ glob ../Physics/*.hpp ]
 	  [ glob ../test/*.hpp ]
+	:
 	;
-boostbook bb : doxy ;
+#boostbook bb : dd ;
