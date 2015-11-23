@@ -52,6 +52,7 @@ rule use-project
 	lib Matrix ;
 	lib Physics ;
 	lib MathCore ;
+	lib MathMore ;
 	lib Thread ;
 	lib MultiProc ;
 	lib EG ;
