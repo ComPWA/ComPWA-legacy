@@ -91,6 +91,7 @@ project ComPWA
       
 ;
 
+
 # This is the layout of the complete project tree. The configure.py script will comment/uncomment the following constant definitions
 # disabling/enabling the appropriate subprojects. Of course the appropriate if statements have to be inserted around build-project rules
 # and library sources etc...

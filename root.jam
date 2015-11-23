@@ -32,7 +32,7 @@ rule use-project
 	  	: usage-requirements 
 		  <include>$(inc) 
 		  <linkflags>-lpthread 
-		  <linkflags>-stdlib=libc++ 
+		  #<linkflags>-stdlib=libc++ 
 		  <linkflags>-lm 
 		  <linkflags>-ldl
 	  	: requirements 
@@ -54,7 +54,6 @@ rule use-project
 	lib MathCore ;
 	lib MathMore ;
 	lib Thread ;
-	lib MultiProc ;
 	lib EG ;
 
     project.pop-current ;

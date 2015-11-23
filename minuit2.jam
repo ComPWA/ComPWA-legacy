@@ -31,7 +31,7 @@ rule use-project
 	  	: usage-requirements 
 		  <include>$(inc) 
 		  <linkflags>-lpthread 
-		  <linkflags>-stdlib=libc++ 
+		  #<linkflags>-stdlib=libc++ 
 		  <linkflags>-lm 
 		  <linkflags>-ldl
 	  	: requirements 
