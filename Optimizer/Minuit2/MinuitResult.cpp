@@ -53,13 +53,17 @@ void MinuitResult::init(FunctionMinimum min){
 		corr = std::vector<std::vector<double>>(
 				nFreeParameter,std::vector<double>(nFreeParameter));
 		for (unsigned i = 0; i < nFreeParameter; ++i)
-			for (unsigned j = i; j < nFreeParameter; ++j)
+			for (unsigned j = i; j < nFreeParameter; ++j){
 				cov.at(i).at(j) = minuitCovMatrix(j,i);
+				cov.at(j).at(i) = minuitCovMatrix(j,i);//fill lower half
+			}
 		for (unsigned i = 0; i < nFreeParameter; ++i)
-			for (unsigned j = i; j < nFreeParameter; ++j)
+			for (unsigned j = i; j < nFreeParameter; ++j){
 				corr.at(i).at(j) =
 						cov.at(i).at(j) / sqrt( cov.at(i).at(i) *
 								cov.at(j).at(j) );
+				corr.at(j).at(i) = corr.at(i).at(j);//fill lower half
+			}
 
 	} else
 		BOOST_LOG_TRIVIAL(error)
@@ -184,6 +188,12 @@ void MinuitResult::calcFractionError(){
 			/******* DEBUGGING *******/
 		}
 		BOOST_LOG_TRIVIAL(info)<<" ------- "<<outFraction.str();
+
+		//free objects
+		gsl_vector_free(gslFinalPar);
+		gsl_matrix_free(gslCov);
+		gsl_rng_free(rnd);
+
 		//Calculate standard deviation
 		for(unsigned int o=0;o<nRes;o++){
 			double mean=0, sqSum=0., stdev=0;
