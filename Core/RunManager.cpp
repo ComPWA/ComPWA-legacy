@@ -109,7 +109,8 @@ bool RunManager::gen( int number, std::shared_ptr<Generator> gen, std::shared_pt
 		throw std::runtime_error("RunManager: gen() We have a sample of true phsp events, "
 				"but the sample size doesn't match that one of the phsp sample!");
 
-	double maxSampleWeight = phsp->getMaxWeight();
+	double maxSampleWeight = 1.0;
+	if(phsp) maxSampleWeight = phsp->getMaxWeight();
 	if(phspTrue && phspTrue->getMaxWeight()>maxSampleWeight) maxSampleWeight = phspTrue->getMaxWeight();
 
 	/* Maximum value for random number generation. We introduce an arbitrary factor of 1.2 to make sure
