@@ -109,7 +109,7 @@
 				<Mother>
 					<ParticleState>
 						<id>5</id>
-						<M>2</M>
+						<M>0</M>
 					</ParticleState>
 				</Mother>
 				<Daughters>
@@ -152,7 +152,7 @@
 					</ParticleState>
 					<ParticleState>
 						<id>5</id>
-						<M>2</M>
+						<M>0</M>
 					</ParticleState>
 				</Daughters>
 			</DecayNode>

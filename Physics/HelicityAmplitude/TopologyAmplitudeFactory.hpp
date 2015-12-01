@@ -45,12 +45,11 @@ class TopologyAmplitudeFactory {
       const boost::graph_traits<HelicityFormalism::HelicityTree>::vertex_descriptor & decay_node,
       const DecayTree& graph) const;
 
-  /*  std::vector<ParticleState> getConnectedFinalStateParticleListForVertex(
-   const boost::graph_traits<HelicityTree>::vertex_descriptor& decay_vertex) const;
+  std::vector<IDInfo> convertToIDInfoList(
+      const std::vector<ParticleStateInfo>& fs_particle_list) const;
 
-   void descendVertexAndFillConnectedFinalStateParticleList(
-   const boost::graph_traits<HelicityTree>::vertex_descriptor& decay_vertex,
-   std::vector<ParticleState>& final_state_particles) const;*/
+  IndexList convertToUniqueIDList(
+      const std::vector<ParticleStateInfo>& fs_particle_list) const;
 
   Particle createParticle(const ParticleStateInfo& particle_state) const;
 

@@ -38,11 +38,11 @@ void DecayXMLConfigReader::readConfig(const std::string &filename) {
   // then we construct concrete states from those templates
   BOOST_FOREACH(ptree::value_type const& v, pt_.get_child("FinalState")){
   ParticleStateInfo ps = parseParticleStateBasics(v.second);
-  template_particle_states_[ps.id_information_.id_] = ps;
+  template_particle_states_[ps.unique_id_] = ps;
 }
   BOOST_FOREACH(ptree::value_type const& v, pt_.get_child("IntermediateStates")){
   ParticleStateInfo ps = parseParticleStateBasics(v.second);
-  template_particle_states_[ps.id_information_.id_] = ps;
+  template_particle_states_[ps.unique_id_] = ps;
 }
 
 // now go through the decay tree info and construct them
@@ -68,8 +68,8 @@ void DecayXMLConfigReader::readConfig(const std::string &filename) {
 ParticleStateInfo DecayXMLConfigReader::parseParticleStateBasics(
     const boost::property_tree::ptree &pt) const {
   ParticleStateInfo ps;
-  ps.id_information_.id_ = pt.get<unsigned int>("id");
-  ps.id_information_.name_ = pt.get<std::string>("name");
+  ps.unique_id_ = pt.get<unsigned int>("id");
+  ps.pid_information_.name_ = pt.get<std::string>("name");
 
   boost::optional<const ptree&> spin_info = pt.get_child_optional("SpinInfo");
   if (spin_info.is_initialized()) {

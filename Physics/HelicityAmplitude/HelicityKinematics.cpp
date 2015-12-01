@@ -16,12 +16,12 @@
 #include "gsl/gsl_monte.h"
 #include "gsl/gsl_monte_vegas.h"
 
-#include "HelicityKinematics.hpp"
-#include "FinalStateParticleCombinatorics.hpp"
 #include "Core/Event.hpp"
 #include "Core/DataPoint.hpp"
 #include "Core/Particle.hpp"
 #include "Core/PhysConst.hpp"
+
+#include "Physics/HelicityAmplitude/HelicityKinematics.hpp"
 
 namespace HelicityFormalism {
 
@@ -100,30 +100,8 @@ void HelicityKinematics::setDecayTopologies(
   }
 }
 
-void HelicityKinematics::init(const Event& event) {
-  FinalStateParticleCombinatorics fsp_combinatorics;
-  fsp_combinatorics.init(createFSParticleList(), event);
-
-  // now for each decay topology  create a index list
-  std::vector<TwoBodyDecayTopology>::const_iterator decay_topology_iter;
-  for (decay_topology_iter = decay_topologies_.begin();
-      decay_topology_iter != decay_topologies_.end(); ++decay_topology_iter) {
-
-    std::vector<IndexMapping> mappings =
-        fsp_combinatorics.getUniqueParticleMappingsSubsetForTopology(
-            *decay_topology_iter);
-
-    std::vector<IndexList> data_point_index_list;
-    for (unsigned int mapping_index = 0; mapping_index < mappings.size();
-        ++mapping_index) {
-      data_point_index_list.push_back(
-          createDataPointIndexListForTopology(*decay_topology_iter,
-              mappings[mapping_index]));
-
-    }
-
-    topology_amplitude_data_point_index_lists_.push_back(data_point_index_list);
-  }
+void HelicityKinematics::init(
+    const FinalStateParticleCombinatorics& fsp_combinatorics) {
 
   // now add the variable names needed for one decay vertex
   variable_names_.push_back("cms_mass_squared");
@@ -131,79 +109,119 @@ void HelicityKinematics::init(const Event& event) {
   variable_names_.push_back("daughter2_mass");
   variable_names_.push_back("helicity_angle_theta");
   variable_names_.push_back("helicity_angle_phi");
-}
 
-std::vector<IDInfo> HelicityKinematics::createFSParticleList() const {
-  std::vector<IDInfo> final_state_particle_pool;
-  // just take the first topology (all should have the same fs particle content)
-  if (decay_topologies_.size() > 0) {
-    const TwoBodyDecayTopology& decay_topology = decay_topologies_.front();
+  fsp_combinatorics_ = fsp_combinatorics;
+  // now for each decay topology  create a index list
+  std::vector<TwoBodyDecayTopology>::const_iterator decay_topology_iter;
+  for (decay_topology_iter = decay_topologies_.begin();
+      decay_topology_iter != decay_topologies_.end(); ++decay_topology_iter) {
 
-    final_state_particle_pool = decay_topology.final_state_id_list_;
-  }
-  return final_state_particle_pool;
-}
+    std::vector<IndexMapping> mappings =
+        fsp_combinatorics_.getUniqueParticleMappingsSubsetForTopology(
+            *decay_topology_iter);
 
-IndexList HelicityKinematics::createDataPointIndexListForTopology(
-    const TwoBodyDecayTopology& topology,
-    const IndexMapping& fs_particle_mapping) {
+    std::vector<IndexList> data_point_index_list;
+    for (unsigned int mapping_index = 0; mapping_index < mappings.size();
+        ++mapping_index) {
 
-  IndexList topology_amplitude_data_point_index_list;
-  // loop through the decay topology
-  for (auto decay_node = topology.decay_node_infos_.begin();
-      decay_node != topology.decay_node_infos_.end(); ++decay_node) {
+      IndexList topology_amplitude_data_point_index_list;
 
-    TwoBodyDecayIndices decay_indices;
-    // for each decay node: create and index list of final state particles
-    // for all occuring cms frames (maybe they already exist... so check)
+      for (unsigned int evalution_order_index = 0;
+          evalution_order_index
+              < decay_topology_iter->unique_id_decay_node_order_.size();
+          ++evalution_order_index) {
+        buildDataPointIndexListForTopology(
+            decay_topology_iter->unique_id_decay_node_order_[evalution_order_index],
+            *decay_topology_iter, mappings[mapping_index],
+            topology_amplitude_data_point_index_list);
+      }
 
-    decay_indices.mother_index_ = convertAndStoreParticleList(
-        topology.final_state_content_id_lists_[decay_node->mother_index_],
-        fs_particle_mapping);
-    decay_indices.decay_state_index_ = convertAndStoreParticleList(
-        topology.final_state_content_id_lists_[decay_node->decay_state_index_],
-        fs_particle_mapping);
-
-    decay_indices.decay_products_.first =
-        convertAndStoreParticleList(
-            topology.final_state_content_id_lists_[decay_node->decay_products_.first],
-            fs_particle_mapping);
-    decay_indices.decay_products_.second =
-        convertAndStoreParticleList(
-            topology.final_state_content_id_lists_[decay_node->decay_products_.second],
-            fs_particle_mapping);
-
-    // then also link these cms frames to the decay product index links
-    // (again the may already exist)
-    auto found_iter = std::find(
-        unique_occurring_decay_product_index_list_links_.begin(),
-        unique_occurring_decay_product_index_list_links_.end(), decay_indices);
-
-    unsigned int index_pair_index;
-    if (found_iter != unique_occurring_decay_product_index_list_links_.end()) {
-      index_pair_index = found_iter
-          - unique_occurring_decay_product_index_list_links_.begin();
-    }
-    else {
-      unique_occurring_decay_product_index_list_links_.push_back(decay_indices);
-      index_pair_index = unique_occurring_decay_product_index_list_links_.size()
-          - 1;
+      data_point_index_list.push_back(topology_amplitude_data_point_index_list);
     }
 
-    // finally add the index, which points to this
-    // decay fs event index list pair, to the index list
-    topology_amplitude_data_point_index_list.push_back(
-        getNumberOfVariables() * index_pair_index);
+    topology_amplitude_data_point_index_lists_.push_back(data_point_index_list);
   }
-
-  return topology_amplitude_data_point_index_list;
 }
 
-unsigned int HelicityKinematics::convertAndStoreParticleList(
-    const std::vector<IDInfo>& particle_list,
-    const IndexMapping& fs_particle_mapping) {
+void HelicityKinematics::buildDataPointIndexListForTopology(
+    unsigned int index, const TwoBodyDecayTopology& topology,
+    const IndexMapping& fs_particle_mapping, IndexList& data_point_index_list) {
 
-  IndexList event_particle_index_list = convertParticleListToEventIndexList(
+  // if its a leaf then just return
+  if (topology.particle_unique_id_decay_tree_.find(index)
+      == topology.particle_unique_id_decay_tree_.end())
+    return;
+
+  const IndexList& daughter_unique_id_list =
+      topology.particle_unique_id_decay_tree_.at(index);
+
+  TwoBodyDecayIndices decay_indices;
+
+  decay_indices.decay_state_index_ = convertAndStoreParticleIndexList(
+      topology.final_state_content_unique_id_mapping_.at(index),
+      fs_particle_mapping);
+
+  unsigned int mother_index(topology.findMotherIndex(index));
+  if (mother_index != index) {
+    decay_indices.mother_index_ = convertAndStoreParticleIndexList(
+        topology.final_state_content_unique_id_mapping_.at(mother_index),
+        fs_particle_mapping);
+  }
+  else {
+    decay_indices.mother_index_ = decay_indices.decay_state_index_;
+  }
+
+  unsigned int final_state_counter(0);
+  for (auto daughter_unique_id = daughter_unique_id_list.begin();
+      daughter_unique_id != daughter_unique_id_list.end();
+      ++daughter_unique_id) {
+
+    if (final_state_counter == 0)
+      decay_indices.decay_products_.first = convertAndStoreParticleIndexList(
+          topology.final_state_content_unique_id_mapping_.at(
+              *daughter_unique_id), fs_particle_mapping);
+    else
+      decay_indices.decay_products_.second = convertAndStoreParticleIndexList(
+          topology.final_state_content_unique_id_mapping_.at(
+              *daughter_unique_id), fs_particle_mapping);
+
+    ++final_state_counter;
+  }
+
+  // then also link these cms frames to the decay product index links
+  // (again the may already exist)
+  auto found_iter = std::find(
+      unique_occurring_decay_product_index_list_links_.begin(),
+      unique_occurring_decay_product_index_list_links_.end(), decay_indices);
+
+  unsigned int index_pair_index;
+  if (found_iter != unique_occurring_decay_product_index_list_links_.end()) {
+    index_pair_index = found_iter
+        - unique_occurring_decay_product_index_list_links_.begin();
+  }
+  else {
+    unique_occurring_decay_product_index_list_links_.push_back(decay_indices);
+    index_pair_index = unique_occurring_decay_product_index_list_links_.size()
+        - 1;
+  }
+
+  // finally add the index, which points to this
+  // decay fs event index list pair, to the index list
+  data_point_index_list.push_back(getNumberOfVariables() * index_pair_index);
+
+  // and recurse to daughters
+  /*for (auto daughter_unique_id = daughter_unique_id_list.begin();
+   daughter_unique_id != daughter_unique_id_list.end();
+   ++daughter_unique_id) {
+   recursivelyBuildDataPointIndexListForTopology(*daughter_unique_id, topology,
+   fs_particle_mapping, data_point_index_list);
+   }*/
+}
+
+unsigned int HelicityKinematics::convertAndStoreParticleIndexList(
+    const IndexList& particle_list, const IndexMapping& fs_particle_mapping) {
+
+  IndexList event_particle_index_list = convertParticleIDToEventIndexList(
       particle_list, fs_particle_mapping);
 
   auto found_iter = std::find(
@@ -221,15 +239,15 @@ unsigned int HelicityKinematics::convertAndStoreParticleList(
   }
 }
 
-IndexList HelicityKinematics::convertParticleListToEventIndexList(
-    const std::vector<IDInfo>& particle_list,
+IndexList HelicityKinematics::convertParticleIDToEventIndexList(
+    const IndexList& particle_id_list,
     const IndexMapping& fs_particle_mapping) const {
   IndexList event_particle_index_list;
-  event_particle_index_list.reserve(particle_list.size());
-  for (auto particle_iter = particle_list.begin();
-      particle_iter != particle_list.end(); ++particle_iter) {
+  event_particle_index_list.reserve(particle_id_list.size());
+  for (auto particle_iter = particle_id_list.begin();
+      particle_iter != particle_id_list.end(); ++particle_iter) {
     event_particle_index_list.push_back(
-        fs_particle_mapping.find(particle_iter->id_)->second);
+        fs_particle_mapping.find(*particle_iter)->second);
   }
 
   std::sort(event_particle_index_list.begin(), event_particle_index_list.end());
@@ -257,19 +275,21 @@ void HelicityKinematics::translateEventToDataPoint(const Event& event,
   }
 
   // check event to data point translation
-  /*std::cout<<"event:\n";
-   for(unsigned int i = 0; i < event.getNParticles(); ++i) {
-   std::cout<<event.getParticle(i).E<<", "<<event.getParticle(i).px<<", "<<event.getParticle(i).py<<", "<<event.getParticle(i).pz<<std::endl;
-   }
-   std::cout<<"4vectors:\n";
-   for(unsigned int i = 0; i < unique_occurring_cms_4vectors.size(); ++i) {
-   unique_occurring_cms_4vectors[i].Print(std::cout);
-   }
-   std::cout<<"data point:\n[";
-   for(unsigned int i = 0; i < point.size(); ++i) {
-   std::cout<<point.getVal(i)<<", ";
-   }
-   std::cout<<"]"<<std::endl;*/
+  /*std::cout << "event:\n";
+  for (unsigned int i = 0; i < event.getNParticles(); ++i) {
+    std::cout << event.getParticle(i).E << ", " << event.getParticle(i).px
+        << ", " << event.getParticle(i).py << ", " << event.getParticle(i).pz
+        << std::endl;
+  }
+  std::cout << "4vectors:\n";
+  for (unsigned int i = 0; i < unique_occurring_cms_4vectors.size(); ++i) {
+    unique_occurring_cms_4vectors[i].Print(std::cout);
+  }
+  std::cout << "\ndata point:\n[";
+  for (unsigned int i = 0; i < point.size(); ++i) {
+    std::cout << point.getVal(i) << ", ";
+  }
+  std::cout << "]\n" << std::endl;*/
 }
 
 // IMPORTANT: the ordering of the 4 vectors is exactly the same as in the
@@ -343,8 +363,7 @@ void HelicityKinematics::fillPointWithBoostedKinematicVariables(
       unique_occurring_cms_4vectors[two_body_state_indices.decay_products_.second]);
   // define the two body state
   Vector4<double> decaying_state(
-      unique_occurring_cms_4vectors[two_body_state_indices.decay_products_.first]
-          + unique_occurring_cms_4vectors[two_body_state_indices.decay_products_.second]);
+      unique_occurring_cms_4vectors[two_body_state_indices.decay_state_index_]);
 
   // at first add the invariant mass squared to the data point
   point.setVal(data_point_fill_position, decaying_state.Mass2());

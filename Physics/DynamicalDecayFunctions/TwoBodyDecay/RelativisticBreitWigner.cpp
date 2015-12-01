@@ -75,11 +75,7 @@ void RelativisticBreitWigner::initialiseParameters(
 std::complex<double> RelativisticBreitWigner::evaluate(const dataPoint& point,
     unsigned int evaluation_index) const {
 
-  // std::cout<<"evaluation_index "<<evaluation_index<<std::endl;
-
   double mSq = point.getVal(evaluation_index + index_cms_mass_squared_);
-  //double ma = point.getVal(++evaluation_index);
-  //double mb = point.getVal(++evaluation_index);
 
   double mR = resonance_mass_->GetValue();
   double width = resonance_width_->GetValue();
@@ -91,8 +87,6 @@ std::complex<double> RelativisticBreitWigner::evaluate(const dataPoint& point,
   std::complex<double> i(0, 1);
   double sqrtS = sqrt(mSq);
 
-  // std::cout << Kinematics::FormFactor(sqrtS, ma, mb, J, mesonRadius) << "  "
-  //     << Kinematics::FormFactor(mR, ma, mb, J, mesonRadius) << std::endl;
   double barrier = Kinematics::FormFactor(sqrtS, ma, mb, J, mesonRadius)
       / Kinematics::FormFactor(mR, ma, mb, J, mesonRadius);
   std::complex<double> qTerm = std::pow(
@@ -111,13 +105,6 @@ std::complex<double> RelativisticBreitWigner::evaluate(const dataPoint& point,
       + (-1.0) * i * sqrtS * (width * qTerm * barrier);
 
   std::complex<double> result = g_final * g_production / denom;
-
-  /* if (std::abs(result) > 1e2) {
-   std::cout << "values: " << sqrtS << " " << mR << " " << ma << " " << mb
-   << " " << J << " " << mesonRadius << std::endl;
-   std::cout << "result: " << result << " = " << g_final << " * "
-   << g_production << " / " << denom << std::endl;
-   }*/
 
   if (result.real() != result.real() || result.imag() != result.imag()) {
     std::cout << "RelativisticBreitWigner::evaluate() | " << barrier << " "

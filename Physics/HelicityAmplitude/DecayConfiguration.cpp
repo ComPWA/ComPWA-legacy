@@ -28,29 +28,6 @@ void DecayConfiguration::addCurrentDecayTreeToList() {
   current_concrete_decay_tree_.clear();
 }
 
-/*unsigned int DecayConfiguration::convertParticleIDToListIndex(
- unsigned int particle_id) const {
- ParticleStateIDComparator ps_comparator(particle_id);
- std::vector<ParticleStateInfo>::const_iterator found_particle = std::find_if(
- particles_.begin(), particles_.end(), ps_comparator);
- if (found_particle != particles_.end()) {
- return std::distance(particles_.begin(), found_particle);
- }
- else {
- throw std::runtime_error(
- "Could not find a particle with the correct ID within the list of particles!");
- }
- }
-
- std::vector<unsigned int> DecayConfiguration::convertParticleIDListToIndexList(
- const std::vector<unsigned int>& particle_id_list) const {
- std::vector<unsigned int> index_list;
- for (unsigned int i = 0; i < particle_id_list.size(); ++i) {
- index_list.push_back(convertParticleIDToListIndex(particle_id_list[i]));
- }
- return index_list;
- }*/
-
 void DecayConfiguration::addDecayToCurrentDecayTree(
     const ParticleStateInfo& mother,
     const std::vector<ParticleStateInfo>& daughter_states,
@@ -76,10 +53,6 @@ std::vector<unsigned int> DecayConfiguration::addParticlesToList(
 }
 
 unsigned int DecayConfiguration::addParticleToList(ParticleStateInfo particle) {
-  //ParticleStateIDComparator ps_comparator(particle_id);
-  //std::vector<ParticleStateInfo>::const_iterator found_particle = std::find_if(
-  //particles_.begin(), particles_.end(), ps_comparator);
-
   // first make sure the contents of the particle are all set (correctly)
   setRemainingParticleProperties(particle);
 
@@ -101,16 +74,16 @@ void DecayConfiguration::setRemainingParticleProperties(
 
   PhysConst *physics_constants = PhysConst::instance();
 
-  if (physics_constants->particleExists(particle.id_information_.name_)) {
-    if (particle.id_information_.particle_id_
-        != physics_constants->getId(particle.id_information_.name_)) {
-      particle.id_information_.particle_id_ = physics_constants->getId(
-          particle.id_information_.name_);
+  if (physics_constants->particleExists(particle.pid_information_.name_)) {
+    if (particle.pid_information_.particle_id_
+        != physics_constants->getId(particle.pid_information_.name_)) {
+      particle.pid_information_.particle_id_ = physics_constants->getId(
+          particle.pid_information_.name_);
     }
     if (particle.spin_information_.J_
-        != physics_constants->getJ(particle.id_information_.name_)) {
+        != physics_constants->getJ(particle.pid_information_.name_)) {
       particle.spin_information_.J_ = physics_constants->getJ(
-          particle.id_information_.name_);
+          particle.pid_information_.name_);
     }
   }
 }

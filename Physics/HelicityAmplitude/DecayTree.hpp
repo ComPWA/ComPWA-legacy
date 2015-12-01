@@ -187,25 +187,13 @@ class DecayTree {
         std::vector<boost::graph_traits<HelicityTree>::vertex_descriptor> > level_sorted_vertices_;
   };
 
-  /*struct FinalStateParticleFinder: public boost::dfs_visitor<> {
-   FinalStateParticleFinder() {
-   }
-
-   template<class Vertex, class Graph>
-   void finish_vertex(v, g) {
-   final_state_vertices_.push_back(v);
-   }
-
-   std::vector<boost::graph_traits<HelicityTree>::vertex_descriptor> final_state_vertices_;
-   };*/
-
   struct VertexWriter {
     VertexWriter(const HelicityTree& graph) :
         graph_(graph) {
     }
     void operator()(std::ostream& out,
         HelicityTree::vertex_descriptor v) const {
-      out << "[label=\"" << graph_[v].state_info_.id_information_.name_ << " ("
+      out << "[label=\"" << graph_[v].state_info_.pid_information_.name_ << " ("
           << graph_[v].state_info_.spin_information_.J_ << ","
           << graph_[v].state_info_.spin_information_.M_ << ") \"]";
     }
@@ -224,8 +212,6 @@ public:
   bool isDecayTreeValid() const;
 
   void clearCurrentGrownNodes();
-
-  //const boost::property_tree::ptree& getGlobalInfoPropertyTree() const;
 
   const HelicityTree& getHelicityDecayTree() const;
 
@@ -248,7 +234,7 @@ public:
   void createDecay(const DecayNode &mother,
       const std::vector<ParticleStateInfo> &daughters);
 
-  std::vector<IDInfo> createDecayProductsFinalStateParticleLists(
+  std::vector<ParticleStateInfo> createDecayProductsFinalStateParticleLists(
       const boost::graph_traits<HelicityFormalism::HelicityTree>::vertex_descriptor& vertex) const;
 
   void print(std::ostream& os) const;

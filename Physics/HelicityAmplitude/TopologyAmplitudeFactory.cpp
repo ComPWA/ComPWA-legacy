@@ -39,7 +39,7 @@ HelicityFormalism::SequentialTwoBodyDecayAmplitude TopologyAmplitudeFactory::gen
   for (decay_vertex_iter = decay_vertex_list.begin();
       decay_vertex_iter != decay_vertex_list.end(); ++decay_vertex_iter) {
     // construct full decay tree amplitude name by intermediate state name concatenation
-    name << helicity_tree[*decay_vertex_iter].state_info_.id_information_.name_
+    name << helicity_tree[*decay_vertex_iter].state_info_.pid_information_.name_
         << "_";
 
     TwoBodyDecaySpinInformation decay_spin_info;
@@ -59,13 +59,13 @@ HelicityFormalism::SequentialTwoBodyDecayAmplitude TopologyAmplitudeFactory::gen
         decay_spin_info.final_state_.first =
             helicity_tree[decay_product].state_info_.spin_information_;
         decay_products_id_info.first =
-            helicity_tree[decay_product].state_info_.id_information_;
+            helicity_tree[decay_product].state_info_.pid_information_;
       }
       else if (2 == final_state_particle_counter) {
         decay_spin_info.final_state_.second =
             helicity_tree[decay_product].state_info_.spin_information_;
         decay_products_id_info.second =
-            helicity_tree[decay_product].state_info_.id_information_;
+            helicity_tree[decay_product].state_info_.pid_information_;
       }
       else {
         std::stringstream ss;
@@ -88,9 +88,9 @@ HelicityFormalism::SequentialTwoBodyDecayAmplitude TopologyAmplitudeFactory::gen
         // create new amplitude if not yet existent
         if (two_body_decay_amplitude_list_.find(decay_spin_info)
             == two_body_decay_amplitude_list_.end()) {
-          two_body_decay_amplitude_list_[decay_spin_info] = std::shared_ptr<
-              TwoBodyDecayAmplitude>(
-              new TwoBodyDecayAmplitude(decay_spin_info));
+          two_body_decay_amplitude_list_[decay_spin_info] = std::shared_ptr
+              < TwoBodyDecayAmplitude
+              > (new TwoBodyDecayAmplitude(decay_spin_info));
         }
 
         // do external parameter stuff here
@@ -122,7 +122,7 @@ HelicityFormalism::SequentialTwoBodyDecayAmplitude TopologyAmplitudeFactory::gen
         // used by higher level decays..
         resonance_parameter_lists.insert(
             std::make_pair(
-                helicity_tree[*decay_vertex_iter].state_info_.id_information_,
+                helicity_tree[*decay_vertex_iter].state_info_.pid_information_,
                 abs_function->getParameterList()));
 
         // get strength and phase of this decay node
@@ -153,8 +153,8 @@ std::shared_ptr<DoubleParameter> TopologyAmplitudeFactory::getResonanceMassParam
     // if not then it has to be a final state particle so just create a
     // shared_ptr with that mass here
     PhysConst *physics_constants = PhysConst::instance();
-    return std::shared_ptr<DoubleParameter>(
-        new DoubleParameter("fs_mass",
+    return std::shared_ptr < DoubleParameter
+        > (new DoubleParameter("fs_mass",
             physics_constants->getMass(id_info.particle_id_)));
   }
 }
@@ -227,12 +227,12 @@ TwoBodyDecayTopology TopologyAmplitudeFactory::createDecayTopology(
       boost::graph_traits<HelicityFormalism::HelicityTree>::vertex_descriptor>::const_iterator decay_vertex_iter;
 
   decay_topology.top_node_id_info_ =
-      helicity_tree[decay_tree.getTopNode()].state_info_.id_information_;
+      helicity_tree[decay_tree.getTopNode()].state_info_.pid_information_;
 
   std::vector<DecayNode> leaves = decay_tree.getLeaves();
   for (unsigned int i = 0; i < leaves.size(); ++i) {
     decay_topology.final_state_id_list_.push_back(
-        leaves[i].state_info_.id_information_);
+        leaves[i].state_info_.pid_information_);
   }
 
   for (decay_vertex_iter = decay_vertex_list.begin();
@@ -243,30 +243,44 @@ TwoBodyDecayTopology TopologyAmplitudeFactory::createDecayTopology(
     boost::graph_traits<HelicityFormalism::HelicityTree>::vertex_descriptor mother_vertex =
         findMotherVertex(*decay_vertex_iter, decay_tree);
 
-    std::vector<IDInfo> fs_particle_list =
+    std::vector<ParticleStateInfo> fs_particle_list =
         decay_tree.createDecayProductsFinalStateParticleLists(mother_vertex);
 
     indices.mother_index_ = decay_topology.insertFinalStateContentList(
-        fs_particle_list);
+        convertToIDInfoList(fs_particle_list));
 
     fs_particle_list = decay_tree.createDecayProductsFinalStateParticleLists(
         *decay_vertex_iter);
 
     indices.decay_state_index_ = decay_topology.insertFinalStateContentList(
-        fs_particle_list);
+        convertToIDInfoList(fs_particle_list));
+
+    decay_topology.final_state_content_unique_id_mapping_.insert(
+        std::make_pair(helicity_tree[*decay_vertex_iter].state_info_.unique_id_,
+            convertToUniqueIDList(fs_particle_list)));
 
     std::pair<boost::graph_traits<HelicityTree>::out_edge_iterator,
         boost::graph_traits<HelicityTree>::out_edge_iterator> ep;
 
     ep = boost::out_edges(*decay_vertex_iter, helicity_tree);
 
+    IndexList daughters;
+
     unsigned final_state_particle_counter = 0;
     while (ep.first != ep.second) {
       fs_particle_list = decay_tree.createDecayProductsFinalStateParticleLists(
           boost::target(*ep.first, helicity_tree));
 
+      daughters.push_back(
+          helicity_tree[boost::target(*ep.first, helicity_tree)].state_info_.unique_id_);
+
       unsigned int index = decay_topology.insertFinalStateContentList(
-          fs_particle_list);
+          convertToIDInfoList(fs_particle_list));
+
+      decay_topology.final_state_content_unique_id_mapping_.insert(
+          std::make_pair(
+              helicity_tree[boost::target(*ep.first, helicity_tree)].state_info_.unique_id_,
+              convertToUniqueIDList(fs_particle_list)));
 
       if (final_state_particle_counter == 0) {
         indices.decay_products_.first = index;
@@ -278,8 +292,45 @@ TwoBodyDecayTopology TopologyAmplitudeFactory::createDecayTopology(
       ++ep.first;
     }
 
-    decay_topology.decay_node_infos_.push_back(indices);
+    decay_topology.decay_node_fs_content_index_infos_.push_back(indices);
+
+    decay_topology.particle_unique_id_decay_tree_[helicity_tree[*decay_vertex_iter].state_info_.unique_id_] =
+        daughters;
+
+    if (indices.decay_state_index_ == indices.mother_index_)
+      decay_topology.top_node_unique_id_ =
+          helicity_tree[*decay_vertex_iter].state_info_.unique_id_;
   }
+
+  // specify the evaluation order...
+  // so the data has to be arranged in the same way the sequential amp is built
+  // up
+  const std::vector<
+      boost::graph_traits<HelicityFormalism::HelicityTree>::vertex_descriptor>& sequential_decay_vertex_list =
+      decay_tree.getDecayNodesList();
+
+  for (decay_vertex_iter = sequential_decay_vertex_list.begin();
+      decay_vertex_iter != sequential_decay_vertex_list.end();
+      ++decay_vertex_iter) {
+    std::pair<boost::graph_traits<HelicityTree>::out_edge_iterator,
+        boost::graph_traits<HelicityTree>::out_edge_iterator> ep;
+
+    ep = boost::out_edges(*decay_vertex_iter, helicity_tree);
+
+    unsigned int final_state_particle_counter = 0;
+    while (ep.first != ep.second) {
+      ++final_state_particle_counter;
+      ++ep.first;
+    }
+    if (final_state_particle_counter > 0) {
+      if (helicity_tree[*decay_vertex_iter].state_info_.dynamical_information_.get<
+          std::string>("type") != "topNode") {
+        decay_topology.unique_id_decay_node_order_.push_back(
+            helicity_tree[*decay_vertex_iter].state_info_.unique_id_);
+      }
+    }
+  }
+
   return decay_topology;
 }
 
@@ -319,96 +370,27 @@ boost::graph_traits<HelicityFormalism::HelicityTree>::vertex_descriptor Topology
   return mother;
 }
 
-/*TwoBodyDecayTopology TopologyAmplitudeFactory::createDecayTopology(
- const DecayTree& decay_tree) const {
- TwoBodyDecayTopology decay_topology;
+std::vector<IDInfo> TopologyAmplitudeFactory::convertToIDInfoList(
+    const std::vector<ParticleStateInfo>& fs_particle_list) const {
+  std::vector<IDInfo> idinfo_list;
+  for (auto iter = fs_particle_list.begin(); iter != fs_particle_list.end();
+      ++iter) {
+    idinfo_list.push_back(iter->pid_information_);
+  }
+  std::sort(idinfo_list.begin(), idinfo_list.end());
+  return idinfo_list;
+}
 
- const HelicityTree helicity_tree = decay_tree.getHelicityDecayTree();
- const std::vector<
- boost::graph_traits<HelicityFormalism::HelicityTree>::vertex_descriptor>& decay_vertex_list =
- decay_tree.getDecayVertexList();
-
- std::vector<
- boost::graph_traits<HelicityFormalism::HelicityTree>::vertex_descriptor>::const_iterator decay_vertex_iter;
-
- std::cout << "number of decay vertices for decay tree "
- << decay_vertex_list.size() << std::endl;
- decay_tree.print(std::cout);
-
- decay_topology.top_node_id_info_ =
- helicity_tree[decay_tree.getTopNode()].state_info_.id_information_;
-
- std::vector<DecayNode> leaves = decay_tree.getLeaves();
- for (unsigned int i = 0; i < leaves.size(); ++i) {
- decay_topology.final_state_id_list_.push_back(
- leaves[i].state_info_.id_information_);
- }
-
- for (decay_vertex_iter = decay_vertex_list.begin();
- decay_vertex_iter != decay_vertex_list.end(); ++decay_vertex_iter) {
-
- std::vector<std::vector<IDInfo> > fs_particle_lists =
- decay_tree.createDecayProductsFinalStateParticleLists(
- *decay_vertex_iter);
-
- TwoBodyDecayIndices indices;
- std::vector<IDInfo> mother_fs_particle_list;
-
- std::sort(fs_particle_lists.begin(), fs_particle_lists.end());
- // if (fs_particle_lists.size() == 2) {
- for (unsigned int i = 0; i < fs_particle_lists.size(); ++i) {
- std::vector<std::vector<IDInfo> >::const_iterator result = std::find(
- decay_topology.final_state_content_id_lists_.begin(),
- decay_topology.final_state_content_id_lists_.end(),
- fs_particle_lists[i]);
-
- unsigned int index = result
- - decay_topology.final_state_content_id_lists_.begin();
- if (result == decay_topology.final_state_content_id_lists_.end()) {
- decay_topology.final_state_content_id_lists_.push_back(
- fs_particle_lists[i]);
- }
-
- if (i == 0) {
- indices.decay_products_.first = index;
- }
- else {
- indices.decay_products_.second = index;
- }
-
- mother_fs_particle_list.insert(mother_fs_particle_list.end(),
- fs_particle_lists[i].begin(), fs_particle_lists[i].end());
- }
- /* }
- else if (fs_particle_lists.size() != 0) {
- std::stringstream ss;
- ss
- << "HelicityAmplitudeTreeFactory: This decay vertex does not have 2 final state particles ("
- << fs_particle_lists.size()
- << " fs particles)! This is not supported in this model. Please fix the decay file.";
- throw std::runtime_error(ss.str());
- }*/
-
-// do the same for the mother
-/* std::vector<std::vector<IDInfo> >::const_iterator result = std::find(
- decay_topology.final_state_content_id_lists_.begin(),
- decay_topology.final_state_content_id_lists_.end(),
- mother_fs_particle_list);
-
- unsigned int mother_index = result
- - decay_topology.final_state_content_id_lists_.begin();
- if (result == decay_topology.final_state_content_id_lists_.end()) {
- decay_topology.final_state_content_id_lists_.push_back(
- mother_fs_particle_list);
- }
- indices.mother_index_ = mother_index;
-
- decay_topology.decay_node_infos_.push_back(indices);
-
- decay_topology.print();
- }
- return decay_topology;
- }*/
+IndexList TopologyAmplitudeFactory::convertToUniqueIDList(
+    const std::vector<ParticleStateInfo>& fs_particle_list) const {
+  IndexList unique_id_list;
+  for (auto iter = fs_particle_list.begin(); iter != fs_particle_list.end();
+      ++iter) {
+    unique_id_list.push_back(iter->unique_id_);
+  }
+  std::sort(unique_id_list.begin(), unique_id_list.end());
+  return unique_id_list;
+}
 
 Event TopologyAmplitudeFactory::createDummyEvent(
     const DecayTree& decay_tree) const {
@@ -424,7 +406,7 @@ Event TopologyAmplitudeFactory::createDummyEvent(
 Particle TopologyAmplitudeFactory::createParticle(
     const ParticleStateInfo& particle_state) const {
   Particle p;
-  p.pid = particle_state.id_information_.particle_id_;
+  p.pid = particle_state.pid_information_.particle_id_;
   return p;
 }
 

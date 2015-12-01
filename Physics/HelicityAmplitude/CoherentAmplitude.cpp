@@ -55,7 +55,7 @@ void CoherentAmplitude::registerTopologyAmplitudeParameters() {
   }
 }
 
-void CoherentAmplitude::init(const Event& event) {
+void CoherentAmplitude::init() {
 // TODO: I have to cast the kinematics instance to a helicity kinematics.
 // This is pretty bad practice... I really don't get the point behind the
 // singleton kinematics class...
@@ -145,14 +145,11 @@ const ParameterList& CoherentAmplitude::intensity(const dataPoint& point,
 const ParameterList& CoherentAmplitude::intensityNoEff(const dataPoint& point) {
   std::complex<double> coherent_amplitude = 0;
   double intensity(0.0);
-  HelicityKinematics::instance();
+
   if (Kinematics::instance()->isWithinPhsp(point)) {
-    // at first we have to create a vector of the kinematic variables
-    // that we pass to the topology amplitudes
-    // here the ordering has to be identical to the one in the data point
-    // since the index lists refer to variable positions in the data point
     for (unsigned int i = 0; i < topology_amplitudes_.size(); ++i) {
-      // get the correct helicity angles from the dataPoint
+      // at first get the appropriate data evaluation index lists for this
+      // topology which we pass to the topology amplitudes later
       const std::vector<IndexList> &topology_data_index_lists =
           data_point_index_lists_[i];
       for (unsigned int final_state_combination_index = 0;

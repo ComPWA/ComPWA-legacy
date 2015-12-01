@@ -28,11 +28,11 @@ class DecayGenerator {
   std::vector<Spin> allowed_M_;
 
   // dynamically filled containers
-  std::vector<IDInfo> total_particle_pool_;
+  std::vector<ParticleStateInfo> total_particle_pool_;
 
 
 
-  IDInfo createIDInfo(const std::string& name);
+  ParticleStateInfo createIDInfo(const std::string& name);
 
   int lookupPID(const std::string& name) const;
 

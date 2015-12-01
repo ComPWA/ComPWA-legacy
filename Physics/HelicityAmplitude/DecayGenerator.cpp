@@ -25,22 +25,22 @@ DecayGenerator::~DecayGenerator() {
 }
 
 void DecayGenerator::addFinalStateParticles(const std::string& name) {
-  final_state_particles_.push_back(createIDInfo(name));
+  final_state_particles_.push_back(createIDInfo(name).pid_information_);
 }
 void DecayGenerator::addIntermediateStateParticles(const std::string& name) {
-  intermediate_state_particles_.push_back(createIDInfo(name));
+  intermediate_state_particles_.push_back(createIDInfo(name).pid_information_);
 }
 void DecayGenerator::setTopNodeState(const std::string& name) {
-  mother_state_particle_ = createIDInfo(name);
+  mother_state_particle_ = createIDInfo(name).pid_information_;
 }
 
-IDInfo DecayGenerator::createIDInfo(const std::string& name) {
-  IDInfo pinfo;
-  pinfo.name_ = name;
-  pinfo.particle_id_ = lookupPID(name);
-  pinfo.id_ = total_particle_pool_.size() + 1;
-  total_particle_pool_.push_back(pinfo);
-  return pinfo;
+ParticleStateInfo DecayGenerator::createIDInfo(const std::string& name) {
+  ParticleStateInfo particle_state;
+  particle_state.pid_information_.name_ = name;
+  particle_state.pid_information_.particle_id_ = lookupPID(name);
+  particle_state.unique_id_ = total_particle_pool_.size() + 1;
+  total_particle_pool_.push_back(particle_state);
+  return particle_state;
 }
 
 int DecayGenerator::lookupPID(const std::string& name) const {
@@ -81,6 +81,7 @@ std::vector<TwoBodyDecayTopology> DecayGenerator::constructPossibleDecayTopologi
       fs_particle != final_state_particles_.end(); ++fs_particle) {
     std::vector<IDInfo> temp_vec;
     temp_vec.push_back(*fs_particle);
+    trsp.first.insertFinalStateContentList(temp_vec);
     trsp.second.push_back(temp_vec);
   }
   current_topology_remaining_state_pairs.push_back(trsp);
@@ -93,10 +94,9 @@ std::vector<TwoBodyDecayTopology> DecayGenerator::constructPossibleDecayTopologi
   std::vector<TwoBodyDecayTopology> topologies;
   for (auto iter = current_topology_remaining_state_pairs.begin();
       iter != current_topology_remaining_state_pairs.end(); ++iter) {
-    std::sort(iter->first.final_state_content_id_lists_.begin(),
-        iter->first.final_state_content_id_lists_.end());
-    std::sort(iter->first.decay_node_infos_.begin(),
-        iter->first.decay_node_infos_.end());
+    std::sort(iter->first.decay_node_fs_content_index_infos_.begin(),
+        iter->first.decay_node_fs_content_index_infos_.end());
+
     if (isTopologyNonExistant(topologies, iter->first)) {
       topologies.push_back(iter->first);
     }
@@ -143,36 +143,45 @@ std::vector<TopologyRemainingStatePair> DecayGenerator::constructNextLevel(
       ++topology_remaining_state_pair) {
 
     // for each topology make all possible remaining state groupings and
-    for (auto remaining_state = topology_remaining_state_pair->second.begin();
-        remaining_state != topology_remaining_state_pair->second.end();
-        ++remaining_state) {
-      auto second_remaining_state = remaining_state;
-      for (std::advance(second_remaining_state, 1);
-          second_remaining_state != topology_remaining_state_pair->second.end();
-          ++second_remaining_state) {
+    for (unsigned int index_remaining_state = 0;
+        index_remaining_state < topology_remaining_state_pair->second.size();
+        ++index_remaining_state) {
+      for (unsigned int index_second_remaining_state = index_remaining_state
+          + 1;
+          index_second_remaining_state
+              < topology_remaining_state_pair->second.size();
+          ++index_second_remaining_state) {
         //create a new TopologyRemainingStatePair
         TopologyRemainingStatePair trsp(*topology_remaining_state_pair);
 
-        std::vector<std::vector<IDInfo> >::iterator selected_state_1 =
-            std::find(trsp.second.begin(), trsp.second.end(), *remaining_state);
-        std::vector<std::vector<IDInfo> >::iterator selected_state_2 =
-            std::find(trsp.second.begin(), trsp.second.end(),
-                *second_remaining_state);
+        TwoBodyDecayIndices indices;
 
-        if (selected_state_1 != trsp.second.end()
-            && selected_state_2 != trsp.second.end()) {
-          std::vector<IDInfo> new_fs_particle_list(*selected_state_1);
-          new_fs_particle_list.insert(new_fs_particle_list.end(),
-              selected_state_2->begin(), selected_state_2->end());
+        indices.decay_products_.first = trsp.first.findFinalStateList(
+            trsp.second[index_remaining_state]);
 
-          trsp.first.insertFinalStateContentList(new_fs_particle_list);
+        indices.decay_products_.second = trsp.first.findFinalStateList(
+            trsp.second[index_second_remaining_state]);
 
-          trsp.second.erase(selected_state_1);
-          trsp.second.erase(selected_state_2);
-          trsp.second.push_back(new_fs_particle_list);
+        trsp.second[index_remaining_state].insert(
+            trsp.second[index_remaining_state].end(),
+            trsp.second[index_second_remaining_state].begin(),
+            trsp.second[index_second_remaining_state].end());
 
-          new_topology_remaining_state_pairs.push_back(trsp);
-        }
+        indices.decay_state_index_ = trsp.first.insertFinalStateContentList(
+            trsp.second[index_remaining_state]);
+
+        trsp.first.setMotherDecayIndexForDecayIndex(indices.decay_state_index_, indices.decay_products_.first);
+        trsp.first.setMotherDecayIndexForDecayIndex(indices.decay_state_index_, indices.decay_products_.second);
+
+        // we set the mother state as the decay state because mother cannot
+        // exist yet and will be linked later correctly
+        indices.mother_index_ = indices.decay_state_index_;
+        //trsp.second.erase(selected_state_1);
+        trsp.second.erase(trsp.second.begin() + index_second_remaining_state);
+
+        trsp.first.decay_node_fs_content_index_infos_.push_back(indices);
+
+        new_topology_remaining_state_pairs.push_back(trsp);
       }
     }
   }
@@ -196,7 +205,7 @@ std::vector<ParticleIndexDecayTree> DecayGenerator::makeConcreteDecayTrees(
 
 boost::property_tree::ptree DecayGenerator::portPropertyTree(
     const std::vector<ParticleIndexDecayTree>& concrete_decay_trees) const {
-
+  return boost::property_tree::ptree();
 }
 
 } /* namespace HelicityFormalism */

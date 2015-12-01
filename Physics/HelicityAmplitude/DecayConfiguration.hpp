@@ -26,16 +26,6 @@ struct DecayProductsInfo {
 
 typedef std::map<unsigned int, std::vector<DecayProductsInfo> > ParticleIndexDecayTree;
 
-class ParticleStateIDComparator {
-  unsigned int particle_id_;
-public:
-  ParticleStateIDComparator(unsigned int particle_id) :
-      particle_id_(particle_id) {
-  }
-  bool operator()(const ParticleStateInfo& ps) const {
-    return ps.id_information_.id_ == particle_id_;
-  }
-};
 
 class DecayConfiguration {
   friend class DecayTreeFactory;

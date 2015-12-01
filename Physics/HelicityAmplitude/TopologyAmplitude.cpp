@@ -27,9 +27,6 @@ std::complex<double> TopologyAmplitude::evaluate(const dataPoint& point,
     const IndexList& evaluation_index_list) const {
   std::complex<double> result(0.0, 0.0);
 
-  /*std::cout << "sequential decays in this topology amp: "
-      << sequential_decay_amplitude_list_.size() << std::endl;*/
-
   // loop over the list of concrete versions of sequential decays
   for (unsigned int sequential_decay_index = 0;
       sequential_decay_index < sequential_decay_amplitude_list_.size();
@@ -38,10 +35,6 @@ std::complex<double> TopologyAmplitude::evaluate(const dataPoint& point,
         std::polar(
             sequential_decay_amplitude_list_[sequential_decay_index].strength_->GetValue(),
             sequential_decay_amplitude_list_[sequential_decay_index].phase_->GetValue()));
-
-    /*std::cout << "two body decays in this seq amp: "
-        << sequential_decay_amplitude_list_[sequential_decay_index].full_decay_amplitude_chain_list_.size()
-        << std::endl;*/
 
     // loop over all the decay amplitudes within each sequential decay
     for (unsigned int two_body_decay_index = 0;
@@ -58,16 +51,7 @@ std::complex<double> TopologyAmplitude::evaluate(const dataPoint& point,
           sequential_decay_amplitude_list_[sequential_decay_index].full_decay_amplitude_chain_list_[two_body_decay_index].second->evaluate(
               point, evaluation_index_list[two_body_decay_index]);
 
-      /*std::cout << sequential_decay_result << " = " << angular_part << " * "
-          << dynamical_part << std::endl;*/
-
       sequential_decay_result *= angular_part * dynamical_part;
-
-      //std::cout << sequential_decay_result << std::endl;
-      /* sequential_decay_amplitude_list_[sequential_decay_index].full_decay_amplitude_chain_list_[two_body_decay_index].first->evaluate(
-       single_decay_helicity_angles)
-       * sequential_decay_amplitude_list_[sequential_decay_index].full_decay_amplitude_chain_list_[two_body_decay_index].second->evaluate(
-       point, evaluation_index_list[two_body_decay_index]);*/
     }
     // the sequential decay results are just added
     result += sequential_decay_result;

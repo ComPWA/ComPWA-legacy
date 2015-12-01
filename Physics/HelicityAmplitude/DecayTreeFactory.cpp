@@ -342,7 +342,7 @@ std::vector<std::string> DecayTreeFactory::convertToUniqueNameList(
   for (vp = vertices(decay_tree.getHelicityDecayTree()); vp.first != vp.second;
       ++vp.first) {
     name_list.push_back(
-        decay_tree.getHelicityDecayTree()[*vp.first].state_info_.id_information_.name_);
+        decay_tree.getHelicityDecayTree()[*vp.first].state_info_.pid_information_.name_);
   }
   std::sort(name_list.begin(), name_list.end());
   return name_list;

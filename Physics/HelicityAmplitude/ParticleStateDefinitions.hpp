@@ -32,13 +32,12 @@ struct HelicityAngles {
 };
 
 struct IDInfo {
-  unsigned int id_;
   int particle_id_;
   std::string name_;
 
   bool operator==(const IDInfo &rhs) const {
-    if (this->id_ != rhs.id_)
-      return false;
+    /* if (this->id_ != rhs.id_)
+     return false;*/
     if (this->particle_id_ != rhs.particle_id_)
       return false;
     if (this->name_ != rhs.name_)
@@ -51,19 +50,25 @@ struct IDInfo {
   }
 
   bool operator<(const IDInfo &rhs) const {
-    if (this->id_ < rhs.id_)
+    /*if (this->id_ < rhs.id_)
+     return true;
+     else if (this->id_ > rhs.id_)
+     return false;*/
+
+    return lessThenIgnoringID(*this, rhs);
+  }
+
+  static bool lessThenIgnoringID(const IDInfo &lhs, const IDInfo &rhs) {
+    if (lhs.particle_id_ < rhs.particle_id_)
       return true;
-    else if (this->id_ > rhs.id_)
+    else if (lhs.particle_id_ > rhs.particle_id_)
       return false;
-    if (this->particle_id_ < rhs.particle_id_)
-      return true;
-    else if (this->particle_id_ > rhs.particle_id_)
-      return false;
-    if (this->name_ < rhs.name_)
+    if (lhs.name_ < rhs.name_)
       return true;
 
     return false;
   }
+
   bool operator>(const IDInfo &rhs) const {
     return (rhs < *this);
   }
@@ -113,12 +118,15 @@ struct SpinInfo {
 };
 
 struct ParticleStateInfo {
-  IDInfo id_information_;
+  unsigned int unique_id_;
+  IDInfo pid_information_;
   SpinInfo spin_information_;
   DynamicalInfo dynamical_information_;
 
   bool operator==(const ParticleStateInfo &rhs) const {
-    if (this->id_information_ != rhs.id_information_)
+    if (this->unique_id_ != rhs.unique_id_)
+      return false;
+    if (this->pid_information_ != rhs.pid_information_)
       return false;
     if (this->spin_information_ != rhs.spin_information_)
       return false;
@@ -131,9 +139,13 @@ struct ParticleStateInfo {
   }
 
   bool operator<(const ParticleStateInfo &rhs) const {
-    if (this->id_information_ < rhs.id_information_)
+    if (this->unique_id_ < rhs.unique_id_)
       return true;
-    else if (this->id_information_ > rhs.id_information_)
+    else if (this->unique_id_ > rhs.unique_id_)
+      return false;
+    if (this->pid_information_ < rhs.pid_information_)
+      return true;
+    else if (this->pid_information_ > rhs.pid_information_)
       return false;
     if (this->spin_information_ < rhs.spin_information_)
       return true;
@@ -154,12 +166,12 @@ struct ParticleIDComparison {
       ps_id_(ps_id) {
   }
 
-  bool operator()(const IDInfo& ps) {
-    return ps.id_ == ps_id_;
+  bool operator()(const ParticleStateInfo& ps) {
+    return ps.unique_id_ == ps_id_;
   }
 
-  bool operator()(const IDInfo& lhs, const IDInfo& rhs) {
-    return lhs.id_ < rhs.id_;
+  bool operator()(const ParticleStateInfo& lhs, const ParticleStateInfo& rhs) {
+    return lhs.unique_id_ < rhs.unique_id_;
   }
 };
 
@@ -264,60 +276,155 @@ struct TwoBodyDecayInformation {
   }
 };
 
+struct checkLessThanOnIDInfoVectorsIgnoringID {
+  bool operator()(const std::vector<IDInfo>& lhs,
+      const std::vector<IDInfo>& rhs) const {
+    if (lhs.size() < rhs.size())
+      return true;
+    else if (lhs.size() > rhs.size())
+      return false;
+    std::vector<unsigned int> not_found_elements;
+    std::vector<IDInfo> clone_lhs(lhs);
+    std::vector<IDInfo> clone_rhs(rhs);
+    std::sort(clone_lhs.begin(), clone_lhs.end(), IDInfo::lessThenIgnoringID);
+    std::sort(clone_rhs.begin(), clone_rhs.end(), IDInfo::lessThenIgnoringID);
+    for (unsigned int i = 0; i < lhs.size(); ++i) {
+      if (clone_lhs[i].particle_id_ < clone_rhs[i].particle_id_)
+        return true;
+      else if (clone_lhs[i].particle_id_ > clone_rhs[i].particle_id_)
+        return false;
+    }
+    return false;
+  }
+};
+
 struct TwoBodyDecayTopology {
   IDInfo top_node_id_info_;
   std::vector<IDInfo> final_state_id_list_;
-  // set of final state particle lists corresponding to particle states
+  // list of final state particle lists corresponding to decay states
+  // this actually uniquely defines a decay topology
+  // all the other information is stored for other purposes
   std::vector<std::vector<IDInfo> > final_state_content_id_lists_;
-  std::vector<TwoBodyDecayIndices> decay_node_infos_;
+  std::vector<TwoBodyDecayIndices> decay_node_fs_content_index_infos_;
+
+  // evaluation order vector
+  IndexList unique_id_decay_node_order_;
+
+  // this stuff is for final state combinatorics
+  unsigned int top_node_unique_id_;
+  std::map<unsigned int, IndexList> particle_unique_id_decay_tree_;
+  std::map<unsigned int, IndexList> final_state_content_unique_id_mapping_;
 
   unsigned int insertFinalStateContentList(
-      const std::vector<IDInfo>& fs_content_list) {
-    std::vector<std::vector<IDInfo> >::const_iterator result = std::find(
-        final_state_content_id_lists_.begin(),
-        final_state_content_id_lists_.end(), fs_content_list);
+      std::vector<IDInfo> fs_content_list) {
+    std::sort(fs_content_list.begin(), fs_content_list.end());
 
-    unsigned int position_index = result
-        - final_state_content_id_lists_.begin();
-    if (result == final_state_content_id_lists_.end()) {
+    unsigned int position_index;
+    auto result = std::find(final_state_content_id_lists_.begin(),
+        final_state_content_id_lists_.end(), fs_content_list);
+    if (result != final_state_content_id_lists_.end())
+      position_index = result - final_state_content_id_lists_.begin();
+    else {
+      position_index = final_state_content_id_lists_.size();
       final_state_content_id_lists_.push_back(fs_content_list);
     }
 
     return position_index;
   }
 
+  unsigned int findMotherIndex(unsigned int decay_state_index) const {
+    unsigned int mother_index(decay_state_index);
+    for (auto iter = particle_unique_id_decay_tree_.begin();
+        iter != particle_unique_id_decay_tree_.end(); ++iter) {
+      if (std::find(iter->second.begin(), iter->second.end(), decay_state_index)
+          != iter->second.end()) {
+        mother_index = iter->first;
+        break;
+      }
+    }
+    return mother_index;
+  }
+
+  unsigned int findFinalStateList(std::vector<IDInfo> fs_content_list) {
+    std::sort(fs_content_list.begin(), fs_content_list.end());
+
+    unsigned int position_index(0);
+    auto result = std::find(final_state_content_id_lists_.begin(),
+        final_state_content_id_lists_.end(), fs_content_list);
+    if (result != final_state_content_id_lists_.end())
+      position_index = result - final_state_content_id_lists_.begin();
+
+    return position_index;
+  }
+
+  void setMotherDecayIndexForDecayIndex(unsigned int mother_index,
+      unsigned int decay_index) {
+    auto result =
+        std::find_if(decay_node_fs_content_index_infos_.begin(),
+            decay_node_fs_content_index_infos_.end(),
+            [&](const TwoBodyDecayIndices tbdi) {return tbdi.decay_state_index_ == decay_index;});
+    if (result != decay_node_fs_content_index_infos_.end())
+      result->mother_index_ = mother_index;
+  }
+
   bool operator==(const TwoBodyDecayTopology &rhs) const {
-    if (this->decay_node_infos_ != rhs.decay_node_infos_)
-      return false;
-    if (this->final_state_content_id_lists_
-        != rhs.final_state_content_id_lists_)
+    std::vector<std::vector<IDInfo> > fscl_copy_lhs(
+        this->final_state_content_id_lists_);
+    std::vector<std::vector<IDInfo> > fscl_copy_rhs(
+        rhs.final_state_content_id_lists_);
+    std::sort(fscl_copy_lhs.begin(), fscl_copy_lhs.end());
+    std::sort(fscl_copy_rhs.begin(), fscl_copy_rhs.end());
+
+    if (fscl_copy_lhs != fscl_copy_rhs)
       return false;
 
     return true;
   }
 
   bool operator<(const TwoBodyDecayTopology &rhs) const {
-    if (this->decay_node_infos_ < rhs.decay_node_infos_)
-      return true;
-    else if (this->decay_node_infos_ > rhs.decay_node_infos_)
-      return false;
-    if (this->final_state_content_id_lists_ < rhs.final_state_content_id_lists_)
+    std::vector<std::vector<IDInfo> > fscl_copy_lhs(
+        this->final_state_content_id_lists_);
+    std::vector<std::vector<IDInfo> > fscl_copy_rhs(
+        rhs.final_state_content_id_lists_);
+
+    std::sort(fscl_copy_lhs.begin(), fscl_copy_lhs.end());
+    std::sort(fscl_copy_rhs.begin(), fscl_copy_rhs.end());
+
+    if (fscl_copy_lhs < fscl_copy_rhs)
       return true;
 
     return false;
   }
 
   void print() const {
-    for (unsigned int j = 0; j < final_state_content_id_lists_.size(); ++j) {
-      for (unsigned int k = 0; k < final_state_content_id_lists_[j].size();
-          ++k) {
-        std::cout << final_state_content_id_lists_[j][k].name_ << " - ";
-      }
-      std::cout << " | " << std::endl;
+    /*for (auto iter = decay_node_fs_content_index_infos_.begin();
+     iter != decay_node_fs_content_index_infos_.end(); ++iter) {
+     std::cout << iter->decay_state_index_ << " "
+     << getFSParticleListString(iter->decay_state_index_) << std::endl;
+     std::cout << "originates from " << iter->mother_index_ << " "
+     << getFSParticleListString(iter->mother_index_) << std::endl;
+     std::cout << "decays into " << iter->decay_products_.first << " "
+     << getFSParticleListString(iter->decay_products_.first) << " + "
+     << iter->decay_products_.second << " "
+     << getFSParticleListString(iter->decay_products_.second) << std::endl;
+     }*/
+
+    for (unsigned int i = 0; i < final_state_content_id_lists_.size(); ++i) {
+      std::cout << getFSParticleListString(i) << std::endl;
     }
     std::cout << std::endl;
   }
-};
+
+  std::string getFSParticleListString(unsigned int index) const {
+    std::stringstream ss;
+    for (unsigned int i = 0; i < final_state_content_id_lists_[index].size();
+        ++i) {
+      ss << final_state_content_id_lists_[index][i].name_ << " ";
+    }
+    return ss.str();
+  }
+}
+;
 
 }
 

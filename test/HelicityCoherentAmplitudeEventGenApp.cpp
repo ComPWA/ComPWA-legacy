@@ -57,76 +57,51 @@ int main(int argc, char **argv) {
   std::cout << "created " << decay_trees.size() << " decay trees from "
       << input_config_file << " config file!" << std::endl;
 
-  HelicityFormalism::TopologyAmplitudeFactory topology_amp_factory;
-
-  HelicityFormalism::HelicityKinematics* kinematics =
-      (HelicityFormalism::HelicityKinematics*) HelicityFormalism::HelicityKinematics::createInstance();
-
-  std::vector<HelicityFormalism::TwoBodyDecayTopology> decay_topologies =
-      topology_amp_factory.generateDecayTopologies(decay_trees);
-
-  kinematics->setDecayTopologies(decay_topologies);
-
-  Event dummy_event = topology_amp_factory.createDummyEvent(decay_trees[0]);
-  kinematics->init(dummy_event);
-
-  // The helicity amplitude tree factory sorts the decay trees based
-  // on their topology, and then creates the list of amplitude trees from the
-  // topology grouped decay trees
-
-  std::vector<HelicityFormalism::TopologyAmplitude> topology_amplitudes =
-      topology_amp_factory.generateTopologyAmplitudes(decay_trees);
-
-  std::cout << "created " << topology_amplitudes.size()
-      << " topology amplitudes from the decay trees!" << std::endl;
-
-  std::shared_ptr<Generator> gen(new RootGenerator());
-
-  std::shared_ptr<HelicityFormalism::CoherentAmplitude> amp(
-      new HelicityFormalism::CoherentAmplitude(topology_amplitudes));
-  amp->init(dummy_event);
-
-  //===== Plot amplitude
-  /* TH2D plot("plot", "", 100, 0.0, 10.0, 100, 0.0, 10.0);
-   TH2D plot_onlyweight("plot", "", 100, 0.0, 10.0, 100, 0.0, 10.0);
-
-   Event event;
-
-   unsigned int num_events(100000);
-   progressBar bar(num_events);
-   for (unsigned int i = 0; i < num_events; i++) {
-   gen->generate(event);
-   double evWeight = event.getWeight();
-   dataPoint point(event);
-   ParameterList ampPar = amp->intensity(point);
-   const Particle& p0 = event.getParticle(0);
-   const Particle& p1 = event.getParticle(1);
-   const Particle& p2 = event.getParticle(2);
-
-   plot.Fill(p1.invariantMass(p2), p0.invariantMass(p1), evWeight*ampPar.GetDoubleParameter(0)->GetValue());
-   plot_onlyweight.Fill(p1.invariantMass(p2), p0.invariantMass(p1), evWeight);
-   }
-
-   TCanvas c;
-   plot.Draw("colz");
-   c.SaveAs("plot.pdf");
-   plot_onlyweight.Draw("colz");
-   c.SaveAs("plot_onlyweight.pdf");*/
-
-  //create dummy final state event to initialized the kinematics class
   if (decay_trees.size() > 0) {
-    std::string outFile = "3Part-4vecs.root";
-    unsigned int dataSize = 1000;
+    HelicityFormalism::TopologyAmplitudeFactory topology_amp_factory;
 
     Event dummy_event = topology_amp_factory.createDummyEvent(decay_trees[0]);
-    kinematics->init(dummy_event);
+
+    std::vector<HelicityFormalism::DecayNode> leaves =
+        decay_trees[0].getLeaves();
+    std::vector<HelicityFormalism::ParticleStateInfo> fs_particles;
+    for (auto iter = leaves.begin(); iter != leaves.end(); ++iter) {
+      fs_particles.push_back(iter->state_info_);
+    }
+
+    HelicityFormalism::FinalStateParticleCombinatorics fsp_combinatorics;
+    fsp_combinatorics.init(fs_particles, dummy_event);
+
+    HelicityFormalism::HelicityKinematics* kinematics =
+        (HelicityFormalism::HelicityKinematics*) HelicityFormalism::HelicityKinematics::createInstance();
+
+    std::vector<HelicityFormalism::TwoBodyDecayTopology> decay_topologies =
+        topology_amp_factory.generateDecayTopologies(decay_trees);
+
+    kinematics->setDecayTopologies(decay_topologies);
+    kinematics->init(fsp_combinatorics);
+
+    // The helicity amplitude tree factory sorts the decay trees based
+    // on their topology, and then creates the list of amplitude trees from the
+    // topology grouped decay trees
+
+    std::vector<HelicityFormalism::TopologyAmplitude> topology_amplitudes =
+        topology_amp_factory.generateTopologyAmplitudes(decay_trees);
+
+    std::cout << "created " << topology_amplitudes.size()
+        << " topology amplitudes from the decay trees!" << std::endl;
+
+    std::shared_ptr<HelicityFormalism::CoherentAmplitude> amp(
+        new HelicityFormalism::CoherentAmplitude(topology_amplitudes));
+    amp->init();
+
+    //create dummy final state event to initialized the kinematics class
+    std::string outFile = "3Part-4vecs.root";
+    unsigned int dataSize = 1000;
 
     std::shared_ptr<Data> data(new RootReader());
     std::shared_ptr<Data> phsp(new RootReader());
     std::shared_ptr<Generator> gen(new RootGenerator());
-    std::shared_ptr<HelicityFormalism::CoherentAmplitude> amp(
-        new HelicityFormalism::CoherentAmplitude(topology_amplitudes));
-    amp->init(dummy_event);
 
     RunManager run(dataSize, amp, gen);
     run.setGenerator(gen);
@@ -137,6 +112,35 @@ int main(int argc, char **argv) {
     std::cout << "Data size: " << data->getNEvents() << std::endl;
     data->writeData("data.root", "events");
     phsp->writeData("phspdata.root", "events");
+
+    //===== Plot amplitude
+    TH2D plot("plot", "", 100, 0.0, 10.0, 100, 0.0, 10.0);
+    TH2D plot_onlyweight("plot", "", 100, 0.0, 10.0, 100, 0.0, 10.0);
+
+    Event event;
+
+    unsigned int num_events(100000);
+    progressBar bar(num_events);
+    for (unsigned int i = 0; i < num_events; i++) {
+      gen->generate(event);
+      double evWeight = event.getWeight();
+      dataPoint point(event);
+      ParameterList ampPar = amp->intensity(point);
+      const Particle& p0 = event.getParticle(0);
+      const Particle& p1 = event.getParticle(1);
+      const Particle& p2 = event.getParticle(2);
+
+      plot.Fill(p1.invariantMass(p2), p0.invariantMass(p1),
+          evWeight * ampPar.GetDoubleParameter(0)->GetValue());
+      plot_onlyweight.Fill(p1.invariantMass(p2), p0.invariantMass(p1),
+          evWeight);
+    }
+
+    TCanvas c;
+    plot.Draw("colz");
+    c.SaveAs("plot.pdf");
+    plot_onlyweight.Draw("colz");
+    c.SaveAs("plot_onlyweight.pdf");
 
     //  TFile output(outFile.c_str(),"update");
     //  output.SetCompressionLevel(1); //try level 2 also

@@ -14,13 +14,17 @@
 
 #include "Core/Kinematics.hpp"
 
-#include "ParticleStateDefinitions.hpp"
+#include "Physics/HelicityAmplitude/ParticleStateDefinitions.hpp"
+#include "Physics/HelicityAmplitude/FinalStateParticleCombinatorics.hpp"
 
 class Particle;
 
 namespace HelicityFormalism {
 
 class HelicityKinematics: public Kinematics {
+  FinalStateParticleCombinatorics fsp_combinatorics_;
+  std::map<std::vector<IDInfo>, std::vector<IndexList> > unique_id_lists_;
+
   // this has the decay information of the topology amplitudes
   std::vector<TwoBodyDecayTopology> decay_topologies_;
 
@@ -57,17 +61,15 @@ class HelicityKinematics: public Kinematics {
   HelicityKinematics(const HelicityKinematics&) = delete;
   void operator=(const HelicityKinematics&) = delete;
 
-  std::vector<IDInfo> createFSParticleList() const;
+  void buildDataPointIndexListForTopology(unsigned int index,
+      const TwoBodyDecayTopology& topology,
+      const IndexMapping& fs_particle_mapping,
+      IndexList& data_point_index_list);
 
-  IndexList createDataPointIndexListForTopology(const TwoBodyDecayTopology& topology,
+  unsigned int convertAndStoreParticleIndexList(const IndexList& particle_list,
       const IndexMapping& fs_particle_mapping);
 
-  unsigned int convertAndStoreParticleList(
-      const std::vector<IDInfo>& particle_list,
-      const IndexMapping& fs_particle_mapping);
-
-  IndexList convertParticleListToEventIndexList(
-      const std::vector<IDInfo>& particle_list,
+  IndexList convertParticleIDToEventIndexList(const IndexList& particle_id_list,
       const IndexMapping& fs_particle_mapping) const;
 
   std::vector<Vector4<double> > createRequired4Vectors(
@@ -94,9 +96,10 @@ public:
     return inst_;
   }
 
-  void setDecayTopologies(const std::vector<TwoBodyDecayTopology>& decay_topologies);
+  void setDecayTopologies(
+      const std::vector<TwoBodyDecayTopology>& decay_topologies);
 
-  void init(const Event& event);
+  void init(const FinalStateParticleCombinatorics& fsp_combinatorics);
 
   std::vector<std::vector<IndexList> > getTopologyAmplitudeDataPointIndexLists() const;
 

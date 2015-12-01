@@ -20,6 +20,8 @@ class Event;
 
 namespace HelicityFormalism {
 
+typedef std::pair<std::vector<IDInfo>, IndexList> IDInfoListUniqueIDListPair;
+
 /**
  * This class takes care of the combinatorics that may arise due to
  * indistinguishable final state particles. Its task is to calculate possible
@@ -46,6 +48,8 @@ class FinalStateParticleCombinatorics {
   IndexMapping distinguishable_fs_particle_mapping_;
 
   std::vector<IndexMapping> fs_particle_mapping_combinations_;
+
+  std::vector<ParticleStateInfo> fs_particle_list_;
 
   struct NotInListIndexFilter {
     const std::vector<unsigned int>& list_;
@@ -90,11 +94,14 @@ class FinalStateParticleCombinatorics {
   };
 
   struct UniqueMappingAccumulatorForTopology {
-    const TwoBodyDecayTopology& topology_;
+    const std::set<IndexList>& unique_id_lists_;
+    const std::vector<ParticleStateInfo>& fs_particle_list_;
     std::vector<IndexMapping> current_unique_mappings_;
 
-    UniqueMappingAccumulatorForTopology(const TwoBodyDecayTopology& topology) :
-        topology_(topology) {
+    UniqueMappingAccumulatorForTopology(
+        const std::vector<ParticleStateInfo>& fs_particle_list,
+        std::set<IndexList>& unique_id_lists) :
+        fs_particle_list_(fs_particle_list), unique_id_lists_(unique_id_lists) {
     }
 
     void addMappingIfUnique(const IndexMapping& mapping) {
@@ -104,13 +111,9 @@ class FinalStateParticleCombinatorics {
       for (unsigned int i = 0; i < current_unique_mappings_.size(); ++i) {
         // now for each final state content list compare the outcome
         // of the current mapping and the reference
-        std::vector<std::vector<IDInfo> >::const_iterator final_state_content_id_list;
-
         bool mappings_identical(true);
-        for (final_state_content_id_list =
-            topology_.final_state_content_id_lists_.begin();
-            final_state_content_id_list
-                != topology_.final_state_content_id_lists_.end();
+        for (auto final_state_content_id_list = unique_id_lists_.begin();
+            final_state_content_id_list != unique_id_lists_.end();
             ++final_state_content_id_list) {
 
           if (createFinalStateMappedList(*final_state_content_id_list,
@@ -135,19 +138,19 @@ class FinalStateParticleCombinatorics {
     }
 
     std::set<unsigned int> createFinalStateMappedList(
-        const std::vector<IDInfo>& fs_info_list, const IndexMapping& mapping) {
+        const std::vector<unsigned int>& fs_unique_id_list,
+        const IndexMapping& mapping) {
 
       std::set<unsigned int> fs_mapped_list;
-      for (unsigned int i = 0; i < fs_info_list.size(); ++i) {
-        fs_mapped_list.insert(mapping.at(fs_info_list[i].id_));
+      for (unsigned int i = 0; i < fs_unique_id_list.size(); ++i) {
+        fs_mapped_list.insert(mapping.at(fs_unique_id_list[i]));
       }
 
       return fs_mapped_list;
     }
   };
 
-  void createDistinguishableParticleMapping(
-      const std::vector<IDInfo>& fs_particle_list, const Event& event);
+  void createDistinguishableParticleMapping(const Event& event);
 
   bool isEventParticleMatchUniqueForParticle(const IDInfo& fs_particle,
       const Event& ev) const;
@@ -155,26 +158,42 @@ class FinalStateParticleCombinatorics {
   unsigned int getEventParticleIndex(const IDInfo& particle_state,
       const Event& event) const;
 
-  void createAllParticleMappings(std::vector<IDInfo> final_state_particle_pool,
-      const Event& event);
+  void createAllParticleMappings(const Event& event);
 
-  void removeDistinguishableParticles(std::vector<IDInfo>& fs_particle_pool,
+  void removeDistinguishableParticles(
+      std::vector<ParticleStateInfo>& fs_particle_pool,
       std::vector<unsigned int>& event_final_state_particle_index_pool) const;
 
   void extendParticleMappings(const IndexMapping& current_mapping,
-      std::vector<IDInfo> remaining_final_state_particle_pool,
+      std::vector<ParticleStateInfo> remaining_final_state_particle_pool,
       const Event& event,
       const std::vector<unsigned int>& remaining_event_final_state_particle_index_pool);
 
   std::vector<unsigned int> getPossibleEventParticleIndicesForParticleState(
       const IDInfo& particle_state, const Event& event) const;
+
+  void recursiveBuild(unsigned int decay_index,
+      const TwoBodyDecayTopology& topology,
+      std::map<std::vector<IDInfo>, std::vector<IndexList> >& unique_id_lists,
+      const std::vector<ParticleStateInfo>& particle_pool) const;
+
+  std::vector<unsigned int> convertIDInfoToUniqueIDList(
+      const std::vector<IDInfo>& fs_content_list,
+      std::vector<ParticleStateInfo>& remaining_fs_particles) const;
+
+  std::vector<ParticleStateInfo> createParticleListFromUniqueIDList(
+      const std::vector<unsigned int>& unique_id_vector) const;
+
 public:
   FinalStateParticleCombinatorics();
   virtual ~FinalStateParticleCombinatorics();
 
-  void init(const std::vector<IDInfo>& fs_particle_list, const Event &event);
+  void init(const std::vector<ParticleStateInfo>& fs_particle_list, const Event &event);
 
   std::vector<IndexMapping> getUniqueParticleMappingsSubsetForTopology(
+      const TwoBodyDecayTopology& topology) const;
+
+  std::map<std::vector<IDInfo>, std::vector<IndexList> > convertTopologyToUniqueIDLists(
       const TwoBodyDecayTopology& topology) const;
 };
 

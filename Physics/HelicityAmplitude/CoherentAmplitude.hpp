@@ -37,7 +37,7 @@ public:
 
   void registerTopologyAmplitudeParameters();
 
-  void init(const Event& event);
+  void init();
 
   const double integral();
   const double integral(ParameterList& par);
