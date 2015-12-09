@@ -27,8 +27,8 @@ before_install:
   - wget https://github.com/ComPWA/ComPWA/raw/gh-pages/travis_ci_external_binaries/compwa_externals_root.tar.gzip -O /tmp/compwa_externals_root.tar.gzip
   - tar xf /tmp/compwa_externals_root.tar.gzip -C /tmp
   - wget http://downloads.sourceforge.net/project/clipsrules/CLIPS/6.30/clips_core_source_630.zip -O /tmp/clips_630.zip
-  - unzip /temp/clips_630.zip -d /tmp
-  - wget https://github.com/ComPWA/ComPWA/blob/gh-pages/patches/clips_make_shared_library.patch -O clips_core_source_630/makefiles/clips_make_shared_library.patch
+  - unzip /tmp/clips_630.zip -d /tmp
+  - wget https://github.com/ComPWA/ComPWA/blob/gh-pages/patches/clips_make_shared_library.patch -O /tmp/clips_core_source_630/makefiles/clips_make_shared_library.patch
   - patch /tmp/clips_core_source_630/makefiles/makefile.g++ -i /tmp/clips_core_source_630/makefiles/clips_make_shared_library.patch
   - cd /tmp/clips_core_source_630/core
   - make -f ../makefiles/makefile.g++
