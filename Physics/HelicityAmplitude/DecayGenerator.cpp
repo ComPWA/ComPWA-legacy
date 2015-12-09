@@ -245,7 +245,7 @@ std::vector<TParticlePDG> DecayGenerator::convertIDInfoToTParticlePDG(
 void DecayGenerator::setupClipsEnvironment(void *clips_environment) const {
   std::stringstream path;
   path << getenv("COMPWA_DIR")
-      << "/Physics/HelicityAmplitude/ConcreteDecayRules/helicity_model.clp";
+      << "/Physics/HelicityAmplitude/helicity_model.clp";
   EnvLoad(clips_environment, path.str().c_str());
   //EnvReset(clips_environment);
 

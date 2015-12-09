@@ -20,15 +20,19 @@ addons:
     - libxext-dev
     - build-essential
     - g++
-    - clips
 before_install:
   #- if [ $TRAVIS_OS_NAME == linux ]; then sudo apt-get install -y x11-common libx11-6 x11-utils libX11-dev libgsl0-dev libxpm-dev libxft-dev libjpeg-dev libtiff4-dev libgmp3-dev libpng12-dev libxext-dev build-essential g++; fi
   - wget https://github.com/ComPWA/ComPWA/raw/gh-pages/travis_ci_external_binaries/compwa_externals.tar.gzip -O /tmp/compwa_externals.tar.gzip
   - tar xf /tmp/compwa_externals.tar.gzip -C /tmp
   - wget https://github.com/ComPWA/ComPWA/raw/gh-pages/travis_ci_external_binaries/compwa_externals_root.tar.gzip -O /tmp/compwa_externals_root.tar.gzip
   - tar xf /tmp/compwa_externals_root.tar.gzip -C /tmp
-  #- wget http://downloads.sourceforge.net/project/clipsrules/CLIPS/6.30/clips_core_source_630.zip -O /tmp/clips_630.zip
-  #- unzip /temp/clips_630.zip -d /tmp
+  - wget http://downloads.sourceforge.net/project/clipsrules/CLIPS/6.30/clips_core_source_630.zip -O /tmp/clips_630.zip
+  - unzip /temp/clips_630.zip -d /tmp
+  - wget https://github.com/ComPWA/ComPWA/blob/gh-pages/patches/clips_make_shared_library.patch -O clips_core_source_630/makefiles/clips_make_shared_library.patch
+  - patch /tmp/clips_core_source_630/makefiles/makefile.g++ -i /tmp/clips_core_source_630/makefiles/clips_make_shared_library.patch
+  - cd /tmp/clips_core_source_630/core
+  - make -f ../makefiles/makefile.g++
+  - cd -
 
 before_script:
   - export COMPWA_DIR=$PWD
@@ -39,7 +43,7 @@ before_script:
   - export BOOST_ROOT=/tmp/boost_1_55_0
   - export BOOST_BUILD_PATH=$BOOST_ROOT/share/boost-build
   - export ROOTSYS=/tmp/root_v5.34.23
-  #- export CLIPS_ROOT=/tmp/clips_core_source_630/core
+  - export CLIPS_ROOT=/tmp/clips_core_source_630/core
   - export PATH=$BOOST_ROOT/bin:$ROOTSYS/bin:$PATH
   - export LD_LIBRARY_PATH=$GENEVA/lib:$ROOTSYS/lib:$MINUIT2/lib:$BOOST_ROOT/lib:$PWA_LIBS:$QFT/lib:$LD_LIBRARY_PATH 
   - export OMP_NUM_THREADS=1
