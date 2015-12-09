@@ -33,7 +33,7 @@ before_install:
   - patch -p0 < clips_make_shared_library.patch
   - cd -
   - cd /tmp/clips_core_source_630/core
-  - make -f ../makefiles/makefile.g++
+  - make -f ../makefiles/makefile.g++ libclips.so
   - cd -
 
 before_script:
