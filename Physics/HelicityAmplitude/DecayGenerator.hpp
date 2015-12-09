@@ -12,6 +12,8 @@
 #ifndef PHYSICS_HELICITYAMPLITUDE_DECAYGENERATOR_HPP_
 #define PHYSICS_HELICITYAMPLITUDE_DECAYGENERATOR_HPP_
 
+#include <vector>
+
 #include "Physics/HelicityAmplitude/ParticleStateDefinitions.hpp"
 #include "Physics/HelicityAmplitude/DecayConfiguration.hpp"
 
@@ -20,6 +22,8 @@ namespace HelicityFormalism {
 typedef std::pair<TwoBodyDecayTopology, std::vector<std::vector<IDInfo> > > TopologyRemainingStatePair;
 
 class DecayGenerator {
+
+
   // containers and fields set by user
   std::vector<IDInfo> final_state_particles_;
   std::vector<IDInfo> intermediate_state_particles_;
@@ -29,7 +33,9 @@ class DecayGenerator {
 
   // dynamically filled containers
   std::vector<ParticleStateInfo> total_particle_pool_;
-
+  unsigned int mother_state_particle_index_;
+  IndexList final_state_particles_indices_;
+  IndexList intermediate_state_particles_indices_;
 
 
   ParticleStateInfo createIDInfo(const std::string& name);
@@ -48,8 +54,19 @@ class DecayGenerator {
   std::vector<TopologyRemainingStatePair> constructNextLevel(
       const std::vector<TopologyRemainingStatePair>& current_topology_remaining_state_pairs) const;
 
-  std::vector<ParticleIndexDecayTree> createDecayTreeRealizationTemplates(
+ /* std::vector<ParticleIndexDecayTree> createDecayTreeRealizationTemplates(
       const std::vector<TwoBodyDecayTopology>& possible_decay_topologies) const;
+
+  std::vector<TParticlePDG> createDecayNodeParticleCandiateList(
+      const std::vector<IDInfo>& decay_products) const;
+
+  std::vector<TParticlePDG> convertIDInfoToTParticlePDG(
+      const std::vector<IDInfo>& particle_id_info_list) const;*/
+
+  void setupClipsEnvironment(void *clips_environment) const;
+
+  void addParticleToClipsEnvironment(void *clips_environment,
+      const ParticleStateInfo& particle_info) const;
 
   std::vector<ParticleIndexDecayTree> makeConcreteDecayTrees(
       const std::vector<ParticleIndexDecayTree>& decay_tree_realization_templates);

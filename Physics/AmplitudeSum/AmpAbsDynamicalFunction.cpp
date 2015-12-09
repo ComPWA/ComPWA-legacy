@@ -122,7 +122,7 @@ double twoDimGaussian(double* z, size_t dim, void *param){
 	//mean and width need to be adjusted according to final state kinematics
 	double x0=1.1, y0=1.1; //mean
 	double sigmaX=0.01, sigmaY=0.01; //width
-	double pi = PhysConst::instance()->getConstValue("Pi");
+	double pi = PhysConst::Instance().findConstant("Pi").value_;
 
 	double result = exp( -(x-x0)*(x-x0)/(2*sigmaX*sigmaX) - (y-y0)*(y-y0)/(2*sigmaY*sigmaY) );
 	result/=2*pi*sigmaY*sigmaX;

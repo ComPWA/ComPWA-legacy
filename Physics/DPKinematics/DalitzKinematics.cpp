@@ -30,19 +30,15 @@ DalitzKinematics::DalitzKinematics(std::string _nameMother,
 		name1(_name1), name2(_name2), name3(_name3), massIdsSet(false)
 {
 	number_of_particles_ = 3;
-	M = PhysConst::instance()->getMass(_nameMother);
-	m1 = PhysConst::instance()->getMass(_name1);
-	m2 = PhysConst::instance()->getMass(_name2);
-	m3 = PhysConst::instance()->getMass(_name3);
-	spinM = PhysConst::instance()->getJ(_nameMother);
-	spin1 = PhysConst::instance()->getJ(_name1);
-	spin2 = PhysConst::instance()->getJ(_name2);
-	spin3 = PhysConst::instance()->getJ(_name3);
+	M = PhysConst::Instance().findParticle(_nameMother).mass_;
+	m1 = PhysConst::Instance().findParticle(_name1).mass_;
+	m2 = PhysConst::Instance().findParticle(_name2).mass_;
+	m3 = PhysConst::Instance().findParticle(_name3).mass_;
+	spinM = PhysConst::Instance().findParticle(_nameMother).spin_;
+	spin1 = PhysConst::Instance().findParticle(_name1).spin_;
+	spin2 = PhysConst::Instance().findParticle(_name2).spin_;
+	spin3 = PhysConst::Instance().findParticle(_name3).spin_;
 
-	if(M==-999 || m1==-999|| m2==-999|| m3==-999) {
-		BOOST_LOG_TRIVIAL(error)<<"Masses not set! EXIT!";
-		exit(1);
-	}
 	BOOST_LOG_TRIVIAL(info) << " DalitzKinematics::DalitzKinematics() | Setting up decay "
 			<<_nameMother<<"->"<<_name1<<" "<<_name2<<" "<<_name3;
 	init();
@@ -54,10 +50,10 @@ DalitzKinematics::DalitzKinematics(double _M, double _Br, double _m1, double _m2
 {
 
 	number_of_particles_ = 3;
-	spinM = PhysConst::instance()->getJ(_nameMother);
-	spin1 = PhysConst::instance()->getJ(_name1);
-	spin2 = PhysConst::instance()->getJ(_name2);
-	spin3 = PhysConst::instance()->getJ(_name3);
+  spinM = PhysConst::Instance().findParticle(_nameMother).spin_;
+  spin1 = PhysConst::Instance().findParticle(_name1).spin_;
+  spin2 = PhysConst::Instance().findParticle(_name2).spin_;
+  spin3 = PhysConst::Instance().findParticle(_name3).spin_;
 	init();
 };
 

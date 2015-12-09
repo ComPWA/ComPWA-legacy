@@ -19,14 +19,13 @@ using namespace boost::log;
 TwoBodyKinematics::TwoBodyKinematics(std::string _nameMother,
     std::string _name1, std::string _name2, double deltaMassWindow) {
   number_of_particles_ = 2;
-  M = PhysConst::instance()->getMass(_nameMother);
-  m1 = PhysConst::instance()->getMass(_name1);
-  m2 = PhysConst::instance()->getMass(_name2);
-  spinM = PhysConst::instance()->getJ(_nameMother);
-  spin1 = PhysConst::instance()->getJ(_name1);
-  spin2 = PhysConst::instance()->getJ(_name2);
-  if (M == -999 || m1 == -999 || m2 == -999)
-    throw std::runtime_error("TwoBodyKinematics(): Masses not set!");
+  M = PhysConst::Instance().findParticle(_nameMother).mass_;
+  m1 = PhysConst::Instance().findParticle(_name1).mass_;
+  m2 = PhysConst::Instance().findParticle(_name2).mass_;
+  spinM = PhysConst::Instance().findParticle(_nameMother).spin_;
+  spin1 = PhysConst::Instance().findParticle(_name1).spin_;
+  spin2 = PhysConst::Instance().findParticle(_name2).spin_;
+
   mass_min = ((M - deltaMassWindow));
   mass_max = ((M + deltaMassWindow));
   mass_sq_max = mass_max * mass_max;

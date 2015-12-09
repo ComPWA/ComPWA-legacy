@@ -86,16 +86,18 @@ void HelicityKinematics::setDecayTopologies(
 
     const std::vector<IDInfo> &fs_particle_list = dt.final_state_id_list_;
 
-    PhysConst *physics_constants = PhysConst::instance();
+    PhysConst& physics_constants = PhysConst::Instance();
 
-    mother_mass_ = physics_constants->getMass(dt.top_node_id_info_.name_);
+    mother_mass_ =
+        physics_constants.findParticle(dt.top_node_id_info_.name_).mass_;
 
     number_of_particles_ = fs_particle_list.size();
     // now set the particle mass and name vectors
     for (auto fs_particle = fs_particle_list.begin();
         fs_particle != fs_particle_list.end(); ++fs_particle) {
       particle_names_.push_back(fs_particle->name_);
-      masses_.push_back(physics_constants->getMass(fs_particle->name_));
+      masses_.push_back(
+          physics_constants.findParticle(fs_particle->name_).mass_);
     }
   }
 }
@@ -143,8 +145,8 @@ void HelicityKinematics::init(
   }
 }
 
-void HelicityKinematics::buildDataPointIndexListForTopology(
-    unsigned int index, const TwoBodyDecayTopology& topology,
+void HelicityKinematics::buildDataPointIndexListForTopology(unsigned int index,
+    const TwoBodyDecayTopology& topology,
     const IndexMapping& fs_particle_mapping, IndexList& data_point_index_list) {
 
   // if its a leaf then just return
@@ -276,20 +278,20 @@ void HelicityKinematics::translateEventToDataPoint(const Event& event,
 
   // check event to data point translation
   /*std::cout << "event:\n";
-  for (unsigned int i = 0; i < event.getNParticles(); ++i) {
-    std::cout << event.getParticle(i).E << ", " << event.getParticle(i).px
-        << ", " << event.getParticle(i).py << ", " << event.getParticle(i).pz
-        << std::endl;
-  }
-  std::cout << "4vectors:\n";
-  for (unsigned int i = 0; i < unique_occurring_cms_4vectors.size(); ++i) {
-    unique_occurring_cms_4vectors[i].Print(std::cout);
-  }
-  std::cout << "\ndata point:\n[";
-  for (unsigned int i = 0; i < point.size(); ++i) {
-    std::cout << point.getVal(i) << ", ";
-  }
-  std::cout << "]\n" << std::endl;*/
+   for (unsigned int i = 0; i < event.getNParticles(); ++i) {
+   std::cout << event.getParticle(i).E << ", " << event.getParticle(i).px
+   << ", " << event.getParticle(i).py << ", " << event.getParticle(i).pz
+   << std::endl;
+   }
+   std::cout << "4vectors:\n";
+   for (unsigned int i = 0; i < unique_occurring_cms_4vectors.size(); ++i) {
+   unique_occurring_cms_4vectors[i].Print(std::cout);
+   }
+   std::cout << "\ndata point:\n[";
+   for (unsigned int i = 0; i < point.size(); ++i) {
+   std::cout << point.getVal(i) << ", ";
+   }
+   std::cout << "]\n" << std::endl;*/
 }
 
 // IMPORTANT: the ordering of the 4 vectors is exactly the same as in the

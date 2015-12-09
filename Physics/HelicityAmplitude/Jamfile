@@ -3,6 +3,7 @@ import os ;
 
 local QFT = [ os.environ QFT ] ;
 local GSL = [ os.environ GSL_ROOT ] ;
+local CLIPS = [ os.environ CLIPS_ROOT ] ;
 
 BOOSTLIBS = -lboost_log_setup -lboost_log -lboost_date_time -lboost_serialization -lboost_system -lboost_thread -lboost_test_exec_monitor -L$(BOOST_ROOT)/lib ;
 
@@ -11,9 +12,12 @@ project :
         <include>$(QFT)/include
 	    <include>$(BOOST_ROOT)/include
 	    #<include>$(GSL)/include
+	    <include>$(CLIPS)
 	#<linkflags>-L$(GSL)/lib
 	#<linkflags>-lgsl
     #<linkflags>-lgslcblas
+	<linkflags>-L$(CLIPS)
+    <linkflags>-lclips
 	<linkflags>-L$(QFT)/lib
 	<linkflags>-lqft++
 	;

@@ -152,10 +152,9 @@ std::shared_ptr<DoubleParameter> TopologyAmplitudeFactory::getResonanceMassParam
   else {
     // if not then it has to be a final state particle so just create a
     // shared_ptr with that mass here
-    PhysConst *physics_constants = PhysConst::instance();
     return std::shared_ptr < DoubleParameter
         > (new DoubleParameter("fs_mass",
-            physics_constants->getMass(id_info.particle_id_)));
+            PhysConst::Instance().findParticle(id_info.particle_id_).mass_));
   }
 }
 

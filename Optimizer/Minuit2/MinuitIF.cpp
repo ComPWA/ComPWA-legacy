@@ -38,7 +38,7 @@ using namespace ROOT::Minuit2;
 double shiftAngle(double v){
 	double originalVal = v;
 	double val = originalVal;
-	double pi = PhysConst::instance()->getConstValue("Pi");
+	double pi = PhysConst::Instance().findConstant("Pi").value_;
 	while(val> pi) val-=2*pi;
 	while(val< -pi ) val+=2*pi;
 	if(val!=originalVal)

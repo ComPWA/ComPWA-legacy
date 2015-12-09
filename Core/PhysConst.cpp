@@ -18,21 +18,7 @@
 #include <boost/log/trivial.hpp>
 using namespace boost::log;
 
-PhysConst* PhysConst::inst = NULL;
-
 PhysConst::PhysConst() {
-  //error code
-  id.push_back(-999);
-  name.push_back("error");
-  mass.push_back(-999);
-  width.push_back(-999);
-  J.push_back(999);
-  P.push_back(false);
-  C.push_back(false);
-  nameConst.push_back("error");
-  valueConst.push_back(-999);
-  errorConst.push_back(-999);
-
   const char* pPath = getenv("COMPWA_DIR");
   std::string path = "";
   try {
@@ -46,9 +32,12 @@ PhysConst::PhysConst() {
   constantFileName = path + "/Physics/physConstants.xml";
   constantDefaultFileName = path + "/Physics/physDefaultConstants.xml";
 
-  flag_readFile = 1;
-  return;
+  readFile();
 }
+
+PhysConst::~PhysConst() {
+}
+
 void PhysConst::readFile() {
 
   // Create an empty property tree object
@@ -88,41 +77,39 @@ void PhysConst::readFile() {
   // The get_child() function returns a reference to the child
   // at the specified path; if there is no such child, it throws.
   // Property tree iterators are models of BidirectionalIterator.
-  int _id;
-  std::string _name;
-  double _mass;
-  double _width;
-  unsigned int _J;
-  int _P;
-  int _C;
-  double _error;
-  double _value;
+  ParticleProperties particle_properties;
+  Constant constant;
 
-  BOOST_FOREACH( ptree::value_type const& v, pt.get_child("particleList") ){
-  _id = -999; _name="error"; _mass=-999; _width=-999; _J=-999; _P=-999; _C=-999;    //setting default values
-  if( v.first == "particle" || v.first == "particleFlatte") {
-    _id= v.second.get<int>("ID",-999);
-    _name = v.second.get<std::string>("name","error");
-    _mass = v.second.get_child("mass").get<double>("value",-999);
-    if( v.second.count("width") != 0) _width = v.second.get_child("width").get<double>("value",-999);    //check if node "width" exists
-    _J = v.second.get<unsigned int>("J",999);
-    _P = v.second.get<int>("P",0);
-    _C = v.second.get<int>("C",0);
-  }
-  if( v.first == "particleFlatte" ) {
-    //read parameters which are specific to flatte description here.
+  BOOST_FOREACH( ptree::value_type const& v, pt.get_child("particleList") ) {
+    if (v.first == "particle" || v.first == "particleFlatte") {
+      particle_properties.id_ = v.second.get<int>("ID");
+      particle_properties.name_ = v.second.get<std::string>("name");
+      particle_properties.mass_ = v.second.get_child("mass").get<double>(
+          "value");
+      if (v.second.count("width") != 0)
+        particle_properties.width_ = v.second.get_child("width").get<double>(
+            "value");    //check if node "width" exists
 
+      particle_properties.charge_ = v.second.get<int>("charge");
+      if (v.second.count("isospin") != 0) {
+        particle_properties.isospin_ = v.second.get<unsigned int>("isospin");
+        particle_properties.isospin_z_ = v.second.get<int>("isospin_z");
+      }
+
+      particle_properties.spin_ = v.second.get<unsigned int>("J");
+      particle_properties.parity_ = v.second.get<int>("P");
+      if (v.second.count("C") != 0)
+        particle_properties.cparity_ = v.second.get<int>("C");
+    }
+    if (v.first == "particleFlatte") {
+      //read parameters which are specific to flatte description here.
+
+    }
+
+    particle_properties_list_.push_back(particle_properties);
+
+    BOOST_LOG_TRIVIAL(debug)<<"PhysConst adding particle: "<<particle_properties.name_<<" mass="<<particle_properties.mass_<<" width="<<particle_properties.width_<<" J=" <<particle_properties.spin_<<" P="<<particle_properties.parity_<< " C="<<particle_properties.cparity_;
   }
-  if(_name=="error" && _mass==-999 ) continue;
-  id.push_back(_id);
-  name.push_back(_name);
-  mass.push_back(_mass);
-  width.push_back(_width);
-  J.push_back(_J);
-  P.push_back(_P);
-  C.push_back(_C);
-  BOOST_LOG_TRIVIAL(debug)<<"PhysConst adding particle: "<<_name<<" mass="<<_mass<<" width="<<_width<<" J=" <<_J<<" P="<<_P<< " C="<<_C;
-}
 
 //Reading XML file with physics constants
   if (FILE *file = std::fopen(constantFileName.c_str(), "r")) {
@@ -140,118 +127,69 @@ void PhysConst::readFile() {
     throw std::runtime_error("Could not open default constants file!");
   }
 //	read_xml(constantFileName, pt);
-  BOOST_FOREACH( ptree::value_type const& v, pt.get_child("physConstList") ){
-  _name="error"; _error=-999; _value=-999;
-  if( v.first == "constant" ) {
-    _name = v.second.get<std::string>("name","error");
-    _value= v.second.get_child("value").get<double>("value",-999);
-    _error= v.second.get_child("value").get<double>("error",-999);
-  }
-  if(_name=="error" && _value==-999 ) continue;
-  nameConst.push_back(_name);
-  valueConst.push_back(_value);
-  errorConst.push_back(_error);
-  BOOST_LOG_TRIVIAL(debug)<<"PhysConst adding particle: "<<_name<<" mass="<<_mass<<" width="<<_width<<" J=" <<_J<<" P="<<_P<< " C="<<_C;
-}
+  BOOST_FOREACH( ptree::value_type const& v, pt.get_child("physConstList") ) {
+    if (v.first == "constant") {
+      constant.name_ = v.second.get<std::string>("name");
+      constant.value_ = v.second.get_child("value").get<double>("value");
+      if (v.second.count("error") != 0)
+        constant.error_ = v.second.get_child("value").get<double>("error");
+    }
 
-  flag_readFile = 0;
+    constants_list_.push_back(constant);
+
+    BOOST_LOG_TRIVIAL(debug)<<"PhysConst adding constant: "<<constant.name_<<" value="<<constant.value_<<" error="<<constant.error_;
+  }
+
   return;
 }
 
-int PhysConst::findParticle(int idid) {
-  if (flag_readFile)
-    readFile();
-  for (unsigned int i = 0; i < name.size(); i++) {
-    if (id[i] == idid)
-      return i;
-  }
+const Constant& PhysConst::findConstant(const std::string& name) const {
+  auto result = std::find_if(constants_list_.begin(), constants_list_.end(),
+      [&] (const Constant& lhs) {return lhs.name_ == name;});
+
+  if (result != constants_list_.end())
+    return *result;
 
   std::stringstream ss;
-  ss << "could not find particle id " << idid << std::endl;
-  throw std::runtime_error(ss.str());
-}
-int PhysConst::findConstant(std::string nnn) {
-  if (flag_readFile)
-    readFile();
-  for (unsigned int i = 0; i < nameConst.size(); i++)
-    if (nameConst[i] == nnn)
-      return i;
-
-  std::stringstream ss;
-  ss << "could not find constant with name " << nnn << std::endl;
-  throw std::runtime_error(ss.str());
-}
-int PhysConst::findParticle(std::string nnn) {
-  if (flag_readFile)
-    readFile();
-  for (unsigned int i = 0; i < name.size(); i++)
-    if (name[i] == nnn)
-      return i;
-
-  std::stringstream ss;
-  ss << "could not find particle name " << nnn << std::endl;
+  ss << "could not find constant with name " << name << std::endl;
   throw std::runtime_error(ss.str());
 }
 
-bool PhysConst::particleExists(std::string nnn) {
-  if (flag_readFile)
-    readFile();
-  for (unsigned int i = 0; i < name.size(); i++)
-    if (name[i] == nnn)
-      return true;
+const ParticleProperties& PhysConst::findParticle(int pid) const {
+  auto result = std::find_if(particle_properties_list_.begin(),
+      particle_properties_list_.end(),
+      [&] (const ParticleProperties& lhs) {return lhs.id_ == pid;});
+
+  if (result != particle_properties_list_.end())
+    return *result;
+
+  std::stringstream ss;
+  ss << "could not find particle id " << pid << std::endl;
+  throw std::runtime_error(ss.str());
+}
+
+const ParticleProperties& PhysConst::findParticle(
+    const std::string& name) const {
+  auto result = std::find_if(particle_properties_list_.begin(),
+      particle_properties_list_.end(),
+      [&] (const ParticleProperties& lhs) {return lhs.name_ == name;});
+
+  if (result != particle_properties_list_.end())
+    return *result;
+
+  std::stringstream ss;
+  ss << "could not find particle name " << name << std::endl;
+  throw std::runtime_error(ss.str());
+}
+
+bool PhysConst::particleExists(const std::string& name) const {
+  auto result = std::find_if(particle_properties_list_.begin(),
+      particle_properties_list_.end(),
+      [&] (const ParticleProperties& lhs) {return lhs.name_ == name;});
+
+  if (result != particle_properties_list_.end())
+    return true;
 
   return false;
-}
-
-double PhysConst::getMass(std::string nnn) {
-  return mass[findParticle(nnn)];
-}
-
-double PhysConst::getWidth(std::string nnn) {
-  return width[findParticle(nnn)];
-}
-
-unsigned int PhysConst::getJ(std::string nnn) {
-  return J[findParticle(nnn)];
-}
-
-bool PhysConst::getP(std::string nnn) {
-  return P[findParticle(nnn)];
-}
-
-bool PhysConst::getC(std::string nnn) {
-  return C[findParticle(nnn)];
-}
-
-int PhysConst::getId(std::string nnn) {
-  return id[findParticle(nnn)];
-}
-
-double PhysConst::getMass(int nnn) {
-  return mass[findParticle(nnn)];
-}
-
-double PhysConst::getWidth(int nnn) {
-  return width[findParticle(nnn)];
-}
-
-unsigned int PhysConst::getJ(int nnn) {
-  return J[findParticle(nnn)];
-}
-
-bool PhysConst::getP(int nnn) {
-  return P[findParticle(nnn)];
-}
-
-bool PhysConst::getC(int nnn) {
-  return C[findParticle(nnn)];
-}
-
-double PhysConst::getConstValue(std::string nnn) {
-  return valueConst[findConstant(nnn)];
-}
-
-double PhysConst::getConstError(std::string nnn) {
-  return errorConst[findConstant(nnn)];
 }
 

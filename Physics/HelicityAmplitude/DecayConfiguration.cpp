@@ -72,18 +72,18 @@ unsigned int DecayConfiguration::addParticleToList(ParticleStateInfo particle) {
 void DecayConfiguration::setRemainingParticleProperties(
     ParticleStateInfo& particle) const {
 
-  PhysConst *physics_constants = PhysConst::instance();
+  PhysConst &physics_constants = PhysConst::Instance();
 
-  if (physics_constants->particleExists(particle.pid_information_.name_)) {
+  if (physics_constants.particleExists(particle.pid_information_.name_)) {
     if (particle.pid_information_.particle_id_
-        != physics_constants->getId(particle.pid_information_.name_)) {
-      particle.pid_information_.particle_id_ = physics_constants->getId(
-          particle.pid_information_.name_);
+        != physics_constants.findParticle(particle.pid_information_.name_).id_) {
+      particle.pid_information_.particle_id_ = physics_constants.findParticle(
+          particle.pid_information_.name_).id_;
     }
     if (particle.spin_information_.J_
-        != physics_constants->getJ(particle.pid_information_.name_)) {
-      particle.spin_information_.J_ = physics_constants->getJ(
-          particle.pid_information_.name_);
+        != physics_constants.findParticle(particle.pid_information_.name_).spin_) {
+      particle.spin_information_.J_ = physics_constants.findParticle(
+          particle.pid_information_.name_).spin_;
     }
   }
 }
