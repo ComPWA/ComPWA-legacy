@@ -29,7 +29,9 @@ before_install:
   - wget http://downloads.sourceforge.net/project/clipsrules/CLIPS/6.30/clips_core_source_630.zip -O /tmp/clips_630.zip
   - unzip /tmp/clips_630.zip -d /tmp
   - wget https://github.com/ComPWA/ComPWA/blob/gh-pages/patches/clips_make_shared_library.patch -O /tmp/clips_core_source_630/makefiles/clips_make_shared_library.patch
-  - patch /tmp/clips_core_source_630/makefiles/makefile.g++ -i /tmp/clips_core_source_630/makefiles/clips_make_shared_library.patch -R
+  - cd /tmp/clips_core_source_630/makefiles
+  - patch -p0 < clips_make_shared_library.patch
+  - cd -
   - cd /tmp/clips_core_source_630/core
   - make -f ../makefiles/makefile.g++
   - cd -
