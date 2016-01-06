@@ -12,9 +12,11 @@
 #ifndef PHYSICS_HELICITYAMPLITUDE_TWOBODYDECAYAMPLITUDE_HPP_
 #define PHYSICS_HELICITYAMPLITUDE_TWOBODYDECAYAMPLITUDE_HPP_
 
-#include "ParticleStateDefinitions.hpp"
-
 #include <complex>
+
+#include "qft++.h"
+
+#include "Physics/HelicityAmplitude/ParticleStateDefinitions.hpp"
 
 class dataPoint;
 
@@ -27,6 +29,11 @@ class TwoBodyDecayAmplitude {
 
   unsigned int index_theta_helicity_angle_;
   unsigned int index_phi_helicity_angle_;
+
+  ::Spin J_; // TODO: switch this to our definition eventually
+  ::Spin M_;
+  ::Spin d1_M_;
+  ::Spin d2_M_;
 
 public:
   TwoBodyDecayAmplitude(const TwoBodyDecaySpinInformation& decay_info);

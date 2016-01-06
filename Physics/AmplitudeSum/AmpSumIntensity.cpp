@@ -134,8 +134,8 @@ void AmpSumIntensity::init(){
 					//params.GetDoubleParameter("g1_"+name),params.GetDoubleParameter("g2_"+name),
 					params.GetDoubleParameter("g1_a_0"),
 					params.GetDoubleParameter("g2_"+name),
-					PhysConst::Instance().findParticle(tmp.m_g2_part1).mass_,
-					PhysConst::Instance().findParticle(tmp.m_g2_part2).mass_,
+					ComPWA::PhysConst::Instance().findParticle(tmp.m_g2_part1).mass_,
+					ComPWA::PhysConst::Instance().findParticle(tmp.m_g2_part2).mass_,
 					subSys, tmp.m_spin,tmp.m_m,tmp.m_n,tmp.m_mesonRadius) );
 		}else{
 			params.AddParameter( std::shared_ptr<DoubleParameter> (
@@ -146,8 +146,8 @@ void AmpSumIntensity::init(){
 					params.GetDoubleParameter("motherRadius"),
 					params.GetDoubleParameter("g1_"+name),
 					params.GetDoubleParameter("g2_"+name),
-					PhysConst::Instance().findParticle(tmp.m_g2_part1).mass_,
-					PhysConst::Instance().findParticle(tmp.m_g2_part2).mass_,
+					ComPWA::PhysConst::Instance().findParticle(tmp.m_g2_part1).mass_,
+					ComPWA::PhysConst::Instance().findParticle(tmp.m_g2_part2).mass_,
 					subSys, tmp.m_spin,tmp.m_m,tmp.m_n,tmp.m_mesonRadius) );
 		}
 		totAmp.addBW(tmpbw, params.GetDoubleParameter("mag_"+name), params.GetDoubleParameter("phase_"+name));
@@ -189,11 +189,11 @@ void AmpSumIntensity::init(){
 					params.GetDoubleParameter("motherRadius"),
 					params.GetDoubleParameter("g1_a_0"),
 					params.GetDoubleParameter("g1_a_0"),
-					PhysConst::Instance().findParticle(tmp.m_g2_part1).mass_,
-					PhysConst::Instance().findParticle(tmp.m_g2_part2).mass_,
+					ComPWA::PhysConst::Instance().findParticle(tmp.m_g2_part1).mass_,
+					ComPWA::PhysConst::Instance().findParticle(tmp.m_g2_part2).mass_,
 					params.GetDoubleParameter("g3_"+name),
-					PhysConst::Instance().findParticle(tmp.m_g3_part1).mass_,
-					PhysConst::Instance().findParticle(tmp.m_g3_part2).mass_,
+					ComPWA::PhysConst::Instance().findParticle(tmp.m_g3_part1).mass_,
+					ComPWA::PhysConst::Instance().findParticle(tmp.m_g3_part2).mass_,
 					subSys, tmp.m_spin,tmp.m_m,tmp.m_n,tmp.m_mesonRadius) );
 		}else{
 			params.AddParameter( std::shared_ptr<DoubleParameter> (
@@ -208,11 +208,11 @@ void AmpSumIntensity::init(){
 					params.GetDoubleParameter("motherRadius"),
 					params.GetDoubleParameter("g1_"+name),
 					params.GetDoubleParameter("g2_"+name),
-					PhysConst::Instance().findParticle(tmp.m_g2_part1).mass_,
-					PhysConst::Instance().findParticle(tmp.m_g2_part2).mass_,
+					ComPWA::PhysConst::Instance().findParticle(tmp.m_g2_part1).mass_,
+					ComPWA::PhysConst::Instance().findParticle(tmp.m_g2_part2).mass_,
 					params.GetDoubleParameter("g3_"+name),
-					PhysConst::Instance().findParticle(tmp.m_g3_part1).mass_,
-					PhysConst::Instance().findParticle(tmp.m_g3_part2).mass_,
+					ComPWA::PhysConst::Instance().findParticle(tmp.m_g3_part1).mass_,
+					ComPWA::PhysConst::Instance().findParticle(tmp.m_g3_part2).mass_,
 					subSys, tmp.m_spin,tmp.m_m,tmp.m_n,tmp.m_mesonRadius) );
 		}
 
@@ -460,9 +460,9 @@ std::shared_ptr<FunctionTree> AmpSumIntensity::setupBasicTree(
 		newTree->createLeaf("mesonRadius_"+tmp.m_name, tmp.m_mesonRadius, "FlatteRes_"+tmp.m_name); //resonance radius
 		newTree->createLeaf("d_"+tmp.m_name, params.GetDoubleParameter("d_"+name) , "FlatteRes_"+tmp.m_name); //d
 		newTree->createLeaf("mHiddenA_"+tmp.m_name, \
-				PhysConst::Instance().findParticle(tmp.m_g2_part1).mass_, "FlatteRes_"+tmp.m_name);
+		    ComPWA::PhysConst::Instance().findParticle(tmp.m_g2_part1).mass_, "FlatteRes_"+tmp.m_name);
 		newTree->createLeaf("mHiddenB_"+tmp.m_name, \
-				PhysConst::Instance().findParticle(tmp.m_g2_part2).mass_, "FlatteRes_"+tmp.m_name);
+		    ComPWA::PhysConst::Instance().findParticle(tmp.m_g2_part2).mass_, "FlatteRes_"+tmp.m_name);
 		if(tmp.m_name.find("a_0") != tmp.m_name.npos)
 			newTree->createLeaf("g1_a_0", params.GetDoubleParameter("g1_a_0"), "FlatteRes_"+tmp.m_name);//use global parameter g1_a0 (asdfef)
 		else
@@ -501,9 +501,9 @@ std::shared_ptr<FunctionTree> AmpSumIntensity::setupBasicTree(
 			newTree->createLeaf("mesonRadius_"+tmp.m_name, tmp.m_mesonRadius, "NormFlatte_"+tmp.m_name); //spin
 			newTree->createLeaf("d_"+tmp.m_name,  params.GetDoubleParameter("d_"+name), "NormFlatte_"+tmp.m_name); //d
 			newTree->createLeaf("mHiddenA_"+tmp.m_name, \
-					PhysConst::Instance().findParticle(tmp.m_g2_part1).mass_, "NormFlatte_"+tmp.m_name);
+			    ComPWA::PhysConst::Instance().findParticle(tmp.m_g2_part1).mass_, "NormFlatte_"+tmp.m_name);
 			newTree->createLeaf("mHiddenB_"+tmp.m_name, \
-					PhysConst::Instance().findParticle(tmp.m_g2_part2).mass_, "NormFlatte_"+tmp.m_name);
+			    ComPWA::PhysConst::Instance().findParticle(tmp.m_g2_part2).mass_, "NormFlatte_"+tmp.m_name);
 			if(tmp.m_name.find("a_0(980)") != tmp.m_name.npos)
 				newTree->createLeaf("g1_a_0", params.GetDoubleParameter("g1_a_0"), "NormFlatte_"+tmp.m_name);//use global parameter g1_a0 (asdfef)
 			else
@@ -583,17 +583,17 @@ std::shared_ptr<FunctionTree> AmpSumIntensity::setupBasicTree(
 		else
 			newTree->createLeaf("g1_"+tmp.m_name, params.GetDoubleParameter("g1_"+name), "FlatteRes_"+tmp.m_name);//use local parameter g1_a0
 		newTree->createLeaf("massB1_"+tmp.m_name, \
-				PhysConst::Instance().findParticle(tmp.m_g2_part1).mass_, "FlatteRes_"+tmp.m_name);
+		    ComPWA::PhysConst::Instance().findParticle(tmp.m_g2_part1).mass_, "FlatteRes_"+tmp.m_name);
 		newTree->createLeaf("massB2_"+tmp.m_name, \
-				PhysConst::Instance().findParticle(tmp.m_g2_part2).mass_, "FlatteRes_"+tmp.m_name);
+		    ComPWA::PhysConst::Instance().findParticle(tmp.m_g2_part2).mass_, "FlatteRes_"+tmp.m_name);
 		if(tmp.m_name.find("a_0(980)") != tmp.m_name.npos)
 			newTree->createLeaf("g1_a_0", params.GetDoubleParameter("g1_a_0"), "FlatteRes_"+tmp.m_name);//use global parameter g1_a0 (asdfef)
 		else
 			newTree->createLeaf("g2_"+tmp.m_name, params.GetDoubleParameter("g2_"+name), "FlatteRes_"+tmp.m_name);
 		newTree->createLeaf("massC1_"+tmp.m_name, \
-				PhysConst::Instance().findParticle(tmp.m_g3_part1).mass_, "FlatteRes_"+tmp.m_name);
+		    ComPWA::PhysConst::Instance().findParticle(tmp.m_g3_part1).mass_, "FlatteRes_"+tmp.m_name);
 		newTree->createLeaf("massC2_"+tmp.m_name, \
-				PhysConst::Instance().findParticle(tmp.m_g3_part2).mass_, "FlatteRes_"+tmp.m_name);
+		    ComPWA::PhysConst::Instance().findParticle(tmp.m_g3_part2).mass_, "FlatteRes_"+tmp.m_name);
 		newTree->createLeaf("g3_"+tmp.m_name, params.GetDoubleParameter("g3_"+name), "FlatteRes_"+tmp.m_name);
 		//Angular distribution
 		newTree->createLeaf("m23sq", m23sq, "AngD_"+tmp.m_name); //ma
@@ -632,17 +632,17 @@ std::shared_ptr<FunctionTree> AmpSumIntensity::setupBasicTree(
 			else
 				newTree->createLeaf("g1_"+tmp.m_name, params.GetDoubleParameter("g1_"+name), "NormFlatte_"+tmp.m_name);//use local parameter g1_a0
 			newTree->createLeaf("massB1_"+tmp.m_name, \
-					PhysConst::Instance().findParticle(tmp.m_g2_part1).mass_, "NormFlatte_"+tmp.m_name);
+			    ComPWA::PhysConst::Instance().findParticle(tmp.m_g2_part1).mass_, "NormFlatte_"+tmp.m_name);
 			newTree->createLeaf("massB2_"+tmp.m_name, \
-					PhysConst::Instance().findParticle(tmp.m_g2_part2).mass_, "NormFlatte_"+tmp.m_name);
+			    ComPWA::PhysConst::Instance().findParticle(tmp.m_g2_part2).mass_, "NormFlatte_"+tmp.m_name);
 			if(tmp.m_name.find("a_0(980)") != tmp.m_name.npos)
 				newTree->createLeaf("g1_a_0", params.GetDoubleParameter("g1_a_0"), "NormFlatte_"+tmp.m_name);//use global parameter g1_a0 (asdfef)
 			else
 				newTree->createLeaf("g2_"+tmp.m_name, params.GetDoubleParameter("g2_"+name), "NormFlatte_"+tmp.m_name);
 			newTree->createLeaf("massC1_"+tmp.m_name, \
-					PhysConst::Instance().findParticle(tmp.m_g3_part1).mass_, "NormFlatte_"+tmp.m_name);
+			    ComPWA::PhysConst::Instance().findParticle(tmp.m_g3_part1).mass_, "NormFlatte_"+tmp.m_name);
 			newTree->createLeaf("massC2_"+tmp.m_name, \
-					PhysConst::Instance().findParticle(tmp.m_g3_part2).mass_, "NormFlatte_"+tmp.m_name);
+			    ComPWA::PhysConst::Instance().findParticle(tmp.m_g3_part2).mass_, "NormFlatte_"+tmp.m_name);
 			newTree->createLeaf("g3_"+tmp.m_name, params.GetDoubleParameter("g3_"+name), "NormFlatte_"+tmp.m_name);
 		} else {
 			newTree->createLeaf("N_"+tmp.m_name, 1., "Flatte_"+tmp.m_name);

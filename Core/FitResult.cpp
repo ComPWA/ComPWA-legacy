@@ -25,7 +25,7 @@ void FitResult::writeSimpleText(std::string filename){
 double FitResult::shiftAngle(double v){
 	double originalVal = v;
 	double val = originalVal;
-	double pi = PhysConst::Instance().findConstant("Pi").value_;
+	double pi = ComPWA::PhysConst::Instance().findConstant("Pi").value_;
 	while(val> pi) val-=2*pi;
 	while(val< -pi ) val+=2*pi;
 	if(val!=originalVal)
@@ -99,7 +99,7 @@ void FitResult::printFitParameters(TableFormater* tableResult){
 				continue;
 			}
 			*tableResult << *truePar;
-			double pi = PhysConst::Instance().findConstant("Pi").value_;
+			double pi = ComPWA::PhysConst::Instance().findConstant("Pi").value_;
 			double pull = (truePar->GetValue()-outPar->GetValue() );
 			if(isAngle && !isFixed) { //shift pull by 2*pi if that reduces the deviation
 				while( pull<0 && pull<-pi) pull+=2*pi;

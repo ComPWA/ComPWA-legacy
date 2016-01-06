@@ -154,7 +154,7 @@ std::shared_ptr<DoubleParameter> TopologyAmplitudeFactory::getResonanceMassParam
     // shared_ptr with that mass here
     return std::shared_ptr < DoubleParameter
         > (new DoubleParameter("fs_mass",
-            PhysConst::Instance().findParticle(id_info.particle_id_).mass_));
+            ComPWA::PhysConst::Instance().findParticle(id_info.particle_id_).mass_));
   }
 }
 

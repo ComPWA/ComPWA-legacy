@@ -22,15 +22,13 @@
 
 #include "boost/property_tree/ptree.hpp"
 
-#include "qft++.h"
-
 #include "Core/Kinematics.hpp"
 #include "Physics/DynamicalDecayFunctions/TwoBodyDecay/RelativisticBreitWigner.hpp"
 #include "Physics/DynamicalDecayFunctions/Kinematics.hpp"
 
 namespace DynamicalFunctions {
 
-RelativisticBreitWigner::RelativisticBreitWigner(const Spin& J) :
+RelativisticBreitWigner::RelativisticBreitWigner(const ComPWA::Spin& J) :
     resonance_width_(new DoubleParameter("width")), resonance_mass_(
         new DoubleParameter("mass")), meson_radius_(
         new DoubleParameter("meson_radius")), J_(J) {
@@ -81,7 +79,7 @@ std::complex<double> RelativisticBreitWigner::evaluate(const dataPoint& point,
   double width = resonance_width_->GetValue();
   double ma = daughter1_mass_->GetValue();
   double mb = daughter2_mass_->GetValue();
-  unsigned int J(J_.Numerator() / J_.Denominator());
+  unsigned int J(J_.J_numerator_ / J_.J_denominator_);
   double mesonRadius = meson_radius_->GetValue();
 
   std::complex<double> i(0, 1);

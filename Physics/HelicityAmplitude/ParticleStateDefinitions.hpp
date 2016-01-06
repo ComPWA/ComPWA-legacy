@@ -13,10 +13,11 @@
 #define PHYSICS_HELICITYAMPLITUDE_PARTICLESTATEDEFINITIONS_HPP_
 
 #include <set>
+#include <map>
 
 #include "boost/property_tree/ptree.hpp"
 
-#include "qft++.h"
+#include "Core/Utility.hpp"
 
 namespace HelicityFormalism {
 
@@ -74,53 +75,12 @@ struct IDInfo {
   }
 };
 
-struct SpinInfo {
-  Spin J_;
-  Spin M_;
 
-  bool operator==(const SpinInfo &rhs) const {
-    if (this->J_.Numerator() != rhs.J_.Numerator())
-      return false;
-    if (this->J_.Denominator() != rhs.J_.Denominator())
-      return false;
-    if (this->M_.Numerator() != rhs.M_.Numerator())
-      return false;
-    if (this->M_.Denominator() != rhs.M_.Denominator())
-      return false;
-
-    return true;
-  }
-  bool operator!=(const SpinInfo &rhs) const {
-    return !(*this == rhs);
-  }
-
-  bool operator<(const SpinInfo &rhs) const {
-    if (this->J_.Numerator() < rhs.J_.Numerator())
-      return true;
-    else if (this->J_.Numerator() > rhs.J_.Numerator())
-      return false;
-    if (this->J_.Denominator() < rhs.J_.Denominator())
-      return true;
-    else if (this->J_.Denominator() > rhs.J_.Denominator())
-      return false;
-    if (this->M_.Numerator() < rhs.M_.Numerator())
-      return true;
-    else if (this->M_.Numerator() > rhs.M_.Numerator())
-      return false;
-    if (this->M_.Denominator() < rhs.M_.Denominator())
-      return true;
-
-    return false;
-  }
-  bool operator>(const SpinInfo &rhs) const {
-    return (rhs < *this);
-  }
-};
 
 struct ParticleStateInfo {
   unsigned int unique_id_;
   IDInfo pid_information_;
-  SpinInfo spin_information_;
+  ComPWA::Spin spin_information_;
   DynamicalInfo dynamical_information_;
 
   bool operator==(const ParticleStateInfo &rhs) const {
@@ -175,7 +135,7 @@ struct ParticleIDComparison {
   }
 };
 
-typedef std::pair<SpinInfo, SpinInfo> SpinInfoPair;
+typedef std::pair<ComPWA::Spin, ComPWA::Spin> SpinInfoPair;
 typedef std::pair<DynamicalInfo, DynamicalInfo> DynamicalInfoPair;
 
 typedef std::vector<unsigned int> IndexList;
@@ -216,7 +176,7 @@ struct TwoBodyDecayIndices {
 };
 
 struct TwoBodyDecaySpinInformation {
-  SpinInfo initial_state_;
+  ComPWA::Spin initial_state_;
   SpinInfoPair final_state_;
 
   bool operator<(const TwoBodyDecaySpinInformation &rhs) const {

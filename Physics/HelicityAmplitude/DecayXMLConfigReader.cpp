@@ -36,33 +36,37 @@ void DecayXMLConfigReader::readConfig(const std::string &filename) {
 
   // add particle states to the template sets first
   // then we construct concrete states from those templates
-  BOOST_FOREACH(ptree::value_type const& v, pt_.get_child("FinalState")){
-  ParticleStateInfo ps = parseParticleStateBasics(v.second);
-  template_particle_states_[ps.unique_id_] = ps;
-}
-  BOOST_FOREACH(ptree::value_type const& v, pt_.get_child("IntermediateStates")){
-  ParticleStateInfo ps = parseParticleStateBasics(v.second);
-  template_particle_states_[ps.unique_id_] = ps;
-}
+  BOOST_FOREACH(ptree::value_type const& v, pt_.get_child("FinalState")) {
+    ParticleStateInfo ps = parseParticleStateBasics(v.second);
+    template_particle_states_[ps.unique_id_] = ps;
+  }
+  BOOST_FOREACH(ptree::value_type const& v, pt_.get_child("IntermediateStates")) {
+    ParticleStateInfo ps = parseParticleStateBasics(v.second);
+    template_particle_states_[ps.unique_id_] = ps;
+  }
 
 // now go through the decay tree info and construct them
-  BOOST_FOREACH(ptree::value_type const& decay_tree, pt_.get_child("DecayTrees")){
-  BOOST_FOREACH(ptree::value_type const& decay_node, decay_tree.second) {
-    ParticleStateInfo mothers = parseParticleStateRemainders(decay_node.second.get_child("Mother").get_child("ParticleState"));
-    std::vector<ParticleStateInfo> daughter_lists;
-    BOOST_FOREACH(ptree::value_type const& daugthers, decay_node.second.get_child("Daughters")) {
-      daughter_lists.push_back(parseParticleStateRemainders(daugthers.second));
-    }
+  BOOST_FOREACH(ptree::value_type const& decay_tree, pt_.get_child("DecayTrees")) {
+    BOOST_FOREACH(ptree::value_type const& decay_node, decay_tree.second) {
+      ParticleStateInfo mothers = parseParticleStateRemainders(
+          decay_node.second.get_child("Mother").get_child("ParticleState"));
+      std::vector<ParticleStateInfo> daughter_lists;
+      BOOST_FOREACH(ptree::value_type const& daugthers, decay_node.second.get_child("Daughters")) {
+        daughter_lists.push_back(
+            parseParticleStateRemainders(daugthers.second));
+      }
 
-    ptree strength_phase;
-    boost::optional<const ptree&> strength_phase_opt = decay_node.second.get_child_optional("StrengthPhase");
-    if (strength_phase_opt.is_initialized()) {
-      strength_phase = decay_node.second.get_child("StrengthPhase");
+      ptree strength_phase;
+      boost::optional<const ptree&> strength_phase_opt =
+          decay_node.second.get_child_optional("StrengthPhase");
+      if (strength_phase_opt.is_initialized()) {
+        strength_phase = decay_node.second.get_child("StrengthPhase");
+      }
+      decay_configuration_.addDecayToCurrentDecayTree(mothers, daughter_lists,
+          strength_phase);
     }
-    decay_configuration_.addDecayToCurrentDecayTree(mothers, daughter_lists, strength_phase);
+    decay_configuration_.addCurrentDecayTreeToList();
   }
-  decay_configuration_.addCurrentDecayTreeToList();
-}
 }
 
 ParticleStateInfo DecayXMLConfigReader::parseParticleStateBasics(
@@ -73,8 +77,9 @@ ParticleStateInfo DecayXMLConfigReader::parseParticleStateBasics(
 
   boost::optional<const ptree&> spin_info = pt.get_child_optional("SpinInfo");
   if (spin_info.is_initialized()) {
-    ps.spin_information_.J_.SetSpin(
-        pt.get_child("SpinInfo").get<unsigned int>("J"), 1);
+    ps.spin_information_.J_numerator_ = pt.get_child("SpinInfo").get<
+        unsigned int>("J");
+    ps.spin_information_.J_denominator_ = 1;
   }
   else {
     // try to read it from a database
@@ -100,7 +105,7 @@ ParticleStateInfo DecayXMLConfigReader::parseParticleStateRemainders(
   auto found_particle_state = template_particle_states_.find(id);
   if (found_particle_state != template_particle_states_.end()) {
     ParticleStateInfo ps(found_particle_state->second);
-    ps.spin_information_.M_.SetSpin(pt.get<int>("M"), 1);
+    ps.spin_information_.J_z_numerator_ = pt.get<int>("M");
 
     return ps;
   }

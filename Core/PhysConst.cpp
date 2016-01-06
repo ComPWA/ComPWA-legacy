@@ -18,6 +18,8 @@
 #include <boost/log/trivial.hpp>
 using namespace boost::log;
 
+namespace ComPWA {
+
 PhysConst::PhysConst() {
   const char* pPath = getenv("COMPWA_DIR");
   std::string path = "";
@@ -92,23 +94,29 @@ void PhysConst::readFile() {
 
       particle_properties.charge_ = v.second.get<int>("charge");
       if (v.second.count("isospin") != 0) {
-        particle_properties.isospin_ = v.second.get<unsigned int>("isospin");
-        particle_properties.isospin_z_ = v.second.get<int>("isospin_z");
+        particle_properties.isospin_.J_numerator_ = v.second.get<unsigned int>(
+            "isospin");
+        particle_properties.isospin_.J_denominator_ = 1;
+        particle_properties.isospin_.J_z_numerator_ = v.second.get<int>(
+            "isospin_z");
       }
 
-      particle_properties.spin_ = v.second.get<unsigned int>("J");
+      particle_properties.spin_.J_numerator_ = v.second.get<unsigned int>("J");
+      particle_properties.spin_.J_denominator_ = 1;
+
       particle_properties.parity_ = v.second.get<int>("P");
       if (v.second.count("C") != 0)
         particle_properties.cparity_ = v.second.get<int>("C");
+
+      if (v.first == "particleFlatte") {
+        //read parameters which are specific to flatte description here.
+
+      }
+
+      particle_properties_list_.push_back(particle_properties);
+
+      BOOST_LOG_TRIVIAL(debug)<<"PhysConst adding particle: "<<particle_properties.name_<<" mass="<<particle_properties.mass_<<" width="<<particle_properties.width_<<" J=" <<1.0*particle_properties.spin_.J_numerator_/particle_properties.spin_.J_denominator_<<" P="<<particle_properties.parity_<< " C="<<particle_properties.cparity_;
     }
-    if (v.first == "particleFlatte") {
-      //read parameters which are specific to flatte description here.
-
-    }
-
-    particle_properties_list_.push_back(particle_properties);
-
-    BOOST_LOG_TRIVIAL(debug)<<"PhysConst adding particle: "<<particle_properties.name_<<" mass="<<particle_properties.mass_<<" width="<<particle_properties.width_<<" J=" <<particle_properties.spin_<<" P="<<particle_properties.parity_<< " C="<<particle_properties.cparity_;
   }
 
 //Reading XML file with physics constants
@@ -182,6 +190,22 @@ const ParticleProperties& PhysConst::findParticle(
   throw std::runtime_error(ss.str());
 }
 
+std::vector<ParticleProperties> PhysConst::findParticlesWithQN(
+    const ParticleProperties& qn) const {
+  std::vector<ParticleProperties> particle_list;
+
+  auto result = particle_properties_list_.begin();
+  while (result != particle_properties_list_.end()) {
+    result = std::find_if(result, particle_properties_list_.end(), qn);
+    if (result != particle_properties_list_.end()) {
+      particle_list.push_back(*result);
+      ++result;
+    }
+  }
+
+  return particle_list;
+}
+
 bool PhysConst::particleExists(const std::string& name) const {
   auto result = std::find_if(particle_properties_list_.begin(),
       particle_properties_list_.end(),
@@ -193,3 +217,4 @@ bool PhysConst::particleExists(const std::string& name) const {
   return false;
 }
 
+}

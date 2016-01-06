@@ -24,7 +24,11 @@
 
 #include <iostream>
 #include <vector>
+
 #include <Core/Parameter.hpp>
+#include <Core/Utility.hpp>
+
+namespace ComPWA {
 
 struct ParticleProperties {
   std::string name_;
@@ -32,15 +36,31 @@ struct ParticleProperties {
   double width_;
   int id_;
   int charge_;
-  unsigned int isospin_;
-  int isospin_z_;
-  unsigned int spin_;
+  Spin isospin_;
+  Spin spin_;
   int parity_;
   int cparity_;
 
   ParticleProperties() :
-      name_(""), mass_(0.0), width_(0.0), id_(0), charge_(0), isospin_(0), isospin_z_(
-          0), spin_(0), parity_(0), cparity_(0) {
+      name_(""), mass_(0.0), width_(0.0), id_(0), charge_(0), parity_(0), cparity_(
+          0) {
+  }
+
+  bool operator()(const ParticleProperties &lhs) const {
+    if (charge_ != lhs.charge_)
+      return false;
+    if (isospin_ != lhs.isospin_)
+      return false;
+    if (spin_.J_numerator_ != lhs.spin_.J_numerator_)
+      return false;
+    if (spin_.J_denominator_ != lhs.spin_.J_denominator_)
+      return false;
+    if (parity_ != lhs.parity_)
+      return false;
+    if (cparity_ != lhs.cparity_)
+      return false;
+
+    return true;
   }
 };
 
@@ -69,6 +89,8 @@ public:
   const Constant& findConstant(const std::string& name) const;
   const ParticleProperties& findParticle(const std::string& name) const;
   const ParticleProperties& findParticle(int pid) const;
+  std::vector<ParticleProperties> findParticlesWithQN(
+      const ParticleProperties& qn) const;
   bool particleExists(const std::string& name) const;
 
 private:
@@ -83,5 +105,7 @@ private:
   std::vector<ParticleProperties> particle_properties_list_;
   std::vector<Constant> constants_list_;
 };
+
+}
 
 #endif /* PHYSCONST_HPP_ */

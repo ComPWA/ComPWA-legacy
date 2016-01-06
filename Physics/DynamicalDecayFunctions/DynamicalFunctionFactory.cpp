@@ -29,7 +29,7 @@ std::shared_ptr<AbstractDynamicalFunction> DynamicalFunctionFactory::generateRel
     const ParameterList& external_parameters) {
 
   std::shared_ptr<RelativisticBreitWigner> rel_bw(
-      new RelativisticBreitWigner(state_info.spin_info_.initial_state_.J_));
+      new RelativisticBreitWigner(state_info.spin_info_.initial_state_));
   rel_bw->initialiseParameters(state_info.dynamical_info_.initial_state_,
       external_parameters);
 

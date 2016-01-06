@@ -97,9 +97,10 @@ bool DecayTreeFactory::isNodeADaughterInTopology(
       is_daughter = isNodeADaughter(node,
           decay_products_iter->particle_indices_);
       if (is_daughter)
-        break;
+        goto finish;
     }
   }
+  finish:
   return is_daughter;
 }
 

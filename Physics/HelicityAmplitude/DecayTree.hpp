@@ -194,8 +194,10 @@ class DecayTree {
     void operator()(std::ostream& out,
         HelicityTree::vertex_descriptor v) const {
       out << "[label=\"" << graph_[v].state_info_.pid_information_.name_ << " ("
-          << graph_[v].state_info_.spin_information_.J_ << ","
-          << graph_[v].state_info_.spin_information_.M_ << ") \"]";
+          << graph_[v].state_info_.spin_information_.J_numerator_ << "/"
+          << graph_[v].state_info_.spin_information_.J_denominator_ << ","
+          << graph_[v].state_info_.spin_information_.J_z_numerator_ << "/"
+          << graph_[v].state_info_.spin_information_.J_denominator_ << ") \"]";
     }
   private:
     const HelicityTree& graph_;
