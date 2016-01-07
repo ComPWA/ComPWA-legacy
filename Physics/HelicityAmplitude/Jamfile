@@ -16,7 +16,7 @@ project :
 	#<linkflags>-L$(GSL)/lib
 	#<linkflags>-lgsl
     #<linkflags>-lgslcblas
-	<linkflags>-L$(CLIPS)
+	<linkflags>-L$(CLIPS)/lib
     <linkflags>-lclips
 	<linkflags>-L$(QFT)/lib
 	<linkflags>-lqft++

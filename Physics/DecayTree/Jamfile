@@ -8,8 +8,8 @@ BOOSTLIBS = -lboost_log_setup -lboost_log -lboost_date_time -lboost_serializatio
 project :
 	requirements
 	    <include>$(BOOST_ROOT)/include
-	    <include>$(CLIPS)
-	<linkflags>-L$(CLIPS)
+	    <include>$(CLIPS)/include
+	<linkflags>-L$(CLIPS)/lib
     <linkflags>-lclips
 	;
 

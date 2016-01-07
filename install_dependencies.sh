@@ -95,3 +95,27 @@ cd Minuit2-5.34.14
 make
 make install
 }
+
+#install clips --------------------------------------------------------------------------
+function install_clips {
+cd ${temp_workdir}
+
+wget http://downloads.sourceforge.net/project/clipsrules/CLIPS/6.30/clips_core_source_630.zip -O ${temp_workdir}/clips_630.zip
+
+unzip clips_630.zip -d ${temp_workdir}
+
+wget https://raw.githubusercontent.com/ComPWA/ComPWA/gh-pages/patches/clips_make_shared_library.patch -O ${temp_workdir}/clips_core_source_630/makefiles/clips_make_shared_library.patch
+cd ${temp_workdir}/clips_core_source_630/makefiles
+patch -p0 < clips_make_shared_library.patch
+cd -
+
+cd ${temp_workdir}/clips_core_source_630/core
+make -f ../makefiles/makefile.g++ libclips.so
+
+clips_root=${install_path}/clips_630
+mkdir -p ${clips_root}/lib
+mkdir -p ${clips_root}/include
+
+cp *.h ${clips_root}/include/.
+cp libclips.so ${clips_root}/lib/.
+}
