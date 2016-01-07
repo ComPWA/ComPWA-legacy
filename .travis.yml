@@ -51,6 +51,7 @@ before_script:
   - export OMP_NUM_THREADS=1
 script:
   - bjam
+  - ./run-test-apps.sh
 after_success:
   - bash <(curl -s https://codecov.io/bash)
 
