@@ -9,12 +9,13 @@
 //   Stefan Pflueger - initial API and implementation
 //-------------------------------------------------------------------------------
 
-#include "DecayXMLConfigReader.hpp"
-
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/foreach.hpp>
 
-namespace HelicityFormalism {
+#include "Physics/DecayTree/DecayXMLConfigReader.hpp"
+
+namespace ComPWA {
+namespace DecayTree {
 
 using boost::property_tree::ptree;
 
@@ -126,5 +127,5 @@ ParticleStateInfo DecayXMLConfigReader::parseParticleStateRemainders(
  return ids;
  }*/
 
-}
-/* namespace HelicityFormalism */
+} /* namespace DecayTree */
+} /* namespace ComPWA */

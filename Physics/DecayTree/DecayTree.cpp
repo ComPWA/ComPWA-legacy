@@ -15,7 +15,8 @@
 
 #include "DecayTree.hpp"
 
-namespace HelicityFormalism {
+namespace ComPWA {
+namespace DecayTree {
 
 DecayTree::DecayTree() {
 }
@@ -109,12 +110,12 @@ void DecayTree::determineListOfDecayVertices() {
 }
 
 const std::vector<
-    boost::graph_traits<HelicityFormalism::HelicityTree>::vertex_descriptor>& DecayTree::getDecayVertexList() const {
+    boost::graph_traits<HelicityTree>::vertex_descriptor>& DecayTree::getDecayVertexList() const {
   return decay_vertex_list_;
 }
 
 std::vector<
-    boost::graph_traits<HelicityFormalism::HelicityTree>::vertex_descriptor> DecayTree::getDecayNodesList() const {
+    boost::graph_traits<HelicityTree>::vertex_descriptor> DecayTree::getDecayNodesList() const {
   std::vector<boost::graph_traits<HelicityTree>::vertex_descriptor> decay_nodes_list;
   GetAscendingVertexList vis(decay_nodes_list);
   boost::depth_first_search(decay_tree_, boost::visitor(vis));
@@ -138,7 +139,7 @@ void DecayTree::createDecay(const DecayNode &mother,
   determineListOfDecayVertices();
 }
 
-boost::graph_traits<HelicityFormalism::HelicityTree>::vertex_descriptor DecayTree::addVertex(
+boost::graph_traits<HelicityTree>::vertex_descriptor DecayTree::addVertex(
     const DecayNode& node) {
   boost::graph_traits<HelicityTree>::vertex_descriptor return_vertex;
   boost::graph_traits<HelicityTree>::vertex_iterator vi, vi_end, next;
@@ -163,7 +164,7 @@ boost::graph_traits<HelicityFormalism::HelicityTree>::vertex_descriptor DecayTre
 }
 
 std::vector<ParticleStateInfo> DecayTree::createDecayProductsFinalStateParticleLists(
-    const boost::graph_traits<HelicityFormalism::HelicityTree>::vertex_descriptor& vertex) const {
+    const boost::graph_traits<HelicityTree>::vertex_descriptor& vertex) const {
   std::vector<unsigned int> complete_decendant_list;
 
   GetVertexDecendants vis(complete_decendant_list, vertex);
@@ -185,4 +186,5 @@ void DecayTree::print(std::ostream& os) const {
   write_graphviz(os, decay_tree_, vertex_writer);
 }
 
-} /* namespace HelicityFormalism */
+} /* namespace DecayTree */
+} /* namespace ComPWA */

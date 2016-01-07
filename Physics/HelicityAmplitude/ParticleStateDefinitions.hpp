@@ -21,7 +21,11 @@
 
 namespace HelicityFormalism {
 
-typedef boost::property_tree::ptree DynamicalInfo;
+typedef ComPWA::ParticleStateInfo ParticleStateInfo;
+typedef ComPWA::IDInfo IDInfo;
+typedef ComPWA::IndexList IndexList;
+typedef ComPWA::IndexPair IndexPair;
+typedef ComPWA::IndexMapping IndexMapping;
 
 struct HelicityAngles {
   double theta_;
@@ -32,90 +36,6 @@ struct HelicityAngles {
   }
 };
 
-struct IDInfo {
-  int particle_id_;
-  std::string name_;
-
-  bool operator==(const IDInfo &rhs) const {
-    /* if (this->id_ != rhs.id_)
-     return false;*/
-    if (this->particle_id_ != rhs.particle_id_)
-      return false;
-    if (this->name_ != rhs.name_)
-      return false;
-
-    return true;
-  }
-  bool operator!=(const IDInfo &rhs) const {
-    return !(*this == rhs);
-  }
-
-  bool operator<(const IDInfo &rhs) const {
-    /*if (this->id_ < rhs.id_)
-     return true;
-     else if (this->id_ > rhs.id_)
-     return false;*/
-
-    return lessThenIgnoringID(*this, rhs);
-  }
-
-  static bool lessThenIgnoringID(const IDInfo &lhs, const IDInfo &rhs) {
-    if (lhs.particle_id_ < rhs.particle_id_)
-      return true;
-    else if (lhs.particle_id_ > rhs.particle_id_)
-      return false;
-    if (lhs.name_ < rhs.name_)
-      return true;
-
-    return false;
-  }
-
-  bool operator>(const IDInfo &rhs) const {
-    return (rhs < *this);
-  }
-};
-
-
-
-struct ParticleStateInfo {
-  unsigned int unique_id_;
-  IDInfo pid_information_;
-  ComPWA::Spin spin_information_;
-  DynamicalInfo dynamical_information_;
-
-  bool operator==(const ParticleStateInfo &rhs) const {
-    if (this->unique_id_ != rhs.unique_id_)
-      return false;
-    if (this->pid_information_ != rhs.pid_information_)
-      return false;
-    if (this->spin_information_ != rhs.spin_information_)
-      return false;
-
-    return true;
-  }
-
-  bool operator!=(const ParticleStateInfo &rhs) const {
-    return !((*this) == rhs);
-  }
-
-  bool operator<(const ParticleStateInfo &rhs) const {
-    if (this->unique_id_ < rhs.unique_id_)
-      return true;
-    else if (this->unique_id_ > rhs.unique_id_)
-      return false;
-    if (this->pid_information_ < rhs.pid_information_)
-      return true;
-    else if (this->pid_information_ > rhs.pid_information_)
-      return false;
-    if (this->spin_information_ < rhs.spin_information_)
-      return true;
-
-    return false;
-  }
-  bool operator>(const ParticleStateInfo &rhs) const {
-    return (rhs < *this);
-  }
-};
 
 struct ParticleIDComparison {
   unsigned int ps_id_;
@@ -126,21 +46,17 @@ struct ParticleIDComparison {
       ps_id_(ps_id) {
   }
 
-  bool operator()(const ParticleStateInfo& ps) {
+  bool operator()(const ComPWA::ParticleStateInfo& ps) {
     return ps.unique_id_ == ps_id_;
   }
 
-  bool operator()(const ParticleStateInfo& lhs, const ParticleStateInfo& rhs) {
+  bool operator()(const ComPWA::ParticleStateInfo& lhs, const ComPWA::ParticleStateInfo& rhs) {
     return lhs.unique_id_ < rhs.unique_id_;
   }
 };
 
 typedef std::pair<ComPWA::Spin, ComPWA::Spin> SpinInfoPair;
-typedef std::pair<DynamicalInfo, DynamicalInfo> DynamicalInfoPair;
-
-typedef std::vector<unsigned int> IndexList;
-typedef std::pair<unsigned int, unsigned int> IndexPair;
-typedef std::map<unsigned int, unsigned int> IndexMapping;
+typedef std::pair<ComPWA::DynamicalInfo, ComPWA::DynamicalInfo> DynamicalInfoPair;
 
 struct TwoBodyDecayIndices {
   unsigned int mother_index_;
@@ -196,7 +112,7 @@ struct TwoBodyDecaySpinInformation {
 };
 
 struct TwoBodyDecayDynamicalInformation {
-  DynamicalInfo initial_state_;
+  ComPWA::DynamicalInfo initial_state_;
 
   bool operator<(const TwoBodyDecayDynamicalInformation &rhs) const {
     if (generateMap(this->initial_state_) < generateMap(rhs.initial_state_))
@@ -210,9 +126,9 @@ struct TwoBodyDecayDynamicalInformation {
   }
 
   std::map<std::string, std::string> generateMap(
-      const DynamicalInfo& tree) const {
+      const ComPWA::DynamicalInfo& tree) const {
     std::map<std::string, std::string> return_map;
-    DynamicalInfo::const_iterator tree_iter;
+    ComPWA::DynamicalInfo::const_iterator tree_iter;
     for (tree_iter = tree.begin(); tree_iter != tree.end(); ++tree_iter) {
       return_map[tree_iter->first] = tree_iter->second.get_value<std::string>();
     }
@@ -237,17 +153,17 @@ struct TwoBodyDecayInformation {
 };
 
 struct checkLessThanOnIDInfoVectorsIgnoringID {
-  bool operator()(const std::vector<IDInfo>& lhs,
-      const std::vector<IDInfo>& rhs) const {
+  bool operator()(const std::vector<ComPWA::IDInfo>& lhs,
+      const std::vector<ComPWA::IDInfo>& rhs) const {
     if (lhs.size() < rhs.size())
       return true;
     else if (lhs.size() > rhs.size())
       return false;
     std::vector<unsigned int> not_found_elements;
-    std::vector<IDInfo> clone_lhs(lhs);
-    std::vector<IDInfo> clone_rhs(rhs);
-    std::sort(clone_lhs.begin(), clone_lhs.end(), IDInfo::lessThenIgnoringID);
-    std::sort(clone_rhs.begin(), clone_rhs.end(), IDInfo::lessThenIgnoringID);
+    std::vector<ComPWA::IDInfo> clone_lhs(lhs);
+    std::vector<ComPWA::IDInfo> clone_rhs(rhs);
+    std::sort(clone_lhs.begin(), clone_lhs.end(), ComPWA::IDInfo::lessThenIgnoringID);
+    std::sort(clone_rhs.begin(), clone_rhs.end(), ComPWA::IDInfo::lessThenIgnoringID);
     for (unsigned int i = 0; i < lhs.size(); ++i) {
       if (clone_lhs[i].particle_id_ < clone_rhs[i].particle_id_)
         return true;
@@ -259,12 +175,12 @@ struct checkLessThanOnIDInfoVectorsIgnoringID {
 };
 
 struct TwoBodyDecayTopology {
-  IDInfo top_node_id_info_;
-  std::vector<IDInfo> final_state_id_list_;
+  ComPWA::IDInfo top_node_id_info_;
+  std::vector<ComPWA::IDInfo> final_state_id_list_;
   // list of final state particle lists corresponding to decay states
   // this actually uniquely defines a decay topology
   // all the other information is stored for other purposes
-  std::vector<std::vector<IDInfo> > final_state_content_id_lists_;
+  std::vector<std::vector<ComPWA::IDInfo> > final_state_content_id_lists_;
   std::vector<TwoBodyDecayIndices> decay_node_fs_content_index_infos_;
 
   // evaluation order vector
@@ -276,7 +192,7 @@ struct TwoBodyDecayTopology {
   std::map<unsigned int, IndexList> final_state_content_unique_id_mapping_;
 
   unsigned int insertFinalStateContentList(
-      std::vector<IDInfo> fs_content_list) {
+      std::vector<ComPWA::IDInfo> fs_content_list) {
     std::sort(fs_content_list.begin(), fs_content_list.end());
 
     unsigned int position_index;
@@ -305,7 +221,7 @@ struct TwoBodyDecayTopology {
     return mother_index;
   }
 
-  unsigned int findFinalStateList(std::vector<IDInfo> fs_content_list) {
+  unsigned int findFinalStateList(std::vector<ComPWA::IDInfo> fs_content_list) {
     std::sort(fs_content_list.begin(), fs_content_list.end());
 
     unsigned int position_index(0);
@@ -328,9 +244,9 @@ struct TwoBodyDecayTopology {
   }
 
   bool operator==(const TwoBodyDecayTopology &rhs) const {
-    std::vector<std::vector<IDInfo> > fscl_copy_lhs(
+    std::vector<std::vector<ComPWA::IDInfo> > fscl_copy_lhs(
         this->final_state_content_id_lists_);
-    std::vector<std::vector<IDInfo> > fscl_copy_rhs(
+    std::vector<std::vector<ComPWA::IDInfo> > fscl_copy_rhs(
         rhs.final_state_content_id_lists_);
     std::sort(fscl_copy_lhs.begin(), fscl_copy_lhs.end());
     std::sort(fscl_copy_rhs.begin(), fscl_copy_rhs.end());
@@ -342,9 +258,9 @@ struct TwoBodyDecayTopology {
   }
 
   bool operator<(const TwoBodyDecayTopology &rhs) const {
-    std::vector<std::vector<IDInfo> > fscl_copy_lhs(
+    std::vector<std::vector<ComPWA::IDInfo> > fscl_copy_lhs(
         this->final_state_content_id_lists_);
-    std::vector<std::vector<IDInfo> > fscl_copy_rhs(
+    std::vector<std::vector<ComPWA::IDInfo> > fscl_copy_rhs(
         rhs.final_state_content_id_lists_);
 
     std::sort(fscl_copy_lhs.begin(), fscl_copy_lhs.end());

@@ -68,8 +68,9 @@ std::shared_ptr<FitResult> MinuitIF::exec(ParameterList& par){
 		std::shared_ptr<DoubleParameter> actPat = par.GetDoubleParameter(i);
 		//if no error is set or error set to 0 we use a default error,
 		//otherwise minuit treads this parameter as fixed
-		double error = actPat->GetError();
-		if(error<=0) error = 0.01;
+		double error(0.01);
+		if(actPat->HasError())
+		  error = actPat->GetError();
 		if(!actPat->IsFixed() && actPat->GetName().find("phase") != actPat->GetName().npos)
 			actPat->SetValue( shiftAngle(actPat->GetValue()) );
 

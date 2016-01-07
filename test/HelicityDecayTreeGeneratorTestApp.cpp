@@ -1,6 +1,6 @@
 #include <fstream>
 
-#include "Physics/HelicityAmplitude/DecayGenerator.hpp"
+#include "Physics/DecayTree/DecayGenerator.hpp"
 
 int main(int argc, char **argv) {
   std::cout << "  ComPWA Copyright (C) 2013  Stefan Pflueger " << std::endl;
@@ -9,9 +9,9 @@ int main(int argc, char **argv) {
       << std::endl;
   std::cout << std::endl;
 
-  HelicityFormalism::DecayGenerator decay_generator;
+  ComPWA::DecayTree::DecayGenerator decay_generator;
   // initialize
-  HelicityFormalism::IFParticleInfo if_particle = decay_generator.createIFParticleInfo("gamma");
+  ComPWA::DecayTree::IFParticleInfo if_particle = decay_generator.createIFParticleInfo("gamma");
   decay_generator.addFinalStateParticles(if_particle);
 //  decay_generator.addFinalStateParticles("gamma");
 //  decay_generator.addFinalStateParticles("pi0");

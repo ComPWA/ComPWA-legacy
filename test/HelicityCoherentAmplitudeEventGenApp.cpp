@@ -25,9 +25,9 @@
 #include "DataReader/RootReader/RootReader.hpp"
 #include "Core/ProgressBar.hpp"
 
-#include "Physics/HelicityAmplitude/DecayConfiguration.hpp"
-#include "Physics/HelicityAmplitude/DecayXMLConfigReader.hpp"
-#include "Physics/HelicityAmplitude/DecayTreeFactory.hpp"
+#include "Physics/DecayTree/DecayConfiguration.hpp"
+#include "Physics/DecayTree/DecayXMLConfigReader.hpp"
+#include "Physics/DecayTree/DecayTreeFactory.hpp"
 #include "Physics/HelicityAmplitude/TopologyAmplitudeFactory.hpp"
 #include "Physics/HelicityAmplitude/HelicityKinematics.hpp"
 #include "Physics/HelicityAmplitude/CoherentAmplitude.hpp"
@@ -45,13 +45,13 @@ int main(int argc, char **argv) {
   //load resonances
   std::string input_config_file("Physics/HelicityAmplitude/JPSI_ypipi.xml");
 
-  HelicityFormalism::DecayConfiguration decay_configuration;
-  HelicityFormalism::DecayXMLConfigReader xml_reader(decay_configuration);
+  ComPWA::DecayTree::DecayConfiguration decay_configuration;
+  ComPWA::DecayTree::DecayXMLConfigReader xml_reader(decay_configuration);
   xml_reader.readConfig(input_config_file);
 
-  HelicityFormalism::DecayTreeFactory decay_tree_factory(decay_configuration);
+  ComPWA::DecayTree::DecayTreeFactory decay_tree_factory(decay_configuration);
 
-  std::vector<HelicityFormalism::DecayTree> decay_trees =
+  std::vector<ComPWA::DecayTree::DecayTree> decay_trees =
       decay_tree_factory.createDecayTrees();
 
   std::cout << "created " << decay_trees.size() << " decay trees from "
@@ -62,7 +62,7 @@ int main(int argc, char **argv) {
 
     Event dummy_event = topology_amp_factory.createDummyEvent(decay_trees[0]);
 
-    std::vector<HelicityFormalism::DecayNode> leaves =
+    std::vector<ComPWA::DecayTree::DecayNode> leaves =
         decay_trees[0].getLeaves();
     std::vector<HelicityFormalism::ParticleStateInfo> fs_particles;
     for (auto iter = leaves.begin(); iter != leaves.end(); ++iter) {

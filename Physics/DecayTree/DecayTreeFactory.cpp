@@ -9,10 +9,12 @@
 //   Stefan Pflueger - initial API and implementation
 //-------------------------------------------------------------------------------
 
-#include "DecayTreeFactory.hpp"
-#include "ParticleStateDefinitions.hpp"
+#include "Core/Utility.hpp"
 
-namespace HelicityFormalism {
+#include "Physics/DecayTree/DecayTreeFactory.hpp"
+
+namespace ComPWA {
+namespace DecayTree {
 
 DecayTreeFactory::DecayTreeFactory(
     const DecayConfiguration& decay_configuration) :
@@ -349,4 +351,5 @@ std::vector<std::string> DecayTreeFactory::convertToUniqueNameList(
   return name_list;
 }
 
-} /* namespace HelicityFormalism */
+} /* namespace DecayTree */
+} /* namespace ComPWA */

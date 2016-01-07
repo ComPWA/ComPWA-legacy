@@ -16,16 +16,18 @@
 
 #include "Core/Utility.hpp"
 
+#include "Physics/DecayTree/DecayConfiguration.hpp"
+
 #include "Physics/HelicityAmplitude/ParticleStateDefinitions.hpp"
-#include "Physics/HelicityAmplitude/DecayConfiguration.hpp"
 
-namespace HelicityFormalism {
+namespace ComPWA {
+namespace DecayTree {
 
-typedef std::pair<TwoBodyDecayTopology, std::vector<std::vector<IDInfo> > > TopologyRemainingStatePair;
+//typedef std::pair<TwoBodyDecayTopology, std::vector<std::vector<IDInfo> > > TopologyRemainingStatePair;
 
 struct IFParticleInfo {
   unsigned int unique_id_;
-  IDInfo particle_info_;
+  ComPWA::IDInfo particle_info_;
   std::vector<ComPWA::Spin> spin_z_components_;
 };
 
@@ -54,7 +56,7 @@ class DecayGenerator {
 
   int lookupPID(const std::string& name) const;
 
-  std::vector<TwoBodyDecayTopology> constructPossibleDecayTopologies() const;
+  /*std::vector<TwoBodyDecayTopology> constructPossibleDecayTopologies() const;
 
   bool isTopologyBuildingFinished(
       const std::vector<TopologyRemainingStatePair>& current_topology_remaining_state_pairs) const;
@@ -64,7 +66,7 @@ class DecayGenerator {
       const TwoBodyDecayTopology& probe) const;
 
   std::vector<TopologyRemainingStatePair> constructNextLevel(
-      const std::vector<TopologyRemainingStatePair>& current_topology_remaining_state_pairs) const;
+      const std::vector<TopologyRemainingStatePair>& current_topology_remaining_state_pairs) const;*/
 
   /* std::vector<ParticleIndexDecayTree> createDecayTreeRealizationTemplates(
    const std::vector<TwoBodyDecayTopology>& possible_decay_topologies) const;
@@ -114,6 +116,7 @@ public:
   void generate();
 };
 
-} /* namespace HelicityFormalism */
+} /* namespace DecayTree */
+} /* namespace ComPWA */
 
 #endif /* PHYSICS_HELICITYAMPLITUDE_DECAYGENERATOR_HPP_ */

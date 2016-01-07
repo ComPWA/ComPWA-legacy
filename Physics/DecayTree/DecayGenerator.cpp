@@ -11,13 +11,14 @@
 
 #include "Core/PhysConst.hpp"
 
-#include "Physics/HelicityAmplitude/DecayGenerator.hpp"
+#include "Physics/DecayTree/DecayGenerator.hpp"
 
 // this include has to be after the compwa includes
 // because it defines an INTEGER in the global scope that introduces clashes
 #include "clips.h"
 
-namespace HelicityFormalism {
+namespace ComPWA {
+namespace DecayTree {
 
 DecayGenerator::DecayGenerator() {
   clips_environment = CreateEnvironment();
@@ -642,4 +643,5 @@ boost::property_tree::ptree DecayGenerator::portPropertyTree(
   return boost::property_tree::ptree();
 }
 
-} /* namespace HelicityFormalism */
+} /* namespace DecayTree */
+} /* namespace ComPWA */

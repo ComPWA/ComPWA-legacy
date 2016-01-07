@@ -15,7 +15,8 @@
 #include "DecayConfiguration.hpp"
 #include "Core/PhysConst.hpp"
 
-namespace HelicityFormalism {
+namespace ComPWA {
+namespace DecayTree {
 
 DecayConfiguration::DecayConfiguration() {
 }
@@ -88,4 +89,5 @@ void DecayConfiguration::setRemainingParticleProperties(
   }
 }
 
-} /* namespace HelicityFormalism */
+} /* namespace DecayTree */
+} /* namespace ComPWA */
