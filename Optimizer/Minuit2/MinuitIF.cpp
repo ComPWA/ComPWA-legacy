@@ -38,7 +38,7 @@ using namespace ROOT::Minuit2;
 double shiftAngle(double v){
 	double originalVal = v;
 	double val = originalVal;
-	double pi = PhysConst::Instance().findConstant("Pi").value_;
+	double pi = ComPWA::PhysConst::Instance().findConstant("Pi").value_;
 	while(val> pi) val-=2*pi;
 	while(val< -pi ) val+=2*pi;
 	if(val!=originalVal)
@@ -68,8 +68,9 @@ std::shared_ptr<FitResult> MinuitIF::exec(ParameterList& par){
 		std::shared_ptr<DoubleParameter> actPat = par.GetDoubleParameter(i);
 		//if no error is set or error set to 0 we use a default error,
 		//otherwise minuit treads this parameter as fixed
-		double error = actPat->GetError();
-		if(error<=0) error = 0.01;
+		double error(0.01);
+		if(actPat->HasError())
+		  error = actPat->GetError();
 		if(!actPat->IsFixed() && actPat->GetName().find("phase") != actPat->GetName().npos)
 			actPat->SetValue( shiftAngle(actPat->GetValue()) );
 

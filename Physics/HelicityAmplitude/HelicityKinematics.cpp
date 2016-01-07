@@ -86,7 +86,7 @@ void HelicityKinematics::setDecayTopologies(
 
     const std::vector<IDInfo> &fs_particle_list = dt.final_state_id_list_;
 
-    PhysConst& physics_constants = PhysConst::Instance();
+    ComPWA::PhysConst& physics_constants = ComPWA::PhysConst::Instance();
 
     mother_mass_ =
         physics_constants.findParticle(dt.top_node_id_info_.name_).mass_;

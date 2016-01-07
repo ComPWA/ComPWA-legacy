@@ -30,14 +30,14 @@ DalitzKinematics::DalitzKinematics(std::string _nameMother,
 		name1(_name1), name2(_name2), name3(_name3), massIdsSet(false)
 {
 	number_of_particles_ = 3;
-	M = PhysConst::Instance().findParticle(_nameMother).mass_;
-	m1 = PhysConst::Instance().findParticle(_name1).mass_;
-	m2 = PhysConst::Instance().findParticle(_name2).mass_;
-	m3 = PhysConst::Instance().findParticle(_name3).mass_;
-	spinM = PhysConst::Instance().findParticle(_nameMother).spin_;
-	spin1 = PhysConst::Instance().findParticle(_name1).spin_;
-	spin2 = PhysConst::Instance().findParticle(_name2).spin_;
-	spin3 = PhysConst::Instance().findParticle(_name3).spin_;
+	M = ComPWA::PhysConst::Instance().findParticle(_nameMother).mass_;
+	m1 = ComPWA::PhysConst::Instance().findParticle(_name1).mass_;
+	m2 = ComPWA::PhysConst::Instance().findParticle(_name2).mass_;
+	m3 = ComPWA::PhysConst::Instance().findParticle(_name3).mass_;
+	spinM = ComPWA::PhysConst::Instance().findParticle(_nameMother).spin_.J_numerator_;
+	spin1 = ComPWA::PhysConst::Instance().findParticle(_name1).spin_.J_numerator_;
+	spin2 = ComPWA::PhysConst::Instance().findParticle(_name2).spin_.J_numerator_;
+	spin3 = ComPWA::PhysConst::Instance().findParticle(_name3).spin_.J_numerator_;
 
 	BOOST_LOG_TRIVIAL(info) << " DalitzKinematics::DalitzKinematics() | Setting up decay "
 			<<_nameMother<<"->"<<_name1<<" "<<_name2<<" "<<_name3;
@@ -50,10 +50,10 @@ DalitzKinematics::DalitzKinematics(double _M, double _Br, double _m1, double _m2
 {
 
 	number_of_particles_ = 3;
-  spinM = PhysConst::Instance().findParticle(_nameMother).spin_;
-  spin1 = PhysConst::Instance().findParticle(_name1).spin_;
-  spin2 = PhysConst::Instance().findParticle(_name2).spin_;
-  spin3 = PhysConst::Instance().findParticle(_name3).spin_;
+  spinM = ComPWA::PhysConst::Instance().findParticle(_nameMother).spin_.J_numerator_;
+  spin1 = ComPWA::PhysConst::Instance().findParticle(_name1).spin_.J_numerator_;
+  spin2 = ComPWA::PhysConst::Instance().findParticle(_name2).spin_.J_numerator_;
+  spin3 = ComPWA::PhysConst::Instance().findParticle(_name3).spin_.J_numerator_;
 	init();
 };
 

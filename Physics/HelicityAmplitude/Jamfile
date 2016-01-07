@@ -26,6 +26,7 @@ lib HelicityAmplitude :
         [ glob *.cpp : ] 
         $(TOP)/Core//ComPWA
         $(TOP)/Physics/DynamicalDecayFunctions//DynamicalDecayFunctions
+        $(TOP)/Physics/DecayTree//DecayTree
         ;
 
 install dist : HelicityAmplitude : <location>$(TOP)/lib ;

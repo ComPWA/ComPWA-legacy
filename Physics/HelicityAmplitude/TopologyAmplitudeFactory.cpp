@@ -1,8 +1,12 @@
 #include "boost/graph/graph_traits.hpp"
 
 #include "Core/PhysConst.hpp"
+
 #include "Physics/HelicityAmplitude/TopologyAmplitudeFactory.hpp"
-#include "Physics/HelicityAmplitude/DecayTree.hpp"
+
+using ComPWA::DecayTree::DecayTree;
+using ComPWA::DecayTree::DecayNode;
+using ComPWA::DecayTree::HelicityTree;
 
 namespace HelicityFormalism {
 
@@ -20,11 +24,11 @@ HelicityFormalism::SequentialTwoBodyDecayAmplitude TopologyAmplitudeFactory::gen
 
   const HelicityTree helicity_tree = decay_tree.getHelicityDecayTree();
   const std::vector<
-      boost::graph_traits<HelicityFormalism::HelicityTree>::vertex_descriptor>& decay_vertex_list =
+      boost::graph_traits<HelicityTree>::vertex_descriptor>& decay_vertex_list =
       decay_tree.getDecayNodesList();
 
   std::vector<
-      boost::graph_traits<HelicityFormalism::HelicityTree>::vertex_descriptor>::const_iterator decay_vertex_iter;
+      boost::graph_traits<HelicityTree>::vertex_descriptor>::const_iterator decay_vertex_iter;
 
   std::stringstream name;
 
@@ -154,7 +158,7 @@ std::shared_ptr<DoubleParameter> TopologyAmplitudeFactory::getResonanceMassParam
     // shared_ptr with that mass here
     return std::shared_ptr < DoubleParameter
         > (new DoubleParameter("fs_mass",
-            PhysConst::Instance().findParticle(id_info.particle_id_).mass_));
+            ComPWA::PhysConst::Instance().findParticle(id_info.particle_id_).mass_));
   }
 }
 
@@ -219,11 +223,11 @@ TwoBodyDecayTopology TopologyAmplitudeFactory::createDecayTopology(
 
   const HelicityTree helicity_tree = decay_tree.getHelicityDecayTree();
   const std::vector<
-      boost::graph_traits<HelicityFormalism::HelicityTree>::vertex_descriptor>& decay_vertex_list =
+      boost::graph_traits<HelicityTree>::vertex_descriptor>& decay_vertex_list =
       decay_tree.getDecayVertexList();
 
   std::vector<
-      boost::graph_traits<HelicityFormalism::HelicityTree>::vertex_descriptor>::const_iterator decay_vertex_iter;
+      boost::graph_traits<HelicityTree>::vertex_descriptor>::const_iterator decay_vertex_iter;
 
   decay_topology.top_node_id_info_ =
       helicity_tree[decay_tree.getTopNode()].state_info_.pid_information_;
@@ -239,7 +243,7 @@ TwoBodyDecayTopology TopologyAmplitudeFactory::createDecayTopology(
 
     TwoBodyDecayIndices indices;
 
-    boost::graph_traits<HelicityFormalism::HelicityTree>::vertex_descriptor mother_vertex =
+    boost::graph_traits<HelicityTree>::vertex_descriptor mother_vertex =
         findMotherVertex(*decay_vertex_iter, decay_tree);
 
     std::vector<ParticleStateInfo> fs_particle_list =
@@ -305,7 +309,7 @@ TwoBodyDecayTopology TopologyAmplitudeFactory::createDecayTopology(
   // so the data has to be arranged in the same way the sequential amp is built
   // up
   const std::vector<
-      boost::graph_traits<HelicityFormalism::HelicityTree>::vertex_descriptor>& sequential_decay_vertex_list =
+      boost::graph_traits<HelicityTree>::vertex_descriptor>& sequential_decay_vertex_list =
       decay_tree.getDecayNodesList();
 
   for (decay_vertex_iter = sequential_decay_vertex_list.begin();
@@ -333,21 +337,21 @@ TwoBodyDecayTopology TopologyAmplitudeFactory::createDecayTopology(
   return decay_topology;
 }
 
-boost::graph_traits<HelicityFormalism::HelicityTree>::vertex_descriptor TopologyAmplitudeFactory::findMotherVertex(
-    const boost::graph_traits<HelicityFormalism::HelicityTree>::vertex_descriptor & decay_node,
+boost::graph_traits<HelicityTree>::vertex_descriptor TopologyAmplitudeFactory::findMotherVertex(
+    const boost::graph_traits<HelicityTree>::vertex_descriptor & decay_node,
     const DecayTree& decay_tree) const {
   // try to find mother of this decay_vertex
-  boost::graph_traits<HelicityFormalism::HelicityTree>::vertex_descriptor mother(
+  boost::graph_traits<HelicityTree>::vertex_descriptor mother(
       decay_node);
 
   const HelicityTree helicity_tree = decay_tree.getHelicityDecayTree();
   const std::vector<
-      boost::graph_traits<HelicityFormalism::HelicityTree>::vertex_descriptor>& decay_vertex_list =
+      boost::graph_traits<HelicityTree>::vertex_descriptor>& decay_vertex_list =
       decay_tree.getDecayVertexList();
   // loop over vertices
 
   std::vector<
-      boost::graph_traits<HelicityFormalism::HelicityTree>::vertex_descriptor>::const_iterator decay_vertex_iter;
+      boost::graph_traits<HelicityTree>::vertex_descriptor>::const_iterator decay_vertex_iter;
 
   for (decay_vertex_iter = decay_vertex_list.begin();
       decay_vertex_iter != decay_vertex_list.end(); ++decay_vertex_iter) {

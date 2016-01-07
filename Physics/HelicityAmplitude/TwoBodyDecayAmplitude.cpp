@@ -28,12 +28,23 @@ TwoBodyDecayAmplitude::~TwoBodyDecayAmplitude() {
 }
 
 void TwoBodyDecayAmplitude::init() {
-  spin_factor_ = sqrt((2.0 * decay_info_.initial_state_.J_ + 1) / (4.0 * M_PI));
+  spin_factor_ = sqrt(
+      (2.0 * decay_info_.initial_state_.J_numerator_
+          / decay_info_.initial_state_.J_denominator_ + 1) / (4.0 * M_PI));
 
   index_theta_helicity_angle_ = Kinematics::instance()->getVariableIndex(
       "helicity_angle_theta");
   index_phi_helicity_angle_ = Kinematics::instance()->getVariableIndex(
       "helicity_angle_phi");
+
+  J_.SetSpin(decay_info_.initial_state_.J_numerator_,
+      decay_info_.initial_state_.J_denominator_);
+  M_.SetSpin(decay_info_.initial_state_.J_z_numerator_,
+      decay_info_.initial_state_.J_denominator_);
+  d1_M_.SetSpin(decay_info_.final_state_.first.J_z_numerator_,
+      decay_info_.final_state_.first.J_denominator_);
+  d2_M_.SetSpin(decay_info_.final_state_.second.J_z_numerator_,
+      decay_info_.final_state_.second.J_denominator_);
 }
 
 std::complex<double> TwoBodyDecayAmplitude::evaluate(const dataPoint& point,
@@ -41,11 +52,7 @@ std::complex<double> TwoBodyDecayAmplitude::evaluate(const dataPoint& point,
   double theta(point.getVal(evaluation_index + index_theta_helicity_angle_));
   double phi(point.getVal(evaluation_index + index_phi_helicity_angle_));
 
-  return spin_factor_
-      * Wigner_D(phi, theta, -phi, decay_info_.initial_state_.J_,
-          decay_info_.initial_state_.M_,
-          decay_info_.final_state_.first.M_
-              - decay_info_.final_state_.second.M_);
+  return spin_factor_ * Wigner_D(phi, theta, -phi, J_, M_, d1_M_ - d2_M_);
 }
 
 } /* namespace HelicityFormalism */

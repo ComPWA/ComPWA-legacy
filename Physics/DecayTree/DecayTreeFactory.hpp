@@ -15,7 +15,8 @@
 #include "DecayTree.hpp"
 #include "DecayConfiguration.hpp"
 
-namespace HelicityFormalism {
+namespace ComPWA {
+namespace DecayTree {
 
 class DecayTreeFactory {
   const DecayConfiguration& decay_configuration_;
@@ -69,6 +70,7 @@ public:
   std::vector<DecayTree> createDecayTrees() const;
 };
 
-} /* namespace HelicityFormalism */
+} /* namespace DecayTree */
+} /* namespace ComPWA */
 
 #endif /* PHYSICS_HELICITYAMPLITUDE_HELICITYDECAYTREEFACTORY_HPP_ */

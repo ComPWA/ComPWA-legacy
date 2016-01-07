@@ -17,7 +17,8 @@
 
 #include "Physics/HelicityAmplitude/ParticleStateDefinitions.hpp"
 
-namespace HelicityFormalism {
+namespace ComPWA {
+namespace DecayTree {
 
 struct DecayProductsInfo {
   std::vector<unsigned int> particle_indices_;
@@ -54,6 +55,7 @@ public:
   void setRemainingParticleProperties(ParticleStateInfo& particle) const;
 };
 
-} /* namespace HelicityFormalism */
+} /* namespace DecayTree */
+} /* namespace ComPWA */
 
 #endif /* PHYSICS_HELICITYAMPLITUDE_DECAYCONFIGURATION_HPP_ */

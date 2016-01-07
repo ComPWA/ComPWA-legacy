@@ -9,9 +9,9 @@
 
 #include <fstream>
 
-#include "Physics/HelicityAmplitude/DecayConfiguration.hpp"
-#include "Physics/HelicityAmplitude/DecayXMLConfigReader.hpp"
-#include "Physics/HelicityAmplitude/DecayTreeFactory.hpp"
+#include "Physics/DecayTree/DecayConfiguration.hpp"
+#include "Physics/DecayTree/DecayXMLConfigReader.hpp"
+#include "Physics/DecayTree/DecayTreeFactory.hpp"
 
 int main(int argc, char **argv) {
   std::cout << "  ComPWA Copyright (C) 2013  Stefan Pflueger " << std::endl;
@@ -23,13 +23,13 @@ int main(int argc, char **argv) {
   std::string input_config_file("Physics/HelicityAmplitude/JPSI_ypipi.xml");
   std::string output_file("graph.dot");
 
-  HelicityFormalism::DecayConfiguration decay_configuration;
-  HelicityFormalism::DecayXMLConfigReader xml_reader(decay_configuration);
+  ComPWA::DecayTree::DecayConfiguration decay_configuration;
+  ComPWA::DecayTree::DecayXMLConfigReader xml_reader(decay_configuration);
   xml_reader.readConfig(input_config_file);
 
-  HelicityFormalism::DecayTreeFactory decay_tree_factory(decay_configuration);
+  ComPWA::DecayTree::DecayTreeFactory decay_tree_factory(decay_configuration);
 
-  std::vector<HelicityFormalism::DecayTree> decay_trees =
+  std::vector<ComPWA::DecayTree::DecayTree> decay_trees =
       decay_tree_factory.createDecayTrees();
 
   std::cout << "created " << decay_trees.size() << " decay trees from "
@@ -38,7 +38,7 @@ int main(int argc, char **argv) {
 
   std::ofstream dot(output_file);
 
-  std::vector<HelicityFormalism::DecayTree>::iterator decay_tree;
+  std::vector<ComPWA::DecayTree::DecayTree>::iterator decay_tree;
   for (decay_tree = decay_trees.begin(); decay_tree != decay_trees.end();
       ++decay_tree) {
     decay_tree->print(dot);

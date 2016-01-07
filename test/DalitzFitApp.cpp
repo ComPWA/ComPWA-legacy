@@ -109,7 +109,7 @@ int main(int argc, char **argv) {
 
 	DalitzKinematics* kin =
 			dynamic_cast<DalitzKinematics*>(DalitzKinematics::createInstance(
-					"J/psi", "gamma", "pi0", "pi0"));
+					"jpsi", "gamma", "pi0", "pi0"));
 	//DPKinematics kin("J/psi","gamma","pi0","pi0");
 	//DPKinematics kin("D0","gamma","K-","K+");
 	//static dataPoint* point = dataPoint::instance(kin);

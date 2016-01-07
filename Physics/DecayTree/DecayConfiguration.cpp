@@ -15,7 +15,8 @@
 #include "DecayConfiguration.hpp"
 #include "Core/PhysConst.hpp"
 
-namespace HelicityFormalism {
+namespace ComPWA {
+namespace DecayTree {
 
 DecayConfiguration::DecayConfiguration() {
 }
@@ -72,7 +73,7 @@ unsigned int DecayConfiguration::addParticleToList(ParticleStateInfo particle) {
 void DecayConfiguration::setRemainingParticleProperties(
     ParticleStateInfo& particle) const {
 
-  PhysConst &physics_constants = PhysConst::Instance();
+  ComPWA::PhysConst &physics_constants = ComPWA::PhysConst::Instance();
 
   if (physics_constants.particleExists(particle.pid_information_.name_)) {
     if (particle.pid_information_.particle_id_
@@ -80,12 +81,13 @@ void DecayConfiguration::setRemainingParticleProperties(
       particle.pid_information_.particle_id_ = physics_constants.findParticle(
           particle.pid_information_.name_).id_;
     }
-    if (particle.spin_information_.J_
+    if (particle.spin_information_
         != physics_constants.findParticle(particle.pid_information_.name_).spin_) {
-      particle.spin_information_.J_ = physics_constants.findParticle(
+      particle.spin_information_ = physics_constants.findParticle(
           particle.pid_information_.name_).spin_;
     }
   }
 }
 
-} /* namespace HelicityFormalism */
+} /* namespace DecayTree */
+} /* namespace ComPWA */

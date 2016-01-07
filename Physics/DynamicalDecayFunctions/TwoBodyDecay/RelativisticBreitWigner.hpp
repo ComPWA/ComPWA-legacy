@@ -23,11 +23,10 @@
 
 #include <vector>
 
+#include "Core/Utility.hpp"
 #include "Core/Functions.hpp"
 #include "Core/Exceptions.hpp"
 #include "Physics/DynamicalDecayFunctions/AbstractDynamicalFunction.hpp"
-
-class Spin;
 
 namespace DynamicalFunctions {
 
@@ -53,7 +52,7 @@ namespace DynamicalFunctions {
  */
 class RelativisticBreitWigner: public AbstractDynamicalFunction {
 public:
-  RelativisticBreitWigner(const Spin& J);
+  RelativisticBreitWigner(const ComPWA::Spin& J);
   virtual ~RelativisticBreitWigner();
 
   void initialiseParameters(const boost::property_tree::ptree& parameter_info,
@@ -68,7 +67,7 @@ private:
   std::shared_ptr<DoubleParameter> daughter1_mass_;
   std::shared_ptr<DoubleParameter> daughter2_mass_;
   std::shared_ptr<DoubleParameter> meson_radius_;
-  Spin J_;
+  ComPWA::Spin J_;
 
   unsigned int index_cms_mass_squared_;
 };

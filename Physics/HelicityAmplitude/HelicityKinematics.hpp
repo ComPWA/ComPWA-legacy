@@ -12,6 +12,8 @@
 #ifndef PHYSICS_HELICITYAMPLITUDE_HELICITYKINEMATICS_HPP_
 #define PHYSICS_HELICITYAMPLITUDE_HELICITYKINEMATICS_HPP_
 
+#include "qft++.h"
+
 #include "Core/Kinematics.hpp"
 
 #include "Physics/HelicityAmplitude/ParticleStateDefinitions.hpp"

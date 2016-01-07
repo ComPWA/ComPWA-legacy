@@ -224,18 +224,21 @@ exe helicityDecayTreeTestApp :
         HelicityDecayTreeTestApp.cpp 
         $(TOP)/Core//ComPWA
         $(TOP)/Physics/HelicityAmplitude//HelicityAmplitude
+        $(TOP)/Physics/DecayTree//DecayTree
         : ;
         
 exe helicityDecayTreeGeneratorTestApp : 
         HelicityDecayTreeGeneratorTestApp.cpp 
         $(TOP)/Core//ComPWA
         $(TOP)/Physics/HelicityAmplitude//HelicityAmplitude
+        $(TOP)/Physics/DecayTree//DecayTree
         : ;        
 exe helicityCoherentAmplitudeEventGenApp : 
         HelicityCoherentAmplitudeEventGenApp.cpp 
         $(TOP)/Core//ComPWA
         $(TOP)/DataReader//RootReader
-	$(TOP)/DataReader//RootGenerator
+		$(TOP)/DataReader//RootGenerator
+		$(TOP)/Physics/DecayTree//DecayTree
         $(TOP)/Physics/HelicityAmplitude//HelicityAmplitude
         : ;  
 

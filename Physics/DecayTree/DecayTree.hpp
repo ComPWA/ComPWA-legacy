@@ -16,9 +16,10 @@
 #include "boost/graph/depth_first_search.hpp"
 #include "boost/property_tree/ptree_fwd.hpp"
 
-#include "ParticleStateDefinitions.hpp"
+#include "Core/Utility.hpp"
 
-namespace HelicityFormalism {
+namespace ComPWA {
+namespace DecayTree {
 
 struct DecayNode {
   ParticleStateInfo state_info_;
@@ -194,8 +195,10 @@ class DecayTree {
     void operator()(std::ostream& out,
         HelicityTree::vertex_descriptor v) const {
       out << "[label=\"" << graph_[v].state_info_.pid_information_.name_ << " ("
-          << graph_[v].state_info_.spin_information_.J_ << ","
-          << graph_[v].state_info_.spin_information_.M_ << ") \"]";
+          << graph_[v].state_info_.spin_information_.J_numerator_ << "/"
+          << graph_[v].state_info_.spin_information_.J_denominator_ << ","
+          << graph_[v].state_info_.spin_information_.J_z_numerator_ << "/"
+          << graph_[v].state_info_.spin_information_.J_denominator_ << ") \"]";
     }
   private:
     const HelicityTree& graph_;
@@ -217,10 +220,10 @@ public:
 
   void determineListOfDecayVertices();
   const std::vector<
-      boost::graph_traits<HelicityFormalism::HelicityTree>::vertex_descriptor>& getDecayVertexList() const;
+      boost::graph_traits<HelicityTree>::vertex_descriptor>& getDecayVertexList() const;
 
   std::vector<
-      boost::graph_traits<HelicityFormalism::HelicityTree>::vertex_descriptor> getDecayNodesList() const;
+      boost::graph_traits<HelicityTree>::vertex_descriptor> getDecayNodesList() const;
 
   std::vector<DecayNode> getLowestLeaves() const;
 
@@ -235,12 +238,13 @@ public:
       const std::vector<ParticleStateInfo> &daughters);
 
   std::vector<ParticleStateInfo> createDecayProductsFinalStateParticleLists(
-      const boost::graph_traits<HelicityFormalism::HelicityTree>::vertex_descriptor& vertex) const;
+      const boost::graph_traits<HelicityTree>::vertex_descriptor& vertex) const;
 
   void print(std::ostream& os) const;
 
 };
 
-} /* namespace HelicityFormalism */
+} /* namespace DecayTree */
+} /* namespace ComPWA */
 
 #endif /* PHYSICS_HELICITYAMPLITUDE_DECAYTREE_HPP_ */
