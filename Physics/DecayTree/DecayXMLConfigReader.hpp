@@ -40,6 +40,7 @@ public:
   virtual ~DecayXMLConfigReader();
 
   void readConfig(const std::string &filename);
+  //void writeConfig(const std::string &filename);
 };
 
 } /* namespace DecayTree */

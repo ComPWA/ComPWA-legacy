@@ -9,6 +9,8 @@
 //    Stefan Pflueger - initial implementation
 //-------------------------------------------------------------------------------
 
+#include <chrono>
+
 #include "Core/PhysConst.hpp"
 
 #include "Physics/DecayTree/DecayGenerator.hpp"
@@ -47,12 +49,6 @@ void DecayGenerator::addFinalStateParticles(
   //    indices.begin(), indices.end());
 }
 
-/*void DecayGenerator::addIntermediateStateParticles(const std::string& name) {
- intermediate_state_particles_.push_back(createIDInfo(name).pid_information_);
- intermediate_state_particles_indices_.push_back(
- total_particle_pool_.size() - 1);
- }*/
-
 void DecayGenerator::setTopNodeState(const IFParticleInfo& particle_info) {
   mother_state_particle_ = particle_info;
   mother_state_particle_.unique_id_ = 0;
@@ -83,29 +79,22 @@ int DecayGenerator::lookupPID(const std::string& name) const {
 }
 
 void DecayGenerator::generate() {
-// first construct all possible decay topologies
-  /* std::vector<TwoBodyDecayTopology> possible_decay_topologies =
-   constructPossibleDecayTopologies();
-
-   // then check the intermediate state pool for possible realization templates
-   // of the different decay topologies
-   std::vector<ParticleIndexDecayTree> decay_tree_realization_templates =
-   createDecayTreeRealizationTemplates(possible_decay_topologies);
-
-   // for each realization template, just generate concrete realizations with
-   // all allowed M L combinations based on the user input
-   std::vector<ParticleIndexDecayTree> concrete_decay_trees =
-   makeConcreteDecayTrees(decay_tree_realization_templates);
-   */
-
+  setupClipsEnvironment();
 
   createAllSpinWaves();
-  createAllTwoBodyDecays();
-  validateTwoBodyDecays();
-  createAllValidTwoBodyDecayTrees();
+  createAllValidTwoBodyDecays();
+  std::cout << "number of spin waves: " << all_spin_waves_.size() << std::endl;
+  //std::cout << "number of two body decays: "
+  //    << all_spin_wave_two_body_decays_.size() << std::endl;
+  std::vector<SpinWaveTwoBodyDecayTree> two_body_decay_trees =
+      createAllValidTwoBodyDecayTrees();
 
-  //cleanup clips environment
-  //  EnvDecrementGCLocks(clips_environment);
+  std::cout << "we have " << two_body_decay_trees.size() << " decay trees!"
+      << std::endl;
+
+  for (unsigned int i = 0; i < two_body_decay_trees.size(); ++i) {
+    printDecayTree(two_body_decay_trees[i]);
+  }
 
   std::vector<ParticleIndexDecayTree> concrete_decay_trees;
   // now just port all the concrete realizations to an boost property tree
@@ -115,172 +104,107 @@ void DecayGenerator::generate() {
 }
 
 void DecayGenerator::createAllSpinWaves() {
-
+  unsigned int unique_id_counter(0);
+  SpinWave spin_wave;
+  for (unsigned int spin_index = 0; spin_index < allowed_spins_.size();
+      ++spin_index) {
+    spin_wave.spin_ = allowed_spins_[spin_index];
+    for (unsigned int isospin_index = 0;
+        isospin_index < allowed_isospins_.size(); ++isospin_index) {
+      spin_wave.isospin_ = allowed_isospins_[isospin_index];
+      for (unsigned int charge_index = 0;
+          charge_index < allowed_charges_.size(); ++charge_index) {
+        spin_wave.charge_ = allowed_charges_[charge_index];
+        for (unsigned int parity_index = 0;
+            parity_index < allowed_parities_.size(); ++parity_index) {
+          spin_wave.parity_ = allowed_parities_[parity_index];
+          for (unsigned int cparity_index = 0;
+              cparity_index < allowed_cparites_.size(); ++cparity_index) {
+            spin_wave.cparity_ = allowed_cparites_[cparity_index];
+            spin_wave.unique_id_ = ++unique_id_counter;
+            all_spin_waves_.push_back(spin_wave);
+          }
+        }
+      }
+    }
+  }
 }
 
-void DecayGenerator::createAllTwoBodyDecays() {
-
+void DecayGenerator::createAllValidTwoBodyDecays() {
+  // loop over all spin waves
+  SpinWaveTwoBodyDecay swtbd;
+  for (unsigned int mother_id = 0; mother_id < all_spin_waves_.size();
+      ++mother_id) {
+    swtbd.mother_index_ = mother_id;
+    std::cout << mother_id << std::endl;
+    for (unsigned int daughter1_id = 0; daughter1_id < all_spin_waves_.size();
+        ++daughter1_id) {
+      for (unsigned int daughter2_id = 0; daughter2_id < all_spin_waves_.size();
+          ++daughter2_id) {
+        swtbd.daughter_indices_ = std::make_pair(daughter1_id, daughter2_id);
+        if (validateTwoBodyDecay(swtbd)) {
+          IndexList daughter_indices;
+          daughter_indices.push_back(daughter1_id);
+          daughter_indices.push_back(daughter2_id);
+          std::sort(daughter_indices.begin(), daughter_indices.end());
+          all_spin_wave_two_body_decays_.push_back(swtbd);
+          two_body_decays_lookup_table_[daughter_indices].push_back(
+              all_spin_wave_two_body_decays_.size() - 1);
+        }
+      }
+    }
+  }
 }
 
-void DecayGenerator::validateTwoBodyDecays() {
+bool DecayGenerator::validateTwoBodyDecay(
+    const SpinWaveTwoBodyDecay& two_body_decay) {
   //  EnvIncrementGCLocks(clips_environment);
-  setupClipsEnvironment();
 
-  // set other user conditions (allowed quantum numbers)
-  applyUserConditions();
+  //using namespace std::chrono;
+
+  //high_resolution_clock::time_point t1 = high_resolution_clock::now();
+
+  addTwoBodyDecayToClipsEnviroment(two_body_decay);
+
+  //high_resolution_clock::time_point t2 = high_resolution_clock::now();
 
   // run
   //EnvFacts(clips_environment, "stdout", NULL, -1, -1, -1);
   int max_number_of_rules_to_fire(-1);
   EnvRun(clips_environment, max_number_of_rules_to_fire);
-  EnvFacts(clips_environment, "stdout", NULL, -1, -1, -1);
+  //EnvFacts(clips_environment, "stdout", NULL, -1, -1, -1);
+
+  //high_resolution_clock::time_point t3 = high_resolution_clock::now();
 
   // get expertise
-  getExpertise();
+  std::vector<int> violated_rules_ids = getExpertise();
+
+  //high_resolution_clock::time_point t4 = high_resolution_clock::now();
+
+  EnvReset(clips_environment);
+
+  //high_resolution_clock::time_point t5 = high_resolution_clock::now();
+
+  /*duration<double> time_span1 = duration_cast<duration<double>>(t2 - t1);
+   duration<double> time_span2 = duration_cast<duration<double>>(t3 - t2);
+   duration<double> time_span3 = duration_cast<duration<double>>(t4 - t3);
+   duration<double> time_span4 = duration_cast<duration<double>>(t5 - t4);
+
+   std::cout<<"adding two body decay takes (seconds): "<< time_span1.count() <<std::endl;
+   std::cout<<"running clips (seconds): "<< time_span2.count() <<std::endl;
+   std::cout<<"getting results (seconds): "<< time_span3.count() <<std::endl;
+   std::cout<<"resetting (seconds): "<< time_span4.count() <<std::endl;*/
+
+  bool result(true);
+
+  if (violated_rules_ids.size() > 0) {
+    //std::cout << "this decay violates " << violated_rules_ids.size()
+    //    << " rules\n";
+    result = false;
+  }
+
+  return result;
 }
-
-/*
- std::vector<TwoBodyDecayTopology> DecayGenerator::constructPossibleDecayTopologies() const {
- // initialize
- std::vector<TopologyRemainingStatePair> current_topology_remaining_state_pairs;
- TopologyRemainingStatePair trsp;
- trsp.first.final_state_id_list_ = final_state_particles_;
- trsp.first.top_node_id_info_ = mother_state_particle_;
- for (auto fs_particle = final_state_particles_.begin();
- fs_particle != final_state_particles_.end(); ++fs_particle) {
- std::vector<IDInfo> temp_vec;
- temp_vec.push_back(*fs_particle);
- trsp.first.insertFinalStateContentList(temp_vec);
- trsp.second.push_back(temp_vec);
- }
- current_topology_remaining_state_pairs.push_back(trsp);
-
- while (!isTopologyBuildingFinished(current_topology_remaining_state_pairs)) {
- current_topology_remaining_state_pairs = constructNextLevel(
- current_topology_remaining_state_pairs);
- }
-
- std::vector<TwoBodyDecayTopology> topologies;
- for (auto iter = current_topology_remaining_state_pairs.begin();
- iter != current_topology_remaining_state_pairs.end(); ++iter) {
- std::sort(iter->first.decay_node_fs_content_index_infos_.begin(),
- iter->first.decay_node_fs_content_index_infos_.end());
-
- if (isTopologyNonExistant(topologies, iter->first)) {
- topologies.push_back(iter->first);
- }
- }
-
- std::cout << "constructed the " << topologies.size()
- << " decay topologies...\n";
- /*for (auto iter = topologies.begin(); iter != topologies.end(); ++iter) {
- iter->print();
- }*/
-/*
- return topologies;
- }
-
- bool DecayGenerator::isTopologyBuildingFinished(
- const std::vector<TopologyRemainingStatePair>& current_topology_remaining_state_pairs) const {
- for (auto iter = current_topology_remaining_state_pairs.begin();
- iter != current_topology_remaining_state_pairs.end(); ++iter) {
- if (iter->second.size() > 1)
- return false;
- }
-
- return true;
- }
-
- bool DecayGenerator::isTopologyNonExistant(
- const std::vector<TwoBodyDecayTopology> topology_pool,
- const TwoBodyDecayTopology& probe) const {
- if (std::find(topology_pool.begin(), topology_pool.end(), probe)
- != topology_pool.end()) {
- return false;
- }
- return true;
- }
-
- std::vector<TopologyRemainingStatePair> DecayGenerator::constructNextLevel(
- const std::vector<TopologyRemainingStatePair>& current_topology_remaining_state_pairs) const {
-
- std::vector<TopologyRemainingStatePair> new_topology_remaining_state_pairs;
-
- for (auto topology_remaining_state_pair =
- current_topology_remaining_state_pairs.begin();
- topology_remaining_state_pair
- != current_topology_remaining_state_pairs.end();
- ++topology_remaining_state_pair) {
-
- // for each topology make all possible remaining state groupings and
- for (unsigned int index_remaining_state = 0;
- index_remaining_state < topology_remaining_state_pair->second.size();
- ++index_remaining_state) {
- for (unsigned int index_second_remaining_state = index_remaining_state
- + 1;
- index_second_remaining_state
- < topology_remaining_state_pair->second.size();
- ++index_second_remaining_state) {
- //create a new TopologyRemainingStatePair
- TopologyRemainingStatePair trsp(*topology_remaining_state_pair);
-
- TwoBodyDecayIndices indices;
-
- indices.decay_products_.first = trsp.first.findFinalStateList(
- trsp.second[index_remaining_state]);
-
- indices.decay_products_.second = trsp.first.findFinalStateList(
- trsp.second[index_second_remaining_state]);
-
- trsp.second[index_remaining_state].insert(
- trsp.second[index_remaining_state].end(),
- trsp.second[index_second_remaining_state].begin(),
- trsp.second[index_second_remaining_state].end());
-
- indices.decay_state_index_ = trsp.first.insertFinalStateContentList(
- trsp.second[index_remaining_state]);
-
- trsp.first.setMotherDecayIndexForDecayIndex(indices.decay_state_index_,
- indices.decay_products_.first);
- trsp.first.setMotherDecayIndexForDecayIndex(indices.decay_state_index_,
- indices.decay_products_.second);
-
- // we set the mother state as the decay state because mother cannot
- // exist yet and will be linked later correctly
- indices.mother_index_ = indices.decay_state_index_;
- //trsp.second.erase(selected_state_1);
- trsp.second.erase(trsp.second.begin() + index_second_remaining_state);
-
- trsp.first.decay_node_fs_content_index_infos_.push_back(indices);
-
- new_topology_remaining_state_pairs.push_back(trsp);
- }
- }
- }
-
- return new_topology_remaining_state_pairs;
- }
-
- std::vector<ParticleIndexDecayTree> DecayGenerator::createDecayTreeRealizationTemplates(
- const std::vector<TwoBodyDecayTopology>& possible_decay_topologies) const {
- std::vector<ParticleIndexDecayTree> decay_tree_realization_templates;
-
- return decay_tree_realization_templates;
- }
-
- std::vector<TParticlePDG> DecayGenerator::createDecayNodeParticleCandiateList(
- const std::vector<IDInfo>& decay_products) const {
- }
-
- std::vector<TParticlePDG> DecayGenerator::convertIDInfoToTParticlePDG(
- const std::vector<IDInfo>& particle_id_info_list) const {
-
- for (auto particle_id_info = particle_id_info_list.begin();
- particle_id_info != particle_id_info_list.end(); ++particle_id_info) {
- particle_list.push_back(TParticlePDG()particle_id_info->particle_id_));
- }
- return particle_list;
- }*/
 
 void DecayGenerator::setupClipsEnvironment() const {
   std::stringstream path;
@@ -288,266 +212,112 @@ void DecayGenerator::setupClipsEnvironment() const {
       << "/Physics/HelicityAmplitude/helicity_model.clp";
   EnvLoad(clips_environment, path.str().c_str());
   EnvReset(clips_environment);
-
-  addIFParticleToClipsEnvironment(mother_state_particle_);
-
-  for (unsigned int i = 0; i < final_state_particles_.size(); ++i) {
-    addIFParticleToClipsEnvironment(final_state_particles_[i]);
-  }
-
-// create top node global unique id
-//  DATA_OBJECT top_node_id_global_value;
-//  top_node_id_global_value.type = INTEGER;
-//  top_node_id_global_value.value = EnvAddLong(clips_environment,
-//      total_particle_pool_[mother_state_particle_index_].unique_id_);
-//  EnvSetDefglobalValue(clips_environment, "initial_state_unique_id",
-//      &top_node_id_global_value);
-
-// create two body decay tree seed
-  /*  void* twobodydecaytree_template;
-   twobodydecaytree_template = EnvFindDeftemplate(clips_environment,
-   "TwoBodyDecayTree");
-   void* twobodydecaytree_fact = EnvCreateFact(clips_environment,
-   twobodydecaytree_template);
-   if (twobodydecaytree_fact != NULL) {
-   DATA_OBJECT available_final_state_particles;
-   void* multifield_ptr = EnvCreateMultifield(clips_environment,
-   final_state_particles_.size());
-
-   for (unsigned int i = 0; i < final_state_particles_indices_.size(); ++i) {
-   SetMFType(multifield_ptr, i + 1, INTEGER);
-   SetMFValue(multifield_ptr, i + 1,
-   EnvAddLong(clips_environment,
-   total_particle_pool_[final_state_particles_indices_[i]].unique_id_));
-   }
-
-   SetpType(&available_final_state_particles, MULTIFIELD);
-   SetpValue(&available_final_state_particles, multifield_ptr);
-
-   SetpDOBegin(&available_final_state_particles, 1);
-   SetpDOEnd(&available_final_state_particles,
-   final_state_particles_indices_.size());
-
-   EnvPutFactSlot(clips_environment, twobodydecaytree_fact,
-   "available_particles", &available_final_state_particles);
-
-   /* DATA_OBJECT two_body_decays;
-   multifield_ptr = EnvCreateMultifield(clips_environment, 0);
-   SetpType(&two_body_decays, MULTIFIELD);
-   SetpValue(&two_body_decays, multifield_ptr);
-
-   SetpDOBegin(&two_body_decays, 0);
-   SetpDOEnd(&two_body_decays, 0);
-   EnvPutFactSlot(clips_environment, twobodydecaytree_fact, "two_body_decays",
-   &two_body_decays);*/
-
-  /* EnvAssignFactSlotDefaults(clips_environment, twobodydecaytree_fact);
-
-   EnvAssert(clips_environment, twobodydecaytree_fact);
-   }*/
 }
 
-void DecayGenerator::addIFParticleToClipsEnvironment(
-    const IFParticleInfo& particle_info) const {
-  ComPWA::ParticleProperties particle_properties =
-      ComPWA::PhysConst::Instance().findParticle(
-          particle_info.particle_info_.name_);
+void DecayGenerator::addTwoBodyDecayToClipsEnviroment(
+    const SpinWaveTwoBodyDecay& two_body_decay) const {
 
-  void* particle_template;
-  particle_template = EnvFindDeftemplate(clips_environment,
-      "SpinWaveMultiplet");
+  // add the SpinWaves
+  addSpinWaveToClipsEnvironment(all_spin_waves_[two_body_decay.mother_index_]);
+  addSpinWaveToClipsEnvironment(
+      all_spin_waves_[two_body_decay.daughter_indices_.first]);
+  addSpinWaveToClipsEnvironment(
+      all_spin_waves_[two_body_decay.daughter_indices_.second]);
+
+  void* two_body_decay_template;
+  two_body_decay_template = EnvFindDeftemplate(clips_environment,
+      "TwoBodyDecay");
+  void* two_body_decay_fact = EnvCreateFact(clips_environment,
+      two_body_decay_template);
+  if (two_body_decay_fact != NULL) {
+    DATA_OBJECT field;
+    field.type = INTEGER;
+
+    field.value = EnvAddLong(clips_environment,
+        all_spin_waves_[two_body_decay.mother_index_].unique_id_);
+    EnvPutFactSlot(clips_environment, two_body_decay_fact, "mother", &field);
+    field.value = EnvAddLong(clips_environment,
+        all_spin_waves_[two_body_decay.daughter_indices_.first].unique_id_);
+    EnvPutFactSlot(clips_environment, two_body_decay_fact, "daughter1", &field);
+    field.value = EnvAddLong(clips_environment,
+        all_spin_waves_[two_body_decay.daughter_indices_.second].unique_id_);
+    EnvPutFactSlot(clips_environment, two_body_decay_fact, "daughter2", &field);
+
+    EnvAssert(clips_environment, two_body_decay_fact);
+  }
+}
+
+void DecayGenerator::addSpinWaveToClipsEnvironment(
+    const SpinWave& spin_wave) const {
+  /*ComPWA::ParticleProperties particle_properties =
+   ComPWA::PhysConst::Instance().findParticle(
+   particle_info.particle_info_.name_);
+   */
+  void* spinwave_template;
+  spinwave_template = EnvFindDeftemplate(clips_environment, "SpinWave");
 // set the facts
-  void* particle_fact = EnvCreateFact(clips_environment, particle_template);
-  if (particle_fact != NULL) {
+  void* spinwave_fact = EnvCreateFact(clips_environment, spinwave_template);
+  if (spinwave_fact != NULL) {
     DATA_OBJECT data_value;
     data_value.type = INTEGER;
-    data_value.value = EnvAddLong(clips_environment, particle_info.unique_id_);
-    EnvPutFactSlot(clips_environment, particle_fact, "unique_id", &data_value);
-    /*data_value.type = SYMBOL;
-     data_value.value = EnvAddSymbol(clips_environment,
-     particle_properties.name_.c_str());
-     EnvPutFactSlot(clips_environment, particle_fact, "name", &data_value);
-     data_value.type = INTEGER;
-     data_value.value = EnvAddLong(clips_environment, particle_properties.id_);
-     EnvPutFactSlot(clips_environment, particle_fact, "pid", &data_value);
-     data_value.type = FLOAT;
-     data_value.value = EnvAddDouble(clips_environment,
-     particle_properties.mass_);
-     EnvPutFactSlot(clips_environment, particle_fact, "mass", &data_value);
-     data_value.type = INTEGER;*/
+    data_value.value = EnvAddLong(clips_environment, spin_wave.unique_id_);
+    EnvPutFactSlot(clips_environment, spinwave_fact, "unique_id", &data_value);
+    data_value.value = EnvAddLong(clips_environment, spin_wave.charge_);
+    EnvPutFactSlot(clips_environment, spinwave_fact, "charge", &data_value);
     data_value.value = EnvAddLong(clips_environment,
-        particle_properties.charge_);
-    EnvPutFactSlot(clips_environment, particle_fact, "charge", &data_value);
-    data_value.value = EnvAddLong(clips_environment,
-        particle_properties.isospin_.J_numerator_);
-    EnvPutFactSlot(clips_environment, particle_fact, "isospin_num",
+        spin_wave.isospin_.J_numerator_);
+    EnvPutFactSlot(clips_environment, spinwave_fact, "isospin_num",
         &data_value);
     data_value.value = EnvAddLong(clips_environment,
-        particle_properties.isospin_.J_denominator_);
-    EnvPutFactSlot(clips_environment, particle_fact, "isospin_denom",
+        spin_wave.isospin_.J_denominator_);
+    EnvPutFactSlot(clips_environment, spinwave_fact, "isospin_denom",
         &data_value);
     data_value.value = EnvAddLong(clips_environment,
-        particle_properties.isospin_.J_z_numerator_);
-    EnvPutFactSlot(clips_environment, particle_fact, "isospin_z_num",
+        spin_wave.isospin_.J_z_numerator_);
+    EnvPutFactSlot(clips_environment, spinwave_fact, "isospin_z_num",
         &data_value);
     data_value.value = EnvAddLong(clips_environment,
-        particle_properties.spin_.J_numerator_);
-    EnvPutFactSlot(clips_environment, particle_fact, "spin_num", &data_value);
+        spin_wave.spin_.J_numerator_);
+    EnvPutFactSlot(clips_environment, spinwave_fact, "spin_num", &data_value);
     data_value.value = EnvAddLong(clips_environment,
-        particle_properties.spin_.J_denominator_);
-    EnvPutFactSlot(clips_environment, particle_fact, "spin_denom", &data_value);
-
-    DATA_OBJECT spin_z_components;
-    void* multifield_ptr = EnvCreateMultifield(clips_environment,
-        particle_info.spin_z_components_.size());
-
-    for (unsigned int i = 0; i < particle_info.spin_z_components_.size(); ++i) {
-      SetMFType(multifield_ptr, i + 1, INTEGER);
-      SetMFValue(multifield_ptr, i + 1,
-          EnvAddLong(clips_environment,
-              particle_info.spin_z_components_[i].J_z_numerator_));
-    }
-
-    SetType(spin_z_components, MULTIFIELD);
-    SetValue(spin_z_components, multifield_ptr);
-
-    SetDOBegin(spin_z_components, 1);
-    SetDOEnd(spin_z_components, particle_info.spin_z_components_.size());
-
-    EnvPutFactSlot(clips_environment, particle_fact, "spin_z_num",
-        &spin_z_components);
-
+        spin_wave.spin_.J_denominator_);
+    EnvPutFactSlot(clips_environment, spinwave_fact, "spin_denom", &data_value);
     data_value.value = EnvAddLong(clips_environment,
-        particle_properties.parity_);
-    EnvPutFactSlot(clips_environment, particle_fact, "parity", &data_value);
-    data_value.value = EnvAddLong(clips_environment,
-        particle_properties.cparity_);
-    EnvPutFactSlot(clips_environment, particle_fact, "cparity", &data_value);
+        spin_wave.spin_.J_z_numerator_);
+    EnvPutFactSlot(clips_environment, spinwave_fact, "spin_z_num", &data_value);
 
-    EnvAssignFactSlotDefaults(clips_environment, particle_fact);
-    EnvAssert(clips_environment, particle_fact);
+    data_value.value = EnvAddLong(clips_environment, spin_wave.parity_);
+    EnvPutFactSlot(clips_environment, spinwave_fact, "parity", &data_value);
+    data_value.value = EnvAddLong(clips_environment, spin_wave.cparity_);
+    EnvPutFactSlot(clips_environment, spinwave_fact, "cparity", &data_value);
+
+    EnvAssignFactSlotDefaults(clips_environment, spinwave_fact);
+    EnvAssert(clips_environment, spinwave_fact);
   }
 }
 
-void DecayGenerator::applyUserConditions() const {
-  /*(AllowedQN
-        (spin_nums 0 1 2) (spin_denom 1 ) (isospin_nums 0 1) (isospin_denom 1)
-        (charge -1 0 1) (parity -1 1) (cparity -1 1)
-    )
+std::vector<int> DecayGenerator::getExpertise() {
+  std::vector<int> violated_rules_id_codes;
 
-  void* allowedqn_template;
-  allowedqn_template = EnvFindDeftemplate(clips_environment,
-      "AllowedQN");
-  void* twobodydecaytree_fact = EnvCreateFact(clips_environment,
-      allowedqn_template);
-  if (twobodydecaytree_fact != NULL) {
-    DATA_OBJECT available_final_state_particles;
-    void* multifield_ptr = EnvCreateMultifield(clips_environment,
-        allowed_charges_.size());
+  //DATA_OBJECT factlist;
+  //EnvGetFactList(clips_environment, &factlist, NULL);
+  //std::cout << "we have " << GetDOLength(factlist) << " facts!\n";
 
-    for (unsigned int i = 0; i < final_state_particles_indices_.size(); ++i) {
-      SetMFType(multifield_ptr, i + 1, INTEGER);
-      SetMFValue(multifield_ptr, i + 1,
-          EnvAddLong(clips_environment,
-              total_particle_pool_[final_state_particles_indices_[i]].unique_id_));
-    }
+  DATA_OBJECT violated_rules_for_decay;
+  std::stringstream clips_query;
+  clips_query
+      << "(do-for-all-facts ((?f ViolatingRulesForDecay)) (< -1 (length ?f:list_of_violated_rules)) (fact-slot-value ?f list_of_violated_rules))", EnvEval(
+      clips_environment, clips_query.str().c_str(), &violated_rules_for_decay);
 
-    SetpType(&available_final_state_particles, MULTIFIELD);
-    SetpValue(&available_final_state_particles, multifield_ptr);
-
-    SetpDOBegin(&available_final_state_particles, 1);
-    SetpDOEnd(&available_final_state_particles,
-        final_state_particles_indices_.size());
-
-    EnvPutFactSlot(clips_environment, twobodydecaytree_fact,
-        "available_particles", &available_final_state_particles);
-
-    DATA_OBJECT two_body_decays;
-    multifield_ptr = EnvCreateMultifield(clips_environment, 0);
-    SetpType(&two_body_decays, MULTIFIELD);
-    SetpValue(&two_body_decays, multifield_ptr);
-
-    SetpDOBegin(&two_body_decays, 0);
-    SetpDOEnd(&two_body_decays, 0);
-    EnvPutFactSlot(clips_environment, twobodydecaytree_fact, "two_body_decays",
-        &two_body_decays);
-
-    EnvAssignFactSlotDefaults(clips_environment, twobodydecaytree_fact);
-  }*/
-}
-
-void DecayGenerator::getExpertise() {
-  DATA_OBJECT factlist;
-  EnvGetFactList(clips_environment, &factlist, NULL);
-  std::cout << "we have " << GetDOLength(factlist) << " facts!\n";
-
-  DATA_OBJECT valid_two_body_decay_trees;
-  EnvEval(clips_environment,
-      "(do-for-all-facts ((?f ValidTwoBodyDecayTrees) (?g TwoBodyDecayTree)) (member$ ?g ?f:two_body_decay_trees) (fact-slot-value ?f two_body_decay_trees))",
-      &valid_two_body_decay_trees);
-  std::cout << "we have " << GetDOLength(valid_two_body_decay_trees)
-      << " decay trees!\n";
-  //EnvGetFactSlot(clips_environment, result_fact, "two_body_decay_trees",
-  //    &valid_two_body_decay_trees);
-  for (unsigned int tree_index = 1;
-      tree_index <= GetDOLength(valid_two_body_decay_trees); ++tree_index) {
-    DATA_OBJECT two_body_decay_tree;
-    EnvGetFactSlot(clips_environment,
-        GetMFValue(GetValue(valid_two_body_decay_trees), tree_index),
-        "two_body_decays", &two_body_decay_tree);
-
-    //std::cout << "this tree contains " << GetDOLength(two_body_decay_tree)
-    //    << " two body decays!\n";
-
-    for (unsigned int two_body_decay_index = 1;
-        two_body_decay_index <= GetDOLength(two_body_decay_tree);
-        ++two_body_decay_index) {
-
-      /*DATA_OBJECT blub2;
-       EnvFactSlotNames(clips_environment,
-       GetMFValue(GetValue(two_body_decay_tree), two_body_decay_index),
-       &blub2);
-       for (unsigned int name_index = 1; name_index <= GetDOLength(blub2);
-       ++name_index) {
-       std::cout << ValueToString(GetMFValue(GetValue(blub2), name_index))
-       << std::endl;
-       }*/
-
-      DATA_OBJECT mother;
-      EnvGetFactSlot(clips_environment,
-          GetMFValue(GetValue(two_body_decay_tree), two_body_decay_index),
-          "mother", &mother);
-      DATA_OBJECT daughter1;
-      EnvGetFactSlot(clips_environment,
-          GetMFValue(GetValue(two_body_decay_tree), two_body_decay_index),
-          "daughter1", &daughter1);
-      DATA_OBJECT daughter2;
-      EnvGetFactSlot(clips_environment,
-          GetMFValue(GetValue(two_body_decay_tree), two_body_decay_index),
-          "daughter2", &daughter2);
-
-      //DATA_OBJECT blub;
-      //EnvFactSlotNames(clips_environment, &mother, &blub);
-      //std::cout << "mother fact: " << GetDOLength(blub) << " slots"
-      //    << std::endl;
-      //DATA_OBJECT particle;
-      //EnvGetFactSlot(clips_environment, GetValue(mother_fact), "unique_id",
-      //    &particle);
-      //std::cout << "test me: " << *((char*) particle.value) << std::endl;
-
-      ParticleStateInfo mother_particle = getSpinWaveFromClipsEnvironment(
-          ValueToInteger(GetValue(mother)));
-      print(mother_particle);
-      std::cout << "decays to\n";
-      ParticleStateInfo daughter1_particle = getSpinWaveFromClipsEnvironment(
-          ValueToInteger(GetValue(daughter1)));
-      print(daughter1_particle);
-      std::cout << " and ";
-      ParticleStateInfo daughter2_particle = getSpinWaveFromClipsEnvironment(
-          ValueToInteger(GetValue(daughter2)));
-      print(daughter2_particle);
-    }
+  for (unsigned int violated_rule_index = 1;
+      violated_rule_index <= GetDOLength(violated_rules_for_decay);
+      ++violated_rule_index) {
+    violated_rules_id_codes.push_back(
+        ValueToInteger(
+            GetMFValue(GetValue(violated_rules_for_decay), violated_rule_index)));
   }
+
+  return violated_rules_id_codes;
 }
 
 ParticleStateInfo DecayGenerator::getSpinWaveFromClipsEnvironment(
@@ -564,13 +334,13 @@ ParticleStateInfo DecayGenerator::getSpinWaveFromClipsEnvironment(
 
   DATA_OBJECT data;
 
-  // get particle id or id quantum numbers
+// get particle id or id quantum numbers
   EnvGetFactSlot(clips_environment, spin_wave_fact, "unique_id", &data);
   particle.unique_id_ = ValueToInteger(GetValue(data));
 
   setPIDInfo(particle, spin_wave_fact);
 
-  // get spin information
+// get spin information
   EnvGetFactSlot(clips_environment, spin_wave_fact, "spin_num", &data);
   particle.spin_information_.J_numerator_ = ValueToInteger(GetValue(data));
   EnvGetFactSlot(clips_environment, spin_wave_fact, "spin_denom", &data);
@@ -582,7 +352,7 @@ ParticleStateInfo DecayGenerator::getSpinWaveFromClipsEnvironment(
 
 void DecayGenerator::setPIDInfo(ParticleStateInfo& particle,
     void* spin_wave_fact) const {
-  // search for a particle in the list, that has the same QNs a the spin wave
+// search for a particle in the list, that has the same QNs a the spin wave
   ComPWA::ParticleProperties particle_properties;
   DATA_OBJECT data;
   EnvGetFactSlot(clips_environment, spin_wave_fact, "charge", &data);
@@ -625,18 +395,228 @@ void DecayGenerator::print(const ParticleStateInfo &psi) const {
       << psi.spin_information_.J_denominator_ << std::endl;
 }
 
+std::vector<SpinWaveTwoBodyDecayTree> DecayGenerator::createAllValidTwoBodyDecayTrees() const {
+  std::vector<SpinWaveTwoBodyDecayTree> final_decay_trees;
 
+  // first create all seed decay trees
+  std::vector<SpinWaveTwoBodyDecayTree> swtbdt = createSeedTwoBodyDecayTrees();
 
-void DecayGenerator::createAllValidTwoBodyDecayTrees() {
+  std::vector<SpinWaveTwoBodyDecayTree> temp_swtbdt;
 
+  while (swtbdt.size() > 0) {
+    // then for all current seed decay trees, go through the complete list of
+    // available decays and look for a possible decay
+    // add it to the list and remove remaining particles entries
+    for (unsigned int i = 0; i < swtbdt.size(); ++i) {
+      if (swtbdt[i].available_particles_.size() > 1) {
+        for (unsigned int available_particle_index = 1;
+            available_particle_index < swtbdt[i].available_particles_.size();
+            ++available_particle_index) {
+          IndexList daughter_indices;
+          daughter_indices.push_back(swtbdt[i].available_particles_[0]);
+          daughter_indices.push_back(
+              swtbdt[i].available_particles_[available_particle_index]);
+          std::sort(daughter_indices.begin(), daughter_indices.end());
+          auto result = two_body_decays_lookup_table_.find(daughter_indices);
+          if (result != two_body_decays_lookup_table_.end()) {
+            for (unsigned int twobodydecay_index = 0;
+                twobodydecay_index < result->second.size();
+                ++twobodydecay_index) {
+              SpinWaveTwoBodyDecayTree temptree(swtbdt[i]);
+              temptree.two_body_decays_.push_back(
+                  result->second[twobodydecay_index]);
+              temptree.available_particles_.erase(
+                  temptree.available_particles_.begin()
+                      + available_particle_index);
+              temptree.available_particles_.erase(
+                  temptree.available_particles_.begin());
+              temptree.available_particles_.push_back(
+                  all_spin_wave_two_body_decays_[temptree.two_body_decays_.back()].mother_index_);
+
+              /*decay_topology[]
+
+              // if we only have 1 particle left this was the top node decay
+              if(temptree.available_particles_.size() == 1) {
+
+              }*/
+
+              temp_swtbdt.push_back(temptree);
+            }
+          }
+        }
+      }
+      else {
+        if (swtbdt[i].available_particles_.size() == 1) {
+          final_decay_trees.push_back(swtbdt[i]);
+        }
+      }
+    }
+    swtbdt = temp_swtbdt;
+    temp_swtbdt.clear();
+  }      // do that until there are no remaining particles left
+
+  final_decay_trees = filterDecayTreesForCorrectInitialState(final_decay_trees);
+
+  return final_decay_trees;
 }
 
-/*std::vector<ParticleIndexDecayTree> DecayGenerator::makeConcreteDecayTrees(
- const std::vector<ParticleIndexDecayTree>& decay_tree_realization_templates) {
- std::vector<ParticleIndexDecayTree> concrete_decay_trees;
+std::vector<SpinWaveTwoBodyDecayTree> DecayGenerator::createSeedTwoBodyDecayTrees() const {
+  std::vector<SpinWaveTwoBodyDecayTree> seed_decay_trees;
+  std::vector<SpinWaveTwoBodyDecayTree> temp_seed_decay_trees;
+  if (final_state_particles_.size() > 0) {
 
- return concrete_decay_trees;
- }*/
+    for (unsigned int i = 0;
+        i < final_state_particles_[0].spin_z_components_.size(); ++i) {
+      ComPWA::ParticleProperties particle_properties =
+          ComPWA::PhysConst::Instance().findParticle(
+              final_state_particles_[0].particle_info_.name_);
+      std::pair<bool, unsigned int> search_result = findSpinWaveIndex(
+          particle_properties, final_state_particles_[0].spin_z_components_[i]);
+
+      if (search_result.first) {
+        unsigned int sw_index = search_result.second;
+        SpinWaveTwoBodyDecayTree decay_tree;
+        decay_tree.available_particles_.push_back(sw_index);
+        seed_decay_trees.push_back(decay_tree);
+      }
+    }
+
+    for (unsigned int fsp_index = 1; fsp_index < final_state_particles_.size();
+        ++fsp_index) {
+      for (unsigned int i = 0;
+          i < final_state_particles_[fsp_index].spin_z_components_.size();
+          ++i) {
+        ComPWA::ParticleProperties particle_properties =
+            ComPWA::PhysConst::Instance().findParticle(
+                final_state_particles_[fsp_index].particle_info_.name_);
+
+        std::pair<bool, unsigned int> search_result = findSpinWaveIndex(
+            particle_properties,
+            final_state_particles_[fsp_index].spin_z_components_[i]);
+
+        if (search_result.first) {
+          unsigned int sw_index = search_result.second;
+          for (unsigned int existing_trees_index = 0;
+              existing_trees_index < seed_decay_trees.size();
+              ++existing_trees_index) {
+            SpinWaveTwoBodyDecayTree decay_tree(
+                seed_decay_trees[existing_trees_index]);
+            decay_tree.available_particles_.push_back(sw_index);
+            temp_seed_decay_trees.push_back(decay_tree);
+          }
+        }
+      }
+      seed_decay_trees = temp_seed_decay_trees;
+      temp_seed_decay_trees.clear();
+    }
+  }
+  return seed_decay_trees;
+}
+
+std::pair<bool, unsigned int> DecayGenerator::findSpinWaveIndex(
+    const ComPWA::ParticleProperties& particle_properties,
+    const Spin& spin_instance) const {
+  SpinWave sw;
+  sw.charge_ = particle_properties.charge_;
+  sw.cparity_ = particle_properties.cparity_;
+  sw.isospin_ = particle_properties.isospin_;
+  sw.parity_ = particle_properties.parity_;
+  sw.spin_ = spin_instance;
+
+  // double check spin
+  if (sw.spin_.J_numerator_ / sw.spin_.J_denominator_
+      != particle_properties.spin_.J_numerator_
+          / particle_properties.spin_.J_denominator_) {
+    throw std::runtime_error(
+        "DecayGenerator::findSpinWaveIndex: The specified final state wave spin does not equal to the one in the database!");
+  }
+
+  unsigned int position(0);
+  bool found(false);
+
+  auto result = std::find_if(all_spin_waves_.begin(), all_spin_waves_.end(),
+      sw);
+
+  if (result != all_spin_waves_.end()) {
+    position = std::distance(all_spin_waves_.begin(), result);
+    found = true;
+  }
+  else {
+    std::stringstream ss;
+    ss << "DecayGenerator::findSpinWaveIndex: The specified final state wave"
+        << " cannot be found in\ the state pool please change your spin wave"
+        << " pool generation constraints!" << std::endl;
+    ss << sw;
+  }
+
+  return std::make_pair(found, position);
+}
+
+std::vector<SpinWaveTwoBodyDecayTree> DecayGenerator::filterDecayTreesForCorrectInitialState(
+    const std::vector<SpinWaveTwoBodyDecayTree>& two_body_decay_trees) const {
+  std::vector<SpinWaveTwoBodyDecayTree> filtered_decay_trees;
+
+  IndexList mother_states;
+  ComPWA::ParticleProperties particle_properties =
+      ComPWA::PhysConst::Instance().findParticle(
+          mother_state_particle_.particle_info_.name_);
+  for (unsigned int i = 0; i < mother_state_particle_.spin_z_components_.size();
+      ++i) {
+    std::pair<bool, unsigned int> search_result = findSpinWaveIndex(
+        particle_properties, mother_state_particle_.spin_z_components_[i]);
+    if (search_result.first) {
+      mother_states.push_back(search_result.second);
+    }
+  }
+
+  for (unsigned int i = 0; i < two_body_decay_trees.size(); ++i) {
+    bool good_decay_tree(false);
+    if (two_body_decay_trees[i].available_particles_.size() == 1) {
+      unsigned int spin_wave_index =
+          two_body_decay_trees[i].available_particles_[0];
+      for (unsigned int mother_state_index = 0;
+          mother_state_index < mother_states.size(); ++mother_state_index) {
+        if (spin_wave_index == mother_states[mother_state_index]) {
+          good_decay_tree = true;
+          break;
+        }
+      }
+    }
+    if (good_decay_tree)
+      filtered_decay_trees.push_back(two_body_decay_trees[i]);
+  }
+  return filtered_decay_trees;
+}
+
+void DecayGenerator::printDecayTree(
+    const SpinWaveTwoBodyDecayTree& decay_tree) const {
+  std::set<unsigned int> wave_list;
+  for (unsigned int i = 0; i < decay_tree.two_body_decays_.size(); ++i) {
+    const SpinWaveTwoBodyDecay& two_body_decay =
+        all_spin_wave_two_body_decays_[decay_tree.two_body_decays_[i]];
+    std::cout << two_body_decay.mother_index_ << " -> "
+        << two_body_decay.daughter_indices_.first << " + "
+        << two_body_decay.daughter_indices_.second << std::endl;
+    wave_list.insert(two_body_decay.mother_index_);
+    wave_list.insert(two_body_decay.daughter_indices_.first);
+    wave_list.insert(two_body_decay.daughter_indices_.second);
+  }
+  for (auto iter = wave_list.begin(); iter != wave_list.end(); ++iter) {
+    std::cout << *iter << std::endl;
+    std::cout << all_spin_waves_[*iter] << std::endl;
+  }
+}
+
+DecayConfiguration DecayGenerator::createDecayConfiguration(
+    const std::vector<SpinWaveTwoBodyDecayTree>& two_body_decay_trees) const {
+  DecayConfiguration decay_configuration;
+
+  std::vector<ParticleIndexDecayTree> concrete_decay_trees;
+
+
+
+  return decay_configuration;
+}
 
 boost::property_tree::ptree DecayGenerator::portPropertyTree(
     const std::vector<ParticleIndexDecayTree>& concrete_decay_trees) const {

@@ -1,6 +1,7 @@
 #include <fstream>
 
 #include "Physics/DecayTree/DecayGenerator.hpp"
+#include "Physics/DecayTree/DecayGeneratorFacade.hpp"
 
 int main(int argc, char **argv) {
   std::cout << "  ComPWA Copyright (C) 2013  Stefan Pflueger " << std::endl;
@@ -11,6 +12,16 @@ int main(int argc, char **argv) {
 
   ComPWA::DecayTree::DecayGenerator decay_generator;
   // initialize
+
+  ComPWA::DecayTree::DecayGeneratorFacade decay_generator_facade(decay_generator);
+
+  decay_generator_facade.setAllowedSpins({0,1});
+  decay_generator_facade.setAllowedIsospins({0, 1});
+  decay_generator_facade.setAllowedCharges({0});
+  decay_generator_facade.setAllowedParities({-1, 1});
+  decay_generator_facade.setAllowedCParities({-1, 1});
+
+
   ComPWA::DecayTree::IFParticleInfo if_particle = decay_generator.createIFParticleInfo("gamma");
   decay_generator.addFinalStateParticles(if_particle);
 //  decay_generator.addFinalStateParticles("gamma");

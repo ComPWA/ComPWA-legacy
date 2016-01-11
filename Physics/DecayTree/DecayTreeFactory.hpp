@@ -36,14 +36,6 @@ class DecayTreeFactory {
   std::vector<ParticleStateInfo> generateParticleStateInfoList(
       const std::vector<unsigned int>& particle_index_list) const;
 
-  /*void extendDaughterCombinations(
-      std::vector<std::vector<unsigned int> > remaining_particle_index_lists,
-      const std::vector<ParticleStateInfo>& decay_daughters_combination,
-      std::vector<std::vector<ParticleStateInfo> >& decay_daughters_combination_list) const;
-
-  bool isParticleValidForCombination(const ParticleStateInfo& particle,
-      const std::vector<ParticleStateInfo>& combination) const;*/
-
   bool canDecayTreesGrow(const std::vector<DecayTree>& decay_trees,
       const ParticleIndexDecayTree& decay_topology) const;
 

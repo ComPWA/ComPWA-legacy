@@ -155,49 +155,6 @@ std::vector<ParticleStateInfo> DecayTreeFactory::generateParticleStateInfoList(
   return particle_list;
 }
 
-/*void DecayTreeFactory::extendDaughterCombinations(
- std::vector<std::vector<unsigned int> > remaining_particle_index_lists,
- const std::vector<ParticleStateInfo>& decay_daughters_combination,
- std::vector<std::vector<ParticleStateInfo> >& decay_daughters_combination_list) const {
-
- if (remaining_particle_index_lists.size() > 0) {
- std::cout<<"wth"<<std::endl;
- std::vector<unsigned int> current_particle_index_list(
- remaining_particle_index_lists.back());
- remaining_particle_index_lists.pop_back();
-
- for (unsigned int i = 0; i < current_particle_index_list.size(); ++i) {
- std::vector<ParticleStateInfo> current_particle_list(
- decay_daughters_combination);
-
- const ParticleStateInfo &particle =
- decay_configuration_.particles_[current_particle_index_list[i]];
-
- if (isParticleValidForCombination(particle, current_particle_list)) {
- current_particle_list.push_back(particle);
-
- extendDaughterCombinations(remaining_particle_index_lists,
- current_particle_list, decay_daughters_combination_list);
- }
- }
- }
- else {
- decay_daughters_combination_list.push_back(decay_daughters_combination);
- }
- }
-
- bool DecayTreeFactory::isParticleValidForCombination(
- const ParticleStateInfo& particle,
- const std::vector<ParticleStateInfo>& combination) const {
- // if we find a particle with the same particle id in the list as the
- // reference particle, this will be not valid
- if (std::find_if(combination.begin(), combination.end(),
- ParticleStateIDComparison(particle.id_)) != combination.end()) {
- return false;
- }
- return true;
- }*/
-
 bool DecayTreeFactory::canDecayTreesGrow(
     const std::vector<DecayTree>& decay_trees,
     const ParticleIndexDecayTree& decay_topology) const {

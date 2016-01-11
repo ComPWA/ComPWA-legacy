@@ -18,12 +18,11 @@
 
 #include "Physics/DecayTree/DecayConfiguration.hpp"
 
-#include "Physics/HelicityAmplitude/ParticleStateDefinitions.hpp"
-
 namespace ComPWA {
-namespace DecayTree {
 
-//typedef std::pair<TwoBodyDecayTopology, std::vector<std::vector<IDInfo> > > TopologyRemainingStatePair;
+class ParticleProperties;
+
+namespace DecayTree {
 
 struct IFParticleInfo {
   unsigned int unique_id_;
@@ -31,13 +30,63 @@ struct IFParticleInfo {
   std::vector<ComPWA::Spin> spin_z_components_;
 };
 
+struct SpinWave {
+  unsigned int unique_id_;
+  int charge_;
+  Spin isospin_;
+  Spin spin_;
+  int parity_;
+  int cparity_;
+
+  bool operator()(const SpinWave& rhs) {
+    if (charge_ != rhs.charge_)
+      return false;
+    if (isospin_ != rhs.isospin_)
+      return false;
+    if (spin_ != rhs.spin_)
+      return false;
+    if (parity_ != rhs.parity_)
+      return false;
+    if (cparity_ != rhs.cparity_)
+      return false;
+    return true;
+  }
+
+  friend std::ostream& operator<<(std::ostream& stream, const SpinWave& sw) {
+    stream << "charge: " << sw.charge_ << std::endl;
+    stream << "isospin: " << sw.isospin_.J_numerator_ << "/"
+        << sw.isospin_.J_denominator_ << "(I_z= " << sw.isospin_.J_z_numerator_
+        << "/" << sw.isospin_.J_denominator_ << ")" << std::endl;
+    stream << "spin: " << sw.spin_.J_numerator_ << "/"
+            << sw.spin_.J_denominator_ << "(J_z= " << sw.spin_.J_z_numerator_
+            << "/" << sw.spin_.J_denominator_ << ")" << std::endl;
+    stream << "c-parity: " << sw.cparity_ << std::endl;
+    stream << "parity: " << sw.parity_ << std::endl;
+    return stream;
+  }
+};
+
+struct SpinWaveTwoBodyDecay {
+  unsigned int mother_index_;
+  IndexPair daughter_indices_;
+};
+
+struct SpinWaveTwoBodyDecayTree {
+  unsigned int top_node_decay_index;
+  std::map<unsigned int, IndexList> decay_index_mapping;
+  std::vector<unsigned int> two_body_decays_;
+  std::vector<unsigned int> available_particles_;
+};
+
 class DecayGenerator {
+  friend class DecayGeneratorFacade;
+
   void *clips_environment;
 
   // containers and fields set by user
   std::vector<IFParticleInfo> final_state_particles_;
-  //std::vector<IDInfo> intermediate_state_particles_;
   IFParticleInfo mother_state_particle_;
+
   std::vector<ComPWA::Spin> allowed_spins_;
   std::vector<ComPWA::Spin> allowed_isospins_;
   std::vector<int> allowed_charges_;
@@ -50,55 +99,41 @@ class DecayGenerator {
   IndexList final_state_particles_indices_;
   IndexList intermediate_state_particles_indices_;
 
-  void populateSpinZStates(IFParticleInfo& particle_info) const;
+  std::vector<SpinWave> all_spin_waves_;
+  std::vector<SpinWaveTwoBodyDecay> all_spin_wave_two_body_decays_;
+  std::map<IndexList, IndexList> two_body_decays_lookup_table_;
 
-  //IndexList createParticleStates(const IFParticleInfo& particle_info);
+  void populateSpinZStates(IFParticleInfo& particle_info) const;
 
   int lookupPID(const std::string& name) const;
 
-  /*std::vector<TwoBodyDecayTopology> constructPossibleDecayTopologies() const;
-
-  bool isTopologyBuildingFinished(
-      const std::vector<TopologyRemainingStatePair>& current_topology_remaining_state_pairs) const;
-
-  bool isTopologyNonExistant(
-      const std::vector<TwoBodyDecayTopology> topology_pool,
-      const TwoBodyDecayTopology& probe) const;
-
-  std::vector<TopologyRemainingStatePair> constructNextLevel(
-      const std::vector<TopologyRemainingStatePair>& current_topology_remaining_state_pairs) const;*/
-
-  /* std::vector<ParticleIndexDecayTree> createDecayTreeRealizationTemplates(
-   const std::vector<TwoBodyDecayTopology>& possible_decay_topologies) const;
-
-   std::vector<TParticlePDG> createDecayNodeParticleCandiateList(
-   const std::vector<IDInfo>& decay_products) const;
-
-   std::vector<TParticlePDG> convertIDInfoToTParticlePDG(
-   const std::vector<IDInfo>& particle_id_info_list) const;*/
-
   void createAllSpinWaves();
-  void createAllTwoBodyDecays();
-  void validateTwoBodyDecays();
-  void createAllValidTwoBodyDecayTrees();
+  void createAllValidTwoBodyDecays();
 
   void setupClipsEnvironment() const;
 
-  void addIFParticleToClipsEnvironment(
-      const IFParticleInfo& particle_info) const;
-
-  void applyUserConditions() const;
-
-  void getExpertise();
-
+  bool validateTwoBodyDecay(const SpinWaveTwoBodyDecay& two_body_decay);
+  void addTwoBodyDecayToClipsEnviroment(
+      const SpinWaveTwoBodyDecay& two_body_decay) const;
+  void addSpinWaveToClipsEnvironment(const SpinWave& spin_wave) const;
+  std::vector<int> getExpertise();
   ParticleStateInfo getSpinWaveFromClipsEnvironment(int unique_id) const;
-
   void setPIDInfo(ParticleStateInfo& particle, void* spin_wave_fact) const;
-
   void print(const ParticleStateInfo &psi) const;
 
-  /*std::vector<ParticleIndexDecayTree> makeConcreteDecayTrees(
-   const std::vector<ParticleIndexDecayTree>& decay_tree_realization_templates);*/
+  std::vector<SpinWaveTwoBodyDecayTree> createAllValidTwoBodyDecayTrees() const;
+  std::vector<SpinWaveTwoBodyDecayTree> createSeedTwoBodyDecayTrees() const;
+  std::pair<bool, unsigned int> findSpinWaveIndex(
+      const ComPWA::ParticleProperties& particle_properties,
+      const Spin& spin_instance) const;
+  std::vector<SpinWaveTwoBodyDecayTree> filterDecayTreesForCorrectInitialState(
+      const std::vector<SpinWaveTwoBodyDecayTree>& two_body_decay_trees) const;
+
+  void printDecayTree(
+      const SpinWaveTwoBodyDecayTree& decay_tree) const;
+
+  DecayConfiguration createDecayConfiguration(
+      const std::vector<SpinWaveTwoBodyDecayTree>& two_body_decay_trees) const;
 
   boost::property_tree::ptree portPropertyTree(
       const std::vector<ParticleIndexDecayTree>& concrete_decay_trees) const;
@@ -110,7 +145,6 @@ public:
   IFParticleInfo createIFParticleInfo(const std::string& name) const;
 
   void addFinalStateParticles(const IFParticleInfo& particle_info);
-  //void addIntermediateStateParticles(const std::string& name);
   void setTopNodeState(const IFParticleInfo& particle_info);
 
   void generate();
