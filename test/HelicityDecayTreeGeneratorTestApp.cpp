@@ -1,5 +1,7 @@
 #include <fstream>
 
+#include "Core/PhysConst.hpp"
+
 #include "Physics/DecayTree/DecayGenerator.hpp"
 #include "Physics/DecayTree/DecayGeneratorFacade.hpp"
 
@@ -13,16 +15,22 @@ int main(int argc, char **argv) {
   ComPWA::DecayTree::DecayGenerator decay_generator;
   // initialize
 
-  ComPWA::DecayTree::DecayGeneratorFacade decay_generator_facade(decay_generator);
+  ComPWA::DecayTree::DecayGeneratorFacade decay_generator_facade(
+      decay_generator);
 
-  decay_generator_facade.setAllowedSpins({0,1});
-  decay_generator_facade.setAllowedIsospins({0, 1});
-  decay_generator_facade.setAllowedCharges({0});
-  decay_generator_facade.setAllowedParities({-1, 1});
-  decay_generator_facade.setAllowedCParities({-1, 1});
+  decay_generator_facade.setAllowedSpinQuantumNumbers(
+      ComPWA::QuantumNumbers::SPIN, { 0, 1, 2 }, 1);
+  decay_generator_facade.setAllowedSpinQuantumNumbers(
+      ComPWA::QuantumNumbers::ISOSPIN, { 0, 1 }, 1);
+  decay_generator_facade.setAllowedIntQuantumNumbers(
+      ComPWA::QuantumNumbers::CHARGE, { -1, 0, 1 });
+  decay_generator_facade.setAllowedIntQuantumNumbers(
+      ComPWA::QuantumNumbers::PARITY, { -1, 1 });
+  decay_generator_facade.setAllowedIntQuantumNumbers(
+      ComPWA::QuantumNumbers::CPARITY, { -1, 1 });
 
-
-  ComPWA::DecayTree::IFParticleInfo if_particle = decay_generator.createIFParticleInfo("gamma");
+  ComPWA::DecayTree::IFParticleInfo if_particle =
+      decay_generator.createIFParticleInfo("gamma");
   decay_generator.addFinalStateParticles(if_particle);
 //  decay_generator.addFinalStateParticles("gamma");
 //  decay_generator.addFinalStateParticles("pi0");
@@ -33,7 +41,7 @@ int main(int argc, char **argv) {
   if_particle = decay_generator.createIFParticleInfo("jpsi");
   decay_generator.setTopNodeState(if_particle);
 
-  decay_generator.generate();
+  ComPWA::DecayTree::DecayConfiguration decay_config = decay_generator.createDecayConfiguration();
 
   return 0;
 }

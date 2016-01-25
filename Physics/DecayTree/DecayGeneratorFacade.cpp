@@ -10,6 +10,7 @@
 //-------------------------------------------------------------------------------
 
 #include "Core/Utility.hpp"
+#include "Core/PhysConst.hpp"
 
 #include "Physics/DecayTree/DecayGeneratorFacade.hpp"
 #include "Physics/DecayTree/DecayGenerator.hpp"
@@ -25,47 +26,35 @@ DecayGeneratorFacade::~DecayGeneratorFacade() {
   // TODO Auto-generated destructor stub
 }
 
-void DecayGeneratorFacade::setAllowedSpins(
+void DecayGeneratorFacade::setAllowedSpinQuantumNumbers(
+    const ComPWA::QuantumNumbers& qn_type,
     const std::vector<unsigned int>& spin_numerators,
-    unsigned int spin_denominator) {
+    unsigned int spin_denominator) const {
+  AllowedQuantumNumbers<ComPWA::Spin> spin;
+
+  spin.quantum_number_name_ =
+      ComPWA::PhysConst::Instance().getQuantumNumberName(qn_type);
   Spin s;
   s.J_denominator_ = spin_denominator;
   for (unsigned int i = 0; i < spin_numerators.size(); ++i) {
     s.J_numerator_ = spin_numerators[i];
-    for (int spinz_num = -spin_numerators[i]; spinz_num <= (int)spin_numerators[i];
-        ++spinz_num) {
+    for (int spinz_num = -spin_numerators[i];
+        spinz_num <= (int) spin_numerators[i]; ++spinz_num) {
       s.J_z_numerator_ = spinz_num;
-      decay_generator_.allowed_spins_.push_back(s);
+      spin.allowed_values_.push_back(s);
     }
   }
+  decay_generator_.allowed_spin_like_quantum_numbers_.push_back(spin);
 }
 
-void DecayGeneratorFacade::setAllowedIsospins(
-    const std::vector<unsigned int>& isospin_numerators,
-    unsigned int isospin_denominator) {
-  Spin s;
-  s.J_denominator_ = isospin_denominator;
-  for (unsigned int i = 0; i < isospin_numerators.size(); ++i) {
-    s.J_numerator_ = isospin_numerators[i];
-    for (int spinz_num = -isospin_numerators[i];
-        spinz_num <= (int)isospin_numerators[i]; ++spinz_num) {
-      s.J_z_numerator_ = spinz_num;
-      decay_generator_.allowed_isospins_.push_back(s);
-    }
-  }
-}
-
-void DecayGeneratorFacade::setAllowedCharges(
-    const std::vector<int>& charges) {
-  decay_generator_.allowed_charges_ = charges;
-}
-void DecayGeneratorFacade::setAllowedParities(
-    const std::vector<int>& parities) {
-  decay_generator_.allowed_parities_ = parities;
-}
-void DecayGeneratorFacade::setAllowedCParities(
-    const std::vector<int>& cparities) {
-  decay_generator_.allowed_cparites_ = cparities;
+void DecayGeneratorFacade::setAllowedIntQuantumNumbers(
+    const ComPWA::QuantumNumbers& qn_type,
+    const std::vector<int>& int_qn_values) const {
+  AllowedQuantumNumbers<int> int_qn;
+  int_qn.quantum_number_name_ =
+      ComPWA::PhysConst::Instance().getQuantumNumberName(qn_type);
+  int_qn.allowed_values_ = int_qn_values;
+  decay_generator_.allowed_integer_like_quantum_numbers_.push_back(int_qn);
 }
 
 } /* namespace DecayTree */

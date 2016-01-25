@@ -30,6 +30,8 @@
 
 namespace ComPWA {
 
+enum class QuantumNumbers {SPIN, ISOSPIN, CHARGE, PARITY, CPARITY};
+
 struct ParticleProperties {
   std::string name_;
   double mass_;
@@ -86,6 +88,8 @@ public:
   PhysConst(PhysConst const&) = delete;
   void operator=(PhysConst const&) = delete;
 
+  void initQuantumNumberMapping();
+
   const Constant& findConstant(const std::string& name) const;
   const ParticleProperties& findParticle(const std::string& name) const;
   const ParticleProperties& findParticle(int pid) const;
@@ -93,10 +97,15 @@ public:
       const ParticleProperties& qn) const;
   bool particleExists(const std::string& name) const;
 
+  std::string getQuantumNumberName(
+      const QuantumNumbers& qn_type) const;
+
 private:
   PhysConst();
 
   void readFile();
+
+  std::map<QuantumNumbers, std::string> quantum_number_key_name_mapping_;
 
   std::string particleFileName;
   std::string particleDefaultFileName;

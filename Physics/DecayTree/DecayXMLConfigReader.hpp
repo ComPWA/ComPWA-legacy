@@ -40,7 +40,8 @@ public:
   virtual ~DecayXMLConfigReader();
 
   void readConfig(const std::string &filename);
-  //void writeConfig(const std::string &filename);
+  void writeConfig(const boost::property_tree::ptree &pt,
+      const std::string &filename) const;
 };
 
 } /* namespace DecayTree */

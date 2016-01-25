@@ -44,6 +44,10 @@ int main(int argc, char **argv) {
     decay_tree->print(dot);
   }
 
+  xml_reader.writeConfig(
+      decay_configuration.exportConfigurationToPropertyTree(),
+      "test_config.xml");
+
   return 0;
 }
 

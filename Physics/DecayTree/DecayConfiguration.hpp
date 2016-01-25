@@ -25,8 +25,7 @@ struct DecayProductsInfo {
   boost::property_tree::ptree decay_strength_info_and_phase_;
 };
 
-typedef std::map<unsigned int, std::vector<DecayProductsInfo> > ParticleIndexDecayTree;
-
+typedef std::map<unsigned int, DecayProductsInfo> ParticleIndexDecayTree;
 
 class DecayConfiguration {
   friend class DecayTreeFactory;
@@ -53,6 +52,39 @@ public:
   unsigned int addParticleToList(ParticleStateInfo particle);
 
   void setRemainingParticleProperties(ParticleStateInfo& particle) const;
+
+  boost::property_tree::ptree exportConfigurationToPropertyTree() const;
+
+  boost::property_tree::ptree createPropertyTreeForParticleIndexTree(
+      const ParticleIndexDecayTree& particle_index_decay_tree) const;
+
+  void addNextDecayTreeLayerToPropertyTree(
+      boost::property_tree::ptree& decay_tree_pt,
+      const std::vector<ParticleIndexDecayTree::const_iterator> & current_nodes) const;
+
+  boost::property_tree::ptree createSingleDecayNodeToPropertyTree(
+      const ParticleIndexDecayTree::const_iterator& current_node) const;
+
+  void fillParticleLists(
+      const ParticleIndexDecayTree& particle_index_decay_tree,
+      std::map<unsigned int, unsigned int>& unique_final_state_particle_index_list,
+      std::map<unsigned int, unsigned int>& unique_intermediate_state_particle_index_list) const;
+
+  boost::property_tree::ptree createPropertyTreeForFinalStateParticle(
+      const ParticleStateInfo& particle) const;
+
+  boost::property_tree::ptree createPropertyTreeForIntermediateStateParticle(
+      const ParticleStateInfo& particle) const;
+
+  ParticleIndexDecayTree::const_iterator determineTopNode(
+      const ParticleIndexDecayTree& decay_topology) const;
+
+  bool isNodeADaughterInTopology(ParticleIndexDecayTree::const_iterator& node,
+      const ParticleIndexDecayTree& decay_topology) const;
+
+  bool isNodeADaughter(ParticleIndexDecayTree::const_iterator& node,
+      const std::vector<unsigned int>& list_of_daughters) const;
+
 };
 
 } /* namespace DecayTree */

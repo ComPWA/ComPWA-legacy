@@ -34,10 +34,20 @@ PhysConst::PhysConst() {
   constantFileName = path + "/Physics/physConstants.xml";
   constantDefaultFileName = path + "/Physics/physDefaultConstants.xml";
 
+  initQuantumNumberMapping();
   readFile();
 }
 
 PhysConst::~PhysConst() {
+}
+
+void PhysConst::initQuantumNumberMapping() {
+  quantum_number_key_name_mapping_[QuantumNumbers::SPIN] = "spin";
+  quantum_number_key_name_mapping_[QuantumNumbers::ISOSPIN] = "isospin";
+  quantum_number_key_name_mapping_[QuantumNumbers::CHARGE] = "charge";
+  quantum_number_key_name_mapping_[QuantumNumbers::PARITY] = "parity";
+  quantum_number_key_name_mapping_[QuantumNumbers::CPARITY] = "cparity";
+
 }
 
 void PhysConst::readFile() {
@@ -215,6 +225,19 @@ bool PhysConst::particleExists(const std::string& name) const {
     return true;
 
   return false;
+}
+
+std::string PhysConst::getQuantumNumberName(
+    const QuantumNumbers& qn_type) const {
+  auto result = quantum_number_key_name_mapping_.find(qn_type);
+  if (result != quantum_number_key_name_mapping_.end()) {
+    return result->second;
+  }
+  else {
+    std::runtime_error("DecayGeneratorFacade::setAllowedSpinQuantumNumbers:"
+        " quantum number with your specified key does not exist in the mapping!"
+        " Please correct or update mapping!");
+  }
 }
 
 }

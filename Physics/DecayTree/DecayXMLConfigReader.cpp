@@ -118,14 +118,12 @@ ParticleStateInfo DecayXMLConfigReader::parseParticleStateRemainders(
   }
 }
 
-/*std::vector<unsigned int> DecayXMLConfigReader::parseIDList(
- const boost::property_tree::ptree &pt) const {
- std::vector<unsigned int> ids;
- BOOST_FOREACH(ptree::value_type const &id_list_item, pt.get_child("IDList")){
- ids.push_back(id_list_item.second.get<unsigned int>(""));
- }
- return ids;
- }*/
+void DecayXMLConfigReader::writeConfig(const boost::property_tree::ptree &pt,
+    const std::string &filename) const {
+
+  // Write the property tree to file
+  write_xml(filename, pt);
+}
 
 } /* namespace DecayTree */
 } /* namespace ComPWA */

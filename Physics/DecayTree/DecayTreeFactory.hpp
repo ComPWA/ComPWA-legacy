@@ -21,33 +21,22 @@ namespace DecayTree {
 class DecayTreeFactory {
   const DecayConfiguration& decay_configuration_;
 
-  ParticleIndexDecayTree::const_iterator determineTopNode(
-      const ParticleIndexDecayTree& decay_topology) const;
+  DecayTree createSeedDecayTree(
+      ParticleIndexDecayTree::const_iterator & top_node_iter) const;
 
-  bool isNodeADaughterInTopology(ParticleIndexDecayTree::const_iterator& node,
-      const ParticleIndexDecayTree& decay_topology) const;
-
-  bool isNodeADaughter(ParticleIndexDecayTree::const_iterator& node,
-      const std::vector<unsigned int>& list_of_daughters) const;
-
-  std::vector<DecayTree> createDecayTreeSeedList(
-      ParticleIndexDecayTree::const_iterator& top_node_iter) const;
+  void growSingleLeafOnDecayTree(DecayTree& decay_tree,
+      ParticleIndexDecayTree::const_iterator& single_decay) const;
 
   std::vector<ParticleStateInfo> generateParticleStateInfoList(
       const std::vector<unsigned int>& particle_index_list) const;
 
-  bool canDecayTreesGrow(const std::vector<DecayTree>& decay_trees,
+  bool canDecayTreeGrow(const DecayTree& decay_tree,
       const ParticleIndexDecayTree& decay_topology) const;
 
-  std::vector<DecayTree> growNextDecayTreeLayer(
-      const std::vector<DecayTree>& decay_trees,
+  void growNextDecayTreeLayer(DecayTree& decay_tree,
       const ParticleIndexDecayTree& decay_topology) const;
 
-  std::vector<DecayTree> growSingleLeafOnDecayTrees(
-      const std::vector<DecayTree>& decay_trees,
-      ParticleIndexDecayTree::const_iterator& single_decay) const;
-
-  void removeFaultyDecayTrees(std::vector<DecayTree>& decay_tree_list) const;
+  bool isDecayTreeFaulty(const DecayTree& decay_tree) const;
 
   void removeUndistinguishableCombinations(
       std::vector<DecayTree>& decay_tree_list) const;
