@@ -11,7 +11,8 @@
 //! Reader for data in ASCII-Format like Pawian's epemEvtReader
 /*! \class AsciiReader
  * @file AsciiReader.h
- * This class reads event-based data from ascii-files in the same syntax as Pawian's epemEvtReader. It implements the
+ * This class reads event-based data from ascii-files in the same syntax
+ * as Pawian's epemEvtReader. It implements the
  * interface of Data.hpp.
 */
 
@@ -27,6 +28,7 @@
 // local headers
 #include "DataReader/Data.hpp"
 #include "Core/Event.hpp"
+#include "Core/ParameterList.hpp"
 #include "Core/DataPoint.hpp"
 
 //_____ D E F I N I T I O N S __________________________________________________
@@ -40,7 +42,10 @@ public:
   virtual AsciiReader* Clone() const;
   virtual AsciiReader* EmptyClone() const;
   virtual Event& getEvent( const int );
-  virtual allMasses getMasses();
+  virtual allMasses getMasses(const unsigned int startEvent=0,
+			unsigned int nEvents=0);
+  virtual ParameterList& getListOfData() { };
+
   virtual const int getBin( const int, double&, double& );
 
   virtual const unsigned int getNEvents() const { return EvtList_.size(); };
@@ -49,7 +54,13 @@ public:
   //! Set correction table
   virtual void applyCorrection(DataCorrection& corr) { };
   virtual std::vector<Event> getEvents() {return EvtList_; }
-  virtual void Add(Data& otherSample){ EvtList_.insert(EvtList_.end(),otherSample.getEvents().begin(),otherSample.getEvents().end()); }
+  virtual void Add(Data& otherSample){
+	  EvtList_.insert(
+			  EvtList_.end(),
+			  otherSample.getEvents().begin(),
+			  otherSample.getEvents().end()
+			  );
+  }
 
   /** Destructor */
   virtual ~AsciiReader();

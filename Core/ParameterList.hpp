@@ -465,6 +465,9 @@ public:
 	//! Append ParameterList to (*this). Shared_ptr are not(!) deep copied
 	virtual void Append(ParameterList& addList);
 
+	//! Create new index
+	virtual void Indexing();
+
 protected:
 	std::map<std::string,unsigned int> mMultiComplexID_; /*!< Map of complex list parameter ids */
 	std::map<std::string,unsigned int> mMultiDoubleID_; /*!< Map of double list parameter ids */
@@ -504,10 +507,14 @@ private:
 	{
 		using namespace boost::serialization;
 		ar & make_nvp("DoubleParameters",vDoublePar_); //currently only DoubleParameters can be serialized
-		ar & make_nvp("DoubleParametersID",mDoubleParID_);
+//		ar & make_nvp("DoubleParametersID",mDoubleParID_);
 		ar & make_nvp("OutString",out_);
+		Indexing();
 	}
 };
+BOOST_SERIALIZATION_SHARED_PTR(ParameterList)
+BOOST_CLASS_IMPLEMENTATION( ParameterList, boost::serialization::object_serializable )
+BOOST_CLASS_TRACKING( ParameterList, boost::serialization::track_never )
 
 #include <boost/serialization/split_free.hpp>
 #include <boost/unordered_map.hpp>

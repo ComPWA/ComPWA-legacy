@@ -21,18 +21,19 @@ int main(int argc, char** argv){
 
 	std::cout<<"Testing boost::serialization"<<std::endl;
 	//Serialize a DoubleParameter
-	DoubleParameter p1("test",2.5,0.0,5.0,0.5);
-	p1.SetError(0.5,1.3);
+//	DoubleParameter p1("test",2.5,0.0,5.0,0.5);
+//	p1.SetError(0.5,1.3);
+//	std::ofstream ofs("DoublePar.xml");
+//	boost::archive::xml_oarchive oa(ofs);
+//	oa << make_nvp("DoublePar", p1);
+//	ofs.close();
 	DoubleParameter p1In;
-	std::ofstream ofs("DoublePar.xml");
-	boost::archive::xml_oarchive oa(ofs);
-	oa << make_nvp("DoublePar", p1);
-	ofs.close();
 	std::ifstream ifs("DoublePar.xml");
 	boost::archive::xml_iarchive ia(ifs);
 	ia >> make_nvp("DoublePar", p1In);
 	ifs.close();
 	std::cout<<"Serialization of DoubleParameter: value="<<p1In.GetValue()<<std::endl;
+	std::cout<<"Serialization of DoubleParameter: value="<<p1In.GetError()<<std::endl;
 
 
 	//Serialize a ParameterList

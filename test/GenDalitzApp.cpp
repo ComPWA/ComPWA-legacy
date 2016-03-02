@@ -48,7 +48,6 @@ using namespace boost::log;
 // Physics Interface header files go here
 #include "Core/PhysConst.hpp"
 #include "Physics/AmplitudeSum/AmpSumIntensity.hpp"
-#include "Physics/AmplitudeSum/AmplitudeSetup.hpp"
 #include "Core/Parameter.hpp"
 #include "Core/ParameterList.hpp"
 #include "Physics/DPKinematics/DalitzKinematics.hpp"
@@ -294,31 +293,11 @@ int main(int argc, char **argv) {
 		BOOST_LOG_TRIVIAL(error)<<"Environment Variable COMPWA_DIR not set?"<< std::endl;
 	}
 	std::string resoFile = path + "/test/JPSI_ypipi.xml";
-	AmplitudeSetup ini(resoFile);
-	cout << "loaded file " << ini.getFileName() << " with "
-			<< ini.getBreitWigner().size() << " resonances:" << endl;
-	for (std::vector<BreitWignerConf>::iterator reso = ini.getBreitWigner().begin();
-			reso != ini.getBreitWigner().end(); reso++) {
-		cout << endl << "Resonance " << (*reso).m_name << endl;
-		cout << "Mass =  " << (*reso).m_mass << " with range "
-				<< (*reso).m_mass_min << " to " << (*reso).m_mass_max << endl;
-		cout << "Width = " << (*reso).m_width << " with range "
-				<< (*reso).m_width_min << " to " << (*reso).m_width_max << endl;
-		cout << "Spin =  " << (*reso).m_spin << " m = " << (*reso).m_m
-				<< " n = " << (*reso).m_n << endl;
-		cout << "Strength =  " << (*reso).m_strength << " Phase = "
-				<< (*reso).m_phase << endl;
-		cout << "mesonRadius=  " << (*reso).m_mesonRadius << endl;
-		cout << "DaughterA =  " << (*reso).m_daughterA << " DaughterB = "
-				<< (*reso).m_daughterB << endl;
-	}
-	cout << endl << endl;
-
-	//Simple Breit-Wigner Physics-Module setup
-	AmpSumIntensity testBW(ini, normStyle::none,
+	boost::property_tree::ptree pt;
+	read_xml(resoFile , pt, boost::property_tree::xml_parser::trim_whitespace);
+	AmpSumIntensity testBW(normStyle::none,
 			std::shared_ptr<Efficiency>(new UnitEfficiency()), MaxEvents);
-	// std::shared_ptr<Amplitude> amps(new AmpSumIntensity(ini, AmpSumIntensity::normStyle::one, std::shared_ptr<Efficiency>(new UnitEfficiency()), myReader->getNEvents()));
-
+	testBW.Configure(pt);
 	testBW.printAmps();
 
 	ParameterList minPar;

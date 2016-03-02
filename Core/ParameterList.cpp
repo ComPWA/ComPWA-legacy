@@ -175,16 +175,18 @@ std::shared_ptr<AbsParameter> ParameterList::GetParameter(const std::string parn
 
 std::shared_ptr<MultiComplex> ParameterList::GetMultiComplex(const unsigned int i) const {
 	if( !(i < vMultiComplex_.size()) ){
-		throw BadParameter("Double Parameter not found: "+std::to_string((double long)i));
-		//return 0;
+		throw BadParameter("ParameterList::GetMultiComplex() | "
+				"Not found parameter "+std::to_string((double long)i)
+		);
 	}
 	return vMultiComplex_.at(i);
 }
 
 std::shared_ptr<MultiDouble> ParameterList::GetMultiDouble(const unsigned int i) const {
 	if( !(i < vMultiDouble_.size()) ){
-		throw BadParameter("Double Parameter not found: "+std::to_string((double long)i));
-		//return 0;
+		throw BadParameter("ParameterList::GetMultiDouble() | "
+				"Not found parameter "+std::to_string((double long)i)
+		);
 	}
 	return vMultiDouble_.at(i);
 }
@@ -192,7 +194,6 @@ std::shared_ptr<MultiDouble> ParameterList::GetMultiDouble(const unsigned int i)
 std::shared_ptr<ComplexParameter> ParameterList::GetComplexParameter(const unsigned int i) const {
 	if( !(i < vComplexPar_.size()) ){
 		throw BadParameter("Complex Parameter not found: "+std::to_string((double long)i));
-		//return 0;
 	}
 	return vComplexPar_.at(i);
 }
@@ -200,7 +201,6 @@ std::shared_ptr<ComplexParameter> ParameterList::GetComplexParameter(const unsig
 std::shared_ptr<DoubleParameter> ParameterList::GetDoubleParameter(const unsigned int i) const {
 	if( !(i < vDoublePar_.size()) ){
 		throw BadParameter("Double Parameter not found: "+std::to_string((double long)i));
-		//return 0;
 	}
 	return vDoublePar_.at(i);
 }
@@ -208,7 +208,6 @@ std::shared_ptr<DoubleParameter> ParameterList::GetDoubleParameter(const unsigne
 std::shared_ptr<IntegerParameter> ParameterList::GetIntegerParameter(const unsigned int i) const {
 	if( !(i < vIntPar_.size()) ){
 		throw BadParameter("Integer Parameter not found: "+std::to_string((double long)i));
-		//return 0;
 	}
 	return vIntPar_.at(i);
 }
@@ -216,7 +215,6 @@ std::shared_ptr<IntegerParameter> ParameterList::GetIntegerParameter(const unsig
 std::shared_ptr<BoolParameter> ParameterList::GetBoolParameter(const unsigned int i) const {
 	if( !(i < vBoolPar_.size()) ){
 		throw BadParameter("Bool Parameter not found: "+std::to_string((double long)i));
-		//return 0;
 	}
 	return vBoolPar_.at(i);
 }
@@ -617,3 +615,35 @@ void ParameterList::Append(ParameterList& addList){
 		AddParameter(addList.GetParameter(i));
 }
 
+template<typename T>
+void createIndex(std::map<std::string,unsigned int> idx, std::vector<std::shared_ptr<T> > list){
+	idx.clear();
+	auto it = list.begin();
+	for(; it != list.end(); it++)
+		idx.insert(
+				std::pair<std::string,unsigned int>(
+						(*it)->GetName(),
+						idx.max_size()
+						)
+				);
+	return;
+}
+
+void ParameterList::Indexing(){
+//	mMultiComplexID_.clear();
+//	std::vector<std::shared_ptr<MultiComplex> >::iterator itMcompl = vMultiComplex_.begin();
+//	for(; itMcompl!= vMultiComplex_.end(); itMcompl++)
+//		mMultiComplexID_.insert(
+//				std::pair<std::string,unsigned int>(
+//						(*itMcompl)->GetName(),
+//						mMultiComplexID_.max_size()
+//						)
+//				);
+	createIndex(mMultiComplexID_, vMultiComplex_);
+	createIndex(mMultiDoubleID_, vMultiDouble_);
+	createIndex(mComplexParID_, vComplexPar_);
+	createIndex(mDoubleParID_, vDoublePar_);
+	createIndex(mIntParID_, vIntPar_);
+	createIndex(mBoolParID_, vBoolPar_);
+	createIndex(mMultiComplexID_, vMultiComplex_);
+}

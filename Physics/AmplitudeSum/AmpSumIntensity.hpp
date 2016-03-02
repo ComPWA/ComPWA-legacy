@@ -18,6 +18,8 @@
 #include <map>
 #include <string>
 
+#include <boost/property_tree/xml_parser.hpp>
+
 #include "Core/Amplitude.hpp"
 #include "Core/Parameter.hpp"
 #include "Core/ParameterList.hpp"
@@ -27,23 +29,28 @@
 #include "Core/Generator.hpp"
 
 #include "Physics/AmplitudeSum/AmpAbsDynamicalFunction.hpp"
-#include "Physics/AmplitudeSum/AmplitudeSetup.hpp"
 #include "Physics/DPKinematics/DalitzKinematics.hpp"
 
 class AmpSumIntensity : public Amplitude {
 
 public:
-
-	AmpSumIntensity(AmplitudeSetup ini, normStyle ns,
-			std::shared_ptr<Efficiency> eff, unsigned int nCalls);
-	AmpSumIntensity(AmplitudeSetup ini,
-			std::shared_ptr<Efficiency> eff, unsigned int nCalls);
+	AmpSumIntensity( normStyle ns=normStyle::none,
+			std::shared_ptr<Efficiency> eff=
+					std::shared_ptr<Efficiency>(new UnitEfficiency),
+			unsigned int nCalls=30000);
 	//! Destructor
 	virtual ~AmpSumIntensity(){ /* nothing */ };
 	//! Clone function
 	virtual AmpSumIntensity* Clone(){
 		return (new AmpSumIntensity(*this));
 	}
+
+	//! Load parameter list
+	virtual void LoadParameters(std::string path);
+	//! Configure resonance from ptree
+	virtual void Configure(const boost::property_tree::ptree &pt);
+	//! Save resonance from to ptree
+	virtual void Save(std::string fileName);
 
 	//! set efficiency
 	virtual void setEfficiency(std::shared_ptr<Efficiency> eff) { eff_ = eff; };
@@ -68,15 +75,31 @@ public:
 
 	//! setting new parameterList
 	virtual void setParameterList(ParameterList& par);
+
 	//! evaluate total amplitude using parameters \par at phsp point \point
 	virtual const ParameterList& intensity(dataPoint& point, ParameterList& par);
-	//! evaluate total amplitude using current set of parameters at phsp point \point. Amplitude is multiplied with efficiency of datapoint.
+
+	/**! Evaluate total amplitude
+	 * Using current set of parameters at phsp point \point. Amplitude is
+	 * multiplied with efficiency of datapoint.
+	 */
 	virtual const ParameterList& intensity(dataPoint& point);
-	//! evaluate total amplitude using current set of parameters at phsp point \point. No efficiency correction.
+
+	/**! Evaluate total amplitude
+	 * Using current set of parameters at phsp point \point.
+	 * No efficiency correction.
+	 */
 	virtual const ParameterList& intensityNoEff(dataPoint& point);
-	//! evaluate total amplitude using current set of parameters at phsp point \point. Amplitude is multiplied with efficiency of datapoint.
-	virtual const ParameterList& intensity(std::vector<double> point, ParameterList& par);
-	virtual const double sliceIntensity(dataPoint& dataP, ParameterList& par,std::complex<double>* reso, unsigned int nResos);
+
+	/**! Evaluate total amplitude
+	 * Using current set of parameters at phsp point \point. Amplitude is
+	 * multiplied with efficiency of datapoint.
+	 */
+	virtual const ParameterList& intensity(
+			std::vector<double> point, ParameterList& par);
+
+	virtual const double sliceIntensity(dataPoint& dataP, ParameterList& par,
+			std::complex<double>* reso, unsigned int nResos);
 
 	//! fill internal parameter list with (start) parameter
 	virtual bool copyParameterList(ParameterList& outPar);
@@ -121,33 +144,33 @@ public:
 	virtual double GetFraction(std::string name);
 	//! get fit fraction for resonance \param id
 	virtual double GetFraction(unsigned int id);
+	//! Get phase of resonance name
+	virtual bool GetEnable(std::string name);
+	//! Get phase of resonance id
+	virtual bool GetEnable(unsigned int id);
 	//! get resonance by @param name
-	virtual std::shared_ptr<AmpAbsDynamicalFunction> GetResonance(std::string name);
+	virtual std::shared_ptr<AmpAbsDynamicalFunction>
+	GetResonance(std::string name);
 	//! get resonance by @param id
-	virtual std::shared_ptr<AmpAbsDynamicalFunction> GetResonance(unsigned int id);
+	virtual std::shared_ptr<AmpAbsDynamicalFunction>
+	GetResonance(unsigned int id);
 	//! Average width of all resonances
 	virtual double averageWidth();
-	/*!Get AmplitudeSetup
-	 * AmpltidueSetup object is updated with current parameters and a pointer is returned.
-	 *
-	 * @return AmplitudeSetup
-	 */
-	AmplitudeSetup* GetAmplitudeSetup();
 
 	//---------- related to FunctionTree -------------
 	//! Check of tree is available
 	virtual bool hasTree(){	return 1; }
 	//! Getter function for function tree
-	virtual std::shared_ptr<FunctionTree> GetTree(allMasses& theMasses,allMasses& toyPhspSample,
-			std::string suffix=""){
+	virtual std::shared_ptr<FunctionTree> GetTree(
+			allMasses& theMasses,allMasses& toyPhspSample,
+			std::string suffix="")
+	{
 		return setupBasicTree(theMasses,toyPhspSample, suffix);
 	}
 	int getFirstRes() { return firstRes; }
 	int getSecondRes() { return secondRes; }
 
 protected:
-	//! Initialize amplitude sum from amplitude setup
-	void init();
 	//! Maximum value of amplitude. Necessary for event generation.
 	double _maxFcnVal;
 	//! Is amplitude maximum already calculated?
@@ -160,14 +183,10 @@ protected:
 	std::shared_ptr<Efficiency> eff_;
 	//! List of resonances
 	std::vector<std::shared_ptr<AmpAbsDynamicalFunction> > resoList;
-	//! Amplitude setup
-	AmplitudeSetup ampSetup;
 	//! Type of normalization
 	normStyle _normStyle;
 	//! List of parameters
 	ParameterList params;
-	//! Update amplitude setup with current parameters
-	void updateAmplitudeSetup();
 	//! precision for numeric integration
 	unsigned int _nCalls;
 
@@ -184,9 +203,6 @@ protected:
 			std::string suffix="");
 
 	int firstRes, secondRes;
-private:
-
-
 };
 
 #endif

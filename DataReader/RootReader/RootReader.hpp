@@ -63,6 +63,8 @@ public:
     virtual void pushEvent(const Event& evt);
     virtual Event& getEvent(const int);
     virtual allMasses getMasses(const unsigned int startEvent=0, unsigned int nEvents=0);
+	virtual ParameterList& getListOfData();
+
     virtual const int getBin(const int, double&, double&);
     virtual void writeData(std::string file="",std::string trName="");
     virtual void Clear();

@@ -30,9 +30,10 @@ using namespace std;
 class AmpGausRes : public AmpAbsDynamicalFunction  {
 public:
 
+	AmpGausRes();
 	AmpGausRes(const char *name,
 			std::shared_ptr<DoubleParameter> mag, std::shared_ptr<DoubleParameter> phase,
-			std::shared_ptr<DoubleParameter> mass, int subSys,
+			std::shared_ptr<DoubleParameter> mass, int part1, int part2,
 			std::shared_ptr<DoubleParameter> width,
 			int nCalls=30000, normStyle nS=normStyle::one) ;
 

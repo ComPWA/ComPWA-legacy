@@ -333,7 +333,7 @@ double MinLogLH::calcPenalty(){
 	if(penaltyLambda<=0) return 0; //penalty term disabled
 	double magSum = 0;
 	for(unsigned int i=0;i<amp->GetNumberOfResonances(); i++){
-		//magSum += amp->getAmpMagnitude(i);
+		if(!amp->GetEnable(i)) continue;
 		magSum += std::fabs(amp->GetMagnitude(i))*std::sqrt(amp->GetIntegral(i));
 	}
 	//return (penaltyLambda*magSum/amp->integral());

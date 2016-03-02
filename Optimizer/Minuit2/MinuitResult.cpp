@@ -118,7 +118,10 @@ void MinuitResult::setUseCorrelatedErrors(bool s, int nSets) {
 }
 
 void MinuitResult::calcFractionError(){
-	if(fractionList.GetNDouble() != _amp->GetNumberOfResonances())
+	int nRes=0;
+	for(int i=0; i<_amp->GetNumberOfResonances(); ++i)
+		if(_amp->GetEnable(i)) nRes++;
+	if(fractionList.GetNDouble() != nRes++)
 		throw std::runtime_error(
 				"MinuitResult::calcFractionError() fraction list not valid!");
 	nRes=fractionList.GetNDouble();
@@ -291,7 +294,7 @@ void MinuitResult::genOutput(std::ostream& out, std::string opt){
 
 	double sumMag;
 	for(unsigned int i=0;i<_amp->GetNumberOfResonances(); i++){ //fill matrix
-		//double resInt= _amp->GetIntegral(i);
+		if(!_amp->GetEnable(i)) continue;
 		std::string resName = _amp->GetNameOfResonance(i);
 		std::shared_ptr<DoubleParameter> magPar =
 				finalParameters.GetDoubleParameter("mag_"+resName);
@@ -310,8 +313,10 @@ void MinuitResult::genOutput(std::ostream& out, std::string opt){
 		tableInterf->addColumn("Value",15);
 		tableInterf->header();
 		double sumInfTerms = 0;
-		for(int i=0; i<_amp->GetNumberOfResonances(); i++)
+		for(int i=0; i<_amp->GetNumberOfResonances(); i++){
+			if(!_amp->GetEnable(i)) continue;
 			for(int j=i; j<_amp->GetNumberOfResonances(); j++){
+				if(!_amp->GetEnable(j)) continue;
 				*tableInterf << i << j;
 				*tableInterf << _amp->GetNameOfResonance(i);
 				*tableInterf << _amp->GetNameOfResonance(j);
@@ -319,6 +324,7 @@ void MinuitResult::genOutput(std::ostream& out, std::string opt){
 				*tableInterf << inf;
 				sumInfTerms+=inf;
 			}
+		}
 		tableInterf->delim();
 		*tableInterf<<" "<<" "<<" "<<"Sum: "<<sumInfTerms;
 		tableInterf->footer();

@@ -528,8 +528,10 @@ public:
 	 * with value 0 but without bounds or an error.
 	 * \param inName internal string identifier of this parameter
 	 */
-	DoubleParameter(std::string inName=""):AbsParameter(inName, ParType::DOUBLE),
-	fixed_(0),val_(0),min_(0),max_(0), errorType(ErrorType::NOTDEF) {
+	DoubleParameter(std::string inName="") :
+		AbsParameter(inName, ParType::DOUBLE), fixed_(0),val_(0),min_(0), max_(0)
+	{
+		SetError(0);
 		bounds_= usebounds_ = false;
 	}
 
@@ -540,9 +542,10 @@ public:
 	 * \param inName internal string identifier of this parameter
 	 * \param value input value of the parameter
 	 */
-	DoubleParameter(std::string inName, const double value):AbsParameter(inName, ParType::DOUBLE),
-			fixed_(0),val_(value),min_(0),max_(0), errorType(ErrorType::NOTDEF)
+	DoubleParameter(std::string inName, const double value) :
+		AbsParameter(inName, ParType::DOUBLE), fixed_(0),val_(value), min_(0),max_(0)
 	{
+		SetError(0);
 		bounds_= usebounds_ = false;
 	}
 
@@ -573,10 +576,12 @@ public:
 	 * \param max input upper bound
 	 * \sa check_bounds()
 	 */
-	DoubleParameter(std::string inName, const double value, const double min, const double max)
-	:AbsParameter(inName, ParType::DOUBLE),fixed_(0),val_(value),min_(0),max_(0),
-	 errorType(ErrorType::NOTDEF)
+	DoubleParameter(std::string inName, const double value,
+			const double min, const double max) :
+				AbsParameter(inName, ParType::DOUBLE),
+				fixed_(0),val_(value),min_(0),max_(0)
 	{
+		SetError(0);
 		bounds_= usebounds_ = false;
 		SetMinMax(min,max);
 	}
@@ -593,15 +598,18 @@ public:
 	 * \param error input error of the parameter
 	 * \sa check_bounds()
 	 */
-	DoubleParameter(std::string inName, const double value, const double min, const double max, const double error)
-	:AbsParameter(inName, ParType::DOUBLE),fixed_(0),val_(value),min_(0),max_(0),
-	 errorType(ErrorType::NOTDEF)
+	DoubleParameter(std::string inName, const double value,
+			const double min, const double max, const double error) :
+				AbsParameter(inName, ParType::DOUBLE),
+				fixed_(0),val_(value),min_(0),max_(0)
 	{
 		SetError(error);
 		bounds_= usebounds_ = false;
 		SetMinMax(min,max);
 	}
-	DoubleParameter(const DoubleParameter& in):AbsParameter(in.name_, ParType::DOUBLE){
+	DoubleParameter(const DoubleParameter& in) :
+		AbsParameter(in.name_, ParType::DOUBLE)
+	{
 		*this = in;
 	}
 	//! Empty Destructor
@@ -613,7 +621,10 @@ public:
 	//! Check if parameter has bounds
 	virtual inline bool HasBounds() const {return bounds_;}
 	//! Check if bounds should be used
-	virtual inline bool UseBounds() const {if(bounds_)return usebounds_; return false;}
+	virtual inline bool UseBounds() const {
+		if(bounds_) return usebounds_;
+		return false;
+	}
 	//! Check if parameter is fixed
 	virtual inline bool IsFixed() const {return fixed_;}
 	//! Set if bounds should be used
@@ -625,8 +636,9 @@ public:
 	//! Set parameter free or fixed
 	virtual inline void FixParameter(const bool fixed) {fixed_=fixed;}
 	/*! Update member variables from other DoubleParameter
-	 * Do to the Observer pattern we can't use a copy constructor. Therefore we use this workaround.
-	 * The function ignores if parameter is fixed!
+	 * Do to the Observer pattern we can't use a copy constructor.
+	 * Therefore we use this workaround. The function ignores if parameter
+	 * is fixed!
 	 */
 	virtual void UpdateParameter( std::shared_ptr<DoubleParameter> newPar ){
 		//copy bounds
@@ -833,13 +845,14 @@ protected:
 		std::stringstream oss;
 		oss << name_;
 		oss << "\t Val = " << val_;
-		if(bounds_)
-			oss << "\t  Min-Max = " << min_ << " to " << max_;
 		if(errorLow!=errorHigh)
-			oss << "\t  Err = -"<< errorLow<<" +"<<errorHigh;
+			oss << " (+"<< errorHigh<<" -"<<errorLow<<")";
 		else
-			oss << "\t  Err = +-"<< errorLow;
-		oss << "\t Type = " << TypeName();
+			oss << " (+-"<< errorLow<<")";
+		if(bounds_)
+			oss << "\t  [" << min_ << " ; " << max_<<"]";
+		oss << " fix? "<<IsFixed();
+		oss << "\t " << TypeName();
 		return oss.str();
 	}
 
@@ -869,11 +882,25 @@ private:
 		ar & make_nvp("value",val_);
 		ar & make_nvp("min_value",min_);
 		ar & make_nvp("max_value",max_);
-		ar & make_nvp("errorType",errorType);
-		ar & make_nvp("errorLow",errorLow);
-		ar & make_nvp("errorHigh",errorHigh);
+		try{
+			ar & make_nvp("errorType",errorType);
+			ar & make_nvp("errorLow",errorLow);
+			ar & make_nvp("errorHigh",errorHigh);
+		} catch (...) {
+			errorLow = 0;
+			errorHigh = 0;
+			errorType = ErrorType::SYM;
+		}
 	}
 };
+BOOST_SERIALIZATION_SHARED_PTR(DoubleParameter)
+BOOST_CLASS_IMPLEMENTATION( DoubleParameter, boost::serialization::object_serializable )
+BOOST_CLASS_TRACKING( DoubleParameter, boost::serialization::track_never )
+BOOST_CLASS_IMPLEMENTATION( std::shared_ptr<DoubleParameter>, boost::serialization::object_serializable )
+BOOST_CLASS_TRACKING( std::shared_ptr<DoubleParameter>, boost::serialization::track_never )
+BOOST_CLASS_IMPLEMENTATION( std::vector<std::shared_ptr<DoubleParameter> >, boost::serialization::object_serializable )
+BOOST_CLASS_TRACKING( std::vector<std::shared_ptr<DoubleParameter> >, boost::serialization::track_never )
+
 
 class IntegerParameter : public AbsParameter
 {

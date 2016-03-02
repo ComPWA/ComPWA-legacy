@@ -18,37 +18,55 @@
 // Class for defining the relativistic Breit-Wigner resonance model, which
 // includes the use of Blatt-Weisskopf barrier factors.
 
-#ifndef AMP_FLATTE_RES
-#define AMP_FLATTE_RES
+#ifndef AMP_FLATTE3CH_RES
+#define AMP_FLATTE3CH_RES
 
 #include <vector>
 #include <cmath>
-
 #include "Physics/AmplitudeSum/AmpAbsDynamicalFunction.hpp"
-#include "Physics/AmplitudeSum/AmpWigner2.hpp"
-#include "Physics/AmplitudeSum/NonResonant.hpp"
 
 using namespace std;
 
-
-class AmpFlatteRes : public AmpAbsDynamicalFunction {
+class AmpFlatteRes : public AmpAbsDynamicalFunction
+{
 public:
+
+	AmpFlatteRes( normStyle nS=normStyle::one, int calls=30000 ) :
+		AmpAbsDynamicalFunction( nS, calls ) { };
+
 	AmpFlatteRes(const char *name,
 			std::shared_ptr<DoubleParameter> mag, std::shared_ptr<DoubleParameter> phase,
-			std::shared_ptr<DoubleParameter> mass, int subSys, Spin spin, Spin m, Spin n,
+			std::shared_ptr<DoubleParameter> mass, int part1, int part2,
+			Spin spin, Spin m, Spin n,
 			std::shared_ptr<DoubleParameter> mesonRadius,
 			std::shared_ptr<DoubleParameter> motherRadius,
-			std::shared_ptr<DoubleParameter> g1, std::shared_ptr<DoubleParameter> g2,
-			double g2_partA, double g2_partB,
+			std::shared_ptr<DoubleParameter> g1,
+			std::shared_ptr<DoubleParameter> g2, std::string g2_idA, std::string g2_idB,
+			std::shared_ptr<DoubleParameter> g3, std::string g3_idA, std::string g3_idB,
 			formFactorType type = formFactorType::CrystalBarrel,
 			int nCalls=30000, normStyle nS=normStyle::one) ;
+
 	virtual ~AmpFlatteRes();
 
+	//! Configure resonance from ptree
+	virtual void Configure(boost::property_tree::ptree::value_type const& v,
+			ParameterList& list);
+
+	//! Save resonance from to ptree
+	virtual void Save(boost::property_tree::ptree&);
+
+	//! Check of parameters have changed and normalization has to be recalculatecd
+	virtual void CheckModified();
+
+	//! Print resonance parameters
+	std::string to_str() const;
+
 	//! Get resonance width
-	double GetWidth() {
-		return std::abs(couplingToWidth(_mass->GetValue(),_mass->GetValue(), _g1->GetValue(),
-			_ma, _mb, _spin, _mesonRadius->GetValue(), ffType) );
+	virtual double GetWidth() {
+		return std::abs( couplingToWidth(_mass->GetValue(),_mass->GetValue(), _g1->GetValue(),
+			_ma, _mb, _spin, _mesonRadius->GetValue(), _ffType) );
 	}
+
 	/** Dynamical function for two coupled channel approach
 	 *
 	 * @param mSq center-of-mass energy^2 (=s)
@@ -66,52 +84,22 @@ public:
 	static std::complex<double> dynamicalFunction(double mSq, double mR,
 			double massA1, double massA2, double gA,
 			double massB1, double massB2, double gB,
-			unsigned int J, double mesonRadius, formFactorType ffType=formFactorType::CrystalBarrel);
+			double massC1, double massC2, double gC,
+			unsigned int J, double mesonRadius, formFactorType ffType=formFactorType::CrystalBarrel );
 
 	virtual std::complex<double> evaluateAmp(dataPoint& point) ;
 
 	virtual std::shared_ptr<FunctionTree> setupTree(
 			allMasses& theMasses,allMasses& toyPhspSample,std::string suffix, ParameterList& params);
 protected:
-	double _g2_partA;//hidden channel: mass particle A
-	double _g2_partB; //hidden channel: mass particle B
-	std::shared_ptr<DoubleParameter> _g2, _g1;
-	double tmp_g2, tmp_g1, tmp_mass;
+	double _g2_massA, _g2_massB, _g3_massA, _g3_massB;
+	std::string _g2_idA, _g2_idB, _g3_idA, _g3_idB;
+	std::shared_ptr<DoubleParameter> _g3, _g2, _g1;
+	double tmp_g3, tmp_g2, tmp_g1;
 };
 
-class FlatteConf : public basicConf
+class FlatteStrategy : public Strategy
 {
-public:
-	virtual ~FlatteConf() { }
-	FlatteConf(const boost::property_tree::ptree &pt_);
-	virtual void put(boost::property_tree::ptree &pt_);
-	virtual void update(ParameterList par);
-
-	double m_mass;
-	bool m_mass_fix;
-	double m_mass_min;
-	double m_mass_max;
-
-	double m_mesonRadius;
-	int m_spin;
-	int m_m;
-	int m_n;
-
-	unsigned int m_daughterA; //TODO: better reference
-	unsigned int m_daughterB; //TODO: better reference
-	double m_g1;
-	double m_g1_fix;
-	double m_g1_min;
-	double m_g1_max;
-	double m_g2;
-	double m_g2_fix;
-	double m_g2_min;
-	double m_g2_max;
-	std::string m_g2_part1;
-	std::string m_g2_part2;
-};
-
-class FlatteStrategy : public Strategy {
 public:
 	FlatteStrategy(const std::string resonanceName, ParType in):Strategy(in),name(resonanceName){}
 	virtual const std::string to_str() const { return ("flatte amplitude of "+name); }
@@ -121,13 +109,4 @@ protected:
 	std::string name;
 };
 
-class FlattePhspStrategy : public Strategy {
-public:
-	FlattePhspStrategy(const std::string resonanceName, ParType in):Strategy(in),name(resonanceName){}
-	virtual const std::string to_str() const { return ("flatte amplitude of "+name); }
-	virtual bool execute(ParameterList& paras, std::shared_ptr<AbsParameter>& out);
-
-protected:
-	std::string name;
-};
 #endif

@@ -103,9 +103,11 @@ int main(int argc, char **argv){
 
 	//Use example model with 3 resonances
 	std::string trueModelFile = "test/CompareTreeAmp-model.xml";
-	//std::string trueModelFile = "/Users/weidenka/work/plots/DKsKK/testPWA/model.xml";
-	AmplitudeSetup iniTrue(trueModelFile);//put start parameters here
-	std::shared_ptr<Amplitude> trueAmp( new AmpSumIntensity(iniTrue, eff, num) );
+	boost::property_tree::ptree pt;
+	read_xml(trueModelFile, pt, boost::property_tree::xml_parser::trim_whitespace);
+	auto fitAmpPtr = new AmpSumIntensity(normStyle::none, eff, num);
+	fitAmpPtr->Configure(pt);
+	std::shared_ptr<Amplitude> trueAmp( fitAmpPtr );
 	trueAmp->copyParameterList(list);
 	esti = std::shared_ptr<ControlParameter>(MinLogLH::createInstance(trueAmp,toyPhspData , toyPhspData));
 

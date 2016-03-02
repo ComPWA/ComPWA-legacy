@@ -210,6 +210,10 @@ allMasses RootReader::getMasses(const unsigned int startEvent, unsigned int nEve
 	//	std::cout<<"after      "<<result.masses_sq.at(std::make_pair(2,3)).size()<<std::endl;
 	return result;
 }
+ParameterList& RootReader::getListOfData()
+{
+//	return ParameterList("test");
+}
 
 const int RootReader::getBin(const int i, double& m12, double& weight){
 	if(!fBinned) return -1;

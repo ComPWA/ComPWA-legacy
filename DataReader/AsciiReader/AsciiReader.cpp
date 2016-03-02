@@ -72,7 +72,9 @@ AsciiReader* AsciiReader::EmptyClone() const{
 //	return new AsciiReader();
 }
 
-allMasses AsciiReader::getMasses(){
+allMasses AsciiReader::getMasses(const unsigned int startEvent,
+			unsigned int nEvents)
+{
   if(!EvtList_.size()) return allMasses();
   unsigned int nParts = EvtList_.at(0).getNParticles();
   BOOST_LOG_TRIVIAL(debug)<<"RootReader::getMasses() #particles: "<<nParts;

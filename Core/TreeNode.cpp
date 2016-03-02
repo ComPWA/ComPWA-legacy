@@ -46,7 +46,7 @@ TreeNode::~TreeNode(){
 void TreeNode::Update(){ //sollte nur von kindern oder observed objects aufgerufen werden!
 	//std::vector<double> newVals;
 	//for(unsigned int i=0; i<children.size(); i++){
-	//    newVals.push_back(children[i]->value);
+	//    newVals.push_back(children.at(i)->value);
 	//}  //end children-loop
 	//changeVal(myStrat->execute(newVals));
 	for(unsigned int i=0; i<_parents.size(); i++)
@@ -63,43 +63,55 @@ void TreeNode::recalculate(){
 	if(_value.size()==1){ //i have just one dim, merge everything
 		ParameterList newVals;
 		for(unsigned int i=0; i<_children.size(); i++){ //all children
-			for(unsigned int ele=0; ele<_children[i]->getDim(); ele++){ //all dims
-				if(_children[i]->needsCalculation())
-					_children[i]->recalculate();
-				std::shared_ptr<AbsParameter> para = _children[i]->getValue(ele);
+			for(unsigned int ele=0; ele<_children.at(i)->getDim(); ele++){ //all dims
+				if(_children.at(i)->needsCalculation()){
+//					BOOST_LOG_TRIVIAL(debug) <<"TreeNode::recalculate() | processing "<<_children.at(i)->getName()<<std::endl;
+					_children.at(i)->recalculate();
+				}
+				std::shared_ptr<AbsParameter> para = _children.at(i)->getValue(ele);
 				if(!para) std::cout << this->getName() << " child failed: " << i << std::endl;
 				//para->type();
 				newVals.AddParameter(para);
 			}  //end children-loop
 		}
 		_changed=false;
-		//std::cout << "Values: " << newVals.GetNDouble() << " " << _strat << std::endl;
-		if(!_strat->execute(newVals, _value[0])) std::cout << this->getName() << " strat failed: " << _strat << std::endl;
-		//std::cout << "New Val: " << _value[0] << std::endl;
-
-	}else{ //i have a certain dim, children must fill it
+		try{ _strat->execute(newVals, _value[0]); }
+		catch (std::exception& ex) {
+			std::stringstream str;
+			str<<"TreeNode::recalculate() | Strategy "<<_strat
+					<<" failed on node "<<this->getName()<<"!";
+			throw std::runtime_error(str.str());
+		}
+	} else { //i have a certain dim, children must fill it
 
 		for(unsigned int ele=0; ele<_value.size(); ele++){
 			ParameterList newVals;
 			for(unsigned int i=0; i<_children.size(); i++){
-				if(!(_children[i]->getDim() == _value.size() || _children[i]->getDim() == 1))
+				if(!(_children.at(i)->getDim() == _value.size() || _children.at(i)->getDim() == 1))
 					continue; //TODO: exception;
 				std::shared_ptr<AbsParameter> para;
 
-				if(_children[i]->needsCalculation())
-					_children[i]->recalculate();
+				if(_children.at(i)->needsCalculation())
+					_children.at(i)->recalculate();
 
-				if(_children[i]->getDim()==1){
-					para = _children[i]->getValue();
+				if(_children.at(i)->getDim()==1){
+					para = _children.at(i)->getValue();
 				}else{
-					para = _children[i]->getValue(ele);
+					para = _children.at(i)->getValue(ele);
 				}
 
 				if(!para) std::cout << this->getName() << " " << i << std::endl;
 				//para->type();
 				newVals.AddParameter(para);
 			}  //end children-loop
-			_strat->execute(newVals, _value[ele]);
+			try{ _strat->execute(newVals, _value[ele]); }
+			catch (std::exception& ex){
+				std::stringstream str;
+				str<<"TreeNode::recalculate() | Strategy "<<_strat
+						<<" failed on node "<<this->getName()<<"!";
+				throw std::runtime_error(str.str());
+			}
+
 			_changed=false;
 		}//end loop dims
 
@@ -164,10 +176,10 @@ std::shared_ptr<AbsParameter> TreeNode::getChildValue(std::string name) const{
 
 	//	std::shared_ptr<AbsParameter> ret = std::shared_ptr<AbsParameter>();
 	//	for(unsigned int i=0; i<_children.size(); i++){
-	//		if(_children[i]->getName()==name)
-	//			return _children[i]->getValue(0);
+	//		if(_children.at(i)->getName()==name)
+	//			return _children.at(i)->getValue(0);
 	//		else {
-	//			ret = _children[i]->getChildValue(name);
+	//			ret = _children.at(i)->getChildValue(name);
 	//			if(ret) return ret;
 	//			else continue;
 	//		}

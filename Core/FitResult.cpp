@@ -140,7 +140,7 @@ void FitResult::printFitParameters(TableFormater* tableResult){
 void FitResult::printFitFractions(TableFormater* fracTable){
 	BOOST_LOG_TRIVIAL(info) << "Calculating fit fractions...";
 	calcFraction();
-	double sum, sumErrorSq;
+	double sum=0, sumErrorSq=0;
 
 	//print matrix
 	fracTable->addColumn("Resonance",15);//add empty first column
@@ -189,9 +189,16 @@ void FitResult::calcFraction(ParameterList& parList){
 	BOOST_LOG_TRIVIAL(debug)<<"FitResult::calcFraction() norm="<<norm;
 	int nRes=_amp->GetNumberOfResonances();
 	for(unsigned int i=0;i<nRes; i++){ //fill matrix
+		if(!_amp->GetEnable(i)) continue;
 		double resInt= _amp->GetIntegral(i);
 		std::string resName = _amp->GetNameOfResonance(i);
-		std::shared_ptr<DoubleParameter> magPar = cList.GetDoubleParameter("mag_"+resName);
+		std::shared_ptr<DoubleParameter> magPar;
+		try{ magPar = cList.GetDoubleParameter("mag_"+resName); }
+		catch (BadParameter& ex){
+			BOOST_LOG_TRIVIAL(error) <<"FitResult::calcFraction() | "
+					"Can't find parameter "<<"mag_"<<resName<<" in list!";
+			throw;
+		}
 		double mag = std::fabs(magPar->GetValue()); //value of magnitude
 		double magError = 0;
 		if(magPar->HasError()) magError = magPar->GetError(); //error of magnitude

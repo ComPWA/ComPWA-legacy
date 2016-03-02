@@ -12,7 +12,7 @@ NonResonant::NonResonant(const char *name,
 		std::shared_ptr<DoubleParameter> mag, std::shared_ptr<DoubleParameter> phase,
 		int nCalls, normStyle nS) :
 		AmpAbsDynamicalFunction(name,mag, phase,
-				std::make_shared<DoubleParameter>("mass", 0.0), 1, Spin(0), Spin(0), Spin(0),
+				std::make_shared<DoubleParameter>("mass", 0.0), 1, 2, Spin(0), Spin(0), Spin(0),
 				formFactorType::noFormFactor, nCalls, nS)
 {
 }
@@ -21,6 +21,17 @@ std::complex<double> NonResonant::dynamicalFunction(){
 	return std::complex<double>(1,0);
 }
 
+//! Configure resonance from ptree
+void NonResonant::Configure(boost::property_tree::ptree::value_type const& v,
+		ParameterList& list)
+{
+	if( v.first != "NonResonant" ) throw BadConfig("");
+
+	boost::property_tree::ptree pt = v.second;
+	AmpAbsDynamicalFunction::Configure(v,list);
+
+	return;
+}
 
 
 std::shared_ptr<FunctionTree> NonResonant::setupTree(

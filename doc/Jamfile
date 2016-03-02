@@ -55,7 +55,6 @@ local header_files = ../Core
 	  ../Optimizer/Minuit2/MinuitResult.hpp
 	  ../Optimizer/Optimizer.hpp
 	  ../Optimizer/ControlParameter.hpp
-	  ../Physics/AmplitudeSum/AmplitudeSetup.hpp
 	  ../Physics/AmplitudeSum/AmpAbsDynamicalFunction.hpp
 	  ../Physics/AmplitudeSum/AmpGausRes.hpp
 	  ../Physics/AmplitudeSum/PhiSumOfAmplitudes.hpp
@@ -64,7 +63,6 @@ local header_files = ../Core
 	  ../Physics/AmplitudeSum/AmpFlatteRes.hpp
 	  ../Physics/AmplitudeSum/AmpSumIntensity.hpp
 	  ../Physics/AmplitudeSum/NonResonant.hpp
-	  ../Physics/AmplitudeSum/AmpFlatteRes3Ch.hpp
 	  ../Physics/BreitWigner/BreitWigner.hpp
 	  ../Physics/DPKinematics/RootEfficiency.hpp
 	  ../Physics/DPKinematics/SimpleAngleEfficiency.hpp

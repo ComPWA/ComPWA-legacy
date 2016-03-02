@@ -27,22 +27,30 @@
 
 #include "Core/ParameterList.hpp"
 #include "Core/Functions.hpp"
-#include "Physics/DPKinematics/DalitzKinematics.hpp"
 #include "Core/DataPoint.hpp"
+#include "Core/FunctionTree.hpp"
+#include "Physics/DPKinematics/DalitzKinematics.hpp"
 
 //using namespace std;
 class AmpWigner2{
 public:
-	AmpWigner2( unsigned int subSys, unsigned int spin );
+	AmpWigner2( ) { };
+	AmpWigner2( unsigned int subSys, unsigned int spin,
+			unsigned int mu=0, unsigned int muPrime=0);
 
 	virtual ~AmpWigner2() {};
 
 	virtual double evaluate(dataPoint& point) ;
 
 	static double dynamicalFunction(int J, int mu, int muPrime, double cosTheta);
+
+	virtual std::shared_ptr<FunctionTree> setupTree(
+			allMasses& theMasses,std::string suffix, ParameterList& params);
 protected:
 	unsigned int _subSys;
 	unsigned int _spin;
+	unsigned int _mu;
+	unsigned int _muPrime;
 };
 
 class WignerDStrategy : public Strategy {
@@ -56,17 +64,4 @@ public:
 protected:
 	std::string name;
 };
-
-class WignerDPhspStrategy : public Strategy {
-public:
-	WignerDPhspStrategy(const std::string resonanceName, ParType in):Strategy(in),name(resonanceName){ }
-
-	virtual const std::string to_str() const { return ("WignerD of "+name);	}
-
-	virtual bool execute(ParameterList& paras, std::shared_ptr<AbsParameter>& out);
-
-protected:
-	std::string name;
-};
-
 #endif

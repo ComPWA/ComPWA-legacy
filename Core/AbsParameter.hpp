@@ -161,6 +161,9 @@ private:
 	}
 
 };
+BOOST_SERIALIZATION_SHARED_PTR(AbsParameter)
+BOOST_CLASS_IMPLEMENTATION( AbsParameter, boost::serialization::object_serializable )
+BOOST_CLASS_TRACKING( AbsParameter, boost::serialization::track_never )
 //BOOST_SERIALIZATION_ASSUME_ABSTRACT(AbsParameter)
 
 #endif

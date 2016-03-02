@@ -120,11 +120,17 @@ int main(int argc, char **argv) {
 	std::string path = "";
 	try {
 		path = std::string(pPath);
-	} catch (std::logic_error) {
+	} catch (std::logic_error& ex) {
 		BOOST_LOG_TRIVIAL(error)<<"Environment Variable COMPWA_DIR not set?"<<std::endl;
 	}
 	std::string resoFile = path + "/test/JPSI_ypipi.xml";
-	AmplitudeSetup ini(resoFile);
+	boost::property_tree::ptree pt;
+	read_xml(resoFile, pt, boost::property_tree::xml_parser::trim_whitespace);
+	auto fitAmpPtr = new AmpSumIntensity(normStyle::none,
+			std::shared_ptr<Efficiency>(new UnitEfficiency()), nFitEvents);
+	fitAmpPtr->Configure(pt);
+	std::shared_ptr<Amplitude> amps( fitAmpPtr );
+
 
 	BOOST_LOG_TRIVIAL(info)<< "Load Modules";
 	std::shared_ptr<RootReader> myReader(
@@ -133,10 +139,6 @@ int main(int argc, char **argv) {
 	std::shared_ptr<RootReader> myPHSPReader(
 			new RootReader(input_file_path, "mc"));
 	myPHSPReader->setEfficiency(shared_ptr<Efficiency>(new UnitEfficiency())); //setting efficiency to 1
-	std::shared_ptr<AmpSumIntensity> amps(
-			new AmpSumIntensity(ini, normStyle::none,
-					std::shared_ptr<Efficiency>(new UnitEfficiency()),
-					nFitEvents));
 
 	//std::shared_ptr<Amplitude> amps(new AmpSumIntensity(M, Br, m1, m2, m3,"J/psi","gamma","pi0","pi0", ini));
 	// Initiate parameters

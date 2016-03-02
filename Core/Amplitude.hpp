@@ -109,6 +109,10 @@ public:
 	virtual double GetPhase(std::string name) {return -999;};
 	//! Get phase of resonance id
 	virtual double GetPhase(unsigned int id) {return -999;};
+	//! Get phase of resonance name
+	virtual bool GetEnable(std::string name) {return -999;};
+	//! Get phase of resonance id
+	virtual bool GetEnable(unsigned int id) {return -999;};
 
 	//---------- related to FunctionTree -------------
 	//! Check of tree is available

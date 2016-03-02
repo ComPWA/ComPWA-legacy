@@ -13,6 +13,7 @@
 #include <string>
 #include <memory>
 
+
 #include "../Physics/DPKinematics/RootGenerator.hpp"
 // Physics Interface header files go here
 #include "Core/Parameter.hpp"
@@ -22,7 +23,6 @@
 #include "DataReader/RootReader/RootReader.hpp"
 
 #include "Physics/AmplitudeSum/AmpSumIntensity.hpp"
-#include "Physics/AmplitudeSum/AmplitudeSetup.hpp"
 #include "Physics/DPKinematics/DalitzKinematics.hpp"
 
 //#include "PWA/PlotData.hpp"
@@ -35,14 +35,19 @@ int main(int argc, char **argv){
 	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(DalitzKinematics::createInstance("J/psi","gamma","pi0","pi0"));
 	std::string outFile="3Part-4vecs.root";
 	unsigned int dataSize = 100000;
-	//load resonances
-	AmplitudeSetup ini("test/JPSI_ypipi.xml");
-	cout << "loaded file " << ini.getFileName() << " with " << ini.getBreitWigner().size() << " resonances!" << std::endl;
+
 	std::shared_ptr<Data> data(new RootReader(outFile, "data",true));
 	std::shared_ptr<Data> phsp(new RootReader(outFile, "mc",true));
 	std::shared_ptr<Generator> gen(new RootGenerator());
-	std::shared_ptr<Amplitude> amp(new AmpSumIntensity(
-			ini,std::shared_ptr<Efficiency>(new UnitEfficiency()),normStyle::none));
+
+	std::string resoFile = "/test/JPSI_ypipi.xml";
+	boost::property_tree::ptree pt;
+	read_xml(resoFile , pt, boost::property_tree::xml_parser::trim_whitespace);
+	auto a = new AmpSumIntensity(normStyle::none,
+			std::shared_ptr<Efficiency>(new UnitEfficiency()), dataSize);
+	a->Configure(pt);
+	a->printAmps();
+	std::shared_ptr<Amplitude> amp(a);
 
 	RunManager run(dataSize,amp,gen);
 	run.setGenerator(gen);

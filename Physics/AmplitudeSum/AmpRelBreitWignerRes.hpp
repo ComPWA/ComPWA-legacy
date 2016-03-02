@@ -33,9 +33,13 @@
 class AmpRelBreitWignerRes : public AmpAbsDynamicalFunction {
 public:
 
+	AmpRelBreitWignerRes( normStyle nS=normStyle::one, int calls=30000 ) :
+		AmpAbsDynamicalFunction( nS, calls ) { };
+
 	AmpRelBreitWignerRes(const char *name,
 			std::shared_ptr<DoubleParameter> mag, std::shared_ptr<DoubleParameter> phase,
-			std::shared_ptr<DoubleParameter> mass, int subSys, Spin spin, Spin m, Spin n,
+			std::shared_ptr<DoubleParameter> mass, int part1, int part2,
+			Spin spin, Spin m, Spin n,
 			std::shared_ptr<DoubleParameter> width,
 			std::shared_ptr<DoubleParameter> mesonRadius,
 			std::shared_ptr<DoubleParameter> motherRadius,
@@ -43,6 +47,18 @@ public:
 			int nCalls=30000, normStyle nS=normStyle::one) ;
 
 	virtual ~AmpRelBreitWignerRes();
+
+	//! Configure resonance from ptree
+	virtual void Configure(boost::property_tree::ptree::value_type const& v,
+			ParameterList& list);
+	//! Save resonance from to ptree
+	virtual void Save(boost::property_tree::ptree &pt);
+
+	//! Trigger recalculation of normalization
+	virtual void CheckModified();
+
+	std::string to_str() const;
+
 	//! Get resonance width
 	double GetWidth() { return _width->GetValue(); }
 	/** Breit-Wigner function
@@ -73,69 +89,6 @@ protected:
 	double tmp_width;
 };
 
-class BreitWignerConf : public basicConf
-{
-public:
-	BreitWignerConf(const boost::property_tree::ptree &pt_) : basicConf(pt_){
-		m_mass= pt_.get<double>("mass");
-		m_mass_fix= pt_.get<bool>("mass_fix");
-		m_mass_min= pt_.get<double>("mass_min");
-		m_mass_max= pt_.get<double>("mass_max");
-		m_width= pt_.get<double>("width");
-		m_width_fix= pt_.get<bool>("width_fix");
-		m_width_min= pt_.get<double>("width_min");
-		m_width_max= pt_.get<double>("width_max");
-		m_mesonRadius= pt_.get<double>("mesonRadius");
-		m_spin= pt_.get<unsigned int>("spin");
-		m_m= pt_.get<unsigned int>("m");
-		m_n= pt_.get<unsigned int>("n");
-		m_daughterA= pt_.get<unsigned int>("daughterA");
-		m_daughterB= pt_.get<unsigned int>("daughterB");
-	}
-	virtual void put(boost::property_tree::ptree &pt_){
-		basicConf::put(pt_);
-		pt_.put("mass", m_mass);
-		pt_.put("mass_fix", m_mass_fix);
-		pt_.put("mass_min", m_mass_min);
-		pt_.put("mass_max", m_mass_max);
-		pt_.put("width", m_width);
-		pt_.put("width_fix", m_width_fix);
-		pt_.put("width_min", m_width_min);
-		pt_.put("width_max", m_width_max);
-		pt_.put("mesonRadius", m_mesonRadius);
-		pt_.put("spin", m_spin);
-		pt_.put("m", m_m);
-		pt_.put("n", m_n);
-		pt_.put("daughterA", m_daughterA);
-		pt_.put("daughterB", m_daughterB);
-	}
-	virtual void update(ParameterList par){
-		if(!m_enable) return;
-		basicConf::update(par);
-		try{// only update parameters if they are found in list
-			m_mass= par.GetDoubleParameter("m0_"+m_name)->GetValue();
-			m_width= par.GetDoubleParameter("width_"+m_name)->GetValue();
-		} catch (BadParameter b) { }
-	}
-
-	double m_mass;
-	bool m_mass_fix;
-	double m_mass_min;
-	double m_mass_max;
-	double m_width;
-	bool m_width_fix;
-	double m_width_min;
-	double m_width_max;
-
-	double m_mesonRadius;
-	int m_spin;
-	int m_m;
-	int m_n;
-
-	unsigned int m_daughterA;
-	unsigned int m_daughterB;
-};
-
 class BreitWignerStrategy : public Strategy {
 public:
 	BreitWignerStrategy(const std::string resonanceName, ParType in):Strategy(in),name(resonanceName){}
@@ -147,12 +100,4 @@ public:
 protected:
 	std::string name;
 };
-
-class BreitWignerPhspStrategy : public BreitWignerStrategy {
-public:
-	BreitWignerPhspStrategy(const std::string resonanceName, ParType in):BreitWignerStrategy(resonanceName,in){}
-	virtual bool execute(ParameterList& paras, std::shared_ptr<AbsParameter>& out);
-};
-
-
 #endif

@@ -45,6 +45,8 @@
 // ComPWA header files go here
 #include "DataReader/RootReader/RootReader.hpp"
 #include "Physics/AmplitudeSum/AmpSumIntensity.hpp"
+#include "Physics/AmplitudeSum/AmpRelBreitWignerRes.hpp"
+#include "Physics/AmplitudeSum/AmpFlatteRes.hpp"
 #include "Estimator/MinLogLH/MinLogLH.hpp"
 #include "Optimizer/Minuit2/MinuitIF.hpp"
 #include "Physics/DPKinematics/RootEfficiency.cpp"
@@ -81,16 +83,26 @@ int main(int argc, char **argv){
 	//======================= AMPLITUDE =============================
 	//true amplitude model
 	std::string trueModelFile = "test/CompareTreeAmp-model.xml";
-	AmplitudeSetup iniTrue(trueModelFile);//put start parameters here
-	std::shared_ptr<Amplitude> trueAmp( new AmpSumIntensity(iniTrue,
-			normStyle::one, eff, mcPrecision) );
+
+	boost::property_tree::ptree pt;
+	read_xml(trueModelFile, pt, boost::property_tree::xml_parser::trim_whitespace);
+	auto a = new AmpSumIntensity(normStyle::one, eff, mcPrecision);
+	a->Configure(pt);
+	std::shared_ptr<Amplitude> trueAmp(a);
+
 	//fit amplitude model
 	std::string fitModelFile = trueModelFile;
-	AmplitudeSetup ini(fitModelFile);//put start parameters here
-	AmplitudeSetup iniTree(fitModelFile);//put start parameters here
-	AmpSumIntensity* fitAmpPtr = new AmpSumIntensity(ini, normStyle::one, eff, mcPrecision);
+	boost::property_tree::ptree pt2;
+	read_xml(fitModelFile, pt2, boost::property_tree::xml_parser::trim_whitespace);
+	auto fitAmpPtr = new AmpSumIntensity(normStyle::one, eff, mcPrecision);
+	fitAmpPtr->Configure(pt2);
+	auto fitAmpTreePtr = new AmpSumIntensity(normStyle::one, eff, mcPrecision);
+	fitAmpTreePtr->Configure(pt2);
+//	AmplitudeSetup ini(fitModelFile);//put start parameters here
+//	AmplitudeSetup iniTree(fitModelFile);//put start parameters here
+//	AmpSumIntensity* fitAmpPtr = new AmpSumIntensity(ini, normStyle::one, eff, mcPrecision);
+//	AmpSumIntensity* fitAmpTreePtr = new AmpSumIntensity(iniTree, normStyle::one, eff, mcPrecision);
 	std::shared_ptr<Amplitude> fitAmp(fitAmpPtr);
-	AmpSumIntensity* fitAmpTreePtr = new AmpSumIntensity(iniTree, normStyle::one, eff, mcPrecision);
 	std::shared_ptr<Amplitude> fitAmpTree(fitAmpTreePtr);
 
 	run.setAmplitude(trueAmp);//set true model here for generation
@@ -146,7 +158,7 @@ int main(int argc, char **argv){
 	double phimag = fitAmpPtr->GetMagnitude("phi(1020)");
 	double phiphase = fitAmpPtr->GetPhase("phi(1020)");
 	std::complex<double> phiCoeff(phimag*cos(phiphase),phimag*sin(phiphase));
-	std::shared_ptr<AmpFlatteRes3Ch> a0Res = std::dynamic_pointer_cast<AmpFlatteRes3Ch>(fitAmpPtr->GetResonance("a_0(980)0"));
+	std::shared_ptr<AmpFlatteRes> a0Res = std::dynamic_pointer_cast<AmpFlatteRes>(fitAmpPtr->GetResonance("a_0(980)0"));
 	double a0mag = fitAmpPtr->GetMagnitude("a_0(980)0");
 	double a0phase = fitAmpPtr->GetPhase("a_0(980)0");
 	std::complex<double> a0Coeff(a0mag*cos(a0phase),a0mag*sin(a0phase));
