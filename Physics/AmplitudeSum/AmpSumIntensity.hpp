@@ -21,6 +21,7 @@
 #include <boost/property_tree/xml_parser.hpp>
 
 #include "Core/Amplitude.hpp"
+#include "Core/Resonance.hpp"
 #include "Core/Parameter.hpp"
 #include "Core/ParameterList.hpp"
 #include "Core/FunctionTree.hpp"
@@ -37,7 +38,7 @@ public:
 	AmpSumIntensity( normStyle ns=normStyle::none,
 			std::shared_ptr<Efficiency> eff=
 					std::shared_ptr<Efficiency>(new UnitEfficiency),
-			unsigned int nCalls=30000);
+					unsigned int nCalls=30000);
 	//! Destructor
 	virtual ~AmpSumIntensity(){ /* nothing */ };
 	//! Clone function
@@ -67,7 +68,7 @@ public:
 	//! normalization integral (includes calculated efficiency)
 	virtual const double integral();
 	//! calculate interference integral between two amplitudes
-	virtual const double interferenceIntegral(unsigned int a, unsigned int b);
+	virtual const double interferenceIntegral(resonanceItr A, resonanceItr B);
 	//! get maximum value of amplitude with current parameters
 	virtual double getMaxVal( std::shared_ptr<Generator> gen);
 	//! get maximum value of amplitude with parameters \par
@@ -121,39 +122,33 @@ public:
 	virtual double getIntValue(std::string var1, double min1, double max1,
 			std::string var2, double min2=0, double max2=0);
 
-	//---------- get resonance parameters -------------
-	//! \return Number of resonances
-	virtual unsigned int GetNumberOfResonances();
-	//! convert resonance \param name to id
+	//! Get ID of resonance from name
 	int GetIdOfResonance(std::string name);
-	//! convert resonance \param id to name
+
+	//! Get resonance name from ID
 	std::string GetNameOfResonance(unsigned int id);
-	//! get magnitude of resonance \param name
-	virtual double GetMagnitude(std::string name);
-	//! get magnitude of resonance \param ID
-	virtual double GetMagnitude(unsigned int id);
-	//! get phase of resonance \param name
-	virtual double GetPhase(std::string name);
-	//! get phase of resonance \param ID
-	virtual double GetPhase(unsigned int id);
-	//! get total integral for resonance \param name
-	virtual double GetIntegral(std::string name);
-	//! get total integral for resonance \param id
-	virtual double GetIntegral(unsigned int id);
-	//! get fit fraction for resonance \param name
-	virtual double GetFraction(std::string name);
-	//! get fit fraction for resonance \param id
-	virtual double GetFraction(unsigned int id);
-	//! Get phase of resonance name
-	virtual bool GetEnable(std::string name);
-	//! Get phase of resonance id
-	virtual bool GetEnable(unsigned int id);
+
 	//! get resonance by @param name
-	virtual std::shared_ptr<AmpAbsDynamicalFunction>
+	virtual std::shared_ptr<Resonance>
 	GetResonance(std::string name);
+
 	//! get resonance by @param id
-	virtual std::shared_ptr<AmpAbsDynamicalFunction>
+	virtual std::shared_ptr<Resonance>
 	GetResonance(unsigned int id);
+
+	//! Iterator on first resonance (which is enabled)
+	resonanceItr GetResonanceItrFirst(){
+		return resonanceItr(
+				_resEnabled, resoList.begin(), resoList.end()
+				);
+	}
+
+	//! Iterator on last resonance (which is enabled)
+	resonanceItr GetResonanceItrLast(){
+		return resonanceItr(
+				_resEnabled, resoList.end(), resoList.end()
+				);
+	}
 	//! Average width of all resonances
 	virtual double averageWidth();
 
@@ -164,11 +159,12 @@ public:
 	virtual std::shared_ptr<FunctionTree> GetTree(
 			allMasses& theMasses,allMasses& toyPhspSample,
 			std::string suffix="")
-	{
+			{
 		return setupBasicTree(theMasses,toyPhspSample, suffix);
-	}
-	int getFirstRes() { return firstRes; }
-	int getSecondRes() { return secondRes; }
+			}
+
+	resonanceItr tmpA;
+	resonanceItr tmpB;
 
 protected:
 	//! Maximum value of amplitude. Necessary for event generation.
@@ -182,7 +178,7 @@ protected:
 	//! Efficiency object
 	std::shared_ptr<Efficiency> eff_;
 	//! List of resonances
-	std::vector<std::shared_ptr<AmpAbsDynamicalFunction> > resoList;
+	std::vector<std::shared_ptr<Resonance> > resoList;
 	//! Type of normalization
 	normStyle _normStyle;
 	//! List of parameters
@@ -199,10 +195,8 @@ protected:
 	 * with efficiency corrected toy phsp sample or "normAcc" normalization tree with sample
 	 * of accepted flat phsp events
 	 */
-	std::shared_ptr<FunctionTree> setupBasicTree(allMasses& theMasses,allMasses& toyPhspSample,
-			std::string suffix="");
-
-	int firstRes, secondRes;
+	std::shared_ptr<FunctionTree> setupBasicTree(allMasses& theMasses,
+			allMasses& toyPhspSample, std::string suffix="");
 };
 
 #endif

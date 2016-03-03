@@ -33,22 +33,21 @@ public:
 
 	virtual void Save(boost::property_tree::ptree &pt) { };
 	//! Get resonance width
-	virtual double GetWidth() { return 0; }
+	virtual double GetWidth() const { return 0; }
 	//! value of dynamical amplitude at \param point
-	virtual std::complex<double> evaluateAmp(dataPoint& point) {
+	virtual std::complex<double> EvaluateAmp(dataPoint& point) {
 		return dynamicalFunction();
 	}
 	//! value of WignerD amplitude at \param point
-	virtual double evaluateWignerD(dataPoint& point) { return 1;} ;
+	virtual double EvaluateWignerD(dataPoint& point) { return 1;} ;
 	//!Integral
-	virtual double integral() {
+	virtual double GetIntegral() {
 		return 1/sqrt(Kinematics::instance()->getPhspVolume());
 	}
 
 	static std::complex<double> dynamicalFunction();
 
-	virtual std::shared_ptr<FunctionTree> setupTree(
-			allMasses& theMasses,allMasses& toyPhspSample,std::string suffix,
-			ParameterList& params);
+	virtual std::shared_ptr<FunctionTree> SetupTree(
+			allMasses& theMasses,allMasses& toyPhspSample,std::string suffix);
 };
 #endif /* NONRESONANT_HPP_ */

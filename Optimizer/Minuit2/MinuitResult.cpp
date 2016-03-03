@@ -117,13 +117,16 @@ void MinuitResult::setUseCorrelatedErrors(bool s, int nSets) {
 	return;
 }
 
-void MinuitResult::calcFractionError(){
+void MinuitResult::calcFractionError()
+{
+	//Check if number of active resonances and size of fraction list matches
 	int nRes=0;
-	for(int i=0; i<_amp->GetNumberOfResonances(); ++i)
-		if(_amp->GetEnable(i)) nRes++;
+	auto it = _amp->GetResonanceItrFirst();
+	for( ; it != _amp->GetResonanceItrLast(); ++it) nRes++;
 	if(fractionList.GetNDouble() != nRes++)
 		throw std::runtime_error(
 				"MinuitResult::calcFractionError() fraction list not valid!");
+
 	nRes=fractionList.GetNDouble();
 	if(useCorrelatedErrors){/* Exact error calculation */
 		BOOST_LOG_TRIVIAL(info) << "Calculating errors of fit fractions using "
@@ -293,12 +296,10 @@ void MinuitResult::genOutput(std::ostream& out, std::string opt){
 	out<<"Number of Resonances > 10^-3: "<<r<<std::endl;
 
 	double sumMag;
-	for(unsigned int i=0;i<_amp->GetNumberOfResonances(); i++){ //fill matrix
-		if(!_amp->GetEnable(i)) continue;
-		std::string resName = _amp->GetNameOfResonance(i);
-		std::shared_ptr<DoubleParameter> magPar =
-				finalParameters.GetDoubleParameter("mag_"+resName);
-		sumMag+= std::fabs(magPar->GetValue()); //value of magnitude
+	auto it = _amp->GetResonanceItrFirst();
+	for( ; it!= _amp->GetResonanceItrLast(); ++it) { //fill matrix
+		std::string resName = (*it)->GetName();
+		sumMag+= std::fabs((*it)->GetMagnitude()); //value of magnitude
 	}
 	out<<"Sum of magnitudes: "<<sumMag<<std::endl;
 
@@ -306,27 +307,24 @@ void MinuitResult::genOutput(std::ostream& out, std::string opt){
 	if(calcInterference){
 		out<<"INTERFERENCE terms: "<<std::endl;
 		TableFormater* tableInterf = new TableFormater(&out);
-		tableInterf->addColumn("Nr 1");
-		tableInterf->addColumn("Nr 2");
 		tableInterf->addColumn("Name 1",15);
 		tableInterf->addColumn("Name 2",15);
 		tableInterf->addColumn("Value",15);
 		tableInterf->header();
 		double sumInfTerms = 0;
-		for(int i=0; i<_amp->GetNumberOfResonances(); i++){
-			if(!_amp->GetEnable(i)) continue;
-			for(int j=i; j<_amp->GetNumberOfResonances(); j++){
-				if(!_amp->GetEnable(j)) continue;
-				*tableInterf << i << j;
-				*tableInterf << _amp->GetNameOfResonance(i);
-				*tableInterf << _amp->GetNameOfResonance(j);
-				double inf = _amp->interferenceIntegral(i,j);
+		auto it = _amp->GetResonanceItrFirst();
+		for( ; it != _amp->GetResonanceItrLast(); ++it){
+			auto it2 = it;
+			for( ; it2 != _amp->GetResonanceItrLast(); ++it2){
+				*tableInterf << (*it)->GetName();
+				*tableInterf << (*it2)->GetName();
+				double inf = _amp->interferenceIntegral(it,it2);
 				*tableInterf << inf;
 				sumInfTerms+=inf;
 			}
 		}
 		tableInterf->delim();
-		*tableInterf<<" "<<" "<<" "<<"Sum: "<<sumInfTerms;
+		*tableInterf<<" "<<"Sum: "<<sumInfTerms;
 		tableInterf->footer();
 		out<<std::endl;
 	}

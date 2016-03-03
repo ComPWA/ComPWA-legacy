@@ -187,18 +187,12 @@ void FitResult::calcFraction(ParameterList& parList){
 	if(norm<0)
 		throw std::runtime_error("FitResult::calcFraction() normalization can't be calculated");
 	BOOST_LOG_TRIVIAL(debug)<<"FitResult::calcFraction() norm="<<norm;
-	int nRes=_amp->GetNumberOfResonances();
-	for(unsigned int i=0;i<nRes; i++){ //fill matrix
-		if(!_amp->GetEnable(i)) continue;
-		double resInt= _amp->GetIntegral(i);
-		std::string resName = _amp->GetNameOfResonance(i);
-		std::shared_ptr<DoubleParameter> magPar;
-		try{ magPar = cList.GetDoubleParameter("mag_"+resName); }
-		catch (BadParameter& ex){
-			BOOST_LOG_TRIVIAL(error) <<"FitResult::calcFraction() | "
-					"Can't find parameter "<<"mag_"<<resName<<" in list!";
-			throw;
-		}
+
+	auto it = _amp->GetResonanceItrFirst();
+	for( ; it != _amp->GetResonanceItrLast(); ++it){ //fill matrix
+		double resInt = (*it)->GetTotalIntegral();
+		std::string resName = (*it)->GetName();
+		std::shared_ptr<DoubleParameter> magPar = (*it)->GetMagnitudePar();
 		double mag = std::fabs(magPar->GetValue()); //value of magnitude
 		double magError = 0;
 		if(magPar->HasError()) magError = magPar->GetError(); //error of magnitude

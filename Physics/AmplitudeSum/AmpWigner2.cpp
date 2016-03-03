@@ -54,8 +54,8 @@ double AmpWigner2::dynamicalFunction(int J, int mu, int muPrime, double cosTheta
 	return (norm*(2*J+1)*result);
 }
 
-std::shared_ptr<FunctionTree> AmpWigner2::setupTree(
-			allMasses& theMasses, std::string suffix, ParameterList& params){
+std::shared_ptr<FunctionTree> AmpWigner2::SetupTree(
+			allMasses& theMasses, std::string suffix){
 
 	std::shared_ptr<MultiDouble> m23sq(
 			new MultiDouble("m23sq",theMasses.masses_sq.at( std::make_pair(2,3) )) );

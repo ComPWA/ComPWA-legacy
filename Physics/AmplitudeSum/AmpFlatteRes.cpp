@@ -91,14 +91,16 @@ void AmpFlatteRes::Configure(boost::property_tree::ptree::value_type const& v,
 		);
 		_g1->FixParameter(tmp_g1_fix);
 		if(_enable) list.AddParameter(_g1);
+		_g1_writeByName = 0;
 	} else {
 		try{
 			_g1 = list.GetDoubleParameter(tmp_g1_name.get());
+			_g1_writeByName = 1;
 		} catch (BadParameter& ex){
 			BOOST_LOG_TRIVIAL(error) <<"AmpFlatteRes::Configure() | "
 					"Requesting parameter "<<tmp_g1_name.get()<<" but"
-							" was not found in parameter list. "
-							"Quit since parameter is mandatory!";
+					" was not found in parameter list. "
+					"Quit since parameter is mandatory!";
 			throw;
 		}
 	}
@@ -119,14 +121,16 @@ void AmpFlatteRes::Configure(boost::property_tree::ptree::value_type const& v,
 		);
 		_g2->FixParameter(tmp_g2_fix);
 		if(_enable) list.AddParameter(_g2);
+		_g2_writeByName = 0;
 	} else {
 		try{
 			_g2 = list.GetDoubleParameter(tmp_g2_name.get());
+			_g2_writeByName = 1;
 		} catch (BadParameter& ex){
 			BOOST_LOG_TRIVIAL(error) <<"AmpFlatteRes::Configure() | "
 					"Requesting parameter "<<tmp_g2_name.get()<<" but"
-							" was not found in parameter list. "
-							"Quit since parameter is mandatory!";
+					" was not found in parameter list. "
+					"Quit since parameter is mandatory!";
 			throw;
 		}
 	}
@@ -157,14 +161,16 @@ void AmpFlatteRes::Configure(boost::property_tree::ptree::value_type const& v,
 		);
 		_g3->FixParameter(tmp_g3_fix);
 		if(_enable && _g3->GetValue() != 0 ) list.AddParameter(_g3);
+		_g3_writeByName = 0;
 	} else {
 		try{
 			_g3 = list.GetDoubleParameter(tmp_g3_name.get());
+			_g3_writeByName = 1;
 		} catch (BadParameter& ex){
 			BOOST_LOG_TRIVIAL(error) <<"AmpFlatteRes::Configure() | "
 					"Requesting parameter "<<tmp_g3_name.get()<<" but"
-							" was not found in parameter list. "
-							"Continue since parameter is not mandatory!";
+					" was not found in parameter list. "
+					"Continue since parameter is not mandatory!";
 			_g3 =std::shared_ptr<DoubleParameter>(
 					new DoubleParameter("g3_"+_name,0.0)
 			);
@@ -183,23 +189,35 @@ void AmpFlatteRes::Save(boost::property_tree::ptree &pt)
 {
 	boost::property_tree::ptree amp;
 	AmpAbsDynamicalFunction::put(amp);
-	amp.put("g1", _g1->GetValue());
-	amp.put("g1_fix", _g1->IsFixed());
-	amp.put("g1_min", _g1->GetMinValue());
-	amp.put("g1_max", _g1->GetMaxValue());
-	amp.put("g2", _g2->GetValue());
-	amp.put("g2_fix", _g2->IsFixed());
-	amp.put("g2_min", _g2->GetMinValue());
-	amp.put("g2_max", _g2->GetMaxValue());
+	if(_g1_writeByName){
+		amp.put("g1",_g1->GetName());
+	} else {
+		amp.put("g1", _g1->GetValue());
+		amp.put("g1_fix", _g1->IsFixed());
+		amp.put("g1_min", _g1->GetMinValue());
+		amp.put("g1_max", _g1->GetMaxValue());
+	}
+	if(_g2_writeByName){
+		amp.put("g2",_g2->GetName());
+	} else {
+		amp.put("g2", _g2->GetValue());
+		amp.put("g2_fix", _g2->IsFixed());
+		amp.put("g2_min", _g2->GetMinValue());
+		amp.put("g2_max", _g2->GetMaxValue());
+	}
 	amp.put("g2_part1", _g2_idA);
 	amp.put("g2_part2", _g2_idB);
 	if(_g3->GetValue() != 0){
-		amp.put("g3", _g3->GetValue());
-		amp.put("g3_fix", _g3->IsFixed());
-		amp.put("g3_min", _g3->GetMinValue());
-		amp.put("g3_max", _g3->GetMaxValue());
-		amp.put("g3_part1", _g3_idA);
-		amp.put("g3_part2", _g3_idB);
+		if(_g3_writeByName){
+			amp.put("g3",_g3->GetName());
+		} else {
+			amp.put("g3", _g3->GetValue());
+			amp.put("g3_fix", _g3->IsFixed());
+			amp.put("g3_min", _g3->GetMinValue());
+			amp.put("g3_max", _g3->GetMaxValue());
+			amp.put("g3_part1", _g3_idA);
+			amp.put("g3_part2", _g3_idB);
+		}
 	}
 
 	pt.add_child("Flatte", amp);
@@ -231,7 +249,7 @@ void AmpFlatteRes::CheckModified()
 	}
 	return;
 }
-std::complex<double> AmpFlatteRes::evaluateAmp(dataPoint& point)
+std::complex<double> AmpFlatteRes::EvaluateAmp(dataPoint& point)
 {
 	CheckModified();
 
@@ -313,7 +331,7 @@ std::complex<double> AmpFlatteRes::dynamicalFunction(double mSq, double mR,
 	//-- new approach - for spin 0 resonances in the imaginary part of the denominator the term qTerm
 	//is added, compared to the old formula
 	std::complex<double> denom = std::complex<double>( mR*mR - mSq,0)
-							+ (-1.0)*i*sqrtS*(termA + termB + termC);
+									+ (-1.0)*i*sqrtS*(termA + termB + termC);
 
 	std::complex<double> result = std::complex<double>(gA*g_production,0) / denom;
 
@@ -325,9 +343,8 @@ std::complex<double> AmpFlatteRes::dynamicalFunction(double mSq, double mR,
 	return result;
 }
 
-std::shared_ptr<FunctionTree> AmpFlatteRes::setupTree(
-		allMasses& theMasses,allMasses& toyPhspSample,std::string suffix,
-		ParameterList& params)
+std::shared_ptr<FunctionTree> AmpFlatteRes::SetupTree(
+		allMasses& theMasses,allMasses& toyPhspSample,std::string suffix)
 {
 	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
 	double phspVol = kin->getPhspVolume();
@@ -362,10 +379,10 @@ std::shared_ptr<FunctionTree> AmpFlatteRes::setupTree(
 
 	newTree->createHead("Reso_"+_name, mmultStrat, theMasses.nEvents); //Reso=BW*C_*AD*N_
 	newTree->createNode("C_"+_name, complStrat, "Reso_"+_name); //c
-	newTree->createLeaf("Intens_"+_name, params.GetDoubleParameter("mag_"+_name), "C_"+_name); //r
-	newTree->createLeaf("Phase_"+_name, params.GetDoubleParameter("phase_"+_name), "C_"+_name); //phi
+	newTree->createLeaf("Intens_"+_name, _mag, "C_"+_name); //r
+	newTree->createLeaf("Phase_"+_name, _phase, "C_"+_name); //phi
 	//Angular distribution
-	newTree->insertTree(_wignerD.setupTree(theMasses,suffix,params), "Reso_"+_name);
+	newTree->insertTree(_wignerD.SetupTree(theMasses,suffix), "Reso_"+_name);
 
 	//Flatte
 	newTree->createNode("FlatteRes_"+_name, flatteStrat, "Reso_"+_name, theMasses.nEvents); //BW
@@ -418,7 +435,7 @@ std::shared_ptr<FunctionTree> AmpFlatteRes::setupTree(
 		newTree->createNode("NormReso_"+_name, mmultStrat, "AbsVal_"+_name,
 				toyPhspSample.nEvents); //BW
 		//Angular distribution (Normalization)
-		newTree->insertTree(_wignerD.setupTree(toyPhspSample,suffix,params),
+		newTree->insertTree(_wignerD.SetupTree(toyPhspSample,suffix),
 				"NormReso_"+_name);
 		//Flatte (Normalization)
 		newTree->createNode("NormFlatte_"+_name, flatteStrat, "NormReso_"+_name,

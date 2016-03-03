@@ -96,7 +96,7 @@ void AmpSumIntensity::Save(std::string filePath)
 			"Save amplitude to "<<filePath<<"!";
 	auto it = resoList.begin();
 	for( ; it!= resoList.end(); ++it)
-		(*it)->Save(ptSub);
+		(dynamic_pointer_cast<AmpAbsDynamicalFunction>(*it))->Save(ptSub);
 
 	pt.add_child("amplitude_setup",ptSub);
 	//new line at the end
@@ -129,8 +129,8 @@ std::shared_ptr<FunctionTree> AmpSumIntensity::setupBasicTree(
 	auto it = resoList.begin();
 	for( ; it!=resoList.end(); ++it){
 		if(!(*it)->GetEnable()) continue;
-		std::shared_ptr<FunctionTree> resTree= (*it)->setupTree(theMasses,
-				toyPhspSample, ""+(*it)->GetName(),params);
+		std::shared_ptr<FunctionTree> resTree= (*it)->SetupTree(theMasses,
+				toyPhspSample, ""+(*it)->GetName());
 		if(!resTree->sanityCheck())
 			throw std::runtime_error("AmpSumIntensity::setupBasicTree() | "
 					"Resonance tree didn't pass sanity check!");
@@ -246,28 +246,24 @@ double interferenceIntegralWrapper(double* x, size_t dim, void* param) {
 	if( !kin->isWithinPhsp(point) ) return 0;//only integrate over phase space
 
 	AmpSumIntensity* amp = static_cast<AmpSumIntensity*>(param);
-	std::shared_ptr<AmpAbsDynamicalFunction> amp1 = amp->GetResonance(amp->getFirstRes());
-	std::shared_ptr<AmpAbsDynamicalFunction> amp2 = amp->GetResonance(amp->getSecondRes());
-	std::complex<double> val1 = amp1->evaluate(point);
-	std::complex<double> val2 = amp2->evaluate(point);
 
-	//	if(amp->getFirstRes() != amp->getSecondRes())
-	//		std::cout<<(val1*std::conj(val2)).real()
-	//		<<" "<<(val2*std::conj(val1)).real()
-	//		<< " "<<std::norm(val1)
-	//		<< " "<<std::norm(val2)<<std::endl;
-	double intens = (val1*std::conj(val2)).real();
-	if(amp->getFirstRes() == amp->getSecondRes()) return intens;
+	auto A = amp->tmpA;
+	auto B = amp->tmpB;
+	double intens = (
+			(*A)->Evaluate(point)*std::conj((*B)->Evaluate(point))
+	).real();
+	if( A == B ) return intens;
 	return 2*intens;
 }
 
-const double AmpSumIntensity::interferenceIntegral(unsigned int a, unsigned int b){
-	assert( GetNumberOfResonances() > a );
-	assert( GetNumberOfResonances() > b );
-	firstRes = a; secondRes = b;
+const double AmpSumIntensity::interferenceIntegral(
+		resonanceItr A, resonanceItr B)
+{
+	tmpA = A; tmpB = B;
 
-	/* Integration functionality was tested with a model with only one normalized amplitude.
-	 * The integration result is equal to the amplitude coefficient^2.
+	/* Integration functionality was tested with a model with only one
+	 * normalized amplitude. The integration result is equal to the
+	 * amplitude coefficient^2.
 	 */
 	size_t dim=2;
 	double res=0.0, err=0.0;
@@ -290,8 +286,9 @@ const double AmpSumIntensity::interferenceIntegral(unsigned int a, unsigned int 
 	gsl_monte_vegas_state *s = gsl_monte_vegas_alloc (dim);
 	gsl_monte_vegas_integrate (&G, xLimit_low, xLimit_high, 2, _nCalls, r,s,&res, &err);
 	gsl_monte_vegas_free(s);
-	BOOST_LOG_TRIVIAL(debug)<<"AmpSumIntensity::interferenceIntegrate() Interference term "
-			"of "<<a<<" and "<<b<<" : "<<res<<"+-"<<err<<" relAcc [%]: "<<100*err/res;
+	BOOST_LOG_TRIVIAL(debug)<<"AmpSumIntensity::interferenceIntegrate() | "
+			"Interference term of "<<(*tmpA)->GetName()<<" and "<<(*tmpB)->GetName()
+			<<" : "<<res<<"+-"<<err<<" relAcc [%]: "<<100*err/res;
 
 	return res;
 }
@@ -378,10 +375,9 @@ const ParameterList& AmpSumIntensity::intensity(dataPoint& point, ParameterList&
 const ParameterList& AmpSumIntensity::intensityNoEff(dataPoint& point){
 	std::complex<double> AMPpdf(0,0);
 	if(Kinematics::instance()->isWithinPhsp(point)) {
-		auto it = resoList.begin();
-		for( ; it!=resoList.end(); ++it){
-			if(!(*it)->GetEnable()) continue;
-			AMPpdf += (*it)->evaluate(point);
+		auto it = GetResonanceItrFirst();
+		for( ; it != GetResonanceItrLast(); ++it){
+			AMPpdf += (*it)->Evaluate(point);
 		}
 	}
 	result.SetParameterValue(0,std::norm(AMPpdf));
@@ -440,11 +436,11 @@ void AmpSumIntensity::printFractions(){
 	std::stringstream outStr;
 	outStr<<"Fit fractions for all amplitudes: \n";
 	double sumFrac=0;
-	for(unsigned int i=0;i<resoList.size();i++){
-		if(!resoList.at(i)->GetEnable()) continue;
-		double frac = GetFraction(i);
+	auto it = GetResonanceItrFirst();
+	for( ; it != GetResonanceItrLast(); ++it){
+		double frac = (*it)->GetMagnitude()/integral();
 		sumFrac+=frac;
-		outStr<<std::setw(10)<<resoList.at(i)->GetName()<<":    "<<frac<<"\n";
+		outStr<<std::setw(10)<<(*it)->GetName()<<":    "<<frac<<"\n";
 	}
 
 	outStr<<std::setw(10)<<" "<<"    ==========\n";
@@ -506,8 +502,6 @@ double AmpSumIntensity::getIntValue(std::string var1, double min1, double max1, 
 	return res;
 }
 
-unsigned int AmpSumIntensity::GetNumberOfResonances() { return resoList.size(); }
-
 int AmpSumIntensity::GetIdOfResonance(std::string name){
 	for(unsigned int i=0; i< resoList.size(); i++)
 		if(resoList.at(i)->GetName()==name) return i;
@@ -521,75 +515,13 @@ std::string AmpSumIntensity::GetNameOfResonance(unsigned int id){
 	return resoList.at(id)->GetName();
 }
 
-double AmpSumIntensity::GetMagnitude(std::string name) {
-	int id = GetIdOfResonance(name);
-	return GetMagnitude(id);
-}
-
-double AmpSumIntensity::GetMagnitude(unsigned int id) {
-	if(id < 0 || id > resoList.size() )
-		throw std::runtime_error("AmpSumIntensity::getAmpMagnitude() | "
-				"Invalid resonance ID! Resonance not found?");
-	return resoList.at(id)->GetMagnitude();
-}
-
-double AmpSumIntensity::GetPhase(std::string name) {
-	int id = GetIdOfResonance(name);
-	return GetPhase(id);
-}
-
-double AmpSumIntensity::GetPhase(unsigned int id) {
-	if(id < 0 || id > resoList.size() )
-		throw std::runtime_error("AmpSumIntensity::getAmpPhase() | "
-				"Invalid resonance ID! Resonance not found?");
-	return resoList.at(id)->GetPhase();
-}
-
-double AmpSumIntensity::GetIntegral(std::string name) {
-	int id = GetIdOfResonance(name);
-	return GetIntegral(id);
-}
-
-double AmpSumIntensity::GetIntegral(unsigned int id) {
-	if(id < 0 || id > resoList.size() )
-		throw std::runtime_error("AmpSumIntensity::getAmpIntegral() | "
-				"Invalid resonance ID! Resonance not found?");
-	//hard code normalization here to save cpu time
-	//return 1;
-	//recalculate integral for each call
-	return resoList.at(id)->totalIntegral();
-}
-
-double AmpSumIntensity::GetFraction(std::string name) {
-	int id = GetIdOfResonance(name);
-	return GetFraction(id);
-}
-
-double AmpSumIntensity::GetFraction(unsigned int id) {
-	if(id < 0 || id > resoList.size() )
-		throw std::runtime_error("AmpSumIntensity::getAmpFraction() | "
-				"Invalid resonance ID! Resonance not found?");
-	return resoList.at(id)->GetMagnitude()/integral();
-}
-bool AmpSumIntensity::GetEnable(std::string name) {
-	int id = GetIdOfResonance(name);
-	return GetEnable(id);
-}
-
-bool AmpSumIntensity::GetEnable(unsigned int id) {
-	if(id < 0 || id > resoList.size() )
-		throw std::runtime_error("AmpSumIntensity::GetEnable() | "
-				"Invalid resonance ID! Resonance not found?");
-	return resoList.at(id)->GetEnable();
-}
-
-std::shared_ptr<AmpAbsDynamicalFunction>
+std::shared_ptr<Resonance>
 AmpSumIntensity::GetResonance(std::string name) {
 	int id = GetIdOfResonance(name);
 	return GetResonance(id);
 }
 
-std::shared_ptr<AmpAbsDynamicalFunction>
+std::shared_ptr<Resonance>
 AmpSumIntensity::GetResonance(unsigned int id) {
 	if(id < 0 || id > resoList.size() )
 		throw std::runtime_error("AmpSumIntensity::getResonance() | "

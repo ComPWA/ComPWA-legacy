@@ -27,6 +27,7 @@
 #include "Core/DataPoint.hpp"
 #include "Core/FunctionTree.hpp"
 #include "Core/PhysConst.hpp"
+#include "Core/Resonance.hpp"
 #include "Physics/AmplitudeSum/AmpWigner2.hpp"
 
 enum normStyle {
@@ -36,7 +37,7 @@ enum normStyle {
 	one
 };
 
-class AmpAbsDynamicalFunction
+class AmpAbsDynamicalFunction : public Resonance
 {
 public:
 	AmpAbsDynamicalFunction( normStyle nS=normStyle::one, int calls=30000) :
@@ -69,29 +70,31 @@ public:
 	//! Implementation of interface for streaming info about the strategy
 	virtual std::string to_str() const;
 	//! value of resonance at \param point
-	virtual std::complex<double> evaluate(dataPoint& point);
+	virtual std::complex<double> Evaluate(dataPoint& point);
 	//! value of dynamical amplitude at \param point
-	virtual std::complex<double> evaluateAmp(dataPoint& point) = 0;
+	virtual std::complex<double> EvaluateAmp(dataPoint& point) = 0;
 	//! value of angular distribution at \param point
-	virtual double evaluateWignerD(dataPoint& point) {
+	virtual double EvaluateWignerD(dataPoint& point) {
 		return _wignerD.evaluate(point);
 	};
 	//! Calculation integral |dynamical amplitude|^2
-	virtual double integral();
+	virtual double GetIntegral() const;
 	/** Calculation integral |c * dynamical amplitude * WignerD|^2
 	 * Used to check the correct normalization of the amplitude. Should always be 1.
 	 * @return
 	 */
-	virtual double totalIntegral() const;
+	virtual double GetTotalIntegral() const;
 
-	//! Get current normalization. In case that resonance parameters has change, it is recalculated.
+	/**! Get current normalization.
+	 * In case that resonance parameters has change, it is recalculated.
+	 */
 	virtual double GetNormalization();
 	//! Set normalization manually. Setting to values <0 disables normalization
 	virtual void SetNormalization(double n){ _norm=n; };
 	//! Set normalization style
 	virtual void SetNormalizationStyle(normStyle n){ _normStyle=n; };
 	//! Get normalization style
-	virtual normStyle GetNormalizationStyle(){ return _normStyle; };
+	virtual normStyle GetNormalizationStyle() const { return _normStyle; };
 	//! Trigger recalculation of normalization
 	virtual void SetModified() { modified=1; }
 	//! Trigger recalculation of normalization
@@ -101,46 +104,48 @@ public:
 	//! Get Enable/Disable status
 	virtual bool GetEnable() const { return _enable; }
 	//! Get resonance name
-	virtual std::string GetName(){ return _name; }
+	virtual std::string GetName() const { return _name; }
 	//! Set resonance name
 	virtual void SetName(std::string n){ _name = n; }
 
 	//! Get coefficient
-	virtual std::complex<double> GetCoefficient();
+	virtual std::complex<double> GetCoefficient() const;
 	//! Get magnitude
-	virtual double GetMagnitude() { return _mag->GetValue(); };
+	virtual double GetMagnitude() const { return _mag->GetValue(); };
+	//! Get magnitude
+	virtual std::shared_ptr<DoubleParameter> GetMagnitudePar() { return _mag; };
 	//! Get phase
-	virtual double GetPhase() { return _phase->GetValue(); };
+	virtual double GetPhase() const { return _phase->GetValue(); };
+	//! Get phase
+	virtual std::shared_ptr<DoubleParameter> GetPhasePar() { return _phase; };
 	//! Get resonance mass
-	virtual double GetMass() {return _mass->GetValue();};
+	virtual double GetMass() const {return _mass->GetValue();};
+	//! Get resonance mass
+	virtual std::shared_ptr<DoubleParameter> GetMassPar() {return _mass;};
 	//! Get resonance width
-	virtual double GetWidth() = 0;
+	virtual double GetWidth() const = 0;
 	//! Get resonance spin
-	virtual double getSpin() { return _spin; }
-	virtual double GetM() {return _m;};
-	virtual double GetN() {return _n;};
+	virtual double GetSpin() const { return _spin; }
+	virtual double GetM() const {return _m;};
+	virtual double GetN() const {return _n;};
 	//! Get mass of daughter A
-	virtual double GetMassA() {return _ma;};
+	virtual double GetMassA() const {return _ma;};
 	//! Get mass of daughter B
-	virtual double GetMassB() {return _mb;};
+	virtual double GetMassB() const {return _mb;};
 	//! Convert dataPoint to invmass in current subsystem
 	virtual double GetInvMass(dataPoint& point);
 	//! Get resonance meson radius
-	virtual double GetMesonRadius() { return _mesonRadius->GetValue(); }
+	virtual double GetMesonRadius() const { return _mesonRadius->GetValue(); }
 	//! Set resonance mother meson radius
 	virtual void SetMesonRadius(double r) {	_mesonRadius->SetValue(r); }
 	//! Get resonance mother meson radius
-	virtual double GetMotherRadius() { return _motherRadius->GetValue(); }
+	virtual double GetMotherRadius() const { return _motherRadius->GetValue(); }
 	//! Set resonance mother meson radius
 	virtual void SetMotherRadius(double r) { _motherRadius->SetValue(r); }
 
 	inline virtual bool isSubSys(const unsigned int subSys) const{ return (subSys==_subSys); };
-	//	virtual std::shared_ptr<FunctionTree> setupTree(
-	//			allMasses& theMasses,allMasses& toyPhspSample,std::string suffix,
-	//			ParameterList params) { return std::shared_ptr<FunctionTree>(); };
-	virtual std::shared_ptr<FunctionTree> setupTree(
-			allMasses& theMasses,allMasses& toyPhspSample,std::string suffix,
-			ParameterList& params) = 0;
+	virtual std::shared_ptr<FunctionTree> SetupTree(
+			allMasses& theMasses,allMasses& toyPhspSample,std::string suffix) = 0;
 
 	/** Convert width of resonance to coupling
 	 *
@@ -184,19 +189,24 @@ protected:
 	normStyle _normStyle;
 	//! Resonance magnitude
 	std::shared_ptr<DoubleParameter> _mag;
+	bool _mag_writeByName;
 	//! Resonance phase
 	std::shared_ptr<DoubleParameter> _phase;
+	bool _phase_writeByName;
 	//! Masses
 	double _ma, _mb, _M;
 	//! Resonance mass
 	std::shared_ptr<DoubleParameter> _mass;
 	double tmp_mass;
+	bool _mass_writeByName;
 	//! Resonance sub system
 	unsigned int _subSys, _part1, _part2;
 	//! Resonance spin
 	Spin _spin, _m, _n;
 	//! Barrier radi for resonance and mother particle
 	std::shared_ptr<DoubleParameter> _mesonRadius, _motherRadius;
+	bool _mesonRadius_writeByName;
+	bool _motherRadius_writeByName;
 	//!Form factor type
 	formFactorType _ffType;
 

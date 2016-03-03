@@ -44,12 +44,12 @@ public:
 	//! Get resonance width
 	double GetWidth() { return _width->GetValue(); }
 
-	virtual std::complex<double> evaluate(dataPoint& point);
-	virtual std::complex<double> evaluateAmp(dataPoint& point);
+	virtual std::complex<double> Evaluate(dataPoint& point);
+	virtual std::complex<double> EvaluateAmp(dataPoint& point);
 	virtual double evaluateWignerD(dataPoint& point) const { return 1; };
 
 	inline virtual bool isSubSys(const unsigned int subSys)const{return (subSys==_subSys);};
-	double getSpin(){return 0;};
+	double GetSpin(){return 0;};
 
 protected:
 	std::shared_ptr<DoubleParameter> _width;

@@ -60,7 +60,7 @@ public:
 	std::string to_str() const;
 
 	//! Get resonance width
-	double GetWidth() { return _width->GetValue(); }
+	double GetWidth() const { return _width->GetValue(); }
 	/** Breit-Wigner function
 	 *
 	 * The dynamical function implemented here is taken from PDG2014 (Eq.47-22) for
@@ -80,13 +80,15 @@ public:
 			double width, unsigned int J, double mesonRadius,
 			formFactorType ffType=formFactorType::BlattWeisskopf);
 
-	virtual std::complex<double> evaluateAmp(dataPoint& point);
+	virtual std::complex<double> EvaluateAmp(dataPoint& point);
 
-	virtual std::shared_ptr<FunctionTree> setupTree(
-			allMasses& theMasses,allMasses& toyPhspSample,std::string suffix, ParameterList& params);
+	virtual std::shared_ptr<FunctionTree> SetupTree(
+			allMasses& theMasses,allMasses& toyPhspSample,std::string suffix);
 protected:
+	//! Resonance width
 	std::shared_ptr<DoubleParameter> _width;
 	double tmp_width;
+	bool _width_writeByName;
 };
 
 class BreitWignerStrategy : public Strategy {

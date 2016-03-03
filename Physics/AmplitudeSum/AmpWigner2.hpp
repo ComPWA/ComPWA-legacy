@@ -44,8 +44,8 @@ public:
 
 	static double dynamicalFunction(int J, int mu, int muPrime, double cosTheta);
 
-	virtual std::shared_ptr<FunctionTree> setupTree(
-			allMasses& theMasses,std::string suffix, ParameterList& params);
+	virtual std::shared_ptr<FunctionTree> SetupTree(
+			allMasses& theMasses,std::string suffix="");
 protected:
 	unsigned int _subSys;
 	unsigned int _spin;

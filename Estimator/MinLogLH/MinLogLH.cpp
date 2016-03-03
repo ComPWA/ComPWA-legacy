@@ -332,11 +332,11 @@ void MinLogLH::iniLHtree(){
 double MinLogLH::calcPenalty(){
 	if(penaltyLambda<=0) return 0; //penalty term disabled
 	double magSum = 0;
-	for(unsigned int i=0;i<amp->GetNumberOfResonances(); i++){
-		if(!amp->GetEnable(i)) continue;
-		magSum += std::fabs(amp->GetMagnitude(i))*std::sqrt(amp->GetIntegral(i));
+	auto it = amp->GetResonanceItrFirst();
+	for(; it != amp->GetResonanceItrLast(); ++it){
+		magSum += std::fabs( (*it)->GetMagnitude()) *
+				std::sqrt( (*it)->GetIntegral() );
 	}
-	//return (penaltyLambda*magSum/amp->integral());
 	return (penaltyLambda*magSum);
 }
 

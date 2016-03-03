@@ -30,6 +30,7 @@
 #include <memory>
 #include <math.h>
 
+#include "Core/Resonance.hpp"
 #include "Core/ParameterList.hpp"
 #include "Core/FunctionTree.hpp"
 #include "DataReader/Data.hpp"
@@ -56,7 +57,8 @@ public:
 	//! calculate integral of amplitude intensity. Sets parameter list first.
 	virtual const double integral(ParameterList& par) =0;
 	//! get (interference) integral for resonances \param id1 and \param id2
-	virtual const double interferenceIntegral(unsigned int id1, unsigned int id2) { return -999; };
+	virtual const double interferenceIntegral(resonanceItr A, resonanceItr B)
+	{ return -999; };
 	//! calculate normalization of amplitude intensity. This includes efficiency correction
 	virtual const double normalization() =0;
 	//! calculate normalization of amplitude intensity. Sets parameter list first.
@@ -90,29 +92,10 @@ public:
 	 */
 	virtual double getIntValue(std::string var1, double min1, double max1, std::string var2, double min2, double max2) = 0;
 
-	//---------- get resonance parameters -------------
-	//! Number of resonances
-	virtual unsigned int GetNumberOfResonances() { return 0; }
-	//! convert resonance \param name to id
-	virtual int GetIdOfResonance(std::string name){ return 0;}
-	//! convert resonance \param id to name
-	virtual std::string GetNameOfResonance(unsigned int id){ return std::string("muh");}
-	//! get total integral for resonance \param id
-	virtual double GetIntegral(unsigned int id) { return -999; };
-	//! get total integral for resonance \param name
-	virtual double GetIntegral(std::string name) { return -999; };
-	//! Get magnitude of resonance name
-	virtual double GetMagnitude(std::string name) {return -999;};
-	//! Get magnitude of resonance id
-	virtual double GetMagnitude(unsigned int id) {return -999;};
-	//! Get phase of resonance name
-	virtual double GetPhase(std::string name) {return -999;};
-	//! Get phase of resonance id
-	virtual double GetPhase(unsigned int id) {return -999;};
-	//! Get phase of resonance name
-	virtual bool GetEnable(std::string name) {return -999;};
-	//! Get phase of resonance id
-	virtual bool GetEnable(unsigned int id) {return -999;};
+	//! Iterator on first resonance (which is enabled)
+	virtual resonanceItr GetResonanceItrFirst() {};
+	//! Iterator on last resonance (which is enabled)
+	virtual resonanceItr GetResonanceItrLast() {};
 
 	//---------- related to FunctionTree -------------
 	//! Check of tree is available
@@ -123,8 +106,11 @@ public:
 	}
 
 protected:
-	ParameterList result;
+	//need to store this object for boost::filter_iterator
+	resIsEnabled _resEnabled;
 
+	//Amplitude value
+	ParameterList result;
 
 };
 

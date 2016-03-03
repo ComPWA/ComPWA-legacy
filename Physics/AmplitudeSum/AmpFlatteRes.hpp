@@ -62,7 +62,7 @@ public:
 	std::string to_str() const;
 
 	//! Get resonance width
-	virtual double GetWidth() {
+	virtual double GetWidth() const {
 		return std::abs( couplingToWidth(_mass->GetValue(),_mass->GetValue(), _g1->GetValue(),
 			_ma, _mb, _spin, _mesonRadius->GetValue(), _ffType) );
 	}
@@ -87,15 +87,16 @@ public:
 			double massC1, double massC2, double gC,
 			unsigned int J, double mesonRadius, formFactorType ffType=formFactorType::CrystalBarrel );
 
-	virtual std::complex<double> evaluateAmp(dataPoint& point) ;
+	virtual std::complex<double> EvaluateAmp(dataPoint& point) ;
 
-	virtual std::shared_ptr<FunctionTree> setupTree(
-			allMasses& theMasses,allMasses& toyPhspSample,std::string suffix, ParameterList& params);
+	virtual std::shared_ptr<FunctionTree> SetupTree(
+			allMasses& theMasses,allMasses& toyPhspSample,std::string suffix);
 protected:
 	double _g2_massA, _g2_massB, _g3_massA, _g3_massB;
 	std::string _g2_idA, _g2_idB, _g3_idA, _g3_idB;
 	std::shared_ptr<DoubleParameter> _g3, _g2, _g1;
 	double tmp_g3, tmp_g2, tmp_g1;
+	double _g1_writeByName, _g2_writeByName, _g3_writeByName;
 };
 
 class FlatteStrategy : public Strategy

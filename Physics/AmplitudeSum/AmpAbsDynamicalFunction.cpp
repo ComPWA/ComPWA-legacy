@@ -42,12 +42,12 @@ AmpAbsDynamicalFunction::AmpAbsDynamicalFunction(const char *name,
 		Spin spin, Spin m, Spin n,
 		formFactorType type,
 		int nCalls, normStyle nS) :
-		_name(name), _mag(mag), _phase(phase), _mass(mass), _part1(part1), _part2(part2),
-		_subSys(part1+part2), _spin(spin), _m(m), _n(n),
-		_mesonRadius(std::make_shared<DoubleParameter>(name, 1.0)),
-		_motherRadius(std::make_shared<DoubleParameter>(name, 1.0)), _ffType(type),
-		_nCalls(nCalls), _normStyle(nS), _norm(1.0), modified(1),
-		_wignerD(part1+part2, spin)
+						_name(name), _mag(mag), _phase(phase), _mass(mass), _part1(part1), _part2(part2),
+						_subSys(part1+part2), _spin(spin), _m(m), _n(n),
+						_mesonRadius(std::make_shared<DoubleParameter>(name, 1.0)),
+						_motherRadius(std::make_shared<DoubleParameter>(name, 1.0)), _ffType(type),
+						_nCalls(nCalls), _normStyle(nS), _norm(1.0), modified(1),
+						_wignerD(part1+part2, spin)
 {
 	initialize();
 }
@@ -90,122 +90,34 @@ void AmpAbsDynamicalFunction::Configure(
 	if(!tmp_enable) _enable = 0;
 	else _enable = tmp_enable.get();
 
-	//Mother radius (optional)
-	auto tmp_motherRadius_fix = pt.get<bool>("motherRadius_fix",1);
-	auto tmp_motherRadius_min = pt.get<double>("motherRadius_min",0.);
-	auto tmp_motherRadius_max = pt.get<double>("motherRadius_max",10.);
-	auto tmp_motherRadius_name = pt.get_optional<std::string>("motherRadius_name");
-	if(!tmp_motherRadius_name){
-		//mother radius is not a strict requriement
-		double tmp_motherRadius= pt.get<double>("motherRadius",1.0);
-		_motherRadius = std::shared_ptr<DoubleParameter>(
-				new DoubleParameter(
-						"motherRadius_"+_name,tmp_motherRadius,
-						tmp_motherRadius_min, tmp_motherRadius_max
-				)
-		);
-		_motherRadius->FixParameter(tmp_motherRadius_fix);
-		//if(_enable) list.AddParameter(_motherRadius);
-	} else {
-		try{
-			_motherRadius = list.GetDoubleParameter(tmp_motherRadius_name.get());
-		} catch (BadParameter& ex){
-			BOOST_LOG_TRIVIAL(error) <<"AmpAbsDynamicalFunction::Configure() | "
-					"Requesting parameter "<<tmp_motherRadius_name.get()<<" but"
-							" was not found in parameter list. "
-							"Continue since parameter is not mandatory!";
-		}
-			_motherRadius =	std::shared_ptr<DoubleParameter>(
-							new DoubleParameter("motherRadius_"+_name,1.0)
-			);
-	}
-
-	//Meson radius (mandatory)
-	auto tmp_mesonRadius_fix = pt.get<bool>("mesonRadius_fix",1);
-	auto tmp_mesonRadius_min = pt.get<double>("mesonRadius_min",0.0);
-	auto tmp_mesonRadius_max = pt.get<double>("mesonRadius_max",10.0);
-	auto tmp_mesonRadius_name = pt.get_optional<std::string>("mesonRadius_name");
-	if(!tmp_mesonRadius_name){
-		auto tmp_mesonRadius = pt.get_optional<double>("mesonRadius");
-		if(!tmp_mesonRadius)
+	//Magnitude (mandatory)
+	auto tmp_mag_fix = pt.get<bool>("mag_fix",1);
+	auto tmp_mag_min = pt.get<double>("mag_min",0.0);
+	auto tmp_mag_max = pt.get<double>("mag_max",5.0);
+	auto tmp_mag_name = pt.get_optional<std::string>("mag_name");
+	if(!tmp_mag_name){
+		auto tmp_mag = pt.get_optional<double>("mag");
+		if(!tmp_mag)
 			throw BadParameter("AmpAbsDynamicalFunction::Configure() | "
-					"mesonRadius for "+_name+" not specified!");
-		_mesonRadius = std::shared_ptr<DoubleParameter>(
-				new DoubleParameter(
-						"d_"+_name,tmp_mesonRadius.get(),
-						tmp_mesonRadius_min, tmp_mesonRadius_max
-				)
-		);
-		_mesonRadius->FixParameter(tmp_mesonRadius_fix);
-		if(_enable) list.AddParameter(_mesonRadius);
-	} else {
-		try{
-			_mesonRadius = list.GetDoubleParameter(tmp_mesonRadius_name.get());
-		} catch (BadParameter& ex){
-			BOOST_LOG_TRIVIAL(error) <<"AmpAbsDynamicalFunction::Configure() | "
-					"Requesting parameter "<<tmp_mesonRadius_name.get()<<" but"
-							" was not found in parameter list. "
-							"Quit since parameter is mandatory!";
-			throw;
-		}
-	}
-
-	//Mass (mandatory)
-	auto tmp_mass_fix = pt.get<bool>("mass_fix",1);
-	auto tmp_mass_min = pt.get<double>("mass_min",0.0);
-	auto tmp_mass_max = pt.get<double>("mass_max",10.0);
-	auto tmp_mass_name = pt.get_optional<std::string>("mass_name");
-	if(!tmp_mass_name){
-		auto tmp_mass = pt.get_optional<double>("mass");
-		if(!tmp_mass)
-			throw BadParameter("AmpAbsDynamicalFunction::Configure() | "
-					"mass for "+_name+" not specified!");
-		_mass = std::shared_ptr<DoubleParameter>(
-				new DoubleParameter(
-						"mass_"+_name,tmp_mass.get(),
-						tmp_mass_min, tmp_mass_max
-				)
-		);
-		_mass->FixParameter(tmp_mass_fix);
-		if(_enable) list.AddParameter(_mass);
-	} else {
-		try{
-			_mass = list.GetDoubleParameter(tmp_mass_name.get());
-		} catch (BadParameter& ex){
-			BOOST_LOG_TRIVIAL(error) <<"AmpAbsDynamicalFunction::Configure() | "
-					"Requesting parameter "<<tmp_mass_name.get()<<" but"
-							" was not found in parameter list. "
-							"Quit since parameter is mandatory!";
-			throw;
-		}
-	}
-
-	//Strength (mandatory)
-	auto tmp_strength_fix = pt.get<bool>("strength_fix",1);
-	auto tmp_strength_min = pt.get<double>("strength_min",0.0);
-	auto tmp_strength_max = pt.get<double>("strength_max",5.0);
-	auto tmp_strength_name = pt.get_optional<std::string>("strength_name");
-	if(!tmp_strength_name){
-		auto tmp_strength = pt.get_optional<double>("strength");
-		if(!tmp_strength)
-			throw BadParameter("AmpAbsDynamicalFunction::Configure() | "
-					"strength for "+_name+" not specified!");
+					"mag for "+_name+" not specified!");
 		_mag = std::shared_ptr<DoubleParameter>(
 				new DoubleParameter(
-						"mag_"+_name,tmp_strength.get(),
-						tmp_strength_min, tmp_strength_max
+						"mag_"+_name,tmp_mag.get(),
+						tmp_mag_min, tmp_mag_max
 				)
 		);
-		_mag->FixParameter(tmp_strength_fix);
+		_mag->FixParameter(tmp_mag_fix);
 		if(_enable) list.AddParameter(_mag);
+		_mag_writeByName = 0;
 	} else {
 		try{
-			_mag = list.GetDoubleParameter(tmp_strength_name.get());
+			_mag = list.GetDoubleParameter(tmp_mag_name.get());
+			_mag_writeByName = 1;
 		} catch (BadParameter& ex){
 			BOOST_LOG_TRIVIAL(error) <<"AmpAbsDynamicalFunction::Configure() | "
-					"Requesting parameter "<<tmp_strength_name.get()<<" but"
-							" was not found in parameter list. "
-							"Quit since parameter is mandatory!";
+					"Requesting parameter "<<tmp_mag_name.get()<<" but"
+					" was not found in parameter list. "
+					"Quit since parameter is mandatory!";
 			throw;
 		}
 	}
@@ -228,27 +140,130 @@ void AmpAbsDynamicalFunction::Configure(
 		);
 		_phase->FixParameter(tmp_phase_fix);
 		if(_enable) list.AddParameter(_phase);
+		_mag_writeByName = 0;
 	} else {
 		try{
 			_phase = list.GetDoubleParameter(tmp_phase_name.get());
+			_mag_writeByName = 1;
 		} catch (BadParameter& ex){
 			BOOST_LOG_TRIVIAL(error) <<"AmpAbsDynamicalFunction::Configure() | "
 					"Requesting parameter "<<tmp_phase_name.get()<<" but"
-							" was not found in parameter list. "
-							"Quit since parameter is mandatory!";
+					" was not found in parameter list. "
+					"Quit since parameter is mandatory!";
 			throw;
 		}
+	}
+
+	//Mass (mandatory)
+	auto tmp_mass_fix = pt.get<bool>("mass_fix",1);
+	auto tmp_mass_min = pt.get<double>("mass_min",0.0);
+	auto tmp_mass_max = pt.get<double>("mass_max",10.0);
+	auto tmp_mass_name = pt.get_optional<std::string>("mass_name");
+	if(!tmp_mass_name){
+		auto tmp_mass = pt.get_optional<double>("mass");
+		if(!tmp_mass)
+			throw BadParameter("AmpAbsDynamicalFunction::Configure() | "
+					"mass for "+_name+" not specified!");
+		_mass = std::shared_ptr<DoubleParameter>(
+				new DoubleParameter(
+						"mass_"+_name,tmp_mass.get(),
+						tmp_mass_min, tmp_mass_max
+				)
+		);
+		_mass->FixParameter(tmp_mass_fix);
+		if(_enable) list.AddParameter(_mass);
+		_mass_writeByName = 0;
+	} else {
+		try{
+			_mass = list.GetDoubleParameter(tmp_mass_name.get());
+			_mass_writeByName = 1;
+		} catch (BadParameter& ex){
+			BOOST_LOG_TRIVIAL(error) <<"AmpAbsDynamicalFunction::Configure() | "
+					"Requesting parameter "<<tmp_mass_name.get()<<" but"
+					" was not found in parameter list. "
+					"Quit since parameter is mandatory!";
+			throw;
+		}
+	}
+
+	//Mother radius (optional)
+	auto tmp_motherRadius_fix = pt.get<bool>("motherRadius_fix",1);
+	auto tmp_motherRadius_min = pt.get<double>("motherRadius_min",0.);
+	auto tmp_motherRadius_max = pt.get<double>("motherRadius_max",10.);
+	auto tmp_motherRadius_name = pt.get_optional<std::string>("motherRadius_name");
+	if(!tmp_motherRadius_name){
+		//mother radius is not a strict requriement
+		double tmp_motherRadius= pt.get<double>("motherRadius",1.0);
+		_motherRadius = std::shared_ptr<DoubleParameter>(
+				new DoubleParameter(
+						"motherRadius_"+_name,tmp_motherRadius,
+						tmp_motherRadius_min, tmp_motherRadius_max
+				)
+		);
+		_motherRadius->FixParameter(tmp_motherRadius_fix);
+		//if(_enable) list.AddParameter(_motherRadius);
+		_motherRadius_writeByName = 0;
+	} else {
+		try{
+			_motherRadius = list.GetDoubleParameter(tmp_motherRadius_name.get());
+			_motherRadius_writeByName = 1;
+		} catch (BadParameter& ex){
+			BOOST_LOG_TRIVIAL(error) <<"AmpAbsDynamicalFunction::Configure() | "
+					"Requesting parameter "<<tmp_motherRadius_name.get()<<" but"
+					" was not found in parameter list. "
+					"Continue since parameter is not mandatory!";
+		}
+		_motherRadius =	std::shared_ptr<DoubleParameter>(
+				new DoubleParameter("motherRadius_"+_name,1.0)
+		);
 	}
 
 	//FormFactor (optional)
 	auto tmp_ffType= pt.get<unsigned int>("FormFactorType", 1);
 	_ffType = formFactorType(tmp_ffType);
 
+	//Meson radius (mandatory)
+	auto tmp_mesonRadius_fix = pt.get<bool>("mesonRadius_fix",1);
+	auto tmp_mesonRadius_min = pt.get<double>("mesonRadius_min",0.0);
+	auto tmp_mesonRadius_max = pt.get<double>("mesonRadius_max",10.0);
+	auto tmp_mesonRadius_name = pt.get_optional<std::string>("mesonRadius_name");
+	if(!tmp_mesonRadius_name){
+		auto tmp_mesonRadius = pt.get_optional<double>("mesonRadius");
+		if(!tmp_mesonRadius)
+			throw BadParameter("AmpAbsDynamicalFunction::Configure() | "
+					"mesonRadius for "+_name+" not specified!");
+		_mesonRadius = std::shared_ptr<DoubleParameter>(
+				new DoubleParameter(
+						"d_"+_name,tmp_mesonRadius.get(),
+						tmp_mesonRadius_min, tmp_mesonRadius_max
+				)
+		);
+		_mesonRadius->FixParameter(tmp_mesonRadius_fix);
+		if(_enable) list.AddParameter(_mesonRadius);
+		_mesonRadius_writeByName = 0;
+	} else {
+		try{
+			_mesonRadius = list.GetDoubleParameter(tmp_mesonRadius_name.get());
+			_mesonRadius_writeByName = 1;
+		} catch (BadParameter& ex){
+			BOOST_LOG_TRIVIAL(error) <<"AmpAbsDynamicalFunction::Configure() | "
+					"Requesting parameter "<<tmp_mesonRadius_name.get()<<" but"
+					" was not found in parameter list. "
+					"Quit since parameter is mandatory!";
+			throw;
+		}
+	}
+
 	auto tmp_spin = pt.get_optional<int>("spin");
 	if(!tmp_spin)
 		throw BadParameter("AmpAbsDynamicalFunction::Configure() | "
 				"spin for "+_name+" not specified!");
 	_spin = Spin(tmp_spin.get());
+	//optional parameters
+	double tmp_m = pt.get<int>("m",0);
+	_m = Spin(tmp_m);
+	double tmp_n = pt.get<int>("n",0);
+	_n = Spin(tmp_n);
 
 	auto tmp_part1 = pt.get_optional<int>("daughterA");
 	if(!tmp_part1)
@@ -263,39 +278,57 @@ void AmpAbsDynamicalFunction::Configure(
 
 	_subSys = _part1+_part2;
 
-	//optional parameters
-	double tmp_m = pt.get<int>("m",0);
-	_m = Spin(tmp_m);
-	double tmp_n = pt.get<int>("n",0);
-	_n = Spin(tmp_n);
-
-
-
 	_wignerD = AmpWigner2(_subSys,_spin);
 	initialize();
+
+	return;
 }
 
 void AmpAbsDynamicalFunction::put(boost::property_tree::ptree &pt){
 	pt.put("<xmlattr>.name", _name);
 	pt.put("<xmlattr>.enable", _enable);
-	pt.put("strength", _mag->GetValue());
-	pt.put("strength_fix", _mag->IsFixed());
-	pt.put("strength_min", _mag->GetMinValue());
-	pt.put("strength_max", _mag->GetMaxValue());
-	pt.put("phase", _phase->GetValue());
-	pt.put("phase_fix", _phase->IsFixed());
-	pt.put("phase_min", _phase->GetMinValue());
-	pt.put("phase_max", _phase->GetMaxValue());
-	pt.put("mass", _mass->GetValue());
-	pt.put("mass_fix", _mass->IsFixed());
-	pt.put("mass_min", _mass->GetMinValue());
-	pt.put("mass_max", _mass->GetMaxValue());
+	if(_mag_writeByName){
+		pt.put("mag_name", _mag->GetName());
+	} else {
+		pt.put("mag", _mag->GetValue());
+		pt.put("mag_fix", _mag->IsFixed());
+		pt.put("mag_min", _mag->GetMinValue());
+		pt.put("mag_max", _mag->GetMaxValue());
+	}
+	if(_phase_writeByName){
+		pt.put("phase_name", _phase->GetName());
+	} else {
+		pt.put("phase", _phase->GetValue());
+		pt.put("phase_fix", _phase->IsFixed());
+		pt.put("phase_min", _phase->GetMinValue());
+		pt.put("phase_max", _phase->GetMaxValue());
+	}
+	if(_mass_writeByName){
+		pt.put("mass_name", _mass->GetName());
+	} else {
+		pt.put("mass", _mass->GetValue());
+		pt.put("mass_fix", _mass->IsFixed());
+		pt.put("mass_min", _mass->GetMinValue());
+		pt.put("mass_max", _mass->GetMaxValue());
+	}
 	pt.put("FormFactorType", _ffType);
+	if(_mesonRadius_writeByName){
+		pt.put("mesonRadius_name", _mesonRadius->GetName());
+	} else {
+		pt.put("mesonRadius", _mesonRadius->GetValue());
+		pt.put("mesonRadius_fix", _mesonRadius->IsFixed());
+		pt.put("mesonRadius_min", _mesonRadius->GetMinValue());
+		pt.put("mesonRadius_max", _mesonRadius->GetMaxValue());
+	}
+	pt.put("spin", _spin);
+	pt.put("m", _m);
+	pt.put("n", _n);
 	pt.put("daughterA", _part1);
 	pt.put("daughterB", _part2);
 }
 
-void AmpAbsDynamicalFunction::CheckModified() {
+void AmpAbsDynamicalFunction::CheckModified()
+{
 	if(_mass->GetValue() != tmp_mass){
 		SetModified();
 		tmp_mass = _mass->GetValue();
@@ -340,21 +373,23 @@ AmpAbsDynamicalFunction::~AmpAbsDynamicalFunction()
 {
 }
 
-std::complex<double> AmpAbsDynamicalFunction::GetCoefficient() {
+std::complex<double> AmpAbsDynamicalFunction::GetCoefficient() const
+{
 	return std::complex<double>(
 			std::fabs(_mag->GetValue())*cos(_phase->GetValue()),
 			std::fabs(_mag->GetValue())*sin(_phase->GetValue())
 	);
 }
 
-std::complex<double> AmpAbsDynamicalFunction::evaluate(dataPoint& point){
+std::complex<double> AmpAbsDynamicalFunction::Evaluate(dataPoint& point){
 	CheckModified();
-	std::complex<double> res = evaluateAmp(point);
-	double ang = evaluateWignerD(point);
+	std::complex<double> res = EvaluateAmp(point);
+	double ang = EvaluateWignerD(point);
 	return (GetCoefficient()*GetNormalization()*res*ang);
 }
 
-double evalAmp(double* x, size_t dim, void* param) {
+double evalAmp(double* x, size_t dim, void* param)
+{
 	/* We need a wrapper here because a eval() is a member function of AmpAbsDynamicalFunction
 	 * and can therefore not be referenced. But gsl_monte_function expects a function reference.
 	 * As third parameter we pass the reference to the current instance of AmpAbsDynamicalFunction
@@ -363,13 +398,14 @@ double evalAmp(double* x, size_t dim, void* param) {
 	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
 	dataPoint pp; pp.setVal(0,x[1]);pp.setVal(1,x[0]);
 	if( !kin->isWithinPhsp(pp) ) return 0;//only integrate over phase space
-	std::complex<double> res = static_cast<AmpAbsDynamicalFunction*>(param)->evaluateAmp(pp);
+	std::complex<double> res = static_cast<AmpAbsDynamicalFunction*>(param)->EvaluateAmp(pp);
 	//include angular distribution in normalization
-	res *= static_cast<AmpAbsDynamicalFunction*>(param)->evaluateWignerD(pp);
+	res *= static_cast<AmpAbsDynamicalFunction*>(param)->EvaluateWignerD(pp);
 	return ( std::norm(res) ); //integrate over |F|^2
 }
 
-double AmpAbsDynamicalFunction::integral(){
+double AmpAbsDynamicalFunction::GetIntegral() const
+{
 	size_t dim=2;
 	double res=0.0, err=0.0;
 
@@ -396,16 +432,18 @@ double AmpAbsDynamicalFunction::integral(){
 	return res;
 }
 
-double AmpAbsDynamicalFunction::GetNormalization(){
+double AmpAbsDynamicalFunction::GetNormalization()
+{
 	if(_norm<0) return 1.0; //normalization is disabled
 	//	return _norm; //disable recalculation of normalization
 	if(!modified) return _norm;
-	_norm = 1/sqrt(integral());
+	_norm = 1/sqrt(GetIntegral());
 	modified=0;
 	return _norm;
 }
 
-double eval(double* x, size_t dim, void* param) {
+double eval(double* x, size_t dim, void* param)
+{
 	/* We need a wrapper here because evaluate() is a member function of AmpAbsDynamicalFunction
 	 * and can therefore not be referenced. But gsl_monte_function expects a function reference.
 	 * As third parameter we pass the reference to the current instance of AmpAbsDynamicalFunction
@@ -414,13 +452,14 @@ double eval(double* x, size_t dim, void* param) {
 	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
 	dataPoint pp; pp.setVal(0,x[1]);pp.setVal(1,x[0]);
 	if( !kin->isWithinPhsp(pp) ) return 0;//only integrate over phase space
-	std::complex<double> res = static_cast<AmpAbsDynamicalFunction*>(param)->evaluateAmp(pp);
-	double ang = static_cast<AmpAbsDynamicalFunction*>(param)->evaluateWignerD(pp);
+	std::complex<double> res = static_cast<AmpAbsDynamicalFunction*>(param)->EvaluateAmp(pp);
+	double ang = static_cast<AmpAbsDynamicalFunction*>(param)->EvaluateWignerD(pp);
 	double norm = static_cast<AmpAbsDynamicalFunction*>(param)->GetNormalization();
 	return ( std::norm(res*ang*norm) ); //integrate over |F|^2
 }
 
-double AmpAbsDynamicalFunction::totalIntegral() const{
+double AmpAbsDynamicalFunction::GetTotalIntegral() const
+{
 	//Save CPU time
 	return 1;
 
@@ -448,8 +487,9 @@ double AmpAbsDynamicalFunction::totalIntegral() const{
 	return res;
 }
 
-std::complex<double> AmpAbsDynamicalFunction::widthToCoupling(double mSq, double mR, double width,
-		double ma, double mb, double spin, double mesonRadius, formFactorType type)
+std::complex<double> AmpAbsDynamicalFunction::widthToCoupling(
+		double mSq, double mR, double width, double ma, double mb,
+		double spin, double mesonRadius, formFactorType type)
 {
 	double sqrtS = sqrt(mSq);
 	//calculate gammaA(s_R)
@@ -462,8 +502,9 @@ std::complex<double> AmpAbsDynamicalFunction::widthToCoupling(double mSq, double
 	return result;
 }
 
-std::complex<double> AmpAbsDynamicalFunction::couplingToWidth(double mSq, double mR, double g,
-		double ma, double mb, double spin, double mesonRadius, formFactorType type)
+std::complex<double> AmpAbsDynamicalFunction::couplingToWidth(
+		double mSq, double mR, double g, double ma, double mb,
+		double spin, double mesonRadius, formFactorType type)
 {
 	double sqrtM = sqrt(mSq);
 	//calculate gammaA(s_R)
@@ -480,7 +521,9 @@ std::complex<double> AmpAbsDynamicalFunction::couplingToWidth(double mSq, double
 	}
 	return result;
 }
-double twoDimGaussian(double* z, size_t dim, void *param){
+
+double twoDimGaussian(double* z, size_t dim, void *param)
+{
 	if(dim!=2) return 0;
 	/* test environment for numeric integration:
 	 * 	Calculating integral of normalized gaussian:

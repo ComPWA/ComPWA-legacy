@@ -34,8 +34,8 @@ void NonResonant::Configure(boost::property_tree::ptree::value_type const& v,
 }
 
 
-std::shared_ptr<FunctionTree> NonResonant::setupTree(
-		allMasses& theMasses,allMasses& toyPhspSample,std::string suffix, ParameterList& params){
+std::shared_ptr<FunctionTree> NonResonant::SetupTree(
+		allMasses& theMasses,allMasses& toyPhspSample,std::string suffix){
 
 	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
 	double phspVol = kin->getPhspVolume();
@@ -61,8 +61,8 @@ std::shared_ptr<FunctionTree> NonResonant::setupTree(
 
 	newTree->createHead("Reso_"+_name, mmultStrat, theMasses.nEvents); //Reso=C*N*nonReso
 	newTree->createNode("C_"+_name, complStrat, "Reso_"+_name); //c=r*exp(phi)
-	newTree->createLeaf("Intens_"+_name, params.GetDoubleParameter("mag_"+_name), "C_"+_name); //r
-	newTree->createLeaf("Phase_"+_name, params.GetDoubleParameter("phase_"+_name), "C_"+_name); //phi
+	newTree->createLeaf("Intens_"+_name, _mag, "C_"+_name); //r
+	newTree->createLeaf("Phase_"+_name, _phase, "C_"+_name); //phi
 
 	std::shared_ptr<MultiComplex> unitVec(
 			new MultiComplex("unit",std::vector<std::complex<double> >(

@@ -74,9 +74,11 @@ void AmpRelBreitWignerRes::Configure(
 		);
 		_width->FixParameter(tmp_width_fix);
 		if(_enable) list.AddParameter(_width);
+		_width_writeByName = 0;
 	} else {
 		try{
 			_width = list.GetDoubleParameter(tmp_width_name.get());
+			_width_writeByName = 1;
 		} catch (BadParameter& ex){
 			BOOST_LOG_TRIVIAL(error) <<"AmpRelBreitWignerRes::Configure() | "
 					"Requesting parameter "<<tmp_width_name.get()<<" but"
@@ -93,10 +95,14 @@ void AmpRelBreitWignerRes::Save(boost::property_tree::ptree &pt)
 {
 	boost::property_tree::ptree amp;
 	AmpAbsDynamicalFunction::put(amp);
-	amp.put("width", _width->GetValue());
-	amp.put("width_fix", _width->IsFixed());
-	amp.put("width_min", _width->GetMinValue());
-	amp.put("width_max", _width->GetMaxValue());
+	if(_width_writeByName){
+		amp.put("width_name", _width->GetName());
+	} else {
+		amp.put("width", _width->GetValue());
+		amp.put("width_fix", _width->IsFixed());
+		amp.put("width_min", _width->GetMinValue());
+		amp.put("width_max", _width->GetMaxValue());
+	}
 
 	pt.add_child("BreitWigner", amp);
 	return;
@@ -119,7 +125,7 @@ void AmpRelBreitWignerRes::CheckModified() {
 	return;
 }
 
-std::complex<double> AmpRelBreitWignerRes::evaluateAmp(dataPoint& point) {
+std::complex<double> AmpRelBreitWignerRes::EvaluateAmp(dataPoint& point) {
 	CheckModified(); //recalculate normalization ?
 
 	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
@@ -144,20 +150,23 @@ std::complex<double> AmpRelBreitWignerRes::dynamicalFunction(double mSq, double 
 			Kinematics::FormFactor(mR,ma,mb,J,mesonRadius, ffType);
 
 	std::complex<double> qTerm = std::pow(
-			(Kinematics::phspFactor(sqrtS,ma,mb) / Kinematics::phspFactor(mR,ma,mb))
-			*mR/sqrtS, (2*J+ 1) );
+			(Kinematics::phspFactor(sqrtS,ma,mb) / Kinematics::phspFactor(mR,ma,mb)) *mR/sqrtS,
+			(2*J+ 1)
+			);
 
 	//Calculate coupling constant to final state
-	std::complex<double> g_final = widthToCoupling(mSq,mR,width,ma,mb,J,mesonRadius,
-			ffType);
+	std::complex<double> g_final = widthToCoupling(
+			mSq,mR,width,ma,mb,J,mesonRadius,ffType
+			);
 
 	/*Coupling constant from production reaction. In case of a particle decay
 	 * the production coupling doesn't depend in energy since the CM energy
 	 * is in the (RC) system fixed to the mass of the decaying particle */
 	double g_production = 1;
 
-	std::complex<double> denom = std::complex<double>( mR*mR - mSq,0)
-											+ (-1.0)*i*sqrtS*(width*qTerm*barrier);
+	std::complex<double> denom =
+			std::complex<double>( mR*mR - mSq,0)
+			+ (-1.0)*i*sqrtS*(width*qTerm*barrier);
 
 	std::complex<double> result = g_final*g_production / denom;
 
@@ -169,9 +178,8 @@ std::complex<double> AmpRelBreitWignerRes::dynamicalFunction(double mSq, double 
 	return result;
 }
 
-std::shared_ptr<FunctionTree> AmpRelBreitWignerRes::setupTree(
-		allMasses& theMasses,allMasses& toyPhspSample,std::string suffix,
-		ParameterList& params)
+std::shared_ptr<FunctionTree> AmpRelBreitWignerRes::SetupTree(
+		allMasses& theMasses,allMasses& toyPhspSample,std::string suffix)
 {
 	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
 	double phspVol = kin->getPhspVolume();
@@ -210,7 +218,7 @@ std::shared_ptr<FunctionTree> AmpRelBreitWignerRes::setupTree(
 	newTree->createLeaf("Intens_"+_name, _mag, "C_"+_name); //r
 	newTree->createLeaf("Phase_"+_name, _phase, "C_"+_name); //phi
 	//Angular distribution
-	newTree->insertTree(_wignerD.setupTree(theMasses,suffix,params), "Reso_"+_name);
+	newTree->insertTree(_wignerD.SetupTree(theMasses,suffix), "Reso_"+_name);
 
 	//Breit-Wigner
 	newTree->createNode("RelBW_"+_name, rbwStrat, "Reso_"+_name, theMasses.nEvents);
@@ -261,7 +269,7 @@ std::shared_ptr<FunctionTree> AmpRelBreitWignerRes::setupTree(
 		newTree->createNode("NormReso_"+_name, mmultStrat, "AbsVal_"+_name,
 				toyPhspSample.nEvents);
 		//Angular distribution (Normalization)
-		newTree->insertTree(_wignerD.setupTree(toyPhspSample,suffix,params),
+		newTree->insertTree(_wignerD.SetupTree(toyPhspSample,suffix),
 				"NormReso_"+_name);
 		//Breit-Wigner (Normalization)
 		newTree->createNode("NormBW_"+_name, rbwStrat, "NormReso_"+_name,
