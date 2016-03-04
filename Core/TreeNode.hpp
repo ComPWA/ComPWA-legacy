@@ -41,7 +41,8 @@ public:
 	 * /param strat strategy how this node is calculated
 	 * /param parent pointer to connected upper level node
 	 */
-	TreeNode(std::string name, std::shared_ptr<AbsParameter> intResult, std::shared_ptr<Strategy> strat, std::shared_ptr<TreeNode> parent);
+	TreeNode(std::string name, std::shared_ptr<AbsParameter> intResult,
+			std::shared_ptr<Strategy> strat, std::shared_ptr<TreeNode> parent);
 
 	//! Standard constructor
 	/*!
@@ -51,7 +52,9 @@ public:
 	 * /param strat strategy how this node is calculated
 	 * /param parent pointer to connected upper level node
 	 */
-	TreeNode(std::string name, std::vector<std::shared_ptr<AbsParameter>>& intResult, std::shared_ptr<Strategy> strat, std::shared_ptr<TreeNode> parent);
+	TreeNode(std::string name,
+			std::vector<std::shared_ptr<AbsParameter>>& intResult,
+			std::shared_ptr<Strategy> strat, std::shared_ptr<TreeNode> parent);
 
 	//! Destructor
 	~TreeNode();

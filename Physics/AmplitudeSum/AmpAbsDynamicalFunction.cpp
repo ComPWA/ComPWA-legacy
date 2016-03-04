@@ -19,6 +19,14 @@
 #include "Physics/DPKinematics/DalitzKinematics.hpp"
 #include "Physics/AmplitudeSum/AmpAbsDynamicalFunction.hpp"
 
+AmpAbsDynamicalFunction::AmpAbsDynamicalFunction( normStyle nS, int calls) :
+		_ffType(formFactorType::BlattWeisskopf), _nCalls(calls),
+		_normStyle(nS), modified(1)
+{
+
+}
+
+
 AmpAbsDynamicalFunction::AmpAbsDynamicalFunction(const char *name,
 		std::shared_ptr<DoubleParameter> mag, std::shared_ptr<DoubleParameter> phase,
 		std::shared_ptr<DoubleParameter> mass, int part1, int part2,
@@ -42,12 +50,12 @@ AmpAbsDynamicalFunction::AmpAbsDynamicalFunction(const char *name,
 		Spin spin, Spin m, Spin n,
 		formFactorType type,
 		int nCalls, normStyle nS) :
-																		_name(name), _mag(mag), _phase(phase), _mass(mass), _part1(part1), _part2(part2),
-																		_subSys(part1+part2), _spin(spin), _m(m), _n(n),
-																		_mesonRadius(std::make_shared<DoubleParameter>(name, 1.0)),
-																		_motherRadius(std::make_shared<DoubleParameter>(name, 1.0)), _ffType(type),
-																		_nCalls(nCalls), _normStyle(nS), _norm(1.0), modified(1),
-																		_wignerD(part1+part2, spin)
+		_name(name), _mag(mag), _phase(phase), _mass(mass), _part1(part1), _part2(part2),
+		_subSys(part1+part2), _spin(spin), _m(m), _n(n),
+		_mesonRadius(std::make_shared<DoubleParameter>(name, 1.0)),
+		_motherRadius(std::make_shared<DoubleParameter>(name, 1.0)), _ffType(type),
+		_nCalls(nCalls), _normStyle(nS), _norm(1.0), modified(1),
+		_wignerD(part1+part2, spin)
 {
 	initialize();
 }
@@ -402,11 +410,6 @@ void AmpAbsDynamicalFunction::initialize()
 		_ma=kin->m2;
 		_mb=kin->m1;
 	}
-
-	if(_mass->GetValue() != tmp_mass){
-		SetModified();
-		tmp_mass = _mass->GetValue();
-	}
 }
 
 AmpAbsDynamicalFunction::~AmpAbsDynamicalFunction()
@@ -466,7 +469,7 @@ double AmpAbsDynamicalFunction::GetIntegral() const
 	gsl_monte_vegas_state *s = gsl_monte_vegas_alloc (dim);
 	gsl_monte_vegas_integrate (&F, xLimit_low, xLimit_high, 2, _nCalls, r,s,&res, &err);
 	gsl_monte_vegas_free(s);
-	BOOST_LOG_TRIVIAL(debug)<<"AmpAbsDynamicalFunction::integral() Integration result for |"
+	BOOST_LOG_TRIVIAL(debug)<<"AmpAbsDynamicalFunction::GetIntegral() Integration result for |"
 			<<_name<<"|^2: "<<res<<"+-"<<err<<" relAcc [%]: "<<100*err/res;
 
 	return res;
@@ -522,7 +525,8 @@ double AmpAbsDynamicalFunction::GetTotalIntegral() const
 	gsl_monte_vegas_state *s = gsl_monte_vegas_alloc (dim);
 	gsl_monte_vegas_integrate (&F, xLimit_low, xLimit_high, 2, _nCalls, r,s,&res, &err);
 	gsl_monte_vegas_free(s);
-	//	BOOST_LOG_TRIVIAL(debug)<<"AmpAbsDynamicalFunction::totalIntegral() result for |"<<_name<<"|^2: "<<res<<"+-"<<err<<" relAcc [%]: "<<100*err/res;
+//	BOOST_LOG_TRIVIAL(debug)<<"AmpAbsDynamicalFunction::totalIntegral() | "
+//			<<" Result for |"<<_name<<"|^2: "<<res<<"+-"<<err<<" relAcc [%]: "<<100*err/res;
 
 	return res;
 }

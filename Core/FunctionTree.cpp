@@ -211,7 +211,9 @@ void FunctionTree::createLeaf(const std::string name, const double extPar, std::
 }
 
 
-void FunctionTree::createLeaf(const std::string name, std::shared_ptr<AbsParameter> extPar, std::string parent){
+void FunctionTree::createLeaf(const std::string name,
+		std::shared_ptr<AbsParameter> extPar, std::string parent)
+{
 	if(parent=="" && head_)
 		throw std::runtime_error("FunctionTree::createNode() | head node already exists!");
 
@@ -234,8 +236,14 @@ void FunctionTree::createLeaf(const std::string name, std::shared_ptr<AbsParamet
 	if(exists){
 		leaf->addParent(parentNode);
 	}else{
-		leaf = std::shared_ptr<TreeNode>(new TreeNode(name, extPar, std::shared_ptr<Strategy>() , parentNode));
-		nodes_.insert(std::pair<std::string, std::shared_ptr<TreeNode> >(name,leaf));
+		leaf = std::shared_ptr<TreeNode>(
+				new TreeNode(
+						name, extPar, std::shared_ptr<Strategy>() , parentNode
+						)
+		);
+		nodes_.insert(
+				std::pair<std::string, std::shared_ptr<TreeNode> >(name,leaf)
+				);
 		leaf->linkParents();
 		extPar->Attach(leaf);
 		if(parent=="") head_ = leaf; //if we created a head, redirect pointer
@@ -243,7 +251,8 @@ void FunctionTree::createLeaf(const std::string name, std::shared_ptr<AbsParamet
 }
 
 void FunctionTree::createLeaf(const std::string name,
-		std::vector<std::shared_ptr<AbsParameter>>& extPar, std::string parent){
+		std::vector<std::shared_ptr<AbsParameter>>& extPar, std::string parent)
+{
 	std::shared_ptr<TreeNode> parentNode;
 	if(parent=="")//is this a head node?
 		parentNode = std::shared_ptr<TreeNode>();

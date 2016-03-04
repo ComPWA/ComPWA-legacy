@@ -137,9 +137,11 @@ protected:
 		unsigned int max=val_.size();
 		if(max>3) max=3; //display only 10 variables
 		for(unsigned int i=0; i<max-1; i++)
-			ovs << val_[i] << ", ";
-		ovs << val_[max-1];
+			ovs << val_.at(i) << ", ";
+		ovs << val_.at(max-1); //print last value without comma
+		//add dots, if only some value are printed
 		if(max<val_.size()) ovs << " ... ";
+
 		return ovs.str();
 	}
 
@@ -248,9 +250,11 @@ protected:
 		unsigned int max=val_.size();
 		if(max>5) max=5; //display only 5 variables
 		for(unsigned int i=0; i<max-1; i++)
-			ovs << val_[i] << ", ";
-		ovs << val_[max-1];
+			ovs << val_.at(i) << ", ";
+		ovs << val_.at(max-1); //print last value without comma
+		//add dots, if only some value are printed
 		if(max<val_.size()) ovs << " ... ";
+
 		return ovs.str();
 	}
 

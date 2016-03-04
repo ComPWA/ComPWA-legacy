@@ -22,6 +22,12 @@
 #include <math.h>
 #include "Physics/AmplitudeSum/AmpFlatteRes.hpp"
 
+AmpFlatteRes::AmpFlatteRes( normStyle nS, int calls ) :
+		AmpAbsDynamicalFunction( nS, calls )
+{
+
+}
+
 AmpFlatteRes::AmpFlatteRes(const char *name,
 		std::shared_ptr<DoubleParameter> mag, std::shared_ptr<DoubleParameter> phase,
 		std::shared_ptr<DoubleParameter> mass, int part1, int part2,
@@ -51,15 +57,11 @@ AmpFlatteRes::AmpFlatteRes(const char *name,
 		throw std::runtime_error("AmpFlatteRes::evaluateAmp | "
 				"particle masses for third channel not set!");
 
-	if( _g1->GetValue()!=tmp_g1 || _g2->GetValue()!=tmp_g2 || _g3->GetValue()!=tmp_g3 ) {
-		SetModified();
-		tmp_g1 = _g1->GetValue();
-		tmp_g2 = _g2->GetValue();
-		tmp_g3 = _g3->GetValue();
-	}
+	tmp_g1 = _g1->GetValue();
+	tmp_g2 = _g2->GetValue();
+	tmp_g3 = _g3->GetValue();
 
-	//setting default normalization
-	GetNormalization();
+	initialize();
 }
 
 AmpFlatteRes::~AmpFlatteRes()
@@ -178,7 +180,6 @@ void AmpFlatteRes::Configure(boost::property_tree::ptree::value_type const& v,
 				)
 		);
 		_g3->FixParameter(tmp_g3_fix);
-		if(_enable && _g3->GetValue() != 0 ) list.AddParameter(_g3);
 		_g3_writeByName = 0;
 		auto tmp_g3_massA = pt.get<std::string>("g3_part1","");
 		_g3_idA = tmp_g3_massA;
@@ -186,6 +187,13 @@ void AmpFlatteRes::Configure(boost::property_tree::ptree::value_type const& v,
 		auto tmp_g3_massB = pt.get<std::string>("g3_part2","");
 		_g3_idB = tmp_g3_massB;
 		_g3_massB = PhysConst::instance()->getMass(tmp_g3_massB);
+
+		if(_enable && _g3->GetValue() != 0 ) {
+		BOOST_LOG_TRIVIAL(info) << "AmpFlatteRes::Configure() | Adding 3rd channel: "
+				<<_name<<" parName="<<_g3->GetName()<<" g3="<<_g3->GetValue()
+				<<" g3_massA="<<_g3_massA<<" g3_massB="<<_g3_massB;
+			list.AddParameter(_g3);
+		}
 	} else {
 		try{
 			_g3 = list.GetDoubleParameter(tmp_g3_name.get());
@@ -196,6 +204,9 @@ void AmpFlatteRes::Configure(boost::property_tree::ptree::value_type const& v,
 			auto tmp_g3_massB = pt.get<std::string>("g3_part2","");
 			_g3_idB = tmp_g3_massB;
 			_g3_massB = PhysConst::instance()->getMass(tmp_g3_massB);
+			BOOST_LOG_TRIVIAL(info) << "AmpFlatteRes::Configure() | Adding 3rd channel:"
+					<<_name<<" parName="<<_g3->GetName()<<" g3="<<_g3->GetValue()
+					<<" g3_massA="<<_g3_massA<<" g3_massB="<<_g3_massB;
 		} catch (BadParameter& ex){
 			if(!_enable){
 				_g3 = std::shared_ptr<DoubleParameter>(
@@ -214,7 +225,7 @@ void AmpFlatteRes::Configure(boost::property_tree::ptree::value_type const& v,
 			}
 		}
 	}
-
+	initialize();
 
 	return;
 }
@@ -267,7 +278,7 @@ std::string AmpFlatteRes::to_str() const
 	str<<_g2->to_str()<<std::endl;
 	str<<_g3->to_str()<<std::endl;
 	str<<"massB1="<<_g2_massA<<" massB2="<<_g2_massB;
-	str<<" massC1="<<_g2_massA<<" massC2="<<_g3_massB<<std::endl;
+	str<<" massC1="<<_g3_massA<<" massC2="<<_g3_massB<<std::endl;
 
 	return dynAmp+str.str();
 }

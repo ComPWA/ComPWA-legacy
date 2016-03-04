@@ -39,8 +39,6 @@ AmpRelBreitWignerRes::AmpRelBreitWignerRes(const char *name,
 		SetModified();
 		tmp_width = _width->GetValue();
 	}
-	//setting default normalization
-	GetNormalization();
 }
 
 AmpRelBreitWignerRes::~AmpRelBreitWignerRes() 
@@ -87,8 +85,9 @@ void AmpRelBreitWignerRes::Configure(
 			throw;
 		}
 	}
-
 	initialize();
+
+	return;
 }
 
 void AmpRelBreitWignerRes::Save(boost::property_tree::ptree &pt)

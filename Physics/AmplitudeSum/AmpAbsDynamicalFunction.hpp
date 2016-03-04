@@ -40,9 +40,7 @@ enum normStyle {
 class AmpAbsDynamicalFunction : public Resonance
 {
 public:
-	AmpAbsDynamicalFunction( normStyle nS=normStyle::one, int calls=30000) :
-		_ffType(formFactorType::BlattWeisskopf), _nCalls(calls),
-		_normStyle(nS), modified(1) {};
+	AmpAbsDynamicalFunction( normStyle nS=normStyle::one, int calls=30000);
 
 	AmpAbsDynamicalFunction(const char *name,
 			std::shared_ptr<DoubleParameter> mag, std::shared_ptr<DoubleParameter> phase,

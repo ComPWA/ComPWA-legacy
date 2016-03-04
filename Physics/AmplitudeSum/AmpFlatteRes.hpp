@@ -31,8 +31,7 @@ class AmpFlatteRes : public AmpAbsDynamicalFunction
 {
 public:
 
-	AmpFlatteRes( normStyle nS=normStyle::one, int calls=30000 ) :
-		AmpAbsDynamicalFunction( nS, calls ) { };
+	AmpFlatteRes( normStyle nS=normStyle::one, int calls=30000 );
 
 	AmpFlatteRes(const char *name,
 			std::shared_ptr<DoubleParameter> mag, std::shared_ptr<DoubleParameter> phase,

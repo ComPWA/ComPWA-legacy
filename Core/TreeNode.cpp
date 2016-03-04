@@ -123,12 +123,14 @@ std::string TreeNode::to_str(int lv, std::string beginning){
 	if(_changed && _children.size())
 		oss << beginning << _name << " = ?";
 	else{
-		oss << beginning << _name << " = ";
-		for(unsigned int i=0; i<_value.size()-1; i++)
-			if(_value[i])
-				oss << _value[i]->val_to_str() << ", ";
-		if(_value[_value.size()-1])
-			oss << _value[_value.size()-1]->val_to_str();
+		oss << beginning << _name ;
+		auto it = _value.begin();
+		for(; it != _value.end(); ++it){
+			if(!_children.size()) //print parameter name for leafs
+				oss << " [" << (*it)->GetName() << "]";
+			oss << " = " << (*it)->val_to_str();
+			if(it != _value.end() ) oss << ", ";
+		}
 	}
 	if(_children.size())
 		oss << " (" << _children.size() << " children/"<<_value.size()<<" values)" << std::endl;
