@@ -31,7 +31,7 @@ public:
 	virtual void Configure(boost::property_tree::ptree::value_type const& v,
 			ParameterList& list);
 
-	virtual void Save(boost::property_tree::ptree &pt) { };
+	virtual void Save(boost::property_tree::ptree &pt);
 	//! Get resonance width
 	virtual double GetWidth() const { return 0; }
 	//! value of dynamical amplitude at \param point

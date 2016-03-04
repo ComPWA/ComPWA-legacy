@@ -97,11 +97,19 @@ void AmpFlatteRes::Configure(boost::property_tree::ptree::value_type const& v,
 			_g1 = list.GetDoubleParameter(tmp_g1_name.get());
 			_g1_writeByName = 1;
 		} catch (BadParameter& ex){
-			BOOST_LOG_TRIVIAL(error) <<"AmpFlatteRes::Configure() | "
-					"Requesting parameter "<<tmp_g1_name.get()<<" but"
-					" was not found in parameter list. "
-					"Quit since parameter is mandatory!";
-			throw;
+			if(!_enable){
+				_g1 = std::shared_ptr<DoubleParameter>(
+						new DoubleParameter(
+								tmp_g1_name.get(),0.0)
+				);
+				_g1_writeByName = 1;
+			} else {
+				BOOST_LOG_TRIVIAL(error) <<"AmpFlatteRes::Configure() | "
+						"Requesting parameter "<<tmp_g1_name.get()<<" but"
+						" was not found in parameter list. "
+						"Quit since parameter is mandatory!";
+				throw;
+			}
 		}
 	}
 	//Coupling to channel 2 (mandatory)
@@ -127,11 +135,19 @@ void AmpFlatteRes::Configure(boost::property_tree::ptree::value_type const& v,
 			_g2 = list.GetDoubleParameter(tmp_g2_name.get());
 			_g2_writeByName = 1;
 		} catch (BadParameter& ex){
-			BOOST_LOG_TRIVIAL(error) <<"AmpFlatteRes::Configure() | "
-					"Requesting parameter "<<tmp_g2_name.get()<<" but"
-					" was not found in parameter list. "
-					"Quit since parameter is mandatory!";
-			throw;
+			if(!_enable){
+				_g2 = std::shared_ptr<DoubleParameter>(
+						new DoubleParameter(
+								tmp_g2_name.get(),0.0)
+				);
+				_g2_writeByName = 1;
+			} else {
+				BOOST_LOG_TRIVIAL(error) <<"AmpFlatteRes::Configure() | "
+						"Requesting parameter "<<tmp_g2_name.get()<<" but"
+						" was not found in parameter list. "
+						"Quit since parameter is mandatory!";
+				throw;
+			}
 		}
 	}
 
@@ -139,13 +155,15 @@ void AmpFlatteRes::Configure(boost::property_tree::ptree::value_type const& v,
 	if(!tmp_g2_massA)
 		throw BadParameter("AmpFlatteRes::Configure() | "
 				"g2_massA for "+_name+" not specified!");
-	_g2_massA = PhysConst::instance()->getMass(tmp_g2_massA.get());
+	_g2_idA = tmp_g2_massA.get();
+	_g2_massA = PhysConst::instance()->getMass(_g2_idA);
 
 	auto tmp_g2_massB = pt.get_optional<std::string>("g2_part2");
 	if(!tmp_g2_massB)
 		throw BadParameter("AmpFlatteRes::Configure() | "
 				"g2_massB for "+_name+" not specified!");
-	_g2_massB = PhysConst::instance()->getMass(tmp_g2_massB.get());
+	_g2_idB = tmp_g2_massB.get();
+	_g2_massB = PhysConst::instance()->getMass(_g2_idB);
 
 	//Coupling to channel 3 (optional)
 	auto tmp_g3_fix = pt.get<bool>("g3_fix",1);
@@ -162,25 +180,41 @@ void AmpFlatteRes::Configure(boost::property_tree::ptree::value_type const& v,
 		_g3->FixParameter(tmp_g3_fix);
 		if(_enable && _g3->GetValue() != 0 ) list.AddParameter(_g3);
 		_g3_writeByName = 0;
+		auto tmp_g3_massA = pt.get<std::string>("g3_part1","");
+		_g3_idA = tmp_g3_massA;
+		_g3_massA = PhysConst::instance()->getMass(tmp_g3_massA);
+		auto tmp_g3_massB = pt.get<std::string>("g3_part2","");
+		_g3_idB = tmp_g3_massB;
+		_g3_massB = PhysConst::instance()->getMass(tmp_g3_massB);
 	} else {
 		try{
 			_g3 = list.GetDoubleParameter(tmp_g3_name.get());
 			_g3_writeByName = 1;
+			auto tmp_g3_massA = pt.get<std::string>("g3_part1","");
+			_g3_idA = tmp_g3_massA;
+			_g3_massA = PhysConst::instance()->getMass(tmp_g3_massA);
+			auto tmp_g3_massB = pt.get<std::string>("g3_part2","");
+			_g3_idB = tmp_g3_massB;
+			_g3_massB = PhysConst::instance()->getMass(tmp_g3_massB);
 		} catch (BadParameter& ex){
-			BOOST_LOG_TRIVIAL(error) <<"AmpFlatteRes::Configure() | "
-					"Requesting parameter "<<tmp_g3_name.get()<<" but"
-					" was not found in parameter list. "
-					"Continue since parameter is not mandatory!";
-			_g3 =std::shared_ptr<DoubleParameter>(
-					new DoubleParameter("g3_"+_name,0.0)
-			);
+			if(!_enable){
+				_g3 = std::shared_ptr<DoubleParameter>(
+						new DoubleParameter(
+								tmp_g3_name.get(),0.0)
+				);
+				_g3_writeByName = 1;
+			} else {
+				BOOST_LOG_TRIVIAL(error) <<"AmpFlatteRes::Configure() | "
+						"Requesting parameter "<<tmp_g3_name.get()<<" but"
+						" was not found in parameter list. "
+						"Continue since parameter is not mandatory!";
+				_g3 =std::shared_ptr<DoubleParameter>(
+						new DoubleParameter("g3_"+_name,0.0)
+				);
+			}
 		}
 	}
 
-	auto tmp_g3_massA = pt.get<std::string>("g3_part1","");
-	_g3_massA = PhysConst::instance()->getMass(tmp_g3_massA);
-	auto tmp_g3_massB = pt.get<std::string>("g3_part2","");
-	_g3_massB = PhysConst::instance()->getMass(tmp_g3_massB);
 
 	return;
 }
@@ -190,7 +224,7 @@ void AmpFlatteRes::Save(boost::property_tree::ptree &pt)
 	boost::property_tree::ptree amp;
 	AmpAbsDynamicalFunction::put(amp);
 	if(_g1_writeByName){
-		amp.put("g1",_g1->GetName());
+		amp.put("g1_name",_g1->GetName());
 	} else {
 		amp.put("g1", _g1->GetValue());
 		amp.put("g1_fix", _g1->IsFixed());
@@ -198,7 +232,7 @@ void AmpFlatteRes::Save(boost::property_tree::ptree &pt)
 		amp.put("g1_max", _g1->GetMaxValue());
 	}
 	if(_g2_writeByName){
-		amp.put("g2",_g2->GetName());
+		amp.put("g2_name",_g2->GetName());
 	} else {
 		amp.put("g2", _g2->GetValue());
 		amp.put("g2_fix", _g2->IsFixed());
@@ -209,15 +243,15 @@ void AmpFlatteRes::Save(boost::property_tree::ptree &pt)
 	amp.put("g2_part2", _g2_idB);
 	if(_g3->GetValue() != 0){
 		if(_g3_writeByName){
-			amp.put("g3",_g3->GetName());
+			amp.put("g3_name",_g3->GetName());
 		} else {
 			amp.put("g3", _g3->GetValue());
 			amp.put("g3_fix", _g3->IsFixed());
 			amp.put("g3_min", _g3->GetMinValue());
 			amp.put("g3_max", _g3->GetMaxValue());
-			amp.put("g3_part1", _g3_idA);
-			amp.put("g3_part2", _g3_idB);
 		}
+		amp.put("g3_part1", _g3_idA);
+		amp.put("g3_part2", _g3_idB);
 	}
 
 	pt.add_child("Flatte", amp);
@@ -331,7 +365,7 @@ std::complex<double> AmpFlatteRes::dynamicalFunction(double mSq, double mR,
 	//-- new approach - for spin 0 resonances in the imaginary part of the denominator the term qTerm
 	//is added, compared to the old formula
 	std::complex<double> denom = std::complex<double>( mR*mR - mSq,0)
-									+ (-1.0)*i*sqrtS*(termA + termB + termC);
+											+ (-1.0)*i*sqrtS*(termA + termB + termC);
 
 	std::complex<double> result = std::complex<double>(gA*g_production,0) / denom;
 

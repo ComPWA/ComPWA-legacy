@@ -42,12 +42,12 @@ AmpAbsDynamicalFunction::AmpAbsDynamicalFunction(const char *name,
 		Spin spin, Spin m, Spin n,
 		formFactorType type,
 		int nCalls, normStyle nS) :
-						_name(name), _mag(mag), _phase(phase), _mass(mass), _part1(part1), _part2(part2),
-						_subSys(part1+part2), _spin(spin), _m(m), _n(n),
-						_mesonRadius(std::make_shared<DoubleParameter>(name, 1.0)),
-						_motherRadius(std::make_shared<DoubleParameter>(name, 1.0)), _ffType(type),
-						_nCalls(nCalls), _normStyle(nS), _norm(1.0), modified(1),
-						_wignerD(part1+part2, spin)
+																		_name(name), _mag(mag), _phase(phase), _mass(mass), _part1(part1), _part2(part2),
+																		_subSys(part1+part2), _spin(spin), _m(m), _n(n),
+																		_mesonRadius(std::make_shared<DoubleParameter>(name, 1.0)),
+																		_motherRadius(std::make_shared<DoubleParameter>(name, 1.0)), _ffType(type),
+																		_nCalls(nCalls), _normStyle(nS), _norm(1.0), modified(1),
+																		_wignerD(part1+part2, spin)
 {
 	initialize();
 }
@@ -114,11 +114,19 @@ void AmpAbsDynamicalFunction::Configure(
 			_mag = list.GetDoubleParameter(tmp_mag_name.get());
 			_mag_writeByName = 1;
 		} catch (BadParameter& ex){
-			BOOST_LOG_TRIVIAL(error) <<"AmpAbsDynamicalFunction::Configure() | "
-					"Requesting parameter "<<tmp_mag_name.get()<<" but"
-					" was not found in parameter list. "
-					"Quit since parameter is mandatory!";
-			throw;
+			if(!_enable){
+				_mag = std::shared_ptr<DoubleParameter>(
+						new DoubleParameter(
+								tmp_mag_name.get(),0.0)
+				);
+				_mag_writeByName = 1;
+			} else {
+				BOOST_LOG_TRIVIAL(error) <<"AmpAbsDynamicalFunction::Configure() | "
+						"Requesting parameter "<<tmp_mag_name.get()<<" but"
+						" was not found in parameter list. "
+						"Quit since parameter is mandatory!";
+				throw;
+			}
 		}
 	}
 
@@ -140,17 +148,25 @@ void AmpAbsDynamicalFunction::Configure(
 		);
 		_phase->FixParameter(tmp_phase_fix);
 		if(_enable) list.AddParameter(_phase);
-		_mag_writeByName = 0;
+		_phase_writeByName = 0;
 	} else {
 		try{
 			_phase = list.GetDoubleParameter(tmp_phase_name.get());
-			_mag_writeByName = 1;
+			_phase_writeByName = 1;
 		} catch (BadParameter& ex){
-			BOOST_LOG_TRIVIAL(error) <<"AmpAbsDynamicalFunction::Configure() | "
-					"Requesting parameter "<<tmp_phase_name.get()<<" but"
-					" was not found in parameter list. "
-					"Quit since parameter is mandatory!";
-			throw;
+			if(!_enable){
+				_phase = std::shared_ptr<DoubleParameter>(
+						new DoubleParameter(
+								tmp_phase_name.get(),0.0)
+				);
+				_phase_writeByName = 1;
+			} else {
+				BOOST_LOG_TRIVIAL(error) <<"AmpAbsDynamicalFunction::Configure() | "
+						"Requesting parameter "<<tmp_phase_name.get()<<" but"
+						" was not found in parameter list. "
+						"Quit since parameter is mandatory!";
+				throw;
+			}
 		}
 	}
 
@@ -178,11 +194,19 @@ void AmpAbsDynamicalFunction::Configure(
 			_mass = list.GetDoubleParameter(tmp_mass_name.get());
 			_mass_writeByName = 1;
 		} catch (BadParameter& ex){
-			BOOST_LOG_TRIVIAL(error) <<"AmpAbsDynamicalFunction::Configure() | "
-					"Requesting parameter "<<tmp_mass_name.get()<<" but"
-					" was not found in parameter list. "
-					"Quit since parameter is mandatory!";
-			throw;
+			if(!_enable){
+				_mass = std::shared_ptr<DoubleParameter>(
+						new DoubleParameter(
+								tmp_mass_name.get(),0.0)
+				);
+				_mass_writeByName = 1;
+			} else {
+				BOOST_LOG_TRIVIAL(error) <<"AmpAbsDynamicalFunction::Configure() | "
+						"Requesting parameter "<<tmp_mass_name.get()<<" but"
+						" was not found in parameter list. "
+						"Quit since parameter is mandatory!";
+				throw;
+			}
 		}
 	}
 
@@ -208,10 +232,18 @@ void AmpAbsDynamicalFunction::Configure(
 			_motherRadius = list.GetDoubleParameter(tmp_motherRadius_name.get());
 			_motherRadius_writeByName = 1;
 		} catch (BadParameter& ex){
-			BOOST_LOG_TRIVIAL(error) <<"AmpAbsDynamicalFunction::Configure() | "
-					"Requesting parameter "<<tmp_motherRadius_name.get()<<" but"
-					" was not found in parameter list. "
-					"Continue since parameter is not mandatory!";
+			if(!_enable){
+				_motherRadius = std::shared_ptr<DoubleParameter>(
+						new DoubleParameter(
+								tmp_motherRadius_name.get(),0.0)
+				);
+				_motherRadius_writeByName = 1;
+			} else {
+				BOOST_LOG_TRIVIAL(error) <<"AmpAbsDynamicalFunction::Configure() | "
+						"Requesting parameter "<<tmp_motherRadius_name.get()<<" but"
+						" was not found in parameter list. "
+						"Continue since parameter is not mandatory!";
+			}
 		}
 		_motherRadius =	std::shared_ptr<DoubleParameter>(
 				new DoubleParameter("motherRadius_"+_name,1.0)
@@ -246,11 +278,19 @@ void AmpAbsDynamicalFunction::Configure(
 			_mesonRadius = list.GetDoubleParameter(tmp_mesonRadius_name.get());
 			_mesonRadius_writeByName = 1;
 		} catch (BadParameter& ex){
-			BOOST_LOG_TRIVIAL(error) <<"AmpAbsDynamicalFunction::Configure() | "
-					"Requesting parameter "<<tmp_mesonRadius_name.get()<<" but"
-					" was not found in parameter list. "
-					"Quit since parameter is mandatory!";
-			throw;
+			if(!_enable){
+				_mesonRadius = std::shared_ptr<DoubleParameter>(
+						new DoubleParameter(
+								tmp_mesonRadius_name.get(),0.0)
+				);
+				_mesonRadius_writeByName = 1;
+			} else {
+				BOOST_LOG_TRIVIAL(error) <<"AmpAbsDynamicalFunction::Configure() | "
+						"Requesting parameter "<<tmp_mesonRadius_name.get()<<" but"
+						" was not found in parameter list. "
+						"Quit since parameter is mandatory!";
+				throw;
+			}
 		}
 	}
 
@@ -369,7 +409,7 @@ void AmpAbsDynamicalFunction::initialize()
 	}
 }
 
-AmpAbsDynamicalFunction::~AmpAbsDynamicalFunction() 
+AmpAbsDynamicalFunction::~AmpAbsDynamicalFunction()
 {
 }
 

@@ -33,6 +33,13 @@ void NonResonant::Configure(boost::property_tree::ptree::value_type const& v,
 	return;
 }
 
+void NonResonant::Save(boost::property_tree::ptree &pt)
+{
+	boost::property_tree::ptree amp;
+	AmpAbsDynamicalFunction::put(amp);
+	pt.add_child("NonResonant", amp);
+	return;
+}
 
 std::shared_ptr<FunctionTree> NonResonant::SetupTree(
 		allMasses& theMasses,allMasses& toyPhspSample,std::string suffix){
