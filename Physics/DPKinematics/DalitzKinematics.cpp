@@ -43,7 +43,7 @@ DalitzKinematics::DalitzKinematics(std::string _nameMother,
 		BOOST_LOG_TRIVIAL(error)<<"Masses not set! EXIT!";
 		exit(1);
 	}
-	BOOST_LOG_TRIVIAL(info) << " DalitzKinematics::DalitzKinematics() | Setting up decay "
+	BOOST_LOG_TRIVIAL(info) << "DalitzKinematics::DalitzKinematics() | Setting up decay "
 			<<_nameMother<<"->"<<_name1<<" "<<_name2<<" "<<_name3;
 	init();
 }
@@ -100,13 +100,12 @@ void DalitzKinematics::init()
 	varTitles.push_back("cos(#Theta^{"+name2+name3+"}_{"+name1+name3+"})");
 	varTitles.push_back("cos(#Theta^{"+name2+name3+"}_{"+name1+name2+"})");
 
-	auto m23sq_limit = GetMinMax(0);
-	auto m13sq_limit = GetMinMax(1);
-	auto m12sq_limit = GetMinMax(2);
-	BOOST_LOG_TRIVIAL(debug) << "PHSP boundaries:";
-	BOOST_LOG_TRIVIAL(debug) << m23sq_limit.first<<" < m23sq < "<<m23sq_limit.second;
-	BOOST_LOG_TRIVIAL(debug) << m13sq_limit.first<<" < m13sq < "<<m13sq_limit.second;
-	BOOST_LOG_TRIVIAL(debug) << m12sq_limit.first<<" < m12sq < "<<m12sq_limit.second;
+	BOOST_LOG_TRIVIAL(debug) << "DalitzKinematics::init() | "
+			"Variables and boundaries: ";
+	for(int i=0; i<9; ++i)
+		BOOST_LOG_TRIVIAL(debug) << GetMinMax(i).first
+		<<" < "<< varNames.at(i)<<" ("<<varTitles.at(i)<<") "<<" < "
+		<<GetMinMax(i).second;
 
 	return;
 }
