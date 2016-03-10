@@ -34,7 +34,6 @@
 
 // Constructors and destructors
 AsciiReader::AsciiReader( const std::string inConfigFile, const int particles  )
-  : fmaxBins_(0)
 {
 
   std::ifstream currentStream;
@@ -52,7 +51,7 @@ AsciiReader::AsciiReader( const std::string inConfigFile, const int particles  )
     }
 
     if (!currentStream.fail()) {
-      EvtList_.push_back( newEvent );
+      fEvents.push_back( newEvent );
       // for ( parts = 0; parts < linesToSkip; parts++ )
       //   currentStream >> px >> py >> pz >> e;
     }
@@ -60,73 +59,19 @@ AsciiReader::AsciiReader( const std::string inConfigFile, const int particles  )
   currentStream.close();
 }
 
-AsciiReader::~AsciiReader() {
-  EvtList_.clear();
+AsciiReader::~AsciiReader()
+{
+  fEvents.clear();
 }
-AsciiReader* AsciiReader::Clone() const{
+
+AsciiReader* AsciiReader::Clone() const
+{
 	//TODO: implement virtual functions and uncomment the following
 	//	return new AsciiReader(*this);
 //	return new AsciiReader();
 }
-AsciiReader* AsciiReader::EmptyClone() const{
+
+AsciiReader* AsciiReader::EmptyClone() const
+{
 //	return new AsciiReader();
 }
-
-allMasses AsciiReader::getMasses(const unsigned int startEvent,
-			unsigned int nEvents)
-{
-  if(!EvtList_.size()) return allMasses();
-  unsigned int nParts = EvtList_.at(0).getNParticles();
-  BOOST_LOG_TRIVIAL(debug)<<"RootReader::getMasses() #particles: "<<nParts;
-
-  //determine invMass combinations
-  unsigned int nMasses=0;
-  std::vector<std::pair<unsigned int, unsigned int> > ids;
-  for(unsigned int i=0; i<nParts; i++)
-    for(unsigned int j=i+1; j<nParts; j++){
-      nMasses++;
-      ids.push_back(std::make_pair(i+1,j+1));
-    }
-  BOOST_LOG_TRIVIAL(debug)<<"AsciiReader::getMasses() #invMasses: "<<nMasses;
-
-  allMasses result(nMasses, EvtList_.size(), ids);
-  //calc and store inv masses
-  for(unsigned int evt=0; evt<EvtList_.size(); evt++){
-    Event tmp = EvtList_.at(evt);
-
-    // Check number of particle in TClonesrray
-    if( nParts != tmp.getNParticles() ){
-      result.nEvents--;
-      continue;
-    }
-
-    for(unsigned int pa=0; pa<nParts; pa++){
-      for(unsigned int pb=pa+1; pb<nParts; pb++){
-        const Particle &inA(tmp.getParticle(pa));
-        const Particle &inB(tmp.getParticle(pb));
-        double mymass_sq = inA.invariantMass(inB);
-
-        (result.masses_sq.at(std::make_pair(pa+1,pb+1))).at(evt) = mymass_sq;
-
-        //tmp.addParticle(Particle(inN.X(), inN.Y(), inN.Z(), inN.E(),partN->GetPdgCode()));
-        //tmp.setWeight(feventWeight); //Todo: weight? what weight? lets wait...
-
-
-      }//particle loop B
-    }//particle loop A
-
-  }//event loop
-
-  return result;
-}
-Event& AsciiReader::getEvent( const int index ) {
-  if ( EvtList_.size() <= (unsigned int)index )
-    throw BadIndex("Index exceeds max number of events");
-
-  return EvtList_.at( index );
-}
-
-const int AsciiReader::getBin( const int i, double& m12, double& weight ) {
-  return 0;
-}
-

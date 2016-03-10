@@ -29,54 +29,6 @@
 #include "Core/Efficiency.hpp"
 #include "Core/Event.hpp"
 
-class allMasses
-{
-public:
-	//!Standard constructor
-	allMasses();
-
-	/**Constructor
-	 *
-	 * @param inMasses number of variables 3 for 3-body decay
-	 * @param inTup combinations for inv masses (e.g (2,3), (1,3), (1,2))
-	 */
-	allMasses(unsigned int inMasses, std::vector<std::pair<unsigned int, unsigned int> >& inTup);
-
-	/**Constructor
-	 * additionally allocates memory, if number of events is known.
-	 *
-	 * @param inMasses number of variables 3 for 3-body decay
-	 * @param inEvents number of events to reserve memory for
-	 * @param inTup combinations for inv masses (e.g (2,3), (1,3), (1,2))
-	 */
-	allMasses(unsigned int inMasses, unsigned int inEvents,
-			std::vector<std::pair<unsigned int, unsigned int> >& inTup);
-
-	//! get reweighting factor for weights
-	double getReWeight();
-
-	//! reset weight vector to one
-	void resetWeights();
-
-	//! Fill event
-	bool Fill(Event &evt);
-
-	//! add constant efficiency value @param constEff to every event in masses_sq
-	void setEfficiency(double constEff);
-
-	//! add efficiency value from \param effObj to every event in masses_sq
-	void setEfficiency(std::shared_ptr<Efficiency> effObj);
-
-	std::map<std::pair<unsigned int, unsigned int>,std::vector<double> > masses_sq;
-	std::vector<double> eff;
-	std::vector<double> weight;
-	double sumWeight;//! sum of all weights
-	double reWeight;//! reweighting factor for event weights, so that these are 1 in average
-	unsigned int nInvMasses;
-	unsigned int nEvents;
-
-};
-
 class dataPoint
 {
 private:
@@ -91,7 +43,7 @@ public:
 	dataPoint(int a, int b, double invMassSqA, double invMassSqB);
 
 	//! Construct dataPoint from Event
-	dataPoint(Event& ev);
+	dataPoint( const Event& ev );
 	//! Construct dataPoint from vector of invariant masses
 	dataPoint(std::vector<double> vec);
 	~dataPoint(){};
@@ -121,6 +73,10 @@ public:
 	void setWeight(double w) { weight=w; };
 	//! Get weight
 	double getWeight() { return weight; };
+	//! Set efficiency
+	void setEfficiency(double e) { eff=e; };
+	//! Get efficiency
+	double getEfficiency() { return eff; };
 
 	static std::vector<double> getRow(int n, std::vector<dataPoint> v){
 		std::vector<double> ret;
@@ -136,6 +92,7 @@ protected:
 	void init();
 	std::vector<double> var;
 	double weight;
+	double eff;
 	friend std::ostream & operator<<(std::ostream &os, dataPoint &p);
 };
 

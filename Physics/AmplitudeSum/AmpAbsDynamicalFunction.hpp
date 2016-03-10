@@ -48,6 +48,7 @@ public:
 			std::shared_ptr<DoubleParameter> phase,
 			std::shared_ptr<DoubleParameter> mass,
 			Spin spin, Spin m, Spin n,
+			std::string mother, std::string particleA, std::string particleB,
 			std::shared_ptr<DoubleParameter> mesonR, //  meson radius
 			std::shared_ptr<DoubleParameter> motherR, //  mother radius
 			formFactorType type = formFactorType::BlattWeisskopf,
@@ -59,6 +60,7 @@ public:
 			std::shared_ptr<DoubleParameter> phase,
 			std::shared_ptr<DoubleParameter> mass,
 			Spin spin, Spin m, Spin n,
+			std::string mother, std::string particleA, std::string particleB,
 			formFactorType type = formFactorType::BlattWeisskopf,
 			int nCalls=30000, normStyle nS=normStyle::one);
 
@@ -131,9 +133,9 @@ public:
 	virtual double GetM() const {return _m;};
 	virtual double GetN() const {return _n;};
 	//! Get mass of daughter A
-	virtual double GetMassA() const {return _ma;};
+	virtual double GetMassA() const {return _mass1;};
 	//! Get mass of daughter B
-	virtual double GetMassB() const {return _mb;};
+	virtual double GetMassB() const {return _mass2;};
 	//! Get resonance meson radius
 	virtual double GetMesonRadius() const { return _mesonRadius->GetValue(); }
 	//! Set resonance mother meson radius
@@ -152,7 +154,7 @@ public:
 	virtual void SetVarIdB(unsigned int id) { _wignerD.SetVarId(id); };
 
 	virtual std::shared_ptr<FunctionTree> SetupTree(
-			allMasses& theMasses,allMasses& toyPhspSample,std::string suffix) = 0;
+			ParameterList& sample, ParameterList& toySample,std::string suffix) = 0;
 
 	/** Convert width of resonance to coupling
 	 *
@@ -188,41 +190,63 @@ public:
 
 protected:
 	virtual void put(boost::property_tree::ptree &pt);
+
 	void initialize();
-	//! enable/disable resonance
-	bool _enable;
 	//! Name of resonance
 	std::string _name;
+	//! enable/disable resonance
+	bool _enable;
+
 	//! Precision of MC integration
 	int _nCalls;
-	//! Type of resonance normalization
-	normStyle _normStyle;
+	//! Normalization
+	double _norm;
+	//! Is resonance shape modified -> we have to recalculate the normalization
+	bool _modified;
+
+	//! Mass of mother particle
+	double _M;
+	std::string _nameMother;
+
+	//! Masses of daughter particles
+	double _mass1, _mass2;
+	//! Name of daughter particles
+	std::string _name1, _name2;
+
+
 	//! Resonance magnitude
 	std::shared_ptr<DoubleParameter> _mag;
 	bool _mag_writeByName;
 	//! Resonance phase
 	std::shared_ptr<DoubleParameter> _phase;
 	bool _phase_writeByName;
-	//! Masses
-	double _ma, _mb, _M;
+
+
 	//! Resonance mass
 	std::shared_ptr<DoubleParameter> _mass;
 	double tmp_mass;
 	bool _mass_writeByName;
-	//! Resonance sub system
-	unsigned int _subSys;
-	//! Resonance spin
-	Spin _spin, _m, _n;
+
+	//! Type of resonance normalization
+	normStyle _normStyle;
+
+	//!Form factor type
+	formFactorType _ffType;
+
 	//! Barrier radi for resonance and mother particle
 	std::shared_ptr<DoubleParameter> _mesonRadius, _motherRadius;
 	bool _mesonRadius_writeByName;
 	bool _motherRadius_writeByName;
-	//!Form factor type
-	formFactorType _ffType;
 
+	//! Resonance sub system
+	unsigned int _subSys;
+
+	//! Resonance spin
+	Spin _spin, _m, _n;
+
+	//! Angular distribution
 	AmpWigner2 _wignerD;
-	double _norm;
-	bool _modified;
+
 
 };
 #endif

@@ -27,12 +27,14 @@ AmpRelBreitWignerRes::AmpRelBreitWignerRes(const char *name,
 		std::shared_ptr<DoubleParameter> mag, std::shared_ptr<DoubleParameter> phase,
 		std::shared_ptr<DoubleParameter> mass,
 		Spin spin, Spin m, Spin n,
+		std::string mother, std::string particleA, std::string particleB,
 		std::shared_ptr<DoubleParameter> width,
 		std::shared_ptr<DoubleParameter> mesonRadius,
 		std::shared_ptr<DoubleParameter> motherRadius,
 		formFactorType type,
 		int nCalls, normStyle nS) :
 		AmpAbsDynamicalFunction(name, varIdA, varIdB, mag, phase, mass, spin, m, n,
+				mother, particleA, particleB,
 				mesonRadius, motherRadius, type, nCalls, nS),
 				_width(width)
 {
@@ -132,7 +134,7 @@ std::complex<double> AmpRelBreitWignerRes::EvaluateAmp(dataPoint& point)
 	double mSq = point.getVal(_subSys);
 	std::complex<double> result;
 	try{
-		result = dynamicalFunction(mSq,_mass->GetValue(),_ma,_mb,_width->GetValue(),_spin,
+		result = dynamicalFunction(mSq,_mass->GetValue(),_mass1,_mass2,_width->GetValue(),_spin,
 			_mesonRadius->GetValue(), _ffType);
 	} catch (std::exception& ex){
 		BOOST_LOG_TRIVIAL(error) <<"AmpRelBreitWignerRes::EvaluateAmp() | "
@@ -182,23 +184,19 @@ std::complex<double> AmpRelBreitWignerRes::dynamicalFunction(double mSq, double 
 }
 
 std::shared_ptr<FunctionTree> AmpRelBreitWignerRes::SetupTree(
-		allMasses& theMasses,allMasses& toyPhspSample,std::string suffix)
+			ParameterList& sample, ParameterList& toySample,std::string suffix)
 {
 	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
 	double phspVol = kin->getPhspVolume();
+	int sampleSize = sample.GetMultiDouble(0)->GetNValues();
+	int toySampleSize = toySample.GetMultiDouble(0)->GetNValues();
+
 	BOOST_LOG_TRIVIAL(info) << "AmpRelBreitWignerRes::setupBasicTree() | "
-			<<_name << " nEvents=" <<theMasses.nEvents<<" nPhspEvents="
-			<<toyPhspSample.nEvents;
+			<<_name << " nEvents=" <<sampleSize<<" nPhspEvents="
+			<<toySampleSize;
 
 	//------------Setup Tree---------------------
 	std::shared_ptr<FunctionTree> newTree(new FunctionTree());
-	//------------Setup Tree Pars---------------------
-	std::shared_ptr<MultiDouble> m23sq( new MultiDouble("m23sq",theMasses.masses_sq.at( std::make_pair(2,3) )) );
-	std::shared_ptr<MultiDouble> m13sq( new MultiDouble("m13sq",theMasses.masses_sq.at( std::make_pair(1,3) )) );
-	std::shared_ptr<MultiDouble> m12sq( new MultiDouble("m12sq",theMasses.masses_sq.at( std::make_pair(1,2) )) );
-	std::shared_ptr<MultiDouble> m23sq_phsp( new MultiDouble("m23sq_phsp",toyPhspSample.masses_sq.at( std::make_pair(2,3) )) );
-	std::shared_ptr<MultiDouble> m13sq_phsp( new MultiDouble("m13sq_phsp",toyPhspSample.masses_sq.at( std::make_pair(1,3) )) );
-	std::shared_ptr<MultiDouble> m12sq_phsp( new MultiDouble("m12sq_phsp",toyPhspSample.masses_sq.at( std::make_pair(1,2) )) );
 
 	//----Strategies needed
 	std::shared_ptr<MultAll> mmultStrat(new MultAll(ParType::MCOMPLEX));
@@ -216,45 +214,23 @@ std::shared_ptr<FunctionTree> AmpRelBreitWignerRes::SetupTree(
 			new WignerDStrategy(_name,ParType::MDOUBLE) );
 
 	//Reso=BW*C*AD*N
-	newTree->createHead("Reso_"+_name, mmultStrat, theMasses.nEvents);
+	newTree->createHead("Reso_"+_name, mmultStrat, sampleSize);
 	newTree->createNode("C_"+_name, complStrat, "Reso_"+_name); //m0c
 	newTree->createLeaf("Intens_"+_name, _mag, "C_"+_name); //r
 	newTree->createLeaf("Phase_"+_name, _phase, "C_"+_name); //phi
 	//Angular distribution
-	newTree->insertTree(_wignerD.SetupTree(theMasses,suffix), "Reso_"+_name);
+	newTree->insertTree(_wignerD.SetupTree(sample,suffix), "Reso_"+_name);
 
 	//Breit-Wigner
-	newTree->createNode("RelBW_"+_name, rbwStrat, "Reso_"+_name, theMasses.nEvents);
+	newTree->createNode("RelBW_"+_name, rbwStrat, "Reso_"+_name, sampleSize);
 	newTree->createLeaf("mass", _mass, "RelBW_"+_name); //m0
 	newTree->createLeaf("width", _width, "RelBW_"+_name); //resWidth
 	newTree->createLeaf("spin", _spin, "RelBW_"+_name); //spin
 	newTree->createLeaf("mesonRadius", _mesonRadius, "RelBW_"+_name); //d
 	newTree->createLeaf("formFactorType", _ffType , "RelBW_"+_name); //d
-	newTree->createLeaf("subSysFlag", _subSys, "RelBW_"+_name); //subSysFlag
-	switch(_subSys){
-	case 3:{ //reso in sys of particles 1&2
-		newTree->createLeaf("ma", kin->m1, "RelBW_"+_name); //ma
-		newTree->createLeaf("mb", kin->m2, "RelBW_"+_name); //mb
-		break;
-	}
-	case 4:{ //reso in sys of particles 1&3
-		newTree->createLeaf("ma", kin->m1, "RelBW_"+_name); //ma
-		newTree->createLeaf("mb", kin->m3, "RelBW_"+_name); //mb
-		break;
-	}
-	case 5:{ //reso in sys of particles 2&3
-		newTree->createLeaf("ma", kin->m2, "RelBW_"+_name); //ma
-		newTree->createLeaf("mb", kin->m3, "RelBW_"+_name); //mb
-		break;
-	}
-	default:{
-		BOOST_LOG_TRIVIAL(error)<<"AmpRelBreitWignerRes::setupBasicTree() | "
-				"Subsys not found!";
-	}
-	}
-	newTree->createLeaf("m12sq", m12sq, "RelBW_"+_name); //mc
-	newTree->createLeaf("m13sq", m13sq, "RelBW_"+_name); //mb
-	newTree->createLeaf("m23sq", m23sq, "RelBW_"+_name); //ma
+	newTree->createLeaf("ma", _mass1, "RelBW_"+_name); //ma
+	newTree->createLeaf("mb", _mass2, "RelBW_"+_name); //mb
+	newTree->createLeaf("sample", sample.GetMultiDouble(_subSys), "RelBW_"+_name); //mc
 
 	//Normalization
 	if(_normStyle==normStyle::none) {
@@ -263,48 +239,29 @@ std::shared_ptr<FunctionTree> AmpRelBreitWignerRes::SetupTree(
 		//Normalization parameter for dynamical amplitude
 		newTree->createNode("N_"+_name, sqRootStrat, "Reso_"+_name); //N = sqrt(NSq)
 		newTree->createNode("NSq_"+_name, multDStrat, "N_"+_name); //NSq = (PhspVolume/N_phspMC * Sum(|A|^2))^-1
-		newTree->createLeaf("PhspSize_"+_name, toyPhspSample.nEvents, "NSq_"+_name); // N_phspMC
+		newTree->createLeaf("PhspSize_"+_name, toySampleSize, "NSq_"+_name); // N_phspMC
 		newTree->createLeaf("PhspVolume_"+_name, 1/phspVol, "NSq_"+_name); // 1/PhspVolume
 		newTree->createNode("InvSum_"+_name, invStrat, "NSq_"+_name); //1/Sum(|A|^2)
 		newTree->createNode("Sum_"+_name, addStrat, "InvSum_"+_name); //Sum(|A|^2)
 		newTree->createNode("AbsVal_"+_name, msqStrat, "Sum_"+_name); //|A_i|^2
 
 		newTree->createNode("NormReso_"+_name, mmultStrat, "AbsVal_"+_name,
-				toyPhspSample.nEvents);
+				toySampleSize);
 		//Angular distribution (Normalization)
-		newTree->insertTree(_wignerD.SetupTree(toyPhspSample,suffix),
+		newTree->insertTree(_wignerD.SetupTree(toySample,suffix),
 				"NormReso_"+_name);
 		//Breit-Wigner (Normalization)
 		newTree->createNode("NormBW_"+_name, rbwStrat, "NormReso_"+_name,
-				toyPhspSample.nEvents); //BW
+				toySampleSize); //BW
 		newTree->createLeaf("mass", _mass, "NormBW_"+_name); //m0
 		newTree->createLeaf("width", _width, "NormBW_"+_name); //resWidth
 		newTree->createLeaf("spin", _spin, "NormBW_"+_name); //spin
 		newTree->createLeaf("mesonRadius", _mesonRadius, "NormBW_"+_name); //d
 		newTree->createLeaf("formFactorType", _ffType , "NormBW_"+_name); //d
-		newTree->createLeaf("subSysFlag", _subSys, "NormBW_"+_name); //subSysFlag
-		switch(_subSys){
-		case 3:{ //reso in sys of particles 1&2
-			newTree->createLeaf("ma", kin->m1, "NormBW_"+_name); //ma
-			newTree->createLeaf("mb", kin->m2, "NormBW_"+_name); //mb
-			break;
-		} case 4: { //reso in sys of particles 1&3
-			newTree->createLeaf("ma", kin->m1, "NormBW_"+_name); //ma
-			newTree->createLeaf("mb", kin->m3, "NormBW_"+_name); //mb
-			break;
-		} case 5: { //reso in sys of particles 2&3
-			newTree->createLeaf("ma", kin->m2, "NormBW_"+_name); //ma
-			newTree->createLeaf("mb", kin->m3, "NormBW_"+_name); //mb
-			break;
-		}
-		default:{
-			BOOST_LOG_TRIVIAL(error)<<"AmpSumIntensity::setupBasicTree(): "
-					"Subsys not found!!";
-		}
-		}
-		newTree->createLeaf("m12sq_phsp", m12sq_phsp, "NormBW_"+_name); //mc
-		newTree->createLeaf("m13sq_phsp", m13sq_phsp, "NormBW_"+_name); //mb
-		newTree->createLeaf("m23sq_phsp", m23sq_phsp, "NormBW_"+_name); //ma
+		newTree->createLeaf("ma", _mass1, "NormBW_"+_name); //ma
+		newTree->createLeaf("mb", _mass2, "NormBW_"+_name); //mb
+		newTree->createLeaf("phspSample", toySample.GetMultiDouble(_subSys),
+				"NormBW_"+_name);
 	}
 
 	BOOST_LOG_TRIVIAL(debug) << "AmpRelBreitWignerRes::setupBasicTree() | "
@@ -336,7 +293,7 @@ bool BreitWignerStrategy::execute(ParameterList& paras,
 		);
 
 	double Gamma0, m0, d, ma, mb;
-	unsigned int spin, subSys;
+	unsigned int spin;
 	int ffType;
 	/** Get parameters from ParameterList:
 	 * We use the same order of the parameters as was used during tree
@@ -347,9 +304,8 @@ bool BreitWignerStrategy::execute(ParameterList& paras,
 	spin = (unsigned int) paras.GetDoubleParameter(2)->GetValue();
 	d = paras.GetDoubleParameter(3)->GetValue();
 	ffType = paras.GetDoubleParameter(4)->GetValue();
-	subSys = paras.GetDoubleParameter(5)->GetValue();
-	ma = paras.GetDoubleParameter(6)->GetValue();
-	mb = paras.GetDoubleParameter(7)->GetValue();
+	ma = paras.GetDoubleParameter(5)->GetValue();
+	mb = paras.GetDoubleParameter(6)->GetValue();
 
 //	BOOST_LOG_TRIVIAL(debug) << "BreitWignerStrategy::execute() | mR="<<m0
 //			<<" Gamma="<<Gamma0<<" spin="<<spin<<" radius="<<d<<" ffType="<<ffType
@@ -357,28 +313,15 @@ bool BreitWignerStrategy::execute(ParameterList& paras,
 
 	//MultiDim output, must have multidim Paras in input
 	if(checkType == ParType::MCOMPLEX){
-		std::shared_ptr<MultiDouble> mp;
-		try {
-			switch(subSys){
-			case 3:{ mp  = (paras.GetMultiDouble(0)); break; }
-			case 4:{ mp  = (paras.GetMultiDouble(1)); break; }
-			case 5:{ mp  = (paras.GetMultiDouble(2)); break; }
-			}
-		} catch ( std::exception &ex ) {
-			BOOST_LOG_TRIVIAL(error) << "BreitWignerStrategy::execute() | "
-					<<ex.what();
-			throw( WrongParType("BreitWignerStrategy::execute() | "
-					"Failed to obtain data vector from parameter list!")
-			);
-		}
+		std::shared_ptr<MultiDouble> mp = paras.GetMultiDouble(0);
 		std::vector<std::complex<double> > results(mp->GetNValues(),
 				std::complex<double>(0.));
 		//calc BW for each point
 		for(unsigned int ele=0; ele<mp->GetNValues(); ele++){
-			double mSq = (mp->GetValue(ele));
 			try{
-				results[ele] = AmpRelBreitWignerRes::dynamicalFunction(
-						mSq,m0,ma,mb,Gamma0,
+				results.at(ele) = AmpRelBreitWignerRes::dynamicalFunction(
+						mp->GetValue(ele),
+						m0,ma,mb,Gamma0,
 						spin,d, formFactorType(ffType)
 				);
 			} catch ( std::exception& ex ) {
@@ -397,20 +340,7 @@ bool BreitWignerStrategy::execute(ParameterList& paras,
 	}//end multicomplex output
 
 	//Only StandardDim Paras in input
-	double mSq;
-	try {
-		switch(subSys){
-		case 3:{ mSq  = paras.GetDoubleParameter(10)->GetValue(); break; }
-		case 4:{ mSq  = paras.GetDoubleParameter(11)->GetValue(); break; }
-		case 5:{ mSq  = paras.GetDoubleParameter(12)->GetValue(); break; }
-		}
-	} catch ( std::exception &ex ) {
-		BOOST_LOG_TRIVIAL(error) << "BreitWignerStrategy::execute() | "
-				<<ex.what();
-		throw( WrongParType("BreitWignerStrategy::execute() | "
-				"Failed to obtain data from parameter list!")
-		);
-	}
+	double mSq = paras.GetDoubleParameter(7)->GetValue();
 	std::complex<double> result;
 	try{
 		result = AmpRelBreitWignerRes::dynamicalFunction(

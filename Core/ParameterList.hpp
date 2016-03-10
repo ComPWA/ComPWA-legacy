@@ -140,19 +140,41 @@ public:
 
 
 	//! Getter for number of parameter
-	virtual const inline unsigned int GetNParameter() const {return (vDoublePar_.size()+vIntPar_.size()+vBoolPar_.size()+vMultiDouble_.size()+vMultiComplex_.size());}
+	virtual const inline unsigned int GetNParameter() const {
+		return (
+				vDoublePar_.size()+vIntPar_.size()+vBoolPar_.size()
+				+vMultiDouble_.size()+vMultiComplex_.size()
+				);
+	}
+
 	//! Getter for number of multi complex parameter
-	virtual const inline unsigned int GetNMultiComplex() const {return vMultiComplex_.size();}
+	virtual const inline unsigned int GetNMultiComplex() const {
+		return vMultiComplex_.size();
+	}
+
 	//! Getter for number of multi double parameter
-	virtual const inline unsigned int GetNMultiDouble() const {return vMultiDouble_.size();}
+	virtual const inline unsigned int GetNMultiDouble() const {
+		return vMultiDouble_.size();
+	}
+
 	//! Getter for number of complex parameter
-	virtual const inline unsigned int GetNComplex() const {return vComplexPar_.size();}
+	virtual const inline unsigned int GetNComplex() const {
+		return vComplexPar_.size();
+	}
+
 	//! Getter for number of double parameter
-	virtual const inline unsigned int GetNDouble() const {return vDoublePar_.size();}
+	virtual const inline unsigned int GetNDouble() const {return vDoublePar_.size();
+	}
+
 	//! Getter for number of integer parameter
-	virtual const inline unsigned int GetNInteger() const {return vIntPar_.size();}
+	virtual const inline unsigned int GetNInteger() const {
+		return vIntPar_.size();
+	}
+
 	//! Getter for number of boolean parameter
-	virtual const inline unsigned int GetNBool() const {return vBoolPar_.size();}
+	virtual const inline unsigned int GetNBool() const {
+		return vBoolPar_.size();
+	}
 
 	//! Getter for complex parameter
 	/*!

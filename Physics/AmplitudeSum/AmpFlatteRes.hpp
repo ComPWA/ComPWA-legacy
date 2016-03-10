@@ -39,6 +39,7 @@ public:
 			std::shared_ptr<DoubleParameter> phase,
 			std::shared_ptr<DoubleParameter> mass,
 			Spin spin, Spin m, Spin n,
+			std::string mother, std::string particleA, std::string particleB,
 			std::shared_ptr<DoubleParameter> mesonRadius,
 			std::shared_ptr<DoubleParameter> motherRadius,
 			std::shared_ptr<DoubleParameter> g1,
@@ -65,7 +66,7 @@ public:
 	//! Get resonance width
 	virtual double GetWidth() const {
 		return std::abs( couplingToWidth(_mass->GetValue(),_mass->GetValue(), _g1->GetValue(),
-			_ma, _mb, _spin, _mesonRadius->GetValue(), _ffType) );
+			_mass1, _mass2, _spin, _mesonRadius->GetValue(), _ffType) );
 	}
 
 	/** Dynamical function for two coupled channel approach
@@ -91,7 +92,8 @@ public:
 	virtual std::complex<double> EvaluateAmp(dataPoint& point) ;
 
 	virtual std::shared_ptr<FunctionTree> SetupTree(
-			allMasses& theMasses,allMasses& toyPhspSample,std::string suffix);
+			ParameterList& sample, ParameterList& toySample,std::string suffix);
+
 protected:
 	double _g2_massA, _g2_massB, _g3_massA, _g3_massB;
 	std::string _g2_idA, _g2_idB, _g3_idA, _g3_idB;

@@ -26,25 +26,27 @@
 
 DalitzKinematics::DalitzKinematics(std::string _nameMother,
 		std::string _name1, std::string _name2, std::string _name3) :
-		Br(0.0), nameMother(_nameMother),
-		name1(_name1), name2(_name2), name3(_name3), massIdsSet(false)
+		name1(_name1), name2(_name2), name3(_name3), massIdsSet(false),
+		Kinematics(_nameMother,0.0,3)
 {
-	nPart = 3;
-	M = PhysConst::instance()->getMass(_nameMother);
-	m1 = PhysConst::instance()->getMass(_name1);
-	m2 = PhysConst::instance()->getMass(_name2);
-	m3 = PhysConst::instance()->getMass(_name3);
-	spinM = PhysConst::instance()->getJ(_nameMother);
-	spin1 = PhysConst::instance()->getJ(_name1);
-	spin2 = PhysConst::instance()->getJ(_name2);
-	spin3 = PhysConst::instance()->getJ(_name3);
-
-	if(M==-999 || m1==-999|| m2==-999|| m3==-999) {
-		BOOST_LOG_TRIVIAL(error)<<"Masses not set! EXIT!";
-		exit(1);
+	try{
+		M = PhysConst::instance()->getMass(_nameMother);
+		m1 = PhysConst::instance()->getMass(_name1);
+		m2 = PhysConst::instance()->getMass(_name2);
+		m3 = PhysConst::instance()->getMass(_name3);
+		spinM = PhysConst::instance()->getJ(_nameMother);
+		spin1 = PhysConst::instance()->getJ(_name1);
+		spin2 = PhysConst::instance()->getJ(_name2);
+		spin3 = PhysConst::instance()->getJ(_name3);
+	} catch (std::exception& ex){
+		BOOST_LOG_TRIVIAL(error) << "DalitzKinematics::DalitzKinematics() | "
+				"One or more particles can not be initialized: "<<ex.what();
+		throw;
 	}
+
 	BOOST_LOG_TRIVIAL(info) << "DalitzKinematics::DalitzKinematics() | Setting up decay "
 			<<_nameMother<<"->"<<_name1<<" "<<_name2<<" "<<_name3;
+
 	init();
 }
 
@@ -52,15 +54,21 @@ DalitzKinematics::DalitzKinematics(double _M, double _Br,
 		double _m1, double _m2, double _m3,
 		std::string _nameMother, std::string _name1,
 		std::string _name2, std::string _name3) :
-			M(_M), Br(_Br), m1(_m1), m2(_m2), m3(_m3),
-			nameMother(_nameMother), name1(_name1), name2(_name2),
-			name3(_name3), massIdsSet(false)
+	m1(_m1), m2(_m2), m3(_m3),
+	name1(_name1), name2(_name2),
+	name3(_name3), massIdsSet(false), Kinematics(_nameMother,_Br,3)
 {
-	nPart = 3;
-	spinM = PhysConst::instance()->getJ(_nameMother);
-	spin1 = PhysConst::instance()->getJ(_name1);
-	spin2 = PhysConst::instance()->getJ(_name2);
-	spin3 = PhysConst::instance()->getJ(_name3);
+	try{
+		spinM = PhysConst::instance()->getJ(_nameMother);
+		spin1 = PhysConst::instance()->getJ(_name1);
+		spin2 = PhysConst::instance()->getJ(_name2);
+		spin3 = PhysConst::instance()->getJ(_name3);
+	} catch (std::exception& ex){
+		BOOST_LOG_TRIVIAL(error) << "DalitzKinematics::DalitzKinematics() | "
+				"One or more particles can not be initialized: "<<ex.what();
+		throw;
+	}
+
 	init();
 }
 
@@ -103,7 +111,7 @@ void DalitzKinematics::init()
 	BOOST_LOG_TRIVIAL(debug) << "DalitzKinematics::init() | "
 			"Variables and boundaries: ";
 	for(int i=0; i<9; ++i)
-		BOOST_LOG_TRIVIAL(debug) << GetMinMax(i).first
+		BOOST_LOG_TRIVIAL(debug) << "[ "<<i<<" ] "<<GetMinMax(i).first
 		<<" < "<< varNames.at(i)<<" ("<<varTitles.at(i)<<") "<<" < "
 		<<GetMinMax(i).second;
 
@@ -114,27 +122,32 @@ unsigned int DalitzKinematics::findVariable(std::string varName) const
 {
 	for(unsigned int i=0; i< varNames.size(); i++)
 		if(varNames.at(i)==varName) return i;
+	throw BadParameter("DalitzKinematics::findVariable() | "
+			"Variable"+varName+" not found!");
 	return -999;
 }
 
 double DalitzKinematics::calculateMoments(unsigned int sys, dataPoint& point,
 		unsigned int n, unsigned int m)
 {
-
 	return gsl_sf_legendre_sphPlm(n,m,point.getVal(sys)); //normalized
 }
 
-void DalitzKinematics::eventToDataPoint(Event& ev, dataPoint& point)
+void DalitzKinematics::eventToDataPoint(const Event& ev, dataPoint& point) const
 {
-	double weight = ev.getWeight();
-	point.setWeight(weight);//reset weight
-	Particle part1 = ev.getParticle(0);
-	Particle part2 = ev.getParticle(1);
-	Particle part3 = ev.getParticle(2);
+	point.setWeight(ev.getWeight());//reset weight
+	point.setEfficiency(ev.getEfficiency());
+
+	const Particle& part1 = ev.getParticle(0);
+	const Particle& part2 = ev.getParticle(1);
+	const Particle& part3 = ev.getParticle(2);
 	double m23sq = Particle::invariantMass(part2,part3);
 	double m13sq = Particle::invariantMass(part1,part3);
-	double m12sq = Particle::invariantMass(part1,part2);
-	//double m12sq = getThirdVariableSq(m23sq,m13sq);
+
+	/* We calculate m12sq from m23sq and m13sq. The values are slightly different
+	/* compared to a calculation from the 4-momenta directly. */
+	double m12sq = getThirdVariableSq(m23sq,m13sq);
+	//	double m12sq = Particle::invariantMass(part1,part2);
 
 	point.setVal(0,m23sq);
 	point.setVal(1,m13sq);
@@ -162,6 +175,10 @@ void DalitzKinematics::FillDataPoint(int a, int b,
 		throw std::runtime_error("DalitzKinematics::FillDataPoint() | "
 				"Particle ID out of range: "+std::to_string(b));
 	}
+
+	point.setWeight(1.0);//reset weight
+	point.setEfficiency(1.0);
+
 	int c;
 	if( (a==0 && b==1) || (a==1 && b==0) ) c=2;
 	if( (a==0 && b==2) || (a==2 && b==0) ) c=1;
@@ -330,11 +347,11 @@ double DalitzKinematics::helicityAngle(double M, double m, double m2, double mSp
 {
 	//Calculate energy and momentum of m1/m2 in the invMassSqA rest frame
 	double eCms = ( invMassSqA + m*m - m2*m2 )/( 2*sqrt(invMassSqA) );
-	double pCms = sqrt( eCms*eCms - m*m );
+	double pCms = eCms*eCms - m*m;
 	//Calculate energy and momentum of mSpec in the invMassSqA rest frame
 	double eSpecCms = ( M*M - mSpec*mSpec - invMassSqA )/( 2*sqrt(invMassSqA) );
-	double pSpecCms = sqrt( eSpecCms*eSpecCms - mSpec*mSpec );
-	double cosAngle = -( invMassSqB - m*m - mSpec*mSpec - 2*eCms*eSpecCms )/( 2*pCms*pSpecCms );
+	double pSpecCms = eSpecCms*eSpecCms - mSpec*mSpec;
+	double cosAngle = -( invMassSqB - m*m - mSpec*mSpec - 2*eCms*eSpecCms )/( 2*sqrt(pCms*pSpecCms) );
 
 	if( cosAngle>1 || cosAngle<-1 ){
 		throw BeyondPhsp("DalitzKinematics::helicityAngle() | "

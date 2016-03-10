@@ -19,9 +19,9 @@
 #include "qft++.h"
 #include <boost/math/special_functions/legendre.hpp>
 
-AmpWigner2::AmpWigner2(unsigned int subSys, unsigned int spin,
+AmpWigner2::AmpWigner2(unsigned int varId, unsigned int spin,
 		unsigned int mu, unsigned int muPrime) :
-		_subSys(subSys), _spin(spin), _mu(mu), _muPrime(muPrime)
+		_varId(varId), _spin(spin), _mu(mu), _muPrime(muPrime)
 {
 
 }
@@ -30,7 +30,7 @@ double AmpWigner2::evaluate(dataPoint& point) {
 	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(
 			Kinematics::instance());
 	return dynamicalFunction(
-			_spin, _mu, _muPrime, point.getVal(_subSys)
+			_spin, _mu, _muPrime, point.getVal(_varId)
 			);
 }
 
@@ -55,34 +55,23 @@ double AmpWigner2::dynamicalFunction(int J, int mu, int muPrime, double cosTheta
 }
 
 std::shared_ptr<FunctionTree> AmpWigner2::SetupTree(
-			allMasses& theMasses, std::string suffix){
-
-	std::shared_ptr<MultiDouble> m23sq(
-			new MultiDouble("m23sq",theMasses.masses_sq.at( std::make_pair(2,3) )) );
-	std::shared_ptr<MultiDouble> m13sq(
-			new MultiDouble("m13sq",theMasses.masses_sq.at( std::make_pair(1,3) )) );
-	std::shared_ptr<MultiDouble> m12sq(
-			new MultiDouble("m12sq",theMasses.masses_sq.at( std::make_pair(1,2) )) );
-
-
+			ParameterList& sample, std::string suffix)
+{
 	std::shared_ptr<FunctionTree> newTree(new FunctionTree());
 
+	int sampleSize = sample.GetMultiDouble(0)->GetNValues();
 	//----Strategies needed
 	std::shared_ptr<WignerDStrategy> angdStrat(
 			new WignerDStrategy("AngD"+suffix,ParType::MDOUBLE) );
-	newTree->createHead("AngD_"+suffix, angdStrat, theMasses.nEvents);
+	newTree->createHead("AngD_"+suffix, angdStrat, sampleSize);
 
-	newTree->createLeaf("subSysFlag", _subSys, "AngD_"+suffix); //subSysFlag
 	newTree->createLeaf("spin",_spin, "AngD_"+suffix); //spin
 	newTree->createLeaf("m", _mu, "AngD_"+suffix); //OutSpin 1
 	newTree->createLeaf("n", _muPrime, "AngD_"+suffix); //OutSpin 2
-	newTree->createLeaf("m12sq", m12sq, "AngD_"+suffix); //mc
-	newTree->createLeaf("m13sq", m13sq, "AngD_"+suffix); //mb
-	newTree->createLeaf("m23sq", m23sq, "AngD_"+suffix); //ma
+	newTree->createLeaf("AngD_sample", sample.GetMultiDouble(_varId), "AngD_"+suffix);
 
 	return newTree;
 }
-
 
 bool WignerDStrategy::execute(ParameterList& paras,
 		std::shared_ptr<AbsParameter>& out)
@@ -94,46 +83,22 @@ bool WignerDStrategy::execute(ParameterList& paras,
 		return false;
 	}
 
-	unsigned int _subSysFlag = (unsigned int)paras.GetDoubleParameter(0)->GetValue();
-	double _inSpin = paras.GetDoubleParameter(1)->GetValue();
-	double _outSpin1 = paras.GetDoubleParameter(2)->GetValue();
-	double _outSpin2 = paras.GetDoubleParameter(3)->GetValue();
-
-	double _m23,_m13,_m12;
+	double _inSpin = paras.GetDoubleParameter(0)->GetValue();
+	double _outSpin1 = paras.GetDoubleParameter(1)->GetValue();
+	double _outSpin2 = paras.GetDoubleParameter(2)->GetValue();
 
 	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(
 			Kinematics::instance());
 	//MultiDim output, must have multidim Paras in input
 	if(checkType == ParType::MDOUBLE){
 		if(paras.GetNMultiDouble()){
-			std::shared_ptr<MultiDouble> _pm12 = paras.GetMultiDouble(0);
-			std::shared_ptr<MultiDouble> _pm13 = paras.GetMultiDouble(1);
-			std::shared_ptr<MultiDouble> _pm23 = paras.GetMultiDouble(2);
+			std::shared_ptr<MultiDouble> _angle = paras.GetMultiDouble(0);
 
-			std::vector<double> results(_pm23->GetNValues(), 0.);
-			for(unsigned int ele=0; ele<_pm23->GetNValues(); ele++){
-				_m23 = double(_pm23->GetValue(ele));
-				_m13 = double(_pm13->GetValue(ele));
-				dataPoint point;
+			std::vector<double> results(_angle->GetNValues(), 0.);
+			for(unsigned int ele=0; ele<_angle->GetNValues(); ele++){
 				try{
-					Kinematics::instance()->FillDataPoint(0,1,_m23,_m13,point);
-				} catch (BeyondPhsp& ex){
-					BOOST_LOG_TRIVIAL(error) << "WignerDStrategy::execute() | Data Beyond Phsp!";
-					throw;
-				}
-
-				double cosTheta;
-				try{
-					cosTheta = kin->helicityAngle(_subSysFlag, point);
-				} catch (std::exception &ex) {
-					BOOST_LOG_TRIVIAL(error) << "WignerDStrategy::execute() | "
-							<<ex.what();
-					throw std::runtime_error("WignerDStrategy::execute() | "
-							"calculation of helicity angle failed!");
-				}
-				try{
-					results[ele]=AmpWigner2::dynamicalFunction(
-							_inSpin,_outSpin1,_outSpin2,cosTheta
+					results.at(ele)=AmpWigner2::dynamicalFunction(
+							_inSpin,_outSpin1,_outSpin2,_angle->GetValue(ele)
 					);
 				} catch (std::exception &ex) {
 					BOOST_LOG_TRIVIAL(error) << "WignerDStrategy::execute() | "
@@ -147,26 +112,7 @@ bool WignerDStrategy::execute(ParameterList& paras,
 			return true;
 		}
 	}else if(checkType == ParType::DOUBLE){ //one dim output
-		_m23 = paras.GetDoubleParameter(4)->GetValue();
-		_m13 = paras.GetDoubleParameter(5)->GetValue();
-		dataPoint point;
-		try{
-			Kinematics::instance()->FillDataPoint(0,1,_m23,_m13,point);
-		} catch (BeyondPhsp& ex){
-			BOOST_LOG_TRIVIAL(error) << "WignerDStrategy::execute() | Data Beyond Phsp!";
-			throw;
-		}
-
-		double cosTheta;
-		try{
-			cosTheta = acos(kin->helicityAngle(_subSysFlag, point));
-		} catch (std::exception &ex) {
-			BOOST_LOG_TRIVIAL(error) << "WignerDStrategy::execute() | "
-					<<ex.what();
-			throw std::runtime_error("WignerDStrategy::execute() | "
-					"calculation of helicity angle failed!");
-		}
-
+		double cosTheta = paras.GetDoubleParameter(3)->GetValue();
 		double result;
 		try{
 			result = AmpWigner2::dynamicalFunction(

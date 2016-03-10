@@ -20,8 +20,8 @@
 #include "Physics/AmplitudeSum/AmpAbsDynamicalFunction.hpp"
 
 AmpAbsDynamicalFunction::AmpAbsDynamicalFunction( normStyle nS, int calls) :
-		_ffType(formFactorType::BlattWeisskopf), _nCalls(calls),
-		_normStyle(nS), _modified(1), _norm(1.0)
+_ffType(formFactorType::BlattWeisskopf), _nCalls(calls),
+_normStyle(nS), _modified(1), _norm(1.0)
 {
 
 }
@@ -33,15 +33,16 @@ AmpAbsDynamicalFunction::AmpAbsDynamicalFunction(const char *name,
 		std::shared_ptr<DoubleParameter> phase,
 		std::shared_ptr<DoubleParameter> mass,
 		Spin spin, Spin m, Spin n,
+		std::string mother, std::string particleA, std::string particleB,
 		std::shared_ptr<DoubleParameter> mesonR, //  meson radius
 		std::shared_ptr<DoubleParameter> motherR, //  mother radius
 		formFactorType type,
 		int nCalls, normStyle nS) :
-		_name(name), _mag(mag), _phase(phase), _mass(mass), _subSys(varIdA),
-		_spin(spin),
-		_m(m), _n(n), _mesonRadius(mesonR), _motherRadius(motherR), _ffType(type),
-		_nCalls(nCalls), _normStyle(nS), _norm(1.0), _modified(1),
-		_wignerD(varIdB, spin)
+						_name(name), _mag(mag), _phase(phase), _mass(mass), _subSys(varIdA),
+						_spin(spin),
+						_m(m), _n(n), _mesonRadius(mesonR), _motherRadius(motherR), _ffType(type),
+						_nCalls(nCalls), _normStyle(nS), _norm(1.0), _modified(1),
+						_wignerD(varIdB, spin)
 {
 	initialize();
 }
@@ -52,14 +53,15 @@ AmpAbsDynamicalFunction::AmpAbsDynamicalFunction(const char *name,
 		std::shared_ptr<DoubleParameter> phase,
 		std::shared_ptr<DoubleParameter> mass,
 		Spin spin, Spin m, Spin n,
+		std::string mother, std::string particleA, std::string particleB,
 		formFactorType type,
 		int nCalls, normStyle nS) :
-		_name(name), _mag(mag), _phase(phase), _mass(mass),
-		_subSys(varIdA), _spin(spin), _m(m), _n(n),
-		_mesonRadius(std::make_shared<DoubleParameter>(name, 1.0)),
-		_motherRadius(std::make_shared<DoubleParameter>(name, 1.0)), _ffType(type),
-		_nCalls(nCalls), _normStyle(nS), _norm(1.0), _modified(1),
-		_wignerD(varIdB, spin)
+						_name(name), _mag(mag), _phase(phase), _mass(mass),
+						_subSys(varIdA), _spin(spin), _m(m), _n(n),
+						_mesonRadius(std::make_shared<DoubleParameter>(name, 1.0)),
+						_motherRadius(std::make_shared<DoubleParameter>(name, 1.0)), _ffType(type),
+						_nCalls(nCalls), _normStyle(nS), _norm(1.0), _modified(1),
+						_wignerD(varIdB, spin)
 {
 	initialize();
 }
@@ -330,7 +332,30 @@ void AmpAbsDynamicalFunction::Configure(
 		throw BadParameter("AmpAbsDynamicalFunction::Configure() | "
 				"varIdB for "+_name+" not specified!");
 
+	//Initialize angular distribution
 	_wignerD = AmpWigner2(tmp_varIdB.get(),_spin);
+
+	//Read mother name
+	auto tmp_nameMother = pt.get_optional<int>("Mother");
+	if(!tmp_nameMother) //if no mother is provided we assume the head paricle
+		_nameMother = Kinematics::instance()->getMotherName();
+	else
+		_nameMother = tmp_nameMother.get();
+
+	//Read name1
+	auto tmp_name1 = pt.get_optional<int>("ParticleA");
+	if(!tmp_name1)
+		throw BadParameter("AmpAbsDynamicalFunction::Configure() | "
+				"ParticleA for "+_name+" not specified!");
+	_name1 = tmp_name1.get();
+
+	//Read name2
+	auto tmp_name2 = pt.get_optional<int>("ParticleA");
+	if(!tmp_name2)
+		throw BadParameter("AmpAbsDynamicalFunction::Configure() | "
+				"ParticleA for "+_name+" not specified!");
+	_name2 = tmp_name2.get();
+
 	initialize();
 
 	return;
@@ -377,6 +402,10 @@ void AmpAbsDynamicalFunction::put(boost::property_tree::ptree &pt){
 	pt.put("n", _n);
 	pt.put("varIdA", GetVarIdA());
 	pt.put("varIdB", GetVarIdB());
+	if(Kinematics::instance()->getMotherName() != _nameMother)
+		pt.put("Mother", _nameMother);
+	pt.put("ParticleA", _name1);
+	pt.put("ParticleB", _name2);
 }
 
 void AmpAbsDynamicalFunction::CheckModified()
@@ -389,19 +418,25 @@ void AmpAbsDynamicalFunction::CheckModified()
 
 void AmpAbsDynamicalFunction::initialize()
 {
-	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
-	_M=kin->M;
-	if(_subSys==0){
-		_ma=kin->m3;
-		_mb=kin->m2;
+	auto phys = PhysConst::instance();
+	try{
+		_M=phys->getMass(_nameMother);
+	} catch (...) {
+		throw BadConfig("AmpAbsDynamicalFunction::initialize() | "
+				"Can not obtain mass of mother particle: "+_nameMother);
 	}
-	if(_subSys==1){
-		_ma=kin->m3;
-		_mb=kin->m1;
+
+	try{
+		_mass1=phys->getMass(_name1);
+	} catch (...) {
+		throw BadConfig("AmpAbsDynamicalFunction::initialize() | "
+				"Can not obtain mass of daughter 1: "+_name1);
 	}
-	if(_subSys==2){
-		_ma=kin->m2;
-		_mb=kin->m1;
+	try{
+		_mass2=phys->getMass(_name2);
+	} catch (...) {
+		throw BadConfig("AmpAbsDynamicalFunction::initialize() | "
+				"DCan not obtain mass of daughter 2: "+_name2);
 	}
 }
 
@@ -536,8 +571,8 @@ double AmpAbsDynamicalFunction::GetTotalIntegral() const
 	gsl_monte_vegas_state *s = gsl_monte_vegas_alloc (dim);
 	gsl_monte_vegas_integrate (&F, xLimit_low, xLimit_high, 2, _nCalls, r,s,&res, &err);
 	gsl_monte_vegas_free(s);
-//	BOOST_LOG_TRIVIAL(debug)<<"AmpAbsDynamicalFunction::totalIntegral() | "
-//			<<" Result for |"<<_name<<"|^2: "<<res<<"+-"<<err<<" relAcc [%]: "<<100*err/res;
+	//	BOOST_LOG_TRIVIAL(debug)<<"AmpAbsDynamicalFunction::totalIntegral() | "
+	//			<<" Result for |"<<_name<<"|^2: "<<res<<"+-"<<err<<" relAcc [%]: "<<100*err/res;
 
 	return res;
 }

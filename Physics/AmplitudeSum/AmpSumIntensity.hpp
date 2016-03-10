@@ -159,10 +159,10 @@ public:
 	virtual bool hasTree(){	return 1; }
 	//! Getter function for function tree
 	virtual std::shared_ptr<FunctionTree> GetTree(
-			allMasses& theMasses,allMasses& toyPhspSample,
+			ParameterList& sample, ParameterList& toySample,
 			std::string suffix="")
 			{
-		return setupBasicTree(theMasses,toyPhspSample, suffix);
+		return setupBasicTree(sample,toySample, suffix);
 			}
 
 	resonanceItr tmpA;
@@ -197,8 +197,8 @@ protected:
 	 * with efficiency corrected toy phsp sample or "normAcc" normalization tree with sample
 	 * of accepted flat phsp events
 	 */
-	std::shared_ptr<FunctionTree> setupBasicTree(allMasses& theMasses,
-			allMasses& toyPhspSample, std::string suffix="");
+	std::shared_ptr<FunctionTree> setupBasicTree(ParameterList& theMasses,
+			ParameterList& toyPhspSample, std::string suffix="");
 };
 
 #endif

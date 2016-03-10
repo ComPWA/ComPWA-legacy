@@ -31,27 +31,7 @@ using namespace boost::log;
 
 class DalitzKinematics : public Kinematics
 {
-protected:
-	bool massIdsSet;
-	unsigned int id23;
-	unsigned int id13;
-	bool _DPareaCalculated;	//! is phsp area already calculated?
-	double _DParea;	//! phsp area
-	//! calculated dalitz plot area for the given kinematics
-	void calcDParea();
-	//! initialization
-	void init();
-	//! default constructor
-	DalitzKinematics() : massIdsSet(false) { };
-	//! constructor access particles by name, masses etc are obtained from PhysConst singleton
-	DalitzKinematics(std::string _nameMother, std::string _name1,
-			std::string _name2, std::string _name3);
-	//! constructor with particle masses and names, independent from PhysConst
-	DalitzKinematics(double _M, double _Br, double _m1, double _m2, double _m3,
-			std::string _nameMother, std::string _name1,
-			std::string _name2, std::string _name3);
 
-	unsigned int findVariable(std::string varName) const;
 
 public:
 	static Kinematics* createInstance(std::string _nameMother,
@@ -63,7 +43,7 @@ public:
 	}
 
 	//! Event to dataPoint conversion
-	void eventToDataPoint(Event& ev, dataPoint& point);
+	void eventToDataPoint(const Event& ev, dataPoint& point) const;
 
 	//! Event to dataPoint conversion
 	void FillDataPoint(int a, int b, double invMassSqA, double invMassSqB,
@@ -160,32 +140,45 @@ public:
 	//! get spin of particles
 	unsigned int getSpin(std::string name);
 
-	//! mass of mother particle
-	double getMotherMass() {return M;};
-
-	std::string nameMother;//! name of mother particle
-	double Msq; //! mass squared of mother particle
-	double M; //! mass of mother particle
-	unsigned int spinM;//! spin of mother particle
-	double Br;//! width of decaying particle
-
 	std::string name1;//! name of daughter 1
 	double mSq1; //! masse squared of daughter 1
 	double m1; //! masses of daughter 1
 	unsigned int spin1; //! spin of daughter 1
+
 	std::string name2;//! name of daughter 2
 	double mSq2; //! masse squared of daughter 2
 	double m2; //! masses of daughter 2
 	unsigned int spin2;//! spin of daughter 2
+
 	std::string name3;//! name of daughter 3
 	double mSq3; //! masse squared of daughter 3
 	double m3; //! masses of daughter 3
 	unsigned int spin3;//! spin of daughter 3
+
 	std::string name4;
 	double mSq4; //! masse squared of daughter 4
 	double m4;
 	unsigned int spin4;
 
+protected:
+	bool massIdsSet;
+	bool _DPareaCalculated;	//! is phsp area already calculated?
+	double _DParea;	//! phsp area
+	//! calculated dalitz plot area for the given kinematics
+	void calcDParea();
+	//! initialization
+	void init();
+	//! default constructor
+	DalitzKinematics() : massIdsSet(false) { };
+	//! constructor access particles by name, masses etc are obtained from PhysConst singleton
+	DalitzKinematics(std::string _nameMother, std::string _name1,
+			std::string _name2, std::string _name3);
+	//! constructor with particle masses and names, independent from PhysConst
+	DalitzKinematics(double _M, double _Br, double _m1, double _m2, double _m3,
+			std::string _nameMother, std::string _name1,
+			std::string _name2, std::string _name3);
+
+	unsigned int findVariable(std::string varName) const;
 };
 
 #endif

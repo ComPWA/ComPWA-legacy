@@ -42,6 +42,7 @@ public:
 			std::shared_ptr<DoubleParameter> phase,
 			std::shared_ptr<DoubleParameter> mass,
 			Spin spin, Spin m, Spin n,
+			std::string mother, std::string particleA, std::string particleB,
 			std::shared_ptr<DoubleParameter> width,
 			std::shared_ptr<DoubleParameter> mesonRadius,
 			std::shared_ptr<DoubleParameter> motherRadius,
@@ -85,7 +86,7 @@ public:
 	virtual std::complex<double> EvaluateAmp(dataPoint& point);
 
 	virtual std::shared_ptr<FunctionTree> SetupTree(
-			allMasses& theMasses,allMasses& toyPhspSample,std::string suffix);
+			ParameterList& sample, ParameterList& toySample,std::string suffix);
 protected:
 	//! Resonance width
 	std::shared_ptr<DoubleParameter> _width;

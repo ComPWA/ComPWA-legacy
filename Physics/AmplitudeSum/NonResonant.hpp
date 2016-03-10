@@ -25,6 +25,7 @@ public:
 	NonResonant(const char *name,
 			std::shared_ptr<DoubleParameter> mag,
 			std::shared_ptr<DoubleParameter> phase,
+			std::string mother, std::string particleA, std::string particleB,
 			int nCalls=30000, normStyle nS=normStyle::one );
 
 	virtual void initialise() { };
@@ -49,6 +50,6 @@ public:
 	static std::complex<double> dynamicalFunction();
 
 	virtual std::shared_ptr<FunctionTree> SetupTree(
-			allMasses& theMasses,allMasses& toyPhspSample,std::string suffix);
+			ParameterList& sample, ParameterList& toySample,std::string suffix);
 };
 #endif /* NONRESONANT_HPP_ */

@@ -328,7 +328,7 @@ int main(int argc, char **argv) {
 
 	//Generation
 //	TLorentzVector W(0.0, 0.0, 0.0, M);//= beam + target;
-	TLorentzVector W(0.0, 0.0, 0.0, kin->M); //= beam + target;
+	TLorentzVector W(0.0, 0.0, 0.0, kin->getMotherMass()); //= beam + target;
 
 	//(Momentum, Energy units are Gev/C, GeV)
 	Double_t masses[3] = { kin->m1, kin->m2, kin->m2 };

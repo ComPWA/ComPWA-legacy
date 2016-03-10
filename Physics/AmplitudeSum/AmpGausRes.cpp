@@ -25,9 +25,12 @@ AmpGausRes::AmpGausRes(const char *name,
 		std::shared_ptr<DoubleParameter> mag,
 		std::shared_ptr<DoubleParameter> phase,
 		std::shared_ptr<DoubleParameter> mass,
-		std::shared_ptr<DoubleParameter> width, int nCalls, normStyle nS) :
+		std::shared_ptr<DoubleParameter> width,
+		std::string mother, std::string particleA, std::string particleB,
+		int nCalls, normStyle nS) :
 		AmpAbsDynamicalFunction(name, varIdA, 0, mag, phase, mass,
-				Spin(0), Spin(0), Spin(0), formFactorType::noFormFactor, nCalls, nS),
+				Spin(0), Spin(0), Spin(0), mother, particleA, particleB,
+				formFactorType::noFormFactor, nCalls, nS),
 				_width(width)
 { }
 
@@ -41,21 +44,12 @@ std::complex<double> AmpGausRes::EvaluateAmp(dataPoint& point){
 
 	double m0 = _mass->GetValue();
 	double width = _width->GetValue();
-	//  double m  = Double_t(_x);
-	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
-	//	double m23sq = point.getVal("m23sq");
-	//	double m13sq = point.getVal("m13sq");
-	double m23sq = point.getVal(0);
-	double m13sq = point.getVal(1);
-	double m12sq = kin->getThirdVariableSq(m23sq,m13sq);
-	double m = -999;
-	switch(_subSys){
-	case 3: m=sqrt(m12sq); break;
-	case 4: m=sqrt(m13sq); break;
-	case 5: m=sqrt(m23sq); break;
-	}
+	double m = point.getVal(_subSys);
 
-	std::complex<double> gaus (GetNormalization() * exp(-1*(m-m0)*(m-m0)/width/width/2.),0);
+	std::complex<double> gaus(
+			GetNormalization() * exp(-1*(m-m0)*(m-m0)/width/width/2.),
+			0
+			);
 
 	return gaus;
 }

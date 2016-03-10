@@ -100,14 +100,17 @@ void AmpSumIntensity::Save(std::string filePath)
 }
 
 std::shared_ptr<FunctionTree> AmpSumIntensity::setupBasicTree(
-		allMasses& theMasses,allMasses& toyPhspSample,std::string suffix)
+		ParameterList& sample, ParameterList& toySample,std::string suffix)
 {
+	int sampleSize = sample.GetMultiDouble(0)->GetNValues();
+	int toySampleSize = toySample.GetMultiDouble(0)->GetNValues();
+
 	BOOST_LOG_TRIVIAL(debug) << "AmpSumIntensity::setupBasicTree() generating new tree!";
-	if(theMasses.nEvents==0){
+	if(sampleSize==0){
 		BOOST_LOG_TRIVIAL(error) << "AmpSumIntensity::setupBasicTree() data sample empty!";
 		return std::shared_ptr<FunctionTree>();
 	}
-	if(toyPhspSample.nEvents==0){
+	if(toySampleSize==0){
 		BOOST_LOG_TRIVIAL(error) << "AmpSumIntensity::setupBasicTree() toy sample empty!";
 		return std::shared_ptr<FunctionTree>();
 	}
@@ -117,13 +120,13 @@ std::shared_ptr<FunctionTree> AmpSumIntensity::setupBasicTree(
 
 	//----Strategies needed
 	std::shared_ptr<AddAll> maddStrat(new AddAll(ParType::MCOMPLEX));
-	newTree->createHead("Amplitude"+suffix, maddStrat, theMasses.nEvents);
+	newTree->createHead("Amplitude"+suffix, maddStrat, sampleSize);
 
 	auto it = resoList.begin();
 	for( ; it!=resoList.end(); ++it){
 		if(!(*it)->GetEnable()) continue;
-		std::shared_ptr<FunctionTree> resTree= (*it)->SetupTree(theMasses,
-				toyPhspSample, ""+(*it)->GetName());
+		std::shared_ptr<FunctionTree> resTree= (*it)->SetupTree(sample,
+				toySample, ""+(*it)->GetName());
 		if(!resTree->sanityCheck())
 			throw std::runtime_error("AmpSumIntensity::setupBasicTree() | "
 					"Resonance tree didn't pass sanity check!");

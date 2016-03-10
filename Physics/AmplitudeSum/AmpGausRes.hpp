@@ -37,6 +37,7 @@ public:
 			std::shared_ptr<DoubleParameter> phase,
 			std::shared_ptr<DoubleParameter> mass,
 			std::shared_ptr<DoubleParameter> width,
+			std::string mother, std::string particleA, std::string particleB,
 			int nCalls=30000, normStyle nS=normStyle::one) ;
 
 	AmpGausRes(const AmpGausRes&);

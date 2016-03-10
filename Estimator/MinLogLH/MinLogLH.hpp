@@ -181,12 +181,13 @@ private:
 	//! Total efficiency of phsp with applied efficency. This is used to calculated to number of generated events.
 	double accSampleEff;
 	//! Data sample
-	allMasses mData;
+	ParameterList mData;
 	//! Phsp sample for normalization
-	allMasses mPhspSample;
+	ParameterList mPhspSample;
 	//! Phsp with applied efficency for unbinned efficiency correction
-	allMasses mAccSample;
+	ParameterList mAccSample;
 
+	int effId, weightId;
 	//! Number of events in data sample
 	unsigned int nEvts_;
 	//! Number of event in phsp sample

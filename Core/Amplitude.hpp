@@ -109,7 +109,7 @@ public:
 	//! Check of tree is available
 	virtual bool hasTree(){ return 0; }
 	//! Getter function for basic amp tree
-	virtual std::shared_ptr<FunctionTree> GetTree(allMasses&,allMasses&,
+	virtual std::shared_ptr<FunctionTree> GetTree(ParameterList&, ParameterList&,
 			std::string) {
 		return std::shared_ptr<FunctionTree>();
 	}
@@ -282,10 +282,11 @@ public:
 	//---------- related to FunctionTree -------------
 	//! Check of tree is available
 	virtual bool hasTree(){ return 1; }
+
 	//! Getter function for basic amp tree
-	virtual std::shared_ptr<FunctionTree> getAmpTree(allMasses& theMasses,
-			allMasses& toyPhspSample, std::string suffix){
-		return setupBasicTree(theMasses,toyPhspSample, suffix);
+	virtual std::shared_ptr<FunctionTree> getAmpTree(ParameterList& sample,
+			ParameterList& toySample, std::string suffix){
+		return setupBasicTree(sample,toySample, suffix);
 	}
 
 protected:
@@ -299,24 +300,28 @@ protected:
 	 * with efficiency corrected toy phsp sample or "normAcc" normalization tree with sample
 	 * of accepted flat phsp events
 	 */
-	std::shared_ptr<FunctionTree> setupBasicTree(allMasses& theMasses,
-			allMasses& toyPhspSample, std::string suffix="") {
+	std::shared_ptr<FunctionTree> setupBasicTree(ParameterList& sample,
+			ParameterList& toySample, std::string suffix) {
+
+		int sampleSize = sample.GetMultiDouble(0)->GetNValues();
+		int toySampleSize = toySample.GetMultiDouble(0)->GetNValues();
+
 		BOOST_LOG_TRIVIAL(debug) << "UnitAmp::setupBasicTree() generating new tree!";
-		if(theMasses.nEvents==0){
+		if(sampleSize==0){
 			BOOST_LOG_TRIVIAL(error) << "UnitAmp::setupBasicTree() data sample empty!";
 			return std::shared_ptr<FunctionTree>();
 		}
 		std::shared_ptr<FunctionTree> newTree(new FunctionTree());
 		//std::shared_ptr<MultAll> mmultDStrat(new MultAll(ParType::MDOUBLE));
 
-		std::vector<double> oneVec(theMasses.nEvents, 1.0);
+		std::vector<double> oneVec(sampleSize, 1.0);
 		std::shared_ptr<AbsParameter> one(new MultiDouble("one",oneVec));
 		newTree->createHead("Amplitude"+suffix, one);
-//		newTree->createHead("Amplitude"+suffix, 3.0);
-//		if(!newTree->head()){
-//			std::cout<<"asfdasfasdfas"<<std::endl;
-//			exit(1);
-//		}
+		//		newTree->createHead("Amplitude"+suffix, 3.0);
+		//		if(!newTree->head()){
+		//			std::cout<<"asfdasfasdfas"<<std::endl;
+		//			exit(1);
+		//		}
 		std::cout<<newTree->head()->to_str(10)<<std::endl;
 		return newTree;
 	}

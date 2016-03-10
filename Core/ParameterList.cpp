@@ -577,28 +577,49 @@ void ParameterList::RemoveBool(const std::string parName){
 void ParameterList::make_str() {
 	std::stringstream oss;
 
-	oss << std::endl << "Parameter List";
-	if( !vDoublePar_.size() && !vIntPar_.size() && !vBoolPar_.size() )
-		oss << " empty" << std::endl;
-	else
-		oss << std::endl;
-	//print list of complex, float, int and bool parameter
-	if(vComplexPar_.size())
-		oss << "  " << vComplexPar_.size() << " complex point parameters: " << std::endl;
-	for(unsigned int d=0; d< vComplexPar_.size(); d++)
-		oss << vComplexPar_[d]->GetName() << ": " << vComplexPar_[d]->GetValue() << std::endl;
-	if(vDoublePar_.size())
-		oss << "  " << vDoublePar_.size() << " floating point parameters: " << std::endl;
-	for(unsigned int d=0; d< vDoublePar_.size(); d++)
-		oss << vDoublePar_[d]->GetName() << ": " << vDoublePar_[d]->GetValue() << " fixed="<<vDoublePar_[d]->IsFixed()<<" hasError? "<<vDoublePar_[d]->HasError()<<std::endl;
-	if(vIntPar_.size())
-		oss << "  " << vIntPar_.size() << " integer parameters: " << std::endl;
-	for(unsigned int i=0; i< vIntPar_.size(); i++)
-		oss << vIntPar_[i]->GetName() << ": " << vIntPar_[i]->GetValue() << std::endl;
-	if(vBoolPar_.size())
-		oss << "  " << vBoolPar_.size() << " boolean parameters: " << std::endl;
-	for(unsigned int b=0; b< vBoolPar_.size(); b++)
-		oss << vBoolPar_[b]->GetName() << ": " << vBoolPar_[b]->GetValue() << std::endl;
+	if( GetNParameter() ){
+		oss << "Parameter List:" << std::endl;
+		//print list of complex, float, int and bool parameter
+		if(vComplexPar_.size()){
+			oss << "Complex parameters: "<< vComplexPar_.size() << std::endl;
+			auto it = vComplexPar_.begin();
+			for( ; it!=vComplexPar_.end(); ++it)
+				oss << (*it)->GetName() << ": " << (*it)->GetValue() << std::endl;
+		}
+		if(vDoublePar_.size()){
+			oss << "Double parameters: "<< vDoublePar_.size() << std::endl;
+			auto it = vDoublePar_.begin();
+			for( ; it!=vDoublePar_.end(); ++it)
+				oss << (*it)->GetName() << ": " << (*it)->GetValue()
+				<< " fixed="<<(*it)->IsFixed()
+				<<" hasError? "<<(*it)->HasError()<<std::endl;
+		}
+		if(vIntPar_.size()){
+			oss << "Integer parameters: "<< vIntPar_.size() << std::endl;
+			auto it = vIntPar_.begin();
+			for( ; it!=vIntPar_.end(); ++it)
+				oss << (*it)->GetName() << ": " << (*it)->GetValue()<< std::endl;
+		}
+		if(vBoolPar_.size()){
+			oss << "Boolean parameters: "<< vBoolPar_.size() << std::endl;
+			auto it = vBoolPar_.begin();
+			for( ; it!=vBoolPar_.end(); ++it)
+				oss << (*it)->GetName() << ": " << (*it)->GetValue()<< std::endl;
+		}
+		if(vMultiComplex_.size()){
+			oss << "Multi complex parameters: "<< vMultiComplex_.size() << std::endl;
+			auto it = vMultiComplex_.begin();
+			for( ; it!=vMultiComplex_.end(); ++it)
+				oss << (*it)->GetName()<< " size="<<(*it)->GetNValues()<<std::endl;
+		}
+		if(vMultiDouble_.size()){
+			oss << "Multi double parameters: "<< vMultiDouble_.size() << std::endl;
+			auto it = vMultiDouble_.begin();
+			for( ; it!=vMultiDouble_.end(); ++it)
+				oss << (*it)->GetName()<< " size="<<(*it)->GetNValues()<<std::endl;
+		}
+	} else
+		oss << "Parameter List empty!";
 
 	out_ = oss.str();
 }
@@ -624,21 +645,21 @@ void createIndex(std::map<std::string,unsigned int> idx, std::vector<std::shared
 				std::pair<std::string,unsigned int>(
 						(*it)->GetName(),
 						idx.max_size()
-						)
-				);
+				)
+		);
 	return;
 }
 
 void ParameterList::Indexing(){
-//	mMultiComplexID_.clear();
-//	std::vector<std::shared_ptr<MultiComplex> >::iterator itMcompl = vMultiComplex_.begin();
-//	for(; itMcompl!= vMultiComplex_.end(); itMcompl++)
-//		mMultiComplexID_.insert(
-//				std::pair<std::string,unsigned int>(
-//						(*itMcompl)->GetName(),
-//						mMultiComplexID_.max_size()
-//						)
-//				);
+	//	mMultiComplexID_.clear();
+	//	std::vector<std::shared_ptr<MultiComplex> >::iterator itMcompl = vMultiComplex_.begin();
+	//	for(; itMcompl!= vMultiComplex_.end(); itMcompl++)
+	//		mMultiComplexID_.insert(
+	//				std::pair<std::string,unsigned int>(
+	//						(*itMcompl)->GetName(),
+	//						mMultiComplexID_.max_size()
+	//						)
+	//				);
 	createIndex(mMultiComplexID_, vMultiComplex_);
 	createIndex(mMultiDoubleID_, vMultiDouble_);
 	createIndex(mComplexParID_, vComplexPar_);

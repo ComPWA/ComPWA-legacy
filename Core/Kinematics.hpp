@@ -33,15 +33,17 @@ public:
 	//! singleton pattern
 	static Kinematics* instance();
 	//! vector with names of variables, e.g. vec[0]=m23sq, vec[1]=m13sq
-	const std::vector<std::string>& getVarNames(){return varNames;}
+	const std::vector<std::string>& getVarNames() { return varNames; }
 	//! checks of data point is within phase space boundaries
 	virtual bool isWithinPhsp(const dataPoint& point) = 0;
-	//! mass of mother particle
-	virtual double getMotherMass() = 0;
+	//! Get name of mother particle
+	virtual std::string getMotherName() { return nameMother; };
+	//! Get mass of mother particle
+	virtual double getMotherMass() { return M; }
 	//! calculated the PHSP volume of the current decay by MC integration
 	virtual double getPhspVolume() = 0;
 	//! converts Event to dataPoint
-	virtual void eventToDataPoint(Event& ev, dataPoint& point) = 0;
+	virtual void eventToDataPoint(const Event& ev, dataPoint& point) const = 0;
 	//! Event to dataPoint conversion
 	virtual void FillDataPoint(int a, int b, double invMassSqA, double invMassSqB,
 			dataPoint& point) = 0;
@@ -84,58 +86,83 @@ public:
 	 * @return
 	 */
 	static std::complex<double> phspFactor(double sqrtS, double ma, double mb);
+
 	//! Calculate form factor
-	static double FormFactor(double sqrtS, double ma, double mb, double spin, double mesonRadius,
+	static double FormFactor(double sqrtS, double ma, double mb,
+			double spin, double mesonRadius,
 			formFactorType type=formFactorType::BlattWeisskopf);
 
 protected:
+	//! Number of particles in reaction
 	unsigned int nPart;
+
 	//! Internal names of variabes
 	std::vector<std::string> varNames;
 	//! Latex titles for variables
 	std::vector<std::string> varTitles;
+
+	//Parameters of decaying mother particle (we assume that we have a decay)
+	std::string nameMother;//! name of mother particle
+	double M; //! mass of mother particle
+	double Msq; //! mass of mother particle
+	unsigned int spinM;//! spin of mother particle
+	double Br;//! width of decaying particle
+
+	//Singleton stuff
 	static Kinematics* _inst;
-	Kinematics() {};
+
+	//!Default constructor (protected)
+	Kinematics(std::string nameM="", double widthM=0.0, unsigned int n=3) :
+		nameMother(nameM), Br(widthM), nPart(n) {};
+
+	//!Copy constructor (protected)
 	Kinematics(const Kinematics&) {};
+
+	//! Default destructor
 	virtual ~Kinematics() {};
+
 };
 
 class TwoBodyKinematics : public Kinematics
 {
 public:
-	TwoBodyKinematics(std::string _nameMother, std::string _name1, std::string _name2, double deltaMassWindow=0.5);
+	TwoBodyKinematics(std::string _nameMother, std::string _name1,
+			std::string _name2, double deltaMassWindow=0.5);
+
 	void init();
-	static Kinematics* createInstance(std::string _nameMother, std::string _name1, std::string _name2, double massWindow=0.5){
+
+	static Kinematics* createInstance(std::string _nameMother,
+			std::string _name1, std::string _name2, double massWindow=0.5){
 		if(_inst) return _inst;
 		_inst = new TwoBodyKinematics(_nameMother, _name1, _name2, massWindow);
 		return _inst;
 	}
+
 	//! checks of data point is within phase space boundaries
 	virtual bool isWithinPhsp(const dataPoint& point);
+
 	//! mass of mother particle
-	virtual double getMotherMass() { return M; }
-	//! calculated the PHSP volume of the current decay by MC integration
+
+	//! Calculate phase-space volume
 	virtual double getPhspVolume() { return (mass_max-mass_min); }
-	//! converts Event to dataPoint
-	virtual void eventToDataPoint(Event& ev, dataPoint& point);
+
+	//! Converts Event to dataPoint
+	virtual void eventToDataPoint(const Event& ev, dataPoint& point) const;
+
 	virtual void FillDataPoint(int a, int b, double invMassSqA, double invMassSqB,
 			dataPoint& point) { };
+
 	//! get mass of particles
 	virtual double getMass(unsigned int num);
 	//! get mass of paticles
 	virtual double getMass(std::string name);
 
 protected:
-	std::string nameMother;//! name of mother particle
-	double Msq; //! mass squared of mother particle
-	double M; //! mass of mother particle
-	unsigned int spinM;//! spin of mother particle
-	double Br;//! width of decaying particle
-
 	std::string name1;//! name of daughter 1
 	double mSq1; //! masse squared of daughter 1
 	double m1; //! masses of daughter 1
 	unsigned int spin1; //! spin of daughter 1
+
 	std::string name2;//! name of daughter 2
 	double mSq2; //! masse squared of daughter 2
 	double m2; //! masses of daughter 2

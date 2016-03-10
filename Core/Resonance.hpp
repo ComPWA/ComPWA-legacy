@@ -56,7 +56,7 @@ public:
 	virtual std::complex<double> Evaluate(dataPoint& point) = 0;
 
 	virtual std::shared_ptr<FunctionTree> SetupTree(
-			allMasses& theMasses,allMasses& toyPhspSample,std::string suffix) = 0;
+			ParameterList& sample, ParameterList& toySample,std::string suffix) = 0;
 };
 
 struct resIsEnabled {

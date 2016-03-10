@@ -34,8 +34,7 @@
 //using namespace std;
 class AmpWigner2{
 public:
-	AmpWigner2( ) { };
-	AmpWigner2( unsigned int subSys, unsigned int spin,
+	AmpWigner2( unsigned int varId=0, unsigned int spin=0,
 			unsigned int mu=0, unsigned int muPrime=0);
 
 	virtual ~AmpWigner2() {};
@@ -45,14 +44,14 @@ public:
 	static double dynamicalFunction(int J, int mu, int muPrime, double cosTheta);
 
 	virtual std::shared_ptr<FunctionTree> SetupTree(
-			allMasses& theMasses,std::string suffix="");
+			ParameterList& sample, std::string suffix="");
 
-	virtual unsigned int GetVarId() const { return _subSys; };
+	virtual unsigned int GetVarId() const { return _varId; };
 
-	virtual void SetVarId(unsigned int id) { _subSys = id; };
+	virtual void SetVarId(unsigned int id) { _varId = id; };
 
 protected:
-	unsigned int _subSys;
+	unsigned int _varId;
 	unsigned int _spin;
 	unsigned int _mu;
 	unsigned int _muPrime;

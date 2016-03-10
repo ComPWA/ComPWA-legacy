@@ -14,7 +14,7 @@
  * This class reads event-based data from ascii-files in the same syntax
  * as Pawian's epemEvtReader. It implements the
  * interface of Data.hpp.
-*/
+ */
 
 #ifndef _ASCII_READER_H_
 #define _ASCII_READER_H_
@@ -36,42 +36,16 @@
 class AsciiReader : public Data {
 
 public:
-  /// Default Constructor (0x0)
-  AsciiReader( const std::string inConfigFile, const int particles );
+	/** Destructor */
+	virtual ~AsciiReader();
 
-  virtual AsciiReader* Clone() const;
-  virtual AsciiReader* EmptyClone() const;
-  virtual Event& getEvent( const int );
-  virtual allMasses getMasses(const unsigned int startEvent=0,
-			unsigned int nEvents=0);
-  virtual ParameterList& getListOfData() { };
+	AsciiReader( const std::string inConfigFile, const int particles );
 
-  virtual const int getBin( const int, double&, double& );
+	virtual AsciiReader* Clone() const;
 
-  virtual const unsigned int getNEvents() const { return EvtList_.size(); };
-  virtual const unsigned int getNBins() const {return fmaxBins_;};
+	virtual AsciiReader* EmptyClone() const;
 
-  //! Set correction table
-  virtual void applyCorrection(DataCorrection& corr) { };
-  virtual std::vector<Event> getEvents() {return EvtList_; }
-  virtual void Add(Data& otherSample){
-	  EvtList_.insert(
-			  EvtList_.end(),
-			  otherSample.getEvents().begin(),
-			  otherSample.getEvents().end()
-			  );
-  }
-
-  /** Destructor */
-  virtual ~AsciiReader();
-
-  virtual void writeData(std::string file="", std::string trName="") { };
-
-protected:
-
-private:
-  std::vector<Event> EvtList_;
-  unsigned int fmaxBins_;
+	virtual void writeData(std::string file="", std::string trName="") { };
 
 };
 

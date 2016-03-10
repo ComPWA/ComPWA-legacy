@@ -101,6 +101,9 @@ public:
 		Notify();
 	}
 
+	std::vector<std::complex<double> >::iterator Begin() { return val_.begin(); }
+	std::vector<std::complex<double> >::iterator End() { return val_.end(); }
+
 protected:
 	virtual std::string TypeName() const { return "complex collection"; }
 	//std::string out_; /*!< Output string to print information */
@@ -213,6 +216,8 @@ public:
 		val_[i] = inVal;
 		Notify();
 	}
+	std::vector<double>::iterator Begin() { return val_.begin(); }
+	std::vector<double>::iterator End() { return val_.end(); }
 
 protected:
 	virtual std::string TypeName() const { return "double collection"; }

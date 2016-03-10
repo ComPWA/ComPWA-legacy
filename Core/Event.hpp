@@ -51,7 +51,7 @@ public:
   virtual void inline setEfficiency(double eff) { fEff = eff;}
 
   virtual const inline unsigned int getNParticles() const { return fParticles.size(); }
-  virtual const Particle& getParticle(const unsigned int id);
+  virtual const Particle& getParticle(const unsigned int id) const;
 
   friend std::ostream& operator<< (std::ostream& stream, const Event& ev);
 

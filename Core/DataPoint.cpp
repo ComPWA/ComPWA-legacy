@@ -19,18 +19,20 @@ void dataPoint::init()
 	var = std::vector<double>(Kinematics::instance()->GetNVars(), 0);
 }
 
-dataPoint::dataPoint(int a, int b, double invMassSqA, double invMassSqB)
+dataPoint::dataPoint(int a, int b, double invMassSqA, double invMassSqB) :
+		eff(1.0), weight(1.0)
 {
 	init();
 	Set(a,b,invMassSqA,invMassSqB);
 }
 
-void dataPoint::Set(int a, int b, double invMassSqA, double invMassSqB){
+void dataPoint::Set(int a, int b, double invMassSqA, double invMassSqB)
+{
 	Kinematics::instance()->FillDataPoint(a,b,invMassSqA,invMassSqB,*this);
 	return;
 }
 
-dataPoint::dataPoint(std::vector<double> vec) : weight(1.)
+dataPoint::dataPoint(std::vector<double> vec) : weight(1.), eff(1.)
 {
 	init();
 	if(Kinematics::instance()->GetNVars() != vec.size())
@@ -38,14 +40,16 @@ dataPoint::dataPoint(std::vector<double> vec) : weight(1.)
 	var=vec;
 	return;
 }
-dataPoint::dataPoint(Event& ev): weight(1.)
+
+dataPoint::dataPoint( const Event& ev ) : weight(1.), eff(1.)
 {
 	init();
 	Kinematics::instance()->eventToDataPoint(ev,*this);
 	weight = ev.getWeight();
 	return;
 }
-dataPoint::dataPoint(): weight(1.)
+
+dataPoint::dataPoint(): weight(1.), eff(1.)
 {
 	init();
 	return;
@@ -130,80 +134,4 @@ std::ostream & operator<<(std::ostream &os, dataPoint &p)
 	for(int i=0; i<varNames.size(); i++)
 		os << varNames.at(i) << "="<<p.getVal(i)<<" ";
 	return os;
-}
-
-
-//--------------------------------------------------------
-
-bool allMasses::Fill(Event &evt){
-	dataPoint point;
-	try{
-		point = dataPoint(evt);
-	} catch (BeyondPhsp& ex){ //event outside phase, remove
-		return 0;
-	}
-
-	// Check number of particle in TClonesrray and if event is within PHSP boundary
-	if( nInvMasses != evt.getNParticles()  || !Kinematics::instance()->isWithinPhsp(point))
-		return 0;
-	eff.push_back(evt.getEfficiency());
-	weight.push_back(evt.getWeight());
-	sumWeight+=evt.getWeight();
-
-	for(unsigned int pa=0; pa<nInvMasses; pa++){
-		for(unsigned int pb=pa+1; pb<nInvMasses; pb++){
-			const Particle &inA(evt.getParticle(pa));
-			const Particle &inB(evt.getParticle(pb));
-			double mymass_sq = inA.invariantMass(inB);
-			(masses_sq.at(std::make_pair(pa+1,pb+1))).push_back(mymass_sq);
-		}//particle loop B
-	}//particle loop A
-	nEvents++;
-	reWeight = (double)nEvents/sumWeight;
-	return 1;
-}
-
-
-allMasses::allMasses(unsigned int inMasses, std::vector<std::pair<unsigned int, unsigned int> >& inTup) :
-								nInvMasses(inMasses),nEvents(0) {
-	for(unsigned int i=0; i<inTup.size(); i++)
-		masses_sq.insert( std::make_pair( inTup[i], std::vector<double>() ) );
-}
-
-
-allMasses::allMasses(unsigned int inMasses, unsigned int inEvents,
-		std::vector<std::pair<unsigned int, unsigned int> >& inTup) :
-								nInvMasses(inMasses),nEvents(inEvents){
-	//alocate memory in advance
-	for(unsigned int i=0; i<inTup.size(); i++)
-		masses_sq.insert( std::make_pair( inTup[i], std::vector<double>(inEvents,0.) ) );
-	eff = std::vector<double>(nEvents,1.);
-	weight = std::vector<double>(nEvents,1.);
-}
-double allMasses::getReWeight(){ return reWeight; };
-
-allMasses::allMasses():nInvMasses(0),nEvents(0) {}
-
-void allMasses::resetWeights(){
-	weight = std::vector<double>(nEvents,1.);
-}
-void allMasses::setEfficiency(double constEff){
-	unsigned int nEvents = masses_sq.at(std::make_pair(2,3)).size();
-	eff = std::vector<double>(nEvents,constEff);
-}
-void allMasses::setEfficiency(std::shared_ptr<Efficiency> effObj){
-	unsigned int nEvents = masses_sq.at(std::make_pair(2,3)).size();
-	eff = std::vector<double>(nEvents,1.);
-	for(unsigned int i=0; i<nEvents;i++){
-		std::vector<double> data;
-		data.push_back(masses_sq.at( std::make_pair(2,3) )[i]);
-		data.push_back(masses_sq.at( std::make_pair(1,3) )[i]);
-		double value  = effObj->evaluate(data);
-		/* We need to use sqrt(eff) here because in the current
-		 * implementation the Amplitude value is squared after
-		 * multiplication with the efficiency */
-		eff.at(i) = sqrt(value);
-		if(value==0) eff.at(i) = 0.001;
-	}
-	return;
 }

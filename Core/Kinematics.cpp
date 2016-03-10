@@ -28,9 +28,9 @@ Kinematics* Kinematics::instance(){
 Kinematics* Kinematics::_inst = 0;
 
 TwoBodyKinematics::TwoBodyKinematics(std::string _nameMother,
-		std::string _name1, std::string _name2,	double deltaMassWindow)
+		std::string _name1, std::string _name2,	double deltaMassWindow) :
+				name1(_name1), name2(_name2), Kinematics(_nameMother,0.0,2)
 {
-	nPart = 2;
 	M = PhysConst::instance()->getMass(_nameMother);
 	m1 = PhysConst::instance()->getMass(_name1);
 	m2 = PhysConst::instance()->getMass(_name2);
@@ -46,18 +46,23 @@ TwoBodyKinematics::TwoBodyKinematics(std::string _nameMother,
 
 	init();
 }
-void TwoBodyKinematics::init(){
+void TwoBodyKinematics::init()
+{
+
 }
+
 bool TwoBodyKinematics::isWithinPhsp(const dataPoint& point){
 	return 1;
 	if(point.getVal(0)>=mass_sq_min && point.getVal(0)<=mass_sq_max) return 1;
 	return 0;
 }
-void TwoBodyKinematics::eventToDataPoint(Event& ev, dataPoint& point){
+
+void TwoBodyKinematics::eventToDataPoint(const Event& ev, dataPoint& point) const
+{
 	double weight = ev.getWeight();
 	point.setWeight(weight);//reset weight
-	Particle part1 = ev.getParticle(0);
-	Particle part2 = ev.getParticle(1);
+	const Particle& part1 = ev.getParticle(0);
+	const Particle& part2 = ev.getParticle(1);
 	double msq = Particle::invariantMass(part1,part2);
 	point.setVal(0,msq);
 	return;
