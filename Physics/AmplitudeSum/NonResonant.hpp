@@ -23,8 +23,9 @@ public:
 		AmpAbsDynamicalFunction( nS, calls ) { };
 
 	NonResonant(const char *name,
-			std::shared_ptr<DoubleParameter> mag, std::shared_ptr<DoubleParameter> phase,
-			int nCalls=30000, normStyle nS=normStyle::one) ;
+			std::shared_ptr<DoubleParameter> mag,
+			std::shared_ptr<DoubleParameter> phase,
+			int nCalls=30000, normStyle nS=normStyle::one );
 
 	virtual void initialise() { };
 	//! Configure resonance from ptree

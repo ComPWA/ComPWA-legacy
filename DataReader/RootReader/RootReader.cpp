@@ -75,8 +75,14 @@ void RootReader::Clear(){
 }
 void RootReader::setEfficiency(std::shared_ptr<Efficiency> eff){
 	for(unsigned int evt=0; evt<fEvents.size(); evt++){
-		dataPoint e(fEvents.at(evt));
-		double val = eff->evaluate(e);
+		dataPoint point;
+		try{
+			point = dataPoint(fEvents.at(evt));
+		} catch (BeyondPhsp& ex){ //event outside phase, remove
+			continue;
+		}
+//		dataPoint point(fEvents.at(evt));
+		double val = eff->evaluate(point);
 		fEvents.at(evt).setEfficiency(val);
 	}
 }
@@ -95,13 +101,22 @@ void RootReader::reduce(unsigned int newSize){
 
 void RootReader::reduceToPhsp(){
 	std::vector<Event> tmp;
+	BOOST_LOG_TRIVIAL(info)<<"RootReader::reduceToPhsp() | "
+			"Remove all events outside PHSP boundary from data sample.";
+
 	for(unsigned int evt=0; evt<fEvents.size(); evt++){
-		dataPoint p(fEvents.at(evt));
-		if(Kinematics::instance()->isWithinPhsp(p))
-			tmp.push_back(fEvents.at(evt));
+		dataPoint point;
+		try{
+			point = dataPoint(fEvents.at(evt));
+		} catch (BeyondPhsp& ex){ //event outside phase, remove
+			continue;
+		}
+		//		if(Kinematics::instance()->isWithinPhsp(p))
+		tmp.push_back(fEvents.at(evt));
 	}
-	BOOST_LOG_TRIVIAL(info)<<"RootReader::reduceToPhsp() | remove all events outside PHSP boundary from data sample.";
-	BOOST_LOG_TRIVIAL(info)<<"RootReader::reduceToPhsp() | "<<tmp.size()<<" from "<<fEvents.size()<<"("<<((double)tmp.size())/fEvents.size()*100 <<"%) were kept.";
+	BOOST_LOG_TRIVIAL(info)<<"RootReader::reduceToPhsp() | "
+			<<tmp.size()<<" from "<<fEvents.size()
+			<<"("<<((double)tmp.size())/fEvents.size()*100 <<"%) were kept.";
 	fEvents = tmp;
 	return;
 }
@@ -212,7 +227,8 @@ allMasses RootReader::getMasses(const unsigned int startEvent, unsigned int nEve
 }
 ParameterList& RootReader::getListOfData()
 {
-//	return ParameterList("test");
+	//fill dataList
+	return dataList;
 }
 
 const int RootReader::getBin(const int i, double& m12, double& weight){
@@ -358,8 +374,15 @@ void RootReader::bin(){
 
 std::vector<dataPoint> RootReader::getDataPoints() {
 	std::vector<dataPoint> vecPoint;
-	for(int i=0; i<fEvents.size(); i++)
-		vecPoint.push_back(dataPoint(fEvents.at(i)));
+	for(int i=0; i<fEvents.size(); i++){
+		dataPoint point;
+		try{
+			point = dataPoint(fEvents.at(i));
+		} catch (BeyondPhsp& ex){ //event outside phase, remove
+			continue;
+		}
+		vecPoint.push_back(point);
+	}
 	return vecPoint;
 }
 

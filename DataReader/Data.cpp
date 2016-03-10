@@ -31,13 +31,26 @@ void rndReduceSet(unsigned int size, std::shared_ptr<Generator> gen,
 
 	/* 2nd method: events are added once only, but total size of sample varies with sqrt(N) */
 	for(unsigned int i=0; i<totalSize; i++){//count how many events are not within PHSP
-		dataPoint point(in1->getEvent(i));
-		if(!Kinematics::instance()->isWithinPhsp(point)) newSize--;
+		dataPoint point;
+		try{
+			point = dataPoint(in1->getEvent(i));
+		} catch (BeyondPhsp& ex){ //event outside phase, remove
+			newSize--;
+			continue;
+		}
+//		dataPoint point(in1->getEvent(i));
+//		if(!Kinematics::instance()->isWithinPhsp(point)) newSize--;
 	}
 	double threshold = (double)size/newSize; //calculate threshold
 	for(unsigned int i=0; i<totalSize; i++){
-		dataPoint point(in1->getEvent(i)); //use first sample for hit&miss
-		if(!Kinematics::instance()->isWithinPhsp(point)) continue;
+		dataPoint point;
+		try{
+			point = dataPoint(in1->getEvent(i));
+		} catch (BeyondPhsp& ex){ //event outside phase, remove
+			continue;
+		}
+		//		dataPoint point(in1->getEvent(i)); //use first sample for hit&miss
+		//		if(!Kinematics::instance()->isWithinPhsp(point)) continue;
 		if( gen->getUniform() < threshold ){
 			out1->pushEvent(in1->getEvent(i));
 			//write second sample if event from first sample were accepted

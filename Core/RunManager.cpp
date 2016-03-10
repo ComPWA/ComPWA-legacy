@@ -150,8 +150,13 @@ bool RunManager::gen( int number, std::shared_ptr<Generator> gen, std::shared_pt
 		double weight = evt.getWeight();
 
 		//use true position for amplitude value
-		dataPoint point(evtTrue);
-		if(!Kinematics::instance()->isWithinPhsp(point)) continue;
+		dataPoint point;
+		try{
+			point = dataPoint(evtTrue);
+		} catch (BeyondPhsp& ex){ //event outside phase, remove
+			continue;
+		}
+		//		if(!Kinematics::instance()->isWithinPhsp(point)) continue;
 
 		totalCalls++;
 		double ampRnd = gen->getUniform()*generationMaxValue;

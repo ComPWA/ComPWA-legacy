@@ -84,12 +84,22 @@ private:
 public:
 	//! Default constructor
 	dataPoint();
+
+	/**! Initialize dataPoint with invariant masses.
+	 * Missing values are filled by Kinematics
+	 */
+	dataPoint(int a, int b, double invMassSqA, double invMassSqB);
+
 	//! Construct dataPoint from Event
 	dataPoint(Event& ev);
 	//! Construct dataPoint from vector of invariant masses
 	dataPoint(std::vector<double> vec);
 	~dataPoint(){};
 
+	/**! Fill dataPoint with invariant masses.
+	 * Missing values are filled by Kinematics
+	 */
+	void Set(int a, int b, double invMassSqA, double invMassSqB);
 	//! Set value of coordinate name
 	void setVal(std::string name, double val);
 	//! Set value of coordinate num
@@ -115,7 +125,7 @@ public:
 	static std::vector<double> getRow(int n, std::vector<dataPoint> v){
 		std::vector<double> ret;
 		if(!v.size()) return ret;
-		if( n >= Kinematics::instance()->getNumberOfVariables() )
+		if( n >= Kinematics::instance()->GetNVars() )
 			throw std::runtime_error("dataPoint::getRow() | out of range!");
 		for(int i=0; i<v.size(); i++)
 			ret.push_back(v.at(i).getVal(n));

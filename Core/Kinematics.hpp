@@ -42,6 +42,10 @@ public:
 	virtual double getPhspVolume() = 0;
 	//! converts Event to dataPoint
 	virtual void eventToDataPoint(Event& ev, dataPoint& point) = 0;
+	//! Event to dataPoint conversion
+	virtual void FillDataPoint(int a, int b, double invMassSqA, double invMassSqB,
+			dataPoint& point) = 0;
+
 	//! get mass of particles
 	virtual double getMass(unsigned int num) = 0;
 	//! get mass of paticles
@@ -49,7 +53,7 @@ public:
 	//! Get number of particles
 	virtual unsigned int getNumberOfParticles() { return nPart; }
 	//! Get number of variables
-	virtual unsigned int getNumberOfVariables() { return varNames.size(); }
+	virtual unsigned int GetNVars() const { return varNames.size(); }
 
 	/** Calculate Break-up momentum squared
 	 *
@@ -86,7 +90,10 @@ public:
 
 protected:
 	unsigned int nPart;
+	//! Internal names of variabes
 	std::vector<std::string> varNames;
+	//! Latex titles for variables
+	std::vector<std::string> varTitles;
 	static Kinematics* _inst;
 	Kinematics() {};
 	Kinematics(const Kinematics&) {};
@@ -111,6 +118,8 @@ public:
 	virtual double getPhspVolume() { return (mass_max-mass_min); }
 	//! converts Event to dataPoint
 	virtual void eventToDataPoint(Event& ev, dataPoint& point);
+	virtual void FillDataPoint(int a, int b, double invMassSqA, double invMassSqB,
+			dataPoint& point) { };
 	//! get mass of particles
 	virtual double getMass(unsigned int num);
 	//! get mass of paticles

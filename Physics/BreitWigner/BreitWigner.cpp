@@ -61,8 +61,11 @@ const ParameterList& BreitWigner::intensity(double x, double M, double T){
 
 const ParameterList& BreitWigner::intensity(dataPoint& point){
 	//ParameterList result;
-	double val = BreitWignerValue(point.getVal(0),params.GetDoubleParameter(0)->GetValue(), params.GetDoubleParameter(1)->GetValue());
-	//result.AddParameter(std::shared_ptr<DoubleParameter>(new DoubleParameter("BreitWignerResult",val)));
+	double val = BreitWignerValue(
+			point.getVal(0),
+			params.GetDoubleParameter(0)->GetValue(),
+			params.GetDoubleParameter(1)->GetValue()
+			);
 	result.SetParameterValue(0,val);
 	return result;
 }
@@ -71,9 +74,14 @@ const ParameterList& BreitWigner::intensity(dataPoint& point, ParameterList& par
 	return intensity(point);
 }
 const ParameterList& BreitWigner::intensity(std::vector<double> x, ParameterList& par){
-	//assmue that x[0]=mass23sq;
-	dataPoint dataP; dataP.setVal(0,x[0]); dataP.setVal(1,x[1]);
-	return intensity(dataP,par);
+	dataPoint point;
+	try{
+		Kinematics::instance()->FillDataPoint(1,0,x[1],x[0],point);
+	} catch (BeyondPhsp& ex){
+		result.SetParameterValue(0,0);
+		return result;
+	}
+	return intensity(point,par);
 }
 
 bool BreitWigner::copyParameterList(ParameterList& outPar){

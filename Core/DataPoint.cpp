@@ -10,88 +10,122 @@
 //-------------------------------------------------------------------------------
 
 #include <algorithm>
+#include "Core/Exceptions.hpp"
 #include "Core/Kinematics.hpp"
 #include "Core/DataPoint.hpp"
 
-void dataPoint::init(){
-	var = std::vector<double>(Kinematics::instance()->getVarNames().size(), 0);
+void dataPoint::init()
+{
+	var = std::vector<double>(Kinematics::instance()->GetNVars(), 0);
 }
 
-dataPoint::dataPoint(std::vector<double> vec) : weight(1.){
+dataPoint::dataPoint(int a, int b, double invMassSqA, double invMassSqB)
+{
 	init();
-	if(Kinematics::instance()->getVarNames().size() != vec.size())
+	Set(a,b,invMassSqA,invMassSqB);
+}
+
+void dataPoint::Set(int a, int b, double invMassSqA, double invMassSqB){
+	Kinematics::instance()->FillDataPoint(a,b,invMassSqA,invMassSqB,*this);
+	return;
+}
+
+dataPoint::dataPoint(std::vector<double> vec) : weight(1.)
+{
+	init();
+	if(Kinematics::instance()->GetNVars() != vec.size())
 		throw std::runtime_error("dataPoint::dataPoint() vector has wrong length!");
 	var=vec;
 	return;
 }
-dataPoint::dataPoint(Event& ev): weight(1.){
+dataPoint::dataPoint(Event& ev): weight(1.)
+{
 	init();
 	Kinematics::instance()->eventToDataPoint(ev,*this);
+	weight = ev.getWeight();
 	return;
 }
-dataPoint::dataPoint(): weight(1.){
+dataPoint::dataPoint(): weight(1.)
+{
 	init();
 	return;
 }
 
-unsigned int dataPoint::getID(std::string name) const{
+unsigned int dataPoint::getID(std::string name) const
+{
 	std::vector<std::string> varNames = Kinematics::instance()->getVarNames();
 	unsigned int size = varNames.size();
 	unsigned int pos = find(varNames.begin(), varNames.end(), name) - varNames.begin();
 	if(pos<0||pos>size-1) {
-		BOOST_LOG_TRIVIAL(error)<<"dataPoint::getVal(): variable with name "<<name<<" not found!";
+		BOOST_LOG_TRIVIAL(error)<<"dataPoint::getVal() | "
+				"Variable with name "<<name<<" not found!";
 		return 999;
 	}
 	return pos;
 }
 
-double dataPoint::getVal(std::string name) const{
+double dataPoint::getVal(std::string name) const
+{
 	std::vector<std::string> varNames = Kinematics::instance()->getVarNames();
 	unsigned int size = varNames.size();
 	unsigned int pos = find(varNames.begin(), varNames.end(), name) - varNames.begin();
 	if(pos<0||pos>size-1) {
-		BOOST_LOG_TRIVIAL(error)<<"dataPoint::getVal(): variable with name "<<name<<" not found!";
+		BOOST_LOG_TRIVIAL(error)<<"dataPoint::getVal() | "
+				"Variable with name "<<name<<" not found!";
 		return -999;
 	}
 	return getVal(pos);
 }
-void dataPoint::setVal(std::string name, double val){
+
+void dataPoint::setVal(std::string name, double val)
+{
 	std::vector<std::string> varNames = Kinematics::instance()->getVarNames();
 	unsigned int size = varNames.size();
 	unsigned int pos = find(varNames.begin(), varNames.end(), name) - varNames.begin();
 	if(pos<0||pos>size-1) {
-		BOOST_LOG_TRIVIAL(error)<<"dataPoint::setVal(): variable with name "<<name<<" not found!";
+		BOOST_LOG_TRIVIAL(error)<<"dataPoint::setVal() | "
+				"Variable with name "<<name<<" not found!";
 		return;
 	}
 	setVal(pos,val);
 	return;
 }
-void dataPoint::setVal(unsigned int num, double val){
+
+void dataPoint::setVal(unsigned int num, double val)
+{
 	try{
 		var.at(num)=val;
 	} catch (...) {
-		BOOST_LOG_TRIVIAL(error)<<"dataPoint::setVal(): cannot access index "<<num<<"!";
+		BOOST_LOG_TRIVIAL(error)<<"dataPoint::setVal() | "
+				"Can not access index "<<num<<"!";
 		throw;
 	}
 	return;
 }
-double dataPoint::getVal(unsigned int num) const{
+
+double dataPoint::getVal(unsigned int num) const
+{
 	double rt;
 	try{
 		rt = var.at(num);
 	} catch (...) {
-		BOOST_LOG_TRIVIAL(error)<<"dataPoint::getVal(): cannot access index "<<num<<"!";
+		BOOST_LOG_TRIVIAL(error)<<"dataPoint::getVal() | "
+				"Can not access index "<<num<<"!";
 		throw;
 	}
 	return rt;
 }
-void dataPoint::setPoint(std::vector<double> values){
-	if(Kinematics::instance()->getVarNames().size() != values.size())
+
+void dataPoint::setPoint(std::vector<double> values)
+{
+	if(Kinematics::instance()->GetNVars() != values.size())
 		throw std::runtime_error("dataPoint::setPoint() vector has wrong length!");
 	var=std::vector<double>(values);
 	return;
 }
-std::ostream & operator<<(std::ostream &os, dataPoint &p){
+
+std::ostream & operator<<(std::ostream &os, dataPoint &p)
+{
 	std::vector<std::string> varNames = Kinematics::instance()->getVarNames();
 	for(int i=0; i<varNames.size(); i++)
 		os << varNames.at(i) << "="<<p.getVal(i)<<" ";
@@ -102,7 +136,13 @@ std::ostream & operator<<(std::ostream &os, dataPoint &p){
 //--------------------------------------------------------
 
 bool allMasses::Fill(Event &evt){
-	dataPoint point(evt);
+	dataPoint point;
+	try{
+		point = dataPoint(evt);
+	} catch (BeyondPhsp& ex){ //event outside phase, remove
+		return 0;
+	}
+
 	// Check number of particle in TClonesrray and if event is within PHSP boundary
 	if( nInvMasses != evt.getNParticles()  || !Kinematics::instance()->isWithinPhsp(point))
 		return 0;
@@ -125,7 +165,7 @@ bool allMasses::Fill(Event &evt){
 
 
 allMasses::allMasses(unsigned int inMasses, std::vector<std::pair<unsigned int, unsigned int> >& inTup) :
-				nInvMasses(inMasses),nEvents(0) {
+								nInvMasses(inMasses),nEvents(0) {
 	for(unsigned int i=0; i<inTup.size(); i++)
 		masses_sq.insert( std::make_pair( inTup[i], std::vector<double>() ) );
 }
@@ -133,7 +173,7 @@ allMasses::allMasses(unsigned int inMasses, std::vector<std::pair<unsigned int, 
 
 allMasses::allMasses(unsigned int inMasses, unsigned int inEvents,
 		std::vector<std::pair<unsigned int, unsigned int> >& inTup) :
-				nInvMasses(inMasses),nEvents(inEvents){
+								nInvMasses(inMasses),nEvents(inEvents){
 	//alocate memory in advance
 	for(unsigned int i=0; i<inTup.size(); i++)
 		masses_sq.insert( std::make_pair( inTup[i], std::vector<double>(inEvents,0.) ) );

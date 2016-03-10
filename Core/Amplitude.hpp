@@ -56,32 +56,39 @@ public:
 	virtual const double integral() =0;
 	//! calculate integral of amplitude intensity. Sets parameter list first.
 	virtual const double integral(ParameterList& par) =0;
+	/**! Evaluate interference term of total amplitude */
+	virtual const ParameterList& intensityInterference(dataPoint& point,
+			resonanceItr A, resonanceItr B) { };
 	//! get (interference) integral for resonances \param id1 and \param id2
 	virtual const double interferenceIntegral(resonanceItr A, resonanceItr B)
 	{ return -999; };
 	//! calculate normalization of amplitude intensity. This includes efficiency correction
-	virtual const double normalization() =0;
+	virtual const double normalization() = 0;
 	//! calculate normalization of amplitude intensity. Sets parameter list first.
-	virtual const double normalization(ParameterList& par) =0;
+	virtual const double normalization(ParameterList& par) = 0;
 	//! get maximum value of amplitude
-	virtual double getMaxVal(ParameterList& par, std::shared_ptr<Generator> gen) = 0;
+	virtual double getMaxVal(
+			ParameterList& par, std::shared_ptr<Generator> gen) = 0;
 	//! get maximum value of amplitude
 	virtual double getMaxVal(std::shared_ptr<Generator> gen) = 0;
 
-	virtual const ParameterList& intensity(dataPoint& point, ParameterList& par) =0;
-	virtual const ParameterList& intensity(dataPoint& point) =0;
-	virtual const ParameterList& intensityNoEff(dataPoint& point) =0;
-	virtual const ParameterList& intensity(std::vector<double> point, ParameterList& par) =0;
+	virtual const ParameterList& intensity(
+			dataPoint& point, ParameterList& par) = 0;
+	virtual const ParameterList& intensity(dataPoint& point) = 0;
+	virtual const ParameterList& intensityNoEff(dataPoint& point) = 0;
+	virtual const ParameterList& intensity(
+			std::vector<double> point, ParameterList& par) = 0;
 
-	virtual void setParameterList(ParameterList& par) =0;
-	virtual bool copyParameterList(ParameterList& par) =0;
+	virtual void setParameterList(ParameterList& par) = 0;
+	virtual bool copyParameterList(ParameterList& par) = 0;
 
 	virtual void printAmps() = 0;
 	virtual void printFractions() = 0;
 
 	/** Integral value of amplitude in certain boundary
-	 * Used for plotting a projection of a function in \p var1 in bin [\p min1, \p min2]. In this
-	 * case we have to integrate over an other variable \p var2
+	 * Used for plotting a projection of a function in \p var1 in
+	 * bin [\p min1, \p min2]. In this case we have to integrate over an
+	 * other variable \p var2
 	 * @param var1 first variable
 	 * @param min1 minimal value of first variable
 	 * @param max1 maximal value of first variable
@@ -90,7 +97,8 @@ public:
 	 * @param max2 maximal value of second variable
 	 * @return
 	 */
-	virtual double getIntValue(std::string var1, double min1, double max1, std::string var2, double min2, double max2) = 0;
+	virtual double getIntValue(std::string var1, double min1, double max1,
+			std::string var2, double min2, double max2) = 0;
 
 	//! Iterator on first resonance (which is enabled)
 	virtual resonanceItr GetResonanceItrFirst() {};
@@ -101,7 +109,8 @@ public:
 	//! Check of tree is available
 	virtual bool hasTree(){ return 0; }
 	//! Getter function for basic amp tree
-	virtual std::shared_ptr<FunctionTree> GetTree(allMasses&,allMasses&, std::string){
+	virtual std::shared_ptr<FunctionTree> GetTree(allMasses&,allMasses&,
+			std::string) {
 		return std::shared_ptr<FunctionTree>();
 	}
 
@@ -130,7 +139,7 @@ public:
 	}
 	virtual void initialise() {
 		result.AddParameter(std::shared_ptr<DoubleParameter>(new DoubleParameter("GaussAmpResult")));
-		if(Kinematics::instance()->getVarNames().size()!=1)
+		if(Kinematics::instance()->GetNVars()!=1)
 			throw std::runtime_error("GaussAmp::initialize() | this amplitude is for two body decays only!");
 	};
 	//! Clone function

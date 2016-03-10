@@ -356,11 +356,12 @@ int main(int argc, char **argv) {
 		m13sq = pPm13.M2();
 		m12sq = pPm12.M2();
 
-		dataPoint dataP;
-		dataP.setVal(0, m23sq);
-		dataP.setVal(1, m13sq);
-//		point->setMsq(3,m12sq); point->setMsq(4,m13sq); point->setMsq(5,m23sq);
-		//		m12sq=M*M+m1*m1+m2*m2+m3*m3-m13sq-m23sq;
+		dataPoint point;
+		try{
+			Kinematics::instance()->FillDataPoint(0,1,m23sq,m13sq,point);
+		} catch (BeyondPhsp& ex){
+			continue;
+		}
 		m12sqtest = kin->getThirdVariableSq(m23sq, m13sq);
 		if ((m12sq - m12sqtest) > 0.01 || (m12sqtest - m12sq) > 0.01) {
 			std::cout << m12sq << " " << m12sqtest << std::endl;
@@ -374,7 +375,7 @@ int main(int argc, char **argv) {
 //		x.push_back(sqrt(m13sq));
 //		x.push_back(sqrt(m12sq));
 		//ParameterList intensL = testBW.intensity(dataP);
-		double AMPpdf = testBW.intensity(dataP).GetParameterValue(0);
+		double AMPpdf = testBW.intensity(point).GetParameterValue(0);
 		//double AMPpdf = testBW.intensity(x, minPar);
 
 		//mb.setVal(m13);
@@ -406,12 +407,12 @@ int main(int argc, char **argv) {
 		m13sq = pPm13.M2();
 		m12sq = pPm12.M2();
 
-		dataPoint dataP;
-		dataP.setVal(0, m23sq);
-		dataP.setVal(1, m13sq);
-		//		m12sq = kin.getThirdVariableSq(m23sq,m13sq);
-//		point->setMsq(3,m12sq); point->setMsq(4,m13sq); point->setMsq(5,m23sq);
-		//		m12sq=M*M+m1*m1+m2*m2+m3*m3-m13sq-m23sq;
+		dataPoint point;
+		try{
+			kin->FillDataPoint(1,0,m13sq,m23sq,point);
+		} catch (BeyondPhsp& ex){
+			continue;
+		}
 		if (std::fabs(m12sq - kin->getThirdVariableSq(m23sq, m13sq)) > 0.01) {
 			std::cout << m12sq << " " << kin->getThirdVariableSq(m23sq, m13sq)
 					<< std::endl;
@@ -423,13 +424,7 @@ int main(int argc, char **argv) {
 		TParticle fparticlePim(111, 1, 0, 0, 0, 0, *pPim, W);
 
 		//call physics module
-//		vector<double> x;
-//		x.push_back(sqrt(m23sq));
-//		x.push_back(sqrt(m13sq));
-//		x.push_back(sqrt(m12sq));
-		//ParameterList intensL = testBW.intensity(dataP, minPar);
-		double AMPpdf = testBW.intensity(dataP).GetParameterValue(0);
-		//double AMPpdf = testBW.intensity(x, minPar);
+		double AMPpdf = testBW.intensity(point).GetParameterValue(0);
 
 		double test = rando.Uniform(0, maxTest);
 		double testmc = rando.Uniform(0, 1.);

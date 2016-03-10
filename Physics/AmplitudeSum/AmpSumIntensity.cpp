@@ -40,13 +40,6 @@ AmpSumIntensity::AmpSumIntensity(normStyle ns, std::shared_ptr<Efficiency> eff,
 	return;
 }
 
-void AmpSumIntensity::LoadParameters(std::string path){
-//	std::ifstream ifs3("ParList.xml");
-//	boost::archive::xml_iarchive ia3(ifs3);
-//	ia3 >> boost::serialization::make_nvp("ParList", list2);
-
-}
-
 //! Configure resonance from ptree
 void AmpSumIntensity::Configure(const boost::property_tree::ptree &pt)
 {
@@ -142,31 +135,44 @@ std::shared_ptr<FunctionTree> AmpSumIntensity::setupBasicTree(
 	return newTree;
 }
 
-double AmpSumIntensity::getMaxVal(std::shared_ptr<Generator> gen){
+double AmpSumIntensity::getMaxVal(std::shared_ptr<Generator> gen)
+{
 	if(!_calcMaxFcnVal) calcMaxVal(gen);
 	return _maxFcnVal;
 }
 
-double AmpSumIntensity::getMaxVal(ParameterList& par, std::shared_ptr<Generator> gen){
+double AmpSumIntensity::getMaxVal(ParameterList& par, std::shared_ptr<Generator> gen)
+{
 	calcMaxVal(par,gen);
 	return _maxFcnVal;
 }
 
-void AmpSumIntensity::calcMaxVal(ParameterList& par, std::shared_ptr<Generator> gen){
+void AmpSumIntensity::calcMaxVal(ParameterList& par, std::shared_ptr<Generator> gen)
+{
 	setParameterList(par);
 	return calcMaxVal(gen);
 }
 
-void AmpSumIntensity::calcMaxVal(std::shared_ptr<Generator> gen){
+void AmpSumIntensity::calcMaxVal(std::shared_ptr<Generator> gen)
+{
 	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
 
 	double maxM23=-999; double maxM13=-999; double maxVal=0;
 	for(unsigned int i=0; i<_nCalls; i++){
-		double m23sq=gen->getUniform()*(kin->m23_sq_max-kin->m23_sq_min)+kin->m23_sq_min;
-		double m13sq=gen->getUniform()*(kin->m13_sq_max-kin->m13_sq_min)+kin->m13_sq_min;
-		//		dataPoint point; point.setVal("m13sq",m13sq); point.setVal("m23sq",m23sq);
-		dataPoint point; point.setVal(1,m13sq); point.setVal(0,m23sq);
-		if( !kin->isWithinPhsp(point) ) { if(i>0) i--; continue; }//only integrate over phase space
+		auto m13sq_limit = kin->GetMinMax(1);
+		auto m23sq_limit = kin->GetMinMax(0);
+
+		double m23sq = gen->getUniform()*(m23sq_limit.second-m23sq_limit.first)
+						+m23sq_limit.first;
+		double m13sq = gen->getUniform()*(m13sq_limit.second-m13sq_limit.first)
+						+m13sq_limit.first;
+		dataPoint point;
+		try{
+			Kinematics::instance()->FillDataPoint(1,0,m13sq,m23sq,point);
+		} catch (BeyondPhsp& ex){
+			if(i>0) i--;
+			continue;
+		}
 		ParameterList res = intensity(point);
 		double intens = *res.GetDoubleParameter(0);
 		if(intens>maxVal) {
@@ -181,20 +187,25 @@ void AmpSumIntensity::calcMaxVal(std::shared_ptr<Generator> gen){
 	return ;
 }
 
-double AmpSumIntensity::evaluate(double x[], size_t dim) {
+double AmpSumIntensity::evaluate(double x[], size_t dim)
+{
 	/* Calculation amplitude integral (excluding efficiency) */
 	if(dim!=2) return 0;
 	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
 	//set data point: we assume that x[0]=m13 and x[1]=m23
-	dataPoint point; point.setVal(1,x[0]); point.setVal(0,x[1]);
-	//	double m12sq = kin->getThirdVariableSq(x[0],x[1]);
-	if( !kin->isWithinPhsp(point) ) return 0;//only integrate over phase space
+	dataPoint point;
+	try{
+		kin->FillDataPoint(1,0,x[0],x[1],point);
+	} catch (BeyondPhsp& ex){
+		return 0;
+	}
 	ParameterList res = intensityNoEff(point);
 	double intens = *res.GetDoubleParameter(0);
 	return intens;
 }
 
-double evalWrapperAmpSumIntensity(double* x, size_t dim, void* param) {
+double evalWrapperAmpSumIntensity(double* x, size_t dim, void* param)
+{
 	/* We need a wrapper here because intensity() is a member function of AmpAbsDynamicalFunction
 	 * and can therefore not be referenced. But gsl_monte_function expects a function reference.
 	 * As third parameter we pass the reference to the current instance of AmpAbsDynamicalFunction
@@ -202,12 +213,14 @@ double evalWrapperAmpSumIntensity(double* x, size_t dim, void* param) {
 	return static_cast<AmpSumIntensity*>(param)->evaluate(x,dim);
 }
 
-const double AmpSumIntensity::integral(ParameterList& par){
+const double AmpSumIntensity::integral(ParameterList& par)
+{
 	setParameterList(par);
 	return integral();
 }
 
-const double AmpSumIntensity::integral(){
+const double AmpSumIntensity::integral()
+{
 	/* Integration functionality was tested with a model with only one normalized amplitude.
 	 * The integration result is equal to the amplitude coefficient^2.
 	 */
@@ -216,8 +229,10 @@ const double AmpSumIntensity::integral(){
 
 	//set limits: we assume that x[0]=m13sq and x[1]=m23sq
 	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
-	double xLimit_low[2] = {kin->m13_sq_min,kin->m23_sq_min};
-	double xLimit_high[2] = {kin->m13_sq_max,kin->m23_sq_max};
+	auto m13sq_limit = kin->GetMinMax(1);
+	auto m23sq_limit = kin->GetMinMax(0);
+	double xLimit_low[2] = {m13sq_limit.first,m23sq_limit.first};
+	double xLimit_high[2] = {m13sq_limit.second,m23sq_limit.second};
 	//	double xLimit_low[2] = {0,0};
 	//	double xLimit_high[2] = {10,10};
 	gsl_rng_env_setup ();
@@ -238,12 +253,17 @@ const double AmpSumIntensity::integral(){
 	return res;
 }
 
-double interferenceIntegralWrapper(double* x, size_t dim, void* param) {
+double interferenceIntegralWrapper(double* x, size_t dim, void* param)
+{
 	/* Calculation amplitude integral (excluding efficiency) */
 	if(dim!=2) return 0;
 	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
-	dataPoint point; point.setVal(1,x[0]); point.setVal(0,x[1]);
-	if( !kin->isWithinPhsp(point) ) return 0;//only integrate over phase space
+	dataPoint point;
+	try{
+		Kinematics::instance()->FillDataPoint(0,1,x[1],x[0],point);
+	} catch (BeyondPhsp& ex){
+		return 0;
+	}
 
 	AmpSumIntensity* amp = static_cast<AmpSumIntensity*>(param);
 
@@ -254,6 +274,18 @@ double interferenceIntegralWrapper(double* x, size_t dim, void* param) {
 	).real();
 	if( A == B ) return intens;
 	return 2*intens;
+}
+
+const ParameterList& AmpSumIntensity::intensityInterference(dataPoint& point,
+		resonanceItr A, resonanceItr B)
+{
+	double intens = (
+			(*A)->Evaluate(point)*std::conj((*B)->Evaluate(point))
+	).real();
+	if( A != B ) intens = 2*intens;
+	result.SetParameterValue(0,intens);
+
+	return result;
 }
 
 const double AmpSumIntensity::interferenceIntegral(
@@ -270,8 +302,10 @@ const double AmpSumIntensity::interferenceIntegral(
 
 	//set limits: we assume that x[0]=m13sq and x[1]=m23sq
 	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
-	double xLimit_low[2] = {kin->m13_sq_min,kin->m23_sq_min};
-	double xLimit_high[2] = {kin->m13_sq_max,kin->m23_sq_max};
+	auto m13sq_limit = kin->GetMinMax(1);
+	auto m23sq_limit = kin->GetMinMax(0);
+	double xLimit_low[2] = {m13sq_limit.first,m23sq_limit.first};
+	double xLimit_high[2] = {m13sq_limit.second,m23sq_limit.second};
 	//	double xLimit_low[2] = {0,0};
 	//	double xLimit_high[2] = {10,10};
 	gsl_rng_env_setup ();
@@ -293,30 +327,39 @@ const double AmpSumIntensity::interferenceIntegral(
 	return res;
 }
 
-double AmpSumIntensity::evaluateEff(double x[], size_t dim) {
+double AmpSumIntensity::evaluateEff(double x[], size_t dim)
+{
 	/* Calculation amplitude normalization (including efficiency) */
 	if(dim!=2) return 0;
 	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
 	//set data point: we assume that x[0]=m13 and x[1]=m23
-	dataPoint point; point.setVal(1,x[0]); point.setVal(0,x[1]);
-	if( !kin->isWithinPhsp(point) ) return 0;//only integrate over phase space
+	dataPoint point;
+	try{
+		kin->FillDataPoint(1,0,x[0],x[1],point);
+	} catch (BeyondPhsp& ex){
+		return 0;
+	}
 	ParameterList res = intensity(point);
 	double intens = *res.GetDoubleParameter(0);
 	return intens;
 }
-double evalWrapperAmpSumIntensityEff(double* x, size_t dim, void* param) {
+
+double evalWrapperAmpSumIntensityEff(double* x, size_t dim, void* param)
+{
 	/* We need a wrapper here because intensity() is a member function of AmpAbsDynamicalFunction
 	 * and can therefore not be referenced. But gsl_monte_function expects a function reference.
 	 * As third parameter we pass the reference to the current instance of AmpAbsDynamicalFunction
 	 */
 	return static_cast<AmpSumIntensity*>(param)->evaluateEff(x,dim);
-};
+}
 
-const double AmpSumIntensity::normalization(ParameterList& par){
+const double AmpSumIntensity::normalization(ParameterList& par)
+{
 	setParameterList(par);
 	return normalization();
 }
-const double AmpSumIntensity::normalization(){
+const double AmpSumIntensity::normalization()
+{
 	/* Integration functionality was tested with a model with only one normalized amplitude.
 	 * The integration result is equal to the amplitude coefficient^2.
 	 */
@@ -325,8 +368,10 @@ const double AmpSumIntensity::normalization(){
 
 	//set limits: we assume that x[0]=m13sq and x[1]=m23sq
 	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
-	double xLimit_low[2] = {kin->m13_sq_min,kin->m23_sq_min};
-	double xLimit_high[2] = {kin->m13_sq_max,kin->m23_sq_max};
+	auto m13sq_limit = kin->GetMinMax(1);
+	auto m23sq_limit = kin->GetMinMax(0);
+	double xLimit_low[2] = {m13sq_limit.first,m23sq_limit.first};
+	double xLimit_high[2] = {m13sq_limit.second,m23sq_limit.second};
 	//	double xLimit_low[2] = {0,0};
 	//	double xLimit_high[2] = {10,10};
 	gsl_rng_env_setup ();
@@ -347,7 +392,9 @@ const double AmpSumIntensity::normalization(){
 	return res;
 }
 
-const double AmpSumIntensity::sliceIntensity(dataPoint& dataP, ParameterList& par,std::complex<double>* reso, unsigned int nResos){
+const double AmpSumIntensity::sliceIntensity(dataPoint& dataP,
+		ParameterList& par,std::complex<double>* reso, unsigned int nResos)
+{
 	setParameterList(par);
 
 	double AMPpdf=0;
@@ -361,18 +408,22 @@ const double AmpSumIntensity::sliceIntensity(dataPoint& dataP, ParameterList& pa
 	return AMPpdf*eff;
 }
 
-const ParameterList& AmpSumIntensity::intensity(std::vector<double> point, ParameterList& par){
+const ParameterList& AmpSumIntensity::intensity(std::vector<double> point,
+		ParameterList& par)
+{
 	setParameterList(par);
 	dataPoint dataP(point);
 	return intensity(dataP);
 }
 
-const ParameterList& AmpSumIntensity::intensity(dataPoint& point, ParameterList& par){
+const ParameterList& AmpSumIntensity::intensity(dataPoint& point, ParameterList& par)
+{
 	setParameterList(par);
 	return intensity(point);
 }
 
-const ParameterList& AmpSumIntensity::intensityNoEff(dataPoint& point){
+const ParameterList& AmpSumIntensity::intensityNoEff(dataPoint& point)
+{
 	std::complex<double> AMPpdf(0,0);
 	if(Kinematics::instance()->isWithinPhsp(point)) {
 		auto it = GetResonanceItrFirst();
@@ -384,7 +435,8 @@ const ParameterList& AmpSumIntensity::intensityNoEff(dataPoint& point){
 	return result;
 }
 
-const ParameterList& AmpSumIntensity::intensity(dataPoint& point){
+const ParameterList& AmpSumIntensity::intensity(dataPoint& point)
+{
 	intensityNoEff(point);
 	double ampNoEff = result.GetParameterValue(0);
 	double eff=eff_->evaluate(point);
@@ -392,7 +444,8 @@ const ParameterList& AmpSumIntensity::intensity(dataPoint& point){
 	return result;
 }
 
-void AmpSumIntensity::setParameterList(ParameterList& par){
+void AmpSumIntensity::setParameterList(ParameterList& par)
+{
 	//parameters varied by Minimization algorithm
 	if(par.GetNDouble()!=params.GetNDouble())
 		throw std::runtime_error("AmpSumIntensity::setParameterList(): size of parameter lists don't match");
@@ -402,12 +455,14 @@ void AmpSumIntensity::setParameterList(ParameterList& par){
 	return;
 }
 
-bool AmpSumIntensity::copyParameterList(ParameterList& outPar){
+bool AmpSumIntensity::copyParameterList(ParameterList& outPar)
+{
 	outPar = ParameterList(params);
 	return true;
 }
 
-void AmpSumIntensity::printAmps(){
+void AmpSumIntensity::printAmps()
+{
 	std::stringstream outStr;
 	outStr<<"AmpSumIntensity: Printing amplitudes with current(!) set of parameters:\n";
 	unsigned int n=0;
@@ -432,7 +487,9 @@ void AmpSumIntensity::printAmps(){
 	BOOST_LOG_TRIVIAL(info)<<outStr.str();
 	return;
 }
-void AmpSumIntensity::printFractions(){
+
+void AmpSumIntensity::printFractions()
+{
 	std::stringstream outStr;
 	outStr<<"Fit fractions for all amplitudes: \n";
 	double sumFrac=0;
@@ -449,7 +506,9 @@ void AmpSumIntensity::printFractions(){
 	return;
 }
 
-double AmpSumIntensity::getIntValue(std::string var1, double min1, double max1, std::string var2, double min2, double max2){
+double AmpSumIntensity::getIntValue(std::string var1, double min1, double max1,
+		std::string var2, double min2, double max2)
+{
 	/*
 	 * Integrates in \var1 from \min1 to \max1 and in \var2 from \min2 to \max2.
 	 * Is intended to be used for calculation of bin content.
@@ -461,8 +520,9 @@ double AmpSumIntensity::getIntValue(std::string var1, double min1, double max1, 
 	double _max2 = max2;
 	//if(_min1==0) _min1 = kin->GetMin(var1);
 	//if(_max1==0) _min1 = kin->GetMax(var1);
-	if(_min2==0) _min2 = kin->getMin(var2);
-	if(_max2==0) _max2 = kin->getMax(var2);
+	auto limit2 = kin->GetMinMax(var2);
+	if(_min2==0) _min2 = limit2.first;
+	if(_max2==0) _max2 = limit2.second;
 	unsigned int dim=2;
 	double res=0.0, err=0.0;
 
@@ -502,34 +562,37 @@ double AmpSumIntensity::getIntValue(std::string var1, double min1, double max1, 
 	return res;
 }
 
-int AmpSumIntensity::GetIdOfResonance(std::string name){
+int AmpSumIntensity::GetIdOfResonance(std::string name)
+{
 	for(unsigned int i=0; i< resoList.size(); i++)
 		if(resoList.at(i)->GetName()==name) return i;
 	return -999;
 }
 
-std::string AmpSumIntensity::GetNameOfResonance(unsigned int id){
+std::string AmpSumIntensity::GetNameOfResonance(unsigned int id)
+{
 	if(id < 0 || id > resoList.size() )
 		throw std::runtime_error("AmpSumIntensity::getNameOfResonance() | "
 				"Invalid resonance ID! Resonance not found?");
 	return resoList.at(id)->GetName();
 }
 
-std::shared_ptr<Resonance>
-AmpSumIntensity::GetResonance(std::string name) {
+std::shared_ptr<Resonance> AmpSumIntensity::GetResonance(std::string name)
+{
 	int id = GetIdOfResonance(name);
 	return GetResonance(id);
 }
 
-std::shared_ptr<Resonance>
-AmpSumIntensity::GetResonance(unsigned int id) {
+std::shared_ptr<Resonance> AmpSumIntensity::GetResonance(unsigned int id)
+{
 	if(id < 0 || id > resoList.size() )
 		throw std::runtime_error("AmpSumIntensity::getResonance() | "
 				"Invalid resonance ID! Resonance not found?");
 	return resoList.at(id);
 }
 
-double AmpSumIntensity::averageWidth(){
+double AmpSumIntensity::averageWidth()
+{
 	double avWidth = 0;
 	double sum = 0;
 	for(int i=0; i<resoList.size(); i++){

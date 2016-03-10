@@ -21,41 +21,45 @@
 
 AmpAbsDynamicalFunction::AmpAbsDynamicalFunction( normStyle nS, int calls) :
 		_ffType(formFactorType::BlattWeisskopf), _nCalls(calls),
-		_normStyle(nS), modified(1)
+		_normStyle(nS), _modified(1), _norm(1.0)
 {
 
 }
 
 
 AmpAbsDynamicalFunction::AmpAbsDynamicalFunction(const char *name,
-		std::shared_ptr<DoubleParameter> mag, std::shared_ptr<DoubleParameter> phase,
-		std::shared_ptr<DoubleParameter> mass, int part1, int part2,
+		unsigned int varIdA, unsigned int varIdB,
+		std::shared_ptr<DoubleParameter> mag,
+		std::shared_ptr<DoubleParameter> phase,
+		std::shared_ptr<DoubleParameter> mass,
 		Spin spin, Spin m, Spin n,
 		std::shared_ptr<DoubleParameter> mesonR, //  meson radius
 		std::shared_ptr<DoubleParameter> motherR, //  mother radius
 		formFactorType type,
 		int nCalls, normStyle nS) :
-		_name(name), _mag(mag), _phase(phase), _mass(mass), _subSys(part1+part2),
-		_part1(part1), _part2(part2), _spin(spin),
+		_name(name), _mag(mag), _phase(phase), _mass(mass), _subSys(varIdA),
+		_spin(spin),
 		_m(m), _n(n), _mesonRadius(mesonR), _motherRadius(motherR), _ffType(type),
-		_nCalls(nCalls), _normStyle(nS), _norm(1.0), modified(1),
-		_wignerD(part1+part2, spin)
+		_nCalls(nCalls), _normStyle(nS), _norm(1.0), _modified(1),
+		_wignerD(varIdB, spin)
 {
 	initialize();
 }
 
 AmpAbsDynamicalFunction::AmpAbsDynamicalFunction(const char *name,
-		std::shared_ptr<DoubleParameter> mag, std::shared_ptr<DoubleParameter> phase,
-		std::shared_ptr<DoubleParameter> mass, int part1, int part2,
+		unsigned int varIdA, unsigned int varIdB,
+		std::shared_ptr<DoubleParameter> mag,
+		std::shared_ptr<DoubleParameter> phase,
+		std::shared_ptr<DoubleParameter> mass,
 		Spin spin, Spin m, Spin n,
 		formFactorType type,
 		int nCalls, normStyle nS) :
-		_name(name), _mag(mag), _phase(phase), _mass(mass), _part1(part1), _part2(part2),
-		_subSys(part1+part2), _spin(spin), _m(m), _n(n),
+		_name(name), _mag(mag), _phase(phase), _mass(mass),
+		_subSys(varIdA), _spin(spin), _m(m), _n(n),
 		_mesonRadius(std::make_shared<DoubleParameter>(name, 1.0)),
 		_motherRadius(std::make_shared<DoubleParameter>(name, 1.0)), _ffType(type),
-		_nCalls(nCalls), _normStyle(nS), _norm(1.0), modified(1),
-		_wignerD(part1+part2, spin)
+		_nCalls(nCalls), _normStyle(nS), _norm(1.0), _modified(1),
+		_wignerD(varIdB, spin)
 {
 	initialize();
 }
@@ -64,8 +68,10 @@ std::string AmpAbsDynamicalFunction::to_str() const
 {
 	std::stringstream str;
 	str<<"AmpAbsDynamicalFunction | "<<_name<<" enabled="<<_enable
-			<< " nCalls="<<_nCalls<<" norm="<<_normStyle
-			<< " subSys="<<_subSys<<" J="<<_spin<<" ffType="<<_ffType<<std::endl;
+			<< " nCalls="<<_nCalls << " subSys="<<_subSys
+			<<" J="<<_spin<<" ffType="<<_ffType<<std::endl;
+	str<<" normStyle="<<_normStyle<< " norm="<<_norm
+			<<" modified?"<<_modified<<std::endl;
 	str<<"Parameters:"<<std::endl;
 	str<<_mag->to_str()<<std::endl;
 	str<<_phase->to_str()<<std::endl;
@@ -313,20 +319,18 @@ void AmpAbsDynamicalFunction::Configure(
 	double tmp_n = pt.get<int>("n",0);
 	_n = Spin(tmp_n);
 
-	auto tmp_part1 = pt.get_optional<int>("daughterA");
-	if(!tmp_part1)
+	auto tmp_varIdA = pt.get_optional<int>("varIdA");
+	if(!tmp_varIdA)
 		throw BadParameter("AmpAbsDynamicalFunction::Configure() | "
-				"daughterA for "+_name+" not specified!");
-	_part1 = tmp_part1.get();
-	auto tmp_part2 = pt.get_optional<int>("daughterB");
-	if(!tmp_part2)
+				"varIdA for "+_name+" not specified!");
+	_subSys = tmp_varIdA.get();
+
+	auto tmp_varIdB = pt.get_optional<int>("varIdB");
+	if(!tmp_varIdB)
 		throw BadParameter("AmpAbsDynamicalFunction::Configure() | "
-				"daughterB for "+_name+" not specified!");
-	_part2 = tmp_part2.get();
+				"varIdB for "+_name+" not specified!");
 
-	_subSys = _part1+_part2;
-
-	_wignerD = AmpWigner2(_subSys,_spin);
+	_wignerD = AmpWigner2(tmp_varIdB.get(),_spin);
 	initialize();
 
 	return;
@@ -371,8 +375,8 @@ void AmpAbsDynamicalFunction::put(boost::property_tree::ptree &pt){
 	pt.put("spin", _spin);
 	pt.put("m", _m);
 	pt.put("n", _n);
-	pt.put("daughterA", _part1);
-	pt.put("daughterB", _part2);
+	pt.put("varIdA", GetVarIdA());
+	pt.put("varIdB", GetVarIdB());
 }
 
 void AmpAbsDynamicalFunction::CheckModified()
@@ -383,30 +387,19 @@ void AmpAbsDynamicalFunction::CheckModified()
 	}
 }
 
-double AmpAbsDynamicalFunction::GetInvMass(dataPoint& point){
-	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
-	double mSq = -999;
-	switch(_subSys){
-	case 3: mSq=kin->getThirdVariableSq(point.getVal(0),point.getVal(1)); break;
-	case 4: mSq=point.getVal(1); break;
-	case 5: mSq=point.getVal(0); break;
-	}
-	return mSq;
-}
-
 void AmpAbsDynamicalFunction::initialize()
 {
 	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
 	_M=kin->M;
-	if(_subSys==5){
+	if(_subSys==0){
 		_ma=kin->m3;
 		_mb=kin->m2;
 	}
-	if(_subSys==4){
+	if(_subSys==1){
 		_ma=kin->m3;
 		_mb=kin->m1;
 	}
-	if(_subSys==3){
+	if(_subSys==2){
 		_ma=kin->m2;
 		_mb=kin->m1;
 	}
@@ -438,12 +431,18 @@ double evalAmp(double* x, size_t dim, void* param)
 	 * As third parameter we pass the reference to the current instance of AmpAbsDynamicalFunction
 	 */
 	if(dim!=2) return 0;
-	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
-	dataPoint pp; pp.setVal(0,x[1]);pp.setVal(1,x[0]);
-	if( !kin->isWithinPhsp(pp) ) return 0;//only integrate over phase space
-	std::complex<double> res = static_cast<AmpAbsDynamicalFunction*>(param)->EvaluateAmp(pp);
+
+	auto amp = static_cast<AmpAbsDynamicalFunction*>(param);
+	dataPoint point;
+	try{
+		Kinematics::instance()->FillDataPoint( 0, 1, x[1], x[0], point );
+	} catch (BeyondPhsp& ex){
+		return 0;
+	}
+
+	std::complex<double> res = amp->EvaluateAmp(point);
 	//include angular distribution in normalization
-	res *= static_cast<AmpAbsDynamicalFunction*>(param)->EvaluateWignerD(pp);
+	res *= amp->EvaluateWignerD(point);
 	return ( std::norm(res) ); //integrate over |F|^2
 }
 
@@ -453,9 +452,12 @@ double AmpAbsDynamicalFunction::GetIntegral() const
 	double res=0.0, err=0.0;
 
 	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
-	//set limits: we assume that x[0]=m13sq and x[1]=m23sq
-	double xLimit_low[2] = {kin->m13_sq_min,kin->m23_sq_min};
-	double xLimit_high[2] = {kin->m13_sq_max,kin->m23_sq_max};
+
+	auto var1_limit = kin->GetMinMax( 0 );
+	auto var2_limit = kin->GetMinMax( 1 );
+	double xLimit_low[2] = {var2_limit.first,var1_limit.first};
+	double xLimit_high[2] = {var2_limit.second,var1_limit.second};
+
 	gsl_rng_env_setup ();
 	const gsl_rng_type *T = gsl_rng_default; //type of random generator
 	gsl_rng *r = gsl_rng_alloc(T); //random generator
@@ -479,9 +481,9 @@ double AmpAbsDynamicalFunction::GetNormalization()
 {
 	if(_norm<0) return 1.0; //normalization is disabled
 	//	return _norm; //disable recalculation of normalization
-	if(!modified) return _norm;
+	if(!_modified) return _norm;
 	_norm = 1/sqrt(GetIntegral());
-	modified=0;
+	_modified=0;
 	return _norm;
 }
 
@@ -492,12 +494,18 @@ double eval(double* x, size_t dim, void* param)
 	 * As third parameter we pass the reference to the current instance of AmpAbsDynamicalFunction
 	 */
 	if(dim!=2) return 0;
-	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
-	dataPoint pp; pp.setVal(0,x[1]);pp.setVal(1,x[0]);
-	if( !kin->isWithinPhsp(pp) ) return 0;//only integrate over phase space
-	std::complex<double> res = static_cast<AmpAbsDynamicalFunction*>(param)->EvaluateAmp(pp);
-	double ang = static_cast<AmpAbsDynamicalFunction*>(param)->EvaluateWignerD(pp);
-	double norm = static_cast<AmpAbsDynamicalFunction*>(param)->GetNormalization();
+
+	auto amp = static_cast<AmpAbsDynamicalFunction*>(param);
+	dataPoint point;
+	try{
+		Kinematics::instance()->FillDataPoint( 0, 1, x[1], x[0], point );
+	} catch (BeyondPhsp& ex){
+		return 0;
+	}
+
+	std::complex<double> res = amp->EvaluateAmp(point);
+	double ang = amp->EvaluateWignerD(point);
+	double norm = amp->GetNormalization();
 	return ( std::norm(res*ang*norm) ); //integrate over |F|^2
 }
 
@@ -510,9 +518,12 @@ double AmpAbsDynamicalFunction::GetTotalIntegral() const
 	double res=0.0, err=0.0;
 
 	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
-	//set limits: we assume that x[0]=m13sq and x[1]=m23sq
-	double xLimit_low[2] = {kin->m13_sq_min,kin->m23_sq_min};
-	double xLimit_high[2] = {kin->m13_sq_max,kin->m23_sq_max};
+
+	auto var1_limit = kin->GetMinMax( 0 );
+	auto var2_limit = kin->GetMinMax( 1 );
+	double xLimit_low[2] = {var2_limit.first,var1_limit.first};
+	double xLimit_high[2] = {var2_limit.second,var1_limit.second};
+
 	gsl_rng_env_setup ();
 	const gsl_rng_type *T = gsl_rng_default; //type of random generator
 	gsl_rng *r = gsl_rng_alloc(T); //random generator

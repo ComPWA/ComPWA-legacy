@@ -30,7 +30,7 @@ double AmpWigner2::evaluate(dataPoint& point) {
 	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(
 			Kinematics::instance());
 	return dynamicalFunction(
-			_spin, _mu, _muPrime, kin->helicityAngle(_subSys, point)
+			_spin, _mu, _muPrime, point.getVal(_subSys)
 			);
 }
 
@@ -114,7 +114,14 @@ bool WignerDStrategy::execute(ParameterList& paras,
 			for(unsigned int ele=0; ele<_pm23->GetNValues(); ele++){
 				_m23 = double(_pm23->GetValue(ele));
 				_m13 = double(_pm13->GetValue(ele));
-				dataPoint point; point.setVal(0,_m23); point.setVal(1,_m13);
+				dataPoint point;
+				try{
+					Kinematics::instance()->FillDataPoint(0,1,_m23,_m13,point);
+				} catch (BeyondPhsp& ex){
+					BOOST_LOG_TRIVIAL(error) << "WignerDStrategy::execute() | Data Beyond Phsp!";
+					throw;
+				}
+
 				double cosTheta;
 				try{
 					cosTheta = kin->helicityAngle(_subSysFlag, point);
@@ -142,7 +149,13 @@ bool WignerDStrategy::execute(ParameterList& paras,
 	}else if(checkType == ParType::DOUBLE){ //one dim output
 		_m23 = paras.GetDoubleParameter(4)->GetValue();
 		_m13 = paras.GetDoubleParameter(5)->GetValue();
-		dataPoint point; point.setVal(0,_m23); point.setVal(1,_m13);
+		dataPoint point;
+		try{
+			Kinematics::instance()->FillDataPoint(0,1,_m23,_m13,point);
+		} catch (BeyondPhsp& ex){
+			BOOST_LOG_TRIVIAL(error) << "WignerDStrategy::execute() | Data Beyond Phsp!";
+			throw;
+		}
 
 		double cosTheta;
 		try{

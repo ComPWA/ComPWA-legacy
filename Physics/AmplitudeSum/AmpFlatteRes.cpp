@@ -29,8 +29,9 @@ AmpFlatteRes::AmpFlatteRes( normStyle nS, int calls ) :
 }
 
 AmpFlatteRes::AmpFlatteRes(const char *name,
+		unsigned int varIdA, unsigned int varIdB,
 		std::shared_ptr<DoubleParameter> mag, std::shared_ptr<DoubleParameter> phase,
-		std::shared_ptr<DoubleParameter> mass, int part1, int part2,
+		std::shared_ptr<DoubleParameter> mass,
 		Spin spin, Spin m, Spin n,
 		std::shared_ptr<DoubleParameter> mesonRadius,
 		std::shared_ptr<DoubleParameter> motherRadius,
@@ -39,8 +40,8 @@ AmpFlatteRes::AmpFlatteRes(const char *name,
 		std::shared_ptr<DoubleParameter> g3, std::string g3_idA, std::string g3_idB,
 		formFactorType type,
 		int nCalls, normStyle nS) :
-		AmpAbsDynamicalFunction(name, mag, phase, mass, part1, part2, spin, m, n,
-				mesonRadius, motherRadius, type, nCalls, nS),
+		AmpAbsDynamicalFunction(name, varIdA, varIdB,mag, phase, mass,
+				spin, m, n,	mesonRadius, motherRadius, type, nCalls, nS),
 				_g1(g1),
 				_g2(g2),_g2_idA(g2_idA), _g2_idB(g2_idB),
 				_g3(g3),_g3_idA(g3_idA), _g3_idB(g3_idB)
@@ -298,19 +299,20 @@ std::complex<double> AmpFlatteRes::EvaluateAmp(dataPoint& point)
 {
 	CheckModified();
 
-	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
-	double mSq=-999;
-	switch(_subSys){
-	case 3:
-		mSq=(kin->getThirdVariableSq(point.getVal(0),point.getVal(1)));	break;
-	case 4: mSq=(point.getVal(1)); break;
-	case 5: mSq=(point.getVal(0)); break;
-	}
+	double mSq=point.getVal(_subSys);
 
-	return dynamicalFunction(mSq,_mass->GetValue(),_ma,_mb,_g1->GetValue(),
+	std::complex<double> result;
+	try{
+		result = dynamicalFunction(mSq,_mass->GetValue(),_ma,_mb,_g1->GetValue(),
 			_g2_massA,_g2_massB,_g2->GetValue(),
 			_g3_massA,_g3_massB,_g3->GetValue(),
 			_spin,_mesonRadius->GetValue(), _ffType);
+	} catch (std::exception& ex){
+		BOOST_LOG_TRIVIAL(error) <<"AmpFlatteRes::EvaluateAmp() | "
+				"Dynamical function can not be evalutated: "<<ex.what();
+		throw;
+	}
+	return result;
 }
 
 std::complex<double> AmpFlatteRes::dynamicalFunction(double mSq, double mR,

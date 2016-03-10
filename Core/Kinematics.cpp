@@ -18,7 +18,8 @@ using namespace boost::log;
 
 Kinematics* Kinematics::instance(){
 	if(!_inst) {
-		throw std::runtime_error("No instance of Kinematics created! Create one first!");
+		throw std::runtime_error("No instance of Kinematics created! "
+				"Create one first!");
 	}
 
 	return Kinematics::_inst;
@@ -26,8 +27,9 @@ Kinematics* Kinematics::instance(){
 
 Kinematics* Kinematics::_inst = 0;
 
-TwoBodyKinematics::TwoBodyKinematics(std::string _nameMother, std::string _name1, std::string _name2,
-		double deltaMassWindow) {
+TwoBodyKinematics::TwoBodyKinematics(std::string _nameMother,
+		std::string _name1, std::string _name2,	double deltaMassWindow)
+{
 	nPart = 2;
 	M = PhysConst::instance()->getMass(_nameMother);
 	m1 = PhysConst::instance()->getMass(_name1);
@@ -65,7 +67,8 @@ double TwoBodyKinematics::getMass(unsigned int num){
 	if(num==0) return M;
 	if(num==1) return m1;
 	if(num==2) return m2;
-	throw std::runtime_error("TwoBodyKinematics::getMass(int) | wrong particle requested!");
+	throw std::runtime_error("TwoBodyKinematics::getMass(int) | "
+			"Wrong particle requested!");
 	return -999;
 }
 //! get mass of paticles
@@ -73,7 +76,8 @@ double TwoBodyKinematics::getMass(std::string name){
 	if(name==nameMother) return M;
 	if(name==name1) return m1;
 	if(name==name2) return m2;
-	throw std::runtime_error("TwoBodyKinematics::getMass(int) | wrong particle "+name+" requested!");
+	throw std::runtime_error("TwoBodyKinematics::getMass(int) | "
+			"Wrong particle "+name+" requested!");
 	return -999;
 }
 
@@ -85,22 +89,20 @@ double Kinematics::qSqValue(double sqrtS, double ma, double mb){
 	double t2 = xSq - mamb*mamb;
 	return ( t1*t2/(4*xSq) );
 }
-std::complex<double> Kinematics::qValue(double sqrtS, double ma, double mb){
-	//std::complex<double> result( sqrt( qSqValue(sqrtS,ma,mb) ) ); //complex sqrt!
-	std::complex<double> result = Kinematics::phspFactor(sqrtS,ma,mb)*8.0*M_PI*sqrtS; //calculate from phsp factor
-	if(result.real()!=result.real() || result.imag()!=result.imag()){
-		std::cout<<"AmpKinematics::qValue() | NaN! sqrtS="<<sqrtS<<" ma="<<ma<<" mb="<<mb<<std::endl;
-	}
-	return result;
+
+std::complex<double> Kinematics::qValue(double sqrtS, double ma, double mb)
+{
+	return Kinematics::phspFactor(sqrtS,ma,mb)*8.0*M_PI*sqrtS;
 }
 
-double Kinematics::FormFactor(double sqrtS, double ma, double mb, double spin, double mesonRadius,
-		formFactorType type){
+double Kinematics::FormFactor(double sqrtS, double ma, double mb, double spin,
+		double mesonRadius,	formFactorType type)
+{
 	if(mesonRadius==0) return 1; //disable form factors
 	if(type == formFactorType::noFormFactor) return 1; //disable form factors
 
 	double qSq = std::norm(Kinematics::qValue(sqrtS,ma,mb));
-//	double qSq = Kinematics::qSqValue(sqrtS,ma,mb);
+	//	double qSq = Kinematics::qSqValue(sqrtS,ma,mb);
 	//From factor for a0(980) used by Crystal Barrel Phys.Rev.D78-074023
 	if(type == formFactorType::CrystalBarrel){
 		if (spin == 0) {
@@ -108,8 +110,11 @@ double Kinematics::FormFactor(double sqrtS, double ma, double mb, double spin, d
 			return std::exp(-alpha*qSq);
 		}
 		else
-			throw std::runtime_error("Kinematics::FormFactor() | Form factors of type "
-					+std::string(formFactorTypeString[type]) + " are implemented for spin 0 only!");
+			throw std::runtime_error("Kinematics::FormFactor() | "
+					"Form factors of type "
+					+std::string(formFactorTypeString[type])
+		+ " are implemented for spin 0 only!"
+			);
 	}
 
 	//Blatt-Weisskopt form factors with normalization F(x=mR) = 1.
@@ -139,8 +144,8 @@ double Kinematics::FormFactor(double sqrtS, double ma, double mb, double spin, d
 			throw std::runtime_error("Kinematics::FormFactor() | Form factors of type "
 					+std::string(formFactorTypeString[type]) + " are implemented for spins up to 4!");
 	}
-	throw std::runtime_error("Kinematics::FormFactor() | Form factor type "+std::to_string((long long int)type)+
-			" not specified!");
+	throw std::runtime_error("Kinematics::FormFactor() | Form factor type "
+			+std::to_string((long long int)type)+" not specified!");
 
 	return 0;
 }
@@ -172,11 +177,11 @@ std::complex<double> Kinematics::phspFactor(double sqrtS, double ma, double mb){
 	} else if( (ma+mb)*(ma+mb)<s ){//above threshold
 		rho = ( -q/M_PI*log( std::fabs((1+q)/(1-q)) )+i*q ) / (i*16.0*M_PI*sqrtS);
 	} else
-		throw std::runtime_error("AmpKinematics::phspFactor| phspFactor not defined at sqrtS = "
-				+std::to_string((long double)sqrtS));
+		throw std::runtime_error("Kinematics::phspFactor| PhspFactor not "
+				"defined at sqrtS = "+std::to_string((long double)sqrtS));
 
-	if(rho.real()!=rho.real() || rho.imag()!=rho.imag()){
-		std::cout<<"AmpKinematics::phspFactor() | NaN! sqrtS="<<sqrtS<<" ma="<<ma<<" mb="<<mb<<std::endl;
-	}
+	if(rho.real()!=rho.real() || rho.imag()!=rho.imag())
+		throw std::runtime_error("Kinematics::phspFactor| Result invalid (NaN)!");
+
 	return rho; //correct analytical continuation
 }

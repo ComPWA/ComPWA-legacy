@@ -354,7 +354,12 @@ double MinLogLH::controlParameter(ParameterList& minPar){
 		int sam_size = sam->getNEvents();
 		for(unsigned int phsp=0; phsp<sam_size; phsp++){ //loop over phspSample
 			Event theEvent(sam->getEvent(phsp));
-			dataPoint point(theEvent);
+			dataPoint point;
+			try{
+				point = dataPoint(theEvent);
+			} catch (BeyondPhsp& ex){ //event outside phase, remove
+				continue;
+			}
 			double intens = 0, intensBkg = 0;
 			ParameterList intensL = amp->intensity(point);
 			intens = intensL.GetDoubleParameter(0)->GetValue();

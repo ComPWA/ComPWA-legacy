@@ -21,10 +21,12 @@
 #include "Physics/AmplitudeSum/AmpGausRes.hpp"
 
 AmpGausRes::AmpGausRes(const char *name,
-		std::shared_ptr<DoubleParameter> mag, std::shared_ptr<DoubleParameter> phase,
-		std::shared_ptr<DoubleParameter> mass, int part1, int part2,
+		unsigned int varIdA,
+		std::shared_ptr<DoubleParameter> mag,
+		std::shared_ptr<DoubleParameter> phase,
+		std::shared_ptr<DoubleParameter> mass,
 		std::shared_ptr<DoubleParameter> width, int nCalls, normStyle nS) :
-		AmpAbsDynamicalFunction(name, mag, phase, mass, part1, part2,
+		AmpAbsDynamicalFunction(name, varIdA, 0, mag, phase, mass,
 				Spin(0), Spin(0), Spin(0), formFactorType::noFormFactor, nCalls, nS),
 				_width(width)
 { }

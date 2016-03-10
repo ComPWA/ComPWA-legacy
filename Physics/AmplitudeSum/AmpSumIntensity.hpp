@@ -46,8 +46,6 @@ public:
 		return (new AmpSumIntensity(*this));
 	}
 
-	//! Load parameter list
-	virtual void LoadParameters(std::string path);
 	//! Configure resonance from ptree
 	virtual void Configure(const boost::property_tree::ptree &pt);
 	//! Save resonance from to ptree
@@ -79,6 +77,10 @@ public:
 
 	//! evaluate total amplitude using parameters \par at phsp point \point
 	virtual const ParameterList& intensity(dataPoint& point, ParameterList& par);
+
+	/**! Evaluate interference term of total amplitude */
+	virtual const ParameterList& intensityInterference(dataPoint& point,
+			resonanceItr A, resonanceItr B);
 
 	/**! Evaluate total amplitude
 	 * Using current set of parameters at phsp point \point. Amplitude is

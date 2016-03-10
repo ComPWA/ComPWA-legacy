@@ -11,6 +11,7 @@
 
 
 #include "Core/DataPoint.hpp"
+#include "Core/Exceptions.hpp"
 #include "Physics/DPKinematics/DalitzKinematics.hpp"
 #include "Physics/DPKinematics/SimpleAngleEfficiency.hpp"
 
@@ -28,13 +29,17 @@ SimpleAngleEfficiency::SimpleAngleEfficiency(const SimpleAngleEfficiency& other)
 }
 double SimpleAngleEfficiency::evaluate(std::vector<double> x){
 	//assume that x[0]=m23sq and x[1]=m13sq
-	dataPoint point; point.setVal(0,x[0]); point.setVal(1,x[1]);
+	dataPoint point;
+	try{
+		Kinematics::instance()->FillDataPoint(0,1,x[0],x[1],point);
+	} catch (BeyondPhsp& ex){
+		return 0;
+	}
 	return evaluate(point);
 }
 double SimpleAngleEfficiency::evaluate(dataPoint& point){
 	double m23sq = point.getVal(0);
-	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
-	double angle = kin->helicityAngle(5,point);
+	double angle = point.getVal(8);
 
 	TH1* test = (TH1*) effHist->GetPassedHistogram();
 	int globalBin = test->FindBin(m23sq,angle);

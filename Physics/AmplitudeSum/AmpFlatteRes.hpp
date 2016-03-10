@@ -34,8 +34,10 @@ public:
 	AmpFlatteRes( normStyle nS=normStyle::one, int calls=30000 );
 
 	AmpFlatteRes(const char *name,
-			std::shared_ptr<DoubleParameter> mag, std::shared_ptr<DoubleParameter> phase,
-			std::shared_ptr<DoubleParameter> mass, int part1, int part2,
+			unsigned int varIdA, unsigned int varIdB,
+			std::shared_ptr<DoubleParameter> mag,
+			std::shared_ptr<DoubleParameter> phase,
+			std::shared_ptr<DoubleParameter> mass,
 			Spin spin, Spin m, Spin n,
 			std::shared_ptr<DoubleParameter> mesonRadius,
 			std::shared_ptr<DoubleParameter> motherRadius,

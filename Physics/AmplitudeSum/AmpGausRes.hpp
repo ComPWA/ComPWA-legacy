@@ -32,8 +32,10 @@ public:
 
 	AmpGausRes();
 	AmpGausRes(const char *name,
-			std::shared_ptr<DoubleParameter> mag, std::shared_ptr<DoubleParameter> phase,
-			std::shared_ptr<DoubleParameter> mass, int part1, int part2,
+			unsigned int varIdA,
+			std::shared_ptr<DoubleParameter> mag,
+			std::shared_ptr<DoubleParameter> phase,
+			std::shared_ptr<DoubleParameter> mass,
 			std::shared_ptr<DoubleParameter> width,
 			int nCalls=30000, normStyle nS=normStyle::one) ;
 
@@ -48,7 +50,11 @@ public:
 	virtual std::complex<double> EvaluateAmp(dataPoint& point);
 	virtual double evaluateWignerD(dataPoint& point) const { return 1; };
 
-	inline virtual bool isSubSys(const unsigned int subSys)const{return (subSys==_subSys);};
+	inline virtual bool isSubSys(const unsigned int subSys) const
+	{
+		return (subSys==_subSys);
+	};
+
 	double GetSpin(){return 0;};
 
 protected:

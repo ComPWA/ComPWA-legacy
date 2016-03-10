@@ -46,6 +46,11 @@ public:
 
 	virtual std::shared_ptr<FunctionTree> SetupTree(
 			allMasses& theMasses,std::string suffix="");
+
+	virtual unsigned int GetVarId() const { return _subSys; };
+
+	virtual void SetVarId(unsigned int id) { _subSys = id; };
+
 protected:
 	unsigned int _subSys;
 	unsigned int _spin;

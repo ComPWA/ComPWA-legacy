@@ -23,15 +23,16 @@
 #include <stdlib.h>
 
 AmpRelBreitWignerRes::AmpRelBreitWignerRes(const char *name,
+		unsigned int varIdA, unsigned int varIdB,
 		std::shared_ptr<DoubleParameter> mag, std::shared_ptr<DoubleParameter> phase,
-		std::shared_ptr<DoubleParameter> mass, int part1, int part2,
+		std::shared_ptr<DoubleParameter> mass,
 		Spin spin, Spin m, Spin n,
 		std::shared_ptr<DoubleParameter> width,
 		std::shared_ptr<DoubleParameter> mesonRadius,
 		std::shared_ptr<DoubleParameter> motherRadius,
 		formFactorType type,
 		int nCalls, normStyle nS) :
-		AmpAbsDynamicalFunction(name, mag, phase, mass, part1, part2, spin, m, n,
+		AmpAbsDynamicalFunction(name, varIdA, varIdB, mag, phase, mass, spin, m, n,
 				mesonRadius, motherRadius, type, nCalls, nS),
 				_width(width)
 {
@@ -124,20 +125,23 @@ void AmpRelBreitWignerRes::CheckModified() {
 	return;
 }
 
-std::complex<double> AmpRelBreitWignerRes::EvaluateAmp(dataPoint& point) {
+std::complex<double> AmpRelBreitWignerRes::EvaluateAmp(dataPoint& point)
+{
 	CheckModified(); //recalculate normalization ?
 
-	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
-	double mSq = -999;
-	switch(_subSys){
-	case 3: mSq=kin->getThirdVariableSq(point.getVal(0),point.getVal(1)); break;
-	case 4: mSq=point.getVal(1); break;
-	case 5: mSq=point.getVal(0); break;
-	}
-
-	return dynamicalFunction(mSq,_mass->GetValue(),_ma,_mb,_width->GetValue(),_spin,
+	double mSq = point.getVal(_subSys);
+	std::complex<double> result;
+	try{
+		result = dynamicalFunction(mSq,_mass->GetValue(),_ma,_mb,_width->GetValue(),_spin,
 			_mesonRadius->GetValue(), _ffType);
+	} catch (std::exception& ex){
+		BOOST_LOG_TRIVIAL(error) <<"AmpRelBreitWignerRes::EvaluateAmp() | "
+				"Dynamical function can not be evalutated: "<<ex.what();
+		throw;
+	}
+	return result;
 }
+
 std::complex<double> AmpRelBreitWignerRes::dynamicalFunction(double mSq, double mR,
 		double ma, double mb, double width, unsigned int J, double mesonRadius,
 		formFactorType ffType)

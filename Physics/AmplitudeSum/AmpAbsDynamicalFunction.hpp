@@ -43,8 +43,10 @@ public:
 	AmpAbsDynamicalFunction( normStyle nS=normStyle::one, int calls=30000);
 
 	AmpAbsDynamicalFunction(const char *name,
-			std::shared_ptr<DoubleParameter> mag, std::shared_ptr<DoubleParameter> phase,
-			std::shared_ptr<DoubleParameter> mass, int part1, int part2,
+			unsigned int varIdA, unsigned int varIdB,
+			std::shared_ptr<DoubleParameter> mag,
+			std::shared_ptr<DoubleParameter> phase,
+			std::shared_ptr<DoubleParameter> mass,
 			Spin spin, Spin m, Spin n,
 			std::shared_ptr<DoubleParameter> mesonR, //  meson radius
 			std::shared_ptr<DoubleParameter> motherR, //  mother radius
@@ -52,8 +54,10 @@ public:
 			int nCalls=30000, normStyle nS=normStyle::one);
 
 	AmpAbsDynamicalFunction(const char *name,
-			std::shared_ptr<DoubleParameter> mag, std::shared_ptr<DoubleParameter> phase,
-			std::shared_ptr<DoubleParameter> mass, int part1, int part2,
+			unsigned int varIdA, unsigned int varIdB,
+			std::shared_ptr<DoubleParameter> mag,
+			std::shared_ptr<DoubleParameter> phase,
+			std::shared_ptr<DoubleParameter> mass,
 			Spin spin, Spin m, Spin n,
 			formFactorType type = formFactorType::BlattWeisskopf,
 			int nCalls=30000, normStyle nS=normStyle::one);
@@ -94,7 +98,7 @@ public:
 	//! Get normalization style
 	virtual normStyle GetNormalizationStyle() const { return _normStyle; };
 	//! Trigger recalculation of normalization
-	virtual void SetModified() { modified=1; }
+	virtual void SetModified() { _modified=1; }
 	//! Trigger recalculation of normalization
 	virtual void CheckModified();
 	//! Enable/Disable resonance
@@ -130,8 +134,6 @@ public:
 	virtual double GetMassA() const {return _ma;};
 	//! Get mass of daughter B
 	virtual double GetMassB() const {return _mb;};
-	//! Convert dataPoint to invmass in current subsystem
-	virtual double GetInvMass(dataPoint& point);
 	//! Get resonance meson radius
 	virtual double GetMesonRadius() const { return _mesonRadius->GetValue(); }
 	//! Set resonance mother meson radius
@@ -141,7 +143,14 @@ public:
 	//! Set resonance mother meson radius
 	virtual void SetMotherRadius(double r) { _motherRadius->SetValue(r); }
 
-	inline virtual bool isSubSys(const unsigned int subSys) const{ return (subSys==_subSys); };
+	virtual unsigned int GetVarIdA() const { return _subSys; };
+
+	virtual unsigned int GetVarIdB() const { return _wignerD.GetVarId(); };
+
+	virtual void SetVarIdA(unsigned int id) { _subSys = id; };
+
+	virtual void SetVarIdB(unsigned int id) { _wignerD.SetVarId(id); };
+
 	virtual std::shared_ptr<FunctionTree> SetupTree(
 			allMasses& theMasses,allMasses& toyPhspSample,std::string suffix) = 0;
 
@@ -155,8 +164,10 @@ public:
 	 * @param mb mass of particle b
 	 * @return
 	 */
-	static std::complex<double> widthToCoupling(double mSq, double mR, double width, double ma,
-			double mb, double spin, double mesonRadius, formFactorType type = formFactorType::BlattWeisskopf);
+	static std::complex<double> widthToCoupling(double mSq, double mR,
+			double width, double ma, double mb, double spin, double mesonRadius,
+			formFactorType type = formFactorType::BlattWeisskopf);
+
 	/** Convert coupling to width
 	 *
 	 * Convert coupling to channel (@ma,@mb) to partial width. Only valid for narrow, isolated resonances.
@@ -171,8 +182,9 @@ public:
 	 * @param mb mass of particle b
 	 * @return
 	 */
-	static std::complex<double> couplingToWidth(double mSq, double mR, double g, double ma,
-			double mb, double spin, double mesonRadius, formFactorType type = formFactorType::BlattWeisskopf);
+	static std::complex<double> couplingToWidth(double mSq, double mR, double g,
+			double ma, double mb, double spin, double mesonRadius,
+			formFactorType type = formFactorType::BlattWeisskopf);
 
 protected:
 	virtual void put(boost::property_tree::ptree &pt);
@@ -198,7 +210,7 @@ protected:
 	double tmp_mass;
 	bool _mass_writeByName;
 	//! Resonance sub system
-	unsigned int _subSys, _part1, _part2;
+	unsigned int _subSys;
 	//! Resonance spin
 	Spin _spin, _m, _n;
 	//! Barrier radi for resonance and mother particle
@@ -210,7 +222,7 @@ protected:
 
 	AmpWigner2 _wignerD;
 	double _norm;
-	bool modified;
+	bool _modified;
 
 };
 #endif
