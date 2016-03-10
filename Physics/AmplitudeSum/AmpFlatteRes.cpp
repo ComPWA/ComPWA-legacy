@@ -23,7 +23,7 @@
 #include "Physics/AmplitudeSum/AmpFlatteRes.hpp"
 
 AmpFlatteRes::AmpFlatteRes( normStyle nS, int calls ) :
-		AmpAbsDynamicalFunction( nS, calls )
+AmpAbsDynamicalFunction( nS, calls )
 {
 
 }
@@ -48,17 +48,7 @@ AmpFlatteRes::AmpFlatteRes(const char *name,
 				_g2(g2),_g2_idA(g2_idA), _g2_idB(g2_idB),
 				_g3(g3),_g3_idA(g3_idA), _g3_idB(g3_idB)
 {
-	_g2_massA = PhysConst::instance()->getMass(_g2_idA);
-	_g2_massB = PhysConst::instance()->getMass(_g2_idB);
-	_g3_massA = PhysConst::instance()->getMass(_g3_idA);
-	_g3_massB = PhysConst::instance()->getMass(_g3_idB);
 
-	if(_g2_massA<0||_g2_massA>5||_g2_massB<0||_g2_massB>5)
-		throw std::runtime_error("AmpFlatteRes::evaluateAmp | "
-				"particle masses for second channel not set!");
-	if(_g3_massA<0||_g3_massA>5||_g3_massB<0||_g3_massB>5)
-		throw std::runtime_error("AmpFlatteRes::evaluateAmp | "
-				"particle masses for third channel not set!");
 
 	tmp_g1 = _g1->GetValue();
 	tmp_g2 = _g2->GetValue();
@@ -69,6 +59,31 @@ AmpFlatteRes::AmpFlatteRes(const char *name,
 
 AmpFlatteRes::~AmpFlatteRes()
 {
+}
+
+void AmpFlatteRes::initialize()
+{
+	AmpAbsDynamicalFunction::initialize();
+
+	try{
+		_g2_massA = PhysConst::instance()->getMass(_g2_idA);
+		_g2_massB = PhysConst::instance()->getMass(_g2_idB);
+	} catch (std::exception& ex){
+		BOOST_LOG_TRIVIAL(error) <<"AmpFlatteRes::initialize() | "
+				"Masses of 2nd channel can not be set!";
+		throw;
+	}
+	try{
+		_g3_massA = PhysConst::instance()->getMass(_g3_idA);
+		_g3_massB = PhysConst::instance()->getMass(_g3_idB);
+	} catch (std::exception& ex){
+		//if g3 is not set we don't need to masses either
+		if(_g3->GetValue()){
+			BOOST_LOG_TRIVIAL(error) <<"AmpFlatteRes::initialize() | "
+					"Masses of 3rd channel can not be set!";
+			throw;
+		}
+	}
 }
 
 void AmpFlatteRes::Configure(boost::property_tree::ptree::value_type const& v,
@@ -161,14 +176,12 @@ void AmpFlatteRes::Configure(boost::property_tree::ptree::value_type const& v,
 		throw BadParameter("AmpFlatteRes::Configure() | "
 				"g2_massA for "+_name+" not specified!");
 	_g2_idA = tmp_g2_massA.get();
-	_g2_massA = PhysConst::instance()->getMass(_g2_idA);
 
 	auto tmp_g2_massB = pt.get_optional<std::string>("g2_part2");
 	if(!tmp_g2_massB)
 		throw BadParameter("AmpFlatteRes::Configure() | "
 				"g2_massB for "+_name+" not specified!");
 	_g2_idB = tmp_g2_massB.get();
-	_g2_massB = PhysConst::instance()->getMass(_g2_idB);
 
 	//Coupling to channel 3 (optional)
 	auto tmp_g3_fix = pt.get<bool>("g3_fix",1);
@@ -186,15 +199,13 @@ void AmpFlatteRes::Configure(boost::property_tree::ptree::value_type const& v,
 		_g3_writeByName = 0;
 		auto tmp_g3_massA = pt.get<std::string>("g3_part1","");
 		_g3_idA = tmp_g3_massA;
-		_g3_massA = PhysConst::instance()->getMass(tmp_g3_massA);
 		auto tmp_g3_massB = pt.get<std::string>("g3_part2","");
 		_g3_idB = tmp_g3_massB;
-		_g3_massB = PhysConst::instance()->getMass(tmp_g3_massB);
 
 		if(_enable && _g3->GetValue() != 0 ) {
-		BOOST_LOG_TRIVIAL(info) << "AmpFlatteRes::Configure() | Adding 3rd channel: "
-				<<_name<<" parName="<<_g3->GetName()<<" g3="<<_g3->GetValue()
-				<<" g3_massA="<<_g3_massA<<" g3_massB="<<_g3_massB;
+			BOOST_LOG_TRIVIAL(info) << "AmpFlatteRes::Configure() | Adding 3rd channel: "
+					<<_name<<" parName="<<_g3->GetName()<<" g3="<<_g3->GetValue()
+					<<" g3_massA="<<_g3_massA<<" g3_massB="<<_g3_massB;
 			list.AddParameter(_g3);
 		}
 	} else {
@@ -203,10 +214,8 @@ void AmpFlatteRes::Configure(boost::property_tree::ptree::value_type const& v,
 			_g3_writeByName = 1;
 			auto tmp_g3_massA = pt.get<std::string>("g3_part1","");
 			_g3_idA = tmp_g3_massA;
-			_g3_massA = PhysConst::instance()->getMass(tmp_g3_massA);
 			auto tmp_g3_massB = pt.get<std::string>("g3_part2","");
 			_g3_idB = tmp_g3_massB;
-			_g3_massB = PhysConst::instance()->getMass(tmp_g3_massB);
 			BOOST_LOG_TRIVIAL(info) << "AmpFlatteRes::Configure() | Adding 3rd channel:"
 					<<_name<<" parName="<<_g3->GetName()<<" g3="<<_g3->GetValue()
 					<<" g3_massA="<<_g3_massA<<" g3_massB="<<_g3_massB;
@@ -228,6 +237,7 @@ void AmpFlatteRes::Configure(boost::property_tree::ptree::value_type const& v,
 			}
 		}
 	}
+
 	initialize();
 
 	return;
@@ -306,9 +316,9 @@ std::complex<double> AmpFlatteRes::EvaluateAmp(dataPoint& point)
 	std::complex<double> result;
 	try{
 		result = dynamicalFunction(mSq,_mass->GetValue(),_mass1,_mass2,_g1->GetValue(),
-			_g2_massA,_g2_massB,_g2->GetValue(),
-			_g3_massA,_g3_massB,_g3->GetValue(),
-			_spin,_mesonRadius->GetValue(), _ffType);
+				_g2_massA,_g2_massB,_g2->GetValue(),
+				_g3_massA,_g3_massB,_g3->GetValue(),
+				_spin,_mesonRadius->GetValue(), _ffType);
 	} catch (std::exception& ex){
 		BOOST_LOG_TRIVIAL(error) <<"AmpFlatteRes::EvaluateAmp() | "
 				"Dynamical function can not be evalutated: "<<ex.what();
@@ -380,7 +390,7 @@ std::complex<double> AmpFlatteRes::dynamicalFunction(double mSq, double mR,
 	//-- new approach - for spin 0 resonances in the imaginary part of the denominator the term qTerm
 	//is added, compared to the old formula
 	std::complex<double> denom = std::complex<double>( mR*mR - mSq,0)
-											+ (-1.0)*i*sqrtS*(termA + termB + termC);
+																			+ (-1.0)*i*sqrtS*(termA + termB + termC);
 
 	std::complex<double> result = std::complex<double>(gA*g_production,0) / denom;
 
@@ -393,7 +403,7 @@ std::complex<double> AmpFlatteRes::dynamicalFunction(double mSq, double mR,
 }
 
 std::shared_ptr<FunctionTree> AmpFlatteRes::SetupTree(
-			ParameterList& sample, ParameterList& toySample,std::string suffix)
+		ParameterList& sample, ParameterList& toySample,std::string suffix)
 {
 	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
 	double phspVol = kin->getPhspVolume();

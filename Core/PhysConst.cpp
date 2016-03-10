@@ -167,7 +167,7 @@ int PhysConst::findParticle(std::string nnn)
 	if(flag_readFile) readFile();
 	for(unsigned int i=0; i<name.size(); i++)
 		if(name[i]==nnn) return i;
-	throw BadParameter("PhysConst::findParticle() | Particle "+nnn+" not found!");
+	throw BadParameter("PhysConst::findParticle() | Particle \""+nnn+"\" not found!");
 	return 0;
 }
 

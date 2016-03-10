@@ -336,21 +336,21 @@ void AmpAbsDynamicalFunction::Configure(
 	_wignerD = AmpWigner2(tmp_varIdB.get(),_spin);
 
 	//Read mother name
-	auto tmp_nameMother = pt.get_optional<int>("Mother");
+	auto tmp_nameMother = pt.get_optional<std::string>("Mother");
 	if(!tmp_nameMother) //if no mother is provided we assume the head paricle
 		_nameMother = Kinematics::instance()->getMotherName();
 	else
 		_nameMother = tmp_nameMother.get();
 
 	//Read name1
-	auto tmp_name1 = pt.get_optional<int>("ParticleA");
+	auto tmp_name1 = pt.get_optional<std::string>("ParticleA");
 	if(!tmp_name1)
 		throw BadParameter("AmpAbsDynamicalFunction::Configure() | "
 				"ParticleA for "+_name+" not specified!");
 	_name1 = tmp_name1.get();
 
 	//Read name2
-	auto tmp_name2 = pt.get_optional<int>("ParticleA");
+	auto tmp_name2 = pt.get_optional<std::string>("ParticleA");
 	if(!tmp_name2)
 		throw BadParameter("AmpAbsDynamicalFunction::Configure() | "
 				"ParticleA for "+_name+" not specified!");

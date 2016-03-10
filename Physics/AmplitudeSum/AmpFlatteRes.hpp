@@ -95,6 +95,9 @@ public:
 			ParameterList& sample, ParameterList& toySample,std::string suffix);
 
 protected:
+	//Initialize masses
+	void initialize();
+
 	double _g2_massA, _g2_massB, _g3_massA, _g3_massB;
 	std::string _g2_idA, _g2_idB, _g3_idA, _g3_idB;
 	std::shared_ptr<DoubleParameter> _g3, _g2, _g1;
