@@ -159,11 +159,8 @@ public:
 	virtual bool hasTree(){	return 1; }
 	//! Getter function for function tree
 	virtual std::shared_ptr<FunctionTree> GetTree(
-			ParameterList& sample, ParameterList& toySample,
-			std::string suffix="")
-			{
-		return setupBasicTree(sample,toySample, suffix);
-			}
+			ParameterList& sample, ParameterList& phspSample,
+			ParameterList& toySample);
 
 	resonanceItr tmpA;
 	resonanceItr tmpB;

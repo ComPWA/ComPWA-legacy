@@ -109,8 +109,8 @@ public:
 	//! Check of tree is available
 	virtual bool hasTree(){ return 0; }
 	//! Getter function for basic amp tree
-	virtual std::shared_ptr<FunctionTree> GetTree(ParameterList&, ParameterList&,
-			std::string) {
+	virtual std::shared_ptr<FunctionTree> GetTree(
+			ParameterList&, ParameterList&, ParameterList&) {
 		return std::shared_ptr<FunctionTree>();
 	}
 

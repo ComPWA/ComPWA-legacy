@@ -142,12 +142,21 @@ public:
 protected:
 	//! Default Constructor
 	MinLogLH() { };
-	//! Constructor
-	MinLogLH(std::shared_ptr<Amplitude> amp_, std::shared_ptr<Amplitude> bkg_,std::shared_ptr<Data> data_,
+
+	//! Constructor for a vector of amplitudes
+	MinLogLH(std::vector<std::shared_ptr<Amplitude> > ampVec_,
+			std::vector<double> fraction_, std::shared_ptr<Data> data_,
 			std::shared_ptr<Data> phspSample_, std::shared_ptr<Data> accSample_,
-			unsigned int startEvent, unsigned int nEvents, double sigFrac=1.);
+			unsigned int startEvent, unsigned int nEvents);
+
+	//! Constructor for a single amplitude
+	MinLogLH(std::shared_ptr<Amplitude> amp_, std::shared_ptr<Data> data_,
+			std::shared_ptr<Data> phspSample_, std::shared_ptr<Data> accSample_,
+			unsigned int startEvent, unsigned int nEvents);
+
 	//! Uses ampTree and creates a tree that calculates the full LH
 	virtual void iniLHtree();
+
 	//! Sum up all weights in data set
 	void calcSumOfWeights();
 
@@ -155,22 +164,12 @@ private:
 	//! FunctionTree for Likelihood calculation
 	std::shared_ptr<FunctionTree> physicsTree;
 
-	//! Signal decay amplitude
-	std::shared_ptr<Amplitude> amp;
-	//! FunctionTree calculation the LH normalizaton
-	std::shared_ptr<FunctionTree> signalPhspTree;
-	//! Signal amplitude tree from #amp with invariant mass from data sample
-	std::shared_ptr<FunctionTree> signalTree_amp;
-	//! Signal amplitude tree from #amp with invariant masses from phsp/acc sample
-	std::shared_ptr<FunctionTree> signalPhspTree_amp;
-	//! Background amplitude
-	std::shared_ptr<Amplitude> ampBkg;
-	//! FunctionTree calculation of background normalization
-	std::shared_ptr<FunctionTree> bkgPhspTree;
-	//! Background amplitude tree from #ampBkg with invariant mass from data sample
-	std::shared_ptr<FunctionTree> bkgTree_amp;
-	//! Background amplitude tree from #ampBkg with invariant masses from phsp/acc sample
-	std::shared_ptr<FunctionTree> bkgPhspTree_amp;
+	//! Amplitudes
+	std::vector<std::shared_ptr<Amplitude> > ampVec;
+	//! Fraction for each amplitude
+	std::vector<double> fraction;
+	//! Sum of fractions
+	double sumFraction;
 
 	//! Data sample
 	std::shared_ptr<Data> data;
@@ -200,8 +199,6 @@ private:
 	double sumOfWeights;
 	//! Use FunctionTree for LH calculation (yes/no)?
 	bool useFunctionTree;
-	//! Fraction of signal in data sample
-	double signalFraction;
 
 	//! Scale of penalty term
 	double penaltyLambda;
