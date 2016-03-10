@@ -77,10 +77,9 @@ void TreeNode::recalculate(){
 		_changed=false;
 		try{ _strat->execute(newVals, _value[0]); }
 		catch (std::exception& ex) {
-			std::stringstream str;
-			str<<"TreeNode::recalculate() | Strategy "<<_strat
-					<<" failed on node "<<this->getName()<<"!";
-			throw std::runtime_error(str.str());
+			BOOST_LOG_TRIVIAL(error)<<"TreeNode::recalculate() | Strategy "<<_strat
+					<<" failed on node "<<this->getName()<<": "<<ex.what();
+			throw;
 		}
 	} else { //i have a certain dim, children must fill it
 
@@ -106,10 +105,9 @@ void TreeNode::recalculate(){
 			}  //end children-loop
 			try{ _strat->execute(newVals, _value[ele]); }
 			catch (std::exception& ex){
-				std::stringstream str;
-				str<<"TreeNode::recalculate() | Strategy "<<_strat
-						<<" failed on node "<<this->getName()<<"!";
-				throw std::runtime_error(str.str());
+				BOOST_LOG_TRIVIAL(error)<<"TreeNode::recalculate() | Strategy "<<_strat
+						<<" failed on node "<<this->getName()<<": "<<ex.what();
+				throw;
 			}
 
 			_changed=false;

@@ -287,7 +287,7 @@ bool BreitWignerStrategy::execute(ParameterList& paras,
 		);
 
 	//Check size of parameter list
-	if( paras.GetNDouble() != 8 && paras.GetNDouble() != 11)
+	if( paras.GetNDouble() != 7 && paras.GetNDouble() != 8)
 		throw( BadParameter("BreitWignerStrategy::execute() | "
 				"number of DoubleParameters does not match!")
 		);

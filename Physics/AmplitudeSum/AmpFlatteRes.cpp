@@ -515,7 +515,7 @@ bool FlatteStrategy::execute(ParameterList& paras,
 		);
 
 	//Check size of parameter list
-	if( paras.GetNDouble() != 14 && paras.GetNDouble() != 17)
+	if( paras.GetNDouble() != 13 && paras.GetNDouble() != 14)
 		throw( BadParameter("FlatteStrategy::execute() | "
 				"number of DoubleParameters does not match!")
 		);

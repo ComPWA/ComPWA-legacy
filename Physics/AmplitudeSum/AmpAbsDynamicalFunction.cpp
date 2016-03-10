@@ -39,8 +39,9 @@ AmpAbsDynamicalFunction::AmpAbsDynamicalFunction(const char *name,
 		formFactorType type,
 		int nCalls, normStyle nS) :
 						_name(name), _mag(mag), _phase(phase), _mass(mass), _subSys(varIdA),
-						_spin(spin),
-						_m(m), _n(n), _mesonRadius(mesonR), _motherRadius(motherR), _ffType(type),
+						_spin(spin), _m(m), _n(n),
+						_nameMother(mother), _name1(particleA), _name2(particleB),
+						_mesonRadius(mesonR), _motherRadius(motherR), _ffType(type),
 						_nCalls(nCalls), _normStyle(nS), _norm(1.0), _modified(1),
 						_wignerD(varIdB, spin)
 {
@@ -58,6 +59,7 @@ AmpAbsDynamicalFunction::AmpAbsDynamicalFunction(const char *name,
 		int nCalls, normStyle nS) :
 						_name(name), _mag(mag), _phase(phase), _mass(mass),
 						_subSys(varIdA), _spin(spin), _m(m), _n(n),
+						_nameMother(mother), _name1(particleA), _name2(particleB),
 						_mesonRadius(std::make_shared<DoubleParameter>(name, 1.0)),
 						_motherRadius(std::make_shared<DoubleParameter>(name, 1.0)), _ffType(type),
 						_nCalls(nCalls), _normStyle(nS), _norm(1.0), _modified(1),
@@ -71,7 +73,9 @@ std::string AmpAbsDynamicalFunction::to_str() const
 	std::stringstream str;
 	str<<"AmpAbsDynamicalFunction | "<<_name<<" enabled="<<_enable
 			<< " nCalls="<<_nCalls << " subSys="<<_subSys
-			<<" J="<<_spin<<" ffType="<<_ffType<<std::endl;
+			<<" J="<<_spin<<" ffType="<<_ffType<<std::endl
+			<<" mother: "<<_nameMother
+			<<" particleA: "<<_name1<<" particleB: "<<_name2<<std::endl;
 	str<<" normStyle="<<_normStyle<< " norm="<<_norm
 			<<" modified?"<<_modified<<std::endl;
 	str<<"Parameters:"<<std::endl;
@@ -350,10 +354,10 @@ void AmpAbsDynamicalFunction::Configure(
 	_name1 = tmp_name1.get();
 
 	//Read name2
-	auto tmp_name2 = pt.get_optional<std::string>("ParticleA");
+	auto tmp_name2 = pt.get_optional<std::string>("ParticleB");
 	if(!tmp_name2)
 		throw BadParameter("AmpAbsDynamicalFunction::Configure() | "
-				"ParticleA for "+_name+" not specified!");
+				"ParticleB for "+_name+" not specified!");
 	_name2 = tmp_name2.get();
 
 	initialize();
