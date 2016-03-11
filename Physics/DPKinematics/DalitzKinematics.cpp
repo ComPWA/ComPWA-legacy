@@ -54,9 +54,9 @@ DalitzKinematics::DalitzKinematics(double _M, double _Br,
 		double _m1, double _m2, double _m3,
 		std::string _nameMother, std::string _name1,
 		std::string _name2, std::string _name3) :
-	m1(_m1), m2(_m2), m3(_m3),
-	name1(_name1), name2(_name2),
-	name3(_name3), massIdsSet(false), Kinematics(_nameMother,_Br,3)
+					m1(_m1), m2(_m2), m3(_m3),
+					name1(_name1), name2(_name2),
+					name3(_name3), massIdsSet(false), Kinematics(_nameMother,_Br,3)
 {
 	try{
 		spinM = PhysConst::instance()->getJ(_nameMother);
@@ -116,6 +116,23 @@ void DalitzKinematics::init()
 		<<GetMinMax(i).second;
 
 	return;
+}
+
+// Check if variables are orthogonal to each other
+bool DalitzKinematics::AreBoxVariables(unsigned int idA, unsigned int idB)
+{
+	if( idA >= GetNVars() || idB >= GetNVars() )
+		throw std::runtime_error("DalitzKinematics::AreBoxVariables() | "
+				"Variables out of range: "
+				+std::to_string(idA)+","+std::to_string(idB));
+	if( idA == 0 || idA == 1 ||idA == 2 )
+		if( idB > 2 )
+			return 1;
+	if( idB == 0 || idB == 1 ||idB == 2 )
+		if( idA > 2 )
+			return 1;
+	return 0;
+
 }
 
 unsigned int DalitzKinematics::findVariable(std::string varName) const
@@ -519,12 +536,34 @@ bool DalitzKinematics::isWithinPhsp(const dataPoint& point)
 	double m13sq = point.getVal(1);
 	double m12sq = point.getVal(2);
 
-	if(m12sq < GetMinMaxLocal(2,0,m23sq).first || m12sq > GetMinMaxLocal(2,0,m23sq).second) return 0;
-	if(m13sq < GetMinMaxLocal(1,0,m23sq).first || m13sq > GetMinMaxLocal(1,0,m23sq).second) return 0;
-	if(m23sq < GetMinMaxLocal(0,1,m13sq).first || m23sq > GetMinMaxLocal(0,1,m13sq).second) return 0;
-	if(m12sq < GetMinMaxLocal(2,1,m13sq).first || m12sq > GetMinMaxLocal(2,1,m13sq).second) return 0;
-	if(m13sq < GetMinMaxLocal(1,2,m12sq).first || m13sq > GetMinMaxLocal(1,2,m12sq).second) return 0;
-	if(m23sq < GetMinMaxLocal(0,2,m12sq).first || m23sq > GetMinMaxLocal(0,2,m12sq).second) return 0;
-	return 1;
+	if(m12sq < GetMinMaxLocal(2,0,m23sq).first ||
+			m12sq > GetMinMaxLocal(2,0,m23sq).second) return 0;
+	if(m13sq < GetMinMaxLocal(1,0,m23sq).first ||
+			m13sq > GetMinMaxLocal(1,0,m23sq).second) return 0;
+	if(m23sq < GetMinMaxLocal(0,1,m13sq).first ||
+			m23sq > GetMinMaxLocal(0,1,m13sq).second) return 0;
+	if(m12sq < GetMinMaxLocal(2,1,m13sq).first ||
+			m12sq > GetMinMaxLocal(2,1,m13sq).second) return 0;
+	if(m13sq < GetMinMaxLocal(1,2,m12sq).first ||
+			m13sq > GetMinMaxLocal(1,2,m12sq).second) return 0;
+	if(m23sq < GetMinMaxLocal(0,2,m12sq).first ||
+			m23sq > GetMinMaxLocal(0,2,m12sq).second) return 0;
 
+	return 1;
+}
+
+bool DalitzKinematics::isWithinBoxPhsp(int idA, int idB,
+		double varA, double varB)
+{
+	if(!AreBoxVariables(idA, idB))
+		throw std::runtime_error("DalitzKinematics::AreBoxVariables() | "
+				"Variables do not form a square phase-space region: "
+				+std::to_string(idA)+","+std::to_string(idB));
+
+	if( varA < GetMinMax(idA).first	|| varA > GetMinMax(idA).second )
+		return 0;
+	if( varB < GetMinMax(idB).first	|| varB > GetMinMax(idB).second )
+		return 0;
+
+	return 1;
 }

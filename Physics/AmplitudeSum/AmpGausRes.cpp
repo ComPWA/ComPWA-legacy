@@ -29,7 +29,7 @@ AmpGausRes::AmpGausRes(const char *name,
 		std::string mother, std::string particleA, std::string particleB,
 		int nCalls, normStyle nS) :
 		AmpAbsDynamicalFunction(name, varIdA, 0, mag, phase, mass,
-				Spin(0), Spin(0), Spin(0), mother, particleA, particleB,
+				Spin(0), Spin(0), Spin(0), +1, 0, mother, particleA, particleB,
 				formFactorType::noFormFactor, nCalls, nS),
 				_width(width)
 { }

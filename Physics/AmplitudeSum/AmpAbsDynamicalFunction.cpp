@@ -20,6 +20,7 @@
 #include "Physics/AmplitudeSum/AmpAbsDynamicalFunction.hpp"
 
 AmpAbsDynamicalFunction::AmpAbsDynamicalFunction( normStyle nS, int calls) :
+_parity(+1), _cparity(0),
 _ffType(formFactorType::BlattWeisskopf), _nCalls(calls),
 _normStyle(nS), _modified(1), _norm(1.0)
 {
@@ -32,14 +33,14 @@ AmpAbsDynamicalFunction::AmpAbsDynamicalFunction(const char *name,
 		std::shared_ptr<DoubleParameter> mag,
 		std::shared_ptr<DoubleParameter> phase,
 		std::shared_ptr<DoubleParameter> mass,
-		Spin spin, Spin m, Spin n,
+		Spin spin, Spin m, Spin n, int P, int C,
 		std::string mother, std::string particleA, std::string particleB,
 		std::shared_ptr<DoubleParameter> mesonR, //  meson radius
 		std::shared_ptr<DoubleParameter> motherR, //  mother radius
 		formFactorType type,
 		int nCalls, normStyle nS) :
 						_name(name), _mag(mag), _phase(phase), _mass(mass), _subSys(varIdA),
-						_spin(spin), _m(m), _n(n),
+						_spin(spin), _m(m), _n(n), _parity(P), _cparity(C),
 						_nameMother(mother), _name1(particleA), _name2(particleB),
 						_mesonRadius(mesonR), _motherRadius(motherR), _ffType(type),
 						_nCalls(nCalls), _normStyle(nS), _norm(1.0), _modified(1),
@@ -53,17 +54,19 @@ AmpAbsDynamicalFunction::AmpAbsDynamicalFunction(const char *name,
 		std::shared_ptr<DoubleParameter> mag,
 		std::shared_ptr<DoubleParameter> phase,
 		std::shared_ptr<DoubleParameter> mass,
-		Spin spin, Spin m, Spin n,
+		Spin spin, Spin m, Spin n, int P, int C,
 		std::string mother, std::string particleA, std::string particleB,
 		formFactorType type,
 		int nCalls, normStyle nS) :
-						_name(name), _mag(mag), _phase(phase), _mass(mass),
-						_subSys(varIdA), _spin(spin), _m(m), _n(n),
-						_nameMother(mother), _name1(particleA), _name2(particleB),
-						_mesonRadius(std::make_shared<DoubleParameter>(name, 1.0)),
-						_motherRadius(std::make_shared<DoubleParameter>(name, 1.0)), _ffType(type),
-						_nCalls(nCalls), _normStyle(nS), _norm(1.0), _modified(1),
-						_wignerD(varIdB, spin)
+							_name(name), _mag(mag), _phase(phase), _mass(mass),
+							_subSys(varIdA), _spin(spin), _m(m), _n(n),
+							_parity(P), _cparity(C),
+							_nameMother(mother), _name1(particleA), _name2(particleB),
+							_mesonRadius(std::make_shared<DoubleParameter>(name, 1.0)),
+							_motherRadius(std::make_shared<DoubleParameter>(name, 1.0)),
+							_ffType(type),
+							_nCalls(nCalls), _normStyle(nS), _norm(1.0), _modified(1),
+							_wignerD(varIdB, spin)
 {
 	initialize();
 }
@@ -71,9 +74,10 @@ AmpAbsDynamicalFunction::AmpAbsDynamicalFunction(const char *name,
 std::string AmpAbsDynamicalFunction::to_str() const
 {
 	std::stringstream str;
-	str<<"AmpAbsDynamicalFunction | "<<_name<<" enabled="<<_enable
-			<< " nCalls="<<_nCalls << " subSys="<<_subSys
-			<<" J="<<_spin<<" ffType="<<_ffType<<std::endl
+	str<<"AmpAbsDynamicalFunction | "<<_name<<" enabled="<<_enable << " nCalls="<<_nCalls
+			<< " varId1="<<GetVarIdA()<<" varId2="<<GetVarIdB()<<std::endl
+			<<" J="<<_spin<<" P="<<_parity<<" C="<<_cparity
+			<<" ffType="<<_ffType<<std::endl
 			<<" mother: "<<_nameMother
 			<<" particleA: "<<_name1<<" particleB: "<<_name2<<std::endl;
 	str<<" normStyle="<<_normStyle<< " norm="<<_norm
@@ -314,11 +318,33 @@ void AmpAbsDynamicalFunction::Configure(
 		}
 	}
 
-	auto tmp_spin = pt.get_optional<int>("spin");
+	auto tmp_spin = pt.get_optional<int>("Spin");
 	if(!tmp_spin)
 		throw BadParameter("AmpAbsDynamicalFunction::Configure() | "
-				"spin for "+_name+" not specified!");
+				"Spin for "+_name+" not specified!");
 	_spin = Spin(tmp_spin.get());
+
+	auto tmp_parity = pt.get_optional<int>("Parity");
+	if(!tmp_parity)
+		throw BadParameter("AmpAbsDynamicalFunction::Configure() | "
+				"Parity for "+_name+" not specified!");
+	if( tmp_parity.get()!=1 && tmp_parity.get()!=-1)
+		throw BadParameter("AmpAbsDynamicalFunction::Configure() | "
+				"Parity for "+_name+" not valid: "
+				+std::to_string(tmp_parity.get()));
+	_parity = tmp_parity.get();
+
+	auto tmp_cparity = pt.get_optional<int>("Cparity");
+	if(!tmp_cparity) _cparity = 0; //default value: no parity
+	else {
+		if( std::abs(tmp_cparity.get()) > 1 )
+			throw BadParameter("AmpAbsDynamicalFunction::Configure() | "
+					"Charge parity for "+_name+" not valid: "
+					+std::to_string(tmp_cparity.get())
+			);
+		_cparity = tmp_cparity.get();
+	}
+
 	//optional parameters
 	double tmp_m = pt.get<int>("m",0);
 	_m = Spin(tmp_m);
@@ -401,11 +427,18 @@ void AmpAbsDynamicalFunction::put(boost::property_tree::ptree &pt){
 		pt.put("mesonRadius_min", _mesonRadius->GetMinValue());
 		pt.put("mesonRadius_max", _mesonRadius->GetMaxValue());
 	}
-	pt.put("spin", _spin);
-	pt.put("m", _m);
-	pt.put("n", _n);
+	pt.put("Spin", _spin);
+	pt.put("Parity", _parity);
+	if( _cparity )
+		pt.put("Cparity", _cparity);
+	if( _m != 0)
+		pt.put("m", _m);
+	if( _n != 0)
+		pt.put("n", _n);
+
 	pt.put("varIdA", GetVarIdA());
 	pt.put("varIdB", GetVarIdB());
+
 	if(Kinematics::instance()->getMotherName() != _nameMother)
 		pt.put("Mother", _nameMother);
 	pt.put("ParticleA", _name1);
@@ -474,10 +507,19 @@ double evalAmp(double* x, size_t dim, void* param)
 	auto amp = static_cast<AmpAbsDynamicalFunction*>(param);
 	dataPoint point;
 	try{
-		Kinematics::instance()->FillDataPoint( 0, 1, x[1], x[0], point );
+		Kinematics::instance()->FillDataPoint( 0, 1, x[0], x[1], point );
 	} catch (BeyondPhsp& ex){
 		return 0;
 	}
+
+//	int idA = amp->GetVarIdA();
+//	int idB = amp->GetVarIdB();
+//	if( !Kinematics::instance()->isWithinBoxPhsp(idA, idB, x[0], x[1]) )
+//		return 0;
+//
+//	dataPoint point;
+//	point.setVal(idA, x[0]);
+//	point.setVal(idB, x[1]);
 
 	std::complex<double> res = amp->EvaluateAmp(point);
 	//include angular distribution in normalization
@@ -494,24 +536,23 @@ double AmpAbsDynamicalFunction::GetIntegral() const
 
 	auto var1_limit = kin->GetMinMax( 0 );
 	auto var2_limit = kin->GetMinMax( 1 );
-	double xLimit_low[2] = {var2_limit.first,var1_limit.first};
-	double xLimit_high[2] = {var2_limit.second,var1_limit.second};
+	double xLimit_low[2] = {var1_limit.first,var2_limit.first};
+	double xLimit_high[2] = {var1_limit.second,var2_limit.second};
 
 	gsl_rng_env_setup ();
 	const gsl_rng_type *T = gsl_rng_default; //type of random generator
 	gsl_rng *r = gsl_rng_alloc(T); //random generator
 	gsl_monte_function F = {&evalAmp,dim, const_cast<AmpAbsDynamicalFunction*> (this)};
-	//	gsl_monte_function F = {&twoDimGaussian,dim, new int()};//using test function; result should be 1
 
-	/*	Choosing vegas algorithm here, because it is the most accurate:
-	 * 		-> 10^5 calls gives (in my example) an accuracy of 0.03%
-	 * 		 this should be sufficiency for most applications
-	 */
+	//Test function: result should be 1
+	//gsl_monte_function F = {&twoDimGaussian,dim, new int()};
+
 	gsl_monte_vegas_state *s = gsl_monte_vegas_alloc (dim);
 	gsl_monte_vegas_integrate (&F, xLimit_low, xLimit_high, 2, _nCalls, r,s,&res, &err);
 	gsl_monte_vegas_free(s);
-	BOOST_LOG_TRIVIAL(debug)<<"AmpAbsDynamicalFunction::GetIntegral() Integration result for |"
-			<<_name<<"|^2: "<<res<<"+-"<<err<<" relAcc [%]: "<<100*err/res;
+	BOOST_LOG_TRIVIAL(debug)<<"AmpAbsDynamicalFunction::GetIntegral() | "
+			"Integration result for |"<<_name<<"|^2: "
+			<<res<<"+-"<<err<<" relAcc [%]: "<<100*err/res;
 
 	return res;
 }
@@ -535,12 +576,22 @@ double eval(double* x, size_t dim, void* param)
 	if(dim!=2) return 0;
 
 	auto amp = static_cast<AmpAbsDynamicalFunction*>(param);
+
 	dataPoint point;
 	try{
-		Kinematics::instance()->FillDataPoint( 0, 1, x[1], x[0], point );
+		Kinematics::instance()->FillDataPoint( 0, 1, x[0], x[1], point );
 	} catch (BeyondPhsp& ex){
 		return 0;
 	}
+
+//	int idA = amp->GetVarIdA();
+//	int idB = amp->GetVarIdB();
+//	if( !Kinematics::instance()->isWithinBoxPhsp(idA, idB, x[0], x[1]) )
+//		return 0;
+//
+//	dataPoint point;
+//	point.setVal(idA, x[0]);
+//	point.setVal(idB, x[1]);
 
 	std::complex<double> res = amp->EvaluateAmp(point);
 	double ang = amp->EvaluateWignerD(point);
@@ -560,23 +611,17 @@ double AmpAbsDynamicalFunction::GetTotalIntegral() const
 
 	auto var1_limit = kin->GetMinMax( 0 );
 	auto var2_limit = kin->GetMinMax( 1 );
-	double xLimit_low[2] = {var2_limit.first,var1_limit.first};
-	double xLimit_high[2] = {var2_limit.second,var1_limit.second};
+	double xLimit_low[2] = {var1_limit.first,var2_limit.first};
+	double xLimit_high[2] = {var1_limit.second,var2_limit.second};
 
 	gsl_rng_env_setup ();
 	const gsl_rng_type *T = gsl_rng_default; //type of random generator
 	gsl_rng *r = gsl_rng_alloc(T); //random generator
 	gsl_monte_function F = {&eval,dim, const_cast<AmpAbsDynamicalFunction*> (this)};
 
-	/*	Choosing vegas algorithm here, because it is the most accurate:
-	 * 		-> 10^5 calls gives (in my example) an accuracy of 0.03%
-	 * 		 this should be sufficiency for most applications
-	 */
 	gsl_monte_vegas_state *s = gsl_monte_vegas_alloc (dim);
 	gsl_monte_vegas_integrate (&F, xLimit_low, xLimit_high, 2, _nCalls, r,s,&res, &err);
 	gsl_monte_vegas_free(s);
-	//	BOOST_LOG_TRIVIAL(debug)<<"AmpAbsDynamicalFunction::totalIntegral() | "
-	//			<<" Result for |"<<_name<<"|^2: "<<res<<"+-"<<err<<" relAcc [%]: "<<100*err/res;
 
 	return res;
 }

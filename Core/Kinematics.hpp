@@ -20,7 +20,12 @@
 #include "Core/Event.hpp"
 class dataPoint;
 
-static const char * formFactorTypeString[] = { "noFormFactor", "BlattWeisskopf", "CrystalBarrel" };
+static const char * formFactorTypeString[] = {
+		"noFormFactor",
+		"BlattWeisskopf",
+		"CrystalBarrel"
+};
+
 enum formFactorType{
 	noFormFactor = 0,
 	BlattWeisskopf = 1,
@@ -32,10 +37,24 @@ class Kinematics
 public:
 	//! singleton pattern
 	static Kinematics* instance();
+
 	//! vector with names of variables, e.g. vec[0]=m23sq, vec[1]=m13sq
 	const std::vector<std::string>& getVarNames() { return varNames; }
-	//! checks of data point is within phase space boundaries
-	virtual bool isWithinPhsp(const dataPoint& point) = 0;
+
+	//! Checks of data point is within phase space boundaries
+	virtual bool isWithinPhsp(const dataPoint& point) { };
+
+	/**! Checks if the position is within the phase-space boundaries.
+	 * This only works correctly if both variables are orthogonal to each other.
+	 * E.g. and invariant mass and an angle.
+	 * @param idA Variable id of invariant mass
+	 * @param idB Variable id of angle
+	 * @param varA Invariant mass
+	 * @param varB Helicity angle
+	 * @return
+	 */
+	virtual bool isWithinBoxPhsp(int idA, int idB, double varA, double varB) = 0;
+
 	//! Get name of mother particle
 	virtual std::string getMotherName() { return nameMother; };
 	//! Get mass of mother particle
@@ -141,7 +160,16 @@ public:
 	//! checks of data point is within phase space boundaries
 	virtual bool isWithinPhsp(const dataPoint& point);
 
-	//! mass of mother particle
+	/**! Checks if the position is within the phase-space boundaries.
+	 * This only works correctly if both variables are orthogonal to each other.
+	 * E.g. and invariant mass and an angle.
+	 * @param idA Variable id of invariant mass
+	 * @param idB Variable id of angle
+	 * @param varA Invariant mass
+	 * @param varB Helicity angle
+	 * @return
+	 */
+	virtual bool isWithinBoxPhsp(int idA, int idB, double varA, double varB) { };
 
 	//! Calculate phase-space volume
 	virtual double getPhspVolume() { return (mass_max-mass_min); }

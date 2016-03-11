@@ -41,7 +41,7 @@ public:
 			std::shared_ptr<DoubleParameter> mag,
 			std::shared_ptr<DoubleParameter> phase,
 			std::shared_ptr<DoubleParameter> mass,
-			Spin spin, Spin m, Spin n,
+			Spin spin, Spin m, Spin n, int P, int C,
 			std::string mother, std::string particleA, std::string particleB,
 			std::shared_ptr<DoubleParameter> width,
 			std::shared_ptr<DoubleParameter> mesonRadius,
