@@ -105,7 +105,7 @@ int main(int argc, char **argv){
 	std::string trueModelFile = "test/CompareTreeAmp-model.xml";
 	boost::property_tree::ptree pt;
 	read_xml(trueModelFile, pt, boost::property_tree::xml_parser::trim_whitespace);
-	auto fitAmpPtr = new AmpSumIntensity(normStyle::none, eff, num);
+	auto fitAmpPtr = new AmpSumIntensity("amp",normStyle::none, eff, num);
 	fitAmpPtr->Configure(pt);
 	std::shared_ptr<Amplitude> trueAmp( fitAmpPtr );
 	trueAmp->copyParameterList(list);

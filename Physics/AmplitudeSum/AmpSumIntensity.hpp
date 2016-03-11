@@ -35,15 +35,17 @@
 class AmpSumIntensity : public Amplitude {
 
 public:
-	AmpSumIntensity( normStyle ns=normStyle::none,
+	AmpSumIntensity( std::string name="", normStyle ns=normStyle::none,
 			std::shared_ptr<Efficiency> eff=
 					std::shared_ptr<Efficiency>(new UnitEfficiency),
 					unsigned int nCalls=30000);
 	//! Destructor
 	virtual ~AmpSumIntensity(){ /* nothing */ };
 	//! Clone function
-	virtual AmpSumIntensity* Clone(){
-		return (new AmpSumIntensity(*this));
+	virtual AmpSumIntensity* Clone(std::string newName=""){
+		auto tmp = (new AmpSumIntensity(*this));
+		tmp->SetName(newName);
+		return tmp;
 	}
 
 	//! Configure resonance from ptree
@@ -194,8 +196,8 @@ protected:
 	 * with efficiency corrected toy phsp sample or "normAcc" normalization tree with sample
 	 * of accepted flat phsp events
 	 */
-	std::shared_ptr<FunctionTree> setupBasicTree(ParameterList& theMasses,
-			ParameterList& toyPhspSample, std::string suffix="");
+	std::shared_ptr<FunctionTree> setupBasicTree(ParameterList& sample,
+			ParameterList& phspSample);
 };
 
 #endif

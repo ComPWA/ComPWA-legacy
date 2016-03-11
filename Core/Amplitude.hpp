@@ -43,12 +43,17 @@ class Amplitude
 
 public:
 
-	Amplitude(){}
+	Amplitude(std::string name="") : _name(name) { }
 
 	virtual ~Amplitude()
 	{ /* nothing */	}
 
-	virtual Amplitude* Clone() = 0;
+	virtual Amplitude* Clone(std::string newName="") = 0;
+
+	//! Get name of amplitude
+	virtual std::string GetName() const { return _name; }
+	//! Set name of amplitude
+	virtual void SetName(std::string name) { _name = name; }
 
 	//! set efficiency
 	virtual void setEfficiency(std::shared_ptr<Efficiency> eff) {};
@@ -115,6 +120,9 @@ public:
 	}
 
 protected:
+	//Name
+	std::string _name;
+
 	//need to store this object for boost::filter_iterator
 	resIsEnabled _resEnabled;
 
@@ -143,8 +151,10 @@ public:
 			throw std::runtime_error("GaussAmp::initialize() | this amplitude is for two body decays only!");
 	};
 	//! Clone function
-	virtual GaussAmp* Clone(){
-		return (new GaussAmp(*this));
+	virtual GaussAmp* Clone(std::string newName=""){
+		auto tmp = (new GaussAmp(*this));
+		tmp->SetName(newName);
+		return tmp;
 	}
 	virtual bool copyParameterList(ParameterList& outPar){
 		outPar = ParameterList(params);
@@ -236,8 +246,10 @@ public:
 
 	virtual ~UnitAmp()	{ /* nothing */	}
 
-	virtual Amplitude* Clone() {;
-	return (new UnitAmp(*this));
+	virtual Amplitude* Clone(std::string newName="") {
+		auto tmp = new UnitAmp(*this);
+		tmp->SetName(newName);
+		return tmp;
 	}
 
 	//! set efficiency

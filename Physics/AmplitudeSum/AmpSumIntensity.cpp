@@ -9,6 +9,7 @@
 //     Mathias Michel - initial API and implementation
 //		Peter Weidenkaff - adding flatte type resonance, removing root dependence
 //-------------------------------------------------------------------------------
+#include <numeric>
 
 #include "Core/PhysConst.hpp"
 #include "Core/Functions.hpp"
@@ -28,9 +29,11 @@
 
 #include "Physics/AmplitudeSum/AmpSumIntensity.hpp"
 
-AmpSumIntensity::AmpSumIntensity(normStyle ns, std::shared_ptr<Efficiency> eff,
+AmpSumIntensity::AmpSumIntensity(std::string name,
+		normStyle ns, std::shared_ptr<Efficiency> eff,
 		unsigned int nCalls) :
-		_normStyle(ns), _calcMaxFcnVal(0), eff_(eff), _nCalls(nCalls)
+		Amplitude(name), _normStyle(ns), _calcMaxFcnVal(0), eff_(eff),
+		_nCalls(nCalls), _maxFcnVal(0.)
 {
 	result.AddParameter(
 			std::shared_ptr<DoubleParameter>(
@@ -100,232 +103,82 @@ void AmpSumIntensity::Save(std::string filePath)
 }
 
 //! Getter function for function tree
-virtual std::shared_ptr<FunctionTree> AmpSumIntensity::GetTree(
-		ParameterList& sample, ParameterList& toySample,
-		std::string suffix="")
+std::shared_ptr<FunctionTree> AmpSumIntensity::GetTree(
+		ParameterList& sample, ParameterList& phspSample, ParameterList& toySample)
 {
-	return setupBasicTree(sample,toySample, suffix);
-}
-		//we assume that the total efficiency of the sample is stored as efficiency of each event
-//		accSampleEff = mAccSample.GetMultiDouble(effId)->GetValue(0);
-//		BOOST_LOG_TRIVIAL(info)<<"MinLogLH::MinLogLH() total efficiency of unbinned correction sample is set to "<<accSampleEff;
+	unsigned int effId = Kinematics::instance()->GetNVars();
+	unsigned int weightId = Kinematics::instance()->GetNVars()+1;
 
-	//Store position of efficiency and weight vector
-//	effId = Kinematics::instance()->GetNVars();
-//	weightId = Kinematics::instance()->GetNVars()+1;
-
-//void MinLogLH::iniLHtree(){
-//	//reset all trees before generating new trees; saves a lot of virtual memory
-//	signalPhspTree = std::shared_ptr<FunctionTree>();
-//	signalTree_amp = std::shared_ptr<FunctionTree>();
-//	signalPhspTree_amp = std::shared_ptr<FunctionTree>();
-//	bkgPhspTree = std::shared_ptr<FunctionTree>();
-//	bkgTree_amp = std::shared_ptr<FunctionTree>();
-//	bkgPhspTree_amp = std::shared_ptr<FunctionTree>();
-//
-//	BOOST_LOG_TRIVIAL(debug) << "MinLogLH::iniLHtree() constructing the LH tree";
-//
-//	if(useFunctionTree) return;
-//	if(!amp->hasTree()){
-//		throw std::runtime_error("MinLogLH::iniLHtree() amplitude has no tree");
-//	}
-//	if(ampBkg && !ampBkg->hasTree()){
-//		throw std::runtime_error("MinLogLH::iniLHtree() amplitude has no tree");
-//	}
-//
-//	//----Strategies needed
-//	std::shared_ptr<Strategy> mmultStrat(new MultAll(ParType::MCOMPLEX));
-//	std::shared_ptr<Strategy> mmultDStrat(new MultAll(ParType::MDOUBLE));
-//	std::shared_ptr<Strategy> multiDoubleAddStrat(new AddAll(ParType::MDOUBLE));
-//	std::shared_ptr<Strategy> multiComplexAddStrat(new AddAll(ParType::MCOMPLEX));
-//	std::shared_ptr<Strategy> msqStrat(new AbsSquare(ParType::MDOUBLE));
-//	std::shared_ptr<Strategy> mlogStrat(new LogOf(ParType::MDOUBLE));
-//	std::shared_ptr<Strategy> multStrat(new MultAll(ParType::COMPLEX));
-//	std::shared_ptr<Strategy> multDStrat(new MultAll(ParType::DOUBLE));
-//	std::shared_ptr<Strategy> addStrat(new AddAll(ParType::DOUBLE));
-//	std::shared_ptr<Strategy> addComplexStrat(new AddAll(ParType::COMPLEX));
-//	std::shared_ptr<Strategy> sqStrat(new AbsSquare(ParType::DOUBLE));
-//	std::shared_ptr<Strategy> logStrat(new LogOf(ParType::DOUBLE));
-//	std::shared_ptr<Strategy> complStrat(new Complexify(ParType::COMPLEX));
-//	std::shared_ptr<Strategy> invStrat(new Inverse(ParType::DOUBLE));
-//
-//	BOOST_LOG_TRIVIAL(debug)<<"MinLogLH::iniLHTree() construction normalization tree";
-//
-//	//=== Signal normalization
-//	signalPhspTree = std::shared_ptr<FunctionTree>(new FunctionTree());
-//	signalPhspTree->createHead("invNormLH", invStrat);// 1/normLH
-//	// normLH = phspVolume/N_{mc} |T_{evPHSP}|^2
-//	signalPhspTree->createNode("normFactor", multDStrat, "invNormLH");
-//	// sumAmp = \sum_{evPHSP} |T_{evPHSP}|^2
-//	signalPhspTree->createNode("sumAmp", addStrat,"normFactor");
-//	std::shared_ptr<MultiDouble> eff, weightPhsp;
-//	signalPhspTree->createLeaf("phspVolume",
-//			Kinematics::instance()->getPhspVolume(), "normFactor");
-//
-//	//Which kind of efficiency correction should be used?
-//	if(!accSample) {//binned
-//		int phspSampleSize = mPhspSample.GetMultiDouble(0)->GetNValues();
-//		signalPhspTree_amp = amp->GetTree(mPhspSample,mPhspSample,"_Phsp");
-//
-//		weightPhsp = mPhspSample.GetMultiDouble(weightId);
-//		double sumWeights =
-//				std::accumulate(weightPhsp->Begin(), weightPhsp->End(), 0.0);
-//		signalPhspTree->createLeaf("InvNmc",
-//				1/ ( (double) sumWeights ), "normFactor");
-//		signalPhspTree->createNode("IntensPhspEff", mmultDStrat, "sumAmp",
-//				phspSampleSize, false); //|T_{ev}|^2
-//		eff = mPhspSample.GetMultiDouble(effId);
-//		signalPhspTree->createLeaf("eff", eff, "IntensPhspEff"); //efficiency
-//		signalPhspTree->createLeaf("weightPhsp", weightPhsp, "IntensPhspEff");
-//		signalPhspTree->createNode("IntensPhsp", msqStrat, "IntensPhspEff",
-//				phspSampleSize, false); //|T_{ev}|^2
-//		BOOST_LOG_TRIVIAL(debug)<<"MinLogLH::iniLHTree() | Setting up "
-//				"normalization tree, using toy sample and assume that "
-//				"efficiency values are saved for every event!";
-//
-//		signalPhspTree->insertTree(signalPhspTree_amp, "IntensPhsp");
-//	}
-//	else {//unbinned
-//		int accSampleSize = mAccSample.GetMultiDouble(0)->GetNValues();
-//		signalPhspTree->createNode("weightIntensPhsp", mmultDStrat, "sumAmp",
-//				accSampleSize, false);
-//		weightPhsp = mPhspSample.GetMultiDouble(weightId);
-//		signalPhspTree->createLeaf("weightPhsp", weightPhsp, "weightIntensPhsp");
-//		signalPhspTree->createNode("IntensPhsp", msqStrat, "weightIntensPhsp",
-//				accSampleSize, false); //|T_{ev}|^2
-//		double sumWeights =
-//				std::accumulate(weightPhsp->Begin(), weightPhsp->End(), 0.0);
-//		signalPhspTree->createLeaf("InvNmc",
-//				1/ ( (double) sumWeights/accSampleEff ), "normFactor");
-//		signalPhspTree_amp = amp->GetTree(mAccSample,mPhspSample,"_Phsp");
-//		BOOST_LOG_TRIVIAL(debug)<<"MinLogLH::iniLHTree() setting up normalization tree, "
-//				"using sample of accepted phsp events for efficiency correction!";
-//		signalPhspTree->insertTree(signalPhspTree_amp, "IntensPhsp"); //Sum of resonances, at each point
-//	}
-//	//=== Background normalization
-//	if(ampBkg){
-//		bkgPhspTree = std::shared_ptr<FunctionTree>(new FunctionTree());
-//		bkgPhspTree->createHead("invBkgNormLH", invStrat);// 1/normLH
-//		bkgPhspTree->createNode("normFactor", multDStrat, "invBkgNormLH"); // normLH = phspVolume/N_{mc} |T_{evPHSP}|^2
-//		bkgPhspTree->createNode("sumAmp", addStrat,"normFactor"); // sumAmp = \sum_{evPHSP} |T_{evPHSP}|^2
-//		bkgPhspTree->createLeaf("phspVolume", Kinematics::instance()->getPhspVolume(), "normFactor");
-//		if(!accSample) {//binned
-//			int phspSampleSize = mPhspSample.GetMultiDouble(0)->GetNValues();
-//			bkgPhspTree_amp = ampBkg->GetTree(mPhspSample,mPhspSample,"_Phsp");
-//
-//			weightPhsp = mPhspSample.GetMultiDouble(weightId);
-//			double sumWeights =
-//					std::accumulate(weightPhsp->Begin(), weightPhsp->End(), 0.0);
-//			bkgPhspTree->createLeaf("InvNmc", 1/ ( (double) sumWeights), "normFactor");
-//			bkgPhspTree->createNode("IntensPhspEff", mmultDStrat, "sumAmp",
-//					phspSampleSize, false); //|T_{ev}|^2
-//			eff = mPhspSample.GetMultiDouble(effId);
-//			bkgPhspTree->createLeaf("eff", eff, "IntensPhspEff"); //efficiency
-//			bkgPhspTree->createLeaf("weightPhsp", weightPhsp, "IntensPhspEff");
-//			bkgPhspTree->createNode("IntensPhsp", msqStrat, "IntensPhspEff",
-//					phspSampleSize, false); //|T_{ev}|^2
-//			BOOST_LOG_TRIVIAL(debug)<<"MinLogLH::iniLHTree() | Setting up tree "
-//					"for background normalization, using toy sample and assume "
-//					"that efficiency values are saved for every event!";
-//
-//			//Sum of resonances, at each point
-//			bkgPhspTree->insertTree(bkgPhspTree_amp, "IntensPhsp");
-//		}
-//		else {//unbinned
-//			int accSampleSize = mAccSample.GetMultiDouble(0)->GetNValues();
-//			bkgPhspTree->createNode("weightIntensPhsp", mmultDStrat, "sumAmp",
-//					accSampleSize, false);
-//			weightPhsp = mPhspSample.GetMultiDouble(weightId);
-//			bkgPhspTree->createLeaf("weightPhsp", weightPhsp, "weightIntensPhsp");
-//			bkgPhspTree->createNode("IntensPhsp", msqStrat, "weightIntensPhsp",
-//					accSampleSize, false); //|T_{ev}|^2
-//			double sumWeights =
-//					std::accumulate(weightPhsp->Begin(), weightPhsp->End(), 0.0);
-//			bkgPhspTree->createLeaf("InvNmc",
-//					1/ ( (double)sumWeights/accSampleEff ), "normFactor");
-//			bkgPhspTree_amp = ampBkg->GetTree(mAccSample,mPhspSample,"_Phsp");
-//			BOOST_LOG_TRIVIAL(debug)<<"MinLogLH::iniLHTree() | Setting up tree "
-//					"for background normalization, using sample of accepted "
-//					"phsp events for efficiency correction!";
-//
-//			bkgPhspTree->insertTree(bkgPhspTree_amp, "IntensPhsp"); //Sum of resonances, at each point
-//		}
-//	}
-//
-//	BOOST_LOG_TRIVIAL(debug)<<"MinLogLH::iniLHTree() construction LH tree";
-//	/* CONSTRUCTION OF THE LIKELIHOOD:
-//	 * We denote the coherent sum over all resonances with T:
-//	 * 		T := \sum_{i,j} c_i c_j^*A_iA_j^*
-//	 * The negative log LH is given by:
-//	 * 		-log L = - N/(\sum_{ev} w_{ev}) \sum_{ev} w_{ev} \log{f_{bkg} \frac{|T|^2}{\int_{DP} |T|^2} + (1-f_{bkg})}
-//	 * The sum over all weights is necessary to normalize the weights to one. Otherwise the error
-//	 * estimate is incorrect. The LH normalization is norm_{LH} = \int_{DP} |T|^2.
-//	 * This formulation includes event weights as well as a flat background description. f_{bkg} is
-//	 * the fraction of background in the sample. Using both is of course non-sense. Set weights to
-//	 * one OR f_{bkg} to zero.
-//	 */
-//	physicsTree = std::shared_ptr<FunctionTree>(new FunctionTree());
-//	int sampleSize = mData.GetMultiDouble(0)->GetNValues();
-//	/* Setup basic tree
-//	 * head node is 'Amplitude' which contains the complex amplitude values for each event in sample
-//	 */
-//	signalTree_amp = amp->GetTree(mData,mPhspSample,"data");
-//	std::shared_ptr<MultiDouble> weight = mData.GetMultiDouble(weightId);
-//
-//	//-log L = (-1)*N/(\sum_{ev} w_{ev}) \sum_{ev} ...
-//	physicsTree->createHead("LH", multDStrat);
-//	physicsTree->createLeaf("minusOne", -1 ,"LH");
-//	physicsTree->createLeaf("nEvents", sampleSize ,"LH");
-//	physicsTree->createNode("invSumWeights", invStrat,"LH");
-//	physicsTree->createNode("sumEvents", addStrat, "LH");
-//	physicsTree->createNode("sumWeights", addStrat, "invSumWeights");
-//	physicsTree->createLeaf("weight", weight, "sumWeights");
-//	physicsTree->createNode("weightLog", mmultDStrat, "sumEvents",
-//			sampleSize, false); //w_{ev} * log( I_{ev} )
-//	physicsTree->createLeaf("weight", weight, "weightLog");
-//	physicsTree->createNode("Log", mlogStrat, "weightLog", sampleSize, false);
-//	//I_{ev} = x_{ev} + (1-f_{bkg})
-//	physicsTree->createNode("Add", multiDoubleAddStrat, "Log",
-//			sampleSize, false);
-//
-//	//signal term
-//	physicsTree->createNode("normIntens", mmultDStrat, "Add", sampleSize, false);// x=f_{bkg}|T|^2/norm_{LH}
-//	physicsTree->createLeaf("signalFrac", signalFraction, "normIntens");
-//	physicsTree->insertTree(signalPhspTree, "normIntens"); //provides 1/normLH
-//	physicsTree->createNode("Intens", msqStrat, "normIntens", sampleSize, false);
-//	physicsTree->insertTree(signalTree_amp,"Intens");
-//	//background term
-//	if(ampBkg){
-//		physicsTree->createNode("normBkg", mmultDStrat, "Add", sampleSize, false);// x=f_{bkg}|T|^2/norm_{LH}
-//		physicsTree->createLeaf("OneMinusBkgFrac", (1-signalFraction), "normBkg");
-//		bkgTree_amp= ampBkg->GetTree(mData,mPhspSample,"data");
-//		physicsTree->insertTree(bkgPhspTree, "normBkg"); //provides 1/normLH
-//		physicsTree->createNode("IntensBkg", msqStrat, "normBkg", sampleSize, false);
-//		physicsTree->insertTree(bkgTree_amp,"IntensBkg");
-//	}
-//	physicsTree->recalculate();
-//	//	std::string treeString = physicsTree->head()->to_str(10);
-//	//	BOOST_LOG_TRIVIAL(debug) << std::endl << treeString;
-//	if(!physicsTree->sanityCheck()) {
-//		throw std::runtime_error("MinLogLH::iniLHtree() tree has structural problems. Sanity check not passed!");
-//	}
-//	BOOST_LOG_TRIVIAL(debug) <<"MinLogLH::iniLHtree() construction of LH tree finished!";
-//	useFunctionTree=1;
-//	return;
-//}
-std::shared_ptr<FunctionTree> AmpSumIntensity::setupBasicTree(
-		ParameterList& sample, ParameterList& toySample,std::string suffix)
-{
 	int sampleSize = sample.GetMultiDouble(0)->GetNValues();
 	int toySampleSize = toySample.GetMultiDouble(0)->GetNValues();
+	int phspSampleSize = phspSample.GetMultiDouble(0)->GetNValues();
+	/* We assume that the total efficiency of the phsp variable is stored in
+	 * each event. This does not influence the result but a correct efficiency
+	 * given consistent results with the GSL integration. */
+	double phspSampleEff = phspSample.GetMultiDouble(effId)->GetValue(0);
 
-	BOOST_LOG_TRIVIAL(debug) << "AmpSumIntensity::setupBasicTree() generating new tree!";
+	std::shared_ptr<MultiDouble> weightPhsp = phspSample.GetMultiDouble(weightId);
+	double sumWeights =
+			std::accumulate(weightPhsp->Begin(), weightPhsp->End(), 0.0);
+	std::shared_ptr<MultiDouble> eff = phspSample.GetMultiDouble(effId);
+
+	std::shared_ptr<Strategy> mmultStrat(new MultAll(ParType::MCOMPLEX));
+	std::shared_ptr<Strategy> mmultDStrat(new MultAll(ParType::MDOUBLE));
+	std::shared_ptr<Strategy> multiDoubleAddStrat(new AddAll(ParType::MDOUBLE));
+	std::shared_ptr<Strategy> multiComplexAddStrat(new AddAll(ParType::MCOMPLEX));
+	std::shared_ptr<Strategy> msqStrat(new AbsSquare(ParType::MDOUBLE));
+	std::shared_ptr<Strategy> mlogStrat(new LogOf(ParType::MDOUBLE));
+	std::shared_ptr<Strategy> multStrat(new MultAll(ParType::COMPLEX));
+	std::shared_ptr<Strategy> multDStrat(new MultAll(ParType::DOUBLE));
+	std::shared_ptr<Strategy> addStrat(new AddAll(ParType::DOUBLE));
+	std::shared_ptr<Strategy> addComplexStrat(new AddAll(ParType::COMPLEX));
+	std::shared_ptr<Strategy> sqStrat(new AbsSquare(ParType::DOUBLE));
+	std::shared_ptr<Strategy> logStrat(new LogOf(ParType::DOUBLE));
+	std::shared_ptr<Strategy> complStrat(new Complexify(ParType::COMPLEX));
+	std::shared_ptr<Strategy> invStrat(new Inverse(ParType::DOUBLE));
+
+	//------------Setup Tree---------------------
+	std::shared_ptr<FunctionTree> tr(new FunctionTree());
+
+	tr->createHead(GetName(),mmultDStrat);
+	tr->createNode("AmpSq",msqStrat,GetName());
+	tr->insertTree( setupBasicTree(sample, toySample), "AmpSq");
+
+	//Normalization
+	tr->createNode("N", invStrat, GetName());// 1/normLH
+	// normLH = phspVolume/N_{mc} |T_{evPHSP}|^2
+	tr->createNode("normFactor", multDStrat, "N");
+	// sumAmp = \sum_{evPHSP} |T_{evPHSP}|^2
+	tr->createNode("sumAmp", addStrat,"normFactor");
+	tr->createLeaf("phspVolume",
+			Kinematics::instance()->getPhspVolume(), "normFactor");
+	tr->createLeaf("InvNmc",
+			1/ ( (double) sumWeights/phspSampleEff ), "normFactor");
+	tr->createNode("IntensPhspEff", mmultDStrat, "sumAmp",
+			phspSampleSize, false); //|T_{ev}|^2
+	tr->createLeaf("eff", eff, "IntensPhspEff"); //efficiency
+	tr->createLeaf("weightPhsp", weightPhsp, "IntensPhspEff");
+	tr->createNode("IntensPhsp", msqStrat, "IntensPhspEff",
+			phspSampleSize, false); //|T_{ev}|^2
+	tr->insertTree( setupBasicTree(phspSample, toySample), "IntensPhsp");
+
+	return tr;
+}
+
+std::shared_ptr<FunctionTree> AmpSumIntensity::setupBasicTree(
+		ParameterList& sample, ParameterList& phspSample)
+{
+	int sampleSize = sample.GetMultiDouble(0)->GetNValues();
+	int phspSampleSize = phspSample.GetMultiDouble(0)->GetNValues();
+
 	if(sampleSize==0){
-		BOOST_LOG_TRIVIAL(error) << "AmpSumIntensity::setupBasicTree() data sample empty!";
+		BOOST_LOG_TRIVIAL(error) << "AmpSumIntensity::setupBasicTree() | "
+				"Data sample empty!";
 		return std::shared_ptr<FunctionTree>();
 	}
-	if(toySampleSize==0){
-		BOOST_LOG_TRIVIAL(error) << "AmpSumIntensity::setupBasicTree() toy sample empty!";
+	if(phspSampleSize==0){
+		BOOST_LOG_TRIVIAL(error) << "AmpSumIntensity::setupBasicTree() | "
+				"Phsp sample empty!";
 		return std::shared_ptr<FunctionTree>();
 	}
 
@@ -334,18 +187,19 @@ std::shared_ptr<FunctionTree> AmpSumIntensity::setupBasicTree(
 
 	//----Strategies needed
 	std::shared_ptr<AddAll> maddStrat(new AddAll(ParType::MCOMPLEX));
-	newTree->createHead("Amplitude"+suffix, maddStrat, sampleSize);
+
+	newTree->createHead("Amplitude", maddStrat, sampleSize);
 
 	auto it = resoList.begin();
 	for( ; it!=resoList.end(); ++it){
 		if(!(*it)->GetEnable()) continue;
 		std::shared_ptr<FunctionTree> resTree= (*it)->SetupTree(sample,
-				toySample, ""+(*it)->GetName());
+				phspSample, ""+(*it)->GetName());
 		if(!resTree->sanityCheck())
 			throw std::runtime_error("AmpSumIntensity::setupBasicTree() | "
 					"Resonance tree didn't pass sanity check!");
 		resTree->recalculate();
-		newTree->insertTree(resTree, "Amplitude"+suffix);
+		newTree->insertTree(resTree, "Amplitude");
 	}
 
 	BOOST_LOG_TRIVIAL(debug)<<"AmpSumIntensity::setupBasicTree(): tree constructed!!";
@@ -380,9 +234,9 @@ void AmpSumIntensity::calcMaxVal(std::shared_ptr<Generator> gen)
 		auto m23sq_limit = kin->GetMinMax(0);
 
 		double m23sq = gen->getUniform()*(m23sq_limit.second-m23sq_limit.first)
-										+m23sq_limit.first;
+												+m23sq_limit.first;
 		double m13sq = gen->getUniform()*(m13sq_limit.second-m13sq_limit.first)
-										+m13sq_limit.first;
+												+m13sq_limit.first;
 		dataPoint point;
 		try{
 			Kinematics::instance()->FillDataPoint(1,0,m13sq,m23sq,point);

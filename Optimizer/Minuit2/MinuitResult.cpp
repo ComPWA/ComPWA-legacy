@@ -20,7 +20,7 @@ MinuitResult::MinuitResult(std::shared_ptr<ControlParameter> esti,
 			useCorrelatedErrors(0), calcInterference(0), useTree(0),
 			correlatedErrors_numberOfSets(200){
 	std::shared_ptr<Estimator> est = std::static_pointer_cast<Estimator>(esti);
-	_amp = est->getAmplitude();
+	_amp = est->getAmplitude(0);
 	penalty = est->calcPenalty();
 	nEvents = est->getNEvents();
 	init(result);
@@ -29,7 +29,7 @@ MinuitResult::MinuitResult(std::shared_ptr<ControlParameter> esti,
 void MinuitResult::setResult(std::shared_ptr<ControlParameter> esti,
 		FunctionMinimum result){
 	std::shared_ptr<Estimator> est = std::static_pointer_cast<Estimator>(esti);
-	_amp = est->getAmplitude();
+	_amp = est->getAmplitude(0);
 	penalty = est->calcPenalty();
 	nEvents = est->getNEvents();
 	init(result);
@@ -373,7 +373,6 @@ void MinuitResult::printCorrelationMatrix(TableFormater* tableCorr){
 				finalParameters.GetDoubleParameter(o);
 		if(ppp->IsFixed()) continue;
 		*tableCorr << ppp->GetName();
-		//TODO: check if emtpy (don't know how this happened, but it did :)
 		*tableCorr << globalCC.at(n);
 		for(unsigned int t=0;t<corr.size();t++) {
 			if(n>=corr.at(0).size()) { *tableCorr<< " "; continue; }

@@ -220,7 +220,8 @@ std::shared_ptr<FunctionTree> AmpRelBreitWignerRes::SetupTree(
 	newTree->createLeaf("Intens_"+_name, _mag, "C_"+_name); //r
 	newTree->createLeaf("Phase_"+_name, _phase, "C_"+_name); //phi
 	//Angular distribution
-	newTree->insertTree(_wignerD.SetupTree(sample,suffix), "Reso_"+_name);
+	if( _spin )
+		newTree->insertTree(_wignerD.SetupTree(sample,suffix), "Reso_"+_name);
 
 	//Breit-Wigner
 	newTree->createNode("RelBW_"+_name, rbwStrat, "Reso_"+_name, sampleSize);
@@ -249,7 +250,8 @@ std::shared_ptr<FunctionTree> AmpRelBreitWignerRes::SetupTree(
 		newTree->createNode("NormReso_"+_name, mmultStrat, "AbsVal_"+_name,
 				toySampleSize);
 		//Angular distribution (Normalization)
-		newTree->insertTree(_wignerD.SetupTree(toySample,suffix),
+		if( _spin )
+			newTree->insertTree(_wignerD.SetupTree(toySample,suffix),
 				"NormReso_"+_name);
 		//Breit-Wigner (Normalization)
 		newTree->createNode("NormBW_"+_name, rbwStrat, "NormReso_"+_name,

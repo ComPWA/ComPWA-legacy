@@ -55,8 +55,10 @@ public:
 	virtual unsigned int getNevents() { return _entries; };
 	/** Destructor */
 	virtual ~BreitWigner();
-	virtual BreitWigner* Clone() {
-		return new BreitWigner(*this);
+	virtual BreitWigner* Clone(std::string newName="") {
+		auto tmp = new BreitWigner(*this);
+		tmp->SetName(newName);
+		return tmp;
 	}
 
 	/* not implemented yet */

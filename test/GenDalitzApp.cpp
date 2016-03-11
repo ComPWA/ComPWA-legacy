@@ -295,7 +295,7 @@ int main(int argc, char **argv) {
 	std::string resoFile = path + "/test/JPSI_ypipi.xml";
 	boost::property_tree::ptree pt;
 	read_xml(resoFile , pt, boost::property_tree::xml_parser::trim_whitespace);
-	AmpSumIntensity testBW(normStyle::none,
+	AmpSumIntensity testBW("amp",normStyle::none,
 			std::shared_ptr<Efficiency>(new UnitEfficiency()), MaxEvents);
 	testBW.Configure(pt);
 	testBW.printAmps();

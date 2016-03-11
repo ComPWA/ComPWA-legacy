@@ -34,15 +34,24 @@ class ControlParameter{
 public:
   static std::shared_ptr<ControlParameter> Instance();
 
-  virtual double controlParameter(ParameterList& minPar) =0;
+  virtual double controlParameter(ParameterList& minPar) = 0;
 
-  virtual void resetInstance() { instance_ = std::shared_ptr<ControlParameter>(); };
+  virtual void resetInstance() {
+	  instance_ = std::shared_ptr<ControlParameter>();
+  }
 
-  virtual std::shared_ptr<FunctionTree> getTree() { return std::shared_ptr<FunctionTree>(); }
+  virtual std::shared_ptr<FunctionTree> getTree() {
+	  return std::shared_ptr<FunctionTree>();
+  }
 
-  virtual std::shared_ptr<Amplitude> getAmplitude() { return std::shared_ptr<Amplitude>(); }
+  virtual std::shared_ptr<Amplitude> getAmplitude(unsigned int id=0) {
+	  return std::shared_ptr<Amplitude>();
+  }
 
-  virtual int nCalls() { return calls; }
+  virtual int nCalls() {
+	  return calls;
+  }
+
 protected:
   static std::shared_ptr<ControlParameter> instance_;
   std::shared_ptr<FunctionTree> f;

@@ -41,12 +41,12 @@ AmpFlatteRes::AmpFlatteRes(const char *name,
 		std::shared_ptr<DoubleParameter> g3, std::string g3_idA, std::string g3_idB,
 		formFactorType type,
 		int nCalls, normStyle nS) :
-		AmpAbsDynamicalFunction(name, varIdA, varIdB,mag, phase, mass,
-				spin, m, n,	P, C, mother, particleA, particleB,
-				mesonRadius, motherRadius, type, nCalls, nS),
-				_g1(g1),
-				_g2(g2),_g2_idA(g2_idA), _g2_idB(g2_idB),
-				_g3(g3),_g3_idA(g3_idA), _g3_idB(g3_idB)
+						AmpAbsDynamicalFunction(name, varIdA, varIdB,mag, phase, mass,
+								spin, m, n,	P, C, mother, particleA, particleB,
+								mesonRadius, motherRadius, type, nCalls, nS),
+								_g1(g1),
+								_g2(g2),_g2_idA(g2_idA), _g2_idB(g2_idB),
+								_g3(g3),_g3_idA(g3_idA), _g3_idB(g3_idB)
 {
 
 
@@ -390,7 +390,7 @@ std::complex<double> AmpFlatteRes::dynamicalFunction(double mSq, double mR,
 	//-- new approach - for spin 0 resonances in the imaginary part of the denominator the term qTerm
 	//is added, compared to the old formula
 	std::complex<double> denom = std::complex<double>( mR*mR - mSq,0)
-																			+ (-1.0)*i*sqrtS*(termA + termB + termC);
+																							+ (-1.0)*i*sqrtS*(termA + termB + termC);
 
 	std::complex<double> result = std::complex<double>(gA*g_production,0) / denom;
 
@@ -438,7 +438,8 @@ std::shared_ptr<FunctionTree> AmpFlatteRes::SetupTree(
 	newTree->createLeaf("Intens_"+_name, _mag, "C_"+_name); //r
 	newTree->createLeaf("Phase_"+_name, _phase, "C_"+_name); //phi
 	//Angular distribution
-	newTree->insertTree(_wignerD.SetupTree(sample,suffix), "Reso_"+_name);
+	if( _spin )
+		newTree->insertTree(_wignerD.SetupTree(sample,suffix), "Reso_"+_name);
 
 	//Flatte
 	newTree->createNode("FlatteRes_"+_name, flatteStrat, "Reso_"+_name, sampleSize);
@@ -452,9 +453,11 @@ std::shared_ptr<FunctionTree> AmpFlatteRes::SetupTree(
 	newTree->createLeaf("g2", _g2, "FlatteRes_"+_name);
 	newTree->createLeaf("massB1", _g2_massA, "FlatteRes_"+_name);
 	newTree->createLeaf("massB2", _g2_massB, "FlatteRes_"+_name);
-	newTree->createLeaf("g3", _g3, "FlatteRes_"+_name);
-	newTree->createLeaf("massC1", _g3_massA, "FlatteRes_"+_name);
-	newTree->createLeaf("massC2", _g3_massB, "FlatteRes_"+_name);
+	if( _g3->GetValue() ){
+		newTree->createLeaf("g3", _g3, "FlatteRes_"+_name);
+		newTree->createLeaf("massC1", _g3_massA, "FlatteRes_"+_name);
+		newTree->createLeaf("massC2", _g3_massB, "FlatteRes_"+_name);
+	}
 	newTree->createLeaf("sample", sample.GetMultiDouble(GetVarIdA()),
 			"FlatteRes_"+_name);
 
@@ -472,9 +475,12 @@ std::shared_ptr<FunctionTree> AmpFlatteRes::SetupTree(
 
 		newTree->createNode("NormReso_"+_name, mmultStrat, "AbsVal_"+_name,
 				toySampleSize); //BW
+
 		//Angular distribution (Normalization)
-		newTree->insertTree(_wignerD.SetupTree(toySample,suffix),
-				"NormReso_"+_name);
+		if( _spin )
+			newTree->insertTree(_wignerD.SetupTree(toySample,suffix),
+					"NormReso_"+_name);
+
 		//Flatte (Normalization)
 		newTree->createNode("NormFlatte_"+_name, flatteStrat, "NormReso_"+_name,
 				toySampleSize); //BW
@@ -488,9 +494,11 @@ std::shared_ptr<FunctionTree> AmpFlatteRes::SetupTree(
 		newTree->createLeaf("g2", _g2, "NormFlatte_"+_name);
 		newTree->createLeaf("massB1", _g2_massA, "NormFlatte_"+_name);
 		newTree->createLeaf("massB2", _g2_massB, "NormFlatte_"+_name);
-		newTree->createLeaf("g3", _g3, "NormFlatte_"+_name);
-		newTree->createLeaf("massC1", _g3_massA, "NormFlatte_"+_name);
-		newTree->createLeaf("massC2", _g3_massB, "NormFlatte_"+_name);
+		if( _g3->GetValue() ){
+			newTree->createLeaf("g3", _g3, "NormFlatte_"+_name);
+			newTree->createLeaf("massC1", _g3_massA, "NormFlatte_"+_name);
+			newTree->createLeaf("massC2", _g3_massB, "NormFlatte_"+_name);
+		}
 		newTree->createLeaf("phspSample", toySample.GetMultiDouble(GetVarIdA()),
 				"NormFlatte_"+_name);
 	}
@@ -515,12 +523,13 @@ bool FlatteStrategy::execute(ParameterList& paras,
 		);
 
 	//Check size of parameter list
-	if( paras.GetNDouble() != 13 && paras.GetNDouble() != 14)
+	if( paras.GetNDouble() != 13 && paras.GetNDouble() != 14 && paras.GetNDouble() != 10 && paras.GetNDouble() != 11)
 		throw( BadParameter("FlatteStrategy::execute() | "
 				"number of DoubleParameters does not match!")
 		);
 
-	double m0, d, ma, mb, g1, g2, massB1, massB2, g3, massC1, massC2;
+	double m0, d, ma, mb, g1, g2, massB1, massB2;
+	double g3=0; double massC1=0; double massC2=0;
 	unsigned int spin;
 	int ffType;
 	/** Get parameters from ParameterList:
@@ -537,9 +546,11 @@ bool FlatteStrategy::execute(ParameterList& paras,
 	g2 = paras.GetDoubleParameter(7)->GetValue();
 	massB1 = paras.GetDoubleParameter(8)->GetValue();
 	massB2 = paras.GetDoubleParameter(9)->GetValue();
-	g3 = paras.GetDoubleParameter(10)->GetValue();
-	massC1 = paras.GetDoubleParameter(11)->GetValue();
-	massC2 = paras.GetDoubleParameter(12)->GetValue();
+	try{
+		g3 = paras.GetDoubleParameter(10)->GetValue();
+		massC1 = paras.GetDoubleParameter(11)->GetValue();
+		massC2 = paras.GetDoubleParameter(12)->GetValue();
+	} catch (...){	}
 
 	//	BOOST_LOG_TRIVIAL(debug) << "FlatteStrategy::execute() | mR="<<m0
 	//			<<" g1="<<g1<<" spin="<<spin<<" radius="<<d<<" ffType="<<ffType
@@ -574,7 +585,10 @@ bool FlatteStrategy::execute(ParameterList& paras,
 		return true;
 	}//end multicomplex output
 
-	double mSq = paras.GetDoubleParameter(13)->GetValue();
+	//Use last parameter
+	int nDouble = paras.GetNDouble();
+	double mSq = paras.GetDoubleParameter(nDouble-1)->GetValue();
+
 	std::complex<double> result;
 	try{
 		result = AmpFlatteRes::dynamicalFunction(

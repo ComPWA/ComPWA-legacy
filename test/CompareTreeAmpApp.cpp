@@ -86,7 +86,7 @@ int main(int argc, char **argv){
 
 	boost::property_tree::ptree pt;
 	read_xml(trueModelFile, pt, boost::property_tree::xml_parser::trim_whitespace);
-	auto a = new AmpSumIntensity(normStyle::one, eff, mcPrecision);
+	auto a = new AmpSumIntensity("amp", normStyle::one, eff, mcPrecision);
 	a->Configure(pt);
 	std::shared_ptr<Amplitude> trueAmp(a);
 
@@ -94,9 +94,9 @@ int main(int argc, char **argv){
 	std::string fitModelFile = trueModelFile;
 	boost::property_tree::ptree pt2;
 	read_xml(fitModelFile, pt2, boost::property_tree::xml_parser::trim_whitespace);
-	auto fitAmpPtr = new AmpSumIntensity(normStyle::one, eff, mcPrecision);
+	auto fitAmpPtr = new AmpSumIntensity("fitAmp",normStyle::one, eff, mcPrecision);
 	fitAmpPtr->Configure(pt2);
-	auto fitAmpTreePtr = new AmpSumIntensity(normStyle::one, eff, mcPrecision);
+	auto fitAmpTreePtr = new AmpSumIntensity("fitAmpTree",normStyle::one, eff, mcPrecision);
 	fitAmpTreePtr->Configure(pt2);
 //	AmplitudeSetup ini(fitModelFile);//put start parameters here
 //	AmplitudeSetup iniTree(fitModelFile);//put start parameters here

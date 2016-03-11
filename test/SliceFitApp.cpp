@@ -98,7 +98,7 @@ int main(int argc, char **argv){
 	std::string resoFile=path+"/test/JPSI_ypipi.xml";
 	boost::property_tree::ptree pt;
 	read_xml(resoFile, pt, boost::property_tree::xml_parser::trim_whitespace);
-	auto fitAmpPtr = new AmpSumIntensity(normStyle::none,
+	auto fitAmpPtr = new AmpSumIntensity("amp",normStyle::none,
 			std::shared_ptr<Efficiency>(new UnitEfficiency()), nFitEvents);
 	fitAmpPtr->Configure(pt);
 	std::shared_ptr<AmpSumIntensity> amps( fitAmpPtr );
