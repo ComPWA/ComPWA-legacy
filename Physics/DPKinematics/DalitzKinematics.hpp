@@ -108,6 +108,17 @@ public:
 	//! Checks if data point is within phase space boundaries
 	bool isWithinPhsp(const dataPoint &point) ;
 
+	/**! Checks if the position is within the phase-space boundaries.
+	 * This only works correctly if both variables are orthogonal to each other.
+	 * E.g. and invariant mass and an angle.
+	 * @param idA Variable id of invariant mass
+	 * @param idB Variable id of angle
+	 * @param varA Invariant mass
+	 * @param varB Helicity angle
+	 * @return
+	 */
+	bool isWithinBoxPhsp(int idA, int idB, double varA, double varB);
+
 	//! Returns the dalitz plot area for the given kinematics
 	double getPhspVolume();
 
@@ -179,6 +190,9 @@ protected:
 			std::string _name2, std::string _name3);
 
 	unsigned int findVariable(std::string varName) const;
+
+	// Check if variables are orthogonal to each other
+	bool AreBoxVariables(unsigned int idA, unsigned int idB);
 };
 
 #endif

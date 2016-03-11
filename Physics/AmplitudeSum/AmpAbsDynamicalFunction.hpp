@@ -47,7 +47,7 @@ public:
 			std::shared_ptr<DoubleParameter> mag,
 			std::shared_ptr<DoubleParameter> phase,
 			std::shared_ptr<DoubleParameter> mass,
-			Spin spin, Spin m, Spin n,
+			Spin spin, Spin m, Spin n, int P, int C,
 			std::string mother, std::string particleA, std::string particleB,
 			std::shared_ptr<DoubleParameter> mesonR, //  meson radius
 			std::shared_ptr<DoubleParameter> motherR, //  mother radius
@@ -59,7 +59,7 @@ public:
 			std::shared_ptr<DoubleParameter> mag,
 			std::shared_ptr<DoubleParameter> phase,
 			std::shared_ptr<DoubleParameter> mass,
-			Spin spin, Spin m, Spin n,
+			Spin spin, Spin m, Spin n, int P, int C,
 			std::string mother, std::string particleA, std::string particleB,
 			formFactorType type = formFactorType::BlattWeisskopf,
 			int nCalls=30000, normStyle nS=normStyle::one);
@@ -243,6 +243,10 @@ protected:
 
 	//! Resonance spin
 	Spin _spin, _m, _n;
+	//! Parity of resonance +-
+	int _parity;
+	//! Charge parity of resonance +-0
+	int _cparity;
 
 	//! Angular distribution
 	AmpWigner2 _wignerD;

@@ -151,9 +151,9 @@ void FitResult::printFitFractions(TableFormater* fracTable){
 	for(unsigned int i=0;i<fractionList.GetNDouble(); ++i){
 		std::shared_ptr<DoubleParameter> tmpPar = fractionList.GetDoubleParameter(i);
 		*fracTable << tmpPar->GetName()
-				<< tmpPar->GetValue()
-				<< tmpPar->GetError() //assume symmetric errors here
-				<< std::fabs(tmpPar->GetValue()/tmpPar->GetError());
+								<< tmpPar->GetValue()
+								<< tmpPar->GetError() //assume symmetric errors here
+								<< std::fabs(tmpPar->GetValue()/tmpPar->GetError());
 		sum += tmpPar->GetValue();
 		sumErrorSq += tmpPar->GetError()*tmpPar->GetError();
 	}
@@ -193,11 +193,18 @@ void FitResult::calcFraction(ParameterList& parList){
 		double resInt = (*it)->GetTotalIntegral();
 		std::string resName = (*it)->GetName();
 		std::shared_ptr<DoubleParameter> magPar = (*it)->GetMagnitudePar();
-		double mag = std::fabs(magPar->GetValue()); //value of magnitude
+		double mag = magPar->GetValue(); //value of magnitude
 		double magError = 0;
-		if(magPar->HasError()) magError = magPar->GetError(); //error of magnitude
-		parList.AddParameter(std::shared_ptr<DoubleParameter>(
-				new DoubleParameter(resName+"_FF", mag*mag*resInt/norm, 2*mag*resInt/norm * magError)) );
+		if(magPar->HasError())
+			magError = magPar->GetError(); //error of magnitude
+
+		parList.AddParameter(
+				std::shared_ptr<DoubleParameter>(
+						new DoubleParameter(resName+"_FF", mag*mag*resInt/norm,
+								std::fabs(2*mag*resInt/norm * magError)
+						)
+				)
+		);
 	}
 	return;
 }
