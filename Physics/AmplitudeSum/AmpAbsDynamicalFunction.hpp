@@ -66,6 +66,8 @@ public:
 
 	virtual ~AmpAbsDynamicalFunction();
 
+
+
 	//! Configure resonance from ptree
 	virtual void Configure(boost::property_tree::ptree::value_type const& v,
 			ParameterList& list);

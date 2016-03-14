@@ -40,12 +40,20 @@ public:
 			std::string mother, std::string particleA, std::string particleB,
 			int nCalls=30000, normStyle nS=normStyle::one) ;
 
-	AmpGausRes(const AmpGausRes&);
+	//! Clone function
+	virtual AmpGausRes* Clone(std::string newName="") const{
+		auto tmp = (new AmpGausRes(*this));
+		if(newName != "")
+			tmp->SetName(newName);
+		return tmp;
+	}
 
 	~AmpGausRes();
 
 	//! Get resonance width
-	double GetWidth() { return _width->GetValue(); }
+	double GetWidth() const { return _width->GetValue(); }
+
+	virtual void Save(boost::property_tree::ptree&) { };
 
 	virtual std::complex<double> Evaluate(dataPoint& point);
 	virtual std::complex<double> EvaluateAmp(dataPoint& point);
@@ -57,6 +65,9 @@ public:
 	};
 
 	double GetSpin(){return 0;};
+
+	virtual std::shared_ptr<FunctionTree> SetupTree(
+			ParameterList& sample, ParameterList& toySample,std::string suffix) { };
 
 protected:
 	std::shared_ptr<DoubleParameter> _width;

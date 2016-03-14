@@ -98,10 +98,10 @@ int main(int argc, char **argv){
 	fitAmpPtr->Configure(pt2);
 	auto fitAmpTreePtr = new AmpSumIntensity("fitAmpTree",normStyle::one, eff, mcPrecision);
 	fitAmpTreePtr->Configure(pt2);
-//	AmplitudeSetup ini(fitModelFile);//put start parameters here
-//	AmplitudeSetup iniTree(fitModelFile);//put start parameters here
-//	AmpSumIntensity* fitAmpPtr = new AmpSumIntensity(ini, normStyle::one, eff, mcPrecision);
-//	AmpSumIntensity* fitAmpTreePtr = new AmpSumIntensity(iniTree, normStyle::one, eff, mcPrecision);
+	//	AmplitudeSetup ini(fitModelFile);//put start parameters here
+	//	AmplitudeSetup iniTree(fitModelFile);//put start parameters here
+	//	AmpSumIntensity* fitAmpPtr = new AmpSumIntensity(ini, normStyle::one, eff, mcPrecision);
+	//	AmpSumIntensity* fitAmpTreePtr = new AmpSumIntensity(iniTree, normStyle::one, eff, mcPrecision);
 	std::shared_ptr<Amplitude> fitAmp(fitAmpPtr);
 	std::shared_ptr<Amplitude> fitAmpTree(fitAmpTreePtr);
 
@@ -172,8 +172,15 @@ int main(int argc, char **argv){
 
 	/*the tree contains multiple node with the same names. We search for node 'Intens' first and
 	 * afterwards for the resonance.*/
-	std::shared_ptr<TreeNode> intensNode = physicsTree->head()->getChildNode("Intens");
-	MultiDouble* intensValue = dynamic_cast<MultiDouble*>( &*(intensNode->getValue()) );
+	std::shared_ptr<TreeNode> intensNode;
+	MultiDouble* intensValue;
+	intensNode = physicsTree->head()->getChildNode("AmpSq");
+	if(intensNode)
+		intensValue = dynamic_cast<MultiDouble*>( &*(intensNode->getValue()) );
+	else {
+		BOOST_LOG_TRIVIAL(error)<<"Failed to get Node 'AmpSq'!";
+		throw;
+	}
 
 	BOOST_LOG_TRIVIAL(info) <<" Total integral of phi(1020) "<<phiRes->GetTotalIntegral();
 	std::cout<<std::setprecision(8)<<std::endl;
@@ -181,45 +188,36 @@ int main(int argc, char **argv){
 	BOOST_LOG_TRIVIAL(info) <<"Compare values: (use first event of data sample) TREE/AMPLITUDE";
 	BOOST_LOG_TRIVIAL(info) <<"===========================================";
 	BOOST_LOG_TRIVIAL(info) <<"Intensity: "<<intensValue->GetValue(0)
-					<<"/"<<*intens.GetDoubleParameter(0)
-					<<" = "<<intensValue->GetValue(0) / *intens.GetDoubleParameter(0);
-	BOOST_LOG_TRIVIAL(info)<<" Norm: "<<physicsTree->head()->getChildSingleValue("normFactor").real()
-					<<"/"<< fitAmp->integral()
-					<<" = "<<physicsTree->head()->getChildSingleValue("normFactor").real()/fitAmp->integral();
+									<<"/"<<*intens.GetDoubleParameter(0)
+									<<" = "<<intensValue->GetValue(0) / *intens.GetDoubleParameter(0);
+	double norm_tree = physicsTree->head()->getChildSingleValue("N").real();
+	double norm_amp = 1/fitAmp->integral();
+	BOOST_LOG_TRIVIAL(info)<<" Norm: "<<norm_tree <<"/"<<norm_amp
+									<<" = "<<norm_tree/norm_amp;
 	BOOST_LOG_TRIVIAL(info) <<"================= phi(1020) ==========================";
 	BOOST_LOG_TRIVIAL(info) <<"Reso_phi(1020): "<<intensNode->getChildSingleValue("Reso_phi(1020)")
-					<<"/"<<phiRes->Evaluate(point);
-	//	BOOST_LOG_TRIVIAL(info) <<"BW_phi(1020): "<<intensNode->getChildSingleValue("BW_phi(1020)")
-	//			<<"/"<<phiRes->evaluateAmp(point)*phiRes->GetNormalization();
+									<<"/"<<phiRes->Evaluate(point);
 	BOOST_LOG_TRIVIAL(info) <<"N_phi(1020): "<<intensNode->getChildSingleValue("N_phi(1020)").real()
-					<<"/"<<phiRes->GetNormalization()
-					<<" = "<<intensNode->getChildSingleValue("N_phi(1020)").real()/phiRes->GetNormalization();
+									<<"/"<<phiRes->GetNormalization()
+									<<" = "<<intensNode->getChildSingleValue("N_phi(1020)").real()/phiRes->GetNormalization();
 	BOOST_LOG_TRIVIAL(info) <<"RelBW_phi(1020): "<<intensNode->getChildSingleValue("RelBW_phi(1020)")
-					<<"/"<<phiRes->EvaluateAmp(point);
+									<<"/"<<phiRes->EvaluateAmp(point);
 	BOOST_LOG_TRIVIAL(info) <<"AngD_phi(1020): "<<intensNode->getChildSingleValue("AngD_phi(1020)").real()
-					<<"/"<<phiRes->EvaluateWignerD(point);
+									<<"/"<<phiRes->EvaluateWignerD(point);
 	BOOST_LOG_TRIVIAL(info) <<"================= a_0(980)0 ==========================";
 	BOOST_LOG_TRIVIAL(info) <<"Reso_a_0(980)0: "<<intensNode->getChildSingleValue("Reso_a_0(980)0")
-					<<"/"<<a0Res->Evaluate(point);
-	//	BOOST_LOG_TRIVIAL(info) <<"Flatte_a_0(980)0: "<<intensNode->getChildSingleValue("Flatte_a_0(980)0")
-	//			<<"/"<<a0Res->evaluateAmp(point)*a0Res->GetNormalization();
+									<<"/"<<a0Res->Evaluate(point);
 	BOOST_LOG_TRIVIAL(info) <<"N_a_0(980)0: "<<intensNode->getChildSingleValue("N_a_0(980)0").real()
-					<<"/"<<a0Res->GetNormalization();
+									<<"/"<<a0Res->GetNormalization();
 	BOOST_LOG_TRIVIAL(info) <<"FlatteRes_a_0(980)0: "<<intensNode->getChildSingleValue("FlatteRes_a_0(980)0")
-					<<"/"<<a0Res->EvaluateAmp(point);
-	BOOST_LOG_TRIVIAL(info) <<"AngD_a_0(980)0: "<<intensNode->getChildSingleValue("AngD_a_0(980)0").real()
-					<<"/"<<a0Res->EvaluateWignerD(point);
+									<<"/"<<a0Res->EvaluateAmp(point);
 	BOOST_LOG_TRIVIAL(info) <<"================= a_0(980)+ ==========================";
 	BOOST_LOG_TRIVIAL(info) <<"Reso_a_0(980)+: "<<intensNode->getChildSingleValue("Reso_a_0(980)+")
-					<<"/"<<aplusRes->Evaluate(point);
-	//	BOOST_LOG_TRIVIAL(info) <<"Flatte_a_0(980)+: "<<intensNode->getChildSingleValue("Flatte_a_0(980)+")
-	//			<<"/"<<aplusRes->evaluateAmp(point)*aplusRes->GetNormalization();
+									<<"/"<<aplusRes->Evaluate(point);
 	BOOST_LOG_TRIVIAL(info) <<"N_a_0(980)+: "<<intensNode->getChildSingleValue("N_a_0(980)+").real()
-					<<"/"<<aplusRes->GetNormalization();
+									<<"/"<<aplusRes->GetNormalization();
 	BOOST_LOG_TRIVIAL(info) <<"FlatteRes_a_0(980)+: "<<intensNode->getChildSingleValue("FlatteRes_a_0(980)+")
-					<<"/"<<aplusRes->EvaluateAmp(point);
-	BOOST_LOG_TRIVIAL(info) <<"AngD_a_0(980)+: "<<intensNode->getChildSingleValue("AngD_a_0(980)+").real()
-					<<"/"<<aplusRes->EvaluateWignerD(point);
+									<<"/"<<aplusRes->EvaluateAmp(point);
 	BOOST_LOG_TRIVIAL(info) <<"===========================================";
 	std::shared_ptr<FitResult> resultTree = run.startFit(fitParTree);
 	double finalLHTree = resultTree->getResult();
@@ -247,7 +245,7 @@ int main(int argc, char **argv){
 	result->print("P");
 	BOOST_LOG_TRIVIAL(info) <<"Comparison TREE/AMPLITUDE:";
 	BOOST_LOG_TRIVIAL(info) <<"Timings[s]: "<<resultTree->getTime()<<"/"<<result->getTime()
-					<<"="<<resultTree->getTime()/result->getTime();
+									<<"="<<resultTree->getTime()/result->getTime();
 	BOOST_LOG_TRIVIAL(info) <<"Initial likelihood: "<<initialLHTree<< "/"<<initialLH
 			<< " Deviation = "<<initialLHTree/initialLH;
 	BOOST_LOG_TRIVIAL(info) <<"Final likelihood: "<<finalLHTree<< "/"<<finalLH

@@ -28,7 +28,13 @@ public:
 			std::string mother, std::string particleA, std::string particleB,
 			int nCalls=30000, normStyle nS=normStyle::one );
 
-	virtual void initialise() { };
+	//! Clone function
+	virtual NonResonant* Clone(std::string newName="") const{
+		auto tmp = (new NonResonant(*this));
+		tmp->SetName(newName);
+		return tmp;
+	}
+
 	//! Configure resonance from ptree
 	virtual void Configure(boost::property_tree::ptree::value_type const& v,
 			ParameterList& list);

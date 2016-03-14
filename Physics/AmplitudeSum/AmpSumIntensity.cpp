@@ -43,6 +43,66 @@ AmpSumIntensity::AmpSumIntensity(std::string name,
 	return;
 }
 
+//! Copy constructor
+AmpSumIntensity::AmpSumIntensity( const AmpSumIntensity& copy ) :
+			_maxFcnVal( copy._maxFcnVal ), _calcMaxFcnVal( copy._calcMaxFcnVal ),
+			eff_( copy.eff_ ), _normStyle( copy._normStyle ),
+			_nCalls( copy._nCalls)
+{
+	//Deep copy of resonances
+	auto it = copy.resoList.begin();
+	for( ; it != copy.resoList.end(); ++it){
+		resoList.push_back( std::shared_ptr<Resonance>( (*it)->Clone() ) );
+	}
+
+	//copy parameter list, but ensure that parameters are not added twice
+	int size = copy.params.GetNDouble();
+	for(unsigned int i=0; i<size; ++i){
+		bool found=0;
+		std::string name = copy.params.GetDoubleParameter(i)->GetName();
+		for(unsigned int j=0; j<params.GetNDouble(); ++j){
+			if(params.GetDoubleParameter(j)->GetName() == name) found = 1;
+		}
+		if( !found ) params.AddParameter( copy.params.GetDoubleParameter(i) );
+	}
+}
+
+//! Clone function
+AmpSumIntensity* AmpSumIntensity::Clone(std::string newName) const {
+	auto tmp = (new AmpSumIntensity(*this));
+	if(newName != "")
+		tmp->SetName(newName);
+	return tmp;
+}
+
+/** Operator for coherent addition of amplitudes
+ *
+ * @param other
+ * @return
+ */
+const AmpSumIntensity AmpSumIntensity::operator+(const AmpSumIntensity& other) const {
+	AmpSumIntensity ret(*this);     // Make a copy of myself.
+	ret += other;            // Use += to add other to the copy.
+	return ret;
+}
+
+/** Operator for coherent addition of amplitudes
+ *
+ * @param rhs
+ * @return
+ */
+AmpSumIntensity& AmpSumIntensity::operator+=(const AmpSumIntensity& rhs) {
+	_name = _name+" + "+rhs._name;
+	resoList.insert(resoList.end(), rhs.resoList.begin(),rhs.resoList.end());
+	//    	params.insert(params.end(), rhs.params.begin(),rhs.params.begin());
+	_calcMaxFcnVal = 0;
+	if(_nCalls < rhs._nCalls) _nCalls = rhs._nCalls;
+	return *this;
+}
+
+
+
+
 //! Configure resonance from ptree
 void AmpSumIntensity::Configure(const boost::property_tree::ptree &pt)
 {
@@ -234,9 +294,9 @@ void AmpSumIntensity::calcMaxVal(std::shared_ptr<Generator> gen)
 		auto m23sq_limit = kin->GetMinMax(0);
 
 		double m23sq = gen->getUniform()*(m23sq_limit.second-m23sq_limit.first)
-												+m23sq_limit.first;
+																						+m23sq_limit.first;
 		double m13sq = gen->getUniform()*(m13sq_limit.second-m13sq_limit.first)
-												+m13sq_limit.first;
+																						+m13sq_limit.first;
 		dataPoint point;
 		try{
 			Kinematics::instance()->FillDataPoint(1,0,m13sq,m23sq,point);
@@ -519,10 +579,13 @@ void AmpSumIntensity::setParameterList(ParameterList& par)
 {
 	//parameters varied by Minimization algorithm
 	if(par.GetNDouble()!=params.GetNDouble())
-		throw std::runtime_error("AmpSumIntensity::setParameterList(): size of parameter lists don't match");
+		throw std::runtime_error("AmpSumIntensity::setParameterList() |"
+				" Size of parameter lists don't match");
+
 	//Should we compared the parameter names? String comparison is slow
 	for(unsigned int i=0; i<params.GetNDouble(); i++)
 		params.GetDoubleParameter(i)->UpdateParameter(par.GetDoubleParameter(i));
+
 	return;
 }
 
@@ -535,25 +598,10 @@ bool AmpSumIntensity::copyParameterList(ParameterList& outPar)
 void AmpSumIntensity::printAmps()
 {
 	std::stringstream outStr;
-	outStr<<"AmpSumIntensity: Printing amplitudes with current(!) set of parameters:\n";
-	unsigned int n=0;
-	for(unsigned int i=0; i<params.GetNDouble(); i++){
-		std::shared_ptr<DoubleParameter> p = params.GetDoubleParameter(i);
-		std::string tmp = p->GetName();
-		std::size_t found = tmp.find("mag");
-		if(found!=std::string::npos){
-			outStr<<"-------- "<<GetNameOfResonance(n)<<" ---------\n";
-			n++;
-		}
-		outStr<<p->GetName()<<" = "<<p->GetValue();
-		if(p->HasError())
-			outStr<<"+-"<<p->GetError();
-		if(p->HasBounds())
-			outStr<<" ["<<p->GetMinValue()<<";"<<p->GetMaxValue()<<"]";
-		if(p->IsFixed())
-			outStr<<" FIXED";
-		outStr<<"\n";
-	}
+	outStr<<"AmpSumIntensity: Printing resonances:\n";
+	auto it = GetResonanceItrFirst();
+	for( ; it!=GetResonanceItrLast(); ++it)
+		outStr << (*it)->to_str();
 
 	BOOST_LOG_TRIVIAL(info)<<outStr.str();
 	return;
@@ -673,3 +721,4 @@ double AmpSumIntensity::averageWidth()
 	avWidth /= sum;
 	return avWidth;
 }
+

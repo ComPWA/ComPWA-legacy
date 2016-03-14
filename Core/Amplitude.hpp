@@ -38,6 +38,8 @@
 #include "Core/DataPoint.hpp"
 #include "Core/Efficiency.hpp"
 #include "Core/Generator.hpp"
+
+
 class Amplitude
 {
 
@@ -48,7 +50,7 @@ public:
 	virtual ~Amplitude()
 	{ /* nothing */	}
 
-	virtual Amplitude* Clone(std::string newName="") = 0;
+	virtual Amplitude* Clone(std::string newName="") const = 0;
 
 	//! Get name of amplitude
 	virtual std::string GetName() const { return _name; }
@@ -89,6 +91,21 @@ public:
 
 	virtual void printAmps() = 0;
 	virtual void printFractions() = 0;
+
+	/** Operator for coherent addition of amplitudes
+	 *
+	 * @param other
+	 * @return
+	 */
+//	virtual const Amplitude operator+(const Amplitude &other) const = 0;
+
+	/** Operator for coherent addition of amplitudes
+	 *
+	 * @param rhs
+	 * @return
+	 */
+//    virtual Amplitude & operator+=(const Amplitude &rhs) = 0;
+
 
 	/** Integral value of amplitude in certain boundary
 	 * Used for plotting a projection of a function in \p var1 in
@@ -145,6 +162,14 @@ public:
 		params.AddParameter(std::shared_ptr<DoubleParameter>(new DoubleParameter("width",_resWidth)));
 		initialise();
 	}
+
+	//! Clone function
+	GaussAmp* Clone(std::string newName="") const {
+		auto tmp = (new GaussAmp(*this));
+		tmp->SetName(newName);
+		return tmp;
+	}
+
 	virtual void initialise() {
 		result.AddParameter(std::shared_ptr<DoubleParameter>(new DoubleParameter("GaussAmpResult")));
 		if(Kinematics::instance()->GetNVars()!=1)
@@ -246,7 +271,7 @@ public:
 
 	virtual ~UnitAmp()	{ /* nothing */	}
 
-	virtual Amplitude* Clone(std::string newName="") {
+	virtual UnitAmp* Clone(std::string newName="") const {
 		auto tmp = new UnitAmp(*this);
 		tmp->SetName(newName);
 		return tmp;

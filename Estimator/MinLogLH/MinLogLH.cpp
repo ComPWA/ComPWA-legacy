@@ -255,15 +255,15 @@ void MinLogLH::iniLHtree()
 			sampleSize, false);
 
 	for(int i=0; i<_ampVec.size(); i++){
-		_tree->createNode("normIntens", mmultDStrat, "Add", sampleSize, false);
-		std::string fracName = "frac_"+_ampVec.at(i)->GetName();
-		_tree->createLeaf(fracName, _fraction.at(i), "normIntens");
+		std::string name = _ampVec.at(i)->GetName();
+		_tree->createNode("Intens_"+name, mmultDStrat, "Add", sampleSize, false);
+		_tree->createLeaf("frac_"+name, _fraction.at(i), "Intens_"+name);
 		//Expect that intensity is calculated and normalised within AmpAbsDyn
 		_tree->insertTree(
 				_ampVec.at(i)->GetTree(
 						_dataSampleList, _phspAccSampleList, _phspSampleList
 				),
-				"normIntens"
+				"Intens_"+name
 		);
 	}
 

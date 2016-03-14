@@ -51,6 +51,14 @@ public:
 
 	virtual ~AmpRelBreitWignerRes();
 
+	//! Clone function
+	virtual AmpRelBreitWignerRes* Clone(std::string newName="") const{
+		auto tmp = (new AmpRelBreitWignerRes(*this));
+		if(newName != "")
+			tmp->SetName(newName);
+		return tmp;
+	}
+
 	//! Configure resonance from ptree
 	virtual void Configure(boost::property_tree::ptree::value_type const& v,
 			ParameterList& list);

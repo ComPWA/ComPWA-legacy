@@ -289,9 +289,11 @@ std::string AmpFlatteRes::to_str() const
 	std::stringstream str;
 	str<<_g1->to_str()<<std::endl;
 	str<<_g2->to_str()<<std::endl;
-	str<<_g3->to_str()<<std::endl;
+	if( _g3->GetValue() )
+		str<<_g3->to_str()<<std::endl;
 	str<<"massB1="<<_g2_massA<<" massB2="<<_g2_massB;
-	str<<" massC1="<<_g3_massA<<" massC2="<<_g3_massB<<std::endl;
+	if( _g3->GetValue() )
+		str<<" massC1="<<_g3_massA<<" massC2="<<_g3_massB<<std::endl;
 
 	return dynAmp+str.str();
 }

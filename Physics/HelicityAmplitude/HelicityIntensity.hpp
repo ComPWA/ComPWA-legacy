@@ -30,6 +30,14 @@ public:
 	HelicityIntensity();
 	virtual ~HelicityIntensity();
 
+	//! Clone function
+	HelicityIntensity* Clone(std::string newName="") const {
+		auto tmp = (new HelicityIntensity(*this));
+		tmp->SetName(newName);
+		return tmp;
+	}
+	virtual bool copyParameterList(ParameterList& par) { };
+
 	const double integral();
 	const double integral(ParameterList& par);
 	const double normalization();
@@ -42,6 +50,21 @@ public:
 	const ParameterList& intensityNoEff(dataPoint& point);
 	const ParameterList& intensity(std::vector<double> point,
 			ParameterList& par);
+
+	/** Integral value of amplitude in certain boundary
+	 * Used for plotting a projection of a function in \p var1 in
+	 * bin [\p min1, \p min2]. In this case we have to integrate over an
+	 * other variable \p var2
+	 * @param var1 first variable
+	 * @param min1 minimal value of first variable
+	 * @param max1 maximal value of first variable
+	 * @param var2 second variable
+	 * @param min2 minimal value of second variable
+	 * @param max2 maximal value of second variable
+	 * @return
+	 */
+	virtual double getIntValue(std::string var1, double min1, double max1,
+			std::string var2, double min2, double max2) { };
 
 	const bool fillStartParVec(ParameterList& outPar);
 	void setParameterList(ParameterList& par);

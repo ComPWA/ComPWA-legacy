@@ -50,6 +50,14 @@ public:
 
 	virtual ~AmpFlatteRes();
 
+	//! Clone function
+	virtual AmpFlatteRes* Clone(std::string newName="") const{
+		auto tmp = (new AmpFlatteRes(*this));
+		if(newName != "")
+			tmp->SetName(newName);
+		return tmp;
+	}
+
 	//! Configure resonance from ptree
 	virtual void Configure(boost::property_tree::ptree::value_type const& v,
 			ParameterList& list);

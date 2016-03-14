@@ -26,8 +26,15 @@
 class BreitWigner : public Amplitude {
 
 public:
-	/// Default Constructor (0x0)
+	/// Default Constructor
 	BreitWigner(const double min, const double max);
+
+	//! Clone function
+	BreitWigner* Clone(std::string newName="") const {
+		auto tmp = (new BreitWigner(*this));
+		tmp->SetName(newName);
+		return tmp;
+	}
 
 	//! normalization integral for parameters \par
 	virtual const double normalization(ParameterList& par) { return integral(par); }

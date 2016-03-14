@@ -15,9 +15,13 @@
 		<mass_max>2</mass_max>
 		<FormFactorType>1</FormFactorType>
 		<mesonRadius>1.5</mesonRadius>
-		<spin>0</spin>
-		<daughterA>2</daughterA>
-		<daughterB>3</daughterB>
+		<Spin>0</Spin>
+		<Parity>+1</Parity>
+		<Cparity>+1</Cparity>
+		<varIdA>0</varIdA>
+		<varIdB>8</varIdB>
+		<ParticleA>K+</ParticleA>
+		<ParticleB>K-</ParticleB>
 		<g1>2.950537870023982</g1>
 		<g1_fix>false</g1_fix>
 		<g1_min>0</g1_min>
@@ -47,9 +51,13 @@
 		<mass_max>2</mass_max>
 		<FormFactorType>1</FormFactorType>
 		<mesonRadius>1.5</mesonRadius>
-		<spin>0</spin>
-		<daughterA>1</daughterA>
-		<daughterB>3</daughterB>
+		<Spin>0</Spin>
+		<Parity>+1</Parity>
+		<Cparity>+1</Cparity>
+		<varIdA>1</varIdA>
+		<varIdB>5</varIdB>
+		<ParticleA>K_S0</ParticleA>
+		<ParticleB>K+</ParticleB>
 		<g1>2.950537870023982</g1>
 		<g1_fix>false</g1_fix>
 		<g1_min>0</g1_min>
@@ -73,9 +81,13 @@
 		<mass_max>2</mass_max>
 		<FormFactorType>1</FormFactorType>
 		<mesonRadius>1.5</mesonRadius>
-		<spin>1</spin>
-		<daughterA>2</daughterA>
-		<daughterB>3</daughterB>
+		<Spin>1</Spin>
+		<Parity>-1</Parity>
+		<Cparity>-1</Cparity>
+		<varIdA>0</varIdA>
+		<varIdB>8</varIdB>
+		<ParticleA>K-</ParticleA>
+		<ParticleB>K+</ParticleB>
 		<width>0.004266</width>
 		<width_fix>true</width_fix>
 		<width_min>0</width_min>

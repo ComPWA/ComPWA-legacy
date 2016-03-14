@@ -39,14 +39,15 @@ public:
 			std::shared_ptr<Efficiency> eff=
 					std::shared_ptr<Efficiency>(new UnitEfficiency),
 					unsigned int nCalls=30000);
+
+	//! Copy constructor
+	AmpSumIntensity( const AmpSumIntensity& copy );
+
 	//! Destructor
 	virtual ~AmpSumIntensity(){ /* nothing */ };
+
 	//! Clone function
-	virtual AmpSumIntensity* Clone(std::string newName=""){
-		auto tmp = (new AmpSumIntensity(*this));
-		tmp->SetName(newName);
-		return tmp;
-	}
+	virtual AmpSumIntensity* Clone(std::string newName="") const;
 
 	//! Configure resonance from ptree
 	virtual void Configure(const boost::property_tree::ptree &pt);
@@ -140,21 +141,40 @@ public:
 	virtual std::shared_ptr<Resonance>
 	GetResonance(unsigned int id);
 
+	//! List of resonances (enabled AND disabled)
+	virtual std::vector<std::shared_ptr<Resonance> > GetFullListOfResonances(){
+		return resoList;
+	}
+
 	//! Iterator on first resonance (which is enabled)
-	resonanceItr GetResonanceItrFirst(){
+	virtual resonanceItr GetResonanceItrFirst(){
 		return resonanceItr(
 				_resEnabled, resoList.begin(), resoList.end()
-				);
+		);
 	}
 
 	//! Iterator on last resonance (which is enabled)
-	resonanceItr GetResonanceItrLast(){
+	virtual resonanceItr GetResonanceItrLast(){
 		return resonanceItr(
 				_resEnabled, resoList.end(), resoList.end()
-				);
+		);
 	}
 	//! Average width of all resonances
 	virtual double averageWidth();
+
+	/** Operator for coherent addition of amplitudes
+	 *
+	 * @param other
+	 * @return
+	 */
+	const AmpSumIntensity operator+(const AmpSumIntensity& other) const;
+
+	/** Operator for coherent addition of amplitudes
+	 *
+	 * @param rhs
+	 * @return
+	 */
+	AmpSumIntensity& operator+=(const AmpSumIntensity& rhs) ;
 
 	//---------- related to FunctionTree -------------
 	//! Check of tree is available
