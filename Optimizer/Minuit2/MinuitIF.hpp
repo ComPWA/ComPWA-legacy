@@ -36,8 +36,9 @@
 #include <boost/archive/xml_iarchive.hpp>
 #include <boost/serialization/nvp.hpp>
 
-
-using namespace ROOT::Minuit2;
+namespace ComPWA {
+namespace Optimizer {
+namespace Minuit2 {
 
 class MinuitIF : public Optimizer {
 
@@ -52,11 +53,11 @@ public:
 protected:
 
 private:
-	MinuitFcn _myFcn;
+	ROOT::Minuit2::MinuitFcn _myFcn;
 	std::shared_ptr<ControlParameter> estimator;
 	// vector<string> paramNames;
 };
-class MinuitStrategy : public MnStrategy
+class MinuitStrategy : public ROOT::Minuit2::MnStrategy
 {
 public:
 	MinuitStrategy(unsigned int i=1) : MnStrategy(i) {
@@ -101,5 +102,9 @@ private:
 		ar & BOOST_SERIALIZATION_NVP(fHessGradNCyc);
 	}
 };
+
+} /* namespace Minuit2 */
+} /* namespace Optimizer */
+} /* namespace ComPWA */
 
 #endif /* _OIFMinuit_HPP */

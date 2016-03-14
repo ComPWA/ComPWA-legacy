@@ -20,6 +20,8 @@
 
 class dataPoint;
 
+namespace ComPWA {
+namespace Physics {
 namespace HelicityFormalism {
 
 class TwoBodyDecayAmplitude {
@@ -46,4 +48,7 @@ public:
 };
 
 } /* namespace HelicityFormalism */
+} /* namespace Physics */
+} /* namespace ComPWA */
+
 #endif /* PHYSICS_HELICITYAMPLITUDE_TWOBODYDECAYAMPLITUDE_HPP_ */

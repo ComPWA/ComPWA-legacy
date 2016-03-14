@@ -38,7 +38,9 @@
 #include "Core/Event.hpp"
 #include "Core/Particle.hpp"
 
-using namespace std;
+using namespace ComPWA;
+using Physics::DPKinematics::DalitzKinematics;
+using DataReader::RootReader::RootReader;
 
 /************************************************************************************************/
 /**
@@ -49,11 +51,11 @@ int main(int argc, char **argv){
 	std::cout << "  This program comes with ABSOLUTELY NO WARRANTY; for details see license.txt" << std::endl;
 	std::cout << std::endl;
 
-	cout << "DataIF Root 3Particles started " << endl << endl;
+	std::cout << "DataIF Root 3Particles started " << std::endl << std::endl;
 
 	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(DalitzKinematics::createInstance("J/psi","gamma","pi0","pi0"));
 
-	string file = "test/3Part-4vecs.root";
+	std::string file = "test/3Part-4vecs.root";
 	RootReader myReader(file, "data",false);
 	unsigned int maxEvents = myReader.getNEvents();
 	double masssq12, masssq13, masssq23;
@@ -169,7 +171,7 @@ int main(int argc, char **argv){
 	output.Write();
 	output.Close();
 
-	cout << "DataIF Root 3Particles finished " <<endl;
+	std::cout << "DataIF Root 3Particles finished " <<std::endl;
 
 	return 0;
 }

@@ -14,6 +14,7 @@
 #include "Physics/DecayTree/DecayTreeFactory.hpp"
 
 namespace ComPWA {
+namespace Physics {
 namespace DecayTree {
 
 DecayTreeFactory::DecayTreeFactory(
@@ -182,4 +183,5 @@ std::vector<std::string> DecayTreeFactory::convertToUniqueNameList(
 }
 
 } /* namespace DecayTree */
+} /* namespace Physics */
 } /* namespace ComPWA */

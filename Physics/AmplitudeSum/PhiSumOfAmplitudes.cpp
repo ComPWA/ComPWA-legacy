@@ -23,6 +23,10 @@
 
 #include "Physics/AmplitudeSum/PhiSumOfAmplitudes.hpp"
 
+namespace ComPWA {
+namespace Physics {
+namespace AmplitudeSum {
+
 //ClassImp(PhiSumOfAmplitudes)
 
  PhiSumOfAmplitudes::PhiSumOfAmplitudes(const char *name) : _name(name)
@@ -93,3 +97,6 @@ double PhiSumOfAmplitudes::evaluate() const
    return fabs(3.1416+atan2(res.imag(),res.real()));
  } 
 
+} /* namespace AmplitudeSum */
+} /* namespace Physics */
+} /* namespace ComPWA */

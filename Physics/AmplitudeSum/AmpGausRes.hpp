@@ -25,7 +25,9 @@
 #include "Physics/AmplitudeSum/AmpAbsDynamicalFunction.hpp"
 #include "Physics/DPKinematics/DalitzKinematics.hpp"
 
-using namespace std;
+namespace ComPWA {
+namespace Physics {
+namespace AmplitudeSum {
 
 class AmpGausRes : public AmpAbsDynamicalFunction  {
 public:
@@ -56,5 +58,9 @@ protected:
 private:
 
 };
+
+} /* namespace AmplitudeSum */
+} /* namespace Physics */
+} /* namespace ComPWA */
 
 #endif

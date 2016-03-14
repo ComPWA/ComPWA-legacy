@@ -15,6 +15,8 @@
 #include <vector>
 #include <string>
 
+namespace ComPWA {
+
 class Event;
 class dataPoint;
 
@@ -69,5 +71,7 @@ protected:
   Kinematics(const Kinematics&) = delete;
   void operator=(const Kinematics&) = delete;
 };
+
+} /* namespace ComPWA */
 
 #endif /* KINEMATICS_HPP_ */

@@ -19,6 +19,10 @@
 #include "Physics/DPKinematics/DalitzKinematics.hpp"
 #include "Physics/AmplitudeSum/AmpAbsDynamicalFunction.hpp"
 
+namespace ComPWA {
+namespace Physics {
+namespace AmplitudeSum {
+
 AmpAbsDynamicalFunction::AmpAbsDynamicalFunction(const char *name) : _name(name), _norm(1.0)
 {
 
@@ -38,7 +42,7 @@ double evalAmp(double* x, size_t dim, void* param) {
 	 * As third parameter we pass the reference to the current instance of AmpAbsDynamicalFunction
 	 */
 	if(dim!=2) return 0;
-	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
+	DPKinematics::DalitzKinematics* kin = dynamic_cast<DPKinematics::DalitzKinematics*>(Kinematics::instance());
 	dataPoint pp; pp.setVal(0,x[1]);pp.setVal(1,x[0]);
 	if( !kin->isWithinPhsp(pp) ) return 0;//only integrate over phase space
 	std::complex<double> res = static_cast<AmpAbsDynamicalFunction*>(param)->evaluateAmp(pp);
@@ -50,7 +54,7 @@ double AmpAbsDynamicalFunction::integral(unsigned int nCalls) const{
 	size_t dim=2;
 	double res=0.0, err=0.0;
 
-	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
+	DPKinematics::DalitzKinematics* kin = dynamic_cast<DPKinematics::DalitzKinematics*>(Kinematics::instance());
 	//set limits: we assume that x[0]=m13sq and x[1]=m23sq
 	double xLimit_low[2] = {kin->m13_sq_min,kin->m23_sq_min};
 	double xLimit_high[2] = {kin->m13_sq_max,kin->m23_sq_max};
@@ -78,7 +82,7 @@ double eval(double* x, size_t dim, void* param) {
 	 * As third parameter we pass the reference to the current instance of AmpAbsDynamicalFunction
 	 */
 	if(dim!=2) return 0;
-	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
+	DPKinematics::DalitzKinematics* kin = dynamic_cast<DPKinematics::DalitzKinematics*>(Kinematics::instance());
 	dataPoint pp; pp.setVal(0,x[1]);pp.setVal(1,x[0]);
 	if( !kin->isWithinPhsp(pp) ) return 0;//only integrate over phase space
 	std::complex<double> res = static_cast<AmpAbsDynamicalFunction*>(param)->evaluate(pp);
@@ -90,7 +94,7 @@ double AmpAbsDynamicalFunction::totalIntegral(unsigned int nCalls) const{
 	size_t dim=2;
 	double res=0.0, err=0.0;
 
-	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
+	DPKinematics::DalitzKinematics* kin = dynamic_cast<DPKinematics::DalitzKinematics*>(Kinematics::instance());
 	//set limits: we assume that x[0]=m13sq and x[1]=m23sq
 	double xLimit_low[2] = {kin->m13_sq_min,kin->m23_sq_min};
 	double xLimit_high[2] = {kin->m13_sq_max,kin->m23_sq_max};
@@ -128,3 +132,7 @@ double twoDimGaussian(double* z, size_t dim, void *param){
 	result/=2*pi*sigmaY*sigmaX;
 	return result;
 }
+
+} /* namespace AmplitudeSum */
+} /* namespace Physics */
+} /* namespace ComPWA */

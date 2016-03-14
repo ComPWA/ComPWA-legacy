@@ -15,6 +15,8 @@
 #include "Core/DataPoint.hpp"
 #include "Core/Event.hpp"
 
+namespace ComPWA {
+
 Kinematics* Kinematics::instance() {
   if (!inst_) {
     throw std::runtime_error(
@@ -61,3 +63,5 @@ void Kinematics::eventToDataPoint(Event& ev, dataPoint& point) const {
   // now do the actual transformation
   translateEventToDataPoint(ev, point);
 }
+
+} /* namespace ComPWA */

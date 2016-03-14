@@ -30,7 +30,7 @@
 
 namespace ComPWA {
 
-enum class QuantumNumbers {SPIN, ISOSPIN, CHARGE, PARITY, CPARITY};
+enum class QuantumNumbers {SPIN, ORBITAL_ANGULAR_MOMENTUM, ISOSPIN, CHARGE, PARITY, CPARITY};
 
 struct ParticleProperties {
   std::string name_;
@@ -115,6 +115,6 @@ private:
   std::vector<Constant> constants_list_;
 };
 
-}
+} /* namespace ComPWA */
 
 #endif /* PHYSCONST_HPP_ */

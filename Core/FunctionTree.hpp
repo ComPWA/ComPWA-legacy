@@ -38,6 +38,8 @@
 
 using namespace boost::log;
 
+namespace ComPWA {
+
 class FunctionTree //: public ControlParametr
 {
 public:
@@ -533,5 +535,7 @@ protected:
 		return;
 	}
 };
+
+} /* namespace ComPWA */
 
 #endif /* _FUNCTIONTREE_HPP_ */

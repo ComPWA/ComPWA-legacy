@@ -19,6 +19,7 @@
 #include "Core/Utility.hpp"
 
 namespace ComPWA {
+namespace Physics {
 namespace DecayTree {
 
 struct DecayNode {
@@ -245,6 +246,7 @@ public:
 };
 
 } /* namespace DecayTree */
+} /* namespace Physics */
 } /* namespace ComPWA */
 
 #endif /* PHYSICS_HELICITYAMPLITUDE_DECAYTREE_HPP_ */

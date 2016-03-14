@@ -154,6 +154,6 @@ struct ParticleStateInfo {
   }
 };
 
-}
+} /* namespace ComPWA */
 
 #endif /* CORE_UTILITY_HPP_ */

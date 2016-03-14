@@ -18,10 +18,13 @@
 
 #include "Physics/DecayTree/DecayConfiguration.hpp"
 
+#include "Physics/DynamicalDecayFunctions/DynamicalFunctionFactory.hpp"
+
 namespace ComPWA {
 
 class ParticleProperties;
 
+namespace Physics {
 namespace DecayTree {
 
 /*template<class T> struct QuantumNumber {
@@ -35,9 +38,15 @@ namespace DecayTree {
  T condition_value_;
  };*/
 
+enum class QuantumNumberTypes {
+  SINGLE_PARTICLE_BASED, COMPOSITE_PARTICLE_BASED
+};
+
 template<class T> struct AllowedQuantumNumbers {
   std::string quantum_number_name_;
   std::vector<T> allowed_values_;
+  std::vector<std::string> required_quantum_numbers_names_;
+  QuantumNumberTypes type;
 };
 
 struct SpinWave {
@@ -121,6 +130,18 @@ struct SpinWaveDecayTree {
   unsigned int top_node_unique_decay_node_index_;
   std::map<unsigned int, IndexList> unique_decay_node_index_tree_;
   std::map<unsigned int, unsigned int> unique_decay_node_index_to_spin_wave_index_mapping_;
+
+  bool operator==(const SpinWaveDecayTree& rhs) const {
+    if (top_node_unique_decay_node_index_
+        != rhs.top_node_unique_decay_node_index_)
+      return false;
+    if (unique_decay_node_index_tree_ != rhs.unique_decay_node_index_tree_)
+      return false;
+    if (unique_decay_node_index_to_spin_wave_index_mapping_
+        != rhs.unique_decay_node_index_to_spin_wave_index_mapping_)
+      return false;
+    return true;
+  }
 };
 
 class DecayGenerator {
@@ -136,11 +157,16 @@ class DecayGenerator {
   std::vector<AllowedQuantumNumbers<ComPWA::Spin> > allowed_spin_like_quantum_numbers_;
   std::vector<AllowedQuantumNumbers<int> > allowed_integer_like_quantum_numbers_;
 
+  std::vector<std::string> conserved_quantum_numbers_;
+
+  std::vector<std::string> allowed_particle_names_;
+
   // dynamically filled containers
   std::vector<ParticleStateInfo> total_particle_pool_;
-  IndexList mother_state_particle_index_;
-  IndexList final_state_particles_indices_;
-  IndexList intermediate_state_particles_indices_;
+  std::vector<ParticleProperties> allowed_particle_pool_;
+  //IndexList mother_state_particle_index_;
+  //IndexList final_state_particles_indices_;
+  //IndexList intermediate_state_particles_indices_;
 
   std::vector<SpinWave> all_spin_waves_;
   std::vector<SpinWaveDecay> all_spin_wave_decays_;
@@ -163,6 +189,8 @@ class DecayGenerator {
   void addIntLikeAllowedQuantumNumbersToClipsEnvironment(
       const AllowedQuantumNumbers<int>& allowed_qn) const;
 
+  void addConservedQuantumNumbersToClipsEnvironment();
+
   void addAllInitialAndFinalStateCombinationsToClipsEnvironment();
   SpinWave createSpinWave(const IFParticleInfo& particle,
       unsigned int state_index) const;
@@ -175,9 +203,17 @@ class DecayGenerator {
   unsigned int createSpinWave(void* spin_wave_fact);
   ComPWA::Spin createSpin(int spin_quantum_number_unique_id) const;
 
+  void initializeAllowedParticlePool();
+
   void addSpinWaveTwoBodyDecayToDecayConfiguration(
       DecayConfiguration& decay_configuration,
       const SpinWaveDecayTree& two_body_decay_tree) const;
+
+  std::vector<ParticleStateInfo> createParticleStateInfoCandidates(
+      unsigned int spin_wave_index) const;
+
+  DynamicalInfo createDynamicInfo(const ParticleProperties& particle_properties,
+      ComPWA::Physics::DynamicalFunctions::DynamicalInfoTypes dynamical_type) const;
 
   /* bool validateTwoBodyDecay(const SpinWaveTwoBodyDecay& two_body_decay);
    void addTwoBodyDecayToClipsEnviroment(
@@ -213,6 +249,7 @@ public:
 };
 
 } /* namespace DecayTree */
+} /* namespace Physics */
 } /* namespace ComPWA */
 
 #endif /* PHYSICS_HELICITYAMPLITUDE_DECAYGENERATOR_HPP_ */

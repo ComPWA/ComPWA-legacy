@@ -18,8 +18,11 @@
 
 #include "Core/ParameterList.hpp"
 
+namespace ComPWA {
+
 class dataPoint;
 
+namespace Physics {
 namespace DynamicalFunctions {
 
 class AbstractDynamicalFunction {
@@ -40,5 +43,7 @@ public:
 };
 
 } /* namespace DynamicalFunctions */
+} /* namespace Physics */
+} /* namespace ComPWA */
 
 #endif /* PHYSICS_HELICITYAMPLITUDE_ABSTRACTDYNAMICALFUNCTION_HPP_ */

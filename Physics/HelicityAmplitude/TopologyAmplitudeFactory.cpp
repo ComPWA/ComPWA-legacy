@@ -4,11 +4,14 @@
 
 #include "Physics/HelicityAmplitude/TopologyAmplitudeFactory.hpp"
 
-using ComPWA::DecayTree::DecayTree;
-using ComPWA::DecayTree::DecayNode;
-using ComPWA::DecayTree::HelicityTree;
 
+namespace ComPWA {
+namespace Physics {
 namespace HelicityFormalism {
+
+using ComPWA::Physics::DecayTree::DecayTree;
+using ComPWA::Physics::DecayTree::DecayNode;
+using ComPWA::Physics::DecayTree::HelicityTree;
 
 TopologyAmplitudeFactory::TopologyAmplitudeFactory() {
   // TODO Auto-generated constructor stub
@@ -414,3 +417,5 @@ Particle TopologyAmplitudeFactory::createParticle(
 }
 
 } /* namespace HelicityFormalism */
+} /* namespace Physics */
+} /* namespace ComPWA */

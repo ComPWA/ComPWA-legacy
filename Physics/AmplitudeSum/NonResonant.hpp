@@ -15,7 +15,9 @@
 #include "Physics/AmplitudeSum/AmpAbsDynamicalFunction.hpp"
 #include "Physics/AmplitudeSum/AmpKinematics.hpp"
 
-using boost::property_tree::ptree;
+namespace ComPWA {
+namespace Physics {
+namespace AmplitudeSum {
 
 class NonResonant : public AmpAbsDynamicalFunction {
 public:
@@ -123,7 +125,8 @@ public:
 	double m_phase_max;
 };
 
-
-
+} /* namespace AmplitudeSum */
+} /* namespace Physics */
+} /* namespace ComPWA */
 
 #endif /* NONRESONANT_HPP_ */

@@ -27,6 +27,14 @@
 
 //#include "PWA/PlotData.hpp"
 
+using namespace ComPWA;
+using Physics::DPKinematics::DalitzKinematics;
+using DataReader::RootReader::RootReader;
+using DataReader::RootGenerator::RootGenerator;
+using DataReader::Data;
+using Physics::AmplitudeSum::AmplitudeSetup;
+using Physics::AmplitudeSum::AmpSumIntensity;
+
 /************************************************************************************************/
 /**
  * The main function.

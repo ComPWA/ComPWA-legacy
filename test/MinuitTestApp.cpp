@@ -41,6 +41,11 @@
 
 using namespace std;
 
+using ComPWA::Optimizer::ControlParameter;
+using ComPWA::Optimizer::Optimizer;
+using ComPWA::ParameterList;
+using ComPWA::DoubleParameter;
+
 /************************************************************************************************/
 /**
  * The main function.
@@ -67,14 +72,14 @@ int main(int argc, char **argv){
   par.AddParameter(std::shared_ptr<DoubleParameter>(new DoubleParameter("p3",-0.1,-0.2,0,0.05)));
 
   // Add minimizers
-  myMinimizerList.push_back(shared_ptr<Optimizer> (new MinuitIF(myFit,par)));
+  myMinimizerList.push_back(shared_ptr<Optimizer> (new ComPWA::Optimizer::Minuit2::MinuitIF(myFit,par)));
 
   // Loop over minimizers (at the moment this means: Geneva, MinuitIF or Geneva then MinuitIF)
   for(unsigned int Nmin=0; Nmin<myMinimizerList.size(); Nmin++){
     // Pointer to one ot the used minimizers
     shared_ptr<Optimizer> minimizer = myMinimizerList[Nmin];
     // Do the actual minimization
-    std::shared_ptr<FitResult> genResult = minimizer->exec(par);
+    std::shared_ptr<ComPWA::FitResult> genResult = minimizer->exec(par);
 
     std::cout << "Minimizer " << Nmin << "\t final par :\t" << genResult << std::endl;
     for(unsigned int i=0; i<par.GetNDouble(); i++)

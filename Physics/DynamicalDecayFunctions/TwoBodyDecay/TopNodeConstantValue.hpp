@@ -14,6 +14,8 @@
 
 #include "Physics/DynamicalDecayFunctions/AbstractDynamicalFunction.hpp"
 
+namespace ComPWA {
+namespace Physics {
 namespace DynamicalFunctions {
 
 class TopNodeConstantValue: public AbstractDynamicalFunction {
@@ -30,5 +32,7 @@ public:
 };
 
 } /* namespace DynamicalFunctions */
+} /* namespace Physics */
+} /* namespace ComPWA */
 
 #endif /* PHYSICS_DYNAMICALDECAYFUNCTIONS_TWOBODYDECAY_TOPNODECONSTANTVALUE_HPP_ */

@@ -18,8 +18,11 @@
 
 #include "Physics/DynamicalDecayFunctions/AbstractDynamicalFunction.hpp"
 
+namespace ComPWA {
+
 class dataPoint;
 
+namespace Physics {
 namespace HelicityFormalism {
 
 typedef std::pair<std::shared_ptr<TwoBodyDecayAmplitude>,
@@ -52,5 +55,7 @@ public:
 };
 
 } /* namespace HelicityFormalism */
+} /* namespace Physics */
+} /* namespace ComPWA */
 
 #endif /* PHYSICS_HELICITYAMPLITUDE_TOPOLOGYAMPLITUDE_HPP_ */

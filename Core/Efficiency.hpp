@@ -15,6 +15,9 @@
 #include <vector>
 #include <boost/log/trivial.hpp>
 //#include "Core/DataPoint.hpp"
+
+namespace ComPWA {
+
 class dataPoint;
 using namespace boost::log;
 
@@ -48,5 +51,7 @@ public:
 	virtual double evaluate(std::vector<double> x) {return 1;};
 	virtual double evaluate(const dataPoint& point) {return 1;};
 };
+
+} /* namespace ComPWA */
 
 #endif /* EFFICIENCY_HPP_ */

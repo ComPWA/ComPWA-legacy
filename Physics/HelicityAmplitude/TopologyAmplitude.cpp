@@ -13,6 +13,8 @@
 
 #include "TopologyAmplitude.hpp"
 
+namespace ComPWA {
+namespace Physics {
 namespace HelicityFormalism {
 
 TopologyAmplitude::TopologyAmplitude() {
@@ -65,3 +67,5 @@ const std::vector<SequentialTwoBodyDecayAmplitude>& TopologyAmplitude::getSequen
 }
 
 } /* namespace HelicityFormalism */
+} /* namespace Physics */
+} /* namespace ComPWA */

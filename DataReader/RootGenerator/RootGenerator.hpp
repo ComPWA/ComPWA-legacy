@@ -35,7 +35,12 @@
 #include "Core/Event.hpp"
 #include "Core/Kinematics.hpp"
 
+namespace ComPWA {
+
 class Event;
+
+namespace DataReader {
+namespace RootGenerator {
 
 class RootGenerator : public Generator {
 protected:
@@ -72,6 +77,10 @@ protected:
 	double minSq, maxSq;
 
 };
+
+} /* namespace RootGenerator */
+} /* namespace DataReader */
+} /* namespace ComPWA */
 
 #endif /* DATAREADER_ROOTGENERATOR_HPP_ */
 

@@ -40,6 +40,7 @@
 #include "Core/ParObserver.hpp"
 //#include "Core/ParameterError.hpp"
 
+namespace ComPWA {
 
 enum ParType { COMPLEX = 1, DOUBLE = 2, INTEGER = 3, BOOL = 4, MDOUBLE = 5, MCOMPLEX = 6, UNDEFINED = 0};
 static const char* ParNames[7] = { "UNDEFINED", "COMPLEX", "DOUBLE", "INTEGER", "BOOL", "MDOUBLE", "MCOMPLEX"};
@@ -162,5 +163,7 @@ private:
 
 };
 //BOOST_SERIALIZATION_ASSUME_ABSTRACT(AbsParameter)
+
+} /* namespace ComPWA */
 
 #endif

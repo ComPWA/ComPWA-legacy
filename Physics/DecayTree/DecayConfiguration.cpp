@@ -16,6 +16,7 @@
 #include "Core/PhysConst.hpp"
 
 namespace ComPWA {
+namespace Physics {
 namespace DecayTree {
 
 DecayConfiguration::DecayConfiguration() {
@@ -329,4 +330,5 @@ bool DecayConfiguration::isNodeADaughter(
 }
 
 } /* namespace DecayTree */
+} /* namespace Physics */
 } /* namespace ComPWA */

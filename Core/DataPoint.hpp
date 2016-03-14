@@ -29,6 +29,8 @@
 #include "Core/Efficiency.hpp"
 #include "Core/Event.hpp"
 
+namespace ComPWA {
+
 class allMasses
 {
 public:
@@ -156,4 +158,7 @@ protected:
 	double weight;
 	friend std::ostream & operator<<(std::ostream &os, dataPoint &p);
 };
+
+} /* namespace ComPWA */
+
 #endif /*DPPOINT2_HPP_*/

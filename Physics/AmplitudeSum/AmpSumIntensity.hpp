@@ -30,6 +30,10 @@
 #include "Physics/AmplitudeSum/AmpSumOfAmplitudes.hpp"
 #include "Physics/DPKinematics/DalitzKinematics.hpp"
 
+namespace ComPWA {
+namespace Physics {
+namespace AmplitudeSum {
+
 class AmpSumIntensity : public Amplitude {
 
 public:
@@ -199,7 +203,10 @@ protected:
 
 private:
 
-
 };
+
+} /* namespace AmplitudeSum */
+} /* namespace Physics */
+} /* namespace ComPWA */
 
 #endif

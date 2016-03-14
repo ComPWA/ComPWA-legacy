@@ -64,7 +64,7 @@
  * The core Framework only needs a boost installation and a compiler
  * supporting c++11. But for the examples and most likely also for starting
  * some fits and plotting some output, it is recommended to have a root
- * installation (for plots and maybe data storage/reading) and a Minuit2
+ * installation (for plots and maybe DataReader::Data storage/reading) and a Minuit2
  * (for optimization) installation ready. Besides Minuit2 also Geneva can be
  * used as optimizer if a compatible installation is available.
  *
@@ -89,30 +89,30 @@
 #include "Core/Efficiency.hpp"
 #include "Core/Generator.hpp"
 
-class DalitzKinematics;
+namespace ComPWA {
 
 class RunManager
 {
 public:
 
 	RunManager();
-	RunManager( std::shared_ptr<Data>, std::shared_ptr<Amplitude>, std::shared_ptr<Optimizer>); //Fit
+	RunManager( std::shared_ptr<DataReader::Data>, std::shared_ptr<Amplitude>, std::shared_ptr<Optimizer::Optimizer>); //Fit
 	RunManager( unsigned int size, std::shared_ptr<Amplitude>, std::shared_ptr<Generator>); //Generate
 
 	virtual ~RunManager();
 
-	virtual void setData ( std::shared_ptr<Data> d){ sampleData_ = d; };
-	virtual std::shared_ptr<Data> getData (){ return sampleData_; };
-	virtual void setBackground ( std::shared_ptr<Data> d){ sampleBkg_ = d; };
-	virtual std::shared_ptr<Data> getBackground (){ return sampleBkg_; };
-	virtual void setPhspSample( std::shared_ptr<Data> d){ samplePhsp_ = d; };
-	virtual std::shared_ptr<Data> getPhspSample(){ return samplePhsp_; };
+	virtual void setData ( std::shared_ptr<DataReader::Data> d){ sampleData_ = d; };
+	virtual std::shared_ptr<DataReader::Data> geData (){ return sampleData_; };
+	virtual void setBackground ( std::shared_ptr<DataReader::Data> d){ sampleBkg_ = d; };
+	virtual std::shared_ptr<DataReader::Data> getBackground (){ return sampleBkg_; };
+	virtual void setPhspSample( std::shared_ptr<DataReader::Data> d){ samplePhsp_ = d; };
+	virtual std::shared_ptr<DataReader::Data> getPhspSample(){ return samplePhsp_; };
 	virtual void setAmplitude ( std::shared_ptr<Amplitude> d){ amp_ = d; };
 	virtual std::shared_ptr<Amplitude> getAmplitude (){ return amp_; };
 	virtual void setBkgAmplitude ( std::shared_ptr<Amplitude> d){ ampBkg_ = d; };
 	virtual std::shared_ptr<Amplitude> getBkgAmplitude(){ return ampBkg_; };
-	virtual void setOptimizer ( std::shared_ptr<Optimizer> d){ opti_ = d; };
-	virtual std::shared_ptr<Optimizer> getOptimizer (){ return opti_; };
+	virtual void setOptimizer ( std::shared_ptr<Optimizer::Optimizer> d){ opti_ = d; };
+	virtual std::shared_ptr<Optimizer::Optimizer> getOptimizer (){ return opti_; };
 	virtual void setGenerator( std::shared_ptr<Generator> d){ gen_= d; };
 	virtual std::shared_ptr<Generator> getGenerator(){ return gen_; };
 
@@ -122,13 +122,15 @@ public:
 	virtual bool generateBkg ( int number );
 
 protected:
-	std::shared_ptr<Data> sampleData_; /*!< Pointer to data sample */
-	std::shared_ptr<Data> sampleBkg_; /*!< Pointer to background sample */
-	std::shared_ptr<Data> samplePhsp_; /*!< Pointer to phsp sample */
+	std::shared_ptr<DataReader::Data> sampleData_; /*!< Pointer to DataReader::Data sample */
+	std::shared_ptr<DataReader::Data> sampleBkg_; /*!< Pointer to background sample */
+	std::shared_ptr<DataReader::Data> samplePhsp_; /*!< Pointer to phsp sample */
 	std::shared_ptr<Amplitude> amp_; /*!< Pointer to signal model */
 	std::shared_ptr<Amplitude> ampBkg_; /*!< Pointer to background model */
-	std::shared_ptr<Optimizer> opti_; /*!< Pointer to Optimizer-Module */
+	std::shared_ptr<Optimizer::Optimizer> opti_; /*!< Pointer to Optimizer-Module */
 	std::shared_ptr<Generator> gen_; /*!< Pointer to Generator-Module */
 };
+
+} /* namespace ComPWA */
 
 #endif

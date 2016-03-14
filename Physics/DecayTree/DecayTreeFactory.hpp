@@ -16,6 +16,7 @@
 #include "DecayConfiguration.hpp"
 
 namespace ComPWA {
+namespace Physics {
 namespace DecayTree {
 
 class DecayTreeFactory {
@@ -52,6 +53,7 @@ public:
 };
 
 } /* namespace DecayTree */
+} /* namespace Physics */
 } /* namespace ComPWA */
 
 #endif /* PHYSICS_HELICITYAMPLITUDE_HELICITYDECAYTREEFACTORY_HPP_ */

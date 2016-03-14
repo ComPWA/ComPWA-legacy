@@ -14,6 +14,8 @@
 
 #include "Core/Kinematics.hpp"
 
+namespace ComPWA {
+
 class TwoBodyKinematics: public Kinematics {
 public:
   TwoBodyKinematics(std::string _nameMother, std::string _name1,
@@ -64,5 +66,7 @@ protected:
   double mass_max;    //!maximum value of masssq
 
 };
+
+} /* namespace ComPWA */
 
 #endif /* TWOBODYKINEMATICS_HPP_ */

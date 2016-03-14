@@ -27,6 +27,9 @@
 
 #include "Core/ParameterList.hpp"
 
+namespace ComPWA {
+namespace Optimizer {
+
 class ControlParameter{
 
 public:
@@ -51,5 +54,8 @@ protected:
 }
 
 std::shared_ptr<ControlParameter> ControlParameter::instance_ = 0;*/
+
+} /* namespace Optimizer */
+} /* namespace ComPWA */
 
 #endif

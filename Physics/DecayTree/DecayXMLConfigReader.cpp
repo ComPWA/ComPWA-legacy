@@ -15,6 +15,7 @@
 #include "Physics/DecayTree/DecayXMLConfigReader.hpp"
 
 namespace ComPWA {
+namespace Physics {
 namespace DecayTree {
 
 using boost::property_tree::ptree;
@@ -118,12 +119,13 @@ ParticleStateInfo DecayXMLConfigReader::parseParticleStateRemainders(
   }
 }
 
-void DecayXMLConfigReader::writeConfig(const boost::property_tree::ptree &pt,
-    const std::string &filename) const {
-
+void DecayXMLConfigReader::writeConfig(const std::string &filename) const {
+  boost::property_tree::ptree pt =
+      decay_configuration_.exportConfigurationToPropertyTree();
   // Write the property tree to file
   write_xml(filename, pt);
 }
 
 } /* namespace DecayTree */
+} /* namespace Physics */
 } /* namespace ComPWA */

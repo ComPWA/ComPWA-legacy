@@ -12,6 +12,8 @@
 #include "CoherentAmplitude.hpp"
 #include "HelicityKinematics.hpp"
 
+namespace ComPWA {
+namespace Physics {
 namespace HelicityFormalism {
 
 CoherentAmplitude::CoherentAmplitude(
@@ -220,3 +222,5 @@ Amplitude * CoherentAmplitude::Clone() {
 }
 
 } /* namespace HelicityFormalism */
+} /* namespace Physics */
+} /* namespace ComPWA */

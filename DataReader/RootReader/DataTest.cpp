@@ -17,6 +17,10 @@
 #include <vector>
 #include <string>
 
+namespace ComPWA {
+namespace DataReader {
+namespace RootReader {
+
 BOOST_AUTO_TEST_SUITE(RootReaderSuite);
 
 BOOST_AUTO_TEST_CASE(ReadingCheck)
@@ -30,3 +34,8 @@ BOOST_AUTO_TEST_CASE(ReadingCheck)
 }
 
 BOOST_AUTO_TEST_SUITE_END();
+
+} /* namespace RootReader */
+} /* namespace DataReader */
+} /* namespace ComPWA */
+

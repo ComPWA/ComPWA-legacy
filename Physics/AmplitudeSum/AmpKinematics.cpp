@@ -12,12 +12,16 @@
 #include "Physics/AmplitudeSum/AmpKinematics.hpp"
 #include "Physics/DPKinematics/DalitzKinematics.hpp"
 
+namespace ComPWA {
+namespace Physics {
+namespace AmplitudeSum {
+
 AmpKinematics::AmpKinematics(std::shared_ptr<DoubleParameter> mR, int subSys, int spin, int m, int n,
 		std::shared_ptr<DoubleParameter> mesonRadius, std::shared_ptr<DoubleParameter> motherRadius) :
 		_M(-999), _mR(mR),_subSys(subSys), _spin(spin),_m(m),_n(n),
 		_mesonRadius(mesonRadius), _motherRadius(motherRadius), _wignerD(subSys,spin)
 {
-	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
+	DPKinematics::DalitzKinematics* kin = dynamic_cast<DPKinematics::DalitzKinematics*>(Kinematics::instance());
 	_M=kin->M;
 	if(_subSys==5){
 		_ma=kin->m3;
@@ -147,3 +151,7 @@ std::complex<double> AmpKinematics::couplingToWidth(double mSq, double mR, doubl
 	}
 	return result;
 }
+
+} /* namespace AmplitudeSum */
+} /* namespace Physics */
+} /* namespace ComPWA */

@@ -18,6 +18,8 @@
 #include "Core/TreeNode.hpp"
 #include "Core/Functions.hpp"
 
+namespace ComPWA {
+
   TreeNode::TreeNode(std::string name, std::shared_ptr<AbsParameter> intResult, std::shared_ptr<Strategy> strat, std::shared_ptr<TreeNode> parent)
     :_name(name),_changed(true),_strat(strat){
 	_value.push_back(intResult);
@@ -139,3 +141,5 @@
 std::ostream & operator<<(std::ostream &os, std::shared_ptr<TreeNode> p){
   return os << p->to_str(-1);
 }
+
+} /* namespace ComPWA */

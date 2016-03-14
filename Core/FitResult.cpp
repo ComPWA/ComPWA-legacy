@@ -5,9 +5,10 @@
  *      Author: weidenka
  */
 
-
-
 #include "Core/FitResult.hpp"
+
+namespace ComPWA {
+
 void FitResult::writeText(std::string filename){
 	std::ofstream myfile;
 	myfile.open(filename);
@@ -79,7 +80,7 @@ void FitResult::printFitParameters(TableFormater* tableResult){
 		ErrorType errorType = outPar->GetErrorType();
 		bool isFixed = outPar->IsFixed();
 		bool isAngle=0;
-		if(outPar->GetName().find("phase")!=string::npos) isAngle=1;//is our Parameter an angle?
+		if(outPar->GetName().find("phase")!=std::string::npos) isAngle=1;//is our Parameter an angle?
 		if(isAngle && !isFixed) {
 			outPar->SetValue( shiftAngle(outPar->GetValue()) ); //shift angle to the interval [-pi;pi]
 		}
@@ -120,3 +121,5 @@ void FitResult::printFitParameters(TableFormater* tableResult){
 
 	return;
 }
+
+} /* namespace ComPWA */

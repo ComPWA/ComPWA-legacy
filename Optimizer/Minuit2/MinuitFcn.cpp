@@ -20,10 +20,11 @@
 #include <boost/log/trivial.hpp>
 #include <boost/chrono.hpp>
 #include <cmath>
+
 using namespace boost::log;
 using namespace ROOT::Minuit2;
 
-MinuitFcn::MinuitFcn(std::shared_ptr<ControlParameter> myData, ParameterList& parList) :
+MinuitFcn::MinuitFcn(std::shared_ptr<ComPWA::Optimizer::ControlParameter> myData, ComPWA::ParameterList& parList) :
 		  _myDataPtr(myData), _parList(parList){
 	if (0==_myDataPtr) {
 		//Alert << "Data pointer is 0 !!!!" << endmsg;
@@ -42,7 +43,7 @@ double MinuitFcn::operator()(const std::vector<double>& x) const{
 	for(unsigned int i=0; i<x.size(); i++){
 		//par.AddParameter(DoubleParameter(std::string("tmpPar"+i),x[i]));
 		//_parList.SetParameterValue(i,x[i]);
-		std::shared_ptr<DoubleParameter> actPat = _parList.GetDoubleParameter(_parNames.at(i));
+		std::shared_ptr<ComPWA::DoubleParameter> actPat = _parList.GetDoubleParameter(_parNames.at(i));
 		if(!actPat->IsFixed())
 			if(x[i]==x[i]){
 				actPat->SetValue(x[i]);

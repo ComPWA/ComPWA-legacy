@@ -31,6 +31,8 @@
 #include "Core/Parameter.hpp"
 #include "Core/ParObserver.hpp"
 
+namespace ComPWA {
+
 class TreeNode : public std::enable_shared_from_this<TreeNode>, public ParObserver {
 public:
 	//! Standard constructor
@@ -261,5 +263,7 @@ protected:
 //std::ostream & operator<<(std::ostream &os, std::shared_ptr<TreeNode> p){
 //  return os << p->to_str();
 //}
+
+} /* namespace ComPWA */
 
 #endif /* _TREENODE_HPP_ */

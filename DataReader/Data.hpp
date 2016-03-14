@@ -31,6 +31,9 @@
 #include "Core/Generator.hpp"
 #include "Core/DataPoint.hpp"
 
+namespace ComPWA {
+namespace DataReader {
+
 class Data
 {
 
@@ -68,5 +71,8 @@ public:
 
 	virtual void writeData(std::string file="", std::string trName="") =0;
 };
+
+} /* namespace DataReader */
+} /* namespace ComPWA */
 
 #endif

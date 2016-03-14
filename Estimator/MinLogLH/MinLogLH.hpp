@@ -33,6 +33,10 @@
 #include "Core/ParameterList.hpp"
 #include "Core/FunctionTree.hpp"
 
+namespace ComPWA {
+namespace Estimator {
+namespace MinLogLH {
+
 class MinLogLH : public Estimator {
 
 public:
@@ -51,7 +55,7 @@ public:
 	 * @return std::shared_ptr<Data> of existing instance or newly created instance
 	 */
 	static std::shared_ptr<ControlParameter> createInstance(std::shared_ptr<Amplitude> amp_,
-			std::shared_ptr<Data> data_, std::shared_ptr<Data> phspSample_,
+			std::shared_ptr<DataReader::Data> data_, std::shared_ptr<DataReader::Data> phspSample_,
 			unsigned int startEvent=0, unsigned int nEvents=0);
 	/** Create instance of MinLogLH.
 	 * An unbinned efficiency correction is applied using #accSample_.
@@ -66,7 +70,7 @@ public:
 	 * @return std::shared_ptr<Data> of existing instance or newly created instance
 	 */
 	static std::shared_ptr<ControlParameter> createInstance(std::shared_ptr<Amplitude> amp_,
-			std::shared_ptr<Data> data_, std::shared_ptr<Data> phspSample_,std::shared_ptr<Data> accSample_,
+			std::shared_ptr<DataReader::Data> data_, std::shared_ptr<DataReader::Data> phspSample_,std::shared_ptr<DataReader::Data> accSample_,
 			unsigned int startEvent=0, unsigned int nEvents=0);
 	/** Create instance of MinLogLH.
 	 * An unbinned efficiency correction is applied using #accSample_.
@@ -82,7 +86,7 @@ public:
 	 * @return std::shared_ptr<Data> of existing instance or newly created instance
 	 */
 	static std::shared_ptr<ControlParameter> createInstance(std::shared_ptr<Amplitude> amp_,std::shared_ptr<Amplitude> bkg_,
-			std::shared_ptr<Data> data_, std::shared_ptr<Data> phspSample_,std::shared_ptr<Data> accSample_,
+			std::shared_ptr<DataReader::Data> data_, std::shared_ptr<DataReader::Data> phspSample_,std::shared_ptr<DataReader::Data> accSample_,
 			unsigned int startEvent, unsigned int nEvents, double sigFrac);
 
 	/** Set new amplitude to existing instance
@@ -95,8 +99,8 @@ public:
 	 * @param nEvents number of events to process
 	 * @param useFuncTr use FunctionTree yes/no?
 	 */
-	virtual void setAmplitude(std::shared_ptr<Amplitude> amp_, std::shared_ptr<Data> data_,
-			std::shared_ptr<Data> phspSample_, std::shared_ptr<Data> accSample_,
+	virtual void setAmplitude(std::shared_ptr<Amplitude> amp_, std::shared_ptr<DataReader::Data> data_,
+			std::shared_ptr<DataReader::Data> phspSample_, std::shared_ptr<DataReader::Data> accSample_,
 			unsigned int startEvent=0, unsigned int nEvents=0, bool useFuncTr=0, double sigFrac=1.);
 	/** Set new amplitude to existing instance
 	 *
@@ -109,8 +113,8 @@ public:
 	 * @param nEvents number of events to process
 	 * @param useFuncTr use FunctionTree yes/no?
 	 */
-	virtual void setAmplitude(std::shared_ptr<Amplitude> amp_, std::shared_ptr<Amplitude> bkg_,std::shared_ptr<Data> data_,
-			std::shared_ptr<Data> phspSample_, std::shared_ptr<Data> accSample_,
+	virtual void setAmplitude(std::shared_ptr<Amplitude> amp_, std::shared_ptr<Amplitude> bkg_,std::shared_ptr<DataReader::Data> data_,
+			std::shared_ptr<DataReader::Data> phspSample_, std::shared_ptr<DataReader::Data> accSample_,
 			unsigned int startEvent=0, unsigned int nEvents=0, bool useFuncTr=0, double sigFrac=1.);
 
 	//! Check if tree for LH calculation is available
@@ -143,8 +147,8 @@ protected:
 	//! Default Constructor
 	MinLogLH() { };
 	//! Constructor
-	MinLogLH(std::shared_ptr<Amplitude> amp_, std::shared_ptr<Amplitude> bkg_,std::shared_ptr<Data> data_,
-			std::shared_ptr<Data> phspSample_, std::shared_ptr<Data> accSample_,
+	MinLogLH(std::shared_ptr<Amplitude> amp_, std::shared_ptr<Amplitude> bkg_,std::shared_ptr<DataReader::Data> data_,
+			std::shared_ptr<DataReader::Data> phspSample_, std::shared_ptr<DataReader::Data> accSample_,
 			unsigned int startEvent, unsigned int nEvents, double sigFrac=1.);
 	//! Uses ampTree and creates a tree that calculates the full LH
 	virtual void iniLHtree();
@@ -173,11 +177,11 @@ private:
 	std::shared_ptr<FunctionTree> bkgPhspTree_amp;
 
 	//! Data sample
-	std::shared_ptr<Data> data;
+	std::shared_ptr<DataReader::Data> data;
 	//! Phsp sample for normalization
-	std::shared_ptr<Data> phspSample;
+	std::shared_ptr<DataReader::Data> phspSample;
 	//! Phsp with applied efficency for unbinned efficiency correction
-	std::shared_ptr<Data> accSample;
+	std::shared_ptr<DataReader::Data> accSample;
 	//! Total efficiency of phsp with applied efficency. This is used to calculated to number of generated events.
 	double accSampleEff;
 	//! Data sample
@@ -205,5 +209,9 @@ private:
 	//! Scale of penalty term
 	double penaltyLambda;
 };
+
+} /* namespace MinLogLH */
+} /* namespace Estimator */
+} /* namespace ComPWA */
 
 #endif /* _MINLOGLHBKG_HPP */

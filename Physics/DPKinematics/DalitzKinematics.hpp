@@ -25,9 +25,12 @@
 #include <vector>
 
 #include <boost/log/trivial.hpp>
-using namespace boost::log;
 
 #include "Core/Kinematics.hpp"
+
+namespace ComPWA {
+namespace Physics {
+namespace DPKinematics {
 
 class DalitzKinematics : public Kinematics
 {
@@ -181,5 +184,9 @@ public:
 	double m12_max;//!maximum value of m12sq
 
 };
+
+} /* namespace DPKinematics */
+} /* namespace Physics */
+} /* namespace ComPWA */
 
 #endif

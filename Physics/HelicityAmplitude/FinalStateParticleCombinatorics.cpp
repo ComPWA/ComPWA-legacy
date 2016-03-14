@@ -15,6 +15,8 @@
 
 #include "Core/Event.hpp"
 
+namespace ComPWA {
+namespace Physics {
 namespace HelicityFormalism {
 
 FinalStateParticleCombinatorics::FinalStateParticleCombinatorics() {
@@ -209,3 +211,5 @@ std::vector<IndexMapping> FinalStateParticleCombinatorics::getUniqueParticleMapp
 }
 
 } /* namespace HelicityFormalism */
+} /* namespace Physics */
+} /* namespace ComPWA */

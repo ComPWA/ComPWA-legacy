@@ -16,6 +16,8 @@
 #include "Core/Particle.hpp"
 #include "Core/Event.hpp"
 
+namespace ComPWA {
+
 Event::Event():fWeight(1.),fName(""){
 
 }
@@ -41,3 +43,5 @@ const Particle& Event::getParticle(const unsigned int id) const{
   }
   return fParticles.at(id);
 }
+
+} /* namespace ComPWA */

@@ -38,6 +38,10 @@
 
 using namespace std;
 
+using ComPWA::DataReader::RootReader::RootReader;
+using ComPWA::Event;
+using ComPWA::Particle;
+
 /************************************************************************************************/
 /**
  * The main function.

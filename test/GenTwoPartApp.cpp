@@ -40,6 +40,9 @@
 #include "Core/ParameterList.hpp"
 
 using namespace std;
+using ComPWA::ParameterList;
+using ComPWA::Physics::BreitWigner::BreitWigner;
+using ComPWA::DoubleParameter;
 
 const unsigned int MaxEvents = 100000;
 

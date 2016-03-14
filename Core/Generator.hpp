@@ -13,6 +13,8 @@
 #define GENERATOR_HPP_
 #include "Core/Event.hpp"
 
+namespace ComPWA {
+
 /**
  *  \class Generator
  *  \brief Virtual class for PHSP generators
@@ -30,5 +32,6 @@ public:
 
 };
 
+} /* namespace ComPWA */
 
 #endif /* GENERATOR_HPP_ */

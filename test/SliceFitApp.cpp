@@ -69,6 +69,13 @@ unsigned int nFitEvents=100000-1;
 unsigned int nStartEvent=0;
 unsigned int nBins=200;
 
+using namespace ComPWA;
+using Physics::DPKinematics::DalitzKinematics;
+using Physics::AmplitudeSum::AmpSumIntensity;
+using DataReader::RootReader::RootReader;
+using Estimator::SliceFit::SliceFit;
+using Physics::AmplitudeSum::AmplitudeSetup;
+
 /************************************************************************************************/
 /**
  * The main function.
@@ -169,7 +176,7 @@ int main(int argc, char **argv){
     //slicePars.AddParameter(std::shared_ptr<DoubleParameter>(new DoubleParameter("P6",1.)));
   //}
 
-    std::shared_ptr<Optimizer> opti(new MinuitIF(esti, slicePars));
+    std::shared_ptr<Optimizer::Optimizer> opti(new Optimizer::Minuit2::MinuitIF(esti, slicePars));
 
     esti->setSlice(33);
 

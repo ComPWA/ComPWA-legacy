@@ -17,6 +17,10 @@
 #include "Core/Parameter.hpp"
 #include "Physics/AmplitudeSum/AmpWigner2.hpp"
 
+namespace ComPWA {
+namespace Physics {
+namespace AmplitudeSum {
+
 class AmpKinematics{
 public:
 	enum barrierType{BWPrime,BW,none};
@@ -110,5 +114,9 @@ protected:
 
 private:
 };
+
+} /* namespace AmplitudeSum */
+} /* namespace Physics */
+} /* namespace ComPWA */
 
 #endif /* AMPKINEMATICS_HPP_ */

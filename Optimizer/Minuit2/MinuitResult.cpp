@@ -26,7 +26,14 @@
 #include "Optimizer/Minuit2/MinuitResult.hpp"
 #include "Core/ProgressBar.hpp"
 
+namespace ComPWA {
+namespace Optimizer {
+namespace Minuit2 {
+
 using namespace boost::log;
+using namespace ROOT::Minuit2;
+
+using ComPWA::Estimator::Estimator;
 
 int multivariateGaussian(const gsl_rng *rnd, const int vecSize, const gsl_vector *in, const gsl_matrix *cov, gsl_vector *res){
 	gsl_matrix *tmpM= gsl_matrix_alloc(vecSize,vecSize);
@@ -456,3 +463,7 @@ bool MinuitResult::hasFailed(){
 
 	return failed;
 }
+
+} /* namespace Minuit2 */
+} /* namespace Optimizer */
+} /* namespace ComPWA */

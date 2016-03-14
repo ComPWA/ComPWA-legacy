@@ -20,6 +20,10 @@
 #include <cmath>
 #include "Physics/AmplitudeSum/AmpGausRes.hpp"
 
+namespace ComPWA {
+namespace Physics {
+namespace AmplitudeSum {
+
 AmpGausRes::AmpGausRes(const char *name,
 		DoubleParameter& resMass, DoubleParameter& resWidth,
 		int subSys) :
@@ -63,7 +67,7 @@ std::complex<double> AmpGausRes::evaluateAmp(const dataPoint& point){
 	double m0 = _mR.GetValue();
 	double width = _resWidth.GetValue();
 	//  double m  = Double_t(_x);
-	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
+	DPKinematics::DalitzKinematics* kin = dynamic_cast<DPKinematics::DalitzKinematics*>(Kinematics::instance());
 //	double m23sq = point.getVal("m23sq");
 //	double m13sq = point.getVal("m13sq");
 	double m23sq = point.getVal(0);
@@ -83,3 +87,7 @@ std::complex<double> AmpGausRes::evaluateAmp(const dataPoint& point){
 std::complex<double> AmpGausRes::evaluate(const dataPoint& point){
 	return evaluateAmp(point)*evaluateWignerD(point);
 }
+
+} /* namespace AmplitudeSum */
+} /* namespace Physics */
+} /* namespace ComPWA */

@@ -17,6 +17,7 @@
 #include "DecayConfiguration.hpp"
 
 namespace ComPWA {
+namespace Physics {
 namespace DecayTree {
 
 class DecayXMLConfigReader {
@@ -40,11 +41,11 @@ public:
   virtual ~DecayXMLConfigReader();
 
   void readConfig(const std::string &filename);
-  void writeConfig(const boost::property_tree::ptree &pt,
-      const std::string &filename) const;
+  void writeConfig(const std::string &filename) const;
 };
 
 } /* namespace DecayTree */
+} /* namespace Physics */
 } /* namespace ComPWA */
 
 #endif /* PHYSICS_HELICITYAMPLITUDE_DECAYXMLCONFIGREADER_HPP_ */

@@ -28,6 +28,10 @@
 #include <boost/log/core.hpp>
 using namespace boost::log;
 
+namespace ComPWA {
+namespace DataReader {
+namespace RootReader {
+
 RootReader::RootReader(){
 	fFile = 0; //need to do this to avoid seg. violation when destructor is called
 }
@@ -339,3 +343,8 @@ std::vector<dataPoint> RootReader::getDataPoints() {
 		vecPoint.push_back(dataPoint(fEvents.at(i)));
 	return vecPoint;
 }
+
+} /* namespace RootReader */
+} /* namespace DataReader */
+} /* namespace ComPWA */
+

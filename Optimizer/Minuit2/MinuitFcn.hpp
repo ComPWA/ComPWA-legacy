@@ -28,16 +28,14 @@
 #include "Optimizer/ControlParameter.hpp"
 #include "Core/ParameterList.hpp"
 
-class ControlParameter;
-
 namespace ROOT {
+namespace Minuit2 {
 
-   namespace Minuit2 {
 class MinuitFcn : public FCNBase {
 
 public:
 
-  MinuitFcn(std::shared_ptr<ControlParameter> theData, ParameterList& parList);
+  MinuitFcn(std::shared_ptr<ComPWA::Optimizer::ControlParameter> theData, ComPWA::ParameterList& parList);
   virtual ~MinuitFcn();
 
   double operator()(const std::vector<double>& x) const;
@@ -53,13 +51,12 @@ public:
   };
 
 private:
-  std::shared_ptr<ControlParameter> _myDataPtr; /*!< pointer to the ControlParameter (e.g. Estimator) */
-  ParameterList& _parList; /*!< List of Parameters the ControlParameter needs */
+  std::shared_ptr<ComPWA::Optimizer::ControlParameter> _myDataPtr; /*!< pointer to the ControlParameter (e.g. Estimator) */
+  ComPWA::ParameterList& _parList; /*!< List of Parameters the ControlParameter needs */
   std::map<unsigned int, std::string> _parNames; /*!< mapping of minuit ids to ComPWA names */
 };
-  }  // namespace Minuit2
 
+}  // namespace Minuit2
 }  // namespace ROOT
-
 
 #endif 

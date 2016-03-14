@@ -43,6 +43,7 @@ PhysConst::~PhysConst() {
 
 void PhysConst::initQuantumNumberMapping() {
   quantum_number_key_name_mapping_[QuantumNumbers::SPIN] = "spin";
+  quantum_number_key_name_mapping_[QuantumNumbers::ORBITAL_ANGULAR_MOMENTUM] = "angular-momentum";
   quantum_number_key_name_mapping_[QuantumNumbers::ISOSPIN] = "isospin";
   quantum_number_key_name_mapping_[QuantumNumbers::CHARGE] = "charge";
   quantum_number_key_name_mapping_[QuantumNumbers::PARITY] = "parity";
@@ -240,4 +241,4 @@ std::string PhysConst::getQuantumNumberName(
   }
 }
 
-}
+} /* namespace ComPWA */

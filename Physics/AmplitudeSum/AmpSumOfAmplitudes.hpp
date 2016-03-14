@@ -21,6 +21,10 @@
 #include <vector>
 #include <memory>
 
+namespace ComPWA {
+namespace Physics {
+namespace AmplitudeSum {
+
 class AmpSumOfAmplitudes{
 public:
   AmpSumOfAmplitudes();
@@ -87,4 +91,8 @@ protected:
   std::vector<std::shared_ptr<DoubleParameter> > _phaseList;  //  List of relative phases
 };
  
+} /* namespace AmplitudeSum */
+} /* namespace Physics */
+} /* namespace ComPWA */
+
 #endif

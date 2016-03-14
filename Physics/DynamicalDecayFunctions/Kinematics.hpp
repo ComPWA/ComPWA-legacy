@@ -14,6 +14,8 @@
 
 #include <complex>
 
+namespace ComPWA {
+namespace Physics {
 namespace DynamicalFunctions {
 
 class Kinematics {
@@ -84,5 +86,8 @@ public:
       double mesonRadius);
 };
 
-}
+} /* namespace DynamicalFunctions */
+} /* namespace Physics */
+} /* namespace ComPWA */
+
 #endif /* PHYSICS_DYNAMICALDECAYFUNCTIONS_KINEMATICS_HPP_ */

@@ -24,6 +24,10 @@
 
 #include "Core/Dictionary.hpp"
 
+namespace ComPWA {
+
+using DataReader::Data;
+
 Dictionary::Dictionary() {
 
 }
@@ -73,3 +77,4 @@ bool Dictionary::amplitudeNameUsed(std::string inName){
   return used;
 }
 
+} /* namespace ComPWA */

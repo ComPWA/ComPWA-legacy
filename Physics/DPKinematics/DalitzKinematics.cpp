@@ -23,6 +23,9 @@
 #include "gsl/gsl_monte_vegas.h"
 #include "gsl/gsl_sf_legendre.h"
 
+namespace ComPWA {
+namespace Physics {
+namespace DPKinematics {
 
 DalitzKinematics::DalitzKinematics(std::string _nameMother,
 		std::string _name1, std::string _name2, std::string _name3) :
@@ -484,3 +487,7 @@ bool DalitzKinematics::isWithinPhsp(const dataPoint& point) {
 //
 //	return result;
 //}
+
+} /* namespace DPKinematics */
+} /* namespace Physics */
+} /* namespace ComPWA */

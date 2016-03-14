@@ -35,6 +35,8 @@
 
 enum ErrorType { SYM = 1, ASYM = 2, LHSCAN = 3, NOTDEF = 0};
 
+namespace ComPWA {
+
 class MultiComplex: public AbsParameter
 {
 
@@ -1274,5 +1276,7 @@ protected:
 	}
 
 };
+
+} /* namespace ComPWA */
 
 #endif

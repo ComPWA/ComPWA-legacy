@@ -16,6 +16,7 @@
 #include "DecayTree.hpp"
 
 namespace ComPWA {
+namespace Physics {
 namespace DecayTree {
 
 DecayTree::DecayTree() {
@@ -187,4 +188,5 @@ void DecayTree::print(std::ostream& os) const {
 }
 
 } /* namespace DecayTree */
+} /* namespace Physics */
 } /* namespace ComPWA */

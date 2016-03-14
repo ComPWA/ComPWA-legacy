@@ -15,6 +15,10 @@
 #include <vector>
 #include <memory>
 
+namespace ComPWA {
+namespace Physics {
+namespace DPKinematics {
+
 /*! \class SimpleEfficiency
  * @file SimpleEfficiency.hpp
  * Implementation of an efficiency class. Similar functionality to TEfficiency
@@ -53,4 +57,9 @@ protected:
 
 	ClassDef(SimpleEfficiency, 3);
 };
+
+} /* namespace DPKinematics */
+} /* namespace Physics */
+} /* namespace ComPWA */
+
 #endif /* SIMPLEEFFICIENCY_HPP_ */

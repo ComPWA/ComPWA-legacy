@@ -7,6 +7,10 @@
 
 #include "Core/TableFormater.hpp"
 
+namespace ComPWA {
+
+using std::endl;
+
 void TableFormater::delim(){
 	*out<<sep;
 	for(unsigned int i=0;i<totalWidth-1; i++) *out << "-" ;
@@ -101,3 +105,5 @@ void TexTableFormater::header() {
 	delim();
 };
 void TexTableFormater::delim(){ *out<<"\\hline"<<std::endl; }
+
+} /* namespace ComPWA */

@@ -23,6 +23,10 @@
 #include "Core/Amplitude.hpp"
 #include "Core/ParameterList.hpp"
 
+namespace ComPWA {
+namespace Physics {
+namespace BreitWigner {
+
 class BreitWigner : public Amplitude {
 
 public:
@@ -76,5 +80,9 @@ private:
 	const double BreitWignerValue(double x, double M, double T);
 
 };
+
+} /* namespace BreitWigner */
+} /* namespace Physics */
+} /* namespace ComPWA */
 
 #endif /* _PIFBW_HPP */

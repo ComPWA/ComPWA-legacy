@@ -4,6 +4,7 @@
 
 #include "Physics/DecayTree/DecayGenerator.hpp"
 #include "Physics/DecayTree/DecayGeneratorFacade.hpp"
+#include "Physics/DecayTree/DecayXMLConfigReader.hpp"
 
 int main(int argc, char **argv) {
   std::cout << "  ComPWA Copyright (C) 2013  Stefan Pflueger " << std::endl;
@@ -12,28 +13,37 @@ int main(int argc, char **argv) {
       << std::endl;
   std::cout << std::endl;
 
-  ComPWA::DecayTree::DecayGenerator decay_generator;
+  ComPWA::Physics::DecayTree::DecayGenerator decay_generator;
   // initialize
 
-  ComPWA::DecayTree::DecayGeneratorFacade decay_generator_facade(
+  ComPWA::Physics::DecayTree::DecayGeneratorFacade decay_generator_facade(
       decay_generator);
 
   decay_generator_facade.setAllowedSpinQuantumNumbers(
-      ComPWA::QuantumNumbers::SPIN, { 0, 1, 2 }, 1);
+      ComPWA::QuantumNumbers::SPIN, { 0, 1, 2}, 1, {
+          ComPWA::QuantumNumbers::ORBITAL_ANGULAR_MOMENTUM });
   decay_generator_facade.setAllowedSpinQuantumNumbers(
-      ComPWA::QuantumNumbers::ISOSPIN, { 0, 1 }, 1);
+      ComPWA::QuantumNumbers::ORBITAL_ANGULAR_MOMENTUM, { 0, 1, 2 }, 1, { },
+      ComPWA::Physics::DecayTree::QuantumNumberTypes::COMPOSITE_PARTICLE_BASED);
+  decay_generator_facade.setAllowedSpinQuantumNumbers(
+      ComPWA::QuantumNumbers::ISOSPIN, { 0, 1 }, 1, { });
   decay_generator_facade.setAllowedIntQuantumNumbers(
-      ComPWA::QuantumNumbers::CHARGE, { -1, 0, 1 });
+      ComPWA::QuantumNumbers::CHARGE, { -1, 0, 1 }, { });
   decay_generator_facade.setAllowedIntQuantumNumbers(
-      ComPWA::QuantumNumbers::PARITY, { -1, 1 });
+      ComPWA::QuantumNumbers::PARITY, { -1, 1 }, {
+          ComPWA::QuantumNumbers::ORBITAL_ANGULAR_MOMENTUM });
   decay_generator_facade.setAllowedIntQuantumNumbers(
-      ComPWA::QuantumNumbers::CPARITY, { -1, 1 });
+      ComPWA::QuantumNumbers::CPARITY, { -1, 1 }, {
+          ComPWA::QuantumNumbers::CHARGE });
 
-  ComPWA::DecayTree::IFParticleInfo if_particle =
+  decay_generator_facade.setConservedQuantumNumbers( {
+      ComPWA::QuantumNumbers::CHARGE, ComPWA::QuantumNumbers::PARITY,
+      ComPWA::QuantumNumbers::CPARITY, ComPWA::QuantumNumbers::SPIN,
+      ComPWA::QuantumNumbers::ORBITAL_ANGULAR_MOMENTUM });
+
+  ComPWA::Physics::DecayTree::IFParticleInfo if_particle =
       decay_generator.createIFParticleInfo("gamma");
   decay_generator.addFinalStateParticles(if_particle);
-//  decay_generator.addFinalStateParticles("gamma");
-//  decay_generator.addFinalStateParticles("pi0");
   if_particle = decay_generator.createIFParticleInfo("pi0");
   decay_generator.addFinalStateParticles(if_particle);
   decay_generator.addFinalStateParticles(if_particle);
@@ -41,7 +51,11 @@ int main(int argc, char **argv) {
   if_particle = decay_generator.createIFParticleInfo("jpsi");
   decay_generator.setTopNodeState(if_particle);
 
-  ComPWA::DecayTree::DecayConfiguration decay_config = decay_generator.createDecayConfiguration();
+  ComPWA::Physics::DecayTree::DecayConfiguration decay_config =
+      decay_generator.createDecayConfiguration();
+
+  ComPWA::Physics::DecayTree::DecayXMLConfigReader xml_config_io(decay_config);
+  xml_config_io.writeConfig("test.xml");
 
   return 0;
 }

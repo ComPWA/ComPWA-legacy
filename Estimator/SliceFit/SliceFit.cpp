@@ -21,6 +21,16 @@
 #include "Core/Particle.hpp"
 #include "Core/ParameterList.hpp"
 
+namespace ComPWA {
+
+using DataReader::Data;
+using Physics::AmplitudeSum::AmpSumIntensity;
+using Physics::DPKinematics::DalitzKinematics;
+using Optimizer::ControlParameter;
+
+namespace Estimator {
+namespace SliceFit {
+
 SliceFit::SliceFit(std::shared_ptr<AmpSumIntensity> inPIF, std::shared_ptr<Data> inDIF, ParameterList& inPar, unsigned int startEvent, unsigned int nEvents)
 : pPIF_(inPIF), pDIF_(inDIF), nEvts_(0), nPhsp_(0), nStartEvt_(startEvent), par_(inPar), nUseEvt_(nEvents),nBins_(200){
 	phspVolume = Kinematics::instance()->getPhspVolume();
@@ -294,3 +304,7 @@ double SliceFit::controlParameter(ParameterList& minPar){
 
   return 0;*/
 }
+
+} /* namespace SliceFit */
+} /* namespace Estimator */
+} /* namespace ComPWA */

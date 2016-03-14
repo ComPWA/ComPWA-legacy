@@ -36,6 +36,8 @@
 #include "Core/AbsParameter.hpp"
 #include "Core/DataPoint.hpp"
 
+namespace ComPWA {
+
 class Strategy
 {
 public:
@@ -838,5 +840,7 @@ public:
     return true;
   };
 };
+
+} /* namespace ComPWA */
 
 #endif

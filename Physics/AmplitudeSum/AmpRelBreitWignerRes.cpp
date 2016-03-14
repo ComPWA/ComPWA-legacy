@@ -22,6 +22,9 @@
 #include "Physics/AmplitudeSum/AmpRelBreitWignerRes.hpp"
 #include <stdlib.h>
 
+namespace ComPWA {
+namespace Physics {
+namespace AmplitudeSum {
 
 AmpRelBreitWignerRes::AmpRelBreitWignerRes(const char *name,
 		std::shared_ptr<DoubleParameter> resMass, std::shared_ptr<DoubleParameter> resWidth,
@@ -50,7 +53,7 @@ std::complex<double> AmpRelBreitWignerRes::evaluateAmp(const dataPoint& point) {
 		std::cout<<"Masses of decay products not set!"<<std::endl;
 		return 0;
 	}
-	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
+	DPKinematics::DalitzKinematics* kin = dynamic_cast<DPKinematics::DalitzKinematics*>(Kinematics::instance());
 	if(!foundMasses){
 		id23 = point.getID("m23sq");
 		id13 = point.getID("m13sq");
@@ -98,3 +101,7 @@ std::complex<double> AmpRelBreitWignerRes::dynamicalFunction(double mSq, double 
 	}
 	return result;
 }
+
+} /* namespace AmplitudeSum */
+} /* namespace Physics */
+} /* namespace ComPWA */

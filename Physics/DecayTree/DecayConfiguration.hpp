@@ -18,6 +18,7 @@
 #include "Physics/HelicityAmplitude/ParticleStateDefinitions.hpp"
 
 namespace ComPWA {
+namespace Physics {
 namespace DecayTree {
 
 struct DecayProductsInfo {
@@ -36,24 +37,6 @@ class DecayConfiguration {
 
   ParticleIndexDecayTree current_concrete_decay_tree_;
 
-public:
-  DecayConfiguration();
-  virtual ~DecayConfiguration();
-
-  void addCurrentDecayTreeToList();
-
-  void addDecayToCurrentDecayTree(const ParticleStateInfo& mother,
-      const std::vector<ParticleStateInfo>& daughter_states,
-      const boost::property_tree::ptree& decay_strength_info_and_phase);
-
-  std::vector<unsigned int> addParticlesToList(
-      const std::vector<ParticleStateInfo>& particle_list);
-
-  unsigned int addParticleToList(ParticleStateInfo particle);
-
-  void setRemainingParticleProperties(ParticleStateInfo& particle) const;
-
-  boost::property_tree::ptree exportConfigurationToPropertyTree() const;
 
   boost::property_tree::ptree createPropertyTreeForParticleIndexTree(
       const ParticleIndexDecayTree& particle_index_decay_tree) const;
@@ -76,6 +59,25 @@ public:
   boost::property_tree::ptree createPropertyTreeForIntermediateStateParticle(
       const ParticleStateInfo& particle) const;
 
+public:
+  DecayConfiguration();
+  virtual ~DecayConfiguration();
+
+  void addCurrentDecayTreeToList();
+
+  void addDecayToCurrentDecayTree(const ParticleStateInfo& mother,
+      const std::vector<ParticleStateInfo>& daughter_states,
+      const boost::property_tree::ptree& decay_strength_info_and_phase);
+
+  std::vector<unsigned int> addParticlesToList(
+      const std::vector<ParticleStateInfo>& particle_list);
+
+  unsigned int addParticleToList(ParticleStateInfo particle);
+
+  void setRemainingParticleProperties(ParticleStateInfo& particle) const;
+
+  boost::property_tree::ptree exportConfigurationToPropertyTree() const;
+
   ParticleIndexDecayTree::const_iterator determineTopNode(
       const ParticleIndexDecayTree& decay_topology) const;
 
@@ -88,6 +90,7 @@ public:
 };
 
 } /* namespace DecayTree */
+} /* namespace Physics */
 } /* namespace ComPWA */
 
 #endif /* PHYSICS_HELICITYAMPLITUDE_DECAYCONFIGURATION_HPP_ */

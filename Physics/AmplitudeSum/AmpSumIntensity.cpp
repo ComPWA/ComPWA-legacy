@@ -24,6 +24,10 @@
 
 #include "Physics/AmplitudeSum/AmpSumIntensity.hpp"
 
+namespace ComPWA {
+namespace Physics {
+namespace AmplitudeSum {
+
 AmpSumIntensity::AmpSumIntensity(AmplitudeSetup ini, normStyle ns, std::shared_ptr<Efficiency> eff,
 		unsigned int nCalls) :
 									totAmp("relBWsumAmplitude"), ampSetup(ini),
@@ -45,7 +49,7 @@ AmpSumIntensity::AmpSumIntensity(AmplitudeSetup ini, std::shared_ptr<Efficiency>
 void AmpSumIntensity::init(){
 	result.AddParameter(std::shared_ptr<DoubleParameter>(new DoubleParameter("AmpSumResult")));
 
-	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
+	DPKinematics::DalitzKinematics* kin = dynamic_cast<DPKinematics::DalitzKinematics*>(Kinematics::instance());
 	_calcNorm=1;
 	if(_normStyle==normStyle::none) _calcNorm=0;
 
@@ -261,7 +265,7 @@ std::shared_ptr<FunctionTree> AmpSumIntensity::setupBasicTree(
 		BOOST_LOG_TRIVIAL(error) << "AmpSumIntensity::setupBasicTree() toy sample empty!";
 		return std::shared_ptr<FunctionTree>();
 	}
-	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
+	DPKinematics::DalitzKinematics* kin = dynamic_cast<DPKinematics::DalitzKinematics*>(Kinematics::instance());
 	double phspVol = kin->getPhspVolume();
 
 	//------------Setup Tree---------------------
@@ -710,7 +714,7 @@ void AmpSumIntensity::calcMaxVal(ParameterList& par, std::shared_ptr<Generator> 
 }
 
 void AmpSumIntensity::calcMaxVal(std::shared_ptr<Generator> gen){
-	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
+  DPKinematics::DalitzKinematics* kin = dynamic_cast<DPKinematics::DalitzKinematics*>(Kinematics::instance());
 
 	double maxM23=-999; double maxM13=-999; double maxVal=0;
 	for(unsigned int i=0; i<_nCalls; i++){
@@ -743,7 +747,7 @@ double AmpSumIntensity::normReso(std::shared_ptr<AmpAbsDynamicalFunction> amp){
 double AmpSumIntensity::evaluate(double x[], size_t dim) {
 	/* Calculation amplitude integral (excluding efficiency) */
 	if(dim!=2) return 0;
-	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
+	DPKinematics::DalitzKinematics* kin = dynamic_cast<DPKinematics::DalitzKinematics*>(Kinematics::instance());
 	//set data point: we assume that x[0]=m13 and x[1]=m23
 	dataPoint point; point.setVal(1,x[0]); point.setVal(0,x[1]);
 	//	double m12sq = kin->getThirdVariableSq(x[0],x[1]);
@@ -771,7 +775,7 @@ const double AmpSumIntensity::integral(){
 	double res=0.0, err=0.0;
 
 	//set limits: we assume that x[0]=m13sq and x[1]=m23sq
-	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
+	DPKinematics::DalitzKinematics* kin = dynamic_cast<DPKinematics::DalitzKinematics*>(Kinematics::instance());
 	double xLimit_low[2] = {kin->m13_sq_min,kin->m23_sq_min};
 	double xLimit_high[2] = {kin->m13_sq_max,kin->m23_sq_max};
 	//	double xLimit_low[2] = {0,0};
@@ -795,7 +799,7 @@ const double AmpSumIntensity::integral(){
 double AmpSumIntensity::evaluateEff(double x[], size_t dim) {
 	/* Calculation amplitude normalization (including efficiency) */
 	if(dim!=2) return 0;
-	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
+	DPKinematics::DalitzKinematics* kin = dynamic_cast<DPKinematics::DalitzKinematics*>(Kinematics::instance());
 	//set data point: we assume that x[0]=m13 and x[1]=m23
 	dataPoint point; point.setVal(1,x[0]); point.setVal(0,x[1]);
 	if( !kin->isWithinPhsp(point) ) return 0;//only integrate over phase space
@@ -823,7 +827,7 @@ const double AmpSumIntensity::normalization(){
 	double res=0.0, err=0.0;
 
 	//set limits: we assume that x[0]=m13sq and x[1]=m23sq
-	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
+	DPKinematics::DalitzKinematics* kin = dynamic_cast<DPKinematics::DalitzKinematics*>(Kinematics::instance());
 	double xLimit_low[2] = {kin->m13_sq_min,kin->m23_sq_min};
 	double xLimit_high[2] = {kin->m13_sq_max,kin->m23_sq_max};
 	//	double xLimit_low[2] = {0,0};
@@ -969,7 +973,7 @@ double AmpSumIntensity::getIntValue(std::string var1, double min1, double max1, 
 	 * Integrates in \var1 from \min1 to \max1 and in \var2 from \min2 to \max2.
 	 * Is intended to be used for calculation of bin content.
 	 */
-	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
+  DPKinematics::DalitzKinematics* kin = dynamic_cast<DPKinematics::DalitzKinematics*>(Kinematics::instance());
 	double _min1 = min1;
 	double _min2 = min2;
 	double _max1 = max1;
@@ -1016,3 +1020,7 @@ double AmpSumIntensity::getIntValue(std::string var1, double min1, double max1, 
 
 	return res;
 }
+
+} /* namespace AmplitudeSum */
+} /* namespace Physics */
+} /* namespace ComPWA */

@@ -11,6 +11,8 @@
 
 #include "Physics/DynamicalDecayFunctions/TwoBodyDecay/TopNodeConstantValue.hpp"
 
+namespace ComPWA {
+namespace Physics {
 namespace DynamicalFunctions {
 
 TopNodeConstantValue::TopNodeConstantValue() {
@@ -34,3 +36,5 @@ std::complex<double> TopNodeConstantValue::evaluate(const dataPoint& point,
 }
 
 } /* namespace DynamicalFunctions */
+} /* namespace Physics */
+} /* namespace ComPWA */

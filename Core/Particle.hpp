@@ -24,6 +24,8 @@
 #include <vector>
 #include <math.h>
 
+namespace ComPWA {
+
 struct Particle
 {
 
@@ -64,5 +66,7 @@ protected:*/
   //TODO: other particle info?
 
 };
+
+} /* namespace ComPWA */
 
 #endif

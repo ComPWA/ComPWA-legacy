@@ -24,7 +24,9 @@
 #include <vector>
 #include "Physics/AmplitudeSum/AmpFlatteRes.hpp"
 
-using namespace std;
+namespace ComPWA {
+namespace Physics {
+namespace AmplitudeSum {
 
 class AmpFlatteRes3Ch : public AmpAbsDynamicalFunction, public AmpKinematics {
 public:
@@ -110,4 +112,9 @@ public:
 protected:
 	std::string name;
 };
+
+} /* namespace AmplitudeSum */
+} /* namespace Physics */
+} /* namespace ComPWA */
+
 #endif

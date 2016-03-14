@@ -18,6 +18,10 @@
 
 #include "qft++.h"
 
+namespace ComPWA {
+namespace Physics {
+namespace AmplitudeSum {
+
 AmpWigner2::AmpWigner2(unsigned int subSys, unsigned int resSpin) : _resSpin(resSpin),_subSys(subSys),massIdsSet(false)
 {
 	initialise();
@@ -30,7 +34,7 @@ AmpWigner2::AmpWigner2(const AmpWigner2& other, const char* newname) : _resSpin(
 
 void AmpWigner2::initialise()
 {
-	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
+  DPKinematics::DalitzKinematics* kin = dynamic_cast<DPKinematics::DalitzKinematics*>(Kinematics::instance());
 	_M=kin->M;
 	_m1=kin->m1;
 	_m2=kin->m2;
@@ -42,7 +46,7 @@ void AmpWigner2::initialise()
 
 }
 double AmpWigner2::evaluate(const dataPoint& point) {
-	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
+  DPKinematics::DalitzKinematics* kin = dynamic_cast<DPKinematics::DalitzKinematics*>(Kinematics::instance());
 
 	double cosTheta=-999, result=-999;
 	Spin J((int)_resSpin);
@@ -152,3 +156,7 @@ double AmpWigner2::evaluate(const dataPoint& point) {
 	}
 	return result;
 }*/
+
+} /* namespace AmplitudeSum */
+} /* namespace Physics */
+} /* namespace ComPWA */

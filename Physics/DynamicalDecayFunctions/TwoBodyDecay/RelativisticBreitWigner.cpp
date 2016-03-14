@@ -26,6 +26,8 @@
 #include "Physics/DynamicalDecayFunctions/TwoBodyDecay/RelativisticBreitWigner.hpp"
 #include "Physics/DynamicalDecayFunctions/Kinematics.hpp"
 
+namespace ComPWA {
+namespace Physics {
 namespace DynamicalFunctions {
 
 RelativisticBreitWigner::RelativisticBreitWigner(const ComPWA::Spin& J) :
@@ -37,7 +39,7 @@ RelativisticBreitWigner::RelativisticBreitWigner(const ComPWA::Spin& J) :
   parameter_list_.AddParameter(resonance_width_);
   parameter_list_.AddParameter(meson_radius_);
 
-  index_cms_mass_squared_ = ::Kinematics::instance()->getVariableIndex(
+  index_cms_mass_squared_ = ComPWA::Kinematics::instance()->getVariableIndex(
       "cms_mass_squared");
 }
 
@@ -112,4 +114,6 @@ std::complex<double> RelativisticBreitWigner::evaluate(const dataPoint& point,
   return result;
 }
 
-}
+} /* namespace DynamicalFunctions */
+} /* namespace Physics */
+} /* namespace ComPWA */

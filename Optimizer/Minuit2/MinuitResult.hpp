@@ -44,14 +44,16 @@
 
 #include <gsl/gsl_rng.h>
 
-using namespace ROOT::Minuit2;
+namespace ComPWA {
+namespace Optimizer {
+namespace Minuit2 {
 
 class MinuitResult : public FitResult
 {
 public:
 	MinuitResult() {};
-	MinuitResult(std::shared_ptr<ControlParameter> esti, FunctionMinimum result);
-	void setResult(std::shared_ptr<ControlParameter> esti,FunctionMinimum result);
+	MinuitResult(std::shared_ptr<ControlParameter> esti, ROOT::Minuit2::FunctionMinimum result);
+	void setResult(std::shared_ptr<ControlParameter> esti, ROOT::Minuit2::FunctionMinimum result);
 	void setInitialLH(double iniLH){ initialLH = iniLH; }
 	//! Convert to double and return final LH values
 	operator double() const { return finalLH; };
@@ -78,8 +80,8 @@ public:
 	//! Any errors during minimization?
 	virtual bool hasFailed();
 
-	void init(FunctionMinimum);
-	std::shared_ptr<Estimator> estimator;
+	void init(ROOT::Minuit2::FunctionMinimum);
+	std::shared_ptr<ComPWA::Estimator::Estimator> estimator;
 	//====== MINUIT FIT RESULT =======
 	bool isValid; //result valid
 	bool covPosDef; //covariance matrix pos.-def.
@@ -152,5 +154,9 @@ public:
 	//! List with fit fractions and errors
 	ParameterList fractionList;
 };
+
+} /* namespace Minuit2 */
+} /* namespace Optimizer */
+} /* namespace ComPWA */
 
 #endif

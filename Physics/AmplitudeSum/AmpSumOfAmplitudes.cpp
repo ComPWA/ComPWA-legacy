@@ -11,6 +11,10 @@
 #include "Core/Parameter.hpp"
 #include "Physics/AmplitudeSum/AmpSumOfAmplitudes.hpp"
 
+namespace ComPWA {
+namespace Physics {
+namespace AmplitudeSum {
+
 AmpSumOfAmplitudes::AmpSumOfAmplitudes()
 {
 
@@ -187,3 +191,7 @@ double AmpSumOfAmplitudes::evaluateSlice(dataPoint& point, std::complex<double>*
 
 	return (std::abs(res)*std::abs(res) );
 }
+
+} /* namespace AmplitudeSum */
+} /* namespace Physics */
+} /* namespace ComPWA */

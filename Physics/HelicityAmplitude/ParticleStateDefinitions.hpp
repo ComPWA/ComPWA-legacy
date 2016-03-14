@@ -19,6 +19,8 @@
 
 #include "Core/Utility.hpp"
 
+namespace ComPWA {
+namespace Physics {
 namespace HelicityFormalism {
 
 typedef ComPWA::ParticleStateInfo ParticleStateInfo;
@@ -36,7 +38,6 @@ struct HelicityAngles {
   }
 };
 
-
 struct ParticleIDComparison {
   unsigned int ps_id_;
 
@@ -50,7 +51,8 @@ struct ParticleIDComparison {
     return ps.unique_id_ == ps_id_;
   }
 
-  bool operator()(const ComPWA::ParticleStateInfo& lhs, const ComPWA::ParticleStateInfo& rhs) {
+  bool operator()(const ComPWA::ParticleStateInfo& lhs,
+      const ComPWA::ParticleStateInfo& rhs) {
     return lhs.unique_id_ < rhs.unique_id_;
   }
 };
@@ -162,8 +164,10 @@ struct checkLessThanOnIDInfoVectorsIgnoringID {
     std::vector<unsigned int> not_found_elements;
     std::vector<ComPWA::IDInfo> clone_lhs(lhs);
     std::vector<ComPWA::IDInfo> clone_rhs(rhs);
-    std::sort(clone_lhs.begin(), clone_lhs.end(), ComPWA::IDInfo::lessThenIgnoringID);
-    std::sort(clone_rhs.begin(), clone_rhs.end(), ComPWA::IDInfo::lessThenIgnoringID);
+    std::sort(clone_lhs.begin(), clone_lhs.end(),
+        ComPWA::IDInfo::lessThenIgnoringID);
+    std::sort(clone_rhs.begin(), clone_rhs.end(),
+        ComPWA::IDInfo::lessThenIgnoringID);
     for (unsigned int i = 0; i < lhs.size(); ++i) {
       if (clone_lhs[i].particle_id_ < clone_rhs[i].particle_id_)
         return true;
@@ -302,6 +306,8 @@ struct TwoBodyDecayTopology {
 }
 ;
 
-}
+} /* namespace HelicityFormalism */
+} /* namespace Physics */
+} /* namespace ComPWA */
 
 #endif /* PHYSICS_HELICITYAMPLITUDE_PARTICLESTATEDEFINITIONS_HPP_ */

@@ -257,6 +257,7 @@
 		<isospin_z>0</isospin_z>
 		<J>0</J>
 		<P>+1</P>
+		<C>+1</C>
 	</particle>
 	<particle>
 		<ID>225</ID>
@@ -282,7 +283,7 @@
 	
 	<particle>
 		<ID>30221</ID>
-		<name>f0(1370)</name>
+		<name>f0_1370</name>
 		<mass>
 			<value>1.37</value>
 			<error>

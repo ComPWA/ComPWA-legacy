@@ -17,7 +17,7 @@
 
 #include "Core/ParameterList.hpp"
 
-using namespace std;
+namespace ComPWA {
 
 class TableFormater
 {
@@ -50,7 +50,7 @@ public:
 	};
 
 protected:
-	ostream* out;
+	std::ostream* out;
 	std::vector<unsigned int> columnWidth;
 	std::vector<std::string> columnTitle;
 
@@ -72,4 +72,7 @@ public:
 	virtual void header();
 	virtual void delim();
 };
+
+} /* namespace ComPWA */
+
 #endif /* TABLEFORMATER_CXX_ */

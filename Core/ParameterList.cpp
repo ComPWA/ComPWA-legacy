@@ -22,6 +22,8 @@
 
 #include "Core/ParameterList.hpp"
 
+namespace ComPWA {
+
 ParameterList::ParameterList(){
 	//make_str();
 }
@@ -617,3 +619,4 @@ void ParameterList::Append(const ParameterList& addList){
 		AddParameter(addList.GetParameter(i));
 }
 
+} /* namespace ComPWA */

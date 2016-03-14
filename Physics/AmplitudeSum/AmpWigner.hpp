@@ -27,7 +27,9 @@
 #include "Physics/DPKinematics/DalitzKinematics.hpp"
 #include "Core/DataPoint.hpp"
 
-using namespace std;
+namespace ComPWA {
+namespace Physics {
+namespace AmplitudeSum {
 
 class AmpWigner{
 public:
@@ -74,5 +76,9 @@ private:
   //ClassDef(AmpWigner,1) // Wigner_d angular distribution
 
 };
+
+} /* namespace AmplitudeSum */
+} /* namespace Physics */
+} /* namespace ComPWA */
 
 #endif

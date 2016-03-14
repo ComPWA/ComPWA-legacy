@@ -32,6 +32,11 @@
 #include <boost/log/core.hpp>
 #include <boost/log/trivial.hpp>
 #include <boost/timer.hpp>
+
+namespace ComPWA {
+namespace Optimizer {
+namespace Minuit2 {
+
 using namespace boost::log;
 using namespace ROOT::Minuit2;
 
@@ -169,3 +174,6 @@ std::shared_ptr<FitResult> MinuitIF::exec(ParameterList& par){
 	return result;
 }
 
+} /* namespace Minuit2 */
+} /* namespace Optimizer */
+} /* namespace ComPWA */

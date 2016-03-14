@@ -16,8 +16,11 @@
 
 #include "ParticleStateDefinitions.hpp"
 
+namespace ComPWA {
+
 class Event;
 
+namespace Physics {
 namespace HelicityFormalism {
 
 typedef std::pair<std::vector<IDInfo>, IndexList> IDInfoListUniqueIDListPair;
@@ -198,5 +201,7 @@ public:
 };
 
 } /* namespace HelicityFormalism */
+} /* namespace Physics */
+} /* namespace ComPWA */
 
 #endif /* PHYSICS_HELICITYAMPLITUDE_FINALSTATEPARTICLECOMBINATORICS_HPP_ */

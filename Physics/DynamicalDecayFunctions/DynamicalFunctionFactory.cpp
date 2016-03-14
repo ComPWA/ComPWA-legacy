@@ -13,6 +13,8 @@
 #include "Physics/DynamicalDecayFunctions/TwoBodyDecay/RelativisticBreitWigner.hpp"
 #include "Physics/DynamicalDecayFunctions/TwoBodyDecay/TopNodeConstantValue.hpp"
 
+namespace ComPWA {
+namespace Physics {
 namespace DynamicalFunctions {
 
 DynamicalFunctionFactory::DynamicalFunctionFactory() {
@@ -48,15 +50,20 @@ std::shared_ptr<AbstractDynamicalFunction> DynamicalFunctionFactory::generateDyn
     return find_result->second;
   }
   else {
-    if (state_info.dynamical_info_.initial_state_.get<std::string>("type")
-        == "relBW") {
+    if (DynamicalFunctions::StringToDynamicalType.at(
+        state_info.dynamical_info_.initial_state_.get < std::string > ("type"))
+        == DynamicalFunctions::DynamicalInfoTypes::RELATIVE_BREIT_WIGNER) {
       return generateRelativisiticBreitWigner(state_info, external_parameters);
     }
-    else if (state_info.dynamical_info_.initial_state_.get<std::string>("type")
-        == "topNode") {
-      return std::shared_ptr<TopNodeConstantValue>(new TopNodeConstantValue());
+    else if (DynamicalFunctions::StringToDynamicalType.at(
+        state_info.dynamical_info_.initial_state_.get < std::string > ("type"))
+        == DynamicalFunctions::DynamicalInfoTypes::TOP_NODE) {
+      return std::shared_ptr < TopNodeConstantValue
+          > (new TopNodeConstantValue());
     }
   }
 }
 
 } /* namespace DynamicalFunctions */
+} /* namespace Physics */
+} /* namespace ComPWA */

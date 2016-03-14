@@ -7,6 +7,12 @@
 
 #include "Physics/AmplitudeSum/AmplitudeSetup.hpp"
 
+namespace ComPWA {
+namespace Physics {
+namespace AmplitudeSum {
+
+using boost::property_tree::ptree;
+
 AmplitudeSetup::AmplitudeSetup() {
 	BOOST_LOG_TRIVIAL(debug) << "AmplitudeSetup::AmplitudeSetup() no filename passed. "
 			"Creating AmplitudeSetup with a non resonant component only!";
@@ -144,3 +150,7 @@ void AmplitudeSetup::save(const std::string &filename)
 	write_xml(filename, pt,std::locale(), settings);
 	return;
 }
+
+} /* namespace AmplitudeSum */
+} /* namespace Physics */
+} /* namespace ComPWA */

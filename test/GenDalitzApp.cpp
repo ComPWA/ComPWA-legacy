@@ -57,6 +57,13 @@ using namespace boost::log;
 
 using namespace std;
 
+using ComPWA::ParameterList;
+using ComPWA::Physics::AmplitudeSum::AmpSumIntensity;
+using ComPWA::Physics::AmplitudeSum::AmplitudeSetup;
+using ComPWA::Physics::AmplitudeSum::BreitWignerConf;
+using ComPWA::dataPoint;
+using ComPWA::Physics::DPKinematics::DalitzKinematics;
+
 const unsigned int MaxEvents = 50000;
 
 //constants
@@ -316,7 +323,7 @@ int main(int argc, char **argv) {
 
 	//Simple Breit-Wigner Physics-Module setup
 	AmpSumIntensity testBW(ini, AmpSumIntensity::normStyle::none,
-			std::shared_ptr<Efficiency>(new UnitEfficiency()), MaxEvents);
+			std::shared_ptr<ComPWA::Efficiency>(new ComPWA::UnitEfficiency()), MaxEvents);
 	// std::shared_ptr<Amplitude> amps(new AmpSumIntensity(ini, AmpSumIntensity::normStyle::one, std::shared_ptr<Efficiency>(new UnitEfficiency()), myReader->getNEvents()));
 
 	testBW.printAmps();

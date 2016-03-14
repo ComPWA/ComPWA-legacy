@@ -22,6 +22,10 @@
 #include <vector>
 #include <memory>
 
+namespace ComPWA {
+namespace Physics {
+namespace DPKinematics {
+
 class SimpleAngleEfficiency : public Efficiency {
 
 protected:
@@ -38,5 +42,9 @@ public:
 	~SimpleAngleEfficiency(){};
 
 };
+
+} /* namespace DPKinematics */
+} /* namespace Physics */
+} /* namespace ComPWA */
 
 #endif /* SIMPLEANGLEEFFICIENCY_HPP_ */

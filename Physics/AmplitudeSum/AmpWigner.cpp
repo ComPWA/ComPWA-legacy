@@ -23,6 +23,10 @@
 
 #include "qft++.h"
 
+namespace ComPWA {
+namespace Physics {
+namespace AmplitudeSum {
+
 AmpWigner::AmpWigner()
 {
 	toEvaluate=false;
@@ -54,7 +58,7 @@ AmpWigner::~AmpWigner()
 
 void AmpWigner::initialise() 
 {
-	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
+  DPKinematics::DalitzKinematics* kin = dynamic_cast<DPKinematics::DalitzKinematics*>(Kinematics::instance());
 	_M=kin->M;
 	//if(_subSys==5){
 	_m1=kin->m1;
@@ -78,7 +82,7 @@ void AmpWigner::setDecayMasses(double m1, double m2, double m3, double M){
 
 double AmpWigner::evaluate(const dataPoint& point) const {
 	if(!toEvaluate) return 1.;
-	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
+	DPKinematics::DalitzKinematics* kin = dynamic_cast<DPKinematics::DalitzKinematics*>(Kinematics::instance());
 
 	double locmin_sq, locmax_sq, beta;
 
@@ -280,3 +284,7 @@ double AmpWigner::s1max(double s2, double m0, double m1, double m2, double m3)co
 
 	return result;
 }
+
+} /* namespace AmplitudeSum */
+} /* namespace Physics */
+} /* namespace ComPWA */

@@ -38,8 +38,9 @@
 #include "Physics/AmplitudeSum/AmpFlatteRes.hpp"
 #include "Physics/AmplitudeSum/AmpFlatteRes3Ch.hpp"
 
-using namespace boost::log;
-using boost::property_tree::ptree;
+namespace ComPWA {
+namespace Physics {
+namespace AmplitudeSum {
 
 class AmplitudeSetup
 {
@@ -79,4 +80,9 @@ public:
 	inline std::vector<basicConf> & getNonRes() { return m_nonRes; };
 
 };
+
+} /* namespace AmplitudeSum */
+} /* namespace Physics */
+} /* namespace ComPWA */
+
 #endif

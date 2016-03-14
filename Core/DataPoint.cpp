@@ -15,6 +15,8 @@
 #include "Core/Kinematics.hpp"
 #include "Core/DataPoint.hpp"
 
+namespace ComPWA {
+
 void dataPoint::init(){
 	var = std::vector<double>(Kinematics::instance()->getVarNames().size(), 0);
 }
@@ -105,3 +107,5 @@ bool allMasses::Fill(Event &evt){
 	reWeight = (double)nEvents/sumWeight;
 	return 1;
 }
+
+} /* namespace ComPWA */

@@ -11,8 +11,15 @@
 
 #include <complex>
 #include <iostream>
+
 #include "Physics/DPKinematics/SimpleEfficiency.hpp"
-ClassImp(SimpleEfficiency);
+
+// leave this outside namespaces... otherwise rootcint is lost...
+ClassImp(ComPWA::Physics::DPKinematics::SimpleEfficiency);
+
+namespace ComPWA {
+namespace Physics {
+namespace DPKinematics {
 
 SimpleEfficiency::~SimpleEfficiency(){
 	delete passedHist;
@@ -106,3 +113,7 @@ void SimpleEfficiency::SetTitle(const char* title){
 	TNamed::SetTitle(teffTitle);
 	return;
 }
+
+} /* namespace DPKinematics */
+} /* namespace Physics */
+} /* namespace ComPWA */

@@ -16,12 +16,15 @@ project :
 		<include>$(GENEVA)/include
         <include>$(QFT)/include
         <include>$(MINUIT2)/include
+        <include>$(TOP)/Tools/RootNeatPlotting
         <cxxflags>-pthread
 	<linkflags>-L$(ROOT_LIB_PATH)
 	<linkflags>$(ROOTLIBS)
 	<linkflags>-lEG
 	<linkflags>-lRooFit
 	<linkflags>-lRooFitCore
+	<linkflags>-L$(TOP)/Tools/RootNeatPlotting/build
+	<linkflags>-lROOTNeatPlotting
 	<linkflags>-L$(QFT)/lib
 	<linkflags>-lqft++
 	#<linkflags>-lgomp

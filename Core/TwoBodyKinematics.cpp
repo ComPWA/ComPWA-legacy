@@ -16,6 +16,8 @@ using namespace boost::log;
 #include "Core/DataPoint.hpp"
 #include "Core/PhysConst.hpp"
 
+namespace ComPWA {
+
 TwoBodyKinematics::TwoBodyKinematics(std::string _nameMother,
     std::string _name1, std::string _name2, double deltaMassWindow) {
   number_of_particles_ = 2;
@@ -74,3 +76,5 @@ double TwoBodyKinematics::getMass(std::string name) const {
           + " requested!");
   return -999;
 }
+
+} /* namespace ComPWA */

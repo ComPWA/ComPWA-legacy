@@ -23,6 +23,8 @@
 
 #include "Physics/HelicityAmplitude/HelicityKinematics.hpp"
 
+namespace ComPWA {
+namespace Physics {
 namespace HelicityFormalism {
 
 HelicityKinematics::HelicityKinematics() {
@@ -412,3 +414,5 @@ double HelicityKinematics::getMass(std::string name) const {
 }
 
 } /* namespace HelicityFormalism */
+} /* namespace Physics */
+} /* namespace ComPWA */

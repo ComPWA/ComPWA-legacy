@@ -31,6 +31,10 @@
 
 //_____ D E F I N I T I O N S __________________________________________________
 
+namespace ComPWA {
+namespace DataReader {
+namespace AsciiReader {
+
 class AsciiReader : public Data {
 
 public:
@@ -62,5 +66,9 @@ private:
   unsigned int fmaxBins_;
 
 };
+
+} /* namespace AsciiReader */
+} /* namespace DataReader */
+} /* namespace ComPWA */
 
 #endif /* _ASCII_READER_H_ */

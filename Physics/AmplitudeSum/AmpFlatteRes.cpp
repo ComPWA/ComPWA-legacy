@@ -21,6 +21,11 @@
 #include <cmath>
 #include <math.h>
 #include "Physics/AmplitudeSum/AmpFlatteRes.hpp"
+
+namespace ComPWA {
+namespace Physics {
+namespace AmplitudeSum {
+
 AmpFlatteRes::AmpFlatteRes(const char *name,
 		std::shared_ptr<DoubleParameter> resMass,
 		std::shared_ptr<DoubleParameter> mesonRadius, //  meson radius
@@ -41,7 +46,7 @@ AmpFlatteRes::~AmpFlatteRes()
 }
 
 std::complex<double> AmpFlatteRes::evaluateAmp(const dataPoint& point) {
-	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
+	DPKinematics::DalitzKinematics* kin = dynamic_cast<DPKinematics::DalitzKinematics*>(Kinematics::instance());
 	if(!foundMasses){
 		id23 = point.getID("m23sq");
 		id13 = point.getID("m13sq");
@@ -422,3 +427,7 @@ bool FlattePhspStrategy::execute(ParameterList& paras, std::shared_ptr<AbsParame
 	out = std::shared_ptr<AbsParameter>(new ComplexParameter(out->GetName(), result));
 	return true;
 }
+
+} /* namespace AmplitudeSum */
+} /* namespace Physics */
+} /* namespace ComPWA */

@@ -32,6 +32,10 @@
 
 //_____ F U N C T I O N S ______________________________________________________
 
+namespace ComPWA {
+namespace DataReader {
+namespace AsciiReader {
+
 // Constructors and destructors
 AsciiReader::AsciiReader( const std::string inConfigFile, const int particles  )
   : fmaxBins_(0)
@@ -119,4 +123,8 @@ Event& AsciiReader::getEvent( const int index ) {
 const int AsciiReader::getBin( const int i, double& m12, double& weight ) {
   return 0;
 }
+
+} /* namespace AsciiReader */
+} /* namespace DataReader */
+} /* namespace ComPWA */
 

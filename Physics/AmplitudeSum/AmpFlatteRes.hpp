@@ -29,7 +29,9 @@
 #include "Physics/AmplitudeSum/AmpWigner2.hpp"
 #include "Physics/AmplitudeSum/NonResonant.hpp"
 
-using namespace std;
+namespace ComPWA {
+namespace Physics {
+namespace AmplitudeSum {
 
 class AmpFlatteRes : public AmpAbsDynamicalFunction, public AmpKinematics {
 public:
@@ -126,4 +128,9 @@ public:
 protected:
 	std::string name;
 };
+
+} /* namespace AmplitudeSum */
+} /* namespace Physics */
+} /* namespace ComPWA */
+
 #endif

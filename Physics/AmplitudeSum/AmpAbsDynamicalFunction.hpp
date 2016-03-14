@@ -24,6 +24,10 @@
 #include "Core/Parameter.hpp"
 #include "Core/DataPoint.hpp"
 
+namespace ComPWA {
+namespace Physics {
+namespace AmplitudeSum {
+
 class AmpAbsDynamicalFunction {
 public:
   AmpAbsDynamicalFunction(const char *name);
@@ -59,5 +63,9 @@ protected:
 private:
 
 };
+
+} /* namespace AmplitudeSum */
+} /* namespace Physics */
+} /* namespace ComPWA */
 
 #endif

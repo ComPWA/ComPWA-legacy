@@ -30,6 +30,10 @@
 #include "Physics/AmplitudeSum/AmpWigner2.hpp"
 #include "Physics/AmplitudeSum/NonResonant.hpp"
 
+namespace ComPWA {
+namespace Physics {
+namespace AmplitudeSum {
+
 class AmpRelBreitWignerRes : public AmpAbsDynamicalFunction, public AmpKinematics {
 public:
 
@@ -382,5 +386,8 @@ public:
 	}
 }; // end BreitwignerPhspStrategy
 
+} /* namespace AmplitudeSum */
+} /* namespace Physics */
+} /* namespace ComPWA */
 
 #endif

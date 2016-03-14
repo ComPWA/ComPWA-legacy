@@ -17,6 +17,8 @@
 #include "Core/Amplitude.hpp"
 #include "Core/Efficiency.hpp"
 
+namespace ComPWA {
+namespace Physics {
 namespace HelicityFormalism {
 
 class CoherentAmplitude: public Amplitude {
@@ -65,5 +67,7 @@ public:
 };
 
 } /* namespace HelicityFormalism */
+} /* namespace Physics */
+} /* namespace ComPWA */
 
 #endif /* PHYSICS_HELICITYAMPLITUDE_COHERENTAMPLITUDE_HPP_ */

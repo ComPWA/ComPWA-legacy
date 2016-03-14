@@ -35,6 +35,7 @@
 #include "Core/Exceptions.hpp"
 #include "Core/Logging.hpp"
 
+namespace ComPWA {
 
 class ParameterList
 {
@@ -507,6 +508,8 @@ private:
 	}
 };
 
+} /* namespace ComPWA */
+
 #include <boost/serialization/split_free.hpp>
 #include <boost/unordered_map.hpp>
 #include <typeinfo>
@@ -549,6 +552,5 @@ inline void serialize(Archive & archive, std::shared_ptr<Type> & value, const un
 
 }//ns:serialization
 }//ns:boost
-
 
 #endif

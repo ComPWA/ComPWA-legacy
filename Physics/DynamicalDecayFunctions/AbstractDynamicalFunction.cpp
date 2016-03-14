@@ -11,6 +11,8 @@
 
 #include "AbstractDynamicalFunction.hpp"
 
+namespace ComPWA {
+namespace Physics {
 namespace DynamicalFunctions {
 
 AbstractDynamicalFunction::AbstractDynamicalFunction() {
@@ -27,3 +29,5 @@ const ParameterList& AbstractDynamicalFunction::getParameterList() const {
 }
 
 } /* namespace DynamicalFunctions */
+} /* namespace Physics */
+} /* namespace ComPWA */

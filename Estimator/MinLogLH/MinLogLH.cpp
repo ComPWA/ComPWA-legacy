@@ -23,6 +23,14 @@
 #include "Core/FunctionTree.hpp"
 #include "Core/Kinematics.hpp"
 
+namespace ComPWA {
+
+using Optimizer::ControlParameter;
+using DataReader::Data;
+
+namespace Estimator {
+namespace MinLogLH {
+
 MinLogLH::MinLogLH(std::shared_ptr<Amplitude> amp_, std::shared_ptr<Amplitude> bkg_, std::shared_ptr<Data> data_,
 		std::shared_ptr<Data> phspSample_,std::shared_ptr<Data> accSample_,
 		unsigned int startEvent, unsigned int nEvents, double sigFrac) :
@@ -398,3 +406,7 @@ void MinLogLH::setPenaltyScale(double sc) {
 	BOOST_LOG_TRIVIAL(info) << "MinLogLH::setPenaltyScale | Setting scale of penalty term to "<<sc;
 	penaltyLambda = sc;
 }
+
+} /* namespace MinLogLH */
+} /* namespace Estimator */
+} /* namespace ComPWA */

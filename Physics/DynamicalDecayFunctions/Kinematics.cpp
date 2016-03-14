@@ -15,6 +15,8 @@
 
 #include "Physics/DynamicalDecayFunctions/Kinematics.hpp"
 
+namespace ComPWA {
+namespace Physics {
 namespace DynamicalFunctions {
 
 Kinematics::Kinematics() {
@@ -157,4 +159,6 @@ std::complex<double> Kinematics::couplingToWidth(double mSq, double mR,
   return result;
 }
 
-}
+} /* namespace DynamicalFunctions */
+} /* namespace Physics */
+} /* namespace ComPWA */

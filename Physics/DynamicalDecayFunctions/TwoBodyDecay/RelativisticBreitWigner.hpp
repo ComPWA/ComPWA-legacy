@@ -28,6 +28,11 @@
 #include "Core/Exceptions.hpp"
 #include "Physics/DynamicalDecayFunctions/AbstractDynamicalFunction.hpp"
 
+namespace ComPWA {
+
+class dataPoint;
+
+namespace Physics {
 namespace DynamicalFunctions {
 
 /**
@@ -72,6 +77,8 @@ private:
   unsigned int index_cms_mass_squared_;
 };
 
-}
+} /* namespace DynamicalFunctions */
+} /* namespace Physics */
+} /* namespace ComPWA */
 
 #endif /* PHYSICS_HELICITYAMPLITUDE_RELATIVISTICBREITWIGNER_HPP_ */

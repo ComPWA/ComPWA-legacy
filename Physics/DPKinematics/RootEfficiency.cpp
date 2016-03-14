@@ -11,6 +11,10 @@
 #include "Physics/DPKinematics/RootEfficiency.hpp"
 #include "Core/DataPoint.hpp"
 
+namespace ComPWA {
+namespace Physics {
+namespace DPKinematics {
+
 DalitzHistEfficiency::DalitzHistEfficiency(TEfficiency* eff) : effHist(new TEfficiency(*eff)){
 	BOOST_LOG_TRIVIAL(debug) << "DalitzHistEfficiency: creating efficiency from existing TEfficiency object!";
 }
@@ -51,3 +55,7 @@ double DalitzAngleHistEfficiency::evaluate(dataPoint& point){
 	int globalBin = test->FindBin(m23sq,angle);
 	return effHist->GetEfficiency(globalBin);
 }
+
+} /* namespace DPKinematics */
+} /* namespace Physics */
+} /* namespace ComPWA */

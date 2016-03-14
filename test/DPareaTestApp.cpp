@@ -30,6 +30,8 @@
 
 using namespace std;
 
+using ComPWA::Physics::DPKinematics::DalitzKinematics;
+
 /************************************************************************************************/
 /**
  * The main function.

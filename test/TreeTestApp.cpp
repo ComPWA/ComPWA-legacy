@@ -31,6 +31,8 @@
 #include "Core/FunctionTree.hpp"
 #include "Core/Parameter.hpp"
 
+using namespace ComPWA;
+
 //This function will be called from a thread
 
 int main(int argc, char **argv) {

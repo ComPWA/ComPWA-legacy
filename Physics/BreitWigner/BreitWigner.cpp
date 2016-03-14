@@ -17,7 +17,9 @@
 #include "Core/ParameterList.hpp"
 #include "Core/Parameter.hpp"
 
-using namespace std;
+namespace ComPWA {
+namespace Physics {
+namespace BreitWigner {
 
 BreitWigner::BreitWigner(const double min, const double max):min_(min),max_(max) {
 	result.AddParameter(std::shared_ptr<DoubleParameter>(new DoubleParameter("BreitWignerResult")));
@@ -96,3 +98,7 @@ void BreitWigner::setParameterList(ParameterList& par){
 	params = par;
 	return;
 }
+
+} /* namespace BreitWigner */
+} /* namespace Physics */
+} /* namespace ComPWA */

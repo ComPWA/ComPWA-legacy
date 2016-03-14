@@ -43,6 +43,12 @@
 #include "Estimator/ChiOneD/ChiOneD.hpp"
 #include "Optimizer/Minuit2/MinuitIF.hpp"
 
+using namespace ComPWA;
+using Optimizer::ControlParameter;
+using DataReader::RootReader::RootReader;
+using Physics::BreitWigner::BreitWigner;
+using DataReader::Data;
+
 /************************************************************************************************/
 /**
  * The main function.
@@ -59,8 +65,8 @@ int main(int argc, char **argv){
   // Initiate parameters
   ParameterList par;
   testBW->copyParameterList(par);
-  std::shared_ptr<ControlParameter> testEsti = ChiOneD::createInstance(testBW, myReader);
-  std::shared_ptr<Optimizer> opti(new MinuitIF(testEsti, par));
+  std::shared_ptr<ControlParameter> testEsti = Estimator::ChiOneD::ChiOneD::createInstance(testBW, myReader);
+  std::shared_ptr<Optimizer::Optimizer> opti(new Optimizer::Minuit2::MinuitIF(testEsti, par));
 
   par.GetDoubleParameter(0)->SetValue(1.7);
   par.GetDoubleParameter(0)->SetValue(0.2);

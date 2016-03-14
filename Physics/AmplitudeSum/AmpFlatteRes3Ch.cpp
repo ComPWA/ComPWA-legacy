@@ -23,6 +23,10 @@
 #include "Physics/AmplitudeSum/AmpFlatteRes3Ch.hpp"
 #include "Physics/AmplitudeSum/AmpFlatteRes.hpp"
 
+namespace ComPWA {
+namespace Physics {
+namespace AmplitudeSum {
+
 AmpFlatteRes3Ch::AmpFlatteRes3Ch(const char *name,
 		std::shared_ptr<DoubleParameter> resMass,
 		std::shared_ptr<DoubleParameter> mesonRadius, //  meson radius
@@ -49,7 +53,7 @@ AmpFlatteRes3Ch::~AmpFlatteRes3Ch()
 
 std::complex<double> AmpFlatteRes3Ch::evaluateAmp(const dataPoint& point) {
 
-	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
+  DPKinematics::DalitzKinematics* kin = dynamic_cast<DPKinematics::DalitzKinematics*>(Kinematics::instance());
 	if(!foundMasses){
 		id23 = point.getID("m23sq");
 		id13 = point.getID("m13sq");
@@ -466,3 +470,7 @@ void Flatte3ChConf::update(ParameterList par){
 //		throw;
 	}
 }
+
+} /* namespace AmplitudeSum */
+} /* namespace Physics */
+} /* namespace ComPWA */

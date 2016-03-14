@@ -39,6 +39,10 @@
 #include "TTree.h"
 #include "TRandom3.h"
 
+namespace ComPWA {
+namespace DataReader {
+namespace RootReader {
+
 class RootReader : public Data {
 
 public:
@@ -123,5 +127,9 @@ protected:
 	virtual void bin();
 
 };
+
+} /* namespace RootReader */
+} /* namespace DataReader */
+} /* namespace ComPWA */
 
 #endif /* _RootReader_HPP */

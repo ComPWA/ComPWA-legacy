@@ -25,6 +25,8 @@
 #include <string>
 #include "Core/Particle.hpp"
 
+namespace ComPWA {
+
 class Event{
 
 public:
@@ -63,5 +65,7 @@ protected:
   //TODO: other event info?
 
 };
+
+} /* namespace ComPWA */
 
 #endif

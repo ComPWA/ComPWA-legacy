@@ -21,6 +21,8 @@
 
 class Particle;
 
+namespace ComPWA {
+namespace Physics {
 namespace HelicityFormalism {
 
 class HelicityKinematics: public Kinematics {
@@ -113,5 +115,7 @@ public:
 };
 
 } /* namespace HelicityFormalism */
+} /* namespace Physics */
+} /* namespace ComPWA */
 
 #endif /* PHYSICS_HELICITYAMPLITUDE_HELICITYKINEMATICS_HPP_ */

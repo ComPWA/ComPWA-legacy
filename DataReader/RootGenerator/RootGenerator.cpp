@@ -15,6 +15,10 @@
 
 #include "DataReader/RootGenerator/RootGenerator.hpp"
 
+namespace ComPWA {
+namespace DataReader {
+namespace RootGenerator {
+
 RootGenerator::RootGenerator(int seed) {
   gRandom = new TRandom3(0);
   if (seed != -1)
@@ -86,3 +90,7 @@ void UniformTwoBodyGenerator::generate(Event& evt) {
   RootGenerator::getGenerator()->SetDecay(W, nPart, masses);
   RootGenerator::generate(evt);
 }
+
+} /* namespace RootGenerator */
+} /* namespace DataReader */
+} /* namespace ComPWA */

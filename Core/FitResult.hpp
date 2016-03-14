@@ -37,7 +37,8 @@
 #include "Core/ParameterList.hpp"
 #include "Core/TableFormater.hpp"
 #include "Core/PhysConst.hpp"
-using namespace boost::log;
+
+namespace ComPWA {
 
 class FitResult
 {
@@ -86,5 +87,6 @@ protected:
 	std::shared_ptr<Amplitude> _amp;
 };
 
+} /* namespace ComPWA */
 
 #endif

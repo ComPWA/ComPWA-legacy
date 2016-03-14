@@ -24,6 +24,7 @@
 #include <exception>
 #include <string>
 
+namespace ComPWA {
 
 class Exception : public std::exception {
 public:
@@ -135,6 +136,7 @@ public:
   virtual ~WrongParType () throw() {}
 };
 
+} /* namespace ComPWA */
 
 #endif
 

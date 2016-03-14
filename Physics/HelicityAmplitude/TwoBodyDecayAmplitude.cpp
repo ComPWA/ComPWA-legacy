@@ -15,6 +15,8 @@
 #include "Core/Kinematics.hpp"
 #include "Physics/HelicityAmplitude/TwoBodyDecayAmplitude.hpp"
 
+namespace ComPWA {
+namespace Physics {
 namespace HelicityFormalism {
 
 TwoBodyDecayAmplitude::TwoBodyDecayAmplitude(
@@ -56,3 +58,5 @@ std::complex<double> TwoBodyDecayAmplitude::evaluate(const dataPoint& point,
 }
 
 } /* namespace HelicityFormalism */
+} /* namespace Physics */
+} /* namespace ComPWA */

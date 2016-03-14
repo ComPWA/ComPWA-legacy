@@ -36,6 +36,9 @@
 #include "Core/DataPoint.hpp"
 #include "Core/Efficiency.hpp"
 #include "Core/Generator.hpp"
+
+namespace ComPWA {
+
 class Amplitude
 {
 
@@ -213,4 +216,7 @@ protected:
 
 
 };
+
+} /* namespace ComPWA */
+
 #endif
