@@ -52,6 +52,10 @@
 #include <geneva/GOptimizationEnums.hpp>*/
 #include "geneva/Go2.hpp"
 
+namespace ComPWA {
+namespace Optimizer {
+namespace Geneva {
+
 class GenevaIF : public Optimizer {
 
 public:
@@ -99,5 +103,9 @@ private:
   boost::uint32_t waitFactor;*/
 
 };
+
+} /* namespace Geneva */
+} /* namespace Optimizer */
+} /* namespace ComPWA */
 
 #endif /* _GENEVAIF_HPP */

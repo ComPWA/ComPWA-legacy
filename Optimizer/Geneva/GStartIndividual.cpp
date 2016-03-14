@@ -40,6 +40,11 @@ namespace Gem
 {
 	namespace Geneva
 	{
+
+	using ComPWA::ParameterList;
+	using ComPWA::Optimizer::ControlParameter;
+	using ComPWA::DoubleParameter;
+
 //	GStartIndividual::GStartIndividual() : GParameterSet(),theData(ControlParameter::Instance())
 //	        		{       /* nothing */ }
 	GStartIndividual::GStartIndividual() : GParameterSet(),theData()

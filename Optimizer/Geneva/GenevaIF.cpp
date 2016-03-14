@@ -54,6 +54,10 @@
 // The individual that should be optimized
 #include "Optimizer/Geneva/GStartIndividual.hpp"
 
+namespace ComPWA {
+namespace Optimizer {
+namespace Geneva {
+
 using namespace Gem::Geneva;
 
 GenevaIF::GenevaIF(std::shared_ptr<ControlParameter> theData, std::string inConfigFileDir)
@@ -150,3 +154,7 @@ std::shared_ptr<FitResult> GenevaIF::exec(ParameterList& par) {
 
 	return result;
 }
+
+} /* namespace Geneva */
+} /* namespace Optimizer */
+} /* namespace ComPWA */

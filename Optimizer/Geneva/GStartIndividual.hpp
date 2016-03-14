@@ -83,13 +83,13 @@ class GStartIndividual :public GParameterSet
 {
 public:
 	/** @brief The default constructor */
-	GStartIndividual(std::shared_ptr<ControlParameter> data, unsigned int parDim, std::string *name, double* val, double* min, double* max, double* err);
+	GStartIndividual(std::shared_ptr<ComPWA::Optimizer::ControlParameter> data, unsigned int parDim, std::string *name, double* val, double* min, double* max, double* err);
 	/** @brief A standard copy constructor */
 	GStartIndividual(const GStartIndividual&);
 	/** @brief The standard destructor */
 	virtual ~GStartIndividual();
 
-	bool getPar(ParameterList& val);
+	bool getPar(ComPWA::ParameterList& val);
 
 
 	/** @brief A standard assignment operator */
@@ -119,7 +119,7 @@ private:
         /********************************************************************************************/
         // You can add other variables here. Do not forget to serialize them if necessary
         // int myVar;
-        std::shared_ptr<ControlParameter> theData;
+        std::shared_ptr<ComPWA::Optimizer::ControlParameter> theData;
 
 	/** @brief Make the class accessible to Boost.Serialization */
 	friend class boost::serialization::access;

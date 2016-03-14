@@ -37,6 +37,10 @@
 
 #include "Optimizer/Geneva/GStartIndividual.hpp"
 
+namespace ComPWA {
+namespace Optimizer {
+namespace Geneva {
+
 class GenevaResult : public FitResult
 {
 public:
@@ -51,5 +55,9 @@ protected:
 	void genOutput(std::ostream& out, std::string opt="");
 	void init(boost::shared_ptr<Gem::Geneva::GStartIndividual> min);
 };
+
+} /* namespace Geneva */
+} /* namespace Optimizer */
+} /* namespace ComPWA */
 
 #endif
