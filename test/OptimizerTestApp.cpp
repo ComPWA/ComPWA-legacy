@@ -68,10 +68,10 @@ int main(int argc, char **argv){
 	DoubleParameter width("width",0.05,0,0.1,0.01);
 	ParameterList truePar, fitPar, initialPar;
 	std::shared_ptr<Amplitude> truegaus(new GaussAmp("gaus",true_mass,true_width));
-	truegaus->copyParameterList(truePar);
+	truegaus->FillParameterList(truePar);
 	std::shared_ptr<Amplitude> gaus(new GaussAmp("gaus",mass,width));
-	gaus->copyParameterList(fitPar);
-	gaus->copyParameterList(initialPar);
+	gaus->FillParameterList(fitPar);
+	gaus->FillParameterList(initialPar);
 
 	run.setAmplitude(truegaus);
 	std::shared_ptr<Data> toyData(new RootReader());
@@ -99,7 +99,7 @@ int main(int argc, char **argv){
 	run.setData(geneva_fit);
 	run.generate(1000);
 
-	gaus->copyParameterList(initialPar);
+	gaus->FillParameterList(initialPar);
 
 	BOOST_LOG_TRIVIAL(info) << "Running Minuit optimizer:";
 	std::shared_ptr<FitResult> minuit_result = minuit_opti->exec(fitPar);

@@ -31,7 +31,8 @@ public:
 	//! Clone function
 	virtual NonResonant* Clone(std::string newName="") const{
 		auto tmp = (new NonResonant(*this));
-		tmp->SetName(newName);
+		if(newName != "")
+			tmp->SetName(newName);
 		return tmp;
 	}
 
@@ -50,7 +51,7 @@ public:
 	virtual double EvaluateWignerD(dataPoint& point) { return 1;} ;
 	//!Integral
 	virtual double GetIntegral() {
-		return 1/sqrt(Kinematics::instance()->getPhspVolume());
+		return 1/sqrt(Kinematics::instance()->GetPhspVolume());
 	}
 
 	static std::complex<double> dynamicalFunction();

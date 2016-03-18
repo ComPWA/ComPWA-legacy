@@ -183,7 +183,7 @@ const ParameterList& Data::getListOfData()
 	for(int i=0; i<size; ++i){
 		std::shared_ptr<MultiDouble> tmp(
 				new MultiDouble(
-						Kinematics::instance()->getVarNames().at(i),
+						Kinematics::instance()->GetVarNames().at(i),
 						data.at(i)
 				)
 		);

@@ -13,52 +13,51 @@
 
 namespace HelicityFormalism {
 
-HelicityIntensity::HelicityIntensity() {
+HelicityIntensity::HelicityIntensity()
+{
 	// TODO Auto-generated constructor stub
 
 }
 
-HelicityIntensity::~HelicityIntensity() {
+HelicityIntensity::~HelicityIntensity()
+{
 	// TODO Auto-generated destructor stub
 }
 
 
-const double HelicityIntensity::integral() {
-
-}
-const double HelicityIntensity::integral(ParameterList& par) {
-
-}
-const double HelicityIntensity::normalization() {
-
-}
-const double HelicityIntensity::normalization(ParameterList& par) {
-
-}
-double HelicityIntensity::getMaxVal(ParameterList& par, std::shared_ptr<Generator> gen) {
-
-}
-double HelicityIntensity::getMaxVal(std::shared_ptr<Generator> gen) {
-
+const double HelicityIntensity::GetIntegral()
+{
+	return 1.0;
 }
 
+const double HelicityIntensity::GetNormalization()
+{
+	return GetIntegral();
+}
 
-const ParameterList& HelicityIntensity::intensity(std::vector<double> point,
-		ParameterList& par) {
-	setParameterList(par);
+double HelicityIntensity::GetMaxVal(std::shared_ptr<Generator> gen)
+{
+	return 1.0;
+}
+
+const ParameterList& HelicityIntensity::intensity(dataPoint& point)
+{
+	intensityNoEff(point);
+	double eff = efficiency_->evaluate(point);
+	result.SetParameterValue(0, result.GetDoubleParameter(0)->GetValue() * eff);
+	return result;
+}
+
+const ParameterList& HelicityIntensity::intensity(std::vector<double> point)
+{
 	dataPoint dataP(point);
 	return intensity(dataP);
 }
 
-const ParameterList& HelicityIntensity::intensity(dataPoint& point,
-		ParameterList& par) {
-	setParameterList(par);
-	return intensity(point);
-}
-
-const ParameterList& HelicityIntensity::intensityNoEff(dataPoint& point) {
+const ParameterList& HelicityIntensity::intensityNoEff(dataPoint& point)
+{
 	std::complex<double> intensity = 0;
-	if (Kinematics::instance()->isWithinPhsp(point)) {
+	if (Kinematics::instance()->IsWithinPhsp(point)) {
 		for (unsigned int i = 0; i < amplitude_trees_.size(); ++i) {
 			intensity += amplitude_trees_[i].evaluate(kinematics_trees_[i]);
 		}
@@ -73,41 +72,10 @@ const ParameterList& HelicityIntensity::intensityNoEff(dataPoint& point) {
 	return result;
 }
 
-const ParameterList& HelicityIntensity::intensity(dataPoint& point) {
-	intensityNoEff(point);
-	double eff = efficiency_->evaluate(point);
-	result.SetParameterValue(0, result.GetDoubleParameter(0)->GetValue() * eff);
-	return result;
-}
-
-const bool HelicityIntensity::fillStartParVec(ParameterList& outPar){
-	outPar = ParameterList(params_);
-	return true;
-}
-
-void HelicityIntensity::setParameterList(ParameterList& par){
-	//parameters varied by Minimization algorithm
-	if(par.GetNDouble()!=params_.GetNDouble())
-		throw std::runtime_error("setParameterList(): size of parameter lists don't match");
-	for(unsigned int i=0; i<params_.GetNDouble(); i++){
-		std::shared_ptr<DoubleParameter> p = params_.GetDoubleParameter(i);
-		if(!p->IsFixed()){
-			p->SetValue(par.GetDoubleParameter(i)->GetValue());
-			p->SetError(par.GetDoubleParameter(i)->GetError());
-		}
-	}
-	return;
-}
-
-void HelicityIntensity::printAmps() {
-
-}
-void HelicityIntensity::printFractions() {
+void HelicityIntensity::to_str()
+{
 
 }
 
-Amplitude* HelicityIntensity::Clone() {
-
-}
 
 } /* namespace HelicityFormalism */

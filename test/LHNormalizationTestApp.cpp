@@ -108,7 +108,7 @@ int main(int argc, char **argv){
 	auto fitAmpPtr = new AmpSumIntensity("amp",normStyle::none, eff, num);
 	fitAmpPtr->Configure(pt);
 	std::shared_ptr<Amplitude> trueAmp( fitAmpPtr );
-	trueAmp->copyParameterList(list);
+	trueAmp->FillParameterList(list);
 	esti = std::shared_ptr<ControlParameter>(MinLogLH::createInstance(trueAmp,toyPhspData , toyPhspData));
 
 	MinLogLH* minLog = dynamic_cast<MinLogLH*>(&*(esti->Instance()));
@@ -121,18 +121,18 @@ int main(int argc, char **argv){
 
 	for(int i=0; i<100; i++){
 		if(i>0)	randomStartValues(list);
-		trueAmp->setParameterList(list);
+		trueAmp->UpdateParameters(list);
 		esti->controlParameter(list);
 		std::shared_ptr<MultiDouble> in = std::dynamic_pointer_cast<MultiDouble>(
 				physicsTree->head()->getChildValue("Intens"));
 		double sumNormAmp = physicsTree->head()->getChildSingleValue("sumAmp").real();
 		double norm = physicsTree->head()->getChildSingleValue("normFactor").real();
-		double norm_expect = Kinematics::instance()->getPhspVolume()/num*sumNormAmp;
+		double norm_expect = Kinematics::instance()->GetPhspVolume()/num*sumNormAmp;
 		double sumLog = 0;
 		for(int i=0; i<in->GetNValues();i++)
 			sumLog+=std::log(in->getNodeValue(i).real());
 		double lh_expect = sumLog
-				-num*std::log(Kinematics::instance()->getPhspVolume()/num)
+				-num*std::log(Kinematics::instance()->GetPhspVolume()/num)
 		-num*std::log(sumNormAmp);
 		lh_expect*=-1;
 		//	std::cout<<sumLog<<" "<<n*std::log(Kinematics::instance()->getPhspVolume()/n)

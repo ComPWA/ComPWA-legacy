@@ -44,8 +44,8 @@ public:
 	  return std::shared_ptr<FunctionTree>();
   }
 
-  virtual std::shared_ptr<Amplitude> getAmplitude(unsigned int id=0) {
-	  return std::shared_ptr<Amplitude>();
+  virtual std::vector<std::shared_ptr<Amplitude> > getAmplitudes() {
+	  return std::vector<std::shared_ptr<Amplitude> >();
   }
 
   virtual int nCalls() {

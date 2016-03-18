@@ -46,7 +46,7 @@ int main(int argc, char **argv){
 	auto a = new AmpSumIntensity("amp",normStyle::none,
 			std::shared_ptr<Efficiency>(new UnitEfficiency()), dataSize);
 	a->Configure(pt);
-	a->printAmps();
+	a->to_str();
 	std::shared_ptr<Amplitude> amp(a);
 
 	RunManager run(dataSize,amp,gen);

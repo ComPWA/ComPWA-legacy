@@ -61,8 +61,6 @@ public:
 	operator double() const { return finalLH; };
 	//! Return final likelihood value
 	double getResult(){return finalLH;}
-	//! Set amplitude
-	void setAmplitude(std::shared_ptr<Amplitude> a) { _amp = a; }
 	//! Enable correct error estimation for fit fractions. Very time consuming!
 	void setUseCorrelatedErrors(bool s, int nSets=200);
 	//! Use tree for calculation of fit fractions
@@ -119,6 +117,9 @@ protected:
 	void genSimpleOutput(std::ostream& out);
 	//! Full fit result output
 	void genOutput(std::ostream& out,std::string opt="");
+	//! Create table with interference terms for each amplitude
+	void createInterferenceTable(std::ostream& out,
+			std::shared_ptr<Amplitude> amp);
 	//! Table with correlation matrix
 	void printCorrelationMatrix(TableFormater* fracTable);
 	//! Table with covariance matrix

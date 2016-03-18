@@ -93,7 +93,7 @@ protected:
 	std::vector<double> var;
 	double weight;
 	double eff;
-	friend std::ostream & operator<<(std::ostream &os, dataPoint &p);
+	friend std::ostream & operator<<(std::ostream &os, const dataPoint &p);
 };
 
 #endif /*DPPOINT2_HPP_*/

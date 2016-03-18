@@ -30,11 +30,11 @@ DalitzKinematics::DalitzKinematics(std::string _nameMother,
 		Kinematics(_nameMother,0.0,3)
 {
 	try{
-		M = PhysConst::instance()->getMass(_nameMother);
+		_M = PhysConst::instance()->getMass(_nameMother);
 		m1 = PhysConst::instance()->getMass(_name1);
 		m2 = PhysConst::instance()->getMass(_name2);
 		m3 = PhysConst::instance()->getMass(_name3);
-		spinM = PhysConst::instance()->getJ(_nameMother);
+		_spinM = PhysConst::instance()->getJ(_nameMother);
 		spin1 = PhysConst::instance()->getJ(_name1);
 		spin2 = PhysConst::instance()->getJ(_name2);
 		spin3 = PhysConst::instance()->getJ(_name3);
@@ -59,7 +59,7 @@ DalitzKinematics::DalitzKinematics(double _M, double _Br,
 					name3(_name3), massIdsSet(false), Kinematics(_nameMother,_Br,3)
 {
 	try{
-		spinM = PhysConst::instance()->getJ(_nameMother);
+		_spinM = PhysConst::instance()->getJ(_nameMother);
 		spin1 = PhysConst::instance()->getJ(_name1);
 		spin2 = PhysConst::instance()->getJ(_name2);
 		spin3 = PhysConst::instance()->getJ(_name3);
@@ -74,7 +74,7 @@ DalitzKinematics::DalitzKinematics(double _M, double _Br,
 
 void DalitzKinematics::init()
 {
-	Msq = M*M;
+	_Msq = _M*_M;
 	mSq1 = m1*m1;
 	mSq2 = m2*m2;
 	mSq3 = m3*m3;
@@ -82,37 +82,37 @@ void DalitzKinematics::init()
 
 	_DPareaCalculated=0;
 
-	varNames.push_back("m23sq");
-	varNames.push_back("m13sq");
-	varNames.push_back("m12sq");
+	_varNames.push_back("m23sq");
+	_varNames.push_back("m13sq");
+	_varNames.push_back("m12sq");
 	// Angle between particle 1 and 3 in the rest frame of 1 and 2
-	varNames.push_back("cosTheta12_13");
+	_varNames.push_back("cosTheta12_13");
 	// Angle between particle 2 and 3 in the rest frame of 1 and 2
-	varNames.push_back("cosTheta12_23");
+	_varNames.push_back("cosTheta12_23");
 	// Angle between particle 1 and 2 in the rest frame of 1 and 3
-	varNames.push_back("cosTheta13_12");
+	_varNames.push_back("cosTheta13_12");
 	// Angle between particle 2 and 3 in the rest frame of 1 and 3
-	varNames.push_back("cosTheta13_23");
+	_varNames.push_back("cosTheta13_23");
 	// Angle between particle 1 and 3 in the rest frame of 2 and 3
-	varNames.push_back("cosTheta23_13");
+	_varNames.push_back("cosTheta23_13");
 	// Angle between particle 1 and 2 in the rest frame of 2 and 3
-	varNames.push_back("cosTheta23_12");
+	_varNames.push_back("cosTheta23_12");
 
-	varTitles.push_back("m_{"+name2+name3+"}^{2} [ GeV^{2}/c^{4} ]");
-	varTitles.push_back("m_{"+name1+name3+"}^{2} [ GeV^{2}/c^{4} ]");
-	varTitles.push_back("m_{"+name1+name2+"}^{2} [ GeV^{2}/c^{4} ]");
-	varTitles.push_back("cos(#Theta^{"+name1+name2+"}_{"+name1+name3+"})");
-	varTitles.push_back("cos(#Theta^{"+name1+name2+"}_{"+name2+name3+"})");
-	varTitles.push_back("cos(#Theta^{"+name1+name3+"}_{"+name1+name2+"})");
-	varTitles.push_back("cos(#Theta^{"+name1+name3+"}_{"+name2+name3+"})");
-	varTitles.push_back("cos(#Theta^{"+name2+name3+"}_{"+name1+name3+"})");
-	varTitles.push_back("cos(#Theta^{"+name2+name3+"}_{"+name1+name2+"})");
+	_varTitles.push_back("m_{"+name2+name3+"}^{2} [ GeV^{2}/c^{4} ]");
+	_varTitles.push_back("m_{"+name1+name3+"}^{2} [ GeV^{2}/c^{4} ]");
+	_varTitles.push_back("m_{"+name1+name2+"}^{2} [ GeV^{2}/c^{4} ]");
+	_varTitles.push_back("cos(#Theta^{"+name1+name2+"}_{"+name1+name3+"})");
+	_varTitles.push_back("cos(#Theta^{"+name1+name2+"}_{"+name2+name3+"})");
+	_varTitles.push_back("cos(#Theta^{"+name1+name3+"}_{"+name1+name2+"})");
+	_varTitles.push_back("cos(#Theta^{"+name1+name3+"}_{"+name2+name3+"})");
+	_varTitles.push_back("cos(#Theta^{"+name2+name3+"}_{"+name1+name3+"})");
+	_varTitles.push_back("cos(#Theta^{"+name2+name3+"}_{"+name1+name2+"})");
 
 	BOOST_LOG_TRIVIAL(debug) << "DalitzKinematics::init() | "
 			"Variables and boundaries: ";
 	for(int i=0; i<9; ++i)
 		BOOST_LOG_TRIVIAL(debug) << "[ "<<i<<" ] "<<GetMinMax(i).first
-		<<" < "<< varNames.at(i)<<" ("<<varTitles.at(i)<<") "<<" < "
+		<<" < "<< _varNames.at(i)<<" ("<<_varTitles.at(i)<<") "<<" < "
 		<<GetMinMax(i).second;
 
 	return;
@@ -135,22 +135,13 @@ bool DalitzKinematics::AreBoxVariables(unsigned int idA, unsigned int idB)
 
 }
 
-unsigned int DalitzKinematics::findVariable(std::string varName) const
-{
-	for(unsigned int i=0; i< varNames.size(); i++)
-		if(varNames.at(i)==varName) return i;
-	throw BadParameter("DalitzKinematics::findVariable() | "
-			"Variable"+varName+" not found!");
-	return -999;
-}
-
 double DalitzKinematics::calculateMoments(unsigned int sys, dataPoint& point,
 		unsigned int n, unsigned int m)
 {
 	return gsl_sf_legendre_sphPlm(n,m,point.getVal(sys)); //normalized
 }
 
-void DalitzKinematics::eventToDataPoint(const Event& ev, dataPoint& point) const
+void DalitzKinematics::EventToDataPoint(const Event& ev, dataPoint& point) const
 {
 	point.setWeight(ev.getWeight());//reset weight
 	point.setEfficiency(ev.getEfficiency());
@@ -170,12 +161,12 @@ void DalitzKinematics::eventToDataPoint(const Event& ev, dataPoint& point) const
 	point.setVal(1,m13sq);
 	point.setVal(2,m12sq);
 
-	point.setVal(3,helicityAngle(M,m1,m2,m3,m12sq,m13sq));
-	point.setVal(4,helicityAngle(M,m2,m1,m3,m12sq,m23sq));
-	point.setVal(5,helicityAngle(M,m1,m3,m2,m13sq,m12sq));
-	point.setVal(6,helicityAngle(M,m3,m1,m2,m13sq,m23sq));
-	point.setVal(7,helicityAngle(M,m3,m2,m1,m23sq,m13sq));
-	point.setVal(8,helicityAngle(M,m2,m3,m1,m23sq,m12sq));
+	point.setVal(3,helicityAngle(_M,m1,m2,m3,m12sq,m13sq));
+	point.setVal(4,helicityAngle(_M,m2,m1,m3,m12sq,m23sq));
+	point.setVal(5,helicityAngle(_M,m1,m3,m2,m13sq,m12sq));
+	point.setVal(6,helicityAngle(_M,m3,m1,m2,m13sq,m23sq));
+	point.setVal(7,helicityAngle(_M,m3,m2,m1,m23sq,m13sq));
+	point.setVal(8,helicityAngle(_M,m2,m3,m1,m23sq,m12sq));
 
 	return;
 }
@@ -208,12 +199,12 @@ void DalitzKinematics::FillDataPoint(int a, int b,
 	double m13sq = point.getVal(1);
 	double m12sq = point.getVal(2);
 
-	point.setVal(3,helicityAngle(M,m1,m2,m3,m12sq,m13sq));
-	point.setVal(4,helicityAngle(M,m2,m1,m3,m12sq,m23sq));
-	point.setVal(5,helicityAngle(M,m1,m3,m2,m13sq,m12sq));
-	point.setVal(6,helicityAngle(M,m3,m1,m2,m13sq,m23sq));
-	point.setVal(7,helicityAngle(M,m3,m2,m1,m23sq,m13sq));
-	point.setVal(8,helicityAngle(M,m2,m3,m1,m23sq,m12sq));
+	point.setVal(3,helicityAngle(_M,m1,m2,m3,m12sq,m13sq));
+	point.setVal(4,helicityAngle(_M,m2,m1,m3,m12sq,m23sq));
+	point.setVal(5,helicityAngle(_M,m1,m3,m2,m13sq,m12sq));
+	point.setVal(6,helicityAngle(_M,m3,m1,m2,m13sq,m23sq));
+	point.setVal(7,helicityAngle(_M,m3,m2,m1,m23sq,m13sq));
+	point.setVal(8,helicityAngle(_M,m2,m3,m1,m23sq,m12sq));
 
 	return;
 }
@@ -250,19 +241,19 @@ double DalitzKinematics::eiCms(unsigned int partId,
 		switch(partId){
 		case 1: E = (invMassSq-mSq2+mSq1)/(2*m);break;
 		case 2: E = (invMassSq-mSq1+mSq2)/(2*m);break;
-		case 3: E =-(invMassSq-Msq+mSq3)/(2*m);break;
+		case 3: E =-(invMassSq-_Msq+mSq3)/(2*m);break;
 		}
 		break;
 		case 1:
 			switch(partId){
 			case 1: E = (invMassSq-mSq3+mSq1)/(2*m);break;
-			case 2: E =-(invMassSq-Msq+mSq2)/(2*m);break;
+			case 2: E =-(invMassSq-_Msq+mSq2)/(2*m);break;
 			case 3: E = (invMassSq-mSq1+mSq3)/(2*m); break;
 			}
 			break;
 			case 0:
 				switch(partId){
-				case 1: E =-(invMassSq-Msq+mSq1)/(2*m);break;
+				case 1: E =-(invMassSq-_Msq+mSq1)/(2*m);break;
 				case 2: E = (invMassSq-mSq3+mSq2)/(2*m);break;
 				case 3: E = (invMassSq-mSq2+mSq3)/(2*m); break;
 				}
@@ -274,7 +265,7 @@ double DalitzKinematics::eiCms(unsigned int partId,
 
 std::pair<double,double> DalitzKinematics::GetMinMax(std::string varName) const
 {
-	return GetMinMax(findVariable(varName));
+	return GetMinMax(FindVariable(varName));
 }
 
 std::pair<double,double> DalitzKinematics::GetMinMax(unsigned int i) const
@@ -288,17 +279,17 @@ std::pair<double,double> DalitzKinematics::GetMinMax(unsigned int i) const
 	{
 	case 0:  return std::make_pair<double,double>(
 			(m2+m3)*(m2+m3),
-			(M-m1)*(M-m1)
+			(_M-m1)*(_M-m1)
 	);
 	break;
 	case 1: return std::make_pair<double,double>(
 			(m1+m3)*(m1+m3),
-			(M-m2)*(M-m2)
+			(_M-m2)*(_M-m2)
 	);
 	break;
 	case 2:  return std::make_pair<double,double>(
 			(m1+m2)*(m1+m2),
-			(M-m3)*(M-m3)
+			(_M-m3)*(_M-m3)
 	);
 	break;
 	}
@@ -408,7 +399,7 @@ double DalitzKinematics::helicityAngle(unsigned int sys,
 		//		eSpecCms = eiCms(3,sys,invMsqSys);
 		//		pCms = sqrt(eCms*eCms-m*m);
 		//		pSpecCms = sqrt(eSpecCms*eSpecCms-mSpec*mSpec);
-		cosAngle = helicityAngle(M,m2,m1,m3,invMassSq12,invMassSq23);
+		cosAngle = helicityAngle(_M,m2,m1,m3,invMassSq12,invMassSq23);
 		break;
 	case 1://angle versus particle 1
 		//		m = m1; mSpec = m2; invMsqSys = invMassSq13; invMsqSecond = invMassSq12;
@@ -416,7 +407,7 @@ double DalitzKinematics::helicityAngle(unsigned int sys,
 		//		eSpecCms = eiCms(2,sys,invMsqSys);
 		//		pCms = sqrt(eCms*eCms-m*m);
 		//		pSpecCms = sqrt(eSpecCms*eSpecCms-mSpec*mSpec);
-		cosAngle = helicityAngle(M,m1,m3,m2,invMassSq13,invMassSq12);
+		cosAngle = helicityAngle(_M,m1,m3,m2,invMassSq13,invMassSq12);
 		break;
 	case 0:
 		//angle versus particle 2
@@ -425,7 +416,7 @@ double DalitzKinematics::helicityAngle(unsigned int sys,
 		//		eSpecCms = eiCms(1,sys,invMsqSys);
 		//		pCms = sqrt(eCms*eCms-m*m);
 		//		pSpecCms = sqrt(eSpecCms*eSpecCms-mSpec*mSpec);
-		cosAngle = helicityAngle(M,m2,m3,m1,invMassSq23,invMassSq12);
+		cosAngle = helicityAngle(_M,m2,m3,m1,invMassSq23,invMassSq12);
 		break;
 	}
 	//	cosAngle = -(invMsqSecond-m*m-mSpec*mSpec-2*eCms*eSpecCms)/(2*pCms*pSpecCms);
@@ -433,35 +424,42 @@ double DalitzKinematics::helicityAngle(unsigned int sys,
 	return cosAngle;
 }
 
-//! returns 1 if point is within PHSP otherwise 0
-double phspFunc(double* x, size_t dim, void* param)
-{
-	if(dim!=2) return 0;
-	dataPoint point;
-	try{
-		Kinematics::instance()->FillDataPoint(0,1,x[1],x[0],point);
-	} catch (BeyondPhsp& ex){
-		return 0;
-	}
-	return 1.0;
-};
-
-double DalitzKinematics::getPhspVolume()
+double DalitzKinematics::GetPhspVolume()
 {
 	if(!_DPareaCalculated) calcDParea();
 	return _DParea;
 }
+
+//! returns 1 if point is within PHSP otherwise 0
+double phspFunc(double* x, size_t dim, void* param)
+{
+	if(dim!=2) return 0;
+
+	int idA = 0;
+	int idB = 8;
+	if( !Kinematics::instance()->IsWithinBoxPhsp(idA, idB, x[0], x[1]) )
+		return 0;
+
+//	dataPoint point;
+//	try{
+//		Kinematics::instance()->FillDataPoint(0,1,x[1],x[0],point);
+//	} catch (BeyondPhsp& ex){
+//		return 0;
+//	}
+	return 1.0;
+};
+
 
 void DalitzKinematics::calcDParea()
 {
 	size_t dim=2;
 	double res=0.0, err=0.0;
 
-	//set limits: we assume that x[0]=m13sq and x[1]=m23sq
-	auto m13_limit = GetMinMax(1);
-	auto m23_limit = GetMinMax(0);
-	double xLimit_low[2] = {m13_limit.first,m23_limit.first};
-	double xLimit_high[2] = {m13_limit.second,m23_limit.second};
+	//Set limits
+	auto var1_limit = GetMinMax(0);
+	auto var2_limit = GetMinMax(8);
+	double xLimit_low[2] = {var1_limit.first,var2_limit.first};
+	double xLimit_high[2] = {var1_limit.second,var2_limit.second};
 
 	size_t calls = 2000000;
 	gsl_rng_env_setup ();
@@ -473,7 +471,7 @@ void DalitzKinematics::calcDParea()
 	gsl_monte_vegas_state *s = gsl_monte_vegas_alloc (dim);
 	gsl_monte_vegas_integrate (&F, xLimit_low, xLimit_high, 2, calls, r,s,&res, &err);
 	gsl_monte_vegas_free(s);
-	BOOST_LOG_TRIVIAL(debug)<<"DPKinematics::calcDParea() Dalitz plot area (MC integration): "
+	BOOST_LOG_TRIVIAL(debug)<<"DalitzKinematics::calcDParea() | Dalitz plot area (MC integration): "
 			<<"("<<res<<"+-"<<err<<") GeV^4 relAcc [%]: "<<100*err/res;
 
 	_DParea=res;
@@ -484,7 +482,7 @@ void DalitzKinematics::calcDParea()
 unsigned int DalitzKinematics::getSpin(unsigned int num)
 {
 	switch(num){
-	case 0: return spinM;
+	case 0: return _spinM;
 	case 1: return spin1;
 	case 2: return spin2;
 	case 3: return spin3;
@@ -495,7 +493,7 @@ unsigned int DalitzKinematics::getSpin(unsigned int num)
 }
 unsigned int DalitzKinematics::getSpin(std::string name)
 {
-	if(name==nameMother) return spinM;
+	if(name==_nameMother) return _spinM;
 	if(name==name1) return spin1;
 	if(name==name2) return spin2;
 	if(name==name3) return spin3;
@@ -503,10 +501,10 @@ unsigned int DalitzKinematics::getSpin(std::string name)
 			"Wrong particle "+name+" requested!");
 }
 
-double DalitzKinematics::getMass(unsigned int num)
+double DalitzKinematics::GetMass(unsigned int num)
 {
 	switch(num){
-	case 0: return M;
+	case 0: return _M;
 	case 1: return m1;
 	case 2: return m2;
 	case 3: return m3;
@@ -514,9 +512,9 @@ double DalitzKinematics::getMass(unsigned int num)
 	throw std::runtime_error("DPKinematics::getMass(int) | "
 			"Wrong particle requested!");
 }
-double DalitzKinematics::getMass(std::string name)
+double DalitzKinematics::GetMass(std::string name)
 {
-	if(name==nameMother) return M;
+	if(name==_nameMother) return _M;
 	if(name==name1) return m1;
 	if(name==name2) return m2;
 	if(name==name3) return m3;
@@ -527,10 +525,10 @@ double DalitzKinematics::getMass(std::string name)
 //! Calculates 3rd invariant mass from the other inv. masses.
 double DalitzKinematics::getThirdVariableSq(double invmass1sq, double invmass2sq) const
 {
-	return (Msq+mSq1+mSq2+mSq3-invmass1sq-invmass2sq);
+	return (_Msq+mSq1+mSq2+mSq3-invmass1sq-invmass2sq);
 }
 
-bool DalitzKinematics::isWithinPhsp(const dataPoint& point)
+bool DalitzKinematics::IsWithinPhsp(const dataPoint& point)
 {
 	double m23sq = point.getVal(0);
 	double m13sq = point.getVal(1);
@@ -552,7 +550,7 @@ bool DalitzKinematics::isWithinPhsp(const dataPoint& point)
 	return 1;
 }
 
-bool DalitzKinematics::isWithinBoxPhsp(int idA, int idB,
+bool DalitzKinematics::IsWithinBoxPhsp(int idA, int idB,
 		double varA, double varB)
 {
 	if(!AreBoxVariables(idA, idB))

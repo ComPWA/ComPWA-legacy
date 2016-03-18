@@ -36,20 +36,14 @@ public:
 		tmp->SetName(newName);
 		return tmp;
 	}
-	virtual bool copyParameterList(ParameterList& par) { };
 
-	const double integral();
-	const double integral(ParameterList& par);
-	const double normalization();
-	const double normalization(ParameterList& par);
-	double getMaxVal(ParameterList& par, std::shared_ptr<Generator> gen);
-	double getMaxVal(std::shared_ptr<Generator> gen);
+	const double GetIntegral();
+	const double GetNormalization();
+	double GetMaxVal(std::shared_ptr<Generator> gen);
 
-	const ParameterList& intensity(dataPoint& point, ParameterList& par);
 	const ParameterList& intensity(dataPoint& point);
+	const ParameterList& intensity(std::vector<double> point);
 	const ParameterList& intensityNoEff(dataPoint& point);
-	const ParameterList& intensity(std::vector<double> point,
-			ParameterList& par);
 
 	/** Integral value of amplitude in certain boundary
 	 * Used for plotting a projection of a function in \p var1 in
@@ -63,16 +57,11 @@ public:
 	 * @param max2 maximal value of second variable
 	 * @return
 	 */
-	virtual double getIntValue(std::string var1, double min1, double max1,
+	virtual double GetIntValue(std::string var1, double min1, double max1,
 			std::string var2, double min2, double max2) { };
 
-	const bool fillStartParVec(ParameterList& outPar);
-	void setParameterList(ParameterList& par);
+	void to_str();
 
-	void printAmps();
-	void printFractions();
-
-	Amplitude* Clone();
 };
 
 } /* namespace HelicityFormalism */

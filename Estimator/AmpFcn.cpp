@@ -15,7 +15,7 @@ class AmpFcn : public Estimator
 public:
 	//	AmpFcn (std::shared_ptr<Amplitude> amp):_amp(amp){};
 	AmpFcn (Amplitude* amp):_amp(amp){
-		_amp->copyParameterList(_par);
+		_amp->FillParameterList(_par);
 	};
 	//	virtual double controlParameter(std::vector<double> x, ParameterList& minPar){
 	//		return _amp->intensity(x,minPar);
@@ -29,7 +29,7 @@ public:
 //		for(unsigned int i=0;i< _par.GetNParameter();i++) std::cout<<_par.GetParameterValue(i)<<std::endl;
 //		std::cout<<"===="<<std::endl;
 //		for(unsigned int i=0;i< xx.size();i++) std::cout<<xx[i]<<std::endl;
-		ParameterList result = _amp->intensity(xx,_par);
+		ParameterList result = _amp->intensity(xx);
 		return ( (-1) * result.GetDoubleParameter(0)->GetValue() );
 	};
 protected:

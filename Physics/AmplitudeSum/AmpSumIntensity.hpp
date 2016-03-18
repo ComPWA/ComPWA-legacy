@@ -51,68 +51,56 @@ public:
 
 	//! Configure resonance from ptree
 	virtual void Configure(const boost::property_tree::ptree &pt);
+
 	//! Save resonance from to ptree
 	virtual void Save(std::string fileName);
 
 	//! set efficiency
-	virtual void setEfficiency(std::shared_ptr<Efficiency> eff) { eff_ = eff; };
-	//! wrapper function for function value times efficiency at point x
-	double evaluateEff(double x[], size_t dim);
-	//! wrapper function for function value at point x
-	double evaluate(double x[], size_t dim);
+	virtual void SetEfficiency(std::shared_ptr<Efficiency> eff) { eff_ = eff; };
+
 	//! normalization integral for parameters \par (doesn't include calculated efficiency)
-	virtual const double normalization(ParameterList& par);
-	//! normalization integral (doesn't include calculated efficiency)
-	virtual const double normalization();
+	virtual const double GetNormalization();
+
 	//! normalization integral for parameters \par (includes calculated efficiency)
-	virtual const double integral(ParameterList& par);
-	//! normalization integral (includes calculated efficiency)
-	virtual const double integral();
+	virtual const double GetIntegral();
+
 	//! calculate interference integral between two amplitudes
-	virtual const double interferenceIntegral(resonanceItr A, resonanceItr B);
+	virtual const double GetIntegralInterference(resonanceItr A, resonanceItr B);
+
 	//! get maximum value of amplitude with current parameters
-	virtual double getMaxVal( std::shared_ptr<Generator> gen);
-	//! get maximum value of amplitude with parameters \par
-	virtual double getMaxVal(ParameterList& par, std::shared_ptr<Generator> gen);
-
-	//! setting new parameterList
-	virtual void setParameterList(ParameterList& par);
-
-	//! evaluate total amplitude using parameters \par at phsp point \point
-	virtual const ParameterList& intensity(dataPoint& point, ParameterList& par);
-
-	/**! Evaluate interference term of total amplitude */
-	virtual const ParameterList& intensityInterference(dataPoint& point,
-			resonanceItr A, resonanceItr B);
+	virtual double GetMaxVal( std::shared_ptr<Generator> gen);
 
 	/**! Evaluate total amplitude
 	 * Using current set of parameters at phsp point \point. Amplitude is
 	 * multiplied with efficiency of datapoint.
 	 */
-	virtual const ParameterList& intensity(dataPoint& point);
+	virtual const ParameterList& intensity( dataPoint& point );
+
+	/**! Evaluate total amplitude
+	 * Using current set of parameters at phsp point \point. Amplitude is
+	 * multiplied with efficiency of datapoint.
+	 */
+	virtual const ParameterList& intensity( std::vector<double> point );
 
 	/**! Evaluate total amplitude
 	 * Using current set of parameters at phsp point \point.
 	 * No efficiency correction.
 	 */
-	virtual const ParameterList& intensityNoEff(dataPoint& point);
+	virtual const ParameterList& intensityNoEff( dataPoint& point );
 
-	/**! Evaluate total amplitude
-	 * Using current set of parameters at phsp point \point. Amplitude is
-	 * multiplied with efficiency of datapoint.
-	 */
-	virtual const ParameterList& intensity(
-			std::vector<double> point, ParameterList& par);
+	/**! Evaluate interference term of total amplitude */
+	virtual const ParameterList& intensityInterference(dataPoint& point,
+			resonanceItr A, resonanceItr B);
 
-	virtual const double sliceIntensity(dataPoint& dataP, ParameterList& par,
+	virtual const double sliceIntensity(dataPoint& dataP,
 			std::complex<double>* reso, unsigned int nResos);
 
-	//! fill internal parameter list with (start) parameter
-	virtual bool copyParameterList(ParameterList& outPar);
-	//! print overview over all amplitudes
-	virtual void printAmps();
+	//! Print overview over all amplitudes
+	virtual void to_str();
+
 	//! print all fit fractions; fitting errors are not available here
 	virtual void printFractions();
+
 	/** Calculate partial integral over amplitude
 	 *
 	 * Currently only integration over m23sq and m13sq is supported
@@ -124,14 +112,14 @@ public:
 	 * @param max2 max of second integration variable
 	 * @return
 	 */
-	virtual double getIntValue(std::string var1, double min1, double max1,
+	virtual double GetIntValue(std::string var1, double min1, double max1,
 			std::string var2, double min2=0, double max2=0);
 
 	//! Get ID of resonance from name
-	int GetIdOfResonance(std::string name);
+	virtual int GetIdOfResonance(std::string name);
 
 	//! Get resonance name from ID
-	std::string GetNameOfResonance(unsigned int id);
+	virtual std::string GetNameOfResonance(unsigned int id);
 
 	//! get resonance by @param name
 	virtual std::shared_ptr<Resonance>
@@ -192,8 +180,6 @@ protected:
 	double _maxFcnVal;
 	//! Is amplitude maximum already calculated?
 	bool _calcMaxFcnVal;
-	//! calculate maximum value of amplitude with parameters \par
-	virtual void calcMaxVal(ParameterList& par ,std::shared_ptr<Generator> gen);
 	//! calculate maximum value of amplitude with current parameters
 	virtual void calcMaxVal( std::shared_ptr<Generator> gen);
 	//! Efficiency object
@@ -202,10 +188,13 @@ protected:
 	std::vector<std::shared_ptr<Resonance> > resoList;
 	//! Type of normalization
 	normStyle _normStyle;
-	//! List of parameters
-	ParameterList params;
 	//! precision for numeric integration
 	unsigned int _nCalls;
+
+	//! normalization integral (doesn't include calculated efficiency)
+	virtual const double normalization();
+	//! normalization integral (includes calculated efficiency)
+	virtual const double integral();
 
 	//---------- related to FunctionTree -------------
 	/**Setup Basic Tree

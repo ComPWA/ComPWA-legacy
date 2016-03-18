@@ -38,7 +38,8 @@ double shiftAngle(double v){
 	while(val> pi) val-=2*pi;
 	while(val< -pi ) val+=2*pi;
 	if(val!=originalVal)
-		BOOST_LOG_TRIVIAL(info) << "shiftAngle(): shifting parameter from "<<originalVal<< " to "<<val<<"!";
+		BOOST_LOG_TRIVIAL(info) << "shiftAngle() | Shifting parameter from "
+		<<originalVal<< " to "<<val<<"!";
 	return val;
 }
 
@@ -56,7 +57,10 @@ MinuitIF::~MinuitIF()
 
 std::shared_ptr<FitResult> MinuitIF::exec(ParameterList& par){
 	boost::timer time;
-	ParameterList initialParList(par);
+	par.RemoveDuplicates();
+
+	ParameterList initialParList;
+	initialParList.DeepCopy(par);
 
 	MnUserParameters upar;
 	int freePars = 0;
@@ -75,7 +79,7 @@ std::shared_ptr<FitResult> MinuitIF::exec(ParameterList& par){
 		}else
 			upar.Add(actPat->GetName(), actPat->GetValue(),error);
 
-		_myFcn.setNameID(i, actPat->GetName());
+		//_myFcn.setNameID(i, actPat->GetName());
 
 		if(!actPat->IsFixed())
 			freePars++;
@@ -176,7 +180,8 @@ std::shared_ptr<FitResult> MinuitIF::exec(ParameterList& par){
 	}
 
 	std::shared_ptr<FitResult> result(new MinuitResult(estimator, minMin));
-	estimator->getAmplitude(0)->setParameterList(finalParList); //update parameters in amplitude
+	//update parameters in amplitude
+	Amplitude::UpdateAmpParameterList(estimator->getAmplitudes(), finalParList);
 	result->setInitialParameters(initialParList);
 	result->setFinalParameters(finalParList);
 	result->setTime(time.elapsed());

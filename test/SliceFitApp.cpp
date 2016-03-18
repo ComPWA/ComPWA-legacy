@@ -110,7 +110,7 @@ int main(int argc, char **argv){
 	// Initiate parameters
 	ParameterList par;
 	std::shared_ptr<SliceFit> esti;
-	amps->copyParameterList(par); //perfect startvalues
+	amps->FillParameterList(par); //perfect startvalues
 	esti = std::static_pointer_cast<SliceFit>(
 			SliceFit::createInstance(
 					amps, myReader, myPHSPReader, par, nStartEvent, nFitEvents
@@ -167,10 +167,10 @@ int main(int argc, char **argv){
 			dataPoint point;
 			point.setVal("m23sq",i/10.); point.setVal("m13sq",j/10.);
 			//std::cout << " " << amps->sliceIntensity(point, par, reso, 2) << "   " << amps->sliceIntensity(point, par, resoTOT, 2) << std::endl;
-			phspA->SetBinContent(i,j,amps->sliceIntensity(point, par, resoTOT, 2));
-			phspB->SetBinContent(i,j,amps->sliceIntensity(point, par, reso, 2));
-			phspC->SetBinContent(i,j,amps->sliceIntensity(point, par, resoFull, 2));
-			phspD->SetBinContent(i,j,amps->sliceIntensity(point, par, resoC, 2));
+			phspA->SetBinContent(i,j,amps->sliceIntensity(point, resoTOT, 2));
+			phspB->SetBinContent(i,j,amps->sliceIntensity(point, reso, 2));
+			phspC->SetBinContent(i,j,amps->sliceIntensity(point, resoFull, 2));
+			phspD->SetBinContent(i,j,amps->sliceIntensity(point, resoC, 2));
 		}}
 
 

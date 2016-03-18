@@ -120,11 +120,11 @@ int main(int argc, char **argv){
 
 	//======================= PARAMETERS =============================
 	ParameterList fitPar;
-	fitAmp->copyParameterList(fitPar);
+	fitAmp->FillParameterList(fitPar);
 	ParameterList fitParTree;
-	fitAmpTree->copyParameterList(fitParTree);
+	fitAmpTree->FillParameterList(fitParTree);
 	ParameterList truePar;
-	trueAmp->copyParameterList(truePar); //true values
+	trueAmp->FillParameterList(truePar); //true values
 
 	//	fitParTree.GetDoubleParameter("g1_a_0")->FixParameter(1);
 	//	fitPar.GetDoubleParameter("g1_a_0")->FixParameter(1);
@@ -134,9 +134,9 @@ int main(int argc, char **argv){
 	for(unsigned int i=0; i<fitPar.GetNDouble(); i++)
 		fitPar.GetDoubleParameter(i)->SetError(.1);
 
-	fitAmpTree->setParameterList(fitParTree);
-	fitAmp->setParameterList(fitPar);
-	fitAmp->printAmps();
+	fitAmpTree->UpdateParameters(fitParTree);
+	fitAmp->UpdateParameters(fitPar);
+	fitAmp->to_str();
 
 	BOOST_LOG_TRIVIAL(info)<<"Entries in data file: "<<inputData->getNEvents();
 	BOOST_LOG_TRIVIAL(info)<<"True model file: "<<trueModelFile ;
@@ -191,7 +191,7 @@ int main(int argc, char **argv){
 									<<"/"<<*intens.GetDoubleParameter(0)
 									<<" = "<<intensValue->GetValue(0) / *intens.GetDoubleParameter(0);
 	double norm_tree = physicsTree->head()->getChildSingleValue("N").real();
-	double norm_amp = 1/fitAmp->integral();
+	double norm_amp = 1/fitAmp->GetIntegral();
 	BOOST_LOG_TRIVIAL(info)<<" Norm: "<<norm_tree <<"/"<<norm_amp
 									<<" = "<<norm_tree/norm_amp;
 	BOOST_LOG_TRIVIAL(info) <<"================= phi(1020) ==========================";

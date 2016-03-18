@@ -32,18 +32,17 @@ using namespace boost::log;
 class DalitzKinematics : public Kinematics
 {
 
-
 public:
-	static Kinematics* createInstance(std::string _nameMother,
-			std::string _name1, std::string _name2, std::string _name3)
+	static Kinematics* createInstance(std::string nameMother,
+			std::string name1, std::string name2, std::string name3)
 	{
 		if(_inst) return _inst;
-		_inst = new DalitzKinematics(_nameMother, _name1, _name2,_name3);
+		_inst = new DalitzKinematics(nameMother, name1, name2, name3);
 		return _inst;
 	}
 
 	//! Event to dataPoint conversion
-	void eventToDataPoint(const Event& ev, dataPoint& point) const;
+	void EventToDataPoint(const Event& ev, dataPoint& point) const;
 
 	//! Event to dataPoint conversion
 	void FillDataPoint(int a, int b, double invMassSqA, double invMassSqB,
@@ -106,7 +105,7 @@ public:
 	double getThirdVariableSq(double, double) const;
 
 	//! Checks if data point is within phase space boundaries
-	bool isWithinPhsp(const dataPoint &point) ;
+	bool IsWithinPhsp(const dataPoint &point) ;
 
 	/**! Checks if the position is within the phase-space boundaries.
 	 * This only works correctly if both variables are orthogonal to each other.
@@ -117,10 +116,10 @@ public:
 	 * @param varB Helicity angle
 	 * @return
 	 */
-	bool isWithinBoxPhsp(int idA, int idB, double varA, double varB);
+	bool IsWithinBoxPhsp(int idA, int idB, double varA, double varB);
 
 	//! Returns the dalitz plot area for the given kinematics
-	double getPhspVolume();
+	double GetPhspVolume();
 
 	//! Calculated momenta n,m using legendre polynomials
 	double calculateMoments(unsigned int sys, dataPoint& point, unsigned int n, unsigned int m);
@@ -138,14 +137,10 @@ public:
 	std::pair<double,double> GetMinMaxLocal(unsigned int sys, unsigned int sys2,
 			double invMass_sys) const;
 
-	//! returns absolute minimum for variable
-	double getMin(std::string);
-	//! returns absolute maximum for variable
-	double getMax(std::string);
 	//! get mass of paticles
-	double getMass(unsigned int num);
+	double GetMass(unsigned int num);
 	//! get mass of paticles
-	double getMass(std::string name);
+	double GetMass(std::string name);
 	//! get spin of decaying particle
 	unsigned int getSpin(unsigned int num);
 	//! get spin of particles
@@ -172,27 +167,31 @@ public:
 	unsigned int spin4;
 
 protected:
-	bool massIdsSet;
-	bool _DPareaCalculated;	//! is phsp area already calculated?
-	double _DParea;	//! phsp area
-	//! calculated dalitz plot area for the given kinematics
-	void calcDParea();
-	//! initialization
-	void init();
 	//! default constructor
 	DalitzKinematics() : massIdsSet(false) { };
+
 	//! constructor access particles by name, masses etc are obtained from PhysConst singleton
 	DalitzKinematics(std::string _nameMother, std::string _name1,
 			std::string _name2, std::string _name3);
+
 	//! constructor with particle masses and names, independent from PhysConst
 	DalitzKinematics(double _M, double _Br, double _m1, double _m2, double _m3,
 			std::string _nameMother, std::string _name1,
 			std::string _name2, std::string _name3);
 
-	unsigned int findVariable(std::string varName) const;
+	//! initialization
+	void init();
 
 	// Check if variables are orthogonal to each other
 	bool AreBoxVariables(unsigned int idA, unsigned int idB);
+
+	//! calculated dalitz plot area for the given kinematics
+	void calcDParea();
+
+	bool massIdsSet;
+	bool _DPareaCalculated;	//! is phsp area already calculated?
+	double _DParea;	//! phsp area
+
 };
 
 #endif

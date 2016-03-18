@@ -12,7 +12,7 @@
 MomentumCorrection::MomentumCorrection(std::vector<CorrectionTable> inCorr, std::string t) :
 corrections(inCorr), title(t)
 {
-	if( corrections.size() != Kinematics::instance()->getNumberOfParticles() )
+	if( corrections.size() != Kinematics::instance()->GetNumberOfParticles() )
 		throw std::runtime_error("RootCorrection::RootCorrection() | Number of histograms is "
 				"expected to be number of final state particles!");
 }

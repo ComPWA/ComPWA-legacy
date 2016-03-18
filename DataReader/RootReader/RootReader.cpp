@@ -150,7 +150,7 @@ void RootReader::writeData(std::string file, std::string trName)
 	fTree->Branch("flavour",&fFlavour,"flavour/I");
 	TClonesArray &partArray = *fParticles;
 
-	TLorentzVector motherMomentum(0,0,0,Kinematics::instance()->getMotherMass());
+	TLorentzVector motherMomentum(0,0,0,Kinematics::instance()->GetMotherMass());
 	auto it = fEvents.begin();
 	for( ; it!=fEvents.end(); ++it){
 		fParticles->Clear();

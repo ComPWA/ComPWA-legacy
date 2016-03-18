@@ -144,7 +144,7 @@ int main(int argc, char **argv) {
 	// Initiate parameters
 	ParameterList par;
 	std::shared_ptr<ControlParameter> esti;
-	amps->copyParameterList(par); //perfect startvalues
+	amps->FillParameterList(par); //perfect startvalues
 	esti = MinLogLH::createInstance(amps, myReader, myPHSPReader, nStartEvent,
 			nFitEvents);
 	MinLogLH* contrPar = dynamic_cast<MinLogLH*>(&*(esti->Instance()));
@@ -512,7 +512,7 @@ int main(int argc, char **argv) {
 		x.push_back(sqrt(m13sq));
 		x.push_back(sqrt(m12sq));
 		//ParameterList intensL = amps->intensity(x, paras);
-		double AMPpdf = amps->intensity(point).GetParameterValue(0);
+		double AMPpdf = amps->intensity(point).GetDoubleParameterValue(0);
 		//double AMPpdf = intensL.GetDoubleParameter(0)->GetValue();
 		//double AMPpdf = testBW.intensity(x, minPar);
 
@@ -562,7 +562,7 @@ int main(int argc, char **argv) {
 		//        x.push_back(sqrt(m23sq));
 		//        x.push_back(sqrt(m13sq));
 		//        x.push_back(sqrt(m12sq));
-		double AMPpdf = amps->intensity(dataP).GetParameterValue(0);
+		double AMPpdf = amps->intensity(dataP).GetDoubleParameterValue(0);
 		//double AMPpdf = amps->intensity(x, par);
 
 		double test = rando.Uniform(0, maxTest);

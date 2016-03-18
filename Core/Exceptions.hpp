@@ -166,7 +166,21 @@ public:
   {}
   virtual ~WrongVariableID () throw() {}
 };
-
+//------------------------------------------------------------------------------
+//! @class   ParameterOutOfBound
+//!
+//! @brief   Parameter out of bound
+//------------------------------------------------------------------------------
+class ParameterOutOfBound: public Exception {
+public:
+  ParameterOutOfBound ( const std::string& error = "Variable not within its limits!" ) :
+    Exception(error)
+  {}
+  ParameterOutOfBound ( const char *error ) :
+    Exception(error)
+  {}
+  virtual ~ParameterOutOfBound () throw() {}
+};
 #endif
 //******************************************************************************
 //! EOF

@@ -57,54 +57,49 @@ public:
 	//! Set name of amplitude
 	virtual void SetName(std::string name) { _name = name; }
 
-	//! set efficiency
-	virtual void setEfficiency(std::shared_ptr<Efficiency> eff) {};
+	//! Set efficiency
+	virtual void SetEfficiency(std::shared_ptr<Efficiency> eff) {};
+
+	//! Get maximum value of amplitude
+	virtual double GetMaxVal(std::shared_ptr<Generator> gen) = 0;
+	//! calculate normalization of amplitude intensity. This includes efficiency correction
+	virtual const double GetNormalization() = 0;
 	//! calculate integral of amplitude intensity. This integral excludes efficiency correction
-	virtual const double integral() =0;
-	//! calculate integral of amplitude intensity. Sets parameter list first.
-	virtual const double integral(ParameterList& par) =0;
+	virtual const double GetIntegral() =0;
+	//! get (interference) integral for resonances \param id1 and \param id2
+	virtual const double GetIntegralInterference(resonanceItr A, resonanceItr B)
+	{ return -999; };
+
+	virtual const ParameterList& intensity( dataPoint& point ) = 0;
+	virtual const ParameterList& intensity(	std::vector<double> point ) = 0;
+	virtual const ParameterList& intensityNoEff( dataPoint& point ) = 0;
 	/**! Evaluate interference term of total amplitude */
 	virtual const ParameterList& intensityInterference(dataPoint& point,
 			resonanceItr A, resonanceItr B) { };
-	//! get (interference) integral for resonances \param id1 and \param id2
-	virtual const double interferenceIntegral(resonanceItr A, resonanceItr B)
-	{ return -999; };
-	//! calculate normalization of amplitude intensity. This includes efficiency correction
-	virtual const double normalization() = 0;
-	//! calculate normalization of amplitude intensity. Sets parameter list first.
-	virtual const double normalization(ParameterList& par) = 0;
-	//! get maximum value of amplitude
-	virtual double getMaxVal(
-			ParameterList& par, std::shared_ptr<Generator> gen) = 0;
-	//! get maximum value of amplitude
-	virtual double getMaxVal(std::shared_ptr<Generator> gen) = 0;
 
-	virtual const ParameterList& intensity(
-			dataPoint& point, ParameterList& par) = 0;
-	virtual const ParameterList& intensity(dataPoint& point) = 0;
-	virtual const ParameterList& intensityNoEff(dataPoint& point) = 0;
-	virtual const ParameterList& intensity(
-			std::vector<double> point, ParameterList& par) = 0;
+	virtual void UpdateParameters(ParameterList& par);
 
-	virtual void setParameterList(ParameterList& par) = 0;
-	virtual bool copyParameterList(ParameterList& par) = 0;
+	/**! Add parameters to list
+	 * Add parameters only to list if not already in
+	 * @param par
+	 */
+	virtual void FillParameterList(ParameterList& par) const;
 
-	virtual void printAmps() = 0;
-	virtual void printFractions() = 0;
+	virtual void to_str() = 0;
 
 	/** Operator for coherent addition of amplitudes
 	 *
 	 * @param other
 	 * @return
 	 */
-//	virtual const Amplitude operator+(const Amplitude &other) const = 0;
+	//	virtual const Amplitude operator+(const Amplitude &other) const = 0;
 
 	/** Operator for coherent addition of amplitudes
 	 *
 	 * @param rhs
 	 * @return
 	 */
-//    virtual Amplitude & operator+=(const Amplitude &rhs) = 0;
+	//    virtual Amplitude & operator+=(const Amplitude &rhs) = 0;
 
 
 	/** Integral value of amplitude in certain boundary
@@ -119,7 +114,7 @@ public:
 	 * @param max2 maximal value of second variable
 	 * @return
 	 */
-	virtual double getIntValue(std::string var1, double min1, double max1,
+	virtual double GetIntValue(std::string var1, double min1, double max1,
 			std::string var2, double min2, double max2) = 0;
 
 	//! Iterator on first resonance (which is enabled)
@@ -136,6 +131,41 @@ public:
 		return std::shared_ptr<FunctionTree>();
 	}
 
+	//---------- static functions to operate on vectors of amplitudes ---------
+	/**! Add parameters to list
+	 * Add parameter only if not already in list
+	 * @param ampVec
+	 * @param list
+	 */
+	static void FillAmpParameterToList(
+			std::vector<std::shared_ptr<Amplitude> > ampVec,
+			ParameterList& list);
+
+	/**! Update parameters
+	 *
+	 * @param ampVec
+	 * @param list
+	 */
+	static void UpdateAmpParameterList(
+			std::vector<std::shared_ptr<Amplitude> > ampVec,
+			ParameterList& list);
+
+	/**! Set efficiencies for a vector of amplitudes
+	 *
+	 * @param ampVec Vector of amplitudes
+	 * @param eff New efficiency object
+	 */
+	static void SetAmpEfficiency( std::vector<std::shared_ptr<Amplitude> > ampVec,
+		std::shared_ptr<Efficiency> eff);
+
+	/**! Check if amplitudes have a FunctionTree
+	 *
+	 * @param ampVec
+	 * @return
+	 */
+	static bool AmpHasTree(std::vector<std::shared_ptr<Amplitude> > ampVec);
+
+
 protected:
 	//Name
 	std::string _name;
@@ -146,8 +176,14 @@ protected:
 	//Amplitude value
 	ParameterList result;
 
+	//List of interal parameters
+	ParameterList params;
 };
+//-----------------------------------------------------------------------------
 
+
+
+//-----------------------------------------------------------------------------
 class GaussAmp : public Amplitude
 {
 public:
@@ -181,43 +217,25 @@ public:
 		tmp->SetName(newName);
 		return tmp;
 	}
-	virtual bool copyParameterList(ParameterList& outPar){
-		outPar = ParameterList(params);
-		return true;
-	}
 
-	virtual double getIntValue(std::string var1, double min1, double max1,
+	virtual double GetIntValue(std::string var1, double min1, double max1,
 			std::string var2, double min2, double max2) { return 0; }
 	/**! Integral from -inf to inf
 	 * @return
 	 */
-	virtual const double integral(){
+	virtual const double GetIntegral(){
 		return (params.GetDoubleParameter(1)->GetValue() * std::sqrt(2*M_PI));
 	}
-	virtual const double integral(ParameterList& par){
-		setParameterList(par);
-		return integral();
-	}
-	virtual const double normalization() { return integral(); }
-	virtual const double normalization(ParameterList& par){
-		setParameterList(par);
-		return normalization();
-	}
-	virtual double getMaxVal(ParameterList& par, std::shared_ptr<Generator> gen){
-		setParameterList(par);
-		return getMaxVal(gen);
-	}
-	virtual double getMaxVal(std::shared_ptr<Generator> gen){
+	virtual const double GetNormalization() { return GetIntegral(); }
+
+	virtual double GetMaxVal(std::shared_ptr<Generator> gen){
 		double mass = params.GetDoubleParameter(0)->GetValue();
 		std::vector<double> m; m.push_back(mass*mass);
 		dataPoint p(m);
 		intensity(p);
-		return (result.GetParameterValue(0));
+		return (result.GetDoubleParameterValue(0));
 	}
-	virtual const ParameterList& intensity(dataPoint& point, ParameterList& par){
-		setParameterList(par);
-		return intensity(point);
-	}
+
 	virtual const ParameterList& intensity(dataPoint& point) {
 		double mass = params.GetDoubleParameter(0)->GetValue();
 		double width = params.GetDoubleParameter(1)->GetValue();
@@ -229,34 +247,20 @@ public:
 		result.SetParameterValue(0,std::norm(gaus));
 		return result;
 	}
-	virtual const ParameterList& intensityNoEff(dataPoint& point){ return intensity(point); }
-	virtual const ParameterList& intensity(std::vector<double> point, ParameterList& par){
-		setParameterList(par);
+
+	virtual const ParameterList& intensity(std::vector<double> point){
 		dataPoint dataP(point);
 		return intensity(dataP);
 	}
-	void setParameterList(ParameterList& par){
-		//parameters varied by Minimization algorithm
-		if(par.GetNDouble()!=params.GetNDouble())
-			throw std::runtime_error("setParameterList(): size of parameter lists don't match");
-		//Should we compared the parameter names? String comparison is slow
-		for(unsigned int i=0; i<params.GetNDouble(); i++)
-			params.GetDoubleParameter(i)->UpdateParameter(par.GetDoubleParameter(i));
-		return;
-	}
 
-	virtual void printAmps() { };
-	virtual void printFractions() { };
+	virtual const ParameterList& intensityNoEff(dataPoint& point){ return intensity(point); }
 
-protected:
-	std::string _name;
-	ParameterList params;
-	//	std::shared_ptr<DoubleParameter> _mR;
-	//	std::shared_ptr<DoubleParameter> _resWidth;
-
+	virtual void to_str() { };
 
 };
+//-----------------------------------------------------------------------------
 
+//-----------------------------------------------------------------------------
 /**! UnitAmp
  *
  * Example implementation of Amplitude with the function value 1.0 at all points in PHSP. It is used
@@ -278,42 +282,33 @@ public:
 	}
 
 	//! set efficiency
-	virtual void setEfficiency(std::shared_ptr<Efficiency> eff) { eff_ = eff; }
-	virtual const double integral() {
-		return Kinematics::instance()->getPhspVolume();
+	virtual void SetEfficiency(std::shared_ptr<Efficiency> eff) { eff_ = eff; }
+
+	virtual const double GetIntegral() {
+		return Kinematics::instance()->GetPhspVolume();
 	}
-	virtual const double integral(ParameterList& par) { return integral(); }
-	virtual const double normalization() {
+	virtual const double GetNormalization() {
 		BOOST_LOG_TRIVIAL(info) << "UnitAmp::normalization() | normalization not implemented!";
 		return 1;
 	}
-	virtual const double normalization(ParameterList& par) { return normalization(); }
-	virtual double getMaxVal(ParameterList& par, std::shared_ptr<Generator> gen) { return 1; }
-	virtual double getMaxVal(std::shared_ptr<Generator> gen) { return 1; }
+	virtual double GetMaxVal(std::shared_ptr<Generator> gen) { return 1; }
 
-	virtual const ParameterList& intensity(dataPoint& point, ParameterList& par) {
-		return intensity(point);
-	}
 	virtual const ParameterList& intensity(dataPoint& point) {
 		result.SetParameterValue(0,eff_->evaluate(point));
 		return result;
+	}
+	virtual const ParameterList& intensity(std::vector<double> point){
+		dataPoint dataP(point);
+		return intensity(dataP);
 	}
 	virtual const ParameterList& intensityNoEff(dataPoint& point) {
 		result.SetParameterValue(0,1.0);
 		return result;
 	}
-	virtual const ParameterList& intensity(std::vector<double> point, ParameterList& par){
-		dataPoint dataP(point);
-		return intensity(dataP);
-	}
 
-	virtual void setParameterList(ParameterList& par) { }
-	virtual bool copyParameterList(ParameterList& par) { return 1; }
+	virtual void to_str() { }
 
-	virtual void printAmps() { }
-	virtual void printFractions() { }
-
-	virtual double getIntValue(std::string var1, double min1, double max1,
+	virtual double GetIntValue(std::string var1, double min1, double max1,
 			std::string var2, double min2, double max2) { return 0; }
 
 	//---------- related to FunctionTree -------------

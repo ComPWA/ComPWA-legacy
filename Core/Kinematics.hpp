@@ -38,11 +38,30 @@ public:
 	//! singleton pattern
 	static Kinematics* instance();
 
+	//! converts Event to dataPoint
+	virtual void EventToDataPoint(const Event& ev, dataPoint& point) const = 0;
+
+	//! Event to dataPoint conversion
+	virtual void FillDataPoint(int a, int b, double invMassSqA, double invMassSqB,
+			dataPoint& point) = 0;
+
 	//! vector with names of variables, e.g. vec[0]=m23sq, vec[1]=m13sq
-	const std::vector<std::string>& getVarNames() { return varNames; }
+	std::vector<std::string> GetVarNames() const { return _varNames; }
+
+	//! vector with names of variables, e.g. vec[0]=m23sq, vec[1]=m13sq
+	std::string GetVarName(unsigned int pos) const { return _varNames.at(pos); }
+
+	//! vector with names of variables, e.g. vec[0]=m23sq, vec[1]=m13sq
+	std::vector<std::string> GetVarTitles() const { return _varTitles; }
+
+	//! vector with names of variables, e.g. vec[0]=m23sq, vec[1]=m13sq
+	std::string GetVarTitle(unsigned int pos) const { return _varTitles.at(pos); }
+
+	//! Get position of variable @param varName
+	unsigned int FindVariable(std::string varName) const;
 
 	//! Checks of data point is within phase space boundaries
-	virtual bool isWithinPhsp(const dataPoint& point) { };
+	virtual bool IsWithinPhsp(const dataPoint& point) { };
 
 	/**! Checks if the position is within the phase-space boundaries.
 	 * This only works correctly if both variables are orthogonal to each other.
@@ -53,28 +72,24 @@ public:
 	 * @param varB Helicity angle
 	 * @return
 	 */
-	virtual bool isWithinBoxPhsp(int idA, int idB, double varA, double varB) = 0;
+	virtual bool IsWithinBoxPhsp(int idA, int idB, double varA, double varB) = 0;
 
 	//! Get name of mother particle
-	virtual std::string getMotherName() { return nameMother; };
+	virtual std::string GetMotherName() { return _nameMother; };
 	//! Get mass of mother particle
-	virtual double getMotherMass() { return M; }
+	virtual double GetMotherMass() { return _M; }
 	//! calculated the PHSP volume of the current decay by MC integration
-	virtual double getPhspVolume() = 0;
-	//! converts Event to dataPoint
-	virtual void eventToDataPoint(const Event& ev, dataPoint& point) const = 0;
-	//! Event to dataPoint conversion
-	virtual void FillDataPoint(int a, int b, double invMassSqA, double invMassSqB,
-			dataPoint& point) = 0;
+	virtual double GetPhspVolume() = 0;
+
 
 	//! get mass of particles
-	virtual double getMass(unsigned int num) = 0;
+	virtual double GetMass(unsigned int num) = 0;
 	//! get mass of paticles
-	virtual double getMass(std::string name) = 0;
+	virtual double GetMass(std::string name) = 0;
 	//! Get number of particles
-	virtual unsigned int getNumberOfParticles() { return nPart; }
+	virtual unsigned int GetNumberOfParticles() { return _nPart; }
 	//! Get number of variables
-	virtual unsigned int GetNVars() const { return varNames.size(); }
+	virtual unsigned int GetNVars() const { return _varNames.size(); }
 
 	/** Calculate Break-up momentum squared
 	 *
@@ -113,26 +128,26 @@ public:
 
 protected:
 	//! Number of particles in reaction
-	unsigned int nPart;
+	unsigned int _nPart;
 
 	//! Internal names of variabes
-	std::vector<std::string> varNames;
+	std::vector<std::string> _varNames;
 	//! Latex titles for variables
-	std::vector<std::string> varTitles;
+	std::vector<std::string> _varTitles;
 
 	//Parameters of decaying mother particle (we assume that we have a decay)
-	std::string nameMother;//! name of mother particle
-	double M; //! mass of mother particle
-	double Msq; //! mass of mother particle
-	unsigned int spinM;//! spin of mother particle
-	double Br;//! width of decaying particle
+	std::string _nameMother;//! name of mother particle
+	double _M; //! mass of mother particle
+	double _Msq; //! mass of mother particle
+	unsigned int _spinM;//! spin of mother particle
+	double _Br;//! width of decaying particle
 
 	//Singleton stuff
 	static Kinematics* _inst;
 
 	//!Default constructor (protected)
 	Kinematics(std::string nameM="", double widthM=0.0, unsigned int n=3) :
-		nameMother(nameM), Br(widthM), nPart(n) {};
+		_nameMother(nameM), _Br(widthM), _nPart(n) {};
 
 	//!Copy constructor (protected)
 	Kinematics(const Kinematics&) {};
@@ -157,8 +172,14 @@ public:
 		return _inst;
 	}
 
+	//! Converts Event to dataPoint
+	virtual void EventToDataPoint(const Event& ev, dataPoint& point) const;
+
+	virtual void FillDataPoint(int a, int b, double invMassSqA, double invMassSqB,
+			dataPoint& point) { };
+
 	//! checks of data point is within phase space boundaries
-	virtual bool isWithinPhsp(const dataPoint& point);
+	virtual bool IsWithinPhsp(const dataPoint& point);
 
 	/**! Checks if the position is within the phase-space boundaries.
 	 * This only works correctly if both variables are orthogonal to each other.
@@ -169,21 +190,16 @@ public:
 	 * @param varB Helicity angle
 	 * @return
 	 */
-	virtual bool isWithinBoxPhsp(int idA, int idB, double varA, double varB) { };
+	virtual bool IsWithinBoxPhsp(int idA, int idB, double varA, double varB) { };
 
 	//! Calculate phase-space volume
-	virtual double getPhspVolume() { return (mass_max-mass_min); }
-
-	//! Converts Event to dataPoint
-	virtual void eventToDataPoint(const Event& ev, dataPoint& point) const;
-
-	virtual void FillDataPoint(int a, int b, double invMassSqA, double invMassSqB,
-			dataPoint& point) { };
+	virtual double GetPhspVolume() { return (mass_max-mass_min); }
 
 	//! get mass of particles
-	virtual double getMass(unsigned int num);
+	virtual double GetMass(unsigned int num);
+
 	//! get mass of paticles
-	virtual double getMass(std::string name);
+	virtual double GetMass(std::string name);
 
 protected:
 	std::string name1;//! name of daughter 1

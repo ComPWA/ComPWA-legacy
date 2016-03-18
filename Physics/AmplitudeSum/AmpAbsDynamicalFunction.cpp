@@ -39,12 +39,12 @@ AmpAbsDynamicalFunction::AmpAbsDynamicalFunction(const char *name,
 		std::shared_ptr<DoubleParameter> motherR, //  mother radius
 		formFactorType type,
 		int nCalls, normStyle nS) :
-						_name(name), _mag(mag), _phase(phase), _mass(mass), _subSys(varIdA),
-						_spin(spin), _m(m), _n(n), _parity(P), _cparity(C),
-						_nameMother(mother), _name1(particleA), _name2(particleB),
-						_mesonRadius(mesonR), _motherRadius(motherR), _ffType(type),
-						_nCalls(nCalls), _normStyle(nS), _norm(1.0), _modified(1),
-						_wignerD(varIdB, spin)
+								_name(name), _mag(mag), _phase(phase), _mass(mass), _subSys(varIdA),
+								_spin(spin), _m(m), _n(n), _parity(P), _cparity(C),
+								_nameMother(mother), _name1(particleA), _name2(particleB),
+								_mesonRadius(mesonR), _motherRadius(motherR), _ffType(type),
+								_nCalls(nCalls), _normStyle(nS), _norm(1.0), _modified(1),
+								_wignerD(varIdB, spin)
 {
 	initialize();
 }
@@ -58,15 +58,15 @@ AmpAbsDynamicalFunction::AmpAbsDynamicalFunction(const char *name,
 		std::string mother, std::string particleA, std::string particleB,
 		formFactorType type,
 		int nCalls, normStyle nS) :
-							_name(name), _mag(mag), _phase(phase), _mass(mass),
-							_subSys(varIdA), _spin(spin), _m(m), _n(n),
-							_parity(P), _cparity(C),
-							_nameMother(mother), _name1(particleA), _name2(particleB),
-							_mesonRadius(std::make_shared<DoubleParameter>(name, 1.0)),
-							_motherRadius(std::make_shared<DoubleParameter>(name, 1.0)),
-							_ffType(type),
-							_nCalls(nCalls), _normStyle(nS), _norm(1.0), _modified(1),
-							_wignerD(varIdB, spin)
+									_name(name), _mag(mag), _phase(phase), _mass(mass),
+									_subSys(varIdA), _spin(spin), _m(m), _n(n),
+									_parity(P), _cparity(C),
+									_nameMother(mother), _name1(particleA), _name2(particleB),
+									_mesonRadius(std::make_shared<DoubleParameter>(name, 1.0)),
+									_motherRadius(std::make_shared<DoubleParameter>(name, 1.0)),
+									_ffType(type),
+									_nCalls(nCalls), _normStyle(nS), _norm(1.0), _modified(1),
+									_wignerD(varIdB, spin)
 {
 	initialize();
 }
@@ -368,7 +368,7 @@ void AmpAbsDynamicalFunction::Configure(
 	//Read mother name
 	auto tmp_nameMother = pt.get_optional<std::string>("Mother");
 	if(!tmp_nameMother) //if no mother is provided we assume the head paricle
-		_nameMother = Kinematics::instance()->getMotherName();
+		_nameMother = Kinematics::instance()->GetMotherName();
 	else
 		_nameMother = tmp_nameMother.get();
 
@@ -439,7 +439,7 @@ void AmpAbsDynamicalFunction::put(boost::property_tree::ptree &pt){
 	pt.put("varIdA", GetVarIdA());
 	pt.put("varIdB", GetVarIdB());
 
-	if(Kinematics::instance()->getMotherName() != _nameMother)
+	if(Kinematics::instance()->GetMotherName() != _nameMother)
 		pt.put("Mother", _nameMother);
 	pt.put("ParticleA", _name1);
 	pt.put("ParticleB", _name2);
@@ -491,9 +491,40 @@ std::complex<double> AmpAbsDynamicalFunction::GetCoefficient() const
 
 std::complex<double> AmpAbsDynamicalFunction::Evaluate(dataPoint& point){
 	CheckModified();
-	std::complex<double> res = EvaluateAmp(point);
-	double ang = EvaluateWignerD(point);
-	return (GetCoefficient()*GetNormalization()*res*ang);
+	std::complex<double> res(0,0);
+	try{
+		res = EvaluateAmp(point);
+	} catch (std::exception& ex){
+		BOOST_LOG_TRIVIAL(error) << "AmpAbsDynamicalFunction::Evaluate() | "
+				"Failed to evaluate dynamic part of resonance "<<GetName()<<" at"
+				" point:"<<std::endl
+				<<point<<std::endl
+				<<ex.what();
+		throw;
+	}
+	double ang = 0;
+	try{
+		ang = EvaluateWignerD(point);
+	} catch (std::exception& ex){
+		BOOST_LOG_TRIVIAL(error) << "AmpAbsDynamicalFunction::Evaluate() | "
+				"Failed to evaluate angular part of resonance "<<GetName()<<" at"
+				" point:"<<std::endl
+				<<point<<std::endl
+				<<ex.what();
+		throw;
+	}
+	res = (GetCoefficient()*GetNormalization()*res*ang);
+
+	//check for NaN
+	if( res.real()!=res.real() || res.imag() != res.imag() )
+		throw std::runtime_error("AmpAbsDynamicalFunction::Evaluate() | Result of"
+				"resonance "+GetName()+" is NaN!");
+	//check for inf
+	if( std::isinf(res.real()) || std::isinf(res.imag()) )
+		throw std::runtime_error("AmpAbsDynamicalFunction::Evaluate() | Result of"
+				"resonance "+GetName()+" is inf!");
+
+	return res;
 }
 
 double evalAmp(double* x, size_t dim, void* param)
@@ -506,22 +537,30 @@ double evalAmp(double* x, size_t dim, void* param)
 
 	auto amp = static_cast<AmpAbsDynamicalFunction*>(param);
 	dataPoint point;
-	try{
-		Kinematics::instance()->FillDataPoint( 0, 1, x[0], x[1], point );
-	} catch (BeyondPhsp& ex){
+
+	//	try{
+	//		Kinematics::instance()->FillDataPoint( 0, 1, x[0], x[1], point );
+	//	} catch (BeyondPhsp& ex){
+	//		return 0;
+	//	}
+
+	int idA = amp->GetVarIdA();
+	int idB = amp->GetVarIdB();
+	if( !Kinematics::instance()->IsWithinBoxPhsp(idA, idB, x[0], x[1]) )
 		return 0;
+
+	point.setVal(idA, x[0]);
+	point.setVal(idB, x[1]);
+
+	std::complex<double> res(0,0);
+	try{
+		res = amp->EvaluateAmp(point);
+	} catch (std::exception& ex){
+		BOOST_LOG_TRIVIAL(error)<<"AmpAbsDynamicalFunction -> evalAmp() | "
+				"Amplitude can not be evaluated at point "<<point<<"! "
+				<<ex.what();
+		throw;
 	}
-
-//	int idA = amp->GetVarIdA();
-//	int idB = amp->GetVarIdB();
-//	if( !Kinematics::instance()->isWithinBoxPhsp(idA, idB, x[0], x[1]) )
-//		return 0;
-//
-//	dataPoint point;
-//	point.setVal(idA, x[0]);
-//	point.setVal(idB, x[1]);
-
-	std::complex<double> res = amp->EvaluateAmp(point);
 	//include angular distribution in normalization
 	res *= amp->EvaluateWignerD(point);
 	return ( std::norm(res) ); //integrate over |F|^2
@@ -534,8 +573,8 @@ double AmpAbsDynamicalFunction::GetIntegral() const
 
 	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
 
-	auto var1_limit = kin->GetMinMax( 0 );
-	auto var2_limit = kin->GetMinMax( 1 );
+	auto var1_limit = kin->GetMinMax( GetVarIdA() );
+	auto var2_limit = kin->GetMinMax( GetVarIdB() );
 	double xLimit_low[2] = {var1_limit.first,var2_limit.first};
 	double xLimit_high[2] = {var1_limit.second,var2_limit.second};
 
@@ -550,6 +589,20 @@ double AmpAbsDynamicalFunction::GetIntegral() const
 	gsl_monte_vegas_state *s = gsl_monte_vegas_alloc (dim);
 	gsl_monte_vegas_integrate (&F, xLimit_low, xLimit_high, 2, _nCalls, r,s,&res, &err);
 	gsl_monte_vegas_free(s);
+
+	//check for NaN
+	if( res!=res )
+		throw std::runtime_error("AmpAbsDynamicalFunction::GetIntegral() |"
+				"Result of resonance "+GetName()+" is NaN!");
+	//check for inf
+	if( std::isinf(res) )
+		throw std::runtime_error("AmpAbsDynamicalFunction::GetIntegral() |"
+				"Result of resonance "+GetName()+" is inf!");
+	//check for zero
+	if( res == 0 )
+		throw std::runtime_error("AmpAbsDynamicalFunction::GetIntegral() |"
+				"Result of resonance "+GetName()+" is zero!");
+
 	BOOST_LOG_TRIVIAL(debug)<<"AmpAbsDynamicalFunction::GetIntegral() | "
 			"Integration result for |"<<_name<<"|^2: "
 			<<res<<"+-"<<err<<" relAcc [%]: "<<100*err/res;
@@ -563,6 +616,20 @@ double AmpAbsDynamicalFunction::GetNormalization()
 	//	return _norm; //disable recalculation of normalization
 	if(!_modified) return _norm;
 	_norm = 1/sqrt(GetIntegral());
+
+	//check for NaN
+	if( _norm!=_norm )
+		throw std::runtime_error("AmpAbsDynamicalFunction::GetNormalization() |"
+				"Result of resonance "+GetName()+" is NaN!");
+	//check for inf
+	if( std::isinf(_norm) )
+		throw std::runtime_error("AmpAbsDynamicalFunction::GetNormalization() |"
+				"Result of resonance "+GetName()+" is inf!");
+	//check for zero
+	if( _norm == 0 )
+		throw std::runtime_error("AmpAbsDynamicalFunction::GetNormalization() |"
+				"Result of resonance "+GetName()+" is zero!");
+
 	_modified=0;
 	return _norm;
 }
@@ -576,22 +643,21 @@ double eval(double* x, size_t dim, void* param)
 	if(dim!=2) return 0;
 
 	auto amp = static_cast<AmpAbsDynamicalFunction*>(param);
-
 	dataPoint point;
-	try{
-		Kinematics::instance()->FillDataPoint( 0, 1, x[0], x[1], point );
-	} catch (BeyondPhsp& ex){
-		return 0;
-	}
 
-//	int idA = amp->GetVarIdA();
-//	int idB = amp->GetVarIdB();
-//	if( !Kinematics::instance()->isWithinBoxPhsp(idA, idB, x[0], x[1]) )
-//		return 0;
-//
-//	dataPoint point;
-//	point.setVal(idA, x[0]);
-//	point.setVal(idB, x[1]);
+	//	try{
+	//		Kinematics::instance()->FillDataPoint( 0, 1, x[0], x[1], point );
+	//	} catch (BeyondPhsp& ex){
+	//		return 0;
+	//	}
+
+	int idA = amp->GetVarIdA();
+	int idB = amp->GetVarIdB();
+	if( !Kinematics::instance()->IsWithinBoxPhsp(idA, idB, x[0], x[1]) )
+		return 0;
+
+	point.setVal(idA, x[0]);
+	point.setVal(idB, x[1]);
 
 	std::complex<double> res = amp->EvaluateAmp(point);
 	double ang = amp->EvaluateWignerD(point);
@@ -609,8 +675,8 @@ double AmpAbsDynamicalFunction::GetTotalIntegral() const
 
 	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
 
-	auto var1_limit = kin->GetMinMax( 0 );
-	auto var2_limit = kin->GetMinMax( 1 );
+	auto var1_limit = kin->GetMinMax( GetVarIdA() );
+	auto var2_limit = kin->GetMinMax( GetVarIdB() );
 	double xLimit_low[2] = {var1_limit.first,var2_limit.first};
 	double xLimit_high[2] = {var1_limit.second,var2_limit.second};
 
@@ -622,6 +688,19 @@ double AmpAbsDynamicalFunction::GetTotalIntegral() const
 	gsl_monte_vegas_state *s = gsl_monte_vegas_alloc (dim);
 	gsl_monte_vegas_integrate (&F, xLimit_low, xLimit_high, 2, _nCalls, r,s,&res, &err);
 	gsl_monte_vegas_free(s);
+
+	//check for NaN
+	if( res!=res )
+		throw std::runtime_error("AmpAbsDynamicalFunction::GetTotalIntegral() |"
+				"Result of resonance "+GetName()+" is NaN!");
+	//check for inf
+	if( std::isinf(res) )
+		throw std::runtime_error("AmpAbsDynamicalFunction::GetTotalIntegral() |"
+				"Result of resonance "+GetName()+" is inf!");
+	//check for zero
+	if( res == 0 )
+		throw std::runtime_error("AmpAbsDynamicalFunction::GetTotalIntegral() |"
+				"Result of resonance "+GetName()+" is zero!");
 
 	return res;
 }
@@ -637,8 +716,18 @@ std::complex<double> AmpAbsDynamicalFunction::widthToCoupling(
 	//calculate phsp factor
 	std::complex<double> rho = Kinematics::phspFactor(sqrtS,ma,mb);
 	std::complex<double> denom = std::pow(qR,spin)*ffR*sqrt(rho);
-	std::complex<double> result = std::complex<double>(sqrt(mR*width), 0) / denom;
-	return result;
+	std::complex<double> res = std::complex<double>(sqrt(mR*width), 0) / denom;
+
+	//check for NaN
+	if( res.real()!=res.real() || res.imag() != res.imag() )
+		throw std::runtime_error("AmpAbsDynamicalFunction::widthToCoupling() | "
+				"Result is NaN!");
+	//check for inf
+	if( std::isinf(res.real()) || std::isinf(res.imag()) )
+		throw std::runtime_error("AmpAbsDynamicalFunction::widthToCoupling() | "
+				"Result is inf!");
+
+	return res;
 }
 
 std::complex<double> AmpAbsDynamicalFunction::couplingToWidth(
@@ -652,13 +741,18 @@ std::complex<double> AmpAbsDynamicalFunction::couplingToWidth(
 	std::complex<double> gammaA = ffR*qR;
 	//calculate phsp factor
 	std::complex<double> rho = Kinematics::phspFactor(sqrtM,ma,mb);
-	std::complex<double> result = std::norm(gammaA)*g*g*rho/ mR;
-	if(result.real()!=result.real() || result.imag()!=result.imag()){
-		std::cout<<"AmpKinematics::couplingToWidth() | NaN! mSq="<<mSq
-				<<" mR="<<mR<<" g="<<g<<" ma="<<ma<<" mb="<<mb<<std::endl;
-		std::cout<<qR<<" "<<gammaA<<" "<<rho<<" "<<g<<std::endl;
-	}
-	return result;
+	std::complex<double> res = std::norm(gammaA)*g*g*rho/ mR;
+
+	//check for NaN
+	if( res.real()!=res.real() || res.imag() != res.imag() )
+		throw std::runtime_error("AmpAbsDynamicalFunction::couplingToWidth() | "
+				"Result is NaN!");
+	//check for inf
+	if( std::isinf(res.real()) || std::isinf(res.imag()) )
+		throw std::runtime_error("AmpAbsDynamicalFunction::couplingToWidth() | "
+				"Result is inf!");
+
+	return res;
 }
 
 double twoDimGaussian(double* z, size_t dim, void *param)

@@ -60,7 +60,10 @@ void MinLogLH::Init()
 	//check size
 	if(_fraction.size() > _ampVec.size() || _fraction.size() < _ampVec.size()-1 )
 		throw std::runtime_error("MinLogLH::init() | List of fractions "
-				"does not match with list of amplitudes!");
+				"("+std::to_string(_fraction.size())+")"
+				" does not match with list of amplitudes"
+				"("+std::to_string(_ampVec.size())+")"
+				"!");
 
 	if(_fraction.size() == _ampVec.size()-1)
 		_fraction.push_back(1-sumFraction);
@@ -291,12 +294,10 @@ double MinLogLH::calcPenalty(){
 
 double MinLogLH::controlParameter(ParameterList& minPar)
 {
-	_ampVec.at(0)->setParameterList(minPar); //setting new parameters
-
 	double lh=0;
 	if(!_useFunctionTree){
 		//Calculate normalization
-		double vol = Kinematics::instance()->getPhspVolume();
+		double vol = Kinematics::instance()->GetPhspVolume();
 		std::vector<double> normVec(_ampVec.size(),0.0);
 
 		std::shared_ptr<Data> sam;

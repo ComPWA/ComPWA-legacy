@@ -298,10 +298,10 @@ int main(int argc, char **argv) {
 	AmpSumIntensity testBW("amp",normStyle::none,
 			std::shared_ptr<Efficiency>(new UnitEfficiency()), MaxEvents);
 	testBW.Configure(pt);
-	testBW.printAmps();
+	testBW.to_str();
 
 	ParameterList minPar;
-	testBW.copyParameterList(minPar);
+	testBW.FillParameterList(minPar);
 	cout << minPar << endl;
 	// minPar.AddParameter(DoubleParameter(1.5,0.5,2.5,0.1));
 
@@ -328,7 +328,7 @@ int main(int argc, char **argv) {
 
 	//Generation
 //	TLorentzVector W(0.0, 0.0, 0.0, M);//= beam + target;
-	TLorentzVector W(0.0, 0.0, 0.0, kin->getMotherMass()); //= beam + target;
+	TLorentzVector W(0.0, 0.0, 0.0, kin->GetMotherMass()); //= beam + target;
 
 	//(Momentum, Energy units are Gev/C, GeV)
 	Double_t masses[3] = { kin->m1, kin->m2, kin->m2 };
@@ -375,7 +375,7 @@ int main(int argc, char **argv) {
 //		x.push_back(sqrt(m13sq));
 //		x.push_back(sqrt(m12sq));
 		//ParameterList intensL = testBW.intensity(dataP);
-		double AMPpdf = testBW.intensity(point).GetParameterValue(0);
+		double AMPpdf = testBW.intensity(point).GetDoubleParameterValue(0);
 		//double AMPpdf = testBW.intensity(x, minPar);
 
 		//mb.setVal(m13);
@@ -424,7 +424,7 @@ int main(int argc, char **argv) {
 		TParticle fparticlePim(111, 1, 0, 0, 0, 0, *pPim, W);
 
 		//call physics module
-		double AMPpdf = testBW.intensity(point).GetParameterValue(0);
+		double AMPpdf = testBW.intensity(point).GetDoubleParameterValue(0);
 
 		double test = rando.Uniform(0, maxTest);
 		double testmc = rando.Uniform(0, 1.);
@@ -466,7 +466,7 @@ int main(int argc, char **argv) {
 	fTreePHSP.Write();
 	output.Close();
 
-	testBW.printAmps();
+	testBW.to_str();
 	cout << "Done ... " << maxTest << endl << endl;
 
 	return 0;

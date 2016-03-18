@@ -48,16 +48,27 @@ class FitResult
 public:
 	FitResult():time(0){};
 	virtual ~FitResult() {};
-	//! Set amplitude
-	virtual void setAmplitude(std::shared_ptr<Amplitude> a) { _amp = a; }
+	//! Set single amplitude. Assume that only one amplitude is used!
+	virtual void SetAmplitude(std::shared_ptr<Amplitude> a) {
+		_ampVec.clear();
+		AddAmplitude(a);
+	}
+	//! Add amplitude
+	virtual void AddAmplitude(std::shared_ptr<Amplitude> a) {
+		_ampVec.push_back(a);
+	}
+	//! Set amplitude vector
+	virtual void SetAmplitude( std::vector<std::shared_ptr<Amplitude> > vec) {
+		_ampVec = vec;
+	}
 	//! Set fraction list
 	virtual void setFractions(ParameterList ini){ fractionList=ini; }
 	//! Set list of initial parameters
-	virtual void setInitialParameters(ParameterList iniPars){ initialParameters=iniPars; }
+	virtual void setInitialParameters(ParameterList iniPars){ initialParameters.DeepCopy(iniPars); }
 	//! Set list of final fit parameters
 	virtual void setFinalParameters(ParameterList finPars);
 	//! Set list of true parameters
-	virtual void setTrueParameters(ParameterList truePars){ trueParameters=truePars; }
+	virtual void setTrueParameters(ParameterList truePars){ trueParameters.DeepCopy(truePars); }
 	//! Set value of likelihood with initial parameter
 	virtual void setInitialLH(double iniLH){ }
 	//! Get list of initial parameters
@@ -109,10 +120,11 @@ protected:
 	//! True list of parameters
 	ParameterList trueParameters;
 	//! Fit amplitude (can't be serialized)
-	std::shared_ptr<Amplitude> _amp;
+	std::vector<std::shared_ptr<Amplitude> > _ampVec;
 
 	//! Calculate fit fractions and its errors.
 	virtual void calcFraction();
+
 	/** Calculate fit fractions.
 	 * Fractions are calculated using the formular:
 	 * \f[
@@ -124,8 +136,14 @@ protected:
 	 * @param parList result with fit fractions for the single resonances
 	 */
 	virtual void calcFraction(ParameterList& parList);
+
+	//! Calculate fit fractions and its errors.
+	static void calcFraction(
+			ParameterList& parList, std::shared_ptr<Amplitude> amp);
+
 	//! Calculate errors on fit result
 	virtual void calcFractionError() {};
+
 	//! List with fit fractions and errors
 	ParameterList fractionList;
 

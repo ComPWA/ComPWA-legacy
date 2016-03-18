@@ -48,7 +48,7 @@ std::shared_ptr<FunctionTree> NonResonant::SetupTree(
 		ParameterList& sample, ParameterList& toySample,std::string suffix){
 
 	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
-	double phspVol = kin->getPhspVolume();
+	double phspVol = kin->GetPhspVolume();
 	BOOST_LOG_TRIVIAL(info) << "NonResonant::setupBasicTree() | "<<_name;
 	//------------Setup Tree---------------------
 	std::shared_ptr<FunctionTree> newTree(new FunctionTree());

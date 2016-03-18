@@ -188,7 +188,7 @@ std::shared_ptr<FunctionTree> AmpRelBreitWignerRes::SetupTree(
 			ParameterList& sample, ParameterList& toySample,std::string suffix)
 {
 	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
-	double phspVol = kin->getPhspVolume();
+	double phspVol = kin->GetPhspVolume();
 	int sampleSize = sample.GetMultiDouble(0)->GetNValues();
 	int toySampleSize = toySample.GetMultiDouble(0)->GetNValues();
 

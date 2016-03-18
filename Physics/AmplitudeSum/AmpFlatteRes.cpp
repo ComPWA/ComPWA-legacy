@@ -41,12 +41,12 @@ AmpFlatteRes::AmpFlatteRes(const char *name,
 		std::shared_ptr<DoubleParameter> g3, std::string g3_idA, std::string g3_idB,
 		formFactorType type,
 		int nCalls, normStyle nS) :
-						AmpAbsDynamicalFunction(name, varIdA, varIdB,mag, phase, mass,
-								spin, m, n,	P, C, mother, particleA, particleB,
-								mesonRadius, motherRadius, type, nCalls, nS),
-								_g1(g1),
-								_g2(g2),_g2_idA(g2_idA), _g2_idB(g2_idB),
-								_g3(g3),_g3_idA(g3_idA), _g3_idB(g3_idB)
+								AmpAbsDynamicalFunction(name, varIdA, varIdB,mag, phase, mass,
+										spin, m, n,	P, C, mother, particleA, particleB,
+										mesonRadius, motherRadius, type, nCalls, nS),
+										_g1(g1),
+										_g2(g2),_g2_idA(g2_idA), _g2_idB(g2_idB),
+										_g3(g3),_g3_idA(g3_idA), _g3_idB(g3_idB)
 {
 
 
@@ -392,7 +392,7 @@ std::complex<double> AmpFlatteRes::dynamicalFunction(double mSq, double mR,
 	//-- new approach - for spin 0 resonances in the imaginary part of the denominator the term qTerm
 	//is added, compared to the old formula
 	std::complex<double> denom = std::complex<double>( mR*mR - mSq,0)
-																							+ (-1.0)*i*sqrtS*(termA + termB + termC);
+																									+ (-1.0)*i*sqrtS*(termA + termB + termC);
 
 	std::complex<double> result = std::complex<double>(gA*g_production,0) / denom;
 
@@ -408,7 +408,7 @@ std::shared_ptr<FunctionTree> AmpFlatteRes::SetupTree(
 		ParameterList& sample, ParameterList& toySample,std::string suffix)
 {
 	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
-	double phspVol = kin->getPhspVolume();
+	double phspVol = kin->GetPhspVolume();
 
 	int sampleSize = sample.GetMultiDouble(0)->GetNValues();
 	int toySampleSize = toySample.GetMultiDouble(0)->GetNValues();
@@ -525,10 +525,16 @@ bool FlatteStrategy::execute(ParameterList& paras,
 		);
 
 	//Check size of parameter list
-	if( paras.GetNDouble() != 13 && paras.GetNDouble() != 14 && paras.GetNDouble() != 10 && paras.GetNDouble() != 11)
+	if( paras.GetNDouble() != 13 && paras.GetNDouble() != 14
+			&& paras.GetNDouble() != 10 && paras.GetNDouble() != 11){
+		BOOST_LOG_TRIVIAL(error)<<"FlatteStrategy::execute() | "
+				<< paras.to_str();
 		throw( BadParameter("FlatteStrategy::execute() | "
-				"number of DoubleParameters does not match!")
+				"Number of DoubleParameters in ParameterList"
+				" ("+std::to_string(paras.GetNDouble())+") "
+				" does not match!")
 		);
+	}
 
 	double m0, d, ma, mb, g1, g2, massB1, massB2;
 	double g3=0; double massC1=0; double massC2=0;

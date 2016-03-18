@@ -116,7 +116,7 @@ bool RunManager::gen( int number, std::shared_ptr<Generator> gen, std::shared_pt
 	/* Maximum value for random number generation. We introduce an arbitrary factor of 1.2 to make sure
 	 * that the maximum value is never reached.
 	 */
-	double generationMaxValue = 1.2*amp->getMaxVal(gen)*maxSampleWeight;
+	double generationMaxValue = 1.2*amp->GetMaxVal(gen)*maxSampleWeight;
 
 	unsigned int totalCalls=0;
 	unsigned int startTime = clock();

@@ -13,16 +13,16 @@ RootGenerator::RootGenerator(int seed){
 	gRandom = new TRandom3(0);
 	if(seed!=-1) setSeed(seed);
 	Kinematics* kin =  Kinematics::instance();
-	nPart = kin->getNumberOfParticles();
+	nPart = kin->GetNumberOfParticles();
 	if(nPart<2)
 		throw std::runtime_error("RootGenerator::RootGenerator() | one particle is not enough!");
 	if(nPart==2)
 		BOOST_LOG_TRIVIAL(info) << "RootGenerator::RootGenerator() | only 2 particles in the final"
 				" state! There are no degrees of freedom!";
 	masses = new Double_t[nPart];
-	TLorentzVector W(0.0, 0.0, 0.0, kin->getMotherMass());//= beam + target;
+	TLorentzVector W(0.0, 0.0, 0.0, kin->GetMotherMass());//= beam + target;
 	for(unsigned int t=0; t<nPart; t++){ // particle 0 is mother particle
-		masses[t] = kin->getMass(t+1);
+		masses[t] = kin->GetMass(t+1);
 	}
 	event.SetDecay(W, nPart, masses);
 };

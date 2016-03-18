@@ -18,18 +18,20 @@
 MinuitResult::MinuitResult(std::shared_ptr<ControlParameter> esti,
 		FunctionMinimum result) :
 			useCorrelatedErrors(0), calcInterference(0), useTree(0),
-			correlatedErrors_numberOfSets(200){
+			correlatedErrors_numberOfSets(200)
+{
 	std::shared_ptr<Estimator> est = std::static_pointer_cast<Estimator>(esti);
-	_amp = est->getAmplitude(0);
+	_ampVec = est->getAmplitudes();
 	penalty = est->calcPenalty();
 	nEvents = est->getNEvents();
 	init(result);
 }
 
 void MinuitResult::setResult(std::shared_ptr<ControlParameter> esti,
-		FunctionMinimum result){
+		FunctionMinimum result)
+{
 	std::shared_ptr<Estimator> est = std::static_pointer_cast<Estimator>(esti);
-	_amp = est->getAmplitude(0);
+	_ampVec = est->getAmplitudes();
 	penalty = est->calcPenalty();
 	nEvents = est->getNEvents();
 	init(result);
@@ -83,15 +85,15 @@ void MinuitResult::init(FunctionMinimum min){
 	nFcn = min.NFcn();
 
 
-	if(_amp && _amp->hasTree()) setUseTree(1);
+	if( Amplitude::AmpHasTree(_ampVec) ) setUseTree(1);
 	return;
 
 }
 
 void MinuitResult::setUseTree(bool s) {
-	if(!_amp || !_amp->hasTree())
+	if( !Amplitude::AmpHasTree(_ampVec) )
 		throw std::runtime_error(
-				"MinuitResult::setUseTree() | amplitude has no tree!");
+				"MinuitResult::setUseTree() | Amplitude(s) has no tree!");
 	useTree = s;
 }
 
@@ -119,15 +121,6 @@ void MinuitResult::setUseCorrelatedErrors(bool s, int nSets) {
 
 void MinuitResult::calcFractionError()
 {
-	//Check if number of active resonances and size of fraction list matches
-	int nRes=0;
-	auto it = _amp->GetResonanceItrFirst();
-	for( ; it != _amp->GetResonanceItrLast(); ++it) nRes++;
-	if(fractionList.GetNDouble() != nRes++)
-		throw std::runtime_error(
-				"MinuitResult::calcFractionError() fraction list not valid!");
-
-	nRes=fractionList.GetNDouble();
 	if(useCorrelatedErrors){/* Exact error calculation */
 		BOOST_LOG_TRIVIAL(info) << "Calculating errors of fit fractions using "
 				<<correlatedErrors_numberOfSets<<" sets of parameters...";
@@ -167,30 +160,30 @@ void MinuitResult::calcFractionError()
 			//free vector
 			gsl_vector_free(gslNewPar);
 			//update amplitude with smeared parameters
-			_amp->setParameterList(newPar);
+			Amplitude::UpdateAmpParameterList(_ampVec, newPar);
 			ParameterList tmp;
 			calcFraction(tmp);
 			fracVect.push_back(tmp);
 
 			/******* DEBUGGING *******/
-			if(i==0){
-				for(int t=0; t<newPar.GetNDouble(); t++){
-					if( newPar.GetDoubleParameter(t)->IsFixed()) continue;
-					outFraction << newPar.GetDoubleParameter(t)->GetName()<<":";
-				}
-				for(int t=0; t<tmp.GetNDouble(); t++)
-					outFraction << tmp.GetDoubleParameter(t)->GetName()<<":";
-				outFraction << "norm" << std::endl;
-			}
-			for(int t=0; t<newPar.GetNDouble(); t++){
-				if( newPar.GetDoubleParameter(t)->IsFixed()) continue;
-				outFraction << newPar.GetDoubleParameter(t)->GetValue()<<" ";
-			}
-			for(int t=0; t<tmp.GetNDouble(); t++)
-				outFraction << tmp.GetDoubleParameter(t)->GetValue()<<" ";
-			double norm = _amp->integral();
-			outFraction << norm;
-			outFraction << std::endl;
+			//			if(i==0){
+			//				for(int t=0; t<newPar.GetNDouble(); t++){
+			//					if( newPar.GetDoubleParameter(t)->IsFixed()) continue;
+			//					outFraction << newPar.GetDoubleParameter(t)->GetName()<<":";
+			//				}
+			//				for(int t=0; t<tmp.GetNDouble(); t++)
+			//					outFraction << tmp.GetDoubleParameter(t)->GetName()<<":";
+			//				outFraction << "norm" << std::endl;
+			//			}
+			//			for(int t=0; t<newPar.GetNDouble(); t++){
+			//				if( newPar.GetDoubleParameter(t)->IsFixed()) continue;
+			//				outFraction << newPar.GetDoubleParameter(t)->GetValue()<<" ";
+			//			}
+			//			for(int t=0; t<tmp.GetNDouble(); t++)
+			//				outFraction << tmp.GetDoubleParameter(t)->GetValue()<<" ";
+			//			double norm = _amp->GetIntegral();
+			//			outFraction << norm;
+			//			outFraction << std::endl;
 			/******* DEBUGGING *******/
 		}
 		BOOST_LOG_TRIVIAL(info)<<" ------- "<<outFraction.str();
@@ -200,6 +193,7 @@ void MinuitResult::calcFractionError()
 		gsl_matrix_free(gslCov);
 		gsl_rng_free(rnd);
 
+		int nRes=fractionList.GetNDouble();
 		//Calculate standard deviation
 		for(unsigned int o=0;o<nRes;o++){
 			double mean=0, sqSum=0., stdev=0;
@@ -215,7 +209,9 @@ void MinuitResult::calcFractionError()
 			stdev = std::sqrt(sqSum - mean*mean);
 			fractionList.GetDoubleParameter(o)->SetError(stdev);
 		}
-		_amp->setParameterList(finalParameters); //set correct fit result
+
+		//Set correct fit result
+		Amplitude::UpdateAmpParameterList(_ampVec, finalParameters);
 	}
 	return;
 }
@@ -295,30 +291,33 @@ void MinuitResult::genOutput(std::ostream& out, std::string opt){
 	}
 	out<<"Number of Resonances > 10^-3: "<<r<<std::endl;
 
-	double sumMag;
-	auto it = _amp->GetResonanceItrFirst();
-	for( ; it!= _amp->GetResonanceItrLast(); ++it) { //fill matrix
-		std::string resName = (*it)->GetName();
-		sumMag+= std::fabs((*it)->GetMagnitude()); //value of magnitude
-	}
-	out<<"Sum of magnitudes: "<<sumMag<<std::endl;
-
-	out<<std::endl;
 	if(calcInterference){
-		out<<"INTERFERENCE terms: "<<std::endl;
+		auto ampItr = _ampVec.begin();
+		for( ; ampItr != _ampVec.end(); ++ampItr)
+			createInterferenceTable(out,(*ampItr));
+	}
+
+	out<<std::setprecision(5);//reset cout precision
+	return;
+}
+
+void MinuitResult::createInterferenceTable(std::ostream& out,
+		std::shared_ptr<Amplitude> amp)
+{
+		out<<"INTERFERENCE terms for "<<amp->GetName()<<": "<<std::endl;
 		TableFormater* tableInterf = new TableFormater(&out);
 		tableInterf->addColumn("Name 1",15);
 		tableInterf->addColumn("Name 2",15);
 		tableInterf->addColumn("Value",15);
 		tableInterf->header();
 		double sumInfTerms = 0;
-		auto it = _amp->GetResonanceItrFirst();
-		for( ; it != _amp->GetResonanceItrLast(); ++it){
+		auto it = amp->GetResonanceItrFirst();
+		for( ; it != amp->GetResonanceItrLast(); ++it){
 			auto it2 = it;
-			for( ; it2 != _amp->GetResonanceItrLast(); ++it2){
+			for( ; it2 != amp->GetResonanceItrLast(); ++it2){
 				*tableInterf << (*it)->GetName();
 				*tableInterf << (*it2)->GetName();
-				double inf = _amp->interferenceIntegral(it,it2);
+				double inf = amp->GetIntegralInterference(it,it2);
 				*tableInterf << inf;
 				sumInfTerms+=inf;
 			}
@@ -327,13 +326,10 @@ void MinuitResult::genOutput(std::ostream& out, std::string opt){
 		*tableInterf<<" "<<"Sum: "<<sumInfTerms;
 		tableInterf->footer();
 		out<<std::endl;
-	}
-
-	out<<std::setprecision(5);//reset cout precision
-	return;
 }
 
-double MinuitResult::calcAIC(){
+double MinuitResult::calcAIC()
+{
 	if(!fractionList.GetNDouble()) calcFraction();
 	double r=0;
 	for(int i=0; i<fractionList.GetNDouble(); i++){

@@ -44,7 +44,7 @@ dataPoint::dataPoint(std::vector<double> vec) : weight(1.), eff(1.)
 dataPoint::dataPoint( const Event& ev ) : weight(1.), eff(1.)
 {
 	init();
-	Kinematics::instance()->eventToDataPoint(ev,*this);
+	Kinematics::instance()->EventToDataPoint(ev,*this);
 	weight = ev.getWeight();
 	return;
 }
@@ -57,7 +57,7 @@ dataPoint::dataPoint(): weight(1.), eff(1.)
 
 unsigned int dataPoint::getID(std::string name) const
 {
-	std::vector<std::string> varNames = Kinematics::instance()->getVarNames();
+	std::vector<std::string> varNames = Kinematics::instance()->GetVarNames();
 	unsigned int size = varNames.size();
 	unsigned int pos = find(varNames.begin(), varNames.end(), name) - varNames.begin();
 	if(pos<0||pos>size-1) {
@@ -70,7 +70,7 @@ unsigned int dataPoint::getID(std::string name) const
 
 double dataPoint::getVal(std::string name) const
 {
-	std::vector<std::string> varNames = Kinematics::instance()->getVarNames();
+	std::vector<std::string> varNames = Kinematics::instance()->GetVarNames();
 	unsigned int size = varNames.size();
 	unsigned int pos = find(varNames.begin(), varNames.end(), name) - varNames.begin();
 	if(pos<0||pos>size-1) {
@@ -83,7 +83,7 @@ double dataPoint::getVal(std::string name) const
 
 void dataPoint::setVal(std::string name, double val)
 {
-	std::vector<std::string> varNames = Kinematics::instance()->getVarNames();
+	std::vector<std::string> varNames = Kinematics::instance()->GetVarNames();
 	unsigned int size = varNames.size();
 	unsigned int pos = find(varNames.begin(), varNames.end(), name) - varNames.begin();
 	if(pos<0||pos>size-1) {
@@ -128,9 +128,9 @@ void dataPoint::setPoint(std::vector<double> values)
 	return;
 }
 
-std::ostream & operator<<(std::ostream &os, dataPoint &p)
+std::ostream & operator<<(std::ostream &os, const dataPoint &p)
 {
-	std::vector<std::string> varNames = Kinematics::instance()->getVarNames();
+	std::vector<std::string> varNames = Kinematics::instance()->GetVarNames();
 	for(int i=0; i<varNames.size(); i++)
 		os << varNames.at(i) << "="<<p.getVal(i)<<" ";
 	return os;

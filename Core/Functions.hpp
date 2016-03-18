@@ -109,7 +109,7 @@ public:
 
 		switch(checkType){
 		case ParType::DOUBLE:{
-			double var = paras.GetParameterValue(0);
+			double var = paras.GetDoubleParameterValue(0);
 			if(var==0){
 				out = std::shared_ptr<AbsParameter>(new DoubleParameter( out->GetName(),0 ));
 				//TODO: exception dividion by 0
@@ -158,7 +158,7 @@ public:
 
 		switch(checkType){
 		case ParType::DOUBLE:{
-			double var = paras.GetParameterValue(0);
+			double var = paras.GetDoubleParameterValue(0);
 			if(var<0){
 				out = std::shared_ptr<AbsParameter>(new DoubleParameter( out->GetName(),-1 ));
 				//TODO: exception argument <0
@@ -561,7 +561,13 @@ public:
 				return false;
 			}
 			//output double: log of one double input
-			out = std::shared_ptr<AbsParameter>(new DoubleParameter(out->GetName(),std::log(paras.GetParameterValue(0))));
+			out = std::shared_ptr<AbsParameter>(
+					new DoubleParameter(
+							out->GetName(),
+							std::log(paras.GetDoubleParameterValue(0)
+							)
+					)
+			);
 			break;
 		}//end double
 

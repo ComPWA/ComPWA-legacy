@@ -539,10 +539,10 @@ public:
 	 */
 	DoubleParameter(std::string inName="") :
 		AbsParameter(inName, ParType::DOUBLE), fixed_(0),val_(0),min_(0), max_(0)
-	{
+{
 		SetError(0);
 		bounds_= usebounds_ = false;
-	}
+}
 
 	//! Standard constructor with a value
 	/*!
@@ -652,13 +652,28 @@ public:
 	virtual void UpdateParameter( std::shared_ptr<DoubleParameter> newPar ){
 		//copy bounds
 		if(newPar->HasBounds()){
-			SetMinMax(newPar->GetMinValue(), newPar->GetMaxValue());
+			try{
+				SetMinMax(newPar->GetMinValue(), newPar->GetMaxValue());
+			} catch (std::exception& ex){
+				//ignore if bound can not be set
+			}
 			SetUseBounds(newPar->UseBounds());
 		} else
 			bounds_ = usebounds_ = 0;
+
+		bool isFix = newPar->IsFixed();
 		//copy value
 		FixParameter(0); //we ignore here if parameter is fixed
 		SetValue(newPar->GetValue());
+
+		//Check if bounds are valid and value is within bounds
+		if( !check_bounds(GetMinValue(),GetMaxValue()) )
+			throw std::runtime_error("DoubleParameter::UpdateParameter() | "
+					"Bounds not valid for parameter "+GetName()+": "
+					+std::to_string(GetValue())
+		+" ["+std::to_string((long double)GetMinValue())+";"
+		+std::to_string((long double)GetMaxValue())+"]!");
+
 		//copy error
 		if(newPar->GetErrorType()==ErrorType::SYM)
 			SetError(newPar->GetError());
@@ -666,8 +681,9 @@ public:
 			SetError(newPar->GetErrorLow(),newPar->GetErrorHigh());
 		else
 			SetErrorType(ErrorType::NOTDEF);
+
 		//copy fix parameter
-		FixParameter(newPar->IsFixed());
+		FixParameter(isFix);
 		return;
 	}
 
@@ -695,17 +711,32 @@ public:
 		 */
 		//if(std::fabs(val_-inVal) < 0.0000001) return;
 		if(val_==inVal) return;
+
+		if(usebounds_ && (inVal < GetMinValue() || inVal > GetMaxValue()) )
+			throw ParameterOutOfBound("DoubleParameter::SetValue() | "
+					"Parameter "+GetName()+" not within bounds: val="
+					+std::to_string(inVal)
+		+" ["+std::to_string((long double)GetMinValue())+";"
+		+std::to_string((long double)GetMaxValue())+"]!");
+
 		val_ = inVal;
 		Notify();
 	}
+
 	//! Setter for bounds of parameter
 	virtual void SetMinMax(const double min, const double max){
-		SetMinValue(min);
-		SetMaxValue(max);
-		if(!bounds_)
-			throw std::runtime_error("DoubleParameter::SetMinMaxValue() bounds not valid: ["
-					+std::to_string((long double)min)+";"
-					+std::to_string((long double)max)+"]!");
+		try{
+			SetMinValue(min);
+		} catch (ParameterOutOfBound& ex) { }
+		try{
+			SetMaxValue(max);
+		} catch (ParameterOutOfBound& ex) { }
+		if(!check_bounds(min,max))
+			throw std::runtime_error("DoubleParameter::SetMinMaxValue() | "
+					"Bounds not valid for parameter "+GetName()+": "
+					+std::to_string(GetValue())
+		+" ["+std::to_string((long double)min)+";"
+		+std::to_string((long double)max)+"]!");
 	}
 	/*! Setter for lower bound
 	 * Setter for lower bound of the parameter. If a check for valid bounds
@@ -717,10 +748,13 @@ public:
 	 */
 	virtual void SetMinValue(const double min) {
 		min_ = min;
-		if(!check_bounds(min_, max_))
-			bounds_ = usebounds_ = false;
-		else
-			bounds_ = usebounds_ = true;
+		if( !check_bounds(min_, max_) )
+			throw ParameterOutOfBound("DoubleParameter::SetMinValue() | "
+					"Boundary not valid: ["
+					+std::to_string(GetMinValue())+", "
+					+std::to_string(GetMaxValue())+"]!"
+			);
+		bounds_ = usebounds_ = true;
 	}
 	/*! Setter for upper bound
 	 * Setter for upper bound of the parameter. If a check for valid bounds
@@ -732,10 +766,13 @@ public:
 	 */
 	virtual void SetMaxValue(const double max) {
 		max_ = max;
-		if(!check_bounds(min_, max_))
-			bounds_ = usebounds_ = false;
-		else
-			bounds_ = usebounds_ = true;
+		if( !check_bounds(min_, max_) )
+			throw ParameterOutOfBound("DoubleParameter::SetMaxValue() | "
+					"Boundary not valid: ["
+					+std::to_string(GetMinValue())+", "
+					+std::to_string(GetMaxValue())+"]!"
+			);
+		bounds_ = usebounds_ = true;
 	}
 	//====== PARAMETER ERROR ========
 	//! Check if parameter has an error

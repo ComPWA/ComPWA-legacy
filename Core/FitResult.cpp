@@ -43,8 +43,7 @@ void FitResult::genSimpleOutput(std::ostream& out){
 	return;
 }
 void FitResult::setFinalParameters(ParameterList finPars){
-	finalParameters=finPars;
-	_amp->setParameterList(finalParameters); //update parameters in amplitude
+	finalParameters.DeepCopy(finPars);
 }
 
 void FitResult::printFitParameters(TableFormater* tableResult){
@@ -151,9 +150,9 @@ void FitResult::printFitFractions(TableFormater* fracTable){
 	for(unsigned int i=0;i<fractionList.GetNDouble(); ++i){
 		std::shared_ptr<DoubleParameter> tmpPar = fractionList.GetDoubleParameter(i);
 		*fracTable << tmpPar->GetName()
-								<< tmpPar->GetValue()
-								<< tmpPar->GetError() //assume symmetric errors here
-								<< std::fabs(tmpPar->GetValue()/tmpPar->GetError());
+												<< tmpPar->GetValue()
+												<< tmpPar->GetError() //assume symmetric errors here
+												<< std::fabs(tmpPar->GetValue()/tmpPar->GetError());
 		sum += tmpPar->GetValue();
 		sumErrorSq += tmpPar->GetError()*tmpPar->GetError();
 	}
@@ -172,26 +171,31 @@ void FitResult::calcFraction() {
 		BOOST_LOG_TRIVIAL(warning) << "FitResult::calcFractions() fractions already calculated. Skip!";
 }
 
-void FitResult::calcFraction(ParameterList& parList){
-	if(!_amp)
-		throw std::runtime_error("FitResult::calcFractions() | no amplitude set, can't calculate fractions!");
-	if(parList.GetNDouble())
-		throw std::runtime_error("FitResult::calcFractions() | ParameterList not empty!");
+void FitResult::calcFraction(ParameterList& parList, std::shared_ptr<Amplitude> amp)
+{
+	double norm;
+	std::string ampName = amp->GetName();
 
-	double norm =-1;
-	ParameterList cList;
-	_amp->copyParameterList(cList);
+	/* Unbinned efficiency correction in the FunctionTree does not provide
+	 * an integral w/o efficiency correction. We have to calculate it here.
+	 */
+	try{
+		norm = amp->GetIntegral();
+	} catch (std::exception& ex){
+		BOOST_LOG_TRIVIAL(error)<< "FitResult::calcFraction() | "
+				"Normalization can't be calculated: "<<ex.what();
+		throw;
+	}
 
-	//in case of unbinned efficiency correction to tree does not provide an integral w/o efficiency correction
-	norm = _amp->integral();
-	if(norm<0)
-		throw std::runtime_error("FitResult::calcFraction() normalization can't be calculated");
-	BOOST_LOG_TRIVIAL(debug)<<"FitResult::calcFraction() norm="<<norm;
+	BOOST_LOG_TRIVIAL(debug)<<"FitResult::calcFraction() | "
+			"Amplitude "<<ampName<< " Norm="<<norm;
 
-	auto it = _amp->GetResonanceItrFirst();
-	for( ; it != _amp->GetResonanceItrLast(); ++it){ //fill matrix
+	//Start loop over resonances
+	auto it = amp->GetResonanceItrFirst();
+	for( ; it != amp->GetResonanceItrLast(); ++it){ //fill matrix
 		double resInt = (*it)->GetTotalIntegral();
-		std::string resName = (*it)->GetName();
+//		double resInt = 1.0;
+		std::string resName = ampName+"_"+(*it)->GetName()+"_FF";
 		std::shared_ptr<DoubleParameter> magPar = (*it)->GetMagnitudePar();
 		double mag = magPar->GetValue(); //value of magnitude
 		double magError = 0;
@@ -200,11 +204,31 @@ void FitResult::calcFraction(ParameterList& parList){
 
 		parList.AddParameter(
 				std::shared_ptr<DoubleParameter>(
-						new DoubleParameter(resName+"_FF", mag*mag*resInt/norm,
+						new DoubleParameter(
+								resName,
+								mag*mag*resInt/norm,
 								std::fabs(2*mag*resInt/norm * magError)
 						)
 				)
 		);
 	}
+
+}
+
+void FitResult::calcFraction(ParameterList& parList){
+	if( !_ampVec.size() )
+		throw std::runtime_error("FitResult::calcFractions() | no amplitude set, can't calculate fractions!");
+	if(parList.GetNDouble())
+		throw std::runtime_error("FitResult::calcFractions() | ParameterList not empty!");
+
+	//	_amp->UpdateParameters(finalParameters); //update parameters in amplitude
+	double norm =-1;
+
+	//Start loop over amplitudes
+	auto ampItr = _ampVec.begin();
+	for( ; ampItr != _ampVec.end(); ++ampItr){
+		calcFraction(parList, (*ampItr));
+	}
+
 	return;
 }

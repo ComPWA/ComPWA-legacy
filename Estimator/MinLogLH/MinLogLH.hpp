@@ -142,8 +142,8 @@ public:
 	}
 
 	//! Get Amplitude
-	virtual std::shared_ptr<Amplitude> getAmplitude(unsigned int id=0) {
-		return _ampVec.at(id);
+	virtual std::vector<std::shared_ptr<Amplitude> > getAmplitudes() {
+		return _ampVec;
 	}
 
 	//! Should we try to use the function tree? Function tree needs to be implemented in Amplitude
