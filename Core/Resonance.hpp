@@ -51,6 +51,12 @@ public:
 	//!Set id of variable B
 	virtual void SetVarIdB(unsigned int id) = 0;
 
+	//!Set prefactor
+	virtual void SetPrefactor(std::complex<double> pre) = 0;
+
+	//!Get prefactor
+	virtual std::complex<double> GetPrefactor() const = 0;
+
 	//! Get total integral for resonance
 	virtual double GetIntegral() const = 0;
 

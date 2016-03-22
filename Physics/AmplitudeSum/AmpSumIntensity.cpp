@@ -222,7 +222,7 @@ std::shared_ptr<FunctionTree> AmpSumIntensity::GetTree(
 	tr->createLeaf("phspVolume",
 			Kinematics::instance()->GetPhspVolume(), "normFactor");
 	tr->createLeaf("InvNmc",
-			1/ ( (double) sumWeights/phspSampleEff ), "normFactor");
+			1/ ( (double) sumWeights ), "normFactor");
 	tr->createNode("IntensPhspEff", mmultDStrat, "sumAmp",
 			phspSampleSize, false); //|T_{ev}|^2
 	tr->createLeaf("eff", eff, "IntensPhspEff"); //efficiency
@@ -326,6 +326,8 @@ double evalNoEff(double* x, size_t dim, void* param)
 	if(dim!=2) return 0;
 	auto amp = static_cast<AmpSumIntensity*>(param);
 	dataPoint point;
+	DalitzKinematics* kin =
+			dynamic_cast<DalitzKinematics*>(Kinematics::instance());
 
 	try{
 		Kinematics::instance()->FillDataPoint(0,1,x[0],x[1],point);
@@ -750,3 +752,13 @@ double AmpSumIntensity::averageWidth()
 	return avWidth;
 }
 
+void AmpSumIntensity::SetPrefactor(std::complex<double> pre)
+{
+	BOOST_LOG_TRIVIAL(info) <<"AmpSumIntensity::SetPrefector() | "
+			"Setting prefactor "<<pre<<" for all resonance of ampltidude "
+			<<GetName()<<"!";
+
+	auto it=resoList.begin();
+	for( ; it!=resoList.end(); ++it)
+			(*it)->SetPrefactor(pre);
+}

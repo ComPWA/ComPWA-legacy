@@ -114,6 +114,12 @@ public:
 	//! Set resonance name
 	virtual void SetName(std::string n){ _name = n; }
 
+	//!Set prefactor
+	virtual void SetPrefactor(std::complex<double> pre) { _prefactor = pre; }
+
+	//!Get prefactor
+	virtual std::complex<double> GetPrefactor() const { return _prefactor; }
+
 	//! Get coefficient
 	virtual std::complex<double> GetCoefficient() const;
 	//! Get magnitude
@@ -205,6 +211,9 @@ protected:
 	double _norm;
 	//! Is resonance shape modified -> we have to recalculate the normalization
 	bool _modified;
+
+	//! Pre factor
+	std::complex<double> _prefactor;
 
 	//! Mass of mother particle
 	double _M;

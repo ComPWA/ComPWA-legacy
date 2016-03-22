@@ -58,6 +58,9 @@ public:
 	//! set efficiency
 	virtual void SetEfficiency(std::shared_ptr<Efficiency> eff) { eff_ = eff; };
 
+	//!Set prefactor
+	virtual void SetPrefactor(std::complex<double> pre);
+
 	//! normalization integral for parameters \par (doesn't include calculated efficiency)
 	virtual const double GetNormalization();
 
@@ -130,7 +133,7 @@ public:
 	GetResonance(unsigned int id);
 
 	//! List of resonances (enabled AND disabled)
-	virtual std::vector<std::shared_ptr<Resonance> > GetFullListOfResonances(){
+	virtual std::vector<std::shared_ptr<Resonance> >& GetFullListOfResonances(){
 		return resoList;
 	}
 

@@ -33,7 +33,8 @@ double FitResult::shiftAngle(double v){
 	return val;
 }
 
-void FitResult::genSimpleOutput(std::ostream& out){
+void FitResult::genSimpleOutput(std::ostream& out)
+{
 	for(unsigned int o=0;o<finalParameters.GetNDouble();o++){
 		std::shared_ptr<DoubleParameter> outPar = finalParameters.GetDoubleParameter(o);
 		out<<outPar->GetValue()<<" "<<outPar->GetError()<<" ";
@@ -42,11 +43,14 @@ void FitResult::genSimpleOutput(std::ostream& out){
 
 	return;
 }
-void FitResult::setFinalParameters(ParameterList finPars){
+
+void FitResult::setFinalParameters(ParameterList finPars)
+{
 	finalParameters.DeepCopy(finPars);
 }
 
-void FitResult::printFitParameters(TableFormater* tableResult){
+void FitResult::printFitParameters(TableFormater* tableResult)
+{
 	bool printTrue=0, printInitial=0;
 	if(trueParameters.GetNParameter()) printTrue=1;
 	if(initialParameters.GetNParameter()) printInitial=1;
@@ -135,40 +139,53 @@ void FitResult::printFitParameters(TableFormater* tableResult){
 
 	return;
 }
+void FitResult::printFitFractions(TableFormater* tab)
+{
+	BOOST_LOG_TRIVIAL(info) << " FitResult::printFitFractions() | "
+			"Calculating fit fractions!";
+	auto itrAmp = _ampVec.begin();
+	for( ; itrAmp!=_ampVec.end(); ++itrAmp){
+		printFitFractions(tab, (*itrAmp));
+	}
+}
 
-void FitResult::printFitFractions(TableFormater* fracTable){
-	BOOST_LOG_TRIVIAL(info) << "Calculating fit fractions...";
-	calcFraction();
+void FitResult::printFitFractions(TableFormater* fracTable,
+		std::shared_ptr<Amplitude> amp)
+{
+	ParameterList ffList;
+	calcFraction(ffList, amp);
 	double sum=0, sumErrorSq=0;
 
+	fracTable->Reset();
+
 	//print matrix
-	fracTable->addColumn("Resonance",15);//add empty first column
+	fracTable->addColumn("Resonance",25);//add empty first column
 	fracTable->addColumn("Fraction",15);//add empty first column
 	fracTable->addColumn("Error",15);//add empty first column
-	fracTable->addColumn("Significance",15);//add empty first column
 	fracTable->header();
-	for(unsigned int i=0;i<fractionList.GetNDouble(); ++i){
-		std::shared_ptr<DoubleParameter> tmpPar = fractionList.GetDoubleParameter(i);
+	for(unsigned int i=0;i<ffList.GetNDouble(); ++i){
+		std::shared_ptr<DoubleParameter> tmpPar = ffList.GetDoubleParameter(i);
 		*fracTable << tmpPar->GetName()
-												<< tmpPar->GetValue()
-												<< tmpPar->GetError() //assume symmetric errors here
-												<< std::fabs(tmpPar->GetValue()/tmpPar->GetError());
+			<< tmpPar->GetValue()
+			<< tmpPar->GetError(); //assume symmetric errors here
 		sum += tmpPar->GetValue();
 		sumErrorSq += tmpPar->GetError()*tmpPar->GetError();
 	}
 	fracTable->delim();
-	*fracTable << "Total" << sum << sqrt(sumErrorSq) << " ";
+	*fracTable << "Total" << sum << sqrt(sumErrorSq) ;
 	fracTable->footer();
 
 	return;
 }
 
-void FitResult::calcFraction() {
+void FitResult::calcFraction()
+{
 	if(!fractionList.GetNDouble()) {
 		calcFraction(fractionList);
 		calcFractionError();
 	} else
-		BOOST_LOG_TRIVIAL(warning) << "FitResult::calcFractions() fractions already calculated. Skip!";
+		BOOST_LOG_TRIVIAL(warning) << "FitResult::calcFractions() | "
+				"Fractions already calculated. Skip!";
 }
 
 void FitResult::calcFraction(ParameterList& parList, std::shared_ptr<Amplitude> amp)
@@ -215,11 +232,15 @@ void FitResult::calcFraction(ParameterList& parList, std::shared_ptr<Amplitude> 
 
 }
 
-void FitResult::calcFraction(ParameterList& parList){
+void FitResult::calcFraction(ParameterList& parList)
+{
 	if( !_ampVec.size() )
-		throw std::runtime_error("FitResult::calcFractions() | no amplitude set, can't calculate fractions!");
+		throw std::runtime_error("FitResult::calcFractions() | "
+				"No amplitude set, can't calculate fractions!");
+
 	if(parList.GetNDouble())
-		throw std::runtime_error("FitResult::calcFractions() | ParameterList not empty!");
+		throw std::runtime_error("FitResult::calcFractions() | "
+				"ParameterList not empty!");
 
 	//	_amp->UpdateParameters(finalParameters); //update parameters in amplitude
 	double norm =-1;

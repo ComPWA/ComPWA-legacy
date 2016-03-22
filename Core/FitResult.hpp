@@ -86,7 +86,9 @@ public:
 	//! Table with fit parameters
 	virtual void printFitParameters(TableFormater* tableResult);
 	//! Table with fit fractions
-	virtual void printFitFractions(TableFormater* fracTable);
+	virtual void printFitFractions(TableFormater* tab);
+	//! Table with fit fractions
+	static void printFitFractions(TableFormater* tab, std::shared_ptr<Amplitude> amp);
 	//! Getter function for fractions list. Make sure that fractions are calculated beforehand.
 	virtual ParameterList& getFractions() {	return fractionList; }
 

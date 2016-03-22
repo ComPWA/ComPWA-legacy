@@ -7,35 +7,56 @@
 
 #include "Core/TableFormater.hpp"
 
-void TableFormater::delim(){
+void TableFormater::delim()
+{
 	*out<<sep;
 	for(unsigned int i=0;i<totalWidth-1; i++) *out << "-" ;
 	*out<<sep<<endl;
 }
-void TableFormater::footer(){ delim(); }
-void TableFormater::header(){
+
+void TableFormater::footer()
+{
+	delim();
+}
+
+void TableFormater::header()
+{
 	delim();
 	for(unsigned int i=0;i<columnTitle.size();i++) *out << "| "<<std::setw(columnWidth[i])<<columnTitle[i]<<" ";
 	*out<<"|"<<std::endl;
 	delim();
-};
-void TableFormater::addColumn(std::string title, unsigned int fixlength){
+}
+
+void TableFormater::addColumn(std::string title, unsigned int fixlength)
+{
 	unsigned int length;
 	if(fixlength!=999) length = fixlength;
 	else length=title.length();
 	columnWidth.push_back(length);
 	totalWidth+=length+3;
 	columnTitle.push_back(title);
-};
+}
 
-void TableFormater::trimString(std::string& src){
+void TableFormater::Reset()
+{
+	curCol = 0;
+	curRow = 0;
+	totalWidth = 0;
+	columnWidth.clear();
+	columnTitle.clear();
+}
+
+void TableFormater::trimString(std::string& src)
+{
 	//remove  all final zeros
 	char chr = '0';
 	std::string::size_type pos2 =  src.find_last_not_of(chr,src.length());
 	if(pos2+1 < src.length() )
 		src.erase(pos2+1,src.length());
 }
-TableFormater& TableFormater::operator<<(DoubleParameter in){
+
+TableFormater& TableFormater::operator<<(DoubleParameter in)
+{
 	if(curCol==0) *out << firstSep+" ";
 	else *out << " "<<sep<<" ";
 	if(in.HasError()){
@@ -64,7 +85,7 @@ TableFormater& TableFormater::operator<<(DoubleParameter in){
 		curRow++; curCol=0;
 	}
 	return *this;
-};
+}
 
 
 //====== TexTableFormater =========

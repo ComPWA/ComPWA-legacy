@@ -54,9 +54,9 @@ DalitzKinematics::DalitzKinematics(double _M, double _Br,
 		double _m1, double _m2, double _m3,
 		std::string _nameMother, std::string _name1,
 		std::string _name2, std::string _name3) :
-					m1(_m1), m2(_m2), m3(_m3),
-					name1(_name1), name2(_name2),
-					name3(_name3), massIdsSet(false), Kinematics(_nameMother,_Br,3)
+							m1(_m1), m2(_m2), m3(_m3),
+							name1(_name1), name2(_name2),
+							name3(_name3), massIdsSet(false), Kinematics(_nameMother,_Br,3)
 {
 	try{
 		_spinM = PhysConst::instance()->getJ(_nameMother);
@@ -435,17 +435,17 @@ double phspFunc(double* x, size_t dim, void* param)
 {
 	if(dim!=2) return 0;
 
-	int idA = 0;
-	int idB = 8;
-	if( !Kinematics::instance()->IsWithinBoxPhsp(idA, idB, x[0], x[1]) )
-		return 0;
+	//	int idA = 0;
+	//	int idB = 8;
+	//	if( !Kinematics::instance()->IsWithinBoxPhsp(idA, idB, x[0], x[1]) )
+	//		return 0;
 
-//	dataPoint point;
-//	try{
-//		Kinematics::instance()->FillDataPoint(0,1,x[1],x[0],point);
-//	} catch (BeyondPhsp& ex){
-//		return 0;
-//	}
+	dataPoint point;
+	try{
+		Kinematics::instance()->FillDataPoint(0,1,x[1],x[0],point);
+	} catch (BeyondPhsp& ex){
+		return 0;
+	}
 	return 1.0;
 };
 
@@ -457,7 +457,9 @@ void DalitzKinematics::calcDParea()
 
 	//Set limits
 	auto var1_limit = GetMinMax(0);
-	auto var2_limit = GetMinMax(8);
+	auto var2_limit = GetMinMax(1);
+	//	auto var1_limit = GetMinMax(0);
+	//	auto var2_limit = GetMinMax(8);
 	double xLimit_low[2] = {var1_limit.first,var2_limit.first};
 	double xLimit_high[2] = {var1_limit.second,var2_limit.second};
 

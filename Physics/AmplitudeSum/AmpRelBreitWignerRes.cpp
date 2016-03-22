@@ -216,6 +216,13 @@ std::shared_ptr<FunctionTree> AmpRelBreitWignerRes::SetupTree(
 
 	//Reso=BW*C*AD*N
 	newTree->createHead("Reso_"+_name, mmultStrat, sampleSize);
+
+	newTree->createNode("PreFactor_"+_name, complStrat, "Reso_"+_name);
+	newTree->createLeaf(
+			"IntensPre_"+_name, std::abs(_prefactor), "PreFactor_"+_name);
+	newTree->createLeaf(
+			"PhasePre_"+_name, std::arg(_prefactor), "PreFactor_"+_name);
+
 	newTree->createNode("C_"+_name, complStrat, "Reso_"+_name); //m0c
 	newTree->createLeaf("Intens_"+_name, _mag, "C_"+_name); //r
 	newTree->createLeaf("Phase_"+_name, _phase, "C_"+_name); //phi

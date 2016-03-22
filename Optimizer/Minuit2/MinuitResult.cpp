@@ -84,6 +84,7 @@ void MinuitResult::init(FunctionMinimum min){
 	errorDef = min.Up();
 	nFcn = min.NFcn();
 
+	//	Amplitude::FillAmpParameterToList(_ampVec, finalParameters);
 
 	if( Amplitude::AmpHasTree(_ampVec) ) setUseTree(1);
 	return;
@@ -270,9 +271,9 @@ void MinuitResult::genOutput(std::ostream& out, std::string opt){
 		}
 	}
 	out<<"FIT FRACTIONS:"<<std::endl;
-	TableFormater* fracTable = new TableFormater(&out);
 	//calculate and print fractions if amplitude is set
-	printFitFractions(fracTable);
+	TableFormater tab(&out);
+	printFitFractions(&tab);
 
 	out<<std::setprecision(10);
 	out<<"Final penalty term: "<<penalty<<std::endl;

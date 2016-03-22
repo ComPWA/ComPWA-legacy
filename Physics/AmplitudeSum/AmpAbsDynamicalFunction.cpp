@@ -22,7 +22,7 @@
 AmpAbsDynamicalFunction::AmpAbsDynamicalFunction( normStyle nS, int calls) :
 _parity(+1), _cparity(0),
 _ffType(formFactorType::BlattWeisskopf), _nCalls(calls),
-_normStyle(nS), _modified(1), _norm(1.0)
+_normStyle(nS), _modified(1), _norm(1.0), _prefactor(1,0)
 {
 
 }
@@ -39,12 +39,12 @@ AmpAbsDynamicalFunction::AmpAbsDynamicalFunction(const char *name,
 		std::shared_ptr<DoubleParameter> motherR, //  mother radius
 		formFactorType type,
 		int nCalls, normStyle nS) :
-								_name(name), _mag(mag), _phase(phase), _mass(mass), _subSys(varIdA),
-								_spin(spin), _m(m), _n(n), _parity(P), _cparity(C),
-								_nameMother(mother), _name1(particleA), _name2(particleB),
-								_mesonRadius(mesonR), _motherRadius(motherR), _ffType(type),
-								_nCalls(nCalls), _normStyle(nS), _norm(1.0), _modified(1),
-								_wignerD(varIdB, spin)
+			_name(name), _mag(mag), _phase(phase), _mass(mass), _subSys(varIdA),
+			_spin(spin), _m(m), _n(n), _parity(P), _cparity(C),
+			_nameMother(mother), _name1(particleA), _name2(particleB),
+			_mesonRadius(mesonR), _motherRadius(motherR), _ffType(type),
+			_nCalls(nCalls), _normStyle(nS), _norm(1.0), _modified(1),
+			_wignerD(varIdB, spin), _prefactor(1,0)
 {
 	initialize();
 }
@@ -58,15 +58,15 @@ AmpAbsDynamicalFunction::AmpAbsDynamicalFunction(const char *name,
 		std::string mother, std::string particleA, std::string particleB,
 		formFactorType type,
 		int nCalls, normStyle nS) :
-									_name(name), _mag(mag), _phase(phase), _mass(mass),
-									_subSys(varIdA), _spin(spin), _m(m), _n(n),
-									_parity(P), _cparity(C),
-									_nameMother(mother), _name1(particleA), _name2(particleB),
-									_mesonRadius(std::make_shared<DoubleParameter>(name, 1.0)),
-									_motherRadius(std::make_shared<DoubleParameter>(name, 1.0)),
-									_ffType(type),
-									_nCalls(nCalls), _normStyle(nS), _norm(1.0), _modified(1),
-									_wignerD(varIdB, spin)
+			_name(name), _mag(mag), _phase(phase), _mass(mass),
+			_subSys(varIdA), _spin(spin), _m(m), _n(n),
+			_parity(P), _cparity(C),
+			_nameMother(mother), _name1(particleA), _name2(particleB),
+			_mesonRadius(std::make_shared<DoubleParameter>(name, 1.0)),
+			_motherRadius(std::make_shared<DoubleParameter>(name, 1.0)),
+			_ffType(type),
+			_nCalls(nCalls), _normStyle(nS), _norm(1.0), _modified(1),
+			_wignerD(varIdB, spin), _prefactor(1,0)
 {
 	initialize();
 }
@@ -74,7 +74,8 @@ AmpAbsDynamicalFunction::AmpAbsDynamicalFunction(const char *name,
 std::string AmpAbsDynamicalFunction::to_str() const
 {
 	std::stringstream str;
-	str<<"AmpAbsDynamicalFunction | "<<_name<<" enabled="<<_enable << " nCalls="<<_nCalls
+	str<<"AmpAbsDynamicalFunction | "<<_name<<" enabled="<<_enable
+			<< " nCalls="<<_nCalls
 			<< " varId1="<<GetVarIdA()<<" varId2="<<GetVarIdB()<<std::endl
 			<<" J="<<_spin<<" P="<<_parity<<" C="<<_cparity
 			<<" ffType="<<_ffType<<std::endl
@@ -82,6 +83,7 @@ std::string AmpAbsDynamicalFunction::to_str() const
 			<<" particleA: "<<_name1<<" particleB: "<<_name2<<std::endl;
 	str<<" normStyle="<<_normStyle<< " norm="<<_norm
 			<<" modified?"<<_modified<<std::endl;
+	str<<"Prefactor: "<<_prefactor<<std::endl;
 	str<<"Parameters:"<<std::endl;
 	str<<_mag->to_str()<<std::endl;
 	str<<_phase->to_str()<<std::endl;
@@ -391,7 +393,8 @@ void AmpAbsDynamicalFunction::Configure(
 	return;
 }
 
-void AmpAbsDynamicalFunction::put(boost::property_tree::ptree &pt){
+void AmpAbsDynamicalFunction::put(boost::property_tree::ptree &pt)
+{
 	pt.put("<xmlattr>.name", _name);
 	pt.put("<xmlattr>.enable", _enable);
 	if(_mag_writeByName){
@@ -479,6 +482,7 @@ void AmpAbsDynamicalFunction::initialize()
 
 AmpAbsDynamicalFunction::~AmpAbsDynamicalFunction()
 {
+
 }
 
 std::complex<double> AmpAbsDynamicalFunction::GetCoefficient() const
@@ -489,7 +493,8 @@ std::complex<double> AmpAbsDynamicalFunction::GetCoefficient() const
 	);
 }
 
-std::complex<double> AmpAbsDynamicalFunction::Evaluate(dataPoint& point){
+std::complex<double> AmpAbsDynamicalFunction::Evaluate(dataPoint& point)
+{
 	CheckModified();
 	std::complex<double> res(0,0);
 	try{
@@ -513,7 +518,7 @@ std::complex<double> AmpAbsDynamicalFunction::Evaluate(dataPoint& point){
 				<<ex.what();
 		throw;
 	}
-	res = (GetCoefficient()*GetNormalization()*res*ang);
+	res = (GetPrefactor()*GetCoefficient()*GetNormalization()*res*ang);
 
 	//check for NaN
 	if( res.real()!=res.real() || res.imag() != res.imag() )
@@ -538,19 +543,18 @@ double evalAmp(double* x, size_t dim, void* param)
 	auto amp = static_cast<AmpAbsDynamicalFunction*>(param);
 	dataPoint point;
 
-	//	try{
-	//		Kinematics::instance()->FillDataPoint( 0, 1, x[0], x[1], point );
-	//	} catch (BeyondPhsp& ex){
-	//		return 0;
-	//	}
-
-	int idA = amp->GetVarIdA();
-	int idB = amp->GetVarIdB();
-	if( !Kinematics::instance()->IsWithinBoxPhsp(idA, idB, x[0], x[1]) )
+	try{
+		Kinematics::instance()->FillDataPoint( 0, 1, x[0], x[1], point );
+	} catch (BeyondPhsp& ex){
 		return 0;
+	}
 
-	point.setVal(idA, x[0]);
-	point.setVal(idB, x[1]);
+	//	int idA = amp->GetVarIdA();
+	//	int idB = amp->GetVarIdB();
+	//	if( !Kinematics::instance()->IsWithinBoxPhsp(idA, idB, x[0], x[1]) )
+	//		return 0;
+	//	point.setVal(idA, x[0]);
+	//	point.setVal(idB, x[1]);
 
 	std::complex<double> res(0,0);
 	try{
@@ -571,23 +575,31 @@ double AmpAbsDynamicalFunction::GetIntegral() const
 	size_t dim=2;
 	double res=0.0, err=0.0;
 
-	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
+	DalitzKinematics* kin =
+			dynamic_cast<DalitzKinematics*>(Kinematics::instance());
 
-	auto var1_limit = kin->GetMinMax( GetVarIdA() );
-	auto var2_limit = kin->GetMinMax( GetVarIdB() );
+	//	auto var1_limit = kin->GetMinMax( GetVarIdA() );
+	//	auto var2_limit = kin->GetMinMax( GetVarIdB() );
+	auto var1_limit = kin->GetMinMax( 0 );
+	auto var2_limit = kin->GetMinMax( 1 );
 	double xLimit_low[2] = {var1_limit.first,var2_limit.first};
 	double xLimit_high[2] = {var1_limit.second,var2_limit.second};
 
 	gsl_rng_env_setup ();
 	const gsl_rng_type *T = gsl_rng_default; //type of random generator
 	gsl_rng *r = gsl_rng_alloc(T); //random generator
-	gsl_monte_function F = {&evalAmp,dim, const_cast<AmpAbsDynamicalFunction*> (this)};
+	gsl_monte_function F = {
+			&evalAmp,
+			dim,
+			const_cast<AmpAbsDynamicalFunction*> (this)
+	};
 
 	//Test function: result should be 1
 	//gsl_monte_function F = {&twoDimGaussian,dim, new int()};
 
 	gsl_monte_vegas_state *s = gsl_monte_vegas_alloc (dim);
-	gsl_monte_vegas_integrate (&F, xLimit_low, xLimit_high, 2, _nCalls, r,s,&res, &err);
+	gsl_monte_vegas_integrate (
+			&F,	xLimit_low,	xLimit_high, 2,	_nCalls, r,	s, &res, &err );
 	gsl_monte_vegas_free(s);
 
 	//check for NaN
@@ -645,19 +657,18 @@ double eval(double* x, size_t dim, void* param)
 	auto amp = static_cast<AmpAbsDynamicalFunction*>(param);
 	dataPoint point;
 
-	//	try{
-	//		Kinematics::instance()->FillDataPoint( 0, 1, x[0], x[1], point );
-	//	} catch (BeyondPhsp& ex){
-	//		return 0;
-	//	}
-
-	int idA = amp->GetVarIdA();
-	int idB = amp->GetVarIdB();
-	if( !Kinematics::instance()->IsWithinBoxPhsp(idA, idB, x[0], x[1]) )
+	try{
+		Kinematics::instance()->FillDataPoint( 0, 1, x[0], x[1], point );
+	} catch (BeyondPhsp& ex){
 		return 0;
+	}
 
-	point.setVal(idA, x[0]);
-	point.setVal(idB, x[1]);
+	//	int idA = amp->GetVarIdA();
+	//	int idB = amp->GetVarIdB();
+	//	if( !Kinematics::instance()->IsWithinBoxPhsp(idA, idB, x[0], x[1]) )
+	//		return 0;
+	//	point.setVal(idA, x[0]);
+	//	point.setVal(idB, x[1]);
 
 	std::complex<double> res = amp->EvaluateAmp(point);
 	double ang = amp->EvaluateWignerD(point);
@@ -673,10 +684,13 @@ double AmpAbsDynamicalFunction::GetTotalIntegral() const
 	size_t dim=2;
 	double res=0.0, err=0.0;
 
-	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
+	DalitzKinematics* kin =
+			dynamic_cast<DalitzKinematics*>(Kinematics::instance());
 
-	auto var1_limit = kin->GetMinMax( GetVarIdA() );
-	auto var2_limit = kin->GetMinMax( GetVarIdB() );
+	auto var1_limit = kin->GetMinMax( 0 );
+	auto var2_limit = kin->GetMinMax( 1 );
+	//	auto var1_limit = kin->GetMinMax( GetVarIdA() );
+	//	auto var2_limit = kin->GetMinMax( GetVarIdB() );
 	double xLimit_low[2] = {var1_limit.first,var2_limit.first};
 	double xLimit_high[2] = {var1_limit.second,var2_limit.second};
 

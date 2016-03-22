@@ -30,6 +30,7 @@ public:
 		lastSep = sep;
 	};
 	virtual ~TableFormater() { }
+	virtual void Reset();
 	virtual void delim();
 	virtual void footer();
 	virtual void header();
