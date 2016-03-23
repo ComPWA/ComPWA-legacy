@@ -301,7 +301,7 @@ void ParameterList::make_str() {
 //******************************************************************************
 
 //---------- BOOL PARAMETER ----------
-std::vector<const std::shared_ptr<BoolParameter> >::iterator
+std::vector<std::shared_ptr<BoolParameter> >::const_iterator
 ParameterList::FindBoolParameter(
 		const std::string name ) const
 {
@@ -367,7 +367,8 @@ void ParameterList::SetParameterValue(const unsigned int i, const bool inVal)
 
 void ParameterList::RemoveBool(const std::string name){
 	try{
-		vBool_.erase( FindBoolParameter(name) );
+		unsigned int id =  FindBoolParameter(name) - vBool_.begin();
+		RemoveBool(id);
 	} catch (BadParameter& ex){
 		BOOST_LOG_TRIVIAL(error) <<" ParameterList::RemoveBool() | Can not remove"
 				"parameter "<<name<<": "<<ex.what();
@@ -387,7 +388,7 @@ void ParameterList::RemoveBool(const unsigned int id){
 
 //******************************************************************************
 //---------- INTEGER PARAMETER ----------
-std::vector<const std::shared_ptr<IntegerParameter> >::iterator
+std::vector<std::shared_ptr<IntegerParameter> >::const_iterator
 ParameterList::FindIntegerParameter(
 		const std::string name ) const
 {
@@ -453,7 +454,8 @@ void ParameterList::SetParameterValue(const unsigned int i, const int inVal)
 
 void ParameterList::RemoveInteger(const std::string name){
 	try{
-		vInt_.erase( FindIntegerParameter(name) );
+		unsigned int id =  FindIntegerParameter(name) - vInt_.begin();
+		RemoveInteger(id);
 	} catch (BadParameter& ex){
 		BOOST_LOG_TRIVIAL(error) <<" ParameterList::RemoveInteger() | Can not remove"
 				"parameter "<<name<<": "<<ex.what();
@@ -473,7 +475,7 @@ void ParameterList::RemoveInteger(const unsigned int id){
 
 //******************************************************************************
 //---------- DOUBLE PARAMETER ----------
-std::vector<const std::shared_ptr<DoubleParameter> >::iterator
+std::vector<std::shared_ptr<DoubleParameter> >::const_iterator
 ParameterList::FindDoubleParameter(
 		const std::string name ) const
 {
@@ -539,7 +541,8 @@ void ParameterList::SetParameterValue(const unsigned int i, const double inVal)
 
 void ParameterList::RemoveDouble(const std::string name){
 	try{
-		vDouble_.erase( FindDoubleParameter(name) );
+		unsigned int id =  FindDoubleParameter(name) - vDouble_.begin();
+		RemoveDouble(id);
 	} catch (BadParameter& ex){
 		BOOST_LOG_TRIVIAL(error) <<" ParameterList::RemoveDouble() | Can not remove"
 				"parameter "<<name<<": "<<ex.what();
@@ -559,7 +562,7 @@ void ParameterList::RemoveDouble(const unsigned int id){
 
 //******************************************************************************
 //---------- COMPLEX PARAMETER ----------
-std::vector<const std::shared_ptr<ComplexParameter> >::iterator
+std::vector<std::shared_ptr<ComplexParameter> >::const_iterator
 ParameterList::FindComplexParameter(
 		const std::string name ) const
 {
@@ -625,7 +628,8 @@ void ParameterList::SetParameterValue(const unsigned int i, const std::complex<d
 
 void ParameterList::RemoveComplex(const std::string name){
 	try{
-		vComplex_.erase( FindComplexParameter(name) );
+		unsigned int id =  FindComplexParameter(name) - vComplex_.begin();
+		RemoveComplex(id);
 	} catch (BadParameter& ex){
 		BOOST_LOG_TRIVIAL(error) <<" ParameterList::RemoveComplex() | Can not remove"
 				"parameter "<<name<<": "<<ex.what();
@@ -645,7 +649,7 @@ void ParameterList::RemoveComplex(const unsigned int id){
 
 //******************************************************************************
 //---------- MULTIDOUBLE PARAMETER ----------
-std::vector<const std::shared_ptr<MultiDouble> >::iterator
+std::vector<std::shared_ptr<MultiDouble> >::const_iterator
 ParameterList::FindMultiDouble(
 		const std::string name ) const
 {
@@ -685,7 +689,8 @@ ParameterList::GetMultiDouble(const unsigned int i) const
 
 void ParameterList::RemoveMultiDouble(const std::string name){
 	try{
-		vMultiDouble_.erase( FindMultiDouble(name) );
+		unsigned int id =  FindMultiDouble(name) - vMultiDouble_.begin();
+		RemoveMultiDouble(id);
 	} catch (BadParameter& ex){
 		BOOST_LOG_TRIVIAL(error) <<" ParameterList::RemoveDouble() | Can not remove"
 				"parameter "<<name<<": "<<ex.what();
@@ -705,7 +710,7 @@ void ParameterList::RemoveMultiDouble(const unsigned int id){
 
 //******************************************************************************
 //---------- MULTICOMPLEX PARAMETER ----------
-std::vector<const std::shared_ptr<MultiComplex> >::iterator
+std::vector<std::shared_ptr<MultiComplex> >::const_iterator
 ParameterList::FindMultiComplex(
 		const std::string name ) const
 {
@@ -745,7 +750,8 @@ ParameterList::GetMultiComplex(const unsigned int i) const
 
 void ParameterList::RemoveMultiComplex(const std::string name){
 	try{
-		vMultiComplex_.erase( FindMultiComplex(name) );
+		unsigned int id =  FindMultiComplex(name) - vMultiComplex_.begin();
+		RemoveMultiComplex(id);
 	} catch (BadParameter& ex){
 		BOOST_LOG_TRIVIAL(error) <<" ParameterList::RemoveComplex() | Can not remove"
 				"parameter "<<name<<": "<<ex.what();

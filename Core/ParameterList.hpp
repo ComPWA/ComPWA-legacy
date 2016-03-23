@@ -173,7 +173,7 @@ public:
 	 * \return string with parameter information
 	 * \sa operator<<
 	 */
-	virtual std::vector<const std::shared_ptr<BoolParameter> >::iterator
+	virtual std::vector<std::shared_ptr<BoolParameter> >::const_iterator
 	FindBoolParameter( const std::string name ) const;
 
 	//! Get ID of Bool parameter
@@ -257,7 +257,7 @@ public:
 	 * \return string with parameter information
 	 * \sa operator<<
 	 */
-	virtual std::vector<const std::shared_ptr<IntegerParameter> >::iterator
+	virtual std::vector<std::shared_ptr<IntegerParameter> >::const_iterator
 	FindIntegerParameter( const std::string name ) const;
 
 	//! Get ID of Integer parameter
@@ -340,7 +340,7 @@ public:
 	 * \return string with parameter information
 	 * \sa operator<<
 	 */
-	virtual std::vector<const std::shared_ptr<DoubleParameter> >::iterator
+	virtual std::vector<std::shared_ptr<DoubleParameter> >::const_iterator
 	FindDoubleParameter( const std::string name ) const;
 
 	//! Get ID of Double parameter
@@ -425,7 +425,7 @@ public:
 	 * \return string with parameter information
 	 * \sa operator<<
 	 */
-	virtual std::vector<const std::shared_ptr<ComplexParameter> >::iterator
+	virtual std::vector<std::shared_ptr<ComplexParameter> >::const_iterator
 	FindComplexParameter( const std::string name ) const;
 
 	//! Get ID of Complex parameter
@@ -510,7 +510,7 @@ public:
 	 * \return string with parameter information
 	 * \sa operator<<
 	 */
-	virtual std::vector<const std::shared_ptr<MultiDouble> >::iterator
+	virtual std::vector<std::shared_ptr<MultiDouble> >::const_iterator
 	FindMultiDouble( const std::string name ) const;
 
 	//! Get ID of MultiDouble parameter
@@ -577,7 +577,7 @@ public:
 	 * \return string with parameter information
 	 * \sa operator<<
 	 */
-	virtual std::vector<const std::shared_ptr<MultiComplex> >::iterator
+	virtual std::vector<std::shared_ptr<MultiComplex> >::const_iterator
 	FindMultiComplex( const std::string name ) const;
 
 	//! Get ID of MultiComplex parameter
