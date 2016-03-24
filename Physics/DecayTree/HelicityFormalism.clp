@@ -13,7 +13,8 @@
 				(daughters ?daughter1_id ?daughter2_id $?others)
 				(required_variable_names "angular-momentum" $?other_rvns) 
 				(violating_quantum_number_list $?violating_quantum_number_list)
-			  )	
+			  )
+	(test (not (member$ "spin" ?violating_quantum_number_list)))
 	=>
 	;get the required information
 	(bind ?angular_momentum (get-spin-qn-with-unique-id (get-required-variable "angular-momentum" ?decay)))

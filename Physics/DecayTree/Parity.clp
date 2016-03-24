@@ -6,6 +6,7 @@
 					(required_variable_names "angular-momentum" $?other_rvns) 
 					(violating_quantum_number_list $?violating_quantum_number_list)
 			  )
+	(test (not (member$ "parity" ?violating_quantum_number_list)))
 	=>
 	;get the required information
 	(bind ?angular_momentum (get-spin-qn-with-unique-id (get-required-variable "angular-momentum" ?decay)))
@@ -36,6 +37,7 @@
 				(required_decays ?charge_decay $?required_decays)
 				(violating_quantum_number_list $?violating_quantum_number_list)
 			  )
+	(test (not (member$ "cparity" ?violating_quantum_number_list)))
 	=>
 	(if (or (or (<> ?charge_mother 0) (<> ?charge_daughter1 0)) (<> ?charge_daughter2 0))
 	then

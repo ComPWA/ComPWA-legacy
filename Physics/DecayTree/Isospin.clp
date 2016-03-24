@@ -12,15 +12,17 @@
 	 			(daughters ?daughter1_id ?daughter2_id $?others)
 	 			(violating_quantum_number_list $?violating_quantum_number_list)
 	 		  )
+	(test (not (member$ "isospin" ?violating_quantum_number_list)))
 	=>
 	(if (<> (/ ?z_num_mother ?denom_mother) 
 			(+ (/ ?z_num_daughter1 ?denom_daughter1) (/ ?z_num_daughter2 ?denom_daughter2))
 		)
 	then
 		(if (is-qn-conserved "isospin")
+		then
 			(retract ?decay)
 	  	else
-	  		(modify ?decay (violating_quantum_number_list ?violating_quantum_number_list "isospin-z"))
+	  		(modify ?decay (violating_quantum_number_list ?violating_quantum_number_list "isospin"))
 	  	)
 		;(printout t "decay violates isospin z!" crlf)
 	)
@@ -36,6 +38,7 @@
 	 			(daughters ?daughter1_id ?daughter2_id $?others)
 	 			(violating_quantum_number_list $?violating_quantum_number_list)
 	 		  )
+	(test (not (member$ "isospin" ?violating_quantum_number_list)))
 	=>
 	(if (or
 			(> (/ ?num_mother ?denom_mother) 
@@ -47,6 +50,7 @@
 		)
 	then
 		(if (is-qn-conserved "isospin")
+		then
 			(retract ?decay)
 	  	else
 	  		(modify ?decay (violating_quantum_number_list ?violating_quantum_number_list "isospin"))

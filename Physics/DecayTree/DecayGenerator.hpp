@@ -27,17 +27,6 @@ class ParticleProperties;
 namespace Physics {
 namespace DecayTree {
 
-/*template<class T> struct QuantumNumber {
- std::string name_;
- T value_;
- };
-
- template<class T1, class T2> struct QuantumNumberCondition {
- std::string name_;
- std::string qn_condition_name_;
- T condition_value_;
- };*/
-
 enum class QuantumNumberTypes {
   SINGLE_PARTICLE_BASED, COMPOSITE_PARTICLE_BASED
 };
@@ -85,51 +74,30 @@ struct IFParticleInfo {
   std::vector<ComPWA::Spin> spin_z_components_;
 };
 
-/*struct SpinWave {
- unsigned int unique_id_;
- int charge_;
- Spin isospin_;
- Spin spin_;
- int parity_;
- int cparity_;
-
- bool operator()(const SpinWave& rhs) {
- if (charge_ != rhs.charge_)
- return false;
- if (isospin_ != rhs.isospin_)
- return false;
- if (spin_ != rhs.spin_)
- return false;
- if (parity_ != rhs.parity_)
- return false;
- if (cparity_ != rhs.cparity_)
- return false;
- return true;
- }
-
- friend std::ostream& operator<<(std::ostream& stream, const SpinWave& sw) {
- stream << "charge: " << sw.charge_ << std::endl;
- stream << "isospin: " << sw.isospin_.J_numerator_ << "/"
- << sw.isospin_.J_denominator_ << "(I_z= " << sw.isospin_.J_z_numerator_
- << "/" << sw.isospin_.J_denominator_ << ")" << std::endl;
- stream << "spin: " << sw.spin_.J_numerator_ << "/"
- << sw.spin_.J_denominator_ << "(J_z= " << sw.spin_.J_z_numerator_
- << "/" << sw.spin_.J_denominator_ << ")" << std::endl;
- stream << "c-parity: " << sw.cparity_ << std::endl;
- stream << "parity: " << sw.parity_ << std::endl;
- return stream;
- }
- };*/
-
 struct SpinWaveDecay {
   unsigned int mother_index_;
-  IndexPair daughter_indices_;
+  IndexList daughter_indices_;
+  std::vector<ComPWA::QuantumNumbers> violated_quantum_numbers_;
+
+  bool operator==(const SpinWaveDecay& rhs) const {
+    if (mother_index_
+        != rhs.mother_index_)
+      return false;
+    if (daughter_indices_ != rhs.daughter_indices_)
+      return false;
+    if (violated_quantum_numbers_
+        != rhs.violated_quantum_numbers_)
+      return false;
+    return true;
+  }
 };
 
 struct SpinWaveDecayTree {
   unsigned int top_node_unique_decay_node_index_;
-  std::map<unsigned int, IndexList> unique_decay_node_index_tree_;
+  std::map<unsigned, IndexList> unique_decay_node_index_tree_;
   std::map<unsigned int, unsigned int> unique_decay_node_index_to_spin_wave_index_mapping_;
+  std::vector<unsigned int> unique_decay_indices_;
+  std::map<unsigned int, unsigned int> unique_decay_node_index_to_decay_index_mapping_;
 
   bool operator==(const SpinWaveDecayTree& rhs) const {
     if (top_node_unique_decay_node_index_
@@ -202,6 +170,9 @@ class DecayGenerator {
   SpinWaveDecayTree getDecayTreeFromClipsEnvironment(void* decay_tree_fact);
   unsigned int createSpinWave(void* spin_wave_fact);
   ComPWA::Spin createSpin(int spin_quantum_number_unique_id) const;
+  unsigned int findSpinWaveListIndex(
+      const std::map<unsigned int, unsigned int>& index_mapping,
+      unsigned int unique_index) const;
 
   void initializeAllowedParticlePool();
 

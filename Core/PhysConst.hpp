@@ -99,6 +99,8 @@ public:
 
   std::string getQuantumNumberName(
       const QuantumNumbers& qn_type) const;
+  QuantumNumbers getQuantumNumberEnum(
+      const std::string& qn_name) const;
 
 private:
   PhysConst();
@@ -106,6 +108,7 @@ private:
   void readFile();
 
   std::map<QuantumNumbers, std::string> quantum_number_key_name_mapping_;
+  std::map<std::string, QuantumNumbers> name_quantum_number_key_mapping_;
 
   std::string particleFileName;
   std::string particleDefaultFileName;

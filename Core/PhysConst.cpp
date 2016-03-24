@@ -49,6 +49,12 @@ void PhysConst::initQuantumNumberMapping() {
   quantum_number_key_name_mapping_[QuantumNumbers::PARITY] = "parity";
   quantum_number_key_name_mapping_[QuantumNumbers::CPARITY] = "cparity";
 
+  name_quantum_number_key_mapping_["spin"] = QuantumNumbers::SPIN;
+  name_quantum_number_key_mapping_["angular-momentum"] = QuantumNumbers::ORBITAL_ANGULAR_MOMENTUM;
+  name_quantum_number_key_mapping_["isospin"] = QuantumNumbers::ISOSPIN;
+  name_quantum_number_key_mapping_["charge"] = QuantumNumbers::CHARGE;
+  name_quantum_number_key_mapping_["parity"] = QuantumNumbers::PARITY;
+  name_quantum_number_key_mapping_["cparity"] = QuantumNumbers::CPARITY;
 }
 
 void PhysConst::readFile() {
@@ -235,7 +241,20 @@ std::string PhysConst::getQuantumNumberName(
     return result->second;
   }
   else {
-    std::runtime_error("DecayGeneratorFacade::setAllowedSpinQuantumNumbers:"
+    std::runtime_error("PhysConst::getQuantumNumberName:"
+        " quantum number with your specified key does not exist in the mapping!"
+        " Please correct or update mapping!");
+  }
+}
+
+QuantumNumbers PhysConst::getQuantumNumberEnum(
+    const std::string& qn_name) const {
+  auto result = name_quantum_number_key_mapping_.find(qn_name);
+  if (result != name_quantum_number_key_mapping_.end()) {
+    return result->second;
+  }
+  else {
+    std::runtime_error("PhysConst::getQuantumNumberEnum:"
         " quantum number with your specified key does not exist in the mapping!"
         " Please correct or update mapping!");
   }
