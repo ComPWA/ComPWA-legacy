@@ -211,7 +211,6 @@ void FitResult::calcFraction(ParameterList& parList, std::shared_ptr<Amplitude> 
 	auto it = amp->GetResonanceItrFirst();
 	for( ; it != amp->GetResonanceItrLast(); ++it){ //fill matrix
 		double resInt = (*it)->GetTotalIntegral();
-//		double resInt = 1.0;
 		std::string resName = ampName+"_"+(*it)->GetName()+"_FF";
 		std::shared_ptr<DoubleParameter> magPar = (*it)->GetMagnitudePar();
 		double mag = magPar->GetValue(); //value of magnitude

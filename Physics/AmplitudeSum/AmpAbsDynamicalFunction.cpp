@@ -22,7 +22,7 @@
 AmpAbsDynamicalFunction::AmpAbsDynamicalFunction( normStyle nS, int calls) :
 _parity(+1), _cparity(0),
 _ffType(formFactorType::BlattWeisskopf), _nCalls(calls),
-_normStyle(nS), _modified(1), _norm(1.0), _prefactor(1,0)
+_normStyle(nS), _modified(1), _prefactor(1,0)
 {
 
 }
@@ -43,7 +43,7 @@ AmpAbsDynamicalFunction::AmpAbsDynamicalFunction(const char *name,
 			_spin(spin), _m(m), _n(n), _parity(P), _cparity(C),
 			_nameMother(mother), _name1(particleA), _name2(particleB),
 			_mesonRadius(mesonR), _motherRadius(motherR), _ffType(type),
-			_nCalls(nCalls), _normStyle(nS), _norm(1.0), _modified(1),
+			_nCalls(nCalls), _normStyle(nS), _modified(1),
 			_wignerD(varIdB, spin), _prefactor(1,0)
 {
 	initialize();
@@ -65,7 +65,7 @@ AmpAbsDynamicalFunction::AmpAbsDynamicalFunction(const char *name,
 			_mesonRadius(std::make_shared<DoubleParameter>(name, 1.0)),
 			_motherRadius(std::make_shared<DoubleParameter>(name, 1.0)),
 			_ffType(type),
-			_nCalls(nCalls), _normStyle(nS), _norm(1.0), _modified(1),
+			_nCalls(nCalls), _normStyle(nS), _modified(1),
 			_wignerD(varIdB, spin), _prefactor(1,0)
 {
 	initialize();
@@ -81,7 +81,7 @@ std::string AmpAbsDynamicalFunction::to_str() const
 			<<" ffType="<<_ffType<<std::endl
 			<<" mother: "<<_nameMother
 			<<" particleA: "<<_name1<<" particleB: "<<_name2<<std::endl;
-	str<<" normStyle="<<_normStyle<< " norm="<<_norm
+	str<<" normStyle="<<_normStyle<< " norm="<<tmp_integral
 			<<" modified?"<<_modified<<std::endl;
 	str<<"Prefactor: "<<_prefactor<<std::endl;
 	str<<"Parameters:"<<std::endl;
@@ -570,7 +570,7 @@ double evalAmp(double* x, size_t dim, void* param)
 	return ( std::norm(res) ); //integrate over |F|^2
 }
 
-double AmpAbsDynamicalFunction::GetIntegral() const
+double AmpAbsDynamicalFunction::integral() const
 {
 	size_t dim=2;
 	double res=0.0, err=0.0;
@@ -604,18 +604,18 @@ double AmpAbsDynamicalFunction::GetIntegral() const
 
 	//check for NaN
 	if( res!=res )
-		throw std::runtime_error("AmpAbsDynamicalFunction::GetIntegral() |"
+		throw std::runtime_error("AmpAbsDynamicalFunction::integral() |"
 				"Result of resonance "+GetName()+" is NaN!");
 	//check for inf
 	if( std::isinf(res) )
-		throw std::runtime_error("AmpAbsDynamicalFunction::GetIntegral() |"
+		throw std::runtime_error("AmpAbsDynamicalFunction::integral() |"
 				"Result of resonance "+GetName()+" is inf!");
 	//check for zero
 	if( res == 0 )
-		throw std::runtime_error("AmpAbsDynamicalFunction::GetIntegral() |"
+		throw std::runtime_error("AmpAbsDynamicalFunction::integral() |"
 				"Result of resonance "+GetName()+" is zero!");
 
-	BOOST_LOG_TRIVIAL(debug)<<"AmpAbsDynamicalFunction::GetIntegral() | "
+	BOOST_LOG_TRIVIAL(debug)<<"AmpAbsDynamicalFunction::integral() | "
 			"Integration result for |"<<_name<<"|^2: "
 			<<res<<"+-"<<err<<" relAcc [%]: "<<100*err/res;
 
@@ -624,26 +624,30 @@ double AmpAbsDynamicalFunction::GetIntegral() const
 
 double AmpAbsDynamicalFunction::GetNormalization()
 {
-	if(_norm<0) return 1.0; //normalization is disabled
-	//	return _norm; //disable recalculation of normalization
-	if(!_modified) return _norm;
-	_norm = 1/sqrt(GetIntegral());
+	if( _normStyle == normStyle::none ) return 1.0;
+	double norm = 1/sqrt(GetIntegral());
 
 	//check for NaN
-	if( _norm!=_norm )
+	if( norm!=norm )
 		throw std::runtime_error("AmpAbsDynamicalFunction::GetNormalization() |"
 				"Result of resonance "+GetName()+" is NaN!");
 	//check for inf
-	if( std::isinf(_norm) )
+	if( std::isinf(norm) )
 		throw std::runtime_error("AmpAbsDynamicalFunction::GetNormalization() |"
 				"Result of resonance "+GetName()+" is inf!");
 	//check for zero
-	if( _norm == 0 )
+	if( norm == 0 )
 		throw std::runtime_error("AmpAbsDynamicalFunction::GetNormalization() |"
 				"Result of resonance "+GetName()+" is zero!");
 
-	_modified=0;
-	return _norm;
+	return norm;
+}
+
+double AmpAbsDynamicalFunction::GetTotalIntegral() const
+{
+	//TODO: add test case to assure that the integral is one
+	if( _normStyle ==  normStyle::one ) return 1.0;
+	return totalIntegral();
 }
 
 double eval(double* x, size_t dim, void* param)
@@ -676,7 +680,7 @@ double eval(double* x, size_t dim, void* param)
 	return ( std::norm(res*ang*norm) ); //integrate over |F|^2
 }
 
-double AmpAbsDynamicalFunction::GetTotalIntegral() const
+double AmpAbsDynamicalFunction::totalIntegral() const
 {
 	//Save CPU time
 	return 1;
@@ -705,15 +709,15 @@ double AmpAbsDynamicalFunction::GetTotalIntegral() const
 
 	//check for NaN
 	if( res!=res )
-		throw std::runtime_error("AmpAbsDynamicalFunction::GetTotalIntegral() |"
+		throw std::runtime_error("AmpAbsDynamicalFunction::totalIntegral() |"
 				"Result of resonance "+GetName()+" is NaN!");
 	//check for inf
 	if( std::isinf(res) )
-		throw std::runtime_error("AmpAbsDynamicalFunction::GetTotalIntegral() |"
+		throw std::runtime_error("AmpAbsDynamicalFunction::totalIntegral() |"
 				"Result of resonance "+GetName()+" is inf!");
 	//check for zero
 	if( res == 0 )
-		throw std::runtime_error("AmpAbsDynamicalFunction::GetTotalIntegral() |"
+		throw std::runtime_error("AmpAbsDynamicalFunction::totalIntegral() |"
 				"Result of resonance "+GetName()+" is zero!");
 
 	return res;

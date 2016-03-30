@@ -83,8 +83,10 @@ public:
 	virtual double EvaluateWignerD(dataPoint& point) {
 		return _wignerD.evaluate(point);
 	};
+
 	//! Calculation integral |dynamical amplitude|^2
-	virtual double GetIntegral() const;
+	//	virtual double GetIntegral() const;
+
 	/** Calculation integral |c * dynamical amplitude * WignerD|^2
 	 * Used to check the correct normalization of the amplitude. Should always be 1.
 	 * @return
@@ -95,8 +97,7 @@ public:
 	 * In case that resonance parameters has change, it is recalculated.
 	 */
 	virtual double GetNormalization();
-	//! Set normalization manually. Setting to values <0 disables normalization
-	virtual void SetNormalization(double n){ _norm=n; };
+
 	//! Set normalization style
 	virtual void SetNormalizationStyle(normStyle n){ _normStyle=n; };
 	//! Get normalization style
@@ -200,17 +201,29 @@ protected:
 	virtual void put(boost::property_tree::ptree &pt);
 
 	void initialize();
+
+	//! Calculation integral |dynamical amplitude|^2
+	virtual double integral() const;
+
+	/** Calculation integral |c * dynamical amplitude * WignerD|^2
+	 * Used to check the correct normalization of the amplitude. Should always be 1.
+	 * @return
+	 */
+	virtual double totalIntegral() const;
+
 	//! Name of resonance
 	std::string _name;
 	//! enable/disable resonance
 	bool _enable;
 
+	//! Resonance shape was modified (recalculate the normalization)
+	bool _modified;
+
+	//! Integral value (temporary)
+	double tmp_integral;
+
 	//! Precision of MC integration
 	int _nCalls;
-	//! Normalization
-	double _norm;
-	//! Is resonance shape modified -> we have to recalculate the normalization
-	bool _modified;
 
 	//! Pre factor
 	std::complex<double> _prefactor;

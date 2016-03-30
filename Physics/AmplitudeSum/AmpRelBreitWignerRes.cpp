@@ -127,11 +127,18 @@ void AmpRelBreitWignerRes::CheckModified() {
 	}
 	return;
 }
+double AmpRelBreitWignerRes::GetIntegral()
+{
+	CheckModified();
+	if(_modified){
+		tmp_integral = integral();
+		_modified=0;
+	}
+	return tmp_integral;
+}
 
 std::complex<double> AmpRelBreitWignerRes::EvaluateAmp(dataPoint& point)
 {
-	CheckModified(); //recalculate normalization ?
-
 	double mSq = point.getVal(_subSys);
 	std::complex<double> result;
 	try{

@@ -71,6 +71,9 @@ public:
 	//! Print resonance parameters
 	std::string to_str() const;
 
+	//! Calculation integral |dynamical amplitude|^2
+	virtual double GetIntegral();
+
 	//! Get resonance width
 	virtual double GetWidth() const {
 		return std::abs( couplingToWidth(_mass->GetValue(),_mass->GetValue(), _g1->GetValue(),

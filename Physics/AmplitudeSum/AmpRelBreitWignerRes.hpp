@@ -70,6 +70,9 @@ public:
 
 	std::string to_str() const;
 
+	//! Calculation integral |dynamical amplitude|^2
+	virtual double GetIntegral();
+
 	//! Get resonance width
 	double GetWidth() const { return _width->GetValue(); }
 	/** Breit-Wigner function

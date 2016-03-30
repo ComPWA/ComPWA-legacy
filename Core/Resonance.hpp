@@ -58,7 +58,10 @@ public:
 	virtual std::complex<double> GetPrefactor() const = 0;
 
 	//! Get total integral for resonance
-	virtual double GetIntegral() const = 0;
+	virtual double GetIntegral() = 0;
+
+	//! Get total integral for resonance
+	virtual double GetNormalization() = 0;
 
 	//! Get total integral for resonance
 	virtual double GetTotalIntegral() const = 0;

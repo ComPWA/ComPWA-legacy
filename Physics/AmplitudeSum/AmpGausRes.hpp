@@ -50,6 +50,9 @@ public:
 
 	~AmpGausRes();
 
+	//! Calculation integral |dynamical amplitude|^2
+	virtual double GetIntegral() { return integral(); }
+
 	//! Get resonance width
 	double GetWidth() const { return _width->GetValue(); }
 

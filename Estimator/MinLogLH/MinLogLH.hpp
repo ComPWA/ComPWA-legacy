@@ -150,7 +150,7 @@ public:
 	virtual void setUseFunctionTree(bool t);
 
 	//! Set scale of penalty term
-	virtual void setPenaltyScale(double sc);
+	virtual void setPenaltyScale(double sc, int ampID=0);
 
 	//! Get scale of penalty term
 	virtual double getPenaltyScale() { return _penaltyLambda; }
@@ -225,6 +225,7 @@ private:
 	double _phspAccSampleEff; //! Total efficiency of phsp with applied efficency
 
 	double _penaltyLambda; //! Scale of penalty term
+	int _penaltyAmpID; //! ID of amplitude that is used for penalty calc
 };
 
 #endif /* _MINLOGLHBKG_HPP */

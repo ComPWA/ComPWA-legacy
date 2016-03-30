@@ -57,16 +57,16 @@ void MinLogLH::Init()
 	if(sumFraction > 1.0)
 		throw std::runtime_error("MinLogLH::init() | Fractions sum larger 1.0!");
 
+	if(_fraction.size() == _ampVec.size()-1)
+		_fraction.push_back(1-sumFraction);
+
 	//check size
-	if(_fraction.size() > _ampVec.size() || _fraction.size() < _ampVec.size()-1 )
+	if( _fraction.size() != _ampVec.size() )
 		throw std::runtime_error("MinLogLH::init() | List of fractions "
 				"("+std::to_string(_fraction.size())+")"
 				" does not match with list of amplitudes"
 				"("+std::to_string(_ampVec.size())+")"
 				"!");
-
-	if(_fraction.size() == _ampVec.size()-1)
-		_fraction.push_back(1-sumFraction);
 
 	nEvts_ = _dataSample->getNEvents();
 	nPhsp_ = _phspSample->getNEvents();
@@ -188,7 +188,8 @@ void MinLogLH::setAmplitude(std::vector<std::shared_ptr<Amplitude> > ampVec,
 	return;
 }
 
-void MinLogLH::calcSumOfWeights(){
+void MinLogLH::calcSumOfWeights()
+{
 	_sumOfWeights=0;
 	for(unsigned int evt = nStartEvt_; evt<nUseEvt_+nStartEvt_; evt++){
 		Event ev(_dataSample->getEvent(evt));
@@ -199,7 +200,8 @@ void MinLogLH::calcSumOfWeights(){
 	return;
 }
 
-void MinLogLH::setUseFunctionTree(bool t) {
+void MinLogLH::setUseFunctionTree(bool t)
+{
 	if(t==0) _useFunctionTree=0;
 	else iniLHtree();
 }
@@ -281,17 +283,6 @@ void MinLogLH::iniLHtree()
 	return;
 }
 
-double MinLogLH::calcPenalty(){
-	if(_penaltyLambda<=0) return 0; //penalty term disabled
-	double magSum = 0;
-	auto it = _ampVec.at(0)->GetResonanceItrFirst();
-	for(; it != _ampVec.at(0)->GetResonanceItrLast(); ++it){
-		magSum += std::fabs( (*it)->GetMagnitude()) *
-				std::sqrt( (*it)->GetIntegral() );
-	}
-	return (_penaltyLambda*magSum);
-}
-
 double MinLogLH::controlParameter(ParameterList& minPar)
 {
 	double lh=0;
@@ -362,14 +353,36 @@ double MinLogLH::controlParameter(ParameterList& minPar)
 	return lh; //return -logLH
 }
 
-void MinLogLH::setPenaltyScale(double sc) {
+void MinLogLH::setPenaltyScale(double sc, int ampID)
+{
 	if(sc < 0){
 		BOOST_LOG_TRIVIAL(info) << "MinLogLH::setPenaltyScale | "
 				"Penalty scale cannot be negative!";
 		return;
 	}
-	BOOST_LOG_TRIVIAL(info) << "MinLogLH::setPenaltyScale | "
-			"Setting scale of penalty term to "<<sc;
+	if(ampID < 0 || ampID >= _ampVec.size())
+		BOOST_LOG_TRIVIAL(info) << "MinLogLH::setPenaltyScale | "
+				"Amplitude ID not valid!";
 
+	_penaltyAmpID = ampID;
 	_penaltyLambda = sc;
+
+	BOOST_LOG_TRIVIAL(info) << "MinLogLH::setPenaltyScale | "
+			"Setting scale of penalty term to "<<sc<<" for amplitude "<<ampID<<"!";
+}
+
+double MinLogLH::calcPenalty()
+{
+	if(_penaltyLambda<=0) return 0; //penalty term disabled
+	double magSum = 0;
+	auto it = _ampVec.at(_penaltyAmpID)->GetResonanceItrFirst();
+	for(; it != _ampVec.at(_penaltyAmpID)->GetResonanceItrLast(); ++it){
+//		magSum += std::fabs( (*it)->GetMagnitude()) *
+//				 1/(*it)->GetNormalization();
+		magSum += (
+				std::fabs( (*it)->GetMagnitude() ) *
+				std::sqrt( (*it)->GetTotalIntegral() )
+		);
+	}
+	return (_penaltyLambda*magSum);
 }

@@ -49,7 +49,8 @@ public:
 	}
 	//! value of WignerD amplitude at \param point
 	virtual double EvaluateWignerD(dataPoint& point) { return 1;} ;
-	//!Integral
+
+	//! Calculation integral |dynamical amplitude|^2
 	virtual double GetIntegral() {
 		return 1/sqrt(Kinematics::instance()->GetPhspVolume());
 	}

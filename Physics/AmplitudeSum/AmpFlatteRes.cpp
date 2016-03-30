@@ -41,12 +41,12 @@ AmpFlatteRes::AmpFlatteRes(const char *name,
 		std::shared_ptr<DoubleParameter> g3, std::string g3_idA, std::string g3_idB,
 		formFactorType type,
 		int nCalls, normStyle nS) :
-								AmpAbsDynamicalFunction(name, varIdA, varIdB,mag, phase, mass,
-										spin, m, n,	P, C, mother, particleA, particleB,
-										mesonRadius, motherRadius, type, nCalls, nS),
-										_g1(g1),
-										_g2(g2),_g2_idA(g2_idA), _g2_idB(g2_idB),
-										_g3(g3),_g3_idA(g3_idA), _g3_idB(g3_idB)
+										AmpAbsDynamicalFunction(name, varIdA, varIdB,mag, phase, mass,
+												spin, m, n,	P, C, mother, particleA, particleB,
+												mesonRadius, motherRadius, type, nCalls, nS),
+												_g1(g1),
+												_g2(g2),_g2_idA(g2_idA), _g2_idB(g2_idB),
+												_g3(g3),_g3_idA(g3_idA), _g3_idB(g3_idB)
 {
 
 
@@ -309,10 +309,19 @@ void AmpFlatteRes::CheckModified()
 	}
 	return;
 }
-std::complex<double> AmpFlatteRes::EvaluateAmp(dataPoint& point)
+
+double AmpFlatteRes::GetIntegral()
 {
 	CheckModified();
+	if(_modified){
+		tmp_integral = integral();
+		_modified=0;
+	}
+	return tmp_integral;
+}
 
+std::complex<double> AmpFlatteRes::EvaluateAmp(dataPoint& point)
+{
 	double mSq = point.getVal(_subSys);
 
 	std::complex<double> result;
@@ -392,7 +401,7 @@ std::complex<double> AmpFlatteRes::dynamicalFunction(double mSq, double mR,
 	//-- new approach - for spin 0 resonances in the imaginary part of the denominator the term qTerm
 	//is added, compared to the old formula
 	std::complex<double> denom = std::complex<double>( mR*mR - mSq,0)
-																									+ (-1.0)*i*sqrtS*(termA + termB + termC);
+																											+ (-1.0)*i*sqrtS*(termA + termB + termC);
 
 	std::complex<double> result = std::complex<double>(gA*g_production,0) / denom;
 
