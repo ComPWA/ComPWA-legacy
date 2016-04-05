@@ -67,6 +67,13 @@ std::shared_ptr<FunctionTree> NonResonant::SetupTree(
 	std::shared_ptr<SquareRoot> sqRootStrat(new SquareRoot(ParType::DOUBLE));
 
 	newTree->createHead("Reso_"+_name, mmultStrat, sampleSize);
+
+	newTree->createNode("PreFactor_"+_name, complStrat, "Reso_"+_name);
+	newTree->createLeaf(
+			"IntensPre_"+_name, std::abs(_prefactor), "PreFactor_"+_name);
+	newTree->createLeaf(
+			"PhasePre_"+_name, std::arg(_prefactor), "PreFactor_"+_name);
+
 	newTree->createNode("C_"+_name, complStrat, "Reso_"+_name); //c=r*exp(phi)
 	newTree->createLeaf("Intens_"+_name, _mag, "C_"+_name); //r
 	newTree->createLeaf("Phase_"+_name, _phase, "C_"+_name); //phi
@@ -80,17 +87,19 @@ std::shared_ptr<FunctionTree> NonResonant::SetupTree(
 	if(_normStyle==normStyle::none){
 		newTree->createLeaf("N_"+_name, 1., "Reso_"+_name);
 	}else{
-		newTree->createNode("N_"+_name, sqRootStrat, "Reso_"+_name);
-		newTree->createNode("NSq_"+_name, multDStrat, "N_"+_name);
-		newTree->createLeaf("PhspSize_"+_name, toySampleSize, "NSq_"+_name);
-		newTree->createLeaf("PhspVolume_"+_name, 1/phspVol, "NSq_"+_name);
-		newTree->createNode("InvSum_"+_name, invStrat, "NSq_"+_name);
-		newTree->createNode("Sum_"+_name, addStrat, "InvSum_"+_name);
-		newTree->createNode("AbsVal_"+_name, msqStrat, "Sum_"+_name);
-		std::shared_ptr<MultiComplex> unitVec2(
-				new MultiComplex("unit",std::vector<std::complex<double> >(
-						toySampleSize, std::complex<double>(1,0))) );
-		newTree->createLeaf("NormNonRes_"+_name, unitVec2, "AbsVal_"+_name);
+		newTree->createLeaf("N_"+_name, 1/std::sqrt(phspVol), "Reso_"+_name);
+//		newTree->createLeaf("N_"+_name, 1/phspVol, "Reso_"+_name);
+//		newTree->createNode("N_"+_name, sqRootStrat, "Reso_"+_name);
+//		newTree->createNode("NSq_"+_name, multDStrat, "N_"+_name);
+//		newTree->createLeaf("PhspSize_"+_name, toySampleSize, "NSq_"+_name);
+//		newTree->createLeaf("PhspVolume_"+_name, 1/phspVol, "NSq_"+_name);
+//		newTree->createNode("InvSum_"+_name, invStrat, "NSq_"+_name);
+//		newTree->createNode("Sum_"+_name, addStrat, "InvSum_"+_name);
+//		newTree->createNode("AbsVal_"+_name, msqStrat, "Sum_"+_name);
+//		std::shared_ptr<MultiComplex> unitVec2(
+//				new MultiComplex("unit",std::vector<std::complex<double> >(
+//						toySampleSize, std::complex<double>(1,0))) );
+//		newTree->createLeaf("NormNonRes_"+_name, unitVec2, "AbsVal_"+_name);
 	}
 	return newTree;
 }

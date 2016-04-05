@@ -81,7 +81,7 @@ std::string AmpAbsDynamicalFunction::to_str() const
 			<<" ffType="<<_ffType<<std::endl
 			<<" mother: "<<_nameMother
 			<<" particleA: "<<_name1<<" particleB: "<<_name2<<std::endl;
-	str<<" normStyle="<<_normStyle<< " norm="<<tmp_integral
+	str<<" normStyle="<<_normStyle
 			<<" modified?"<<_modified<<std::endl;
 	str<<"Prefactor: "<<_prefactor<<std::endl;
 	str<<"Parameters:"<<std::endl;
@@ -534,9 +534,10 @@ std::complex<double> AmpAbsDynamicalFunction::Evaluate(dataPoint& point)
 
 double evalAmp(double* x, size_t dim, void* param)
 {
-	/* We need a wrapper here because a eval() is a member function of AmpAbsDynamicalFunction
-	 * and can therefore not be referenced. But gsl_monte_function expects a function reference.
-	 * As third parameter we pass the reference to the current instance of AmpAbsDynamicalFunction
+	/* We need a wrapper here because a eval() is a member function of
+	 * AmpAbsDynamicalFunction and can therefore not be referenced. But
+	 * gsl_monte_function expects a function reference. As third parameter
+	 * we pass the reference to the current instance of AmpAbsDynamicalFunction
 	 */
 	if(dim!=2) return 0;
 

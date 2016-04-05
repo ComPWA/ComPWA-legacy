@@ -52,7 +52,7 @@ public:
 
 	//! Calculation integral |dynamical amplitude|^2
 	virtual double GetIntegral() {
-		return 1/sqrt(Kinematics::instance()->GetPhspVolume());
+		return Kinematics::instance()->GetPhspVolume();
 	}
 
 	static std::complex<double> dynamicalFunction();
