@@ -78,12 +78,10 @@ std::string AmpAbsDynamicalFunction::to_str() const
 			<< " nCalls="<<_nCalls
 			<< " varId1="<<GetVarIdA()<<" varId2="<<GetVarIdB()<<std::endl
 			<<" J="<<_spin<<" P="<<_parity<<" C="<<_cparity
-			<<" ffType="<<_ffType<<std::endl
-			<<" mother: "<<_nameMother
+			<<" ffType="<<_ffType <<" mother: "<<_nameMother
 			<<" particleA: "<<_name1<<" particleB: "<<_name2<<std::endl;
-	str<<" normStyle="<<_normStyle
-			<<" modified?"<<_modified<<std::endl;
-	str<<"Prefactor: "<<_prefactor<<std::endl;
+	str<<" normStyle="<<_normStyle <<" modified?"<<_modified
+			<<" Prefactor="<<_prefactor<<std::endl;
 	str<<"Parameters:"<<std::endl;
 	str<<_mag->to_str()<<std::endl;
 	str<<_phase->to_str()<<std::endl;
@@ -523,11 +521,11 @@ std::complex<double> AmpAbsDynamicalFunction::Evaluate(dataPoint& point)
 	//check for NaN
 	if( res.real()!=res.real() || res.imag() != res.imag() )
 		throw std::runtime_error("AmpAbsDynamicalFunction::Evaluate() | Result of"
-				"resonance "+GetName()+" is NaN!");
+				" resonance "+GetName()+" is NaN!");
 	//check for inf
 	if( std::isinf(res.real()) || std::isinf(res.imag()) )
 		throw std::runtime_error("AmpAbsDynamicalFunction::Evaluate() | Result of"
-				"resonance "+GetName()+" is inf!");
+				" resonance "+GetName()+" is inf!");
 
 	return res;
 }
