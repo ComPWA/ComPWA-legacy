@@ -17,7 +17,7 @@
 
 MinuitResult::MinuitResult(std::shared_ptr<ControlParameter> esti,
 		FunctionMinimum result) :
-			useCorrelatedErrors(0), calcInterference(0)
+			useCorrelatedErrors(0), calcInterference(0),
 			correlatedErrors_numberOfSets(200)
 {
 	std::shared_ptr<Estimator> est = std::static_pointer_cast<Estimator>(esti);
@@ -84,11 +84,7 @@ void MinuitResult::init(FunctionMinimum min){
 	errorDef = min.Up();
 	nFcn = min.NFcn();
 
-	//	Amplitude::FillAmpParameterToList(_ampVec, finalParameters);
-
-	if( Amplitude::AmpHasTree(_ampVec) ) setUseTree(1);
 	return;
-
 }
 
 void MinuitResult::genSimpleOutput(std::ostream& out){
