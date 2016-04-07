@@ -53,43 +53,56 @@ using namespace ROOT::Minuit2;
 class MinuitResult : public FitResult
 {
 public:
+	//Default constructor
 	MinuitResult() {};
+
+	//Constructor
 	MinuitResult(std::shared_ptr<ControlParameter> esti, FunctionMinimum result);
-	void setResult(std::shared_ptr<ControlParameter> esti,FunctionMinimum result);
+
+	void setResult(std::shared_ptr<ControlParameter> esti, FunctionMinimum result);
+
 	void setInitialLH(double iniLH){ initialLH = iniLH; }
+
 	//! Convert to double and return final LH values
-	operator double() const { return finalLH; };
+	operator double() const { return finalLH; }
+
 	//! Return final likelihood value
-	double getResult(){return finalLH;}
+	double getResult(){ return finalLH; }
+
 	//! Enable correct error estimation for fit fractions. Very time consuming!
 	void setUseCorrelatedErrors(bool s, int nSets=200);
-	//! Use tree for calculation of fit fractions
-	void setUseTree(bool s);
+
 	//! Set calculation of interference terms
 	void setCalcInterference(bool b) { calcInterference = b; }
+
 	//! Write list of fit parameters and list of fitfractions to XML file @filename
 	virtual void writeXML(std::string filename);
+
 	//! Write fit parameters, fit fractions and cov matrix as TeX to file @filename
 	virtual void writeTeX(std::string filename);
+
 	//! Any errors during minimization?
 	virtual bool hasFailed();
+
 	//! Initialize result with Minuit2::FunctionMinimum
 	void init(FunctionMinimum);
 
 protected:
 	//! Calculate interference terms
 	bool calcInterference;
+
 	//! Should we calcualte fit fraction errors accurately?
 	bool useCorrelatedErrors;
-	//! calculate fractions using tree (if available)
-	bool useTree;
+
 	//! number of resonances in amplitude
 	unsigned int nRes;
 
 	//! Number of floating parameters
 	int nFreeParameter;
+
 	//! Number of events
 	int nEvents;
+
 	//====== MINUIT FIT RESULT =======
 	bool isValid; //result valid
 	bool covPosDef; //covariance matrix pos.-def.
@@ -115,13 +128,17 @@ protected:
 	//====== OUTPUT =====
 	//! Simplified fit result output
 	void genSimpleOutput(std::ostream& out);
+
 	//! Full fit result output
 	void genOutput(std::ostream& out,std::string opt="");
+
 	//! Create table with interference terms for each amplitude
 	void createInterferenceTable(std::ostream& out,
 			std::shared_ptr<Amplitude> amp);
+
 	//! Table with correlation matrix
 	void printCorrelationMatrix(TableFormater* fracTable);
+
 	//! Table with covariance matrix
 	void printCovarianceMatrix(TableFormater* fracTable);
 
@@ -137,14 +154,16 @@ protected:
 	 * @param fracError result with errors
 	 */
 	virtual void calcFractionError();
+
 	//! Number of parameter sets that are used to propagate the cov matrix through the normalization
 	unsigned int correlatedErrors_numberOfSets;
-	//! Smear ParameterList with a multidimensional gaussian and the cov matrix from the fit
-	//void smearParameterList(const gsl_rng *rnd, ParameterList&);
+
 	//! Calculate information criterion AIC
 	double calcAIC();
+
 	//! Calculate information criterion BIC
 	double calcBIC();
+
 private:
 	friend class boost::serialization::access;
 	template<class archive>
@@ -154,7 +173,6 @@ private:
 		ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(FitResult);
 		ar & BOOST_SERIALIZATION_NVP(calcInterference);
 		ar & BOOST_SERIALIZATION_NVP(useCorrelatedErrors);
-		ar & BOOST_SERIALIZATION_NVP(useTree);
 		ar & BOOST_SERIALIZATION_NVP(nRes);
 		ar & BOOST_SERIALIZATION_NVP(isValid);
 		ar & BOOST_SERIALIZATION_NVP(covPosDef);

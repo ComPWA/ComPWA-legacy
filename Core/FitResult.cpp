@@ -188,9 +188,22 @@ void FitResult::calcFraction()
 				"Fractions already calculated. Skip!";
 }
 
+resonanceItr findResonancePartner(std::shared_ptr<Amplitude> amp, resonanceItr res)
+{
+	auto name = (*res)->GetName();
+	auto it = amp->GetResonanceItrFirst();
+	for( ; it != amp->GetResonanceItrLast(); ++it){ //fill matrix
+		if( it == res ) continue;
+		auto name2 = (*it)->GetName();
+		if(name2.find(name) != std::string::npos) return it;
+	}
+	return res;
+
+}
+
 void FitResult::calcFraction(ParameterList& parList, std::shared_ptr<Amplitude> amp)
 {
-	double norm;
+	double norm = 1.0;
 	std::string ampName = amp->GetName();
 
 	/* Unbinned efficiency correction in the FunctionTree does not provide
@@ -210,7 +223,23 @@ void FitResult::calcFraction(ParameterList& parList, std::shared_ptr<Amplitude> 
 	//Start loop over resonances
 	auto it = amp->GetResonanceItrFirst();
 	for( ; it != amp->GetResonanceItrLast(); ++it){ //fill matrix
-		double resInt = (*it)->GetTotalIntegral();
+		//double resInt = (*it)->GetTotalIntegral();
+
+		// We search for a partner resonance and add it to the integral
+		auto it2 = findResonancePartner(amp, it);
+
+		// GetIntegralInterference returns the integal Int( A*B+B*A ),
+		// including the complex coefficienct
+		double nom = amp->GetIntegralInterference(it,it);
+		if( it != it2 ){// Int |A+B|^2 = |A|^2 + |B|^2 + A*B + B*A
+			nom += amp->GetIntegralInterference(it2,it2);
+			nom += amp->GetIntegralInterference(it,it2);
+			std::cout<<(*it)->GetName()<<" "<<(*it2)->GetName()<<" "
+					<<amp->GetIntegralInterference(it,it)
+					<<"+"<<amp->GetIntegralInterference(it2,it2)
+					<<"+"<<amp->GetIntegralInterference(it,it2)<<std::endl;
+		}
+
 		std::string resName = ampName+"_"+(*it)->GetName()+"_FF";
 		std::shared_ptr<DoubleParameter> magPar = (*it)->GetMagnitudePar();
 		double mag = magPar->GetValue(); //value of magnitude
@@ -222,14 +251,16 @@ void FitResult::calcFraction(ParameterList& parList, std::shared_ptr<Amplitude> 
 				std::shared_ptr<DoubleParameter>(
 						new DoubleParameter(
 								resName,
-								mag*mag*resInt/norm,
-								std::fabs(2*mag*resInt/norm * magError)
+//								mag*mag*resInt/norm,
+								nom/norm,
+								std::fabs(2*(nom/mag)/norm * magError)
 						)
 				)
 		);
 	}
 
 }
+
 
 void FitResult::calcFraction(ParameterList& parList)
 {

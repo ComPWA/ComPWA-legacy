@@ -645,7 +645,7 @@ double AmpAbsDynamicalFunction::GetNormalization()
 double AmpAbsDynamicalFunction::GetTotalIntegral() const
 {
 	//TODO: add test case to assure that the integral is one
-	if( _normStyle ==  normStyle::one ) return 1.0;
+	if( _normStyle ==  normStyle::one ) return std::norm(GetPrefactor());
 	return totalIntegral();
 }
 
@@ -673,17 +673,15 @@ double eval(double* x, size_t dim, void* param)
 	//	point.setVal(idA, x[0]);
 	//	point.setVal(idB, x[1]);
 
-	std::complex<double> res = amp->EvaluateAmp(point);
-	double ang = amp->EvaluateWignerD(point);
-	double norm = amp->GetNormalization();
-	return ( std::norm(res*ang*norm) ); //integrate over |F|^2
+//	std::complex<double> res = amp->EvaluateAmp(point);
+//	double ang = amp->EvaluateWignerD(point);
+//	double norm = amp->GetNormalization();
+//	return ( std::norm(res*ang*norm) ); //integrate over |F|^2
+	return ( std::norm(amp->Evaluate(point)/amp->GetCoefficient()) ); //integrate over |F|^2
 }
 
 double AmpAbsDynamicalFunction::totalIntegral() const
 {
-	//Save CPU time
-	return 1;
-
 	size_t dim=2;
 	double res=0.0, err=0.0;
 

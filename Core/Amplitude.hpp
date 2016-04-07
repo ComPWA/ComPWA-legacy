@@ -165,6 +165,7 @@ public:
 	 */
 	static bool AmpHasTree(std::vector<std::shared_ptr<Amplitude> > ampVec);
 
+	unsigned int GetMcPrecision() { return 30000;}
 
 protected:
 	//Name

@@ -17,7 +17,7 @@
 
 MinuitResult::MinuitResult(std::shared_ptr<ControlParameter> esti,
 		FunctionMinimum result) :
-			useCorrelatedErrors(0), calcInterference(0), useTree(0),
+			useCorrelatedErrors(0), calcInterference(0)
 			correlatedErrors_numberOfSets(200)
 {
 	std::shared_ptr<Estimator> est = std::static_pointer_cast<Estimator>(esti);
@@ -89,13 +89,6 @@ void MinuitResult::init(FunctionMinimum min){
 	if( Amplitude::AmpHasTree(_ampVec) ) setUseTree(1);
 	return;
 
-}
-
-void MinuitResult::setUseTree(bool s) {
-	if( !Amplitude::AmpHasTree(_ampVec) )
-		throw std::runtime_error(
-				"MinuitResult::setUseTree() | Amplitude(s) has no tree!");
-	useTree = s;
 }
 
 void MinuitResult::genSimpleOutput(std::ostream& out){

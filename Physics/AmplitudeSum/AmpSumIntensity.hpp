@@ -178,6 +178,11 @@ public:
 	resonanceItr tmpA;
 	resonanceItr tmpB;
 
+	unsigned int GetMcPrecision() { return _nCalls;}
+
+	//! Integral
+	static double integral(const Amplitude* amp, bool eff, int nCalls=30000);
+
 protected:
 	//! Maximum value of amplitude. Necessary for event generation.
 	double _maxFcnVal;
@@ -193,11 +198,6 @@ protected:
 	normStyle _normStyle;
 	//! precision for numeric integration
 	unsigned int _nCalls;
-
-	//! normalization integral (doesn't include calculated efficiency)
-	virtual const double normalization();
-	//! normalization integral (includes calculated efficiency)
-	virtual const double integral();
 
 	//---------- related to FunctionTree -------------
 	/**Setup Basic Tree
