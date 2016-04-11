@@ -725,8 +725,8 @@ double AmpSumIntensity::averageWidth()
 
 void AmpSumIntensity::SetPrefactor(std::complex<double> pre)
 {
-	BOOST_LOG_TRIVIAL(info) <<"AmpSumIntensity::SetPrefector() | "
-			"Setting prefactor "<<pre<<" for all resonance of ampltidude "
+	BOOST_LOG_TRIVIAL(info) <<"AmpSumIntensity::SetPreFactor() | "
+			"Setting prefactor "<<pre<<" for all resonance of amplitude "
 			<<GetName()<<"!";
 
 	auto it=resoList.begin();

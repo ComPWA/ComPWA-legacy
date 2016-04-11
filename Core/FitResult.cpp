@@ -143,6 +143,7 @@ void FitResult::printFitFractions(TableFormater* tab)
 {
 	BOOST_LOG_TRIVIAL(info) << " FitResult::printFitFractions() | "
 			"Calculating fit fractions!";
+	std::cout<<_ampVec.size()<<std::endl;
 	auto itrAmp = _ampVec.begin();
 	for( ; itrAmp!=_ampVec.end(); ++itrAmp){
 		printFitFractions(tab, (*itrAmp));
@@ -158,14 +159,22 @@ void FitResult::printFitFractions(TableFormater* fracTable,
 
 	fracTable->Reset();
 
+	std::string ampName = amp->GetName();
 	//print matrix
-	fracTable->addColumn("Resonance",25);//add empty first column
+	fracTable->addColumn("Resonance: "+ampName,40);//add empty first column
 	fracTable->addColumn("Fraction",15);//add empty first column
 	fracTable->addColumn("Error",15);//add empty first column
 	fracTable->header();
 	for(unsigned int i=0;i<ffList.GetNDouble(); ++i){
 		std::shared_ptr<DoubleParameter> tmpPar = ffList.GetDoubleParameter(i);
-		*fracTable << tmpPar->GetName()
+		std::string resName = tmpPar->GetName();
+
+		//Remove amplitude name from string
+		std::string::size_type strPos = resName.find(ampName);
+		if (strPos != std::string::npos)
+			resName.erase(strPos, ampName.length());
+
+		*fracTable << resName
 			<< tmpPar->GetValue()
 			<< tmpPar->GetError(); //assume symmetric errors here
 		sum += tmpPar->GetValue();
@@ -232,15 +241,21 @@ void FitResult::calcFraction(ParameterList& parList, std::shared_ptr<Amplitude> 
 		// including the complex coefficienct
 		double nom = amp->GetIntegralInterference(it,it);
 		if( it != it2 ){// Int |A+B|^2 = |A|^2 + |B|^2 + A*B + B*A
-			nom += amp->GetIntegralInterference(it2,it2);
-			nom += amp->GetIntegralInterference(it,it2);
-			std::cout<<(*it)->GetName()<<" "<<(*it2)->GetName()<<" "
-					<<amp->GetIntegralInterference(it,it)
-					<<"+"<<amp->GetIntegralInterference(it2,it2)
-					<<"+"<<amp->GetIntegralInterference(it,it2)<<std::endl;
+			double tmp22 = amp->GetIntegralInterference(it2,it2);
+			double tmp12 = amp->GetIntegralInterference(it,it2);
+			BOOST_LOG_TRIVIAL(debug) << "FitResult::calcFraction() | Calculating"
+					<<" amplitude integral for composed amplitudes "
+					<<(*it)->GetName()<<" and "<<(*it2)->GetName()<<": "
+					<<"(11) "<<nom <<" (22) "<<tmp22 <<" (12) "<<tmp12
+					<<" Total: "<<nom+tmp22+tmp12;
+			nom += tmp22;
+			nom += tmp12;
+		} else {
+			BOOST_LOG_TRIVIAL(debug) << "FitResult::calcFraction() | Resonance "
+					"integal for "<<(*it)->GetName()<<": "<<nom;
 		}
 
-		std::string resName = ampName+"_"+(*it)->GetName()+"_FF";
+		std::string resName = ampName+" "+(*it)->GetName()+"_FF";
 		std::shared_ptr<DoubleParameter> magPar = (*it)->GetMagnitudePar();
 		double mag = magPar->GetValue(); //value of magnitude
 		double magError = 0;
