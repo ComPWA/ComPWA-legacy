@@ -361,18 +361,21 @@ double DalitzKinematics::helicityAngle(double M, double m, double m2, double mSp
 	double pSpecCms = eSpecCms*eSpecCms - mSpec*mSpec;
 	double cosAngle = -( invMassSqB - m*m - mSpec*mSpec - 2*eCms*eSpecCms )/( 2*sqrt(pCms*pSpecCms) );
 
-	if( cosAngle>1 || cosAngle<-1 ){
+	//	if( cosAngle>1 || cosAngle<-1 ){
+	//		throw BeyondPhsp("DalitzKinematics::helicityAngle() | "
+	//				"scattering angle out of range! Datapoint beyond phsp? angle="
+	//				+std::to_string((long double) cosAngle)
+	//		+" M="+std::to_string((long double) M)
+	//		+" m="+std::to_string((long double) m)
+	//		+" m2="+std::to_string((long double) m2)
+	//		+" mSpec="+std::to_string((long double) mSpec)
+	//		+" mSqA="+std::to_string((long double) invMassSqA)
+	//		+" mSqB="+std::to_string((long double) invMassSqB) );
+	//	}
+	if( cosAngle>1 || cosAngle<-1 ){ //faster
 		throw BeyondPhsp("DalitzKinematics::helicityAngle() | "
-				"scattering angle out of range! Datapoint beyond phsp? angle="
-				+std::to_string((long double) cosAngle)
-		+" M="+std::to_string((long double) M)
-		+" m="+std::to_string((long double) m)
-		+" m2="+std::to_string((long double) m2)
-		+" mSpec="+std::to_string((long double) mSpec)
-		+" mSqA="+std::to_string((long double) invMassSqA)
-		+" mSqB="+std::to_string((long double) invMassSqB) );
+				"scattering angle out of range! Datapoint beyond phsp?");
 	}
-
 	return cosAngle;
 }
 

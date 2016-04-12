@@ -416,8 +416,14 @@ std::complex<double> AmpFlatteRes::dynamicalFunction(double mSq, double mR,
 std::shared_ptr<FunctionTree> AmpFlatteRes::SetupTree(
 		ParameterList& sample, ParameterList& toySample,std::string suffix)
 {
-	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
+	DalitzKinematics* kin =
+			dynamic_cast<DalitzKinematics*>(Kinematics::instance());
+//	auto var1_limit = kin->GetMinMax( GetVarIdA() );
+//	auto var2_limit = kin->GetMinMax( GetVarIdB() );
+//	double phspVol = (var1_limit.second-var1_limit.first)
+//			*(var2_limit.second-var2_limit.first);
 	double phspVol = kin->GetPhspVolume();
+//	double phspVol=1;
 
 	int sampleSize = sample.GetMultiDouble(0)->GetNValues();
 	int toySampleSize = toySample.GetMultiDouble(0)->GetNValues();

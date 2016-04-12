@@ -548,12 +548,12 @@ double evalAmp(double* x, size_t dim, void* param)
 		return 0;
 	}
 
-	//	int idA = amp->GetVarIdA();
-	//	int idB = amp->GetVarIdB();
-	//	if( !Kinematics::instance()->IsWithinBoxPhsp(idA, idB, x[0], x[1]) )
-	//		return 0;
-	//	point.setVal(idA, x[0]);
-	//	point.setVal(idB, x[1]);
+//		int idA = amp->GetVarIdA();
+//		int idB = amp->GetVarIdB();
+//		if( !Kinematics::instance()->IsWithinBoxPhsp(idA, idB, x[0], x[1]) )
+//			return 0;
+//		point.setVal(idA, x[0]);
+//		point.setVal(idB, x[1]);
 
 	std::complex<double> res(0,0);
 	try{
@@ -577,10 +577,14 @@ double AmpAbsDynamicalFunction::integral() const
 	DalitzKinematics* kin =
 			dynamic_cast<DalitzKinematics*>(Kinematics::instance());
 
-	//	auto var1_limit = kin->GetMinMax( GetVarIdA() );
-	//	auto var2_limit = kin->GetMinMax( GetVarIdB() );
+//	auto var1_limit = kin->GetMinMax( GetVarIdA() );
+//	auto var2_limit = kin->GetMinMax( GetVarIdB() );
+//	double vol = (var1_limit.second-var1_limit.first)
+//			*(var2_limit.second-var2_limit.first);
 	auto var1_limit = kin->GetMinMax( 0 );
 	auto var2_limit = kin->GetMinMax( 1 );
+//	double vol = kin->GetPhspVolume();
+	double vol = 1.0;
 	double xLimit_low[2] = {var1_limit.first,var2_limit.first};
 	double xLimit_high[2] = {var1_limit.second,var2_limit.second};
 
@@ -618,7 +622,7 @@ double AmpAbsDynamicalFunction::integral() const
 			"Integration result for |"<<_name<<"|^2: "
 			<<res<<"+-"<<err<<" relAcc [%]: "<<100*err/res;
 
-	return res;
+	return res/vol;
 }
 
 double AmpAbsDynamicalFunction::GetNormalization()

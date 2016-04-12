@@ -232,7 +232,7 @@ void FitResult::calcFraction(ParameterList& parList, std::shared_ptr<Amplitude> 
 	//Start loop over resonances
 	auto it = amp->GetResonanceItrFirst();
 	for( ; it != amp->GetResonanceItrLast(); ++it){ //fill matrix
-		//double resInt = (*it)->GetTotalIntegral();
+		if( (*it)->GetName().find("_CP")!=std::string::npos ) continue;
 
 		// We search for a partner resonance and add it to the integral
 		auto it2 = findResonancePartner(amp, it);

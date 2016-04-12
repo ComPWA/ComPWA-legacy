@@ -84,8 +84,8 @@ void AmpRelBreitWignerRes::Configure(
 		} catch (BadParameter& ex){
 			BOOST_LOG_TRIVIAL(error) <<"AmpRelBreitWignerRes::Configure() | "
 					"Requesting parameter "<<tmp_width_name.get()<<" but"
-							" was not found in parameter list. "
-							"Quit since parameter is mandatory!";
+					" was not found in parameter list. "
+					"Quit since parameter is mandatory!";
 			throw;
 		}
 	}
@@ -142,8 +142,16 @@ std::complex<double> AmpRelBreitWignerRes::EvaluateAmp(dataPoint& point)
 	double mSq = point.getVal(_subSys);
 	std::complex<double> result;
 	try{
-		result = dynamicalFunction(mSq,_mass->GetValue(),_mass1,_mass2,_width->GetValue(),_spin,
-			_mesonRadius->GetValue(), _ffType);
+		result = dynamicalFunction(
+				mSq,
+				_mass->GetValue(),
+				_mass1,
+				_mass2,
+				_width->GetValue(),
+				_spin,
+				_mesonRadius->GetValue(),
+				_ffType
+		);
 	} catch (std::exception& ex){
 		BOOST_LOG_TRIVIAL(error) <<"AmpRelBreitWignerRes::EvaluateAmp() | "
 				"Dynamical function can not be evalutated: "<<ex.what();
@@ -165,12 +173,12 @@ std::complex<double> AmpRelBreitWignerRes::dynamicalFunction(double mSq, double 
 	std::complex<double> qTerm = std::pow(
 			(Kinematics::phspFactor(sqrtS,ma,mb) / Kinematics::phspFactor(mR,ma,mb)) *mR/sqrtS,
 			(2*J+ 1)
-			);
+	);
 
 	//Calculate coupling constant to final state
 	std::complex<double> g_final = widthToCoupling(
 			mSq,mR,width,ma,mb,J,mesonRadius,ffType
-			);
+	);
 
 	/*Coupling constant from production reaction. In case of a particle decay
 	 * the production coupling doesn't depend in energy since the CM energy
@@ -192,10 +200,17 @@ std::complex<double> AmpRelBreitWignerRes::dynamicalFunction(double mSq, double 
 }
 
 std::shared_ptr<FunctionTree> AmpRelBreitWignerRes::SetupTree(
-			ParameterList& sample, ParameterList& toySample,std::string suffix)
+		ParameterList& sample, ParameterList& toySample,std::string suffix)
 {
-	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
+	DalitzKinematics* kin =
+			dynamic_cast<DalitzKinematics*>(Kinematics::instance());
+//	auto var1_limit = kin->GetMinMax( GetVarIdA() );
+//	auto var2_limit = kin->GetMinMax( GetVarIdB() );
+//	double phspVol = (var1_limit.second-var1_limit.first)
+//			*(var2_limit.second-var2_limit.first);
 	double phspVol = kin->GetPhspVolume();
+//	double phspVol = 1;
+
 	int sampleSize = sample.GetMultiDouble(0)->GetNValues();
 	int toySampleSize = toySample.GetMultiDouble(0)->GetNValues();
 
@@ -266,7 +281,7 @@ std::shared_ptr<FunctionTree> AmpRelBreitWignerRes::SetupTree(
 		//Angular distribution (Normalization)
 		if( _spin )
 			newTree->insertTree(_wignerD.SetupTree(toySample,suffix),
-				"NormReso_"+_name);
+					"NormReso_"+_name);
 		//Breit-Wigner (Normalization)
 		newTree->createNode("NormBW_"+_name, rbwStrat, "NormReso_"+_name,
 				toySampleSize); //BW
@@ -324,9 +339,9 @@ bool BreitWignerStrategy::execute(ParameterList& paras,
 	ma = paras.GetDoubleParameter(5)->GetValue();
 	mb = paras.GetDoubleParameter(6)->GetValue();
 
-//	BOOST_LOG_TRIVIAL(debug) << "BreitWignerStrategy::execute() | mR="<<m0
-//			<<" Gamma="<<Gamma0<<" spin="<<spin<<" radius="<<d<<" ffType="<<ffType
-//			<<" subSys="<<subSys<<" ma="<<ma<<" mb="<<mb;
+	//	BOOST_LOG_TRIVIAL(debug) << "BreitWignerStrategy::execute() | mR="<<m0
+	//			<<" Gamma="<<Gamma0<<" spin="<<spin<<" radius="<<d<<" ffType="<<ffType
+	//			<<" subSys="<<subSys<<" ma="<<ma<<" mb="<<mb;
 
 	//MultiDim output, must have multidim Paras in input
 	if(checkType == ParType::MCOMPLEX){
@@ -351,8 +366,8 @@ bool BreitWignerStrategy::execute(ParameterList& paras,
 		}
 		out = std::shared_ptr<AbsParameter>(
 				new MultiComplex(out->GetName(),results));
-//		BOOST_LOG_TRIVIAL(debug) <<"BreitWignerStrategy::execute() | "
-//				"finished!";
+		//		BOOST_LOG_TRIVIAL(debug) <<"BreitWignerStrategy::execute() | "
+		//				"finished!";
 		return true;
 	}//end multicomplex output
 
@@ -372,6 +387,6 @@ bool BreitWignerStrategy::execute(ParameterList& paras,
 	}
 	out = std::shared_ptr<AbsParameter>(
 			new ComplexParameter(out->GetName(), result));
-//	BOOST_LOG_TRIVIAL(debug) <<"BreitWignerStrategy::execute() | finished!";
+	//	BOOST_LOG_TRIVIAL(debug) <<"BreitWignerStrategy::execute() | finished!";
 	return true;
 }
