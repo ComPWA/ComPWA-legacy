@@ -82,10 +82,12 @@ void DecayConfiguration::setRemainingParticleProperties(
       particle.pid_information_.particle_id_ = physics_constants.findParticle(
           particle.pid_information_.name_).id_;
     }
-    if (particle.spin_information_
-        != physics_constants.findParticle(particle.pid_information_.name_).spin_) {
+    if (!particle.spin_information_.equalMagnitude(
+        physics_constants.findParticle(particle.pid_information_.name_).getSpinLikeQuantumNumber(
+            QuantumNumberIDs::SPIN))) {
       particle.spin_information_ = physics_constants.findParticle(
-          particle.pid_information_.name_).spin_;
+          particle.pid_information_.name_).getSpinLikeQuantumNumber(
+          QuantumNumberIDs::SPIN);
     }
   }
 }

@@ -20,6 +20,120 @@ using namespace boost::log;
 
 namespace ComPWA {
 
+QuantumNumberTranslator::QuantumNumberTranslator() {
+  quantum_number_key_name_mapping_[QuantumNumberIDs::SPIN] = "spin";
+  quantum_number_key_name_mapping_[QuantumNumberIDs::ORBITAL_ANGULAR_MOMENTUM] =
+      "angular-momentum";
+  quantum_number_key_name_mapping_[QuantumNumberIDs::ISOSPIN] = "isospin";
+  quantum_number_key_name_mapping_[QuantumNumberIDs::CHARGE] = "charge";
+  quantum_number_key_name_mapping_[QuantumNumberIDs::PARITY] = "parity";
+  quantum_number_key_name_mapping_[QuantumNumberIDs::CPARITY] = "cparity";
+
+  name_quantum_number_key_mapping_["spin"] = QuantumNumberIDs::SPIN;
+  name_quantum_number_key_mapping_["angular-momentum"] =
+      QuantumNumberIDs::ORBITAL_ANGULAR_MOMENTUM;
+  name_quantum_number_key_mapping_["isospin"] = QuantumNumberIDs::ISOSPIN;
+  name_quantum_number_key_mapping_["charge"] = QuantumNumberIDs::CHARGE;
+  name_quantum_number_key_mapping_["parity"] = QuantumNumberIDs::PARITY;
+  name_quantum_number_key_mapping_["cparity"] = QuantumNumberIDs::CPARITY;
+
+  quantum_number_key_type_mapping_[QuantumNumberIDs::SPIN] =
+      QuantumNumberType::SPIN_LIKE;
+  quantum_number_key_type_mapping_[QuantumNumberIDs::ORBITAL_ANGULAR_MOMENTUM] =
+      QuantumNumberType::SPIN_LIKE;
+  quantum_number_key_type_mapping_[QuantumNumberIDs::ISOSPIN] =
+      QuantumNumberType::SPIN_LIKE;
+  quantum_number_key_type_mapping_[QuantumNumberIDs::CHARGE] =
+      QuantumNumberType::INTEGER_LIKE;
+  quantum_number_key_type_mapping_[QuantumNumberIDs::PARITY] =
+      QuantumNumberType::INTEGER_LIKE;
+  quantum_number_key_type_mapping_[QuantumNumberIDs::CPARITY] =
+      QuantumNumberType::INTEGER_LIKE;
+
+};
+
+QuantumNumberTranslator::~QuantumNumberTranslator() {};
+
+QuantumNumberType QuantumNumberTranslator::getQuantumNumberType(const std::string& qn_name) const {
+  auto result = quantum_number_key_type_mapping_.find(getQuantumNumberEnum(qn_name));
+  if (result != quantum_number_key_type_mapping_.end()) {
+    return result->second;
+  }
+  else {
+    std::runtime_error("QuantumNumberTranslator::getQuantumNumberType:"
+        " quantum number with your specified key does not exist in the mapping!"
+        " Please correct or update mapping!");
+  }
+}
+
+std::string QuantumNumberTranslator::getQuantumNumberName(
+    const QuantumNumberIDs& qn_type) const {
+  auto result = quantum_number_key_name_mapping_.find(qn_type);
+  if (result != quantum_number_key_name_mapping_.end()) {
+    return result->second;
+  }
+  else {
+    std::runtime_error("QuantumNumberTranslator::getQuantumNumberName:"
+        " quantum number with your specified key does not exist in the mapping!"
+        " Please correct or update mapping!");
+  }
+}
+
+QuantumNumberIDs QuantumNumberTranslator::getQuantumNumberEnum(
+    const std::string& qn_name) const {
+  auto result = name_quantum_number_key_mapping_.find(qn_name);
+  if (result != name_quantum_number_key_mapping_.end()) {
+    return result->second;
+  }
+  else {
+    std::runtime_error("QuantumNumberTranslator::getQuantumNumberEnum:"
+        " quantum number with your specified key does not exist in the mapping!"
+        " Please correct or update mapping!");
+  }
+}
+
+Spin SpinWave::getSpinLikeQuantumNumber(QuantumNumberIDs qn_id) const {
+  auto spin_result = spin_like_quantum_numbers_.find(
+      QuantumNumberTranslator::Instance().getQuantumNumberName(qn_id));
+  if (spin_result != spin_like_quantum_numbers_.end())
+    return spin_result->second;
+  else {
+    std::stringstream ss;
+    ss << "SpinWave::getSpinLikeQuantumNumber: did not find quantum number ";
+    ss << QuantumNumberTranslator::Instance().getQuantumNumberName(qn_id);
+    ss << " in spin like qn list!";
+    std::runtime_error(ss.str());
+  }
+}
+
+int SpinWave::getIntLikeQuantumNumber(QuantumNumberIDs qn_id) const {
+  auto int_result = integer_like_quantum_numbers_.find(
+      QuantumNumberTranslator::Instance().getQuantumNumberName(qn_id));
+  if (int_result != integer_like_quantum_numbers_.end())
+    return int_result->second;
+  else {
+    std::stringstream ss;
+    ss << "SpinWave::getIntLikeQuantumNumber: did not find quantum number ";
+    ss << QuantumNumberTranslator::Instance().getQuantumNumberName(qn_id);
+    ss << " in int like qn list!";
+    std::runtime_error(ss.str());
+  }
+}
+
+double SpinWave::getDoubleLikeQuantumNumber(QuantumNumberIDs qn_id) const {
+  auto double_result = double_like_quantum_numbers_.find(
+      QuantumNumberTranslator::Instance().getQuantumNumberName(qn_id));
+  if (double_result != double_like_quantum_numbers_.end())
+    return double_result->second;
+  else {
+    std::stringstream ss;
+    ss << "SpinWave::getDoubleLikeQuantumNumber: did not find quantum number ";
+    ss << QuantumNumberTranslator::Instance().getQuantumNumberName(qn_id);
+    ss << " in double like qn list!";
+    std::runtime_error(ss.str());
+  }
+}
+
 PhysConst::PhysConst() {
   const char* pPath = getenv("COMPWA_DIR");
   std::string path = "";
@@ -34,31 +148,13 @@ PhysConst::PhysConst() {
   constantFileName = path + "/Physics/physConstants.xml";
   constantDefaultFileName = path + "/Physics/physDefaultConstants.xml";
 
-  initQuantumNumberMapping();
   readFile();
 }
 
 PhysConst::~PhysConst() {
 }
 
-void PhysConst::initQuantumNumberMapping() {
-  quantum_number_key_name_mapping_[QuantumNumbers::SPIN] = "spin";
-  quantum_number_key_name_mapping_[QuantumNumbers::ORBITAL_ANGULAR_MOMENTUM] = "angular-momentum";
-  quantum_number_key_name_mapping_[QuantumNumbers::ISOSPIN] = "isospin";
-  quantum_number_key_name_mapping_[QuantumNumbers::CHARGE] = "charge";
-  quantum_number_key_name_mapping_[QuantumNumbers::PARITY] = "parity";
-  quantum_number_key_name_mapping_[QuantumNumbers::CPARITY] = "cparity";
-
-  name_quantum_number_key_mapping_["spin"] = QuantumNumbers::SPIN;
-  name_quantum_number_key_mapping_["angular-momentum"] = QuantumNumbers::ORBITAL_ANGULAR_MOMENTUM;
-  name_quantum_number_key_mapping_["isospin"] = QuantumNumbers::ISOSPIN;
-  name_quantum_number_key_mapping_["charge"] = QuantumNumbers::CHARGE;
-  name_quantum_number_key_mapping_["parity"] = QuantumNumbers::PARITY;
-  name_quantum_number_key_mapping_["cparity"] = QuantumNumbers::CPARITY;
-}
-
 void PhysConst::readFile() {
-
   // Create an empty property tree object
   using boost::property_tree::ptree;
   ptree pt;
@@ -99,31 +195,40 @@ void PhysConst::readFile() {
   ParticleProperties particle_properties;
   Constant constant;
 
-  BOOST_FOREACH( ptree::value_type const& v, pt.get_child("particleList") ) {
+  for (auto const& v : pt.get_child("particleList")) {
     if (v.first == "particle" || v.first == "particleFlatte") {
       particle_properties.id_ = v.second.get<int>("ID");
-      particle_properties.name_ = v.second.get<std::string>("name");
+      particle_properties.name_ = v.second.get < std::string > ("name");
       particle_properties.mass_ = v.second.get_child("mass").get<double>(
           "value");
       if (v.second.count("width") != 0)
         particle_properties.width_ = v.second.get_child("width").get<double>(
             "value");    //check if node "width" exists
 
-      particle_properties.charge_ = v.second.get<int>("charge");
-      if (v.second.count("isospin") != 0) {
-        particle_properties.isospin_.J_numerator_ = v.second.get<unsigned int>(
-            "isospin");
-        particle_properties.isospin_.J_denominator_ = 1;
-        particle_properties.isospin_.J_z_numerator_ = v.second.get<int>(
-            "isospin_z");
+      for (auto const& qn : v.second.get_child("quantum_numbers")) {
+        QuantumNumberType qn_type = QuantumNumberTranslator::Instance().getQuantumNumberType(qn.first);
+        if (qn_type
+            == QuantumNumberType::SPIN_LIKE) {
+          Spin s;
+          if(QuantumNumberTranslator::Instance().getQuantumNumberEnum(qn.first) == QuantumNumberIDs::SPIN)
+            s.z_component_relevant = false;
+          s.J_numerator_ = qn.second.get<unsigned int>("numerator");
+          s.J_denominator_ = qn.second.get<unsigned int>("denominator");
+          if (qn.second.count("z_numerator") != 0)
+            s.J_z_numerator_ = qn.second.get<int>("z_numerator");
+          particle_properties.spin_like_quantum_numbers_[qn.first] = s;
+        }
+        else if (qn_type
+            == QuantumNumberType::INTEGER_LIKE) {
+          particle_properties.integer_like_quantum_numbers_[qn.first] =
+              v.second.get_child("quantum_numbers").get<int>(qn.first);
+        }
+        else if (qn_type
+            == QuantumNumberType::DOUBLE_LIKE) {
+          particle_properties.double_like_quantum_numbers_[qn.first] =
+              v.second.get_child("quantum_numbers").get<double>(qn.first);
+        }
       }
-
-      particle_properties.spin_.J_numerator_ = v.second.get<unsigned int>("J");
-      particle_properties.spin_.J_denominator_ = 1;
-
-      particle_properties.parity_ = v.second.get<int>("P");
-      if (v.second.count("C") != 0)
-        particle_properties.cparity_ = v.second.get<int>("C");
 
       if (v.first == "particleFlatte") {
         //read parameters which are specific to flatte description here.
@@ -132,7 +237,9 @@ void PhysConst::readFile() {
 
       particle_properties_list_.push_back(particle_properties);
 
-      BOOST_LOG_TRIVIAL(debug)<<"PhysConst adding particle: "<<particle_properties.name_<<" mass="<<particle_properties.mass_<<" width="<<particle_properties.width_<<" J=" <<1.0*particle_properties.spin_.J_numerator_/particle_properties.spin_.J_denominator_<<" P="<<particle_properties.parity_<< " C="<<particle_properties.cparity_;
+      Spin s = particle_properties.getSpinLikeQuantumNumber(
+          QuantumNumberIDs::SPIN);
+      BOOST_LOG_TRIVIAL(debug)<<"PhysConst adding particle: "<<particle_properties.name_<<" mass="<<particle_properties.mass_<<" width="<<particle_properties.width_<<" J=" <<1.0*s.J_numerator_/s.J_denominator_<<" P="<<particle_properties.getIntLikeQuantumNumber(QuantumNumberIDs::PARITY)<< " C="<<particle_properties.getIntLikeQuantumNumber(QuantumNumberIDs::CPARITY);
     }
   }
 
@@ -152,18 +259,18 @@ void PhysConst::readFile() {
     throw std::runtime_error("Could not open default constants file!");
   }
 //	read_xml(constantFileName, pt);
-  BOOST_FOREACH( ptree::value_type const& v, pt.get_child("physConstList") ) {
-    if (v.first == "constant") {
-      constant.name_ = v.second.get<std::string>("name");
-      constant.value_ = v.second.get_child("value").get<double>("value");
-      if (v.second.count("error") != 0)
-        constant.error_ = v.second.get_child("value").get<double>("error");
-    }
-
-    constants_list_.push_back(constant);
-
-    BOOST_LOG_TRIVIAL(debug)<<"PhysConst adding constant: "<<constant.name_<<" value="<<constant.value_<<" error="<<constant.error_;
+  BOOST_FOREACH( ptree::value_type const& v, pt.get_child("physConstList") ){
+  if (v.first == "constant") {
+    constant.name_ = v.second.get<std::string>("name");
+    constant.value_ = v.second.get_child("value").get<double>("value");
+    if (v.second.count("error") != 0)
+    constant.error_ = v.second.get_child("value").get<double>("error");
   }
+
+  constants_list_.push_back(constant);
+
+  BOOST_LOG_TRIVIAL(debug)<<"PhysConst adding constant: "<<constant.name_<<" value="<<constant.value_<<" error="<<constant.error_;
+}
 
   return;
 }
@@ -213,7 +320,7 @@ std::vector<ParticleProperties> PhysConst::findParticlesWithQN(
 
   auto result = particle_properties_list_.begin();
   while (result != particle_properties_list_.end()) {
-    result = std::find_if(result, particle_properties_list_.end(), qn);
+    result = std::find(result, particle_properties_list_.end(), qn);
     if (result != particle_properties_list_.end()) {
       particle_list.push_back(*result);
       ++result;
@@ -232,32 +339,6 @@ bool PhysConst::particleExists(const std::string& name) const {
     return true;
 
   return false;
-}
-
-std::string PhysConst::getQuantumNumberName(
-    const QuantumNumbers& qn_type) const {
-  auto result = quantum_number_key_name_mapping_.find(qn_type);
-  if (result != quantum_number_key_name_mapping_.end()) {
-    return result->second;
-  }
-  else {
-    std::runtime_error("PhysConst::getQuantumNumberName:"
-        " quantum number with your specified key does not exist in the mapping!"
-        " Please correct or update mapping!");
-  }
-}
-
-QuantumNumbers PhysConst::getQuantumNumberEnum(
-    const std::string& qn_name) const {
-  auto result = name_quantum_number_key_mapping_.find(qn_name);
-  if (result != name_quantum_number_key_mapping_.end()) {
-    return result->second;
-  }
-  else {
-    std::runtime_error("PhysConst::getQuantumNumberEnum:"
-        " quantum number with your specified key does not exist in the mapping!"
-        " Please correct or update mapping!");
-  }
 }
 
 } /* namespace ComPWA */

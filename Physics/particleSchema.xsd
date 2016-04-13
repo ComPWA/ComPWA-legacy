@@ -35,14 +35,7 @@
 				maxOccurs="1" />
 			<xs:element name="width" type="valueWithError" minOccurs="0"
 				maxOccurs="1" />
-			<xs:element name="charge" type="xs:integer" minOccurs="1"
-				maxOccurs="1" />
-			<xs:element name="J" type="xs:integer" minOccurs="1"
-				maxOccurs="1" />
-			<xs:element name="P" type="xs:integer" minOccurs="0"
-				maxOccurs="1" default="0" />
-			<xs:element name="C" type="xs:integer" minOccurs="0"
-				maxOccurs="1" default="0" />
+			<xs:element name="quantum_numbers"/>
 			<xs:element name="radius" type="xs:double" default="1.5"
 				minOccurs="0" maxOccurs="1" />
 			<xs:element name="reference" type="xs:string" minOccurs="0"

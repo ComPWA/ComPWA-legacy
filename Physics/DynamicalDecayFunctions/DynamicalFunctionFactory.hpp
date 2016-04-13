@@ -45,7 +45,7 @@ class DynamicalFunctionFactory {
       const HelicityFormalism::TwoBodyDecayInformation& state_info,
       const ParameterList& external_parameters);
 
-  static std::map<QuantumNumbers, std::string> dynamical_type_name_mapping_;
+  static std::map<QuantumNumberIDs, std::string> dynamical_type_name_mapping_;
 
 public:
   DynamicalFunctionFactory();

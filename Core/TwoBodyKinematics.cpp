@@ -24,9 +24,15 @@ TwoBodyKinematics::TwoBodyKinematics(std::string _nameMother,
   M = ComPWA::PhysConst::Instance().findParticle(_nameMother).mass_;
   m1 = ComPWA::PhysConst::Instance().findParticle(_name1).mass_;
   m2 = ComPWA::PhysConst::Instance().findParticle(_name2).mass_;
-  spinM = ComPWA::PhysConst::Instance().findParticle(_nameMother).spin_.J_numerator_;
-  spin1 = ComPWA::PhysConst::Instance().findParticle(_name1).spin_.J_numerator_;
-  spin2 = ComPWA::PhysConst::Instance().findParticle(_name2).spin_.J_numerator_;
+  spinM =
+      ComPWA::PhysConst::Instance().findParticle(_nameMother).getSpinLikeQuantumNumber(
+          QuantumNumberIDs::SPIN).J_numerator_;
+  spin1 =
+      ComPWA::PhysConst::Instance().findParticle(_name1).getSpinLikeQuantumNumber(
+          QuantumNumberIDs::SPIN).J_numerator_;
+  spin2 =
+      ComPWA::PhysConst::Instance().findParticle(_name2).getSpinLikeQuantumNumber(
+          QuantumNumberIDs::SPIN).J_numerator_;
 
   mass_min = ((M - deltaMassWindow));
   mass_max = ((M + deltaMassWindow));
@@ -44,7 +50,8 @@ bool TwoBodyKinematics::isWithinPhsp(const dataPoint& point) {
     return 1;
   return 0;
 }
-void TwoBodyKinematics::translateEventToDataPoint(const Event& ev, dataPoint& point) const {
+void TwoBodyKinematics::translateEventToDataPoint(const Event& ev,
+    dataPoint& point) const {
   Particle part1 = ev.getParticle(0);
   Particle part2 = ev.getParticle(1);
   double msq = Particle::invariantMass(part1, part2);

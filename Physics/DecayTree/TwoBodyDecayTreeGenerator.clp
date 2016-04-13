@@ -244,6 +244,9 @@
 			(bind ?spin_wave_index 0)
 			(foreach ?spin_wave ?spin_waves
 				;(printout t (fact-slot-value ?spin_wave quantum_number_names) crlf)
+				
+				;spawn new qn here (like c-parity)
+				
 				(bind ?spin_wave_index (+ 1 ?spin_wave_index))
 				(bind ?new_all_occuring_waves ?all_occuring_waves)
 				(bind ?mother_index (member$ ?spin_wave ?all_occuring_waves))
@@ -284,7 +287,7 @@
 		)
 	  )
 	  (retract ?decay_tree)
-	else 
+	else
 		(if (= 2 (length ?available_waves))
 		then
 			;(printout t "we are about to finish the decaytree here" crlf)
@@ -306,9 +309,13 @@
 				(bind ?single_qn_decays (find-all-facts ((?d Decay))
 					(= 0 (str-compare ?d:quantum_number_name ?qn_name))
 				))
-				;(printout t ?qn_name crlf)
+				(printout t ?qn_name crlf)
 				(bind ?found_something FALSE)
 				(foreach ?single_qn_decay ?single_qn_decays
+				    (printout t (fact-slot-value ?single_qn_decay mother) " " (nth$ (member$ ?qn_name (fact-slot-value ?initial_state_wave quantum_number_names))
+							(fact-slot-value ?initial_state_wave quantum_number_values)
+						) crlf)
+						
 					(if (= (fact-slot-value ?single_qn_decay mother)
 						(nth$ (member$ ?qn_name (fact-slot-value ?initial_state_wave quantum_number_names))
 							(fact-slot-value ?initial_state_wave quantum_number_values)
@@ -318,6 +325,7 @@
 						(if (is-decay-valid ?single_qn_decay ?dwave1 ?dwave2)
 						then
 							;check the requirements of the new decay
+							(printout t "checking if this decay is good " ?single_qn_decay crlf)
 							(if (check-decay-requirements ?single_decay_list ?single_qn_decay)
 							then
 								(bind ?single_decay_list (create-list (insert$ (fact-slot-value ?single_decay_list values) 1 ?single_qn_decay)))
@@ -331,6 +339,8 @@
 									)
 								)
 								
+								(printout t "this should never happend then..." crlf)
+								
 								(break)
 							)
 						)
@@ -338,6 +348,7 @@
 				)
 				(if (not ?found_something)
 				then 
+				    (printout t "found nothing for " ?qn_name)
 					(bind ?valid_tree FALSE)
 					(break)
 				)

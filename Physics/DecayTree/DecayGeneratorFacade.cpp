@@ -27,15 +27,15 @@ DecayGeneratorFacade::~DecayGeneratorFacade() {
 }
 
 void DecayGeneratorFacade::setAllowedSpinQuantumNumbers(
-    const ComPWA::QuantumNumbers& qn_type,
+    const ComPWA::QuantumNumberIDs& qn_type,
     const std::vector<unsigned int>& spin_numerators,
     unsigned int spin_denominator,
-    const std::vector<ComPWA::QuantumNumbers>& required_qns,
+    const std::vector<ComPWA::QuantumNumberIDs>& required_qns,
     const QuantumNumberTypes& type) const {
   AllowedQuantumNumbers<ComPWA::Spin> spin;
   spin.type = type;
   spin.quantum_number_name_ =
-      ComPWA::PhysConst::Instance().getQuantumNumberName(qn_type);
+      QuantumNumberTranslator::Instance().getQuantumNumberName(qn_type);
   Spin s;
   s.J_denominator_ = spin_denominator;
   for (unsigned int i = 0; i < spin_numerators.size(); ++i) {
@@ -54,14 +54,14 @@ void DecayGeneratorFacade::setAllowedSpinQuantumNumbers(
 }
 
 void DecayGeneratorFacade::setAllowedIntQuantumNumbers(
-    const ComPWA::QuantumNumbers& qn_type,
+    const ComPWA::QuantumNumberIDs& qn_type,
     const std::vector<int>& int_qn_values,
-    const std::vector<ComPWA::QuantumNumbers>& required_qns,
+    const std::vector<ComPWA::QuantumNumberIDs>& required_qns,
     const QuantumNumberTypes& type) const {
   AllowedQuantumNumbers<int> int_qn;
   int_qn.type = type;
   int_qn.quantum_number_name_ =
-      ComPWA::PhysConst::Instance().getQuantumNumberName(qn_type);
+      QuantumNumberTranslator::Instance().getQuantumNumberName(qn_type);
   int_qn.allowed_values_ = int_qn_values;
 
   int_qn.required_quantum_numbers_names_ = convertQNTypeListToQNStringList(
@@ -71,20 +71,20 @@ void DecayGeneratorFacade::setAllowedIntQuantumNumbers(
 }
 
 std::vector<std::string> DecayGeneratorFacade::convertQNTypeListToQNStringList(
-    const std::vector<ComPWA::QuantumNumbers>& required_qns) const {
+    const std::vector<ComPWA::QuantumNumberIDs>& required_qns) const {
   std::vector<std::string> qn_name_list;
   for (auto required_qn_type : required_qns) {
     qn_name_list.push_back(
-        ComPWA::PhysConst::Instance().getQuantumNumberName(required_qn_type));
+        QuantumNumberTranslator::Instance().getQuantumNumberName(required_qn_type));
   }
   return qn_name_list;
 }
 
 void DecayGeneratorFacade::setConservedQuantumNumbers(
-    const std::vector<ComPWA::QuantumNumbers>& conserved_qn) const {
+    const std::vector<ComPWA::QuantumNumberIDs>& conserved_qn) const {
   for (auto conserved_qn_type : conserved_qn) {
     decay_generator_.conserved_quantum_numbers_.push_back(
-        ComPWA::PhysConst::Instance().getQuantumNumberName(conserved_qn_type));
+        QuantumNumberTranslator::Instance().getQuantumNumberName(conserved_qn_type));
   }
 }
 

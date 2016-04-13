@@ -38,36 +38,6 @@ template<class T> struct AllowedQuantumNumbers {
   QuantumNumberTypes type;
 };
 
-struct SpinWave {
-  std::map<std::string, ComPWA::Spin> spin_like_quantum_numbers_;
-  std::map<std::string, int> integer_like_quantum_numbers_;
-  std::map<std::string, double> double_like_quantum_numbers_;
-
-  bool operator()(const SpinWave& rhs) {
-    if (spin_like_quantum_numbers_ != rhs.spin_like_quantum_numbers_)
-      return false;
-    if (integer_like_quantum_numbers_ != rhs.integer_like_quantum_numbers_)
-      return false;
-    if (double_like_quantum_numbers_ != rhs.double_like_quantum_numbers_)
-      return false;
-    return true;
-  }
-
-  friend std::ostream& operator<<(std::ostream& stream, const SpinWave& sw) {
-    for (auto iter = sw.spin_like_quantum_numbers_.begin();
-        iter != sw.spin_like_quantum_numbers_.end(); ++iter) {
-      stream << iter->first << ": " << iter->second.J_numerator_ << "/"
-          << iter->second.J_denominator_ << " (z="
-          << iter->second.J_z_numerator_ << ")\n";
-    }
-    for (auto iter = sw.integer_like_quantum_numbers_.begin();
-        iter != sw.integer_like_quantum_numbers_.end(); ++iter) {
-      stream << iter->first << ": " << iter->second << "\n";
-    }
-    return stream;
-  }
-};
-
 struct IFParticleInfo {
   unsigned int unique_id_;
   ComPWA::IDInfo particle_info_;
@@ -77,7 +47,7 @@ struct IFParticleInfo {
 struct SpinWaveDecay {
   unsigned int mother_index_;
   IndexList daughter_indices_;
-  std::vector<ComPWA::QuantumNumbers> violated_quantum_numbers_;
+  std::vector<ComPWA::QuantumNumberIDs> violated_quantum_numbers_;
 
   bool operator==(const SpinWaveDecay& rhs) const {
     if (mother_index_
@@ -178,13 +148,23 @@ class DecayGenerator {
 
   void addSpinWaveTwoBodyDecayToDecayConfiguration(
       DecayConfiguration& decay_configuration,
-      const SpinWaveDecayTree& two_body_decay_tree) const;
+      const SpinWaveDecayTree& two_body_decay_tree);
 
   std::vector<ParticleStateInfo> createParticleStateInfoCandidates(
-      unsigned int spin_wave_index) const;
+      unsigned int spin_wave_index);
 
   DynamicalInfo createDynamicInfo(const ParticleProperties& particle_properties,
       ComPWA::Physics::DynamicalFunctions::DynamicalInfoTypes dynamical_type) const;
+
+  bool checkMass(const ParticleStateInfo& mother,
+      const std::vector<ParticleStateInfo>& daughters) const;
+  bool isDecayValidForTree(
+      const std::pair<ParticleStateInfo, std::vector<ParticleStateInfo> >& decay_pair,
+      const std::vector<
+          std::pair<ParticleStateInfo, std::vector<ParticleStateInfo> > >& decay_tree) const;
+  bool checkForCorrectIFState(
+      const std::vector<
+          std::pair<ParticleStateInfo, std::vector<ParticleStateInfo> > >& decay_tree) const;
 
   /* bool validateTwoBodyDecay(const SpinWaveTwoBodyDecay& two_body_decay);
    void addTwoBodyDecayToClipsEnviroment(

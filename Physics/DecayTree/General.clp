@@ -344,6 +344,21 @@
 
 (deffunction is-decay-valid 
 	(?single_qn_decay ?spin_wave1 ?spin_wave2)
+	(printout t (nth$ 1 (fact-slot-value ?single_qn_decay daughters))  " ==? " (nth$ 
+				(member$ (fact-slot-value ?single_qn_decay quantum_number_name) 
+					(fact-slot-value ?spin_wave1 quantum_number_names)
+				)
+				(fact-slot-value ?spin_wave1 quantum_number_values)
+			)
+			crlf)
+	(printout t (nth$ 2 (fact-slot-value ?single_qn_decay daughters)) " ==? " (nth$ 
+				(member$ (fact-slot-value ?single_qn_decay quantum_number_name) 
+					(fact-slot-value ?spin_wave2 quantum_number_names)
+				)
+				(fact-slot-value ?spin_wave2 quantum_number_values)
+			)
+			crlf)
+			
 	(and 
 		(= (nth$ 1 (fact-slot-value ?single_qn_decay daughters))
 			(nth$ 
@@ -397,7 +412,7 @@
 	(bind ?required_var_values (fact-slot-value ?single_qn_decay required_variables))
 	(loop-for-count (?i 1 (length ?required_var_names))
 	do
-		;(printout t (nth$ ?i ?required_var_names) crlf)
+		(printout t (nth$ ?i ?required_var_names) crlf)
 		(foreach ?single_available_decay (fact-slot-value ?single_qn_decay_list values)
 			;find required variable name
 			(bind ?found_index
@@ -407,18 +422,18 @@
 				)
 			)
 			
-			;(bind ?angular_momentum (get-spin-qn-with-unique-id (get-required-variable "angular-momentum" ?single_qn_decay)))
-			;(bind ?L (/ (fact-slot-value ?angular_momentum numerator) (fact-slot-value ?angular_momentum denominator)))
-			;(printout t ?L crlf)
-			;(printout t ?found_index " in " (fact-slot-value ?single_available_decay quantum_number_name) crlf)
+			(bind ?angular_momentum (get-spin-qn-with-unique-id (get-required-variable "angular-momentum" ?single_qn_decay)))
+			(bind ?L (/ (fact-slot-value ?angular_momentum numerator) (fact-slot-value ?angular_momentum denominator)))
+			(printout t ?L " " (fact-slot-value ?angular_momentum z_component_numerator) crlf)
+			(printout t ?found_index " in " (fact-slot-value ?single_available_decay quantum_number_name) crlf)
 			(if ?found_index
 			then
 			
-				;(bind ?angular_momentum (get-spin-qn-with-unique-id (get-required-variable "angular-momentum" ?single_available_decay)))
-				;(bind ?L (/ (fact-slot-value ?angular_momentum numerator) (fact-slot-value ?angular_momentum denominator)))
-				;(printout t "other " ?L crlf)
+				(bind ?angular_momentum (get-spin-qn-with-unique-id (get-required-variable "angular-momentum" ?single_available_decay)))
+				(bind ?L (/ (fact-slot-value ?angular_momentum numerator) (fact-slot-value ?angular_momentum denominator)))
+				(printout t "other " ?L crlf)
 			
-				;(printout t (get-required-variable (nth$ ?i ?required_var_names) ?single_available_decay) " ==? " (nth$ ?i ?required_var_values) crlf)
+				(printout t (get-required-variable (nth$ ?i ?required_var_names) ?single_available_decay) " ==? " (nth$ ?i ?required_var_values) crlf)
 				(if (<> (get-required-variable (nth$ ?i ?required_var_names) ?single_available_decay) (nth$ ?i ?required_var_values))
 				then
 					(return FALSE)

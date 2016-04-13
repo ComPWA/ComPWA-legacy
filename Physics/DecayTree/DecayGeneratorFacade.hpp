@@ -28,22 +28,22 @@ public:
   DecayGeneratorFacade(DecayGenerator &decay_generator);
   virtual ~DecayGeneratorFacade();
 
-  void setAllowedSpinQuantumNumbers(const ComPWA::QuantumNumbers& qn_type,
+  void setAllowedSpinQuantumNumbers(const ComPWA::QuantumNumberIDs& qn_type,
       const std::vector<unsigned int>& spin_numerators,
       unsigned int spin_denominator,
-      const std::vector<ComPWA::QuantumNumbers>& required_qns,
+      const std::vector<ComPWA::QuantumNumberIDs>& required_qns,
       const QuantumNumberTypes& type = QuantumNumberTypes::SINGLE_PARTICLE_BASED) const;
 
-  void setAllowedIntQuantumNumbers(const ComPWA::QuantumNumbers& qn_type,
+  void setAllowedIntQuantumNumbers(const ComPWA::QuantumNumberIDs& qn_type,
       const std::vector<int>& int_qn_values,
-      const std::vector<ComPWA::QuantumNumbers>& required_qns,
+      const std::vector<ComPWA::QuantumNumberIDs>& required_qns,
       const QuantumNumberTypes& type = QuantumNumberTypes::SINGLE_PARTICLE_BASED) const;
 
   std::vector<std::string> convertQNTypeListToQNStringList(
-      const std::vector<ComPWA::QuantumNumbers>& required_qns) const;
+      const std::vector<ComPWA::QuantumNumberIDs>& required_qns) const;
 
   void setConservedQuantumNumbers(
-      const std::vector<ComPWA::QuantumNumbers>& conserved_qn) const;
+      const std::vector<ComPWA::QuantumNumberIDs>& conserved_qn) const;
 
   /* void setAllowedSpins(const std::vector<unsigned int>& spin_numerators,
    unsigned int spin_denominator = 1);

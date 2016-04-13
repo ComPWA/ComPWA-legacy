@@ -9,7 +9,6 @@
 //   Stefan Pflueger - initial API and implementation
 //-------------------------------------------------------------------------------
 
-
 //! Utility defines basic structures
 
 #ifndef CORE_UTILITY_HPP_
@@ -34,8 +33,18 @@ struct Spin {
   unsigned int J_denominator_;
   int J_z_numerator_;
 
+  bool z_component_relevant;
+
   Spin() :
-      J_numerator_(0), J_denominator_(1), J_z_numerator_(0) {
+      J_numerator_(0), J_denominator_(1), J_z_numerator_(0), z_component_relevant(
+          true) {
+  }
+
+  bool equalMagnitude(const Spin &rhs) const {
+    if (1.0 * this->J_numerator_ / this->J_denominator_
+        == 1.0 * rhs.J_numerator_ / rhs.J_denominator_)
+      return true;
+    return false;
   }
 
   bool operator==(const Spin &rhs) const {

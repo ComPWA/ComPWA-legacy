@@ -20,35 +20,35 @@ int main(int argc, char **argv) {
       decay_generator);
 
   decay_generator_facade.setAllowedSpinQuantumNumbers(
-      ComPWA::QuantumNumbers::SPIN, { 0, 1, 2}, 1, {
-          ComPWA::QuantumNumbers::ORBITAL_ANGULAR_MOMENTUM });
+      ComPWA::QuantumNumberIDs::SPIN, { 0, 1, 2}, 1, {
+          ComPWA::QuantumNumberIDs::ORBITAL_ANGULAR_MOMENTUM });
   decay_generator_facade.setAllowedSpinQuantumNumbers(
-      ComPWA::QuantumNumbers::ORBITAL_ANGULAR_MOMENTUM, { 0, 1, 2 }, 1, { },
+      ComPWA::QuantumNumberIDs::ORBITAL_ANGULAR_MOMENTUM, { 0, 1, 2 }, 1, { },
       ComPWA::Physics::DecayTree::QuantumNumberTypes::COMPOSITE_PARTICLE_BASED);
   decay_generator_facade.setAllowedSpinQuantumNumbers(
-      ComPWA::QuantumNumbers::ISOSPIN, { 0, 1 }, 1, { });
+      ComPWA::QuantumNumberIDs::ISOSPIN, { 0, 1 }, 1, { });
   decay_generator_facade.setAllowedIntQuantumNumbers(
-      ComPWA::QuantumNumbers::CHARGE, { -1, 0, 1 }, { });
+      ComPWA::QuantumNumberIDs::CHARGE, { -1, 0, 1 }, { });
   decay_generator_facade.setAllowedIntQuantumNumbers(
-      ComPWA::QuantumNumbers::PARITY, { -1, 1 }, {
-          ComPWA::QuantumNumbers::ORBITAL_ANGULAR_MOMENTUM });
+      ComPWA::QuantumNumberIDs::PARITY, { -1, 1 }, {
+          ComPWA::QuantumNumberIDs::ORBITAL_ANGULAR_MOMENTUM });
   decay_generator_facade.setAllowedIntQuantumNumbers(
-      ComPWA::QuantumNumbers::CPARITY, { -1, 1 }, {
-          ComPWA::QuantumNumbers::CHARGE });
+      ComPWA::QuantumNumberIDs::CPARITY, { -1, 1 }, {
+          ComPWA::QuantumNumberIDs::CHARGE });
 
   decay_generator_facade.setConservedQuantumNumbers( {
-      ComPWA::QuantumNumbers::CHARGE, ComPWA::QuantumNumbers::PARITY,
-      ComPWA::QuantumNumbers::CPARITY, ComPWA::QuantumNumbers::SPIN,
-      ComPWA::QuantumNumbers::ORBITAL_ANGULAR_MOMENTUM });
+      ComPWA::QuantumNumberIDs::CHARGE, ComPWA::QuantumNumberIDs::PARITY,
+      ComPWA::QuantumNumberIDs::CPARITY, ComPWA::QuantumNumberIDs::SPIN,
+      ComPWA::QuantumNumberIDs::ORBITAL_ANGULAR_MOMENTUM });
 
   ComPWA::Physics::DecayTree::IFParticleInfo if_particle =
       decay_generator.createIFParticleInfo("gamma");
   decay_generator.addFinalStateParticles(if_particle);
   if_particle = decay_generator.createIFParticleInfo("pi0");
   decay_generator.addFinalStateParticles(if_particle);
-  decay_generator.addFinalStateParticles(if_particle);
+  //decay_generator.addFinalStateParticles(if_particle);
 
-  if_particle = decay_generator.createIFParticleInfo("jpsi");
+  if_particle = decay_generator.createIFParticleInfo("omega");
   decay_generator.setTopNodeState(if_particle);
 
   ComPWA::Physics::DecayTree::DecayConfiguration decay_config =
