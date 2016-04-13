@@ -295,10 +295,6 @@ std::shared_ptr<FunctionTree> AmpRelBreitWignerRes::SetupTree(
 		newTree->createLeaf("phspSample", toySample.GetMultiDouble(_subSys),
 				"NormBW_"+_name);
 	}
-
-	BOOST_LOG_TRIVIAL(debug) << "AmpRelBreitWignerRes::setupBasicTree() | "
-			"finished!";
-
 	return newTree;
 }
 

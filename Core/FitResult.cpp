@@ -143,7 +143,6 @@ void FitResult::printFitFractions(TableFormater* tab)
 {
 	BOOST_LOG_TRIVIAL(info) << " FitResult::printFitFractions() | "
 			"Calculating fit fractions!";
-	std::cout<<_ampVec.size()<<std::endl;
 	auto itrAmp = _ampVec.begin();
 	for( ; itrAmp!=_ampVec.end(); ++itrAmp){
 		printFitFractions(tab, (*itrAmp));
