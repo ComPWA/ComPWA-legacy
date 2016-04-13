@@ -523,7 +523,11 @@ const double AmpSumIntensity::GetIntegralInterference(
 	gsl_rng_env_setup ();
 	const gsl_rng_type *T = gsl_rng_default; //type of random generator
 	gsl_rng *r = gsl_rng_alloc(T); //random generator
-	gsl_monte_function G = {&interferenceIntegralWrapper,dim, const_cast<AmpSumIntensity*> (this)};
+	gsl_monte_function G = {
+			&interferenceIntegralWrapper,
+			dim,
+			const_cast<AmpSumIntensity*> (this)
+	};
 
 	/*	Choosing vegas algorithm here, because it is the most accurate:
 	 * 		-> 10^5 calls gives (in my example) an accuracy of 0.03%

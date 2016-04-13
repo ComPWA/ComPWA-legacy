@@ -159,10 +159,10 @@ protected:
 	unsigned int correlatedErrors_numberOfSets;
 
 	//! Calculate information criterion AIC
-	double calcAIC();
+	double calcAIC(ParameterList& frac);
 
 	//! Calculate information criterion BIC
-	double calcBIC();
+	double calcBIC(ParameterList& frac);
 
 private:
 	friend class boost::serialization::access;

@@ -37,7 +37,8 @@ void MinuitResult::setResult(std::shared_ptr<ControlParameter> esti,
 	init(result);
 }
 
-void MinuitResult::init(FunctionMinimum min){
+void MinuitResult::init(FunctionMinimum min)
+{
 	nRes = 0;
 	MnUserParameterState minState = min.UserState();
 
@@ -87,7 +88,8 @@ void MinuitResult::init(FunctionMinimum min){
 	return;
 }
 
-void MinuitResult::genSimpleOutput(std::ostream& out){
+void MinuitResult::genSimpleOutput(std::ostream& out)
+{
 	for(unsigned int o=0;o<finalParameters.GetNDouble();o++){
 		std::shared_ptr<DoubleParameter> outPar =
 				finalParameters.GetDoubleParameter(o);
@@ -98,7 +100,8 @@ void MinuitResult::genSimpleOutput(std::ostream& out){
 	return;
 }
 
-void MinuitResult::setUseCorrelatedErrors(bool s, int nSets) {
+void MinuitResult::setUseCorrelatedErrors(bool s, int nSets)
+{
 	useCorrelatedErrors = s;
 	if(nSets <= 0)
 		throw std::runtime_error(
@@ -206,7 +209,8 @@ void MinuitResult::calcFractionError()
 	return;
 }
 
-void MinuitResult::genOutput(std::ostream& out, std::string opt){
+void MinuitResult::genOutput(std::ostream& out, std::string opt)
+{
 	bool printTrue=0;
 	bool printParam=1, printCorrMatrix=1, printCovMatrix=1;
 	if(opt=="P") {//print only parameters
@@ -272,8 +276,10 @@ void MinuitResult::genOutput(std::ostream& out, std::string opt){
 	 * Schwarz, Anals of Statistics 6 No.2: 461-464 (1978)
 	 * and
 	 * IEEE Transacrions on Automatic Control 19, No.6:716-723 (1974) */
-	out<<"AIC: "<<calcAIC()-penalty<<std::endl;
-	out<<"BIC: "<<calcBIC()-penalty<<std::endl;
+	ParameterList frac;
+	calcFraction(frac, _ampVec.at(0));
+	out<<"AIC: "<<calcAIC(frac)-penalty<<std::endl;
+	out<<"BIC: "<<calcBIC(frac)-penalty<<std::endl;
 	double r=0;
 	for(int i=0; i<fractionList.GetNDouble(); i++){
 		double val = std::fabs(fractionList.GetDoubleParameter(i)->GetValue());
@@ -318,28 +324,28 @@ void MinuitResult::createInterferenceTable(std::ostream& out,
 		out<<std::endl;
 }
 
-double MinuitResult::calcAIC()
+double MinuitResult::calcAIC(ParameterList& frac)
 {
-	if(!fractionList.GetNDouble()) calcFraction();
 	double r=0;
-	for(int i=0; i<fractionList.GetNDouble(); i++){
-		double val = fractionList.GetDoubleParameter(i)->GetValue();
+	for(int i=0; i<frac.GetNDouble(); i++){
+		double val = frac.GetDoubleParameter(i)->GetValue();
 		if(val > 0.001) r++;
 	}
 	return (finalLH+2*r);
 }
 
-double MinuitResult::calcBIC(){
-	if(!fractionList.GetNDouble()) calcFraction();
+double MinuitResult::calcBIC(ParameterList& frac)
+{
 	double r=0;
-	for(int i=0; i<fractionList.GetNDouble(); i++){
-		double val = fractionList.GetDoubleParameter(i)->GetValue();
+	for(int i=0; i<frac.GetNDouble(); i++){
+		double val = frac.GetDoubleParameter(i)->GetValue();
 		if(val > 0.001) r++;
 	}
 	return (finalLH+r*std::log(nEvents));
 }
 
-void MinuitResult::printCorrelationMatrix(TableFormater* tableCorr){
+void MinuitResult::printCorrelationMatrix(TableFormater* tableCorr)
+{
 	if(!hasValidCov) return;
 	tableCorr->addColumn(" ",15);//add empty first column
 	tableCorr->addColumn("GlobalCC",10);//global correlation coefficient
@@ -371,7 +377,8 @@ void MinuitResult::printCorrelationMatrix(TableFormater* tableCorr){
 	return;
 }
 
-void MinuitResult::printCovarianceMatrix(TableFormater* tableCov){
+void MinuitResult::printCovarianceMatrix(TableFormater* tableCov)
+{
 	if(!hasValidCov) return;
 	tableCov->addColumn(" ",17);//add empty first column
 	//add columns first
@@ -399,7 +406,8 @@ void MinuitResult::printCovarianceMatrix(TableFormater* tableCov){
 	return;
 }
 
-void MinuitResult::writeXML(std::string filename){
+void MinuitResult::writeXML(std::string filename)
+{
 	std::ofstream ofs(filename);
 	boost::archive::xml_oarchive oa(ofs);
 	oa << boost::serialization::make_nvp("FitParameters", finalParameters);
@@ -408,7 +416,8 @@ void MinuitResult::writeXML(std::string filename){
 	return;
 }
 
-void MinuitResult::writeTeX(std::string filename){
+void MinuitResult::writeTeX(std::string filename)
+{
 	std::ofstream out(filename);
 	bool printTrue=0;
 	if(trueParameters.GetNParameter()) printTrue=1;
@@ -428,7 +437,8 @@ void MinuitResult::writeTeX(std::string filename){
 	return;
 }
 
-bool MinuitResult::hasFailed(){
+bool MinuitResult::hasFailed()
+{
 	bool failed=0;
 	if(!isValid) failed=1;
 	//	if(!covPosDef) failed=1;

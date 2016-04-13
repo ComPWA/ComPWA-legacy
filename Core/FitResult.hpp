@@ -43,6 +43,8 @@
 #include "Core/PhysConst.hpp"
 using namespace boost::log;
 
+resonanceItr findResonancePartner(std::shared_ptr<Amplitude> amp, resonanceItr res);
+
 class FitResult
 {
 public:

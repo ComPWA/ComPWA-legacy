@@ -23,6 +23,7 @@
 #include "Core/ParameterList.hpp"
 #include "Core/FunctionTree.hpp"
 #include "Core/Kinematics.hpp"
+#include "Core/FitResult.hpp"
 
 MinLogLH::MinLogLH(std::shared_ptr<Amplitude> amp, std::shared_ptr<Data> data,
 		std::shared_ptr<Data> phspSample,std::shared_ptr<Data> accSample,
@@ -375,14 +376,24 @@ double MinLogLH::calcPenalty()
 {
 	if(_penaltyLambda<=0) return 0; //penalty term disabled
 	double magSum = 0;
-	auto it = _ampVec.at(_penaltyAmpID)->GetResonanceItrFirst();
-	for(; it != _ampVec.at(_penaltyAmpID)->GetResonanceItrLast(); ++it){
-//		magSum += std::fabs( (*it)->GetMagnitude()) *
-//				 1/(*it)->GetNormalization();
-		magSum += (
-				std::fabs( (*it)->GetMagnitude() ) *
-				std::sqrt( (*it)->GetTotalIntegral() )
-		);
+	auto amp = _ampVec.at(_penaltyAmpID);
+	auto it = amp->GetResonanceItrFirst();
+	for(; it != amp->GetResonanceItrLast(); ++it){
+		if( (*it)->GetName().find("_CP")!=std::string::npos ) continue;
+
+		// We search for a partner resonance and add it to the integral
+		auto it2 = findResonancePartner(amp, it);
+
+		// GetIntegralInterference returns the integal Int( A*B+B*A ),
+		// including the complex coefficienct
+		double nom = amp->GetIntegralInterference(it,it);
+		if( it != it2 ){// Int |A+B|^2 = |A|^2 + |B|^2 + A*B + B*A
+			double tmp22 = amp->GetIntegralInterference(it2,it2);
+			double tmp12 = amp->GetIntegralInterference(it,it2);
+			nom += tmp22;
+			nom += tmp12;
+		}
+		magSum += nom;
 	}
 	return (_penaltyLambda*magSum);
 }
