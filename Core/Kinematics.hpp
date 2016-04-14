@@ -126,6 +126,11 @@ public:
 			double spin, double mesonRadius,
 			formFactorType type=formFactorType::BlattWeisskopf);
 
+	//! Calculate form factor
+	static double FormFactor(double sqrtS, double ma, double mb,
+			double spin, double mesonRadius, std::complex<double> qValue,
+			formFactorType type=formFactorType::BlattWeisskopf);
+
 protected:
 	//! Number of particles in reaction
 	unsigned int _nPart;

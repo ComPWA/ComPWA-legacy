@@ -46,14 +46,23 @@ std::complex<double> Kinematics::qValue(double sqrtS, double ma, double mb)
 double Kinematics::FormFactor(double sqrtS, double ma, double mb, double spin,
 		double mesonRadius,	formFactorType type)
 {
+	if(type == formFactorType::BlattWeisskopf && spin == 0){ return 1.0; }
+
+	std::complex<double> qValue = Kinematics::qValue(sqrtS,ma,mb);
+	return Kinematics::FormFactor(sqrtS, ma, mb, spin, mesonRadius, qValue, type);
+}
+
+double Kinematics::FormFactor(double sqrtS, double ma, double mb, double spin,
+		double mesonRadius,	std::complex<double> qValue, formFactorType type)
+{
 	if(mesonRadius==0) return 1; //disable form factors
 	if(type == formFactorType::noFormFactor) return 1; //disable form factors
+	if(type == formFactorType::BlattWeisskopf && spin == 0){ return 1.0; }
 
-	double qSq = std::norm(Kinematics::qValue(sqrtS,ma,mb));
-	//	double qSq = Kinematics::qSqValue(sqrtS,ma,mb);
 	//From factor for a0(980) used by Crystal Barrel Phys.Rev.D78-074023
 	if(type == formFactorType::CrystalBarrel){
 		if (spin == 0) {
+			double qSq = std::norm(qValue);
 			double alpha = mesonRadius*mesonRadius/6;
 			return std::exp(-alpha*qSq);
 		}
@@ -70,6 +79,7 @@ double Kinematics::FormFactor(double sqrtS, double ma, double mb, double spin,
 	//z = q / (interaction range). For the interaction range we assume 1/mesonRadius
 	if(type == formFactorType::BlattWeisskopf){
 		if (spin == 0) return 1;
+		double qSq = std::norm(qValue);
 		double z = qSq*mesonRadius*mesonRadius;
 		/* Events below threshold
 		 * What should we do if event is below threshold? Shouldn't really influence the result
