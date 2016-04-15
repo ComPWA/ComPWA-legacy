@@ -62,8 +62,8 @@ void FitResult::printFitParameters(TableFormater* tableResult)
 	tableResult->addColumn("Name",15);
 	if(printInitial) tableResult->addColumn("Initial Value",parErrorWidth);
 	tableResult->addColumn("Final Value",parErrorWidth);
-	if(printTrue) tableResult->addColumn("True Value",13);
-	if(printTrue) tableResult->addColumn("Deviation",13);
+	if(printTrue) tableResult->addColumn("True Value",10);
+	if(printTrue) tableResult->addColumn("Deviation",9);
 	tableResult->header();
 
 	std::shared_ptr<DoubleParameter> iniPar, outPar, truePar;
@@ -113,7 +113,7 @@ void FitResult::printFitParameters(TableFormater* tableResult)
 
 		*tableResult << o << outPar->GetName();
 		if(printInitial) *tableResult << *iniPar;// |nr.| name| inital value|
-		if(isFixed) *tableResult<<"FIXED";
+		if(isFixed) *tableResult<<" ";
 		else
 			*tableResult << *outPar;//final value
 		if(printTrue){
@@ -132,7 +132,10 @@ void FitResult::printFitParameters(TableFormater* tableResult)
 				else
 					pull /= outPar->GetError();
 			}
-			*tableResult << pull;
+			if( !std::isnan(pull) )
+				*tableResult << pull;
+			else
+				*tableResult << " ";
 		}
 	}
 	tableResult->footer();

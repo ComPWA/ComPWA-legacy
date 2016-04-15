@@ -61,13 +61,12 @@ TableFormater& TableFormater::operator<<(DoubleParameter in)
 	else *out << " "<<sep<<" ";
 	if(in.HasError()){
 		std::string tmp;
-		if(in.GetErrorType()==ErrorType::SYM){
+		if(in.GetErrorType()==ErrorType::SYM && in.GetError()!=0){
 			unsigned int halfWidth = (unsigned int)(columnWidth[curCol])/2;//divide column width
 			*out << std::setw(halfWidth) << in.GetValue();
 			tmp = pm+std::to_string((long double) in.GetError()); trimString(tmp);
 			*out << std::setw(halfWidth) << tmp;
-		}
-		if(in.GetErrorType()==ErrorType::ASYM){
+		} else if(in.GetErrorType()==ErrorType::ASYM){
 			unsigned int w = (unsigned int)(columnWidth[curCol])/3;//take 1/3 of column width
 			tmp = std::to_string((long double) in.GetValue()); trimString(tmp);
 			*out << std::setw(w) << tmp;
@@ -75,7 +74,8 @@ TableFormater& TableFormater::operator<<(DoubleParameter in)
 			*out << std::setw(w) << tmp;
 			tmp = "-"+std::to_string((long double) in.GetErrorLow());trimString(tmp);
 			*out << std::setw(w) << tmp;
-		}
+		} else
+			*out << std::setw(columnWidth[curCol]) << in.GetValue();
 	} else {
 		*out << std::setw(columnWidth[curCol]) << in.GetValue();
 	}

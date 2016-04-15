@@ -379,21 +379,22 @@ double MinLogLH::calcPenalty()
 	auto amp = _ampVec.at(_penaltyAmpID);
 	auto it = amp->GetResonanceItrFirst();
 	for(; it != amp->GetResonanceItrLast(); ++it){
-		if( (*it)->GetName().find("_CP")!=std::string::npos ) continue;
+		//if( (*it)->GetName().find("_CP")!=std::string::npos ) continue;
 
-		// We search for a partner resonance and add it to the integral
-		auto it2 = findResonancePartner(amp, it);
+		//// We search for a partner resonance and add it to the integral
+		//auto it2 = findResonancePartner(amp, it);
 
-		// GetIntegralInterference returns the integal Int( A*B+B*A ),
-		// including the complex coefficienct
-		double nom = amp->GetIntegralInterference(it,it);
-		if( it != it2 ){// Int |A+B|^2 = |A|^2 + |B|^2 + A*B + B*A
-			double tmp22 = amp->GetIntegralInterference(it2,it2);
-			double tmp12 = amp->GetIntegralInterference(it,it2);
-			nom += tmp22;
-			nom += tmp12;
-		}
-		magSum += nom;
+		//// GetIntegralInterference returns the integal Int( A*B+B*A ),
+		//// including the complex coefficienct
+		//double nom = amp->GetIntegralInterference(it,it);
+		//if( it != it2 ){// Int |A+B|^2 = |A|^2 + |B|^2 + A*B + B*A
+			//double tmp22 = amp->GetIntegralInterference(it2,it2);
+			//double tmp12 = amp->GetIntegralInterference(it,it2);
+			//nom += tmp22;
+			//nom += tmp12;
+		//}
+		//magSum += nom;
+		magSum += (*it)->GetMagnitudePar()->GetValue();
 	}
 	return (_penaltyLambda*magSum);
 }

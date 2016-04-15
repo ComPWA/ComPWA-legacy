@@ -893,7 +893,7 @@ protected:
 		oss << "\t Val = " << val_;
 		if(errorLow!=errorHigh)
 			oss << " (+"<< errorHigh<<" -"<<errorLow<<")";
-		else
+		else if ( errorLow!=0 )
 			oss << " (+-"<< errorLow<<")";
 		if(bounds_)
 			oss << "\t  [" << min_ << " ; " << max_<<"]";
