@@ -69,9 +69,6 @@ public:
 	//! Return final likelihood value
 	double getResult(){ return finalLH; }
 
-	//! Enable correct error estimation for fit fractions. Very time consuming!
-	void setUseCorrelatedErrors(bool s, int nSets=200);
-
 	//! Set calculation of interference terms
 	void setCalcInterference(bool b) { calcInterference = b; }
 
@@ -90,12 +87,6 @@ public:
 protected:
 	//! Calculate interference terms
 	bool calcInterference;
-
-	//! Should we calcualte fit fraction errors accurately?
-	bool useCorrelatedErrors;
-
-	//! number of resonances in amplitude
-	unsigned int nRes;
 
 	//! Number of floating parameters
 	int nFreeParameter;
@@ -153,10 +144,9 @@ protected:
 	 *
 	 * @param fracError result with errors
 	 */
-	virtual void calcFractionError();
+	virtual void calcFractionError(ParameterList& parList,
+			std::shared_ptr<Amplitude> amp, int nSets);
 
-	//! Number of parameter sets that are used to propagate the cov matrix through the normalization
-	unsigned int correlatedErrors_numberOfSets;
 
 	//! Calculate information criterion AIC
 	double calcAIC(ParameterList& frac);
@@ -172,8 +162,6 @@ private:
 		using namespace boost::serialization;
 		ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(FitResult);
 		ar & BOOST_SERIALIZATION_NVP(calcInterference);
-		ar & BOOST_SERIALIZATION_NVP(useCorrelatedErrors);
-		ar & BOOST_SERIALIZATION_NVP(nRes);
 		ar & BOOST_SERIALIZATION_NVP(isValid);
 		ar & BOOST_SERIALIZATION_NVP(covPosDef);
 		ar & BOOST_SERIALIZATION_NVP(hasValidParameters);

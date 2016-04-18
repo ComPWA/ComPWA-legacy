@@ -48,7 +48,7 @@ resonanceItr findResonancePartner(std::shared_ptr<Amplitude> amp, resonanceItr r
 class FitResult
 {
 public:
-	FitResult():time(0){};
+	FitResult() : time(0), nSetsFractionError(0) { };
 	virtual ~FitResult() {};
 	//! Set single amplitude. Assume that only one amplitude is used!
 	virtual void SetAmplitude(std::shared_ptr<Amplitude> a) {
@@ -90,9 +90,13 @@ public:
 	//! Table with fit fractions
 	virtual void printFitFractions(TableFormater* tab);
 	//! Table with fit fractions
-	static void printFitFractions(TableFormater* tab, std::shared_ptr<Amplitude> amp);
+	virtual void printFitFractions(TableFormater* tab,
+			std::shared_ptr<Amplitude> amp, int nErrorSets=0);
 	//! Getter function for fractions list. Make sure that fractions are calculated beforehand.
 	virtual ParameterList& getFractions() {	return fractionList; }
+
+	//! Enable correct error estimation for fit fractions. Very time consuming!
+	void setUseCorrelatedErrors(int nSets=200);
 
 	//output
 	virtual void print(std::string opt=""){
@@ -126,8 +130,8 @@ protected:
 	//! Fit amplitude (can't be serialized)
 	std::vector<std::shared_ptr<Amplitude> > _ampVec;
 
-	//! Calculate fit fractions and its errors.
-	virtual void calcFraction();
+	//! Number of parameter sets that are used to propagate the cov matrix through the normalization
+	int nSetsFractionError;
 
 	/** Calculate fit fractions.
 	 * Fractions are calculated using the formular:
@@ -138,15 +142,17 @@ protected:
 	 * the whole amplitude.
 	 *
 	 * @param parList result with fit fractions for the single resonances
+	 * @param nSets Precise error calcucation using @nSets Monte-Carlo events
 	 */
-	virtual void calcFraction(ParameterList& parList);
+	virtual void calcFraction(ParameterList& parList, int nSets=0);
 
 	//! Calculate fit fractions and its errors.
 	static void calcFraction(
 			ParameterList& parList, std::shared_ptr<Amplitude> amp);
 
 	//! Calculate errors on fit result
-	virtual void calcFractionError() {};
+	virtual void calcFractionError(ParameterList& parList,
+			std::shared_ptr<Amplitude> amp, int nSets=200) = 0;
 
 	//! List with fit fractions and errors
 	ParameterList fractionList;
@@ -162,6 +168,7 @@ private:
 		ar & BOOST_SERIALIZATION_NVP(finalParameters);
 		ar & BOOST_SERIALIZATION_NVP(trueParameters);
 		ar & BOOST_SERIALIZATION_NVP(fractionList);
+		ar & BOOST_SERIALIZATION_NVP(nSetsFractionError);
 	}
 };
 BOOST_SERIALIZATION_ASSUME_ABSTRACT( FitResult );

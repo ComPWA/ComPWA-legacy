@@ -17,8 +17,7 @@
 
 MinuitResult::MinuitResult(std::shared_ptr<ControlParameter> esti,
 		FunctionMinimum result) :
-			useCorrelatedErrors(0), calcInterference(0),
-			correlatedErrors_numberOfSets(200)
+		calcInterference(0)
 {
 	std::shared_ptr<Estimator> est = std::static_pointer_cast<Estimator>(esti);
 	_ampVec = est->getAmplitudes();
@@ -39,7 +38,6 @@ void MinuitResult::setResult(std::shared_ptr<ControlParameter> esti,
 
 void MinuitResult::init(FunctionMinimum min)
 {
-	nRes = 0;
 	MnUserParameterState minState = min.UserState();
 
 	if(minState.HasCovariance()){
@@ -100,112 +98,102 @@ void MinuitResult::genSimpleOutput(std::ostream& out)
 	return;
 }
 
-void MinuitResult::setUseCorrelatedErrors(bool s, int nSets)
+
+void MinuitResult::calcFractionError(ParameterList& parList,
+		std::shared_ptr<Amplitude> amp, int nSets)
 {
-	useCorrelatedErrors = s;
-	if(nSets <= 0)
-		throw std::runtime_error(
-				"MinuitResult::setUseCorrelatedErrors() |"
-				" nSets <=0. That makes no sense!"
-				);
-	correlatedErrors_numberOfSets = nSets;
-	return;
-}
+	if( nSets <= 0 ) return;
+	if( !parList.GetNDouble() ) return;
+	BOOST_LOG_TRIVIAL(info) << "Calculating errors of fit fractions using "
+			<<nSets<<" sets of parameters...";
 
-void MinuitResult::calcFractionError()
-{
-	if(useCorrelatedErrors){/* Exact error calculation */
-		BOOST_LOG_TRIVIAL(info) << "Calculating errors of fit fractions using "
-				<<correlatedErrors_numberOfSets<<" sets of parameters...";
+	//Setting up random number generator
+	const gsl_rng_type * T;
+	gsl_rng_env_setup();
+	T = gsl_rng_default;
+	gsl_rng* rnd = gsl_rng_alloc (T);
 
-		//Setting up random number generator
-		const gsl_rng_type * T;
-		gsl_rng_env_setup();
-		T = gsl_rng_default;
-		gsl_rng* rnd = gsl_rng_alloc (T);
+	//convert to GSL objects
+	gsl_vector* gslFinalPar = gsl_parameterList2Vec(finalParameters);
+	gsl_matrix* gslCov = gsl_vecVec2Matrix(cov);
+	gsl_matrix_print(gslCov); //DEBUG
 
-		//convert to GSL objects
-		gsl_vector* gslFinalPar = gsl_parameterList2Vec(finalParameters);
-		gsl_matrix* gslCov = gsl_vecVec2Matrix(cov);
-		gsl_matrix_print(gslCov); //DEBUG
-
-		std::vector<ParameterList> fracVect;
-		progressBar bar(correlatedErrors_numberOfSets);
-		stringstream outFraction;
-		for(unsigned int i=0; i<correlatedErrors_numberOfSets; i++){
-			bar.nextEvent();
-			gsl_vector* gslNewPar = gsl_vector_alloc(nFreeParameter);
-			//generate set of smeared parameters
-			multivariateGaussian( rnd, nFreeParameter,
-					gslFinalPar, gslCov, gslNewPar );
-			gsl_vector_print(gslNewPar);
-			//deep copy of finalParameters
-			ParameterList newPar = ParameterList(finalParameters);
-			std::size_t t=0;
-			for(std::size_t o=0;o<newPar.GetNDouble();o++){
-				std::shared_ptr<DoubleParameter> outPar =
-						newPar.GetDoubleParameter(o);
-				if(outPar->IsFixed()) continue;
-				//set floating values to smeared values
-				outPar->SetValue(gslNewPar->data[t]);
-				t++;
-			}
-			//free vector
-			gsl_vector_free(gslNewPar);
-			//update amplitude with smeared parameters
-			Amplitude::UpdateAmpParameterList(_ampVec, newPar);
-			ParameterList tmp;
-			calcFraction(tmp);
-			fracVect.push_back(tmp);
-
-			/******* DEBUGGING *******/
-			//			if(i==0){
-			//				for(int t=0; t<newPar.GetNDouble(); t++){
-			//					if( newPar.GetDoubleParameter(t)->IsFixed()) continue;
-			//					outFraction << newPar.GetDoubleParameter(t)->GetName()<<":";
-			//				}
-			//				for(int t=0; t<tmp.GetNDouble(); t++)
-			//					outFraction << tmp.GetDoubleParameter(t)->GetName()<<":";
-			//				outFraction << "norm" << std::endl;
-			//			}
-			//			for(int t=0; t<newPar.GetNDouble(); t++){
-			//				if( newPar.GetDoubleParameter(t)->IsFixed()) continue;
-			//				outFraction << newPar.GetDoubleParameter(t)->GetValue()<<" ";
-			//			}
-			//			for(int t=0; t<tmp.GetNDouble(); t++)
-			//				outFraction << tmp.GetDoubleParameter(t)->GetValue()<<" ";
-			//			double norm = _amp->GetIntegral();
-			//			outFraction << norm;
-			//			outFraction << std::endl;
-			/******* DEBUGGING *******/
+	std::vector<ParameterList> fracVect;
+	progressBar bar(nSets);
+	stringstream outFraction;
+	for(unsigned int i=0; i<nSets; i++){
+		bar.nextEvent();
+		gsl_vector* gslNewPar = gsl_vector_alloc(nFreeParameter);
+		//generate set of smeared parameters
+		multivariateGaussian( rnd, nFreeParameter,
+				gslFinalPar, gslCov, gslNewPar );
+		gsl_vector_print(gslNewPar);
+		//deep copy of finalParameters
+		ParameterList newPar = ParameterList(finalParameters);
+		std::size_t t=0;
+		for(std::size_t o=0;o<newPar.GetNDouble();o++){
+			std::shared_ptr<DoubleParameter> outPar =
+					newPar.GetDoubleParameter(o);
+			if(outPar->IsFixed()) continue;
+			//set floating values to smeared values
+			outPar->SetValue(gslNewPar->data[t]);
+			t++;
 		}
-		BOOST_LOG_TRIVIAL(info)<<" ------- "<<outFraction.str();
+		//free vector
+		gsl_vector_free(gslNewPar);
+		//update amplitude with smeared parameters
+		Amplitude::UpdateAmpParameterList(_ampVec, newPar);
+		ParameterList tmp;
+		calcFraction(tmp, amp);
+		fracVect.push_back(tmp);
 
-		//free objects
-		gsl_vector_free(gslFinalPar);
-		gsl_matrix_free(gslCov);
-		gsl_rng_free(rnd);
-
-		int nRes=fractionList.GetNDouble();
-		//Calculate standard deviation
-		for(unsigned int o=0;o<nRes;o++){
-			double mean=0, sqSum=0., stdev=0;
-			for(unsigned int i=0; i<fracVect.size();i++){
-				double tmp = fracVect.at(i).GetDoubleParameter(o)->GetValue();
-				mean += tmp;
-				sqSum += tmp*tmp;
-			}
-			unsigned int s = fracVect.size();
-			sqSum /= s;
-			mean /= s;
-			//this is cross-checked with the RMS of the distribution
-			stdev = std::sqrt(sqSum - mean*mean);
-			fractionList.GetDoubleParameter(o)->SetError(stdev);
-		}
-
-		//Set correct fit result
-		Amplitude::UpdateAmpParameterList(_ampVec, finalParameters);
+		/******* DEBUGGING *******/
+		//			if(i==0){
+		//				for(int t=0; t<newPar.GetNDouble(); t++){
+		//					if( newPar.GetDoubleParameter(t)->IsFixed()) continue;
+		//					outFraction << newPar.GetDoubleParameter(t)->GetName()<<":";
+		//				}
+		//				for(int t=0; t<tmp.GetNDouble(); t++)
+		//					outFraction << tmp.GetDoubleParameter(t)->GetName()<<":";
+		//				outFraction << "norm" << std::endl;
+		//			}
+		//			for(int t=0; t<newPar.GetNDouble(); t++){
+		//				if( newPar.GetDoubleParameter(t)->IsFixed()) continue;
+		//				outFraction << newPar.GetDoubleParameter(t)->GetValue()<<" ";
+		//			}
+		//			for(int t=0; t<tmp.GetNDouble(); t++)
+		//				outFraction << tmp.GetDoubleParameter(t)->GetValue()<<" ";
+		//			double norm = _amp->GetIntegral();
+		//			outFraction << norm;
+		//			outFraction << std::endl;
+		/******* DEBUGGING *******/
 	}
+	BOOST_LOG_TRIVIAL(info)<<" ------- "<<outFraction.str();
+
+	//free objects
+	gsl_vector_free(gslFinalPar);
+	gsl_matrix_free(gslCov);
+	gsl_rng_free(rnd);
+
+	int nRes=parList.GetNDouble();
+	//Calculate standard deviation
+	for(unsigned int o=0;o<nRes;o++){
+		double mean=0, sqSum=0., stdev=0;
+		for(unsigned int i=0; i<fracVect.size();i++){
+			double tmp = fracVect.at(i).GetDoubleParameter(o)->GetValue();
+			mean += tmp;
+			sqSum += tmp*tmp;
+		}
+		unsigned int s = fracVect.size();
+		sqSum /= s;
+		mean /= s;
+		//this is cross-checked with the RMS of the distribution
+		stdev = std::sqrt(sqSum - mean*mean);
+		parList.GetDoubleParameter(o)->SetError(stdev);
+	}
+
+	//Set correct fit result
+	Amplitude::UpdateAmpParameterList(_ampVec, finalParameters);
 	return;
 }
 
@@ -300,28 +288,28 @@ void MinuitResult::genOutput(std::ostream& out, std::string opt)
 void MinuitResult::createInterferenceTable(std::ostream& out,
 		std::shared_ptr<Amplitude> amp)
 {
-		out<<"INTERFERENCE terms for "<<amp->GetName()<<": "<<std::endl;
-		TableFormater* tableInterf = new TableFormater(&out);
-		tableInterf->addColumn("Name 1",15);
-		tableInterf->addColumn("Name 2",15);
-		tableInterf->addColumn("Value",15);
-		tableInterf->header();
-		double sumInfTerms = 0;
-		auto it = amp->GetResonanceItrFirst();
-		for( ; it != amp->GetResonanceItrLast(); ++it){
-			auto it2 = it;
-			for( ; it2 != amp->GetResonanceItrLast(); ++it2){
-				*tableInterf << (*it)->GetName();
-				*tableInterf << (*it2)->GetName();
-				double inf = amp->GetIntegralInterference(it,it2);
-				*tableInterf << inf;
-				sumInfTerms+=inf;
-			}
+	out<<"INTERFERENCE terms for "<<amp->GetName()<<": "<<std::endl;
+	TableFormater* tableInterf = new TableFormater(&out);
+	tableInterf->addColumn("Name 1",15);
+	tableInterf->addColumn("Name 2",15);
+	tableInterf->addColumn("Value",15);
+	tableInterf->header();
+	double sumInfTerms = 0;
+	auto it = amp->GetResonanceItrFirst();
+	for( ; it != amp->GetResonanceItrLast(); ++it){
+		auto it2 = it;
+		for( ; it2 != amp->GetResonanceItrLast(); ++it2){
+			*tableInterf << (*it)->GetName();
+			*tableInterf << (*it2)->GetName();
+			double inf = amp->GetIntegralInterference(it,it2);
+			*tableInterf << inf;
+			sumInfTerms+=inf;
 		}
-		tableInterf->delim();
-		*tableInterf<<" "<<"Sum: "<<sumInfTerms;
-		tableInterf->footer();
-		out<<std::endl;
+	}
+	tableInterf->delim();
+	*tableInterf<<" "<<"Sum: "<<sumInfTerms;
+	tableInterf->footer();
+	out<<std::endl;
 }
 
 double MinuitResult::calcAIC(ParameterList& frac)

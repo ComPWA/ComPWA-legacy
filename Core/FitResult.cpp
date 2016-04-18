@@ -49,6 +49,17 @@ void FitResult::setFinalParameters(ParameterList finPars)
 	finalParameters.DeepCopy(finPars);
 }
 
+void FitResult::setUseCorrelatedErrors(int nSets)
+{
+	if(nSets <= 0)
+		throw std::runtime_error(
+				"FitResult::setUseCorrelatedErrors() |"
+				" nSets <=0. That makes no sense!"
+				);
+	nSetsFractionError = nSets;
+	return;
+}
+
 void FitResult::printFitParameters(TableFormater* tableResult)
 {
 	bool printTrue=0, printInitial=0;
@@ -142,21 +153,23 @@ void FitResult::printFitParameters(TableFormater* tableResult)
 
 	return;
 }
+
 void FitResult::printFitFractions(TableFormater* tab)
 {
 	BOOST_LOG_TRIVIAL(info) << " FitResult::printFitFractions() | "
 			"Calculating fit fractions!";
 	auto itrAmp = _ampVec.begin();
 	for( ; itrAmp!=_ampVec.end(); ++itrAmp){
-		printFitFractions(tab, (*itrAmp));
+		printFitFractions(tab, (*itrAmp), nSetsFractionError);
 	}
 }
 
 void FitResult::printFitFractions(TableFormater* fracTable,
-		std::shared_ptr<Amplitude> amp)
+		std::shared_ptr<Amplitude> amp, int nErrorSets)
 {
 	ParameterList ffList;
 	calcFraction(ffList, amp);
+	calcFractionError(ffList, amp, nErrorSets);
 	double sum=0, sumErrorSq=0;
 
 	fracTable->Reset();
@@ -187,16 +200,6 @@ void FitResult::printFitFractions(TableFormater* fracTable,
 	fracTable->footer();
 
 	return;
-}
-
-void FitResult::calcFraction()
-{
-	if(!fractionList.GetNDouble()) {
-		calcFraction(fractionList);
-		calcFractionError();
-	} else
-		BOOST_LOG_TRIVIAL(warning) << "FitResult::calcFractions() | "
-				"Fractions already calculated. Skip!";
 }
 
 resonanceItr findResonancePartner(std::shared_ptr<Amplitude> amp, resonanceItr res)
@@ -278,8 +281,7 @@ void FitResult::calcFraction(ParameterList& parList, std::shared_ptr<Amplitude> 
 
 }
 
-
-void FitResult::calcFraction(ParameterList& parList)
+void FitResult::calcFraction(ParameterList& parList, int nSets)
 {
 	if( !_ampVec.size() )
 		throw std::runtime_error("FitResult::calcFractions() | "
@@ -296,6 +298,8 @@ void FitResult::calcFraction(ParameterList& parList)
 	auto ampItr = _ampVec.begin();
 	for( ; ampItr != _ampVec.end(); ++ampItr){
 		calcFraction(parList, (*ampItr));
+		if( parList.GetNDouble() )
+			calcFractionError(parList, (*ampItr), nSets);
 	}
 
 	return;
