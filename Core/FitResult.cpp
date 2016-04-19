@@ -51,11 +51,7 @@ void FitResult::setFinalParameters(ParameterList finPars)
 
 void FitResult::setUseCorrelatedErrors(int nSets)
 {
-	if(nSets <= 0)
-		throw std::runtime_error(
-				"FitResult::setUseCorrelatedErrors() |"
-				" nSets <=0. That makes no sense!"
-				);
+	if(nSets < 0) nSetsFractionError = 0;
 	nSetsFractionError = nSets;
 	return;
 }
