@@ -14,14 +14,15 @@
 #include "Physics/DPKinematics/SimpleEfficiency.hpp"
 ClassImp(SimpleEfficiency);
 
-SimpleEfficiency::~SimpleEfficiency(){
+SimpleEfficiency::~SimpleEfficiency()
+{
 	delete passedHist;
 	delete totalHist;
 	delete effHist;
 }
 
-SimpleEfficiency::SimpleEfficiency(const SimpleEfficiency& other) : TNamed(){
-//		totalEff(other.totalEff),totalEff_error(other.totalEff_error){
+SimpleEfficiency::SimpleEfficiency(const SimpleEfficiency& other) : TNamed()
+{
 	((TObject&)other).Copy(*this);
 
 	Bool_t bStatus = TH1::AddDirectoryStatus();
@@ -37,52 +38,79 @@ SimpleEfficiency::SimpleEfficiency(const SimpleEfficiency& other) : TNamed(){
 	title += other.GetTitle();
 	SetNameTitle(name,title);
 }
-SimpleEfficiency::SimpleEfficiency(const TH1& passed, const TH1& total){
-	//we should do some consistency checks here
 
+SimpleEfficiency::SimpleEfficiency(const TH1& passed, const TH1& total)
+{
 	Bool_t bStatus = TH1::AddDirectoryStatus();
 	TH1::AddDirectory(kFALSE);
+
 	passedHist = (TH1*) passed.Clone();
 	totalHist = (TH1*) total.Clone();
 	effHist = (TH1*) passed.Clone();
-//	effHist->Sumw2();
+	effHist->SetNameTitle(
+			passed.GetName()+TString("_eff"),
+			"Efficiency"
+	);
+
 	effHist->Divide(totalHist);
+
 	TH1::AddDirectory(bStatus);
 
 	TString newName = total.GetName();
 	newName += TString("_clone");
 	SetName(newName);
 
-	//	totalEff = (double)passed->GetEntries()/total->GetEntries();
 	totalEff = (double)passedHist->GetSumOfWeights()/totalHist->GetSumOfWeights();
+	totalEff_error = totalEff*sqrt(1/passedHist->GetSumOfWeights()
+			+1/totalHist->GetSumOfWeights());
 }
 
-SimpleEfficiency::SimpleEfficiency(TString name, TString title,const TH1& passed, const TH1& total):TNamed(name,title){
-	//we should do some consistency checks here
-
+SimpleEfficiency::SimpleEfficiency(TString name, TString title,
+		const TH1& passed, const TH1& total):TNamed(name,title)
+{
 	Bool_t bStatus = TH1::AddDirectoryStatus();
 	TH1::AddDirectory(kFALSE);
-	passedHist = (TH1*) passed.Clone(title+" (passed)");
-	totalHist = (TH1*) total.Clone(title+" (total)");
-	effHist = (TH1*) passed.Clone(title+" (eff)");
-//	effHist->Sumw2();
-//	effHist->Divide(totalHist);
+
+	passedHist = (TH1*) passed.Clone();
+	passedHist->SetNameTitle(
+			name+TString("_passed"),
+			title+TString(" (passed)")
+	);
+	totalHist = (TH1*) total.Clone();
+	totalHist->SetNameTitle(
+			name+TString("_total"),
+			title+TString(" (total)")
+			);
+	effHist = (TH1*) passed.Clone();
+	effHist->SetNameTitle(
+			name+TString("_eff"),
+			title+TString(" (eff)")
+	);
+
+	effHist->Divide(totalHist);
+
 	TH1::AddDirectory(bStatus);
 
-	//	totalEff = (double)passed->GetEntries()/total->GetEntries();
 	totalEff = (double)passedHist->GetSumOfWeights()/totalHist->GetSumOfWeights();
-	totalEff_error = totalEff*sqrt(1/passedHist->GetSumOfWeights()+1/totalHist->GetSumOfWeights());
-};
-double SimpleEfficiency::GetEfficiency(int globalBin){
+	totalEff_error = totalEff*sqrt(1/passedHist->GetSumOfWeights()
+			+1/totalHist->GetSumOfWeights());
+}
+
+double SimpleEfficiency::GetEfficiency(int globalBin)
+{
 	return (double) effHist->GetBinContent(globalBin);
 }
-double SimpleEfficiency::GetEfficiencyError(int globalBin){
+
+double SimpleEfficiency::GetEfficiencyError(int globalBin)
+{
 	unsigned int N = totalHist->GetSumOfWeights();
 	double eff = GetEfficiency(globalBin);
 	double err = 1;
 	return err;
 }
-void SimpleEfficiency::SetTitle(const char* title){
+
+void SimpleEfficiency::SetTitle(const char* title)
+{
 	//setting the titles (looking for the first semicolon and insert the tokens there)
 	TString title_passed = title;
 	TString title_total = title;
