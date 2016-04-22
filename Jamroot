@@ -142,4 +142,4 @@ if $(build_Optimizer) && $(build_Optimizer) != 0 {
 }
 
 #Build documentation module
-build-project doc ;
+#build-project doc ;
