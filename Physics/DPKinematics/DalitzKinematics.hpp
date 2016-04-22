@@ -46,7 +46,7 @@ public:
 
 	//! Event to dataPoint conversion
 	void FillDataPoint(int a, int b, double invMassSqA, double invMassSqB,
-			dataPoint& point);
+			dataPoint& point) const;
 
 	/**! Generate contour of phsp boundary
 	 *
@@ -59,7 +59,7 @@ public:
 	 * The allocated size of the arrays should be n+1.
 	 */
 	void phspContour(unsigned int xsys,unsigned int ysys, unsigned int n,
-			double* xcoord, double* ycoord);
+			double* xcoord, double* ycoord) const;
 
 	/**! Calculates the helicity angle.
 	 *
@@ -68,7 +68,11 @@ public:
 	 * angle is measured versus daughter 2 in system [12],
 	 * versus daughter 1 in [13] and versus 2 in [23]
 	 */
-	double helicityAngle(unsigned int sys, double invMassSq23, double invMassSq13);
+	double helicityAngle(unsigned int sys, double invMassSq23,
+			double invMassSq13) const;
+
+	//! Helicity angle for subSystem sys at dataPoint point.
+	double helicityAngle(unsigned int sys,dataPoint& point) const;
 
 	/**! Calculates the helicity angle of particle m and mSpec in the rest
 	 * Helicity angle between particle m and mSpec in the rest frame of m and m2
@@ -83,9 +87,6 @@ public:
 	static double helicityAngle(double M, double m, double m2, double mSpec,
 		double invMassSqA, double invMassSqB);
 
-	//! Helicity angle for subSystem sys at dataPoint point.
-	double helicityAngle(unsigned int sys,dataPoint& point);
-
 	/**! Calculates the scattering angle.
 	 *
 	 * Function obsolete!
@@ -99,13 +100,14 @@ public:
 	 * When masses for scatteringAngle() are set correctly both functions are equivalent.
 	 * \return cos(helicityAngle)
 	 */
-	double scatteringAngle(double s, double t, double M, double mSpec, double mSecond, double m);
+	double scatteringAngle(double s, double t, double M, double mSpec,
+			double mSecond, double m) const;
 
 	//! Calculates third dalitz plot variable, e.g f(s1,s2)=s3
 	double getThirdVariableSq(double, double) const;
 
 	//! Checks if data point is within phase space boundaries
-	bool IsWithinPhsp(const dataPoint &point) ;
+	bool IsWithinPhsp(const dataPoint &point) const;
 
 	/**! Checks if the position is within the phase-space boundaries.
 	 * This only works correctly if both variables are orthogonal to each other.
@@ -116,13 +118,14 @@ public:
 	 * @param varB Helicity angle
 	 * @return
 	 */
-	bool IsWithinBoxPhsp(int idA, int idB, double varA, double varB);
+	bool IsWithinBoxPhsp(int idA, int idB, double varA, double varB) const;
 
 	//! Returns the dalitz plot area for the given kinematics
 	double GetPhspVolume();
 
 	//! Calculated momenta n,m using legendre polynomials
-	double calculateMoments(unsigned int sys, dataPoint& point, unsigned int n, unsigned int m);
+	double calculateMoments(unsigned int sys, dataPoint& point,
+			unsigned int n, unsigned int m) const;
 
 	//! Global minimum and maximum value of variable
 	std::pair<double,double> GetMinMax(std::string varName) const;
@@ -138,13 +141,13 @@ public:
 			double invMass_sys) const;
 
 	//! get mass of paticles
-	double GetMass(unsigned int num);
+	double GetMass(unsigned int num) const;
 	//! get mass of paticles
-	double GetMass(std::string name);
+	double GetMass(std::string name) const;
 	//! get spin of decaying particle
-	unsigned int getSpin(unsigned int num);
+	unsigned int getSpin(unsigned int num) const;
 	//! get spin of particles
-	unsigned int getSpin(std::string name);
+	unsigned int getSpin(std::string name) const;
 
 	std::string name1;//! name of daughter 1
 	double mSq1; //! masse squared of daughter 1
@@ -183,10 +186,10 @@ protected:
 	void init();
 
 	// Check if variables are orthogonal to each other
-	bool AreBoxVariables(unsigned int idA, unsigned int idB);
+	bool AreBoxVariables(unsigned int idA, unsigned int idB) const;
 
 	//! calculated dalitz plot area for the given kinematics
-	void calcDParea();
+	double calcDParea() const;
 
 	bool massIdsSet;
 	bool _DPareaCalculated;	//! is phsp area already calculated?

@@ -16,7 +16,8 @@ using namespace boost::log;
 #include "Core/Kinematics.hpp"
 #include "Core/PhysConst.hpp"
 
-Kinematics* Kinematics::instance(){
+Kinematics* Kinematics::instance()
+{
 	if(!_inst) {
 		throw std::runtime_error("No instance of Kinematics created! "
 				"Create one first!");
@@ -27,9 +28,8 @@ Kinematics* Kinematics::instance(){
 
 Kinematics* Kinematics::_inst = 0;
 
-
-
-double Kinematics::qSqValue(double sqrtS, double ma, double mb){
+double Kinematics::qSqValue(double sqrtS, double ma, double mb)
+{
 	double mapb = ma + mb;
 	double mamb = ma - mb;
 	double xSq = sqrtS*sqrtS;
@@ -108,7 +108,8 @@ double Kinematics::FormFactor(double sqrtS, double ma, double mb, double spin,
 	return 0;
 }
 
-std::complex<double> Kinematics::phspFactor(double sqrtS, double ma, double mb){
+std::complex<double> Kinematics::phspFactor(double sqrtS, double ma, double mb)
+{
 	double s = sqrtS*sqrtS;
 	std::complex<double> i(0,1);
 
@@ -173,12 +174,14 @@ TwoBodyKinematics::TwoBodyKinematics(std::string _nameMother,
 
 	init();
 }
+
 void TwoBodyKinematics::init()
 {
 
 }
 
-bool TwoBodyKinematics::IsWithinPhsp(const dataPoint& point){
+bool TwoBodyKinematics::IsWithinPhsp(const dataPoint& point) const
+{
 	return 1;
 	if(point.getVal(0)>=mass_sq_min && point.getVal(0)<=mass_sq_max) return 1;
 	return 0;
@@ -194,8 +197,10 @@ void TwoBodyKinematics::EventToDataPoint(const Event& ev, dataPoint& point) cons
 	point.setVal(0,msq);
 	return;
 }
+
 //! get mass of particles
-double TwoBodyKinematics::GetMass(unsigned int num){
+double TwoBodyKinematics::GetMass(unsigned int num) const
+{
 	if(num==0) return _M;
 	if(num==1) return m1;
 	if(num==2) return m2;
@@ -203,8 +208,10 @@ double TwoBodyKinematics::GetMass(unsigned int num){
 			"Wrong particle requested!");
 	return -999;
 }
+
 //! get mass of paticles
-double TwoBodyKinematics::GetMass(std::string name){
+double TwoBodyKinematics::GetMass(std::string name) const
+{
 	if(name==_nameMother) return _M;
 	if(name==name1) return m1;
 	if(name==name2) return m2;

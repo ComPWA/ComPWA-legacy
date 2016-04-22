@@ -43,7 +43,7 @@ public:
 
 	//! Event to dataPoint conversion
 	virtual void FillDataPoint(int a, int b, double invMassSqA, double invMassSqB,
-			dataPoint& point) = 0;
+			dataPoint& point) const = 0;
 
 	//! vector with names of variables, e.g. vec[0]=m23sq, vec[1]=m13sq
 	std::vector<std::string> GetVarNames() const { return _varNames; }
@@ -61,7 +61,7 @@ public:
 	unsigned int FindVariable(std::string varName) const;
 
 	//! Checks of data point is within phase space boundaries
-	virtual bool IsWithinPhsp(const dataPoint& point) { };
+	virtual bool IsWithinPhsp(const dataPoint& point) const { };
 
 	/**! Checks if the position is within the phase-space boundaries.
 	 * This only works correctly if both variables are orthogonal to each other.
@@ -72,22 +72,22 @@ public:
 	 * @param varB Helicity angle
 	 * @return
 	 */
-	virtual bool IsWithinBoxPhsp(int idA, int idB, double varA, double varB) = 0;
+	virtual bool IsWithinBoxPhsp(int idA, int idB, double varA, double varB) const = 0;
 
 	//! Get name of mother particle
-	virtual std::string GetMotherName() { return _nameMother; };
+	virtual std::string GetMotherName() const { return _nameMother; };
 	//! Get mass of mother particle
-	virtual double GetMotherMass() { return _M; }
+	virtual double GetMotherMass() const { return _M; }
 	//! calculated the PHSP volume of the current decay by MC integration
 	virtual double GetPhspVolume() = 0;
 
 
 	//! get mass of particles
-	virtual double GetMass(unsigned int num) = 0;
+	virtual double GetMass(unsigned int num) const = 0;
 	//! get mass of paticles
-	virtual double GetMass(std::string name) = 0;
+	virtual double GetMass(std::string name) const = 0;
 	//! Get number of particles
-	virtual unsigned int GetNumberOfParticles() { return _nPart; }
+	virtual unsigned int GetNumberOfParticles() const { return _nPart; }
 	//! Get number of variables
 	virtual unsigned int GetNVars() const { return _varNames.size(); }
 
@@ -181,10 +181,10 @@ public:
 	virtual void EventToDataPoint(const Event& ev, dataPoint& point) const;
 
 	virtual void FillDataPoint(int a, int b, double invMassSqA, double invMassSqB,
-			dataPoint& point) { };
+			dataPoint& point) const { };
 
 	//! checks of data point is within phase space boundaries
-	virtual bool IsWithinPhsp(const dataPoint& point);
+	virtual bool IsWithinPhsp(const dataPoint& point) const;
 
 	/**! Checks if the position is within the phase-space boundaries.
 	 * This only works correctly if both variables are orthogonal to each other.
@@ -195,16 +195,16 @@ public:
 	 * @param varB Helicity angle
 	 * @return
 	 */
-	virtual bool IsWithinBoxPhsp(int idA, int idB, double varA, double varB) { };
+	virtual bool IsWithinBoxPhsp(int idA, int idB, double varA, double varB) const { };
 
 	//! Calculate phase-space volume
 	virtual double GetPhspVolume() { return (mass_max-mass_min); }
 
 	//! get mass of particles
-	virtual double GetMass(unsigned int num);
+	virtual double GetMass(unsigned int num) const;
 
 	//! get mass of paticles
-	virtual double GetMass(std::string name);
+	virtual double GetMass(std::string name) const;
 
 protected:
 	std::string name1;//! name of daughter 1

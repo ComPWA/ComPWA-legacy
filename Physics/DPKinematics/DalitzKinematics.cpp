@@ -119,7 +119,7 @@ void DalitzKinematics::init()
 }
 
 // Check if variables are orthogonal to each other
-bool DalitzKinematics::AreBoxVariables(unsigned int idA, unsigned int idB)
+bool DalitzKinematics::AreBoxVariables(unsigned int idA, unsigned int idB) const
 {
 	if( idA >= GetNVars() || idB >= GetNVars() )
 		throw std::runtime_error("DalitzKinematics::AreBoxVariables() | "
@@ -136,7 +136,7 @@ bool DalitzKinematics::AreBoxVariables(unsigned int idA, unsigned int idB)
 }
 
 double DalitzKinematics::calculateMoments(unsigned int sys, dataPoint& point,
-		unsigned int n, unsigned int m)
+		unsigned int n, unsigned int m) const
 {
 	return gsl_sf_legendre_sphPlm(n,m,point.getVal(sys)); //normalized
 }
@@ -151,27 +151,13 @@ void DalitzKinematics::EventToDataPoint(const Event& ev, dataPoint& point) const
 	const Particle& part3 = ev.getParticle(2);
 	double m23sq = Particle::invariantMass(part2,part3);
 	double m13sq = Particle::invariantMass(part1,part3);
-
-	/* We calculate m12sq from m23sq and m13sq. The values are slightly different
-	/* compared to a calculation from the 4-momenta directly. */
-	double m12sq = getThirdVariableSq(m23sq,m13sq);
-	//	double m12sq = Particle::invariantMass(part1,part2);
-
-	point.setVal(0,m23sq);
-	point.setVal(1,m13sq);
-	point.setVal(2,m12sq);
-
-	point.setVal(3,helicityAngle(_M,m1,m2,m3,m12sq,m13sq));
-	point.setVal(4,helicityAngle(_M,m2,m1,m3,m12sq,m23sq));
-	point.setVal(5,helicityAngle(_M,m1,m3,m2,m13sq,m12sq));
-	point.setVal(6,helicityAngle(_M,m3,m1,m2,m13sq,m23sq));
-	point.setVal(7,helicityAngle(_M,m3,m2,m1,m23sq,m13sq));
-	point.setVal(8,helicityAngle(_M,m2,m3,m1,m23sq,m12sq));
+	FillDataPoint(0,1,m23sq,m13sq,point);
 
 	return;
 }
+
 void DalitzKinematics::FillDataPoint(int a, int b,
-		double invMassSqA, double invMassSqB, dataPoint& point)
+		double invMassSqA, double invMassSqB, dataPoint& point) const
 {
 	if( a != 0 && a != 1 && a != 2){
 		std::cout<<"A "<<a<<" "<<b<<" "<<invMassSqA<<std::endl;
@@ -299,7 +285,7 @@ std::pair<double,double> DalitzKinematics::GetMinMax(unsigned int i) const
 }
 
 void DalitzKinematics::phspContour(unsigned int xsys,unsigned int ysys,
-		unsigned int n, double* xcoord, double* ycoord)
+		unsigned int n, double* xcoord, double* ycoord) const
 {
 	if(xsys >= GetNVars() || ysys >= GetNVars())
 		throw WrongVariableID("DalitzKinematics::phspContour() | "
@@ -340,7 +326,7 @@ void DalitzKinematics::phspContour(unsigned int xsys,unsigned int ysys,
 }
 
 double DalitzKinematics::scatteringAngle(double s, double t,
-		double M, double mSpec, double mSecond, double m)
+		double M, double mSpec, double mSecond, double m) const
 {
 	double u = getThirdVariableSq(s,t);
 	double qSq = (s-(M+mSpec)*(M+mSpec))*(s-(M-mSpec)*(M-mSpec))/(4*s);
@@ -350,8 +336,8 @@ double DalitzKinematics::scatteringAngle(double s, double t,
 	return cosAngle;
 }
 
-double DalitzKinematics::helicityAngle(double M, double m, double m2, double mSpec,
-		double invMassSqA, double invMassSqB)
+double DalitzKinematics::helicityAngle(double M, double m, double m2,
+		double mSpec, double invMassSqA, double invMassSqB)
 {
 	//Calculate energy and momentum of m1/m2 in the invMassSqA rest frame
 	double eCms = ( invMassSqA + m*m - m2*m2 )/( 2*sqrt(invMassSqA) );
@@ -379,13 +365,13 @@ double DalitzKinematics::helicityAngle(double M, double m, double m2, double mSp
 	return cosAngle;
 }
 
-double DalitzKinematics::helicityAngle(unsigned int sys, dataPoint& point)
+double DalitzKinematics::helicityAngle(unsigned int sys, dataPoint& point) const
 {
 	return helicityAngle(sys,point.getVal(0),point.getVal(1));
 }
 
 double DalitzKinematics::helicityAngle(unsigned int sys,
-		double invMassSq23, double invMassSq13)
+		double invMassSq23, double invMassSq13) const
 {
 	if( sys > 2 )
 		throw WrongVariableID("DalitzKinematics::helicityAngle() | "
@@ -429,7 +415,10 @@ double DalitzKinematics::helicityAngle(unsigned int sys,
 
 double DalitzKinematics::GetPhspVolume()
 {
-	if(!_DPareaCalculated) calcDParea();
+	if(!_DPareaCalculated) {
+		_DParea = calcDParea();
+		_DPareaCalculated = 1;
+	}
 	return _DParea;
 }
 
@@ -453,7 +442,7 @@ double phspFunc(double* x, size_t dim, void* param)
 };
 
 
-void DalitzKinematics::calcDParea()
+double DalitzKinematics::calcDParea() const
 {
 	size_t dim=2;
 	double res=0.0, err=0.0;
@@ -479,12 +468,10 @@ void DalitzKinematics::calcDParea()
 	BOOST_LOG_TRIVIAL(debug)<<"DalitzKinematics::calcDParea() | Dalitz plot area (MC integration): "
 			<<"("<<res<<"+-"<<err<<") GeV^4 relAcc [%]: "<<100*err/res;
 
-	_DParea=res;
-	_DPareaCalculated=1;
-	return;
+	return res;
 }
 
-unsigned int DalitzKinematics::getSpin(unsigned int num)
+unsigned int DalitzKinematics::getSpin(unsigned int num) const
 {
 	switch(num){
 	case 0: return _spinM;
@@ -496,7 +483,7 @@ unsigned int DalitzKinematics::getSpin(unsigned int num)
 			"Wrong particle requested!");
 	return -999;
 }
-unsigned int DalitzKinematics::getSpin(std::string name)
+unsigned int DalitzKinematics::getSpin(std::string name) const
 {
 	if(name==_nameMother) return _spinM;
 	if(name==name1) return spin1;
@@ -506,7 +493,7 @@ unsigned int DalitzKinematics::getSpin(std::string name)
 			"Wrong particle "+name+" requested!");
 }
 
-double DalitzKinematics::GetMass(unsigned int num)
+double DalitzKinematics::GetMass(unsigned int num) const
 {
 	switch(num){
 	case 0: return _M;
@@ -517,7 +504,7 @@ double DalitzKinematics::GetMass(unsigned int num)
 	throw std::runtime_error("DPKinematics::getMass(int) | "
 			"Wrong particle requested!");
 }
-double DalitzKinematics::GetMass(std::string name)
+double DalitzKinematics::GetMass(std::string name) const
 {
 	if(name==_nameMother) return _M;
 	if(name==name1) return m1;
@@ -533,7 +520,7 @@ double DalitzKinematics::getThirdVariableSq(double invmass1sq, double invmass2sq
 	return (_Msq+mSq1+mSq2+mSq3-invmass1sq-invmass2sq);
 }
 
-bool DalitzKinematics::IsWithinPhsp(const dataPoint& point)
+bool DalitzKinematics::IsWithinPhsp(const dataPoint& point) const
 {
 	double m23sq = point.getVal(0);
 	double m13sq = point.getVal(1);
@@ -556,7 +543,7 @@ bool DalitzKinematics::IsWithinPhsp(const dataPoint& point)
 }
 
 bool DalitzKinematics::IsWithinBoxPhsp(int idA, int idB,
-		double varA, double varB)
+		double varA, double varB) const
 {
 	if(!AreBoxVariables(idA, idB))
 		throw std::runtime_error("DalitzKinematics::AreBoxVariables() | "
