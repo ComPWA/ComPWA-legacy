@@ -14,39 +14,44 @@
 #include <cmath>
 
 #include <boost/chrono.hpp>
+namespace bc = boost::chrono;
 
 #include "Core/ParameterList.hpp"
 #include "Core/Parameter.hpp"
 #include "Optimizer/Minuit2/MinuitFcn.hpp"
 #include "Optimizer/ControlParameter.hpp"
-using namespace boost::log;
+
 using namespace ROOT::Minuit2;
 
 MinuitFcn::MinuitFcn(std::shared_ptr<ControlParameter> myData, ParameterList& parList) :
-		  _myDataPtr(myData), _parList(parList){
+		  _myDataPtr(myData), _parList(parList)
+{
 	if (0==_myDataPtr)
 		throw std::runtime_error("MinuitFcn::MinuitFcn() | Data pointer is 0!");
 }
 
-MinuitFcn::~MinuitFcn(){
+MinuitFcn::~MinuitFcn()
+{
+
 }
 
-double MinuitFcn::operator()(const std::vector<double>& x) const{
+double MinuitFcn::operator()(const std::vector<double>& x) const
+{
 	//ParameterList par;
 	std::ostringstream paramOut;
 	for(unsigned int i=0; i<x.size(); i++){
-//		std::shared_ptr<DoubleParameter> actPat = _parList.GetDoubleParameter(_parNames.at(i));
 		std::shared_ptr<DoubleParameter> actPat = _parList.GetDoubleParameter(i);
-//		std::cout<<i<<" "<<actPat->GetName()<<" "<<actPat->GetValue()<<" "<<x[i]<<" "<<actPat->IsFixed()<<std::endl;
+		//std::cout<<i<<" "<<actPat->GetName()<<" "<<actPat->GetValue()
+		//<<" "<<x[i]<<" "<<actPat->IsFixed()<<std::endl;
 		if(!actPat->IsFixed())
 			if(x[i]==x[i]){
 				actPat->SetValue(x[i]);
 				paramOut << x[i] << " ";//print only free parameters
 			}
 	}
-	boost::chrono::system_clock::time_point start = boost::chrono::system_clock::now();
-	double result=_myDataPtr->controlParameter(_parList);
-	boost::chrono::duration<double> sec = boost::chrono::system_clock::now() - start;
+	bc::system_clock::time_point start = bc::system_clock::now();
+	double result = _myDataPtr->controlParameter(_parList);
+	bc::duration<double> sec = bc::system_clock::now() - start;
 
 	BOOST_LOG_TRIVIAL(info) << std::setprecision(10)
 	<< "MinuitFcn: -log(L) = "<< result
@@ -58,7 +63,8 @@ double MinuitFcn::operator()(const std::vector<double>& x) const{
 	return result;
 }
 
-double MinuitFcn::Up() const{
+double MinuitFcn::Up() const
+{
 	return 0.5; //TODO: Setter, LH 0.5, Chi2 1.
 }
 

@@ -731,12 +731,13 @@ public:
 		try{
 			SetMaxValue(max);
 		} catch (ParameterOutOfBound& ex) { }
-		if(!check_bounds(min,max))
+		if(!check_bounds(min_,max_))
 			throw std::runtime_error("DoubleParameter::SetMinMaxValue() | "
 					"Bounds not valid for parameter "+GetName()+": "
 					+std::to_string(GetValue())
-		+" ["+std::to_string((long double)min)+";"
-		+std::to_string((long double)max)+"]!");
+		+" ["+std::to_string((long double)min_)+";"
+		+std::to_string((long double)max_)+"]!");
+		bounds_ = usebounds_ = true;
 	}
 	/*! Setter for lower bound
 	 * Setter for lower bound of the parameter. If a check for valid bounds

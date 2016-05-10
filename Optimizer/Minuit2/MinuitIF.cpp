@@ -31,7 +31,8 @@
 #include "Core/Parameter.hpp"
 #include "Core/FitResult.hpp"
 
-double shiftAngle(double v){
+double shiftAngle(double v)
+{
 	double originalVal = v;
 	double val = originalVal;
 	double pi = PhysConst::instance()->getConstValue("Pi");
@@ -55,7 +56,8 @@ MinuitIF::~MinuitIF()
 
 }
 
-std::shared_ptr<FitResult> MinuitIF::exec(ParameterList& par){
+std::shared_ptr<FitResult> MinuitIF::exec(ParameterList& par)
+{
 	boost::timer time;
 	par.RemoveDuplicates();
 
@@ -70,22 +72,22 @@ std::shared_ptr<FitResult> MinuitIF::exec(ParameterList& par){
 		//otherwise minuit treads this parameter as fixed
 		double error = actPat->GetError();
 		if(error<=0) error = 0.01;
-		if(!actPat->IsFixed() && actPat->GetName().find("phase") != actPat->GetName().npos)
+		if(!actPat->IsFixed() && actPat->GetName().find("phase") != actPat->GetName().npos )
 			actPat->SetValue( shiftAngle(actPat->GetValue()) );
 
 		if( actPat->UseBounds() ){
 			upar.Add(actPat->GetName(), actPat->GetValue(), error,
-					actPat->GetMaxValue(), actPat->GetMinValue());
-		}else
+					actPat->GetMinValue(), actPat->GetMaxValue());
+		} else {
 			upar.Add(actPat->GetName(), actPat->GetValue(),error);
-
-		//_myFcn.setNameID(i, actPat->GetName());
+		}
 
 		if(!actPat->IsFixed())
 			freePars++;
 		if(actPat->IsFixed())
 			upar.Fix(actPat->GetName());
 	}
+
 	BOOST_LOG_TRIVIAL(info) << "MinuitIF::exec() | Number of parameters (free): "
 			<<par.GetNDouble()<<" ("<<freePars<<")";
 
