@@ -80,8 +80,9 @@ ParticleStateInfo DecayXMLConfigReader::parseParticleStateBasics(
   boost::optional<const ptree&> spin_info = pt.get_child_optional("SpinInfo");
   if (spin_info.is_initialized()) {
     ps.spin_information_.J_numerator_ = pt.get_child("SpinInfo").get<
-        unsigned int>("J");
-    ps.spin_information_.J_denominator_ = 1;
+        unsigned int>("J_numerator");
+    ps.spin_information_.J_denominator_ = pt.get_child("SpinInfo").get<
+        unsigned int>("J_denominator");
   }
   else {
     // try to read it from a database
@@ -107,7 +108,7 @@ ParticleStateInfo DecayXMLConfigReader::parseParticleStateRemainders(
   auto found_particle_state = template_particle_states_.find(id);
   if (found_particle_state != template_particle_states_.end()) {
     ParticleStateInfo ps(found_particle_state->second);
-    ps.spin_information_.J_z_numerator_ = pt.get<int>("M");
+    ps.spin_information_.J_z_numerator_ = pt.get<int>("J_z_numerator");
 
     return ps;
   }

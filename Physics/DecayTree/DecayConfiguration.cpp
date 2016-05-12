@@ -38,9 +38,16 @@ void DecayConfiguration::addDecayToCurrentDecayTree(
   // add particles to list if not already existent and get index
   unsigned int mother_state_index = addParticleToList(mother);
 
+  std::cout<<"mother index: "<<mother_state_index<<std::endl;
+
   DecayProductsInfo products;
   products.decay_strength_info_and_phase_ = decay_strength_info_and_phase;
   products.particle_indices_ = addParticlesToList(daughter_states);
+
+  std::cout<<"daughter indices: ";
+  for(auto di : products.particle_indices_)
+    std::cout<<di<<" ";
+  std::cout<<std::endl;
 
   current_concrete_decay_tree_[mother_state_index] = products;
 }
@@ -106,7 +113,7 @@ boost::property_tree::ptree DecayConfiguration::exportConfigurationToPropertyTre
     boost::property_tree::ptree decay_tree_property_tree =
         createPropertyTreeForParticleIndexTree(*particle_index_decay_tree);
 
-    pt.add_child("DecayTreeSetup.DecayTrees", decay_tree_property_tree);
+    pt.add_child("DecayTreeSetup.DecayTrees.DecayTree", decay_tree_property_tree);
 
     // fill the sets with the particles of the final state (only unique id matter here)
 
@@ -171,7 +178,7 @@ void DecayConfiguration::addNextDecayTreeLayerToPropertyTree(
     boost::property_tree::ptree& decay_tree_pt,
     const std::vector<ParticleIndexDecayTree::const_iterator> & current_nodes) const {
   for (auto node = current_nodes.begin(); node != current_nodes.end(); ++node) {
-    decay_tree_pt.add_child("DecayTree.DecayNode",
+    decay_tree_pt.add_child("DecayNode",
         createSingleDecayNodeToPropertyTree(*node));
   }
 }
@@ -294,12 +301,16 @@ ParticleIndexDecayTree::const_iterator DecayConfiguration::determineTopNode(
   }
 
 // if we have more than 1 candidate throw an error...
-  if (candidates.size() > 1)
+  if (candidates.size() > 1) {
+    printDecayTree(decay_topology);
     throw std::runtime_error(
         "The decay topology has more than one top node, meaning the topology is corrupted. Please fix the configuration file and rerun!");
-  else if (candidates.size() == 0)
+  }
+  else if (candidates.size() == 0) {
+    printDecayTree(decay_topology);
     throw std::runtime_error(
         "The decay topology does not have any top node, meaning the topology is corrupted. Please fix the configuration file and rerun!");
+  }
 // otherwise return here
   return candidates[0];
 }
@@ -329,6 +340,16 @@ bool DecayConfiguration::isNodeADaughter(
       return true;
   }
   return false;
+}
+
+void DecayConfiguration::printDecayTree(
+    const ParticleIndexDecayTree& index_decay_tree) const {
+  for (auto const& node : index_decay_tree) {
+    std::cout << node.first << " -> ";
+    for (auto daughter_index : node.second.particle_indices_)
+      std::cout << daughter_index << " ";
+    std::cout << std::endl;
+  }
 }
 
 } /* namespace DecayTree */

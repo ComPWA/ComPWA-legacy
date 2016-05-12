@@ -101,6 +101,8 @@ class DecayGenerator {
 
   // dynamically filled containers
   std::vector<ParticleStateInfo> total_particle_pool_;
+  std::map<unsigned int, std::map<unsigned int, ParticleStateInfo> > current_particle_mapping_;
+  std::vector<ParticleStateInfo> current_total_particle_pool_;
   std::vector<ParticleProperties> allowed_particle_pool_;
   //IndexList mother_state_particle_index_;
   //IndexList final_state_particles_indices_;
@@ -151,7 +153,7 @@ class DecayGenerator {
       const SpinWaveDecayTree& two_body_decay_tree);
 
   std::vector<ParticleStateInfo> createParticleStateInfoCandidates(
-      unsigned int spin_wave_index);
+      unsigned int spin_wave_index,  unsigned int unique_index) const;
 
   DynamicalInfo createDynamicInfo(const ParticleProperties& particle_properties,
       ComPWA::Physics::DynamicalFunctions::DynamicalInfoTypes dynamical_type) const;
@@ -165,6 +167,10 @@ class DecayGenerator {
   bool checkForCorrectIFState(
       const std::vector<
           std::pair<ParticleStateInfo, std::vector<ParticleStateInfo> > >& decay_tree) const;
+
+  ParticleStateInfo createParticleInstance(const ParticleStateInfo& psi);
+
+  const boost::property_tree::ptree createStrengthAndPhase() const;
 
   /* bool validateTwoBodyDecay(const SpinWaveTwoBodyDecay& two_body_decay);
    void addTwoBodyDecayToClipsEnviroment(

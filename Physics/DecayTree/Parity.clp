@@ -11,17 +11,16 @@
 	;get the required information
 	(bind ?angular_momentum (get-spin-qn-with-unique-id (get-required-variable "angular-momentum" ?decay)))
 	(bind ?L (/ (fact-slot-value ?angular_momentum numerator) (fact-slot-value ?angular_momentum denominator)))
-	(printout t ?L " " ?parity_mother " " ?parity_daughter1 " "  ?parity_daughter2 crlf)
+	;(printout t ?L " " ?parity_mother " " ?parity_daughter1 " "  ?parity_daughter2 crlf)
 	(if (<> ?parity_mother (* (* ?parity_daughter1 ?parity_daughter2) (** -1 ?L)))
 	then
 		(if (is-qn-conserved "parity")
 		then
 			(retract ?decay)
 	  	else
-	  	    (printout -t "asdf" crlf)
 	  		(modify ?decay (violating_quantum_number_list ?violating_quantum_number_list "parity"))
 	  	)
-	  	(printout t "decay violates parity!" crlf)
+	  	;(printout t "decay violates parity!" crlf)
 	)
 )
 

@@ -4,7 +4,6 @@
 
 #include "Physics/HelicityAmplitude/TopologyAmplitudeFactory.hpp"
 
-
 namespace ComPWA {
 namespace Physics {
 namespace HelicityFormalism {
@@ -26,12 +25,10 @@ HelicityFormalism::SequentialTwoBodyDecayAmplitude TopologyAmplitudeFactory::gen
   SequentialTwoBodyDecayAmplitude full_decay_amplitude;
 
   const HelicityTree helicity_tree = decay_tree.getHelicityDecayTree();
-  const std::vector<
-      boost::graph_traits<HelicityTree>::vertex_descriptor>& decay_vertex_list =
+  const std::vector<boost::graph_traits<HelicityTree>::vertex_descriptor>& decay_vertex_list =
       decay_tree.getDecayNodesList();
 
-  std::vector<
-      boost::graph_traits<HelicityTree>::vertex_descriptor>::const_iterator decay_vertex_iter;
+  std::vector<boost::graph_traits<HelicityTree>::vertex_descriptor>::const_iterator decay_vertex_iter;
 
   std::stringstream name;
 
@@ -95,9 +92,9 @@ HelicityFormalism::SequentialTwoBodyDecayAmplitude TopologyAmplitudeFactory::gen
         // create new amplitude if not yet existent
         if (two_body_decay_amplitude_list_.find(decay_spin_info)
             == two_body_decay_amplitude_list_.end()) {
-          two_body_decay_amplitude_list_[decay_spin_info] = std::shared_ptr
-              < TwoBodyDecayAmplitude
-              > (new TwoBodyDecayAmplitude(decay_spin_info));
+          two_body_decay_amplitude_list_[decay_spin_info] = std::shared_ptr<
+              TwoBodyDecayAmplitude>(
+              new TwoBodyDecayAmplitude(decay_spin_info));
         }
 
         // do external parameter stuff here
@@ -159,8 +156,8 @@ std::shared_ptr<DoubleParameter> TopologyAmplitudeFactory::getResonanceMassParam
   else {
     // if not then it has to be a final state particle so just create a
     // shared_ptr with that mass here
-    return std::shared_ptr < DoubleParameter
-        > (new DoubleParameter("fs_mass",
+    return std::shared_ptr<DoubleParameter>(
+        new DoubleParameter("fs_mass",
             ComPWA::PhysConst::Instance().findParticle(id_info.particle_id_).mass_));
   }
 }
@@ -177,28 +174,27 @@ std::shared_ptr<DoubleParameter> TopologyAmplitudeFactory::generateDoubleParamet
 
 std::vector<TopologyAmplitude> TopologyAmplitudeFactory::generateTopologyAmplitudes(
     const std::vector<DecayTree>& decay_tree_collection) {
-// first group decay trees according to their topology
-  std::map<TwoBodyDecayTopology, std::vector<DecayTree> > topology_grouped_decay_trees;
-  std::vector<DecayTree>::const_iterator decay_tree_iter;
-  for (decay_tree_iter = decay_tree_collection.begin();
-      decay_tree_iter != decay_tree_collection.end(); ++decay_tree_iter) {
-    topology_grouped_decay_trees[createDecayTopology(*decay_tree_iter)].push_back(
-        *decay_tree_iter);
+  // first group decay trees according to their topology
+  std::vector<TwoBodyDecayTopology> decay_topologies = generateDecayTopologies(
+      decay_tree_collection);
+  std::vector<std::vector<DecayTree> > topology_grouped_decay_trees(decay_topologies.size());
+
+  for (auto const& decay_tree : decay_tree_collection) {
+    auto result = std::find(decay_topologies.begin(), decay_topologies.end(),
+        createDecayTopology(decay_tree));
+
+    unsigned int position = result - decay_topologies.begin();
+
+    topology_grouped_decay_trees[position].push_back(decay_tree);
   }
 
   std::vector<TopologyAmplitude> topology_amps;
 
-  std::map<TwoBodyDecayTopology, std::vector<DecayTree> >::const_iterator grouped_decay_tree_iter;
-  for (grouped_decay_tree_iter = topology_grouped_decay_trees.begin();
-      grouped_decay_tree_iter != topology_grouped_decay_trees.end();
-      ++grouped_decay_tree_iter) {
+  for (auto const& grouped_decay_tree : topology_grouped_decay_trees) {
     TopologyAmplitude topology_amp;
-
-    for (decay_tree_iter = grouped_decay_tree_iter->second.begin();
-        decay_tree_iter != grouped_decay_tree_iter->second.end();
-        ++decay_tree_iter) {
+    for (auto const& decay_tree : grouped_decay_tree) {
       topology_amp.sequential_decay_amplitude_list_.push_back(
-          generateSequentialDecayAmplitude(*decay_tree_iter));
+          generateSequentialDecayAmplitude(decay_tree));
     }
     topology_amps.push_back(topology_amp);
   }
@@ -207,11 +203,11 @@ std::vector<TopologyAmplitude> TopologyAmplitudeFactory::generateTopologyAmplitu
 }
 
 std::vector<TwoBodyDecayTopology> TopologyAmplitudeFactory::generateDecayTopologies(
-    std::vector<DecayTree>& decay_trees) const {
+    const std::vector<DecayTree>& decay_trees) const {
   std::vector<TwoBodyDecayTopology> decay_topologies;
 
-  for (unsigned int i = 0; i < decay_trees.size(); ++i) {
-    TwoBodyDecayTopology dt = createDecayTopology(decay_trees[i]);
+  for (auto const& decay_tree : decay_trees) {
+    TwoBodyDecayTopology dt = createDecayTopology(decay_tree);
     if (decay_topologies.end()
         == std::find(decay_topologies.begin(), decay_topologies.end(), dt)) {
       decay_topologies.push_back(dt);
@@ -225,12 +221,10 @@ TwoBodyDecayTopology TopologyAmplitudeFactory::createDecayTopology(
   TwoBodyDecayTopology decay_topology;
 
   const HelicityTree helicity_tree = decay_tree.getHelicityDecayTree();
-  const std::vector<
-      boost::graph_traits<HelicityTree>::vertex_descriptor>& decay_vertex_list =
+  const std::vector<boost::graph_traits<HelicityTree>::vertex_descriptor>& decay_vertex_list =
       decay_tree.getDecayVertexList();
 
-  std::vector<
-      boost::graph_traits<HelicityTree>::vertex_descriptor>::const_iterator decay_vertex_iter;
+  std::vector<boost::graph_traits<HelicityTree>::vertex_descriptor>::const_iterator decay_vertex_iter;
 
   decay_topology.top_node_id_info_ =
       helicity_tree[decay_tree.getTopNode()].state_info_.pid_information_;
@@ -308,11 +302,10 @@ TwoBodyDecayTopology TopologyAmplitudeFactory::createDecayTopology(
           helicity_tree[*decay_vertex_iter].state_info_.unique_id_;
   }
 
-  // specify the evaluation order...
-  // so the data has to be arranged in the same way the sequential amp is built
-  // up
-  const std::vector<
-      boost::graph_traits<HelicityTree>::vertex_descriptor>& sequential_decay_vertex_list =
+// specify the evaluation order...
+// so the data has to be arranged in the same way the sequential amp is built
+// up
+  const std::vector<boost::graph_traits<HelicityTree>::vertex_descriptor>& sequential_decay_vertex_list =
       decay_tree.getDecayNodesList();
 
   for (decay_vertex_iter = sequential_decay_vertex_list.begin();
@@ -343,18 +336,15 @@ TwoBodyDecayTopology TopologyAmplitudeFactory::createDecayTopology(
 boost::graph_traits<HelicityTree>::vertex_descriptor TopologyAmplitudeFactory::findMotherVertex(
     const boost::graph_traits<HelicityTree>::vertex_descriptor & decay_node,
     const DecayTree& decay_tree) const {
-  // try to find mother of this decay_vertex
-  boost::graph_traits<HelicityTree>::vertex_descriptor mother(
-      decay_node);
+// try to find mother of this decay_vertex
+  boost::graph_traits<HelicityTree>::vertex_descriptor mother(decay_node);
 
   const HelicityTree helicity_tree = decay_tree.getHelicityDecayTree();
-  const std::vector<
-      boost::graph_traits<HelicityTree>::vertex_descriptor>& decay_vertex_list =
+  const std::vector<boost::graph_traits<HelicityTree>::vertex_descriptor>& decay_vertex_list =
       decay_tree.getDecayVertexList();
-  // loop over vertices
+// loop over vertices
 
-  std::vector<
-      boost::graph_traits<HelicityTree>::vertex_descriptor>::const_iterator decay_vertex_iter;
+  std::vector<boost::graph_traits<HelicityTree>::vertex_descriptor>::const_iterator decay_vertex_iter;
 
   for (decay_vertex_iter = decay_vertex_list.begin();
       decay_vertex_iter != decay_vertex_list.end(); ++decay_vertex_iter) {

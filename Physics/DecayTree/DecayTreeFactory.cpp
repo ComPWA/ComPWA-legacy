@@ -144,6 +144,7 @@ bool DecayTreeFactory::isDecayTreeFaulty(const DecayTree& decay_tree) const {
   if (decay_tree.hasCycles() || decay_tree.isDisconnected()) {
     return true;
   }
+  return false;
 }
 
 void DecayTreeFactory::removeUndistinguishableCombinations(

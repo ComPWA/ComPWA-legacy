@@ -20,6 +20,11 @@
 			</spin>
 			<parity>-1</parity>
 			<cparity>-1</cparity>
+			<isospin>
+				<numerator>0</numerator>
+				<denominator>1</denominator>
+				<z_numerator>0</z_numerator>
+			</isospin>
 		</quantum_numbers>
 	</particle>
 	<particle>
@@ -45,6 +50,11 @@
 			</spin>
 			<parity>-1</parity>
 			<cparity>1</cparity>
+			<isospin>
+				<numerator>0</numerator>
+				<denominator>1</denominator>
+				<z_numerator>0</z_numerator>
+			</isospin>
 		</quantum_numbers>
 
 	</particle>
@@ -464,6 +474,7 @@
 			</isospin>
 		</quantum_numbers>
 	</particle>
+	
 	<particleFlatte>
 		<ID>9000111</ID>
 		<name>a0_0</name>

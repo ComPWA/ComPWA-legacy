@@ -56,7 +56,10 @@ int main(int argc, char **argv) {
       dynamic_cast<ComPWA::Physics::HelicityFormalism::HelicityKinematics*>(ComPWA::Physics::HelicityFormalism::HelicityKinematics::createInstance());
 
   //load resonances
-  std::string input_config_file("Physics/HelicityAmplitude/JPSI_ypipi.xml");
+    std::string input_config_file("Physics/HelicityAmplitude/JPSI_ypipi.xml");
+  if(argc > 1) {
+    input_config_file = argv[1];
+  }
 
   ComPWA::Physics::DecayTree::DecayConfiguration decay_configuration;
   ComPWA::Physics::DecayTree::DecayXMLConfigReader xml_reader(
@@ -179,8 +182,10 @@ int main(int argc, char **argv) {
 
     plot_bundle.drawOnCurrentPad();*/
 
+    c.SetLogz(1);
+
     hist.Draw("colz");
-    c.SaveAs("plot.png");
+    c.SaveAs("plot.pdf");
     plot_onlyweight.Draw("colz");
     c.SaveAs("plot_onlyweight.pdf");
 

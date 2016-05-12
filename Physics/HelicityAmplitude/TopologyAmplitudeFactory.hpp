@@ -40,7 +40,8 @@ class TopologyAmplitudeFactory {
   std::shared_ptr<DoubleParameter> generateDoubleParameter(
       const boost::property_tree::ptree& pt, const std::string& name) const;
 
-  TwoBodyDecayTopology createDecayTopology(const ComPWA::Physics::DecayTree::DecayTree& decay_tree) const;
+  TwoBodyDecayTopology createDecayTopology(
+      const ComPWA::Physics::DecayTree::DecayTree& decay_tree) const;
 
   std::pair<std::vector<ParticleStateInfo>, std::vector<ParticleStateInfo> > createDecayProductsFinalStateParticleLists(
       const boost::graph_traits<ComPWA::Physics::DecayTree::HelicityTree>::vertex_descriptor& vertex) const;
@@ -65,9 +66,10 @@ public:
       const std::vector<ComPWA::Physics::DecayTree::DecayTree>& decay_tree_collection);
 
   std::vector<TwoBodyDecayTopology> generateDecayTopologies(
-      std::vector<ComPWA::Physics::DecayTree::DecayTree>& decay_trees) const;
+      const std::vector<ComPWA::Physics::DecayTree::DecayTree>& decay_trees) const;
 
-  Event createDummyEvent(const ComPWA::Physics::DecayTree::DecayTree& decay_tree) const;
+  Event createDummyEvent(
+      const ComPWA::Physics::DecayTree::DecayTree& decay_tree) const;
 };
 
 } /* namespace HelicityFormalism */

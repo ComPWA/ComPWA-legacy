@@ -46,16 +46,18 @@ int main(int argc, char **argv) {
   decay_generator.addFinalStateParticles(if_particle);
   if_particle = decay_generator.createIFParticleInfo("pi0");
   decay_generator.addFinalStateParticles(if_particle);
-  //decay_generator.addFinalStateParticles(if_particle);
+  decay_generator.addFinalStateParticles(if_particle);
 
-  if_particle = decay_generator.createIFParticleInfo("omega");
+  if_particle = decay_generator.createIFParticleInfo("jpsi");
   decay_generator.setTopNodeState(if_particle);
 
   ComPWA::Physics::DecayTree::DecayConfiguration decay_config =
       decay_generator.createDecayConfiguration();
 
   ComPWA::Physics::DecayTree::DecayXMLConfigReader xml_config_io(decay_config);
+  std::cout<<"Saving decay configuration to xml file...\n";
   xml_config_io.writeConfig("test.xml");
+  std::cout<<"Done!\n";
 
   return 0;
 }

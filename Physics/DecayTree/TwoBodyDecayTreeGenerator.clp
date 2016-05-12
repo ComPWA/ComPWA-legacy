@@ -90,17 +90,19 @@
 	?decay_tree <- (DecayTree (available_waves $?available_waves) (decays $?decays)
 					(initial_state_wave ?initial_state_wave) (all_occuring_waves $?all_occuring_waves)
 					(unique_index_wave_mapping $?unique_index_wave_mapping))
+	(test (> (length ?available_waves) 1))
 	=>
-	;(printout t "number of decay trees: " (length (find-all-facts ((?d DecayTree)) TRUE)) crlf)
-	;(printout t "available waves in this tree: " (length ?available_waves) crlf)
+	(printout t "number of decay trees: " (length (find-all-facts ((?d DecayTree)) TRUE)) crlf)
+	(printout t "available waves in this tree: " (length ?available_waves) crlf)
 	(bind ?dummy_wave (assert (SpinWave)))
 	(bind ?dummy_list (create-list (create$)))
-	(if (> (length ?available_waves) 2)
-	then
-	  (bind ?unique_available_waves (get-unique-available-waves ?available_waves ?decay_tree))
-	  (bind ?non_unique_left_overs (get-unique-available-waves-remainder ?available_waves ?decay_tree))
+	
+	(bind ?only_two_waves_left (= 2 (length ?available_waves)))
+
+	(bind ?unique_available_waves (get-unique-available-waves ?available_waves ?decay_tree))
+	(bind ?non_unique_left_overs (get-unique-available-waves-remainder ?available_waves ?decay_tree))
 	  
-	  (foreach ?wave_unique_id ?unique_available_waves
+	(foreach ?wave_unique_id ?unique_available_waves
 	  	(bind ?wave (get-wave-from-unique-index ?wave_unique_id ?decay_tree))
 	  	
 	    (bind ?reduced_available_waves (insert$ (delete-member$ ?unique_available_waves ?wave_unique_id) 1 ?non_unique_left_overs))
@@ -122,7 +124,7 @@
 			(foreach ?qn_name ?qn_name_list
 				(bind ?extended_tree FALSE)
 				(bind ?spin_wave_index 0)
-				;(printout t "qn name " ?qn_name crlf)
+				;(printout t "=========================== qn name " ?qn_name crlf)
 				;(printout t "spin waves " ?spin_waves crlf)
 				(foreach ?spin_wave ?spin_waves
 					(bind ?spin_wave_index (+ 1 ?spin_wave_index))
@@ -132,8 +134,28 @@
 						;(printout t ?qn_name " of " ?qn_name_list crlf)
 						;(printout t (fact-slot-value ?single_qn_decay quantum_number_name) crlf)
 						;(printout t (fact-slot-value ?single_qn_decay mother) " " (fact-slot-value ?single_qn_decay daughters) crlf)
+											
 						(if (is-decay-valid ?single_qn_decay ?wave ?wave2)
 						then
+						    ;(printout t "decay is valid" crlf)
+						    
+						    (bind ?skip_decay FALSE)
+			    		    (if ?only_two_waves_left then
+			              		(if (<> 
+			              				(fact-slot-value ?single_qn_decay mother)
+										(nth$ 
+											(member$ (fact-slot-value ?single_qn_decay quantum_number_name) 
+												(fact-slot-value ?initial_state_wave quantum_number_names)
+											)
+											(fact-slot-value ?initial_state_wave quantum_number_values)
+										)
+								    )
+			              		then
+			                		(bind ?skip_decay TRUE)
+			              		)
+			            	)
+						    
+						    (if (not ?skip_decay) then
 							(bind ?requirements_satisfied TRUE)
 							(bind ?spin_wave_fact TRUE)
 							(if (not (fact-slot-value ?spin_wave quantum_number_names))
@@ -153,7 +175,7 @@
 										)
 									)
 								)
-							else			
+							else		
 								;check the requirements of the new decay
 								(bind ?requirements_satisfied (check-decay-requirements 
 																(nth$ ?spin_wave_index ?single_decay_lists) ?single_qn_decay
@@ -222,6 +244,7 @@
 							else
 								;(printout t "did not meet requirements" crlf)
 							)
+							)
 						)
 					)
 				)
@@ -240,6 +263,7 @@
 				;)
 			)
 			
+			;(printout t "number of decay trees: " (length (find-all-facts ((?d DecayTree)) TRUE)) crlf)
 			;(printout t "we have that many solutions: " (length ?spin_waves) crlf)
 			(bind ?spin_wave_index 0)
 			(foreach ?spin_wave ?spin_waves
@@ -285,109 +309,10 @@
 			)
 			;(printout t "number of decay trees now...: " (length (find-all-facts ((?d DecayTree)) TRUE)) crlf)
 		)
-	  )
-	  (retract ?decay_tree)
-	else
-		(if (= 2 (length ?available_waves))
-		then
-			;(printout t "we are about to finish the decaytree here" crlf)
-
-			(bind ?wave_unique_id (nth$ 1 ?available_waves))
-			(bind ?wave2_unique_id (nth$ 2 ?available_waves))
-			
-			(bind ?dwave1 (get-wave-from-unique-index ?wave_unique_id ?decay_tree))
-			(bind ?dwave2 (get-wave-from-unique-index ?wave2_unique_id ?decay_tree))
+	)
+	(retract ?decay_tree)
+	;(printout t "number of decay trees now...: " (length (find-all-facts ((?d DecayTree)) TRUE)) crlf)
 		
-			(bind ?qn_name_list (get-list-of-qn-names ?dwave1 ?dwave2))
-			;(printout t ?qn_name_list crlf)
-			(bind ?single_decay_list ?dummy_list)
-			(bind ?decay_violating_list ?dummy_list)
-		
-			(bind ?valid_tree TRUE)
-			; go through qn name list
-			(foreach ?qn_name ?qn_name_list
-				(bind ?single_qn_decays (find-all-facts ((?d Decay))
-					(= 0 (str-compare ?d:quantum_number_name ?qn_name))
-				))
-				(printout t ?qn_name crlf)
-				(bind ?found_something FALSE)
-				(foreach ?single_qn_decay ?single_qn_decays
-				    (printout t (fact-slot-value ?single_qn_decay mother) " " (nth$ (member$ ?qn_name (fact-slot-value ?initial_state_wave quantum_number_names))
-							(fact-slot-value ?initial_state_wave quantum_number_values)
-						) crlf)
-						
-					(if (= (fact-slot-value ?single_qn_decay mother)
-						(nth$ (member$ ?qn_name (fact-slot-value ?initial_state_wave quantum_number_names))
-							(fact-slot-value ?initial_state_wave quantum_number_values)
-						)
-						)
-					then
-						(if (is-decay-valid ?single_qn_decay ?dwave1 ?dwave2)
-						then
-							;check the requirements of the new decay
-							(printout t "checking if this decay is good " ?single_qn_decay crlf)
-							(if (check-decay-requirements ?single_decay_list ?single_qn_decay)
-							then
-								(bind ?single_decay_list (create-list (insert$ (fact-slot-value ?single_decay_list values) 1 ?single_qn_decay)))
-								(bind ?found_something TRUE)
-							
-							
-								(bind ?temp_violated_qns_for_decay (fact-slot-value ?single_qn_decay violating_quantum_number_list))
-								(foreach ?violated_qn ?temp_violated_qns_for_decay
-									(bind ?decay_violating_list
-										(create-list (insert$ (fact-slot-value ?decay_violating_list values) 1 ?violated_qn))
-									)
-								)
-								
-								(printout t "this should never happend then..." crlf)
-								
-								(break)
-							)
-						)
-					)
-				)
-				(if (not ?found_something)
-				then 
-				    (printout t "found nothing for " ?qn_name)
-					(bind ?valid_tree FALSE)
-					(break)
-				)
-			)
-			
-			(if ?valid_tree	then
-				(bind ?new_all_occuring_waves ?all_occuring_waves)
-				(bind ?mother_index (member$ ?initial_state_wave ?all_occuring_waves))
-				(if (not ?mother_index) then
-				    (bind ?new_all_occuring_waves (insert$ ?all_occuring_waves (+ 1 (length ?all_occuring_waves)) ?initial_state_wave))
-					(bind ?mother_index (length ?new_all_occuring_waves))
-				)
-				(bind ?mother_wave_unique_id (+ 1 (length ?unique_index_wave_mapping)))
-				
-				(bind ?decay 
-					(assert-index-decay 
-						?mother_wave_unique_id 
-						?wave_unique_id 
-						?wave2_unique_id 
-						?decay_violating_list 
-						?single_decay_list
-					)
-				)
-
-				;(printout t "wuuttt" crlf)
-				
-				(modify ?decay_tree 
-					(decays ?decays ?decay)
-					(available_waves ?mother_wave_unique_id)
-					(all_occuring_waves ?new_all_occuring_waves)
-					(unique_index_wave_mapping ?unique_index_wave_mapping 
-						(assert-index-pair ?mother_wave_unique_id ?mother_index)
-					)
-				)
-			else
-				(retract ?decay_tree)
-			)
-		)
-    )
     (retract ?dummy_list)
 	(retract ?dummy_wave)
 )

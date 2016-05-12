@@ -161,6 +161,17 @@ struct ParticleStateInfo {
   bool operator>(const ParticleStateInfo &rhs) const {
     return (rhs < *this);
   }
+
+  friend std::ostream& operator<<(std::ostream& os,
+      const ParticleStateInfo &rhs) {
+    os << "unique id: " << rhs.unique_id_ << std::endl;
+    os << "name: " << rhs.pid_information_.name_ << std::endl;
+    os << "pid: " << rhs.pid_information_.particle_id_ << std::endl;
+    os << "J: " << rhs.spin_information_.J_numerator_ << "/"
+        << rhs.spin_information_.J_denominator_ << "("
+        << rhs.spin_information_.J_z_numerator_ << ")" << std::endl;
+    return os;
+  }
 };
 
 } /* namespace ComPWA */

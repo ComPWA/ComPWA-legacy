@@ -52,7 +52,7 @@
 		(bind ?comb1 (insert$ ?comb1 1 ?i))
 	)
 	;(printout t ?L " " ?comb1 crlf)
-	(printout t ?L " " (/ ?num_mother ?denom_mother) " " (/ ?num_daughter1 ?denom_daughter1) " "  (/ ?num_daughter2 ?denom_daughter2) crlf)
+	;(printout t ?L " " (/ ?num_mother ?denom_mother) " " (/ ?num_daughter1 ?denom_daughter1) " "  (/ ?num_daughter2 ?denom_daughter2) crlf)
 	(foreach ?val ?comb1
 	do
 		(if (and
@@ -73,7 +73,7 @@
 	then
 		(if (is-qn-conserved "spin")
 		then
-			(printout t "decay violates angular momentum conservation!" crlf)
+			;(printout t "decay violates angular momentum conservation!" crlf)
 			(retract ?decay)
 	  	else
 	  		(modify ?decay (violating_quantum_number_list ?violating_quantum_number_list "spin"))
@@ -88,9 +88,7 @@
 	(SpinQuantumNumber (unique_id ?daughter2_id) (z_component_numerator ?z_num_daughter2) (denominator ?denom_daughter2))
 	?decay <- (Decay (quantum_number_name "spin") (mother ?mother_id) (daughters ?daughter1_id ?daughter2_id $?others))
 	=>
-	(if (< (/ ?num_mother ?denom_mother) 
-			(abs (- (/ ?z_num_daughter1 ?denom_daughter1) (/ ?z_num_daughter2 ?denom_daughter2)))
-		)
+	(if (< (/ ?num_mother ?denom_mother) (abs (+ (/ ?z_num_daughter1 ?denom_daughter1) (/ ?z_num_daughter2 ?denom_daughter2))))
 	then
 	  ;(printout t "decay violates angular momentum conservation!" crlf)
 	  (retract ?decay)

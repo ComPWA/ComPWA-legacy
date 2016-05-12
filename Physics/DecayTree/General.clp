@@ -76,11 +76,30 @@
 	(> ?a ?b)
 )
 
-(deffunction check-multifields-identical (?list1 ?list2)
+(deffunction check-multifields-content-identical (?list1 ?list2)
 	(and 
 		(subsetp ?list1 ?list2) 
 		(subsetp ?list2 ?list1)
 	)
+)
+
+(deffunction check-multifields-identical (?list1 ?list2)
+    (if (<> (length ?list1) (length ?list2)) then (return FALSE))
+    
+	(loop-for-count (?index 1 (length ?list1))
+	do
+	  (bind ?val1 (nth$ ?index ?list1))
+	  (bind ?val2 (nth$ ?index ?list2))
+	  (if (stringp ?val1)
+	  then
+	  	(if (not (stringp ?val2)) then (return FALSE))
+	  	(if (<> 0 (str-compare ?val1 ?val2)) then (return FALSE))
+	  else
+	    (if (stringp ?val2) then (return FALSE))
+	    (if (<> ?val1 ?val2) then (return FALSE))
+	  )
+	)
+	(return TRUE)
 )
 
 (deffunction get-spin-qn-with-unique-id (?uid)
@@ -142,7 +161,7 @@
 	(bind ?return_value (create$ (assert (List (values ?values)))))
 	(if (not (nth$ 1 ?return_value))
 	then 
-		(bind ?return_value (find-fact ((?l List)) (check-multifields-identical ?l:values ?values)))
+		(bind ?return_value (find-fact ((?l List)) (check-multifields-content-identical ?l:values ?values)))
 	)
 	(nth$ 1 ?return_value)
 )
@@ -268,11 +287,27 @@
 	(return ?decay)
 )
 
+(deffunction compare-spinwave-values
+	(?quantum_number_names1 ?quantum_number_names2 ?quantum_number_values1 ?quantum_number_values2)
+	
+	(bind ?correct_fact TRUE)
+	(foreach ?quantum_number_name ?quantum_number_names1
+		(bind ?index1 (member$ ?quantum_number_name ?quantum_number_names1))
+		(bind ?index2 (member$ ?quantum_number_name ?quantum_number_names2))
+		(if (<> (nth$ ?index1 ?quantum_number_values1) (nth$ ?index2 ?quantum_number_values2))
+		then
+		  (bind ?correct_fact FALSE)
+		  (break)
+		)
+	)
+	(return ?correct_fact)
+)
+
 (deffunction find-spinwave-fact-list
 	(?quantum_number_names ?quantum_number_values)
 		
 	(bind ?found_facts (find-all-facts ((?sw SpinWave)) 
-		(check-multifields-identical ?sw:quantum_number_names ?quantum_number_names)
+		(check-multifields-content-identical ?sw:quantum_number_names ?quantum_number_names)
 	))
 	
 	(bind ?result (create$))
@@ -280,17 +315,8 @@
 	(foreach ?sw_fact ?found_facts
 		(bind ?fact_qn_names (fact-slot-value ?sw_fact quantum_number_names))
 		(bind ?fact_qn_values (fact-slot-value ?sw_fact quantum_number_values))
-		(bind ?correct_fact TRUE)
-		(foreach ?quantum_number_name ?quantum_number_names
-			(bind ?fact_qn_index (member$ ?quantum_number_name ?fact_qn_names))
-			(bind ?index (member$ ?quantum_number_name ?quantum_number_names))
-			(if (<> (nth$ ?fact_qn_index ?fact_qn_values) (nth$ ?index ?quantum_number_values))
-			then
-			  (bind ?correct_fact FALSE)
-			  (break)
-			)
-		)
-		(if ?correct_fact
+		
+		(if (compare-spinwave-values ?quantum_number_names ?fact_qn_names ?quantum_number_values ?fact_qn_values)
 		then
 			(bind ?result (insert$ ?result 1 ?sw_fact))
 		    (break)
@@ -306,20 +332,21 @@
 	(nth$ 1 (find-spinwave-fact-list ?quantum_number_names ?quantum_number_values))
 )
 
+(deffunction check-spinwaves-equal (?spinwave1 ?spinwave2)	
+	(bind ?return_value TRUE)
+	(compare-spinwave-values 
+	    (fact-slot-value ?spinwave1 quantum_number_names)
+	    (fact-slot-value ?spinwave2 quantum_number_names)
+		(fact-slot-value ?spinwave1 quantum_number_values)
+		(fact-slot-value ?spinwave2 quantum_number_values)
+	)
+)
+
 (deffunction check-spinwave-equality (?spinwave_index1 ?spinwave_index2 ?all_occuring_waves)
 	(bind ?spinwave1 (nth$ ?spinwave_index1 ?all_occuring_waves))
 	(bind ?spinwave2 (nth$ ?spinwave_index2 ?all_occuring_waves))
 	
-	(bind ?return_value (create$ TRUE))
-	(if (or
-			(not (check-multifields-identical (fact-slot-value ?spinwave1 quantum_number_names) (fact-slot-value ?spinwave2 quantum_number_names)))
-			(not (check-multifields-identical (fact-slot-value ?spinwave1 quantum_number_values) (fact-slot-value ?spinwave2 quantum_number_values)))
-		)
-	then
-		(bind ?return_value (create$ FALSE))
-	) 	
-	
-	(nth$ 1 ?return_value)
+	(check-spinwaves-equal ?spinwave1 ?spinwave2)
 )
 
 (deffunction get-list-of-qn-names
@@ -344,20 +371,20 @@
 
 (deffunction is-decay-valid 
 	(?single_qn_decay ?spin_wave1 ?spin_wave2)
-	(printout t (nth$ 1 (fact-slot-value ?single_qn_decay daughters))  " ==? " (nth$ 
-				(member$ (fact-slot-value ?single_qn_decay quantum_number_name) 
-					(fact-slot-value ?spin_wave1 quantum_number_names)
-				)
-				(fact-slot-value ?spin_wave1 quantum_number_values)
-			)
-			crlf)
-	(printout t (nth$ 2 (fact-slot-value ?single_qn_decay daughters)) " ==? " (nth$ 
-				(member$ (fact-slot-value ?single_qn_decay quantum_number_name) 
-					(fact-slot-value ?spin_wave2 quantum_number_names)
-				)
-				(fact-slot-value ?spin_wave2 quantum_number_values)
-			)
-			crlf)
+	;(printout t (nth$ 1 (fact-slot-value ?single_qn_decay daughters))  " ==? " (nth$ 
+	;			(member$ (fact-slot-value ?single_qn_decay quantum_number_name) 
+	;				(fact-slot-value ?spin_wave1 quantum_number_names)
+	;			)
+	;			(fact-slot-value ?spin_wave1 quantum_number_values)
+	;		)
+	;		crlf)
+	;(printout t (nth$ 2 (fact-slot-value ?single_qn_decay daughters)) " ==? " (nth$ 
+	;			(member$ (fact-slot-value ?single_qn_decay quantum_number_name) 
+	;				(fact-slot-value ?spin_wave2 quantum_number_names)
+	;			)
+	;			(fact-slot-value ?spin_wave2 quantum_number_values)
+	;		)
+	;		crlf)
 			
 	(and 
 		(= (nth$ 1 (fact-slot-value ?single_qn_decay daughters))
@@ -412,7 +439,7 @@
 	(bind ?required_var_values (fact-slot-value ?single_qn_decay required_variables))
 	(loop-for-count (?i 1 (length ?required_var_names))
 	do
-		(printout t (nth$ ?i ?required_var_names) crlf)
+		;(printout t (nth$ ?i ?required_var_names) crlf)
 		(foreach ?single_available_decay (fact-slot-value ?single_qn_decay_list values)
 			;find required variable name
 			(bind ?found_index
@@ -422,18 +449,18 @@
 				)
 			)
 			
-			(bind ?angular_momentum (get-spin-qn-with-unique-id (get-required-variable "angular-momentum" ?single_qn_decay)))
-			(bind ?L (/ (fact-slot-value ?angular_momentum numerator) (fact-slot-value ?angular_momentum denominator)))
-			(printout t ?L " " (fact-slot-value ?angular_momentum z_component_numerator) crlf)
-			(printout t ?found_index " in " (fact-slot-value ?single_available_decay quantum_number_name) crlf)
+			;(bind ?angular_momentum (get-spin-qn-with-unique-id (get-required-variable "angular-momentum" ?single_qn_decay)))
+			;(bind ?L (/ (fact-slot-value ?angular_momentum numerator) (fact-slot-value ?angular_momentum denominator)))
+			;(printout t ?L " " (fact-slot-value ?angular_momentum z_component_numerator) crlf)
+			;(printout t ?found_index " in " (fact-slot-value ?single_available_decay quantum_number_name) crlf)
 			(if ?found_index
 			then
 			
-				(bind ?angular_momentum (get-spin-qn-with-unique-id (get-required-variable "angular-momentum" ?single_available_decay)))
-				(bind ?L (/ (fact-slot-value ?angular_momentum numerator) (fact-slot-value ?angular_momentum denominator)))
-				(printout t "other " ?L crlf)
+				;(bind ?angular_momentum (get-spin-qn-with-unique-id (get-required-variable "angular-momentum" ?single_available_decay)))
+				;(bind ?L (/ (fact-slot-value ?angular_momentum numerator) (fact-slot-value ?angular_momentum denominator)))
+				;(printout t "other " ?L crlf)
 			
-				(printout t (get-required-variable (nth$ ?i ?required_var_names) ?single_available_decay) " ==? " (nth$ ?i ?required_var_values) crlf)
+				;(printout t (get-required-variable (nth$ ?i ?required_var_names) ?single_available_decay) " ==? " (nth$ ?i ?required_var_values) crlf)
 				(if (<> (get-required-variable (nth$ ?i ?required_var_names) ?single_available_decay) (nth$ ?i ?required_var_values))
 				then
 					(return FALSE)

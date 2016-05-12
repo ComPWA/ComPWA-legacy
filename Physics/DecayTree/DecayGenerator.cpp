@@ -125,25 +125,37 @@ void DecayGenerator::addSpinWaveTwoBodyDecayToDecayConfiguration(
     DecayConfiguration& decay_configuration,
     const SpinWaveDecayTree& two_body_decay_tree) {
 
+  std::cout << "adding spin wave decay tree to decay configuration \n";
+  std::cout << "number of decay nodes: "
+      << two_body_decay_tree.unique_decay_node_index_tree_.size() << std::endl;
+
   std::map<unsigned int, std::vector<ParticleStateInfo> > temp_state_pool;
   std::vector<
       std::vector<std::pair<ParticleStateInfo, std::vector<ParticleStateInfo> > > > decay_trees;
 
   for (auto const &decay_node : two_body_decay_tree.unique_decay_node_index_tree_) {
+    std::cout<<"mother: "<<decay_node.first<<std::endl;
     if (temp_state_pool.find(decay_node.first) == temp_state_pool.end()) {
       temp_state_pool[decay_node.first] =
           createParticleStateInfoCandidates(
               two_body_decay_tree.unique_decay_node_index_to_spin_wave_index_mapping_.at(
-                  decay_node.first));
+                  decay_node.first), decay_node.first);
+      //if we could not find any particle for this mother state then just quit here
+      if (temp_state_pool[decay_node.first].size() == 0)
+        return;
     }
 
     std::vector<std::vector<ParticleStateInfo> > daughter_list_combinations;
     for (unsigned int i = 0; i < decay_node.second.size(); ++i) {
+      std::cout<<"daugther: "<<decay_node.second[i]<<std::endl;
       if (temp_state_pool.find(decay_node.second[i]) == temp_state_pool.end()) {
         temp_state_pool[decay_node.second[i]] =
             createParticleStateInfoCandidates(
                 two_body_decay_tree.unique_decay_node_index_to_spin_wave_index_mapping_.at(
-                    decay_node.second[i]));
+                    decay_node.second[i]), decay_node.second[i]);
+        //if we could not find any particle for this daughter state then just quit here
+        if (temp_state_pool[decay_node.second[i]].size() == 0)
+          return;
       }
 
       if (daughter_list_combinations.size() == 0) {
@@ -180,7 +192,12 @@ void DecayGenerator::addSpinWaveTwoBodyDecayToDecayConfiguration(
       for (auto const& daughters : daughter_list_combinations) {
         // do some checks here
         if (!checkMass(mother, daughters))
-          break;
+          continue;
+
+        std::cout << mother << std::endl;
+        for (auto d : daughters) {
+          std::cout << d << std::endl;
+        }
 
         if (decay_trees_empty) {
           std::vector<
@@ -208,36 +225,52 @@ void DecayGenerator::addSpinWaveTwoBodyDecayToDecayConfiguration(
   }
 
   for (auto const& decay_tree : decay_trees) {
-    //if (!checkForCorrectIFState(decay_tree))
-    //   continue;
+    if (!checkForCorrectIFState(decay_tree))
+      continue;
+    // reset particle picking pool
+    current_total_particle_pool_ = total_particle_pool_;
+    current_particle_mapping_.clear();
     std::cout << "decay tree\n";
     // for each possible mother state make copy for all pairs of daughters
     for (auto const &decay_node : decay_tree) {
-      const boost::property_tree::ptree decay_strength_info_and_phase;
+      ParticleStateInfo mother = createParticleInstance(decay_node.first);
+      std::cout << " before!!!: trying to add decay for: "
+          << decay_node.first.pid_information_.name_ << " ("
+          << decay_node.first.unique_id_ << ") -> ";
+      std::vector<ParticleStateInfo> daughters;
+      for (auto const& daughter : decay_node.second) {
+        daughters.push_back(createParticleInstance(daughter));
+        std::cout << daughter.pid_information_.name_ << " ("
+            << daughter.unique_id_ << ") ";
+      }
+      std::cout << std::endl;
+      const boost::property_tree::ptree decay_strength_info_and_phase =
+          createStrengthAndPhase();
 
-      std::cout << "trying to add decay for: "
-          << decay_node.first.pid_information_.name_ << " -> ";
-      for (auto daughter : decay_node.second) {
-        std::cout << daughter.pid_information_.name_ << " ";
+      std::cout << "trying to add decay for: " << mother.pid_information_.name_
+          << " (" << mother.unique_id_ << ") -> ";
+      for (auto daughter : daughters) {
+        std::cout << daughter.pid_information_.name_ << " ("
+            << daughter.unique_id_ << ") ";
       }
       std::cout << std::endl;
 
-      decay_configuration.addDecayToCurrentDecayTree(decay_node.first,
-          decay_node.second, decay_strength_info_and_phase);
+      decay_configuration.addDecayToCurrentDecayTree(mother, daughters,
+          decay_strength_info_and_phase);
     }
     decay_configuration.addCurrentDecayTreeToList();
   }
+  std::cout << "nada\n";
 }
 
 std::vector<ParticleStateInfo> DecayGenerator::createParticleStateInfoCandidates(
-    unsigned int spin_wave_index) {
+    unsigned int spin_wave_index, unsigned int unique_index) const {
   SpinWave spin_wave = all_spin_waves_[spin_wave_index];
 
   std::vector<ParticleStateInfo> candidates;
 
   // find candidates
   for (auto const& allowed_particle : allowed_particle_pool_) {
-
     if (spin_wave.supersetOf(allowed_particle)) {
       ParticleStateInfo ps;
       ps.spin_information_ = spin_wave.getSpinLikeQuantumNumber(
@@ -249,18 +282,8 @@ std::vector<ParticleStateInfo> DecayGenerator::createParticleStateInfoCandidates
       ps.dynamical_information_ = createDynamicInfo(allowed_particle,
           DynamicalFunctions::DynamicalInfoTypes::RELATIVE_BREIT_WIGNER);
 
-      ps.unique_id_ = spin_wave_index;
+      ps.unique_id_ = unique_index;
 
-      auto result =
-          std::find_if(total_particle_pool_.begin(), total_particle_pool_.end(),
-              [&](const ParticleStateInfo& psi) {return psi.pid_information_.particle_id_ == ps.pid_information_.particle_id_;});
-      if (result == total_particle_pool_.end()) {
-        ps.unique_id_ = total_particle_pool_.size() + 1;
-        total_particle_pool_.push_back(ps);
-      }
-      else {
-        ps.unique_id_ = result->unique_id_;
-      }
       candidates.push_back(ps);
     }
   }
@@ -275,25 +298,21 @@ DynamicalInfo DecayGenerator::createDynamicInfo(
 
   if (dynamical_type
       == ComPWA::Physics::DynamicalFunctions::DynamicalInfoTypes::RELATIVE_BREIT_WIGNER) {
-    dynamical_info.put("DynamicalInfo.type",
+    dynamical_info.put("type",
         ComPWA::Physics::DynamicalFunctions::DynamicalTypeToString.at(
             dynamical_type));
-    dynamical_info.put("DynamicalInfo.mass", particle_properties.mass_);
-    dynamical_info.put("DynamicalInfo.mass_fix", 1);
-    dynamical_info.put("DynamicalInfo.mass_min",
-        0.5 * particle_properties.mass_);
-    dynamical_info.put("DynamicalInfo.mass_max",
-        1.5 * particle_properties.mass_);
-    dynamical_info.put("DynamicalInfo.width", particle_properties.width_);
-    dynamical_info.put("DynamicalInfo.width_fix", 1);
-    dynamical_info.put("DynamicalInfo.width_min",
-        0.5 * particle_properties.width_);
-    dynamical_info.put("DynamicalInfo.width_max",
-        10.0 * particle_properties.width_);
-    dynamical_info.put("DynamicalInfo.mesonRadius", 1.0);
-    dynamical_info.put("DynamicalInfo.norm", 1);
-    dynamical_info.put("DynamicalInfo.par1", 1.0);
-    dynamical_info.put("DynamicalInfo.par2", 1.0);
+    dynamical_info.put("mass", particle_properties.mass_);
+    dynamical_info.put("mass_fix", 1);
+    dynamical_info.put("mass_min", 0.5 * particle_properties.mass_);
+    dynamical_info.put("mass_max", 1.5 * particle_properties.mass_);
+    dynamical_info.put("width", particle_properties.width_);
+    dynamical_info.put("width_fix", 1);
+    dynamical_info.put("width_min", 0.5 * particle_properties.width_);
+    dynamical_info.put("width_max", 10.0 * particle_properties.width_);
+    dynamical_info.put("mesonRadius", 1.0);
+    dynamical_info.put("norm", 1);
+    dynamical_info.put("par1", 1.0);
+    dynamical_info.put("par2", 1.0);
   }
 
   return dynamical_info;
@@ -319,14 +338,14 @@ bool DecayGenerator::isDecayValidForTree(
   // check if we can plug this decay on the bottom of our tree
   for (auto decay_node : decay_tree) {
     for (auto daughter : decay_node.second) {
-      if (decay_pair.first.unique_id_ == daughter.unique_id_)
+      if (decay_pair.first == daughter)
         return true;
     }
   }
   // check if we can plug this decay on the top of our tree
   for (auto decay_node : decay_tree) {
     for (auto daughter : decay_pair.second) {
-      if (decay_node.first.unique_id_ == daughter.unique_id_)
+      if (decay_node.first == daughter)
         return true;
     }
   }
@@ -387,6 +406,58 @@ bool DecayGenerator::checkForCorrectIFState(
     }
   }
   return true;
+}
+
+ParticleStateInfo DecayGenerator::createParticleInstance(
+    const ParticleStateInfo& ps) {
+
+  ParticleStateInfo return_ps(ps);
+
+  auto used_result = current_particle_mapping_[ps.unique_id_].find(
+      ps.pid_information_.particle_id_);
+  if (used_result != current_particle_mapping_[ps.unique_id_].end()) {
+    return_ps.unique_id_ = used_result->second.unique_id_;
+  }
+  else {
+    auto result =
+        std::find_if(current_total_particle_pool_.begin(),
+            current_total_particle_pool_.end(),
+            [&](const ParticleStateInfo& psi) {return psi.pid_information_.particle_id_ == ps.pid_information_.particle_id_;});
+
+    // if we could not find anything then just add to the end off the total particle pool
+    if (result == current_total_particle_pool_.end()) {
+      total_particle_pool_.push_back(ps);
+      total_particle_pool_[total_particle_pool_.size() - 1].unique_id_ =
+          total_particle_pool_.size();
+      return_ps.unique_id_ = total_particle_pool_[total_particle_pool_.size() - 1].unique_id_;
+    }
+    else {
+      return_ps.unique_id_ = result->unique_id_;
+      // remove this particle out of the current pool
+      current_total_particle_pool_.erase(
+          std::remove(current_total_particle_pool_.begin(),
+              current_total_particle_pool_.end(), *result),
+          current_total_particle_pool_.end());
+    }
+    current_particle_mapping_[ps.unique_id_][ps.pid_information_.particle_id_] =
+        return_ps;
+  }
+  return return_ps;
+}
+
+const boost::property_tree::ptree DecayGenerator::createStrengthAndPhase() const {
+  boost::property_tree::ptree decay_strength_info_and_phase;
+
+  decay_strength_info_and_phase.put("strength.value", 1.0);
+  decay_strength_info_and_phase.put("strength.fix", 0);
+  decay_strength_info_and_phase.put("strength.min", 0);
+  decay_strength_info_and_phase.put("strength.max", 5);
+  decay_strength_info_and_phase.put("phase.value", 0.0);
+  decay_strength_info_and_phase.put("phase.fix", 0);
+  decay_strength_info_and_phase.put("phase.min", -100);
+  decay_strength_info_and_phase.put("phase.max", 100);
+
+  return decay_strength_info_and_phase;
 }
 
 std::vector<SpinWaveDecayTree> DecayGenerator::generate() {
@@ -1014,7 +1085,7 @@ ComPWA::Spin DecayGenerator::createSpin(
   EnvEval(clips_environment_, clips_query.str().c_str(),
       &spin_quantum_number_fact_list);
 
-//EnvFacts(clips_environment_, "stdout", NULL, -1, -1, -1);
+  //EnvFacts(clips_environment_, "stdout", NULL, -1, -1, 50);
 
   if (0 < GetDOLength(spin_quantum_number_fact_list)) {
     void* spin_quantum_number_fact = GetMFValue(

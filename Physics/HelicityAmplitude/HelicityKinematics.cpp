@@ -115,29 +115,21 @@ void HelicityKinematics::init(
   variable_names_.push_back("helicity_angle_phi");
 
   fsp_combinatorics_ = fsp_combinatorics;
-  // now for each decay topology  create a index list
-  std::vector<TwoBodyDecayTopology>::const_iterator decay_topology_iter;
-  for (decay_topology_iter = decay_topologies_.begin();
-      decay_topology_iter != decay_topologies_.end(); ++decay_topology_iter) {
+  // now for each decay topology create a index list
+  for (auto const& decay_topology : decay_topologies_) {
 
     std::vector<IndexMapping> mappings =
         fsp_combinatorics_.getUniqueParticleMappingsSubsetForTopology(
-            *decay_topology_iter);
+            decay_topology);
 
     std::vector<IndexList> data_point_index_list;
-    for (unsigned int mapping_index = 0; mapping_index < mappings.size();
-        ++mapping_index) {
+    for (auto const& mapping : mappings) {
 
       IndexList topology_amplitude_data_point_index_list;
 
-      for (unsigned int evalution_order_index = 0;
-          evalution_order_index
-              < decay_topology_iter->unique_id_decay_node_order_.size();
-          ++evalution_order_index) {
-        buildDataPointIndexListForTopology(
-            decay_topology_iter->unique_id_decay_node_order_[evalution_order_index],
-            *decay_topology_iter, mappings[mapping_index],
-            topology_amplitude_data_point_index_list);
+      for (auto evalution_order_index : decay_topology.unique_id_decay_node_order_) {
+        buildDataPointIndexListForTopology(evalution_order_index, decay_topology,
+            mapping, topology_amplitude_data_point_index_list);
       }
 
       data_point_index_list.push_back(topology_amplitude_data_point_index_list);
