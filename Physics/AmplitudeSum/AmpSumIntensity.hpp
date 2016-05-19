@@ -55,8 +55,11 @@ public:
 	//! Save resonance from to ptree
 	virtual void Save(std::string fileName);
 
-	//! set efficiency
+	//! Set efficiency
 	virtual void SetEfficiency(std::shared_ptr<Efficiency> eff) { eff_ = eff; };
+
+	//! Get efficiency
+	virtual std::shared_ptr<Efficiency> GetEfficiency() { return eff_; };
 
 	//!Set prefactor
 	virtual void SetPrefactor(std::complex<double> pre);
@@ -67,8 +70,12 @@ public:
 	//! normalization integral for parameters \par (includes calculated efficiency)
 	virtual const double GetIntegral();
 
-	//! calculate interference integral between two amplitudes
+	//! calculate integral between two resonances
 	virtual const double GetIntegralInterference(resonanceItr A, resonanceItr B);
+
+	//! calculate integral for a list of resonances
+	static const double GetIntegralInterference(
+			std::vector<resonanceItr> resList, unsigned int nCalls);
 
 	//! get maximum value of amplitude with current parameters
 	virtual double GetMaxVal( std::shared_ptr<Generator> gen);
@@ -150,6 +157,16 @@ public:
 				_resEnabled, resoList.end(), resoList.end()
 		);
 	}
+
+	//! List of resonance iterators
+	virtual const std::vector<resonanceItr> GetResonanceItrList(){
+		std::vector<resonanceItr> resItrList;
+		auto itr = GetResonanceItrFirst();
+		for( ; itr != GetResonanceItrLast(); ++itr)
+			resItrList.push_back(itr);
+		return resItrList;
+	}
+
 	//! Average width of all resonances
 	virtual double averageWidth();
 
@@ -181,7 +198,9 @@ public:
 	unsigned int GetMcPrecision() { return _nCalls;}
 
 	//! Integral
-	static double integral(const Amplitude* amp, bool eff, int nCalls=30000);
+//	static double integral(Amplitude* amp, bool eff, int nCalls=30000);
+	static double integral(std::vector<resonanceItr> resList,
+			std::shared_ptr<Efficiency> eff, int nCalls=30000);
 
 protected:
 	//! Maximum value of amplitude. Necessary for event generation.

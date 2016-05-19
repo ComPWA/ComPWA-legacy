@@ -318,7 +318,7 @@ void AmpSumIntensity::calcMaxVal(std::shared_ptr<Generator> gen)
 const double AmpSumIntensity::GetIntegral()
 {
 	return AmpSumIntensity::integral(
-			this,
+			GetResonanceItrList(),
 			0, //efficiency not included
 			_nCalls
 	);
@@ -327,8 +327,8 @@ const double AmpSumIntensity::GetIntegral()
 const double AmpSumIntensity::GetNormalization()
 {
 	double res = AmpSumIntensity::integral(
-			this,
-			1,
+			GetResonanceItrList(),
+			GetEfficiency(),
 			_nCalls
 	);
 
@@ -348,7 +348,13 @@ const double AmpSumIntensity::GetNormalization()
 	return res;
 }
 
-double evalEff(double* x, size_t dim, void* param)
+struct GSLOpt_integral
+{
+	std::vector<resonanceItr> resList;
+	std::shared_ptr<Efficiency> eff;
+};
+
+double GSLWrapper_integral(double* x, size_t dim, void* param)
 {
 	/* Calculation amplitude normalization (including efficiency).
 	 * We can not used (invmass, angle) for integration since the full point
@@ -356,7 +362,6 @@ double evalEff(double* x, size_t dim, void* param)
 
 	if(dim!=2) return 0;
 
-	auto amp = static_cast<AmpSumIntensity*>(param);
 	dataPoint point;
 
 	try{
@@ -365,41 +370,28 @@ double evalEff(double* x, size_t dim, void* param)
 		return 0;
 	}
 
-	ParameterList res = amp->intensity(point);
-	double intens = *res.GetDoubleParameter(0);
-	return intens;
-}
+	GSLOpt_integral* opt = static_cast<GSLOpt_integral*>(param);
+	std::vector<resonanceItr> resList = opt->resList;
+	std::shared_ptr<Efficiency> eff = opt->eff;
 
-double evalNoEff(double* x, size_t dim, void* param)
-{
-	/* Calculation amplitude integral (excluding efficiency) */
-	if(dim!=2) return 0;
-	auto amp = static_cast<AmpSumIntensity*>(param);
-	dataPoint point;
-	DalitzKinematics* kin =
-			dynamic_cast<DalitzKinematics*>(Kinematics::instance());
-
-	try{
-		Kinematics::instance()->FillDataPoint(0,1,x[0],x[1],point);
-	} catch (BeyondPhsp& ex){
-		return 0;
+	std::complex<double> sum(0,0);
+	auto it = resList.begin();
+	for( ; it!=resList.end(); ++it){
+		std::complex<double> val = (*(*it))->Evaluate(point);
+		double pointEff = 1.0;
+		if(eff) pointEff = std::sqrt(eff->evaluate(point));
+		sum += val*pointEff;
 	}
-
-	//	int idA = 0;
-	//	int idB = 8;
-	//	if( !Kinematics::instance()->IsWithinBoxPhsp(idA, idB, x[0], x[1]) )
-	//		return 0;
-	//
-	//	point.setVal(idA, x[0]);
-	//	point.setVal(idB, x[1]);
-
-	ParameterList res = amp->intensityNoEff(point);
-	double intens = *res.GetDoubleParameter(0);
-	return intens;
+	return std::norm(sum);
 }
 
-double AmpSumIntensity::integral(const Amplitude* amp, bool eff, int nCalls)
+double AmpSumIntensity::integral(std::vector<resonanceItr> resList,
+		std::shared_ptr<Efficiency> eff, int nCalls)
 {
+	GSLOpt_integral par;
+	par.resList = resList;
+	par.eff = eff;
+
 	/* Integration functionality was tested with a model with only one
 	 * normalized amplitude. The integration result is equal to the
 	 * amplitude coefficient^2.
@@ -419,11 +411,12 @@ double AmpSumIntensity::integral(const Amplitude* amp, bool eff, int nCalls)
 	gsl_rng_env_setup ();
 	const gsl_rng_type *T = gsl_rng_default; //type of random generator
 	gsl_rng *r = gsl_rng_alloc(T); //random generator
-	gsl_monte_function G;
-	if( eff )
-		G = { &evalEff, dim, const_cast<Amplitude*>(amp) };
-	else
-		G = { &evalNoEff, dim, const_cast<Amplitude*>(amp) };
+
+	gsl_monte_function G = {
+			&GSLWrapper_integral,
+			dim,
+			&par
+	};
 
 	/*	Choosing vegas algorithm here, because it is the most accurate:
 	 * 		-> 10^5 calls gives (in my example) an accuracy of 0.03%
@@ -436,15 +429,15 @@ double AmpSumIntensity::integral(const Amplitude* amp, bool eff, int nCalls)
 	//check for NaN
 	if( res!=res )
 		throw std::runtime_error("AmpSumIntensity::integral() |"
-				"Result of amplitude "+amp->GetName()+" is NaN!");
+				"Result is NaN!");
 	//check for inf
 	if( std::isinf(res) )
 		throw std::runtime_error("AmpSumIntensity::integral() |"
-				"Result of amplitude "+amp->GetName()+" is inf!");
+				"Result is inf!");
 	//check for zero
 	if( res == 0 )
 		throw std::runtime_error("AmpSumIntensity::integral() |"
-				"Result of amplitude "+amp->GetName()+" is zero!");
+				"Result is zero!");
 
 	BOOST_LOG_TRIVIAL(debug)<<"AmpSumIntensity::integrate() | Integration result"
 			" for amplitude sum: "<<res<<"+-"<<err<<" relAcc [%]: "<<100*err/res;
@@ -464,7 +457,7 @@ const ParameterList& AmpSumIntensity::intensityInterference(dataPoint& point,
 	return result;
 }
 
-double interferenceIntegralWrapper(double* x, size_t dim, void* param)
+double GSLWrapper_intfIntegral(double* x, size_t dim, void* param)
 {
 	/* Calculation amplitude integral (excluding efficiency) */
 	if(dim!=2) return 0;
@@ -475,31 +468,29 @@ double interferenceIntegralWrapper(double* x, size_t dim, void* param)
 	} catch (BeyondPhsp& ex){
 		return 0;
 	}
+	GSLOpt_integral* opt = static_cast<GSLOpt_integral*>(param);
+	std::vector<resonanceItr> resList = opt->resList;
+	std::shared_ptr<Efficiency> eff = opt->eff;
 
-	AmpSumIntensity* amp = static_cast<AmpSumIntensity*>(param);
-
-	auto A = amp->tmpA;
-	auto B = amp->tmpB;
-	std::complex<double> a = (*A)->Evaluate(point);
-	std::complex<double> b = (*B)->Evaluate(point);
-	std::complex<double> intens = a*std::conj(b) + b*std::conj(a);
-	//	double intens = (
-	//			(*A)->Evaluate(point)*std::conj((*B)->Evaluate(point))
-	//	).real();
-
-	if( intens.imag() )
-		throw std::runtime_error("interferenceIntegralWrapper() | "
-				"Value is not expected to have an imaginary part!");
-
-	if( A == B ) return intens.real()/2;
-	return intens.real();
+	double rm = 0;
+	std::complex<double> sum(0,0);
+	auto it = resList.begin();
+	for( ; it!=resList.end(); ++it){
+		std::complex<double> val = (*(*it))->Evaluate(point);
+		double pointEff = 1.0;
+		if(eff) pointEff = eff->evaluate(point);
+		rm += std::norm(val)*pointEff;
+		sum += val*std::sqrt(pointEff);
+	}
+	return (std::norm(sum) - rm );
 }
 
-
 const double AmpSumIntensity::GetIntegralInterference(
-		resonanceItr A, resonanceItr B)
+		std::vector<resonanceItr> resList,
+		unsigned int nCalls)
 {
-	tmpA = A; tmpB = B;
+	GSLOpt_integral par;
+	par.resList = resList;
 
 	/* Integration functionality was tested with a model with only one
 	 * normalized amplitude. The integration result is equal to the
@@ -518,15 +509,13 @@ const double AmpSumIntensity::GetIntegralInterference(
 	double xLimit_low[2] = {var1_limit.first,var2_limit.first};
 	double xLimit_high[2] = {var1_limit.second,var2_limit.second};
 
-	//	double xLimit_low[2] = {0,0};
-	//	double xLimit_high[2] = {10,10};
 	gsl_rng_env_setup ();
 	const gsl_rng_type *T = gsl_rng_default; //type of random generator
 	gsl_rng *r = gsl_rng_alloc(T); //random generator
 	gsl_monte_function G = {
-			&interferenceIntegralWrapper,
+			&GSLWrapper_intfIntegral,
 			dim,
-			const_cast<AmpSumIntensity*> (this)
+			&par
 	};
 
 	/*	Choosing vegas algorithm here, because it is the most accurate:
@@ -534,16 +523,20 @@ const double AmpSumIntensity::GetIntegralInterference(
 	 * 		 this should be sufficiency for most applications
 	 */
 	gsl_monte_vegas_state *s = gsl_monte_vegas_alloc (dim);
-	gsl_monte_vegas_integrate (&G, xLimit_low, xLimit_high, 2, _nCalls, r,s,&res, &err);
+	gsl_monte_vegas_integrate (&G, xLimit_low, xLimit_high, 2, nCalls, r,s,&res, &err);
 	gsl_monte_vegas_free(s);
-	//	BOOST_LOG_TRIVIAL(debug)<<"AmpSumIntensity::interferenceIntegrate() | "
-	//			"Interference term of "<<(*tmpA)->GetName()<<" and "<<(*tmpB)->GetName()
-	//			<<" : "<<res<<"+-"<<err<<" relAcc [%]: "<<100*err/res;
 
 	return res;
 }
 
+const double AmpSumIntensity::GetIntegralInterference(
+		resonanceItr A, resonanceItr B){
+	std::vector<resonanceItr> par;
+	par.push_back(A);
+	par.push_back(B);
+	return GetIntegralInterference(par, _nCalls);
 
+}
 
 const double AmpSumIntensity::sliceIntensity(dataPoint& dataP,
 		std::complex<double>* reso, unsigned int nResos)
@@ -617,7 +610,7 @@ void AmpSumIntensity::printFractions()
 	outStr<<"Fit fractions for all amplitudes: \n";
 	double sumFrac=0;
 	auto it = GetResonanceItrFirst();
-	double norm = 1/integral(this, 0, _nCalls);
+	double norm = 1/integral(GetResonanceItrList(), 0, _nCalls);
 	for( ; it != GetResonanceItrLast(); ++it){
 		double frac = (*it)->GetMagnitude()*norm;
 		sumFrac+=frac;
@@ -633,6 +626,9 @@ void AmpSumIntensity::printFractions()
 double AmpSumIntensity::GetIntValue(std::string var1, double min1, double max1,
 		std::string var2, double min2, double max2)
 {
+	GSLOpt_integral par;
+	par.resList = GetResonanceItrList();
+	par.eff = GetEfficiency();
 	/*
 	 * Integrates in \var1 from \min1 to \max1 and in \var2 from \min2 to \max2.
 	 * Is intended to be used for calculation of bin content.
@@ -665,7 +661,8 @@ double AmpSumIntensity::GetIntValue(std::string var1, double min1, double max1,
 		xLimit_high[0] = _max2;
 		xLimit_high[1] = _max1;
 	} else {
-		BOOST_LOG_TRIVIAL(error) << "AmpSumIntensity::getIntValue() wrong variables specified!";
+		BOOST_LOG_TRIVIAL(error) << "AmpSumIntensity::getIntValue() | "
+				"Wrong variables specified!";
 		return -999;
 	}
 
@@ -673,7 +670,11 @@ double AmpSumIntensity::GetIntValue(std::string var1, double min1, double max1,
 	gsl_rng_env_setup ();
 	const gsl_rng_type *T = gsl_rng_default; //type of random generator
 	gsl_rng *r = gsl_rng_alloc(T); //random generator
-	gsl_monte_function G = {&evalEff,dim, const_cast<AmpSumIntensity*> (this)};
+	gsl_monte_function G = {
+			&GSLWrapper_integral,
+			dim,
+			&par
+	};
 
 	/*	Choosing vegas algorithm here, because it is the most accurate:
 	 * 		-> 10^5 calls gives (in my example) an accuracy of 0.03%
