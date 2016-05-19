@@ -59,6 +59,8 @@ public:
 
 	//! Set efficiency
 	virtual void SetEfficiency(std::shared_ptr<Efficiency> eff) {};
+	//! Get efficiency
+	virtual std::shared_ptr<Efficiency> GetEfficiency() {};
 
 	//! Get maximum value of amplitude
 	virtual double GetMaxVal(std::shared_ptr<Generator> gen) = 0;
@@ -121,6 +123,8 @@ public:
 	virtual resonanceItr GetResonanceItrFirst() {};
 	//! Iterator on last resonance (which is enabled)
 	virtual resonanceItr GetResonanceItrLast() {};
+	//! Iterator on last resonance (which is enabled)
+	virtual const std::vector<resonanceItr> GetResonanceItrList() {};
 
 	//---------- related to FunctionTree -------------
 	//! Check of tree is available
@@ -282,8 +286,11 @@ public:
 		return tmp;
 	}
 
-	//! set efficiency
+	//! Set efficiency
 	virtual void SetEfficiency(std::shared_ptr<Efficiency> eff) { eff_ = eff; }
+
+	//! Get efficiency
+	virtual std::shared_ptr<Efficiency> GetEfficiency() { return eff_; };
 
 	virtual const double GetIntegral() {
 		return Kinematics::instance()->GetPhspVolume();
