@@ -539,8 +539,9 @@ const double AmpSumIntensity::GetIntegralInterference(
 	std::vector<resonanceItr> par;
 	par.push_back(A);
 	par.push_back(B);
-	return GetIntegralInterference(par, _nCalls);
-
+	double val = GetIntegralInterference(par, _nCalls);
+	if (A == B) val /=2 ;
+	return val;
 }
 
 const double AmpSumIntensity::sliceIntensity(dataPoint& dataP,

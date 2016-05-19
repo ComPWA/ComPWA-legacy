@@ -216,6 +216,12 @@ void FitResult::calcFraction(ParameterList& parList, std::shared_ptr<Amplitude> 
 	double norm = 1.0;
 	std::string ampName = amp->GetName();
 
+	auto it = amp->GetResonanceItrFirst();
+	std::vector<resonanceItr> resoList;
+	for( ; it != amp->GetResonanceItrLast(); ++it){ //fill matrix
+		if( (*it)->GetName().find("_CP")!=std::string::npos ) continue;
+		resoList.push_back(it);
+	}
 	/* Unbinned efficiency correction in the FunctionTree does not provide
 	 * an integral w/o efficiency correction. We have to calculate it here.
 	 */
@@ -231,7 +237,7 @@ void FitResult::calcFraction(ParameterList& parList, std::shared_ptr<Amplitude> 
 			"Amplitude "<<ampName<< " Norm="<<norm;
 
 	//Start loop over resonances
-	auto it = amp->GetResonanceItrFirst();
+	it = amp->GetResonanceItrFirst();
 	for( ; it != amp->GetResonanceItrLast(); ++it){ //fill matrix
 		if( (*it)->GetName().find("_CP")!=std::string::npos ) continue;
 
