@@ -172,108 +172,113 @@ const ParameterList& Data::getListOfData()
 
 	auto itr = fEvents.begin();
 	for( ; itr!=fEvents.end(); ++itr){
-		dataPoint point(*itr);
-		eff.push_back(point.getEfficiency());
-		weight.push_back(point.getWeight());
-		for(int i=0; i<size; ++i)
-			data.at(i).push_back(point.getVal(i));
+	   dataPoint  point;
+	   try{
+		point = dataPoint(*itr);
+	   } catch(BeyondPhsp& ex) {
+		  continue;
+	   }
+	   eff.push_back(point.getEfficiency());
+	   weight.push_back(point.getWeight());
+	   for(int i=0; i<size; ++i)
+		  data.at(i).push_back(point.getVal(i));
 	}
 
 	//Add data vector to ParameterList
 	for(int i=0; i<size; ++i){
-		std::shared_ptr<MultiDouble> tmp(
-				new MultiDouble(
-						Kinematics::instance()->GetVarNames().at(i),
-						data.at(i)
+	   std::shared_ptr<MultiDouble> tmp(
+			 new MultiDouble(
+				Kinematics::instance()->GetVarNames().at(i),
+				data.at(i)
 				)
-		);
-		dataList.AddParameter(tmp);
+			 );
+	   dataList.AddParameter(tmp);
 	}
 
 	//Adding efficiency at the end
 	dataList.AddParameter(
-			std::shared_ptr<MultiDouble>(
-					new MultiDouble(
-							"Efficiency",
-							eff
-					)
-			)
-	);
+		  std::shared_ptr<MultiDouble>(
+			 new MultiDouble(
+				"Efficiency",
+				eff
+				)
+			 )
+		  );
 
 	//Adding weight at the end
 	dataList.AddParameter(
-			std::shared_ptr<MultiDouble>(
-					new MultiDouble(
-							"Weight",
-							weight
-					)
-			)
-	);
+		  std::shared_ptr<MultiDouble>(
+			 new MultiDouble(
+				"Weight",
+				weight
+				)
+			 )
+		  );
 
 	return dataList;
 }
 
 std::vector<dataPoint> Data::getDataPoints() const
 {
-	std::vector<dataPoint> vecPoint;
-	for(int i=0; i<fEvents.size(); i++){
-		dataPoint point;
-		try{
-			point = dataPoint(fEvents.at(i));
-		} catch (BeyondPhsp& ex){ //event outside phase, remove
-			continue;
-		}
-		vecPoint.push_back(point);
-	}
-	return vecPoint;
+   std::vector<dataPoint> vecPoint;
+   for(int i=0; i<fEvents.size(); i++){
+	  dataPoint point;
+	  try{
+		 point = dataPoint(fEvents.at(i));
+	  } catch (BeyondPhsp& ex){ //event outside phase, remove
+		 continue;
+	  }
+	  vecPoint.push_back(point);
+   }
+   return vecPoint;
 }
 
 void Data::setResolution(std::shared_ptr<Resolution> res)
 {
-	for(int i=0; i<fEvents.size(); i++)
-		res->resolution(fEvents.at(i));
+   for(int i=0; i<fEvents.size(); i++)
+	  res->resolution(fEvents.at(i));
 }
 
 void Data::Add(Data& otherSample)
 {
-	std::vector<Event> otherEvents = otherSample.getEvents();
-	fEvents.insert(fEvents.end(), otherEvents.begin(), otherEvents.end());
-	if(otherSample.getMaxWeight() > maxWeight)
-		maxWeight = otherSample.getMaxWeight();
-	return;
+   std::vector<Event> otherEvents = otherSample.getEvents();
+   fEvents.insert(fEvents.end(), otherEvents.begin(), otherEvents.end());
+   if(otherSample.getMaxWeight() > maxWeight)
+	  maxWeight = otherSample.getMaxWeight();
+   return;
 }
 
 void Data::applyCorrection(DataCorrection& corr)
 {
-	double sumWeightSq=0;
-	for(int i=0; i<fEvents.size(); i++){
-		double w = corr.getCorrection(fEvents.at(i));
-		if( w < 0 )
-			throw std::runtime_error("Data::applyCorrection() | "
-					"Negative weight!");
-		sumWeightSq += w*w;
-		double oldW = fEvents.at(i).getWeight();
-		if(w*oldW > maxWeight) maxWeight = w*oldW;
-		fEvents.at(i).setWeight(w*oldW);
-	}
-	BOOST_LOG_TRIVIAL(info)<<"Data::applyCorrection() | "
-			"Sample corrected! Sum of weights squared is "<<sumWeightSq;
-	return;
+   double sumWeightSq=0;
+   for(int i=0; i<fEvents.size(); i++){
+	  double w = corr.getCorrection(fEvents.at(i));
+	  if( w < 0 )
+		 throw std::runtime_error("Data::applyCorrection() | "
+			   "Negative weight!");
+	  sumWeightSq += w*w;
+	  double oldW = fEvents.at(i).getWeight();
+	  if(w*oldW > maxWeight) maxWeight = w*oldW;
+	  fEvents.at(i).setWeight(w*oldW);
+   }
+   BOOST_LOG_TRIVIAL(info)<<"Data::applyCorrection() | "
+	  "Sample corrected! Sum of weights squared is "<<sumWeightSq;
+   return;
 }
 
 const int Data::getBin(const int i, double& m12, double& weight)
 {
-	if(!fBinned) return -1;
+   if(!fBinned) return -1;
 
-	m12 = fBins[i].first;
-	weight = fBins[i].second;
+   m12 = fBins[i].first;
+   weight = fBins[i].second;
 
-	return 1;
+   return 1;
 }
 
 //! Add event to data sample
 void Data::pushEvent(const Event& evt)
 {
-	fEvents.push_back(evt);
-	if( evt.getWeight() > maxWeight ) maxWeight = evt.getWeight();
+   fEvents.push_back(evt);
+   if( evt.getWeight() > maxWeight ) maxWeight = evt.getWeight();
 }
