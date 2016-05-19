@@ -70,6 +70,9 @@ public:
 	//! normalization integral for parameters \par (includes calculated efficiency)
 	virtual const double GetIntegral();
 
+	//! normalization integral for parameters \par (includes calculated efficiency)
+	virtual const double GetIntegral(std::vector<resonanceItr> resoList);
+
 	//! calculate integral between two resonances
 	virtual const double GetIntegralInterference(resonanceItr A, resonanceItr B);
 

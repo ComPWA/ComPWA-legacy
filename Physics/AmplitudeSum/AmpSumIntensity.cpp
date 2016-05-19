@@ -317,8 +317,13 @@ void AmpSumIntensity::calcMaxVal(std::shared_ptr<Generator> gen)
 
 const double AmpSumIntensity::GetIntegral()
 {
+	return GetIntegral(GetResonanceItrList());
+}
+
+const double AmpSumIntensity::GetIntegral(std::vector<resonanceItr> resoList)
+{
 	return AmpSumIntensity::integral(
-			GetResonanceItrList(),
+			resoList,
 			0, //efficiency not included
 			_nCalls
 	);
