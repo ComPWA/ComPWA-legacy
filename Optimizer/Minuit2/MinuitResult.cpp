@@ -266,8 +266,10 @@ void MinuitResult::genOutput(std::ostream& out, std::string opt)
 	 * IEEE Transacrions on Automatic Control 19, No.6:716-723 (1974) */
 	ParameterList frac;
 	_ampVec.at(0)->GetFitFractions(frac);
-	out<<"AIC: "<<calcAIC(frac)-penalty<<std::endl;
-	out<<"BIC: "<<calcBIC(frac)-penalty<<std::endl;
+	AIC = calcAIC(frac)-penalty;
+	BIC = calcBIC(frac)-penalty;
+	out<<"AIC: "<<AIC<<std::endl;
+	out<<"BIC: "<<BIC<<std::endl;
 	double r=0;
 	for(int i=0; i<fractionList.GetNDouble(); i++){
 		double val = std::fabs(fractionList.GetDoubleParameter(i)->GetValue());

@@ -116,6 +116,9 @@ protected:
 	//! Global correlation coefficients
 	std::vector<double> globalCC;
 
+	double AIC;
+	double BIC;
+
 	//====== OUTPUT =====
 	//! Simplified fit result output
 	void genSimpleOutput(std::ostream& out);
@@ -175,6 +178,8 @@ private:
 		ar & BOOST_SERIALIZATION_NVP(initialLH);
 		ar & BOOST_SERIALIZATION_NVP(finalLH);
 		ar & BOOST_SERIALIZATION_NVP(penalty);
+		ar & BOOST_SERIALIZATION_NVP(AIC);
+		ar & BOOST_SERIALIZATION_NVP(BIC);
 		ar & BOOST_SERIALIZATION_NVP(nEvents);
 		ar & BOOST_SERIALIZATION_NVP(edm);
 		ar & BOOST_SERIALIZATION_NVP(cov);
