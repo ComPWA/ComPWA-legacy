@@ -37,14 +37,11 @@ public:
 		return tmp;
 	}
 
+	void to_str();
+
 	const double GetIntegral();
 	const double GetNormalization();
 	double GetMaxVal(std::shared_ptr<Generator> gen);
-
-	const ParameterList& intensity(dataPoint& point);
-	const ParameterList& intensity(std::vector<double> point);
-	const ParameterList& intensityNoEff(dataPoint& point);
-
 	/** Integral value of amplitude in certain boundary
 	 * Used for plotting a projection of a function in \p var1 in
 	 * bin [\p min1, \p min2]. In this case we have to integrate over an
@@ -60,8 +57,11 @@ public:
 	virtual double GetIntValue(std::string var1, double min1, double max1,
 			std::string var2, double min2, double max2) { };
 
-	void to_str();
+	const ParameterList& intensity(dataPoint& point);
+	const ParameterList& intensity(std::vector<double> point);
+	const ParameterList& intensityNoEff(dataPoint& point);
 
+	virtual void GetFitFractions(ParameterList& parList ) { };
 };
 
 } /* namespace HelicityFormalism */

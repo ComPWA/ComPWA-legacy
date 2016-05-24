@@ -5,10 +5,7 @@
  *      Author: weidenka
  */
 
-
-
 #include "Core/Amplitude.hpp"
-
 
 void Amplitude::UpdateParameters(ParameterList& par)
 {
@@ -47,6 +44,17 @@ void Amplitude::FillAmpParameterToList(
 	list.RemoveDuplicates(); //Parameter should contain each enry only once
 }
 
+double Amplitude::intensityInterference(dataPoint& point,
+		resonanceItr A, resonanceItr B)
+{
+	double intens = (
+			(*A)->Evaluate(point)*std::conj((*B)->Evaluate(point))
+	).real();
+	if( A != B ) intens = 2*intens;
+
+	return intens;
+}
+
 void Amplitude::SetAmpEfficiency(
 		std::vector<std::shared_ptr<Amplitude> > ampVec,
 		std::shared_ptr<Efficiency> eff)
@@ -73,4 +81,28 @@ bool Amplitude::AmpHasTree(std::vector<std::shared_ptr<Amplitude> > ampVec)
 		if( !(*it)->hasTree() ) return 0;
 
 	return 1;
+}
+
+void Amplitude::GetAmpFitFractions(
+		std::vector<std::shared_ptr<Amplitude> > ampVec,
+		ParameterList& parList)
+{
+	if( !ampVec.size() )
+		throw std::runtime_error("FitResult::calcFractions() | "
+				"No amplitude set, can't calculate fractions!");
+
+	if(parList.GetNDouble())
+		throw std::runtime_error("FitResult::calcFractions() | "
+				"ParameterList not empty!");
+
+	//	_amp->UpdateParameters(finalParameters); //update parameters in amplitude
+	double norm =-1;
+
+	//Start loop over amplitudes
+	auto ampItr = ampVec.begin();
+	for( ; ampItr != ampVec.end(); ++ampItr){
+		(*ampItr)->GetFitFractions(parList);
+	}
+
+	return;
 }

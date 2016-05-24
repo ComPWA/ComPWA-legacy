@@ -45,64 +45,75 @@ class Amplitude
 
 public:
 
-	Amplitude(std::string name="") : _name(name) { }
+	Amplitude(std::string name="",
+			std::shared_ptr<Efficiency> eff	= std::shared_ptr<Efficiency>(new UnitEfficiency)) :
+				_name(name), eff_(eff) { }
 
-	virtual ~Amplitude()
-	{ /* nothing */	}
+	virtual ~Amplitude() { /* nothing */	}
 
 	virtual Amplitude* Clone(std::string newName="") const = 0;
 
+	//============ SET/GET =================
 	//! Get name of amplitude
 	virtual std::string GetName() const { return _name; }
+
 	//! Set name of amplitude
 	virtual void SetName(std::string name) { _name = name; }
 
-	//! Set efficiency
-	virtual void SetEfficiency(std::shared_ptr<Efficiency> eff) {};
 	//! Get efficiency
-	virtual std::shared_ptr<Efficiency> GetEfficiency() {};
+	virtual std::shared_ptr<Efficiency> GetEfficiency() { return eff_; };
 
-	//! Get maximum value of amplitude
-	virtual double GetMaxVal(std::shared_ptr<Generator> gen) = 0;
-	//! calculate normalization of amplitude intensity. This includes efficiency correction
-	virtual const double GetNormalization() = 0;
-	//! calculate integral of amplitude intensity. This integral excludes efficiency correction
-	virtual const double GetIntegral() =0;
-	//! get (interference) integral for resonances \param id1 and \param id2
-	virtual const double GetIntegralInterference(resonanceItr A, resonanceItr B)
-	{ return -999; };
+	//! Set efficiency
+	virtual void SetEfficiency(std::shared_ptr<Efficiency> eff) { eff_ = eff; };
 
-	virtual const ParameterList& intensity( dataPoint& point ) = 0;
-	virtual const ParameterList& intensity(	std::vector<double> point ) = 0;
-	virtual const ParameterList& intensityNoEff( dataPoint& point ) = 0;
-	/**! Evaluate interference term of total amplitude */
-	virtual const ParameterList& intensityInterference(dataPoint& point,
-			resonanceItr A, resonanceItr B) { };
-
-	virtual void UpdateParameters(ParameterList& par);
-
-	/**! Add parameters to list
-	 * Add parameters only to list if not already in
-	 * @param par
+	/**! Set efficiencies for a vector of amplitudes
+	 *
+	 * @param ampVec Vector of amplitudes
+	 * @param eff New efficiency object
 	 */
-	virtual void FillParameterList(ParameterList& par) const;
+	static void SetAmpEfficiency( std::vector<std::shared_ptr<Amplitude> > ampVec,
+		std::shared_ptr<Efficiency> eff);
 
+	/** Get maximum value of amplitude
+	 * Maximum is numerically calculated using a random number generator
+	 * @param gen Random number generator
+	 * @return
+	 */
+	virtual double GetMaxVal(std::shared_ptr<Generator> gen) = 0;
+
+	//============= PRINTING =====================
+	//! Print amplitude to logging system
 	virtual void to_str() = 0;
 
-	/** Operator for coherent addition of amplitudes
+	//=========== INTEGRATION/NORMALIZATION =================
+	/** Calculate normalization of amplitude.
+	 * The integral includes efficiency correction
+	 */
+	virtual const double GetNormalization() = 0;
+
+	/** Calculate integral of amplitude.
+	 * The integral does not include efficiency correction
+	 */
+	virtual const double GetIntegral() = 0;
+
+	/** Calculate integral of amplitudes for a given vector.
+	 * The integral does not include efficiency correction
 	 *
-	 * @param other
+	 * @param resoList Vector of amplitudes
 	 * @return
 	 */
-	//	virtual const Amplitude operator+(const Amplitude &other) const = 0;
+	virtual const double GetIntegral(std::vector<resonanceItr> resoList) {
+		return 0;
+	};
 
-	/** Operator for coherent addition of amplitudes
+	/** Calculate interference integral
 	 *
-	 * @param rhs
-	 * @return
+	 * @param A First resonance
+	 * @param B Second resonance
+	 * @return a*conj(b)+conj(a)*b
 	 */
-	//    virtual Amplitude & operator+=(const Amplitude &rhs) = 0;
-
+	virtual const double GetIntegralInterference(resonanceItr A, resonanceItr B)
+	{ return -999; };
 
 	/** Integral value of amplitude in certain boundary
 	 * Used for plotting a projection of a function in \p var1 in
@@ -119,48 +130,100 @@ public:
 	virtual double GetIntValue(std::string var1, double min1, double max1,
 			std::string var2, double min2, double max2) = 0;
 
-	//! Iterator on first resonance (which is enabled)
-	virtual resonanceItr GetResonanceItrFirst() {};
-	//! Iterator on last resonance (which is enabled)
-	virtual resonanceItr GetResonanceItrLast() {};
-	//! Iterator on last resonance (which is enabled)
-	virtual const std::vector<resonanceItr> GetResonanceItrList() {};
-
-	//---------- related to FunctionTree -------------
-	//! Check of tree is available
-	virtual bool hasTree(){ return 0; }
-	//! Getter function for basic amp tree
-	virtual std::shared_ptr<FunctionTree> GetTree(
-			ParameterList&, ParameterList&, ParameterList&) {
-		return std::shared_ptr<FunctionTree>();
-	}
-
-	//---------- static functions to operate on vectors of amplitudes ---------
-	/**! Add parameters to list
-	 * Add parameter only if not already in list
-	 * @param ampVec
-	 * @param list
-	 */
-	static void FillAmpParameterToList(
-			std::vector<std::shared_ptr<Amplitude> > ampVec,
-			ParameterList& list);
-
-	/**! Update parameters
+	//=========== EVALUATION =================
+	/** Calculate intensity of amplitude at point in phase-space
 	 *
-	 * @param ampVec
-	 * @param list
+	 * @param point Data point
+	 * @return
+	 */
+	virtual const ParameterList& intensity( dataPoint& point ) = 0;
+
+	/** Calculate intensity of amplitude at point in phase-space
+	 *
+	 * @param point Data point
+	 * @return
+	 */
+	virtual const ParameterList& intensity(	std::vector<double> point ) = 0;
+
+	/** Calculate intensity of amplitude at point in phase-space
+	 * Intensity is calculated excluding efficiency correction
+	 * @param point Data point
+	 * @return
+	 */
+	virtual const ParameterList& intensityNoEff( dataPoint& point ) = 0;
+
+	/**! Evaluate interference term of two resonances
+	 *
+	 * @param point Data point
+	 * @param A First resonance
+	 * @param B Second resonance
+	 * @return
+	 */
+	static double intensityInterference(dataPoint& point,
+			resonanceItr A, resonanceItr B);
+
+	//=========== PARAMETERS =================
+	/** Update parameters of resonance
+	 *
+	 * @param par New list of parameters
+	 */
+	virtual void UpdateParameters(ParameterList& par);
+
+	/**! Update parameters of vector of amplitudes
+	 *
+	 * @param ampVec Vector of amplitudes
+	 * @param list New list of parameters
 	 */
 	static void UpdateAmpParameterList(
 			std::vector<std::shared_ptr<Amplitude> > ampVec,
 			ParameterList& list);
 
-	/**! Set efficiencies for a vector of amplitudes
+	/**! Add amplitude parameters to list
+	 * Add parameters only to list if not already in
+	 * @param list Parameter list to be filled
+	 */
+	virtual void FillParameterList(ParameterList& list) const;
+
+	/**! Add amplitude parameters to list
+	 * Add parameter only if not already in list
+	 * @param ampVec Vector of amplitudes
+	 * @param list Parameter List to be filled
+	 */
+	static void FillAmpParameterToList(
+			std::vector<std::shared_ptr<Amplitude> > ampVec,
+			ParameterList& list);
+
+	//! Calculate & fill fit fractions of this amplitude to ParameterList
+	virtual void GetFitFractions(ParameterList& parList) = 0;
+
+	/**! Calculate & fill fit fractions of amplitude Vector to list
 	 *
 	 * @param ampVec Vector of amplitudes
-	 * @param eff New efficiency object
+	 * @param list Parameter List to be filled
 	 */
-	static void SetAmpEfficiency( std::vector<std::shared_ptr<Amplitude> > ampVec,
-		std::shared_ptr<Efficiency> eff);
+	static void GetAmpFitFractions(
+			std::vector<std::shared_ptr<Amplitude> > ampVec,
+			ParameterList& list);
+
+	//============= ACCESS TO RESONANCES ================
+	//! Iterator on first resonance (which is enabled)
+	virtual resonanceItr GetResonanceItrFirst() {};
+
+	//! Iterator on last resonance (which is enabled)
+	virtual resonanceItr GetResonanceItrLast() {};
+
+	//! Iterator on last resonance (which is enabled)
+	virtual const std::vector<resonanceItr> GetResonanceItrList() {};
+
+	//========== FUNCTIONTREE =============
+	//! Check of tree is available
+	virtual bool hasTree(){ return 0; }
+
+	//! Getter function for basic amp tree
+	virtual std::shared_ptr<FunctionTree> GetTree(
+			ParameterList&, ParameterList&, ParameterList&) {
+		return std::shared_ptr<FunctionTree>();
+	}
 
 	/**! Check if amplitudes have a FunctionTree
 	 *
@@ -172,17 +235,20 @@ public:
 	unsigned int GetMcPrecision() { return 30000;}
 
 protected:
-	//Name
+	//! Name
 	std::string _name;
 
-	//need to store this object for boost::filter_iterator
+	//! need to store this object for boost::filter_iterator
 	resIsEnabled _resEnabled;
 
-	//Amplitude value
+	//! Amplitude value
 	ParameterList result;
 
-	//List of interal parameters
+	//! List of interal parameters
 	ParameterList params;
+
+	//! Efficiency object
+	std::shared_ptr<Efficiency> eff_;
 };
 //-----------------------------------------------------------------------------
 
@@ -192,15 +258,28 @@ protected:
 class GaussAmp : public Amplitude
 {
 public:
-	GaussAmp(const char *name, DoubleParameter _resMass, DoubleParameter _resWidth){
-		params.AddParameter(std::shared_ptr<DoubleParameter>(new DoubleParameter(_resMass)));
-		params.AddParameter(std::shared_ptr<DoubleParameter>(new DoubleParameter(_resWidth)));
+	GaussAmp(const char *name, DoubleParameter _resMass,
+			DoubleParameter _resWidth){
+		params.AddParameter(
+				std::shared_ptr<DoubleParameter>(new DoubleParameter(_resMass))
+		);
+		params.AddParameter(
+				std::shared_ptr<DoubleParameter>(new DoubleParameter(_resWidth))
+		);
 		initialise();
 	}
 
 	GaussAmp(const char *name, double _resMass, double _resWidth){
-		params.AddParameter(std::shared_ptr<DoubleParameter>(new DoubleParameter("mass",_resMass)));
-		params.AddParameter(std::shared_ptr<DoubleParameter>(new DoubleParameter("width",_resWidth)));
+		params.AddParameter(
+				std::shared_ptr<DoubleParameter>(
+						new DoubleParameter("mass",_resMass)
+				)
+		);
+		params.AddParameter(
+				std::shared_ptr<DoubleParameter>(
+						new DoubleParameter("width",_resWidth)
+				)
+		);
 		initialise();
 	}
 
@@ -212,9 +291,14 @@ public:
 	}
 
 	virtual void initialise() {
-		result.AddParameter(std::shared_ptr<DoubleParameter>(new DoubleParameter("GaussAmpResult")));
+		result.AddParameter(
+				std::shared_ptr<DoubleParameter>(
+						new DoubleParameter("GaussAmpResult")
+				)
+		);
 		if(Kinematics::instance()->GetNVars()!=1)
-			throw std::runtime_error("GaussAmp::initialize() | this amplitude is for two body decays only!");
+			throw std::runtime_error("GaussAmp::initialize() | "
+					"this amplitude is for two body decays only!");
 	};
 	//! Clone function
 	virtual GaussAmp* Clone(std::string newName=""){
@@ -223,11 +307,12 @@ public:
 		return tmp;
 	}
 
+	virtual void to_str() { };
+
 	virtual double GetIntValue(std::string var1, double min1, double max1,
 			std::string var2, double min2, double max2) { return 0; }
-	/**! Integral from -inf to inf
-	 * @return
-	 */
+
+	//! Get integral
 	virtual const double GetIntegral(){
 		return (params.GetDoubleParameter(1)->GetValue() * std::sqrt(2*M_PI));
 	}
@@ -246,7 +331,11 @@ public:
 		double width = params.GetDoubleParameter(1)->GetValue();
 		double sqrtS = std::sqrt(point.getVal(0));
 
-		std::complex<double> gaus(std::exp(-1*(sqrtS-mass)*(sqrtS-mass)/width/width/2.),0);
+		std::complex<double> gaus(
+				std::exp(-1*(sqrtS-mass)*(sqrtS-mass)/width/width/2.),
+				0
+		);
+
 		if(gaus.real() != gaus.real())
 			BOOST_LOG_TRIVIAL(error)<<"GaussAmp::intensity() | result NaN!";
 		result.SetParameterValue(0,std::norm(gaus));
@@ -258,9 +347,11 @@ public:
 		return intensity(dataP);
 	}
 
-	virtual const ParameterList& intensityNoEff(dataPoint& point){ return intensity(point); }
+	virtual const ParameterList& intensityNoEff(dataPoint& point){
+		return intensity(point);
+	}
 
-	virtual void to_str() { };
+	virtual void GetFitFractions(ParameterList& parList) {}
 
 };
 //-----------------------------------------------------------------------------
@@ -268,14 +359,19 @@ public:
 //-----------------------------------------------------------------------------
 /**! UnitAmp
  *
- * Example implementation of Amplitude with the function value 1.0 at all points in PHSP. It is used
- * to test the likelihood normalization.
+ * Example implementation of Amplitude with the function value 1.0 at all
+ * points in PHSP. It is used to test the likelihood normalization.
  */
 class UnitAmp : public Amplitude
 {
 public:
-	UnitAmp() : eff_(std::shared_ptr<Efficiency>(new UnitEfficiency())){
-		result.AddParameter(std::shared_ptr<DoubleParameter>(new DoubleParameter("AmpSumResult")));
+	UnitAmp() {
+		result.AddParameter(
+				std::shared_ptr<DoubleParameter>(
+						new DoubleParameter("AmpSumResult")
+				)
+		);
+		eff_ = std::shared_ptr<Efficiency>(new UnitEfficiency());
 	}
 
 	virtual ~UnitAmp()	{ /* nothing */	}
@@ -286,20 +382,20 @@ public:
 		return tmp;
 	}
 
-	//! Set efficiency
-	virtual void SetEfficiency(std::shared_ptr<Efficiency> eff) { eff_ = eff; }
+	virtual void to_str() { }
 
-	//! Get efficiency
-	virtual std::shared_ptr<Efficiency> GetEfficiency() { return eff_; };
+	virtual double GetMaxVal(std::shared_ptr<Generator> gen) { return 1; }
 
 	virtual const double GetIntegral() {
 		return Kinematics::instance()->GetPhspVolume();
 	}
 	virtual const double GetNormalization() {
-		BOOST_LOG_TRIVIAL(info) << "UnitAmp::normalization() | normalization not implemented!";
+		BOOST_LOG_TRIVIAL(info) << "UnitAmp::normalization() | "
+				"normalization not implemented!";
 		return 1;
 	}
-	virtual double GetMaxVal(std::shared_ptr<Generator> gen) { return 1; }
+	virtual double GetIntValue(std::string var1, double min1, double max1,
+			std::string var2, double min2, double max2) { return 0; }
 
 	virtual const ParameterList& intensity(dataPoint& point) {
 		result.SetParameterValue(0,eff_->evaluate(point));
@@ -313,13 +409,9 @@ public:
 		result.SetParameterValue(0,1.0);
 		return result;
 	}
+	virtual void GetFitFractions(ParameterList& parList) {}
 
-	virtual void to_str() { }
-
-	virtual double GetIntValue(std::string var1, double min1, double max1,
-			std::string var2, double min2, double max2) { return 0; }
-
-	//---------- related to FunctionTree -------------
+	//========== FunctionTree =============
 	//! Check of tree is available
 	virtual bool hasTree(){ return 1; }
 
@@ -330,7 +422,6 @@ public:
 	}
 
 protected:
-	std::shared_ptr<Efficiency> eff_;
 
 	/**Setup Basic Tree
 	 *
@@ -357,11 +448,6 @@ protected:
 		std::vector<double> oneVec(sampleSize, 1.0);
 		std::shared_ptr<AbsParameter> one(new MultiDouble("one",oneVec));
 		newTree->createHead("Amplitude"+suffix, one);
-		//		newTree->createHead("Amplitude"+suffix, 3.0);
-		//		if(!newTree->head()){
-		//			std::cout<<"asfdasfasdfas"<<std::endl;
-		//			exit(1);
-		//		}
 		std::cout<<newTree->head()->to_str(10)<<std::endl;
 		return newTree;
 	}

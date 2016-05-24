@@ -56,6 +56,14 @@ void FitResult::setUseCorrelatedErrors(int nSets)
 	return;
 }
 
+void FitResult::print(std::string opt)
+{
+	std::stringstream s;
+	genOutput(s,opt);
+	std::string str = s.str();
+	BOOST_LOG_TRIVIAL(info) << str;
+}
+
 void FitResult::printFitParameters(TableFormater* tableResult)
 {
 	bool printTrue=0, printInitial=0;
@@ -164,7 +172,7 @@ void FitResult::printFitFractions(TableFormater* fracTable,
 		std::shared_ptr<Amplitude> amp, int nErrorSets)
 {
 	ParameterList ffList;
-	calcFraction(ffList, amp);
+	amp->GetFitFractions(ffList);
 	calcFractionError(ffList, amp, nErrorSets);
 	double sum=0, sumErrorSq=0;
 
@@ -198,111 +206,27 @@ void FitResult::printFitFractions(TableFormater* fracTable,
 	return;
 }
 
-resonanceItr findResonancePartner(std::shared_ptr<Amplitude> amp, resonanceItr res)
-{
-	auto name = (*res)->GetName();
-	auto it = amp->GetResonanceItrFirst();
-	for( ; it != amp->GetResonanceItrLast(); ++it){ //fill matrix
-		if( it == res ) continue;
-		auto name2 = (*it)->GetName();
-		if(name2.find(name) != std::string::npos) return it;
-	}
-	return res;
-
-}
-
-void FitResult::calcFraction(ParameterList& parList, std::shared_ptr<Amplitude> amp)
-{
-	double norm = 1.0;
-	std::string ampName = amp->GetName();
-
-	auto it = amp->GetResonanceItrFirst();
-	std::vector<resonanceItr> resoList;
-	for( ; it != amp->GetResonanceItrLast(); ++it){ //fill matrix
-		if( (*it)->GetName().find("_CP")!=std::string::npos ) continue;
-		resoList.push_back(it);
-	}
-	/* Unbinned efficiency correction in the FunctionTree does not provide
-	 * an integral w/o efficiency correction. We have to calculate it here.
-	 */
-	try{
-		norm = amp->GetIntegral();
-	} catch (std::exception& ex){
-		BOOST_LOG_TRIVIAL(error)<< "FitResult::calcFraction() | "
-				"Normalization can't be calculated: "<<ex.what();
-		throw;
-	}
-
-	BOOST_LOG_TRIVIAL(debug)<<"FitResult::calcFraction() | "
-			"Amplitude "<<ampName<< " Norm="<<norm;
-
-	//Start loop over resonances
-	it = amp->GetResonanceItrFirst();
-	for( ; it != amp->GetResonanceItrLast(); ++it){ //fill matrix
-		if( (*it)->GetName().find("_CP")!=std::string::npos ) continue;
-
-		// We search for a partner resonance and add it to the integral
-		auto it2 = findResonancePartner(amp, it);
-
-		// GetIntegralInterference returns the integal Int( A*B+B*A ),
-		// including the complex coefficienct
-		double nom = amp->GetIntegralInterference(it,it);
-		if( it != it2 ){// Int |A+B|^2 = |A|^2 + |B|^2 + A*B + B*A
-			double tmp22 = amp->GetIntegralInterference(it2,it2);
-			double tmp12 = amp->GetIntegralInterference(it,it2);
-			BOOST_LOG_TRIVIAL(debug) << "FitResult::calcFraction() | Calculating"
-					<<" amplitude integral for composed amplitudes "
-					<<(*it)->GetName()<<" and "<<(*it2)->GetName()<<": "
-					<<"(11) "<<nom <<" (22) "<<tmp22 <<" (12) "<<tmp12
-					<<" Total: "<<nom+tmp22+tmp12;
-			nom += tmp22;
-			nom += tmp12;
-		} else {
-			BOOST_LOG_TRIVIAL(debug) << "FitResult::calcFraction() | Resonance "
-					"integal for "<<(*it)->GetName()<<": "<<nom;
-		}
-
-		std::string resName = ampName+" "+(*it)->GetName()+"_FF";
-		std::shared_ptr<DoubleParameter> magPar = (*it)->GetMagnitudePar();
-		double mag = magPar->GetValue(); //value of magnitude
-		double magError = 0;
-		if(magPar->HasError())
-			magError = magPar->GetError(); //error of magnitude
-
-		parList.AddParameter(
-				std::shared_ptr<DoubleParameter>(
-						new DoubleParameter(
-								resName,
-//								mag*mag*resInt/norm,
-								nom/norm,
-								std::fabs(2*(nom/mag)/norm * magError)
-						)
-				)
-		);
-	}
-
-}
-
-void FitResult::calcFraction(ParameterList& parList, int nSets)
-{
-	if( !_ampVec.size() )
-		throw std::runtime_error("FitResult::calcFractions() | "
-				"No amplitude set, can't calculate fractions!");
-
-	if(parList.GetNDouble())
-		throw std::runtime_error("FitResult::calcFractions() | "
-				"ParameterList not empty!");
-
-	//	_amp->UpdateParameters(finalParameters); //update parameters in amplitude
-	double norm =-1;
-
-	//Start loop over amplitudes
-	auto ampItr = _ampVec.begin();
-	for( ; ampItr != _ampVec.end(); ++ampItr){
-		calcFraction(parList, (*ampItr));
-		if( parList.GetNDouble() )
-			calcFractionError(parList, (*ampItr), nSets);
-	}
-
-	return;
-}
+//void FitResult::calcFraction(ParameterList& parList, int nSets)
+//{
+//	if( !_ampVec.size() )
+//		throw std::runtime_error("FitResult::calcFractions() | "
+//				"No amplitude set, can't calculate fractions!");
+//
+//	if(parList.GetNDouble())
+//		throw std::runtime_error("FitResult::calcFractions() | "
+//				"ParameterList not empty!");
+//
+//	//	_amp->UpdateParameters(finalParameters); //update parameters in amplitude
+//	double norm =-1;
+//
+//	//Start loop over amplitudes
+//	auto ampItr = _ampVec.begin();
+//	for( ; ampItr != _ampVec.end(); ++ampItr){
+////		calcFraction(parList, (*ampItr));
+//		(*ampItr)->GetFitFractions(parList);
+//		if( parList.GetNDouble() )
+//			calcFractionError(parList, (*ampItr), nSets);
+//	}
+//
+//	return;
+//}

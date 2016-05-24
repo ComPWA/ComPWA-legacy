@@ -239,7 +239,7 @@ exe multiVariateGaussianTestApp
 install dist 
 	: test 
 	: <threading>single
-	  <location>$(TOP)lib/
+	  <location>$(TOP)lib/ ;
 
 install dist2 
 	: compareTreeAmpApp 
@@ -263,9 +263,4 @@ install dist2
 	  lhNormalizationTestApp
 	  multiVariateGaussianTestApp
 	: <threading>single
-	  <location>$(TOP)/bin
-
-#if $(GENEVA) { 
-#install dist7 : genevatestApp : <location>$(TOP)/bin ;
-#}
-
+	  <location>$(TOP)/bin ;

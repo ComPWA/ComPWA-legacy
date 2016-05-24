@@ -49,40 +49,88 @@ public:
 	//! Clone function
 	virtual AmpSumIntensity* Clone(std::string newName="") const;
 
+	//===================== OPERATORS ==========================
+	/** Operator for coherent addition of amplitudes
+	 *
+	 * @param other
+	 * @return
+	 */
+	const AmpSumIntensity operator+(const AmpSumIntensity& other) const;
+
+	/** Operator for coherent addition of amplitudes
+	 *
+	 * @param rhs
+	 * @return
+	 */
+	AmpSumIntensity& operator+=(const AmpSumIntensity& rhs) ;
+
+	//===================== LOAD/SAVE CONFIG ====================
 	//! Configure resonance from ptree
 	virtual void Configure(const boost::property_tree::ptree &pt);
 
 	//! Save resonance from to ptree
 	virtual void Save(std::string fileName);
 
-	//! Set efficiency
-	virtual void SetEfficiency(std::shared_ptr<Efficiency> eff) { eff_ = eff; };
-
-	//! Get efficiency
-	virtual std::shared_ptr<Efficiency> GetEfficiency() { return eff_; };
-
 	//!Set prefactor
 	virtual void SetPrefactor(std::complex<double> pre);
 
-	//! normalization integral for parameters \par (doesn't include calculated efficiency)
+	//! Get Monte-Carlo precision (number of calls to integration algorithms)
+	unsigned int GetMcPrecision() { return _nCalls;}
+
+	//! get maximum value of amplitude with current parameters
+	virtual double GetMaxVal( std::shared_ptr<Generator> gen);
+
+	//! Average width of all resonances
+	virtual double averageWidth();
+
+	//==================== PRINTING ============================
+	//! Print overview over all amplitudes
+	virtual void to_str();
+	//! print all fit fractions; fitting errors are not available here
+	virtual void printFractions();
+
+	//==================== NORMALIZATION/INTEGRATION ==============
+	//! Get normalization factor
 	virtual const double GetNormalization();
 
-	//! normalization integral for parameters \par (includes calculated efficiency)
+	//! Get amplitdude integral. Result is not efficiency corrected.
 	virtual const double GetIntegral();
 
-	//! normalization integral for parameters \par (includes calculated efficiency)
+	//! Get amplitude integral for a set of (sub-) resonances
 	virtual const double GetIntegral(std::vector<resonanceItr> resoList);
 
-	//! calculate integral between two resonances
+	//! Calculate inteference integral of two subresonances of @A and @B
 	virtual const double GetIntegralInterference(resonanceItr A, resonanceItr B);
 
 	//! calculate integral for a list of resonances
 	static const double GetIntegralInterference(
 			std::vector<resonanceItr> resList, unsigned int nCalls);
 
-	//! get maximum value of amplitude with current parameters
-	virtual double GetMaxVal( std::shared_ptr<Generator> gen);
+	/** Calculate partial integral over amplitude
+	 *
+	 * Currently only integration over m23sq and m13sq is supported
+	 * @param var1 first integration variables, choose m23sq or m13sq
+	 * @param min1 min of first integration variable
+	 * @param max1 min of first integration variable
+	 * @param var2 second integration variables, choose m23sq or m13sq
+	 * @param min2 min of second integration variable
+	 * @param max2 max of second integration variable
+	 * @return
+	 */
+	virtual double GetIntValue(std::string var1, double min1, double max1,
+			std::string var2, double min2=0, double max2=0);
 
+	/** Calculation of integral
+	 *
+	 * @param resList List of resonances to integrate
+	 * @param eff Efficiency correction (disable -> NULLPTR)
+	 * @param nCalls Monte-Carlo precision (number of calls)
+	 * @return
+	 */
+	static double integral(std::vector<resonanceItr> resList,
+			std::shared_ptr<Efficiency> eff, int nCalls=30000);
+
+	//==================== EVALUATION =======================
 	/**! Evaluate total amplitude
 	 * Using current set of parameters at phsp point \point. Amplitude is
 	 * multiplied with efficiency of datapoint.
@@ -101,33 +149,16 @@ public:
 	 */
 	virtual const ParameterList& intensityNoEff( dataPoint& point );
 
-	/**! Evaluate interference term of total amplitude */
-	virtual const ParameterList& intensityInterference(dataPoint& point,
-			resonanceItr A, resonanceItr B);
-
 	virtual const double sliceIntensity(dataPoint& dataP,
 			std::complex<double>* reso, unsigned int nResos);
 
-	//! Print overview over all amplitudes
-	virtual void to_str();
+	//==================== FIT FRACTIONS =======================
+	virtual void GetFitFractions(ParameterList& parList);
 
-	//! print all fit fractions; fitting errors are not available here
-	virtual void printFractions();
+	static void GetFitFractions(ParameterList& parList,
+			const Amplitude* amp);
 
-	/** Calculate partial integral over amplitude
-	 *
-	 * Currently only integration over m23sq and m13sq is supported
-	 * @param var1 first integration variables, choose m23sq or m13sq
-	 * @param min1 min of first integration variable
-	 * @param max1 min of first integration variable
-	 * @param var2 second integration variables, choose m23sq or m13sq
-	 * @param min2 min of second integration variable
-	 * @param max2 max of second integration variable
-	 * @return
-	 */
-	virtual double GetIntValue(std::string var1, double min1, double max1,
-			std::string var2, double min2=0, double max2=0);
-
+	//================== ACCESS to resonances ====================
 	//! Get ID of resonance from name
 	virtual int GetIdOfResonance(std::string name);
 
@@ -135,12 +166,10 @@ public:
 	virtual std::string GetNameOfResonance(unsigned int id);
 
 	//! get resonance by @param name
-	virtual std::shared_ptr<Resonance>
-	GetResonance(std::string name);
+	virtual std::shared_ptr<Resonance> GetResonance(std::string name);
 
 	//! get resonance by @param id
-	virtual std::shared_ptr<Resonance>
-	GetResonance(unsigned int id);
+	virtual std::shared_ptr<Resonance> GetResonance(unsigned int id);
 
 	//! List of resonances (enabled AND disabled)
 	virtual std::vector<std::shared_ptr<Resonance> >& GetFullListOfResonances(){
@@ -170,40 +199,13 @@ public:
 		return resItrList;
 	}
 
-	//! Average width of all resonances
-	virtual double averageWidth();
-
-	/** Operator for coherent addition of amplitudes
-	 *
-	 * @param other
-	 * @return
-	 */
-	const AmpSumIntensity operator+(const AmpSumIntensity& other) const;
-
-	/** Operator for coherent addition of amplitudes
-	 *
-	 * @param rhs
-	 * @return
-	 */
-	AmpSumIntensity& operator+=(const AmpSumIntensity& rhs) ;
-
-	//---------- related to FunctionTree -------------
+	//========== FunctionTree =============
 	//! Check of tree is available
 	virtual bool hasTree(){	return 1; }
 	//! Getter function for function tree
 	virtual std::shared_ptr<FunctionTree> GetTree(
 			ParameterList& sample, ParameterList& phspSample,
 			ParameterList& toySample);
-
-	resonanceItr tmpA;
-	resonanceItr tmpB;
-
-	unsigned int GetMcPrecision() { return _nCalls;}
-
-	//! Integral
-//	static double integral(Amplitude* amp, bool eff, int nCalls=30000);
-	static double integral(std::vector<resonanceItr> resList,
-			std::shared_ptr<Efficiency> eff, int nCalls=30000);
 
 protected:
 	//! Maximum value of amplitude. Necessary for event generation.
@@ -212,8 +214,6 @@ protected:
 	bool _calcMaxFcnVal;
 	//! calculate maximum value of amplitude with current parameters
 	virtual void calcMaxVal( std::shared_ptr<Generator> gen);
-	//! Efficiency object
-	std::shared_ptr<Efficiency> eff_;
 	//! List of resonances
 	std::vector<std::shared_ptr<Resonance> > resoList;
 	//! Type of normalization
@@ -221,7 +221,7 @@ protected:
 	//! precision for numeric integration
 	unsigned int _nCalls;
 
-	//---------- related to FunctionTree -------------
+	//========== FunctionTree =============
 	/**Setup Basic Tree
 	 *
 	 * @param theMasses data sample

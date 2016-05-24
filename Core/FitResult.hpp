@@ -43,7 +43,6 @@
 #include "Core/PhysConst.hpp"
 using namespace boost::log;
 
-resonanceItr findResonancePartner(std::shared_ptr<Amplitude> amp, resonanceItr res);
 
 class FitResult
 {
@@ -98,13 +97,9 @@ public:
 	//! Enable correct error estimation for fit fractions. Very time consuming!
 	void setUseCorrelatedErrors(int nSets=200);
 
-	//output
-	virtual void print(std::string opt=""){
-		std::stringstream s;
-		genOutput(s,opt);
-		std::string str = s.str();
-		BOOST_LOG_TRIVIAL(info) << str;
-	};
+	//! Print fit result
+	virtual void print(std::string opt="");
+
 	virtual void writeTeX(std::string filename) {};
 	virtual void writeXML(std::string filename) {};
 	virtual void writeText(std::string filename) ;
@@ -144,11 +139,11 @@ protected:
 	 * @param parList result with fit fractions for the single resonances
 	 * @param nSets Precise error calcucation using @nSets Monte-Carlo events
 	 */
-	virtual void calcFraction(ParameterList& parList, int nSets=0);
+//	virtual void calcFraction(ParameterList& parList, int nSets=0);
 
 	//! Calculate fit fractions and its errors.
-	static void calcFraction(
-			ParameterList& parList, std::shared_ptr<Amplitude> amp);
+//	static void calcFraction(
+//			ParameterList& parList, std::shared_ptr<Amplitude> amp);
 
 	//! Calculate errors on fit result
 	virtual void calcFractionError(ParameterList& parList,

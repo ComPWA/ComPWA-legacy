@@ -144,7 +144,7 @@ void MinuitResult::calcFractionError(ParameterList& parList,
 		//update amplitude with smeared parameters
 		Amplitude::UpdateAmpParameterList(_ampVec, newPar);
 		ParameterList tmp;
-		calcFraction(tmp, amp);
+		amp->GetFitFractions(tmp);
 		fracVect.push_back(tmp);
 
 		/******* DEBUGGING *******/
@@ -265,7 +265,7 @@ void MinuitResult::genOutput(std::ostream& out, std::string opt)
 	 * and
 	 * IEEE Transacrions on Automatic Control 19, No.6:716-723 (1974) */
 	ParameterList frac;
-	calcFraction(frac, _ampVec.at(0));
+	_ampVec.at(0)->GetFitFractions(frac);
 	out<<"AIC: "<<calcAIC(frac)-penalty<<std::endl;
 	out<<"BIC: "<<calcBIC(frac)-penalty<<std::endl;
 	double r=0;
