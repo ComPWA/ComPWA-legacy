@@ -44,6 +44,9 @@ public:
   //! Get penalty term
   virtual double calcPenalty() { return 0.0; }
 
+  //! Get penalty scale
+  virtual double getPenaltyScale() { return 1.0; }
+
   //! Get number of events in data set
   virtual int getNEvents() { return -999; }
 

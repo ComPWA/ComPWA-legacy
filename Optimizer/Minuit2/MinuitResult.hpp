@@ -108,6 +108,7 @@ protected:
 	double initialLH;
 	double finalLH;
 	double penalty;
+	double penaltyScale;
 	double edm; //estimated distance to minimum
 	//! Covariance matrix
 	std::vector<std::vector<double> > cov;
@@ -178,6 +179,7 @@ private:
 		ar & BOOST_SERIALIZATION_NVP(initialLH);
 		ar & BOOST_SERIALIZATION_NVP(finalLH);
 		ar & BOOST_SERIALIZATION_NVP(penalty);
+		ar & BOOST_SERIALIZATION_NVP(penaltyScale);
 		ar & BOOST_SERIALIZATION_NVP(AIC);
 		ar & BOOST_SERIALIZATION_NVP(BIC);
 		ar & BOOST_SERIALIZATION_NVP(nEvents);

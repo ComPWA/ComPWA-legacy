@@ -379,7 +379,7 @@ double MinLogLH::calcPenalty()
 	auto amp = _ampVec.at(_penaltyAmpID);
 	auto it = amp->GetResonanceItrFirst();
 	for(; it != amp->GetResonanceItrLast(); ++it){
-		//if( (*it)->GetName().find("_CP")!=std::string::npos ) continue;
+		if( (*it)->GetName().find("_CP")!=std::string::npos ) continue;
 
 		//// We search for a partner resonance and add it to the integral
 		//auto it2 = findResonancePartner(amp, it);

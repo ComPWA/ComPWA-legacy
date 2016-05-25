@@ -22,6 +22,7 @@ MinuitResult::MinuitResult(std::shared_ptr<ControlParameter> esti,
 	std::shared_ptr<Estimator> est = std::static_pointer_cast<Estimator>(esti);
 	_ampVec = est->getAmplitudes();
 	penalty = est->calcPenalty();
+	penaltyScale = est->getPenaltyScale();
 	nEvents = est->getNEvents();
 	init(result);
 }
@@ -32,6 +33,7 @@ void MinuitResult::setResult(std::shared_ptr<ControlParameter> esti,
 	std::shared_ptr<Estimator> est = std::static_pointer_cast<Estimator>(esti);
 	_ampVec = est->getAmplitudes();
 	penalty = est->calcPenalty();
+	penaltyScale = est->getPenaltyScale();
 	nEvents = est->getNEvents();
 	init(result);
 }
