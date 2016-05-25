@@ -200,8 +200,11 @@ void FitResult::printFitFractions(TableFormater* fracTable,
 		sumErrorSq += tmpPar->GetError()*tmpPar->GetError();
 	}
 	fracTable->delim();
-	*fracTable << "Total" << sum << sqrt(sumErrorSq) ;
+	*fracTable << "Total" << sum << "+-" << sqrt(sumErrorSq) ;
 	fracTable->footer();
+	fractionList = ffList;
+	sumFractions = sum;
+	sumFractionsError = sqrt(sumErrorSq);
 
 	return;
 }

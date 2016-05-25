@@ -151,6 +151,8 @@ protected:
 
 	//! List with fit fractions and errors
 	ParameterList fractionList;
+	double sumFractions;
+	double sumFractionsError;
 
 
 private:
@@ -163,6 +165,8 @@ private:
 		ar & BOOST_SERIALIZATION_NVP(finalParameters);
 		ar & BOOST_SERIALIZATION_NVP(trueParameters);
 		ar & BOOST_SERIALIZATION_NVP(fractionList);
+		ar & BOOST_SERIALIZATION_NVP(sumFractions);
+		ar & BOOST_SERIALIZATION_NVP(sumFractionsError);
 		ar & BOOST_SERIALIZATION_NVP(nSetsFractionError);
 	}
 };
