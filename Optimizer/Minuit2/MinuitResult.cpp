@@ -267,7 +267,12 @@ void MinuitResult::genOutput(std::ostream& out, std::string opt)
 	 * and
 	 * IEEE Transacrions on Automatic Control 19, No.6:716-723 (1974) */
 	ParameterList frac;
-	_ampVec.at(0)->GetFitFractions(frac);
+	try{
+		_ampVec.at(0)->GetFitFractions(frac);
+	} catch (std::exception& ex){
+		BOOST_LOG_TRIVIAL(error) << "MinuitResult::genOutput() | Can not "
+				"calculate fit fractions for amplitude 0.";
+	}
 	AIC = calcAIC(frac)-penalty;
 	BIC = calcBIC(frac)-penalty;
 	out<<"AIC: "<<AIC<<std::endl;

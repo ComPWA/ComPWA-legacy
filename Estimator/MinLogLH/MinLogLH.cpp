@@ -321,10 +321,14 @@ double MinLogLH::controlParameter(ParameterList& minPar)
 			(*it) *= vol/(double)size;
 		}
 
-		//Approximate error of integration, see (Numerical Recipes Vol3, p398, Eq. 7.7.1)
-		//double normError = sqrt( ( vol*vol*normSq/sam_size - norm*norm) / sam_size);
+		/* Approximate error of integration, see (Numerical Recipes Vol3,
+		 * p398, Eq. 7.7.1)
+		 * double normError = sqrt(
+		 * 			( vol*vol*normSq/sam_size - norm*norm) / sam_size
+		 * 		);
+		 */
 
-		//Use internal amplitude integration - no unbinned efficiency correction possible
+		//Use internal amplitude integration - no unbinned eff correction
 		//norm = amp->normalization();
 
 		//Calculate \Sum_{ev} log()
@@ -345,8 +349,10 @@ double MinLogLH::controlParameter(ParameterList& minPar)
 		lh = (-1)*((double)nUseEvt_)/_sumOfWeights*sumLog;
 	} else {
 		_tree->recalculate();
-		std::shared_ptr<DoubleParameter> logLH = std::dynamic_pointer_cast<DoubleParameter>(
-				_tree->head()->getValue() );
+		std::shared_ptr<DoubleParameter> logLH =
+				std::dynamic_pointer_cast<DoubleParameter>(
+						_tree->head()->getValue()
+				);
 		lh = logLH->GetValue();
 	}
 	lh += calcPenalty();
@@ -369,7 +375,8 @@ void MinLogLH::setPenaltyScale(double sc, int ampID)
 	_penaltyLambda = sc;
 
 	BOOST_LOG_TRIVIAL(info) << "MinLogLH::setPenaltyScale | "
-			"Setting scale of penalty term to "<<sc<<" for amplitude "<<ampID<<"!";
+			"Setting scale of penalty term to "
+			<<sc<<" for amplitude "<<ampID<<"!";
 }
 
 double MinLogLH::calcPenalty()
@@ -380,21 +387,8 @@ double MinLogLH::calcPenalty()
 	auto it = amp->GetResonanceItrFirst();
 	for(; it != amp->GetResonanceItrLast(); ++it){
 		if( (*it)->GetName().find("_CP")!=std::string::npos ) continue;
-
-		//// We search for a partner resonance and add it to the integral
-		//auto it2 = findResonancePartner(amp, it);
-
-		//// GetIntegralInterference returns the integal Int( A*B+B*A ),
-		//// including the complex coefficienct
-		//double nom = amp->GetIntegralInterference(it,it);
-		//if( it != it2 ){// Int |A+B|^2 = |A|^2 + |B|^2 + A*B + B*A
-			//double tmp22 = amp->GetIntegralInterference(it2,it2);
-			//double tmp12 = amp->GetIntegralInterference(it,it2);
-			//nom += tmp22;
-			//nom += tmp12;
-		//}
-		//magSum += nom;
-		magSum += (*it)->GetMagnitudePar()->GetValue();
+		double v = std::fabs( (*it)->GetMagnitude() )/(*it)->GetNormalization();
+		magSum += v;
 	}
 	return (_penaltyLambda*magSum);
 }
