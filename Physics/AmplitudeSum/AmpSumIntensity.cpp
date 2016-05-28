@@ -404,10 +404,6 @@ double AmpSumIntensity::integral(std::vector<resonanceItr> resList,
 	if( std::isinf(res) )
 		throw std::runtime_error("AmpSumIntensity::integral() |"
 				"Result is inf!");
-	//check for zero
-	if( res == 0 )
-		throw std::runtime_error("AmpSumIntensity::integral() |"
-				"Result is zero!");
 
 	BOOST_LOG_TRIVIAL(debug)<<"AmpSumIntensity::integrate() | Integration result"
 			" for amplitude sum: "<<res<<"+-"<<err<<" relAcc [%]: "<<100*err/res;
