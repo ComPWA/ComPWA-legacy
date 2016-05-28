@@ -254,9 +254,12 @@ void MinuitResult::genOutput(std::ostream& out, std::string opt)
 		}
 	}
 	out<<"FIT FRACTIONS:"<<std::endl;
-	//calculate and print fractions if amplitude is set
+	//Calculate and print fractions
 	TableFormater tab(&out);
-	printFitFractions(&tab);
+	//Calculate fit fractions for all amplitudes
+	//	printFitFractions(&tab);
+	//Calculate fit fractions for first amplitude only
+	printFitFractions(&tab,_ampVec.at(0),nSetsFractionError);
 
 	out<<std::setprecision(10);
 	out<<"Final penalty term: "<<penalty<<std::endl;
