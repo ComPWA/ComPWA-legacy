@@ -387,7 +387,8 @@ double MinLogLH::calcPenalty()
 	auto it = amp->GetResonanceItrFirst();
 	for(; it != amp->GetResonanceItrLast(); ++it){
 		if( (*it)->GetName().find("_CP")!=std::string::npos ) continue;
-		double v = std::fabs( (*it)->GetMagnitude() )/(*it)->GetNormalization();
+//		double v = std::fabs( (*it)->GetMagnitude() )/(*it)->GetNormalization();
+		double v = std::fabs( (*it)->GetMagnitude() );
 		magSum += v;
 	}
 	return (_penaltyLambda*magSum);
