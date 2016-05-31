@@ -385,13 +385,15 @@ double MinLogLH::calcPenalty()
 	double magSum = 0;
 	auto amp = _ampVec.at(_penaltyAmpID);
 	auto it = amp->GetResonanceItrFirst();
+	std::vector<resonanceItr> resoList;
 	for(; it != amp->GetResonanceItrLast(); ++it){
 		if( (*it)->GetName().find("_CP")!=std::string::npos ) continue;
 		double v = std::fabs( (*it)->GetMagnitude() );
 		magSum += v;
+		resoList.push_back(it);
 	}
+	return ( _penaltyLambda*magSum / std::sqrt(amp->GetIntegral(resoList)) );
 //	return (_penaltyLambda*magSum);
-	return ( _penaltyLambda*magSum / std::sqrt(amp->GetIntegral()) );
 }
 
 //double MinLogLH::calcPenalty()
