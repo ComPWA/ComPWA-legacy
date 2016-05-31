@@ -379,32 +379,33 @@ void MinLogLH::setPenaltyScale(double sc, int ampID)
 			<<sc<<" for amplitude "<<ampID<<"!";
 }
 
-//double MinLogLH::calcPenalty()
-//{
-//	if(_penaltyLambda<=0) return 0; //penalty term disabled
-//	double magSum = 0;
-//	auto amp = _ampVec.at(_penaltyAmpID);
-//	auto it = amp->GetResonanceItrFirst();
-//	for(; it != amp->GetResonanceItrLast(); ++it){
-//		if( (*it)->GetName().find("_CP")!=std::string::npos ) continue;
-////		double v = std::fabs( (*it)->GetMagnitude() )/(*it)->GetNormalization();
-//		double v = std::fabs( (*it)->GetMagnitude() );
-//		magSum += v;
-//	}
-////	return (_penaltyLambda*magSum);
-//	return (_penaltyLambda*magSum/amp->GetIntegral());
-//}
-
 double MinLogLH::calcPenalty()
 {
 	if(_penaltyLambda<=0) return 0; //penalty term disabled
-	double ffSum = 0;
+	double magSum = 0;
 	auto amp = _ampVec.at(_penaltyAmpID);
-	ParameterList ffList;
-	amp->GetFitFractions(ffList);
-
-	for(unsigned int i=0;i<ffList.GetNDouble(); ++i){
-		ffSum += ffList.GetDoubleParameter(i)->GetValue();
+	auto it = amp->GetResonanceItrFirst();
+	for(; it != amp->GetResonanceItrLast(); ++it){
+		if( (*it)->GetName().find("_CP")!=std::string::npos ) continue;
+		double v = std::fabs( (*it)->GetMagnitude() );
+		magSum += v;
 	}
-	return (_penaltyLambda*ffSum);
+//	return (_penaltyLambda*magSum);
+	return ( _penaltyLambda*magSum / std::sqrt(amp->GetIntegral()) );
 }
+
+//double MinLogLH::calcPenalty()
+//{
+//	if(_penaltyLambda<=0) return 0; //penalty term disabled
+//	double ffSum = 0;
+//	auto amp = _ampVec.at(_penaltyAmpID);
+//	ParameterList ffList;
+//	amp->GetFitFractions(ffList);
+//
+//	for(unsigned int i=0;i<ffList.GetNDouble(); ++i){
+//		double norm = amp->GetIntegral(resoList);
+//
+//		ffSum += ffList.GetDoubleParameter(i)->GetValue();
+//	}
+//	return (_penaltyLambda*ffSum);
+//}
