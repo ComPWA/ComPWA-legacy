@@ -39,7 +39,8 @@
 
 using namespace ROOT::Minuit2;
 
-class MinuitIF : public Optimizer {
+class MinuitIF : public Optimizer
+{
 
 public:
 	/// Default Constructor (0x0)
@@ -49,13 +50,20 @@ public:
 	/** Destructor */
 	virtual ~MinuitIF();
 
+	virtual void SetHesse(bool onoff) { enableHesse=onoff; }
+	virtual bool GetHesse() { return enableHesse; }
+	virtual void SetMinos(bool onoff) { enableMinos=onoff; }
+	virtual bool GetMinos() { return enableMinos; }
+
 protected:
 
 private:
 	MinuitFcn _myFcn;
 	std::shared_ptr<ControlParameter> estimator;
-	// vector<string> paramNames;
+	bool enableHesse;
+	bool enableMinos;
 };
+
 class MinuitStrategy : public MnStrategy
 {
 public:
