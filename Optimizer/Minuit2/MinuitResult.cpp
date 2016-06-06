@@ -201,12 +201,10 @@ void MinuitResult::calcFractionError(ParameterList& parList,
 
 void MinuitResult::genOutput(std::ostream& out, std::string opt)
 {
-	bool printTrue=0;
 	bool printParam=1, printCorrMatrix=1, printCovMatrix=1;
 	if(opt=="P") {//print only parameters
 		printCorrMatrix=0; printCovMatrix=0;
 	}
-	if(trueParameters.GetNParameter()) printTrue=1;
 	out<<std::endl;
 	out<<"--------------MINUIT2 FIT RESULT----------------"<<std::endl;
 	if(!isValid) out<<"		*** MINIMUM NOT VALID! ***"<<std::endl;
@@ -419,8 +417,6 @@ void MinuitResult::writeXML(std::string filename)
 void MinuitResult::writeTeX(std::string filename)
 {
 	std::ofstream out(filename);
-	bool printTrue=0;
-	if(trueParameters.GetNParameter()) printTrue=1;
 	TableFormater* tableResult = new TexTableFormater(&out);
 	printFitParameters(tableResult);
 	if(hasValidCov){

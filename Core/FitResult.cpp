@@ -69,9 +69,14 @@ void FitResult::printFitParameters(TableFormater* tableResult)
 	bool printTrue=0, printInitial=0;
 	if(trueParameters.GetNParameter()) printTrue=1;
 	if(initialParameters.GetNParameter()) printInitial=1;
+
+	//Column width for parameter with symmetric error
 	unsigned int parErrorWidth = 22;
+
+	//Do we have a parameter with assymetric errors?
 	for(unsigned int o=0;o<finalParameters.GetNDouble();o++)
-		if(finalParameters.GetDoubleParameter(o)->GetErrorType()==ErrorType::ASYM) parErrorWidth=33;
+		if(finalParameters.GetDoubleParameter(o)->GetErrorType()==ErrorType::ASYM)
+			parErrorWidth=33;
 
 	tableResult->addColumn("Nr");
 	tableResult->addColumn("Name",15);
@@ -81,8 +86,8 @@ void FitResult::printFitParameters(TableFormater* tableResult)
 	if(printTrue) tableResult->addColumn("Deviation",9);
 	tableResult->header();
 
-	std::shared_ptr<DoubleParameter> iniPar, outPar, truePar;
 	for(unsigned int o=0;o<finalParameters.GetNDouble();o++){
+		std::shared_ptr<DoubleParameter> iniPar, outPar, truePar;
 		try{
 			outPar = finalParameters.GetDoubleParameter(o);
 		} catch (BadParameter& bad){
@@ -94,64 +99,78 @@ void FitResult::printFitParameters(TableFormater* tableResult)
 			try{
 				iniPar = initialParameters.GetDoubleParameter(outPar->GetName());
 			} catch (BadParameter& bad){
-				BOOST_LOG_TRIVIAL(error) << "FitResult::printFitParameters() | "
-						"can't access parameter '"<<outPar->GetName()<<"' of initial parameter list!";
-				throw;
+				iniPar = 0;
 			}
 		}
 		if(printTrue){
 			try{
 				truePar = trueParameters.GetDoubleParameter(outPar->GetName());
 			} catch (BadParameter& bad){
-				BOOST_LOG_TRIVIAL(error) << "FitResult::printFitParameters() | "
-						"can't access parameter '"<<outPar->GetName()<<"' of true parameter list!";
-				*tableResult << "not found"<< " - ";
-				throw;
+				iniPar = 0;
 			}
 		}
 
 		ErrorType errorType = outPar->GetErrorType();
 		bool isFixed = outPar->IsFixed();
-		bool isAngle=0, isMag=0;
-		if(outPar->GetName().find("phase")!=string::npos) isAngle=1;//is our Parameter an angle?
-		if(outPar->GetName().find("mag")!=string::npos) isMag=1;//is our Parameter an angle?
+
+		// Is parameter an angle?
+		bool isAngle=0;
+		if(outPar->GetName().find("phase")!=string::npos) isAngle=1;
+		// ... then shift the value to the domain [-pi;pi]
 		if(isAngle && !isFixed) {
-			outPar->SetValue( shiftAngle(outPar->GetValue()) ); //shift angle to the interval [-pi;pi]
+			outPar->SetValue( shiftAngle(outPar->GetValue()) );
 			if(printInitial) iniPar->SetValue( shiftAngle(iniPar->GetValue()) );
 			if(printTrue) truePar->SetValue( shiftAngle(truePar->GetValue()) );
 		}
+
+		// Is parameter a magnitude?
+		bool isMag=0;
+		if(outPar->GetName().find("mag")!=string::npos) isMag=1;
+		// ... then make sure that it is positive
 		if(isMag && !isFixed) {
-			outPar->SetValue( std::fabs(outPar->GetValue()) ); //abs value of parameter is magnitude
-			if(printInitial) iniPar->SetValue( std::fabs(iniPar->GetValue()) );
-			if(printTrue) truePar->SetValue( std::fabs(truePar->GetValue()) );
+			outPar->SetValue( std::fabs(outPar->GetValue()) );
+			if(printInitial && iniPar)
+				iniPar->SetValue( std::fabs(iniPar->GetValue()) );
+			if(printTrue && truePar)
+				truePar->SetValue( std::fabs(truePar->GetValue()) );
 		}
 
+		//Print parameter name
 		*tableResult << o << outPar->GetName();
-		if(printInitial) *tableResult << *iniPar;// |nr.| name| inital value|
-		if(isFixed) *tableResult<<" ";
-		else
-			*tableResult << *outPar;//final value
-		if(printTrue){
-			*tableResult << *truePar;
-			double pi = PhysConst::instance()->getConstValue("Pi");
-			double pull = (truePar->GetValue()-outPar->GetValue() );
-			if(isAngle && !isFixed) { //shift pull by 2*pi if that reduces the deviation
-				while( pull<0 && pull<-pi) pull+=2*pi;
-				while( pull>0 && pull>pi) pull-=2*pi;
-			}
-			if(outPar->HasError()){
-				if( errorType == ErrorType::ASYM && pull < 0)
-					pull /= outPar->GetErrorLow();
-				else if( errorType == ErrorType::ASYM && pull > 0)
-					pull /= outPar->GetErrorHigh();
+
+		//Print initial values
+		if(printInitial)
+			if( iniPar ) *tableResult << *iniPar;// |nr.| name| inital value|
+			else *tableResult<<" ";
+
+		//Print final value
+		if( !isFixed ) *tableResult << *outPar;//final value
+		else *tableResult<<" ";
+
+		//Print true values
+		if(printTrue)
+			if( truePar ){
+				*tableResult << *truePar;
+				double pi = PhysConst::instance()->getConstValue("Pi");
+				double pull = (truePar->GetValue()-outPar->GetValue() );
+				// Shift pull by 2*pi if that reduces the deviation
+				if(isAngle && !isFixed) {
+					while( pull<0 && pull<-pi) pull+=2*pi;
+					while( pull>0 && pull>pi) pull-=2*pi;
+				}
+				if(outPar->HasError()){
+					if( errorType == ErrorType::ASYM && pull < 0)
+						pull /= outPar->GetErrorLow();
+					else if( errorType == ErrorType::ASYM && pull > 0)
+						pull /= outPar->GetErrorHigh();
+					else
+						pull /= outPar->GetError();
+				}
+				if( !std::isnan(pull) )
+					*tableResult << pull;
 				else
-					pull /= outPar->GetError();
-			}
-			if( !std::isnan(pull) )
-				*tableResult << pull;
-			else
-				*tableResult << " ";
-		}
+					*tableResult << " ";
+			} else *tableResult << " " << " ";
 	}
 	tableResult->footer();
 
