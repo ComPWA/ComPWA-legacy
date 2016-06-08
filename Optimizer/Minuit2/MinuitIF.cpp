@@ -146,9 +146,6 @@ std::shared_ptr<FitResult> MinuitIF::exec(ParameterList& par)
 	BOOST_LOG_TRIVIAL(info) <<"MinuitIF::exec() | Migrad finished! "
 			"Minimum is valid = "<<minMin.IsValid();
 
-	// Copy parameters here because minos and hesse can still change it
-	ParameterList finalParList(par);
-
 	//HESSE
 	MnHesse hesse(strat);
 	if( minMin.IsValid() && enableHesse ) {
@@ -164,16 +161,29 @@ std::shared_ptr<FitResult> MinuitIF::exec(ParameterList& par)
 
 	//save minimzed values
 	MnUserParameterState minState = minMin.UserState();
+
+	//ParameterList can be changes by minos. We have to do a deep copy here.
+	ParameterList finalParList;
+	finalParList.DeepCopy(par);
+
+	/* We directly write the central values of the fit result to check if the
+	 * parameters change later on
+	 */
+	std::stringstream resultsOut;
+	resultsOut<<"Central values of floating paramters:"<<std::endl;
 	for(unsigned int i=0; i<finalParList.GetNDouble(); ++i){
-
 		auto finalPar =	finalParList.GetDoubleParameter(i);
-
 		if(finalPar->IsFixed()) continue;
 
+		//central value
 		double val = minState.Value(finalPar->GetName());
+
+		//shift to [-pi;pi] if parameter is a phase
 		if(finalPar->GetName().find("phase") != finalPar->GetName().npos)
 			val =  shiftAngle(val);
 		finalPar->SetValue(val);
+
+		resultsOut<<finalPar->GetName()<<" "<<val<<std::endl;
 		if( finalPar->GetErrorType()==ErrorType::ASYM  ){
 			// Skip minos and fill symmetic errors
 			if(!minMin.IsValid() || !enableMinos){
@@ -201,6 +211,7 @@ std::shared_ptr<FitResult> MinuitIF::exec(ParameterList& par)
 			);
 		}
 	}
+	BOOST_LOG_TRIVIAL(debug)<<"MinuitIF::exec() | "<<resultsOut.str();
 
 	std::shared_ptr<FitResult> result(
 			new MinuitResult(estimator, minMin)

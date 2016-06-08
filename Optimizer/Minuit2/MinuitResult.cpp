@@ -130,8 +130,11 @@ void MinuitResult::calcFractionError(ParameterList& parList,
 		multivariateGaussian( rnd, nFreeParameter,
 				gslFinalPar, gslCov, gslNewPar );
 		gsl_vector_print(gslNewPar);
+
 		//deep copy of finalParameters
-		ParameterList newPar = ParameterList(finalParameters);
+		ParameterList newPar;
+		newPar.DeepCopy(finalParameters);
+
 		std::size_t t=0;
 		for(std::size_t o=0;o<newPar.GetNDouble();o++){
 			std::shared_ptr<DoubleParameter> outPar =

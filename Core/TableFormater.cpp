@@ -70,9 +70,9 @@ TableFormater& TableFormater::operator<<(DoubleParameter in)
 			unsigned int w = (unsigned int)(columnWidth[curCol])/3;//take 1/3 of column width
 			tmp = std::to_string((long double) in.GetValue()); trimString(tmp);
 			*out << std::setw(w) << tmp;
-			tmp = "+"+std::to_string((long double) in.GetErrorHigh());trimString(tmp);
-			*out << std::setw(w) << tmp;
 			tmp = "-"+std::to_string((long double) in.GetErrorLow());trimString(tmp);
+			*out << std::setw(w) << tmp;
+			tmp = "+"+std::to_string((long double) in.GetErrorHigh());trimString(tmp);
 			*out << std::setw(w) << tmp;
 		} else
 			*out << std::setw(columnWidth[curCol]) << in.GetValue();
