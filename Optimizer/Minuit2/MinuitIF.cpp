@@ -217,16 +217,16 @@ std::shared_ptr<FitResult> MinuitIF::exec(ParameterList& par)
 	}
 	BOOST_LOG_TRIVIAL(debug)<<"MinuitIF::exec() | "<<resultsOut.str();
 
-	//update parameters in amplitude
-	Amplitude::UpdateAmpParameterList(estimator->getAmplitudes(), finalParList);
-
 	// Create fit result
 	std::shared_ptr<FitResult> result(
 			new MinuitResult(estimator, minMin)
 	);
-	result->setInitialParameters(initialParList);
 	result->setFinalParameters(finalParList);
+	result->setInitialParameters(initialParList);
 	result->setTime(time.elapsed());
+
+	//update parameters in amplitude
+	Amplitude::UpdateAmpParameterList(estimator->getAmplitudes(), finalParList);
 
 	return result;
 }

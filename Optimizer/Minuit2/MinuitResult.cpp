@@ -15,9 +15,15 @@
 #include "Core/Logging.hpp"
 #include "Optimizer/Minuit2/MinuitResult.hpp"
 
+MinuitResult::MinuitResult() : initialLH(0), finalLH(0), trueLH(0),
+calcInterference(0)
+{
+
+}
+
 MinuitResult::MinuitResult(std::shared_ptr<ControlParameter> esti,
 		FunctionMinimum result) :
-		calcInterference(0)
+		initialLH(0), finalLH(0), trueLH(0), calcInterference(0)
 {
 	est = std::static_pointer_cast<Estimator>(esti);
 	_ampVec = est->getAmplitudes();
@@ -96,6 +102,19 @@ void MinuitResult::setTrueParameters(ParameterList truePars)
 		//Setting true parameter and calculate LH value
 		Amplitude::UpdateAmpParameterList(_ampVec,trueParameters);
 		SetTrueLH( est->controlParameter(trueParameters) );
+		Amplitude::UpdateAmpParameterList(_ampVec,finalParameters);
+	}
+
+}
+
+//! Set list of initial parameters
+void MinuitResult::setInitialParameters(ParameterList iniPars)
+{
+	initialParameters = iniPars;
+	if( initialParameters.GetNDouble() && est ){
+		//Setting initial parameter and calculate LH value
+		Amplitude::UpdateAmpParameterList(_ampVec,initialParameters);
+		SetInitialLH( est->controlParameter(initialParameters) );
 		Amplitude::UpdateAmpParameterList(_ampVec,finalParameters);
 	}
 
@@ -227,6 +246,8 @@ void MinuitResult::genOutput(std::ostream& out, std::string opt)
 	out<<std::setprecision(10);
 	out<<"Initial Likelihood: "<<initialLH<<std::endl;
 	out<<"Final Likelihood: "<<finalLH<<std::endl;
+	if(trueLH)
+		out<<"True Likelihood: "<<trueLH<<std::endl;
 
 	out<<"Estimated distance to minimumn: "<<edm<<std::endl;
 	if(edmAboveMax) out<<"		*** EDM IS ABOVE MAXIMUM! ***"<<std::endl;

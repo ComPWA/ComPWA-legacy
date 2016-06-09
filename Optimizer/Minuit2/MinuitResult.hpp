@@ -54,7 +54,7 @@ class MinuitResult : public FitResult
 {
 public:
 	//Default constructor
-	MinuitResult() {};
+	MinuitResult();
 
 	//Constructor
 	MinuitResult(std::shared_ptr<ControlParameter> esti, FunctionMinimum result);
@@ -80,6 +80,9 @@ public:
 
 	//! Set list of true parameters
 	virtual void setTrueParameters(ParameterList truePars);
+
+	//! Set list of initial parameters
+	virtual void setInitialParameters(ParameterList iniPars);
 
 	//! Convert to double and return final LH values
 	operator double() const { return finalLH; }
