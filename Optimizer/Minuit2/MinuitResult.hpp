@@ -59,18 +59,33 @@ public:
 	//Constructor
 	MinuitResult(std::shared_ptr<ControlParameter> esti, FunctionMinimum result);
 
+	//! Set Minuit2 function minimum
 	void setResult(std::shared_ptr<ControlParameter> esti, FunctionMinimum result);
-
-	void setInitialLH(double iniLH){ initialLH = iniLH; }
-
-	//! Convert to double and return final LH values
-	operator double() const { return finalLH; }
 
 	//! Return final likelihood value
 	double getResult(){ return finalLH; }
 
+	//! Set initial likelihood value
+	virtual void SetInitialLH( double iniLH ){ initialLH = iniLH; }
+	//! Get initial likelihood value
+	virtual double GetInitialLH(){ return initialLH; }
+	//! Set final likelihood value
+	virtual void SetFinalLH( double iniLH ){ finalLH = iniLH; }
+	//! Get final likelihood value
+	virtual double GetFinalLH(){ return finalLH; }
+	//! Set true likelihood value
+	virtual void SetTrueLH( double iniLH ){ trueLH = iniLH; }
+	//! Get true likelihood value
+	virtual double GetTrueLH(){ return trueLH; }
+
+	//! Set list of true parameters
+	virtual void setTrueParameters(ParameterList truePars);
+
+	//! Convert to double and return final LH values
+	operator double() const { return finalLH; }
+
 	//! Set calculation of interference terms
-	void setCalcInterference(bool b) { calcInterference = b; }
+	void SetCalcInterference(bool b) { calcInterference = b; }
 
 	//! Write list of fit parameters and list of fitfractions to XML file @filename
 	virtual void writeXML(std::string filename);
@@ -81,10 +96,10 @@ public:
 	//! Any errors during minimization?
 	virtual bool hasFailed();
 
+protected:
 	//! Initialize result with Minuit2::FunctionMinimum
 	void init(FunctionMinimum);
 
-protected:
 	//! Calculate interference terms
 	bool calcInterference;
 
@@ -93,6 +108,9 @@ protected:
 
 	//! Number of events
 	int nEvents;
+
+	//! Pointer to estimator
+	std::shared_ptr<Estimator> est;
 
 	//====== MINUIT FIT RESULT =======
 	bool isValid; //result valid
@@ -107,6 +125,7 @@ protected:
 	unsigned int nFcn;
 	double initialLH;
 	double finalLH;
+	double trueLH;
 	double penalty;
 	double penaltyScale;
 	double edm; //estimated distance to minimum
@@ -178,6 +197,7 @@ private:
 		ar & BOOST_SERIALIZATION_NVP(nFcn);
 		ar & BOOST_SERIALIZATION_NVP(initialLH);
 		ar & BOOST_SERIALIZATION_NVP(finalLH);
+		ar & BOOST_SERIALIZATION_NVP(trueLH);
 		ar & BOOST_SERIALIZATION_NVP(penalty);
 		ar & BOOST_SERIALIZATION_NVP(penaltyScale);
 		ar & BOOST_SERIALIZATION_NVP(AIC);

@@ -19,7 +19,7 @@ MinuitResult::MinuitResult(std::shared_ptr<ControlParameter> esti,
 		FunctionMinimum result) :
 		calcInterference(0)
 {
-	std::shared_ptr<Estimator> est = std::static_pointer_cast<Estimator>(esti);
+	est = std::static_pointer_cast<Estimator>(esti);
 	_ampVec = est->getAmplitudes();
 	penalty = est->calcPenalty();
 	penaltyScale = est->getPenaltyScale();
@@ -30,7 +30,7 @@ MinuitResult::MinuitResult(std::shared_ptr<ControlParameter> esti,
 void MinuitResult::setResult(std::shared_ptr<ControlParameter> esti,
 		FunctionMinimum result)
 {
-	std::shared_ptr<Estimator> est = std::static_pointer_cast<Estimator>(esti);
+	est = std::static_pointer_cast<Estimator>(esti);
 	_ampVec = est->getAmplitudes();
 	penalty = est->calcPenalty();
 	penaltyScale = est->getPenaltyScale();
@@ -86,6 +86,19 @@ void MinuitResult::init(FunctionMinimum min)
 	nFcn = min.NFcn();
 
 	return;
+}
+
+//! Set list of true parameters
+void MinuitResult::setTrueParameters(ParameterList truePars)
+{
+	trueParameters = truePars;
+	if( trueParameters.GetNDouble() && est ){
+		//Setting true parameter and calculate LH value
+		Amplitude::UpdateAmpParameterList(_ampVec,trueParameters);
+		SetTrueLH( est->controlParameter(trueParameters) );
+		Amplitude::UpdateAmpParameterList(_ampVec,finalParameters);
+	}
+
 }
 
 void MinuitResult::genSimpleOutput(std::ostream& out)

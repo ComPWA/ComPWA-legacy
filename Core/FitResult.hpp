@@ -71,7 +71,7 @@ public:
 	//! Set list of true parameters
 	virtual void setTrueParameters(ParameterList truePars){ trueParameters.DeepCopy(truePars); }
 	//! Set value of likelihood with initial parameter
-	virtual void setInitialLH(double iniLH){ }
+	virtual void SetInitialLH(double iniLH){ }
 	//! Get list of initial parameters
 	virtual ParameterList getInitialParameters(){ return initialParameters; }
 	//! Get list of final fit parameters

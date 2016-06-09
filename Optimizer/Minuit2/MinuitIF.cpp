@@ -129,8 +129,6 @@ std::shared_ptr<FitResult> MinuitIF::exec(ParameterList& par)
 	MnMigrad migrad(_myFcn, upar, strat);
 	double maxfcn = 0.0;
 	double tolerance = 0.1;
-	BOOST_LOG_TRIVIAL(info) <<"MinuitIF::exec() | Starting migrad: "
-			"maxCalls="<<maxfcn<<" tolerance="<<tolerance;
 
 	/* From the MINUIT2 Documentation:
 	 * Minimize the function MnMigrad()(maxfcn, tolerance)
@@ -141,6 +139,9 @@ std::shared_ptr<FitResult> MinuitIF::exec(ParameterList& par)
 	 *           distance from minimum) will be: edm < tolerance * 10**-3
 	 *           Default value of tolerance used is 0.1
 	 */
+	BOOST_LOG_TRIVIAL(info) <<"MinuitIF::exec() | Starting migrad: "
+			"maxCalls="<<maxfcn<<" tolerance="<<tolerance;
+
 	FunctionMinimum minMin = migrad(maxfcn,tolerance);//(maxfcn,tolerance)
 
 	BOOST_LOG_TRIVIAL(info) <<"MinuitIF::exec() | Migrad finished! "
@@ -155,6 +156,9 @@ std::shared_ptr<FitResult> MinuitIF::exec(ParameterList& par)
 	} else
 		BOOST_LOG_TRIVIAL(info) <<"MinuitIF::exec() | Migrad failed to "
 				"find minimum! Skip hesse and minos!";
+
+	BOOST_LOG_TRIVIAL(info) << "MinuitIF::exec() | Minimization finished! "
+			"LH = "<<std::setprecision(10)<<minMin.Fval();
 
 	//MINOS
 	MnMinos minos(_myFcn,minMin,strat);
@@ -213,12 +217,13 @@ std::shared_ptr<FitResult> MinuitIF::exec(ParameterList& par)
 	}
 	BOOST_LOG_TRIVIAL(debug)<<"MinuitIF::exec() | "<<resultsOut.str();
 
+	//update parameters in amplitude
+	Amplitude::UpdateAmpParameterList(estimator->getAmplitudes(), finalParList);
+
+	// Create fit result
 	std::shared_ptr<FitResult> result(
 			new MinuitResult(estimator, minMin)
 	);
-
-	//update parameters in amplitude
-	Amplitude::UpdateAmpParameterList(estimator->getAmplitudes(), finalParList);
 	result->setInitialParameters(initialParList);
 	result->setFinalParameters(finalParList);
 	result->setTime(time.elapsed());

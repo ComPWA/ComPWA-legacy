@@ -9,18 +9,36 @@
 
 void Amplitude::UpdateParameters(ParameterList& par)
 {
+	std::shared_ptr<DoubleParameter> pOld, pNew;
+
+	/* First we check if new parameter list contains at least one matching
+	 * parameter. Otherwise we skip! */
+	int commonPar = 0;
 	for(unsigned int i=0; i<params.GetNDouble(); i++){
-		std::shared_ptr<DoubleParameter> p, pNew;
-		p = params.GetDoubleParameter(i);
 		try{
-			pNew = par.GetDoubleParameter(p->GetName());
+			pNew = par.GetDoubleParameter(
+					params.GetDoubleParameter(i)->GetName()
+			);
+		} catch (std::exception& ex){
+			continue;
+		}
+		commonPar++;
+	}
+	if(commonPar == 0) return;
+
+	/* If we have at least one matching parameter, we require that all
+	 * parameters are contained in the new list */
+	for(unsigned int i=0; i<params.GetNDouble(); i++){
+		pOld = params.GetDoubleParameter(i);
+		try{
+			pNew = par.GetDoubleParameter( pOld->GetName() );
 		} catch (std::exception& ex){
 			BOOST_LOG_TRIVIAL(error) << "AmpSumIntensity::setParameterList() | "
 					" Can not find parameter! "<<ex.what();
 			throw;
 		}
 		//Update parameter
-		p->UpdateParameter( pNew );
+		pOld->UpdateParameter( pNew );
 	}
 
 	return;
