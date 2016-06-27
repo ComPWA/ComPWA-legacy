@@ -143,15 +143,16 @@ double DalitzKinematics::calculateMoments(unsigned int sys, dataPoint& point,
 
 void DalitzKinematics::EventToDataPoint(const Event& ev, dataPoint& point) const
 {
-	point.setWeight(ev.getWeight());//reset weight
-	point.setEfficiency(ev.getEfficiency());
-
 	const Particle& part1 = ev.getParticle(0);
 	const Particle& part2 = ev.getParticle(1);
 	const Particle& part3 = ev.getParticle(2);
 	double m23sq = Particle::invariantMass(part2,part3);
 	double m13sq = Particle::invariantMass(part1,part3);
+	//FillDataPoint resets weight and efficiency
 	FillDataPoint(0,1,m23sq,m13sq,point);
+
+	point.setWeight(ev.getWeight());//reset weight
+	point.setEfficiency(ev.getEfficiency());
 
 	return;
 }
