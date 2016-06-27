@@ -163,7 +163,6 @@ exe gendalitzApp :
         
 exe compareTreeAmpApp : 
         CompareTreeAmpApp.cpp 
-        test
         $(TOP)/Core//ComPWA
         $(TOP)/Physics/AmplitudeSum//AmplitudeSum  
         $(TOP)/DataReader/RootReader//RootReader  
