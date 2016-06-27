@@ -174,7 +174,7 @@ const ParameterList& Data::getListOfData()
 	for( ; itr!=fEvents.end(); ++itr){
 	   dataPoint  point;
 	   try{
-		point = dataPoint(*itr);
+		   point = dataPoint(*itr);
 	   } catch(BeyondPhsp& ex) {
 		  continue;
 	   }
