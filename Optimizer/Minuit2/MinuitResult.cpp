@@ -155,7 +155,10 @@ void MinuitResult::calcFractionError(ParameterList& parList,
 	std::vector<ParameterList> fracVect;
 	progressBar bar(nSets);
 	stringstream outFraction;
-	for(unsigned int i=0; i<nSets; i++){
+//	for(unsigned int i=0; i<nSets; i++){
+	int i=0;
+	while( i<nSets ){
+		bool error=0;
 		bar.nextEvent();
 		gsl_vector* gslNewPar = gsl_vector_alloc(nFreeParameter);
 		//generate set of smeared parameters
@@ -173,16 +176,27 @@ void MinuitResult::calcFractionError(ParameterList& parList,
 					newPar.GetDoubleParameter(o);
 			if(outPar->IsFixed()) continue;
 			//set floating values to smeared values
-			outPar->SetValue(gslNewPar->data[t]);
+			try{ //catch out-of-bound
+				outPar->SetValue(gslNewPar->data[t]);
+			} catch ( ParameterOutOfBound& ex ){
+				error=1;
+			}
 			t++;
 		}
+		if( error ) continue; //skip this set if one parameter is out of bound
+
 		//free vector
 		gsl_vector_free(gslNewPar);
 		//update amplitude with smeared parameters
-		Amplitude::UpdateAmpParameterList(_ampVec, newPar);
+		try{
+			Amplitude::UpdateAmpParameterList(_ampVec, newPar);
+		} catch ( ParameterOutOfBound& ex ){
+			continue;
+		}
 		ParameterList tmp;
 		amp->GetFitFractions(tmp);
 		fracVect.push_back(tmp);
+		i++;
 
 		/******* DEBUGGING *******/
 		//			if(i==0){
