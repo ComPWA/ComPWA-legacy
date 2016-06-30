@@ -562,13 +562,7 @@ double AmpSumIntensity::GetIntValue(std::string var1, double min1, double max1,
 //=======================================================
 //==================== EVALUATION =======================
 //=======================================================
-const ParameterList& AmpSumIntensity::intensity(std::vector<double> point)
-{
-	dataPoint dataP(point);
-	return intensity(dataP);
-}
-
-const ParameterList& AmpSumIntensity::intensityNoEff(dataPoint& point)
+const std::complex<double>& AmpSumIntensity::evaluate(dataPoint& point)
 {
 	std::complex<double> AMPpdf(0,0);
 	auto it = GetResonanceItrFirst();
@@ -582,6 +576,18 @@ const ParameterList& AmpSumIntensity::intensityNoEff(dataPoint& point)
 			throw;
 		}
 	}
+	return AMPpdf;
+}
+
+const ParameterList& AmpSumIntensity::intensity(std::vector<double> point)
+{
+	dataPoint dataP(point);
+	return intensity(dataP);
+}
+
+const ParameterList& AmpSumIntensity::intensityNoEff(dataPoint& point)
+{
+	auto AMPpdf = evaluate(point);
 	result.SetParameterValue(0,std::norm(AMPpdf));
 	return result;
 }
