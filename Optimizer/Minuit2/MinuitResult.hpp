@@ -90,6 +90,9 @@ public:
 	//! Set calculation of interference terms
 	void SetCalcInterference(bool b) { calcInterference = b; }
 
+	//! Get calculation of interference terms
+	bool GetCalcInterference() { return calcInterference; }
+
 	//! Write list of fit parameters and list of fitfractions to XML file @filename
 	virtual void writeXML(std::string filename);
 
@@ -98,6 +101,42 @@ public:
 
 	//! Any errors during minimization?
 	virtual bool hasFailed();
+
+	//! Is minimum valid?
+	virtual bool MinimumIsValid() { return isValid; }
+
+	//! Number of free parameters
+	virtual int GetNDF() { return nFreeParameter; }
+
+	//! Get number of events
+	virtual int GetNEvents() { return nEvents; }
+
+	//! Get covariance matrix
+	virtual std::vector<std::vector<double> > GetCovarianceMatrix() {
+		return cov;
+	}
+	//! Get correlation matrix
+	virtual std::vector<std::vector<double> > GetCorrelationMatrix() {
+		return corr;
+	}
+	//! Get global correlation coefficiencts
+	virtual std::vector<double > GetGlobalCC() {
+		return globalCC;
+	}
+	//! Get estimated distrance to minimum
+	virtual double GetEDM() { return edm; }
+
+	//! Get AIC
+	virtual double GetAIC() { return AIC; }
+
+	//! Get BIC
+	virtual double GetBIC() { return BIC; }
+
+	//! Get penalty scale
+	virtual double GetPenaltyScale() { return penaltyScale; }
+
+	//! Get penalty term
+	virtual double GetPenalty() { return penalty; }
 
 protected:
 	//! Initialize result with Minuit2::FunctionMinimum
