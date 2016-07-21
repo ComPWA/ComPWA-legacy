@@ -243,7 +243,17 @@ exe helicityCoherentAmplitudeEventGenApp :
 		$(TOP)/DataReader//RootGenerator
 		$(TOP)/Physics/DecayTree//DecayTree
         $(TOP)/Physics/HelicityAmplitude//HelicityAmplitude
-        : ;  
+        : ;
+exe helicityAmplitudeFitApp : 
+        HelicityAmplitudeFitApp.cpp 
+        $(TOP)/Core//ComPWA
+        $(TOP)/Physics/DecayTree//DecayTree
+        $(TOP)/Physics/HelicityAmplitude//HelicityAmplitude
+        $(TOP)/DataReader/RootReader//RootReader
+        $(TOP)/Optimizer//Optimizer
+        $(TOP)/Estimator/MinLogLH//MinLogLH
+        $(TOP)/Optimizer/Minuit2//Minuit2IF
+        : ;
 
 exe serializeApp : 
         SerializationApp.cpp 
@@ -256,7 +266,7 @@ install dist : test : <location>$(TOP)/lib <threading>single ;
 install dist2 : compareTreeAmpApp dalitzfitApp slicefitApp treetestApp dataiftestApp optimizertestApp physicstestApp : <location>$(TOP)/bin <threading>single ;
 install dist3 : estimatortestApp integrationtestApp integrationtestbinnedApp runmanagertestApp gentwopartApp gendalitzApp dalitzplotApp serializeApp dpareaTestApp genRunManager : <location>$(TOP)/bin <threading>single ;
 
-install dist4 : helicityDecayTreeTestApp helicityDecayTreeGeneratorTestApp helicityCoherentAmplitudeEventGenApp : <location>$(TOP)/bin <threading>single ;
+install dist4 : helicityDecayTreeTestApp helicityDecayTreeGeneratorTestApp helicityCoherentAmplitudeEventGenApp helicityAmplitudeFitApp : <location>$(TOP)/bin <threading>single ;
 
 #if $(GENEVA) { 
 #install dist7 : genevatestApp : <location>$(TOP)/bin ;

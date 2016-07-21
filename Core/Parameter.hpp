@@ -682,10 +682,12 @@ public:
 	virtual void SetMinMax(const double min, const double max){
 		SetMinValue(min);
 		SetMaxValue(max);
-		if(!bounds_)
+		if(!bounds_) {
+		  std::cout<<min_<<" < "<<val_<<" < "<<max_<<std::endl;
 			throw std::runtime_error("DoubleParameter::SetMinMaxValue() bounds not valid: ["
 					+std::to_string((long double)min)+";"
 					+std::to_string((long double)max)+"]!");
+		}
 	}
 	/*! Setter for lower bound
 	 * Setter for lower bound of the parameter. If a check for valid bounds

@@ -53,7 +53,7 @@ std::vector<DecayTree> DecayTreeFactory::createDecayTrees() const {
     }
   }
 
-  removeUndistinguishableCombinations(decay_trees);
+  //removeUndistinguishableCombinations(decay_trees);
 
   return decay_trees;
 }

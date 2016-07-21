@@ -42,8 +42,13 @@ public:
 
   double Up() const;
 
-  inline void setNameID(const unsigned int id, const std::string name){
-    _parNames.insert(std::pair<unsigned int,std::string>(id,name));
+  inline void setNameID(const unsigned int id, const std::string& name){
+    auto result = _parNames.insert(std::pair<unsigned int,std::string>(id,name));
+    if(!result.second) {
+      std::stringstream ss;
+      ss<<"MinuitFcn::setNameID(): Could not create entry in ID-name map for id="<<id<<" and name="<<name;
+      throw std::runtime_error(ss.str());
+    }
   };
 
   inline std::string parName(const unsigned int id){

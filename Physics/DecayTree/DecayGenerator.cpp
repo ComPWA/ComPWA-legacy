@@ -34,6 +34,8 @@ DecayGenerator::DecayGenerator() :
   allowed_particle_names_.push_back("f2_1270");
   allowed_particle_names_.push_back("omega");
   allowed_particle_names_.push_back("jpsi");
+  allowed_particle_names_.push_back("pi+");
+  allowed_particle_names_.push_back("pi-");
 }
 
 DecayGenerator::~DecayGenerator() {

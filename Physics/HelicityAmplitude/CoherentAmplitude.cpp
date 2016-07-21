@@ -28,30 +28,13 @@ CoherentAmplitude::~CoherentAmplitude() {
 }
 
 void CoherentAmplitude::registerTopologyAmplitudeParameters() {
-  for (unsigned int topology_amplitude_index = 0;
-      topology_amplitude_index < topology_amplitudes_.size();
-      ++topology_amplitude_index) {
+  for (auto const& topology_amplitude : topology_amplitudes_) {
+    for (auto const& sequential_decay : topology_amplitude.getSequentialDecayList()) {
+      parameters_.AddParameter(sequential_decay.strength_);
+      parameters_.AddParameter(sequential_decay.phase_);
 
-    const std::vector<SequentialTwoBodyDecayAmplitude>& sequential_decay_list =
-        topology_amplitudes_[topology_amplitude_index].getSequentialDecayList();
-
-    std::vector<SequentialTwoBodyDecayAmplitude>::const_iterator sequential_decay_iter;
-
-    for (sequential_decay_iter = sequential_decay_list.begin();
-        sequential_decay_iter != sequential_decay_list.end();
-        ++sequential_decay_iter) {
-
-      parameters_.AddParameter(sequential_decay_iter->strength_);
-      parameters_.AddParameter(sequential_decay_iter->phase_);
-
-      std::vector<FullTwoBodyDecayAmplitude>::const_iterator decay_node_iter;
-
-      for (decay_node_iter =
-          sequential_decay_iter->full_decay_amplitude_chain_list_.begin();
-          decay_node_iter
-              != sequential_decay_iter->full_decay_amplitude_chain_list_.end();
-          ++decay_node_iter) {
-        parameters_.Append(decay_node_iter->second->getParameterList());
+      for (auto const& decay_node : sequential_decay.full_decay_amplitude_chain_list_) {
+        parameters_.Append(decay_node.second->getParameterList());
       }
     }
   }
@@ -74,9 +57,8 @@ void CoherentAmplitude::init() {
       kinematics->getTopologyAmplitudeDataPointIndexLists();
 
   // and initialize parameter at position 0 in the result objects as result
-  std::shared_ptr<DoubleParameter> result_value(
-      new DoubleParameter("coherent_amp"));
-  result.AddParameter(result_value);
+  result_value_.reset(new DoubleParameter("coherent_amp"));
+  result.AddParameter(result_value_);
 }
 
 const double CoherentAmplitude::integral() {
@@ -168,7 +150,7 @@ const ParameterList& CoherentAmplitude::intensityNoEff(const dataPoint& point) {
     BOOST_LOG_TRIVIAL(error)<<"Intensity is not a number!!";
     intensity = 0;
   }
-  result.SetParameterValue(0, intensity);
+  result_value_->SetValue(intensity);
   return result;
 }
 
@@ -176,7 +158,7 @@ const ParameterList& CoherentAmplitude::intensity(const dataPoint& point) {
   intensityNoEff(point);
   if (0 != efficiency_.get()) {
     double eff = efficiency_->evaluate(point);
-    result.SetParameterValue(0, result.GetDoubleParameter(0)->GetValue() * eff);
+    result_value_->SetValue(result_value_->GetValue() * eff);
   }
   return result;
 }
@@ -186,17 +168,19 @@ const bool CoherentAmplitude::fillStartParVec(ParameterList& outPar) {
   return true;
 }
 
-void CoherentAmplitude::setParameterList(ParameterList& par) {
+void CoherentAmplitude::setParameterList(const ParameterList& par) {
 //parameters varied by Minimization algorithm
   if (par.GetNDouble() != parameters_.GetNDouble())
     throw std::runtime_error(
         "setParameterList(): size of parameter lists don't match");
   for (unsigned int i = 0; i < parameters_.GetNDouble(); i++) {
     std::shared_ptr<DoubleParameter> p = parameters_.GetDoubleParameter(i);
-    if (!p->IsFixed()) {
-      p->SetValue(par.GetDoubleParameter(i)->GetValue());
-      p->SetError(par.GetDoubleParameter(i)->GetError());
-    }
+    p->UpdateParameter(par.GetDoubleParameter(i));
+    /*if (!p->IsFixed()) {
+     p->SetValue(par.GetDoubleParameter(i)->GetValue());
+     if (p->HasError())
+     p->SetError(par.GetDoubleParameter(i)->GetError());
+     }*/
   }
   return;
 }

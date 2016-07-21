@@ -81,7 +81,7 @@ std::shared_ptr<FitResult> MinuitIF::exec(ParameterList& par){
 
 		if( actPat->UseBounds() ){
 			upar.Add(actPat->GetName(), actPat->GetValue(), error,
-					actPat->GetMaxValue(), actPat->GetMinValue());
+					actPat->GetMinValue(), actPat->GetMaxValue());
 		}else
 			upar.Add(actPat->GetName(), actPat->GetValue(),error);
 

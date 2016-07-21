@@ -17,6 +17,7 @@
 #include "TH2D.h"
 #include "TCanvas.h"
 #include "TStyle.h"
+#include "TF1.h"
 
 #include "DataReader/RootGenerator/RootGenerator.hpp"
 // Physics Interface header files go here
@@ -35,13 +36,12 @@
 #include "Physics/HelicityAmplitude/CoherentAmplitude.hpp"
 
 /*#include "Tools/RootNeatPlotting/HelperFunctions.h"
-#include "Tools/RootNeatPlotting/plotting/PlotBundle.h"
-#include "Tools/RootNeatPlotting/plotting/Booky.h"
-#include "Tools/RootNeatPlotting/style/DataObjectStyle.h"
-#include "Tools/RootNeatPlotting/style/DefaultStyleSingleton.h"
-#include "Tools/RootNeatPlotting/style/xml-parser/XMLStyleConfigParser.h"*/
+ #include "Tools/RootNeatPlotting/plotting/PlotBundle.h"
+ #include "Tools/RootNeatPlotting/plotting/Booky.h"
+ #include "Tools/RootNeatPlotting/style/DataObjectStyle.h"
+ #include "Tools/RootNeatPlotting/style/DefaultStyleSingleton.h"
+ #include "Tools/RootNeatPlotting/style/xml-parser/XMLStyleConfigParser.h"*/
 //#include "PWA/PlotData.hpp"
-
 using namespace ComPWA;
 using DataReader::Data;
 using DataReader::RootReader::RootReader;
@@ -56,8 +56,8 @@ int main(int argc, char **argv) {
       dynamic_cast<ComPWA::Physics::HelicityFormalism::HelicityKinematics*>(ComPWA::Physics::HelicityFormalism::HelicityKinematics::createInstance());
 
   //load resonances
-    std::string input_config_file("Physics/HelicityAmplitude/JPSI_ypipi.xml");
-  if(argc > 1) {
+  std::string input_config_file("Physics/HelicityAmplitude/JPSI_ypipi.xml");
+  if (argc > 1) {
     input_config_file = argv[1];
   }
 
@@ -115,8 +115,7 @@ int main(int argc, char **argv) {
     amp->init();
 
     //create dummy final state event to initialized the kinematics class
-    std::string outFile = "3Part-4vecs.root";
-    unsigned int dataSize = 2000;
+    unsigned int dataSize = 20000;
 
     std::shared_ptr<Data> data(new RootReader());
     std::shared_ptr<Data> phsp(new RootReader());
@@ -126,7 +125,7 @@ int main(int argc, char **argv) {
     run.setGenerator(gen);
     run.setData(data);
     run.setPhspSample(phsp);
-    run.generatePhsp(dataSize * 10);
+    run.generatePhsp(dataSize * 100);
     run.generate(dataSize);
     std::cout << "Data size: " << data->getNEvents() << std::endl;
     data->writeData("data.root", "events");
@@ -155,34 +154,37 @@ int main(int argc, char **argv) {
           evWeight);
     }
 
+    hist.Scale(1.0 * num_events / hist.Integral());
+    plot_onlyweight.Scale(1.0 * num_events / plot_onlyweight.Integral());
+
     TCanvas c;
 
-    // get default styles from xml file
-   /* NeatPlotting::XMLStyleConfigParser xml_style_config_parser(
-        "Tools/RootNeatPlotting/default-style.xml");
-    NeatPlotting::DefaultStyleSingleton::Instance().readStyleConfigParser(
-        xml_style_config_parser);
+    /*// get default styles from xml file
+     NeatPlotting::XMLStyleConfigParser xml_style_config_parser(
+     "Tools/RootNeatPlotting/default-style.xml");
+     NeatPlotting::DefaultStyleSingleton::Instance().readStyleConfigParser(
+     xml_style_config_parser);
 
-    // create an empty plot bundle
-    NeatPlotting::PlotBundle plot_bundle;
+     // create an empty plot bundle
+     NeatPlotting::PlotBundle plot_bundle;
 
-    //create a drawable root object and style pair (default style is being used)
-    NeatPlotting::DrawableDataObjectStylePair<TH1*> hist_style_pair(&hist);
-    // change the draw option
-    hist_style_pair.draw_style.draw_option = "COLZ";
+     //create a drawable root object and style pair (default style is being used)
+     NeatPlotting::DrawableDataObjectStylePair<TH1*> hist_style_pair(&hist);
+     // change the draw option
+     hist_style_pair.draw_style.draw_option = "COLZ";
 
-    // and add it to the plot bundle
-    // the plot bundle will not make a copy of the histogram
-    // so make sure the lifetime of hist is long enough
-    plot_bundle.addHistogram(hist_style_pair);
+     // and add it to the plot bundle
+     // the plot bundle will not make a copy of the histogram
+     // so make sure the lifetime of hist is long enough
+     plot_bundle.addHistogram(hist_style_pair);
 
-    // add labels to the x and y axis
-    plot_bundle.plot_axis.x_axis_title = "M^{2}_#pi_0#pi_0";
-    plot_bundle.plot_axis.y_axis_title = "M^{2}_#pi_0#gamma";
+     // add labels to the x and y axis
+     plot_bundle.plot_axis.x_axis_title = "M^{2}_#pi_0#pi_0";
+     plot_bundle.plot_axis.y_axis_title = "M^{2}_#pi_0#gamma";
 
-    plot_bundle.drawOnCurrentPad();*/
+     plot_bundle.drawOnCurrentPad();
 
-    c.SetLogz(1);
+     c.SetLogz(1);*/
 
     hist.Draw("colz");
     c.SaveAs("plot.pdf");

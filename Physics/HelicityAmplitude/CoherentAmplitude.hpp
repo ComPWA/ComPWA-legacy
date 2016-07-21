@@ -27,6 +27,7 @@ class CoherentAmplitude: public Amplitude {
   std::shared_ptr<Efficiency> efficiency_;
 
   ParameterList parameters_;
+  std::shared_ptr<DoubleParameter> result_value_;
   std::vector<std::vector<IndexList> > data_point_index_lists_;
 
 
@@ -54,7 +55,7 @@ public:
   const ParameterList& intensity(std::vector<double> point, ParameterList& par);
 
   const bool fillStartParVec(ParameterList& outPar);
-  void setParameterList(ParameterList& par);
+  void setParameterList(const ParameterList& par);
   bool copyParameterList(ParameterList& par);
 
   double getIntValue(std::string var1, double min1, double max1,

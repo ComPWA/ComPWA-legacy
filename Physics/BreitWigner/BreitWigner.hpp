@@ -54,7 +54,7 @@ public:
 	virtual const ParameterList& intensityNoEff(const dataPoint& point){ return intensity(point); };
 	virtual bool copyParameterList(ParameterList& outPar);
 
-	virtual void setParameterList(ParameterList& par);
+	virtual void setParameterList(const ParameterList& par);
 	virtual void setNevents(unsigned int n) { _entries=n; };
 	virtual unsigned int getNevents() { return _entries; };
 	/** Destructor */

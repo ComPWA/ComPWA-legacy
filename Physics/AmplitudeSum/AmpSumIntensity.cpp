@@ -913,7 +913,7 @@ const ParameterList& AmpSumIntensity::intensity(const dataPoint& point){
 
 }
 
-void AmpSumIntensity::setParameterList(ParameterList& par){
+void AmpSumIntensity::setParameterList(const ParameterList& par){
 	//parameters varied by Minimization algorithm
 	if(par.GetNDouble()!=params.GetNDouble())
 		throw std::runtime_error("setParameterList(): size of parameter lists don't match");

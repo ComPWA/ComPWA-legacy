@@ -54,8 +54,10 @@ void RelativisticBreitWigner::initialiseParameters(
     resonance_mass_->SetParameterFixed();
   else
     resonance_mass_->SetParameterFree();
+
   resonance_mass_->SetMinValue(parameter_info.get<double>("mass_min"));
   resonance_mass_->SetMaxValue(parameter_info.get<double>("mass_max"));
+  //resonance_mass_->SetUseBounds(false);
 
   resonance_width_->SetValue(parameter_info.get<double>("width"));
   if (parameter_info.get<bool>("width_fix"))
@@ -64,6 +66,7 @@ void RelativisticBreitWigner::initialiseParameters(
     resonance_width_->SetParameterFree();
   resonance_width_->SetMinValue(parameter_info.get<double>("width_min"));
   resonance_width_->SetMaxValue(parameter_info.get<double>("width_max"));
+  //resonance_width_->SetUseBounds(false);
 
   meson_radius_->SetValue(parameter_info.get<double>("mesonRadius"));
 

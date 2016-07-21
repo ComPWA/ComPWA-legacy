@@ -41,14 +41,21 @@ int main(int argc, char **argv) {
       ComPWA::QuantumNumberIDs::CPARITY, ComPWA::QuantumNumberIDs::SPIN,
       ComPWA::QuantumNumberIDs::ORBITAL_ANGULAR_MOMENTUM });
 
-  ComPWA::Physics::DecayTree::IFParticleInfo if_particle =
+/*  ComPWA::Physics::DecayTree::IFParticleInfo if_particle =
       decay_generator.createIFParticleInfo("gamma");
   decay_generator.addFinalStateParticles(if_particle);
   if_particle = decay_generator.createIFParticleInfo("pi0");
   decay_generator.addFinalStateParticles(if_particle);
   decay_generator.addFinalStateParticles(if_particle);
+*/
 
-  if_particle = decay_generator.createIFParticleInfo("jpsi");
+  ComPWA::Physics::DecayTree::IFParticleInfo if_particle =
+        decay_generator.createIFParticleInfo("pi+");
+          decay_generator.addFinalStateParticles(if_particle);
+if_particle = decay_generator.createIFParticleInfo("pi-");
+  decay_generator.addFinalStateParticles(if_particle);
+
+  if_particle = decay_generator.createIFParticleInfo("f0_980");
   decay_generator.setTopNodeState(if_particle);
 
   ComPWA::Physics::DecayTree::DecayConfiguration decay_config =

@@ -38,16 +38,9 @@ void DecayConfiguration::addDecayToCurrentDecayTree(
   // add particles to list if not already existent and get index
   unsigned int mother_state_index = addParticleToList(mother);
 
-  std::cout<<"mother index: "<<mother_state_index<<std::endl;
-
   DecayProductsInfo products;
   products.decay_strength_info_and_phase_ = decay_strength_info_and_phase;
   products.particle_indices_ = addParticlesToList(daughter_states);
-
-  std::cout<<"daughter indices: ";
-  for(auto di : products.particle_indices_)
-    std::cout<<di<<" ";
-  std::cout<<std::endl;
 
   current_concrete_decay_tree_[mother_state_index] = products;
 }

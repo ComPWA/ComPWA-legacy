@@ -54,7 +54,7 @@ std::complex<double> TwoBodyDecayAmplitude::evaluate(const dataPoint& point,
   double theta(point.getVal(evaluation_index + index_theta_helicity_angle_));
   double phi(point.getVal(evaluation_index + index_phi_helicity_angle_));
 
-  return spin_factor_ * Wigner_D(phi, theta, -phi, J_, M_, d1_M_ - d2_M_);
+  return spin_factor_ * Wigner_D(phi, theta, 0.0, J_, M_, d1_M_ - d2_M_);
 }
 
 } /* namespace HelicityFormalism */

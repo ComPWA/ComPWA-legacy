@@ -84,8 +84,8 @@ HelicityFormalism::SequentialTwoBodyDecayAmplitude TopologyAmplitudeFactory::gen
 
     if (final_state_particle_counter > 0) {
       // TODO: top node is just ignored... and basically set as a constant factor 1.0
-      if (helicity_tree[*decay_vertex_iter].state_info_.dynamical_information_.get<
-          std::string>("type") != "topNode") {
+      //if (helicity_tree[*decay_vertex_iter].state_info_.dynamical_information_.get<
+      //    std::string>("type") != "topNode") {
         decay_spin_info.initial_state_ =
             helicity_tree[*decay_vertex_iter].state_info_.spin_information_;
 
@@ -137,7 +137,7 @@ HelicityFormalism::SequentialTwoBodyDecayAmplitude TopologyAmplitudeFactory::gen
             strength_and_phase_pt.get_child("strength"), name.str());
         full_decay_amplitude.phase_ = generateDoubleParameter(
             strength_and_phase_pt.get_child("phase"), name.str());
-      }
+     // }
     }
   }
 

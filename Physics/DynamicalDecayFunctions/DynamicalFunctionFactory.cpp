@@ -35,7 +35,7 @@ std::shared_ptr<AbstractDynamicalFunction> DynamicalFunctionFactory::generateRel
   rel_bw->initialiseParameters(state_info.dynamical_info_.initial_state_,
       external_parameters);
 
-  dynamical_function_list_[state_info] = rel_bw;
+  dynamical_function_list_.insert(std::make_pair(state_info, rel_bw));
 
   return rel_bw;
 }

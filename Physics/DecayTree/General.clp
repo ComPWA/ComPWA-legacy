@@ -403,7 +403,7 @@
 				(fact-slot-value ?spin_wave2 quantum_number_values)
 			)
 		)
-	)
+)
 )
 
 (deffunction get-required-variable (?variable_name ?decay)
@@ -414,11 +414,13 @@
 (deffunction check-decay-requirements (?single_qn_decay_list ?single_qn_decay)
 	; this function checks if all the required information is there
 	
-	;(printout t (fact-slot-value ?single_qn_decay quantum_number_name) crlf)
-	;(printout t (fact-slot-value ?single_qn_decay mother) (fact-slot-value ?single_qn_decay daughters) crlf)
+	(printout t (fact-slot-value ?single_qn_decay quantum_number_name) crlf)
+	(printout t (fact-slot-value ?single_qn_decay mother) (fact-slot-value ?single_qn_decay daughters) crlf)
 	
 	(bind ?required_decays (fact-slot-value ?single_qn_decay required_decays))
-	(foreach ?required_decay ?required_decays
+
+  (printout t ?required_decays crlf)
+  (foreach ?required_decay ?required_decays
 		(bind ?is_decay_in_list FALSE)
 		(foreach ?single_available_decay (fact-slot-value ?single_qn_decay_list values)
 		do
@@ -439,7 +441,7 @@
 	(bind ?required_var_values (fact-slot-value ?single_qn_decay required_variables))
 	(loop-for-count (?i 1 (length ?required_var_names))
 	do
-		;(printout t (nth$ ?i ?required_var_names) crlf)
+		(printout t (nth$ ?i ?required_var_names) crlf)
 		(foreach ?single_available_decay (fact-slot-value ?single_qn_decay_list values)
 			;find required variable name
 			(bind ?found_index

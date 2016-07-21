@@ -64,19 +64,39 @@ double HelicityKinematics::calculatePSArea() {
    const gsl_rng_type *T = gsl_rng_default;    //type of random generator
    gsl_rng *r = gsl_rng_alloc(T);    //random generator
 
-   gsl_monte_function F = { &phspFunc, dim, const_cast<DalitzKinematics*>(this) };
+   gsl_monte_function F = { &heliphspFunc, dim, const_cast<HelicityKinematics*>(this) };
 
    gsl_monte_vegas_state *s = gsl_monte_vegas_alloc(dim);
    gsl_monte_vegas_integrate(&F, xLimit_low, xLimit_high, 2, calls, r, s, &res,
    &err);
    gsl_monte_vegas_free(s);
+
    BOOST_LOG_TRIVIAL(debug)
    << "HelicityKinematics::calculatePSArea() phase space area (MC integration): " << "("
-   << res << "+-" << err << ") relAcc [%]: " << 100 * err / res;
+   << res << "+-" << err << ") relAcc [%]: " << 100 * err / res;*/
 
-   PS_area_ = res;
-   is_PS_area_calculated_ = 1;
-   return;*/
+  /*TGenPhaseSpace gen;
+   TLorentzVector mother;
+   double *masses = {};
+   gen.SetDecay(mother, num_particles, masses);
+
+   double precision(1e-5);
+   unsigned int max_calls(10000000);
+
+   double added_weights(0.0);
+   unsigned int counter(0);
+   double integral(1.0);
+   double previous_value(0.0);
+
+   while(std::fabs((integral-previous_value)/integral) > precision && counter < max_calls) {
+   previous_value = integral;
+   added_weights += gen.Generate();
+   ++counter;
+   integral = added_weights/counter;
+   }
+
+   return integral;*/
+  return 1.0;
 }
 
 void HelicityKinematics::setDecayTopologies(
@@ -128,8 +148,8 @@ void HelicityKinematics::init(
       IndexList topology_amplitude_data_point_index_list;
 
       for (auto evalution_order_index : decay_topology.unique_id_decay_node_order_) {
-        buildDataPointIndexListForTopology(evalution_order_index, decay_topology,
-            mapping, topology_amplitude_data_point_index_list);
+        buildDataPointIndexListForTopology(evalution_order_index,
+            decay_topology, mapping, topology_amplitude_data_point_index_list);
       }
 
       data_point_index_list.push_back(topology_amplitude_data_point_index_list);
@@ -368,7 +388,7 @@ void HelicityKinematics::fillPointWithBoostedKinematicVariables(
   point.setVal(++data_point_fill_position, particle2_4vector.Mass());
 
   // boost particle1 into the rest frame of the two body state
-  particle1_4vector.Boost(decaying_state);
+ /* particle1_4vector.Boost(decaying_state);
 
   // if this decay node is the not the top level decay we have to do some
   // boosting
@@ -377,16 +397,40 @@ void HelicityKinematics::fillPointWithBoostedKinematicVariables(
     // define mother state
     Vector4<double> mother(
         unique_occurring_cms_4vectors[two_body_state_indices.mother_index_]);
+
     // then boost the two body state into the rest frame of its mother
     decaying_state.Boost(mother);
     // now determine the theta and phi values of the boosted particle1 vector
     // with respect to the boosted two body state
     double rotation_phi = decaying_state.Phi();
-    particle1_4vector.Rotate(rotation_phi, decaying_state.Theta(),
-        -rotation_phi);
-  }
+    particle1_4vector.RotateZ(-rotation_phi);
+    particle1_4vector.RotateY(-decaying_state.Theta());
+  }*/
+
+  Vector4<double> mother(
+   std::sqrt(decaying_state.Mass2() + 1.0), 0., 0., 1.0);
+
+   if (two_body_state_indices.decay_state_index_
+   != two_body_state_indices.mother_index_) {
+   mother =
+   unique_occurring_cms_4vectors[two_body_state_indices.mother_index_];
+   }
+
+   decaying_state.Boost(mother);
+
+   Vector4<double> decaying_state_rot(decaying_state);
+   decaying_state_rot.RotateZ(-decaying_state.Phi());
+   decaying_state_rot.RotateY(-decaying_state.Theta());
+
+   particle1_4vector.Boost(mother);
+   particle1_4vector.RotateZ(-decaying_state.Phi());
+   particle1_4vector.RotateY(-decaying_state.Theta());
+
+   particle1_4vector.Boost(decaying_state_rot);
+
   // now just get the theta and phi angles of the boosted particle 1
   point.setVal(++data_point_fill_position, particle1_4vector.Theta());
+
   point.setVal(++data_point_fill_position, particle1_4vector.Phi());
   ++data_point_fill_position;
 }

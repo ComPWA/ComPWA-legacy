@@ -93,7 +93,7 @@ const double BreitWigner::BreitWignerValue(double x, double M, double T){
 
 	return 1./denom;
 }
-void BreitWigner::setParameterList(ParameterList& par){
+void BreitWigner::setParameterList(const ParameterList& par){
 	//parameters varied by Minimization algorithm
 	params = par;
 	return;

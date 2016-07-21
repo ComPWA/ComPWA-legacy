@@ -87,6 +87,9 @@ class HelicityKinematics: public Kinematics {
       const TwoBodyDecayIndices& two_body_state_indices,
       unsigned int &data_point_fill_position) const;
 
+  double calculateDecayAngle(const Vector4<double> &p, const Vector4<double> &q,
+      const Vector4<double> &d) const;
+
 protected:
   double calculatePSArea();
   //! Event to dataPoint conversion
