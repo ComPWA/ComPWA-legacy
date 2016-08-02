@@ -335,6 +335,11 @@ bool DecayConfiguration::isNodeADaughter(
   return false;
 }
 
+void DecayConfiguration::printInfo() const {
+  BOOST_LOG_TRIVIAL(info)<<"number of particles: "<<particles_.size()<<std::endl;
+  BOOST_LOG_TRIVIAL(info)<<"number of concrete decay trees: "<<concrete_decay_trees_.size()<<std::endl;
+}
+
 void DecayConfiguration::printDecayTree(
     const ParticleIndexDecayTree& index_decay_tree) const {
   for (auto const& node : index_decay_tree) {

@@ -80,12 +80,15 @@ double CoherentAmplitude::getMaxVal(ParameterList& par,
 }
 double CoherentAmplitude::getMaxVal(std::shared_ptr<Generator> gen) {
   if (!wasMaxAmplitudeValueCalculated_) {
+    unsigned int evaluations(5000000);
+    BOOST_LOG_TRIVIAL(info)<<"CoherentAmplitude::calcMaxVal() calculating amplitude max value with "
+        <<evaluations<< " events...";
     HelicityKinematics* kin =
         dynamic_cast<HelicityKinematics*>(Kinematics::instance());
 
     Event event;
     double maxVal = 0;
-    for (unsigned int i = 0; i < 100000; i++) {
+    for (unsigned int i = 0; i < evaluations; i++) {
       //create event
       gen->generate(event);
       dataPoint point;
@@ -96,8 +99,8 @@ double CoherentAmplitude::getMaxVal(std::shared_ptr<Generator> gen) {
           i--;
         continue;
       }    //only integrate over phase space
-      ParameterList res = intensity(point);
-      double intens = *res.GetDoubleParameter(0);
+      intensity(point);
+      double intens = result_value_->GetValue();
       if (intens > maxVal) {
         maxVal = intens;
       }
@@ -106,7 +109,7 @@ double CoherentAmplitude::getMaxVal(std::shared_ptr<Generator> gen) {
     maxAmplitudeValue_ = maxVal;
     wasMaxAmplitudeValueCalculated_ = true;
 
-    BOOST_LOG_TRIVIAL(info)<<"AmpSumIntensity::calcMaxVal() calculated maximum of amplitude: "
+    BOOST_LOG_TRIVIAL(info)<<"CoherentAmplitude::calcMaxVal() calculated maximum of amplitude: "
     <<maxAmplitudeValue_;
   }
 
@@ -143,7 +146,7 @@ const ParameterList& CoherentAmplitude::intensityNoEff(const dataPoint& point) {
             topology_data_index_lists[final_state_combination_index]);
       }
     }
-    intensity = pow(std::abs(coherent_amplitude), 2.0);
+    intensity = std::pow(std::abs(coherent_amplitude), 2.0);
   }
 
   if (intensity != intensity) {

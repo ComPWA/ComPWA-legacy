@@ -30,12 +30,12 @@ DecayGenerator::DecayGenerator() :
   allowed_particle_names_.push_back("gamma");
   allowed_particle_names_.push_back("pi0");
   allowed_particle_names_.push_back("f0_980");
-  allowed_particle_names_.push_back("f0_1370");
-  allowed_particle_names_.push_back("f2_1270");
-  allowed_particle_names_.push_back("omega");
+  //allowed_particle_names_.push_back("f0_1370");
+  //allowed_particle_names_.push_back("f2_1270");
+  //allowed_particle_names_.push_back("omega");
   allowed_particle_names_.push_back("jpsi");
-  allowed_particle_names_.push_back("pi+");
-  allowed_particle_names_.push_back("pi-");
+  //allowed_particle_names_.push_back("pi+");
+  //allowed_particle_names_.push_back("pi-");
 }
 
 DecayGenerator::~DecayGenerator() {
@@ -127,37 +127,36 @@ void DecayGenerator::addSpinWaveTwoBodyDecayToDecayConfiguration(
     DecayConfiguration& decay_configuration,
     const SpinWaveDecayTree& two_body_decay_tree) {
 
-  std::cout << "adding spin wave decay tree to decay configuration \n";
-  std::cout << "number of decay nodes: "
-      << two_body_decay_tree.unique_decay_node_index_tree_.size() << std::endl;
+  BOOST_LOG_TRIVIAL(debug)<<"adding spin wave decay tree to decay configuration \n";
+  BOOST_LOG_TRIVIAL(debug)<<"number of decay nodes: "<< two_body_decay_tree.unique_decay_node_index_tree_.size() << std::endl;
 
   std::map<unsigned int, std::vector<ParticleStateInfo> > temp_state_pool;
   std::vector<
-      std::vector<std::pair<ParticleStateInfo, std::vector<ParticleStateInfo> > > > decay_trees;
+  std::vector<std::pair<ParticleStateInfo, std::vector<ParticleStateInfo> > > > decay_trees;
 
   for (auto const &decay_node : two_body_decay_tree.unique_decay_node_index_tree_) {
-    std::cout<<"mother: "<<decay_node.first<<std::endl;
+    BOOST_LOG_TRIVIAL(debug)<<"mother: "<<decay_node.first<<std::endl;
     if (temp_state_pool.find(decay_node.first) == temp_state_pool.end()) {
       temp_state_pool[decay_node.first] =
-          createParticleStateInfoCandidates(
-              two_body_decay_tree.unique_decay_node_index_to_spin_wave_index_mapping_.at(
-                  decay_node.first), decay_node.first);
+      createParticleStateInfoCandidates(
+          two_body_decay_tree.unique_decay_node_index_to_spin_wave_index_mapping_.at(
+              decay_node.first), decay_node.first);
       //if we could not find any particle for this mother state then just quit here
       if (temp_state_pool[decay_node.first].size() == 0)
-        return;
+      return;
     }
 
     std::vector<std::vector<ParticleStateInfo> > daughter_list_combinations;
     for (unsigned int i = 0; i < decay_node.second.size(); ++i) {
-      std::cout<<"daugther: "<<decay_node.second[i]<<std::endl;
+      BOOST_LOG_TRIVIAL(debug)<<"daugther: "<<decay_node.second[i]<<std::endl;
       if (temp_state_pool.find(decay_node.second[i]) == temp_state_pool.end()) {
         temp_state_pool[decay_node.second[i]] =
-            createParticleStateInfoCandidates(
-                two_body_decay_tree.unique_decay_node_index_to_spin_wave_index_mapping_.at(
-                    decay_node.second[i]), decay_node.second[i]);
+        createParticleStateInfoCandidates(
+            two_body_decay_tree.unique_decay_node_index_to_spin_wave_index_mapping_.at(
+                decay_node.second[i]), decay_node.second[i]);
         //if we could not find any particle for this daughter state then just quit here
         if (temp_state_pool[decay_node.second[i]].size() == 0)
-          return;
+        return;
       }
 
       if (daughter_list_combinations.size() == 0) {
@@ -186,24 +185,25 @@ void DecayGenerator::addSpinWaveTwoBodyDecayToDecayConfiguration(
     }
 
     std::vector<
-        std::vector<
-            std::pair<ParticleStateInfo, std::vector<ParticleStateInfo> > > > new_decay_trees;
+    std::vector<
+    std::pair<ParticleStateInfo, std::vector<ParticleStateInfo> > > > new_decay_trees;
 
+    BOOST_LOG_TRIVIAL(debug)<<"constructing decay trees and checking for single decay constraints...\n";
     // add them to the decay trees
     for (auto const& mother : temp_state_pool[decay_node.first]) {
       for (auto const& daughters : daughter_list_combinations) {
         // do some checks here
         if (!checkMass(mother, daughters))
-          continue;
+        continue;
 
-        std::cout << mother << std::endl;
+        BOOST_LOG_TRIVIAL(debug) << mother << std::endl;
         for (auto d : daughters) {
-          std::cout << d << std::endl;
+          BOOST_LOG_TRIVIAL(debug)<< d << std::endl;
         }
 
         if (decay_trees_empty) {
           std::vector<
-              std::pair<ParticleStateInfo, std::vector<ParticleStateInfo> > > blank_decay_tree;
+          std::pair<ParticleStateInfo, std::vector<ParticleStateInfo> > > blank_decay_tree;
           auto decay_pair = std::make_pair(mother, daughters);
           blank_decay_tree.push_back(decay_pair);
           decay_trees.push_back(blank_decay_tree);
@@ -213,7 +213,7 @@ void DecayGenerator::addSpinWaveTwoBodyDecayToDecayConfiguration(
             auto decay_pair = std::make_pair(mother, daughters);
             if (isDecayValidForTree(decay_pair, current_decay_tree)) {
               std::vector<
-                  std::pair<ParticleStateInfo, std::vector<ParticleStateInfo> > > extended_decay_tree(
+              std::pair<ParticleStateInfo, std::vector<ParticleStateInfo> > > extended_decay_tree(
                   current_decay_tree);
               extended_decay_tree.push_back(decay_pair);
               new_decay_trees.push_back(extended_decay_tree);
@@ -223,12 +223,13 @@ void DecayGenerator::addSpinWaveTwoBodyDecayToDecayConfiguration(
       }
     }
     if (!decay_trees_empty)
-      decay_trees = new_decay_trees;
+    decay_trees = new_decay_trees;
   }
 
+  BOOST_LOG_TRIVIAL(debug)<<"checking for correct initial and final state and adding decay tree to decay configuration...\n";
   for (auto const& decay_tree : decay_trees) {
     if (!checkForCorrectIFState(decay_tree))
-      continue;
+    continue;
     // reset particle picking pool
     current_total_particle_pool_ = total_particle_pool_;
     current_particle_mapping_.clear();
@@ -236,33 +237,33 @@ void DecayGenerator::addSpinWaveTwoBodyDecayToDecayConfiguration(
     // for each possible mother state make copy for all pairs of daughters
     for (auto const &decay_node : decay_tree) {
       ParticleStateInfo mother = createParticleInstance(decay_node.first);
-      std::cout << " before!!!: trying to add decay for: "
-          << decay_node.first.pid_information_.name_ << " ("
-          << decay_node.first.unique_id_ << ") -> ";
+      BOOST_LOG_TRIVIAL(debug)<<" before!!!: trying to add decay for: "
+      << decay_node.first.pid_information_.name_ << " ("
+      << decay_node.first.unique_id_ << ") -> ";
       std::vector<ParticleStateInfo> daughters;
       for (auto const& daughter : decay_node.second) {
         daughters.push_back(createParticleInstance(daughter));
-        std::cout << daughter.pid_information_.name_ << " ("
-            << daughter.unique_id_ << ") ";
+        BOOST_LOG_TRIVIAL(debug)<<daughter.pid_information_.name_ << " ("
+        << daughter.unique_id_ << ") ";
       }
-      std::cout << std::endl;
+      BOOST_LOG_TRIVIAL(debug)<< std::endl;
       const boost::property_tree::ptree decay_strength_info_and_phase =
-          createStrengthAndPhase();
+      createStrengthAndPhase();
 
-      std::cout << "trying to add decay for: " << mother.pid_information_.name_
-          << " (" << mother.unique_id_ << ") -> ";
+      BOOST_LOG_TRIVIAL(debug)<< "trying to add decay for: " << mother.pid_information_.name_
+      << " (" << mother.unique_id_ << ") -> ";
       for (auto daughter : daughters) {
-        std::cout << daughter.pid_information_.name_ << " ("
-            << daughter.unique_id_ << ") ";
+        BOOST_LOG_TRIVIAL(debug)<< daughter.pid_information_.name_ << " ("
+        << daughter.unique_id_ << ") ";
       }
-      std::cout << std::endl;
+      BOOST_LOG_TRIVIAL(debug)<< std::endl;
 
       decay_configuration.addDecayToCurrentDecayTree(mother, daughters,
           decay_strength_info_and_phase);
     }
     decay_configuration.addCurrentDecayTreeToList();
   }
-  std::cout << "nada\n";
+  BOOST_LOG_TRIVIAL(debug)<<"finished converting spin wave decay trees to concrete decay trees...\n";
 }
 
 std::vector<ParticleStateInfo> DecayGenerator::createParticleStateInfoCandidates(
@@ -431,7 +432,8 @@ ParticleStateInfo DecayGenerator::createParticleInstance(
       total_particle_pool_.push_back(ps);
       total_particle_pool_[total_particle_pool_.size() - 1].unique_id_ =
           total_particle_pool_.size();
-      return_ps.unique_id_ = total_particle_pool_[total_particle_pool_.size() - 1].unique_id_;
+      return_ps.unique_id_ = total_particle_pool_[total_particle_pool_.size()
+          - 1].unique_id_;
     }
     else {
       return_ps.unique_id_ = result->unique_id_;

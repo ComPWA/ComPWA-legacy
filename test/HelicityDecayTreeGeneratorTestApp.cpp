@@ -41,25 +41,29 @@ int main(int argc, char **argv) {
       ComPWA::QuantumNumberIDs::CPARITY, ComPWA::QuantumNumberIDs::SPIN,
       ComPWA::QuantumNumberIDs::ORBITAL_ANGULAR_MOMENTUM });
 
-/*  ComPWA::Physics::DecayTree::IFParticleInfo if_particle =
+  ComPWA::Physics::DecayTree::IFParticleInfo if_particle =
       decay_generator.createIFParticleInfo("gamma");
   decay_generator.addFinalStateParticles(if_particle);
   if_particle = decay_generator.createIFParticleInfo("pi0");
   decay_generator.addFinalStateParticles(if_particle);
   decay_generator.addFinalStateParticles(if_particle);
-*/
 
-  ComPWA::Physics::DecayTree::IFParticleInfo if_particle =
+  if_particle = decay_generator.createIFParticleInfo("jpsi");
+  decay_generator.setTopNodeState(if_particle);
+
+ /* ComPWA::Physics::DecayTree::IFParticleInfo if_particle =
         decay_generator.createIFParticleInfo("pi+");
           decay_generator.addFinalStateParticles(if_particle);
 if_particle = decay_generator.createIFParticleInfo("pi-");
   decay_generator.addFinalStateParticles(if_particle);
 
   if_particle = decay_generator.createIFParticleInfo("f0_980");
-  decay_generator.setTopNodeState(if_particle);
+  decay_generator.setTopNodeState(if_particle);*/
 
   ComPWA::Physics::DecayTree::DecayConfiguration decay_config =
       decay_generator.createDecayConfiguration();
+
+  decay_config.printInfo();
 
   ComPWA::Physics::DecayTree::DecayXMLConfigReader xml_config_io(decay_config);
   std::cout<<"Saving decay configuration to xml file...\n";

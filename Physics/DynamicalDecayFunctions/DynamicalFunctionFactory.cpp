@@ -17,7 +17,7 @@ namespace ComPWA {
 namespace Physics {
 namespace DynamicalFunctions {
 
-DynamicalFunctionFactory::DynamicalFunctionFactory() {
+DynamicalFunctionFactory::DynamicalFunctionFactory() : dynamical_function_list_() {
   // TODO Auto-generated constructor stub
 
 }

@@ -36,6 +36,7 @@ class TwoBodyDecayAmplitude {
   ::Spin M_;
   ::Spin d1_M_;
   ::Spin d2_M_;
+  ::Spin daughters_delta_M_;
 
 public:
   TwoBodyDecayAmplitude(const TwoBodyDecaySpinInformation& decay_info);

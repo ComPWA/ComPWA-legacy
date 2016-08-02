@@ -141,7 +141,7 @@
 						    
 						    (bind ?skip_decay FALSE)
 			    		    (if ?only_two_waves_left then
-			          (if (<> 
+			                    (if (<> 
 			              				(fact-slot-value ?single_qn_decay mother)
 										(nth$ 
 											(member$ (fact-slot-value ?single_qn_decay quantum_number_name) 

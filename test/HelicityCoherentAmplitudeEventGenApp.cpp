@@ -115,7 +115,7 @@ int main(int argc, char **argv) {
     amp->init();
 
     //create dummy final state event to initialized the kinematics class
-    unsigned int dataSize = 20000;
+    unsigned int dataSize = 100000;
 
     std::shared_ptr<Data> data(new RootReader());
     std::shared_ptr<Data> phsp(new RootReader());
@@ -132,7 +132,7 @@ int main(int argc, char **argv) {
     phsp->writeData("phspdata.root", "events");
 
     //===== Plot amplitude
-    TH2D hist("plot", "", 200, 0.0, 10.0, 200, 0.0, 10.0);
+  /*  TH2D hist("plot", "", 200, 0.0, 10.0, 200, 0.0, 10.0);
     TH2D plot_onlyweight("plot", "", 100, 0.0, 10.0, 100, 0.0, 10.0);
 
     Event event;
@@ -157,7 +157,7 @@ int main(int argc, char **argv) {
     hist.Scale(1.0 * num_events / hist.Integral());
     plot_onlyweight.Scale(1.0 * num_events / plot_onlyweight.Integral());
 
-    TCanvas c;
+    TCanvas c;*/
 
     /*// get default styles from xml file
      NeatPlotting::XMLStyleConfigParser xml_style_config_parser(
@@ -184,12 +184,12 @@ int main(int argc, char **argv) {
 
      plot_bundle.drawOnCurrentPad();
 
-     c.SetLogz(1);*/
+     c.SetLogz(1);
 
     hist.Draw("colz");
     c.SaveAs("plot.pdf");
     plot_onlyweight.Draw("colz");
-    c.SaveAs("plot_onlyweight.pdf");
+    c.SaveAs("plot_onlyweight.pdf");*/
 
     //  TFile output(outFile.c_str(),"update");
     //  output.SetCompressionLevel(1); //try level 2 also

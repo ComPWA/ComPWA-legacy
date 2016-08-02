@@ -12,7 +12,8 @@ using ComPWA::Physics::DecayTree::DecayTree;
 using ComPWA::Physics::DecayTree::DecayNode;
 using ComPWA::Physics::DecayTree::HelicityTree;
 
-TopologyAmplitudeFactory::TopologyAmplitudeFactory() {
+TopologyAmplitudeFactory::TopologyAmplitudeFactory() :
+    two_body_decay_amplitude_list_(), dynamical_function_factory_() {
   // TODO Auto-generated constructor stub
 }
 
@@ -86,20 +87,21 @@ HelicityFormalism::SequentialTwoBodyDecayAmplitude TopologyAmplitudeFactory::gen
       // TODO: top node is just ignored... and basically set as a constant factor 1.0
       //if (helicity_tree[*decay_vertex_iter].state_info_.dynamical_information_.get<
       //    std::string>("type") != "topNode") {
-        decay_spin_info.initial_state_ =
-            helicity_tree[*decay_vertex_iter].state_info_.spin_information_;
+      decay_spin_info.initial_state_ =
+          helicity_tree[*decay_vertex_iter].state_info_.spin_information_;
 
-        // create new amplitude if not yet existent
-        if (two_body_decay_amplitude_list_.find(decay_spin_info)
-            == two_body_decay_amplitude_list_.end()) {
-          two_body_decay_amplitude_list_[decay_spin_info] = std::shared_ptr<
-              TwoBodyDecayAmplitude>(
-              new TwoBodyDecayAmplitude(decay_spin_info));
-        }
+      // create new amplitude if not yet existent
+      if (two_body_decay_amplitude_list_.find(decay_spin_info)
+          == two_body_decay_amplitude_list_.end()) {
+        two_body_decay_amplitude_list_[decay_spin_info] = std::shared_ptr<
+            TwoBodyDecayAmplitude>(new TwoBodyDecayAmplitude(decay_spin_info));
+      }
 
-        // do external parameter stuff here
-        ParameterList daughter_masses_parameter_list;
+      // do external parameter stuff here
+      ParameterList daughter_masses_parameter_list;
 
+      if (helicity_tree[*decay_vertex_iter].state_info_.dynamical_information_.get<
+          std::string>("type") != "topNode") {
         std::shared_ptr<DoubleParameter> daughter1_mass(
             new DoubleParameter("daughter1_mass",
                 getResonanceMassParameter(resonance_parameter_lists,
@@ -110,34 +112,35 @@ HelicityFormalism::SequentialTwoBodyDecayAmplitude TopologyAmplitudeFactory::gen
                     decay_products_id_info.second)->GetValue()));
         daughter_masses_parameter_list.AddParameter(daughter1_mass);
         daughter_masses_parameter_list.AddParameter(daughter2_mass);
+      }
 
-        TwoBodyDecayInformation decay_info;
-        decay_info.spin_info_ = decay_spin_info;
-        decay_info.dynamical_info_.initial_state_ =
-            helicity_tree[*decay_vertex_iter].state_info_.dynamical_information_;
-        std::shared_ptr<DynamicalFunctions::AbstractDynamicalFunction> abs_function =
-            dynamical_function_factory_.generateDynamicalFunction(decay_info,
-                daughter_masses_parameter_list);
-        full_decay_amplitude.full_decay_amplitude_chain_list_.push_back(
-            std::make_pair(two_body_decay_amplitude_list_[decay_spin_info],
-                abs_function));
+      TwoBodyDecayInformation decay_info;
+      decay_info.spin_info_ = decay_spin_info;
+      decay_info.dynamical_info_.initial_state_ =
+          helicity_tree[*decay_vertex_iter].state_info_.dynamical_information_;
+      std::shared_ptr<DynamicalFunctions::AbstractDynamicalFunction> abs_function =
+          dynamical_function_factory_.generateDynamicalFunction(decay_info,
+              daughter_masses_parameter_list);
+      full_decay_amplitude.full_decay_amplitude_chain_list_.push_back(
+          std::make_pair(two_body_decay_amplitude_list_[decay_spin_info],
+              abs_function));
 
-        // create external parameter list for this decay, which can be
-        // used by higher level decays..
-        resonance_parameter_lists.insert(
-            std::make_pair(
-                helicity_tree[*decay_vertex_iter].state_info_.pid_information_,
-                abs_function->getParameterList()));
+      // create external parameter list for this decay, which can be
+      // used by higher level decays..
+      resonance_parameter_lists.insert(
+          std::make_pair(
+              helicity_tree[*decay_vertex_iter].state_info_.pid_information_,
+              abs_function->getParameterList()));
 
-        // get strength and phase of this decay node
-        const boost::property_tree::ptree& strength_and_phase_pt =
-            helicity_tree[*decay_vertex_iter].strength_and_phase_;
+      // get strength and phase of this decay node
+      const boost::property_tree::ptree& strength_and_phase_pt =
+          helicity_tree[*decay_vertex_iter].strength_and_phase_;
 
-        full_decay_amplitude.strength_ = generateDoubleParameter(
-            strength_and_phase_pt.get_child("strength"), name.str());
-        full_decay_amplitude.phase_ = generateDoubleParameter(
-            strength_and_phase_pt.get_child("phase"), name.str());
-     // }
+      full_decay_amplitude.strength_ = generateDoubleParameter(
+          strength_and_phase_pt.get_child("strength"), name.str());
+      full_decay_amplitude.phase_ = generateDoubleParameter(
+          strength_and_phase_pt.get_child("phase"), name.str());
+      // }
     }
   }
 
@@ -177,7 +180,8 @@ std::vector<TopologyAmplitude> TopologyAmplitudeFactory::generateTopologyAmplitu
   // first group decay trees according to their topology
   std::vector<TwoBodyDecayTopology> decay_topologies = generateDecayTopologies(
       decay_tree_collection);
-  std::vector<std::vector<DecayTree> > topology_grouped_decay_trees(decay_topologies.size());
+  std::vector<std::vector<DecayTree> > topology_grouped_decay_trees(
+      decay_topologies.size());
 
   for (auto const& decay_tree : decay_tree_collection) {
     auto result = std::find(decay_topologies.begin(), decay_topologies.end(),
@@ -311,22 +315,23 @@ TwoBodyDecayTopology TopologyAmplitudeFactory::createDecayTopology(
   for (decay_vertex_iter = sequential_decay_vertex_list.begin();
       decay_vertex_iter != sequential_decay_vertex_list.end();
       ++decay_vertex_iter) {
-    std::pair<boost::graph_traits<HelicityTree>::out_edge_iterator,
-        boost::graph_traits<HelicityTree>::out_edge_iterator> ep;
+    /* std::pair<boost::graph_traits<HelicityTree>::out_edge_iterator,
+     boost::graph_traits<HelicityTree>::out_edge_iterator> ep;
 
-    ep = boost::out_edges(*decay_vertex_iter, helicity_tree);
+     ep = boost::out_edges(*decay_vertex_iter, helicity_tree);
 
-    unsigned int final_state_particle_counter = 0;
-    while (ep.first != ep.second) {
-      ++final_state_particle_counter;
-      ++ep.first;
-    }
-    if (final_state_particle_counter > 0) {
-      if (helicity_tree[*decay_vertex_iter].state_info_.dynamical_information_.get<
-          std::string>("type") != "topNode") {
-        decay_topology.unique_id_decay_node_order_.push_back(
-            helicity_tree[*decay_vertex_iter].state_info_.unique_id_);
-      }
+     unsigned int final_state_particle_counter = 0;
+     while (ep.first != ep.second) {
+     ++final_state_particle_counter;
+     ++ep.first;
+     }*/
+
+    if (!decay_tree.isDecayVertexALeaf(*decay_vertex_iter)) {
+      //if (helicity_tree[*decay_vertex_iter].state_info_.dynamical_information_.get<
+      //    std::string>("type") != "topNode") {
+      decay_topology.unique_id_decay_node_order_.push_back(
+          helicity_tree[*decay_vertex_iter].state_info_.unique_id_);
+      //}
     }
   }
 

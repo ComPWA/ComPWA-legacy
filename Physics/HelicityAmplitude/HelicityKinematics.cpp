@@ -317,28 +317,20 @@ std::vector<Vector4<double> > HelicityKinematics::createRequired4Vectors(
   unique_occurring_cms_4vectors.reserve(
       3 * unique_occurring_decay_event_fs_index_lists_.size());
 
-  for (unsigned int fs_particle_lists_index = 0;
-      fs_particle_lists_index
-          < unique_occurring_decay_event_fs_index_lists_.size();
-      ++fs_particle_lists_index) {
+  for (auto const& fs_particle_list : unique_occurring_decay_event_fs_index_lists_) {
     Vector4<double> temp_vector(0.0, 0.0, 0.0, 0.0);
 
-    if (unique_occurring_decay_event_fs_index_lists_[fs_particle_lists_index].size()
-        == 1) {
-      const Particle& p =
-          event.getParticle(
-              unique_occurring_decay_event_fs_index_lists_[fs_particle_lists_index][0]);
+    if (fs_particle_list.size() == 1) {
+      const Particle& p = event.getParticle(fs_particle_list[0]);
       temp_vector.SetP4(p.E, p.px, p.py, p.pz);
     }
     else {
       for (unsigned int event_particle_list_index = 0;
-          event_particle_list_index
-              < unique_occurring_decay_event_fs_index_lists_[fs_particle_lists_index].size();
+          event_particle_list_index < fs_particle_list.size();
           ++event_particle_list_index) {
 
         addParticleToCMS4Vector(
-            event.getParticle(
-                unique_occurring_decay_event_fs_index_lists_[fs_particle_lists_index][event_particle_list_index]),
+            event.getParticle(fs_particle_list[event_particle_list_index]),
             temp_vector);
       }
     }
@@ -373,9 +365,9 @@ void HelicityKinematics::fillPointWithBoostedKinematicVariables(
     const TwoBodyDecayIndices& two_body_state_indices,
     unsigned int& data_point_fill_position) const {
   // define particle products of the two body decay
-  Vector4<double> particle1_4vector(
+  Vector4<double> daughter1_4vector(
       unique_occurring_cms_4vectors[two_body_state_indices.decay_products_.first]);
-  Vector4<double> particle2_4vector(
+  Vector4<double> daughter2_4vector(
       unique_occurring_cms_4vectors[two_body_state_indices.decay_products_.second]);
   // define the two body state
   Vector4<double> decaying_state(
@@ -384,11 +376,11 @@ void HelicityKinematics::fillPointWithBoostedKinematicVariables(
   // at first add the invariant mass squared to the data point
   point.setVal(data_point_fill_position, decaying_state.Mass2());
   // then add the invariant masses of the daughters
-  point.setVal(++data_point_fill_position, particle1_4vector.Mass());
-  point.setVal(++data_point_fill_position, particle2_4vector.Mass());
+  point.setVal(++data_point_fill_position, daughter1_4vector.Mass());
+  point.setVal(++data_point_fill_position, daughter2_4vector.Mass());
 
   // boost particle1 into the rest frame of the two body state
- /* particle1_4vector.Boost(decaying_state);
+  daughter1_4vector.Boost(decaying_state);
 
   // if this decay node is the not the top level decay we have to do some
   // boosting
@@ -401,14 +393,18 @@ void HelicityKinematics::fillPointWithBoostedKinematicVariables(
     // then boost the two body state into the rest frame of its mother
     decaying_state.Boost(mother);
     // now determine the theta and phi values of the boosted particle1 vector
-    // with respect to the boosted two body state
-    double rotation_phi = decaying_state.Phi();
-    particle1_4vector.RotateZ(-rotation_phi);
-    particle1_4vector.RotateY(-decaying_state.Theta());
-  }*/
+    // with respect to direction of flight of the boosted two body state
+    // so we need to rotate
+    //double rotation_theta = daughter1_4vector.Theta();
+    //double rotation_phi = daughter1_4vector.Phi();
+    //daughter1_4vector.RotateZ(-rotation_phi);
+    //daughter1_4vector.RotateY(-rotation_theta);
+    daughter1_4vector.Rotate(decaying_state.Phi(), decaying_state.Theta(), -decaying_state.Phi());
+    //daughter1_4vector.RotateY(rotation_theta);
+    //daughter1_4vector.RotateZ(rotation_phi);
+  }
 
-  Vector4<double> mother(
-   std::sqrt(decaying_state.Mass2() + 1.0), 0., 0., 1.0);
+   /*Vector4<double> mother(std::sqrt(decaying_state.Mass2() + 1.0), 0., 0., 1.0);
 
    if (two_body_state_indices.decay_state_index_
    != two_body_state_indices.mother_index_) {
@@ -426,12 +422,12 @@ void HelicityKinematics::fillPointWithBoostedKinematicVariables(
    particle1_4vector.RotateZ(-decaying_state.Phi());
    particle1_4vector.RotateY(-decaying_state.Theta());
 
-   particle1_4vector.Boost(decaying_state_rot);
+   particle1_4vector.Boost(decaying_state_rot);*/
 
   // now just get the theta and phi angles of the boosted particle 1
-  point.setVal(++data_point_fill_position, particle1_4vector.Theta());
+  point.setVal(++data_point_fill_position, daughter1_4vector.Theta());
 
-  point.setVal(++data_point_fill_position, particle1_4vector.Phi());
+  point.setVal(++data_point_fill_position, daughter1_4vector.Phi());
   ++data_point_fill_position;
 }
 

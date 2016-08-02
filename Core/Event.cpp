@@ -34,6 +34,10 @@ void Event::addParticle(Particle inParticle){
   fParticles.push_back(inParticle);
 }
 
+void Event::setParticleAt(const Particle &particle, unsigned int index) {
+  fParticles[index] = particle;
+}
+
 Event::~Event() { /* nothing */	}
 
 const Particle& Event::getParticle(const unsigned int id) const{

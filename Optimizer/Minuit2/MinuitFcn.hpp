@@ -13,7 +13,7 @@
  * @file MinuitFcn.hpp
  * Based on the Minuit2 FcnBase. This class uses the ControlParameter interface for the
  * optimization.
-*/
+ */
 
 #ifndef _OIFMinuitFcn_HPP
 #define _OIFMinuitFcn_HPP
@@ -31,29 +31,35 @@
 namespace ROOT {
 namespace Minuit2 {
 
-class MinuitFcn : public FCNBase {
+class MinuitFcn: public FCNBase {
 
 public:
 
-  MinuitFcn(std::shared_ptr<ComPWA::Optimizer::ControlParameter> theData, ComPWA::ParameterList& parList);
+  MinuitFcn(std::shared_ptr<ComPWA::Optimizer::ControlParameter> theData,
+      ComPWA::ParameterList& parList);
   virtual ~MinuitFcn();
 
   double operator()(const std::vector<double>& x) const;
 
   double Up() const;
 
-  inline void setNameID(const unsigned int id, const std::string& name){
-    auto result = _parNames.insert(std::pair<unsigned int,std::string>(id,name));
-    if(!result.second) {
+  inline void setNameID(const unsigned int id, const std::string& name) {
+    auto result = _parNames.insert(
+        std::pair<unsigned int, std::string>(id, name));
+    if (!result.second) {
       std::stringstream ss;
-      ss<<"MinuitFcn::setNameID(): Could not create entry in ID-name map for id="<<id<<" and name="<<name;
+      ss
+          << "MinuitFcn::setNameID(): Could not create entry in ID-name map for id="
+          << id << " and name=" << name;
       throw std::runtime_error(ss.str());
     }
-  };
+  }
+  ;
 
-  inline std::string parName(const unsigned int id){
+  inline std::string parName(const unsigned int id) {
     return _parNames.at(id);
-  };
+  }
+  ;
 
 private:
   std::shared_ptr<ComPWA::Optimizer::ControlParameter> _myDataPtr; /*!< pointer to the ControlParameter (e.g. Estimator) */
@@ -61,7 +67,7 @@ private:
   std::map<unsigned int, std::string> _parNames; /*!< mapping of minuit ids to ComPWA names */
 };
 
-}  // namespace Minuit2
-}  // namespace ROOT
+}    // namespace Minuit2
+}    // namespace ROOT
 
 #endif 

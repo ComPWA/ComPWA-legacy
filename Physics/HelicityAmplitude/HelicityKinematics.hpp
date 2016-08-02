@@ -92,8 +92,6 @@ class HelicityKinematics: public Kinematics {
 
 protected:
   double calculatePSArea();
-  //! Event to dataPoint conversion
-  void translateEventToDataPoint(const Event& event, dataPoint& point) const;
 
 public:
   static Kinematics* createInstance() {
@@ -109,6 +107,9 @@ public:
   void init(const FinalStateParticleCombinatorics& fsp_combinatorics);
 
   std::vector<std::vector<IndexList> > getTopologyAmplitudeDataPointIndexLists() const;
+
+  //! Event to dataPoint conversion
+  void translateEventToDataPoint(const Event& event, dataPoint& point) const;
 
   bool isWithinPhsp(const dataPoint& point);
   double getMotherMass() const;

@@ -87,6 +87,7 @@ public:
   bool isNodeADaughter(ParticleIndexDecayTree::const_iterator& node,
       const std::vector<unsigned int>& list_of_daughters) const;
 
+  void printInfo() const;
   void printDecayTree(const ParticleIndexDecayTree& index_decay_tree) const;
 
 };

@@ -38,22 +38,25 @@
 			  )
 	(test (not (member$ "cparity" ?violating_quantum_number_list)))
 	=>
-	(if (or (or (<> ?charge_mother 0) (<> ?charge_daughter1 0)) (<> ?charge_daughter2 0))
+	(if (and (and (<> ?charge_mother 0) (<> ?charge_daughter1 0)) (<> ?charge_daughter2 0))
 	then
 		(retract ?decay)
 	else
-		(if (<> ?cparity_mother (* ?cparity_daughter1 ?cparity_daughter2))
-		then		 
-	 	 	(if (is-qn-conserved "cparity")
-	  		then
-				(retract ?decay)
-				;(printout t "decay violates cparity!" crlf)
-	  		else
-	  			(modify ?decay 
-	  				(violating_quantum_number_list ?violating_quantum_number_list "cparity")
+	    (if (and (and (= ?charge_mother 0) (= ?charge_daughter1 0)) (= ?charge_daughter2 0))
+	    then
+			(if (<> ?cparity_mother (* ?cparity_daughter1 ?cparity_daughter2))
+			then		 
+	 	 		(if (is-qn-conserved "cparity")
+	  			then
+					(retract ?decay)
+					;(printout t "decay violates cparity!" crlf)
+	  			else
+	  				(modify ?decay 
+	  					(violating_quantum_number_list ?violating_quantum_number_list "cparity")
+	  				)
 	  			)
-	  		)
-			;(printout t "decay violates cparity!" crlf)
+				;(printout t "decay violates cparity!" crlf)
+			)
 		)
 	)
 )
