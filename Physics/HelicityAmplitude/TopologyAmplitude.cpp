@@ -30,37 +30,33 @@ std::complex<double> TopologyAmplitude::evaluate(const dataPoint& point,
   std::complex<double> result(0.0, 0.0);
 
   // loop over the list of concrete versions of sequential decays
-  for (unsigned int sequential_decay_index = 0;
-      sequential_decay_index < sequential_decay_amplitude_list_.size();
-      ++sequential_decay_index) {
-    std::complex<double> sequential_decay_result(
-        std::polar(
-            sequential_decay_amplitude_list_[sequential_decay_index].strength_->GetValue(),
-            sequential_decay_amplitude_list_[sequential_decay_index].phase_->GetValue()));
+  for (auto const& sequential_decay : sequential_decay_amplitude_list_) {
+    std::complex<double> sequential_decay_result(1.0, 0.0);
 
     // loop over all the decay amplitudes within each sequential decay
-    for (unsigned int two_body_decay_index = 0;
-        two_body_decay_index
-            < sequential_decay_amplitude_list_[sequential_decay_index].full_decay_amplitude_chain_list_.size();
-        ++two_body_decay_index) {
+    unsigned int two_body_decay_index(0);
+    for (auto const& two_body_decay : sequential_decay.decay_amplitude) {
       // the results for each amplitude evaluation are multiplied to the sequential decay result
+      sequential_decay_result *= std::polar(
+          two_body_decay.strength_->GetValue(),
+          two_body_decay.phase_->GetValue());
 
       std::complex<double> angular_part =
-          sequential_decay_amplitude_list_[sequential_decay_index].full_decay_amplitude_chain_list_[two_body_decay_index].first->evaluate(
-              point, evaluation_index_list[two_body_decay_index]);
+          two_body_decay.angular_part_->evaluate(point,
+              evaluation_index_list[two_body_decay_index]);
 
       std::complex<double> dynamical_part =
-          sequential_decay_amplitude_list_[sequential_decay_index].full_decay_amplitude_chain_list_[two_body_decay_index].second->evaluate(
-              point, evaluation_index_list[two_body_decay_index]);
+          two_body_decay.dynamical_part_->evaluate(point,
+              evaluation_index_list[two_body_decay_index]);
 
       sequential_decay_result *= angular_part * dynamical_part;
+      ++two_body_decay_index;
     }
     // the sequential decay results are just added
-    result += sequential_decay_result;
+    result += sequential_decay_result * sequential_decay.factor;
   }
   return result;
 }
-
 
 const std::vector<SequentialTwoBodyDecayAmplitude>& TopologyAmplitude::getSequentialDecayList() const {
   return sequential_decay_amplitude_list_;

@@ -28,17 +28,14 @@ namespace HelicityFormalism {
 class TopologyAmplitudeFactory {
   DynamicalFunctions::DynamicalFunctionFactory dynamical_function_factory_;
 
+  bool parity_conserved;
+
+  std::map<std::string, std::shared_ptr<DoubleParameter> > global_parameter_list_;
+
   std::map<TwoBodyDecaySpinInformation, std::shared_ptr<TwoBodyDecayAmplitude> > two_body_decay_amplitude_list_;
 
-  HelicityFormalism::SequentialTwoBodyDecayAmplitude generateSequentialDecayAmplitude(
+  SequentialTwoBodyDecayAmplitude generateSequentialDecayAmplitude(
       const ComPWA::Physics::DecayTree::DecayTree& decay_tree);
-
-  std::shared_ptr<DoubleParameter> getResonanceMassParameter(
-      const std::map<IDInfo, ParameterList>& resonance_parameter_lists,
-      const IDInfo& id_info) const;
-
-  std::shared_ptr<DoubleParameter> generateDoubleParameter(
-      const boost::property_tree::ptree& pt, const std::string& name) const;
 
   TwoBodyDecayTopology createDecayTopology(
       const ComPWA::Physics::DecayTree::DecayTree& decay_tree) const;
@@ -57,6 +54,21 @@ class TopologyAmplitudeFactory {
       const std::vector<ParticleStateInfo>& fs_particle_list) const;
 
   Particle createParticle(const ParticleStateInfo& particle_state) const;
+
+  void appendParticleInfoToName(std::stringstream &name,
+      const ParticleStateInfo &state_info) const;
+
+  double getParityFactor(int pid_mother, int pid_d1, int pid_d2) const;
+
+  void fixParticlePropertyTree(
+      boost::property_tree::ptree& pt, const IDInfo& id_info) const;
+
+  std::pair<std::shared_ptr<DoubleParameter>, bool> generateGlobalParameter(
+      const boost::property_tree::ptree& pt, const std::string& name,
+      const std::string& related_name);
+
+  std::shared_ptr<DoubleParameter> generateDoubleParameter(
+      const boost::property_tree::ptree& pt, const std::string& name) const;
 
 public:
   TopologyAmplitudeFactory();

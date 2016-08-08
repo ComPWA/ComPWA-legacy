@@ -30,11 +30,10 @@ CoherentAmplitude::~CoherentAmplitude() {
 void CoherentAmplitude::registerTopologyAmplitudeParameters() {
   for (auto const& topology_amplitude : topology_amplitudes_) {
     for (auto const& sequential_decay : topology_amplitude.getSequentialDecayList()) {
-      parameters_.AddParameter(sequential_decay.strength_);
-      parameters_.AddParameter(sequential_decay.phase_);
-
-      for (auto const& decay_node : sequential_decay.full_decay_amplitude_chain_list_) {
-        parameters_.Append(decay_node.second->getParameterList());
+      for (auto const& decay_node : sequential_decay.decay_amplitude) {
+        parameters_.AddParameter(decay_node.strength_);
+        parameters_.AddParameter(decay_node.phase_);
+        parameters_.Append(decay_node.dynamical_part_->getParameterList());
       }
     }
   }

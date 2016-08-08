@@ -19,13 +19,12 @@ namespace Physics {
 namespace DynamicalFunctions {
 
 class TopNodeConstantValue: public AbstractDynamicalFunction {
+  void initialiseParameters(const boost::property_tree::ptree& parameter_info,
+      const ExternalParameters& external_parameters);
+
 public:
   TopNodeConstantValue();
   virtual ~TopNodeConstantValue();
-
-  void initialiseParameters(
-      const boost::property_tree::ptree& parameter_info,
-      const ParameterList& external_parameters);
 
   std::complex<double> evaluate(const dataPoint& point,
       unsigned int evaluation_index) const;

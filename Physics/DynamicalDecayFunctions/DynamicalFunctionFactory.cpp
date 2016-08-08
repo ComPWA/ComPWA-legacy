@@ -27,13 +27,11 @@ DynamicalFunctionFactory::~DynamicalFunctionFactory() {
 }
 
 std::shared_ptr<AbstractDynamicalFunction> DynamicalFunctionFactory::generateRelativisiticBreitWigner(
-    const HelicityFormalism::TwoBodyDecayInformation& state_info,
-    const ParameterList& external_parameters) {
+    const ParticleStateInfo& state_info,
+    const ExternalParameters& external_parameters) {
 
   std::shared_ptr<RelativisticBreitWigner> rel_bw(
-      new RelativisticBreitWigner(state_info.spin_info_.initial_state_));
-  rel_bw->initialiseParameters(state_info.dynamical_info_.initial_state_,
-      external_parameters);
+      new RelativisticBreitWigner(state_info, external_parameters));
 
   dynamical_function_list_.insert(std::make_pair(state_info, rel_bw));
 
@@ -41,8 +39,8 @@ std::shared_ptr<AbstractDynamicalFunction> DynamicalFunctionFactory::generateRel
 }
 
 std::shared_ptr<AbstractDynamicalFunction> DynamicalFunctionFactory::generateDynamicalFunction(
-    const HelicityFormalism::TwoBodyDecayInformation& state_info,
-    const ParameterList& external_parameters) {
+    const ParticleStateInfo& state_info,
+    const ExternalParameters& external_parameters) {
 
   // first check if we already have this dynamical function
   auto find_result = dynamical_function_list_.find(state_info);
@@ -51,12 +49,12 @@ std::shared_ptr<AbstractDynamicalFunction> DynamicalFunctionFactory::generateDyn
   }
   else {
     if (DynamicalFunctions::StringToDynamicalType.at(
-        state_info.dynamical_info_.initial_state_.get < std::string > ("type"))
+        state_info.dynamical_information_.get < std::string > ("type"))
         == DynamicalFunctions::DynamicalInfoTypes::RELATIVE_BREIT_WIGNER) {
       return generateRelativisiticBreitWigner(state_info, external_parameters);
     }
     else if (DynamicalFunctions::StringToDynamicalType.at(
-        state_info.dynamical_info_.initial_state_.get < std::string > ("type"))
+        state_info.dynamical_information_.get < std::string > ("type"))
         == DynamicalFunctions::DynamicalInfoTypes::TOP_NODE) {
       return std::shared_ptr < TopNodeConstantValue
           > (new TopNodeConstantValue());

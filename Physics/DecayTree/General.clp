@@ -13,8 +13,14 @@
 
 (deftemplate NameList
 	(slot name (type STRING))
-	(multislot names)
+	(multislot values)
 )
+
+;(deftemplate DecayRelationEntry
+;	(slot reference_decays)
+;	(slot related_decays)
+;	(slot relation_factor)
+;)
 
 (deftemplate SpinQuantumNumber
 	(slot unique_id (type INTEGER))
@@ -50,6 +56,7 @@
 	
 ; define decay template
 (deftemplate Decay
+	(slot relation_factor)
 	(slot quantum_number_name (type STRING))
 	(slot mother)
 	(multislot daughters)
@@ -352,7 +359,7 @@
 (deffunction get-list-of-qn-names
 	(?spin_wave1 ?spin_wave2)
 	
-	(bind ?all_qn_names (fact-slot-value (nth$ 1 (find-fact ((?f NameList)) (= 0 (str-compare ?f:name "AllQuantumNumbers")))) names))
+	(bind ?all_qn_names (fact-slot-value (nth$ 1 (find-fact ((?f NameList)) (= 0 (str-compare ?f:name "AllQuantumNumbers")))) values))
 	(bind ?names (create$))
 	(if (and (fact-slot-value ?spin_wave1 quantum_number_names) (fact-slot-value ?spin_wave2 quantum_number_names))
 	then
@@ -414,12 +421,12 @@
 (deffunction check-decay-requirements (?single_qn_decay_list ?single_qn_decay)
 	; this function checks if all the required information is there
 	
-	(printout t (fact-slot-value ?single_qn_decay quantum_number_name) crlf)
-	(printout t (fact-slot-value ?single_qn_decay mother) (fact-slot-value ?single_qn_decay daughters) crlf)
+	;(printout t (fact-slot-value ?single_qn_decay quantum_number_name) crlf)
+	;(printout t (fact-slot-value ?single_qn_decay mother) (fact-slot-value ?single_qn_decay daughters) crlf)
 	
 	(bind ?required_decays (fact-slot-value ?single_qn_decay required_decays))
 
-  (printout t ?required_decays crlf)
+  ;(printout t ?required_decays crlf)
   (foreach ?required_decay ?required_decays
 		(bind ?is_decay_in_list FALSE)
 		(foreach ?single_available_decay (fact-slot-value ?single_qn_decay_list values)
@@ -441,7 +448,7 @@
 	(bind ?required_var_values (fact-slot-value ?single_qn_decay required_variables))
 	(loop-for-count (?i 1 (length ?required_var_names))
 	do
-		(printout t (nth$ ?i ?required_var_names) crlf)
+		;(printout t (nth$ ?i ?required_var_names) crlf)
 		(foreach ?single_available_decay (fact-slot-value ?single_qn_decay_list values)
 			;find required variable name
 			(bind ?found_index
@@ -474,6 +481,7 @@
 	(return TRUE)
 )
 
+
 (deffunction get-qn-value (?index ?decay_tree ?qn_name)
 	(bind ?spinwave_fact (get-wave-from-unique-index ?index ?decay_tree))
 	
@@ -499,7 +507,7 @@
     (bind ?conserved_qn_list 
     	(fact-slot-value 
     		(nth$ 1 (find-fact ((?f NameList)) (= 0 (str-compare ?f:name "ConservedQuantumNumbers"))))
-    		names
+    		values
     	)
     )
 	(member$ ?qn_name ?conserved_qn_list)
@@ -510,7 +518,7 @@
 	(bind ?quantum_number_name_list 
     		(nth$ 1 (find-fact ((?f NameList)) (= 0 (str-compare ?f:name "AllQuantumNumbers"))))
     )
-    (bind ?current_names (fact-slot-value ?quantum_number_name_list names))
+    (bind ?current_names (fact-slot-value ?quantum_number_name_list values))
 	
 	(bind ?insert_index (+ (length ?current_names) 1))
 	(loop-for-count (?i 1 (length ?current_names))
@@ -536,12 +544,12 @@
 	(bind ?quantum_number_name_list 
     		(nth$ 1 (find-fact ((?f NameList)) (= 0 (str-compare ?f:name "AllQuantumNumbers"))))
     )
-    (bind ?current_names (fact-slot-value ?quantum_number_name_list names))
+    (bind ?current_names (fact-slot-value ?quantum_number_name_list values))
     
 	(if (not (member$ ?qn_name ?current_names))
 	then
 		(modify ?quantum_number_name_list 
-			(names (insert$ 
+			(values (insert$ 
 					?current_names 
 					(get-insert-index-for-correct-requirements ?qn_name) 
 					?qn_name
@@ -642,12 +650,14 @@
 	)
 )
 
+
+
 ;;;*******************
 ;;;* USER CONDITIONS *
 ;;;*******************
 
 (deffacts initial-facts-setup
 	(NameList (name "AllQuantumNumbers"))
-	;(NameList (name "ConservedQuantumNumbers"))
+	(NameList (name "ConservedQuantumNumbers"))
+	;(NameList (name "DecayRelationList"))
 )
-

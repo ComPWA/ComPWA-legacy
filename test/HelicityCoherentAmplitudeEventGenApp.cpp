@@ -114,6 +114,17 @@ int main(int argc, char **argv) {
             topology_amplitudes));
     amp->init();
 
+    ParameterList temp_param_list;
+    amp->copyParameterList(temp_param_list);
+    unsigned int free_params(0);
+    for (auto para : temp_param_list.GetDoubleParameters()) {
+      if (!para->IsFixed())
+        ++free_params;
+      std::cout<<para->GetName()<<std::endl;
+      std::cout<<para.get()<<std::endl;
+    }
+    std::cout << "free parameter count: " << free_params << std::endl;
+
     //create dummy final state event to initialized the kinematics class
     unsigned int dataSize = 100000;
 
@@ -132,32 +143,32 @@ int main(int argc, char **argv) {
     phsp->writeData("phspdata.root", "events");
 
     //===== Plot amplitude
-  /*  TH2D hist("plot", "", 200, 0.0, 10.0, 200, 0.0, 10.0);
-    TH2D plot_onlyweight("plot", "", 100, 0.0, 10.0, 100, 0.0, 10.0);
+    /*  TH2D hist("plot", "", 200, 0.0, 10.0, 200, 0.0, 10.0);
+     TH2D plot_onlyweight("plot", "", 100, 0.0, 10.0, 100, 0.0, 10.0);
 
-    Event event;
+     Event event;
 
-    unsigned int num_events(200000);
-    progressBar bar(num_events);
-    for (unsigned int i = 0; i < num_events; i++) {
-      gen->generate(event);
-      double evWeight = event.getWeight();
-      ComPWA::dataPoint point(event);
-      ParameterList ampPar = amp->intensity(point);
-      const ComPWA::Particle& p0 = event.getParticle(0);
-      const ComPWA::Particle& p1 = event.getParticle(1);
-      const ComPWA::Particle& p2 = event.getParticle(2);
+     unsigned int num_events(200000);
+     progressBar bar(num_events);
+     for (unsigned int i = 0; i < num_events; i++) {
+     gen->generate(event);
+     double evWeight = event.getWeight();
+     ComPWA::dataPoint point(event);
+     ParameterList ampPar = amp->intensity(point);
+     const ComPWA::Particle& p0 = event.getParticle(0);
+     const ComPWA::Particle& p1 = event.getParticle(1);
+     const ComPWA::Particle& p2 = event.getParticle(2);
 
-      hist.Fill(p1.invariantMass(p2), p0.invariantMass(p1),
-          evWeight * ampPar.GetDoubleParameter(0)->GetValue());
-      plot_onlyweight.Fill(p1.invariantMass(p2), p0.invariantMass(p1),
-          evWeight);
-    }
+     hist.Fill(p1.invariantMass(p2), p0.invariantMass(p1),
+     evWeight * ampPar.GetDoubleParameter(0)->GetValue());
+     plot_onlyweight.Fill(p1.invariantMass(p2), p0.invariantMass(p1),
+     evWeight);
+     }
 
-    hist.Scale(1.0 * num_events / hist.Integral());
-    plot_onlyweight.Scale(1.0 * num_events / plot_onlyweight.Integral());
+     hist.Scale(1.0 * num_events / hist.Integral());
+     plot_onlyweight.Scale(1.0 * num_events / plot_onlyweight.Integral());
 
-    TCanvas c;*/
+     TCanvas c;*/
 
     /*// get default styles from xml file
      NeatPlotting::XMLStyleConfigParser xml_style_config_parser(
@@ -186,10 +197,10 @@ int main(int argc, char **argv) {
 
      c.SetLogz(1);
 
-    hist.Draw("colz");
-    c.SaveAs("plot.pdf");
-    plot_onlyweight.Draw("colz");
-    c.SaveAs("plot_onlyweight.pdf");*/
+     hist.Draw("colz");
+     c.SaveAs("plot.pdf");
+     plot_onlyweight.Draw("colz");
+     c.SaveAs("plot_onlyweight.pdf");*/
 
     //  TFile output(outFile.c_str(),"update");
     //  output.SetCompressionLevel(1); //try level 2 also

@@ -37,21 +37,22 @@ const boost::unordered_map<std::string, DynamicalInfoTypes> StringToDynamicalTyp
     boost::assign::map_list_of("topNode", DynamicalInfoTypes::TOP_NODE)("relBW",
         DynamicalInfoTypes::RELATIVE_BREIT_WIGNER);
 
+
 class DynamicalFunctionFactory {
-  std::map<HelicityFormalism::TwoBodyDecayInformation,
+  std::map<ParticleStateInfo,
       std::shared_ptr<AbstractDynamicalFunction> > dynamical_function_list_;
 
   std::shared_ptr<AbstractDynamicalFunction> generateRelativisiticBreitWigner(
-      const HelicityFormalism::TwoBodyDecayInformation& state_info,
-      const ParameterList& external_parameters);
+      const ParticleStateInfo& state_info,
+      const ExternalParameters& external_parameters);
 
 public:
   DynamicalFunctionFactory();
   virtual ~DynamicalFunctionFactory();
 
   std::shared_ptr<AbstractDynamicalFunction> generateDynamicalFunction(
-      const HelicityFormalism::TwoBodyDecayInformation& state_info,
-      const ParameterList& external_parameters);
+      const ParticleStateInfo& state_info,
+      const ExternalParameters& external_parameters);
 };
 
 } /* namespace DynamicalFunctions */

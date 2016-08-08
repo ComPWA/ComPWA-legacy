@@ -25,16 +25,21 @@ class dataPoint;
 namespace Physics {
 namespace DynamicalFunctions {
 
+struct ExternalParameters {
+  ParameterList parameters_;
+  std::map<std::string, std::string> parameter_name_mapping_;
+};
+
 class AbstractDynamicalFunction {
+  virtual void initialiseParameters(
+      const boost::property_tree::ptree& parameter_info,
+      const ExternalParameters& external_parameters) =0;
+
 protected:
   ParameterList parameter_list_;
 public:
   AbstractDynamicalFunction();
   virtual ~AbstractDynamicalFunction();
-
-  virtual void initialiseParameters(
-      const boost::property_tree::ptree& parameter_info,
-      const ParameterList& external_parameters) =0;
 
   virtual std::complex<double> evaluate(const dataPoint& point,
       unsigned int evaluation_index) const =0;

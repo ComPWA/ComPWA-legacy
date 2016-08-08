@@ -30,9 +30,9 @@ DecayGenerator::DecayGenerator() :
   allowed_particle_names_.push_back("gamma");
   allowed_particle_names_.push_back("pi0");
   allowed_particle_names_.push_back("f0_980");
-  //allowed_particle_names_.push_back("f0_1370");
-  //allowed_particle_names_.push_back("f2_1270");
-  //allowed_particle_names_.push_back("omega");
+  allowed_particle_names_.push_back("f0_1370");
+  allowed_particle_names_.push_back("f2_1270");
+  allowed_particle_names_.push_back("omega");
   allowed_particle_names_.push_back("jpsi");
   //allowed_particle_names_.push_back("pi+");
   //allowed_particle_names_.push_back("pi-");
@@ -304,14 +304,14 @@ DynamicalInfo DecayGenerator::createDynamicInfo(
     dynamical_info.put("type",
         ComPWA::Physics::DynamicalFunctions::DynamicalTypeToString.at(
             dynamical_type));
-    dynamical_info.put("mass", particle_properties.mass_);
-    dynamical_info.put("mass_fix", 1);
-    dynamical_info.put("mass_min", 0.5 * particle_properties.mass_);
-    dynamical_info.put("mass_max", 1.5 * particle_properties.mass_);
-    dynamical_info.put("width", particle_properties.width_);
-    dynamical_info.put("width_fix", 1);
-    dynamical_info.put("width_min", 0.5 * particle_properties.width_);
-    dynamical_info.put("width_max", 10.0 * particle_properties.width_);
+    dynamical_info.put("mass.value", particle_properties.mass_);
+    dynamical_info.put("mass.fix", 1);
+    dynamical_info.put("mass.min", 0.5 * particle_properties.mass_);
+    dynamical_info.put("mass.max", 1.5 * particle_properties.mass_);
+    dynamical_info.put("width.value", particle_properties.width_);
+    dynamical_info.put("width.fix", 1);
+    dynamical_info.put("width.min", 0.5 * particle_properties.width_);
+    dynamical_info.put("width.max", 10.0 * particle_properties.width_);
     dynamical_info.put("mesonRadius", 1.0);
     dynamical_info.put("norm", 1);
     dynamical_info.put("par1", 1.0);
