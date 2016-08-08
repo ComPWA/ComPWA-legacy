@@ -88,7 +88,7 @@
 	(SpinQuantumNumber (unique_id ?daughter2_id) (z_component_numerator ?z_num_daughter2) (denominator ?denom_daughter2))
 	?decay <- (Decay (quantum_number_name "spin") (mother ?mother_id) (daughters ?daughter1_id ?daughter2_id $?others))
 	=>
-	(if (< (/ ?num_mother ?denom_mother) (abs (+ (/ ?z_num_daughter1 ?denom_daughter1) (/ ?z_num_daughter2 ?denom_daughter2))))
+	(if (< (/ ?num_mother ?denom_mother) (abs (- (/ ?z_num_daughter1 ?denom_daughter1) (/ ?z_num_daughter2 ?denom_daughter2))))
 	then
 	  ;(printout t "decay violates angular momentum conservation!" crlf)
 	  (retract ?decay)

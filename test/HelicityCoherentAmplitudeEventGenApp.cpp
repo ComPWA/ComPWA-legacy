@@ -114,17 +114,6 @@ int main(int argc, char **argv) {
             topology_amplitudes));
     amp->init();
 
-    ParameterList temp_param_list;
-    amp->copyParameterList(temp_param_list);
-    unsigned int free_params(0);
-    for (auto para : temp_param_list.GetDoubleParameters()) {
-      if (!para->IsFixed())
-        ++free_params;
-      std::cout<<para->GetName()<<std::endl;
-      std::cout<<para.get()<<std::endl;
-    }
-    std::cout << "free parameter count: " << free_params << std::endl;
-
     //create dummy final state event to initialized the kinematics class
     unsigned int dataSize = 100000;
 

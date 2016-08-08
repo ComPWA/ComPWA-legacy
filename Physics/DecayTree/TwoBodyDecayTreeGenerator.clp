@@ -92,8 +92,8 @@
 					(unique_index_wave_mapping $?unique_index_wave_mapping))
 	(test (> (length ?available_waves) 1))
 	=>
-	(printout t "number of decay trees: " (length (find-all-facts ((?d DecayTree)) TRUE)) crlf)
-	(printout t "available waves in this tree: " (length ?available_waves) crlf)
+	;(printout t "number of decay trees: " (length (find-all-facts ((?d DecayTree)) TRUE)) crlf)
+	;(printout t "available waves in this tree: " (length ?available_waves) crlf)
 	(bind ?dummy_wave (assert (SpinWave)))
 	(bind ?dummy_list (create-list (create$)))
 	
@@ -124,20 +124,20 @@
 			(foreach ?qn_name ?qn_name_list
 				(bind ?extended_tree FALSE)
 				(bind ?spin_wave_index 0)
-				(printout t "=========================== qn name " ?qn_name crlf)
-				(printout t "spin waves " ?spin_waves crlf)
+				;(printout t "=========================== qn name " ?qn_name crlf)
+				;(printout t "spin waves " ?spin_waves crlf)
 				(foreach ?spin_wave ?spin_waves
 					(bind ?spin_wave_index (+ 1 ?spin_wave_index))
 					(bind ?single_qn_decays (find-all-facts ((?d Decay)) (= 0 (str-compare ?d:quantum_number_name ?qn_name))))
-					(printout t "qn names for spin wave " (fact-slot-value ?spin_wave quantum_number_names) crlf)
+					;(printout t "qn names for spin wave " (fact-slot-value ?spin_wave quantum_number_names) crlf)
 					(foreach ?single_qn_decay ?single_qn_decays
 					;	(printout t ?qn_name " of " ?qn_name_list crlf)
 					;	(printout t (fact-slot-value ?single_qn_decay quantum_number_name) crlf)
-						(printout t (fact-slot-value ?single_qn_decay mother) " " (fact-slot-value ?single_qn_decay daughters) crlf)
+					;	(printout t (fact-slot-value ?single_qn_decay mother) " " (fact-slot-value ?single_qn_decay daughters) crlf)
 											
 						(if (is-decay-valid ?single_qn_decay ?wave ?wave2)
 						then
-						    (printout t "decay is valid" crlf)
+						   ; (printout t "decay is valid" crlf)
 						    
 						    (bind ?skip_decay FALSE)
 			    		    (if ?only_two_waves_left then
@@ -242,7 +242,7 @@
 								(bind ?extended_tree TRUE)
 							
 							else
-								(printout t "did not meet requirements" crlf)
+								;(printout t "did not meet requirements" crlf)
 							)
 							)
 						)
@@ -264,7 +264,7 @@
 			)
 			
 			;(printout t "number of decay trees: " (length (find-all-facts ((?d DecayTree)) TRUE)) crlf)
-			(printout t "we have that many solutions: " (length ?spin_waves) crlf)
+			;(printout t "we have that many solutions: " (length ?spin_waves) crlf)
 			(bind ?spin_wave_index 0)
 			(foreach ?spin_wave ?spin_waves
 				;(printout t (fact-slot-value ?spin_wave quantum_number_names) crlf)
