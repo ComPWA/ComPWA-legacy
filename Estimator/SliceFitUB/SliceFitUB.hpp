@@ -25,7 +25,7 @@
 #include <string>
 
 //Root Header
-#include "TH2D.h"
+#include "TH1D.h"
 //#include "TGraph.h"
 //#include "TGraphErrors.h"
 //#include "TF1.h"

@@ -2,16 +2,15 @@
 import os ;
 
 local QFT = [ os.environ QFT ] ;
-local ROOTSYS = [ os.environ ROOTSYS ] ;
-local ROOTINC = [ os.environ ROOTINCLUDE ] ;
 
 local rlibs = [ SHELL "$ROOTSYS/bin/root-config --libs" ] ;
 ROOTLIBS = [ MATCH "(.*)[\n]" : $(rlibs) ] ;
 
 project :
 	requirements
-	<include>$(ROOTINC)
+	<include>$(ROOT_INC_PATH)
 	<include>$(QFT)/include
+	<linkflags>-L$(ROOT_LIB_PATH)
 	<linkflags>$(ROOTLIBS)
 	<linkflags>-lEG
 	<linkflags>-L$(QFT)/lib
@@ -20,6 +19,8 @@ project :
 
 lib SliceFitUB : 
         [ glob *.cpp ]
+        $(TOP)/Physics//DPKinematics
+        $(TOP)/Optimizer//Optimizer 
         $(TOP)/Core//ComPWA 
          ;
 
