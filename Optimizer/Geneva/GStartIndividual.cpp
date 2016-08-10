@@ -84,17 +84,17 @@ namespace Gem
 		}
 	}
 
-	/********************************************************************************************/
-	/**
-	 * A standard copy constructor. All real work is done by the parent class.
-	 *
-	 * @param cp A copy of another GStartIndividual
-	 */
-	//GStartIndividual::GStartIndividual(const GStartIndividual& cp)
-	//	: GParameterSet(cp),parNames(cp.parNames)
-	//	, theData(ControlParameter::Instance())
-	//{ /* nothing */ }
-	GStartIndividual::GStartIndividual(const GStartIndividual& cp)
+  /********************************************************************************************/
+  /**
+   * A standard copy constructor. All real work is done by the parent class.
+   *
+   * @param cp A copy of another GStartIndividual
+   */
+  //GStartIndividual::GStartIndividual(const GStartIndividual& cp)
+  //  : GParameterSet(cp),parNames(cp.parNames)
+  //  , theData(ControlParameter::Instance())
+  //{ /* nothing */ }
+  GStartIndividual::GStartIndividual(const GStartIndividual& cp)
 	: GParameterSet(cp),parNames(cp.parNames)
 	, theData(cp.theData)
 	{ /* nothing */ }

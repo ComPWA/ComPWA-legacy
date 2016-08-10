@@ -55,6 +55,7 @@ public:
 	void setTime(double t){ time = t; }
 	double getTime(){ return time; }
 	virtual double getResult() =0;
+	virtual double getCorr(unsigned int n, unsigned int t) {return -9000;};
 
 	//output
 	virtual void print(std::string opt=""){

@@ -245,16 +245,47 @@ exe helicityCoherentAmplitudeEventGenApp :
         $(TOP)/Physics/HelicityAmplitude//HelicityAmplitude
         : ;  
 
+exe slicefitubApp : 
+        SliceFitUBApp.cpp 
+        test
+        $(TOP)/Core//ComPWA
+        $(TOP)/Physics/AmplitudeSum//AmplitudeSum
+        $(TOP)/Physics/DPKinematics//DPKinematics  
+        $(TOP)/DataReader/RootReader//RootReader
+        $(TOP)/Estimator/SliceFitUB//SliceFitUB
+        $(TOP)/Optimizer/Minuit2//Minuit2IF
+        $(TOP)/Physics/DPKinematics//DPKinematics  
+        : ;
+        
+exe slicefitrandApp : 
+        SliceFitRANDApp.cpp 
+        test
+        $(TOP)/Core//ComPWA
+        $(TOP)/Physics/AmplitudeSum//AmplitudeSum
+        $(TOP)/Physics/DPKinematics//DPKinematics  
+        $(TOP)/DataReader/RootReader//RootReader
+        $(TOP)/Estimator/SliceFitUB//SliceFitUB
+        $(TOP)/Optimizer/Minuit2//Minuit2IF
+        $(TOP)/Physics/DPKinematics//DPKinematics  
+        : ;
+
 exe serializeApp : 
         SerializationApp.cpp 
+        test
+        $(TOP)/Core//ComPWA
+        : ;
+        
+exe iteratorApp : 
+        IteratorTestApp.cpp 
         test
         $(TOP)/Core//ComPWA
         : ;
 
 install dist : test : <location>$(TOP)/lib <threading>single ;
 #install dist2 : dalitzfitApp treetestApp cx0testApp dataiftestApp optimizertestApp physicstestApp blackscholesApp neuralnetworkApp : <location>$(TOP)/bin <threading>single ;
-install dist2 : compareTreeAmpApp dalitzfitApp slicefitApp treetestApp dataiftestApp optimizertestApp physicstestApp : <location>$(TOP)/bin <threading>single ;
+install dist2 : compareTreeAmpApp dalitzfitApp slicefitApp slicefitubApp slicefitrandApp treetestApp dataiftestApp optimizertestApp physicstestApp : <location>$(TOP)/bin <threading>single ;
 install dist3 : estimatortestApp integrationtestApp integrationtestbinnedApp runmanagertestApp gentwopartApp gendalitzApp dalitzplotApp serializeApp dpareaTestApp genRunManager : <location>$(TOP)/bin <threading>single ;
+
 
 install dist4 : helicityDecayTreeTestApp helicityDecayTreeGeneratorTestApp helicityCoherentAmplitudeEventGenApp : <location>$(TOP)/bin <threading>single ;
 

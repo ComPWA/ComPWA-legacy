@@ -37,6 +37,10 @@ public:
   virtual double calculatePSArea() {
     return (mass_max - mass_min);
   }
+  //! calculate phase space area with simple interval
+  virtual double getPhspVolumePart(double min, double max) {
+    return (max - min);
+  }
   //! converts Event to dataPoint
   void translateEventToDataPoint(const Event& ev, dataPoint& point) const;
   //! get mass of particles

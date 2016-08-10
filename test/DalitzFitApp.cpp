@@ -54,6 +54,7 @@
 #include "Physics/AmplitudeSum/AmpSumIntensity.hpp"
 #include "Estimator/MinLogLH/MinLogLH.hpp"
 #include "Optimizer/Minuit2/MinuitIF.hpp"
+#include "Optimizer/Geneva/GenevaIF.hpp"
 #include "Core/DataPoint.hpp"
 #include "Core/Efficiency.hpp"
 
@@ -117,6 +118,7 @@ int main(int argc, char **argv) {
 	DalitzKinematics* kin =
 			dynamic_cast<DalitzKinematics*>(DalitzKinematics::createInstance(
 					"jpsi", "gamma", "pi0", "pi0"));
+
 	//DPKinematics kin("J/psi","gamma","pi0","pi0");
 	//DPKinematics kin("D0","gamma","K-","K+");
 	//static dataPoint* point = dataPoint::instance(kin);

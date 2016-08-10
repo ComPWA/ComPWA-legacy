@@ -1,0 +1,27 @@
+########### SliceFitUB lib #############
+import os ;
+
+local QFT = [ os.environ QFT ] ;
+local ROOTSYS = [ os.environ ROOTSYS ] ;
+local ROOTINC = [ os.environ ROOTINCLUDE ] ;
+
+local rlibs = [ SHELL "$ROOTSYS/bin/root-config --libs" ] ;
+ROOTLIBS = [ MATCH "(.*)[\n]" : $(rlibs) ] ;
+
+project :
+	requirements
+	<include>$(ROOTINC)
+	<include>$(QFT)/include
+	<linkflags>$(ROOTLIBS)
+	<linkflags>-lEG
+	<linkflags>-L$(QFT)/lib
+	<linkflags>-lqft++
+	;
+
+lib SliceFitUB : 
+        [ glob *.cpp ]
+        $(TOP)/Core//ComPWA 
+         ;
+
+install dist : SliceFitUB : <location>$(TOP)/lib ;
+

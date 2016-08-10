@@ -154,7 +154,7 @@ int AmpSumOfAmplitudes::getAmpId(std::string name) {
 	return -999;
 }
 
-double AmpSumOfAmplitudes::evaluateSlice(dataPoint& point, std::complex<double>* reso, unsigned int nResos, unsigned int subSys=5) const
+double AmpSumOfAmplitudes::evaluateSlice(dataPoint& point, std::complex<double>* reso, unsigned int nResos, unsigned int subSys=5, double N=1., unsigned int nF0=3, unsigned int nF2=2) const
 {
 	// ENTER EXPRESSION IN TERMS OF VARIABLE ARGUMENTS HERE
 	std::complex<double> res;
@@ -169,10 +169,11 @@ double AmpSumOfAmplitudes::evaluateSlice(dataPoint& point, std::complex<double>*
 	for(unsigned int i=0; i<_pdfList.size(); i++){
 		double a = _intList[i]->GetValue();
 		double phi = _phaseList[i]->GetValue();
-		std::complex<double> eiphi (cos(phi), sin(phi));
-		if(i<3) sys = 0; //TODO: way better!!!
-		else if(i<5) sys = 1;
-		else sys = 2;
+		std::complex<double> eiphi (a * cos(phi), a * sin(phi));
+		double twoJplusOne = (2*_pdfList[i]->getSpin()+1);
+		if(i<nF0) sys = 0; //TODO: way better!!!
+		else if(i<(nF2+nF0)) sys = 1;
+		else sys = 999;
 		//sys = itReso;
 
 		//std::cout<< "DEBUG Reso " << i << " spinsys " << sys << " " << _pdfList[i]->isSubSys(subSys) << " use " << used[sys] << std::endl;
@@ -180,12 +181,16 @@ double AmpSumOfAmplitudes::evaluateSlice(dataPoint& point, std::complex<double>*
 		if(dynamic_cast<AmpKinematics*>(&*(_pdfList[i]))->isSubSys(subSys)){
 		  if(!used[sys]){
 			res = res + reso[sys] * dynamic_cast<AmpKinematics*>(&*(_pdfList[i]))->evaluateWignerD(point);
+		//if(_pdfList[i]->isSubSys(subSys)){
+		//  if(!used[sys] && sys<999){ //add terms only ones
+		//	res = res + N * twoJplusOne * reso[sys] * _angList[i]->evaluate(point);
 			used[sys]=true;
 		  }
 		}else{
-			res = res + _pdfList[i]->evaluate(point) * a * eiphi;
+			res = res + N * twoJplusOne * _pdfList[i]->evaluate(point) * eiphi;
+			//std::cout<< " Omega " << i << std::endl;
 		}
-		//res = res + _pdfList[i]->evaluate() * a * eiphi * _angList[i]->evaluate();
+		//res = res + twoJplusOne * _pdfList[i]->evaluate(point) * eiphi;
 		//itReso++;
 	}
 

@@ -11,14 +11,14 @@
 //! Estimator for a Fit of Dalitz-Plot Slices.
 /*! \class SliceFit
  * @file SliceFit.hpp
- * This class performs a Chi2-Fit on slices along one axis of a dalitz-plot.
+ * This class performs a LH-Fit on slices along one axis of a dalitz-plot.
  * The Dalitz-Plot is generated directly in the constructor of this Estimator.
  * Data and Model are provided in the constructor using the Amplitude and Data
  * interfaces. The class itself fulfills the Estimator interface.
 */
 
-#ifndef _SLICEFIT_HPP
-#define _SLICEFIT_HPP
+#ifndef _SLICEFITUB_HPP
+#define _SLICEFITUB_HPP
 
 #include <vector>
 #include <memory>
@@ -26,9 +26,9 @@
 
 //Root Header
 #include "TH2D.h"
-#include "TGraph.h"
-#include "TGraphErrors.h"
-#include "TF1.h"
+//#include "TGraph.h"
+//#include "TGraphErrors.h"
+//#include "TF1.h"
 
 //PWA-Header
 #include "Estimator/Estimator.hpp"
@@ -75,9 +75,9 @@
 
 namespace ComPWA {
 namespace Estimator {
-namespace SliceFit {
+namespace SliceFitUB {
 
-class SliceFit : public Estimator {
+class SliceFitUB : public Estimator {
 
 public:
   /// Default Constructor (0x0)
@@ -90,9 +90,9 @@ public:
   double setSlice(unsigned int i) {
     if(i<nBins_){
       whichSlice_=i;
-      return dalitzPlot_->GetBinCenter(whichSlice_);
+      return sliceMass_[i];
     }
-    return 0;
+    return -1;
   };
 
   std::shared_ptr<TH1D> getSliceHist() { return aSlice_;}
@@ -100,12 +100,12 @@ public:
   std::shared_ptr<TH1D> getAmpClHist() { return theAmpCl_;}
 
   /** Destructor */
-  virtual ~SliceFit();
+  virtual ~SliceFitUB();
 
 protected:
   /// Default Constructor (0x0)
-  SliceFit(std::shared_ptr<Physics::AmplitudeSum::AmpSumIntensity>, std::shared_ptr<DataReader::Data>, ParameterList&, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int);
-  SliceFit(std::shared_ptr<Physics::AmplitudeSum::AmpSumIntensity>, std::shared_ptr<DataReader::Data>, std::shared_ptr<DataReader::Data>, ParameterList&, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int);
+  SliceFitUB(std::shared_ptr<Physics::AmplitudeSum::AmpSumIntensity>, std::shared_ptr<DataReader::Data>, ParameterList&, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int);
+  SliceFitUB(std::shared_ptr<Physics::AmplitudeSum::AmpSumIntensity>, std::shared_ptr<DataReader::Data>, std::shared_ptr<DataReader::Data>, ParameterList&, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int);
 
   void init();
 
@@ -122,9 +122,15 @@ protected:
   };
 
 private:
-  static double fitsliceAMP(Double_t*, Double_t*);
+  //static double fitsliceAMP(Double_t*, Double_t*);
 
-  TH2D* dalitzPlot_;
+
+  std::vector<std::vector<unsigned int>> slicedEvents_; //list Event ID's per slice
+  std::vector<std::vector<unsigned int>> slicedPhspEvt_; //list phsp Event ID's per slice
+  std::vector<std::vector<double>> slicedEvtMass_; //for debugging
+  std::vector<double> sliceMass_;
+
+  //TH2D* dalitzPlot_;
   std::shared_ptr<TH1D> aSlice_;
   std::shared_ptr<TH1D> theAmpSl_;
   std::shared_ptr<TH1D> theAmpCl_;
@@ -134,7 +140,7 @@ private:
   std::shared_ptr<Physics::AmplitudeSum::AmpSumIntensity> pPIF_;
   std::shared_ptr<DataReader::Data> pDIF_;
   std::shared_ptr<DataReader::Data> pPHSP_;
-  double phspVolume;
+  std::vector<double> phspVolume_;
   unsigned int nEvts_;
   unsigned int nPhsp_;
   unsigned int nStartEvt_;
@@ -142,19 +148,20 @@ private:
 
   unsigned int nBins_;
   unsigned int whichSlice_;
+
   unsigned int nF0_;
   unsigned int nF2_;
 
-  double M; // GeV/c² (J/psi+)
-  double Br; // GeV/c² (width)
-  double m1; // GeV/c² (gamma)
-  double m2; // GeV/c² (pi)
-  double m3; // GeV/c² (pi)
-  double PI; // m/s
+  double M = 3.096916; // GeV/c² (J/psi+)
+  double Br = 0.000093; // GeV/c² (width)
+  double m1 = 0.; // GeV/c² (gamma)
+  double m2 = 0.139570; // GeV/c² (pi)
+  double m3 = 0.139570; // GeV/c² (pi)
+  double PI = 3.14159; // m/s
 
 };
 
-} /* namespace SliceFit */
+} /* namespace SliceFitUB */
 } /* namespace Estimator */
 } /* namespace ComPWA */
 

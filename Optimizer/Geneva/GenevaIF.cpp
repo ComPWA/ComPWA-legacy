@@ -149,7 +149,8 @@ std::shared_ptr<FitResult> GenevaIF::exec(ParameterList& par) {
 	ParameterList resultPar;
 	bestIndividual_ptr->getPar(resultPar);
 	for(unsigned int i=0; i<par.GetNDouble(); i++){  //TODO: better way, no cast or check type
-	  par.GetDoubleParameter(i)->SetValue(resultPar.GetDoubleParameter(i)->GetValue());
+	  if(!par.GetDoubleParameter(i)->IsFixed())
+	    par.GetDoubleParameter(i)->SetValue(resultPar.GetDoubleParameter(i)->GetValue());
 	}
 
 	return result;

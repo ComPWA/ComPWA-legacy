@@ -88,6 +88,7 @@ class HelicityKinematics: public Kinematics {
       unsigned int &data_point_fill_position) const;
 
 protected:
+  virtual double getPhspVolumePart(double m23_sq_min_loc, double m23_sq_max_loc);
   double calculatePSArea();
   //! Event to dataPoint conversion
   void translateEventToDataPoint(const Event& event, dataPoint& point) const;
