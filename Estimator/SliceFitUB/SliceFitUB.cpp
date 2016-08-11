@@ -56,6 +56,13 @@ void SliceFitUB::init(){
 
   DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
 
+  M = 3.096916; // GeV/c² (J/psi+)
+  Br = 0.000093; // GeV/c² (width)
+  m1 = 0.; // GeV/c² (gamma)
+  m2 = 0.139570; // GeV/c² (pi)
+  m3 = 0.139570; // GeV/c² (pi)
+  PI = 3.14159; // m/s
+
   double m23_min = (kin->m2+kin->m3);
   double m23_max = (kin->M-kin->m1);
   double m13_min = (kin->m1+kin->m3);

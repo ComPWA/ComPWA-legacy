@@ -152,12 +152,12 @@ private:
   unsigned int nF0_;
   unsigned int nF2_;
 
-  double M = 3.096916; // GeV/c² (J/psi+)
-  double Br = 0.000093; // GeV/c² (width)
-  double m1 = 0.; // GeV/c² (gamma)
-  double m2 = 0.139570; // GeV/c² (pi)
-  double m3 = 0.139570; // GeV/c² (pi)
-  double PI = 3.14159; // m/s
+  double M; // GeV/c² (J/psi+)
+  double Br; // GeV/c² (width)
+  double m1; // GeV/c² (gamma)
+  double m2; // GeV/c² (pi)
+  double m3; // GeV/c² (pi)
+  double PI; // m/s
 
 };
 
