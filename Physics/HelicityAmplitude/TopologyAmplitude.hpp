@@ -26,6 +26,12 @@ namespace Physics {
 namespace HelicityFormalism {
 
 struct FullTwoBodyDecayAmplitude {
+  std::string name;    // for full coherent amplitude construction reasons
+
+  //TODO: we add this particle state info for the coherent sum stuff
+  // the whole design is fucked up because of that, change that someday
+  std::pair<ParticleStateInfo, std::pair<ParticleStateInfo, ParticleStateInfo> > decay_spin_info_;
+
   std::shared_ptr<DoubleParameter> strength_;
   std::shared_ptr<DoubleParameter> phase_;
   std::shared_ptr<TwoBodyDecayAmplitude> angular_part_;
@@ -36,7 +42,8 @@ struct SequentialTwoBodyDecayAmplitude {
   std::vector<FullTwoBodyDecayAmplitude> decay_amplitude;
   double factor;
 
-  SequentialTwoBodyDecayAmplitude() : factor(1.0) {
+  SequentialTwoBodyDecayAmplitude() :
+      factor(1.0) {
   }
 };
 

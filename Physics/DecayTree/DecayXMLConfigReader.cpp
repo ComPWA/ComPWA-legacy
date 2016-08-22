@@ -77,6 +77,7 @@ ParticleStateInfo DecayXMLConfigReader::parseParticleStateBasics(
   ParticleStateInfo ps;
   ps.unique_id_ = pt.get<unsigned int>("id");
   ps.pid_information_.name_ = pt.get<std::string>("name");
+  ps.coherent = pt.get<bool>("coherent");
 
   boost::optional<const ptree&> spin_info = pt.get_child_optional("SpinInfo");
   if (spin_info.is_initialized()) {

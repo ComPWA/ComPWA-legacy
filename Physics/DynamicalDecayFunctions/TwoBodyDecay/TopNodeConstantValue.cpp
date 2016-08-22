@@ -31,7 +31,11 @@ void TopNodeConstantValue::initialiseParameters(
 
 std::complex<double> TopNodeConstantValue::evaluate(const dataPoint& point,
     unsigned int evaluation_index) const {
+  return std::complex<double>(1.0, 0.0);
+}
 
+std::complex<double> TopNodeConstantValue::evaluate(unsigned int data_index,
+    unsigned int evaluation_index) const {
   return std::complex<double>(1.0, 0.0);
 }
 

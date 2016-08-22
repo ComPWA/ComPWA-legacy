@@ -44,6 +44,9 @@ public:
   virtual std::complex<double> evaluate(const dataPoint& point,
       unsigned int evaluation_index) const =0;
 
+  virtual std::complex<double> evaluate(unsigned int data_index,
+      unsigned int evaluation_index) const =0;
+
   const ParameterList& getParameterList() const;
 };
 

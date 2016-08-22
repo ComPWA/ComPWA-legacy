@@ -128,6 +128,7 @@ struct ParticleStateInfo {
   IDInfo pid_information_;
   Spin spin_information_;
   DynamicalInfo dynamical_information_;
+  bool coherent;
 
   bool operator==(const ParticleStateInfo &rhs) const {
     if (this->unique_id_ != rhs.unique_id_)
@@ -135,6 +136,8 @@ struct ParticleStateInfo {
     if (this->pid_information_ != rhs.pid_information_)
       return false;
     if (this->spin_information_ != rhs.spin_information_)
+      return false;
+    if (this->coherent != rhs.coherent)
       return false;
 
     return true;
@@ -153,6 +156,10 @@ struct ParticleStateInfo {
       return true;
     else if (this->pid_information_ > rhs.pid_information_)
       return false;
+    if (this->coherent < rhs.coherent)
+      return true;
+    else if (this->coherent > rhs.coherent)
+      return false;
     if (this->spin_information_ < rhs.spin_information_)
       return true;
 
@@ -169,7 +176,9 @@ struct ParticleStateInfo {
     os << "pid: " << rhs.pid_information_.particle_id_ << std::endl;
     os << "J: " << rhs.spin_information_.J_numerator_ << "/"
         << rhs.spin_information_.J_denominator_ << "("
-        << rhs.spin_information_.J_z_numerator_ << ")" << std::endl;
+        << rhs.spin_information_.J_z_numerator_ << ")";
+    if (rhs.coherent)
+      os << " coherent" << std::endl;
     return os;
   }
 };

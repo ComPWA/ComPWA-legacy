@@ -257,14 +257,13 @@ boost::property_tree::ptree DecayConfiguration::createPropertyTreeForFinalStateP
   boost::property_tree::ptree pt;
   pt.put("id", particle.unique_id_);
   pt.put("name", particle.pid_information_.name_);
+  pt.put("coherent", particle.coherent);
   return pt;
 }
 
 boost::property_tree::ptree DecayConfiguration::createPropertyTreeForIntermediateStateParticle(
     const ParticleStateInfo& particle) const {
-  boost::property_tree::ptree pt;
-  pt.put("id", particle.unique_id_);
-  pt.put("name", particle.pid_information_.name_);
+  boost::property_tree::ptree pt(createPropertyTreeForFinalStateParticle(particle));
 
 //spin info
   boost::property_tree::ptree spin_pt;

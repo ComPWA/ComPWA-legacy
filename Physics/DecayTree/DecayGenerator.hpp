@@ -168,7 +168,10 @@ class DecayGenerator {
       const std::vector<
           std::pair<ParticleStateInfo, std::vector<ParticleStateInfo> > >& decay_tree) const;
 
-  ParticleStateInfo createParticleInstance(const ParticleStateInfo& psi);
+  ParticleStateInfo createParticleInstance(const ParticleStateInfo& psi, bool make_coherent);
+
+  bool isParticleIntermediateState(const ParticleStateInfo& state, const std::vector<
+      std::pair<ParticleStateInfo, std::vector<ParticleStateInfo> > >& decay_tree) const;
 
   const boost::property_tree::ptree createStrengthAndPhase() const;
 

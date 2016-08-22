@@ -106,25 +106,31 @@ bool RunManager::generate(int number) {
       //otherwise generate event
       genNew->generate(tmp);
     totalCalls++;
+
+   /* if (ComPWA::Particle::invariantMass(tmp.getParticle(0), tmp.getParticle(1))
+        > 4 * tmp.getParticle(0).getMassSquare() + 0.2) {
+      continue;
+    }*/
+
     double weight = tmp.getWeight();
     /* reset weights: the weights are taken into account by hit and miss. The resulting
      * sample is therefore unweighted */
     tmp.setWeight(1.);    //reset weight
     tmp.setEfficiency(1.);    //reset weight
     dataPoint point(tmp);
-    double ampRnd = genNew->getUniform() * genMaxVal;
+     double ampRnd = genNew->getUniform() * genMaxVal;
     ParameterList list;
     list = amp_->intensity(point);    //unfortunatly not thread safe
     AMPpdf = *list.GetDoubleParameter(0);
-    if (genMaxVal < (AMPpdf * weight)) {
-      std::stringstream ss;
-      ss << "RunManager::generate: error in HitMiss procedure. "
-          << "Maximum value of random number generation smaller then amplitude maximum! "
-          << genMaxVal << " < " << (AMPpdf * weight);
-      throw std::runtime_error(ss.str());
-    }
-    if (ampRnd > (weight * AMPpdf))
-      continue;
+     if (genMaxVal < (AMPpdf * weight)) {
+     std::stringstream ss;
+     ss << "RunManager::generate: error in HitMiss procedure. "
+     << "Maximum value of random number generation smaller then amplitude maximum! "
+     << genMaxVal << " < " << (AMPpdf * weight);
+     throw std::runtime_error(ss.str());
+     }
+     if (ampRnd > (weight * AMPpdf))
+     continue;
     sampleData_->pushEvent(tmp);    //Unfortunately not thread safe
     acceptedEvents++;
     bar.nextEvent();

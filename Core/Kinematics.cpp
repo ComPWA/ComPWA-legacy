@@ -58,7 +58,7 @@ double Kinematics::getPhspVolume() {
 }
 
 //! converts Event to dataPoint
-void Kinematics::eventToDataPoint(Event& ev, dataPoint& point) const {
+void Kinematics::eventToDataPoint(const Event& ev, dataPoint& point) const {
   // set event weight as data point weight first
   double weight = ev.getWeight();
   point.setWeight(weight);

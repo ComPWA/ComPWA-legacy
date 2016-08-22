@@ -13,6 +13,7 @@
 
 #include "Core/DataPoint.hpp"
 #include "Core/Kinematics.hpp"
+#include "Core/DataPointStorage.hpp"
 #include "Physics/HelicityAmplitude/TwoBodyDecayAmplitude.hpp"
 
 namespace ComPWA {
@@ -54,6 +55,18 @@ std::complex<double> TwoBodyDecayAmplitude::evaluate(const dataPoint& point,
     unsigned int evaluation_index) const {
   double theta(point.getVal(evaluation_index + index_theta_helicity_angle_));
   double phi(point.getVal(evaluation_index + index_phi_helicity_angle_));
+
+  return spin_factor_ * Wigner_D(phi, theta, -phi, J_, M_, daughters_delta_M_);
+}
+
+std::complex<double> TwoBodyDecayAmplitude::evaluate(unsigned int data_index,
+    unsigned int evaluation_index) const {
+  double theta(
+      DataPointStorage::Instance().getDataList(
+          evaluation_index + index_theta_helicity_angle_)[data_index]);
+  double phi(
+      DataPointStorage::Instance().getDataList(
+          evaluation_index + index_phi_helicity_angle_)[data_index]);
 
   return spin_factor_ * Wigner_D(phi, theta, -phi, J_, M_, daughters_delta_M_);
 }

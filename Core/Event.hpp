@@ -27,7 +27,7 @@
 
 namespace ComPWA {
 
-class Event{
+class Event {
 
 public:
   Event();
@@ -43,14 +43,14 @@ public:
   virtual ~Event();
 
   virtual void inline setName(const std::string& name) { fName = name; }
-  virtual const inline std::string& getName() { return fName; }
-  virtual double inline getWeight() {return fWeight;};
+  virtual const inline std::string& getName() const { return fName; }
+  virtual double inline getWeight() const {return fWeight;};
   virtual void inline setWeight(double w) { fWeight=w;};
-  virtual int inline getFlavour() {return fFlavour;};
+  virtual int inline getFlavour() const {return fFlavour;};
   virtual void inline setFlavour(int fl) { fFlavour = fl;};
-  virtual int inline getCharge() {return fCharge;};
+  virtual int inline getCharge() const {return fCharge;};
   virtual void inline setCharge(int ch) { fCharge = ch;};
-  virtual double inline getEfficiency() {return fEff;};
+  virtual double inline getEfficiency() const {return fEff;};
   virtual void inline setEfficiency(double eff) { fEff = eff;};
 
   virtual const inline unsigned int getNParticles() const { return fParticles.size(); }

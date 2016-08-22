@@ -119,7 +119,7 @@ public:
 	//! Default constructor
 	dataPoint();
 	//! Construct dataPoint from Event
-	dataPoint(Event& ev);
+	dataPoint(const Event& ev);
 	//! Construct dataPoint from vector of invariant masses
 	dataPoint(std::vector<double> vec);
 	~dataPoint(){};

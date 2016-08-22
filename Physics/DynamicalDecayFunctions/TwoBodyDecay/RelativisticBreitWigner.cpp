@@ -22,6 +22,7 @@
 
 #include "boost/property_tree/ptree.hpp"
 
+#include "Core/DataPointStorage.hpp"
 #include "Core/Kinematics.hpp"
 #include "Physics/DynamicalDecayFunctions/TwoBodyDecay/RelativisticBreitWigner.hpp"
 #include "Physics/DynamicalDecayFunctions/Kinematics.hpp"
@@ -56,23 +57,29 @@ RelativisticBreitWigner::~RelativisticBreitWigner() {
 void RelativisticBreitWigner::initialiseParameters(
     const boost::property_tree::ptree& parameter_info,
     const ExternalParameters& external_parameters) {
-  resonance_mass_->SetValue(parameter_info.get_child("mass").get<double>("value"));
+  resonance_mass_->SetValue(
+      parameter_info.get_child("mass").get<double>("value"));
   if (parameter_info.get_child("mass").get<double>("fix"))
     resonance_mass_->SetParameterFixed();
   else
     resonance_mass_->SetParameterFree();
 
-  resonance_mass_->SetMinValue(parameter_info.get_child("mass").get<double>("min"));
-  resonance_mass_->SetMaxValue(parameter_info.get_child("mass").get<double>("max"));
+  resonance_mass_->SetMinValue(
+      parameter_info.get_child("mass").get<double>("min"));
+  resonance_mass_->SetMaxValue(
+      parameter_info.get_child("mass").get<double>("max"));
   //resonance_mass_->SetUseBounds(false);
 
-  resonance_width_->SetValue(parameter_info.get_child("width").get<double>("value"));
+  resonance_width_->SetValue(
+      parameter_info.get_child("width").get<double>("value"));
   if (parameter_info.get_child("width").get<double>("fix"))
     resonance_width_->SetParameterFixed();
   else
     resonance_width_->SetParameterFree();
-  resonance_width_->SetMinValue(parameter_info.get_child("width").get<double>("min"));
-  resonance_width_->SetMaxValue(parameter_info.get_child("width").get<double>("max"));
+  resonance_width_->SetMinValue(
+      parameter_info.get_child("width").get<double>("min"));
+  resonance_width_->SetMaxValue(
+      parameter_info.get_child("width").get<double>("max"));
   //resonance_width_->SetUseBounds(false);
 
   meson_radius_->SetValue(parameter_info.get<double>("mesonRadius"));
@@ -89,6 +96,21 @@ std::complex<double> RelativisticBreitWigner::evaluate(const dataPoint& point,
 
   double mSq = point.getVal(evaluation_index + index_cms_mass_squared_);
 
+  return evaluate(mSq);
+}
+
+std::complex<double> RelativisticBreitWigner::evaluate(unsigned int data_index,
+    unsigned int evaluation_index) const {
+
+  auto const& data_vec = DataPointStorage::Instance().getDataList(
+      evaluation_index + index_cms_mass_squared_);
+
+  double mSq = data_vec[data_index];
+
+  return evaluate(mSq);
+}
+
+std::complex<double> RelativisticBreitWigner::evaluate(double mSq) const {
   double mR = resonance_mass_->GetValue();
   double width = resonance_width_->GetValue();
   double ma = daughter1_mass_->GetValue();

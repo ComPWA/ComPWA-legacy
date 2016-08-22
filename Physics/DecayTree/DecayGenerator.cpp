@@ -29,9 +29,9 @@ DecayGenerator::DecayGenerator() :
 
   allowed_particle_names_.push_back("gamma");
   allowed_particle_names_.push_back("pi0");
-  allowed_particle_names_.push_back("f0_980");
-  allowed_particle_names_.push_back("f0_1370");
-  allowed_particle_names_.push_back("f2_1270");
+  //allowed_particle_names_.push_back("f0_980");
+  //allowed_particle_names_.push_back("f0_1370");
+  //allowed_particle_names_.push_back("f2_1270");
   allowed_particle_names_.push_back("omega");
   allowed_particle_names_.push_back("jpsi");
   //allowed_particle_names_.push_back("pi+");
@@ -236,13 +236,13 @@ void DecayGenerator::addSpinWaveTwoBodyDecayToDecayConfiguration(
     std::cout << "decay tree\n";
     // for each possible mother state make copy for all pairs of daughters
     for (auto const &decay_node : decay_tree) {
-      ParticleStateInfo mother = createParticleInstance(decay_node.first);
+      ParticleStateInfo mother = createParticleInstance(decay_node.first, isParticleIntermediateState(decay_node.first, decay_tree));
       BOOST_LOG_TRIVIAL(debug)<<" before!!!: trying to add decay for: "
       << decay_node.first.pid_information_.name_ << " ("
       << decay_node.first.unique_id_ << ") -> ";
       std::vector<ParticleStateInfo> daughters;
       for (auto const& daughter : decay_node.second) {
-        daughters.push_back(createParticleInstance(daughter));
+        daughters.push_back(createParticleInstance(daughter, isParticleIntermediateState(daughter, decay_tree)));
         BOOST_LOG_TRIVIAL(debug)<<daughter.pid_information_.name_ << " ("
         << daughter.unique_id_ << ") ";
       }
@@ -412,7 +412,7 @@ bool DecayGenerator::checkForCorrectIFState(
 }
 
 ParticleStateInfo DecayGenerator::createParticleInstance(
-    const ParticleStateInfo& ps) {
+    const ParticleStateInfo& ps, bool make_coherent) {
 
   ParticleStateInfo return_ps(ps);
 
@@ -446,7 +446,27 @@ ParticleStateInfo DecayGenerator::createParticleInstance(
     current_particle_mapping_[ps.unique_id_][ps.pid_information_.particle_id_] =
         return_ps;
   }
+  return_ps.coherent = make_coherent;
+
   return return_ps;
+}
+
+bool DecayGenerator::isParticleIntermediateState(const ParticleStateInfo& state,
+    const std::vector<
+        std::pair<ParticleStateInfo, std::vector<ParticleStateInfo> > >& decay_tree) const {
+  // ok if its the top node or a leaf then it cant be intermediate
+  bool is_leaf(true);
+  bool is_top_node(true);
+  for (auto const& decay_node : decay_tree) {
+    if (decay_node.first == state) {
+      is_leaf = false;
+    }
+    if (std::find(decay_node.second.begin(), decay_node.second.end(), state)
+        != decay_node.second.end()) {
+      is_top_node = false;
+    }
+  }
+  return !(is_leaf || is_top_node);
 }
 
 const boost::property_tree::ptree DecayGenerator::createStrengthAndPhase() const {

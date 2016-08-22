@@ -265,7 +265,9 @@ SequentialTwoBodyDecayAmplitude TopologyAmplitudeFactory::generateSequentialDeca
     appendParticleInfoToName(name,
         helicity_tree[*decay_vertex_iter].state_info_);
 
-    std::stringstream parity_related_name(name.str());
+    std::stringstream helicity_amp_name;
+    appendSpinMagnitudeInfoToName(helicity_amp_name, helicity_tree[*decay_vertex_iter].state_info_);
+    std::stringstream parity_related_name(helicity_amp_name.str());
 
     TwoBodyDecaySpinInformation decay_spin_info;
     std::pair<ParticleStateInfo, ParticleStateInfo> decay_products_ps_info;
@@ -301,11 +303,13 @@ SequentialTwoBodyDecayAmplitude TopologyAmplitudeFactory::generateSequentialDeca
       }
       appendParticleInfoToName(name, helicity_tree[decay_product].state_info_);
 
+      appendSpinZComponentInfoToName(helicity_amp_name, helicity_tree[decay_product].state_info_);
+
       ParticleStateInfo temp_psi(helicity_tree[decay_product].state_info_);
       temp_psi.spin_information_.J_z_numerator_ =
           -temp_psi.spin_information_.J_z_numerator_;
-      appendParticleInfoToName(parity_related_name,
-          helicity_tree[decay_product].state_info_);
+      appendSpinZComponentInfoToName(parity_related_name,
+          temp_psi);
 
       ++ep.first;
     }
@@ -315,6 +319,10 @@ SequentialTwoBodyDecayAmplitude TopologyAmplitudeFactory::generateSequentialDeca
           helicity_tree[*decay_vertex_iter].state_info_.spin_information_;
 
       FullTwoBodyDecayAmplitude full_two_body_decay_amplitude;
+      full_two_body_decay_amplitude.name = name.str();
+      full_two_body_decay_amplitude.decay_spin_info_ = std::make_pair(
+          helicity_tree[*decay_vertex_iter].state_info_,
+          decay_products_ps_info);
 
       // create new amplitude if not yet existent
       if (two_body_decay_amplitude_list_.find(decay_spin_info)
@@ -378,11 +386,11 @@ SequentialTwoBodyDecayAmplitude TopologyAmplitudeFactory::generateSequentialDeca
           helicity_tree[*decay_vertex_iter].strength_and_phase_;
 
       auto strength_param = generateGlobalParameter(
-          strength_and_phase_pt.get_child("strength"), name.str() + "_mag",
+          strength_and_phase_pt.get_child("strength"), helicity_amp_name.str() + "_mag",
           parity_related_name.str() + "_mag");
 
       auto phase_param = generateGlobalParameter(
-          strength_and_phase_pt.get_child("phase"), name.str() + "_phase",
+          strength_and_phase_pt.get_child("phase"), helicity_amp_name.str() + "_phase",
           parity_related_name.str() + "_phase");
 
       full_two_body_decay_amplitude.strength_ = strength_param.first;
@@ -428,13 +436,21 @@ double TopologyAmplitudeFactory::getParityFactor(int pid_mother, int pid_d1,
 
 void TopologyAmplitudeFactory::appendParticleInfoToName(std::stringstream &name,
     const ParticleStateInfo &state_info) const {
+  appendSpinMagnitudeInfoToName(name, state_info);
+  appendSpinZComponentInfoToName(name, state_info);
+}
+
+void TopologyAmplitudeFactory::appendSpinMagnitudeInfoToName(
+    std::stringstream &name, const ParticleStateInfo &state_info) const {
   name << state_info.pid_information_.name_ << "_J";
 
   name
       << state_info.spin_information_.J_numerator_
-          / state_info.spin_information_.J_denominator_ << "_lambda";
-  name
-      << 1.0 * state_info.spin_information_.J_z_numerator_
+          / state_info.spin_information_.J_denominator_;
+}
+void TopologyAmplitudeFactory::appendSpinZComponentInfoToName(
+    std::stringstream &name, const ParticleStateInfo &state_info) const {
+  name << "_lambda" << 1.0 * state_info.spin_information_.J_z_numerator_
           / state_info.spin_information_.J_denominator_;
 }
 

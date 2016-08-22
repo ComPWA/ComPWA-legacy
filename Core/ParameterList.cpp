@@ -65,12 +65,14 @@ ParameterList::ParameterList(
 ParameterList::ParameterList(const ParameterList& in) {
   mMultiComplexID_ = in.mMultiComplexID_;
   mMultiDoubleID_ = in.mMultiDoubleID_;
+  mMultiUnsignedIntegerID_ = in.mMultiUnsignedIntegerID_;
   mDoubleParID_ = in.mDoubleParID_;
   mIntParID_ = in.mIntParID_;
   mBoolParID_ = in.mBoolParID_;
   out_ = in.out_;
   vMultiComplex_.clear();
   vMultiDouble_.clear();
+  vMultiUnsignedInteger_.clear();
   vDoublePar_.clear();
   vIntPar_.clear();
   vBoolPar_.clear();
@@ -81,6 +83,10 @@ ParameterList::ParameterList(const ParameterList& in) {
   for (unsigned int i = 0; i < in.GetNMultiDouble(); i++)
     vMultiDouble_.push_back(
         std::shared_ptr<MultiDouble>(new MultiDouble(*(in.vMultiDouble_[i]))));
+  for (unsigned int i = 0; i < in.GetNMultiUnsignedInteger(); i++)
+    vMultiUnsignedInteger_.push_back(
+        std::shared_ptr<MultiUnsignedInteger>(
+            new MultiUnsignedInteger(*(in.vMultiUnsignedInteger_[i]))));
   for (unsigned int i = 0; i < in.GetNDouble(); i++)
     vDoublePar_.push_back(
         std::shared_ptr<DoubleParameter>(
@@ -102,7 +108,8 @@ std::shared_ptr<AbsParameter> ParameterList::GetParameter(
     const unsigned int i) const {
   if (!(i
       < (vBoolPar_.size() + vIntPar_.size() + vDoublePar_.size()
-          + vComplexPar_.size() + vMultiDouble_.size() + vMultiComplex_.size()))) {
+          + vComplexPar_.size() + vMultiDouble_.size() + vMultiComplex_.size()
+          + vMultiUnsignedInteger_.size()))) {
     throw BadParameter("Parameter not in list");
     return std::shared_ptr<AbsParameter>();
   }
@@ -123,14 +130,38 @@ std::shared_ptr<AbsParameter> ParameterList::GetParameter(
     return vMultiDouble_.at(
         i - vComplexPar_.size() - vDoublePar_.size() - vIntPar_.size()
             - vBoolPar_.size());
-  else
-    // is in multicomplex list
+  else if (i
+      < (vComplexPar_.size() + vDoublePar_.size() + vIntPar_.size()
+          + vBoolPar_.size() + vMultiDouble_.size()))    // is in multidouble list
     return vMultiComplex_.at(
         i - vComplexPar_.size() - vDoublePar_.size() - vIntPar_.size()
             - vBoolPar_.size() - vMultiDouble_.size());
+  else
+    // is in multicomplex list
+    return vMultiUnsignedInteger_.at(
+        i - vComplexPar_.size() - vDoublePar_.size() - vIntPar_.size()
+            - vBoolPar_.size() - vMultiDouble_.size() - vMultiComplex_.size());
 
   throw BadParameter("Parameter not in list");
   return std::shared_ptr<AbsParameter>();
+}
+
+bool ParameterList::ParameterExists(const std::string parname) const {
+  if (mMultiComplexID_.find(parname) != mMultiComplexID_.end())
+    return true;
+  if (mMultiDoubleID_.find(parname) != mMultiDoubleID_.end())
+    return true;
+  if (mMultiUnsignedIntegerID_.find(parname) != mMultiUnsignedIntegerID_.end())
+    return true;
+  if (mBoolParID_.find(parname) != mBoolParID_.end())
+    return true;
+  if (mIntParID_.find(parname) != mIntParID_.end())
+    return true;
+  if (mDoubleParID_.find(parname) != mDoubleParID_.end())
+    return true;
+  if (mComplexParID_.find(parname) != mComplexParID_.end())
+    return true;
+  return false;
 }
 
 std::shared_ptr<AbsParameter> ParameterList::GetParameter(
@@ -154,6 +185,15 @@ std::shared_ptr<AbsParameter> ParameterList::GetParameter(
   };
   if (i > -1)
     return vMultiDouble_.at(i);
+
+  try {
+    i = mMultiUnsignedIntegerID_.at(parname);
+  }
+  catch (...) {
+    i = -1;
+  };
+  if (i > -1)
+    return vMultiUnsignedInteger_.at(i);
 
   try {
     i = mBoolParID_.at(parname);
@@ -215,6 +255,16 @@ std::shared_ptr<MultiDouble> ParameterList::GetMultiDouble(
   return vMultiDouble_.at(i);
 }
 
+std::shared_ptr<MultiUnsignedInteger> ParameterList::GetMultiUnsignedInteger(
+    const unsigned int i) const {
+  if (!(i < vMultiUnsignedInteger_.size())) {
+    throw BadParameter(
+        "Unsigned Integer Parameter not found: " + std::to_string((long) i));
+    //return 0;
+  }
+  return vMultiUnsignedInteger_.at(i);
+}
+
 std::shared_ptr<ComplexParameter> ParameterList::GetComplexParameter(
     const unsigned int i) const {
   if (!(i < vComplexPar_.size())) {
@@ -258,7 +308,8 @@ std::shared_ptr<BoolParameter> ParameterList::GetBoolParameter(
 const double ParameterList::GetParameterValue(const unsigned int i) const {
   if (!(i
       < (vBoolPar_.size() + vIntPar_.size() + vDoublePar_.size()
-          + vComplexPar_.size() + vMultiDouble_.size() + vMultiComplex_.size()))) {
+          + vComplexPar_.size() + vMultiDouble_.size() + vMultiComplex_.size()
+          + vMultiUnsignedInteger_.size()))) {
     throw BadParameter("Parameter not in list");
     return 0;
   }
@@ -279,11 +330,17 @@ const double ParameterList::GetParameterValue(const unsigned int i) const {
     return (double) vMultiDouble_.at(
         i - vComplexPar_.size() - vDoublePar_.size() - vIntPar_.size()
             - vBoolPar_.size())->GetValue();
-  else
-    // is in multicomplex list
+  else if (i
+      < (vComplexPar_.size() + vDoublePar_.size() + vIntPar_.size()
+          + vBoolPar_.size()) + vBoolPar_.size() - vMultiDouble_.size())    // is in multidouble list
     return (double) vMultiComplex_.at(
         i - vComplexPar_.size() - vDoublePar_.size() - vIntPar_.size()
             - vBoolPar_.size() - vMultiDouble_.size())->GetValue().real();
+  else
+    // is in multicomplex list
+    return (double) vMultiUnsignedInteger_.at(
+        i - vComplexPar_.size() - vDoublePar_.size() - vIntPar_.size()
+            - vBoolPar_.size() - vMultiDouble_.size() - vMultiComplex_.size())->GetValue();
 
   throw BadParameter("Parameter not in list");
   return 0;
@@ -311,6 +368,18 @@ std::shared_ptr<MultiDouble> ParameterList::GetMultiDouble(
     throw BadParameter("MultiDouble not found: " + parname);
   };
   return vMultiDouble_.at(i);
+}
+
+std::shared_ptr<MultiUnsignedInteger> ParameterList::GetMultiUnsignedInteger(
+    const std::string parname) const {
+  unsigned int i = 0;
+  try {
+    i = mMultiUnsignedIntegerID_.at(parname);
+  }
+  catch (...) {
+    throw BadParameter("MultiUnsignedInteger not found: " + parname);
+  };
+  return vMultiUnsignedInteger_.at(i);
 }
 
 std::shared_ptr<ComplexParameter> ParameterList::GetComplexParameter(
@@ -381,6 +450,15 @@ const double ParameterList::GetParameterValue(const std::string parname) const {
   };
   if (i > -1)
     return vMultiDouble_.at(i)->GetValue();
+
+  try {
+    i = mMultiUnsignedIntegerID_.at(parname);
+  }
+  catch (...) {
+    i = -1;
+  };
+  if (i > -1)
+    return vMultiUnsignedInteger_.at(i)->GetValue();
 
   try {
     i = mBoolParID_.at(parname);
@@ -483,6 +561,13 @@ void ParameterList::AddParameter(std::shared_ptr<AbsParameter> par) {
     //cout << "Easy\n";
     break;
   }
+  case ParType::MUNSIGNEDINTEGER: {
+    std::shared_ptr<MultiUnsignedInteger> tmp = std::dynamic_pointer_cast<
+        MultiUnsignedInteger>(par);
+    AddParameter(tmp);
+    //cout << "Easy\n";
+    break;
+  }
   case ParType::DOUBLE: {
     std::shared_ptr<DoubleParameter> tmp = std::dynamic_pointer_cast<
         DoubleParameter>(par);
@@ -513,57 +598,56 @@ void ParameterList::AddParameter(std::shared_ptr<AbsParameter> par) {
 
 void ParameterList::AddParameter(std::shared_ptr<MultiComplex> par) {
   //TODO check names!
-  vMultiComplex_.push_back(par);
-  mMultiComplexID_.insert(
+  auto result = mMultiComplexID_.insert(
       std::pair<std::string, unsigned int>(par->GetName(),
           vMultiDouble_.size() - 1));
+  if (result.second)
+    vMultiComplex_.push_back(par);
   //make_str();
 }
 
 void ParameterList::AddParameter(std::shared_ptr<MultiDouble> par) {
-  //TODO check names!
-  vMultiDouble_.push_back(par);
-  mMultiDoubleID_.insert(
+  auto result = mMultiDoubleID_.insert(
       std::pair<std::string, unsigned int>(par->GetName(),
-          vMultiDouble_.size() - 1));
-  //make_str();
+          vMultiDouble_.size()));
+  if (result.second)
+    vMultiDouble_.push_back(par);
 }
 
-void ParameterList::AddParameter(std::shared_ptr<ComplexParameter> par) {
-  //TODO check names!
-  vComplexPar_.push_back(par);
-  mComplexParID_.insert(
+void ParameterList::AddParameter(std::shared_ptr<MultiUnsignedInteger> par) {
+  auto result = mMultiUnsignedIntegerID_.insert(
       std::pair<std::string, unsigned int>(par->GetName(),
-          vComplexPar_.size() - 1));
-  //make_str();
+          vMultiUnsignedInteger_.size()));
+  if (result.second)
+    vMultiUnsignedInteger_.push_back(par);
+}
+void ParameterList::AddParameter(std::shared_ptr<ComplexParameter> par) {
+  auto result = mComplexParID_.insert(
+      std::pair<std::string, unsigned int>(par->GetName(),
+          vComplexPar_.size()));
+  if (result.second)
+    vComplexPar_.push_back(par);
 }
 
 void ParameterList::AddParameter(std::shared_ptr<DoubleParameter> par) {
-  //TODO check names!
-
   auto result = mDoubleParID_.insert(
       std::pair<std::string, unsigned int>(par->GetName(), vDoublePar_.size()));
   if (result.second)
     vDoublePar_.push_back(par);
-  //make_str();
 }
 
 void ParameterList::AddParameter(std::shared_ptr<IntegerParameter> par) {
-  //TODO check names!
-  vIntPar_.push_back(par);
-  mIntParID_.insert(
-      std::pair<std::string, unsigned int>(par->GetName(),
-          vIntPar_.size() - 1));
-  //make_str();
+  auto result = mIntParID_.insert(
+      std::pair<std::string, unsigned int>(par->GetName(), vIntPar_.size()));
+  if (result.second)
+    vIntPar_.push_back(par);
 }
 
 void ParameterList::AddParameter(std::shared_ptr<BoolParameter> par) {
-  //TODO check names!
-  vBoolPar_.push_back(par);
-  mBoolParID_.insert(
-      std::pair<std::string, unsigned int>(par->GetName(),
-          vBoolPar_.size() - 1));
-  //make_str();
+  auto result = mBoolParID_.insert(
+      std::pair<std::string, unsigned int>(par->GetName(), vBoolPar_.size()));
+  if (result.second)
+    vBoolPar_.push_back(par);
 }
 
 void ParameterList::RemoveComplex(const unsigned int id) {

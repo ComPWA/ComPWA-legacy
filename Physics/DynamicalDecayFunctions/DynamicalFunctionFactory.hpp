@@ -29,6 +29,16 @@ enum class DynamicalInfoTypes {
   TOP_NODE, RELATIVE_BREIT_WIGNER
 };
 
+struct ParticleStateComperator {
+    bool operator()(const ParticleStateInfo& a, const ParticleStateInfo& b) const {
+      if (a.pid_information_ < b.pid_information_)
+        return true;
+      else if (a.pid_information_ > b.pid_information_)
+        return false;
+      return false;
+    }
+};
+
 const boost::unordered_map<DynamicalInfoTypes, std::string> DynamicalTypeToString =
     boost::assign::map_list_of(DynamicalInfoTypes::TOP_NODE, "topNode")(
         DynamicalInfoTypes::RELATIVE_BREIT_WIGNER, "relBW");
@@ -40,7 +50,7 @@ const boost::unordered_map<std::string, DynamicalInfoTypes> StringToDynamicalTyp
 
 class DynamicalFunctionFactory {
   std::map<ParticleStateInfo,
-      std::shared_ptr<AbstractDynamicalFunction> > dynamical_function_list_;
+      std::shared_ptr<AbstractDynamicalFunction>, ParticleStateComperator> dynamical_function_list_;
 
   std::shared_ptr<AbstractDynamicalFunction> generateRelativisiticBreitWigner(
       const ParticleStateInfo& state_info,

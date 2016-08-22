@@ -57,11 +57,15 @@ class TopologyAmplitudeFactory {
 
   void appendParticleInfoToName(std::stringstream &name,
       const ParticleStateInfo &state_info) const;
+  void appendSpinMagnitudeInfoToName(std::stringstream &name,
+      const ParticleStateInfo &state_info) const;
+  void appendSpinZComponentInfoToName(std::stringstream &name,
+      const ParticleStateInfo &state_info) const;
 
   double getParityFactor(int pid_mother, int pid_d1, int pid_d2) const;
 
-  void fixParticlePropertyTree(
-      boost::property_tree::ptree& pt, const IDInfo& id_info) const;
+  void fixParticlePropertyTree(boost::property_tree::ptree& pt,
+      const IDInfo& id_info) const;
 
   std::pair<std::shared_ptr<DoubleParameter>, bool> generateGlobalParameter(
       const boost::property_tree::ptree& pt, const std::string& name,
