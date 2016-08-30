@@ -114,7 +114,7 @@ int main(int argc, char **argv) {
             topology_amplitudes));
 
     //create dummy final state event to initialized the kinematics class
-    unsigned int dataSize = 5000;
+    unsigned int dataSize = 10000;
 
     std::shared_ptr<Data> data(new RootReader());
     std::shared_ptr<Data> phsp(new RootReader());

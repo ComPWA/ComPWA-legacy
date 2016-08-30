@@ -1,9 +1,12 @@
 #include <fstream>
 
+#include "boost/filesystem.hpp"
+
 #include "Core/PhysConst.hpp"
 
 #include "Physics/DecayTree/DecayGenerator.hpp"
 #include "Physics/DecayTree/DecayGeneratorFacade.hpp"
+#include "Physics/DecayTree/DecayGeneratorConfig.hpp"
 #include "Physics/DecayTree/DecayXMLConfigReader.hpp"
 
 int main(int argc, char **argv) {
@@ -12,6 +15,16 @@ int main(int argc, char **argv) {
       << "  This program comes with ABSOLUTELY NO WARRANTY; for details see license.txt"
       << std::endl;
   std::cout << std::endl;
+
+  if(argc < 2) {
+    std::runtime_error("Error: please specify a config url!");
+  }
+
+  boost::filesystem::path output_path(argv[1]);
+  output_path = output_path.parent_path();
+
+  // first read the config file
+  ComPWA::Physics::DecayTree::DecayGeneratorConfig::Instance().readConfig(std::string(argv[1]));
 
   ComPWA::Physics::DecayTree::DecayGenerator decay_generator;
   // initialize
@@ -49,16 +62,6 @@ int main(int argc, char **argv) {
   decay_generator.addFinalStateParticles(if_particle);
 
   if_particle = decay_generator.createIFParticleInfo("jpsi");
-
-  auto particle_properties = ComPWA::PhysConst::Instance().findParticle(
-      if_particle.particle_info_.name_);
-
-  ComPWA::Spin s = particle_properties.getSpinLikeQuantumNumber(
-      ComPWA::QuantumNumberIDs::SPIN);
-  s.J_z_numerator_ = 1;
-  if_particle.spin_z_components_.push_back(s);
-  s.J_z_numerator_ = -1;
-  if_particle.spin_z_components_.push_back(s);
   decay_generator.setTopNodeState(if_particle);
 
   /* ComPWA::Physics::DecayTree::IFParticleInfo if_particle =
@@ -77,7 +80,7 @@ int main(int argc, char **argv) {
 
   ComPWA::Physics::DecayTree::DecayXMLConfigReader xml_config_io(decay_config);
   std::cout << "Saving decay configuration to xml file...\n";
-  xml_config_io.writeConfig("test.xml");
+  xml_config_io.writeConfig(output_path.string() + "/test.xml");
   std::cout << "Done!\n";
 
   return 0;

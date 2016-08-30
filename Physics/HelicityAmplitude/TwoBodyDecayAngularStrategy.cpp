@@ -13,8 +13,9 @@ namespace Physics {
 namespace HelicityFormalism {
 
 TwoBodyDecayAngularStrategy::TwoBodyDecayAngularStrategy(
-    std::shared_ptr<TwoBodyDecayAmplitude> tbd_amp) :
-    Strategy(ParType::MCOMPLEX), tbd_amp_(tbd_amp) {
+    std::shared_ptr<TwoBodyDecayAmplitude> tbd_amp, unsigned storage_index) :
+    Strategy(ParType::MCOMPLEX), tbd_amp_(tbd_amp), storage_index_(
+        storage_index) {
 }
 
 TwoBodyDecayAngularStrategy::~TwoBodyDecayAngularStrategy() {
@@ -32,19 +33,16 @@ bool TwoBodyDecayAngularStrategy::execute(ParameterList& paras,
 
   if (ParType::MCOMPLEX) {
     std::vector<std::complex<double> > values;
-    values.reserve(DataPointStorage::Instance().getNumberOfEvents());
+    values.reserve(
+        DataPointStorage::Instance().getNumberOfEvents(storage_index_));
     for (unsigned int i = 0;
-        i < DataPointStorage::Instance().getNumberOfEvents(); ++i) {
-      std::complex<double> value(0.0);
-      auto const& evaluation_list =
-          paras.GetMultiUnsignedIntegers()[0]->GetValues();
-      //should be just one entry in that list
-      for (unsigned int j = 0; j < evaluation_list.size(); ++j) {
-        value += tbd_amp_->evaluate(i, evaluation_list[j]);
-      }
-      values.push_back(value);
+        i < DataPointStorage::Instance().getNumberOfEvents(storage_index_);
+        ++i) {
+      values.push_back(
+          tbd_amp_->evaluate(storage_index_, i, paras.GetMultiUnsignedInteger(0)->GetValue(0)));
     }
-    out = std::shared_ptr<MultiComplex>(new MultiComplex(out->GetName(), values));
+    out = std::shared_ptr<MultiComplex>(
+        new MultiComplex(out->GetName(), values));
   }
   return true;
 }

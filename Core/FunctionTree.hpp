@@ -179,7 +179,7 @@ public:
     /* In case of an existing node, it is possible that this node already have parents. Do need
      * to consider this here? */
     inNode->addParent(parentNode);
-    //inTree->head()->linkParents();
+    parentNode->addChild(inNode);
 
     //Subtree already linked, but need to be added to list of nodes
     addChildNodes(inNode);
@@ -568,6 +568,61 @@ public:
 
     //some basic infos next
     BOOST_LOG_TRIVIAL(debug)<<"# of Nodes: "<<nodes_.size();
+
+    // check links on all registered nodes
+    for (auto node : nodes_) {
+      // check links to children
+      for (auto node2 : nodes_) {
+        std::vector<std::string> parent_names;
+        node2.second->getParentNames(parent_names);
+        for (auto parent_name : parent_names) {
+          if(parent_name.compare(node.first) == 0) {
+            //then node2 is a child of node
+            // check if node has child node2
+            bool found(false);
+            for(auto const& child_node : node.second->getChildren()) {
+              if(node2.first.compare(child_node->getName()) == 0) {
+                found = true;
+                break;
+              }
+            }
+            if(!found) {
+              BOOST_LOG_TRIVIAL(warning)<<"node "<<node.first<<" does not have child "<<node2.first;
+              node.second->addChild(node2.second);
+              BOOST_LOG_TRIVIAL(warning)<<"automatically repaired node link...";
+            }
+            break;
+          }
+        }
+      }
+
+      // check links to parents
+      for (auto node2 : nodes_) {
+        std::vector<std::string> children_names;
+        node2.second->getChildrenNames(children_names);
+        for (auto child_name : children_names) {
+          if(child_name.compare(node.first) == 0) {
+            // then node2 is a parent of node
+            // check if node has parent node2
+            bool found(false);
+            std::vector<std::string> parent_names;
+            node.second->getParentNames(parent_names);
+            for(auto const& parent : parent_names) {
+              if(parent.compare(node2.first) == 0) {
+                found = true;
+                break;
+              }
+            }
+            if(!found) {
+              BOOST_LOG_TRIVIAL(warning)<<"node "<<node.first<<" does not have parent "<<node2.first;
+              node.second->addParent(node2.second);
+              BOOST_LOG_TRIVIAL(warning)<<"automatically repaired node link...";
+            }
+            break;
+          }
+        }
+      }
+    }
 
     //collect all children and parent names
     std::vector<std::string> childNames, parentNames;

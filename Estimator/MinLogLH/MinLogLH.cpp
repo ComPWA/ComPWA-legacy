@@ -373,7 +373,7 @@ void MinLogLH::iniLHtree() {
         false);
     physicsTree->insertTree(bkgTree_amp, "IntensBkg");
   }
-  physicsTree->recalculate();
+  physicsTree->forceRecalculate();
 //	std::string treeString = physicsTree->head()->to_str(10);
 //	BOOST_LOG_TRIVIAL(debug) << std::endl << treeString;
   if (!physicsTree->sanityCheck()) {

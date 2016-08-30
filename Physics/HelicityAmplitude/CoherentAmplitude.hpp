@@ -44,7 +44,7 @@ struct SequentialDecayInformation {
 class CoherentAmplitude: public Amplitude {
   std::vector<TopologyAmplitude> topology_amplitudes_;
 
-  std::shared_ptr<FunctionTree> tree_;
+  std::map<unsigned int, std::shared_ptr<FunctionTree> > tree_;
 
   std::vector<ParticleStateInfo> particles_;
   std::map<SequentialDecayInformation, unsigned int> sequential_decay_amplitudes_map_;
@@ -53,14 +53,13 @@ class CoherentAmplitude: public Amplitude {
   std::map<std::shared_ptr<TwoBodyDecayAmplitude>, std::shared_ptr<TreeNode> > angular_part_nodes_;
   std::map<std::shared_ptr<DynamicalFunctions::AbstractDynamicalFunction>,
       std::shared_ptr<TreeNode> > dynamical_part_nodes_;
-  std::map<std::string, std::shared_ptr<TreeNode> > dynamical_parameter_nodes_;
+  std::map<std::string, std::shared_ptr<AbsParameter> > dynamical_parameter_nodes_;
   std::map<std::string, std::shared_ptr<TreeNode> > full_two_body_decay_nodes_;
+  std::map<std::string, std::vector<std::pair<std::string, std::shared_ptr<AbsParameter> > > > tree_leaves_;
 
   std::map<std::string, std::shared_ptr<TwoBodyDecayAngularStrategy> > angular_part_strategies_;
   std::map<std::string,
       std::shared_ptr<DynamicalFunctions::DynamicalFunctionStrategy> > dynamical_part_strategies_;
-
-  std::vector<std::pair<unsigned int, IndexList> > coherent_sum_pairings_;
 
   std::shared_ptr<Efficiency> efficiency_;
 
@@ -73,10 +72,14 @@ class CoherentAmplitude: public Amplitude {
 
   void init();
 
+  void constructSequentialDecayTreeNodes(unsigned int storage_index);
+  void constructCoherentAmpTree(unsigned int storage_index);
+  void clearMaps();
+
   std::vector<IndexList> convertIndexLists(
       const std::vector<IndexList> evaluation_lists) const;
 
-  std::vector<std::shared_ptr<TreeNode> > createLeaves(
+  std::vector<std::shared_ptr<AbsParameter> > createLeaves(
       const ParameterList& parameter_list);
 
   IndexList getListOfCoherentPartners(
@@ -89,8 +92,6 @@ class CoherentAmplitude: public Amplitude {
   bool compareCoherentParticleStates(const ParticleStateInfo& ps,
       const ParticleStateInfo& ref) const;
 
-  void registerTopologyAmplitudeParameters();
-
 public:
   CoherentAmplitude(const std::vector<TopologyAmplitude>& amplitude_trees);
   virtual ~CoherentAmplitude();
@@ -102,7 +103,8 @@ public:
   double getMaxVal(ParameterList& par, std::shared_ptr<Generator> gen);
   double getMaxVal(std::shared_ptr<Generator> gen);
 
-  std::shared_ptr<FunctionTree> getAmpTree(allMasses&,allMasses&, std::string);
+  virtual bool hasTree();
+  std::shared_ptr<FunctionTree> getAmpTree(allMasses&, allMasses&, std::string);
 
   const ParameterList& intensity(const dataPoint& point, ParameterList& par);
   const ParameterList& intensity(const dataPoint& point);

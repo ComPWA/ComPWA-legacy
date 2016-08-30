@@ -19,11 +19,12 @@ class dataPoint;
 typedef std::vector<double> DataList;
 
 class DataPointStorage {
-  unsigned int number_of_events_;
-  unsigned int expected_number_of_events_;
-  unsigned int number_of_variables_;
-  // the map key is a the variable or storage index. then we have one data list for each variable
-  std::map<unsigned int, DataList> data_storage_;
+  std::map<unsigned int, unsigned int> number_of_events_;
+  std::map<unsigned int, unsigned int> expected_number_of_events_;
+  std::map<unsigned int, unsigned int> number_of_variables_;
+  // the first map key is a the storage index (phsp or data).
+  // the second map key is the variable index. then we have one data list for each variable
+  std::map<unsigned int, std::map<unsigned int, DataList> > data_storage_;
 
   DataPointStorage();
 
@@ -37,17 +38,20 @@ public:
   DataPointStorage(DataPointStorage const&) = delete;
   void operator=(DataPointStorage const&) = delete;
 
-  unsigned int getNumberOfEvents() const;
+  unsigned int getNumberOfEvents(unsigned storage_index) const;
 
-  void layoutDataStorageStructure(unsigned int expected_number_of_events_, const Event& evt);
+  void layoutDataStorageStructure(unsigned storage_index,
+      unsigned int expected_number_of_events_, const Event& evt);
+  void layoutDataStorageStructure(unsigned storage_index,
+      unsigned int expected_number_of_events_, const dataPoint& dp);
 
   void clearStorage();
 
-  void addEvent(const Event& evt);
-  void addDataPoint(const dataPoint& dp);
+  void addEvent(unsigned storage_index, const Event& evt);
+  void addDataPoint(unsigned storage_index, const dataPoint& dp);
 
-  const DataList& getDataList(
-      unsigned int storage_index) const;
+  const DataList& getDataList(unsigned int storage_index,
+      unsigned int variable_index) const;
 };
 
 } /* namespace ComPWA */

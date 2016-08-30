@@ -13,8 +13,10 @@ namespace Physics {
 namespace DynamicalFunctions {
 
 DynamicalFunctionStrategy::DynamicalFunctionStrategy(
-    std::shared_ptr<AbstractDynamicalFunction> abs_dyn_func) :
-    Strategy(ParType::MCOMPLEX), dynamical_function_(abs_dyn_func) {
+    std::shared_ptr<AbstractDynamicalFunction> abs_dyn_func,
+    unsigned int storage_index) :
+    Strategy(ParType::MCOMPLEX), dynamical_function_(abs_dyn_func), storage_index_(
+        storage_index) {
 }
 
 DynamicalFunctionStrategy::~DynamicalFunctionStrategy() {
@@ -31,19 +33,15 @@ bool DynamicalFunctionStrategy::execute(ParameterList& paras,
 
   if (ParType::MCOMPLEX) {
     std::vector<std::complex<double> > values;
-    values.reserve(DataPointStorage::Instance().getNumberOfEvents());
+    values.reserve(DataPointStorage::Instance().getNumberOfEvents(storage_index_));
     for (unsigned int i = 0;
-        i < DataPointStorage::Instance().getNumberOfEvents(); ++i) {
-      std::complex<double> value(0.0);
-      auto const& evaluation_list =
-          paras.GetMultiUnsignedIntegers()[0]->GetValues();
-      //should be just one entry in that list
-      for (unsigned int j = 0; j < evaluation_list.size(); ++j) {
-        value += dynamical_function_->evaluate(i, evaluation_list[j]);
-      }
-      values.push_back(value);
+        i < DataPointStorage::Instance().getNumberOfEvents(storage_index_); ++i) {
+      values.push_back(
+          dynamical_function_->evaluate(storage_index_, i,
+              paras.GetMultiUnsignedInteger(0)->GetValue(0)));
     }
-    out = std::shared_ptr<MultiComplex>(new MultiComplex(out->GetName(), values));
+    out = std::shared_ptr<MultiComplex>(
+        new MultiComplex(out->GetName(), values));
   }
   return true;
 }

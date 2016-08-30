@@ -625,6 +625,72 @@ public:
   ;
 };
 
+class Real: public Strategy {
+public:
+  Real(ParType in) :
+      Strategy(in) {
+  }
+  ;
+  virtual ~Real() {
+  }
+
+  virtual const std::string to_str() const {
+    return "RealPart";
+  }
+  ;
+
+  virtual bool execute(ParameterList& paras,
+      std::shared_ptr<AbsParameter>& out) {
+
+    unsigned int nMC = paras.GetNMultiComplex();
+    unsigned int nC = paras.GetNComplex();
+
+    switch (checkType) {
+
+    case ParType::MCOMPLEX: {
+      if (!(nMC == 1)) {
+        //TODO: exception wrong input
+        return false;
+      }
+      unsigned int nElements = paras.GetMultiComplex(0)->GetNValues();
+      //fill MultiDouble parameter
+      std::vector<double> results;
+      results.reserve(nElements);
+      for (auto const & complex_element : paras.GetMultiComplex(0)->GetValues()) {
+        results.push_back(complex_element.real());
+      }
+
+      out = std::shared_ptr<AbsParameter>(
+          new MultiDouble(out->GetName(), results));
+
+      break;
+    }        //end multi complex
+
+    case ParType::COMPLEX: {
+      if (!(nC == 1)) {
+        //TODO: exception wrong input
+        return false;
+      }
+
+      out = std::shared_ptr<AbsParameter>(
+          new DoubleParameter(out->GetName(),
+              paras.GetComplexParameter(0)->GetValue().real()));
+
+      break;
+    }        //end double
+
+    default: {
+      //TODO: exception output partype wrong
+      return false;
+    }
+
+    }        //end switch
+
+    return true;
+  }
+  ;
+};
+
 class Complexify: public Strategy {
 public:
   Complexify(ParType in) :

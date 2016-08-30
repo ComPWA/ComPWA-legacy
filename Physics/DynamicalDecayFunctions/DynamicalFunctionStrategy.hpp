@@ -17,10 +17,12 @@ namespace DynamicalFunctions {
 
 class DynamicalFunctionStrategy: public Strategy {
   std::shared_ptr<AbstractDynamicalFunction> dynamical_function_;
+  unsigned int storage_index_;
 
 public:
   DynamicalFunctionStrategy(
-      std::shared_ptr<AbstractDynamicalFunction> abs_dyn_func);
+      std::shared_ptr<AbstractDynamicalFunction> abs_dyn_func,
+      unsigned int storage_index);
   virtual ~DynamicalFunctionStrategy();
 
   //! Pure Virtual interface for streaming info about the strategy

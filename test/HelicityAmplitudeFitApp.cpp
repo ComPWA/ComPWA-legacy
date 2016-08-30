@@ -55,6 +55,8 @@
 #include "Optimizer/Minuit2/MinuitIF.hpp"
 #include "Core/DataPoint.hpp"
 #include "Core/Efficiency.hpp"
+#include "Core/ProgressBar.hpp"
+#include "Core/DataPointStorage.hpp"
 
 #include "Physics/DecayTree/DecayConfiguration.hpp"
 #include "Physics/DecayTree/DecayXMLConfigReader.hpp"
@@ -110,7 +112,7 @@ int main(int argc, char **argv) {
   BOOST_LOG_TRIVIAL(info)<< "  This program comes with ABSOLUTELY NO WARRANTY; for details see license.txt";
   BOOST_LOG_TRIVIAL(info)<< std::endl;
 
-  bool useFctTree = false, resultGen = true;
+  bool useFctTree = true, resultGen = true;
 
   BOOST_LOG_TRIVIAL(info)<< "Load Modules";
 
@@ -169,6 +171,7 @@ int main(int argc, char **argv) {
         new ComPWA::Physics::HelicityFormalism::CoherentAmplitude(
             topology_amplitudes));
 
+
     std::shared_ptr<RootReader> myReader(
         new RootReader(input_data_file_path, "events"));
     myReader->resetWeights();    //setting weights to 1
@@ -176,9 +179,44 @@ int main(int argc, char **argv) {
         new RootReader(input_phsp_file_path, "events"));
     myPHSPReader->setEfficiency(shared_ptr<Efficiency>(new UnitEfficiency()));    //setting efficiency to 1
 
+    if (myReader) {
+      Event tmp;
+      unsigned int num_events(myReader->getNEvents());
+      if (num_events > 0) {
+        tmp = myReader->getEvent(0);
+        DataPointStorage::Instance().layoutDataStorageStructure(1, num_events,
+            tmp);
+        progressBar bar(num_events);
+        for (unsigned int i = 0; i < num_events; ++i) {
+          tmp = myReader->getEvent(i);
+          DataPointStorage::Instance().addEvent(1, tmp);
+          bar.nextEvent();
+        }
+      }
+    }
+    if (myPHSPReader) {
+      Event tmp;
+      unsigned int num_events(myPHSPReader->getNEvents());
+      if (num_events > 0) {
+        tmp = myPHSPReader->getEvent(0);
+        DataPointStorage::Instance().layoutDataStorageStructure(0, num_events,
+            tmp);
+        progressBar bar(num_events);
+        for (unsigned int i = 0; i < num_events; ++i) {
+          tmp = myPHSPReader->getEvent(i);
+          DataPointStorage::Instance().addEvent(0, tmp);
+          bar.nextEvent();
+        }
+      }
+    }
+
     ParameterList par;
     std::shared_ptr<Optimizer::ControlParameter> esti;
     amp->copyParameterList(par);    //perfect startvalues
+
+    for (auto const& param : par.GetDoubleParameters()) {
+      std::cout << param->GetName() << " " << param->IsFixed() << std::endl;
+    }
     esti = MinLogLH::createInstance(amp, myReader, myPHSPReader, 0,
         myReader->getNEvents());
     MinLogLH* contrPar = dynamic_cast<MinLogLH*>(&*(esti->Instance()));
@@ -187,7 +225,6 @@ int main(int argc, char **argv) {
       contrPar->setUseFunctionTree(1);
       tree = contrPar->getTree();
     }
-
 
     std::shared_ptr<Optimizer::Optimizer> opti(
         new Optimizer::Minuit2::MinuitIF(esti, par));
@@ -206,7 +243,7 @@ int main(int argc, char **argv) {
         tmp->SetValue(tmp->GetValue()*1.2);
         tmp->SetError(tmp->GetValue());
         if (!tmp->GetValue())
-          tmp->SetError(1.);
+        tmp->SetError(1.);
       }
       startInt[i] = tmp->GetValue();
     }

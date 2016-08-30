@@ -14,6 +14,7 @@
 #include "Core/PhysConst.hpp"
 
 #include "Physics/DecayTree/DecayGenerator.hpp"
+#include "Physics/DecayTree/DecayGeneratorConfig.hpp"
 
 // this include has to be after the compwa includes
 // because it defines an INTEGER in the global scope that introduces clashes
@@ -27,15 +28,13 @@ DecayGenerator::DecayGenerator() :
     unique_spin_state_counter_(1) {
   clips_environment_ = CreateEnvironment();
 
-  allowed_particle_names_.push_back("gamma");
-  allowed_particle_names_.push_back("pi0");
-  //allowed_particle_names_.push_back("f0_980");
-  //allowed_particle_names_.push_back("f0_1370");
-  //allowed_particle_names_.push_back("f2_1270");
-  allowed_particle_names_.push_back("omega");
-  allowed_particle_names_.push_back("jpsi");
-  //allowed_particle_names_.push_back("pi+");
-  //allowed_particle_names_.push_back("pi-");
+  auto const& config_ptree = DecayGeneratorConfig::Instance().getConfig();
+  //allowed particles
+  for (auto const& allowed_particle_name : config_ptree.get_child(
+      "allowed_particles")) {
+    allowed_particle_names_.push_back(
+        allowed_particle_name.second.get_value<std::string>());
+  }
 }
 
 DecayGenerator::~DecayGenerator() {
@@ -73,7 +72,7 @@ void DecayGenerator::setTopNodeState(const IFParticleInfo& particle_info) {
 
 void DecayGenerator::populateSpinZStates(IFParticleInfo& particle_info) const {
   // if the user did not specify any spin z components yet
-  // then just populate homogeneously
+  // then populate either from user config or homogeneously
   if (particle_info.spin_z_components_.size() == 0) {
     auto particle_properties = ComPWA::PhysConst::Instance().findParticle(
         particle_info.particle_info_.name_);
@@ -87,13 +86,33 @@ void DecayGenerator::populateSpinZStates(IFParticleInfo& particle_info) const {
             particle_info.particle_info_.name_).mass_)
       is_massless = true;
 
+    std::vector<int> user_requested_z_components;
+    auto const& config_pt = DecayGeneratorConfig::Instance().getConfig();
+    for (auto const& entry : config_pt.get_child("spin_z_components")) {
+      if (particle_info.particle_info_.name_.compare(entry.first) == 0) {
+        for (auto const& spin_z_comp : entry.second) {
+          user_requested_z_components.push_back(
+              spin_z_comp.second.get_value<int>());
+        }
+        break;
+      }
+    }
+
     for (int i = -1 * s.J_numerator_; i <= (int) s.J_numerator_;
         i = i + s.J_denominator_) {
       if (!(is_massless && i == 0)) {
-        s.J_z_numerator_ = i;
-        particle_info.spin_z_components_.push_back(s);
+        if (user_requested_z_components.size() == 0
+            || std::find(user_requested_z_components.begin(),
+                user_requested_z_components.end(), i)
+                != user_requested_z_components.end()) {
+          s.J_z_numerator_ = i;
+          particle_info.spin_z_components_.push_back(s);
+        }
       }
     }
+  }
+  else {
+    BOOST_LOG_TRIVIAL(warning)<<"User custom set spin z components! Use on own risk!\n";
   }
 }
 
@@ -148,7 +167,7 @@ void DecayGenerator::addSpinWaveTwoBodyDecayToDecayConfiguration(
 
     std::vector<std::vector<ParticleStateInfo> > daughter_list_combinations;
     for (unsigned int i = 0; i < decay_node.second.size(); ++i) {
-      BOOST_LOG_TRIVIAL(debug)<<"daugther: "<<decay_node.second[i]<<std::endl;
+      BOOST_LOG_TRIVIAL(debug)<<"daughter: "<<decay_node.second[i]<<std::endl;
       if (temp_state_pool.find(decay_node.second[i]) == temp_state_pool.end()) {
         temp_state_pool[decay_node.second[i]] =
         createParticleStateInfoCandidates(
@@ -193,13 +212,25 @@ void DecayGenerator::addSpinWaveTwoBodyDecayToDecayConfiguration(
     for (auto const& mother : temp_state_pool[decay_node.first]) {
       for (auto const& daughters : daughter_list_combinations) {
         // do some checks here
-        if (!checkMass(mother, daughters))
-        continue;
-
-        BOOST_LOG_TRIVIAL(debug) << mother << std::endl;
-        for (auto d : daughters) {
-          BOOST_LOG_TRIVIAL(debug)<< d << std::endl;
+        if (!checkMass(mother, daughters)) {
+          continue;
         }
+        if (!checkConfigConstraints(mother)) {
+          continue;
+        }
+        bool skip(false);
+        for(auto const& d : daughters) {
+          if (!checkConfigConstraints(d)) {
+            skip = true;
+            break;}
+        }
+        if(skip) {
+          continue;
+        }
+        /*BOOST_LOG_TRIVIAL(debug) << mother << std::endl;
+         for (auto d : daughters) {
+         BOOST_LOG_TRIVIAL(debug)<< d << std::endl;
+         }*/
 
         if (decay_trees_empty) {
           std::vector<
@@ -229,7 +260,7 @@ void DecayGenerator::addSpinWaveTwoBodyDecayToDecayConfiguration(
   BOOST_LOG_TRIVIAL(debug)<<"checking for correct initial and final state and adding decay tree to decay configuration...\n";
   for (auto const& decay_tree : decay_trees) {
     if (!checkForCorrectIFState(decay_tree))
-    continue;
+      continue;
     // reset particle picking pool
     current_total_particle_pool_ = total_particle_pool_;
     current_particle_mapping_.clear();
@@ -282,9 +313,15 @@ std::vector<ParticleStateInfo> DecayGenerator::createParticleStateInfoCandidates
       ps.pid_information_.particle_id_ = allowed_particle.id_;
       ps.pid_information_.name_ = allowed_particle.name_;
 
-      ps.dynamical_information_ = createDynamicInfo(allowed_particle,
-          DynamicalFunctions::DynamicalInfoTypes::RELATIVE_BREIT_WIGNER);
-
+      // if top node
+      if (mother_state_particle_.particle_info_ == ps.pid_information_) {
+        ps.dynamical_information_ = createDynamicInfo(allowed_particle,
+            DynamicalFunctions::DynamicalInfoTypes::TOP_NODE);
+      }
+      else {
+        ps.dynamical_information_ = createDynamicInfo(allowed_particle,
+            DynamicalFunctions::DynamicalInfoTypes::RELATIVE_BREIT_WIGNER);
+      }
       ps.unique_id_ = unique_index;
 
       candidates.push_back(ps);
@@ -299,11 +336,12 @@ DynamicalInfo DecayGenerator::createDynamicInfo(
     ComPWA::Physics::DynamicalFunctions::DynamicalInfoTypes dynamical_type) const {
   DynamicalInfo dynamical_info;
 
+  dynamical_info.put("type",
+      ComPWA::Physics::DynamicalFunctions::DynamicalTypeToString.at(
+          dynamical_type));
+
   if (dynamical_type
       == ComPWA::Physics::DynamicalFunctions::DynamicalInfoTypes::RELATIVE_BREIT_WIGNER) {
-    dynamical_info.put("type",
-        ComPWA::Physics::DynamicalFunctions::DynamicalTypeToString.at(
-            dynamical_type));
     dynamical_info.put("mass.value", particle_properties.mass_);
     dynamical_info.put("mass.fix", 1);
     dynamical_info.put("mass.min", 0.5 * particle_properties.mass_);
@@ -331,6 +369,29 @@ bool DecayGenerator::checkMass(const ParticleStateInfo& mother,
   double mass_mother = PhysConst::Instance().findParticle(
       mother.pid_information_.particle_id_).mass_;
   return mass_mother > sum_mass_daughters;
+}
+
+bool DecayGenerator::checkConfigConstraints(
+    const ParticleStateInfo& particle_state_info) const {
+  bool is_allowed(true);
+  auto const& config_ptree = DecayGeneratorConfig::Instance().getConfig();
+  //allowed particles
+  for (auto const& particle : config_ptree.get_child("spin_z_components")) {
+    if (particle_state_info.pid_information_.name_.compare(particle.first)
+        == 0) {
+      is_allowed = false;
+      for (auto const& spin_z_component : particle.second) {
+        if ((1.0 * particle_state_info.spin_information_.J_z_numerator_
+            / particle_state_info.spin_information_.J_denominator_)
+            == spin_z_component.second.get_value<double>()) {
+          is_allowed = true;
+          break;
+        }
+      }
+      break;
+    }
+  }
+  return is_allowed;
 }
 
 bool DecayGenerator::isDecayValidForTree(
@@ -377,7 +438,7 @@ bool DecayGenerator::checkForCorrectIFState(
     if (is_initial)
       initial_state = decay_node.first;
 
-    // check if this decay daughers are final state ones
+    // check if this decay daughters are final state ones
     for (auto daughter : decay_node.second) {
       bool is_final(true);
       for (auto other_decay_node : decay_tree) {
@@ -408,7 +469,10 @@ bool DecayGenerator::checkForCorrectIFState(
       return false;
     }
   }
-  return true;
+  if(true_final_state_copy.size() == 0)
+    return true;
+  else
+    return false;
 }
 
 ParticleStateInfo DecayGenerator::createParticleInstance(

@@ -286,13 +286,15 @@ protected:
   virtual std::string make_val_str() {
     std::stringstream ovs;
     unsigned int max = val_.size();
-    if (max > 5)
-      max = 5;    //display only 5 variables
-    for (unsigned int i = 0; i < max - 1; i++)
-      ovs << val_[i] << ", ";
-    ovs << val_[max - 1];
-    if (max < val_.size())
-      ovs << " ... ";
+    if (max > 0) {
+      if (max > 5)
+        max = 5;    //display only 5 variables
+      for (unsigned int i = 0; i < max - 1; i++)
+        ovs << val_[i] << ", ";
+      ovs << val_[max - 1];
+      if (max < val_.size())
+        ovs << " ... ";
+    }
     return ovs.str();
   }
 

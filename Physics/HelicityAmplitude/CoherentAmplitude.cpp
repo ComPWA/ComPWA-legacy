@@ -29,8 +29,6 @@ CoherentAmplitude::~CoherentAmplitude() {
 }
 
 void CoherentAmplitude::init() {
-  registerTopologyAmplitudeParameters();
-
 // TODO: I have to cast the kinematics instance to a helicity kinematics.
 // This is pretty bad practice... I really don't get the point behind the
 // singleton kinematics class...
@@ -55,157 +53,245 @@ void CoherentAmplitude::init() {
   // so the plan is to have evaluation lists as leaves. then those calculate two body decay amps
   // and from those individual building blocks we have to build the coherent/incoherent sum
 
+  // ok we need to create two trees one for phsp and one for data
+  // we give phasespace storage index 0 and data storage index 1
+  // these trees are completely independent and are constructed independently
+  unsigned int storage_index(0);
+  constructSequentialDecayTreeNodes(storage_index);
+  constructCoherentAmpTree(storage_index);
+  storage_index = 1;
+  clearMaps();
+  constructSequentialDecayTreeNodes(storage_index);
+  constructCoherentAmpTree(storage_index);
+}
+
+void CoherentAmplitude::constructSequentialDecayTreeNodes(
+    unsigned int storage_index) {
   // ok we will just go through the topology amplitudes and build up the basic building blocks
   unsigned int topology_index(0);
   for (auto const& decay_topology_amp : topology_amplitudes_) {
     // for each final state combination for this topology there exists a index list
-    // now we have to merge these into the correct format
     const std::vector<IndexList> evaluation_lists(
-        convertIndexLists(data_point_index_lists_[topology_index]));
+        data_point_index_lists_[topology_index]);
     ++topology_index;
 
-    std::vector<std::shared_ptr<TreeNode> > eval_leaves;
-
-    for (unsigned int i = 0; i < evaluation_lists.size(); ++i) {
-      std::stringstream eval_leaf_name;
-      eval_leaf_name << "topology_" << topology_index << "_decay_" << i;
-      std::shared_ptr<MultiUnsignedInteger> init_value(
-          new MultiUnsignedInteger(eval_leaf_name.str(), evaluation_lists[i]));
-
-      std::shared_ptr<TreeNode> eval_list_leaf(
-          new TreeNode(eval_leaf_name.str(), init_value, nullptr, nullptr));
-      eval_leaves.push_back(eval_list_leaf);
-    }
-
     for (auto const& sequential_decay : decay_topology_amp.getSequentialDecayList()) {
-      // just connect all these sequential decay tree nodes with the appropriate
-      unsigned int two_body_decay_index(0);
+      std::vector<std::shared_ptr<TreeNode> > single_combinatoric_sequential_decay_nodes;
 
-      std::vector<std::shared_ptr<TreeNode> > temp_two_body_decay_list;
-      std::string seq_decay_node_name;
       SequentialDecayInformation seq_decay_info;
 
-      for (auto const& full_two_body_decay_amp : sequential_decay.decay_amplitude) {
-        std::string basename(full_two_body_decay_amp.name);
+      for (unsigned int i = 0; i < evaluation_lists.size(); ++i) {
+        std::stringstream eval_leaf_name;
+        eval_leaf_name << "topology_" << topology_index << "_combination_" << i;
+        std::shared_ptr<MultiUnsignedInteger> init_value(
+            new MultiUnsignedInteger(eval_leaf_name.str(),
+                evaluation_lists[i]));
 
-        seq_decay_node_name = basename + "-&-" + seq_decay_node_name;
+        std::shared_ptr<TreeNode> eval_list_leaf(
+            new TreeNode(eval_leaf_name.str(), init_value, nullptr, nullptr));
 
-        auto tbd_psi = full_two_body_decay_amp.decay_spin_info_;
-        auto result = std::find(particles_.begin(), particles_.end(),
-            tbd_psi.first);
-        unsigned int mother_index(result - particles_.begin());
-        if (result == particles_.end()) {
-          particles_.push_back(tbd_psi.first);
-          mother_index = particles_.size() - 1;
-        }
-        result = std::find(particles_.begin(), particles_.end(),
-            tbd_psi.second.first);
-        unsigned int d1_index(result - particles_.begin());
-        if (result == particles_.end()) {
-          particles_.push_back(tbd_psi.second.first);
-          d1_index = particles_.size() - 1;
-        }
-        result = std::find(particles_.begin(), particles_.end(),
-            tbd_psi.second.second);
-        unsigned int d2_index(result - particles_.begin());
-        if (result == particles_.end()) {
-          particles_.push_back(tbd_psi.second.second);
-          d2_index = particles_.size() - 1;
-        }
+        // just connect all these sequential decay tree nodes with the appropriate
+        unsigned int two_body_decay_index(0);
 
-        // ok just add it to the index decay tree, the indices should be unique
-        seq_decay_info.unique_id_decay_tree_[mother_index].push_back(d1_index);
-        seq_decay_info.unique_id_decay_tree_[mother_index].push_back(d2_index);
+        std::vector<std::shared_ptr<TreeNode> > temp_two_body_decay_list;
+        std::string seq_decay_node_name;
 
-        // create strategies
-        auto tbdas = angular_part_strategies_.insert(
-            std::make_pair(basename,
-                std::shared_ptr<TwoBodyDecayAngularStrategy>(
-                    new TwoBodyDecayAngularStrategy(
-                        full_two_body_decay_amp.angular_part_))));
-        auto dfs = dynamical_part_strategies_.insert(
-            std::make_pair(basename,
-                std::shared_ptr<DynamicalFunctions::DynamicalFunctionStrategy>(
-                    new DynamicalFunctions::DynamicalFunctionStrategy(
-                        full_two_body_decay_amp.dynamical_part_))));
+        for (auto const& full_two_body_decay_amp : sequential_decay.decay_amplitude) {
+          std::string basename(full_two_body_decay_amp.name);
+          basename = basename + "_" + eval_leaf_name.str();
 
-        std::shared_ptr<MultiComplex> full_tbd_amp(
-            new MultiComplex(basename + "_full_values",
-                std::vector<std::complex<double> >()));
-        auto full_two_body_decay = full_two_body_decay_nodes_.insert(
-            std::make_pair(basename + "_full",
-                std::shared_ptr<TreeNode>(
-                    new TreeNode(basename + "_full", full_tbd_amp,
-                        std::shared_ptr<MultAll>(
-                            new MultAll(ParType::MCOMPLEX)), nullptr))));
+          seq_decay_node_name = basename + "-&-" + seq_decay_node_name;
 
-        if (full_two_body_decay.second) {
-          std::shared_ptr<TreeNode> strength(
-              new TreeNode(basename + "_mag", full_two_body_decay_amp.strength_,
-                  nullptr, nullptr));
+          auto tbd_psi = full_two_body_decay_amp.decay_spin_info_;
+          auto result = std::find(particles_.begin(), particles_.end(),
+              tbd_psi.first);
+          unsigned int mother_index(result - particles_.begin());
+          if (result == particles_.end()) {
+            particles_.push_back(tbd_psi.first);
+            mother_index = particles_.size() - 1;
+          }
+          result = std::find(particles_.begin(), particles_.end(),
+              tbd_psi.second.first);
+          unsigned int d1_index(result - particles_.begin());
+          if (result == particles_.end()) {
+            particles_.push_back(tbd_psi.second.first);
+            d1_index = particles_.size() - 1;
+          }
+          result = std::find(particles_.begin(), particles_.end(),
+              tbd_psi.second.second);
+          unsigned int d2_index(result - particles_.begin());
+          if (result == particles_.end()) {
+            particles_.push_back(tbd_psi.second.second);
+            d2_index = particles_.size() - 1;
+          }
 
-          std::shared_ptr<TreeNode> phase(
-              new TreeNode(basename + "_phase", full_two_body_decay_amp.phase_,
-                  nullptr, nullptr));
+          // only do this once for the first evaluation list
+          if (i == 0) {
+            // ok just add it to the index decay tree, the indices should be unique
+            seq_decay_info.unique_id_decay_tree_[mother_index].push_back(
+                d1_index);
+            seq_decay_info.unique_id_decay_tree_[mother_index].push_back(
+                d2_index);
+          }
 
-          std::shared_ptr<ComplexParameter> temp_str_phase(
-              new ComplexParameter(basename + "_str-phase_value", std::complex<double>(0, 0)));
-          std::shared_ptr<TreeNode> strength_and_phase(
-              new TreeNode(basename + "_str-phase", temp_str_phase,
-                  std::shared_ptr<Complexify>(new Complexify(ParType::COMPLEX)),
-                  nullptr));
+          // create strategies
+          auto tbdas = angular_part_strategies_.insert(
+              std::make_pair(basename,
+                  std::shared_ptr<TwoBodyDecayAngularStrategy>(
+                      new TwoBodyDecayAngularStrategy(
+                          full_two_body_decay_amp.angular_part_,
+                          storage_index))));
+          auto dfs =
+              dynamical_part_strategies_.insert(
+                  std::make_pair(basename,
+                      std::shared_ptr<
+                          DynamicalFunctions::DynamicalFunctionStrategy>(
+                          new DynamicalFunctions::DynamicalFunctionStrategy(
+                              full_two_body_decay_amp.dynamical_part_,
+                              storage_index))));
 
-          strength_and_phase->addChild(strength);
-          strength_and_phase->addChild(phase);
-          full_two_body_decay.first->second->addChild(strength_and_phase);
-
-          std::shared_ptr<MultiComplex> initial_value(
-              new MultiComplex("ang_part_values",
+          std::shared_ptr<MultiComplex> full_tbd_amp(
+              new MultiComplex(basename + "_full_values",
                   std::vector<std::complex<double> >()));
-          auto two_body_decay_angular_part = angular_part_nodes_.insert(
-              std::make_pair(full_two_body_decay_amp.angular_part_,
+          auto full_two_body_decay = full_two_body_decay_nodes_.insert(
+              std::make_pair(basename + "_full",
                   std::shared_ptr<TreeNode>(
-                      new TreeNode(basename + "_angular", initial_value,
-                          tbdas.first->second, nullptr))));
-          full_two_body_decay.first->second->addChild(
-              two_body_decay_angular_part.first->second);
+                      new TreeNode(basename + "_full", full_tbd_amp,
+                          std::shared_ptr<MultAll>(
+                              new MultAll(ParType::MCOMPLEX)), nullptr))));
 
-          std::shared_ptr<MultiComplex> initial_value2(
-              new MultiComplex("dyn_part_values",
-                  std::vector<std::complex<double> >()));
-          auto two_body_decay_dynamical_part = dynamical_part_nodes_.insert(
-              std::make_pair(full_two_body_decay_amp.dynamical_part_,
-                  std::shared_ptr<TreeNode>(
-                      new TreeNode(basename + "_dynamic", initial_value2,
-                          dfs.first->second, nullptr))));
-          full_two_body_decay.first->second->addChild(
-              two_body_decay_dynamical_part.first->second);
+          if (full_two_body_decay.second) {
+            /*std::shared_ptr<TreeNode> strength(
+             new TreeNode(basename + "_mag",
+             full_two_body_decay_amp.strength_, nullptr, nullptr));
 
-          if (two_body_decay_dynamical_part.second) {
-            // we need to add the parameters of the dynamical function in order to trigger recalculation
-            // they are not actually passed to the function because they have a copy of the same shared ptr
-            // this concept has be be reworked... does not seem the best way
-            std::vector<std::shared_ptr<TreeNode> > dynamic_part_leaves =
-                createLeaves(
-                    full_two_body_decay_amp.dynamical_part_->getParameterList());
-            for (auto leaf : dynamic_part_leaves) {
-              two_body_decay_dynamical_part.first->second->addChild(leaf);
+             std::shared_ptr<TreeNode> phase(
+             new TreeNode(basename + "_phase",
+             full_two_body_decay_amp.phase_, nullptr, nullptr));*/
+
+            parameters_.AddParameter(full_two_body_decay_amp.strength_);
+            parameters_.AddParameter(full_two_body_decay_amp.phase_);
+
+            std::shared_ptr<ComplexParameter> temp_str_phase(
+                new ComplexParameter(basename + "_str-phase_value",
+                    std::complex<double>(0, 0)));
+            std::shared_ptr<TreeNode> strength_and_phase(
+                new TreeNode(basename + "_str-phase", temp_str_phase,
+                    std::shared_ptr<Complexify>(
+                        new Complexify(ParType::COMPLEX)), nullptr));
+
+            //strength_and_phase->addChild(strength);
+            //strength_and_phase->addChild(phase);
+            tree_leaves_[strength_and_phase->getName()].push_back(
+                std::make_pair(basename + "_mag",
+                    full_two_body_decay_amp.strength_));
+            tree_leaves_[strength_and_phase->getName()].push_back(
+                std::make_pair(basename + "_phase",
+                    full_two_body_decay_amp.phase_));
+
+            full_two_body_decay.first->second->addChild(strength_and_phase);
+
+            std::shared_ptr<MultiComplex> initial_value(
+                new MultiComplex("ang_part_values",
+                    std::vector<std::complex<double> >()));
+            auto two_body_decay_angular_part = angular_part_nodes_.insert(
+                std::make_pair(full_two_body_decay_amp.angular_part_,
+                    std::shared_ptr<TreeNode>(
+                        new TreeNode(basename + "_angular", initial_value,
+                            tbdas.first->second, nullptr))));
+            full_two_body_decay.first->second->addChild(
+                two_body_decay_angular_part.first->second);
+
+            std::shared_ptr<MultiComplex> initial_value2(
+                new MultiComplex("dyn_part_values",
+                    std::vector<std::complex<double> >()));
+            auto two_body_decay_dynamical_part = dynamical_part_nodes_.insert(
+                std::make_pair(full_two_body_decay_amp.dynamical_part_,
+                    std::shared_ptr<TreeNode>(
+                        new TreeNode(basename + "_dynamic", initial_value2,
+                            dfs.first->second, nullptr))));
+            full_two_body_decay.first->second->addChild(
+                two_body_decay_dynamical_part.first->second);
+
+            if (two_body_decay_dynamical_part.second) {
+              // we need to add the parameters of the dynamical function in order to trigger recalculation
+              // they are not actually passed to the function because they have a copy of the same shared ptr
+              // this concept has be be reworked... does not seem the best way
+              /*std::vector<std::shared_ptr<TreeNode> > dynamic_part_leaves =
+               createLeaves(
+               full_two_body_decay_amp.dynamical_part_->getParameterList());
+               for (auto leaf : dynamic_part_leaves) {
+               two_body_decay_dynamical_part.first->second->addChild(leaf);
+               }*/
+              std::vector<std::shared_ptr<AbsParameter> > dynamic_part_leaves =
+                  createLeaves(
+                      full_two_body_decay_amp.dynamical_part_->getParameterList());
+              auto& leaf_vec =
+                  tree_leaves_[two_body_decay_dynamical_part.first->second->getName()];
+              for (auto leaf : dynamic_part_leaves) {
+                leaf_vec.push_back(std::make_pair(leaf->GetName(), leaf));
+              }
+
+              // add the evaluation lists so that final state combinatorics is taken care of as well
+              two_body_decay_dynamical_part.first->second->addChild(
+                  eval_list_leaf);
             }
-            // add the evaluation lists so that final state combinatorics is taken care of as well
-            two_body_decay_dynamical_part.first->second->addChild(
-                eval_leaves[two_body_decay_index]);
+
+            if (two_body_decay_angular_part.second) {
+              // add the evaluation lists so that final state combinatorics is taken care of as well
+              two_body_decay_angular_part.first->second->addChild(
+                  eval_list_leaf);
+            }
           }
 
-          if (two_body_decay_angular_part.second) {
-            // add the evaluation lists so that final state combinatorics is taken care of as well
-            two_body_decay_angular_part.first->second->addChild(
-                eval_leaves[two_body_decay_index]);
-          }
+          temp_two_body_decay_list.push_back(full_two_body_decay.first->second);
+
+          ++two_body_decay_index;
         }
 
-        temp_two_body_decay_list.push_back(full_two_body_decay.first->second);
+        // create tree node for sequential decay if it is not in storage yet
+        std::shared_ptr<MultiComplex> seq_tbd_amp(
+            new MultiComplex(seq_decay_node_name + "_values",
+                std::vector<std::complex<double> >()));
+        std::shared_ptr<TreeNode> seq_decay_node(
+            new TreeNode(seq_decay_node_name, seq_tbd_amp,
+                std::shared_ptr<MultAll>(new MultAll(ParType::MCOMPLEX)),
+                nullptr));
 
-        ++two_body_decay_index;
+        for (auto const& tbd_amp : temp_two_body_decay_list) {
+          seq_decay_node->addChild(tbd_amp);
+        }
+
+        single_combinatoric_sequential_decay_nodes.push_back(seq_decay_node);
+      }
+
+      std::shared_ptr<TreeNode> combinatorics_seq_decay_amp_node;
+      if (single_combinatoric_sequential_decay_nodes.size() == 1) {
+        // just use this node
+        combinatorics_seq_decay_amp_node =
+            single_combinatoric_sequential_decay_nodes[0];
+      }
+      else {
+        // add all nodes coherently
+        std::stringstream node_label;
+
+        for (auto node : single_combinatoric_sequential_decay_nodes) {
+          node_label << "_" << node->getName();
+        }
+
+        std::shared_ptr<MultiComplex> combi_seq_amp_dummy_val(
+            new MultiComplex("combinatorics" + node_label.str() + "_values",
+                std::vector<std::complex<double> >()));
+        std::shared_ptr<TreeNode> combinatorics_seq_decay_amp_node(
+            new TreeNode("combinatorics" + node_label.str(),
+                combi_seq_amp_dummy_val,
+                std::shared_ptr<AddAll>(new AddAll(ParType::MCOMPLEX)),
+                nullptr));
+
+        for (auto node : single_combinatoric_sequential_decay_nodes) {
+          combinatorics_seq_decay_amp_node->addChild(node);
+        }
+
       }
 
       // determine top node of sequential decay
@@ -222,21 +308,11 @@ void CoherentAmplitude::init() {
           seq_decay_info.top_node = decay_node.first;
       }
 
-      // create tree node for sequential decay if it is not in storage yet
-      std::shared_ptr<MultiComplex> seq_tbd_amp(
-          new MultiComplex(seq_decay_node_name+"_values", std::vector<std::complex<double> >()));
-      std::shared_ptr<TreeNode> seq_decay_node(
-          new TreeNode(seq_decay_node_name, seq_tbd_amp,
-              std::shared_ptr<MultAll>(new MultAll(ParType::MCOMPLEX)),
-              nullptr));
-
-      for (auto const& tbd_amp : temp_two_body_decay_list) {
-        seq_decay_node->addChild(tbd_amp);
-      }
       auto insert_success = sequential_decay_amplitudes_map_.insert(
           std::make_pair(seq_decay_info,
               sequential_decay_amplitudes_vec_.size()));
-      sequential_decay_amplitudes_vec_.push_back(seq_decay_node);
+      sequential_decay_amplitudes_vec_.push_back(
+          combinatorics_seq_decay_amp_node);
 
       // ok in principle we should never fail to create a new two body decay
       // safety check!
@@ -245,22 +321,26 @@ void CoherentAmplitude::init() {
             "CoherentAmplitude::init(): error in the sequential decay tree node construction!");
     }
   }
+}
 
-  // now we build the intensity from that
+void CoherentAmplitude::constructCoherentAmpTree(unsigned int storage_index) {
+// now we build the intensity from that
 
   /* ok now when we construct the coherent amplitude we have to go through the sequential decay list
    and find suitable partners for the summation.
    so we need some kind of search algorithm that goes through the map and look for sequential decay trees
    that have the coherent index the same or different*/
 
-  // create the different pairings based on the coherency of the individual parts
+  std::vector<std::pair<unsigned int, IndexList> > coherent_sum_pairings;
+
+// create the different pairings based on the coherency of the individual parts
   for (auto seq_amp_node : sequential_decay_amplitudes_map_) {
     IndexList partners = getListOfCoherentPartners(seq_amp_node);
-    coherent_sum_pairings_.push_back(
+    coherent_sum_pairings.push_back(
         std::make_pair(seq_amp_node.second, partners));
   }
 
-  // construct the actual full tree amplitude
+// construct the actual full tree amplitude
   std::shared_ptr<MultiComplex> coh_amp_val(
       new MultiComplex("coherent_sum_value",
           std::vector<std::complex<double> >()));
@@ -269,7 +349,7 @@ void CoherentAmplitude::init() {
           std::shared_ptr<AddAll>(new AddAll(ParType::MCOMPLEX)), nullptr));
 
   unsigned int node_label_index(0);
-  for (auto const& pairing : coherent_sum_pairings_) {
+  for (auto const& pairing : coherent_sum_pairings) {
     ++node_label_index;
     std::stringstream node_label;
     node_label << node_label_index;
@@ -308,11 +388,45 @@ void CoherentAmplitude::init() {
 
     coherent_amp->addChild(coherent_amp_node);
   }
-  tree_ = std::shared_ptr<FunctionTree>(new FunctionTree());
-  tree_->addHead(coherent_amp);
-  tree_->fixLinks();
-  tree_->sanityCheck();
-  std::cout << tree_->print() << std::endl;
+
+  // construct the actual full tree amplitude
+  std::shared_ptr<MultiDouble> real_coh_amp_val(
+      new MultiDouble("real_coherent_sum_value", std::vector<double>()));
+  std::shared_ptr<TreeNode> real_coherent_amp(
+      new TreeNode("real_coherent_sum", real_coh_amp_val,
+          std::shared_ptr<Real>(new Real(ParType::MCOMPLEX)), nullptr));
+  real_coherent_amp->addChild(coherent_amp);
+
+  tree_[storage_index] = std::shared_ptr<FunctionTree>(new FunctionTree());
+  tree_[storage_index]->addHead(real_coherent_amp);
+  // ok create leafs
+  for (auto const& parent_leaves : tree_leaves_) {
+    for (auto leaf : parent_leaves.second) {
+      tree_[storage_index]->createLeaf(leaf.first, leaf.second,
+          parent_leaves.first);
+    }
+  }
+
+  tree_[storage_index]->fixLinks();
+  tree_[storage_index]->sanityCheck();
+  //tree_[storage_index]->forceRecalculate();
+  //std::cout << tree_[storage_index]->print() << std::endl;
+}
+
+void CoherentAmplitude::clearMaps() {
+// clear all of these containers
+  particles_.clear();
+  sequential_decay_amplitudes_map_.clear();
+  sequential_decay_amplitudes_vec_.clear();
+
+  angular_part_nodes_.clear();
+  dynamical_part_nodes_.clear();
+  dynamical_parameter_nodes_.clear();
+  full_two_body_decay_nodes_.clear();
+  tree_leaves_.clear();
+
+  angular_part_strategies_.clear();
+  dynamical_part_strategies_.clear();
 }
 
 std::vector<IndexList> CoherentAmplitude::convertIndexLists(
@@ -329,16 +443,19 @@ std::vector<IndexList> CoherentAmplitude::convertIndexLists(
   return converted_list;
 }
 
-std::vector<std::shared_ptr<TreeNode> > CoherentAmplitude::createLeaves(
+std::vector<std::shared_ptr<AbsParameter> > CoherentAmplitude::createLeaves(
     const ParameterList& parameter_list) {
-  std::vector<std::shared_ptr<TreeNode> > leaves;
+  std::vector<std::shared_ptr<AbsParameter> > leaves;
 
   auto const& parameters = parameter_list.GetDoubleParameters();
   for (auto const& param : parameters) {
+    parameters_.AddParameter(param);
     auto result = dynamical_parameter_nodes_.insert(
-        std::make_pair(param->GetName(),
-            std::shared_ptr<TreeNode>(
-                new TreeNode(param->GetName(), param, nullptr, nullptr))));
+        std::make_pair(param->GetName(), param));
+    /*auto result = dynamical_parameter_nodes_.insert(
+     std::make_pair(param->GetName(),
+     std::shared_ptr<TreeNode>(
+     new TreeNode(param->GetName(), param, nullptr, nullptr))));*/
 
     leaves.push_back(result.first->second);
   }
@@ -350,7 +467,7 @@ IndexList CoherentAmplitude::getListOfCoherentPartners(
     const std::pair<SequentialDecayInformation, unsigned int>& seq_amp) const {
   IndexList coherent_partners;
 
-  //find all elements with appropriate quantum numbers
+//find all elements with appropriate quantum numbers
   for (auto const& seq_amp_element : sequential_decay_amplitudes_map_) {
     if (isCoherentPartner(
         std::make_pair(seq_amp_element.first, seq_amp_element.first.top_node),
@@ -415,18 +532,6 @@ bool CoherentAmplitude::compareCoherentParticleStates(
   return true;
 }
 
-void CoherentAmplitude::registerTopologyAmplitudeParameters() {
-  for (auto const& topology_amplitude : topology_amplitudes_) {
-    for (auto const& sequential_decay : topology_amplitude.getSequentialDecayList()) {
-      for (auto const& decay_node : sequential_decay.decay_amplitude) {
-        parameters_.AddParameter(decay_node.strength_);
-        parameters_.AddParameter(decay_node.phase_);
-        parameters_.Append(decay_node.dynamical_part_->getParameterList());
-      }
-    }
-  }
-}
-
 const double CoherentAmplitude::integral() {
 
 }
@@ -484,9 +589,17 @@ double CoherentAmplitude::getMaxVal(std::shared_ptr<Generator> gen) {
   return maxAmplitudeValue_;
 }
 
+bool CoherentAmplitude::hasTree() {
+  return true;
+}
+
 std::shared_ptr<FunctionTree> CoherentAmplitude::getAmpTree(allMasses&,
-    allMasses&, std::string) {
-  return tree_;
+    allMasses&, std::string label) {
+  if (label.compare("data") == 0) {
+    return tree_.at(1);
+  }
+  else
+    return tree_.at(0);
 }
 
 const ParameterList& CoherentAmplitude::intensity(std::vector<double> point,
@@ -533,12 +646,17 @@ const ParameterList& CoherentAmplitude::intensityNoEff(const dataPoint& point) {
      //intensity = std::pow(std::abs(coherent_amplitude), 2.0);
      }*/
 
+    static bool first_time(true);
+    if (first_time) {
+      DataPointStorage::Instance().layoutDataStorageStructure(0, 1, point);
+      first_time = false;
+    }
     DataPointStorage::Instance().clearStorage();
-    DataPointStorage::Instance().addDataPoint(point);
+    DataPointStorage::Instance().addDataPoint(0, point);
 
-    tree_->forceRecalculate();
+    tree_.at(0)->forceRecalculate();
     intensity = std::abs(
-        ((MultiComplex*) tree_->head()->getValue().get())->GetValue(0));
+        ((MultiComplex*) tree_.at(0)->head()->getValue().get())->GetValue(0));
 
     if (intensity != intensity) {
       BOOST_LOG_TRIVIAL(error)<<"Intensity is not a number!!";
@@ -564,18 +682,20 @@ const bool CoherentAmplitude::fillStartParVec(ParameterList& outPar) {
 }
 
 void CoherentAmplitude::setParameterList(const ParameterList& par) {
-//parameters varied by Minimization algorithm
+  //parameters varied by Minimization algorithm
   if (par.GetNDouble() != parameters_.GetNDouble())
     throw std::runtime_error(
         "setParameterList(): size of parameter lists don't match");
   for (unsigned int i = 0; i < parameters_.GetNDouble(); i++) {
     std::shared_ptr<DoubleParameter> p = parameters_.GetDoubleParameter(i);
-    p->UpdateParameter(par.GetDoubleParameter(i));
-    /*if (!p->IsFixed()) {
-     p->SetValue(par.GetDoubleParameter(i)->GetValue());
-     if (p->HasError())
-     p->SetError(par.GetDoubleParameter(i)->GetError());
-     }*/
+    if (p != par.GetDoubleParameter(i)) {
+      //p->UpdateParameter(par.GetDoubleParameter(i));
+      if (!p->IsFixed()) {
+        p->SetValue(par.GetDoubleParameter(i)->GetValue());
+        if (p->HasError())
+          p->SetError(par.GetDoubleParameter(i)->GetError());
+      }
+    }
   }
   return;
 }

@@ -160,6 +160,8 @@ class DecayGenerator {
 
   bool checkMass(const ParticleStateInfo& mother,
       const std::vector<ParticleStateInfo>& daughters) const;
+  bool checkConfigConstraints(
+      const ParticleStateInfo& particle_state_info) const;
   bool isDecayValidForTree(
       const std::pair<ParticleStateInfo, std::vector<ParticleStateInfo> >& decay_pair,
       const std::vector<

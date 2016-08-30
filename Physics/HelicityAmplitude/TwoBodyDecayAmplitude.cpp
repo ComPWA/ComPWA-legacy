@@ -59,13 +59,13 @@ std::complex<double> TwoBodyDecayAmplitude::evaluate(const dataPoint& point,
   return spin_factor_ * Wigner_D(phi, theta, -phi, J_, M_, daughters_delta_M_);
 }
 
-std::complex<double> TwoBodyDecayAmplitude::evaluate(unsigned int data_index,
-    unsigned int evaluation_index) const {
+std::complex<double> TwoBodyDecayAmplitude::evaluate(unsigned int storage_index,
+    unsigned int data_index, unsigned int evaluation_index) const {
   double theta(
-      DataPointStorage::Instance().getDataList(
+      DataPointStorage::Instance().getDataList(storage_index,
           evaluation_index + index_theta_helicity_angle_)[data_index]);
   double phi(
-      DataPointStorage::Instance().getDataList(
+      DataPointStorage::Instance().getDataList(storage_index,
           evaluation_index + index_phi_helicity_angle_)[data_index]);
 
   return spin_factor_ * Wigner_D(phi, theta, -phi, J_, M_, daughters_delta_M_);

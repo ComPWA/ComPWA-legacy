@@ -29,8 +29,8 @@ public:
   std::complex<double> evaluate(const dataPoint& point,
       unsigned int evaluation_index) const;
 
-  std::complex<double> evaluate(unsigned int data_index,
-      unsigned int evaluation_index) const;
+  std::complex<double> evaluate(unsigned int storage_index,
+      unsigned int data_index, unsigned int evaluation_index) const;
 };
 
 } /* namespace DynamicalFunctions */

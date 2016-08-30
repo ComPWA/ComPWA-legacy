@@ -17,12 +17,15 @@ namespace HelicityFormalism {
 
 class TwoBodyDecayAngularStrategy: public Strategy {
   std::shared_ptr<TwoBodyDecayAmplitude> tbd_amp_;
+  unsigned int storage_index_;
 
 public:
-  TwoBodyDecayAngularStrategy(std::shared_ptr<TwoBodyDecayAmplitude> tbd_amp);
+  TwoBodyDecayAngularStrategy(
+      std::shared_ptr<TwoBodyDecayAmplitude> tbd_amp,
+      unsigned storage_index);
   virtual ~TwoBodyDecayAngularStrategy();
-  
-    //! Pure Virtual interface for streaming info about the strategy
+
+  //! Pure Virtual interface for streaming info about the strategy
   virtual const std::string to_str() const;
 
   //! Pure Virtual interface for executing a strategy

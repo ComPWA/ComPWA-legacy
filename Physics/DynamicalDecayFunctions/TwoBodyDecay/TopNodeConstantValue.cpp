@@ -34,8 +34,8 @@ std::complex<double> TopNodeConstantValue::evaluate(const dataPoint& point,
   return std::complex<double>(1.0, 0.0);
 }
 
-std::complex<double> TopNodeConstantValue::evaluate(unsigned int data_index,
-    unsigned int evaluation_index) const {
+std::complex<double> TopNodeConstantValue::evaluate(unsigned int storage_index,
+    unsigned int data_index, unsigned int evaluation_index) const {
   return std::complex<double>(1.0, 0.0);
 }
 

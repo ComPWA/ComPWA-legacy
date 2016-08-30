@@ -82,7 +82,20 @@ void RelativisticBreitWigner::initialiseParameters(
       parameter_info.get_child("width").get<double>("max"));
   //resonance_width_->SetUseBounds(false);
 
-  meson_radius_->SetValue(parameter_info.get<double>("mesonRadius"));
+  auto meson_radius_pt = parameter_info.get_child("mesonRadius");
+  if (meson_radius_pt.get_optional<double>("value")) {
+    meson_radius_->SetValue(meson_radius_pt.get<double>("value"));
+    if (meson_radius_pt.get<double>("fix"))
+      meson_radius_->SetParameterFixed();
+    else
+      meson_radius_->SetParameterFree();
+    meson_radius_->SetMinValue(meson_radius_pt.get<double>("min"));
+    meson_radius_->SetMaxValue(meson_radius_pt.get<double>("max"));
+  }
+  else {
+    meson_radius_->SetValue(parameter_info.get<double>("mesonRadius"));
+    meson_radius_->SetParameterFixed();
+  }
 
   // try to extract daughter masses from external parameters
   daughter1_mass_ = external_parameters.parameters_.GetDoubleParameter(
@@ -99,10 +112,11 @@ std::complex<double> RelativisticBreitWigner::evaluate(const dataPoint& point,
   return evaluate(mSq);
 }
 
-std::complex<double> RelativisticBreitWigner::evaluate(unsigned int data_index,
+std::complex<double> RelativisticBreitWigner::evaluate(
+    unsigned int storage_index, unsigned int data_index,
     unsigned int evaluation_index) const {
 
-  auto const& data_vec = DataPointStorage::Instance().getDataList(
+  auto const& data_vec = DataPointStorage::Instance().getDataList(storage_index,
       evaluation_index + index_cms_mass_squared_);
 
   double mSq = data_vec[data_index];
