@@ -22,8 +22,9 @@ class dataPoint;
 
 class Kinematics {
 public:
-  //! singleton pattern
-  static Kinematics* instance();
+	//! singleton pattern
+	static Kinematics* instance();
+
 
   //! vector with names of variables, e.g. vec[0]=m23sq, vec[1]=m13sq
   const std::vector<std::string>& getVarNames() const {
@@ -38,6 +39,8 @@ public:
   virtual double getMotherMass() const = 0;
   //! calculated the PHSP volume of the current decay by MC integration
   virtual double getPhspVolume();
+  //! calculated the PHSP volume of the current decay by MC integration in limited m23
+  virtual double getPhspVolumePart(double, double) = 0;
   //! converts Event to dataPoint
   virtual void eventToDataPoint(const Event& ev, dataPoint& point) const;
   //! get mass of particles

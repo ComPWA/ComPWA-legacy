@@ -83,6 +83,14 @@ public:
 	void init(ROOT::Minuit2::FunctionMinimum);
 	std::shared_ptr<ComPWA::Estimator::Estimator> estimator;
 	//====== MINUIT FIT RESULT =======
+	double getCorr(unsigned int n, unsigned int t){
+	  if(n<corr.size2() && t<corr.size1() && t>=n)
+	    return corr(n,t);
+	  else
+	    return -9000;
+	};
+
+private:
 	bool isValid; //result valid
 	bool covPosDef; //covariance matrix pos.-def.
 	bool hasValidParameters; //valid parameters

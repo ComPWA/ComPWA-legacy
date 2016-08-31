@@ -89,7 +89,7 @@ public:
 	virtual const ParameterList& intensityNoEff(const dataPoint& point);
 	//! evaluate total amplitude using current set of parameters at phsp point \point. Amplitude is multiplied with efficiency of datapoint.
 	virtual const ParameterList& intensity(std::vector<double> point, ParameterList& par);
-	virtual const double sliceIntensity(dataPoint& dataP, ParameterList& par,std::complex<double>* reso, unsigned int nResos);
+	virtual const double sliceIntensity(dataPoint& dataP, ParameterList& par,std::complex<double>* reso, unsigned int nResos, double N=1., unsigned int nF0=3, unsigned int nF2=2);
 
 	//! fill internal parameter list with (start) parameter
 	virtual bool copyParameterList(ParameterList& outPar);

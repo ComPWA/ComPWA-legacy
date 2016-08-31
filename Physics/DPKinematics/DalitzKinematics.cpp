@@ -488,20 +488,44 @@ double DalitzKinematics::calculatePSArea() {
 
   return res;
 }
-unsigned int DalitzKinematics::getSpin(unsigned int num) {
-  switch (num) {
-  case 0:
-    return spinM;
-  case 1:
-    return spin1;
-  case 2:
-    return spin2;
-  case 3:
-    return spin3;
-  }
-  throw std::runtime_error(
-      "DPKinematics::getSpin(int) | Wrong particle requested!");
-  return -999;
+double DalitzKinematics::getPhspVolumePart(double m23_sq_min_loc, double m23_sq_max_loc){
+
+  //    std::cout<<"DPKinematics: DEBUG: calculating dalitz plot area"<<std::endl;
+      BOOST_LOG_TRIVIAL(debug)<<"DPKinematics: DEBUG: calculating dalitz plot area";
+      size_t dim=2;
+      double res=0.0, err=0.0;
+
+      //set limits: we assume that x[0]=m13sq and x[1]=m23sq
+      double xLimit_low[2] = {m13_sq_min,m23_sq_min_loc};
+      double xLimit_high[2] = {m13_sq_max,m23_sq_max_loc};
+
+      size_t calls = 100000;
+      gsl_rng_env_setup ();
+      const gsl_rng_type *T = gsl_rng_default; //type of random generator
+      gsl_rng *r = gsl_rng_alloc(T); //random generator
+
+      gsl_monte_function F = {&phspFunc,dim, const_cast<DalitzKinematics*> (this)};
+
+      /*  Choosing vegas algorithm here, because it is the most accurate:
+       *      -> 10^5 calls gives (in my example) an accuracy of 0.03%
+       *       this should be sufficiency for most applications
+       */
+      gsl_monte_vegas_state *s = gsl_monte_vegas_alloc (dim);
+      gsl_monte_vegas_integrate (&F, xLimit_low, xLimit_high, 2, calls, r,s,&res, &err);
+      gsl_monte_vegas_free(s);
+      BOOST_LOG_TRIVIAL(debug)<<"DPKinematics: Area of dalitz plot slice " << m23_sq_min_loc << "-" << m23_sq_max_loc << " form MC integration: "<<res<<"+-"<<err<<" relAcc [%]: "<<100*err/res;
+
+      return res;
+}
+unsigned int DalitzKinematics::getSpin(unsigned int num){
+	switch(num){
+	case 0: return spinM;
+	case 1: return spin1;
+	case 2: return spin2;
+	case 3: return spin3;
+	}
+	throw std::runtime_error("DPKinematics::getSpin(int) | Wrong particle requested!");
+	return -999;
 }
 unsigned int DalitzKinematics::getSpin(std::string name) {
   if (name == nameMother)

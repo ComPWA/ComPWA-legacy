@@ -42,6 +42,8 @@ using namespace ComPWA;
 using Physics::DPKinematics::DalitzKinematics;
 using DataReader::RootReader::RootReader;
 
+unsigned int nBins = 400;
+
 /************************************************************************************************/
 /**
  * The main function.
@@ -59,38 +61,40 @@ int main(int argc, char **argv){
 	RootReader myReader(file, "data",false);
 	unsigned int maxEvents = myReader.getNEvents();
 	double masssq12, masssq13, masssq23;
-	TH2D* bw12 = new TH2D("bw12","inv. mass-sq of particles 1&2",1000,0.,10.,1000,0.,10.);
-	bw12->GetXaxis()->SetTitle("m_{12}^{2} / GeV^{2}");
-	bw12->GetYaxis()->SetTitle("m_{13}^{2} / GeV^{2}");
+	TH2D* bw12 = new TH2D("bw12","inv. mass-sq of particles 1&2",nBins,0.,10.,nBins,0.,10.);
+	bw12->GetXaxis()->SetTitle("m_{12}^{2} / GeV^{2}/c^{2}");
+	bw12->GetYaxis()->SetTitle("m_{13}^{2} / GeV^{2}/c^{2}");
 	bw12->GetXaxis()->CenterTitle();
 	bw12->GetYaxis()->CenterTitle();
-	TH2D* bw13 = new TH2D("bw13","inv. mass-sq of particles 1&3",1000,0.,10.,1000,0.,10.);
-	bw13->GetXaxis()->SetTitle("m_{13}^{2} / GeV^{2}");
-	bw13->GetYaxis()->SetTitle("m_{12}^{2} / GeV^{2}");
+	TH2D* bw13 = new TH2D("bw13","inv. mass-sq of particles 1&3",nBins,0.,10.,nBins,0.,10.);
+	bw13->GetXaxis()->SetTitle("m_{13}^{2} / GeV^{2}/c^{2}");
+	bw13->GetYaxis()->SetTitle("m_{12}^{2} / GeV^{2}/c^{2}");
 	bw13->GetXaxis()->CenterTitle();
 	bw13->GetYaxis()->CenterTitle();
-	TH2D* bw23 = new TH2D("bw23","inv. mass-sq of particles 2&3",1000,0.,10.,1000,0.,10.);
-	bw23->GetXaxis()->SetTitle("m_{23}^{2} / GeV^{2}");
-	bw23->GetYaxis()->SetTitle("m_{12}^{2} / GeV^{2}");
+	TH2D* bw23 = new TH2D("bw23","inv. mass-sq of particles 2&3",nBins,0.,10.,nBins,0.,10.);
+	bw23->GetXaxis()->SetTitle("m_{23}^{2} / GeV^{2}/c^{2}");
+	bw23->GetYaxis()->SetTitle("m_{12}^{2} / GeV^{2}/c^{2}");
 	bw23->GetXaxis()->CenterTitle();
 	bw23->GetYaxis()->CenterTitle();
 
+
 	RootReader myReaderPHSP(file, "mc");
+
 	unsigned int maxEventsPHSP = myReaderPHSP.getNEvents();
 	//double masssq12PHSP, masssq13PHSP, masssq23PHSP;
-	TH2D* bw12PHSP = new TH2D("bw12PHSP","inv. mass-sq of particles 1&2 PHSP",1000,0.,10.,1000,0.,10.);
-	bw12PHSP->GetXaxis()->SetTitle("m_{12}^{2} / GeV^{2}");
-	bw12PHSP->GetYaxis()->SetTitle("m_{13}^{2} / GeV^{2}");
+	TH2D* bw12PHSP = new TH2D("bw12PHSP","inv. mass-sq of particles 1&2 PHSP",nBins,0.,10.,nBins,0.,10.);
+	bw12PHSP->GetXaxis()->SetTitle("m_{12}^{2} / GeV^{2}/c^{2}");
+	bw12PHSP->GetYaxis()->SetTitle("m_{13}^{2} / GeV^{2}/c^{2}");
 	bw12PHSP->GetXaxis()->CenterTitle();
 	bw12PHSP->GetYaxis()->CenterTitle();
-	TH2D* bw13PHSP = new TH2D("bw13PHSP","inv. mass-sq of particles 1&3 PHSP",1000,0.,10.,1000,0.,10.);
-	bw13PHSP->GetXaxis()->SetTitle("m_{13}^{2} / GeV^{2}");
-	bw13PHSP->GetYaxis()->SetTitle("m_{12}^{2} / GeV^{2}");
+	TH2D* bw13PHSP = new TH2D("bw13PHSP","inv. mass-sq of particles 1&3 PHSP",nBins,0.,10.,nBins,0.,10.);
+	bw13PHSP->GetXaxis()->SetTitle("m_{13}^{2} / GeV^{2}/c^{2}");
+	bw13PHSP->GetYaxis()->SetTitle("m_{12}^{2} / GeV^{2}/c^{2}");
 	bw13PHSP->GetXaxis()->CenterTitle();
 	bw13PHSP->GetYaxis()->CenterTitle();
-	TH2D* bw23PHSP = new TH2D("bw23PHSP","inv. mass-sq of particles 2&3 PHSP",1000,0.,10.,1000,0.,10.);
-	bw23PHSP->GetXaxis()->SetTitle("m_{23}^{2} / GeV^{2}");
-	bw23PHSP->GetYaxis()->SetTitle("m_{12}^{2} / GeV^{2}");
+	TH2D* bw23PHSP = new TH2D("bw23PHSP","inv. mass-sq of particles 2&3 PHSP",nBins,0.,10.,nBins,0.,10.);
+	bw23PHSP->GetXaxis()->SetTitle("m_{23}^{2} / GeV^{2}/c^{2}");
+	bw23PHSP->GetYaxis()->SetTitle("m_{12}^{2} / GeV^{2}/c^{2}");
 	bw23PHSP->GetXaxis()->CenterTitle();
 	bw23PHSP->GetYaxis()->CenterTitle();
 
@@ -117,7 +121,6 @@ int main(int argc, char **argv){
 	m23m12_contour->SetName("m23m13_contour");
 	m23m12_contour->SetFillColor(kWhite);
 
-
 	for(unsigned int i = 0; i < maxEvents; i++){
 		Event event(myReader.getEvent(i));
 
@@ -136,6 +139,10 @@ int main(int argc, char **argv){
 		bw12->Fill(masssq12,masssq13);
 		bw13->Fill(masssq13,masssq12);
 		bw23->Fill(masssq23,masssq12);
+
+		//m12->Fill(masssq12);
+		//m23->Fill(masssq23);
+		//m13->Fill(masssq13);
 	}
 
 	for(unsigned int i = 0; i < maxEventsPHSP; i++){
@@ -158,16 +165,19 @@ int main(int argc, char **argv){
 		bw23PHSP->Fill(masssq23,masssq12);
 	}
 
-	TFile output("test/DalitzJPSI.root","RECREATE","ROOT_Tree");
-	m12m13_contour->Write();
-	m13m12_contour->Write();
-	m23m12_contour->Write();
-	bw12->Write();
-	bw13->Write();
-	bw23->Write();
-	bw12PHSP->Write();
-	bw13PHSP->Write();
-	bw23PHSP->Write();
+	TFile output("results/FINAL_UB/INPUT/DalitzJPSI_1M_3f_2o_oP.root","RECREATE","ROOT_Tree");
+	m12m13_contour->Write("con13");
+	m13m12_contour->Write("con12");
+	m23m12_contour->Write("con23");
+	bw12->Write("bw12");
+	bw13->Write("bw13");
+	bw23->Write("bw23");
+	bw12PHSP->Write("phsp12");
+	bw13PHSP->Write("phsp13");
+	bw23PHSP->Write("phsp23");
+    //m12->Write("m12");
+    //m13->Write("m13");
+    //m23->Write("m23");
 	output.Write();
 	output.Close();
 

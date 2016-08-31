@@ -108,6 +108,19 @@ int main(int argc, char **argv) {
   std::shared_ptr<Optimizer> minuit_opti(
       new ComPWA::Optimizer::Minuit2::MinuitIF(myFit, fitPar));
 
+  /*std::vector<std::shared_ptr<Optimizer> > myMinimizerList;
+  // Add minimizers
+  if (whichMinimizer=="Geneva") myMinimizerList.push_back(std::shared_ptr<Optimizer> (new GenevaIF(myFit)));
+  else if (whichMinimizer=="Minuit") myMinimizerList.push_back(std::shared_ptr<Optimizer> (new MinuitIF(myFit,par)));
+  else if (whichMinimizer=="all") {
+    myMinimizerList.push_back(std::shared_ptr<Optimizer> (new GenevaIF(myFit)));
+    myMinimizerList.push_back(std::shared_ptr<Optimizer> (new MinuitIF(myFit,par)));
+    std::cout << "TEST" << std::endl;
+  }else{
+   std::cout << "Minimizer\t" << whichMinimizer << "\tdoesn't exist" << std::endl;
+   return 0;
+  }*/
+
   BOOST_LOG_TRIVIAL(info)<< "Starting Parameters:";
   BOOST_LOG_TRIVIAL(info)<< fitPar.to_str();
   BOOST_LOG_TRIVIAL(info)<< "Running Geneva optimizer:";

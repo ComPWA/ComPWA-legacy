@@ -91,6 +91,7 @@ class HelicityKinematics: public Kinematics {
       const Vector4<double> &d) const;
 
 protected:
+  virtual double getPhspVolumePart(double m23_sq_min_loc, double m23_sq_max_loc);
   double calculatePSArea();
 
 public:

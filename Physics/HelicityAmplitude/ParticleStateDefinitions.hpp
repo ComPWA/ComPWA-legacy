@@ -16,6 +16,7 @@
 #include <map>
 
 #include "boost/property_tree/ptree.hpp"
+#include <boost/log/trivial.hpp>
 
 #include "Core/Utility.hpp"
 
@@ -290,9 +291,9 @@ struct TwoBodyDecayTopology {
      }*/
 
     for (unsigned int i = 0; i < final_state_content_id_lists_.size(); ++i) {
-      std::cout << getFSParticleListString(i) << std::endl;
+      BOOST_LOG_TRIVIAL(debug) << getFSParticleListString(i);
     }
-    std::cout << std::endl;
+    BOOST_LOG_TRIVIAL(debug) << " ";
   }
 
   std::string getFSParticleListString(unsigned int index) const {

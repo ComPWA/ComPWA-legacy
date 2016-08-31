@@ -14,11 +14,10 @@
 #include "Physics/DecayTree/DecayTreeFactory.hpp"
 
 int main(int argc, char **argv) {
-  std::cout << "  ComPWA Copyright (C) 2013  Stefan Pflueger " << std::endl;
-  std::cout
-      << "  This program comes with ABSOLUTELY NO WARRANTY; for details see license.txt"
-      << std::endl;
-  std::cout << std::endl;
+  BOOST_LOG_TRIVIAL(info) << "  ComPWA Copyright (C) 2013  Stefan Pflueger ";
+  BOOST_LOG_TRIVIAL(info)
+      << "  This program comes with ABSOLUTELY NO WARRANTY; for details see license.txt";
+  BOOST_LOG_TRIVIAL(info) << " ";
 
   std::string input_config_file("Physics/HelicityAmplitude/JPSI_ypipi.xml");
   std::string output_file("graph.dot");
@@ -32,9 +31,9 @@ int main(int argc, char **argv) {
   std::vector<ComPWA::Physics::DecayTree::DecayTree> decay_trees =
       decay_tree_factory.createDecayTrees();
 
-  std::cout << "created " << decay_trees.size() << " decay trees from "
-      << input_config_file << " config file!" << std::endl;
-  std::cout << "printing to " << output_file << " output file" << std::endl;
+  BOOST_LOG_TRIVIAL(info) << "created " << decay_trees.size() << " decay trees from "
+      << input_config_file << " config file!";
+  BOOST_LOG_TRIVIAL(info) << "printing to " << output_file << " output file";
 
   std::ofstream dot(output_file);
 

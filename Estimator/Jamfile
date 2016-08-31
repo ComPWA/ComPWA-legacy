@@ -23,6 +23,8 @@ if $(build_SliceFit) && $(build_SliceFit) != 0
 {
 	build-project SliceFit ;
 	sources = $(sources) $(ESTIMATOR)/SliceFit//SliceFit ;
+    build-project SliceFitUB ;
+   	sources = $(sources) $(ESTIMATOR)/SliceFitUB//SliceFitUB ;
 }
 
 # Build libEstimator.so

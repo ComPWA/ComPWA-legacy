@@ -33,6 +33,7 @@
 #include "TFile.h"
 #include "TLorentzVector.h"
 #include "TH2D.h"
+#include "TGraphErrors.h"
 #include "TMath.h"
 #include "TParticle.h"
 #include "TGenPhaseSpace.h"
@@ -52,10 +53,13 @@
 // ComPWA header files go here
 #include "DataReader/RootReader/RootReader.hpp"
 #include "Physics/AmplitudeSum/AmpSumIntensity.hpp"
-#include "Estimator/SliceFit/SliceFit.hpp"
+#include "Estimator/SliceFitUB/SliceFitUB.hpp"
 #include "Optimizer/Minuit2/MinuitIF.hpp"
 #include "Core/DataPoint.hpp"
 #include "Core/Efficiency.hpp"
+
+// Stefans header files go here
+#include "ROOTPlotHelper.hpp"
 
 const Double_t M = 3.096916; // GeV/c² (J/psi+)
 const Double_t Br = 0.000093; // GeV/c² (width)
@@ -65,9 +69,9 @@ const Double_t m3 = 0.139570; // GeV/c² (pi)
 //const Double_t c = 299792458.; // m/s
 const Double_t PI = 3.14159; // m/s
 
-unsigned int nFitEvents=1000000-1;
+unsigned int nFitEvents=100000-1;
 unsigned int nStartEvent=0;
-unsigned int nBins=400;
+unsigned int nBins=160;
 unsigned int nF0=3;
 unsigned int nF2=2;
 
@@ -75,7 +79,7 @@ using namespace ComPWA;
 using Physics::DPKinematics::DalitzKinematics;
 using Physics::AmplitudeSum::AmpSumIntensity;
 using DataReader::RootReader::RootReader;
-using Estimator::SliceFit::SliceFit;
+using Estimator::SliceFitUB::SliceFitUB;
 using Physics::AmplitudeSum::AmplitudeSetup;
 
 /************************************************************************************************/
@@ -99,8 +103,7 @@ int main(int argc, char **argv){
   if(argc>1)
    dataID = std::atoi(argv[1]);
 
-  //std::string file="test/3Part-4vecs_1M.root";
-  std::string file="test/3Part-4vecs_1M_PDG_PHASE.root";
+  std::string file="test/3Part-4vecs_1M_PDG.root";
   if(argc>1){
     file="test/3Part-4vecs_100k_SIMPLE_oP_";
     file+=std::to_string(dataID);
@@ -115,7 +118,7 @@ int main(int argc, char **argv){
 	}catch(std::logic_error){
 	  BOOST_LOG_TRIVIAL(error)<<"Environment Variable COMPWA_DIR not set?"<<std::endl;
 	}
-	std::string resoFile=path+"/test/JPSI_ypipi_phase.xml";
+	std::string resoFile=path+"/test/JPSI_ypipi.xml";
 	AmplitudeSetup ini(resoFile);
 
   BOOST_LOG_TRIVIAL(info)<< "Load Modules";
@@ -125,25 +128,24 @@ int main(int argc, char **argv){
 
   // Initiate parameters
   ParameterList par;
-  std::shared_ptr<SliceFit> esti;
+  std::shared_ptr<SliceFitUB> esti;
   amps->copyParameterList(par); //perfect startvalues
-  //esti = std::static_pointer_cast<SliceFit>(SliceFit::createInstance(amps, myReader, myPHSPReader, par, nStartEvent, nFitEvents));
-  //amps->fillStartParVec(par); //perfect startvalues
-  esti = std::static_pointer_cast<SliceFit>(SliceFit::createInstance(amps, myReader, myPHSPReader, par, nStartEvent, nFitEvents, nBins, nF0, nF2));
+  esti = std::static_pointer_cast<SliceFitUB>(SliceFitUB::createInstance(amps, myReader, myPHSPReader, par, nStartEvent, nFitEvents, nBins, nF0, nF2));
 
-  double startpar[5] = {0.145, 1., 0., 0., 1.};
+  double startpar[5] = {0.75, 1., 0., 0.1, 1.};
+
 
   //unsigned int nSlices = nBins-(nBins/20.);
   ParameterList slicePars;
   //for(unsigned int i=0; i<nSlices; i++){
  //   std::string sliceName = "S"+std::to_string(i);
-  std::shared_ptr<DoubleParameter> tmpA = std::shared_ptr<DoubleParameter>(new DoubleParameter("P0",startpar[0],0.1,100.));
-  std::shared_ptr<DoubleParameter> tmpB = std::shared_ptr<DoubleParameter>(new DoubleParameter("P1",startpar[1],-15,15));
-  std::shared_ptr<DoubleParameter> tmpC = std::shared_ptr<DoubleParameter>(new DoubleParameter("P2",startpar[2],-15,15));
-  std::shared_ptr<DoubleParameter> tmpD = std::shared_ptr<DoubleParameter>(new DoubleParameter("P3",startpar[3],-20,20));
-  std::shared_ptr<DoubleParameter> tmpE = std::shared_ptr<DoubleParameter>(new DoubleParameter("P4",startpar[4],-20,20));
+    std::shared_ptr<DoubleParameter> tmpA = std::shared_ptr<DoubleParameter>(new DoubleParameter("P0",startpar[0],0.1,100.));
+    std::shared_ptr<DoubleParameter> tmpB = std::shared_ptr<DoubleParameter>(new DoubleParameter("P1",startpar[1],-15,15));
+    std::shared_ptr<DoubleParameter> tmpC = std::shared_ptr<DoubleParameter>(new DoubleParameter("P2",startpar[2],-15,15));
+    std::shared_ptr<DoubleParameter> tmpD = std::shared_ptr<DoubleParameter>(new DoubleParameter("P3",startpar[3],-20,20));
+    std::shared_ptr<DoubleParameter> tmpE = std::shared_ptr<DoubleParameter>(new DoubleParameter("P4",startpar[4],-20,20));
     //std::shared_ptr<DoubleParameter> tmpF = std::shared_ptr<DoubleParameter>(new DoubleParameter("P5",1.,-10,10));
-    tmpA->FixParameter(true);
+    //tmpA->FixParameter(true);
     //tmpC->FixParameter(true);
     //tmpE->FixParameter(true);
     //tmpB->FixParameter(true);
@@ -152,6 +154,11 @@ int main(int argc, char **argv){
     tmpC->SetError(1.);
     tmpD->SetError(1.);
     tmpE->SetError(1.);
+    //tmpA->UseBounds();
+    //tmpB->UseBounds();
+   // tmpC->UseBounds();
+   // tmpD->UseBounds();
+   // tmpE->UseBounds();
     slicePars.AddParameter(tmpA);
     slicePars.AddParameter(tmpB);
     slicePars.AddParameter(tmpC);
@@ -177,8 +184,8 @@ int main(int argc, char **argv){
     resoFull[0]=std::complex<double>(22,0);
     resoFull[1]=std::complex<double>(15,0);
     //std::cout << " " << reso[0] << "   " << reso[1] << std::endl;
-    for(unsigned int i=0; i<100; i++){
-      for(unsigned int j=0; j<100; j++){
+    for(unsigned int i=0; i<95; i++){
+      for(unsigned int j=0; j<95; j++){
       dataPoint point;
       point.setVal("m23sq",i/10.); point.setVal("m13sq",j/10.);
       //std::cout << " " << amps->sliceIntensity(point, par, reso, 2) << "   " << amps->sliceIntensity(point, par, resoTOT, 2) << std::endl;
@@ -197,7 +204,8 @@ int main(int argc, char **argv){
 
     esti->setSlice(33);
 
-  BOOST_LOG_TRIVIAL(info) << "Chi2 with start parameters slice 33: " << esti->controlParameter(slicePars);
+
+  BOOST_LOG_TRIVIAL(info) << "LH with start parameters slice 33: " << esti->controlParameter(slicePars);
 
   /*double startInt[par.GetNDouble()], optiInt[par.GetNDouble()];
   for(unsigned int i=0; i<par.GetNDouble(); i++){
@@ -219,12 +227,12 @@ int main(int argc, char **argv){
   //    par.GetDoubleParameter(i).FixParameter(true);
   //  }
 
-  std::string fitres="FitResultsAllSlices.txt", fitresroot="test/FitResultJPSISLICE.root";
+  std::string fitres="FitResultsAllSlicesUB.txt", fitresroot="test/FitResultJPSISLICEUB.root";
   if(argc>1){
-    fitres="FitResultsAllSlices_";
+    fitres="FitResultsAllSlicesUB_";
     fitres+=std::to_string(dataID);
     fitres+=".txt";
-    fitresroot="test/FitResultJPSISLICE_";
+    fitresroot="test/FitResultJPSISLICEUB_";
     fitresroot+=std::to_string(dataID);
     fitresroot+=".root";
   }
@@ -233,6 +241,7 @@ int main(int argc, char **argv){
   std::vector<std::complex<double> > p1,p2, e1, e2;
   std::vector<double> invMass, norm, norme;
   std::vector<std::shared_ptr<TH1D> > histData, histModel, histModelCl;
+  //std::vector<std::shared_ptr<TH1D> > histData, histModel, histModelCl;
   for(int i=0+(nBins/40.); i<nBins-(nBins/20.)-1; i++){
   //  {unsigned int i=50;
 
@@ -270,6 +279,8 @@ int main(int argc, char **argv){
     //p3.push_back(slicePars.GetDoubleParameter(3)->GetValue());
     //p4.push_back(slicePars.GetDoubleParameter(4)->GetValue());
 
+    //if(i==30) i = 10000;
+    genResult.reset();
   }
 
   BOOST_LOG_TRIVIAL(debug) << "Results";
@@ -294,16 +305,18 @@ int main(int argc, char **argv){
   TGraphErrors par_xy0(nBins-3*(nBins/40.)-1);
   TGraphErrors par_xy2(nBins-3*(nBins/40.)-1);
 
+ // NeatPlotting::PlotBundle bundlexy0;
 
+  //std::vector<NeatPlotting::PlotLabel> labelsxy0;
   for(unsigned int i=0; i<p1.size(); i++){
     double phi0=std::arg(p1[i]), phi2=std::arg(p2[i]);
     double phi0e, phi2e, abs0e, abs2e;
-    //while(phi0<0){
-    //  phi0+=2*3.14159;
-    //};
-    //while(phi2<0){
-    //  phi2+=2*3.14159;
-    //};
+    while(phi0<0){
+      phi0+=2*3.14159;
+    };
+    while(phi2<0){
+      phi2+=2*3.14159;
+    };
 
     double xx, yy, xexe, yeye;
     xx = p1[i].real()*p1[i].real(); yy = p1[i].imag()*p1[i].imag(); xexe = e1[i].real()*e1[i].real(); yeye = e1[i].imag()*e1[i].imag();
@@ -340,10 +353,26 @@ int main(int argc, char **argv){
     par_xy2.SetPoint(i,p2[i].real(),p2[i].imag());
     par_xy0.SetPointError(i,e1[i].real(),e1[i].imag());
     par_xy2.SetPointError(i,e2[i].real(),e2[i].imag());
+    //NeatPlotting::PlotLabel tmplabelxy0(std::to_string(i),NeatPlotting::TextStyle());
+    //tmplabelxy0.setAbsolutionPosition(p1[i].real()+0.2,p1[i].imag()+0.2);
+   // labelsxy0.push_back(tmplabelxy0);
 
     par_N.SetPoint(i,invMass[i],norm[i]);
     par_N.SetPointError(i,0,norme[i]);
   }
+
+  //bundlexy0.addGraph(par_xy0, NeatPlotting::DataObjectStyle());
+ // for(unsigned int i=0; i<labelsxy0.size(); i++){
+  //  bundlexy0.plot_decoration.labels.push_back(labelsxy0[i]);
+  //}
+
+  //NeatPlotting::PlotStyle myStyle;
+  //bundlexy0.plot_axis.x_axis_title = "Real Spin 0";
+ // bundlexy0.plot_axis.y_axis_title = "Imag Spin 0";
+
+  //TCanvas bla("Argand Spin 0");
+  //bundlexy0.drawOnCurrentPad(myStyle);
+
 
   par_r0.Draw();
   par_r2.Draw();
@@ -371,7 +400,7 @@ int main(int argc, char **argv){
   par_y0.SetTitle("");
   par_y2.SetTitle("");
   par_x0.GetYaxis()->SetTitle("Real Spin 0");
-  par_y0.GetYaxis()->SetTitle("Imag Spin 0 /rad");
+  par_y0.GetYaxis()->SetTitle("Imag Spin 0");
   par_x0.GetXaxis()->SetTitle("m_{23}^{2} / GeV^{2}/c^{2}");
   par_y0.GetXaxis()->SetTitle("m_{23}^{2} / GeV^{2}/c^{2}");
   par_x2.GetYaxis()->SetTitle("Real Spin 2");
@@ -405,6 +434,7 @@ int main(int argc, char **argv){
   phspD->Write();
   par_xy0.Write("Argand Spin 0");
   par_xy2.Write("Argand Spin 2");
+  //bla.Write();
   output.mkdir("Slices");
   output.cd("Slices");
   for(unsigned int h=0; h<histData.size(); h++){

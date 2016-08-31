@@ -11,7 +11,7 @@ namespace ComPWA {
 
 void FitResult::writeText(std::string filename){
 	std::ofstream myfile;
-	myfile.open(filename);
+	myfile.open(filename, std::ios::app);
 	genOutput(myfile);
 	myfile.close();
 	return;
@@ -123,3 +123,5 @@ void FitResult::printFitParameters(TableFormater* tableResult){
 }
 
 } /* namespace ComPWA */
+
+

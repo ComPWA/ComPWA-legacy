@@ -35,7 +35,7 @@ public:
   void addBW(std::shared_ptr<AmpAbsDynamicalFunction>, std::shared_ptr<DoubleParameter>, std::shared_ptr<DoubleParameter>);
   void addBW(std::shared_ptr<AmpAbsDynamicalFunction>, std::shared_ptr<DoubleParameter>, std::shared_ptr<DoubleParameter>, std::shared_ptr<AmpWigner2>);
 
-  double evaluateSlice(dataPoint& point,std::complex<double>*, unsigned int, unsigned int) const ;
+  double evaluateSlice(dataPoint& point,std::complex<double>*, unsigned int, unsigned int, double, unsigned int, unsigned int) const ;
   std::complex<double> getFirstBW(dataPoint& point) const ;
   std::complex<double> getFirstReso(dataPoint& point) const ;
   std::complex<double> getFirstAmp(dataPoint& point) const ;

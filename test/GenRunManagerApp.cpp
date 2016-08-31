@@ -41,6 +41,7 @@ using Physics::AmplitudeSum::AmpSumIntensity;
  */
 int main(int argc, char **argv){
 	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(DalitzKinematics::createInstance("J/psi","gamma","pi0","pi0"));
+
 	std::string outFile="3Part-4vecs.root";
 	unsigned int dataSize = 100000;
 	//load resonances
@@ -60,6 +61,32 @@ int main(int argc, char **argv){
 	std::cout<<"Data size: "<<data->getNEvents()<<std::endl;
 	data->writeData();
 	phsp->writeData();
+
+/* ****Pull generation by Mathias, TODO: better handling
+	for(unsigned int i=0; i<1; i++){
+	  std::string outFile="test/3Part-4vecs_1M_PDG_PHASE_";
+	  outFile+=std::to_string(i);
+	  outFile+=".root";
+	  unsigned int dataSize = 1000000;
+	  //load resonances
+	  AmplitudeSetup ini("test/JPSI_ypipi_phase.xml");
+	  cout << "loaded file " << ini.getFileName() << " with " << ini.getResonances().size() << " resonances!" << std::endl;
+	  std::shared_ptr<Data> data(new RootReader(outFile, true,"data",false));
+	  std::shared_ptr<Data> phsp(new RootReader(outFile, true,"mc",false));
+	  std::shared_ptr<Generator> gen(new RootGenerator(i*7+13));
+	  std::shared_ptr<Amplitude> amp(new AmpSumIntensity(ini,std::shared_ptr<Efficiency>(new UnitEfficiency()),dataSize,AmpSumIntensity::normStyle::none));
+
+	  RunManager run(dataSize,amp,gen);
+	  run.setGenerator(gen);
+	  run.setData(data);
+	  run.setPhspSample(phsp);
+	  run.generate(dataSize);
+	  run.generatePhsp(dataSize);
+	  std::cout<<"Data size: "<<data->getNEvents()<<std::endl;
+	  data->writeData();
+	  phsp->writeData();
+	}*/
+
 //	TFile output(outFile.c_str(),"update");
 //	output.SetCompressionLevel(1); //try level 2 also
 //	output.Close(); //clean output file

@@ -100,7 +100,11 @@ public:
 	//! Calculates third dalitz plot variable, e.g f(s1,s2)=s3
 	double getThirdVariableSq(double, double) const;
 	//! Checks if data point is within phase space boundaries
-	bool isWithinPhsp(const dataPoint &point);
+	bool isWithinPhsp(const dataPoint &point) ;
+	//! Returns the dalitz plot area for the given kinematics
+	//double getPhspVolume();
+    //! Returns the dalitz plot area for the given kinematics and limited m23 range
+    double getPhspVolumePart(double, double);
 	//! Calculated momenta n,m using legendre polynomials
 	double calculateMoments(unsigned int sys, dataPoint& point, unsigned int n, unsigned int m);
 	//!maximum value for invariant mass squared: m23sq=5, m13sq=4, m12sq=3

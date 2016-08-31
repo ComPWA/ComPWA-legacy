@@ -864,19 +864,19 @@ std::complex<double> AmpSumIntensity::getFirstAmp(dataPoint& point, ParameterLis
 	return totAmp.getFirstAmp(point);
 }
 
-const double AmpSumIntensity::sliceIntensity(dataPoint& dataP, ParameterList& par,std::complex<double>* reso, unsigned int nResos){
-	setParameterList(par);
-	//  dataPoint dataP; dataP.setVal("m23sq",point[0]); dataP.setVal("m13sq",point[1]);
-	//dataPoint dataP; dataP.setVal(0,point[0]); dataP.setVal(1,point[1]);
+const double AmpSumIntensity::sliceIntensity(dataPoint& dataP, ParameterList& par,std::complex<double>* reso, unsigned int nResos, double N, unsigned int nF0, unsigned int nF2){
+    setParameterList(par);
+    //  dataPoint dataP; dataP.setVal("m23sq",point[0]); dataP.setVal("m13sq",point[1]);
+    //dataPoint dataP; dataP.setVal(0,point[0]); dataP.setVal(1,point[1]);
 
-	double AMPpdf=0;
-	if(Kinematics::instance()->isWithinPhsp(dataP)) AMPpdf = totAmp.evaluateSlice(dataP, reso, nResos,5);
-	if(AMPpdf!=AMPpdf){
-		BOOST_LOG_TRIVIAL(error)<<"Error AmpSumIntensity: Intensity is not a number!!";
-		AMPpdf = 0;
-	}
-	double eff=eff_->evaluate(dataP);
-	return AMPpdf*eff;
+    double AMPpdf=0;
+    if(Kinematics::instance()->isWithinPhsp(dataP)) AMPpdf = totAmp.evaluateSlice(dataP, reso, nResos,5, N, nF0, nF2);
+    if(AMPpdf!=AMPpdf){
+        BOOST_LOG_TRIVIAL(error)<<"Error AmpSumIntensity: Intensity is not a number!!";
+        AMPpdf = 0;
+    }
+    double eff=eff_->evaluate(dataP);
+    return AMPpdf*eff;
 }
 
 const ParameterList& AmpSumIntensity::intensity(std::vector<double> point, ParameterList& par){
