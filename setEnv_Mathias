@@ -6,9 +6,8 @@ export ROOTSYS=/local/data/michel/fairroot/build
 export ROOTINCLUDE=/local/data/michel/fairroot/build/include/root
 export QFT=/local/home/mathias/workspace/qft++
 export COMPWA_DIR=/local/home/mathias/workspace/nextPWA
-export CLIPS_ROOT=/local/home/mathias/workspace/Clips/clips_630
 
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$GENEVA/lib:$MINUIT2/lib:$ROOTSYS/lib/root:$BOOST_ROOT/lib:/local/home/mathias/workspace/nextPWA/lib:$QFT/lib:$CLIPS_ROOT/lib
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$GENEVA/lib:$MINUIT2/lib:$ROOTSYS/lib/root:$BOOST_ROOT/lib:/local/home/mathias/workspace/nextPWA/lib:$QFT/lib
 
 echo "check libs:"
 echo $LD_LIBRARY_PATH

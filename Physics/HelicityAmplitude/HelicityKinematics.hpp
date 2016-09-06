@@ -87,11 +87,12 @@ class HelicityKinematics: public Kinematics {
       const TwoBodyDecayIndices& two_body_state_indices,
       unsigned int &data_point_fill_position) const;
 
+  double calculateDecayAngle(const Vector4<double> &p, const Vector4<double> &q,
+      const Vector4<double> &d) const;
+
 protected:
   virtual double getPhspVolumePart(double m23_sq_min_loc, double m23_sq_max_loc);
   double calculatePSArea();
-  //! Event to dataPoint conversion
-  void translateEventToDataPoint(const Event& event, dataPoint& point) const;
 
 public:
   static Kinematics* createInstance() {
@@ -107,6 +108,9 @@ public:
   void init(const FinalStateParticleCombinatorics& fsp_combinatorics);
 
   std::vector<std::vector<IndexList> > getTopologyAmplitudeDataPointIndexLists() const;
+
+  //! Event to dataPoint conversion
+  void translateEventToDataPoint(const Event& event, dataPoint& point) const;
 
   bool isWithinPhsp(const dataPoint& point);
   double getMotherMass() const;

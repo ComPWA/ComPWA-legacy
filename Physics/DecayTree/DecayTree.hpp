@@ -220,15 +220,16 @@ public:
   const HelicityTree& getHelicityDecayTree() const;
 
   void determineListOfDecayVertices();
-  const std::vector<
-      boost::graph_traits<HelicityTree>::vertex_descriptor>& getDecayVertexList() const;
+  const std::vector<boost::graph_traits<HelicityTree>::vertex_descriptor>& getDecayVertexList() const;
 
-  std::vector<
-      boost::graph_traits<HelicityTree>::vertex_descriptor> getDecayNodesList() const;
+  std::vector<boost::graph_traits<HelicityTree>::vertex_descriptor> getDecayNodesList() const;
 
   std::vector<DecayNode> getLowestLeaves() const;
 
   std::vector<DecayNode> getLeaves() const;
+
+  bool isDecayVertexALeaf(
+      const boost::graph_traits<HelicityTree>::vertex_descriptor &decay_vertex) const;
 
   boost::graph_traits<HelicityTree>::vertex_descriptor getTopNode() const;
 

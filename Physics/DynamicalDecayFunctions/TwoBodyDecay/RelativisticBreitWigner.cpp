@@ -22,6 +22,7 @@
 
 #include "boost/property_tree/ptree.hpp"
 
+#include "Core/DataPointStorage.hpp"
 #include "Core/Kinematics.hpp"
 #include "Physics/DynamicalDecayFunctions/TwoBodyDecay/RelativisticBreitWigner.hpp"
 #include "Physics/DynamicalDecayFunctions/Kinematics.hpp"
@@ -30,10 +31,15 @@ namespace ComPWA {
 namespace Physics {
 namespace DynamicalFunctions {
 
-RelativisticBreitWigner::RelativisticBreitWigner(const ComPWA::Spin& J) :
-    resonance_width_(new DoubleParameter("width")), resonance_mass_(
-        new DoubleParameter("mass")), meson_radius_(
-        new DoubleParameter("meson_radius")), J_(J) {
+RelativisticBreitWigner::RelativisticBreitWigner(const ParticleStateInfo& psi,
+    const ExternalParameters& external_parameters) {
+  J_ = psi.spin_information_;
+  resonance_width_.reset(
+      new DoubleParameter(psi.pid_information_.name_ + "_width"));
+  resonance_mass_.reset(
+      new DoubleParameter(psi.pid_information_.name_ + "_mass"));
+  meson_radius_.reset(
+      new DoubleParameter(psi.pid_information_.name_ + "_meson_radius"));
 
   parameter_list_.AddParameter(resonance_mass_);
   parameter_list_.AddParameter(resonance_width_);
@@ -41,6 +47,8 @@ RelativisticBreitWigner::RelativisticBreitWigner(const ComPWA::Spin& J) :
 
   index_cms_mass_squared_ = ComPWA::Kinematics::instance()->getVariableIndex(
       "cms_mass_squared");
+
+  initialiseParameters(psi.dynamical_information_, external_parameters);
 }
 
 RelativisticBreitWigner::~RelativisticBreitWigner() {
@@ -48,28 +56,52 @@ RelativisticBreitWigner::~RelativisticBreitWigner() {
 
 void RelativisticBreitWigner::initialiseParameters(
     const boost::property_tree::ptree& parameter_info,
-    const ParameterList& external_parameters) {
-  resonance_mass_->SetValue(parameter_info.get<double>("mass"));
-  if (parameter_info.get<bool>("mass_fix"))
+    const ExternalParameters& external_parameters) {
+  resonance_mass_->SetValue(
+      parameter_info.get_child("mass").get<double>("value"));
+  if (parameter_info.get_child("mass").get<double>("fix"))
     resonance_mass_->SetParameterFixed();
   else
     resonance_mass_->SetParameterFree();
-  resonance_mass_->SetMinValue(parameter_info.get<double>("mass_min"));
-  resonance_mass_->SetMaxValue(parameter_info.get<double>("mass_max"));
 
-  resonance_width_->SetValue(parameter_info.get<double>("width"));
-  if (parameter_info.get<bool>("width_fix"))
+  resonance_mass_->SetMinValue(
+      parameter_info.get_child("mass").get<double>("min"));
+  resonance_mass_->SetMaxValue(
+      parameter_info.get_child("mass").get<double>("max"));
+  //resonance_mass_->SetUseBounds(false);
+
+  resonance_width_->SetValue(
+      parameter_info.get_child("width").get<double>("value"));
+  if (parameter_info.get_child("width").get<double>("fix"))
     resonance_width_->SetParameterFixed();
   else
     resonance_width_->SetParameterFree();
-  resonance_width_->SetMinValue(parameter_info.get<double>("width_min"));
-  resonance_width_->SetMaxValue(parameter_info.get<double>("width_max"));
+  resonance_width_->SetMinValue(
+      parameter_info.get_child("width").get<double>("min"));
+  resonance_width_->SetMaxValue(
+      parameter_info.get_child("width").get<double>("max"));
+  //resonance_width_->SetUseBounds(false);
 
-  meson_radius_->SetValue(parameter_info.get<double>("mesonRadius"));
+  auto meson_radius_pt = parameter_info.get_child("mesonRadius");
+  if (meson_radius_pt.get_optional<double>("value")) {
+    meson_radius_->SetValue(meson_radius_pt.get<double>("value"));
+    if (meson_radius_pt.get<double>("fix"))
+      meson_radius_->SetParameterFixed();
+    else
+      meson_radius_->SetParameterFree();
+    meson_radius_->SetMinValue(meson_radius_pt.get<double>("min"));
+    meson_radius_->SetMaxValue(meson_radius_pt.get<double>("max"));
+  }
+  else {
+    meson_radius_->SetValue(parameter_info.get<double>("mesonRadius"));
+    meson_radius_->SetParameterFixed();
+  }
 
   // try to extract daughter masses from external parameters
-  daughter1_mass_ = external_parameters.GetDoubleParameter("daughter1_mass");
-  daughter2_mass_ = external_parameters.GetDoubleParameter("daughter2_mass");
+  daughter1_mass_ = external_parameters.parameters_.GetDoubleParameter(
+      external_parameters.parameter_name_mapping_.at("daughter1_mass"));
+  daughter2_mass_ = external_parameters.parameters_.GetDoubleParameter(
+      external_parameters.parameter_name_mapping_.at("daughter2_mass"));
 }
 
 std::complex<double> RelativisticBreitWigner::evaluate(const dataPoint& point,
@@ -77,6 +109,22 @@ std::complex<double> RelativisticBreitWigner::evaluate(const dataPoint& point,
 
   double mSq = point.getVal(evaluation_index + index_cms_mass_squared_);
 
+  return evaluate(mSq);
+}
+
+std::complex<double> RelativisticBreitWigner::evaluate(
+    unsigned int storage_index, unsigned int data_index,
+    unsigned int evaluation_index) const {
+
+  auto const& data_vec = DataPointStorage::Instance().getDataList(storage_index,
+      evaluation_index + index_cms_mass_squared_);
+
+  double mSq = data_vec[data_index];
+
+  return evaluate(mSq);
+}
+
+std::complex<double> RelativisticBreitWigner::evaluate(double mSq) const {
   double mR = resonance_mass_->GetValue();
   double width = resonance_width_->GetValue();
   double ma = daughter1_mass_->GetValue();

@@ -6,6 +6,7 @@
 					(required_variable_names "angular-momentum" $?other_rvns) 
 					(violating_quantum_number_list $?violating_quantum_number_list)
 			  )
+	(test (not (member$ "parity" ?violating_quantum_number_list)))
 	=>
 	;get the required information
 	(bind ?angular_momentum (get-spin-qn-with-unique-id (get-required-variable "angular-momentum" ?decay)))
@@ -15,7 +16,6 @@
 	then
 		(if (is-qn-conserved "parity")
 		then
-			;(printout t "decay violates parity!" crlf)
 			(retract ?decay)
 	  	else
 	  		(modify ?decay (violating_quantum_number_list ?violating_quantum_number_list "parity"))
@@ -36,23 +36,27 @@
 				(required_decays ?charge_decay $?required_decays)
 				(violating_quantum_number_list $?violating_quantum_number_list)
 			  )
+	(test (not (member$ "cparity" ?violating_quantum_number_list)))
 	=>
-	(if (or (or (<> ?charge_mother 0) (<> ?charge_daughter1 0)) (<> ?charge_daughter2 0))
+	(if (and (and (<> ?charge_mother 0) (<> ?charge_daughter1 0)) (<> ?charge_daughter2 0))
 	then
 		(retract ?decay)
 	else
-		(if (<> ?cparity_mother (* ?cparity_daughter1 ?cparity_daughter2))
-		then		 
-	 	 	(if (is-qn-conserved "cparity")
-	  		then
-				(retract ?decay)
-				;(printout t "decay violates cparity!" crlf)
-	  		else
-	  			(modify ?decay 
-	  				(violating_quantum_number_list ?violating_quantum_number_list "cparity")
+	    (if (and (and (= ?charge_mother 0) (= ?charge_daughter1 0)) (= ?charge_daughter2 0))
+	    then
+			(if (<> ?cparity_mother (* ?cparity_daughter1 ?cparity_daughter2))
+			then		 
+	 	 		(if (is-qn-conserved "cparity")
+	  			then
+					(retract ?decay)
+					;(printout t "decay violates cparity!" crlf)
+	  			else
+	  				(modify ?decay 
+	  					(violating_quantum_number_list ?violating_quantum_number_list "cparity")
+	  				)
 	  			)
-	  		)
-			;(printout t "decay violates cparity!" crlf)
+				;(printout t "decay violates cparity!" crlf)
+			)
 		)
 	)
 )

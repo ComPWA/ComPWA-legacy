@@ -42,7 +42,7 @@ public:
   //! calculated the PHSP volume of the current decay by MC integration in limited m23
   virtual double getPhspVolumePart(double, double) = 0;
   //! converts Event to dataPoint
-  virtual void eventToDataPoint(Event& ev, dataPoint& point) const;
+  virtual void eventToDataPoint(const Event& ev, dataPoint& point) const;
   //! get mass of particles
   virtual double getMass(unsigned int num) const = 0;
   //! get mass of paticles
@@ -64,11 +64,13 @@ protected:
 
   unsigned int number_of_particles_;
   std::vector<std::string> variable_names_;
+
   Kinematics();
   virtual ~Kinematics();
 
   virtual double calculatePSArea() =0;
-  virtual void translateEventToDataPoint(const Event& ev, dataPoint& point) const =0;
+  virtual void translateEventToDataPoint(const Event& ev,
+      dataPoint& point) const =0;
 
   // delete methods to ensure that there will only be one instance
   Kinematics(const Kinematics&) = delete;

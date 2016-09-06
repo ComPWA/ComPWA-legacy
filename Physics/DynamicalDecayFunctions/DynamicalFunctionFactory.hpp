@@ -29,6 +29,16 @@ enum class DynamicalInfoTypes {
   TOP_NODE, RELATIVE_BREIT_WIGNER
 };
 
+struct ParticleStateComperator {
+    bool operator()(const ParticleStateInfo& a, const ParticleStateInfo& b) const {
+      if (a.pid_information_ < b.pid_information_)
+        return true;
+      else if (a.pid_information_ > b.pid_information_)
+        return false;
+      return false;
+    }
+};
+
 const boost::unordered_map<DynamicalInfoTypes, std::string> DynamicalTypeToString =
     boost::assign::map_list_of(DynamicalInfoTypes::TOP_NODE, "topNode")(
         DynamicalInfoTypes::RELATIVE_BREIT_WIGNER, "relBW");
@@ -37,25 +47,22 @@ const boost::unordered_map<std::string, DynamicalInfoTypes> StringToDynamicalTyp
     boost::assign::map_list_of("topNode", DynamicalInfoTypes::TOP_NODE)("relBW",
         DynamicalInfoTypes::RELATIVE_BREIT_WIGNER);
 
+
 class DynamicalFunctionFactory {
-  std::map<HelicityFormalism::TwoBodyDecayInformation,
-      std::shared_ptr<AbstractDynamicalFunction> > dynamical_function_list_;
+  std::map<ParticleStateInfo,
+      std::shared_ptr<AbstractDynamicalFunction>, ParticleStateComperator> dynamical_function_list_;
 
   std::shared_ptr<AbstractDynamicalFunction> generateRelativisiticBreitWigner(
-      const HelicityFormalism::TwoBodyDecayInformation& state_info,
-      const ParameterList& external_parameters);
-
-  static std::map<QuantumNumbers, std::string> dynamical_type_name_mapping_;
+      const ParticleStateInfo& state_info,
+      const ExternalParameters& external_parameters);
 
 public:
   DynamicalFunctionFactory();
   virtual ~DynamicalFunctionFactory();
 
   std::shared_ptr<AbstractDynamicalFunction> generateDynamicalFunction(
-      const HelicityFormalism::TwoBodyDecayInformation& state_info,
-      const ParameterList& external_parameters);
-
-  //static get
+      const ParticleStateInfo& state_info,
+      const ExternalParameters& external_parameters);
 };
 
 } /* namespace DynamicalFunctions */

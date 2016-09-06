@@ -65,7 +65,7 @@ public:
 	virtual const ParameterList& intensityNoEff(const dataPoint& point) =0;
 	virtual const ParameterList& intensity(std::vector<double> point, ParameterList& par) =0;
 
-	virtual void setParameterList(ParameterList& par) =0;
+	virtual void setParameterList(const ParameterList& par) =0;
 	virtual bool copyParameterList(ParameterList& par) =0;
 
 	virtual void printAmps() = 0;
@@ -195,7 +195,7 @@ public:
 		dataPoint dataP(point);
 		return intensity(dataP);
 	}
-	void setParameterList(ParameterList& par){
+	void setParameterList(const ParameterList& par){
 		//parameters varied by Minimization algorithm
 		if(par.GetNDouble()!=params.GetNDouble())
 			throw std::runtime_error("setParameterList(): size of parameter lists don't match");

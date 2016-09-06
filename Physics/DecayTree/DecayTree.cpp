@@ -78,10 +78,26 @@ std::vector<DecayNode> DecayTree::getLeaves() const {
   return fs_particle_list;
 }
 
+bool DecayTree::isDecayVertexALeaf(
+    const boost::graph_traits<HelicityTree>::vertex_descriptor &decay_vertex) const {
+  // go through edges and check that this vertex never occurred in any edge as target
+  std::pair<boost::graph_traits<HelicityTree>::edge_iterator,
+      boost::graph_traits<HelicityTree>::edge_iterator> ep = boost::edges(
+      decay_tree_);
+
+  bool not_top_node(false);
+
+  for (auto edge = ep.first; edge != ep.second; ++edge) {
+    if (boost::source(*edge, decay_tree_) == decay_vertex) {
+      return false;
+    }
+  }
+  return true;
+}
+
 boost::graph_traits<HelicityTree>::vertex_descriptor DecayTree::getTopNode() const {
   boost::graph_traits<HelicityTree>::vertex_descriptor top_node;
-  for (auto vertex = decay_vertex_list_.begin();
-      vertex != decay_vertex_list_.end(); ++vertex) {
+  for (auto const& vertex : decay_vertex_list_) {
     // go through edges and check that this vertex never occurred in any edge as target
     std::pair<boost::graph_traits<HelicityTree>::edge_iterator,
         boost::graph_traits<HelicityTree>::edge_iterator> ep = boost::edges(
@@ -90,13 +106,13 @@ boost::graph_traits<HelicityTree>::vertex_descriptor DecayTree::getTopNode() con
     bool not_top_node(false);
 
     for (auto edge = ep.first; edge != ep.second; ++edge) {
-      if (boost::target(*edge, decay_tree_) == *vertex) {
+      if (boost::target(*edge, decay_tree_) == vertex) {
         not_top_node = true;
         break;
       }
     }
     if (!not_top_node) {
-      top_node = *vertex;
+      top_node = vertex;
       break;
     }
   }
@@ -110,13 +126,11 @@ void DecayTree::determineListOfDecayVertices() {
   boost::depth_first_search(decay_tree_, boost::visitor(vis));
 }
 
-const std::vector<
-    boost::graph_traits<HelicityTree>::vertex_descriptor>& DecayTree::getDecayVertexList() const {
+const std::vector<boost::graph_traits<HelicityTree>::vertex_descriptor>& DecayTree::getDecayVertexList() const {
   return decay_vertex_list_;
 }
 
-std::vector<
-    boost::graph_traits<HelicityTree>::vertex_descriptor> DecayTree::getDecayNodesList() const {
+std::vector<boost::graph_traits<HelicityTree>::vertex_descriptor> DecayTree::getDecayNodesList() const {
   std::vector<boost::graph_traits<HelicityTree>::vertex_descriptor> decay_nodes_list;
   GetAscendingVertexList vis(decay_nodes_list);
   boost::depth_first_search(decay_tree_, boost::visitor(vis));

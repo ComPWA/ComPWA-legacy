@@ -131,6 +131,8 @@ public:
 	 */
 	virtual std::shared_ptr<AbsParameter> GetParameter(const unsigned int i) const;
 
+	virtual bool ParameterExists(const std::string parname) const;
+
 	//! Getter for abstract parameter
 	/*!
 	 * Getter for abstract parameter pointer
@@ -146,6 +148,8 @@ public:
 	virtual const inline unsigned int GetNMultiComplex() const {return vMultiComplex_.size();}
 	//! Getter for number of multi double parameter
 	virtual const inline unsigned int GetNMultiDouble() const {return vMultiDouble_.size();}
+  //! Getter for number of multi unsigned int parameter
+  virtual const inline unsigned int GetNMultiUnsignedInteger() const {return vMultiUnsignedInteger_.size();}
 	//! Getter for number of complex parameter
 	virtual const inline unsigned int GetNComplex() const {return vComplexPar_.size();}
 	//! Getter for number of double parameter
@@ -170,6 +174,16 @@ public:
 	 * \return par output container for loaded parameter
 	 */
 	virtual std::shared_ptr<DoubleParameter> GetDoubleParameter(const unsigned int i) const;
+
+
+  //! Getter for unsigned int list parameter
+  /*!
+   * Getter for unsigned int list parameter MultiUnsignedInteger
+   * \param i input number of parameter to load
+   * \return par output container for loaded parameter
+   */
+	std::shared_ptr<MultiUnsignedInteger> GetMultiUnsignedInteger(
+	    const unsigned int i) const;
 
 	//! Getter for double list parameter
 	/*!
@@ -227,6 +241,14 @@ public:
 	 */
 	virtual std::shared_ptr<MultiDouble> GetMultiDouble(const std::string parname) const;
 
+  //! Getter for unsigned int list parameter
+  /*!
+   * Getter for unsigned int list parameter MultiUnsignedInteger
+   * \param parname input name of parameter to load
+   * \return par output container for loaded parameter
+   */
+  virtual std::shared_ptr<MultiUnsignedInteger> GetMultiUnsignedInteger(const std::string parname) const;
+
 	//! Getter for complex parameter
 	/*!
 	 * Getter for complex parameter
@@ -283,6 +305,14 @@ public:
 	 * \return par output container for loaded parameter
 	 */
 	virtual std::vector<std::shared_ptr<MultiDouble> > GetMultiDoubles() const { return vMultiDouble_; }
+
+  //! Getter for unsigned int list parameter
+  /*!
+   * Getter for unsigned int list parameter MultiUnsignedInteger
+   * \param i input number of parameter to load
+   * \return par output container for loaded parameter
+   */
+  virtual std::vector<std::shared_ptr<MultiUnsignedInteger> > GetMultiUnsignedIntegers() const { return vMultiUnsignedInteger_; }
 
 	//! Getter for complex list parameter
 	/*!
@@ -368,6 +398,13 @@ public:
 	 * \param par input parameter
 	 */
 	virtual void AddParameter(std::shared_ptr<MultiDouble> par);
+
+  //! Add unsigned int list parameter
+  /*!
+   * Adds a unsigned int parameter MultiUnsignedInteger to the list
+   * \param par input parameter
+   */
+  virtual void AddParameter(std::shared_ptr<MultiUnsignedInteger> par);
 
 	//! Add complex parameter
 	/*!
@@ -469,12 +506,14 @@ public:
 protected:
 	std::map<std::string,unsigned int> mMultiComplexID_; /*!< Map of complex list parameter ids */
 	std::map<std::string,unsigned int> mMultiDoubleID_; /*!< Map of double list parameter ids */
+  std::map<std::string,unsigned int> mMultiUnsignedIntegerID_; /*!< Map of unsigned int list parameter ids */
 	std::map<std::string,unsigned int> mComplexParID_; /*!< Map of complex parameter ids */
 	std::map<std::string,unsigned int> mDoubleParID_; /*!< Map of floating point parameter ids */
 	std::map<std::string,unsigned int> mIntParID_; /*!< Map of integer parameter ids */
 	std::map<std::string,unsigned int> mBoolParID_; /*!< Map of boolean parameter ids */
 	std::vector<std::shared_ptr<MultiComplex> > vMultiComplex_; /*!< Vector of complex parameter lists */
 	std::vector<std::shared_ptr<MultiDouble> > vMultiDouble_; /*!< Vector of floating point parameter lists */
+  std::vector<std::shared_ptr<MultiUnsignedInteger> > vMultiUnsignedInteger_; /*!< Vector of unsigned int parameter lists */
 	std::vector<std::shared_ptr<ComplexParameter> > vComplexPar_; /*!< Vector of complex parameters */
 	std::vector<std::shared_ptr<DoubleParameter> > vDoublePar_; /*!< Vector of floating point parameters */
 	std::vector<std::shared_ptr<IntegerParameter> > vIntPar_; /*!< Vector of integer parameters */

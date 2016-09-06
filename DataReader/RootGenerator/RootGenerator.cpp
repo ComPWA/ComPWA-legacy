@@ -45,31 +45,20 @@ RootGenerator* RootGenerator::Clone() {
 }
 
 void RootGenerator::generate(Event& evt) {
-  bool regenerate_event(false);
+  evt.setWeight(event.Generate());
 
-  do {
-    regenerate_event = false;
-    const double weight = event.Generate();
-    Event tmp(weight, "");
+  Event tmp;
+  for (unsigned int t = 0; t < nPart; t++) {
+    TLorentzVector* p = event.GetDecay(t);
 
-    for (unsigned int t = 0; t < nPart; t++) {
-      TLorentzVector* p = event.GetDecay(t);
-      if (p->M2() < 0.0) {
-        regenerate_event = true;
-        break;
-      }
-      tmp.addParticle(Particle(p->X(), p->Y(), p->Z(), p->E()));
-
-      if (tmp.getParticle(t).getMassSquare() < 0.0) {
-        regenerate_event = true;
-        break;
-      }
+    if(p->M() < 0.0) {
+      p->SetE(p->Vect().Mag());
+      if(p->M() < 0.0)
+        p->SetE(p->E()+std::numeric_limits<double>::epsilon());
     }
-    evt = tmp;
+    tmp.addParticle(Particle(p->X(), p->Y(), p->Z(), p->E()));
   }
-  while (regenerate_event);
-
-  //dataPoint p(tmp); std::cout<<"-"<<p.getVal(0)<<std::endl;
+  evt = tmp;
 }
 
 void RootGenerator::setSeed(unsigned int seed) {

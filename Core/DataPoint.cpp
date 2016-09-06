@@ -28,7 +28,7 @@ dataPoint::dataPoint(std::vector<double> vec) : weight(1.){
 	var=vec;
 	return;
 }
-dataPoint::dataPoint(Event& ev): weight(1.){
+dataPoint::dataPoint(const Event& ev): weight(1.){
 	init();
 	Kinematics::instance()->eventToDataPoint(ev,*this);
 	return;

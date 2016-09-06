@@ -70,7 +70,7 @@ constant build_SliceFit : 1 ;
 
 constant build_Optimizer : 1 ;
 constant build_Minuit2 : 1 ;
-constant build_Geneva : 0 ;
+constant build_Geneva : 1 ;
 
 # core should always be built
 build-project Core ;

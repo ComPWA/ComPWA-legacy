@@ -50,13 +50,15 @@ unsigned int Kinematics::getVariableIndex(std::string name) const {
 
 //! calculated the PHSP volume of the current decay by MC integration
 double Kinematics::getPhspVolume() {
-  if (!is_PS_area_calculated_)
+  if (!is_PS_area_calculated_) {
     PS_area_ = calculatePSArea();
+    is_PS_area_calculated_ = true;
+  }
   return PS_area_;
 }
 
 //! converts Event to dataPoint
-void Kinematics::eventToDataPoint(Event& ev, dataPoint& point) const {
+void Kinematics::eventToDataPoint(const Event& ev, dataPoint& point) const {
   // set event weight as data point weight first
   double weight = ev.getWeight();
   point.setWeight(weight);

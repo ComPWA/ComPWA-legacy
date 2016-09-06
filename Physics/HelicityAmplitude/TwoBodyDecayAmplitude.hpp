@@ -18,9 +18,10 @@
 
 #include "Physics/HelicityAmplitude/ParticleStateDefinitions.hpp"
 
+namespace ComPWA {
+
 class dataPoint;
 
-namespace ComPWA {
 namespace Physics {
 namespace HelicityFormalism {
 
@@ -36,6 +37,7 @@ class TwoBodyDecayAmplitude {
   ::Spin M_;
   ::Spin d1_M_;
   ::Spin d2_M_;
+  ::Spin daughters_delta_M_;
 
 public:
   TwoBodyDecayAmplitude(const TwoBodyDecaySpinInformation& decay_info);
@@ -44,6 +46,9 @@ public:
   void init();
 
   std::complex<double> evaluate(const dataPoint& point,
+      unsigned int evaluation_index) const;
+
+  std::complex<double> evaluate(unsigned int storage_index, unsigned int data_index,
       unsigned int evaluation_index) const;
 };
 

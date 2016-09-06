@@ -54,7 +54,7 @@
 			then
 				(if (= -1 (get-qn-value ?mother_index ?decay_tree "parity"))
 				then 
-	  				;(printout t "decay violates bose statistics!" crlf)
+	  				(printout t "decay violates bose statistics!" crlf)
 	  				(retract ?decay_tree)
 	  				(retract ?decay)
 	  			)

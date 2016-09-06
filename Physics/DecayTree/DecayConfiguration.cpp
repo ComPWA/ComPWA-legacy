@@ -82,10 +82,12 @@ void DecayConfiguration::setRemainingParticleProperties(
       particle.pid_information_.particle_id_ = physics_constants.findParticle(
           particle.pid_information_.name_).id_;
     }
-    if (particle.spin_information_
-        != physics_constants.findParticle(particle.pid_information_.name_).spin_) {
+    if (!particle.spin_information_.equalMagnitude(
+        physics_constants.findParticle(particle.pid_information_.name_).getSpinLikeQuantumNumber(
+            QuantumNumberIDs::SPIN))) {
       particle.spin_information_ = physics_constants.findParticle(
-          particle.pid_information_.name_).spin_;
+          particle.pid_information_.name_).getSpinLikeQuantumNumber(
+          QuantumNumberIDs::SPIN);
     }
   }
 }
@@ -104,7 +106,7 @@ boost::property_tree::ptree DecayConfiguration::exportConfigurationToPropertyTre
     boost::property_tree::ptree decay_tree_property_tree =
         createPropertyTreeForParticleIndexTree(*particle_index_decay_tree);
 
-    pt.add_child("DecayTreeSetup.DecayTrees", decay_tree_property_tree);
+    pt.add_child("DecayTreeSetup.DecayTrees.DecayTree", decay_tree_property_tree);
 
     // fill the sets with the particles of the final state (only unique id matter here)
 
@@ -169,7 +171,7 @@ void DecayConfiguration::addNextDecayTreeLayerToPropertyTree(
     boost::property_tree::ptree& decay_tree_pt,
     const std::vector<ParticleIndexDecayTree::const_iterator> & current_nodes) const {
   for (auto node = current_nodes.begin(); node != current_nodes.end(); ++node) {
-    decay_tree_pt.add_child("DecayTree.DecayNode",
+    decay_tree_pt.add_child("DecayNode",
         createSingleDecayNodeToPropertyTree(*node));
   }
 }
@@ -255,14 +257,13 @@ boost::property_tree::ptree DecayConfiguration::createPropertyTreeForFinalStateP
   boost::property_tree::ptree pt;
   pt.put("id", particle.unique_id_);
   pt.put("name", particle.pid_information_.name_);
+  pt.put("coherent", particle.coherent);
   return pt;
 }
 
 boost::property_tree::ptree DecayConfiguration::createPropertyTreeForIntermediateStateParticle(
     const ParticleStateInfo& particle) const {
-  boost::property_tree::ptree pt;
-  pt.put("id", particle.unique_id_);
-  pt.put("name", particle.pid_information_.name_);
+  boost::property_tree::ptree pt(createPropertyTreeForFinalStateParticle(particle));
 
 //spin info
   boost::property_tree::ptree spin_pt;
@@ -292,12 +293,16 @@ ParticleIndexDecayTree::const_iterator DecayConfiguration::determineTopNode(
   }
 
 // if we have more than 1 candidate throw an error...
-  if (candidates.size() > 1)
+  if (candidates.size() > 1) {
+    printDecayTree(decay_topology);
     throw std::runtime_error(
         "The decay topology has more than one top node, meaning the topology is corrupted. Please fix the configuration file and rerun!");
-  else if (candidates.size() == 0)
+  }
+  else if (candidates.size() == 0) {
+    printDecayTree(decay_topology);
     throw std::runtime_error(
         "The decay topology does not have any top node, meaning the topology is corrupted. Please fix the configuration file and rerun!");
+  }
 // otherwise return here
   return candidates[0];
 }
@@ -327,6 +332,21 @@ bool DecayConfiguration::isNodeADaughter(
       return true;
   }
   return false;
+}
+
+void DecayConfiguration::printInfo() const {
+  BOOST_LOG_TRIVIAL(info)<<"number of particles: "<<particles_.size()<<std::endl;
+  BOOST_LOG_TRIVIAL(info)<<"number of concrete decay trees: "<<concrete_decay_trees_.size()<<std::endl;
+}
+
+void DecayConfiguration::printDecayTree(
+    const ParticleIndexDecayTree& index_decay_tree) const {
+  for (auto const& node : index_decay_tree) {
+    std::cout << node.first << " -> ";
+    for (auto daughter_index : node.second.particle_indices_)
+      std::cout << daughter_index << " ";
+    std::cout << std::endl;
+  }
 }
 
 } /* namespace DecayTree */

@@ -113,88 +113,84 @@ int main(int argc, char **argv) {
         new ComPWA::Physics::HelicityFormalism::CoherentAmplitude(
             topology_amplitudes));
 
-    //create dummy final state event to initialized the kinematics class
-    unsigned int dataSize = 10000;
-
-    std::shared_ptr<Data> data(new RootReader());
-    std::shared_ptr<Data> phsp(new RootReader());
     std::shared_ptr<Generator> gen(new RootGenerator());
+    gen->generate(dummy_event);
 
-    RunManager run(dataSize, amp, gen);
-    run.setGenerator(gen);
-    run.setData(data);
-    run.setPhspSample(phsp);
-    run.generatePhsp(dataSize * 100);
-    run.generate(dataSize);
-    std::cout << "Data size: " << data->getNEvents() << std::endl;
-    data->writeData("data.root", "events");
-    phsp->writeData("phspdata.root", "events");
+    ComPWA::dataPoint dummy_data_point;
+    kinematics->translateEventToDataPoint(dummy_event, dummy_data_point);
 
-    //===== Plot amplitude
-    /*  TH2D hist("plot", "", 200, 0.0, 10.0, 200, 0.0, 10.0);
-     TH2D plot_onlyweight("plot", "", 100, 0.0, 10.0, 100, 0.0, 10.0);
+    TH1D ct_pi_pi("cms_costheta_pi0_pi0_system", "", 100, 0, 3.2);
+    TH1D ct_pi_pi_hel("hel_costheta_pi0_pi0_system", "", 100, 0, 3.2);
+    TH1D phi_pi_pi("cms_phi_pi0_pi0_system", "", 100, -3.2, 3.2);
+    TH1D phi_pi_pi_hel("hel_phi_pi0_pi0_system", "", 100, -3.2, 3.2);
 
-     Event event;
+    // ok now just randomize theta and phis
 
-     unsigned int num_events(200000);
-     progressBar bar(num_events);
-     for (unsigned int i = 0; i < num_events; i++) {
-     gen->generate(event);
-     double evWeight = event.getWeight();
-     ComPWA::dataPoint point(event);
-     ParameterList ampPar = amp->intensity(point);
-     const ComPWA::Particle& p0 = event.getParticle(0);
-     const ComPWA::Particle& p1 = event.getParticle(1);
-     const ComPWA::Particle& p2 = event.getParticle(2);
+    double genMaxVal(0.0);
+    double AMPpdf(0.0);
 
-     hist.Fill(p1.invariantMass(p2), p0.invariantMass(p1),
-     evWeight * ampPar.GetDoubleParameter(0)->GetValue());
-     plot_onlyweight.Fill(p1.invariantMass(p2), p0.invariantMass(p1),
-     evWeight);
-     }
+    gRandom = new TRandom3(123456);
 
-     hist.Scale(1.0 * num_events / hist.Integral());
-     plot_onlyweight.Scale(1.0 * num_events / plot_onlyweight.Integral());
+    for (unsigned int i = 0; i < 500000; ++i) {
+      dummy_data_point.setVal(3, gRandom->Uniform(0, TMath::Pi()));
+      dummy_data_point.setVal(4, gRandom->Uniform(-TMath::Pi(), TMath::Pi()));
 
-     TCanvas c;*/
+      dummy_data_point.setVal(8, gRandom->Uniform(0, TMath::Pi()));
+      dummy_data_point.setVal(9, gRandom->Uniform(-TMath::Pi(), TMath::Pi()));
 
-    /*// get default styles from xml file
-     NeatPlotting::XMLStyleConfigParser xml_style_config_parser(
-     "Tools/RootNeatPlotting/default-style.xml");
-     NeatPlotting::DefaultStyleSingleton::Instance().readStyleConfigParser(
-     xml_style_config_parser);
+      ParameterList list = amp->intensity(dummy_data_point);    //unfortunatly not thread safe
+      AMPpdf = *list.GetDoubleParameter(0);
+      if (AMPpdf > genMaxVal)
+        genMaxVal = 1.2*AMPpdf;
+    }
 
-     // create an empty plot bundle
-     NeatPlotting::PlotBundle plot_bundle;
+    unsigned int acceptedEvents(0);
+    while (acceptedEvents < 100000) {
+      dummy_data_point.setVal(3, gRandom->Uniform(0, TMath::Pi()));
+      dummy_data_point.setVal(4, gRandom->Uniform(-TMath::Pi(), TMath::Pi()));
 
-     //create a drawable root object and style pair (default style is being used)
-     NeatPlotting::DrawableDataObjectStylePair<TH1*> hist_style_pair(&hist);
-     // change the draw option
-     hist_style_pair.draw_style.draw_option = "COLZ";
+      dummy_data_point.setVal(8, gRandom->Uniform(0, TMath::Pi()));
+      dummy_data_point.setVal(9, gRandom->Uniform(-TMath::Pi(), TMath::Pi()));
 
-     // and add it to the plot bundle
-     // the plot bundle will not make a copy of the histogram
-     // so make sure the lifetime of hist is long enough
-     plot_bundle.addHistogram(hist_style_pair);
+      double ampRnd = gRandom->Uniform(0.0, 1.0) * genMaxVal;
+      ParameterList list;
+      list = amp->intensity(dummy_data_point);    //unfortunatly not thread safe
+      AMPpdf = *list.GetDoubleParameter(0);
+      if (genMaxVal < AMPpdf) {
+        std::stringstream ss;
+        ss << "RunManager::generate: error in HitMiss procedure. "
+            << "Maximum value of random number generation smaller then amplitude maximum! "
+            << genMaxVal << " < " << AMPpdf;
+        throw std::runtime_error(ss.str());
+      }
+      if (ampRnd > AMPpdf)
+        continue;
 
-     // add labels to the x and y axis
-     plot_bundle.plot_axis.x_axis_title = "M^{2}_#pi_0#pi_0";
-     plot_bundle.plot_axis.y_axis_title = "M^{2}_#pi_0#gamma";
+      ++acceptedEvents;
 
-     plot_bundle.drawOnCurrentPad();
+      ct_pi_pi.Fill(dummy_data_point.getVal(3));
+      ct_pi_pi_hel.Fill(dummy_data_point.getVal(8));
+      phi_pi_pi.Fill(dummy_data_point.getVal(4));
+      phi_pi_pi_hel.Fill(dummy_data_point.getVal(9));
+    }
 
-     c.SetLogz(1);
+    TCanvas c;
+    c.Divide(2, 4);
+    c.cd(2);
+    ct_pi_pi.Draw();
+    ct_pi_pi.GetYaxis()->SetRangeUser(0.0, ct_pi_pi.GetMaximum());
+    c.cd(4);
+    ct_pi_pi_hel.Draw();
+    ct_pi_pi_hel.GetYaxis()->SetRangeUser(0.0, ct_pi_pi_hel.GetMaximum());
 
-     hist.Draw("colz");
-     c.SaveAs("plot.pdf");
-     plot_onlyweight.Draw("colz");
-     c.SaveAs("plot_onlyweight.pdf");*/
+    c.cd(6);
+    phi_pi_pi.Draw();
+    phi_pi_pi.GetYaxis()->SetRangeUser(0.0, phi_pi_pi.GetMaximum());
+    c.cd(8);
+    phi_pi_pi_hel.Draw();
+    phi_pi_pi_hel.GetYaxis()->SetRangeUser(0.0, phi_pi_pi_hel.GetMaximum());
+    c.SaveAs("blub.pdf");
 
-    //  TFile output(outFile.c_str(),"update");
-    //  output.SetCompressionLevel(1); //try level 2 also
-    //  output.Close(); //clean output file
-    //  plotData plot(std::string("dalitz"),outFile, data);  plot.plot(300);
-    //  plotData plotPhsp(std::string("dalitz_phsp"),outFile, data);  plotPhsp.plot(300);
   }
   return 0;
 }

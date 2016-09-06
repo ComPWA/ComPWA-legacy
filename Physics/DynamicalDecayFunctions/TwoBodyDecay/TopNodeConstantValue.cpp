@@ -26,12 +26,16 @@ TopNodeConstantValue::~TopNodeConstantValue() {
 
 void TopNodeConstantValue::initialiseParameters(
     const boost::property_tree::ptree& parameter_info,
-    const ParameterList& external_parameters) {
+    const ExternalParameters& external_parameters) {
 }
 
 std::complex<double> TopNodeConstantValue::evaluate(const dataPoint& point,
     unsigned int evaluation_index) const {
+  return std::complex<double>(1.0, 0.0);
+}
 
+std::complex<double> TopNodeConstantValue::evaluate(unsigned int storage_index,
+    unsigned int data_index, unsigned int evaluation_index) const {
   return std::complex<double>(1.0, 0.0);
 }
 

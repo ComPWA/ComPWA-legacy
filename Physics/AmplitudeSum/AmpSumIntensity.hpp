@@ -80,7 +80,7 @@ public:
 	virtual std::complex<double> getFirstBW(dataPoint& point, ParameterList& par);
 
 	//! setting new parameterList
-	virtual void setParameterList(ParameterList& par);
+	virtual void setParameterList(const ParameterList& par);
 	//! evaluate total amplitude using parameters \par at phsp point \point
 	virtual const ParameterList& intensity(const dataPoint& point, ParameterList& par);
 	//! evaluate total amplitude using current set of parameters at phsp point \point. Amplitude is multiplied with efficiency of datapoint.

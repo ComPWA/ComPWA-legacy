@@ -13,6 +13,7 @@
 
 #include "Core/DataPoint.hpp"
 #include "Core/Kinematics.hpp"
+#include "Core/DataPointStorage.hpp"
 #include "Physics/HelicityAmplitude/TwoBodyDecayAmplitude.hpp"
 
 namespace ComPWA {
@@ -47,6 +48,7 @@ void TwoBodyDecayAmplitude::init() {
       decay_info_.final_state_.first.J_denominator_);
   d2_M_.SetSpin(decay_info_.final_state_.second.J_z_numerator_,
       decay_info_.final_state_.second.J_denominator_);
+  daughters_delta_M_ = d1_M_ - d2_M_;
 }
 
 std::complex<double> TwoBodyDecayAmplitude::evaluate(const dataPoint& point,
@@ -54,7 +56,19 @@ std::complex<double> TwoBodyDecayAmplitude::evaluate(const dataPoint& point,
   double theta(point.getVal(evaluation_index + index_theta_helicity_angle_));
   double phi(point.getVal(evaluation_index + index_phi_helicity_angle_));
 
-  return spin_factor_ * Wigner_D(phi, theta, -phi, J_, M_, d1_M_ - d2_M_);
+  return spin_factor_ * Wigner_D(phi, theta, -phi, J_, M_, daughters_delta_M_);
+}
+
+std::complex<double> TwoBodyDecayAmplitude::evaluate(unsigned int storage_index,
+    unsigned int data_index, unsigned int evaluation_index) const {
+  double theta(
+      DataPointStorage::Instance().getDataList(storage_index,
+          evaluation_index + index_theta_helicity_angle_)[data_index]);
+  double phi(
+      DataPointStorage::Instance().getDataList(storage_index,
+          evaluation_index + index_phi_helicity_angle_)[data_index]);
+
+  return spin_factor_ * Wigner_D(phi, theta, -phi, J_, M_, daughters_delta_M_);
 }
 
 } /* namespace HelicityFormalism */

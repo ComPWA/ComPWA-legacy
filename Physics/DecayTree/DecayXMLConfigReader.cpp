@@ -12,6 +12,7 @@
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/foreach.hpp>
 
+#include "Core/PhysConst.hpp"
 #include "Physics/DecayTree/DecayXMLConfigReader.hpp"
 
 namespace ComPWA {
@@ -38,37 +39,37 @@ void DecayXMLConfigReader::readConfig(const std::string &filename) {
 
   // add particle states to the template sets first
   // then we construct concrete states from those templates
-  BOOST_FOREACH(ptree::value_type const& v, pt_.get_child("FinalState")) {
-    ParticleStateInfo ps = parseParticleStateBasics(v.second);
-    template_particle_states_[ps.unique_id_] = ps;
-  }
-  BOOST_FOREACH(ptree::value_type const& v, pt_.get_child("IntermediateStates")) {
-    ParticleStateInfo ps = parseParticleStateBasics(v.second);
-    template_particle_states_[ps.unique_id_] = ps;
-  }
+  BOOST_FOREACH(ptree::value_type const& v, pt_.get_child("FinalState")){
+  ParticleStateInfo ps = parseParticleStateBasics(v.second);
+  template_particle_states_[ps.unique_id_] = ps;
+}
+  BOOST_FOREACH(ptree::value_type const& v, pt_.get_child("IntermediateStates")){
+  ParticleStateInfo ps = parseParticleStateBasics(v.second);
+  template_particle_states_[ps.unique_id_] = ps;
+}
 
 // now go through the decay tree info and construct them
-  BOOST_FOREACH(ptree::value_type const& decay_tree, pt_.get_child("DecayTrees")) {
-    BOOST_FOREACH(ptree::value_type const& decay_node, decay_tree.second) {
-      ParticleStateInfo mothers = parseParticleStateRemainders(
-          decay_node.second.get_child("Mother").get_child("ParticleState"));
-      std::vector<ParticleStateInfo> daughter_lists;
-      BOOST_FOREACH(ptree::value_type const& daugthers, decay_node.second.get_child("Daughters")) {
-        daughter_lists.push_back(
-            parseParticleStateRemainders(daugthers.second));
-      }
-
-      ptree strength_phase;
-      boost::optional<const ptree&> strength_phase_opt =
-          decay_node.second.get_child_optional("StrengthPhase");
-      if (strength_phase_opt.is_initialized()) {
-        strength_phase = decay_node.second.get_child("StrengthPhase");
-      }
-      decay_configuration_.addDecayToCurrentDecayTree(mothers, daughter_lists,
-          strength_phase);
+  BOOST_FOREACH(ptree::value_type const& decay_tree, pt_.get_child("DecayTrees")){
+  BOOST_FOREACH(ptree::value_type const& decay_node, decay_tree.second) {
+    ParticleStateInfo mothers = parseParticleStateRemainders(
+        decay_node.second.get_child("Mother").get_child("ParticleState"));
+    std::vector<ParticleStateInfo> daughter_lists;
+    BOOST_FOREACH(ptree::value_type const& daugthers, decay_node.second.get_child("Daughters")) {
+      daughter_lists.push_back(
+          parseParticleStateRemainders(daugthers.second));
     }
-    decay_configuration_.addCurrentDecayTreeToList();
+
+    ptree strength_phase;
+    boost::optional<const ptree&> strength_phase_opt =
+    decay_node.second.get_child_optional("StrengthPhase");
+    if (strength_phase_opt.is_initialized()) {
+      strength_phase = decay_node.second.get_child("StrengthPhase");
+    }
+    decay_configuration_.addDecayToCurrentDecayTree(mothers, daughter_lists,
+        strength_phase);
   }
+  decay_configuration_.addCurrentDecayTreeToList();
+}
 }
 
 ParticleStateInfo DecayXMLConfigReader::parseParticleStateBasics(
@@ -76,15 +77,23 @@ ParticleStateInfo DecayXMLConfigReader::parseParticleStateBasics(
   ParticleStateInfo ps;
   ps.unique_id_ = pt.get<unsigned int>("id");
   ps.pid_information_.name_ = pt.get<std::string>("name");
+  ps.coherent = pt.get<bool>("coherent");
 
   boost::optional<const ptree&> spin_info = pt.get_child_optional("SpinInfo");
   if (spin_info.is_initialized()) {
     ps.spin_information_.J_numerator_ = pt.get_child("SpinInfo").get<
-        unsigned int>("J");
-    ps.spin_information_.J_denominator_ = 1;
+        unsigned int>("J_numerator");
+    ps.spin_information_.J_denominator_ = pt.get_child("SpinInfo").get<
+        unsigned int>("J_denominator");
   }
   else {
     // try to read it from a database
+    if (ComPWA::PhysConst::Instance().particleExists(ps.pid_information_.name_)) {
+      const ComPWA::ParticleProperties& particle_prop =
+          ComPWA::PhysConst::Instance().findParticle(ps.pid_information_.name_);
+      ps.spin_information_ = particle_prop.getSpinLikeQuantumNumber(
+          ComPWA::QuantumNumberIDs::SPIN);
+    }
   }
 
   boost::optional<const ptree&> dynamical_info = pt.get_child_optional(
@@ -107,7 +116,7 @@ ParticleStateInfo DecayXMLConfigReader::parseParticleStateRemainders(
   auto found_particle_state = template_particle_states_.find(id);
   if (found_particle_state != template_particle_states_.end()) {
     ParticleStateInfo ps(found_particle_state->second);
-    ps.spin_information_.J_z_numerator_ = pt.get<int>("M");
+    ps.spin_information_.J_z_numerator_ = pt.get<int>("J_z_numerator");
 
     return ps;
   }

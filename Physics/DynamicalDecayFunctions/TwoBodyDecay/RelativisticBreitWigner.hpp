@@ -27,6 +27,7 @@
 #include "Core/Functions.hpp"
 #include "Core/Exceptions.hpp"
 #include "Physics/DynamicalDecayFunctions/AbstractDynamicalFunction.hpp"
+#include "Physics/HelicityAmplitude/ParticleStateDefinitions.hpp"
 
 namespace ComPWA {
 
@@ -56,17 +57,6 @@ namespace DynamicalFunctions {
  * daughter masses.
  */
 class RelativisticBreitWigner: public AbstractDynamicalFunction {
-public:
-  RelativisticBreitWigner(const ComPWA::Spin& J);
-  virtual ~RelativisticBreitWigner();
-
-  void initialiseParameters(const boost::property_tree::ptree& parameter_info,
-      const ParameterList& external_parameters);
-
-  std::complex<double> evaluate(const dataPoint& point,
-      unsigned int evaluation_index) const;
-
-private:
   std::shared_ptr<DoubleParameter> resonance_width_;
   std::shared_ptr<DoubleParameter> resonance_mass_;
   std::shared_ptr<DoubleParameter> daughter1_mass_;
@@ -75,6 +65,21 @@ private:
   ComPWA::Spin J_;
 
   unsigned int index_cms_mass_squared_;
+
+  void initialiseParameters(const boost::property_tree::ptree& parameter_info,
+      const ExternalParameters& external_parameters);
+
+  std::complex<double> evaluate(double mSq) const;
+
+public:
+  RelativisticBreitWigner(const ParticleStateInfo& psi, const ExternalParameters& external_parameters);
+  virtual ~RelativisticBreitWigner();
+
+  std::complex<double> evaluate(const dataPoint& point,
+      unsigned int evaluation_index) const;
+
+  std::complex<double> evaluate(unsigned int storage_index, unsigned int data_index,
+      unsigned int evaluation_index) const;
 };
 
 } /* namespace DynamicalFunctions */

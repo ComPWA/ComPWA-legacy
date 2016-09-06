@@ -25,13 +25,26 @@ class dataPoint;
 namespace Physics {
 namespace HelicityFormalism {
 
-typedef std::pair<std::shared_ptr<TwoBodyDecayAmplitude>,
-    std::shared_ptr<DynamicalFunctions::AbstractDynamicalFunction> > FullTwoBodyDecayAmplitude;
+struct FullTwoBodyDecayAmplitude {
+  std::string name;    // for full coherent amplitude construction reasons
 
-struct SequentialTwoBodyDecayAmplitude {
+  //TODO: we add this particle state info for the coherent sum stuff
+  // the whole design is fucked up because of that, change that someday
+  std::pair<ParticleStateInfo, std::pair<ParticleStateInfo, ParticleStateInfo> > decay_spin_info_;
+
   std::shared_ptr<DoubleParameter> strength_;
   std::shared_ptr<DoubleParameter> phase_;
-  std::vector<FullTwoBodyDecayAmplitude> full_decay_amplitude_chain_list_;
+  std::shared_ptr<TwoBodyDecayAmplitude> angular_part_;
+  std::shared_ptr<DynamicalFunctions::AbstractDynamicalFunction> dynamical_part_;
+};
+
+struct SequentialTwoBodyDecayAmplitude {
+  std::vector<FullTwoBodyDecayAmplitude> decay_amplitude;
+  double factor;
+
+  SequentialTwoBodyDecayAmplitude() :
+      factor(1.0) {
+  }
 };
 
 /**
