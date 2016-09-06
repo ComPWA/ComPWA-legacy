@@ -6,8 +6,10 @@ local QFTINC = [ os.environ QFT_INCLUDE ] ;
 local QFT = [ os.environ QFT ] ;
 local MINUIT2 = [ os.environ MINUIT2 ] ;
 
-local rlibs = [ SHELL "$ROOTSYS/bin/root-config --libs" ] ;
+local rlibs = [ SHELL "$ROOTSYS/bin/root-config --glibs" ] ;
 ROOTLIBS = [ MATCH "(.*)[\n]" : $(rlibs) ] ;
+
+SHELL "rootcint -f test/plotterDict.cpp -c test/TTripleSliderDemo.hpp test/LinkDefPlotter.h" ;
 
 project :
 	requirements <include>./
@@ -80,6 +82,13 @@ exe optimizertestApp :
 
 exe physicstestApp : 
         PhysicsTestApp.cpp 
+        test
+        $(TOP)/Core//ComPWA
+        $(TOP)/Physics/BreitWigner//BreitWigner
+        : ;
+        
+exe ampplotterApp : 
+        AmpPlotterApp.cpp 
         test
         $(TOP)/Core//ComPWA
         $(TOP)/Physics/BreitWigner//BreitWigner
@@ -283,7 +292,7 @@ exe iteratorApp :
 
 install dist : test : <location>$(TOP)/lib <threading>single ;
 #install dist2 : dalitzfitApp treetestApp cx0testApp dataiftestApp optimizertestApp physicstestApp blackscholesApp neuralnetworkApp : <location>$(TOP)/bin <threading>single ;
-install dist2 : compareTreeAmpApp dalitzfitApp slicefitApp slicefitubApp slicefitrandApp treetestApp dataiftestApp optimizertestApp physicstestApp : <location>$(TOP)/bin <threading>single ;
+install dist2 : compareTreeAmpApp dalitzfitApp slicefitApp slicefitubApp slicefitrandApp treetestApp dataiftestApp optimizertestApp physicstestApp ampplotterApp : <location>$(TOP)/bin <threading>single ;
 install dist3 : estimatortestApp integrationtestApp integrationtestbinnedApp runmanagertestApp gentwopartApp gendalitzApp dalitzplotApp serializeApp dpareaTestApp genRunManager : <location>$(TOP)/bin <threading>single ;
 
 
