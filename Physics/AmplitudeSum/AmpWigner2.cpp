@@ -62,7 +62,7 @@ std::shared_ptr<FunctionTree> AmpWigner2::SetupTree(
 	int sampleSize = sample.GetMultiDouble(0)->GetNValues();
 	//----Strategies needed
 	std::shared_ptr<WignerDStrategy> angdStrat(
-			new WignerDStrategy("AngD"+suffix,ParType::MDOUBLE) );
+			new WignerDStrategy("AngD"+suffix) );
 	newTree->createHead("AngD_"+suffix, angdStrat, sampleSize);
 
 	newTree->createLeaf("spin",_spin, "AngD_"+suffix); //spin
@@ -89,44 +89,24 @@ bool WignerDStrategy::execute(ParameterList& paras,
 
 	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(
 			Kinematics::instance());
-	//MultiDim output, must have multidim Paras in input
-	if(checkType == ParType::MDOUBLE){
-		if(paras.GetNMultiDouble()){
-			std::shared_ptr<MultiDouble> _angle = paras.GetMultiDouble(0);
 
-			std::vector<double> results(_angle->GetNValues(), 0.);
-			for(unsigned int ele=0; ele<_angle->GetNValues(); ele++){
-				try{
-					results.at(ele)=AmpWigner2::dynamicalFunction(
-							_inSpin,_outSpin1,_outSpin2,_angle->GetValue(ele)
-					);
-				} catch (std::exception &ex) {
-					BOOST_LOG_TRIVIAL(error) << "WignerDStrategy::execute() | "
-							<<ex.what();
-					throw std::runtime_error("WignerDStrategy::execute() | "
-							"Evaluation of dynamical function failed!");
-				}
-			}//end element loop
-			out = std::shared_ptr<AbsParameter>(
-					new MultiDouble(out->GetName(),results));
-			return true;
-		}
-	}else if(checkType == ParType::DOUBLE){ //one dim output
-		double cosTheta = paras.GetDoubleParameter(3)->GetValue();
-		double result;
+	std::shared_ptr<MultiDouble> _angle = paras.GetMultiDouble(0);
+
+	std::vector<double> results(_angle->GetNValues(), 0.);
+	for(unsigned int ele=0; ele<_angle->GetNValues(); ele++){
 		try{
-			result = AmpWigner2::dynamicalFunction(
-				_inSpin,_outSpin1,_outSpin2,cosTheta
-				);
+			results.at(ele)=AmpWigner2::dynamicalFunction(
+					_inSpin,_outSpin1,_outSpin2,_angle->GetValue(ele)
+			);
 		} catch (std::exception &ex) {
 			BOOST_LOG_TRIVIAL(error) << "WignerDStrategy::execute() | "
 					<<ex.what();
 			throw std::runtime_error("WignerDStrategy::execute() | "
 					"Evaluation of dynamical function failed!");
 		}
-		out = std::shared_ptr<AbsParameter>(
-				new DoubleParameter(out->GetName(),result));
-		return true;
-	}
-	return false;
+	}//end element loop
+	out = std::shared_ptr<AbsParameter>(
+			new MultiDouble(out->GetName(),results));
+
+	return true;
 }

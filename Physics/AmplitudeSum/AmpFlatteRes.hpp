@@ -90,6 +90,9 @@ public:
 	 * @param massB1 mass of first particle of second channel
 	 * @param massB2 mass of second particle of second channel
 	 * @param gB coupling constant for second channel
+	 * @param massC1 mass of first particle of third channel
+	 * @param massC2 mass of third particle of third channel
+	 * @param gC coupling constant for third channel
 	 * @param J resonance spin
 	 * @param mesonRadius 1/interaction length (needed for barrier factors)
 	 * @return
@@ -98,7 +101,22 @@ public:
 			double massA1, double massA2, double gA,
 			double massB1, double massB2, double gB,
 			double massC1, double massC2, double gC,
-			unsigned int J, double mesonRadius, formFactorType ffType=formFactorType::CrystalBarrel );
+			unsigned int J, double mesonRadius,
+			formFactorType ffType);
+
+	/** Dynamical function for two coupled channel approach
+	 *
+	 * @param mSq center-of-mass energy^2 (=s)
+	 * @param mR mass of resonances
+	 * @param gA coupling constant for signal channel
+	 * @param termA Coupling term to signal channel
+	 * @param termB Coupling term to second channel
+	 * @param termC Coupling term to third channel (optional)
+	 * @return
+	 */
+	static std::complex<double> dynamicalFunction(double mSq, double mR, double gA,
+			std::complex<double> termA, std::complex<double> termB,
+			std::complex<double> termC = std::complex<double>(0,0));
 
 	virtual std::complex<double> EvaluateAmp(dataPoint& point) ;
 
@@ -119,9 +137,24 @@ protected:
 class FlatteStrategy : public Strategy
 {
 public:
-	FlatteStrategy(const std::string resonanceName, ParType in):Strategy(in),name(resonanceName){}
-	virtual const std::string to_str() const { return ("flatte amplitude of "+name); }
-	virtual bool execute(ParameterList& paras, std::shared_ptr<AbsParameter>& out);
+	FlatteStrategy(const std::string resonanceName) :
+		Strategy(ParType::MCOMPLEX), name(resonanceName) { }
+
+	virtual const std::string to_str() const {
+		return ("flatte amplitude of "+name);
+	}
+
+	static std::shared_ptr<FunctionTree> SetupTree( std::string name,
+			std::shared_ptr<MultiDouble> mSq,
+			std::shared_ptr<DoubleParameter> mR,
+			std::shared_ptr<DoubleParameter> g, double ma, double mb,
+			std::shared_ptr<DoubleParameter> g2, double g2_ma, double g2_mb,
+			std::shared_ptr<DoubleParameter> g3, double g3_ma, double g3_mb,
+			Spin spin, std::shared_ptr<DoubleParameter> mesonRadius,
+			formFactorType type);
+
+	virtual bool execute(ParameterList& paras,
+			std::shared_ptr<AbsParameter>& out);
 
 protected:
 	std::string name;

@@ -18,6 +18,7 @@
 #include "Core/PhysConst.hpp"
 #include "Physics/DPKinematics/DalitzKinematics.hpp"
 #include "Physics/AmplitudeSum/AmpAbsDynamicalFunction.hpp"
+#include "Physics/AdvancedStrategies.hpp"
 
 AmpAbsDynamicalFunction::AmpAbsDynamicalFunction( normStyle nS, int calls) :
 _parity(+1), _cparity(0),
@@ -766,6 +767,17 @@ std::complex<double> AmpAbsDynamicalFunction::couplingToWidth(
 		double spin, double mesonRadius, formFactorType type)
 {
 	double sqrtM = sqrt(mSq);
+	std::complex<double> phspFactor = Kinematics::phspFactor(sqrtM,ma,mb);
+
+	return couplingToWidth(mSq,mR,g,ma,mb,spin,mesonRadius,type,phspFactor);
+}
+
+std::complex<double> AmpAbsDynamicalFunction::couplingToWidth(
+		double mSq, double mR, double g, double ma, double mb,
+		double spin, double mesonRadius, formFactorType type,
+		std::complex<double> phspFactor)
+{
+	double sqrtM = sqrt(mSq);
 
 	//calculate gammaA(s_R)
 	std::complex<double> gammaA(1,0); //spin==0
@@ -780,8 +792,7 @@ std::complex<double> AmpAbsDynamicalFunction::couplingToWidth(
 		gammaA = ffR*qR;
 	}
 	//calculate phsp factor
-	std::complex<double> rho = Kinematics::phspFactor(sqrtM,ma,mb);
-	std::complex<double> res = std::norm(gammaA)*g*g*rho/ mR;
+	std::complex<double> res = std::norm(gammaA)*g*g*phspFactor/ mR;
 
 	//check for NaN
 	if( res.real()!=res.real() || res.imag() != res.imag() )
@@ -794,6 +805,8 @@ std::complex<double> AmpAbsDynamicalFunction::couplingToWidth(
 
 	return res;
 }
+
+//_____________________________________________________________________________
 
 double twoDimGaussian(double* z, size_t dim, void *param)
 {
@@ -812,4 +825,94 @@ double twoDimGaussian(double* z, size_t dim, void *param)
 	double result = exp( -(x-x0)*(x-x0)/(2*sigmaX*sigmaX) - (y-y0)*(y-y0)/(2*sigmaY*sigmaY) );
 	result/=2*pi*sigmaY*sigmaX;
 	return result;
+}
+
+//_____________________________________________________________________________
+std::shared_ptr<FunctionTree> couplingToWidthStrat::SetupTree(
+			std::shared_ptr<MultiDouble> mSq,
+			std::shared_ptr<DoubleParameter> mR,
+			std::shared_ptr<DoubleParameter> g, double ma, double mb,
+			Spin spin, std::shared_ptr<DoubleParameter> mesonRadius,
+			formFactorType type)
+{
+
+		std::shared_ptr<couplingToWidthStrat> thisStrat(
+				new couplingToWidthStrat);
+
+		std::string stratName = "couplingToWidth";
+		//------------Setup Tree---------------------
+		std::shared_ptr<FunctionTree> newTree(new FunctionTree());
+
+		newTree->createHead(stratName, thisStrat, mSq->GetNValues());
+		newTree->createLeaf("mass", mR, stratName);
+		newTree->createLeaf("g", g, stratName);
+		newTree->createLeaf("massA", ma, stratName);
+		newTree->createLeaf("massB", mb, stratName);
+		newTree->createLeaf("spin", spin, stratName);
+		newTree->createLeaf("mesonRadius", mesonRadius, stratName);
+		newTree->createLeaf("ffType", (double) type, stratName);
+
+		newTree->insertTree(phspFactorStrat::SetupTree(mSq, ma, mb), stratName);
+		newTree->createLeaf("mSq", mSq ,stratName);
+
+		return newTree;
+
+}
+
+bool couplingToWidthStrat::execute(ParameterList& paras,
+		std::shared_ptr<AbsParameter>& out)
+{
+	//Check parameter type
+	if( checkType != out->type() )
+		throw( WrongParType(	std::string("Output Type ")
+	+ParNames[out->type()] + std::string(" conflicts expected type ")
+	+ParNames[checkType]+std::string(" of ) couplingToWidthStrat") )
+		);
+
+	//Check size of parameter list
+	if( paras.GetNDouble() != 7 ){
+		BOOST_LOG_TRIVIAL(error)<<"couplingToWidthStrat::execute() | "
+				<< paras.to_str();
+		throw( BadParameter("couplingToWidthStrat::execute() | "
+				"Number of DoubleParameters in ParameterList"
+				" ("+std::to_string(paras.GetNDouble())+") "
+				" does not match!")
+		);
+	}
+
+	/* Get parameters from ParameterList:
+	 * We use the same order of the parameters as was used during tree
+	 * construction */
+	double mR = paras.GetDoubleParameter(0)->GetValue();
+	double g = paras.GetDoubleParameter(1)->GetValue();
+	double ma = paras.GetDoubleParameter(2)->GetValue();
+	double mb = paras.GetDoubleParameter(3)->GetValue();
+	unsigned int spin = paras.GetDoubleParameter(4)->GetValue();
+	double mesonRadius = paras.GetDoubleParameter(5)->GetValue();
+	formFactorType ffType = formFactorType(paras.GetDoubleParameter(6)->GetValue());
+
+	std::shared_ptr<MultiDouble> mp = paras.GetMultiDouble(0);
+	std::shared_ptr<MultiComplex> phspFactors =
+			paras.GetMultiComplex(0);
+	std::vector<std::complex<double> > results(mp->GetNValues(),
+			std::complex<double>(0.));
+	//calc function for each point
+	for(unsigned int ele=0; ele<mp->GetNValues(); ele++){
+		try{
+			results.at(ele) = AmpAbsDynamicalFunction::couplingToWidth(
+					mp->GetValue(ele),
+					mR, g, ma, mb, spin, mesonRadius, ffType,
+					phspFactors->GetValue(ele)
+			);
+		} catch (std::exception& ex) {
+			BOOST_LOG_TRIVIAL(error) << "couplingToWidthStrat::execute() | "
+					<<ex.what();
+			throw( std::runtime_error("couplingToWidthStrat::execute() | "
+					"Evaluation of dynamic function failed!")
+			);
+		}
+	}
+	out = std::shared_ptr<AbsParameter>(
+			new MultiComplex(out->GetName(),results));
+	return true;
 }

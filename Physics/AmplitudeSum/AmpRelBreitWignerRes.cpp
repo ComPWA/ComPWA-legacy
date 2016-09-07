@@ -232,9 +232,9 @@ std::shared_ptr<FunctionTree> AmpRelBreitWignerRes::SetupTree(
 
 	//----Add Nodes
 	std::shared_ptr<BreitWignerStrategy> rbwStrat(
-			new BreitWignerStrategy(_name,ParType::MCOMPLEX) );
+			new BreitWignerStrategy(_name) );
 	std::shared_ptr<WignerDStrategy> angdStrat(
-			new WignerDStrategy(_name,ParType::MDOUBLE) );
+			new WignerDStrategy(_name) );
 
 	//Reso=BW*C*AD*N
 	newTree->createHead("Reso_"+_name, mmultStrat, sampleSize);

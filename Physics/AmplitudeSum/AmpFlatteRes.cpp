@@ -21,6 +21,7 @@
 #include <cmath>
 #include <math.h>
 #include "Physics/AmplitudeSum/AmpFlatteRes.hpp"
+#include "Physics/AdvancedStrategies.hpp"
 
 AmpFlatteRes::AmpFlatteRes( normStyle nS, int calls ) :
 AmpAbsDynamicalFunction( nS, calls )
@@ -337,6 +338,31 @@ std::complex<double> AmpFlatteRes::EvaluateAmp(dataPoint& point)
 	}
 	return result;
 }
+std::complex<double> AmpFlatteRes::dynamicalFunction(double mSq, double mR, double gA,
+		std::complex<double> termA, std::complex<double> termB,
+		std::complex<double> termC )
+{
+	std::complex<double> i(0,1);
+	double sqrtS = sqrt(mSq);
+
+	/* Coupling constant from production reaction. In case of a particle decay
+	 * the production. coupling doesn't depend in energy since the CM energy
+	 * is in the (RC) system fixed to the mass of the decaying particle
+	 */
+	double g_production = 1;
+
+	std::complex<double> denom = std::complex<double>( mR*mR - mSq,0)
+					+ (-1.0)*i*sqrtS*(termA + termB + termC);
+
+	std::complex<double> result = std::complex<double>(gA*g_production,0) / denom;
+
+	if(result.real()!=result.real() || result.imag()!=result.imag()){
+		std::cout<<"AmpFlatteRes::dynamicalFunction() | "<<mR<<" "<<mSq<<" "
+				<<termA<<" "<<termB<<" "<<termC<<std::endl;
+		return 0;
+	}
+	return result;
+}
 
 std::complex<double> AmpFlatteRes::dynamicalFunction(double mSq, double mR,
 		double massA1, double massA2, double gA,
@@ -359,9 +385,6 @@ std::complex<double> AmpFlatteRes::dynamicalFunction(double mSq, double mR,
 	//		qTermA = Kinematics::qValue(sqrtS,massA1,massA2) / Kinematics::qValue(mR,massA1,massA2);
 	qTermA = std::complex<double>(1,0);
 	termA = gammaA*barrierA*barrierA*std::pow(qTermA,(double)2*J+1);
-
-	//	std::cout<<qTermA<<" "<<Kinematics::qValue(sqrtS,massA1,massA2)
-	//	<<" "<<Kinematics::qValue(mR,massA1,massA2)<<std::endl;
 
 	//channel B - hidden channel
 	std::complex<double> gammaB, qTermB, termB;
@@ -391,26 +414,7 @@ std::complex<double> AmpFlatteRes::dynamicalFunction(double mSq, double mR,
 		termC = gammaC*barrierC*barrierC*std::pow(qTermC,(double)2*J+1);
 	}
 
-	//Coupling constant from production reaction. In case of a particle decay the production
-	//coupling doesn't depend in energy since the CM energy is in the (RC) system fixed to the
-	//mass of the decaying particle
-	double g_production = 1;
-
-	//-- old approach(BaBar)
-	//std::complex<double> denom( mR*mR - mSq, (-1)*(rhoA*gA*gA + rhoB*gB*gB + rhoC*gC*gC) );
-	//-- new approach - for spin 0 resonances in the imaginary part of the denominator the term qTerm
-	//is added, compared to the old formula
-	std::complex<double> denom = std::complex<double>( mR*mR - mSq,0)
-																											+ (-1.0)*i*sqrtS*(termA + termB + termC);
-
-	std::complex<double> result = std::complex<double>(gA*g_production,0) / denom;
-
-	if(result.real()!=result.real() || result.imag()!=result.imag()){
-		std::cout<<"mpFlatteRes::dynamicalFunction() | "<<barrierA<<" "<<mR<<" "<<mSq<<" "
-				<<massA1<<" "<<massA2<<std::endl;
-		return 0;
-	}
-	return result;
+	return dynamicalFunction(mSq, mR, gA, termA, termB, termC);
 }
 
 std::shared_ptr<FunctionTree> AmpFlatteRes::SetupTree(
@@ -418,12 +422,7 @@ std::shared_ptr<FunctionTree> AmpFlatteRes::SetupTree(
 {
 	DalitzKinematics* kin =
 			dynamic_cast<DalitzKinematics*>(Kinematics::instance());
-//	auto var1_limit = kin->GetMinMax( GetVarIdA() );
-//	auto var2_limit = kin->GetMinMax( GetVarIdB() );
-//	double phspVol = (var1_limit.second-var1_limit.first)
-//			*(var2_limit.second-var2_limit.first);
 	double phspVol = kin->GetPhspVolume();
-//	double phspVol=1;
 
 	int sampleSize = sample.GetMultiDouble(0)->GetNValues();
 	int toySampleSize = toySample.GetMultiDouble(0)->GetNValues();
@@ -446,11 +445,12 @@ std::shared_ptr<FunctionTree> AmpFlatteRes::SetupTree(
 
 	//----Add Nodes
 	std::shared_ptr<FlatteStrategy> flatteStrat(
-			new FlatteStrategy(_name,ParType::MCOMPLEX));
+			new FlatteStrategy(_name));
 	std::shared_ptr<WignerDStrategy> angdStrat(
-			new WignerDStrategy(_name,ParType::MDOUBLE) );
+			new WignerDStrategy(_name) );
 
-	newTree->createHead("Reso_"+_name, mmultStrat, sampleSize); //Reso=BW*C_*AD*N_
+	//R = (mag,phase)*(Flatte)*(WignerD)*(Norm)
+	newTree->createHead("Reso_"+_name, mmultStrat, sampleSize);
 	newTree->createNode("PreFactor_"+_name, complStrat, "Reso_"+_name);
 	newTree->createLeaf(
 			"IntensPre_"+_name, std::abs(_prefactor), "PreFactor_"+_name);
@@ -459,29 +459,21 @@ std::shared_ptr<FunctionTree> AmpFlatteRes::SetupTree(
 	newTree->createNode("C_"+_name, complStrat, "Reso_"+_name); //c
 	newTree->createLeaf("Intens_"+_name, _mag, "C_"+_name); //r
 	newTree->createLeaf("Phase_"+_name, _phase, "C_"+_name); //phi
+
 	//Angular distribution
 	if( _spin )
 		newTree->insertTree(_wignerD.SetupTree(sample,suffix), "Reso_"+_name);
 
 	//Flatte
-	newTree->createNode("FlatteRes_"+_name, flatteStrat, "Reso_"+_name, sampleSize);
-	newTree->createLeaf("mass", _mass, "FlatteRes_"+_name);
-	newTree->createLeaf("g1", _g1, "FlatteRes_"+_name);
-	newTree->createLeaf("spin", _spin, "FlatteRes_"+_name);
-	newTree->createLeaf("mesonRadius", _mesonRadius , "FlatteRes_"+_name);
-	newTree->createLeaf("formFactorType", _ffType , "FlatteRes_"+_name);
-	newTree->createLeaf("massA1", _mass1, "FlatteRes_"+_name);
-	newTree->createLeaf("massA2", _mass2, "FlatteRes_"+_name);
-	newTree->createLeaf("g2", _g2, "FlatteRes_"+_name);
-	newTree->createLeaf("massB1", _g2_massA, "FlatteRes_"+_name);
-	newTree->createLeaf("massB2", _g2_massB, "FlatteRes_"+_name);
-	if( _g3->GetValue() ){
-		newTree->createLeaf("g3", _g3, "FlatteRes_"+_name);
-		newTree->createLeaf("massC1", _g3_massA, "FlatteRes_"+_name);
-		newTree->createLeaf("massC2", _g3_massB, "FlatteRes_"+_name);
-	}
-	newTree->createLeaf("sample", sample.GetMultiDouble(GetVarIdA()),
-			"FlatteRes_"+_name);
+	newTree->insertTree(
+			FlatteStrategy::SetupTree("FlatteRes_"+_name,
+					sample.GetMultiDouble(GetVarIdA()),
+					_mass, _g1, _mass1, _mass2,
+					_g2, _g2_massA, _g2_massB,
+					_g3, _g3_massA, _g3_massB,
+					_spin, _mesonRadius, _ffType),
+					"Reso_"+_name
+	);
 
 	//Normalization
 	if(_normStyle==normStyle::none){
@@ -504,26 +496,100 @@ std::shared_ptr<FunctionTree> AmpFlatteRes::SetupTree(
 					"NormReso_"+_name);
 
 		//Flatte (Normalization)
-		newTree->createNode("NormFlatte_"+_name, flatteStrat, "NormReso_"+_name,
-				toySampleSize); //BW
-		newTree->createLeaf("mass", _mass, "NormFlatte_"+_name);//use local parameter m0_a0
-		newTree->createLeaf("g1", _g1, "NormFlatte_"+_name);//use global parameter g1_a0 (asdfef)
-		newTree->createLeaf("spin", _spin, "NormFlatte_"+_name); //spin
-		newTree->createLeaf("mesonRadius",  _mesonRadius, "NormFlatte_"+_name); //d
-		newTree->createLeaf("formFactorType", _ffType , "NormFlatte_"+_name); //d
-		newTree->createLeaf("ma_"+_name, _mass1, "NormFlatte_"+_name); //ma
-		newTree->createLeaf("mb_"+_name, _mass2, "NormFlatte_"+_name); //mb
-		newTree->createLeaf("g2", _g2, "NormFlatte_"+_name);
-		newTree->createLeaf("massB1", _g2_massA, "NormFlatte_"+_name);
-		newTree->createLeaf("massB2", _g2_massB, "NormFlatte_"+_name);
-		if( _g3->GetValue() ){
-			newTree->createLeaf("g3", _g3, "NormFlatte_"+_name);
-			newTree->createLeaf("massC1", _g3_massA, "NormFlatte_"+_name);
-			newTree->createLeaf("massC2", _g3_massB, "NormFlatte_"+_name);
-		}
-		newTree->createLeaf("phspSample", toySample.GetMultiDouble(GetVarIdA()),
-				"NormFlatte_"+_name);
+		newTree->insertTree(
+			FlatteStrategy::SetupTree("NormFlatte_"+_name,
+					toySample.GetMultiDouble(GetVarIdA()),
+					_mass, _g1, _mass1, _mass2,
+					_g2, _g2_massA, _g2_massB,
+					_g3, _g3_massA, _g3_massB,
+					_spin, _mesonRadius, _ffType),
+					"NormReso_"+_name
+		);
 	}
+	return newTree;
+}
+
+
+std::shared_ptr<FunctionTree> FlatteStrategy::SetupTree( std::string name,
+		std::shared_ptr<MultiDouble> mSq,
+		std::shared_ptr<DoubleParameter> mR,
+		std::shared_ptr<DoubleParameter> g, double ma, double mb,
+		std::shared_ptr<DoubleParameter> g2, double g2_ma, double g2_mb,
+		std::shared_ptr<DoubleParameter> g3, double g3_ma, double g3_mb,
+		Spin spin, std::shared_ptr<DoubleParameter> mesonRadius,
+		formFactorType type)
+{
+	std::shared_ptr<FlatteStrategy> thisStrat(
+			new FlatteStrategy(name));
+
+	std::string stratName = "FlatteRes_"+name;
+	//------------Setup Tree---------------------
+	std::shared_ptr<FunctionTree> newTree( new FunctionTree() );
+
+	newTree->createHead(stratName, thisStrat, mSq->GetNValues());
+
+	newTree->createLeaf("mass", mR, stratName);
+	newTree->createLeaf("g", g, stratName);
+
+	//Partial width of channel A
+	newTree->insertTree(
+			couplingToWidthStrat::SetupTree( mSq, mR, g, ma, mb, spin,
+					mesonRadius, type),
+					stratName
+	);
+	newTree->insertTree(
+			barrierStrat::SetupTree( mSq, mR, ma, mb, spin,
+					mesonRadius, type),
+					stratName
+	);
+
+	//Partial width of channel B
+	newTree->insertTree(
+			couplingToWidthStrat::SetupTree( mSq, mR, g2, g2_ma, g2_mb,	spin,
+					mesonRadius, type),
+					stratName
+	);
+	newTree->insertTree(
+			barrierStrat::SetupTree( mSq, mR, g2_ma, g2_mb, spin,
+					mesonRadius, type),
+					stratName
+	);
+
+	//Partial width of channel C (optional)
+	if( g3->GetValue() ){
+		newTree->insertTree(
+				couplingToWidthStrat::SetupTree( mSq, mR, g3, g3_ma, g3_mb, spin,
+						mesonRadius, type),
+						stratName
+		);
+		newTree->insertTree(
+				barrierStrat::SetupTree( mSq, mR, g3_ma, g3_mb, spin,
+						mesonRadius, type),
+						stratName
+		);
+	}
+	else {
+		std::shared_ptr<MultiDouble> vecmd(
+				new MultiDouble(
+						"zero",
+						std::vector<double>(mSq->GetNValues(), 0.0)
+				)
+		);
+		std::shared_ptr<MultiComplex> veccd(
+				new MultiComplex(
+						"zero",
+						std::vector<std::complex<double> >(
+								mSq->GetNValues(),
+								std::complex<double>(0,0)
+						)
+				)
+		);
+		newTree->createLeaf("gammaC",veccd,stratName);
+		newTree->createLeaf("barrierSqC",vecmd,stratName);
+	}
+
+	//invariant masses
+	newTree->createLeaf("mSq", mSq ,stratName);
 
 	return newTree;
 }
@@ -531,111 +597,85 @@ std::shared_ptr<FunctionTree> AmpFlatteRes::SetupTree(
 bool FlatteStrategy::execute(ParameterList& paras,
 		std::shared_ptr<AbsParameter>& out)
 {
-	//Debug
-	//	BOOST_LOG_TRIVIAL(debug) <<"FlatteStrategy::execute() | start";
-	//	for( int i=0; i<paras.GetDoubleParameters().size(); ++i){
-	//		BOOST_LOG_TRIVIAL(debug)<<paras.GetDoubleParameter(i)->GetName();
-	//	}
-
 	//Check parameter type
 	if( checkType != out->type() )
-		throw( WrongParType(	std::string("Output Type ")
-	+ParNames[out->type()] + std::string(" conflicts expected type ")
-	+ParNames[checkType]+std::string(" of ")+name+" BW strat")
+		throw( WrongParType("FlatteStrategy::execute() | "
+				"Output parameter is of type "
+				+ std::string(ParNames[out->type()])
+	+ " and conflicts with expected type "
+	+ std::string(ParNames[checkType]))
 		);
+
+	//How many parameters do we expect?
+	int check_nDouble = 2;
+	int check_nMDouble = 4;
+	int check_nMComplex = 3;
 
 	//Check size of parameter list
-	if( paras.GetNDouble() != 13 && paras.GetNDouble() != 14
-			&& paras.GetNDouble() != 10 && paras.GetNDouble() != 11){
-		BOOST_LOG_TRIVIAL(error)<<"FlatteStrategy::execute() | "
-				<< paras.to_str();
+	if( paras.GetNDouble() != check_nDouble )
 		throw( BadParameter("FlatteStrategy::execute() | "
-				"Number of DoubleParameters in ParameterList"
-				" ("+std::to_string(paras.GetNDouble())+") "
-				" does not match!")
+				"Number of DoubleParameters does not match: "
+				+std::to_string(paras.GetNDouble())+" given but "
+				+std::to_string(check_nDouble)+ " expected.")
 		);
-	}
+	if( paras.GetNMultiDouble() != check_nMDouble )
+		throw( BadParameter("FlatteStrategy::execute() | "
+				"Number of MultiDoubles does not match: "
+				+std::to_string(paras.GetNMultiDouble())+" given but "
+				+std::to_string(check_nMDouble)+ " expected.")
+		);
+	if( paras.GetNMultiComplex() != check_nMComplex )
+		throw( BadParameter("FlatteStrategy::execute() | "
+				"Number of MultiComplexes does not match: "
+				+std::to_string(paras.GetNMultiComplex())+" given but "
+				+std::to_string(check_nMComplex)+ " expected.")
+		);
 
-	double m0, d, ma, mb, g1, g2, massB1, massB2;
-	double g3=0; double massC1=0; double massC2=0;
-	unsigned int spin;
-	int ffType;
-	/** Get parameters from ParameterList:
+	/* Get parameters from ParameterList:
 	 * We use the same order of the parameters as was used during tree
-	 * construction
-	 */
-	m0 = paras.GetDoubleParameter(0)->GetValue();
-	g1 = paras.GetDoubleParameter(1)->GetValue();
-	spin = (unsigned int)paras.GetDoubleParameter(2)->GetValue();
-	d = paras.GetDoubleParameter(3)->GetValue();
-	ffType = paras.GetDoubleParameter(4)->GetValue();
-	ma = paras.GetDoubleParameter(5)->GetValue();
-	mb = paras.GetDoubleParameter(6)->GetValue();
-	g2 = paras.GetDoubleParameter(7)->GetValue();
-	massB1 = paras.GetDoubleParameter(8)->GetValue();
-	massB2 = paras.GetDoubleParameter(9)->GetValue();
-	try{
-		g3 = paras.GetDoubleParameter(10)->GetValue();
-		massC1 = paras.GetDoubleParameter(11)->GetValue();
-		massC2 = paras.GetDoubleParameter(12)->GetValue();
-	} catch (...){	}
+	 * construction */
+	double mR = paras.GetDoubleParameter(0)->GetValue();
+	double gA = paras.GetDoubleParameter(1)->GetValue();
 
-	//	BOOST_LOG_TRIVIAL(debug) << "FlatteStrategy::execute() | mR="<<m0
-	//			<<" g1="<<g1<<" spin="<<spin<<" radius="<<d<<" ffType="<<ffType
-	//			<<" subSys="<<subSys<<" mA1="<<ma<<" mA2="<<mb
-	//			<<" g2="<<g2<<" mB1="<<massB1<<" mB2="<<massB2;
-	//			<<" g3="<<g3<<" mC1="<<massC1<<" mC2="<<massC2;
+	std::shared_ptr<MultiComplex> gammaA = paras.GetMultiComplex(0);
+	std::shared_ptr<MultiDouble> barrierSqA = paras.GetMultiDouble(0);
+	std::shared_ptr<MultiComplex> gammaB = paras.GetMultiComplex(1);
+	std::shared_ptr<MultiDouble> barrierSqB = paras.GetMultiDouble(1);
+	std::shared_ptr<MultiComplex> gammaC = paras.GetMultiComplex(2);
+	std::shared_ptr<MultiDouble> barrierSqC = paras.GetMultiDouble(2);
 
-	//MultiDim output, must have multidim Paras in input
-	if(checkType == ParType::MCOMPLEX){
-		std::shared_ptr<MultiDouble> mp = paras.GetMultiDouble(0);
-		std::vector<std::complex<double> > results(mp->GetNValues(),
-				std::complex<double>(0.));
-		//calc BW for each point
-		for(unsigned int ele=0; ele<mp->GetNValues(); ele++){
-			try{
-				results.at(ele) = AmpFlatteRes::dynamicalFunction(
-						mp->GetValue(ele),
-						m0,ma,mb,g1,massB1,massB2,g2,massC1,massC2,g3,
-						spin,d, formFactorType(ffType)
-				);
-			} catch (std::exception& ex) {
-				BOOST_LOG_TRIVIAL(error) << "FlatteStrategy::execute() | "
-						<<ex.what();
-				throw( std::runtime_error("FlatteStrategy::execute() | "
-						"Evaluation of dynamic function failed!")
-				);
-			}
+	//invariant masses
+	std::shared_ptr<MultiDouble> mSq = paras.GetMultiDouble(3);
+
+	std::vector<std::complex<double> > results(mSq->GetNValues(),
+			std::complex<double>(0.));
+
+	//calc BW for each point
+	for(unsigned int ele=0; ele<mSq->GetNValues(); ele++){
+		double s = mSq->GetValue(ele);
+		double sqrtS = sqrt(s);
+
+		std::complex<double> termA =
+				gammaA->GetValue(ele)*barrierSqA->GetValue(ele);
+		std::complex<double> termB =
+				gammaB->GetValue(ele)*barrierSqB->GetValue(ele);
+		std::complex<double> termC =
+				gammaC->GetValue(ele)*barrierSqC->GetValue(ele);
+		//A factor q^{2J+1} is neglected since Flatte resonances are usually J=1
+
+		try{
+			results.at(ele) = AmpFlatteRes::dynamicalFunction(
+					s, mR, gA, termA, termB, termC
+			);
+		} catch (std::exception& ex) {
+			BOOST_LOG_TRIVIAL(error) << "FlatteStrategy::execute() | "
+					<<ex.what();
+			throw( std::runtime_error("FlatteStrategy::execute() | "
+					"Evaluation of dynamic function failed!")
+			);
 		}
-		out = std::shared_ptr<AbsParameter>(
-				new MultiComplex(out->GetName(),results));
-		//		BOOST_LOG_TRIVIAL(debug) <<"FlatteStrategy::execute() | finished!";
-		return true;
-	}//end multicomplex output
-
-	//Use last parameter
-	int nDouble = paras.GetNDouble();
-	double mSq = paras.GetDoubleParameter(nDouble-1)->GetValue();
-
-	std::complex<double> result;
-	try{
-		result = AmpFlatteRes::dynamicalFunction(
-				mSq,m0,ma,mb,g1,massB1,massB2,g2,massC1,massC2,g3,
-				spin,d, formFactorType(ffType)
-		);
-	} catch (std::exception& ex) {
-		BOOST_LOG_TRIVIAL(error) << "FlatteStrategy::execute() | "
-				<<ex.what();
-		throw( std::runtime_error("FlatteStrategy::execute() | "
-				"Evaluation of dynamic function failed!")
-		);
 	}
 	out = std::shared_ptr<AbsParameter>(
-			new ComplexParameter(out->GetName(), result));
-	//	BOOST_LOG_TRIVIAL(debug) <<"FlatteStrategy::execute() | finished!";
+			new MultiComplex(out->GetName(),results));
 	return true;
 }
-
-
-
-

@@ -163,11 +163,13 @@ public:
 	virtual void SetVarIdB(unsigned int id) { _wignerD.SetVarId(id); };
 
 	virtual std::shared_ptr<FunctionTree> SetupTree(
-			ParameterList& sample, ParameterList& toySample,std::string suffix) = 0;
+			ParameterList& sample, ParameterList& toySample,
+			std::string suffix) = 0;
 
 	/** Convert width of resonance to coupling
 	 *
-	 * Implementation of Eq.47-21 of PDG2014. Only valid for narrow, isolated resonances.
+	 * Implementation of Eq.47-21 of PDG2014. Only valid for narrow, isolated
+	 * resonances.
 	 * @param mSq invariant mass
 	 * @param mR mass of resonance
 	 * @param width width of resonance in channel [a,b]
@@ -181,21 +183,42 @@ public:
 
 	/** Convert coupling to width
 	 *
-	 * Convert coupling to channel (@ma,@mb) to partial width. Only valid for narrow, isolated resonances.
-	 * Implementation of inverted Eq.47-21 of PDG2014.
-	 * @param mSq invariant mass
-	 * @param mR mass of resonance
-	 * Implementation of inverted Eq.47-21 of PDG2014. Only valid for narrow, isolated resonances.
+	 * Convert coupling to channel (@ma,@mb) to partial width. Only valid for
+	 * narrow, isolated resonances. Implementation of inverted Eq.47-21
+	 * of PDG2014.
 	 * @param mSq invariant mass
 	 * @param mR mass of resonance
 	 * @param g coupling to channel [a,b]
 	 * @param ma mass of particle a
 	 * @param mb mass of particle b
+	 * @param spin Spin of resonance
+	 * @param mesonRadius Meson radius of resonance
+	 * @param type Type of barrier factor
 	 * @return
 	 */
 	static std::complex<double> couplingToWidth(double mSq, double mR, double g,
 			double ma, double mb, double spin, double mesonRadius,
 			formFactorType type = formFactorType::BlattWeisskopf);
+
+	/** Convert coupling to width
+	 *
+	 * Convert coupling to channel (@ma,@mb) to partial width. Only valid for
+	 * narrow, isolated resonances. Implementation of inverted
+	 * Eqs.47-21 of PDG2014.
+	 * @param mSq invariant mass
+	 * @param mR mass of resonance
+	 * @param g coupling to channel [a,b]
+	 * @param ma mass of particle a
+	 * @param mb mass of particle b
+	 * @param spin Spin of resonance
+	 * @param mesonRadius Meson radius of resonance
+	 * @param type Type of barrier factor
+	 * @param phspFactor Phase-space factor
+	 * @return
+	 */
+	static std::complex<double> couplingToWidth(double mSq, double mR, double g,
+			double ma, double mb, double spin, double mesonRadius,
+			formFactorType type, std::complex<double> phspFactor);
 
 protected:
 	virtual void put(boost::property_tree::ptree &pt);
@@ -206,7 +229,8 @@ protected:
 	virtual double integral() const;
 
 	/** Calculation integral |c * dynamical amplitude * WignerD|^2
-	 * Used to check the correct normalization of the amplitude. Should always be 1.
+	 * Used to check the correct normalization of the amplitude. Should
+	 * always be 1.
 	 * @return
 	 */
 	virtual double totalIntegral() const;
@@ -276,5 +300,25 @@ protected:
 	AmpWigner2 _wignerD;
 
 
+};
+
+class couplingToWidthStrat: public Strategy
+{
+public:
+	couplingToWidthStrat() :
+		Strategy(ParType::MCOMPLEX) { }
+
+	virtual const std::string to_str() const {
+		return ("coupling to width "); }
+
+	static std::shared_ptr<FunctionTree> SetupTree(
+			std::shared_ptr<MultiDouble> mSq,
+			std::shared_ptr<DoubleParameter> mR,
+			std::shared_ptr<DoubleParameter> g, double ma, double mb,
+			Spin spin, std::shared_ptr<DoubleParameter> mesonRadius,
+			formFactorType type);
+
+	virtual bool execute(ParameterList& paras,
+			std::shared_ptr<AbsParameter>& out);
 };
 #endif

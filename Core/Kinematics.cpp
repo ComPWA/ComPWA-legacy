@@ -154,6 +154,7 @@ unsigned int Kinematics::FindVariable(std::string varName) const
 	return -999;
 }
 
+
 //======================== TWO-BODY KINEMATICS =============================
 TwoBodyKinematics::TwoBodyKinematics(std::string _nameMother,
 		std::string _name1, std::string _name2,	double deltaMassWindow) :
