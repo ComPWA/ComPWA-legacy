@@ -231,13 +231,14 @@ public:
 			double s = mp->GetValue(ele);
 			double sqrtS = sqrt(s);
 			std::complex<double> qValue = Kinematics::qValue(sqrtS, ma, mb);
+			std::complex<double> qRValue = Kinematics::qValue(mR, ma, mb);
 			try{
 				double nom = Kinematics::FormFactor(
 						sqrtS, ma, mb, spin, mesonRadius,
 						qValue,	type);
 				double denom = Kinematics::FormFactor(
 						mR, ma, mb, spin, mesonRadius,
-						qValue,	type);
+						qRValue, type);
 
 				results.at(ele) = nom/denom*nom/denom;
 			} catch (std::exception& ex) {
