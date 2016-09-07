@@ -105,7 +105,7 @@ public:
 		for(unsigned int ele=0; ele<mp->GetNValues(); ele++){
 			try{
 				results.at(ele) = Kinematics::phspFactor(
-						mp->GetValue(ele), ma, mb );
+						sqrt(mp->GetValue(ele)), ma, mb );
 			} catch (std::exception& ex) {
 				BOOST_LOG_TRIVIAL(error) << "phspFactorStrat::execute() | "
 						<<ex.what();
@@ -224,10 +224,20 @@ public:
 				formFactorType(paras.GetDoubleParameter(5)->GetValue());
 
 		std::shared_ptr<MultiDouble> mp = paras.GetMultiDouble(0);
-		std::vector<double> results(mp->GetNValues(),0.);
+
+		//Initialize results with one
+		std::vector<double> results(mp->GetNValues(),1.);
+
+		//If form factors are one anyway, we skip the loop
+		if( spin == 0 && type != formFactorType::CrystalBarrel){
+			out = std::shared_ptr<AbsParameter>(
+					new MultiDouble(out->GetName(),results));
+			return true;
+		}
 
 		//calc function for each point
 		for(unsigned int ele=0; ele<mp->GetNValues(); ele++){
+
 			double s = mp->GetValue(ele);
 			double sqrtS = sqrt(s);
 			std::complex<double> qValue = Kinematics::qValue(sqrtS, ma, mb);

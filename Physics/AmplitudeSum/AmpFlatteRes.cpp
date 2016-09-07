@@ -327,7 +327,8 @@ std::complex<double> AmpFlatteRes::EvaluateAmp(dataPoint& point)
 
 	std::complex<double> result;
 	try{
-		result = dynamicalFunction(mSq,_mass->GetValue(),_mass1,_mass2,_g1->GetValue(),
+		result = dynamicalFunction(mSq,_mass->GetValue(),
+				_mass1,_mass2,_g1->GetValue(),
 				_g2_massA,_g2_massB,_g2->GetValue(),
 				_g3_massA,_g3_massB,_g3->GetValue(),
 				_spin,_mesonRadius->GetValue(), _ffType);
@@ -522,7 +523,7 @@ std::shared_ptr<FunctionTree> FlatteStrategy::SetupTree( std::string name,
 	std::shared_ptr<FlatteStrategy> thisStrat(
 			new FlatteStrategy(name));
 
-	std::string stratName = "FlatteRes_"+name;
+	std::string stratName = name;
 	//------------Setup Tree---------------------
 	std::shared_ptr<FunctionTree> newTree( new FunctionTree() );
 
@@ -661,7 +662,7 @@ bool FlatteStrategy::execute(ParameterList& paras,
 				gammaB->GetValue(ele)*barrierSqB->GetValue(ele);
 		std::complex<double> termC =
 				gammaC->GetValue(ele)*barrierSqC->GetValue(ele);
-		//A factor q^{2J+1} is neglected since Flatte resonances are usually J=1
+		//A factor q^{2J+1} is neglected since Flatte resonances are usually J=0
 
 		try{
 			results.at(ele) = AmpFlatteRes::dynamicalFunction(

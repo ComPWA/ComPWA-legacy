@@ -781,7 +781,7 @@ std::complex<double> AmpAbsDynamicalFunction::couplingToWidth(
 
 	//calculate gammaA(s_R)
 	std::complex<double> gammaA(1,0); //spin==0
-	if( spin > 0 ){
+	if( spin > 0 || type == formFactorType::CrystalBarrel){
 		std::complex<double> qValue = Kinematics::qValue(mR,ma,mb);
 		double ffR = Kinematics::FormFactor(
 				mR,ma,mb,
@@ -862,23 +862,60 @@ std::shared_ptr<FunctionTree> couplingToWidthStrat::SetupTree(
 bool couplingToWidthStrat::execute(ParameterList& paras,
 		std::shared_ptr<AbsParameter>& out)
 {
-	//Check parameter type
-	if( checkType != out->type() )
-		throw( WrongParType(	std::string("Output Type ")
-	+ParNames[out->type()] + std::string(" conflicts expected type ")
-	+ParNames[checkType]+std::string(" of ) couplingToWidthStrat") )
-		);
+		//Check parameter type
+		if( checkType != out->type() )
+			throw( WrongParType("couplingToWidthStrat::execute() | "
+					"Output parameter is of type "
+					+ std::string(ParNames[out->type()])
+		+ " and conflicts with expected type "
+		+ std::string(ParNames[checkType]) )
+			);
 
-	//Check size of parameter list
-	if( paras.GetNDouble() != 7 ){
-		BOOST_LOG_TRIVIAL(error)<<"couplingToWidthStrat::execute() | "
-				<< paras.to_str();
-		throw( BadParameter("couplingToWidthStrat::execute() | "
-				"Number of DoubleParameters in ParameterList"
-				" ("+std::to_string(paras.GetNDouble())+") "
-				" does not match!")
-		);
-	}
+		//How many parameters do we expect?
+		int check_nBool = 0;
+		int check_nInt = 0;
+		int check_nComplex = 0;
+		int check_nDouble = 7;
+		int check_nMDouble = 1;
+		int check_nMComplex = 1;
+
+		//Check size of parameter list
+		if( paras.GetNBool() != check_nBool )
+			throw( BadParameter("couplingToWidthStrat::execute() | "
+					"Number of BoolParameters does not match: "
+					+std::to_string(paras.GetNBool())+" given but "
+					+std::to_string(check_nBool)+ " expected.")
+			);
+		if( paras.GetNInteger() != check_nInt )
+			throw( BadParameter("couplingToWidthStrat::execute() | "
+					"Number of IntParameters does not match: "
+					+std::to_string(paras.GetNInteger())+" given but "
+					+std::to_string(check_nInt)+ " expected.")
+			);
+		if( paras.GetNDouble() != check_nDouble )
+			throw( BadParameter("couplingToWidthStrat::execute() | "
+					"Number of DoubleParameters does not match: "
+					+std::to_string(paras.GetNDouble())+" given but "
+					+std::to_string(check_nDouble)+ " expected.")
+			);
+		if( paras.GetNComplex() != check_nComplex )
+			throw( BadParameter("couplingToWidthStrat::execute() | "
+					"Number of ComplexParameters does not match: "
+					+std::to_string(paras.GetNComplex())+" given but "
+					+std::to_string(check_nComplex)+ " expected.")
+			);
+		if( paras.GetNMultiDouble() != check_nMDouble )
+			throw( BadParameter("couplingToWidthStrat::execute() | "
+					"Number of MultiDoubles does not match: "
+					+std::to_string(paras.GetNMultiDouble())+" given but "
+					+std::to_string(check_nMDouble)+ " expected.")
+			);
+		if( paras.GetNMultiComplex() != check_nMComplex )
+			throw( BadParameter("couplingToWidthStrat::execute() | "
+					"Number of MultiComplexes does not match: "
+					+std::to_string(paras.GetNMultiComplex())+" given but "
+					+std::to_string(check_nMComplex)+ " expected.")
+			);
 
 	/* Get parameters from ParameterList:
 	 * We use the same order of the parameters as was used during tree
