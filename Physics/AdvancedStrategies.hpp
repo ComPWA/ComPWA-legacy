@@ -98,25 +98,29 @@ public:
 		double ma = paras.GetDoubleParameter(0)->GetValue();
 		double mb = paras.GetDoubleParameter(1)->GetValue();
 
-		std::shared_ptr<MultiDouble> mp = paras.GetMultiDouble(0);
-		std::vector<std::complex<double> > results(mp->GetNValues(),
-				std::complex<double>(0.));
+		std::vector<double> mp = paras.GetMultiDouble(0)->GetValues();
+
+		std::vector<std::complex<double> > results(
+				mp.size(),
+				std::complex<double>(0.,0.)
+		);
+
 		//calc function for each point
-		for(unsigned int ele=0; ele<mp->GetNValues(); ele++){
+		for(unsigned int ele=0; ele<mp.size(); ele++){
 			try{
 				results.at(ele) = Kinematics::phspFactor(
-						sqrt(mp->GetValue(ele)), ma, mb );
+						std::sqrt(mp.at(ele)), ma, mb );
 			} catch (std::exception& ex) {
 				BOOST_LOG_TRIVIAL(error) << "phspFactorStrat::execute() | "
 						<<ex.what();
-				std::cout<<mp->GetValue(ele)<<" "<<ma<<" "<<mb<<std::endl;
 				throw( std::runtime_error("phspFactorStrat::execute() | "
 						"Evaluation of dynamic function failed!")
 				);
 			}
 		}
 		out = std::shared_ptr<AbsParameter>(
-				new MultiComplex(out->GetName(),results));
+				new MultiComplex( out->GetName(), results )
+		);
 		return true;
 	}
 };
@@ -223,22 +227,23 @@ public:
 		formFactorType type =
 				formFactorType(paras.GetDoubleParameter(5)->GetValue());
 
-		std::shared_ptr<MultiDouble> mp = paras.GetMultiDouble(0);
+		std::vector<double> mp = paras.GetMultiDouble(0)->GetValues();
 
 		//Initialize results with one
-		std::vector<double> results(mp->GetNValues(),1.);
+		std::vector<double> results(mp.size(),1.);
 
 		//If form factors are one anyway, we skip the loop
 		if( spin == 0 && type != formFactorType::CrystalBarrel){
 			out = std::shared_ptr<AbsParameter>(
-					new MultiDouble(out->GetName(),results));
+					new MultiDouble( out->GetName(), results)
+			);
 			return true;
 		}
 
 		//calc function for each point
-		for(unsigned int ele=0; ele<mp->GetNValues(); ele++){
+		for(unsigned int ele=0; ele<mp.size(); ele++){
 
-			double s = mp->GetValue(ele);
+			double s = mp.at(ele);
 			double sqrtS = sqrt(s);
 			std::complex<double> qValue = Kinematics::qValue(sqrtS, ma, mb);
 			std::complex<double> qRValue = Kinematics::qValue(mR, ma, mb);
@@ -260,7 +265,8 @@ public:
 			}
 		}
 		out = std::shared_ptr<AbsParameter>(
-				new MultiDouble(out->GetName(),results));
+				new MultiDouble( out->GetName(), results )
+		);
 		return true;
 	}
 };

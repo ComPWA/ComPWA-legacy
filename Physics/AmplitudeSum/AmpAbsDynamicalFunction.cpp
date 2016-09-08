@@ -520,9 +520,9 @@ std::complex<double> AmpAbsDynamicalFunction::Evaluate(dataPoint& point)
 	res = (GetPrefactor()*GetCoefficient()*GetNormalization()*res*ang);
 
 	//check for NaN
-	if( res.real()!=res.real() || res.imag() != res.imag() )
-		throw std::runtime_error("AmpAbsDynamicalFunction::Evaluate() | Result of"
-				" resonance "+GetName()+" is NaN!");
+//	if( std::isnan(res.real()) || std::isnan(res.imag()) )
+//		throw std::runtime_error("AmpAbsDynamicalFunction::Evaluate() | Result of"
+//				" resonance "+GetName()+" is NaN!");
 	//check for inf
 	if( std::isinf(res.real()) || std::isinf(res.imag()) )
 		throw std::runtime_error("AmpAbsDynamicalFunction::Evaluate() | Result of"
@@ -607,9 +607,9 @@ double AmpAbsDynamicalFunction::integral() const
 	gsl_monte_vegas_free(s);
 
 	//check for NaN
-	if( res!=res )
-		throw std::runtime_error("AmpAbsDynamicalFunction::integral() |"
-				"Result of resonance "+GetName()+" is NaN!");
+//	if( std::isnan(res) )
+//		throw std::runtime_error("AmpAbsDynamicalFunction::integral() |"
+//				"Result of resonance "+GetName()+" is NaN!");
 	//check for inf
 	if( std::isinf(res) )
 		throw std::runtime_error("AmpAbsDynamicalFunction::integral() |"
@@ -632,9 +632,9 @@ double AmpAbsDynamicalFunction::GetNormalization()
 	double norm = 1/sqrt(GetIntegral());
 
 	//check for NaN
-	if( norm!=norm )
-		throw std::runtime_error("AmpAbsDynamicalFunction::GetNormalization() |"
-				"Result of resonance "+GetName()+" is NaN!");
+//	if( std::isnan(norm) )
+//		throw std::runtime_error("AmpAbsDynamicalFunction::GetNormalization() |"
+//				"Result of resonance "+GetName()+" is NaN!");
 	//check for inf
 	if( std::isinf(norm) )
 		throw std::runtime_error("AmpAbsDynamicalFunction::GetNormalization() |"
@@ -710,9 +710,9 @@ double AmpAbsDynamicalFunction::totalIntegral() const
 	gsl_monte_vegas_free(s);
 
 	//check for NaN
-	if( res!=res )
-		throw std::runtime_error("AmpAbsDynamicalFunction::totalIntegral() |"
-				"Result of resonance "+GetName()+" is NaN!");
+//	if( std::isnan(res) )
+//		throw std::runtime_error("AmpAbsDynamicalFunction::totalIntegral() |"
+//				"Result of resonance "+GetName()+" is NaN!");
 	//check for inf
 	if( std::isinf(res) )
 		throw std::runtime_error("AmpAbsDynamicalFunction::totalIntegral() |"
@@ -751,9 +751,9 @@ std::complex<double> AmpAbsDynamicalFunction::widthToCoupling(
 	std::complex<double> res = std::complex<double>(sqrt(mR*width), 0) / denom;
 
 	//check for NaN
-	if( res.real()!=res.real() || res.imag() != res.imag() )
-		throw std::runtime_error("AmpAbsDynamicalFunction::widthToCoupling() | "
-				"Result is NaN!");
+//	if( std::isnan(res.real()) || std::isnan(res.imag()) )
+//		throw std::runtime_error("AmpAbsDynamicalFunction::widthToCoupling() | "
+//				"Result is NaN!");
 	//check for inf
 	if( std::isinf(res.real()) || std::isinf(res.imag()) )
 		throw std::runtime_error("AmpAbsDynamicalFunction::widthToCoupling() | "
@@ -795,9 +795,9 @@ std::complex<double> AmpAbsDynamicalFunction::couplingToWidth(
 	std::complex<double> res = std::norm(gammaA)*g*g*phspFactor/ mR;
 
 	//check for NaN
-	if( res.real()!=res.real() || res.imag() != res.imag() )
-		throw std::runtime_error("AmpAbsDynamicalFunction::couplingToWidth() | "
-				"Result is NaN!");
+//	if( std::isnan(res.real()) || std::isnan(res.imag()) )
+//		throw std::runtime_error("AmpAbsDynamicalFunction::couplingToWidth() | "
+//				"Result is NaN!");
 	//check for inf
 	if( std::isinf(res.real()) || std::isinf(res.imag()) )
 		throw std::runtime_error("AmpAbsDynamicalFunction::couplingToWidth() | "
@@ -926,20 +926,22 @@ bool couplingToWidthStrat::execute(ParameterList& paras,
 	double mb = paras.GetDoubleParameter(3)->GetValue();
 	unsigned int spin = paras.GetDoubleParameter(4)->GetValue();
 	double mesonRadius = paras.GetDoubleParameter(5)->GetValue();
-	formFactorType ffType = formFactorType(paras.GetDoubleParameter(6)->GetValue());
+	formFactorType ffType =
+			formFactorType(paras.GetDoubleParameter(6)->GetValue());
 
-	std::shared_ptr<MultiDouble> mp = paras.GetMultiDouble(0);
-	std::shared_ptr<MultiComplex> phspFactors =
-			paras.GetMultiComplex(0);
-	std::vector<std::complex<double> > results(mp->GetNValues(),
-			std::complex<double>(0.));
+	std::vector<double> mp = paras.GetMultiDouble(0)->GetValues();
+	std::vector<std::complex<double> > phspFactors =
+			paras.GetMultiComplex(0)->GetValues();
+
+	std::vector<std::complex<double> > results(mp.size(),
+			std::complex<double>(0.,0.));
 	//calc function for each point
-	for(unsigned int ele=0; ele<mp->GetNValues(); ele++){
+	for(unsigned int ele=0; ele<mp.size(); ele++){
 		try{
 			results.at(ele) = AmpAbsDynamicalFunction::couplingToWidth(
-					mp->GetValue(ele),
+					mp.at(ele),
 					mR, g, ma, mb, spin, mesonRadius, ffType,
-					phspFactors->GetValue(ele)
+					phspFactors.at(ele)
 			);
 		} catch (std::exception& ex) {
 			BOOST_LOG_TRIVIAL(error) << "couplingToWidthStrat::execute() | "
@@ -950,6 +952,7 @@ bool couplingToWidthStrat::execute(ParameterList& paras,
 		}
 	}
 	out = std::shared_ptr<AbsParameter>(
-			new MultiComplex(out->GetName(),results));
+			new MultiComplex(out->GetName(),results)
+	);
 	return true;
 }

@@ -357,11 +357,11 @@ std::complex<double> AmpFlatteRes::dynamicalFunction(double mSq, double mR, doub
 
 	std::complex<double> result = std::complex<double>(gA*g_production,0) / denom;
 
-	if(result.real()!=result.real() || result.imag()!=result.imag()){
-		std::cout<<"AmpFlatteRes::dynamicalFunction() | "<<mR<<" "<<mSq<<" "
-				<<termA<<" "<<termB<<" "<<termC<<std::endl;
-		return 0;
-	}
+//	if( std::isnan(result.real()) || std::isnan(result.imag()) ){
+//		std::cout<<"AmpFlatteRes::dynamicalFunction() | "<<mR<<" "<<mSq<<" "
+//				<<termA<<" "<<termB<<" "<<termC<<std::endl;
+//		return 0;
+//	}
 	return result;
 }
 
@@ -638,35 +638,36 @@ bool FlatteStrategy::execute(ParameterList& paras,
 	double mR = paras.GetDoubleParameter(0)->GetValue();
 	double gA = paras.GetDoubleParameter(1)->GetValue();
 
-	std::shared_ptr<MultiComplex> gammaA = paras.GetMultiComplex(0);
-	std::shared_ptr<MultiDouble> barrierSqA = paras.GetMultiDouble(0);
-	std::shared_ptr<MultiComplex> gammaB = paras.GetMultiComplex(1);
-	std::shared_ptr<MultiDouble> barrierSqB = paras.GetMultiDouble(1);
-	std::shared_ptr<MultiComplex> gammaC = paras.GetMultiComplex(2);
-	std::shared_ptr<MultiDouble> barrierSqC = paras.GetMultiDouble(2);
+	std::vector<std::complex<double> > gammaA =
+			paras.GetMultiComplex(0)->GetValues();
+	std::vector<double> barrierSqA = paras.GetMultiDouble(0)->GetValues();
+	std::vector<std::complex<double> > gammaB =
+			paras.GetMultiComplex(1)->GetValues();
+	std::vector<double> barrierSqB = paras.GetMultiDouble(1)->GetValues();
+	std::vector<std::complex<double> > gammaC =
+			paras.GetMultiComplex(2)->GetValues();
+	std::vector<double> barrierSqC = paras.GetMultiDouble(2)->GetValues();
 
 	//invariant masses
-	std::shared_ptr<MultiDouble> mSq = paras.GetMultiDouble(3);
+	std::vector<double> mSq = paras.GetMultiDouble(3)->GetValues();
 
-	std::vector<std::complex<double> > results(mSq->GetNValues(),
-			std::complex<double>(0.));
+	std::vector<std::complex<double> > results(
+			mSq.size(),
+			std::complex<double>(0.,0.)
+	);
+	//TODO make sure all vectors have to same size
 
-	//calc BW for each point
-	for(unsigned int ele=0; ele<mSq->GetNValues(); ele++){
-		double s = mSq->GetValue(ele);
-		double sqrtS = sqrt(s);
-
-		std::complex<double> termA =
-				gammaA->GetValue(ele)*barrierSqA->GetValue(ele);
-		std::complex<double> termB =
-				gammaB->GetValue(ele)*barrierSqB->GetValue(ele);
-		std::complex<double> termC =
-				gammaC->GetValue(ele)*barrierSqC->GetValue(ele);
-		//A factor q^{2J+1} is neglected since Flatte resonances are usually J=0
-
+	//calc function for each point
+	for(unsigned int ele=0; ele<mSq.size(); ele++){
 		try{
+			/* Generally we need to add a factor q^{2J+1} to each channel term.
+			 * But since Flatte resonances are usually J=0 we neglect it here.*/
 			results.at(ele) = AmpFlatteRes::dynamicalFunction(
-					s, mR, gA, termA, termB, termC
+					mSq.at(ele),
+					mR, gA,
+					gammaA.at(ele)*barrierSqA.at(ele),
+					gammaB.at(ele)*barrierSqB.at(ele),
+					gammaC.at(ele)*barrierSqC.at(ele)
 			);
 		} catch (std::exception& ex) {
 			BOOST_LOG_TRIVIAL(error) << "FlatteStrategy::execute() | "
@@ -677,6 +678,7 @@ bool FlatteStrategy::execute(ParameterList& paras,
 		}
 	}
 	out = std::shared_ptr<AbsParameter>(
-			new MultiComplex(out->GetName(),results));
+			new MultiComplex(out->GetName(),results)
+	);
 	return true;
 }
