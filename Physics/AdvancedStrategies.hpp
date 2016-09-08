@@ -37,6 +37,7 @@ public:
 	virtual bool execute(ParameterList& paras,
 			std::shared_ptr<AbsParameter>& out){
 
+#ifdef DEBUG
 		//Check parameter type
 		if( checkType != out->type() )
 			throw( WrongParType("phspFactorStrat::execute() | "
@@ -91,6 +92,7 @@ public:
 					+std::to_string(paras.GetNMultiComplex())+" given but "
 					+std::to_string(check_nMComplex)+ " expected.")
 			);
+#endif
 
 		/** Get parameters from ParameterList:
 		 * We use the same order of the parameters as was used during tree
@@ -160,6 +162,7 @@ public:
 	virtual bool execute(ParameterList& paras,
 			std::shared_ptr<AbsParameter>& out){
 
+#ifdef DEBUG
 		//Check parameter type
 		if( checkType != out->type() )
 			throw( WrongParType("barrierStrat::execute() | "
@@ -214,6 +217,7 @@ public:
 					+std::to_string(paras.GetNMultiComplex())+" given but "
 					+std::to_string(check_nMComplex)+ " expected.")
 			);
+#endif
 
 		/** Get parameters from ParameterList:
 		 * We use the same order of the parameters as was used during tree

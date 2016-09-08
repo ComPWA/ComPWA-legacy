@@ -76,12 +76,14 @@ std::shared_ptr<FunctionTree> AmpWigner2::SetupTree(
 bool WignerDStrategy::execute(ParameterList& paras,
 		std::shared_ptr<AbsParameter>& out)
 {
+#ifdef DEBUG
 	if( checkType != out->type() ) {
 		throw( WrongParType( std::string("Output Type ")
 		+ParNames[out->type()]+std::string(" conflicts expected type ")
 		+ParNames[checkType]+std::string(" of ")+name+" Wigner strat") );
 		return false;
 	}
+#endif
 
 	double _inSpin = paras.GetDoubleParameter(0)->GetValue();
 	double _outSpin1 = paras.GetDoubleParameter(1)->GetValue();

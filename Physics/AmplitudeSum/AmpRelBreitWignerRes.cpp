@@ -191,11 +191,14 @@ std::complex<double> AmpRelBreitWignerRes::dynamicalFunction(double mSq, double 
 
 	std::complex<double> result = g_final*g_production / denom;
 
-	if(result.real()!=result.real() || result.imag()!=result.imag()){
+#ifdef DEBUG
+	if(std::isnan(result.real()) || std::isnan(result.imag()) ){
 		std::cout<<"AmpRelBreitWignerRes::dynamicalFunction() | "
 				<< barrier<<" "<<mR<<" "<<mSq <<" "<<ma<<" "<<mb<<std::endl;
 		return 0;
 	}
+#endif
+
 	return result;
 }
 
@@ -204,12 +207,12 @@ std::shared_ptr<FunctionTree> AmpRelBreitWignerRes::SetupTree(
 {
 	DalitzKinematics* kin =
 			dynamic_cast<DalitzKinematics*>(Kinematics::instance());
-//	auto var1_limit = kin->GetMinMax( GetVarIdA() );
-//	auto var2_limit = kin->GetMinMax( GetVarIdB() );
-//	double phspVol = (var1_limit.second-var1_limit.first)
-//			*(var2_limit.second-var2_limit.first);
+	//	auto var1_limit = kin->GetMinMax( GetVarIdA() );
+	//	auto var2_limit = kin->GetMinMax( GetVarIdB() );
+	//	double phspVol = (var1_limit.second-var1_limit.first)
+	//			*(var2_limit.second-var2_limit.first);
 	double phspVol = kin->GetPhspVolume();
-//	double phspVol = 1;
+	//	double phspVol = 1;
 
 	int sampleSize = sample.GetMultiDouble(0)->GetNValues();
 	int toySampleSize = toySample.GetMultiDouble(0)->GetNValues();
@@ -301,88 +304,99 @@ std::shared_ptr<FunctionTree> AmpRelBreitWignerRes::SetupTree(
 bool BreitWignerStrategy::execute(ParameterList& paras,
 		std::shared_ptr<AbsParameter>& out)
 {
-	//Debug
-	//	BOOST_LOG_TRIVIAL(debug) <<"BreitWignerStrategy::execute() | start";
-	//	for( int i=0; i<paras.GetDoubleParameters().size(); ++i){
-	//		BOOST_LOG_TRIVIAL(debug)<<paras.GetDoubleParameter(i)->GetName();
-	//	}
-
+#ifdef DEBUG
 	//Check parameter type
 	if( checkType != out->type() )
-		throw(WrongParType(std::string("Output Type ")
-	+ ParNames[out->type()] + std::string(" conflicts expected type ")
-	+ ParNames[checkType] + std::string(" of ")+name+" BW strat")
+		throw( WrongParType("BreitWignerStrat::execute() | "
+				"Output parameter is of type "
+				+ std::string(ParNames[out->type()])
+	+ " and conflicts with expected type "
+	+ std::string(ParNames[checkType]) )
 		);
+
+	//How many parameters do we expect?
+	int check_nBool = 0;
+	int check_nInt = 0;
+	int check_nComplex = 0;
+	int check_nDouble = 7;
+	int check_nMDouble = 1;
+	int check_nMComplex = 0;
 
 	//Check size of parameter list
-	if( paras.GetNDouble() != 7 && paras.GetNDouble() != 8)
-		throw( BadParameter("BreitWignerStrategy::execute() | "
-				"number of DoubleParameters does not match!")
+	if( paras.GetNBool() != check_nBool )
+		throw( BadParameter("BreitWignerStrat::execute() | "
+				"Number of BoolParameters does not match: "
+				+std::to_string(paras.GetNBool())+" given but "
+				+std::to_string(check_nBool)+ " expected.")
 		);
+	if( paras.GetNInteger() != check_nInt )
+		throw( BadParameter("BreitWignerStrat::execute() | "
+				"Number of IntParameters does not match: "
+				+std::to_string(paras.GetNInteger())+" given but "
+				+std::to_string(check_nInt)+ " expected.")
+		);
+	if( paras.GetNDouble() != check_nDouble )
+		throw( BadParameter("BreitWignerStrat::execute() | "
+				"Number of DoubleParameters does not match: "
+				+std::to_string(paras.GetNDouble())+" given but "
+				+std::to_string(check_nDouble)+ " expected.")
+		);
+	if( paras.GetNComplex() != check_nComplex )
+		throw( BadParameter("BreitWignerStrat::execute() | "
+				"Number of ComplexParameters does not match: "
+				+std::to_string(paras.GetNComplex())+" given but "
+				+std::to_string(check_nComplex)+ " expected.")
+		);
+	if( paras.GetNMultiDouble() != check_nMDouble )
+		throw( BadParameter("BreitWignerStrat::execute() | "
+				"Number of MultiDoubles does not match: "
+				+std::to_string(paras.GetNMultiDouble())+" given but "
+				+std::to_string(check_nMDouble)+ " expected.")
+		);
+	if( paras.GetNMultiComplex() != check_nMComplex )
+		throw( BadParameter("BreitWignerStrat::execute() | "
+				"Number of MultiComplexes does not match: "
+				+std::to_string(paras.GetNMultiComplex())+" given but "
+				+std::to_string(check_nMComplex)+ " expected.")
+		);
+#endif
 
-	double Gamma0, m0, d, ma, mb;
-	unsigned int spin;
-	int ffType;
 	/** Get parameters from ParameterList:
 	 * We use the same order of the parameters as was used during tree
 	 * construction
 	 */
-	m0 = paras.GetDoubleParameter(0)->GetValue();
-	Gamma0 = paras.GetDoubleParameter(1)->GetValue();
-	spin = (unsigned int) paras.GetDoubleParameter(2)->GetValue();
-	d = paras.GetDoubleParameter(3)->GetValue();
-	ffType = paras.GetDoubleParameter(4)->GetValue();
-	ma = paras.GetDoubleParameter(5)->GetValue();
-	mb = paras.GetDoubleParameter(6)->GetValue();
+	double m0 = paras.GetDoubleParameter(0)->GetValue();
+	double Gamma0 = paras.GetDoubleParameter(1)->GetValue();
+	unsigned int spin = (unsigned int) paras.GetDoubleParameter(2)->GetValue();
+	double d = paras.GetDoubleParameter(3)->GetValue();
+	formFactorType ffType =
+			formFactorType(paras.GetDoubleParameter(4)->GetValue());
+	double ma = paras.GetDoubleParameter(5)->GetValue();
+	double mb = paras.GetDoubleParameter(6)->GetValue();
 
-	//	BOOST_LOG_TRIVIAL(debug) << "BreitWignerStrategy::execute() | mR="<<m0
-	//			<<" Gamma="<<Gamma0<<" spin="<<spin<<" radius="<<d<<" ffType="<<ffType
-	//			<<" subSys="<<subSys<<" ma="<<ma<<" mb="<<mb;
+	std::vector<double> mp = paras.GetMultiDouble(0)->GetValues();
 
-	//MultiDim output, must have multidim Paras in input
-	if(checkType == ParType::MCOMPLEX){
-		std::shared_ptr<MultiDouble> mp = paras.GetMultiDouble(0);
-		std::vector<std::complex<double> > results(mp->GetNValues(),
-				std::complex<double>(0.));
-		//calc BW for each point
-		for(unsigned int ele=0; ele<mp->GetNValues(); ele++){
-			try{
-				results.at(ele) = AmpRelBreitWignerRes::dynamicalFunction(
-						mp->GetValue(ele),
-						m0,ma,mb,Gamma0,
-						spin,d, formFactorType(ffType)
-				);
-			} catch ( std::exception& ex ) {
-				BOOST_LOG_TRIVIAL(error) << "BreitWignerStrategy::execute() | "
-						<<ex.what();
-				throw( std::runtime_error("BreitWignerStrategy::execute() | "
-						"Evaluation of dynamic function failed!")
-				);
-			}
+	std::vector<std::complex<double> > results(mp.size(),
+			std::complex<double>(0.,0.));
+
+	//calc function for each point
+	for(unsigned int ele=0; ele<mp.size(); ele++){
+		try{
+			results.at(ele) = AmpRelBreitWignerRes::dynamicalFunction(
+					mp.at(ele),
+					m0, ma, mb, Gamma0,
+					spin, d, ffType
+			);
+		} catch ( std::exception& ex ) {
+			BOOST_LOG_TRIVIAL(error) << "BreitWignerStrategy::execute() | "
+					<<ex.what();
+			throw( std::runtime_error("BreitWignerStrategy::execute() | "
+					"Evaluation of dynamic function failed!")
+			);
 		}
-		out = std::shared_ptr<AbsParameter>(
-				new MultiComplex(out->GetName(),results));
-		//		BOOST_LOG_TRIVIAL(debug) <<"BreitWignerStrategy::execute() | "
-		//				"finished!";
-		return true;
-	}//end multicomplex output
-
-	//Only StandardDim Paras in input
-	double mSq = paras.GetDoubleParameter(7)->GetValue();
-	std::complex<double> result;
-	try{
-		result = AmpRelBreitWignerRes::dynamicalFunction(
-				mSq,m0,ma,mb,Gamma0, spin,d, formFactorType(ffType)
-		);
-	} catch (std::exception& ex) {
-		BOOST_LOG_TRIVIAL(error) << "BreitWignerStrategy::execute() | "
-				<<ex.what();
-		throw( std::runtime_error("BreitWignerStrategy::execute() | "
-				"Evaluation of dynamic function failed!")
-		);
 	}
 	out = std::shared_ptr<AbsParameter>(
-			new ComplexParameter(out->GetName(), result));
-	//	BOOST_LOG_TRIVIAL(debug) <<"BreitWignerStrategy::execute() | finished!";
+			new MultiComplex(out->GetName(),results)
+	);
 	return true;
 }

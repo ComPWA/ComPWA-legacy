@@ -357,11 +357,14 @@ std::complex<double> AmpFlatteRes::dynamicalFunction(double mSq, double mR, doub
 
 	std::complex<double> result = std::complex<double>(gA*g_production,0) / denom;
 
-//	if( std::isnan(result.real()) || std::isnan(result.imag()) ){
-//		std::cout<<"AmpFlatteRes::dynamicalFunction() | "<<mR<<" "<<mSq<<" "
-//				<<termA<<" "<<termB<<" "<<termC<<std::endl;
-//		return 0;
-//	}
+#ifdef DEBUG
+	if( std::isnan(result.real()) || std::isnan(result.imag()) ){
+		std::cout<<"AmpFlatteRes::dynamicalFunction() | "<<mR<<" "<<mSq<<" "
+				<<termA<<" "<<termB<<" "<<termC<<std::endl;
+		return 0;
+	}
+#endif
+
 	return result;
 }
 
@@ -598,26 +601,48 @@ std::shared_ptr<FunctionTree> FlatteStrategy::SetupTree( std::string name,
 bool FlatteStrategy::execute(ParameterList& paras,
 		std::shared_ptr<AbsParameter>& out)
 {
+#ifdef DEBUG
 	//Check parameter type
 	if( checkType != out->type() )
 		throw( WrongParType("FlatteStrategy::execute() | "
 				"Output parameter is of type "
 				+ std::string(ParNames[out->type()])
 	+ " and conflicts with expected type "
-	+ std::string(ParNames[checkType]))
+	+ std::string(ParNames[checkType]) )
 		);
 
 	//How many parameters do we expect?
+	int check_nBool = 0;
+	int check_nInt = 0;
+	int check_nComplex = 0;
 	int check_nDouble = 2;
 	int check_nMDouble = 4;
 	int check_nMComplex = 3;
 
 	//Check size of parameter list
+	if( paras.GetNBool() != check_nBool )
+		throw( BadParameter("FlatteStrategy::execute() | "
+				"Number of BoolParameters does not match: "
+				+std::to_string(paras.GetNBool())+" given but "
+				+std::to_string(check_nBool)+ " expected.")
+		);
+	if( paras.GetNInteger() != check_nInt )
+		throw( BadParameter("FlatteStrategy::execute() | "
+				"Number of IntParameters does not match: "
+				+std::to_string(paras.GetNInteger())+" given but "
+				+std::to_string(check_nInt)+ " expected.")
+		);
 	if( paras.GetNDouble() != check_nDouble )
 		throw( BadParameter("FlatteStrategy::execute() | "
 				"Number of DoubleParameters does not match: "
 				+std::to_string(paras.GetNDouble())+" given but "
 				+std::to_string(check_nDouble)+ " expected.")
+		);
+	if( paras.GetNComplex() != check_nComplex )
+		throw( BadParameter("FlatteStrategy::execute() | "
+				"Number of ComplexParameters does not match: "
+				+std::to_string(paras.GetNComplex())+" given but "
+				+std::to_string(check_nComplex)+ " expected.")
 		);
 	if( paras.GetNMultiDouble() != check_nMDouble )
 		throw( BadParameter("FlatteStrategy::execute() | "
@@ -631,6 +656,7 @@ bool FlatteStrategy::execute(ParameterList& paras,
 				+std::to_string(paras.GetNMultiComplex())+" given but "
 				+std::to_string(check_nMComplex)+ " expected.")
 		);
+#endif
 
 	/* Get parameters from ParameterList:
 	 * We use the same order of the parameters as was used during tree

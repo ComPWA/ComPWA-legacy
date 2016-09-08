@@ -862,6 +862,7 @@ std::shared_ptr<FunctionTree> couplingToWidthStrat::SetupTree(
 bool couplingToWidthStrat::execute(ParameterList& paras,
 		std::shared_ptr<AbsParameter>& out)
 {
+#ifdef DEBUG
 		//Check parameter type
 		if( checkType != out->type() )
 			throw( WrongParType("couplingToWidthStrat::execute() | "
@@ -916,6 +917,7 @@ bool couplingToWidthStrat::execute(ParameterList& paras,
 					+std::to_string(paras.GetNMultiComplex())+" given but "
 					+std::to_string(check_nMComplex)+ " expected.")
 			);
+#endif
 
 	/* Get parameters from ParameterList:
 	 * We use the same order of the parameters as was used during tree
