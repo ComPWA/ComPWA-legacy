@@ -1,12 +1,6 @@
 ########### BreitWigner lib #############
 import os ;
 
-#project :
-#	requirements <include>$(TOP)
-#	<cxxflags>-ftemplate-depth-256
-#	<cxxflags>-std=c++0x
-#	;
-
 lib BreitWigner : 
         [ glob *.cpp ] 
         $(TOP)/Core//ComPWA

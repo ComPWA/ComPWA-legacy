@@ -105,8 +105,11 @@ public:
 	virtual std::shared_ptr<Data> getData (){ return sampleData_; };
 	virtual void setBackground ( std::shared_ptr<Data> d){ sampleBkg_ = d; };
 	virtual std::shared_ptr<Data> getBackground (){ return sampleBkg_; };
-	virtual void setPhspSample( std::shared_ptr<Data> d){ samplePhsp_ = d; };
+	virtual void setPhspSample( std::shared_ptr<Data> phsp,
+			std::shared_ptr<Data> truePhsp = std::shared_ptr<Data>());
 	virtual std::shared_ptr<Data> getPhspSample(){ return samplePhsp_; };
+	virtual void setTruePhspSample( std::shared_ptr<Data> );
+	virtual std::shared_ptr<Data> getTruePhspSample(){ return sampleTruePhsp_; };
 	virtual void setAmplitude ( std::shared_ptr<Amplitude> d){ amp_ = d; };
 	virtual std::shared_ptr<Amplitude> getAmplitude (){ return amp_; };
 	virtual void setBkgAmplitude ( std::shared_ptr<Amplitude> d){ ampBkg_ = d; };
@@ -117,18 +120,65 @@ public:
 	virtual std::shared_ptr<Generator> getGenerator(){ return gen_; };
 
 	virtual std::shared_ptr<FitResult> startFit( ParameterList& );
-	virtual bool generate ( int number );
+
+	/**Generate phase space events by Hit&Miss
+	 *
+	 * @param number Number of events to generate
+	 * @return
+	 */
 	virtual bool generatePhsp ( int number );
+
+	/**Generate signal events by Hit&Miss
+	 * 1) In case no phsp sample is set and the @param number is larger zero,
+	 * phsp events are generated on the fly.
+	 * 2) In case a phsp sample is set and @param number is smaller zero,
+	 * the whole sample is used for event generation.
+	 *
+	 * @param number Number of events to generate
+	 * @return
+	 */
+	virtual bool generate ( int number );
+
+	/**Generate background events by Hit&Miss
+	 * 1) In case no phsp sample is set and the @param number is larger zero, phsp events
+	 * are generated on the fly.
+	 * 2) In case a phsp sample is set and @param number is smaller zero, the whole sample
+	 * is used for event generation.
+	 *
+	 * @param number Number of events to generate
+	 * @return
+	 */
 	virtual bool generateBkg ( int number );
 
+	virtual void SetAmplitudesData(
+			std::vector<std::shared_ptr<Amplitude> >ampVec,
+			std::vector<double> fraction,
+			std::vector<std::shared_ptr<Data> > dataVec );
+
+	virtual void GenAmplitudesData( int nEvents );
+
+	virtual std::vector<std::shared_ptr<Data> > GetData() { return _dataVec; }
+
 protected:
+	static bool gen( int number, std::shared_ptr<Generator> gen,
+			std::shared_ptr<Amplitude> amp, std::shared_ptr<Data> data,
+			std::shared_ptr<Data> phsp = std::shared_ptr<Data>(),
+			std::shared_ptr<Data> phspTrue = std::shared_ptr<Data>()
+			);
+
 	std::shared_ptr<Data> sampleData_; /*!< Pointer to data sample */
-	std::shared_ptr<Data> sampleBkg_; /*!< Pointer to background sample */
+	std::shared_ptr<Data> sampleBkg_; /*!< Pointer to data sample */
+
 	std::shared_ptr<Data> samplePhsp_; /*!< Pointer to phsp sample */
+	std::shared_ptr<Data> sampleTruePhsp_; /*!< Pointer to true phsp sample */
 	std::shared_ptr<Amplitude> amp_; /*!< Pointer to signal model */
 	std::shared_ptr<Amplitude> ampBkg_; /*!< Pointer to background model */
 	std::shared_ptr<Optimizer> opti_; /*!< Pointer to Optimizer-Module */
 	std::shared_ptr<Generator> gen_; /*!< Pointer to Generator-Module */
+
+	std::vector<std::shared_ptr<Amplitude> > _ampVec;
+	std::vector<double> _fraction;
+	std::vector<std::shared_ptr<Data> > _dataVec;
 };
 
 #endif

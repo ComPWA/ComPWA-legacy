@@ -29,86 +29,6 @@
 #include "Core/Efficiency.hpp"
 #include "Core/Event.hpp"
 
-class allMasses
-{
-public:
-	/**Constructor
-	 *
-	 * @param inMasses number of variables 3 for 3-body decay
-	 * @param inTup combinations for inv masses (e.g (2,3), (1,3), (1,2))
-	 */
-	allMasses(unsigned int inMasses, std::vector<std::pair<unsigned int, unsigned int> >& inTup) :
-		nInvMasses(inMasses),nEvents(0) {
-		for(unsigned int i=0; i<inTup.size(); i++)
-			masses_sq.insert( std::make_pair( inTup[i], std::vector<double>() ) );
-	}
-
-
-	/**Constructor
-	 * additionally allocates memory, if number of events is known.
-	 *
-	 * @param inMasses number of variables 3 for 3-body decay
-	 * @param inEvents number of events to reserve memory for
-	 * @param inTup combinations for inv masses (e.g (2,3), (1,3), (1,2))
-	 */
-	allMasses(unsigned int inMasses, unsigned int inEvents, std::vector<std::pair<unsigned int, unsigned int> >& inTup)
-	:nInvMasses(inMasses),nEvents(inEvents){
-		//alocate memory in advance
-		for(unsigned int i=0; i<inTup.size(); i++)
-			masses_sq.insert( std::make_pair( inTup[i], std::vector<double>(inEvents,0.) ) );
-		eff = std::vector<double>(nEvents,1.);
-		weight = std::vector<double>(nEvents,1.);
-	}
-	//! get reweighting factor for weights
-	double getReWeight(){ return reWeight; };
-
-	//!Standard constructor
-	allMasses():nInvMasses(0),nEvents(0) {}
-
-	//! reset weight vector to one
-	void resetWeights(){
-		weight = std::vector<double>(nEvents,1.);
-	}
-	//! Fill event
-	bool Fill(Event &evt);
-	//! add constant efficiency value @param constEff to every event in masses_sq
-	void setEfficiency(double constEff){
-		unsigned int nEvents = masses_sq.at(std::make_pair(2,3)).size();
-		eff = std::vector<double>(nEvents,constEff);
-	}
-	//! add efficiency value from \param effObj to every event in masses_sq
-	void setEfficiency(std::shared_ptr<Efficiency> effObj){
-		unsigned int nEvents = masses_sq.at(std::make_pair(2,3)).size();
-		eff = std::vector<double>(nEvents,1.);
-		for(unsigned int i=0; i<nEvents;i++){
-			std::vector<double> data;
-			data.push_back(masses_sq.at( std::make_pair(2,3) )[i]);
-			data.push_back(masses_sq.at( std::make_pair(1,3) )[i]);
-			double value  = effObj->evaluate(data);
-			//			if(value <= 0) value = 0;
-			//			else value = 1/value;
-			/*
-			 * we need to use sqrt(eff) here because in the current
-			 * implementation the Amplitude value is squared after
-			 * multiplication with the efficiency
-			 */
-			eff.at(i) = sqrt(value);
-			if(value==0) eff.at(i) = 0.001;
-			//			std::cout<<effObj->evaluate(data)<<std::endl;
-		}
-		return;
-	}
-
-	std::map<std::pair<unsigned int, unsigned int>,std::vector<double> > masses_sq;
-	std::vector<double> eff;
-	std::vector<double> weight;
-	double sumWeight;//! sum of all weights
-	double reWeight;//! reweighting factor for event weights, so that these are 1 in average
-	unsigned int nInvMasses;
-	unsigned int nEvents;
-
-};
-
 class dataPoint
 {
 private:
@@ -116,12 +36,22 @@ private:
 public:
 	//! Default constructor
 	dataPoint();
+
+	/**! Initialize dataPoint with invariant masses.
+	 * Missing values are filled by Kinematics
+	 */
+	dataPoint(int a, int b, double invMassSqA, double invMassSqB);
+
 	//! Construct dataPoint from Event
-	dataPoint(Event& ev);
+	dataPoint( const Event& ev );
 	//! Construct dataPoint from vector of invariant masses
 	dataPoint(std::vector<double> vec);
 	~dataPoint(){};
 
+	/**! Fill dataPoint with invariant masses.
+	 * Missing values are filled by Kinematics
+	 */
+	void Set(int a, int b, double invMassSqA, double invMassSqB);
 	//! Set value of coordinate name
 	void setVal(std::string name, double val);
 	//! Set value of coordinate num
@@ -143,11 +73,27 @@ public:
 	void setWeight(double w) { weight=w; };
 	//! Get weight
 	double getWeight() { return weight; };
+	//! Set efficiency
+	void setEfficiency(double e) { eff=e; };
+	//! Get efficiency
+	double getEfficiency() { return eff; };
+
+	static std::vector<double> getRow(int n, std::vector<dataPoint> v){
+		std::vector<double> ret;
+		if(!v.size()) return ret;
+		if( n >= Kinematics::instance()->GetNVars() )
+			throw std::runtime_error("dataPoint::getRow() | out of range!");
+		for(int i=0; i<v.size(); i++)
+			ret.push_back(v.at(i).getVal(n));
+		return ret;
+	}
 
 protected:
 	void init();
 	std::vector<double> var;
 	double weight;
-	friend std::ostream & operator<<(std::ostream &os, dataPoint &p);
+	double eff;
+	friend std::ostream & operator<<(std::ostream &os, const dataPoint &p);
 };
+
 #endif /*DPPOINT2_HPP_*/

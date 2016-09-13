@@ -83,7 +83,7 @@ class GStartIndividual :public GParameterSet
 {
 public:
 	/** @brief The default constructor */
-	GStartIndividual(std::shared_ptr<ControlParameter> data, unsigned int parDim, std::string *name, double* val, double* min, double* max, double* err);
+	GStartIndividual(std::shared_ptr<ControlParameter> data, ParameterList list);
 	/** @brief A standard copy constructor */
 	GStartIndividual(const GStartIndividual&);
 	/** @brief The standard destructor */
@@ -96,7 +96,10 @@ public:
 	const GStartIndividual& operator=(const GStartIndividual&);
 
 protected:
+	ParameterList parList;
 	std::vector<std::string > parNames;
+
+	void updatePar();
 
 	/** @brief Loads the data of another GStartIndividual */
 	virtual void load_(const GObject*);

@@ -1,30 +1,18 @@
 ########### test apps #############
-import os ;
 
-local GENEVA = [ os.environ GENEVA ] ;
-local QFTINC = [ os.environ QFT_INCLUDE ] ;
-local QFT = [ os.environ QFT ] ;
-local MINUIT2 = [ os.environ MINUIT2 ] ;
+project ComPWA/test 
+	: requirements 
+	  <include>.
 
-local rlibs = [ SHELL "$ROOTSYS/bin/root-config --libs" ] ;
-ROOTLIBS = [ MATCH "(.*)[\n]" : $(rlibs) ] ;
+       <library>/boost//program_options
+       <library>/boost//filesystem
+       <library>/boost//serialization
 
-project :
-	requirements <include>./
-	    <include>$(TOP)
-		<include>$(ROOT_INC_PATH)
-		<include>$(GENEVA)/include
-        <include>$(QFT)/include
-        <include>$(MINUIT2)/include
-        <cxxflags>-pthread
-	<linkflags>-L$(ROOT_LIB_PATH)
-	<linkflags>$(ROOTLIBS)
-	<linkflags>-lEG
-	<linkflags>-lRooFit
-	<linkflags>-lRooFitCore
-	<linkflags>-L$(QFT)/lib
-	<linkflags>-lqft++
-	#<linkflags>-lgomp
+	  <library>/root
+	  <linkflags>-lRooFit
+	  <linkflags>-lRooFitCore
+
+	  <library>$(TOP)//qft++
 	;
 
 lib test : 
@@ -175,6 +163,17 @@ exe gendalitzApp :
         
 exe compareTreeAmpApp : 
         CompareTreeAmpApp.cpp 
+        $(TOP)/Core//ComPWA
+        $(TOP)/Physics/AmplitudeSum//AmplitudeSum  
+        $(TOP)/DataReader/RootReader//RootReader  
+        $(TOP)/Optimizer//Optimizer
+        $(TOP)/Estimator/MinLogLH//MinLogLH 
+        $(TOP)/Optimizer/Minuit2//Minuit2IF
+        $(TOP)/Physics/DPKinematics//DPKinematics  
+        : ;
+
+exe lhNormalizationTestApp : 
+        LHNormalizationTestApp.cpp 
         test
         $(TOP)/Core//ComPWA
         $(TOP)/Physics/AmplitudeSum//AmplitudeSum  
@@ -229,20 +228,65 @@ exe helicityAmplitudeTreeTestApp :
         $(TOP)/Physics/HelicityAmplitude//HelicityAmplitude
         : ;        
 
-exe serializeApp : 
-        SerializationApp.cpp 
-        test
+exe serializeApp 
+	: SerializationApp.cpp 
+       test
+       $(TOP)/Core//ComPWA
+     : ;
+        
+exe multiVariateGaussianTestApp 
+	: MultiVariateGaussianTestApp.cpp  
+	  test 
+	: <library>/gsl 
+	  <library>/root
+	;
+
+exe openMPTestApp 
+	: OpenMPTestApp.cpp  
+	  test 
         $(TOP)/Core//ComPWA
-        : ;
+        $(TOP)/Physics/AmplitudeSum//AmplitudeSum
+        $(TOP)/Physics/DPKinematics//DPKinematics
+        $(TOP)/DataReader/RootReader//RootReader
+        $(TOP)/Optimizer//Optimizer
+        $(TOP)/Estimator/MinLogLH//MinLogLH
+        $(TOP)/Optimizer/Minuit2//Minuit2IF
+	: <library>/gsl 
+	  <library>/root
+	  #<cxxflags>-fopenmp
+	;
 
-install dist : test : <location>$(TOP)/lib <threading>single ;
-#install dist2 : dalitzfitApp treetestApp cx0testApp dataiftestApp optimizertestApp physicstestApp blackscholesApp neuralnetworkApp : <location>$(TOP)/bin <threading>single ;
-install dist2 : compareTreeAmpApp dalitzfitApp slicefitApp treetestApp dataiftestApp optimizertestApp physicstestApp : <location>$(TOP)/bin <threading>single ;
-install dist3 : estimatortestApp integrationtestApp integrationtestbinnedApp runmanagertestApp gentwopartApp gendalitzApp dalitzplotApp serializeApp dpareaTestApp genRunManager : <location>$(TOP)/bin <threading>single ;
+install dist 
+	: test 
+	: <threading>single
+	  <location>$(TOP)lib/ ;
 
-install dist4 : helicityDecayTreeTestApp helicityAmplitudeTreeTestApp : <location>$(TOP)/bin <threading>single ;
+install dist2 
+	: compareTreeAmpApp 
+	  dalitzfitApp 
+	  slicefitApp 
+	  treetestApp 
+	  dataiftestApp 
+	  optimizertestApp 
+	  physicstestApp 
+	  estimatortestApp 
+	  integrationtestApp 
+	  integrationtestbinnedApp 
+	  runmanagertestApp 
+	  gentwopartApp 
+	  gendalitzApp 
+	  dalitzplotApp 
+	  serializeApp 
+	  dpareaTestApp 
+	  genRunManager 
+	  openMPTestApp
+	  lhNormalizationTestApp
+	  multiVariateGaussianTestApp
+	: <threading>single
+	  <location>$(TOP)/bin ;
 
-#if $(GENEVA) { 
-#install dist7 : genevatestApp : <location>$(TOP)/bin ;
-#}
-
+install dist4 
+	: helicityDecayTreeTestApp 
+	  helicityAmplitudeTreeTestApp 
+	: <threading>single 
+	  <location>$(TOP)/bin ;

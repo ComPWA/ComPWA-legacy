@@ -21,65 +21,38 @@
 #include "Physics/AmplitudeSum/AmpGausRes.hpp"
 
 AmpGausRes::AmpGausRes(const char *name,
-		DoubleParameter& resMass, DoubleParameter& resWidth,
-		int subSys) :
-		AmpAbsDynamicalFunction(name),
-		_mR(resMass), _resWidth(resWidth),
-		_subSys(subSys)
-{
-	initialise();
-}
+		unsigned int varIdA,
+		std::shared_ptr<DoubleParameter> mag,
+		std::shared_ptr<DoubleParameter> phase,
+		std::shared_ptr<DoubleParameter> mass,
+		std::shared_ptr<DoubleParameter> width,
+		std::string mother, std::string particleA, std::string particleB,
+		int nCalls, normStyle nS) :
+		AmpAbsDynamicalFunction(name, varIdA, 0, mag, phase, mass,
+				Spin(0), Spin(0), Spin(0), +1, 0, mother, particleA, particleB,
+				formFactorType::noFormFactor, nCalls, nS),
+				_width(width)
+{ }
 
-
-AmpGausRes::AmpGausRes(const AmpGausRes& other, const char* newname) :
-		  AmpAbsDynamicalFunction(other, newname),
-		  _mR(other._mR),
-		  _resWidth(other._resWidth),
-		  _subSys(other._subSys)
-{
-	initialise();
-}
-
-AmpGausRes::AmpGausRes(const AmpGausRes& other) :
-		  AmpAbsDynamicalFunction(other),
-		  _mR(other._mR),
-		  _resWidth(other._resWidth),
-		  _subSys(other._subSys)
-{
-	initialise();
-}
 
 AmpGausRes::~AmpGausRes() 
 {
 }
 
-void AmpGausRes::initialise() 
-{
-}   
-
-std::complex<double> AmpGausRes::evaluateAmp(dataPoint& point){
+std::complex<double> AmpGausRes::EvaluateAmp(dataPoint& point){
 
 
-	double m0 = _mR.GetValue();
-	double width = _resWidth.GetValue();
-	//  double m  = Double_t(_x);
-	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
-//	double m23sq = point.getVal("m23sq");
-//	double m13sq = point.getVal("m13sq");
-	double m23sq = point.getVal(0);
-	double m13sq = point.getVal(1);
-	double m12sq = kin->getThirdVariableSq(m23sq,m13sq);
-	double m = -999;
-	switch(_subSys){
-	case 3: m=sqrt(m12sq); break;
-	case 4: m=sqrt(m13sq); break;
-	case 5: m=sqrt(m23sq); break;
-	}
+	double m0 = _mass->GetValue();
+	double width = _width->GetValue();
+	double m = point.getVal(_subSys);
 
-	std::complex<double> gaus (_norm * exp(-1*(m-m0)*(m-m0)/width/width/2.),0);
+	std::complex<double> gaus(
+			GetNormalization() * exp(-1*(m-m0)*(m-m0)/width/width/2.),
+			0
+			);
 
 	return gaus;
 }
-std::complex<double> AmpGausRes::evaluate(dataPoint& point){
-	return evaluateAmp(point)*evaluateWignerD(point);
+std::complex<double> AmpGausRes::Evaluate(dataPoint& point){
+	return EvaluateAmp(point)*evaluateWignerD(point);
 }

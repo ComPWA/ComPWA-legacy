@@ -6,84 +6,77 @@
  */
 
 #include <numeric>
-#include <math.h>
+#include <cmath>
+#include <cstdlib>
 
-#include <gsl/gsl_sf_gamma.h>
-#include <gsl/gsl_randist.h>
-#include <gsl/gsl_vector.h>
-#include <gsl/gsl_matrix.h>
-#include <gsl/gsl_blas.h>
-#include <gsl/gsl_linalg.h>
-
-#include <boost/numeric/ublas/symmetric.hpp>
-#include <boost/numeric/ublas/io.hpp>
-#include <boost/log/core.hpp>
-#include <boost/log/trivial.hpp>
-#include <boost/random/normal_distribution.hpp>
 #include <boost/archive/xml_oarchive.hpp>
-#include <boost/archive/xml_iarchive.hpp>
 
-#include "Optimizer/Minuit2/MinuitResult.hpp"
 #include "Core/ProgressBar.hpp"
+#include "Core/Logging.hpp"
+#include "Optimizer/Minuit2/MinuitResult.hpp"
 
-using namespace boost::log;
+MinuitResult::MinuitResult() : initialLH(0), finalLH(0), trueLH(0),
+calcInterference(0)
+{
 
-int multivariateGaussian(const gsl_rng *rnd, const int vecSize, const gsl_vector *in, const gsl_matrix *cov, gsl_vector *res){
-	gsl_matrix *tmpM= gsl_matrix_alloc(vecSize,vecSize);
-	gsl_matrix_memcpy(tmpM,cov);
-	gsl_linalg_cholesky_decomp(tmpM);
-	for(unsigned int i=0; i<vecSize; i++)
-		gsl_vector_set( res, i, gsl_ran_ugaussian(rnd) );
-
-	gsl_blas_dtrmv(CblasLower, CblasNoTrans, CblasNonUnit, tmpM, res);
-	gsl_vector_add(res,in);
-	gsl_matrix_free(tmpM);
-
-	return 0;
 }
 
-MinuitResult::MinuitResult(std::shared_ptr<ControlParameter> esti, FunctionMinimum result) : useCorrelatedErrors(0){
-	estimator = std::static_pointer_cast<Estimator>(esti);
-	_amp=estimator->getAmplitude();
+MinuitResult::MinuitResult(std::shared_ptr<ControlParameter> esti,
+		FunctionMinimum result) :
+		initialLH(0), finalLH(0), trueLH(0), calcInterference(0)
+{
+	est = std::static_pointer_cast<Estimator>(esti);
+	_ampVec = est->getAmplitudes();
+	penalty = est->calcPenalty();
+	penaltyScale = est->getPenaltyScale();
+	nEvents = est->getNEvents();
 	init(result);
 }
 
-void MinuitResult::setResult(std::shared_ptr<ControlParameter> esti,FunctionMinimum result){
-	estimator = std::static_pointer_cast<Estimator>(esti);
-	_amp=estimator->getAmplitude();
+void MinuitResult::setResult(std::shared_ptr<ControlParameter> esti,
+		FunctionMinimum result)
+{
+	est = std::static_pointer_cast<Estimator>(esti);
+	_ampVec = est->getAmplitudes();
+	penalty = est->calcPenalty();
+	penaltyScale = est->getPenaltyScale();
+	nEvents = est->getNEvents();
 	init(result);
 }
 
-void MinuitResult::init(FunctionMinimum min){
-	nRes = 0;
+void MinuitResult::init(FunctionMinimum min)
+{
 	MnUserParameterState minState = min.UserState();
-	using namespace boost::numeric::ublas;
 
 	if(minState.HasCovariance()){
 		MnUserCovariance minuitCovMatrix = minState.Covariance();
 		/* Size of Minuit covariance vector is given by dim*(dim+1)/2.
 		 * dim is the dimension of the covariance matrix.
-		 * The dimension can therefore be calculated as dim = -0.5+-0.5 sqrt(8*size+1)
+		 * The dimension can therefore be calculated as
+		 * dim = -0.5+-0.5 sqrt(8*size+1)
 		 */
-		unsigned int dim = minuitCovMatrix.Nrow();
+		nFreeParameter = minuitCovMatrix.Nrow();
 		globalCC = minState.GlobalCC().GlobalCC();
-		symmetric_matrix<double,upper> covMatrix(dim,dim);
-		symmetric_matrix<double,upper> corrMatrix(dim,dim);
-		//	if(minuitCovM.size()==dim*(dim+1)/2){
-		for (unsigned i = 0; i < covMatrix.size1 (); ++ i)
-			for (unsigned j = i; j < covMatrix.size2 (); ++ j){
-				double entry = minuitCovMatrix(j,i);
-				covMatrix (i, j) = entry;
-				if(i==j) variance.push_back(sqrt(entry));
+		cov = std::vector<std::vector<double>>(
+				nFreeParameter,std::vector<double>(nFreeParameter));
+		corr = std::vector<std::vector<double>>(
+				nFreeParameter,std::vector<double>(nFreeParameter));
+		for (unsigned i = 0; i < nFreeParameter; ++i)
+			for (unsigned j = i; j < nFreeParameter; ++j){
+				cov.at(i).at(j) = minuitCovMatrix(j,i);
+				cov.at(j).at(i) = minuitCovMatrix(j,i);//fill lower half
 			}
-		for (unsigned i = 0; i < covMatrix.size1 (); ++ i)
-			for (unsigned j = i; j < covMatrix.size2 (); ++ j){
-				double denom = variance[i]*variance[j];
-				corrMatrix(i,j) = covMatrix(i,j)/denom;
+		for (unsigned i = 0; i < nFreeParameter; ++i)
+			for (unsigned j = i; j < nFreeParameter; ++j){
+				corr.at(i).at(j) =
+						cov.at(i).at(j) / sqrt( cov.at(i).at(i) *
+								cov.at(j).at(j) );
+				corr.at(j).at(i) = corr.at(i).at(j);//fill lower half
 			}
-		cov=covMatrix;
-		corr=corrMatrix;
-	} else BOOST_LOG_TRIVIAL(error)<<"MinuitResult: no valid correlation matrix available!";
+
+	} else
+		BOOST_LOG_TRIVIAL(error)
+		<< "MinuitResult: no valid correlation matrix available!";
 	initialLH = -1;
 	finalLH = minState.Fval();
 	edm= minState.Edm();
@@ -93,24 +86,45 @@ void MinuitResult::init(FunctionMinimum min){
 	hasValidCov = min.HasValidCovariance();
 	hasAccCov = min.HasAccurateCovar();
 	hasReachedCallLimit = min.HasReachedCallLimit();
+	edmAboveMax = min.IsAboveMaxEdm();
 	hesseFailed = min.HesseFailed();
 	errorDef = min.Up();
 	nFcn = min.NFcn();
 
-	const gsl_rng_type * T;
-	gsl_rng_env_setup();
-	T = gsl_rng_default;
-	r = gsl_rng_alloc (T);
-
-	useCorrelatedErrors=0;
-	if(_amp && _amp->hasTree()) setUseTree(1);
 	return;
+}
+
+//! Set list of true parameters
+void MinuitResult::setTrueParameters(ParameterList truePars)
+{
+	trueParameters = truePars;
+	if( trueParameters.GetNDouble() && est ){
+		//Setting true parameter and calculate LH value
+		Amplitude::UpdateAmpParameterList(_ampVec,trueParameters);
+		SetTrueLH( est->controlParameter(trueParameters) );
+		Amplitude::UpdateAmpParameterList(_ampVec,finalParameters);
+	}
 
 }
 
-void MinuitResult::genSimpleOutput(std::ostream& out){
+//! Set list of initial parameters
+void MinuitResult::setInitialParameters(ParameterList iniPars)
+{
+	initialParameters = iniPars;
+	if( initialParameters.GetNDouble() && est ){
+		//Setting initial parameter and calculate LH value
+		Amplitude::UpdateAmpParameterList(_ampVec,initialParameters);
+		SetInitialLH( est->controlParameter(initialParameters) );
+		Amplitude::UpdateAmpParameterList(_ampVec,finalParameters);
+	}
+
+}
+
+void MinuitResult::genSimpleOutput(std::ostream& out)
+{
 	for(unsigned int o=0;o<finalParameters.GetNDouble();o++){
-		std::shared_ptr<DoubleParameter> outPar = finalParameters.GetDoubleParameter(o);
+		std::shared_ptr<DoubleParameter> outPar =
+				finalParameters.GetDoubleParameter(o);
 		out<<outPar->GetValue()<<" "<<outPar->GetError()<<" ";
 	}
 	out<<"\n";
@@ -118,170 +132,169 @@ void MinuitResult::genSimpleOutput(std::ostream& out){
 	return;
 }
 
-void MinuitResult::smearParameterList(ParameterList& newParList){
-	unsigned int nFree = 0;
-	for(unsigned int o=0;o<finalParameters.GetNDouble();o++)
-		if(!finalParameters.GetDoubleParameter(o)->IsFixed()) nFree++;
-	unsigned int t=0;
-	gsl_vector* oldPar = gsl_vector_alloc(nFree);
-	for(unsigned int o=0;o<finalParameters.GetNDouble();o++){
-		std::shared_ptr<DoubleParameter> outPar = finalParameters.GetDoubleParameter(o);
-		if(outPar->IsFixed()) continue;
-		gsl_vector_set(oldPar,t,outPar->GetValue());
-		t++;
-	}
-	gsl_matrix* gslCov = gsl_matrix_alloc(nFree,nFree);
-	for(unsigned int i=0; i<cov.size1();i++)
-		for(unsigned int j=0; j<cov.size2();j++)
-			gsl_matrix_set(gslCov,i,j,cov(i,j));
 
-	gsl_vector* newPar = gsl_vector_alloc(nFree);
-	multivariateGaussian(r, nFree,oldPar,gslCov,newPar);//generate set of smeared parameters
+void MinuitResult::calcFractionError(ParameterList& parList,
+		std::shared_ptr<Amplitude> amp, int nSets)
+{
+	if( nSets <= 0 ) return;
+	if( !parList.GetNDouble() ) return;
+	BOOST_LOG_TRIVIAL(info) << "Calculating errors of fit fractions using "
+			<<nSets<<" sets of parameters...";
 
-	newParList = ParameterList(finalParameters); //deep copy of finalParameters
-	t=0;
-	for(unsigned int o=0;o<newParList.GetNDouble();o++){
-		std::shared_ptr<DoubleParameter> outPar = newParList.GetDoubleParameter(o);
-		if(outPar->IsFixed()) continue;
-		outPar->SetValue(newPar->data[t]);//set floating values to smeard values
-		t++;
-	}
-}
+	//Setting up random number generator
+	const gsl_rng_type * T;
+	gsl_rng_env_setup();
+	T = gsl_rng_default;
+	gsl_rng* rnd = gsl_rng_alloc (T);
 
-void MinuitResult::calcFractionError(){
-	if(fractionList.GetNDouble() != _amp->getNumberOfResonances())
-		throw std::runtime_error("MinuitResult::calcFractionError() parameterList empty! Calculate fit fractions first!");
-	nRes=fractionList.GetNDouble();
-	if(useCorrelatedErrors){
-		/* Exact error calculation */
-		unsigned int numberOfSets = 1000;
-		BOOST_LOG_TRIVIAL(info) << "Calculating errors of fit fractions using "<<numberOfSets<<" sets of parameters...";
-		std::vector<ParameterList> fracVect;
-		progressBar bar(numberOfSets);
-		for(unsigned int i=0; i<numberOfSets; i++){
-			bar.nextEvent();
-			ParameterList newPar; smearParameterList(newPar);
-			_amp->setParameterList(newPar);//smear all free parameters according to cov matrix
-			ParameterList tmp;
-			calcFraction(tmp);
-			fracVect.push_back(tmp);
-		}
-		//Calculate standart deviation
-		for(unsigned int o=0;o<nRes;o++){
-			double mean=0, sqSum=0., stdev=0;
-			for(unsigned int i=0; i<fracVect.size();i++){
-				double tmp = fracVect.at(i).GetDoubleParameter(o)->GetValue();
-				mean += tmp;
-				sqSum += tmp*tmp;
+	//convert to GSL objects
+	gsl_vector* gslFinalPar = gsl_parameterList2Vec(finalParameters);
+	gsl_matrix* gslCov = gsl_vecVec2Matrix(cov);
+	gsl_matrix_print(gslCov); //DEBUG
+
+	std::vector<ParameterList> fracVect;
+	progressBar bar(nSets);
+	stringstream outFraction;
+//	for(unsigned int i=0; i<nSets; i++){
+	int i=0;
+	while( i<nSets ){
+		bool error=0;
+		bar.nextEvent();
+		gsl_vector* gslNewPar = gsl_vector_alloc(nFreeParameter);
+		//generate set of smeared parameters
+		multivariateGaussian( rnd, nFreeParameter,
+				gslFinalPar, gslCov, gslNewPar );
+		gsl_vector_print(gslNewPar);
+
+		//deep copy of finalParameters
+		ParameterList newPar;
+		newPar.DeepCopy(finalParameters);
+
+		std::size_t t=0;
+		for(std::size_t o=0;o<newPar.GetNDouble();o++){
+			std::shared_ptr<DoubleParameter> outPar =
+					newPar.GetDoubleParameter(o);
+			if(outPar->IsFixed()) continue;
+			//set floating values to smeared values
+			try{ //catch out-of-bound
+				outPar->SetValue(gslNewPar->data[t]);
+			} catch ( ParameterOutOfBound& ex ){
+				error=1;
 			}
-			unsigned int s = fracVect.size();
-			sqSum /= s;
-			mean /= s;
-			stdev = std::sqrt(sqSum - mean*mean); //this is crosscecked with the RMS of the distribution
-			fractionList.GetDoubleParameter(o)->SetError(stdev);
+			t++;
 		}
-		//		std::cout<<"frac error: ";
-		//			for(unsigned int i=0; i<fracError.size();i++) std::cout<<fracError.at(i)<<" ";
-		//			std::cout<<std::endl;
-		_amp->setParameterList(finalParameters); //set correct fit result
+		if( error ) continue; //skip this set if one parameter is out of bound
+
+		//free vector
+		gsl_vector_free(gslNewPar);
+		//update amplitude with smeared parameters
+		try{
+			Amplitude::UpdateAmpParameterList(_ampVec, newPar);
+		} catch ( ParameterOutOfBound& ex ){
+			continue;
+		}
+		ParameterList tmp;
+		amp->GetFitFractions(tmp);
+		fracVect.push_back(tmp);
+		i++;
+
+		/******* DEBUGGING *******/
+		//			if(i==0){
+		//				for(int t=0; t<newPar.GetNDouble(); t++){
+		//					if( newPar.GetDoubleParameter(t)->IsFixed()) continue;
+		//					outFraction << newPar.GetDoubleParameter(t)->GetName()<<":";
+		//				}
+		//				for(int t=0; t<tmp.GetNDouble(); t++)
+		//					outFraction << tmp.GetDoubleParameter(t)->GetName()<<":";
+		//				outFraction << "norm" << std::endl;
+		//			}
+		//			for(int t=0; t<newPar.GetNDouble(); t++){
+		//				if( newPar.GetDoubleParameter(t)->IsFixed()) continue;
+		//				outFraction << newPar.GetDoubleParameter(t)->GetValue()<<" ";
+		//			}
+		//			for(int t=0; t<tmp.GetNDouble(); t++)
+		//				outFraction << tmp.GetDoubleParameter(t)->GetValue()<<" ";
+		//			double norm = _amp->GetIntegral();
+		//			outFraction << norm;
+		//			outFraction << std::endl;
+		/******* DEBUGGING *******/
 	}
+	BOOST_LOG_TRIVIAL(info)<<" ------- "<<outFraction.str();
+
+	//free objects
+	gsl_vector_free(gslFinalPar);
+	gsl_matrix_free(gslCov);
+	gsl_rng_free(rnd);
+
+	int nRes=parList.GetNDouble();
+	//Calculate standard deviation
+	for(unsigned int o=0;o<nRes;o++){
+		double mean=0, sqSum=0., stdev=0;
+		for(unsigned int i=0; i<fracVect.size();i++){
+			double tmp = fracVect.at(i).GetDoubleParameter(o)->GetValue();
+			mean += tmp;
+			sqSum += tmp*tmp;
+		}
+		unsigned int s = fracVect.size();
+		sqSum /= s;
+		mean /= s;
+		//this is cross-checked with the RMS of the distribution
+		stdev = std::sqrt(sqSum - mean*mean);
+		parList.GetDoubleParameter(o)->SetError(stdev);
+	}
+
+	//Set correct fit result
+	Amplitude::UpdateAmpParameterList(_ampVec, finalParameters);
 	return;
 }
 
-void MinuitResult::calcFraction() {
-	if(!fractionList.GetNDouble()) {
-		calcFraction(fractionList);
-		calcFractionError();
-	} else
-		BOOST_LOG_TRIVIAL(warning) << "MinuitResult::calcFractions() fractions already calculated. Skip!";
-}
-
-void MinuitResult::calcFraction(ParameterList& parList){
-	if(!_amp)
-		throw std::runtime_error("MinuitResult::calcFractions() | no amplitude set, can't calculate fractions!");
-	if(parList.GetNDouble())
-		throw std::runtime_error("MinuitResult::calcFractions() | ParameterList not empty!");
-
-	double norm =-1;
-	ParameterList currentPar;
-	_amp->copyParameterList(currentPar);
-	//	if(!useTree) norm = _amp->integral();
-	//	else {//if we have a tree, use it. Much faster especially in case of correlated errors in calcFractionError()
-	//		std::shared_ptr<FunctionTree> tree = estimator->getTree();
-	//		tree->recalculate();
-	//		double phspVolume = Kinematics::instance()->getPhspVolume();
-	//		/*We need the intensity over the PHSP without efficiency correction. Therefore we
-	//		 * access node 'Amplitude' and sum up its values.*/
-	//		std::shared_ptr<TreeNode> amplitudeNode = tree->head()->getChildNode("Amplitude_Phsp");
-	//		if(!amplitudeNode){
-	//			BOOST_LOG_TRIVIAL(error)<<"MinuitResult::calcFraction() : Can't find node 'Amplitude_Phsp' in tree!";
-	//			throw BadParameter("Node not found!");
-	//		}
-	//		std::shared_ptr<MultiComplex> normPar = std::dynamic_pointer_cast<MultiComplex>(amplitudeNode->getValue());//node 'Amplitude'
-	//		unsigned int numPhspEvents = normPar->GetNValues();
-	//		for(unsigned int i=0; i<numPhspEvents;i++)
-	//			norm+=std::norm(normPar->GetValue(i));
-	//		norm = norm*phspVolume/numPhspEvents; //correct calculation of normalization
-	//	}
-
-	//in case of unbinned efficiency correction to tree does not provide an integral w/o efficiency correction
-	norm = _amp->integral();
-	if(norm<0)
-		throw std::runtime_error("MinuitResult::calcFraction() normalization can't be calculated");
-	BOOST_LOG_TRIVIAL(debug)<<"MinuitResult::calcFraction() norm="<<norm;
-	nRes=_amp->getNumberOfResonances();
-	for(unsigned int i=0;i<nRes; i++){ //fill matrix
-		double resInt= _amp->getAmpIntegral(i);//this is simply the factor 2J+1, because the resonance is already normalized
-		std::string resName = _amp->getNameOfResonance(i);
-		std::shared_ptr<DoubleParameter> magPar = currentPar.GetDoubleParameter("mag_"+resName);
-		double mag = magPar->GetValue(); //value of magnitude
-		double magError = 0;
-		if(magPar->HasError()) magError = magPar->GetError(); //error of magnitude
-		parList.AddParameter(std::shared_ptr<DoubleParameter>(
-				new DoubleParameter(resName+"_FF", mag*mag*resInt/norm, 2*mag*resInt/norm * magError)) );
-	}
-	return;
-}
-
-void MinuitResult::genOutput(std::ostream& out, std::string opt){
-	bool printTrue=0;
+void MinuitResult::genOutput(std::ostream& out, std::string opt)
+{
 	bool printParam=1, printCorrMatrix=1, printCovMatrix=1;
 	if(opt=="P") {//print only parameters
 		printCorrMatrix=0; printCovMatrix=0;
 	}
-	if(trueParameters.GetNParameter()) printTrue=1;
 	out<<std::endl;
 	out<<"--------------MINUIT2 FIT RESULT----------------"<<std::endl;
 	if(!isValid) out<<"		*** MINIMUM NOT VALID! ***"<<std::endl;
 	out<<std::setprecision(10);
 	out<<"Initial Likelihood: "<<initialLH<<std::endl;
 	out<<"Final Likelihood: "<<finalLH<<std::endl;
+	if(trueLH)
+		out<<"True Likelihood: "<<trueLH<<std::endl;
 
 	out<<"Estimated distance to minimumn: "<<edm<<std::endl;
+	if(edmAboveMax) out<<"		*** EDM IS ABOVE MAXIMUM! ***"<<std::endl;
 	out<<"Error definition: "<<errorDef<<std::endl;
 	out<<"Number of calls: "<<nFcn<<std::endl;
-	if(hasReachedCallLimit) out<<"		*** LIMIT OF MAX CALLS REACHED! ***"<<std::endl;
+	if(hasReachedCallLimit)
+		out<<"		*** LIMIT OF MAX CALLS REACHED! ***"<<std::endl;
 	out<<"CPU Time : "<<time/60<<"min"<<std::endl;
 	out<<std::setprecision(5)<<std::endl;
 
 
-	if(!hasValidParameters) out<<"		*** NO VALID SET OF PARAMETERS! ***"<<std::endl;
+	if(!hasValidParameters)
+		out<<"		*** NO VALID SET OF PARAMETERS! ***"<<std::endl;
 	if(printParam){
 		out<<"PARAMETERS:"<<std::endl;
 		TableFormater* tableResult = new TableFormater(&out);
 		printFitParameters(tableResult);
 	}
 
-	if(!hasValidCov) out<<"		*** COVARIANCE MATRIX NOT VALID! ***"<<std::endl;
-	if(!hasAccCov) out<<"		*** COVARIANCE MATRIX NOT ACCURATE! ***"<<std::endl;
-	if(!covPosDef) out<<"		*** COVARIANCE MATRIX NOT POSITIVE DEFINITE! ***"<<std::endl;
-	if(hesseFailed) out<<"		*** HESSE FAILED! ***"<<std::endl;
+	if(!hasValidCov)
+		out<<"		*** COVARIANCE MATRIX NOT VALID! ***"<<std::endl;
+	if(!hasAccCov)
+		out<<"		*** COVARIANCE MATRIX NOT ACCURATE! ***"<<std::endl;
+	if(!covPosDef)
+		out<<"		*** COVARIANCE MATRIX NOT POSITIVE DEFINITE! ***"<<std::endl;
+	if(hesseFailed)
+		out<<"		*** HESSE FAILED! ***"<<std::endl;
 	if(hasValidCov){
 		unsigned int n=0;
 		if(printCovMatrix){
 			out<<"COVARIANCE MATRIX:"<<std::endl;
 			TableFormater* tableCov = new TableFormater(&out);
-			printCorrelationMatrix(tableCov);
+			printCovarianceMatrix(tableCov);
 		}
 		if(printCorrMatrix){
 			out<<"CORRELATION MATRIX:"<<std::endl;
@@ -290,92 +303,121 @@ void MinuitResult::genOutput(std::ostream& out, std::string opt){
 		}
 	}
 	out<<"FIT FRACTIONS:"<<std::endl;
-	TableFormater* fracTable = new TableFormater(&out);
-	printFitFractions(fracTable); //calculate and print fractions if amplitude is set
+	//Calculate and print fractions
+	TableFormater tab(&out);
+	//Calculate fit fractions for all amplitudes
+	//	printFitFractions(&tab);
+	//Calculate fit fractions for first amplitude only
+	printFitFractions(&tab,_ampVec.at(0),nSetsFractionError);
 
-	double penalty = estimator->calcPenalty();
 	out<<std::setprecision(10);
+	out<<"Final penalty term: "<<penalty<<std::endl;
 	out<<"FinalLH w/o penalty: "<<finalLH-penalty<<std::endl;
+	out<<"FinalLH w/ penalty: "<<finalLH<<std::endl;
 	/* The Akaike (AIC) and Bayesian (BIC) information criteria are described in
 	 * Schwarz, Anals of Statistics 6 No.2: 461-464 (1978)
 	 * and
 	 * IEEE Transacrions on Automatic Control 19, No.6:716-723 (1974) */
-	out<<"AIC: "<<calcAIC()<<std::endl;
-	out<<"BIC: "<<calcBIC()<<std::endl;
-	out<<std::endl;
-	out<<std::setprecision(5);
+	ParameterList frac;
+	try{
+		_ampVec.at(0)->GetFitFractions(frac);
+	} catch (std::exception& ex){
+		BOOST_LOG_TRIVIAL(error) << "MinuitResult::genOutput() | Can not "
+				"calculate fit fractions for amplitude 0.";
+	}
+	AIC = calcAIC(frac)-penalty;
+	BIC = calcBIC(frac)-penalty;
+	out<<"AIC: "<<AIC<<std::endl;
+	out<<"BIC: "<<BIC<<std::endl;
+	double r=0;
+	for(int i=0; i<fractionList.GetNDouble(); i++){
+		double val = std::fabs(fractionList.GetDoubleParameter(i)->GetValue());
+		if(val > 0.001) r++;
+	}
+	out<<"Number of Resonances > 10^-3: "<<r<<std::endl;
 
+	if(calcInterference){
+		auto ampItr = _ampVec.begin();
+		for( ; ampItr != _ampVec.end(); ++ampItr)
+			createInterferenceTable(out,(*ampItr));
+	}
+
+	out<<std::setprecision(5);//reset cout precision
 	return;
 }
 
-double MinuitResult::calcAIC(){
-	if(!fractionList.GetNDouble()) calcFraction();
+void MinuitResult::createInterferenceTable(std::ostream& out,
+		std::shared_ptr<Amplitude> amp)
+{
+	out<<"INTERFERENCE terms for "<<amp->GetName()<<": "<<std::endl;
+	TableFormater* tableInterf = new TableFormater(&out);
+	tableInterf->addColumn("Name 1",15);
+	tableInterf->addColumn("Name 2",15);
+	tableInterf->addColumn("Value",15);
+	tableInterf->header();
+	double sumInfTerms = 0;
+	auto it = amp->GetResonanceItrFirst();
+	for( ; it != amp->GetResonanceItrLast(); ++it){
+		auto it2 = it;
+		for( ; it2 != amp->GetResonanceItrLast(); ++it2){
+			*tableInterf << (*it)->GetName();
+			*tableInterf << (*it2)->GetName();
+			double inf = amp->GetIntegralInterference(it,it2);
+			*tableInterf << inf;
+			sumInfTerms+=inf;
+		}
+	}
+	tableInterf->delim();
+	*tableInterf<<" "<<"Sum: "<<sumInfTerms;
+	tableInterf->footer();
+	out<<std::endl;
+}
+
+double MinuitResult::calcAIC(ParameterList& frac)
+{
 	double r=0;
-	for(int i=0; i<fractionList.GetNDouble(); i++){
-		double val = fractionList.GetDoubleParameter(i)->GetValue();
-		if(val > 0.001) r+=val;
+	for(int i=0; i<frac.GetNDouble(); i++){
+		double val = frac.GetDoubleParameter(i)->GetValue();
+		if(val > 0.001) r++;
 	}
 	return (finalLH+2*r);
 }
-double MinuitResult::calcBIC(){
-	if(!fractionList.GetNDouble()) calcFraction();
+
+double MinuitResult::calcBIC(ParameterList& frac)
+{
 	double r=0;
-	for(int i=0; i<fractionList.GetNDouble(); i++){
-		double val = fractionList.GetDoubleParameter(i)->GetValue();
-		if(val > 0.001) r+=val;
+	for(int i=0; i<frac.GetNDouble(); i++){
+		double val = frac.GetDoubleParameter(i)->GetValue();
+		if(val > 0.001) r++;
 	}
-	return (finalLH+r*std::log(estimator->getNEvents()));
+	return (finalLH+r*std::log(nEvents));
 }
 
-void MinuitResult::printFitFractions(TableFormater* fracTable){
-	BOOST_LOG_TRIVIAL(info) << "Calculating fit fractions...";
-	calcFraction();
-	double sum, sumErrorSq;
-
-	//print matrix
-	fracTable->addColumn("Resonance",15);//add empty first column
-	fracTable->addColumn("Fraction",15);//add empty first column
-	fracTable->addColumn("Error",15);//add empty first column
-	fracTable->addColumn("Significance",15);//add empty first column
-	fracTable->header();
-	for(unsigned int i=0;i<fractionList.GetNDouble(); ++i){
-		std::shared_ptr<DoubleParameter> tmpPar = fractionList.GetDoubleParameter(i);
-		*fracTable << tmpPar->GetName()
-				<< tmpPar->GetValue()
-				<< tmpPar->GetError() //assume symmetric errors here
-				<< std::abs(tmpPar->GetValue()/tmpPar->GetError());
-		sum += tmpPar->GetValue();
-		sumErrorSq += tmpPar->GetError()*tmpPar->GetError();
-	}
-	fracTable->delim();
-	*fracTable << "Total" << sum << sqrt(sumErrorSq) << " ";
-	fracTable->footer();
-
-	return;
-}
-
-void MinuitResult::printCorrelationMatrix(TableFormater* tableCorr){
+void MinuitResult::printCorrelationMatrix(TableFormater* tableCorr)
+{
 	if(!hasValidCov) return;
 	tableCorr->addColumn(" ",15);//add empty first column
 	tableCorr->addColumn("GlobalCC",10);//global correlation coefficient
+
+	//add columns in correlation matrix
 	for(unsigned int o=0;o<finalParameters.GetNDouble();o++){
-		std::shared_ptr<DoubleParameter> ppp = finalParameters.GetDoubleParameter(o);
+		std::shared_ptr<DoubleParameter> ppp =
+				finalParameters.GetDoubleParameter(o);
 		if(ppp->IsFixed()) continue;
-		tableCorr->addColumn(ppp->GetName(),15);//add columns in correlation matrix
+		tableCorr->addColumn(ppp->GetName(),15);
 	}
 
-	tableCorr->header();
 	unsigned int n=0;
+	tableCorr->header();
 	for(unsigned int o=0;o<finalParameters.GetNDouble();o++){
-		std::shared_ptr<DoubleParameter> ppp = initialParameters.GetDoubleParameter(o);
-		std::shared_ptr<DoubleParameter> ppp2 = finalParameters.GetDoubleParameter(o);
+		std::shared_ptr<DoubleParameter> ppp =
+				finalParameters.GetDoubleParameter(o);
 		if(ppp->IsFixed()) continue;
 		*tableCorr << ppp->GetName();
-		//				if(globalCC.size()>o)
-		*tableCorr << globalCC[n]; //TODO: check if emtpy (don't know how this happened, but it did :)
-		for(unsigned int t=0;t<corr.size1();t++) {
-			if(n>=corr.size2()) { *tableCorr<< " "; continue; }
-			if(t>=n)*tableCorr << corr(n,t);
+		*tableCorr << globalCC.at(n);
+		for(unsigned int t=0;t<corr.size();t++) {
+			if(n>=corr.at(0).size()) { *tableCorr<< " "; continue; }
+			if(t>=n)*tableCorr << corr.at(n).at(t);
 			else *tableCorr << "";
 		}
 		n++;
@@ -384,31 +426,27 @@ void MinuitResult::printCorrelationMatrix(TableFormater* tableCorr){
 	return;
 }
 
-void MinuitResult::printCovarianceMatrix(TableFormater* tableCov){
+void MinuitResult::printCovarianceMatrix(TableFormater* tableCov)
+{
 	if(!hasValidCov) return;
-	tableCov->addColumn(" ",15);//add empty first column
-	tableCov->addColumn("GlobalCC",10);//global correlation coefficient
-	for(unsigned int o=0;o<finalParameters.GetNDouble();o++){
-		std::shared_ptr<DoubleParameter> ppp = finalParameters.GetDoubleParameter(o);
-		if(ppp->IsFixed()) continue;
-		tableCov->addColumn(ppp->GetName(),15);//add columns in correlation matrix
-	}
+	tableCov->addColumn(" ",17);//add empty first column
 	//add columns first
 	for(unsigned int o=0;o<finalParameters.GetNDouble();o++){
 		if(!finalParameters.GetDoubleParameter(o)->IsFixed())
-			tableCov->addColumn(finalParameters.GetDoubleParameter(o)->GetName(),15);//add columns in covariance matrix
+			tableCov->addColumn(
+					finalParameters.GetDoubleParameter(o)->GetName(),17);
 	}
 
 	unsigned int n=0;
 	tableCov->header();
 	for(unsigned int o=0;o<finalParameters.GetNDouble();o++){
-		std::shared_ptr<DoubleParameter> ppp = initialParameters.GetDoubleParameter(o);
-		std::shared_ptr<DoubleParameter> ppp2 = finalParameters.GetDoubleParameter(o);
+		std::shared_ptr<DoubleParameter> ppp =
+				finalParameters.GetDoubleParameter(o);
 		if(ppp->IsFixed()) continue;
 		*tableCov << ppp->GetName();
-		for(unsigned int t=0;t<cov.size1();t++) {
-			if(n>=cov.size2()) { *tableCov<< " "; continue; }
-			if(t>=n) *tableCov << cov(n,t);
+		for(unsigned int t=0;t<cov.size();t++) {
+			if(n>=cov.at(0).size()) { *tableCov<< " "; continue; }
+			if(t>=n) *tableCov << cov.at(n).at(t);
 			else *tableCov << "";
 		}
 		n++;
@@ -417,7 +455,8 @@ void MinuitResult::printCovarianceMatrix(TableFormater* tableCov){
 	return;
 }
 
-void MinuitResult::writeXML(std::string filename){
+void MinuitResult::writeXML(std::string filename)
+{
 	std::ofstream ofs(filename);
 	boost::archive::xml_oarchive oa(ofs);
 	oa << boost::serialization::make_nvp("FitParameters", finalParameters);
@@ -426,33 +465,35 @@ void MinuitResult::writeXML(std::string filename){
 	return;
 }
 
-void MinuitResult::writeTeX(std::string filename){
+void MinuitResult::writeTeX(std::string filename)
+{
 	std::ofstream out(filename);
-	bool printTrue=0;
-	if(trueParameters.GetNParameter()) printTrue=1;
 	TableFormater* tableResult = new TexTableFormater(&out);
 	printFitParameters(tableResult);
 	if(hasValidCov){
 		unsigned int n=0;
 		TableFormater* tableCov = new TexTableFormater(&out);
-		printCorrelationMatrix(tableCov);
+		printCovarianceMatrix(tableCov);
 		TableFormater* tableCorr = new TexTableFormater(&out);
 		printCorrelationMatrix(tableCorr);
 	}
 	TableFormater* fracTable = new TexTableFormater(&out);
-	printFitFractions(fracTable); //calculate and print fractions if amplitude is set
+	//calculate and print fractions if amplitude is set
+	printFitFractions(fracTable);
 	out.close();
 	return;
 }
-bool MinuitResult::hasFailed(){
+
+bool MinuitResult::hasFailed()
+{
 	bool failed=0;
 	if(!isValid) failed=1;
-//	if(!covPosDef) failed=1;
-//	if(!hasValidParameters) failed=1;
-//	if(!hasValidCov) failed=1;
-//	if(!hasAccCov) failed=1;
-//	if(hasReachedCallLimit) failed=1;
-//	if(hesseFailed) failed=1;
+	//	if(!covPosDef) failed=1;
+	//	if(!hasValidParameters) failed=1;
+	//	if(!hasValidCov) failed=1;
+	//	if(!hasAccCov) failed=1;
+	//	if(hasReachedCallLimit) failed=1;
+	//	if(hesseFailed) failed=1;
 
 	return failed;
 }

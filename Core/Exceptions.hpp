@@ -135,9 +135,53 @@ public:
   virtual ~WrongParType () throw() {}
 };
 
+//------------------------------------------------------------------------------
+//! @class   Beyond phase-space
+//!
+//! @brief   Parameter of wrong type
+//------------------------------------------------------------------------------
+class BeyondPhsp : public Exception {
+public:
+  BeyondPhsp ( const std::string& error = "Data beyond phsp!" ) :
+    Exception(error)
+  {}
+  BeyondPhsp ( const char *error ) :
+    Exception(error)
+  {}
+  virtual ~BeyondPhsp () throw() {}
+};
 
+//------------------------------------------------------------------------------
+//! @class   Wrong variable ID
+//!
+//! @brief   Parameter of wrong type
+//------------------------------------------------------------------------------
+class WrongVariableID: public Exception {
+public:
+  WrongVariableID ( const std::string& error = "Variable does not exist!" ) :
+    Exception(error)
+  {}
+  WrongVariableID ( const char *error ) :
+    Exception(error)
+  {}
+  virtual ~WrongVariableID () throw() {}
+};
+//------------------------------------------------------------------------------
+//! @class   ParameterOutOfBound
+//!
+//! @brief   Parameter out of bound
+//------------------------------------------------------------------------------
+class ParameterOutOfBound: public Exception {
+public:
+  ParameterOutOfBound ( const std::string& error = "Variable not within its limits!" ) :
+    Exception(error)
+  {}
+  ParameterOutOfBound ( const char *error ) :
+    Exception(error)
+  {}
+  virtual ~ParameterOutOfBound () throw() {}
+};
 #endif
-
 //******************************************************************************
 //! EOF
 //******************************************************************************

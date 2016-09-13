@@ -49,7 +49,13 @@ protected:
 	double finalLH;
 
 	void genOutput(std::ostream& out, std::string opt="");
+
 	void init(boost::shared_ptr<Gem::Geneva::GStartIndividual> min);
+
+	virtual void calcFractionError(ParameterList& parList,
+			std::shared_ptr<Amplitude> amp) {
+
+	};
 };
 
 #endif

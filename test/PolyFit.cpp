@@ -69,7 +69,10 @@ double PolyFit::controlParameter(ParameterList& minPar){
   // Calculate chi^2 for current set of fit parameters 
   double result=0.;
   for (unsigned int i=0; i<_xValue.size(); i++){
-    double yValFit=minPar.GetParameterValue(0)+minPar.GetParameterValue(1)*_xValue[i]+minPar.GetParameterValue(2)*_xValue[i]*_xValue[i]+minPar.GetParameterValue(3)*_xValue[i]*_xValue[i]*_xValue[i];
+    double yValFit = minPar.GetDoubleParameterValue(0)
+    		+minPar.GetDoubleParameterValue(1)*_xValue[i]
+			+minPar.GetDoubleParameterValue(2)*_xValue[i]*_xValue[i]
+			+minPar.GetDoubleParameterValue(3)*_xValue[i]*_xValue[i]*_xValue[i];
     double yValExp=_yValue[i];
     double tmpChi=((yValExp-yValFit)*(yValExp-yValFit))/(_sigma*_sigma);
     result+=tmpChi;

@@ -1,24 +1,6 @@
 ########### DPKinematics lib #############
-import os ;
-path-constant DPKINEMATICS : . ;
-local GSL = [ os.environ GSL_ROOT ] ;
 
-#ROOTLIBS = -lCore -lCint -lRIO -lNet -lHist -lGraf -lGraf3d -lGpad -lTree -lRint -lPostscript -lMatrix -lPhysics -lMathCore -lThread -lpthread  -lm -ldl ;
-local rlibs = [ SHELL "$ROOTSYS/bin/root-config --libs" ] ;
-ROOTLIBS = [ MATCH "(.*)[\n]" : $(rlibs) ] ;
-
-project :
-	requirements
-	    <include>$(GSL)/include
-	    <include>$(ROOT_INC_PATH)
-	<linkflags>-L$(ROOT_LIB_PATH) 
-	<linkflags>$(ROOTLIBS)
-	<linkflags>-L$(GSL)/lib
-	<linkflags>-lgsl 
-	<linkflags>-lgslcblas
-	;
-
-#the dictionary file are generated in bin/<version>/<release>/. 
+#The dictionary file are generated in bin/<version>/<release>/. 
 #The path of the SimpleEfficiency.hpp must be adjusted in libDPKinematicsDict.h!
 make libDPKinematicsDict.cpp : SimpleEfficiency.hpp libDPKinematicsLinkDef.hpp : @genDict ;
 actions genDict
@@ -27,10 +9,8 @@ actions genDict
 	rootcint -f $(<) -c $(>)
 }
 
-lib DPKinematics : 
-        [ glob *.cpp ]
-        libDPKinematicsDict.cpp
-        $(TOP)/Core//ComPWA
-        ; 
+lib DPKinematics : [ glob *.cpp ] libDPKinematicsDict.cpp  
+	: <library>/root
+     ; 
 
 install dist : DPKinematics : <location>$(TOP)/lib ;

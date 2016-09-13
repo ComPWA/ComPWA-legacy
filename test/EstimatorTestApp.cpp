@@ -54,7 +54,7 @@ int main(int argc, char **argv){
   shared_ptr<ControlParameter> testEsti = MinLogLH::createInstance(testBW, myReader, std::shared_ptr<Data>(), std::shared_ptr<Data>());
   //if(!testEsti) return 0;
   ParameterList minPar;
-  testBW->copyParameterList(minPar);
+  testBW->FillParameterList(minPar);
   double result=0;
   result = testEsti->controlParameter(minPar);
   cout << "1dim Fit optimal Likelihood: " << result << endl;

@@ -11,19 +11,9 @@
 
 #include <cmath> 
 
-//#include "Riostream.h"
-//#include "TMath.h"
-
-//#include "RooAbsReal.h"
-//#include "RooRealVar.h"
-//#include "RooAbsCategory.h"
-//#include "RooLinkedListIter.h"
-
 #include "qft++.h"
 
 #include "Physics/AmplitudeSum/PhiSumOfAmplitudes.hpp"
-
-//ClassImp(PhiSumOfAmplitudes)
 
  PhiSumOfAmplitudes::PhiSumOfAmplitudes(const char *name) : _name(name)
  { 
@@ -46,7 +36,7 @@
 //   _phaseIter = _phaseList.createIterator() ;
 //   _angIter = _angList.createIterator() ;
  } 
-void PhiSumOfAmplitudes::addBW(std::shared_ptr<AmpAbsDynamicalFunction> theRes , std::shared_ptr<DoubleParameter> r, std::shared_ptr<DoubleParameter> phi, std::shared_ptr<AmpWigner> theAng) {
+void PhiSumOfAmplitudes::addBW(std::shared_ptr<AmpAbsDynamicalFunction> theRes , std::shared_ptr<DoubleParameter> r, std::shared_ptr<DoubleParameter> phi, std::shared_ptr<AmpWigner2> theAng) {
   _pdfList.push_back(theRes);
   _intList.push_back(r);
   _phaseList.push_back(phi);
@@ -57,7 +47,7 @@ void PhiSumOfAmplitudes::addBW(std::shared_ptr<AmpAbsDynamicalFunction> theRes ,
   _pdfList.push_back(theRes);
   _intList.push_back(r);
   _phaseList.push_back(phi);
-  _angList.push_back(std::shared_ptr<AmpWigner>(new AmpWigner()));
+  _angList.push_back(std::shared_ptr<AmpWigner2>(new AmpWigner2(1,0)));
 }
 
 double PhiSumOfAmplitudes::evaluate() const

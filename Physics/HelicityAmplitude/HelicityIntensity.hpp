@@ -30,26 +30,38 @@ public:
 	HelicityIntensity();
 	virtual ~HelicityIntensity();
 
-	const double integral();
-	const double integral(ParameterList& par);
-	const double normalization();
-	const double normalization(ParameterList& par);
-	double getMaxVal(ParameterList& par, std::shared_ptr<Generator> gen);
-	double getMaxVal(std::shared_ptr<Generator> gen);
+	//! Clone function
+	HelicityIntensity* Clone(std::string newName="") const {
+		auto tmp = (new HelicityIntensity(*this));
+		tmp->SetName(newName);
+		return tmp;
+	}
 
-	const ParameterList& intensity(dataPoint& point, ParameterList& par);
+	void to_str();
+
+	const double GetIntegral();
+	const double GetNormalization();
+	double GetMaxVal(std::shared_ptr<Generator> gen);
+	/** Integral value of amplitude in certain boundary
+	 * Used for plotting a projection of a function in \p var1 in
+	 * bin [\p min1, \p min2]. In this case we have to integrate over an
+	 * other variable \p var2
+	 * @param var1 first variable
+	 * @param min1 minimal value of first variable
+	 * @param max1 maximal value of first variable
+	 * @param var2 second variable
+	 * @param min2 minimal value of second variable
+	 * @param max2 maximal value of second variable
+	 * @return
+	 */
+	virtual double GetIntValue(std::string var1, double min1, double max1,
+			std::string var2, double min2, double max2) { };
+
 	const ParameterList& intensity(dataPoint& point);
+	const ParameterList& intensity(std::vector<double> point);
 	const ParameterList& intensityNoEff(dataPoint& point);
-	const ParameterList& intensity(std::vector<double> point,
-			ParameterList& par);
 
-	const bool fillStartParVec(ParameterList& outPar);
-	void setParameterList(ParameterList& par);
-
-	void printAmps();
-	void printFractions();
-
-	Amplitude* Clone();
+	virtual void GetFitFractions(ParameterList& parList ) { };
 };
 
 } /* namespace HelicityFormalism */

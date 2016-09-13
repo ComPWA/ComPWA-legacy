@@ -40,30 +40,37 @@ namespace Gem
 {
 	namespace Geneva
 	{
-//	GStartIndividual::GStartIndividual() : GParameterSet(),theData(ControlParameter::Instance())
-//	        		{       /* nothing */ }
+	//	GStartIndividual::GStartIndividual() : GParameterSet(),theData(ControlParameter::Instance())
+	//	        		{       /* nothing */ }
 	GStartIndividual::GStartIndividual() : GParameterSet(),theData()
 	{       /* nothing */ }
-
 
 	/********************************************************************************************/
 	/**
 	 * The default constructor. This function will add two double parameters to this individual,
 	 * each of which has a constrained value range [-10:10].
 	 */
-	GStartIndividual::GStartIndividual(std::shared_ptr<ControlParameter> data, unsigned int parDim, std::string *name, double* val, double* min, double* max, double* err)
-	: GParameterSet(), theData(data)
+	GStartIndividual::GStartIndividual(std::shared_ptr<ControlParameter> data, ParameterList list)
+	: GParameterSet(), theData(data), parList(list)
 	{
-
-		// Set up a GConstrainedDoubleObjectCollection
-
-		// Add bounded double objects
-		for(std::size_t i=0; i<parDim; i++) {
-
-			boost::shared_ptr<GConstrainedDoubleObject> gbd_ptr(new GConstrainedDoubleObject(val[i], min[i], max[i]) );
+		for(std::size_t i=0; i<parList.GetNDouble(); i++) {
+			std::shared_ptr<DoubleParameter> p = parList.GetDoubleParameter(i);
+			if(p->IsFixed()) continue;
+			double val = p->GetValue();
+			double min = -1.79768e+307;
+			double max =  1.79768e+307;
+			double err = val;
+			if(p->HasError()) err = p->GetError();
+			if(p->UseBounds()){
+				min=p->GetMinValue();
+				max=p->GetMaxValue();
+			}
+			boost::shared_ptr<GConstrainedDoubleObject> gbd_ptr(
+					new GConstrainedDoubleObject(val, min, max) );
 
 			// Create a suitable adaptor (sigma=0.1, sigma-adaption=0.5, min sigma=0, max sigma=0,5)
-			boost::shared_ptr<GDoubleGaussAdaptor> gdga_ptr(new GDoubleGaussAdaptor(err[i], 0.5, 0., 3*err[i]));
+			boost::shared_ptr<GDoubleGaussAdaptor> gdga_ptr(new GDoubleGaussAdaptor(
+					err, 0.5, 0., 3*err));
 			gdga_ptr->setAdaptionThreshold(1); // Adaption parameters are modified after each adaption
 			gdga_ptr->setAdaptionProbability(0.05); // The likelihood for a parameter to be adapted
 
@@ -75,8 +82,10 @@ namespace Gem
 			// gpoc_ptr->push_back(gbd_ptr);
 			this->push_back(gbd_ptr);
 			//parNames.insert( std::pair<boost::shared_ptr<GConstrainedDoubleObject>,std::string>(gbd_ptr,name[i]) );
-			parNames.push_back(name[i]);
+			parNames.push_back(p->GetName());
 		}
+		BOOST_LOG_TRIVIAL(info) << "GStartIndividual::GStartIndividual() | "
+				<<parNames.size()<<" Parameters were added for minimization!";
 	}
 
 	/********************************************************************************************/
@@ -91,7 +100,7 @@ namespace Gem
 	//{ /* nothing */ }
 	GStartIndividual::GStartIndividual(const GStartIndividual& cp)
 	: GParameterSet(cp),parNames(cp.parNames)
-	, theData(cp.theData)
+	, theData(cp.theData), parList(cp.parList)
 	{ /* nothing */ }
 
 	/********************************************************************************************/
@@ -111,16 +120,8 @@ namespace Gem
 	 * @return bool if valid
 	 */
 	bool GStartIndividual::getPar(ParameterList& val){
-		GStartIndividual::conversion_iterator<GConstrainedDoubleObject> it(this->end());
-		unsigned int i=0;
-		for(it=this->begin(); it!=this->end(); ++it) {
-			std::string test;
-			if(i<parNames.size())
-				test = parNames.at(i);
-			val.AddParameter(std::shared_ptr<DoubleParameter>(
-					new DoubleParameter(test,(*it)->value())));
-			i++;
-		}
+		updatePar();
+		val = ParameterList(parList);
 		return true;
 	}
 
@@ -171,35 +172,8 @@ namespace Gem
 	 * @return The value of this object
 	 */
 	double GStartIndividual::fitnessCalculation(){
-		//double result = 0.;
-
-		// Extract the GConstrainedDoubleObjectCollection object. In a realistic scenario, you might want
-		// to add error checks here upon first invocation.
-
-		GStartIndividual::conversion_iterator<GConstrainedDoubleObject> it(this->end());
-		ParameterList minPar;
-		unsigned int i=0;
-		//std::cout << "STart" <<std::endl;
-		for(it=this->begin(); it!=this->end(); ++it) {
-			std::string test;
-			if(i<parNames.size())
-				test = parNames.at(i);
-			//std::cout << "ParName: " << test << " Value: "<< (*it)->value() << std::endl;
-			//boost::shared_ptr<GConstrainedDoubleObject> ptr = (*it);
-			//std::cout << "Value: " << (*it)->value() << " Iterator: "<< (*it).get() << std::endl;
-
-			minPar.AddParameter(std::shared_ptr<DoubleParameter>(
-					new DoubleParameter(test,(*it)->value())));
-			//  minPar.AddParameter(DoubleParameter("test",(*it)->value(),0,0,0));
-
-			i++;
-		}
-
-		if(!theData){
-			std::cout << "No Data!" << std::endl; //TODO: exception
-			return 0;
-		}
-		return theData->controlParameter(minPar);
+		updatePar();
+		return theData->controlParameter(parList);
 	}
 
 	/********************************************************************************************/
@@ -213,5 +187,17 @@ namespace Gem
 
 	/********************************************************************************************/
 
+	void GStartIndividual::updatePar(){
+		BOOST_LOG_TRIVIAL(debug) << "GStartIndividual::updatePar() | setting new parameters!";
+		GStartIndividual::conversion_iterator<GConstrainedDoubleObject> it(this->end());
+		it = this->begin();
+		for(unsigned int i=0; i<parList.GetNDouble(); ++i) {
+			std::shared_ptr<DoubleParameter> p = parList.GetDoubleParameter(i);
+			if(p->IsFixed()) continue;
+			p->SetValue( (*it)->value() );
+			++it;
+		}
+
+	}
 	} /* namespace Geneva */
 } /* namespace Gem */

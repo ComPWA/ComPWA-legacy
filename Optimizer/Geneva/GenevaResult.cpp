@@ -23,6 +23,10 @@ void GenevaResult::genOutput(std::ostream& out, std::string opt){
 		TableFormater* tableResult = new TableFormater(&out);
 		printFitParameters(tableResult);
 	}
+
+	out<<"FIT FRACTIONS:"<<std::endl;
+	TableFormater* fracTable = new TableFormater(&out);
+	printFitFractions(fracTable); //calculate and print fractions if amplitude is set
 	return;
 }
 

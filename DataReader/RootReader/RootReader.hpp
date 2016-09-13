@@ -25,12 +25,13 @@
 #include <utility>
 
 //PWA-Headers
-#include "DataReader/Data.hpp"
 #include "Core/Event.hpp"
 #include "Core/DataPoint.hpp"
+#include "DataReader/Data.hpp"
+#include "DataReader/DataCorrection.hpp"
 
 //Root-Headers
-#include "TMath.h"
+//#include "TMath.h"
 #include "TLorentzVector.h"
 #include "TParticle.h"
 #include "TROOT.h"
@@ -39,88 +40,73 @@
 #include "TTree.h"
 #include "TRandom3.h"
 
-class RootReader : public Data {
-
+class RootReader : public Data
+{
 public:
-	//! Default Constructor: Empty object, can be filled
+
+	//! Destructor
+	virtual ~RootReader();
+
+	//! Default constructor
 	RootReader();
+
+	/**! Constructor read from TTree
+	 *
+	 * @param tr 		TTree to read
+	 * @param size 		Number of events to read
+	 * @param binned 	Create binned/unbinned data set
+	 */
 	RootReader(TTree* tr, int size=-1 , const bool binned=false);
+
 	/*! Read constructor.
 	 *
 	 * @param inRootFile Input file name
 	 * @param inTreeName Name of tree in input file
-	 * @param size 		Number of events to read in
+	 * @param size 		 Number of events to read in
 	 * @param binned	 Create binning
 	 */
-	RootReader(const std::string inRootFile, const std::string inTreeName="data", int size=-1, const bool binned=false);
+	RootReader(const std::string inRootFile, const std::string inTreeName="data",
+			int size=-1, const bool binned=false);
 
-	virtual const std::vector<std::string>& getVariableNames();
+	//! Create clone
+	virtual RootReader* Clone() const;
 
-//  virtual void writeToFile();
-    virtual void pushEvent(const Event& evt) {fEvents.push_back(evt);};
-    virtual Event& getEvent(const int);
-    virtual allMasses getMasses(const unsigned int startEvent=0, unsigned int nEvents=0);
-    virtual const int getBin(const int, double&, double&);
-    //virtual const int getEvent(const int, TLorentzVector& , TLorentzVector& , double&);
+	//! Create empty clone
+	virtual RootReader* EmptyClone() const;
+
     virtual void writeData(std::string file="",std::string trName="");
-    virtual void Clear();
-
-	virtual const unsigned int getNEvents() const {return fEvents.size();};
-	virtual const unsigned int getNBins() const {return fmaxBins;};
-
-	virtual std::vector<Event> getEvents() {return fEvents; }
-	virtual std::vector<dataPoint> getDataPoints();
-	virtual void Add(Data& otherSample){
-		std::vector<Event> otherEvents = otherSample.getEvents();
-		fEvents.insert(fEvents.end(), otherEvents.begin(), otherEvents.end());
-	}
-	//! Destructor
-	virtual ~RootReader();
-	//! Remove all events outside PHSP
-	virtual void reduceToPhsp();
-	//! Select only first @param newSize events from full sample
-	virtual void reduce(unsigned int newSize);
-	//! Select random subset of events
-	std::shared_ptr<Data> rndSubSet(unsigned int size, std::shared_ptr<Generator> gen);
-
-	//! Set efficiency value for all stored events. Efficiency is taken from Efficiency object.
-	void setEfficiency(std::shared_ptr<Efficiency> eff);
-	//! Reset effciencies of all events
-	void resetEfficiency(double e=1.);
-	//! Reset weights
-	void resetWeights(double w=1.);
-	//! Weights set?
-	bool hasWeights();
 
 protected:
+    //Open ROOT file and set branch addresses to TTree
 	void read();
-	int readSize;
-	bool _readFlag;
 
-	//input tree
+	//Read TTree and store Events in fEvents
+	virtual void storeEvents();
+
+	//Create binning (obsolete?)
+	virtual void bin();
+
+	//Number of events to read from TTree
+	int readSize;
+
+	//Input file name
 	std::string fileName;
+
+	//Input tree name
 	std::string treeName;
+
+	//Pointer to Tfile
 	TFile* fFile;
+
+	//Pointer to TTree
 	TTree* fTree;
+
+	//TTree branch variables
 	TClonesArray* fParticles;
 	double feventWeight;
 	double feventEff;
 	int fCharge;
 	int fFlavour;
-
-	//binning
-	bool fBinned;
-	unsigned int fmaxBins;
-	std::map<int, std::pair<double,double> > fBins;
-
-	//storage of events
-	std::vector<std::string> fVarNames;
-	std::vector<Event> fEvents;
-//	unsigned int fmaxEvents;
-	//  unsigned int fEvent;
-
-	virtual void storeEvents();
-	virtual void bin();
 
 };
 

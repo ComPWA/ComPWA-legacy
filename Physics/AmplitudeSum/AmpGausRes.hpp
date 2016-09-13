@@ -30,30 +30,50 @@ using namespace std;
 class AmpGausRes : public AmpAbsDynamicalFunction  {
 public:
 
+	AmpGausRes();
 	AmpGausRes(const char *name,
-			DoubleParameter& _resMass, DoubleParameter& _resWidth,
-			int _subsys) ;
+			unsigned int varIdA,
+			std::shared_ptr<DoubleParameter> mag,
+			std::shared_ptr<DoubleParameter> phase,
+			std::shared_ptr<DoubleParameter> mass,
+			std::shared_ptr<DoubleParameter> width,
+			std::string mother, std::string particleA, std::string particleB,
+			int nCalls=30000, normStyle nS=normStyle::one) ;
 
-	AmpGausRes(const AmpGausRes&, const char*);
-	AmpGausRes(const AmpGausRes&);
+	//! Clone function
+	virtual AmpGausRes* Clone(std::string newName="") const{
+		auto tmp = (new AmpGausRes(*this));
+		if(newName != "")
+			tmp->SetName(newName);
+		return tmp;
+	}
 
 	~AmpGausRes();
 
-	virtual void initialise();
-	virtual std::complex<double> evaluate(dataPoint& point);
-	virtual std::complex<double> evaluateAmp(dataPoint& point);
+	//! Calculation integral |dynamical amplitude|^2
+	virtual double GetIntegral() { return integral(); }
+
+	//! Get resonance width
+	double GetWidth() const { return _width->GetValue(); }
+
+	virtual void Save(boost::property_tree::ptree&) { };
+
+	virtual std::complex<double> Evaluate(dataPoint& point);
+	virtual std::complex<double> EvaluateAmp(dataPoint& point);
 	virtual double evaluateWignerD(dataPoint& point) const { return 1; };
 
-	inline virtual bool isSubSys(const unsigned int subSys)const{return (subSys==_subSys);};
-	double getSpin(){return 0;};
+	inline virtual bool isSubSys(const unsigned int subSys) const
+	{
+		return (subSys==_subSys);
+	};
+
+	double GetSpin(){return 0;};
+
+	virtual std::shared_ptr<FunctionTree> SetupTree(
+			ParameterList& sample, ParameterList& toySample,std::string suffix) { };
 
 protected:
-	DoubleParameter _mR;
-	DoubleParameter _resWidth;
-
-	unsigned int _subSys;
-
-private:
+	std::shared_ptr<DoubleParameter> _width;
 
 };
 

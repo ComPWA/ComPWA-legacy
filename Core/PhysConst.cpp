@@ -145,36 +145,88 @@ void PhysConst::readFile(){
 	flag_readFile=0;
 	return;
 }
-int PhysConst::findParticle(int idid){
+
+int PhysConst::findParticle(int idid)
+{
 	if(flag_readFile) readFile();
 	for(unsigned int i=0; i<name.size(); i++){
 		if(id[i]==idid) return i;
 	}
 	return 0; //error particle not found
 }
-int PhysConst::findConstant(std::string nnn){
+
+int PhysConst::findConstant(std::string nnn)
+{
 	if(flag_readFile) readFile();
 	for(unsigned int i=0; i<nameConst.size(); i++)
 		if(nameConst[i]==nnn) return i;
 	return 0; //error particle not found
 }
-int PhysConst::findParticle(std::string nnn){
+int PhysConst::findParticle(std::string nnn)
+{
 	if(flag_readFile) readFile();
 	for(unsigned int i=0; i<name.size(); i++)
 		if(name[i]==nnn) return i;
-	return 0; //error particle not found
+	throw BadParameter("PhysConst::findParticle() | Particle \""+nnn+"\" not found!");
+	return 0;
 }
-double PhysConst::getMass(std::string nnn)	 	{ return mass[findParticle(nnn)]; } ;
-double PhysConst::getWidth(std::string nnn) 	{ return width[findParticle(nnn)]; } ;
-unsigned int PhysConst::getJ(std::string nnn) 	{ return J[findParticle(nnn)]; } ;
-bool PhysConst::getP(std::string nnn) 			{ return P[findParticle(nnn)]; } ;
-bool PhysConst::getC(std::string nnn) 			{ return C[findParticle(nnn)]; } ;
 
-double PhysConst::getMass(int nnn)	 	{ return mass[findParticle(nnn)]; } ;
-double PhysConst::getWidth(int nnn) 	{ return width[findParticle(nnn)]; } ;
-unsigned int PhysConst::getJ(int nnn) 	{ return J[findParticle(nnn)]; } ;
-bool PhysConst::getP(int nnn) 			{ return P[findParticle(nnn)]; } ;
-bool PhysConst::getC(int nnn) 			{ return C[findParticle(nnn)]; } ;
+double PhysConst::getMass(std::string nnn)
+{
+	return mass.at(findParticle(nnn));
+}
 
-double PhysConst::getConstValue(std::string nnn)	 	{ return valueConst[findConstant(nnn)]; } ;
-double PhysConst::getConstError(std::string nnn)	 	{ return errorConst[findConstant(nnn)]; } ;
+double PhysConst::getWidth(std::string nnn)
+{
+	return width.at(findParticle(nnn));
+}
+
+unsigned int PhysConst::getJ(std::string nnn)
+{
+	return J.at(findParticle(nnn));
+}
+
+bool PhysConst::getP(std::string nnn)
+{
+	return P.at(findParticle(nnn));
+}
+
+bool PhysConst::getC(std::string nnn)
+{
+	return C.at(findParticle(nnn));
+}
+
+double PhysConst::getMass(int nnn)
+{
+	return mass.at(findParticle(nnn));
+}
+
+double PhysConst::getWidth(int nnn)
+{
+	return width.at(findParticle(nnn));
+}
+
+unsigned int PhysConst::getJ(int nnn)
+{
+	return J.at(findParticle(nnn));
+}
+
+bool PhysConst::getP(int nnn)
+{
+	return P.at(findParticle(nnn));
+}
+
+bool PhysConst::getC(int nnn)
+{
+	return C.at(findParticle(nnn));
+}
+
+double PhysConst::getConstValue(std::string nnn)
+{
+	return valueConst.at(findConstant(nnn));
+}
+
+double PhysConst::getConstError(std::string nnn)
+{
+	return errorConst.at(findConstant(nnn));
+}

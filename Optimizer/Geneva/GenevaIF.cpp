@@ -59,7 +59,8 @@ using namespace Gem::Geneva;
 GenevaIF::GenevaIF(std::shared_ptr<ControlParameter> theData, std::string inConfigFileDir)
   : _myData(theData),configFileDir(inConfigFileDir),parallelizationMode(EXECMODE_SERIAL),
     serMode(Gem::Common::SERIALIZATIONMODE_BINARY),clientMode(false),ip("localhost"),port(0){
-
+	BOOST_LOG_TRIVIAL(info) << "GenevaIF::GenevaIF() | "
+			"Starting Geneva interface: config dir="<<configFileDir;
 }
 
 GenevaIF::~GenevaIF(){
@@ -82,71 +83,35 @@ void GenevaIF::setClientMode(std::string serverip, unsigned int serverport){
 
 std::shared_ptr<FitResult> GenevaIF::exec(ParameterList& par) {
 	std::shared_ptr<GenevaResult> result(new GenevaResult());
-	//Go2::init();
-	//Go2 go(argc, argv, configFile);
-	//Go2 go( clientMode, serMode, ip, port,
-	 //   (configFileDir+"Go2.json"), parallelizationMode, GO2_DEF_DEFAULTVERBOSE);
+	ParameterList initialParList(par);
+
 	Go2 go( (configFileDir+"Go2.json"));
 
-	//---------------------------------------------------------------------
 	// Initialize a client, if requested
-
     if(go.clientMode()) {
 	  std::cout << "Geneva Client waiting for action!" << std::endl;
 	  go.clientRun();
 	  return result;
 	}
 
-	//---------------------------------------------------------------------
-	// Add individuals and algorithms and perform the actual optimization cycle
-
-	//Provide Parameter in Geneva-Style
-	unsigned int NPar = par.GetNDouble(); //just doubles up to now, TODO
-	double val[NPar], min[NPar], max[NPar], err[NPar];
-	std::string names[NPar];
-	for(unsigned int i=0; i<NPar; i++){
-	  std::shared_ptr<DoubleParameter> dpar = par.GetDoubleParameter(i);
-	  names[i] = dpar->GetName();
-	  val[i] = dpar->GetValue();
-	  if(dpar->HasBounds()){
-	    min[i] = dpar->GetMinValue();
-	    max[i] = dpar->GetMaxValue();
-	  }else{
-	    max[i] = 1.79768e+307;//std::numeric_limits<double>::max();
-	    min[i] = -1.79768e+307;//-1*max[i];
-	  }
-	  if(dpar->HasError())
-	    err[i] = dpar->GetError();
-	  else
-	    err[i] = val[i];
-	}
-
-	// Make an individual known to the optimizer
-	boost::shared_ptr<GStartIndividual> p(new GStartIndividual(_myData, NPar, names, val, min, max, err));
+	boost::shared_ptr<GStartIndividual> p( new GStartIndividual(_myData, par) );
 	go.push_back(p);
 
 	// Add an evolutionary algorithm to the Go2 class.
-        GEvolutionaryAlgorithmFactory ea((configFileDir+"GEvolutionaryAlgorithm.json"), parallelizationMode);
+	GEvolutionaryAlgorithmFactory ea((configFileDir+"GEvolutionaryAlgorithm.json"), parallelizationMode);
 	go & ea();
 
 	// Perform the actual optimization
 	boost::shared_ptr<GStartIndividual>
 		bestIndividual_ptr = go.optimize<GStartIndividual>();
 
-	// Do something with the best result
-
 	// Terminate
-//	double result= bestIndividual_ptr->getBestKnownFitness();
-	//double finalValue = bestIndividual_ptr->getBestKnownFitness();
+	bestIndividual_ptr->getPar(par);
 	result->setResult(bestIndividual_ptr);
+	result->setAmplitude(_myData->getAmplitude(0));
+	result->setInitialParameters(initialParList);
+	result->setFinalParameters(par);
 	//int whattodowiththisidontknow =  go.finalize(); //Go2::finalize();
-
-        //write Parameters back
-	ParameterList resultPar;
-	bestIndividual_ptr->getPar(resultPar);
-	for(unsigned int i=0; i<par.GetNDouble(); i++){  //TODO: better way, no cast or check type
-	  par.GetDoubleParameter(i)->SetValue(resultPar.GetDoubleParameter(i)->GetValue());
-	}
 
 	return result;
 }

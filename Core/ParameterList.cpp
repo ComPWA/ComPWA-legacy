@@ -27,22 +27,22 @@ ParameterList::ParameterList(){
 }
 
 ParameterList::ParameterList(const std::vector<std::shared_ptr<ComplexParameter> >& inVec)
-:vComplexPar_(inVec){
+:vComplex_(inVec){
 	//make_str();
 }
 
 ParameterList::ParameterList(const std::vector<std::shared_ptr<DoubleParameter> >& inVec)
-:vDoublePar_(inVec){
+:vDouble_(inVec){
 	//make_str();
 }
 
 ParameterList::ParameterList(const std::vector<std::shared_ptr<IntegerParameter> >& inVec)
-:vIntPar_(inVec){
+:vInt_(inVec){
 	//make_str();
 }
 
 ParameterList::ParameterList(const std::vector<std::shared_ptr<BoolParameter> >& inVec)
-:vBoolPar_(inVec){
+:vBool_(inVec){
 	//make_str();
 }
 
@@ -50,570 +50,721 @@ ParameterList::ParameterList(const std::vector<std::shared_ptr<ComplexParameter>
 		const std::vector<std::shared_ptr<DoubleParameter> >& inD,
 		const std::vector<std::shared_ptr<IntegerParameter> >& inI,
 		const std::vector<std::shared_ptr<BoolParameter> >& inB)
-:vComplexPar_(inC), vDoublePar_(inD), vIntPar_(inI), vBoolPar_(inB){
+:vComplex_(inC), vDouble_(inD), vInt_(inI), vBool_(inB){
 	//TODO check names!
 	//make_str();
 }
 
-ParameterList::ParameterList(const ParameterList& in){
-	mMultiComplexID_ = in.mMultiComplexID_;
-	mMultiDoubleID_ = in.mMultiDoubleID_;
-	mDoubleParID_ = in.mDoubleParID_;
-	mIntParID_ = in.mIntParID_;
-	mBoolParID_ = in.mBoolParID_;
+void ParameterList::DeepCopy(const ParameterList& in)
+{
 	out_=in.out_;
 	vMultiComplex_.clear();
 	vMultiDouble_.clear();
-	vDoublePar_.clear();
-	vIntPar_.clear();
-	vBoolPar_.clear();
+	vDouble_.clear();
+	vInt_.clear();
+	vBool_.clear();
 	for(unsigned int i=0; i<in.GetNMultiComplex();i++)
-		vMultiComplex_.push_back( std::shared_ptr<MultiComplex>(new MultiComplex(*(in.vMultiComplex_[i]))) );
+		vMultiComplex_.push_back(
+				std::shared_ptr<MultiComplex>(
+						new MultiComplex(*(in.vMultiComplex_[i]))
+				)
+		);
 	for(unsigned int i=0; i<in.GetNMultiDouble();i++)
-		vMultiDouble_.push_back( std::shared_ptr<MultiDouble>(new MultiDouble(*(in.vMultiDouble_[i]))) );
+		vMultiDouble_.push_back(
+				std::shared_ptr<MultiDouble>(
+						new MultiDouble(*(in.vMultiDouble_[i]))
+				)
+		);
 	for(unsigned int i=0; i<in.GetNDouble();i++)
-		vDoublePar_.push_back( std::shared_ptr<DoubleParameter>(new DoubleParameter(*(in.vDoublePar_[i]))) );
+		vDouble_.push_back(
+				std::shared_ptr<DoubleParameter>(
+						new DoubleParameter(*(in.vDouble_[i]))
+				)
+		);
 	for(unsigned int i=0; i<in.GetNInteger();i++)
-		vIntPar_.push_back( std::shared_ptr<IntegerParameter>(new IntegerParameter(*(in.vIntPar_[i]))) );
+		vInt_.push_back(
+				std::shared_ptr<IntegerParameter>(
+						new IntegerParameter(*(in.vInt_[i]))
+				)
+		);
 	for(unsigned int i=0; i<in.GetNBool();i++)
-		vBoolPar_.push_back( std::shared_ptr<BoolParameter>(new BoolParameter(*(in.vBoolPar_[i]))) );
+		vBool_.push_back(
+				std::shared_ptr<BoolParameter>(
+						new BoolParameter(*(in.vBool_[i]))
+				)
+		);
 }
 
-ParameterList::~ParameterList() {
+ParameterList::~ParameterList()
+{
 	/* nothing */
 }
 
 std::shared_ptr<AbsParameter> ParameterList::GetParameter(const unsigned int i) {
-	if( !(i < (vBoolPar_.size()+vIntPar_.size()+vDoublePar_.size()+vComplexPar_.size()+vMultiDouble_.size()+vMultiComplex_.size()) ) ){
-		throw BadParameter("Parameter not in list");
-		return std::shared_ptr<AbsParameter>();
-	}
-	if( i < vComplexPar_.size() ) // is in complex list
-		return vComplexPar_.at(i);
-	else if( i < (vComplexPar_.size()+vDoublePar_.size()) ) // is in double list
-		return vDoublePar_.at(i-vComplexPar_.size());
-	else if( i < (vComplexPar_.size()+vDoublePar_.size()+vIntPar_.size()) ) // is in integer list
-		return vIntPar_.at(i-vComplexPar_.size()-vDoublePar_.size());
-	else if( i < (vComplexPar_.size()+vDoublePar_.size()+vIntPar_.size()+vBoolPar_.size()) )// is in boolean list
-		return vBoolPar_.at(i-vComplexPar_.size()-vDoublePar_.size()-vIntPar_.size());
-	else if( i < (vComplexPar_.size()+vDoublePar_.size()+vIntPar_.size()+vBoolPar_.size()+vMultiDouble_.size()) )// is in multidouble list
-		return vMultiDouble_.at(i-vComplexPar_.size()-vDoublePar_.size()-vIntPar_.size()-vBoolPar_.size());
-	else // is in multicomplex list
-		return vMultiComplex_.at(i-vComplexPar_.size()-vDoublePar_.size()-vIntPar_.size()-vBoolPar_.size()-vMultiDouble_.size());
+	if( i >= GetNParameter() )
+		throw BadParameter("ParameterList::GetParameter() | Parameter ID="
+				+std::to_string(i)+" not in list");
 
-	throw BadParameter("Parameter not in list");
+	unsigned int pos = 0;
+	if( i < vBool_.size() )
+		return vBool_.at(i-pos);
+	pos += vBool_.size();
+	if( i < (pos+vInt_.size()) )
+		return vInt_.at(i-pos);
+	pos += vInt_.size();
+	if( i < (pos+vDouble_.size()) )
+		return vDouble_.at(i-pos);
+	pos += vDouble_.size();
+	if( i < (pos+vComplex_.size()) )
+		return vComplex_.at(i-pos);
+	pos += vComplex_.size();
+	if( i < (pos+vMultiDouble_.size()) )
+		return vMultiDouble_.at(i-pos);
+	pos += vMultiDouble_.size();
+	if( i < (pos+vMultiComplex_.size()) )
+		return vMultiComplex_.at(i-pos);
+
+	std::cout<<"aajsnajkknghjgjgjggjgjgj"<<std::endl;
+	throw BadParameter("ParameterList::GetParameter() | Parameter ID="
+			+std::to_string(i)+" not in list");
+
 	return std::shared_ptr<AbsParameter>();
 }
 
-std::shared_ptr<AbsParameter> ParameterList::GetParameter(const std::string parname) {
-	int i=-1;
 
-	try{
-		i=mMultiComplexID_.at(parname);
-	}
-	catch(...)
-	{
-		i=-1;
-	};
-	if(i>-1)
-		return vMultiComplex_.at(i);
-
-	try{
-		i=mMultiDoubleID_.at(parname);
-	}
-	catch(...)
-	{
-		i=-1;
-	};
-	if(i>-1)
-		return vMultiDouble_.at(i);
-
-	try{
-		i=mBoolParID_.at(parname);
-	}
-	catch(...)
-	{
-		i=-1;
-	};
-	if(i>-1)
-		return vBoolPar_.at(i);
-
-	try{
-		i=mIntParID_.at(parname);
-	}
-	catch(...)
-	{
-		i=-1;
-	};
-	if(i>-1)
-		return vIntPar_.at(i);
-
-	try{
-		i=mDoubleParID_.at(parname);
-	}
-	catch(...)
-	{
-		i=-1;
-	};
-	if(i>-1)
-		return vDoublePar_.at(i);
-
-	try{
-		i=mComplexParID_.at(parname);
-	}
-	catch(...)
-	{
-		i=-1;
-	};
-	if(i>-1)
-		return vComplexPar_.at(i);
-
-
-	throw BadParameter("Parameter not found by name: "+parname);
-	return std::shared_ptr<AbsParameter>();
-}
-
-std::shared_ptr<MultiComplex> ParameterList::GetMultiComplex(const unsigned int i) {
-	if( !(i < vMultiComplex_.size()) ){
-		throw BadParameter("Double Parameter not found: "+std::to_string((double long)i));
-		//return 0;
-	}
-	return vMultiComplex_.at(i);
-}
-
-std::shared_ptr<MultiDouble> ParameterList::GetMultiDouble(const unsigned int i) {
-	if( !(i < vMultiDouble_.size()) ){
-		throw BadParameter("Double Parameter not found: "+std::to_string((double long)i));
-		//return 0;
-	}
-	return vMultiDouble_.at(i);
-}
-
-std::shared_ptr<ComplexParameter> ParameterList::GetComplexParameter(const unsigned int i) {
-	if( !(i < vComplexPar_.size()) ){
-		throw BadParameter("Complex Parameter not found: "+std::to_string((double long)i));
-		//return 0;
-	}
-	return vComplexPar_.at(i);
-}
-
-std::shared_ptr<DoubleParameter> ParameterList::GetDoubleParameter(const unsigned int i) {
-	if( !(i < vDoublePar_.size()) ){
-		throw BadParameter("Double Parameter not found: "+std::to_string((double long)i));
-		//return 0;
-	}
-	return vDoublePar_.at(i);
-}
-
-std::shared_ptr<IntegerParameter> ParameterList::GetIntegerParameter(const unsigned int i) {
-	if( !(i < vIntPar_.size()) ){
-		throw BadParameter("Integer Parameter not found: "+std::to_string((double long)i));
-		//return 0;
-	}
-	return vIntPar_.at(i);
-}
-
-std::shared_ptr<BoolParameter> ParameterList::GetBoolParameter(const unsigned int i) {
-	if( !(i < vBoolPar_.size()) ){
-		throw BadParameter("Bool Parameter not found: "+std::to_string((double long)i));
-		//return 0;
-	}
-	return vBoolPar_.at(i);
-}
-
-const double ParameterList::GetParameterValue(const unsigned int i) const {
-	if( !(i < (vBoolPar_.size()+vIntPar_.size()+vDoublePar_.size()+vComplexPar_.size()+vMultiDouble_.size()+vMultiComplex_.size()) ) ){
-		throw BadParameter("Parameter not in list");
-		return 0;
-	}
-	if( i < vComplexPar_.size() ) // is in complex list
-		return vComplexPar_.at(i)->GetValue().real();
-	else if( i < (vComplexPar_.size()+vDoublePar_.size()) ) // is in double list
-		return (double) vDoublePar_.at(i-vComplexPar_.size())->GetValue();
-	else if( i < (vComplexPar_.size()+vDoublePar_.size()+vIntPar_.size()) ) // is in integer list
-		return (double) vIntPar_.at(i-vComplexPar_.size()-vDoublePar_.size())->GetValue();
-	else if( i < (vComplexPar_.size()+vDoublePar_.size()+vIntPar_.size()+vBoolPar_.size()) )// is in boolean list
-		return (double) vBoolPar_.at(i-vComplexPar_.size()-vDoublePar_.size()-vIntPar_.size())->GetValue();
-	else if( i < (vComplexPar_.size()+vDoublePar_.size()+vIntPar_.size()+vBoolPar_.size())+vBoolPar_.size() )// is in multidouble list
-		return (double) vMultiDouble_.at(i-vComplexPar_.size()-vDoublePar_.size()-vIntPar_.size()-vBoolPar_.size())->GetValue();
-	else // is in multicomplex list
-		return (double) vMultiComplex_.at(i-vComplexPar_.size()-vDoublePar_.size()-vIntPar_.size()-vBoolPar_.size()-vMultiDouble_.size())->GetValue().real();
-
-	throw BadParameter("Parameter not in list");
-	return 0;
-}
-
-std::shared_ptr<MultiComplex> ParameterList::GetMultiComplex(const std::string parname) {
-	unsigned int i=0;
-	try{
-		i=mMultiComplexID_.at(parname);
-	}
-	catch(...)
-	{
-		throw BadParameter("MultiComplex not found: "+parname);
-	};
-	return vMultiComplex_.at(i);
-}
-
-std::shared_ptr<MultiDouble> ParameterList::GetMultiDouble(const std::string parname) {
-	unsigned int i=0;
-	try{
-		i=mMultiDoubleID_.at(parname);
-	}
-	catch(...)
-	{
-		throw BadParameter("MultiDouble not found: "+parname);
-	};
-	return vMultiDouble_.at(i);
-}
-
-std::shared_ptr<ComplexParameter> ParameterList::GetComplexParameter(const std::string parname) {
-	unsigned int i=0;
-	try{
-		i=mComplexParID_.at(parname);
-	}
-	catch(...)
-	{
-		throw BadParameter("Complex Parameter not found: "+parname);
-	};
-	return vComplexPar_.at(i);
-}
-
-std::shared_ptr<DoubleParameter> ParameterList::GetDoubleParameter(const std::string parname) {
-	unsigned int i=0;
-	try{
-		i=mDoubleParID_.at(parname);
-	}
-	catch(...)
-	{
-		throw BadParameter("Double Parameter not found: "+parname);
-	};
-	return vDoublePar_.at(i);
-}
-
-std::shared_ptr<IntegerParameter> ParameterList::GetIntegerParameter(const std::string parname) {
-	unsigned int i=0;
-	try{
-		i=mIntParID_.at(parname);
-	}
-	catch(...)
-	{
-		throw BadParameter("Integer Parameter not found: "+parname);
-	};
-	return vIntPar_.at(i);
-}
-
-std::shared_ptr<BoolParameter> ParameterList::GetBoolParameter(const std::string parname) {
-	unsigned int i=0;
-	try{
-		i=mBoolParID_.at(parname);
-	}
-	catch(...)
-	{
-		throw BadParameter("Bool Parameter not found: "+parname);
-	};
-	return vBoolPar_.at(i);
-}
-
-const double ParameterList::GetParameterValue(const std::string parname) const {
-	int i=-1;
-
-	try{
-		i=mMultiComplexID_.at(parname);
-	}
-	catch(...)
-	{
-		i=-1;
-	};
-	if(i>-1)
-		return (vMultiComplex_.at(i)->GetValue()).real();
-
-	try{
-		i=mMultiDoubleID_.at(parname);
-	}
-	catch(...)
-	{
-		i=-1;
-	};
-	if(i>-1)
-		return vMultiDouble_.at(i)->GetValue();
-
-	try{
-		i=mBoolParID_.at(parname);
-	}
-	catch(...)
-	{
-		i=-1;
-	};
-	if(i>-1)
-		return vBoolPar_.at(i)->GetValue();
-
-	try{
-		i=mIntParID_.at(parname);
-	}
-	catch(...)
-	{
-		i=-1;
-	};
-	if(i>-1)
-		return vIntPar_.at(i)->GetValue();
-
-	try{
-		i=mDoubleParID_.at(parname);
-	}
-	catch(...)
-	{
-		i=-1;
-	};
-	if(i>-1)
-		return vDoublePar_.at(i)->GetValue();
-
-	try{
-		i=mComplexParID_.at(parname);
-	}
-	catch(...)
-	{
-		i=-1;
-	};
-	if(i>-1)
-		return vComplexPar_.at(i)->GetValue().real();
-
-
-	throw BadParameter("Parameter not found by name: "+parname);
-	return 0;
-}
-
-void ParameterList::SetParameterValue(const unsigned int i, const std::complex<double> inVal) {
-	if( !(i < vComplexPar_.size() ) ){
-		throw BadParameter("Parameter not in complex list");
-		return ;
-	}
-	(vComplexPar_.at(i))->SetValue(inVal);
-	return;
+std::shared_ptr<AbsParameter> ParameterList::GetParameter(const std::string parname)
+{
+	return (*FindBoolParameter(parname));
+	return (*FindIntegerParameter(parname));
+	return (*FindDoubleParameter(parname));
+	return (*FindComplexParameter(parname));
+	return (*FindMultiDouble(parname));
+	return (*FindMultiComplex(parname));
 }
 
 
-void ParameterList::SetParameterValue(const unsigned int i, const double inVal) {
-	if( !(i < vDoublePar_.size() ) ){
-		throw BadParameter("Parameter not in double list");
-		return ;
-	}
-	(vDoublePar_.at(i))->SetValue(inVal);
-	return;
+void ParameterList::Append(const ParameterList& addList)
+{
+	for(int i=0; i<addList.GetNBool(); i++ )
+		AddParameter(addList.GetBoolParameter(i));
+	for(int i=0; i<addList.GetNInteger(); i++ )
+		AddParameter(addList.GetIntegerParameter(i));
+	for(int i=0; i<addList.GetNDouble(); i++ )
+		AddParameter(addList.GetDoubleParameter(i));
+	for(int i=0; i<addList.GetNComplex(); i++ )
+		AddParameter(addList.GetComplexParameter(i));
+	for(int i=0; i<addList.GetNMultiDouble(); i++ )
+		AddParameter(addList.GetMultiDouble(i));
+	for(int i=0; i<addList.GetNMultiComplex(); i++ )
+		AddParameter(addList.GetMultiComplex(i));
 }
 
-void ParameterList::SetParameterValue(const unsigned int i, const int inVal) {
-	if( !(i < vIntPar_.size() ) ){
-		throw BadParameter("Parameter not in integer list");
-		return ;
+
+void ParameterList::RemoveDuplicates()
+{
+	//We loop over the list of parameters and delete some. Therefore the size
+	//changes during to loop. We enclose GetParameter in try...catch
+	for(int i=0; i<GetNParameter(); i++ ){
+		std::string name;
+		try{
+			name = GetParameter(i)->GetName();
+		} catch (...){
+			continue;
+		}
+		for(int j=i+1; j<GetNParameter(); j++ ){
+			std::string name2;
+			std::shared_ptr<AbsParameter> delPar;
+			try{
+				delPar = GetParameter(j);
+				name2 = GetParameter(j)->GetName();
+			} catch (...){
+				continue;
+			}
+
+			if( name == name2 ){
+				auto type = delPar->type();
+				switch(type){
+				case ParType::BOOL:
+					RemoveBool(j); break;
+				case ParType::INTEGER:
+					RemoveInteger(j-vBool_.size()); break;
+				case ParType::DOUBLE:
+					RemoveDouble(j-vBool_.size()-vInt_.size()); break;
+				case ParType::COMPLEX:
+					RemoveComplex(j-vBool_.size()-vInt_.size()-vComplex_.size());
+					break;
+				case ParType::MDOUBLE:
+					RemoveMultiDouble(j-vBool_.size()-vInt_.size()-vComplex_.size()
+							-vMultiDouble_.size());
+					break;
+				case ParType::MCOMPLEX:
+					RemoveMultiComplex(j-vBool_.size()-vInt_.size()-vComplex_.size()
+							-vMultiDouble_.size()-vMultiComplex_.size());
+					break;
+				}
+				j--; //decrement if a parameter is removed
+			}
+		}
 	}
-	(vIntPar_.at(i))->SetValue(inVal);
-	return;
 }
 
-void ParameterList::SetParameterValue(const unsigned int i, const bool inVal) {
-	if( !(i < vBoolPar_.size() ) ){
-		throw BadParameter("Parameter not in bool list");
-		return ;
-	}
-	(vBoolPar_.at(i))->SetValue(inVal);
-	return;
-}
-
-void ParameterList::AddParameter(std::shared_ptr<AbsParameter> par) {
-	//TODO check names!
+void ParameterList::AddParameter(std::shared_ptr<AbsParameter> par)
+{
 	switch(par->type())
 	{
-	case ParType::COMPLEX:{
-		std::shared_ptr<ComplexParameter> tmp = std::dynamic_pointer_cast<ComplexParameter>(par);
-		vComplexPar_.push_back(tmp);
-		mComplexParID_.insert(std::pair<std::string,unsigned int>(par->GetName(),vComplexPar_.size()-1));
-		break;}
-	case ParType::MCOMPLEX:{
-		std::shared_ptr<MultiComplex> tmp = std::dynamic_pointer_cast<MultiComplex>(par);
-		vMultiComplex_.push_back(tmp);
-		mMultiComplexID_.insert(std::pair<std::string,unsigned int>(par->GetName(),vMultiComplex_.size()-1));
-		//cout << "Easy\n";
-		break;}
-	case ParType::MDOUBLE:{
-		std::shared_ptr<MultiDouble> tmp = std::dynamic_pointer_cast<MultiDouble>(par);
-		vMultiDouble_.push_back(tmp);
-		mMultiDoubleID_.insert(std::pair<std::string,unsigned int>(par->GetName(),vMultiDouble_.size()-1));
-		//cout << "Easy\n";
-		break;}
-	case ParType::DOUBLE:{
-		std::shared_ptr<DoubleParameter> tmp = std::dynamic_pointer_cast<DoubleParameter>(par);
-		vDoublePar_.push_back(tmp);
-		mDoubleParID_.insert(std::pair<std::string,unsigned int>(par->GetName(),vDoublePar_.size()-1));
+	case ParType::BOOL:{
+		AddParameter( std::dynamic_pointer_cast<BoolParameter>(par) );
 		break;}
 	case ParType::INTEGER:{
-		std::shared_ptr<IntegerParameter> tmp = std::dynamic_pointer_cast<IntegerParameter>(par);
-		vIntPar_.push_back(tmp);
-		mIntParID_.insert(std::pair<std::string,unsigned int>(par->GetName(),vIntPar_.size()-1));
+		AddParameter( std::dynamic_pointer_cast<IntegerParameter>(par) );
 		break;}
-	case ParType::BOOL:{
-		std::shared_ptr<BoolParameter> tmp = std::dynamic_pointer_cast<BoolParameter>(par);
-		vBoolPar_.push_back(tmp);
-		mBoolParID_.insert(std::pair<std::string,unsigned int>(par->GetName(),vBoolPar_.size()-1));
+	case ParType::DOUBLE:{
+		AddParameter( std::dynamic_pointer_cast<DoubleParameter>(par) );
 		break;}
-	default:{
-		//TODO exception
-		//cout << "Invalid Selection\n";
+	case ParType::COMPLEX:{
+		AddParameter( std::dynamic_pointer_cast<ComplexParameter>(par) );
 		break;}
+	case ParType::MDOUBLE:{
+		AddParameter( std::dynamic_pointer_cast<MultiDouble>(par) );
+		break;}
+	case ParType::MCOMPLEX:{
+		AddParameter( std::dynamic_pointer_cast<MultiComplex>(par) );
+		break;}
+	default:{ break; }
 	}
-	// vDoublePar_.push_back(par);
-	//make_str();
 }
 
-void ParameterList::AddParameter(std::shared_ptr<MultiComplex> par) {
-	//TODO check names!
-	vMultiComplex_.push_back(par);
-	mMultiComplexID_.insert(std::pair<std::string,unsigned int>(par->GetName(),vMultiDouble_.size()-1));
-	//make_str();
+std::string const& ParameterList::to_str()
+{
+	make_str();
+	return out_;
 }
 
-void ParameterList::AddParameter(std::shared_ptr<MultiDouble> par) {
-	//TODO check names!
-	vMultiDouble_.push_back(par);
-	mMultiDoubleID_.insert(std::pair<std::string,unsigned int>(par->GetName(),vMultiDouble_.size()-1));
-	//make_str();
-}
-
-void ParameterList::AddParameter(std::shared_ptr<ComplexParameter> par) {
-	//TODO check names!
-	vComplexPar_.push_back(par);
-	mComplexParID_.insert(std::pair<std::string,unsigned int>(par->GetName(),vComplexPar_.size()-1));
-	//make_str();
-}
-
-void ParameterList::AddParameter(std::shared_ptr<DoubleParameter> par) {
-	//TODO check names!
-	vDoublePar_.push_back(par);
-	mDoubleParID_.insert(std::pair<std::string,unsigned int>(par->GetName(),vDoublePar_.size()-1));
-	//make_str();
-}
-
-void ParameterList::AddParameter(std::shared_ptr<IntegerParameter> par) {
-	//TODO check names!
-	vIntPar_.push_back(par);
-	mIntParID_.insert(std::pair<std::string,unsigned int>(par->GetName(),vIntPar_.size()-1));
-	//make_str();
-}
-
-void ParameterList::AddParameter(std::shared_ptr<BoolParameter> par) {
-	//TODO check names!
-	vBoolPar_.push_back(par);
-	mBoolParID_.insert(std::pair<std::string,unsigned int>(par->GetName(),vBoolPar_.size()-1));
-	//make_str();
-}
-
-void ParameterList::RemoveComplex(const unsigned int id){
-	//TODO: try catch
-	vComplexPar_.erase(vComplexPar_.begin()+id);
-	for (std::map<std::string,unsigned int>::iterator it = mComplexParID_.begin(); it != mComplexParID_.end(); ++it )
-		if (it->second == id)
-			mComplexParID_.erase(it);
-	//make_str();
-}
-
-
-void ParameterList::RemoveDouble(const unsigned int id){
-	//TODO: try catch
-	vDoublePar_.erase(vDoublePar_.begin()+id);
-	for (std::map<std::string,unsigned int>::iterator it = mDoubleParID_.begin(); it != mDoubleParID_.end(); ++it )
-		if (it->second == id)
-			mDoubleParID_.erase(it);
-	//make_str();
-}
-
-void ParameterList::RemoveInteger(const unsigned int id){
-	//TODO: try catch
-	vIntPar_.erase(vIntPar_.begin()+id);
-	for (std::map<std::string,unsigned int>::iterator it = mIntParID_.begin(); it != mIntParID_.end(); ++it )
-		if (it->second == id)
-			mIntParID_.erase(it);
-	//make_str();
-}
-
-void ParameterList::RemoveBool(const unsigned int id){
-	//TODO: try catch
-	vBoolPar_.erase(vBoolPar_.begin()+id);
-	for (std::map<std::string,unsigned int>::iterator it = mBoolParID_.begin(); it != mBoolParID_.end(); ++it )
-		if (it->second == id)
-			mBoolParID_.erase(it);
-	//make_str();
-}
-
-void ParameterList::RemoveComplex(const std::string parName){
-	//TODO: try catch
-	unsigned int id = mComplexParID_.find(parName)->second;
-	vComplexPar_.erase(vComplexPar_.begin()+id);
-	mComplexParID_.erase(parName);
-	//make_str();
-}
-
-void ParameterList::RemoveDouble(const std::string parName){
-	//TODO: try catch
-	unsigned int id = mDoubleParID_.find(parName)->second;
-	vDoublePar_.erase(vDoublePar_.begin()+id);
-	mDoubleParID_.erase(parName);
-	//make_str();
-}
-
-void ParameterList::RemoveInteger(const std::string parName){
-	//TODO: try catch
-	unsigned int id = mIntParID_.find(parName)->second;
-	vIntPar_.erase(vIntPar_.begin()+id);
-	mIntParID_.erase(parName);
-	//make_str();
-}
-
-void ParameterList::RemoveBool(const std::string parName){
-	//TODO: try catch
-	unsigned int id = mBoolParID_.find(parName)->second;
-	vBoolPar_.erase(vBoolPar_.begin()+id);
-	mBoolParID_.erase(parName);
-	//make_str();
+std::ostream & operator<<(std::ostream &os, ParameterList &p)
+{
+	return os << p.to_str();
 }
 
 void ParameterList::make_str() {
 	std::stringstream oss;
 
-	oss << std::endl << "Parameter List";
-	if( !vDoublePar_.size() && !vIntPar_.size() && !vBoolPar_.size() )
-		oss << " empty" << std::endl;
-	else
-		oss << std::endl;
-	//print list of complex, float, int and bool parameter
-	if(vComplexPar_.size())
-		oss << "  " << vComplexPar_.size() << " complex point parameters: " << std::endl;
-	for(unsigned int d=0; d< vComplexPar_.size(); d++)
-		oss << vComplexPar_[d]->GetName() << ": " << vComplexPar_[d]->GetValue() << std::endl;
-	if(vDoublePar_.size())
-		oss << "  " << vDoublePar_.size() << " floating point parameters: " << std::endl;
-	for(unsigned int d=0; d< vDoublePar_.size(); d++)
-		oss << vDoublePar_[d]->GetName() << ": " << vDoublePar_[d]->GetValue() << " fixed="<<vDoublePar_[d]->IsFixed()<<" hasError? "<<vDoublePar_[d]->HasError()<<std::endl;
-	if(vIntPar_.size())
-		oss << "  " << vIntPar_.size() << " integer parameters: " << std::endl;
-	for(unsigned int i=0; i< vIntPar_.size(); i++)
-		oss << vIntPar_[i]->GetName() << ": " << vIntPar_[i]->GetValue() << std::endl;
-	if(vBoolPar_.size())
-		oss << "  " << vBoolPar_.size() << " boolean parameters: " << std::endl;
-	for(unsigned int b=0; b< vBoolPar_.size(); b++)
-		oss << vBoolPar_[b]->GetName() << ": " << vBoolPar_[b]->GetValue() << std::endl;
+	if( GetNParameter() ){
+		oss << "Parameter List:" << std::endl;
+		//print list of complex, float, int and bool parameter
+		if(vComplex_.size()){
+			oss << "Complex parameters: "<< vComplex_.size() << std::endl;
+			auto it = vComplex_.begin();
+			for( ; it!=vComplex_.end(); ++it)
+				oss << (*it)->GetName() << ": " << (*it)->GetValue() << std::endl;
+		}
+		if(vDouble_.size()){
+			oss << "Double parameters: "<< vDouble_.size() << std::endl;
+			auto it = vDouble_.begin();
+			for( ; it!=vDouble_.end(); ++it)
+				oss << (*it)->GetName() << ": " << (*it)->GetValue()
+				<< " fixed="<<(*it)->IsFixed()
+				<<" hasError? "<<(*it)->HasError()<<std::endl;
+		}
+		if(vInt_.size()){
+			oss << "Integer parameters: "<< vInt_.size() << std::endl;
+			auto it = vInt_.begin();
+			for( ; it!=vInt_.end(); ++it)
+				oss << (*it)->GetName() << ": " << (*it)->GetValue()<< std::endl;
+		}
+		if(vBool_.size()){
+			oss << "Boolean parameters: "<< vBool_.size() << std::endl;
+			auto it = vBool_.begin();
+			for( ; it!=vBool_.end(); ++it)
+				oss << (*it)->GetName() << ": " << (*it)->GetValue()<< std::endl;
+		}
+		if(vMultiComplex_.size()){
+			oss << "Multi complex parameters: "<< vMultiComplex_.size() << std::endl;
+			auto it = vMultiComplex_.begin();
+			for( ; it!=vMultiComplex_.end(); ++it)
+				oss << (*it)->GetName()<< " size="<<(*it)->GetNValues()<<std::endl;
+		}
+		if(vMultiDouble_.size()){
+			oss << "Multi double parameters: "<< vMultiDouble_.size() << std::endl;
+			auto it = vMultiDouble_.begin();
+			for( ; it!=vMultiDouble_.end(); ++it)
+				oss << (*it)->GetName()<< " size="<<(*it)->GetNValues()<<std::endl;
+		}
+	} else
+		oss << "Parameter List empty!";
 
 	out_ = oss.str();
 }
-std::string const& ParameterList::to_str() {
-	make_str();
-	return out_;
+
+
+//******************************************************************************
+//************* Functions to access individual parameter types *****************
+//******************************************************************************
+
+//---------- BOOL PARAMETER ----------
+std::vector<std::shared_ptr<BoolParameter> >::const_iterator
+ParameterList::FindBoolParameter(
+		const std::string name ) const
+{
+	auto it = vBool_.begin();
+	for( ; it != vBool_.end(); ++it){
+		if( (*it)->GetName() == name ) return it;
+	}
+	throw BadParameter("ParameterList::FindBoolParameter() | Boolean parameter "
+			+name+" can not be found in list!");
 }
 
-std::ostream & operator<<(std::ostream &os, ParameterList &p){
-	return os << p.to_str();
-}
-void ParameterList::Append(ParameterList& addList){
-	for(int i=0; i<addList.GetNParameter(); i++ )
-		AddParameter(addList.GetParameter(i));
+unsigned int ParameterList::FindBoolId( const std::string name )
+{
+	return (FindBoolParameter( name ) - vBool_.begin());
 }
 
+void ParameterList::AddParameter(std::shared_ptr<BoolParameter> par)
+{
+	vBool_.push_back(par);
+}
+
+std::shared_ptr<BoolParameter>
+ParameterList::GetBoolParameter(const std::string parname) const
+{
+	return (*FindBoolParameter(parname));
+}
+
+std::shared_ptr<BoolParameter>
+ParameterList::GetBoolParameter(const unsigned int i) const
+{
+	if( !(i < vBool_.size()) ){
+		throw BadParameter("ParameterList::GetBoolParameter() | Parameter not found: "
+				+std::to_string((double long)i));
+	}
+	return vBool_.at(i);
+}
+
+const bool ParameterList::GetBoolParameterValue(const std::string parname) const
+{
+	return (*FindBoolParameter(parname))->GetValue();
+}
+
+const bool ParameterList::GetBoolParameterValue(const unsigned int i) const
+{
+	return vBool_.at(i)->GetValue();
+}
+
+void ParameterList::SetParameterValue(const std::string name, const bool inVal)
+{
+	(*FindBoolParameter(name))->SetValue(inVal);
+	return;
+}
+
+void ParameterList::SetParameterValue(const unsigned int i, const bool inVal)
+{
+	if( !(i < vBool_.size() ) ){
+		throw BadParameter("Parameter not in bool list");
+		return ;
+	}
+	(vBool_.at(i))->SetValue(inVal);
+	return;
+}
+
+void ParameterList::RemoveBool(const std::string name){
+	try{
+		unsigned int id =  FindBoolParameter(name) - vBool_.begin();
+		RemoveBool(id);
+	} catch (BadParameter& ex){
+		BOOST_LOG_TRIVIAL(error) <<" ParameterList::RemoveBool() | Can not remove"
+				"parameter "<<name<<": "<<ex.what();
+		throw;
+	}
+}
+
+void ParameterList::RemoveBool(const unsigned int id){
+	try{
+		vBool_.erase(vBool_.begin()+id);
+	} catch (BadParameter& ex){
+		BOOST_LOG_TRIVIAL(error) <<" ParameterList::RemoveBool() | Can not remove"
+				"parameter with ID="<<id<<": "<<ex.what();
+		throw;
+	}
+}
+
+//******************************************************************************
+//---------- INTEGER PARAMETER ----------
+std::vector<std::shared_ptr<IntegerParameter> >::const_iterator
+ParameterList::FindIntegerParameter(
+		const std::string name ) const
+{
+	auto it = vInt_.begin();
+	for( ; it != vInt_.end(); ++it){
+		if( (*it)->GetName() == name ) return it;
+	}
+	throw BadParameter("ParameterList::FindIntegerParameter() | Integerean parameter "
+			+name+" can not be found in list!");
+}
+
+unsigned int ParameterList::FindIntegerId( const std::string name )
+{
+	return (FindIntegerParameter( name ) - vInt_.begin());
+}
+
+void ParameterList::AddParameter(std::shared_ptr<IntegerParameter> par)
+{
+	vInt_.push_back(par);
+}
+
+std::shared_ptr<IntegerParameter>
+ParameterList::GetIntegerParameter(const std::string parname) const
+{
+	return (*FindIntegerParameter(parname));
+}
+
+std::shared_ptr<IntegerParameter>
+ParameterList::GetIntegerParameter(const unsigned int i) const
+{
+	if( !(i < vInt_.size()) ){
+		throw BadParameter("ParameterList::GetIntegerParameter() | Parameter not found: "
+				+std::to_string((double long)i));
+	}
+	return vInt_.at(i);
+}
+
+const int ParameterList::GetIntegerParameterValue(const std::string parname) const
+{
+	return (*FindIntegerParameter(parname))->GetValue();
+}
+
+const int ParameterList::GetIntegerParameterValue(const unsigned int i) const
+{
+	return vInt_.at(i)->GetValue();
+}
+
+void ParameterList::SetParameterValue(const std::string name, const int inVal)
+{
+	(*FindIntegerParameter(name))->SetValue(inVal);
+	return;
+}
+
+void ParameterList::SetParameterValue(const unsigned int i, const int inVal)
+{
+	if( !(i < vInt_.size() ) ){
+		throw BadParameter("Parameter not in bool list");
+		return ;
+	}
+	(vInt_.at(i))->SetValue(inVal);
+	return;
+}
+
+void ParameterList::RemoveInteger(const std::string name){
+	try{
+		unsigned int id =  FindIntegerParameter(name) - vInt_.begin();
+		RemoveInteger(id);
+	} catch (BadParameter& ex){
+		BOOST_LOG_TRIVIAL(error) <<" ParameterList::RemoveInteger() | Can not remove"
+				"parameter "<<name<<": "<<ex.what();
+		throw;
+	}
+}
+
+void ParameterList::RemoveInteger(const unsigned int id){
+	try{
+		vInt_.erase(vInt_.begin()+id);
+	} catch (BadParameter& ex){
+		BOOST_LOG_TRIVIAL(error) <<" ParameterList::RemoveInteger() | Can not remove"
+				"parameter with ID="<<id<<": "<<ex.what();
+		throw;
+	}
+}
+
+//******************************************************************************
+//---------- DOUBLE PARAMETER ----------
+std::vector<std::shared_ptr<DoubleParameter> >::const_iterator
+ParameterList::FindDoubleParameter(
+		const std::string name ) const
+{
+	auto it = vDouble_.begin();
+	for( ; it != vDouble_.end(); ++it){
+		if( (*it)->GetName() == name ) return it;
+	}
+	throw BadParameter("ParameterList::FindDoubleParameter() | Double parameter "
+			+name+" can not be found in list!");
+}
+
+unsigned int ParameterList::FindDoubleId( const std::string name )
+{
+	return (FindDoubleParameter( name ) - vDouble_.begin());
+}
+
+void ParameterList::AddParameter(std::shared_ptr<DoubleParameter> par)
+{
+	vDouble_.push_back(par);
+}
+
+std::shared_ptr<DoubleParameter>
+ParameterList::GetDoubleParameter(const std::string parname) const
+{
+	return (*FindDoubleParameter(parname));
+}
+
+std::shared_ptr<DoubleParameter>
+ParameterList::GetDoubleParameter(const unsigned int i) const
+{
+	if( !(i < vDouble_.size()) ){
+		throw BadParameter("ParameterList::GetDoubleParameter() | Parameter not found: "
+				+std::to_string((double long)i));
+	}
+	return vDouble_.at(i);
+}
+
+const double ParameterList::GetDoubleParameterValue(const std::string parname) const
+{
+	return (*FindDoubleParameter(parname))->GetValue();
+}
+
+const double ParameterList::GetDoubleParameterValue(const unsigned int i) const
+{
+	return vDouble_.at(i)->GetValue();
+}
+
+void ParameterList::SetParameterValue(const std::string name, const double inVal)
+{
+	(*FindDoubleParameter(name))->SetValue(inVal);
+	return;
+}
+
+void ParameterList::SetParameterValue(const unsigned int i, const double inVal)
+{
+	if( !(i < vDouble_.size() ) ){
+		throw BadParameter("Parameter not in bool list");
+		return ;
+	}
+	(vDouble_.at(i))->SetValue(inVal);
+	return;
+}
+
+void ParameterList::RemoveDouble(const std::string name){
+	try{
+		unsigned int id =  FindDoubleParameter(name) - vDouble_.begin();
+		RemoveDouble(id);
+	} catch (BadParameter& ex){
+		BOOST_LOG_TRIVIAL(error) <<" ParameterList::RemoveDouble() | Can not remove"
+				"parameter "<<name<<": "<<ex.what();
+		throw;
+	}
+}
+
+void ParameterList::RemoveDouble(const unsigned int id){
+	try{
+		vDouble_.erase(vDouble_.begin()+id);
+	} catch (BadParameter& ex){
+		BOOST_LOG_TRIVIAL(error) <<" ParameterList::RemoveDouble() | Can not remove"
+				"parameter with ID="<<id<<": "<<ex.what();
+		throw;
+	}
+}
+
+//******************************************************************************
+//---------- COMPLEX PARAMETER ----------
+std::vector<std::shared_ptr<ComplexParameter> >::const_iterator
+ParameterList::FindComplexParameter(
+		const std::string name ) const
+{
+	auto it = vComplex_.begin();
+	for( ; it != vComplex_.end(); ++it){
+		if( (*it)->GetName() == name ) return it;
+	}
+	throw BadParameter("ParameterList::FindComplexParameter() | Complexean parameter "
+			+name+" can not be found in list!");
+}
+
+unsigned int ParameterList::FindComplexId( const std::string name )
+{
+	return (FindComplexParameter( name ) - vComplex_.begin());
+}
+
+void ParameterList::AddParameter(std::shared_ptr<ComplexParameter> par)
+{
+	vComplex_.push_back(par);
+}
+
+std::shared_ptr<ComplexParameter>
+ParameterList::GetComplexParameter(const std::string parname) const
+{
+	return (*FindComplexParameter(parname));
+}
+
+std::shared_ptr<ComplexParameter>
+ParameterList::GetComplexParameter(const unsigned int i) const
+{
+	if( !(i < vComplex_.size()) ){
+		throw BadParameter("ParameterList::GetComplexParameter() | Parameter not found: "
+				+std::to_string((double long)i));
+	}
+	return vComplex_.at(i);
+}
+
+const std::complex<double> ParameterList::GetComplexParameterValue(const std::string parname) const
+{
+	return (*FindComplexParameter(parname))->GetValue();
+}
+
+const std::complex<double> ParameterList::GetComplexParameterValue(const unsigned int i) const
+{
+	return vComplex_.at(i)->GetValue();
+}
+
+void ParameterList::SetParameterValue(const std::string name, const std::complex<double> inVal)
+{
+	(*FindComplexParameter(name))->SetValue(inVal);
+	return;
+}
+
+void ParameterList::SetParameterValue(const unsigned int i, const std::complex<double> inVal)
+{
+	if( !(i < vComplex_.size() ) ){
+		throw BadParameter("Parameter not in bool list");
+		return ;
+	}
+	(vComplex_.at(i))->SetValue(inVal);
+	return;
+}
+
+void ParameterList::RemoveComplex(const std::string name){
+	try{
+		unsigned int id =  FindComplexParameter(name) - vComplex_.begin();
+		RemoveComplex(id);
+	} catch (BadParameter& ex){
+		BOOST_LOG_TRIVIAL(error) <<" ParameterList::RemoveComplex() | Can not remove"
+				"parameter "<<name<<": "<<ex.what();
+		throw;
+	}
+}
+
+void ParameterList::RemoveComplex(const unsigned int id){
+	try{
+		vComplex_.erase(vComplex_.begin()+id);
+	} catch (BadParameter& ex){
+		BOOST_LOG_TRIVIAL(error) <<" ParameterList::RemoveComplex() | Can not remove"
+				"parameter with ID="<<id<<": "<<ex.what();
+		throw;
+	}
+}
+
+//******************************************************************************
+//---------- MULTIDOUBLE PARAMETER ----------
+std::vector<std::shared_ptr<MultiDouble> >::const_iterator
+ParameterList::FindMultiDouble(
+		const std::string name ) const
+{
+	auto it = vMultiDouble_.begin();
+	for( ; it != vMultiDouble_.end(); ++it){
+		if( (*it)->GetName() == name ) return it;
+	}
+	throw BadParameter("ParameterList::FindMultiDouble() | Doubleean parameter "
+			+name+" can not be found in list!");
+}
+
+unsigned int ParameterList::FindMultiDoubleId( const std::string name )
+{
+	return (FindMultiDouble( name ) - vMultiDouble_.begin());
+}
+
+void ParameterList::AddParameter(std::shared_ptr<MultiDouble> par)
+{
+	vMultiDouble_.push_back(par);
+}
+
+std::shared_ptr<MultiDouble>
+ParameterList::GetMultiDouble(const std::string parname) const
+{
+	return (*FindMultiDouble(parname));
+}
+
+std::shared_ptr<MultiDouble>
+ParameterList::GetMultiDouble(const unsigned int i) const
+{
+	if( !(i < vMultiDouble_.size()) ){
+		throw BadParameter("ParameterList::GetMultiDouble() | Parameter not found: "
+				+std::to_string((double long)i));
+	}
+	return vMultiDouble_.at(i);
+}
+
+void ParameterList::RemoveMultiDouble(const std::string name){
+	try{
+		unsigned int id =  FindMultiDouble(name) - vMultiDouble_.begin();
+		RemoveMultiDouble(id);
+	} catch (BadParameter& ex){
+		BOOST_LOG_TRIVIAL(error) <<" ParameterList::RemoveDouble() | Can not remove"
+				"parameter "<<name<<": "<<ex.what();
+		throw;
+	}
+}
+
+void ParameterList::RemoveMultiDouble(const unsigned int id){
+	try{
+		vMultiDouble_.erase(vMultiDouble_.begin()+id);
+	} catch (BadParameter& ex){
+		BOOST_LOG_TRIVIAL(error) <<" ParameterList::RemoveDouble() | Can not remove"
+				"parameter with ID="<<id<<": "<<ex.what();
+		throw;
+	}
+}
+
+//******************************************************************************
+//---------- MULTICOMPLEX PARAMETER ----------
+std::vector<std::shared_ptr<MultiComplex> >::const_iterator
+ParameterList::FindMultiComplex(
+		const std::string name ) const
+{
+	auto it = vMultiComplex_.begin();
+	for( ; it != vMultiComplex_.end(); ++it){
+		if( (*it)->GetName() == name ) return it;
+	}
+	throw BadParameter("ParameterList::FindMultiComplex() | Complexean parameter "
+			+name+" can not be found in list!");
+}
+
+unsigned int ParameterList::FindMultiComplexId( const std::string name )
+{
+	return (FindMultiComplex( name ) - vMultiComplex_.begin());
+}
+
+void ParameterList::AddParameter(std::shared_ptr<MultiComplex> par)
+{
+	vMultiComplex_.push_back(par);
+}
+
+std::shared_ptr<MultiComplex>
+ParameterList::GetMultiComplex(const std::string parname) const
+{
+	return (*FindMultiComplex(parname));
+}
+
+std::shared_ptr<MultiComplex>
+ParameterList::GetMultiComplex(const unsigned int i) const
+{
+	if( !(i < vMultiComplex_.size()) ){
+		throw BadParameter("ParameterList::GetMultiComplex() | Parameter not found: "
+				+std::to_string((double long)i));
+	}
+	return vMultiComplex_.at(i);
+}
+
+void ParameterList::RemoveMultiComplex(const std::string name){
+	try{
+		unsigned int id =  FindMultiComplex(name) - vMultiComplex_.begin();
+		RemoveMultiComplex(id);
+	} catch (BadParameter& ex){
+		BOOST_LOG_TRIVIAL(error) <<" ParameterList::RemoveComplex() | Can not remove"
+				"parameter "<<name<<": "<<ex.what();
+		throw;
+	}
+}
+
+void ParameterList::RemoveMultiComplex(const unsigned int id){
+	try{
+		vMultiComplex_.erase(vMultiComplex_.begin()+id);
+	} catch (BadParameter& ex){
+		BOOST_LOG_TRIVIAL(error) <<" ParameterList::RemoveComplex() | Can not remove"
+				"parameter with ID="<<id<<": "<<ex.what();
+		throw;
+	}
+}

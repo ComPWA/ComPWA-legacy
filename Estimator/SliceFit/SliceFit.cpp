@@ -21,17 +21,25 @@
 #include "Core/Particle.hpp"
 #include "Core/ParameterList.hpp"
 
-SliceFit::SliceFit(std::shared_ptr<AmpSumIntensity> inPIF, std::shared_ptr<Data> inDIF, ParameterList& inPar, unsigned int startEvent, unsigned int nEvents)
-: pPIF_(inPIF), pDIF_(inDIF), nEvts_(0), nPhsp_(0), nStartEvt_(startEvent), par_(inPar), nUseEvt_(nEvents),nBins_(200){
-	phspVolume = Kinematics::instance()->getPhspVolume();
+SliceFit::SliceFit(std::shared_ptr<AmpSumIntensity> inPIF,
+		std::shared_ptr<Data> inDIF, ParameterList& inPar,
+		unsigned int startEvent, unsigned int nEvents)
+: pPIF_(inPIF), pDIF_(inDIF), nEvts_(0), nPhsp_(0), nStartEvt_(startEvent),
+  par_(inPar), nUseEvt_(nEvents),nBins_(200)
+{
+	phspVolume = Kinematics::instance()->GetPhspVolume();
 	nEvts_ = pDIF_->getNEvents();
 	if(startEvent+nUseEvt_<nEvts_) nUseEvt_ = nEvts_-startEvent;
 	init();
 }
 
-SliceFit::SliceFit(std::shared_ptr<AmpSumIntensity> inPIF, std::shared_ptr<Data> inDIF, std::shared_ptr<Data> inPHSP, ParameterList& inPar, unsigned int startEvent, unsigned int nEvents)
-: pPIF_(inPIF), pDIF_(inDIF), pPHSP_(inPHSP), nEvts_(0), nPhsp_(0), nStartEvt_(startEvent), par_(inPar), nUseEvt_(nEvents),nBins_(200){
-	phspVolume = Kinematics::instance()->getPhspVolume();
+SliceFit::SliceFit(std::shared_ptr<AmpSumIntensity> inPIF,
+		std::shared_ptr<Data> inDIF, std::shared_ptr<Data> inPHSP,
+		ParameterList& inPar, unsigned int startEvent, unsigned int nEvents)
+: pPIF_(inPIF), pDIF_(inDIF), pPHSP_(inPHSP), nEvts_(0), nPhsp_(0),
+  nStartEvt_(startEvent), par_(inPar), nUseEvt_(nEvents),nBins_(200)
+{
+	phspVolume = Kinematics::instance()->GetPhspVolume();
 	nEvts_ = pDIF_->getNEvents();
 	nPhsp_ = inPHSP->getNEvents();
 	if(!(startEvent+nUseEvt_<=nEvts_)) nUseEvt_ = nEvts_-startEvent;
@@ -54,11 +62,11 @@ void SliceFit::init(){
 	PI = 3.14159; // m/s
 
 	Double_t m23_min = (kin->m2+kin->m3);
-	Double_t m23_max = (kin->M-kin->m1);
+	Double_t m23_max = (kin->GetMotherMass()-kin->m1);
 	Double_t m13_min = (kin->m1+kin->m3);
-	Double_t m13_max = (kin->M-kin->m2);
+	Double_t m13_max = (kin->GetMotherMass()-kin->m2);
 	Double_t m12_min = (kin->m1+kin->m2);
-	Double_t m12_max = (kin->M-kin->m3);
+	Double_t m12_max = (kin->GetMotherMass()-kin->m3);
 
 	dalitzPlot_ = new TH2D("SliceDalitz","SliceDalitz", //TODO: variable binning
 			nBins_,m23_min*m23_min,m23_max*m23_max, nBins_,m13_min*m13_min,m13_max*m13_max);
@@ -149,11 +157,11 @@ double SliceFit::controlParameter(ParameterList& minPar){
 	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
 
 	Double_t m23_sq_min = (kin->m2+kin->m3); m23_sq_min*=m23_sq_min;
-	Double_t m23_sq_max = (kin->M-kin->m1); m23_sq_max*=m23_sq_max;
+	Double_t m23_sq_max = (kin->GetMotherMass()-kin->m1); m23_sq_max*=m23_sq_max;
 	Double_t m13_sq_min = (kin->m1+kin->m3); m13_sq_min*=m13_sq_min;
-	Double_t m13_sq_max = (kin->M-kin->m2); m13_sq_max*=m13_sq_max;
+	Double_t m13_sq_max = (kin->GetMotherMass()-kin->m2); m13_sq_max*=m13_sq_max;
 	Double_t m12_sq_min = (kin->m1+kin->m2); m12_sq_min*=m12_sq_min;
-	Double_t m12_sq_max = (kin->M-kin->m3); m12_sq_max*=m12_sq_max;
+	Double_t m12_sq_max = (kin->GetMotherMass()-kin->m3); m12_sq_max*=m12_sq_max;
 
 	//------------fit slice number whichSlice_
 	double lh=0;
@@ -172,12 +180,12 @@ double SliceFit::controlParameter(ParameterList& minPar){
 		point.setVal("m23sq",m23); point.setVal("m13sq",m13);//point.push_back(m12sq);
 
 		std::complex<double> reso[2];
-		//reso[2]=std::complex<double>(minPar.GetParameterValue(5),0.);
-		reso[0]=std::complex<double>(minPar.GetParameterValue(1),minPar.GetParameterValue(2));
-		reso[1]=std::complex<double>(minPar.GetParameterValue(3),minPar.GetParameterValue(4));
+		//reso[2]=std::complex<double>(minPar.GetDoubleParameterValue(5),0.);
+		reso[0]=std::complex<double>(minPar.GetDoubleParameterValue(1),minPar.GetDoubleParameterValue(2));
+		reso[1]=std::complex<double>(minPar.GetDoubleParameterValue(3),minPar.GetDoubleParameterValue(4));
 
-		double amp = std::fabs(minPar.GetParameterValue(0))*pPIF_->sliceIntensity(point, par_,reso, 2);
-		double ampCl = (double) (0.0725*(pPIF_->intensity(point, par_).GetParameterValue(0)));
+		double amp = std::fabs(minPar.GetDoubleParameterValue(0))*pPIF_->sliceIntensity(point,reso, 2);
+		double ampCl = (double) (0.0725*(pPIF_->intensity(point).GetDoubleParameterValue(0)));
 
 		aSlice_->SetBinContent(j,val);
 		theAmpSl_->SetBinContent(j,amp);

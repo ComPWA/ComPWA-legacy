@@ -28,6 +28,7 @@
 #include <sstream>
 #include <complex>
 #include <stdexcept>
+#include <cmath>
 
 #include "Core/AbsParameter.hpp"
 #include "Core/Exceptions.hpp"
@@ -100,6 +101,9 @@ public:
 		Notify();
 	}
 
+	std::vector<std::complex<double> >::iterator Begin() { return val_.begin(); }
+	std::vector<std::complex<double> >::iterator End() { return val_.end(); }
+
 protected:
 	virtual std::string TypeName() const { return "complex collection"; }
 	//std::string out_; /*!< Output string to print information */
@@ -136,9 +140,11 @@ protected:
 		unsigned int max=val_.size();
 		if(max>3) max=3; //display only 10 variables
 		for(unsigned int i=0; i<max-1; i++)
-			ovs << val_[i] << ", ";
-		ovs << val_[max-1];
+			ovs << val_.at(i) << ", ";
+		ovs << val_.at(max-1); //print last value without comma
+		//add dots, if only some value are printed
 		if(max<val_.size()) ovs << " ... ";
+
 		return ovs.str();
 	}
 
@@ -210,6 +216,8 @@ public:
 		val_[i] = inVal;
 		Notify();
 	}
+	std::vector<double>::iterator Begin() { return val_.begin(); }
+	std::vector<double>::iterator End() { return val_.end(); }
 
 protected:
 	virtual std::string TypeName() const { return "double collection"; }
@@ -247,9 +255,11 @@ protected:
 		unsigned int max=val_.size();
 		if(max>5) max=5; //display only 5 variables
 		for(unsigned int i=0; i<max-1; i++)
-			ovs << val_[i] << ", ";
-		ovs << val_[max-1];
+			ovs << val_.at(i) << ", ";
+		ovs << val_.at(max-1); //print last value without comma
+		//add dots, if only some value are printed
 		if(max<val_.size()) ovs << " ... ";
+
 		return ovs.str();
 	}
 
@@ -527,10 +537,12 @@ public:
 	 * with value 0 but without bounds or an error.
 	 * \param inName internal string identifier of this parameter
 	 */
-	DoubleParameter(std::string inName=""):AbsParameter(inName, ParType::DOUBLE),
-	fixed_(0),val_(0),min_(0),max_(0), errorType(ErrorType::NOTDEF) {
+	DoubleParameter(std::string inName="") :
+		AbsParameter(inName, ParType::DOUBLE), fixed_(0),val_(0),min_(0), max_(0)
+{
+		SetError(0);
 		bounds_= usebounds_ = false;
-	}
+}
 
 	//! Standard constructor with a value
 	/*!
@@ -539,9 +551,10 @@ public:
 	 * \param inName internal string identifier of this parameter
 	 * \param value input value of the parameter
 	 */
-	DoubleParameter(std::string inName, const double value):AbsParameter(inName, ParType::DOUBLE),
-			fixed_(0),val_(value),min_(0),max_(0), errorType(ErrorType::NOTDEF)
+	DoubleParameter(std::string inName, const double value) :
+		AbsParameter(inName, ParType::DOUBLE), fixed_(0),val_(value), min_(0),max_(0)
 	{
+		SetError(0);
 		bounds_= usebounds_ = false;
 	}
 
@@ -572,10 +585,12 @@ public:
 	 * \param max input upper bound
 	 * \sa check_bounds()
 	 */
-	DoubleParameter(std::string inName, const double value, const double min, const double max)
-	:AbsParameter(inName, ParType::DOUBLE),fixed_(0),val_(value),min_(0),max_(0),
-	 errorType(ErrorType::NOTDEF)
+	DoubleParameter(std::string inName, const double value,
+			const double min, const double max) :
+				AbsParameter(inName, ParType::DOUBLE),
+				fixed_(0),val_(value),min_(0),max_(0)
 	{
+		SetError(0);
 		bounds_= usebounds_ = false;
 		SetMinMax(min,max);
 	}
@@ -592,15 +607,18 @@ public:
 	 * \param error input error of the parameter
 	 * \sa check_bounds()
 	 */
-	DoubleParameter(std::string inName, const double value, const double min, const double max, const double error)
-	:AbsParameter(inName, ParType::DOUBLE),fixed_(0),val_(value),min_(0),max_(0),
-	 errorType(ErrorType::NOTDEF)
+	DoubleParameter(std::string inName, const double value,
+			const double min, const double max, const double error) :
+				AbsParameter(inName, ParType::DOUBLE),
+				fixed_(0),val_(value),min_(0),max_(0)
 	{
 		SetError(error);
 		bounds_= usebounds_ = false;
 		SetMinMax(min,max);
 	}
-	DoubleParameter(const DoubleParameter& in):AbsParameter(in.name_, ParType::DOUBLE){
+	DoubleParameter(const DoubleParameter& in) :
+		AbsParameter(in.name_, ParType::DOUBLE)
+	{
 		*this = in;
 	}
 	//! Empty Destructor
@@ -612,7 +630,10 @@ public:
 	//! Check if parameter has bounds
 	virtual inline bool HasBounds() const {return bounds_;}
 	//! Check if bounds should be used
-	virtual inline bool UseBounds() const {if(bounds_)return usebounds_; return false;}
+	virtual inline bool UseBounds() const {
+		if(bounds_) return usebounds_;
+		return false;
+	}
 	//! Check if parameter is fixed
 	virtual inline bool IsFixed() const {return fixed_;}
 	//! Set if bounds should be used
@@ -624,19 +645,35 @@ public:
 	//! Set parameter free or fixed
 	virtual inline void FixParameter(const bool fixed) {fixed_=fixed;}
 	/*! Update member variables from other DoubleParameter
-	 * Do to the Observer pattern we can't use a copy constructor. Therefore we use this workaround.
-	 * The function ignores if parameter is fixed!
+	 * Do to the Observer pattern we can't use a copy constructor.
+	 * Therefore we use this workaround. The function ignores if parameter
+	 * is fixed!
 	 */
 	virtual void UpdateParameter( std::shared_ptr<DoubleParameter> newPar ){
 		//copy bounds
 		if(newPar->HasBounds()){
-			SetMinMax(newPar->GetMinValue(), newPar->GetMaxValue());
+			try{
+				SetMinMax(newPar->GetMinValue(), newPar->GetMaxValue());
+			} catch (std::exception& ex){
+				//ignore if bound can not be set
+			}
 			SetUseBounds(newPar->UseBounds());
 		} else
 			bounds_ = usebounds_ = 0;
+
+		bool isFix = newPar->IsFixed();
 		//copy value
 		FixParameter(0); //we ignore here if parameter is fixed
 		SetValue(newPar->GetValue());
+
+		//Check if bounds are valid and value is within bounds
+		if( !check_bounds(GetMinValue(),GetMaxValue()) )
+			throw std::runtime_error("DoubleParameter::UpdateParameter() | "
+					"Bounds not valid for parameter "+GetName()+": "
+					+std::to_string(GetValue())
+		+" ["+std::to_string((long double)GetMinValue())+";"
+		+std::to_string((long double)GetMaxValue())+"]!");
+
 		//copy error
 		if(newPar->GetErrorType()==ErrorType::SYM)
 			SetError(newPar->GetError());
@@ -644,8 +681,9 @@ public:
 			SetError(newPar->GetErrorLow(),newPar->GetErrorHigh());
 		else
 			SetErrorType(ErrorType::NOTDEF);
+
 		//copy fix parameter
-		FixParameter(newPar->IsFixed());
+		FixParameter(isFix);
 		return;
 	}
 
@@ -671,19 +709,35 @@ public:
 		/*Call notify only if value has changed! Otherwise tree is
 		 * recalculated also in case where current parameter is not changed
 		 */
-		//if(abs(val_-inVal) < 0.0000001) return;
+		//if(std::fabs(val_-inVal) < 0.0000001) return;
 		if(val_==inVal) return;
+
+		if(usebounds_ && (inVal < GetMinValue() || inVal > GetMaxValue()) )
+			throw ParameterOutOfBound("DoubleParameter::SetValue() | "
+					"Parameter "+GetName()+" not within bounds: val="
+					+std::to_string(inVal)
+		+" ["+std::to_string((long double)GetMinValue())+";"
+		+std::to_string((long double)GetMaxValue())+"]!");
+
 		val_ = inVal;
 		Notify();
 	}
+
 	//! Setter for bounds of parameter
 	virtual void SetMinMax(const double min, const double max){
-		SetMinValue(min);
-		SetMaxValue(max);
-		if(!bounds_)
-			throw std::runtime_error("DoubleParameter::SetMinMaxValue() bounds not valid: ["
-					+std::to_string((long double)min)+";"
-					+std::to_string((long double)max)+"]!");
+		try{
+			SetMinValue(min);
+		} catch (ParameterOutOfBound& ex) { }
+		try{
+			SetMaxValue(max);
+		} catch (ParameterOutOfBound& ex) { }
+		if(!check_bounds(min_,max_))
+			throw std::runtime_error("DoubleParameter::SetMinMaxValue() | "
+					"Bounds not valid for parameter "+GetName()+": "
+					+std::to_string(GetValue())
+		+" ["+std::to_string((long double)min_)+";"
+		+std::to_string((long double)max_)+"]!");
+		bounds_ = usebounds_ = true;
 	}
 	/*! Setter for lower bound
 	 * Setter for lower bound of the parameter. If a check for valid bounds
@@ -695,10 +749,13 @@ public:
 	 */
 	virtual void SetMinValue(const double min) {
 		min_ = min;
-		if(!check_bounds(min_, max_))
-			bounds_ = usebounds_ = false;
-		else
-			bounds_ = usebounds_ = true;
+		if( !check_bounds(min_, max_) )
+			throw ParameterOutOfBound("DoubleParameter::SetMinValue() | "
+					"Boundary not valid: ["
+					+std::to_string(GetMinValue())+", "
+					+std::to_string(GetMaxValue())+"]!"
+			);
+		bounds_ = usebounds_ = true;
 	}
 	/*! Setter for upper bound
 	 * Setter for upper bound of the parameter. If a check for valid bounds
@@ -710,10 +767,13 @@ public:
 	 */
 	virtual void SetMaxValue(const double max) {
 		max_ = max;
-		if(!check_bounds(min_, max_))
-			bounds_ = usebounds_ = false;
-		else
-			bounds_ = usebounds_ = true;
+		if( !check_bounds(min_, max_) )
+			throw ParameterOutOfBound("DoubleParameter::SetMaxValue() | "
+					"Boundary not valid: ["
+					+std::to_string(GetMinValue())+", "
+					+std::to_string(GetMaxValue())+"]!"
+			);
+		bounds_ = usebounds_ = true;
 	}
 	//====== PARAMETER ERROR ========
 	//! Check if parameter has an error
@@ -800,7 +860,7 @@ protected:
 	//! Setter for upper error of parameter
 	virtual void SetErrorHigh(double errHigh) { errorHigh=errHigh;}
 	//! Setter for lower error of parameter
-	virtual void SetErrorLow(double errLow) { errorLow=std::abs(errLow);}
+	virtual void SetErrorLow(double errLow) { errorLow=std::fabs(errLow);}
 	//! Setter for type of parameter error
 	virtual void SetErrorType(ErrorType t) { errorType=t; }
 
@@ -832,13 +892,14 @@ protected:
 		std::stringstream oss;
 		oss << name_;
 		oss << "\t Val = " << val_;
-		if(bounds_)
-			oss << "\t  Min-Max = " << min_ << " to " << max_;
 		if(errorLow!=errorHigh)
-			oss << "\t  Err = -"<< errorLow<<" +"<<errorHigh;
-		else
-			oss << "\t  Err = +-"<< errorLow;
-		oss << "\t Type = " << TypeName();
+			oss << " (+"<< errorHigh<<" -"<<errorLow<<")";
+		else if ( errorLow!=0 )
+			oss << " (+-"<< errorLow<<")";
+		if(bounds_)
+			oss << "\t  [" << min_ << " ; " << max_<<"]";
+		oss << " fix? "<<IsFixed();
+		oss << "\t " << TypeName();
 		return oss.str();
 	}
 
@@ -868,11 +929,25 @@ private:
 		ar & make_nvp("value",val_);
 		ar & make_nvp("min_value",min_);
 		ar & make_nvp("max_value",max_);
-		ar & make_nvp("errorType",errorType);
-		ar & make_nvp("errorLow",errorLow);
-		ar & make_nvp("errorHigh",errorHigh);
+		try{
+			ar & make_nvp("errorType",errorType);
+			ar & make_nvp("errorLow",errorLow);
+			ar & make_nvp("errorHigh",errorHigh);
+		} catch (...) {
+			errorLow = 0;
+			errorHigh = 0;
+			errorType = ErrorType::SYM;
+		}
 	}
 };
+BOOST_SERIALIZATION_SHARED_PTR(DoubleParameter)
+BOOST_CLASS_IMPLEMENTATION( DoubleParameter, boost::serialization::object_serializable )
+BOOST_CLASS_TRACKING( DoubleParameter, boost::serialization::track_never )
+BOOST_CLASS_IMPLEMENTATION( std::shared_ptr<DoubleParameter>, boost::serialization::object_serializable )
+BOOST_CLASS_TRACKING( std::shared_ptr<DoubleParameter>, boost::serialization::track_never )
+BOOST_CLASS_IMPLEMENTATION( std::vector<std::shared_ptr<DoubleParameter> >, boost::serialization::object_serializable )
+BOOST_CLASS_TRACKING( std::vector<std::shared_ptr<DoubleParameter> >, boost::serialization::track_never )
+
 
 class IntegerParameter : public AbsParameter
 {

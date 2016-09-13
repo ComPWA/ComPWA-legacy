@@ -16,11 +16,11 @@
 #include "Core/Particle.hpp"
 #include "Core/Event.hpp"
 
-Event::Event():fWeight(1.),fName(""){
+Event::Event():fWeight(1.),fName(""),fFlavour(0),fCharge(0),fEff(1.){
 
 }
 
-Event::Event(const std::string& name):fWeight(1.),fName(name),fFlavour(0),fCharge(0){
+Event::Event(const std::string& name):fWeight(1.),fName(name),fFlavour(0),fCharge(0),fEff(1.){
 
 }
 
@@ -34,10 +34,20 @@ void Event::addParticle(Particle inParticle){
 
 Event::~Event() { /* nothing */	}
 
-const Particle& Event::getParticle(const unsigned int id){
+const Particle& Event::getParticle(const unsigned int id) const{
   if(id>=getNParticles()){
     //TODO Exception
     return Particle();
   }
   return fParticles.at(id);
+}
+
+std::ostream& operator<< (std::ostream& stream, const Event& ev){
+	stream<< "Event name="<<ev.fName<<" weight="<<ev.fWeight<<" efficiency="<<ev.fEff
+			<<" flavour="<<ev.fFlavour<<" charge="<<ev.fCharge<<std::endl;
+	stream<< " Printing particles (N="<<ev.fParticles.size()<<"):"<<std::endl;
+	for(auto i: ev.fParticles)
+		stream<<i<<std::endl;
+
+	return stream;
 }
