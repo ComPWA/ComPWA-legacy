@@ -30,12 +30,24 @@
 #include "Core/ParameterList.hpp"
 #include "Core/Parameter.hpp"
 #include "Core/FitResult.hpp"
+//#include <boost/numeric/ublas/symmetric.hpp>
+//#include <boost/numeric/ublas/io.hpp>
+//#include <boost/log/core.hpp>
+//#include <boost/log/trivial.hpp>
+//#include <boost/timer.hpp>
+
+namespace ComPWA {
+namespace Optimizer {
+namespace Minuit2 {
+
+using namespace boost::log;
+using namespace ROOT::Minuit2;
 
 double shiftAngle(double v)
 {
 	double originalVal = v;
 	double val = originalVal;
-	double pi = PhysConst::instance()->getConstValue("Pi");
+	double pi = ComPWA::PhysConst::Instance().findConstant("Pi").value_;
 	while(val> pi) val-=2*pi;
 	while(val< -pi ) val+=2*pi;
 	if(val!=originalVal)
@@ -231,3 +243,6 @@ std::shared_ptr<FitResult> MinuitIF::exec(ParameterList& par)
 	return result;
 }
 
+} /* namespace Minuit2 */
+} /* namespace Optimizer */
+} /* namespace ComPWA */

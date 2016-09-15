@@ -39,7 +39,9 @@
 
 using namespace boost::log;
 
-class FunctionTree //: public ControlParametr
+namespace ComPWA {
+
+class FunctionTree    //: public ControlParametr
 {
 public:
 	//! Standard constructor
@@ -66,6 +68,14 @@ public:
 			iter->second->deleteLinks();
 		}
 	}
+  
+  virtual void recursiveAddDaughters(std::shared_ptr<TreeNode> newNode) {
+    addNode(newNode);
+    auto children = newNode->getChildren();
+    for (auto child : children) {
+      recursiveAddDaughters(child);
+    }
+  }
 
 	//! Add node to FcnTree
 	/*!
@@ -249,4 +259,5 @@ protected:
 	virtual void UpdateAll(std::shared_ptr<TreeNode> startNode);
 };
 
+} /* End ComPWA namespace */
 #endif /* _FUNCTIONTREE_HPP_ */

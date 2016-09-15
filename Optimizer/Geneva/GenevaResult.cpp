@@ -1,6 +1,10 @@
 #include "Optimizer/Geneva/GenevaResult.hpp"
 #include "Core/Logging.hpp"
 
+namespace ComPWA {
+namespace Optimizer {
+namespace Geneva {
+
 void GenevaResult::init(boost::shared_ptr<Gem::Geneva::GStartIndividual> min){
 	finalLH = min->getBestCase();
 	min->getPar(finalParameters);
@@ -30,3 +34,6 @@ void GenevaResult::genOutput(std::ostream& out, std::string opt){
 	return;
 }
 
+} /* namespace Geneva */
+} /* namespace Optimizer */
+} /* namespace ComPWA */

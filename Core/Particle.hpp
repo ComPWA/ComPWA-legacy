@@ -26,6 +26,7 @@
 #include <iostream>
 #include <stdexcept>
 
+namespace ComPWA {
 class Particle
 {
 public:
@@ -77,9 +78,15 @@ public:
 
 	Particle operator+(const Particle& c2) ;
 
+	inline double getMassSquare() const {
+		return E*E-px*px-py*py-pz*pz;
+	}
+
 	//protected:
 	double px, py, pz, E;
 	int pid;
 	int charge;
 };
+
+} /* namespace ComPWA */
 #endif

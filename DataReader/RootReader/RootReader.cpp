@@ -29,8 +29,11 @@
 #include <boost/log/core.hpp>
 using namespace boost::log;
 
-RootReader::RootReader()
-{
+namespace ComPWA {
+namespace DataReader {
+namespace RootReader {
+
+RootReader::RootReader(){
 	fFile = 0; //need to do this to avoid seg. violation when destructor is called
 }
 
@@ -241,4 +244,6 @@ void RootReader::bin()
 
 }
 
-
+} /* namespace RootReader */
+} /* namespace DataReader */
+} /* namespace ComPWA */

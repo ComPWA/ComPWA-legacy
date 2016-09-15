@@ -81,6 +81,12 @@ void ParameterList::DeepCopy(const ParameterList& in)
 						new DoubleParameter(*(in.vDouble_[i]))
 				)
 		);
+	for (unsigned int i = 0; i < in.GetNMultiUnsignedInteger(); i++)
+		vMultiUnsignedInteger_.push_back(
+				std::shared_ptr<MultiUnsignedInteger>(
+						new MultiUnsignedInteger(*(in.vMultiUnsignedInteger_[i]))
+				)
+		);
 	for(unsigned int i=0; i<in.GetNInteger();i++)
 		vInt_.push_back(
 				std::shared_ptr<IntegerParameter>(
@@ -100,7 +106,8 @@ ParameterList::~ParameterList()
 	/* nothing */
 }
 
-std::shared_ptr<AbsParameter> ParameterList::GetParameter(const unsigned int i) {
+std::shared_ptr<AbsParameter> ParameterList::GetParameter(const unsigned int i)
+{
 	if( i >= GetNParameter() )
 		throw BadParameter("ParameterList::GetParameter() | Parameter ID="
 				+std::to_string(i)+" not in list");
@@ -123,14 +130,31 @@ std::shared_ptr<AbsParameter> ParameterList::GetParameter(const unsigned int i) 
 	pos += vMultiDouble_.size();
 	if( i < (pos+vMultiComplex_.size()) )
 		return vMultiComplex_.at(i-pos);
+	pos += vMultiComplex.size();
+	if( i < (pos+vMultiUnsignedInteger_.size()) )
+		return vMultiUnsignedInteger_.at(i-pos);
 
-	std::cout<<"aajsnajkknghjgjgjggjgjgj"<<std::endl;
 	throw BadParameter("ParameterList::GetParameter() | Parameter ID="
 			+std::to_string(i)+" not in list");
-
-	return std::shared_ptr<AbsParameter>();
 }
 
+bool ParameterList::ParameterExists(const std::string parname) const {
+	if (mMultiComplexID_.find(parname) != mMultiComplexID_.end())
+		return true;
+	if (mMultiDoubleID_.find(parname) != mMultiDoubleID_.end())
+		return true;
+	if (mMultiUnsignedIntegerID_.find(parname) != mMultiUnsignedIntegerID_.end())
+		return true;
+	if (mBoolParID_.find(parname) != mBoolParID_.end())
+		return true;
+	if (mIntParID_.find(parname) != mIntParID_.end())
+		return true;
+	if (mDoubleParID_.find(parname) != mDoubleParID_.end())
+		return true;
+	if (mComplexParID_.find(parname) != mComplexParID_.end())
+		return true;
+	return false;
+}
 
 std::shared_ptr<AbsParameter> ParameterList::GetParameter(const std::string parname)
 {
@@ -140,6 +164,7 @@ std::shared_ptr<AbsParameter> ParameterList::GetParameter(const std::string parn
 	return (*FindComplexParameter(parname));
 	return (*FindMultiDouble(parname));
 	return (*FindMultiComplex(parname));
+	return (*FindMultiUnsignedInteger(parname));
 }
 
 
@@ -157,6 +182,8 @@ void ParameterList::Append(const ParameterList& addList)
 		AddParameter(addList.GetMultiDouble(i));
 	for(int i=0; i<addList.GetNMultiComplex(); i++ )
 		AddParameter(addList.GetMultiComplex(i));
+	for(int i=0; i<addList.GetNMultiUnsignedInteger(); i++ )
+		AddParameter(addList.GetMultiUnsignedInteger(i));
 }
 
 
@@ -201,6 +228,10 @@ void ParameterList::RemoveDuplicates()
 					RemoveMultiComplex(j-vBool_.size()-vInt_.size()-vComplex_.size()
 							-vMultiDouble_.size()-vMultiComplex_.size());
 					break;
+				case ParType::MUNSIGNEDINTEGER:
+					RemoveMultiUnsignedInteger(j-vBool_.size()-vInt_.size()-vComplex_.size()
+							-vMultiDouble_.size()-vMultiComplex_.size()-vMultiUnsignedInteger.size());
+					break;
 				}
 				j--; //decrement if a parameter is removed
 			}
@@ -229,6 +260,9 @@ void ParameterList::AddParameter(std::shared_ptr<AbsParameter> par)
 		break;}
 	case ParType::MCOMPLEX:{
 		AddParameter( std::dynamic_pointer_cast<MultiComplex>(par) );
+		break;}
+	case ParType::MUNSIGNEDINTEGER:{
+		AddParameter( std::dynamic_pointer_cast<MultiUnsignedInteger>(par) );
 		break;}
 	default:{ break; }
 	}
@@ -281,6 +315,12 @@ void ParameterList::make_str() {
 			oss << "Multi complex parameters: "<< vMultiComplex_.size() << std::endl;
 			auto it = vMultiComplex_.begin();
 			for( ; it!=vMultiComplex_.end(); ++it)
+				oss << (*it)->GetName()<< " size="<<(*it)->GetNValues()<<std::endl;
+		}
+		if(vMultiUnsignedInteger_.size()){
+			oss << "Multi unsigned int parameters: "<< vMultiUnsignedInteger_.size() << std::endl;
+			auto it = vMultiUnsignedInteger_.begin();
+			for( ; it!=vMultiUnsignedInteger_.end(); ++it)
 				oss << (*it)->GetName()<< " size="<<(*it)->GetNValues()<<std::endl;
 		}
 		if(vMultiDouble_.size()){
@@ -764,6 +804,66 @@ void ParameterList::RemoveMultiComplex(const unsigned int id){
 		vMultiComplex_.erase(vMultiComplex_.begin()+id);
 	} catch (BadParameter& ex){
 		BOOST_LOG_TRIVIAL(error) <<" ParameterList::RemoveComplex() | Can not remove"
+				"parameter with ID="<<id<<": "<<ex.what();
+		throw;
+	}
+}
+//******************************************************************************
+//---------- MULTIUNSIGNED INT PARAMETER ----------
+std::vector<std::shared_ptr<MultiUnsignedInteger> >::const_iterator
+ParameterList::FindMultiUnsignedInteger(
+		const std::string name ) const
+{
+	auto it = vMultiUnsignedInteger_.begin();
+	for( ; it != vMultiUnsignedInteger_.end(); ++it){
+		if( (*it)->GetName() == name ) return it;
+	}
+	throw BadParameter("ParameterList::FindMultiUnsignedInteger() | UnsignedInteger parameter "
+			+name+" can not be found in list!");
+}
+
+unsigned int ParameterList::FindMultiUnsignedIntegerId( const std::string name )
+{
+	return (FindMultiUnsignedInteger( name ) - vMultiUnsignedInteger_.begin());
+}
+
+void ParameterList::AddParameter(std::shared_ptr<MultiUnsignedInteger> par)
+{
+	vMultiUnsignedInteger_.push_back(par);
+}
+
+std::shared_ptr<MultiUnsignedInteger>
+ParameterList::GetMultiUnsignedInteger(const std::string parname) const
+{
+	return (*FindMultiUnsignedInteger(parname));
+}
+
+std::shared_ptr<MultiUnsignedInteger>
+ParameterList::GetMultiUnsignedInteger(const unsigned int i) const
+{
+	if( !(i < vMultiUnsignedInteger_.size()) ){
+		throw BadParameter("ParameterList::GetMultiUnsignedInteger() | Parameter not found: "
+				+std::to_string((double long)i));
+	}
+	return vMultiUnsignedInteger_.at(i);
+}
+
+void ParameterList::RemoveMultiUnsignedInteger(const std::string name){
+	try{
+		unsigned int id =  FindMultiUnsignedInteger(name) - vMultiUnsignedInteger_.begin();
+		RemoveMultiUnsignedInteger(id);
+	} catch (BadParameter& ex){
+		BOOST_LOG_TRIVIAL(error) <<" ParameterList::RemoveUnsignedInteger() | Can not remove"
+				"parameter "<<name<<": "<<ex.what();
+		throw;
+	}
+}
+
+void ParameterList::RemoveMultiUnsignedInteger(const unsigned int id){
+	try{
+		vMultiUnsignedInteger_.erase(vMultiUnsignedInteger_.begin()+id);
+	} catch (BadParameter& ex){
+		BOOST_LOG_TRIVIAL(error) <<" ParameterList::RemoveUnsignedInteger() | Can not remove"
 				"parameter with ID="<<id<<": "<<ex.what();
 		throw;
 	}

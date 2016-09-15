@@ -20,7 +20,13 @@
 #include <memory>
 
 class TIterator;
+
+namespace ComPWA {
+
 class DoubleParameter;
+
+namespace Physics {
+namespace AmplitudeSum {
  
 class PhiSumOfAmplitudes {
 public:
@@ -54,5 +60,9 @@ private:
 
   //ClassDef(PhiSumOfAmplitudes,1) // Your description goes here...
 };
+
+} /* namespace AmplitudeSum */
+} /* namespace Physics */
+} /* namespace ComPWA */
  
 #endif

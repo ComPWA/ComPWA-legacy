@@ -8,6 +8,8 @@
 
 #include "Core/Logging.hpp"
 
+namespace ComPWA {
+
 void Logging::init(std::string out,boost::log::trivial::severity_level minLevel){
    boost::log::add_common_attributes();
    boost::log::add_console_log(std::cout,
@@ -47,3 +49,5 @@ void Logging::setLogLevel(boost::log::trivial::severity_level minLevel){
    boost::log::core::get()->set_filter(boost::log::trivial::severity >= minLevel);
    BOOST_LOG_TRIVIAL(info)<<"New severity level: "<<minLevel;
 }
+
+} /* namespace ComPWA */

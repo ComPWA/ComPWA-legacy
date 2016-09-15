@@ -32,7 +32,6 @@
 #include "TLorentzVector.h"
 #include "TH2D.h"
 
-#include "../Physics/DPKinematics/RootGenerator.hpp"
 //Core header files go here
 #include "Core/Event.hpp"
 #include "Core/Particle.hpp"
@@ -44,6 +43,7 @@
 
 // ComPWA header files go here
 #include "DataReader/RootReader/RootReader.hpp"
+#include "DataReader/RootGenerator/RootGenerator.hpp"
 #include "Physics/AmplitudeSum/AmpSumIntensity.hpp"
 #include "Physics/AmplitudeSum/AmpRelBreitWignerRes.hpp"
 #include "Physics/AmplitudeSum/AmpFlatteRes.hpp"
@@ -54,7 +54,18 @@
 #include "Core/AbsParameter.hpp"
 #include "Core/Logging.hpp"
 
-using namespace std;
+using namespace ComPWA;
+
+using Physics::AmplitudeSum::AmplitudeSetup;
+using Physics::AmplitudeSum::AmpSumIntensity;
+using Physics::AmplitudeSum::AmpFlatteRes;
+using DataReader::Data;
+using DataReader::RootGenerator::RootGenerator;
+using DataReader::RootReader::RootReader;
+using Optimizer::ControlParameter;
+using Optimizer::Minuit2::MinuitIF;
+using Optimizer::Optimizer;
+using Estimator::MinLogLH::MinLogLH;
 
 /************************************************************************************************/
 /**
@@ -63,11 +74,16 @@ using namespace std;
 int main(int argc, char **argv){
 	int seed = 3041; //default seed
 
+<<<<<<< HEAD
 	//number of calls for numeric integration and number of events for phsp integration
 	unsigned int mcPrecision = 500000;
 	Logging log("log-compareTreeAmp.txt",boost::log::trivial::debug); //initialize logging
+=======
+	unsigned int mcPrecision = 1000000; //number of calls for numeric integration and number of events for phsp integration
+	ComPWA::Logging log("log-compareTreeAmp.txt",boost::log::trivial::debug); //initialize logging
+>>>>>>> dd7eb340b0f73d2b07005f687e586aae14fbc9fa
 	//initialize kinematics of decay
-	DalitzKinematics::createInstance("D0","K_S0","K-","K+");//setup kinematics
+	Physics::DPKinematics::DalitzKinematics::createInstance("D0","K_S0","K-","K+");//setup kinematics
 	//initialize random generator
 	std::shared_ptr<Generator> gen = std::shared_ptr<Generator>(new RootGenerator(seed));
 
@@ -150,13 +166,19 @@ int main(int argc, char **argv){
 	std::shared_ptr<FunctionTree> physicsTree = minLog->getTree();
 	BOOST_LOG_TRIVIAL(debug) << physicsTree->head()->to_str(20);
 	double initialLHTree = esti->controlParameter(fitParTree);
-	std::shared_ptr<Optimizer> optiTree(new MinuitIF(esti, fitParTree));
+	std::shared_ptr<Optimizer::Optimizer> optiTree(new MinuitIF(esti, fitParTree));
 	run.setOptimizer(optiTree);
 
 	//======================= Compare tree and amplitude =============================
+<<<<<<< HEAD
 	std::shared_ptr<AmpRelBreitWignerRes> phiRes = std::dynamic_pointer_cast<AmpRelBreitWignerRes>(fitAmpPtr->GetResonance("phi(1020)"));
 	double phimag = fitAmpPtr->GetResonance("phi(1020)")->GetMagnitude();
 	double phiphase = fitAmpPtr->GetResonance("phi(1020)")->GetPhase();
+=======
+	std::shared_ptr<Physics::AmplitudeSum::AmpRelBreitWignerRes> phiRes = std::dynamic_pointer_cast<Physics::AmplitudeSum::AmpRelBreitWignerRes>(fitAmpPtr->getResonance("phi(1020)"));
+	double phimag = fitAmpPtr->getAmpMagnitude("phi(1020)");
+	double phiphase = fitAmpPtr->getAmpPhase("phi(1020)");
+>>>>>>> dd7eb340b0f73d2b07005f687e586aae14fbc9fa
 	std::complex<double> phiCoeff(phimag*cos(phiphase),phimag*sin(phiphase));
 	std::shared_ptr<AmpFlatteRes> a0Res = std::dynamic_pointer_cast<AmpFlatteRes>(fitAmpPtr->GetResonance("a_0(980)0"));
 	double a0mag = fitAmpPtr->GetResonance("a_0(980)0")->GetMagnitude();
@@ -231,7 +253,7 @@ int main(int argc, char **argv){
 	BOOST_LOG_TRIVIAL(info) <<"Initial likelihood: "<<initialLHTree<< "/"<<initialLH
 			<< " Deviation = "<<initialLHTree-initialLH;
 
-	std::shared_ptr<Optimizer> opti(new MinuitIF(esti, fitPar));
+	std::shared_ptr<Optimizer::Optimizer> opti(new MinuitIF(esti, fitPar));
 	run.setOptimizer(opti);
 
 	std::shared_ptr<FitResult> result= run.startFit(fitPar);

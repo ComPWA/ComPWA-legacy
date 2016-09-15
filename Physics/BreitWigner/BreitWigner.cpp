@@ -17,7 +17,9 @@
 #include "Core/ParameterList.hpp"
 #include "Core/Parameter.hpp"
 
-using namespace std;
+namespace ComPWA {
+namespace Physics {
+namespace BreitWigner {
 
 BreitWigner::BreitWigner(const double min, const double max):min_(min),max_(max)
 {
@@ -81,7 +83,7 @@ const ParameterList& BreitWigner::intensity(double x, double M, double T)
 	return result;
 }
 
-const ParameterList& BreitWigner::intensity(dataPoint& point)
+const ParameterList& BreitWigner::intensity(const dataPoint& point)
 {
 	//ParameterList result;
 	double val = BreitWignerValue(
@@ -110,3 +112,13 @@ const double BreitWigner::BreitWignerValue(double x, double M, double T){
 
 	return 1./denom;
 }
+
+//void BreitWigner::setParameterList(const ParameterList& par){
+//	//parameters varied by Minimization algorithm
+//	params = par;
+//	return;
+//}
+
+} /* namespace BreitWigner */
+} /* namespace Physics */
+} /* namespace ComPWA */

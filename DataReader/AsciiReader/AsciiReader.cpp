@@ -32,6 +32,10 @@
 
 //_____ F U N C T I O N S ______________________________________________________
 
+namespace ComPWA {
+namespace DataReader {
+namespace AsciiReader {
+
 // Constructors and destructors
 AsciiReader::AsciiReader( const std::string inConfigFile, const int particles  )
 {
@@ -75,3 +79,7 @@ AsciiReader* AsciiReader::EmptyClone() const
 {
 //	return new AsciiReader();
 }
+
+} /* namespace AsciiReader */
+} /* namespace DataReader */
+} /* namespace ComPWA */

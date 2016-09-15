@@ -54,6 +54,10 @@
 // The individual that should be optimized
 #include "Optimizer/Geneva/GStartIndividual.hpp"
 
+namespace ComPWA {
+namespace Optimizer {
+namespace Geneva {
+
 using namespace Gem::Geneva;
 
 GenevaIF::GenevaIF(std::shared_ptr<ControlParameter> theData, std::string inConfigFileDir)
@@ -113,5 +117,17 @@ std::shared_ptr<FitResult> GenevaIF::exec(ParameterList& par) {
 	result->setFinalParameters(par);
 	//int whattodowiththisidontknow =  go.finalize(); //Go2::finalize();
 
+        //write Parameters back
+	ParameterList resultPar;
+	bestIndividual_ptr->getPar(resultPar);
+	for(unsigned int i=0; i<par.GetNDouble(); i++){  //TODO: better way, no cast or check type
+	  if(!par.GetDoubleParameter(i)->IsFixed())
+	    par.GetDoubleParameter(i)->SetValue(resultPar.GetDoubleParameter(i)->GetValue());
+	}
+
 	return result;
 }
+
+} /* namespace Geneva */
+} /* namespace Optimizer */
+} /* namespace ComPWA */

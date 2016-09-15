@@ -26,7 +26,9 @@
 #include <iostream>
 #include "Core/Particle.hpp"
 
-class Event{
+namespace ComPWA {
+
+class Event {
 
 public:
   Event();
@@ -36,6 +38,8 @@ public:
   Event(const double inWeight, const std::string& name, const double inEff = 1.);
 
   virtual void addParticle(Particle inParticle);
+
+  virtual void setParticleAt(const Particle &particle, unsigned int index);
 
   virtual ~Event();
 
@@ -64,5 +68,7 @@ protected:
   int fCharge;
 
 };
+
+} /* namespace ComPWA */
 
 #endif

@@ -25,6 +25,15 @@
 #include "Core/Kinematics.hpp"
 #include "Core/FitResult.hpp"
 
+
+namespace ComPWA {
+
+using Optimizer::ControlParameter;
+using DataReader::Data;
+
+namespace Estimator {
+namespace MinLogLH {
+
 MinLogLH::MinLogLH(std::shared_ptr<Amplitude> amp, std::shared_ptr<Data> data,
 		std::shared_ptr<Data> phspSample,std::shared_ptr<Data> accSample,
 		unsigned int startEvent, unsigned int nEvents) :
@@ -411,3 +420,8 @@ double MinLogLH::calcPenalty()
 //	}
 //	return (_penaltyLambda*ffSum);
 //}
+
+
+} /* namespace MinLogLH */
+} /* namespace Estimator */
+} /* namespace ComPWA */

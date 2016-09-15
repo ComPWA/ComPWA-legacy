@@ -32,6 +32,10 @@
 #include "Physics/AmplitudeSum/AmpAbsDynamicalFunction.hpp"
 #include "Physics/DPKinematics/DalitzKinematics.hpp"
 
+namespace ComPWA {
+namespace Physics {
+namespace AmplitudeSum {
+
 class AmpSumIntensity : public Amplitude {
 
 public:
@@ -86,6 +90,7 @@ public:
 	//==================== PRINTING ============================
 	//! Print overview over all amplitudes
 	virtual void to_str();
+
 	//! print all fit fractions; fitting errors are not available here
 	virtual void printFractions();
 
@@ -240,5 +245,9 @@ protected:
 	std::shared_ptr<FunctionTree> setupBasicTree(ParameterList& sample,
 			ParameterList& phspSample);
 };
+
+} /* namespace AmplitudeSum */
+} /* namespace Physics */
+} /* namespace ComPWA */
 
 #endif

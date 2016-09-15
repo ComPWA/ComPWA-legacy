@@ -10,9 +10,13 @@
 //-------------------------------------------------------------------------------
 #include "Core/Efficiency.hpp"
 
+namespace ComPWA {
+
 Efficiency::Efficiency(){
 }
 //DalitzEfficiency::DalitzEfficiency(const DalitzEfficiency&, const char*){
 //}
 Efficiency::~Efficiency(){
 }
+
+} /* namespace ComPWA */

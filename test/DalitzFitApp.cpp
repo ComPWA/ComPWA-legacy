@@ -54,6 +54,7 @@
 #include "Physics/AmplitudeSum/AmpSumIntensity.hpp"
 #include "Estimator/MinLogLH/MinLogLH.hpp"
 #include "Optimizer/Minuit2/MinuitIF.hpp"
+#include "Optimizer/Geneva/GenevaIF.hpp"
 #include "Core/DataPoint.hpp"
 #include "Core/Efficiency.hpp"
 
@@ -69,6 +70,13 @@ const Double_t PI = 3.14159; // m/s
 
 unsigned int nFitEvents = 100000 - 1;
 unsigned int nStartEvent = 0;
+
+using namespace ComPWA;
+using Physics::DPKinematics::DalitzKinematics;
+using Physics::AmplitudeSum::AmpSumIntensity;
+using DataReader::RootReader::RootReader;
+using Estimator::MinLogLH::MinLogLH;
+using Physics::AmplitudeSum::AmplitudeSetup;
 
 /************************************************************************************************/
 /**
@@ -109,7 +117,8 @@ int main(int argc, char **argv) {
 
 	DalitzKinematics* kin =
 			dynamic_cast<DalitzKinematics*>(DalitzKinematics::createInstance(
-					"J/psi", "gamma", "pi0", "pi0"));
+					"jpsi", "gamma", "pi0", "pi0"));
+
 	//DPKinematics kin("J/psi","gamma","pi0","pi0");
 	//DPKinematics kin("D0","gamma","K-","K+");
 	//static dataPoint* point = dataPoint::instance(kin);
@@ -143,8 +152,13 @@ int main(int argc, char **argv) {
 	//std::shared_ptr<Amplitude> amps(new AmpSumIntensity(M, Br, m1, m2, m3,"J/psi","gamma","pi0","pi0", ini));
 	// Initiate parameters
 	ParameterList par;
+<<<<<<< HEAD
 	std::shared_ptr<ControlParameter> esti;
 	amps->FillParameterList(par); //perfect startvalues
+=======
+	std::shared_ptr<Optimizer::ControlParameter> esti;
+	amps->copyParameterList(par); //perfect startvalues
+>>>>>>> dd7eb340b0f73d2b07005f687e586aae14fbc9fa
 	esti = MinLogLH::createInstance(amps, myReader, myPHSPReader, nStartEvent,
 			nFitEvents);
 	MinLogLH* contrPar = dynamic_cast<MinLogLH*>(&*(esti->Instance()));
@@ -225,7 +239,7 @@ int main(int argc, char **argv) {
 
 	//std::shared_ptr<ControlParameter> esti = MinLogLH::createInstance(amps, myReader, myPHSPReader);
 	//std::shared_ptr<Estimator> esti(new MinLogLH(amps, myReader, myPHSPReader));
-	std::shared_ptr<Optimizer> opti(new MinuitIF(esti, par));
+	std::shared_ptr<Optimizer::Optimizer> opti(new Optimizer::Minuit2::MinuitIF(esti, par));
 
 	ParameterList test;
 	/*if(useFctTree)

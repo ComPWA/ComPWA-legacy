@@ -33,6 +33,12 @@
 #include "Core/ParameterList.hpp"
 #include "Core/FunctionTree.hpp"
 
+namespace ComPWA {
+namespace Estimator {
+namespace MinLogLH {
+
+using namepsace DataReader;
+
 class MinLogLH : public Estimator {
 
 public:
@@ -227,5 +233,9 @@ private:
 	double _penaltyLambda; //! Scale of penalty term
 	int _penaltyAmpID; //! ID of amplitude that is used for penalty calc
 };
+
+} /* namespace MinLogLH */
+} /* namespace Estimator */
+} /* namespace ComPWA */
 
 #endif /* _MINLOGLHBKG_HPP */

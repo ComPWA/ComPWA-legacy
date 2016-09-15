@@ -23,7 +23,7 @@ namespace bc = boost::chrono;
 
 using namespace ROOT::Minuit2;
 
-MinuitFcn::MinuitFcn(std::shared_ptr<ControlParameter> myData, ParameterList& parList) :
+MinuitFcn::MinuitFcn(std::shared_ptr<ComPWA::Optimizer::ControlParameter> myData, ComPWA::ParameterList& parList) :
 		  _myDataPtr(myData), _parList(parList)
 {
 	if (0==_myDataPtr)
@@ -40,7 +40,7 @@ double MinuitFcn::operator()(const std::vector<double>& x) const
 	//ParameterList par;
 	std::ostringstream paramOut;
 	for(unsigned int i=0; i<x.size(); i++){
-		std::shared_ptr<DoubleParameter> actPat = _parList.GetDoubleParameter(i);
+		std::shared_ptr<ComPWA::DoubleParameter> actPat = _parList.GetDoubleParameter(i);
 		//std::cout<<i<<" "<<actPat->GetName()<<" "<<actPat->GetValue()
 		//<<" "<<x[i]<<" "<<actPat->IsFixed()<<std::endl;
 		if(!actPat->IsFixed())

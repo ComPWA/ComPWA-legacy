@@ -25,36 +25,15 @@
 #include <vector>
 
 #include <boost/log/trivial.hpp>
-using namespace boost::log;
 
 #include "Core/Kinematics.hpp"
 
+namespace ComPWA {
+namespace Physics {
+namespace DPKinematics {
+
 class DalitzKinematics : public Kinematics
 {
-//protected:
-//	bool massIdsSet;
-//	unsigned int id23;
-//	unsigned int id13;
-//	bool DPareaCalculated_;	//! is phsp area already calculated?
-//	double DParea_;	//! phsp area
-//	//! calculated dalitz plot area for the given kinematics
-//	void calcDParea();
-//	//! initialization
-//	void init();
-//	//! default constructor
-//	DalitzKinematics():massIdsSet(false){};
-//	//! constructor access particles by name, masses etc are obtained from PhysConst singleton
-//	DalitzKinematics(std::string _nameMother, std::string _name1, std::string _name2, std::string _name3);
-//	//! constructor with particle masses and names, independent from PhysConst
-//	DalitzKinematics(double _M, double _Br, double _m1, double _m2, double _m3,
-//			std::string _nameMother, std::string _name1, std::string _name2, std::string _name3);
-//
-//public:
-//	static Kinematics* createInstance(std::string _nameMother, std::string _name1, std::string _name2, std::string _name3){
-//		if(0 == inst_)
-//	    inst_ = new DalitzKinematics(_nameMother, _name1, _name2,_name3);
-//		return inst_;
-
 public:
 	static Kinematics* createInstance(std::string nameMother,
 			std::string name1, std::string name2, std::string name3)
@@ -146,6 +125,9 @@ public:
 	//! Returns the dalitz plot area for the given kinematics
 	double GetPhspVolume();
 
+    //! Returns the dalitz plot area for the given kinematics and limited m23 range
+    double getPhspVolumePart(double, double);
+
 	//! Calculated momenta n,m using legendre polynomials
 	double calculateMoments(unsigned int sys, dataPoint& point,
 			unsigned int n, unsigned int m) const;
@@ -211,13 +193,20 @@ protected:
 	// Check if variables are orthogonal to each other
 	bool AreBoxVariables(unsigned int idA, unsigned int idB) const;
 
-	//! calculated dalitz plot area for the given kinematics
-	double calcDParea() const;
 
 	bool massIdsSet;
-	bool _DPareaCalculated;	//! is phsp area already calculated?
-	double _DParea;	//! phsp area
+
+	//unsigned int id23;
+	//unsigned int id13;
+
+	//! calculated dalitz plot area for the given kinematics
+	double calculatePSArea();
+
 
 };
+
+} /* namespace DPKinematics */
+} /* namespace Physics */
+} /* namespace ComPWA */
 
 #endif

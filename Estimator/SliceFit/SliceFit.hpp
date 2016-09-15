@@ -73,6 +73,10 @@
 
 };*/
 
+namespace ComPWA {
+namespace Estimator {
+namespace SliceFit {
+
 class SliceFit : public Estimator {
 
 public:
@@ -80,8 +84,8 @@ public:
   //SliceFit(std::shared_ptr<Amplitude>, std::shared_ptr<Data>);
 
   virtual double controlParameter(ParameterList& minPar);
-  static std::shared_ptr<ControlParameter> createInstance(std::shared_ptr<AmpSumIntensity>, std::shared_ptr<Data>, ParameterList& inPar, unsigned int startEvent=0, unsigned int nEvents=0);
-  static std::shared_ptr<ControlParameter> createInstance(std::shared_ptr<AmpSumIntensity>, std::shared_ptr<Data>, std::shared_ptr<Data>, ParameterList& inPar, unsigned int startEvent=0, unsigned int nEvents=0);
+  static std::shared_ptr<ControlParameter> createInstance(std::shared_ptr<Physics::AmplitudeSum::AmpSumIntensity>, std::shared_ptr<DataReader::Data>, ParameterList& inPar, unsigned int startEvent=0, unsigned int nEvents=0, unsigned int nBins=200, unsigned int nF0=3, unsigned int nF2=2);
+  static std::shared_ptr<ControlParameter> createInstance(std::shared_ptr<Physics::AmplitudeSum::AmpSumIntensity>, std::shared_ptr<DataReader::Data>, std::shared_ptr<DataReader::Data>, ParameterList& inPar, unsigned int startEvent=0, unsigned int nEvents=0, unsigned int nBins=200, unsigned int nF0=3, unsigned int nF2=2);
 
   double setSlice(unsigned int i) {
     if(i<nBins_){
@@ -100,8 +104,8 @@ public:
 
 protected:
   /// Default Constructor (0x0)
-  SliceFit(std::shared_ptr<AmpSumIntensity>, std::shared_ptr<Data>, ParameterList&, unsigned int, unsigned int);
-  SliceFit(std::shared_ptr<AmpSumIntensity>, std::shared_ptr<Data>, std::shared_ptr<Data>, ParameterList&, unsigned int, unsigned int);
+  SliceFit(std::shared_ptr<Physics::AmplitudeSum::AmpSumIntensity>, std::shared_ptr<DataReader::Data>, ParameterList&, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int);
+  SliceFit(std::shared_ptr<Physics::AmplitudeSum::AmpSumIntensity>, std::shared_ptr<DataReader::Data>, std::shared_ptr<DataReader::Data>, ParameterList&, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int);
 
   void init();
 
@@ -127,9 +131,9 @@ private:
   ParameterList& par_;
   //FitFuncObject func_;
 
-  std::shared_ptr<AmpSumIntensity> pPIF_;
-  std::shared_ptr<Data> pDIF_;
-  std::shared_ptr<Data> pPHSP_;
+  std::shared_ptr<Physics::AmplitudeSum::AmpSumIntensity> pPIF_;
+  std::shared_ptr<DataReader::Data> pDIF_;
+  std::shared_ptr<DataReader::Data> pPHSP_;
   double phspVolume;
   unsigned int nEvts_;
   unsigned int nPhsp_;
@@ -138,6 +142,8 @@ private:
 
   unsigned int nBins_;
   unsigned int whichSlice_;
+  unsigned int nF0_;
+  unsigned int nF2_;
 
   double M; // GeV/c² (J/psi+)
   double Br; // GeV/c² (width)
@@ -147,5 +153,9 @@ private:
   double PI; // m/s
 
 };
+
+} /* namespace SliceFit */
+} /* namespace Estimator */
+} /* namespace ComPWA */
 
 #endif /* _SLICEFIT_HPP */

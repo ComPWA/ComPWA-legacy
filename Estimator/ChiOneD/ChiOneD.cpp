@@ -17,6 +17,14 @@
 #include "Estimator/ChiOneD/ChiOneD.hpp"
 #include "Core/ParameterList.hpp"
 
+namespace ComPWA {
+
+using DataReader::Data;
+using Optimizer::ControlParameter;
+
+namespace Estimator {
+namespace ChiOneD {
+
 ChiOneD::ChiOneD(std::shared_ptr<Amplitude> inPIF, std::shared_ptr<Data> inDIF) : pPIF_(inPIF), pDIF_(inDIF){
 
 }
@@ -51,3 +59,7 @@ double ChiOneD::controlParameter(ParameterList& minPar){
 
   return chi;
 }
+
+} /* namespace ChiOneD */
+} /* namespace Estimator */
+} /* namespace ComPWA */

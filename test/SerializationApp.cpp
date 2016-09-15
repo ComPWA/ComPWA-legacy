@@ -17,6 +17,9 @@
 
 using namespace boost::serialization;
 
+using ComPWA::ParameterList;
+using ComPWA::DoubleParameter;
+
 int main(int argc, char** argv){
 
 	std::cout<<"Testing boost::serialization"<<std::endl;

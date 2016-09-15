@@ -29,6 +29,8 @@
 #include "Core/Efficiency.hpp"
 #include "Core/Event.hpp"
 
+namespace ComPWA {
+
 class dataPoint
 {
 private:
@@ -52,6 +54,13 @@ public:
 	 * Missing values are filled by Kinematics
 	 */
 	void Set(int a, int b, double invMassSqA, double invMassSqB);
+
+	void reset(unsigned int size);
+
+	unsigned int size() const {
+	  return var.size();
+	}
+
 	//! Set value of coordinate name
 	void setVal(std::string name, double val);
 	//! Set value of coordinate num
@@ -96,4 +105,5 @@ protected:
 	friend std::ostream & operator<<(std::ostream &os, const dataPoint &p);
 };
 
+} /* namespace ComPWA */
 #endif /*DPPOINT2_HPP_*/

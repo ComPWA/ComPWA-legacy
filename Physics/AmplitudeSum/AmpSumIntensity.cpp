@@ -29,11 +29,15 @@
 
 #include "Physics/AmplitudeSum/AmpSumIntensity.hpp"
 
+namespace ComPWA {
+namespace Physics {
+namespace AmplitudeSum {
+
 AmpSumIntensity::AmpSumIntensity(std::string name,
 		normStyle ns, std::shared_ptr<Efficiency> eff,
 		unsigned int nCalls) :
-		Amplitude(name, eff), _normStyle(ns), _calcMaxFcnVal(0),
-		_nCalls(nCalls), _maxFcnVal(0.)
+				Amplitude(name, eff), _normStyle(ns), _calcMaxFcnVal(0),
+				_nCalls(nCalls), _maxFcnVal(0.)
 {
 	result.AddParameter(
 			std::shared_ptr<DoubleParameter>(
@@ -45,10 +49,10 @@ AmpSumIntensity::AmpSumIntensity(std::string name,
 
 //! Copy constructor
 AmpSumIntensity::AmpSumIntensity( const AmpSumIntensity& copy ) :
-			_maxFcnVal( copy._maxFcnVal ),
-			_calcMaxFcnVal( copy._calcMaxFcnVal ),
-			_normStyle( copy._normStyle ),
-			_nCalls( copy._nCalls)
+					_maxFcnVal( copy._maxFcnVal ),
+					_calcMaxFcnVal( copy._calcMaxFcnVal ),
+					_normStyle( copy._normStyle ),
+					_nCalls( copy._nCalls)
 {
 	//Copy efficiency
 	eff_ = copy.eff_;
@@ -235,8 +239,6 @@ void AmpSumIntensity::SetPrefactor(std::complex<double> pre)
 		(*it)->SetPrefactor(pre);
 }
 
-
-
 double AmpSumIntensity::GetMaxVal(std::shared_ptr<Generator> gen)
 {
 	if(!_calcMaxFcnVal) calcMaxVal(gen);
@@ -245,7 +247,8 @@ double AmpSumIntensity::GetMaxVal(std::shared_ptr<Generator> gen)
 
 void AmpSumIntensity::calcMaxVal(std::shared_ptr<Generator> gen)
 {
-	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
+	DalitzKinematics* kin =
+			dynamic_cast<DalitzKinematics*>(Kinematics::instance());
 
 	double maxM23=-999; double maxM13=-999; double maxVal=0;
 	for(unsigned int i=0; i<_nCalls; i++){
@@ -253,9 +256,9 @@ void AmpSumIntensity::calcMaxVal(std::shared_ptr<Generator> gen)
 		auto m23sq_limit = kin->GetMinMax(0);
 
 		double m23sq = gen->getUniform()*(m23sq_limit.second-m23sq_limit.first)
-																		+m23sq_limit.first;
+									+m23sq_limit.first;
 		double m13sq = gen->getUniform()*(m13sq_limit.second-m13sq_limit.first)
-																		+m13sq_limit.first;
+									+m13sq_limit.first;
 		dataPoint point;
 		try{
 			Kinematics::instance()->FillDataPoint(1,0,m13sq,m23sq,point);
@@ -272,7 +275,8 @@ void AmpSumIntensity::calcMaxVal(std::shared_ptr<Generator> gen)
 	}
 	_maxFcnVal=maxVal;
 	_calcMaxFcnVal=1;
-	BOOST_LOG_TRIVIAL(info)<<"AmpSumIntensity::calcMaxVal() calculated maximum of amplitude: "
+	BOOST_LOG_TRIVIAL(info)<<"AmpSumIntensity::calcMaxVal() | "
+			"calculated maximum of amplitude: "
 			<<_maxFcnVal<<" at m23sq="<<maxM23<<"/m13sq="<<maxM13;
 	return ;
 }
@@ -505,7 +509,8 @@ double AmpSumIntensity::GetIntValue(std::string var1, double min1, double max1,
 	 * Integrates in \var1 from \min1 to \max1 and in \var2 from \min2 to \max2.
 	 * Is intended to be used for calculation of bin content.
 	 */
-	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
+	DPKinematics::DalitzKinematics* kin =
+			dynamic_cast<DPKinematics::DalitzKinematics*>(Kinematics::instance());
 	double _min1 = min1;
 	double _min2 = min2;
 	double _max1 = max1;
@@ -643,7 +648,7 @@ void AmpSumIntensity::GetFitFractions(ParameterList& parList)
 }
 
 void AmpSumIntensity::GetFitFractions(ParameterList& parList,
-			const Amplitude* ampConst)
+		const Amplitude* ampConst)
 {
 	// Work around: Remove const
 	Amplitude* amp = const_cast<Amplitude*>(ampConst);
@@ -683,25 +688,25 @@ void AmpSumIntensity::GetFitFractions(ParameterList& parList,
 		resonanceItr cReso = (*itit);
 
 		// We search for a partner resonance and add it to the integral
-//		auto it2 = findResonancePartner(amp, it);
+		//		auto it2 = findResonancePartner(amp, it);
 
 		// GetIntegralInterference returns the integal Int( A*B+B*A ),
 		// including the complex coefficienct
-//		double nom = amp->GetIntegralInterference(it,it);
-//		if( it != it2 ){// Int |A+B|^2 = |A|^2 + |B|^2 + A*B + B*A
-//			double tmp22 = amp->GetIntegralInterference(it2,it2);
-//			double tmp12 = amp->GetIntegralInterference(it,it2);
-//			BOOST_LOG_TRIVIAL(debug) << "FitResult::calcFraction() | Calculating"
-//					<<" amplitude integral for composed amplitudes "
-//					<<(*it)->GetName()<<" and "<<(*it2)->GetName()<<": "
-//					<<"(11) "<<nom <<" (22) "<<tmp22 <<" (12) "<<tmp12
-//					<<" Total: "<<nom+tmp22+tmp12;
-//			nom += tmp22;
-//			nom += tmp12;
-//		} else {
-//		BOOST_LOG_TRIVIAL(debug) << "FitResult::calcFraction() | Resonance "
-//				"integal for "<<(*it)->GetName()<<": "<<nom;
-//		}
+		//		double nom = amp->GetIntegralInterference(it,it);
+		//		if( it != it2 ){// Int |A+B|^2 = |A|^2 + |B|^2 + A*B + B*A
+		//			double tmp22 = amp->GetIntegralInterference(it2,it2);
+		//			double tmp12 = amp->GetIntegralInterference(it,it2);
+		//			BOOST_LOG_TRIVIAL(debug) << "FitResult::calcFraction() | Calculating"
+		//					<<" amplitude integral for composed amplitudes "
+		//					<<(*it)->GetName()<<" and "<<(*it2)->GetName()<<": "
+		//					<<"(11) "<<nom <<" (22) "<<tmp22 <<" (12) "<<tmp12
+		//					<<" Total: "<<nom+tmp22+tmp12;
+		//			nom += tmp22;
+		//			nom += tmp12;
+		//		} else {
+		//		BOOST_LOG_TRIVIAL(debug) << "FitResult::calcFraction() | Resonance "
+		//				"integal for "<<(*it)->GetName()<<": "<<nom;
+		//		}
 		std::vector<resonanceItr> thisAmp; thisAmp.push_back(cReso);
 
 		//Calculate resonance integral. This includes the magnitude^2.
@@ -868,3 +873,6 @@ std::shared_ptr<FunctionTree> AmpSumIntensity::setupBasicTree(
 	BOOST_LOG_TRIVIAL(debug)<<"AmpSumIntensity::setupBasicTree(): tree constructed!!";
 	return newTree;
 }
+} /* namespace AmplitudeSum */
+} /* namespace Physics */
+} /* namespace ComPWA */

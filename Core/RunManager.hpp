@@ -64,7 +64,7 @@
  * The core Framework only needs a boost installation and a compiler
  * supporting c++11. But for the examples and most likely also for starting
  * some fits and plotting some output, it is recommended to have a root
- * installation (for plots and maybe data storage/reading) and a Minuit2
+ * installation (for plots and maybe DataReader::Data storage/reading) and a Minuit2
  * (for optimization) installation ready. Besides Minuit2 also Geneva can be
  * used as optimizer if a compatible installation is available.
  *
@@ -89,14 +89,16 @@
 #include "Core/Efficiency.hpp"
 #include "Core/Generator.hpp"
 
-class DalitzKinematics;
+namespace ComPWA {
+
+using namespace DataReader;
 
 class RunManager
 {
 public:
 
 	RunManager();
-	RunManager( std::shared_ptr<Data>, std::shared_ptr<Amplitude>, std::shared_ptr<Optimizer>); //Fit
+	RunManager( std::shared_ptr<DataReader::Data>, std::shared_ptr<Amplitude>, std::shared_ptr<Optimizer::Optimizer>); //Fit
 	RunManager( unsigned int size, std::shared_ptr<Amplitude>, std::shared_ptr<Generator>); //Generate
 
 	virtual ~RunManager();
@@ -110,12 +112,13 @@ public:
 	virtual std::shared_ptr<Data> getPhspSample(){ return samplePhsp_; };
 	virtual void setTruePhspSample( std::shared_ptr<Data> );
 	virtual std::shared_ptr<Data> getTruePhspSample(){ return sampleTruePhsp_; };
+
 	virtual void setAmplitude ( std::shared_ptr<Amplitude> d){ amp_ = d; };
 	virtual std::shared_ptr<Amplitude> getAmplitude (){ return amp_; };
 	virtual void setBkgAmplitude ( std::shared_ptr<Amplitude> d){ ampBkg_ = d; };
 	virtual std::shared_ptr<Amplitude> getBkgAmplitude(){ return ampBkg_; };
-	virtual void setOptimizer ( std::shared_ptr<Optimizer> d){ opti_ = d; };
-	virtual std::shared_ptr<Optimizer> getOptimizer (){ return opti_; };
+	virtual void setOptimizer ( std::shared_ptr<Optimizer::Optimizer> d){ opti_ = d; };
+	virtual std::shared_ptr<Optimizer::Optimizer> getOptimizer (){ return opti_; };
 	virtual void setGenerator( std::shared_ptr<Generator> d){ gen_= d; };
 	virtual std::shared_ptr<Generator> getGenerator(){ return gen_; };
 
@@ -171,14 +174,17 @@ protected:
 
 	std::shared_ptr<Data> samplePhsp_; /*!< Pointer to phsp sample */
 	std::shared_ptr<Data> sampleTruePhsp_; /*!< Pointer to true phsp sample */
+
 	std::shared_ptr<Amplitude> amp_; /*!< Pointer to signal model */
 	std::shared_ptr<Amplitude> ampBkg_; /*!< Pointer to background model */
-	std::shared_ptr<Optimizer> opti_; /*!< Pointer to Optimizer-Module */
+	std::shared_ptr<Optimizer::Optimizer> opti_; /*!< Pointer to Optimizer-Module */
 	std::shared_ptr<Generator> gen_; /*!< Pointer to Generator-Module */
 
 	std::vector<std::shared_ptr<Amplitude> > _ampVec;
 	std::vector<double> _fraction;
 	std::vector<std::shared_ptr<Data> > _dataVec;
 };
+
+} /* namespace ComPWA */
 
 #endif

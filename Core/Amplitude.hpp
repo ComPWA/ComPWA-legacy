@@ -39,6 +39,7 @@
 #include "Core/Efficiency.hpp"
 #include "Core/Generator.hpp"
 
+namespace ComPWA {
 
 class Amplitude
 {
@@ -80,6 +81,7 @@ public:
 	 * @return
 	 */
 	virtual double GetMaxVal(std::shared_ptr<Generator> gen) = 0;
+//	virtual bool copyParameterList(ParameterList& par) =0;
 
 	//============= PRINTING =====================
 	//! Print amplitude to logging system
@@ -327,6 +329,7 @@ public:
 	}
 
 	virtual const ParameterList& intensity(dataPoint& point) {
+
 		double mass = params.GetDoubleParameter(0)->GetValue();
 		double width = params.GetDoubleParameter(1)->GetValue();
 		double sqrtS = std::sqrt(point.getVal(0));
@@ -453,4 +456,5 @@ protected:
 	}
 };
 
+} /* namespace ComPWA */
 #endif

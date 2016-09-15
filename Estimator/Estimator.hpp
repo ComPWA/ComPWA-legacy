@@ -33,7 +33,10 @@
 #include "Core/FunctionTree.hpp"
 #include "Core/Amplitude.hpp"
 
-class Estimator : public ControlParameter
+namespace ComPWA {
+namespace Estimator {
+
+class Estimator : public ComPWA::Optimizer::ControlParameter
 {
 
 public:
@@ -54,5 +57,8 @@ protected:
     Estimator(){ }
     virtual ~Estimator(){ /* nothing */ }
 };
+
+} /* namespace Estimator */
+} /* namespace ComPWA */
 
 #endif

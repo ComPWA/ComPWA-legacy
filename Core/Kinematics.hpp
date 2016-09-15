@@ -16,8 +16,8 @@
 #include <string>
 #include <complex>
 
+namespace ComPWA {
 #include <Core/Event.hpp>
-//class Event;
 class dataPoint;
 
 //class Kinematics {
@@ -116,8 +116,7 @@ public:
 	//! Get mass of mother particle
 	virtual double GetMotherMass() const { return _M; }
 	//! calculated the PHSP volume of the current decay by MC integration
-	virtual double GetPhspVolume() = 0;
-
+	virtual double GetPhspVolume();
 
 	//! get mass of particles
 	virtual double GetMass(unsigned int num) const = 0;
@@ -189,7 +188,8 @@ protected:
 
 	//!Default constructor (protected)
 	Kinematics(std::string nameM="", double widthM=0.0, unsigned int n=3) :
-		_nameMother(nameM), _Br(widthM), _nPart(n) {};
+		_nameMother(nameM), _Br(widthM), _nPart(n),
+		is_PS_area_calculated_(false), PS_area_(0.0){};
 
 	//!Delete Copy constructor (protected)
 	Kinematics(const Kinematics&) = delete;
@@ -199,5 +199,11 @@ protected:
 
 	//! Delete assignment operator
 	void operator=(const Kinematics&) = delete;
+
+	virtual double calculatePSArea() =0;
+	bool is_PS_area_calculated_;
+	double PS_area_;
 };
+
+} /* namespace ComPWA */
 #endif /* KINEMATICS_HPP_ */

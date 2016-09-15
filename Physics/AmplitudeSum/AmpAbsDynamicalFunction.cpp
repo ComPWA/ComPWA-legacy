@@ -20,6 +20,10 @@
 #include "Physics/AmplitudeSum/AmpAbsDynamicalFunction.hpp"
 #include "Physics/AdvancedStrategies.hpp"
 
+namespace ComPWA {
+namespace Physics {
+namespace AmplitudeSum {
+
 AmpAbsDynamicalFunction::AmpAbsDynamicalFunction( normStyle nS, int calls) :
 _parity(+1), _cparity(0),
 _ffType(formFactorType::BlattWeisskopf), _nCalls(calls),
@@ -567,6 +571,7 @@ double evalAmp(double* x, size_t dim, void* param)
 	}
 	//include angular distribution in normalization
 	res *= amp->EvaluateWignerD(point);
+
 	return ( std::norm(res) ); //integrate over |F|^2
 }
 
@@ -820,7 +825,7 @@ double twoDimGaussian(double* z, size_t dim, void *param)
 	//mean and width need to be adjusted according to final state kinematics
 	double x0=1.1, y0=1.1; //mean
 	double sigmaX=0.01, sigmaY=0.01; //width
-	double pi = PhysConst::instance()->getConstValue("Pi");
+	double pi = ComPWA::PhysConst::Instance().findConstant("Pi").value_;
 
 	double result = exp( -(x-x0)*(x-x0)/(2*sigmaX*sigmaX) - (y-y0)*(y-y0)/(2*sigmaY*sigmaY) );
 	result/=2*pi*sigmaY*sigmaX;
@@ -958,3 +963,6 @@ bool couplingToWidthStrat::execute(ParameterList& paras,
 	);
 	return true;
 }
+} /* namespace AmplitudeSum */
+} /* namespace Physics */
+} /* namespace ComPWA */

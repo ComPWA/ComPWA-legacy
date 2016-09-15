@@ -36,6 +36,12 @@
 
 using namespace std;
 
+using ComPWA::Optimizer::ControlParameter;
+using ComPWA::DataReader::RootReader::RootReader;
+using ComPWA::Physics::BreitWigner::BreitWigner;
+using ComPWA::ParameterList;
+using ComPWA::DataReader::Data;
+
 /************************************************************************************************/
 /**
  * The main function.
@@ -49,9 +55,9 @@ int main(int argc, char **argv){
   //RootReader myReader("test/2Part-4vecs.root");
   shared_ptr<RootReader> myReader(new RootReader(file, "data",true));
 //  shared_ptr<BreitWigner> testBW(new BreitWigner(0.,5.));
-  shared_ptr<Amplitude> testBW(new BreitWigner(0.,5.));
+  shared_ptr<ComPWA::Amplitude> testBW(new BreitWigner(0.,5.));
 
-  shared_ptr<ControlParameter> testEsti = MinLogLH::createInstance(testBW, myReader, std::shared_ptr<Data>(), std::shared_ptr<Data>());
+  shared_ptr<ControlParameter> testEsti = ComPWA::Estimator::MinLogLH::MinLogLH::createInstance(testBW, myReader, std::shared_ptr<Data>(), std::shared_ptr<Data>());
   //if(!testEsti) return 0;
   ParameterList minPar;
   testBW->FillParameterList(minPar);
@@ -84,7 +90,7 @@ int main(int argc, char **argv){
   result = testEsti->controlParameter(minPar);
   cout << "1.5 0.01:  " << result << endl;
 
-  shared_ptr<ControlParameter> testEsti2 = ChiOneD::createInstance(testBW, myReader);
+  shared_ptr<ControlParameter> testEsti2 = ComPWA::Estimator::ChiOneD::ChiOneD::createInstance(testBW, myReader);
   minPar.SetParameterValue(0,1.5);
   minPar.SetParameterValue(1,0.3);
   result = testEsti2->controlParameter(minPar);

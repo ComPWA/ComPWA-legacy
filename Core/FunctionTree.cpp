@@ -7,6 +7,7 @@
 
 #include "Core/FunctionTree.hpp"
 
+namespace ComPWA {
 void FunctionTree::insertTree(std::shared_ptr<FunctionTree> inTree,
 		std::string parent)
 {
@@ -384,3 +385,4 @@ bool FunctionTree::sanityCheck(){
 
 	return isSane;
 }
+} /* End ComPWA namespace */

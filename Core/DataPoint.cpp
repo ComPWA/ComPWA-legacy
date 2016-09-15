@@ -95,6 +95,10 @@ void dataPoint::setVal(std::string name, double val)
 	return;
 }
 
+void dataPoint::reset(unsigned int size) {
+  var = std::vector<double>(size);
+}
+
 void dataPoint::setVal(unsigned int num, double val)
 {
 	try{
@@ -110,6 +114,7 @@ void dataPoint::setVal(unsigned int num, double val)
 double dataPoint::getVal(unsigned int num) const
 {
 	double rt;
+
 	try{
 		rt = var.at(num);
 	} catch (...) {
@@ -135,3 +140,5 @@ std::ostream & operator<<(std::ostream &os, const dataPoint &p)
 		os << varNames.at(i) << "="<<p.getVal(i)<<" ";
 	return os;
 }
+
+} /* namespace ComPWA */

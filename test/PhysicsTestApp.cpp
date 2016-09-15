@@ -31,6 +31,10 @@
 
 using namespace std;
 
+using ComPWA::Amplitude;
+using ComPWA::Physics::BreitWigner::BreitWigner;
+using ComPWA::ParameterList;
+
 /************************************************************************************************/
 /**
  * The main function.

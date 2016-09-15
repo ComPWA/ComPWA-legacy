@@ -102,11 +102,14 @@ constant build_Physics : 1 ;
 constant build_AmplitudeSum : 1 ;
 constant build_DPKinematics : 1 ;
 constant build_BreitWigner : 1 ;
+constant build_DecayTree : 1 ;
 constant build_HelicityAmplitude : 1 ;
+constant build_DynamicalDecayFunctions : 1 ;
 
 constant build_DataReader : 1 ;
 constant build_RootReader : 1 ;
 constant build_AsciiReader : 1 ;
+constant build_RootGenerator : 1 ;
 
 constant build_Estimator : 1 ;
 constant build_ChiOneD : 1 ;

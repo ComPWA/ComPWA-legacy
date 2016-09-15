@@ -1,4 +1,4 @@
-<amplitude_setup>
+<DecayTreeSetup>
 
 	<FinalState>
 		<Particle>
@@ -19,15 +19,17 @@
 		<Particle>
 			<id>4</id>
 			<name>f0_980</name>
-			<BreitWigner>
+			<SpinInfo>
+				<J>0</J>
+			</SpinInfo>
+			<DynamicalInfo>
 				<type>relBW</type>
-				<reference>f0_980</reference>
 				<mass>0.99</mass>
 				<mass_fix>1</mass_fix>
 				<mass_min>0.5</mass_min>
 				<mass_max>2.0</mass_max>
 				<mesonRadius>1.</mesonRadius>
-				<width>0.05</width>
+				<width>0.15</width>
 				<width_fix>1</width_fix>
 				<width_min>0.</width_min>
 				<width_max>2.</width_max>
@@ -35,93 +37,21 @@
 				<par1>1.</par1>
 				<par2>1.</par2>
 				<mesonRadius>1.</mesonRadius>
-				<strength>1.</strength>
-				<strength_fix>0</strength_fix>
-				<strength_min>0</strength_min>
-				<strength_max>2</strength_max>
-				<phase>0.</phase>
-				<phase_fix>0</phase_fix>
-				<phase_min>-100</phase_min>
-				<phase_max>100</phase_max>
-				<spin>0</spin>
-				<m>0</m>
-				<n>0</n>
-			</BreitWigner>
+			</DynamicalInfo>
 		</Particle>
+		
 		<Particle>
 			<id>5</id>
-			<name>f0_1500</name>
-			<BreitWigner>
-				<type>relBW</type>
-				<reference>f0_1500</reference>
-				<mass>1.505</mass>
-				<mass_fix>1</mass_fix>
-				<mass_min>1.0</mass_min>
-				<mass_max>2.0</mass_max>
-				<mesonRadius>1.</mesonRadius>
-				<width>0.109</width>
-				<width_fix>1</width_fix>
-				<width_min>0.</width_min>
-				<width_max>2.</width_max>
-				<norm>1</norm>
-				<par1>1.</par1>
-				<par2>1.</par2>
-				<mesonRadius>1.</mesonRadius>
-				<strength>1.</strength>
-				<strength_fix>0</strength_fix>
-				<strength_min>0</strength_min>
-				<strength_max>2</strength_max>
-				<phase>0.</phase>
-				<phase_fix>0</phase_fix>
-				<phase_min>-100</phase_min>
-				<phase_max>100</phase_max>
-				<spin>0</spin>
-				<m>0</m>
-				<n>0</n>
-			</BreitWigner>
-		</Particle>
-		<Particle>
-			<id>6</id>
-			<name>f0_1710</name>
-			<BreitWigner>
-				<type>relBW</type>
-				<reference>f0_1710</reference>
-				<mass>1.72</mass>
-				<mass_fix>1</mass_fix>
-				<mass_min>1.2</mass_min>
-				<mass_max>2.2</mass_max>
-				<mesonRadius>1.</mesonRadius>
-				<width>0.135</width>
-				<width_fix>1</width_fix>
-				<width_min>0.</width_min>
-				<width_max>2.</width_max>
-				<norm>1</norm>
-				<par1>1.</par1>
-				<par2>1.</par2>
-				<mesonRadius>1.</mesonRadius>
-				<strength>1.</strength>
-				<strength_fix>0</strength_fix>
-				<strength_min>0</strength_min>
-				<strength_max>2</strength_max>
-				<phase>0.</phase>
-				<phase_fix>0</phase_fix>
-				<phase_min>-100</phase_min>
-				<phase_max>100</phase_max>
-				<spin>0</spin>
-				<m>0</m>
-				<n>0</n>
-			</BreitWigner>
-		</Particle>
-		<Particle>
-			<id>7</id>
 			<name>f2_1270</name>
-			<BreitWigner>
+			<SpinInfo>
+				<J>2</J>
+			</SpinInfo>
+			<DynamicalInfo>
 				<type>relBW</type>
-				<reference>f2_1270</reference>
-				<mass>1.274</mass>
+				<mass>1.475</mass>
 				<mass_fix>1</mass_fix>
-				<mass_min>0.7</mass_min>
-				<mass_max>1.7</mass_max>
+				<mass_min>0.5</mass_min>
+				<mass_max>2.0</mass_max>
 				<mesonRadius>1.</mesonRadius>
 				<width>0.185</width>
 				<width_fix>1</width_fix>
@@ -131,89 +61,17 @@
 				<par1>1.</par1>
 				<par2>1.</par2>
 				<mesonRadius>1.</mesonRadius>
-				<strength>1.</strength>
-				<strength_fix>0</strength_fix>
-				<strength_min>0</strength_min>
-				<strength_max>2</strength_max>
-				<phase>0.</phase>
-				<phase_fix>0</phase_fix>
-				<phase_min>-100</phase_min>
-				<phase_max>100</phase_max>
-				<spin>2</spin>
-				<m>0</m>
-				<n>0</n>
-			</BreitWigner>
+			</DynamicalInfo>
 		</Particle>
-		<Particle>
-			<id>8</id>
-			<name>f2_1525</name>
-			<BreitWigner>
-				<type>relBW</type>
-				<reference>f2_1525</reference>
-				<mass>1.525</mass>
-				<mass_fix>1</mass_fix>
-				<mass_min>1.0</mass_min>
-				<mass_max>2.0</mass_max>
-				<mesonRadius>1.</mesonRadius>
-				<width>0.073</width>
-				<width_fix>1</width_fix>
-				<width_min>0.</width_min>
-				<width_max>2.</width_max>
-				<norm>1</norm>
-				<par1>1.</par1>
-				<par2>1.</par2>
-				<mesonRadius>1.</mesonRadius>
-				<strength>1.</strength>
-				<strength_fix>0</strength_fix>
-				<strength_min>0</strength_min>
-				<strength_max>2</strength_max>
-				<phase>1.6</phase>
-				<phase_fix>0</phase_fix>
-				<phase_min>-100</phase_min>
-				<phase_max>100</phase_max>
-				<spin>2</spin>
-				<m>0</m>
-				<n>0</n>
-			</BreitWigner>
-		</Particle>
-		<Particle>
-			<id>9</id>
-			<name>omega</name>
-			<BreitWigner>
-				<type>relBW</type>
-				<reference>omega</reference>
-				<mass>0.783</mass>
-				<mass_fix>1</mass_fix>
-				<mass_min>0.5</mass_min>
-				<mass_max>2.</mass_max>
-				<mesonRadius>1.</mesonRadius>
-				<width>0.0085</width>
-				<width_fix>1</width_fix>
-				<width_min>0.</width_min>
-				<width_max>2.</width_max>
-				<norm>3</norm>
-				<par1>1.</par1>
-				<par2>1.</par2>
-				<mesonRadius>1.</mesonRadius>
-				<strength>1.</strength>
-				<strength_fix>0</strength_fix>
-				<strength_min>0</strength_min>
-				<strength_max>2</strength_max>
-				<phase>0.8</phase>
-				<phase_fix>0</phase_fix>
-				<phase_min>-100</phase_min>
-				<phase_max>100</phase_max>
-				<spin>1</spin>
-				<m>0</m>
-				<n>0</n>
-			</BreitWigner>
-		</Particle>
+		
 		<Particle>
 			<id>10</id>
 			<name>jpsi</name>
-			<BreitWigner>
-				<type>relBW</type>
-				<reference>jpsi</reference>
+			<SpinInfo>
+				<J>1</J>
+			</SpinInfo>
+			<DynamicalInfo>
+				<type>topNode</type>
 				<mass>3.097</mass>
 				<mass_fix>1</mass_fix>
 				<mass_min>2.5</mass_min>
@@ -227,104 +85,147 @@
 				<par1>1.</par1>
 				<par2>1.</par2>
 				<mesonRadius>1.</mesonRadius>
-				<strength>1.</strength>
-				<strength_fix>0</strength_fix>
-				<strength_min>0</strength_min>
-				<strength_max>2</strength_max>
-				<phase>0.8</phase>
-				<phase_fix>0</phase_fix>
-				<phase_min>-100</phase_min>
-				<phase_max>100</phase_max>
-				<spin>1</spin>
-				<m>0</m>
-				<n>0</n>
-			</BreitWigner>
+			</DynamicalInfo>
 		</Particle>
 	</IntermediateStates>
 
-	<DecayTrees>
+	<DecayTrees> 
 		<DecayTree>
-			<TwoBodyDecay>
-				<particle_ids>
-					<id_list>
-						<item>4</item>
-						<item>5</item>
-						<item>6</item>
-						<item>7</item>
-						<item>8</item>
-					</id_list>
-				</particle_ids>
-				<daughter_1_ids>
-					<id_list>
-						<item>2</item>
-					</id_list>
-				</daughter_1_ids>
-				<daughter_2_ids>
-					<id_list>
-						<item>3</item>
-					</id_list>
-				</daughter_2_ids>
-			</TwoBodyDecay>
-			<TwoBodyDecay>
-				<particle_ids>
-					<id_list>
-						<item>10</item>
-					</id_list>
-				</particle_ids>
-				<daughter_1_ids>
-					<id_list>
-						<item>1</item>
-					</id_list>
-				</daughter_1_ids>
-				<daughter_2_ids>
-					<id_list>
-						<item>4</item>
-						<item>5</item>
-						<item>6</item>
-						<item>7</item>
-						<item>8</item>
-					</id_list>
-				</daughter_2_ids>
-			</TwoBodyDecay>
+			<DecayNode>
+				<StrengthPhase>
+					<strength>
+						<value>1.</value>
+						<fix>0</fix>
+						<min>0</min>
+						<max>2</max>
+					</strength>
+					<phase>
+						<value>0.</value>
+						<fix>0</fix>
+						<min>-100</min>
+						<max>100</max>
+					</phase>
+				</StrengthPhase>
+				<Mother>
+					<ParticleState>
+						<id>5</id>
+						<M>0</M>
+					</ParticleState>
+				</Mother>
+				<Daughters>
+					<ParticleState>
+						<id>2</id>
+						<M>0</M>
+					</ParticleState>
+					<ParticleState>
+						<id>3</id>
+						<M>0</M>
+					</ParticleState>
+				</Daughters>
+			</DecayNode>
+
+			<DecayNode>
+				<StrengthPhase>
+					<strength>
+						<value>1.</value>
+						<fix>0</fix>
+						<min>0</min>
+						<max>2</max>
+					</strength>
+					<phase>
+						<value>0.0</value>
+						<fix>0</fix>
+						<min>-100</min>
+						<max>100</max>
+					</phase>
+				</StrengthPhase>
+				<Mother>
+					<ParticleState>
+						<id>10</id>
+						<M>1</M>
+					</ParticleState>
+				</Mother>
+				<Daughters>
+					<ParticleState>
+						<id>1</id>
+						<M>1</M>
+					</ParticleState>
+					<ParticleState>
+						<id>5</id>
+						<M>0</M>
+					</ParticleState>
+				</Daughters>
+			</DecayNode>
 		</DecayTree>
+		
 		<DecayTree>
-			<TwoBodyDecay>
-				<particle_ids>
-					<id_list>
-						<item>9</item>
-					</id_list>
-				</particle_ids>
-				<daughter_1_ids>
-					<id_list>
-						<item>1</item>
-					</id_list>
-				</daughter_1_ids>
-				<daughter_2_ids>
-					<id_list>
-						<item>2</item>
-						<item>3</item>
-					</id_list>
-				</daughter_2_ids>
-			</TwoBodyDecay>
-			<TwoBodyDecay>
-				<particle_ids>
-					<id_list>
-						<item>10</item>
-					</id_list>
-				</particle_ids>
-				<daughter_1_ids>
-					<id_list>
-						<item>9</item>
-					</id_list>
-				</daughter_1_ids>
-				<daughter_2_ids>
-					<id_list>
-						<item>2</item>
-						<item>3</item>
-					</id_list>
-				</daughter_2_ids>
-			</TwoBodyDecay>
+			<DecayNode>
+				<StrengthPhase>
+					<strength>
+						<value>1.</value>
+						<fix>0</fix>
+						<min>0</min>
+						<max>2</max>
+					</strength>
+					<phase>
+						<value>0.</value>
+						<fix>0</fix>
+						<min>-100</min>
+						<max>100</max>
+					</phase>
+				</StrengthPhase>
+				<Mother>
+					<ParticleState>
+						<id>4</id>
+						<M>0</M>
+					</ParticleState>
+				</Mother>
+				<Daughters>
+					<ParticleState>
+						<id>2</id>
+						<M>0</M>
+					</ParticleState>
+					<ParticleState>
+						<id>3</id>
+						<M>0</M>
+					</ParticleState>
+				</Daughters>
+			</DecayNode>
+
+			<DecayNode>
+				<StrengthPhase>
+					<strength>
+						<value>1.</value>
+						<fix>0</fix>
+						<min>0</min>
+						<max>2</max>
+					</strength>
+					<phase>
+						<value>0.0</value>
+						<fix>0</fix>
+						<min>-100</min>
+						<max>100</max>
+					</phase>
+				</StrengthPhase>
+				<Mother>
+					<ParticleState>
+						<id>10</id>
+						<M>-1</M>
+					</ParticleState>
+				</Mother>
+				<Daughters>
+					<ParticleState>
+						<id>1</id>
+						<M>-1</M>
+					</ParticleState>
+					<ParticleState>
+						<id>4</id>
+						<M>0</M>
+					</ParticleState>
+				</Daughters>
+			</DecayNode>
 		</DecayTree>
+        
 	</DecayTrees>
 
-</amplitude_setup>
+</DecayTreeSetup>

@@ -23,6 +23,11 @@
 #include "Physics/AmplitudeSum/AmpFlatteRes.hpp"
 #include "Physics/AdvancedStrategies.hpp"
 
+namespace ComPWA {
+namespace Physics {
+namespace AmplitudeSum {
+
+
 AmpFlatteRes::AmpFlatteRes( normStyle nS, int calls ) :
 AmpAbsDynamicalFunction( nS, calls )
 {
@@ -42,15 +47,13 @@ AmpFlatteRes::AmpFlatteRes(const char *name,
 		std::shared_ptr<DoubleParameter> g3, std::string g3_idA, std::string g3_idB,
 		formFactorType type,
 		int nCalls, normStyle nS) :
-										AmpAbsDynamicalFunction(name, varIdA, varIdB,mag, phase, mass,
-												spin, m, n,	P, C, mother, particleA, particleB,
-												mesonRadius, motherRadius, type, nCalls, nS),
-												_g1(g1),
-												_g2(g2),_g2_idA(g2_idA), _g2_idB(g2_idB),
-												_g3(g3),_g3_idA(g3_idA), _g3_idB(g3_idB)
+			AmpAbsDynamicalFunction(name, varIdA, varIdB,mag, phase, mass,
+					spin, m, n,	P, C, mother, particleA, particleB,
+					mesonRadius, motherRadius, type, nCalls, nS),
+					_g1(g1),
+					_g2(g2),_g2_idA(g2_idA), _g2_idB(g2_idB),
+					_g3(g3),_g3_idA(g3_idA), _g3_idB(g3_idB)
 {
-
-
 	tmp_g1 = _g1->GetValue();
 	tmp_g2 = _g2->GetValue();
 	tmp_g3 = _g3->GetValue();
@@ -708,3 +711,7 @@ bool FlatteStrategy::execute(ParameterList& paras,
 	);
 	return true;
 }
+
+} /* namespace AmplitudeSum */
+} /* namespace Physics */
+} /* namespace ComPWA */

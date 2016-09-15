@@ -29,6 +29,9 @@
 #include "Core/FunctionTree.hpp"
 #include "Core/Amplitude.hpp"
 
+namespace ComPWA {
+namespace Optimizer {
+
 class ControlParameter{
 
 public:
@@ -60,4 +63,7 @@ protected:
   int calls;
  
 };
+
+} /* namespace Optimizer */
+} /* namespace ComPWA */
 #endif

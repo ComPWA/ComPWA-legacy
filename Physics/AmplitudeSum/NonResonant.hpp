@@ -13,10 +13,13 @@
 #include "Core/Parameter.hpp"
 #include "Physics/AmplitudeSum/AmpAbsDynamicalFunction.hpp"
 
-using boost::property_tree::ptree;
+namespace ComPWA {
+namespace Physics {
+namespace AmplitudeSum {
 
 class NonResonant : public AmpAbsDynamicalFunction
 {
+
 public:
 
 	NonResonant( normStyle nS=normStyle::one, int calls=30000 ) :
@@ -60,4 +63,6 @@ public:
 	virtual std::shared_ptr<FunctionTree> SetupTree(
 			ParameterList& sample, ParameterList& toySample,std::string suffix);
 };
+} /* namespace Physics */
+} /* namespace ComPWA */
 #endif /* NONRESONANT_HPP_ */

@@ -31,8 +31,11 @@
 #include "Core/FunctionTree.hpp"
 #include "Physics/DPKinematics/DalitzKinematics.hpp"
 
-//using namespace std;
-class AmpWigner2{
+namespace ComPWA {
+namespace Physics {
+namespace AmplitudeSum {
+
+class AmpWigner2 {
 public:
 	AmpWigner2( unsigned int varId=0, unsigned int spin=0,
 			unsigned int mu=0, unsigned int muPrime=0);
@@ -50,6 +53,7 @@ public:
 
 	virtual void SetVarId(unsigned int id) { _varId = id; };
 
+
 protected:
 	unsigned int _varId;
 	unsigned int _spin;
@@ -57,7 +61,7 @@ protected:
 	unsigned int _muPrime;
 };
 
-class WignerDStrategy : public Strategy {
+class WignerDStrategy: public Strategy {
 public:
 	WignerDStrategy(const std::string resonanceName) :
 		Strategy(ParType::MDOUBLE), name(resonanceName) { }
@@ -69,4 +73,9 @@ public:
 protected:
 	std::string name;
 };
+
+} /* namespace AmplitudeSum */
+} /* namespace Physics */
+} /* namespace ComPWA */
+
 #endif

@@ -21,30 +21,33 @@
 #include "Core/Particle.hpp"
 #include "Core/ParameterList.hpp"
 
-SliceFit::SliceFit(std::shared_ptr<AmpSumIntensity> inPIF,
-		std::shared_ptr<Data> inDIF, ParameterList& inPar,
-		unsigned int startEvent, unsigned int nEvents)
-: pPIF_(inPIF), pDIF_(inDIF), nEvts_(0), nPhsp_(0), nStartEvt_(startEvent),
-  par_(inPar), nUseEvt_(nEvents),nBins_(200)
-{
-	phspVolume = Kinematics::instance()->GetPhspVolume();
-	nEvts_ = pDIF_->getNEvents();
-	if(startEvent+nUseEvt_<nEvts_) nUseEvt_ = nEvts_-startEvent;
-	init();
+
+namespace ComPWA {
+
+using DataReader::Data;
+using Physics::AmplitudeSum::AmpSumIntensity;
+using Physics::DPKinematics::DalitzKinematics;
+using Optimizer::ControlParameter;
+
+namespace Estimator {
+namespace SliceFit {
+
+SliceFit::SliceFit(std::shared_ptr<AmpSumIntensity> inPIF, std::shared_ptr<Data> inDIF, ParameterList& inPar, unsigned int startEvent, unsigned int nEvents, unsigned int nBins, unsigned int nF0, unsigned int nF2)
+: pPIF_(inPIF), pDIF_(inDIF), nEvts_(0), nPhsp_(0), nStartEvt_(startEvent), par_(inPar), nUseEvt_(nEvents),nBins_(nBins),nF0_(nF0),nF2_(nF2){
+    phspVolume = Kinematics::instance()->getPhspVolume();
+    nEvts_ = pDIF_->getNEvents();
+    if(startEvent+nUseEvt_<nEvts_) nUseEvt_ = nEvts_-startEvent;
+    init();
 }
 
-SliceFit::SliceFit(std::shared_ptr<AmpSumIntensity> inPIF,
-		std::shared_ptr<Data> inDIF, std::shared_ptr<Data> inPHSP,
-		ParameterList& inPar, unsigned int startEvent, unsigned int nEvents)
-: pPIF_(inPIF), pDIF_(inDIF), pPHSP_(inPHSP), nEvts_(0), nPhsp_(0),
-  nStartEvt_(startEvent), par_(inPar), nUseEvt_(nEvents),nBins_(200)
-{
-	phspVolume = Kinematics::instance()->GetPhspVolume();
-	nEvts_ = pDIF_->getNEvents();
-	nPhsp_ = inPHSP->getNEvents();
-	if(!(startEvent+nUseEvt_<=nEvts_)) nUseEvt_ = nEvts_-startEvent;
-	if(!(startEvent+nUseEvt_<=nPhsp_)) nUseEvt_ = nPhsp_-startEvent;
-	init();
+SliceFit::SliceFit(std::shared_ptr<AmpSumIntensity> inPIF, std::shared_ptr<Data> inDIF, std::shared_ptr<Data> inPHSP, ParameterList& inPar, unsigned int startEvent, unsigned int nEvents, unsigned int nBins, unsigned int nF0, unsigned int nF2)
+: pPIF_(inPIF), pDIF_(inDIF), pPHSP_(inPHSP), nEvts_(0), nPhsp_(0), nStartEvt_(startEvent), par_(inPar), nUseEvt_(nEvents),nBins_(nBins),nF0_(nF0),nF2_(nF2){
+phspVolume = Kinematics::instance()->getPhspVolume();
+    nEvts_ = pDIF_->getNEvents();
+    nPhsp_ = inPHSP->getNEvents();
+    if(!(startEvent+nUseEvt_<=nEvts_)) nUseEvt_ = nEvts_-startEvent;
+    if(!(startEvent+nUseEvt_<=nPhsp_)) nUseEvt_ = nPhsp_-startEvent;
+    init();
 }
 
 void SliceFit::init(){
@@ -92,16 +95,16 @@ void SliceFit::init(){
 
 }
 
-std::shared_ptr<ControlParameter> SliceFit::createInstance(std::shared_ptr<AmpSumIntensity> inPIF, std::shared_ptr<Data> inDIF, ParameterList& inPar, unsigned int startEvent, unsigned int nEvents){
-	if(!instance_)
-		instance_ = std::shared_ptr<ControlParameter>(new SliceFit(inPIF, inDIF, inPar, startEvent, nEvents));
+std::shared_ptr<ControlParameter> SliceFit::createInstance(std::shared_ptr<AmpSumIntensity> inPIF, std::shared_ptr<Data> inDIF, ParameterList& inPar, unsigned int startEvent, unsigned int nEvents, unsigned int nBins, unsigned int nF0, unsigned int nF2){
+    if(!instance_)
+        instance_ = std::shared_ptr<ControlParameter>(new SliceFit(inPIF, inDIF, inPar, startEvent, nEvents, nBins, nF0, nF2));
 
 	return instance_;
 }
 
-std::shared_ptr<ControlParameter> SliceFit::createInstance(std::shared_ptr<AmpSumIntensity> inPIF, std::shared_ptr<Data> inDIF, std::shared_ptr<Data> inPHSP, ParameterList& inPar, unsigned int startEvent, unsigned int nEvents){
-	if(!instance_)
-		instance_ = std::shared_ptr<ControlParameter>(new SliceFit(inPIF, inDIF, inPHSP, inPar, startEvent, nEvents));
+std::shared_ptr<ControlParameter> SliceFit::createInstance(std::shared_ptr<AmpSumIntensity> inPIF, std::shared_ptr<Data> inDIF, std::shared_ptr<Data> inPHSP, ParameterList& inPar, unsigned int startEvent, unsigned int nEvents, unsigned int nBins, unsigned int nF0, unsigned int nF2){
+    if(!instance_)
+        instance_ = std::shared_ptr<ControlParameter>(new SliceFit(inPIF, inDIF, inPHSP, inPar, startEvent, nEvents, nBins, nF0, nF2));
 
 	return instance_;
 }
@@ -134,8 +137,41 @@ SliceFit::~SliceFit(){
 }*/
 
 double SliceFit::controlParameter(ParameterList& minPar){
-	unsigned int nEvents = pDIF_->getNEvents();
-	unsigned int nParts = ((Event)pDIF_->getEvent(0)).getNParticles();
+  unsigned int nEvents = pDIF_->getNEvents();
+  unsigned int nParts = ((Event)pDIF_->getEvent(0)).getNParticles();
+
+  //check if able to handle this many particles
+  if(nParts!=3){
+      //TODO: exception
+      return 0;
+  }
+
+  //delete aSlice_;
+  //delete theAmp_;
+
+  /*std::string name1="Slice ", name2="Slice ", name3="Slice ";
+  name1+=std::to_string(whichSlice_)+" data";
+  name2+=std::to_string(whichSlice_)+" modelSlice";
+  name3+=std::to_string(whichSlice_)+" modelClassic";
+  aSlice_ = std::shared_ptr<TH1D>(new TH1D(name1.c_str(),name1.c_str(),nBins_,0,10));
+  theAmpSl_ = std::shared_ptr<TH1D>(new TH1D(name2.c_str(),name2.c_str(),nBins_,0,10));
+  theAmpCl_ = std::shared_ptr<TH1D>(new TH1D(name3.c_str(),name3.c_str(),nBins_,0,10));
+
+  DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
+
+  Double_t m23_sq_min = (kin->m2+kin->m3); m23_sq_min*=m23_sq_min;
+  Double_t m23_sq_max = (kin->M-kin->m1); m23_sq_max*=m23_sq_max;
+  Double_t m13_sq_min = (kin->m1+kin->m3); m13_sq_min*=m13_sq_min;
+  Double_t m13_sq_max = (kin->M-kin->m2); m13_sq_max*=m13_sq_max;
+  Double_t m12_sq_min = (kin->m1+kin->m2); m12_sq_min*=m12_sq_min;
+  Double_t m12_sq_max = (kin->M-kin->m3); m12_sq_max*=m12_sq_max;*/
+
+  //------------fit slice number whichSlice_
+  double lh=0;
+  //for(int i=0+(nBins_/20.); i<nBins_-(nBins_/10.); i++){//slices
+    double m23 = dalitzPlot_->GetBinCenter(whichSlice_);
+    //double m23 = dalitzPlot_->GetBinLowEdge(whichSlice_);
+    double locmin = m13_sq_min_constr(m23), locmax = m13_sq_max_constr(m23);
 
 	//check if able to handle this many particles
 	if(nParts!=3){
@@ -163,11 +199,8 @@ double SliceFit::controlParameter(ParameterList& minPar){
 	Double_t m12_sq_min = (kin->m1+kin->m2); m12_sq_min*=m12_sq_min;
 	Double_t m12_sq_max = (kin->GetMotherMass()-kin->m3); m12_sq_max*=m12_sq_max;
 
-	//------------fit slice number whichSlice_
-	double lh=0;
-	//for(int i=0+(nBins_/20.); i<nBins_-(nBins_/10.); i++){//slices
-	double m23 = dalitzPlot_->GetBinCenter(whichSlice_);
-	double locmin = m13_sq_min_constr(m23), locmax = m13_sq_max_constr(m23);
+     // double amp = pPIF_->sliceIntensity(point, par_,reso, 2, std::fabs(minPar.GetParameterValue(0)),nF0_,nF2_);
+     // double ampCl = (double) (0.0725*(pPIF_->intensity(point, par_).GetParameterValue(0)));
 
 
 	for(unsigned int j=0; j<nBins_; j++){//slice values
@@ -302,3 +335,7 @@ double SliceFit::controlParameter(ParameterList& minPar){
 
   return 0;*/
 }
+
+} /* namespace SliceFit */
+} /* namespace Estimator */
+} /* namespace ComPWA */

@@ -30,6 +30,10 @@
 #include "Core/Resonance.hpp"
 #include "Physics/AmplitudeSum/AmpWigner2.hpp"
 
+namespace ComPWA {
+namespace Physics {
+namespace AmplitudeSum {
+
 enum normStyle {
 	none, /*!< no normaliztion between Amplitudes. */
 	/*!< all amplitudes are normalized to one.
@@ -321,4 +325,8 @@ public:
 	virtual bool execute(ParameterList& paras,
 			std::shared_ptr<AbsParameter>& out);
 };
+} /* namespace AmplitudeSum */
+} /* namespace Physics */
+} /* namespace ComPWA */
+
 #endif

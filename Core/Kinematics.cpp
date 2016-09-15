@@ -13,6 +13,9 @@
 #include "Core/Exceptions.hpp"
 #include "Core/PhysConst.hpp"
 #include "Core/DataPoint.hpp"
+#include "Core/Event.hpp"
+
+namespace ComPWA {
 
 Kinematics* Kinematics::instance()
 {
@@ -151,3 +154,14 @@ unsigned int Kinematics::FindVariable(std::string varName) const
 			"Variable"+varName+" not found!");
 	return -999;
 }
+
+//! calculated the PHSP volume of the current decay by MC integration
+double Kinematics::GetPhspVolume() {
+  if (!is_PS_area_calculated_) {
+    PS_area_ = calculatePSArea();
+    is_PS_area_calculated_ = true;
+  }
+  return PS_area_;
+}
+
+} /* namespace ComPWA */

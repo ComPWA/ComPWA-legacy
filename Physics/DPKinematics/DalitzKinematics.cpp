@@ -23,6 +23,9 @@
 #include "gsl/gsl_monte_vegas.h"
 #include "gsl/gsl_sf_legendre.h"
 
+namespace ComPWA {
+namespace Physics {
+namespace DPKinematics {
 
 DalitzKinematics::DalitzKinematics(std::string _nameMother,
 		std::string _name1, std::string _name2, std::string _name3) :
@@ -30,14 +33,24 @@ DalitzKinematics::DalitzKinematics(std::string _nameMother,
 		Kinematics(_nameMother,0.0,3)
 {
 	try{
-		_M = PhysConst::instance()->getMass(_nameMother);
-		m1 = PhysConst::instance()->getMass(_name1);
-		m2 = PhysConst::instance()->getMass(_name2);
-		m3 = PhysConst::instance()->getMass(_name3);
-		_spinM = PhysConst::instance()->getJ(_nameMother);
-		spin1 = PhysConst::instance()->getJ(_name1);
-		spin2 = PhysConst::instance()->getJ(_name2);
-		spin3 = PhysConst::instance()->getJ(_name3);
+		  M = ComPWA::PhysConst::Instance().findParticle(_nameMother).mass_;
+		  m1 = ComPWA::PhysConst::Instance().findParticle(_name1).mass_;
+		  m2 = ComPWA::PhysConst::Instance().findParticle(_name2).mass_;
+		  m3 = ComPWA::PhysConst::Instance().findParticle(_name3).mass_;
+
+		  _spinM =
+		      ComPWA::PhysConst::Instance().findParticle(_nameMother).getSpinLikeQuantumNumber(
+		          QuantumNumberIDs::SPIN).J_numerator_;
+		  spin1 =
+		      ComPWA::PhysConst::Instance().findParticle(_name1).getSpinLikeQuantumNumber(
+		          QuantumNumberIDs::SPIN).J_numerator_;
+		  spin2 =
+		      ComPWA::PhysConst::Instance().findParticle(_name2).getSpinLikeQuantumNumber(
+		          QuantumNumberIDs::SPIN).J_numerator_;
+		  spin3 =
+		      ComPWA::PhysConst::Instance().findParticle(_name3).getSpinLikeQuantumNumber(
+		          QuantumNumberIDs::SPIN).J_numerator_;
+
 	} catch (std::exception& ex){
 		BOOST_LOG_TRIVIAL(error) << "DalitzKinematics::DalitzKinematics() | "
 				"One or more particles can not be initialized: "<<ex.what();
@@ -59,10 +72,18 @@ DalitzKinematics::DalitzKinematics(double _M, double _Br,
 							name3(_name3), massIdsSet(false), Kinematics(_nameMother,_Br,3)
 {
 	try{
-		_spinM = PhysConst::instance()->getJ(_nameMother);
-		spin1 = PhysConst::instance()->getJ(_name1);
-		spin2 = PhysConst::instance()->getJ(_name2);
-		spin3 = PhysConst::instance()->getJ(_name3);
+		  _spinM =
+		      ComPWA::PhysConst::Instance().findParticle(_nameMother).getSpinLikeQuantumNumber(
+		          QuantumNumberIDs::SPIN).J_numerator_;
+		  spin1 =
+		      ComPWA::PhysConst::Instance().findParticle(_name1).getSpinLikeQuantumNumber(
+		          QuantumNumberIDs::SPIN).J_numerator_;
+		  spin2 =
+		      ComPWA::PhysConst::Instance().findParticle(_name2).getSpinLikeQuantumNumber(
+		          QuantumNumberIDs::SPIN).J_numerator_;
+		  spin3 =
+		      ComPWA::PhysConst::Instance().findParticle(_name3).getSpinLikeQuantumNumber(
+		          QuantumNumberIDs::SPIN).J_numerator_;
 	} catch (std::exception& ex){
 		BOOST_LOG_TRIVIAL(error) << "DalitzKinematics::DalitzKinematics() | "
 				"One or more particles can not be initialized: "<<ex.what();
@@ -79,8 +100,6 @@ void DalitzKinematics::init()
 	mSq2 = m2*m2;
 	mSq3 = m3*m3;
 	mSq4 = m4*m4;
-
-	_DPareaCalculated=0;
 
 	_varNames.push_back("m23sq");
 	_varNames.push_back("m13sq");
@@ -246,8 +265,6 @@ double DalitzKinematics::eiCms(unsigned int partId,
 				}
 				break;
 	}
-
-	return E;
 }
 
 std::pair<double,double> DalitzKinematics::GetMinMax(std::string varName) const
@@ -442,33 +459,59 @@ double phspFunc(double* x, size_t dim, void* param)
 	return 1.0;
 };
 
-double DalitzKinematics::calcDParea() const
-{
-	size_t dim=2;
-	double res=0.0, err=0.0;
+double DalitzKinematics::calculatePSArea() {
+  size_t dim = 2;
+  double res = 0.0, err = 0.0;
 
-	//Set limits
-	auto var1_limit = GetMinMax(0);
-	auto var2_limit = GetMinMax(1);
-	//	auto var1_limit = GetMinMax(0);
-	//	auto var2_limit = GetMinMax(8);
-	double xLimit_low[2] = {var1_limit.first,var2_limit.first};
-	double xLimit_high[2] = {var1_limit.second,var2_limit.second};
+  //set limits: we assume that x[0]=m13sq and x[1]=m23sq
+  double xLimit_low[2] = { m13_sq_min, m23_sq_min };
+  double xLimit_high[2] = { m13_sq_max, m23_sq_max };
 
-	size_t calls = 2000000;
-	gsl_rng_env_setup ();
-	const gsl_rng_type *T = gsl_rng_default; //type of random generator
-	gsl_rng *r = gsl_rng_alloc(T); //random generator
+  size_t calls = 2000000;
+  gsl_rng_env_setup();
+  const gsl_rng_type *T = gsl_rng_default;    //type of random generator
+  gsl_rng *r = gsl_rng_alloc(T);    //random generator
 
-	gsl_monte_function F = {&phspFunc,dim, const_cast<DalitzKinematics*> (this)};
+  gsl_monte_function F = { &phspFunc, dim, const_cast<DalitzKinematics*>(this) };
 
-	gsl_monte_vegas_state *s = gsl_monte_vegas_alloc (dim);
-	gsl_monte_vegas_integrate (&F, xLimit_low, xLimit_high, 2, calls, r,s,&res, &err);
-	gsl_monte_vegas_free(s);
-	BOOST_LOG_TRIVIAL(debug)<<"DalitzKinematics::calcDParea() | Dalitz plot area (MC integration): "
-			<<"("<<res<<"+-"<<err<<") GeV^4 relAcc [%]: "<<100*err/res;
+  gsl_monte_vegas_state *s = gsl_monte_vegas_alloc(dim);
+  gsl_monte_vegas_integrate(&F, xLimit_low, xLimit_high, 2, calls, r, s, &res,
+      &err);
+  gsl_monte_vegas_free(s);
+  BOOST_LOG_TRIVIAL(debug)<<"DPKinematics::calcDParea() Dalitz plot area (MC integration): "
+  <<"("<<res<<"+-"<<err<<") GeV^4 relAcc [%]: "<<100*err/res;
 
-	return res;
+  return res;
+}
+
+double DalitzKinematics::getPhspVolumePart(double m23_sq_min_loc, double m23_sq_max_loc){
+
+  //    std::cout<<"DPKinematics: DEBUG: calculating dalitz plot area"<<std::endl;
+      BOOST_LOG_TRIVIAL(debug)<<"DPKinematics: DEBUG: calculating dalitz plot area";
+      size_t dim=2;
+      double res=0.0, err=0.0;
+
+      //set limits: we assume that x[0]=m13sq and x[1]=m23sq
+      double xLimit_low[2] = {m13_sq_min,m23_sq_min_loc};
+      double xLimit_high[2] = {m13_sq_max,m23_sq_max_loc};
+
+      size_t calls = 100000;
+      gsl_rng_env_setup ();
+      const gsl_rng_type *T = gsl_rng_default; //type of random generator
+      gsl_rng *r = gsl_rng_alloc(T); //random generator
+
+      gsl_monte_function F = {&phspFunc,dim, const_cast<DalitzKinematics*> (this)};
+
+      /*  Choosing vegas algorithm here, because it is the most accurate:
+       *      -> 10^5 calls gives (in my example) an accuracy of 0.03%
+       *       this should be sufficiency for most applications
+       */
+      gsl_monte_vegas_state *s = gsl_monte_vegas_alloc (dim);
+      gsl_monte_vegas_integrate (&F, xLimit_low, xLimit_high, 2, calls, r,s,&res, &err);
+      gsl_monte_vegas_free(s);
+      BOOST_LOG_TRIVIAL(debug)<<"DPKinematics: Area of dalitz plot slice " << m23_sq_min_loc << "-" << m23_sq_max_loc << " form MC integration: "<<res<<"+-"<<err<<" relAcc [%]: "<<100*err/res;
+
+      return res;
 }
 
 unsigned int DalitzKinematics::getSpin(unsigned int num) const
@@ -483,42 +526,55 @@ unsigned int DalitzKinematics::getSpin(unsigned int num) const
 			"Wrong particle requested!");
 	return -999;
 }
-unsigned int DalitzKinematics::getSpin(std::string name) const
-{
-	if(name==_nameMother) return _spinM;
-	if(name==name1) return spin1;
-	if(name==name2) return spin2;
-	if(name==name3) return spin3;
-	throw std::runtime_error("DPKinematics::getSpin(string) | "
-			"Wrong particle "+name+" requested!");
+
+unsigned int DalitzKinematics::getSpin(std::string name) {
+  if (name == nameMother)
+    return spinM;
+  if (name == name1)
+    return spin1;
+  if (name == name2)
+    return spin2;
+  if (name == name3)
+    return spin3;
+  throw std::runtime_error(
+      "DPKinematics::getSpin(string) | Wrong particle " + name + " requested!");
 }
 
-double DalitzKinematics::GetMass(unsigned int num) const
-{
-	switch(num){
-	case 0: return _M;
-	case 1: return m1;
-	case 2: return m2;
-	case 3: return m3;
-	}
-	throw std::runtime_error("DPKinematics::getMass(int) | "
-			"Wrong particle requested!");
+double DalitzKinematics::getMass(unsigned int num) const {
+  switch (num) {
+  case 0:
+    return M;
+  case 1:
+    return m1;
+  case 2:
+    return m2;
+  case 3:
+    return m3;
+  }
+  throw std::runtime_error(
+      "DPKinematics::getMass(int) | Wrong particle requested!");
 }
 
-double DalitzKinematics::GetMass(std::string name) const
-{
-	if(name==_nameMother) return _M;
-	if(name==name1) return m1;
-	if(name==name2) return m2;
-	if(name==name3) return m3;
-	throw std::runtime_error("DPKinematics::getMass(string) | "
-			"Wrong particle "+name+" requested!");
+double DalitzKinematics::getMass(std::string name) const {
+  if (name == nameMother)
+    return M;
+  if (name == name1)
+    return m1;
+  if (name == name2)
+    return m2;
+  if (name == name3)
+    return m3;
+  throw std::runtime_error(
+      "DPKinematics::getMass(string) | Wrong particle " + name + " requested!");
 }
 
-//! Calculates 3rd invariant mass from the other inv. masses.
-double DalitzKinematics::getThirdVariableSq(double invmass1sq, double invmass2sq) const
-{
-	return (_Msq+mSq1+mSq2+mSq3-invmass1sq-invmass2sq);
+double DalitzKinematics::getThirdVariableSq(double invmass1sq,
+    double invmass2sq) const {
+  /*!
+   * calculates 3rd invariant mass from the other inv. masses.
+   */
+  //	return sqrt(M*M+m1*m1+m2*m2+m3*m3-invmass1-invmass2);
+  return (Msq + mSq1 + mSq2 + mSq3 - invmass1sq - invmass2sq);
 }
 
 bool DalitzKinematics::IsWithinPhsp(const dataPoint& point) const
@@ -558,3 +614,8 @@ bool DalitzKinematics::IsWithinBoxPhsp(int idA, int idB,
 
 	return 1;
 }
+
+
+} /* namespace DPKinematics */
+} /* namespace Physics */
+} /* namespace ComPWA */

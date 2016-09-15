@@ -1,4 +1,5 @@
 ########### test apps #############
+<<<<<<< HEAD
 
 project ComPWA/test 
 	: requirements 
@@ -13,11 +14,45 @@ project ComPWA/test
 	  <linkflags>-lRooFitCore
 
 	  <library>$(TOP)//qft++
+=======
+import os ;
+
+local GENEVA = [ os.environ GENEVA ] ;
+local QFTINC = [ os.environ QFT_INCLUDE ] ;
+local QFT = [ os.environ QFT ] ;
+local MINUIT2 = [ os.environ MINUIT2 ] ;
+
+local rlibs = [ SHELL "$ROOTSYS/bin/root-config --glibs" ] ;
+ROOTLIBS = [ MATCH "(.*)[\n]" : $(rlibs) ] ;
+
+SHELL "rootcint -f test/plotterDict.cpp -c test/TTripleSliderDemo.hpp test/LinkDefPlotter.h" ;
+
+project :
+	requirements <include>./
+	    <include>$(TOP)
+		<include>$(ROOT_INC_PATH)
+		<include>$(GENEVA)/include
+        <include>$(QFT)/include
+        <include>$(MINUIT2)/include
+        #<include>$(TOP)/Tools/RootNeatPlotting
+        <cxxflags>-pthread
+	<linkflags>-L$(ROOT_LIB_PATH)
+	<linkflags>$(ROOTLIBS)
+	<linkflags>-lEG
+	<linkflags>-lRooFit
+	<linkflags>-lRooFitCore
+	#<linkflags>-L$(TOP)/Tools/RootNeatPlotting/build
+	#<linkflags>-lROOTNeatPlotting
+	<linkflags>-L$(QFT)/lib
+	<linkflags>-lqft++
+	#<linkflags>-lgomp
+>>>>>>> dd7eb340b0f73d2b07005f687e586aae14fbc9fa
 	;
 
 lib test : 
         [ glob *.cpp : *App.cpp ]
-        $(TOP)/Optimizer//Optimizer 
+        $(TOP)/Optimizer//Optimizer
+        $(TOP)/Physics/HelicityAmplitude//HelicityAmplitude
         : : ;
         
 
@@ -44,11 +79,11 @@ exe optimizertestApp :
         OptimizerTestApp.cpp
         test
         $(TOP)/Core//ComPWA
+        $(TOP)/DataReader/RootReader//RootReader
         $(TOP)/Estimator/MinLogLH//MinLogLH
         $(TOP)/Optimizer/Minuit2//Minuit2IF
         $(TOP)/Optimizer/Geneva//GenevaIF
-        $(TOP)/DataReader/RootReader//RootReader
-        $(TOP)/Physics/DPKinematics//DPKinematics
+        $(TOP)/DataReader/RootGenerator//RootGenerator
         : ;
 } else {
 exe optimizertestApp : 
@@ -58,12 +93,19 @@ exe optimizertestApp :
         $(TOP)/Estimator/MinLogLH//MinLogLH
         $(TOP)/Optimizer/Minuit2//Minuit2IF
         $(TOP)/DataReader/RootReader//RootReader
-        $(TOP)/Physics/DPKinematics//DPKinematics
+        $(TOP)/DataReader/RootGenerator//RootGenerator
         : ;
 }
 
 exe physicstestApp : 
         PhysicsTestApp.cpp 
+        test
+        $(TOP)/Core//ComPWA
+        $(TOP)/Physics/BreitWigner//BreitWigner
+        : ;
+        
+exe ampplotterApp : 
+        AmpPlotterApp.cpp 
         test
         $(TOP)/Core//ComPWA
         $(TOP)/Physics/BreitWigner//BreitWigner
@@ -150,7 +192,8 @@ exe genRunManager :
         $(TOP)/Core//ComPWA
         $(TOP)/Physics/AmplitudeSum//AmplitudeSum  
         $(TOP)/DataReader/RootReader//RootReader  
-        $(TOP)/Physics/DPKinematics//DPKinematics  
+        $(TOP)/DataReader/RootGenerator//RootGenerator
+	$(TOP)/Physics/DPKinematics//DPKinematics
         : ;
 
 exe gendalitzApp : 
@@ -181,7 +224,8 @@ exe lhNormalizationTestApp :
         $(TOP)/Optimizer//Optimizer
         $(TOP)/Estimator/MinLogLH//MinLogLH 
         $(TOP)/Optimizer/Minuit2//Minuit2IF
-        $(TOP)/Physics/DPKinematics//DPKinematics  
+        $(TOP)/DataReader/RootGenerator//RootGenerator
+	$(TOP)/Physics/DPKinematics//DPKinematics 
         : ;
 
 exe dalitzplotApp : 
@@ -220,14 +264,69 @@ exe helicityDecayTreeTestApp :
         HelicityDecayTreeTestApp.cpp 
         $(TOP)/Core//ComPWA
         $(TOP)/Physics/HelicityAmplitude//HelicityAmplitude
+        $(TOP)/Physics/DecayTree//DecayTree
         : ;
         
-exe helicityAmplitudeTreeTestApp : 
-        HelicityAmplitudeTreeTestApp.cpp 
+exe helicityDecayTreeGeneratorTestApp : 
+        HelicityDecayTreeGeneratorTestApp.cpp 
         $(TOP)/Core//ComPWA
         $(TOP)/Physics/HelicityAmplitude//HelicityAmplitude
+        $(TOP)/Physics/DecayTree//DecayTree
         : ;        
+exe helicityCoherentAmplitudeEventGenApp : 
+        HelicityCoherentAmplitudeEventGenApp.cpp 
+        $(TOP)/Core//ComPWA
+        $(TOP)/DataReader//RootReader
+		$(TOP)/DataReader//RootGenerator
+		$(TOP)/Physics/DecayTree//DecayTree
+        $(TOP)/Physics/HelicityAmplitude//HelicityAmplitude
+        : ;
+        
+exe helicityCoherentAmplitudePlotApp : 
+        HelicityCoherentAmplitudePlotApp.cpp 
+        $(TOP)/Core//ComPWA
+        $(TOP)/DataReader//RootReader
+		$(TOP)/DataReader//RootGenerator
+		$(TOP)/Physics/DecayTree//DecayTree
+        $(TOP)/Physics/HelicityAmplitude//HelicityAmplitude
+        : ;
+        
+exe helicityAmplitudeFitApp : 
+        HelicityAmplitudeFitApp.cpp 
+        $(TOP)/Core//ComPWA
+        $(TOP)/Physics/DecayTree//DecayTree
+        $(TOP)/Physics/HelicityAmplitude//HelicityAmplitude
+        $(TOP)/DataReader/RootReader//RootReader
+        $(TOP)/Optimizer//Optimizer
+        $(TOP)/Estimator/MinLogLH//MinLogLH
+        $(TOP)/Optimizer/Minuit2//Minuit2IF
+        : ;
 
+exe slicefitubApp : 
+        SliceFitUBApp.cpp 
+        test
+        $(TOP)/Core//ComPWA
+        $(TOP)/Physics/AmplitudeSum//AmplitudeSum
+        $(TOP)/Physics/DPKinematics//DPKinematics  
+        $(TOP)/DataReader/RootReader//RootReader
+        $(TOP)/Estimator/SliceFitUB//SliceFitUB
+        $(TOP)/Optimizer/Minuit2//Minuit2IF
+        $(TOP)/Physics/DPKinematics//DPKinematics  
+        : ;
+        
+exe slicefitrandApp : 
+        SliceFitRANDApp.cpp 
+        test
+        $(TOP)/Core//ComPWA
+        $(TOP)/Physics/AmplitudeSum//AmplitudeSum
+        $(TOP)/Physics/DPKinematics//DPKinematics  
+        $(TOP)/DataReader/RootReader//RootReader
+        $(TOP)/Estimator/SliceFitUB//SliceFitUB
+        $(TOP)/Optimizer/Minuit2//Minuit2IF
+        $(TOP)/Physics/DPKinematics//DPKinematics  
+        : ;
+
+<<<<<<< HEAD
 exe serializeApp 
 	: SerializationApp.cpp 
        test
@@ -260,6 +359,26 @@ install dist
 	: test 
 	: <threading>single
 	  <location>$(TOP)lib/ ;
+=======
+exe serializeApp : 
+        SerializationApp.cpp 
+        test
+        $(TOP)/Core//ComPWA
+        : ;
+        
+exe iteratorApp : 
+        IteratorTestApp.cpp 
+        test
+        $(TOP)/Core//ComPWA
+        : ;
+
+install dist : test : <location>$(TOP)/lib <threading>single ;
+#install dist2 : dalitzfitApp treetestApp cx0testApp dataiftestApp optimizertestApp physicstestApp blackscholesApp neuralnetworkApp : <location>$(TOP)/bin <threading>single ;
+install dist2 : compareTreeAmpApp dalitzfitApp slicefitApp slicefitubApp slicefitrandApp treetestApp dataiftestApp optimizertestApp physicstestApp ampplotterApp : <location>$(TOP)/bin <threading>single ;
+install dist3 : estimatortestApp integrationtestApp integrationtestbinnedApp runmanagertestApp gentwopartApp gendalitzApp dalitzplotApp serializeApp dpareaTestApp genRunManager : <location>$(TOP)/bin <threading>single ;
+
+install dist4 : helicityDecayTreeTestApp helicityDecayTreeGeneratorTestApp helicityCoherentAmplitudeEventGenApp helicityCoherentAmplitudePlotApp helicityAmplitudeFitApp : <location>$(TOP)/bin <threading>single ;
+>>>>>>> dd7eb340b0f73d2b07005f687e586aae14fbc9fa
 
 install dist2 
 	: compareTreeAmpApp 

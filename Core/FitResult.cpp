@@ -6,9 +6,11 @@
  */
 #include "Core/FitResult.hpp"
 
+namespace ComPWA {
+
 void FitResult::writeText(std::string filename){
 	std::ofstream myfile;
-	myfile.open(filename);
+	myfile.open(filename, std::ios::app);
 	genOutput(myfile);
 	myfile.close();
 	return;
@@ -25,7 +27,7 @@ void FitResult::writeSimpleText(std::string filename){
 double FitResult::shiftAngle(double v){
 	double originalVal = v;
 	double val = originalVal;
-	double pi = PhysConst::instance()->getConstValue("Pi");
+	double pi = ComPWA::PhysConst::Instance().findConstant("Pi").value_;
 	while(val> pi) val-=2*pi;
 	while(val< -pi ) val+=2*pi;
 	if(val!=originalVal)
@@ -252,3 +254,6 @@ void FitResult::printFitFractions(TableFormater* fracTable,
 //
 //	return;
 //}
+} /* namespace ComPWA */
+
+

@@ -39,18 +39,18 @@ class TGraph;
 class TCanvas;
 class TRandom;
 
-class PolyFit : public ControlParameter {
+class PolyFit : public ComPWA::Optimizer::ControlParameter {
 
 public:
 
   // create/copy/destroy:
-  static std::shared_ptr<ControlParameter> createInstance(double p0, double p1, double p2, double p3, double sigma);
+  static std::shared_ptr<ComPWA::Optimizer::ControlParameter> createInstance(double p0, double p1, double p2, double p3, double sigma);
 
   /** Destructor */
   virtual ~PolyFit();
 
 
-  double controlParameter(ParameterList& minPar);
+  double controlParameter(ComPWA::ParameterList& minPar);
   void drawGraph(double a, double b, double c, double d);
   // Getters:
  

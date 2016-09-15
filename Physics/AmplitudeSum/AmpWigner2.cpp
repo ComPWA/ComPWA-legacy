@@ -19,6 +19,9 @@
 #include "qft++.h"
 #include <boost/math/special_functions/legendre.hpp>
 
+namespace ComPWA {
+namespace Physics {
+namespace AmplitudeSum {
 AmpWigner2::AmpWigner2(unsigned int varId, unsigned int spin,
 		unsigned int mu, unsigned int muPrime) :
 		_varId(varId), _spin(spin), _mu(mu), _muPrime(muPrime)
@@ -112,3 +115,7 @@ bool WignerDStrategy::execute(ParameterList& paras,
 
 	return true;
 }
+
+} /* namespace AmplitudeSum */
+} /* namespace Physics */
+} /* namespace ComPWA */

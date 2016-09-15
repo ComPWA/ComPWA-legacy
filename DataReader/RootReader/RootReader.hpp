@@ -40,8 +40,13 @@
 #include "TTree.h"
 #include "TRandom3.h"
 
-class RootReader : public Data
-{
+
+namespace ComPWA {
+namespace DataReader {
+namespace RootReader {
+
+class RootReader : public Data {
+
 public:
 
 	//! Destructor
@@ -109,5 +114,9 @@ protected:
 	int fFlavour;
 
 };
+
+} /* namespace RootReader */
+} /* namespace DataReader */
+} /* namespace ComPWA */
 
 #endif /* _RootReader_HPP */

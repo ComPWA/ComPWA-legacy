@@ -31,6 +31,8 @@
 #include "Core/FunctionTree.hpp"
 #include "Core/Parameter.hpp"
 
+using namespace ComPWA;
+
 //This function will be called from a thread
 
 int main(int argc, char **argv) {
@@ -55,7 +57,7 @@ int main(int argc, char **argv) {
  // std::cout << parA << std::endl;
   //std::cout << " ValToStr: " << parA->val_to_str() << std::endl;
 
-  std::shared_ptr<FunctionTree> myTree;
+  std::shared_ptr<FunctionTree> myTree, subTree;
 
   if(autonodes){ //Let FunctionTree manage the creation of the tree
 
@@ -64,9 +66,13 @@ int main(int argc, char **argv) {
     myTree->createLeaf("a", parA, "R");
     myTree->createNode("bcd", add, "R");
     myTree->createLeaf("b", parB, "bcd");
-    myTree->createNode("cd", mult, "bcd");
-    myTree->createLeaf("c", parC, "cd");
-    myTree->createLeaf("d", parD, "cd");
+
+    subTree = std::shared_ptr<FunctionTree>(new FunctionTree());
+    subTree->createHead("cd", mult);
+    subTree->createLeaf("c", parC, "cd");
+    subTree->createLeaf("d", parD, "cd");
+
+    myTree->insertTree(subTree, "bcd");
 
   }else{ //create Tree manually
 
@@ -115,14 +121,14 @@ int main(int argc, char **argv) {
   std::cout << "Tree calculated" << std::endl;
   std::cout << std::endl << myTree << std::endl << std::endl;
 
-  parB->SetValue(3.);
+  parD->SetValue(2.);
 
-  std::cout << "Changed b from 2 to 3 " << std::endl;
+  std::cout << "Changed d from 1 to 2 " << std::endl;
   std::cout << std::endl << myTree << std::endl << std::endl;
 
   myTree->recalculate();
 
-  std::cout << "Changed b from 2 to 3 and recalculated " << std::endl;
+  std::cout << "Changed d from 1 to 2 and recalculated " << std::endl;
   std::cout << std::endl << myTree << std::endl << std::endl;
 
 

@@ -33,6 +33,10 @@
 
 //_____ D E F I N I T I O N S __________________________________________________
 
+namespace ComPWA {
+namespace DataReader {
+namespace AsciiReader {
+
 class AsciiReader : public Data {
 
 public:
@@ -48,5 +52,9 @@ public:
 	virtual void writeData(std::string file="", std::string trName="") { };
 
 };
+
+} /* namespace AsciiReader */
+} /* namespace DataReader */
+} /* namespace ComPWA */
 
 #endif /* _ASCII_READER_H_ */

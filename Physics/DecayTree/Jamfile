@@ -1,0 +1,21 @@
+########### DecayTree lib #############
+import os ;
+
+local CLIPS = [ os.environ CLIPS_ROOT ] ;
+
+BOOSTLIBS = -lboost_log_setup -lboost_log -lboost_date_time -lboost_serialization -lboost_system -lboost_thread -lboost_test_exec_monitor -L$(BOOST_ROOT)/lib ;
+
+project :
+	requirements
+	    <include>$(BOOST_ROOT)/include
+	    <include>$(CLIPS)/include
+	<linkflags>-L$(CLIPS)/lib
+    <linkflags>-lclips
+	;
+
+lib DecayTree : 
+        [ glob *.cpp : ] 
+        $(TOP)/Core//ComPWA
+        ;
+
+install dist : DecayTree : <location>$(TOP)/lib ;

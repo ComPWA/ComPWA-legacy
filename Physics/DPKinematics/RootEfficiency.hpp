@@ -20,6 +20,11 @@
 #include "TH2.h"
 #include "Physics/DPKinematics/DalitzKinematics.hpp"
 #include "Core/Efficiency.hpp"
+
+namespace ComPWA {
+namespace Physics {
+namespace DPKinematics {
+
 /**
  *  \class DalitzHistEfficiency
  *  \brief Efficiency provided by a histogram
@@ -68,5 +73,9 @@ public:
 	~DalitzPolyEfficiency(){};
 
 };
+
+} /* namespace DPKinematics */
+} /* namespace Physics */
+} /* namespace ComPWA */
 
 #endif /* ROOTEFFICIENCY_HPP_ */

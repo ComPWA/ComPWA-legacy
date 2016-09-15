@@ -15,6 +15,15 @@
 #include "Core/Logging.hpp"
 #include "Optimizer/Minuit2/MinuitResult.hpp"
 
+namespace ComPWA {
+namespace Optimizer {
+namespace Minuit2 {
+
+using namespace boost::log;
+using namespace ROOT::Minuit2;
+
+using ComPWA::Estimator::Estimator;
+
 MinuitResult::MinuitResult() : initialLH(0), finalLH(0), trueLH(0),
 calcInterference(0)
 {
@@ -123,9 +132,10 @@ void MinuitResult::setInitialParameters(ParameterList iniPars)
 void MinuitResult::genSimpleOutput(std::ostream& out)
 {
 	for(unsigned int o=0;o<finalParameters.GetNDouble();o++){
-		std::shared_ptr<DoubleParameter> outPar =
-				finalParameters.GetDoubleParameter(o);
-		out<<outPar->GetValue()<<" "<<outPar->GetError()<<" ";
+		std::shared_ptr<DoubleParameter> outPar = finalParameters.GetDoubleParameter(o);
+		out<<outPar->GetValue()<<" ";
+		if(outPar->HasError())
+		  out<<outPar->GetError()<<" ";
 	}
 	out<<"\n";
 
@@ -497,3 +507,7 @@ bool MinuitResult::hasFailed()
 
 	return failed;
 }
+
+} /* namespace Minuit2 */
+} /* namespace Optimizer */
+} /* namespace ComPWA */

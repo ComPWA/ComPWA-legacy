@@ -4,9 +4,11 @@
  *  Created on: Aug 6, 2014
  *      Author: weidenka
  */
-
 #include <chrono>
 #include "Core/ProgressBar.hpp"
+
+namespace ComPWA {
+
 progressBar::progressBar(int size, int update) : hasStarted(0), numEvents(size), updateInterval(update),lastUpdate(0) {
 	if(update==0) updateInterval = 1;
 
@@ -67,4 +69,4 @@ time_t progressBar::endTime(){
 	return estEndTime;
 }
 
-
+} /* namespace ComPWA */

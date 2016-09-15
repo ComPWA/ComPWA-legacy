@@ -48,7 +48,9 @@
 #include <gsl/gsl_blas.h>
 #include <gsl/gsl_linalg.h>
 
-using namespace ROOT::Minuit2;
+namespace ComPWA {
+namespace Optimizer {
+namespace Minuit2 {
 
 class MinuitResult : public FitResult
 {
@@ -57,10 +59,10 @@ public:
 	MinuitResult();
 
 	//Constructor
-	MinuitResult(std::shared_ptr<ControlParameter> esti, FunctionMinimum result);
+	MinuitResult(std::shared_ptr<ControlParameter> esti, ROOT::Minuit2::FunctionMinimum result);
 
 	//! Set Minuit2 function minimum
-	void setResult(std::shared_ptr<ControlParameter> esti, FunctionMinimum result);
+	void setResult(std::shared_ptr<ControlParameter> esti, ROOT::Minuit2::FunctionMinimum result);
 
 	//! Return final likelihood value
 	double getResult(){ return finalLH; }
@@ -140,7 +142,7 @@ public:
 
 protected:
 	//! Initialize result with Minuit2::FunctionMinimum
-	void init(FunctionMinimum);
+	void init(ROOT::Minuit2::FunctionMinimum);
 
 	//! Calculate interference terms
 	bool calcInterference;
@@ -152,9 +154,17 @@ protected:
 	int nEvents;
 
 	//! Pointer to estimator
-	std::shared_ptr<Estimator> est;
+	std::shared_ptr<ComPWA::Estimator::Estimator> est;
 
 	//====== MINUIT FIT RESULT =======
+	double getCorr(unsigned int n, unsigned int t){
+	  if(n<corr.size2() && t<corr.size1() && t>=n)
+	    return corr(n,t);
+	  else
+	    return -9000;
+	};
+
+private:
 	bool isValid; //result valid
 	bool covPosDef; //covariance matrix pos.-def.
 	bool hasValidParameters; //valid parameters
@@ -349,5 +359,9 @@ inline void multivariateGaussian(const gsl_rng *rnd, const int vecSize,
 
 };
 /************** HELPER FUNCTION FOR GSL VECTOR AND MATRIX *******************/
+
+} /* namespace Minuit2 */
+} /* namespace Optimizer */
+} /* namespace ComPWA */
 
 #endif

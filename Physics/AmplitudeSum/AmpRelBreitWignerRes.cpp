@@ -22,6 +22,11 @@
 #include "Physics/AmplitudeSum/AmpRelBreitWignerRes.hpp"
 #include <stdlib.h>
 
+namespace ComPWA {
+namespace Physics {
+namespace AmplitudeSum {
+
+
 AmpRelBreitWignerRes::AmpRelBreitWignerRes(const char *name,
 		unsigned int varIdA, unsigned int varIdB,
 		std::shared_ptr<DoubleParameter> mag, std::shared_ptr<DoubleParameter> phase,
@@ -127,6 +132,7 @@ void AmpRelBreitWignerRes::CheckModified() {
 	}
 	return;
 }
+
 double AmpRelBreitWignerRes::GetIntegral()
 {
 	CheckModified();
@@ -400,3 +406,7 @@ bool BreitWignerStrategy::execute(ParameterList& paras,
 	);
 	return true;
 }
+
+} /* namespace AmplitudeSum */
+} /* namespace Physics */
+} /* namespace ComPWA */

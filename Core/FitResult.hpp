@@ -41,7 +41,8 @@
 #include "Core/ParameterList.hpp"
 #include "Core/TableFormater.hpp"
 #include "Core/PhysConst.hpp"
-using namespace boost::log;
+
+namespace ComPWA {
 
 
 class FitResult
@@ -84,6 +85,15 @@ public:
 	virtual double getTime(){ return time; }
 	//! Get fit result (e.g. likelihood or chi2)
 	virtual double getResult() =0;
+	virtual double getCorr(unsigned int n, unsigned int t) {return -9000;};
+
+	//output
+	virtual void print(std::string opt=""){
+		std::stringstream s;
+		genOutput(s,opt);
+		std::string str = s.str();
+		BOOST_LOG_TRIVIAL(info) << str;
+	};
 	//! Table with fit parameters
 	virtual void printFitParameters(TableFormater* tableResult);
 	//! Table with fit fractions
@@ -171,5 +181,6 @@ private:
 	}
 };
 BOOST_SERIALIZATION_ASSUME_ABSTRACT( FitResult );
+} /* namespace ComPWA */
 
 #endif

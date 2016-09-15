@@ -35,6 +35,7 @@
 #include "Core/Exceptions.hpp"
 #include "Core/Logging.hpp"
 
+namespace ComPWA {
 
 class ParameterList
 {
@@ -132,15 +133,17 @@ public:
 		);
 	}
 
-	std::shared_ptr<AbsParameter> GetParameter(const unsigned int i);
+	virtual std::shared_ptr<AbsParameter> GetParameter(const unsigned int i) const;
 
-	std::shared_ptr<AbsParameter> GetParameter(const std::string parname);
+	virtual std::shared_ptr<AbsParameter> GetParameter(const std::string parname) const;
 
 	/**! Remove duplicate entries
 	 * If a parameter name is found multiple times only the fist occurance is kept.
 	 * The parameter values of parameters with the same name are not compared.
 	 */
 	virtual void RemoveDuplicates();
+
+	virtual bool ParameterExists(const std::string parname) const;
 
 	//! Add parameter via abstract pointer
 	/*!
@@ -155,6 +158,16 @@ public:
 	//! Append ParameterList to (*this). Shared_ptr are not(!) deep copied
 	virtual void Append(const ParameterList& addList);
 
+	//! Getter for number of multi unsigned int parameter
+	virtual const inline unsigned int GetNMultiUnsignedInteger() const {return vMultiUnsignedInteger_.size();}
+
+	//! Getter for complex parameter
+	/*!
+	 * Getter for complex parameter
+	 * \param i input number of parameter to load
+	 * \return par output container for loaded parameter
+	 */
+	virtual std::shared_ptr<ComplexParameter> GetComplexParameter(const unsigned int i) const;
 
 
 	//**************************************************************************
@@ -175,6 +188,8 @@ public:
 	 */
 	virtual std::vector<std::shared_ptr<BoolParameter> >::const_iterator
 	FindBoolParameter( const std::string name ) const;
+
+
 
 	//! Get ID of Bool parameter
 	virtual unsigned int FindBoolId( const std::string name );
@@ -243,7 +258,6 @@ public:
 	 * \param par input parameter
 	 */
 	virtual void RemoveBool(const unsigned int id);
-
 
 	//================= Integer Parameter ==================
 	//! Getter for number of integer parameter
@@ -411,7 +425,6 @@ public:
 	 * \param par input parameter
 	 */
 	virtual void RemoveDouble(const unsigned int id);
-
 
 	//================= Complex Parameter ==================
 	//! Getter for number of complex parameter
@@ -632,6 +645,72 @@ public:
 	 */
 	virtual void RemoveMultiComplex(const unsigned int id);
 
+	//================= MultiUnsigedInteger Parameter ==================
+	//! Getter for number of multi-complex parameter
+	virtual const inline unsigned int GetNMultiUnsignedInteger() const {
+		return vMultiUnsignedInteger_.size();
+	}
+	/**! A public function returning a string with parameter information
+	 * This function simply returns the member string out_, which contains
+	 * all parameter information. The string gets created using the outstream
+	 * of the PWAParameter class.
+	 * \return string with parameter information
+	 * \sa operator<<
+	 */
+	virtual std::vector<std::shared_ptr<MultiUnsignedInteger> >::const_iterator
+	FindMultiUnsignedInteger( const std::string name ) const;
+
+	//! Get ID of MultiUnsignedInteger parameter
+	virtual unsigned int FindMultiUnsignedIntegerId( const std::string name );
+
+	/**! Add multi-complex parameter
+	 * Adds an multi-complex parameter to the list
+	 * \param par input parameter
+	 */
+	virtual void AddParameter(std::shared_ptr<MultiUnsignedInteger> par);
+
+	//! Getter for multi-complex parameter
+	/*!
+	 * Getter for multi-complex parameter
+	 * \param parname input name of parameter to load
+	 * \return par output container for loaded parameter
+	 */
+	virtual std::shared_ptr<MultiUnsignedInteger>
+	GetMultiUnsignedInteger(const std::string parname) const ;
+
+	//! Getter for multi-complex parameter
+	/*!
+	 * Getter for multi-complex parameter
+	 * \param i input number of parameter to load
+	 * \return par output container for loaded parameter
+	 */
+	virtual std::shared_ptr<MultiUnsignedInteger>
+	GetMultiUnsignedInteger(const unsigned int i) const ;
+
+	//! Getter for multi-complex parameter
+	/*!
+	 * Getter for multi-complex parameter
+	 * \param i input number of parameter to load
+	 * \return par output container for loaded parameter
+	 */
+	virtual std::vector<std::shared_ptr<MultiUnsignedInteger> >
+	GetMultiUnsignedIntegers() const {
+		return vMultiUnsignedInteger_;
+	}
+
+	//! Remove multi-complex parameter
+	/*!
+	 * Remove an multi-complex parameter from the list
+	 * \param parName parameter name
+	 */
+	virtual void RemoveMultiUnsignedInteger(const std::string name);
+
+	//! Remove multi-complex parameter
+	/*!
+	 * Remove an multi-complex parameter from the list
+	 * \param par input parameter
+	 */
+	virtual void RemoveMultiUnsignedInteger(const unsigned int id);
 
 protected:
 	/*!< Vector of boolean parameters */
@@ -646,6 +725,8 @@ protected:
 	std::vector<std::shared_ptr<MultiDouble> > vMultiDouble_;
 	/*!< Vector of complex parameter lists */
 	std::vector<std::shared_ptr<MultiComplex> > vMultiComplex_;
+	/*!< Vector of unsigned int parameter lists */
+	std::vector<std::shared_ptr<MultiUnsignedInteger> > vMultiUnsignedInteger_;
 
 	/*!< Output string to print information */
 	std::string out_;
@@ -680,6 +761,8 @@ private:
 BOOST_SERIALIZATION_SHARED_PTR(ParameterList)
 BOOST_CLASS_IMPLEMENTATION( ParameterList, boost::serialization::object_serializable )
 BOOST_CLASS_TRACKING( ParameterList, boost::serialization::track_never )
+
+} /* namespace ComPWA */
 
 #include <boost/serialization/split_free.hpp>
 #include <boost/unordered_map.hpp>
@@ -723,6 +806,5 @@ namespace boost {
 
 	}//ns:serialization
 }//ns:boost
-
 
 #endif

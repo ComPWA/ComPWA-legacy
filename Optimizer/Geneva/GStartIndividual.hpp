@@ -83,20 +83,22 @@ class GStartIndividual :public GParameterSet
 {
 public:
 	/** @brief The default constructor */
-	GStartIndividual(std::shared_ptr<ControlParameter> data, ParameterList list);
+	GStartIndividual(std::shared_ptr<ComPWA::Optimizer::ControlParameter> data,
+			ParameterList list);
+
 	/** @brief A standard copy constructor */
 	GStartIndividual(const GStartIndividual&);
 	/** @brief The standard destructor */
 	virtual ~GStartIndividual();
 
-	bool getPar(ParameterList& val);
+	bool getPar(ComPWA::ParameterList& val);
 
 
 	/** @brief A standard assignment operator */
 	const GStartIndividual& operator=(const GStartIndividual&);
 
 protected:
-	ParameterList parList;
+	ComPWA::ParameterList parList;
 	std::vector<std::string > parNames;
 
 	void updatePar();
@@ -112,17 +114,17 @@ protected:
 	virtual double fitnessCalculation();
 
 private:
-        /********************************************************************************************/
-        /**
-         * The default constructor. Intentionally private and empty, as it is only needed for
-         * serialization purposes.
-         */
+	/********************************************************************************************/
+	/**
+	 * The default constructor. Intentionally private and empty, as it is only needed for
+	 * serialization purposes.
+	 */
 	GStartIndividual();
 
-        /********************************************************************************************/
-        // You can add other variables here. Do not forget to serialize them if necessary
-        // int myVar;
-        std::shared_ptr<ControlParameter> theData;
+	/********************************************************************************************/
+	// You can add other variables here. Do not forget to serialize them if necessary
+	// int myVar;
+	std::shared_ptr<ComPWA::Optimizer::ControlParameter> theData;
 
 	/** @brief Make the class accessible to Boost.Serialization */
 	friend class boost::serialization::access;
@@ -136,8 +138,8 @@ private:
 	void serialize(Archive & ar, const unsigned int) {
 		using boost::serialization::make_nvp;
 		ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(GParameterSet);
-	    // Add other variables here like this:
-	    // ar & BOOST_SERIALIZATION_NVP(sampleVariable);
+		// Add other variables here like this:
+		// ar & BOOST_SERIALIZATION_NVP(sampleVariable);
 	}
 	/**************************************************************/
 

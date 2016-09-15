@@ -7,11 +7,12 @@
 
 #include "Core/TableFormater.hpp"
 
+namespace ComPWA {
 void TableFormater::delim()
 {
 	*out<<sep;
 	for(unsigned int i=0;i<totalWidth-1; i++) *out << "-" ;
-	*out<<sep<<endl;
+	*out<<sep<<std::endl;
 }
 
 void TableFormater::footer()
@@ -122,3 +123,5 @@ void TexTableFormater::header() {
 	delim();
 };
 void TexTableFormater::delim(){ *out<<"\\hline"<<std::endl; }
+
+} /* namespace ComPWA */

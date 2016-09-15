@@ -49,23 +49,5 @@ public:
 	//! get mass of paticles
 	virtual double GetMass(std::string name) const;
 
-protected:
-	std::string name1;//! name of daughter 1
-	double mSq1; //! masse squared of daughter 1
-	double m1; //! masses of daughter 1
-	unsigned int spin1; //! spin of daughter 1
-
-	std::string name2;//! name of daughter 2
-	double mSq2; //! masse squared of daughter 2
-	double m2; //! masses of daughter 2
-	unsigned int spin2;//! spin of daughter 2
-
-	double mass_sq_min; //!minimum value of masssq
-	double mass_sq_max;//!maximum value of masssq
-	double mass_min; //!minimum value of masssq
-	double mass_max;//!maximum value of masssq
-
-
-};
-
-#endif
+} /* namespace ComPWA */
+#endif /* TWOBODYKINEMATICS_HPP_ */

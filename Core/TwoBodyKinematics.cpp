@@ -2,7 +2,10 @@
 #include "Core/PhysConst.hpp"
 #include "Core/DataPoint.hpp"
 
+namespace ComPWA {
+
 TwoBodyKinematics::TwoBodyKinematics(std::string _nameMother,
+<<<<<<< HEAD
 		std::string _name1, std::string _name2,	double deltaMassWindow) :
 				name1(_name1), name2(_name2), Kinematics(_nameMother,0.0,2)
 {
@@ -18,6 +21,28 @@ TwoBodyKinematics::TwoBodyKinematics(std::string _nameMother,
 	mass_sq_max = mass_max*mass_max;
 	mass_sq_min = mass_min*mass_max;
 	_varNames.push_back("msq");
+=======
+    std::string _name1, std::string _name2, double deltaMassWindow) {
+  number_of_particles_ = 2;
+  M = ComPWA::PhysConst::Instance().findParticle(_nameMother).mass_;
+  m1 = ComPWA::PhysConst::Instance().findParticle(_name1).mass_;
+  m2 = ComPWA::PhysConst::Instance().findParticle(_name2).mass_;
+  spinM =
+      ComPWA::PhysConst::Instance().findParticle(_nameMother).getSpinLikeQuantumNumber(
+          QuantumNumberIDs::SPIN).J_numerator_;
+  spin1 =
+      ComPWA::PhysConst::Instance().findParticle(_name1).getSpinLikeQuantumNumber(
+          QuantumNumberIDs::SPIN).J_numerator_;
+  spin2 =
+      ComPWA::PhysConst::Instance().findParticle(_name2).getSpinLikeQuantumNumber(
+          QuantumNumberIDs::SPIN).J_numerator_;
+
+  mass_min = ((M - deltaMassWindow));
+  mass_max = ((M + deltaMassWindow));
+  mass_sq_max = mass_max * mass_max;
+  mass_sq_min = mass_min * mass_max;
+  variable_names_.push_back("msq");
+>>>>>>> dd7eb340b0f73d2b07005f687e586aae14fbc9fa
 
 	init();
 }
@@ -33,6 +58,7 @@ bool TwoBodyKinematics::IsWithinPhsp(const dataPoint& point) const
 	if(point.getVal(0)>=mass_sq_min && point.getVal(0)<=mass_sq_max) return 1;
 	return 0;
 }
+<<<<<<< HEAD
 
 void TwoBodyKinematics::EventToDataPoint(const Event& ev, dataPoint& point) const
 {
@@ -43,6 +69,15 @@ void TwoBodyKinematics::EventToDataPoint(const Event& ev, dataPoint& point) cons
 	double msq = Particle::invariantMass(part1,part2);
 	point.setVal(0,msq);
 	return;
+=======
+void TwoBodyKinematics::translateEventToDataPoint(const Event& ev,
+    dataPoint& point) const {
+  Particle part1 = ev.getParticle(0);
+  Particle part2 = ev.getParticle(1);
+  double msq = Particle::invariantMass(part1, part2);
+  point.setVal(0, msq);
+  return;
+>>>>>>> dd7eb340b0f73d2b07005f687e586aae14fbc9fa
 }
 
 //! get mass of particles
@@ -66,3 +101,5 @@ double TwoBodyKinematics::GetMass(std::string name) const
 			"Wrong particle "+name+" requested!");
 	return -999;
 }
+
+} /* namespace ComPWA */

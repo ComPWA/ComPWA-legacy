@@ -34,6 +34,9 @@
 #include "Core/Resolution.hpp"
 #include "DataReader/DataCorrection.hpp"
 
+namespace ComPWA {
+namespace DataReader {
+
 class Data
 {
 public:
@@ -183,5 +186,7 @@ protected:
  */
 void rndReduceSet(unsigned int size, std::shared_ptr<Generator> gen,
 		Data* in1, Data* out1, Data* in2=NULL, Data* out2=NULL);
+} /* namespace DataReader */
+} /* namespace ComPWA */
 
 #endif

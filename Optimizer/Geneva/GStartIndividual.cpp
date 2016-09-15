@@ -40,8 +40,15 @@ namespace Gem
 {
 	namespace Geneva
 	{
-	//	GStartIndividual::GStartIndividual() : GParameterSet(),theData(ControlParameter::Instance())
-	//	        		{       /* nothing */ }
+
+
+	using ComPWA::ParameterList;
+	using ComPWA::Optimizer::ControlParameter;
+	using ComPWA::DoubleParameter;
+
+//	GStartIndividual::GStartIndividual() : GParameterSet(),theData(ControlParameter::Instance())
+//	        		{       /* nothing */ }
+
 	GStartIndividual::GStartIndividual() : GParameterSet(),theData()
 	{       /* nothing */ }
 
@@ -88,17 +95,17 @@ namespace Gem
 				<<parNames.size()<<" Parameters were added for minimization!";
 	}
 
-	/********************************************************************************************/
-	/**
-	 * A standard copy constructor. All real work is done by the parent class.
-	 *
-	 * @param cp A copy of another GStartIndividual
-	 */
-	//GStartIndividual::GStartIndividual(const GStartIndividual& cp)
-	//	: GParameterSet(cp),parNames(cp.parNames)
-	//	, theData(ControlParameter::Instance())
-	//{ /* nothing */ }
-	GStartIndividual::GStartIndividual(const GStartIndividual& cp)
+  /********************************************************************************************/
+  /**
+   * A standard copy constructor. All real work is done by the parent class.
+   *
+   * @param cp A copy of another GStartIndividual
+   */
+  //GStartIndividual::GStartIndividual(const GStartIndividual& cp)
+  //  : GParameterSet(cp),parNames(cp.parNames)
+  //  , theData(ControlParameter::Instance())
+  //{ /* nothing */ }
+  GStartIndividual::GStartIndividual(const GStartIndividual& cp)
 	: GParameterSet(cp),parNames(cp.parNames)
 	, theData(cp.theData), parList(cp.parList)
 	{ /* nothing */ }

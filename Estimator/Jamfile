@@ -25,7 +25,9 @@ if $(build_MinLogLH) && $(build_MinLogLH) != 0
 if $(build_SliceFit) && $(build_SliceFit) != 0
 {
 	build-project SliceFit ;
-	sources = $(sources) [ glob SliceFit/*.cpp ] ;
+	sources = $(sources) $(ESTIMATOR)/SliceFit//SliceFit ;
+    build-project SliceFitUB ;
+   	sources = $(sources) $(ESTIMATOR)/SliceFitUB//SliceFitUB ;
 }
 
 # Build libEstimator.so

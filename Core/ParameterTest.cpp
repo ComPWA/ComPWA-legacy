@@ -19,6 +19,8 @@
 #include <memory>
 #include <vector>
 
+namespace ComPWA {
+
 BOOST_AUTO_TEST_SUITE(ParameterSuite);
 
 BOOST_AUTO_TEST_CASE(BoundsCheck)
@@ -81,3 +83,5 @@ BOOST_AUTO_TEST_CASE(ConstructorCheck)
 }
 
 BOOST_AUTO_TEST_SUITE_END();
+
+} /* namespace ComPWA */

@@ -16,7 +16,9 @@
 #include "Core/Particle.hpp"
 #include "Core/Event.hpp"
 
-Event::Event():fWeight(1.),fName(""),fFlavour(0),fCharge(0),fEff(1.){
+namespace ComPWA {
+Event::Event() : fWeight(1.),fName(""),fFlavour(0),fCharge(0),fEff(1.)
+{
 
 }
 
@@ -30,6 +32,10 @@ Event::Event(const double inWeight, const std::string& name="", const double inE
 
 void Event::addParticle(Particle inParticle){
   fParticles.push_back(inParticle);
+}
+
+void Event::setParticleAt(const Particle &particle, unsigned int index) {
+  fParticles[index] = particle;
 }
 
 Event::~Event() { /* nothing */	}
@@ -51,3 +57,4 @@ std::ostream& operator<< (std::ostream& stream, const Event& ev){
 
 	return stream;
 }
+} /* namespace ComPWA */

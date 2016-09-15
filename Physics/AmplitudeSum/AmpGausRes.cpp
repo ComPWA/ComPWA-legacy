@@ -20,6 +20,10 @@
 #include <cmath>
 #include "Physics/AmplitudeSum/AmpGausRes.hpp"
 
+namespace ComPWA {
+namespace Physics {
+namespace AmplitudeSum {
+
 AmpGausRes::AmpGausRes(const char *name,
 		unsigned int varIdA,
 		std::shared_ptr<DoubleParameter> mag,
@@ -55,4 +59,9 @@ std::complex<double> AmpGausRes::EvaluateAmp(dataPoint& point){
 }
 std::complex<double> AmpGausRes::Evaluate(dataPoint& point){
 	return EvaluateAmp(point)*evaluateWignerD(point);
+
 }
+
+} /* namespace AmplitudeSum */
+} /* namespace Physics */
+} /* namespace ComPWA */

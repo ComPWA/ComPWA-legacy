@@ -7,16 +7,19 @@
 
 #include "Physics/AmplitudeSum/NonResonant.hpp"
 
+namespace ComPWA {
+namespace Physics {
+namespace AmplitudeSum {
 
 NonResonant::NonResonant(const char *name,
 		std::shared_ptr<DoubleParameter> mag,
 		std::shared_ptr<DoubleParameter> phase,
 		std::string mother, std::string particleA, std::string particleB,
 		int nCalls, normStyle nS) :
-		AmpAbsDynamicalFunction(name, 0, 0, mag, phase,
-				std::make_shared<DoubleParameter>("mass", 0.0),
-				Spin(0), Spin(0), Spin(0), +1, 0, mother, particleA, particleB,
-				formFactorType::noFormFactor, nCalls, nS)
+				AmpAbsDynamicalFunction(name, 0, 0, mag, phase,
+						std::make_shared<DoubleParameter>("mass", 0.0),
+						Spin(0), Spin(0), Spin(0), +1, 0, mother, particleA, particleB,
+						formFactorType::noFormFactor, nCalls, nS)
 {
 }
 
@@ -88,18 +91,21 @@ std::shared_ptr<FunctionTree> NonResonant::SetupTree(
 		newTree->createLeaf("N_"+_name, 1., "Reso_"+_name);
 	}else{
 		newTree->createLeaf("N_"+_name, 1/std::sqrt(phspVol), "Reso_"+_name);
-//		newTree->createLeaf("N_"+_name, 1/phspVol, "Reso_"+_name);
-//		newTree->createNode("N_"+_name, sqRootStrat, "Reso_"+_name);
-//		newTree->createNode("NSq_"+_name, multDStrat, "N_"+_name);
-//		newTree->createLeaf("PhspSize_"+_name, toySampleSize, "NSq_"+_name);
-//		newTree->createLeaf("PhspVolume_"+_name, 1/phspVol, "NSq_"+_name);
-//		newTree->createNode("InvSum_"+_name, invStrat, "NSq_"+_name);
-//		newTree->createNode("Sum_"+_name, addStrat, "InvSum_"+_name);
-//		newTree->createNode("AbsVal_"+_name, msqStrat, "Sum_"+_name);
-//		std::shared_ptr<MultiComplex> unitVec2(
-//				new MultiComplex("unit",std::vector<std::complex<double> >(
-//						toySampleSize, std::complex<double>(1,0))) );
-//		newTree->createLeaf("NormNonRes_"+_name, unitVec2, "AbsVal_"+_name);
+		//		newTree->createLeaf("N_"+_name, 1/phspVol, "Reso_"+_name);
+		//		newTree->createNode("N_"+_name, sqRootStrat, "Reso_"+_name);
+		//		newTree->createNode("NSq_"+_name, multDStrat, "N_"+_name);
+		//		newTree->createLeaf("PhspSize_"+_name, toySampleSize, "NSq_"+_name);
+		//		newTree->createLeaf("PhspVolume_"+_name, 1/phspVol, "NSq_"+_name);
+		//		newTree->createNode("InvSum_"+_name, invStrat, "NSq_"+_name);
+		//		newTree->createNode("Sum_"+_name, addStrat, "InvSum_"+_name);
+		//		newTree->createNode("AbsVal_"+_name, msqStrat, "Sum_"+_name);
+		//		std::shared_ptr<MultiComplex> unitVec2(
+		//				new MultiComplex("unit",std::vector<std::complex<double> >(
+		//						toySampleSize, std::complex<double>(1,0))) );
+		//		newTree->createLeaf("NormNonRes_"+_name, unitVec2, "AbsVal_"+_name);
 	}
 	return newTree;
 }
+} /* namespace AmplitudeSum */
+} /* namespace Physics */
+} /* namespace ComPWA */

@@ -18,30 +18,143 @@
 #include <boost/log/trivial.hpp>
 using namespace boost::log;
 
-PhysConst* PhysConst::inst = NULL;
+namespace ComPWA {
 
-PhysConst::PhysConst(){
-	//error code
-	id.push_back(-999); name.push_back("error"); mass.push_back(-999); width.push_back(-999); J.push_back(999); P.push_back(false); C.push_back(false);
-	nameConst.push_back("error"); valueConst.push_back(-999); errorConst.push_back(-999);
+QuantumNumberTranslator::QuantumNumberTranslator() {
+	quantum_number_key_name_mapping_[QuantumNumberIDs::SPIN] = "spin";
+	quantum_number_key_name_mapping_[QuantumNumberIDs::ORBITAL_ANGULAR_MOMENTUM] =
+			"angular-momentum";
+	quantum_number_key_name_mapping_[QuantumNumberIDs::ISOSPIN] = "isospin";
+	quantum_number_key_name_mapping_[QuantumNumberIDs::CHARGE] = "charge";
+	quantum_number_key_name_mapping_[QuantumNumberIDs::PARITY] = "parity";
+	quantum_number_key_name_mapping_[QuantumNumberIDs::CPARITY] = "cparity";
 
+	name_quantum_number_key_mapping_["spin"] = QuantumNumberIDs::SPIN;
+	name_quantum_number_key_mapping_["angular-momentum"] =
+			QuantumNumberIDs::ORBITAL_ANGULAR_MOMENTUM;
+	name_quantum_number_key_mapping_["isospin"] = QuantumNumberIDs::ISOSPIN;
+	name_quantum_number_key_mapping_["charge"] = QuantumNumberIDs::CHARGE;
+	name_quantum_number_key_mapping_["parity"] = QuantumNumberIDs::PARITY;
+	name_quantum_number_key_mapping_["cparity"] = QuantumNumberIDs::CPARITY;
+
+	quantum_number_key_type_mapping_[QuantumNumberIDs::SPIN] =
+			QuantumNumberType::SPIN_LIKE;
+	quantum_number_key_type_mapping_[QuantumNumberIDs::ORBITAL_ANGULAR_MOMENTUM] =
+			QuantumNumberType::SPIN_LIKE;
+	quantum_number_key_type_mapping_[QuantumNumberIDs::ISOSPIN] =
+			QuantumNumberType::SPIN_LIKE;
+	quantum_number_key_type_mapping_[QuantumNumberIDs::CHARGE] =
+			QuantumNumberType::INTEGER_LIKE;
+	quantum_number_key_type_mapping_[QuantumNumberIDs::PARITY] =
+			QuantumNumberType::INTEGER_LIKE;
+	quantum_number_key_type_mapping_[QuantumNumberIDs::CPARITY] =
+			QuantumNumberType::INTEGER_LIKE;
+
+};
+
+QuantumNumberTranslator::~QuantumNumberTranslator() {};
+
+QuantumNumberType QuantumNumberTranslator::getQuantumNumberType(const std::string& qn_name) const {
+	auto result = quantum_number_key_type_mapping_.find(getQuantumNumberEnum(qn_name));
+	if (result != quantum_number_key_type_mapping_.end()) {
+		return result->second;
+	}
+	else {
+		std::runtime_error("QuantumNumberTranslator::getQuantumNumberType:"
+				" quantum number with your specified key does not exist in the mapping!"
+				" Please correct or update mapping!");
+	}
+}
+
+std::string QuantumNumberTranslator::getQuantumNumberName(
+		const QuantumNumberIDs& qn_type) const {
+	auto result = quantum_number_key_name_mapping_.find(qn_type);
+	if (result != quantum_number_key_name_mapping_.end()) {
+		return result->second;
+	}
+	else {
+		std::runtime_error("QuantumNumberTranslator::getQuantumNumberName:"
+				" quantum number with your specified key does not exist in the mapping!"
+				" Please correct or update mapping!");
+	}
+}
+
+QuantumNumberIDs QuantumNumberTranslator::getQuantumNumberEnum(
+		const std::string& qn_name) const {
+	auto result = name_quantum_number_key_mapping_.find(qn_name);
+	if (result != name_quantum_number_key_mapping_.end()) {
+		return result->second;
+	}
+	else {
+		std::runtime_error("QuantumNumberTranslator::getQuantumNumberEnum:"
+				" quantum number with your specified key does not exist in the mapping!"
+				" Please correct or update mapping!");
+	}
+}
+
+Spin SpinWave::getSpinLikeQuantumNumber(QuantumNumberIDs qn_id) const {
+	auto spin_result = spin_like_quantum_numbers_.find(
+			QuantumNumberTranslator::Instance().getQuantumNumberName(qn_id));
+	if (spin_result != spin_like_quantum_numbers_.end())
+		return spin_result->second;
+	else {
+		std::stringstream ss;
+		ss << "SpinWave::getSpinLikeQuantumNumber: did not find quantum number ";
+		ss << QuantumNumberTranslator::Instance().getQuantumNumberName(qn_id);
+		ss << " in spin like qn list!";
+		std::runtime_error(ss.str());
+	}
+}
+
+int SpinWave::getIntLikeQuantumNumber(QuantumNumberIDs qn_id) const {
+	auto int_result = integer_like_quantum_numbers_.find(
+			QuantumNumberTranslator::Instance().getQuantumNumberName(qn_id));
+	if (int_result != integer_like_quantum_numbers_.end())
+		return int_result->second;
+	else {
+		std::stringstream ss;
+		ss << "SpinWave::getIntLikeQuantumNumber: did not find quantum number ";
+		ss << QuantumNumberTranslator::Instance().getQuantumNumberName(qn_id);
+		ss << " in int like qn list!";
+		std::runtime_error(ss.str());
+	}
+}
+
+double SpinWave::getDoubleLikeQuantumNumber(QuantumNumberIDs qn_id) const {
+	auto double_result = double_like_quantum_numbers_.find(
+			QuantumNumberTranslator::Instance().getQuantumNumberName(qn_id));
+	if (double_result != double_like_quantum_numbers_.end())
+		return double_result->second;
+	else {
+		std::stringstream ss;
+		ss << "SpinWave::getDoubleLikeQuantumNumber: did not find quantum number ";
+		ss << QuantumNumberTranslator::Instance().getQuantumNumberName(qn_id);
+		ss << " in double like qn list!";
+		std::runtime_error(ss.str());
+	}
+}
+
+PhysConst::PhysConst() {
 	const char* pPath = getenv("COMPWA_DIR");
 	std::string path = "";
-	try{
+	try {
 		path = std::string(pPath);
-	}catch(std::logic_error){
+	}
+	catch (std::logic_error) {
 		BOOST_LOG_TRIVIAL(error)<<"Environment Variable COMPWA_DIR not set?"<<std::endl;
 	}
-	particleFileName = path+"/Physics/particles.xml";
-	particleDefaultFileName = path+"/Physics/particlesDefault.xml";
-	constantFileName = path+"/Physics/physConstants.xml";
-	constantDefaultFileName = path+"/Physics/physDefaultConstants.xml";
+	particleFileName = path + "/Physics/particles.xml";
+	particleDefaultFileName = path + "/Physics/particlesDefault.xml";
+	constantFileName = path + "/Physics/physConstants.xml";
+	constantDefaultFileName = path + "/Physics/physDefaultConstants.xml";
 
-	flag_readFile=1;
-	return;
+	readFile();
 }
-void PhysConst::readFile(){
 
+PhysConst::~PhysConst() {
+}
+
+void PhysConst::readFile() {
 	// Create an empty property tree object
 	using boost::property_tree::ptree;
 	ptree pt;
@@ -54,13 +167,15 @@ void PhysConst::readFile(){
 	if (FILE *file = std::fopen(particleFileName.c_str(), "r")) {
 		fclose(file);
 		read_xml(particleFileName, pt);
-		BOOST_LOG_TRIVIAL(info) << "PhysConst: reading particle file "<<particleFileName;
+		BOOST_LOG_TRIVIAL(info)<< "PhysConst: reading particle file "<<particleFileName;
 		//Otherwise try to load default file
-	}else if (FILE *file = std::fopen(particleDefaultFileName.c_str(), "r")) {
+	}
+	else if (FILE *file = std::fopen(particleDefaultFileName.c_str(), "r")) {
 		fclose(file);
 		read_xml(particleDefaultFileName, pt);
 		BOOST_LOG_TRIVIAL(info) << "PhysConst: reading particles default file "<<particleDefaultFileName;
-	} else {
+	}
+	else {
 		throw std::runtime_error("Could not open default particle file!");
 	}
 
@@ -77,156 +192,153 @@ void PhysConst::readFile(){
 	// The get_child() function returns a reference to the child
 	// at the specified path; if there is no such child, it throws.
 	// Property tree iterators are models of BidirectionalIterator.
-	int _id;
-	std::string _name;
-	double _mass;
-	double _width;
-	unsigned int _J;
-	int _P;
-	int _C;
-	double _error;
-	double _value;
+	ParticleProperties particle_properties;
+	Constant constant;
 
+	for (auto const& v : pt.get_child("particleList")) {
+		if (v.first == "particle" || v.first == "particleFlatte") {
+			particle_properties.id_ = v.second.get<int>("ID");
+			particle_properties.name_ = v.second.get < std::string > ("name");
+			particle_properties.mass_ = v.second.get_child("mass").get<double>(
+					"value");
+			if (v.second.count("width") != 0)
+				particle_properties.width_ = v.second.get_child("width").get<double>(
+						"value");    //check if node "width" exists
 
-	BOOST_FOREACH( ptree::value_type const& v, pt.get_child("particleList") ) {
-		_id = -999; _name="error"; _mass=-999; _width=-999; _J=-999; _P=-999; _C=-999;//setting default values
-		if( v.first == "particle" || v.first == "particleFlatte") {
-			_id= v.second.get<int>("ID",-999);
-			_name = v.second.get<std::string>("name","error");
-			_mass = v.second.get_child("mass").get<double>("value",-999);
-			if( v.second.count("width") != 0) _width = v.second.get_child("width").get<double>("value",-999);//check if node "width" exists
-			_J = v.second.get<unsigned int>("J",999);
-			_P = v.second.get<int>("P",0);
-			_C = v.second.get<int>("C",0);
+			for (auto const& qn : v.second.get_child("quantum_numbers")) {
+				QuantumNumberType qn_type = QuantumNumberTranslator::Instance().getQuantumNumberType(qn.first);
+				if (qn_type
+						== QuantumNumberType::SPIN_LIKE) {
+					Spin s;
+					if(QuantumNumberTranslator::Instance().getQuantumNumberEnum(qn.first) == QuantumNumberIDs::SPIN)
+						s.z_component_relevant = false;
+					s.J_numerator_ = qn.second.get<unsigned int>("numerator");
+					s.J_denominator_ = qn.second.get<unsigned int>("denominator");
+					if (qn.second.count("z_numerator") != 0)
+						s.J_z_numerator_ = qn.second.get<int>("z_numerator");
+					particle_properties.spin_like_quantum_numbers_[qn.first] = s;
+				}
+				else if (qn_type
+						== QuantumNumberType::INTEGER_LIKE) {
+					particle_properties.integer_like_quantum_numbers_[qn.first] =
+							v.second.get_child("quantum_numbers").get<int>(qn.first);
+				}
+				else if (qn_type
+						== QuantumNumberType::DOUBLE_LIKE) {
+					particle_properties.double_like_quantum_numbers_[qn.first] =
+							v.second.get_child("quantum_numbers").get<double>(qn.first);
+				}
+			}
+
+			if (v.first == "particleFlatte") {
+				//read parameters which are specific to flatte description here.
+
+			}
+
+			particle_properties_list_.push_back(particle_properties);
+
+			Spin s = particle_properties.getSpinLikeQuantumNumber(
+					QuantumNumberIDs::SPIN);
+			BOOST_LOG_TRIVIAL(debug)<<"PhysConst adding particle: "<<particle_properties.name_<<" mass="<<particle_properties.mass_<<" width="<<particle_properties.width_<<" J=" <<1.0*s.J_numerator_/s.J_denominator_<<" P="<<particle_properties.getIntLikeQuantumNumber(QuantumNumberIDs::PARITY)<< " C="<<particle_properties.getIntLikeQuantumNumber(QuantumNumberIDs::CPARITY);
 		}
-		if( v.first == "particleFlatte" ) {
-			//read parameters which are specific to flatte description here.
-
-		}
-		if(_name=="error" && _mass==-999 ) continue;
-		id.push_back(_id);
-		name.push_back(_name);
-		mass.push_back(_mass);
-		width.push_back(_width);
-		J.push_back(_J);
-		P.push_back(_P);
-		C.push_back(_C);
-		BOOST_LOG_TRIVIAL(debug)<<"PhysConst adding particle: "<<_name<<" mass="<<_mass<<" width="<<_width<<" J=" <<_J<<" P="<<_P<< " C="<<_C;
 	}
 
 	//Reading XML file with physics constants
 	if (FILE *file = std::fopen(constantFileName.c_str(), "r")) {
 		fclose(file);
 		read_xml(constantFileName, pt);
-		BOOST_LOG_TRIVIAL(info) << "PhysConst: reading file with physical constants"<<constantFileName;
+		BOOST_LOG_TRIVIAL(info)<< "PhysConst: reading file with physical constants"<<constantFileName;
 		//Otherwise try to load default file
-	}else if (FILE *file = std::fopen(constantDefaultFileName.c_str(), "r")) {
+	}
+	else if (FILE *file = std::fopen(constantDefaultFileName.c_str(), "r")) {
 		fclose(file);
 		read_xml(constantDefaultFileName, pt);
 		BOOST_LOG_TRIVIAL(info) << "PhysConst: reading default file with physical constants"<<constantDefaultFileName;
-	} else {
+	}
+	else {
 		throw std::runtime_error("Could not open default constants file!");
 	}
-//	read_xml(constantFileName, pt);
-	BOOST_FOREACH( ptree::value_type const& v, pt.get_child("physConstList") ) {
-		_name="error"; _error=-999; _value=-999;
-		if( v.first == "constant" ){
-			_name = v.second.get<std::string>("name","error");
-			_value= v.second.get_child("value").get<double>("value",-999);
-			_error= v.second.get_child("value").get<double>("error",-999);
+	//	read_xml(constantFileName, pt);
+	BOOST_FOREACH( ptree::value_type const& v, pt.get_child("physConstList") ){
+		if (v.first == "constant") {
+			constant.name_ = v.second.get<std::string>("name");
+			constant.value_ = v.second.get_child("value").get<double>("value");
+			if (v.second.count("error") != 0)
+				constant.error_ = v.second.get_child("value").get<double>("error");
 		}
-		if(_name=="error" && _value==-999 ) continue;
-		nameConst.push_back(_name);
-		valueConst.push_back(_value);
-		errorConst.push_back(_error);
-		BOOST_LOG_TRIVIAL(debug)<<"PhysConst adding particle: "<<_name<<" mass="<<_mass<<" width="<<_width<<" J=" <<_J<<" P="<<_P<< " C="<<_C;
+
+		constants_list_.push_back(constant);
+
+		BOOST_LOG_TRIVIAL(debug)<<"PhysConst adding constant: "<<constant.name_<<" value="<<constant.value_<<" error="<<constant.error_;
 	}
 
-	flag_readFile=0;
 	return;
 }
 
-int PhysConst::findParticle(int idid)
-{
-	if(flag_readFile) readFile();
-	for(unsigned int i=0; i<name.size(); i++){
-		if(id[i]==idid) return i;
+const Constant& PhysConst::findConstant(const std::string& name) const {
+	auto result = std::find_if(constants_list_.begin(), constants_list_.end(),
+			[&] (const Constant& lhs) {return lhs.name_ == name;});
+
+	if (result != constants_list_.end())
+		return *result;
+
+	std::stringstream ss;
+	ss << "could not find constant with name " << name << std::endl;
+	throw std::runtime_error(ss.str());
+}
+
+const ParticleProperties& PhysConst::findParticle(int pid) const {
+	auto result = std::find_if(particle_properties_list_.begin(),
+			particle_properties_list_.end(),
+			[&] (const ParticleProperties& lhs) {return lhs.id_ == pid;});
+
+	if (result != particle_properties_list_.end())
+		return *result;
+
+	std::stringstream ss;
+	ss << "could not find particle id " << pid << std::endl;
+	throw std::runtime_error(ss.str());
+}
+
+const ParticleProperties& PhysConst::findParticle(
+		const std::string& name) const {
+	auto result = std::find_if(particle_properties_list_.begin(),
+			particle_properties_list_.end(),
+			[&] (const ParticleProperties& lhs) {return lhs.name_ == name;});
+
+	if (result != particle_properties_list_.end())
+		return *result;
+
+	std::stringstream ss;
+	ss << "could not find particle name " << name << std::endl;
+	throw std::runtime_error(ss.str());
+}
+
+std::vector<ParticleProperties> PhysConst::findParticlesWithQN(
+		const ParticleProperties& qn) const {
+	std::vector<ParticleProperties> particle_list;
+
+	auto result = particle_properties_list_.begin();
+	while (result != particle_properties_list_.end()) {
+		result = std::find(result, particle_properties_list_.end(), qn);
+		if (result != particle_properties_list_.end()) {
+			particle_list.push_back(*result);
+			++result;
+		}
 	}
-	return 0; //error particle not found
+
+	return particle_list;
 }
 
-int PhysConst::findConstant(std::string nnn)
-{
-	if(flag_readFile) readFile();
-	for(unsigned int i=0; i<nameConst.size(); i++)
-		if(nameConst[i]==nnn) return i;
-	return 0; //error particle not found
-}
-int PhysConst::findParticle(std::string nnn)
-{
-	if(flag_readFile) readFile();
-	for(unsigned int i=0; i<name.size(); i++)
-		if(name[i]==nnn) return i;
-	throw BadParameter("PhysConst::findParticle() | Particle \""+nnn+"\" not found!");
-	return 0;
+bool PhysConst::particleExists(const std::string& name) const {
+	auto result = std::find_if(particle_properties_list_.begin(),
+			particle_properties_list_.end(),
+			[&] (const ParticleProperties& lhs) {return lhs.name_ == name;});
+
+	if (result != particle_properties_list_.end())
+		return true;
+
+	return false;
 }
 
-double PhysConst::getMass(std::string nnn)
-{
-	return mass.at(findParticle(nnn));
-}
-
-double PhysConst::getWidth(std::string nnn)
-{
-	return width.at(findParticle(nnn));
-}
-
-unsigned int PhysConst::getJ(std::string nnn)
-{
-	return J.at(findParticle(nnn));
-}
-
-bool PhysConst::getP(std::string nnn)
-{
-	return P.at(findParticle(nnn));
-}
-
-bool PhysConst::getC(std::string nnn)
-{
-	return C.at(findParticle(nnn));
-}
-
-double PhysConst::getMass(int nnn)
-{
-	return mass.at(findParticle(nnn));
-}
-
-double PhysConst::getWidth(int nnn)
-{
-	return width.at(findParticle(nnn));
-}
-
-unsigned int PhysConst::getJ(int nnn)
-{
-	return J.at(findParticle(nnn));
-}
-
-bool PhysConst::getP(int nnn)
-{
-	return P.at(findParticle(nnn));
-}
-
-bool PhysConst::getC(int nnn)
-{
-	return C.at(findParticle(nnn));
-}
-
-double PhysConst::getConstValue(std::string nnn)
-{
-	return valueConst.at(findConstant(nnn));
-}
-
-double PhysConst::getConstError(std::string nnn)
-{
-	return errorConst.at(findConstant(nnn));
-}
+} /* namespace ComPWA */

@@ -34,6 +34,7 @@ install_geneva
 install_root
 install_qftpp
 install_minuit2
+install_clips
 
 cd ${install_path}
 rm -rf temp

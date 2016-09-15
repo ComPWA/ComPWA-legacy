@@ -34,12 +34,14 @@
 #include "DataReader/Data.hpp"
 #include "Core/Amplitude.hpp"
 
+namespace ComPWA {
+
 struct dataInfo{
   std::string name;
-  std::shared_ptr<Data> data;
+  std::shared_ptr<DataReader::Data> data;
   std::vector<std::string> parProvided;
 
-  dataInfo(std::string inN, std::shared_ptr<Data> inD, std::vector<std::string> inP):
+  dataInfo(std::string inN, std::shared_ptr<DataReader::Data> inD, std::vector<std::string> inP):
     name(inN), data(inD), parProvided(inP){};
 };
 
@@ -73,7 +75,7 @@ public:
     * \return associated name for this DataReader
     * \sa std::string introduce(std::shared_ptr<Amplitude> inAmp, std::string inName="");
    */
-  virtual std::string introduce(std::shared_ptr<Data> inData, std::string inName="");
+  virtual std::string introduce(std::shared_ptr<DataReader::Data> inData, std::string inName="");
 
   //! Introduction of an Amplitude
    /*!
@@ -111,5 +113,7 @@ protected:
   std::vector<ampInfo > mAmps_; /*!< List of Amplitude Info */
 
 };
+
+} /* namespace ComPWA */
 
 #endif /* _DICTIONARY_HPP_ */

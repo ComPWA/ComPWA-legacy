@@ -15,6 +15,9 @@
 #include "Physics/DPKinematics/DalitzKinematics.hpp"
 #include "Physics/DPKinematics/SimpleAngleEfficiency.hpp"
 
+namespace ComPWA {
+namespace Physics {
+namespace DPKinematics {
 
 //SimpleAngleEfficiency::SimpleAngleEfficiency(SimpleEfficiency* eff) : effHist(new SimpleEfficiency(*eff)){
 SimpleAngleEfficiency::SimpleAngleEfficiency(SimpleEfficiency* eff) {
@@ -47,3 +50,7 @@ double SimpleAngleEfficiency::evaluate(dataPoint& point){
 //	std::cout<<globalBin<<" m="<<m23sq<<" theta="<<angle<<" ->"<<eff<<std::endl;
 	return eff;
 }
+
+} /* namespace DPKinematics */
+} /* namespace Physics */
+} /* namespace ComPWA */

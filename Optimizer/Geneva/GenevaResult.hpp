@@ -37,6 +37,10 @@
 
 #include "Optimizer/Geneva/GStartIndividual.hpp"
 
+namespace ComPWA {
+namespace Optimizer {
+namespace Geneva {
+
 class GenevaResult : public FitResult
 {
 public:
@@ -57,5 +61,9 @@ protected:
 
 	};
 };
+
+} /* namespace Geneva */
+} /* namespace Optimizer */
+} /* namespace ComPWA */
 
 #endif

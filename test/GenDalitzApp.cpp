@@ -56,6 +56,13 @@ using namespace boost::log;
 
 using namespace std;
 
+using ComPWA::ParameterList;
+using ComPWA::Physics::AmplitudeSum::AmpSumIntensity;
+using ComPWA::Physics::AmplitudeSum::AmplitudeSetup;
+using ComPWA::Physics::AmplitudeSum::BreitWignerConf;
+using ComPWA::dataPoint;
+using ComPWA::Physics::DPKinematics::DalitzKinematics;
+
 const unsigned int MaxEvents = 50000;
 
 //constants
@@ -88,7 +95,7 @@ int main(int argc, char **argv) {
 
 	DalitzKinematics* kin =
 			dynamic_cast<DalitzKinematics*>(DalitzKinematics::createInstance(
-					"J/psi", "gamma", "pi0", "pi0"));
+					"jpsi", "gamma", "pi0", "pi0"));
 //	static dataPoint* point = dataPoint::instance();
 
 	//DPKinematics kin("J/psi","gamma","pi0","pi0");
@@ -293,12 +300,41 @@ int main(int argc, char **argv) {
 		BOOST_LOG_TRIVIAL(error)<<"Environment Variable COMPWA_DIR not set?"<< std::endl;
 	}
 	std::string resoFile = path + "/test/JPSI_ypipi.xml";
+<<<<<<< HEAD
 	boost::property_tree::ptree pt;
 	read_xml(resoFile , pt, boost::property_tree::xml_parser::trim_whitespace);
 	AmpSumIntensity testBW("amp",normStyle::none,
 			std::shared_ptr<Efficiency>(new UnitEfficiency()), MaxEvents);
 	testBW.Configure(pt);
 	testBW.to_str();
+=======
+	AmplitudeSetup ini(resoFile);
+	cout << "loaded file " << ini.getFileName() << " with "
+			<< ini.getBreitWigner().size() << " resonances:" << endl;
+	for (std::vector<BreitWignerConf>::iterator reso = ini.getBreitWigner().begin();
+			reso != ini.getBreitWigner().end(); reso++) {
+		cout << endl << "Resonance " << (*reso).m_name << endl;
+		cout << "Mass =  " << (*reso).m_mass << " with range "
+				<< (*reso).m_mass_min << " to " << (*reso).m_mass_max << endl;
+		cout << "Width = " << (*reso).m_width << " with range "
+				<< (*reso).m_width_min << " to " << (*reso).m_width_max << endl;
+		cout << "Spin =  " << (*reso).m_spin << " m = " << (*reso).m_m
+				<< " n = " << (*reso).m_n << endl;
+		cout << "Strength =  " << (*reso).m_strength << " Phase = "
+				<< (*reso).m_phase << endl;
+		cout << "mesonRadius=  " << (*reso).m_mesonRadius << endl;
+		cout << "DaughterA =  " << (*reso).m_daughterA << " DaughterB = "
+				<< (*reso).m_daughterB << endl;
+	}
+	cout << endl << endl;
+
+	//Simple Breit-Wigner Physics-Module setup
+	AmpSumIntensity testBW(ini, AmpSumIntensity::normStyle::none,
+			std::shared_ptr<ComPWA::Efficiency>(new ComPWA::UnitEfficiency()), MaxEvents);
+	// std::shared_ptr<Amplitude> amps(new AmpSumIntensity(ini, AmpSumIntensity::normStyle::one, std::shared_ptr<Efficiency>(new UnitEfficiency()), myReader->getNEvents()));
+
+	testBW.printAmps();
+>>>>>>> dd7eb340b0f73d2b07005f687e586aae14fbc9fa
 
 	ParameterList minPar;
 	testBW.FillParameterList(minPar);

@@ -35,7 +35,12 @@
 #include "Core/ProgressBar.hpp"
 
 #include "Core/RunManager.hpp"
+
+namespace ComPWA {
+
 using namespace boost::log;
+using DataReader::Data;
+using Optimizer::Optimizer;
 
 RunManager::RunManager()
 {
@@ -69,7 +74,7 @@ std::shared_ptr<FitResult> RunManager::startFit(ParameterList& inPar)
 	BOOST_LOG_TRIVIAL(info) << "RunManager::startFit() | Minimization finished!"
 			" Result = "<<result->getResult()<<".";
 
-	return result;
+  return result;
 }
 
 void RunManager::setPhspSample( std::shared_ptr<Data> phsp,
@@ -318,3 +323,6 @@ bool RunManager::generatePhsp( int number )
 	}
 	return true;
 }
+
+
+} /* namespace ComPWA */

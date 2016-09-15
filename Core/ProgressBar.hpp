@@ -11,6 +11,8 @@
 #include <ctime>
 #include <iostream>
 
+namespace ComPWA {
+
 class progressBar
 {
 public:
@@ -35,6 +37,6 @@ protected:
 
 };
 
-
+} /* namespace ComPWA */
 
 #endif /* PROGRESSBAR_HPP_ */

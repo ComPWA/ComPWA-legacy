@@ -21,6 +21,7 @@
 #include <boost/date_time/posix_time/ptime.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 
+namespace ComPWA {
 //using namespace boost::log;
 class Logging
 {
@@ -33,4 +34,7 @@ public:
 private:
 	void init(std::string out,boost::log::trivial::severity_level minLevel);
 };
+
+} /* namespace ComPWA */
+
 #endif /* LOGGING_HPP_ */

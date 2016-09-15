@@ -30,10 +30,14 @@
 #include "Core/Event.hpp"
 #include "Core/ParameterList.hpp"
 
+namespace ComPWA {
+namespace Estimator {
+namespace ChiOneD {
+
 class ChiOneD : public Estimator {
 
 public:
-  static std::shared_ptr<ControlParameter> createInstance(std::shared_ptr<Amplitude>, std::shared_ptr<Data>);
+  static std::shared_ptr<Optimizer::ControlParameter> createInstance(std::shared_ptr<Amplitude>, std::shared_ptr<DataReader::Data>);
   virtual double controlParameter(ParameterList& minPar);
 
   /** Destructor */
@@ -41,12 +45,16 @@ public:
 
 protected:
   /// Default Constructor (0x0)
-  ChiOneD(std::shared_ptr<Amplitude>, std::shared_ptr<Data>);
+  ChiOneD(std::shared_ptr<Amplitude>, std::shared_ptr<DataReader::Data>);
 
 private:
   std::shared_ptr<Amplitude> pPIF_;
-  std::shared_ptr<Data> pDIF_;
+  std::shared_ptr<DataReader::Data> pDIF_;
 
 };
+
+} /* namespace ChiOneD */
+} /* namespace Estimator */
+} /* namespace ComPWA */
 
 #endif /* _EIFChiOneD_HPP */
