@@ -35,12 +35,12 @@ rule use-project
 	  	;
 
 	lib gemfony-geneva ;
-    lib gemfony-geneva-individuals ;
-    lib gemfony-courtier ;
-    lib gemfony-hap ;
-    lib gemfony-common ;
+    	lib gemfony-geneva-individuals ;
+    	lib gemfony-courtier ;
+    	lib gemfony-hap ;
+    	lib gemfony-common ;
 
-    project.pop-current ;
+    	project.pop-current ;
 }
 
 

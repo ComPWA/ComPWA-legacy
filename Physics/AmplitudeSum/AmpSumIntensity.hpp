@@ -162,7 +162,9 @@ public:
 	virtual const ParameterList& intensityNoEff( dataPoint& point );
 
 	virtual const double sliceIntensity(dataPoint& dataP,
-			std::complex<double>* reso, unsigned int nResos);
+			ParameterList& par,std::complex<double>* reso,
+			unsigned int nResos, double N, unsigned int nF0,
+			unsigned int nF2);
 
 	//==================== FIT FRACTIONS =======================
 	virtual void GetFitFractions(ParameterList& parList);

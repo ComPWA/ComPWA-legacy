@@ -10,6 +10,7 @@
 //		Peter Weidenkaff - adding flatte type resonance, removing root dependence
 //-------------------------------------------------------------------------------
 #include <numeric>
+#include <algorithm>
 
 #include "Core/PhysConst.hpp"
 #include "Core/Functions.hpp"
@@ -32,6 +33,8 @@
 namespace ComPWA {
 namespace Physics {
 namespace AmplitudeSum {
+
+using namespace boost::property_tree;
 
 AmpSumIntensity::AmpSumIntensity(std::string name,
 		normStyle ns, std::shared_ptr<Efficiency> eff,
@@ -247,8 +250,10 @@ double AmpSumIntensity::GetMaxVal(std::shared_ptr<Generator> gen)
 
 void AmpSumIntensity::calcMaxVal(std::shared_ptr<Generator> gen)
 {
-	DalitzKinematics* kin =
-			dynamic_cast<DalitzKinematics*>(Kinematics::instance());
+	ComPWA::Physics::DPKinematics::DalitzKinematics* kin =
+			dynamic_cast<ComPWA::Physics::DPKinematics::DalitzKinematics*>(
+					Kinematics::instance()
+	);
 
 	double maxM23=-999; double maxM13=-999; double maxVal=0;
 	for(unsigned int i=0; i<_nCalls; i++){
@@ -373,8 +378,10 @@ double AmpSumIntensity::integral(std::vector<resonanceItr> resList,
 	size_t dim=2;
 	double res=0.0, err=0.0;
 
-	DalitzKinematics* kin =
-			dynamic_cast<DalitzKinematics*>(Kinematics::instance());
+	ComPWA::Physics::DPKinematics::DalitzKinematics* kin =
+			dynamic_cast<ComPWA::Physics::DPKinematics::DalitzKinematics*>(
+					Kinematics::instance()
+	);
 
 	//Set limits
 	auto var1_limit = kin->GetMinMax(0);
@@ -459,8 +466,10 @@ const double AmpSumIntensity::GetIntegralInterference(
 	double res=0.0, err=0.0;
 
 	//set limits: we assume that x[0]=m13sq and x[1]=m23sq
-	DalitzKinematics* kin =
-			dynamic_cast<DalitzKinematics*>(Kinematics::instance());
+	ComPWA::Physics::DPKinematics::DalitzKinematics* kin =
+			dynamic_cast<ComPWA::Physics::DPKinematics::DalitzKinematics*>(
+					Kinematics::instance()
+	);
 
 	//Set limits
 	auto var1_limit = kin->GetMinMax(0);
@@ -614,11 +623,14 @@ const ParameterList& AmpSumIntensity::intensity(dataPoint& point)
 }
 
 const double AmpSumIntensity::sliceIntensity(dataPoint& dataP,
-		std::complex<double>* reso, unsigned int nResos)
+		ParameterList& par,	std::complex<double>* reso,
+		unsigned int nResos, double N,
+		unsigned int nF0, unsigned int nF2)
 {
 	double AMPpdf=0;
 	//TODO: implement slice fit
-	//	if(Kinematics::instance()->isWithinPhsp(dataP)) AMPpdf = totAmp.evaluateSlice(dataP, reso, nResos,5);
+	//	if(Kinematics::instance()->isWithinPhsp(dataP))
+	//	AMPpdf = totAmp.evaluateSlice(dataP, reso, nResos,5, N, nF0, nF2);
 	if(AMPpdf!=AMPpdf){
 		BOOST_LOG_TRIVIAL(error)<<"Error AmpSumIntensity: Intensity is not a number!!";
 		AMPpdf = 0;

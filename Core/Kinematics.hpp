@@ -16,47 +16,12 @@
 #include <string>
 #include <complex>
 
-namespace ComPWA {
 #include <Core/Event.hpp>
+
+namespace ComPWA {
+
 class dataPoint;
 
-//class Kinematics {
-//public:
-//  //! singleton pattern
-//  static Kinematics* instance();
-//
-//  //! vector with names of variables, e.g. vec[0]=m23sq, vec[1]=m13sq
-//  const std::vector<std::string>& getVarNames() const {
-//    return variable_names_;
-//  }
-//  //! checks of data point is within phase space boundaries
-//  virtual bool isWithinPhsp(const dataPoint& point) = 0;
-//  //! mass of mother particle
-//  virtual double getMotherMass() const = 0;
-//  //! calculated the PHSP volume of the current decay by MC integration
-//  virtual double getPhspVolume() = 0;
-//  //! converts Event to dataPoint
-//  virtual void eventToDataPoint(Event& ev, dataPoint& point) const = 0;
-//  //! get mass of particles
-//  virtual double getMass(unsigned int num) const = 0;
-//  //! get mass of paticles
-//  virtual double getMass(std::string name) const = 0;
-//  //! Get number of particles
-//  virtual unsigned int getNumberOfParticles() const {
-//    return number_of_particles_;
-//  }
-//  //! Get number of variables
-//  virtual unsigned int getNumberOfVariables() const {
-//    return variable_names_.size();
-//  }
-//
-//protected:
-//  static Kinematics* inst_;
-//
-//  unsigned int number_of_particles_;
-//  std::vector<std::string> variable_names_;
-//  Kinematics();
-//  virtual ~Kinematics();
 static const char * formFactorTypeString[] = {
 		"noFormFactor",
 		"BlattWeisskopf",
@@ -76,11 +41,12 @@ public:
 	static Kinematics* instance();
 
 	//! converts Event to dataPoint
-	virtual void EventToDataPoint(const Event& ev, dataPoint& point) const = 0;
+	virtual void EventToDataPoint( const ComPWA::Event& ev,
+			dataPoint& point) const = 0;
 
 	//! Event to dataPoint conversion
-	virtual void FillDataPoint(int a, int b, double invMassSqA, double invMassSqB,
-			dataPoint& point) const = 0;
+	virtual void FillDataPoint(int a, int b, double invMassSqA,
+			double invMassSqB, dataPoint& point) const = 0;
 
 	//! vector with names of variables, e.g. vec[0]=m23sq, vec[1]=m13sq
 	std::vector<std::string> GetVarNames() const { return _varNames; }
@@ -120,7 +86,7 @@ public:
 
 	//! get mass of particles
 	virtual double GetMass(unsigned int num) const = 0;
-	//! get mass of paticles
+	//! get mass of particles
 	virtual double GetMass(std::string name) const = 0;
 	//! Get number of particles
 	virtual unsigned int GetNumberOfParticles() const { return _nPart; }
@@ -189,7 +155,8 @@ protected:
 	//!Default constructor (protected)
 	Kinematics(std::string nameM="", double widthM=0.0, unsigned int n=3) :
 		_nameMother(nameM), _Br(widthM), _nPart(n),
-		is_PS_area_calculated_(false), PS_area_(0.0){};
+		is_PS_area_calculated_(false), PS_area_(0.0),
+		_M(1.0), _Msq(1.0), _spinM(0) { };
 
 	//!Delete Copy constructor (protected)
 	Kinematics(const Kinematics&) = delete;

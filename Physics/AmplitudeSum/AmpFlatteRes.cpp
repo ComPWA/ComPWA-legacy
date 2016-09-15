@@ -27,6 +27,7 @@ namespace ComPWA {
 namespace Physics {
 namespace AmplitudeSum {
 
+using Physics::DPKinematics::DalitzKinematics;
 
 AmpFlatteRes::AmpFlatteRes( normStyle nS, int calls ) :
 AmpAbsDynamicalFunction( nS, calls )
@@ -70,16 +71,16 @@ void AmpFlatteRes::initialize()
 	AmpAbsDynamicalFunction::initialize();
 
 	try{
-		_g2_massA = PhysConst::instance()->getMass(_g2_idA);
-		_g2_massB = PhysConst::instance()->getMass(_g2_idB);
+		_g2_massA = PhysConst::Instance().findParticle(_g2_idA).mass_;
+		_g2_massB = PhysConst::Instance().findParticle(_g2_idB).mass_;
 	} catch (std::exception& ex){
 		BOOST_LOG_TRIVIAL(error) <<"AmpFlatteRes::initialize() | "
 				"Masses of 2nd channel can not be set!";
 		throw;
 	}
 	try{
-		_g3_massA = PhysConst::instance()->getMass(_g3_idA);
-		_g3_massB = PhysConst::instance()->getMass(_g3_idB);
+		_g3_massA = PhysConst::Instance().findParticle(_g3_idA).mass_;
+		_g3_massB = PhysConst::Instance().findParticle(_g3_idB).mass_;
 	} catch (std::exception& ex){
 		//if g3 is not set we don't need to masses either
 		if(_g3->GetValue()){
@@ -334,7 +335,7 @@ std::complex<double> AmpFlatteRes::EvaluateAmp(dataPoint& point)
 				_mass1,_mass2,_g1->GetValue(),
 				_g2_massA,_g2_massB,_g2->GetValue(),
 				_g3_massA,_g3_massB,_g3->GetValue(),
-				_spin,_mesonRadius->GetValue(), _ffType);
+				_spin.Val(),_mesonRadius->GetValue(), _ffType);
 	} catch (std::exception& ex){
 		BOOST_LOG_TRIVIAL(error) <<"AmpFlatteRes::EvaluateAmp() | "
 				"Dynamical function can not be evalutated: "<<ex.what();
@@ -468,7 +469,7 @@ std::shared_ptr<FunctionTree> AmpFlatteRes::SetupTree(
 	newTree->createLeaf("Phase_"+_name, _phase, "C_"+_name); //phi
 
 	//Angular distribution
-	if( _spin )
+	if( _spin.Val() )
 		newTree->insertTree(_wignerD.SetupTree(sample,suffix), "Reso_"+_name);
 
 	//Flatte
@@ -478,7 +479,7 @@ std::shared_ptr<FunctionTree> AmpFlatteRes::SetupTree(
 					_mass, _g1, _mass1, _mass2,
 					_g2, _g2_massA, _g2_massB,
 					_g3, _g3_massA, _g3_massB,
-					_spin, _mesonRadius, _ffType),
+					_spin.Val(), _mesonRadius, _ffType),
 					"Reso_"+_name
 	);
 
@@ -498,7 +499,7 @@ std::shared_ptr<FunctionTree> AmpFlatteRes::SetupTree(
 				toySampleSize); //BW
 
 		//Angular distribution (Normalization)
-		if( _spin )
+		if( _spin.Val() )
 			newTree->insertTree(_wignerD.SetupTree(toySample,suffix),
 					"NormReso_"+_name);
 
@@ -509,7 +510,7 @@ std::shared_ptr<FunctionTree> AmpFlatteRes::SetupTree(
 					_mass, _g1, _mass1, _mass2,
 					_g2, _g2_massA, _g2_massB,
 					_g3, _g3_massA, _g3_massB,
-					_spin, _mesonRadius, _ffType),
+					_spin.Val(), _mesonRadius, _ffType),
 					"NormReso_"+_name
 		);
 	}

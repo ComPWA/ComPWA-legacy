@@ -18,11 +18,6 @@ if $(build_AsciiReader) && $(build_AsciiReader) != 0
 	build-project AsciiReader ;
 	sources = $(sources) [ glob AsciiReader/*.cpp : *.Test.cpp ] ;
 }
-if $(build_RootGenerator) && $(build_RootGenerator) != 0
-{
-	build-project RootGenerator ;
-	sources = $(sources) $(DATAREADER)/RootGenerator//RootGenerator ;
-}
 
 # Build libDataReader.so
 lib DataReader : $(sources) $(TOP)/Core//ComPWA ;

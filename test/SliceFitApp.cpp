@@ -72,11 +72,12 @@ unsigned int nF0=3;
 unsigned int nF2=2;
 
 using namespace ComPWA;
+using namespace ComPWA::Physics::AmplitudeSum;
 using Physics::DPKinematics::DalitzKinematics;
+
 using Physics::AmplitudeSum::AmpSumIntensity;
 using DataReader::RootReader::RootReader;
 using Estimator::SliceFit::SliceFit;
-using Physics::AmplitudeSum::AmplitudeSetup;
 
 /************************************************************************************************/
 /**
@@ -95,9 +96,6 @@ int main(int argc, char **argv){
 
 	bool resultGen = true;
 
-<<<<<<< HEAD
-	std::string file="test/3Part-4vecs.root";
-=======
   unsigned int dataID = 0;
   if(argc>1)
    dataID = std::atoi(argv[1]);
@@ -110,7 +108,6 @@ int main(int argc, char **argv){
     file+=".root";
     BOOST_LOG_TRIVIAL(info) << "Started with runID: " << dataID;
   }
->>>>>>> dd7eb340b0f73d2b07005f687e586aae14fbc9fa
 
 	const char* pPath = getenv("COMPWA_DIR");
 	std::string path = "";
@@ -119,109 +116,24 @@ int main(int argc, char **argv){
 	}catch(std::logic_error& ex){
 		BOOST_LOG_TRIVIAL(error)<<"Environment Variable COMPWA_DIR not set?"<<std::endl;
 	}
-<<<<<<< HEAD
-	std::string resoFile=path+"/test/JPSI_ypipi.xml";
-	boost::property_tree::ptree pt;
-	read_xml(resoFile, pt, boost::property_tree::xml_parser::trim_whitespace);
-	auto fitAmpPtr = new AmpSumIntensity("amp",normStyle::none,
-			std::shared_ptr<Efficiency>(new UnitEfficiency()), nFitEvents);
-	fitAmpPtr->Configure(pt);
-	std::shared_ptr<AmpSumIntensity> amps( fitAmpPtr );
 
-	BOOST_LOG_TRIVIAL(info)<< "Load Modules";
-	std::shared_ptr<RootReader> myReader(new RootReader(file, "data"));
-	std::shared_ptr<RootReader> myPHSPReader(new RootReader(file, "mc"));
-
-	// Initiate parameters
-	ParameterList par;
-	std::shared_ptr<SliceFit> esti;
-	amps->FillParameterList(par); //perfect startvalues
-	esti = std::static_pointer_cast<SliceFit>(
-			SliceFit::createInstance(
-					amps, myReader, myPHSPReader, par, nStartEvent, nFitEvents
-					)
-	);
-
-
-	//unsigned int nSlices = nBins-(nBins/20.);
-	ParameterList slicePars;
-	//for(unsigned int i=0; i<nSlices; i++){
-	//   std::string sliceName = "S"+std::to_string(i);
-	std::shared_ptr<DoubleParameter> tmpA = std::shared_ptr<DoubleParameter>(new DoubleParameter("P0",0.05,0,100));
-	std::shared_ptr<DoubleParameter> tmpB = std::shared_ptr<DoubleParameter>(new DoubleParameter("P1",10.,0,20));
-	std::shared_ptr<DoubleParameter> tmpC = std::shared_ptr<DoubleParameter>(new DoubleParameter("P2",0.,0,20));
-	std::shared_ptr<DoubleParameter> tmpD = std::shared_ptr<DoubleParameter>(new DoubleParameter("P3",0.,0,30));
-	std::shared_ptr<DoubleParameter> tmpE = std::shared_ptr<DoubleParameter>(new DoubleParameter("P4",0.,0,20));
-	//std::shared_ptr<DoubleParameter> tmpF = std::shared_ptr<DoubleParameter>(new DoubleParameter("P5",1.,-10,10));
-	tmpA->FixParameter(true);
-	//tmpC->FixParameter(true);
-	// tmpE->FixParameter(true);
-	//tmpB->FixParameter(true);
-	//tmpD->FixParameter(true);
-	tmpB->SetError(1.);
-	tmpC->SetError(1.);
-	tmpD->SetError(1.);
-	tmpE->SetError(1.);
-	slicePars.AddParameter(tmpA);
-	slicePars.AddParameter(tmpB);
-	slicePars.AddParameter(tmpC);
-	slicePars.AddParameter(tmpD);
-	slicePars.AddParameter(tmpE);
-	//slicePars.AddParameter(tmpF);
-
-
-	TH2D* phspA = new TH2D("phspTOT","phspTOT",100,0,10,100,0,10);
-	TH2D* phspB = new TH2D("phspSpin0","phspSpin0",100,0,10,100,0,10);
-	TH2D* phspD = new TH2D("phspSpin2","phspSpin2",100,0,10,100,0,10);
-	TH2D* phspC = new TH2D("phspAll","phspAll",100,0,10,100,0,10);
-	std::complex<double> reso[2];
-	reso[0]=std::complex<double>(10,0);
-	reso[1]=std::complex<double>(0,0);
-	std::complex<double> resoC[2];
-	resoC[0]=std::complex<double>(0,0);
-	resoC[1]=std::complex<double>(20,0);
-	std::complex<double> resoTOT[2];
-	resoTOT[0]=std::complex<double>(0,0);
-	resoTOT[1]=std::complex<double>(0,0);
-	std::complex<double> resoFull[2];
-	resoFull[0]=std::complex<double>(22,0);
-	resoFull[1]=std::complex<double>(15,0);
-	//std::cout << " " << reso[0] << "   " << reso[1] << std::endl;
-	for(unsigned int i=0; i<100; i++){
-		for(unsigned int j=0; j<100; j++){
-			dataPoint point;
-			point.setVal("m23sq",i/10.); point.setVal("m13sq",j/10.);
-			//std::cout << " " << amps->sliceIntensity(point, par, reso, 2) << "   " << amps->sliceIntensity(point, par, resoTOT, 2) << std::endl;
-			phspA->SetBinContent(i,j,amps->sliceIntensity(point, resoTOT, 2));
-			phspB->SetBinContent(i,j,amps->sliceIntensity(point, reso, 2));
-			phspC->SetBinContent(i,j,amps->sliceIntensity(point, resoFull, 2));
-			phspD->SetBinContent(i,j,amps->sliceIntensity(point, resoC, 2));
-		}}
-
-
-	//slicePars.AddParameter(std::shared_ptr<DoubleParameter>(new DoubleParameter("P6",1.)));
-	//}
-
-	std::shared_ptr<Optimizer> opti(new MinuitIF(esti, slicePars));
-
-	esti->setSlice(33);
-
-	BOOST_LOG_TRIVIAL(info) << "Chi2 with start parameters slice 33: " << esti->controlParameter(slicePars);
-
-	/*double startInt[par.GetNDouble()], optiInt[par.GetNDouble()];
-=======
 	std::string resoFile=path+"/test/JPSI_ypipi_phase.xml";
 	AmplitudeSetup ini(resoFile);
 
   BOOST_LOG_TRIVIAL(info)<< "Load Modules";
   std::shared_ptr<RootReader> myReader(new RootReader(file, "data"));
   std::shared_ptr<RootReader> myPHSPReader(new RootReader(file, "mc"));
-  std::shared_ptr<AmpSumIntensity> amps(new AmpSumIntensity(ini, AmpSumIntensity::normStyle::none, std::shared_ptr<Efficiency>(new UnitEfficiency()), nFitEvents));
+  std::shared_ptr<AmpSumIntensity> amps(
+		  new AmpSumIntensity(
+				  ini,
+				  normStyle::none,
+				  std::shared_ptr<Efficiency>(new UnitEfficiency()), nFitEvents)
+  );
 
   // Initiate parameters
   ParameterList par;
   std::shared_ptr<SliceFit> esti;
-  amps->copyParameterList(par); //perfect startvalues
+  amps->FillParameterList(par); //perfect startvalues
   //esti = std::static_pointer_cast<SliceFit>(SliceFit::createInstance(amps, myReader, myPHSPReader, par, nStartEvent, nFitEvents));
   //amps->fillStartParVec(par); //perfect startvalues
   esti = std::static_pointer_cast<SliceFit>(SliceFit::createInstance(amps, myReader, myPHSPReader, par, nStartEvent, nFitEvents, nBins, nF0, nF2));
@@ -295,7 +207,6 @@ int main(int argc, char **argv){
   BOOST_LOG_TRIVIAL(info) << "Chi2 with start parameters slice 33: " << esti->controlParameter(slicePars);
 
   /*double startInt[par.GetNDouble()], optiInt[par.GetNDouble()];
->>>>>>> dd7eb340b0f73d2b07005f687e586aae14fbc9fa
   for(unsigned int i=0; i<par.GetNDouble(); i++){
     std::shared_ptr<DoubleParameter> tmp = par.GetDoubleParameter(i);
     optiInt[i] = tmp->GetValue();
@@ -310,123 +221,7 @@ int main(int argc, char **argv){
     startInt[i] = tmp->GetValue();
   }*/
 
-<<<<<<< HEAD
-	// std::cout << "Fixing 5 of 7 parameters " << std::endl;
-	//for(unsigned int i=2; i<par.GetNDouble(); i++){
-	//    par.GetDoubleParameter(i).FixParameter(true);
-	//  }
 
-	BOOST_LOG_TRIVIAL(info) << "Start Fit of all slices";
-	std::vector<std::complex<double> > p1,p2;
-	std::vector<double> invMass, norm;
-	std::vector<std::shared_ptr<TH1D> > histData, histModel, histModelCl;
-	for(int i=0+(nBins/40.); i<nBins-(nBins/20.)-1; i++){
-		//  {unsigned int i=50;
-
-		BOOST_LOG_TRIVIAL(info) << "Slice " << i << " reset par" ;
-		for(unsigned int i=0; i<slicePars.GetNDouble(); i++){
-			std::shared_ptr<DoubleParameter> tmp = slicePars.GetDoubleParameter(i);
-			if(!tmp->IsFixed()){
-				tmp->SetValue(1.);
-				tmp->SetError(tmp->GetValue());
-			}
-		}
-
-		double tmpMass = esti->setSlice(i);
-		BOOST_LOG_TRIVIAL(debug) << "InvMass Slice " << i << " " << tmpMass ;
-		std::shared_ptr<FitResult> genResult = opti->exec(slicePars);
-
-		histData.push_back(esti->getSliceHist());
-		histModel.push_back(esti->getAmpSlHist());
-		histModelCl.push_back(esti->getAmpClHist());
-
-		double parN(slicePars.GetDoubleParameter(0)->GetValue());
-		std::complex<double> parCA(slicePars.GetDoubleParameter(1)->GetValue(), slicePars.GetDoubleParameter(2)->GetValue());
-		std::complex<double> parCB(slicePars.GetDoubleParameter(3)->GetValue(), slicePars.GetDoubleParameter(4)->GetValue());
-		p1.push_back(parCA);
-		p2.push_back(parCB);
-		invMass.push_back(tmpMass);
-		norm.push_back(std::fabs(parN));
-		//p3.push_back(slicePars.GetDoubleParameter(3)->GetValue());
-		//p4.push_back(slicePars.GetDoubleParameter(4)->GetValue());
-
-	}
-
-	BOOST_LOG_TRIVIAL(debug) << "Results";
-	for(unsigned int i=0; i<p1.size(); i++){
-		BOOST_LOG_TRIVIAL(debug) << "Slice " << i+(nBins/40.) << " " << std::abs(p1[i]) << " " << std::abs(p2[i]);
-	}
-
-	if(!resultGen) return 0;
-
-	//Plot result
-	TGraphErrors par_N(nBins-3*(nBins/40.)-1);
-	TGraphErrors par_r0(nBins-3*(nBins/40.)-1);
-	TGraphErrors par_r2(nBins-3*(nBins/40.)-1);
-	TGraphErrors par_p0(nBins-3*(nBins/40.)-1);
-	TGraphErrors par_p2(nBins-3*(nBins/40.)-1);
-
-
-	for(unsigned int i=0; i<p1.size(); i++){
-		double phi0=std::arg(p1[i]), phi2=std::arg(p2[i]);
-		while(phi0<0){
-			phi0+=2*3.14159;
-		};
-		while(phi2<0){
-			phi2+=2*3.14159;
-		};
-
-		par_r0.SetPoint(i,invMass[i],std::abs(p1[i]));
-		par_p0.SetPoint(i,invMass[i],phi0);
-
-		par_r2.SetPoint(i,invMass[i],std::abs(p2[i]));
-		par_p2.SetPoint(i,invMass[i],phi2);
-
-		par_N.SetPoint(i,invMass[i],norm[i]);
-	}
-
-	par_r0.Draw();
-	par_r2.Draw();
-	par_p0.Draw();
-	par_p2.Draw();
-	par_r0.SetTitle("");
-	par_r2.SetTitle("");
-	par_p0.SetTitle("");
-	par_p2.SetTitle("");
-	par_r0.GetYaxis()->SetTitle("Magnitude Spin 0");
-	par_p0.GetYaxis()->SetTitle("Phase Spin 0 /rad");
-	par_r0.GetXaxis()->SetTitle("m_{23}^{2} / GeV^{2}/c^{2}");
-	par_p0.GetXaxis()->SetTitle("m_{23}^{2} / GeV^{2}/c^{2}");
-	par_r2.GetYaxis()->SetTitle("Magnitude Spin 2");
-	par_p2.GetYaxis()->SetTitle("Phase Spin 2 /rad");
-	par_r2.GetXaxis()->SetTitle("m_{23}^{2} / GeV^{2}/c^{2}");
-	par_p2.GetXaxis()->SetTitle("m_{23}^{2} / GeV^{2}/c^{2}");
-
-
-	TFile output("test/FitResultJPSISLICE.root","RECREATE","ROOT_Tree");
-	par_N.Write();
-	par_r0.Write();
-	par_r2.Write();
-	par_p0.Write();
-	par_p2.Write();
-	phspA->Write();
-	phspB->Write();
-	phspC->Write();
-	phspD->Write();
-	output.mkdir("Slices");
-	output.cd("Slices");
-	for(unsigned int h=0; h<histData.size(); h++){
-		histData[h]->Write();
-		histModel[h]->Write();
-		histModelCl[h]->Write();
-	}
-	output.Write();
-	output.Close();
-
-	BOOST_LOG_TRIVIAL(info) << "Done";
-
-	return 0;
-=======
  // std::cout << "Fixing 5 of 7 parameters " << std::endl;
   //for(unsigned int i=2; i<par.GetNDouble(); i++){
   //    par.GetDoubleParameter(i).FixParameter(true);
@@ -631,5 +426,4 @@ int main(int argc, char **argv){
   BOOST_LOG_TRIVIAL(info) << "Done";
 
   return 0;
->>>>>>> dd7eb340b0f73d2b07005f687e586aae14fbc9fa
 }

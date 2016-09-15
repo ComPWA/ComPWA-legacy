@@ -7,6 +7,7 @@
 
 #ifndef PHYSICS_AMPLITUDESUM_ADVANCEDSTRATEGIES_HPP_
 #define PHYSICS_AMPLITUDESUM_ADVANCEDSTRATEGIES_HPP_
+namespace ComPWA {
 
 class phspFactorStrat : public Strategy
 {
@@ -150,7 +151,7 @@ public:
 		newTree->createLeaf("mass", mR, stratName);
 		newTree->createLeaf("massA1", ma, stratName);
 		newTree->createLeaf("massA2", mb, stratName);
-		newTree->createLeaf("spin", spin, stratName);
+		newTree->createLeaf("spin", spin.Val(), stratName);
 		newTree->createLeaf("mesonRadius", mesonRadius, stratName);
 		newTree->createLeaf("formFactorType", type, stratName);
 		newTree->createLeaf("mSq", mSq ,stratName);
@@ -275,4 +276,5 @@ public:
 	}
 };
 
+}
 #endif /* PHYSICS_AMPLITUDESUM_ADVANCEDSTRATEGIES_HPP_ */

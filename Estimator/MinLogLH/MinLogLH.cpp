@@ -34,7 +34,7 @@ using DataReader::Data;
 namespace Estimator {
 namespace MinLogLH {
 
-MinLogLH::MinLogLH(std::shared_ptr<Amplitude> amp, std::shared_ptr<Data> data,
+MinLogLH::MinLogLH(std::shared_ptr<ComPWA::Amplitude> amp, std::shared_ptr<Data> data,
 		std::shared_ptr<Data> phspSample,std::shared_ptr<Data> accSample,
 		unsigned int startEvent, unsigned int nEvents) :
 		_dataSample(data), _phspSample(phspSample),_phspAccSample(accSample),
@@ -47,7 +47,7 @@ MinLogLH::MinLogLH(std::shared_ptr<Amplitude> amp, std::shared_ptr<Data> data,
 	return;
 }
 
-MinLogLH::MinLogLH(std::vector<std::shared_ptr<Amplitude> > ampVec,
+MinLogLH::MinLogLH(std::vector<std::shared_ptr<ComPWA::Amplitude> > ampVec,
 		std::vector<double> fraction, std::shared_ptr<Data> data,
 		std::shared_ptr<Data> phspSample,std::shared_ptr<Data> accSample,
 		unsigned int startEvent, unsigned int nEvents) :

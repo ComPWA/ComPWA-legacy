@@ -37,9 +37,9 @@ namespace ComPWA {
 namespace Estimator {
 namespace MinLogLH {
 
-using namepsace DataReader;
+using ComPWA::DataReader::Data;
 
-class MinLogLH : public Estimator {
+class MinLogLH : public ComPWA::Estimator::Estimator {
 
 public:
 
@@ -61,9 +61,10 @@ public:
 	 * @param nEvents number of events to process
 	 * @return std::shared_ptr<Data> of existing instance or newly created instance
 	 */
-	static std::shared_ptr<ControlParameter> createInstance(
+	static std::shared_ptr<ComPWA::Optimizer::ControlParameter> createInstance(
 			std::shared_ptr<Amplitude> amp,
-			std::shared_ptr<Data> data, std::shared_ptr<Data> phspSample,
+			std::shared_ptr<DataReader::Data> data,
+			std::shared_ptr<DataReader::Data> phspSample,
 			unsigned int startEvent=0, unsigned int nEvents=0);
 
 	/** Create instance of MinLogLH.
@@ -80,8 +81,9 @@ public:
 	 */
 	static std::shared_ptr<ControlParameter> createInstance(
 			std::shared_ptr<Amplitude> amp,
-			std::shared_ptr<Data> data, std::shared_ptr<Data> phspSample,
-			std::shared_ptr<Data> accSample,
+			std::shared_ptr<DataReader::Data> data,
+			std::shared_ptr<DataReader::Data> phspSample,
+			std::shared_ptr<DataReader::Data> accSample,
 			unsigned int startEvent=0, unsigned int nEvents=0);
 
 	/** Create instance of MinLogLH.
@@ -100,8 +102,9 @@ public:
 	static std::shared_ptr<ControlParameter> createInstance(
 			std::vector<std::shared_ptr<Amplitude> > ampVec,
 			std::vector<double> frac,
-			std::shared_ptr<Data> data, std::shared_ptr<Data> phspSample,
-			std::shared_ptr<Data> accSample,
+			std::shared_ptr<DataReader::Data> data,
+			std::shared_ptr<DataReader::Data> phspSample,
+			std::shared_ptr<DataReader::Data> accSample,
 			unsigned int startEvent, unsigned int nEvents);
 
 	/** Set new amplitude to existing instance
@@ -115,8 +118,9 @@ public:
 	 * @param useFuncTr use FunctionTree yes/no?
 	 */
 	virtual void setAmplitude(std::shared_ptr<Amplitude> amp,
-			std::shared_ptr<Data> data,
-			std::shared_ptr<Data> phspSample, std::shared_ptr<Data> accSample,
+			std::shared_ptr<DataReader::Data> data,
+			std::shared_ptr<DataReader::Data> phspSample,
+			std::shared_ptr<DataReader::Data> accSample,
 			unsigned int startEvent=0, unsigned int nEvents=0, bool useFuncTr=0);
 
 	/** Set new amplitude to existing instance
@@ -132,8 +136,9 @@ public:
 	 */
 	virtual void setAmplitude(std::vector<std::shared_ptr<Amplitude> > ampVec,
 			std::vector<double> frac,
-			std::shared_ptr<Data> data_,
-			std::shared_ptr<Data> phspSample_, std::shared_ptr<Data> accSample_,
+			std::shared_ptr<DataReader::Data> data_,
+			std::shared_ptr<DataReader::Data> phspSample_,
+			std::shared_ptr<DataReader::Data> accSample_,
 			unsigned int startEvent=0, unsigned int nEvents=0, bool useFuncTr=0);
 
 	//! Check if tree for LH calculation is available

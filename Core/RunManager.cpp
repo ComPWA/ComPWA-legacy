@@ -40,7 +40,6 @@ namespace ComPWA {
 
 using namespace boost::log;
 using DataReader::Data;
-using Optimizer::Optimizer;
 
 RunManager::RunManager()
 {
@@ -48,7 +47,7 @@ RunManager::RunManager()
 }
 
 RunManager::RunManager(std::shared_ptr<Data> inD, std::shared_ptr<Amplitude> inP,
-		std::shared_ptr<Optimizer> inO) : sampleData_(inD), amp_(inP), opti_(inO)
+		std::shared_ptr<Optimizer::Optimizer> inO) : sampleData_(inD), amp_(inP), opti_(inO)
 {
 
 }

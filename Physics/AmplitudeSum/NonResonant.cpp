@@ -18,7 +18,8 @@ NonResonant::NonResonant(const char *name,
 		int nCalls, normStyle nS) :
 				AmpAbsDynamicalFunction(name, 0, 0, mag, phase,
 						std::make_shared<DoubleParameter>("mass", 0.0),
-						Spin(0), Spin(0), Spin(0), +1, 0, mother, particleA, particleB,
+						ComPWA::Spin(0.0), ComPWA::Spin(0.0), ComPWA::Spin(0.0),
+						+1, 0, mother, particleA, particleB,
 						formFactorType::noFormFactor, nCalls, nS)
 {
 }
@@ -48,10 +49,10 @@ void NonResonant::Save(boost::property_tree::ptree &pt)
 }
 
 std::shared_ptr<FunctionTree> NonResonant::SetupTree(
-		ParameterList& sample, ParameterList& toySample,std::string suffix){
+		ParameterList& sample, ParameterList& toySample,std::string suffix)
+{
+	double phspVol = Kinematics::instance()->GetPhspVolume();
 
-	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
-	double phspVol = kin->GetPhspVolume();
 	BOOST_LOG_TRIVIAL(info) << "NonResonant::setupBasicTree() | "<<_name;
 	//------------Setup Tree---------------------
 	std::shared_ptr<FunctionTree> newTree(new FunctionTree());

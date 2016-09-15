@@ -63,6 +63,8 @@ public:
 	virtual std::shared_ptr<FunctionTree> SetupTree(
 			ParameterList& sample, ParameterList& toySample,std::string suffix);
 };
+
+}
 } /* namespace Physics */
 } /* namespace ComPWA */
 #endif /* NONRESONANT_HPP_ */

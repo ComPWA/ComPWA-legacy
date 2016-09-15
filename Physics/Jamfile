@@ -32,21 +32,21 @@ if $(build_Background) && $(build_Background) != 0
 }
 if $(build_DecayTree) && $(build_DecayTree) != 0
 {
-	build-project DecayTree ;
-	sources = $(sources) $(PHYSICS)/DecayTree//DecayTree ;
+	#build-project DecayTree ;
+	#sources = $(sources) $(PHYSICS)/DecayTree//DecayTree ;
 }
 if $(build_DynamicalDecayFunctions) && $(build_DynamicalDecayFunctions) != 0
 {
-	build-project DynamicalDecayFunctions ;
-	sources = $(sources) $(PHYSICS)/DynamicalDecayFunctions//DynamicalDecayFunctions ;
+	#build-project DynamicalDecayFunctions ;
+	#sources = $(sources) $(PHYSICS)/DynamicalDecayFunctions//DynamicalDecayFunctions ;
 }
 if $(build_HelicityAmplitude) && $(build_HelicityAmplitude) != 0
 {
-	build-project HelicityAmplitude ;
+	#build-project HelicityAmplitude ;
 	#sources = $(sources) $(PHYSICS)/HelicityAmplitude//HelicityAmplitude ;
 }
 
 # Build libPhysics.so
-lib Physics : [ glob *.cpp ] ;
+#lib Physics : [ glob *.cpp ] ;
 
-install dist : Physics : <location>$(TOP)/lib ;
+#install dist : Physics : <location>$(TOP)/lib ;

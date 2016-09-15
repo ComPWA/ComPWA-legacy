@@ -18,15 +18,13 @@
 #include <map>
 #include <vector>
 
-#include "boost/property_tree/ptree.hpp"
-
 namespace ComPWA {
 
 typedef std::vector<unsigned int> IndexList;
 typedef std::pair<unsigned int, unsigned int> IndexPair;
 typedef std::map<unsigned int, unsigned int> IndexMapping;
 
-typedef boost::property_tree::ptree DynamicalInfo;
+//typedef boost::property_tree::ptree DynamicalInfo;
 
 struct Spin {
   unsigned int J_numerator_;
@@ -35,10 +33,24 @@ struct Spin {
 
   bool z_component_relevant;
 
-  Spin() :
-      J_numerator_(0), J_denominator_(1), J_z_numerator_(0), z_component_relevant(
-          true) {
+  double Val() const {
+	  if (J_denominator_ == 0) return 0;
+	  return (double)J_numerator_/J_denominator_;
   }
+
+  Spin() :
+      J_numerator_(0), J_denominator_(1), J_z_numerator_(0),
+	  z_component_relevant(true) { }
+
+  //! Constructor for half-integer spin
+  Spin(int num, int denom) :
+      J_numerator_(num), J_denominator_(denom),
+	  J_z_numerator_(0), z_component_relevant(false) { }
+
+  //! Constructor for integer spin
+  Spin(int intSpin) :
+      J_numerator_(intSpin), J_denominator_(1), J_z_numerator_(0),
+	  z_component_relevant(true) { }
 
   bool equalMagnitude(const Spin &rhs) const {
     if (1.0 * this->J_numerator_ / this->J_denominator_
@@ -127,7 +139,6 @@ struct ParticleStateInfo {
   unsigned int unique_id_;
   IDInfo pid_information_;
   Spin spin_information_;
-  DynamicalInfo dynamical_information_;
   bool coherent;
 
   bool operator==(const ParticleStateInfo &rhs) const {

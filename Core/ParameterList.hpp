@@ -158,18 +158,6 @@ public:
 	//! Append ParameterList to (*this). Shared_ptr are not(!) deep copied
 	virtual void Append(const ParameterList& addList);
 
-	//! Getter for number of multi unsigned int parameter
-	virtual const inline unsigned int GetNMultiUnsignedInteger() const {return vMultiUnsignedInteger_.size();}
-
-	//! Getter for complex parameter
-	/*!
-	 * Getter for complex parameter
-	 * \param i input number of parameter to load
-	 * \return par output container for loaded parameter
-	 */
-	virtual std::shared_ptr<ComplexParameter> GetComplexParameter(const unsigned int i) const;
-
-
 	//**************************************************************************
 	//************* Functions to access individual parameter types *************
 	//**************************************************************************
@@ -754,15 +742,24 @@ private:
 	void serialize(archive& ar, const unsigned int version)
 	{
 		using namespace boost::serialization;
-		ar & make_nvp("DoubleParameters",vDouble_); //currently only DoubleParameters can be serialized
+		//currently only DoubleParameters can be serialized
+		ar & make_nvp("DoubleParameters",vDouble_);
 		ar & make_nvp("OutString",out_);
 	}
 };
-BOOST_SERIALIZATION_SHARED_PTR(ParameterList)
-BOOST_CLASS_IMPLEMENTATION( ParameterList, boost::serialization::object_serializable )
-BOOST_CLASS_TRACKING( ParameterList, boost::serialization::track_never )
+
 
 } /* namespace ComPWA */
+
+BOOST_SERIALIZATION_SHARED_PTR( ParameterList )
+BOOST_CLASS_IMPLEMENTATION(
+		ComPWA::ParameterList,
+		boost::serialization::object_serializable
+		)
+BOOST_CLASS_TRACKING(
+		ComPWA::ParameterList,
+		boost::serialization::track_never
+		)
 
 #include <boost/serialization/split_free.hpp>
 #include <boost/unordered_map.hpp>

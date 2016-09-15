@@ -92,7 +92,7 @@ QuantumNumberIDs QuantumNumberTranslator::getQuantumNumberEnum(
 	}
 }
 
-Spin SpinWave::getSpinLikeQuantumNumber(QuantumNumberIDs qn_id) const {
+ComPWA::Spin SpinWave::getSpinLikeQuantumNumber(QuantumNumberIDs qn_id) const {
 	auto spin_result = spin_like_quantum_numbers_.find(
 			QuantumNumberTranslator::Instance().getQuantumNumberName(qn_id));
 	if (spin_result != spin_like_quantum_numbers_.end())
@@ -207,9 +207,8 @@ void PhysConst::readFile() {
 
 			for (auto const& qn : v.second.get_child("quantum_numbers")) {
 				QuantumNumberType qn_type = QuantumNumberTranslator::Instance().getQuantumNumberType(qn.first);
-				if (qn_type
-						== QuantumNumberType::SPIN_LIKE) {
-					Spin s;
+				if (qn_type	== QuantumNumberType::SPIN_LIKE) {
+					ComPWA::Spin s;
 					if(QuantumNumberTranslator::Instance().getQuantumNumberEnum(qn.first) == QuantumNumberIDs::SPIN)
 						s.z_component_relevant = false;
 					s.J_numerator_ = qn.second.get<unsigned int>("numerator");
@@ -218,13 +217,11 @@ void PhysConst::readFile() {
 						s.J_z_numerator_ = qn.second.get<int>("z_numerator");
 					particle_properties.spin_like_quantum_numbers_[qn.first] = s;
 				}
-				else if (qn_type
-						== QuantumNumberType::INTEGER_LIKE) {
+				else if (qn_type == QuantumNumberType::INTEGER_LIKE) {
 					particle_properties.integer_like_quantum_numbers_[qn.first] =
 							v.second.get_child("quantum_numbers").get<int>(qn.first);
 				}
-				else if (qn_type
-						== QuantumNumberType::DOUBLE_LIKE) {
+				else if (qn_type == QuantumNumberType::DOUBLE_LIKE) {
 					particle_properties.double_like_quantum_numbers_[qn.first] =
 							v.second.get_child("quantum_numbers").get<double>(qn.first);
 				}
@@ -237,7 +234,7 @@ void PhysConst::readFile() {
 
 			particle_properties_list_.push_back(particle_properties);
 
-			Spin s = particle_properties.getSpinLikeQuantumNumber(
+			ComPWA::Spin s = particle_properties.getSpinLikeQuantumNumber(
 					QuantumNumberIDs::SPIN);
 			BOOST_LOG_TRIVIAL(debug)<<"PhysConst adding particle: "<<particle_properties.name_<<" mass="<<particle_properties.mass_<<" width="<<particle_properties.width_<<" J=" <<1.0*s.J_numerator_/s.J_denominator_<<" P="<<particle_properties.getIntLikeQuantumNumber(QuantumNumberIDs::PARITY)<< " C="<<particle_properties.getIntLikeQuantumNumber(QuantumNumberIDs::CPARITY);
 		}

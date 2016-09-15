@@ -169,7 +169,8 @@ int main(int argc, char **argv) {
 
     std::shared_ptr<ComPWA::Physics::HelicityFormalism::CoherentAmplitude> amp(
         new ComPWA::Physics::HelicityFormalism::CoherentAmplitude(
-            topology_amplitudes));
+            topology_amplitudes)
+    );
 
 
     std::shared_ptr<RootReader> myReader(

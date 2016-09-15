@@ -51,6 +51,8 @@
 #include "Physics/DPKinematics/RootGenerator.hpp"
 
 using namespace std;
+using namespace ComPWA;
+using namespace ComPWA::Physics::AmplitudeSum;
 
 /************************************************************************************************/
 void randomStartValues(ParameterList& fitPar){
@@ -77,7 +79,9 @@ int main(int argc, char **argv){
 	unsigned int num = 1000000;
 	Logging log("log-compareTreeAmp.txt",boost::log::trivial::debug); //initialize logging
 	//initialize kinematics of decay
-	DalitzKinematics::createInstance("D0","K_S0","K-","K+");//setup kinematics
+	Physics::DPKinematics::DalitzKinematics::createInstance(
+			"D0","K_S0","K-","K+"
+	);
 	//initialize random generator
 	std::shared_ptr<Generator> gen = std::shared_ptr<Generator>(new RootGenerator(seed));
 
@@ -95,7 +99,7 @@ int main(int argc, char **argv){
 
 	std::shared_ptr<Amplitude> unitAmp(new UnitAmp());
 	ParameterList list;
-	std::shared_ptr<ControlParameter> esti;
+	std::shared_ptr<Optimizer::ControlParameter> esti;
 	//Use unit amplitude
 	//	esti = std::shared_ptr<ControlParameter>(MinLogLH::createInstance(unitAmp,
 	//		toyPhspData, toyPhspData));
@@ -109,14 +113,19 @@ int main(int argc, char **argv){
 	fitAmpPtr->Configure(pt);
 	std::shared_ptr<Amplitude> trueAmp( fitAmpPtr );
 	trueAmp->FillParameterList(list);
-	esti = std::shared_ptr<ControlParameter>(MinLogLH::createInstance(trueAmp,toyPhspData , toyPhspData));
+	esti = std::shared_ptr<Optimizer::ControlParameter>(
+			MinLogLH::createInstance(trueAmp,toyPhspData , toyPhspData)
+	);
 
-	MinLogLH* minLog = dynamic_cast<MinLogLH*>(&*(esti->Instance()));
+	Estimator::MinLogLH::MinLogLH* minLog =
+			dynamic_cast<Estimator::MinLogLH::MinLogLH*>(&*(esti->Instance()));
 	minLog->setUseFunctionTree(1);
 	std::shared_ptr<FunctionTree> physicsTree = minLog->getTree();
 	BOOST_LOG_TRIVIAL(debug) << physicsTree->head()->to_str(10);
 	double initialLHTree = esti->controlParameter(list);
-	std::shared_ptr<Optimizer> optiTree(new MinuitIF(esti, list));
+	std::shared_ptr<Optimizer::Optimizer> optiTree(
+			new Optimizer::Minuit2::MinuitIF(esti, list)
+	);
 	run.setOptimizer(optiTree);
 
 	for(int i=0; i<100; i++){

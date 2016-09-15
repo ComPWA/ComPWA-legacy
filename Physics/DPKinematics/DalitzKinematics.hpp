@@ -27,6 +27,7 @@
 #include <boost/log/trivial.hpp>
 
 #include "Core/Kinematics.hpp"
+#include "Core/Utility.hpp"
 
 namespace ComPWA {
 namespace Physics {
@@ -122,9 +123,6 @@ public:
 	 */
 	bool IsWithinBoxPhsp(int idA, int idB, double varA, double varB) const;
 
-	//! Returns the dalitz plot area for the given kinematics
-	double GetPhspVolume();
-
     //! Returns the dalitz plot area for the given kinematics and limited m23 range
     double getPhspVolumePart(double, double);
 
@@ -146,13 +144,13 @@ public:
 			double invMass_sys) const;
 
 	//! get mass of paticles
-	double GetMass(unsigned int num) const;
+	virtual double GetMass(unsigned int num) const;
 	//! get mass of paticles
-	double GetMass(std::string name) const;
+	virtual double GetMass(std::string name) const;
 	//! get spin of decaying particle
-	unsigned int getSpin(unsigned int num) const;
+	ComPWA::Spin getSpin(unsigned int num) const;
 	//! get spin of particles
-	unsigned int getSpin(std::string name) const;
+	ComPWA::Spin getSpin(std::string name) const;
 
 	std::string name1;//! name of daughter 1
 	double mSq1; //! masse squared of daughter 1
@@ -196,13 +194,8 @@ protected:
 
 	bool massIdsSet;
 
-	//unsigned int id23;
-	//unsigned int id13;
-
 	//! calculated dalitz plot area for the given kinematics
-	double calculatePSArea();
-
-
+	virtual double calculatePSArea();
 };
 
 } /* namespace DPKinematics */

@@ -7,6 +7,9 @@
 
 #include "Core/Amplitude.hpp"
 
+namespace ComPWA {
+
+
 void Amplitude::UpdateParameters(ParameterList& par)
 {
 	std::shared_ptr<DoubleParameter> pOld, pNew;
@@ -123,4 +126,6 @@ void Amplitude::GetAmpFitFractions(
 	}
 
 	return;
+}
+
 }

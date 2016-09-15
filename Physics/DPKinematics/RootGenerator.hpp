@@ -1,3 +1,13 @@
+/*
+ * RootGenerator.hpp
+ *
+ *  Created on: 15 Sep 2016
+ *      Author: weidenka
+ */
+
+#ifndef PHYSICS_DPKINEMATICS_ROOTGENERATOR_HPP_
+#define PHYSICS_DPKINEMATICS_ROOTGENERATOR_HPP_
+
 //-------------------------------------------------------------------------------
 // Copyright (c) 2013 Peter Weidenkaff.
 // All rights reserved. This program and the accompanying materials
@@ -8,23 +18,15 @@
 // Contributors:
 //     Peter Weidenkaff - initial API
 //-------------------------------------------------------------------------------
-//! Class to generate 4-Vectors.
-/*!
- * @file RootGen.hpp
- * This application uses arbitrary Amplitude implementations and the root
- * phase-space generator to generate a root-file with 4-Vectors distributed
- * according the given amplitude model.
-*/
 
-#ifndef DATAREADER_ROOTGENERATOR_HPP_
-#define DATAREADER_ROOTGENERATOR_HPP_
+#ifndef ROOTGENERATOR_HPP_
+#define ROOTGENERATOR_HPP_
 
 #include <iostream>
 #include <sstream>
 #include <vector>
 #include <string>
 #include <memory>
-#include <stdexcept>
 
 #include "TLorentzVector.h"
 #include "TParticle.h"
@@ -33,14 +35,12 @@
 
 #include "Core/Generator.hpp"
 #include "Core/Event.hpp"
-#include "Core/Kinematics.hpp"
+#include "Core/Particle.hpp"
+#include "Physics/DPKinematics/DalitzKinematics.hpp"
 
 namespace ComPWA {
-
-class Event;
-
-namespace DataReader {
-namespace RootGenerator {
+namespace Physics {
+namespace DPKinematics {
 
 class RootGenerator : public Generator {
 protected:
@@ -79,9 +79,11 @@ protected:
 
 };
 
-} /* namespace RootGenerator */
-} /* namespace DataReader */
-} /* namespace ComPWA */
+}}}
 
-#endif /* DATAREADER_ROOTGENERATOR_HPP_ */
+#endif /* ROOTGENERATOR_HPP_ */
 
+
+
+
+#endif /* PHYSICS_DPKINEMATICS_ROOTGENERATOR_HPP_ */

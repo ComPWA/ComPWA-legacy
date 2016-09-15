@@ -7,6 +7,8 @@
 
 #include "Core/Functions.hpp"
 
+namespace ComPWA {
+
 bool Inverse::execute(ParameterList& paras,
 		std::shared_ptr<AbsParameter>& out)
 {
@@ -778,3 +780,5 @@ bool Power::execute(ParameterList& paras, std::shared_ptr<AbsParameter>& out)
 
 	return true;
 };
+
+}

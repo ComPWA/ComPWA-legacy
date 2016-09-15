@@ -5,14 +5,17 @@ namespace ComPWA {
 namespace Optimizer {
 namespace Geneva {
 
-void GenevaResult::init(boost::shared_ptr<Gem::Geneva::GStartIndividual> min){
-	finalLH = min->getBestCase();
+void GenevaResult::init(boost::shared_ptr<Gem::Geneva::GStartIndividual> min)
+{
+	//	finalLH = min->getBestCase();
+	finalLH = min->getBestKnownFitness();
 	min->getPar(finalParameters);
     //ToDO: extract more info
 	return;
 }
 
-void GenevaResult::genOutput(std::ostream& out, std::string opt){
+void GenevaResult::genOutput(std::ostream& out, std::string opt)
+{
 	bool printTrue=0;
 	if(trueParameters.GetNParameter()) printTrue=1;
 	bool printParam=1;

@@ -1,5 +1,4 @@
 ########### test apps #############
-<<<<<<< HEAD
 
 project ComPWA/test 
 	: requirements 
@@ -12,42 +11,7 @@ project ComPWA/test
 	  <library>/root
 	  <linkflags>-lRooFit
 	  <linkflags>-lRooFitCore
-
-	  <library>$(TOP)//qft++
-=======
-import os ;
-
-local GENEVA = [ os.environ GENEVA ] ;
-local QFTINC = [ os.environ QFT_INCLUDE ] ;
-local QFT = [ os.environ QFT ] ;
-local MINUIT2 = [ os.environ MINUIT2 ] ;
-
-local rlibs = [ SHELL "$ROOTSYS/bin/root-config --glibs" ] ;
-ROOTLIBS = [ MATCH "(.*)[\n]" : $(rlibs) ] ;
-
-SHELL "rootcint -f test/plotterDict.cpp -c test/TTripleSliderDemo.hpp test/LinkDefPlotter.h" ;
-
-project :
-	requirements <include>./
-	    <include>$(TOP)
-		<include>$(ROOT_INC_PATH)
-		<include>$(GENEVA)/include
-        <include>$(QFT)/include
-        <include>$(MINUIT2)/include
-        #<include>$(TOP)/Tools/RootNeatPlotting
-        <cxxflags>-pthread
-	<linkflags>-L$(ROOT_LIB_PATH)
-	<linkflags>$(ROOTLIBS)
-	<linkflags>-lEG
-	<linkflags>-lRooFit
-	<linkflags>-lRooFitCore
-	#<linkflags>-L$(TOP)/Tools/RootNeatPlotting/build
-	#<linkflags>-lROOTNeatPlotting
-	<linkflags>-L$(QFT)/lib
-	<linkflags>-lqft++
-	#<linkflags>-lgomp
->>>>>>> dd7eb340b0f73d2b07005f687e586aae14fbc9fa
-	;
+	  <library>$(TOP)//qft++ ;
 
 lib test : 
         [ glob *.cpp : *App.cpp ]
@@ -326,7 +290,6 @@ exe slicefitrandApp :
         $(TOP)/Physics/DPKinematics//DPKinematics  
         : ;
 
-<<<<<<< HEAD
 exe serializeApp 
 	: SerializationApp.cpp 
        test
@@ -359,26 +322,12 @@ install dist
 	: test 
 	: <threading>single
 	  <location>$(TOP)lib/ ;
-=======
-exe serializeApp : 
-        SerializationApp.cpp 
-        test
-        $(TOP)/Core//ComPWA
-        : ;
         
 exe iteratorApp : 
         IteratorTestApp.cpp 
         test
         $(TOP)/Core//ComPWA
         : ;
-
-install dist : test : <location>$(TOP)/lib <threading>single ;
-#install dist2 : dalitzfitApp treetestApp cx0testApp dataiftestApp optimizertestApp physicstestApp blackscholesApp neuralnetworkApp : <location>$(TOP)/bin <threading>single ;
-install dist2 : compareTreeAmpApp dalitzfitApp slicefitApp slicefitubApp slicefitrandApp treetestApp dataiftestApp optimizertestApp physicstestApp ampplotterApp : <location>$(TOP)/bin <threading>single ;
-install dist3 : estimatortestApp integrationtestApp integrationtestbinnedApp runmanagertestApp gentwopartApp gendalitzApp dalitzplotApp serializeApp dpareaTestApp genRunManager : <location>$(TOP)/bin <threading>single ;
-
-install dist4 : helicityDecayTreeTestApp helicityDecayTreeGeneratorTestApp helicityCoherentAmplitudeEventGenApp helicityCoherentAmplitudePlotApp helicityAmplitudeFitApp : <location>$(TOP)/bin <threading>single ;
->>>>>>> dd7eb340b0f73d2b07005f687e586aae14fbc9fa
 
 install dist2 
 	: compareTreeAmpApp 
@@ -406,6 +355,9 @@ install dist2
 
 install dist4 
 	: helicityDecayTreeTestApp 
-	  helicityAmplitudeTreeTestApp 
+	  helicityDecayTreeGeneratorTestApp 
+	  helicityCoherentAmplitudeEventGenApp 
+	  helicityCoherentAmplitudePlotApp 
+	  helicityAmplitudeFitApp 
 	: <threading>single 
 	  <location>$(TOP)/bin ;

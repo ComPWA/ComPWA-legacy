@@ -27,6 +27,9 @@
 #include <stdexcept>
 
 namespace ComPWA {
+
+using namespace std;
+
 class Particle
 {
 public:

@@ -22,7 +22,7 @@
 namespace ComPWA {
 namespace Physics {
 namespace AmplitudeSum {
-AmpWigner2::AmpWigner2(unsigned int varId, unsigned int spin,
+AmpWigner2::AmpWigner2(unsigned int varId, ComPWA::Spin spin,
 		unsigned int mu, unsigned int muPrime) :
 		_varId(varId), _spin(spin), _mu(mu), _muPrime(muPrime)
 {
@@ -30,10 +30,12 @@ AmpWigner2::AmpWigner2(unsigned int varId, unsigned int spin,
 }
 
 double AmpWigner2::evaluate(dataPoint& point) {
-	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(
-			Kinematics::instance());
+	ComPWA::Physics::DPKinematics::DalitzKinematics* kin =
+			dynamic_cast<ComPWA::Physics::DPKinematics::DalitzKinematics*>(
+					Kinematics::instance()
+	);
 	return dynamicalFunction(
-			_spin, _mu, _muPrime, point.getVal(_varId)
+			_spin.Val(), _mu, _muPrime, point.getVal(_varId)
 			);
 }
 
@@ -49,7 +51,9 @@ double AmpWigner2::dynamicalFunction(int J, int mu, int muPrime, double cosTheta
 		throw std::runtime_error( "AmpWigner2::dynamicalFunction() | "
 				"scattering angle out of range! Datapoint beyond phsp?");
 	// Calling WignerD function (boost and qft++ version give same results)
-	double result = Wigner_d( Spin(J), Spin(mu), Spin(muPrime), acos(cosTheta) );
+	double result = Wigner_d(
+			::Spin(J), ::Spin(mu), ::Spin(muPrime), acos(cosTheta)
+	);
 	//	double result = boost::math::legendre_p<double>(J,cosTheta);
 	if( ( result!=result ) )
 		throw std::runtime_error("AmpWigner2::evaluate() | Result is NaN!");
@@ -68,7 +72,7 @@ std::shared_ptr<FunctionTree> AmpWigner2::SetupTree(
 			new WignerDStrategy("AngD"+suffix) );
 	newTree->createHead("AngD_"+suffix, angdStrat, sampleSize);
 
-	newTree->createLeaf("spin",_spin, "AngD_"+suffix); //spin
+	newTree->createLeaf("spin",_spin.Val(), "AngD_"+suffix); //spin
 	newTree->createLeaf("m", _mu, "AngD_"+suffix); //OutSpin 1
 	newTree->createLeaf("n", _muPrime, "AngD_"+suffix); //OutSpin 2
 	newTree->createLeaf("AngD_sample", sample.GetMultiDouble(_varId), "AngD_"+suffix);
@@ -92,8 +96,10 @@ bool WignerDStrategy::execute(ParameterList& paras,
 	double _outSpin1 = paras.GetDoubleParameter(1)->GetValue();
 	double _outSpin2 = paras.GetDoubleParameter(2)->GetValue();
 
-	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(
-			Kinematics::instance());
+	ComPWA::Physics::DPKinematics::DalitzKinematics* kin =
+			dynamic_cast<ComPWA::Physics::DPKinematics::DalitzKinematics*>(
+			Kinematics::instance()
+	);
 
 	std::shared_ptr<MultiDouble> _angle = paras.GetMultiDouble(0);
 

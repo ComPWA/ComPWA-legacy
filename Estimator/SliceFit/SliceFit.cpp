@@ -32,9 +32,14 @@ using Optimizer::ControlParameter;
 namespace Estimator {
 namespace SliceFit {
 
-SliceFit::SliceFit(std::shared_ptr<AmpSumIntensity> inPIF, std::shared_ptr<Data> inDIF, ParameterList& inPar, unsigned int startEvent, unsigned int nEvents, unsigned int nBins, unsigned int nF0, unsigned int nF2)
-: pPIF_(inPIF), pDIF_(inDIF), nEvts_(0), nPhsp_(0), nStartEvt_(startEvent), par_(inPar), nUseEvt_(nEvents),nBins_(nBins),nF0_(nF0),nF2_(nF2){
-    phspVolume = Kinematics::instance()->getPhspVolume();
+SliceFit::SliceFit(std::shared_ptr<AmpSumIntensity> inPIF,
+		std::shared_ptr<Data> inDIF, ParameterList& inPar,
+		unsigned int startEvent, unsigned int nEvents, unsigned int nBins,
+		unsigned int nF0, unsigned int nF2)
+: pPIF_(inPIF), pDIF_(inDIF), nEvts_(0), nPhsp_(0), nStartEvt_(startEvent),
+  par_(inPar), nUseEvt_(nEvents),nBins_(nBins),nF0_(nF0),nF2_(nF2)
+{
+    phspVolume = Kinematics::instance()->GetPhspVolume();
     nEvts_ = pDIF_->getNEvents();
     if(startEvent+nUseEvt_<nEvts_) nUseEvt_ = nEvts_-startEvent;
     init();
@@ -42,7 +47,7 @@ SliceFit::SliceFit(std::shared_ptr<AmpSumIntensity> inPIF, std::shared_ptr<Data>
 
 SliceFit::SliceFit(std::shared_ptr<AmpSumIntensity> inPIF, std::shared_ptr<Data> inDIF, std::shared_ptr<Data> inPHSP, ParameterList& inPar, unsigned int startEvent, unsigned int nEvents, unsigned int nBins, unsigned int nF0, unsigned int nF2)
 : pPIF_(inPIF), pDIF_(inDIF), pPHSP_(inPHSP), nEvts_(0), nPhsp_(0), nStartEvt_(startEvent), par_(inPar), nUseEvt_(nEvents),nBins_(nBins),nF0_(nF0),nF2_(nF2){
-phspVolume = Kinematics::instance()->getPhspVolume();
+phspVolume = Kinematics::instance()->GetPhspVolume();
     nEvts_ = pDIF_->getNEvents();
     nPhsp_ = inPHSP->getNEvents();
     if(!(startEvent+nUseEvt_<=nEvts_)) nUseEvt_ = nEvts_-startEvent;
@@ -217,7 +222,11 @@ double SliceFit::controlParameter(ParameterList& minPar){
 		reso[0]=std::complex<double>(minPar.GetDoubleParameterValue(1),minPar.GetDoubleParameterValue(2));
 		reso[1]=std::complex<double>(minPar.GetDoubleParameterValue(3),minPar.GetDoubleParameterValue(4));
 
-		double amp = std::fabs(minPar.GetDoubleParameterValue(0))*pPIF_->sliceIntensity(point,reso, 2);
+		//TODO: I modified the call to sliceIntensity; pretty sure that it is wrong
+		double amp = std::fabs(minPar.GetDoubleParameterValue(0))*
+				pPIF_->sliceIntensity(
+						point, minPar, reso, 2, 0, 0, 0
+				);
 		double ampCl = (double) (0.0725*(pPIF_->intensity(point).GetDoubleParameterValue(0)));
 
 		aSlice_->SetBinContent(j,val);

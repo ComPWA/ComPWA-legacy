@@ -63,7 +63,7 @@ struct SpinWave {
   std::map<std::string, int> integer_like_quantum_numbers_;
   std::map<std::string, double> double_like_quantum_numbers_;
 
-  Spin getSpinLikeQuantumNumber(QuantumNumberIDs qn_id) const;
+  ComPWA::Spin getSpinLikeQuantumNumber(QuantumNumberIDs qn_id) const;
   int getIntLikeQuantumNumber(QuantumNumberIDs qn_id) const;
   double getDoubleLikeQuantumNumber(QuantumNumberIDs qn_id) const;
 

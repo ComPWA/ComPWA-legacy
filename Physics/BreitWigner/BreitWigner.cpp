@@ -83,7 +83,7 @@ const ParameterList& BreitWigner::intensity(double x, double M, double T)
 	return result;
 }
 
-const ParameterList& BreitWigner::intensity(const dataPoint& point)
+const ParameterList& BreitWigner::intensity(dataPoint& point)
 {
 	//ParameterList result;
 	double val = BreitWignerValue(

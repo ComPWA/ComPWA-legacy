@@ -84,7 +84,7 @@ class GStartIndividual :public GParameterSet
 public:
 	/** @brief The default constructor */
 	GStartIndividual(std::shared_ptr<ComPWA::Optimizer::ControlParameter> data,
-			ParameterList list);
+			ComPWA::ParameterList list);
 
 	/** @brief A standard copy constructor */
 	GStartIndividual(const GStartIndividual&);

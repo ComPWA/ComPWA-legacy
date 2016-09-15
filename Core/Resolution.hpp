@@ -8,6 +8,7 @@
 #ifndef CORE_RESOLUTION_HPP_
 #define CORE_RESOLUTION_HPP_
 
+namespace ComPWA {
 
 class Resolution
 {
@@ -28,8 +29,11 @@ public:
 	virtual std::vector<double> resolution(std::vector<double> v) {
 		std::vector<double> offset(v.size(),0);
 		for(int i=0; i<v.size(); i++) v.at(i)+=offset.at(i);
+		return v;
 	}
 
 };
+
+}
 
 #endif /* CORE_RESOLUTION_HPP_ */

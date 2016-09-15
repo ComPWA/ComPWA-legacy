@@ -9,6 +9,8 @@
 #include "Core/Kinematics.hpp"
 #include "DataReader/DataCorrection.hpp"
 
+namespace ComPWA {
+
 MomentumCorrection::MomentumCorrection(std::vector<CorrectionTable> inCorr, std::string t) :
 corrections(inCorr), title(t)
 {
@@ -39,4 +41,6 @@ void MomentumCorrection::Print() const{
 	for(int i=0; i < corrections.size(); i++)
 		corrections.at(i).Print();
 	return;
+}
+
 }

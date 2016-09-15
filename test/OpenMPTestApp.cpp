@@ -8,6 +8,8 @@
 #include "Physics/AmplitudeSum/AmpFlatteRes.cpp"
 //#include <omp.h>
 
+using namespace ComPWA;
+using namespace ComPWA::Physics::AmplitudeSum;
 
 int main()
 {

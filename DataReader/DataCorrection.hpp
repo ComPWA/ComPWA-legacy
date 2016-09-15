@@ -14,6 +14,9 @@
 #include <stdexcept>
 #include <cfloat>
 
+namespace ComPWA {
+
+
 class DataCorrection
 {
 public:
@@ -47,6 +50,5 @@ protected:
 	std::string title;
 };
 
-
-
+}
 #endif /* DATAREADER_DATACORRECTION_HPP_ */

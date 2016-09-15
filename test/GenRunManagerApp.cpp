@@ -13,11 +13,8 @@
 #include <string>
 #include <memory>
 
-<<<<<<< HEAD
 
-#include "../Physics/DPKinematics/RootGenerator.hpp"
-=======
->>>>>>> dd7eb340b0f73d2b07005f687e586aae14fbc9fa
+#include "Physics/DPKinematics/RootGenerator.hpp"
 // Physics Interface header files go here
 #include "Core/Parameter.hpp"
 #include "Core/ParameterList.hpp"
@@ -32,12 +29,9 @@
 //#include "PWA/PlotData.hpp"
 
 using namespace ComPWA;
+using namespace Physics::AmplitudeSum;
+using namespace DataReader;
 using Physics::DPKinematics::DalitzKinematics;
-using DataReader::RootReader::RootReader;
-using DataReader::RootGenerator::RootGenerator;
-using DataReader::Data;
-using Physics::AmplitudeSum::AmplitudeSetup;
-using Physics::AmplitudeSum::AmpSumIntensity;
 
 /************************************************************************************************/
 /**
@@ -56,7 +50,7 @@ int main(int argc, char **argv){
 	std::string resoFile = "/test/JPSI_ypipi.xml";
 	boost::property_tree::ptree pt;
 	read_xml(resoFile , pt, boost::property_tree::xml_parser::trim_whitespace);
-	auto a = new AmpSumIntensity("amp",normStyle::none,
+	auto a = new AmpSumIntensity("amp", normStyle::none,
 			std::shared_ptr<Efficiency>(new UnitEfficiency()), dataSize);
 	a->Configure(pt);
 	a->to_str();

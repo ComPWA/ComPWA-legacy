@@ -112,7 +112,7 @@ std::shared_ptr<FitResult> GenevaIF::exec(ParameterList& par) {
 	// Terminate
 	bestIndividual_ptr->getPar(par);
 	result->setResult(bestIndividual_ptr);
-	result->setAmplitude(_myData->getAmplitude(0));
+	result->SetAmplitude(_myData->getAmplitudes().at(0));
 	result->setInitialParameters(initialParList);
 	result->setFinalParameters(par);
 	//int whattodowiththisidontknow =  go.finalize(); //Go2::finalize();

@@ -1,4 +1,6 @@
 ########### AmplitudeSum lib #############
-lib AmplitudeSum : [ glob *.cpp : *Test.cpp ] $(PHYSICS)/DPKinematics//DPKinematics ;
+lib AmplitudeSum : 
+	[ glob *.cpp : *Test.cpp ] 
+	$(PHYSICS)/DPKinematics//DPKinematics ;
 
 install dist : AmplitudeSum : <location>$(TOP)/lib ;

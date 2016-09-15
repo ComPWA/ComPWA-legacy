@@ -34,12 +34,6 @@ namespace ComPWA {
 namespace Physics {
 namespace AmplitudeSum {
 
-enum normStyle {
-	none, /*!< no normaliztion between Amplitudes. */
-	/*!< all amplitudes are normalized to one.
-	 *  The normalization factor is \f$ 1/\sqrt(\int |A|^2)\f$ */
-	one
-};
 
 class AmpAbsDynamicalFunction : public Resonance
 {
@@ -142,9 +136,9 @@ public:
 	//! Get resonance width
 	virtual double GetWidth() const = 0;
 	//! Get resonance spin
-	virtual double GetSpin() const { return _spin; }
-	virtual double GetM() const {return _m;};
-	virtual double GetN() const {return _n;};
+	virtual double GetSpin() const { return _spin.Val(); }
+	virtual double GetM() const {return _m.Val();};
+	virtual double GetN() const {return _n.Val();};
 	//! Get mass of daughter A
 	virtual double GetMassA() const {return _mass1;};
 	//! Get mass of daughter B
@@ -294,7 +288,7 @@ protected:
 	unsigned int _subSys;
 
 	//! Resonance spin
-	Spin _spin, _m, _n;
+	ComPWA::Spin _spin, _m, _n;
 	//! Parity of resonance +-
 	int _parity;
 	//! Charge parity of resonance +-0

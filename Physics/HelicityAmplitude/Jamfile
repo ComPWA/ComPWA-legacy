@@ -1,6 +1,4 @@
 ########### HelicityAmplitude lib #############
-<<<<<<< HEAD
-=======
 import os ;
 
 local QFT = [ os.environ QFT ] ;
@@ -24,7 +22,6 @@ project :
 	<linkflags>-lqft++
 	;
 
->>>>>>> dd7eb340b0f73d2b07005f687e586aae14fbc9fa
 lib HelicityAmplitude : 
         [ glob *.cpp : ] 
         $(TOP)/Core//ComPWA

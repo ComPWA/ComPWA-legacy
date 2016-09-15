@@ -158,10 +158,11 @@ protected:
 
 	//====== MINUIT FIT RESULT =======
 	double getCorr(unsigned int n, unsigned int t){
-	  if(n<corr.size2() && t<corr.size1() && t>=n)
-	    return corr(n,t);
-	  else
-	    return -9000;
+		std::cout<<"WARNING: not sure if row and column are choose correctly!"<<std::endl;
+		if(n<corr.size() && t<corr.at(1).size() && t>=n)
+			return corr.at(n).at(t);
+		else
+			return -9000;
 	};
 
 private:

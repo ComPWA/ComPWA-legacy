@@ -30,6 +30,7 @@
 #include "Core/DataPoint.hpp"
 #include "Core/FunctionTree.hpp"
 #include "Physics/DPKinematics/DalitzKinematics.hpp"
+#include "Core/Utility.hpp"
 
 namespace ComPWA {
 namespace Physics {
@@ -37,7 +38,7 @@ namespace AmplitudeSum {
 
 class AmpWigner2 {
 public:
-	AmpWigner2( unsigned int varId=0, unsigned int spin=0,
+	AmpWigner2( unsigned int varId=0, ComPWA::Spin spin = ComPWA::Spin(0),
 			unsigned int mu=0, unsigned int muPrime=0);
 
 	virtual ~AmpWigner2() {};
@@ -56,7 +57,7 @@ public:
 
 protected:
 	unsigned int _varId;
-	unsigned int _spin;
+	ComPWA::Spin _spin;
 	unsigned int _mu;
 	unsigned int _muPrime;
 };

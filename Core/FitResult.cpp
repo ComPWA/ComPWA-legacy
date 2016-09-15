@@ -153,7 +153,7 @@ void FitResult::printFitParameters(TableFormater* tableResult)
 		if(printTrue)
 			if( truePar ){
 				*tableResult << *truePar;
-				double pi = PhysConst::instance()->getConstValue("Pi");
+				double pi = PhysConst::Instance().findConstant("Pi").value_;
 				double pull = (truePar->GetValue()-outPar->GetValue() );
 				// Shift pull by 2*pi if that reduces the deviation
 				if(isAngle && !isFixed) {

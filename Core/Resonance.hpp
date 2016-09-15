@@ -18,6 +18,15 @@
 #include "Core/DataPoint.hpp"
 #include "Core/FunctionTree.hpp"
 
+namespace ComPWA {
+
+enum normStyle {
+	none, /*!< no normaliztion between Amplitudes. */
+	/*!< all amplitudes are normalized to one.
+	 *  The normalization factor is \f$ 1/\sqrt(\int |A|^2)\f$ */
+	one
+};
+
 class Resonance
 {
 public:
@@ -106,4 +115,5 @@ struct resIsEnabled {
 typedef boost::filter_iterator<resIsEnabled,
 		std::vector<std::shared_ptr<Resonance> >::iterator> resonanceItr;
 
+}
 #endif /* CORE_RESONANCE_HPP_ */

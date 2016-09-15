@@ -43,9 +43,7 @@
  #include "Tools/RootNeatPlotting/style/xml-parser/XMLStyleConfigParser.h"*/
 //#include "PWA/PlotData.hpp"
 using namespace ComPWA;
-using DataReader::Data;
-using DataReader::RootReader::RootReader;
-using DataReader::RootGenerator::RootGenerator;
+using namespace DataReader;
 
 /************************************************************************************************/
 /**
@@ -118,7 +116,7 @@ int main(int argc, char **argv) {
 
     std::shared_ptr<Data> data(new RootReader());
     std::shared_ptr<Data> phsp(new RootReader());
-    std::shared_ptr<Generator> gen(new RootGenerator());
+    std::shared_ptr<Generator> gen(new Physics::DPKinematics::RootGenerator());
 
     RunManager run(dataSize, amp, gen);
     run.setGenerator(gen);

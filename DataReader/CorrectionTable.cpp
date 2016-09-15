@@ -14,7 +14,7 @@
 void CorrectionTable::Print() const{
 	if(sys.size() == 0 && antiSys.size() == 0) return; //don't print if empty
 	std::stringstream out;
-	TableFormater table(&out);
+	ComPWA::TableFormater table(&out);
 	table.addColumn("Bin",12);//add empty first column
 	table.addColumn("Particle",20);//global correlation coefficient
 	table.addColumn("anti-Particle",20);//global correlation coefficient

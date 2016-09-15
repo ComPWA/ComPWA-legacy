@@ -78,8 +78,13 @@ public:
 
 	//! Get resonance width
 	virtual double GetWidth() const {
-		return std::abs( couplingToWidth(_mass->GetValue(),_mass->GetValue(), _g1->GetValue(),
-			_mass1, _mass2, _spin, _mesonRadius->GetValue(), _ffType) );
+		return std::abs(
+				couplingToWidth(
+						_mass->GetValue(),_mass->GetValue(), _g1->GetValue(),
+						_mass1, _mass2, _spin.Val(), _mesonRadius->GetValue(),
+						_ffType
+				)
+		);
 	}
 
 	/** Dynamical function for two coupled channel approach

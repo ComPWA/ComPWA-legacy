@@ -21,6 +21,8 @@
 #include "Optimizer/Minuit2/MinuitResult.hpp"
 #include <TH2D.h>
 
+using namespace ComPWA;
+
 int main(){
 	size_t n = 3;
 	const size_t nRnd = 5000;
@@ -48,7 +50,7 @@ int main(){
 	gsl_matrix_set(m,2,1,sigmaY*sigmaZ*corrYZ);
 	gsl_matrix_set(m,2,2,sigmaZ*sigmaZ);
 	std::cout<<"COVARIANCE MATRIX:"<<std::endl;
-	gsl_matrix_print(m);
+	Optimizer::Minuit2::gsl_matrix_print(m);
 
 	const gsl_rng_type * T;
 	gsl_rng_env_setup();
@@ -66,7 +68,7 @@ int main(){
 	myfile <<"x/F:y:z"<<std::endl;
 	for(size_t i=0; i<nRnd; i++){
 		gsl_vector* tmpV = gsl_vector_alloc(n);
-		multivariateGaussian(rnd, n, v, m, tmpV);
+		Optimizer::Minuit2::multivariateGaussian(rnd, n, v, m, tmpV);
 		x[i] = gsl_vector_get(tmpV,0);
 		y[i] = gsl_vector_get(tmpV,1);
 		z[i] = gsl_vector_get(tmpV,2);

@@ -100,7 +100,7 @@ TexTableFormater::TexTableFormater(std::ostream* output) : TableFormater(output)
 void TexTableFormater::footer() {
 	delim();
 	delim();
-	*out <<"\\end{tabular}"<<endl;
+	*out <<"\\end{tabular}"<<std::endl;
 //	*out <<"\label{...}"<<endl;
 //	*out <<"\caption{...}"<<endl;
 
@@ -110,7 +110,7 @@ void TexTableFormater::header() {
 	//	*out <<"\centering"<<endl;
 	*out <<"\\begin{tabular}{|";
 	for(int i=0; i<columnTitle.size(); i++) *out<<"c|";
-	*out <<"}"<<endl;
+	*out <<"}"<<std::endl;
 	delim();
 	*out << firstSep;
 	for(unsigned int i=0;i<columnTitle.size();i++) {

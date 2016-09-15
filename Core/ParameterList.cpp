@@ -22,6 +22,8 @@
 
 #include "Core/ParameterList.hpp"
 
+namespace ComPWA {
+
 ParameterList::ParameterList(){
 	//make_str();
 }
@@ -107,6 +109,7 @@ ParameterList::~ParameterList()
 }
 
 std::shared_ptr<AbsParameter> ParameterList::GetParameter(const unsigned int i)
+const
 {
 	if( i >= GetNParameter() )
 		throw BadParameter("ParameterList::GetParameter() | Parameter ID="
@@ -130,7 +133,7 @@ std::shared_ptr<AbsParameter> ParameterList::GetParameter(const unsigned int i)
 	pos += vMultiDouble_.size();
 	if( i < (pos+vMultiComplex_.size()) )
 		return vMultiComplex_.at(i-pos);
-	pos += vMultiComplex.size();
+	pos += vMultiComplex_.size();
 	if( i < (pos+vMultiUnsignedInteger_.size()) )
 		return vMultiUnsignedInteger_.at(i-pos);
 
@@ -139,24 +142,17 @@ std::shared_ptr<AbsParameter> ParameterList::GetParameter(const unsigned int i)
 }
 
 bool ParameterList::ParameterExists(const std::string parname) const {
-	if (mMultiComplexID_.find(parname) != mMultiComplexID_.end())
+	try {
+		GetParameter( parname );
 		return true;
-	if (mMultiDoubleID_.find(parname) != mMultiDoubleID_.end())
-		return true;
-	if (mMultiUnsignedIntegerID_.find(parname) != mMultiUnsignedIntegerID_.end())
-		return true;
-	if (mBoolParID_.find(parname) != mBoolParID_.end())
-		return true;
-	if (mIntParID_.find(parname) != mIntParID_.end())
-		return true;
-	if (mDoubleParID_.find(parname) != mDoubleParID_.end())
-		return true;
-	if (mComplexParID_.find(parname) != mComplexParID_.end())
-		return true;
+	} catch ( std::exception& ex) {
+		return false;
+	}
 	return false;
 }
 
-std::shared_ptr<AbsParameter> ParameterList::GetParameter(const std::string parname)
+std::shared_ptr<AbsParameter> ParameterList::GetParameter(
+		const std::string parname ) const
 {
 	return (*FindBoolParameter(parname));
 	return (*FindIntegerParameter(parname));
@@ -229,8 +225,11 @@ void ParameterList::RemoveDuplicates()
 							-vMultiDouble_.size()-vMultiComplex_.size());
 					break;
 				case ParType::MUNSIGNEDINTEGER:
-					RemoveMultiUnsignedInteger(j-vBool_.size()-vInt_.size()-vComplex_.size()
-							-vMultiDouble_.size()-vMultiComplex_.size()-vMultiUnsignedInteger.size());
+					RemoveMultiUnsignedInteger(
+							j-vBool_.size()-vInt_.size()-vComplex_.size()
+							-vMultiDouble_.size()-vMultiComplex_.size()
+							-vMultiUnsignedInteger_.size()
+					);
 					break;
 				}
 				j--; //decrement if a parameter is removed
@@ -867,4 +866,6 @@ void ParameterList::RemoveMultiUnsignedInteger(const unsigned int id){
 				"parameter with ID="<<id<<": "<<ex.what();
 		throw;
 	}
+}
+
 }

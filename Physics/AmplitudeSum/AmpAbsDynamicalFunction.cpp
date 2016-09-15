@@ -82,7 +82,7 @@ std::string AmpAbsDynamicalFunction::to_str() const
 	str<<"AmpAbsDynamicalFunction | "<<_name<<" enabled="<<_enable
 			<< " nCalls="<<_nCalls
 			<< " varId1="<<GetVarIdA()<<" varId2="<<GetVarIdB()<<std::endl
-			<<" J="<<_spin<<" P="<<_parity<<" C="<<_cparity
+			<<" J="<<_spin.Val()<<" P="<<_parity<<" C="<<_cparity
 			<<" ffType="<<_ffType <<" mother: "<<_nameMother
 			<<" particleA: "<<_name1<<" particleB: "<<_name2<<std::endl;
 	str<<" normStyle="<<_normStyle <<" modified?"<<_modified
@@ -327,7 +327,7 @@ void AmpAbsDynamicalFunction::Configure(
 	if(!tmp_spin)
 		throw BadParameter("AmpAbsDynamicalFunction::Configure() | "
 				"Spin for "+_name+" not specified!");
-	_spin = Spin(tmp_spin.get());
+	_spin = ComPWA::Spin(tmp_spin.get());
 
 	auto tmp_parity = pt.get_optional<int>("Parity");
 	if(!tmp_parity)
@@ -352,9 +352,9 @@ void AmpAbsDynamicalFunction::Configure(
 
 	//optional parameters
 	double tmp_m = pt.get<int>("m",0);
-	_m = Spin(tmp_m);
+	_m = ComPWA::Spin(tmp_m);
 	double tmp_n = pt.get<int>("n",0);
-	_n = Spin(tmp_n);
+	_n = ComPWA::Spin(tmp_n);
 
 	auto tmp_varIdA = pt.get_optional<int>("varIdA");
 	if(!tmp_varIdA)
@@ -433,14 +433,14 @@ void AmpAbsDynamicalFunction::put(boost::property_tree::ptree &pt)
 		pt.put("mesonRadius_min", _mesonRadius->GetMinValue());
 		pt.put("mesonRadius_max", _mesonRadius->GetMaxValue());
 	}
-	pt.put("Spin", _spin);
+	pt.put("Spin", _spin.Val());
 	pt.put("Parity", _parity);
 	if( _cparity )
 		pt.put("Cparity", _cparity);
 	if( _m != 0)
-		pt.put("m", _m);
+		pt.put("m", _m.Val());
 	if( _n != 0)
-		pt.put("n", _n);
+		pt.put("n", _n.Val());
 
 	pt.put("varIdA", GetVarIdA());
 	pt.put("varIdB", GetVarIdB());
@@ -461,22 +461,21 @@ void AmpAbsDynamicalFunction::CheckModified()
 
 void AmpAbsDynamicalFunction::initialize()
 {
-	auto phys = PhysConst::instance();
 	try{
-		_M=phys->getMass(_nameMother);
+		_M=PhysConst::Instance().findParticle(_nameMother).mass_;
 	} catch (...) {
 		throw BadConfig("AmpAbsDynamicalFunction::initialize() | "
 				"Can not obtain mass of mother particle: "+_nameMother);
 	}
 
 	try{
-		_mass1=phys->getMass(_name1);
+		_mass1=PhysConst::Instance().findParticle(_name1).mass_;
 	} catch (...) {
 		throw BadConfig("AmpAbsDynamicalFunction::initialize() | "
 				"Can not obtain mass of daughter 1: "+_name1);
 	}
 	try{
-		_mass2=phys->getMass(_name2);
+		_mass2=PhysConst::Instance().findParticle(_name2).mass_;
 	} catch (...) {
 		throw BadConfig("AmpAbsDynamicalFunction::initialize() | "
 				"DCan not obtain mass of daughter 2: "+_name2);
@@ -580,8 +579,10 @@ double AmpAbsDynamicalFunction::integral() const
 	size_t dim=2;
 	double res=0.0, err=0.0;
 
-	DalitzKinematics* kin =
-			dynamic_cast<DalitzKinematics*>(Kinematics::instance());
+	ComPWA::Physics::DPKinematics::DalitzKinematics* kin =
+			dynamic_cast<ComPWA::Physics::DPKinematics::DalitzKinematics*>(
+					Kinematics::instance()
+	);
 
 	//	auto var1_limit = kin->GetMinMax( GetVarIdA() );
 	//	auto var2_limit = kin->GetMinMax( GetVarIdB() );
@@ -695,8 +696,8 @@ double AmpAbsDynamicalFunction::totalIntegral() const
 	size_t dim=2;
 	double res=0.0, err=0.0;
 
-	DalitzKinematics* kin =
-			dynamic_cast<DalitzKinematics*>(Kinematics::instance());
+	ComPWA::Physics::DPKinematics::DalitzKinematics* kin =
+			dynamic_cast<ComPWA::Physics::DPKinematics::DalitzKinematics*>(Kinematics::instance());
 
 	auto var1_limit = kin->GetMinMax( 0 );
 	auto var2_limit = kin->GetMinMax( 1 );
@@ -853,7 +854,7 @@ std::shared_ptr<FunctionTree> couplingToWidthStrat::SetupTree(
 		newTree->createLeaf("g", g, stratName);
 		newTree->createLeaf("massA", ma, stratName);
 		newTree->createLeaf("massB", mb, stratName);
-		newTree->createLeaf("spin", spin, stratName);
+		newTree->createLeaf("spin", spin.Val(), stratName);
 		newTree->createLeaf("mesonRadius", mesonRadius, stratName);
 		newTree->createLeaf("ffType", (double) type, stratName);
 
