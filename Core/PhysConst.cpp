@@ -210,11 +210,11 @@ void PhysConst::readFile() {
 				if (qn_type	== QuantumNumberType::SPIN_LIKE) {
 					ComPWA::Spin s;
 					if(QuantumNumberTranslator::Instance().getQuantumNumberEnum(qn.first) == QuantumNumberIDs::SPIN)
-						s.z_component_relevant = false;
-					s.J_numerator_ = qn.second.get<unsigned int>("numerator");
-					s.J_denominator_ = qn.second.get<unsigned int>("denominator");
+						s.SetUseZ( false );
+					s.SetNumerator( qn.second.get<unsigned int>("numerator") );
+					s.SetDenominator( qn.second.get<unsigned int>("denominator") );
 					if (qn.second.count("z_numerator") != 0)
-						s.J_z_numerator_ = qn.second.get<int>("z_numerator");
+						s.SetZNumerator( qn.second.get<int>("z_numerator") );
 					particle_properties.spin_like_quantum_numbers_[qn.first] = s;
 				}
 				else if (qn_type == QuantumNumberType::INTEGER_LIKE) {
@@ -236,7 +236,15 @@ void PhysConst::readFile() {
 
 			ComPWA::Spin s = particle_properties.getSpinLikeQuantumNumber(
 					QuantumNumberIDs::SPIN);
-			BOOST_LOG_TRIVIAL(debug)<<"PhysConst adding particle: "<<particle_properties.name_<<" mass="<<particle_properties.mass_<<" width="<<particle_properties.width_<<" J=" <<1.0*s.J_numerator_/s.J_denominator_<<" P="<<particle_properties.getIntLikeQuantumNumber(QuantumNumberIDs::PARITY)<< " C="<<particle_properties.getIntLikeQuantumNumber(QuantumNumberIDs::CPARITY);
+			BOOST_LOG_TRIVIAL(debug)<<"PhysConst adding particle: "
+					<<particle_properties.name_
+					<<" mass="<<particle_properties.mass_
+					<<" width="<<particle_properties.width_
+					<<" J=" <<s.GetSpin()
+					<<" P="<<particle_properties.getIntLikeQuantumNumber(
+							QuantumNumberIDs::PARITY)
+					<<" C="<<particle_properties.getIntLikeQuantumNumber(
+							QuantumNumberIDs::CPARITY);
 		}
 	}
 

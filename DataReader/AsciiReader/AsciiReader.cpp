@@ -11,18 +11,15 @@
 //_____ I N C L U D E S _______________________________________________________
 
 // ANSI C headers
+#include "AsciiReader.hpp"
+
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
 #include <sstream>
 #include <utility>
 
-// 3rd party headers
-//#include "external/qft++/include/Tensor.h"
-
-// local headers
 #include "Core/Exceptions.hpp"
-#include "DataReader/AsciiReader/AsciiReader.h"
 
 //_____ D E F I N I T I O N S __________________________________________________
 

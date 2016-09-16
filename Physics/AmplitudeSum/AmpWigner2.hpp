@@ -45,7 +45,12 @@ public:
 
 	virtual double evaluate(dataPoint& point) ;
 
-	static double dynamicalFunction(int J, int mu, int muPrime, double cosTheta);
+	static double dynamicalFunction(ComPWA::Spin J, ComPWA::Spin mu,
+			ComPWA::Spin muPrime, double cosTheta);
+
+	static std::complex<double> dynamicalFunction(double cosAlpha,
+			double cosBeta, double cosGamma, ComPWA::Spin J, ComPWA::Spin mu,
+			ComPWA::Spin muPrime);
 
 	virtual std::shared_ptr<FunctionTree> SetupTree(
 			ParameterList& sample, std::string suffix="");

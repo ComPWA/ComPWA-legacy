@@ -48,9 +48,11 @@ const boost::unordered_map<std::string, DynamicalInfoTypes> StringToDynamicalTyp
         DynamicalInfoTypes::RELATIVE_BREIT_WIGNER);
 
 
-class DynamicalFunctionFactory {
+class DynamicalFunctionFactory
+{
   std::map<ParticleStateInfo,
-      std::shared_ptr<AbstractDynamicalFunction>, ParticleStateComperator> dynamical_function_list_;
+      std::shared_ptr<AbstractDynamicalFunction>,
+	  ParticleStateComperator> dynamical_function_list_;
 
   std::shared_ptr<AbstractDynamicalFunction> generateRelativisiticBreitWigner(
       const ParticleStateInfo& state_info,

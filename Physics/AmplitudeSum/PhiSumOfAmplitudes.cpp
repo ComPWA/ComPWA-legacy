@@ -11,8 +11,6 @@
 
 #include <cmath> 
 
-#include "qft++.h"
-
 #include "Physics/AmplitudeSum/PhiSumOfAmplitudes.hpp"
 
 namespace ComPWA {

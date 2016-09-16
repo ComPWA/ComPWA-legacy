@@ -38,18 +38,19 @@ DalitzKinematics::DalitzKinematics(std::string _nameMother,
 		m2 = ComPWA::PhysConst::Instance().findParticle(_name2).mass_;
 		m3 = ComPWA::PhysConst::Instance().findParticle(_name3).mass_;
 
+		//TODO: What shall we do with half-integer spins
 		_spinM =
 				ComPWA::PhysConst::Instance().findParticle(_nameMother).getSpinLikeQuantumNumber(
-						QuantumNumberIDs::SPIN).J_numerator_;
+						QuantumNumberIDs::SPIN).GetNumerator();
 		spin1 =
 				ComPWA::PhysConst::Instance().findParticle(_name1).getSpinLikeQuantumNumber(
-						QuantumNumberIDs::SPIN).J_numerator_;
+						QuantumNumberIDs::SPIN).GetNumerator();
 		spin2 =
 				ComPWA::PhysConst::Instance().findParticle(_name2).getSpinLikeQuantumNumber(
-						QuantumNumberIDs::SPIN).J_numerator_;
+						QuantumNumberIDs::SPIN).GetNumerator();
 		spin3 =
 				ComPWA::PhysConst::Instance().findParticle(_name3).getSpinLikeQuantumNumber(
-						QuantumNumberIDs::SPIN).J_numerator_;
+						QuantumNumberIDs::SPIN).GetNumerator();
 
 	} catch (std::exception& ex){
 		BOOST_LOG_TRIVIAL(error) << "DalitzKinematics::DalitzKinematics() | "
@@ -74,16 +75,16 @@ DalitzKinematics::DalitzKinematics(double _M, double _Br,
 	try{
 		_spinM =
 				ComPWA::PhysConst::Instance().findParticle(_nameMother).getSpinLikeQuantumNumber(
-						QuantumNumberIDs::SPIN).J_numerator_;
+						QuantumNumberIDs::SPIN).GetNumerator();
 		spin1 =
 				ComPWA::PhysConst::Instance().findParticle(_name1).getSpinLikeQuantumNumber(
-						QuantumNumberIDs::SPIN).J_numerator_;
+						QuantumNumberIDs::SPIN).GetNumerator();
 		spin2 =
 				ComPWA::PhysConst::Instance().findParticle(_name2).getSpinLikeQuantumNumber(
-						QuantumNumberIDs::SPIN).J_numerator_;
+						QuantumNumberIDs::SPIN).GetNumerator();
 		spin3 =
 				ComPWA::PhysConst::Instance().findParticle(_name3).getSpinLikeQuantumNumber(
-						QuantumNumberIDs::SPIN).J_numerator_;
+						QuantumNumberIDs::SPIN).GetNumerator();
 	} catch (std::exception& ex){
 		BOOST_LOG_TRIVIAL(error) << "DalitzKinematics::DalitzKinematics() | "
 				"One or more particles can not be initialized: "<<ex.what();

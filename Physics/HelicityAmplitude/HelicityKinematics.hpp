@@ -96,10 +96,10 @@ protected:
 
 public:
   static Kinematics* createInstance() {
-    if (0 == inst_) {
-      inst_ = new HelicityKinematics();
+    if (0 == _inst) {
+      _inst = new HelicityKinematics();
     }
-    return inst_;
+    return _inst;
   }
 
   void setDecayTopologies(
@@ -112,7 +112,7 @@ public:
   //! Event to dataPoint conversion
   void translateEventToDataPoint(const Event& event, dataPoint& point) const;
 
-  bool isWithinPhsp(const dataPoint& point);
+  bool IsWithinPhsp(const dataPoint& point);
   double getMotherMass() const;
   double getPhspVolume() const;
   double getMass(unsigned int num) const;

@@ -16,7 +16,6 @@
 #include <cmath>
 #include "Physics/AmplitudeSum/AmpWigner2.hpp"
 
-#include "qft++.h"
 #include <boost/math/special_functions/legendre.hpp>
 
 namespace ComPWA {
@@ -39,7 +38,8 @@ double AmpWigner2::evaluate(dataPoint& point) {
 			);
 }
 
-double AmpWigner2::dynamicalFunction(int J, int mu, int muPrime, double cosTheta){
+double AmpWigner2::dynamicalFunction(ComPWA::Spin J, ComPWA::Spin mu, ComPWA::Spin muPrime, double cosTheta)
+{
 	/* We assume that we have spin 0 particles only and the Wigner_d functions simplifies to
 	 * ordinary Legendre polynomials. We normalize the square of these to one by the pre factor
 	 * sqrt(2J+1). The factor was obtained by trial and error. No idea for why thats the
@@ -50,15 +50,44 @@ double AmpWigner2::dynamicalFunction(int J, int mu, int muPrime, double cosTheta
 	if(cosTheta>1 ||cosTheta<-1)
 		throw std::runtime_error( "AmpWigner2::dynamicalFunction() | "
 				"scattering angle out of range! Datapoint beyond phsp?");
-	// Calling WignerD function (boost and qft++ version give same results)
-	double result = Wigner_d(
-			::Spin(J), ::Spin(mu), ::Spin(muPrime), acos(cosTheta)
-	);
-	//	double result = boost::math::legendre_p<double>(J,cosTheta);
-	if( ( result!=result ) )
-		throw std::runtime_error("AmpWigner2::evaluate() | Result is NaN!");
 
-	return (norm*(2*J+1)*result);
+	double result = 1.0;
+	::Spin _J(J.GetNumerator(), J.GetDenominator());
+	::Spin _mu(mu.GetNumerator(), mu.GetDenominator());
+	::Spin _muPrime(muPrime.GetNumerator(), muPrime.GetDenominator());
+
+	//TODO: this is the only point in which we use qft++, we should be rid of it
+	result = Wigner_d( _J, _mu, _muPrime, acos(cosTheta) );
+
+#ifdef DEBUG
+	if( ( result!=result ) )
+		throw
+		std::runtime_error("AmpWigner2::dynamicalFunction() | Result is NaN!");
+#endif
+
+	return (norm*(2*J.GetSpin()+1)*result);
+}
+
+std::complex<double> AmpWigner2::dynamicalFunction(double cosAlpha,
+		double cosBeta, double cosGamma, ComPWA::Spin J, ComPWA::Spin mu,
+		ComPWA::Spin muPrime )
+{
+	if(J==0) return 1.0;
+
+	std::complex<double> i(0,1);
+
+	double tmp = AmpWigner2::dynamicalFunction(J, mu, muPrime, cosBeta);
+	std::complex<double> result =
+			tmp * std::exp( -i*(mu.GetSpin()*acos(cosAlpha)
+					+ muPrime.GetSpin()*acos(cosGamma)) );
+
+#ifdef DEBUG
+	if( ( result.real != result.real || result.imag != result.imag ) )
+		throw
+		std::runtime_error("AmpWigner2::dynamicalFunction() | Result is NaN!");
+#endif
+
+	return result;
 }
 
 std::shared_ptr<FunctionTree> AmpWigner2::SetupTree(

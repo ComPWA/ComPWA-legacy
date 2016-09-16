@@ -39,7 +39,7 @@ rule use-project
 		  <search>$(lib)
 	  	;
 
-    lib Core ; 
+     lib Core ; 
 	lib RIO ;
 	lib Net ;
 	lib Hist ;

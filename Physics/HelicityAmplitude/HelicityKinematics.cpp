@@ -33,7 +33,7 @@ HelicityKinematics::HelicityKinematics() {
 HelicityKinematics::~HelicityKinematics() {
 }
 
-bool HelicityKinematics::isWithinPhsp(const dataPoint& point) {
+bool HelicityKinematics::IsWithinPhsp(const dataPoint& point) {
   for (unsigned int i = 0;
       i < unique_occurring_decay_product_index_list_links_.size(); ++i) {
     double mother_mass(sqrt(point.getVal((i * getNumberOfVariables()))));

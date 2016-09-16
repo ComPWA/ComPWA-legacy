@@ -17,6 +17,7 @@
 #include <string>
 #include <map>
 #include <vector>
+#include "Core/Exceptions.hpp"
 
 namespace ComPWA {
 
@@ -24,15 +25,11 @@ typedef std::vector<unsigned int> IndexList;
 typedef std::pair<unsigned int, unsigned int> IndexPair;
 typedef std::map<unsigned int, unsigned int> IndexMapping;
 
-//typedef boost::property_tree::ptree DynamicalInfo;
 
-struct Spin {
-  unsigned int J_numerator_;
-  unsigned int J_denominator_;
-  int J_z_numerator_;
 
-  bool z_component_relevant;
+class Spin {
 
+public:
   double Val() const {
 	  if (J_denominator_ == 0) return 0;
 	  return (double)J_numerator_/J_denominator_;
@@ -59,6 +56,88 @@ struct Spin {
     return false;
   }
 
+  Spin operator+(const Spin &rhs) const {
+	  /* We calculate (a/b - c/d) = (a*d - c*b)/(bd) */
+	  int num = GetNumerator() * rhs.GetDenominator()
+			  + rhs.GetNumerator() * GetDenominator();
+	  int denom = rhs.GetDenominator() * GetDenominator();
+	  int znum = GetZNumerator() * rhs.GetDenominator()
+			  + rhs.GetZNumerator() * GetDenominator();
+	  Spin s;
+	  s.SetNumerator(num);
+	  s.SetZNumerator(znum);
+	  s.SetDenominator(denom);
+	  s.Simplify();
+	  return s;
+  }
+
+  Spin operator-(const Spin &rhs) const {
+	  /* We calculate (a/b - c/d) = (a*d - c*b)/(bd) */
+	  int num = GetNumerator() * rhs.GetDenominator()
+			  - rhs.GetNumerator() * GetDenominator();
+	  int denom = rhs.GetDenominator() * GetDenominator();
+	  int znum = GetZNumerator() * rhs.GetDenominator()
+			  - rhs.GetZNumerator() * GetDenominator();
+	  Spin s;
+	  s.SetNumerator(num);
+	  s.SetZNumerator(znum);
+	  s.SetDenominator(denom);
+	  s.Simplify();
+	  return s;
+  }
+
+  Spin& operator--()
+  {
+	  //Only decrement if the result is larger zero
+	  if(GetNumerator()-1 >= 0){
+		  SetNumerator( GetNumerator()-1 );
+		  if(z_component_relevant)
+			  SetZNumerator( GetZNumerator()+1 );
+	  }
+      return *this;
+  }
+
+  Spin operator--(int)
+  {
+      Spin tmp(*this); // copy
+      operator++(); // pre-increment
+      return tmp;   // return old value
+  }
+
+  Spin& operator++()
+  {
+	  SetNumerator( GetNumerator()+1 );
+	  if(z_component_relevant)
+		  SetZNumerator( GetZNumerator()+1 );
+      return *this;
+  }
+
+  Spin operator++(int)
+  {
+      Spin tmp(*this); // copy
+      operator++(); // pre-increment
+      return tmp;   // return old value
+  }
+
+  void Simplify() {
+	  int tmp, tmpZ;
+	  tmp = tmpZ = ggT(GetNumerator(),GetDenominator());
+	  if( UseZ() )
+		  tmpZ = ggT(GetZNumerator(),GetDenominator());
+	  if(tmp == tmpZ){
+		  SetNumerator( GetNumerator()/tmp );
+		  SetZNumerator( GetZNumerator()/tmp );
+		  SetDenominator( GetDenominator()/tmp );
+	  }
+  }
+
+  /**! Calculate largest common factor */
+  static unsigned int ggT(unsigned int a, unsigned int b){
+	  if(b == 0)
+		  return a;
+	  else return ggT(b, a % b);
+  }
+
   bool operator==(const Spin &rhs) const {
     if (this->J_numerator_ != rhs.J_numerator_)
       return false;
@@ -69,6 +148,7 @@ struct Spin {
 
     return true;
   }
+
   bool operator!=(const Spin &rhs) const {
     return !(*this == rhs);
   }
@@ -87,9 +167,47 @@ struct Spin {
 
     return false;
   }
+
   bool operator>(const Spin &rhs) const {
     return (rhs < *this);
   }
+
+  unsigned int GetNumerator() const { return J_numerator_; }
+
+  unsigned int GetZNumerator() const { return J_z_numerator_; }
+
+  unsigned int GetDenominator() const { return J_denominator_; }
+
+  void SetNumerator(unsigned int num) {
+	  J_numerator_ = num;
+  }
+
+  void SetZNumerator(unsigned int znum) {
+	  J_z_numerator_ = znum;
+  }
+
+  void SetDenominator(unsigned int denom) {
+	  if( denom != 1 && denom != 2)
+		  throw BadParameter("Spin::SetDenominator() |"
+				  " Should be equal 1 oder 2!");
+	  J_denominator_ = denom;
+  }
+
+  double GetSpin() { return (double)J_numerator_/J_denominator_; }
+
+  double GetZComponent() { return (double)J_z_numerator_/J_denominator_; }
+
+  bool UseZ() const { return z_component_relevant; }
+
+  void SetUseZ( bool b ) { z_component_relevant = b; }
+
+protected:
+
+  unsigned int J_numerator_;
+  unsigned int J_denominator_;
+  int J_z_numerator_;
+
+  bool z_component_relevant;
 };
 
 struct IDInfo {
@@ -185,9 +303,9 @@ struct ParticleStateInfo {
     os << "unique id: " << rhs.unique_id_ << std::endl;
     os << "name: " << rhs.pid_information_.name_ << std::endl;
     os << "pid: " << rhs.pid_information_.particle_id_ << std::endl;
-    os << "J: " << rhs.spin_information_.J_numerator_ << "/"
-        << rhs.spin_information_.J_denominator_ << "("
-        << rhs.spin_information_.J_z_numerator_ << ")";
+    os << "J: " << rhs.spin_information_.GetNumerator() << "/"
+        << rhs.spin_information_.GetDenominator()<< "("
+        << rhs.spin_information_.GetZNumerator()<< ")";
     if (rhs.coherent)
       os << " coherent" << std::endl;
     return os;

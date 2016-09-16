@@ -14,13 +14,14 @@ TwoBodyKinematics::TwoBodyKinematics(std::string _nameMother,
 
 	_spinM =
 			ComPWA::PhysConst::Instance().findParticle(_nameMother).getSpinLikeQuantumNumber(
-					QuantumNumberIDs::SPIN).J_numerator_;
+					QuantumNumberIDs::SPIN).GetNumerator();
 	spin1 =
 			ComPWA::PhysConst::Instance().findParticle(_name1).getSpinLikeQuantumNumber(
-					QuantumNumberIDs::SPIN).J_numerator_;
+					QuantumNumberIDs::SPIN).GetNumerator();
 	spin2 =
 			ComPWA::PhysConst::Instance().findParticle(_name2).getSpinLikeQuantumNumber(
-					QuantumNumberIDs::SPIN).J_numerator_;
+					QuantumNumberIDs::SPIN).GetNumerator();
+
 	if(_M==-999 || m1==-999|| m2==-999)
 		throw std::runtime_error("TwoBodyKinematics(): Masses not set!");
 

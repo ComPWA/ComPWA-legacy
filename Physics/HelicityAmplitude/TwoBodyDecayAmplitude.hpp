@@ -33,11 +33,11 @@ class TwoBodyDecayAmplitude {
   unsigned int index_theta_helicity_angle_;
   unsigned int index_phi_helicity_angle_;
 
-  ::Spin J_; // TODO: switch this to our definition eventually
-  ::Spin M_;
-  ::Spin d1_M_;
-  ::Spin d2_M_;
-  ::Spin daughters_delta_M_;
+  ComPWA::Spin J_; // TODO: switch this to our definition eventually
+  ComPWA::Spin M_;
+  ComPWA::Spin d1_M_;
+  ComPWA::Spin d2_M_;
+  ComPWA::Spin daughters_delta_M_;
 
 public:
   TwoBodyDecayAmplitude(const TwoBodyDecaySpinInformation& decay_info);

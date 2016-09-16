@@ -49,18 +49,26 @@ public:
 
 	//! integral for parameters \par excluding efficiency
 	virtual const double GetIntegral();
+
 	//! normalization integral
 	virtual const double GetNormalization() { return GetIntegral(); };
 
 	virtual double GetIntValue(std::string var1, double min1, double max1,
-			std::string var2, double min2, double max2) {};
+			std::string var2, double min2, double max2) { return 0.0; }
 
 	virtual const double volume();
+
 	virtual const double drawInt(double *x, double *p); //For easy usage in a root TF1
+
 	virtual const ParameterList& intensity(double x, double M, double T);
+
 	virtual const ParameterList& intensity(std::vector<double> x);
+
 	virtual const ParameterList& intensity(dataPoint& point);
-	virtual const ParameterList& intensityNoEff(dataPoint& point){ return intensity(point); };
+
+	virtual const ParameterList& intensityNoEff(dataPoint& point) {
+		return intensity(point);
+	}
 
 	virtual void GetFitFractions(ParameterList& parList) { };
 
