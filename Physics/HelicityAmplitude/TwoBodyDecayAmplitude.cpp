@@ -44,9 +44,9 @@ void TwoBodyDecayAmplitude::init() {
   J_=decay_info_.initial_state_;
   M_=ComPWA::Spin(decay_info_.initial_state_.GetZNumerator(),
       decay_info_.initial_state_.GetDenominator());
-  d1_M_=ComPWA::Spin(decay_info_.final_state_.first.GetZNumerator(),
+  auto d1_M_=ComPWA::Spin(decay_info_.final_state_.first.GetZNumerator(),
       decay_info_.final_state_.first.GetDenominator());
-  d2_M_=ComPWA::Spin(decay_info_.final_state_.second.GetZNumerator(),
+  auto d2_M_=ComPWA::Spin(decay_info_.final_state_.second.GetZNumerator(),
       decay_info_.final_state_.second.GetDenominator());
   daughters_delta_M_ = d1_M_ - d2_M_;
 }

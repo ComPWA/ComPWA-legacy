@@ -36,9 +36,9 @@ DynamicalFunctionFactory::generateRelativisiticBreitWigner(
   std::shared_ptr<RelativisticBreitWigner> rel_bw(
       new RelativisticBreitWigner(state_info, external_parameters));
 
-  dynamical_function_list_.insert(std::make_pair(state_info, rel_bw));
+  auto r = dynamical_function_list_.insert(std::make_pair(state_info, rel_bw));
 
-  return rel_bw;
+  return r.first->second;
 }
 
 std::shared_ptr<AbstractDynamicalFunction>

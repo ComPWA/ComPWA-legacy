@@ -37,19 +37,8 @@ std::complex<double> TopologyAmplitude::evaluate(const dataPoint& point,
     unsigned int two_body_decay_index(0);
     for (auto const& two_body_decay : sequential_decay.decay_amplitude) {
       // the results for each amplitude evaluation are multiplied to the sequential decay result
-      sequential_decay_result *= std::polar(
-          two_body_decay.strength_->GetValue(),
-          two_body_decay.phase_->GetValue());
+    	two_body_decay.Evaluate(point);
 
-      std::complex<double> angular_part =
-          two_body_decay.angular_part_->evaluate(point,
-              evaluation_index_list[two_body_decay_index]);
-
-      std::complex<double> dynamical_part =
-          two_body_decay.dynamical_part_->evaluate(point,
-              evaluation_index_list[two_body_decay_index]);
-
-      sequential_decay_result *= angular_part * dynamical_part;
       ++two_body_decay_index;
     }
     // the sequential decay results are just added

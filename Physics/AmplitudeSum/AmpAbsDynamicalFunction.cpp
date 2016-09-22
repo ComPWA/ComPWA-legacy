@@ -522,14 +522,16 @@ std::complex<double> AmpAbsDynamicalFunction::Evaluate(dataPoint& point)
 	}
 	res = (GetPrefactor()*GetCoefficient()*GetNormalization()*res*ang);
 
+#ifdef DEBUG
 	//check for NaN
-//	if( std::isnan(res.real()) || std::isnan(res.imag()) )
-//		throw std::runtime_error("AmpAbsDynamicalFunction::Evaluate() | Result of"
-//				" resonance "+GetName()+" is NaN!");
+	if( std::isnan(res.real()) || std::isnan(res.imag()) )
+		throw std::runtime_error("AmpAbsDynamicalFunction::Evaluate() | Result of"
+				" resonance "+GetName()+" is NaN!");
 	//check for inf
 	if( std::isinf(res.real()) || std::isinf(res.imag()) )
 		throw std::runtime_error("AmpAbsDynamicalFunction::Evaluate() | Result of"
 				" resonance "+GetName()+" is inf!");
+#endif
 
 	return res;
 }
@@ -612,10 +614,11 @@ double AmpAbsDynamicalFunction::integral() const
 			&F,	xLimit_low,	xLimit_high, 2,	_nCalls, r,	s, &res, &err );
 	gsl_monte_vegas_free(s);
 
+#ifdef DEBUG
 	//check for NaN
-//	if( std::isnan(res) )
-//		throw std::runtime_error("AmpAbsDynamicalFunction::integral() |"
-//				"Result of resonance "+GetName()+" is NaN!");
+	if( std::isnan(res) )
+		throw std::runtime_error("AmpAbsDynamicalFunction::integral() |"
+				"Result of resonance "+GetName()+" is NaN!");
 	//check for inf
 	if( std::isinf(res) )
 		throw std::runtime_error("AmpAbsDynamicalFunction::integral() |"
@@ -628,6 +631,7 @@ double AmpAbsDynamicalFunction::integral() const
 	BOOST_LOG_TRIVIAL(debug)<<"AmpAbsDynamicalFunction::integral() | "
 			"Integration result for |"<<_name<<"|^2: "
 			<<res<<"+-"<<err<<" relAcc [%]: "<<100*err/res;
+#endif
 
 	return res/vol;
 }
@@ -637,10 +641,11 @@ double AmpAbsDynamicalFunction::GetNormalization()
 	if( _normStyle == normStyle::none ) return 1.0;
 	double norm = 1/sqrt(GetIntegral());
 
+#ifdef DEBUG
 	//check for NaN
-//	if( std::isnan(norm) )
-//		throw std::runtime_error("AmpAbsDynamicalFunction::GetNormalization() |"
-//				"Result of resonance "+GetName()+" is NaN!");
+	if( std::isnan(norm) )
+		throw std::runtime_error("AmpAbsDynamicalFunction::GetNormalization() |"
+				"Result of resonance "+GetName()+" is NaN!");
 	//check for inf
 	if( std::isinf(norm) )
 		throw std::runtime_error("AmpAbsDynamicalFunction::GetNormalization() |"
@@ -649,6 +654,7 @@ double AmpAbsDynamicalFunction::GetNormalization()
 	if( norm == 0 )
 		throw std::runtime_error("AmpAbsDynamicalFunction::GetNormalization() |"
 				"Result of resonance "+GetName()+" is zero!");
+#endif
 
 	return norm;
 }
@@ -715,10 +721,11 @@ double AmpAbsDynamicalFunction::totalIntegral() const
 	gsl_monte_vegas_integrate (&F, xLimit_low, xLimit_high, 2, _nCalls, r,s,&res, &err);
 	gsl_monte_vegas_free(s);
 
+#ifdef DEBUG
 	//check for NaN
-//	if( std::isnan(res) )
-//		throw std::runtime_error("AmpAbsDynamicalFunction::totalIntegral() |"
-//				"Result of resonance "+GetName()+" is NaN!");
+	if( std::isnan(res) )
+		throw std::runtime_error("AmpAbsDynamicalFunction::totalIntegral() |"
+				"Result of resonance "+GetName()+" is NaN!");
 	//check for inf
 	if( std::isinf(res) )
 		throw std::runtime_error("AmpAbsDynamicalFunction::totalIntegral() |"
@@ -727,6 +734,7 @@ double AmpAbsDynamicalFunction::totalIntegral() const
 	if( res == 0 )
 		throw std::runtime_error("AmpAbsDynamicalFunction::totalIntegral() |"
 				"Result of resonance "+GetName()+" is zero!");
+#endif
 
 	return res;
 }
@@ -756,6 +764,7 @@ std::complex<double> AmpAbsDynamicalFunction::widthToCoupling(
 	std::complex<double> denom = gammaA*sqrt(rho);
 	std::complex<double> res = std::complex<double>(sqrt(mR*width), 0) / denom;
 
+#ifdef DEBUG
 	//check for NaN
 //	if( std::isnan(res.real()) || std::isnan(res.imag()) )
 //		throw std::runtime_error("AmpAbsDynamicalFunction::widthToCoupling() | "
@@ -764,6 +773,7 @@ std::complex<double> AmpAbsDynamicalFunction::widthToCoupling(
 	if( std::isinf(res.real()) || std::isinf(res.imag()) )
 		throw std::runtime_error("AmpAbsDynamicalFunction::widthToCoupling() | "
 				"Result is inf!");
+#endif
 
 	return res;
 }
@@ -800,14 +810,16 @@ std::complex<double> AmpAbsDynamicalFunction::couplingToWidth(
 	//calculate phsp factor
 	std::complex<double> res = std::norm(gammaA)*g*g*phspFactor/ mR;
 
+#ifdef DEBUG
 	//check for NaN
-//	if( std::isnan(res.real()) || std::isnan(res.imag()) )
-//		throw std::runtime_error("AmpAbsDynamicalFunction::couplingToWidth() | "
-//				"Result is NaN!");
+	if( std::isnan(res.real()) || std::isnan(res.imag()) )
+		throw std::runtime_error("AmpAbsDynamicalFunction::couplingToWidth() | "
+				"Result is NaN!");
 	//check for inf
 	if( std::isinf(res.real()) || std::isinf(res.imag()) )
 		throw std::runtime_error("AmpAbsDynamicalFunction::couplingToWidth() | "
 				"Result is inf!");
+#endif
 
 	return res;
 }

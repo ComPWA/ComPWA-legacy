@@ -42,7 +42,7 @@ struct SequentialDecayInformation
   }
 };
 
-class CoherentAmplitude: public Amplitude
+class CoherentAmplitude: public AmplitudeIntensity
 {
   std::vector<TopologyAmplitude> topology_amplitudes_;
 

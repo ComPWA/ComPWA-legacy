@@ -35,8 +35,6 @@ class TwoBodyDecayAmplitude {
 
   ComPWA::Spin J_; // TODO: switch this to our definition eventually
   ComPWA::Spin M_;
-  ComPWA::Spin d1_M_;
-  ComPWA::Spin d2_M_;
   ComPWA::Spin daughters_delta_M_;
 
 public:

@@ -99,8 +99,8 @@ constant build_AmplitudeSum : 1 ;
 constant build_DPKinematics : 1 ;
 constant build_BreitWigner : 1 ;
 constant build_DecayTree : 0 ;
-constant build_HelicityAmplitude : 1 ;
-constant build_DynamicalDecayFunctions : 1 ;
+constant build_HelicityAmplitude : 0 ;
+constant build_DynamicalDecayFunctions : 0 ;
 
 constant build_DataReader : 1 ;
 constant build_RootReader : 1 ;
@@ -114,7 +114,7 @@ constant build_SliceFit : 1 ;
 
 constant build_Optimizer : 1 ;
 constant build_Minuit2 : 1 ;
-constant build_Geneva : 1 ;
+constant build_Geneva : 0 ;
 
 # core should always be built
 build-project Core ;
