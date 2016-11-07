@@ -1,27 +1,6 @@
 ########### AmplitudeSum lib #############
-import os ;
-
-local QFT = [ os.environ QFT ] ;
-local GSL = [ os.environ GSL_ROOT ] ;
-
-BOOSTLIBS = -lboost_log_setup -lboost_log -lboost_date_time -lboost_filesystem -lboost_program_options -lboost_regex -lboost_serialization -lboost_system -lboost_thread -lboost_test_exec_monitor -L$(BOOST_ROOT)/lib ;
-
-project :
-	requirements
-        <include>$(QFT)/include
-	    <include>$(BOOST_ROOT)/include
-	    <include>$(GSL)/include
-	<linkflags>-L$(GSL)/lib
-	<linkflags>-lgsl
-     <linkflags>-lgslcblas
-	<linkflags>-L$(QFT)/lib
-	<linkflags>-lqft++
-	;
-
 lib AmplitudeSum : 
-        [ glob *.cpp : *Test.cpp ] 
-        $(TOP)/Core//ComPWA
-        $(PHYSICS)/DPKinematics//DPKinematics
-        ;
+	[ glob *.cpp : *Test.cpp ] 
+	$(PHYSICS)/DPKinematics//DPKinematics ;
 
 install dist : AmplitudeSum : <location>$(TOP)/lib ;

@@ -50,12 +50,12 @@ int main(int argc, char **argv){
   ParameterList par;
   //par.push_back(shared_ptr<PWAParameter>(new PWAGenericPar<double>(1.5, 0.5, 2.5, 0.1)));
  // par.push_back(shared_ptr<PWAParameter>(new PWAGenericPar<double>(0.3, 0.1, 0.5, 0.05)));
-  testBW->copyParameterList(par);
-  ParameterList intensL = testBW->intensity(x, par);
+  testBW->FillParameterList(par);
+  ParameterList intensL = testBW->intensity(x);
   double BWpdf = intensL.GetDoubleParameter(0)->GetValue();
   cout << "BreitWigner Intensity: " << BWpdf << endl;
-  cout << "BreitWigner Integral: " << testBW->integral(par) << endl;
-  cout << "BreitWigner Intensity normalized: " << BWpdf / testBW->integral(par) << endl;
+  cout << "BreitWigner Integral: " << testBW->GetIntegral() << endl;
+  cout << "BreitWigner Intensity normalized: " << BWpdf / testBW->GetIntegral() << endl;
 
   cout << "Done ..." << endl << endl;
 

@@ -9,6 +9,7 @@
 //     Peter Weidenkaff -
 //-------------------------------------------------------------------------------
 #include "Physics/DPKinematics/RootEfficiency.hpp"
+#include "Core/Exceptions.hpp"
 #include "Core/DataPoint.hpp"
 
 namespace ComPWA {
@@ -25,13 +26,13 @@ DalitzHistEfficiency::DalitzHistEfficiency(const DalitzHistEfficiency&){
 }
 double DalitzHistEfficiency::evaluate(std::vector<double> x){
 	//we assume that x[1]=m13sq and x[0]=m23sq
-	dataPoint point; point.setVal(0,x[0]); point.setVal(1,x[1]);
-//	double m13sq = x[1];
-//	double m23sq = x[0];
+	dataPoint point;
+	try{
+		Kinematics::instance()->FillDataPoint(1,0,x[1],x[0],point);
+	} catch (BeyondPhsp& ex){
+		return 0;
+	}
 
-//	TH2D* test = (TH2D*) effHist->GetPassedHistogram();
-//	int globalBin = test->FindBin(m23sq,m13sq);
-//	return effHist->GetEfficiency(globalBin);
 	return evaluate(point);
 }
 double DalitzHistEfficiency::evaluate(dataPoint& point){
@@ -46,10 +47,8 @@ double DalitzHistEfficiency::evaluate(dataPoint& point){
 }
 
 double DalitzAngleHistEfficiency::evaluate(dataPoint& point){
-//	double m23sq = point.getVal("m23sq");
 	double m23sq = point.getVal(0);
-	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(Kinematics::instance());
-	double angle = kin->helicityAngle(5,point);
+	double angle = point.getVal(8);
 
 	TH2D* test = (TH2D*) effHist->GetPassedHistogram();
 	int globalBin = test->FindBin(m23sq,angle);

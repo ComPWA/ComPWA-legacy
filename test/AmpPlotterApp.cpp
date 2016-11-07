@@ -133,7 +133,7 @@ int main(int argc, char **argv){
     case 1:{ //ComPWA single BW
       plotMe.reset(new ComPWA::Physics::BreitWigner::BreitWigner(0.,5.));
       ParameterList partmp;
-      plotMe->copyParameterList(partmp);
+      plotMe->FillParameterList(partmp);
       nPar = 0;
       for(unsigned int i=0; i<partmp.GetNDouble(); i++){
         std::shared_ptr<DoubleParameter> tmpdouble = partmp.GetDoubleParameter(i);

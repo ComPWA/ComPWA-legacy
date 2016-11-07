@@ -17,30 +17,35 @@ namespace ComPWA {
 namespace Physics {
 namespace DynamicalFunctions {
 
-DynamicalFunctionFactory::DynamicalFunctionFactory() : dynamical_function_list_() {
+DynamicalFunctionFactory::DynamicalFunctionFactory() : dynamical_function_list_()
+{
   // TODO Auto-generated constructor stub
-
 }
 
-DynamicalFunctionFactory::~DynamicalFunctionFactory() {
+DynamicalFunctionFactory::~DynamicalFunctionFactory()
+{
   // TODO Auto-generated destructor stub
 }
 
-std::shared_ptr<AbstractDynamicalFunction> DynamicalFunctionFactory::generateRelativisiticBreitWigner(
+std::shared_ptr<AbstractDynamicalFunction>
+DynamicalFunctionFactory::generateRelativisiticBreitWigner(
     const ParticleStateInfo& state_info,
-    const ExternalParameters& external_parameters) {
+    const ExternalParameters& external_parameters)
+{
 
   std::shared_ptr<RelativisticBreitWigner> rel_bw(
       new RelativisticBreitWigner(state_info, external_parameters));
 
-  dynamical_function_list_.insert(std::make_pair(state_info, rel_bw));
+  auto r = dynamical_function_list_.insert(std::make_pair(state_info, rel_bw));
 
-  return rel_bw;
+  return r.first->second;
 }
 
-std::shared_ptr<AbstractDynamicalFunction> DynamicalFunctionFactory::generateDynamicalFunction(
+std::shared_ptr<AbstractDynamicalFunction>
+DynamicalFunctionFactory::generateDynamicalFunction(
     const ParticleStateInfo& state_info,
-    const ExternalParameters& external_parameters) {
+    const ExternalParameters& external_parameters)
+{
 
   // first check if we already have this dynamical function
   auto find_result = dynamical_function_list_.find(state_info);

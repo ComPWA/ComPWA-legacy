@@ -563,7 +563,7 @@ double CoherentAmplitude::getMaxVal(std::shared_ptr<Generator> gen) {
       //create event
       gen->generate(event);
       dataPoint point;
-      kin->eventToDataPoint(event, point);
+      kin->EventToDataPoint(event, point);
 
       if (!kin->isWithinPhsp(point)) {
         if (i > 0)
@@ -590,20 +590,20 @@ double CoherentAmplitude::getMaxVal(std::shared_ptr<Generator> gen) {
 }
 
 bool CoherentAmplitude::hasTree() {
-  return true;
+	return true;
 }
 
-std::shared_ptr<FunctionTree> CoherentAmplitude::getAmpTree(allMasses&,
-    allMasses&, std::string label) {
-  if (label.compare("data") == 0) {
-    return tree_.at(1);
-  }
-  else
-    return tree_.at(0);
+std::shared_ptr<FunctionTree> CoherentAmplitude::GetTree(
+		ParameterList&, ParameterList&, ParameterList&) {
+	if (label.compare("data") == 0) {
+		return tree_.at(1);
+	}
+	else
+		return tree_.at(0);
 }
 
 const ParameterList& CoherentAmplitude::intensity(std::vector<double> point,
-    ParameterList& par) {
+		ParameterList& par) {
   setParameterList(par);
   dataPoint dataP(point);
   return intensity(dataP);
@@ -619,7 +619,7 @@ const ParameterList& CoherentAmplitude::intensityNoEff(const dataPoint& point) {
 //  std::complex<double> coherent_amplitude = 0;
   double intensity(0.0);
 
-  if (Kinematics::instance()->isWithinPhsp(point)) {
+  if (Kinematics::instance()->IsWithinPhsp(point)) {
     /* for (unsigned int i = 0; i < topology_amplitudes_.size(); ++i) {
      // at first get the appropriate data evaluation index lists for this
      // topology which we pass to the topology amplitudes later

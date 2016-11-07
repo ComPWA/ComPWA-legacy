@@ -61,6 +61,95 @@ using ComPWA::dataPoint;
 /**
  * The main function.
  */
+<<<<<<< HEAD
+int main(int argc, char **argv){
+	std::cout << "  ComPWA Copyright (C) 2013  Mathias Michel " << std::endl;
+	std::cout << "  This program comes with ABSOLUTELY NO WARRANTY; for details see license.txt" << std::endl;
+	std::cout << std::endl;
+
+	TwoBodyKinematics::createInstance("D0","K-","pi+",0.1);
+
+	std::shared_ptr<Generator> gen = std::shared_ptr<Generator>(
+			new UniformTwoBodyGenerator(1.8*1.8,2.0*2.0,1234567)
+	);
+	RunManager run;
+	run.setGenerator(gen);
+
+	DoubleParameter true_mass("mean",1.865,1.5,2.0,0.1);
+	DoubleParameter true_width("width",0.004,0,0.1,0.01);
+	DoubleParameter mass("mean",1.8,1.5,2.0,0.1);
+	DoubleParameter width("width",0.05,0,0.1,0.01);
+	ParameterList truePar, fitPar, initialPar;
+	std::shared_ptr<Amplitude> truegaus(new GaussAmp("gaus",true_mass,true_width));
+	truegaus->FillParameterList(truePar);
+	std::shared_ptr<Amplitude> gaus(new GaussAmp("gaus",mass,width));
+	gaus->FillParameterList(fitPar);
+	gaus->FillParameterList(initialPar);
+
+	run.setAmplitude(truegaus);
+	std::shared_ptr<Data> toyData(new RootReader());
+	run.setData(toyData);
+	run.generate(1000);
+	run.setAmplitude(gaus);
+
+	std::shared_ptr<Data> toyPhsp(new RootReader());
+	run.setPhspSample(toyPhsp);
+	run.generatePhsp(100000);
+
+	std::shared_ptr<ControlParameter> myFit(MinLogLH::createInstance( gaus, toyData, toyPhsp ));
+
+	//--------------------------Minimizer IF --------------------------------------------------------
+	std::shared_ptr<Optimizer> geneva_opti(new GenevaIF(myFit));
+	std::shared_ptr<Optimizer> minuit_opti(new MinuitIF(myFit,fitPar));
+
+	BOOST_LOG_TRIVIAL(info) << "Starting Parameters:";
+	BOOST_LOG_TRIVIAL(info) << fitPar.to_str();
+	BOOST_LOG_TRIVIAL(info) << "Running Geneva optimizer:";
+	std::shared_ptr<FitResult> geneva_result = geneva_opti->exec(fitPar);
+	geneva_result->setInitialParameters(initialPar);
+	geneva_result->setTrueParameters(truePar);
+	std::shared_ptr<Data> geneva_fit(new RootReader());
+	run.setData(geneva_fit);
+	run.generate(1000);
+
+	gaus->FillParameterList(initialPar);
+
+	BOOST_LOG_TRIVIAL(info) << "Running Minuit optimizer:";
+	std::shared_ptr<FitResult> minuit_result = minuit_opti->exec(fitPar);
+	minuit_result->setInitialParameters(initialPar);
+	minuit_result->setTrueParameters(truePar);
+	std::shared_ptr<Data> minuit_fit(new RootReader());
+	run.setData(minuit_fit);
+	run.generate(1000);
+
+	geneva_result->print();
+	minuit_result->print();
+
+	//Plotting
+	TH1D* h_data = new TH1D("data","data",100,1.8,2.0);
+	TH1D* h_minuit = new TH1D("minuit","minuit",100,1.8,2.0);
+	h_minuit->SetLineColor(kGreen);
+	TH1D* h_geneva = new TH1D("geneva","geneva",100,1.8,2.0);
+	h_minuit->SetLineColor(kBlue);
+	for(int i =0; i<toyData->getNEvents(); i++){
+		dataPoint p(toyData->getEvent(i));
+		h_data->Fill(sqrt(p.getVal(0)));
+	}
+	for(int i =0; i<geneva_fit->getNEvents(); i++){
+		dataPoint p(geneva_fit->getEvent(i));
+		h_geneva->Fill(sqrt(p.getVal(0)));
+	}
+	for(int i =0; i<minuit_fit->getNEvents(); i++){
+		dataPoint p(minuit_fit->getEvent(i));
+		h_minuit->Fill(sqrt(p.getVal(0)));
+	}
+	TCanvas s;
+	h_data->Draw();
+	h_minuit->Draw("Sames");
+	h_geneva->Draw("Sames");
+	s.Print("OptimizerTest.root");
+	return 0;
+=======
 int main(int argc, char **argv) {
   std::cout << "  ComPWA Copyright (C) 2013  Mathias Michel " << std::endl;
   std::cout
@@ -168,4 +257,5 @@ int main(int argc, char **argv) {
   h_geneva->Draw("Sames");
   s.Print("OptimizerTest.root");
   return 0;
+>>>>>>> dd7eb340b0f73d2b07005f687e586aae14fbc9fa
 }

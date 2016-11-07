@@ -14,7 +14,7 @@
 
 #include "Core/Parameter.hpp"
 #include "Physics/AmplitudeSum/AmpAbsDynamicalFunction.hpp"
-#include "Physics/AmplitudeSum/AmpWigner.hpp"
+#include "Physics/AmplitudeSum/AmpWigner2.hpp"
 
 #include <vector>
 #include <memory>
@@ -37,7 +37,7 @@ public:
   inline virtual ~PhiSumOfAmplitudes() { };
 
   void addBW(std::shared_ptr<AmpAbsDynamicalFunction> theRes , std::shared_ptr<DoubleParameter> r, std::shared_ptr<DoubleParameter> phi);
-  void addBW(std::shared_ptr<AmpAbsDynamicalFunction>, std::shared_ptr<DoubleParameter>, std::shared_ptr<DoubleParameter>, std::shared_ptr<AmpWigner>);
+  void addBW(std::shared_ptr<AmpAbsDynamicalFunction>, std::shared_ptr<DoubleParameter>, std::shared_ptr<DoubleParameter>, std::shared_ptr<AmpWigner2>);
   
   virtual std::string GetName(){ return _name; };
   virtual std::string GetTitle(){ return GetName(); };
@@ -51,7 +51,7 @@ private:
   std::vector<std::shared_ptr<AmpAbsDynamicalFunction> > 	_pdfList ;   //  List of component PDFs
   std::vector<std::shared_ptr<DoubleParameter> > 			_intList;    //  List of relative intensities
   std::vector<std::shared_ptr<DoubleParameter> > 			_phaseList;  //  List of relative phases
-  std::vector<std::shared_ptr<AmpWigner> > 					_angList ;   //  List of component angular distributions
+  std::vector<std::shared_ptr<AmpWigner2> >					_angList ;   //  List of component angular distributions
 
 //  TIterator* _pdfIter  ;
 //  TIterator* _intIter  ;

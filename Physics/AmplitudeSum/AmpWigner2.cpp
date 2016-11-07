@@ -16,146 +16,140 @@
 #include <cmath>
 #include "Physics/AmplitudeSum/AmpWigner2.hpp"
 
-#include "qft++.h"
+#include <boost/math/special_functions/legendre.hpp>
 
 namespace ComPWA {
 namespace Physics {
 namespace AmplitudeSum {
-
-AmpWigner2::AmpWigner2(unsigned int subSys, unsigned int resSpin) : _resSpin(resSpin),_subSys(subSys),massIdsSet(false)
+AmpWigner2::AmpWigner2(unsigned int varId, ComPWA::Spin spin,
+		unsigned int mu, unsigned int muPrime) :
+		_varId(varId), _spin(spin), _mu(mu), _muPrime(muPrime)
 {
-	initialise();
+
 }
 
-AmpWigner2::AmpWigner2(const AmpWigner2& other, const char* newname) : _resSpin(other._resSpin),_subSys(other._subSys),massIdsSet(false)
-{
-	initialise();
+double AmpWigner2::evaluate(dataPoint& point) {
+	ComPWA::Physics::DPKinematics::DalitzKinematics* kin =
+			dynamic_cast<ComPWA::Physics::DPKinematics::DalitzKinematics*>(
+					Kinematics::instance()
+	);
+	return dynamicalFunction(
+			_spin.Val(), _mu, _muPrime, point.getVal(_varId)
+			);
 }
 
-void AmpWigner2::initialise()
+double AmpWigner2::dynamicalFunction(ComPWA::Spin J, ComPWA::Spin mu, ComPWA::Spin muPrime, double cosTheta)
 {
-  DPKinematics::DalitzKinematics* kin = dynamic_cast<DPKinematics::DalitzKinematics*>(Kinematics::instance());
-	_M=kin->M;
-	_m1=kin->m1;
-	_m2=kin->m2;
-	_m3=kin->m3;
+	/* We assume that we have spin 0 particles only and the Wigner_d functions simplifies to
+	 * ordinary Legendre polynomials. We normalize the square of these to one by the pre factor
+	 * sqrt(2J+1). The factor was obtained by trial and error. No idea for why thats the
+	 * normalization.  */
+//	double norm = 1/sqrt(2*J+1);
+	double norm = 1;
+	if(J==0) return norm; //assure that angular term is properly normalized
+	if(cosTheta>1 ||cosTheta<-1)
+		throw std::runtime_error( "AmpWigner2::dynamicalFunction() | "
+				"scattering angle out of range! Datapoint beyond phsp?");
 
-	_spinM = kin->getSpin(0);
-	_spin1 = kin->getSpin(1);
-	_spin2 = kin->getSpin(2);
+	double result = 1.0;
+	::Spin _J(J.GetNumerator(), J.GetDenominator());
+	::Spin _mu(mu.GetNumerator(), mu.GetDenominator());
+	::Spin _muPrime(muPrime.GetNumerator(), muPrime.GetDenominator());
 
+	//TODO: this is the only point in which we use qft++, we should be rid of it
+	result = Wigner_d( _J, _mu, _muPrime, acos(cosTheta) );
+
+#ifdef DEBUG
+	if( ( result!=result ) )
+		throw
+		std::runtime_error("AmpWigner2::dynamicalFunction() | Result is NaN!");
+#endif
+
+	return (norm*(2*J.GetSpin()+1)*result);
 }
-double AmpWigner2::evaluate(const dataPoint& point) {
-  DPKinematics::DalitzKinematics* kin = dynamic_cast<DPKinematics::DalitzKinematics*>(Kinematics::instance());
 
-	double cosTheta=-999, result=-999;
-	Spin J((int)_resSpin);
-	/*
-	 * \in and \out are the difference in the spins of the ingoing and outgoing particles.
-	 * In literature it is often denoted with mu and muPrime
-	 * !!!! Spin M,N completely wrong! We need to calculate helicities!
-	 */
-	Spin N=0, M=0;
-	if(!massIdsSet){
-		id23 = point.getID("m23sq");
-		id13 = point.getID("m13sq");
-		massIdsSet=true;
-	}
-	double m23sq = point.getVal(id23);
-	double m13sq = point.getVal(id13);
-	double m12sq = kin->getThirdVariableSq(m23sq,m13sq);
+std::complex<double> AmpWigner2::dynamicalFunction(double cosAlpha,
+		double cosBeta, double cosGamma, ComPWA::Spin J, ComPWA::Spin mu,
+		ComPWA::Spin muPrime )
+{
+	if(J==0) return 1.0;
 
-	cosTheta = kin->helicityAngle(_subSys, point);
-//	switch(_subSys){
-//	case 3:
-////		cosTheta = kin->calcHelicityAngle(point->getMsq(3),point->getMsq(4),_M,_m3,_m1,_m2);
-////		cosTheta = kin->calcHelicityAngle(m12sq,m23sq,_M,_m3,_m1,_m2);
-//		M = (int)(_spinM-_spin3); N = (int)(_spin1-_spin2);
-//		M = 0; N=0;
-//		break;
-//	case 4:
-////		cosTheta = kin->calcHelicityAngle(m13sq,m23sq,_M,_m2,_m1,_m3);
-//		M = (int)(_spinM-_spin1); N = (int)(_spin3-_spin2);
-//		M = 0; N=0;
-//		break;
-//	case 5:
-////		cosTheta = kin->calcHelicityAngle(m23sq,m13sq,_M,_m1,_m2,_m3);
-//		M = (int)(_spinM-_spin1); N = (int)(_spin3-_spin2);
-//		M = 0; N=0;
-//		break;
-//	default:
-//		BOOST_LOG_TRIVIAL(fatal)<<"AmpWigner2: wrong subSystem! Exit!"; exit(1);
-//	}
-//	if(cosTheta>1.) cosTheta=1.;
-//	if(cosTheta<-1.) cosTheta=-1.;
-	double theta = acos(cosTheta);
+	std::complex<double> i(0,1);
 
-	/* Calling WignerD function
-	 * Note that Wigner_d depends on the sign of \in and \out. I hope it is correctly assigned.
-	 */
-	result = (2*J+1)*Wigner_d(J,M,N,theta);
-	if( ( result!=result ) || (theta!=theta)) {
-		BOOST_LOG_TRIVIAL(error)<<"AmpWigner2: NAN! (J,M,N)=("<< J<<","<<M<<","<<N
-				<<") subsys="<<_subSys<<" theta="<<theta<<" cosTheta="<<cosTheta<<" result="<<result
-				<<"point = (m23sq="<<m23sq<<" m13sq="<<m13sq<<" m12sq="<<m12sq<<")";
-		return 0;
-	}
+	double tmp = AmpWigner2::dynamicalFunction(J, mu, muPrime, cosBeta);
+	std::complex<double> result =
+			tmp * std::exp( -i*(mu.GetSpin()*acos(cosAlpha)
+					+ muPrime.GetSpin()*acos(cosGamma)) );
+
+#ifdef DEBUG
+	if( ( result.real != result.real || result.imag != result.imag ) )
+		throw
+		std::runtime_error("AmpWigner2::dynamicalFunction() | Result is NaN!");
+#endif
+
 	return result;
 }
 
-/*double AmpWigner2::evaluateTree(const ParameterList& paras, const std::string name) const{
-	dataPoint* point = dataPoint::instance();
-	DPKinematics kin = point->DPKin;
+std::shared_ptr<FunctionTree> AmpWigner2::SetupTree(
+			ParameterList& sample, std::string suffix)
+{
+	std::shared_ptr<FunctionTree> newTree(new FunctionTree());
 
-	//double Gamma0, GammaV;
-	double m23 = double(paras.GetParameterValue("m23"));
-	double m13 = double(paras.GetParameterValue("m13"));
-	double m12 = double(paras.GetParameterValue("m12"));
-	double M  = double(paras.GetParameterValue("M"));
-	double m1 = double(paras.GetParameterValue("m1"));
-	double m2 = double(paras.GetParameterValue("m2"));
-	double m3 = double(paras.GetParameterValue("m3"));
-	//double locmax_sq = Double_t(paras.GetParameterValue("mb_"+name));
-	//double locmin_sq = Double_t(paras.GetParameterValue("mb_"+name));
-	unsigned int subSysFlag = double(paras.GetParameterValue("subSysFlag_"+name));
-	double motherSpin = double(paras.GetParameterValue("motherSpin_"+name));
-	double resSpin = double(paras.GetParameterValue("resSpin_"+name));
-	double outSpin1 = double(paras.GetParameterValue("outSpin1_"+name));
-	double outSpin2 = double(paras.GetParameterValue("outSpin2_"+name));
-	double outSpin3 = double(paras.GetParameterValue("outSpin3_"+name));
+	int sampleSize = sample.GetMultiDouble(0)->GetNValues();
+	//----Strategies needed
+	std::shared_ptr<WignerDStrategy> angdStrat(
+			new WignerDStrategy("AngD"+suffix) );
+	newTree->createHead("AngD_"+suffix, angdStrat, sampleSize);
 
-	double cosTheta=-999, result=-999;
-	Spin J((int)resSpin);
-	Spin out, in;
+	newTree->createLeaf("spin",_spin.Val(), "AngD_"+suffix); //spin
+	newTree->createLeaf("m", _mu, "AngD_"+suffix); //OutSpin 1
+	newTree->createLeaf("n", _muPrime, "AngD_"+suffix); //OutSpin 2
+	newTree->createLeaf("AngD_sample", sample.GetMultiDouble(_varId), "AngD_"+suffix);
 
-	switch(_subSys){
-	case 3:
-		cosTheta = kin.calcHelicityAngle(m12,m13,M,m3,m1,m2);
-		in = (int)(motherSpin-outSpin3); out = (int)(outSpin1-outSpin2);
-		break;
-	case 4:
-		cosTheta = kin.calcHelicityAngle(m13,m23,M,m2,m3,m1);
-		in = (int)(motherSpin-outSpin2); out = (int)(outSpin3-outSpin1);
-		break;
-	case 5:
-		cosTheta = kin.calcHelicityAngle(m23,m13,M,m1,m2,m3);
-		in = (int)(motherSpin-outSpin1); out = (int)(outSpin3-outSpin2);
-		break;
-	default:
-		std::cout<<"AmpWigner: wrong subSystem! Exit!"<<std::endl; exit(1);
+	return newTree;
+}
+
+bool WignerDStrategy::execute(ParameterList& paras,
+		std::shared_ptr<AbsParameter>& out)
+{
+#ifdef DEBUG
+	if( checkType != out->type() ) {
+		throw( WrongParType( std::string("Output Type ")
+		+ParNames[out->type()]+std::string(" conflicts expected type ")
+		+ParNames[checkType]+std::string(" of ")+name+" Wigner strat") );
+		return false;
 	}
-	if(cosTheta>1.) cosTheta=1.;
-	if(cosTheta<-1.) cosTheta=-1.;
-	double theta = acos(cosTheta);
+#endif
 
-	result = Wigner_d(J,in,out,theta); //TODO: use same functions as above
-	if( ( result!=result ) || (theta!=theta)) {
-		std::cout<< "NAN! J="<< J<<" M="<<out<<" N="<<in<<" beta="<<cosTheta<<std::endl;
-		std::cout<< "msq12="<< m12<<" msq13="<< m13<<" msq23="<< m23<<std::endl;
-		return 0;
-	}
-	return result;
-}*/
+	double _inSpin = paras.GetDoubleParameter(0)->GetValue();
+	double _outSpin1 = paras.GetDoubleParameter(1)->GetValue();
+	double _outSpin2 = paras.GetDoubleParameter(2)->GetValue();
+
+	ComPWA::Physics::DPKinematics::DalitzKinematics* kin =
+			dynamic_cast<ComPWA::Physics::DPKinematics::DalitzKinematics*>(
+			Kinematics::instance()
+	);
+
+	std::shared_ptr<MultiDouble> _angle = paras.GetMultiDouble(0);
+
+	std::vector<double> results(_angle->GetNValues(), 0.);
+	for(unsigned int ele=0; ele<_angle->GetNValues(); ele++){
+		try{
+			results.at(ele)=AmpWigner2::dynamicalFunction(
+					_inSpin,_outSpin1,_outSpin2,_angle->GetValue(ele)
+			);
+		} catch (std::exception &ex) {
+			BOOST_LOG_TRIVIAL(error) << "WignerDStrategy::execute() | "
+					<<ex.what();
+			throw std::runtime_error("WignerDStrategy::execute() | "
+					"Evaluation of dynamical function failed!");
+		}
+	}//end element loop
+	out = std::shared_ptr<AbsParameter>(
+			new MultiDouble(out->GetName(),results));
+
+	return true;
+}
 
 } /* namespace AmplitudeSum */
 } /* namespace Physics */

@@ -72,8 +72,8 @@ int main(int argc, char **argv){
   run->startFit(par);
 
   std::cout << "Minimized final par :\t" << std::endl;
-  std::cout << "final M:\t" << par.GetParameterValue(0) << std::endl;
-  std::cout << "final T:\t" << par.GetParameterValue(1) << std::endl;
+  std::cout << "final M:\t" << par.GetDoubleParameterValue(0) << std::endl;
+  std::cout << "final T:\t" << par.GetDoubleParameterValue(1) << std::endl;
 
   return 0;
 }

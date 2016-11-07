@@ -78,7 +78,6 @@ using Physics::AmplitudeSum::AmpSumIntensity;
 using DataReader::RootReader::RootReader;
 using DataReader::JakeReader::JakeReader;
 using Estimator::MinLogLH::MinLogLH;
-using Physics::AmplitudeSum::AmplitudeSetup;
 
 /************************************************************************************************/
 /**
@@ -131,11 +130,17 @@ int main(int argc, char **argv) {
 	std::string path = "";
 	try {
 		path = std::string(pPath);
-	} catch (std::logic_error) {
+	} catch (std::logic_error& ex) {
 		BOOST_LOG_TRIVIAL(error)<<"Environment Variable COMPWA_DIR not set?"<<std::endl;
 	}
+
 	std::string resoFile = path + "/test/Jake_ypipi.xml";
-	AmplitudeSetup ini(resoFile);
+	boost::property_tree::ptree pt;
+	read_xml(resoFile, pt, boost::property_tree::xml_parser::trim_whitespace);
+	auto fitAmpPtr = new AmpSumIntensity("amp",normStyle::none,
+			std::shared_ptr<Efficiency>(new UnitEfficiency()), nFitEvents);
+	fitAmpPtr->Configure(pt);
+	std::shared_ptr<Amplitude> amps( fitAmpPtr );
 
 	BOOST_LOG_TRIVIAL(info)<< "Load Modules";
     std::string file = "test/JPSIDATA.ACC.root";
@@ -147,16 +152,12 @@ int main(int argc, char **argv) {
 	std::shared_ptr<JakeReader> myPHSPReader(
 			new JakeReader(input_file_path, "kin"));
 	myPHSPReader->setEfficiency(shared_ptr<Efficiency>(new UnitEfficiency())); //setting efficiency to 1
-	std::shared_ptr<AmpSumIntensity> amps(
-			new AmpSumIntensity(ini, AmpSumIntensity::normStyle::none,
-					std::shared_ptr<Efficiency>(new UnitEfficiency()),
-					nFitEvents));
 
 	//std::shared_ptr<Amplitude> amps(new AmpSumIntensity(M, Br, m1, m2, m3,"J/psi","gamma","pi0","pi0", ini));
 	// Initiate parameters
 	ParameterList par;
-	std::shared_ptr<Optimizer::ControlParameter> esti;
-	amps->copyParameterList(par); //perfect startvalues
+	std::shared_ptr<ControlParameter> esti;
+	amps->FillParameterList(par); //perfect startvalues
 	esti = MinLogLH::createInstance(amps, myReader, myPHSPReader, nStartEvent,
 			nFitEvents);
 	MinLogLH* contrPar = dynamic_cast<MinLogLH*>(&*(esti->Instance()));
@@ -500,14 +501,18 @@ int main(int argc, char **argv) {
 		m23sq = pPm23.M2();
 		m13sq = pPm13.M2();
 		m12sq = pPm12.M2();
-		dataPoint dataP;
-		dataP.setVal(0, m23sq);
-		dataP.setVal(1, m13sq);
+
+		dataPoint point;
+		try{
+			Kinematics::instance()->FillDataPoint(0,1,m23sq,m13sq,point);
+		} catch (BeyondPhsp& ex){
+			continue;
+		}
 
 		//		m12sq = kin.getThirdVariableSq(m23sq,m13sq);
 		//point->setMsq(3,m12sq); point->setMsq(4,m13sq); point->setMsq(5,m23sq);
 		//		m12sq=M*M+m1*m1+m2*m2+m3*m3-m13sq-m23sq;
-		if (abs(m12sq - kin->getThirdVariableSq(m23sq, m13sq)) > 0.01) {
+		if (std::fabs(m12sq - kin->getThirdVariableSq(m23sq, m13sq)) > 0.01) {
 			std::cout << m12sq << " " << kin->getThirdVariableSq(m23sq, m13sq)
 					<< std::endl;
 			std::cout << "   " << m23sq << " " << m13sq << " " << m12sq
@@ -520,7 +525,7 @@ int main(int argc, char **argv) {
 		x.push_back(sqrt(m13sq));
 		x.push_back(sqrt(m12sq));
 		//ParameterList intensL = amps->intensity(x, paras);
-		double AMPpdf = amps->intensity(dataP).GetParameterValue(0);
+		double AMPpdf = amps->intensity(point).GetDoubleParameterValue(0);
 		//double AMPpdf = intensL.GetDoubleParameter(0)->GetValue();
 		//double AMPpdf = testBW.intensity(x, minPar);
 
@@ -570,7 +575,7 @@ int main(int argc, char **argv) {
 		//        x.push_back(sqrt(m23sq));
 		//        x.push_back(sqrt(m13sq));
 		//        x.push_back(sqrt(m12sq));
-		double AMPpdf = amps->intensity(dataP).GetParameterValue(0);
+		double AMPpdf = amps->intensity(dataP).GetDoubleParameterValue(0);
 		//double AMPpdf = amps->intensity(x, par);
 
 		double test = rando.Uniform(0, maxTest);

@@ -84,54 +84,6 @@ void JakeReader::resetEfficiency(double e){
 		fEvents.at(evt).setEfficiency(e);
 	}
 }
-void JakeReader::reduce(unsigned int newSize){
-   if(newSize >= fEvents.size()) {
-	  BOOST_LOG_TRIVIAL(error) << "RooReader::reduce() requested size too large, cant reduce sample!";
-	  return;
-   }
-   fEvents.resize(newSize);
-}
-
-void JakeReader::reduceToPhsp(){
-   std::vector<Event> tmp;
-   for(unsigned int evt=0; evt<fEvents.size(); evt++){
-	  dataPoint p(fEvents.at(evt));
-	  if(Kinematics::instance()->isWithinPhsp(p))
-		 tmp.push_back(fEvents.at(evt));
-   }
-   BOOST_LOG_TRIVIAL(info)<<"RootReader::reduceToPhsp() | remove all events outside PHSP boundary from data sample.";
-   BOOST_LOG_TRIVIAL(info)<<"RootReader::reduceToPhsp() | "<<tmp.size()<<" from "<<fEvents.size()<<"("<<((double)tmp.size())/fEvents.size()*100 <<"%) were kept.";
-   fEvents = tmp;
-   return;
-}
-std::shared_ptr<Data> JakeReader::rndSubSet(unsigned int size, std::shared_ptr<Generator> gen){
-   std::shared_ptr<Data> newSample(new JakeReader());
-   unsigned int totalSize = getNEvents();
-   unsigned int newSize = totalSize;
-   /* 1th method: new Sample has exact size, but possibly events are added twice.
-	* We would have to store all used events in a vector and search the vector at every event -> slow */
-   /*unsigned int t=0;
-	 unsigned int d=0;
-	 while(t<newSize){
-	 d = (unsigned int) gen->getUniform()*totalSize;
-	 newSample->pushEvent(fEvents[d]);
-	 t++;
-	 }*/
-
-   /* 2nd method: events are added once only, but total size of sample varies with sqrt(N) */
-   for(unsigned int i=0; i<totalSize; i++){//count how many events are not within PHSP
-	  dataPoint point(fEvents[i]);
-	  if(!Kinematics::instance()->isWithinPhsp(point)) newSize--;
-   }
-   double threshold = (double)size/newSize; //calculate threshold
-   for(unsigned int i=0; i<totalSize; i++){
-	  dataPoint point(fEvents[i]);
-	  if(!Kinematics::instance()->isWithinPhsp(point)) continue;
-	  if(gen->getUniform()<threshold)
-		 newSample->pushEvent(fEvents[i]);
-   }
-   return newSample;
-}
 
 void JakeReader::read(){
    //fParticles = new TClonesArray("TParticle");
@@ -162,43 +114,6 @@ void JakeReader::resetWeights(double w){
 
 Event& JakeReader::getEvent(const int i){
    return fEvents.at(i);
-}
-
-allMasses JakeReader::getMasses(const unsigned int startEvent, unsigned int nEvents){
-   if(!fEvents.size()) return allMasses();
-   if(!nEvents) nEvents = fEvents.size();
-   unsigned int nParts = fEvents.at(0).getNParticles();
-
-   //determine invMass combinations
-   unsigned int nMasses=0;
-   std::vector<std::pair<unsigned int, unsigned int> > ids;
-   for(unsigned int i=0; i<nParts; i++)
-	  for(unsigned int j=i+1; j<nParts; j++){
-		 nMasses++;
-		 ids.push_back(std::make_pair(i+1,j+1));
-	  }
-
-   if(startEvent+nEvents>fEvents.size()){
-	  nEvents = fEvents.size() - startEvent;
-	  //Todo: Exception
-   }
-
-   unsigned int nSkipped =0; //count events which are outside PHSP boundary
-   unsigned int nFilled=0; //count events which are outside PHSP boundary
-
-   allMasses result(nMasses, ids);
-   //calc and store inv masses
-   for(unsigned int evt=startEvent; evt<startEvent+nEvents; evt++){
-	  if( result.Fill(fEvents.at(evt)) ) nFilled++;
-	  else nSkipped++;
-   }
-   if(nSkipped)
-	  BOOST_LOG_TRIVIAL(debug)<<"RootReader::getMasses() "<<nSkipped
-		 <<"("<<(double)nSkipped/fEvents.size()*100<<"%) data points are "
-		 "outside the PHSP boundary. We skip these points!";
-
-   //	std::cout<<"after      "<<result.masses_sq.at(std::make_pair(2,3)).size()<<std::endl;
-   return result;
 }
 
 const int JakeReader::getBin(const int i, double& m12, double& weight){

@@ -104,7 +104,7 @@ int main(int argc, char **argv){
       //call physics module
       vector<double> x;
       x.push_back(pPm.Mag());
-      ParameterList intensL = testBW->intensity(x, minPar);
+      ParameterList intensL = testBW->intensity(x);
       double BWpdf = intensL.GetDoubleParameter(0)->GetValue();
       //double BWpdf = testBW->intensity(x, minPar); //TMath::BreitWigner(pPm.Mag(),1.2,0.2);
 

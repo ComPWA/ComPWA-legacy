@@ -1,10 +1,5 @@
 ########### ChiOneD lib #############
-
-lib ChiOneD : 
-        [ glob *.cpp ]
-        $(TOP)/Core//ComPWA 
-        $(TOP)/Optimizer//Optimizer 
-         ;
+lib ChiOneD : [ glob *.cpp ] ;
 
 install dist : ChiOneD : <location>$(TOP)/lib ;
 

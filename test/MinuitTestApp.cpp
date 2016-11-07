@@ -83,7 +83,8 @@ int main(int argc, char **argv){
 
     std::cout << "Minimizer " << Nmin << "\t final par :\t" << genResult << std::endl;
     for(unsigned int i=0; i<par.GetNDouble(); i++)
-      std::cout << "final par "<< i << ":\t" << std::setprecision(9) << par.GetParameterValue(i) << std::endl;
+    	std::cout << "final par "<< i << ":\t" << std::setprecision(9)
+    << par.GetDoubleParameterValue(i) << std::endl;
     std::cout << "Done ..." << std::endl << std::endl;
   }
 

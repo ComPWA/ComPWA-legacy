@@ -63,7 +63,6 @@ public:
 //  virtual void writeToFile();
     virtual void pushEvent(const Event& evt) {fEvents.push_back(evt);};
     virtual Event& getEvent(const int);
-    virtual allMasses getMasses(const unsigned int startEvent=0, unsigned int nEvents=0);
     virtual const int getBin(const int, double&, double&);
     //virtual const int getEvent(const int, TLorentzVector& , TLorentzVector& , double&);
     virtual void writeData(std::string file="",std::string trName="");
@@ -80,12 +79,6 @@ public:
 	}
 	//! Destructor
 	virtual ~JakeReader();
-	//! Remove all events outside PHSP
-	virtual void reduceToPhsp();
-	//! Select only first @param newSize events from full sample
-	virtual void reduce(unsigned int newSize);
-	//! Select random subset of events
-	std::shared_ptr<Data> rndSubSet(unsigned int size, std::shared_ptr<Generator> gen);
 
 	//! Set efficiency value for all stored events. Efficiency is taken from Efficiency object.
 	void setEfficiency(std::shared_ptr<Efficiency> eff);

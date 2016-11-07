@@ -50,7 +50,7 @@ double ChiOneD::controlParameter(ParameterList& minPar){
 
     std::vector<double> x;
     x.push_back(m12);
-    ParameterList intensL = pPIF_->intensity(x, minPar);
+    ParameterList intensL = pPIF_->intensity(x);
     double intens = intensL.GetDoubleParameter(0)->GetValue();
     //double intens = pPIF_->intensity(x, minPar);
 

@@ -1,23 +1,26 @@
 ########### Estimator Jamfile #############
 path-constant ESTIMATOR : . ;
 
-# libEstimator.so will consist of these packages:
+project ComPWA/Estimator 
+	: requirements 
+		<library>$(TOP)/Core//ComPWA 
+		<library>$(TOP)/Optimizer//Optimizer 
+		<library>$(TOP)/Physics//DPKinematics
+	  	<library>/root
+	  	<library>$(TOP)//qft++
+;
 
+# libEstimator.so will consist of these packages:
 sources = [ glob *.cpp ] ;
 if $(build_ChiOneD) && $(build_ChiOneD) != 0
 {
 	build-project ChiOneD ;
-	sources = $(sources) $(ESTIMATOR)/ChiOneD//ChiOneD ;
+	sources = $(sources) [ glob ChiOneD/*.cpp ] ;
 }
 if $(build_MinLogLH) && $(build_MinLogLH) != 0
 {
 	build-project MinLogLH ;
-	sources = $(sources) $(ESTIMATOR)/MinLogLH//MinLogLH ;
-}
-if $(build_MinLogLHbkg) && $(build_MinLogLHbkg) != 0
-{
-	build-project MinLogLHbkg ;
-	sources = $(sources) $(ESTIMATOR)/MinLogLHbkg//MinLogLHbkg ;
+	sources = $(sources) [ glob MinLogLH/*.cpp ] ;
 }
 if $(build_SliceFit) && $(build_SliceFit) != 0
 {
@@ -28,8 +31,7 @@ if $(build_SliceFit) && $(build_SliceFit) != 0
 }
 
 # Build libEstimator.so
-lib Estimator : 
-        $(sources)
-        ;
+#lib Estimator : [ glob *.cpp ] ;
+lib Estimator : $(sources) ;
 
 install dist : Estimator : <location>$(TOP)/lib ;

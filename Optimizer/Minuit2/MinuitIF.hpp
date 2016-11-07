@@ -20,27 +20,29 @@
 #define _OIFMINUIT_HPP
 
 #include <vector>
-//#include <boost/shared_ptr.hpp>
 #include <memory>
-
-#include "Optimizer/ControlParameter.hpp"
-#include "Optimizer/Optimizer.hpp"
-#include "Core/ParameterList.hpp"
-#include "Optimizer/Minuit2/MinuitFcn.hpp"
-#include "Optimizer/Minuit2/MinuitResult.hpp"
-#include "Minuit2/MnStrategy.h"
 #include <fstream>
+
 #include <boost/serialization/string.hpp>
 #include <boost/serialization/map.hpp>
 #include <boost/archive/xml_oarchive.hpp>
 #include <boost/archive/xml_iarchive.hpp>
 #include <boost/serialization/nvp.hpp>
 
+#include "Minuit2/MnStrategy.h"
+
+#include "Core/ParameterList.hpp"
+#include "Optimizer/Optimizer.hpp"
+#include "Optimizer/ControlParameter.hpp"
+#include "Optimizer/Minuit2/MinuitFcn.hpp"
+#include "Optimizer/Minuit2/MinuitResult.hpp"
+
 namespace ComPWA {
 namespace Optimizer {
 namespace Minuit2 {
 
-class MinuitIF : public Optimizer {
+class MinuitIF : public Optimizer
+{
 
 public:
 	/// Default Constructor (0x0)
@@ -50,13 +52,20 @@ public:
 	/** Destructor */
 	virtual ~MinuitIF();
 
+	virtual void SetHesse(bool onoff) { enableHesse=onoff; }
+	virtual bool GetHesse() { return enableHesse; }
+	virtual void SetMinos(bool onoff) { enableMinos=onoff; }
+	virtual bool GetMinos() { return enableMinos; }
+
 protected:
 
 private:
 	ROOT::Minuit2::MinuitFcn _myFcn;
 	std::shared_ptr<ControlParameter> estimator;
-	// vector<string> paramNames;
+	bool enableHesse;
+	bool enableMinos;
 };
+
 class MinuitStrategy : public ROOT::Minuit2::MnStrategy
 {
 public:

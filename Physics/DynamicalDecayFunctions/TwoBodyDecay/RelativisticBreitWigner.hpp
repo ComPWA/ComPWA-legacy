@@ -69,7 +69,7 @@ class RelativisticBreitWigner: public AbstractDynamicalFunction {
   void initialiseParameters(const boost::property_tree::ptree& parameter_info,
       const ExternalParameters& external_parameters);
 
-  std::complex<double> evaluate(double mSq) const;
+std::complex<double> evaluate(double mSq) const;
 
 public:
   RelativisticBreitWigner(const ParticleStateInfo& psi, const ExternalParameters& external_parameters);

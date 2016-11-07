@@ -29,7 +29,6 @@
 #include <memory>
 
 #include "TROOT.h"
-//#include "qft++/topincludes/relativistic-quantum-mechanics.hh"
 
 #include "Optimizer/ControlParameter.hpp"
 #include "Core/ParameterList.hpp"

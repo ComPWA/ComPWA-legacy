@@ -25,8 +25,8 @@
 
 #include "Core/Functions.hpp"
 #include "Core/Exceptions.hpp"
+#include "Core/FunctionTree.hpp"
 #include "Physics/AmplitudeSum/AmpAbsDynamicalFunction.hpp"
-#include "Physics/AmplitudeSum/AmpKinematics.hpp"
 #include "Physics/AmplitudeSum/AmpWigner2.hpp"
 #include "Physics/AmplitudeSum/NonResonant.hpp"
 
@@ -34,16 +34,52 @@ namespace ComPWA {
 namespace Physics {
 namespace AmplitudeSum {
 
-class AmpRelBreitWignerRes : public AmpAbsDynamicalFunction, public AmpKinematics {
+
+class AmpRelBreitWignerRes : public AmpAbsDynamicalFunction {
 public:
 
-	AmpRelBreitWignerRes(const char *name,
-			std::shared_ptr<DoubleParameter> _resMass, std::shared_ptr<DoubleParameter> _resWidth,
-			std::shared_ptr<DoubleParameter> _radius, std::shared_ptr<DoubleParameter> _motherRadius,
-			int _subsys, int resSpin, int m, int n
-	) ;
+	AmpRelBreitWignerRes( normStyle nS=normStyle::one, int calls=30000 ) :
+		AmpAbsDynamicalFunction( nS, calls ) { };
+
+	AmpRelBreitWignerRes( const char *name,
+			unsigned int varIdA, unsigned int varIdB,
+			std::shared_ptr<DoubleParameter> mag,
+			std::shared_ptr<DoubleParameter> phase,
+			std::shared_ptr<DoubleParameter> mass,
+			Spin spin, Spin m, Spin n, int P, int C,
+			std::string mother, std::string particleA, std::string particleB,
+			std::shared_ptr<DoubleParameter> width,
+			std::shared_ptr<DoubleParameter> mesonRadius,
+			std::shared_ptr<DoubleParameter> motherRadius,
+			formFactorType type = formFactorType::BlattWeisskopf,
+			int nCalls=30000, normStyle nS=normStyle::one );
+
 	virtual ~AmpRelBreitWignerRes();
-	virtual void initialise();
+
+	//! Clone function
+	virtual AmpRelBreitWignerRes* Clone(std::string newName="") const{
+		auto tmp = (new AmpRelBreitWignerRes(*this));
+		if(newName != "")
+			tmp->SetName(newName);
+		return tmp;
+	}
+
+	//! Configure resonance from ptree
+	virtual void Configure(boost::property_tree::ptree::value_type const& v,
+			ParameterList& list);
+	//! Save resonance from to ptree
+	virtual void Save(boost::property_tree::ptree &pt);
+
+	//! Trigger recalculation of normalization
+	virtual void CheckModified();
+
+	std::string to_str() const;
+
+	//! Calculation integral |dynamical amplitude|^2
+	virtual double GetIntegral();
+
+	//! Get resonance width
+	double GetWidth() const { return _width->GetValue(); }
 	/** Breit-Wigner function
 	 *
 	 * The dynamical function implemented here is taken from PDG2014 (Eq.47-22) for
@@ -59,332 +95,36 @@ public:
 	 * @param mesonRadius Scale of interaction range
 	 * @return
 	 */
-	static std::complex<double> dynamicalFunction(double mSq, double mR, double ma, double mb, double width, unsigned int J, double mesonRadius);
-	virtual std::complex<double> evaluate(const dataPoint& point) { return _norm*evaluateAmp(point)*evaluateWignerD(point); };
-	virtual std::complex<double> evaluateAmp(const dataPoint& point);
+	static std::complex<double> dynamicalFunction(double mSq, double mR, double ma, double mb,
+			double width, unsigned int J, double mesonRadius,
+			formFactorType ffType=formFactorType::BlattWeisskopf);
 
-	double getSpin() {return _spin;}; //needs to be declared in AmpAbsDynamicalFunction
-	unsigned int getNParams(){ return nParams;}
+	virtual std::complex<double> EvaluateAmp(dataPoint& point);
 
+	virtual std::shared_ptr<FunctionTree> SetupTree(
+			ParameterList& sample, ParameterList& toySample,std::string suffix);
 protected:
-	std::shared_ptr<DoubleParameter> _resWidth;
-//	AmpWigner2 _wignerD;
-	bool foundMasses;
-	unsigned int id23, id13;
-	unsigned int nParams;
-
-};
-
-class BreitWignerConf : public basicConf
-{
-public:
-	BreitWignerConf(const boost::property_tree::ptree &pt_) : basicConf(pt_){
-		m_mass= pt_.get<double>("mass");
-		m_mass_fix= pt_.get<bool>("mass_fix");
-		m_mass_min= pt_.get<double>("mass_min");
-		m_mass_max= pt_.get<double>("mass_max");
-		m_width= pt_.get<double>("width");
-		m_width_fix= pt_.get<bool>("width_fix");
-		m_width_min= pt_.get<double>("width_min");
-		m_width_max= pt_.get<double>("width_max");
-		m_mesonRadius= pt_.get<double>("mesonRadius");
-		m_spin= pt_.get<unsigned int>("spin");
-		m_m= pt_.get<unsigned int>("m");
-		m_n= pt_.get<unsigned int>("n");
-		m_daughterA= pt_.get<unsigned int>("daughterA");
-		m_daughterB= pt_.get<unsigned int>("daughterB");
-	}
-	virtual void put(boost::property_tree::ptree &pt_){
-		basicConf::put(pt_);
-		pt_.put("mass", m_mass);
-		pt_.put("mass_fix", m_mass_fix);
-		pt_.put("mass_min", m_mass_min);
-		pt_.put("mass_max", m_mass_max);
-		pt_.put("width", m_width);
-		pt_.put("width_fix", m_width_fix);
-		pt_.put("width_min", m_width_min);
-		pt_.put("width_max", m_width_max);
-		pt_.put("mesonRadius", m_mesonRadius);
-		pt_.put("spin", m_spin);
-		pt_.put("m", m_m);
-		pt_.put("n", m_n);
-		pt_.put("daughterA", m_daughterA);
-		pt_.put("daughterB", m_daughterB);
-	}
-	virtual void update(ParameterList par){
-		basicConf::update(par);
-		try{// only update parameters if they are found in list
-			m_mass= par.GetDoubleParameter("m0_"+m_name)->GetValue();
-			m_width= par.GetDoubleParameter("width_"+m_name)->GetValue();
-		} catch (BadParameter b) { }
-	}
-
-	double m_mass;
-	bool m_mass_fix;
-	double m_mass_min;
-	double m_mass_max;
-	double m_width;
-	bool m_width_fix;
-	double m_width_min;
-	double m_width_max;
-
-	double m_mesonRadius;
-	unsigned int m_spin;
-	unsigned int m_m;
-	unsigned int m_n;
-
-	unsigned int m_daughterA;
-	unsigned int m_daughterB;
+	//! Resonance width
+	std::shared_ptr<DoubleParameter> _width;
+	double tmp_width;
+	bool _width_writeByName;
 };
 
 class BreitWignerStrategy : public Strategy {
 public:
-	BreitWignerStrategy(const std::string resonanceName, ParType in):Strategy(in),name(resonanceName){}
+	BreitWignerStrategy(const std::string resonanceName) :
+		Strategy(ParType::MCOMPLEX), name(resonanceName) { }
 
 	virtual const std::string to_str() const {
 		return ("relativistic BreitWigner of "+name);
 	}
 
-	virtual bool execute(ParameterList& paras, std::shared_ptr<AbsParameter>& out) {
-		if( checkType != out->type() ) {
-			throw(WrongParType(std::string("Output Type ")+ParNames[out->type()]+std::string(" conflicts expected type ")+ParNames[checkType]+std::string(" of ")+name+" BW strat"));
-			return false;
-		}
-
-		double Gamma0, m0, d, ma, mb;
-		unsigned int spin, subSys;
-		//Get parameters from ParameterList -
-		//enclosing in try...catch for the case that names of nodes have changed
-		try{
-			m0 = double(paras.GetParameterValue("m0_"+name));
-		}catch(BadParameter& e){
-			BOOST_LOG_TRIVIAL(error) <<"BreitWignerStrategy: can't find parameter m0_"+name;
-			throw;
-		}
-		try{
-			spin = (unsigned int)(paras.GetParameterValue("ParOfNode_spin_"+name));
-		}catch(BadParameter& e){
-			BOOST_LOG_TRIVIAL(error) <<"BreitWignerStrategy: can't find parameter ParOfNode_spin_"+name;
-			throw;
-		}
-		try{
-			d = double(paras.GetParameterValue("d_"+name));
-		}catch(BadParameter& e){
-			std::cout<<paras<<std::endl;
-			BOOST_LOG_TRIVIAL(error) <<"----BreitWignerStrategy: can't find parameter d_"+name;
-			throw;
-		}
-		try{
-			subSys = double(paras.GetParameterValue("ParOfNode_subSysFlag_"+name));
-		}catch(BadParameter& e){
-			BOOST_LOG_TRIVIAL(error) <<"BreitWignerStrategy: can't find parameter ParOfNode_subSysFlag_"+name;
-			throw;
-		}
-		try{
-			ma = double(paras.GetParameterValue("ParOfNode_ma_"+name));
-		}catch(BadParameter& e){
-			BOOST_LOG_TRIVIAL(error) <<"BreitWignerStrategy: can't find parameter ParOfNode_ma_"+name;
-			throw;
-		}
-		try{
-			mb = double(paras.GetParameterValue("ParOfNode_mb_"+name));
-		}catch(BadParameter& e){
-			BOOST_LOG_TRIVIAL(error) <<"BreitWignerStrategy: can't find parameter ParOfNode_mb_"+name;
-			throw;
-		}
-
-		try{
-			Gamma0 = double(paras.GetParameterValue("width_"+name));
-		}catch(BadParameter& e){
-			BOOST_LOG_TRIVIAL(error) <<"BreitWignerStrategy: can't find parameter width_"+name;
-			throw;
-		}
-
-		//MultiDim output, must have multidim Paras in input
-		if(checkType == ParType::MCOMPLEX){
-			if(paras.GetNMultiDouble()){
-				unsigned int nElements = paras.GetMultiDouble(0)->GetNValues();
-
-				std::vector<std::complex<double> > results(nElements, std::complex<double>(0.));
-				std::shared_ptr<MultiDouble> mp;//=paras.GetMultiDouble("mym_"+name);
-				switch(subSys){
-				case 3:{ //reso in sys of particles 1&2
-					mp  = (paras.GetMultiDouble("m12sq"));
-					break;
-				}
-				case 4:{ //reso in sys of particles 1&3
-					mp  = (paras.GetMultiDouble("m13sq"));
-					break;
-				}
-				case 5:{ //reso in sys of particles 2&3
-					mp  = (paras.GetMultiDouble("m23sq"));
-					break;
-				}
-				}
-
-				//calc BW for each point
-				for(unsigned int ele=0; ele<nElements; ele++){
-					double mSq = (mp->GetValue(ele));
-					results[ele] = AmpRelBreitWignerRes::dynamicalFunction(mSq,m0,ma,mb,Gamma0,spin,d);
-				}
-				out = std::shared_ptr<AbsParameter>(new MultiComplex(out->GetName(),results));
-				return true;
-			}else{ //end multidim para treatment
-				throw(WrongParType("Input MultiDoubles missing in BW strat of "+name));
-				return false;
-			}
-		}//end multicomplex output
-
-		//Only StandardDim Paras in input
-		//  double spinTerm = evaluateWignerD(); //spinTerm =1;
-		double mSq;// = sqrt(paras.GetParameterValue("mym_"+name));
-		switch(subSys){
-		case 3:{ //reso in sys of particles 1&2
-			mSq  = (double(paras.GetParameterValue("m12sq")));
-			break;
-		}
-		case 4:{ //reso in sys of particles 1&3
-			mSq  = (double(paras.GetParameterValue("m13sq")));
-			break;
-		}
-		case 5:{ //reso in sys of particles 2&3
-			mSq  = (double(paras.GetParameterValue("m23sq")));
-			break;
-		}
-		}
-		std::complex<double> result = AmpRelBreitWignerRes::dynamicalFunction(mSq,m0,ma,mb,Gamma0,spin,d);
-		out = std::shared_ptr<AbsParameter>(new ComplexParameter(out->GetName(), result));
-		return true;
-	}
+	virtual bool execute(ParameterList& paras,
+			std::shared_ptr<AbsParameter>& out);
 
 protected:
 	std::string name;
 };
-
-class BreitWignerPhspStrategy : public BreitWignerStrategy {
-public:
-	BreitWignerPhspStrategy(const std::string resonanceName, ParType in):BreitWignerStrategy(resonanceName,in){}
-	virtual bool execute(ParameterList& paras, std::shared_ptr<AbsParameter>& out) {
-		if( checkType != out->type() ) {
-			throw(WrongParType(std::string("Output Type ")+ParNames[out->type()]+std::string(" conflicts expected type ")+ParNames[checkType]+std::string(" of ")+name+" BW strat"));
-			return false;
-		}
-
-		double Gamma0, m0, d, ma, mb;
-		unsigned int spin, subSys;
-		//Get parameters from ParameterList -
-		//enclosing in try...catch for the case that names of nodes have changed
-		try{
-			m0 = double(paras.GetParameterValue("m0_"+name));
-		}catch(BadParameter& e){
-			BOOST_LOG_TRIVIAL(error) <<"BreitWignerPhspStrategy: can't find parameter m0_"+name;
-			throw;
-		}
-		try{
-		spin = (unsigned int)(paras.GetParameterValue("ParOfNode_spin_"+name));
-		}catch(BadParameter& e){
-			BOOST_LOG_TRIVIAL(error) <<"BreitWignerPhspStrategy: can't find parameter ParOfNode_spin_"+name;
-			throw;
-		}
-		try{
-		d = double(paras.GetParameterValue("d_"+name));
-		}catch(BadParameter& e){
-			BOOST_LOG_TRIVIAL(error) <<"BreitWignerPhspStrategy: can't find parameter d_"+name;
-			throw;
-		}
-		try{
-		subSys = double(paras.GetParameterValue("ParOfNode_subSysFlag_"+name));
-		}catch(BadParameter& e){
-			BOOST_LOG_TRIVIAL(error) <<"BreitWignerPhspStrategy: can't find parameter ParOfNode_subSysFlag_"+name;
-			throw;
-		}
-		try{
-		ma = double(paras.GetParameterValue("ParOfNode_ma_"+name));
-		}catch(BadParameter& e){
-			BOOST_LOG_TRIVIAL(error) <<"BreitWignerPhspStrategy: can't find parameter ParOfNode_ma_"+name;
-			throw;
-		}
-		try{
-		mb = double(paras.GetParameterValue("ParOfNode_mb_"+name));
-		}catch(BadParameter& e){
-			BOOST_LOG_TRIVIAL(error) <<"BreitWignerPhspStrategy: can't find parameter ParOfNode_mb_"+name;
-			throw;
-		}
-		try{
-			Gamma0 = double(paras.GetParameterValue("width_"+name));
-		}catch(BadParameter& e){
-			BOOST_LOG_TRIVIAL(error) <<"BreitWignerPhspStrategy: can't find parameter width_"+name;
-			throw;
-		}
-
-		//MultiDim output, must have multidim Paras in input
-		if(checkType == ParType::MCOMPLEX){
-			if(paras.GetNMultiDouble()){
-				unsigned int nElements = paras.GetMultiDouble(0)->GetNValues();
-
-				std::vector<std::complex<double> > results(nElements, std::complex<double>(0.));
-				std::shared_ptr<MultiDouble> mp;//=paras.GetMultiDouble("mym_"+name);
-				switch(subSys){
-				case 3:{ //reso in sys of particles 1&2
-					mp  = (paras.GetMultiDouble("m12sq_phsp"));
-					//map  = (paras.GetMultiDouble("m23"));
-					// mbp  = (paras.GetMultiDouble("m13"));
-					break;
-				}
-				case 4:{ //reso in sys of particles 1&3
-					mp  = (paras.GetMultiDouble("m13sq_phsp"));
-					// map  = (paras.GetMultiDouble("m12"));
-					// mbp  = (paras.GetMultiDouble("m23"));
-					break;
-				}
-				case 5:{ //reso in sys of particles 2&3
-					mp  = (paras.GetMultiDouble("m23sq_phsp"));
-					// map  = (paras.GetMultiDouble("m13"));
-					// mbp  = (paras.GetMultiDouble("m12"));
-					break;
-				}
-				}
-
-				//calc BW for each point
-				for(unsigned int ele=0; ele<nElements; ele++){
-					double mSq = (mp->GetValue(ele));
-					results[ele] = AmpRelBreitWignerRes::dynamicalFunction(mSq,m0,ma,mb,Gamma0,spin,d);
-				}
-				//std::vector<std::complex<double> > resultsTMP(nElements, std::complex<double>(1.));
-				out = std::shared_ptr<AbsParameter>(new MultiComplex(out->GetName(),results));
-				return true;
-			}else{ //end multidim para treatment
-				throw(WrongParType("Input MultiDoubles missing in BW strat of "+name));
-				return false;
-			}
-		}//end multicomplex output
-
-
-		//Only StandardDim Paras in input
-		//  double spinTerm = evaluateWignerD(); //spinTerm =1;
-		double mSq;// = sqrt(paras.GetParameterValue("mym_"+name));
-		switch(subSys){
-		case 3:{ //reso in sys of particles 1&2
-			mSq  = (double(paras.GetParameterValue("m12sq_phsp")));
-			break;
-		}
-		case 4:{ //reso in sys of particles 1&3
-			mSq  = (double(paras.GetParameterValue("m13sq_phsp")));
-			break;
-		}
-		case 5:{ //reso in sys of particles 2&3
-			mSq  = (double(paras.GetParameterValue("m23sq_phsp")));
-			break;
-		}
-		}
-		std::complex<double> result = AmpRelBreitWignerRes::dynamicalFunction(mSq,m0,ma,mb,Gamma0,spin,d);
-		std::cout<<"Strategy BWrelPHSP single value "<<result<<std::endl;
-
-		out = std::shared_ptr<AbsParameter>(new ComplexParameter(out->GetName(), result));
-
-		return true;
-	}
-}; // end BreitwignerPhspStrategy
 
 } /* namespace AmplitudeSum */
 } /* namespace Physics */

@@ -48,7 +48,6 @@ using namespace boost::log;
 // Physics Interface header files go here
 #include "Core/PhysConst.hpp"
 #include "Physics/AmplitudeSum/AmpSumIntensity.hpp"
-#include "Physics/AmplitudeSum/AmplitudeSetup.hpp"
 #include "Core/Parameter.hpp"
 #include "Core/ParameterList.hpp"
 #include "Physics/DPKinematics/DalitzKinematics.hpp"
@@ -56,11 +55,11 @@ using namespace boost::log;
 #include "Core/Efficiency.hpp"
 
 using namespace std;
+using namespace ComPWA;
+using namespace Physics::AmplitudeSum;
 
 using ComPWA::ParameterList;
 using ComPWA::Physics::AmplitudeSum::AmpSumIntensity;
-using ComPWA::Physics::AmplitudeSum::AmplitudeSetup;
-using ComPWA::Physics::AmplitudeSum::BreitWignerConf;
 using ComPWA::dataPoint;
 using ComPWA::Physics::DPKinematics::DalitzKinematics;
 
@@ -301,35 +300,16 @@ int main(int argc, char **argv) {
 		BOOST_LOG_TRIVIAL(error)<<"Environment Variable COMPWA_DIR not set?"<< std::endl;
 	}
 	std::string resoFile = path + "/test/JPSI_ypipi.xml";
-	AmplitudeSetup ini(resoFile);
-	cout << "loaded file " << ini.getFileName() << " with "
-			<< ini.getBreitWigner().size() << " resonances:" << endl;
-	for (std::vector<BreitWignerConf>::iterator reso = ini.getBreitWigner().begin();
-			reso != ini.getBreitWigner().end(); reso++) {
-		cout << endl << "Resonance " << (*reso).m_name << endl;
-		cout << "Mass =  " << (*reso).m_mass << " with range "
-				<< (*reso).m_mass_min << " to " << (*reso).m_mass_max << endl;
-		cout << "Width = " << (*reso).m_width << " with range "
-				<< (*reso).m_width_min << " to " << (*reso).m_width_max << endl;
-		cout << "Spin =  " << (*reso).m_spin << " m = " << (*reso).m_m
-				<< " n = " << (*reso).m_n << endl;
-		cout << "Strength =  " << (*reso).m_strength << " Phase = "
-				<< (*reso).m_phase << endl;
-		cout << "mesonRadius=  " << (*reso).m_mesonRadius << endl;
-		cout << "DaughterA =  " << (*reso).m_daughterA << " DaughterB = "
-				<< (*reso).m_daughterB << endl;
-	}
-	cout << endl << endl;
 
-	//Simple Breit-Wigner Physics-Module setup
-	AmpSumIntensity testBW(ini, AmpSumIntensity::normStyle::none,
-			std::shared_ptr<ComPWA::Efficiency>(new ComPWA::UnitEfficiency()), MaxEvents);
-	// std::shared_ptr<Amplitude> amps(new AmpSumIntensity(ini, AmpSumIntensity::normStyle::one, std::shared_ptr<Efficiency>(new UnitEfficiency()), myReader->getNEvents()));
-
-	testBW.printAmps();
+	boost::property_tree::ptree pt;
+	read_xml(resoFile , pt, boost::property_tree::xml_parser::trim_whitespace);
+	AmpSumIntensity testBW("amp", normStyle::none,
+			std::shared_ptr<Efficiency>(new UnitEfficiency()), MaxEvents);
+	testBW.Configure(pt);
+	testBW.to_str();
 
 	ParameterList minPar;
-	testBW.copyParameterList(minPar);
+	testBW.FillParameterList(minPar);
 	cout << minPar << endl;
 	// minPar.AddParameter(DoubleParameter(1.5,0.5,2.5,0.1));
 
@@ -356,7 +336,7 @@ int main(int argc, char **argv) {
 
 	//Generation
 //	TLorentzVector W(0.0, 0.0, 0.0, M);//= beam + target;
-	TLorentzVector W(0.0, 0.0, 0.0, kin->M); //= beam + target;
+	TLorentzVector W(0.0, 0.0, 0.0, kin->GetMotherMass()); //= beam + target;
 
 	//(Momentum, Energy units are Gev/C, GeV)
 	Double_t masses[3] = { kin->m1, kin->m2, kin->m2 };
@@ -384,11 +364,12 @@ int main(int argc, char **argv) {
 		m13sq = pPm13.M2();
 		m12sq = pPm12.M2();
 
-		dataPoint dataP;
-		dataP.setVal(0, m23sq);
-		dataP.setVal(1, m13sq);
-//		point->setMsq(3,m12sq); point->setMsq(4,m13sq); point->setMsq(5,m23sq);
-		//		m12sq=M*M+m1*m1+m2*m2+m3*m3-m13sq-m23sq;
+		dataPoint point;
+		try{
+			Kinematics::instance()->FillDataPoint(0,1,m23sq,m13sq,point);
+		} catch (BeyondPhsp& ex){
+			continue;
+		}
 		m12sqtest = kin->getThirdVariableSq(m23sq, m13sq);
 		if ((m12sq - m12sqtest) > 0.01 || (m12sqtest - m12sq) > 0.01) {
 			std::cout << m12sq << " " << m12sqtest << std::endl;
@@ -402,7 +383,7 @@ int main(int argc, char **argv) {
 //		x.push_back(sqrt(m13sq));
 //		x.push_back(sqrt(m12sq));
 		//ParameterList intensL = testBW.intensity(dataP);
-		double AMPpdf = testBW.intensity(dataP).GetParameterValue(0);
+		double AMPpdf = testBW.intensity(point).GetDoubleParameterValue(0);
 		//double AMPpdf = testBW.intensity(x, minPar);
 
 		//mb.setVal(m13);
@@ -434,13 +415,13 @@ int main(int argc, char **argv) {
 		m13sq = pPm13.M2();
 		m12sq = pPm12.M2();
 
-		dataPoint dataP;
-		dataP.setVal(0, m23sq);
-		dataP.setVal(1, m13sq);
-		//		m12sq = kin.getThirdVariableSq(m23sq,m13sq);
-//		point->setMsq(3,m12sq); point->setMsq(4,m13sq); point->setMsq(5,m23sq);
-		//		m12sq=M*M+m1*m1+m2*m2+m3*m3-m13sq-m23sq;
-		if (abs(m12sq - kin->getThirdVariableSq(m23sq, m13sq)) > 0.01) {
+		dataPoint point;
+		try{
+			kin->FillDataPoint(1,0,m13sq,m23sq,point);
+		} catch (BeyondPhsp& ex){
+			continue;
+		}
+		if (std::fabs(m12sq - kin->getThirdVariableSq(m23sq, m13sq)) > 0.01) {
 			std::cout << m12sq << " " << kin->getThirdVariableSq(m23sq, m13sq)
 					<< std::endl;
 			std::cout << "   " << m23sq << " " << m13sq << " " << m12sq
@@ -451,13 +432,7 @@ int main(int argc, char **argv) {
 		TParticle fparticlePim(111, 1, 0, 0, 0, 0, *pPim, W);
 
 		//call physics module
-//		vector<double> x;
-//		x.push_back(sqrt(m23sq));
-//		x.push_back(sqrt(m13sq));
-//		x.push_back(sqrt(m12sq));
-		//ParameterList intensL = testBW.intensity(dataP, minPar);
-		double AMPpdf = testBW.intensity(dataP).GetParameterValue(0);
-		//double AMPpdf = testBW.intensity(x, minPar);
+		double AMPpdf = testBW.intensity(point).GetDoubleParameterValue(0);
 
 		double test = rando.Uniform(0, maxTest);
 		double testmc = rando.Uniform(0, 1.);
@@ -499,7 +474,7 @@ int main(int argc, char **argv) {
 	fTreePHSP.Write();
 	output.Close();
 
-	testBW.printAmps();
+	testBW.to_str();
 	cout << "Done ... " << maxTest << endl << endl;
 
 	return 0;

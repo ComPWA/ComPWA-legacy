@@ -25,7 +25,7 @@ class dataPoint;
 namespace Physics {
 namespace HelicityFormalism {
 
-struct FullTwoBodyDecayAmplitude {
+class FullTwoBodyDecayAmplitude : Resonance {
   std::string name;    // for full coherent amplitude construction reasons
 
   //TODO: we add this particle state info for the coherent sum stuff
@@ -36,9 +36,26 @@ struct FullTwoBodyDecayAmplitude {
   std::shared_ptr<DoubleParameter> phase_;
   std::shared_ptr<TwoBodyDecayAmplitude> angular_part_;
   std::shared_ptr<DynamicalFunctions::AbstractDynamicalFunction> dynamical_part_;
+  unsigned int positionToEval;
+
+  std::complex<double> Evaluate(dataPoint& point) {
+	       sequential_decay_result *= std::polar(
+          two_body_decay.strength_->GetValue(),
+          two_body_decay.phase_->GetValue());
+
+      std::complex<double> angular_part =
+          two_body_decay.angular_part_->evaluate(point,positionToEval);
+
+      std::complex<double> dynamical_part =
+          two_body_decay.dynamical_part_->evaluate(point,
+              evaluation_index_list[two_body_decay_index]);
+
+      sequential_decay_result *= angular_part * dynamical_part;
+
+  };
 };
 
-struct SequentialTwoBodyDecayAmplitude {
+struct SequentialTwoBodyDecayAmplitude : Amplitude {
   std::vector<FullTwoBodyDecayAmplitude> decay_amplitude;
   double factor;
 

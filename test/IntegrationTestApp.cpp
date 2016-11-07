@@ -45,10 +45,7 @@
 #include "Optimizer/Minuit2/MinuitIF.hpp"
 
 using namespace ComPWA;
-using Optimizer::ControlParameter;
-using DataReader::RootReader::RootReader;
-using Physics::BreitWigner::BreitWigner;
-using DataReader::Data;
+using namespace DataReader;
 
 /************************************************************************************************/
 /**
@@ -62,13 +59,22 @@ int main(int argc, char **argv){
   std::string file="test/2Part-4vecs.root";
   std::cout << "Load Modules" << std::endl;
   std::shared_ptr<Data> myReader(new RootReader(file, "data"));
-  std::shared_ptr<Amplitude> testBW(new BreitWigner(0.,5.));
+  std::shared_ptr<Amplitude> testBW(
+		  new Physics::BreitWigner::BreitWigner(0.,5.)
+  );
 
   // Initiate parameters
   ParameterList par;
-  testBW->copyParameterList(par);
-  std::shared_ptr<ControlParameter> testEsti = Estimator::MinLogLH::MinLogLH::createInstance(testBW, myReader, std::shared_ptr<Data>(), std::shared_ptr<Data>());
-  std::shared_ptr<Optimizer::Optimizer> opti(new Optimizer::Minuit2::MinuitIF(testEsti, par));
+  testBW->FillParameterList(par);
+
+  std::shared_ptr<Optimizer::ControlParameter> testEsti =
+		  Estimator::MinLogLH::MinLogLH::createInstance(
+				  testBW, myReader, std::shared_ptr<Data>(),
+				  std::shared_ptr<Data>()
+		  );
+  std::shared_ptr<Optimizer::Optimizer> opti(
+		  new Optimizer::Minuit2::MinuitIF(testEsti, par)
+  );
 
   par.GetDoubleParameter(0)->SetValue(1.7);
   par.GetDoubleParameter(0)->SetValue(0.2);
@@ -105,7 +111,15 @@ int main(int argc, char **argv){
   }
 
   //BreitWigner *drawBW = (BreitWigner*) (&(*testBW));
-  TF1* fitresult = new TF1("fitresult", ((BreitWigner*)testBW.get()), &BreitWigner::drawInt,0.,2.4,3,"PIFBW","intensity");
+  TF1* fitresult = new TF1(
+		  "fitresult",
+		  ((BreitWigner*) testBW.get()),
+		  &Physics::BreitWigner::BreitWigner::drawInt,
+		  0.,2.4,3,
+		  "PIFBW",
+		  "intensity"
+  );
+
   fitresult->FixParameter(0, par.GetDoubleParameter(0)->GetValue());
   fitresult->FixParameter(1, par.GetDoubleParameter(1)->GetValue());
   //fitresult->FixParameter(2, par[2]->GetValue());

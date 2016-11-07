@@ -63,7 +63,7 @@ struct SpinWave {
   std::map<std::string, int> integer_like_quantum_numbers_;
   std::map<std::string, double> double_like_quantum_numbers_;
 
-  Spin getSpinLikeQuantumNumber(QuantumNumberIDs qn_id) const;
+  ComPWA::Spin getSpinLikeQuantumNumber(QuantumNumberIDs qn_id) const;
   int getIntLikeQuantumNumber(QuantumNumberIDs qn_id) const;
   double getDoubleLikeQuantumNumber(QuantumNumberIDs qn_id) const;
 
@@ -83,14 +83,14 @@ struct SpinWave {
       bool nothing_found(true);
       auto result = spin_like_quantum_numbers_.find(spin_like_qn.first);
       if (result != spin_like_quantum_numbers_.end()) {
-        if (1.0 * result->second.J_numerator_ / result->second.J_denominator_
-            == 1.0 * spin_like_qn.second.J_numerator_
-                / spin_like_qn.second.J_denominator_) {
-          if (result->second.z_component_relevant) {
-            if (1.0 * result->second.J_z_numerator_
-                / result->second.J_denominator_
-                == 1.0 * spin_like_qn.second.J_z_numerator_
-                    / spin_like_qn.second.J_denominator_) {
+        if (1.0 * result->second.GetNumerator() / result->second.GetDenominator()
+            == 1.0 * spin_like_qn.second.GetNumerator()
+                / spin_like_qn.second.GetDenominator()) {
+          if (result->second.UseZ()) {
+            if (1.0 * result->second.GetZNumerator()
+                / result->second.GetDenominator()
+                == 1.0 * spin_like_qn.second.GetZNumerator()
+                    / spin_like_qn.second.GetDenominator()) {
               nothing_found = false;
             }
           }
@@ -124,9 +124,9 @@ struct SpinWave {
   friend std::ostream& operator<<(std::ostream& stream, const SpinWave& sw) {
     for (auto iter = sw.spin_like_quantum_numbers_.begin();
         iter != sw.spin_like_quantum_numbers_.end(); ++iter) {
-      stream << iter->first << ": " << iter->second.J_numerator_ << "/"
-          << iter->second.J_denominator_ << " (z="
-          << iter->second.J_z_numerator_ << ")\n";
+      stream << iter->first << ": " << iter->second.GetNumerator()<< "/"
+          << iter->second.GetDenominator()<< " (z="
+          << iter->second.GetZNumerator()<< ")\n";
     }
     for (auto iter = sw.integer_like_quantum_numbers_.begin();
         iter != sw.integer_like_quantum_numbers_.end(); ++iter) {

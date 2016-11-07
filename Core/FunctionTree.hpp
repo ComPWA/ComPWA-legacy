@@ -29,12 +29,13 @@
 
 #include <boost/log/trivial.hpp>
 
+#include "Core/Logging.hpp"
 #include "Core/Functions.hpp"
 #include "Core/TreeNode.hpp"
 #include "Core/AbsParameter.hpp"
 #include "Core/Parameter.hpp"
 
-#include "Optimizer/ControlParameter.hpp"
+//#include "Optimizer/ControlParameter.hpp"
 
 using namespace boost::log;
 
@@ -43,65 +44,31 @@ namespace ComPWA {
 class FunctionTree    //: public ControlParametr
 {
 public:
-  //! Standard constructor
-  /*!
-   * Standard constructor for empty tree
-   */
-  FunctionTree() {
+	//! Standard constructor
+	/*!
+	 * Standard constructor for empty tree
+	 */
+	FunctionTree(){
 
-  }
+	}
 
-  //! Standard constructor
-  /*!
-   * Standard constructor with the top node provided
-   * /param head first node to be used as head
-   */
-  FunctionTree(std::shared_ptr<TreeNode> head) :
-      head_(head) {
-    nodes_.insert(
-        std::pair<std::string, std::shared_ptr<TreeNode> >(head->getName(),
-            head));
-  }
+	//! Standard constructor
+	/*!
+	 * Standard constructor with the top node provided
+	 * /param head first node to be used as head
+	 */
+	FunctionTree(std::shared_ptr<TreeNode> head):head_(head){
+		nodes_.insert(std::pair<std::string, std::shared_ptr<TreeNode> >(head->getName(),head));
+	}
 
-  //! Destructor
-  virtual ~FunctionTree() {
-    for (std::map<std::string, std::shared_ptr<TreeNode> >::iterator iter =
-        nodes_.begin(); iter != nodes_.end(); ++iter) {
-      iter->second->deleteLinks();
-    }
-
-    //;
-  }
-
-  //! Add node to FcnTree
-  /*!
-   * Add a node to the function tree
-   * Adds Top-Down-Linking to the node
-   * \param newNode Node to be added
-   */
-  virtual void addNode(std::shared_ptr<TreeNode> newNode) {
-    //TODO: check existence, throw exception
-    nodes_.insert(
-        std::pair<std::string, std::shared_ptr<TreeNode> >(newNode->getName(),
-            newNode));
-    newNode->linkParents();
-  }
-
-  //! Create head node of FcnTree
-  /*!
-   * Add top node to the function tree
-   * \param name identifier of node
-   * \param strat Strategy with which the node calculates its value
-   * \sa addNode(), createNode(), createLeaf()
-   */
-  virtual void addHead(std::shared_ptr<TreeNode> newNode) {
-    if (head_)    //if head exists throw exception
-      throw std::runtime_error(
-          "FunctionTree::createNode() head node already exists!");
-    head_ = newNode;
-    recursiveAddDaughters(newNode);
-  }
-
+	//! Destructor
+	virtual ~FunctionTree(){
+		std::map<std::string, std::shared_ptr<TreeNode> >::iterator iter = nodes_.begin();
+		for( ; iter != nodes_.end(); ++iter){
+			iter->second->deleteLinks();
+		}
+	}
+  
   virtual void recursiveAddDaughters(std::shared_ptr<TreeNode> newNode) {
     addNode(newNode);
     auto children = newNode->getChildren();
@@ -110,628 +77,187 @@ public:
     }
   }
 
-  //! Create head node of FcnTree
-  /*!
-   * Add top node to the function tree
-   * \param name identifier of node
-   * \param strat Strategy with which the node calculates its value
-   * \sa addNode(), createNode(), createLeaf()
-   */
-  virtual void createHead(const std::string& name,
-      std::shared_ptr<Strategy> strat, unsigned int dim = 1,
-      bool useVec = false) {
-    if (head_)    //if head exists throw exception
-      throw std::runtime_error(
-          "FunctionTree::createNode() head node already exists!");
-    //TODO: (type of) parameter from strategy!
-    //std::shared_ptr<AbsParameter> inter = strat->GetResultContainer();
+	//! Add node to FcnTree
+	/*!
+	 * Add a node to the function tree
+	 * Adds Top-Down-Linking to the node
+	 * \param newNode Node to be added
+	 */
+	virtual void addNode(std::shared_ptr<TreeNode> newNode){
+		//TODO: check existence, throw exception
+		nodes_.insert(std::pair<std::string, std::shared_ptr<TreeNode> >(newNode->getName(),newNode));
+		newNode->linkParents();
+	}
 
-//		std::shared_ptr<DoubleParameter> inter(new DoubleParameter("par"+name,0.));
-//		std::shared_ptr<TreeNode> newNode(new TreeNode(name, inter, strat, std::shared_ptr<TreeNode>()));
-//		head_ = newNode;
-//		nodes_.insert(std::pair<std::string, std::shared_ptr<TreeNode> >(name,newNode));
-    createNode(name, strat, "", dim, useVec);
-  }
-  //! Create head node of FcnTree
-  /*!
-   * Create head node as a leaf. Constant parameter! We use this to generate an empty tree.
-   * \param name identifier of node
-   * \param strat Strategy with which the node calculates its value
-   * \sa addNode(), createNode(), createLeaf()
-   */
-  virtual void createHead(const std::string& name, const double extPar) {
-    if (head_)    //if head exists throw exception
-      throw std::runtime_error(
-          "FunctionTree::createNode() head node already exists!");
-    createLeaf(name, extPar, "");
-  }
-//	//! Create head node of FcnTree
-//	/*!
-//	 * Create head node as a leaf.
-//	 * \param name identifier of node
-//	 * \param strat Strategy with which the node calculates its value
-//	 * \sa addNode(), createNode(), createLeaf()
-//	 */
-//	virtual void createHead(const std::string& name, std::shared_ptr<AbsParameter> extPar){
-//		if( head_ )//if head exists throw exception
-//			throw std::runtime_error("FunctionTree::createNode() head node already exists!");
-//		createLeaf(name,extPar,"");
-//	}
+	//! Create head node of FcnTree
+	/*!
+	 * Add top node to the function tree
+	 * \param name identifier of node
+	 * \param strat Strategy with which the node calculates its value
+	 * \sa addNode(), createNode(), createLeaf()
+	 */
+	virtual void createHead(const std::string& name, std::shared_ptr<Strategy> strat,
+			unsigned int dim=1, bool useVec=false);
 
-  //! Add an existing node to FunctionTree
-  /*!
-   * Add an existing node to FunctionTree. Can be used to link tree's to each other: simply insert
-   * head node of tree A to tree B
-   *
-   * \param inNode Node to insert in FunctionTree
-   * \param parent the parent of this node (for linking)
-   * \sa addNode(), createHead(), createLeaf(), insertTree
-   */
-  virtual void insertNode(std::shared_ptr<TreeNode> inNode,
-      std::string parent) {
-//		inNode->recalculate(); //make sure node is calculated once
-    nodes_.insert(
-        std::pair<std::string, std::shared_ptr<TreeNode> >(inNode->getName(),
-            inNode));
-    //Assign new parent to head of new tree, create links
-    std::shared_ptr<TreeNode> parentNode = nodes_.at(parent);
+	//! Create head node of FcnTree
+	/*!
+	 * Create head node as a leaf. Constant parameter! We use this to generate an empty tree.
+	 * \param name identifier of node
+	 * \param strat Strategy with which the node calculates its value
+	 * \sa addNode(), createNode(), createLeaf()
+	 */
+	virtual void createHead(const std::string& name, const double extPar){
+		if( head_ )//if head exists throw exception
+			throw std::runtime_error("FunctionTree::createNode() | head node already exists!");
+		createLeaf(name,extPar,"");
+	}
 
-    /* In case of an existing node, it is possible that this node already have parents. Do need
-     * to consider this here? */
-    inNode->addParent(parentNode);
-    parentNode->addChild(inNode);
+	//! Create head node of FcnTree
+	/*!
+	 * Create head node as a leaf.
+	 * \param name identifier of node
+	 * \param strat Strategy with which the node calculates its value
+	 * \sa addNode(), createNode(), createLeaf()
+	 */
+	virtual void createHead(const std::string& name, std::shared_ptr<AbsParameter> extPar){
+		if( head_ )//if head exists throw exception
+			throw std::runtime_error("FunctionTree::createNode() | head node already exists!");
+		createLeaf(name,extPar,"");
+	}
 
-    //Subtree already linked, but need to be added to list of nodes
-    addChildNodes(inNode);
-  }
-  //! Insert an existing FunctionTree as TreeNode
-  /*!
-   * Insert head of a existing FunctionTree to current tree.
-   *
-   * \param inNode Node to insert in FunctionTree
-   * \param parent the parent of this node (for linking)
-   * \sa addNode(), createHead(), createLeaf(), insertNode()
-   */
-  virtual void insertTree(std::shared_ptr<FunctionTree> inTree,
-      std::string parent) {
-    insertNode(inTree->head(), parent);
-    return;
-//		nodes_.insert(std::pair<std::string, std::shared_ptr<TreeNode> >(
-//				inTree->head()->getName(),inTree->head()) );
-//		//Assign new parent to head of new tree, create links
-//		std::shared_ptr<TreeNode> parentNode = nodes_.at(parent);
-//		inTree->head()->addParent(parentNode);
-//
-//		//Subtree already linked, but need to be added to list of nodes
-//		addChildNodes(inTree->head());
-  }
+	//! Add an existing node to FunctionTree
+	/*!
+	 * Add an existing node to FunctionTree. Can be used to link tree's to each other: simply insert
+	 * head node of tree A to tree B
+	 *
+	 * \param inNode Node to insert in FunctionTree
+	 * \param parent the parent of this node (for linking)
+	 * \sa addNode(), createHead(), createLeaf(), insertTree
+	 */
+	virtual void insertNode(std::shared_ptr<TreeNode> inNode, std::string parent);
+	//! Insert an existing FunctionTree as TreeNode
+	/*!
+	 * Insert head of a existing FunctionTree to current tree.
+	 *
+	 * \param inNode Node to insert in FunctionTree
+	 * \param parent the parent of this node (for linking)
+	 * \sa addNode(), createHead(), createLeaf(), insertNode()
+	 */
+	virtual void insertTree(std::shared_ptr<FunctionTree> inTree, std::string parent);
 
-  //! Create a node for the FcnTree
-  /*!
-   * Create and add a node to the function tree
-   * Adds Top-Down-Linking to the node
-   * \param name identifier of node
-   * \param strat Strategy with which the node calculates its value
-   * \param parent the parent of this node (for linking)
-   * \sa addNode(), createHead(), createLeaf()
-   */
-  virtual void createNode(const std::string& name,
-      std::shared_ptr<Strategy> strat, std::string parent, unsigned int dim = 1,
-      bool useVec = false) {
-    //TODO: (type of) parameter from strategy!
-    //std::shared_ptr<AbsParameter> inter = strat->GetResultContainer();
-    if (dim == 0)
-      throw std::runtime_error("FunctionTree::createNode() dim=0! ");
-    if (parent == "" && head_)
-      throw std::runtime_error(
-          "FunctionTree::createNode() head node already exists!");
+	//! Create a node for the FcnTree
+	/*!
+	 * Create and add a node to the function tree
+	 * Adds Top-Down-Linking to the node
+	 * \param name identifier of node
+	 * \param strat Strategy with which the node calculates its value
+	 * \param parent the parent of this node (for linking)
+	 * \sa addNode(), createHead(), createLeaf()
+	 */
+	virtual void createNode(const std::string& name, std::shared_ptr<Strategy> strat,
+			std::string parent, unsigned int dim=1, bool useVec=false);
 
-    std::vector<std::shared_ptr<AbsParameter>> inter;
-    switch (strat->OutType()) {
-    case ParType::MCOMPLEX: {
-      //TODO: error if dim>1
-      std::vector<std::complex<double> > start(dim,
-          std::complex<double>(0., 0.));
-      inter.push_back(
-          std::shared_ptr<AbsParameter>(new MultiComplex("par" + name, start)));
-      break;
-    }    //end multi complex
+	//! Create a leaf for the FcnTree
+	/*!
+	 * Create and add a static node to the function tree if not existing yet
+	 * Adds Top-Down-Linking to the node
+	 * \param name identifier of node
+	 * \param extPar the parameter this node represents
+	 * \param parent the parent of this node (for linking)
+	 * \sa addNode(), createHead(), createNode()
+	 */
+	virtual void createLeaf(const std::string name, const double extPar, std::string parent);
 
-    case ParType::MDOUBLE: {
-      //TODO: error if dim>1
-      std::vector<double> start(dim, 0.);
-      inter.push_back(
-          std::shared_ptr<AbsParameter>(new MultiDouble("par" + name, start)));
-      break;
-    }    //end multi double
+	//! Create a leaf for the FcnTree
+	/*!
+	 * Create and add a node to the function tree if not existing yet
+	 * Adds Top-Down-Linking to the node
+	 * Attaches the Node as Observer to the external parameter
+	 * \param name identifier of node
+	 * \param extPar the parameter this node represents
+	 * \param parent the parent of this node (for linking)
+	 * \sa addNode(), createHead(), createNode()
+	 */
+	virtual void createLeaf(const std::string name, std::shared_ptr<AbsParameter> extPar,
+			std::string parent);
 
-    case ParType::COMPLEX: {
-      std::complex<double> start(0., 0.);
-      if (useVec) {
-        for (unsigned int i; i < dim; i++)
-          inter.push_back(
-              std::shared_ptr<AbsParameter>(
-                  new ComplexParameter("par" + name, start)));
-      }
-      else {
-        inter.push_back(
-            std::shared_ptr<AbsParameter>(
-                new ComplexParameter("par" + name, start)));
-      }
-      break;
-    }    //end complex
+	//! Create a leaf for the FcnTree with higher dimension
+	/*!
+	 * Create and add a node to the function tree if not existing yet
+	 * Adds Top-Down-Linking to the node
+	 * Attaches the Node as Observer to the external parameter
+	 * \param name identifier of node
+	 * \param extPar list of parameters this node represents
+	 * \param parent the parent of this node (for linking)
+	 * \sa addNode(), createHead(), createNode()
+	 */
+	virtual void createLeaf(const std::string name,
+			std::vector<std::shared_ptr<AbsParameter>>& extPar, std::string parent);
 
-    case ParType::DOUBLE: {
-      double start(0.);
-      if (useVec) {
-        for (unsigned int i; i < dim; i++)
-          inter.push_back(
-              std::shared_ptr<AbsParameter>(
-                  new DoubleParameter("par" + name, start)));
-      }
-      else {
-        inter.push_back(
-            std::shared_ptr<AbsParameter>(
-                new DoubleParameter("par" + name, start)));
-      }
-      break;
-    }    //end double
+	//! return the head of the tree
+	/*!
+	 * Access to the head element of the tree
+	 * \return FuntionTreeNode at head of tree
+	 */
+	virtual const std::shared_ptr<TreeNode> head() const {
+		return head_;
+		//TODO: return double? ;
+	}
 
-    case ParType::INTEGER: {
-      int start(0);
-      if (useVec) {
-        for (unsigned int i; i < dim; i++)
-          inter.push_back(
-              std::shared_ptr<AbsParameter>(
-                  new IntegerParameter("par" + name, start)));
-      }
-      else {
-        inter.push_back(
-            std::shared_ptr<AbsParameter>(
-                new IntegerParameter("par" + name, start)));
-      }
-      break;
-    }    //end int
+	//! trigger calculation
+	void recalculate(){
+		head_->recalculate();
+	}
 
-    case ParType::BOOL: {
-      bool start = false;
-      if (useVec) {
-        for (unsigned int i; i < dim; i++)
-          inter.push_back(
-              std::shared_ptr<AbsParameter>(
-                  new BoolParameter("par" + name, start)));
-      }
-      else {
-        inter.push_back(
-            std::shared_ptr<AbsParameter>(
-                new BoolParameter("par" + name, start)));
-      }
-      break;
-    }    //end bool
+	//! check if Tree functions, create some debug messages if not
+	bool sanityCheck();
 
-    default: {
-      //TODO: exception output partype wrong
-      return;
-    }
-    }    //end switch
+	//! friend function to stream parameter information to output
+	/*!
+	 * Declaring the stream-operator << as friend allows to stream parameter
+	 * information to the output as easily as a generic type.
+	 * \sa make_str(), to_str()
+	 */
+	friend std::ostream& operator<<( std::ostream& out, const FunctionTree& b ){
+		return out << b.head();
+	}
 
-    std::shared_ptr<TreeNode> newNode, parentNode;
-    if (parent == "")    //is this a head node?
-      parentNode = std::shared_ptr<TreeNode>();
-    else
-      parentNode = nodes_.at(parent);
+	//! friend function to stream parameter information to output
+	/*!
+	 * Declaring the stream-operator << as friend allows to stream parameter
+	 * information to the output as easily as a generic type.
+	 * \param out the ostream the object is piped to
+	 * \param b the piped object
+	 * \sa make_str(), to_str()
+	 */
+	friend std::ostream& operator<<( std::ostream& out, std::shared_ptr<FunctionTree> b ){
+		return out << b->head();
+	}
+	/*! Print structure of tree and its values
+	 * \param lv Print down to level lv, lv=-1 print the whole tree
+	 */
+	std::string print(unsigned int lv=-1) { return head_->print(lv); };
 
-    if (dim == 1 && !useVec)
-      newNode = std::shared_ptr<TreeNode>(
-          new TreeNode(name, inter[0], strat, parentNode));
-    else
-      newNode = std::shared_ptr<TreeNode>(
-          new TreeNode(name, inter, strat, parentNode));
-
-    nodes_.insert(
-        std::pair<std::string, std::shared_ptr<TreeNode> >(name, newNode));
-    newNode->linkParents();
-    if (parent == "")
-      head_ = newNode;    //if we created a head redirect pointer
-  }
-
-  //! Create a leaf for the FcnTree
-  /*!
-   * Create and add a static node to the function tree if not existing yet
-   * Adds Top-Down-Linking to the node
-   * \param name identifier of node
-   * \param extPar the parameter this node represents
-   * \param parent the parent of this node (for linking)
-   * \sa addNode(), createHead(), createNode()
-   */
-  virtual void createLeaf(const std::string name, const double extPar,
-      std::string parent) {
-    std::shared_ptr<TreeNode> parentNode;
-    if (parent == "")    //is this a head node?
-      parentNode = std::shared_ptr<TreeNode>();
-    else
-      parentNode = nodes_.at(parent);
-//		std::shared_ptr<TreeNode> parentNode = nodes_.at(parent);
-    std::shared_ptr<TreeNode> leaf;
-    std::shared_ptr<DoubleParameter> staticVal(
-        new DoubleParameter("ParOfNode_" + name, extPar));
-
-    //check if Leaf already exists
-    bool exists = true;
-    if (nodes_.find(name) == nodes_.end()) {
-      exists = false;
-    }
-    else {
-      leaf = nodes_.at(name);
-    }
-
-    //setup connections
-    if (exists) {
-      leaf->addParent(parentNode);
-      //TODO: check if also static?
-    }
-    else {
-      leaf = std::shared_ptr<TreeNode>(
-          new TreeNode(name, staticVal, std::shared_ptr<Strategy>(),
-              parentNode));
-      nodes_.insert(
-          std::pair<std::string, std::shared_ptr<TreeNode> >(name, leaf));
-      leaf->linkParents();
-    }
-  }
-
-  //! Create a leaf for the FcnTree
-  /*!
-   * Create and add a node to the function tree if not existing yet
-   * Adds Top-Down-Linking to the node
-   * Attaches the Node as Observer to the external parameter
-   * \param name identifier of node
-   * \param extPar the parameter this node represents
-   * \param parent the parent of this node (for linking)
-   * \sa addNode(), createHead(), createNode()
-   */
-  virtual void createLeaf(const std::string name,
-      std::shared_ptr<AbsParameter> extPar, std::string parent) {
-    std::shared_ptr<TreeNode> parentNode;
-    if (parent == "")    //is this a head node?
-      parentNode = std::shared_ptr<TreeNode>();
-    else
-      parentNode = nodes_.at(parent);
-//		std::shared_ptr<TreeNode> parentNode = nodes_.at(parent);
-    std::shared_ptr<TreeNode> leaf;
-
-    //check if Leaf already exists
-    bool exists = true;
-    if (nodes_.find(name) == nodes_.end()) {
-      exists = false;
-    }
-    else {
-      leaf = nodes_.at(name);
-    }
-
-    //setup connections
-    if (exists) {
-      leaf->addParent(parentNode);
-    }
-    else {
-      leaf = std::shared_ptr<TreeNode>(
-          new TreeNode(name, extPar, std::shared_ptr<Strategy>(), parentNode));
-      nodes_.insert(
-          std::pair<std::string, std::shared_ptr<TreeNode> >(name, leaf));
-      leaf->linkParents();
-      extPar->Attach(leaf);
-    }
-  }
-
-  //! Create a leaf for the FcnTree with higher dimension
-  /*!
-   * Create and add a node to the function tree if not existing yet
-   * Adds Top-Down-Linking to the node
-   * Attaches the Node as Observer to the external parameter
-   * \param name identifier of node
-   * \param extPar list of parameters this node represents
-   * \param parent the parent of this node (for linking)
-   * \sa addNode(), createHead(), createNode()
-   */
-  virtual void createLeaf(const std::string name,
-      std::vector<std::shared_ptr<AbsParameter>>& extPar, std::string parent) {
-    std::shared_ptr<TreeNode> parentNode;
-    if (parent == "")    //is this a head node?
-      parentNode = std::shared_ptr<TreeNode>();
-    else
-      parentNode = nodes_.at(parent);
-//		std::shared_ptr<TreeNode> parentNode = nodes_.at(parent);
-    std::shared_ptr<TreeNode> leaf;
-
-    //check if Leaf already exists
-    bool exists = true;
-    if (nodes_.find(name) == nodes_.end()) {
-      exists = false;
-    }
-    else {
-      leaf = nodes_.at(name);
-    }
-
-    //setup connections
-    if (exists) {
-      leaf->addParent(parentNode);
-    }
-    else {
-      leaf = std::shared_ptr<TreeNode>(
-          new TreeNode(name, extPar, std::shared_ptr<Strategy>(), parentNode));
-      nodes_.insert(
-          std::pair<std::string, std::shared_ptr<TreeNode> >(name, leaf));
-      leaf->linkParents();
-      for (unsigned int i = 0; i < extPar.size(); i++)
-        extPar[i]->Attach(leaf);
-    }
-  }
-
-  //! return the head of the tree
-  /*!
-   * Access to the head element of the tree
-   * \return FuntionTreeNode at head of tree
-   */
-  virtual const std::shared_ptr<TreeNode> head() const {
-    return head_;
-    //TODO: return double? ;
-  }
-
-  /* virtual double controlParameter(ParameterList& minPar){
-   ParType resultType = head_->getValue()->type();
-   switch(par->type())
-   {
-   case ParType::COMPLEX: //TODO
-   //cout << "Easy\n";
-   break;
-   case ParType::DOUBLE:{
-   DoubleParameter* tmp = (DoubleParameter*) par.get(); //TODO: saver
-   return tmp->GetValue();
-   break;}
-   case ParType::INTEGER:{
-   IntegerParameter* tmp = (IntegerParameter*) par.get();
-   return tmp->GetValue();
-   break;}
-   case ParType::BOOL:{
-   BoolParameter* tmp = (BoolParameter*) par.get();
-   return tmp->GetValue();
-   break;}
-   default:{
-   //TODO exception
-   //cout << "Invalid Selection\n";
-   break;}
-   }
-   return 0;
-   }*/
-
-  //! trigger calculation
-  void recalculate() {
-    head_->recalculate();
-  }
-
-  //! trigger calculation
-  void forceRecalculate() {
-    for (auto node : nodes_) {
-      //TODO: there is an overhead as every node above the leaves are
-      // updated several times. only leaves need an update!
-      node.second->Update();
-    }
-
-    head_->recalculate();
-  }
-
-  void fixLinks() {
-    for (auto node : nodes_) {
-      repairLinks(node.second);
-    }
-  }
-
-  void repairLinks(std::shared_ptr<TreeNode> node) {
-    // repair links to children
-    for (auto child : node->getChildren()) {
-      std::vector<std::string> parent_names;
-      child->getParentNames(parent_names);
-      auto result = std::find(parent_names.begin(), parent_names.end(),
-          node->getName());
-      if (result == parent_names.end()) {
-        BOOST_LOG_TRIVIAL(debug)<<"adding parent "<<node->getName()<<" in child "<<child->getName();
-        child->addParent(node);
-      }
-    }
-    // repair links to parents
-    std::vector<std::string> parent_names;
-    node->getParentNames(parent_names);
-    for (auto parent_name : parent_names) {
-      auto result = nodes_.find(parent_name);
-      if (result != nodes_.end()) {
-        std::vector<std::string> children_names;
-        result->second->getChildrenNames(children_names);
-        auto found_child = std::find(children_names.begin(),
-            children_names.end(), node->getName());
-        if (found_child == parent_names.end()) {
-          BOOST_LOG_TRIVIAL(debug)<<"adding child "<<node->getName()<<" in parent "<<result->second->getName();
-          result->second->addChild(node);
-        }
-      }
-    }
-  }
-
-  //! check if Tree functions, create some debug messages if not
-  bool sanityCheck() {
-    bool isSane = true;
-
-    //first fo all: is there a tree?
-    if (!head_) {
-      BOOST_LOG_TRIVIAL(error)<<"This tree has no head!";
-      return false;
-    }
-
-    //some basic infos next
-    BOOST_LOG_TRIVIAL(debug)<<"# of Nodes: "<<nodes_.size();
-
-    // check links on all registered nodes
-    for (auto node : nodes_) {
-      // check links to children
-      for (auto node2 : nodes_) {
-        std::vector<std::string> parent_names;
-        node2.second->getParentNames(parent_names);
-        for (auto parent_name : parent_names) {
-          if(parent_name.compare(node.first) == 0) {
-            //then node2 is a child of node
-            // check if node has child node2
-            bool found(false);
-            for(auto const& child_node : node.second->getChildren()) {
-              if(node2.first.compare(child_node->getName()) == 0) {
-                found = true;
-                break;
-              }
-            }
-            if(!found) {
-              BOOST_LOG_TRIVIAL(warning)<<"node "<<node.first<<" does not have child "<<node2.first;
-              node.second->addChild(node2.second);
-              BOOST_LOG_TRIVIAL(warning)<<"automatically repaired node link...";
-            }
-            break;
-          }
-        }
-      }
-
-      // check links to parents
-      for (auto node2 : nodes_) {
-        std::vector<std::string> children_names;
-        node2.second->getChildrenNames(children_names);
-        for (auto child_name : children_names) {
-          if(child_name.compare(node.first) == 0) {
-            // then node2 is a parent of node
-            // check if node has parent node2
-            bool found(false);
-            std::vector<std::string> parent_names;
-            node.second->getParentNames(parent_names);
-            for(auto const& parent : parent_names) {
-              if(parent.compare(node2.first) == 0) {
-                found = true;
-                break;
-              }
-            }
-            if(!found) {
-              BOOST_LOG_TRIVIAL(warning)<<"node "<<node.first<<" does not have parent "<<node2.first;
-              node.second->addParent(node2.second);
-              BOOST_LOG_TRIVIAL(warning)<<"automatically repaired node link...";
-            }
-            break;
-          }
-        }
-      }
-    }
-
-    //collect all children and parent names
-    std::vector<std::string> childNames, parentNames;
-    getNamesDownward(head_, childNames, parentNames);
-
-    //check if matches with available nodeNames
-    std::vector<std::string> missedChild, missedParent;
-    for (unsigned int i = 0; i < childNames.size(); i++) {
-      try {
-        nodes_.at(childNames[i]);
-      }
-      catch (std::out_of_range()) {
-        missedChild.push_back(childNames[i]);
-      }
-    }
-    for (unsigned int i = 0; i < parentNames.size(); i++) {
-      try {
-        nodes_.at(parentNames[i]);
-      }
-      catch (std::out_of_range()) {
-        missedParent.push_back(parentNames[i]);
-      }
-    }
-    if (missedChild.size()) {
-      for (unsigned int i = 0; i < missedChild.size(); i++)
-      BOOST_LOG_TRIVIAL(debug)<<"This tree misses a child: "<<missedChild[i];
-      return false;
-    }
-    if (missedParent.size()) {
-      for (unsigned int i = 0; i < missedParent.size(); i++)
-      BOOST_LOG_TRIVIAL(debug)<<"This tree misses a parent: "<<missedParent[i];
-      return false;
-    }
-
-    return isSane;
-  }
-
-  //! friend function to stream parameter information to output
-  /*!
-   * Declaring the stream-operator << as friend allows to stream parameter
-   * information to the output as easily as a generic type.
-   * \sa make_str(), to_str()
-   */
-  friend std::ostream& operator<<(std::ostream& out, const FunctionTree& b) {
-    return out << b.head();
-  }
-
-  //! friend function to stream parameter information to output
-  /*!
-   * Declaring the stream-operator << as friend allows to stream parameter
-   * information to the output as easily as a generic type.
-   * \param out the ostream the object is piped to
-   * \param b the piped object
-   * \sa make_str(), to_str()
-   */
-  friend std::ostream& operator<<(std::ostream& out,
-      std::shared_ptr<FunctionTree> b) {
-    return out << b->head();
-  }
-  /*! Print structure of tree and its values
-   * \param lv Print down to level lv, lv=-1 print the whole tree
-   */
-  std::string print(unsigned int lv = -1) {
-    return head_->print(lv);
-  }
-  ;
+	//! Get number of nodes
+	int GetNumberOfNodes() { return nodes_.size(); }
 
 protected:
-  std::shared_ptr<TreeNode> head_; /*!< the head node storing the absolute result */
-  std::map<std::string, std::shared_ptr<TreeNode> > nodes_; /*!< map to store the nodes */
+	/** List of child tree's
+	 * We need to store the childTreee that were added via insertTree() here. Because otherwise the
+	 * destructor of these tree's would delete the linking of the tree nodes.
+	 * */
+	std::vector<std::shared_ptr<FunctionTree> > _childTrees;
 
-  //! recursive function to get all used NodeNames
-  void getNamesDownward(std::shared_ptr<TreeNode> start,
-      std::vector<std::string>& childNames,
-      std::vector<std::string>& parentNames) {
-
-    start->getParentNames(parentNames);
-    start->getChildrenNames(childNames);
-
-    const std::vector<std::shared_ptr<TreeNode> > childs = start->getChildren();
-    for (unsigned int i = 0; i < childs.size(); i++)
-    getNamesDownward(childs[i], childNames, parentNames);
-
-  }
-  //! Helper function to recursively add child nodes of a new tree
-  virtual void addChildNodes(std::shared_ptr<TreeNode> startNode) {
-    std::vector<std::shared_ptr<TreeNode>> newChildren =
-    startNode->getChildren();
-    for (unsigned int i = 0; i < newChildren.size(); i++) {
-      nodes_.insert(
-          std::pair<std::string, std::shared_ptr<TreeNode> >(
-              newChildren[i]->getName(), newChildren[i]));
-      addChildNodes(newChildren[i]);
-    }
-    return;
-  }
-  //! Helper function to set all nodes to status changed
-  virtual void UpdateAll(std::shared_ptr<TreeNode> startNode) {
-    std::vector<std::shared_ptr<TreeNode>> newChildren =
-    startNode->getChildren();
-    for (unsigned int i = 0; i < newChildren.size(); i++) {
-      newChildren[i]->Update();
-      UpdateAll(newChildren[i]);
-    }
-    return;
-  }
+	std::shared_ptr<TreeNode> head_; /*!< the head node storing the absolute result */
+	std::map<std::string, std::shared_ptr<TreeNode> > nodes_; /*!< map to store the nodes */
+	//! recursive function to get all used NodeNames
+	void getNamesDownward(std::shared_ptr<TreeNode> start, std::vector<std::string>& childNames,
+			std::vector<std::string>& parentNames);
+	//! Helper function to recursively add child nodes of a new tree
+	virtual void addChildNodes(std::shared_ptr<TreeNode> startNode);
+	//! Helper function to set all nodes to status changed
+	virtual void UpdateAll(std::shared_ptr<TreeNode> startNode);
 };
 
-}
-/* namespace ComPWA */
-
+} /* End ComPWA namespace */
 #endif /* _FUNCTIONTREE_HPP_ */

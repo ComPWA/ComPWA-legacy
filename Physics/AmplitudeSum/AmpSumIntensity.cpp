@@ -9,15 +9,21 @@
 //     Mathias Michel - initial API and implementation
 //		Peter Weidenkaff - adding flatte type resonance, removing root dependence
 //-------------------------------------------------------------------------------
+#include <numeric>
+#include <algorithm>
 
 #include "Core/PhysConst.hpp"
 #include "Core/Functions.hpp"
+
+// Boost header files go here
+#include <boost/foreach.hpp>
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/xml_parser.hpp>
 
 #include "Physics/AmplitudeSum/NonResonant.hpp"
 #include "Physics/AmplitudeSum/AmpRelBreitWignerRes.hpp"
 #include "Physics/AmplitudeSum/AmpGausRes.hpp"
 #include "Physics/AmplitudeSum/AmpFlatteRes.hpp"
-#include "Physics/AmplitudeSum/AmpFlatteRes3Ch.hpp"
 #include "Physics/AmplitudeSum/AmpWigner2.hpp"
 
 #include "gsl/gsl_monte_vegas.h"
@@ -28,701 +34,243 @@ namespace ComPWA {
 namespace Physics {
 namespace AmplitudeSum {
 
-AmpSumIntensity::AmpSumIntensity(AmplitudeSetup ini, normStyle ns, std::shared_ptr<Efficiency> eff,
+using namespace boost::property_tree;
+
+AmpSumIntensity::AmpSumIntensity(std::string name,
+		normStyle ns, std::shared_ptr<Efficiency> eff,
 		unsigned int nCalls) :
-									totAmp("relBWsumAmplitude"), ampSetup(ini),
-									_normStyle(ns), _calcNorm(1),
-									_calcMaxFcnVal(0),eff_(eff),_nCalls(nCalls)
+				Amplitude(name, eff), _normStyle(ns), _calcMaxFcnVal(0),
+				_nCalls(nCalls), _maxFcnVal(0.)
 {
-	init();
-}
-
-AmpSumIntensity::AmpSumIntensity(AmplitudeSetup ini, std::shared_ptr<Efficiency> eff,
-		unsigned int nCalls) :
-									totAmp("relBWsumAmplitude"), ampSetup(ini),
-									_normStyle(none), _calcNorm(0),
-									_calcMaxFcnVal(0),eff_(eff),_nCalls(nCalls)
-{
-	init();
-}
-
-void AmpSumIntensity::init(){
-	result.AddParameter(std::shared_ptr<DoubleParameter>(new DoubleParameter("AmpSumResult")));
-
-	DPKinematics::DalitzKinematics* kin = dynamic_cast<DPKinematics::DalitzKinematics*>(Kinematics::instance());
-	_calcNorm=1;
-	if(_normStyle==normStyle::none) _calcNorm=0;
-
-	params.AddParameter( std::shared_ptr<DoubleParameter> (
-			new DoubleParameter("motherRadius",1.5) ));
-	params.GetDoubleParameter("motherRadius")->FixParameter(1); //we should add this to Kinematics
-	/* For peter's analysis the a_0+ and a_00 share the same coupling. To implement
-	 * this in the model, we have to do the following work-a-round.
-	 * Don't forget to adjust the iterator 'paramsPos' and 'g1Itr', if you comment out that line.
-	 * Search for "(asdfef)" to find all positions that have to be adjusted
-	 */
-	params.AddParameter( std::shared_ptr<DoubleParameter> (
-			new DoubleParameter("g1_a_0",2.0) )); //default value (asdfef)
-	//params.AddParameter( std::shared_ptr<DoubleParameter> (
-	//new DoubleParameter("g1_a_0",3.34348) )); //BaBar value (asdfef)
-	//params.AddParameter( std::shared_ptr<DoubleParameter> (
-	//new DoubleParameter("g1_a_0",2.16) )); //Our value (asdfef)
-	params.GetDoubleParameter(0)->SetParameterFixed();
-
-	for(std::vector<BreitWignerConf>::iterator reso=ampSetup.getBreitWigner().begin(); reso!=ampSetup.getBreitWigner().end(); reso++){
-		BreitWignerConf tmp = (*reso);
-		if(!tmp.m_enable) continue;
-		std::string name = tmp.m_name;
-		unsigned int subSys = tmp.m_daughterA + tmp.m_daughterB;
-		params.AddParameter( std::shared_ptr<DoubleParameter> (
-				new DoubleParameter("mag_"+name,tmp.m_strength,tmp.m_strength_min,tmp.m_strength_max) ) );
-		params.GetDoubleParameter("mag_"+name)->FixParameter(tmp.m_strength_fix);
-		params.AddParameter( std::shared_ptr<DoubleParameter> (
-				new DoubleParameter("phase_"+name,tmp.m_phase,tmp.m_phase_min,tmp.m_phase_max) ) );
-		params.GetDoubleParameter("phase_"+name)->FixParameter(tmp.m_phase_fix);
-		params.AddParameter( std::shared_ptr<DoubleParameter> (
-				new DoubleParameter("m0_"+name,tmp.m_mass, tmp.m_mass_min, tmp.m_mass_max) ) );
-		params.GetDoubleParameter("m0_"+name)->FixParameter(tmp.m_mass_fix);
-		params.AddParameter( std::shared_ptr<DoubleParameter> (
-				new DoubleParameter("width_"+name,tmp.m_width, tmp.m_width_min, tmp.m_width_max) ) );
-		params.GetDoubleParameter("width_"+name)->FixParameter(tmp.m_width_fix);
-		params.AddParameter( std::shared_ptr<DoubleParameter> (
-				new DoubleParameter("d_"+name,tmp.m_mesonRadius) ) );
-		params.GetDoubleParameter("d_"+name)->FixParameter(1);
-
-		std::shared_ptr<AmpRelBreitWignerRes> tmpbw(new AmpRelBreitWignerRes(name.c_str(),
-				params.GetDoubleParameter("m0_"+name), params.GetDoubleParameter("width_"+name),
-				params.GetDoubleParameter("d_"+name),
-				params.GetDoubleParameter("motherRadius"),
-				subSys, tmp.m_spin,tmp.m_m,tmp.m_n) );
-		totAmp.addBW(tmpbw, params.GetDoubleParameter("mag_"+name), params.GetDoubleParameter("phase_"+name));
-
-		//setting normalization between amplitudes
-		double norm=1.0;
-		if(norm<0 || _calcNorm) {//recalculate normalization
-			norm = normReso(tmpbw);
-		}
-		tmpbw->SetNormalization(1/norm);
-	}// end loop over resonances
-
-	for(std::vector<FlatteConf>::iterator reso=ampSetup.getFlatte().begin(); reso!=ampSetup.getFlatte().end(); reso++){
-		FlatteConf tmp = (*reso);
-		if(!tmp.m_enable) continue;
-		std::string name = tmp.m_name;
-		unsigned int subSys = tmp.m_daughterA + tmp.m_daughterB;
-		params.AddParameter( std::shared_ptr<DoubleParameter> (
-				new DoubleParameter("mag_"+name,tmp.m_strength,tmp.m_strength_min,tmp.m_strength_max) ) );
-		params.GetDoubleParameter("mag_"+name)->FixParameter(tmp.m_strength_fix);
-		params.AddParameter( std::shared_ptr<DoubleParameter> (
-				new DoubleParameter("phase_"+name,tmp.m_phase,tmp.m_phase_min,tmp.m_phase_max) ) );
-		params.GetDoubleParameter("phase_"+name)->FixParameter(tmp.m_phase_fix);
-		params.AddParameter( std::shared_ptr<DoubleParameter> (
-				new DoubleParameter("m0_"+name,tmp.m_mass, tmp.m_mass_min, tmp.m_mass_max)  ));
-		params.GetDoubleParameter("m0_"+name)->FixParameter(tmp.m_mass_fix);
-		params.AddParameter( std::shared_ptr<DoubleParameter> (
-				new DoubleParameter("g2_"+name,tmp.m_g2) ) );
-		params.GetDoubleParameter("g2_"+name)->FixParameter(1);
-		params.AddParameter( std::shared_ptr<DoubleParameter> (
-				new DoubleParameter("d_"+name,tmp.m_mesonRadius) ) );
-		params.GetDoubleParameter("d_"+name)->FixParameter(1);
-
-		std::shared_ptr<AmpFlatteRes> tmpbw;
-		if(tmp.m_name.find("a_0") != tmp.m_name.npos){
-			params.GetDoubleParameter("g1_a_0")->FixParameter(0);
-			params.GetDoubleParameter("g1_a_0")->SetValue(tmp.m_g1);
-			params.GetDoubleParameter("g1_a_0")->SetMinMax(tmp.m_g1_min, tmp.m_g1_max);
-			params.GetDoubleParameter("g1_a_0")->FixParameter(tmp.m_g1_fix);
-			tmpbw = std::shared_ptr<AmpFlatteRes>(new AmpFlatteRes(name.c_str(),
-					params.GetDoubleParameter("m0_"+name), params.GetDoubleParameter("d_"+name),
-					params.GetDoubleParameter("motherRadius"),
-					//params.GetDoubleParameter("g1_"+name),params.GetDoubleParameter("g2_"+name),
-					params.GetDoubleParameter("g1_a_0"),
-					params.GetDoubleParameter("g2_"+name),
-					ComPWA::PhysConst::Instance().findParticle(tmp.m_g2_part1).mass_,
-					ComPWA::PhysConst::Instance().findParticle(tmp.m_g2_part2).mass_,
-					subSys, tmp.m_spin,tmp.m_m,tmp.m_n,tmp.m_mesonRadius) );
-		}else{
-			params.AddParameter( std::shared_ptr<DoubleParameter> (
-					new DoubleParameter("g1_"+name,tmp.m_g1,tmp.m_g1_min,tmp.m_g1_max) ) );
-			params.GetDoubleParameter("g1_"+name)->FixParameter(tmp.m_g1_fix);
-			tmpbw = std::shared_ptr<AmpFlatteRes>(new AmpFlatteRes(name.c_str(),
-					params.GetDoubleParameter("m0_"+name), params.GetDoubleParameter("d_"+name),
-					params.GetDoubleParameter("motherRadius"),
-					params.GetDoubleParameter("g1_"+name),
-					params.GetDoubleParameter("g2_"+name),
-					ComPWA::PhysConst::Instance().findParticle(tmp.m_g2_part1).mass_,
-					ComPWA::PhysConst::Instance().findParticle(tmp.m_g2_part2).mass_,
-					subSys, tmp.m_spin,tmp.m_m,tmp.m_n,tmp.m_mesonRadius) );
-		}
-		totAmp.addBW(tmpbw, params.GetDoubleParameter("mag_"+name), params.GetDoubleParameter("phase_"+name));
-
-		double norm=1.0;
-		if(norm<0 || _calcNorm)	norm = normReso(tmpbw);
-		tmpbw->SetNormalization(1./norm);
-	}// end loop over resonancesFlatte
-	for(std::vector<Flatte3ChConf>::iterator reso=ampSetup.getFlatte3Ch().begin(); reso!=ampSetup.getFlatte3Ch().end(); reso++){
-		Flatte3ChConf tmp = (*reso);
-		if(!tmp.m_enable) continue;
-		std::string name = tmp.m_name;
-		unsigned int subSys = tmp.m_daughterA + tmp.m_daughterB;
-		params.AddParameter( std::shared_ptr<DoubleParameter> (
-				new DoubleParameter("mag_"+name,tmp.m_strength,tmp.m_strength_min,tmp.m_strength_max) ) );
-		params.GetDoubleParameter("mag_"+name)->FixParameter(tmp.m_strength_fix);
-		params.AddParameter( std::shared_ptr<DoubleParameter> (
-				new DoubleParameter("phase_"+name,tmp.m_phase,tmp.m_phase_min,tmp.m_phase_max) ) );
-		params.GetDoubleParameter("phase_"+name)->FixParameter(tmp.m_phase_fix);
-		params.AddParameter( std::shared_ptr<DoubleParameter> (
-				new DoubleParameter("m0_"+name,tmp.m_mass, tmp.m_mass_min, tmp.m_mass_max)  ));
-		params.GetDoubleParameter("m0_"+name)->FixParameter(tmp.m_mass_fix);
-		params.AddParameter( std::shared_ptr<DoubleParameter> (
-				new DoubleParameter("g3_"+name,tmp.m_g3) ) );
-		params.GetDoubleParameter("g3_"+name)->FixParameter(1);
-		params.AddParameter( std::shared_ptr<DoubleParameter> (
-				new DoubleParameter("d_"+name,tmp.m_mesonRadius) ) );
-		params.GetDoubleParameter("d_"+name)->FixParameter(1);
-
-		std::shared_ptr<AmpFlatteRes3Ch> tmpbw;
-		if(tmp.m_name.find("a_0") != tmp.m_name.npos){
-			params.GetDoubleParameter("g1_a_0")->FixParameter(0);
-			params.GetDoubleParameter("g1_a_0")->SetValue(tmp.m_g1);
-			params.GetDoubleParameter("g1_a_0")->SetMinMax(tmp.m_g1_min, tmp.m_g1_max);
-			params.GetDoubleParameter("g1_a_0")->FixParameter(tmp.m_g1_fix);
-
-			tmpbw = std::shared_ptr<AmpFlatteRes3Ch>(new AmpFlatteRes3Ch(name.c_str(),
-					params.GetDoubleParameter("m0_"+name), params.GetDoubleParameter("d_"+name),
-					params.GetDoubleParameter("motherRadius"),
-					params.GetDoubleParameter("g1_a_0"),
-					params.GetDoubleParameter("g1_a_0"),
-					ComPWA::PhysConst::Instance().findParticle(tmp.m_g2_part1).mass_,
-					ComPWA::PhysConst::Instance().findParticle(tmp.m_g2_part2).mass_,
-					params.GetDoubleParameter("g3_"+name),
-					ComPWA::PhysConst::Instance().findParticle(tmp.m_g3_part1).mass_,
-					ComPWA::PhysConst::Instance().findParticle(tmp.m_g3_part2).mass_,
-					subSys, tmp.m_spin,tmp.m_m,tmp.m_n,tmp.m_mesonRadius) );
-		}else{
-			params.AddParameter( std::shared_ptr<DoubleParameter> (
-					new DoubleParameter("g1_"+name,tmp.m_g1,tmp.m_g1_min,tmp.m_g1_max) ) );
-			params.GetDoubleParameter("g1_"+name)->FixParameter(tmp.m_g1_fix);
-			params.AddParameter( std::shared_ptr<DoubleParameter> (
-					new DoubleParameter("g2_"+name,tmp.m_g2) ) );
-			params.GetDoubleParameter("g2_"+name)->FixParameter(1);
-
-			tmpbw = std::shared_ptr<AmpFlatteRes3Ch>(new AmpFlatteRes3Ch(name.c_str(),
-					params.GetDoubleParameter("m0_"+name), params.GetDoubleParameter("d_"+name),
-					params.GetDoubleParameter("motherRadius"),
-					params.GetDoubleParameter("g1_"+name),
-					params.GetDoubleParameter("g2_"+name),
-					ComPWA::PhysConst::Instance().findParticle(tmp.m_g2_part1).mass_,
-					ComPWA::PhysConst::Instance().findParticle(tmp.m_g2_part2).mass_,
-					params.GetDoubleParameter("g3_"+name),
-					ComPWA::PhysConst::Instance().findParticle(tmp.m_g3_part1).mass_,
-					ComPWA::PhysConst::Instance().findParticle(tmp.m_g3_part2).mass_,
-					subSys, tmp.m_spin,tmp.m_m,tmp.m_n,tmp.m_mesonRadius) );
-		}
-
-		totAmp.addBW(tmpbw, params.GetDoubleParameter("mag_"+name), params.GetDoubleParameter("phase_"+name));
-
-		double norm=1.0;
-		if(norm<0 || _calcNorm)	norm = normReso(tmpbw);
-		tmpbw->SetNormalization(1./norm);
-	}// end loop over resonancesFlatte
-
-	for(std::vector<basicConf>::iterator reso=ampSetup.getNonRes().begin(); reso!=ampSetup.getNonRes().end(); reso++){
-		basicConf tmp = (*reso);
-		if(!tmp.m_enable) continue;
-		std::string name = tmp.m_name;
-		params.AddParameter( std::shared_ptr<DoubleParameter> (
-				new DoubleParameter("mag_"+name,tmp.m_strength,tmp.m_strength_min,tmp.m_strength_max) ) );
-		params.GetDoubleParameter("mag_"+name)->FixParameter(tmp.m_strength_fix);
-		params.AddParameter( std::shared_ptr<DoubleParameter> (
-				new DoubleParameter("phase_"+name,tmp.m_phase,tmp.m_phase_min,tmp.m_phase_max) ) );
-		params.GetDoubleParameter("phase_"+name)->FixParameter(tmp.m_phase_fix);
-
-		std::shared_ptr<NonResonant> tmpNonRes( new NonResonant(name.c_str()) );
-
-		totAmp.addBW(tmpNonRes, params.GetDoubleParameter("mag_"+name), params.GetDoubleParameter("phase_"+name));
-
-		double norm=1.0;
-		if(norm<0 || _calcNorm)	norm = normReso(tmpNonRes);
-		tmpNonRes->SetNormalization(1./norm);
-	}// end loop over resonancesFlatte
-
-	BOOST_LOG_TRIVIAL(info) << "AmpSumIntensity::init() | setting parameter g1_a_0 to "
-			<<params.GetDoubleParameter("g1_a_0")->GetValue();
-
-	BOOST_LOG_TRIVIAL(info)<<"AmpSumIntensity: completed setup!";
-}
-
-std::shared_ptr<FunctionTree> AmpSumIntensity::setupBasicTree(
-		allMasses& theMasses,allMasses& toyPhspSample,std::string suffix)
-{
-	BOOST_LOG_TRIVIAL(debug) << "AmpSumIntensity::setupBasicTree() generating new tree!";
-	if(theMasses.nEvents==0){
-		BOOST_LOG_TRIVIAL(error) << "AmpSumIntensity::setupBasicTree() data sample empty!";
-		return std::shared_ptr<FunctionTree>();
-	}
-	if(toyPhspSample.nEvents==0){
-		BOOST_LOG_TRIVIAL(error) << "AmpSumIntensity::setupBasicTree() toy sample empty!";
-		return std::shared_ptr<FunctionTree>();
-	}
-	DPKinematics::DalitzKinematics* kin = dynamic_cast<DPKinematics::DalitzKinematics*>(Kinematics::instance());
-	double phspVol = kin->getPhspVolume();
-
-	//------------Setup Tree---------------------
-	std::shared_ptr<FunctionTree> newTree(new FunctionTree());
-	//------------Setup Tree Pars---------------------
-	std::shared_ptr<MultiDouble> m23sq( new MultiDouble("m23sq",theMasses.masses_sq.at( std::make_pair(2,3) )) );
-	std::shared_ptr<MultiDouble> m13sq( new MultiDouble("m13sq",theMasses.masses_sq.at( std::make_pair(1,3) )) );
-	std::shared_ptr<MultiDouble> m12sq( new MultiDouble("m12sq",theMasses.masses_sq.at( std::make_pair(1,2) )) );
-	std::shared_ptr<MultiDouble> m23sq_phsp( new MultiDouble("m23sq_phsp",toyPhspSample.masses_sq.at( std::make_pair(2,3) )) );
-	std::shared_ptr<MultiDouble> m13sq_phsp( new MultiDouble("m13sq_phsp",toyPhspSample.masses_sq.at( std::make_pair(1,3) )) );
-	std::shared_ptr<MultiDouble> m12sq_phsp( new MultiDouble("m12sq_phsp",toyPhspSample.masses_sq.at( std::make_pair(1,2) )) );
-
-	//----Strategies needed
-	std::shared_ptr<MultAll> mmultStrat(new MultAll(ParType::MCOMPLEX));
-	std::shared_ptr<MultAll> mmultDStrat(new MultAll(ParType::MDOUBLE));
-	std::shared_ptr<AddAll> maddStrat(new AddAll(ParType::MCOMPLEX));
-	std::shared_ptr<AbsSquare> msqStrat(new AbsSquare(ParType::MDOUBLE));
-	std::shared_ptr<LogOf> mlogStrat(new LogOf(ParType::MDOUBLE));
-	std::shared_ptr<MultAll> multStrat(new MultAll(ParType::COMPLEX));
-	std::shared_ptr<MultAll> multDStrat(new MultAll(ParType::DOUBLE));
-	std::shared_ptr<AddAll> addStrat(new AddAll(ParType::DOUBLE));
-	std::shared_ptr<AddAll> addComplexStrat(new AddAll(ParType::COMPLEX));
-	std::shared_ptr<AbsSquare> sqStrat(new AbsSquare(ParType::DOUBLE));
-	std::shared_ptr<LogOf> logStrat(new LogOf(ParType::DOUBLE));
-	std::shared_ptr<Complexify> complStrat(new Complexify(ParType::COMPLEX));
-	std::shared_ptr<Inverse> invStrat(new Inverse(ParType::DOUBLE));
-	std::shared_ptr<SquareRoot> sqRootStrat(new SquareRoot(ParType::DOUBLE));
-
-	newTree->createHead("Amplitude"+suffix, maddStrat, theMasses.nEvents);
-
-	//----Adding Non Resonant
-	for(std::vector<basicConf>::iterator reso=ampSetup.getNonRes().begin();
-			reso!=ampSetup.getNonRes().end(); reso++){
-		basicConf tmp = (*reso);
-		std::string name = tmp.m_name;
-		if(!tmp.m_enable) continue;
-		BOOST_LOG_TRIVIAL(info) << "AmpSumIntensity::setupBasicTree() adding "<<tmp.m_name<<" (non-resonant) to tree.";
-		std::shared_ptr<NonResonantStrategy> nonResStrat(new NonResonantStrategy(tmp.m_name,ParType::MCOMPLEX));
-
-		newTree->createNode("Reso_"+tmp.m_name, mmultStrat, "Amplitude"+suffix, theMasses.nEvents); //Reso=C*N*nonReso
-		newTree->createNode("C_"+tmp.m_name, complStrat, "Reso_"+tmp.m_name); //c=r*exp(phi)
-		newTree->createLeaf("Intens_"+tmp.m_name, params.GetDoubleParameter("mag_"+name), "C_"+tmp.m_name); //r
-		newTree->createLeaf("Phase_"+tmp.m_name, params.GetDoubleParameter("phase_"+name), "C_"+tmp.m_name); //phi
-
-		std::shared_ptr<MultiComplex> unitVec(
-				new MultiComplex("unit",std::vector<std::complex<double> >(theMasses.nEvents, std::complex<double>(1,0))) );
-
-		newTree->createLeaf("NonRes_"+tmp.m_name, unitVec, "Reso_"+tmp.m_name); //nonReso
-		//adding nodes and leafs for calculation of normalization
-		if(_normStyle==normStyle::none){
-			newTree->createLeaf("N_"+tmp.m_name, 1., "Reso_"+tmp.m_name);
-		}else{
-			newTree->createNode("N_"+tmp.m_name, sqRootStrat, "Reso_"+tmp.m_name); //N = sqrt(NSq)
-			newTree->createNode("NSq_"+tmp.m_name, multDStrat, "N_"+tmp.m_name); //NSq = (PhspVolume/N_phspMC * Sum(|A|^2))^-1
-			newTree->createLeaf("PhspSize_"+tmp.m_name, toyPhspSample.nEvents, "NSq_"+tmp.m_name); // N_phspMC
-			newTree->createLeaf("PhspVolume_"+tmp.m_name, 1/phspVol, "NSq_"+tmp.m_name); // 1/PhspVolume
-			newTree->createNode("InvSum_"+tmp.m_name, invStrat, "NSq_"+tmp.m_name); //1/Sum(|A|^2)
-			newTree->createNode("Sum_"+tmp.m_name, addStrat, "InvSum_"+tmp.m_name); //Sum(|A|^2)
-			newTree->createNode("AbsVal_"+tmp.m_name, msqStrat, "Sum_"+tmp.m_name); //|A_i|^2
-			std::shared_ptr<MultiComplex> unitVec2(
-					new MultiComplex("unit",std::vector<std::complex<double> >(toyPhspSample.nEvents, std::complex<double>(1,0))) );
-			newTree->createLeaf("NormNonRes_"+tmp.m_name, unitVec2, "AbsVal_"+tmp.m_name); //BW
-		}
-	}
-
-	//----Adding Breit-Wigner
-	for(std::vector<BreitWignerConf>::iterator reso=ampSetup.getBreitWigner().begin();
-			reso!=ampSetup.getBreitWigner().end(); reso++){
-		BreitWignerConf tmp = (*reso);
-		std::string name = tmp.m_name;
-		if(!tmp.m_enable) continue;
-		BOOST_LOG_TRIVIAL(info) << "AmpSumIntensity::setupBasicTree() adding "<<tmp.m_name<<" (BW) to tree.";
-
-		//----Add Nodes
-		std::shared_ptr<BreitWignerStrategy> rbwStrat( new BreitWignerStrategy(tmp.m_name,ParType::MCOMPLEX) );
-		std::shared_ptr<BreitWignerPhspStrategy> rbwPhspStrat( new BreitWignerPhspStrategy(tmp.m_name,ParType::MCOMPLEX) );
-		std::shared_ptr<WignerDStrategy> angdStrat(	new WignerDStrategy(tmp.m_name,ParType::MDOUBLE) );
-
-		unsigned int subSys = tmp.m_daughterA + tmp.m_daughterB;
-		newTree->createNode("Reso_"+tmp.m_name, mmultStrat, "Amplitude"+suffix, theMasses.nEvents); //Reso=BW*C_*AD*N_
-		newTree->createNode("BW_"+tmp.m_name, mmultStrat , "Reso_"+tmp.m_name, theMasses.nEvents); //BW
-		newTree->createNode("RelBW_"+tmp.m_name, rbwStrat, "BW_"+tmp.m_name, theMasses.nEvents); //BW
-		newTree->createNode("C_"+tmp.m_name, complStrat, "Reso_"+tmp.m_name); //m0c
-		newTree->createLeaf("Intens_"+tmp.m_name, params.GetDoubleParameter("mag_"+name), "C_"+tmp.m_name); //r
-		newTree->createLeaf("Phase_"+tmp.m_name, params.GetDoubleParameter("phase_"+name), "C_"+tmp.m_name); //phi
-		newTree->createNode("AngD_"+tmp.m_name, angdStrat, "Reso_"+tmp.m_name, theMasses.nEvents); //AD
-
-		//Breit-Wigner
-		newTree->createLeaf("m0_"+tmp.m_name, params.GetDoubleParameter("m0_"+name), "RelBW_"+tmp.m_name); //m0
-		newTree->createLeaf("m23sq", m23sq, "RelBW_"+tmp.m_name); //ma
-		newTree->createLeaf("m13sq", m13sq, "RelBW_"+tmp.m_name); //mb
-		newTree->createLeaf("m12sq", m12sq, "RelBW_"+tmp.m_name); //mc
-		newTree->createLeaf("subSysFlag_"+tmp.m_name, subSys, "RelBW_"+tmp.m_name); //subSysFlag
-		newTree->createLeaf("spin_"+tmp.m_name, tmp.m_spin, "RelBW_"+tmp.m_name); //spin
-		newTree->createLeaf("d_"+tmp.m_name, params.GetDoubleParameter("d_"+name), "RelBW_"+tmp.m_name); //d
-		newTree->createLeaf("width_"+tmp.m_name, params.GetDoubleParameter("width_"+name), "RelBW_"+tmp.m_name); //resWidth
-		//Angular distribution
-		newTree->createLeaf("m23sq", m23sq, "AngD_"+tmp.m_name); //ma
-		newTree->createLeaf("m13sq", m13sq, "AngD_"+tmp.m_name); //mb
-		newTree->createLeaf("m12sq", m12sq, "AngD_"+tmp.m_name); //mc
-		newTree->createLeaf("M", kin->M, "AngD_"+tmp.m_name); //M
-		newTree->createLeaf("m1", kin->m1, "AngD_"+tmp.m_name); //m1
-		newTree->createLeaf("m2", kin->m2, "AngD_"+tmp.m_name); //m2
-		newTree->createLeaf("m3", kin->m3, "AngD_"+tmp.m_name); //m3
-		newTree->createLeaf("subSysFlag_"+tmp.m_name, subSys, "AngD_"+tmp.m_name); //subSysFlag
-		newTree->createLeaf("spin_"+tmp.m_name,tmp.m_spin, "AngD_"+tmp.m_name); //spin
-		newTree->createLeaf("m_"+tmp.m_name, tmp.m_m, "AngD_"+tmp.m_name); //OutSpin 1
-		newTree->createLeaf("n_"+tmp.m_name, tmp.m_n, "AngD_"+tmp.m_name); //OutSpin 2
-
-		//adding nodes and leafs for calculation of normalization
-		if(_normStyle==normStyle::none){
-			newTree->createLeaf("N_"+tmp.m_name, 1., "BW_"+tmp.m_name);
-		}else{
-			//Normalization parameter for dynamical amplitude
-			newTree->createNode("N_"+tmp.m_name, sqRootStrat, "BW_"+tmp.m_name); //N = sqrt(NSq)
-			newTree->createNode("NSq_"+tmp.m_name, multDStrat, "N_"+tmp.m_name); //NSq = (PhspVolume/N_phspMC * Sum(|A|^2))^-1
-			newTree->createLeaf("PhspSize_"+tmp.m_name, toyPhspSample.nEvents, "NSq_"+tmp.m_name); // N_phspMC
-			newTree->createLeaf("PhspVolume_"+tmp.m_name, 1/phspVol, "NSq_"+tmp.m_name); // 1/PhspVolume
-			newTree->createNode("InvSum_"+tmp.m_name, invStrat, "NSq_"+tmp.m_name); //1/Sum(|A|^2)
-			newTree->createNode("Sum_"+tmp.m_name, addStrat, "InvSum_"+tmp.m_name); //Sum(|A|^2)
-			newTree->createNode("AbsVal_"+tmp.m_name, msqStrat, "Sum_"+tmp.m_name); //|A_i|^2
-			//Breit-Wigner (Normalization)
-			newTree->createNode("NormBW_"+tmp.m_name, rbwPhspStrat, "AbsVal_"+tmp.m_name, toyPhspSample.nEvents); //BW
-			newTree->createLeaf("m0_"+tmp.m_name, params.GetDoubleParameter("m0_"+name), "NormBW_"+tmp.m_name); //m0
-			newTree->createLeaf("m23sq_phsp", m23sq_phsp, "NormBW_"+tmp.m_name); //ma
-			newTree->createLeaf("m13sq_phsp", m13sq_phsp, "NormBW_"+tmp.m_name); //mb
-			newTree->createLeaf("m12sq_phsp", m12sq_phsp, "NormBW_"+tmp.m_name); //mc
-			newTree->createLeaf("subSysFlag_"+tmp.m_name, subSys, "NormBW_"+tmp.m_name); //subSysFlag
-			newTree->createLeaf("spin_"+tmp.m_name, tmp.m_spin, "NormBW_"+tmp.m_name); //spin
-			newTree->createLeaf("d_"+tmp.m_name, params.GetDoubleParameter("d_"+name), "NormBW_"+tmp.m_name); //d
-			newTree->createLeaf("width_"+tmp.m_name, params.GetDoubleParameter("width_"+name), "NormBW_"+tmp.m_name); //resWidth
-		}
-		switch(subSys){
-		case 3:{ //reso in sys of particles 1&2
-			newTree->createLeaf("ma_"+tmp.m_name, kin->m1, "RelBW_"+tmp.m_name); //ma
-			newTree->createLeaf("mb_"+tmp.m_name, kin->m2, "RelBW_"+tmp.m_name); //mb
-			if(_normStyle!=normStyle::none){
-				newTree->createLeaf("ma_"+tmp.m_name, kin->m1, "NormBW_"+tmp.m_name); //ma
-				newTree->createLeaf("mb_"+tmp.m_name, kin->m2, "NormBW_"+tmp.m_name); //mb
-			}
-			break;
-		}
-		case 4:{ //reso in sys of particles 1&3
-			//newTree->createLeaf("mym_"+tmp.m_name, m13, "RelBW_"+tmp.m_name); //m
-			newTree->createLeaf("ma_"+tmp.m_name, kin->m1, "RelBW_"+tmp.m_name); //ma
-			newTree->createLeaf("mb_"+tmp.m_name, kin->m3, "RelBW_"+tmp.m_name); //mb
-			if(_normStyle!=normStyle::none){
-				newTree->createLeaf("ma_"+tmp.m_name, kin->m1, "NormBW_"+tmp.m_name); //ma
-				newTree->createLeaf("mb_"+tmp.m_name, kin->m3, "NormBW_"+tmp.m_name); //mb
-			}
-			break;
-		}
-		case 5:{ //reso in sys of particles 2&3
-			//newTree->createLeaf("mym_"+tmp.m_name, m23, "RelBW_"+tmp.m_name); //m
-			newTree->createLeaf("ma_"+tmp.m_name, kin->m2, "RelBW_"+tmp.m_name); //ma
-			newTree->createLeaf("mb_"+tmp.m_name, kin->m3, "RelBW_"+tmp.m_name); //mb
-			if(_normStyle!=normStyle::none){
-				newTree->createLeaf("ma_"+tmp.m_name, kin->m2, "NormBW_"+tmp.m_name); //ma
-				newTree->createLeaf("mb_"+tmp.m_name, kin->m3, "NormBW_"+tmp.m_name); //mb
-			}
-			break;
-		}
-		default:{
-			BOOST_LOG_TRIVIAL(error)<<"AmpSumIntensity::setupBasicTree(): Subsys not found!!";
-		}
-		}
-	}// end loop over resonances
-
-	for(std::vector<FlatteConf>::iterator reso=ampSetup.getFlatte().begin(); reso!=ampSetup.getFlatte().end(); reso++){
-		FlatteConf tmp = (*reso);
-		std::string name = tmp.m_name;
-		if(!tmp.m_enable) continue;
-		BOOST_LOG_TRIVIAL(info) << "AmpSumIntensity::setupBasicTree() adding "<<tmp.m_name<<" (Flatte) to tree.";
-
-		//----Add Nodes
-		std::shared_ptr<FlatteStrategy> flatteStrat(new FlatteStrategy(tmp.m_name,ParType::MCOMPLEX));
-		std::shared_ptr<FlattePhspStrategy> flattePhspStrat(new FlattePhspStrategy(tmp.m_name,ParType::MCOMPLEX));
-		std::shared_ptr<WignerDStrategy> angdStrat(	new WignerDStrategy(tmp.m_name,ParType::MDOUBLE) );
-
-		unsigned int subSys = tmp.m_daughterA + tmp.m_daughterB;
-		newTree->createNode("Reso_"+tmp.m_name, mmultStrat, "Amplitude"+suffix, theMasses.nEvents); //Reso=BW*C_*AD*N_
-		newTree->createNode("Flatte_"+tmp.m_name, mmultStrat , "Reso_"+tmp.m_name, theMasses.nEvents); //BW
-		newTree->createNode("FlatteRes_"+tmp.m_name, flatteStrat, "Flatte_"+tmp.m_name, theMasses.nEvents); //BW
-		newTree->createNode("C_"+tmp.m_name, complStrat, "Reso_"+tmp.m_name); //c
-		newTree->createLeaf("Intens_"+tmp.m_name, params.GetDoubleParameter("mag_"+name), "C_"+tmp.m_name); //r
-		newTree->createLeaf("Phase_"+tmp.m_name, params.GetDoubleParameter("phase_"+name), "C_"+tmp.m_name); //phi
-		newTree->createNode("AngD_"+tmp.m_name, angdStrat, "Reso_"+tmp.m_name, theMasses.nEvents); //AD
-
-		//Flatte
-		newTree->createLeaf("m0_"+tmp.m_name, params.GetDoubleParameter("m0_"+name), "FlatteRes_"+tmp.m_name); //m0
-		newTree->createLeaf("m23sq", m23sq, "FlatteRes_"+tmp.m_name); //ma
-		newTree->createLeaf("m13sq", m13sq, "FlatteRes_"+tmp.m_name); //mb
-		newTree->createLeaf("m12sq", m12sq, "FlatteRes_"+tmp.m_name); //mc
-		newTree->createLeaf("subSysFlag_"+tmp.m_name, subSys, "FlatteRes_"+tmp.m_name); //subSysFlag
-		newTree->createLeaf("spin_"+tmp.m_name, tmp.m_spin, "FlatteRes_"+tmp.m_name); //spin
-		newTree->createLeaf("mesonRadius_"+tmp.m_name, tmp.m_mesonRadius, "FlatteRes_"+tmp.m_name); //resonance radius
-		newTree->createLeaf("d_"+tmp.m_name, params.GetDoubleParameter("d_"+name) , "FlatteRes_"+tmp.m_name); //d
-		newTree->createLeaf("mHiddenA_"+tmp.m_name, \
-		    ComPWA::PhysConst::Instance().findParticle(tmp.m_g2_part1).mass_, "FlatteRes_"+tmp.m_name);
-		newTree->createLeaf("mHiddenB_"+tmp.m_name, \
-		    ComPWA::PhysConst::Instance().findParticle(tmp.m_g2_part2).mass_, "FlatteRes_"+tmp.m_name);
-		if(tmp.m_name.find("a_0") != tmp.m_name.npos)
-			newTree->createLeaf("g1_a_0", params.GetDoubleParameter("g1_a_0"), "FlatteRes_"+tmp.m_name);//use global parameter g1_a0 (asdfef)
-		else
-			newTree->createLeaf("g1_"+tmp.m_name, params.GetDoubleParameter("g1_"+name), "FlatteRes_"+tmp.m_name);//use local parameter g1_a0
-		newTree->createLeaf("g2_"+tmp.m_name, params.GetDoubleParameter("g2_"+name), "FlatteRes_"+tmp.m_name);
-		//Angular distribution
-		newTree->createLeaf("m23sq", m23sq, "AngD_"+tmp.m_name); //ma
-		newTree->createLeaf("m13sq", m13sq, "AngD_"+tmp.m_name); //mb
-		newTree->createLeaf("m12sq", m12sq, "AngD_"+tmp.m_name); //mc
-		newTree->createLeaf("M", kin->M, "AngD_"+tmp.m_name); //M
-		newTree->createLeaf("m1", kin->m1, "AngD_"+tmp.m_name); //m1
-		newTree->createLeaf("m2", kin->m2, "AngD_"+tmp.m_name); //m2
-		newTree->createLeaf("m3", kin->m3, "AngD_"+tmp.m_name); //m3
-		newTree->createLeaf("subSysFlag_"+tmp.m_name, subSys, "AngD_"+tmp.m_name); //subSysFlag
-		newTree->createLeaf("spin_"+tmp.m_name,tmp.m_spin, "AngD_"+tmp.m_name); //spin
-		newTree->createLeaf("m_"+tmp.m_name, tmp.m_m, "AngD_"+tmp.m_name); //OutSpin 1
-		newTree->createLeaf("n_"+tmp.m_name, tmp.m_n, "AngD_"+tmp.m_name); //OutSpin 2
-
-		//Normalization
-		if(_normStyle!=normStyle::none){
-			newTree->createNode("N_"+tmp.m_name, sqRootStrat, "Flatte_"+tmp.m_name); //N = sqrt(NSq)
-			newTree->createNode("NSq_"+tmp.m_name, multDStrat, "N_"+tmp.m_name); //NSq = N_phspMC * 1/PhspVolume * 1/Sum(|A|^2)
-			newTree->createLeaf("PhspSize_"+tmp.m_name, toyPhspSample.nEvents, "NSq_"+tmp.m_name); // N_phspMC
-			newTree->createLeaf("PhspVolume_"+tmp.m_name, 1/phspVol, "NSq_"+tmp.m_name); // 1/PhspVolume
-			newTree->createNode("InvSum_"+tmp.m_name, invStrat, "NSq_"+tmp.m_name); //1/Sum(|A|^2)
-			newTree->createNode("Sum_"+tmp.m_name, addStrat, "InvSum_"+tmp.m_name); //Sum(|A|^2)
-			newTree->createNode("AbsVal_"+tmp.m_name, msqStrat, "Sum_"+tmp.m_name); //|A_i|^2
-			newTree->createNode("NormFlatte_"+tmp.m_name, flattePhspStrat, "AbsVal_"+tmp.m_name, toyPhspSample.nEvents); //BW
-			//Flatte (Normalization)
-			newTree->createLeaf("m0_"+tmp.m_name, params.GetDoubleParameter("m0_"+name), "NormFlatte_"+tmp.m_name); //m0
-			newTree->createLeaf("m23sq_phsp", m23sq_phsp, "NormFlatte_"+tmp.m_name); //ma
-			newTree->createLeaf("m13sq_phsp", m13sq_phsp, "NormFlatte_"+tmp.m_name); //mb
-			newTree->createLeaf("m12sq_phsp", m12sq_phsp, "NormFlatte_"+tmp.m_name); //mc
-			newTree->createLeaf("subSysFlag_"+tmp.m_name, subSys, "NormFlatte_"+tmp.m_name); //subSysFlag
-			newTree->createLeaf("spin_"+tmp.m_name, tmp.m_spin, "NormFlatte_"+tmp.m_name); //spin
-			newTree->createLeaf("mesonRadius_"+tmp.m_name, tmp.m_mesonRadius, "NormFlatte_"+tmp.m_name); //spin
-			newTree->createLeaf("d_"+tmp.m_name,  params.GetDoubleParameter("d_"+name), "NormFlatte_"+tmp.m_name); //d
-			newTree->createLeaf("mHiddenA_"+tmp.m_name, \
-			    ComPWA::PhysConst::Instance().findParticle(tmp.m_g2_part1).mass_, "NormFlatte_"+tmp.m_name);
-			newTree->createLeaf("mHiddenB_"+tmp.m_name, \
-			    ComPWA::PhysConst::Instance().findParticle(tmp.m_g2_part2).mass_, "NormFlatte_"+tmp.m_name);
-			if(tmp.m_name.find("a_0(980)") != tmp.m_name.npos)
-				newTree->createLeaf("g1_a_0", params.GetDoubleParameter("g1_a_0"), "NormFlatte_"+tmp.m_name);//use global parameter g1_a0 (asdfef)
-			else
-				newTree->createLeaf("g1_"+tmp.m_name, params.GetDoubleParameter("g1_"+name), "NormFlatte_"+tmp.m_name);//use local parameter g1_a0
-			newTree->createLeaf("g2_"+tmp.m_name, params.GetDoubleParameter("g2_"+name), "NormFlatte_"+tmp.m_name);
-		} else {
-			newTree->createLeaf("N_"+tmp.m_name, 1., "Flatte_"+tmp.m_name);
-		}
-
-		switch(subSys){
-		case 3:{ //reso in sys of particles 1&2
-			//newTree->createLeaf("mym_"+tmp.m_name, m12, "RelBW_"+tmp.m_name); //m
-			newTree->createLeaf("ma_"+tmp.m_name, kin->m1, "FlatteRes_"+tmp.m_name); //ma
-			newTree->createLeaf("mb_"+tmp.m_name, kin->m2, "FlatteRes_"+tmp.m_name); //mb
-			if(_normStyle!=normStyle::none){
-				newTree->createLeaf("ma_"+tmp.m_name, kin->m1, "NormFlatte_"+tmp.m_name); //ma
-				newTree->createLeaf("mb_"+tmp.m_name, kin->m2, "NormFlatte_"+tmp.m_name); //mb
-			}
-			break;
-		}
-		case 4:{ //reso in sys of particles 1&3
-			//newTree->createLeaf("mym_"+tmp.m_name, m13, "FlatteRes_"+tmp.m_name); //m
-			newTree->createLeaf("ma_"+tmp.m_name, kin->m1, "FlatteRes_"+tmp.m_name); //ma
-			newTree->createLeaf("mb_"+tmp.m_name, kin->m3, "FlatteRes_"+tmp.m_name); //mb
-			if(_normStyle!=normStyle::none){
-				newTree->createLeaf("ma_"+tmp.m_name, kin->m1, "NormFlatte_"+tmp.m_name); //ma
-				newTree->createLeaf("mb_"+tmp.m_name, kin->m3, "NormFlatte_"+tmp.m_name); //mb
-			}
-			break;
-		}
-		case 5:{ //reso in sys of particles 2&3
-			//newTree->createLeaf("mym_"+tmp.m_name, m23, "FlatteRes_"+tmp.m_name); //m
-			newTree->createLeaf("ma_"+tmp.m_name, kin->m2, "FlatteRes_"+tmp.m_name); //ma
-			newTree->createLeaf("mb_"+tmp.m_name, kin->m3, "FlatteRes_"+tmp.m_name); //mb
-			if(_normStyle!=normStyle::none){
-				newTree->createLeaf("ma_"+tmp.m_name, kin->m2, "NormFlatte_"+tmp.m_name); //ma
-				newTree->createLeaf("mb_"+tmp.m_name, kin->m3, "NormFlatte_"+tmp.m_name); //mb
-			}
-			break;
-		}
-		default:{
-			BOOST_LOG_TRIVIAL(error)<<"AmpSumIntensity::setupBasicTree(): Subsys not found!!";
-		}
-		}
-	}
-	for(std::vector<Flatte3ChConf>::iterator reso=ampSetup.getFlatte3Ch().begin(); reso!=ampSetup.getFlatte3Ch().end(); reso++){
-		Flatte3ChConf tmp = (*reso);
-		std::string name = tmp.m_name;
-		if(!tmp.m_enable) continue;
-		BOOST_LOG_TRIVIAL(info) << "AmpSumIntensity::setupBasicTree() adding "<<tmp.m_name<<" (Flatte3Ch) to tree.";
-
-		//----Add Nodes
-		std::shared_ptr<Flatte3ChStrategy> flatteStrat(new Flatte3ChStrategy(tmp.m_name,ParType::MCOMPLEX));
-		std::shared_ptr<Flatte3ChPhspStrategy> flattePhspStrat(new Flatte3ChPhspStrategy(tmp.m_name,ParType::MCOMPLEX));
-		std::shared_ptr<WignerDStrategy> angdStrat(	new WignerDStrategy(tmp.m_name,ParType::MDOUBLE) );
-
-		unsigned int subSys = tmp.m_daughterA + tmp.m_daughterB;
-		newTree->createNode("Reso_"+tmp.m_name, mmultStrat, "Amplitude"+suffix, theMasses.nEvents); //Reso=BW*C_*AD*N_
-		newTree->createNode("Flatte_"+tmp.m_name, mmultStrat , "Reso_"+tmp.m_name, theMasses.nEvents); //BW
-		newTree->createNode("FlatteRes_"+tmp.m_name, flatteStrat, "Flatte_"+tmp.m_name, theMasses.nEvents); //BW
-		newTree->createNode("C_"+tmp.m_name, complStrat, "Reso_"+tmp.m_name); //c
-		newTree->createLeaf("Intens_"+tmp.m_name, params.GetDoubleParameter("mag_"+name), "C_"+tmp.m_name); //r
-		newTree->createLeaf("Phase_"+tmp.m_name, params.GetDoubleParameter("phase_"+name), "C_"+tmp.m_name); //phi
-		newTree->createNode("AngD_"+tmp.m_name, angdStrat, "Reso_"+tmp.m_name, theMasses.nEvents); //AD
-
-		//Flatte
-		newTree->createLeaf("m0_"+tmp.m_name, params.GetDoubleParameter("m0_"+name), "FlatteRes_"+tmp.m_name); //m0
-		newTree->createLeaf("m23sq", m23sq, "FlatteRes_"+tmp.m_name); //ma
-		newTree->createLeaf("m13sq", m13sq, "FlatteRes_"+tmp.m_name); //mb
-		newTree->createLeaf("m12sq", m12sq, "FlatteRes_"+tmp.m_name); //mc
-		newTree->createLeaf("subSysFlag_"+tmp.m_name, subSys, "FlatteRes_"+tmp.m_name); //subSysFlag
-		newTree->createLeaf("spin_"+tmp.m_name, tmp.m_spin, "FlatteRes_"+tmp.m_name); //spin
-		newTree->createLeaf("mesonRadius_"+tmp.m_name, tmp.m_mesonRadius, "FlatteRes_"+tmp.m_name); //resonance radius
-		newTree->createLeaf("d_"+tmp.m_name, params.GetDoubleParameter("d_"+name) , "FlatteRes_"+tmp.m_name); //d
-		if(tmp.m_name.find("a_0(980)") != tmp.m_name.npos)
-			newTree->createLeaf("g1_a_0", params.GetDoubleParameter("g1_a_0"), "FlatteRes_"+tmp.m_name);//use global parameter g1_a0 (asdfef)
-		else
-			newTree->createLeaf("g1_"+tmp.m_name, params.GetDoubleParameter("g1_"+name), "FlatteRes_"+tmp.m_name);//use local parameter g1_a0
-		newTree->createLeaf("massB1_"+tmp.m_name, \
-		    ComPWA::PhysConst::Instance().findParticle(tmp.m_g2_part1).mass_, "FlatteRes_"+tmp.m_name);
-		newTree->createLeaf("massB2_"+tmp.m_name, \
-		    ComPWA::PhysConst::Instance().findParticle(tmp.m_g2_part2).mass_, "FlatteRes_"+tmp.m_name);
-		if(tmp.m_name.find("a_0(980)") != tmp.m_name.npos)
-			newTree->createLeaf("g1_a_0", params.GetDoubleParameter("g1_a_0"), "FlatteRes_"+tmp.m_name);//use global parameter g1_a0 (asdfef)
-		else
-			newTree->createLeaf("g2_"+tmp.m_name, params.GetDoubleParameter("g2_"+name), "FlatteRes_"+tmp.m_name);
-		newTree->createLeaf("massC1_"+tmp.m_name, \
-		    ComPWA::PhysConst::Instance().findParticle(tmp.m_g3_part1).mass_, "FlatteRes_"+tmp.m_name);
-		newTree->createLeaf("massC2_"+tmp.m_name, \
-		    ComPWA::PhysConst::Instance().findParticle(tmp.m_g3_part2).mass_, "FlatteRes_"+tmp.m_name);
-		newTree->createLeaf("g3_"+tmp.m_name, params.GetDoubleParameter("g3_"+name), "FlatteRes_"+tmp.m_name);
-		//Angular distribution
-		newTree->createLeaf("m23sq", m23sq, "AngD_"+tmp.m_name); //ma
-		newTree->createLeaf("m13sq", m13sq, "AngD_"+tmp.m_name); //mb
-		newTree->createLeaf("m12sq", m12sq, "AngD_"+tmp.m_name); //mc
-		newTree->createLeaf("M", kin->M, "AngD_"+tmp.m_name); //M
-		newTree->createLeaf("m1", kin->m1, "AngD_"+tmp.m_name); //m1
-		newTree->createLeaf("m2", kin->m2, "AngD_"+tmp.m_name); //m2
-		newTree->createLeaf("m3", kin->m3, "AngD_"+tmp.m_name); //m3
-		newTree->createLeaf("subSysFlag_"+tmp.m_name, subSys, "AngD_"+tmp.m_name); //subSysFlag
-		newTree->createLeaf("spin_"+tmp.m_name,tmp.m_spin, "AngD_"+tmp.m_name); //spin
-		newTree->createLeaf("m_"+tmp.m_name, tmp.m_m, "AngD_"+tmp.m_name); //OutSpin 1
-		newTree->createLeaf("n_"+tmp.m_name, tmp.m_n, "AngD_"+tmp.m_name); //OutSpin 2
-
-		//Normalization
-		if(_normStyle!=normStyle::none){
-			newTree->createNode("N_"+tmp.m_name, sqRootStrat, "Flatte_"+tmp.m_name); //N = sqrt(NSq)
-			newTree->createNode("NSq_"+tmp.m_name, multDStrat, "N_"+tmp.m_name); //NSq = N_phspMC * 1/PhspVolume * 1/Sum(|A|^2)
-			newTree->createLeaf("PhspSize_"+tmp.m_name, toyPhspSample.nEvents, "NSq_"+tmp.m_name); // N_phspMC
-			newTree->createLeaf("PhspVolume_"+tmp.m_name, 1/phspVol, "NSq_"+tmp.m_name); // 1/PhspVolume
-			newTree->createNode("InvSum_"+tmp.m_name, invStrat, "NSq_"+tmp.m_name); //1/Sum(|A|^2)
-			newTree->createNode("Sum_"+tmp.m_name, addStrat, "InvSum_"+tmp.m_name); //Sum(|A|^2)
-			newTree->createNode("AbsVal_"+tmp.m_name, msqStrat, "Sum_"+tmp.m_name); //|A_i|^2
-			newTree->createNode("NormFlatte_"+tmp.m_name, flattePhspStrat, "AbsVal_"+tmp.m_name, toyPhspSample.nEvents); //BW
-			//Flatte (Normalization)
-			newTree->createLeaf("m0_"+tmp.m_name, params.GetDoubleParameter("m0_"+name), "NormFlatte_"+tmp.m_name); //m0
-			newTree->createLeaf("m23sq_phsp", m23sq_phsp, "NormFlatte_"+tmp.m_name); //ma
-			newTree->createLeaf("m13sq_phsp", m13sq_phsp, "NormFlatte_"+tmp.m_name); //mb
-			newTree->createLeaf("m12sq_phsp", m12sq_phsp, "NormFlatte_"+tmp.m_name); //mc
-			newTree->createLeaf("subSysFlag_"+tmp.m_name, subSys, "NormFlatte_"+tmp.m_name); //subSysFlag
-			newTree->createLeaf("spin_"+tmp.m_name, tmp.m_spin, "NormFlatte_"+tmp.m_name); //spin
-			newTree->createLeaf("mesonRadius_"+tmp.m_name, tmp.m_mesonRadius, "NormFlatte_"+tmp.m_name); //spin
-			newTree->createLeaf("d_"+tmp.m_name,  params.GetDoubleParameter("d_"+name), "NormFlatte_"+tmp.m_name); //d
-			if(tmp.m_name.find("a_0(980)") != tmp.m_name.npos)
-				newTree->createLeaf("g1_a_0", params.GetDoubleParameter("g1_a_0"), "NormFlatte_"+tmp.m_name);//use global parameter g1_a0 (asdfef)
-			else
-				newTree->createLeaf("g1_"+tmp.m_name, params.GetDoubleParameter("g1_"+name), "NormFlatte_"+tmp.m_name);//use local parameter g1_a0
-			newTree->createLeaf("massB1_"+tmp.m_name, \
-			    ComPWA::PhysConst::Instance().findParticle(tmp.m_g2_part1).mass_, "NormFlatte_"+tmp.m_name);
-			newTree->createLeaf("massB2_"+tmp.m_name, \
-			    ComPWA::PhysConst::Instance().findParticle(tmp.m_g2_part2).mass_, "NormFlatte_"+tmp.m_name);
-			if(tmp.m_name.find("a_0(980)") != tmp.m_name.npos)
-				newTree->createLeaf("g1_a_0", params.GetDoubleParameter("g1_a_0"), "NormFlatte_"+tmp.m_name);//use global parameter g1_a0 (asdfef)
-			else
-				newTree->createLeaf("g2_"+tmp.m_name, params.GetDoubleParameter("g2_"+name), "NormFlatte_"+tmp.m_name);
-			newTree->createLeaf("massC1_"+tmp.m_name, \
-			    ComPWA::PhysConst::Instance().findParticle(tmp.m_g3_part1).mass_, "NormFlatte_"+tmp.m_name);
-			newTree->createLeaf("massC2_"+tmp.m_name, \
-			    ComPWA::PhysConst::Instance().findParticle(tmp.m_g3_part2).mass_, "NormFlatte_"+tmp.m_name);
-			newTree->createLeaf("g3_"+tmp.m_name, params.GetDoubleParameter("g3_"+name), "NormFlatte_"+tmp.m_name);
-		} else {
-			newTree->createLeaf("N_"+tmp.m_name, 1., "Flatte_"+tmp.m_name);
-		}
-
-		switch(subSys){
-		case 3:{ //reso in sys of particles 1&2
-			//newTree->createLeaf("mym_"+tmp.m_name, m12, "RelBW_"+tmp.m_name); //m
-			newTree->createLeaf("ma_"+tmp.m_name, kin->m1, "FlatteRes_"+tmp.m_name); //ma
-			newTree->createLeaf("mb_"+tmp.m_name, kin->m2, "FlatteRes_"+tmp.m_name); //mb
-			if(_normStyle!=normStyle::none){
-				newTree->createLeaf("ma_"+tmp.m_name, kin->m1, "NormFlatte_"+tmp.m_name); //ma
-				newTree->createLeaf("mb_"+tmp.m_name, kin->m2, "NormFlatte_"+tmp.m_name); //mb
-			}
-			break;
-		}
-		case 4:{ //reso in sys of particles 1&3
-			//newTree->createLeaf("mym_"+tmp.m_name, m13, "FlatteRes_"+tmp.m_name); //m
-			newTree->createLeaf("ma_"+tmp.m_name, kin->m1, "FlatteRes_"+tmp.m_name); //ma
-			newTree->createLeaf("mb_"+tmp.m_name, kin->m3, "FlatteRes_"+tmp.m_name); //mb
-			if(_normStyle!=normStyle::none){
-				newTree->createLeaf("ma_"+tmp.m_name, kin->m1, "NormFlatte_"+tmp.m_name); //ma
-				newTree->createLeaf("mb_"+tmp.m_name, kin->m3, "NormFlatte_"+tmp.m_name); //mb
-			}
-			break;
-		}
-		case 5:{ //reso in sys of particles 2&3
-			//newTree->createLeaf("mym_"+tmp.m_name, m23, "FlatteRes_"+tmp.m_name); //m
-			newTree->createLeaf("ma_"+tmp.m_name, kin->m2, "FlatteRes_"+tmp.m_name); //ma
-			newTree->createLeaf("mb_"+tmp.m_name, kin->m3, "FlatteRes_"+tmp.m_name); //mb
-			if(_normStyle!=normStyle::none){
-				newTree->createLeaf("ma_"+tmp.m_name, kin->m2, "NormFlatte_"+tmp.m_name); //ma
-				newTree->createLeaf("mb_"+tmp.m_name, kin->m3, "NormFlatte_"+tmp.m_name); //mb
-			}
-			break;
-		}
-		default:{
-			BOOST_LOG_TRIVIAL(error)<<"AmpSumIntensity::setupBasicTree(): Subsys not found!!";
-		}
-		}
-	}
-
-	BOOST_LOG_TRIVIAL(debug)<<"AmpSumIntensity::setupBasicTree(): tree constructed!!";
-	return newTree;
-}
-
-void AmpSumIntensity::updateAmplitudeSetup(){
-	ampSetup.update(params);
+	result.AddParameter(
+			std::shared_ptr<DoubleParameter>(
+					new DoubleParameter("AmpSumResult")
+			)
+	);
 	return;
-};
+}
 
-double AmpSumIntensity::getMaxVal(std::shared_ptr<Generator> gen){
+//! Copy constructor
+AmpSumIntensity::AmpSumIntensity( const AmpSumIntensity& copy ) :
+					_maxFcnVal( copy._maxFcnVal ),
+					_calcMaxFcnVal( copy._calcMaxFcnVal ),
+					_normStyle( copy._normStyle ),
+					_nCalls( copy._nCalls)
+{
+	//Copy efficiency
+	eff_ = copy.eff_;
+
+	//Deep copy of resonances
+	auto it = copy.resoList.begin();
+	for( ; it != copy.resoList.end(); ++it){
+		resoList.push_back( std::shared_ptr<Resonance>( (*it)->Clone() ) );
+	}
+
+	//copy parameter list, but ensure that parameters are not added twice
+	int size = copy.params.GetNDouble();
+	for(unsigned int i=0; i<size; ++i){
+		bool found=0;
+		std::string name = copy.params.GetDoubleParameter(i)->GetName();
+		for(unsigned int j=0; j<params.GetNDouble(); ++j){
+			if(params.GetDoubleParameter(j)->GetName() == name) found = 1;
+		}
+		if( !found ) params.AddParameter( copy.params.GetDoubleParameter(i) );
+	}
+	std::shared_ptr<DoubleParameter> r = copy.result.GetDoubleParameter(0);
+	result.AddParameter(
+			std::shared_ptr<DoubleParameter>( new DoubleParameter(*r) )
+	);
+
+	//Check if memory addresses are different
+	//	std::cout<<(result.GetDoubleParameter(0).get())<<" "<<r.get()<<std::endl;
+}
+
+//! Clone function
+AmpSumIntensity* AmpSumIntensity::Clone(std::string newName) const
+{
+	auto tmp = (new AmpSumIntensity(*this));
+	if(newName != "")
+		tmp->SetName(newName);
+	return tmp;
+}
+
+//==========================================================
+//===================== OPERATORS ==========================
+//==========================================================
+/** Operator for coherent addition of amplitudes
+ *
+ * @param other
+ * @return
+ */
+const AmpSumIntensity AmpSumIntensity::operator+(const AmpSumIntensity& other) const
+{
+	AmpSumIntensity ret(*this);     // Make a copy of myself.
+	ret += other;            // Use += to add other to the copy.
+	return ret;
+}
+
+/** Operator for coherent addition of amplitudes
+ *
+ * @param rhs
+ * @return
+ */
+AmpSumIntensity& AmpSumIntensity::operator+=(const AmpSumIntensity& rhs) {
+	_name = _name+" + "+rhs._name;
+	resoList.insert(resoList.end(), rhs.resoList.begin(),rhs.resoList.end());
+	//    	params.insert(params.end(), rhs.params.begin(),rhs.params.begin());
+	_calcMaxFcnVal = 0;
+	if(_nCalls < rhs._nCalls) _nCalls = rhs._nCalls;
+	return *this;
+}
+
+//==========================================================
+//===================== LOAD/SAVE CONFIG ===================
+//==========================================================
+//! Configure resonance from ptree
+void AmpSumIntensity::Configure(const boost::property_tree::ptree &pt)
+{
+	BOOST_FOREACH( ptree::value_type const& v,
+			pt.get_child("amplitude_setup") ) {
+		/* We try to configure each type of resonance. In case that v.first does
+		 * not contain the correct string, a BadConfig is thrown. We catch it
+		 * and try the next type.
+		 */
+		try{
+			auto amp=new AmpRelBreitWignerRes(_normStyle, _nCalls);
+			amp->Configure(v,params);
+			resoList.push_back(std::shared_ptr<AmpAbsDynamicalFunction>(amp));
+			BOOST_LOG_TRIVIAL(debug) << "AmpSumIntensity::Configure() | "
+					"adding amplitude:"
+					<<std::endl<<amp->to_str();
+		} catch (BadConfig& ex) {}
+		try{
+			auto amp=new AmpFlatteRes(_normStyle, _nCalls);
+			amp->Configure(v,params);
+			resoList.push_back(std::shared_ptr<AmpAbsDynamicalFunction>(amp));
+			BOOST_LOG_TRIVIAL(debug) << "AmpSumIntensity::Configure() | "
+					"adding amplitude:"
+					<<std::endl<<amp->to_str();
+		} catch (BadConfig& ex) {}
+		try{
+			auto amp=new NonResonant(_normStyle, _nCalls);
+			amp->Configure(v,params);
+			resoList.push_back(std::shared_ptr<AmpAbsDynamicalFunction>(amp));
+			BOOST_LOG_TRIVIAL(debug) << "AmpSumIntensity::Configure() | "
+					"adding amplitude:"
+					<<std::endl<<amp->to_str();
+		} catch (BadConfig& ex) {}
+	}
+	BOOST_LOG_TRIVIAL(info) << "AmpSumIntensity::Configure() | "
+			"Loaded property tree!";
+	return;
+}
+
+//! Save resonance from to ptree
+void AmpSumIntensity::Save(std::string filePath)
+{
+	using boost::property_tree::ptree;
+	boost::property_tree::ptree ptSub, pt;
+
+	BOOST_LOG_TRIVIAL(info) << "AmpSumIntensity::Save() | "
+			"Save amplitude to "<<filePath<<"!";
+	auto it = resoList.begin();
+	for( ; it!= resoList.end(); ++it)
+		(dynamic_pointer_cast<AmpAbsDynamicalFunction>(*it))->Save(ptSub);
+
+	pt.add_child("amplitude_setup",ptSub);
+	//new line at the end
+	boost::property_tree::xml_writer_settings<char> settings('\t', 1);
+	// Write the property tree to the XML file.
+	write_xml(filePath, pt,std::locale(), settings);
+
+}
+
+//==========================================================
+//==================== PRINTING ============================
+//==========================================================
+void AmpSumIntensity::to_str()
+{
+	std::stringstream outStr;
+	outStr<<"AmpSumIntensity: Printing resonances:\n";
+	auto it = GetResonanceItrFirst();
+	for( ; it!=GetResonanceItrLast(); ++it)
+		outStr << (*it)->to_str();
+
+	BOOST_LOG_TRIVIAL(info)<<outStr.str();
+	return;
+}
+
+void AmpSumIntensity::printFractions()
+{
+	std::stringstream outStr;
+	outStr<<"Fit fractions for all amplitudes: \n";
+	double sumFrac=0;
+	auto it = GetResonanceItrFirst();
+	double norm = 1/integral(GetResonanceItrList(), 0, _nCalls);
+	for( ; it != GetResonanceItrLast(); ++it){
+		double frac = (*it)->GetMagnitude()*norm;
+		sumFrac+=frac;
+		outStr<<std::setw(10)<<(*it)->GetName()<<":    "<<frac<<"\n";
+	}
+
+	outStr<<std::setw(10)<<" "<<"    ==========\n";
+	outStr<<std::setw(10)<<" "<<"     "<<sumFrac;
+	BOOST_LOG_TRIVIAL(info)<<outStr.str();
+	return;
+}
+
+double AmpSumIntensity::averageWidth()
+{
+	double avWidth = 0;
+	double sum = 0;
+	for(int i=0; i<resoList.size(); i++){
+		avWidth += std::norm(resoList.at(i)->GetMagnitude())*resoList.at(i)->GetWidth();
+		sum += std::norm(resoList.at(i)->GetMagnitude());
+	}
+	avWidth /= sum;
+	return avWidth;
+}
+
+void AmpSumIntensity::SetPrefactor(std::complex<double> pre)
+{
+	BOOST_LOG_TRIVIAL(info) <<"AmpSumIntensity::SetPreFactor() | "
+			"Setting prefactor "<<pre<<" for all resonance of amplitude "
+			<<GetName()<<"!";
+
+	auto it=resoList.begin();
+	for( ; it!=resoList.end(); ++it)
+		(*it)->SetPrefactor(pre);
+}
+
+double AmpSumIntensity::GetMaxVal(std::shared_ptr<Generator> gen)
+{
 	if(!_calcMaxFcnVal) calcMaxVal(gen);
 	return _maxFcnVal;
 }
 
-double AmpSumIntensity::getMaxVal(ParameterList& par, std::shared_ptr<Generator> gen){
-	calcMaxVal(par,gen);
-	return _maxFcnVal;
-}
-
-void AmpSumIntensity::calcMaxVal(ParameterList& par, std::shared_ptr<Generator> gen){
-	setParameterList(par);
-	return calcMaxVal(gen);
-}
-
-void AmpSumIntensity::calcMaxVal(std::shared_ptr<Generator> gen){
-  DPKinematics::DalitzKinematics* kin = dynamic_cast<DPKinematics::DalitzKinematics*>(Kinematics::instance());
+void AmpSumIntensity::calcMaxVal(std::shared_ptr<Generator> gen)
+{
+	ComPWA::Physics::DPKinematics::DalitzKinematics* kin =
+			dynamic_cast<ComPWA::Physics::DPKinematics::DalitzKinematics*>(
+					Kinematics::instance()
+	);
 
 	double maxM23=-999; double maxM13=-999; double maxVal=0;
 	for(unsigned int i=0; i<_nCalls; i++){
-		double m23sq=gen->getUniform()*(kin->m23_sq_max-kin->m23_sq_min)+kin->m23_sq_min;
-		double m13sq=gen->getUniform()*(kin->m13_sq_max-kin->m13_sq_min)+kin->m13_sq_min;
-		//		dataPoint point; point.setVal("m13sq",m13sq); point.setVal("m23sq",m23sq);
-		dataPoint point; point.setVal(1,m13sq); point.setVal(0,m23sq);
-		if( !kin->isWithinPhsp(point) ) { if(i>0) i--; continue; }//only integrate over phase space
+		auto m13sq_limit = kin->GetMinMax(1);
+		auto m23sq_limit = kin->GetMinMax(0);
+
+		double m23sq = gen->getUniform()*(m23sq_limit.second-m23sq_limit.first)
+									+m23sq_limit.first;
+		double m13sq = gen->getUniform()*(m13sq_limit.second-m13sq_limit.first)
+									+m13sq_limit.first;
+		dataPoint point;
+		try{
+			Kinematics::instance()->FillDataPoint(1,0,m13sq,m23sq,point);
+		} catch (BeyondPhsp& ex){
+			if(i>0) i--;
+			continue;
+		}
 		ParameterList res = intensity(point);
 		double intens = *res.GetDoubleParameter(0);
 		if(intens>maxVal) {
@@ -732,256 +280,255 @@ void AmpSumIntensity::calcMaxVal(std::shared_ptr<Generator> gen){
 	}
 	_maxFcnVal=maxVal;
 	_calcMaxFcnVal=1;
-	BOOST_LOG_TRIVIAL(info)<<"AmpSumIntensity::calcMaxVal() calculated maximum of amplitude: "
+	BOOST_LOG_TRIVIAL(info)<<"AmpSumIntensity::calcMaxVal() | "
+			"calculated maximum of amplitude: "
 			<<_maxFcnVal<<" at m23sq="<<maxM23<<"/m13sq="<<maxM13;
 	return ;
 }
-double AmpSumIntensity::normReso(std::shared_ptr<AmpAbsDynamicalFunction> amp){
-	double norm;
-	if(_normStyle==none) norm=amp->GetNormalization();
-	else if(_normStyle==one) norm = sqrt(amp->integral(_nCalls));
-	BOOST_LOG_TRIVIAL(debug)<<"AmpSumIntensity::normRes Normalization constant for "
-			<<amp->GetName()<<": "<<1.0/norm;
-	return norm;
+
+//=============================================================
+//==================== NORMALIZATION/INTEGRATION ==============
+//=============================================================
+const double AmpSumIntensity::GetIntegral()
+{
+	return GetIntegral(GetResonanceItrList());
 }
-double AmpSumIntensity::evaluate(double x[], size_t dim) {
+
+const double AmpSumIntensity::GetIntegral(std::vector<resonanceItr> resoList)
+{
+	return AmpSumIntensity::integral(
+			resoList,
+			0, //efficiency not included
+			_nCalls
+	);
+}
+
+const double AmpSumIntensity::GetNormalization()
+{
+	double res = AmpSumIntensity::integral(
+			GetResonanceItrList(),
+			GetEfficiency(),
+			_nCalls
+	);
+
+	//check for NaN
+	if( res!=res )
+		throw std::runtime_error("AmpSumIntensity::normalization() |"
+				"Result of amplitude "+GetName()+" is NaN!");
+	//check for inf
+	if( std::isinf(res) )
+		throw std::runtime_error("AmpSumIntensity::normalization() |"
+				"Result of amplitude "+GetName()+" is inf!");
+	//check for zero
+	if( res == 0 )
+		throw std::runtime_error("AmpSumIntensity::normalization() |"
+				"Result of amplitude "+GetName()+" is zero!");
+
+	return res;
+}
+
+struct GSLOpt_integral
+{
+	std::vector<resonanceItr> resList;
+	std::shared_ptr<Efficiency> eff;
+};
+
+double GSLWrapper_integral(double* x, size_t dim, void* param)
+{
+	/* Calculation amplitude normalization (including efficiency).
+	 * We can not used (invmass, angle) for integration since the full point
+	 * has to be calculated.*/
+
+	if(dim!=2) return 0;
+
+	dataPoint point;
+
+	try{
+		Kinematics::instance()->FillDataPoint(0,1,x[0],x[1],point);
+	} catch (BeyondPhsp& ex){
+		return 0;
+	}
+
+	GSLOpt_integral* opt = static_cast<GSLOpt_integral*>(param);
+	std::vector<resonanceItr> resList = opt->resList;
+	std::shared_ptr<Efficiency> eff = opt->eff;
+
+	std::complex<double> sum(0,0);
+	auto it = resList.begin();
+	for( ; it!=resList.end(); ++it){
+		std::complex<double> val = (*(*it))->Evaluate(point);
+		sum += val;
+	}
+	double pointEff = 1.0;
+	if(eff) pointEff = eff->evaluate(point);
+	return std::norm(sum)*pointEff;
+}
+
+double AmpSumIntensity::integral(std::vector<resonanceItr> resList,
+		std::shared_ptr<Efficiency> eff, int nCalls)
+{
+	GSLOpt_integral par;
+	par.resList = resList;
+	par.eff = eff;
+
+	/* Integration functionality was tested with a model with only one
+	 * normalized amplitude. The integration result is equal to the
+	 * amplitude coefficient^2.
+	 */
+	size_t dim=2;
+	double res=0.0, err=0.0;
+
+	ComPWA::Physics::DPKinematics::DalitzKinematics* kin =
+			dynamic_cast<ComPWA::Physics::DPKinematics::DalitzKinematics*>(
+					Kinematics::instance()
+	);
+
+	//Set limits
+	auto var1_limit = kin->GetMinMax(0);
+	auto var2_limit = kin->GetMinMax(1);
+	double xLimit_low[2] = {var1_limit.first,var2_limit.first};
+	double xLimit_high[2] = {var1_limit.second,var2_limit.second};
+
+	gsl_rng_env_setup ();
+	const gsl_rng_type *T = gsl_rng_default; //type of random generator
+	gsl_rng *r = gsl_rng_alloc(T); //random generator
+
+	gsl_monte_function G = {
+			&GSLWrapper_integral,
+			dim,
+			&par
+	};
+
+	/*	Choosing vegas algorithm here, because it is the most accurate:
+	 * 		-> 10^5 calls gives (in my example) an accuracy of 0.03%
+	 * 		 this should be sufficiency for most applications
+	 */
+	gsl_monte_vegas_state *s = gsl_monte_vegas_alloc (dim);
+	gsl_monte_vegas_integrate (&G, xLimit_low, xLimit_high, dim, nCalls, r,s,&res, &err);
+	gsl_monte_vegas_free(s);
+
+	//check for NaN
+	if( res!=res )
+		throw std::runtime_error("AmpSumIntensity::integral() |"
+				"Result is NaN!");
+	//check for inf
+	if( std::isinf(res) )
+		throw std::runtime_error("AmpSumIntensity::integral() |"
+				"Result is inf!");
+
+	BOOST_LOG_TRIVIAL(debug)<<"AmpSumIntensity::integrate() | Integration result"
+			" for amplitude sum: "<<res<<"+-"<<err<<" relAcc [%]: "<<100*err/res;
+
+	return res;
+}
+
+
+double GSLWrapper_intfIntegral(double* x, size_t dim, void* param)
+{
 	/* Calculation amplitude integral (excluding efficiency) */
 	if(dim!=2) return 0;
-	DPKinematics::DalitzKinematics* kin = dynamic_cast<DPKinematics::DalitzKinematics*>(Kinematics::instance());
-	//set data point: we assume that x[0]=m13 and x[1]=m23
-	dataPoint point; point.setVal(1,x[0]); point.setVal(0,x[1]);
-	//	double m12sq = kin->getThirdVariableSq(x[0],x[1]);
-	if( !kin->isWithinPhsp(point) ) return 0;//only integrate over phase space
-	ParameterList res = intensityNoEff(point);
-	double intens = *res.GetDoubleParameter(0);
-	return intens;
+
+	dataPoint point;
+	try{
+		Kinematics::instance()->FillDataPoint(0,1,x[1],x[0],point);
+	} catch (BeyondPhsp& ex){
+		return 0;
+	}
+	GSLOpt_integral* opt = static_cast<GSLOpt_integral*>(param);
+	std::vector<resonanceItr> resList = opt->resList;
+	std::shared_ptr<Efficiency> eff = opt->eff;
+
+	double rm = 0;
+	std::complex<double> sum(0,0);
+	auto it = resList.begin();
+	for( ; it!=resList.end(); ++it){
+		std::complex<double> val = (*(*it))->Evaluate(point);
+		rm += std::norm(val);
+		sum += val;
+	}
+	double pointEff = 1.0;
+	if(eff) pointEff = eff->evaluate(point);
+	return (std::norm(sum) - rm )*pointEff;
 }
-double evalWrapperAmpSumIntensity(double* x, size_t dim, void* param) {
-	/* We need a wrapper here because intensity() is a member function of AmpAbsDynamicalFunction
-	 * and can therefore not be referenced. But gsl_monte_function expects a function reference.
-	 * As third parameter we pass the reference to the current instance of AmpAbsDynamicalFunction
-	 */
-	return static_cast<AmpSumIntensity*>(param)->evaluate(x,dim);
-};
-const double AmpSumIntensity::integral(ParameterList& par){
-	setParameterList(par);
-	return integral();
-}
-const double AmpSumIntensity::integral(){
-	/* Integration functionality was tested with a model with only one normalized amplitude.
-	 * The integration result is equal to the amplitude coefficient^2.
+
+const double AmpSumIntensity::GetIntegralInterference(
+		std::vector<resonanceItr> resList,
+		unsigned int nCalls)
+{
+	GSLOpt_integral par;
+	par.resList = resList;
+
+	/* Integration functionality was tested with a model with only one
+	 * normalized amplitude. The integration result is equal to the
+	 * amplitude coefficient^2.
 	 */
 	size_t dim=2;
 	double res=0.0, err=0.0;
 
 	//set limits: we assume that x[0]=m13sq and x[1]=m23sq
-	DPKinematics::DalitzKinematics* kin = dynamic_cast<DPKinematics::DalitzKinematics*>(Kinematics::instance());
-	double xLimit_low[2] = {kin->m13_sq_min,kin->m23_sq_min};
-	double xLimit_high[2] = {kin->m13_sq_max,kin->m23_sq_max};
-	//	double xLimit_low[2] = {0,0};
-	//	double xLimit_high[2] = {10,10};
+	ComPWA::Physics::DPKinematics::DalitzKinematics* kin =
+			dynamic_cast<ComPWA::Physics::DPKinematics::DalitzKinematics*>(
+					Kinematics::instance()
+	);
+
+	//Set limits
+	auto var1_limit = kin->GetMinMax(0);
+	auto var2_limit = kin->GetMinMax(1);
+	double xLimit_low[2] = {var1_limit.first,var2_limit.first};
+	double xLimit_high[2] = {var1_limit.second,var2_limit.second};
+
 	gsl_rng_env_setup ();
 	const gsl_rng_type *T = gsl_rng_default; //type of random generator
 	gsl_rng *r = gsl_rng_alloc(T); //random generator
-	gsl_monte_function G = {&evalWrapperAmpSumIntensity,dim, const_cast<AmpSumIntensity*> (this)};
+	gsl_monte_function G = {
+			&GSLWrapper_intfIntegral,
+			dim,
+			&par
+	};
 
 	/*	Choosing vegas algorithm here, because it is the most accurate:
 	 * 		-> 10^5 calls gives (in my example) an accuracy of 0.03%
 	 * 		 this should be sufficiency for most applications
 	 */
 	gsl_monte_vegas_state *s = gsl_monte_vegas_alloc (dim);
-	gsl_monte_vegas_integrate (&G, xLimit_low, xLimit_high, 2, _nCalls, r,s,&res, &err);
+	gsl_monte_vegas_integrate (&G, xLimit_low, xLimit_high, 2, nCalls, r,s,&res, &err);
 	gsl_monte_vegas_free(s);
-	//BOOST_LOG_TRIVIAL(info)<<"AmpSumIntensity::integrate() Integration result for amplitude sum: "<<res<<"+-"<<err<<" relAcc [%]: "<<100*err/res;
-
-	return res;
-}
-double AmpSumIntensity::evaluateEff(double x[], size_t dim) {
-	/* Calculation amplitude normalization (including efficiency) */
-	if(dim!=2) return 0;
-	DPKinematics::DalitzKinematics* kin = dynamic_cast<DPKinematics::DalitzKinematics*>(Kinematics::instance());
-	//set data point: we assume that x[0]=m13 and x[1]=m23
-	dataPoint point; point.setVal(1,x[0]); point.setVal(0,x[1]);
-	if( !kin->isWithinPhsp(point) ) return 0;//only integrate over phase space
-	ParameterList res = intensity(point);
-	double intens = *res.GetDoubleParameter(0);
-	return intens;
-}
-double evalWrapperAmpSumIntensityEff(double* x, size_t dim, void* param) {
-	/* We need a wrapper here because intensity() is a member function of AmpAbsDynamicalFunction
-	 * and can therefore not be referenced. But gsl_monte_function expects a function reference.
-	 * As third parameter we pass the reference to the current instance of AmpAbsDynamicalFunction
-	 */
-	return static_cast<AmpSumIntensity*>(param)->evaluateEff(x,dim);
-};
-
-const double AmpSumIntensity::normalization(ParameterList& par){
-	setParameterList(par);
-	return integral();
-}
-const double AmpSumIntensity::normalization(){
-	/* Integration functionality was tested with a model with only one normalized amplitude.
-	 * The integration result is equal to the amplitude coefficient^2.
-	 */
-	size_t dim=2;
-	double res=0.0, err=0.0;
-
-	//set limits: we assume that x[0]=m13sq and x[1]=m23sq
-	DPKinematics::DalitzKinematics* kin = dynamic_cast<DPKinematics::DalitzKinematics*>(Kinematics::instance());
-	double xLimit_low[2] = {kin->m13_sq_min,kin->m23_sq_min};
-	double xLimit_high[2] = {kin->m13_sq_max,kin->m23_sq_max};
-	//	double xLimit_low[2] = {0,0};
-	//	double xLimit_high[2] = {10,10};
-	gsl_rng_env_setup ();
-	const gsl_rng_type *T = gsl_rng_default; //type of random generator
-	gsl_rng *r = gsl_rng_alloc(T); //random generator
-	gsl_monte_function G = {&evalWrapperAmpSumIntensityEff,dim, const_cast<AmpSumIntensity*> (this)};
-
-	/*	Choosing vegas algorithm here, because it is the most accurate:
-	 * 		-> 10^5 calls gives (in my example) an accuracy of 0.03%
-	 * 		 this should be sufficiency for most applications
-	 */
-	gsl_monte_vegas_state *s = gsl_monte_vegas_alloc (dim);
-	gsl_monte_vegas_integrate (&G, xLimit_low, xLimit_high, 2, _nCalls, r,s,&res, &err);
-	gsl_monte_vegas_free(s);
-	BOOST_LOG_TRIVIAL(info)<<"AmpSumIntensity::normalization() Integration result for amplitude sum: "<<res<<"+-"<<err<<" relAcc [%]: "<<100*err/res;
 
 	return res;
 }
 
-std::complex<double> AmpSumIntensity::getFirstBW(dataPoint& point, ParameterList& par){
-	setParameterList(par);
-	return totAmp.getFirstBW(point);
+const double AmpSumIntensity::GetIntegralInterference(
+		resonanceItr A, resonanceItr B)
+{
+	std::vector<resonanceItr> par;
+	par.push_back(A);
+	par.push_back(B);
+	double val = GetIntegralInterference(par, _nCalls);
+	if (A == B) val /=2 ;
+	return val;
 }
 
-std::complex<double> AmpSumIntensity::getFirstReso(dataPoint& point, ParameterList& par){
-	setParameterList(par);
-	return totAmp.getFirstReso(point);
-}
-
-std::complex<double> AmpSumIntensity::getFirstAmp(dataPoint& point, ParameterList& par){
-	setParameterList(par);
-	return totAmp.getFirstAmp(point);
-}
-
-const double AmpSumIntensity::sliceIntensity(dataPoint& dataP, ParameterList& par,std::complex<double>* reso, unsigned int nResos, double N, unsigned int nF0, unsigned int nF2){
-    setParameterList(par);
-    //  dataPoint dataP; dataP.setVal("m23sq",point[0]); dataP.setVal("m13sq",point[1]);
-    //dataPoint dataP; dataP.setVal(0,point[0]); dataP.setVal(1,point[1]);
-
-    double AMPpdf=0;
-    if(Kinematics::instance()->isWithinPhsp(dataP)) AMPpdf = totAmp.evaluateSlice(dataP, reso, nResos,5, N, nF0, nF2);
-    if(AMPpdf!=AMPpdf){
-        BOOST_LOG_TRIVIAL(error)<<"Error AmpSumIntensity: Intensity is not a number!!";
-        AMPpdf = 0;
-    }
-    double eff=eff_->evaluate(dataP);
-    return AMPpdf*eff;
-}
-
-const ParameterList& AmpSumIntensity::intensity(std::vector<double> point, ParameterList& par){
-	setParameterList(par);
-	dataPoint dataP(point);
-	return intensity(dataP);
-}
-const ParameterList& AmpSumIntensity::intensity(const dataPoint& point, ParameterList& par){
-	setParameterList(par);
-	return intensity(point);
-}
-const ParameterList& AmpSumIntensity::intensityNoEff(const dataPoint& point){
-	double AMPpdf=0;
-	if(Kinematics::instance()->isWithinPhsp(point)) AMPpdf = totAmp.evaluate(point);
-
-	if(AMPpdf!=AMPpdf){
-		BOOST_LOG_TRIVIAL(error)<<"Error AmpSumIntensity: Intensity is not a number!!";
-		AMPpdf = 0;
-	}
-	result.SetParameterValue(0,AMPpdf);
-	return result;
-}
-const ParameterList& AmpSumIntensity::intensity(const dataPoint& point){
-	double AMPpdf=0;
-	if(Kinematics::instance()->isWithinPhsp(point)) AMPpdf = totAmp.evaluate(point);
-
-	if(AMPpdf!=AMPpdf){
-		BOOST_LOG_TRIVIAL(error)<<"Error AmpSumIntensity: Intensity is not a number!!";
-		AMPpdf = 0;
-	}
-	double eff=eff_->evaluate(point);
-	result.SetParameterValue(0,AMPpdf*eff);
-	return result;
-
-}
-
-void AmpSumIntensity::setParameterList(const ParameterList& par){
-	//parameters varied by Minimization algorithm
-	if(par.GetNDouble()!=params.GetNDouble())
-		throw std::runtime_error("setParameterList(): size of parameter lists don't match");
-	//Should we compared the parameter names? String comparison is slow
-	for(unsigned int i=0; i<params.GetNDouble(); i++)
-		params.GetDoubleParameter(i)->UpdateParameter(par.GetDoubleParameter(i));
-	return;
-}
-bool AmpSumIntensity::copyParameterList(ParameterList& outPar){
-	outPar = ParameterList(params);
-	return true;
-}
-
-void AmpSumIntensity::printAmps(){
-	std::stringstream outStr;
-	outStr<<"AmpSumIntensity: Printing amplitudes with current(!) set of parameters:\n";
-	unsigned int n=0;
-	for(unsigned int i=0; i<params.GetNDouble(); i++){
-		std::shared_ptr<DoubleParameter> p = params.GetDoubleParameter(i);
-		std::string tmp = p->GetName();
-		std::size_t found = tmp.find("mag");
-		if(found!=std::string::npos){
-			outStr<<"-------- "<<totAmp.getAmpName(n)<<" ---------\n";
-			n++;
-		}
-		outStr<<p->GetName()<<" = "<<p->GetValue();
-		if(p->HasError())
-			outStr<<"+-"<<p->GetError();
-		if(p->HasBounds())
-			outStr<<" ["<<p->GetMinValue()<<";"<<p->GetMaxValue()<<"]";
-		if(p->IsFixed())
-			outStr<<" FIXED";
-		outStr<<"\n";
-	}
-
-	BOOST_LOG_TRIVIAL(info)<<outStr.str();
-	return;
-}
-void AmpSumIntensity::printFractions(){
-	std::stringstream outStr;
-	outStr<<"Fit fractions for all amplitudes: \n";
-	double sumFrac=0;
-	for(unsigned int i=0;i<totAmp.getNumberOfResonances();i++){
-		double frac = getAmpFraction(i);
-		sumFrac+=frac;
-		outStr<<std::setw(10)<<totAmp.getAmpName(i)<<":    "<<frac<<"\n";
-		//		if(!(i==totAmp.getNAmps()-1)) outStr << "\n";
-	}
-	outStr<<std::setw(10)<<" "<<"    ==========\n";
-	outStr<<std::setw(10)<<" "<<"     "<<sumFrac;
-	BOOST_LOG_TRIVIAL(info)<<outStr.str();
-	return;
-}
-
-double AmpSumIntensity::getIntValue(std::string var1, double min1, double max1, std::string var2, double min2, double max2){
+double AmpSumIntensity::GetIntValue(std::string var1, double min1, double max1,
+		std::string var2, double min2, double max2)
+{
+	GSLOpt_integral par;
+	par.resList = GetResonanceItrList();
+	par.eff = GetEfficiency();
 	/*
 	 * Integrates in \var1 from \min1 to \max1 and in \var2 from \min2 to \max2.
 	 * Is intended to be used for calculation of bin content.
 	 */
-  DPKinematics::DalitzKinematics* kin = dynamic_cast<DPKinematics::DalitzKinematics*>(Kinematics::instance());
+	DPKinematics::DalitzKinematics* kin =
+			dynamic_cast<DPKinematics::DalitzKinematics*>(Kinematics::instance());
 	double _min1 = min1;
 	double _min2 = min2;
 	double _max1 = max1;
 	double _max2 = max2;
 	//if(_min1==0) _min1 = kin->GetMin(var1);
 	//if(_max1==0) _min1 = kin->GetMax(var1);
-	if(_min2==0) _min2 = kin->getMin(var2);
-	if(_max2==0) _max2 = kin->getMax(var2);
+	auto limit2 = kin->GetMinMax(var2);
+	if(_min2==0) _min2 = limit2.first;
+	if(_max2==0) _max2 = limit2.second;
 	unsigned int dim=2;
 	double res=0.0, err=0.0;
 
@@ -1000,7 +547,8 @@ double AmpSumIntensity::getIntValue(std::string var1, double min1, double max1, 
 		xLimit_high[0] = _max2;
 		xLimit_high[1] = _max1;
 	} else {
-		BOOST_LOG_TRIVIAL(error) << "AmpSumIntensity::getIntValue() wrong variables specified!";
+		BOOST_LOG_TRIVIAL(error) << "AmpSumIntensity::getIntValue() | "
+				"Wrong variables specified!";
 		return -999;
 	}
 
@@ -1008,7 +556,11 @@ double AmpSumIntensity::getIntValue(std::string var1, double min1, double max1, 
 	gsl_rng_env_setup ();
 	const gsl_rng_type *T = gsl_rng_default; //type of random generator
 	gsl_rng *r = gsl_rng_alloc(T); //random generator
-	gsl_monte_function G = {&evalWrapperAmpSumIntensity,dim, const_cast<AmpSumIntensity*> (this)};
+	gsl_monte_function G = {
+			&GSLWrapper_integral,
+			dim,
+			&par
+	};
 
 	/*	Choosing vegas algorithm here, because it is the most accurate:
 	 * 		-> 10^5 calls gives (in my example) an accuracy of 0.03%
@@ -1021,6 +573,318 @@ double AmpSumIntensity::getIntValue(std::string var1, double min1, double max1, 
 	return res;
 }
 
+//=======================================================
+//==================== EVALUATION =======================
+//=======================================================
+const std::complex<double>& AmpSumIntensity::evaluate(dataPoint& point)
+{
+	std::complex<double> AMPpdf(0,0);
+	auto it = GetResonanceItrFirst();
+	for( ; it != GetResonanceItrLast(); ++it){
+		try{
+			AMPpdf += (*it)->Evaluate(point);
+		} catch (std::exception& ex){
+			BOOST_LOG_TRIVIAL(error) << "AmpSumIntensity::intensityNoEff() | "
+					"Failed to evaluate resonance "<<(*it)->GetName()<<": "
+					<<ex.what();
+			throw;
+		}
+	}
+	return AMPpdf;
+}
+
+const ParameterList& AmpSumIntensity::intensity(std::vector<double> point)
+{
+	dataPoint dataP(point);
+	return intensity(dataP);
+}
+
+const ParameterList& AmpSumIntensity::intensityNoEff(dataPoint& point)
+{
+	auto AMPpdf = evaluate(point);
+	result.SetParameterValue(0,std::norm(AMPpdf));
+	return result;
+}
+
+const ParameterList& AmpSumIntensity::intensity(dataPoint& point)
+{
+	intensityNoEff(point);
+	double ampNoEff;
+	try{
+		ampNoEff = result.GetDoubleParameterValue(0);
+	} catch (BadParameter& ex){
+		BOOST_LOG_TRIVIAL(error) <<"AmpSumIntensity::intensity() | Can not "
+				"obtain parameter from ParameterList 'result'!";
+		throw;
+	}
+	double eff=eff_->evaluate(point);
+	result.SetParameterValue(0,ampNoEff*eff);
+	return result;
+}
+
+const double AmpSumIntensity::sliceIntensity(dataPoint& dataP,
+		ParameterList& par,	std::complex<double>* reso,
+		unsigned int nResos, double N,
+		unsigned int nF0, unsigned int nF2)
+{
+	double AMPpdf=0;
+	//TODO: implement slice fit
+	//	if(Kinematics::instance()->isWithinPhsp(dataP))
+	//	AMPpdf = totAmp.evaluateSlice(dataP, reso, nResos,5, N, nF0, nF2);
+	if(AMPpdf!=AMPpdf){
+		BOOST_LOG_TRIVIAL(error)<<"Error AmpSumIntensity: Intensity is not a number!!";
+		AMPpdf = 0;
+	}
+	double eff=eff_->evaluate(dataP);
+	return AMPpdf*eff;
+}
+
+//============== FIT FRACTIONS ================
+resonanceItr findResonancePartner(std::shared_ptr<Amplitude> amp,
+		resonanceItr res)
+{
+	auto name = (*res)->GetName();
+	auto it = amp->GetResonanceItrFirst();
+	for( ; it != amp->GetResonanceItrLast(); ++it){ //fill matrix
+		if( it == res ) continue;
+		auto name2 = (*it)->GetName();
+		if(name2.find(name) != std::string::npos) return it;
+	}
+	return res;
+
+}
+
+void AmpSumIntensity::GetFitFractions(ParameterList& parList)
+{
+	GetFitFractions(parList, this);
+}
+
+void AmpSumIntensity::GetFitFractions(ParameterList& parList,
+		const Amplitude* ampConst)
+{
+	// Work around: Remove const
+	Amplitude* amp = const_cast<Amplitude*>(ampConst);
+
+	std::string ampName = amp->GetName();
+
+	// Select only resonace without "_CP" in name for calculation of fit fraction
+	auto it = amp->GetResonanceItrFirst();
+	std::vector<resonanceItr> resoList;
+	for( ; it != amp->GetResonanceItrLast(); ++it){
+		if( (*it)->GetName().find("_CP")!=std::string::npos ) continue;
+		resoList.push_back(it);
+	}
+	if( !resoList.size() )
+		throw std::runtime_error("AmpSumIntensity::GetFitFractions() | "
+				"No resonance are selected for calculation if fit fractions!");
+
+	/* Unbinned efficiency correction in the FunctionTree does not provide
+	 * an integral w/o efficiency correction. We have to calculate it here. */
+	double norm = 1.0;
+	try{
+		norm = amp->GetIntegral(resoList);
+		//norm = amp->GetIntegral();
+	} catch (std::exception& ex){
+		BOOST_LOG_TRIVIAL(error)<< "FitResult::calcFraction() | "
+				"Normalization can't be calculated: "<<ex.what();
+		throw;
+	}
+
+	BOOST_LOG_TRIVIAL(debug)<<"FitResult::calcFraction() | "
+			"Amplitude "<<ampName<< " Norm="<<norm;
+
+	// Start loop over resonances
+	auto itit = resoList.begin();
+	for( ; itit != resoList.end(); ++itit){
+		//Current resonance iterator
+		resonanceItr cReso = (*itit);
+
+		// We search for a partner resonance and add it to the integral
+		//		auto it2 = findResonancePartner(amp, it);
+
+		// GetIntegralInterference returns the integal Int( A*B+B*A ),
+		// including the complex coefficienct
+		//		double nom = amp->GetIntegralInterference(it,it);
+		//		if( it != it2 ){// Int |A+B|^2 = |A|^2 + |B|^2 + A*B + B*A
+		//			double tmp22 = amp->GetIntegralInterference(it2,it2);
+		//			double tmp12 = amp->GetIntegralInterference(it,it2);
+		//			BOOST_LOG_TRIVIAL(debug) << "FitResult::calcFraction() | Calculating"
+		//					<<" amplitude integral for composed amplitudes "
+		//					<<(*it)->GetName()<<" and "<<(*it2)->GetName()<<": "
+		//					<<"(11) "<<nom <<" (22) "<<tmp22 <<" (12) "<<tmp12
+		//					<<" Total: "<<nom+tmp22+tmp12;
+		//			nom += tmp22;
+		//			nom += tmp12;
+		//		} else {
+		//		BOOST_LOG_TRIVIAL(debug) << "FitResult::calcFraction() | Resonance "
+		//				"integal for "<<(*it)->GetName()<<": "<<nom;
+		//		}
+		std::vector<resonanceItr> thisAmp; thisAmp.push_back(cReso);
+
+		//Calculate resonance integral. This includes the magnitude^2.
+		double nom = amp->GetIntegral(thisAmp);
+
+		BOOST_LOG_TRIVIAL(debug) << "FitResult::calcFraction() | Resonance "
+				"integal for "<<(*cReso)->GetName()<<": "<<nom;
+
+		std::string resName = ampName+" "+(*cReso)->GetName()+"_FF";
+		std::shared_ptr<DoubleParameter> magPar = (*cReso)->GetMagnitudePar();
+		double mag = magPar->GetValue(); //value of magnitude
+		double magError = 0;
+		if(magPar->HasError())
+			magError = magPar->GetError(); //error of magnitude
+
+		parList.AddParameter(
+				std::shared_ptr<DoubleParameter>(
+						new DoubleParameter(
+								resName,
+								nom/norm,
+								std::fabs(2*(nom/mag)/norm * magError)
+						)
+				)
+		);
+	}
+}
+
+//=========================================================
+//================== ACCESS to resonances =================
+//=========================================================
+
+int AmpSumIntensity::GetIdOfResonance(std::string name)
+{
+	for(unsigned int i=0; i< resoList.size(); i++)
+		if(resoList.at(i)->GetName()==name) return i;
+	return -999;
+}
+
+std::string AmpSumIntensity::GetNameOfResonance(unsigned int id)
+{
+	if(id < 0 || id > resoList.size() )
+		throw std::runtime_error("AmpSumIntensity::GetNameOfResonance() | "
+				"Invalid resonance ID="+std::to_string(id)+"! Resonance not found?");
+	return resoList.at(id)->GetName();
+}
+
+std::shared_ptr<Resonance> AmpSumIntensity::GetResonance(std::string name)
+{
+	int id = GetIdOfResonance(name);
+	return GetResonance(id);
+}
+
+std::shared_ptr<Resonance> AmpSumIntensity::GetResonance(unsigned int id)
+{
+	if(id < 0 || id > resoList.size() )
+		throw std::runtime_error("AmpSumIntensity::GetResonance() | "
+				"Invalid resonance ID="+std::to_string(id)+"! Resonance not found?");
+	return resoList.at(id);
+}
+
+//=====================================
+//========== FunctionTree =============
+//=====================================
+//! Getter function for function tree
+std::shared_ptr<FunctionTree> AmpSumIntensity::GetTree(
+		ParameterList& sample, ParameterList& phspSample, ParameterList& toySample)
+{
+	unsigned int effId = Kinematics::instance()->GetNVars();
+	unsigned int weightId = Kinematics::instance()->GetNVars()+1;
+
+	int sampleSize = sample.GetMultiDouble(0)->GetNValues();
+	int toySampleSize = toySample.GetMultiDouble(0)->GetNValues();
+	int phspSampleSize = phspSample.GetMultiDouble(0)->GetNValues();
+	/* We assume that the total efficiency of the phsp variable is stored in
+	 * each event. This does not influence the result but a correct efficiency
+	 * given consistent results with the GSL integration. */
+	double phspSampleEff = phspSample.GetMultiDouble(effId)->GetValue(0);
+
+	std::shared_ptr<MultiDouble> weightPhsp = phspSample.GetMultiDouble(weightId);
+	double sumWeights =
+			std::accumulate(weightPhsp->Begin(), weightPhsp->End(), 0.0);
+	std::shared_ptr<MultiDouble> eff = phspSample.GetMultiDouble(effId);
+
+	std::shared_ptr<Strategy> mmultStrat(new MultAll(ParType::MCOMPLEX));
+	std::shared_ptr<Strategy> mmultDStrat(new MultAll(ParType::MDOUBLE));
+	std::shared_ptr<Strategy> multiDoubleAddStrat(new AddAll(ParType::MDOUBLE));
+	std::shared_ptr<Strategy> multiComplexAddStrat(new AddAll(ParType::MCOMPLEX));
+	std::shared_ptr<Strategy> msqStrat(new AbsSquare(ParType::MDOUBLE));
+	std::shared_ptr<Strategy> mlogStrat(new LogOf(ParType::MDOUBLE));
+	std::shared_ptr<Strategy> multStrat(new MultAll(ParType::COMPLEX));
+	std::shared_ptr<Strategy> multDStrat(new MultAll(ParType::DOUBLE));
+	std::shared_ptr<Strategy> addStrat(new AddAll(ParType::DOUBLE));
+	std::shared_ptr<Strategy> addComplexStrat(new AddAll(ParType::COMPLEX));
+	std::shared_ptr<Strategy> sqStrat(new AbsSquare(ParType::DOUBLE));
+	std::shared_ptr<Strategy> logStrat(new LogOf(ParType::DOUBLE));
+	std::shared_ptr<Strategy> complStrat(new Complexify(ParType::COMPLEX));
+	std::shared_ptr<Strategy> invStrat(new Inverse(ParType::DOUBLE));
+
+	//------------Setup Tree---------------------
+	std::shared_ptr<FunctionTree> tr(new FunctionTree());
+
+	tr->createHead(GetName(),mmultDStrat);
+	tr->createNode("AmpSq",msqStrat,GetName());
+	tr->insertTree( setupBasicTree(sample, toySample), "AmpSq");
+
+	//Normalization
+	tr->createNode("N", invStrat, GetName());// 1/normLH
+	// normLH = phspVolume/N_{mc} |T_{evPHSP}|^2
+	tr->createNode("normFactor", multDStrat, "N");
+	// sumAmp = \sum_{evPHSP} |T_{evPHSP}|^2
+	tr->createNode("sumAmp", addStrat,"normFactor");
+	tr->createLeaf("phspVolume",
+			Kinematics::instance()->GetPhspVolume(), "normFactor");
+	tr->createLeaf("InvNmc",
+			1/ ( (double) sumWeights ), "normFactor");
+	tr->createNode("IntensPhspEff", mmultDStrat, "sumAmp",
+			phspSampleSize, false); //|T_{ev}|^2
+	tr->createLeaf("eff", eff, "IntensPhspEff"); //efficiency
+	tr->createLeaf("weightPhsp", weightPhsp, "IntensPhspEff");
+	tr->createNode("IntensPhsp", msqStrat, "IntensPhspEff",
+			phspSampleSize, false); //|T_{ev}|^2
+	tr->insertTree( setupBasicTree(phspSample, toySample), "IntensPhsp");
+
+	return tr;
+}
+
+std::shared_ptr<FunctionTree> AmpSumIntensity::setupBasicTree(
+		ParameterList& sample, ParameterList& phspSample)
+{
+	int sampleSize = sample.GetMultiDouble(0)->GetNValues();
+	int phspSampleSize = phspSample.GetMultiDouble(0)->GetNValues();
+
+	if(sampleSize==0){
+		BOOST_LOG_TRIVIAL(error) << "AmpSumIntensity::setupBasicTree() | "
+				"Data sample empty!";
+		return std::shared_ptr<FunctionTree>();
+	}
+	if(phspSampleSize==0){
+		BOOST_LOG_TRIVIAL(error) << "AmpSumIntensity::setupBasicTree() | "
+				"Phsp sample empty!";
+		return std::shared_ptr<FunctionTree>();
+	}
+
+	//------------Setup Tree---------------------
+	std::shared_ptr<FunctionTree> newTree(new FunctionTree());
+
+	//----Strategies needed
+	std::shared_ptr<AddAll> maddStrat(new AddAll(ParType::MCOMPLEX));
+
+	newTree->createHead("Amplitude", maddStrat, sampleSize);
+
+	auto it = resoList.begin();
+	for( ; it!=resoList.end(); ++it){
+		if(!(*it)->GetEnable()) continue;
+		std::shared_ptr<FunctionTree> resTree= (*it)->SetupTree(sample,
+				phspSample, ""+(*it)->GetName());
+		if(!resTree->sanityCheck())
+			throw std::runtime_error("AmpSumIntensity::setupBasicTree() | "
+					"Resonance tree didn't pass sanity check!");
+		resTree->recalculate();
+		newTree->insertTree(resTree, "Amplitude");
+	}
+
+	BOOST_LOG_TRIVIAL(debug)<<"AmpSumIntensity::setupBasicTree(): tree constructed!!";
+	return newTree;
+}
 } /* namespace AmplitudeSum */
 } /* namespace Physics */
 } /* namespace ComPWA */

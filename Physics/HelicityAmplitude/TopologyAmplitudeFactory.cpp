@@ -306,8 +306,8 @@ SequentialTwoBodyDecayAmplitude TopologyAmplitudeFactory::generateSequentialDeca
       appendSpinZComponentInfoToName(helicity_amp_name, helicity_tree[decay_product].state_info_);
 
       ParticleStateInfo temp_psi(helicity_tree[decay_product].state_info_);
-      temp_psi.spin_information_.J_z_numerator_ =
-          -temp_psi.spin_information_.J_z_numerator_;
+      temp_psi.spin_information_.GetZNumerator()=
+          -temp_psi.spin_information_.GetZNumerator();
       appendSpinZComponentInfoToName(parity_related_name,
           temp_psi);
 
@@ -419,7 +419,7 @@ double TopologyAmplitudeFactory::getParityFactor(int pid_mother, int pid_d1,
   auto const& particle1 = PhysConst::Instance().findParticle(pid_d1);
   parity_product *= particle1.getIntLikeQuantumNumber(QuantumNumberIDs::PARITY);
   auto spin = particle1.getSpinLikeQuantumNumber(QuantumNumberIDs::SPIN);
-  double spin_sum(spin.J_numerator_ / spin.J_denominator_);
+  double spin_sum = spin.GetSpin();
 
   auto const& particle2 = PhysConst::Instance().findParticle(pid_d2);
   parity_product *= particle2.getIntLikeQuantumNumber(QuantumNumberIDs::PARITY);

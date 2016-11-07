@@ -29,6 +29,7 @@ public:
 	virtual void setSeed(unsigned int) = 0;
 	virtual unsigned int getSeed() = 0;
 	virtual double getUniform() = 0;
+	virtual double getGaussDist(double mu, double sigma) { return 0; }
 
 };
 

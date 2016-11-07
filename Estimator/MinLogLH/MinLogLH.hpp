@@ -37,11 +37,18 @@ namespace ComPWA {
 namespace Estimator {
 namespace MinLogLH {
 
-class MinLogLH : public Estimator {
+using ComPWA::DataReader::Data;
+
+class MinLogLH : public ComPWA::Estimator::Estimator {
 
 public:
+
+	//! Destructor
+	virtual ~MinLogLH() { };
+
 	//! Implementation of ControlParameter::controlParameter
 	virtual double controlParameter(ParameterList& minPar);
+
 	/** Create instance of MinLogLH.
 	 * A binned efficiency correction is used. We expect that phspSample_ has efficiency values for
 	 * each event.
@@ -54,9 +61,12 @@ public:
 	 * @param nEvents number of events to process
 	 * @return std::shared_ptr<Data> of existing instance or newly created instance
 	 */
-	static std::shared_ptr<ControlParameter> createInstance(std::shared_ptr<Amplitude> amp_,
-			std::shared_ptr<DataReader::Data> data_, std::shared_ptr<DataReader::Data> phspSample_,
+	static std::shared_ptr<ComPWA::Optimizer::ControlParameter> createInstance(
+			std::shared_ptr<Amplitude> amp,
+			std::shared_ptr<DataReader::Data> data,
+			std::shared_ptr<DataReader::Data> phspSample,
 			unsigned int startEvent=0, unsigned int nEvents=0);
+
 	/** Create instance of MinLogLH.
 	 * An unbinned efficiency correction is applied using #accSample_.
 	 *
@@ -69,9 +79,13 @@ public:
 	 * @param sigFrac signal fraction in data sample
 	 * @return std::shared_ptr<Data> of existing instance or newly created instance
 	 */
-	static std::shared_ptr<ControlParameter> createInstance(std::shared_ptr<Amplitude> amp_,
-			std::shared_ptr<DataReader::Data> data_, std::shared_ptr<DataReader::Data> phspSample_,std::shared_ptr<DataReader::Data> accSample_,
+	static std::shared_ptr<ControlParameter> createInstance(
+			std::shared_ptr<Amplitude> amp,
+			std::shared_ptr<DataReader::Data> data,
+			std::shared_ptr<DataReader::Data> phspSample,
+			std::shared_ptr<DataReader::Data> accSample,
 			unsigned int startEvent=0, unsigned int nEvents=0);
+
 	/** Create instance of MinLogLH.
 	 * An unbinned efficiency correction is applied using #accSample_.
 	 *
@@ -85,9 +99,13 @@ public:
 	 * @param sigFrac signal fraction in data sample
 	 * @return std::shared_ptr<Data> of existing instance or newly created instance
 	 */
-	static std::shared_ptr<ControlParameter> createInstance(std::shared_ptr<Amplitude> amp_,std::shared_ptr<Amplitude> bkg_,
-			std::shared_ptr<DataReader::Data> data_, std::shared_ptr<DataReader::Data> phspSample_,std::shared_ptr<DataReader::Data> accSample_,
-			unsigned int startEvent, unsigned int nEvents, double sigFrac);
+	static std::shared_ptr<ControlParameter> createInstance(
+			std::vector<std::shared_ptr<Amplitude> > ampVec,
+			std::vector<double> frac,
+			std::shared_ptr<DataReader::Data> data,
+			std::shared_ptr<DataReader::Data> phspSample,
+			std::shared_ptr<DataReader::Data> accSample,
+			unsigned int startEvent, unsigned int nEvents);
 
 	/** Set new amplitude to existing instance
 	 *
@@ -99,9 +117,12 @@ public:
 	 * @param nEvents number of events to process
 	 * @param useFuncTr use FunctionTree yes/no?
 	 */
-	virtual void setAmplitude(std::shared_ptr<Amplitude> amp_, std::shared_ptr<DataReader::Data> data_,
-			std::shared_ptr<DataReader::Data> phspSample_, std::shared_ptr<DataReader::Data> accSample_,
-			unsigned int startEvent=0, unsigned int nEvents=0, bool useFuncTr=0, double sigFrac=1.);
+	virtual void setAmplitude(std::shared_ptr<Amplitude> amp,
+			std::shared_ptr<DataReader::Data> data,
+			std::shared_ptr<DataReader::Data> phspSample,
+			std::shared_ptr<DataReader::Data> accSample,
+			unsigned int startEvent=0, unsigned int nEvents=0, bool useFuncTr=0);
+
 	/** Set new amplitude to existing instance
 	 *
 	 * @param amp_ amplitude
@@ -113,83 +134,80 @@ public:
 	 * @param nEvents number of events to process
 	 * @param useFuncTr use FunctionTree yes/no?
 	 */
-	virtual void setAmplitude(std::shared_ptr<Amplitude> amp_, std::shared_ptr<Amplitude> bkg_,std::shared_ptr<DataReader::Data> data_,
-			std::shared_ptr<DataReader::Data> phspSample_, std::shared_ptr<DataReader::Data> accSample_,
-			unsigned int startEvent=0, unsigned int nEvents=0, bool useFuncTr=0, double sigFrac=1.);
+	virtual void setAmplitude(std::vector<std::shared_ptr<Amplitude> > ampVec,
+			std::vector<double> frac,
+			std::shared_ptr<DataReader::Data> data_,
+			std::shared_ptr<DataReader::Data> phspSample_,
+			std::shared_ptr<DataReader::Data> accSample_,
+			unsigned int startEvent=0, unsigned int nEvents=0, bool useFuncTr=0);
 
 	//! Check if tree for LH calculation is available
-	virtual bool hasTree() { return useFunctionTree; }
+	virtual bool hasTree() { return _useFunctionTree; }
+
 	//! Get FunctionTree for LH calculation. Check first if its available using MinLogLH::hasTree().
 	virtual std::shared_ptr<FunctionTree> getTree() {
-		if(!useFunctionTree)
-			throw std::runtime_error("MinLogLH::getTree() you requested a tree which was not constructed!");
-		return physicsTree;
+		if(!_useFunctionTree)
+			throw std::runtime_error("MinLogLH::getTree()  | You requested a "
+					"tree which was not constructed!");
+		return _tree;
 	}
+
 	//! Get Amplitude
-	virtual std::shared_ptr<Amplitude> getAmplitude() { return amp; }
-	//! Destructor
-	virtual ~MinLogLH() { };
+	virtual std::vector<std::shared_ptr<Amplitude> > getAmplitudes() {
+		return _ampVec;
+	}
+
 	//! Should we try to use the function tree? Function tree needs to be implemented in Amplitude
 	virtual void setUseFunctionTree(bool t);
+
 	//! Set scale of penalty term
-	virtual void setPenaltyScale(double sc);
+	virtual void setPenaltyScale(double sc, int ampID=0);
+
 	//! Get scale of penalty term
-	virtual double getPenaltyScale() { return penaltyLambda; }
+	virtual double getPenaltyScale() { return _penaltyLambda; }
+
 	/** Calculate penalty term
 	 * A penalty term can be added to the LH to punish unnecessary complexity of amplitudes in
 	 * minimization. The strength of this term can be set via MinLogLH::setPenaltyScale(double).
 	 * A detailed description of the approach can be found in arXiv:1505.05133 */
 	virtual double calcPenalty();
+
 	//! Get number of events in data set
 	virtual int getNEvents() { return nEvts_; }
 
 protected:
 	//! Default Constructor
 	MinLogLH() { };
-	//! Constructor
-	MinLogLH(std::shared_ptr<Amplitude> amp_, std::shared_ptr<Amplitude> bkg_,std::shared_ptr<DataReader::Data> data_,
-			std::shared_ptr<DataReader::Data> phspSample_, std::shared_ptr<DataReader::Data> accSample_,
-			unsigned int startEvent, unsigned int nEvents, double sigFrac=1.);
+
+	//! Constructor for a vector of amplitudes
+	MinLogLH(std::vector<std::shared_ptr<Amplitude> > ampVec,
+			std::vector<double> fraction, std::shared_ptr<Data> data,
+			std::shared_ptr<Data> phspSample, std::shared_ptr<Data> accSample,
+			unsigned int startEvent, unsigned int nEvents);
+
+	//! Constructor for a single amplitude
+	MinLogLH(std::shared_ptr<Amplitude> amp, std::shared_ptr<Data> data,
+			std::shared_ptr<Data> phspSample, std::shared_ptr<Data> accSample,
+			unsigned int startEvent, unsigned int nEvents);
+
 	//! Uses ampTree and creates a tree that calculates the full LH
 	virtual void iniLHtree();
+
 	//! Sum up all weights in data set
 	void calcSumOfWeights();
 
 private:
+	//! Initialize
+	void Init();
+
+	//! Reset instance
+	void Reset();
+
+	//! Use FunctionTree for LH calculation (yes/no)?
+	bool _useFunctionTree;
+
 	//! FunctionTree for Likelihood calculation
-	std::shared_ptr<FunctionTree> physicsTree;
-
-	//! Signal decay amplitude
-	std::shared_ptr<Amplitude> amp;
-	//! FunctionTree calculation the LH normalizaton
-	std::shared_ptr<FunctionTree> signalPhspTree;
-	//! Signal amplitude tree from #amp with invariant mass from data sample
-	std::shared_ptr<FunctionTree> signalTree_amp;
-	//! Signal amplitude tree from #amp with invariant masses from phsp/acc sample
-	std::shared_ptr<FunctionTree> signalPhspTree_amp;
-	//! Background amplitude
-	std::shared_ptr<Amplitude> ampBkg;
-	//! FunctionTree calculation of background normalization
-	std::shared_ptr<FunctionTree> bkgPhspTree;
-	//! Background amplitude tree from #ampBkg with invariant mass from data sample
-	std::shared_ptr<FunctionTree> bkgTree_amp;
-	//! Background amplitude tree from #ampBkg with invariant masses from phsp/acc sample
-	std::shared_ptr<FunctionTree> bkgPhspTree_amp;
-
-	//! Data sample
-	std::shared_ptr<DataReader::Data> data;
-	//! Phsp sample for normalization
-	std::shared_ptr<DataReader::Data> phspSample;
-	//! Phsp with applied efficency for unbinned efficiency correction
-	std::shared_ptr<DataReader::Data> accSample;
-	//! Total efficiency of phsp with applied efficency. This is used to calculated to number of generated events.
-	double accSampleEff;
-	//! Data sample
-	allMasses mData;
-	//! Phsp sample for normalization
-	allMasses mPhspSample;
-	//! Phsp with applied efficency for unbinned efficiency correction
-	allMasses mAccSample;
+	std::shared_ptr<FunctionTree> _tree;
 
 	//! Number of events in data sample
 	unsigned int nEvts_;
@@ -197,17 +215,28 @@ private:
 	unsigned int nPhsp_;
 	//! Process data sample from position #nStartEvt_ on
 	unsigned int nStartEvt_;
-	//! Number of events to process in data sample
+	//! Number of events to process in _dataSample sample
 	unsigned int nUseEvt_;
-	//! Sum over all weights in data sample
-	double sumOfWeights;
-	//! Use FunctionTree for LH calculation (yes/no)?
-	bool useFunctionTree;
-	//! Fraction of signal in data sample
-	double signalFraction;
 
-	//! Scale of penalty term
-	double penaltyLambda;
+	//! Amplitudes
+	std::vector<std::shared_ptr<Amplitude> > _ampVec;
+	//! Fraction for each amplitude
+	std::vector<double> _fraction;
+
+	// Samples
+	std::shared_ptr<Data> _dataSample; //! Data sample
+	ParameterList _dataSampleList; //! _dataSample stored as ParameterList
+	double _sumOfWeights; //! Sum of weights in _dataSample
+
+	std::shared_ptr<Data> _phspSample; //! phsp sample for normalization
+	ParameterList _phspSampleList;//! _phspSample stored as ParameterList
+
+	std::shared_ptr<Data> _phspAccSample;//! Phsp sample with applied efficency
+	ParameterList _phspAccSampleList;//! _phspAccSample stored as ParameterList
+	double _phspAccSampleEff; //! Total efficiency of phsp with applied efficency
+
+	double _penaltyLambda; //! Scale of penalty term
+	int _penaltyAmpID; //! ID of amplitude that is used for penalty calc
 };
 
 } /* namespace MinLogLH */

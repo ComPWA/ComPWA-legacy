@@ -1,62 +1,106 @@
 ########### ComPWA Jamroot #############
-
-path-constant TOP : . ;
-path-constant PHYSICS : Physics ;
-path-constant DPKINEMATICS : Physics/DPKinematics ;
 import os ;
 import path ;
+
+path-constant TOP : . ;
+
+# -------- Configure BOOST
+import boost ;
 local BOOST_ROOT = [ os.environ BOOST_ROOT ] ;
+using boost : 1.54 :
+    <include>$(BOOST_ROOT)/include
+    <library>$(BOOST_ROOT)/lib
+    <layout>system
+;
+#boost.use-project 1.54 ; #specify boost version
+boost.use-project ;
+
+# -------- Configure ROOT
+import root ;
 local ROOTSYS = [ os.environ ROOTSYS ] ;
+local rootlibdir = [ SHELL "$(ROOTSYS)/bin/root-config --libdir" ] ;
+local rootlibs = [ SHELL "$(ROOTSYS)/bin/root-config --libs" ] ;
+local rootincdir = [ SHELL "$(ROOTSYS)/bin/root-config --incdir" ] ;
+local ROOT_INC_PATH = [ MATCH "(.*)[\n]" : $(rootincdir) ] ;
+local ROOT_LIB_PATH = [ MATCH "(.*)[\n]" : $(rootlibdir) ] ;
+#local ROOTLIBS = [ MATCH "(.*)[\n]" : $(rootlibs) ] ;
+using root : :
+    <include>$(ROOT_INC_PATH)
+    <library>$(ROOT_LIB_PATH)
+;
+root.use-project ;
 
-local FOUND_ROOT_TOBJECT_HEADER = [ path.exists $(ROOTSYS)/include/TObject.h ] ;
+# -------- Configure GSL
+local GSL_ROOT = [ os.environ GSL_ROOT ] ;
+import gsl ;
+using gsl : :
+    <include>$(GSL_ROOT)/include
+    <library>$(GSL_ROOT)/lib
+;
+gsl.use-project ;
 
-if $(FOUND_ROOT_TOBJECT_HEADER)
-{
-  constant ROOT_INC_PATH : $(ROOTSYS)/include ;
-  constant ROOT_LIB_PATH : $(ROOTSYS)/lib ;
-}
-else
-{ 
-  FOUND_ROOT_TOBJECT_HEADER = [ path.exists $(ROOTSYS)/include/root/TObject.h ] ;
-  constant ROOT_INC_PATH : $(ROOTSYS)/include/root ;
-  constant ROOT_LIB_PATH : $(ROOTSYS)/lib/root ;
-}
+# -------- Configure QFT
+local QFT_ROOT = [ os.environ QFT ] ;
+lib qft++ : : <name>qft++ <search>$(QFT_ROOT)/lib : : <include>$(QFT_ROOT)/include ; 
 
-if true != $(FOUND_ROOT_TOBJECT_HEADER)
-{
-  echo "WARNING: ROOT environment is not set up correctly! Please ensure ROOTSYS points to a valid ROOT installation" ;
-}
+# -------- Configure MINUIT2
+local MINUIT2_ROOT = [ os.environ ROOTSYS ] ;
+import minuit2 ;
+using minuit2 : :
+    <include>$(ROOT_INC_PATH)
+    <library>$(ROOT_LIB_PATH)
+;
+minuit2.use-project ;
 
-echo "Using $(ROOT_INC_PATH) as ROOT include path!" ;
-echo "Using $(ROOT_LIB_PATH) as ROOT library path!" ;
+# -------- Configure GENEVA
+local GENEVA_ROOT = [ os.environ GENEVA ] ;
+import geneva ;
+using geneva : :
+    <include>$(GENEVA_ROOT)/include
+    <library>$(GENEVA_ROOT)/lib
+;
+geneva.use-project ;
 
-BOOSTLIBS = -lboost_log_setup -lboost_log -lboost_date_time -lboost_filesystem -lboost_program_options -lboost_regex -lboost_serialization -lboost_system -lboost_thread -lboost_test_exec_monitor -L$(BOOST_ROOT)/lib ;
+# ---------- ComPWA ----------------
+project ComPWA 
+	: requirements 
+	  <include>.
+	  <cxxflags>-ftemplate-depth-256
+	  <cxxflags>-std=c++11
+	  <cxxflags>-DBOOST_SPIRIT_USE_PHOENIX_V3
+	  <warnings>off
+	  
+	  #Static linking of std lib. In case that different 
+	  #compiler versions are used we are on the safe side
+	  <toolset>gcc:<linkflags>-static-libgcc 
+	  <toolset>gcc:<linkflags>-static-libstdc++
 
-project :
-	requirements <include>$(TOP)
-	<include>$(BOOST_ROOT)/include
-	<define>BOOST_LOG_DYN_LINK
-	<cxxflags>-ftemplate-depth-256
-	<cxxflags>-std=c++0x
-	<cxxflags>-DBOOST_SPIRIT_USE_PHOENIX_V3
-	<linkflags>$(BOOSTLIBS)
-	<linkflags>-fopenmp
-	<warnings>off
-	;
+      <library>/boost//system
+      <library>/boost//log #Logging is needed by all libraries
+
+    : default-build release
+    : usage-requirements #flags are automatically added to depended projects
+      <include>.
+      <define>BOOST_LOG_DYN_LINK
+      <cxxflags>-std=c++11
+      <cxxflags>-DBOOST_SPIRIT_USE_PHOENIX_V3
+      
+;
+
 
 # This is the layout of the complete project tree. The configure.py script will comment/uncomment the following constant definitions
 # disabling/enabling the appropriate subprojects. Of course the appropriate if statements have to be inserted around build-project rules
 # and library sources etc...
 
-constant build_test : 1 ;
+constant build_test : 0 ;
 
 constant build_Physics : 1 ;
 constant build_AmplitudeSum : 1 ;
 constant build_DPKinematics : 1 ;
 constant build_BreitWigner : 1 ;
-constant build_DecayTree : 1 ;
-constant build_HelicityAmplitude : 1 ;
-constant build_DynamicalDecayFunctions : 1 ;
+constant build_DecayTree : 0 ;
+constant build_HelicityAmplitude : 0 ;
+constant build_DynamicalDecayFunctions : 0 ;
 
 constant build_DataReader : 1 ;
 constant build_RootReader : 1 ;
@@ -70,7 +114,7 @@ constant build_SliceFit : 1 ;
 
 constant build_Optimizer : 1 ;
 constant build_Minuit2 : 1 ;
-constant build_Geneva : 1 ;
+constant build_Geneva : 0 ;
 
 # core should always be built
 build-project Core ;
@@ -88,4 +132,13 @@ if $(build_Estimator) && $(build_Estimator) != 0 {
 }
 if $(build_Optimizer) && $(build_Optimizer) != 0 {
   build-project Optimizer ;
+  if $(build_Minuit2) && $(build_Minuit2) != 0 {
+	path-constant MINUIT2 : [ os.environ MINUIT2 ] ;
+  }
+  if $(build_Geneva) && $(build_Geneva) != 0 {
+	path-constant GENEVA : [ os.environ GENEVA ] ;
+  }
 }
+
+#Build documentation module
+#build-project doc ;

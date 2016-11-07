@@ -26,6 +26,8 @@
 #include <memory>
 
 #include "Core/ParameterList.hpp"
+#include "Core/FunctionTree.hpp"
+#include "Core/Amplitude.hpp"
 
 namespace ComPWA {
 namespace Optimizer {
@@ -35,27 +37,33 @@ class ControlParameter{
 public:
   static std::shared_ptr<ControlParameter> Instance();
 
-  virtual double controlParameter(ParameterList& minPar) =0;
+  virtual double controlParameter(ParameterList& minPar) = 0;
 
-  virtual void resetInstance() { instance_ = std::shared_ptr<ControlParameter>(); };
+  virtual void resetInstance() {
+	  instance_ = std::shared_ptr<ControlParameter>();
+  }
+
+  virtual std::shared_ptr<FunctionTree> getTree() {
+	  return std::shared_ptr<FunctionTree>();
+  }
+
+  virtual std::vector<std::shared_ptr<Amplitude> > getAmplitudes() {
+	  return std::vector<std::shared_ptr<Amplitude> >();
+  }
+
+  virtual int nCalls() {
+	  return calls;
+  }
 
 protected:
   static std::shared_ptr<ControlParameter> instance_;
-
-  ControlParameter(){
-  }
-
+  std::shared_ptr<FunctionTree> f;
+  ControlParameter(){  /* nothing */ }
   virtual ~ControlParameter(){ /* nothing */	}
+  int calls;
  
 };
 
-/*std::shared_ptr<ControlParameter> ControlParameter::Instance() {
-    return ControlParameter::instance_;
-}
-
-std::shared_ptr<ControlParameter> ControlParameter::instance_ = 0;*/
-
 } /* namespace Optimizer */
 } /* namespace ComPWA */
-
 #endif

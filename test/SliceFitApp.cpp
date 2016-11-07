@@ -17,7 +17,7 @@
  * the Breit-Wigner-Sum  physics module AmplitudeSum. The optimization of the
  * parameters is done with the Minuit2 module MinuitIF. As result the
  * optimized parameters are printed to the terminal.
-*/
+ */
 
 // Standard header files go here
 #include <iostream>
@@ -72,28 +72,29 @@ unsigned int nF0=3;
 unsigned int nF2=2;
 
 using namespace ComPWA;
+using namespace ComPWA::Physics::AmplitudeSum;
 using Physics::DPKinematics::DalitzKinematics;
+
 using Physics::AmplitudeSum::AmpSumIntensity;
 using DataReader::RootReader::RootReader;
 using Estimator::SliceFit::SliceFit;
-using Physics::AmplitudeSum::AmplitudeSetup;
 
 /************************************************************************************************/
 /**
  * The main function.
  */
 int main(int argc, char **argv){
-  boost::log::core::get()->set_filter(trivial::severity >= trivial::debug); //setting log level
-  BOOST_LOG_TRIVIAL(info) << "  ComPWA Copyright (C) 2013  Mathias Michel ";
-  BOOST_LOG_TRIVIAL(info) << "  This program comes with ABSOLUTELY NO WARRANTY; for details see license.txt";
-  BOOST_LOG_TRIVIAL(info) << std::endl;
+	boost::log::core::get()->set_filter(trivial::severity >= trivial::debug); //setting log level
+	BOOST_LOG_TRIVIAL(info) << "  ComPWA Copyright (C) 2013  Mathias Michel ";
+	BOOST_LOG_TRIVIAL(info) << "  This program comes with ABSOLUTELY NO WARRANTY; for details see license.txt";
+	BOOST_LOG_TRIVIAL(info) << std::endl;
 
-  DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(DalitzKinematics::createInstance("J/psi","gamma","pi0","pi0"));
+	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(DalitzKinematics::createInstance("J/psi","gamma","pi0","pi0"));
 	//DPKinematics kin("J/psi","gamma","pi0","pi0");
 	//DPKinematics kin("D0","gamma","K-","K+");
 	//static dataPoint* point = dataPoint::instance(kin);
 
-  bool resultGen = true;
+	bool resultGen = true;
 
   unsigned int dataID = 0;
   if(argc>1)
@@ -111,22 +112,28 @@ int main(int argc, char **argv){
 	const char* pPath = getenv("COMPWA_DIR");
 	std::string path = "";
 	try{
-	  path = std::string(pPath);
-	}catch(std::logic_error){
-	  BOOST_LOG_TRIVIAL(error)<<"Environment Variable COMPWA_DIR not set?"<<std::endl;
+		path = std::string(pPath);
+	}catch(std::logic_error& ex){
+		BOOST_LOG_TRIVIAL(error)<<"Environment Variable COMPWA_DIR not set?"<<std::endl;
 	}
+
 	std::string resoFile=path+"/test/JPSI_ypipi_phase.xml";
 	AmplitudeSetup ini(resoFile);
 
   BOOST_LOG_TRIVIAL(info)<< "Load Modules";
   std::shared_ptr<RootReader> myReader(new RootReader(file, "data"));
   std::shared_ptr<RootReader> myPHSPReader(new RootReader(file, "mc"));
-  std::shared_ptr<AmpSumIntensity> amps(new AmpSumIntensity(ini, AmpSumIntensity::normStyle::none, std::shared_ptr<Efficiency>(new UnitEfficiency()), nFitEvents));
+  std::shared_ptr<AmpSumIntensity> amps(
+		  new AmpSumIntensity(
+				  ini,
+				  normStyle::none,
+				  std::shared_ptr<Efficiency>(new UnitEfficiency()), nFitEvents)
+  );
 
   // Initiate parameters
   ParameterList par;
   std::shared_ptr<SliceFit> esti;
-  amps->copyParameterList(par); //perfect startvalues
+  amps->FillParameterList(par); //perfect startvalues
   //esti = std::static_pointer_cast<SliceFit>(SliceFit::createInstance(amps, myReader, myPHSPReader, par, nStartEvent, nFitEvents));
   //amps->fillStartParVec(par); //perfect startvalues
   esti = std::static_pointer_cast<SliceFit>(SliceFit::createInstance(amps, myReader, myPHSPReader, par, nStartEvent, nFitEvents, nBins, nF0, nF2));
@@ -213,6 +220,7 @@ int main(int argc, char **argv){
     }
     startInt[i] = tmp->GetValue();
   }*/
+
 
  // std::cout << "Fixing 5 of 7 parameters " << std::endl;
   //for(unsigned int i=2; i<par.GetNDouble(); i++){

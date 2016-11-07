@@ -1,46 +1,15 @@
 ########### GenevaIF lib #############
-import os ;
-
-local GENEVA = [ os.environ GENEVA ] ;
-
-lib gemfony-common : :  <name>gemfony-common <search>$(GENEVA)/lib ;
-lib gemfony-hap : :  <name>gemfony-hap <search>$(GENEVA)/lib ;
-lib gemfony-courtier : :  <name>gemfony-courtier <search>$(GENEVA)/lib ;
-lib gemfony-geneva-individuals : :  <name>gemfony-geneva-individuals <search>$(GENEVA)/lib ;
-lib gemfony-geneva : :  <name>gemfony-geneva <search>$(GENEVA)/lib
-			<use>gemfony-hap
-			: <library>gemfony-hap
-			;
-
-
-project :
-	requirements <include>./
-	  <include>$(GENEVA)/include
-          #<linkflags>-L$(GENEVA)/lib
-          #<linkflags>-lgemfony-geneva
-          #<linkflags>-lgemfony-geneva-individuals
-          #<linkflags>-lgemfony-courtier
-          #<linkflags>-lgemfony-hap
-          #<linkflags>-lgemfony-common
-	;  
 
 lib GenevaIF : 
         [ glob *.cpp ] 
         $(TOP)/Core//ComPWA
-	: 
-	<use>gemfony-common
-	<use>gemfony-hap
-	<use>gemfony-courtier
-	<use>gemfony-geneva-individuals
-	<use>gemfony-geneva
-	: 
-	<library>gemfony-common
-	<library>gemfony-hap
-	<library>gemfony-courtier
-	<library>gemfony-geneva-individuals
-	<library>gemfony-geneva
-	:        
-	;
+	: <library>/geneva//gemfony-geneva
+	  <library>/geneva//gemfony-common
+    	  <library>/geneva//gemfony-geneva-individuals
+    	  <library>/geneva//gemfony-courtier
+    	  <library>/geneva//gemfony-hap
+       <library>/boost//serialization
+	: ;
 
 install dist : GenevaIF : <location>$(TOP)/lib ;
 

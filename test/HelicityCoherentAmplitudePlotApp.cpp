@@ -113,7 +113,7 @@ int main(int argc, char **argv) {
         new ComPWA::Physics::HelicityFormalism::CoherentAmplitude(
             topology_amplitudes));
 
-    std::shared_ptr<Generator> gen(new RootGenerator());
+    std::shared_ptr<Generator> gen(new Physics::DPKinematics::RootGenerator());
     gen->generate(dummy_event);
 
     ComPWA::dataPoint dummy_data_point;

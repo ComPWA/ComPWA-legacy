@@ -30,22 +30,20 @@
 #include <algorithm>
 #include <fstream>
 
-#include <boost/serialization/string.hpp>
-#include <boost/serialization/map.hpp>
-#include <boost/serialization/nvp.hpp>
-#include <boost/serialization/shared_ptr.hpp>
 #include <boost/serialization/serialization.hpp>
-
+#include <boost/serialization/shared_ptr.hpp>
+#include <boost/serialization/nvp.hpp>
+#include <boost/serialization/level.hpp>
+#include <boost/serialization/tracking.hpp>
 
 #include "Core/ParObserver.hpp"
-//#include "Core/ParameterError.hpp"
 
 namespace ComPWA {
 
 enum ParType { COMPLEX = 1, DOUBLE = 2, INTEGER = 3, BOOL = 4, MDOUBLE = 5, MCOMPLEX = 6, MUNSIGNEDINTEGER = 7, UNDEFINED = 0};
 static const char* ParNames[8] = { "UNDEFINED", "COMPLEX", "DOUBLE", "INTEGER", "BOOL", "MDOUBLE", "MCOMPLEX", "MUNSIGNEDINTEGER"};
 
-class AbsParameter //: public std::enable_shared_from_this<AbsParameter>
+class AbsParameter
 {
 public:
 	//! Constructor with name of parameter and optional type
@@ -68,7 +66,7 @@ public:
 	}
 
 	//! Getter for typename of object, to be defined by the actual implementation
-	virtual std::string TypeName() const=0;
+	virtual std::string TypeName() const = 0;
 
 	//Observer Pattern Functions
 
@@ -162,8 +160,18 @@ private:
 	}
 
 };
-//BOOST_SERIALIZATION_ASSUME_ABSTRACT(AbsParameter)
-
 } /* namespace ComPWA */
+
+BOOST_SERIALIZATION_SHARED_PTR( AbsParameter );
+
+BOOST_CLASS_IMPLEMENTATION(
+		ComPWA::AbsParameter,
+		boost::serialization::level_type::object_serializable
+)
+
+BOOST_CLASS_TRACKING(
+		ComPWA::AbsParameter,
+		boost::serialization::tracking_type::track_never
+)
 
 #endif

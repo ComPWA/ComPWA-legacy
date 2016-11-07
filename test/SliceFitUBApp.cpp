@@ -76,11 +76,12 @@ unsigned int nF0=3;
 unsigned int nF2=2;
 
 using namespace ComPWA;
+using namespace ComPWA::Physics::AmplitudeSum;
 using Physics::DPKinematics::DalitzKinematics;
+
 using Physics::AmplitudeSum::AmpSumIntensity;
 using DataReader::RootReader::RootReader;
-using Estimator::SliceFitUB::SliceFitUB;
-using Physics::AmplitudeSum::AmplitudeSetup;
+//using Estimator::SliceFitUB::SliceFitUB;
 
 /************************************************************************************************/
 /**
@@ -124,13 +125,25 @@ int main(int argc, char **argv){
   BOOST_LOG_TRIVIAL(info)<< "Load Modules";
   std::shared_ptr<RootReader> myReader(new RootReader(file, "data"));
   std::shared_ptr<RootReader> myPHSPReader(new RootReader(file, "mc"));
-  std::shared_ptr<AmpSumIntensity> amps(new AmpSumIntensity(ini, AmpSumIntensity::normStyle::none, std::shared_ptr<Efficiency>(new UnitEfficiency()), nFitEvents));
+  std::shared_ptr<AmpSumIntensity> amps(
+		  new AmpSumIntensity(
+				  ini,
+				  normStyle::none,
+				  std::shared_ptr<Efficiency>(new UnitEfficiency()),
+				  nFitEvents
+		  )
+  );
 
   // Initiate parameters
   ParameterList par;
-  std::shared_ptr<SliceFitUB> esti;
-  amps->copyParameterList(par); //perfect startvalues
-  esti = std::static_pointer_cast<SliceFitUB>(SliceFitUB::createInstance(amps, myReader, myPHSPReader, par, nStartEvent, nFitEvents, nBins, nF0, nF2));
+  std::shared_ptr<Estimator::SliceFitUB::SliceFitUB> esti;
+  amps->FillParameterList(par); //perfect startvalues
+  esti = std::static_pointer_cast<Estimator::SliceFitUB::SliceFitUB>(
+		  Estimator::SliceFitUB::SliceFitUB::createInstance(
+				  amps, myReader, myPHSPReader, par, nStartEvent,
+				  nFitEvents, nBins, nF0, nF2
+				  )
+  );
 
   double startpar[5] = {0.75, 1., 0., 0.1, 1.};
 

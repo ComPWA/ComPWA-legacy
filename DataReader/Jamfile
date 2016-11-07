@@ -1,30 +1,27 @@
 ########### DataReader Jamfile #############
 path-constant DATAREADER : . ;
 
-# libDataReader.so will consist of these packages:
+project ComPWA/DataReader 
+	: requirements
+	  <library>/root
+;
 
-sources = [ glob *.cpp ] ;
+sources = [ glob *.cpp : *.Test.cpp ] ;
+# libDataReader.so will consist of these packages:
 if $(build_RootReader) && $(build_RootReader) != 0
 {
 	build-project RootReader ;
-	sources = $(sources) $(DATAREADER)/RootReader//RootReader ;
+	sources = $(sources) [ glob RootReader/*.cpp : *.Test.cpp ] ;
 	build-project JakeReader ;
-	sources = $(sources) $(DATAREADER)/JakeReader//JakeReader ;
+	sources = $(sources) [ glob JakeReader/*.cpp : *.Test.cpp ] ;
 }
 if $(build_AsciiReader) && $(build_AsciiReader) != 0
 {
 	build-project AsciiReader ;
-	sources = $(sources) $(DATAREADER)/AsciiReader//AsciiReader ;
-}
-if $(build_RootGenerator) && $(build_RootGenerator) != 0
-{
-	build-project RootGenerator ;
-	sources = $(sources) $(DATAREADER)/RootGenerator//RootGenerator ;
+	sources = $(sources) [ glob AsciiReader/*.cpp : *.Test.cpp ] ;
 }
 
 # Build libDataReader.so
-lib DataReader : 
-        $(sources)
-        ;
+lib DataReader : $(sources) $(TOP)/Core//ComPWA ;
 
 install dist : DataReader : <location>$(TOP)/lib ;

@@ -108,14 +108,16 @@ public:
 			const std::vector<std::shared_ptr<IntegerParameter> >& inI,
 			const std::vector<std::shared_ptr<BoolParameter> >& inB);
 
-	//! Copy constructor using = operator
-	/*!
+	/**! Copy constructor using = operator
+	 *
 	 * Simple copy constructor using the = operator. As this operator is not
 	 * overloaded in this class, c++ will copy every member variable. As this
 	 * is a container class, this should be fine.
 	 * \param in input PWAParameterList which variables will be copied
 	 */
-	ParameterList(const ParameterList& in);
+	ParameterList(const ParameterList& in) = default;
+
+	void DeepCopy(const ParameterList& in);
 
 	//! Empty Destructor
 	/*!
@@ -123,260 +125,25 @@ public:
 	 */
 	virtual ~ParameterList();
 
-	//! Getter for abstract parameter
-	/*!
-	 * Getter for abstract parameter pointer
-	 * \param i input number of parameter to load
-	 * \return shared pointer to parameter
-	 */
+	//! Get number of parameters
+	virtual const inline unsigned int GetNParameter() const {
+		return (
+				vDouble_.size()+vInt_.size()+vBool_.size()
+				+vMultiDouble_.size()+vMultiComplex_.size()
+		);
+	}
+
 	virtual std::shared_ptr<AbsParameter> GetParameter(const unsigned int i) const;
 
-	virtual bool ParameterExists(const std::string parname) const;
-
-	//! Getter for abstract parameter
-	/*!
-	 * Getter for abstract parameter pointer
-	 * \param parname name of parameter to load
-	 * \return shared pointer to parameter
-	 */
 	virtual std::shared_ptr<AbsParameter> GetParameter(const std::string parname) const;
 
-
-	//! Getter for number of parameter
-	virtual const inline unsigned int GetNParameter() const {return (vDoublePar_.size()+vIntPar_.size()+vBoolPar_.size()+vMultiDouble_.size()+vMultiComplex_.size());}
-	//! Getter for number of multi complex parameter
-	virtual const inline unsigned int GetNMultiComplex() const {return vMultiComplex_.size();}
-	//! Getter for number of multi double parameter
-	virtual const inline unsigned int GetNMultiDouble() const {return vMultiDouble_.size();}
-  //! Getter for number of multi unsigned int parameter
-  virtual const inline unsigned int GetNMultiUnsignedInteger() const {return vMultiUnsignedInteger_.size();}
-	//! Getter for number of complex parameter
-	virtual const inline unsigned int GetNComplex() const {return vComplexPar_.size();}
-	//! Getter for number of double parameter
-	virtual const inline unsigned int GetNDouble() const {return vDoublePar_.size();}
-	//! Getter for number of integer parameter
-	virtual const inline unsigned int GetNInteger() const {return vIntPar_.size();}
-	//! Getter for number of boolean parameter
-	virtual const inline unsigned int GetNBool() const {return vBoolPar_.size();}
-
-	//! Getter for complex parameter
-	/*!
-	 * Getter for complex parameter
-	 * \param i input number of parameter to load
-	 * \return par output container for loaded parameter
+	/**! Remove duplicate entries
+	 * If a parameter name is found multiple times only the fist occurance is kept.
+	 * The parameter values of parameters with the same name are not compared.
 	 */
-	virtual std::shared_ptr<ComplexParameter> GetComplexParameter(const unsigned int i) const;
+	virtual void RemoveDuplicates();
 
-	//! Getter for floating point parameter
-	/*!
-	 * Getter for floating point parameter
-	 * \param i input number of parameter to load
-	 * \return par output container for loaded parameter
-	 */
-	virtual std::shared_ptr<DoubleParameter> GetDoubleParameter(const unsigned int i) const;
-
-
-  //! Getter for unsigned int list parameter
-  /*!
-   * Getter for unsigned int list parameter MultiUnsignedInteger
-   * \param i input number of parameter to load
-   * \return par output container for loaded parameter
-   */
-	std::shared_ptr<MultiUnsignedInteger> GetMultiUnsignedInteger(
-	    const unsigned int i) const;
-
-	//! Getter for double list parameter
-	/*!
-	 * Getter for double list parameter MultiDouble
-	 * \param i input number of parameter to load
-	 * \return par output container for loaded parameter
-	 */
-	virtual std::shared_ptr<MultiDouble> GetMultiDouble(const unsigned int i) const;
-
-	//! Getter for complex list parameter
-	/*!
-	 * Getter for complex list parameter MultiComplex
-	 * \param i input number of parameter to load
-	 * \return par output container for loaded parameter
-	 */
-	virtual std::shared_ptr<MultiComplex> GetMultiComplex(const unsigned int i) const;
-
-	//! Getter for integer parameter
-	/*!
-	 * Getter for integer parameter
-	 * \param i input number of parameter to load
-	 * \return par output container for loaded parameter
-	 */
-	virtual std::shared_ptr<IntegerParameter> GetIntegerParameter(const unsigned int i) const;
-
-	//! Getter for boolean parameter
-	/*!
-	 * Getter for boolean parameter
-	 * \param i input number of parameter to load
-	 * \return par output container for loaded parameter
-	 */
-	virtual std::shared_ptr<BoolParameter> GetBoolParameter(const unsigned int i) const;
-
-	//! Getter for parameter value
-	/*!
-	 * Getter for parameter value
-	 * \param i input number of parameter to load
-	 * \return par output container for loaded parameter
-	 */
-	virtual const double GetParameterValue(const unsigned int i) const ;
-
-	//! Getter for complex list parameter
-	/*!
-	 * Getter for double list parameter MultiComplex
-	 * \param parname input name of parameter to load
-	 * \return par output container for loaded parameter
-	 */
-	virtual std::shared_ptr<MultiComplex> GetMultiComplex(const std::string parname) const;
-
-	//! Getter for double list parameter
-	/*!
-	 * Getter for double list parameter MultiDouble
-	 * \param parname input name of parameter to load
-	 * \return par output container for loaded parameter
-	 */
-	virtual std::shared_ptr<MultiDouble> GetMultiDouble(const std::string parname) const;
-
-  //! Getter for unsigned int list parameter
-  /*!
-   * Getter for unsigned int list parameter MultiUnsignedInteger
-   * \param parname input name of parameter to load
-   * \return par output container for loaded parameter
-   */
-  virtual std::shared_ptr<MultiUnsignedInteger> GetMultiUnsignedInteger(const std::string parname) const;
-
-	//! Getter for complex parameter
-	/*!
-	 * Getter for complex parameter
-	 * \param parname input name of parameter to load
-	 * \return par output container for loaded parameter
-	 */
-	virtual std::shared_ptr<ComplexParameter> GetComplexParameter(const std::string parname) const;
-
-	//! Getter for floating point parameter
-	/*!
-	 * Getter for floating point parameter
-	 * \param parname input name of parameter to load
-	 * \return par output container for loaded parameter
-	 */
-	virtual std::shared_ptr<DoubleParameter> GetDoubleParameter(const std::string parname) const;
-
-	//! Getter for integer parameter
-	/*!
-	 * Getter for integer parameter
-	 * \param i input number of parameter to load
-	 * \return par output container for loaded parameter
-	 */
-	virtual std::shared_ptr<IntegerParameter> GetIntegerParameter(const std::string parname) const;
-
-	//! Getter for boolean parameter
-	/*!
-	 * Getter for boolean parameter
-	 * \param parname input name of parameter to load
-	 * \return par output container for loaded parameter
-	 */
-	virtual std::shared_ptr<BoolParameter> GetBoolParameter(const std::string parname) const;
-
-
-	//! Getter for complex parameter
-	/*!
-	 * Getter for complex parameter
-	 * \param i input number of parameter to load
-	 * \return par output container for loaded parameter
-	 */
-	virtual std::vector<std::shared_ptr<ComplexParameter> > GetComplexParameters() const { return vComplexPar_; }
-
-	//! Getter for floating point parameter
-	/*!
-	 * Getter for floating point parameter
-	 * \param i input number of parameter to load
-	 * \return par output container for loaded parameter
-	 */
-	virtual std::vector<std::shared_ptr<DoubleParameter> > GetDoubleParameters() const { return vDoublePar_; }
-
-	//! Getter for double list parameter
-	/*!
-	 * Getter for double list parameter MultiDouble
-	 * \param i input number of parameter to load
-	 * \return par output container for loaded parameter
-	 */
-	virtual std::vector<std::shared_ptr<MultiDouble> > GetMultiDoubles() const { return vMultiDouble_; }
-
-  //! Getter for unsigned int list parameter
-  /*!
-   * Getter for unsigned int list parameter MultiUnsignedInteger
-   * \param i input number of parameter to load
-   * \return par output container for loaded parameter
-   */
-  virtual std::vector<std::shared_ptr<MultiUnsignedInteger> > GetMultiUnsignedIntegers() const { return vMultiUnsignedInteger_; }
-
-	//! Getter for complex list parameter
-	/*!
-	 * Getter for complex list parameter MultiComplex
-	 * \param i input number of parameter to load
-	 * \return par output container for loaded parameter
-	 */
-	virtual std::vector<std::shared_ptr<MultiComplex> > GetMultiComplexs() const { return vMultiComplex_; }
-
-	//! Getter for integer parameter
-	/*!
-	 * Getter for integer parameter
-	 * \param i input number of parameter to load
-	 * \return par output container for loaded parameter
-	 */
-	virtual std::vector<std::shared_ptr<IntegerParameter> > GetIntegerParameters() const { return vIntPar_; }
-
-	//! Getter for boolean parameter
-	/*!
-	 * Getter for boolean parameter
-	 * \param i input number of parameter to load
-	 * \return par output container for loaded parameter
-	 */
-	virtual std::vector<std::shared_ptr<BoolParameter> > GetBoolParameters() const { return vBoolPar_; }
-
-	//! Getter for parameter value
-	/*!
-	 * Getter for parameter value
-	 * \param parname input name of parameter to load
-	 * \return par output container for loaded parameter
-	 */
-	virtual const double GetParameterValue(const std::string parname) const ;
-
-	//! Setter for parameter value
-	/*!
-	 * Setter for parameter value
-	 * \param i input number of parameter to load
-	 * \param inVal input complex value for parameter
-	 */
-	virtual void SetParameterValue(const unsigned int i, const std::complex<double> inVal) ;
-
-	//! Setter for parameter value
-	/*!
-	 * Setter for parameter value
-	 * \param i input number of parameter to load
-	 * \param inVal input floating value for parameter
-	 */
-	virtual void SetParameterValue(const unsigned int i, const double inVal) ;
-
-	//! Setter for parameter value
-	/*!
-	 * Setter for parameter value
-	 * \param i input number of parameter to load
-	 * \param inVal input integer value for parameter
-	 */
-	virtual void SetParameterValue(const unsigned int i, const int inVal) ;
-
-	//! Setter for parameter value
-	/*!
-	 * Setter for parameter value
-	 * \param i input number of parameter to load
-	 * \param inVal input boolean value for parameter
-	 */
-	virtual void SetParameterValue(const unsigned int i, const bool inVal) ;
+	virtual bool ParameterExists(const std::string parname) const;
 
 	//! Add parameter via abstract pointer
 	/*!
@@ -385,75 +152,93 @@ public:
 	 */
 	virtual void AddParameter(std::shared_ptr<AbsParameter> par);
 
-	//! Add complex list parameter
-	/*!
-	 * Adds a complex parameter MultiComplex to the list
-	 * \param par input parameter
+	//! Get string
+	std::string const& to_str() ;
+
+	//! Append ParameterList to (*this). Shared_ptr are not(!) deep copied
+	virtual void Append(const ParameterList& addList);
+
+	//**************************************************************************
+	//************* Functions to access individual parameter types *************
+	//**************************************************************************
+
+	//================= Bool Parameter ==================
+	//! Getter for number of boolean parameter
+	virtual const inline unsigned int GetNBool() const {
+		return vBool_.size();
+	}
+	/**! A public function returning a string with parameter information
+	 * This function simply returns the member string out_, which contains
+	 * all parameter information. The string gets created using the outstream
+	 * of the PWAParameter class.
+	 * \return string with parameter information
+	 * \sa operator<<
 	 */
-	virtual void AddParameter(std::shared_ptr<MultiComplex> par);
+	virtual std::vector<std::shared_ptr<BoolParameter> >::const_iterator
+	FindBoolParameter( const std::string name ) const;
 
-	//! Add double list parameter
-	/*!
-	 * Adds a double parameter MultiDouble to the list
-	 * \param par input parameter
-	 */
-	virtual void AddParameter(std::shared_ptr<MultiDouble> par);
 
-  //! Add unsigned int list parameter
-  /*!
-   * Adds a unsigned int parameter MultiUnsignedInteger to the list
-   * \param par input parameter
-   */
-  virtual void AddParameter(std::shared_ptr<MultiUnsignedInteger> par);
 
-	//! Add complex parameter
-	/*!
-	 * Adds a complex parameter to the list
-	 * \param par input parameter
-	 */
-	virtual void AddParameter(std::shared_ptr<ComplexParameter> par);
+	//! Get ID of Bool parameter
+	virtual unsigned int FindBoolId( const std::string name );
 
-	//! Add floating point parameter
-	/*!
-	 * Adds a floating point parameter to the list
-	 * \param par input parameter
-	 */
-	virtual void AddParameter(std::shared_ptr<DoubleParameter> par);
-
-	//! Add integer parameter
-	/*!
-	 * Adds an integer parameter to the list
-	 * \param par input parameter
-	 */
-	virtual void AddParameter(std::shared_ptr<IntegerParameter> par);
-
-	//! Add boolean parameter
-	/*!
+	/**! Add boolean parameter
 	 * Adds an boolean parameter to the list
 	 * \param par input parameter
 	 */
 	virtual void AddParameter(std::shared_ptr<BoolParameter> par);
 
-	//! Remove complex parameter
+	//! Getter for boolean parameter
 	/*!
-	 * Remove a complex parameter from the list
-	 * \param id of parameter to remove
+	 * Getter for boolean parameter
+	 * \param parname input name of parameter to load
+	 * \return par output container for loaded parameter
 	 */
-	virtual void RemoveComplex(const unsigned int id);
+	virtual std::shared_ptr<BoolParameter>
+	GetBoolParameter(const std::string parname) const ;
 
-	//! Remove floating point parameter
+	//! Getter for boolean parameter
 	/*!
-	 * Remove a floating point parameter from the list
-	 * \param par input parameter
+	 * Getter for boolean parameter
+	 * \param i input number of parameter to load
+	 * \return par output container for loaded parameter
 	 */
-	virtual void RemoveDouble(const unsigned int id);
+	virtual std::shared_ptr<BoolParameter>
+	GetBoolParameter(const unsigned int i) const ;
 
-	//! Remove integer parameter
+	//! Getter for boolean parameter
 	/*!
-	 * Remove an integer parameter from the list
-	 * \param par input parameter
+	 * Getter for boolean parameter
+	 * \param i input number of parameter to load
+	 * \return par output container for loaded parameter
 	 */
-	virtual void RemoveInteger(const unsigned int id);
+	virtual std::vector<std::shared_ptr<BoolParameter> >
+	GetBoolParameters() const {
+		return vBool_;
+	}
+
+	//! Get value of Bool parameter by name
+	virtual const bool GetBoolParameterValue(const std::string parname) const;
+
+	//! Get value of Bool parameter by id
+	virtual const bool GetBoolParameterValue(const unsigned int i) const;
+
+	//! Set value of Bool parameter by name
+	virtual void SetParameterValue(const std::string name, const bool inVal);
+
+	/*! Setter for parameter value
+	 * Setter for parameter value
+	 * \param i input number of parameter to load
+	 * \param inVal input boolean value for parameter
+	 */
+	virtual void SetParameterValue(const unsigned int i, const bool inVal);
+
+	//! Remove boolean parameter
+	/*!
+	 * Remove an boolean parameter from the list
+	 * \param parName parameter name
+	 */
+	virtual void RemoveBool(const std::string name);
 
 	//! Remove boolean parameter
 	/*!
@@ -462,63 +247,477 @@ public:
 	 */
 	virtual void RemoveBool(const unsigned int id);
 
-	//! Remove complex parameter
-	/*!
-	 * Remove a complex parameter from the list
-	 * \param parName parameter name
-	 */
-	virtual void RemoveComplex(const std::string parName);
-
-	//! Remove floating point parameter
-	/*!
-	 * Remove a floating point parameter from the list
-	 * \param parName parameter name
-	 */
-	virtual void RemoveDouble(const std::string parName);
-
-	//! Remove integer parameter
-	/*!
-	 * Remove an integer parameter from the list
-	 * \param parName parameter name
-	 */
-	virtual void RemoveInteger(const std::string parName);
-
-	//! Remove boolean parameter
-	/*!
-	 * Remove an boolean parameter from the list
-	 * \param parName parameter name
-	 */
-	virtual void RemoveBool(const std::string parName);
-
-	//! A public function returning a string with parameter information
-	/*!
+	//================= Integer Parameter ==================
+	//! Getter for number of integer parameter
+	virtual const inline unsigned int GetNInteger() const {
+		return vInt_.size();
+	}
+	/**! A public function returning a string with parameter information
 	 * This function simply returns the member string out_, which contains
 	 * all parameter information. The string gets created using the outstream
 	 * of the PWAParameter class.
 	 * \return string with parameter information
 	 * \sa operator<<
 	 */
-	std::string const& to_str() ;
+	virtual std::vector<std::shared_ptr<IntegerParameter> >::const_iterator
+	FindIntegerParameter( const std::string name ) const;
 
-	//! Append ParameterList to (*this). Shared_ptr are not(!) deep copied
-	virtual void Append(const ParameterList& addList);
+	//! Get ID of Integer parameter
+	virtual unsigned int FindIntegerId( const std::string name );
+
+	/**! Add integer parameter
+	 * Adds an integer parameter to the list
+	 * \param par input parameter
+	 */
+	virtual void AddParameter(std::shared_ptr<IntegerParameter> par);
+
+	//! Getter for integer parameter
+	/*!
+	 * Getter for integer parameter
+	 * \param parname input name of parameter to load
+	 * \return par output container for loaded parameter
+	 */
+	virtual std::shared_ptr<IntegerParameter>
+	GetIntegerParameter(const std::string parname) const ;
+
+	//! Getter for integer parameter
+	/*!
+	 * Getter for integer parameter
+	 * \param i input number of parameter to load
+	 * \return par output container for loaded parameter
+	 */
+	virtual std::shared_ptr<IntegerParameter>
+	GetIntegerParameter(const unsigned int i) const ;
+
+	//! Getter for integer parameter
+	/*!
+	 * Getter for integer parameter
+	 * \param i input number of parameter to load
+	 * \return par output container for loaded parameter
+	 */
+	virtual std::vector<std::shared_ptr<IntegerParameter> >
+	GetIntegerParameters() const {
+		return vInt_;
+	}
+
+	//! Get value of Integer parameter by name
+	virtual const int GetIntegerParameterValue(const std::string parname) const;
+
+	//! Get value of Integer parameter by id
+	virtual const int GetIntegerParameterValue(const unsigned int i) const;
+
+	//! Set value of Integer parameter by name
+	virtual void SetParameterValue(const std::string name, const int inVal);
+
+	/*! Setter for parameter value
+	 * Setter for parameter value
+	 * \param i input number of parameter to load
+	 * \param inVal input integer value for parameter
+	 */
+	virtual void SetParameterValue(const unsigned int i, const int inVal);
+
+	//! Remove integer parameter
+	/*!
+	 * Remove an integer parameter from the list
+	 * \param parName parameter name
+	 */
+	virtual void RemoveInteger(const std::string name);
+
+	//! Remove integer parameter
+	/*!
+	 * Remove an integer parameter from the list
+	 * \param par input parameter
+	 */
+	virtual void RemoveInteger(const unsigned int id);
+
+	//================= Double Parameter ==================
+	//! Getter for number of double parameter
+	virtual const inline unsigned int GetNDouble() const {
+		return vDouble_.size();
+	}
+	/**! A public function returning a string with parameter information
+	 * This function simply returns the member string out_, which contains
+	 * all parameter information. The string gets created using the outstream
+	 * of the PWAParameter class.
+	 * \return string with parameter information
+	 * \sa operator<<
+	 */
+	virtual std::vector<std::shared_ptr<DoubleParameter> >::const_iterator
+	FindDoubleParameter( const std::string name ) const;
+
+	//! Get ID of Double parameter
+	virtual unsigned int FindDoubleId( const std::string name );
+
+	/**! Add double parameter
+	 * Adds an double parameter to the list
+	 * \param par input parameter
+	 */
+	virtual void AddParameter(std::shared_ptr<DoubleParameter> par);
+
+	//! Getter for double parameter
+	/*!
+	 * Getter for double parameter
+	 * \param parname input name of parameter to load
+	 * \return par output container for loaded parameter
+	 */
+	virtual std::shared_ptr<DoubleParameter>
+	GetDoubleParameter(const std::string parname) const ;
+
+	//! Getter for double parameter
+	/*!
+	 * Getter for double parameter
+	 * \param i input number of parameter to load
+	 * \return par output container for loaded parameter
+	 */
+	virtual std::shared_ptr<DoubleParameter>
+	GetDoubleParameter(const unsigned int i) const ;
+
+	//! Getter for double parameter
+	/*!
+	 * Getter for double parameter
+	 * \param i input number of parameter to load
+	 * \return par output container for loaded parameter
+	 */
+	virtual std::vector<std::shared_ptr<DoubleParameter> >
+	GetDoubleParameters() const {
+		return vDouble_;
+	}
+
+	//! Get value of Double parameter by name
+	virtual const double
+	GetDoubleParameterValue(const std::string parname) const;
+
+	//! Get value of Double parameter by id
+	virtual const double GetDoubleParameterValue(const unsigned int i) const;
+
+	//! Set value of Double parameter by name
+	virtual void SetParameterValue(const std::string name, const double inVal);
+
+	/*! Setter for parameter value
+	 * Setter for parameter value
+	 * \param i input number of parameter to load
+	 * \param inVal input double value for parameter
+	 */
+	virtual void SetParameterValue(const unsigned int i, const double inVal);
+
+	//! Remove double parameter
+	/*!
+	 * Remove an double parameter from the list
+	 * \param parName parameter name
+	 */
+	virtual void RemoveDouble(const std::string name);
+
+	//! Remove double parameter
+	/*!
+	 * Remove an double parameter from the list
+	 * \param par input parameter
+	 */
+	virtual void RemoveDouble(const unsigned int id);
+
+	//================= Complex Parameter ==================
+	//! Getter for number of complex parameter
+	virtual const inline unsigned int GetNComplex() const {
+		return vComplex_.size();
+	}
+	/**! A public function returning a string with parameter information
+	 * This function simply returns the member string out_, which contains
+	 * all parameter information. The string gets created using the outstream
+	 * of the PWAParameter class.
+	 * \return string with parameter information
+	 * \sa operator<<
+	 */
+	virtual std::vector<std::shared_ptr<ComplexParameter> >::const_iterator
+	FindComplexParameter( const std::string name ) const;
+
+	//! Get ID of Complex parameter
+	virtual unsigned int FindComplexId( const std::string name );
+
+	/**! Add complex parameter
+	 * Adds an complex parameter to the list
+	 * \param par input parameter
+	 */
+	virtual void AddParameter(std::shared_ptr<ComplexParameter> par);
+
+	//! Getter for complex parameter
+	/*!
+	 * Getter for complex parameter
+	 * \param parname input name of parameter to load
+	 * \return par output container for loaded parameter
+	 */
+	virtual std::shared_ptr<ComplexParameter>
+	GetComplexParameter(const std::string parname) const ;
+
+	//! Getter for complex parameter
+	/*!
+	 * Getter for complex parameter
+	 * \param i input number of parameter to load
+	 * \return par output container for loaded parameter
+	 */
+	virtual std::shared_ptr<ComplexParameter>
+	GetComplexParameter(const unsigned int i) const ;
+
+	//! Getter for complex parameter
+	/*!
+	 * Getter for complex parameter
+	 * \param i input number of parameter to load
+	 * \return par output container for loaded parameter
+	 */
+	virtual std::vector<std::shared_ptr<ComplexParameter> >
+	GetComplexParameters() const { return vComplex_; }
+
+	//! Get value of Complex parameter by name
+	virtual const std::complex<double>
+	GetComplexParameterValue(const std::string parname) const;
+
+	//! Get value of Complex parameter by id
+	virtual const std::complex<double>
+	GetComplexParameterValue(const unsigned int i) const;
+
+	//! Set value of Complex parameter by name
+	virtual void
+	SetParameterValue(const std::string name, const std::complex<double> inVal);
+
+	/*! Setter for parameter value
+	 * Setter for parameter value
+	 * \param i input number of parameter to load
+	 * \param inVal input complex value for parameter
+	 */
+	virtual void
+	SetParameterValue(const unsigned int i, const std::complex<double> inVal);
+
+	//! Remove complex parameter
+	/*!
+	 * Remove an complex parameter from the list
+	 * \param parName parameter name
+	 */
+	virtual void RemoveComplex(const std::string name);
+
+	//! Remove complex parameter
+	/*!
+	 * Remove an complex parameter from the list
+	 * \param par input parameter
+	 */
+	virtual void RemoveComplex(const unsigned int id);
+
+	//================= MultiDouble Parameter ==================
+	//! Getter for number of multi-double parameter
+	virtual const inline unsigned int GetNMultiDouble() const {
+		return vMultiDouble_.size();
+	}
+	/**! A public function returning a string with parameter information
+	 * This function simply returns the member string out_, which contains
+	 * all parameter information. The string gets created using the outstream
+	 * of the PWAParameter class.
+	 * \return string with parameter information
+	 * \sa operator<<
+	 */
+	virtual std::vector<std::shared_ptr<MultiDouble> >::const_iterator
+	FindMultiDouble( const std::string name ) const;
+
+	//! Get ID of MultiDouble parameter
+	virtual unsigned int FindMultiDoubleId( const std::string name );
+
+	/**! Add multi-double parameter
+	 * Adds an multi-double parameter to the list
+	 * \param par input parameter
+	 */
+	virtual void AddParameter(std::shared_ptr<MultiDouble> par);
+
+	//! Getter for multi-double parameter
+	/*!
+	 * Getter for multi-double parameter
+	 * \param parname input name of parameter to load
+	 * \return par output container for loaded parameter
+	 */
+	virtual std::shared_ptr<MultiDouble>
+	GetMultiDouble(const std::string parname) const ;
+
+	//! Getter for multi-double parameter
+	/*!
+	 * Getter for multi-double parameter
+	 * \param i input number of parameter to load
+	 * \return par output container for loaded parameter
+	 */
+	virtual std::shared_ptr<MultiDouble>
+	GetMultiDouble(const unsigned int i) const ;
+
+	//! Getter for multi-double parameter
+	/*!
+	 * Getter for multi-double parameter
+	 * \param i input number of parameter to load
+	 * \return par output container for loaded parameter
+	 */
+	virtual std::vector<std::shared_ptr<MultiDouble> >
+	GetMultiDoubles() const {
+		return vMultiDouble_;
+	}
+
+	//! Remove multi-double parameter
+	/*!
+	 * Remove an multi-double parameter from the list
+	 * \param parName parameter name
+	 */
+	virtual void RemoveMultiDouble(const std::string name);
+
+	//! Remove multi-double parameter
+	/*!
+	 * Remove an multi-double parameter from the list
+	 * \param par input parameter
+	 */
+	virtual void RemoveMultiDouble(const unsigned int id);
+
+	//================= MultiComplex Parameter ==================
+	//! Getter for number of multi-complex parameter
+	virtual const inline unsigned int GetNMultiComplex() const {
+		return vMultiComplex_.size();
+	}
+	/**! A public function returning a string with parameter information
+	 * This function simply returns the member string out_, which contains
+	 * all parameter information. The string gets created using the outstream
+	 * of the PWAParameter class.
+	 * \return string with parameter information
+	 * \sa operator<<
+	 */
+	virtual std::vector<std::shared_ptr<MultiComplex> >::const_iterator
+	FindMultiComplex( const std::string name ) const;
+
+	//! Get ID of MultiComplex parameter
+	virtual unsigned int FindMultiComplexId( const std::string name );
+
+	/**! Add multi-complex parameter
+	 * Adds an multi-complex parameter to the list
+	 * \param par input parameter
+	 */
+	virtual void AddParameter(std::shared_ptr<MultiComplex> par);
+
+	//! Getter for multi-complex parameter
+	/*!
+	 * Getter for multi-complex parameter
+	 * \param parname input name of parameter to load
+	 * \return par output container for loaded parameter
+	 */
+	virtual std::shared_ptr<MultiComplex>
+	GetMultiComplex(const std::string parname) const ;
+
+	//! Getter for multi-complex parameter
+	/*!
+	 * Getter for multi-complex parameter
+	 * \param i input number of parameter to load
+	 * \return par output container for loaded parameter
+	 */
+	virtual std::shared_ptr<MultiComplex>
+	GetMultiComplex(const unsigned int i) const ;
+
+	//! Getter for multi-complex parameter
+	/*!
+	 * Getter for multi-complex parameter
+	 * \param i input number of parameter to load
+	 * \return par output container for loaded parameter
+	 */
+	virtual std::vector<std::shared_ptr<MultiComplex> >
+	GetMultiComplexs() const {
+		return vMultiComplex_;
+	}
+
+	//! Remove multi-complex parameter
+	/*!
+	 * Remove an multi-complex parameter from the list
+	 * \param parName parameter name
+	 */
+	virtual void RemoveMultiComplex(const std::string name);
+
+	//! Remove multi-complex parameter
+	/*!
+	 * Remove an multi-complex parameter from the list
+	 * \param par input parameter
+	 */
+	virtual void RemoveMultiComplex(const unsigned int id);
+
+	//================= MultiUnsigedInteger Parameter ==================
+	//! Getter for number of multi-complex parameter
+	virtual const inline unsigned int GetNMultiUnsignedInteger() const {
+		return vMultiUnsignedInteger_.size();
+	}
+	/**! A public function returning a string with parameter information
+	 * This function simply returns the member string out_, which contains
+	 * all parameter information. The string gets created using the outstream
+	 * of the PWAParameter class.
+	 * \return string with parameter information
+	 * \sa operator<<
+	 */
+	virtual std::vector<std::shared_ptr<MultiUnsignedInteger> >::const_iterator
+	FindMultiUnsignedInteger( const std::string name ) const;
+
+	//! Get ID of MultiUnsignedInteger parameter
+	virtual unsigned int FindMultiUnsignedIntegerId( const std::string name );
+
+	/**! Add multi-complex parameter
+	 * Adds an multi-complex parameter to the list
+	 * \param par input parameter
+	 */
+	virtual void AddParameter(std::shared_ptr<MultiUnsignedInteger> par);
+
+	//! Getter for multi-complex parameter
+	/*!
+	 * Getter for multi-complex parameter
+	 * \param parname input name of parameter to load
+	 * \return par output container for loaded parameter
+	 */
+	virtual std::shared_ptr<MultiUnsignedInteger>
+	GetMultiUnsignedInteger(const std::string parname) const ;
+
+	//! Getter for multi-complex parameter
+	/*!
+	 * Getter for multi-complex parameter
+	 * \param i input number of parameter to load
+	 * \return par output container for loaded parameter
+	 */
+	virtual std::shared_ptr<MultiUnsignedInteger>
+	GetMultiUnsignedInteger(const unsigned int i) const ;
+
+	//! Getter for multi-complex parameter
+	/*!
+	 * Getter for multi-complex parameter
+	 * \param i input number of parameter to load
+	 * \return par output container for loaded parameter
+	 */
+	virtual std::vector<std::shared_ptr<MultiUnsignedInteger> >
+	GetMultiUnsignedIntegers() const {
+		return vMultiUnsignedInteger_;
+	}
+
+	//! Remove multi-complex parameter
+	/*!
+	 * Remove an multi-complex parameter from the list
+	 * \param parName parameter name
+	 */
+	virtual void RemoveMultiUnsignedInteger(const std::string name);
+
+	//! Remove multi-complex parameter
+	/*!
+	 * Remove an multi-complex parameter from the list
+	 * \param par input parameter
+	 */
+	virtual void RemoveMultiUnsignedInteger(const unsigned int id);
 
 protected:
-	std::map<std::string,unsigned int> mMultiComplexID_; /*!< Map of complex list parameter ids */
-	std::map<std::string,unsigned int> mMultiDoubleID_; /*!< Map of double list parameter ids */
-  std::map<std::string,unsigned int> mMultiUnsignedIntegerID_; /*!< Map of unsigned int list parameter ids */
-	std::map<std::string,unsigned int> mComplexParID_; /*!< Map of complex parameter ids */
-	std::map<std::string,unsigned int> mDoubleParID_; /*!< Map of floating point parameter ids */
-	std::map<std::string,unsigned int> mIntParID_; /*!< Map of integer parameter ids */
-	std::map<std::string,unsigned int> mBoolParID_; /*!< Map of boolean parameter ids */
-	std::vector<std::shared_ptr<MultiComplex> > vMultiComplex_; /*!< Vector of complex parameter lists */
-	std::vector<std::shared_ptr<MultiDouble> > vMultiDouble_; /*!< Vector of floating point parameter lists */
-  std::vector<std::shared_ptr<MultiUnsignedInteger> > vMultiUnsignedInteger_; /*!< Vector of unsigned int parameter lists */
-	std::vector<std::shared_ptr<ComplexParameter> > vComplexPar_; /*!< Vector of complex parameters */
-	std::vector<std::shared_ptr<DoubleParameter> > vDoublePar_; /*!< Vector of floating point parameters */
-	std::vector<std::shared_ptr<IntegerParameter> > vIntPar_; /*!< Vector of integer parameters */
-	std::vector<std::shared_ptr<BoolParameter> > vBoolPar_; /*!< Vector of boolean parameters */
-	std::string out_; /*!< Output string to print information */
+	/*!< Vector of boolean parameters */
+	std::vector<std::shared_ptr<BoolParameter> > vBool_;
+	/*!< Vector of integer parameters */
+	std::vector<std::shared_ptr<IntegerParameter> > vInt_;
+	/*!< Vector of floating point parameters */
+	std::vector<std::shared_ptr<DoubleParameter> > vDouble_;
+	/*!< Vector of complex parameters */
+	std::vector<std::shared_ptr<ComplexParameter> > vComplex_;
+	/*!< Vector of floating point parameter lists */
+	std::vector<std::shared_ptr<MultiDouble> > vMultiDouble_;
+	/*!< Vector of complex parameter lists */
+	std::vector<std::shared_ptr<MultiComplex> > vMultiComplex_;
+	/*!< Vector of unsigned int parameter lists */
+	std::vector<std::shared_ptr<MultiUnsignedInteger> > vMultiUnsignedInteger_;
+
+	/*!< Output string to print information */
+	std::string out_;
 
 	//! A protected function which creates an output string for printing
 	/*!
@@ -543,11 +742,24 @@ private:
 	void serialize(archive& ar, const unsigned int version)
 	{
 		using namespace boost::serialization;
-		ar & make_nvp("DoubleParameters",vDoublePar_); //currently only DoubleParameters can be serialized
+		//currently only DoubleParameters can be serialized
+		ar & make_nvp("DoubleParameters",vDouble_);
+		ar & make_nvp("OutString",out_);
 	}
 };
 
+
 } /* namespace ComPWA */
+
+BOOST_SERIALIZATION_SHARED_PTR( ParameterList )
+BOOST_CLASS_IMPLEMENTATION(
+		ComPWA::ParameterList,
+		boost::serialization::object_serializable
+		)
+BOOST_CLASS_TRACKING(
+		ComPWA::ParameterList,
+		boost::serialization::track_never
+		)
 
 #include <boost/serialization/split_free.hpp>
 #include <boost/unordered_map.hpp>
@@ -556,40 +768,40 @@ private:
 //---/ Wrapper for std::shared_ptr<> /------------------------------------------
 
 namespace boost {
-namespace serialization {
+	namespace serialization {
 
-template<class Archive, class Type>
-void save(Archive & archive, const std::shared_ptr<Type> & value, const unsigned int /*version*/)
-{
-	Type *data = value.get();
-	archive << make_nvp("shared_ptr",data);
-}
-
-template<class Archive, class Type>
-void load(Archive & archive, std::shared_ptr<Type> & value, const unsigned int /*version*/)
-{
-	Type *data;
-	archive >> make_nvp("shared_ptr",data);
-//	archive >>data;
-
-	typedef std::weak_ptr<Type> WeakPtr;
-	static boost::unordered_map<void*, WeakPtr> hash;
-
-	if (hash[data].expired())
+	template<class Archive, class Type>
+	void save(Archive & archive, const std::shared_ptr<Type> & value, const unsigned int /*version*/)
 	{
-		value = std::shared_ptr<Type>(data);
-		hash[data] = value;
+		Type *data = value.get();
+		archive << make_nvp("shared_ptr",data);
 	}
-	else value = hash[data].lock();
-}
 
-template<class Archive, class Type>
-inline void serialize(Archive & archive, std::shared_ptr<Type> & value, const unsigned int version)
-{
-	split_free(archive, value, version);
-}
+	template<class Archive, class Type>
+	void load(Archive & archive, std::shared_ptr<Type> & value, const unsigned int /*version*/)
+	{
+		Type *data;
+		archive >> make_nvp("shared_ptr",data);
+		//	archive >>data;
 
-}//ns:serialization
+		typedef std::weak_ptr<Type> WeakPtr;
+		static boost::unordered_map<void*, WeakPtr> hash;
+
+		if (hash[data].expired())
+		{
+			value = std::shared_ptr<Type>(data);
+			hash[data] = value;
+		}
+		else value = hash[data].lock();
+	}
+
+	template<class Archive, class Type>
+	inline void serialize(Archive & archive, std::shared_ptr<Type> & value, const unsigned int version)
+	{
+		split_free(archive, value, version);
+	}
+
+	}//ns:serialization
 }//ns:boost
 
 #endif

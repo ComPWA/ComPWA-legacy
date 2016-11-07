@@ -44,40 +44,19 @@ public:
 
   virtual bool hasTree() { return 0; }
 
-  virtual std::shared_ptr<FunctionTree> getTree() { return std::shared_ptr<FunctionTree>(); }
-
-  virtual std::shared_ptr<Amplitude> getAmplitude() { return std::shared_ptr<Amplitude>(); }
-
   //! Get penalty term
   virtual double calcPenalty() { return 0.0; }
 
+  //! Get penalty scale
+  virtual double getPenaltyScale() { return 1.0; }
+
   //! Get number of events in data set
   virtual int getNEvents() { return -999; }
+
 protected:
-    //static std::shared_ptr<Estimator> instance_;
-
-    Estimator(){
-    }
-
-    virtual ~Estimator(){
-    /* nothing */
-    }
-
-
+    Estimator(){ }
+    virtual ~Estimator(){ /* nothing */ }
 };
-
-//std::shared_ptr<Estimator> Estimator::Instance() {
- //   return Estimator::instance_;
-//}
-
-//std::shared_ptr<Estimator> Estimator::instance_ = 0;
-
-//Why can i do this here but not inside ControlParameter.hpp?
-/*std::shared_ptr<ControlParameter> ControlParameter::Instance() {
-    return ControlParameter::instance_;
-}
-
-std::shared_ptr<ControlParameter> ControlParameter::instance_ = 0;*/
 
 } /* namespace Estimator */
 } /* namespace ComPWA */

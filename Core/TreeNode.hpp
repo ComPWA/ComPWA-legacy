@@ -43,7 +43,8 @@ public:
 	 * /param strat strategy how this node is calculated
 	 * /param parent pointer to connected upper level node
 	 */
-	TreeNode(std::string name, std::shared_ptr<AbsParameter> intResult, std::shared_ptr<Strategy> strat, std::shared_ptr<TreeNode> parent);
+	TreeNode(std::string name, std::shared_ptr<AbsParameter> intResult,
+			std::shared_ptr<Strategy> strat, std::shared_ptr<TreeNode> parent);
 
 	//! Standard constructor
 	/*!
@@ -53,7 +54,9 @@ public:
 	 * /param strat strategy how this node is calculated
 	 * /param parent pointer to connected upper level node
 	 */
-	TreeNode(std::string name, std::vector<std::shared_ptr<AbsParameter>>& intResult, std::shared_ptr<Strategy> strat, std::shared_ptr<TreeNode> parent);
+	TreeNode(std::string name,
+			std::vector<std::shared_ptr<AbsParameter>>& intResult,
+			std::shared_ptr<Strategy> strat, std::shared_ptr<TreeNode> parent);
 
 	//! Destructor
 	~TreeNode();
@@ -69,23 +72,11 @@ public:
 		return _changed;
 	};
 
-	//inline void changeVal(const double& newVal){
-	//  _value=newVal;
-	//  for(unsigned int i=0; i<_parents.size(); i++)
-	//    _parents[i]->Update();
-	//changed=true;
-	//};
-
 	//! Trigger flagged to be recalculated
 	void Update();
 
 	//! Trigger recalculation
 	void recalculate();
-
-	//! Get pointer to node value
-	//const std::shared_ptr<AbsParameter> getValue(){
-	//  return _value[0];
-	//};
 
 	//! Get pointer to node value
 	const std::shared_ptr<AbsParameter> getValue(unsigned int ele=0){
@@ -131,27 +122,12 @@ public:
 	};
 
 	//! delete children & parent pointer
-	const void deleteLinks(){
-		_children.clear();
-		_parents.clear();
-		for(unsigned int i=0; i<_value.size(); i++){
-			_value[i]->Detach(shared_from_this());
-		}
-	};
-
-	//! Get value of this node
-	/*!
-	 * pure virtual function inheriting classes must implement to provide a
-	 * value calculated or set in this node
-	 * /return complex number for this node-value
-	 */
-	//virtual const std::complex<double> getNodeValue() =0; //TODO: complex? Template?
+	const void deleteLinks();
 
 	/*! String used to display tree
 	 *\param lv print down to level lv, if lv=-1 print to whole tree, if lv=0 print current node only
 	 */
 	std::string to_str(int lv=-1, std::string beginning="");
-
 
 	/** Return Node of tree
 	 * We go recursively through the tree to find the specified node and return a shared_ptr of it
@@ -159,18 +135,8 @@ public:
 	 * @param name node specifier
 	 * @return pointer to node
 	 */
-	virtual std::shared_ptr<TreeNode> getChildNode(std::string name) const{
-		std::shared_ptr<TreeNode> node;
-		if(!_children.size()) node = std::shared_ptr<TreeNode>();
-		for(unsigned int i=0; i<_children.size(); i++){
-			if(_children.at(i)->getName()==name){
-				return _children.at(i);
-			} else
-				node = _children.at(i)->getChildNode(name);
-				if(node) return node;
-		}
-		return node;
-	}
+	virtual std::shared_ptr<TreeNode> getChildNode(std::string name) const;
+
 	/** Return value of certain child node
 	 * We go recursively through out tree to find the specified node and return its value. In case
 	 * of a node with multiple values we return the first one. Currently we assume that the variable
@@ -179,32 +145,8 @@ public:
 	 * @param name node specifier
 	 * @return current value of node
 	 */
-	virtual std::complex<double> getChildValue(std::string name) const{
-		if(!_children.size()) return std::complex<double>(-999,0);
-		for(unsigned int i=0; i<_children.size(); i++){
-			std::complex<double> ret(-999,0);
-			if(_children[i]->getName()==name){
-				if(_children[i]->getValue()->type() == ParType::DOUBLE)
-					return std::complex<double>((std::dynamic_pointer_cast<DoubleParameter>(_children[i]->getValue(0)))->GetValue(),0);
-				if(_children[i]->getValue()->type() == ParType::COMPLEX)
-					return std::complex<double>((std::dynamic_pointer_cast<ComplexParameter>(_children[i]->getValue(0)))->GetValue());
-				if(_children[i]->getValue()->type() == ParType::INTEGER)
-					return std::complex<double>((std::dynamic_pointer_cast<IntegerParameter>(_children[i]->getValue(0)))->GetValue(),0);
-				if(_children[i]->getValue()->type() == ParType::BOOL)
-					return std::complex<double>((std::dynamic_pointer_cast<BoolParameter>(_children[i]->getValue(0)))->GetValue(),0);
-				if(_children[i]->getValue()->type() == ParType::MDOUBLE)
-					return std::complex<double>((std::dynamic_pointer_cast<MultiDouble>(_children[i]->getValue(0)))->GetValue(0),0);
-				if(_children[i]->getValue()->type() == ParType::MCOMPLEX)
-					return std::complex<double>((std::dynamic_pointer_cast<MultiComplex>(_children[i]->getValue(0)))->GetValue(0));
-			}
-			else {
-				ret = _children[i]->getChildValue(name);
-				if(ret.real()!=-999) return ret;
-				else continue;
-			}
-		}
-		return std::complex<double>(-999,0);
-	}
+	virtual std::complex<double> getChildSingleValue(std::string name) const;
+
 	/** Return vector of values of certain child node
 	 * We go recursively through out tree to find the specified node and the vector of its contents.
 	 * In cast the nodes doesn't have multiple values with return a vector of the size 1.
@@ -212,37 +154,11 @@ public:
 	 * @param name node specifier
 	 * @return current vector of values of node
 	 */
-	virtual std::vector<double> getChildMultiDoubleValue(std::string name) const{
-		std::vector<double> ret;
-		if(!_children.size()) {
-			return ret;
-		}
-		for(unsigned int i=0; i<_children.size(); i++){
-			if(_children[i]->getName()==name){
-//				if(_children[i]->getValue()->type() == ParType::DOUBLE){
-//					ret.push_back((std::dynamic_pointer_cast<DoubleParameter>(_children[i]->getValue(0)))->GetValue());
-//					return ret;
-//				}
-//				if(_children[i]->getValue()->type() == ParType::COMPLEX)
-//					return std::complex<double>((std::dynamic_pointer_cast<ComplexParameter>(_children[i]->getValue(0)))->GetValue());
-//				if(_children[i]->getValue()->type() == ParType::INTEGER)
-//					return std::complex<double>((std::dynamic_pointer_cast<IntegerParameter>(_children[i]->getValue(0)))->GetValue(),0);
-//				if(_children[i]->getValue()->type() == ParType::BOOL)
-//					return std::complex<double>((std::dynamic_pointer_cast<BoolParameter>(_children[i]->getValue(0)))->GetValue(),0);
-				if(_children[i]->getValue()->type() == ParType::MDOUBLE)
-					return std::dynamic_pointer_cast<MultiDouble>(_children[i]->getValue(0))->GetValues();
-			}
-			else {
-				ret = _children[i]->getChildMultiDoubleValue(name);
-				if(ret.size()>0) return ret;
-				else continue;
-			}
-		}
-		return ret;
-	}
+	virtual std::shared_ptr<AbsParameter> getChildValue(std::string name) const;
 
 	//! Stream-Operator used to display tree
 	friend std::ostream & operator<<(std::ostream &os, std::shared_ptr<TreeNode> p);
+
 	/*! Print structure of tree and its values
 	 * \param lv Print down to level lv, lv=-1 print the whole tree
 	 */
@@ -255,14 +171,9 @@ protected:
 	std::vector<std::shared_ptr<AbsParameter>> _value; /*!< Value of this node */
 	std::string _name; /*!< Unique name of this node */
 	bool _changed; /*!< flag if node needs recalculation */
-	//std::string childOP;
 
 	std::shared_ptr<Strategy> _strat; /*!< Strategy how node calculates its value */
 };
-
-//std::ostream & operator<<(std::ostream &os, std::shared_ptr<TreeNode> p){
-//  return os << p->to_str();
-//}
 
 } /* namespace ComPWA */
 

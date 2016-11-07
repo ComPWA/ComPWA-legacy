@@ -35,7 +35,7 @@
 #include "RooAbsArg.h"
 #include "RooRealProxy.h"
 
-#include "Physics/Amplitude.hpp"
+#include "Core/Amplitude.hpp"
 #include "Core/Parameter.hpp"
 #include "Core/ParameterList.hpp"
 
@@ -43,7 +43,7 @@
 #include "Physics/AmplitudeSum/AmpRelBreitWignerRes.hpp"
 #include "Physics/AmplitudeSum/AmpGausRes.hpp"
 #include "Physics/AmplitudeSum/AmpFlatteRes.hpp"
-#include "Physics/AmplitudeSum/AmpWigner.hpp"
+#include "Physics/AmplitudeSum/AmpWigner2.hpp"
 #include "Physics/AmplitudeSum/AmpSumOfAmplitudes.hpp"
 
 class AmpSumSliceIntensity : public Amplitude {

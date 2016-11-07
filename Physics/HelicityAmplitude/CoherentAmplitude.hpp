@@ -25,7 +25,8 @@ namespace ComPWA {
 namespace Physics {
 namespace HelicityFormalism {
 
-struct SequentialDecayInformation {
+struct SequentialDecayInformation
+{
   unsigned int top_node;
   std::map<unsigned int, IndexList> unique_id_decay_tree_;
 
@@ -41,7 +42,8 @@ struct SequentialDecayInformation {
   }
 };
 
-class CoherentAmplitude: public Amplitude {
+class CoherentAmplitude: public AmplitudeIntensity
+{
   std::vector<TopologyAmplitude> topology_amplitudes_;
 
   std::map<unsigned int, std::shared_ptr<FunctionTree> > tree_;
@@ -103,9 +105,6 @@ public:
   double getMaxVal(ParameterList& par, std::shared_ptr<Generator> gen);
   double getMaxVal(std::shared_ptr<Generator> gen);
 
-  virtual bool hasTree();
-  std::shared_ptr<FunctionTree> getAmpTree(allMasses&, allMasses&, std::string);
-
   const ParameterList& intensity(const dataPoint& point, ParameterList& par);
   const ParameterList& intensity(const dataPoint& point);
   const ParameterList& intensityNoEff(const dataPoint& point);
@@ -120,6 +119,14 @@ public:
 
   void printAmps();
   void printFractions();
+
+  //========== FUNCTIONTREE =============
+  //! Check of tree is available
+  virtual bool hasTree(){ return 0; }
+
+  //! Getter function for basic amp tree
+  virtual std::shared_ptr<FunctionTree> GetTree(
+		  ParameterList&, ParameterList&, ParameterList&);
 
   Amplitude* Clone();
 };

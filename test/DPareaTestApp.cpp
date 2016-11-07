@@ -39,7 +39,7 @@ using ComPWA::Physics::DPKinematics::DalitzKinematics;
 int main(int argc, char **argv){
 
 	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(DalitzKinematics::createInstance("J/psi","gamma","gamma","gamma"));
-	double area = kin->getPhspVolume();
+	double area = kin->GetPhspVolume();
 
 	std::cout<<"DPareaApp: Phase space area expected from the decay X-> gamma gamma gamma with M(X)=1.0GeV "\
 			"is a symmetric triangle with edge length of 1.0GeV. The expected area is therefore A = 0.5*1.0*1.0"<<std::endl;
