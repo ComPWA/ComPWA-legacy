@@ -51,6 +51,7 @@
 
 // ComPWA header files go here
 #include "DataReader/RootReader/RootReader.hpp"
+#include "DataReader/JakeReader/JakeReader.hpp"
 #include "Physics/AmplitudeSum/AmpSumIntensity.hpp"
 #include "Estimator/MinLogLH/MinLogLH.hpp"
 #include "Optimizer/Minuit2/MinuitIF.hpp"
@@ -68,13 +69,14 @@ const Double_t m3 = 0.139570; // GeV/c² (pi)
 //const Double_t c = 299792458.; // m/s
 const Double_t PI = 3.14159; // m/s
 
-unsigned int nFitEvents = 100000 - 1;
+unsigned int nFitEvents = 44000 - 1;
 unsigned int nStartEvent = 0;
 
 using namespace ComPWA;
 using Physics::DPKinematics::DalitzKinematics;
 using Physics::AmplitudeSum::AmpSumIntensity;
 using DataReader::RootReader::RootReader;
+using DataReader::JakeReader::JakeReader;
 using Estimator::MinLogLH::MinLogLH;
 using Physics::AmplitudeSum::AmplitudeSetup;
 
@@ -84,10 +86,10 @@ using Physics::AmplitudeSum::AmplitudeSetup;
  */
 int main(int argc, char **argv) {
 	int seed = 1234;
-	string output_filename("FitResultJPSI.root");
-	string output_directory("./");
-	string input_filename("3Part-4vecs.root");
-	string input_directory("./");
+	string output_filename("JakeFitResult.root");
+	string output_directory("./test/");
+	string input_filename("JPSIPSMC.ACC.root");
+	string input_directory("./test/");
 	string output_file_suffix("");
 	if (argc > 1)
 		output_directory = argv[1];
@@ -132,15 +134,18 @@ int main(int argc, char **argv) {
 	} catch (std::logic_error) {
 		BOOST_LOG_TRIVIAL(error)<<"Environment Variable COMPWA_DIR not set?"<<std::endl;
 	}
-	std::string resoFile = path + "/test/JPSI_ypipi.xml";
+	std::string resoFile = path + "/test/Jake_ypipi.xml";
 	AmplitudeSetup ini(resoFile);
 
 	BOOST_LOG_TRIVIAL(info)<< "Load Modules";
-	std::shared_ptr<RootReader> myReader(
-			new RootReader(input_file_path, "data"));
+    std::string file = "test/JPSIDATA.ACC.root";
+    std::shared_ptr<JakeReader> myReader(
+        new JakeReader(file, "kin"));
+	//std::shared_ptr<RootReader> myReader(
+			//new RootReader(input_file_path, "data"));
 	myReader->resetWeights(); //setting weights to 1
-	std::shared_ptr<RootReader> myPHSPReader(
-			new RootReader(input_file_path, "mc"));
+	std::shared_ptr<JakeReader> myPHSPReader(
+			new JakeReader(input_file_path, "kin"));
 	myPHSPReader->setEfficiency(shared_ptr<Efficiency>(new UnitEfficiency())); //setting efficiency to 1
 	std::shared_ptr<AmpSumIntensity> amps(
 			new AmpSumIntensity(ini, AmpSumIntensity::normStyle::none,
@@ -248,13 +253,13 @@ int main(int argc, char **argv) {
 	for (unsigned int i = 0; i < par.GetNDouble(); i++) {
 		std::shared_ptr<DoubleParameter> tmp = par.GetDoubleParameter(i);
 		optiInt[i] = tmp->GetValue();
-		if (i < 2 || i > 3 /*|| i%4==2 || i%4==3 */) { //omega's and f0 fixed
+		if (/*i < 2 ||*/ i > 10 /*|| i%4==2 || i%4==3 */) { //omega's and f0 fixed
 			//if(i<2 || i>3 || i%2==1){ //omega's and f0 fixed
 			tmp->FixParameter(true);
 		} else {
 			tmp->FixParameter(false);
 			BOOST_LOG_TRIVIAL(debug)<< *tmp;
-			tmp->SetValue(tmp->GetValue()+0.5);			///((i+1)));
+			//tmp->SetValue(tmp->GetValue()+0.5);			///((i+1)));
 			tmp->SetError(tmp->GetValue());
 			if (!tmp->GetValue())
 				tmp->SetError(1.);
@@ -331,7 +336,7 @@ int main(int argc, char **argv) {
 	bw23->GetYaxis()->SetTitle("#");
 	bw23->GetYaxis()->CenterTitle();
 
-	RootReader myReaderPHSP(input_file_path, "mc");
+	JakeReader myReaderPHSP(input_file_path, "kin");
 	unsigned int maxEventsPHSP = myReaderPHSP.getNEvents();
 	//double masssq12PHSP, masssq13PHSP, masssq23PHSP;
 	TH2D* bw12PHSP = new TH2D("bw12PHSP", "inv. mass-sq of particles 1&2 PHSP",

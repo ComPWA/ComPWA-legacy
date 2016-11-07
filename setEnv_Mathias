@@ -1,6 +1,6 @@
 export BOOST_BUILD_PATH=/local/data/michel/workspace/boost_1_54_0
 export BOOST_ROOT=/local/data/michel/workspace/boost_1_54_0/build
-export GENEVA=/local/data/michel/geneva-v1.0.0/build
+export GENEVA=/local/data/michel/geneva-v1.4.0/build
 export MINUIT2=/local/data/michel/Minuit2-5.24.00
 export ROOTSYS=/local/data/michel/fairroot/build
 export ROOTINCLUDE=/local/data/michel/fairroot/build/include/root

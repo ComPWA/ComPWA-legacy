@@ -1,0 +1,37 @@
+########### JakeReader lib #############
+# @brief
+# This package is a data reader, which reads the data from root files
+# @end
+
+import os ;
+
+local BOOST_ROOT = [ os.environ BOOST_ROOT ] ;
+local ROOTSYS = [ os.environ ROOTSYS ] ;
+
+BOOSTLIBS = -lboost_log_setup -lboost_log -lboost_date_time -lboost_filesystem -lboost_program_options -lboost_regex -lboost_serialization -lboost_system -lboost_thread -lboost_test_exec_monitor ;
+
+local rlibs = [ SHELL "$ROOTSYS/bin/root-config --libs" ] ;
+ROOTLIBS = [ MATCH "(.*)[\n]" : $(rlibs) ] ;
+
+project :
+	requirements
+	<include>$(ROOT_INC_PATH)
+	<include>$(BOOST_ROOT)/include
+	<linkflags>-L$(BOOST_ROOT)/lib
+	<linkflags>-L$(ROOT_LIB_PATH)
+	<linkflags>$(ROOTLIBS)
+	<linkflags>-lEG
+	<linkflags>$(BOOSTLIBS)
+	;
+
+lib JakeReader : 
+        [ glob *.cpp : *Test.cpp ] 
+        $(TOP)/Core//ComPWA  
+        ;
+        
+#using testing ;
+#lib boost_unit_test_framework ;
+#run DataTest.cpp RootReader $(TOP)/Core//ComPWA boost_unit_test_framework ;
+
+install dist : JakeReader : <location>$(TOP)/lib ;
+

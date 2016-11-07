@@ -32,6 +32,7 @@
 
 // Data Interface header files go here
 #include "DataReader/RootReader/RootReader.hpp"
+#include "DataReader/JakeReader/JakeReader.hpp"
 #include "Physics/DPKinematics/DalitzKinematics.hpp"
 
 //Core header files go here
@@ -41,6 +42,7 @@
 using namespace ComPWA;
 using Physics::DPKinematics::DalitzKinematics;
 using DataReader::RootReader::RootReader;
+using DataReader::JakeReader::JakeReader;
 
 unsigned int nBins = 400;
 
@@ -55,10 +57,10 @@ int main(int argc, char **argv){
 
 	std::cout << "DataIF Root 3Particles started " << std::endl << std::endl;
 
-	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(DalitzKinematics::createInstance("J/psi","gamma","pi0","pi0"));
+	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(DalitzKinematics::createInstance("jpsi", "gamma", "pi0", "pi0"));
 
-	std::string file = "test/3Part-4vecs.root";
-	RootReader myReader(file, "data",false);
+	std::string file = "test/JPSIDATA_JPE.ACC.root";
+	JakeReader myReader(file, "kin"); //return 0;
 	unsigned int maxEvents = myReader.getNEvents();
 	double masssq12, masssq13, masssq23;
 	TH2D* bw12 = new TH2D("bw12","inv. mass-sq of particles 1&2",nBins,0.,10.,nBins,0.,10.);
@@ -78,7 +80,8 @@ int main(int argc, char **argv){
 	bw23->GetYaxis()->CenterTitle();
 
 
-	RootReader myReaderPHSP(file, "mc");
+	std::string fileB = "test/3Part-4vecs_100k.root";
+	RootReader myReaderPHSP(fileB, "mc");
 
 	unsigned int maxEventsPHSP = myReaderPHSP.getNEvents();
 	//double masssq12PHSP, masssq13PHSP, masssq23PHSP;
@@ -165,7 +168,7 @@ int main(int argc, char **argv){
 		bw23PHSP->Fill(masssq23,masssq12);
 	}
 
-	TFile output("results/FINAL_UB/INPUT/DalitzJPSI_1M_3f_2o_oP.root","RECREATE","ROOT_Tree");
+	TFile output("results/JAKETEST.root","RECREATE","ROOT_Tree");
 	m12m13_contour->Write("con13");
 	m13m12_contour->Write("con12");
 	m23m12_contour->Write("con23");

@@ -205,6 +205,7 @@ exe dalitzplotApp :
         test
         $(TOP)/Core//ComPWA
         $(TOP)/DataReader/RootReader//RootReader  
+        $(TOP)/DataReader/JakeReader//JakeReader
         $(TOP)/Physics/DPKinematics//DPKinematics  
         : ;
         
@@ -215,6 +216,7 @@ exe dalitzfitApp :
         $(TOP)/Physics/AmplitudeSum//AmplitudeSum
         $(TOP)/Physics/DPKinematics//DPKinematics
         $(TOP)/DataReader/RootReader//RootReader
+        $(TOP)/DataReader/JakeReader//JakeReader
         $(TOP)/Optimizer//Optimizer
         $(TOP)/Estimator/MinLogLH//MinLogLH
         $(TOP)/Optimizer/Minuit2//Minuit2IF
