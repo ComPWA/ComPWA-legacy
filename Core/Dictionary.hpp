@@ -72,6 +72,7 @@ public:
     * Use this function to introduce a DataReader implementation. The
     * dictionary gathers information from it associates it with a name.
     * \param inData pointer to DataReader
+    * \param inName unique name of the data set
     * \return associated name for this DataReader
     * \sa std::string introduce(std::shared_ptr<Amplitude> inAmp, std::string inName="");
    */
@@ -82,6 +83,7 @@ public:
     * Use this function to introduce an Amplitude implementation. The
     * dictionary gathers information from it associates it with a name.
     * \param inAmp pointer to Amplitude
+    * \param inName unique name of the data set
     * \return associated name for this Amplitude
     * \sa std::string introduce(std::shared_ptr<Data> inData, std::string inName="");
    */
@@ -90,7 +92,7 @@ public:
   //! Check if name already used for a Data Module
    /*!
     * This function is used to check if a name is available for usage
-    * \param inAmp pointer to Amplitude
+    * \param inName name to be checked
     * \return boolean, true when name already used
     * \sa std::string introduce(std::shared_ptr<Data> inData, std::string inName="");
     * \sa std::string introduce(std::shared_ptr<Amplitude> inAmp, std::string inName="");
@@ -100,7 +102,7 @@ public:
   //! Check if name already used for an Amplitude
    /*!
     * This function is used to check if a name is available for usage
-    * \param inAmp pointer to Amplitude
+    * \param inName name to be checked
     * \return boolean, true when name already used
     * \sa std::string introduce(std::shared_ptr<Data> inData, std::string inName="");
     * \sa std::string introduce(std::shared_ptr<Amplitude> inAmp, std::string inName="");

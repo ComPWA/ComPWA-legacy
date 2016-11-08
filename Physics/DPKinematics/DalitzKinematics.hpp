@@ -11,15 +11,15 @@
 //		Klaus Goetzen - most of the kin. calculations
 //-------------------------------------------------------------------------------
 
-//! DPKinematics stores kinematic information of a dalitz plot
+//! DalitzKinematics stores kinematic information of a dalitz plot
 /*!
- * @file DPKinematics.hpp
- *\class DPKinematics
- * 			DPKinematics stores particle masses of a process and provides some functions which calculate kinematic
+ * @file DalitzKinematics.hpp
+ *\class DalitzKinematics
+ * 			DalitzKinematics stores particle masses of a process and provides some functions which calculate kinematic
  * 			quantities.
  */
-#ifndef DPKINEMATICS_HPP_
-#define DPKINEMATICS_HPP_
+#ifndef DALITZKINEMATICS_HPP_
+#define DALITZKINEMATICS_HPP_
 
 #include <iostream>
 #include <vector>
@@ -67,7 +67,7 @@ public:
 	/**! Calculates the helicity angle.
 	 *
 	 * Calculates the helicity angle for subsystem @param sys given
-	 * the invariant masses. @param invMass23sq and @param invMass23sq. The
+	 * the invariant masses. @param invMassSq23 and @param invMassSq23. The
 	 * angle is measured versus daughter 2 in system [12],
 	 * versus daughter 1 in [13] and versus 2 in [23]
 	 */
@@ -198,7 +198,7 @@ protected:
 	virtual double calculatePSArea();
 };
 
-} /* namespace DPKinematics */
+} /* namespace DalitzKinematics */
 } /* namespace Physics */
 } /* namespace ComPWA */
 

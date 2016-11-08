@@ -37,8 +37,6 @@ namespace ComPWA {
 namespace Estimator {
 namespace MinLogLH {
 
-using ComPWA::DataReader::Data;
-
 class MinLogLH : public ComPWA::Estimator::Estimator {
 
 public:
@@ -53,9 +51,9 @@ public:
 	 * A binned efficiency correction is used. We expect that phspSample_ has efficiency values for
 	 * each event.
 	 *
-	 * @param amp_ amplitude
-	 * @param data_ data sample
-	 * @param phspSample_ phsp sample for normalization. Efficiency values for each point needs
+	 * @param amp amplitude
+	 * @param data data sample
+	 * @param phspSample phsp sample for normalization. Efficiency values for each point needs
 	 *  to be set beforehand.
 	 * @param startEvent use #data_ from that position on
 	 * @param nEvents number of events to process
@@ -68,18 +66,17 @@ public:
 			unsigned int startEvent=0, unsigned int nEvents=0);
 
 	/** Create instance of MinLogLH.
-	 * An unbinned efficiency correction is applied using #accSample_.
+	 * An unbinned efficiency correction is applied using accSample.
 	 *
-	 * @param amp_ amplitude
-	 * @param data_ data sample
-	 * @param phspSample_ phsp sample for normalization
-	 * @param accSample_ sample of efficiency applied phsp events for unbinned efficiency correction
+	 * @param amp amplitude
+	 * @param data data sample
+	 * @param phspSample phsp sample for normalization
+	 * @param accSample sample of efficiency applied phsp events for unbinned efficiency correction
 	 * @param startEvent use #data_ from that position on
 	 * @param nEvents number of events to process
-	 * @param sigFrac signal fraction in data sample
 	 * @return std::shared_ptr<Data> of existing instance or newly created instance
 	 */
-	static std::shared_ptr<ControlParameter> createInstance(
+	static std::shared_ptr<ComPWA::Optimizer::ControlParameter> createInstance(
 			std::shared_ptr<Amplitude> amp,
 			std::shared_ptr<DataReader::Data> data,
 			std::shared_ptr<DataReader::Data> phspSample,
@@ -87,19 +84,18 @@ public:
 			unsigned int startEvent=0, unsigned int nEvents=0);
 
 	/** Create instance of MinLogLH.
-	 * An unbinned efficiency correction is applied using #accSample_.
+	 * An unbinned efficiency correction is applied using accSample.
 	 *
-	 * @param amp_ amplitude
-	 * @param bkg_ background description amplitude
-	 * @param data_ data sample
-	 * @param phspSample_ phsp sample for normalization
-	 * @param accSample_ sample of efficiency applied phsp events for unbinned efficiency correction
+	 * @param ampVec amplitude
+	 * @param frac signal fraction in data sample
+	 * @param data data sample
+	 * @param phspSample phsp sample for normalization
+	 * @param accSample sample of efficiency applied phsp events for unbinned efficiency correction
 	 * @param startEvent use #data_ from that position on
 	 * @param nEvents number of events to process
-	 * @param sigFrac signal fraction in data sample
 	 * @return std::shared_ptr<Data> of existing instance or newly created instance
 	 */
-	static std::shared_ptr<ControlParameter> createInstance(
+	static std::shared_ptr<ComPWA::Optimizer::ControlParameter> createInstance(
 			std::vector<std::shared_ptr<Amplitude> > ampVec,
 			std::vector<double> frac,
 			std::shared_ptr<DataReader::Data> data,
@@ -109,10 +105,10 @@ public:
 
 	/** Set new amplitude to existing instance
 	 *
-	 * @param amp_ amplitude
-	 * @param data_ data sample
-	 * @param phspSample_ phsp sample for normalization
-	 * @param accSample_ sample of efficiency applied phsp events for unbinned efficiency correction
+	 * @param amp amplitude
+	 * @param data data sample
+	 * @param phspSample phsp sample for normalization
+	 * @param accSample sample of efficiency applied phsp events for unbinned efficiency correction
 	 * @param startEvent use #data_ from that position on
 	 * @param nEvents number of events to process
 	 * @param useFuncTr use FunctionTree yes/no?
@@ -125,11 +121,11 @@ public:
 
 	/** Set new amplitude to existing instance
 	 *
-	 * @param amp_ amplitude
-	 * @param bkg_ amplitude
-	 * @param data_ data sample
-	 * @param phspSample_ phsp sample for normalization
-	 * @param accSample_ sample of efficiency applied phsp events for unbinned efficiency correction
+	 * @param ampVec amplitude
+	 * @param frac signal fraction in data sample
+	 * @param data data sample
+	 * @param phspSample phsp sample for normalization
+	 * @param accSample sample of efficiency applied phsp events for unbinned efficiency correction
 	 * @param startEvent use #data_ from that position on
 	 * @param nEvents number of events to process
 	 * @param useFuncTr use FunctionTree yes/no?
@@ -181,13 +177,13 @@ protected:
 
 	//! Constructor for a vector of amplitudes
 	MinLogLH(std::vector<std::shared_ptr<Amplitude> > ampVec,
-			std::vector<double> fraction, std::shared_ptr<Data> data,
-			std::shared_ptr<Data> phspSample, std::shared_ptr<Data> accSample,
+			std::vector<double> fraction, std::shared_ptr<DataReader::Data> data,
+			std::shared_ptr<DataReader::Data> phspSample, std::shared_ptr<DataReader::Data> accSample,
 			unsigned int startEvent, unsigned int nEvents);
 
 	//! Constructor for a single amplitude
-	MinLogLH(std::shared_ptr<Amplitude> amp, std::shared_ptr<Data> data,
-			std::shared_ptr<Data> phspSample, std::shared_ptr<Data> accSample,
+	MinLogLH(std::shared_ptr<Amplitude> amp, std::shared_ptr<DataReader::Data> data,
+			std::shared_ptr<DataReader::Data> phspSample, std::shared_ptr<DataReader::Data> accSample,
 			unsigned int startEvent, unsigned int nEvents);
 
 	//! Uses ampTree and creates a tree that calculates the full LH
@@ -224,14 +220,14 @@ private:
 	std::vector<double> _fraction;
 
 	// Samples
-	std::shared_ptr<Data> _dataSample; //! Data sample
+	std::shared_ptr<DataReader::Data> _dataSample; //! Data sample
 	ParameterList _dataSampleList; //! _dataSample stored as ParameterList
 	double _sumOfWeights; //! Sum of weights in _dataSample
 
-	std::shared_ptr<Data> _phspSample; //! phsp sample for normalization
+	std::shared_ptr<DataReader::Data> _phspSample; //! phsp sample for normalization
 	ParameterList _phspSampleList;//! _phspSample stored as ParameterList
 
-	std::shared_ptr<Data> _phspAccSample;//! Phsp sample with applied efficency
+	std::shared_ptr<DataReader::Data> _phspAccSample;//! Phsp sample with applied efficency
 	ParameterList _phspAccSampleList;//! _phspAccSample stored as ParameterList
 	double _phspAccSampleEff; //! Total efficiency of phsp with applied efficency
 

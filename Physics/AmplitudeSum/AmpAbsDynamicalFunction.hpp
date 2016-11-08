@@ -173,6 +173,9 @@ public:
 	 * @param width width of resonance in channel [a,b]
 	 * @param ma mass of particle a
 	 * @param mb mass of particle b
+	 * @param spin spin of the resonance
+	 * @param mesonRadius MesonRadius
+	 * @param type formfactor type
 	 * @return
 	 */
 	static std::complex<double> widthToCoupling(double mSq, double mR,
@@ -181,7 +184,7 @@ public:
 
 	/** Convert coupling to width
 	 *
-	 * Convert coupling to channel (@ma,@mb) to partial width. Only valid for
+	 * Convert coupling to channel (@param ma,@param mb) to partial width. Only valid for
 	 * narrow, isolated resonances. Implementation of inverted Eq.47-21
 	 * of PDG2014.
 	 * @param mSq invariant mass
@@ -200,7 +203,7 @@ public:
 
 	/** Convert coupling to width
 	 *
-	 * Convert coupling to channel (@ma,@mb) to partial width. Only valid for
+	 * Convert coupling to channel (@param ma,@param mb) to partial width. Only valid for
 	 * narrow, isolated resonances. Implementation of inverted
 	 * Eqs.47-21 of PDG2014.
 	 * @param mSq invariant mass

@@ -209,7 +209,6 @@ public:
 	//! Getter for boolean parameter
 	/*!
 	 * Getter for boolean parameter
-	 * \param i input number of parameter to load
 	 * \return par output container for loaded parameter
 	 */
 	virtual std::vector<std::shared_ptr<BoolParameter> >
@@ -236,14 +235,14 @@ public:
 	//! Remove boolean parameter
 	/*!
 	 * Remove an boolean parameter from the list
-	 * \param parName parameter name
+	 * \param name parameter name
 	 */
 	virtual void RemoveBool(const std::string name);
 
 	//! Remove boolean parameter
 	/*!
 	 * Remove an boolean parameter from the list
-	 * \param par input parameter
+	 * \param id identification of the paramter to be removed
 	 */
 	virtual void RemoveBool(const unsigned int id);
 
@@ -292,7 +291,6 @@ public:
 	//! Getter for integer parameter
 	/*!
 	 * Getter for integer parameter
-	 * \param i input number of parameter to load
 	 * \return par output container for loaded parameter
 	 */
 	virtual std::vector<std::shared_ptr<IntegerParameter> >
@@ -319,14 +317,14 @@ public:
 	//! Remove integer parameter
 	/*!
 	 * Remove an integer parameter from the list
-	 * \param parName parameter name
+	 * \param name parameter name
 	 */
 	virtual void RemoveInteger(const std::string name);
 
 	//! Remove integer parameter
 	/*!
 	 * Remove an integer parameter from the list
-	 * \param par input parameter
+     * \param id identification of the paramter to be removed
 	 */
 	virtual void RemoveInteger(const unsigned int id);
 
@@ -375,7 +373,6 @@ public:
 	//! Getter for double parameter
 	/*!
 	 * Getter for double parameter
-	 * \param i input number of parameter to load
 	 * \return par output container for loaded parameter
 	 */
 	virtual std::vector<std::shared_ptr<DoubleParameter> >
@@ -403,14 +400,14 @@ public:
 	//! Remove double parameter
 	/*!
 	 * Remove an double parameter from the list
-	 * \param parName parameter name
+	 * \param name parameter name
 	 */
 	virtual void RemoveDouble(const std::string name);
 
 	//! Remove double parameter
 	/*!
 	 * Remove an double parameter from the list
-	 * \param par input parameter
+     * \param id identification of the paramter to be removed
 	 */
 	virtual void RemoveDouble(const unsigned int id);
 
@@ -459,7 +456,6 @@ public:
 	//! Getter for complex parameter
 	/*!
 	 * Getter for complex parameter
-	 * \param i input number of parameter to load
 	 * \return par output container for loaded parameter
 	 */
 	virtual std::vector<std::shared_ptr<ComplexParameter> >
@@ -488,14 +484,14 @@ public:
 	//! Remove complex parameter
 	/*!
 	 * Remove an complex parameter from the list
-	 * \param parName parameter name
+	 * \param name parameter name
 	 */
 	virtual void RemoveComplex(const std::string name);
 
 	//! Remove complex parameter
 	/*!
 	 * Remove an complex parameter from the list
-	 * \param par input parameter
+     * \param id identification of the paramter to be removed
 	 */
 	virtual void RemoveComplex(const unsigned int id);
 
@@ -544,7 +540,6 @@ public:
 	//! Getter for multi-double parameter
 	/*!
 	 * Getter for multi-double parameter
-	 * \param i input number of parameter to load
 	 * \return par output container for loaded parameter
 	 */
 	virtual std::vector<std::shared_ptr<MultiDouble> >
@@ -555,14 +550,14 @@ public:
 	//! Remove multi-double parameter
 	/*!
 	 * Remove an multi-double parameter from the list
-	 * \param parName parameter name
+	 * \param name parameter name
 	 */
 	virtual void RemoveMultiDouble(const std::string name);
 
 	//! Remove multi-double parameter
 	/*!
 	 * Remove an multi-double parameter from the list
-	 * \param par input parameter
+     * \param id identification of the paramter to be removed
 	 */
 	virtual void RemoveMultiDouble(const unsigned int id);
 
@@ -611,7 +606,6 @@ public:
 	//! Getter for multi-complex parameter
 	/*!
 	 * Getter for multi-complex parameter
-	 * \param i input number of parameter to load
 	 * \return par output container for loaded parameter
 	 */
 	virtual std::vector<std::shared_ptr<MultiComplex> >
@@ -622,14 +616,14 @@ public:
 	//! Remove multi-complex parameter
 	/*!
 	 * Remove an multi-complex parameter from the list
-	 * \param parName parameter name
+	 * \param name parameter name
 	 */
 	virtual void RemoveMultiComplex(const std::string name);
 
 	//! Remove multi-complex parameter
 	/*!
 	 * Remove an multi-complex parameter from the list
-	 * \param par input parameter
+     * \param id identification of the paramter to be removed
 	 */
 	virtual void RemoveMultiComplex(const unsigned int id);
 
@@ -678,7 +672,6 @@ public:
 	//! Getter for multi-complex parameter
 	/*!
 	 * Getter for multi-complex parameter
-	 * \param i input number of parameter to load
 	 * \return par output container for loaded parameter
 	 */
 	virtual std::vector<std::shared_ptr<MultiUnsignedInteger> >
@@ -689,14 +682,14 @@ public:
 	//! Remove multi-complex parameter
 	/*!
 	 * Remove an multi-complex parameter from the list
-	 * \param parName parameter name
+	 * \param name parameter name
 	 */
 	virtual void RemoveMultiUnsignedInteger(const std::string name);
 
 	//! Remove multi-complex parameter
 	/*!
 	 * Remove an multi-complex parameter from the list
-	 * \param par input parameter
+     * \param id identification of the paramter to be removed
 	 */
 	virtual void RemoveMultiUnsignedInteger(const unsigned int id);
 

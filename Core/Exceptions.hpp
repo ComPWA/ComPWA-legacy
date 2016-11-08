@@ -137,9 +137,9 @@ public:
 };
 
 //------------------------------------------------------------------------------
-//! @class   Beyond phase-space
+//! @class   BeyondPhsp
 //!
-//! @brief   Parameter of wrong type
+//! @brief   Data beyond phasespace requested
 //------------------------------------------------------------------------------
 class BeyondPhsp : public Exception {
 public:
@@ -153,9 +153,9 @@ public:
 };
 
 //------------------------------------------------------------------------------
-//! @class   Wrong variable ID
+//! @class   WrongVariableID
 //!
-//! @brief   Parameter of wrong type
+//! @brief   Variable not found
 //------------------------------------------------------------------------------
 class WrongVariableID: public Exception {
 public:

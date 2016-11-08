@@ -38,17 +38,17 @@ public:
   DataPointStorage(DataPointStorage const&) = delete;
   void operator=(DataPointStorage const&) = delete;
 
-  unsigned int getNumberOfEvents(unsigned storage_index) const;
+  unsigned int getNumberOfEvents(unsigned int storage_index) const;
 
-  void layoutDataStorageStructure(unsigned storage_index,
+  void layoutDataStorageStructure(unsigned int storage_index,
       unsigned int expected_number_of_events_, const Event& evt);
-  void layoutDataStorageStructure(unsigned storage_index,
+  void layoutDataStorageStructure(unsigned int storage_index,
       unsigned int expected_number_of_events_, const dataPoint& dp);
 
   void clearStorage();
 
-  void addEvent(unsigned storage_index, const Event& evt);
-  void addDataPoint(unsigned storage_index, const dataPoint& dp);
+  void addEvent(unsigned int storage_index, const Event& evt);
+  void addDataPoint(unsigned int storage_index, const dataPoint& dp);
 
   const DataList& getDataList(unsigned int storage_index,
       unsigned int variable_index) const;

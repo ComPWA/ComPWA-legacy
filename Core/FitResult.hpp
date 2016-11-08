@@ -143,15 +143,10 @@ protected:
 	 * the whole amplitude.
 	 *
 	 * @param parList result with fit fractions for the single resonances
+	 * @param amp amplitude with the resonances which share the fit fractions
 	 * @param nSets Precise error calcucation using @nSets Monte-Carlo events
 	 */
-//	virtual void calcFraction(ParameterList& parList, int nSets=0);
-
 	//! Calculate fit fractions and its errors.
-//	static void calcFraction(
-//			ParameterList& parList, std::shared_ptr<Amplitude> amp);
-
-	//! Calculate errors on fit result
 	virtual void calcFractionError(ParameterList& parList,
 			std::shared_ptr<Amplitude> amp, int nSets=200) = 0;
 

@@ -428,9 +428,9 @@ protected:
 
 	/**Setup Basic Tree
 	 *
-	 * @param theMasses data sample
-	 * @param toyPhspSample sample of flat toy MC events for normalization of the resonances
-	 * @param opt Which tree should be created? "data" data Tree, "norm" normalization tree
+	 * @param sample data sample
+	 * @param toySample sample of flat toy MC events for normalization of the resonances
+	 * @param suffix Which tree should be created? "data" data Tree, "norm" normalization tree
 	 * with efficiency corrected toy phsp sample or "normAcc" normalization tree with sample
 	 * of accepted flat phsp events
 	 */

@@ -9,7 +9,7 @@
 //     Peter Weidenkaff
 //-------------------------------------------------------------------------------
 /** Test application to validate tree and amplitude
- * @file CompareTreeAmpAmpp.cpp
+ * @file CompareTreeAmpApp.cpp
  * Application to validate that fitting using the function tree and using the amplitude produces the
  * same result. The decay D0->K_S0 K+ K- is used as example and the Breit-Wigner description of the
  * phi(1020) and the Flatte description of the a_0(980)0 are compared between tree and amplitude.

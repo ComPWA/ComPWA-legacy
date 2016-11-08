@@ -175,7 +175,7 @@ protected:
  * event of the first sample is added to the output sample, an event from the second sample is also
  * added to the corresponding output sample. This function can be used for two sample that are in sync.
  * E.g. a sample with reconstructed values and a sample with the corresponding true values
- * We expect that @out1 and @out2 are pointers to empty samples.
+ * We expect that @param out1 and @param out2 are pointers to empty samples.
  *
  * @param size size of sub sample
  * @param gen generator

@@ -26,8 +26,6 @@
 
 namespace ComPWA {
 
-using DataReader::Data;
-
 Dictionary::Dictionary() {
 
 }
@@ -36,7 +34,7 @@ Dictionary::~Dictionary(){
   /* nothing */
 }
 
-std::string Dictionary::introduce(std::shared_ptr<Data> inData, std::string inName){
+std::string Dictionary::introduce(std::shared_ptr<DataReader::Data> inData, std::string inName){
   if(inName=="" || dataNameUsed(inName)){
     inName="test";//TODO: Generate new name, check available
   }

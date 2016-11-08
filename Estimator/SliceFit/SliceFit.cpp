@@ -24,16 +24,14 @@
 
 namespace ComPWA {
 
-using DataReader::Data;
 using Physics::AmplitudeSum::AmpSumIntensity;
 using Physics::DPKinematics::DalitzKinematics;
-using Optimizer::ControlParameter;
 
 namespace Estimator {
 namespace SliceFit {
 
 SliceFit::SliceFit(std::shared_ptr<AmpSumIntensity> inPIF,
-		std::shared_ptr<Data> inDIF, ParameterList& inPar,
+		std::shared_ptr<DataReader::Data> inDIF, ParameterList& inPar,
 		unsigned int startEvent, unsigned int nEvents, unsigned int nBins,
 		unsigned int nF0, unsigned int nF2)
 : pPIF_(inPIF), pDIF_(inDIF), nEvts_(0), nPhsp_(0), nStartEvt_(startEvent),
@@ -45,7 +43,7 @@ SliceFit::SliceFit(std::shared_ptr<AmpSumIntensity> inPIF,
     init();
 }
 
-SliceFit::SliceFit(std::shared_ptr<AmpSumIntensity> inPIF, std::shared_ptr<Data> inDIF, std::shared_ptr<Data> inPHSP, ParameterList& inPar, unsigned int startEvent, unsigned int nEvents, unsigned int nBins, unsigned int nF0, unsigned int nF2)
+SliceFit::SliceFit(std::shared_ptr<AmpSumIntensity> inPIF, std::shared_ptr<DataReader::Data> inDIF, std::shared_ptr<DataReader::Data> inPHSP, ParameterList& inPar, unsigned int startEvent, unsigned int nEvents, unsigned int nBins, unsigned int nF0, unsigned int nF2)
 : pPIF_(inPIF), pDIF_(inDIF), pPHSP_(inPHSP), nEvts_(0), nPhsp_(0), nStartEvt_(startEvent), par_(inPar), nUseEvt_(nEvents),nBins_(nBins),nF0_(nF0),nF2_(nF2){
 phspVolume = Kinematics::instance()->GetPhspVolume();
     nEvts_ = pDIF_->getNEvents();
@@ -100,16 +98,16 @@ void SliceFit::init(){
 
 }
 
-std::shared_ptr<ControlParameter> SliceFit::createInstance(std::shared_ptr<AmpSumIntensity> inPIF, std::shared_ptr<Data> inDIF, ParameterList& inPar, unsigned int startEvent, unsigned int nEvents, unsigned int nBins, unsigned int nF0, unsigned int nF2){
+std::shared_ptr<Optimizer::ControlParameter> SliceFit::createInstance(std::shared_ptr<AmpSumIntensity> inPIF, std::shared_ptr<DataReader::Data> inDIF, ParameterList& inPar, unsigned int startEvent, unsigned int nEvents, unsigned int nBins, unsigned int nF0, unsigned int nF2){
     if(!instance_)
-        instance_ = std::shared_ptr<ControlParameter>(new SliceFit(inPIF, inDIF, inPar, startEvent, nEvents, nBins, nF0, nF2));
+        instance_ = std::shared_ptr<Optimizer::ControlParameter>(new SliceFit(inPIF, inDIF, inPar, startEvent, nEvents, nBins, nF0, nF2));
 
 	return instance_;
 }
 
-std::shared_ptr<ControlParameter> SliceFit::createInstance(std::shared_ptr<AmpSumIntensity> inPIF, std::shared_ptr<Data> inDIF, std::shared_ptr<Data> inPHSP, ParameterList& inPar, unsigned int startEvent, unsigned int nEvents, unsigned int nBins, unsigned int nF0, unsigned int nF2){
+std::shared_ptr<Optimizer::ControlParameter> SliceFit::createInstance(std::shared_ptr<AmpSumIntensity> inPIF, std::shared_ptr<DataReader::Data> inDIF, std::shared_ptr<DataReader::Data> inPHSP, ParameterList& inPar, unsigned int startEvent, unsigned int nEvents, unsigned int nBins, unsigned int nF0, unsigned int nF2){
     if(!instance_)
-        instance_ = std::shared_ptr<ControlParameter>(new SliceFit(inPIF, inDIF, inPHSP, inPar, startEvent, nEvents, nBins, nF0, nF2));
+        instance_ = std::shared_ptr<Optimizer::ControlParameter>(new SliceFit(inPIF, inDIF, inPHSP, inPar, startEvent, nEvents, nBins, nF0, nF2));
 
 	return instance_;
 }

@@ -45,11 +45,11 @@ namespace DynamicalFunctions {
  *
  * The three required parameters are defined in this model and can be
  * retrieved via the #getParameterList() function:
- * @resonance_width_ width of the resonance
- * @resonance_mass_ mass of the resonance
- * @meson_radius_ Scale of interaction range
+ * @param resonance_width_ width of the resonance
+ * @param resonance_mass_ mass of the resonance
+ * @param meson_radius_ Scale of interaction range
  *
- * The remaining required parameter is the angular momentum @J_ of the two
+ * The remaining required parameter is the angular momentum param J_ of the two
  * particle state.
  *
  * Additional informations from the event are extracted from the data point

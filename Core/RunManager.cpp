@@ -39,14 +39,13 @@
 namespace ComPWA {
 
 using namespace boost::log;
-using DataReader::Data;
 
 RunManager::RunManager()
 {
 
 }
 
-RunManager::RunManager(std::shared_ptr<Data> inD, std::shared_ptr<Amplitude> inP,
+RunManager::RunManager(std::shared_ptr<DataReader::Data> inD, std::shared_ptr<Amplitude> inP,
 		std::shared_ptr<Optimizer::Optimizer> inO) : sampleData_(inD), amp_(inP), opti_(inO)
 {
 
@@ -77,7 +76,7 @@ std::shared_ptr<FitResult> RunManager::startFit(ParameterList& inPar)
 }
 
 void RunManager::setPhspSample( std::shared_ptr<Data> phsp,
-		std::shared_ptr<Data> truePhsp)
+		std::shared_ptr<DataReader::Data> truePhsp)
 {
 	if(truePhsp && truePhsp->getNEvents() != phsp->getNEvents())
 		throw std::runtime_error("RunManager::setPhspSample() | "
@@ -86,7 +85,7 @@ void RunManager::setPhspSample( std::shared_ptr<Data> phsp,
 	sampleTruePhsp_ = truePhsp;
 }
 
-void RunManager::setTruePhspSample( std::shared_ptr<Data> truePhsp)
+void RunManager::setTruePhspSample( std::shared_ptr<DataReader::Data> truePhsp)
 {
 	if(truePhsp && samplePhsp_ && truePhsp->getNEvents() != samplePhsp_->getNEvents())
 		throw std::runtime_error("RunManager::setPhspSample() | "
@@ -115,7 +114,7 @@ bool RunManager::generateBkg( int number )
 void RunManager::SetAmplitudesData(
 		std::vector<std::shared_ptr<Amplitude> > ampVec,
 		std::vector<double> fraction,
-		std::vector<std::shared_ptr<Data> > dataVec )
+		std::vector<std::shared_ptr<DataReader::Data> > dataVec )
 {
 	_ampVec = ampVec;
 	_fraction = fraction;
@@ -177,8 +176,8 @@ void RunManager::GenAmplitudesData( int nEvents )
 }
 
 bool RunManager::gen( int number, std::shared_ptr<Generator> gen,
-		std::shared_ptr<Amplitude> amp,	std::shared_ptr<Data> data,
-		std::shared_ptr<Data> phsp, std::shared_ptr<Data> phspTrue)
+		std::shared_ptr<Amplitude> amp,	std::shared_ptr<DataReader::Data> data,
+		std::shared_ptr<DataReader::Data> phsp, std::shared_ptr<DataReader::Data> phspTrue)
 {
 
 	if(number == 0) return 0;

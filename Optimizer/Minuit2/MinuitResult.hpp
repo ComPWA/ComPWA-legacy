@@ -55,10 +55,10 @@ namespace Minuit2 {
 class MinuitResult : public FitResult
 {
 public:
-	//Default constructor
+	//! Default constructor
 	MinuitResult();
 
-	//Constructor
+	//! Constructor with estimator and result
 	MinuitResult(std::shared_ptr<ControlParameter> esti, ROOT::Minuit2::FunctionMinimum result);
 
 	//! Set Minuit2 function minimum
@@ -95,10 +95,10 @@ public:
 	//! Get calculation of interference terms
 	bool GetCalcInterference() { return calcInterference; }
 
-	//! Write list of fit parameters and list of fitfractions to XML file @filename
+	//! Write list of fit parameters and list of fitfractions to XML file @param filename
 	virtual void writeXML(std::string filename);
 
-	//! Write fit parameters, fit fractions and cov matrix as TeX to file @filename
+	//! Write fit parameters, fit fractions and cov matrix as TeX to file @param filename
 	virtual void writeTeX(std::string filename);
 
 	//! Any errors during minimization?
@@ -218,7 +218,9 @@ private:
 	 * we calculate the fit frations and calculate its mean. The can be a very time consuming method,
 	 * especially if the function tree is not used.
 	 *
-	 * @param fracError result with errors
+	 * @param parList fit parameter
+	 * @param amp amplitude that was fitted
+	 * @param nSets number of sets used
 	 */
 	virtual void calcFractionError(ParameterList& parList,
 			std::shared_ptr<Amplitude> amp, int nSets);

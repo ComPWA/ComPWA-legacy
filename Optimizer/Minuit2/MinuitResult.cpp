@@ -20,7 +20,6 @@ namespace Optimizer {
 namespace Minuit2 {
 
 using namespace boost::log;
-using namespace ROOT::Minuit2;
 
 using ComPWA::Estimator::Estimator;
 
@@ -31,7 +30,7 @@ calcInterference(0)
 }
 
 MinuitResult::MinuitResult(std::shared_ptr<ControlParameter> esti,
-		FunctionMinimum result) :
+    ROOT::Minuit2::FunctionMinimum result) :
 		initialLH(0), finalLH(0), trueLH(0), calcInterference(0)
 {
 	est = std::static_pointer_cast<Estimator>(esti);
@@ -43,7 +42,7 @@ MinuitResult::MinuitResult(std::shared_ptr<ControlParameter> esti,
 }
 
 void MinuitResult::setResult(std::shared_ptr<ControlParameter> esti,
-		FunctionMinimum result)
+    ROOT::Minuit2::FunctionMinimum result)
 {
 	est = std::static_pointer_cast<Estimator>(esti);
 	_ampVec = est->getAmplitudes();
@@ -53,12 +52,12 @@ void MinuitResult::setResult(std::shared_ptr<ControlParameter> esti,
 	init(result);
 }
 
-void MinuitResult::init(FunctionMinimum min)
+void MinuitResult::init(ROOT::Minuit2::FunctionMinimum min)
 {
-	MnUserParameterState minState = min.UserState();
+    ROOT::Minuit2::MnUserParameterState minState = min.UserState();
 
 	if(minState.HasCovariance()){
-		MnUserCovariance minuitCovMatrix = minState.Covariance();
+	    ROOT::Minuit2::MnUserCovariance minuitCovMatrix = minState.Covariance();
 		/* Size of Minuit covariance vector is given by dim*(dim+1)/2.
 		 * dim is the dimension of the covariance matrix.
 		 * The dimension can therefore be calculated as

@@ -104,7 +104,7 @@ public:
 	//! Get amplitude integral for a set of (sub-) resonances
 	virtual const double GetIntegral(std::vector<resonanceItr> resoList);
 
-	//! Calculate inteference integral of two subresonances of @A and @B
+	//! Calculate inteference integral of two subresonances of @param A and @param B
 	virtual const double GetIntegralInterference(resonanceItr A, resonanceItr B);
 
 	//! calculate integral for a list of resonances
@@ -137,26 +137,26 @@ public:
 
 	//==================== EVALUATION =======================
 	/**! Evaluate total amplitude
-	 * Using current set of parameters at phsp point \point
+	 * Using current set of parameters at phsp point @param point
 	 * @param point Point in phase-space
 	 * @return Complex function value
 	 */
 	virtual const std::complex<double>& evaluate( dataPoint& point );
 
 	/**! Evaluate total amplitude
-	 * Using current set of parameters at phsp point \point. Amplitude is
+	 * Using current set of parameters at phsp point @param point. Amplitude is
 	 * multiplied with efficiency of datapoint.
 	 */
 	virtual const ParameterList& intensity( dataPoint& point );
 
 	/**! Evaluate total amplitude
-	 * Using current set of parameters at phsp point \point. Amplitude is
+	 * Using current set of parameters at phsp point @param point. Amplitude is
 	 * multiplied with efficiency of datapoint.
 	 */
 	virtual const ParameterList& intensity( std::vector<double> point );
 
 	/**! Evaluate total amplitude
-	 * Using current set of parameters at phsp point \point.
+	 * Using current set of parameters at phsp point @param point.
 	 * No efficiency correction.
 	 */
 	virtual const ParameterList& intensityNoEff( dataPoint& point );

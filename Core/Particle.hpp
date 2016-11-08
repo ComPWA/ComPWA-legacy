@@ -40,7 +40,7 @@ public:
 	//! Default destructor
 	virtual ~Particle();
 
-	//! Invariant mass of this particle and @param inParticle
+	//! Invariant mass of this particle and @param in
 	inline double invariantMass(const Particle& in) const
 	{
 		return ( std::pow(getE()+in.getE(),2)

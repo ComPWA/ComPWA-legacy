@@ -28,14 +28,14 @@
 
 namespace ComPWA {
 
-using Optimizer::ControlParameter;
-using DataReader::Data;
+//using Optimizer::ControlParameter;
+//using DataReader::Data;
 
 namespace Estimator {
 namespace MinLogLH {
 
-MinLogLH::MinLogLH(std::shared_ptr<ComPWA::Amplitude> amp, std::shared_ptr<Data> data,
-		std::shared_ptr<Data> phspSample,std::shared_ptr<Data> accSample,
+MinLogLH::MinLogLH(std::shared_ptr<Amplitude> amp, std::shared_ptr<DataReader::Data> data,
+		std::shared_ptr<DataReader::Data> phspSample,std::shared_ptr<DataReader::Data> accSample,
 		unsigned int startEvent, unsigned int nEvents) :
 		_dataSample(data), _phspSample(phspSample),_phspAccSample(accSample),
 		nEvts_(0), nPhsp_(0), nStartEvt_(startEvent), nUseEvt_(nEvents),
@@ -47,9 +47,9 @@ MinLogLH::MinLogLH(std::shared_ptr<ComPWA::Amplitude> amp, std::shared_ptr<Data>
 	return;
 }
 
-MinLogLH::MinLogLH(std::vector<std::shared_ptr<ComPWA::Amplitude> > ampVec,
-		std::vector<double> fraction, std::shared_ptr<Data> data,
-		std::shared_ptr<Data> phspSample,std::shared_ptr<Data> accSample,
+MinLogLH::MinLogLH(std::vector<std::shared_ptr<Amplitude> > ampVec,
+		std::vector<double> fraction, std::shared_ptr<DataReader::Data> data,
+		std::shared_ptr<DataReader::Data> phspSample,std::shared_ptr<DataReader::Data> accSample,
 		unsigned int startEvent, unsigned int nEvents) :
 						_ampVec(ampVec), _fraction(fraction),
 						_dataSample(data), _phspSample(phspSample), _phspAccSample(accSample),
@@ -101,24 +101,24 @@ void MinLogLH::Reset()
 {
 	_ampVec.clear();
 	_fraction.clear();
-	_dataSample = std::shared_ptr<Data>();
-	_phspSample = std::shared_ptr<Data>();
-	_phspAccSample = std::shared_ptr<Data>();
+	_dataSample = std::shared_ptr<DataReader::Data>();
+	_phspSample = std::shared_ptr<DataReader::Data>();
+	_phspAccSample = std::shared_ptr<DataReader::Data>();
 	_phspAccSampleEff = 1.0;
 
 }
 
-std::shared_ptr<ControlParameter> MinLogLH::createInstance(
+std::shared_ptr<Optimizer::ControlParameter> MinLogLH::createInstance(
 		std::shared_ptr<Amplitude> amp,
-		std::shared_ptr<Data> data, std::shared_ptr<Data> phspSample,
+		std::shared_ptr<DataReader::Data> data, std::shared_ptr<DataReader::Data> phspSample,
 		unsigned int startEvent, unsigned int nEvents)
 {
 	if(!instance_){
-		std::shared_ptr<Data> accSample_ = std::shared_ptr<Data>();
-		instance_ = std::shared_ptr<ControlParameter>(
+		std::shared_ptr<DataReader::Data> accSample_ = std::shared_ptr<DataReader::Data>();
+		instance_ = std::shared_ptr<Optimizer::ControlParameter>(
 				new MinLogLH(
 						amp, data, phspSample,
-						std::shared_ptr<Data>(), //empty sample
+						std::shared_ptr<DataReader::Data>(), //empty sample
 						startEvent, nEvents
 				)
 		);
@@ -128,10 +128,10 @@ std::shared_ptr<ControlParameter> MinLogLH::createInstance(
 	return instance_;
 }
 
-std::shared_ptr<ControlParameter> MinLogLH::createInstance(
+std::shared_ptr<Optimizer::ControlParameter> MinLogLH::createInstance(
 		std::shared_ptr<Amplitude> amp,
-		std::shared_ptr<Data> data, std::shared_ptr<Data> phspSample,
-		std::shared_ptr<Data> accSample,
+		std::shared_ptr<DataReader::Data> data, std::shared_ptr<DataReader::Data> phspSample,
+		std::shared_ptr<DataReader::Data> accSample,
 		unsigned int startEvent, unsigned int nEvents)
 {
 	if(!instance_){
@@ -144,10 +144,10 @@ std::shared_ptr<ControlParameter> MinLogLH::createInstance(
 	return instance_;
 }
 
-std::shared_ptr<ControlParameter> MinLogLH::createInstance(
+std::shared_ptr<Optimizer::ControlParameter> MinLogLH::createInstance(
 		std::vector<std::shared_ptr<Amplitude> > ampVec, std::vector<double> frac,
-		std::shared_ptr<Data> data_, std::shared_ptr<Data> phspSample_,
-		std::shared_ptr<Data> accSample_,
+		std::shared_ptr<DataReader::Data> data_, std::shared_ptr<DataReader::Data> phspSample_,
+		std::shared_ptr<DataReader::Data> accSample_,
 		unsigned int startEvent, unsigned int nEvents)
 {
 	if(!instance_){
@@ -159,8 +159,8 @@ std::shared_ptr<ControlParameter> MinLogLH::createInstance(
 }
 
 void MinLogLH::setAmplitude(std::shared_ptr<Amplitude> amp,
-		std::shared_ptr<Data> data, std::shared_ptr<Data> phspSample,
-		std::shared_ptr<Data> accSample,
+		std::shared_ptr<DataReader::Data> data, std::shared_ptr<DataReader::Data> phspSample,
+		std::shared_ptr<DataReader::Data> accSample,
 		unsigned int startEvent, unsigned int nEvents, bool useFuncTr)
 {
 	Reset();
@@ -179,8 +179,8 @@ void MinLogLH::setAmplitude(std::shared_ptr<Amplitude> amp,
 }
 
 void MinLogLH::setAmplitude(std::vector<std::shared_ptr<Amplitude> > ampVec,
-		std::vector<double> frac,	std::shared_ptr<Data> data,
-		std::shared_ptr<Data> phspSample, std::shared_ptr<Data> accSample,
+		std::vector<double> frac,	std::shared_ptr<DataReader::Data> data,
+		std::shared_ptr<DataReader::Data> phspSample, std::shared_ptr<DataReader::Data> accSample,
 		unsigned int startEvent, unsigned int nEvents, bool useFuncTr)
 {
 	_ampVec.clear();
@@ -301,7 +301,7 @@ double MinLogLH::controlParameter(ParameterList& minPar)
 		double vol = Kinematics::instance()->GetPhspVolume();
 		std::vector<double> normVec(_ampVec.size(),0.0);
 
-		std::shared_ptr<Data> sam;
+		std::shared_ptr<DataReader::Data> sam;
 		if(_phspAccSample) sam=_phspAccSample;
 		else sam=_phspSample;
 

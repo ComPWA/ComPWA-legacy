@@ -1,6 +1,6 @@
 //! Application to generate J/Psi -> g pi pi.
 /*!
- * @file HelicityCoherentAmplitudeGenApp.cpp
+ * @file HelicityCoherentAmplitudePlotApp.cpp
  * This application uses the HelicityAmplitude module and a
  * phase-space generator to generate a file with J/Psi -> gamma pi0 pi0 events.
  * Also uses the neat plotting tool to create a dalitz plot of the data.

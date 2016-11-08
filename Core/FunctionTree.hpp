@@ -94,6 +94,8 @@ public:
 	 * Add top node to the function tree
 	 * \param name identifier of node
 	 * \param strat Strategy with which the node calculates its value
+	 * \param dim dimension of the head node
+	 * \param useVec true if value is a vector
 	 * \sa addNode(), createNode(), createLeaf()
 	 */
 	virtual void createHead(const std::string& name, std::shared_ptr<Strategy> strat,
@@ -103,7 +105,7 @@ public:
 	/*!
 	 * Create head node as a leaf. Constant parameter! We use this to generate an empty tree.
 	 * \param name identifier of node
-	 * \param strat Strategy with which the node calculates its value
+	 * \param extPar value of the head
 	 * \sa addNode(), createNode(), createLeaf()
 	 */
 	virtual void createHead(const std::string& name, const double extPar){
@@ -116,7 +118,7 @@ public:
 	/*!
 	 * Create head node as a leaf.
 	 * \param name identifier of node
-	 * \param strat Strategy with which the node calculates its value
+	 * \param extPar parameter which holds the value of the head
 	 * \sa addNode(), createNode(), createLeaf()
 	 */
 	virtual void createHead(const std::string& name, std::shared_ptr<AbsParameter> extPar){
@@ -135,11 +137,12 @@ public:
 	 * \sa addNode(), createHead(), createLeaf(), insertTree
 	 */
 	virtual void insertNode(std::shared_ptr<TreeNode> inNode, std::string parent);
+
 	//! Insert an existing FunctionTree as TreeNode
 	/*!
 	 * Insert head of a existing FunctionTree to current tree.
 	 *
-	 * \param inNode Node to insert in FunctionTree
+	 * \param inTree Tree to insert in FunctionTree
 	 * \param parent the parent of this node (for linking)
 	 * \sa addNode(), createHead(), createLeaf(), insertNode()
 	 */
@@ -152,6 +155,8 @@ public:
 	 * \param name identifier of node
 	 * \param strat Strategy with which the node calculates its value
 	 * \param parent the parent of this node (for linking)
+	 * \param dim dimension of the head node
+     * \param useVec true if value is a vector
 	 * \sa addNode(), createHead(), createLeaf()
 	 */
 	virtual void createNode(const std::string& name, std::shared_ptr<Strategy> strat,

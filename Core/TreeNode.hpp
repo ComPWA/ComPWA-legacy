@@ -125,7 +125,8 @@ public:
 	const void deleteLinks();
 
 	/*! String used to display tree
-	 *\param lv print down to level lv, if lv=-1 print to whole tree, if lv=0 print current node only
+	 * \param lv print down to level lv, if lv=-1 print to whole tree, if lv=0 print current node only
+	 * \param beginning input string which will be put before the generated output
 	 */
 	std::string to_str(int lv=-1, std::string beginning="");
 

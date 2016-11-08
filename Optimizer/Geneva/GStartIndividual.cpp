@@ -41,11 +41,6 @@ namespace Gem
 	namespace Geneva
 	{
 
-
-	using ComPWA::ParameterList;
-	using ComPWA::Optimizer::ControlParameter;
-	using ComPWA::DoubleParameter;
-
 //	GStartIndividual::GStartIndividual() : GParameterSet(),theData(ControlParameter::Instance())
 //	        		{       /* nothing */ }
 
@@ -57,11 +52,11 @@ namespace Gem
 	 * The default constructor. This function will add two double parameters to this individual,
 	 * each of which has a constrained value range [-10:10].
 	 */
-	GStartIndividual::GStartIndividual(std::shared_ptr<ControlParameter> data, ParameterList list)
+	GStartIndividual::GStartIndividual(std::shared_ptr<ComPWA::Optimizer::ControlParameter> data, ComPWA::ParameterList list)
 	: GParameterSet(), theData(data), parList(list)
 	{
 		for(std::size_t i=0; i<parList.GetNDouble(); i++) {
-			std::shared_ptr<DoubleParameter> p = parList.GetDoubleParameter(i);
+			std::shared_ptr<ComPWA::DoubleParameter> p = parList.GetDoubleParameter(i);
 			if(p->IsFixed()) continue;
 			double val = p->GetValue();
 			double min = -1.79768e+307;
@@ -126,7 +121,7 @@ namespace Gem
 	 * @param val The ParameterList to fill
 	 * @return bool if valid
 	 */
-	bool GStartIndividual::getPar(ParameterList& val){
+	bool GStartIndividual::getPar(ComPWA::ParameterList& val){
 		updatePar();
 		val = ParameterList(parList);
 		return true;
@@ -199,7 +194,7 @@ namespace Gem
 		GStartIndividual::conversion_iterator<GConstrainedDoubleObject> it(this->end());
 		it = this->begin();
 		for(unsigned int i=0; i<parList.GetNDouble(); ++i) {
-			std::shared_ptr<DoubleParameter> p = parList.GetDoubleParameter(i);
+			std::shared_ptr<ComPWA::DoubleParameter> p = parList.GetDoubleParameter(i);
 			if(p->IsFixed()) continue;
 			p->SetValue( (*it)->value() );
 			++it;
