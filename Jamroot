@@ -92,7 +92,7 @@ project ComPWA
 # disabling/enabling the appropriate subprojects. Of course the appropriate if statements have to be inserted around build-project rules
 # and library sources etc...
 
-constant build_test : 0 ;
+constant build_test : 1 ;
 
 constant build_Physics : 1 ;
 constant build_AmplitudeSum : 1 ;

@@ -9,7 +9,10 @@
 //   Stefan Pflueger - initial API and implementation
 //-------------------------------------------------------------------------------
 
-//! Utility defines basic structures
+/*! \class Spin
+ * @file Utility.hpp
+ * Basic structures for amplitude calculations
+ */
 
 #ifndef CORE_UTILITY_HPP_
 #define CORE_UTILITY_HPP_

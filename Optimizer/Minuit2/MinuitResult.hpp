@@ -210,9 +210,7 @@ private:
 	void printCovarianceMatrix(TableFormater* fracTable);
 
 	/** Calculate errors on fit result
-	 * Set @param assumeUnCorrelatedErrors to assume that the error of the fit parameter only depends
-	 * on the error of the magnitude. The error of normalization due the the fit error on magnitudes
-	 * and phases is ignored.
+	 * The error of normalization due the the fit error on magnitudes and phases is ignored.
 	 * If we want to calculate the errors correctly we have to generate a set of fit parameters that
 	 * are smeard by a multidimensional gaussian and the covariance matrix of the fit. For every set
 	 * we calculate the fit frations and calculate its mean. The can be a very time consuming method,

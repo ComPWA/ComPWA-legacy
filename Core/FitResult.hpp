@@ -144,7 +144,7 @@ protected:
 	 *
 	 * @param parList result with fit fractions for the single resonances
 	 * @param amp amplitude with the resonances which share the fit fractions
-	 * @param nSets Precise error calcucation using @nSets Monte-Carlo events
+	 * @param nSets Precise error calcucation using @param nSets Monte-Carlo events
 	 */
 	//! Calculate fit fractions and its errors.
 	virtual void calcFractionError(ParameterList& parList,

@@ -102,6 +102,7 @@ public:
 	 * @param gC coupling constant for third channel
 	 * @param J resonance spin
 	 * @param mesonRadius 1/interaction length (needed for barrier factors)
+	 * @param ffType formfactor type
 	 * @return
 	 */
 	static std::complex<double> dynamicalFunction(double mSq, double mR,

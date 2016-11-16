@@ -95,7 +95,7 @@ public:
 
 	/** Calculate Break-up momentum squared
 	 *
-	 * Calculate Break-up momentum at energy @param sqrtS for particles with masses @param ma and @param mb.
+	 * Calculate Break-up momentum at energy @param sqrtS for particles with masses @param ma and @param mb .
 	 * From PDG2014 Eq.46-20a. Below threshold the function is analytically continued.
 	 * @param sqrtS center-of-mass energy
 	 * @param ma mass particle A
@@ -105,7 +105,7 @@ public:
 	static double qSqValue(double sqrtS, double ma, double mb);
 	/** Calculate Break-up momentum
 	 *
-	 * Calculate Break-up momentum at energy @param sqrtS for particles with masses @param ma and @param mb.
+	 * Calculate Break-up momentum at energy @param sqrtS for particles with masses @param ma and @param mb .
 	 * From PDG2014 Eq.46-20a. Below threshold the function is analytically continued.
 	 * @param sqrtS center-of-mass energy
 	 * @param ma mass particle A

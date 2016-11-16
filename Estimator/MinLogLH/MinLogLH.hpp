@@ -55,7 +55,7 @@ public:
 	 * @param data data sample
 	 * @param phspSample phsp sample for normalization. Efficiency values for each point needs
 	 *  to be set beforehand.
-	 * @param startEvent use #data_ from that position on
+	 * @param startEvent use @param data from that position on
 	 * @param nEvents number of events to process
 	 * @return std::shared_ptr<Data> of existing instance or newly created instance
 	 */
@@ -72,7 +72,7 @@ public:
 	 * @param data data sample
 	 * @param phspSample phsp sample for normalization
 	 * @param accSample sample of efficiency applied phsp events for unbinned efficiency correction
-	 * @param startEvent use #data_ from that position on
+	 * @param startEvent use @param data from that position on
 	 * @param nEvents number of events to process
 	 * @return std::shared_ptr<Data> of existing instance or newly created instance
 	 */
@@ -91,7 +91,7 @@ public:
 	 * @param data data sample
 	 * @param phspSample phsp sample for normalization
 	 * @param accSample sample of efficiency applied phsp events for unbinned efficiency correction
-	 * @param startEvent use #data_ from that position on
+	 * @param startEvent use @param data from that position on
 	 * @param nEvents number of events to process
 	 * @return std::shared_ptr<Data> of existing instance or newly created instance
 	 */
@@ -109,7 +109,7 @@ public:
 	 * @param data data sample
 	 * @param phspSample phsp sample for normalization
 	 * @param accSample sample of efficiency applied phsp events for unbinned efficiency correction
-	 * @param startEvent use #data_ from that position on
+	 * @param startEvent use @param data from that position on
 	 * @param nEvents number of events to process
 	 * @param useFuncTr use FunctionTree yes/no?
 	 */
@@ -123,10 +123,10 @@ public:
 	 *
 	 * @param ampVec amplitude
 	 * @param frac signal fraction in data sample
-	 * @param data data sample
-	 * @param phspSample phsp sample for normalization
-	 * @param accSample sample of efficiency applied phsp events for unbinned efficiency correction
-	 * @param startEvent use #data_ from that position on
+	 * @param data_ data sample
+	 * @param phspSample_ phsp sample for normalization
+	 * @param accSample_ sample of efficiency applied phsp events for unbinned efficiency correction
+	 * @param startEvent use @param data_ from that position on
 	 * @param nEvents number of events to process
 	 * @param useFuncTr use FunctionTree yes/no?
 	 */

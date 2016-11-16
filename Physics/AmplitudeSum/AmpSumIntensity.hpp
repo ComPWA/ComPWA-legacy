@@ -144,19 +144,19 @@ public:
 	virtual const std::complex<double>& evaluate( dataPoint& point );
 
 	/**! Evaluate total amplitude
-	 * Using current set of parameters at phsp point @param point. Amplitude is
+	 * Using current set of parameters at phsp point @param point . Amplitude is
 	 * multiplied with efficiency of datapoint.
 	 */
 	virtual const ParameterList& intensity( dataPoint& point );
 
 	/**! Evaluate total amplitude
-	 * Using current set of parameters at phsp point @param point. Amplitude is
+	 * Using current set of parameters at phsp point @param point . Amplitude is
 	 * multiplied with efficiency of datapoint.
 	 */
 	virtual const ParameterList& intensity( std::vector<double> point );
 
 	/**! Evaluate total amplitude
-	 * Using current set of parameters at phsp point @param point.
+	 * Using current set of parameters at phsp point @param point .
 	 * No efficiency correction.
 	 */
 	virtual const ParameterList& intensityNoEff( dataPoint& point );
@@ -237,10 +237,8 @@ protected:
 
 	//========== FunctionTree =============
 	/**Setup Basic Tree
-	 *
-	 * @param theMasses data sample
-	 * @param toyPhspSample sample of flat toy MC events for normalization of the resonances
-	 * @param opt Which tree should be created? "data" data Tree, "norm" normalization tree
+	 * @param sample sample of events for the amplitude calculation
+	 * @param phspSample sample of flat toy MC events for normalization of the resonances
 	 * with efficiency corrected toy phsp sample or "normAcc" normalization tree with sample
 	 * of accepted flat phsp events
 	 */

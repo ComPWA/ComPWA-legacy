@@ -184,7 +184,7 @@ public:
 
 	/** Convert coupling to width
 	 *
-	 * Convert coupling to channel (@param ma,@param mb) to partial width. Only valid for
+	 * Convert coupling to channel (ma ,mb) to partial width. Only valid for
 	 * narrow, isolated resonances. Implementation of inverted Eq.47-21
 	 * of PDG2014.
 	 * @param mSq invariant mass
@@ -203,7 +203,7 @@ public:
 
 	/** Convert coupling to width
 	 *
-	 * Convert coupling to channel (@param ma,@param mb) to partial width. Only valid for
+	 * Convert coupling to channel (ma ,mb) to partial width. Only valid for
 	 * narrow, isolated resonances. Implementation of inverted
 	 * Eqs.47-21 of PDG2014.
 	 * @param mSq invariant mass

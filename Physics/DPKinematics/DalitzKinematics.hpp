@@ -67,7 +67,7 @@ public:
 	/**! Calculates the helicity angle.
 	 *
 	 * Calculates the helicity angle for subsystem @param sys given
-	 * the invariant masses. @param invMassSq23 and @param invMassSq23. The
+	 * the invariant masses. @param invMassSq23 and @param invMassSq23 . The
 	 * angle is measured versus daughter 2 in system [12],
 	 * versus daughter 1 in [13] and versus 2 in [23]
 	 */
@@ -93,9 +93,10 @@ public:
 	/**! Calculates the scattering angle.
 	 *
 	 * Function obsolete!
-	 * Calculates the scattering angle given the invariant masses @param s and @param t.
-	 * The angle is measured between the spectator particle @param mSpec and particle @param m.
+	 * Calculates the scattering angle given the invariant masses @param s and @param t .
+	 * The angle is measured between the spectator particle @param mSpec and particle @param m .
 	 * @param mSecond is the third particle of the decay
+	 * @param M is mass of the initial system
 	 * You should set the masses as follows:
 	 * (m12sq,m23sq,M,m3,m1,m2); for subsystem 3
 	 * (m13sq,m12sq,M,m2,m3,m1); for subsystem 4
