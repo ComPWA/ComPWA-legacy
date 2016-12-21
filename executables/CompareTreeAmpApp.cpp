@@ -43,13 +43,13 @@
 
 // ComPWA header files go here
 #include "DataReader/RootReader/RootReader.hpp"
-#include "DataReader/RootGenerator/RootGenerator.hpp"
 #include "Physics/AmplitudeSum/AmpSumIntensity.hpp"
 #include "Physics/AmplitudeSum/AmpRelBreitWignerRes.hpp"
 #include "Physics/AmplitudeSum/AmpFlatteRes.hpp"
 #include "Estimator/MinLogLH/MinLogLH.hpp"
 #include "Optimizer/Minuit2/MinuitIF.hpp"
 #include "Physics/DPKinematics/RootEfficiency.cpp"
+#include "Physics/DPKinematics/RootGenerator.cpp"
 #include "Core/TableFormater.hpp"
 #include "Core/AbsParameter.hpp"
 #include "Core/Logging.hpp"
@@ -82,8 +82,8 @@ int main(int argc, char **argv){
 	unsigned int numEvents = 2000;//data size to be generated
 
 	//empty file: run generation before fit
-	std::shared_ptr<DataReader::Data> inputData(
-			new DataReader::RootReader()
+	std::shared_ptr<Data> inputData(
+			new DataReader::RootReader::RootReader()
 	);
 
 	//======================= EFFICIENCY =============================
@@ -126,8 +126,8 @@ int main(int argc, char **argv){
 	run.setAmplitude(trueAmp);//set true model here for generation
 
 	//empty phsp sample
-	std::shared_ptr<DataReader::Data> toyPhspData(
-			new DataReader::RootReader()
+	std::shared_ptr<Data> toyPhspData(
+			new DataReader::RootReader::RootReader()
 	);
 
 	run.setPhspSample(toyPhspData);
@@ -166,9 +166,9 @@ int main(int argc, char **argv){
 	BOOST_LOG_TRIVIAL(info)<<"Fit model file: "<<fitModelFile ;
 
 	//======================= TREE FIT =============================
-	std::shared_ptr<Optimizer::ControlParameter> esti(Estimator::MinLogLH::createInstance(
+	std::shared_ptr<Optimizer::ControlParameter> esti(Estimator::MinLogLH::MinLogLH::createInstance(
 			fitAmpTree, inputData, toyPhspData));
-	Estimator::MinLogLH* minLog = dynamic_cast<Estimator::MinLogLH*>(&*(esti->Instance()));
+	Estimator::MinLogLH::MinLogLH* minLog = dynamic_cast<Estimator::MinLogLH::MinLogLH*>(&*(esti->Instance()));
 	minLog->setUseFunctionTree(1);
 	std::shared_ptr<FunctionTree> physicsTree = minLog->getTree();
 	BOOST_LOG_TRIVIAL(debug) << physicsTree->head()->to_str(20);

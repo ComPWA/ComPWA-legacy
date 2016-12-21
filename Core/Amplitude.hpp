@@ -46,12 +46,15 @@ class Amplitude
 
 public:
 
+    //! Constructor with an optional, unique name and an optional efficiency
 	Amplitude(std::string name="",
 			std::shared_ptr<Efficiency> eff	= std::shared_ptr<Efficiency>(new UnitEfficiency)) :
 				_name(name), eff_(eff) { }
 
+	//!Destructor
 	virtual ~Amplitude() { /* nothing */	}
 
+	//!Function to create a full copy of the amplitude
 	virtual Amplitude* Clone(std::string newName="") const = 0;
 
 	//============ SET/GET =================
@@ -229,12 +232,16 @@ public:
 
 	/**! Check if amplitudes have a FunctionTree
 	 *
-	 * @param ampVec
-	 * @return
+	 * @param ampVec corresponding vector of amplitudes
+	 * @return true if tree is present
 	 */
 	static bool AmpHasTree(std::vector<std::shared_ptr<Amplitude> > ampVec);
 
-	unsigned int GetMcPrecision() { return 30000;}
+    /**! Return Precision of Monte-Carlo Normalization
+     *
+     * @return integer value of used precision
+     */
+	unsigned int GetMcPrecision() { return 30000;} //Todo: fixed?
 
 protected:
 	//! Name

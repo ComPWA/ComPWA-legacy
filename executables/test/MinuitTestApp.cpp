@@ -37,7 +37,7 @@
 #include "Core/Parameter.hpp"
 
 // The toy-data to fit to
-#include "PolyFit.hpp"
+#include "executables/test/PolyFit.hpp"
 
 using namespace std;
 

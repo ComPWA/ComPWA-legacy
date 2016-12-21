@@ -55,7 +55,6 @@
 #include "Physics/AmplitudeSum/AmpSumIntensity.hpp"
 #include "Estimator/MinLogLH/MinLogLH.hpp"
 #include "Optimizer/Minuit2/MinuitIF.hpp"
-#include "Optimizer/Geneva/GenevaIF.hpp"
 #include "Core/DataPoint.hpp"
 #include "Core/Efficiency.hpp"
 
@@ -86,9 +85,9 @@ using Estimator::MinLogLH::MinLogLH;
 int main(int argc, char **argv) {
 	int seed = 1234;
 	string output_filename("JakeFitResult.root");
-	string output_directory("./test/");
+	string output_directory("./executables/DalitzFit/");
 	string input_filename("JPSIPSMC.ACC.root");
-	string input_directory("./test/");
+	string input_directory("./executables/DalitzFit/");
 	string output_file_suffix("");
 	if (argc > 1)
 		output_directory = argv[1];
@@ -134,7 +133,7 @@ int main(int argc, char **argv) {
 		BOOST_LOG_TRIVIAL(error)<<"Environment Variable COMPWA_DIR not set?"<<std::endl;
 	}
 
-	std::string resoFile = path + "/test/Jake_ypipi.xml";
+	std::string resoFile = path + "/executables/DalitzFit/Jake_ypipi.xml";
 	boost::property_tree::ptree pt;
 	read_xml(resoFile, pt, boost::property_tree::xml_parser::trim_whitespace);
 	auto fitAmpPtr = new AmpSumIntensity("amp",normStyle::none,
@@ -143,7 +142,7 @@ int main(int argc, char **argv) {
 	std::shared_ptr<Amplitude> amps( fitAmpPtr );
 
 	BOOST_LOG_TRIVIAL(info)<< "Load Modules";
-    std::string file = "test/JPSIDATA.ACC.root";
+    std::string file = "executables/DalitzFit/JPSIDATA.ACC.root";
     std::shared_ptr<JakeReader> myReader(
         new JakeReader(file, "kin"));
 	//std::shared_ptr<RootReader> myReader(
@@ -156,7 +155,7 @@ int main(int argc, char **argv) {
 	//std::shared_ptr<Amplitude> amps(new AmpSumIntensity(M, Br, m1, m2, m3,"J/psi","gamma","pi0","pi0", ini));
 	// Initiate parameters
 	ParameterList par;
-	std::shared_ptr<ControlParameter> esti;
+	std::shared_ptr<Optimizer::ControlParameter> esti;
 	amps->FillParameterList(par); //perfect startvalues
 	esti = MinLogLH::createInstance(amps, myReader, myPHSPReader, nStartEvent,
 			nFitEvents);
@@ -254,19 +253,20 @@ int main(int argc, char **argv) {
 	for (unsigned int i = 0; i < par.GetNDouble(); i++) {
 		std::shared_ptr<DoubleParameter> tmp = par.GetDoubleParameter(i);
 		optiInt[i] = tmp->GetValue();
-		if (/*i < 2 ||*/ i > 10 /*|| i%4==2 || i%4==3 */) { //omega's and f0 fixed
+		//if (/*i < 2 ||*/ i > 10 /*|| i%4==2 || i%4==3 */) { //omega's and f0 fixed
 			//if(i<2 || i>3 || i%2==1){ //omega's and f0 fixed
-			tmp->FixParameter(true);
-		} else {
-			tmp->FixParameter(false);
-			BOOST_LOG_TRIVIAL(debug)<< *tmp;
+		//	tmp->FixParameter(true);
+		//} else {
+		//	tmp->FixParameter(true); if(i==5) tmp->FixParameter(false);
+		//	BOOST_LOG_TRIVIAL(debug)<< *tmp;
 			//tmp->SetValue(tmp->GetValue()+0.5);			///((i+1)));
-			tmp->SetError(tmp->GetValue());
-			if (!tmp->GetValue())
-				tmp->SetError(1.);
-		}
+		//	tmp->SetError(tmp->GetValue());
+		//	if (!tmp->GetValue())
+		//		tmp->SetError(1.);
+		//}
 		startInt[i] = tmp->GetValue();
 	}
+
 	BOOST_LOG_TRIVIAL(info)<< "LH with following parameters: " << esti->controlParameter(par);
 	for (unsigned int i = 0; i < par.GetNDouble(); i++) {
 		BOOST_LOG_TRIVIAL(info)<< par.GetDoubleParameter(i)->GetName() << " = " << par.GetDoubleParameter(i)->GetValue();
@@ -595,7 +595,7 @@ int main(int argc, char **argv) {
 		}
 
 
-	} while (i < myReader->getNEvents());
+	} while (i < (myReader->getNEvents()/10.));
 
 	bw12DIFF->Add(bw12, 1.0);
 	bw23DIFF->Add(bw23, 1.0);

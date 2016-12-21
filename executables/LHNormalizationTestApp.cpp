@@ -83,14 +83,14 @@ int main(int argc, char **argv){
 			"D0","K_S0","K-","K+"
 	);
 	//initialize random generator
-	std::shared_ptr<Generator> gen = std::shared_ptr<Generator>(new RootGenerator(seed));
+	std::shared_ptr<Generator> gen = std::shared_ptr<Generator>(new Physics::DPKinematics::RootGenerator(seed));
 
 	std::cout<<std::setprecision(8)<<std::endl;
 	RunManager run;
 	run.setGenerator(gen);
 	std::shared_ptr<Efficiency> eff(new UnitEfficiency());
 
-	std::shared_ptr<Data> toyPhspData(new RootReader());//empty phsp sample
+	std::shared_ptr<Data> toyPhspData(new DataReader::RootReader::RootReader());//empty phsp sample
 	run.setPhspSample(toyPhspData);
 	if( !toyPhspData->getNEvents() ) {
 		run.generatePhsp(num);
@@ -114,7 +114,7 @@ int main(int argc, char **argv){
 	std::shared_ptr<Amplitude> trueAmp( fitAmpPtr );
 	trueAmp->FillParameterList(list);
 	esti = std::shared_ptr<Optimizer::ControlParameter>(
-			MinLogLH::createInstance(trueAmp,toyPhspData , toyPhspData)
+			Estimator::MinLogLH::MinLogLH::createInstance(trueAmp,toyPhspData , toyPhspData)
 	);
 
 	Estimator::MinLogLH::MinLogLH* minLog =

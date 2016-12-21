@@ -40,7 +40,9 @@
 
 namespace ComPWA {
 
+//! Enums for the type of the parameter, should be extended if an new parameter type is added
 enum ParType { COMPLEX = 1, DOUBLE = 2, INTEGER = 3, BOOL = 4, MDOUBLE = 5, MCOMPLEX = 6, MUNSIGNEDINTEGER = 7, UNDEFINED = 0};
+//! Nems of the parameter types, should be extended if an new parameter type is added
 static const char* ParNames[8] = { "UNDEFINED", "COMPLEX", "DOUBLE", "INTEGER", "BOOL", "MDOUBLE", "MCOMPLEX", "MUNSIGNEDINTEGER"};
 
 class AbsParameter

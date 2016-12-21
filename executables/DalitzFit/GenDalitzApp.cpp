@@ -73,7 +73,7 @@ const unsigned int MaxEvents = 50000;
  */
 int main(int argc, char **argv) {
 	int seed = 1234;
-	string output_filename("3Part-4vecs.root");
+	string output_filename("JakeJPSI_GEN.root");
 	string output_directory("./");
 	string output_file_suffix("");
 	if (argc > 1)
@@ -299,7 +299,7 @@ int main(int argc, char **argv) {
 	} catch (std::logic_error) {
 		BOOST_LOG_TRIVIAL(error)<<"Environment Variable COMPWA_DIR not set?"<< std::endl;
 	}
-	std::string resoFile = path + "/test/JPSI_ypipi.xml";
+	std::string resoFile = path + "/executables/DalitzFit/Jake_ypipi.xml";
 
 	boost::property_tree::ptree pt;
 	read_xml(resoFile , pt, boost::property_tree::xml_parser::trim_whitespace);
@@ -314,8 +314,8 @@ int main(int argc, char **argv) {
 	// minPar.AddParameter(DoubleParameter(1.5,0.5,2.5,0.1));
 
 	//Output File setup
-	boost::filesystem::path output_file(output_filename);
-	string output_file_path = output_directory + "/" + output_filename;
+	boost::filesystem::path output_file("/executables/DalitzFit/"+output_filename);
+	string output_file_path = output_directory + "/executables/DalitzFit/" + output_filename;
 	if (output_file_suffix != "")
 		output_file_path = output_directory + "/" + output_file.stem().string()
 				+ "_" + output_file_suffix + output_file.extension().string();

@@ -1,111 +1,106 @@
 #error Documentation only.
 
-/**
+/*!
  * @namespace ComPWA
  * General namespace for the ComPWA modules and classes.
  */
 
-  /**
-   * @namespace DataReader
+  /*!
+   * @namespace ComPWA::DataReader
    * Namespace for all ComPWA Data modules.
    */
 
-    /**
-     * @namespace AsciiReader
+    /*!
+     * @namespace ComPWA::DataReader::AsciiReader
      * Classes of the Module for reading Ascii input files.
      */
 
-    /**
-     * @namespace JakeReader
+    /*!
+     * @namespace ComPWA::DataReader::JakeReader
      * Classes of the Module for reading BESIII root files.
      */
 
-    /**
-     * @namespace RootReader
+    /*!
+     * @namespace ComPWA::DataReader::RootReader
      * Classes of the Module for reading Root input files.
      */
 
-    /**
-     * @namespace RootGenerator
-     * Classes for the generation of MonteCarlo data in root files.
-     */
-
-  /**
-   * @namespace Estimator
+  /*!
+   * @namespace ComPWA::Estimator
    * Namespace for all ComPWA Estimator modules.
    */
 
-    /**
-     * @namespace ChiOneD
+    /*!
+     * @namespace ComPWA::Estimator::ChiOneD
      * Classes of the Module calculating a Chi-Square estimate.
      */
 
-    /**
-     * @namespace MinLogLH
+    /*!
+     * @namespace ComPWA::Estimator::MinLogLH
      * Classes of the Module calculating a minimum likelihood estimate.
      */
 
-    /**
-     * @namespace SliceFit
+    /*!
+     * @namespace ComPWA::Estimator::SliceFit
      * Classes of the Module calculating the model independent slice fit estimates using a binned slices.
      */
 
-    /**
-     * @namespace SliceFitUb
+    /*!
+     * @namespace ComPWA::Estimator::SliceFitUb
      * Classes of the Module calculating the model independent slice fit estimates using unbinned slices.
      */
 
-  /**
-   * @namespace Optimizer
+  /*!
+   * @namespace ComPWA::Optimizer
    * Namespace for all ComPWA Optimizer modules.
    */
 
-    /**
-     * @namespace Geneva
+    /*!
+     * @namespace ComPWA::Optimizer::Geneva
      * Wrapper to the Geneva library optimization tools.
      */
 
-    /**
-     * @namespace Minuit2
+    /*!
+     * @namespace ComPWA::Optimizer::Minuit2
      * Wrapper to the Minuit2 library optimization tools.
      */
 
-  /**
-   * @namespace Physics
+  /*!
+   * @namespace ComPWA::Physics
    * Namespace for all ComPWA Physics modules.
    */
 
-    /**
-     * @namespace AmplitudeSum
+    /*!
+     * @namespace ComPWA::Physics::AmplitudeSum
      * Module to calculate a coherent Amplitude with BreitWigner and Flatte resonances for three-body final states.
      */
 
-    /**
-     * @namespace BreitWigner
+    /*!
+     * @namespace ComPWA::Physics::BreitWigner
      * Module to calculate a single relativistic BreitWigner for a two-body final state.
      */
 
-    /**
-     * @namespace DecayTree
+    /*!
+     * @namespace ComPWA::Physics::DecayTree
      * Module to provide decay trees for the calculation of helicity amplitudes for general final states
      */
 
-    /**
-     * @namespace DPKinematics
+    /*!
+     * @namespace ComPWA::Physics::DPKinematics
      * Helper classes providing container for kinematic information of three-body final states.
      */
 
-    /**
-     * @namespace DynamicalFunctions
+    /*!
+     * @namespace ComPWA::Physics::DynamicalFunctions
      * Namespace for classes calculating dynamical functions for various modules.
      */
 
-    /**
-     * @namespace HelicityFormalism
+    /*!
+     * @namespace ComPWA::Physics::HelicityFormalism
      * Module to calculate helicity amplitudes for general final states.
      */
 
-/**
+/*!
  * @namespace NeatPlotting
  * Helper classes for creating root histograms and graphs.
  */

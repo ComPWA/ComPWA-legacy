@@ -59,7 +59,7 @@ int main(int argc, char **argv){
 
 	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(DalitzKinematics::createInstance("jpsi", "gamma", "pi0", "pi0"));
 
-	std::string file = "test/JPSIDATA_JPE.ACC.root";
+	std::string file = "executables/DalitzFit/JPSIDATA.ACC.root";
 	JakeReader myReader(file, "kin"); //return 0;
 	unsigned int maxEvents = myReader.getNEvents();
 	double masssq12, masssq13, masssq23;
@@ -80,22 +80,22 @@ int main(int argc, char **argv){
 	bw23->GetYaxis()->CenterTitle();
 
 
-	std::string fileB = "test/3Part-4vecs_100k.root";
-	RootReader myReaderPHSP(fileB, "mc");
+	std::string fileB = "executables/DalitzFit/JakeJPSI_GEN.root";
+	RootReader myReaderPHSP(fileB, "data");
 
 	unsigned int maxEventsPHSP = myReaderPHSP.getNEvents();
 	//double masssq12PHSP, masssq13PHSP, masssq23PHSP;
-	TH2D* bw12PHSP = new TH2D("bw12PHSP","inv. mass-sq of particles 1&2 PHSP",nBins,0.,10.,nBins,0.,10.);
+	TH2D* bw12PHSP = new TH2D("bw12GEN","inv. mass-sq of particles 1&2 GEN",nBins,0.,10.,nBins,0.,10.);
 	bw12PHSP->GetXaxis()->SetTitle("m_{12}^{2} / GeV^{2}/c^{2}");
 	bw12PHSP->GetYaxis()->SetTitle("m_{13}^{2} / GeV^{2}/c^{2}");
 	bw12PHSP->GetXaxis()->CenterTitle();
 	bw12PHSP->GetYaxis()->CenterTitle();
-	TH2D* bw13PHSP = new TH2D("bw13PHSP","inv. mass-sq of particles 1&3 PHSP",nBins,0.,10.,nBins,0.,10.);
+	TH2D* bw13PHSP = new TH2D("bw13GEN","inv. mass-sq of particles 1&3 GEN",nBins,0.,10.,nBins,0.,10.);
 	bw13PHSP->GetXaxis()->SetTitle("m_{13}^{2} / GeV^{2}/c^{2}");
 	bw13PHSP->GetYaxis()->SetTitle("m_{12}^{2} / GeV^{2}/c^{2}");
 	bw13PHSP->GetXaxis()->CenterTitle();
 	bw13PHSP->GetYaxis()->CenterTitle();
-	TH2D* bw23PHSP = new TH2D("bw23PHSP","inv. mass-sq of particles 2&3 PHSP",nBins,0.,10.,nBins,0.,10.);
+	TH2D* bw23PHSP = new TH2D("bw23GEN","inv. mass-sq of particles 2&3 GEN",nBins,0.,10.,nBins,0.,10.);
 	bw23PHSP->GetXaxis()->SetTitle("m_{23}^{2} / GeV^{2}/c^{2}");
 	bw23PHSP->GetYaxis()->SetTitle("m_{12}^{2} / GeV^{2}/c^{2}");
 	bw23PHSP->GetXaxis()->CenterTitle();
@@ -168,7 +168,7 @@ int main(int argc, char **argv){
 		bw23PHSP->Fill(masssq23,masssq12);
 	}
 
-	TFile output("results/JAKETEST.root","RECREATE","ROOT_Tree");
+	TFile output("executables/DalitzFit/JAKEPLOTS.root","RECREATE","ROOT_Tree");
 	m12m13_contour->Write("con13");
 	m13m12_contour->Write("con12");
 	m23m12_contour->Write("con23");
