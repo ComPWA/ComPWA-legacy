@@ -51,6 +51,7 @@
 
 // ComPWA header files go here
 #include "DataReader/RootReader/RootReader.hpp"
+#include "DataReader/JakeReader/JakeReader.hpp"
 #include "Physics/AmplitudeSum/AmpSumIntensity.hpp"
 #include "Estimator/SliceFit/SliceFit.hpp"
 #include "Optimizer/Minuit2/MinuitIF.hpp"
@@ -65,11 +66,11 @@ const Double_t m3 = 0.139570; // GeV/c² (pi)
 //const Double_t c = 299792458.; // m/s
 const Double_t PI = 3.14159; // m/s
 
-unsigned int nFitEvents=1000000-1;
+unsigned int nFitEvents=44000 - 1;
 unsigned int nStartEvent=0;
 unsigned int nBins=400;
-unsigned int nF0=3;
-unsigned int nF2=2;
+unsigned int nF0=4;
+unsigned int nF2=3;
 
 using namespace ComPWA;
 using namespace ComPWA::Physics::AmplitudeSum;
@@ -77,6 +78,7 @@ using Physics::DPKinematics::DalitzKinematics;
 
 using Physics::AmplitudeSum::AmpSumIntensity;
 using DataReader::RootReader::RootReader;
+using DataReader::JakeReader::JakeReader;
 using Estimator::SliceFit::SliceFit;
 
 /************************************************************************************************/
@@ -101,13 +103,13 @@ int main(int argc, char **argv){
    dataID = std::atoi(argv[1]);
 
   //std::string file="test/3Part-4vecs_1M.root";
-  std::string file="test/3Part-4vecs_1M_PDG_PHASE.root";
-  if(argc>1){
+  std::string file="executables/SliceFit/JPSIDATA.ACC.root";
+  /*if(argc>1){
     file="test/3Part-4vecs_100k_SIMPLE_oP_";
     file+=std::to_string(dataID);
     file+=".root";
     BOOST_LOG_TRIVIAL(info) << "Started with runID: " << dataID;
-  }
+  }*/
 
 	const char* pPath = getenv("COMPWA_DIR");
 	std::string path = "";
@@ -117,13 +119,19 @@ int main(int argc, char **argv){
 		BOOST_LOG_TRIVIAL(error)<<"Environment Variable COMPWA_DIR not set?"<<std::endl;
 	}
 
-	std::string resoFile=path+"/test/JPSI_ypipi_phase.xml";
+	std::string resoFile=path+"/executables/SliceFit/Jake_ypipi.xml";
     boost::property_tree::ptree pt;
     read_xml(resoFile, pt, boost::property_tree::xml_parser::trim_whitespace);
 
   BOOST_LOG_TRIVIAL(info)<< "Load Modules";
-  std::shared_ptr<RootReader> myReader(new RootReader(file, "data"));
-  std::shared_ptr<RootReader> myPHSPReader(new RootReader(file, "mc"));
+  std::shared_ptr<JakeReader> myReader(
+      new JakeReader(file, "kin"));
+  myReader->resetWeights(); //setting weights to 1
+  std::shared_ptr<JakeReader> myPHSPReader(
+            new JakeReader("executables/SliceFit/JPSIMC.ACC.root", "kin"));
+    myPHSPReader->setEfficiency(shared_ptr<Efficiency>(new UnitEfficiency())); //setting efficiency to 1
+  //std::shared_ptr<RootReader> myReader(new RootReader(file, "data"));
+  //std::shared_ptr<RootReader> myPHSPReader(new RootReader(file, "mc"));
   std::shared_ptr<AmpSumIntensity> amps(
 		  new AmpSumIntensity(
 				  "amp",
@@ -227,15 +235,15 @@ int main(int argc, char **argv){
   //    par.GetDoubleParameter(i).FixParameter(true);
   //  }
 
-  std::string fitres="FitResultsAllSlices.txt", fitresroot="test/FitResultJPSISLICE.root";
-  if(argc>1){
+  std::string fitres="executables/SliceFit/FitResultsAllSlices.txt", fitresroot="executables/SliceFit/FitResultJAKESLICE.root";
+  /*if(argc>1){
     fitres="FitResultsAllSlices_";
     fitres+=std::to_string(dataID);
     fitres+=".txt";
     fitresroot="test/FitResultJPSISLICE_";
     fitresroot+=std::to_string(dataID);
     fitresroot+=".root";
-  }
+  }*/
 
   BOOST_LOG_TRIVIAL(info) << "Start Fit of all slices";
   std::vector<std::complex<double> > p1,p2, e1, e2;

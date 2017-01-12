@@ -114,20 +114,20 @@ exe runmanagertestApp :
         $(TOP)/Optimizer/Minuit2//Minuit2IF
         : ;
 
-exe openMPTestApp 
-	: OpenMPTestApp.cpp  
-	  test 
-        $(TOP)/Core//ComPWA
-        $(TOP)/Physics/AmplitudeSum//AmplitudeSum
-        $(TOP)/Physics/DPKinematics//DPKinematics
-        $(TOP)/DataReader/RootReader//RootReader
-        $(TOP)/Optimizer//Optimizer
-        $(TOP)/Estimator/MinLogLH//MinLogLH
-        $(TOP)/Optimizer/Minuit2//Minuit2IF
-	: <library>/gsl 
-	  <library>/root
-	  #<cxxflags>-fopenmp
-	;
+#exe openMPTestApp 
+#	: OpenMPTestApp.cpp  
+#	  test 
+#        $(TOP)/Core//ComPWA
+#        $(TOP)/Physics/AmplitudeSum//AmplitudeSum
+#        $(TOP)/Physics/DPKinematics//DPKinematics
+#        $(TOP)/DataReader/RootReader//RootReader
+#        $(TOP)/Optimizer//Optimizer
+#        $(TOP)/Estimator/MinLogLH//MinLogLH
+#        $(TOP)/Optimizer/Minuit2//Minuit2IF
+#	: <library>/gsl 
+#	  <library>/root
+#	  #<cxxflags>-fopenmp
+#	;
 
 exe iteratorApp : 
         IteratorTestApp.cpp 
@@ -149,7 +149,7 @@ install dist2
 	  #integrationtestApp 
 	  #integrationtestbinnedApp 
 	  runmanagertestApp 
-	  openMPTestApp
+	  #openMPTestApp
 	  iteratorApp
 	: <threading>single
 	  <location>$(TOP)/bin ;

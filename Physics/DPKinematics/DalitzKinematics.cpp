@@ -377,9 +377,11 @@ double DalitzKinematics::helicityAngle(double M, double m, double m2,
 	//		+" mSqA="+std::to_string((long double) invMassSqA)
 	//		+" mSqB="+std::to_string((long double) invMassSqB) );
 	//	}
+	if( cosAngle<-1 && cosAngle>-1.01 ) cosAngle = -1;
+    if( cosAngle>1 && cosAngle<1.01 ) cosAngle = 1;
 	if( cosAngle>1 || cosAngle<-1 ){ //faster
 		throw BeyondPhsp("DalitzKinematics::helicityAngle() | "
-				"scattering angle out of range! Datapoint beyond phsp?");
+				" scattering angle out of range! Datapoint beyond phsp?");
 	}
 	return cosAngle;
 }

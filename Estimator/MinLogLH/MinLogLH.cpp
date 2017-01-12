@@ -321,12 +321,13 @@ double MinLogLH::controlParameter(ParameterList& minPar)
 					normVec.at(i) += intens;
 			}
 		}
-		auto it = normVec.begin();
-		for( ; it!=normVec.end(); ++it){
-			if( !(*it) )
+		for(auto it = normVec.begin(); it!=normVec.end(); ++it){
+			if( !(*it) ){
+			  std::cout<< "Amps: " << _ampVec.size() << " Norms: " << normVec.size() << " Norm " << normVec.at(0) << std::endl;
 				throw std::runtime_error("MinLogLH::controlParameter() | "
 						"Normalization can not be calculated for at least one "
 						"resonance ");
+			}
 			(*it) *= vol/(double)size;
 		}
 

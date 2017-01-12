@@ -15,6 +15,7 @@ project ComPWA/executables
 
 
 	  <library>/root
+	  <linkflags>-lgomp
 	  <linkflags>-lRooFit
 	  <linkflags>-lRooFitCore
 	  <linkflags>-lboost_unit_test_framework
@@ -25,6 +26,9 @@ project ComPWA/executables
 	
 	build-project DalitzFit ;
 	sources = $(sources) [ glob DalitzFit/*.cpp : *.Test.cpp ] ;
+	
+	build-project SliceFit ;
+	sources = $(sources) [ glob SliceFit/*.cpp : *.Test.cpp ] ;
 	
 #	build-project AmpPlotter  ;
 #	sources = $(sources) [ glob AmpPlotter/*.cpp : *.Test.cpp ] ;
@@ -103,18 +107,6 @@ exe lhNormalizationTestApp :
 	$(TOP)/Physics/DPKinematics//DPKinematics 
         : ;
         
-exe slicefitApp : 
-        SliceFitApp.cpp 
-        executables
-        $(TOP)/Core//ComPWA
-        $(TOP)/Physics/AmplitudeSum//AmplitudeSum
-        $(TOP)/Physics/DPKinematics//DPKinematics
-        $(TOP)/DataReader/RootReader//RootReader
-        $(TOP)/Estimator/SliceFit//SliceFit
-        $(TOP)/Optimizer/Minuit2//Minuit2IF
-        $(TOP)/Physics/DPKinematics//DPKinematics
-        : ;
-        
 #exe helicityDecayTreeTestApp : 
 #        HelicityDecayTreeTestApp.cpp 
 #        executables
@@ -161,30 +153,6 @@ exe slicefitApp :
 #        $(TOP)/Optimizer/Minuit2//Minuit2IF
 #        : ;
 
-exe slicefitubApp : 
-        SliceFitUBApp.cpp 
-        executables
-        $(TOP)/Core//ComPWA
-        $(TOP)/Physics/AmplitudeSum//AmplitudeSum
-        $(TOP)/Physics/DPKinematics//DPKinematics  
-        $(TOP)/DataReader/RootReader//RootReader
-        $(TOP)/Estimator/SliceFitUB//SliceFitUB
-        $(TOP)/Optimizer/Minuit2//Minuit2IF
-        $(TOP)/Physics/DPKinematics//DPKinematics  
-        : ;
-        
-exe slicefitrandApp : 
-        SliceFitRANDApp.cpp 
-        executables
-        $(TOP)/Core//ComPWA
-        $(TOP)/Physics/AmplitudeSum//AmplitudeSum
-        $(TOP)/Physics/DPKinematics//DPKinematics  
-        $(TOP)/DataReader/RootReader//RootReader
-        $(TOP)/Estimator/SliceFitUB//SliceFitUB
-        $(TOP)/Optimizer/Minuit2//Minuit2IF
-        $(TOP)/Physics/DPKinematics//DPKinematics  
-        : ;
-
 exe serializeApp 
 	: SerializationApp.cpp 
        executables
@@ -205,7 +173,6 @@ install dist
         
 install dist2 
 	: compareTreeAmpApp 
-	  slicefitApp 
 	  gentwopartApp 
 	  serializeApp 
 	  dpareaTestApp 

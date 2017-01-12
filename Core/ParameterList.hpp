@@ -29,6 +29,7 @@
 #include <map>
 
 #include "boost/serialization/vector.hpp"
+#include <boost/serialization/shared_ptr.hpp>
 
 #include "Core/AbsParameter.hpp"
 #include "Core/Parameter.hpp"

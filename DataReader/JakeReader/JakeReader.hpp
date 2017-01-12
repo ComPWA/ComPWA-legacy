@@ -80,6 +80,12 @@ public:
 	//! Destructor
 	virtual ~JakeReader();
 
+    //! Create clone
+    virtual JakeReader* Clone() const;
+
+    //! Create empty clone
+    virtual JakeReader* EmptyClone() const;
+
 	//! Set efficiency value for all stored events. Efficiency is taken from Efficiency object.
 	void setEfficiency(std::shared_ptr<Efficiency> eff);
 	//! Reset effciencies of all events

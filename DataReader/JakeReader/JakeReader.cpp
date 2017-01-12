@@ -69,6 +69,16 @@ bool JakeReader::hasWeights(){
 	return has;
 }
 
+JakeReader* JakeReader::Clone() const
+{
+    return new JakeReader(*this);
+}
+
+JakeReader* JakeReader::EmptyClone() const
+{
+    return new JakeReader();
+}
+
 void JakeReader::Clear(){
 	fEvents.clear();
 }

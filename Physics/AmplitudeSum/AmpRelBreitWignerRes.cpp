@@ -60,7 +60,6 @@ void AmpRelBreitWignerRes::Configure(
 		ParameterList& list)
 {
 	if( v.first != "BreitWigner" ) throw BadConfig("");
-
 	boost::property_tree::ptree pt = v.second;
 	AmpAbsDynamicalFunction::Configure(v,list);
 
@@ -96,7 +95,6 @@ void AmpRelBreitWignerRes::Configure(
 		}
 	}
 	initialize();
-
 	return;
 }
 
