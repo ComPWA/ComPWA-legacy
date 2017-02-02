@@ -55,7 +55,7 @@ public:
 	 * /param parent pointer to connected upper level node
 	 */
 	TreeNode(std::string name,
-			std::vector<std::shared_ptr<AbsParameter>>& intResult,
+			std::vector<std::shared_ptr<AbsParameter> >& intResult,
 			std::shared_ptr<Strategy> strat, std::shared_ptr<TreeNode> parent);
 
 	//! Destructor
@@ -169,7 +169,7 @@ protected:
 	std::vector<std::shared_ptr<TreeNode> > _parents; /*!< Link to parents */
 	std::vector<std::shared_ptr<TreeNode> > _children; /*!< Link to children */
 
-	std::vector<std::shared_ptr<AbsParameter>> _value; /*!< Value of this node */
+	std::vector<std::shared_ptr<AbsParameter> > _value; /*!< Value of this node */
 	std::string _name; /*!< Unique name of this node */
 	bool _changed; /*!< flag if node needs recalculation */
 

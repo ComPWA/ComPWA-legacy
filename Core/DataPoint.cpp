@@ -21,7 +21,7 @@ void dataPoint::init()
 }
 
 dataPoint::dataPoint(int a, int b, double invMassSqA, double invMassSqB) :
-		eff(1.0), weight(1.0)
+		weight(1.0), eff(1.0)
 {
 	init();
 	Set(a,b,invMassSqA,invMassSqB);
@@ -61,7 +61,7 @@ unsigned int dataPoint::getID(std::string name) const
 	std::vector<std::string> varNames = Kinematics::instance()->GetVarNames();
 	unsigned int size = varNames.size();
 	unsigned int pos = find(varNames.begin(), varNames.end(), name) - varNames.begin();
-	if(pos<0||pos>size-1) {
+	if( pos > size-1 ) {
 		BOOST_LOG_TRIVIAL(error)<<"dataPoint::getVal() | "
 				"Variable with name "<<name<<" not found!";
 		return 999;
@@ -74,7 +74,7 @@ double dataPoint::getVal(std::string name) const
 	std::vector<std::string> varNames = Kinematics::instance()->GetVarNames();
 	unsigned int size = varNames.size();
 	unsigned int pos = find(varNames.begin(), varNames.end(), name) - varNames.begin();
-	if(pos<0||pos>size-1) {
+	if( pos > size-1 ) {
 		BOOST_LOG_TRIVIAL(error)<<"dataPoint::getVal() | "
 				"Variable with name "<<name<<" not found!";
 		return -999;
@@ -87,7 +87,7 @@ void dataPoint::setVal(std::string name, double val)
 	std::vector<std::string> varNames = Kinematics::instance()->GetVarNames();
 	unsigned int size = varNames.size();
 	unsigned int pos = find(varNames.begin(), varNames.end(), name) - varNames.begin();
-	if(pos<0||pos>size-1) {
+	if( pos > size-1 ) {
 		BOOST_LOG_TRIVIAL(error)<<"dataPoint::setVal() | "
 				"Variable with name "<<name<<" not found!";
 		return;

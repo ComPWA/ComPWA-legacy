@@ -1,6 +1,7 @@
 # Create DataReader library.
 FILE(GLOB lib_srcs *.cpp)
-add_library (DataReader SHARED ${lib_srcs})
+FILE(GLOB lib_headers *.hpp)
+add_library (DataReader SHARED ${lib_srcs} ${lib_headers})
 
 add_subdirectory (RootReader)
 add_subdirectory (JakeReader)

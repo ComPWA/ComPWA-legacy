@@ -20,11 +20,11 @@ void FunctionTree::insertNode(std::shared_ptr<TreeNode> inNode,
 		std::string parent)
 {
 	std::string n = inNode->getName();
-	bool ret = nodes_.insert(
+	nodes_.insert(
 			std::pair<std::string, std::shared_ptr<TreeNode> >(
 					inNode->getName(),inNode
 			)
-	).second;
+	);
 
 	//Assign new parent to head of new tree, create links
 	std::shared_ptr<TreeNode> parentNode = nodes_.at(parent);
@@ -40,14 +40,14 @@ void FunctionTree::insertNode(std::shared_ptr<TreeNode> inNode,
 
 void FunctionTree::addChildNodes(std::shared_ptr<TreeNode> startNode)
 {
-	std::vector<std::shared_ptr<TreeNode>> newChildren =
+	std::vector<std::shared_ptr<TreeNode> > newChildren =
 			startNode->getChildren();
 
 	for(unsigned int i=0; i<newChildren.size(); i++){
-		bool ret = nodes_.insert(
+		nodes_.insert(
 				std::pair<std::string, std::shared_ptr<TreeNode> >(
 						newChildren.at(i)->getName(),newChildren.at(i))
-		).second;
+		);
 
 		addChildNodes(newChildren.at(i));
 	}
@@ -55,7 +55,7 @@ void FunctionTree::addChildNodes(std::shared_ptr<TreeNode> startNode)
 }
 
 void FunctionTree::UpdateAll(std::shared_ptr<TreeNode> startNode){
-	std::vector<std::shared_ptr<TreeNode>> newChildren = startNode->getChildren();
+	std::vector<std::shared_ptr<TreeNode> > newChildren = startNode->getChildren();
 	for(unsigned int i=0; i<newChildren.size(); i++){
 		newChildren[i]->Update();
 		UpdateAll(newChildren[i]);
@@ -98,7 +98,7 @@ void FunctionTree::createNode( const std::string& name,
 		throw std::runtime_error("FunctionTree::createNode() | "
 				"Head node already exists!");
 
-	std::vector<std::shared_ptr<AbsParameter>> inter;
+	std::vector<std::shared_ptr<AbsParameter> > inter;
 
 	switch(strat->OutType())
 	{
@@ -128,7 +128,7 @@ void FunctionTree::createNode( const std::string& name,
 	} case ParType::COMPLEX : {
 		std::complex<double> start(0.,0.);
 		if(useVec){
-			for(unsigned int i; i<dim; i++)
+			for(unsigned int i=0; i<dim; i++)
 				inter.push_back(
 						std::shared_ptr<AbsParameter>(
 								new ComplexParameter("par"+name,start)
@@ -145,7 +145,7 @@ void FunctionTree::createNode( const std::string& name,
 	} case ParType::DOUBLE : {
 		double start(0.);
 		if(useVec){
-			for(unsigned int i; i<dim; i++)
+			for(unsigned int i=0; i<dim; i++)
 				inter.push_back(
 						std::shared_ptr<AbsParameter>(
 								new DoubleParameter("par"+name,start)
@@ -162,7 +162,7 @@ void FunctionTree::createNode( const std::string& name,
 	} case ParType::INTEGER : {
 		int start(0);
 		if(useVec){
-			for(unsigned int i; i<dim; i++)
+			for(unsigned int i=0; i<dim; i++)
 				inter.push_back(
 						std::shared_ptr<AbsParameter>(
 								new IntegerParameter("par"+name,start)
@@ -179,7 +179,7 @@ void FunctionTree::createNode( const std::string& name,
 	} case ParType::BOOL : {
 		bool start=false;
 		if(useVec){
-			for(unsigned int i; i<dim; i++)
+			for(unsigned int i=0; i<dim; i++)
 				inter.push_back(
 						std::shared_ptr<AbsParameter>(
 								new BoolParameter("par"+name,start)
@@ -307,7 +307,7 @@ void FunctionTree::createLeaf(const std::string name,
 }
 
 void FunctionTree::createLeaf(const std::string name,
-		std::vector<std::shared_ptr<AbsParameter>>& extPar, std::string parent)
+		std::vector<std::shared_ptr<AbsParameter> >& extPar, std::string parent)
 {
 	std::shared_ptr<TreeNode> parentNode;
 	if(parent=="")//is this a head node?

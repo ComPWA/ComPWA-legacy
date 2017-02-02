@@ -1,6 +1,7 @@
 # Create Estimator library.
 FILE(GLOB lib_srcs *.cpp)
-add_library (Estimator SHARED ${lib_srcs})
+FILE(GLOB lib_headers *.hpp)
+add_library (Estimator SHARED ${lib_srcs} ${lib_headers})
 
 add_subdirectory (ChiOneD)
 add_subdirectory (MinLogLH)

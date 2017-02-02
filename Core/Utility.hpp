@@ -93,7 +93,7 @@ public:
   Spin& operator--()
   {
 	  //Only decrement if the result is larger zero
-	  if(GetNumerator()-1 >= 0){
+	  if( ((int)GetNumerator())-1 >= 0){
 		  SetNumerator( GetNumerator()-1 );
 		  if(z_component_relevant)
 			  SetZNumerator( GetZNumerator()+1 );

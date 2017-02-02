@@ -41,7 +41,7 @@ public:
 	 * @param varB Helicity angle
 	 * @return
 	 */
-	virtual bool IsWithinBoxPhsp(int idA, int idB, double varA, double varB) const { };
+    virtual bool IsWithinBoxPhsp(int idA, int idB, double varA, double varB) const { return 0; };
 
 	//! get mass of particles
 	virtual double GetMass(unsigned int num) const;

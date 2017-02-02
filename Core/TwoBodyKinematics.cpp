@@ -6,7 +6,7 @@ namespace ComPWA {
 
 TwoBodyKinematics::TwoBodyKinematics(std::string _nameMother,
 		std::string _name1, std::string _name2,	double deltaMassWindow) :
-								name1(_name1), name2(_name2), Kinematics(_nameMother,0.0,2)
+								Kinematics(_nameMother,0.0,2), name1(_name1), name2(_name2)
 {
 	_M = ComPWA::PhysConst::Instance().findParticle(_nameMother).mass_;
 	m1 = ComPWA::PhysConst::Instance().findParticle(_name1).mass_;

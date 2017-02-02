@@ -17,16 +17,16 @@
 #include "Core/Event.hpp"
 
 namespace ComPWA {
-Event::Event() : fWeight(1.),fName(""),fFlavour(0),fCharge(0),fEff(1.)
+Event::Event() : fWeight(1.),fEff(1.),fName(""),fFlavour(0),fCharge(0)
 {
 
 }
 
-Event::Event(const std::string& name):fWeight(1.),fName(name),fFlavour(0),fCharge(0),fEff(1.){
+Event::Event(const std::string& name):fWeight(1.),fEff(1.),fName(name),fFlavour(0),fCharge(0){
 
 }
 
-Event::Event(const double inWeight, const std::string& name="", const double inEff):fWeight(inWeight),fName(name),fFlavour(0),fCharge(0),fEff(inEff){
+Event::Event(const double inWeight, const std::string& name="", const double inEff):fWeight(inWeight),fEff(inEff),fName(name),fFlavour(0),fCharge(0){
 
 }
 
@@ -42,8 +42,7 @@ Event::~Event() { /* nothing */	}
 
 const Particle& Event::getParticle(const unsigned int id) const{
   if(id>=getNParticles()){
-    //TODO Exception
-    return Particle();
+      throw std::runtime_error("Event::getParticle() | Particle id does not match!");
   }
   return fParticles.at(id);
 }

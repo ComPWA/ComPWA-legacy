@@ -52,7 +52,7 @@ RunManager::RunManager(std::shared_ptr<DataReader::Data> inD, std::shared_ptr<Am
 }
 
 RunManager::RunManager( unsigned int size, std::shared_ptr<Amplitude> inP,
-		std::shared_ptr<Generator> gen) : gen_(gen),  amp_(inP)
+		std::shared_ptr<Generator> gen) : amp_(inP), gen_(gen)
 {
 
 }
@@ -213,7 +213,7 @@ bool RunManager::gen( int number, std::shared_ptr<Generator> gen,
 	double generationMaxValue = 1.2*amp->GetMaxVal(gen)*maxSampleWeight;
 
 	unsigned int totalCalls=0;
-	unsigned int startTime = clock();
+//	unsigned int startTime = clock();
 	double AMPpdf;
 
 	unsigned int limit;

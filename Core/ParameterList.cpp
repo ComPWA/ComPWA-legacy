@@ -52,7 +52,7 @@ ParameterList::ParameterList(const std::vector<std::shared_ptr<ComplexParameter>
 		const std::vector<std::shared_ptr<DoubleParameter> >& inD,
 		const std::vector<std::shared_ptr<IntegerParameter> >& inI,
 		const std::vector<std::shared_ptr<BoolParameter> >& inB)
-:vComplex_(inC), vDouble_(inD), vInt_(inI), vBool_(inB){
+: vBool_(inB), vInt_(inI),vDouble_(inD),vComplex_(inC){
 	//TODO check names!
 	//make_str();
 }

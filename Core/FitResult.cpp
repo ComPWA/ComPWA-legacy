@@ -101,14 +101,14 @@ void FitResult::printFitParameters(TableFormater* tableResult)
 			try{
 				iniPar = initialParameters.GetDoubleParameter(outPar->GetName());
 			} catch (BadParameter& bad){
-				iniPar = 0;
+				iniPar.reset();
 			}
 		}
 		if(printTrue){
 			try{
 				truePar = trueParameters.GetDoubleParameter(outPar->GetName());
 			} catch (BadParameter& bad){
-				iniPar = 0;
+				iniPar.reset();
 			}
 		}
 
@@ -142,8 +142,11 @@ void FitResult::printFitParameters(TableFormater* tableResult)
 
 		//Print initial values
 		if(printInitial)
-			if( iniPar ) *tableResult << *iniPar;// |nr.| name| inital value|
-			else *tableResult<<" ";
+            if( iniPar ) {
+                (*tableResult) << *iniPar;// |nr.| name| inital value|
+            } else {
+                (*tableResult)<<" ";
+            }
 
 		//Print final value
 		if( !isFixed ) *tableResult << *outPar;//final value
@@ -169,10 +172,12 @@ void FitResult::printFitParameters(TableFormater* tableResult)
 						pull /= outPar->GetError();
 				}
 				if( !std::isnan(pull) )
-					*tableResult << pull;
+					(*tableResult) << pull;
 				else
-					*tableResult << " ";
-			} else *tableResult << " " << " ";
+					(*tableResult) << " ";
+            } else {
+                (*tableResult) << " " << " ";
+            }
 	}
 	tableResult->footer();
 
