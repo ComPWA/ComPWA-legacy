@@ -10,3 +10,6 @@ target_link_libraries( RootReader ${ROOT_LIBRARIES} )
 #MESSAGE( STATUS "FindROOT include dirs: " "${ROOT_INCLUDE_DIR}/" )
 
 target_include_directories (RootReader PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${ROOT_INCLUDE_DIR})
+
+install (TARGETS RootReader DESTINATION lib/ComPWA)
+install (FILES ${lib_headers} DESTINATION include/ComPWA)

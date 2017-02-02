@@ -9,3 +9,6 @@ add_library (Core ${lib_srcs} ${lib_headers})
 target_link_libraries( Core ${Boost_LIBRARIES} )
 
 target_include_directories (Core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+
+install (TARGETS Core DESTINATION lib/ComPWA)
+install (FILES ${lib_headers} DESTINATION include/ComPWA)
