@@ -25,7 +25,7 @@ LINK_DIRECTORIES(${COMPWA_SOURCE_DIR}/lib)
 # Recurse into subdirectories.
 add_subdirectory (Core)
 add_subdirectory (DataReader)
-#add_subdirectory (Estimator)
+add_subdirectory (Estimator)
 #add_subdirectory (Optimizer)
 #add_subdirectory (Physics)
 #add_subdirectory (executables)

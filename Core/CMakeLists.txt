@@ -4,7 +4,7 @@ FILE(GLOB lib_headers *.hpp)
 #FILE(GLOB lib_ignore *Test.cpp)
 list(REMOVE_ITEM lib_srcs "${CMAKE_CURRENT_SOURCE_DIR}/ParameterListTest.cpp" "${CMAKE_CURRENT_SOURCE_DIR}/ParameterTest.cpp")
 
-add_library (Core ${lib_srcs} ${lib_headers})
+add_library (Core SHARED ${lib_srcs} ${lib_headers})
 
 target_link_libraries( Core ${Boost_LIBRARIES} )
 
