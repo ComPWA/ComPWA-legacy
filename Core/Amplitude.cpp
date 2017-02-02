@@ -117,7 +117,6 @@ void Amplitude::GetAmpFitFractions(
 				"ParameterList not empty!");
 
 	//	_amp->UpdateParameters(finalParameters); //update parameters in amplitude
-	double norm =-1;
 
 	//Start loop over amplitudes
 	auto ampItr = ampVec.begin();

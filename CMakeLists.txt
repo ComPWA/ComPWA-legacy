@@ -10,6 +10,8 @@ set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 #set the default path for built libraries to the "lib" directory
 set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 
+set (CMAKE_CXX_STANDARD 11)
+
 #Add Boost
 #set(Boost_INCLUDE_DIR $(BOOST_ROOT)/build/include)
 #set(Boost_LIBRARY_DIR $(BOOST_LIBRARYDIR))

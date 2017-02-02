@@ -135,7 +135,7 @@ bool AddAll::execute(ParameterList& paras, std::shared_ptr<AbsParameter>& out)
 		}
 
 		//fill MultiComplex parameter
-		std::vector<std::complex<double>> results(nElements, result);
+		std::vector<std::complex<double> > results(nElements, result);
 		for(unsigned int i=0; i<nMD; i++){
 			const std::vector<double> v_tmp =
 					paras.GetMultiDouble(i)->GetValues();
@@ -300,7 +300,7 @@ bool MultAll::execute(ParameterList& paras,  std::shared_ptr<AbsParameter>& out)
 		}
 
 		//fill MultiComplex parameter
-		std::vector<std::complex<double>> results(nElements, result);
+		std::vector<std::complex<double> > results(nElements, result);
 		for(unsigned int i=0; i<nMD; i++){
 			const std::vector<double> tmpVec =
 					paras.GetMultiDouble(i)->GetValues();

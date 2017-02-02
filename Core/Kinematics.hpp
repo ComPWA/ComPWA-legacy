@@ -64,7 +64,7 @@ public:
 	unsigned int FindVariable(std::string varName) const;
 
 	//! Checks of data point is within phase space boundaries
-	virtual bool IsWithinPhsp(const dataPoint& point) const { };
+    virtual bool IsWithinPhsp(const dataPoint& point) const { return 0; };
 
 	/**! Checks if the position is within the phase-space boundaries.
 	 * This only works correctly if both variables are orthogonal to each other.
@@ -154,9 +154,8 @@ protected:
 
 	//!Default constructor (protected)
 	Kinematics(std::string nameM="", double widthM=0.0, unsigned int n=3) :
-		_nameMother(nameM), _Br(widthM), _nPart(n),
-		is_PS_area_calculated_(false), PS_area_(0.0),
-		_M(1.0), _Msq(1.0), _spinM(0) { };
+		_nPart(n), _nameMother(nameM),
+		_M(1.0), _Msq(1.0), _spinM(0), _Br(widthM), is_PS_area_calculated_(false), PS_area_(0.0){ };
 
 	//!Delete Copy constructor (protected)
 	Kinematics(const Kinematics&) = delete;

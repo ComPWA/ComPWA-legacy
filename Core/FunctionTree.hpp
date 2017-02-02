@@ -197,7 +197,7 @@ public:
 	 * \sa addNode(), createHead(), createNode()
 	 */
 	virtual void createLeaf(const std::string name,
-			std::vector<std::shared_ptr<AbsParameter>>& extPar, std::string parent);
+			std::vector<std::shared_ptr<AbsParameter> >& extPar, std::string parent);
 
 	//! return the head of the tree
 	/*!

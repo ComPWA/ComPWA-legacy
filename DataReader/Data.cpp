@@ -4,7 +4,7 @@ namespace DataReader {
 
 
 Data::Data(bool binning, unsigned int maxBins,double maxW) :
-fBinned(binning), fmaxBins(maxBins), maxWeight(maxW)
+maxWeight(maxW), fBinned(binning), fmaxBins(maxBins)
 {
 
 }

@@ -445,7 +445,6 @@ protected:
 			ParameterList& toySample, std::string suffix) {
 
 		int sampleSize = sample.GetMultiDouble(0)->GetNValues();
-		int toySampleSize = toySample.GetMultiDouble(0)->GetNValues();
 
 		BOOST_LOG_TRIVIAL(debug) << "UnitAmp::setupBasicTree() generating new tree!";
 		if(sampleSize==0){
