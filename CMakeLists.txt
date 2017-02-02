@@ -20,12 +20,14 @@ include_directories(${Boost_INCLUDE_DIR})
 link_directories(${Boost_LIBRARY_DIR})
 
 INCLUDE_DIRECTORIES(${COMPWA_SOURCE_DIR})
-LINK_DIRECTORIES(${COMPWA_SOURCE_DIR}/lib)
+#LINK_DIRECTORIES(${COMPWA_SOURCE_DIR}/lib)
+
+add_definitions(-DBOOST_LOG_DYN_LINK)
 
 # Recurse into subdirectories.
 add_subdirectory (Core)
 add_subdirectory (DataReader)
 add_subdirectory (Estimator)
-#add_subdirectory (Optimizer)
+add_subdirectory (Optimizer)
 #add_subdirectory (Physics)
 #add_subdirectory (executables)

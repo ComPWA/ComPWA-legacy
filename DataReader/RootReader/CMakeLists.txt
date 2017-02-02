@@ -5,7 +5,7 @@ FILE(GLOB lib_srcs *.cpp)
 FILE(GLOB lib_headers *.hpp)
 list(REMOVE_ITEM lib_srcs "${CMAKE_CURRENT_SOURCE_DIR}/DataTest.cpp")
 add_library (RootReader SHARED ${lib_srcs} ${lib_headers})
-target_link_libraries( RootReader ${ROOT_LIBRARIES} )
+target_link_libraries( RootReader ${ROOT_LIBRARIES} DataReader )
 
 #MESSAGE( STATUS "FindROOT include dirs: " "${ROOT_INCLUDE_DIR}/" )
 

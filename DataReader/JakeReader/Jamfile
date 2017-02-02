@@ -26,6 +26,7 @@ project :
 
 lib JakeReader : 
         [ glob *.cpp : *Test.cpp ] 
+		$(TOP)/DataReader//DataReader 
         $(TOP)/Core//ComPWA  
         ;
         

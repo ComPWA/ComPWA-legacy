@@ -3,11 +3,11 @@ FILE(GLOB lib_srcs *.cpp)
 FILE(GLOB lib_headers *.hpp)
 add_library (DataReader SHARED ${lib_srcs} ${lib_headers})
 
-add_subdirectory (RootReader)
+#add_subdirectory (RootReader)
 add_subdirectory (JakeReader)
-#add_subdirectory (AsciiReader)
+add_subdirectory (AsciiReader)
 
-target_link_libraries( DataReader ${Boost_LIBRARIES} RootReader JakeReader)
+target_link_libraries( DataReader ${Boost_LIBRARIES} ComPWACore )
 
 target_include_directories (DataReader PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 

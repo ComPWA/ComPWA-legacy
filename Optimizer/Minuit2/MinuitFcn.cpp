@@ -18,6 +18,7 @@ namespace bc = boost::chrono;
 
 #include "Core/ParameterList.hpp"
 #include "Core/Parameter.hpp"
+#include "Core/Logging.hpp"
 #include "Optimizer/Minuit2/MinuitFcn.hpp"
 #include "Optimizer/ControlParameter.hpp"
 
@@ -53,9 +54,8 @@ double MinuitFcn::operator()(const std::vector<double>& x) const
 	double result = _myDataPtr->controlParameter(_parList);
 	bc::duration<double> sec = bc::system_clock::now() - start;
 
-	BOOST_LOG_TRIVIAL(info) << std::setprecision(10)
-	<< "MinuitFcn: -log(L) = "<< result
-	<< std::setprecision(4)
+	BOOST_LOG_TRIVIAL(info) << "MinuitFcn: -log(L) = "
+    << std::setprecision(10) << result << std::setprecision(4)
 	<<" Time: "<<sec.count()<<"s"
 	<<" nCalls: "<<_myDataPtr->nCalls();
 	BOOST_LOG_TRIVIAL(debug) << "Parameters: "<<paramOut.str();
