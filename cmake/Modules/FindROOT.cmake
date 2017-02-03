@@ -91,6 +91,7 @@ function(ROOT_GENERATE_DICTIONARY dictionary)
   #---Get the list of include directories------------------
   get_directory_property(incdirs INCLUDE_DIRECTORIES)
   set(includedirs)
+
   foreach( d ${incdirs})
      set(includedirs ${includedirs} -I${d})
   endforeach()
@@ -118,6 +119,7 @@ function(ROOT_GENERATE_DICTIONARY dictionary)
     unset(linkFile CACHE)
   endforeach()
   #---call rootcint------------------------------------------
+  MESSAGE( STATUS "Calling rootcint " ${ROOTCINT_EXECUTABLE} -cint -f ${dictionary}.cxx -c ${ARG_OPTIONS} ${includedirs} ${headerfiles} ${linkdefs})
   add_custom_command(OUTPUT ${dictionary}.cxx
                      COMMAND ${ROOTCINT_EXECUTABLE} -cint -f  ${dictionary}.cxx
                                           -c ${ARG_OPTIONS} ${includedirs} ${headerfiles} ${linkdefs}

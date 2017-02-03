@@ -4,7 +4,7 @@ find_package(ROOT COMPONENTS Core Cint RIO Net Hist Graf Graf3d Gpad Tree Rint P
 FILE(GLOB lib_srcs *.cpp)
 FILE(GLOB lib_headers *.hpp)
 add_library (JakeReader SHARED ${lib_srcs} ${lib_headers})
-target_link_libraries( JakeReader DataReader ${ROOT_LIBRARIES} ${BOOST_LIBRARIES} )
+target_link_libraries( JakeReader DataReader ${ROOT_LIBRARIES} ${Boost_LIBRARIES} )
 
 #MESSAGE( STATUS "FindROOT include dirs: " "${ROOT_INCLUDE_DIR}/" )
 

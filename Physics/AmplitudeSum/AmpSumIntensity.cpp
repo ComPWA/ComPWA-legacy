@@ -179,7 +179,7 @@ void AmpSumIntensity::Save(std::string filePath)
 
 	pt.add_child("amplitude_setup",ptSub);
 	//new line at the end
-	boost::property_tree::xml_writer_settings<char> settings('\t', 1);
+    boost::property_tree::xml_writer_settings<std::string> settings('\t', 1);
 	// Write the property tree to the XML file.
 	write_xml(filePath, pt,std::locale(), settings);
 

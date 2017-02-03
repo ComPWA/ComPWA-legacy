@@ -18,6 +18,8 @@
 
 #include <boost/math/special_functions/legendre.hpp>
 
+//#include "qft++.h"
+
 namespace ComPWA {
 namespace Physics {
 namespace AmplitudeSum {
@@ -51,13 +53,13 @@ double AmpWigner2::dynamicalFunction(ComPWA::Spin J, ComPWA::Spin mu, ComPWA::Sp
 		throw std::runtime_error( "AmpWigner2::dynamicalFunction() | "
 				"scattering angle out of range! Datapoint beyond phsp?");
 
+    
 	double result = 1.0;
-	::Spin _J(J.GetNumerator(), J.GetDenominator());
-	::Spin _mu(mu.GetNumerator(), mu.GetDenominator());
-	::Spin _muPrime(muPrime.GetNumerator(), muPrime.GetDenominator());
-
 	//TODO: this is the only point in which we use qft++, we should be rid of it
-	result = Wigner_d( _J, _mu, _muPrime, acos(cosTheta) );
+//	::Spin _J(J.GetNumerator(), J.GetDenominator());
+//	::Spin _mu(mu.GetNumerator(), mu.GetDenominator());
+//	::Spin _muPrime(muPrime.GetNumerator(), muPrime.GetDenominator());
+//    	result = Wigner_d( _J, _mu, _muPrime, acos(cosTheta) );
 
 #ifdef DEBUG
 	if( ( result!=result ) )
