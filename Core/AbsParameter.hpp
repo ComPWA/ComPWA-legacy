@@ -171,9 +171,9 @@ BOOST_CLASS_IMPLEMENTATION(
 		boost::serialization::level_type::object_serializable
 )
 
-BOOST_CLASS_TRACKING(
-		ComPWA::AbsParameter,
-		boost::serialization::tracking_type::track_never
-)
+//BOOST_CLASS_TRACKING(
+//		ComPWA::AbsParameter,
+//		boost::serialization::tracking_type::track_never
+//)
 
 #endif
