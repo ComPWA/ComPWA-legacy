@@ -461,20 +461,20 @@ namespace ComPWA { namespace Physics { namespace AmplitudeSum {
     void AmpAbsDynamicalFunction::initialize()
     {
         try{
-            _M=PhysConst::Instance().findParticle(_nameMother).mass_;
+            _M=PhysConst::instance()->findParticle(_nameMother).mass_;
         } catch (...) {
             throw BadConfig("AmpAbsDynamicalFunction::initialize() | "
                             "Can not obtain mass of mother particle: "+_nameMother);
         }
         
         try{
-            _mass1=PhysConst::Instance().findParticle(_name1).mass_;
+            _mass1=PhysConst::instance()->findParticle(_name1).mass_;
         } catch (...) {
             throw BadConfig("AmpAbsDynamicalFunction::initialize() | "
                             "Can not obtain mass of daughter 1: "+_name1);
         }
         try{
-            _mass2=PhysConst::Instance().findParticle(_name2).mass_;
+            _mass2=PhysConst::instance()->findParticle(_name2).mass_;
         } catch (...) {
             throw BadConfig("AmpAbsDynamicalFunction::initialize() | "
                             "DCan not obtain mass of daughter 2: "+_name2);
@@ -835,7 +835,7 @@ namespace ComPWA { namespace Physics { namespace AmplitudeSum {
         //mean and width need to be adjusted according to final state kinematics
         double x0=1.1, y0=1.1; //mean
         double sigmaX=0.01, sigmaY=0.01; //width
-        double pi = ComPWA::PhysConst::Instance().findConstant("Pi").value_;
+        double pi = ComPWA::PhysConst::instance()->findConstant("Pi").value_;
         
         double result = exp( -(x-x0)*(x-x0)/(2*sigmaX*sigmaX) - (y-y0)*(y-y0)/(2*sigmaY*sigmaY) );
         result/=2*pi*sigmaY*sigmaX;

@@ -28,7 +28,7 @@ namespace ComPWA {
     double FitResult::shiftAngle(double v){
         double originalVal = v;
         double val = originalVal;
-        double pi = ComPWA::PhysConst::Instance().findConstant("Pi").value_;
+        double pi = PhysConst::instance()->findConstant("Pi").value_;
         while(val> pi) val-=2*pi;
         while(val< -pi ) val+=2*pi;
         if(val!=originalVal)
@@ -159,7 +159,7 @@ namespace ComPWA {
             if(printTrue) {
                 if( truePar ){
                     *tableResult << *truePar;
-                    double pi = PhysConst::Instance().findConstant("Pi").value_;
+                    double pi = PhysConst::instance()->findConstant("Pi").value_;
                     double pull = (truePar->GetValue()-outPar->GetValue() );
                     // Shift pull by 2*pi if that reduces the deviation
                     if(isAngle && !isFixed) {

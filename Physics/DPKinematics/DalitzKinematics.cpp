@@ -32,20 +32,20 @@ namespace ComPWA { namespace Physics { namespace DPKinematics {
     massIdsSet(false)
     {
         try{
-            _M = PhysConst::Instance().findParticle(_nameMother).mass_;
-            m1 = PhysConst::Instance().findParticle(_name1).mass_;
-            m2 = PhysConst::Instance().findParticle(_name2).mass_;
-            m3 = PhysConst::Instance().findParticle(_name3).mass_;
+            _M = PhysConst::instance()->findParticle(_nameMother).mass_;
+            m1 = PhysConst::instance()->findParticle(_name1).mass_;
+            m2 = PhysConst::instance()->findParticle(_name2).mass_;
+            m3 = PhysConst::instance()->findParticle(_name3).mass_;
             
             //TODO: What shall we do with half-integer spins
             _spinM =
-            PhysConst::Instance().findParticle(_nameMother).getSpinLikeQuantumNumber(QuantumNumberIDs::SPIN).GetNumerator();
+            PhysConst::instance()->findParticle(_nameMother).getSpinLikeQuantumNumber(QuantumNumberIDs::SPIN).GetNumerator();
             spin1 =
-            PhysConst::Instance().findParticle(_name1).getSpinLikeQuantumNumber(                                                QuantumNumberIDs::SPIN).GetNumerator();
+            PhysConst::instance()->findParticle(_name1).getSpinLikeQuantumNumber(                                                QuantumNumberIDs::SPIN).GetNumerator();
             spin2 =
-            PhysConst::Instance().findParticle(_name2).getSpinLikeQuantumNumber(            QuantumNumberIDs::SPIN).GetNumerator();
+            PhysConst::instance()->findParticle(_name2).getSpinLikeQuantumNumber(            QuantumNumberIDs::SPIN).GetNumerator();
             spin3 =
-            PhysConst::Instance().findParticle(_name3).getSpinLikeQuantumNumber(                QuantumNumberIDs::SPIN).GetNumerator();
+            PhysConst::instance()->findParticle(_name3).getSpinLikeQuantumNumber(                QuantumNumberIDs::SPIN).GetNumerator();
             
         } catch (std::exception& ex){
             BOOST_LOG_TRIVIAL(error) << "DalitzKinematics::DalitzKinematics() | "
@@ -68,13 +68,13 @@ namespace ComPWA { namespace Physics { namespace DPKinematics {
     {
         try{
             _spinM =
-            PhysConst::Instance().findParticle(_nameMother).getSpinLikeQuantumNumber(QuantumNumberIDs::SPIN).GetNumerator();
+            PhysConst::instance()->findParticle(_nameMother).getSpinLikeQuantumNumber(QuantumNumberIDs::SPIN).GetNumerator();
             spin1 =
-            PhysConst::Instance().findParticle(_name1).getSpinLikeQuantumNumber(        QuantumNumberIDs::SPIN).GetNumerator();
+            PhysConst::instance()->findParticle(_name1).getSpinLikeQuantumNumber(        QuantumNumberIDs::SPIN).GetNumerator();
             spin2 =
-            PhysConst::Instance().findParticle(_name2).getSpinLikeQuantumNumber(        QuantumNumberIDs::SPIN).GetNumerator();
+            PhysConst::instance()->findParticle(_name2).getSpinLikeQuantumNumber(        QuantumNumberIDs::SPIN).GetNumerator();
             spin3 =
-            PhysConst::Instance().findParticle(_name3).getSpinLikeQuantumNumber(       QuantumNumberIDs::SPIN).GetNumerator();
+            PhysConst::instance()->findParticle(_name3).getSpinLikeQuantumNumber(       QuantumNumberIDs::SPIN).GetNumerator();
         } catch (std::exception& ex){
             BOOST_LOG_TRIVIAL(error) << "DalitzKinematics::DalitzKinematics() | "
             "One or more particles can not be initialized: "<<ex.what();
@@ -432,7 +432,7 @@ namespace ComPWA { namespace Physics { namespace DPKinematics {
         
         //	int idA = 0;
         //	int idB = 8;
-        //	if( !Kinematics::instance()->IsWithinBoxPhsp(idA, idB, x[0], x[1]) )
+        //	if( !Kinematics::instance()->->IsWithinBoxPhsp(idA, idB, x[0], x[1]) )
         //		return 0;
         
         dataPoint point;

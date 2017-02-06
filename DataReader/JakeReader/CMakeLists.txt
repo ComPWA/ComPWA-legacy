@@ -10,5 +10,5 @@ target_link_libraries( JakeReader DataReader ${ROOT_LIBRARIES} ${Boost_LIBRARIES
 
 target_include_directories (JakeReader PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${ROOT_INCLUDE_DIR})
 
-install (TARGETS JakeReader DESTINATION lib/ComPWA)
+#install (TARGETS JakeReader DESTINATION lib/ComPWA)
 install (FILES ${lib_headers} DESTINATION include/ComPWA)

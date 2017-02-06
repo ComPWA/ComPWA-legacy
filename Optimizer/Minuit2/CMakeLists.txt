@@ -10,5 +10,5 @@ add_library( Minuit2 SHARED ${lib_srcs} ${lib_headers} ../Optimizer.hpp )
 target_link_libraries( Minuit2 Estimator Core ${ROOT_LIBRARIES} ${GSL_LIBRARIES} )
 target_include_directories( Minuit2 PUBLIC ${ROOT_INCLUDE_DIR} ${GSL_INCLUDE_DIR} )
 
-install (TARGETS Minuit2 DESTINATION lib/ComPWA)
+#install (TARGETS Minuit2 DESTINATION lib/ComPWA)
 install (FILES ${lib_headers} DESTINATION include/ComPWA)

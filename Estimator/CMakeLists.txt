@@ -12,5 +12,5 @@ target_link_libraries( Estimator ${Boost_LIBRARIES} )
 
 target_include_directories (Estimator PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
-install (TARGETS Estimator DESTINATION lib/ComPWA)
+#install (TARGETS Estimator DESTINATION lib/ComPWA)
 install (FILES ${lib_headers} DESTINATION include/ComPWA)

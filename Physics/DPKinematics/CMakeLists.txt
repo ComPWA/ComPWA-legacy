@@ -14,11 +14,8 @@ target_include_directories( DPKinematics PUBLIC ${ROOT_INCLUDE_DIR} ${Boost_INCL
 #so rootcint can find the header and LinkDef files
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
 
-#---Define useful ROOT functions and macros (e.g. ROOT_GENERATE_DICTIONARY)
-#include(${ROOT_USE_FILE})
-
 ROOT_GENERATE_DICTIONARY( G__Dict SimpleEfficiency.hpp LINKDEF libDPKinematicsLinkDef.h )
 
 
-install (TARGETS DPKinematics DESTINATION lib/ComPWA)
+#install (TARGETS DPKinematics DESTINATION lib/ComPWA)
 install (FILES ${lib_headers} DESTINATION include/ComPWA)

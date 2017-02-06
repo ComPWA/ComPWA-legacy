@@ -10,5 +10,5 @@ add_executable ( DalitzFitD03K ${lib_srcs} ${lib_headers})
 target_link_libraries( DalitzFitD03K DPKinematics Core Minuit2 Estimator MinLogLH RootReader AmplitudeSum ${ROOT_LIBRARIES} ${Boost_LIBRARIES} )
 target_include_directories( DalitzFitD03K PUBLIC ${ROOT_INCLUDE_DIR} ${Boost_INCLUDE_DIR} )
 
-#install (TARGETS DalitzFitD03K DESTINATION bin/DalitzFitD03K )
+#install (TARGETS DalitzFitD03K DESTINATION bin/ )
 #install (FILES ${lib_headers} DESTINATION include/ComPWA/ )

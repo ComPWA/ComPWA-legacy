@@ -72,18 +72,18 @@ namespace ComPWA { namespace Physics { namespace AmplitudeSum {
     void AmpFlatteRes::initialize()
     {
         AmpAbsDynamicalFunction::initialize();
-        
+
         try{
-            _g2_massA = PhysConst::Instance().findParticle(_g2_idA).mass_;
-            _g2_massB = PhysConst::Instance().findParticle(_g2_idB).mass_;
+            _g2_massA = PhysConst::instance()->findParticle(_g2_idA).mass_;
+            _g2_massB = PhysConst::instance()->findParticle(_g2_idB).mass_;
         } catch (std::exception& ex){
             BOOST_LOG_TRIVIAL(error) <<"AmpFlatteRes::initialize() | "
             "Masses of 2nd channel can not be set!";
             throw;
         }
         try{
-            _g3_massA = PhysConst::Instance().findParticle(_g3_idA).mass_;
-            _g3_massB = PhysConst::Instance().findParticle(_g3_idB).mass_;
+            _g3_massA = PhysConst::instance()->findParticle(_g3_idA).mass_;
+            _g3_massB = PhysConst::instance()->findParticle(_g3_idB).mass_;
         } catch (std::exception& ex){
             //if g3 is not set we don't need to masses either
             if(_g3->GetValue()){

@@ -10,5 +10,5 @@ add_library ( AmplitudeSum SHARED ${lib_srcs} ${lib_headers})
 target_link_libraries( AmplitudeSum DPKinematics Core ${ROOT_LIBRARIES} ${Boost_LIBRARIES} ${GSL_LIBRARIES} )
 target_include_directories( AmplitudeSum PUBLIC ${ROOT_INCLUDE_DIR} ${Boost_INCLUDE_DIR} ${GSL_INCLUDE_DIR} )
 
-install (TARGETS AmplitudeSum DESTINATION lib/ComPWA)
+#install (TARGETS AmplitudeSum DESTINATION lib/ComPWA)
 install (FILES ${lib_headers} DESTINATION include/ComPWA)

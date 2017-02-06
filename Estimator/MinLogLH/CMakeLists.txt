@@ -8,5 +8,5 @@ target_link_libraries( MinLogLH Estimator Core )
 
 #target_include_directories (MinLogLH PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${MINUIT2}/include)
 
-install (TARGETS MinLogLH DESTINATION lib/ComPWA)
+#install (TARGETS MinLogLH DESTINATION lib/ComPWA)
 install (FILES ${lib_headers} DESTINATION include/ComPWA)

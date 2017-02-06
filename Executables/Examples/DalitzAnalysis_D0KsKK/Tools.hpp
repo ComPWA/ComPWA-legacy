@@ -17,7 +17,70 @@
 #include <TMath.h>
 #include <TKDTreeBinning.h>
 
-TH1* getPull(TH1* hist1, TH1* hist2, TString name="pull_")
+//Expands '~' in file path to user directory
+inline std::string expand_user(std::string p)
+{
+    std::string path = p;
+    if (not path.empty() and path[0] == '~') {
+        assert(path.size() == 1 or path[1] == '/');  // or other error handling
+        char const* home = getenv("HOME");
+        if( home || home==getenv("USERPROFILE") ) {
+            path.replace(0, 1, home);
+        } else {
+            char const *hdrive = getenv("HOMEDRIVE"),
+            *hpath = getenv("HOMEPATH");
+            assert(hdrive);  // or other error handling
+            assert(hpath);
+            path.replace(0, 1, std::string(hdrive) + hpath);
+        }
+    }
+    return path;
+}
+
+inline void createAmp(std::string name, std::vector<std::shared_ptr<ComPWA::Amplitude> >& ampV,
+               std::string xmlInput, std::shared_ptr<ComPWA::Efficiency> eff,
+               double mcPrecision, std::string ampOption)
+{
+    auto DzeroAmp = new ComPWA::Physics::AmplitudeSum::AmpSumIntensity(name,ComPWA::normStyle::one, eff, mcPrecision);
+    DzeroAmp->Configure(expand_user(xmlInput));
+    auto tmpAmp = std::shared_ptr<ComPWA::Physics::AmplitudeSum::AmpSumIntensity>(DzeroAmp);
+    ampV.push_back(tmpAmp);
+}
+
+inline void setErrorOnParameterList(ComPWA::ParameterList& list, double error, bool asym)
+{
+    for(unsigned int i=0; i<list.GetNDouble(); i++){
+        std::shared_ptr<ComPWA::DoubleParameter> p = list.GetDoubleParameter(i);
+        if(p->IsFixed()) {
+            p->SetError(0.0);
+            continue;
+        }
+        if(asym)
+            list.GetDoubleParameter(i)->SetError(
+                                                 error,error
+                                                 );
+        else list.GetDoubleParameter(i)->SetError(error);
+    }
+}
+
+inline void randomStartValues(ComPWA::ParameterList& fitPar)
+{
+    for(unsigned int i=0; i<fitPar.GetNDouble(); i++){
+        std::shared_ptr<ComPWA::DoubleParameter> p = fitPar.GetDoubleParameter(i);
+        if(p->IsFixed()) continue;
+        double min = -999, max = 999;
+        if(p->UseBounds()){
+            min = p->GetMinValue();
+            max = p->GetMaxValue();
+        }
+        p->SetValue(gRandom->Uniform(min,max));
+    }
+    std::cout<<"Randomizing parameter list. New list:"<<fitPar<<std::endl;
+    return;
+}
+
+
+inline TH1* getPull(TH1* hist1, TH1* hist2, TString name="pull_")
 {
     if(hist1->GetNbinsX() != hist2->GetNbinsX() ||
        hist1->GetNbinsY() != hist2->GetNbinsY()||
@@ -75,7 +138,7 @@ TH1* getPull(TH1* hist1, TH1* hist2, TString name="pull_")
     return pullHist;
 }
 
-TH1* getResidual(TH1* hist1, TH1* hist2, TString name="res_")
+inline TH1* getResidual(TH1* hist1, TH1* hist2, TString name="res_")
 {
     if(hist1->GetNbinsX() != hist2->GetNbinsX() ||
        hist1->GetNbinsY() != hist2->GetNbinsY()||
@@ -114,7 +177,7 @@ TH1* getResidual(TH1* hist1, TH1* hist2, TString name="res_")
     return resHist;
 }
 
-TPad* drawHist(std::vector<TH1D*> hist, std::vector<TString> drawOption,
+inline TPad* drawHist(std::vector<TH1D*> hist, std::vector<TString> drawOption,
                double min=0, double max=0)
 {
     if(hist.size() != drawOption.size() )
@@ -131,7 +194,7 @@ TPad* drawHist(std::vector<TH1D*> hist, std::vector<TString> drawOption,
     return pad;
 }
 
-TPad* drawPull(std::vector<TH1D*> hist, std::vector<TString> drawOption,
+inline TPad* drawPull(std::vector<TH1D*> hist, std::vector<TString> drawOption,
                double min=0, double max=0)
 {
     if(hist.size() != drawOption.size() )
@@ -228,7 +291,7 @@ TPad* drawPull(std::vector<TH1D*> hist, std::vector<TString> drawOption,
     return pad;
 }
 
-TPad* drawPull(TH1D* hist1, TH1D* hist2, TString drawOption1,
+inline TPad* drawPull(TH1D* hist1, TH1D* hist2, TString drawOption1,
                TString drawOption2, double min=0, double max=0)
 {
     std::vector<TH1D*> vHist;
@@ -240,7 +303,7 @@ TPad* drawPull(TH1D* hist1, TH1D* hist2, TString drawOption1,
     return drawPull(vHist,vOpt,min,max);
 }
 
-TPad* drawResidual(std::vector<TH1D*> hist, std::vector<TString> drawOption,
+inline TPad* drawResidual(std::vector<TH1D*> hist, std::vector<TString> drawOption,
                    double min=0, double max=0)
 {
     if(hist.size() != drawOption.size() )
@@ -334,7 +397,7 @@ TPad* drawResidual(std::vector<TH1D*> hist, std::vector<TString> drawOption,
     return pad;
 }
 
-TPad* drawResidual(TH1D* hist1, TH1D* hist2, TString drawOption1,
+inline TPad* drawResidual(TH1D* hist1, TH1D* hist2, TString drawOption1,
                    TString drawOption2, double min=0, double max=0)
 {
     std::vector<TH1D*> vHist;
@@ -346,7 +409,7 @@ TPad* drawResidual(TH1D* hist1, TH1D* hist2, TString drawOption1,
     return drawResidual(vHist,vOpt,min,max);
 }
 
-void getTH2PolyChi2(TH2Poly* hist1, TH2Poly* hist2, double& chi2, int& ndf, int& igood)
+inline void getTH2PolyChi2(TH2Poly* hist1, TH2Poly* hist2, double& chi2, int& ndf, int& igood)
 {
     if(hist1->GetBins()->GetEntries() != hist2->GetBins()->GetEntries() ){
         std::cout<<"binning doesnt match"<<std::endl;
@@ -373,7 +436,7 @@ void getTH2PolyChi2(TH2Poly* hist1, TH2Poly* hist2, double& chi2, int& ndf, int&
     return;
 }
 
-TH2Poly* getTH2PolyPull(TH2Poly* hist1, TH2Poly* hist2, TString name){
+inline TH2Poly* getTH2PolyPull(TH2Poly* hist1, TH2Poly* hist2, TString name){
     if(hist1->GetBins()->GetEntries() != hist2->GetBins()->GetEntries() )
     {
         std::cout<<"binning doesnt match"<<std::endl;
@@ -412,7 +475,7 @@ TH2Poly* getTH2PolyPull(TH2Poly* hist1, TH2Poly* hist2, TString name){
     return resHist;
 }
 
-TH2Poly* adaptiveBinning(UInt_t dataSize, UInt_t dataDim, Double_t* data, UInt_t nBins = 100)
+inline TH2Poly* adaptiveBinning(UInt_t dataSize, UInt_t dataDim, Double_t* data, UInt_t nBins = 100)
 {
     UInt_t size = UInt_t(dataSize/nBins)*nBins;//size should be a multiple of nBins
     if( size==0 ) { //return empty histogram

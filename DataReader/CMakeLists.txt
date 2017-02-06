@@ -11,5 +11,5 @@ target_link_libraries( DataReader Core ${Boost_LIBRARIES} )
 
 target_include_directories (DataReader PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
-install (TARGETS DataReader DESTINATION lib/ComPWA)
+#install (TARGETS DataReader DESTINATION lib/ComPWA)
 install (FILES ${lib_headers} DESTINATION include/ComPWA)

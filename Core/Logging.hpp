@@ -14,19 +14,27 @@
 
 
 namespace ComPWA {
-
-class Logging
-{
-public:
-	Logging(std::string outFileName="output.log",
-			boost::log::trivial::severity_level minLevel=boost::log::trivial::debug){
-		init(outFileName,minLevel);
-	};
-	void setLogLevel(boost::log::trivial::severity_level minLevel);
-private:
-	void init(std::string out,boost::log::trivial::severity_level minLevel);
-};
-
+    
+    //Redefine BOOST_LOG_TRIVIAL(lvl) to LOG(lvl
+#define LOG(lvl) \
+    BOOST_LOG_STREAM_WITH_PARAMS(::boost::log::trivial::logger::get(),\
+(::boost::log::keywords::severity = ::boost::log::trivial::lvl))
+    
+    class Logging
+    {
+    public:
+        Logging(std::string outFileName="output.log",
+                boost::log::trivial::severity_level minLevel
+                = boost::log::trivial::debug){
+            init(outFileName,minLevel);
+        };
+        
+        void setLogLevel(boost::log::trivial::severity_level minLevel);
+        
+    private:
+        void init(std::string out,boost::log::trivial::severity_level minLevel);
+    };
+    
 } /* namespace ComPWA */
 
 #endif /* LOGGING_HPP_ */
