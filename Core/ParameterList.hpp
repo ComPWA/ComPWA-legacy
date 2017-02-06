@@ -28,7 +28,7 @@
 #include <vector>
 #include <map>
 
-#include "boost/serialization/vector.hpp"
+#include <boost/serialization/vector.hpp>
 #include <boost/serialization/shared_ptr.hpp>
 
 #include "Core/AbsParameter.hpp"
@@ -761,11 +761,12 @@ private:
  * added in boost 1.56 . For previous versions we have to implement
  * it ourself
  */
+#include <boost/version.hpp>
 #if ( BOOST_VERSION  < 105600 )
 #include <boost/serialization/split_free.hpp>
 #include <boost/unordered_map.hpp>
 #include <typeinfo>
-#include <boost/version.hpp>
+
 
 //---/ Wrapper for td::shared_ptr<> /------------------------------------------
 	namespace boost {

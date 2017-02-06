@@ -4,34 +4,22 @@
 #ifndef PLOTDATA_HPP_
 #define PLOTDATA_HPP_
 
-#include <TFile.h>
 #include <TH1D.h>
 #include <TH2D.h>
-#include "TH2Poly.h"
-#include <TObject.h>
-#include <TCanvas.h>
-#include "TGraph.h"
-#include "TRandom3.h"
-#include "TLatex.h"
-#include "TStyle.h"
-#include "TPaveStats.h"
-#include "TPad.h"
-#include "RooPlot.h"
-#include "RooHist.h"
-#include "RooRealVar.h"
-#include "TClonesArray.h"
-#include "TMath.h"
+#include <TH2Poly.h>
+#include <TGraph.h>
 
 //Core header files go here
 #include "Core/Event.hpp"
+#include "Core/Amplitude.hpp"
 #include "Core/Particle.hpp"
 #include "Core/Parameter.hpp"
 #include "Core/ParameterList.hpp"
 #include "DataReader/RootReader/RootReader.hpp"
 #include "Physics/AmplitudeSum/AmpSumIntensity.hpp"
-#include "Core/Amplitude.hpp"
 
 using namespace ComPWA;
+
 class dalitzHisto
 {
 public:
@@ -66,7 +54,8 @@ public:
 	//! GetIntegral
 	double GetIntegral() { return _integral; }
 
-	static TH2Poly* getTH2PolyPull(TH2Poly* hist1, TH2Poly* hist2, TString name="residual_");
+	static TH2Poly* getTH2PolyPull(TH2Poly* hist1, TH2Poly* hist2,
+                                   TString name="residual_");
 
 private:
 	std::vector<TH1D> arr;
@@ -85,20 +74,38 @@ private:
 class plotData
 {
 public:
+    
 	plotData(std::string name, int bins=100);
+    
 	virtual ~plotData();
 
 	void setCorrectEfficiency(bool s) { _correctForEfficiency = s; }
-    void setData(std::shared_ptr<ComPWA::DataReader::Data> dataSample) { s_data = dataSample; }
-    void setPhspData(std::shared_ptr<ComPWA::DataReader::Data> phsp) { s_phsp =phsp; }
-    void setFitData(std::shared_ptr<ComPWA::DataReader::Data> fit) { s_fit= fit; }
-    void setHitMissData(std::shared_ptr<ComPWA::DataReader::Data> hitMiss) { s_hitMiss= hitMiss; }
+    
+    void setData(std::shared_ptr<DataReader::Data> dataSample) {
+        s_data = dataSample;
+    }
+    
+    void setPhspData(std::shared_ptr<DataReader::Data> phsp) {
+        s_phsp =phsp;
+    }
+    
+    void setFitData(std::shared_ptr<DataReader::Data> fit) {
+        s_fit= fit;
+    }
+    
+    void setHitMissData(std::shared_ptr<DataReader::Data> hitMiss) {
+        s_hitMiss= hitMiss;
+    }
+    
 	void setFitAmp(std::vector<std::shared_ptr<Amplitude> > ampVec,
 			std::vector<double> fraction);
+    
 	TH2Poly* getAdBinHist(int bins=30);
+    
 	void setGlobalScale( double s ) { _globalScale = s; }
 
 	void Fill();
+    
 	void Plot();
 
 	void DrawComponent(unsigned int i, Color_t color) {
@@ -109,9 +116,9 @@ public:
 	}
 
 protected:
+    TString _name;
 	bool _isFilled;
 	unsigned int _bins;
-	TString _name;
 
 	double _globalScale;
 	bool _correctForEfficiency;
@@ -133,10 +140,10 @@ protected:
 	dalitzHisto fitDiagrams;
 	dalitzHisto fitHitMissDiagrams;
 
-    std::shared_ptr<ComPWA::DataReader::Data> s_data;
-	std::shared_ptr<ComPWA::DataReader::Data> s_phsp;
-	std::shared_ptr<ComPWA::DataReader::Data> s_fit;
-	std::shared_ptr<ComPWA::DataReader::Data> s_hitMiss;
+    std::shared_ptr<DataReader::Data> s_data;
+	std::shared_ptr<DataReader::Data> s_phsp;
+	std::shared_ptr<DataReader::Data> s_fit;
+	std::shared_ptr<DataReader::Data> s_hitMiss;
 	std::vector<std::shared_ptr<Amplitude> > _ampVec;
 	std::vector<double> _fraction;
 

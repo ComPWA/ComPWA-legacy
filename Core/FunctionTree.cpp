@@ -6,6 +6,7 @@
  */
 
 #include "Core/FunctionTree.hpp"
+#include "Core/Logging.hpp"
 
 namespace ComPWA {
 void FunctionTree::insertTree(std::shared_ptr<FunctionTree> inTree,

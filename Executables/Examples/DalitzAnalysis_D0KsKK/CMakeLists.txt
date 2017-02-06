@@ -1,10 +1,8 @@
-# Create MinLogLH library.
+# Create executable for Dalitz plot analysis of D0->KsKK.
 
 # The REQUIRED statement is somehow not working
 find_package( ROOT REQUIRED )
-find_package( GSL REQUIRED gsl gslcblas )
-
-MESSAGE( STATUS "FindBoost libraries: " ${Boost_LIBRARIES} )
+find_package( Boost REQUIRED )
 
 FILE(GLOB lib_srcs *.cpp)
 FILE(GLOB lib_headers *.hpp)

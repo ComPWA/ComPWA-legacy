@@ -12,6 +12,7 @@
 #include <memory>
 #include <iostream>
 #include <cmath>
+#include <iomanip>
 
 #include <boost/chrono.hpp>
 namespace bc = boost::chrono;
