@@ -127,8 +127,10 @@ AmpSumIntensity& AmpSumIntensity::operator+=(const AmpSumIntensity& rhs) {
 //===================== LOAD/SAVE CONFIG ===================
 //==========================================================
 //! Configure resonance from ptree
-void AmpSumIntensity::Configure(const boost::property_tree::ptree &pt)
+    void AmpSumIntensity::Configure(std::string filepath)
 {
+    boost::property_tree::ptree pt;
+    read_xml(filepath, pt, boost::property_tree::xml_parser::trim_whitespace);
 	BOOST_FOREACH( ptree::value_type const& v,
 			pt.get_child("amplitude_setup") ) {
 		/* We try to configure each type of resonance. In case that v.first does

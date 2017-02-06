@@ -18,7 +18,6 @@
 #include <map>
 #include <string>
 
-#include <boost/property_tree/xml_parser.hpp>
 
 #include "Core/Amplitude.hpp"
 #include "Core/Resonance.hpp"
@@ -70,7 +69,7 @@ public:
 
 	//===================== LOAD/SAVE CONFIG ====================
 	//! Configure resonance from ptree
-	virtual void Configure(const boost::property_tree::ptree &pt);
+    virtual void Configure(std::string filepath);
 
 	//! Save resonance from to ptree
 	virtual void Save(std::string fileName);

@@ -2,9 +2,9 @@
 
 FILE(GLOB lib_srcs *.cpp)
 FILE(GLOB lib_headers *.hpp)
-add_library (MinLogLH SHARED ${lib_srcs} ${lib_headers})
+add_library( MinLogLH SHARED ${lib_srcs} ${lib_headers} )
 
-target_link_libraries( MinLogLH Estimator Optimizer )
+target_link_libraries( MinLogLH Estimator Core )
 
 #target_include_directories (MinLogLH PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${MINUIT2}/include)
 

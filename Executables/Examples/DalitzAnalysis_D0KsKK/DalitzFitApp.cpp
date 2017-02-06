@@ -42,7 +42,6 @@
 #include "Optimizer/Minuit2/MinuitResult.hpp"
 using namespace ComPWA;
 BOOST_CLASS_EXPORT(ComPWA::Optimizer::Minuit2::MinuitResult)
-//#include "Optimizer/Geneva/GenevaIF.hpp"
 #include "Physics/AmplitudeSum/AmpSumIntensity.hpp"
 #include "Physics/DPKinematics/RootEfficiency.cpp"
 #include "Physics/DPKinematics/SimpleEfficiency.hpp"
@@ -50,12 +49,71 @@ BOOST_CLASS_EXPORT(ComPWA::Optimizer::Minuit2::MinuitResult)
 #include "Physics/DPKinematics/RootGenerator.hpp"
 
 #include "PlotData.hpp"
-//#include "PWA/GoodnessOfFit.hpp"
-//#include "PWA/systematics.hpp"
-//#include "Tools/Tools.hpp"
-//#include "PWA/Tools.hpp"
 
 using namespace std;
+using namespace ComPWA;
+
+//Expands '~' in file path to user directory
+std::string expand_user(std::string p)
+{
+    std::string path = p;
+    if (not path.empty() and path[0] == '~') {
+        assert(path.size() == 1 or path[1] == '/');  // or other error handling
+        char const* home = getenv("HOME");
+        if( home || home==getenv("USERPROFILE") ) {
+            path.replace(0, 1, home);
+        } else {
+            char const *hdrive = getenv("HOMEDRIVE"),
+            *hpath = getenv("HOMEPATH");
+            assert(hdrive);  // or other error handling
+            assert(hpath);
+            path.replace(0, 1, std::string(hdrive) + hpath);
+        }
+    }
+    return path;
+}
+
+void createAmp(std::string name, std::vector<std::shared_ptr<Amplitude> >& ampV,
+               std::string xmlInput, std::shared_ptr<Efficiency> eff,
+               double mcPrecision, std::string ampOption)
+{
+    auto DzeroAmp = new ComPWA::Physics::AmplitudeSum::AmpSumIntensity(name,normStyle::one, eff, mcPrecision);
+    DzeroAmp->Configure(expand_user(xmlInput));
+    auto tmpAmp = std::shared_ptr<ComPWA::Physics::AmplitudeSum::AmpSumIntensity>(DzeroAmp);
+    ampV.push_back(tmpAmp);
+}
+
+void setErrorOnParameterList(ParameterList& list, double error, bool asym)
+{
+    for(unsigned int i=0; i<list.GetNDouble(); i++){
+        std::shared_ptr<DoubleParameter> p = list.GetDoubleParameter(i);
+        if(p->IsFixed()) {
+            p->SetError(0.0);
+            continue;
+        }
+        if(asym)
+            list.GetDoubleParameter(i)->SetError(
+                                                 error,error
+                                                 );
+        else list.GetDoubleParameter(i)->SetError(error);
+    }
+}
+
+void randomStartValues(ParameterList& fitPar)
+{
+    for(unsigned int i=0; i<fitPar.GetNDouble(); i++){
+        std::shared_ptr<DoubleParameter> p = fitPar.GetDoubleParameter(i);
+        if(p->IsFixed()) continue;
+        double min = -999, max = 999;
+        if(p->UseBounds()){
+            min = p->GetMinValue();
+            max = p->GetMaxValue();
+        }
+        p->SetValue(gRandom->Uniform(min,max));
+    }
+    std::cout<<"Randomizing parameter list. New list:"<<fitPar<<std::endl;
+    return;
+}
 
 /*****************************************************************************/
 /**
@@ -266,9 +324,9 @@ int main(int argc, char **argv){
 	if(!efficiencyFile.empty()){
 		TFile* tf= new TFile(TString(efficiencyFile));
 		ComPWA::Physics::DPKinematics::SimpleEfficiency* effDalitz =
-				(SimpleEfficiency*) tf->Get(TString(efficiencyObject));
+				(ComPWA::Physics::DPKinematics::SimpleEfficiency*) tf->Get(TString(efficiencyObject));
 		tf->Close();
-		eff = std::shared_ptr<Efficiency>(new SimpleAngleEfficiency(effDalitz));
+		eff = std::shared_ptr<Efficiency>(new ComPWA::Physics::DPKinematics::SimpleAngleEfficiency(effDalitz));
 	}
 
 	//Unbinned efficiency
@@ -287,14 +345,14 @@ int main(int argc, char **argv){
 		 * with unbinned correction. Doesn't influence the fit result. */
 		//phspData->resetEfficiency( 1.0 );
 		phspData->resetEfficiency( 0.0135554 );
-		if(applySysCorrection){
-			MomentumCorrection* trkSys = getTrackingCorrection();
-			MomentumCorrection* pidSys = getPidCorrection();
-			trkSys->Print();
-			pidSys->Print();
-			phspData->applyCorrection(*trkSys);
-			phspData->applyCorrection(*pidSys);
-		}
+//		if(applySysCorrection){
+//			MomentumCorrection* trkSys = getTrackingCorrection();
+//			MomentumCorrection* pidSys = getPidCorrection();
+//			trkSys->Print();
+//			pidSys->Print();
+//			phspData->applyCorrection(*trkSys);
+//			phspData->applyCorrection(*pidSys);
+//		}
 		if( fittingMethod == "amplitude" ){
 			BOOST_LOG_TRIVIAL(error)<<"ATTENTION: amplitude fit with unbinned "
 					"efficiency correction needs UnitEfficiency at this point! "
@@ -344,7 +402,7 @@ int main(int argc, char **argv){
 	//TRUE MODEL
 	if(trueSignalFraction!=1. && !trueBkgModelFile.empty()){
 		createAmp("trueBkg",trueAmpVec,trueBkgModelFile,eff,ampMcPrecision,"none");
-		trueDataVec.push_back( std::shared_ptr<Data>(new RootReader()) );
+		trueDataVec.push_back( std::shared_ptr<Data>(new ComPWA::DataReader::RootReader::RootReader()) );
 		trueFraction.push_back(1-trueSignalFraction);
 	} else if(trueSignalFraction!=1. && trueBkgModelFile.empty() && bkgFile.empty()){
 		throw std::runtime_error("A true signal fraction was specified "
@@ -360,13 +418,13 @@ int main(int argc, char **argv){
 					"but no background model");
 
 		createAmp("Bkg",ampVec,fitBkgFile,eff,ampMcPrecision,"none");
-		dataVec.push_back( std::shared_ptr<Data>(new RootReader()) );
+		dataVec.push_back( std::shared_ptr<Data>(new ComPWA::DataReader::RootReader::RootReader()) );
 		fraction.push_back( 1-fitSignalFraction );
 	}
 
 	//======================= READING DATA =============================
 	//sample is used for minimization
-	std::shared_ptr<Data> sample( new RootReader() );
+	std::shared_ptr<Data> sample( new ComPWA::DataReader::RootReader::RootReader() );
 
 	//temporary samples for signal and background
 	std::shared_ptr<Data> inputData, inputBkg;
@@ -378,7 +436,7 @@ int main(int argc, char **argv){
 	if(trueSignalFraction!=1. && !bkgFile.empty()) {
 		int numBkgEvents = (int)( (1-trueSignalFraction)*numEvents);
 		BOOST_LOG_TRIVIAL(info)<<"Reading background file...";
-		std::shared_ptr<Data> inBkg(new RootReader(bkgFile,bkgFileTreeName));
+		std::shared_ptr<Data> inBkg(new ComPWA::DataReader::RootReader::RootReader(bkgFile,bkgFileTreeName));
 		inBkg->reduceToPhsp();
 		if(resetWeights) inBkg->resetWeights(); //resetting weights of requested
 		inputBkg = inBkg->rndSubSet(numBkgEvents,gen);
@@ -390,7 +448,7 @@ int main(int argc, char **argv){
 		int numSignalEvents = numEvents;
 		if( inputBkg ) numSignalEvents -= inputBkg->getNEvents();
 		BOOST_LOG_TRIVIAL(info)<<"Reading data file...";
-		std::shared_ptr<Data> inD(new RootReader(dataFile,dataFileTreeName));
+		std::shared_ptr<Data> inD(new ComPWA::DataReader::RootReader::RootReader(dataFile,dataFileTreeName));
 		inD->reduceToPhsp();
 		if(resetWeights) inD->resetWeights(); //resetting weights of requested
 		inputData = inD->rndSubSet(numSignalEvents,gen);
@@ -401,7 +459,7 @@ int main(int argc, char **argv){
 	}
 
 	//======================== GENERATION =====================
-	std::shared_ptr<Data> toyPhspData(new RootReader());//Toy sample
+	std::shared_ptr<Data> toyPhspData(new ComPWA::DataReader::RootReader::RootReader());//Toy sample
 	run.setPhspSample(toyPhspData);
 	run.generatePhsp(mcPrecision);
 	toyPhspData->setEfficiency(eff);//set efficiency values for each event
@@ -412,7 +470,7 @@ int main(int argc, char **argv){
 		double phspSampleSize = numEvents/0.005;
 
 		std::shared_ptr<Data> fullPhsp(
-				new RootReader(
+				new ComPWA::DataReader::RootReader::RootReader(
 					phspEfficiencyFile,
 					phspEfficiencyFileTreeName,
 					phspSampleSize
@@ -421,7 +479,7 @@ int main(int argc, char **argv){
 		std::shared_ptr<Data> fullTruePhsp;
 		if(!phspEfficiencyFileTrueTreeName.empty()){
 			fullTruePhsp = std::shared_ptr<Data>(
-					new RootReader(
+					new ComPWA::DataReader::RootReader::RootReader(
 						phspEfficiencyFile,
 						phspEfficiencyFileTrueTreeName,
 						phspSampleSize
@@ -562,7 +620,7 @@ int main(int argc, char **argv){
 
 	std::shared_ptr<FitResult> result;
 	ParameterList finalParList;
-	std::shared_ptr<COMPWA::ControlParameter> esti;
+	std::shared_ptr<ComPWA::ControlParameter> esti;
 	if( fittingMethod != "plotOnly") {
 		//========================FITTING =====================
 		ParameterList truePar, fitPar;
@@ -570,13 +628,12 @@ int main(int argc, char **argv){
 		Amplitude::FillAmpParameterToList(ampVec,fitPar);
 
 		//=== Constructing likelihood
-		esti = std::shared_ptr<COMPWA::ControlParameter>(
-				MinLogLH::createInstance(
+		esti = std::shared_ptr<ComPWA::ControlParameter>(                                                         ComPWA::Estimator::MinLogLH::MinLogLH::createInstance(
 					ampVec, fraction, sample, toyPhspData, phspData, 0, 0
 					)
 				);
 
-		MinLogLH* contrPar = dynamic_cast<MinLogLH*>(&*(esti->Instance()));
+        ComPWA::Estimator::MinLogLH::MinLogLH* contrPar = dynamic_cast<ComPWA::Estimator::MinLogLH::MinLogLH*>(&*(esti->Instance()));
 
 		contrPar->setAmplitude(ampVec, fraction, sample, toyPhspData, phspData,
 				0, 0, false); //setting new trees in ControlParameter
@@ -595,7 +652,7 @@ int main(int argc, char **argv){
 		BOOST_LOG_TRIVIAL(debug) << "Initial LH="
 			<< esti->controlParameter(fitPar) <<".";
 
-		std::shared_ptr<Optimizer> preOpti, opti;
+        std::shared_ptr<ComPWA::Optimizer::Optimizer> preOpti, opti;
 		std::shared_ptr<FitResult> preResult;
 		if( usePreFitter ){
 			BOOST_LOG_TRIVIAL(info) << "Running Geneva as pre fitter!";
@@ -611,16 +668,16 @@ int main(int argc, char **argv){
 		//Set start error of 0.05 for parameters
 		setErrorOnParameterList(fitPar, 0.05, useMinos);
 
-		auto minuitif = new MinuitIF(esti, fitPar);
+        auto minuitif = new ComPWA::Optimizer::Minuit2::MinuitIF(esti, fitPar);
 		minuitif->SetHesse(useHesse);
-		opti = std::shared_ptr<Optimizer>(minuitif);
+        opti = std::shared_ptr<ComPWA::Optimizer::Optimizer>(minuitif);
 		run.setOptimizer(opti);
 
 		//====== STARTING MINIMIZATION ======
 		result = run.startFit(fitPar);
 
 		//====== FIT RESULT =======
-		MinuitResult* minuitResult = dynamic_cast<MinuitResult*>(&*result);
+        ComPWA::Optimizer::Minuit2::MinuitResult* minuitResult = dynamic_cast<ComPWA::Optimizer::Minuit2::MinuitResult*>(&*result);
 		finalParList = result->getFinalParameters();
 		Amplitude::UpdateAmpParameterList(esti->getAmplitudes(), finalParList);
 		result->setTrueParameters(truePar);
@@ -636,8 +693,8 @@ int main(int argc, char **argv){
 			//result->writeTeX(fileNamePrefix+std::string("-fitResult.tex"));
 
 			//Save final amplitude
-			AmpSumIntensity* fitAmpSum =
-				dynamic_cast<AmpSumIntensity*>(&*ampVec.at(0));
+			ComPWA::Physics::AmplitudeSum::AmpSumIntensity* fitAmpSum =
+				dynamic_cast<ComPWA::Physics::AmplitudeSum::AmpSumIntensity*>(&*ampVec.at(0));
 			BOOST_LOG_TRIVIAL(info) << "Average resonance width of fit model: "
 				<<fitAmpSum->averageWidth();
 			fitAmpSum->Save(fileNamePrefix+std::string("-Model.xml"));
@@ -647,14 +704,14 @@ int main(int argc, char **argv){
 			double confLevel = std::sqrt(
 					2*( minuitResult->GetTrueLH() - minuitResult->GetFinalLH() )
 			);
-			BOOST_LOG_TRIVIAL(info) <<std::setprecision(15)<< "CHI2 TEST: "
+			BOOST_LOG_TRIVIAL(info) << "CHI2 TEST: "
 					<<" finalLH = "<<minuitResult->GetFinalLH()
 					<<" trueLH = "<<minuitResult->GetTrueLH()
 					<<" -> confLevel [sigma] = "<<confLevel;
 		}
 	} else if(!inputResult.empty()){
 		BOOST_LOG_TRIVIAL(info) << "Reading MinuitResult from "<<inputResult;
-		std::shared_ptr<MinuitResult> inResult;
+		std::shared_ptr<ComPWA::Optimizer::Minuit2::MinuitResult> inResult;
 		std::ifstream ifs(inputResult);
 		if(!ifs.good()) throw std::runtime_error("input stream not good!");
 		boost::archive::xml_iarchive ia(ifs);
@@ -677,124 +734,28 @@ int main(int argc, char **argv){
 		finalParList.DeepCopy(tmpList);
 	}
 
-	gROOT->ProcessLine(".x ~/work/rootAnalysis/DKsKK/rootStyle.C");
-	gROOT->SetStyle("MYSTYLE");
-	//======================= GOODNESS-OF-FIT =============================
-	double gofValue =-999;
-	if(gof_enable){
-		BOOST_LOG_TRIVIAL(info)<<"Calculating Goodness-Of-Fit value using the"
-			" PointToPoint Dissimilarity method!";
-		std::shared_ptr<Data> gofPhspSample;
-
-		if(fittingMethod != "plotOnly")
-			Amplitude::UpdateAmpParameterList(ampVec,finalParList);
-		if(!phspEfficiencyFile.empty()){
-			/* Use phsp same for event generation */
-
-			//read in sample with accepted phsp events
-			gofPhspSample = std::shared_ptr<Data>(
-					new RootReader(
-						phspEfficiencyFile,
-						phspEfficiencyFileTreeName,
-						gof_mcPrecision
-						)
-					);
-
-			//apply correction
-			if(applySysCorrection){
-				MomentumCorrection* trkSys = getTrackingCorrection();
-				MomentumCorrection* pidSys = getPidCorrection();
-				gofPhspSample->applyCorrection(*trkSys);
-				gofPhspSample->applyCorrection(*pidSys);
-			}
-			//read in true sample (if available)
-			std::shared_ptr<Data> gofTruePhsp;
-			if(!phspEfficiencyFileTrueTreeName.empty())
-				gofTruePhsp = std::shared_ptr<Data>(
-						new RootReader(
-							phspEfficiencyFile,
-							phspEfficiencyFileTrueTreeName,
-							gof_mcPrecision
-							)
-						);
-
-			//set sample(s) to RunManager
-			run.setPhspSample( gofPhspSample, gofTruePhsp );
-
-			//make sure no efficiency is set
-			Amplitude::SetAmpEfficiency(
-					ampVec,
-					std::shared_ptr<Efficiency>(new UnitEfficiency)
-					);
-		} else if( gof_mcPrecision > 0 ){
-			/* Generate certain number of phsp events for event generation */
-			gofPhspSample = std::shared_ptr<Data>( new RootReader() );
-			run.setPhspSample(gofPhspSample);
-			run.generatePhsp(gof_mcPrecision);
-		} else {
-			/* Do not generate phsp sample. Events are generated on the fly. */
-			run.setPhspSample(gofPhspSample);
-		}
-
-		//Hit&miss sample for plotting
-		std::vector<std::shared_ptr<Data> > gof_sampleVec;
-		std::shared_ptr<Data> gof_sample( new RootReader() );
-		for(int i=0; i<ampVec.size(); ++i)
-			gof_sampleVec.push_back( std::shared_ptr<Data>( new RootReader() ) );
-		run.SetAmplitudesData( ampVec, fraction, gof_sampleVec ) ;
-		run.GenAmplitudesData( gof_size );
-		//merge samples
-		for(int i=0; i<gof_sampleVec.size(); ++i){
-			gof_sample->Add(*gof_sampleVec.at(i));
-		}
-		//reduce sample to phsp
-		gof_sample->reduceToPhsp();
-
-		BOOST_LOG_TRIVIAL(info)<<"Calculating goodness-of-fit using "
-			<<gof_sample->getNEvents()<<" events!";
-
-		//Goodness-of-fit via point-to-point dissimilarity method
-		PointToPoint goodOfFit(
-				std::dynamic_pointer_cast<RootReader>(sample)->getDataPoints(),
-				std::dynamic_pointer_cast<RootReader>(gof_sample)->getDataPoints()
-				);
-		//goodOfFit.setAmpMax(fitAmp->GetMaxVal(gen));
-		goodOfFit.setSigma(0.03);
-		goodOfFit.setAmplitude(ampVec, fraction);
-
-		//Run the actual calculation
-		gofValue = goodOfFit.getValue();
-
-		//Result
-		BOOST_LOG_TRIVIAL(info)<<"PointToPoint Dissimilarity value phi = "<<gofValue;
-	}
 	//======================= PLOTTING =============================
 	if(enablePlotting){
 		if(fittingMethod != "plotOnly")
 			Amplitude::UpdateAmpParameterList(ampVec,finalParList);
 
 		//------- phase-space sample
-		std::shared_ptr<Data> pl_phspSample( new RootReader() );
+		std::shared_ptr<Data> pl_phspSample( new ComPWA::DataReader::RootReader::RootReader() );
 		BOOST_LOG_TRIVIAL(info) << "Plotting results...";
 		if(!phspEfficiencyFile.empty()){ //unbinned plotting
 			//sample with accepted phsp events
 			pl_phspSample = std::shared_ptr<Data>(
-					new RootReader(
+					new ComPWA::DataReader::RootReader::RootReader(
 						phspEfficiencyFile,
 						phspEfficiencyFileTreeName,
 						plotSize
 						)
 					);
-			if(applySysCorrection){
-				MomentumCorrection* trkSys = getTrackingCorrection();
-				MomentumCorrection* pidSys = getPidCorrection();
-				pl_phspSample->applyCorrection(*trkSys);
-				pl_phspSample->applyCorrection(*pidSys);
-			}
+
 			std::shared_ptr<Data> plotTruePhsp;
 			if(!phspEfficiencyFileTrueTreeName.empty())
 				plotTruePhsp = std::shared_ptr<Data>(
-						new RootReader(
+						new ComPWA::DataReader::RootReader::RootReader(
 							phspEfficiencyFile,
 							phspEfficiencyFileTrueTreeName,
 							plotSize

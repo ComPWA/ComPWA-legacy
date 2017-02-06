@@ -13,10 +13,9 @@
 //-------------------------------------------------------------------------------
 #include <memory>
 
-#include "Optimizer/ControlParameter.hpp"
+#include "Core/ControlParameter.hpp"
 
 namespace ComPWA {
-namespace Optimizer {
 
 std::shared_ptr<ControlParameter> ControlParameter::Instance() {
     return ControlParameter::instance_;
@@ -24,5 +23,4 @@ std::shared_ptr<ControlParameter> ControlParameter::Instance() {
 
 std::shared_ptr<ControlParameter> ControlParameter::instance_ = std::shared_ptr<ControlParameter>();
 
-} /* namespace Optimizer */
 } /* namespace ComPWA */

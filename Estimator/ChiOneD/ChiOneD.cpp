@@ -20,7 +20,7 @@
 namespace ComPWA {
 
 using DataReader::Data;
-using Optimizer::ControlParameter;
+using ComPWA::ControlParameter;
 
 namespace Estimator {
 namespace ChiOneD {

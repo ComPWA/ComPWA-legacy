@@ -13,13 +13,11 @@
 
 #include <iostream>
 #include <vector>
-#include <boost/log/trivial.hpp>
-//#include "Core/DataPoint.hpp"
+#include "Core/Logging.hpp"
 
 namespace ComPWA {
 
 class dataPoint;
-using namespace boost::log;
 
 /**
  *  \class DalitzEfficiency
@@ -34,6 +32,7 @@ public:
 	virtual ~Efficiency();
 
 	virtual double evaluate(std::vector<double> x) = 0;
+    
 	virtual double evaluate(const dataPoint& point) = 0;
 };
 

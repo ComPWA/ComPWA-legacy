@@ -40,7 +40,7 @@ double SimpleAngleEfficiency::evaluate(std::vector<double> x){
 	}
 	return evaluate(point);
 }
-double SimpleAngleEfficiency::evaluate(dataPoint& point){
+double SimpleAngleEfficiency::evaluate(const dataPoint& point){
 	double m23sq = point.getVal(0);
 	double angle = point.getVal(8);
 

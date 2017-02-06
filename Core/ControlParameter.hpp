@@ -30,7 +30,6 @@
 #include "Core/Amplitude.hpp"
 
 namespace ComPWA {
-namespace Optimizer {
 
 class ControlParameter{
 
@@ -64,6 +63,5 @@ protected:
  
 };
 
-} /* namespace Optimizer */
 } /* namespace ComPWA */
 #endif

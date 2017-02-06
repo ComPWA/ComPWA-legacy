@@ -108,14 +108,14 @@ void MinLogLH::Reset()
 
 }
 
-std::shared_ptr<Optimizer::ControlParameter> MinLogLH::createInstance(
+std::shared_ptr<ComPWA::ControlParameter> MinLogLH::createInstance(
 		std::shared_ptr<Amplitude> amp,
 		std::shared_ptr<DataReader::Data> data, std::shared_ptr<DataReader::Data> phspSample,
 		unsigned int startEvent, unsigned int nEvents)
 {
 	if(!instance_){
 		std::shared_ptr<DataReader::Data> accSample_ = std::shared_ptr<DataReader::Data>();
-		instance_ = std::shared_ptr<Optimizer::ControlParameter>(
+		instance_ = std::shared_ptr<ComPWA::ControlParameter>(
 				new MinLogLH(
 						amp, data, phspSample,
 						std::shared_ptr<DataReader::Data>(), //empty sample
@@ -128,7 +128,7 @@ std::shared_ptr<Optimizer::ControlParameter> MinLogLH::createInstance(
 	return instance_;
 }
 
-std::shared_ptr<Optimizer::ControlParameter> MinLogLH::createInstance(
+std::shared_ptr<ComPWA::ControlParameter> MinLogLH::createInstance(
 		std::shared_ptr<Amplitude> amp,
 		std::shared_ptr<DataReader::Data> data, std::shared_ptr<DataReader::Data> phspSample,
 		std::shared_ptr<DataReader::Data> accSample,
@@ -144,7 +144,7 @@ std::shared_ptr<Optimizer::ControlParameter> MinLogLH::createInstance(
 	return instance_;
 }
 
-std::shared_ptr<Optimizer::ControlParameter> MinLogLH::createInstance(
+std::shared_ptr<ComPWA::ControlParameter> MinLogLH::createInstance(
 		std::vector<std::shared_ptr<Amplitude> > ampVec, std::vector<double> frac,
 		std::shared_ptr<DataReader::Data> data_, std::shared_ptr<DataReader::Data> phspSample_,
 		std::shared_ptr<DataReader::Data> accSample_,
