@@ -27,17 +27,10 @@
 #include <string>
 #include <map>
 
-#include <boost/log/trivial.hpp>
-
-#include "Core/Logging.hpp"
 #include "Core/Functions.hpp"
 #include "Core/TreeNode.hpp"
 #include "Core/AbsParameter.hpp"
 #include "Core/Parameter.hpp"
-
-//#include "Optimizer/ControlParameter.hpp"
-
-using namespace boost::log;
 
 namespace ComPWA {
 

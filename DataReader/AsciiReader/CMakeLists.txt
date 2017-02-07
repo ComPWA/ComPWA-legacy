@@ -7,5 +7,5 @@ target_link_libraries( AsciiReader DataReader )
 
 target_include_directories (AsciiReader PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
-install (TARGETS AsciiReader DESTINATION lib/ComPWA)
+#install (TARGETS AsciiReader DESTINATION lib/ComPWA)
 install (FILES ${lib_headers} DESTINATION include/ComPWA)

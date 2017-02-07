@@ -31,15 +31,9 @@
 #include "DataReader/DataCorrection.hpp"
 
 //Root-Headers
-//#include "TMath.h"
-#include "TLorentzVector.h"
-#include "TParticle.h"
-#include "TROOT.h"
 #include "TFile.h"
 #include "TClonesArray.h"
 #include "TTree.h"
-#include "TRandom3.h"
-
 
 namespace ComPWA {
 namespace DataReader {

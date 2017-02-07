@@ -24,10 +24,9 @@
 #include <iostream>
 #include <vector>
 
-#include <boost/log/trivial.hpp>
-
 #include "Core/Kinematics.hpp"
 #include "Core/Utility.hpp"
+#include "Core/Logging.hpp"
 
 namespace ComPWA {
 namespace Physics {

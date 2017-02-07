@@ -8,11 +8,13 @@
 #ifndef DATAREADER_DATACORRECTION_HPP_
 #define DATAREADER_DATACORRECTION_HPP_
 
+#include <stdexcept>
+#include <cfloat>
+
 #include "Core/Event.hpp"
 #include "Core/Logging.hpp"
 #include "DataReader/CorrectionTable.hpp"
-#include <stdexcept>
-#include <cfloat>
+
 
 namespace ComPWA {
 

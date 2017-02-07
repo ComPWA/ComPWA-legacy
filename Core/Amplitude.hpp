@@ -218,7 +218,7 @@ public:
 	virtual resonanceItr GetResonanceItrLast() {};
 
 	//! Iterator on last resonance (which is enabled)
-	virtual const std::vector<resonanceItr> GetResonanceItrList() {};
+    virtual const std::vector<resonanceItr> GetResonanceItrList() { return std::vector<resonanceItr>(); };
 
 	//========== FUNCTIONTREE =============
 	//! Check of tree is available

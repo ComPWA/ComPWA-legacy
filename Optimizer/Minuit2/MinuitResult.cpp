@@ -1,5 +1,5 @@
 /*
- * FitResult.cpp
+ * MinuitResult.cpp
  *
  *  Created on: Jan 15, 2014
  *      Author: weidenka
@@ -23,15 +23,15 @@ using namespace boost::log;
 
 using ComPWA::Estimator::Estimator;
 
-MinuitResult::MinuitResult() : initialLH(0), finalLH(0), trueLH(0),
-calcInterference(0)
+MinuitResult::MinuitResult() :
+calcInterference(0),initialLH(0),finalLH(0),trueLH(0)
 {
 
 }
 
 MinuitResult::MinuitResult(std::shared_ptr<ControlParameter> esti,
     ROOT::Minuit2::FunctionMinimum result) :
-		initialLH(0), finalLH(0), trueLH(0), calcInterference(0)
+		calcInterference(0),initialLH(0), finalLH(0), trueLH(0)
 {
 	est = std::static_pointer_cast<Estimator>(esti);
 	_ampVec = est->getAmplitudes();
@@ -299,7 +299,6 @@ void MinuitResult::genOutput(std::ostream& out, std::string opt)
 	if(hesseFailed)
 		out<<"		*** HESSE FAILED! ***"<<std::endl;
 	if(hasValidCov){
-		unsigned int n=0;
 		if(printCovMatrix){
 			out<<"COVARIANCE MATRIX:"<<std::endl;
 			TableFormater* tableCov = new TableFormater(&out);
@@ -468,6 +467,7 @@ void MinuitResult::writeXML(std::string filename)
 {
 	std::ofstream ofs(filename);
 	boost::archive::xml_oarchive oa(ofs);
+    //TODO: Compile error due to serialization
 	oa << boost::serialization::make_nvp("FitParameters", finalParameters);
 	oa << boost::serialization::make_nvp("FitFractions", fractionList);
 	ofs.close();
@@ -480,7 +480,6 @@ void MinuitResult::writeTeX(std::string filename)
 	TableFormater* tableResult = new TexTableFormater(&out);
 	printFitParameters(tableResult);
 	if(hasValidCov){
-		unsigned int n=0;
 		TableFormater* tableCov = new TexTableFormater(&out);
 		printCovarianceMatrix(tableCov);
 		TableFormater* tableCorr = new TexTableFormater(&out);

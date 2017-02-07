@@ -110,10 +110,8 @@ double SimpleEfficiency::GetEfficiency(int globalBin)
 
 double SimpleEfficiency::GetEfficiencyError(int globalBin)
 {
-	unsigned int N = totalHist->GetSumOfWeights();
-	double eff = GetEfficiency(globalBin);
-	double err = 1;
-	return err;
+//	return GetEfficiency(globalBin);
+	return 1.0;
 }
 
 void SimpleEfficiency::SetTitle(const char* title)

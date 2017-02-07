@@ -29,8 +29,7 @@
 #include <iostream>
 #include <fstream>
 #include <memory>
-#include <boost/numeric/ublas/symmetric.hpp>
-#include <boost/numeric/ublas/io.hpp>
+
 #include <boost/serialization/serialization.hpp>
 #include <boost/serialization/nvp.hpp>
 #include <boost/serialization/vector.hpp>

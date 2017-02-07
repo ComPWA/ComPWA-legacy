@@ -69,12 +69,12 @@ AsciiReader* AsciiReader::Clone() const
 {
 	//TODO: implement virtual functions and uncomment the following
 	//	return new AsciiReader(*this);
-//	return new AsciiReader();
+	return new AsciiReader();
 }
 
 AsciiReader* AsciiReader::EmptyClone() const
 {
-//	return new AsciiReader();
+	return new AsciiReader();
 }
 
 } /* namespace AsciiReader */

@@ -32,8 +32,8 @@
 #include "Minuit2/MnStrategy.h"
 
 #include "Core/ParameterList.hpp"
+#include "Core/ControlParameter.hpp"
 #include "Optimizer/Optimizer.hpp"
-#include "Optimizer/ControlParameter.hpp"
 #include "Optimizer/Minuit2/MinuitFcn.hpp"
 #include "Optimizer/Minuit2/MinuitResult.hpp"
 

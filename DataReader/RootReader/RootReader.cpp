@@ -18,15 +18,18 @@
 #include <utility>
 #include <stdexcept>
 
-#include "DataReader/RootReader/RootReader.hpp"
+
 #include "Core/Kinematics.hpp"
 #include "Core/Generator.hpp"
+#include "Core/Logging.hpp"
+#include "DataReader/RootReader/RootReader.hpp"
 
 #include "TParticle.h"
-
+#include "TRandom3.h"
+#include "TLorentzVector.h"
+#include "TROOT.h"
 #include "TParticlePDG.h"
-#include <boost/log/trivial.hpp>
-#include <boost/log/core.hpp>
+
 using namespace boost::log;
 
 namespace ComPWA {

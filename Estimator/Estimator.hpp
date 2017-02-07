@@ -28,7 +28,7 @@
 #include <vector>
 #include <memory>
 
-#include "Optimizer/ControlParameter.hpp"
+#include "Core/ControlParameter.hpp"
 #include "Core/ParameterList.hpp"
 #include "Core/FunctionTree.hpp"
 #include "Core/Amplitude.hpp"
@@ -36,7 +36,7 @@
 namespace ComPWA {
 namespace Estimator {
 
-class Estimator : public ComPWA::Optimizer::ControlParameter
+class Estimator : public ComPWA::ControlParameter
 {
 
 public:

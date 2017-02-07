@@ -42,7 +42,9 @@ class AsciiReader : public Data {
 public:
 	/** Destructor */
 	virtual ~AsciiReader();
-
+    
+    AsciiReader( ) { };
+    
 	AsciiReader( const std::string inConfigFile, const int particles );
 
 	virtual AsciiReader* Clone() const;

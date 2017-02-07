@@ -28,7 +28,7 @@
 #include <vector>
 #include <map>
 
-#include "boost/serialization/vector.hpp"
+#include <boost/serialization/vector.hpp>
 #include <boost/serialization/shared_ptr.hpp>
 
 #include "Core/AbsParameter.hpp"
@@ -745,27 +745,28 @@ private:
 
 } /* namespace ComPWA */
 
-BOOST_SERIALIZATION_SHARED_PTR( ParameterList )
-BOOST_CLASS_IMPLEMENTATION(
-		ComPWA::ParameterList,
-		boost::serialization::object_serializable
-		)
-BOOST_CLASS_TRACKING(
-		ComPWA::ParameterList,
-		boost::serialization::track_never
-		)
+//BOOST_SERIALIZATION_SHARED_PTR( ParameterList )
+//BOOST_CLASS_IMPLEMENTATION(
+//		ComPWA::ParameterList,
+//		boost::serialization::object_serializable
+//		)
+//BOOST_CLASS_TRACKING(
+//		ComPWA::ParameterList,
+//		boost::serialization::track_never
+//		)
 
 
 
-/* Support for serialization of std::shared_ptr (and other type) is 
+/* Support for serialization of std::shared_ptr (and other types) is 
  * added in boost 1.56 . For previous versions we have to implement
  * it ourself
  */
-#if (BOOST_VERSION / 100000) < 56
+#include <boost/version.hpp>
+#if ( BOOST_VERSION  < 105600 )
 #include <boost/serialization/split_free.hpp>
 #include <boost/unordered_map.hpp>
 #include <typeinfo>
-#include <boost/version.hpp>
+
 
 //---/ Wrapper for td::shared_ptr<> /------------------------------------------
 	namespace boost {

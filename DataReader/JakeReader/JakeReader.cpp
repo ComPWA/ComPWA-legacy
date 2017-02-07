@@ -43,7 +43,7 @@ JakeReader::JakeReader(TTree* tr, int size, const bool binned) : readSize(size),
 }
 
 JakeReader::JakeReader(const std::string inRootFile, const std::string inTreeName, int size, const bool binned) :
-				fBinned(binned),fileName(inRootFile),treeName(inTreeName),readSize(size){
+				readSize(size),fileName(inRootFile),treeName(inTreeName),fBinned(binned){
 	fFile = new TFile(fileName.c_str());
 	if(fFile->IsZombie())
 		throw std::runtime_error("RootReader::RootReader() can't open data file: "+inRootFile);
@@ -201,7 +201,6 @@ void JakeReader::writeData(std::string file, std::string trName){
 }
 
 void JakeReader::bin(){
-   double min=-1, max=-1;
    fmaxBins=500; //TODO setter, consturctor
    TLorentzVector in1, in2;
 

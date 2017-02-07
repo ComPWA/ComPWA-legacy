@@ -8,18 +8,18 @@ TwoBodyKinematics::TwoBodyKinematics(std::string _nameMother,
 		std::string _name1, std::string _name2,	double deltaMassWindow) :
 								Kinematics(_nameMother,0.0,2), name1(_name1), name2(_name2)
 {
-	_M = ComPWA::PhysConst::Instance().findParticle(_nameMother).mass_;
-	m1 = ComPWA::PhysConst::Instance().findParticle(_name1).mass_;
-	m2 = ComPWA::PhysConst::Instance().findParticle(_name2).mass_;
+	_M = ComPWA::PhysConst::instance()->findParticle(_nameMother).mass_;
+	m1 = ComPWA::PhysConst::instance()->findParticle(_name1).mass_;
+	m2 = ComPWA::PhysConst::instance()->findParticle(_name2).mass_;
 
 	_spinM =
-			ComPWA::PhysConst::Instance().findParticle(_nameMother).getSpinLikeQuantumNumber(
+			ComPWA::PhysConst::instance()->findParticle(_nameMother).getSpinLikeQuantumNumber(
 					QuantumNumberIDs::SPIN).GetNumerator();
 	spin1 =
-			ComPWA::PhysConst::Instance().findParticle(_name1).getSpinLikeQuantumNumber(
+			ComPWA::PhysConst::instance()->findParticle(_name1).getSpinLikeQuantumNumber(
 					QuantumNumberIDs::SPIN).GetNumerator();
 	spin2 =
-			ComPWA::PhysConst::Instance().findParticle(_name2).getSpinLikeQuantumNumber(
+			ComPWA::PhysConst::instance()->findParticle(_name2).getSpinLikeQuantumNumber(
 					QuantumNumberIDs::SPIN).GetNumerator();
 
 	if(_M==-999 || m1==-999|| m2==-999)

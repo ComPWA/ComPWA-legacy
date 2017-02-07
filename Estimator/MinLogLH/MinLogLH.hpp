@@ -59,7 +59,7 @@ public:
 	 * @param nEvents number of events to process
 	 * @return std::shared_ptr<Data> of existing instance or newly created instance
 	 */
-	static std::shared_ptr<ComPWA::Optimizer::ControlParameter> createInstance(
+	static std::shared_ptr<ComPWA::ControlParameter> createInstance(
 			std::shared_ptr<Amplitude> amp,
 			std::shared_ptr<DataReader::Data> data,
 			std::shared_ptr<DataReader::Data> phspSample,
@@ -76,7 +76,7 @@ public:
 	 * @param nEvents number of events to process
 	 * @return std::shared_ptr<Data> of existing instance or newly created instance
 	 */
-	static std::shared_ptr<ComPWA::Optimizer::ControlParameter> createInstance(
+	static std::shared_ptr<ComPWA::ControlParameter> createInstance(
 			std::shared_ptr<Amplitude> amp,
 			std::shared_ptr<DataReader::Data> data,
 			std::shared_ptr<DataReader::Data> phspSample,
@@ -95,7 +95,7 @@ public:
 	 * @param nEvents number of events to process
 	 * @return std::shared_ptr<Data> of existing instance or newly created instance
 	 */
-	static std::shared_ptr<ComPWA::Optimizer::ControlParameter> createInstance(
+	static std::shared_ptr<ComPWA::ControlParameter> createInstance(
 			std::vector<std::shared_ptr<Amplitude> > ampVec,
 			std::vector<double> frac,
 			std::shared_ptr<DataReader::Data> data,
