@@ -999,7 +999,7 @@ namespace ComPWA {
             throw std::runtime_error("DoubleParameter::GetError() | "
                                      "Parameter "+name_+" has no errors defined!");
             //		if(GetErrorType()==ErrorType::SYM){
-            //			BOOST_LOG_TRIVIAL(info) << "DoubleParameter::GetErrorHigh() | Parameter "<<name_
+            //			LOG(info) << "DoubleParameter::GetErrorHigh() | Parameter "<<name_
             //					<<" has no asymmetric errors! Returning symmetric error";
             //			return GetError();
             //		}
@@ -1012,7 +1012,7 @@ namespace ComPWA {
             throw std::runtime_error("DoubleParameter::GetError() | "
                                      "Parameter "+name_+" has no errors defined!");
             //		if(GetErrorType()==ErrorType::SYM){
-            //			BOOST_LOG_TRIVIAL(info) << "DoubleParameter::GetErrorHigh() | Parameter "<<name_
+            //			LOG(info) << "DoubleParameter::GetErrorHigh() | Parameter "<<name_
             //					<<" has no assymetric errors! Returning symmetric error";
             //			return GetError();
             //		}

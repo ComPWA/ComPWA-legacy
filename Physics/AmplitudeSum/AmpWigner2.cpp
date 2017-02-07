@@ -132,7 +132,7 @@ namespace ComPWA { namespace Physics { namespace AmplitudeSum {
                                                               _inSpin,_outSpin1,_outSpin2,_angle->GetValue(ele)
                                                               );
             } catch (std::exception &ex) {
-                BOOST_LOG_TRIVIAL(error) << "WignerDStrategy::execute() | "
+                LOG(error) << "WignerDStrategy::execute() | "
                 <<ex.what();
                 throw std::runtime_error("WignerDStrategy::execute() | "
                                          "Evaluation of dynamical function failed!");

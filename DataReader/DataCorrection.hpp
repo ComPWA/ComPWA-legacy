@@ -32,7 +32,7 @@ class UnitCorrection : public DataCorrection
 	virtual ~UnitCorrection() { }
 	virtual double getCorrection(Event& ev) { return 1; }
 	virtual void Print() const {
-		BOOST_LOG_TRIVIAL(info) << "UnitCorrection::Print() | correction factors are set to one";
+		LOG(info) << "UnitCorrection::Print() | correction factors are set to one";
 	}
 };
 

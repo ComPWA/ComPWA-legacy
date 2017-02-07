@@ -36,7 +36,7 @@ bool Inverse::execute(ParameterList& paras,
 					new DoubleParameter( out->GetName(), 0 )
 			);
 			//TODO: exception dividion by 0
-			BOOST_LOG_TRIVIAL(error) << "Inverse::execute() | Division by zero";
+			LOG(error) << "Inverse::execute() | Division by zero";
 		} else
 			out = std::shared_ptr<AbsParameter>(
 					new DoubleParameter( out->GetName(),1/var )
@@ -78,7 +78,7 @@ bool SquareRoot::execute(ParameterList& paras,
 					new DoubleParameter( out->GetName(), -1 )
 			);
 			//TODO: exception argument <0
-			BOOST_LOG_TRIVIAL(error) << "SquareRoot::execute() | Argument "
+			LOG(error) << "SquareRoot::execute() | Argument "
 					"negative! Returning -1";
 		} else
 			out = std::shared_ptr<AbsParameter>(

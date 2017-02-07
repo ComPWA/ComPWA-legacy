@@ -32,7 +32,7 @@ namespace ComPWA {
         while(val> pi) val-=2*pi;
         while(val< -pi ) val+=2*pi;
         if(val!=originalVal)
-            BOOST_LOG_TRIVIAL(info) << "shiftAngle(): shifting parameter from "
+            LOG(info) << "shiftAngle(): shifting parameter from "
             <<originalVal<< " to "<<val<<"!";
         return val;
     }
@@ -65,7 +65,7 @@ namespace ComPWA {
         std::stringstream s;
         genOutput(s,opt);
         std::string str = s.str();
-        BOOST_LOG_TRIVIAL(info) << str;
+        LOG(info) << str;
     }
     
     void FitResult::printFitParameters(TableFormater* tableResult)
@@ -95,7 +95,7 @@ namespace ComPWA {
             try{
                 outPar = finalParameters.GetDoubleParameter(o);
             } catch (BadParameter& bad){
-                BOOST_LOG_TRIVIAL(error) << "FitResult::printFitParameters() | "
+                LOG(error) << "FitResult::printFitParameters() | "
                 "can't access parameter of final parameter list!";
                 throw;
             }
@@ -190,7 +190,7 @@ namespace ComPWA {
     
     void FitResult::printFitFractions(TableFormater* tab)
     {
-        BOOST_LOG_TRIVIAL(info) << " FitResult::printFitFractions() | "
+        LOG(info) << " FitResult::printFitFractions() | "
         "Calculating fit fractions!";
         auto itrAmp = _ampVec.begin();
         for( ; itrAmp!=_ampVec.end(); ++itrAmp){

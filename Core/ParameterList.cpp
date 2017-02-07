@@ -416,7 +416,7 @@ namespace ComPWA {
             unsigned int id =  FindBoolParameter(name) - vBool_.begin();
             RemoveBool(id);
         } catch (BadParameter& ex){
-            BOOST_LOG_TRIVIAL(error) <<" ParameterList::RemoveBool() | Can not remove"
+            LOG(error) <<" ParameterList::RemoveBool() | Can not remove"
             "parameter "<<name<<": "<<ex.what();
             throw;
         }
@@ -426,7 +426,7 @@ namespace ComPWA {
         try{
             vBool_.erase(vBool_.begin()+id);
         } catch (BadParameter& ex){
-            BOOST_LOG_TRIVIAL(error) <<" ParameterList::RemoveBool() | Can not remove"
+            LOG(error) <<" ParameterList::RemoveBool() | Can not remove"
             "parameter with ID="<<id<<": "<<ex.what();
             throw;
         }
@@ -503,7 +503,7 @@ namespace ComPWA {
             unsigned int id =  FindIntegerParameter(name) - vInt_.begin();
             RemoveInteger(id);
         } catch (BadParameter& ex){
-            BOOST_LOG_TRIVIAL(error) <<" ParameterList::RemoveInteger() | Can not remove"
+            LOG(error) <<" ParameterList::RemoveInteger() | Can not remove"
             "parameter "<<name<<": "<<ex.what();
             throw;
         }
@@ -513,7 +513,7 @@ namespace ComPWA {
         try{
             vInt_.erase(vInt_.begin()+id);
         } catch (BadParameter& ex){
-            BOOST_LOG_TRIVIAL(error) <<" ParameterList::RemoveInteger() | Can not remove"
+            LOG(error) <<" ParameterList::RemoveInteger() | Can not remove"
             "parameter with ID="<<id<<": "<<ex.what();
             throw;
         }
@@ -590,7 +590,7 @@ namespace ComPWA {
             unsigned int id =  FindDoubleParameter(name) - vDouble_.begin();
             RemoveDouble(id);
         } catch (BadParameter& ex){
-            BOOST_LOG_TRIVIAL(error) <<" ParameterList::RemoveDouble() | Can not remove"
+            LOG(error) <<" ParameterList::RemoveDouble() | Can not remove"
             "parameter "<<name<<": "<<ex.what();
             throw;
         }
@@ -600,7 +600,7 @@ namespace ComPWA {
         try{
             vDouble_.erase(vDouble_.begin()+id);
         } catch (BadParameter& ex){
-            BOOST_LOG_TRIVIAL(error) <<" ParameterList::RemoveDouble() | Can not remove"
+            LOG(error) <<" ParameterList::RemoveDouble() | Can not remove"
             "parameter with ID="<<id<<": "<<ex.what();
             throw;
         }
@@ -677,7 +677,7 @@ namespace ComPWA {
             unsigned int id =  FindComplexParameter(name) - vComplex_.begin();
             RemoveComplex(id);
         } catch (BadParameter& ex){
-            BOOST_LOG_TRIVIAL(error) <<" ParameterList::RemoveComplex() | Can not remove"
+            LOG(error) <<" ParameterList::RemoveComplex() | Can not remove"
             "parameter "<<name<<": "<<ex.what();
             throw;
         }
@@ -687,7 +687,7 @@ namespace ComPWA {
         try{
             vComplex_.erase(vComplex_.begin()+id);
         } catch (BadParameter& ex){
-            BOOST_LOG_TRIVIAL(error) <<" ParameterList::RemoveComplex() | Can not remove"
+            LOG(error) <<" ParameterList::RemoveComplex() | Can not remove"
             "parameter with ID="<<id<<": "<<ex.what();
             throw;
         }
@@ -738,7 +738,7 @@ namespace ComPWA {
             unsigned int id =  FindMultiDouble(name) - vMultiDouble_.begin();
             RemoveMultiDouble(id);
         } catch (BadParameter& ex){
-            BOOST_LOG_TRIVIAL(error) <<" ParameterList::RemoveDouble() | Can not remove"
+            LOG(error) <<" ParameterList::RemoveDouble() | Can not remove"
             "parameter "<<name<<": "<<ex.what();
             throw;
         }
@@ -748,7 +748,7 @@ namespace ComPWA {
         try{
             vMultiDouble_.erase(vMultiDouble_.begin()+id);
         } catch (BadParameter& ex){
-            BOOST_LOG_TRIVIAL(error) <<" ParameterList::RemoveDouble() | Can not remove"
+            LOG(error) <<" ParameterList::RemoveDouble() | Can not remove"
             "parameter with ID="<<id<<": "<<ex.what();
             throw;
         }
@@ -799,7 +799,7 @@ namespace ComPWA {
             unsigned int id =  FindMultiComplex(name) - vMultiComplex_.begin();
             RemoveMultiComplex(id);
         } catch (BadParameter& ex){
-            BOOST_LOG_TRIVIAL(error) <<" ParameterList::RemoveComplex() | Can not remove"
+            LOG(error) <<" ParameterList::RemoveComplex() | Can not remove"
             "parameter "<<name<<": "<<ex.what();
             throw;
         }
@@ -809,7 +809,7 @@ namespace ComPWA {
         try{
             vMultiComplex_.erase(vMultiComplex_.begin()+id);
         } catch (BadParameter& ex){
-            BOOST_LOG_TRIVIAL(error) <<" ParameterList::RemoveComplex() | Can not remove"
+            LOG(error) <<" ParameterList::RemoveComplex() | Can not remove"
             "parameter with ID="<<id<<": "<<ex.what();
             throw;
         }
@@ -859,7 +859,7 @@ namespace ComPWA {
             unsigned int id =  FindMultiUnsignedInteger(name) - vMultiUnsignedInteger_.begin();
             RemoveMultiUnsignedInteger(id);
         } catch (BadParameter& ex){
-            BOOST_LOG_TRIVIAL(error) <<" ParameterList::RemoveUnsignedInteger() | Can not remove"
+            LOG(error) <<" ParameterList::RemoveUnsignedInteger() | Can not remove"
             "parameter "<<name<<": "<<ex.what();
             throw;
         }
@@ -869,7 +869,7 @@ namespace ComPWA {
         try{
             vMultiUnsignedInteger_.erase(vMultiUnsignedInteger_.begin()+id);
         } catch (BadParameter& ex){
-            BOOST_LOG_TRIVIAL(error) <<" ParameterList::RemoveUnsignedInteger() | Can not remove"
+            LOG(error) <<" ParameterList::RemoveUnsignedInteger() | Can not remove"
             "parameter with ID="<<id<<": "<<ex.what();
             throw;
         }

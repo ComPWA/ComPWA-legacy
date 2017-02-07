@@ -59,17 +59,17 @@ RunManager::RunManager( unsigned int size, std::shared_ptr<Amplitude> inP,
 
 RunManager::~RunManager()
 {
-	BOOST_LOG_TRIVIAL(debug) << "~RunManager: Last seed: "<<gen_->getSeed();
+	LOG(debug) << "~RunManager: Last seed: "<<gen_->getSeed();
 }
 
 std::shared_ptr<FitResult> RunManager::startFit(ParameterList& inPar)
 {
-	BOOST_LOG_TRIVIAL(info) << "RunManager::startFit() | Starting minimization.";
+	LOG(info) << "RunManager::startFit() | Starting minimization.";
 
 	//MINIMIZATION
 	std::shared_ptr<FitResult> result = opti_->exec(inPar);
 
-	BOOST_LOG_TRIVIAL(info) << "RunManager::startFit() | Minimization finished!"
+	LOG(info) << "RunManager::startFit() | Minimization finished!"
 			" Result = "<<result->getResult()<<".";
 
   return result;
@@ -97,7 +97,7 @@ void RunManager::setTruePhspSample( std::shared_ptr<DataReader::Data> truePhsp)
 
 bool RunManager::generate( int number )
 {
-	BOOST_LOG_TRIVIAL(info) << "RunManager::generate() | "
+	LOG(info) << "RunManager::generate() | "
 			"Generating "<<number<<" signal events!";
 
 	return gen( number, gen_, amp_, sampleData_, samplePhsp_, sampleTruePhsp_ );
@@ -105,7 +105,7 @@ bool RunManager::generate( int number )
 
 bool RunManager::generateBkg( int number )
 {
-	BOOST_LOG_TRIVIAL(info) << "RunManager::generateBkg() | "
+	LOG(info) << "RunManager::generateBkg() | "
 			"Generating "<<number<<" background events!";
 
 	return gen( number, gen_, ampBkg_, sampleBkg_, samplePhsp_, sampleTruePhsp_);
@@ -161,7 +161,7 @@ void RunManager::GenAmplitudesData( int nEvents )
 				"not have the same size!");
 
 	for(int i=0; i<_ampVec.size(); ++i){
-		BOOST_LOG_TRIVIAL(info) <<"RunManager::GenAmplitudesData() | "
+		LOG(info) <<"RunManager::GenAmplitudesData() | "
 				"Generating "<<(int)(nEvents*_fraction.at(i))
 				<<" events for amplitude "<<_ampVec.at(i)->GetName();
 		gen(
@@ -279,11 +279,11 @@ bool RunManager::gen( int number, std::shared_ptr<Generator> gen,
 		if(acceptedEvents>=number) i=limit;
 	}
 	if(data->getNEvents()<number)
-		BOOST_LOG_TRIVIAL(error) << "RunManager::gen() | Not able to generate "
+		LOG(error) << "RunManager::gen() | Not able to generate "
 		" "<<number<<" events. Phsp sample too small. Current size "
 		"of sample is now "<<data->getNEvents();
 
-	BOOST_LOG_TRIVIAL(info) << "Efficiency of toy MC generation: "
+	LOG(info) << "Efficiency of toy MC generation: "
 			<<(double)data->getNEvents()/totalCalls;
 
 	return true;
@@ -299,7 +299,7 @@ bool RunManager::generatePhsp( int number )
 		throw std::runtime_error("RunManager: generatePhsp() | "
 				"Dataset not empty! abort!");
 
-	BOOST_LOG_TRIVIAL(info) << "Generating phase-space MC: ["<<number<<" events] ";
+	LOG(info) << "Generating phase-space MC: ["<<number<<" events] ";
 
 	progressBar bar(number);
 	for(unsigned int i=0;i<number;i++){

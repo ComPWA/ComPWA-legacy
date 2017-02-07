@@ -34,7 +34,7 @@ namespace ComPWA {
                          )
                         );
         if(out == ""){
-            BOOST_LOG_TRIVIAL(info)<<"Logging: logging to filename disables. Console severity level: "<<minLevel;
+            LOG(info)<<"Logging: logging to filename disables. Console severity level: "<<minLevel;
         } else {
             add_file_log( keywords::file_name=out,
                          //			keywords::format="(%LineID%) [%TimeStamp%][%Severity%]: %Message%"
@@ -47,7 +47,7 @@ namespace ComPWA {
                           )
                          );
             core::get()->set_filter(trivial::severity >= minLevel);
-            BOOST_LOG_TRIVIAL(info)<<"Logging: using output filename: "<<out<<", Severity level: "<<minLevel;
+            LOG(info)<<"Logging: using output filename: "<<out<<", Severity level: "<<minLevel;
         }
         
         //Print local time and date at the beginning
@@ -55,13 +55,13 @@ namespace ComPWA {
                                           boost::gregorian::day_clock::universal_day(),
                                           boost::posix_time::second_clock::local_time().time_of_day()
                                           );
-        BOOST_LOG_TRIVIAL(info) << "Current date and time: "<<boost::posix_time::to_simple_string(todayUtc);
+        LOG(info) << "Current date and time: "<<boost::posix_time::to_simple_string(todayUtc);
     }
     
     void Logging::setLogLevel(trivial::severity_level minLevel)
     {
         core::get()->set_filter(trivial::severity >= minLevel);
-        BOOST_LOG_TRIVIAL(info)<<"New severity level: "<<minLevel;
+        LOG(info)<<"New severity level: "<<minLevel;
     }
     
 } /* namespace ComPWA */

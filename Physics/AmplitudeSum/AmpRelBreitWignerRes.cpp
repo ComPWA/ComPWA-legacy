@@ -87,7 +87,7 @@ void AmpRelBreitWignerRes::Configure(
 			_width = list.GetDoubleParameter(tmp_width_name.get());
 			_width_writeByName = 1;
 		} catch (BadParameter& ex){
-			BOOST_LOG_TRIVIAL(error) <<"AmpRelBreitWignerRes::Configure() | "
+			LOG(error) <<"AmpRelBreitWignerRes::Configure() | "
 					"Requesting parameter "<<tmp_width_name.get()<<" but"
 					" was not found in parameter list. "
 					"Quit since parameter is mandatory!";
@@ -158,7 +158,7 @@ std::complex<double> AmpRelBreitWignerRes::EvaluateAmp(dataPoint& point)
 				_ffType
 		);
 	} catch (std::exception& ex){
-		BOOST_LOG_TRIVIAL(error) <<"AmpRelBreitWignerRes::EvaluateAmp() | "
+		LOG(error) <<"AmpRelBreitWignerRes::EvaluateAmp() | "
 				"Dynamical function can not be evalutated: "<<ex.what();
 		throw;
 	}
@@ -222,7 +222,7 @@ std::shared_ptr<FunctionTree> AmpRelBreitWignerRes::SetupTree(
 	int sampleSize = sample.GetMultiDouble(0)->GetNValues();
 	int toySampleSize = toySample.GetMultiDouble(0)->GetNValues();
 
-	BOOST_LOG_TRIVIAL(info) << "AmpRelBreitWignerRes::setupBasicTree() | "
+	LOG(info) << "AmpRelBreitWignerRes::setupBasicTree() | "
 			<<_name << " nEvents=" <<sampleSize<<" nPhspEvents="
 			<<toySampleSize;
 
@@ -393,7 +393,7 @@ bool BreitWignerStrategy::execute(ParameterList& paras,
 					spin, d, ffType
 			);
 		} catch ( std::exception& ex ) {
-			BOOST_LOG_TRIVIAL(error) << "BreitWignerStrategy::execute() | "
+			LOG(error) << "BreitWignerStrategy::execute() | "
 					<<ex.what();
 			throw( std::runtime_error("BreitWignerStrategy::execute() | "
 					"Evaluation of dynamic function failed!")

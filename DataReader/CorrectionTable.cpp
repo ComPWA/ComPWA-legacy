@@ -37,7 +37,7 @@ void CorrectionTable::Print() const{
 		table << strAvg.str();
 	}
 	table.footer();
-	BOOST_LOG_TRIVIAL(info) << "CorrectionTable::Print() | "<<title << std::endl << out.str();
+	LOG(info) << "CorrectionTable::Print() | "<<title << std::endl << out.str();
 
 }
 void CorrectionTable::SetSystematics(std::vector<double> b, std::vector<double> bError ){
@@ -129,7 +129,7 @@ void CorrectionTable::AddToTotalError(int charge, double momentum){
 		totalSys.push_back( GetValue(charge, momentum) );
 		totalSysError.push_back( GetError(charge, momentum) );
 	} catch ( const std::exception &e) {
-		BOOST_LOG_TRIVIAL(info) << "momentumSys::AddToTotalError()  can't add "
+		LOG(info) << "momentumSys::AddToTotalError()  can't add "
 				"systematics for momentum "<<momentum<<" to total systematics. We skip that track!";
 	}
 }

@@ -78,7 +78,7 @@ plotData::~plotData()
 
 //TH2Poly* plotData::getAdBinHist(int bins)
 //{
-//    BOOST_LOG_TRIVIAL(info)<<"Creating adaptively binned histogram";
+//    LOG(info)<<"Creating adaptively binned histogram";
 //    
 //    if( !s_data )
 //        throw std::runtime_error("plotData::getAdBinHist() | No data sample set!");
@@ -167,7 +167,7 @@ void plotData::Fill()
             double eff = 1.0;
             if( _correctForEfficiency ) eff = event.getEfficiency();
             if( eff==0.0 ){
-                BOOST_LOG_TRIVIAL(error) <<"plotData::Fill() | Loop over "
+                LOG(error) <<"plotData::Fill() | Loop over "
                 "data sample: An event with zero efficiency was found! "
                 "This should not happen! We skip it!";
                 continue;
@@ -181,7 +181,7 @@ void plotData::Fill()
     }
     
     //===== Plot amplitude
-    BOOST_LOG_TRIVIAL(info) << "PlotData::plot | Evaluating amplitude...";
+    LOG(info) << "PlotData::plot | Evaluating amplitude...";
     
     if( _ampVec.size() && s_phsp ){
         std::vector<double> ampHistos_integral(_ampVec.size(),0);
@@ -193,7 +193,7 @@ void plotData::Fill()
             double eff = 1.0;
             if( _correctForEfficiency ) eff = event.getEfficiency();
             if( eff==0.0 ){
-                BOOST_LOG_TRIVIAL(error) <<"plotData::Fill() | Loop over "
+                LOG(error) <<"plotData::Fill() | Loop over "
                 "phsp sample: An event with zero efficiency was found! "
                 "This should not happen! We skip it!";
                 continue;
@@ -278,7 +278,7 @@ void plotData::Fill()
             double eff = 1.0;
             if( _correctForEfficiency ) eff = event.getEfficiency();
             if( eff==0.0 ){
-                BOOST_LOG_TRIVIAL(error) <<"plotData::Fill() | Loop over "
+                LOG(error) <<"plotData::Fill() | Loop over "
                 "Hit&Miss sample: An event with zero efficiency was "
                 "found! This should not happen! We skip it!";
                 continue;
@@ -297,24 +297,24 @@ void plotData::Plot()
     if( !_isFilled ) Fill();
     
     //=== create 2dim residual histogrom from data and fit model. Use adaptive binning here
-    TH2Poly* adaptiveResiduals =
-    (TH2Poly*) dalitzHisto::getTH2PolyPull(
-                                           dataAdaptiveBinningHist,
-                                           fitAdaptiveBinningHist
-                                           );
-    adaptiveResiduals->SetStats(0);
+//    TH2Poly* adaptiveResiduals =
+//    (TH2Poly*) dalitzHisto::getTH2PolyPull(
+//                                           dataAdaptiveBinningHist,
+//                                           fitAdaptiveBinningHist
+//                                           );
+//    adaptiveResiduals->SetStats(0);
     
     //=== calculate goodness-of-fit variable
     //    double chi2;
     //    int NDF, igood;
     //	dalitzHisto::getTH2PolyChi2(dataAdaptiveBinningHist,fitAdaptiveBinningHist,chi2,NDF,igood);
     //	double pValue = ROOT::Math::chisquared_cdf_c(chi2,NDF);//lower tail cdf
-    //	BOOST_LOG_TRIVIAL(info) << "Goodness-of-fit (2D): chi^2/ndf = "
+    //	LOG(info) << "Goodness-of-fit (2D): chi^2/ndf = "
     //			<<chi2<<" / "<<NDF<<" = "<<chi2/NDF<<" pValue="<<pValue;
     
     //    Chi2TestX(dataAdaptiveBinningHist, fitAdaptiveBinningHist,chi2,NDF,igood,"UW,UF");
     //    double pValue = ROOT::Math::chisquared_cdf_c(chi2,NDF);//lower tail cdf
-    //    BOOST_LOG_TRIVIAL(info) << "Goodness-of-fit (2D): chi^2/ndf = "
+    //    LOG(info) << "Goodness-of-fit (2D): chi^2/ndf = "
     //    <<chi2<<" / "<<NDF<<" = "<<chi2/NDF<<" pValue="<<pValue;
     
     //    char chi2Char[60];
@@ -333,9 +333,9 @@ void plotData::Plot()
     c1->cd(3);
     fitDiagrams.getHistogram2D(0)->Draw("COLZ");
     m23m13_contour.Draw("P");
-    c1->cd(4);
-    adaptiveResiduals->Draw("COLZ");
-    m23m13_contour.Draw("P");
+//    c1->cd(4);
+//    adaptiveResiduals->Draw("COLZ");
+//    m23m13_contour.Draw("P");
     
     //----- plotting invariant mass distributions -----
     TCanvas* c2 = new TCanvas("invmass","invmass",50,50,1200,400);
@@ -414,9 +414,9 @@ void plotData::Plot()
     //Save data trees and histograms
     tf2->mkdir("hist");
     tf2->cd("hist");
-    dataAdaptiveBinningHist->Write("dataAdaptive",TObject::kOverwrite,0);
-    fitAdaptiveBinningHist->Write("fitAdaptive",TObject::kOverwrite,0);
-    adaptiveResiduals->Write("residualsAdaptive",TObject::kOverwrite,0);
+//    dataAdaptiveBinningHist->Write("dataAdaptive",TObject::kOverwrite,0);
+//    fitAdaptiveBinningHist->Write("fitAdaptive",TObject::kOverwrite,0);
+//    adaptiveResiduals->Write("residualsAdaptive",TObject::kOverwrite,0);
     dataDiagrams.Write();
     phspDiagrams.Write();
     fitDiagrams.Write();

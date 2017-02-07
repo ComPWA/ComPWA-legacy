@@ -72,7 +72,7 @@ void TreeNode::recalculate(){
 		for(unsigned int i=0; i<_children.size(); i++){ //all children
 			for(unsigned int ele=0; ele<_children.at(i)->getDim(); ele++){ //all dims
 				if(_children.at(i)->needsCalculation()){
-//					BOOST_LOG_TRIVIAL(debug) <<"TreeNode::recalculate() | processing "<<_children.at(i)->getName()<<std::endl;
+//					LOG(debug) <<"TreeNode::recalculate() | processing "<<_children.at(i)->getName()<<std::endl;
 					_children.at(i)->recalculate();
 				}
 				std::shared_ptr<AbsParameter> para = _children.at(i)->getValue(ele);
@@ -84,7 +84,7 @@ void TreeNode::recalculate(){
 		_changed=false;
 		try{ _strat->execute(newVals, _value[0]); }
 		catch (std::exception& ex) {
-			BOOST_LOG_TRIVIAL(error)<<"TreeNode::recalculate() | Strategy "<<_strat
+			LOG(error)<<"TreeNode::recalculate() | Strategy "<<_strat
 					<<" failed on node "<<this->getName()<<": "<<ex.what();
 			throw;
 		}
@@ -112,7 +112,7 @@ void TreeNode::recalculate(){
 			}  //end children-loop
 			try{ _strat->execute(newVals, _value[ele]); }
 			catch (std::exception& ex){
-				BOOST_LOG_TRIVIAL(error)<<"TreeNode::recalculate() | Strategy "<<_strat
+				LOG(error)<<"TreeNode::recalculate() | Strategy "<<_strat
 						<<" failed on node "<<this->getName()<<": "<<ex.what();
 				throw;
 			}

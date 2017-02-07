@@ -77,7 +77,7 @@ namespace ComPWA { namespace Physics { namespace AmplitudeSum {
             _g2_massA = PhysConst::instance()->findParticle(_g2_idA).mass_;
             _g2_massB = PhysConst::instance()->findParticle(_g2_idB).mass_;
         } catch (std::exception& ex){
-            BOOST_LOG_TRIVIAL(error) <<"AmpFlatteRes::initialize() | "
+            LOG(error) <<"AmpFlatteRes::initialize() | "
             "Masses of 2nd channel can not be set!";
             throw;
         }
@@ -87,7 +87,7 @@ namespace ComPWA { namespace Physics { namespace AmplitudeSum {
         } catch (std::exception& ex){
             //if g3 is not set we don't need to masses either
             if(_g3->GetValue()){
-                BOOST_LOG_TRIVIAL(error) <<"AmpFlatteRes::initialize() | "
+                LOG(error) <<"AmpFlatteRes::initialize() | "
                 "Masses of 3rd channel can not be set!";
                 throw;
             }
@@ -132,7 +132,7 @@ namespace ComPWA { namespace Physics { namespace AmplitudeSum {
                                                            );
                     _g1_writeByName = 1;
                 } else {
-                    BOOST_LOG_TRIVIAL(error) <<"AmpFlatteRes::Configure() | "
+                    LOG(error) <<"AmpFlatteRes::Configure() | "
                     "Requesting parameter "<<tmp_g1_name.get()<<" but"
                     " was not found in parameter list. "
                     "Quit since parameter is mandatory!";
@@ -170,7 +170,7 @@ namespace ComPWA { namespace Physics { namespace AmplitudeSum {
                                                            );
                     _g2_writeByName = 1;
                 } else {
-                    BOOST_LOG_TRIVIAL(error) <<"AmpFlatteRes::Configure() | "
+                    LOG(error) <<"AmpFlatteRes::Configure() | "
                     "Requesting parameter "<<tmp_g2_name.get()<<" but"
                     " was not found in parameter list. "
                     "Quit since parameter is mandatory!";
@@ -211,7 +211,7 @@ namespace ComPWA { namespace Physics { namespace AmplitudeSum {
             _g3_idB = tmp_g3_massB;
             
             if(_enable && _g3->GetValue() != 0 ) {
-                BOOST_LOG_TRIVIAL(info) << "AmpFlatteRes::Configure() | Adding 3rd channel: "
+                LOG(info) << "AmpFlatteRes::Configure() | Adding 3rd channel: "
                 <<_name<<" parName="<<_g3->GetName()<<" g3="<<_g3->GetValue()
                 <<" g3_massA="<<_g3_massA<<" g3_massB="<<_g3_massB;
                 list.AddParameter(_g3);
@@ -224,7 +224,7 @@ namespace ComPWA { namespace Physics { namespace AmplitudeSum {
                 _g3_idA = tmp_g3_massA;
                 auto tmp_g3_massB = pt.get<std::string>("g3_part2","");
                 _g3_idB = tmp_g3_massB;
-                BOOST_LOG_TRIVIAL(info) << "AmpFlatteRes::Configure() | Adding 3rd channel:"
+                LOG(info) << "AmpFlatteRes::Configure() | Adding 3rd channel:"
                 <<_name<<" parName="<<_g3->GetName()<<" g3="<<_g3->GetValue()
                 <<" g3_massA="<<_g3_massA<<" g3_massB="<<_g3_massB;
             } catch (BadParameter& ex){
@@ -235,7 +235,7 @@ namespace ComPWA { namespace Physics { namespace AmplitudeSum {
                                                            );
                     _g3_writeByName = 1;
                 } else {
-                    BOOST_LOG_TRIVIAL(error) <<"AmpFlatteRes::Configure() | "
+                    LOG(error) <<"AmpFlatteRes::Configure() | "
                     "Requesting parameter "<<tmp_g3_name.get()<<" but"
                     " was not found in parameter list. "
                     "Continue since parameter is not mandatory!";
@@ -340,7 +340,7 @@ namespace ComPWA { namespace Physics { namespace AmplitudeSum {
                                        _g3_massA,_g3_massB,_g3->GetValue(),
                                        _spin.Val(),_mesonRadius->GetValue(), _ffType);
         } catch (std::exception& ex){
-            BOOST_LOG_TRIVIAL(error) <<"AmpFlatteRes::EvaluateAmp() | "
+            LOG(error) <<"AmpFlatteRes::EvaluateAmp() | "
             "Dynamical function can not be evalutated: "<<ex.what();
             throw;
         }
@@ -438,7 +438,7 @@ namespace ComPWA { namespace Physics { namespace AmplitudeSum {
         int sampleSize = sample.GetMultiDouble(0)->GetNValues();
         int toySampleSize = toySample.GetMultiDouble(0)->GetNValues();
         
-        BOOST_LOG_TRIVIAL(info) << "AmpFlatteRes::setupBasicTree() | "
+        LOG(info) << "AmpFlatteRes::setupBasicTree() | "
         <<_name << " nEvents=" <<sampleSize<<" nPhspEvents="
         <<toySampleSize;
         
@@ -703,7 +703,7 @@ namespace ComPWA { namespace Physics { namespace AmplitudeSum {
                                                                   gammaC.at(ele)*barrierSqC.at(ele)
                                                                   );
             } catch (std::exception& ex) {
-                BOOST_LOG_TRIVIAL(error) << "FlatteStrategy::execute() | "
+                LOG(error) << "FlatteStrategy::execute() | "
                 <<ex.what();
                 throw( std::runtime_error("FlatteStrategy::execute() | "
                                           "Evaluation of dynamic function failed!")

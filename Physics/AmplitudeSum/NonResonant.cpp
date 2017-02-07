@@ -51,7 +51,7 @@ namespace ComPWA { namespace Physics { namespace AmplitudeSum {
     {
         double phspVol = Kinematics::instance()->GetPhspVolume();
         
-        BOOST_LOG_TRIVIAL(info) << "NonResonant::setupBasicTree() | "<<_name;
+        LOG(info) << "NonResonant::setupBasicTree() | "<<_name;
         //------------Setup Tree---------------------
         std::shared_ptr<FunctionTree> newTree(new FunctionTree());
         

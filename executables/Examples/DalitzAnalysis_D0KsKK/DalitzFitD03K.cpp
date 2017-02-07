@@ -80,7 +80,7 @@ int main(int argc, char **argv){
     std::string outputFileName;
     po::options_description config("General settings");
     config.add_options()
-    ("nEvents", po::value<int>(&numEvents)->default_value(1000), "set of events per fit")
+    ("nEvents", po::value<int>(&numEvents)->default_value(100), "set of events per fit")
     ("seed", po::value<int>(&seed)->default_value(-1), "set random number seed; default is to used unique seed for every job")
     ("logLevel", po::value<std::string>(&logLevel)->default_value("info"), "set log level: error|warning|info|debug")
     ("disableFileLog", po::value<bool>(&disableFileLog)->default_value(0), "write log file? 0/1")
@@ -216,7 +216,7 @@ int main(int argc, char **argv){
     std::string logFileName = fileNamePrefix+std::string(".log");
     if(disableFileLog) logFileName = "";
     Logging log(logFileName,boost::log::trivial::info); //initialize logging
-    
+    log.setLogLevel(logLevel);
     
     //check configuration
     assert(!outputDir.empty());
@@ -230,18 +230,8 @@ int main(int argc, char **argv){
         LOG(error) << "Unknown fitting method: "
         <<fittingMethod; return 1;
     }
-    if(logLevel!="info"&&logLevel!="warning"&&logLevel!="error"&&logLevel!="debug"){
-        LOG(error) << "Unknown log level: "<<logLevel; return 1;
-    }
-    boost::log::trivial::severity_level logLv;
-    if(logLevel == "info") logLv = boost::log::trivial::info;
-    if(logLevel == "error") logLv = boost::log::trivial::error;
-    if(logLevel == "debug") logLv = boost::log::trivial::debug;
-    if(logLevel == "warning") logLv = boost::log::trivial::warning;
-    log.setLogLevel(logLv);
     
     LOG(info) << "Current path: " << getenv("PWD");
-    
     po::notify(vm);
 
     
@@ -254,12 +244,9 @@ int main(int argc, char **argv){
     //initialize random generator
     std::shared_ptr<Generator> gen =
     std::shared_ptr<Generator>(new Physics::DPKinematics::RootGenerator(seed));
-  
-
     
     RunManager run;
     run.setGenerator(gen);
-    std::cout<<"asdfasdf"<<std::endl;
     //======================= EFFICIENCY =============================
     auto eff = std::shared_ptr<Efficiency>(new UnitEfficiency());
     
@@ -284,23 +271,6 @@ int main(int argc, char **argv){
                                                                      mcPrecision )
                               );
         phspData->reduceToPhsp();
-        /* Set total efficiency of phsp sample. Necessary for consitency check
-         * with unbinned correction. Doesn't influence the fit result. */
-        //phspData->resetEfficiency( 1.0 );
-//        phspData->resetEfficiency( 0.0135554 );
-        //		if(applySysCorrection){
-        //			MomentumCorrection* trkSys = getTrackingCorrection();
-        //			MomentumCorrection* pidSys = getPidCorrection();
-        //			trkSys->Print();
-        //			pidSys->Print();
-        //			phspData->applyCorrection(*trkSys);
-        //			phspData->applyCorrection(*pidSys);
-        //		}
-//        if( fittingMethod == "amplitude" ){
-//            LOG(error)<<"ATTENTION: amplitude fit with unbinned "
-//            "efficiency correction needs UnitEfficiency at this point! "
-//            "During plotting the normalization is not correct";
-//        }
     }
     //======================= AMPLITUDE =============================
     std::vector<std::shared_ptr<Data> > dataVec, trueDataVec;
@@ -327,9 +297,7 @@ int main(int argc, char **argv){
     //FIT MODEL
     if( !fitModelFile.empty() ) {
         createAmp("DzeroAmp",ampVec,fitModelFile,eff,ampMcPrecision,ampOption);
-    
         if(ampVec.size()==1) {
-            std::cout<<"ajdslfajsdfkl"<<std::endl;
             dataVec.push_back( std::shared_ptr<Data>(new DataReader::RootReader::RootReader()) );
             fraction.push_back(fitSignalFraction);
         } else if(ampVec.size()==2) {

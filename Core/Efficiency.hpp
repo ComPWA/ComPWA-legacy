@@ -44,7 +44,7 @@ class UnitEfficiency : public Efficiency {
 private:
 public:
 	UnitEfficiency(){
-		BOOST_LOG_TRIVIAL(info)<<"Efficiency: creating UnitEfficiency!";
+		LOG(info)<<"Efficiency: creating UnitEfficiency!";
 	};
 	~UnitEfficiency(){};
 	virtual double evaluate(std::vector<double> x) {return 1;};

@@ -120,7 +120,7 @@ namespace ComPWA { namespace Estimator { namespace MinLogLH {
                                                                                startEvent, nEvents
                                                                                )
                                                                   );
-            BOOST_LOG_TRIVIAL(debug)<<"MinLogLH::createInstance() | "
+            LOG(debug)<<"MinLogLH::createInstance() | "
             "Creating instance from amplitude and dataset!";
         }
         return instance_;
@@ -203,7 +203,7 @@ namespace ComPWA { namespace Estimator { namespace MinLogLH {
             Event ev(_dataSample->getEvent(evt));
             _sumOfWeights += ev.getWeight();
         }
-        BOOST_LOG_TRIVIAL(info)<<"MinLogLH: for current data set: numEvents = "
+        LOG(info)<<"MinLogLH: for current data set: numEvents = "
         <<nUseEvt_<<" sumOfWeights="<<_sumOfWeights<< " for current data set.";
         return;
     }
@@ -216,7 +216,7 @@ namespace ComPWA { namespace Estimator { namespace MinLogLH {
     
     void MinLogLH::iniLHtree()
     {
-        BOOST_LOG_TRIVIAL(debug) << "MinLogLH::iniLHtree() constructing the LH tree";
+        LOG(debug) << "MinLogLH::iniLHtree() constructing the LH tree";
         
         if(_useFunctionTree) return;
         auto it = _ampVec.begin();
@@ -232,7 +232,7 @@ namespace ComPWA { namespace Estimator { namespace MinLogLH {
         std::shared_ptr<Strategy> addStrat(new AddAll(ParType::DOUBLE));
         std::shared_ptr<Strategy> invStrat(new Inverse(ParType::DOUBLE));
         
-        BOOST_LOG_TRIVIAL(debug)<<"MinLogLH::iniLHTree() construction LH tree";
+        LOG(debug)<<"MinLogLH::iniLHTree() construction LH tree";
         /* CONSTRUCTION OF THE LIKELIHOOD:
          * We denote the coherent sum over all resonances with T:
          * 		T := \sum_{i,j} c_i c_j^*A_iA_j^*
@@ -285,7 +285,7 @@ namespace ComPWA { namespace Estimator { namespace MinLogLH {
             throw std::runtime_error("MinLogLH::iniLHtree() | Tree has structural "
                                      "problems. Sanity check not passed!");
         }
-        BOOST_LOG_TRIVIAL(debug) <<"MinLogLH::iniLHtree() | "
+        LOG(debug) <<"MinLogLH::iniLHtree() | "
         "Construction of LH tree finished!";
         _useFunctionTree=1;
         return;
@@ -371,18 +371,18 @@ namespace ComPWA { namespace Estimator { namespace MinLogLH {
     void MinLogLH::setPenaltyScale(double sc, int ampID)
     {
         if(sc < 0){
-            BOOST_LOG_TRIVIAL(info) << "MinLogLH::setPenaltyScale | "
+            LOG(info) << "MinLogLH::setPenaltyScale | "
             "Penalty scale cannot be negative!";
             return;
         }
         if(ampID < 0 || ampID >= _ampVec.size())
-            BOOST_LOG_TRIVIAL(info) << "MinLogLH::setPenaltyScale | "
+            LOG(info) << "MinLogLH::setPenaltyScale | "
             "Amplitude ID not valid!";
         
         _penaltyAmpID = ampID;
         _penaltyLambda = sc;
         
-        BOOST_LOG_TRIVIAL(info) << "MinLogLH::setPenaltyScale | "
+        LOG(info) << "MinLogLH::setPenaltyScale | "
         "Setting scale of penalty term to "
         <<sc<<" for amplitude "<<ampID<<"!";
     }

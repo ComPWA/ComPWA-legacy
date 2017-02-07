@@ -347,7 +347,7 @@ public:
 		);
 
 		if(gaus.real() != gaus.real())
-			BOOST_LOG_TRIVIAL(error)<<"GaussAmp::intensity() | result NaN!";
+			LOG(error)<<"GaussAmp::intensity() | result NaN!";
 		result.SetParameterValue(0,std::norm(gaus));
 		return result;
 	}
@@ -400,7 +400,7 @@ public:
 		return Kinematics::instance()->GetPhspVolume();
 	}
 	virtual const double GetNormalization() {
-		BOOST_LOG_TRIVIAL(info) << "UnitAmp::normalization() | "
+		LOG(info) << "UnitAmp::normalization() | "
 				"normalization not implemented!";
 		return 1;
 	}
@@ -446,9 +446,9 @@ protected:
 
 		int sampleSize = sample.GetMultiDouble(0)->GetNValues();
 
-		BOOST_LOG_TRIVIAL(debug) << "UnitAmp::setupBasicTree() generating new tree!";
+		LOG(debug) << "UnitAmp::setupBasicTree() generating new tree!";
 		if(sampleSize==0){
-			BOOST_LOG_TRIVIAL(error) << "UnitAmp::setupBasicTree() data sample empty!";
+			LOG(error) << "UnitAmp::setupBasicTree() data sample empty!";
 			return std::shared_ptr<FunctionTree>();
 		}
 		std::shared_ptr<FunctionTree> newTree(new FunctionTree());

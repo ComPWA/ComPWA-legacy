@@ -36,7 +36,7 @@ void Amplitude::UpdateParameters(ParameterList& par)
 		try{
 			pNew = par.GetDoubleParameter( pOld->GetName() );
 		} catch (std::exception& ex){
-			BOOST_LOG_TRIVIAL(error) << "AmpSumIntensity::setParameterList() | "
+			LOG(error) << "AmpSumIntensity::setParameterList() | "
 					" Can not find parameter! "<<ex.what();
 			throw;
 		}

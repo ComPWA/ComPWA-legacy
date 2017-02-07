@@ -22,7 +22,7 @@ RootGenerator::RootGenerator(int seed){
 	if(nPart<2)
 		throw std::runtime_error("RootGenerator::RootGenerator() | one particle is not enough!");
 	if(nPart==2)
-		BOOST_LOG_TRIVIAL(info) << "RootGenerator::RootGenerator() | only 2 particles in the final"
+		LOG(info) << "RootGenerator::RootGenerator() | only 2 particles in the final"
 				" state! There are no degrees of freedom!";
 	masses = new Double_t[nPart];
 	TLorentzVector W(0.0, 0.0, 0.0, kin->GetMotherMass());//= beam + target;

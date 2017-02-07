@@ -83,7 +83,7 @@ void MinuitResult::init(ROOT::Minuit2::FunctionMinimum min)
 			}
 
 	} else
-		BOOST_LOG_TRIVIAL(error)
+		LOG(error)
 		<< "MinuitResult: no valid correlation matrix available!";
 	initialLH = -1;
 	finalLH = minState.Fval();
@@ -147,7 +147,7 @@ void MinuitResult::calcFractionError(ParameterList& parList,
 {
 	if( nSets <= 0 ) return;
 	if( !parList.GetNDouble() ) return;
-	BOOST_LOG_TRIVIAL(info) << "Calculating errors of fit fractions using "
+	LOG(info) << "Calculating errors of fit fractions using "
 			<<nSets<<" sets of parameters...";
 
 	//Setting up random number generator
@@ -228,7 +228,7 @@ void MinuitResult::calcFractionError(ParameterList& parList,
 		//			outFraction << std::endl;
 		/******* DEBUGGING *******/
 	}
-	BOOST_LOG_TRIVIAL(info)<<" ------- "<<outFraction.str();
+	LOG(info)<<" ------- "<<outFraction.str();
 
 	//free objects
 	gsl_vector_free(gslFinalPar);
@@ -330,7 +330,7 @@ void MinuitResult::genOutput(std::ostream& out, std::string opt)
 	try{
 		_ampVec.at(0)->GetFitFractions(frac);
 	} catch (std::exception& ex){
-		BOOST_LOG_TRIVIAL(error) << "MinuitResult::genOutput() | Can not "
+		LOG(error) << "MinuitResult::genOutput() | Can not "
 				"calculate fit fractions for amplitude 0.";
 	}
 	AIC = calcAIC(frac)-penalty;
