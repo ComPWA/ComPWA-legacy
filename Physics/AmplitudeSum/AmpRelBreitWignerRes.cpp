@@ -153,7 +153,7 @@ std::complex<double> AmpRelBreitWignerRes::EvaluateAmp(dataPoint& point)
 				_mass1,
 				_mass2,
 				_width->GetValue(),
-				_spin.Val(),
+				(double)_spin,
 				_mesonRadius->GetValue(),
 				_ffType
 		);
@@ -257,14 +257,14 @@ std::shared_ptr<FunctionTree> AmpRelBreitWignerRes::SetupTree(
 	newTree->createLeaf("Intens_"+_name, _mag, "C_"+_name); //r
 	newTree->createLeaf("Phase_"+_name, _phase, "C_"+_name); //phi
 	//Angular distribution
-	if( _spin.Val() )
+	if( (double)_spin )
 		newTree->insertTree(_wignerD.SetupTree(sample,suffix), "Reso_"+_name);
 
 	//Breit-Wigner
 	newTree->createNode("RelBW_"+_name, rbwStrat, "Reso_"+_name, sampleSize);
 	newTree->createLeaf("mass", _mass, "RelBW_"+_name); //m0
 	newTree->createLeaf("width", _width, "RelBW_"+_name); //resWidth
-	newTree->createLeaf("spin", _spin.Val(), "RelBW_"+_name); //spin
+	newTree->createLeaf("spin", (double)_spin, "RelBW_"+_name); //spin
 	newTree->createLeaf("mesonRadius", _mesonRadius, "RelBW_"+_name); //d
 	newTree->createLeaf("formFactorType", _ffType , "RelBW_"+_name); //d
 	newTree->createLeaf("ma", _mass1, "RelBW_"+_name); //ma
@@ -287,7 +287,7 @@ std::shared_ptr<FunctionTree> AmpRelBreitWignerRes::SetupTree(
 		newTree->createNode("NormReso_"+_name, mmultStrat, "AbsVal_"+_name,
 				toySampleSize);
 		//Angular distribution (Normalization)
-		if( _spin.Val() )
+		if( (double)_spin )
 			newTree->insertTree(_wignerD.SetupTree(toySample,suffix),
 					"NormReso_"+_name);
 		//Breit-Wigner (Normalization)
@@ -295,7 +295,7 @@ std::shared_ptr<FunctionTree> AmpRelBreitWignerRes::SetupTree(
 				toySampleSize); //BW
 		newTree->createLeaf("mass", _mass, "NormBW_"+_name); //m0
 		newTree->createLeaf("width", _width, "NormBW_"+_name); //resWidth
-		newTree->createLeaf("spin", _spin.Val(), "NormBW_"+_name); //spin
+		newTree->createLeaf("spin", (double)_spin, "NormBW_"+_name); //spin
 		newTree->createLeaf("mesonRadius", _mesonRadius, "NormBW_"+_name); //d
 		newTree->createLeaf("formFactorType", _ffType , "NormBW_"+_name); //d
 		newTree->createLeaf("ma", _mass1, "NormBW_"+_name); //ma

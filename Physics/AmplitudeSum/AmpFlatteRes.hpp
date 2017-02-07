@@ -83,7 +83,7 @@ namespace ComPWA { namespace Physics { namespace AmplitudeSum {
                             couplingToWidth(
                                             _mass->GetValue(),_mass->GetValue(),
                                             _g1->GetValue(), _mass1, _mass2,
-                                            _spin.Val(), _mesonRadius->GetValue(),
+                                            (double)_spin, _mesonRadius->GetValue(),
                                             _ffType
                                             )
                             );

@@ -338,7 +338,7 @@ namespace ComPWA { namespace Physics { namespace AmplitudeSum {
                                        _mass1,_mass2,_g1->GetValue(),
                                        _g2_massA,_g2_massB,_g2->GetValue(),
                                        _g3_massA,_g3_massB,_g3->GetValue(),
-                                       _spin.Val(),_mesonRadius->GetValue(), _ffType);
+                                       (double)_spin,_mesonRadius->GetValue(), _ffType);
         } catch (std::exception& ex){
             LOG(error) <<"AmpFlatteRes::EvaluateAmp() | "
             "Dynamical function can not be evalutated: "<<ex.what();
@@ -472,7 +472,7 @@ namespace ComPWA { namespace Physics { namespace AmplitudeSum {
         newTree->createLeaf("Phase_"+_name, _phase, "C_"+_name); //phi
         
         //Angular distribution
-        if( _spin.Val() )
+        if( (double)_spin )
             newTree->insertTree(_wignerD.SetupTree(sample,suffix), "Reso_"+_name);
         
         //Flatte
@@ -482,7 +482,7 @@ namespace ComPWA { namespace Physics { namespace AmplitudeSum {
                                                       _mass, _g1, _mass1, _mass2,
                                                       _g2, _g2_massA, _g2_massB,
                                                       _g3, _g3_massA, _g3_massB,
-                                                      _spin.Val(), _mesonRadius, _ffType),
+                                                      (double)_spin, _mesonRadius, _ffType),
                             "Reso_"+_name
                             );
         
@@ -502,7 +502,7 @@ namespace ComPWA { namespace Physics { namespace AmplitudeSum {
                                 toySampleSize); //BW
             
             //Angular distribution (Normalization)
-            if( _spin.Val() )
+            if( (double)_spin )
                 newTree->insertTree(_wignerD.SetupTree(toySample,suffix),
                                     "NormReso_"+_name);
             
@@ -513,7 +513,7 @@ namespace ComPWA { namespace Physics { namespace AmplitudeSum {
                                                           _mass, _g1, _mass1, _mass2,
                                                           _g2, _g2_massA, _g2_massB,
                                                           _g3, _g3_massA, _g3_massB,
-                                                          _spin.Val(), _mesonRadius, _ffType),
+                                                          (double)_spin, _mesonRadius, _ffType),
                                 "NormReso_"+_name
                                 );
         }

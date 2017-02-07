@@ -81,7 +81,7 @@ namespace ComPWA { namespace Physics { namespace AmplitudeSum {
         str<<"AmpAbsDynamicalFunction | "<<_name<<" enabled="<<_enable
         << " nCalls="<<_nCalls
         << " varId1="<<GetVarIdA()<<" varId2="<<GetVarIdB()<<std::endl
-        <<" J="<<_spin.Val()<<" P="<<_parity<<" C="<<_cparity
+        <<" J="<<(double)_spin<<" P="<<_parity<<" C="<<_cparity
         <<" ffType="<<_ffType <<" mother: "<<_nameMother
         <<" particleA: "<<_name1<<" particleB: "<<_name2<<std::endl;
         str<<" normStyle="<<_normStyle <<" modified?"<<_modified
@@ -432,14 +432,14 @@ namespace ComPWA { namespace Physics { namespace AmplitudeSum {
             pt.put("mesonRadius_min", _mesonRadius->GetMinValue());
             pt.put("mesonRadius_max", _mesonRadius->GetMaxValue());
         }
-        pt.put("Spin", _spin.Val());
+        pt.put("Spin", (double)_spin);
         pt.put("Parity", _parity);
         if( _cparity )
             pt.put("Cparity", _cparity);
-        if( _m != 0)
-            pt.put("m", _m.Val());
-        if( _n != 0)
-            pt.put("n", _n.Val());
+        if( (int)_m != 0)
+            pt.put("m", (double)_m);
+        if( (int)_n != 0)
+            pt.put("n", (double)_n);
         
         pt.put("varIdA", GetVarIdA());
         pt.put("varIdB", GetVarIdB());
@@ -861,7 +861,7 @@ namespace ComPWA { namespace Physics { namespace AmplitudeSum {
         newTree->createLeaf("g", g, stratName);
         newTree->createLeaf("massA", ma, stratName);
         newTree->createLeaf("massB", mb, stratName);
-        newTree->createLeaf("spin", spin.Val(), stratName);
+        newTree->createLeaf("spin", (double)spin, stratName);
         newTree->createLeaf("mesonRadius", mesonRadius, stratName);
         newTree->createLeaf("ffType", (double) type, stratName);
         

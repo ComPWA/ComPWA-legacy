@@ -80,7 +80,7 @@ int main(int argc, char **argv){
     std::string outputFileName;
     po::options_description config("General settings");
     config.add_options()
-    ("nEvents", po::value<int>(&numEvents)->default_value(100), "set of events per fit")
+    ("nEvents", po::value<int>(&numEvents)->default_value(1000), "set of events per fit")
     ("seed", po::value<int>(&seed)->default_value(-1), "set random number seed; default is to used unique seed for every job")
     ("logLevel", po::value<std::string>(&logLevel)->default_value("info"), "set log level: error|warning|info|debug")
     ("disableFileLog", po::value<bool>(&disableFileLog)->default_value(0), "write log file? 0/1")

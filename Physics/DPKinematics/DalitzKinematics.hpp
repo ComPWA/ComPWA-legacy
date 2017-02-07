@@ -155,22 +155,22 @@ public:
 	std::string name1;//! name of daughter 1
 	double mSq1; //! masse squared of daughter 1
 	double m1; //! masses of daughter 1
-	unsigned int spin1; //! spin of daughter 1
+	Spin spin1; //! spin of daughter 1
 
 	std::string name2;//! name of daughter 2
 	double mSq2; //! masse squared of daughter 2
 	double m2; //! masses of daughter 2
-	unsigned int spin2;//! spin of daughter 2
+    ComPWA::Spin spin2;//! spin of daughter 2
 
 	std::string name3;//! name of daughter 3
 	double mSq3; //! masse squared of daughter 3
 	double m3; //! masses of daughter 3
-	unsigned int spin3;//! spin of daughter 3
+    ComPWA::Spin spin3;//! spin of daughter 3
 
 	std::string name4;
 	double mSq4; //! masse squared of daughter 4
 	double m4;
-	unsigned int spin4;
+    ComPWA::Spin spin4;
 
 protected:
 	//! default constructor
