@@ -141,7 +141,7 @@ public:
 	 * @param point Point in phase-space
 	 * @return Complex function value
 	 */
-	virtual const std::complex<double>& evaluate( dataPoint& point );
+	virtual const std::complex<double> evaluate( dataPoint& point );
 
 	/**! Evaluate total amplitude
 	 * Using current set of parameters at phsp point @param point . Amplitude is

@@ -536,6 +536,24 @@ std::complex<double> AmpAbsDynamicalFunction::Evaluate(dataPoint& point)
 	return res;
 }
 
+double AmpAbsDynamicalFunction::EvaluateAngular(dataPoint& point)
+{
+    CheckModified();
+    double ang = 0;
+    try{
+        ang = EvaluateWignerD(point);
+    } catch (std::exception& ex){
+        BOOST_LOG_TRIVIAL(error) << "AmpAbsDynamicalFunction::Evaluate() | "
+                "Failed to evaluate angular part of resonance "<<GetName()<<" at"
+                " point:"<<std::endl
+                <<point<<std::endl
+                <<ex.what();
+        throw;
+    }
+
+    return ang;
+}
+
 double evalAmp(double* x, size_t dim, void* param)
 {
 	/* We need a wrapper here because a eval() is a member function of

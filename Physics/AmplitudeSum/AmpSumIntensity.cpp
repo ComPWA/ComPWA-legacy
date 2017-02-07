@@ -576,7 +576,7 @@ double AmpSumIntensity::GetIntValue(std::string var1, double min1, double max1,
 //=======================================================
 //==================== EVALUATION =======================
 //=======================================================
-const std::complex<double>& AmpSumIntensity::evaluate(dataPoint& point)
+const std::complex<double> AmpSumIntensity::evaluate(dataPoint& point)
 {
 	std::complex<double> AMPpdf(0,0);
 	auto it = GetResonanceItrFirst();
@@ -601,8 +601,8 @@ const ParameterList& AmpSumIntensity::intensity(std::vector<double> point)
 
 const ParameterList& AmpSumIntensity::intensityNoEff(dataPoint& point)
 {
-	auto AMPpdf = evaluate(point);
-	result.SetParameterValue(0,std::norm(AMPpdf));
+    const std::complex<double> test(evaluate(point));
+	result.SetParameterValue(0,std::norm(test));
 	return result;
 }
 
@@ -627,16 +627,45 @@ const double AmpSumIntensity::sliceIntensity(dataPoint& dataP,
 		unsigned int nResos, double N,
 		unsigned int nF0, unsigned int nF2)
 {
-	double AMPpdf=0;
-	//TODO: implement slice fit
-	//	if(Kinematics::instance()->isWithinPhsp(dataP))
-	//	AMPpdf = totAmp.evaluateSlice(dataP, reso, nResos,5, N, nF0, nF2);
-	if(AMPpdf!=AMPpdf){
-		BOOST_LOG_TRIVIAL(error)<<"Error AmpSumIntensity: Intensity is not a number!!";
-		AMPpdf = 0;
-	}
+    std::complex<double> res;
+
+    int sys=0;
+
+    //std::cout<< "DEBUG Point " << point.getVal("m23sq") << " " << point.getVal("m13sq") << " " << reso[0] << " " << reso[1] << std::endl;
+
+    bool used[nResos];
+    for(unsigned int i=0; i<nResos; i++) used[i]=false;
+
+    auto it = GetResonanceItrFirst();
+    unsigned int i=0;
+    for( ; it != GetResonanceItrLast(); ++it){
+          if(i<nF0) sys = 0; //TODO: way better!!!
+          else if(i<(nF2+nF0)) sys = 1;
+          else sys = 999;
+          i++;
+
+          try{
+            unsigned int subA = (*it)->GetVarIdA(), subB = (*it)->GetVarIdB();
+            if(subA+subB==5){
+              if(!used[sys]){
+                res = res + reso[sys] * (*it)->EvaluateAngular(dataP);
+                used[sys]=true;
+              }else{
+                res = res + N * (*it)->Evaluate(dataP);
+              }
+            }
+          } catch (std::exception& ex){
+            BOOST_LOG_TRIVIAL(error) << "AmpSumIntensity::intensityNoEff() | "
+                    "Failed to evaluate resonance "<<(*it)->GetName()<<": "
+                    <<ex.what();
+            throw;
+          }
+
+
+    }
+
 	double eff=eff_->evaluate(dataP);
-	return AMPpdf*eff;
+	return (std::abs(res)*std::abs(res)*eff);
 }
 
 //============== FIT FRACTIONS ================
