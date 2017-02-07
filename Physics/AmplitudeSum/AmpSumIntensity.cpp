@@ -19,6 +19,7 @@
 #include <boost/foreach.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
+#include <boost/version.hpp>
 
 #include "Physics/AmplitudeSum/NonResonant.hpp"
 #include "Physics/AmplitudeSum/AmpRelBreitWignerRes.hpp"
@@ -179,7 +180,13 @@ namespace ComPWA { namespace Physics { namespace AmplitudeSum {
         
         pt.add_child("amplitude_setup",ptSub);
         //new line at the end
+
+        //Interface has changed
+#if ( BOOST_VERSION  < 105600 )
+        boost::property_tree::xml_writer_settings<char> settings('\t', 1);
+#else
         boost::property_tree::xml_writer_settings<std::string> settings('\t', 1);
+#endif
         // Write the property tree to the XML file.
         write_xml(filePath, pt,std::locale(), settings);
         
@@ -576,7 +583,7 @@ namespace ComPWA { namespace Physics { namespace AmplitudeSum {
     //=======================================================
     //==================== EVALUATION =======================
     //=======================================================
-    const std::complex<double>& AmpSumIntensity::evaluate(dataPoint& point)
+    const std::complex<double> AmpSumIntensity::evaluate(dataPoint& point)
     {
         std::complex<double> AMPpdf(0,0);
         auto it = GetResonanceItrFirst();
