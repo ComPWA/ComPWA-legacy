@@ -45,7 +45,7 @@ install:
     - echo "Installation"
     - lsb_release -si
     - uname -a
-    - ls /usr/lib/libboost*
+    - ls /usr/lib/
     - cd ComPWA/ComPWA; ls
     - mkdir build
     - cd build
