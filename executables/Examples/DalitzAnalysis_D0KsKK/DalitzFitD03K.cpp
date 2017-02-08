@@ -82,7 +82,7 @@ int main(int argc, char **argv){
     config.add_options()
     ("nEvents", po::value<int>(&numEvents)->default_value(1000), "set of events per fit")
     ("seed", po::value<int>(&seed)->default_value(-1), "set random number seed; default is to used unique seed for every job")
-    ("logLevel", po::value<std::string>(&logLevel)->default_value("info"), "set log level: error|warning|info|debug")
+    ("logLevel", po::value<std::string>(&logLevel)->default_value("trace"), "set log level: error|warning|info|debug")
     ("disableFileLog", po::value<bool>(&disableFileLog)->default_value(0), "write log file? 0/1")
     ("outputFile", po::value<std::string>(&outputFileName)->default_value("out"),
      "set output file name x. The files x.root and .log are created")
@@ -156,7 +156,7 @@ int main(int argc, char **argv){
     config_fit.add_options()
     ("mcPrecision", po::value<unsigned int>(&mcPrecision)->default_value(100000), "Precision for MC integration and normalization")
     ("ampMcPrecision", po::value<unsigned int>(&ampMcPrecision)->default_value(0), "Precision for MC integration and normalization")
-    ("fittingMethod", po::value<std::string>(&fittingMethod)->default_value("plotOnly"), "choose between 'tree', 'amplitude' and 'plotOnly'")
+    ("fittingMethod", po::value<std::string>(&fittingMethod)->default_value("tree"), "choose between 'tree', 'amplitude' and 'plotOnly'")
     ("useMinos", po::value<bool>(&useMinos)->default_value(0), "Run MINOS for each parameter")
     ("useHesse", po::value<bool>(&useHesse)->default_value(1), "Run HESSE after MIGRAD")
     ("fitModelFile", po::value<std::string>(&fitModelFile)->default_value("model.xml"), "Set XML model file of fit distribution")

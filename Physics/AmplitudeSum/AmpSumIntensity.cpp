@@ -845,13 +845,13 @@ namespace ComPWA { namespace Physics { namespace AmplitudeSum {
         tr->createLeaf("weightPhsp", weightPhsp, "IntensPhspEff");
         tr->createNode("IntensPhsp", msqStrat, "IntensPhspEff",
                        phspSampleSize, false); //|T_{ev}|^2
-        tr->insertTree( setupBasicTree(phspSample, toySample), "IntensPhsp");
+        tr->insertTree( setupBasicTree(phspSample, toySample, "_norm"), "IntensPhsp");
         
         return tr;
     }
     
     std::shared_ptr<FunctionTree> AmpSumIntensity::setupBasicTree(
-                                                                  ParameterList& sample, ParameterList& phspSample)
+             ParameterList& sample, ParameterList& phspSample, std::string suffix)
     {
         int sampleSize = sample.GetMultiDouble(0)->GetNValues();
         int phspSampleSize = phspSample.GetMultiDouble(0)->GetNValues();
@@ -873,7 +873,7 @@ namespace ComPWA { namespace Physics { namespace AmplitudeSum {
         //----Strategies needed
         std::shared_ptr<AddAll> maddStrat(new AddAll(ParType::MCOMPLEX));
         
-        newTree->createHead("Amplitude", maddStrat, sampleSize);
+        newTree->createHead("Amplitude"+suffix, maddStrat, sampleSize);
         
         auto it = resoList.begin();
         for( ; it!=resoList.end(); ++it){
@@ -884,7 +884,7 @@ namespace ComPWA { namespace Physics { namespace AmplitudeSum {
                 throw std::runtime_error("AmpSumIntensity::setupBasicTree() | "
                                          "Resonance tree didn't pass sanity check!");
             resTree->recalculate();
-            newTree->insertTree(resTree, "Amplitude");
+            newTree->insertTree(resTree, "Amplitude"+suffix);
         }
         
         LOG(debug)<<"AmpSumIntensity::setupBasicTree(): tree constructed!!";

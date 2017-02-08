@@ -18,7 +18,6 @@
 #include "Core/PhysConst.hpp"
 #include "Physics/DPKinematics/DalitzKinematics.hpp"
 #include "Physics/AmplitudeSum/AmpAbsDynamicalFunction.hpp"
-#include "Physics/AdvancedStrategies.hpp"
 
 namespace ComPWA { namespace Physics { namespace AmplitudeSum {
     
@@ -846,13 +845,13 @@ namespace ComPWA { namespace Physics { namespace AmplitudeSum {
                                                                   std::shared_ptr<DoubleParameter> mR,
                                                                   std::shared_ptr<DoubleParameter> g, double ma, double mb,
                                                                   Spin spin, std::shared_ptr<DoubleParameter> mesonRadius,
-                                                                  formFactorType type)
+                                                                  formFactorType type, std::string suffix)
     {
         
         std::shared_ptr<couplingToWidthStrat> thisStrat(
                                                         new couplingToWidthStrat);
         
-        std::string stratName = "couplingToWidth";
+        std::string stratName = "couplingToWidth"+suffix;
         //------------Setup Tree---------------------
         std::shared_ptr<FunctionTree> newTree(new FunctionTree());
         

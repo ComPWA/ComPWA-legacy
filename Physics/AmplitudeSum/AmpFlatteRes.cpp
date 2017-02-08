@@ -21,7 +21,6 @@
 #include <cmath>
 #include <math.h>
 #include "Physics/AmplitudeSum/AmpFlatteRes.hpp"
-#include "Physics/AdvancedStrategies.hpp"
 
 namespace ComPWA { namespace Physics { namespace AmplitudeSum {
     
@@ -482,10 +481,11 @@ namespace ComPWA { namespace Physics { namespace AmplitudeSum {
                                                       _mass, _g1, _mass1, _mass2,
                                                       _g2, _g2_massA, _g2_massB,
                                                       _g3, _g3_massA, _g3_massB,
-                                                      (double)_spin, _mesonRadius, _ffType),
+                                                      _spin, _mesonRadius, _ffType),
                             "Reso_"+_name
                             );
-        
+
+
         //Normalization
         if(_normStyle==normStyle::none){
             newTree->createLeaf("N_"+_name, 1., "Reso_"+_name);
@@ -513,7 +513,7 @@ namespace ComPWA { namespace Physics { namespace AmplitudeSum {
                                                           _mass, _g1, _mass1, _mass2,
                                                           _g2, _g2_massA, _g2_massB,
                                                           _g3, _g3_massA, _g3_massB,
-                                                          (double)_spin, _mesonRadius, _ffType),
+                                                          _spin, _mesonRadius, _ffType),
                                 "NormReso_"+_name
                                 );
         }
@@ -545,24 +545,24 @@ namespace ComPWA { namespace Physics { namespace AmplitudeSum {
         //Partial width of channel A
         newTree->insertTree(
                             couplingToWidthStrat::SetupTree( mSq, mR, g, ma, mb, spin,
-                                                            mesonRadius, type),
+                                                            mesonRadius, type, "_cA"),
                             stratName
                             );
         newTree->insertTree(
                             barrierStrat::SetupTree( mSq, mR, ma, mb, spin,
-                                                    mesonRadius, type),
+                                                    mesonRadius, type, "_bA"),
                             stratName
                             );
         
         //Partial width of channel B
         newTree->insertTree(
                             couplingToWidthStrat::SetupTree( mSq, mR, g2, g2_ma, g2_mb,	spin,
-                                                            mesonRadius, type),
+                                                            mesonRadius, type, "_cB"),
                             stratName
                             );
         newTree->insertTree(
                             barrierStrat::SetupTree( mSq, mR, g2_ma, g2_mb, spin,
-                                                    mesonRadius, type),
+                                                    mesonRadius, type, "_bB"),
                             stratName
                             );
         
@@ -570,12 +570,12 @@ namespace ComPWA { namespace Physics { namespace AmplitudeSum {
         if( g3->GetValue() ){
             newTree->insertTree(
                                 couplingToWidthStrat::SetupTree( mSq, mR, g3, g3_ma, g3_mb, spin,
-                                                                mesonRadius, type),
+                                                                mesonRadius, type, "_cC"),
                                 stratName
                                 );
             newTree->insertTree(
                                 barrierStrat::SetupTree( mSq, mR, g3_ma, g3_mb, spin,
-                                                        mesonRadius, type),
+                                                        mesonRadius, type, "_bC"),
                                 stratName
                                 );
         }
@@ -601,7 +601,7 @@ namespace ComPWA { namespace Physics { namespace AmplitudeSum {
         
         //invariant masses
         newTree->createLeaf("mSq", mSq ,stratName);
-        
+
         return newTree;
     }
     
