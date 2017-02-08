@@ -27,42 +27,51 @@ class DoubleParameter;
 
 namespace Physics {
 namespace AmplitudeSum {
- 
+
 class PhiSumOfAmplitudes {
 public:
-  PhiSumOfAmplitudes() {} ; 
+  PhiSumOfAmplitudes(){};
   PhiSumOfAmplitudes(const char *name);
-  PhiSumOfAmplitudes(const PhiSumOfAmplitudes& other, const char* name=0) ;
-//  virtual TObject* clone(const char* newname) const { return new PhiSumOfAmplitudes(*this,newname); }
-  inline virtual ~PhiSumOfAmplitudes() { };
+  PhiSumOfAmplitudes(const PhiSumOfAmplitudes &other, const char *name = 0);
+  //  virtual TObject* clone(const char* newname) const { return new
+  //  PhiSumOfAmplitudes(*this,newname); }
+  inline virtual ~PhiSumOfAmplitudes(){};
 
-  void addBW(std::shared_ptr<AmpAbsDynamicalFunction> theRes , std::shared_ptr<DoubleParameter> r, std::shared_ptr<DoubleParameter> phi);
-  void addBW(std::shared_ptr<AmpAbsDynamicalFunction>, std::shared_ptr<DoubleParameter>, std::shared_ptr<DoubleParameter>, std::shared_ptr<AmpWigner2>);
-  
-  virtual std::string GetName(){ return _name; };
-  virtual std::string GetTitle(){ return GetName(); };
+  void addBW(std::shared_ptr<AmpAbsDynamicalFunction> theRes,
+             std::shared_ptr<DoubleParameter> r,
+             std::shared_ptr<DoubleParameter> phi);
+  void addBW(std::shared_ptr<AmpAbsDynamicalFunction>,
+             std::shared_ptr<DoubleParameter>, std::shared_ptr<DoubleParameter>,
+             std::shared_ptr<AmpWigner2>);
+
+  virtual std::string GetName() { return _name; };
+  virtual std::string GetTitle() { return GetName(); };
+
 protected:
-
-  double evaluate() const ;
+  double evaluate() const;
 
 private:
   std::string _name;
 
-  std::vector<std::shared_ptr<AmpAbsDynamicalFunction> > 	_pdfList ;   //  List of component PDFs
-  std::vector<std::shared_ptr<DoubleParameter> > 			_intList;    //  List of relative intensities
-  std::vector<std::shared_ptr<DoubleParameter> > 			_phaseList;  //  List of relative phases
-  std::vector<std::shared_ptr<AmpWigner2> >					_angList ;   //  List of component angular distributions
+  std::vector<std::shared_ptr<AmpAbsDynamicalFunction>>
+      _pdfList; //  List of component PDFs
+  std::vector<std::shared_ptr<DoubleParameter>>
+      _intList; //  List of relative intensities
+  std::vector<std::shared_ptr<DoubleParameter>>
+      _phaseList; //  List of relative phases
+  std::vector<std::shared_ptr<AmpWigner2>>
+      _angList; //  List of component angular distributions
 
-//  TIterator* _pdfIter  ;
-//  TIterator* _intIter  ;
-//  TIterator* _phaseIter;
-//  TIterator* _angIter;
+  //  TIterator* _pdfIter  ;
+  //  TIterator* _intIter  ;
+  //  TIterator* _phaseIter;
+  //  TIterator* _angIter;
 
-  //ClassDef(PhiSumOfAmplitudes,1) // Your description goes here...
+  // ClassDef(PhiSumOfAmplitudes,1) // Your description goes here...
 };
 
 } /* namespace AmplitudeSum */
 } /* namespace Physics */
 } /* namespace ComPWA */
- 
+
 #endif

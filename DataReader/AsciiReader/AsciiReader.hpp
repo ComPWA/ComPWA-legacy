@@ -40,19 +40,18 @@ namespace AsciiReader {
 class AsciiReader : public Data {
 
 public:
-	/** Destructor */
-	virtual ~AsciiReader();
-    
-    AsciiReader( ) { };
-    
-	AsciiReader( const std::string inConfigFile, const int particles );
+  /** Destructor */
+  virtual ~AsciiReader();
 
-	virtual AsciiReader* Clone() const;
+  AsciiReader(){};
 
-	virtual AsciiReader* EmptyClone() const;
+  AsciiReader(const std::string inConfigFile, const int particles);
 
-	virtual void writeData(std::string file="", std::string trName="") { };
+  virtual AsciiReader *Clone() const;
 
+  virtual AsciiReader *EmptyClone() const;
+
+  virtual void writeData(std::string file = "", std::string trName = ""){};
 };
 
 } /* namespace AsciiReader */

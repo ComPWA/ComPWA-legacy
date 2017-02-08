@@ -14,7 +14,8 @@
 //! Optimizer Data Base-Class.
 /*! \class ControlParameter
  * @file ControlParameter.hpp
- * This class provides the interface for the optimizer module to access the data.
+ * This class provides the interface for the optimizer module to access the
+ * data.
  * If the access to the data is provided fulfilling this interface, then one can
  * use the same data and parameter-set with different optimizers.
 */
@@ -31,36 +32,35 @@
 
 namespace ComPWA {
 
-class ControlParameter{
+class ControlParameter {
 
 public:
   static std::shared_ptr<ControlParameter> Instance();
 
-  virtual double controlParameter(ParameterList& minPar) = 0;
+  virtual double controlParameter(ParameterList &minPar) = 0;
 
   virtual void resetInstance() {
-	  instance_ = std::shared_ptr<ControlParameter>();
+    instance_ = std::shared_ptr<ControlParameter>();
   }
 
   virtual std::shared_ptr<FunctionTree> getTree() {
-	  return std::shared_ptr<FunctionTree>();
+    return std::shared_ptr<FunctionTree>();
   }
 
-  virtual std::vector<std::shared_ptr<Amplitude> > getAmplitudes() {
-	  return std::vector<std::shared_ptr<Amplitude> >();
+  virtual std::vector<std::shared_ptr<Amplitude>> getAmplitudes() {
+    return std::vector<std::shared_ptr<Amplitude>>();
   }
 
-  virtual int nCalls() {
-	  return calls;
-  }
+  virtual int nCalls() { return calls; }
 
 protected:
   static std::shared_ptr<ControlParameter> instance_;
   std::shared_ptr<FunctionTree> f;
-  ControlParameter(){  /* nothing */ }
-  virtual ~ControlParameter(){ /* nothing */	}
+  ControlParameter() { /* nothing */
+  }
+  virtual ~ControlParameter() { /* nothing */
+  }
   int calls;
- 
 };
 
 } /* namespace ComPWA */

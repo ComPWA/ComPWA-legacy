@@ -10,7 +10,8 @@
 //-------------------------------------------------------------------------------
 /*! \class SimpleAngleEfficiency
  * @file SimpleAngleEfficiency.hpp
- * Implementation of Efficiency interface. Efficiency over the Dalitz plot is stored in a
+ * Implementation of Efficiency interface. Efficiency over the Dalitz plot is
+ * stored in a
  * SimpleEfficiency object.
  */
 
@@ -23,35 +24,33 @@
 #include <memory>
 
 namespace ComPWA {
-    namespace Physics {
-        namespace DPKinematics {
-            
-            class SimpleAngleEfficiency : public Efficiency
-            {
-            public:
-                //! Construct SimpleAngleEfficiency from TEfficiency object
-                SimpleAngleEfficiency(SimpleEfficiency* eff);
-                
-                //! Construct SimpleAngleEfficiency from two TH2 objects for passed and total events
-                SimpleAngleEfficiency(TH1* passed, TH1* total);
-                
-                SimpleAngleEfficiency(const SimpleAngleEfficiency&);
-                
-                ~SimpleAngleEfficiency(){};
-                
-                //! returns efficiency for current datapoint
-                virtual double evaluate(std::vector<double> x);
-                
-                virtual double evaluate(const dataPoint& point);
-                
-                
-            protected:
-                std::shared_ptr<SimpleEfficiency> effHist;
-                
-            };
-            
-        } /* namespace DPKinematics */
-    } /* namespace Physics */
+namespace Physics {
+namespace DPKinematics {
+
+class SimpleAngleEfficiency : public Efficiency {
+public:
+  //! Construct SimpleAngleEfficiency from TEfficiency object
+  SimpleAngleEfficiency(SimpleEfficiency *eff);
+
+  //! Construct SimpleAngleEfficiency from two TH2 objects for passed and total
+  //! events
+  SimpleAngleEfficiency(TH1 *passed, TH1 *total);
+
+  SimpleAngleEfficiency(const SimpleAngleEfficiency &);
+
+  ~SimpleAngleEfficiency(){};
+
+  //! returns efficiency for current datapoint
+  virtual double evaluate(std::vector<double> x);
+
+  virtual double evaluate(const dataPoint &point);
+
+protected:
+  std::shared_ptr<SimpleEfficiency> effHist;
+};
+
+} /* namespace DPKinematics */
+} /* namespace Physics */
 } /* namespace ComPWA */
 
 #endif /* SIMPLEANGLEEFFICIENCY_HPP_ */

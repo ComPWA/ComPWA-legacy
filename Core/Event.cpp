@@ -17,20 +17,16 @@
 #include "Core/Event.hpp"
 
 namespace ComPWA {
-Event::Event() : fWeight(1.),fEff(1.),fName(""),fFlavour(0),fCharge(0)
-{
+Event::Event() : fWeight(1.), fEff(1.), fName(""), fFlavour(0), fCharge(0) {}
 
-}
+Event::Event(const std::string &name)
+    : fWeight(1.), fEff(1.), fName(name), fFlavour(0), fCharge(0) {}
 
-Event::Event(const std::string& name):fWeight(1.),fEff(1.),fName(name),fFlavour(0),fCharge(0){
+Event::Event(const double inWeight, const std::string &name = "",
+             const double inEff)
+    : fWeight(inWeight), fEff(inEff), fName(name), fFlavour(0), fCharge(0) {}
 
-}
-
-Event::Event(const double inWeight, const std::string& name="", const double inEff):fWeight(inWeight),fEff(inEff),fName(name),fFlavour(0),fCharge(0){
-
-}
-
-void Event::addParticle(Particle inParticle){
+void Event::addParticle(Particle inParticle) {
   fParticles.push_back(inParticle);
 }
 
@@ -38,22 +34,26 @@ void Event::setParticleAt(const Particle &particle, unsigned int index) {
   fParticles[index] = particle;
 }
 
-Event::~Event() { /* nothing */	}
+Event::~Event() { /* nothing */
+}
 
-const Particle& Event::getParticle(const unsigned int id) const{
-  if(id>=getNParticles()){
-      throw std::runtime_error("Event::getParticle() | Particle id does not match!");
+const Particle &Event::getParticle(const unsigned int id) const {
+  if (id >= getNParticles()) {
+    throw std::runtime_error(
+        "Event::getParticle() | Particle id does not match!");
   }
   return fParticles.at(id);
 }
 
-std::ostream& operator<< (std::ostream& stream, const Event& ev){
-	stream<< "Event name="<<ev.fName<<" weight="<<ev.fWeight<<" efficiency="<<ev.fEff
-			<<" flavour="<<ev.fFlavour<<" charge="<<ev.fCharge<<std::endl;
-	stream<< " Printing particles (N="<<ev.fParticles.size()<<"):"<<std::endl;
-	for(auto i: ev.fParticles)
-		stream<<i<<std::endl;
+std::ostream &operator<<(std::ostream &stream, const Event &ev) {
+  stream << "Event name=" << ev.fName << " weight=" << ev.fWeight
+         << " efficiency=" << ev.fEff << " flavour=" << ev.fFlavour
+         << " charge=" << ev.fCharge << std::endl;
+  stream << " Printing particles (N=" << ev.fParticles.size()
+         << "):" << std::endl;
+  for (auto i : ev.fParticles)
+    stream << i << std::endl;
 
-	return stream;
+  return stream;
 }
 } /* namespace ComPWA */

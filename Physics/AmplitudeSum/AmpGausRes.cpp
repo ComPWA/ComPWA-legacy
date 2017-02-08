@@ -24,43 +24,35 @@ namespace ComPWA {
 namespace Physics {
 namespace AmplitudeSum {
 
-AmpGausRes::AmpGausRes(const char *name,
-		unsigned int varIdA,
-		std::shared_ptr<DoubleParameter> mag,
-		std::shared_ptr<DoubleParameter> phase,
-		std::shared_ptr<DoubleParameter> mass,
-		std::shared_ptr<DoubleParameter> width,
-		std::string mother, std::string particleA, std::string particleB,
-		int nCalls, normStyle nS) :
-		AmpAbsDynamicalFunction(name, varIdA, 0, mag, phase, mass,
-				ComPWA::Spin(0.), ComPWA::Spin(0.), ComPWA::Spin(0.),
-				+1, 0, mother, particleA, particleB,
-				formFactorType::noFormFactor, nCalls, nS),
-				_width(width)
-{ }
+AmpGausRes::AmpGausRes(const char *name, unsigned int varIdA,
+                       std::shared_ptr<DoubleParameter> mag,
+                       std::shared_ptr<DoubleParameter> phase,
+                       std::shared_ptr<DoubleParameter> mass,
+                       std::shared_ptr<DoubleParameter> width,
+                       std::string mother, std::string particleA,
+                       std::string particleB, int nCalls, normStyle nS)
+    : AmpAbsDynamicalFunction(
+          name, varIdA, 0, mag, phase, mass, ComPWA::Spin(0.), ComPWA::Spin(0.),
+          ComPWA::Spin(0.), +1, 0, mother, particleA, particleB,
+          formFactorType::noFormFactor, nCalls, nS),
+      _width(width) {}
 
+AmpGausRes::~AmpGausRes() {}
 
-AmpGausRes::~AmpGausRes() 
-{
+std::complex<double> AmpGausRes::EvaluateAmp(dataPoint &point) {
+
+  double m0 = _mass->GetValue();
+  double width = _width->GetValue();
+  double m = point.getVal(_subSys);
+
+  std::complex<double> gaus(
+      GetNormalization() * exp(-1 * (m - m0) * (m - m0) / width / width / 2.),
+      0);
+
+  return gaus;
 }
-
-std::complex<double> AmpGausRes::EvaluateAmp(dataPoint& point){
-
-
-	double m0 = _mass->GetValue();
-	double width = _width->GetValue();
-	double m = point.getVal(_subSys);
-
-	std::complex<double> gaus(
-			GetNormalization() * exp(-1*(m-m0)*(m-m0)/width/width/2.),
-			0
-			);
-
-	return gaus;
-}
-std::complex<double> AmpGausRes::Evaluate(dataPoint& point){
-	return EvaluateAmp(point)*evaluateWignerD(point);
-
+std::complex<double> AmpGausRes::Evaluate(dataPoint &point) {
+  return EvaluateAmp(point) * evaluateWignerD(point);
 }
 
 } /* namespace AmplitudeSum */

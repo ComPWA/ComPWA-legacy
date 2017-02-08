@@ -14,9 +14,11 @@
 //! Estimator Interface Base-Class.
 /*! \class Estimator
  * @file Estimator.hpp
- * This class provides the interface to classes which estimate the "closeness" of
+ * This class provides the interface to classes which estimate the "closeness"
+ * of
  * the modeled intensity to the data. As it is pure virtual, one needs at least
- * one implementation to provide an estimator for the analysis. If a new estimator
+ * one implementation to provide an estimator for the analysis. If a new
+ * estimator
  * is derived from and fulfills this base-class, no change in other modules are
  * necessary to work with the new estimation function. As it is derived from
  * ControlParameter, it can be used in the optimizer modules.
@@ -36,11 +38,10 @@
 namespace ComPWA {
 namespace Estimator {
 
-class Estimator : public ComPWA::ControlParameter
-{
+class Estimator : public ComPWA::ControlParameter {
 
 public:
-  virtual double controlParameter(ParameterList& minPar) = 0;
+  virtual double controlParameter(ParameterList &minPar) = 0;
 
   virtual bool hasTree() { return 0; }
 
@@ -54,8 +55,9 @@ public:
   virtual int getNEvents() { return -999; }
 
 protected:
-    Estimator(){ }
-    virtual ~Estimator(){ /* nothing */ }
+  Estimator() {}
+  virtual ~Estimator() { /* nothing */
+  }
 };
 
 } /* namespace Estimator */

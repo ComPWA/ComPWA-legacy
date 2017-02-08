@@ -40,14 +40,9 @@ namespace ComPWA {
 
 class Strategy {
 public:
-
   //! Constructor
-  Strategy(ParType in) :
-      checkType(in) {
-  }
-  ;
-  virtual ~Strategy() {
-  }
+  Strategy(ParType in) : checkType(in){};
+  virtual ~Strategy() {}
 
   //! friend function to stream parameter information to output
   /*!
@@ -55,8 +50,8 @@ public:
    * information to the output as easily as a generic type.
    * \sa make_str(), to_str()
    */
-  friend std::ostream& operator<<(std::ostream& out,
-      std::shared_ptr<Strategy> b) {
+  friend std::ostream &operator<<(std::ostream &out,
+                                  std::shared_ptr<Strategy> b) {
     return out << b->to_str();
   }
 
@@ -66,114 +61,89 @@ public:
    * information to the output as easily as a generic type.
    * \sa make_str(), to_str()
    */
-  friend std::ostream& operator<<(std::ostream& out, const Strategy& b) {
+  friend std::ostream &operator<<(std::ostream &out, const Strategy &b) {
     return out << b.to_str();
   }
 
   //! Get ParType
-  virtual const ParType OutType() const {
-    return checkType;
-  }
+  virtual const ParType OutType() const { return checkType; }
 
   //! Pure Virtual interface for streaming info about the strategy
-  virtual const std::string to_str() const =0;
+  virtual const std::string to_str() const = 0;
 
   //! Pure Virtual interface for executing a strategy
-  virtual bool execute(ParameterList& paras,
-      std::shared_ptr<AbsParameter>& out) = 0;
+  virtual bool execute(ParameterList &paras,
+                       std::shared_ptr<AbsParameter> &out) = 0;
 
 protected:
-	ParType checkType;
+  ParType checkType;
 };
 
-class Inverse: public Strategy {
+class Inverse : public Strategy {
 public:
-	Inverse(ParType in):Strategy(in){
-	};
-	virtual ~Inverse() {};
+  Inverse(ParType in) : Strategy(in){};
+  virtual ~Inverse(){};
 
-	virtual const std::string to_str() const{
-		return "+";
-	}
+  virtual const std::string to_str() const { return "+"; }
 
-	virtual bool execute(ParameterList& paras,
-			std::shared_ptr<AbsParameter>& out);
+  virtual bool execute(ParameterList &paras,
+                       std::shared_ptr<AbsParameter> &out);
 };
 
-class SquareRoot: public Strategy {
+class SquareRoot : public Strategy {
 public:
-	SquareRoot(ParType in) : Strategy(in) {	};
+  SquareRoot(ParType in) : Strategy(in){};
 
-	virtual ~SquareRoot(){}
+  virtual ~SquareRoot() {}
 
-	virtual const std::string to_str() const{
-		return "+";
-	}
+  virtual const std::string to_str() const { return "+"; }
 
-	virtual bool execute(ParameterList& paras,
-			std::shared_ptr<AbsParameter>& out);
+  virtual bool execute(ParameterList &paras,
+                       std::shared_ptr<AbsParameter> &out);
 };
 
-class AddAll : public Strategy
-{
+class AddAll : public Strategy {
 public:
-	AddAll(ParType in):Strategy(in){
-	};
-	virtual ~AddAll(){}
+  AddAll(ParType in) : Strategy(in){};
+  virtual ~AddAll() {}
 
-	virtual const std::string to_str() const{
-		return "+";
-	}
+  virtual const std::string to_str() const { return "+"; }
 
-	virtual bool execute(ParameterList& paras,
-			std::shared_ptr<AbsParameter>& out);
-
+  virtual bool execute(ParameterList &paras,
+                       std::shared_ptr<AbsParameter> &out);
 };
 
-class MultAll: public Strategy {
+class MultAll : public Strategy {
 public:
-	MultAll(ParType in):Strategy(in){
-	};
-	virtual ~MultAll(){}
+  MultAll(ParType in) : Strategy(in){};
+  virtual ~MultAll() {}
 
-	virtual const std::string to_str() const{
-		return "*";
-	};
+  virtual const std::string to_str() const { return "*"; };
 
-	virtual bool execute(ParameterList& paras,
-			std::shared_ptr<AbsParameter>& out);
+  virtual bool execute(ParameterList &paras,
+                       std::shared_ptr<AbsParameter> &out);
 };
 
-class LogOf: public Strategy {
+class LogOf : public Strategy {
 public:
-	LogOf(ParType in):Strategy(in){
-	};
-	virtual ~LogOf(){};
+  LogOf(ParType in) : Strategy(in){};
+  virtual ~LogOf(){};
 
-	virtual const std::string to_str() const{
-		return "Log";
-	};
+  virtual const std::string to_str() const { return "Log"; };
 
-	virtual bool execute(ParameterList& paras,
-			std::shared_ptr<AbsParameter>& out);
+  virtual bool execute(ParameterList &paras,
+                       std::shared_ptr<AbsParameter> &out);
 };
 
-class Real: public Strategy {
+class Real : public Strategy {
 public:
-  Real(ParType in) :
-      Strategy(in) {
-  }
-  ;
-  virtual ~Real() {
-  }
+  Real(ParType in) : Strategy(in){};
+  virtual ~Real() {}
 
-  virtual const std::string to_str() const {
-    return "RealPart";
-  }
-  ;
+  virtual const std::string to_str() const { return "RealPart"; };
 
-  virtual bool execute(ParameterList& paras,
-      std::shared_ptr<AbsParameter>& out) {
+  virtual bool execute(ParameterList &paras,
+                       std::shared_ptr<AbsParameter> &out) {
 
     unsigned int nMC = paras.GetNMultiComplex();
     unsigned int nC = paras.GetNComplex();
@@ -182,14 +152,15 @@ public:
 
     case ParType::MCOMPLEX: {
       if (!(nMC == 1)) {
-        //TODO: exception wrong input
+        // TODO: exception wrong input
         return false;
       }
       unsigned int nElements = paras.GetMultiComplex(0)->GetNValues();
-      //fill MultiDouble parameter
+      // fill MultiDouble parameter
       std::vector<double> results;
       results.reserve(nElements);
-      for (auto const & complex_element : paras.GetMultiComplex(0)->GetValues()) {
+      for (auto const &complex_element :
+           paras.GetMultiComplex(0)->GetValues()) {
         results.push_back(complex_element.real());
       }
 
@@ -197,64 +168,51 @@ public:
           new MultiDouble(out->GetName(), results));
 
       break;
-    }        //end multi complex
+    } // end multi complex
 
     case ParType::COMPLEX: {
       if (!(nC == 1)) {
-        //TODO: exception wrong input
+        // TODO: exception wrong input
         return false;
       }
 
-      out = std::shared_ptr<AbsParameter>(
-          new DoubleParameter(out->GetName(),
-              paras.GetComplexParameter(0)->GetValue().real()));
+      out = std::shared_ptr<AbsParameter>(new DoubleParameter(
+          out->GetName(), paras.GetComplexParameter(0)->GetValue().real()));
 
       break;
-    }        //end double
+    } // end double
 
     default: {
-      //TODO: exception output partype wrong
+      // TODO: exception output partype wrong
       return false;
     }
 
-    }        //end switch
+    } // end switch
 
     return true;
-  }
-  ;
+  };
 };
 
-class Complexify: public Strategy {
+class Complexify : public Strategy {
 public:
-	Complexify(ParType in):Strategy(in){
-	};
-	virtual ~Complexify(){}
+  Complexify(ParType in) : Strategy(in){};
+  virtual ~Complexify() {}
 
-	virtual const std::string to_str() const{
-		return "MakeComplex";
-	};
+  virtual const std::string to_str() const { return "MakeComplex"; };
 
-	virtual bool execute(ParameterList& paras,
-			std::shared_ptr<AbsParameter>& out);
-
+  virtual bool execute(ParameterList &paras,
+                       std::shared_ptr<AbsParameter> &out);
 };
 
-class ComplexConjugate: public Strategy {
+class ComplexConjugate : public Strategy {
 public:
-  ComplexConjugate(ParType in) :
-      Strategy(in) {
-  }
-  ;
-  virtual ~ComplexConjugate() {
-  }
+  ComplexConjugate(ParType in) : Strategy(in){};
+  virtual ~ComplexConjugate() {}
 
-  virtual const std::string to_str() const {
-    return "ComplexConjugate";
-  }
-  ;
+  virtual const std::string to_str() const { return "ComplexConjugate"; };
 
-  virtual bool execute(ParameterList& paras,
-      std::shared_ptr<AbsParameter>& out) {
+  virtual bool execute(ParameterList &paras,
+                       std::shared_ptr<AbsParameter> &out) {
     if (checkType != out->type())
       return false;
 
@@ -262,22 +220,22 @@ public:
     unsigned int nC = paras.GetNComplex();
 
     if (nMC + nC == 0) {
-      //TODO: exception no input
+      // TODO: exception no input
       return false;
     }
 
     switch (checkType) {
     case ParType::MCOMPLEX: {
-      //output complex: input must be one multicomplex
+      // output complex: input must be one multicomplex
       if (!(nMC == 1)) {
-        //TODO: exception wrong input
+        // TODO: exception wrong input
         return false;
       }
 
-      for (auto const& multi_complex : paras.GetMultiComplexs()) {
+      for (auto const &multi_complex : paras.GetMultiComplexs()) {
         unsigned int nElements = multi_complex->GetNValues();
-        //fill MultiDouble parameter
-        std::vector<std::complex<double> > results;
+        // fill MultiDouble parameter
+        std::vector<std::complex<double>> results;
         results.reserve(nElements);
         for (unsigned int ele = 0; ele < nElements; ele++) {
           results.push_back(std::conj(multi_complex->GetValue(ele)));
@@ -286,60 +244,50 @@ public:
             new MultiComplex(out->GetName(), results));
       }
       break;
-    }        //end multi complex
+    } // end multi complex
 
     case ParType::COMPLEX: {
-      //output complex: input must be a complex
+      // output complex: input must be a complex
       if (!(nC == 1)) {
-        //TODO: exception wrong input
+        // TODO: exception wrong input
         return false;
       }
-      out = std::shared_ptr<AbsParameter>(
-          new ComplexParameter(out->GetName(),
-              std::conj(paras.GetComplexParameter(0)->GetValue())));
+      out = std::shared_ptr<AbsParameter>(new ComplexParameter(
+          out->GetName(), std::conj(paras.GetComplexParameter(0)->GetValue())));
       break;
-    }        //end double
+    } // end double
 
     default: {
-      //TODO: exception output partype wrong
+      // TODO: exception output partype wrong
       return false;
     }
 
-    }        //end switch
+    } // end switch
 
     return true;
-  }
-  ;
+  };
 };
 
-class AbsSquare: public Strategy {
+class AbsSquare : public Strategy {
 public:
-	AbsSquare(ParType in):Strategy(in){
-	};
-	virtual ~AbsSquare(){}
+  AbsSquare(ParType in) : Strategy(in){};
+  virtual ~AbsSquare() {}
 
-	virtual const std::string to_str() const{
-		return "||^2";
-	};
+  virtual const std::string to_str() const { return "||^2"; };
 
-	virtual bool execute(ParameterList& paras,
-			std::shared_ptr<AbsParameter>& out);
-
+  virtual bool execute(ParameterList &paras,
+                       std::shared_ptr<AbsParameter> &out);
 };
 
-class Power: public Strategy {
+class Power : public Strategy {
 public:
-	Power(ParType in):Strategy(in){
-	};
-	virtual ~Power(){}
+  Power(ParType in) : Strategy(in){};
+  virtual ~Power() {}
 
-	virtual const std::string to_str() const{
-		return "^";
-	}
+  virtual const std::string to_str() const { return "^"; }
 
-	virtual bool execute(ParameterList& paras,
-			std::shared_ptr<AbsParameter>& out);
-
+  virtual bool execute(ParameterList &paras,
+                       std::shared_ptr<AbsParameter> &out);
 };
 
 } /* namespace ComPWA */

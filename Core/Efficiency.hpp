@@ -23,32 +23,30 @@ class dataPoint;
  *  \class DalitzEfficiency
  *  \brief Virtual efficiency class
  */
-class Efficiency{
+class Efficiency {
 private:
-
 public:
-	Efficiency();
+  Efficiency();
 
-	virtual ~Efficiency();
+  virtual ~Efficiency();
 
-	virtual double evaluate(std::vector<double> x) = 0;
-    
-	virtual double evaluate(const dataPoint& point) = 0;
+  virtual double evaluate(std::vector<double> x) = 0;
+
+  virtual double evaluate(const dataPoint &point) = 0;
 };
 
 /**
  *  \class UnitEfficiency
- *  \brief implementation of virtual class efficiency. Efficiency ist constant one allover the PHSP
+ *  \brief implementation of virtual class efficiency. Efficiency ist constant
+ * one allover the PHSP
  */
 class UnitEfficiency : public Efficiency {
 private:
 public:
-	UnitEfficiency(){
-		LOG(info)<<"Efficiency: creating UnitEfficiency!";
-	};
-	~UnitEfficiency(){};
-	virtual double evaluate(std::vector<double> x) {return 1;};
-	virtual double evaluate(const dataPoint& point) {return 1;};
+  UnitEfficiency() { LOG(info) << "Efficiency: creating UnitEfficiency!"; };
+  ~UnitEfficiency(){};
+  virtual double evaluate(std::vector<double> x) { return 1; };
+  virtual double evaluate(const dataPoint &point) { return 1; };
 };
 
 } /* namespace ComPWA */

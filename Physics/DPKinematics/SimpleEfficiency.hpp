@@ -23,39 +23,45 @@ namespace DPKinematics {
  * @file SimpleEfficiency.hpp
  * Implementation of an efficiency class. Similar functionality to TEfficiency
  */
-class SimpleEfficiency : public TNamed
-{
+class SimpleEfficiency : public TNamed {
 public:
-	~SimpleEfficiency();
-	//!Contruct from two TH1 histrograms
-	SimpleEfficiency(const TH1& passed, const TH1& total);
-	//!Contruct from two TH1 histrograms and specify name and title of object
-	SimpleEfficiency(TString name, TString title, const TH1& passed, const TH1& total);
-	SimpleEfficiency():passedHist(NULL),totalHist(NULL),effHist(NULL){};
-	SimpleEfficiency(const SimpleEfficiency&);
-	//! return total efficiency
-	double GetTotalEfficiency() { return totalEff; };
-	//! return error of total efficiency
-	double GetTotalEfficiencyError() { return totalEff_error; };
-	//! return efficiency of globalBin
-	double GetEfficiency(int globalBin);
-	double GetEfficiencyError(int globalBin);
-	double GetEfficiencyErrorLow(int globalBin) { return GetEfficiencyError(globalBin); };
-	double GetEfficiencyErrorUp(int globalBin) { return GetEfficiencyError(globalBin); };
-	int FindFixBin(double x, double y = 0, double z = 0) {return effHist->FindFixBin(x,y,z); };
-	TH1* GetEfficiencyHistogram() { return effHist; }
-	TH1* GetPassedHistogram() { return passedHist; }
-	TH1* GetTotalHistogram() { return totalHist; }
-	void SetTitle(const char* title);
+  ~SimpleEfficiency();
+  //! Contruct from two TH1 histrograms
+  SimpleEfficiency(const TH1 &passed, const TH1 &total);
+  //! Contruct from two TH1 histrograms and specify name and title of object
+  SimpleEfficiency(TString name, TString title, const TH1 &passed,
+                   const TH1 &total);
+  SimpleEfficiency() : passedHist(NULL), totalHist(NULL), effHist(NULL){};
+  SimpleEfficiency(const SimpleEfficiency &);
+  //! return total efficiency
+  double GetTotalEfficiency() { return totalEff; };
+  //! return error of total efficiency
+  double GetTotalEfficiencyError() { return totalEff_error; };
+  //! return efficiency of globalBin
+  double GetEfficiency(int globalBin);
+  double GetEfficiencyError(int globalBin);
+  double GetEfficiencyErrorLow(int globalBin) {
+    return GetEfficiencyError(globalBin);
+  };
+  double GetEfficiencyErrorUp(int globalBin) {
+    return GetEfficiencyError(globalBin);
+  };
+  int FindFixBin(double x, double y = 0, double z = 0) {
+    return effHist->FindFixBin(x, y, z);
+  };
+  TH1 *GetEfficiencyHistogram() { return effHist; }
+  TH1 *GetPassedHistogram() { return passedHist; }
+  TH1 *GetTotalHistogram() { return totalHist; }
+  void SetTitle(const char *title);
 
 protected:
-	TH1* passedHist;
-	TH1* totalHist;
-	TH1* effHist;
-	Double_t totalEff;
-	Double_t totalEff_error;
+  TH1 *passedHist;
+  TH1 *totalHist;
+  TH1 *effHist;
+  Double_t totalEff;
+  Double_t totalEff_error;
 
-	ClassDef(SimpleEfficiency, 3);
+  ClassDef(SimpleEfficiency, 3);
 };
 
 } /* namespace DPKinematics */

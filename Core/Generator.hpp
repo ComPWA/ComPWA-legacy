@@ -19,20 +19,19 @@ namespace ComPWA {
  *  \class Generator
  *  \brief Virtual class for PHSP generators
  */
-class Generator{
+class Generator {
 private:
 public:
-	Generator(){};
-	virtual ~Generator(){};
-	virtual void generate(Event&) = 0;
-	virtual Generator* Clone() = 0;
-	virtual void setSeed(unsigned int) = 0;
-	virtual unsigned int getSeed() = 0;
-	virtual double getUniform() = 0;
-	virtual double getGaussDist(double mu, double sigma) { return 0; }
-
+  Generator(){};
+  virtual ~Generator(){};
+  virtual void generate(Event &) = 0;
+  virtual Generator *Clone() = 0;
+  virtual void setSeed(unsigned int) = 0;
+  virtual unsigned int getSeed() = 0;
+  virtual double getUniform() = 0;
+  virtual double getGaussDist(double mu, double sigma) { return 0; }
 };
 
 } /* namespace ComPWA */
 
-#endif /* GENERATOR_HPP_ */
+#endif /* GENERATOR_HPP_ */ 

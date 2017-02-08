@@ -18,9 +18,10 @@
 namespace ComPWA {
 
 std::shared_ptr<ControlParameter> ControlParameter::Instance() {
-    return ControlParameter::instance_;
+  return ControlParameter::instance_;
 }
 
-std::shared_ptr<ControlParameter> ControlParameter::instance_ = std::shared_ptr<ControlParameter>();
+std::shared_ptr<ControlParameter> ControlParameter::instance_ =
+    std::shared_ptr<ControlParameter>();
 
 } /* namespace ComPWA */

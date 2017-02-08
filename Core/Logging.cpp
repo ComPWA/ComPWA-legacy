@@ -5,7 +5,6 @@
  *      Author: weidenka
  */
 
-
 #include "Core/Logging.hpp"
 
 #include <boost/log/expressions.hpp>
@@ -20,48 +19,47 @@
 #include <boost/date_time/posix_time/posix_time.hpp>
 
 namespace ComPWA {
-    using namespace boost::log;
-    void Logging::init( std::string out, trivial::severity_level minLevel )
-    {
-        add_common_attributes();
-        boost::log::add_console_log(std::cout,
-                        keywords::format =
-                        (
-                         expressions::stream
-                         << expressions::format_date_time< boost::posix_time::ptime >("TimeStamp", "%H:%M:%S")
-                         << " [" << std::setw(7) << trivial::severity<< "] : "
-                         << expressions::smessage
-                         )
-                        );
-        if(out == ""){
-            LOG(info)<<"Logging: logging to filename disables. Console severity level: "<<minLevel;
-        } else {
-            add_file_log( keywords::file_name=out,
-                         //			keywords::format="(%LineID%) [%TimeStamp%][%Severity%]: %Message%"
-                         keywords::format =
-                         (
-                          expressions::stream
-                          << expressions::format_date_time< boost::posix_time::ptime >("TimeStamp", "%Y-%m-%d %H:%M:%S")
-                          << " [" << trivial::severity<< "] : "
-                          << expressions::smessage
-                          )
-                         );
-            core::get()->set_filter(trivial::severity >= minLevel);
-            LOG(info)<<"Logging: using output filename: "<<out<<", Severity level: "<<minLevel;
-        }
-        
-        //Print local time and date at the beginning
-        boost::posix_time::ptime todayUtc(
-                                          boost::gregorian::day_clock::universal_day(),
-                                          boost::posix_time::second_clock::local_time().time_of_day()
-                                          );
-        LOG(info) << "Current date and time: "<<boost::posix_time::to_simple_string(todayUtc);
-    }
-    
-    void Logging::setLogLevel(trivial::severity_level minLevel)
-    {
-        core::get()->set_filter(trivial::severity >= minLevel);
-        LOG(info)<<"New severity level: "<<minLevel;
-    }
-    
+using namespace boost::log;
+void Logging::init(std::string out, trivial::severity_level minLevel) {
+  add_common_attributes();
+  boost::log::add_console_log(
+      std::cout,
+      keywords::format =
+          (expressions::stream
+           << expressions::format_date_time<boost::posix_time::ptime>(
+                  "TimeStamp", "%H:%M:%S")
+           << " [" << std::setw(7) << trivial::severity
+           << "] : " << expressions::smessage));
+  if (out == "") {
+    LOG(info)
+        << "Logging: logging to filename disables. Console severity level: "
+        << minLevel;
+  } else {
+    add_file_log(
+        keywords::file_name = out,
+        //			keywords::format="(%LineID%)
+        //[%TimeStamp%][%Severity%]: %Message%"
+        keywords::format =
+            (expressions::stream
+             << expressions::format_date_time<boost::posix_time::ptime>(
+                    "TimeStamp", "%Y-%m-%d %H:%M:%S")
+             << " [" << trivial::severity << "] : " << expressions::smessage));
+    core::get()->set_filter(trivial::severity >= minLevel);
+    LOG(info) << "Logging: using output filename: " << out
+              << ", Severity level: " << minLevel;
+  }
+
+  // Print local time and date at the beginning
+  boost::posix_time::ptime todayUtc(
+      boost::gregorian::day_clock::universal_day(),
+      boost::posix_time::second_clock::local_time().time_of_day());
+  LOG(info) << "Current date and time: "
+            << boost::posix_time::to_simple_string(todayUtc);
+}
+
+void Logging::setLogLevel(trivial::severity_level minLevel) {
+  core::get()->set_filter(trivial::severity >= minLevel);
+  LOG(info) << "New severity level: " << minLevel;
+}
+
 } /* namespace ComPWA */
