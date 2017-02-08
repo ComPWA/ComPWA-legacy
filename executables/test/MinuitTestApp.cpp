@@ -41,7 +41,7 @@
 
 using namespace std;
 
-using ComPWA::Optimizer::ControlParameter;
+using ComPWA::ControlParameter;
 using ComPWA::Optimizer::Optimizer;
 using ComPWA::ParameterList;
 using ComPWA::DoubleParameter;

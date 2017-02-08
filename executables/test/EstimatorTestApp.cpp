@@ -36,7 +36,7 @@
 
 using namespace std;
 
-using ComPWA::Optimizer::ControlParameter;
+using ComPWA::ControlParameter;
 using ComPWA::DataReader::RootReader::RootReader;
 using ComPWA::Physics::BreitWigner::BreitWigner;
 using ComPWA::ParameterList;

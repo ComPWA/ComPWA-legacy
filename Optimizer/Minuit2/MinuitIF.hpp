@@ -46,7 +46,7 @@ class MinuitIF : public Optimizer
 
 public:
 	/// Default Constructor (0x0)
-	MinuitIF(std::shared_ptr<ControlParameter> esti, ParameterList& par);
+	MinuitIF(std::shared_ptr<ComPWA::ControlParameter> esti, ParameterList& par);
 	virtual std::shared_ptr<FitResult> exec(ParameterList& par);
 
 	/** Destructor */
@@ -61,7 +61,7 @@ protected:
 
 private:
 	ROOT::Minuit2::MinuitFcn _myFcn;
-	std::shared_ptr<ControlParameter> estimator;
+	std::shared_ptr<ComPWA::ControlParameter> estimator;
 	bool enableHesse;
 	bool enableMinos;
 };

@@ -26,7 +26,7 @@
 
 //#include "ErrLogger/ErrLogger.hh"
 
-using ComPWA::Optimizer::ControlParameter;
+using ComPWA::ControlParameter;
 using ComPWA::ParameterList;
 
 std::shared_ptr<ControlParameter> PolyFit::createInstance(double p0, double p1, double p2, double p3, double sigma){

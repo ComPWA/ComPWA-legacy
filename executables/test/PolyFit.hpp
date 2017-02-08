@@ -30,7 +30,7 @@
 
 #include "TROOT.h"
 
-#include "Optimizer/ControlParameter.hpp"
+#include "Core/ControlParameter.hpp"
 #include "Core/ParameterList.hpp"
 
 class TFile;
@@ -38,12 +38,12 @@ class TGraph;
 class TCanvas;
 class TRandom;
 
-class PolyFit : public ComPWA::Optimizer::ControlParameter {
+class PolyFit : public ComPWA::ControlParameter {
 
 public:
 
   // create/copy/destroy:
-  static std::shared_ptr<ComPWA::Optimizer::ControlParameter> createInstance(double p0, double p1, double p2, double p3, double sigma);
+  static std::shared_ptr<ComPWA::ControlParameter> createInstance(double p0, double p1, double p2, double p3, double sigma);
 
   /** Destructor */
   virtual ~PolyFit();

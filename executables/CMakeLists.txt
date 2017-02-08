@@ -1,2 +1,10 @@
-#add_subdirectory( test )
+add_subdirectory( test )
 add_subdirectory( Examples )
+
+#add_executable (gentwopartApp GenTwoPartApp.cpp)
+#add_executable (dpareaTestApp DPareaTestApp.cpp)
+#add_executable (genRunManager GenRunManagerApp.cpp)
+#add_executable (compareTreeAmpApp CompareTreeAmpApp.cpp)
+#add_executable (lhNormalizationTestApp LHNormalizationTestApp.cpp)
+#add_executable (multiVariateGaussianTestApp MultiVariateGaussianTestApp.cpp)
+#add_executable (serializeApp SerializationApp.cpp)

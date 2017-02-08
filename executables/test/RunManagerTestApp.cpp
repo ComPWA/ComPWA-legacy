@@ -50,7 +50,7 @@ using DataReader::Data;
  * The main function.
  */
 int main(int argc, char **argv){
-  boost::log::core::get()->set_filter(trivial::severity >= trivial::debug); //setting log level
+  Logging log("log", boost::log::trivial::debug); //initialize logging
   std::cout << "  ComPWA Copyright (C) 2013  Mathias Michel " << std::endl;
   std::cout << "  This program comes with ABSOLUTELY NO WARRANTY; for details see license.txt" << std::endl;
   std::cout << std::endl;
@@ -63,7 +63,7 @@ int main(int argc, char **argv){
   ParameterList par;
   par.AddParameter(std::shared_ptr<DoubleParameter>(new DoubleParameter("BWPos",1.7,0.5,2.5,0.1)));
   par.AddParameter(std::shared_ptr<DoubleParameter>(new DoubleParameter("BWWidth",0.2,0.1,0.2,0.01)));
-  std::shared_ptr<Optimizer::ControlParameter> testEsti = Estimator::MinLogLH::MinLogLH::createInstance(testBW, myReader, std::shared_ptr<Data>(), std::shared_ptr<Data>()); //TODO: <- should be done by runManager
+  std::shared_ptr<ComPWA::ControlParameter> testEsti = Estimator::MinLogLH::MinLogLH::createInstance(testBW, myReader, std::shared_ptr<Data>(), std::shared_ptr<Data>()); //TODO: <- should be done by runManager
   std::shared_ptr<Optimizer::Optimizer> opti(new Optimizer::Minuit2::MinuitIF(testEsti,par));
 //  std::shared_ptr<RunManager> run(new RunManager(myReader, testEsti, testBW, opti, eff));
   std::shared_ptr<RunManager> run(new RunManager(myReader, testBW, opti));
