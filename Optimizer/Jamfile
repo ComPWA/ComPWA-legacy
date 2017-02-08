@@ -12,15 +12,17 @@ project ComPWA/Optimizer
 if $(build_Minuit2) && $(build_Minuit2) != 0
 {
 	build-project Minuit2 ;
-	#sources = $(sources) [ glob Minuit2/*.cpp ] ;
+	sources = $(sources) [ glob Minuit2/*.cpp ] ;
 }
 
 if $(build_Geneva) && $(build_Geneva) != 0
 {
 	build-project Geneva ;
-	#sources = $(sources) [ glob Geneva/*.cpp ] ;
+	sources = $(sources) [ glob Geneva/*.cpp ] ;
 }
 
 lib Optimizer : [ glob *.cpp ] ;
+
+ECHO $(TOP)/lib ;
 
 install dist : Optimizer : <location>$(TOP)/lib ;

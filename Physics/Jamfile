@@ -35,6 +35,6 @@ if $(build_DynamicalDecayFunctions) && $(build_DynamicalDecayFunctions) != 0
 }
 if $(build_HelicityAmplitude) && $(build_HelicityAmplitude) != 0
 {
-	build-project HelicityAmplitude ;
-	sources = $(sources) $(PHYSICS)/HelicityAmplitude//HelicityAmplitude ;
+	#build-project HelicityAmplitude ;
+	#sources = $(sources) $(PHYSICS)/HelicityAmplitude//HelicityAmplitude ;
 }
