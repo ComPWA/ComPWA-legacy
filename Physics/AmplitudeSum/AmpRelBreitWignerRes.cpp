@@ -19,8 +19,10 @@
 // includes the use of Blatt-Weisskopf barrier factors.
 
 #include <cmath>
-#include "Physics/AmplitudeSum/AmpRelBreitWignerRes.hpp"
 #include <stdlib.h>
+
+#include "Physics/AmplitudeSum/AmpRelBreitWignerRes.hpp"
+
 
 namespace ComPWA {
 namespace Physics {
@@ -257,9 +259,9 @@ std::shared_ptr<FunctionTree> AmpRelBreitWignerRes::SetupTree(
 	newTree->createLeaf("Intens_"+_name, _mag, "C_"+_name); //r
 	newTree->createLeaf("Phase_"+_name, _phase, "C_"+_name); //phi
 	//Angular distribution
-	if( (double)_spin )
-		newTree->insertTree(_wignerD.SetupTree(sample,suffix), "Reso_"+_name);
-
+    if( (double)_spin )
+        newTree->insertTree(_wignerD.SetupTree(sample,suffix), "Reso_"+_name);
+    
 	//Breit-Wigner
 	newTree->createNode("RelBW_"+_name, rbwStrat, "Reso_"+_name, sampleSize);
 	newTree->createLeaf("mass", _mass, "RelBW_"+_name); //m0
@@ -286,9 +288,10 @@ std::shared_ptr<FunctionTree> AmpRelBreitWignerRes::SetupTree(
 
 		newTree->createNode("NormReso_"+_name, mmultStrat, "AbsVal_"+_name,
 				toySampleSize);
+        
 		//Angular distribution (Normalization)
-		if( (double)_spin )
-			newTree->insertTree(_wignerD.SetupTree(toySample,suffix),
+        if( (double)_spin )
+			newTree->insertTree(_wignerD.SetupTree(toySample,suffix+"_norm"),
 					"NormReso_"+_name);
 		//Breit-Wigner (Normalization)
 		newTree->createNode("NormBW_"+_name, rbwStrat, "NormReso_"+_name,

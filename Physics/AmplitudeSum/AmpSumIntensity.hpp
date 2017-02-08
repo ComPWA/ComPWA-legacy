@@ -242,7 +242,7 @@ protected:
 	 * of accepted flat phsp events
 	 */
 	std::shared_ptr<FunctionTree> setupBasicTree(ParameterList& sample,
-			ParameterList& phspSample);
+                                                 ParameterList& phspSample, std::string suffix="");
 };
 
 } /* namespace AmplitudeSum */

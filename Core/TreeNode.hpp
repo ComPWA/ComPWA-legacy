@@ -101,7 +101,7 @@ public:
 	//! Add link to parents list
 	void addParent(std::shared_ptr<TreeNode> newParent){
 		_parents.push_back(newParent);
-		//newParent->_children.push_back(shared_from_this());
+		newParent->_children.push_back(shared_from_this());
 	};
 
 	//! return parents names

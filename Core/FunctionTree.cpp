@@ -21,12 +21,15 @@ void FunctionTree::insertNode(std::shared_ptr<TreeNode> inNode,
 		std::string parent)
 {
 	std::string n = inNode->getName();
-	nodes_.insert(
+	bool ret = nodes_.insert(
 			std::pair<std::string, std::shared_ptr<TreeNode> >(
 					inNode->getName(),inNode
 			)
-	);
-
+	).second;
+    if( !ret )
+        throw TreeBuildError("FunctionTree::insertNode | "
+                                 "Can not insert node "+inNode->getName()+"!");
+    
 	//Assign new parent to head of new tree, create links
 	std::shared_ptr<TreeNode> parentNode = nodes_.at(parent);
 
@@ -45,10 +48,13 @@ void FunctionTree::addChildNodes(std::shared_ptr<TreeNode> startNode)
 			startNode->getChildren();
 
 	for(unsigned int i=0; i<newChildren.size(); i++){
-		nodes_.insert(
+		bool ret = nodes_.insert(
 				std::pair<std::string, std::shared_ptr<TreeNode> >(
 						newChildren.at(i)->getName(),newChildren.at(i))
-		);
+		).second;
+//        if( !ret )
+//            throw TreeBuildError("FunctionTree::addChildNodes | "
+//                                 "Can not insert node "+inNode->getName()+"!");
 
 		addChildNodes(newChildren.at(i));
 	}
