@@ -79,6 +79,10 @@ namespace ComPWA { namespace Physics { namespace AmplitudeSum {
         virtual double EvaluateWignerD(dataPoint& point) {
             return _wignerD.evaluate(point);
         };
+        //! value of angular distribution at \param point
+        virtual double EvaluateAngular(dataPoint& point) {
+            return EvaluateWignerD(point);
+        };
         
         //! Calculation integral |dynamical amplitude|^2
         //	virtual double GetIntegral() const;
