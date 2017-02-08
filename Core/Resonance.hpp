@@ -105,6 +105,9 @@ public:
 	//! value of resonance at \param point
 	virtual std::complex<double> Evaluate(dataPoint& point) = 0;
 
+    //! value of resonance angular distribution at \param point
+    virtual double EvaluateAngular(dataPoint& point) = 0;
+
 	virtual std::shared_ptr<FunctionTree> SetupTree(
 			ParameterList& sample, ParameterList& toySample,std::string suffix) = 0;
 };
