@@ -36,14 +36,9 @@ before_install:
     - sudo apt-get install -y libboost-all-dev
     - wget https://root.cern.ch/download/root_v5.34.36.Linux-ubuntu14-x86_64-gcc4.8.tar.gz
     - tar xpvfz root_v5.34*
-    - cd root
+    - pushd root
     - source bin/thisroot.sh
-    #- sudo apt-get install -y libboost-system-dev \
-      #libboost-serialization-dev \
-      #libboost-thread-dev \
-      #libboost-data-time-dev \
-      #libboost-log-dev \
-      #libboost-program-options-dev
+    - popd
 install:
     - echo "Installation"
     - lsb_release
