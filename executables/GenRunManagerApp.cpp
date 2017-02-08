@@ -13,6 +13,7 @@
 #include <string>
 #include <memory>
 
+#include <boost/property_tree/xml_parser.hpp>
 
 #include "Physics/DPKinematics/RootGenerator.hpp"
 // Physics Interface header files go here
@@ -25,8 +26,6 @@
 
 #include "Physics/AmplitudeSum/AmpSumIntensity.hpp"
 #include "Physics/DPKinematics/DalitzKinematics.hpp"
-
-//#include "PWA/PlotData.hpp"
 
 using namespace ComPWA;
 using namespace Physics::AmplitudeSum;
@@ -48,11 +47,9 @@ int main(int argc, char **argv){
 	std::shared_ptr<Generator> gen(new Physics::DPKinematics::RootGenerator());
 
 	std::string resoFile = "/test/JPSI_ypipi.xml";
-	boost::property_tree::ptree pt;
-	read_xml(resoFile , pt, boost::property_tree::xml_parser::trim_whitespace);
 	auto a = new AmpSumIntensity("amp", normStyle::none,
 			std::shared_ptr<Efficiency>(new UnitEfficiency()), dataSize);
-	a->Configure(pt);
+	a->Configure(resoFile);
 	a->to_str();
 	std::shared_ptr<Amplitude> amp(a);
 

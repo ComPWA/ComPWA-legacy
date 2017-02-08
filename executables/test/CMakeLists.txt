@@ -8,8 +8,8 @@ FILE(GLOB lib_srcs PolyFit.cpp)
 FILE(GLOB lib_headers PolyFit.hpp)
 
 add_library ( testApps SHARED ${lib_srcs} ${lib_headers} )
-target_link_libraries( testApps ${ROOT_LIBRARIES} )
-target_include_directories ( testApps PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${ROOT_INCLUDE_DIR} )
+target_link_libraries( testApps ${ROOT_LIBRARIES} ${Boost_LIBRARIES})
+target_include_directories ( testApps PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${ROOT_INCLUDE_DIR} ${Boost_INCLUDE_DIR} )
 
 add_executable ( cx0testApp CX0TestApp.cpp ${lib_headers})
 target_link_libraries( cx0testApp pthread )

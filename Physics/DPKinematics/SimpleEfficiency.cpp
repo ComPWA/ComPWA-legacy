@@ -15,7 +15,7 @@
 #include "Physics/DPKinematics/SimpleEfficiency.hpp"
 
 // leave this outside namespaces... otherwise rootcint is lost...
-ClassImp(ComPWA::Physics::DPKinematics::SimpleEfficiency);
+//ClassImp(ComPWA::Physics::DPKinematics::SimpleEfficiency);
 
 namespace ComPWA {
 namespace Physics {

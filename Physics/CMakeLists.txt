@@ -5,7 +5,7 @@ FILE(GLOB lib_headers *.hpp)
 
 add_subdirectory( AmplitudeSum )
 add_subdirectory( DPKinematics )
-#add_subdirectory( BreitWigner )
+add_subdirectory( BreitWigner )
 
 #target_link_libraries( Physics Core ${Boost_LIBRARIES} )
 

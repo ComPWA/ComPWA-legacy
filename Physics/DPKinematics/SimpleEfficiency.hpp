@@ -61,7 +61,7 @@ protected:
   Double_t totalEff;
   Double_t totalEff_error;
 
-  ClassDef(SimpleEfficiency, 3);
+//  ClassDef(SimpleEfficiency, 3);
 };
 
 } /* namespace DPKinematics */
