@@ -140,7 +140,7 @@ namespace ComPWA { namespace Physics { namespace AmplitudeSum {
                 auto amp=new AmpRelBreitWignerRes(_normStyle, _nCalls);
                 amp->Configure(v,params);
                 resoList.push_back(std::shared_ptr<AmpAbsDynamicalFunction>(amp));
-                BOOST_LOG_TRIVIAL(debug) << "AmpSumIntensity::Configure() | "
+                LOG(debug) << "AmpSumIntensity::Configure() | "
                 "adding amplitude:"
                 <<std::endl<<amp->to_str();
             } catch (BadConfig& ex) {}
@@ -148,7 +148,7 @@ namespace ComPWA { namespace Physics { namespace AmplitudeSum {
                 auto amp=new AmpFlatteRes(_normStyle, _nCalls);
                 amp->Configure(v,params);
                 resoList.push_back(std::shared_ptr<AmpAbsDynamicalFunction>(amp));
-                BOOST_LOG_TRIVIAL(debug) << "AmpSumIntensity::Configure() | "
+                LOG(debug) << "AmpSumIntensity::Configure() | "
                 "adding amplitude:"
                 <<std::endl<<amp->to_str();
             } catch (BadConfig& ex) {}
@@ -156,12 +156,12 @@ namespace ComPWA { namespace Physics { namespace AmplitudeSum {
                 auto amp=new NonResonant(_normStyle, _nCalls);
                 amp->Configure(v,params);
                 resoList.push_back(std::shared_ptr<AmpAbsDynamicalFunction>(amp));
-                BOOST_LOG_TRIVIAL(debug) << "AmpSumIntensity::Configure() | "
+                LOG(debug) << "AmpSumIntensity::Configure() | "
                 "adding amplitude:"
                 <<std::endl<<amp->to_str();
             } catch (BadConfig& ex) {}
         }
-        BOOST_LOG_TRIVIAL(info) << "AmpSumIntensity::Configure() | "
+        LOG(info) << "AmpSumIntensity::Configure() | "
         "Loaded property tree!";
         return;
     }
@@ -172,7 +172,7 @@ namespace ComPWA { namespace Physics { namespace AmplitudeSum {
         using boost::property_tree::ptree;
         boost::property_tree::ptree ptSub, pt;
         
-        BOOST_LOG_TRIVIAL(info) << "AmpSumIntensity::Save() | "
+        LOG(info) << "AmpSumIntensity::Save() | "
         "Save amplitude to "<<filePath<<"!";
         auto it = resoList.begin();
         for( ; it!= resoList.end(); ++it)
@@ -203,7 +203,7 @@ namespace ComPWA { namespace Physics { namespace AmplitudeSum {
         for( ; it!=GetResonanceItrLast(); ++it)
             outStr << (*it)->to_str();
         
-        BOOST_LOG_TRIVIAL(info)<<outStr.str();
+        LOG(info)<<outStr.str();
         return;
     }
     
@@ -222,7 +222,7 @@ namespace ComPWA { namespace Physics { namespace AmplitudeSum {
         
         outStr<<std::setw(10)<<" "<<"    ==========\n";
         outStr<<std::setw(10)<<" "<<"     "<<sumFrac;
-        BOOST_LOG_TRIVIAL(info)<<outStr.str();
+        LOG(info)<<outStr.str();
         return;
     }
     
@@ -240,7 +240,7 @@ namespace ComPWA { namespace Physics { namespace AmplitudeSum {
     
     void AmpSumIntensity::SetPrefactor(std::complex<double> pre)
     {
-        BOOST_LOG_TRIVIAL(info) <<"AmpSumIntensity::SetPreFactor() | "
+        LOG(info) <<"AmpSumIntensity::SetPreFactor() | "
         "Setting prefactor "<<pre<<" for all resonance of amplitude "
         <<GetName()<<"!";
         
@@ -287,7 +287,7 @@ namespace ComPWA { namespace Physics { namespace AmplitudeSum {
         }
         _maxFcnVal=maxVal;
         _calcMaxFcnVal=1;
-        BOOST_LOG_TRIVIAL(info)<<"AmpSumIntensity::calcMaxVal() | "
+        LOG(info)<<"AmpSumIntensity::calcMaxVal() | "
         "calculated maximum of amplitude: "
         <<_maxFcnVal<<" at m23sq="<<maxM23<<"/m13sq="<<maxM13;
         return ;
@@ -423,7 +423,7 @@ namespace ComPWA { namespace Physics { namespace AmplitudeSum {
             throw std::runtime_error("AmpSumIntensity::integral() |"
                                      "Result is inf!");
         
-        BOOST_LOG_TRIVIAL(debug)<<"AmpSumIntensity::integrate() | Integration result"
+        LOG(debug)<<"AmpSumIntensity::integrate() | Integration result"
         " for amplitude sum: "<<res<<"+-"<<err<<" relAcc [%]: "<<100*err/res;
         
         return res;
@@ -554,7 +554,7 @@ namespace ComPWA { namespace Physics { namespace AmplitudeSum {
             xLimit_high[0] = _max2;
             xLimit_high[1] = _max1;
         } else {
-            BOOST_LOG_TRIVIAL(error) << "AmpSumIntensity::getIntValue() | "
+            LOG(error) << "AmpSumIntensity::getIntValue() | "
             "Wrong variables specified!";
             return -999;
         }
@@ -591,7 +591,7 @@ namespace ComPWA { namespace Physics { namespace AmplitudeSum {
             try{
                 AMPpdf += (*it)->Evaluate(point);
             } catch (std::exception& ex){
-                BOOST_LOG_TRIVIAL(error) << "AmpSumIntensity::intensityNoEff() | "
+                LOG(error) << "AmpSumIntensity::intensityNoEff() | "
                 "Failed to evaluate resonance "<<(*it)->GetName()<<": "
                 <<ex.what();
                 throw;
@@ -620,7 +620,7 @@ namespace ComPWA { namespace Physics { namespace AmplitudeSum {
         try{
             ampNoEff = result.GetDoubleParameterValue(0);
         } catch (BadParameter& ex){
-            BOOST_LOG_TRIVIAL(error) <<"AmpSumIntensity::intensity() | Can not "
+            LOG(error) <<"AmpSumIntensity::intensity() | Can not "
             "obtain parameter from ParameterList 'result'!";
             throw;
         }
@@ -639,7 +639,7 @@ namespace ComPWA { namespace Physics { namespace AmplitudeSum {
         //	if(Kinematics::instance()->isWithinPhsp(dataP))
         //	AMPpdf = totAmp.evaluateSlice(dataP, reso, nResos,5, N, nF0, nF2);
         if(AMPpdf!=AMPpdf){
-            BOOST_LOG_TRIVIAL(error)<<"Error AmpSumIntensity: Intensity is not a number!!";
+            LOG(error)<<"Error AmpSumIntensity: Intensity is not a number!!";
             AMPpdf = 0;
         }
         double eff=eff_->evaluate(dataP);
@@ -692,12 +692,12 @@ namespace ComPWA { namespace Physics { namespace AmplitudeSum {
             norm = amp->GetIntegral(resoList);
             //norm = amp->GetIntegral();
         } catch (std::exception& ex){
-            BOOST_LOG_TRIVIAL(error)<< "FitResult::calcFraction() | "
+            LOG(error)<< "FitResult::calcFraction() | "
             "Normalization can't be calculated: "<<ex.what();
             throw;
         }
         
-        BOOST_LOG_TRIVIAL(debug)<<"FitResult::calcFraction() | "
+        LOG(debug)<<"FitResult::calcFraction() | "
         "Amplitude "<<ampName<< " Norm="<<norm;
         
         // Start loop over resonances
@@ -715,7 +715,7 @@ namespace ComPWA { namespace Physics { namespace AmplitudeSum {
             //		if( it != it2 ){// Int |A+B|^2 = |A|^2 + |B|^2 + A*B + B*A
             //			double tmp22 = amp->GetIntegralInterference(it2,it2);
             //			double tmp12 = amp->GetIntegralInterference(it,it2);
-            //			BOOST_LOG_TRIVIAL(debug) << "FitResult::calcFraction() | Calculating"
+            //			LOG(debug) << "FitResult::calcFraction() | Calculating"
             //					<<" amplitude integral for composed amplitudes "
             //					<<(*it)->GetName()<<" and "<<(*it2)->GetName()<<": "
             //					<<"(11) "<<nom <<" (22) "<<tmp22 <<" (12) "<<tmp12
@@ -723,7 +723,7 @@ namespace ComPWA { namespace Physics { namespace AmplitudeSum {
             //			nom += tmp22;
             //			nom += tmp12;
             //		} else {
-            //		BOOST_LOG_TRIVIAL(debug) << "FitResult::calcFraction() | Resonance "
+            //		LOG(debug) << "FitResult::calcFraction() | Resonance "
             //				"integal for "<<(*it)->GetName()<<": "<<nom;
             //		}
             std::vector<resonanceItr> thisAmp; thisAmp.push_back(cReso);
@@ -731,7 +731,7 @@ namespace ComPWA { namespace Physics { namespace AmplitudeSum {
             //Calculate resonance integral. This includes the magnitude^2.
             double nom = amp->GetIntegral(thisAmp);
             
-            BOOST_LOG_TRIVIAL(debug) << "FitResult::calcFraction() | Resonance "
+            LOG(debug) << "FitResult::calcFraction() | Resonance "
             "integal for "<<(*cReso)->GetName()<<": "<<nom;
             
             std::string resName = ampName+" "+(*cReso)->GetName()+"_FF";
@@ -857,12 +857,12 @@ namespace ComPWA { namespace Physics { namespace AmplitudeSum {
         int phspSampleSize = phspSample.GetMultiDouble(0)->GetNValues();
         
         if(sampleSize==0){
-            BOOST_LOG_TRIVIAL(error) << "AmpSumIntensity::setupBasicTree() | "
+            LOG(error) << "AmpSumIntensity::setupBasicTree() | "
             "Data sample empty!";
             return std::shared_ptr<FunctionTree>();
         }
         if(phspSampleSize==0){
-            BOOST_LOG_TRIVIAL(error) << "AmpSumIntensity::setupBasicTree() | "
+            LOG(error) << "AmpSumIntensity::setupBasicTree() | "
             "Phsp sample empty!";
             return std::shared_ptr<FunctionTree>();
         }
@@ -887,7 +887,7 @@ namespace ComPWA { namespace Physics { namespace AmplitudeSum {
             newTree->insertTree(resTree, "Amplitude");
         }
         
-        BOOST_LOG_TRIVIAL(debug)<<"AmpSumIntensity::setupBasicTree(): tree constructed!!";
+        LOG(debug)<<"AmpSumIntensity::setupBasicTree(): tree constructed!!";
         return newTree;
     }
 } /* namespace AmplitudeSum */

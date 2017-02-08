@@ -51,7 +51,7 @@ double shiftAngle(double v)
 	while(val> pi) val-=2*pi;
 	while(val< -pi ) val+=2*pi;
 	if(val!=originalVal)
-		BOOST_LOG_TRIVIAL(info) << "shiftAngle() | Shifting parameter from "
+		LOG(info) << "shiftAngle() | Shifting parameter from "
 		<<originalVal<< " to "<<val<<"!";
 	return val;
 }
@@ -100,7 +100,7 @@ std::shared_ptr<FitResult> MinuitIF::exec(ParameterList& par)
 			upar.Fix(actPat->GetName());
 	}
 
-	BOOST_LOG_TRIVIAL(info) << "MinuitIF::exec() | Number of parameters (free): "
+	LOG(info) << "MinuitIF::exec() | Number of parameters (free): "
 			<<par.GetNDouble()<<" ("<<freePars<<")";
 
 	//use MnStrategy class to set all options for the fit
@@ -120,21 +120,21 @@ std::shared_ptr<FitResult> MinuitIF::exec(ParameterList& par)
 	//	oa << BOOST_SERIALIZATION_NVP(strat);
 	//	ofs.close();
 
-	BOOST_LOG_TRIVIAL(debug) << "Minuit strategy parameters: (from "<<
+	LOG(debug) << "Minuit strategy parameters: (from "<<
 			path+"Optimizer/Minuit2/MinuitStrategy.xml"<<")";
-	BOOST_LOG_TRIVIAL(debug) << "Gradient number of steps: "
+	LOG(debug) << "Gradient number of steps: "
 			<<strat.GradientNCycles();
-	BOOST_LOG_TRIVIAL(debug) << "Gradient step tolerance: "
+	LOG(debug) << "Gradient step tolerance: "
 			<<strat.GradientStepTolerance();
-	BOOST_LOG_TRIVIAL(debug) << "Gradient tolerance: "
+	LOG(debug) << "Gradient tolerance: "
 			<<strat.GradientTolerance();
-	BOOST_LOG_TRIVIAL(debug) << "Hesse number of steps: "
+	LOG(debug) << "Hesse number of steps: "
 			<<strat.HessianNCycles();
-	BOOST_LOG_TRIVIAL(debug) << "Hesse gradient number of steps: "
+	LOG(debug) << "Hesse gradient number of steps: "
 			<<strat.HessianGradientNCycles();
-	BOOST_LOG_TRIVIAL(debug) << "Hesse step tolerance: "
+	LOG(debug) << "Hesse step tolerance: "
 			<<strat.HessianStepTolerance();
-	BOOST_LOG_TRIVIAL(debug) << "Hesse G2 tolerance: "
+	LOG(debug) << "Hesse G2 tolerance: "
 			<<strat.HessianG2Tolerance();
 
 	//MIGRAD
@@ -151,25 +151,25 @@ std::shared_ptr<FitResult> MinuitIF::exec(ParameterList& par)
 	 *           distance from minimum) will be: edm < tolerance * 10**-3
 	 *           Default value of tolerance used is 0.1
 	 */
-	BOOST_LOG_TRIVIAL(info) <<"MinuitIF::exec() | Starting migrad: "
+	LOG(info) <<"MinuitIF::exec() | Starting migrad: "
 			"maxCalls="<<maxfcn<<" tolerance="<<tolerance;
 
 	FunctionMinimum minMin = migrad(maxfcn,tolerance);//(maxfcn,tolerance)
 
-	BOOST_LOG_TRIVIAL(info) <<"MinuitIF::exec() | Migrad finished! "
+	LOG(info) <<"MinuitIF::exec() | Migrad finished! "
 			"Minimum is valid = "<<minMin.IsValid();
 
 	//HESSE
 	MnHesse hesse(strat);
 	if( minMin.IsValid() && enableHesse ) {
-		BOOST_LOG_TRIVIAL(info) <<"MinuitIF::exec() | Starting hesse";
+		LOG(info) <<"MinuitIF::exec() | Starting hesse";
 		hesse(_myFcn,minMin);//function minimum minMin is updated by hesse
-		BOOST_LOG_TRIVIAL(info) <<"MinuitIF::exec() | Hesse finished";
+		LOG(info) <<"MinuitIF::exec() | Hesse finished";
 	} else
-		BOOST_LOG_TRIVIAL(info) <<"MinuitIF::exec() | Migrad failed to "
+		LOG(info) <<"MinuitIF::exec() | Migrad failed to "
 				"find minimum! Skip hesse and minos!";
 
-	BOOST_LOG_TRIVIAL(info) << "MinuitIF::exec() | Minimization finished! "
+	LOG(info) << "MinuitIF::exec() | Minimization finished! "
 			"LH = "<<std::setprecision(10)<<minMin.Fval();
 
 	//MINOS
@@ -203,13 +203,13 @@ std::shared_ptr<FitResult> MinuitIF::exec(ParameterList& par)
 		if( finalPar->GetErrorType()==ErrorType::ASYM  ){
 			// Skip minos and fill symmetic errors
 			if(!minMin.IsValid() || !enableMinos){
-				BOOST_LOG_TRIVIAL(info) <<"MinuitIF::exec() | Skip Minos "
+				LOG(info) <<"MinuitIF::exec() | Skip Minos "
 						"for parameter "<<i<< "...";
 				finalPar->SetError(minState.Error(finalPar->GetName()));
 				continue;
 			}
 			//asymmetric errors -> run minos
-			BOOST_LOG_TRIVIAL(info) <<"MinuitIF::exec() | Run minos "
+			LOG(info) <<"MinuitIF::exec() | Run minos "
 					"for parameter "<<i<< "...";
 			MinosError err = minos.Minos(i);
 			//lower = pair.first, upper= pair.second
@@ -227,7 +227,7 @@ std::shared_ptr<FitResult> MinuitIF::exec(ParameterList& par)
 			);
 		}
 	}
-	BOOST_LOG_TRIVIAL(debug)<<"MinuitIF::exec() | "<<resultsOut.str();
+	LOG(debug)<<"MinuitIF::exec() | "<<resultsOut.str();
 
 	// Create fit result
 	std::shared_ptr<FitResult> result(

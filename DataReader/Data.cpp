@@ -68,7 +68,7 @@ void rndReduceSet(unsigned int size, std::shared_ptr<Generator> gen,
 	}
 	if(out2) assert(out1->getNEvents() == out2->getNEvents());
 
-	BOOST_LOG_TRIVIAL(debug) << "DataReader::rndReduceSet() | sample size reduced to "<<out1->getNEvents();
+	LOG(debug) << "DataReader::rndReduceSet() | sample size reduced to "<<out1->getNEvents();
 	return;
 }
 
@@ -96,7 +96,7 @@ double Data::getMaxWeight() const
 void Data::reduceToPhsp()
 {
 	std::vector<Event> tmp;
-	BOOST_LOG_TRIVIAL(info)<<"Data::reduceToPhsp() | "
+	LOG(info)<<"Data::reduceToPhsp() | "
 			"Remove all events outside PHSP boundary from data sample.";
 
 	for(unsigned int evt=0; evt<fEvents.size(); evt++){
@@ -109,7 +109,7 @@ void Data::reduceToPhsp()
 		//		if(Kinematics::instance()->isWithinPhsp(p))
 		tmp.push_back(fEvents.at(evt));
 	}
-	BOOST_LOG_TRIVIAL(info)<<"Data::reduceToPhsp() | "
+	LOG(info)<<"Data::reduceToPhsp() | "
 			<<tmp.size()<<" from "<<fEvents.size()
 			<<"("<<((double)tmp.size())/fEvents.size()*100 <<"%) were kept.";
 	fEvents = tmp;
@@ -124,7 +124,7 @@ void Data::resetEfficiency(double e)
 void Data::reduce(unsigned int newSize)
 {
 	if(newSize >= fEvents.size()) {
-		BOOST_LOG_TRIVIAL(error) << "RooReader::reduce() requested size too large, cant reduce sample!";
+		LOG(error) << "RooReader::reduce() requested size too large, cant reduce sample!";
 		return;
 	}
 	fEvents.resize(newSize);
@@ -265,7 +265,7 @@ void Data::applyCorrection(DataCorrection& corr)
 	  if(w*oldW > maxWeight) maxWeight = w*oldW;
 	  fEvents.at(i).setWeight(w*oldW);
    }
-   BOOST_LOG_TRIVIAL(info)<<"Data::applyCorrection() | "
+   LOG(info)<<"Data::applyCorrection() | "
 	  "Sample corrected! Sum of weights squared is "<<sumWeightSq;
    return;
 }

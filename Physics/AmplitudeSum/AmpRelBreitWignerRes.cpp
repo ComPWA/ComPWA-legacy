@@ -87,7 +87,7 @@ void AmpRelBreitWignerRes::Configure(
 			_width = list.GetDoubleParameter(tmp_width_name.get());
 			_width_writeByName = 1;
 		} catch (BadParameter& ex){
-			BOOST_LOG_TRIVIAL(error) <<"AmpRelBreitWignerRes::Configure() | "
+			LOG(error) <<"AmpRelBreitWignerRes::Configure() | "
 					"Requesting parameter "<<tmp_width_name.get()<<" but"
 					" was not found in parameter list. "
 					"Quit since parameter is mandatory!";
@@ -153,12 +153,12 @@ std::complex<double> AmpRelBreitWignerRes::EvaluateAmp(dataPoint& point)
 				_mass1,
 				_mass2,
 				_width->GetValue(),
-				_spin.Val(),
+				(double)_spin,
 				_mesonRadius->GetValue(),
 				_ffType
 		);
 	} catch (std::exception& ex){
-		BOOST_LOG_TRIVIAL(error) <<"AmpRelBreitWignerRes::EvaluateAmp() | "
+		LOG(error) <<"AmpRelBreitWignerRes::EvaluateAmp() | "
 				"Dynamical function can not be evalutated: "<<ex.what();
 		throw;
 	}
@@ -222,7 +222,7 @@ std::shared_ptr<FunctionTree> AmpRelBreitWignerRes::SetupTree(
 	int sampleSize = sample.GetMultiDouble(0)->GetNValues();
 	int toySampleSize = toySample.GetMultiDouble(0)->GetNValues();
 
-	BOOST_LOG_TRIVIAL(info) << "AmpRelBreitWignerRes::setupBasicTree() | "
+	LOG(info) << "AmpRelBreitWignerRes::setupBasicTree() | "
 			<<_name << " nEvents=" <<sampleSize<<" nPhspEvents="
 			<<toySampleSize;
 
@@ -257,14 +257,14 @@ std::shared_ptr<FunctionTree> AmpRelBreitWignerRes::SetupTree(
 	newTree->createLeaf("Intens_"+_name, _mag, "C_"+_name); //r
 	newTree->createLeaf("Phase_"+_name, _phase, "C_"+_name); //phi
 	//Angular distribution
-	if( _spin.Val() )
+	if( (double)_spin )
 		newTree->insertTree(_wignerD.SetupTree(sample,suffix), "Reso_"+_name);
 
 	//Breit-Wigner
 	newTree->createNode("RelBW_"+_name, rbwStrat, "Reso_"+_name, sampleSize);
 	newTree->createLeaf("mass", _mass, "RelBW_"+_name); //m0
 	newTree->createLeaf("width", _width, "RelBW_"+_name); //resWidth
-	newTree->createLeaf("spin", _spin.Val(), "RelBW_"+_name); //spin
+	newTree->createLeaf("spin", (double)_spin, "RelBW_"+_name); //spin
 	newTree->createLeaf("mesonRadius", _mesonRadius, "RelBW_"+_name); //d
 	newTree->createLeaf("formFactorType", _ffType , "RelBW_"+_name); //d
 	newTree->createLeaf("ma", _mass1, "RelBW_"+_name); //ma
@@ -287,7 +287,7 @@ std::shared_ptr<FunctionTree> AmpRelBreitWignerRes::SetupTree(
 		newTree->createNode("NormReso_"+_name, mmultStrat, "AbsVal_"+_name,
 				toySampleSize);
 		//Angular distribution (Normalization)
-		if( _spin.Val() )
+		if( (double)_spin )
 			newTree->insertTree(_wignerD.SetupTree(toySample,suffix),
 					"NormReso_"+_name);
 		//Breit-Wigner (Normalization)
@@ -295,7 +295,7 @@ std::shared_ptr<FunctionTree> AmpRelBreitWignerRes::SetupTree(
 				toySampleSize); //BW
 		newTree->createLeaf("mass", _mass, "NormBW_"+_name); //m0
 		newTree->createLeaf("width", _width, "NormBW_"+_name); //resWidth
-		newTree->createLeaf("spin", _spin.Val(), "NormBW_"+_name); //spin
+		newTree->createLeaf("spin", (double)_spin, "NormBW_"+_name); //spin
 		newTree->createLeaf("mesonRadius", _mesonRadius, "NormBW_"+_name); //d
 		newTree->createLeaf("formFactorType", _ffType , "NormBW_"+_name); //d
 		newTree->createLeaf("ma", _mass1, "NormBW_"+_name); //ma
@@ -393,7 +393,7 @@ bool BreitWignerStrategy::execute(ParameterList& paras,
 					spin, d, ffType
 			);
 		} catch ( std::exception& ex ) {
-			BOOST_LOG_TRIVIAL(error) << "BreitWignerStrategy::execute() | "
+			LOG(error) << "BreitWignerStrategy::execute() | "
 					<<ex.what();
 			throw( std::runtime_error("BreitWignerStrategy::execute() | "
 					"Evaluation of dynamic function failed!")

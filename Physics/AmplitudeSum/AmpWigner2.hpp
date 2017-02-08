@@ -31,6 +31,7 @@
 #include "Physics/DPKinematics/DalitzKinematics.hpp"
 #include "Core/Utility.hpp"
 
+
 namespace ComPWA {
 namespace Physics {
 namespace AmplitudeSum {

@@ -15,10 +15,7 @@
 
 #include <cmath>
 #include "Physics/AmplitudeSum/AmpWigner2.hpp"
-
-#include <boost/math/special_functions/legendre.hpp>
-
-//#include "qft++.h"
+#include "Physics/AmplitudeSum/WignerD.hpp"
 
 namespace ComPWA { namespace Physics { namespace AmplitudeSum {
     
@@ -32,11 +29,12 @@ namespace ComPWA { namespace Physics { namespace AmplitudeSum {
     double AmpWigner2::evaluate(dataPoint& point)
     {
         return dynamicalFunction(
-                                 _spin.Val(), _mu, _muPrime, point.getVal(_varId)
+                                 _spin, Spin(_mu), Spin(_muPrime), point.getVal(_varId)
                                  );
     }
     
-    double AmpWigner2::dynamicalFunction(ComPWA::Spin J, ComPWA::Spin mu, ComPWA::Spin muPrime, double cosTheta)
+    double AmpWigner2::dynamicalFunction(ComPWA::Spin J, ComPWA::Spin mu,
+                                         ComPWA::Spin muPrime, double cosTheta)
     {
         /* We assume that we have spin 0 particles only and the Wigner_d functions simplifies to
          * ordinary Legendre polynomials. We normalize the square of these to one by the pre factor
@@ -44,18 +42,13 @@ namespace ComPWA { namespace Physics { namespace AmplitudeSum {
          * normalization.  */
         //	double norm = 1/sqrt(2*J+1);
         double norm = 1;
-        if(J==0) return norm; //assure that angular term is properly normalized
+        if((double)J==0) return norm; //assure that angular term is properly normalized
         if(cosTheta>1 ||cosTheta<-1)
             throw std::runtime_error( "AmpWigner2::dynamicalFunction() | "
                                      "scattering angle out of range! Datapoint beyond phsp?");
         
-        
         double result = 1.0;
-        //TODO: this is the only point in which we use qft++, we should be rid of it
-        //	::Spin _J(J.GetNumerator(), J.GetDenominator());
-        //	::Spin _mu(mu.GetNumerator(), mu.GetDenominator());
-        //	::Spin _muPrime(muPrime.GetNumerator(), muPrime.GetDenominator());
-        //    	result = Wigner_d( _J, _mu, _muPrime, acos(cosTheta) );
+        result = Wigner_d( J, mu, muPrime, acos(cosTheta) );
         
 #ifdef DEBUG
         if( ( result!=result ) )
@@ -70,7 +63,7 @@ namespace ComPWA { namespace Physics { namespace AmplitudeSum {
                                                        double cosBeta, double cosGamma, ComPWA::Spin J, ComPWA::Spin mu,
                                                        ComPWA::Spin muPrime )
     {
-        if(J==0) return 1.0;
+        if((double)J==0) return 1.0;
         
         std::complex<double> i(0,1);
         
@@ -99,7 +92,7 @@ namespace ComPWA { namespace Physics { namespace AmplitudeSum {
                                                    new WignerDStrategy("AngD"+suffix) );
         newTree->createHead("AngD_"+suffix, angdStrat, sampleSize);
         
-        newTree->createLeaf("spin",_spin.Val(), "AngD_"+suffix); //spin
+        newTree->createLeaf("spin",(double)_spin, "AngD_"+suffix); //spin
         newTree->createLeaf("m", _mu, "AngD_"+suffix); //OutSpin 1
         newTree->createLeaf("n", _muPrime, "AngD_"+suffix); //OutSpin 2
         newTree->createLeaf("AngD_sample", sample.GetMultiDouble(_varId), "AngD_"+suffix);
@@ -132,7 +125,7 @@ namespace ComPWA { namespace Physics { namespace AmplitudeSum {
                                                               _inSpin,_outSpin1,_outSpin2,_angle->GetValue(ele)
                                                               );
             } catch (std::exception &ex) {
-                BOOST_LOG_TRIVIAL(error) << "WignerDStrategy::execute() | "
+                LOG(error) << "WignerDStrategy::execute() | "
                 <<ex.what();
                 throw std::runtime_error("WignerDStrategy::execute() | "
                                          "Evaluation of dynamical function failed!");

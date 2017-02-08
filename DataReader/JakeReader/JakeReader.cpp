@@ -166,7 +166,7 @@ void JakeReader::storeEvents(){
 void JakeReader::writeData(std::string file, std::string trName){
    if(file!="") fileName=file;
    if(trName!="") treeName=trName;
-  /* BOOST_LOG_TRIVIAL(info) << "RootReader: writing current vector of events to file "<<fileName;
+  /* LOG(info) << "RootReader: writing current vector of events to file "<<fileName;
    TFile* fFile = new TFile(fileName.c_str(),"UPDATE");
    if(fFile->IsZombie())
 	  throw std::runtime_error("RootReader::RootReader() can't open data file: "+fileName);

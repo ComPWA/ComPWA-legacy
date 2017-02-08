@@ -62,7 +62,7 @@ unsigned int dataPoint::getID(std::string name) const
 	unsigned int size = varNames.size();
 	unsigned int pos = find(varNames.begin(), varNames.end(), name) - varNames.begin();
 	if( pos > size-1 ) {
-		BOOST_LOG_TRIVIAL(error)<<"dataPoint::getVal() | "
+		LOG(error)<<"dataPoint::getVal() | "
 				"Variable with name "<<name<<" not found!";
 		return 999;
 	}
@@ -75,7 +75,7 @@ double dataPoint::getVal(std::string name) const
 	unsigned int size = varNames.size();
 	unsigned int pos = find(varNames.begin(), varNames.end(), name) - varNames.begin();
 	if( pos > size-1 ) {
-		BOOST_LOG_TRIVIAL(error)<<"dataPoint::getVal() | "
+		LOG(error)<<"dataPoint::getVal() | "
 				"Variable with name "<<name<<" not found!";
 		return -999;
 	}
@@ -88,7 +88,7 @@ void dataPoint::setVal(std::string name, double val)
 	unsigned int size = varNames.size();
 	unsigned int pos = find(varNames.begin(), varNames.end(), name) - varNames.begin();
 	if( pos > size-1 ) {
-		BOOST_LOG_TRIVIAL(error)<<"dataPoint::setVal() | "
+		LOG(error)<<"dataPoint::setVal() | "
 				"Variable with name "<<name<<" not found!";
 		return;
 	}
@@ -105,7 +105,7 @@ void dataPoint::setVal(unsigned int num, double val)
 	try{
 		var.at(num)=val;
 	} catch (...) {
-		BOOST_LOG_TRIVIAL(error)<<"dataPoint::setVal() | "
+		LOG(error)<<"dataPoint::setVal() | "
 				"Can not access index "<<num<<"!";
 		throw;
 	}
@@ -119,7 +119,7 @@ double dataPoint::getVal(unsigned int num) const
 	try{
 		rt = var.at(num);
 	} catch (...) {
-		BOOST_LOG_TRIVIAL(error)<<"dataPoint::getVal() | "
+		LOG(error)<<"dataPoint::getVal() | "
 				"Can not access index "<<num<<"!";
 		throw;
 	}

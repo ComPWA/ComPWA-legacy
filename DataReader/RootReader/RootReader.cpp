@@ -141,7 +141,7 @@ namespace ComPWA {
                 if(file!="") fileName=file;
                 if(trName!="") treeName=trName;
                 
-                BOOST_LOG_TRIVIAL(info) << "RootReader::writeData() | Writing current "
+                LOG(info) << "RootReader::writeData() | Writing current "
                 "vector of events to file "<<fileName;
                 
                 TFile* fFile = new TFile(fileName.c_str(),"UPDATE");

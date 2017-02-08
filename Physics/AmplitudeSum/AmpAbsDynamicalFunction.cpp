@@ -81,7 +81,7 @@ namespace ComPWA { namespace Physics { namespace AmplitudeSum {
         str<<"AmpAbsDynamicalFunction | "<<_name<<" enabled="<<_enable
         << " nCalls="<<_nCalls
         << " varId1="<<GetVarIdA()<<" varId2="<<GetVarIdB()<<std::endl
-        <<" J="<<_spin.Val()<<" P="<<_parity<<" C="<<_cparity
+        <<" J="<<(double)_spin<<" P="<<_parity<<" C="<<_cparity
         <<" ffType="<<_ffType <<" mother: "<<_nameMother
         <<" particleA: "<<_name1<<" particleB: "<<_name2<<std::endl;
         str<<" normStyle="<<_normStyle <<" modified?"<<_modified
@@ -149,7 +149,7 @@ namespace ComPWA { namespace Physics { namespace AmplitudeSum {
                                                             );
                     _mag_writeByName = 1;
                 } else {
-                    BOOST_LOG_TRIVIAL(error) <<"AmpAbsDynamicalFunction::Configure() | "
+                    LOG(error) <<"AmpAbsDynamicalFunction::Configure() | "
                     "Requesting parameter "<<tmp_mag_name.get()<<" but"
                     " was not found in parameter list. "
                     "Quit since parameter is mandatory!";
@@ -189,7 +189,7 @@ namespace ComPWA { namespace Physics { namespace AmplitudeSum {
                                                               );
                     _phase_writeByName = 1;
                 } else {
-                    BOOST_LOG_TRIVIAL(error) <<"AmpAbsDynamicalFunction::Configure() | "
+                    LOG(error) <<"AmpAbsDynamicalFunction::Configure() | "
                     "Requesting parameter "<<tmp_phase_name.get()<<" but"
                     " was not found in parameter list. "
                     "Quit since parameter is mandatory!";
@@ -229,7 +229,7 @@ namespace ComPWA { namespace Physics { namespace AmplitudeSum {
                                                              );
                     _mass_writeByName = 1;
                 } else {
-                    BOOST_LOG_TRIVIAL(error) <<"AmpAbsDynamicalFunction::Configure() | "
+                    LOG(error) <<"AmpAbsDynamicalFunction::Configure() | "
                     "Requesting parameter "<<tmp_mass_name.get()<<" but"
                     " was not found in parameter list. "
                     "Quit since parameter is mandatory!";
@@ -267,7 +267,7 @@ namespace ComPWA { namespace Physics { namespace AmplitudeSum {
                                                                      );
                     _motherRadius_writeByName = 1;
                 } else {
-                    BOOST_LOG_TRIVIAL(error) <<"AmpAbsDynamicalFunction::Configure() | "
+                    LOG(error) <<"AmpAbsDynamicalFunction::Configure() | "
                     "Requesting parameter "<<tmp_motherRadius_name.get()<<" but"
                     " was not found in parameter list. "
                     "Continue since parameter is not mandatory!";
@@ -313,7 +313,7 @@ namespace ComPWA { namespace Physics { namespace AmplitudeSum {
                                                                     );
                     _mesonRadius_writeByName = 1;
                 } else {
-                    BOOST_LOG_TRIVIAL(error) <<"AmpAbsDynamicalFunction::Configure() | "
+                    LOG(error) <<"AmpAbsDynamicalFunction::Configure() | "
                     "Requesting parameter "<<tmp_mesonRadius_name.get()<<" but"
                     " was not found in parameter list. "
                     "Quit since parameter is mandatory!";
@@ -432,14 +432,14 @@ namespace ComPWA { namespace Physics { namespace AmplitudeSum {
             pt.put("mesonRadius_min", _mesonRadius->GetMinValue());
             pt.put("mesonRadius_max", _mesonRadius->GetMaxValue());
         }
-        pt.put("Spin", _spin.Val());
+        pt.put("Spin", (double)_spin);
         pt.put("Parity", _parity);
         if( _cparity )
             pt.put("Cparity", _cparity);
-        if( _m != 0)
-            pt.put("m", _m.Val());
-        if( _n != 0)
-            pt.put("n", _n.Val());
+        if( (int)_m != 0)
+            pt.put("m", (double)_m);
+        if( (int)_n != 0)
+            pt.put("n", (double)_n);
         
         pt.put("varIdA", GetVarIdA());
         pt.put("varIdB", GetVarIdB());
@@ -501,7 +501,7 @@ namespace ComPWA { namespace Physics { namespace AmplitudeSum {
         try{
             res = EvaluateAmp(point);
         } catch (std::exception& ex){
-            BOOST_LOG_TRIVIAL(error) << "AmpAbsDynamicalFunction::Evaluate() | "
+            LOG(error) << "AmpAbsDynamicalFunction::Evaluate() | "
             "Failed to evaluate dynamic part of resonance "<<GetName()<<" at"
             " point:"<<std::endl
             <<point<<std::endl
@@ -512,7 +512,7 @@ namespace ComPWA { namespace Physics { namespace AmplitudeSum {
         try{
             ang = EvaluateWignerD(point);
         } catch (std::exception& ex){
-            BOOST_LOG_TRIVIAL(error) << "AmpAbsDynamicalFunction::Evaluate() | "
+            LOG(error) << "AmpAbsDynamicalFunction::Evaluate() | "
             "Failed to evaluate angular part of resonance "<<GetName()<<" at"
             " point:"<<std::endl
             <<point<<std::endl
@@ -564,7 +564,7 @@ namespace ComPWA { namespace Physics { namespace AmplitudeSum {
         try{
             res = amp->EvaluateAmp(point);
         } catch (std::exception& ex){
-            BOOST_LOG_TRIVIAL(error)<<"AmpAbsDynamicalFunction -> evalAmp() | "
+            LOG(error)<<"AmpAbsDynamicalFunction -> evalAmp() | "
             "Amplitude can not be evaluated at point "<<point<<"! "
             <<ex.what();
             throw;
@@ -581,9 +581,7 @@ namespace ComPWA { namespace Physics { namespace AmplitudeSum {
         double res=0.0, err=0.0;
         
         ComPWA::Physics::DPKinematics::DalitzKinematics* kin =
-        dynamic_cast<ComPWA::Physics::DPKinematics::DalitzKinematics*>(
-                                                                       Kinematics::instance()
-                                                                       );
+        dynamic_cast<ComPWA::Physics::DPKinematics::DalitzKinematics*>(Kinematics::instance());
         
         //	auto var1_limit = kin->GetMinMax( GetVarIdA() );
         //	auto var2_limit = kin->GetMinMax( GetVarIdB() );
@@ -627,7 +625,7 @@ namespace ComPWA { namespace Physics { namespace AmplitudeSum {
             throw std::runtime_error("AmpAbsDynamicalFunction::integral() |"
                                      "Result of resonance "+GetName()+" is zero!");
         
-        BOOST_LOG_TRIVIAL(debug)<<"AmpAbsDynamicalFunction::integral() | "
+        LOG(debug)<<"AmpAbsDynamicalFunction::integral() | "
         "Integration result for |"<<_name<<"|^2: "
         <<res<<"+-"<<err<<" relAcc [%]: "<<100*err/res;
 #endif
@@ -863,7 +861,7 @@ namespace ComPWA { namespace Physics { namespace AmplitudeSum {
         newTree->createLeaf("g", g, stratName);
         newTree->createLeaf("massA", ma, stratName);
         newTree->createLeaf("massB", mb, stratName);
-        newTree->createLeaf("spin", spin.Val(), stratName);
+        newTree->createLeaf("spin", (double)spin, stratName);
         newTree->createLeaf("mesonRadius", mesonRadius, stratName);
         newTree->createLeaf("ffType", (double) type, stratName);
         
@@ -961,7 +959,7 @@ namespace ComPWA { namespace Physics { namespace AmplitudeSum {
                                                                            phspFactors.at(ele)
                                                                            );
             } catch (std::exception& ex) {
-                BOOST_LOG_TRIVIAL(error) << "couplingToWidthStrat::execute() | "
+                LOG(error) << "couplingToWidthStrat::execute() | "
                 <<ex.what();
                 throw( std::runtime_error("couplingToWidthStrat::execute() | "
                                           "Evaluation of dynamic function failed!")

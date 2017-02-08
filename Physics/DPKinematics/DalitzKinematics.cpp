@@ -48,12 +48,12 @@ namespace ComPWA { namespace Physics { namespace DPKinematics {
             PhysConst::instance()->findParticle(_name3).getSpinLikeQuantumNumber(                QuantumNumberIDs::SPIN).GetNumerator();
             
         } catch (std::exception& ex){
-            BOOST_LOG_TRIVIAL(error) << "DalitzKinematics::DalitzKinematics() | "
+            LOG(error) << "DalitzKinematics::DalitzKinematics() | "
             "One or more particles can not be initialized: "<<ex.what();
             throw;
         }
         
-        BOOST_LOG_TRIVIAL(info) << "DalitzKinematics::DalitzKinematics() | Setting up decay "
+        LOG(info) << "DalitzKinematics::DalitzKinematics() | Setting up decay "
         <<_nameMother<<"->"<<_name1<<" "<<_name2<<" "<<_name3;
         
         init();
@@ -76,7 +76,7 @@ namespace ComPWA { namespace Physics { namespace DPKinematics {
             spin3 =
             PhysConst::instance()->findParticle(_name3).getSpinLikeQuantumNumber(       QuantumNumberIDs::SPIN).GetNumerator();
         } catch (std::exception& ex){
-            BOOST_LOG_TRIVIAL(error) << "DalitzKinematics::DalitzKinematics() | "
+            LOG(error) << "DalitzKinematics::DalitzKinematics() | "
             "One or more particles can not be initialized: "<<ex.what();
             throw;
         }
@@ -118,10 +118,10 @@ namespace ComPWA { namespace Physics { namespace DPKinematics {
         _varTitles.push_back("cos(#Theta^{"+name2+name3+"}_{"+name1+name3+"})");
         _varTitles.push_back("cos(#Theta^{"+name2+name3+"}_{"+name1+name2+"})");
         
-        BOOST_LOG_TRIVIAL(debug) << "DalitzKinematics::init() | "
+        LOG(debug) << "DalitzKinematics::init() | "
         "Variables and boundaries: ";
         for(int i=0; i<9; ++i)
-            BOOST_LOG_TRIVIAL(debug) << "[ "<<i<<" ] "<<GetMinMax(i).first
+            LOG(debug) << "[ "<<i<<" ] "<<GetMinMax(i).first
             <<" < "<< _varNames.at(i)<<" ("<<_varTitles.at(i)<<") "<<" < "
             <<GetMinMax(i).second;
         
@@ -304,7 +304,7 @@ namespace ComPWA { namespace Physics { namespace DPKinematics {
         unsigned int num=n;
         if(num%2!=0) {
             num-=1;
-            BOOST_LOG_TRIVIAL(info)<<"DalitzKinematics::phspContour() | "
+            LOG(info)<<"DalitzKinematics::phspContour() | "
             "Setting size to a even number. Assure that the size of "
             "your arrays is "<<num*2+1<<"!";
         }
@@ -469,7 +469,7 @@ namespace ComPWA { namespace Physics { namespace DPKinematics {
         gsl_monte_vegas_state *s = gsl_monte_vegas_alloc (dim);
         gsl_monte_vegas_integrate (&F, xLimit_low, xLimit_high, 2, calls, r,s,&res, &err);
         gsl_monte_vegas_free(s);
-        BOOST_LOG_TRIVIAL(debug)<<"DalitzKinematics::calcDParea() | Dalitz plot area (MC integration): "
+        LOG(debug)<<"DalitzKinematics::calcDParea() | Dalitz plot area (MC integration): "
         <<"("<<res<<"+-"<<err<<") GeV^4 relAcc [%]: "<<100*err/res;
         
         return res;
@@ -480,7 +480,7 @@ namespace ComPWA { namespace Physics { namespace DPKinematics {
     {
         
         //    std::cout<<"DPKinematics: DEBUG: calculating dalitz plot area"<<std::endl;
-        BOOST_LOG_TRIVIAL(debug)<<"DPKinematics: DEBUG: calculating dalitz plot area";
+        LOG(debug)<<"DPKinematics: DEBUG: calculating dalitz plot area";
         size_t dim=2;
         double res=0.0, err=0.0;
         
@@ -506,7 +506,7 @@ namespace ComPWA { namespace Physics { namespace DPKinematics {
         gsl_monte_vegas_state *s = gsl_monte_vegas_alloc (dim);
         gsl_monte_vegas_integrate (&F, xLimit_low, xLimit_high, 2, calls, r,s,&res, &err);
         gsl_monte_vegas_free(s);
-        BOOST_LOG_TRIVIAL(debug)<<"DPKinematics: Area of dalitz plot slice "
+        LOG(debug)<<"DPKinematics: Area of dalitz plot slice "
         << m23_sq_min_loc << "-" << m23_sq_max_loc
         << " form MC integration: "<<res<<"+-"<<err
         <<" relAcc [%]: "<<100*err/res;

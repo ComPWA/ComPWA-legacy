@@ -161,13 +161,13 @@ namespace ComPWA {
         if (FILE *file = std::fopen(particleFileName.c_str(), "r")) {
             fclose(file);
             read_xml(particleFileName, pt);
-            BOOST_LOG_TRIVIAL(info)<< "PhysConst: reading particle file "<<particleFileName;
+            LOG(info)<< "PhysConst: reading particle file "<<particleFileName;
             //Otherwise try to load default file
         }
         else if (FILE *file = std::fopen(particleDefaultFileName.c_str(), "r")) {
             fclose(file);
             read_xml(particleDefaultFileName, pt);
-            BOOST_LOG_TRIVIAL(info) << "PhysConst: reading particles default file "<<particleDefaultFileName;
+            LOG(info) << "PhysConst: reading particles default file "<<particleDefaultFileName;
         }
         else {
             throw std::runtime_error("Could not open default particle file!");
@@ -230,7 +230,7 @@ namespace ComPWA {
                 
                 ComPWA::Spin s = particle_properties.getSpinLikeQuantumNumber(
                                                                               QuantumNumberIDs::SPIN);
-                BOOST_LOG_TRIVIAL(debug)<<"PhysConst adding particle: "
+                LOG(debug)<<"PhysConst adding particle: "
                 <<particle_properties.name_
                 <<" mass="<<particle_properties.mass_
                 <<" width="<<particle_properties.width_
@@ -246,13 +246,13 @@ namespace ComPWA {
         if (FILE *file = std::fopen(constantFileName.c_str(), "r")) {
             fclose(file);
             read_xml(constantFileName, pt);
-            BOOST_LOG_TRIVIAL(info)<< "PhysConst: reading file with physical constants"<<constantFileName;
+            LOG(info)<< "PhysConst: reading file with physical constants"<<constantFileName;
             //Otherwise try to load default file
         }
         else if (FILE *file = std::fopen(constantDefaultFileName.c_str(), "r")) {
             fclose(file);
             read_xml(constantDefaultFileName, pt);
-            BOOST_LOG_TRIVIAL(info) << "PhysConst: reading default file with physical constants"<<constantDefaultFileName;
+            LOG(info) << "PhysConst: reading default file with physical constants"<<constantDefaultFileName;
         }
         else {
             throw std::runtime_error("Could not open default constants file!");
@@ -268,7 +268,7 @@ namespace ComPWA {
             
             constants_list_.push_back(constant);
             
-            BOOST_LOG_TRIVIAL(debug)<<"PhysConst adding constant: "<<constant.name_<<" value="<<constant.value_<<" error="<<constant.error_;
+            LOG(debug)<<"PhysConst adding constant: "<<constant.name_<<" value="<<constant.value_<<" error="<<constant.error_;
         }
         
         return;

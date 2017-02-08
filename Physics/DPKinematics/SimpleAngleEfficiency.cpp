@@ -22,10 +22,10 @@ namespace DPKinematics {
 //SimpleAngleEfficiency::SimpleAngleEfficiency(SimpleEfficiency* eff) : effHist(new SimpleEfficiency(*eff)){
 SimpleAngleEfficiency::SimpleAngleEfficiency(SimpleEfficiency* eff) {
 	effHist = std::shared_ptr<SimpleEfficiency>(new SimpleEfficiency(*eff));
-	BOOST_LOG_TRIVIAL(debug) << "SimpleAngleEfficiency: creating efficiency from existing SimpleEfficiency object!";
+	LOG(debug) << "SimpleAngleEfficiency: creating efficiency from existing SimpleEfficiency object!";
 }
 SimpleAngleEfficiency::SimpleAngleEfficiency(TH1* passed, TH1* total) : effHist(new SimpleEfficiency("angleEff","angleEff",*passed, *total)){
-	BOOST_LOG_TRIVIAL(debug) << "SimpleAngleEfficiency: creating efficiency from two histograms objects!";
+	LOG(debug) << "SimpleAngleEfficiency: creating efficiency from two histograms objects!";
 }
 SimpleAngleEfficiency::SimpleAngleEfficiency(const SimpleAngleEfficiency& other){
 	effHist = other.effHist;

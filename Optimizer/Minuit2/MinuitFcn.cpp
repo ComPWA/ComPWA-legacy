@@ -55,11 +55,11 @@ double MinuitFcn::operator()(const std::vector<double>& x) const
 	double result = _myDataPtr->controlParameter(_parList);
 	bc::duration<double> sec = bc::system_clock::now() - start;
 
-	BOOST_LOG_TRIVIAL(info) << "MinuitFcn: -log(L) = "
+	LOG(info) << "MinuitFcn: -log(L) = "
     << std::setprecision(10) << result << std::setprecision(4)
 	<<" Time: "<<sec.count()<<"s"
 	<<" nCalls: "<<_myDataPtr->nCalls();
-	BOOST_LOG_TRIVIAL(debug) << "Parameters: "<<paramOut.str();
+	LOG(debug) << "Parameters: "<<paramOut.str();
 
 	return result;
 }

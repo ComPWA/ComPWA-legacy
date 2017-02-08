@@ -17,10 +17,10 @@ namespace ComPWA {
         namespace DPKinematics {
             
             DalitzHistEfficiency::DalitzHistEfficiency(TEfficiency* eff) : effHist(new TEfficiency(*eff)){
-                BOOST_LOG_TRIVIAL(debug) << "DalitzHistEfficiency: creating efficiency from existing TEfficiency object!";
+                LOG(debug) << "DalitzHistEfficiency: creating efficiency from existing TEfficiency object!";
             }
             DalitzHistEfficiency::DalitzHistEfficiency(TH2D* passed, TH2D* total) : effHist(new TEfficiency(*passed, *total)){
-                BOOST_LOG_TRIVIAL(debug) << "DalitzHistEfficiency: creating efficiency from two TH2D objects!";
+                LOG(debug) << "DalitzHistEfficiency: creating efficiency from two TH2D objects!";
             }
             DalitzHistEfficiency::DalitzHistEfficiency(const DalitzHistEfficiency&){
             }

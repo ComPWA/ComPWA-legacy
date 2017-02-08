@@ -37,7 +37,7 @@ double MomentumCorrection::getCorrection(Event& ev){
 }
 
 void MomentumCorrection::Print() const{
-	BOOST_LOG_TRIVIAL(info)<<"MomentumCorrection::Print() | "<<title;
+	LOG(info)<<"MomentumCorrection::Print() | "<<title;
 	for(int i=0; i < corrections.size(); i++)
 		corrections.at(i).Print();
 	return;

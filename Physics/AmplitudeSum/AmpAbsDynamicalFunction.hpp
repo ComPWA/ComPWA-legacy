@@ -138,9 +138,9 @@ public:
 	//! Get resonance width
 	virtual double GetWidth() const = 0;
 	//! Get resonance spin
-	virtual double GetSpin() const { return _spin.Val(); }
-	virtual double GetM() const {return _m.Val();};
-	virtual double GetN() const {return _n.Val();};
+	virtual double GetSpin() const { return _spin; }
+	virtual double GetM() const {return _m;};
+	virtual double GetN() const {return _n;};
 	//! Get mass of daughter A
 	virtual double GetMassA() const {return _mass1;};
 	//! Get mass of daughter B

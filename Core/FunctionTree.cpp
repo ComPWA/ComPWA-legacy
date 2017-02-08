@@ -372,13 +372,13 @@ bool FunctionTree::sanityCheck(){
 	}
 	if(missedChild.size()){
 		for(unsigned int i=0; i<missedChild.size();i++)
-			BOOST_LOG_TRIVIAL(debug)<<"This tree misses a child: "
+			LOG(debug)<<"This tree misses a child: "
 			<<missedChild[i];
 		return false;
 	}
 	if(missedParent.size()){
 		for(unsigned int i=0; i<missedParent.size();i++)
-			BOOST_LOG_TRIVIAL(debug)<<"This tree misses a parent: "
+			LOG(debug)<<"This tree misses a parent: "
 			<<missedParent[i];
 		return false;
 	}

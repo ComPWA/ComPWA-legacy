@@ -16,7 +16,8 @@
 #include <string>
 #include <complex>
 
-#include <Core/Event.hpp>
+#include "Core/Event.hpp"
+#include "Core/Utility.hpp"
 
 namespace ComPWA {
 
@@ -146,7 +147,7 @@ protected:
 	std::string _nameMother;//! name of mother particle
 	double _M; //! mass of mother particle
 	double _Msq; //! mass of mother particle
-	unsigned int _spinM;//! spin of mother particle
+    ComPWA::Spin _spinM;//! spin of mother particle
 	double _Br;//! width of decaying particle
 
 	//Singleton stuff

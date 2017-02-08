@@ -331,7 +331,7 @@ inline void multivariateGaussian(const gsl_rng *rnd, const int vecSize,
 	//Cholesky decomposition
 	int status = gsl_linalg_cholesky_decomp(tmpM);
 	if(status == GSL_EDOM )
-		BOOST_LOG_TRIVIAL(error)<<"Decomposition has failed!";
+		LOG(error)<<"Decomposition has failed!";
 
 	//Compute vector of random gaussian variables
 	for(unsigned int i=0; i<vecSize; i++)
