@@ -8,7 +8,7 @@ compiler:
 env:
 matrix:
     - OS=fedora DIST=24
-    - OS=ubuntu DIST=wily
+    #- OS=ubuntu DIST=wily
 
 addons:
 apt:
@@ -43,7 +43,6 @@ install:
     - echo "Installation"
     - lsb_release -si
     - uname -a
-    - root --version
     - ls /usr/lib/libboost*
     - cd ComPWA/ComPWA; ls
     - mkdir build
