@@ -44,46 +44,45 @@ namespace DPKinematics {
 
 class RootGenerator : public Generator {
 protected:
-	TGenPhaseSpace event;
-	unsigned int nPart;
-	Double_t* masses;
-public:
-	RootGenerator(int seed=-1) ;
-	~RootGenerator(){
-		delete[] masses;
-	};
+  TGenPhaseSpace event;
+  unsigned int nPart;
+  Double_t *masses;
 
-	virtual RootGenerator* Clone();
-	virtual void generate(Event& evt);
-	virtual void setSeed( unsigned int seed );
-	virtual unsigned int getSeed();
-	virtual double getUniform();
-	virtual double getGaussDist(double mu, double sigma);
-	virtual TGenPhaseSpace* getGenerator() { return &event; }
+public:
+  RootGenerator(int seed = -1);
+  ~RootGenerator() { delete[] masses; };
+
+  virtual RootGenerator *Clone();
+  virtual void generate(Event &evt);
+  virtual void setSeed(unsigned int seed);
+  virtual unsigned int getSeed();
+  virtual double getUniform();
+  virtual double getGaussDist(double mu, double sigma);
+  virtual TGenPhaseSpace *getGenerator() { return &event; }
 };
 
-class UniformTwoBodyGenerator : public RootGenerator
-{
+class UniformTwoBodyGenerator : public RootGenerator {
 public:
-	UniformTwoBodyGenerator(double minSq_, double maxSq_, int seed=-1) :
-		RootGenerator(seed), minSq(minSq_),maxSq(maxSq_){
-		if(Kinematics::instance()->GetNumberOfParticles()!=2)
-			throw std::runtime_error(
-					"UniformTwoBodyGenerator::UniformTwoBodyGenerator() | Not a two body decay!");
-	}
-	virtual void generate(Event& evt);
-	virtual UniformTwoBodyGenerator* Clone() { return (new UniformTwoBodyGenerator(*this)); }
+  UniformTwoBodyGenerator(double minSq_, double maxSq_, int seed = -1)
+      : RootGenerator(seed), minSq(minSq_), maxSq(maxSq_) {
+    if (Kinematics::instance()->GetNumberOfParticles() != 2)
+      throw std::runtime_error("UniformTwoBodyGenerator::"
+                               "UniformTwoBodyGenerator() | Not a two body "
+                               "decay!");
+  }
+  virtual void generate(Event &evt);
+  virtual UniformTwoBodyGenerator *Clone() {
+    return (new UniformTwoBodyGenerator(*this));
+  }
 
 protected:
-	double minSq, maxSq;
-
+  double minSq, maxSq;
 };
-
-}}}
+    
+} /* namespace DPKinematics */
+} /* namespace Physics */
+} /* namespace ComPWA */
 
 #endif /* ROOTGENERATOR_HPP_ */
-
-
-
 
 #endif /* PHYSICS_DPKINEMATICS_ROOTGENERATOR_HPP_ */

@@ -34,25 +34,25 @@ namespace DataReader {
 namespace AsciiReader {
 
 // Constructors and destructors
-AsciiReader::AsciiReader( const std::string inConfigFile, const int particles  )
-{
+AsciiReader::AsciiReader(const std::string inConfigFile, const int particles) {
 
   std::ifstream currentStream;
-  currentStream.open ( inConfigFile.c_str() );
+  currentStream.open(inConfigFile.c_str());
 
-  if ( !currentStream ) throw BadConfig( "Can not open " + inConfigFile );
+  if (!currentStream)
+    throw BadConfig("Can not open " + inConfigFile);
 
-  while( !currentStream.eof() ) {
+  while (!currentStream.eof()) {
     double e, px, py, pz;
     Event newEvent;
 
-    for ( int parts = 0; parts < particles; parts++ ) {
+    for (int parts = 0; parts < particles; parts++) {
       currentStream >> px >> py >> pz >> e;
-      newEvent.addParticle( Particle( px, py, pz, e ) );
+      newEvent.addParticle(Particle(px, py, pz, e));
     }
 
     if (!currentStream.fail()) {
-      fEvents.push_back( newEvent );
+      fEvents.push_back(newEvent);
       // for ( parts = 0; parts < linesToSkip; parts++ )
       //   currentStream >> px >> py >> pz >> e;
     }
@@ -60,22 +60,15 @@ AsciiReader::AsciiReader( const std::string inConfigFile, const int particles  )
   currentStream.close();
 }
 
-AsciiReader::~AsciiReader()
-{
-  fEvents.clear();
+AsciiReader::~AsciiReader() { fEvents.clear(); }
+
+AsciiReader *AsciiReader::Clone() const {
+  // TODO: implement virtual functions and uncomment the following
+  //	return new AsciiReader(*this);
+  return new AsciiReader();
 }
 
-AsciiReader* AsciiReader::Clone() const
-{
-	//TODO: implement virtual functions and uncomment the following
-	//	return new AsciiReader(*this);
-	return new AsciiReader();
-}
-
-AsciiReader* AsciiReader::EmptyClone() const
-{
-	return new AsciiReader();
-}
+AsciiReader *AsciiReader::EmptyClone() const { return new AsciiReader(); }
 
 } /* namespace AsciiReader */
 } /* namespace DataReader */

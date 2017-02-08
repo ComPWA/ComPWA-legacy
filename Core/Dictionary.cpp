@@ -26,51 +26,53 @@
 
 namespace ComPWA {
 
-Dictionary::Dictionary() {
+Dictionary::Dictionary() {}
 
-}
+Dictionary::~Dictionary() { /* nothing */ }
 
-Dictionary::~Dictionary(){
-  /* nothing */
-}
-
-std::string Dictionary::introduce(std::shared_ptr<DataReader::Data> inData, std::string inName){
-  if(inName=="" || dataNameUsed(inName)){
-    inName="test";//TODO: Generate new name, check available
+std::string Dictionary::introduce(std::shared_ptr<DataReader::Data> inData,
+                                  std::string inName) {
+  if (inName == "" || dataNameUsed(inName)) {
+    inName = "test"; // TODO: Generate new name, check available
   }
 
+  // dataInfo tmp(inName, inData, inData->getVariableNames());//TODO!!
 
-  //dataInfo tmp(inName, inData, inData->getVariableNames());//TODO!!
-
-  //mData_.push_back( tmp );
+  // mData_.push_back( tmp );
 
   return inName;
 }
 
-std::string Dictionary::introduce(std::shared_ptr<Amplitude> inAmp, std::string inName){
-  if(inName=="" || amplitudeNameUsed(inName)){
-    inName="test";//TODO: Generate new name, check available
+std::string Dictionary::introduce(std::shared_ptr<Amplitude> inAmp,
+                                  std::string inName) {
+  if (inName == "" || amplitudeNameUsed(inName)) {
+    inName = "test"; // TODO: Generate new name, check available
   }
 
-  //mData_.insert( std::pair<std::string, std::shared_ptr<Amplitude> >(inName,inData) );
+  // mData_.insert( std::pair<std::string, std::shared_ptr<Amplitude>
+  // >(inName,inData) );
 
   return inName;
 }
 
-bool Dictionary::dataNameUsed(std::string inName){
+bool Dictionary::dataNameUsed(std::string inName) {
   bool used = false;
 
-  for (std::vector<dataInfo >::iterator it=mData_.begin(); it!=mData_.end(); ++it)
-    if( it->name == inName) used = true;
+  for (std::vector<dataInfo>::iterator it = mData_.begin(); it != mData_.end();
+       ++it)
+    if (it->name == inName)
+      used = true;
 
   return used;
 }
 
-bool Dictionary::amplitudeNameUsed(std::string inName){
+bool Dictionary::amplitudeNameUsed(std::string inName) {
   bool used = false;
 
-  for (std::vector<ampInfo >::iterator it=mAmps_.begin(); it!=mAmps_.end(); ++it)
-    if( it->name == inName) used = true;
+  for (std::vector<ampInfo>::iterator it = mAmps_.begin(); it != mAmps_.end();
+       ++it)
+    if (it->name == inName)
+      used = true;
 
   return used;
 }

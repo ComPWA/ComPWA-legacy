@@ -22,52 +22,53 @@
 #include "Core/Efficiency.hpp"
 
 namespace ComPWA {
-    namespace Physics {
-        namespace DPKinematics {
-            
-            /**
-             *  \class DalitzHistEfficiency
-             *  \brief Efficiency provided by a histogram
-             */
-            class DalitzHistEfficiency : public Efficiency
-            {
-            protected:
-                std::shared_ptr<TEfficiency> effHist;
-            public:
-                
-                //! Construct DalitzHistEfficiency from TEfficiency object
-                DalitzHistEfficiency(TEfficiency* eff);
-                //! Construct DalitzHistEfficiency from two TH2 objects for passed and total events
-                DalitzHistEfficiency(TH2D* passed, TH2D* total);
-                DalitzHistEfficiency(const DalitzHistEfficiency&);
-                ~DalitzHistEfficiency(){};
-                
-                //! returns efficiency for current datapoint
-                virtual double evaluate(std::vector<double> x);
-                virtual double evaluate(const dataPoint& point);
-                
-            };
-            
-            /**
-             *  \class DalitzAngleHistEfficiency
-             *  \brief Uses also TEfficiency object, but the variables are one invariant
-             *  mass and the corresponding helicity angle. This avoids binning effects near the phsp boundaries.
-             *  ATTENTION: We assume that the invariant mass of particle 2 and 3 and the helicity angle
-             *  between 1 and 2 are used!
-             */
-            class DalitzAngleHistEfficiency : public DalitzHistEfficiency
-            {
-            public:
-                DalitzAngleHistEfficiency(TEfficiency* eff) : DalitzHistEfficiency(eff) {};
-                DalitzAngleHistEfficiency(TH2D* passed, TH2D* total) : DalitzHistEfficiency(passed, total) {};
-                DalitzAngleHistEfficiency(const DalitzAngleHistEfficiency& p) : DalitzHistEfficiency(p) {};
-                ~DalitzAngleHistEfficiency(){};
-                
-                virtual double evaluate(const dataPoint& point);
-                
-            };
-        }
-    }
+namespace Physics {
+namespace DPKinematics {
+
+/**
+ *  \class DalitzHistEfficiency
+ *  \brief Efficiency provided by a histogram
+ */
+class DalitzHistEfficiency : public Efficiency {
+protected:
+  std::shared_ptr<TEfficiency> effHist;
+
+public:
+  //! Construct DalitzHistEfficiency from TEfficiency object
+  DalitzHistEfficiency(TEfficiency *eff);
+  //! Construct DalitzHistEfficiency from two TH2 objects for passed and total
+  //! events
+  DalitzHistEfficiency(TH2D *passed, TH2D *total);
+  DalitzHistEfficiency(const DalitzHistEfficiency &);
+  ~DalitzHistEfficiency(){};
+
+  //! returns efficiency for current datapoint
+  virtual double evaluate(std::vector<double> x);
+  virtual double evaluate(const dataPoint &point);
+};
+
+/**
+ *  \class DalitzAngleHistEfficiency
+ *  \brief Uses also TEfficiency object, but the variables are one invariant
+ *  mass and the corresponding helicity angle. This avoids binning effects near
+ * the phsp boundaries.
+ *  ATTENTION: We assume that the invariant mass of particle 2 and 3 and the
+ * helicity angle
+ *  between 1 and 2 are used!
+ */
+class DalitzAngleHistEfficiency : public DalitzHistEfficiency {
+public:
+  DalitzAngleHistEfficiency(TEfficiency *eff) : DalitzHistEfficiency(eff){};
+  DalitzAngleHistEfficiency(TH2D *passed, TH2D *total)
+      : DalitzHistEfficiency(passed, total){};
+  DalitzAngleHistEfficiency(const DalitzAngleHistEfficiency &p)
+      : DalitzHistEfficiency(p){};
+  ~DalitzAngleHistEfficiency(){};
+
+  virtual double evaluate(const dataPoint &point);
+};
+}
+}
 } /* namespace ComPWA */
 
 #endif /* ROOTEFFICIENCY_HPP_ */

@@ -10,7 +10,8 @@
 //
 // Contributors:
 //     Mathias Michel - initial API and implementation
-//		Peter Weidenkaff - adding functionality to generate set of events
+//		Peter Weidenkaff - adding functionality to generate set of
+//events
 //-------------------------------------------------------------------------------
 //! Run-Manager for a simple fit.
 /*! \class RunManager
@@ -64,7 +65,8 @@
  * The core Framework only needs a boost installation and a compiler
  * supporting c++11. But for the examples and most likely also for starting
  * some fits and plotting some output, it is recommended to have a root
- * installation (for plots and maybe DataReader::Data storage/reading) and a Minuit2
+ * installation (for plots and maybe DataReader::Data storage/reading) and a
+ * Minuit2
  * (for optimization) installation ready. Besides Minuit2 also Geneva can be
  * used as optimizer if a compatible installation is available.
  *
@@ -93,96 +95,102 @@ namespace ComPWA {
 
 using namespace DataReader;
 
-class RunManager
-{
+class RunManager {
 public:
+  RunManager();
+  RunManager(std::shared_ptr<DataReader::Data>, std::shared_ptr<Amplitude>,
+             std::shared_ptr<Optimizer::Optimizer>); // Fit
+  RunManager(unsigned int size, std::shared_ptr<Amplitude>,
+             std::shared_ptr<Generator>); // Generate
 
-	RunManager();
-	RunManager( std::shared_ptr<DataReader::Data>, std::shared_ptr<Amplitude>, std::shared_ptr<Optimizer::Optimizer>); //Fit
-	RunManager( unsigned int size, std::shared_ptr<Amplitude>, std::shared_ptr<Generator>); //Generate
+  virtual ~RunManager();
 
-	virtual ~RunManager();
+  virtual void setData(std::shared_ptr<Data> d) { sampleData_ = d; };
+  virtual std::shared_ptr<Data> getData() { return sampleData_; };
+  virtual void setBackground(std::shared_ptr<Data> d) { sampleBkg_ = d; };
+  virtual std::shared_ptr<Data> getBackground() { return sampleBkg_; };
+  virtual void
+  setPhspSample(std::shared_ptr<Data> phsp,
+                std::shared_ptr<Data> truePhsp = std::shared_ptr<Data>());
+  virtual std::shared_ptr<Data> getPhspSample() { return samplePhsp_; };
+  virtual void setTruePhspSample(std::shared_ptr<Data>);
+  virtual std::shared_ptr<Data> getTruePhspSample() { return sampleTruePhsp_; };
 
-	virtual void setData ( std::shared_ptr<Data> d){ sampleData_ = d; };
-	virtual std::shared_ptr<Data> getData (){ return sampleData_; };
-	virtual void setBackground ( std::shared_ptr<Data> d){ sampleBkg_ = d; };
-	virtual std::shared_ptr<Data> getBackground (){ return sampleBkg_; };
-	virtual void setPhspSample( std::shared_ptr<Data> phsp,
-			std::shared_ptr<Data> truePhsp = std::shared_ptr<Data>());
-	virtual std::shared_ptr<Data> getPhspSample(){ return samplePhsp_; };
-	virtual void setTruePhspSample( std::shared_ptr<Data> );
-	virtual std::shared_ptr<Data> getTruePhspSample(){ return sampleTruePhsp_; };
+  virtual void setAmplitude(std::shared_ptr<Amplitude> d) { amp_ = d; };
+  virtual std::shared_ptr<Amplitude> getAmplitude() { return amp_; };
+  virtual void setBkgAmplitude(std::shared_ptr<Amplitude> d) { ampBkg_ = d; };
+  virtual std::shared_ptr<Amplitude> getBkgAmplitude() { return ampBkg_; };
+  virtual void setOptimizer(std::shared_ptr<Optimizer::Optimizer> d) {
+    opti_ = d;
+  };
+  virtual std::shared_ptr<Optimizer::Optimizer> getOptimizer() {
+    return opti_;
+  };
+  virtual void setGenerator(std::shared_ptr<Generator> d) { gen_ = d; };
+  virtual std::shared_ptr<Generator> getGenerator() { return gen_; };
 
-	virtual void setAmplitude ( std::shared_ptr<Amplitude> d){ amp_ = d; };
-	virtual std::shared_ptr<Amplitude> getAmplitude (){ return amp_; };
-	virtual void setBkgAmplitude ( std::shared_ptr<Amplitude> d){ ampBkg_ = d; };
-	virtual std::shared_ptr<Amplitude> getBkgAmplitude(){ return ampBkg_; };
-	virtual void setOptimizer ( std::shared_ptr<Optimizer::Optimizer> d){ opti_ = d; };
-	virtual std::shared_ptr<Optimizer::Optimizer> getOptimizer (){ return opti_; };
-	virtual void setGenerator( std::shared_ptr<Generator> d){ gen_= d; };
-	virtual std::shared_ptr<Generator> getGenerator(){ return gen_; };
+  virtual std::shared_ptr<FitResult> startFit(ParameterList &);
 
-	virtual std::shared_ptr<FitResult> startFit( ParameterList& );
+  /**Generate phase space events by Hit&Miss
+   *
+   * @param number Number of events to generate
+   * @return
+   */
+  virtual bool generatePhsp(int number);
 
-	/**Generate phase space events by Hit&Miss
-	 *
-	 * @param number Number of events to generate
-	 * @return
-	 */
-	virtual bool generatePhsp ( int number );
+  /**Generate signal events by Hit&Miss
+   * 1) In case no phsp sample is set and the @param number is larger zero,
+   * phsp events are generated on the fly.
+   * 2) In case a phsp sample is set and @param number is smaller zero,
+   * the whole sample is used for event generation.
+   *
+   * @param number Number of events to generate
+   * @return
+   */
+  virtual bool generate(int number);
 
-	/**Generate signal events by Hit&Miss
-	 * 1) In case no phsp sample is set and the @param number is larger zero,
-	 * phsp events are generated on the fly.
-	 * 2) In case a phsp sample is set and @param number is smaller zero,
-	 * the whole sample is used for event generation.
-	 *
-	 * @param number Number of events to generate
-	 * @return
-	 */
-	virtual bool generate ( int number );
+  /**Generate background events by Hit&Miss
+   * 1) In case no phsp sample is set and the @param number is larger zero, phsp
+   * events
+   * are generated on the fly.
+   * 2) In case a phsp sample is set and @param number is smaller zero, the
+   * whole sample
+   * is used for event generation.
+   *
+   * @param number Number of events to generate
+   * @return
+   */
+  virtual bool generateBkg(int number);
 
-	/**Generate background events by Hit&Miss
-	 * 1) In case no phsp sample is set and the @param number is larger zero, phsp events
-	 * are generated on the fly.
-	 * 2) In case a phsp sample is set and @param number is smaller zero, the whole sample
-	 * is used for event generation.
-	 *
-	 * @param number Number of events to generate
-	 * @return
-	 */
-	virtual bool generateBkg ( int number );
+  virtual void SetAmplitudesData(std::vector<std::shared_ptr<Amplitude>> ampVec,
+                                 std::vector<double> fraction,
+                                 std::vector<std::shared_ptr<Data>> dataVec);
 
-	virtual void SetAmplitudesData(
-			std::vector<std::shared_ptr<Amplitude> >ampVec,
-			std::vector<double> fraction,
-			std::vector<std::shared_ptr<Data> > dataVec );
+  virtual void GenAmplitudesData(int nEvents);
 
-	virtual void GenAmplitudesData( int nEvents );
-
-	virtual std::vector<std::shared_ptr<Data> > GetData() { return _dataVec; }
+  virtual std::vector<std::shared_ptr<Data>> GetData() { return _dataVec; }
 
 protected:
-	static bool gen( int number, std::shared_ptr<Generator> gen,
-			std::shared_ptr<Amplitude> amp, std::shared_ptr<Data> data,
-			std::shared_ptr<Data> phsp = std::shared_ptr<Data>(),
-			std::shared_ptr<Data> phspTrue = std::shared_ptr<Data>()
-			);
+  static bool gen(int number, std::shared_ptr<Generator> gen,
+                  std::shared_ptr<Amplitude> amp, std::shared_ptr<Data> data,
+                  std::shared_ptr<Data> phsp = std::shared_ptr<Data>(),
+                  std::shared_ptr<Data> phspTrue = std::shared_ptr<Data>());
 
-	std::shared_ptr<Data> sampleData_; /*!< Pointer to data sample */
-	std::shared_ptr<Data> sampleBkg_; /*!< Pointer to data sample */
+  std::shared_ptr<Data> sampleData_; /*!< Pointer to data sample */
+  std::shared_ptr<Data> sampleBkg_;  /*!< Pointer to data sample */
 
-	std::shared_ptr<Data> samplePhsp_; /*!< Pointer to phsp sample */
-	std::shared_ptr<Data> sampleTruePhsp_; /*!< Pointer to true phsp sample */
+  std::shared_ptr<Data> samplePhsp_;     /*!< Pointer to phsp sample */
+  std::shared_ptr<Data> sampleTruePhsp_; /*!< Pointer to true phsp sample */
 
-	std::shared_ptr<Amplitude> amp_; /*!< Pointer to signal model */
-	std::shared_ptr<Amplitude> ampBkg_; /*!< Pointer to background model */
-	std::shared_ptr<Optimizer::Optimizer> opti_; /*!< Pointer to Optimizer-Module */
-	std::shared_ptr<Generator> gen_; /*!< Pointer to Generator-Module */
+  std::shared_ptr<Amplitude> amp_;    /*!< Pointer to signal model */
+  std::shared_ptr<Amplitude> ampBkg_; /*!< Pointer to background model */
+  std::shared_ptr<Optimizer::Optimizer>
+      opti_;                       /*!< Pointer to Optimizer-Module */
+  std::shared_ptr<Generator> gen_; /*!< Pointer to Generator-Module */
 
-	std::vector<std::shared_ptr<Amplitude> > _ampVec;
-	std::vector<double> _fraction;
-	std::vector<std::shared_ptr<Data> > _dataVec;
+  std::vector<std::shared_ptr<Amplitude>> _ampVec;
+  std::vector<double> _fraction;
+  std::vector<std::shared_ptr<Data>> _dataVec;
 };
 
 } /* namespace ComPWA */

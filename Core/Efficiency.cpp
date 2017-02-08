@@ -12,11 +12,9 @@
 
 namespace ComPWA {
 
-Efficiency::Efficiency(){
-}
-//DalitzEfficiency::DalitzEfficiency(const DalitzEfficiency&, const char*){
+Efficiency::Efficiency() {}
+// DalitzEfficiency::DalitzEfficiency(const DalitzEfficiency&, const char*){
 //}
-Efficiency::~Efficiency(){
-}
+Efficiency::~Efficiency() {}
 
 } /* namespace ComPWA */

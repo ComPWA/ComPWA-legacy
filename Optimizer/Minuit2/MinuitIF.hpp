@@ -41,75 +41,71 @@ namespace ComPWA {
 namespace Optimizer {
 namespace Minuit2 {
 
-class MinuitIF : public Optimizer
-{
+class MinuitIF : public Optimizer {
 
 public:
-	/// Default Constructor (0x0)
-	MinuitIF(std::shared_ptr<ComPWA::ControlParameter> esti, ParameterList& par);
-	virtual std::shared_ptr<FitResult> exec(ParameterList& par);
+  /// Default Constructor (0x0)
+  MinuitIF(std::shared_ptr<ComPWA::ControlParameter> esti, ParameterList& par);
+  virtual std::shared_ptr<FitResult> exec(ParameterList& par);
 
-	/** Destructor */
-	virtual ~MinuitIF();
+  /** Destructor */
+  virtual ~MinuitIF();
 
-	virtual void SetHesse(bool onoff) { enableHesse=onoff; }
-	virtual bool GetHesse() { return enableHesse; }
-	virtual void SetMinos(bool onoff) { enableMinos=onoff; }
-	virtual bool GetMinos() { return enableMinos; }
+  virtual void SetHesse(bool onoff) { enableHesse = onoff; }
+  virtual bool GetHesse() { return enableHesse; }
+  virtual void SetMinos(bool onoff) { enableMinos = onoff; }
+  virtual bool GetMinos() { return enableMinos; }
 
 protected:
-
 private:
-	ROOT::Minuit2::MinuitFcn _myFcn;
-	std::shared_ptr<ComPWA::ControlParameter> estimator;
-	bool enableHesse;
-	bool enableMinos;
+  ROOT::Minuit2::MinuitFcn _myFcn;
+  std::shared_ptr<ComPWA::ControlParameter> estimator;
+  bool enableHesse;
+  bool enableMinos;
 };
 
-class MinuitStrategy : public ROOT::Minuit2::MnStrategy
-{
+class MinuitStrategy : public ROOT::Minuit2::MnStrategy {
 public:
-	MinuitStrategy(unsigned int i=1) : MnStrategy(i) {
-		fGradNCyc = GradientNCycles();
-		fGradTlrStp = GradientStepTolerance();
-		fGradTlr = GradientTolerance();
-		fHessNCyc = HessianNCycles();
-		fHessTlrStp = HessianStepTolerance();
-		fHessTlrG2 = HessianG2Tolerance();
-		fHessGradNCyc = HessianGradientNCycles();
-	};
-	void init(){
-		SetGradientNCycles(fGradNCyc);
-		SetGradientStepTolerance(fGradTlrStp);
-		SetGradientTolerance(fGradTlr);
-		SetHessianNCycles(fHessNCyc);
-		SetHessianStepTolerance(fHessTlrStp);
-		SetHessianG2Tolerance(fHessTlrG2);
-		SetHessianGradientNCycles(fHessGradNCyc);
-	}
+  MinuitStrategy(unsigned int i = 1) : MnStrategy(i) {
+    fGradNCyc = GradientNCycles();
+    fGradTlrStp = GradientStepTolerance();
+    fGradTlr = GradientTolerance();
+    fHessNCyc = HessianNCycles();
+    fHessTlrStp = HessianStepTolerance();
+    fHessTlrG2 = HessianG2Tolerance();
+    fHessGradNCyc = HessianGradientNCycles();
+  };
+  void init() {
+    SetGradientNCycles(fGradNCyc);
+    SetGradientStepTolerance(fGradTlrStp);
+    SetGradientTolerance(fGradTlr);
+    SetHessianNCycles(fHessNCyc);
+    SetHessianStepTolerance(fHessTlrStp);
+    SetHessianG2Tolerance(fHessTlrG2);
+    SetHessianGradientNCycles(fHessGradNCyc);
+  }
 
 private:
-	unsigned int fGradNCyc;
-	double fGradTlrStp;
-	double fGradTlr;
-	unsigned int fHessNCyc;
-	double fHessTlrStp;
-	double fHessTlrG2;
-	unsigned int fHessGradNCyc;
+  unsigned int fGradNCyc;
+  double fGradTlrStp;
+  double fGradTlr;
+  unsigned int fHessNCyc;
+  double fHessTlrStp;
+  double fHessTlrG2;
+  unsigned int fHessGradNCyc;
 
-	friend class boost::serialization::access;
-	template<class archive>
-	void serialize(archive& ar, const unsigned int version)
-	{
-		//		ar & BOOST_SERIALIZATION_NVP(fStrategy);
-		ar & BOOST_SERIALIZATION_NVP(fGradNCyc);
-		ar & BOOST_SERIALIZATION_NVP(fGradTlrStp);
-		ar & BOOST_SERIALIZATION_NVP(fGradTlr);
-		ar & BOOST_SERIALIZATION_NVP(fHessNCyc);
-		ar & BOOST_SERIALIZATION_NVP(fHessTlrStp);
-		ar & BOOST_SERIALIZATION_NVP(fHessTlrG2);
-		ar & BOOST_SERIALIZATION_NVP(fHessGradNCyc);
-	}
+  friend class boost::serialization::access;
+  template <class archive>
+  void serialize(archive &ar, const unsigned int version) {
+    //		ar & BOOST_SERIALIZATION_NVP(fStrategy);
+    ar &BOOST_SERIALIZATION_NVP(fGradNCyc);
+    ar &BOOST_SERIALIZATION_NVP(fGradTlrStp);
+    ar &BOOST_SERIALIZATION_NVP(fGradTlr);
+    ar &BOOST_SERIALIZATION_NVP(fHessNCyc);
+    ar &BOOST_SERIALIZATION_NVP(fHessTlrStp);
+    ar &BOOST_SERIALIZATION_NVP(fHessTlrG2);
+    ar &BOOST_SERIALIZATION_NVP(fHessGradNCyc);
+  }
 };
 
 } /* namespace Minuit2 */

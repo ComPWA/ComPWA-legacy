@@ -15,131 +15,124 @@
 #include "Core/DataPoint.hpp"
 namespace ComPWA {
 
-void dataPoint::init()
-{
-	var = std::vector<double>(Kinematics::instance()->GetNVars(), 0);
+void dataPoint::init() {
+  var = std::vector<double>(Kinematics::instance()->GetNVars(), 0);
 }
 
-dataPoint::dataPoint(int a, int b, double invMassSqA, double invMassSqB) :
-		weight(1.0), eff(1.0)
-{
-	init();
-	Set(a,b,invMassSqA,invMassSqB);
+dataPoint::dataPoint(int a, int b, double invMassSqA, double invMassSqB)
+    : weight(1.0), eff(1.0) {
+  init();
+  Set(a, b, invMassSqA, invMassSqB);
 }
 
-void dataPoint::Set(int a, int b, double invMassSqA, double invMassSqB)
-{
-	Kinematics::instance()->FillDataPoint(a,b,invMassSqA,invMassSqB,*this);
-	return;
+void dataPoint::Set(int a, int b, double invMassSqA, double invMassSqB) {
+  Kinematics::instance()->FillDataPoint(a, b, invMassSqA, invMassSqB, *this);
+  return;
 }
 
-dataPoint::dataPoint(std::vector<double> vec) : weight(1.), eff(1.)
-{
-	init();
-	if(Kinematics::instance()->GetNVars() != vec.size())
-		throw std::runtime_error("dataPoint::dataPoint() vector has wrong length!");
-	var=vec;
-	return;
+dataPoint::dataPoint(std::vector<double> vec) : weight(1.), eff(1.) {
+  init();
+  if (Kinematics::instance()->GetNVars() != vec.size())
+    throw std::runtime_error("dataPoint::dataPoint() vector has wrong length!");
+  var = vec;
+  return;
 }
 
-dataPoint::dataPoint( const Event& ev ) : weight(1.), eff(1.)
-{
-	init();
-	Kinematics::instance()->EventToDataPoint(ev,*this);
-	weight = ev.getWeight();
-	return;
+dataPoint::dataPoint(const Event &ev) : weight(1.), eff(1.) {
+  init();
+  Kinematics::instance()->EventToDataPoint(ev, *this);
+  weight = ev.getWeight();
+  return;
 }
 
-dataPoint::dataPoint(): weight(1.), eff(1.)
-{
-	init();
-	return;
+dataPoint::dataPoint() : weight(1.), eff(1.) {
+  init();
+  return;
 }
 
-unsigned int dataPoint::getID(std::string name) const
-{
-	std::vector<std::string> varNames = Kinematics::instance()->GetVarNames();
-	unsigned int size = varNames.size();
-	unsigned int pos = find(varNames.begin(), varNames.end(), name) - varNames.begin();
-	if( pos > size-1 ) {
-		LOG(error)<<"dataPoint::getVal() | "
-				"Variable with name "<<name<<" not found!";
-		return 999;
-	}
-	return pos;
+unsigned int dataPoint::getID(std::string name) const {
+  std::vector<std::string> varNames = Kinematics::instance()->GetVarNames();
+  unsigned int size = varNames.size();
+  unsigned int pos =
+      find(varNames.begin(), varNames.end(), name) - varNames.begin();
+  if (pos > size - 1) {
+    LOG(error) << "dataPoint::getVal() | "
+                  "Variable with name "
+               << name << " not found!";
+    return 999;
+  }
+  return pos;
 }
 
-double dataPoint::getVal(std::string name) const
-{
-	std::vector<std::string> varNames = Kinematics::instance()->GetVarNames();
-	unsigned int size = varNames.size();
-	unsigned int pos = find(varNames.begin(), varNames.end(), name) - varNames.begin();
-	if( pos > size-1 ) {
-		LOG(error)<<"dataPoint::getVal() | "
-				"Variable with name "<<name<<" not found!";
-		return -999;
-	}
-	return getVal(pos);
+double dataPoint::getVal(std::string name) const {
+  std::vector<std::string> varNames = Kinematics::instance()->GetVarNames();
+  unsigned int size = varNames.size();
+  unsigned int pos =
+      find(varNames.begin(), varNames.end(), name) - varNames.begin();
+  if (pos > size - 1) {
+    LOG(error) << "dataPoint::getVal() | "
+                  "Variable with name "
+               << name << " not found!";
+    return -999;
+  }
+  return getVal(pos);
 }
 
-void dataPoint::setVal(std::string name, double val)
-{
-	std::vector<std::string> varNames = Kinematics::instance()->GetVarNames();
-	unsigned int size = varNames.size();
-	unsigned int pos = find(varNames.begin(), varNames.end(), name) - varNames.begin();
-	if( pos > size-1 ) {
-		LOG(error)<<"dataPoint::setVal() | "
-				"Variable with name "<<name<<" not found!";
-		return;
-	}
-	setVal(pos,val);
-	return;
+void dataPoint::setVal(std::string name, double val) {
+  std::vector<std::string> varNames = Kinematics::instance()->GetVarNames();
+  unsigned int size = varNames.size();
+  unsigned int pos =
+      find(varNames.begin(), varNames.end(), name) - varNames.begin();
+  if (pos > size - 1) {
+    LOG(error) << "dataPoint::setVal() | "
+                  "Variable with name "
+               << name << " not found!";
+    return;
+  }
+  setVal(pos, val);
+  return;
 }
 
-void dataPoint::reset(unsigned int size) {
-  var = std::vector<double>(size);
+void dataPoint::reset(unsigned int size) { var = std::vector<double>(size); }
+
+void dataPoint::setVal(unsigned int num, double val) {
+  try {
+    var.at(num) = val;
+  } catch (...) {
+    LOG(error) << "dataPoint::setVal() | "
+                  "Can not access index "
+               << num << "!";
+    throw;
+  }
+  return;
 }
 
-void dataPoint::setVal(unsigned int num, double val)
-{
-	try{
-		var.at(num)=val;
-	} catch (...) {
-		LOG(error)<<"dataPoint::setVal() | "
-				"Can not access index "<<num<<"!";
-		throw;
-	}
-	return;
+double dataPoint::getVal(unsigned int num) const {
+  double rt;
+
+  try {
+    rt = var.at(num);
+  } catch (...) {
+    LOG(error) << "dataPoint::getVal() | "
+                  "Can not access index "
+               << num << "!";
+    throw;
+  }
+  return rt;
 }
 
-double dataPoint::getVal(unsigned int num) const
-{
-	double rt;
-
-	try{
-		rt = var.at(num);
-	} catch (...) {
-		LOG(error)<<"dataPoint::getVal() | "
-				"Can not access index "<<num<<"!";
-		throw;
-	}
-	return rt;
+void dataPoint::setPoint(std::vector<double> values) {
+  if (Kinematics::instance()->GetNVars() != values.size())
+    throw std::runtime_error("dataPoint::setPoint() vector has wrong length!");
+  var = std::vector<double>(values);
+  return;
 }
 
-void dataPoint::setPoint(std::vector<double> values)
-{
-	if(Kinematics::instance()->GetNVars() != values.size())
-		throw std::runtime_error("dataPoint::setPoint() vector has wrong length!");
-	var=std::vector<double>(values);
-	return;
-}
-
-std::ostream & operator<<(std::ostream &os, const dataPoint &p)
-{
-	std::vector<std::string> varNames = Kinematics::instance()->GetVarNames();
-	for(int i=0; i<varNames.size(); i++)
-		os << varNames.at(i) << "="<<p.getVal(i)<<" ";
-	return os;
+std::ostream &operator<<(std::ostream &os, const dataPoint &p) {
+  std::vector<std::string> varNames = Kinematics::instance()->GetVarNames();
+  for (int i = 0; i < varNames.size(); i++)
+    os << varNames.at(i) << "=" << p.getVal(i) << " ";
+  return os;
 }
 
 } /* namespace ComPWA */

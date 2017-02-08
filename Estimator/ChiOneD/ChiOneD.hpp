@@ -37,7 +37,9 @@ namespace ChiOneD {
 class ChiOneD : public Estimator {
 
 public:
-  static std::shared_ptr<ComPWA::ControlParameter> createInstance(std::shared_ptr<Amplitude>, std::shared_ptr<DataReader::Data>);
+  static std::shared_ptr<ComPWA::ControlParameter>
+      createInstance(std::shared_ptr<Amplitude>,
+                     std::shared_ptr<DataReader::Data>);
   virtual double controlParameter(ParameterList& minPar);
 
   /** Destructor */

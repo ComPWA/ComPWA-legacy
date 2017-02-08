@@ -13,28 +13,27 @@
 
 namespace ComPWA {
 
-class progressBar
-{
+class progressBar {
 public:
-	progressBar() : hasStarted(0){ };
-	~progressBar() { std::cout<<std::endl; };
-	progressBar(int size, int update=1);
-	void nextEvent();
+  progressBar() : hasStarted(0){};
+  ~progressBar() { std::cout << std::endl; };
+  progressBar(int size, int update = 1);
+  void nextEvent();
+
 protected:
-	double timeRemaining();
-	double timePassed();
-	time_t endTime();
-	void update();
+  double timeRemaining();
+  double timePassed();
+  time_t endTime();
+  void update();
 
-	int numEvents;
-	int updateInterval;
-	bool hasStarted;
-	time_t startTime;
+  int numEvents;
+  int updateInterval;
+  bool hasStarted;
+  time_t startTime;
 
-	double currentPercent;
-	int currentEvent;
-	double lastUpdate;
-
+  double currentPercent;
+  int currentEvent;
+  double lastUpdate;
 };
 
 } /* namespace ComPWA */
