@@ -74,13 +74,15 @@ public:
 	//! Implementation of interface for streaming info about the strategy
 	virtual std::string to_str() const;
 	//! value of resonance at \param point
-	virtual std::complex<double> Evaluate(dataPoint& point);
+	virtual std::complex<double> Evaluate(ComPWA::dataPoint& point);
 	//! value of resonance's angular distribution at \param point
-	virtual double EvaluateAngular(dataPoint& point);
+	virtual double EvaluateAngular(ComPWA::dataPoint& point) {
+      return EvaluateWignerD(point);
+    };
 	//! value of dynamical amplitude at \param point
-	virtual std::complex<double> EvaluateAmp(dataPoint& point) = 0;
+	virtual std::complex<double> EvaluateAmp(ComPWA::dataPoint& point) = 0;
 	//! value of angular distribution at \param point
-	virtual double EvaluateWignerD(dataPoint& point) {
+	virtual double EvaluateWignerD(ComPWA::dataPoint& point) {
 		return _wignerD.evaluate(point);
 	};
 
