@@ -44,7 +44,7 @@ install:
     - echo "Installation"
     - lsb_release
     - uname -a
-    - ls /usr/include/*
+    - ls /usr/include/root/*
     - cd ComPWA/ComPWA; ls
     - mkdir build
     - cd build
