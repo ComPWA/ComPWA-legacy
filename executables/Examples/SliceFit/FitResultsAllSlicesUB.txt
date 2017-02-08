@@ -1,0 +1,375 @@
+
+--------------MINUIT2 FIT RESULT----------------
+		*** MINIMUM NOT VALID! ***
+Initial Likelihood: -912.1189894
+Final Likelihood: -912.1189894
+Estimated distance to minimumn: 0
+Error definition: 0.5
+Number of calls: 28
+CPU Time : 0.0043101min
+
+PARAMETERS:
+|------------------------------------------------------------------------|
+| Nr |            Name |          Initial Value |            Final Value |
+|------------------------------------------------------------------------|
+|  0 |              P0 |        0.75       +-1. |        0.75+-22.663096 |
+|  1 |              P1 |           1       +-1. |           1+-12.593985 |
+|  2 |              P2 |           0       +-1. |           0+-12.622065 |
+|  3 |              P3 |         0.1       +-1. |         0.1+-16.829209 |
+|  4 |              P4 |           1       +-1. |           1 +-16.80837 |
+|------------------------------------------------------------------------|
+		*** COVARIANCE MATRIX NOT VALID! ***
+		*** COVARIANCE MATRIX NOT ACCURATE! ***
+		*** COVARIANCE MATRIX NOT POSITIVE DEFINITE! ***
+		*** HESSE FAILED! ***
+FIT FRACTIONS:
+
+--------------MINUIT2 FIT RESULT----------------
+		*** MINIMUM NOT VALID! ***
+Initial Likelihood: -912.1189894
+Final Likelihood: -912.1189894
+Estimated distance to minimumn: 0
+Error definition: 0.5
+Number of calls: 28
+CPU Time : 0.002675483333min
+
+PARAMETERS:
+|------------------------------------------------------------------------|
+| Nr |            Name |          Initial Value |            Final Value |
+|------------------------------------------------------------------------|
+|  0 |              P0 |        0.75       +-1. |        0.75+-22.663096 |
+|  1 |              P1 |           1       +-1. |           1+-12.593985 |
+|  2 |              P2 |           0       +-1. |           0+-12.622065 |
+|  3 |              P3 |         0.1       +-1. |         0.1+-16.829209 |
+|  4 |              P4 |           1       +-1. |           1 +-16.80837 |
+|------------------------------------------------------------------------|
+		*** COVARIANCE MATRIX NOT VALID! ***
+		*** COVARIANCE MATRIX NOT ACCURATE! ***
+		*** COVARIANCE MATRIX NOT POSITIVE DEFINITE! ***
+		*** HESSE FAILED! ***
+FIT FRACTIONS:
+
+--------------MINUIT2 FIT RESULT----------------
+		*** MINIMUM NOT VALID! ***
+Initial Likelihood: -912.1189894
+Final Likelihood: -912.1189894
+Estimated distance to minimumn: 0
+Error definition: 0.5
+Number of calls: 28
+CPU Time : 0.002717933333min
+
+PARAMETERS:
+|------------------------------------------------------------------------|
+| Nr |            Name |          Initial Value |            Final Value |
+|------------------------------------------------------------------------|
+|  0 |              P0 |        0.75       +-1. |        0.75+-22.663096 |
+|  1 |              P1 |           1       +-1. |           1+-12.593985 |
+|  2 |              P2 |           0       +-1. |           0+-12.622065 |
+|  3 |              P3 |         0.1       +-1. |         0.1+-16.829209 |
+|  4 |              P4 |           1       +-1. |           1 +-16.80837 |
+|------------------------------------------------------------------------|
+		*** COVARIANCE MATRIX NOT VALID! ***
+		*** COVARIANCE MATRIX NOT ACCURATE! ***
+		*** COVARIANCE MATRIX NOT POSITIVE DEFINITE! ***
+		*** HESSE FAILED! ***
+FIT FRACTIONS:
+
+--------------MINUIT2 FIT RESULT----------------
+		*** MINIMUM NOT VALID! ***
+Initial Likelihood: -912.1189894
+Final Likelihood: -912.1189894
+Estimated distance to minimumn: 0
+Error definition: 0.5
+Number of calls: 28
+CPU Time : 0.002757733333min
+
+PARAMETERS:
+|------------------------------------------------------------------------|
+| Nr |            Name |          Initial Value |            Final Value |
+|------------------------------------------------------------------------|
+|  0 |              P0 |        0.75       +-1. |        0.75+-22.663096 |
+|  1 |              P1 |           1       +-1. |           1+-12.593985 |
+|  2 |              P2 |           0       +-1. |           0+-12.622065 |
+|  3 |              P3 |         0.1       +-1. |         0.1+-16.829209 |
+|  4 |              P4 |           1       +-1. |           1 +-16.80837 |
+|------------------------------------------------------------------------|
+		*** COVARIANCE MATRIX NOT VALID! ***
+		*** COVARIANCE MATRIX NOT ACCURATE! ***
+		*** COVARIANCE MATRIX NOT POSITIVE DEFINITE! ***
+		*** HESSE FAILED! ***
+FIT FRACTIONS:
+
+--------------MINUIT2 FIT RESULT----------------
+		*** MINIMUM NOT VALID! ***
+Initial Likelihood: -912.1189894
+Final Likelihood: -912.1189894
+Estimated distance to minimumn: 0
+Error definition: 0.5
+Number of calls: 28
+CPU Time : 0.002563383333min
+
+PARAMETERS:
+|------------------------------------------------------------------------|
+| Nr |            Name |          Initial Value |            Final Value |
+|------------------------------------------------------------------------|
+|  0 |              P0 |        0.75       +-1. |        0.75+-22.663096 |
+|  1 |              P1 |           1       +-1. |           1+-12.593985 |
+|  2 |              P2 |           0       +-1. |           0+-12.622065 |
+|  3 |              P3 |         0.1       +-1. |         0.1+-16.829209 |
+|  4 |              P4 |           1       +-1. |           1 +-16.80837 |
+|------------------------------------------------------------------------|
+		*** COVARIANCE MATRIX NOT VALID! ***
+		*** COVARIANCE MATRIX NOT ACCURATE! ***
+		*** COVARIANCE MATRIX NOT POSITIVE DEFINITE! ***
+		*** HESSE FAILED! ***
+FIT FRACTIONS:
+
+--------------MINUIT2 FIT RESULT----------------
+		*** MINIMUM NOT VALID! ***
+Initial Likelihood: -912.1189894
+Final Likelihood: -912.1189894
+Estimated distance to minimumn: 0
+Error definition: 0.5
+Number of calls: 28
+CPU Time : 0.002549583333min
+
+PARAMETERS:
+|------------------------------------------------------------------------|
+| Nr |            Name |          Initial Value |            Final Value |
+|------------------------------------------------------------------------|
+|  0 |              P0 |        0.75       +-1. |        0.75+-22.663096 |
+|  1 |              P1 |           1       +-1. |           1+-12.593985 |
+|  2 |              P2 |           0       +-1. |           0+-12.622065 |
+|  3 |              P3 |         0.1       +-1. |         0.1+-16.829209 |
+|  4 |              P4 |           1       +-1. |           1 +-16.80837 |
+|------------------------------------------------------------------------|
+		*** COVARIANCE MATRIX NOT VALID! ***
+		*** COVARIANCE MATRIX NOT ACCURATE! ***
+		*** COVARIANCE MATRIX NOT POSITIVE DEFINITE! ***
+		*** HESSE FAILED! ***
+FIT FRACTIONS:
+
+--------------MINUIT2 FIT RESULT----------------
+		*** MINIMUM NOT VALID! ***
+Initial Likelihood: -912.1189894
+Final Likelihood: -912.1189894
+Estimated distance to minimumn: 0
+Error definition: 0.5
+Number of calls: 28
+CPU Time : 0.002736733333min
+
+PARAMETERS:
+|------------------------------------------------------------------------|
+| Nr |            Name |          Initial Value |            Final Value |
+|------------------------------------------------------------------------|
+|  0 |              P0 |        0.75       +-1. |        0.75+-22.663096 |
+|  1 |              P1 |           1       +-1. |           1+-12.593985 |
+|  2 |              P2 |           0       +-1. |           0+-12.622065 |
+|  3 |              P3 |         0.1       +-1. |         0.1+-16.829209 |
+|  4 |              P4 |           1       +-1. |           1 +-16.80837 |
+|------------------------------------------------------------------------|
+		*** COVARIANCE MATRIX NOT VALID! ***
+		*** COVARIANCE MATRIX NOT ACCURATE! ***
+		*** COVARIANCE MATRIX NOT POSITIVE DEFINITE! ***
+		*** HESSE FAILED! ***
+FIT FRACTIONS:
+
+--------------MINUIT2 FIT RESULT----------------
+		*** MINIMUM NOT VALID! ***
+Initial Likelihood: -912.1189894
+Final Likelihood: -912.1189894
+Estimated distance to minimumn: 0
+Error definition: 0.5
+Number of calls: 28
+CPU Time : 0.002639183333min
+
+PARAMETERS:
+|------------------------------------------------------------------------|
+| Nr |            Name |          Initial Value |            Final Value |
+|------------------------------------------------------------------------|
+|  0 |              P0 |        0.75       +-1. |        0.75+-22.663096 |
+|  1 |              P1 |           1       +-1. |           1+-12.593985 |
+|  2 |              P2 |           0       +-1. |           0+-12.622065 |
+|  3 |              P3 |         0.1       +-1. |         0.1+-16.829209 |
+|  4 |              P4 |           1       +-1. |           1 +-16.80837 |
+|------------------------------------------------------------------------|
+		*** COVARIANCE MATRIX NOT VALID! ***
+		*** COVARIANCE MATRIX NOT ACCURATE! ***
+		*** COVARIANCE MATRIX NOT POSITIVE DEFINITE! ***
+		*** HESSE FAILED! ***
+FIT FRACTIONS:
+
+--------------MINUIT2 FIT RESULT----------------
+		*** MINIMUM NOT VALID! ***
+Initial Likelihood: -912.1189894
+Final Likelihood: -912.1189894
+Estimated distance to minimumn: 0
+Error definition: 0.5
+Number of calls: 28
+CPU Time : 0.004152616667min
+
+PARAMETERS:
+|------------------------------------------------------------------------|
+| Nr |            Name |          Initial Value |            Final Value |
+|------------------------------------------------------------------------|
+|  0 |              P0 |        0.75       +-1. |        0.75+-22.663096 |
+|  1 |              P1 |           1       +-1. |           1+-12.593985 |
+|  2 |              P2 |           0       +-1. |           0+-12.622065 |
+|  3 |              P3 |         0.1       +-1. |         0.1+-16.829209 |
+|  4 |              P4 |           1       +-1. |           1 +-16.80837 |
+|------------------------------------------------------------------------|
+		*** COVARIANCE MATRIX NOT VALID! ***
+		*** COVARIANCE MATRIX NOT ACCURATE! ***
+		*** COVARIANCE MATRIX NOT POSITIVE DEFINITE! ***
+		*** HESSE FAILED! ***
+FIT FRACTIONS:
+
+--------------MINUIT2 FIT RESULT----------------
+		*** MINIMUM NOT VALID! ***
+Initial Likelihood: -912.1189894
+Final Likelihood: -912.1189894
+Estimated distance to minimumn: 0
+Error definition: 0.5
+Number of calls: 28
+CPU Time : 0.001677916667min
+
+PARAMETERS:
+|------------------------------------------------------------------------|
+| Nr |            Name |          Initial Value |            Final Value |
+|------------------------------------------------------------------------|
+|  0 |              P0 |        0.75       +-1. |        0.75+-22.663096 |
+|  1 |              P1 |           1       +-1. |           1+-12.593985 |
+|  2 |              P2 |           0       +-1. |           0+-12.622065 |
+|  3 |              P3 |         0.1       +-1. |         0.1+-16.829209 |
+|  4 |              P4 |           1       +-1. |           1 +-16.80837 |
+|------------------------------------------------------------------------|
+		*** COVARIANCE MATRIX NOT VALID! ***
+		*** COVARIANCE MATRIX NOT ACCURATE! ***
+		*** COVARIANCE MATRIX NOT POSITIVE DEFINITE! ***
+		*** HESSE FAILED! ***
+FIT FRACTIONS:
+
+--------------MINUIT2 FIT RESULT----------------
+		*** MINIMUM NOT VALID! ***
+Initial Likelihood: -534.6854958
+Final Likelihood: -534.6854958
+Estimated distance to minimumn: 0
+Error definition: 0.5
+Number of calls: 28
+CPU Time : 0.001696383333min
+
+PARAMETERS:
+|------------------------------------------------------------------------|
+| Nr |            Name |          Initial Value |            Final Value |
+|------------------------------------------------------------------------|
+|  0 |              P0 |        0.75       +-1. |        0.75+-22.663096 |
+|  1 |              P1 |           1       +-1. |           1+-12.593985 |
+|  2 |              P2 |           0       +-1. |           0+-12.622065 |
+|  3 |              P3 |         0.1       +-1. |         0.1+-16.829209 |
+|  4 |              P4 |           1       +-1. |           1 +-16.80837 |
+|------------------------------------------------------------------------|
+		*** COVARIANCE MATRIX NOT VALID! ***
+		*** COVARIANCE MATRIX NOT ACCURATE! ***
+		*** COVARIANCE MATRIX NOT POSITIVE DEFINITE! ***
+		*** HESSE FAILED! ***
+FIT FRACTIONS:
+
+--------------MINUIT2 FIT RESULT----------------
+		*** MINIMUM NOT VALID! ***
+Initial Likelihood: -534.6854958
+Final Likelihood: -534.6854958
+Estimated distance to minimumn: 0
+Error definition: 0.5
+Number of calls: 28
+CPU Time : 0.004207133333min
+
+PARAMETERS:
+|------------------------------------------------------------------------|
+| Nr |            Name |          Initial Value |            Final Value |
+|------------------------------------------------------------------------|
+|  0 |              P0 |        0.75       +-1. |        0.75+-22.663096 |
+|  1 |              P1 |           1       +-1. |           1+-12.593985 |
+|  2 |              P2 |           0       +-1. |           0+-12.622065 |
+|  3 |              P3 |         0.1       +-1. |         0.1+-16.829209 |
+|  4 |              P4 |           1       +-1. |           1 +-16.80837 |
+|------------------------------------------------------------------------|
+		*** COVARIANCE MATRIX NOT VALID! ***
+		*** COVARIANCE MATRIX NOT ACCURATE! ***
+		*** COVARIANCE MATRIX NOT POSITIVE DEFINITE! ***
+		*** HESSE FAILED! ***
+FIT FRACTIONS:
+
+--------------MINUIT2 FIT RESULT----------------
+		*** MINIMUM NOT VALID! ***
+Initial Likelihood: -534.6854958
+Final Likelihood: -534.6854958
+Estimated distance to minimumn: 0
+Error definition: 0.5
+Number of calls: 28
+CPU Time : 0.001664866667min
+
+PARAMETERS:
+|------------------------------------------------------------------------|
+| Nr |            Name |          Initial Value |            Final Value |
+|------------------------------------------------------------------------|
+|  0 |              P0 |        0.75       +-1. |        0.75+-22.663096 |
+|  1 |              P1 |           1       +-1. |           1+-12.593985 |
+|  2 |              P2 |           0       +-1. |           0+-12.622065 |
+|  3 |              P3 |         0.1       +-1. |         0.1+-16.829209 |
+|  4 |              P4 |           1       +-1. |           1 +-16.80837 |
+|------------------------------------------------------------------------|
+		*** COVARIANCE MATRIX NOT VALID! ***
+		*** COVARIANCE MATRIX NOT ACCURATE! ***
+		*** COVARIANCE MATRIX NOT POSITIVE DEFINITE! ***
+		*** HESSE FAILED! ***
+FIT FRACTIONS:
+
+--------------MINUIT2 FIT RESULT----------------
+		*** MINIMUM NOT VALID! ***
+Initial Likelihood: -5951.298169
+Final Likelihood: -5951.298169
+Estimated distance to minimumn: 0
+Error definition: 0.5
+Number of calls: 26
+CPU Time : 0.001984333333min
+
+PARAMETERS:
+|------------------------------------------------------------------------|
+| Nr |            Name |          Initial Value |            Final Value |
+|------------------------------------------------------------------------|
+|  0 |              P0 |        0.75       +-1. |        0.75+-22.663096 |
+|  1 |              P1 |           1       +-1. |           1+-12.593985 |
+|  2 |              P2 |           0       +-1. |           0+-12.622065 |
+|  3 |              P3 |         0.1       +-1. |         0.1+-16.829209 |
+|  4 |              P4 |           1       +-1. |           1 +-16.80837 |
+|------------------------------------------------------------------------|
+		*** COVARIANCE MATRIX NOT VALID! ***
+		*** COVARIANCE MATRIX NOT ACCURATE! ***
+		*** COVARIANCE MATRIX NOT POSITIVE DEFINITE! ***
+		*** HESSE FAILED! ***
+FIT FRACTIONS:
+
+--------------MINUIT2 FIT RESULT----------------
+		*** MINIMUM NOT VALID! ***
+Initial Likelihood: -5951.298169
+Final Likelihood: -5951.298169
+Estimated distance to minimumn: 0
+Error definition: 0.5
+Number of calls: 26
+CPU Time : 0.002303716667min
+
+PARAMETERS:
+|------------------------------------------------------------------------|
+| Nr |            Name |          Initial Value |            Final Value |
+|------------------------------------------------------------------------|
+|  0 |              P0 |        0.75       +-1. |        0.75+-22.663096 |
+|  1 |              P1 |           1       +-1. |           1+-12.593985 |
+|  2 |              P2 |           0       +-1. |           0+-12.622065 |
+|  3 |              P3 |         0.1       +-1. |         0.1+-16.829209 |
+|  4 |              P4 |           1       +-1. |           1 +-16.80837 |
+|------------------------------------------------------------------------|
+		*** COVARIANCE MATRIX NOT VALID! ***
+		*** COVARIANCE MATRIX NOT ACCURATE! ***
+		*** COVARIANCE MATRIX NOT POSITIVE DEFINITE! ***
+		*** HESSE FAILED! ***
+FIT FRACTIONS:
