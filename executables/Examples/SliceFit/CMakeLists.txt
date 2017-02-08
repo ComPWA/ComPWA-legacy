@@ -1,0 +1,23 @@
+# Create executable for slice fit of J/psi -> ypipi.
+
+# The REQUIRED statement is somehow not working
+find_package( ROOT REQUIRED )
+find_package( Boost REQUIRED )
+
+FILE(GLOB lib_srcs *.cpp)
+FILE(GLOB lib_headers *.hpp)
+
+add_executable ( slicefitApp SliceFitApp.cpp ${lib_headers})
+target_link_libraries( slicefitApp AmplitudeSum Minuit2IF SliceFit Estimator RootReader JakeReader DPKinematics Core ${ROOT_LIBRARIES} ${Boost_LIBRARIES} pthread )
+target_include_directories( slicefitApp PUBLIC ${ROOT_INCLUDE_DIR} ${Boost_INCLUDE_DIR} )
+
+#add_executable ( slicefitrandApp SliceFitRANDApp.cpp ${lib_headers})
+#target_link_libraries( slicefitrandApp AmplitudeSum Minuit2IF SliceFitUB Estimator RootReader JakeReader DPKinematics Core ${ROOT_LIBRARIES} ${Boost_LIBRARIES} pthread )
+#target_include_directories( slicefitrandApp PUBLIC ${ROOT_INCLUDE_DIR} ${Boost_INCLUDE_DIR} )
+
+add_executable ( slicefitubApp SliceFitUBApp.cpp ${lib_headers})
+target_link_libraries( slicefitubApp AmplitudeSum Minuit2IF SliceFitUB Estimator RootReader JakeReader DPKinematics Core ${ROOT_LIBRARIES} ${Boost_LIBRARIES} pthread )
+target_include_directories( slicefitubApp PUBLIC ${ROOT_INCLUDE_DIR} ${Boost_INCLUDE_DIR} )
+
+#install (TARGETS DalitzFitD03K DESTINATION bin/ )
+#install (FILES ${lib_headers} DESTINATION include/ComPWA/ )
