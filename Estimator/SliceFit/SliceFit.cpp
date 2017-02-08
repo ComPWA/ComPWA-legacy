@@ -97,16 +97,16 @@ void SliceFit::init(){
 
 }
 
-std::shared_ptr<Optimizer::ControlParameter> SliceFit::createInstance(std::shared_ptr<Physics::AmplitudeSum::AmpSumIntensity> inPIF, std::shared_ptr<DataReader::Data> inDIF, ParameterList& inPar, unsigned int startEvent, unsigned int nEvents, unsigned int nBins, unsigned int nF0, unsigned int nF2){
+std::shared_ptr<ComPWA::ControlParameter> SliceFit::createInstance(std::shared_ptr<Physics::AmplitudeSum::AmpSumIntensity> inPIF, std::shared_ptr<DataReader::Data> inDIF, ParameterList& inPar, unsigned int startEvent, unsigned int nEvents, unsigned int nBins, unsigned int nF0, unsigned int nF2){
     if(!instance_)
-        instance_ = std::shared_ptr<Optimizer::ControlParameter>(new SliceFit(inPIF, inDIF, inPar, startEvent, nEvents, nBins, nF0, nF2));
+        instance_ = std::shared_ptr<ComPWA::ControlParameter>(new SliceFit(inPIF, inDIF, inPar, startEvent, nEvents, nBins, nF0, nF2));
 
 	return instance_;
 }
 
-std::shared_ptr<Optimizer::ControlParameter> SliceFit::createInstance(std::shared_ptr<Physics::AmplitudeSum::AmpSumIntensity> inPIF, std::shared_ptr<DataReader::Data> inDIF, std::shared_ptr<DataReader::Data> inPHSP, ParameterList& inPar, unsigned int startEvent, unsigned int nEvents, unsigned int nBins, unsigned int nF0, unsigned int nF2){
+std::shared_ptr<ComPWA::ControlParameter> SliceFit::createInstance(std::shared_ptr<Physics::AmplitudeSum::AmpSumIntensity> inPIF, std::shared_ptr<DataReader::Data> inDIF, std::shared_ptr<DataReader::Data> inPHSP, ParameterList& inPar, unsigned int startEvent, unsigned int nEvents, unsigned int nBins, unsigned int nF0, unsigned int nF2){
     if(!instance_)
-        instance_ = std::shared_ptr<Optimizer::ControlParameter>(new SliceFit(inPIF, inDIF, inPHSP, inPar, startEvent, nEvents, nBins, nF0, nF2));
+        instance_ = std::shared_ptr<ComPWA::ControlParameter>(new SliceFit(inPIF, inDIF, inPHSP, inPar, startEvent, nEvents, nBins, nF0, nF2));
 
 	return instance_;
 }

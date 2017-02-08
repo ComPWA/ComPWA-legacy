@@ -12,12 +12,14 @@ lib ComPWA : [ glob *.cpp : *Test.cpp ]
       <library>/boost//log_setup
 ;
 
+install distCore 
+    : ComPWA 
+    : <location>$(TOP)/lib 
+;
 
-install dist : ComPWA : <location>$(TOP)/lib ;
 
-
-using testing ;
-lib boost_unit_test_framework ;
+#using testing ;
+#lib boost_unit_test_framework ;
 #TODO!!!!
 #run ParameterTest.cpp ComPWA boost_unit_test_framework ;
 #run ParameterListTest.cpp ComPWA boost_unit_test_framework ;

@@ -241,9 +241,9 @@ inline TPad* drawPull(std::vector<TH1D*> hist, std::vector<TString> drawOption,
         
         char chi2Char[60];
         sprintf(chi2Char,"#chi^{2}_{1D}/ndf = %.2f/%d",chi2,ndf);
-        TLatex* ltx = new TLatex();
-        ltx->DrawLatexNDC(0.2,0.85,chi2Char);//needs to be drawn inside a TPad
-        delete ltx;
+        //TLatex* ltx = new TLatex();
+        //ltx->DrawLatexNDC(0.2,0.85,chi2Char);//needs to be drawn inside a TPad
+        //delete ltx;
         
         TAxis *xaxis = ((TH1*)hist.at(0))->GetXaxis();
         Int_t fNpoints = xaxis->GetNbins();
@@ -350,9 +350,9 @@ inline TPad* drawResidual(std::vector<TH1D*> hist, std::vector<TString> drawOpti
         
         char chi2Char[60];
         sprintf(chi2Char,"#chi^{2}_{1D}/ndf = %.2f/%d",chi2,ndf);
-        TLatex* ltx = new TLatex();
-        ltx->DrawLatexNDC(0.2,0.85,chi2Char);//needs to be drawn inside a TPad
-        delete ltx;
+        //TLatex* ltx = new TLatex();
+        //ltx->DrawLatexNDC(0.2,0.85,chi2Char);//needs to be drawn inside a TPad
+        //delete ltx;
         
         TAxis *xaxis = ((TH1*)hist.at(0))->GetXaxis();
         Int_t fNpoints = xaxis->GetNbins();

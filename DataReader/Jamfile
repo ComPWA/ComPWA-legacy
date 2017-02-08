@@ -15,11 +15,11 @@ if $(build_RootReader) && $(build_RootReader) != 0
 	build-project JakeReader ;
 	sources = $(sources) [ glob JakeReader/*.cpp : *.Test.cpp ] ;
 }
-if $(build_AsciiReader) && $(build_AsciiReader) != 0
-{
-	build-project AsciiReader ;
-	sources = $(sources) [ glob AsciiReader/*.cpp : *.Test.cpp ] ;
-}
+#if $(build_AsciiReader) && $(build_AsciiReader) != 0
+#{
+#	build-project AsciiReader ;
+#	sources = $(sources) [ glob AsciiReader/*.cpp : *.Test.cpp ] ;
+#}
 
 # Build libDataReader.so
 lib DataReader : $(sources) $(TOP)/Core//ComPWA ;
