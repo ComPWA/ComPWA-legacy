@@ -36,9 +36,11 @@ before_install:
     - sudo apt-get install -y libboost-all-dev
     - wget https://root.cern.ch/download/root_v5.34.36.Linux-ubuntu14-x86_64-gcc4.8.tar.gz
     - tar xpvfz root_v5.34*
-    - pushd root
+    - export h=`pdf`
+    - cd root
     - source bin/thisroot.sh
-    - popd
+    - cd $h
+    - pwd
 install:
     - echo "Installation"
     - lsb_release
