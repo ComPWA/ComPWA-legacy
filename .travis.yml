@@ -32,8 +32,12 @@ compiler:
 before_install:
     - echo "Before installation"
     - sudo apt-get update -qq
-    - sudo apt-get install -y root-system libroot-math-minuit-dev root-plugin-math-minuit2
+    #- sudo apt-get install -y root-system libroot-math-minuit-dev root-plugin-math-minuit2
     - sudo apt-get install -y libboost-all-dev
+    - wget https://root.cern.ch/download/root_v5.34.36.Linux-ubuntu14-x86_64-gcc4.8.tar.gz
+    - tar xpvfz root_v5.34*
+    - cd root
+    - source bin/thisroot.sh
     #- sudo apt-get install -y libboost-system-dev \
       #libboost-serialization-dev \
       #libboost-thread-dev \
