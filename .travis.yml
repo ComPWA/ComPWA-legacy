@@ -30,7 +30,8 @@ packages:
       #- g++
 before_install:
     - echo "Before installation"
-    - apt-get install root-system
+    #- apt-get update
+    #- apt-get install -y root-system
     #- if [ $TRAVIS_OS_NAME == linux ]; then sudo apt-get install -y x11-common libx11-6 x11-utils libX11-dev libgsl0-dev libxpm-dev libxft-dev libjpeg-dev libtiff4-dev libgmp3-dev libpng12-dev libxext-dev build-essential g++; fi
     #- wget https://github.com/ComPWA/ComPWA/raw/gh-pages/travis_ci_external_binaries/compwa_externals.tar.gzip -O /tmp/compwa_externals.tar.gzip
     #- tar xf /tmp/compwa_externals.tar.gzip -C /tmp
@@ -39,9 +40,10 @@ before_install:
     #- wget https://github.com/ComPWA/ComPWA/raw/gh-pages/travis_ci_external_binaries/compwa_externals_clips.tar.gzip -O /tmp/compwa_externals_clips.tar.gzip
     #- tar xf /tmp/compwa_externals_clips.tar.gzip -C /tmp
 install:
+    - echo "Installation"
     - lsb_release -si
     - uname -a
-    - root -version
+    - root --version
     - ls /usr/lib/libboost*
     - cd ComPWA/ComPWA; ls
     - mkdir build
