@@ -1,4 +1,4 @@
-add_subdirectory( test )
+#add_subdirectory( test )
 add_subdirectory( Examples )
 
 #add_executable (gentwopartApp GenTwoPartApp.cpp)

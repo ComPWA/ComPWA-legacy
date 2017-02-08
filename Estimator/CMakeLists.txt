@@ -5,8 +5,8 @@ add_library (Estimator SHARED ${lib_srcs} ${lib_headers})
 
 add_subdirectory (ChiOneD)
 add_subdirectory (MinLogLH)
-add_subdirectory (SliceFit)
-add_subdirectory (SliceFitUB)
+#add_subdirectory (SliceFit)
+#add_subdirectory (SliceFitUB)
 
 target_link_libraries( Estimator ${Boost_LIBRARIES} )
 
