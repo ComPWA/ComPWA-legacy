@@ -75,6 +75,8 @@ public:
 	virtual std::string to_str() const;
 	//! value of resonance at \param point
 	virtual std::complex<double> Evaluate(dataPoint& point);
+	//! value of resonance's angular distribution at \param point
+	virtual double EvaluateAngular(dataPoint& point);
 	//! value of dynamical amplitude at \param point
 	virtual std::complex<double> EvaluateAmp(dataPoint& point) = 0;
 	//! value of angular distribution at \param point
