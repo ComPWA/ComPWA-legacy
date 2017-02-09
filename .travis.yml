@@ -27,7 +27,7 @@ install:
     - cmake ..
     - make -j4 
 
-before_script:
+#before_script:
     #- export COMPWA_DIR=$PWD
     #- export PWA_LIBS=$COMPWA_DIR/lib
     #- export QFT=/tmp/qft++
