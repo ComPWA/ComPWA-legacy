@@ -4,7 +4,7 @@ language: cpp
 #services:
     #- docker
 compiler:
-    - g++
+    - clang
 
 before_install:
     - echo "Before installation"
