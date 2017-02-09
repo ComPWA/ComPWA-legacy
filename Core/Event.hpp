@@ -38,6 +38,8 @@ public:
   Event(const double inWeight, const std::string &name,
         const double inEff = 1.);
 
+  Event(Event const&);
+
   virtual void addParticle(Particle inParticle);
 
   virtual void setParticleAt(const Particle &particle, unsigned int index);

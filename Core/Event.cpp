@@ -26,6 +26,10 @@ Event::Event(const double inWeight, const std::string &name = "",
              const double inEff)
     : fWeight(inWeight), fEff(inEff), fName(name), fFlavour(0), fCharge(0) {}
 
+Event::Event(const Event &in)
+    : fWeight(in.getWeight()), fEff(in.getEfficiency()), fName(in.getName()),
+      fFlavour(in.getFlavour()), fCharge(in.getCharge()) {}
+
 void Event::addParticle(Particle inParticle) {
   fParticles.push_back(inParticle);
 }

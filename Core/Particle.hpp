@@ -36,6 +36,9 @@ public:
   Particle(double inPx = 0, double inPy = 0, double inPz = 0, double inE = 0,
            int inpid = 0, int c = 0);
 
+  //! Copy constructor
+  Particle(Particle const&);
+
   //! Default destructor
   virtual ~Particle();
 

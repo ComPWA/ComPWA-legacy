@@ -13,6 +13,10 @@ Particle::Particle(double inPx, double inPy, double inPz, double inE, int inpid,
                    int c)
     : px(inPx), py(inPy), pz(inPz), E(inE), pid(inpid), charge(c) {}
 
+Particle::Particle(const Particle &in)
+    : px(in.getPx()), py(in.getPy()), pz(in.getPz()), E(in.getE())
+    , pid(in.getPid()), charge(in.getCharge()) {}
+
 Particle::~Particle() {}
 
 std::ostream &operator<<(std::ostream &stream, const Particle &p) {
