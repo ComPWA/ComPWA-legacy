@@ -25,11 +25,11 @@ target_include_directories( dataiftestApp PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${R
 
 #Todo: if geneva
 #add_executable ( optimizertestApp OptimizerTestApp.cpp ${lib_headers})
-#target_link_libraries( optimizertestApp ComPWA_testApps ComPWA_Core ComPWA_RootReader ComPWA_MinLogLH ComPWA_Minuit2IF ComPWA_GenevaIF pthread )
+#target_link_libraries( optimizertestApp ComPWA_testApps ComPWA_Core ComPWA_RootReader ComPWA_MinLogLH ComPWA_Minuit2IF ComPWA_GenevaIF ${Boost_LIBRARIES} pthread )
 #target_include_directories( optimizertestApp PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} )
 
 add_executable ( optimizertestApp MinuitTestApp.cpp ${lib_headers})
-target_link_libraries( optimizertestApp ComPWA_testApps ComPWA_Core ComPWA_RootReader ComPWA_MinLogLH ComPWA_Minuit2IF pthread )
+target_link_libraries( optimizertestApp ComPWA_testApps ComPWA_Core ComPWA_RootReader ComPWA_MinLogLH ComPWA_Minuit2IF ${Boost_LIBRARIES} pthread )
 target_include_directories( optimizertestApp PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} )
 
 add_executable ( physicstestApp PhysicsTestApp.cpp ${lib_headers})
