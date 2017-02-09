@@ -4,9 +4,9 @@ find_package( Boost REQUIRED )
 add_subdirectory( test )
 add_subdirectory( Examples )
 
-add_executable (gentwopartApp GenTwoPartApp.cpp)
-target_link_libraries( gentwopartApp Core BreitWigner pthread ${ROOT_LIBRARIES} )
-target_include_directories( gentwopartApp PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${ROOT_INCLUDE_DIR} )
+#add_executable (gentwopartApp GenTwoPartApp.cpp)
+#target_link_libraries( gentwopartApp Core BreitWigner pthread ${ROOT_LIBRARIES} )
+#target_include_directories( gentwopartApp PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${ROOT_INCLUDE_DIR} )
 
 add_executable (dpareaTestApp DPareaTestApp.cpp)
 target_link_libraries( dpareaTestApp Core DPKinematics pthread ${ROOT_LIBRARIES} )
