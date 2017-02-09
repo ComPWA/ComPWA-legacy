@@ -40,7 +40,6 @@
 #include "Core/ParameterList.hpp"
 
 using namespace std;
-using ComPWA::ParameterList;
 using ComPWA::Physics::BreitWigner::BreitWigner;
 using ComPWA::DoubleParameter;
 
@@ -66,7 +65,7 @@ int main(int argc, char **argv){
 
   //Simple Breit-Wigner Physics-Module setup
   shared_ptr<BreitWigner> testBW(new BreitWigner(0.,5.));
-  ParameterList minPar;
+  ComPWA::ParameterList minPar;
   minPar.AddParameter(std::shared_ptr<DoubleParameter>(new DoubleParameter("BWPos",1.5,0.5,2.5,0.1)));
   minPar.AddParameter(std::shared_ptr<DoubleParameter>(new DoubleParameter("BWWidth",0.3,0.1,0.2,0.01)));
 
@@ -104,7 +103,7 @@ int main(int argc, char **argv){
       //call physics module
       vector<double> x;
       x.push_back(pPm.Mag());
-      ParameterList intensL = testBW->intensity(x);
+      ComPWA::ParameterList intensL = testBW->intensity(x);
       double BWpdf = intensL.GetDoubleParameter(0)->GetValue();
       //double BWpdf = testBW->intensity(x, minPar); //TMath::BreitWigner(pPm.Mag(),1.2,0.2);
 

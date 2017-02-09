@@ -33,8 +33,8 @@ target_link_libraries( optimizertestApp testApps Core RootReader MinLogLH Minuit
 target_include_directories( optimizertestApp PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} )
 
 add_executable ( physicstestApp PhysicsTestApp.cpp ${lib_headers})
-target_link_libraries( physicstestApp Core BreitWigner pthread )
-target_include_directories( physicstestApp PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} )
+target_link_libraries( physicstestApp Core BreitWigner ${ROOT_LIBRARIES} pthread )
+target_include_directories( physicstestApp PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${ROOT_INCLUDE_DIR} )
 
 add_executable ( estimatortestApp EstimatorTestApp.cpp ${lib_headers})
 target_link_libraries( estimatortestApp Core MinLogLH ChiOneD BreitWigner RootReader pthread )
