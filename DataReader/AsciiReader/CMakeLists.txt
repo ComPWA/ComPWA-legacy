@@ -2,10 +2,10 @@
 FILE(GLOB lib_srcs *.cpp)
 FILE(GLOB lib_headers *.hpp)
 #list(REMOVE_ITEM lib_srcs "${CMAKE_CURRENT_SOURCE_DIR}/DataTest.cpp")
-add_library (AsciiReader SHARED ${lib_srcs} ${lib_headers})
-target_link_libraries( AsciiReader DataReader )
+add_library (ComPWA_AsciiReader SHARED ${lib_srcs} ${lib_headers})
+target_link_libraries( ComPWA_AsciiReader ComPWA_DataReader )
 
-target_include_directories (AsciiReader PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories (ComPWA_AsciiReader PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
-#install (TARGETS AsciiReader DESTINATION lib/ComPWA)
+#install (TARGETS ComPWA_AsciiReader DESTINATION lib/ComPWA)
 install (FILES ${lib_headers} DESTINATION include/ComPWA)

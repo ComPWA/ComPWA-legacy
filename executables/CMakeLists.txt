@@ -5,15 +5,15 @@ add_subdirectory( test )
 add_subdirectory( Examples )
 
 #add_executable (gentwopartApp GenTwoPartApp.cpp)
-#target_link_libraries( gentwopartApp Core BreitWigner pthread ${ROOT_LIBRARIES} )
+#target_link_libraries( gentwopartApp ComPWA_Core ComPWA_BreitWigner pthread ${ROOT_LIBRARIES} )
 #target_include_directories( gentwopartApp PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${ROOT_INCLUDE_DIR} )
 
 #add_executable (dpareaTestApp DPareaTestApp.cpp)
-#target_link_libraries( dpareaTestApp Core DPKinematics pthread ${ROOT_LIBRARIES} )
+#target_link_libraries( dpareaTestApp ComPWA_Core ComPWA_DPKinematics pthread ${ROOT_LIBRARIES} )
 #target_include_directories( dpareaTestApp PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${ROOT_INCLUDE_DIR} )
 
 #add_executable (genRunManager GenRunManagerApp.cpp)
-#target_link_libraries( genRunManager Core AmplitudeSum RootReader DPKinematics pthread ${ROOT_LIBRARIES} )
+#target_link_libraries( genRunManager ComPWA_Core ComPWA_AmplitudeSum ComPWA_RootReader ComPWA_DPKinematics pthread ${ROOT_LIBRARIES} )
 #target_include_directories( genRunManager PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${ROOT_INCLUDE_DIR})
 
 #add_executable (compareTreeAmpApp CompareTreeAmpApp.cpp)
