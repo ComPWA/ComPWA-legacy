@@ -20,8 +20,8 @@ target_link_libraries( treetestApp Core pthread )
 target_include_directories( treetestApp PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} )
 
 add_executable ( dataiftestApp DataIFTestApp.cpp ${lib_headers})
-target_link_libraries( dataiftestApp Core RootReader pthread )
-target_include_directories( dataiftestApp PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} )
+target_link_libraries( dataiftestApp Core RootReader ${ROOT_LIBRARIES} pthread )
+target_include_directories( dataiftestApp PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${ROOT_INCLUDE_DIR} )
 
 #Todo: if geneva
 #add_executable ( optimizertestApp OptimizerTestApp.cpp ${lib_headers})
