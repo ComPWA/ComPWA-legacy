@@ -2,6 +2,7 @@
 # refer to the root source directory of the project as ${COMPWA_SOURCE_DIR} and
 # to the root binary directory of the project as ${COMPWA_BINARY_DIR}.
 cmake_minimum_required (VERSION 3.0)
+#set(CMAKE_BUILD_TYPE Debug) 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 
 project( COMPWA )
