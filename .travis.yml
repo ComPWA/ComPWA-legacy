@@ -24,8 +24,8 @@ install:
     - cd ComPWA/ComPWA; ls
     - mkdir build
     - cd build
-    - cmake ..
-    - make -j4 
+    #- cmake ..
+    #- make -j4 
 
 #before_script:
     #- export COMPWA_DIR=$PWD
@@ -40,7 +40,9 @@ install:
     #- export PATH=$BOOST_ROOT/bin:$ROOTSYS/bin:$PATH
     #- export LD_LIBRARY_PATH=$CLIPS_ROOT/lib:$GENEVA/lib:$ROOTSYS/lib:$MINUIT2/lib:$BOOST_ROOT/lib:$PWA_LIBS:$QFT/lib:$LD_LIBRARY_PATH 
     #- export OMP_NUM_THREADS=1
-#script:
+script:
+    - cmake ..
+    - make -j4
     #- bjam
     #- ./run-test-apps.sh
 #after_success:
