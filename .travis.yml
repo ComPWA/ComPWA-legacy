@@ -1,22 +1,23 @@
 dist: trusty
 sudo: true
 language: cpp
-#services:
-    #- docker
 compiler:
     - g++
 
 before_install:
     - echo "Before installation"
     - sudo apt-get update -qq
-    #- sudo apt-get install -y root-system libroot-math-minuit-dev root-plugin-math-minuit2
     - sudo apt-get install -y libboost-all-dev libgsl0-dev
+    # ROOT package that is shipped with Ubuntu 14.04 does not include Minuit2
+    # so we have to download the binaries directly
+    #- sudo apt-get install -y root-system libroot-math-minuit-dev root-plugin-math-minuit2
     - wget https://root.cern.ch/download/root_v5.34.36.Linux-ubuntu14-x86_64-gcc4.8.tar.gz
     - tar xpvfz root_v5.34*
     - cd root
     - source bin/thisroot.sh
     - cd ..
     - pwd
+
 install:
     - echo "Installation"
     - lsb_release
@@ -24,29 +25,13 @@ install:
     - cd ComPWA/ComPWA; ls
     - mkdir build
     - cd build
-    #- cmake ..
-    #- make -j4 
 
-#before_script:
-    #- export COMPWA_DIR=$PWD
-    #- export PWA_LIBS=$COMPWA_DIR/lib
-    #- export QFT=/tmp/qft++
-    #- export GENEVA=/tmp/geneva_1_4_0
-    #- export MINUIT2=/tmp/Minuit2-5.34.14
-    #- export BOOST_ROOT=/tmp/boost_1_55_0
-    #- export BOOST_BUILD_PATH=$BOOST_ROOT/share/boost-build
-    #- export ROOTSYS=/tmp/root_v5.34.23
-    #- export CLIPS_ROOT=/tmp/clips_630
-    #- export PATH=$BOOST_ROOT/bin:$ROOTSYS/bin:$PATH
-    #- export LD_LIBRARY_PATH=$CLIPS_ROOT/lib:$GENEVA/lib:$ROOTSYS/lib:$MINUIT2/lib:$BOOST_ROOT/lib:$PWA_LIBS:$QFT/lib:$LD_LIBRARY_PATH 
-    #- export OMP_NUM_THREADS=1
+before_script:
+    - export OMP_NUM_THREADS=1
+
 script:
     - cmake ..
-    - make -j4
-    #- bjam
-    #- ./run-test-apps.sh
-#after_success:
-    #- bash <(curl -s https://codecov.io/bash)
+    - make -j4 VERBOSE=1
 
 branches:
     only:
