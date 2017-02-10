@@ -181,7 +181,7 @@ std::complex<double> AmpRelBreitWignerRes::dynamicalFunction(
 
   std::complex<double> result = g_final * g_production / denom;
 
-#ifdef DEBUG
+#ifndef NDEBUG
   if (std::isnan(result.real()) || std::isnan(result.imag())) {
     std::cout << "AmpRelBreitWignerRes::dynamicalFunction() | " << barrier
               << " " << mR << " " << mSq << " " << ma << " " << mb << std::endl;
@@ -299,7 +299,7 @@ AmpRelBreitWignerRes::SetupTree(ParameterList &sample, ParameterList &toySample,
 
 bool BreitWignerStrategy::execute(ParameterList &paras,
                                   std::shared_ptr<AbsParameter> &out) {
-#ifdef DEBUG
+#ifndef NDEBUG
   // Check parameter type
   if (checkType != out->type())
     throw(WrongParType("BreitWignerStrat::execute() | "

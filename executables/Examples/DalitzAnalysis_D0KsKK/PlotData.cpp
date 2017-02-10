@@ -1,3 +1,18 @@
+ 
+                                                           
+                                                    
+                                                 
+                                             
+                          
+                         
+                      
+                  
+              
+          
+        
+      
+    
+  
 
 #include <stdio.h>
 #include <numeric>
@@ -97,7 +112,7 @@ plotData::~plotData() {}
 //    }
 //    //Create adaptive histogram for data
 ////    TH2Poly* hist =
-///adaptiveBinning(adaptiveBinningSample->getNEvents(),2,tmpArray,bins);
+/// adaptiveBinning(adaptiveBinningSample->getNEvents(),2,tmpArray,bins);
 ////    if( !hist )
 ////        throw std::runtime_error("plotData::getAdBinHist() | Can not create"
 ////                                 "adaptively binned histogram!");
@@ -184,6 +199,7 @@ void plotData::Fill() {
   if (_ampVec.size() && s_phsp) {
     std::vector<double> ampHistos_integral(_ampVec.size(), 0);
 
+    /* Loop over all events in phase space sample */
     progressBar bar(s_phsp->getNEvents());
     for (unsigned int i = 0; i < s_phsp->getNEvents();
          i++) { // loop over phsp MC
@@ -198,16 +214,19 @@ void plotData::Fill() {
                       "This should not happen! We skip it!";
         continue;
       }
-      double evWeight = event.getWeight();
+      //double evWeight = event.getWeight();
 
-      phspDiagrams.Fill(event, evWeight * 1 / eff); // scale phsp to data size
-
+      /* Construct DataPoint from Event and check if dataPoint is within the
+       * phase space boundaries */
       dataPoint point;
       try {
         point = dataPoint(event);
       } catch (BeyondPhsp &ex) { // event outside phase, remove
         continue;
       }
+
+      // Fill diagrams with pure phase space events
+      phspDiagrams.Fill(point, 1 / eff); // scale phsp to data size
 
       for (int t = 0; t < signalComponents.size(); ++t) {
         resonanceItr res = _ampVec.at(0)->GetResonanceItrFirst();
@@ -230,9 +249,11 @@ void plotData::Fill() {
           val += cpRes->Evaluate(point);
         } catch (std::exception &ex) {
         }
-        signalComponents.at(t).Fill(event, std::norm(val) / evWeight * 1 / eff);
+        signalComponents.at(t).Fill(point, std::norm(val) / eff);
       }
 
+      /* Loop over all resonances of first amplitude. This is supposed to be our
+       * signal intensity */
       std::complex<double> tmp_intens2(0, 0);
       auto it = _ampVec.at(0)->GetResonanceItrFirst();
       for (; it != _ampVec.at(0)->GetResonanceItrLast(); ++it) {
@@ -240,8 +261,10 @@ void plotData::Fill() {
           continue;
         tmp_intens2 += (*it)->Evaluate(point);
       }
-      ampHistos.at(0).Fill(event, std::norm(tmp_intens2) / evWeight * 1 / eff);
+      ampHistos.at(0).Fill(point, std::norm(tmp_intens2) / eff);
 
+      /* Loop over all amplitudes. This is supposed to be our total intensity
+       * (usually signal+background) */
       double intens = 0;
       for (int t = 0; t < _ampVec.size(); ++t) {
         ParameterList tmp_list = _ampVec.at(t)->intensity(point);
@@ -249,12 +272,11 @@ void plotData::Fill() {
         tmp_intens = tmp_intens * _fraction.at(t);
         intens += tmp_intens;
         if (t == 1) // fill background
-          ampHistos.at(t).Fill(event, tmp_intens / evWeight * 1 / eff);
+          ampHistos.at(t).Fill(point, tmp_intens / eff);
       }
-      fitDiagrams.Fill(event, intens / evWeight * 1 / eff);
+      fitDiagrams.Fill(point, intens / eff);
     }
 
-    _globalScale = 1934;
     // Scale histograms to match data sample
     fitDiagrams.Scale(_globalScale / fitDiagrams.GetIntegral());
     phspDiagrams.Scale(_globalScale / phspDiagrams.GetIntegral());
@@ -298,34 +320,8 @@ void plotData::Plot() {
   if (!_isFilled)
     Fill();
 
-  //=== create 2dim residual histogrom from data and fit model. Use adaptive
-  //binning here
-  //    TH2Poly* adaptiveResiduals =
-  //    (TH2Poly*) dalitzHisto::getTH2PolyPull(
-  //                                           dataAdaptiveBinningHist,
-  //                                           fitAdaptiveBinningHist
-  //                                           );
-  //    adaptiveResiduals->SetStats(0);
-
-  //=== calculate goodness-of-fit variable
-  //    double chi2;
-  //    int NDF, igood;
-  //	dalitzHisto::getTH2PolyChi2(dataAdaptiveBinningHist,fitAdaptiveBinningHist,chi2,NDF,igood);
-  //	double pValue = ROOT::Math::chisquared_cdf_c(chi2,NDF);//lower tail cdf
-  //	LOG(info) << "Goodness-of-fit (2D): chi^2/ndf = "
-  //			<<chi2<<" / "<<NDF<<" = "<<chi2/NDF<<" pValue="<<pValue;
-
-  //    Chi2TestX(dataAdaptiveBinningHist,
-  //    fitAdaptiveBinningHist,chi2,NDF,igood,"UW,UF");
-  //    double pValue = ROOT::Math::chisquared_cdf_c(chi2,NDF);//lower tail cdf
-  //    LOG(info) << "Goodness-of-fit (2D): chi^2/ndf = "
-  //    <<chi2<<" / "<<NDF<<" = "<<chi2/NDF<<" pValue="<<pValue;
-
-  //    char chi2Char[60];
-  //    sprintf(chi2Char,"#chi^{2}/ndf = %.2f/%d",chi2,NDF);
-
-  //----- plotting dalitz distributions -----
-  TCanvas *c1 = new TCanvas("dalitz", "dalitz", 50, 50, 800, 800);
+  //----- plotting 2D dalitz distributions -----
+  TCanvas *c1 = new TCanvas("dalitz", "dalitz", 50, 50, 1600, 1600);
   c1->Divide(2, 2);
   c1->cd(1);
   dataDiagrams.getHistogram2D(0)->Draw("COLZ");
@@ -337,60 +333,39 @@ void plotData::Plot() {
   c1->cd(3);
   fitDiagrams.getHistogram2D(0)->Draw("COLZ");
   m23m13_contour.Draw("P");
-  //    c1->cd(4);
-  //    adaptiveResiduals->Draw("COLZ");
-  //    m23m13_contour.Draw("P");
 
   //----- plotting invariant mass distributions -----
-  TCanvas *c2 = new TCanvas("invmass", "invmass", 50, 50, 1200, 400);
+  TCanvas *c2 = new TCanvas("invmass", "invmass", 50, 50, 2400, 800);
   c2->Divide(3, 1);
-
-  // Plotting mKKsq
-  c2->cd(1);
-  CreateHist(0);
-
-  // Plotting mKSK+sq
-  c2->cd(2);
-  CreateHist(1);
-
-  // Plotting mKSK+sq
-  c2->cd(3);
-  CreateHist(2);
-  c2->cd(3);
+    c2->cd(1);
+    CreateHist(0);// Plotting mKKsq
+    c2->cd(2);
+    CreateHist(1);// Plotting mKSK+sq
+    c2->cd(3);
+    CreateHist(2);// Plotting mKSK+sq
+    c2->cd(3);
   TLegend *leg = new TLegend(0.15, 0.6, 0.50, 0.85);
   leg->AddEntry(dataDiagrams.getHistogram(2), "Data");
   leg->AddEntry(fitDiagrams.getHistogram(2), "Model");
   if (ampHistos.size())
     leg->AddEntry(ampHistos.back().getHistogram(2), "Background");
   leg->SetFillStyle(0);
-  leg->Draw();
+  leg->Draw(); // Plot legend
 
   //----- plotting signal amplitude contributions -----
   TCanvas *c5 =
-      new TCanvas("signalInvmass", "signalInvmass", 50, 50, 1200, 400);
+      new TCanvas("signalInvmass", "signalInvmass", 50, 50, 2400, 800);
   c5->Divide(3, 1);
-
-  // Plotting mKKsq
-  c5->cd(1);
-  CreateHist2(0);
-
-  // Plotting mKSK+sq
-  c5->cd(2);
-  CreateHist2(1);
-
-  // Plotting mKSK+sq
+    c5->cd(1);
+    CreateHist2(0);// Plotting mKKsq
+    c5->cd(2);
+    CreateHist2(1);// Plotting mKSK+sq
   c5->cd(3);
-  CreateHist2(2);
-  //	c2->cd(3);
-  //	TLegend* leg = new TLegend(0.15,0.6,0.50,0.85);
-  //	leg->AddEntry(dataDiagrams.getHistogram(2),"Data");
-  //	leg->AddEntry(fitDiagrams.getHistogram(2),"Model");
-  //	leg->SetFillStyle(0);
-  //	leg->Draw();
+  CreateHist2(2);// Plotting mKSK+sq
 
   //----- Helicity angle distributions -----
   TCanvas *c3 =
-      new TCanvas("helicityAngle", "helicity angle", 50, 50, 1200, 800);
+      new TCanvas("helicityAngle", "helicity angle", 50, 50, 2400, 1600);
   c3->Divide(3, 2);
   c3->cd(1);
   CreateHist(3);
@@ -406,7 +381,7 @@ void plotData::Plot() {
   CreateHist(8);
 
   //----- Weights distributions -----
-  TCanvas *c4 = new TCanvas("weights", "weights", 50, 50, 1200, 400);
+  TCanvas *c4 = new TCanvas("weights", "weights", 50, 50, 2400, 800);
   c4->cd();
   h_weights.Draw();
 
@@ -427,9 +402,6 @@ void plotData::Plot() {
   // Save data trees and histograms
   tf2->mkdir("hist");
   tf2->cd("hist");
-  //    dataAdaptiveBinningHist->Write("dataAdaptive",TObject::kOverwrite,0);
-  //    fitAdaptiveBinningHist->Write("fitAdaptive",TObject::kOverwrite,0);
-  //    adaptiveResiduals->Write("residualsAdaptive",TObject::kOverwrite,0);
   dataDiagrams.Write();
   phspDiagrams.Write();
   fitDiagrams.Write();
@@ -556,16 +528,19 @@ dalitzHisto::dalitzHisto(std::string n, std::string t, unsigned int bins)
   }
   return;
 }
-
 void dalitzHisto::Fill(Event &event, double w) {
   dataPoint point(event);
+  Fill(point, w);
+}
+
+void dalitzHisto::Fill(dataPoint &point, double w) {
   double weight = point.getWeight() * w; // use event weights?
 
   _integral += weight;
   for (int i = 0; i < Kinematics::instance()->GetNVars(); ++i) {
     arr.at(i).Fill(point.getVal(i), weight);
   }
-  t_eff = event.getEfficiency();
+  t_eff = point.getEfficiency();
   t_weight = weight;
   t_point = point.getPoint();
   //	tree->Fill();

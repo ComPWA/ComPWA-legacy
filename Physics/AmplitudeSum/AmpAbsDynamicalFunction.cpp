@@ -503,7 +503,7 @@ std::complex<double> AmpAbsDynamicalFunction::Evaluate(dataPoint &point) {
   }
   res = (GetPrefactor() * GetCoefficient() * GetNormalization() * res * ang);
 
-#ifdef DEBUG
+#ifndef NDEBUG
   // check for NaN
   if (std::isnan(res.real()) || std::isnan(res.imag()))
     throw std::runtime_error("AmpAbsDynamicalFunction::Evaluate() | Result of"
@@ -593,7 +593,7 @@ double AmpAbsDynamicalFunction::integral() const {
                             &err);
   gsl_monte_vegas_free(s);
 
-#ifdef DEBUG
+#ifndef NDEBUG
   // check for NaN
   if (std::isnan(res))
     throw std::runtime_error("AmpAbsDynamicalFunction::integral() |"
@@ -624,7 +624,7 @@ double AmpAbsDynamicalFunction::GetNormalization() {
     return 1.0;
   double norm = 1 / sqrt(GetIntegral());
 
-#ifdef DEBUG
+#ifndef NDEBUG
   // check for NaN
   if (std::isnan(norm))
     throw std::runtime_error("AmpAbsDynamicalFunction::GetNormalization() |"
@@ -713,7 +713,7 @@ double AmpAbsDynamicalFunction::totalIntegral() const {
                             &err);
   gsl_monte_vegas_free(s);
 
-#ifdef DEBUG
+#ifndef NDEBUG
   // check for NaN
   if (std::isnan(res))
     throw std::runtime_error("AmpAbsDynamicalFunction::totalIntegral() |"
@@ -755,7 +755,7 @@ std::complex<double> AmpAbsDynamicalFunction::widthToCoupling(
   std::complex<double> denom = gammaA * sqrt(rho);
   std::complex<double> res = std::complex<double>(sqrt(mR * width), 0) / denom;
 
-#ifdef DEBUG
+#ifndef NDEBUG
   // check for NaN
   //	if( std::isnan(res.real()) || std::isnan(res.imag()) )
   //		throw std::runtime_error("AmpAbsDynamicalFunction::widthToCoupling()
@@ -795,7 +795,7 @@ std::complex<double> AmpAbsDynamicalFunction::couplingToWidth(
   // calculate phsp factor
   std::complex<double> res = std::norm(gammaA) * g * g * phspFactor / mR;
 
-#ifdef DEBUG
+#ifndef NDEBUG
   // check for NaN
   if (std::isnan(res.real()) || std::isnan(res.imag()))
     throw std::runtime_error("AmpAbsDynamicalFunction::couplingToWidth() | "
@@ -862,7 +862,7 @@ std::shared_ptr<FunctionTree> couplingToWidthStrat::SetupTree(
 
 bool couplingToWidthStrat::execute(ParameterList &paras,
                                    std::shared_ptr<AbsParameter> &out) {
-#ifdef DEBUG
+#ifndef NDEBUG
   // Check parameter type
   if (checkType != out->type())
     throw(WrongParType("couplingToWidthStrat::execute() | "

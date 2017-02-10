@@ -1,3 +1,5 @@
+
+
 /*! Dalitz plot analysis of the decay D0->K_S0 K_ K-
  * @file DalitzFitApp.cpp
  * Fit application for D0->K_S0 K_ K- analysis. A model with BW and flatte
@@ -68,9 +70,10 @@ int main(int argc, char **argv) {
 
   std::string config_file;
   po::options_description generic("Generic options");
-  generic.add_options()("help,h", "produce help message")(
-      "config,c", po::value<string>(&config_file)->default_value(""),
-      "name of a file of a configuration.");
+  generic.add_options()("help,h", "produce help message");
+  generic.add_options()("config,c",
+                        po::value<string>(&config_file)->default_value(""),
+                        "name of a file of a configuration.");
 
   int seed;      // initial seed
   int numEvents; // data size to be generated
@@ -82,20 +85,26 @@ int main(int argc, char **argv) {
   po::options_description config("General settings");
   config.add_options()("nEvents",
                        po::value<int>(&numEvents)->default_value(1000),
-                       "set of events per fit")(
+                       "set of events per fit");
+  config.add_options()(
       "seed", po::value<int>(&seed)->default_value(-1),
-      "set random number seed; default is to used unique seed for every job")(
+      "set random number seed; default is to used unique seed for every job");
+  config.add_options()(
       "logLevel", po::value<std::string>(&logLevel)->default_value("trace"),
-      "set log level: error|warning|info|debug")(
-      "disableFileLog", po::value<bool>(&disableFileLog)->default_value(0),
-      "write log file? 0/1")(
+      "set log level: error|warning|info|debug");
+  config.add_options()("disableFileLog",
+                       po::value<bool>(&disableFileLog)->default_value(0),
+                       "write log file? 0/1");
+  config.add_options()(
       "outputFile",
       po::value<std::string>(&outputFileName)->default_value("out"),
-      "set output file name x. The files x.root and .log are created")(
-      "outputDir", po::value<std::string>(&outputDir)->default_value("./"),
-      "set output directory")("smearNEvents",
-                              po::value<bool>(&smearNEvents)->default_value(0),
-                              "smear NEvents for sqrt(NEvents)");
+      "set output file name x. The files x.root and .log are created");
+  config.add_options()("outputDir",
+                       po::value<std::string>(&outputDir)->default_value("./"),
+                       "set output directory");
+  config.add_options()("smearNEvents",
+                       po::value<bool>(&smearNEvents)->default_value(0),
+                       "smear NEvents for sqrt(NEvents)");
 
   std::string dataFile, dataFileTreeName;
   std::string bkgFile, bkgFileTreeName;
@@ -107,30 +116,39 @@ int main(int argc, char **argv) {
   po::options_description config_inout("Input/Generate settings");
   config_inout.add_options()(
       "dataFile", po::value<std::string>(&dataFile)->default_value(""),
-      "set input data; leave blank for toy mc generation")(
+      "set input data; leave blank for toy mc generation");
+  config_inout.add_options()(
       "dataFileTreeName",
       po::value<std::string>(&dataFileTreeName)->default_value("data"),
-      "set tree name in data file")(
+      "set tree name in data file");
+  config_inout.add_options()(
       "bkgFile", po::value<std::string>(&bkgFile)->default_value(""),
-      "set bkg sample; leave blank if we fit data")(
+      "set bkg sample; leave blank if we fit data");
+  config_inout.add_options()(
       "bkgFileTreeName",
       po::value<std::string>(&bkgFileTreeName)->default_value("data"),
-      "set tree name in bkg file")(
+      "set tree name in bkg file");
+  config_inout.add_options()(
       "trueModelFile",
       po::value<std::string>(&trueModelFile)->default_value("model.xml"),
-      "set XML model file of true distribution")(
+      "set XML model file of true distribution");
+  config_inout.add_options()(
       "trueBkgFile",
       po::value<std::string>(&trueBkgModelFile)->default_value(""),
-      "set XML model file of true distribution")(
+      "set XML model file of true distribution");
+  config_inout.add_options()(
       "trueSignalFraction",
       po::value<double>(&trueSignalFraction)->default_value(1.),
       "add this number of background events: Nbkg=(1-f)*NSignal; only makes "
-      "sense together with bkgFile; ")(
+      "sense together with bkgFile; ");
+  config_inout.add_options()(
       "trueAmpOption",
       po::value<std::string>(&trueAmpOption)->default_value(""),
-      "Use nocorrection=2/tagged=1/untagged=0")(
-      "resetWeights", po::value<bool>(&resetWeights)->default_value(0),
-      "should we reset all weights to one?")(
+      "Use nocorrection=2/tagged=1/untagged=0");
+  config_inout.add_options()("resetWeights",
+                             po::value<bool>(&resetWeights)->default_value(0),
+                             "should we reset all weights to one?");
+  config_inout.add_options()(
       "inputResult", po::value<std::string>(&inputResult)->default_value(""),
       "input file for MinuitResult");
 
@@ -189,7 +207,7 @@ int main(int argc, char **argv) {
       po::value<unsigned int>(&ampMcPrecision)->default_value(0),
       "Precision for MC integration and normalization")(
       "fittingMethod",
-      po::value<std::string>(&fittingMethod)->default_value("tree"),
+      po::value<std::string>(&fittingMethod)->default_value("plotOnly"),
       "choose between 'tree', 'amplitude' and 'plotOnly'")(
       "useMinos", po::value<bool>(&useMinos)->default_value(0),
       "Run MINOS for each parameter")(
@@ -224,9 +242,6 @@ int main(int argc, char **argv) {
   bool plotCorrectEfficiency;
   int plotNBins;
   bool plotAmplitude;
-  bool gof_enable;
-  int gof_mcPrecision;
-  int gof_size;
   po::options_description config_plot("Plot settings");
   config_plot.add_options()("plotting",
                             po::value<bool>(&enablePlotting)->default_value(1),
@@ -241,13 +256,7 @@ int main(int argc, char **argv) {
       po::value<bool>(&plotCorrectEfficiency)->default_value(0),
       "Number of bins")("plotAmplitude",
                         po::value<bool>(&plotAmplitude)->default_value(1),
-                        "Enable/Disable plotting of amplitude")(
-      "enableGoF", po::value<bool>(&gof_enable)->default_value(0),
-      "Enable/Disable calculation of goodness-of-fit value")(
-      "GoF_mcPrecision", po::value<int>(&gof_mcPrecision)->default_value(-1),
-      "Number of MC events for PointToPoint GoF test calculation")(
-      "GoF_size", po::value<int>(&gof_size)->default_value(10000),
-      "Number of MC events for PointToPoint GoF test calculation");
+                        "Enable/Disable plotting of amplitude");
 
   po::options_description cmdline_options;
   cmdline_options.add(generic).add(config).add(config_inout);
@@ -349,7 +358,7 @@ int main(int argc, char **argv) {
     createAmp("trueDzeroAmp", trueAmpVec, trueModelFile, eff, ampMcPrecision,
               trueAmpOption);
     if (trueAmpVec.size() == 1) {
-        trueDataVec.push_back(std::shared_ptr<Data>(new RootReader()));
+      trueDataVec.push_back(std::shared_ptr<Data>(new RootReader()));
       trueFraction.push_back(trueSignalFraction);
     } else if (trueAmpVec.size() == 2) {
       trueDataVec.push_back(std::shared_ptr<Data>(new RootReader()));
@@ -544,12 +553,6 @@ int main(int argc, char **argv) {
   LOG(info) << "Use MINOS: " << useMinos;
   LOG(info) << "Accurate errors on fit fractions: " << fitFractionError;
   LOG(info) << "Penalty scale: " << penaltyScale;
-  LOG(info) << "==== GOF";
-  LOG(info) << "enable gof: " << gof_enable;
-  if (gof_enable) {
-    LOG(info) << "size of sample: " << gof_size;
-    LOG(info) << "mc precision: " << gof_mcPrecision;
-  }
 
   LOG(info) << "==== PLOTTING";
   LOG(info) << "enable plotting: " << enablePlotting;
