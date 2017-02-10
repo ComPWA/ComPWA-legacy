@@ -1,7 +1,0 @@
-export BOOST_BUILD_PATH=
-export BOOST_ROOT=
-export GENEVA=
-export MINUIT2=
-export ROOTSYS= 
-
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$GENEVA/lib:$MINUIT2/lib:$ROOTSYS/lib/root:$BOOST_BUILD_PATH/lib:<ADD ComPWA lib>

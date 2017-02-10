@@ -1,9 +1,0 @@
-########### AsciiReader lib #############
-lib AsciiReader : [ glob *.cpp : *Test.cpp ] $(TOP)/DataReader//DataReader $(TOP)/Core//ComPWA ;
-        
-#using testing ;
-#lib boost_unit_test_framework ;
-#run DataTest.cpp AsciiReader $(TOP)/Core//ComPWA boost_unit_test_framework ;
-
-install dist : AsciiReader : <location>$(TOP)/lib ;
-

@@ -1,5 +1,0 @@
-########### ChiOneD lib #############
-lib ChiOneD : [ glob *.cpp ] ;
-
-install dist : ChiOneD : <location>$(TOP)/lib ;
-

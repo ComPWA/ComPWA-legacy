@@ -24,9 +24,12 @@ add_executable (lhNormalizationTestApp LHNormalizationTestApp.cpp)
 target_link_libraries( lhNormalizationTestApp ComPWA_Core ComPWA_Minuit2IF ComPWA_RootReader ComPWA_DPKinematics ComPWA_MinLogLH ComPWA_AmplitudeSum ${Boost_LIBRARIES} ${ROOT_LIBRARIES} )
 target_include_directories( lhNormalizationTestApp PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${Boost_INCLUDE_DIR} ${ROOT_INCLUDE_DIR})
 
+if( GSL_VERSION GREATER 1.9 )
 add_executable (multiVariateGaussianTestApp MultiVariateGaussianTestApp.cpp)
-target_link_libraries( multiVariateGaussianTestApp ComPWA_Core ComPWA_Minuit2IF ${ROOT_LIBRARIES} -lgslcblas ${GSL_LIBRARIES} )
+target_link_libraries( multiVariateGaussianTestApp ComPWA_Core ComPWA_Minuit2IF ${ROOT_LIBRARIES} ${GSL_LIBRARIES} )
 target_include_directories( multiVariateGaussianTestApp PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${ROOT_INCLUDE_DIR} ${GSL_INCLUDE_DIR})
+MESSAGE( STATUS "GSL version " ${GSL_VERSION})
+endif()
 
 add_executable (serializeApp SerializationApp.cpp)
 target_link_libraries( serializeApp ComPWA_Core ${Boost_LIBRARIES} )
