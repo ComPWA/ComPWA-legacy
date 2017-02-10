@@ -25,7 +25,7 @@ target_link_libraries( lhNormalizationTestApp ComPWA_Core ComPWA_Minuit2IF ComPW
 target_include_directories( lhNormalizationTestApp PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${Boost_INCLUDE_DIR} ${ROOT_INCLUDE_DIR})
 
 add_executable (multiVariateGaussianTestApp MultiVariateGaussianTestApp.cpp)
-target_link_libraries( multiVariateGaussianTestApp ComPWA_Core ComPWA_Minuit2IF ${ROOT_LIBRARIES} ${GSL_LIBRARIES} )
+target_link_libraries( multiVariateGaussianTestApp ComPWA_Core ComPWA_Minuit2IF ${ROOT_LIBRARIES} -lgslcblas ${GSL_LIBRARIES} )
 target_include_directories( multiVariateGaussianTestApp PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${ROOT_INCLUDE_DIR} ${GSL_INCLUDE_DIR})
 
 add_executable (serializeApp SerializationApp.cpp)
