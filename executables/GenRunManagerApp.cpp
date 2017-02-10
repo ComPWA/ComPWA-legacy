@@ -29,7 +29,7 @@
 
 using namespace ComPWA;
 using namespace Physics::AmplitudeSum;
-using namespace DataReader;
+using DataReader::RootReader;
 using Physics::DPKinematics::DalitzKinematics;
 
 /************************************************************************************************/
@@ -42,8 +42,8 @@ int main(int argc, char **argv){
 	std::string outFile="3Part-4vecs.root";
 	unsigned int dataSize = 100000;
 
-	std::shared_ptr<Data> data(new RootReader::RootReader(outFile, "data",true));
-	std::shared_ptr<Data> phsp(new RootReader::RootReader(outFile, "mc",true));
+	std::shared_ptr<Data> data(new RootReader(outFile, "data",true));
+	std::shared_ptr<Data> phsp(new RootReader(outFile, "mc",true));
 	std::shared_ptr<Generator> gen(new Physics::DPKinematics::RootGenerator());
 
 	std::string resoFile = "/test/JPSI_ypipi.xml";
