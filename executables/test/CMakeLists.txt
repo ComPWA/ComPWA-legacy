@@ -2,13 +2,13 @@
 
 # The REQUIRED statement is somehow not working
 find_package( ROOT REQUIRED )
-find_package( Boost REQUIRED )
+#find_package( Boost REQUIRED )
 
 FILE(GLOB lib_srcs PolyFit.cpp)
 FILE(GLOB lib_headers PolyFit.hpp)
 
 add_library ( ComPWA_testApps SHARED ${lib_srcs} ${lib_headers} )
-target_link_libraries( ComPWA_testApps ${ROOT_LIBRARIES} ${Boost_LIBRARIES})
+target_link_libraries( ComPWA_testApps ComPWA_Core ${ROOT_LIBRARIES} ${Boost_LIBRARIES})
 target_include_directories ( ComPWA_testApps PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${ROOT_INCLUDE_DIR} ${Boost_INCLUDE_DIR} )
 
 add_executable ( cx0testApp CX0TestApp.cpp ${lib_headers})
