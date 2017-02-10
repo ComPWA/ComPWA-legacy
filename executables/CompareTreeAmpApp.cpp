@@ -83,7 +83,7 @@ int main(int argc, char **argv){
 
 	//empty file: run generation before fit
 	std::shared_ptr<Data> inputData(
-			new DataReader::RootReader::RootReader()
+			new DataReader::RootReader()
 	);
 
 	//======================= EFFICIENCY =============================
@@ -120,7 +120,7 @@ int main(int argc, char **argv){
 
 	//empty phsp sample
 	std::shared_ptr<Data> toyPhspData(
-			new DataReader::RootReader::RootReader()
+			new DataReader::RootReader()
 	);
 
 	run.setPhspSample(toyPhspData);

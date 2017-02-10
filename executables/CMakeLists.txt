@@ -1,5 +1,5 @@
 find_package( ROOT REQUIRED )
-find_package( GSL REQUIRED )
+find_package( GSL REQUIRED gsl gslcblas )
 
 add_subdirectory( test )
 add_subdirectory( Examples )

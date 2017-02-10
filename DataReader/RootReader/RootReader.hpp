@@ -37,7 +37,6 @@
 
 namespace ComPWA {
 namespace DataReader {
-namespace RootReader {
 
 class RootReader : public Data {
 
@@ -108,7 +107,6 @@ protected:
   int fFlavour;
 };
 
-} /* namespace RootReader */
 } /* namespace DataReader */
 } /* namespace ComPWA */
 

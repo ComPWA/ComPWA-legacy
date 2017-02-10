@@ -90,7 +90,7 @@ int main(int argc, char **argv){
 	run.setGenerator(gen);
 	std::shared_ptr<Efficiency> eff(new UnitEfficiency());
 
-	std::shared_ptr<Data> toyPhspData(new DataReader::RootReader::RootReader());//empty phsp sample
+	std::shared_ptr<Data> toyPhspData(new DataReader::RootReader());//empty phsp sample
 	run.setPhspSample(toyPhspData);
 	if( !toyPhspData->getNEvents() ) {
 		run.generatePhsp(num);

@@ -51,6 +51,7 @@
 
 using namespace std;
 using namespace ComPWA;
+using ComPWA::DataReader::RootReader;
 
 BOOST_CLASS_EXPORT(Optimizer::Minuit2::MinuitResult)
 
@@ -232,7 +233,7 @@ int main(int argc, char **argv) {
                             "Enable/Disable plotting")(
       "plotData", po::value<bool>(&plotDataSample)->default_value(1),
       "Enable/Disable plotting of data")(
-      "plotSize", po::value<int>(&plotSize)->default_value(1000000),
+      "plotSize", po::value<int>(&plotSize)->default_value(100000),
       "Size of sample for amplitude plot")(
       "plotNBins", po::value<int>(&plotNBins)->default_value(100),
       "Number of bins")(
@@ -331,7 +332,7 @@ int main(int argc, char **argv) {
   std::shared_ptr<Data> phspData, phspTrueData;
   if (!phspEfficiencyFile.empty()) {
     // sample with accepted phsp events
-    phspData = std::shared_ptr<Data>(new DataReader::RootReader::RootReader(
+    phspData = std::shared_ptr<Data>(new RootReader(
         phspEfficiencyFile, phspEfficiencyFileTreeName, mcPrecision));
     phspData->reduceToPhsp();
   }
@@ -348,14 +349,11 @@ int main(int argc, char **argv) {
     createAmp("trueDzeroAmp", trueAmpVec, trueModelFile, eff, ampMcPrecision,
               trueAmpOption);
     if (trueAmpVec.size() == 1) {
-      trueDataVec.push_back(
-          std::shared_ptr<Data>(new DataReader::RootReader::RootReader()));
+        trueDataVec.push_back(std::shared_ptr<Data>(new RootReader()));
       trueFraction.push_back(trueSignalFraction);
     } else if (trueAmpVec.size() == 2) {
-      trueDataVec.push_back(
-          std::shared_ptr<Data>(new DataReader::RootReader::RootReader()));
-      trueDataVec.push_back(
-          std::shared_ptr<Data>(new DataReader::RootReader::RootReader()));
+      trueDataVec.push_back(std::shared_ptr<Data>(new RootReader()));
+      trueDataVec.push_back(std::shared_ptr<Data>(new RootReader()));
       trueFraction.push_back(0.5 * trueSignalFraction);
       trueFraction.push_back(0.5 * trueSignalFraction);
     } else {
@@ -366,14 +364,11 @@ int main(int argc, char **argv) {
   if (!fitModelFile.empty()) {
     createAmp("DzeroAmp", ampVec, fitModelFile, eff, ampMcPrecision, ampOption);
     if (ampVec.size() == 1) {
-      dataVec.push_back(
-          std::shared_ptr<Data>(new DataReader::RootReader::RootReader()));
+      dataVec.push_back(std::shared_ptr<Data>(new RootReader()));
       fraction.push_back(fitSignalFraction);
     } else if (ampVec.size() == 2) {
-      dataVec.push_back(
-          std::shared_ptr<Data>(new DataReader::RootReader::RootReader()));
-      dataVec.push_back(
-          std::shared_ptr<Data>(new DataReader::RootReader::RootReader()));
+      dataVec.push_back(std::shared_ptr<Data>(new RootReader()));
+      dataVec.push_back(std::shared_ptr<Data>(new RootReader()));
       fraction.push_back(0.5 * fitSignalFraction);
       fraction.push_back(0.5 * fitSignalFraction);
     } else {
@@ -386,8 +381,7 @@ int main(int argc, char **argv) {
   if (trueSignalFraction != 1. && !trueBkgModelFile.empty()) {
     createAmp("trueBkg", trueAmpVec, trueBkgModelFile, eff, ampMcPrecision,
               "none");
-    trueDataVec.push_back(
-        std::shared_ptr<Data>(new DataReader::RootReader::RootReader()));
+    trueDataVec.push_back(std::shared_ptr<Data>(new RootReader()));
     trueFraction.push_back(1 - trueSignalFraction);
   } else if (trueSignalFraction != 1. && trueBkgModelFile.empty() &&
              bkgFile.empty()) {
@@ -404,14 +398,13 @@ int main(int argc, char **argv) {
                                "but no background model");
 
     createAmp("Bkg", ampVec, fitBkgFile, eff, ampMcPrecision, "none");
-    dataVec.push_back(
-        std::shared_ptr<Data>(new DataReader::RootReader::RootReader()));
+    dataVec.push_back(std::shared_ptr<Data>(new RootReader()));
     fraction.push_back(1 - fitSignalFraction);
   }
 
   //======================= READING DATA =============================
   // sample is used for minimization
-  std::shared_ptr<Data> sample(new DataReader::RootReader::RootReader());
+  std::shared_ptr<Data> sample(new RootReader());
 
   // temporary samples for signal and background
   std::shared_ptr<Data> inputData, inputBkg;
@@ -423,8 +416,7 @@ int main(int argc, char **argv) {
   if (trueSignalFraction != 1. && !bkgFile.empty()) {
     int numBkgEvents = (int)((1 - trueSignalFraction) * numEvents);
     LOG(info) << "Reading background file...";
-    std::shared_ptr<Data> inBkg(
-        new DataReader::RootReader::RootReader(bkgFile, bkgFileTreeName));
+    std::shared_ptr<Data> inBkg(new RootReader(bkgFile, bkgFileTreeName));
     inBkg->reduceToPhsp();
     if (resetWeights)
       inBkg->resetWeights(); // resetting weights of requested
@@ -438,8 +430,7 @@ int main(int argc, char **argv) {
     if (inputBkg)
       numSignalEvents -= inputBkg->getNEvents();
     LOG(info) << "Reading data file...";
-    std::shared_ptr<Data> inD(
-        new DataReader::RootReader::RootReader(dataFile, dataFileTreeName));
+    std::shared_ptr<Data> inD(new RootReader(dataFile, dataFileTreeName));
     inD->reduceToPhsp();
     if (resetWeights)
       inD->resetWeights(); // resetting weights of requested
@@ -451,8 +442,7 @@ int main(int argc, char **argv) {
   }
 
   //======================== GENERATION =====================
-  std::shared_ptr<Data> toyPhspData(
-      new DataReader::RootReader::RootReader()); // Toy sample
+  std::shared_ptr<Data> toyPhspData(new RootReader()); // Toy sample
   run.setPhspSample(toyPhspData);
   run.generatePhsp(mcPrecision);
   toyPhspData->setEfficiency(eff); // set efficiency values for each event
@@ -462,14 +452,12 @@ int main(int argc, char **argv) {
     // assume that efficiency of hit&miss is large 0.5%
     double phspSampleSize = numEvents / 0.005;
 
-    std::shared_ptr<Data> fullPhsp(new DataReader::RootReader::RootReader(
+    std::shared_ptr<Data> fullPhsp(new RootReader(
         phspEfficiencyFile, phspEfficiencyFileTreeName, phspSampleSize));
     std::shared_ptr<Data> fullTruePhsp;
     if (!phspEfficiencyFileTrueTreeName.empty()) {
-      fullTruePhsp =
-          std::shared_ptr<Data>(new DataReader::RootReader::RootReader(
-              phspEfficiencyFile, phspEfficiencyFileTrueTreeName,
-              phspSampleSize));
+      fullTruePhsp = std::shared_ptr<Data>(new RootReader(
+          phspEfficiencyFile, phspEfficiencyFileTrueTreeName, phspSampleSize));
       // Data* fullPhspRed = fullPhsp->EmptyClone();
       // Data* fullPhspTrueRed = fullTruePhsp->EmptyClone();
       // rndReduceSet(phspSampleSize,gen,fullPhsp.get(),fullPhspRed,
@@ -599,12 +587,12 @@ int main(int argc, char **argv) {
       contrPar->setUseFunctionTree(1);
       LOG(debug) << contrPar->getTree()->head()->to_str(20);
       //			auto trNode =
-      //contrPar->getTree()->head()->getChildNode("N");
+      // contrPar->getTree()->head()->getChildNode("N");
       //			LOG(info) <<"Compare normalization: (asmndj)"
       //				<<" Tree:
       //"<<trNode->getChildSingleValue("normFactor")
       //				<<" Amplitude(VEGAS): "<<
-      //ampVec.at(0)->GetNormalization();
+      // ampVec.at(0)->GetNormalization();
     }
 
     if (useRandomStartValues)
@@ -618,7 +606,7 @@ int main(int argc, char **argv) {
       setErrorOnParameterList(fitPar, 0.5, useMinos);
       //			preOpti = std::shared_ptr<Optimizer>(
       //					new
-      //GenevaIF(esti,dkskkDir+"/PWA/geneva-config/")
+      // GenevaIF(esti,dkskkDir+"/PWA/geneva-config/")
       //			);
       preResult = preOpti->exec(fitPar);
       preResult->setTrueParameters(truePar);
@@ -702,20 +690,17 @@ int main(int argc, char **argv) {
       Amplitude::UpdateAmpParameterList(ampVec, finalParList);
 
     //------- phase-space sample
-    std::shared_ptr<Data> pl_phspSample(
-        new DataReader::RootReader::RootReader());
+    std::shared_ptr<Data> pl_phspSample(new RootReader());
     LOG(info) << "Plotting results...";
     if (!phspEfficiencyFile.empty()) { // unbinned plotting
       // sample with accepted phsp events
-      pl_phspSample =
-          std::shared_ptr<Data>(new DataReader::RootReader::RootReader(
-              phspEfficiencyFile, phspEfficiencyFileTreeName, plotSize));
+      pl_phspSample = std::shared_ptr<Data>(new RootReader(
+          phspEfficiencyFile, phspEfficiencyFileTreeName, plotSize));
 
       std::shared_ptr<Data> plotTruePhsp;
       if (!phspEfficiencyFileTrueTreeName.empty())
-        plotTruePhsp =
-            std::shared_ptr<Data>(new DataReader::RootReader::RootReader(
-                phspEfficiencyFile, phspEfficiencyFileTrueTreeName, plotSize));
+        plotTruePhsp = std::shared_ptr<Data>(new RootReader(
+            phspEfficiencyFile, phspEfficiencyFileTrueTreeName, plotSize));
       run.setPhspSample(pl_phspSample, plotTruePhsp);
       // make sure no efficiency is set
       Amplitude::SetAmpEfficiency(
@@ -753,4 +738,3 @@ int main(int argc, char **argv) {
     return result->hasFailed();
   return 0;
 }
-

@@ -36,7 +36,6 @@ using namespace boost::log;
 
 namespace ComPWA {
 namespace DataReader {
-namespace RootReader {
 
 RootReader::RootReader() {
   fFile = 0; // need to do this to avoid seg. violation when destructor is
@@ -248,6 +247,5 @@ void RootReader::bin() {
   }
 }
 
-} /* namespace RootReader */
 } /* namespace DataReader */
 } /* namespace ComPWA */

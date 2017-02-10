@@ -77,7 +77,7 @@ unsigned int nStartEvent = 0;
 using namespace ComPWA;
 using Physics::DPKinematics::DalitzKinematics;
 using Physics::AmplitudeSum::AmpSumIntensity;
-using DataReader::RootReader::RootReader;
+using DataReader::RootReader;
 using DataReader::JakeReader::JakeReader;
 using Estimator::MinLogLH::MinLogLH;
 
