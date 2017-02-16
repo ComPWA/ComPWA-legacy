@@ -224,7 +224,7 @@ std::shared_ptr<FitResult> MinuitIF::exec(ParameterList &par) {
   result->setTime(time.elapsed());
 
   // update parameters in amplitude
-  Amplitude::UpdateAmpParameterList(estimator->getAmplitudes(), finalParList);
+//  Amplitude::UpdateAmpParameterList(estimator->getAmplitudes(), finalParList);
 
   return result;
 }

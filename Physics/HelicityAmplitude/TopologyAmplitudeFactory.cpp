@@ -318,7 +318,7 @@ SequentialTwoBodyDecayAmplitude TopologyAmplitudeFactory::generateSequentialDeca
       decay_spin_info.initial_state_ =
           helicity_tree[*decay_vertex_iter].state_info_.spin_information_;
 
-      FullTwoBodyDecayAmplitude full_two_body_decay_amplitude;
+      PartialDecay full_two_body_decay_amplitude;
       full_two_body_decay_amplitude.name = name.str();
       full_two_body_decay_amplitude.decay_spin_info_ = std::make_pair(
           helicity_tree[*decay_vertex_iter].state_info_,

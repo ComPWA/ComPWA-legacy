@@ -26,7 +26,7 @@
 #include <vector>
 
 #include "Core/Kinematics.hpp"
-#include "Core/Utility.hpp"
+#include "Core/Spin.hpp"
 #include "Core/Logging.hpp"
 
 namespace ComPWA {

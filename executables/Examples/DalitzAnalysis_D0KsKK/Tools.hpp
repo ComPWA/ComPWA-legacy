@@ -36,7 +36,7 @@ inline std::string expand_user(std::string p) {
 }
 
 inline void createAmp(std::string name,
-                      std::vector<std::shared_ptr<ComPWA::Amplitude>> &ampV,
+                      std::vector<std::shared_ptr<ComPWA::AmpIntensity>> &ampV,
                       std::string xmlInput,
                       std::shared_ptr<ComPWA::Efficiency> eff,
                       double mcPrecision, std::string ampOption) {

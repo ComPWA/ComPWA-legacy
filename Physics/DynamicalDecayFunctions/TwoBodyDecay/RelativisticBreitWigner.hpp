@@ -7,7 +7,8 @@
 //
 // Contributors:
 //     Mathias Michel - initial API and implementation
-//		Peter Weidenkaff - correct nominator, using dataPoint for data handling
+//		Peter Weidenkaff - correct nominator, using dataPoint for data
+// handling
 //-------------------------------------------------------------------------------
 //****************************************************************************
 // Class for defining the relativistic Breit-Wigner resonance model, which
@@ -22,6 +23,7 @@
 #define PHYSICS_HELICITYAMPLITUDE_RELATIVISTICBREITWIGNER_HPP_
 
 #include <vector>
+#include <boost/property_tree/ptree.hpp>
 
 #include "Core/Utility.hpp"
 #include "Core/Functions.hpp"
@@ -56,30 +58,176 @@ namespace DynamicalFunctions {
  * within the #evaluate() function. For example the invariant mass and the
  * daughter masses.
  */
-class RelativisticBreitWigner: public AbstractDynamicalFunction {
-  std::shared_ptr<DoubleParameter> resonance_width_;
-  std::shared_ptr<DoubleParameter> resonance_mass_;
-  std::shared_ptr<DoubleParameter> daughter1_mass_;
-  std::shared_ptr<DoubleParameter> daughter2_mass_;
-  std::shared_ptr<DoubleParameter> meson_radius_;
-  ComPWA::Spin J_;
-
-  unsigned int index_cms_mass_squared_;
-
-  void initialiseParameters(const boost::property_tree::ptree& parameter_info,
-      const ExternalParameters& external_parameters);
-
-std::complex<double> evaluate(double mSq) const;
+class RelativisticBreitWigner : public AbstractDynamicalFunction {
 
 public:
-  RelativisticBreitWigner(const ParticleStateInfo& psi, const ExternalParameters& external_parameters);
+  RelativisticBreitWigner();
+
   virtual ~RelativisticBreitWigner();
 
-  std::complex<double> evaluate(const dataPoint& point,
-      unsigned int evaluation_index) const;
+  std::complex<double> Evaluate(const dataPoint &point) const;
 
-  std::complex<double> evaluate(unsigned int storage_index, unsigned int data_index,
-      unsigned int evaluation_index) const;
+  /**! Get current normalization.  */
+  virtual double GetNormalization() { return 1 / integral(); };
+
+  /**! Setup function tree */
+  virtual std::shared_ptr<FunctionTree> SetupTree(ParameterList &sample,
+                                                  ParameterList &toySample,
+                                                  std::string suffix) {
+    return std::shared_ptr<FunctionTree>();
+  };
+
+  // --------------------------- Set/Get functions ---------------------------
+
+  /**
+   Set decay width
+
+   @param w Decay width
+   */
+  void SetWidth(std::shared_ptr<DoubleParameter> w) { _width = w; }
+
+  /**
+   Get decay width
+
+   @return Decay width
+   */
+  std::shared_ptr<DoubleParameter> GetWidth() { return _width; }
+
+  /**
+   Set decay width
+
+   @param w Decay width
+   */
+  void SetWidth(double w) { _width->SetValue(w); }
+
+  /**
+   Get decay width
+
+   @return Decay width
+   */
+  double GetWidth() { return _width->GetValue(); }
+
+  /**
+   Set meson radius
+   The meson radius is a measure of the size of the resonant state. It is used
+   to calculate the angular momentum barrier factors.
+
+   @param r Meson radius
+   */
+  void SetMesonRadius(std::shared_ptr<DoubleParameter> r) { _mesonRadius = r; }
+
+  /**
+   Get meson radius
+   The meson radius is a measure of the size of the resonant state. It is used
+   to calculate the angular momentum barrier factors.
+
+   @return Meson radius
+   */
+  std::shared_ptr<DoubleParameter> GetMesonRadius() { return _mesonRadius; }
+
+  /**
+   Set meson radius
+   The meson radius is a measure of the size of the resonant state. It is used
+   to calculate the angular momentum barrier factors.
+
+   @param r Meson radius
+   */
+  void SetMesonRadius(double w) { _mesonRadius->SetValue(w); }
+
+  /**
+   Get meson radius
+   The meson radius is a measure of the size of the resonant state. It is used
+   to calculate the angular momentum barrier factors.
+
+   @return Meson radius
+   */
+  double GetMesonRadius() { return _mesonRadius->GetValue(); }
+
+  /**
+   Set form factor type
+   The type of formfactor that is used to calculate the angular momentum barrier
+   factors
+
+   @param t From factor type
+   */
+  void SetFormFactorType(formFactorType t) { _ffType = t; }
+
+  /**
+   Get form factor type
+   The type of formfactor that is used to calculate the angular momentum barrier
+   factors
+
+   @return From factor type
+   */
+  formFactorType GetFormFactorType() { return _ffType; }
+
+  /**
+   Dynamical Breit-Wigner function
+
+   @param mSq Invariant mass squared
+   @param mR Mass of the resonant state
+   @param ma Mass of daughter particle
+   @param mb Mass of daughter particle
+   @param width Decay width
+   @param J Spin
+   @param mesonRadius Meson Radius
+   @param ffType Form factor type
+   @return Amplitude value
+   */
+  static std::complex<double>
+  dynamicalFunction(double mSq, double mR, double ma, double mb, double width,
+                    unsigned int J, double mesonRadius, formFactorType ffType);
+  
+  
+  /**
+   Factory for RelativisticBreitWigner dynamical function
+   
+   @param pt Configuration tree
+   @return Constructed object
+   */
+  static std::shared_ptr<RelativisticBreitWigner>
+  Factory(boost::property_tree::ptree &pt) {
+    std::shared_ptr<RelativisticBreitWigner> ret;
+    auto node = pt.second.get_child("Mother").get_child("ParticleState");
+    double motherID = node.get_child("id").second;
+    
+      BOOST_FOREACH(ptree::value_type const& decay_node, decay_tree.second) {
+        ParticleStateInfo mothers = parseParticleStateRemainders(
+                                                                 decay_node.second.get_child("Mother").get_child("ParticleState"));
+        std::vector<ParticleStateInfo> daughter_lists;
+        BOOST_FOREACH(ptree::value_type const& daugthers, decay_node.second.get_child("Daughters")) {
+          daughter_lists.push_back(
+                                   parseParticleStateRemainders(daugthers.second));
+        }
+        
+        ptree strength_phase;
+        boost::optional<const ptree&> strength_phase_opt =
+        decay_node.second.get_child_optional("StrengthPhase");
+        if (strength_phase_opt.is_initialized()) {
+          strength_phase = decay_node.second.get_child("StrengthPhase");
+        }
+        decay_configuration_.addDecayToCurrentDecayTree(mothers, daughter_lists,
+                                                        strength_phase);
+      }
+      decay_configuration_.addCurrentDecayTreeToList();
+    return ret;
+  }
+  
+  std::shared_ptr<PartialDecay> operator*(std::shared_ptr<AmpWignerD> wigner) {
+    std::shared_ptr<PartialDecay> partDecay(std::make_shared(this),wigner);
+    return partDecay;
+  }
+
+
+protected:
+  //! Decay width of resonante state
+  std::shared_ptr<DoubleParameter> _width;
+
+  //! Meson radius of resonant state
+  std::shared_ptr<DoubleParameter> _mesonRadius;
+
+  //! Form factor type
+  formFactorType _ffType;
 };
 
 } /* namespace DynamicalFunctions */
@@ -87,3 +235,5 @@ public:
 } /* namespace ComPWA */
 
 #endif /* PHYSICS_HELICITYAMPLITUDE_RELATIVISTICBREITWIGNER_HPP_ */
+
+/

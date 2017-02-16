@@ -1,19 +1,3 @@
- 
-                                                           
-                                                    
-                                                 
-                                             
-                          
-                         
-                      
-                  
-              
-          
-        
-      
-    
-  
-
 #include <stdio.h>
 #include <numeric>
 
@@ -131,7 +115,7 @@ plotData::~plotData() {}
 //    return hist;
 //}
 
-void plotData::setFitAmp(std::vector<std::shared_ptr<Amplitude>> ampVec,
+void plotData::setFitAmp(std::vector<std::shared_ptr<AmpIntensity>> ampVec,
                          std::vector<double> fraction) {
   _ampVec = ampVec;
   _fraction = fraction;
@@ -267,8 +251,7 @@ void plotData::Fill() {
        * (usually signal+background) */
       double intens = 0;
       for (int t = 0; t < _ampVec.size(); ++t) {
-        ParameterList tmp_list = _ampVec.at(t)->intensity(point);
-        double tmp_intens = tmp_list.GetDoubleParameter(0)->GetValue();
+        double tmp_intens = _ampVec.at(t)->Intensity(point);
         tmp_intens = tmp_intens * _fraction.at(t);
         intens += tmp_intens;
         if (t == 1) // fill background

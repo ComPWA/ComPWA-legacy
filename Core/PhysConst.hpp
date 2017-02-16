@@ -26,7 +26,7 @@
 #include <vector>
 
 #include <Core/Parameter.hpp>
-#include <Core/Utility.hpp>
+#include <Core/Spin.hpp>
 
 namespace ComPWA {
 

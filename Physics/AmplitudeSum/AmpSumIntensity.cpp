@@ -41,7 +41,7 @@ using namespace boost::property_tree;
 AmpSumIntensity::AmpSumIntensity(std::string name, normStyle ns,
                                  std::shared_ptr<Efficiency> eff,
                                  unsigned int nCalls)
-    : Amplitude(name, eff), _maxFcnVal(0.), _calcMaxFcnVal(0), _normStyle(ns),
+    : AmpIntensity(name, eff), _maxFcnVal(0.), _calcMaxFcnVal(0), _normStyle(ns),
       _nCalls(nCalls) {
   result.AddParameter(
       std::shared_ptr<DoubleParameter>(new DoubleParameter("AmpSumResult")));
@@ -250,7 +250,7 @@ void AmpSumIntensity::SetPrefactor(std::complex<double> pre) {
     (*it)->SetPrefactor(pre);
 }
 
-double AmpSumIntensity::GetMaxVal(std::shared_ptr<Generator> gen) {
+double AmpSumIntensity::GetMaximum(std::shared_ptr<Generator> gen) {
   if (!_calcMaxFcnVal)
     calcMaxVal(gen);
   return _maxFcnVal;
@@ -282,8 +282,7 @@ void AmpSumIntensity::calcMaxVal(std::shared_ptr<Generator> gen) {
         i--;
       continue;
     }
-    ParameterList res = intensity(point);
-    double intens = *res.GetDoubleParameter(0);
+    double intens = Intensity(point);
     if (intens > maxVal) {
       maxM23 = m23sq;
       maxM13 = m13sq;
@@ -301,11 +300,11 @@ void AmpSumIntensity::calcMaxVal(std::shared_ptr<Generator> gen) {
 //=============================================================
 //==================== NORMALIZATION/INTEGRATION ==============
 //=============================================================
-const double AmpSumIntensity::GetIntegral() {
-  return GetIntegral(GetResonanceItrList());
+const double AmpSumIntensity::Integral() {
+  return Integral(GetResonanceItrList());
 }
 
-const double AmpSumIntensity::GetIntegral(std::vector<resonanceItr> resoList) {
+const double AmpSumIntensity::Integral(std::vector<resonanceItr> resoList) {
   return AmpSumIntensity::integral(resoList,
                                    0, // efficiency not included
                                    _nCalls);
@@ -506,74 +505,10 @@ const double AmpSumIntensity::GetIntegralInterference(resonanceItr A,
   return val;
 }
 
-double AmpSumIntensity::GetIntValue(std::string var1, double min1, double max1,
-                                    std::string var2, double min2,
-                                    double max2) {
-  GSLOpt_integral par;
-  par.resList = GetResonanceItrList();
-  par.eff = GetEfficiency();
-  /*
-   * Integrates in \var1 from \min1 to \max1 and in \var2 from \min2 to \max2.
-   * Is intended to be used for calculation of bin content.
-   */
-  DPKinematics::DalitzKinematics *kin =
-      dynamic_cast<DPKinematics::DalitzKinematics *>(Kinematics::instance());
-  double _min1 = min1;
-  double _min2 = min2;
-  double _max1 = max1;
-  double _max2 = max2;
-  // if(_min1==0) _min1 = kin->GetMin(var1);
-  // if(_max1==0) _min1 = kin->GetMax(var1);
-  auto limit2 = kin->GetMinMax(var2);
-  if (_min2 == 0)
-    _min2 = limit2.first;
-  if (_max2 == 0)
-    _max2 = limit2.second;
-  unsigned int dim = 2;
-  double res = 0.0, err = 0.0;
-
-  // set limits: we assume that x[0]=m13sq and x[1]=m23sq
-  double xLimit_low[2];
-  double xLimit_high[2];
-
-  if (var1 == "m13sq" && var2 == "m23sq") {
-    xLimit_low[0] = _min1;
-    xLimit_low[1] = _min2;
-    xLimit_high[0] = _max1;
-    xLimit_high[1] = _max2;
-  } else if (var1 == "m23sq" && var2 == "m13sq") {
-    xLimit_low[0] = _min2;
-    xLimit_low[1] = _min1;
-    xLimit_high[0] = _max2;
-    xLimit_high[1] = _max1;
-  } else {
-    LOG(error) << "AmpSumIntensity::getIntValue() | "
-                  "Wrong variables specified!";
-    return -999;
-  }
-
-  size_t calls = 5000;
-  gsl_rng_env_setup();
-  const gsl_rng_type *T = gsl_rng_default; // type of random generator
-  gsl_rng *r = gsl_rng_alloc(T);           // random generator
-  gsl_monte_function G = {&GSLWrapper_integral, dim, &par};
-
-  /*	Choosing vegas algorithm here, because it is the most accurate:
-   * 		-> 10^5 calls gives (in my example) an accuracy of 0.03%
-   * 		 this should be sufficiency for most applications
-   */
-  gsl_monte_vegas_state *s = gsl_monte_vegas_alloc(dim);
-  gsl_monte_vegas_integrate(&G, xLimit_low, xLimit_high, 2, calls, r, s, &res,
-                            &err);
-  gsl_monte_vegas_free(s);
-
-  return res;
-}
-
 //=======================================================
 //==================== EVALUATION =======================
 //=======================================================
-const std::complex<double> AmpSumIntensity::evaluate(dataPoint &point) {
+const std::complex<double> AmpSumIntensity::Evaluate(dataPoint &point) {
   std::complex<double> AMPpdf(0, 0);
   auto it = GetResonanceItrFirst();
   for (; it != GetResonanceItrLast(); ++it) {
@@ -589,30 +524,21 @@ const std::complex<double> AmpSumIntensity::evaluate(dataPoint &point) {
   return AMPpdf;
 }
 
-const ParameterList &AmpSumIntensity::intensity(std::vector<double> point) {
-  dataPoint dataP(point);
-  return intensity(dataP);
+const double AmpSumIntensity::IntensityNoEff(dataPoint &point) {
+  return std::norm(Evaluate(point));
 }
 
-const ParameterList &AmpSumIntensity::intensityNoEff(dataPoint &point) {
-  auto AMPpdf = evaluate(point);
-  result.SetParameterValue(0, std::norm(AMPpdf));
-  return result;
-}
-
-const ParameterList &AmpSumIntensity::intensity(dataPoint &point) {
-  intensityNoEff(point);
+const double AmpSumIntensity::Intensity(dataPoint &point) {
+  IntensityNoEff(point);
   double ampNoEff;
   try {
     ampNoEff = result.GetDoubleParameterValue(0);
   } catch (BadParameter &ex) {
-    LOG(error) << "AmpSumIntensity::intensity() | Can not "
+    LOG(error) << "AmpSumIntensity::Intensity() | Can not "
                   "obtain parameter from ParameterList 'result'!";
     throw;
   }
-  double eff = eff_->evaluate(point);
-  result.SetParameterValue(0, ampNoEff * eff);
-  return result;
+  return ampNoEff * eff_->evaluate(point);
 }
 
 const double
@@ -632,7 +558,7 @@ AmpSumIntensity::sliceIntensity(dataPoint &dataP, ParameterList &par,
 }
 
 //============== FIT FRACTIONS ================
-resonanceItr findResonancePartner(std::shared_ptr<Amplitude> amp,
+resonanceItr findResonancePartner(std::shared_ptr<AmpIntensity> amp,
                                   resonanceItr res) {
   auto name = (*res)->GetName();
   auto it = amp->GetResonanceItrFirst();
@@ -647,13 +573,13 @@ resonanceItr findResonancePartner(std::shared_ptr<Amplitude> amp,
 }
 
 void AmpSumIntensity::GetFitFractions(ParameterList &parList) {
-  GetFitFractions(parList, this);
+//  GetFitFractions(parList, this);
 }
 
 void AmpSumIntensity::GetFitFractions(ParameterList &parList,
-                                      const Amplitude *ampConst) {
+                                      const AmpSumIntensity *ampConst) {
   // Work around: Remove const
-  Amplitude *amp = const_cast<Amplitude *>(ampConst);
+  AmpSumIntensity* amp = const_cast<AmpSumIntensity*>(ampConst);
 
   std::string ampName = amp->GetName();
 
@@ -720,7 +646,8 @@ void AmpSumIntensity::GetFitFractions(ParameterList &parList,
     thisAmp.push_back(cReso);
 
     // Calculate resonance integral. This includes the magnitude^2.
-    double nom = amp->GetIntegral(thisAmp);
+//    double nom = amp->Integral(thisAmp);
+    double nom = 1.0;
 
     LOG(debug) << "FitResult::calcFraction() | Resonance "
                   "integal for "

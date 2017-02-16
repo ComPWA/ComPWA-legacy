@@ -14,8 +14,6 @@
 
 #include <complex>
 
-#include "qft++.h"
-
 #include "Physics/HelicityAmplitude/ParticleStateDefinitions.hpp"
 
 namespace ComPWA {

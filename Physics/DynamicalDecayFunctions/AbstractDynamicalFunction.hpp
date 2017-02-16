@@ -14,40 +14,67 @@
 
 #include <complex>
 
-#include "boost/property_tree/ptree_fwd.hpp"
-
+#include "Core/DataPoint.hpp"
 #include "Core/ParameterList.hpp"
+#include "Core/Spin.hpp"
 
 namespace ComPWA {
-
-class dataPoint;
-
 namespace Physics {
 namespace DynamicalFunctions {
 
-struct ExternalParameters {
-  ParameterList parameters_;
-  std::map<std::string, std::string> parameter_name_mapping_;
-};
-
 class AbstractDynamicalFunction {
-  virtual void initialiseParameters(
-      const boost::property_tree::ptree& parameter_info,
-      const ExternalParameters& external_parameters) =0;
-
-protected:
-  ParameterList parameter_list_;
 public:
   AbstractDynamicalFunction();
+
   virtual ~AbstractDynamicalFunction();
 
-  virtual std::complex<double> evaluate(const dataPoint& point,
-      unsigned int evaluation_index) const =0;
+  virtual std::complex<double> Evaluate(const dataPoint &) const = 0;
 
-  virtual std::complex<double> evaluate(unsigned int storage_index,
-      unsigned int data_index, unsigned int evaluation_index) const =0;
+  /**! Get current normalization.  */
+  virtual double GetNormalization() = 0;
+  
+  /**! Setup function tree */
+  virtual std::shared_ptr<FunctionTree> SetupTree(ParameterList &sample,
+                                                  ParameterList &toySample,
+                                                  std::string suffix) = 0;
 
-  const ParameterList& getParameterList() const;
+protected:
+  //! Name of resonance
+  std::string _name;
+
+  unsigned int dataIndex;
+
+  //! Type of resonance normalization
+  normStyle _normStyle;
+
+  //! Precision of MC integration
+  int _mcPrecision;
+
+  //! Integral
+  virtual double integral() { return 1.0; };
+
+  //! Masses of daughter particles
+  double _mass1, _mass2;
+
+  //! Resonance mass
+  std::shared_ptr<DoubleParameter> _mass;
+
+  //! Barrier radi for resonance and mother particle
+  std::shared_ptr<DoubleParameter> _mesonRadius;
+
+  //! Resonance sub system
+  unsigned int _dataIndex;
+
+  //! Resonance spin
+  ComPWA::Spin _spin;
+
+private:
+  //! Resonance shape was modified (recalculate the normalization)
+  bool _modified;
+  //! Integral value (temporary)
+  double _integral;
+  double _current_mass;
+  double _current_mesonRadius;
 };
 
 } /* namespace DynamicalFunctions */
@@ -55,3 +82,5 @@ public:
 } /* namespace ComPWA */
 
 #endif /* PHYSICS_HELICITYAMPLITUDE_ABSTRACTDYNAMICALFUNCTION_HPP_ */
+
+/

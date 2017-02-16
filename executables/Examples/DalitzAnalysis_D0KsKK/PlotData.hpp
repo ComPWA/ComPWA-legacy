@@ -11,7 +11,6 @@
 
 // Core header files go here
 #include "Core/Event.hpp"
-#include "Core/Amplitude.hpp"
 #include "Core/Particle.hpp"
 #include "Core/Parameter.hpp"
 #include "Core/ParameterList.hpp"
@@ -92,7 +91,7 @@ public:
     s_hitMiss = hitMiss;
   }
 
-  void setFitAmp(std::vector<std::shared_ptr<Amplitude>> ampVec,
+  void setFitAmp(std::vector<std::shared_ptr<ComPWA::AmpIntensity> > ampVec,
                  std::vector<double> fraction);
 
   TH2Poly *getAdBinHist(int bins = 30);
@@ -138,7 +137,7 @@ protected:
   std::shared_ptr<DataReader::Data> s_phsp;
   std::shared_ptr<DataReader::Data> s_fit;
   std::shared_ptr<DataReader::Data> s_hitMiss;
-  std::vector<std::shared_ptr<Amplitude>> _ampVec;
+  std::vector<std::shared_ptr<AmpIntensity> > _ampVec;
   std::vector<double> _fraction;
 };
 

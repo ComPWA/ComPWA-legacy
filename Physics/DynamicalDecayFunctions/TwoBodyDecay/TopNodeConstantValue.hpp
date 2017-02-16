@@ -13,24 +13,26 @@
 #define PHYSICS_DYNAMICALDECAYFUNCTIONS_TWOBODYDECAY_TOPNODECONSTANTVALUE_HPP_
 
 #include "Physics/DynamicalDecayFunctions/AbstractDynamicalFunction.hpp"
+#include "Core/Kinematics.hpp"
 
 namespace ComPWA {
 namespace Physics {
 namespace DynamicalFunctions {
 
-class TopNodeConstantValue: public AbstractDynamicalFunction {
-  void initialiseParameters(const boost::property_tree::ptree& parameter_info,
-      const ExternalParameters& external_parameters);
+class NonResonant: public AbstractDynamicalFunction {
 
 public:
-  TopNodeConstantValue();
-  virtual ~TopNodeConstantValue();
+  NonResonant();
+  virtual ~NonResonant();
 
-  std::complex<double> evaluate(const dataPoint& point,
-      unsigned int evaluation_index) const;
-
-  std::complex<double> evaluate(unsigned int storage_index,
-      unsigned int data_index, unsigned int evaluation_index) const;
+  virtual std::complex<double> Evaluate(const dataPoint &) const {
+    return std::complex<double>(1.0,0.0); }
+  
+  /**! Get current normalization.  */
+  virtual double GetNormalization() { return 1 / integral(); };
+  
+protected:
+  virtual double integral() { return Kinematics::Instance()->phspVolume(); }
 };
 
 } /* namespace DynamicalFunctions */

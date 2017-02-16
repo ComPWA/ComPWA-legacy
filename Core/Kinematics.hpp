@@ -24,7 +24,7 @@
 #include <complex>
 
 #include "Core/Event.hpp"
-#include "Core/Utility.hpp"
+#include "Core/Spin.hpp"
 
 namespace ComPWA {
 

@@ -30,7 +30,6 @@
 #include "Core/RunManager.hpp"
 #include "Core/Efficiency.hpp"
 #include "Core/FunctionTree.hpp"
-#include "Core/Amplitude.hpp"
 #include "Core/TableFormater.hpp"
 #include "Core/AbsParameter.hpp"
 #include "Core/Logging.hpp"
@@ -347,7 +346,7 @@ int main(int argc, char **argv) {
   }
   //======================= AMPLITUDE =============================
   std::vector<std::shared_ptr<Data>> dataVec, trueDataVec;
-  std::vector<std::shared_ptr<Amplitude>> ampVec, trueAmpVec;
+  std::vector<std::shared_ptr<AmpIntensity> > ampVec, trueAmpVec;
   std::vector<double> fraction, trueFraction;
 
   // ========= SIGNAL AMPLITUDE ========
@@ -385,7 +384,7 @@ int main(int argc, char **argv) {
   }
 
   // ========= BACKGROUND AMPLITUDE ========
-  std::shared_ptr<Amplitude> trueBkgAmp, fitBkgAmp;
+  std::shared_ptr<AmpIntensity> trueBkgAmp, fitBkgAmp;
   // TRUE MODEL
   if (trueSignalFraction != 1. && !trueBkgModelFile.empty()) {
     createAmp("trueBkg", trueAmpVec, trueBkgModelFile, eff, ampMcPrecision,
@@ -571,8 +570,8 @@ int main(int argc, char **argv) {
   if (fittingMethod != "plotOnly") {
     //========================FITTING =====================
     ParameterList truePar, fitPar;
-    Amplitude::FillAmpParameterToList(trueAmpVec, truePar);
-    Amplitude::FillAmpParameterToList(ampVec, fitPar);
+//    Amplitude::FillAmpParameterToList(trueAmpVec, truePar);
+//    Amplitude::FillAmpParameterToList(ampVec, fitPar);
 
     //=== Constructing likelihood
     esti = std::shared_ptr<ControlParameter>(
@@ -631,7 +630,7 @@ int main(int argc, char **argv) {
     Optimizer::Minuit2::MinuitResult *minuitResult =
         dynamic_cast<Optimizer::Minuit2::MinuitResult *>(&*result);
     finalParList = result->getFinalParameters();
-    Amplitude::UpdateAmpParameterList(esti->getAmplitudes(), finalParList);
+//    Amplitude::UpdateAmpParameterList(esti->getAmplitudes(), finalParList);
     result->setTrueParameters(truePar);
     minuitResult->setUseCorrelatedErrors(fitFractionError);
     minuitResult->SetCalcInterference(calculateInterference);
@@ -683,14 +682,14 @@ int main(int argc, char **argv) {
   // Fill final parameters if minimization was not run
   if (!finalParList.GetNParameter()) {
     ParameterList tmpList;
-    Amplitude::FillAmpParameterToList(ampVec, tmpList);
+//    Amplitude::FillAmpParameterToList(ampVec, tmpList);
     finalParList.DeepCopy(tmpList);
   }
 
   //======================= PLOTTING =============================
   if (enablePlotting) {
     if (fittingMethod != "plotOnly")
-      Amplitude::UpdateAmpParameterList(ampVec, finalParList);
+//      Amplitude::UpdateAmpParameterList(ampVec, finalParList);
 
     //------- phase-space sample
     std::shared_ptr<Data> pl_phspSample(new RootReader());
@@ -706,8 +705,8 @@ int main(int argc, char **argv) {
             phspEfficiencyFile, phspEfficiencyFileTrueTreeName, plotSize));
       run.setPhspSample(pl_phspSample, plotTruePhsp);
       // make sure no efficiency is set
-      Amplitude::SetAmpEfficiency(
-          ampVec, std::shared_ptr<Efficiency>(new UnitEfficiency));
+//      Amplitude::SetAmpEfficiency(
+//          ampVec, std::shared_ptr<Efficiency>(new UnitEfficiency));
     } else { // binned plotting
       run.setPhspSample(pl_phspSample);
       run.generatePhsp(plotSize); // we generate a very large sample for

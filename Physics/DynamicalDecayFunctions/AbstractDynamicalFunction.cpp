@@ -24,10 +24,6 @@ AbstractDynamicalFunction::~AbstractDynamicalFunction() {
   // TODO Auto-generated destructor stub
 }
 
-const ParameterList& AbstractDynamicalFunction::getParameterList() const {
-  return parameter_list_;
-}
-
 } /* namespace DynamicalFunctions */
 } /* namespace Physics */
 } /* namespace ComPWA */

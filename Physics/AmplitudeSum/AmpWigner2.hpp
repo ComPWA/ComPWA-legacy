@@ -29,7 +29,7 @@
 #include "Core/DataPoint.hpp"
 #include "Core/FunctionTree.hpp"
 #include "Physics/DPKinematics/DalitzKinematics.hpp"
-#include "Core/Utility.hpp"
+#include "Core/Spin.hpp"
 
 namespace ComPWA {
 namespace Physics {

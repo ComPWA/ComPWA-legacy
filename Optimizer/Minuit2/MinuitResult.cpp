@@ -99,9 +99,9 @@ void MinuitResult::setTrueParameters(ParameterList truePars) {
   trueParameters = truePars;
   if (trueParameters.GetNDouble() && est) {
     // Setting true parameter and calculate LH value
-    Amplitude::UpdateAmpParameterList(_ampVec, trueParameters);
+//    Amplitude::UpdateAmpParameterList(_ampVec, trueParameters);
     SetTrueLH(est->controlParameter(trueParameters));
-    Amplitude::UpdateAmpParameterList(_ampVec, finalParameters);
+//    Amplitude::UpdateAmpParameterList(_ampVec, finalParameters);
   }
 }
 
@@ -110,9 +110,9 @@ void MinuitResult::setInitialParameters(ParameterList iniPars) {
   initialParameters = iniPars;
   if (initialParameters.GetNDouble() && est) {
     // Setting initial parameter and calculate LH value
-    Amplitude::UpdateAmpParameterList(_ampVec, initialParameters);
+//    Amplitude::UpdateAmpParameterList(_ampVec, initialParameters);
     SetInitialLH(est->controlParameter(initialParameters));
-    Amplitude::UpdateAmpParameterList(_ampVec, finalParameters);
+//    Amplitude::UpdateAmpParameterList(_ampVec, finalParameters);
   }
 }
 
@@ -187,7 +187,7 @@ void MinuitResult::calcFractionError(ParameterList &parList,
     gsl_vector_free(gslNewPar);
     // update amplitude with smeared parameters
     try {
-      Amplitude::UpdateAmpParameterList(_ampVec, newPar);
+//      Amplitude::UpdateAmpParameterList(_ampVec, newPar);
     } catch (ParameterOutOfBound &ex) {
       continue;
     }
@@ -248,7 +248,7 @@ void MinuitResult::calcFractionError(ParameterList &parList,
   }
 
   // Set correct fit result
-  Amplitude::UpdateAmpParameterList(_ampVec, finalParameters);
+//  Amplitude::UpdateAmpParameterList(_ampVec, finalParameters);
   return;
 }
 

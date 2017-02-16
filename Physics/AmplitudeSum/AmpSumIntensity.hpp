@@ -19,7 +19,7 @@
 #include <map>
 #include <string>
 
-#include "Core/Amplitude.hpp"
+#include "Core/AmpIntensity.hpp"
 #include "Core/Resonance.hpp"
 #include "Core/Parameter.hpp"
 #include "Core/ParameterList.hpp"
@@ -35,7 +35,7 @@ namespace ComPWA {
 namespace Physics {
 namespace AmplitudeSum {
 
-class AmpSumIntensity : public Amplitude {
+class AmpSumIntensity : public AmpIntensity {
 
 public:
   AmpSumIntensity(std::string name = "", normStyle ns = normStyle::none,
@@ -81,7 +81,7 @@ public:
   unsigned int GetMcPrecision() { return _nCalls; }
 
   //! get maximum value of amplitude with current parameters
-  virtual double GetMaxVal(std::shared_ptr<Generator> gen);
+  virtual double GetMaximum(std::shared_ptr<Generator> gen);
 
   //! Average width of all resonances
   virtual double averageWidth();
@@ -97,11 +97,6 @@ public:
   //! Get normalization factor
   virtual const double GetNormalization();
 
-  //! Get amplitdude integral. Result is not efficiency corrected.
-  virtual const double GetIntegral();
-
-  //! Get amplitude integral for a set of (sub-) resonances
-  virtual const double GetIntegral(std::vector<resonanceItr> resoList);
 
   //! Calculate inteference integral of two subresonances of @param A and @param
   //! B
@@ -110,21 +105,6 @@ public:
   //! calculate integral for a list of resonances
   static const double GetIntegralInterference(std::vector<resonanceItr> resList,
                                               unsigned int nCalls);
-
-  /** Calculate partial integral over amplitude
-   *
-   * Currently only integration over m23sq and m13sq is supported
-   * @param var1 first integration variables, choose m23sq or m13sq
-   * @param min1 min of first integration variable
-   * @param max1 min of first integration variable
-   * @param var2 second integration variables, choose m23sq or m13sq
-   * @param min2 min of second integration variable
-   * @param max2 max of second integration variable
-   * @return
-   */
-  virtual double GetIntValue(std::string var1, double min1, double max1,
-                             std::string var2, double min2 = 0,
-                             double max2 = 0);
 
   /** Calculation of integral
    *
@@ -142,25 +122,19 @@ public:
    * @param point Point in phase-space
    * @return Complex function value
    */
-  virtual const std::complex<double> evaluate(dataPoint &point);
+  virtual const std::complex<double> Evaluate(dataPoint &point);
 
   /**! Evaluate total amplitude
    * Using current set of parameters at phsp point @param point . Amplitude is
    * multiplied with efficiency of datapoint.
    */
-  virtual const ParameterList &intensity(dataPoint &point);
-
-  /**! Evaluate total amplitude
-   * Using current set of parameters at phsp point @param point . Amplitude is
-   * multiplied with efficiency of datapoint.
-   */
-  virtual const ParameterList &intensity(std::vector<double> point);
+  virtual const double Intensity(dataPoint &point);
 
   /**! Evaluate total amplitude
    * Using current set of parameters at phsp point @param point .
    * No efficiency correction.
    */
-  virtual const ParameterList &intensityNoEff(dataPoint &point);
+  virtual const double IntensityNoEff(dataPoint &point);
 
   virtual const double sliceIntensity(dataPoint &dataP, ParameterList &par,
                                       std::complex<double> *reso,
@@ -170,7 +144,7 @@ public:
   //==================== FIT FRACTIONS =======================
   virtual void GetFitFractions(ParameterList &parList);
 
-  static void GetFitFractions(ParameterList &parList, const Amplitude *amp);
+  static void GetFitFractions(ParameterList &parList, const AmpSumIntensity *amp);
 
   //================== ACCESS to resonances ====================
   //! Get ID of resonance from name
@@ -192,12 +166,12 @@ public:
 
   //! Iterator on first resonance (which is enabled)
   virtual resonanceItr GetResonanceItrFirst() {
-    return resonanceItr(_resEnabled, resoList.begin(), resoList.end());
+//    return resonanceItr(_resEnabled, resoList.begin(), resoList.end());
   }
 
   //! Iterator on last resonance (which is enabled)
   virtual resonanceItr GetResonanceItrLast() {
-    return resonanceItr(_resEnabled, resoList.end(), resoList.end());
+//    return resonanceItr(_resEnabled, resoList.end(), resoList.end());
   }
 
   //! List of resonance iterators
@@ -218,6 +192,12 @@ public:
                                                 ParameterList &toySample);
 
 protected:
+  //! Get amplitdude integral. Result is not efficiency corrected.
+  virtual const double Integral();
+  
+  //! Get amplitude integral for a set of (sub-) resonances
+  virtual const double Integral(std::vector<resonanceItr> resoList);
+  
   //! Maximum value of amplitude. Necessary for event generation.
   double _maxFcnVal;
   //! Is amplitude maximum already calculated?
