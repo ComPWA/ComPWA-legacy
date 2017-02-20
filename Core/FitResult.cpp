@@ -212,7 +212,7 @@ void FitResult::printFitFractions(TableFormater *tab) {
 }
 
 void FitResult::printFitFractions(TableFormater *fracTable,
-                                  std::shared_ptr<Amplitude> amp,
+                                  std::shared_ptr<AmpIntensity> amp,
                                   int nErrorSets) {
   ParameterList ffList;
   amp->GetFitFractions(ffList);

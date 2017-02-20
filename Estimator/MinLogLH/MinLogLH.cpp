@@ -29,7 +29,7 @@ namespace ComPWA {
 namespace Estimator {
 namespace MinLogLH {
 
-MinLogLH::MinLogLH(std::shared_ptr<Amplitude> amp,
+MinLogLH::MinLogLH(std::shared_ptr<AmpIntensity> amp,
                    std::shared_ptr<DataReader::Data> data,
                    std::shared_ptr<DataReader::Data> phspSample,
                    std::shared_ptr<DataReader::Data> accSample,
@@ -43,7 +43,7 @@ MinLogLH::MinLogLH(std::shared_ptr<Amplitude> amp,
   return;
 }
 
-MinLogLH::MinLogLH(std::vector<std::shared_ptr<Amplitude>> ampVec,
+MinLogLH::MinLogLH(std::vector<std::shared_ptr<AmpIntensity>> ampVec,
                    std::vector<double> fraction,
                    std::shared_ptr<DataReader::Data> data,
                    std::shared_ptr<DataReader::Data> phspSample,
@@ -109,7 +109,7 @@ void MinLogLH::Reset() {
 }
 
 std::shared_ptr<ComPWA::ControlParameter>
-MinLogLH::createInstance(std::shared_ptr<Amplitude> amp,
+MinLogLH::createInstance(std::shared_ptr<AmpIntensity> amp,
                          std::shared_ptr<DataReader::Data> data,
                          std::shared_ptr<DataReader::Data> phspSample,
                          unsigned int startEvent, unsigned int nEvents) {
@@ -127,7 +127,7 @@ MinLogLH::createInstance(std::shared_ptr<Amplitude> amp,
 }
 
 std::shared_ptr<ComPWA::ControlParameter>
-MinLogLH::createInstance(std::shared_ptr<Amplitude> amp,
+MinLogLH::createInstance(std::shared_ptr<AmpIntensity> amp,
                          std::shared_ptr<DataReader::Data> data,
                          std::shared_ptr<DataReader::Data> phspSample,
                          std::shared_ptr<DataReader::Data> accSample,
@@ -140,7 +140,7 @@ MinLogLH::createInstance(std::shared_ptr<Amplitude> amp,
 }
 
 std::shared_ptr<ComPWA::ControlParameter>
-MinLogLH::createInstance(std::vector<std::shared_ptr<Amplitude>> ampVec,
+MinLogLH::createInstance(std::vector<std::shared_ptr<AmpIntensity>> ampVec,
                          std::vector<double> frac,
                          std::shared_ptr<DataReader::Data> data_,
                          std::shared_ptr<DataReader::Data> phspSample_,
@@ -153,7 +153,7 @@ MinLogLH::createInstance(std::vector<std::shared_ptr<Amplitude>> ampVec,
   return instance_;
 }
 
-void MinLogLH::setAmplitude(std::shared_ptr<Amplitude> amp,
+void MinLogLH::setAmplitude(std::shared_ptr<AmpIntensity> amp,
                             std::shared_ptr<DataReader::Data> data,
                             std::shared_ptr<DataReader::Data> phspSample,
                             std::shared_ptr<DataReader::Data> accSample,
@@ -174,7 +174,7 @@ void MinLogLH::setAmplitude(std::shared_ptr<Amplitude> amp,
   return;
 }
 
-void MinLogLH::setAmplitude(std::vector<std::shared_ptr<Amplitude>> ampVec,
+void MinLogLH::setAmplitude(std::vector<std::shared_ptr<AmpIntensity>> ampVec,
                             std::vector<double> frac,
                             std::shared_ptr<DataReader::Data> data,
                             std::shared_ptr<DataReader::Data> phspSample,
@@ -275,7 +275,7 @@ void MinLogLH::iniLHtree() {
     _tree->createNode("Intens_" + name, mmultDStrat, "Add", sampleSize, false);
     _tree->createLeaf("frac_" + name, _fraction.at(i), "Intens_" + name);
     // Expect that intensity is calculated and normalised within AmpAbsDyn
-    _tree->insertTree(_ampVec.at(i)->GetTree(
+    _tree->insertTree(_ampVec.at(i)->SetupTree(
                           _dataSampleList, _phspAccSampleList, _phspSampleList),
                       "Intens_" + name);
   }
@@ -314,8 +314,7 @@ double MinLogLH::controlParameter(ParameterList &minPar) {
         continue;
       }
       for (unsigned int i = 0; i < _ampVec.size(); ++i) {
-        ParameterList intensList = _ampVec.at(i)->intensity(point);
-        double intens = intensList.GetDoubleParameter(0)->GetValue();
+        double intens = _ampVec.at(i)->Intensity(point);
         if (intens > 0)
           normVec.at(i) += intens;
       }
@@ -350,8 +349,7 @@ double MinLogLH::controlParameter(ParameterList &minPar) {
       dataPoint point(ev);
       double val = 0;
       for (unsigned int i = 0; i < _ampVec.size(); ++i) {
-        ParameterList intensList = _ampVec.at(i)->intensityNoEff(point);
-        double tmp = intensList.GetDoubleParameter(0)->GetValue();
+        double tmp = _ampVec.at(i)->IntensityNoEff(point);
         val += tmp * _fraction.at(i) / normVec.at(i);
       }
       if (val > 0)

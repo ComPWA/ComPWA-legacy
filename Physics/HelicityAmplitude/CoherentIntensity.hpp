@@ -1,4 +1,5 @@
-//-------------------------------------------------------------------------------
+ 
+        //-------------------------------------------------------------------------------
 // Copyright (c) 2013 Stefan Pflueger.
 // All rights reserved. This program and the accompanying materials
 // are made available under the terms of the GNU Public License v3.0
@@ -46,42 +47,52 @@ public:
   static std::shared_ptr<CoherentIntensity>
   Factory(boost::property_tree::ptree &pt) {
     auto obj = std::make_shared<CoherentIntensity>();
-    obj->SetName( pt.get<string>("AmpIntensity.<xmlattr>.name","empty") );
+    obj->SetName(pt.get<string>("AmpIntensity.<xmlattr>.name", "empty"));
     BOOST_FOREACH (ptree::value_type const &ampTree,
                    pt.second.get_child("Amplitude")) {
-      obj->Add( SequentialTwoBodyDecay::Factory(ampTree) );
+      obj->Add(SequentialTwoBodyDecay::Factory(ampTree));
     }
-      return obj;
-}
-  
-  void Add( std::shared_ptr<SequentialTwoBodyDecay> d ){
+    return obj;
+  }
+
+  void Add(std::shared_ptr<SequentialTwoBodyDecay> d) {
     _seqDecays.push_back(d);
   }
 
   /**
    Get number of partial decays
-   
+
    @return Number of partial decays
    */
-  size_t size() { return _seqDecayAmps.size() };
-  
+  size_t size(){return _seqDecayAmps.size()};
+
   typedef std::vector <
-  std::shared_ptr<ComPWA::HelicityFormalism::SequentialTwoBodyDecay>::iterator seqDecayItr;
-  
+      std::shared_ptr<ComPWA::HelicityFormalism::SequentialTwoBodyDecay>::
+          iterator seqDecayItr;
+
   seqDecayItr begin() { return _seqDecays.begin(); }
-  
+
   seqDecayItr end() { return _seqDecays.end(); }
-  
+
 protected:
   virtual const double Integral();
 
-  std::vector<std::shared_ptr<SequentialTwoBodyDecay> > _seqDecays;
+  std::vector<std::shared_ptr<SequentialTwoBodyDecay>> _seqDecays;
 };
+
+#define BOOST_TEST_MODULE CoherentIntensity_test
+#include <boost/test/unit_test.hpp>
+
+BOOST_AUTO_TEST_CASE( CoherentIntensity_test ) {
+  ptree tr;
+  stringstream ss;
+  read_xml(ss, tr);
+
+  BOOST_CHECK(CoherentIntensity::Factory(tr));
+}
 
 } /* namespace HelicityFormalism */
 } /* namespace Physics */
 } /* namespace ComPWA */
 
 #endif /* PHYSICS_HELICITYAMPLITUDE_COHERENTAMPLITUDE_HPP_ */
-
-/

@@ -23,7 +23,7 @@
 
 namespace ComPWA {
 namespace Physics {
-namespace DynamicalFunctions {
+namespace HelicityFormalism {
 
 enum class DynamicalInfoTypes {
   TOP_NODE, RELATIVE_BREIT_WIGNER

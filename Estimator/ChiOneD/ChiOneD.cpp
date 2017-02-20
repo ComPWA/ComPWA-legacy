@@ -25,13 +25,13 @@ using ComPWA::ControlParameter;
 namespace Estimator {
 namespace ChiOneD {
 
-ChiOneD::ChiOneD(std::shared_ptr<Amplitude> inPIF, std::shared_ptr<Data> inDIF)
+ChiOneD::ChiOneD(std::shared_ptr<AmpIntensity> inPIF, std::shared_ptr<Data> inDIF)
     : pPIF_(inPIF), pDIF_(inDIF) {}
 
 ChiOneD::~ChiOneD() {}
 
 std::shared_ptr<ControlParameter>
-ChiOneD::createInstance(std::shared_ptr<Amplitude> inPIF,
+ChiOneD::createInstance(std::shared_ptr<AmpIntensity> inPIF,
                         std::shared_ptr<Data> inDIF) {
   if (!instance_)
     instance_ = std::shared_ptr<ControlParameter>(new ChiOneD(inPIF, inDIF));

@@ -13,7 +13,7 @@
 
 namespace ComPWA {
 namespace Physics {
-namespace DynamicalFunctions {
+namespace HelicityFormalism {
 
 AbstractDynamicalFunction::AbstractDynamicalFunction() {
   // TODO Auto-generated constructor stub

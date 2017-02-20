@@ -10,7 +10,7 @@
 
 namespace ComPWA {
 namespace Physics {
-namespace DynamicalFunctions {
+namespace HelicityFormalism {
 
 DynamicalFunctionStrategy::DynamicalFunctionStrategy(
     std::shared_ptr<AbstractDynamicalFunction> abs_dyn_func,

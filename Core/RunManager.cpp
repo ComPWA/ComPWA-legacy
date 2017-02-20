@@ -44,11 +44,11 @@ using namespace boost::log;
 RunManager::RunManager() {}
 
 RunManager::RunManager(std::shared_ptr<DataReader::Data> inD,
-                       std::shared_ptr<Amplitude> inP,
+                       std::shared_ptr<AmpIntensity> inP,
                        std::shared_ptr<Optimizer::Optimizer> inO)
     : sampleData_(inD), amp_(inP), opti_(inO) {}
 
-RunManager::RunManager(unsigned int size, std::shared_ptr<Amplitude> inP,
+RunManager::RunManager(unsigned int size, std::shared_ptr<AmpIntensity> inP,
                        std::shared_ptr<Generator> gen)
     : amp_(inP), gen_(gen) {}
 
@@ -106,7 +106,7 @@ bool RunManager::generateBkg(int number) {
 }
 
 void RunManager::SetAmplitudesData(
-    std::vector<std::shared_ptr<Amplitude>> ampVec,
+    std::vector<std::shared_ptr<AmpIntensity>> ampVec,
     std::vector<double> fraction,
     std::vector<std::shared_ptr<DataReader::Data>> dataVec) {
   _ampVec = ampVec;
@@ -172,7 +172,7 @@ void RunManager::GenAmplitudesData(int nEvents) {
 }
 
 bool RunManager::gen(int number, std::shared_ptr<Generator> gen,
-                     std::shared_ptr<Amplitude> amp,
+                     std::shared_ptr<AmpIntensity> amp,
                      std::shared_ptr<DataReader::Data> data,
                      std::shared_ptr<DataReader::Data> phsp,
                      std::shared_ptr<DataReader::Data> phspTrue) {
@@ -211,7 +211,7 @@ bool RunManager::gen(int number, std::shared_ptr<Generator> gen,
   /* Maximum value for random number generation. We introduce an arbitrary
    * factor of 1.2 to make sure that the maximum value is never reached.
    */
-  double generationMaxValue = 1.2 * amp->GetMaxVal(gen) * maxSampleWeight;
+  double generationMaxValue = 1.2 * amp->GetMaximum(gen) * maxSampleWeight;
 
   unsigned int totalCalls = 0;
   //	unsigned int startTime = clock();
@@ -257,9 +257,7 @@ bool RunManager::gen(int number, std::shared_ptr<Generator> gen,
 
     totalCalls++;
     double ampRnd = gen->getUniform() * generationMaxValue;
-    ParameterList list;
-    list = amp->intensity(point); // unfortunatly not thread safe
-    AMPpdf = *list.GetDoubleParameter(0);
+    AMPpdf = amp->Intensity(point); // unfortunatly not thread safe
 
     if (generationMaxValue < (AMPpdf * weight))
       throw std::runtime_error(

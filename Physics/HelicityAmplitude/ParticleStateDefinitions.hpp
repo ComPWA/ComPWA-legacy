@@ -18,7 +18,7 @@
 #include "boost/property_tree/ptree.hpp"
 #include <boost/log/trivial.hpp>
 
-#include "Core/Utility.hpp"
+#include "Core/Spin.hpp"
 
 namespace ComPWA {
 namespace Physics {

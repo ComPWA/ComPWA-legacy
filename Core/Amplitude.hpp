@@ -25,8 +25,8 @@
  * physics module.
  */
 
-#ifndef PIFBASE_HPP_
-#define PIFBASE_HPP_
+#ifndef AMPLITUDE_HPP_
+#define AMPLITUDE_HPP_
 
 #include <vector>
 #include <memory>

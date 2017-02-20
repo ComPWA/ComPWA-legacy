@@ -9,32 +9,34 @@
 //   Stefan Pflueger - initial API and implementation
 //----------------------------------------------------------------------------------
 
-#ifndef PHYSICS_HELICITYAMPLITUDE_TOPOLOGYAMPLITUDE_HPP_
-#define PHYSICS_HELICITYAMPLITUDE_TOPOLOGYAMPLITUDE_HPP_
+#ifndef PARTIALDECAY_HPP_
+#define PARTIALDECAY_HPP_
 
-#inlcude "Core/Resonance.hpp"
+#include <boost/property_tree/ptree.hpp>
+
+#include "Core/Resonance.hpp"
 #include "Physics/DynamicalDecayFunctions/AbstractDynamicalFunction.hpp"
-#include "Physics/AmpitudeSum/AmpWignerD.hpp"
+#include "Physics/AmplitudeSum/AmpWigner2.hpp"
 
 namespace ComPWA {
 std::shared_ptr<DoubleParameter>
 DoubleParameterFactory(boost::property_tree::ptree &pt) {
   auto obj = std::make_shared<DoubleParameter>();
-    obj->SetValue( pt.second.get_child("value");
+    obj->SetValue( pt.get_child("value") );
 }
 namespace Physics {
 
 namespace HelicityFormalism {
 
-class PartialDecay : Resonance {
+  class PartialDecay : ComPWA::Resonance {
 
 public:
   /**! Evaluate decay */
   std::complex<double> Evaluate(dataPoint &point) {
     std::complex<double> result =
-        std::polar(strength_->GetValue(), phase_->GetValue());
-    result *= angular_part_->Evaluate(point);
-    result *= dynamical_part_->Evaluate(point);
+        std::polar(_strength->GetValue(), _phase->GetValue());
+    result *= _angD->Evaluate(point);
+    result *= _dynamic->Evaluate(point);
 
     return result;
   };
@@ -69,7 +71,7 @@ public:
 
    @return Shared_ptr<AmpWignerD>
    */
-  std::shared_ptr<ComPWA::Physics::AmpSumIntensity::AmpWignerD> GetWignerD() {
+  std::shared_ptr<ComPWA::Physics::AmplitudeSum::AmpWigner2> GetWignerD() {
     return _angD;
   }
 
@@ -79,7 +81,7 @@ public:
    @param w WignerD function
    */
   void
-  SetWignerD(std::shared_ptr<ComPWA::Physics::AmpSumIntensity::AmpWignerD> w) {
+  SetWignerD(std::shared_ptr<ComPWA::Physics::AmplitudeSum::AmpWigner2> w) {
     _angD = w;
   }
 
@@ -89,7 +91,7 @@ public:
    @return Shared_ptr<AbstractDynamicalFunction>
    */
   std::shared_ptr<
-      ComPWA::Physics::DynamicalFunctions::AbstractDynamicalFunction>
+      ComPWA::Physics::HelicityFormalism::AbstractDynamicalFunction>
   SetDynamicalFunction() {
     return _dynamic;
   }
@@ -111,7 +113,7 @@ public:
 
    @return strength parameter
    */
-  std::shared_ptr<ComPWA::Physics::AmpSumIntensity::AmpWignerD> GetStrength() {
+  std::shared_ptr<ComPWA::DoubleParameter> GetStrength() {
     return _strength;
   }
 
@@ -120,7 +122,7 @@ public:
 
    @return strength parameter
    */
-  double GetStrength() { return _strength->GetValue(); }
+  double GetStrengthValue() { return _strength->GetValue(); }
 
   /**
    Set strength parameter
@@ -143,7 +145,7 @@ public:
 
    @return Phase parameter
    */
-  std::shared_ptr<ComPWA::Physics::AmpSumIntensity::AmpWignerD> GetPhase() {
+  std::shared_ptr<ComPWA::DoubleParameter> GetPhase() {
     return _phase;
   }
 
@@ -152,7 +154,7 @@ public:
 
    @return Phase parameter
    */
-  double GetPhase() { return _phase->GetValue(); }
+  double GetPhaseValue() { return _phase->GetValue(); }
 
   /**
    Set phase parameter
@@ -171,7 +173,7 @@ public:
 protected:
   std::shared_ptr<ComPWA::DoubleParameter> _strength;
   std::shared_ptr<ComPWA::DoubleParameter> _phase;
-  std::shared_ptr<ComPWA::Physics::AmpSumIntensity::AmpWignerD> _angD;
+  std::shared_ptr<ComPWA::Physics::AmplitudeSum::AmpWigner2> _angD;
   std::shared_ptr<
       ComPWA::Physics::DynamicalFunctions::AbstractDynamicalFunction>
       _dynamic;
@@ -183,6 +185,4 @@ protected:
 } /* namespace Physics */
 } /* namespace ComPWA */
 
-#endif /* PHYSICS_HELICITYAMPLITUDE_TOPOLOGYAMPLITUDE_HPP_ */
-
-/
+#endif /* PARTIALDECAY_ */

@@ -13,6 +13,8 @@
 #define SequentialTwoBodyDecay_h
 
 #include "Core/Amplitude.hpp"
+#include "Core/Parameter.hpp"
+#include "Physics/HelicityAmplitude/PartialDecay.hpp"
 #include "Physics/DynamicalDecayFunctions/AbstractDynamicalFunction.hpp"
 #include "Physics/AmplitudeSum/AmpWigner2.hpp"
 
@@ -29,7 +31,7 @@ public:
     std::complex<double> result =
         std::polar(_strength->GetValue(), _phase->GetValue());
     for( auto i : _partDecays)
-      result *= (*i)->Evaluate(point);
+      result *= i->Evaluate(point);
     return result;
   };
 
@@ -48,7 +50,7 @@ public:
    */
   static std::shared_ptr<SequentialTwoBodyDecay>
   Factory(boost::property_tree::ptree &pt) {
-    auto obj = std::make_shared<SeqentialTwoBodyDecay>();
+    auto obj = std::make_shared<SequentialTwoBodyDecay>();
     obj->SetName( pt.get<string>("Amplitude.<xmlattr>.name","empty") );
     obj->SetStrength(DoubleParameterFactory(pt.get_child("strength")));
     obj->SetPhase(DoubleParameterFactory(pt.get_child("phase")));
@@ -65,19 +67,81 @@ public:
    @param d Partial decay
    */
   void
-  Add( std::shared_ptr<ComPWA::HelicityFormalism::PartialDecay> d ) {
+  Add( std::shared_ptr<ComPWA::Physics::HelicityFormalism::PartialDecay> d ) {
     _partDecays.push_back(d);
   }
+  
+  /**
+   Get strength parameter
+   
+   @return strength parameter
+   */
+  std::shared_ptr<ComPWA::DoubleParameter> GetStrength() {
+    return _strength;
+  }
+  
+  /**
+   Get strength parameter
+   
+   @return strength parameter
+   */
+  double GetStrengthValue() { return _strength->GetValue(); }
+  
+  /**
+   Set strength parameter
+   
+   @param par Strength parameter
+   */
+  void SetStrength(std::shared_ptr<ComPWA::DoubleParameter> par) {
+    _strength = par;
+  }
+  
+  /**
+   Set strength parameter
+   
+   @param par Strength parameter
+   */
+  void SetStrength(double par) { _strength->SetValue(par); }
+  
+  /**
+   Get phase parameter
+   
+   @return Phase parameter
+   */
+  std::shared_ptr<ComPWA::DoubleParameter> GetPhase() {
+    return _phase;
+  }
+  
+  /**
+   Get phase parameter
+   
+   @return Phase parameter
+   */
+  double GetPhaseValue() { return _phase->GetValue(); }
+  
+  /**
+   Set phase parameter
+   
+   @param par Phase parameter
+   */
+  void SetPhase(std::shared_ptr<ComPWA::DoubleParameter> par) { _phase = par; }
+  
+  /**
+   Set phase parameter
+   
+   @param par Phase parameter
+   */
+  void SetPhase(double par) { _phase->SetValue(par); }
+
   
   /**
    Get number of partial decays
 
    @return Number of partial decays
    */
-  size_t size() { return _partDecays.size() };
+  size_t size() { return _partDecays.size(); };
   
-  typedef std::vector <
-  std::shared_ptr<ComPWA::HelicityFormalism::PartialDecay>::iterator partDecayItr;
+  typedef std::vector<std::shared_ptr<PartialDecay> >::iterator partDecayItr;
   
   partDecayItr begin() { return _partDecays.begin(); }
   
@@ -91,20 +155,14 @@ protected:
   std::pair<ParticleStateInfo, std::pair<ParticleStateInfo, ParticleStateInfo>>
       decay_spin_info_;
 
-  std::shared_ptr<ComPWA::DoubleParameter> _strength;
-  std::shared_ptr<ComPWA::DoubleParameter> _phase;
-  std::vector <
-      std::shared_ptr<ComPWA::HelicityFormalism::PartialDecay> _partDecays;
+  std::shared_ptr<DoubleParameter> _strength;
+  std::shared_ptr<DoubleParameter> _phase;
+  std::vector<std::shared_ptr<PartialDecay> > _partDecays;
 
-  SequentialTwoBodyDecayAmp
 };
 
 } /* namespace HelicityFormalism */
 } /* namespace Physics */
 } /* namespace ComPWA */
-
-#endif /* PHYSICS_HELICITYAMPLITUDE_TOPOLOGYAMPLITUDE_HPP_ */
-
-/
 
 #endif /* SequentialTwoBodyDecay_h */

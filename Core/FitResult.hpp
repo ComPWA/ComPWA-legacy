@@ -37,7 +37,7 @@
 #include <boost/serialization/assume_abstract.hpp>
 #include <boost/serialization/export.hpp>
 
-#include "Core/Amplitude.hpp"
+#include "Core/AmpIntensity.hpp"
 #include "Core/ParameterList.hpp"
 #include "Core/TableFormater.hpp"
 #include "Core/PhysConst.hpp"
@@ -48,17 +48,17 @@ class FitResult {
 public:
   FitResult() : time(0), nSetsFractionError(0){};
   virtual ~FitResult(){};
-  //! Set single amplitude. Assume that only one amplitude is used!
-  virtual void SetAmplitude(std::shared_ptr<Amplitude> a) {
+  //! Set single AmpIntensity. Assume that only one AmpIntensity is used!
+  virtual void SetAmplitude(std::shared_ptr<AmpIntensity> a) {
     _ampVec.clear();
     AddAmplitude(a);
   }
   //! Add amplitude
-  virtual void AddAmplitude(std::shared_ptr<Amplitude> a) {
+  virtual void AddAmplitude(std::shared_ptr<AmpIntensity> a) {
     _ampVec.push_back(a);
   }
   //! Set amplitude vector
-  virtual void SetAmplitude(std::vector<std::shared_ptr<Amplitude>> vec) {
+  virtual void SetAmplitude(std::vector<std::shared_ptr<AmpIntensity>> vec) {
     _ampVec = vec;
   }
   //! Set fraction list
@@ -95,7 +95,7 @@ public:
   virtual void printFitFractions(TableFormater *tab);
   //! Table with fit fractions
   virtual void printFitFractions(TableFormater *tab,
-                                 std::shared_ptr<Amplitude> amp,
+                                 std::shared_ptr<AmpIntensity> amp,
                                  int nErrorSets = 0);
   //! Getter function for fractions list. Make sure that fractions are
   //! calculated beforehand.
@@ -133,7 +133,7 @@ protected:
   //! True list of parameters
   ParameterList trueParameters;
   //! Fit amplitude (can't be serialized)
-  std::vector<std::shared_ptr<Amplitude>> _ampVec;
+  std::vector<std::shared_ptr<AmpIntensity>> _ampVec;
 
   //! Number of parameter sets that are used to propagate the cov matrix through
   //! the normalization
@@ -155,7 +155,7 @@ protected:
    */
   //! Calculate fit fractions and its errors.
   virtual void calcFractionError(ParameterList &parList,
-                                 std::shared_ptr<Amplitude> amp,
+                                 std::shared_ptr<AmpIntensity> amp,
                                  int nSets = 200) = 0;
 
   //! List with fit fractions and errors

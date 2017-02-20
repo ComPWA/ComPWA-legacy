@@ -27,7 +27,7 @@
 
 // PWA-Header
 #include "Estimator/Estimator.hpp"
-#include "Core/Amplitude.hpp"
+#include "Core/AmpIntensity.hpp"
 #include "DataReader/Data.hpp"
 #include "Core/Event.hpp"
 #include "Core/ParameterList.hpp"
@@ -62,7 +62,7 @@ public:
    * instance
    */
   static std::shared_ptr<ComPWA::ControlParameter>
-  createInstance(std::shared_ptr<Amplitude> amp,
+  createInstance(std::shared_ptr<AmpIntensity> amp,
                  std::shared_ptr<DataReader::Data> data,
                  std::shared_ptr<DataReader::Data> phspSample,
                  unsigned int startEvent = 0, unsigned int nEvents = 0);
@@ -81,7 +81,7 @@ public:
    * instance
    */
   static std::shared_ptr<ComPWA::ControlParameter>
-  createInstance(std::shared_ptr<Amplitude> amp,
+  createInstance(std::shared_ptr<AmpIntensity> amp,
                  std::shared_ptr<DataReader::Data> data,
                  std::shared_ptr<DataReader::Data> phspSample,
                  std::shared_ptr<DataReader::Data> accSample,
@@ -102,7 +102,7 @@ public:
    * instance
    */
   static std::shared_ptr<ComPWA::ControlParameter>
-  createInstance(std::vector<std::shared_ptr<Amplitude>> ampVec,
+  createInstance(std::vector<std::shared_ptr<AmpIntensity>> ampVec,
                  std::vector<double> frac,
                  std::shared_ptr<DataReader::Data> data,
                  std::shared_ptr<DataReader::Data> phspSample,
@@ -120,7 +120,7 @@ public:
    * @param nEvents number of events to process
    * @param useFuncTr use FunctionTree yes/no?
    */
-  virtual void setAmplitude(std::shared_ptr<Amplitude> amp,
+  virtual void setAmplitude(std::shared_ptr<AmpIntensity> amp,
                             std::shared_ptr<DataReader::Data> data,
                             std::shared_ptr<DataReader::Data> phspSample,
                             std::shared_ptr<DataReader::Data> accSample,
@@ -139,7 +139,7 @@ public:
    * @param nEvents number of events to process
    * @param useFuncTr use FunctionTree yes/no?
    */
-  virtual void setAmplitude(std::vector<std::shared_ptr<Amplitude>> ampVec,
+  virtual void setAmplitude(std::vector<std::shared_ptr<AmpIntensity>> ampVec,
                             std::vector<double> frac,
                             std::shared_ptr<DataReader::Data> data_,
                             std::shared_ptr<DataReader::Data> phspSample_,
@@ -160,7 +160,7 @@ public:
   }
 
   //! Get Amplitude
-  virtual std::vector<std::shared_ptr<Amplitude>> getAmplitudes() {
+  virtual std::vector<std::shared_ptr<ComPWA::AmpIntensity>> getAmplitudes() {
     return _ampVec;
   }
 
@@ -190,14 +190,14 @@ protected:
   MinLogLH(){};
 
   //! Constructor for a vector of amplitudes
-  MinLogLH(std::vector<std::shared_ptr<Amplitude>> ampVec,
+  MinLogLH(std::vector<std::shared_ptr<AmpIntensity>> ampVec,
            std::vector<double> fraction, std::shared_ptr<DataReader::Data> data,
            std::shared_ptr<DataReader::Data> phspSample,
            std::shared_ptr<DataReader::Data> accSample, unsigned int startEvent,
            unsigned int nEvents);
 
   //! Constructor for a single amplitude
-  MinLogLH(std::shared_ptr<Amplitude> amp,
+  MinLogLH(std::shared_ptr<AmpIntensity> amp,
            std::shared_ptr<DataReader::Data> data,
            std::shared_ptr<DataReader::Data> phspSample,
            std::shared_ptr<DataReader::Data> accSample, unsigned int startEvent,
@@ -232,7 +232,7 @@ private:
   unsigned int nUseEvt_;
 
   //! Amplitudes
-  std::vector<std::shared_ptr<Amplitude>> _ampVec;
+  std::vector<std::shared_ptr<AmpIntensity>> _ampVec;
   //! Fraction for each amplitude
   std::vector<double> _fraction;
 

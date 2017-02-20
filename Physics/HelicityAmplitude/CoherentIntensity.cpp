@@ -10,7 +10,7 @@
 //--------------------------------------------------------------------------------
 #include "Core/Efficiency.hpp"
 #include "Physics/HelicityAmplitude/CoherentIntensity.hpp"
-#include "Physics/HelicityAmplitude/HelicityKinematics.hpp"
+//#include "Physics/HelicityAmplitude/HelicityKinematics.hpp"
 
 namespace ComPWA {
 namespace Physics {

@@ -17,10 +17,13 @@
 #include "Core/DataPoint.hpp"
 #include "Core/ParameterList.hpp"
 #include "Core/Spin.hpp"
+#include "Core/FunctionTree.hpp"
+#include "Physics/DynamicalDecayFunctions/RelativisticBreitWigner.hpp"
 
 namespace ComPWA {
 namespace Physics {
-namespace DynamicalFunctions {
+namespace HelicityFormalism {
+  
 
 class AbstractDynamicalFunction {
 public:
@@ -38,6 +41,18 @@ public:
                                                   ParameterList &toySample,
                                                   std::string suffix) = 0;
 
+  /**
+   Factory for RelativisticBreitWigner dynamical function
+   
+   @param pt Configuration tree
+   @return Constructed object
+   */
+  static std::shared_ptr<AbstractDynamicalFunction>
+  Factory(boost::property_tree::ptree &pt) {
+    std::shared_ptr<AbstractDynamicalFunction> ret;
+    return ret;
+  }
+  
 protected:
   //! Name of resonance
   std::string _name;
@@ -82,5 +97,3 @@ private:
 } /* namespace ComPWA */
 
 #endif /* PHYSICS_HELICITYAMPLITUDE_ABSTRACTDYNAMICALFUNCTION_HPP_ */
-
-/

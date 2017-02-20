@@ -17,7 +17,7 @@
 
 namespace ComPWA {
 namespace Physics {
-namespace DynamicalFunctions {
+namespace HelicityFormalism {
 
 class NonResonant: public AbstractDynamicalFunction {
 

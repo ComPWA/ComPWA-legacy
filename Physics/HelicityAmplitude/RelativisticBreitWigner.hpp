@@ -25,18 +25,16 @@
 #include <vector>
 #include <boost/property_tree/ptree.hpp>
 
-#include "Core/Utility.hpp"
+#include "Core/Spin.hpp"
 #include "Core/Functions.hpp"
 #include "Core/Exceptions.hpp"
+#include "Physics/HelicityAmplitude/PartialDecay.hpp"
 #include "Physics/DynamicalDecayFunctions/AbstractDynamicalFunction.hpp"
-#include "Physics/HelicityAmplitude/ParticleStateDefinitions.hpp"
+#include "Physics/AmplitudeSum/AmpWigner2.hpp"
 
 namespace ComPWA {
-
-class dataPoint;
-
 namespace Physics {
-namespace DynamicalFunctions {
+namespace HelicityFormalism {
 
 /**
  * Relativistic Breit-Wigner
@@ -61,14 +59,14 @@ namespace DynamicalFunctions {
 class RelativisticBreitWigner : public AbstractDynamicalFunction {
 
 public:
-  RelativisticBreitWigner();
+  RelativisticBreitWigner() {};
 
-  virtual ~RelativisticBreitWigner();
+  virtual ~RelativisticBreitWigner() {};
 
-  std::complex<double> Evaluate(const dataPoint &point) const;
+  std::complex<double> Evaluate(const dataPoint &point, int pos) const;
 
   /**! Get current normalization.  */
-  virtual double GetNormalization() { return 1 / integral(); };
+  virtual double GetNormalization() { return 1 / Integral(); };
 
   /**! Setup function tree */
   virtual std::shared_ptr<FunctionTree> SetupTree(ParameterList &sample,
@@ -105,7 +103,7 @@ public:
 
    @return Decay width
    */
-  double GetWidth() { return _width->GetValue(); }
+  double GetWidthValue() { return _width->GetValue(); }
 
   /**
    Set meson radius
@@ -141,7 +139,7 @@ public:
 
    @return Meson radius
    */
-  double GetMesonRadius() { return _mesonRadius->GetValue(); }
+  double GetMesonRadiusValue() { return _mesonRadius->GetValue(); }
 
   /**
    Set form factor type
@@ -177,11 +175,10 @@ public:
   static std::complex<double>
   dynamicalFunction(double mSq, double mR, double ma, double mb, double width,
                     unsigned int J, double mesonRadius, formFactorType ffType);
-  
-  
+
   /**
    Factory for RelativisticBreitWigner dynamical function
-   
+
    @param pt Configuration tree
    @return Constructed object
    */
@@ -190,34 +187,36 @@ public:
     std::shared_ptr<RelativisticBreitWigner> ret;
     auto node = pt.second.get_child("Mother").get_child("ParticleState");
     double motherID = node.get_child("id").second;
-    
-      BOOST_FOREACH(ptree::value_type const& decay_node, decay_tree.second) {
-        ParticleStateInfo mothers = parseParticleStateRemainders(
-                                                                 decay_node.second.get_child("Mother").get_child("ParticleState"));
-        std::vector<ParticleStateInfo> daughter_lists;
-        BOOST_FOREACH(ptree::value_type const& daugthers, decay_node.second.get_child("Daughters")) {
-          daughter_lists.push_back(
-                                   parseParticleStateRemainders(daugthers.second));
-        }
-        
-        ptree strength_phase;
-        boost::optional<const ptree&> strength_phase_opt =
-        decay_node.second.get_child_optional("StrengthPhase");
-        if (strength_phase_opt.is_initialized()) {
-          strength_phase = decay_node.second.get_child("StrengthPhase");
-        }
-        decay_configuration_.addDecayToCurrentDecayTree(mothers, daughter_lists,
-                                                        strength_phase);
+
+    BOOST_FOREACH (ptree::value_type const &decay_node, decay_tree.second) {
+      ParticleStateInfo mothers = parseParticleStateRemainders(
+          decay_node.second.get_child("Mother").get_child("ParticleState"));
+      std::vector<ParticleStateInfo> daughter_lists;
+      BOOST_FOREACH (ptree::value_type const &daugthers,
+                     decay_node.second.get_child("Daughters")) {
+        daughter_lists.push_back(
+            parseParticleStateRemainders(daugthers.second));
       }
-      decay_configuration_.addCurrentDecayTreeToList();
+
+      ptree strength_phase;
+      boost::optional<const ptree &> strength_phase_opt =
+          decay_node.second.get_child_optional("StrengthPhase");
+      if (strength_phase_opt.is_initialized()) {
+        strength_phase = decay_node.second.get_child("StrengthPhase");
+      }
+      decay_configuration_.addDecayToCurrentDecayTree(mothers, daughter_lists,
+                                                      strength_phase);
+    }
+    decay_configuration_.addCurrentDecayTreeToList();
     return ret;
   }
-  
-  std::shared_ptr<PartialDecay> operator*(std::shared_ptr<AmpWignerD> wigner) {
-    std::shared_ptr<PartialDecay> partDecay(std::make_shared(this),wigner);
+
+  std::shared_ptr<ComPWA::Physics::HelicityFormalism::PartialDecay>
+  operator*(std::shared_ptr<ComPWA::Physics::AmplitudeSum::AmpWigner2> wigner) {
+    std::shared_ptr<ComPWA::Physics::HelicityFormalism::PartialDecay> partDecay(
+        std::make_shared(this), wigner);
     return partDecay;
   }
-
 
 protected:
   //! Decay width of resonante state
@@ -235,5 +234,3 @@ protected:
 } /* namespace ComPWA */
 
 #endif /* PHYSICS_HELICITYAMPLITUDE_RELATIVISTICBREITWIGNER_HPP_ */
-
-/

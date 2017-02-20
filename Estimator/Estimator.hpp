@@ -33,7 +33,7 @@
 #include "Core/ControlParameter.hpp"
 #include "Core/ParameterList.hpp"
 #include "Core/FunctionTree.hpp"
-#include "Core/Amplitude.hpp"
+#include "Core/AmpIntensity.hpp"
 
 namespace ComPWA {
 namespace Estimator {

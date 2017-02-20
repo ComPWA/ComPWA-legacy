@@ -130,7 +130,7 @@ void MinuitResult::genSimpleOutput(std::ostream &out) {
 }
 
 void MinuitResult::calcFractionError(ParameterList &parList,
-                                     std::shared_ptr<Amplitude> amp,
+                                     std::shared_ptr<AmpIntensity> amp,
                                      int nSets) {
   if (nSets <= 0)
     return;
@@ -353,7 +353,7 @@ void MinuitResult::genOutput(std::ostream &out, std::string opt) {
 }
 
 void MinuitResult::createInterferenceTable(std::ostream &out,
-                                           std::shared_ptr<Amplitude> amp) {
+                                           std::shared_ptr<AmpIntensity> amp) {
   out << "INTERFERENCE terms for " << amp->GetName() << ": " << std::endl;
   TableFormater *tableInterf = new TableFormater(&out);
   tableInterf->addColumn("Name 1", 15);

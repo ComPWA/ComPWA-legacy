@@ -200,9 +200,9 @@ private:
   //! Full fit result output
   void genOutput(std::ostream &out, std::string opt = "");
 
-  //! Create table with interference terms for each amplitude
+  //! Create table with interference terms for each AmpIntensity
   void createInterferenceTable(std::ostream &out,
-                               std::shared_ptr<Amplitude> amp);
+                               std::shared_ptr<AmpIntensity> amp);
 
   //! Table with correlation matrix
   void printCorrelationMatrix(TableFormater *fracTable);
@@ -222,11 +222,11 @@ private:
    * especially if the function tree is not used.
    *
    * @param parList fit parameter
-   * @param amp amplitude that was fitted
+   * @param amp AmpIntensity that was fitted
    * @param nSets number of sets used
    */
   virtual void calcFractionError(ParameterList &parList,
-                                 std::shared_ptr<Amplitude> amp, int nSets);
+                                 std::shared_ptr<AmpIntensity> amp, int nSets);
 
   //! Calculate information criterion AIC
   double calcAIC(ParameterList &frac);

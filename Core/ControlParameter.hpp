@@ -28,7 +28,7 @@
 
 #include "Core/ParameterList.hpp"
 #include "Core/FunctionTree.hpp"
-#include "Core/Amplitude.hpp"
+#include "Core/AmpIntensity.hpp"
 
 namespace ComPWA {
 
@@ -47,8 +47,8 @@ public:
     return std::shared_ptr<FunctionTree>();
   }
 
-  virtual std::vector<std::shared_ptr<Amplitude>> getAmplitudes() {
-    return std::vector<std::shared_ptr<Amplitude>>();
+  virtual std::vector<std::shared_ptr<AmpIntensity>> getAmplitudes() {
+    return std::vector<std::shared_ptr<AmpIntensity>>();
   }
 
   virtual int nCalls() { return calls; }

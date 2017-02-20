@@ -15,7 +15,7 @@
 
 namespace ComPWA {
 namespace Physics {
-namespace DynamicalFunctions {
+namespace HelicityFormalism {
 
 DynamicalFunctionFactory::DynamicalFunctionFactory() : dynamical_function_list_()
 {

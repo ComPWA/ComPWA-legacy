@@ -688,11 +688,11 @@ int main(int argc, char **argv) {
 
   //======================= PLOTTING =============================
   if (enablePlotting) {
-    if (fittingMethod != "plotOnly")
+//    if (fittingMethod != "plotOnly")
 //      Amplitude::UpdateAmpParameterList(ampVec, finalParList);
 
     //------- phase-space sample
-    std::shared_ptr<Data> pl_phspSample(new RootReader());
+    std::shared_ptr<ComPWA::Data> pl_phspSample(new RootReader());
     LOG(info) << "Plotting results...";
     if (!phspEfficiencyFile.empty()) { // unbinned plotting
       // sample with accepted phsp events
