@@ -14,16 +14,28 @@
 
 #include <complex>
 
+#include <boost/property_tree/ptree.hpp>
+
 #include "Core/DataPoint.hpp"
 #include "Core/ParameterList.hpp"
 #include "Core/Spin.hpp"
 #include "Core/FunctionTree.hpp"
-#include "Physics/DynamicalDecayFunctions/RelativisticBreitWigner.hpp"
+//#include "Physics/HelicityFormalism/RelativisticBreitWigner.hpp"
 
 namespace ComPWA {
 namespace Physics {
 namespace HelicityFormalism {
-  
+
+enum normStyle {
+  none, /*!< no normaliztion between Amplitudes. */
+  /*!< all amplitudes are normalized to one.
+   *  The normalization factor is \f$ 1/\sqrt(\int |A|^2)\f$ */
+  one
+};
+
+class
+    RelativisticBreitWigner; /* Forward declaration to avoid circular includes
+                                */
 
 class AbstractDynamicalFunction {
 public:
@@ -35,7 +47,7 @@ public:
 
   /**! Get current normalization.  */
   virtual double GetNormalization() = 0;
-  
+
   /**! Setup function tree */
   virtual std::shared_ptr<FunctionTree> SetupTree(ParameterList &sample,
                                                   ParameterList &toySample,
@@ -43,7 +55,7 @@ public:
 
   /**
    Factory for RelativisticBreitWigner dynamical function
-   
+
    @param pt Configuration tree
    @return Constructed object
    */
@@ -52,7 +64,7 @@ public:
     std::shared_ptr<AbstractDynamicalFunction> ret;
     return ret;
   }
-  
+
 protected:
   //! Name of resonance
   std::string _name;
@@ -74,9 +86,6 @@ protected:
   //! Resonance mass
   std::shared_ptr<DoubleParameter> _mass;
 
-  //! Barrier radi for resonance and mother particle
-  std::shared_ptr<DoubleParameter> _mesonRadius;
-
   //! Resonance sub system
   unsigned int _dataIndex;
 
@@ -86,10 +95,12 @@ protected:
 private:
   //! Resonance shape was modified (recalculate the normalization)
   bool _modified;
+
   //! Integral value (temporary)
   double _integral;
+
+  //! Temporary value of mass (used to trigger recalculation of normalization)
   double _current_mass;
-  double _current_mesonRadius;
 };
 
 } /* namespace DynamicalFunctions */

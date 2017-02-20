@@ -34,7 +34,6 @@
 
 namespace ComPWA {
 namespace Physics {
-namespace AmplitudeSum {
 
 inline int factorial(int __i) {
   int f = 1;
@@ -316,7 +315,7 @@ void Wigner_D(const Spin &__jmax, double __alpha, double __beta, double __gamma,
     }
   }
 }
-} /* namespace AmplitudeSum */
+
 } /* namespace Physics */
 } /* namespace ComPWA */
 #endif /* _Utils_H */

@@ -14,9 +14,8 @@
 
 #include "Core/Amplitude.hpp"
 #include "Core/Parameter.hpp"
-#include "Physics/HelicityAmplitude/PartialDecay.hpp"
-#include "Physics/DynamicalDecayFunctions/AbstractDynamicalFunction.hpp"
-#include "Physics/AmplitudeSum/AmpWigner2.hpp"
+#include "Physics/HelicityFormalism/PartialDecay.hpp"
+#include "Physics/HelicityFormalism/AbstractDynamicalFunction.hpp"
 
 namespace ComPWA {
 namespace Physics {

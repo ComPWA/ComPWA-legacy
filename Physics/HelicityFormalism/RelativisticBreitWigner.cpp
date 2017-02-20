@@ -24,7 +24,7 @@
 
 #include "Core/DataPointStorage.hpp"
 #include "Core/Kinematics.hpp"
-#include "Physics/DynamicalDecayFunctions/RelativisticBreitWigner.hpp"
+#include "Physics/HelicityFormalism/RelativisticBreitWigner.hpp"
 
 namespace ComPWA {
 namespace Physics {

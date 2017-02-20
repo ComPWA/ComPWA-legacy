@@ -14,7 +14,7 @@
 #define PHYSICS_HELICITYAMPLITUDE_COHERENTAMPLITUDE_HPP_
 
 #include "Core/AmpIntensity.hpp"
-#include "Physics/HelicityAmplitude/SequentialTwoBodyDecay.hpp"
+#include "Physics/HelicityFormalism/SequentialTwoBodyDecay.hpp"
 
 namespace ComPWA {
 namespace Physics {
@@ -24,7 +24,7 @@ class CoherentIntensity : public AmpIntensity {
 
 public:
   CoherentIntensity();
-  virtual ~CoherentAmplitude();
+  virtual ~CoherentIntensity();
 
   double GetMaximum(std::shared_ptr<Generator> gen);
 
@@ -64,10 +64,10 @@ public:
 
    @return Number of partial decays
    */
-  size_t size(){return _seqDecayAmps.size()};
+  size_t size(){ return _seqDecays.size(); }
 
   typedef std::vector <
-      std::shared_ptr<ComPWA::HelicityFormalism::SequentialTwoBodyDecay>::
+      std::shared_ptr<ComPWA::HelicityFormalism::SequentialTwoBodyDecay> >::
           iterator seqDecayItr;
 
   seqDecayItr begin() { return _seqDecays.begin(); }

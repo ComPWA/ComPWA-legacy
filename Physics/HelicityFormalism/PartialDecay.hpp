@@ -15,20 +15,21 @@
 #include <boost/property_tree/ptree.hpp>
 
 #include "Core/Resonance.hpp"
-#include "Physics/DynamicalDecayFunctions/AbstractDynamicalFunction.hpp"
-#include "Physics/AmplitudeSum/AmpWigner2.hpp"
+#include "Physics/HelicityFormalism/AbstractDynamicalFunction.hpp"
+#include "Physics/HelicityFormalism/AmpWignerD.hpp"
 
 namespace ComPWA {
+
 std::shared_ptr<DoubleParameter>
 DoubleParameterFactory(boost::property_tree::ptree &pt) {
   auto obj = std::make_shared<DoubleParameter>();
-    obj->SetValue( pt.get_child("value") );
+  obj->SetValue(pt.get_child("value"));
 }
-namespace Physics {
 
+namespace Physics {
 namespace HelicityFormalism {
 
-  class PartialDecay : ComPWA::Resonance {
+class PartialDecay : ComPWA::Resonance {
 
 public:
   /**! Evaluate decay */
@@ -60,7 +61,8 @@ public:
     obj->SetName(pt.get<string>("Resonance.<xmlattr>.name", "empty"));
     obj->SetStrength(DoubleParameterFactory(pt.get_child("strength")));
     obj->SetPhase(DoubleParameterFactory(pt.get_child("phase")));
-    obj->SetWignerD(AmpWignerD::Factory(pt));
+    obj->SetWignerD(
+        ComPWA::Physics::HelicityFormalism::AmpWignerD::Factory(pt));
     obj->SetDynamicalFunction(AbstractDynamicalFunction::Factory(pt));
 
     return obj;
@@ -71,7 +73,7 @@ public:
 
    @return Shared_ptr<AmpWignerD>
    */
-  std::shared_ptr<ComPWA::Physics::AmplitudeSum::AmpWigner2> GetWignerD() {
+  std::shared_ptr<ComPWA::Physics::HelicityFormalism::AmpWignerD> GetWignerD() {
     return _angD;
   }
 
@@ -80,8 +82,8 @@ public:
 
    @param w WignerD function
    */
-  void
-  SetWignerD(std::shared_ptr<ComPWA::Physics::AmplitudeSum::AmpWigner2> w) {
+  void SetWignerD(
+      std::shared_ptr<ComPWA::Physics::HelicityFormalism::AmpWignerD> w) {
     _angD = w;
   }
 
@@ -90,8 +92,7 @@ public:
 
    @return Shared_ptr<AbstractDynamicalFunction>
    */
-  std::shared_ptr<
-      ComPWA::Physics::HelicityFormalism::AbstractDynamicalFunction>
+  std::shared_ptr<ComPWA::Physics::HelicityFormalism::AbstractDynamicalFunction>
   SetDynamicalFunction() {
     return _dynamic;
   }
@@ -103,7 +104,7 @@ public:
    */
   void SetDynamicalFunction(
       std::shared_ptr<
-          ComPWA::Physics::DynamicalFunctions::AbstractDynamicalFunction>
+          ComPWA::Physics::HelicityFormalism::AbstractDynamicalFunction>
           f) {
     _dynamic = f;
   }
@@ -113,9 +114,7 @@ public:
 
    @return strength parameter
    */
-  std::shared_ptr<ComPWA::DoubleParameter> GetStrength() {
-    return _strength;
-  }
+  std::shared_ptr<ComPWA::DoubleParameter> GetStrength() { return _strength; }
 
   /**
    Get strength parameter
@@ -145,9 +144,7 @@ public:
 
    @return Phase parameter
    */
-  std::shared_ptr<ComPWA::DoubleParameter> GetPhase() {
-    return _phase;
-  }
+  std::shared_ptr<ComPWA::DoubleParameter> GetPhase() { return _phase; }
 
   /**
    Get phase parameter
@@ -173,9 +170,8 @@ public:
 protected:
   std::shared_ptr<ComPWA::DoubleParameter> _strength;
   std::shared_ptr<ComPWA::DoubleParameter> _phase;
-  std::shared_ptr<ComPWA::Physics::AmplitudeSum::AmpWigner2> _angD;
-  std::shared_ptr<
-      ComPWA::Physics::DynamicalFunctions::AbstractDynamicalFunction>
+  std::shared_ptr<ComPWA::Physics::HelicityFormalism::AmpWignerD> _angD;
+  std::shared_ptr<ComPWA::Physics::HelicityFormalism::AbstractDynamicalFunction>
       _dynamic;
 
   // TODO: Operator* to construct SequentialTwoBodyDecay

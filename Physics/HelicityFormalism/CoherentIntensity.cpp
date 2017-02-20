@@ -9,8 +9,7 @@
 //   Stefan Pflueger - initial API and implementation
 //--------------------------------------------------------------------------------
 #include "Core/Efficiency.hpp"
-#include "Physics/HelicityAmplitude/CoherentIntensity.hpp"
-//#include "Physics/HelicityAmplitude/HelicityKinematics.hpp"
+#include "Physics/HelicityFormalism/CoherentIntensity.hpp"
 
 namespace ComPWA {
 namespace Physics {

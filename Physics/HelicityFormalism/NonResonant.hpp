@@ -12,7 +12,7 @@
 #ifndef PHYSICS_DYNAMICALDECAYFUNCTIONS_TWOBODYDECAY_TOPNODECONSTANTVALUE_HPP_
 #define PHYSICS_DYNAMICALDECAYFUNCTIONS_TWOBODYDECAY_TOPNODECONSTANTVALUE_HPP_
 
-#include "Physics/DynamicalDecayFunctions/AbstractDynamicalFunction.hpp"
+#include "Physics/HelicityFormalism/AbstractDynamicalFunction.hpp"
 #include "Core/Kinematics.hpp"
 
 namespace ComPWA {

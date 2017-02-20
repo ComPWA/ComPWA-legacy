@@ -23,14 +23,14 @@
 #define PHYSICS_HELICITYAMPLITUDE_RELATIVISTICBREITWIGNER_HPP_
 
 #include <vector>
+#include <memory>
 #include <boost/property_tree/ptree.hpp>
 
 #include "Core/Spin.hpp"
 #include "Core/Functions.hpp"
 #include "Core/Exceptions.hpp"
-#include "Physics/HelicityAmplitude/PartialDecay.hpp"
-#include "Physics/DynamicalDecayFunctions/AbstractDynamicalFunction.hpp"
-#include "Physics/AmplitudeSum/AmpWigner2.hpp"
+#include "Physics/HelicityFormalism/PartialDecay.hpp"
+#include "Physics/HelicityFormalism/AbstractDynamicalFunction.hpp"
 
 namespace ComPWA {
 namespace Physics {
@@ -212,9 +212,9 @@ public:
   }
 
   std::shared_ptr<ComPWA::Physics::HelicityFormalism::PartialDecay>
-  operator*(std::shared_ptr<ComPWA::Physics::AmplitudeSum::AmpWigner2> wigner) {
-    std::shared_ptr<ComPWA::Physics::HelicityFormalism::PartialDecay> partDecay(
-        std::make_shared(this), wigner);
+  operator*(std::shared_ptr<ComPWA::Physics::HelicityFormalism::AmpWignerD> wigner) {
+    std::shared_ptr<ComPWA::Physics::HelicityFormalism::PartialDecay>
+    partDecay(std::make_shared(this), wigner);
     return partDecay;
   }
 
@@ -227,6 +227,10 @@ protected:
 
   //! Form factor type
   formFactorType _ffType;
+  
+private:
+  //! Temporary value of meson radius (used to trigger recalculation of normalization)
+  double _current_mesonRadius;
 };
 
 } /* namespace DynamicalFunctions */

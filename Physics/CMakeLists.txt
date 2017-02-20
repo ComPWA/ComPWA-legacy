@@ -6,9 +6,8 @@
 add_subdirectory( AmplitudeSum )
 add_subdirectory( DPKinematics )
 add_subdirectory( BreitWigner )
-add_subdirectory( DecayTree )
-add_subdirectory( HelicityAmplitude )
-add_subdirectory( DynamicalDecayFunctions )
+#add_subdirectory( DecayTree )
+add_subdirectory( HelicityFormalism )
 
 #target_link_libraries( ComPWA_Physics ComPWA_Core ${Boost_LIBRARIES} )
 

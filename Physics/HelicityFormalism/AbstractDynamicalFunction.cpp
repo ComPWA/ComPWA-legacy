@@ -9,7 +9,7 @@
 //   Stefan Pflueger - initial API and implementation
 //----------------------------------------------------------------------------------
 
-#include "AbstractDynamicalFunction.hpp"
+#include "Physics/HelicityFormalism/AbstractDynamicalFunction.hpp"
 
 namespace ComPWA {
 namespace Physics {
