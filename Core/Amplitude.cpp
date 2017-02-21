@@ -51,4 +51,4 @@ void Amplitude::FillParameterList(ParameterList &outPar) const {
   outPar.RemoveDuplicates();
 }
 
-}
+} /* namespace ComPWA */

@@ -24,6 +24,8 @@
 #include <vector>
 #include <memory>
 
+#include <boost/property_tree/ptree.hpp>
+
 #include "Core/ParameterList.hpp"
 #include "Core/Functions.hpp"
 #include "Core/DataPoint.hpp"
@@ -41,7 +43,7 @@ public:
 
   virtual ~AmpWignerD(){};
 
-  virtual double Evaluate(dataPoint &point, int pos1, int pos2);
+  virtual double Evaluate(const dataPoint &point, int pos1, int pos2) const;
 
   static double dynamicalFunction(ComPWA::Spin J, ComPWA::Spin mu,
                                   ComPWA::Spin muPrime, double cosTheta);
@@ -53,6 +55,19 @@ public:
 
   virtual std::shared_ptr<FunctionTree> SetupTree(ParameterList &sample,
                                                   std::string suffix = "");
+  
+  /**
+   Factory for AmpWignerD
+   
+   @param pt Configuration tree
+   @return Constructed object
+   */
+  static std::shared_ptr<AmpWignerD>
+  Factory(const boost::property_tree::ptree &pt) {
+    auto obj = std::make_shared<AmpWignerD>();
+    return obj;
+  }
+
 
 protected:
   unsigned int _varId;

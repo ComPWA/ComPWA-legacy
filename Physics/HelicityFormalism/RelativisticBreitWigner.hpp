@@ -29,13 +29,14 @@
 #include "Core/Spin.hpp"
 #include "Core/Functions.hpp"
 #include "Core/Exceptions.hpp"
-#include "Physics/HelicityFormalism/PartialDecay.hpp"
 #include "Physics/HelicityFormalism/AbstractDynamicalFunction.hpp"
+#include "Physics/HelicityFormalism/AmpWignerD.hpp"
 
 namespace ComPWA {
 namespace Physics {
 namespace HelicityFormalism {
 
+  class PartialDecay;
 /**
  * Relativistic Breit-Wigner
  * (Breit Wigner with Blatt-Weisskopf barrier factors)
@@ -183,39 +184,19 @@ public:
    @return Constructed object
    */
   static std::shared_ptr<RelativisticBreitWigner>
-  Factory(boost::property_tree::ptree &pt) {
-    std::shared_ptr<RelativisticBreitWigner> ret;
-    auto node = pt.second.get_child("Mother").get_child("ParticleState");
-    double motherID = node.get_child("id").second;
-
-    BOOST_FOREACH (ptree::value_type const &decay_node, decay_tree.second) {
-      ParticleStateInfo mothers = parseParticleStateRemainders(
-          decay_node.second.get_child("Mother").get_child("ParticleState"));
-      std::vector<ParticleStateInfo> daughter_lists;
-      BOOST_FOREACH (ptree::value_type const &daugthers,
-                     decay_node.second.get_child("Daughters")) {
-        daughter_lists.push_back(
-            parseParticleStateRemainders(daugthers.second));
-      }
-
-      ptree strength_phase;
-      boost::optional<const ptree &> strength_phase_opt =
-          decay_node.second.get_child_optional("StrengthPhase");
-      if (strength_phase_opt.is_initialized()) {
-        strength_phase = decay_node.second.get_child("StrengthPhase");
-      }
-      decay_configuration_.addDecayToCurrentDecayTree(mothers, daughter_lists,
-                                                      strength_phase);
-    }
-    decay_configuration_.addCurrentDecayTreeToList();
-    return ret;
+  Factory(const boost::property_tree::ptree &pt) {
+    std::shared_ptr<RelativisticBreitWigner> obj;
+    auto node = pt.get_child("Mother").get_child("ParticleState");
+    int motherID = node.get<int>("ID");
+    return obj;
   }
 
   std::shared_ptr<ComPWA::Physics::HelicityFormalism::PartialDecay>
   operator*(std::shared_ptr<ComPWA::Physics::HelicityFormalism::AmpWignerD> wigner) {
-    std::shared_ptr<ComPWA::Physics::HelicityFormalism::PartialDecay>
-    partDecay(std::make_shared(this), wigner);
-    return partDecay;
+//    auto obj =std::make_shared<ComPWA::Physics::HelicityFormalism::PartialDecay>();
+//    std::shared_ptr<ComPWA::Physics::HelicityFormalism::PartialDecay>
+//    partDecay(std::make_shared<PartialDecay>(this), wigner);
+//    return obj;
   }
 
 protected:

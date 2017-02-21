@@ -20,7 +20,7 @@
 #include "Core/ParameterList.hpp"
 #include "Core/Spin.hpp"
 #include "Core/FunctionTree.hpp"
-//#include "Physics/HelicityFormalism/RelativisticBreitWigner.hpp"
+
 
 namespace ComPWA {
 namespace Physics {
@@ -60,7 +60,7 @@ public:
    @return Constructed object
    */
   static std::shared_ptr<AbstractDynamicalFunction>
-  Factory(boost::property_tree::ptree &pt) {
+  Factory(const boost::property_tree::ptree &pt) {
     std::shared_ptr<AbstractDynamicalFunction> ret;
     return ret;
   }
@@ -78,7 +78,7 @@ protected:
   int _mcPrecision;
 
   //! Integral
-  virtual double integral() { return 1.0; };
+  virtual double Integral() { return 1.0; };
 
   //! Masses of daughter particles
   double _mass1, _mass2;

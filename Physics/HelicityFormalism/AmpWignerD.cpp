@@ -25,7 +25,7 @@ AmpWignerD::AmpWignerD(ComPWA::Spin spin, unsigned int mu,
                        unsigned int muPrime)
     : _spin(spin), _mu(mu), _muPrime(muPrime) {}
 
-double AmpWignerD::Evaluate(dataPoint &point, int pos1, int pos2) {
+double AmpWignerD::Evaluate(const dataPoint &point, int pos1, int pos2) const {
   return dynamicalFunction(_spin, Spin(_mu), Spin(_muPrime),
                            point.getVal(pos1));
 }

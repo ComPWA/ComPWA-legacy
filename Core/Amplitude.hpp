@@ -101,9 +101,9 @@ public:
    * @param resoList Vector of amplitudes
    * @return
    */
-  virtual const double GetIntegral(std::vector<resonanceItr> resoList) {
-    return 0;
-  };
+//  virtual const double GetIntegral(std::vector<resonanceItr> resoList) {
+//    return 0;
+//  };
 
   /** Calculate interference integral
    *
@@ -111,31 +111,18 @@ public:
    * @param B Second resonance
    * @return a*conj(b)+conj(a)*b
    */
-  virtual const double GetIntegralInterference(resonanceItr A, resonanceItr B) {
-    return -999;
-  };
+//  virtual const double GetIntegralInterference(resonanceItr A, resonanceItr B) {
+//    return -999;
+//  };
 
   //=========== EVALUATION =================
-  /** Calculate intensity of amplitude at point in phase-space
+  /** Calculate value of amplitude at point in phase space
    *
    * @param point Data point
    * @return
    */
-  virtual const ParameterList &intensity(dataPoint &point) = 0;
-
-  /** Calculate intensity of amplitude at point in phase-space
-   *
-   * @param point Data point
-   * @return
-   */
-  virtual const ParameterList &intensity(std::vector<double> point) = 0;
-
-  /** Calculate intensity of amplitude at point in phase-space
-   * Intensity is calculated excluding efficiency correction
-   * @param point Data point
-   * @return
-   */
-  virtual const ParameterList &intensityNoEff(dataPoint &point) = 0;
+ 
+  virtual std::complex<double> Evaluate(const dataPoint &point) const = 0;
 
   //=========== PARAMETERS =================
   /** Update parameters of resonance
@@ -154,16 +141,16 @@ public:
   virtual void GetFitFractions(ParameterList &parList) = 0;
 
   //============= ACCESS TO RESONANCES ================
-  //! Iterator on first resonance (which is enabled)
-  virtual resonanceItr GetResonanceItrFirst(){};
-
-  //! Iterator on last resonance (which is enabled)
-  virtual resonanceItr GetResonanceItrLast(){};
-
-  //! Iterator on last resonance (which is enabled)
-  virtual const std::vector<resonanceItr> GetResonanceItrList() {
-    return std::vector<resonanceItr>();
-  };
+//  //! Iterator on first resonance (which is enabled)
+//  virtual resonanceItr GetResonanceItrFirst(){};
+//
+//  //! Iterator on last resonance (which is enabled)
+//  virtual resonanceItr GetResonanceItrLast(){};
+//
+//  //! Iterator on last resonance (which is enabled)
+//  virtual const std::vector<resonanceItr> GetResonanceItrList() {
+//    return std::vector<resonanceItr>();
+//  };
 
   //========== FUNCTIONTREE =============
   //! Check of tree is available
@@ -193,7 +180,7 @@ protected:
   std::string _name;
 
   //! need to store this object for boost::filter_iterator
-  resIsEnabled _resEnabled;
+//  resIsEnabled _resEnabled;
 
   //! Amplitude value
   ParameterList result;

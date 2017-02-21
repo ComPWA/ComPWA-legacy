@@ -3,9 +3,9 @@
 #FILE(GLOB lib_headers *.hpp)
 #add_library (ComPWA_Physics SHARED ${lib_srcs} ${lib_headers})
 
-add_subdirectory( AmplitudeSum )
-add_subdirectory( DPKinematics )
-add_subdirectory( BreitWigner )
+#add_subdirectory( AmplitudeSum )
+#add_subdirectory( DPKinematics )
+#add_subdirectory( BreitWigner )
 #add_subdirectory( DecayTree )
 add_subdirectory( HelicityFormalism )
 

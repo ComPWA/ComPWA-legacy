@@ -36,43 +36,19 @@ public:
   virtual Resonance *Clone(std::string newName = "") const = 0;
 
   //! Get resonance name
-  virtual std::string GetName() const = 0;
+  virtual std::string GetName() const { return _name; }
 
   //! Set resonance name
-  virtual void SetName(std::string name) = 0;
-
-  //! Get phase of resonance name
-  virtual bool GetEnable() const = 0;
+  virtual void SetName(std::string name) { _name = name; }
 
   //! Implementation of interface for streaming info about the strategy
   virtual std::string to_str() const = 0;
-
-  //! Get id of variable A
-  virtual unsigned int GetVarIdA() const = 0;
-
-  //! Get id of variable B
-  virtual unsigned int GetVarIdB() const = 0;
-
-  //! Set id of variable A
-  virtual void SetVarIdA(unsigned int id) = 0;
-
-  //! Set id of variable B
-  virtual void SetVarIdB(unsigned int id) = 0;
 
   //! Set prefactor
   virtual void SetPrefactor(std::complex<double> pre) = 0;
 
   //! Get prefactor
   virtual std::complex<double> GetPrefactor() const = 0;
-
-  //! Get total integral for resonance
-  virtual double GetIntegral() = 0;
-
-  //! Get total integral for resonance
-  virtual double GetNormalization() = 0;
-
-  //! Get total integral for resonance
-  virtual double GetTotalIntegral() const = 0;
 
   //! Get coefficient
   virtual std::complex<double> GetCoefficient() const = 0;
@@ -89,34 +65,15 @@ public:
   //! Get phase of resonance id
   virtual std::shared_ptr<DoubleParameter> GetPhasePar() = 0;
 
-  //! Get resonance mass
-  virtual double GetMass() const = 0;
-
-  //! Get resonance mass
-  virtual std::shared_ptr<DoubleParameter> GetMassPar() = 0;
-
-  //! Get resonance mass
-  virtual double GetWidth() const = 0;
-
-  //! Get resonance spin
-  virtual double GetSpin() const = 0;
-
   //! value of resonance at \param point
-  virtual std::complex<double> Evaluate(dataPoint &point) = 0;
-
-  //! value of resonance angular distribution at \param point
-  virtual double EvaluateAngular(dataPoint &point) = 0;
+  virtual std::complex<double> Evaluate(const dataPoint &point) const = 0;
 
   virtual std::shared_ptr<FunctionTree> SetupTree(ParameterList &sample,
                                                   ParameterList &toySample,
                                                   std::string suffix) = 0;
+protected:
+  std::string _name;
 };
-
-struct resIsEnabled {
-  bool operator()(std::shared_ptr<Resonance> r) { return r->GetEnable(); }
-};
-typedef boost::filter_iterator<
-    resIsEnabled, std::vector<std::shared_ptr<Resonance>>::iterator>
-    resonanceItr;
-}
+  
+} /* namespace ComPWA */
 #endif /* CORE_RESONANCE_HPP_ */

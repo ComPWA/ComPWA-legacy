@@ -89,68 +89,30 @@ public:
    */
   virtual const double GetNormalization() { return 1/Integral(); }
 
-  /** Calculate integral of amplitudes for a given vector.
-   * The integral does not include efficiency correction
-   *
-   * @param resoList Vector of amplitudes
-   * @return
-   */
-  virtual const double GetIntegral(std::vector<resonanceItr> resoList) {
-    return 0;
-  };
-
-  /** Calculate interference integral
-   *
-   * @param A First resonance
-   * @param B Second resonance
-   * @return a*conj(b)+conj(a)*b
-   */
-  virtual const double GetIntegralInterference(resonanceItr A, resonanceItr B) {
-    return -999;
-  };
-
   //=========== EVALUATION =================
   /** Calculate intensity of amplitude at point in phase-space
    *
    * @param point Data point
    * @return
    */
-  virtual const double Intensity(dataPoint &point) = 0;
+  virtual double Intensity(const dataPoint &point) const = 0;
 
   /** Calculate intensity of amplitude at point in phase-space
    * Intensity is calculated excluding efficiency correction
    * @param point Data point
    * @return
    */
-  virtual const double IntensityNoEff(dataPoint &point) = 0;
+  virtual double IntensityNoEff(const dataPoint &point) const = 0;
 
   //=========== PARAMETERS =================
-  /** Update parameters of resonance
-   *
-   * @param par New list of parameters
-   */
-  virtual void UpdateParameters(ParameterList &par);
-
   /**! Add amplitude parameters to list
    * Add parameters only to list if not already in
    * @param list Parameter list to be filled
    */
-  virtual void FillParameterList(ParameterList &list) const;
+  virtual void FillParameterList(ParameterList &list) const = 0;
 
   //! Calculate & fill fit fractions of this amplitude to ParameterList
   virtual void GetFitFractions(ParameterList &parList) = 0;
-
-  //============= ACCESS TO RESONANCES ================
-  //! Iterator on first resonance (which is enabled)
-  virtual resonanceItr GetResonanceItrFirst(){};
-
-  //! Iterator on last resonance (which is enabled)
-  virtual resonanceItr GetResonanceItrLast(){};
-
-  //! Iterator on last resonance (which is enabled)
-  virtual const std::vector<resonanceItr> GetResonanceItrList() {
-    return std::vector<resonanceItr>();
-  };
 
   //========== FUNCTIONTREE =============
   //! Check of tree is available
@@ -177,15 +139,6 @@ protected:
 
   //! Name
   std::string _name;
-
-  //! need to store this object for boost::filter_iterator
-  resIsEnabled _resEnabled;
-
-  //! AmpIntensity value
-  ParameterList result;
-
-  //! List of interal parameters
-  ParameterList params;
 
   //! Efficiency object
   std::shared_ptr<Efficiency> eff_;
@@ -220,8 +173,6 @@ public:
   }
 
   virtual void initialise() {
-    result.AddParameter(std::shared_ptr<DoubleParameter>(
-        new DoubleParameter("GaussAmpResult")));
     if (Kinematics::instance()->GetNVars() != 1)
       throw std::runtime_error("GaussAmp::initialize() | "
                                "this amplitude is for two body decays only!");
@@ -242,11 +193,12 @@ public:
     std::vector<double> m;
     m.push_back(mass * mass);
     dataPoint p(m);
-    Intensity(p);
-    return (result.GetDoubleParameterValue(0));
+    return Intensity(p);
   }
 
-  virtual const double Intensity(dataPoint &point) {
+  virtual void FillParameterList(ParameterList &list) const { };
+  
+  virtual double Intensity(const dataPoint &point) const {
 
     double mass = params.GetDoubleParameter(0)->GetValue();
     double width = params.GetDoubleParameter(1)->GetValue();
@@ -255,11 +207,10 @@ public:
     std::complex<double> gaus(
         std::exp(-1 * (sqrtS - mass) * (sqrtS - mass) / width / width / 2.), 0);
 
-    result.SetParameterValue(0, std::norm(gaus));
     return std::norm(gaus);
   }
 
-  virtual const double IntensityNoEff(dataPoint &point) {
+  virtual double IntensityNoEff(const dataPoint &point) const {
     return Intensity(point);
   }
 
@@ -270,6 +221,9 @@ protected:
   virtual const double Integral() {
     return (params.GetDoubleParameter(1)->GetValue() * std::sqrt(2 * M_PI));
   }
+  
+  //! List of interal parameters
+  ParameterList params;
 };
 //-----------------------------------------------------------------------------
 
@@ -282,8 +236,6 @@ protected:
 class UnitAmp : public AmpIntensity {
 public:
   UnitAmp() {
-    result.AddParameter(
-        std::shared_ptr<DoubleParameter>(new DoubleParameter("AmpSumResult")));
     eff_ = std::shared_ptr<Efficiency>(new UnitEfficiency());
   }
 
@@ -307,11 +259,13 @@ public:
     return 1;
   }
 
-  virtual const double Intensity(dataPoint &point) {
+  virtual double Intensity(const dataPoint &point) const {
     return eff_->evaluate(point);
   }
 
-  virtual const double IntensityNoEff(dataPoint &point) {
+  virtual void FillParameterList(ParameterList &list) const { };
+  
+  virtual double IntensityNoEff(const dataPoint &point) const {
     return 1.0;
   }
   virtual void GetFitFractions(ParameterList &parList) {}

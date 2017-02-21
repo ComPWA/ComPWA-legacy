@@ -12,21 +12,22 @@
 #ifndef SequentialTwoBodyDecay_h
 #define SequentialTwoBodyDecay_h
 
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/xml_parser.hpp>
+
 #include "Core/Amplitude.hpp"
 #include "Core/Parameter.hpp"
 #include "Physics/HelicityFormalism/PartialDecay.hpp"
-#include "Physics/HelicityFormalism/AbstractDynamicalFunction.hpp"
 
 namespace ComPWA {
 namespace Physics {
 namespace HelicityFormalism {
 
 class SequentialTwoBodyDecay : Amplitude {
-
   
 public:
   /**! Evaluate decay */
-  std::complex<double> Evaluate(dataPoint &point) {
+  virtual std::complex<double> Evaluate(const dataPoint &point) const {
     std::complex<double> result =
         std::polar(_strength->GetValue(), _phase->GetValue());
     for( auto i : _partDecays)
@@ -48,14 +49,14 @@ public:
    @return Constructed object
    */
   static std::shared_ptr<SequentialTwoBodyDecay>
-  Factory(boost::property_tree::ptree &pt) {
-    auto obj = std::make_shared<SequentialTwoBodyDecay>();
+  Factory(const boost::property_tree::ptree &pt) {
+    auto obj = std::shared_ptr<SequentialTwoBodyDecay>(); //std::make_shared(new SequentialTwoBodyDecay());
     obj->SetName( pt.get<string>("Amplitude.<xmlattr>.name","empty") );
-    obj->SetStrength(DoubleParameterFactory(pt.get_child("strength")));
-    obj->SetPhase(DoubleParameterFactory(pt.get_child("phase")));
-    BOOST_FOREACH (ptree::value_type const &ampTree,
-                   pt.second.get_child("Resonance")) {
-      obj->Add( PartialDecay::Factory(ampTree) );
+    obj->SetStrength( ComPWA::DoubleParameterFactory(pt.get_child("strength")) );
+    obj->SetPhase( ComPWA::DoubleParameterFactory(pt.get_child("phase")) );
+    
+    for(const auto& v : pt.get_child("Resonance") ){
+      obj->Add( PartialDecay::Factory(v.second) );
     }
     return obj;
   }
@@ -65,8 +66,7 @@ public:
 
    @param d Partial decay
    */
-  void
-  Add( std::shared_ptr<ComPWA::Physics::HelicityFormalism::PartialDecay> d ) {
+  void Add( std::shared_ptr<ComPWA::Physics::HelicityFormalism::PartialDecay> d ) {
     _partDecays.push_back(d);
   }
   

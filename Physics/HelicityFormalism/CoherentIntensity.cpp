@@ -15,15 +15,15 @@ namespace ComPWA {
 namespace Physics {
 namespace HelicityFormalism {
 
-const double CoherentIntensity::Intensity(const dataPoint &point) {
-  return IntensityNoEff(point) * eff_->Evaluate(point);
+double CoherentIntensity::Intensity(const dataPoint &point) const {
+  return IntensityNoEff(point) * eff_->evaluate(point);
 }
 
-const double CoherentIntensity::IntensityNoEff(const dataPoint &point) {
-  double result = 0.0;
-  for (auto i : _seqDecayAmps)
-    result += (*i)->Evaluate(point);
-  return result;
+double CoherentIntensity::IntensityNoEff(const dataPoint &point) const {
+  std::complex<double> result(0.0,0.0);
+  for (auto i : _seqDecays)
+    result += i->Evaluate(point);
+  return std::norm(result);
 };
 
 } /* namespace HelicityFormalism */

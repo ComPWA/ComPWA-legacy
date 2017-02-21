@@ -12,6 +12,7 @@
 #ifndef PARTIALDECAY_HPP_
 #define PARTIALDECAY_HPP_
 
+#include <memory>
 #include <boost/property_tree/ptree.hpp>
 
 #include "Core/Resonance.hpp"
@@ -21,9 +22,10 @@
 namespace ComPWA {
 
 std::shared_ptr<DoubleParameter>
-DoubleParameterFactory(boost::property_tree::ptree &pt) {
+DoubleParameterFactory(const boost::property_tree::ptree &pt) {
   auto obj = std::make_shared<DoubleParameter>();
-  obj->SetValue(pt.get_child("value"));
+  obj->SetValue( pt.get<double>("value") );
+  return obj;
 }
 
 namespace Physics {
@@ -32,11 +34,13 @@ namespace HelicityFormalism {
 class PartialDecay : ComPWA::Resonance {
 
 public:
+  PartialDecay() {};
+  
   /**! Evaluate decay */
-  std::complex<double> Evaluate(dataPoint &point) {
+  std::complex<double> Evaluate(const dataPoint &point) const {
     std::complex<double> result =
         std::polar(_strength->GetValue(), _phase->GetValue());
-    result *= _angD->Evaluate(point);
+    result *= _angD->Evaluate(point, 1, 2);
     result *= _dynamic->Evaluate(point);
 
     return result;
@@ -56,11 +60,11 @@ public:
    @return Constructed object
    */
   static std::shared_ptr<PartialDecay>
-  Factory(boost::property_tree::ptree &pt) {
-    auto obj = std::make_shared<PartialDecay>();
+  Factory(const boost::property_tree::ptree &pt) {
+    auto obj = std::shared_ptr<PartialDecay>();
     obj->SetName(pt.get<string>("Resonance.<xmlattr>.name", "empty"));
-    obj->SetStrength(DoubleParameterFactory(pt.get_child("strength")));
-    obj->SetPhase(DoubleParameterFactory(pt.get_child("phase")));
+    obj->SetMagnitudePar(ComPWA::DoubleParameterFactory(pt.get_child("strength")));
+    obj->SetPhasePar(ComPWA::DoubleParameterFactory(pt.get_child("phase")));
     obj->SetWignerD(
         ComPWA::Physics::HelicityFormalism::AmpWignerD::Factory(pt));
     obj->SetDynamicalFunction(AbstractDynamicalFunction::Factory(pt));
@@ -114,21 +118,21 @@ public:
 
    @return strength parameter
    */
-  std::shared_ptr<ComPWA::DoubleParameter> GetStrength() { return _strength; }
+  std::shared_ptr<ComPWA::DoubleParameter> GetMagnitudePar() { return _strength; }
 
   /**
    Get strength parameter
 
    @return strength parameter
    */
-  double GetStrengthValue() { return _strength->GetValue(); }
+  double GetMagnitude() const { return _strength->GetValue(); }
 
   /**
    Set strength parameter
 
    @param par Strength parameter
    */
-  void SetStrength(std::shared_ptr<ComPWA::DoubleParameter> par) {
+  void SetMagnitudePar(std::shared_ptr<ComPWA::DoubleParameter> par) {
     _strength = par;
   }
 
@@ -137,28 +141,28 @@ public:
 
    @param par Strength parameter
    */
-  void SetStrength(double par) { _strength->SetValue(par); }
+  void SetMagnitude(double par) { _strength->SetValue(par); }
 
   /**
    Get phase parameter
 
    @return Phase parameter
    */
-  std::shared_ptr<ComPWA::DoubleParameter> GetPhase() { return _phase; }
+  std::shared_ptr<ComPWA::DoubleParameter> GetPhasePar() { return _phase; }
 
   /**
    Get phase parameter
 
    @return Phase parameter
    */
-  double GetPhaseValue() { return _phase->GetValue(); }
+  double GetPhase() const { return _phase->GetValue(); }
 
   /**
    Set phase parameter
 
    @param par Phase parameter
    */
-  void SetPhase(std::shared_ptr<ComPWA::DoubleParameter> par) { _phase = par; }
+  void SetPhasePar(std::shared_ptr<ComPWA::DoubleParameter> par) { _phase = par; }
 
   /**
    Set phase parameter
@@ -166,10 +170,32 @@ public:
    @param par Phase parameter
    */
   void SetPhase(double par) { _phase->SetValue(par); }
+  
+  //! Get coefficient
+  virtual std::complex<double> GetCoefficient() const {
+//    return std::complex<double>(1,0);
+  };
 
+  //! Set prefactor
+  virtual void SetPrefactor(std::complex<double> pre) { _preFactor = pre; }
+  
+  //! Get prefactor
+  virtual std::complex<double> GetPrefactor() const { return _preFactor; }
+  
+  //! Implementation of interface for streaming info about the strategy
+  virtual std::string to_str() const { return std::string("PartialDecay"); }
+
+  
+  
+  //! Clone function
+  virtual Resonance *Clone(std::string newName = "") const {
+    return (new PartialDecay());
+  };
+  
 protected:
   std::shared_ptr<ComPWA::DoubleParameter> _strength;
   std::shared_ptr<ComPWA::DoubleParameter> _phase;
+  std::complex<double> _preFactor;
   std::shared_ptr<ComPWA::Physics::HelicityFormalism::AmpWignerD> _angD;
   std::shared_ptr<ComPWA::Physics::HelicityFormalism::AbstractDynamicalFunction>
       _dynamic;

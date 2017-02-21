@@ -30,7 +30,7 @@ namespace ComPWA {
 namespace Physics {
 namespace HelicityFormalism {
 
-std::complex<double> Evaluate(const dataPoint &point, int pos) const {
+  std::complex<double> RelativisticBreitWigner::Evaluate(const dataPoint &point, int pos) const {
   std::complex<double> result = dynamicalFunction(
       point.getVal(pos), _mass->GetValue(), _mass1, _mass2, _width->GetValue(),
       (double)_spin, _mesonRadius->GetValue(), _ffType);
@@ -53,8 +53,9 @@ std::complex<double> RelativisticBreitWigner::dynamicalFunction(
                                         (2 * J + 1));
 
   // Calculate coupling constant to final state
-  std::complex<double> g_final =
-      widthToCoupling(mSq, mR, width, ma, mb, J, mesonRadius, ffType);
+//  std::complex<double> g_final =
+//      widthToCoupling(mSq, mR, width, ma, mb, J, mesonRadius, ffType);
+  std::complex<double> g_final = 1.0;
 
   /*Coupling constant from production reaction. In case of a particle decay
    * the production coupling doesn't depend in energy since the CM energy
