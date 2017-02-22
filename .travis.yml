@@ -1,5 +1,12 @@
 # This will run on Travis' 'new' container-based infrastructure
 sudo: false
+language: c++
+os: linux
+dist: trusty 
+
+compiler:
+      - gcc
+      #- clang
 
 # Blacklist
 branches:
@@ -8,7 +15,7 @@ branches:
     except:
         - gh-pages
 
-          # Environment variables
+# Environment variables
 env:
     global:
         - GH_REPO_NAME: ComPWA
@@ -16,7 +23,7 @@ env:
         - GH_REPO_REF: github.com/ComPWA/ComPWA.git
         - OMP_NUM_THREADS: 1
         - LANG: en_US.UTF-8
-        - ROOTSYS: /rootbuild/root
+        - ROOTSYS: $TRAVIS_BUILD_DIR/rootbuild/root
 
 # Install dependencies
 addons:
@@ -26,18 +33,19 @@ addons:
             - libgsl0-dev
             - doxygen
             - doxygen-doc
-            - doxygen-latex
             - doxygen-gui
             - graphviz
 
 before_script:
+    - pwd
     - env
     - lsb_release -d
-    - ls /usr/lib/
+    - cd $TRAVIS_BUILD_DIR
+    - mkdir rootbuild
+    - cd rootbuild  
     - wget https://root.cern.ch/download/root_v5.34.36.Linux-ubuntu14-x86_64-gcc4.8.tar.gz
-    - mkdir /rootbuild
-    - cd /rootbuild  
     - tar xpvfz root_v5.34*
+
 # Build your code e.g. by calling make
 script:
     - cd $TRAVIS_BUILD_DIR  
