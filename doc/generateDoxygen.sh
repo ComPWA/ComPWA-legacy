@@ -2,7 +2,7 @@
 ################################################################################
 # Title         : generateDocumentationAndDeploy.sh
 # Date created  : 2016/02/22
-# Notes         :
+# Notes         : https://gist.github.com/vidavidorra/548ffbcdae99d752da02
 __AUTHOR__="Jeroen de Bruijn"
 # Preconditions:
 # - Packages doxygen doxygen-doc doxygen-latex doxygen-gui graphviz
