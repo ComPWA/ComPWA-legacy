@@ -21,9 +21,9 @@
 
 namespace ComPWA {
 
-std::shared_ptr<DoubleParameter>
+static std::shared_ptr<DoubleParameter>
 DoubleParameterFactory(const boost::property_tree::ptree &pt) {
-  auto obj = std::make_shared<DoubleParameter>();
+  auto obj = std::shared_ptr<DoubleParameter>();
   obj->SetValue( pt.get<double>("value") );
   return obj;
 }
@@ -173,8 +173,8 @@ public:
   
   //! Get coefficient
   virtual std::complex<double> GetCoefficient() const {
-//    return std::complex<double>(1,0);
-  };
+    return std::polar(_strength->GetValue(), _phase->GetValue());
+  }
 
   //! Set prefactor
   virtual void SetPrefactor(std::complex<double> pre) { _preFactor = pre; }
@@ -184,13 +184,13 @@ public:
   
   //! Implementation of interface for streaming info about the strategy
   virtual std::string to_str() const { return std::string("PartialDecay"); }
-
-  
   
   //! Clone function
-  virtual Resonance *Clone(std::string newName = "") const {
-    return (new PartialDecay());
-  };
+  virtual PartialDecay *Clone(std::string newName = "") const {
+      auto tmp = new PartialDecay(*this);
+      tmp->SetName(newName);
+      return tmp;
+  }
   
 protected:
   std::shared_ptr<ComPWA::DoubleParameter> _strength;
