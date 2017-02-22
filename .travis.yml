@@ -1,42 +1,53 @@
-dist: trusty
-sudo: true
-language: cpp
-compiler:
-    - g++
+# This will run on Travis' 'new' container-based infrastructure
+sudo: false
 
-before_install:
-    - echo "Before installation"
-    - sudo apt-get update -qq
-    - sudo apt-get install -y libboost-all-dev libgsl0-dev
-    # ROOT package that is shipped with Ubuntu 14.04 does not include Minuit2
-    # so we have to download the binaries directly
-    #- sudo apt-get install -y root-system libroot-math-minuit-dev root-plugin-math-minuit2
-    - wget https://root.cern.ch/download/root_v5.34.36.Linux-ubuntu14-x86_64-gcc4.8.tar.gz
-    - tar xpvfz root_v5.34*
-    - cd root
-    - source bin/thisroot.sh
-    - cd ..
-    - pwd
-
-install:
-    - echo "Installation"
-    - lsb_release
-    - uname -a
-    - cd ComPWA/ComPWA; ls
-    - mkdir build
-    - cd build
-
-before_script:
-    - export OMP_NUM_THREADS=1
-
-script:
-    - cmake ..
-    - make -j4 VERBOSE=1
-
+# Blacklist
 branches:
     only:
         - master
-    env:
-        - LANG="en_US.UTF-8"
-    os:
-        - linux
+    except:
+        - gh-pages
+
+          # Environment variables
+env:
+    global:
+        - GH_REPO_NAME: ComPWA
+        - DOXYFILE: $TRAVIS_BUILD_DIR/doc/Doxyfile.travisCI
+        - GH_REPO_REF: github.com/ComPWA/ComPWA.git
+        - OMP_NUM_THREADS: 1
+        - LANG: en_US.UTF-8
+        - ROOTSYS: /rootbuild/root
+
+# Install dependencies
+addons:
+    apt:
+        packages:
+            - libboost-all-dev
+            - libgsl0-dev
+            - doxygen
+            - doxygen-doc
+            - doxygen-latex
+            - doxygen-gui
+            - graphviz
+
+before_script:
+    - env
+    - lsb_release -d
+    - ls /usr/lib/
+    - wget https://root.cern.ch/download/root_v5.34.36.Linux-ubuntu14-x86_64-gcc4.8.tar.gz
+    - mkdir /rootbuild
+    - cd /rootbuild  
+    - tar xpvfz root_v5.34*
+# Build your code e.g. by calling make
+script:
+    - cd $TRAVIS_BUILD_DIR  
+    - mkdir build
+    - cd build
+    - cmake ..
+    - make -j4 VERBOSE=1
+
+# Generate and deploy documentation
+after_success:
+    - cd $TRAVIS_BUILD_DIR
+    - chmod +x ./doc/generateDoxygen.sh
+    - ./doc/generateDoxygen.sh
