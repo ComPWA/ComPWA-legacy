@@ -37,13 +37,17 @@ addons:
             - graphviz
 
 before_script:
+    - echo $TRAVIS_BUILD_DIR
+    - echo $HOME
+    - ls ~/
     - pwd
     - env
-    - lsb_release -d
     - cd $TRAVIS_BUILD_DIR
     - mkdir rootbuild
     - cd rootbuild  
+    - echo "Downloading ROOT ..."
     - wget https://root.cern.ch/download/root_v5.34.36.Linux-ubuntu14-x86_64-gcc4.8.tar.gz
+    - echo "Unpacking ROOT ..."
     - tar xpvfz root_v5.34*
 
 # Build your code e.g. by calling make
