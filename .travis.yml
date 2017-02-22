@@ -23,7 +23,8 @@ env:
         - GH_REPO_REF: github.com/ComPWA/ComPWA.git
         - OMP_NUM_THREADS: 1
         - LANG: en_US.UTF-8
-        - ROOTSYS: $TRAVIS_BUILD_DIR/rootbuild/root
+        #- ROOTSYS: $TRAVIS_BUILD_DIR/rootbuild/root
+        - ROOTSYS: /home/travis/build/ComPWA/root
 
 # Install dependencies
 addons:
@@ -39,24 +40,22 @@ addons:
 before_script:
     - echo $TRAVIS_BUILD_DIR
     - echo $HOME
-    - ls ~/
+    - ls ~/*/*
     - pwd
     - env
-    - cd $TRAVIS_BUILD_DIR
-    - mkdir rootbuild
-    - cd rootbuild  
-    - echo "Downloading ROOT ..."
+    - cd $ROOTSYS
+    - echo "Installing ROOT ..."
     - wget https://root.cern.ch/download/root_v5.34.36.Linux-ubuntu14-x86_64-gcc4.8.tar.gz
-    - echo "Unpacking ROOT ..."
-    - tar xpvfz root_v5.34*
+    - tar xpvfz root_v5.34* > /dev/null 2>&1
 
 # Build your code e.g. by calling make
 script:
-    - cd $TRAVIS_BUILD_DIR  
+    - cd $TRAVIS_BUILD_DIR/../  
     - mkdir build
     - cd build
-    - cmake ..
-    - make -j4 VERBOSE=1
+    - cmake ../ComPWA/
+    #- make -j2 VERBOSE=1
+    - make -j2 # TravisCI container-based nodes provide two CPUs
 
 # Generate and deploy documentation
 after_success:
