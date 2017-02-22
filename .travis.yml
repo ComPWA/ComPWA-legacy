@@ -24,7 +24,8 @@ env:
         - OMP_NUM_THREADS: 1
         - LANG: en_US.UTF-8
         #- ROOTSYS: $TRAVIS_BUILD_DIR/rootbuild/root
-        - ROOTSYS: /home/travis/build/ComPWA/root
+        - BASEPATH: /home/travis/build/ComPWA
+        - ROOTSYS: $BASEPATH/root
 
 # Install dependencies
 addons:
@@ -43,14 +44,14 @@ before_script:
     - ls ~/*/*
     - pwd
     - env
-    - cd $ROOTSYS/../
+    - cd $BASEPATH
     - echo "Installing ROOT ..."
     - wget https://root.cern.ch/download/root_v5.34.36.Linux-ubuntu14-x86_64-gcc4.8.tar.gz
     - tar xpvfz root_v5.34* > /dev/null 2>&1
 
 # Build your code e.g. by calling make
 script:
-    - cd $TRAVIS_BUILD_DIR/../  
+    - cd $BASEPATH
     - mkdir build
     - cd build
     - cmake ../ComPWA/
