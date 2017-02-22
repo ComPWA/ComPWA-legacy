@@ -6,7 +6,7 @@ dist: trusty  #Ubuntu14.04 LTS
 
 compiler:
       - gcc
-      #- clang
+      - clang
 
 # Blacklist
 branches:
