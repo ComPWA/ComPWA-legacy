@@ -39,6 +39,7 @@ addons:
             - graphviz
 
 before_script:
+    - env
     - cd $BASEPATH
     - echo "Installing ROOT in path $PWD"
     - wget https://root.cern.ch/download/root_v5.34.36.Linux-ubuntu14-x86_64-gcc4.8.tar.gz
@@ -56,4 +57,5 @@ script:
 after_success:
     - cd $BASEPATH
     - chmod +x $TRAVIS_BUILD_DIR/doc/generateDoxygen.sh
+      #only generate doxygen in one of two jobs
     - $TRAVIS_BUILD_DIR/doc/generateDoxygen.sh
