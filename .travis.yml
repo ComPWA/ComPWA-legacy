@@ -58,4 +58,4 @@ after_success:
     - cd $BASEPATH
     - chmod +x $TRAVIS_BUILD_DIR/doc/generateDoxygen.sh
       #only generate doxygen in one of two jobs
-    - if [[ "$CXX" == "clang" ]]; then $TRAVIS_BUILD_DIR/doc/generateDoxygen.sh; fi
+    - if [[ "$CXX" == "clang++" ]]; then $TRAVIS_BUILD_DIR/doc/generateDoxygen.sh; fi
