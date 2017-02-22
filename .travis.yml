@@ -43,7 +43,7 @@ before_script:
     - ls ~/*/*
     - pwd
     - env
-    - cd $ROOTSYS
+    - cd $ROOTSYS/../
     - echo "Installing ROOT ..."
     - wget https://root.cern.ch/download/root_v5.34.36.Linux-ubuntu14-x86_64-gcc4.8.tar.gz
     - tar xpvfz root_v5.34* > /dev/null 2>&1
