@@ -50,7 +50,7 @@ public:
   AmpIntensity(std::string name = "",
             std::shared_ptr<Efficiency> eff =
                 std::shared_ptr<Efficiency>(new UnitEfficiency))
-      : _name(name), eff_(eff) {}
+      : _name(name), _eff(eff) {}
 
   //! Destructor
   virtual ~AmpIntensity() { /* nothing */
@@ -67,10 +67,10 @@ public:
   virtual void SetName(std::string name) { _name = name; }
 
   //! Get efficiency
-  virtual std::shared_ptr<Efficiency> GetEfficiency() { return eff_; };
+  virtual std::shared_ptr<Efficiency> GetEfficiency() { return _eff; };
 
   //! Set efficiency
-  virtual void SetEfficiency(std::shared_ptr<Efficiency> eff) { eff_ = eff; };
+  virtual void SetEfficiency(std::shared_ptr<Efficiency> eff) { _eff = eff; };
 
   /** Get maximum value of amplitude
    * Maximum is numerically calculated using a random number generator
@@ -141,7 +141,7 @@ protected:
   std::string _name;
 
   //! Efficiency object
-  std::shared_ptr<Efficiency> eff_;
+  std::shared_ptr<Efficiency> _eff;
 };
 //-----------------------------------------------------------------------------
 
@@ -236,7 +236,7 @@ protected:
 class UnitAmp : public AmpIntensity {
 public:
   UnitAmp() {
-    eff_ = std::shared_ptr<Efficiency>(new UnitEfficiency());
+    _eff = std::shared_ptr<Efficiency>(new UnitEfficiency());
   }
 
   virtual ~UnitAmp() { /* nothing */
@@ -260,7 +260,7 @@ public:
   }
 
   virtual double Intensity(const dataPoint &point) const {
-    return eff_->evaluate(point);
+    return _eff->evaluate(point);
   }
 
   virtual void FillParameterList(ParameterList &list) const { };

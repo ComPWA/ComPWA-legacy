@@ -16,7 +16,7 @@ namespace Physics {
 namespace HelicityFormalism {
 
 double CoherentIntensity::Intensity(const dataPoint &point) const {
-  return IntensityNoEff(point) * eff_->evaluate(point);
+  return IntensityNoEff(point) * _eff->evaluate(point);
 }
 
 double CoherentIntensity::IntensityNoEff(const dataPoint &point) const {
