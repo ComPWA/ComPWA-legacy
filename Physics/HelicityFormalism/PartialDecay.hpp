@@ -21,12 +21,12 @@
 
 namespace ComPWA {
 
-static DoubleParameter
-DoubleParameterFactory(const boost::property_tree::ptree &pt) {
-  auto obj = std::shared_ptr<DoubleParameter>();
-  obj->SetValue( pt.get<double>("value") );
-  return obj;
-}
+//static DoubleParameter
+//DoubleParameterFactory(const boost::property_tree::ptree &pt) {
+//  auto obj = std::shared_ptr<DoubleParameter>();
+//  obj->SetValue( pt.get<double>("value") );
+//  return obj;
+//}
 
 namespace Physics {
 namespace HelicityFormalism {

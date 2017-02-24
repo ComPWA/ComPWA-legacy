@@ -165,17 +165,23 @@ class ParticleProperties : public Properties {
 public:
   ParticleProperties(std::string name = "test", int id = -999)
       : Properties(name, id){};
-  
-  ParticleProperties(boost::property_tree::ptree pt){
-    SetName( pt.get<std::string>("<xmlattr>.Name") );
-    SetId( pt.get<int>("Id") );
-    SetMass( DoubleParameterFactory( pt.get_child("Mass") ) );
-    SetSpin( ComPWA::Spin(pt.get<double>("Spin")) );
-    SetIsoSpin( ComPWA::Spin(pt.get<double>("IsoSpin")) );
-    SetIsoSpinZ( ComPWA::Spin(pt.get<double>("IsoSpinZ")) );
-    SetParity( pt.get<double>("Parity") );
-    SetCparity( pt.get<double>("Cparity") );
-    SetGparity( pt.get<double>("Gparity") );
+
+  ParticleProperties(boost::property_tree::ptree pt) {
+    // TODO: intialize tree with decay type=stable
+    SetName(pt.get<std::string>("<xmlattr>.Name"));
+    SetId(pt.get<int>("Id"));
+    // TODO: how to we pass the tree?
+    //    SetMass( DoubleParameterFactory( pt.find("Mass") ) );
+    // Parameters optional. Shall we require them?
+    SetSpin(ComPWA::Spin(pt.get<double>("Spin", 0.)));
+    SetIsoSpin(ComPWA::Spin(pt.get<double>("IsoSpin", 0.)));
+    SetIsoSpinZ(ComPWA::Spin(pt.get<double>("IsoSpinZ", 0.)));
+    SetParity(pt.get<double>("Parity", 0));
+    SetCparity(pt.get<double>("Cparity", 0));
+    SetGparity(pt.get<double>("Gparity", 0));
+    auto decayInfo = pt.get_child_optional("DecayInfo");
+    if (decayInfo)
+      SetDecayInfo(decayInfo.get());
   }
 
   void SetMass(double m) { _mass.SetValue(m); }
@@ -202,6 +208,13 @@ public:
   void SetGparity(int p) { _gparity = p; }
   int GetGparity() const { return _gparity; }
 
+  void SetDecayInfo(boost::property_tree::ptree pt) { _decayInfo = pt; }
+  boost::property_tree::ptree GetDecayInfo() const { return _decayInfo; }
+
+  std::string GetDecayType() const {
+    return _decayInfo.get<std::string>("<xmlattr>.DecayType");
+  }
+
 protected:
   ComPWA::DoubleParameter _mass;
   ComPWA::Spin _spin;
@@ -213,12 +226,13 @@ protected:
 
   /* Store decay info in property_tree. The tree is later on passed to the
    * respective class. */
-  boost::property_tree::ptree decayInfo;
+  boost::property_tree::ptree _decayInfo;
 };
 
 class Constant : public Properties {
 public:
-  Constant(std::string n="", double value=0.0) : Properties(n), _value(n,value) { }
+  Constant(std::string n = "", double value = 0.0)
+      : Properties(n), _value(n, value) {}
   Constant(boost::property_tree::ptree pt){};
 
   void SetValue(double m) { _value.SetValue(m); }
@@ -235,19 +249,20 @@ class PhysConst {
 public:
   static PhysConst *CreateInstance(std::string file = "./particles.xml") {
     if (_inst)
-        throw std::runtime_error("PhysConst::CreateInstance() | Instance already exists. Use Instance() to access it!");
+      throw std::runtime_error("PhysConst::CreateInstance() | Instance already "
+                               "exists. Use Instance() to access it!");
     _inst = new PhysConst(file);
     return _inst;
   }
-  
+
   static PhysConst *CreateInstance(boost::property_tree::ptree pt) {
     if (_inst)
-      throw std::runtime_error("PhysConst::CreateInstance() | Instance already exists. Use Instance() to access it!");
-    
+      throw std::runtime_error("PhysConst::CreateInstance() | Instance already "
+                               "exists. Use Instance() to access it!");
+
     _inst = new PhysConst(pt);
     return _inst;
   }
-
 
   static PhysConst *Instance() {
     if (!_inst) {
@@ -259,7 +274,6 @@ public:
 
   ~PhysConst();
 
-  
   PhysConst(PhysConst const &) = delete;
 
   void operator=(PhysConst const &) = delete;
@@ -270,8 +284,8 @@ public:
 
   const ParticleProperties &FindParticle(int pid) const;
 
-//  std::vector<ParticleProperties>
-//  findParticlesWithQN(const ParticleProperties &qn) const;
+  //  std::vector<ParticleProperties>
+  //  findParticlesWithQN(const ParticleProperties &qn) const;
 
   bool ParticleExists(const std::string &name) const;
 
@@ -279,17 +293,17 @@ protected:
   PhysConst(std::string filePath = "./particles.xml");
 
   PhysConst(boost::property_tree::ptree pt);
-  
+
   //! Singleton stuff
   static PhysConst *_inst;
-  
-  void readTree( boost::property_tree::ptree pt );
-  
+
+  void readTree(boost::property_tree::ptree pt);
+
   //! Input file name
   std::string _particleFileName;
   //! Input file name
   std::string _constantFileName;
-  
+
   std::vector<ParticleProperties> _partList;
   std::vector<Constant> _constList;
 };
@@ -297,3 +311,4 @@ protected:
 } /* namespace ComPWA */
 
 #endif /* PHYSCONST_HPP_ */
+       /

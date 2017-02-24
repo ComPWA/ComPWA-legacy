@@ -1132,11 +1132,17 @@ BOOST_SERIALIZATION_SHARED_PTR(ComPWA::DoubleParameter)
  @return Parameter
  */
 static DoubleParameter
-DoubleParameterFactory(const boost::property_tree::ptree &pt) {
+     DoubleParameterFactory(boost::property_tree::ptree::const_iterator &node) {
+    
+//       std::string d =   nodeget<std::string>("<xmlattr>.Name");
+//       boost::property_tree::ptree pt = node.second;
+       boost::property_tree::ptree pt;
+
   DoubleParameter obj;
   // Require that name and value are provided
-  obj.SetName( pt.get<std::string>("<xmlattr>.Name") );
-
+//  obj.SetName( node.first.get<std::string>("<xmlattr>.Name") );
+    
+  
   obj.SetValue( pt.get<double>("Value") );
   
   // Optional settings
