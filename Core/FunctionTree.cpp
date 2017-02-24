@@ -44,10 +44,9 @@ void FunctionTree::addChildNodes(std::shared_ptr<TreeNode> startNode) {
   std::vector<std::shared_ptr<TreeNode>> newChildren = startNode->getChildren();
 
   for (unsigned int i = 0; i < newChildren.size(); i++) {
-    bool ret = nodes_
-                   .insert(std::pair<std::string, std::shared_ptr<TreeNode>>(
-                       newChildren.at(i)->getName(), newChildren.at(i)))
-                   .second;
+    nodes_
+        .insert(std::pair<std::string, std::shared_ptr<TreeNode>>(
+            newChildren.at(i)->getName(), newChildren.at(i)));
     //        if( !ret )
     //            throw TreeBuildError("FunctionTree::addChildNodes | "
     //                                 "Can not insert node

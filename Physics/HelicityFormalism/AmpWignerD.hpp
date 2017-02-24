@@ -25,6 +25,7 @@
 #include <memory>
 
 #include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/exceptions.hpp>
 
 #include "Core/ParameterList.hpp"
 #include "Core/Functions.hpp"
@@ -38,12 +39,13 @@ namespace HelicityFormalism {
 
 class AmpWignerD {
 public:
-  AmpWignerD(ComPWA::Spin spin = ComPWA::Spin(0),
-             unsigned int mu = 0, unsigned int muPrime = 0);
+  AmpWignerD(ComPWA::Spin spin = ComPWA::Spin(0), unsigned int mu = 0,
+             unsigned int muPrime = 0);
 
   virtual ~AmpWignerD(){};
 
-  virtual double Evaluate(const dataPoint &point, int pos1, int pos2) const;
+  virtual double Evaluate(const ComPWA::dataPoint &point, int pos1,
+                          int pos2) const;
 
   static double dynamicalFunction(ComPWA::Spin J, ComPWA::Spin mu,
                                   ComPWA::Spin muPrime, double cosTheta);
@@ -53,27 +55,56 @@ public:
                                                 ComPWA::Spin mu,
                                                 ComPWA::Spin muPrime);
 
-  virtual std::shared_ptr<FunctionTree> SetupTree(ParameterList &sample,
-                                                  std::string suffix = "");
-  
+  virtual std::shared_ptr<ComPWA::FunctionTree>
+  SetupTree(ComPWA::ParameterList &sample, std::string suffix = "");
+
   /**
    Factory for AmpWignerD
-   
+
    @param pt Configuration tree
    @return Constructed object
    */
   static std::shared_ptr<AmpWignerD>
   Factory(const boost::property_tree::ptree &pt) {
     auto obj = std::make_shared<AmpWignerD>();
+    
+    auto decayParticle = pt.get_child("DecayParticle");
+    
+    int id = pt.get<double>("DecayParticle.Id");
+    ComPWA::Spin J; //TODO: Get particle spin from id
+    obj->SetSpin( J );
+    ComPWA::Spin mu(pt.get<double>("DecayParticle.Helicity"));
+    obj->SetMu( mu );
+    
+    auto decayProducts = pt.get_child("DecayProducts");
+    std::vector<ComPWA::Spin> vHelicity;
+    for( auto i : decayProducts ){
+      vHelicity.push_back( ComPWA::Spin(i.second.get<double>("Helicity")) );
+    }
+
+    if (vHelicity.size() != 2)
+      throw boost::property_tree::ptree_error(
+          "Expect exactly two decay products (" +
+          std::to_string(decayProducts.size()) + " given)!");
+    
+    obj->SetMuPrime( vHelicity.at(0)-vHelicity.at(1) );
+    
     return obj;
   }
 
+  void SetSpin(ComPWA::Spin s) { _spin = s; }
+  ComPWA::Spin GetSpin() const { return _spin; }
+
+  void SetMu(ComPWA::Spin s) { _mu = s; }
+  ComPWA::Spin GetMu() const { return _mu; }
+
+  void SetMuPrime(ComPWA::Spin s) { _muPrime = s; }
+  ComPWA::Spin GetMuPrime() const { return _muPrime; }
 
 protected:
-  unsigned int _varId;
   ComPWA::Spin _spin;
-  unsigned int _mu;
-  unsigned int _muPrime;
+  ComPWA::Spin _mu;
+  ComPWA::Spin _muPrime;
 };
 
 class WignerDStrategy : public Strategy {

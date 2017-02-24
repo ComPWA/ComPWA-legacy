@@ -39,7 +39,7 @@ public:
   /**! Evaluate decay */
   std::complex<double> Evaluate(const dataPoint &point) const {
     std::complex<double> result =
-        std::polar(_strength->GetValue(), _phase->GetValue());
+        std::polar(_magnitude->GetValue(), _phase->GetValue());
     result *= _angD->Evaluate(point, 1, 2);
     result *= _dynamic->Evaluate(point);
 
@@ -62,9 +62,9 @@ public:
   static std::shared_ptr<PartialDecay>
   Factory(const boost::property_tree::ptree &pt) {
     auto obj = std::shared_ptr<PartialDecay>();
-    obj->SetName(pt.get<string>("Resonance.<xmlattr>.name", "empty"));
-    obj->SetMagnitudePar(ComPWA::DoubleParameterFactory(pt.get_child("strength")));
-    obj->SetPhasePar(ComPWA::DoubleParameterFactory(pt.get_child("phase")));
+    obj->SetName(pt.get<string>("Resonance.<xmlattr>.Name", "empty"));
+    obj->SetMagnitudePar(ComPWA::DoubleParameterFactory(pt.get_child("Magnitude")));
+    obj->SetPhasePar(ComPWA::DoubleParameterFactory(pt.get_child("Phase")));
     obj->SetWignerD(
         ComPWA::Physics::HelicityFormalism::AmpWignerD::Factory(pt));
     obj->SetDynamicalFunction(AbstractDynamicalFunction::Factory(pt));
@@ -118,14 +118,14 @@ public:
 
    @return strength parameter
    */
-  std::shared_ptr<ComPWA::DoubleParameter> GetMagnitudePar() { return _strength; }
+  std::shared_ptr<ComPWA::DoubleParameter> GetMagnitudePar() { return _magnitude; }
 
   /**
    Get strength parameter
 
    @return strength parameter
    */
-  double GetMagnitude() const { return _strength->GetValue(); }
+  double GetMagnitude() const { return _magnitude->GetValue(); }
 
   /**
    Set strength parameter
@@ -133,7 +133,7 @@ public:
    @param par Strength parameter
    */
   void SetMagnitudePar(std::shared_ptr<ComPWA::DoubleParameter> par) {
-    _strength = par;
+    _magnitude = par;
   }
 
   /**
@@ -141,7 +141,7 @@ public:
 
    @param par Strength parameter
    */
-  void SetMagnitude(double par) { _strength->SetValue(par); }
+  void SetMagnitude(double par) { _magnitude->SetValue(par); }
 
   /**
    Get phase parameter
@@ -173,7 +173,7 @@ public:
   
   //! Get coefficient
   virtual std::complex<double> GetCoefficient() const {
-    return std::polar(_strength->GetValue(), _phase->GetValue());
+    return std::polar(_magnitude->GetValue(), _phase->GetValue());
   }
 
   //! Set prefactor
@@ -193,7 +193,7 @@ public:
   }
   
 protected:
-  std::shared_ptr<ComPWA::DoubleParameter> _strength;
+  std::shared_ptr<ComPWA::DoubleParameter> _magnitude;
   std::shared_ptr<ComPWA::DoubleParameter> _phase;
   std::complex<double> _preFactor;
   std::shared_ptr<ComPWA::Physics::HelicityFormalism::AmpWignerD> _angD;

@@ -16,11 +16,11 @@
 
 #include <boost/property_tree/ptree.hpp>
 
+#include "Core/PhysConst.hpp"
 #include "Core/DataPoint.hpp"
 #include "Core/ParameterList.hpp"
 #include "Core/Spin.hpp"
 #include "Core/FunctionTree.hpp"
-
 
 namespace ComPWA {
 namespace Physics {
@@ -33,9 +33,8 @@ enum normStyle {
   one
 };
 
-class
-    RelativisticBreitWigner; /* Forward declaration to avoid circular includes
-                                */
+/* Forward declaration to avoid circular includes */
+class RelativisticBreitWigner;
 
 class AbstractDynamicalFunction {
 public:
@@ -43,14 +42,14 @@ public:
 
   virtual ~AbstractDynamicalFunction();
 
-  virtual std::complex<double> Evaluate(const dataPoint &) const = 0;
+  virtual std::complex<double> Evaluate(const ComPWA::dataPoint &) const = 0;
 
   /**! Get current normalization.  */
   virtual double GetNormalization() = 0;
 
   /**! Setup function tree */
-  virtual std::shared_ptr<FunctionTree> SetupTree(ParameterList &sample,
-                                                  ParameterList &toySample,
+  virtual std::shared_ptr<ComPWA::FunctionTree> SetupTree(ComPWA::ParameterList &sample,
+                                                  ComPWA::ParameterList &toySample,
                                                   std::string suffix) = 0;
 
   /**
@@ -61,15 +60,20 @@ public:
    */
   static std::shared_ptr<AbstractDynamicalFunction>
   Factory(const boost::property_tree::ptree &pt) {
-    std::shared_ptr<AbstractDynamicalFunction> ret;
-    return ret;
+    auto obj = std::shared_ptr<AbstractDynamicalFunction>();
+    
+    auto decayParticle = pt.get_child("DecayParticle");
+    int id = pt.get<double>("DecayParticle.Id");
+    auto partProp = PhysConst::instance()->findParticle(id);
+    
+    //TODO: Ask PhysConstSvc for particle info
+    
+    return obj;
   }
 
 protected:
   //! Name of resonance
   std::string _name;
-
-  unsigned int dataIndex;
 
   //! Type of resonance normalization
   normStyle _normStyle;
@@ -84,7 +88,7 @@ protected:
   double _mass1, _mass2;
 
   //! Resonance mass
-  std::shared_ptr<DoubleParameter> _mass;
+  std::shared_ptr<ComPWA::DoubleParameter> _mass;
 
   //! Resonance sub system
   unsigned int _dataIndex;

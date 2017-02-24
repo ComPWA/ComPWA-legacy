@@ -15,7 +15,9 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib)
 set (CMAKE_CXX_STANDARD 11)
 
 #Add Boost
-find_package(Boost COMPONENTS system filesystem serialization thread chrono date_time log log_setup program_options REQUIRED)
+find_package(Boost COMPONENTS unit_test_framework system filesystem
+serialization thread chrono date_time log log_setup program_options REQUIRED)
+
 include_directories(${Boost_INCLUDE_DIR})
 link_directories(${Boost_LIBRARY_DIR})
 
@@ -23,6 +25,7 @@ INCLUDE_DIRECTORIES(${COMPWA_SOURCE_DIR})
 #LINK_DIRECTORIES(${COMPWA_SOURCE_DIR}/lib)
 
 add_definitions(-DBOOST_LOG_DYN_LINK)
+#add_definitions(-DBOOST_TEST_DYN_LINK)
 add_definitions(-DBOOST_SERIALIZATION_DYN_LINK)
 
 # Recurse into subdirectories.

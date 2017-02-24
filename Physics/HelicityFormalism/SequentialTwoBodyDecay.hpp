@@ -29,7 +29,7 @@ public:
   /**! Evaluate decay */
   virtual std::complex<double> Evaluate(const dataPoint &point) const {
     std::complex<double> result =
-        std::polar(_strength->GetValue(), _phase->GetValue());
+        std::polar(_magnitude->GetValue(), _phase->GetValue());
     for( auto i : _partDecays)
       result *= i->Evaluate(point);
     return result;
@@ -50,10 +50,10 @@ public:
    */
   static std::shared_ptr<SequentialTwoBodyDecay>
   Factory(const boost::property_tree::ptree &pt) {
-    auto obj = std::shared_ptr<SequentialTwoBodyDecay>(); //std::make_shared(new SequentialTwoBodyDecay());
-    obj->SetName( pt.get<string>("Amplitude.<xmlattr>.name","empty") );
-    obj->SetStrength( ComPWA::DoubleParameterFactory(pt.get_child("strength")) );
-    obj->SetPhase( ComPWA::DoubleParameterFactory(pt.get_child("phase")) );
+    auto obj = std::shared_ptr<SequentialTwoBodyDecay>();
+    obj->SetName( pt.get<string>("Amplitude.<xmlattr>.Name","empty") );
+    obj->SetMagnitude( ComPWA::DoubleParameterFactory(pt.get_child("Magnitude")) );
+    obj->SetPhase( ComPWA::DoubleParameterFactory(pt.get_child("Phase")) );
     
     for(const auto& v : pt.get_child("Resonance") ){
       obj->Add( PartialDecay::Factory(v.second) );
@@ -71,36 +71,36 @@ public:
   }
   
   /**
-   Get strength parameter
+   Get Magnitude parameter
    
-   @return strength parameter
+   @return Magnitude parameter
    */
-  std::shared_ptr<ComPWA::DoubleParameter> GetStrength() {
-    return _strength;
+  std::shared_ptr<ComPWA::DoubleParameter> GetMagnitude() {
+    return _magnitude;
   }
   
   /**
-   Get strength parameter
+   Get Magnitude parameter
    
-   @return strength parameter
+   @return Magnitude parameter
    */
-  double GetStrengthValue() { return _strength->GetValue(); }
+  double GetMagnitudeValue() { return _magnitude->GetValue(); }
   
   /**
-   Set strength parameter
+   Set Magnitude parameter
    
-   @param par Strength parameter
+   @param par Magnitude parameter
    */
-  void SetStrength(std::shared_ptr<ComPWA::DoubleParameter> par) {
-    _strength = par;
+  void SetMagnitude(std::shared_ptr<ComPWA::DoubleParameter> par) {
+    _magnitude = par;
   }
   
   /**
-   Set strength parameter
+   Set Magnitude parameter
    
-   @param par Strength parameter
+   @param par Magnitude parameter
    */
-  void SetStrength(double par) { _strength->SetValue(par); }
+  void SetMagnitude(double par) { _magnitude->SetValue(par); }
   
   /**
    Get phase parameter
@@ -154,7 +154,7 @@ protected:
   std::pair<ParticleStateInfo, std::pair<ParticleStateInfo, ParticleStateInfo>>
       decay_spin_info_;
 
-  std::shared_ptr<DoubleParameter> _strength;
+  std::shared_ptr<DoubleParameter> _magnitude;
   std::shared_ptr<DoubleParameter> _phase;
   std::vector<std::shared_ptr<PartialDecay> > _partDecays;
 

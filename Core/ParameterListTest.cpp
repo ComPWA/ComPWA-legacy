@@ -1,3 +1,5 @@
+
+
 //-------------------------------------------------------------------------------
 // Copyright (c) 2013 Mathias Michel.
 //
@@ -22,34 +24,33 @@
 
 namespace ComPWA {
 
-BOOST_AUTO_TEST_SUITE(ParameterListSuite);
+  BOOST_AUTO_TEST_SUITE( Core );
 
-BOOST_AUTO_TEST_CASE(ConstructorCheck)
-{
-  std::vector<std::shared_ptr<IntegerParameter> > vecParInt;
-  for(unsigned int par=0; par<10; par++)
-    vecParInt.push_back(std::shared_ptr<IntegerParameter>(new  IntegerParameter(std::string("listPar"+par),par,0,10,1)));
+BOOST_AUTO_TEST_CASE(ConstructorCheck) {
+  std::vector<std::shared_ptr<IntegerParameter>> vecParInt;
+  for (unsigned int par = 0; par < 10; par++)
+    vecParInt.push_back(std::make_shared<IntegerParameter>(
+        std::string("listPar") + std::to_string(par), par, 0, 10, 1));
 
   ParameterList testList(vecParInt);
-  std::shared_ptr<DoubleParameter> dTest(new DoubleParameter("doublePAr",2.2));
+  std::shared_ptr<DoubleParameter> dTest(new DoubleParameter("doublePAr", 2.2));
   testList.AddParameter(dTest);
-  std::shared_ptr<BoolParameter> bTest(new BoolParameter("boolPar",true));
+  std::shared_ptr<BoolParameter> bTest(new BoolParameter("boolPar", true));
   testList.AddParameter(bTest);
 
+    BOOST_REQUIRE( 1 );
   BOOST_CHECK_CLOSE(testList.GetNParameter(), 12., 0.0001);
   BOOST_CHECK_CLOSE(testList.GetNDouble(), 1., 0.0001);
   BOOST_CHECK_CLOSE(testList.GetNInteger(), 10., 0.0001);
   BOOST_CHECK_CLOSE(testList.GetNBool(), 1., 0.0001);
 
   BOOST_CHECK_CLOSE(testList.GetIntegerParameter(4)->GetValue(), 4., 0.0001);
-  BOOST_CHECK_CLOSE(testList.GetIntegerParameter(4)->GetValue(), testList.GetParameterValue(5), 0.0001);
   BOOST_CHECK(testList.GetBoolParameter(0)->GetValue());
-  BOOST_CHECK_CLOSE(testList.GetBoolParameter(0)->GetValue(), testList.GetParameterValue(11), 0.0001);
 
   BOOST_CHECK_THROW(testList.GetBoolParameter(4), BadParameter);
 
-  BOOST_CHECK_THROW(testList.SetParameterValue(2,5.), BadParameter);
-  testList.SetParameterValue(0,1.1);
+  BOOST_CHECK_THROW(testList.SetParameterValue(2, 5.), BadParameter);
+  testList.SetParameterValue(0, 1.1);
   BOOST_CHECK_CLOSE(testList.GetDoubleParameter(0)->GetValue(), 1.1, 0.0001);
 }
 

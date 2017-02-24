@@ -19,6 +19,7 @@
 using namespace boost::log;
 
 namespace ComPWA {
+
 PhysConst *PhysConst::_inst;
 
 QuantumNumberTranslator::QuantumNumberTranslator() {
@@ -136,12 +137,8 @@ double SpinWave::getDoubleLikeQuantumNumber(QuantumNumberIDs qn_id) const {
   }
 }
 
-PhysConst::PhysConst(std::string path) {
-  particleFileName = path + "particles.xml";
-  particleDefaultFileName = path + "particlesDefault.xml";
-  constantFileName = path + "physConstants.xml";
-  constantDefaultFileName = path + "physDefaultConstants.xml";
-
+PhysConst::PhysConst(std::string filename)
+    : _particleFileName(filename), _constantFileName(filename) {
   readFile();
 }
 
@@ -149,194 +146,133 @@ PhysConst::~PhysConst() {}
 
 void PhysConst::readFile() {
   // Create an empty property tree object
-  using boost::property_tree::ptree;
-  ptree pt;
-  ptree pt2;
+  boost::property_tree::ptree pt;
 
-  // Load the XML file into the property tree. If reading fails
-  // (cannot open file, parse error), an exception is thrown.
-  //		read_xml(particleFileName, pt);
-  // first check if particles.xml existsheck if file exists
-  if (FILE *file = std::fopen(particleFileName.c_str(), "r")) {
-    fclose(file);
-    read_xml(particleFileName, pt);
-    LOG(info) << "PhysConst: reading particle file " << particleFileName;
-    // Otherwise try to load default file
-  } else if (FILE *file = std::fopen(particleDefaultFileName.c_str(), "r")) {
-    fclose(file);
-    read_xml(particleDefaultFileName, pt);
-    LOG(info) << "PhysConst: reading particles default file "
-              << particleDefaultFileName;
-  } else {
-    throw std::runtime_error("Could not open default particle file!");
+  try {
+    read_xml(_particleFileName, pt);
+    LOG(info) << "PhysConst: reading particle file " << _particleFileName;
+  } catch (std::exception &ex) {
+    throw;
   }
 
-  // Get the filename and store it in the m_file variable.
-  // Note that we construct the path to the value by separating
-  // the individual keys with dots. If dots appear in the keys,
-  // a path type with a different separator can be used.
-  // If the amplitude_setup.filename key is not found, an
-  // exception is thrown.
-  //    m_file = pt.get<std::string>("amplitude_setup.filename");
-
-  // Iterate over the amplitude_setup.resonances section and
-  // store all found resonance names in the m_name set.
-  // The get_child() function returns a reference to the child
-  // at the specified path; if there is no such child, it throws.
-  // Property tree iterators are models of BidirectionalIterator.
-  ParticleProperties particle_properties;
-  Constant constant;
-
-  for (auto const &v : pt.get_child("particleList")) {
-    if (v.first == "particle" || v.first == "particleFlatte") {
-      particle_properties.id_ = v.second.get<int>("ID");
-      particle_properties.name_ = v.second.get<std::string>("name");
-      particle_properties.mass_ =
-          v.second.get_child("mass").get<double>("value");
-      if (v.second.count("width") != 0)
-        particle_properties.width_ = v.second.get_child("width").get<double>(
-            "value"); // check if node "width" exists
-
-      for (auto const &qn : v.second.get_child("quantum_numbers")) {
-        QuantumNumberType qn_type =
-            QuantumNumberTranslator::Instance().getQuantumNumberType(qn.first);
-        if (qn_type == QuantumNumberType::SPIN_LIKE) {
-          ComPWA::Spin s;
-          if (QuantumNumberTranslator::Instance().getQuantumNumberEnum(
-                  qn.first) == QuantumNumberIDs::SPIN)
-            s.SetUseZ(false);
-          s.SetNumerator(qn.second.get<unsigned int>("numerator"));
-          s.SetDenominator(qn.second.get<unsigned int>("denominator"));
-          if (qn.second.count("z_numerator") != 0)
-            s.SetZNumerator(qn.second.get<int>("z_numerator"));
-          particle_properties.spin_like_quantum_numbers_[qn.first] = s;
-        } else if (qn_type == QuantumNumberType::INTEGER_LIKE) {
-          particle_properties.integer_like_quantum_numbers_[qn.first] =
-              v.second.get_child("quantum_numbers").get<int>(qn.first);
-        } else if (qn_type == QuantumNumberType::DOUBLE_LIKE) {
-          particle_properties.double_like_quantum_numbers_[qn.first] =
-              v.second.get_child("quantum_numbers").get<double>(qn.first);
-        }
-      }
-
-      if (v.first == "particleFlatte") {
-        // read parameters which are specific to flatte description here.
-      }
-
-      particle_properties_list_.push_back(particle_properties);
-
-      ComPWA::Spin s =
-          particle_properties.getSpinLikeQuantumNumber(QuantumNumberIDs::SPIN);
-      LOG(debug) << "PhysConst adding particle: " << particle_properties.name_
-                 << " mass=" << particle_properties.mass_
-                 << " width=" << particle_properties.width_
-                 << " J=" << s.GetSpin() << " P="
-                 << particle_properties.getIntLikeQuantumNumber(
-                        QuantumNumberIDs::PARITY)
-                 << " C="
-                 << particle_properties.getIntLikeQuantumNumber(
-                        QuantumNumberIDs::CPARITY);
-    }
+  for (auto const &v : pt.get_child("ParticleList")) {
+    _partList.push_back(ParticleProperties(v.second));
+    auto last = _partList.back();
+    LOG(debug) << "PhysConst adding particle: " << last.GetName()
+               << " mass=" << last.GetMass() << " J=" << last.GetSpin()
+               << " P=" << last.GetParity() << " C=" << last.GetCparity();
   }
 
-  // Reading XML file with physics constants
-  if (FILE *file = std::fopen(constantFileName.c_str(), "r")) {
-    fclose(file);
-    read_xml(constantFileName, pt);
-    LOG(info) << "PhysConst: reading file with physical constants"
-              << constantFileName;
-    // Otherwise try to load default file
-  } else if (FILE *file = std::fopen(constantDefaultFileName.c_str(), "r")) {
-    fclose(file);
-    read_xml(constantDefaultFileName, pt);
-    LOG(info) << "PhysConst: reading default file with physical constants"
-              << constantDefaultFileName;
-  } else {
-    throw std::runtime_error("Could not open default constants file!");
-  }
-  //	read_xml(constantFileName, pt);
-  BOOST_FOREACH (ptree::value_type const &v, pt.get_child("physConstList")) {
-    if (v.first == "constant") {
-      constant.name_ = v.second.get<std::string>("name");
-      constant.value_ = v.second.get_child("value").get<double>("value");
-      if (v.second.count("error") != 0)
-        constant.error_ = v.second.get_child("value").get<double>("error");
-    }
+  _constList.push_back(Constant("Pi", 3.141592654));
+  _constList.push_back(Constant("c", 299792458)); /* Units: m/s */
 
-    constants_list_.push_back(constant);
-
-    LOG(debug) << "PhysConst adding constant: " << constant.name_
-               << " value=" << constant.value_ << " error=" << constant.error_;
-  }
+  // Currently its is not necessary to read an external file
+  //  try {
+  //      read_xml(_constantFileName, pt);
+  //      LOG(info) << "PhysConst: reading file with physical constants"
+  //                << _constantFileName;
+  //  } catch (std::exception &ex) {
+  //    throw;
+  //  }
+  //  for( auto const &v : pt.get_child("PhysConstantsList") ) {
+  //    _constList.push_back( Constant(v.second) );
+  //    auto last = _constList.back();
+  //    LOG(debug) << "PhysConst adding constant: " << last.GetName()
+  //    << " value=" << last.GetValue();
+  //  }
 
   return;
 }
 
-const Constant &PhysConst::findConstant(const std::string &name) const {
+const ComPWA::Constant &PhysConst::findConstant(const std::string &name) const {
   auto result =
-      std::find_if(constants_list_.begin(), constants_list_.end(),
-                   [&](const Constant &lhs) { return lhs.name_ == name; });
+      std::find_if(_constList.begin(), _constList.end(),
+                   [&](const Constant &lhs) { return lhs.GetName() == name; });
 
-  if (result != constants_list_.end())
-    return *result;
-
-  std::stringstream ss;
-  ss << "could not find constant with name " << name << std::endl;
-  throw std::runtime_error(ss.str());
+  if (result == _constList.end()) {
+    std::stringstream ss;
+    ss << "PhysConst::findConstant() | Constant " << name
+       << " not found in list!";
+    throw std::runtime_error(ss.str());
+  }
+  return *result;
 }
 
 const ParticleProperties &PhysConst::findParticle(int pid) const {
   auto result = std::find_if(
-      particle_properties_list_.begin(), particle_properties_list_.end(),
-      [&](const ParticleProperties &lhs) { return lhs.id_ == pid; });
+      _partList.begin(), _partList.end(),
+      [&](const ParticleProperties &lhs) { return lhs.GetId() == pid; });
 
-  if (result != particle_properties_list_.end())
-    return *result;
-
-  std::stringstream ss;
-  ss << "could not find particle id " << pid << std::endl;
-  throw std::runtime_error(ss.str());
+  if (result == _partList.end()) {
+    std::stringstream ss;
+    ss << "PhysConst::findParticle() | Particle " << pid
+       << " not found in list!";
+    throw std::runtime_error(ss.str());
+  }
+  return *result;
 }
 
 const ParticleProperties &
 PhysConst::findParticle(const std::string &name) const {
   auto result = std::find_if(
-      particle_properties_list_.begin(), particle_properties_list_.end(),
-      [&](const ParticleProperties &lhs) { return lhs.name_ == name; });
+      _partList.begin(), _partList.end(),
+      [&](const ParticleProperties &lhs) { return lhs.GetName() == name; });
 
-  if (result != particle_properties_list_.end())
-    return *result;
-
-  std::stringstream ss;
-  ss << "could not find particle name " << name << std::endl;
-  throw std::runtime_error(ss.str());
-}
-
-std::vector<ParticleProperties>
-PhysConst::findParticlesWithQN(const ParticleProperties &qn) const {
-  std::vector<ParticleProperties> particle_list;
-
-  auto result = particle_properties_list_.begin();
-  while (result != particle_properties_list_.end()) {
-    result = std::find(result, particle_properties_list_.end(), qn);
-    if (result != particle_properties_list_.end()) {
-      particle_list.push_back(*result);
-      ++result;
-    }
+  if (result == _partList.end()) {
+    std::stringstream ss;
+    ss << "PhysConst::findParticle() | Particle " << name
+       << " not found in list!";
+    throw std::runtime_error(ss.str());
   }
-
-  return particle_list;
+  return *result;
 }
+
+//std::vector<ParticleProperties>
+//PhysConst::findParticlesWithQN(const ParticleProperties &qn) const {
+//  std::vector<ParticleProperties> particle_list;
+//
+//  auto result = _partList.begin();
+//  while (result != _partList.end()) {
+//    result = std::find(result, _partList.end(), qn);
+//    if (result != _partList.end()) {
+//      particle_list.push_back(*result);
+//      ++result;
+//    }
+//  }
+//
+//  return particle_list;
+//}
 
 bool PhysConst::particleExists(const std::string &name) const {
-  auto result = std::find_if(
-      particle_properties_list_.begin(), particle_properties_list_.end(),
-      [&](const ParticleProperties &lhs) { return lhs.name_ == name; });
-
-  if (result != particle_properties_list_.end())
-    return true;
-
-  return false;
+  try {
+    findParticle(name);
+  } catch (std::exception &ex) {
+    return false;
+  }
+  return true;
 }
 
 } /* namespace ComPWA */
+
+
+#define BOOST_TEST_DYN_LINK
+#define BOOST_TEST_MODULE Number
+#include <boost/test/unit_test.hpp>
+BOOST_AUTO_TEST_SUITE( Core )
+
+BOOST_AUTO_TEST_CASE( xmlInput )
+{
+//  auto inst = ComPWA::PhysConst::createInstance("particles.xml");
+  //const_string cs1( "test_string" );                                 // 1 //
+  //BOOST_CHECK_EQUAL( cs1[(size_t)0], 't' );
+  //BOOST_CHECK_EQUAL( cs1[(size_t)4], '_' );
+  //BOOST_CHECK_EQUAL( cs1[cs1.length()-1], 'g' );
+  //
+  //BOOST_CHECK_EQUAL( cs1[(size_t)0], cs1.at( 0 ) );                  // 2 //
+  //BOOST_CHECK_EQUAL( cs1[(size_t)2], cs1.at( 5 ) );
+  //BOOST_CHECK_EQUAL( cs1.at( cs1.length() - 1 ), 'g' );
+  //
+  //BOOST_CHECK_THROW( cs1.at( cs1.length() ), std::out_of_range );    // 3 //
+  BOOST_REQUIRE( 0 );
+};
+BOOST_AUTO_TEST_SUITE_END()

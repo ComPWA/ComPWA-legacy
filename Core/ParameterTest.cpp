@@ -21,7 +21,7 @@
 
 namespace ComPWA {
 
-BOOST_AUTO_TEST_SUITE(ParameterSuite);
+BOOST_AUTO_TEST_SUITE( Core );
 
 BOOST_AUTO_TEST_CASE(BoundsCheck)
 {
@@ -58,7 +58,7 @@ BOOST_AUTO_TEST_CASE(FixValueCheck)
   BOOST_CHECK_CLOSE(emptyFloat.GetValue(), 7., 0.0001);
 }
 
-BOOST_AUTO_TEST_CASE(ConstructorCheck)
+BOOST_AUTO_TEST_CASE(ConstructorCheck2)
 {
   IntegerParameter emptyInt("emptyIntPar");
   DoubleParameter emptyFloat("emptyFloatPar");
@@ -68,7 +68,7 @@ BOOST_AUTO_TEST_CASE(ConstructorCheck)
   std::shared_ptr<IntegerParameter> pParInt(new IntegerParameter("intPointerPar",3,0,5,1));
   std::vector<DoubleParameter> vecParInt, vecParIntCopy;
   for(unsigned int par=0; par<10; par++)
-    vecParInt.push_back(DoubleParameter(std::string("listPar"+par),par,0,10,1));
+    vecParInt.push_back(DoubleParameter(std::string("listPar")+std::to_string(par),par,0,10,1));
   vecParIntCopy = vecParInt; //copy vector
 
   BOOST_CHECK_CLOSE(emptyInt.GetValue(), 0., 0.0001);

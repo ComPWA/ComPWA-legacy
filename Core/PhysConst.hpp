@@ -25,6 +25,8 @@
 #include <iostream>
 #include <vector>
 
+#include <boost/property_tree/ptree.hpp>
+
 #include <Core/Parameter.hpp>
 #include <Core/Spin.hpp>
 
@@ -63,11 +65,8 @@ public:
   QuantumNumberIDs getQuantumNumberEnum(const std::string &qn_name) const;
 };
 
-struct SpinWave {
-  std::map<std::string, ComPWA::Spin> spin_like_quantum_numbers_;
-  std::map<std::string, int> integer_like_quantum_numbers_;
-  std::map<std::string, double> double_like_quantum_numbers_;
-
+class SpinWave {
+public:
   ComPWA::Spin getSpinLikeQuantumNumber(QuantumNumberIDs qn_id) const;
   int getIntLikeQuantumNumber(QuantumNumberIDs qn_id) const;
   double getDoubleLikeQuantumNumber(QuantumNumberIDs qn_id) const;
@@ -81,6 +80,7 @@ struct SpinWave {
       return false;
     return true;
   }
+
   // lets define a modulus operator for our special comparison
   // we want to check if all the properties of rhs are available in this
   bool supersetOf(const SpinWave &rhs) const {
@@ -139,39 +139,90 @@ struct SpinWave {
     }
     return stream;
   }
+
+protected:
+  std::map<std::string, ComPWA::Spin> spin_like_quantum_numbers_;
+  std::map<std::string, int> integer_like_quantum_numbers_;
+  std::map<std::string, double> double_like_quantum_numbers_;
 };
 
-struct ParticleProperties : public SpinWave {
-  std::string name_;
-  double mass_;
-  double width_;
-  int id_;
+class Properties {
+public:
+  Properties(std::string name = "test", int id = -999) : _name(name), _id(id){};
 
-  ParticleProperties() : name_(""), mass_(0.0), width_(0.0), id_(0) {}
+  void SetName(std::string n) { _name = n; }
+  std::string GetName() const { return _name; }
 
-  /*bool operator()(const ParticleProperties &lhs) const {
-   if (spin_like_quantum_numbers_ != lhs.spin_like_quantum_numbers_)
-   return false;
-   if (integer_like_quantum_numbers_ != lhs.integer_like_quantum_numbers_)
-   return false;
-   if (double_like_quantum_numbers_ != lhs.double_like_quantum_numbers_)
-   return false;
+  void SetId(int id) { _id = id; }
+  int GetId() const { return _id; }
 
-   return true;
-   }*/
+protected:
+  std::string _name;
+  int _id;
 };
 
-struct Constant {
-  std::string name_;
-  double value_;
-  double error_;
+class ParticleProperties : public Properties {
+public:
+  ParticleProperties(std::string name = "test", int id = -999)
+      : Properties(name, id){};
+  ParticleProperties(boost::property_tree::ptree pt){};
 
-  Constant() : name_(""), value_(0.0), error_(0.0) {}
+  void SetMass(double m) { _mass.SetValue(m); }
+  double GetMass() const { return _mass.GetValue(); }
+
+  void SetMassPar(ComPWA::DoubleParameter m) { _mass = m; }
+  ComPWA::DoubleParameter GetMassPar() const { return _mass; }
+
+  void SetSpin(ComPWA::Spin s) { _spin = s; }
+  ComPWA::Spin GetSpin() const { return _spin; }
+
+  void SetIsoSpin(ComPWA::Spin s) { _isoSpin = s; }
+  ComPWA::Spin GetIsoSpin() const { return _isoSpin; }
+
+  void SetIsoSpinZ(ComPWA::Spin s) { _isoSpinZ = s; }
+  ComPWA::Spin GetIsoSpinZ() const { return _isoSpinZ; }
+
+  void SetParity(int p) { _parity = p; }
+  int GetParity() const { return _parity; }
+
+  void SetCparity(int p) { _cparity = p; }
+  int GetCparity() const { return _cparity; }
+
+  void SetGparity(int p) { _gparity = p; }
+  int GetGparity() const { return _gparity; }
+
+protected:
+  ComPWA::DoubleParameter _mass;
+  ComPWA::Spin _spin;
+  int _parity;
+  int _cparity;
+  int _gparity;
+  ComPWA::Spin _isoSpin;
+  ComPWA::Spin _isoSpinZ;
+
+  /* Store decay info in property_tree. The tree is later on passed to the
+   * respective class. */
+  boost::property_tree::ptree decayInfo;
+};
+
+class Constant : public Properties {
+public:
+  Constant(std::string n="", double value=0.0) : Properties(n), _value(n,value) { }
+  Constant(boost::property_tree::ptree pt){};
+
+  void SetValue(double m) { _value.SetValue(m); }
+  double GetValue() const { return _value.GetValue(); }
+
+  void SetValuePar(ComPWA::DoubleParameter m) { _value = m; }
+  ComPWA::DoubleParameter GetValuePar() const { return _value; }
+
+protected:
+  ComPWA::DoubleParameter _value;
 };
 
 class PhysConst {
 public:
-  static PhysConst *createInstance(std::string file = "./") {
+  static PhysConst *createInstance(std::string file = "./particles.xml") {
     if (_inst)
       return _inst;
     _inst = new PhysConst(file);
@@ -186,11 +237,6 @@ public:
     return _inst;
   }
 
-  //! returns existing instance of PhysConst, or creates a new one
-  //        static PhysConst& Instance() {
-  //            static PhysConst instance;
-  //            return _inst;
-  //        }
   ~PhysConst();
 
   PhysConst(PhysConst const &) = delete;
@@ -203,25 +249,26 @@ public:
 
   const ParticleProperties &findParticle(int pid) const;
 
-  std::vector<ParticleProperties>
-  findParticlesWithQN(const ParticleProperties &qn) const;
+//  std::vector<ParticleProperties>
+//  findParticlesWithQN(const ParticleProperties &qn) const;
 
   bool particleExists(const std::string &name) const;
 
 protected:
-  PhysConst(std::string filePath = "./");
+  PhysConst(std::string filePath = "./particles.xml");
 
-  // Singleton stuff
+  //! Singleton stuff
   static PhysConst *_inst;
 
   void readFile();
 
-  std::string particleFileName;
-  std::string particleDefaultFileName;
-  std::string constantFileName;
-  std::string constantDefaultFileName;
-  std::vector<ParticleProperties> particle_properties_list_;
-  std::vector<Constant> constants_list_;
+  //! Input file name
+  std::string _particleFileName;
+  //! Input file name
+  std::string _constantFileName;
+  
+  std::vector<ParticleProperties> _partList;
+  std::vector<Constant> _constList;
 };
 
 } /* namespace ComPWA */

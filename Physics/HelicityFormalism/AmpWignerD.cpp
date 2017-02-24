@@ -96,8 +96,8 @@ std::shared_ptr<FunctionTree> AmpWignerD::SetupTree(ParameterList &sample,
   newTree->createLeaf("spin", (double)_spin, "AngD_" + suffix); // spin
   newTree->createLeaf("m", _mu, "AngD_" + suffix);              // OutSpin 1
   newTree->createLeaf("n", _muPrime, "AngD_" + suffix);         // OutSpin 2
-  newTree->createLeaf("AngD_sample", sample.GetMultiDouble(_varId),
-                      "AngD_" + suffix);
+//  newTree->createLeaf("AngD_sample", sample.GetMultiDouble(_varId),
+//                      "AngD_" + suffix);
 
   return newTree;
 }
