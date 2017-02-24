@@ -8,16 +8,16 @@ TwoBodyKinematics::TwoBodyKinematics(std::string _nameMother,
                                      std::string _name1, std::string _name2,
                                      double deltaMassWindow)
     : Kinematics(_nameMother, 0.0, 2), name1(_name1), name2(_name2) {
-  _M = ComPWA::PhysConst::instance()->findParticle(_nameMother).GetMass();
-  m1 = ComPWA::PhysConst::instance()->findParticle(_name1).GetMass();
-  m2 = ComPWA::PhysConst::instance()->findParticle(_name2).GetMass();
+  _M = ComPWA::PhysConst::Instance()->FindParticle(_nameMother).GetMass();
+  m1 = ComPWA::PhysConst::Instance()->FindParticle(_name1).GetMass();
+  m2 = ComPWA::PhysConst::Instance()->FindParticle(_name2).GetMass();
 
-  _spinM = ComPWA::PhysConst::instance()
-      ->findParticle(_nameMother).GetSpin();
-  spin1 = ComPWA::PhysConst::instance()
-      ->findParticle(_name1).GetSpin();
-    spin2 = ComPWA::PhysConst::instance()
-      ->findParticle(_name2).GetSpin();
+  _spinM = ComPWA::PhysConst::Instance()
+      ->FindParticle(_nameMother).GetSpin();
+  spin1 = ComPWA::PhysConst::Instance()
+      ->FindParticle(_name1).GetSpin();
+    spin2 = ComPWA::PhysConst::Instance()
+      ->FindParticle(_name2).GetSpin();
  
 
   if (_M == -999 || m1 == -999 || m2 == -999)

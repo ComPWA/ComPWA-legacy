@@ -21,7 +21,7 @@
 
 namespace ComPWA {
 
-static std::shared_ptr<DoubleParameter>
+static DoubleParameter
 DoubleParameterFactory(const boost::property_tree::ptree &pt) {
   auto obj = std::shared_ptr<DoubleParameter>();
   obj->SetValue( pt.get<double>("value") );

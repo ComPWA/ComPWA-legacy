@@ -30,6 +30,8 @@
 #include <stdexcept>
 #include <cmath>
 
+#include <boost/property_tree/ptree.hpp>
+
 #include "Core/AbsParameter.hpp"
 #include "Core/Exceptions.hpp"
 #include "Core/Logging.hpp"
@@ -200,7 +202,7 @@ public:
       : AbsParameter(in.name_, ParType::MDOUBLE) {
     *this = in;
     //		error_ = std::shared_ptr<ParError<double>>(new
-    //ParError<double>(*in.error_));
+    // ParError<double>(*in.error_));
   }
 
   //! Empty Destructor
@@ -882,6 +884,11 @@ public:
   }
 
   //! Setter for bounds of parameter
+  virtual void SetRange(const double min, const double max) {
+    SetMinMax(min,max);
+  }
+  
+  //! Setter for bounds of parameter
   virtual void SetMinMax(const double min, const double max) {
     try {
       SetMinValue(min);
@@ -962,10 +969,12 @@ public:
                                "Parameter " +
                                name_ + " has no errors defined!");
     //		if(GetErrorType()==ErrorType::SYM){
-    //			LOG(info) << "DoubleParameter::GetErrorHigh() | Parameter
+    //			LOG(info) << "DoubleParameter::GetErrorHigh() |
+    //Parameter
     //"<<name_
-    //					<<" has no asymmetric errors! Returning symmetric
-    //error";
+    //					<<" has no asymmetric errors! Returning
+    //symmetric
+    // error";
     //			return GetError();
     //		}
     return errorHigh;
@@ -978,10 +987,12 @@ public:
                                "Parameter " +
                                name_ + " has no errors defined!");
     //		if(GetErrorType()==ErrorType::SYM){
-    //			LOG(info) << "DoubleParameter::GetErrorHigh() | Parameter
+    //			LOG(info) << "DoubleParameter::GetErrorHigh() |
+    //Parameter
     //"<<name_
-    //					<<" has no assymetric errors! Returning symmetric
-    //error";
+    //					<<" has no assymetric errors! Returning
+    //symmetric
+    // error";
     //			return GetError();
     //		}
     if (!HasError())
@@ -994,7 +1005,7 @@ public:
   virtual void SetError(double errLow, double errHigh) {
     // if(fixed_)
     //	throw ParameterFixed("DoubleParameter::SetError(double, double) |
-    //Parameter "+GetName()+" is fixed!");
+    // Parameter "+GetName()+" is fixed!");
     SetErrorType(ErrorType::ASYM);
     SetErrorHigh(errHigh);
     SetErrorLow(errLow);
@@ -1112,32 +1123,56 @@ private:
 };
 BOOST_SERIALIZATION_SHARED_PTR(ComPWA::DoubleParameter)
 
-//    BOOST_CLASS_IMPLEMENTATION(
-//                               ComPWA::DoubleParameter,
-//                               ::boost::serialization::object_serializable
-//                               )
-//    BOOST_CLASS_TRACKING(
-//                         ComPWA::DoubleParameter,
-//                         ::boost::serialization::track_never
-//                         )
-//    BOOST_CLASS_IMPLEMENTATION(
-//                               std::shared_ptr<ComPWA::DoubleParameter>,
-//                               ::boost::serialization::object_serializable
-//                               )
-//    BOOST_CLASS_TRACKING(
-//                         std::shared_ptr<ComPWA::DoubleParameter>,
-//                         ::boost::serialization::track_never
-//                         )
-//    BOOST_CLASS_IMPLEMENTATION(
-//                               std::vector<std::shared_ptr<ComPWA::DoubleParameter>
-//                               >,
-//                               ::boost::serialization::object_serializable
-//                               )
-//    BOOST_CLASS_TRACKING(
-//                         std::vector<std::shared_ptr<ComPWA::DoubleParameter>
-//                         >,
-//                         ::boost::serialization::track_never
-//                         )
+/**
+ Create a DoubleParameter object from a ptree. This approach is more or
+ less equivalent to the serialization of a parameter but provides a better
+ readable format.
+
+ @param pt Input property tree
+ @return Parameter
+ */
+static DoubleParameter
+DoubleParameterFactory(const boost::property_tree::ptree &pt) {
+  DoubleParameter obj;
+  // Require that name and value are provided
+  obj.SetName( pt.get<std::string>("<xmlattr>.Name") );
+
+  obj.SetValue( pt.get<double>("Value") );
+  
+  // Optional settings
+  if (pt.get_optional<double>("Error")) {
+    obj.SetError(pt.get<double>("Error"));
+  }
+  if (pt.get_optional<double>("ErrorLow")) {
+    if (pt.get_optional<double>("ErrorHigh"))
+      obj.SetError(pt.get<double>("ErrorLow"), pt.get<double>("ErrorHigh"));
+    else
+      throw std::runtime_error("DoubleParameterFactory() | Parameter asymmetic "
+                               "error not properly set!");
+  } else if (pt.get_optional<double>("ErrorHigh")) {
+    throw std::runtime_error("DoubleParameterFactory() | Parameter asymmetic "
+                             "error not properly set!");
+  } else { /* Do not set a asymmetric errors */
+  }
+
+  if( pt.get_optional<bool>("Fix") )
+    obj.FixParameter(pt.get<bool>("Fix"));
+
+  if (pt.get_optional<double>("Min")) {
+    if (pt.get_optional<double>("Max")) {
+      obj.SetRange(pt.get<double>("Min"), pt.get<double>("Max"));
+    } else {
+      throw std::runtime_error(
+          "DoubleParameterFactory() | Parameter range not properly set!");
+    }
+  } else if (pt.get_optional<double>("Max")) {
+    throw std::runtime_error(
+        "DoubleParameterFactory() | Parameter range not properly set!");
+  } else { /* Do not set a parameter range */
+  }
+
+  return obj;
+}
 
 class IntegerParameter : public AbsParameter {
 

@@ -137,23 +137,33 @@ double SpinWave::getDoubleLikeQuantumNumber(QuantumNumberIDs qn_id) const {
   }
 }
 
-PhysConst::PhysConst(std::string filename)
-    : _particleFileName(filename), _constantFileName(filename) {
-  readFile();
-}
+PhysConst::PhysConst(std::string filename) {
 
-PhysConst::~PhysConst() {}
+  _constList.push_back(Constant("Pi", 3.141592654));
+  _constList.push_back(Constant("c", 299792458)); /* Units: m/s */
 
-void PhysConst::readFile() {
   // Create an empty property tree object
   boost::property_tree::ptree pt;
-
   try {
     read_xml(_particleFileName, pt);
     LOG(info) << "PhysConst: reading particle file " << _particleFileName;
   } catch (std::exception &ex) {
     throw;
   }
+  readTree(pt);
+}
+
+PhysConst::PhysConst(boost::property_tree::ptree pt) {
+
+  _constList.push_back(Constant("Pi", 3.141592654));
+  _constList.push_back(Constant("c", 299792458)); /* Units: m/s */
+
+  readTree(pt);
+}
+
+PhysConst::~PhysConst() {}
+
+void PhysConst::readTree(boost::property_tree::ptree pt) {
 
   for (auto const &v : pt.get_child("ParticleList")) {
     _partList.push_back(ParticleProperties(v.second));
@@ -163,28 +173,17 @@ void PhysConst::readFile() {
                << " P=" << last.GetParity() << " C=" << last.GetCparity();
   }
 
-  _constList.push_back(Constant("Pi", 3.141592654));
-  _constList.push_back(Constant("c", 299792458)); /* Units: m/s */
-
-  // Currently its is not necessary to read an external file
-  //  try {
-  //      read_xml(_constantFileName, pt);
-  //      LOG(info) << "PhysConst: reading file with physical constants"
-  //                << _constantFileName;
-  //  } catch (std::exception &ex) {
-  //    throw;
-  //  }
-  //  for( auto const &v : pt.get_child("PhysConstantsList") ) {
-  //    _constList.push_back( Constant(v.second) );
-  //    auto last = _constList.back();
-  //    LOG(debug) << "PhysConst adding constant: " << last.GetName()
-  //    << " value=" << last.GetValue();
-  //  }
+  for (auto const &v : pt.get_child("PhysConstantsList")) {
+    _constList.push_back(Constant(v.second));
+    auto last = _constList.back();
+    LOG(debug) << "PhysConst adding constant: " << last.GetName()
+               << " value=" << last.GetValue();
+  }
 
   return;
 }
 
-const ComPWA::Constant &PhysConst::findConstant(const std::string &name) const {
+const ComPWA::Constant &PhysConst::FindConstant(const std::string &name) const {
   auto result =
       std::find_if(_constList.begin(), _constList.end(),
                    [&](const Constant &lhs) { return lhs.GetName() == name; });
@@ -198,7 +197,7 @@ const ComPWA::Constant &PhysConst::findConstant(const std::string &name) const {
   return *result;
 }
 
-const ParticleProperties &PhysConst::findParticle(int pid) const {
+const ParticleProperties &PhysConst::FindParticle(int pid) const {
   auto result = std::find_if(
       _partList.begin(), _partList.end(),
       [&](const ParticleProperties &lhs) { return lhs.GetId() == pid; });
@@ -213,7 +212,7 @@ const ParticleProperties &PhysConst::findParticle(int pid) const {
 }
 
 const ParticleProperties &
-PhysConst::findParticle(const std::string &name) const {
+PhysConst::FindParticle(const std::string &name) const {
   auto result = std::find_if(
       _partList.begin(), _partList.end(),
       [&](const ParticleProperties &lhs) { return lhs.GetName() == name; });
@@ -227,8 +226,8 @@ PhysConst::findParticle(const std::string &name) const {
   return *result;
 }
 
-//std::vector<ParticleProperties>
-//PhysConst::findParticlesWithQN(const ParticleProperties &qn) const {
+// std::vector<ParticleProperties>
+// PhysConst::findParticlesWithQN(const ParticleProperties &qn) const {
 //  std::vector<ParticleProperties> particle_list;
 //
 //  auto result = _partList.begin();
@@ -243,9 +242,9 @@ PhysConst::findParticle(const std::string &name) const {
 //  return particle_list;
 //}
 
-bool PhysConst::particleExists(const std::string &name) const {
+bool PhysConst::ParticleExists(const std::string &name) const {
   try {
-    findParticle(name);
+    FindParticle(name);
   } catch (std::exception &ex) {
     return false;
   }
@@ -253,26 +252,3 @@ bool PhysConst::particleExists(const std::string &name) const {
 }
 
 } /* namespace ComPWA */
-
-
-#define BOOST_TEST_DYN_LINK
-#define BOOST_TEST_MODULE Number
-#include <boost/test/unit_test.hpp>
-BOOST_AUTO_TEST_SUITE( Core )
-
-BOOST_AUTO_TEST_CASE( xmlInput )
-{
-//  auto inst = ComPWA::PhysConst::createInstance("particles.xml");
-  //const_string cs1( "test_string" );                                 // 1 //
-  //BOOST_CHECK_EQUAL( cs1[(size_t)0], 't' );
-  //BOOST_CHECK_EQUAL( cs1[(size_t)4], '_' );
-  //BOOST_CHECK_EQUAL( cs1[cs1.length()-1], 'g' );
-  //
-  //BOOST_CHECK_EQUAL( cs1[(size_t)0], cs1.at( 0 ) );                  // 2 //
-  //BOOST_CHECK_EQUAL( cs1[(size_t)2], cs1.at( 5 ) );
-  //BOOST_CHECK_EQUAL( cs1.at( cs1.length() - 1 ), 'g' );
-  //
-  //BOOST_CHECK_THROW( cs1.at( cs1.length() ), std::out_of_range );    // 3 //
-  BOOST_REQUIRE( 0 );
-};
-BOOST_AUTO_TEST_SUITE_END()

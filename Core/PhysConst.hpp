@@ -165,7 +165,18 @@ class ParticleProperties : public Properties {
 public:
   ParticleProperties(std::string name = "test", int id = -999)
       : Properties(name, id){};
-  ParticleProperties(boost::property_tree::ptree pt){};
+  
+  ParticleProperties(boost::property_tree::ptree pt){
+    SetName( pt.get<std::string>("<xmlattr>.Name") );
+    SetId( pt.get<int>("Id") );
+    SetMass( DoubleParameterFactory( pt.get_child("Mass") ) );
+    SetSpin( ComPWA::Spin(pt.get<double>("Spin")) );
+    SetIsoSpin( ComPWA::Spin(pt.get<double>("IsoSpin")) );
+    SetIsoSpinZ( ComPWA::Spin(pt.get<double>("IsoSpinZ")) );
+    SetParity( pt.get<double>("Parity") );
+    SetCparity( pt.get<double>("Cparity") );
+    SetGparity( pt.get<double>("Gparity") );
+  }
 
   void SetMass(double m) { _mass.SetValue(m); }
   double GetMass() const { return _mass.GetValue(); }
@@ -222,14 +233,23 @@ protected:
 
 class PhysConst {
 public:
-  static PhysConst *createInstance(std::string file = "./particles.xml") {
+  static PhysConst *CreateInstance(std::string file = "./particles.xml") {
     if (_inst)
-      return _inst;
+        throw std::runtime_error("PhysConst::CreateInstance() | Instance already exists. Use Instance() to access it!");
     _inst = new PhysConst(file);
     return _inst;
   }
+  
+  static PhysConst *CreateInstance(boost::property_tree::ptree pt) {
+    if (_inst)
+      throw std::runtime_error("PhysConst::CreateInstance() | Instance already exists. Use Instance() to access it!");
+    
+    _inst = new PhysConst(pt);
+    return _inst;
+  }
 
-  static PhysConst *instance() {
+
+  static PhysConst *Instance() {
     if (!_inst) {
       throw std::runtime_error("No instance of PhysConst created! "
                                "Create one first!");
@@ -239,29 +259,32 @@ public:
 
   ~PhysConst();
 
+  
   PhysConst(PhysConst const &) = delete;
 
   void operator=(PhysConst const &) = delete;
 
-  const Constant &findConstant(const std::string &name) const;
+  const Constant &FindConstant(const std::string &name) const;
 
-  const ParticleProperties &findParticle(const std::string &name) const;
+  const ParticleProperties &FindParticle(const std::string &name) const;
 
-  const ParticleProperties &findParticle(int pid) const;
+  const ParticleProperties &FindParticle(int pid) const;
 
 //  std::vector<ParticleProperties>
 //  findParticlesWithQN(const ParticleProperties &qn) const;
 
-  bool particleExists(const std::string &name) const;
+  bool ParticleExists(const std::string &name) const;
 
 protected:
   PhysConst(std::string filePath = "./particles.xml");
 
+  PhysConst(boost::property_tree::ptree pt);
+  
   //! Singleton stuff
   static PhysConst *_inst;
-
-  void readFile();
-
+  
+  void readTree( boost::property_tree::ptree pt );
+  
   //! Input file name
   std::string _particleFileName;
   //! Input file name
