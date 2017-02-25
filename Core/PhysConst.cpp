@@ -165,19 +165,28 @@ PhysConst::~PhysConst() {}
 
 void PhysConst::readTree(boost::property_tree::ptree pt) {
 
-  for (auto const &v : pt.get_child("ParticleList")) {
-    _partList.push_back(ParticleProperties(v.second));
-    auto last = _partList.back();
-    LOG(debug) << "PhysConst adding particle: " << last.GetName()
-               << " mass=" << last.GetMass() << " J=" << last.GetSpin()
-               << " P=" << last.GetParity() << " C=" << last.GetCparity();
+  auto particleTree = pt.get_child_optional("ParticleList");
+  if (particleTree) {
+    for (auto const &v : particleTree.get()) {
+      _partList.push_back(ParticleProperties(v.second));
+      auto last = _partList.back();
+      LOG(debug) << "PhysConst::readTree() | Adding particle " << last.GetName()
+                 << " (id=" << last.GetId() << ") "
+                 << " J(PC)=" << last.GetSpin() << "(" << last.GetParity()
+                 << last.GetCparity() << ") "
+                 << " mass=" << last.GetMass()
+                 << " decayType=" << last.GetDecayType();
+    }
   }
 
-  for (auto const &v : pt.get_child("PhysConstantsList")) {
-    _constList.push_back(Constant(v.second));
-    auto last = _constList.back();
-    LOG(debug) << "PhysConst adding constant: " << last.GetName()
-               << " value=" << last.GetValue();
+  auto constTree = pt.get_child_optional("PhysConstantsList");
+  if (constTree) {
+    for (auto const &v : constTree.get()) {
+      _constList.push_back(Constant(v.second));
+      auto last = _constList.back();
+      LOG(debug) << "PhysConst::readTree() | Adding constant " << last.GetName()
+                 << " value=" << last.GetValue();
+    }
   }
 
   return;
@@ -190,7 +199,7 @@ const ComPWA::Constant &PhysConst::FindConstant(const std::string &name) const {
 
   if (result == _constList.end()) {
     std::stringstream ss;
-    ss << "PhysConst::findConstant() | Constant " << name
+    ss << "PhysConst::FindConstant() | Constant " << name
        << " not found in list!";
     throw std::runtime_error(ss.str());
   }
@@ -204,7 +213,7 @@ const ParticleProperties &PhysConst::FindParticle(int pid) const {
 
   if (result == _partList.end()) {
     std::stringstream ss;
-    ss << "PhysConst::findParticle() | Particle " << pid
+    ss << "PhysConst::FindParticle() | Particle id=" << pid
        << " not found in list!";
     throw std::runtime_error(ss.str());
   }
@@ -219,7 +228,7 @@ PhysConst::FindParticle(const std::string &name) const {
 
   if (result == _partList.end()) {
     std::stringstream ss;
-    ss << "PhysConst::findParticle() | Particle " << name
+    ss << "PhysConst::FindParticle() | Particle " << name
        << " not found in list!";
     throw std::runtime_error(ss.str());
   }

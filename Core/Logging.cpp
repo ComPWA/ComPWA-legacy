@@ -20,6 +20,7 @@
 
 namespace ComPWA {
 using namespace boost::log;
+  
 void Logging::init(std::string out, trivial::severity_level minLevel) {
   add_common_attributes();
   boost::log::add_console_log(
@@ -32,7 +33,7 @@ void Logging::init(std::string out, trivial::severity_level minLevel) {
            << "] : " << expressions::smessage));
   if (out == "") {
     LOG(info)
-        << "Logging: logging to filename disables. Console severity level: "
+        << "Logging::init() | Logging to file disabled. Console severity level: "
         << minLevel;
   } else {
     add_file_log(

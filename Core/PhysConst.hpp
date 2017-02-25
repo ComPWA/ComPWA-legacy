@@ -1,3 +1,4 @@
+
 //-------------------------------------------------------------------------------
 // Copyright (c) 2013 Peter Weidenkaff.
 // All rights reserved. This program and the accompanying materials
@@ -166,12 +167,10 @@ public:
   ParticleProperties(std::string name = "test", int id = -999)
       : Properties(name, id){};
 
-  ParticleProperties(boost::property_tree::ptree pt) {
-    // TODO: intialize tree with decay type=stable
-    SetName(pt.get<std::string>("<xmlattr>.Name"));
-    SetId(pt.get<int>("Id"));
-    // TODO: how to we pass the tree?
-    //    SetMass( DoubleParameterFactory( pt.find("Mass") ) );
+  ParticleProperties(boost::property_tree::ptree pt)
+      : Properties(pt.get<std::string>("<xmlattr>.Name"), pt.get<int>("Id")) {
+
+    SetMass(DoubleParameterFactory(pt.get_child("Mass")));
     // Parameters optional. Shall we require them?
     SetSpin(ComPWA::Spin(pt.get<double>("Spin", 0.)));
     SetIsoSpin(ComPWA::Spin(pt.get<double>("IsoSpin", 0.)));
@@ -179,9 +178,13 @@ public:
     SetParity(pt.get<double>("Parity", 0));
     SetCparity(pt.get<double>("Cparity", 0));
     SetGparity(pt.get<double>("Gparity", 0));
+
     auto decayInfo = pt.get_child_optional("DecayInfo");
     if (decayInfo)
       SetDecayInfo(decayInfo.get());
+    else {
+      _decayInfo.put("<xmlattr>.Type", "stable");
+    }
   }
 
   void SetMass(double m) { _mass.SetValue(m); }
@@ -212,7 +215,7 @@ public:
   boost::property_tree::ptree GetDecayInfo() const { return _decayInfo; }
 
   std::string GetDecayType() const {
-    return _decayInfo.get<std::string>("<xmlattr>.DecayType");
+    return _decayInfo.get<std::string>("<xmlattr>.Type");
   }
 
 protected:
@@ -311,4 +314,3 @@ protected:
 } /* namespace ComPWA */
 
 #endif /* PHYSCONST_HPP_ */
-       /
