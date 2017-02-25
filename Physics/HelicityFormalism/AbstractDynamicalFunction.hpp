@@ -64,7 +64,7 @@ public:
     
     auto decayParticle = pt.get_child("DecayParticle");
     int id = pt.get<double>("DecayParticle.Id");
-    auto partProp = PhysConst::instance()->findParticle(id);
+    auto partProp = PhysConst::Instance()->FindParticle(id);
     
     //TODO: Ask PhysConstSvc for particle info
     

@@ -95,8 +95,8 @@ public:
     auto obj = std::shared_ptr<CoherentIntensity>();
     obj->SetName(pt.get<string>("AmpIntensity.<xmlattr>.Name", "empty"));
     try {
-      obj->SetStrengthPar(
-          ComPWA::DoubleParameterFactory(pt.get_child("Strength")));
+      auto strength = ComPWA::DoubleParameterFactory(pt.get_child("Strength"));
+      obj->SetStrengthPar( std::make_shared<DoubleParameter>(strength) );
     } catch (boost::property_tree::ptree_bad_path &ex) {
       /* strength is optional */
       obj->SetStrengthPar( std::make_shared<ComPWA::DoubleParameter>("", 1.0) );

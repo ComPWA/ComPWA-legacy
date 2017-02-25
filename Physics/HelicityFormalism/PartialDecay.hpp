@@ -63,8 +63,10 @@ public:
   Factory(const boost::property_tree::ptree &pt) {
     auto obj = std::shared_ptr<PartialDecay>();
     obj->SetName(pt.get<string>("Resonance.<xmlattr>.Name", "empty"));
-    obj->SetMagnitudePar(ComPWA::DoubleParameterFactory(pt.get_child("Magnitude")));
-    obj->SetPhasePar(ComPWA::DoubleParameterFactory(pt.get_child("Phase")));
+    auto mag = ComPWA::DoubleParameterFactory(pt.get_child("Magnitude") );
+    obj->SetMagnitudePar( std::make_shared<DoubleParameter>(mag) );
+    auto phase = ComPWA::DoubleParameterFactory(pt.get_child("Magnitude") );
+    obj->SetPhasePar( std::make_shared<DoubleParameter>(phase) );
     obj->SetWignerD(
         ComPWA::Physics::HelicityFormalism::AmpWignerD::Factory(pt));
     obj->SetDynamicalFunction(AbstractDynamicalFunction::Factory(pt));
