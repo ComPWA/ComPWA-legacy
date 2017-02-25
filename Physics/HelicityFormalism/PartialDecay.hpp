@@ -41,7 +41,7 @@ public:
     std::complex<double> result =
         std::polar(_magnitude->GetValue(), _phase->GetValue());
     result *= _angD->Evaluate(point, 1, 2);
-    result *= _dynamic->Evaluate(point);
+    result *= _dynamic->Evaluate(point,1);
 
     return result;
   };

@@ -79,10 +79,10 @@ public:
   }
 
   /**
-   <#Description#>
+   Clone function
 
-   @param "" <#"" description#>
-   @return <#return value description#>
+   @param newName New name
+   @return Pointer to new object
    */
   ComPWA::AmpIntensity *Clone(std::string newName = "") const {
     auto tmp = (new CoherentIntensity(*this));

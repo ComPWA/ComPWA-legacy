@@ -42,7 +42,7 @@ public:
 
   virtual ~AbstractDynamicalFunction();
 
-  virtual std::complex<double> Evaluate(const ComPWA::dataPoint &) const = 0;
+  virtual std::complex<double> Evaluate(const ComPWA::dataPoint &, int pos) const = 0;
 
   /**! Get current normalization.  */
   virtual double GetNormalization() = 0;
