@@ -60,7 +60,6 @@ BOOST_AUTO_TEST_CASE(FixValueCheck) {
   BOOST_CHECK(emptyFloat.IsFixed());
   BOOST_CHECK_THROW(emptyFloat.SetValue(8.), ParameterFixed);
   BOOST_CHECK_CLOSE(emptyFloat.GetValue(), 7., 0.0001);
-  BOOST_CHECK_EQUAL(1, 2);
 }
 
 BOOST_AUTO_TEST_CASE(ConstructorCheck2) {
