@@ -8,24 +8,25 @@
 * Contributors:
 *     michel - initial API and implementation
 *-------------------------------------------------------------------------------*/
-#define BOOST_TEST_DYN_LINK
-#define BOOST_TEST_MODULE Number
-#include <boost/test/unit_test.hpp>
-#include "DataReader/RootReader/RootReader.hpp"
-//#include "Core/PWAEvent.hpp"
+
 #include <memory>
 #include <vector>
 #include <string>
 
+//#define BOOST_TEST_DYN_LINK
+#define BOOST_TEST_MODULE Number
+#include <boost/test/unit_test.hpp>
+
+#include "DataReader/RootReader/RootReader.hpp"
+
 namespace ComPWA {
 namespace DataReader {
-namespace RootReader {
 
 BOOST_AUTO_TEST_SUITE(RootReaderSuite);
 
 BOOST_AUTO_TEST_CASE(ReadingCheck)
 {
-  std::string file = "test/2Part-4vecs.root";
+  std::string file = "DataTest-input.root";
   RootReader myReader(file);
   BOOST_CHECK_EQUAL(myReader.getNEvents(), (unsigned int)100000);
 
@@ -35,7 +36,6 @@ BOOST_AUTO_TEST_CASE(ReadingCheck)
 
 BOOST_AUTO_TEST_SUITE_END();
 
-} /* namespace RootReader */
 } /* namespace DataReader */
 } /* namespace ComPWA */
 
