@@ -68,7 +68,8 @@ public:
   //! value of resonance at \param point
   virtual std::complex<double> Evaluate(const dataPoint &point) const = 0;
 
-  virtual std::shared_ptr<FunctionTree> SetupTree(ParameterList &sample,
+  virtual std::shared_ptr<FunctionTree> GetTree(ParameterList &sample,
+                                                  ParameterList &phspSample,
                                                   ParameterList &toySample,
                                                   std::string suffix) = 0;
 protected:

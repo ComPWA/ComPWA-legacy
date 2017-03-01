@@ -36,7 +36,8 @@ public:
   };
 
   /**! Setup function tree */
-  virtual std::shared_ptr<FunctionTree> SetupTree(ParameterList &sample,
+  virtual std::shared_ptr<FunctionTree> GetTree(ParameterList &sample,
+                                                  ParameterList &phspSample,
                                                   ParameterList &toySample,
                                                   std::string suffix) {
     return std::shared_ptr<FunctionTree>();
@@ -49,17 +50,7 @@ public:
    @return Constructed object
    */
   static std::shared_ptr<SequentialTwoBodyDecay>
-  Factory(const boost::property_tree::ptree &pt) {
-    auto obj = std::shared_ptr<SequentialTwoBodyDecay>();
-    obj->SetName( pt.get<string>("Amplitude.<xmlattr>.Name","empty") );
-    obj->SetMagnitude( ComPWA::DoubleParameterFactory(pt.get_child("Magnitude")) );
-    obj->SetPhase( ComPWA::DoubleParameterFactory(pt.get_child("Phase")) );
-    
-    for(const auto& v : pt.get_child("Resonance") ){
-      obj->Add( PartialDecay::Factory(v.second) );
-    }
-    return obj;
-  }
+  Factory(const boost::property_tree::ptree &pt);
 
   /**
    Add a partial decay to Sequential decay
@@ -84,7 +75,7 @@ public:
    
    @return Magnitude parameter
    */
-  double GetMagnitudeValue() { return _magnitude->GetValue(); }
+  double GetMagnitudeValue() const { return _magnitude->GetValue(); }
   
   /**
    Set Magnitude parameter
@@ -116,7 +107,7 @@ public:
    
    @return Phase parameter
    */
-  double GetPhaseValue() { return _phase->GetValue(); }
+  double GetPhaseValue() const { return _phase->GetValue(); }
   
   /**
    Set phase parameter
@@ -132,6 +123,19 @@ public:
    */
   void SetPhase(double par) { _phase->SetValue(par); }
 
+  //! Function to create a full copy of the amplitude
+  virtual Amplitude *Clone(std::string newName = "") const {
+    auto tmp = (new SequentialTwoBodyDecay(*this));
+    tmp->SetName(newName);
+    return tmp;
+    
+  };
+  
+  //! Print amplitude to logging system
+  virtual void to_str() { LOG(info) << "SequentialTwoBodyDecay "; }
+  
+  //! Fill ParameterList with fit fractions
+  virtual void GetFitFractions(ParameterList &parList) { };
   
   /**
    Get number of partial decays

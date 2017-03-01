@@ -30,9 +30,10 @@ namespace ComPWA {
 namespace Physics {
 namespace HelicityFormalism {
 
-  std::complex<double> RelativisticBreitWigner::Evaluate(const dataPoint &point, int pos) const {
+std::complex<double> RelativisticBreitWigner::Evaluate(const dataPoint &point,
+                                                       int pos) const {
   std::complex<double> result = dynamicalFunction(
-      point.getVal(pos), _mass->GetValue(), _mass1, _mass2, _width->GetValue(),
+      point.getVal(pos), _mass->GetValue(), _massA, _massB, _width->GetValue(),
       (double)_spin, _mesonRadius->GetValue(), _ffType);
   return result;
 }
@@ -53,8 +54,8 @@ std::complex<double> RelativisticBreitWigner::dynamicalFunction(
                                         (2 * J + 1));
 
   // Calculate coupling constant to final state
-//  std::complex<double> g_final =
-//      widthToCoupling(mSq, mR, width, ma, mb, J, mesonRadius, ffType);
+  //  std::complex<double> g_final =
+  //      widthToCoupling(mSq, mR, width, ma, mb, J, mesonRadius, ffType);
   std::complex<double> g_final = 1.0;
 
   /*Coupling constant from production reaction. In case of a particle decay
@@ -76,6 +77,46 @@ std::complex<double> RelativisticBreitWigner::dynamicalFunction(
 #endif
 
   return result;
+}
+
+std::shared_ptr<RelativisticBreitWigner>
+RelativisticBreitWigner::Factory(const boost::property_tree::ptree &pt) {
+  LOG(trace) << "RelativisticBreitWigner::Factory() | Construction....";
+  auto obj = std::make_shared<RelativisticBreitWigner>() ;
+
+  int id = pt.get<double>("DecayParticle.Id");
+  auto partProp = PhysConst::Instance()->FindParticle(id);
+  obj->SetMass(std::make_shared<DoubleParameter>(partProp.GetMassPar()));
+
+  auto decayTr = partProp.GetDecayInfo();
+  if (decayTr.get<std::string>("<xmlattr>.Type") != "relativisitcBreitWigner")
+    throw std::runtime_error(
+        "RelativisticBreitWigner::Factory() | Decay type does not match! ");
+
+  auto width = ComPWA::DoubleParameterFactory(decayTr.get_child("Width"));
+  obj->SetWidth(std::make_shared<DoubleParameter>(width));
+  auto mesonRadius =
+      ComPWA::DoubleParameterFactory(decayTr.get_child("MesonRadius"));
+  obj->SetMesonRadius(std::make_shared<DoubleParameter>(mesonRadius));
+
+
+  //Get masses of decay products
+  auto decayProducts = pt.get_child("DecayProducts");
+  std::vector<double> daughterMasses;
+  for (auto i : decayProducts) {
+    auto daughterId = i.second.get<double>("Id");
+    daughterMasses.push_back(
+        PhysConst::Instance()->FindParticle(daughterId).GetMass());
+  }
+  if (daughterMasses.size() != 2)
+    throw boost::property_tree::ptree_error(
+        "AmpWignerD::Factory() | Expect exactly two decay products (" +
+        std::to_string(decayProducts.size()) + " given)!");
+  
+  obj->SetDecayMassA(daughterMasses.at(0));
+  obj->SetDecayMassB(daughterMasses.at(1));
+  
+  return obj;
 }
 
 } /* namespace DynamicalFunctions */

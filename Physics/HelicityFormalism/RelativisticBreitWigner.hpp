@@ -184,12 +184,7 @@ public:
    @return Constructed object
    */
   static std::shared_ptr<RelativisticBreitWigner>
-  Factory(const boost::property_tree::ptree &pt) {
-    std::shared_ptr<RelativisticBreitWigner> obj;
-    auto node = pt.get_child("Mother").get_child("ParticleState");
-    int motherID = node.get<int>("ID");
-    return obj;
-  }
+  Factory(const boost::property_tree::ptree &pt);
 
   std::shared_ptr<ComPWA::Physics::HelicityFormalism::PartialDecay>
   operator*(std::shared_ptr<ComPWA::Physics::HelicityFormalism::AmpWignerD> wigner) {

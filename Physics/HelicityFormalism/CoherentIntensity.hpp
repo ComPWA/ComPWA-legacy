@@ -26,10 +26,10 @@ namespace HelicityFormalism {
 class CoherentIntensity : public ComPWA::AmpIntensity {
 
 public:
-  CoherentIntensity();
-  virtual ~CoherentIntensity();
+  CoherentIntensity() {};
+  virtual ~CoherentIntensity() {};
 
-  virtual double GetMaximum(std::shared_ptr<ComPWA::Generator> gen) const;
+  virtual double GetMaximum(std::shared_ptr<ComPWA::Generator> gen) const { return 1.0; }
 
   virtual double Intensity(const ComPWA::dataPoint &point) const;
 
@@ -59,24 +59,7 @@ public:
   }
 
   static std::shared_ptr<CoherentIntensity>
-  Factory(const boost::property_tree::ptree &pt) {
-    auto obj = std::shared_ptr<CoherentIntensity>();
-    obj->SetName(pt.get<string>("AmpIntensity.<xmlattr>.Name", "empty"));
-    try {
-      auto strength = ComPWA::DoubleParameterFactory(pt.get_child("Strength"));
-      obj->SetStrength( std::make_shared<DoubleParameter>(strength) );
-    } catch (boost::property_tree::ptree_bad_path &ex) {
-      /* strength is optional */
-      obj->SetStrength( std::make_shared<ComPWA::DoubleParameter>("", 1.0) );
-    }
-
-    for (const auto &v : pt.get_child("Amplitude")) {
-      obj->Add(
-          ComPWA::Physics::HelicityFormalism::SequentialTwoBodyDecay::Factory(
-              v.second));
-    }
-    return obj;
-  }
+  Factory(const boost::property_tree::ptree &pt);
 
   void Add(std::shared_ptr<
            ComPWA::Physics::HelicityFormalism::SequentialTwoBodyDecay>
@@ -110,7 +93,7 @@ public:
   virtual void to_str() const { LOG(info) << "CoherentIntensity"; }
 
 protected:
-  virtual double Integral() const;
+  virtual double Integral() const { return 1.0; }
 
 
   std::vector<std::shared_ptr<

@@ -47,16 +47,7 @@ public:
   }
 
   static std::shared_ptr<IncoherentIntensity>
-  Factory(const boost::property_tree::ptree &pt) {
-    auto obj = std::shared_ptr<IncoherentIntensity>();
-    obj->SetName(pt.get<string>("AmpIntensity.<xmlattr>.Name", "empty"));
-
-    for (const auto &v : pt.get_child("CoherentIntensity")) {
-      obj->Add(ComPWA::Physics::HelicityFormalism::CoherentIntensity::Factory(
-          v.second));
-    }
-    return obj;
-  }
+  Factory(const boost::property_tree::ptree &pt);
 
   //=========== EVALUATION =================
   /** Calculate intensity of amplitude at point in phase-space
@@ -93,11 +84,11 @@ public:
 
   //! Check of tree is available
   virtual bool HasTree() { return 0; }
-  
+
   //! Getter function for basic amp tree
   virtual std::shared_ptr<ComPWA::FunctionTree>
   GetTree(ComPWA::ParameterList &, ComPWA::ParameterList &,
-            ComPWA::ParameterList &, std::string suffix="") {
+          ComPWA::ParameterList &, std::string suffix = "") {
     return std::shared_ptr<ComPWA::FunctionTree>();
   }
 

@@ -32,6 +32,7 @@
 #include "Core/DataPoint.hpp"
 #include "Core/FunctionTree.hpp"
 #include "Core/Spin.hpp"
+#include "Core/PhysConst.hpp"
 
 namespace ComPWA {
 namespace Physics {
@@ -66,14 +67,15 @@ public:
    */
   static std::shared_ptr<AmpWignerD>
   Factory(const boost::property_tree::ptree &pt) {
+  LOG(trace) << "AmpWignerD::Factory() | Construction....";
     auto obj = std::make_shared<AmpWignerD>();
     
     auto decayParticle = pt.get_child("DecayParticle");
     
     int id = pt.get<double>("DecayParticle.Id");
-    ComPWA::Spin J; //TODO: Get particle spin from id
+    ComPWA::Spin J = PhysConst::Instance()->FindParticle(id).GetSpin();
     obj->SetSpin( J );
-    ComPWA::Spin mu(pt.get<double>("DecayParticle.Helicity"));
+    ComPWA::Spin mu( pt.get<double>("DecayParticle.Helicity") );
     obj->SetMu( mu );
     
     auto decayProducts = pt.get_child("DecayProducts");
@@ -84,7 +86,7 @@ public:
 
     if (vHelicity.size() != 2)
       throw boost::property_tree::ptree_error(
-          "Expect exactly two decay products (" +
+          "AmpWignerD::Factory() | Expect exactly two decay products (" +
           std::to_string(decayProducts.size()) + " given)!");
     
     obj->SetMuPrime( vHelicity.at(0)-vHelicity.at(1) );

@@ -67,12 +67,6 @@ public:
   //! Print amplitude to logging system
   virtual void to_str() = 0;
 
-  //=========== INTEGRATION/NORMALIZATION =================
-  /** Calculate normalization of amplitude.
-   * The integral includes efficiency correction
-   */
-  virtual double GetNormalization() const = 0;
-
   /** Calculate value of amplitude at point in phase space
    *
    * @param point Data point

@@ -47,7 +47,8 @@ public:
   };
 
   /**! Setup function tree */
-  virtual std::shared_ptr<FunctionTree> SetupTree(ParameterList &sample,
+  virtual std::shared_ptr<FunctionTree> GetTree(ParameterList &sample,
+                                                  ParameterList &phspSample,
                                                   ParameterList &toySample,
                                                   std::string suffix) {
     return std::shared_ptr<FunctionTree>();
@@ -60,19 +61,7 @@ public:
    @return Constructed object
    */
   static std::shared_ptr<PartialDecay>
-  Factory(const boost::property_tree::ptree &pt) {
-    auto obj = std::shared_ptr<PartialDecay>();
-    obj->SetName(pt.get<string>("Resonance.<xmlattr>.Name", "empty"));
-    auto mag = ComPWA::DoubleParameterFactory(pt.get_child("Magnitude") );
-    obj->SetMagnitudePar( std::make_shared<DoubleParameter>(mag) );
-    auto phase = ComPWA::DoubleParameterFactory(pt.get_child("Magnitude") );
-    obj->SetPhasePar( std::make_shared<DoubleParameter>(phase) );
-    obj->SetWignerD(
-        ComPWA::Physics::HelicityFormalism::AmpWignerD::Factory(pt));
-    obj->SetDynamicalFunction(AbstractDynamicalFunction::Factory(pt));
-
-    return obj;
-  }
+  Factory(const boost::property_tree::ptree &pt);
 
   /**
    Get WignerD function

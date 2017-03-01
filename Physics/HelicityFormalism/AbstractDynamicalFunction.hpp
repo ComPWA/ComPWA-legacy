@@ -33,9 +33,6 @@ enum normStyle {
   one
 };
 
-/* Forward declaration to avoid circular includes */
-class RelativisticBreitWigner;
-
 class AbstractDynamicalFunction {
 public:
   AbstractDynamicalFunction();
@@ -46,31 +43,52 @@ public:
 
   /**! Get current normalization.  */
   virtual double GetNormalization() = 0;
+  
+  virtual bool HasTree() const { return false; }
 
   /**! Setup function tree */
-  virtual std::shared_ptr<ComPWA::FunctionTree> SetupTree(ComPWA::ParameterList &sample,
+  virtual std::shared_ptr<ComPWA::FunctionTree> GetTree(ComPWA::ParameterList &sample,
                                                   ComPWA::ParameterList &toySample,
-                                                  std::string suffix) = 0;
+                                                        std::string suffix) {
+    return std::shared_ptr<ComPWA::FunctionTree>();
+  };
+  
+  /**
+   Set decay width
+
+   @param w Decay width
+   */
+  virtual void SetMass(std::shared_ptr<DoubleParameter> mass) { _mass = mass; }
 
   /**
-   Factory for RelativisticBreitWigner dynamical function
+   Get decay mass
 
-   @param pt Configuration tree
-   @return Constructed object
+   @return Decay mass
    */
-  static std::shared_ptr<AbstractDynamicalFunction>
-  Factory(const boost::property_tree::ptree &pt) {
-    auto obj = std::shared_ptr<AbstractDynamicalFunction>();
-    
-    auto decayParticle = pt.get_child("DecayParticle");
-    int id = pt.get<double>("DecayParticle.Id");
-    auto partProp = PhysConst::Instance()->FindParticle(id);
-    
-    //TODO: Ask PhysConstSvc for particle info
-    
-    return obj;
-  }
+  virtual std::shared_ptr<DoubleParameter> GetMass() { return _mass; }
 
+  /**
+   Set decay mass
+
+   @param w Decay mass
+   */
+  virtual void SetMass(double mass) { _mass->SetValue(mass); }
+
+  /**
+   Get decay mass
+
+   @return Decay mass
+   */
+  virtual double GetMassValue() const { return _mass->GetValue(); }
+  
+  virtual void SetDecayMassA( double mass ){ _massA = mass; }
+  
+  virtual double GetDecayMassA() const { return _massA; }
+  
+  virtual void SetDecayMassB( double mass ){ _massB = mass; }
+  
+  virtual double GetDecayMassB() const { return _massB; }
+  
 protected:
   //! Name of resonance
   std::string _name;
@@ -85,7 +103,7 @@ protected:
   virtual double Integral() { return 1.0; };
 
   //! Masses of daughter particles
-  double _mass1, _mass2;
+  double _massA, _massB;
 
   //! Resonance mass
   std::shared_ptr<ComPWA::DoubleParameter> _mass;
