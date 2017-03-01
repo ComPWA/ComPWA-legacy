@@ -28,7 +28,7 @@
 #include "Core/Functions.hpp"
 #include "Core/DataPoint.hpp"
 #include "Core/FunctionTree.hpp"
-#include "Physics/DPKinematics/DalitzKinematics.hpp"
+#include "Physics/AmplitudeSum/DalitzKinematics.hpp"
 #include "Core/Spin.hpp"
 
 namespace ComPWA {
@@ -42,7 +42,7 @@ public:
 
   virtual ~AmpWigner2(){};
 
-  virtual double evaluate(dataPoint &point);
+  virtual double Evaluate(const dataPoint &point) const;
 
   static double dynamicalFunction(ComPWA::Spin J, ComPWA::Spin mu,
                                   ComPWA::Spin muPrime, double cosTheta);

@@ -8,37 +8,28 @@
 // Contributors:
 //     Peter Weidenkaff -
 //-------------------------------------------------------------------------------
-#include "Physics/DPKinematics/RootEfficiency.hpp"
 #include "Core/Exceptions.hpp"
 #include "Core/DataPoint.hpp"
+#include "DataReader/RootReader/RootEfficiency.hpp"
 
 namespace ComPWA {
-namespace Physics {
-namespace DPKinematics {
+namespace DataReader {
 
-DalitzHistEfficiency::DalitzHistEfficiency(TEfficiency *eff)
+RootEfficiency::RootEfficiency(TEfficiency *eff)
     : effHist(new TEfficiency(*eff)) {
-  LOG(debug) << "DalitzHistEfficiency: creating efficiency from existing "
+  LOG(debug) << "RootEfficiency: creating efficiency from existing "
                 "TEfficiency object!";
 }
-DalitzHistEfficiency::DalitzHistEfficiency(TH2D *passed, TH2D *total)
+  
+RootEfficiency::RootEfficiency(TH1 *passed, TH1 *total)
     : effHist(new TEfficiency(*passed, *total)) {
   LOG(debug)
-      << "DalitzHistEfficiency: creating efficiency from two TH2D objects!";
+      << "RootEfficiency: creating efficiency from two TH2D objects!";
 }
-DalitzHistEfficiency::DalitzHistEfficiency(const DalitzHistEfficiency &) {}
-double DalitzHistEfficiency::evaluate(std::vector<double> x) {
-  // we assume that x[1]=m13sq and x[0]=m23sq
-  dataPoint point;
-  try {
-    Kinematics::instance()->FillDataPoint(1, 0, x[1], x[0], point);
-  } catch (BeyondPhsp &ex) {
-    return 0;
-  }
-
-  return evaluate(point);
-}
-double DalitzHistEfficiency::evaluate(const dataPoint &point) {
+  
+RootEfficiency::RootEfficiency(const RootEfficiency &) {}
+  
+double RootEfficiency::Evaluate(const dataPoint &point) const {
   //	double m13sq = point.getVal("m13sq");
   //	double m23sq = point.getVal("m23sq");
   double m13sq = point.getVal(1);
@@ -48,8 +39,11 @@ double DalitzHistEfficiency::evaluate(const dataPoint &point) {
   int globalBin = test->FindBin(m23sq, m13sq);
   return effHist->GetEfficiency(globalBin);
 }
+  
+  
+  // ------------------ ROOTANGLEEFFICIENCY ---------------------
 
-double DalitzAngleHistEfficiency::evaluate(const dataPoint &point) {
+double RootAngleEfficiency::Evaluate(const dataPoint &point) const {
   double m23sq = point.getVal(0);
   double angle = point.getVal(8);
 
@@ -58,6 +52,5 @@ double DalitzAngleHistEfficiency::evaluate(const dataPoint &point) {
   return effHist->GetEfficiency(globalBin);
 }
 
-} /* namespace DPKinematics */
-} /* namespace Physics */
+} /* namespace DataReader */
 } /* namespace ComPWA */

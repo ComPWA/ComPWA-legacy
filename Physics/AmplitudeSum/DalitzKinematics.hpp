@@ -31,7 +31,7 @@
 
 namespace ComPWA {
 namespace Physics {
-namespace DPKinematics {
+namespace AmplitudeSum {
 
 class DalitzKinematics : public Kinematics {
 public:

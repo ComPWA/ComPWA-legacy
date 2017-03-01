@@ -28,8 +28,6 @@ namespace ComPWA {
 namespace Physics {
 namespace AmplitudeSum {
 
-using Physics::DPKinematics::DalitzKinematics;
-
 AmpFlatteRes::AmpFlatteRes(normStyle nS, int calls)
     : AmpAbsDynamicalFunction(nS, calls) {}
 
@@ -65,16 +63,16 @@ void AmpFlatteRes::initialize() {
   AmpAbsDynamicalFunction::initialize();
 
   try {
-    _g2_massA = PhysConst::instance()->findParticle(_g2_idA).mass_;
-    _g2_massB = PhysConst::instance()->findParticle(_g2_idB).mass_;
+    _g2_massA = PhysConst::Instance()->FindParticle(_g2_idA).GetMass();
+    _g2_massB = PhysConst::Instance()->FindParticle(_g2_idB).GetMass();
   } catch (std::exception &ex) {
     LOG(error) << "AmpFlatteRes::initialize() | "
                   "Masses of 2nd channel can not be set!";
     throw;
   }
   try {
-    _g3_massA = PhysConst::instance()->findParticle(_g3_idA).mass_;
-    _g3_massB = PhysConst::instance()->findParticle(_g3_idB).mass_;
+    _g3_massA = PhysConst::Instance()->FindParticle(_g3_idA).GetMass();
+    _g3_massB = PhysConst::Instance()->FindParticle(_g3_idB).GetMass();
   } catch (std::exception &ex) {
     // if g3 is not set we don't need to masses either
     if (_g3->GetValue()) {
@@ -85,195 +83,6 @@ void AmpFlatteRes::initialize() {
   }
 }
 
-void AmpFlatteRes::Configure(boost::property_tree::ptree::value_type const &v,
-                             ParameterList &list) {
-  if (v.first != "Flatte")
-    throw BadConfig("");
-
-  boost::property_tree::ptree pt = v.second;
-  AmpAbsDynamicalFunction::Configure(v, list);
-
-  // Coupling to channel 1 (mandatory)
-  auto tmp_g1_fix = pt.get<bool>("g1_fix", 1);
-  auto tmp_g1_min = pt.get<double>("g1_min", 0.);
-  auto tmp_g1_max = pt.get<double>("g1_max", 10.);
-  auto tmp_g1_name = pt.get_optional<std::string>("g1_name");
-  if (!tmp_g1_name) {
-    auto tmp_g1 = pt.get_optional<double>("g1");
-    if (!tmp_g1)
-      throw BadParameter("AmpFlatteRes::Configure() | "
-                         "g1 for " +
-                         _name + " not specified!");
-    _g1 = std::shared_ptr<DoubleParameter>(new DoubleParameter(
-        "g1_" + _name, tmp_g1.get(), tmp_g1_min, tmp_g1_max));
-    _g1->FixParameter(tmp_g1_fix);
-    if (_enable)
-      list.AddParameter(_g1);
-    _g1_writeByName = 0;
-  } else {
-    try {
-      _g1 = list.GetDoubleParameter(tmp_g1_name.get());
-      _g1_writeByName = 1;
-    } catch (BadParameter &ex) {
-      if (!_enable) {
-        _g1 = std::shared_ptr<DoubleParameter>(
-            new DoubleParameter(tmp_g1_name.get(), 0.0));
-        _g1_writeByName = 1;
-      } else {
-        LOG(error) << "AmpFlatteRes::Configure() | "
-                      "Requesting parameter "
-                   << tmp_g1_name.get() << " but"
-                                           " was not found in parameter list. "
-                                           "Quit since parameter is mandatory!";
-        throw;
-      }
-    }
-  }
-  // Coupling to channel 2 (mandatory)
-  auto tmp_g2_fix = pt.get<bool>("g2_fix", 1);
-  auto tmp_g2_min = pt.get<double>("g2_min", 0.);
-  auto tmp_g2_max = pt.get<double>("g2_max", 10.);
-  auto tmp_g2_name = pt.get_optional<std::string>("g2_name");
-  if (!tmp_g2_name) {
-    auto tmp_g2 = pt.get_optional<double>("g2");
-    if (!tmp_g2)
-      throw BadParameter("AmpFlatteRes::Configure() | "
-                         "g2 for " +
-                         _name + " not specified!");
-    _g2 = std::shared_ptr<DoubleParameter>(new DoubleParameter(
-        "g2_" + _name, tmp_g2.get(), tmp_g2_min, tmp_g2_max));
-    _g2->FixParameter(tmp_g2_fix);
-    if (_enable)
-      list.AddParameter(_g2);
-    _g2_writeByName = 0;
-  } else {
-    try {
-      _g2 = list.GetDoubleParameter(tmp_g2_name.get());
-      _g2_writeByName = 1;
-    } catch (BadParameter &ex) {
-      if (!_enable) {
-        _g2 = std::shared_ptr<DoubleParameter>(
-            new DoubleParameter(tmp_g2_name.get(), 0.0));
-        _g2_writeByName = 1;
-      } else {
-        LOG(error) << "AmpFlatteRes::Configure() | "
-                      "Requesting parameter "
-                   << tmp_g2_name.get() << " but"
-                                           " was not found in parameter list. "
-                                           "Quit since parameter is mandatory!";
-        throw;
-      }
-    }
-  }
-
-  auto tmp_g2_massA = pt.get_optional<std::string>("g2_part1");
-  if (!tmp_g2_massA)
-    throw BadParameter("AmpFlatteRes::Configure() | "
-                       "g2_massA for " +
-                       _name + " not specified!");
-  _g2_idA = tmp_g2_massA.get();
-
-  auto tmp_g2_massB = pt.get_optional<std::string>("g2_part2");
-  if (!tmp_g2_massB)
-    throw BadParameter("AmpFlatteRes::Configure() | "
-                       "g2_massB for " +
-                       _name + " not specified!");
-  _g2_idB = tmp_g2_massB.get();
-
-  // Coupling to channel 3 (optional)
-  auto tmp_g3_fix = pt.get<bool>("g3_fix", 1);
-  auto tmp_g3_min = pt.get<double>("g3_min", 0.);
-  auto tmp_g3_max = pt.get<double>("g3_max", 10.);
-  auto tmp_g3_name = pt.get_optional<std::string>("g3_name");
-  if (!tmp_g3_name) {
-    auto tmp_g3 = pt.get<double>("g3", 0.0);
-    _g3 = std::shared_ptr<DoubleParameter>(
-        new DoubleParameter("g3_" + _name, tmp_g3, tmp_g3_min, tmp_g3_max));
-    _g3->FixParameter(tmp_g3_fix);
-    _g3_writeByName = 0;
-    auto tmp_g3_massA = pt.get<std::string>("g3_part1", "");
-    _g3_idA = tmp_g3_massA;
-    auto tmp_g3_massB = pt.get<std::string>("g3_part2", "");
-    _g3_idB = tmp_g3_massB;
-
-    if (_enable && _g3->GetValue() != 0) {
-      LOG(info) << "AmpFlatteRes::Configure() | Adding 3rd channel: " << _name
-                << " parName=" << _g3->GetName() << " g3=" << _g3->GetValue()
-                << " g3_massA=" << _g3_massA << " g3_massB=" << _g3_massB;
-      list.AddParameter(_g3);
-    }
-  } else {
-    try {
-      _g3 = list.GetDoubleParameter(tmp_g3_name.get());
-      _g3_writeByName = 1;
-      auto tmp_g3_massA = pt.get<std::string>("g3_part1", "");
-      _g3_idA = tmp_g3_massA;
-      auto tmp_g3_massB = pt.get<std::string>("g3_part2", "");
-      _g3_idB = tmp_g3_massB;
-      LOG(info) << "AmpFlatteRes::Configure() | Adding 3rd channel:" << _name
-                << " parName=" << _g3->GetName() << " g3=" << _g3->GetValue()
-                << " g3_massA=" << _g3_massA << " g3_massB=" << _g3_massB;
-    } catch (BadParameter &ex) {
-      if (!_enable) {
-        _g3 = std::shared_ptr<DoubleParameter>(
-            new DoubleParameter(tmp_g3_name.get(), 0.0));
-        _g3_writeByName = 1;
-      } else {
-        LOG(error) << "AmpFlatteRes::Configure() | "
-                      "Requesting parameter "
-                   << tmp_g3_name.get()
-                   << " but"
-                      " was not found in parameter list. "
-                      "Continue since parameter is not mandatory!";
-        _g3 = std::shared_ptr<DoubleParameter>(
-            new DoubleParameter("g3_" + _name, 0.0));
-      }
-    }
-  }
-
-  initialize();
-
-  return;
-}
-
-void AmpFlatteRes::Save(boost::property_tree::ptree &pt) {
-  boost::property_tree::ptree amp;
-  AmpAbsDynamicalFunction::put(amp);
-  if (_g1_writeByName) {
-    amp.put("g1_name", _g1->GetName());
-  } else {
-    amp.put("g1", _g1->GetValue());
-    amp.put("g1_fix", _g1->IsFixed());
-    amp.put("g1_min", _g1->GetMinValue());
-    amp.put("g1_max", _g1->GetMaxValue());
-  }
-  if (_g2_writeByName) {
-    amp.put("g2_name", _g2->GetName());
-  } else {
-    amp.put("g2", _g2->GetValue());
-    amp.put("g2_fix", _g2->IsFixed());
-    amp.put("g2_min", _g2->GetMinValue());
-    amp.put("g2_max", _g2->GetMaxValue());
-  }
-  amp.put("g2_part1", _g2_idA);
-  amp.put("g2_part2", _g2_idB);
-  if (_g3->GetValue() != 0) {
-    if (_g3_writeByName) {
-      amp.put("g3_name", _g3->GetName());
-    } else {
-      amp.put("g3", _g3->GetValue());
-      amp.put("g3_fix", _g3->IsFixed());
-      amp.put("g3_min", _g3->GetMinValue());
-      amp.put("g3_max", _g3->GetMaxValue());
-    }
-    amp.put("g3_part1", _g3_idA);
-    amp.put("g3_part2", _g3_idB);
-  }
-
-  pt.add_child("Flatte", amp);
-
-  return;
-}
 
 std::string AmpFlatteRes::to_str() const {
   std::string dynAmp = AmpAbsDynamicalFunction::to_str();
@@ -289,28 +98,28 @@ std::string AmpFlatteRes::to_str() const {
   return dynAmp + str.str();
 }
 
-void AmpFlatteRes::CheckModified() {
+void AmpFlatteRes::CheckModified() const{
   AmpAbsDynamicalFunction::CheckModified();
   if (_g1->GetValue() != tmp_g1 || _g2->GetValue() != tmp_g2 ||
       _g3->GetValue() != tmp_g3) {
-    SetModified();
-    tmp_g1 = _g1->GetValue();
-    tmp_g2 = _g2->GetValue();
-    tmp_g3 = _g3->GetValue();
+    const_cast<bool&>(_modified) = 1;
+    const_cast<double&>(tmp_g1) = _g1->GetValue();
+    const_cast<double&>(tmp_g2) = _g2->GetValue();
+    const_cast<double&>(tmp_g3) = _g3->GetValue();
   }
   return;
 }
 
-double AmpFlatteRes::GetIntegral() {
+double AmpFlatteRes::GetIntegral() const {
   CheckModified();
   if (_modified) {
-    tmp_integral = integral();
-    _modified = 0;
+    const_cast<double&>(tmp_integral) = Integral();
+    const_cast<bool&>(_modified) = 0;
   }
   return tmp_integral;
 }
 
-std::complex<double> AmpFlatteRes::EvaluateAmp(dataPoint &point) {
+std::complex<double> AmpFlatteRes::EvaluateAmp( const dataPoint &point) const{
   double mSq = point.getVal(_subSys);
 
   std::complex<double> result;
@@ -366,8 +175,7 @@ AmpFlatteRes::dynamicalFunction(double mSq, double mR, double massA1,
   double sqrtS = sqrt(mSq);
 
 // channel A - signal channel
-std:
-  complex<double> gammaA, qTermA, termA;
+  std::complex<double> gammaA, qTermA, termA;
   double barrierA;
   // break-up momentum
   barrierA =
@@ -418,7 +226,8 @@ std:
   return dynamicalFunction(mSq, mR, gA, termA, termB, termC);
 }
 
-std::shared_ptr<FunctionTree> AmpFlatteRes::SetupTree(ParameterList &sample,
+std::shared_ptr<FunctionTree> AmpFlatteRes::GetTree(ParameterList &sample,
+                                                      ParameterList &phspSample,
                                                       ParameterList &toySample,
                                                       std::string suffix) {
   DalitzKinematics *kin =
@@ -450,9 +259,9 @@ std::shared_ptr<FunctionTree> AmpFlatteRes::SetupTree(ParameterList &sample,
   // R = (mag,phase)*(Flatte)*(WignerD)*(Norm)
   newTree->createHead("Reso_" + _name, mmultStrat, sampleSize);
   newTree->createNode("PreFactor_" + _name, complStrat, "Reso_" + _name);
-  newTree->createLeaf("IntensPre_" + _name, std::abs(_prefactor),
+  newTree->createLeaf("IntensPre_" + _name, std::abs(_preFactor),
                       "PreFactor_" + _name);
-  newTree->createLeaf("PhasePre_" + _name, std::arg(_prefactor),
+  newTree->createLeaf("PhasePre_" + _name, std::arg(_preFactor),
                       "PreFactor_" + _name);
   newTree->createNode("C_" + _name, complStrat, "Reso_" + _name); // c
   newTree->createLeaf("Intens_" + _name, _mag, "C_" + _name);     // r

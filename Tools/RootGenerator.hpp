@@ -5,9 +5,6 @@
  *      Author: weidenka
  */
 
-#ifndef PHYSICS_DPKINEMATICS_ROOTGENERATOR_HPP_
-#define PHYSICS_DPKINEMATICS_ROOTGENERATOR_HPP_
-
 //-------------------------------------------------------------------------------
 // Copyright (c) 2013 Peter Weidenkaff.
 // All rights reserved. This program and the accompanying materials
@@ -19,8 +16,8 @@
 //     Peter Weidenkaff - initial API
 //-------------------------------------------------------------------------------
 
-#ifndef ROOTGENERATOR_HPP_
-#define ROOTGENERATOR_HPP_
+#ifndef TOOLS_ROOTGENERATOR_HPP_
+#define TOOLS_ROOTGENERATOR_HPP_
 
 #include <iostream>
 #include <sstream>
@@ -36,18 +33,12 @@
 #include "Core/Generator.hpp"
 #include "Core/Event.hpp"
 #include "Core/Particle.hpp"
-#include "Physics/DPKinematics/DalitzKinematics.hpp"
+#include "Core/Kinematics.hpp"
 
 namespace ComPWA {
-namespace Physics {
-namespace DPKinematics {
+namespace Tools {
 
 class RootGenerator : public Generator {
-protected:
-  TGenPhaseSpace event;
-  unsigned int nPart;
-  Double_t *masses;
-
 public:
   RootGenerator(int seed = -1);
   ~RootGenerator() { delete[] masses; };
@@ -59,6 +50,12 @@ public:
   virtual double getUniform();
   virtual double getGaussDist(double mu, double sigma);
   virtual TGenPhaseSpace *getGenerator() { return &event; }
+  
+protected:
+  TGenPhaseSpace event;
+  unsigned int nPart;
+  Double_t *masses;
+
 };
 
 class UniformTwoBodyGenerator : public RootGenerator {
@@ -79,10 +76,7 @@ protected:
   double minSq, maxSq;
 };
     
-} /* namespace DPKinematics */
-} /* namespace Physics */
+} /* namespace Tools*/
 } /* namespace ComPWA */
 
-#endif /* ROOTGENERATOR_HPP_ */
-
-#endif /* PHYSICS_DPKINEMATICS_ROOTGENERATOR_HPP_ */
+#endif /* TOOLS_ROOTGENERATOR_HPP_ */

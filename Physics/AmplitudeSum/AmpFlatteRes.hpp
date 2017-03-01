@@ -58,21 +58,14 @@ public:
     return tmp;
   }
 
-  //! Configure resonance from ptree
-  virtual void Configure(boost::property_tree::ptree::value_type const &v,
-                         ParameterList &list);
-
-  //! Save resonance from to ptree
-  virtual void Save(boost::property_tree::ptree &);
-
   //! Check of parameters have changed and normalization has to be recalculatecd
-  virtual void CheckModified();
+  virtual void CheckModified() const;
 
   //! Print resonance parameters
   std::string to_str() const;
 
   //! Calculation integral |dynamical amplitude|^2
-  virtual double GetIntegral();
+  virtual double GetIntegral() const;
 
   //! Get resonance width
   virtual double GetWidth() const {
@@ -120,9 +113,10 @@ public:
                     std::complex<double> termA, std::complex<double> termB,
                     std::complex<double> termC = std::complex<double>(0, 0));
 
-  virtual std::complex<double> EvaluateAmp(dataPoint &point);
+  virtual std::complex<double> EvaluateAmp(const dataPoint &point) const;
 
-  virtual std::shared_ptr<FunctionTree> SetupTree(ParameterList &sample,
+  virtual std::shared_ptr<FunctionTree> GetTree(ParameterList &sample,
+                                                  ParameterList &phspSample,
                                                   ParameterList &toySample,
                                                   std::string suffix);
 

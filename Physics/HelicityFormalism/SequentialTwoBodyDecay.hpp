@@ -154,8 +154,6 @@ protected:
   std::pair<ParticleStateInfo, std::pair<ParticleStateInfo, ParticleStateInfo>>
       decay_spin_info_;
 
-  std::shared_ptr<DoubleParameter> _magnitude;
-  std::shared_ptr<DoubleParameter> _phase;
   std::vector<std::shared_ptr<PartialDecay> > _partDecays;
 
 };

@@ -28,8 +28,6 @@ namespace ComPWA {
 namespace Physics {
 namespace AmplitudeSum {
 
-using Physics::DPKinematics::DalitzKinematics;
-
 AmpRelBreitWignerRes::AmpRelBreitWignerRes(
     const char *name, unsigned int varIdA, unsigned int varIdB,
     std::shared_ptr<DoubleParameter> mag,
@@ -45,70 +43,12 @@ AmpRelBreitWignerRes::AmpRelBreitWignerRes(
                               mesonRadius, motherRadius, type, nCalls, nS),
       _width(width) {
   if (_width->GetValue() != tmp_width) {
-    SetModified();
+    _modified=1;
     tmp_width = _width->GetValue();
   }
 }
 
 AmpRelBreitWignerRes::~AmpRelBreitWignerRes() {}
-
-void AmpRelBreitWignerRes::Configure(
-    boost::property_tree::ptree::value_type const &v, ParameterList &list) {
-  if (v.first != "BreitWigner")
-    throw BadConfig("");
-  boost::property_tree::ptree pt = v.second;
-  AmpAbsDynamicalFunction::Configure(v, list);
-
-  // Width (mandatory)
-  auto tmp_width_fix = pt.get<bool>("width_fix", 1);
-  auto tmp_width_min = pt.get<double>("width_min", 0.0);
-  auto tmp_width_max = pt.get<double>("width_max", 1.0);
-  auto tmp_width_name = pt.get_optional<std::string>("width_name");
-  if (!tmp_width_name) {
-    auto tmp_width = pt.get_optional<double>("width");
-    if (!tmp_width)
-      throw BadParameter("AmpRelBreitWignerRes::Configure() | "
-                         "width for " +
-                         _name + " not specified!");
-    _width = std::shared_ptr<DoubleParameter>(new DoubleParameter(
-        "width_" + _name, tmp_width.get(), tmp_width_min, tmp_width_max));
-    _width->FixParameter(tmp_width_fix);
-    if (_enable)
-      list.AddParameter(_width);
-    _width_writeByName = 0;
-  } else {
-    try {
-      _width = list.GetDoubleParameter(tmp_width_name.get());
-      _width_writeByName = 1;
-    } catch (BadParameter &ex) {
-      LOG(error) << "AmpRelBreitWignerRes::Configure() | "
-                    "Requesting parameter "
-                 << tmp_width_name.get()
-                 << " but"
-                    " was not found in parameter list. "
-                    "Quit since parameter is mandatory!";
-      throw;
-    }
-  }
-  initialize();
-  return;
-}
-
-void AmpRelBreitWignerRes::Save(boost::property_tree::ptree &pt) {
-  boost::property_tree::ptree amp;
-  AmpAbsDynamicalFunction::put(amp);
-  if (_width_writeByName) {
-    amp.put("width_name", _width->GetName());
-  } else {
-    amp.put("width", _width->GetValue());
-    amp.put("width_fix", _width->IsFixed());
-    amp.put("width_min", _width->GetMinValue());
-    amp.put("width_max", _width->GetMaxValue());
-  }
-
-  pt.add_child("BreitWigner", amp);
-  return;
-}
 
 std::string AmpRelBreitWignerRes::to_str() const {
   std::string dynAmp = AmpAbsDynamicalFunction::to_str();
@@ -118,25 +58,25 @@ std::string AmpRelBreitWignerRes::to_str() const {
   return dynAmp + str.str();
 }
 
-void AmpRelBreitWignerRes::CheckModified() {
+void AmpRelBreitWignerRes::CheckModified() const {
   AmpAbsDynamicalFunction::CheckModified();
   if (_width->GetValue() != tmp_width) {
-    SetModified();
-    tmp_width = _width->GetValue();
+    const_cast<bool&>(_modified) = 1;
+    const_cast<double&>(tmp_width) = _width->GetValue();
   }
   return;
 }
 
-double AmpRelBreitWignerRes::GetIntegral() {
+double AmpRelBreitWignerRes::GetIntegral() const{
   CheckModified();
   if (_modified) {
-    tmp_integral = integral();
-    _modified = 0;
+    const_cast<double&>(tmp_integral) = Integral();
+    const_cast<bool&>(_modified) = 0;
   }
   return tmp_integral;
 }
 
-std::complex<double> AmpRelBreitWignerRes::EvaluateAmp(dataPoint &point) {
+std::complex<double> AmpRelBreitWignerRes::EvaluateAmp(const dataPoint &point) const {
   double mSq = point.getVal(_subSys);
   std::complex<double> result;
   try {
@@ -193,10 +133,9 @@ std::complex<double> AmpRelBreitWignerRes::dynamicalFunction(
 }
 
 std::shared_ptr<FunctionTree>
-AmpRelBreitWignerRes::SetupTree(ParameterList &sample, ParameterList &toySample,
+AmpRelBreitWignerRes::GetTree(ParameterList &sample, ParameterList &phspSample, ParameterList &toySample,
                                 std::string suffix) {
-  DalitzKinematics *kin =
-      dynamic_cast<DalitzKinematics *>(Kinematics::instance());
+  auto kin = dynamic_cast<DalitzKinematics *>(Kinematics::instance());
   //	auto var1_limit = kin->GetMinMax( GetVarIdA() );
   //	auto var2_limit = kin->GetMinMax( GetVarIdB() );
   //	double phspVol = (var1_limit.second-var1_limit.first)
@@ -230,9 +169,9 @@ AmpRelBreitWignerRes::SetupTree(ParameterList &sample, ParameterList &toySample,
   newTree->createHead("Reso_" + _name, mmultStrat, sampleSize);
 
   newTree->createNode("PreFactor_" + _name, complStrat, "Reso_" + _name);
-  newTree->createLeaf("IntensPre_" + _name, std::abs(_prefactor),
+  newTree->createLeaf("IntensPre_" + _name, std::abs(_preFactor),
                       "PreFactor_" + _name);
-  newTree->createLeaf("PhasePre_" + _name, std::arg(_prefactor),
+  newTree->createLeaf("PhasePre_" + _name, std::arg(_preFactor),
                       "PreFactor_" + _name);
 
   newTree->createNode("C_" + _name, complStrat, "Reso_" + _name); // m0c

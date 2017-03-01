@@ -138,7 +138,7 @@ void Data::setEfficiency(std::shared_ptr<Efficiency> eff) {
       continue;
     }
     //		dataPoint point(fEvents.at(evt));
-    double val = eff->evaluate(point);
+    double val = eff->Evaluate(point);
     fEvents.at(evt).setEfficiency(val);
   }
 }

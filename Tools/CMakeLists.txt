@@ -17,10 +17,10 @@ FILE(GLOB lib_headers *.hpp)
 #install(FILES ${CMAKE_CURRENT_BINARY_DIR}/G__Dict.cxx.o DESTINATION lib/)
 #add_library ( ComPWA_DPKinematics SHARED ${lib_srcs} G__Dict.cxx ${lib_headers} )
 
-add_library ( ComPWA_DPKinematics SHARED ${lib_srcs} ${lib_headers} )
+add_library ( ComPWA_Tools SHARED ${lib_srcs} ${lib_headers} )
 
-target_link_libraries( ComPWA_DPKinematics ComPWA_Core ${ROOT_LIBRARIES} ${Boost_LIBRARIES} ${GSL_LIBRARIES} )
-target_include_directories( ComPWA_DPKinematics PUBLIC ${ROOT_INCLUDE_DIR} ${Boost_INCLUDE_DIR} ${GSL_INCLUDE_DIR} )
+target_link_libraries( ComPWA_Tools ComPWA_Core ${ROOT_LIBRARIES} ${Boost_LIBRARIES} ${GSL_LIBRARIES} )
+target_include_directories( ComPWA_Tools PUBLIC ${ROOT_INCLUDE_DIR} ${Boost_INCLUDE_DIR} ${GSL_INCLUDE_DIR} )
 
 
 #install (TARGETS ComPWA_DPKinematics DESTINATION lib/ComPWA)

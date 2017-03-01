@@ -15,7 +15,7 @@
 
 #include <cmath>
 #include "Physics/AmplitudeSum/AmpWigner2.hpp"
-#include "Physics/AmplitudeSum/WignerD.hpp"
+#include "Physics/WignerD.hpp"
 
 namespace ComPWA {
 namespace Physics {
@@ -25,7 +25,7 @@ AmpWigner2::AmpWigner2(unsigned int varId, ComPWA::Spin spin, unsigned int mu,
                        unsigned int muPrime)
     : _varId(varId), _spin(spin), _mu(mu), _muPrime(muPrime) {}
 
-double AmpWigner2::evaluate(dataPoint &point) {
+double AmpWigner2::Evaluate(const dataPoint &point)  const {
   return dynamicalFunction(_spin, Spin(_mu), Spin(_muPrime),
                            point.getVal(_varId));
 }

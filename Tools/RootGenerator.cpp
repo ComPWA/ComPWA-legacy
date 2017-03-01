@@ -7,12 +7,11 @@
 
 #include <stdexcept>
 
-#include "Physics/DPKinematics/RootGenerator.hpp"
 #include "Core/DataPoint.hpp"
+#include "Tools/RootGenerator.hpp"
 
 namespace ComPWA {
-namespace Physics {
-namespace DPKinematics {
+namespace Tools {
 
 RootGenerator::RootGenerator(int seed) {
   gRandom = new TRandom3(0);
@@ -65,6 +64,5 @@ void UniformTwoBodyGenerator::generate(Event &evt) {
   RootGenerator::getGenerator()->SetDecay(W, nPart, masses);
   RootGenerator::generate(evt);
 }
-} /* namespace DPKinematics */
-} /* namespace Physics */
+} /* namespace Tools */
 } /* namespace ComPWA */

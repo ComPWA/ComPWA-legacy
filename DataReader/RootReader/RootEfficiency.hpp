@@ -14,41 +14,37 @@
 #include <vector>
 #include <memory>
 
-#include <memory>
+#include <TEfficiency.h>
+#include <TH2.h>
 
-#include "TEfficiency.h"
-#include "TH2.h"
-#include "Physics/DPKinematics/DalitzKinematics.hpp"
 #include "Core/Efficiency.hpp"
 
 namespace ComPWA {
-namespace Physics {
-namespace DPKinematics {
+namespace DataReader {
 
 /**
- *  \class DalitzHistEfficiency
+ *  \class RootEfficiency
  *  \brief Efficiency provided by a histogram
  */
-class DalitzHistEfficiency : public Efficiency {
+class RootEfficiency : public Efficiency {
 protected:
   std::shared_ptr<TEfficiency> effHist;
 
 public:
-  //! Construct DalitzHistEfficiency from TEfficiency object
-  DalitzHistEfficiency(TEfficiency *eff);
-  //! Construct DalitzHistEfficiency from two TH2 objects for passed and total
+  //! Construct RootEfficiency from TEfficiency object
+  RootEfficiency(TEfficiency *eff);
+  //! Construct RootEfficiency from two TH2 objects for passed and total
   //! events
-  DalitzHistEfficiency(TH2D *passed, TH2D *total);
-  DalitzHistEfficiency(const DalitzHistEfficiency &);
-  ~DalitzHistEfficiency(){};
+  RootEfficiency(TH1 *passed, TH1 *total);
+  RootEfficiency(const RootEfficiency &);
+  ~RootEfficiency(){};
 
   //! returns efficiency for current datapoint
-  virtual double evaluate(std::vector<double> x);
-  virtual double evaluate(const dataPoint &point);
+  virtual double Evaluate(const dataPoint &point) const;
 };
 
 /**
- *  \class DalitzAngleHistEfficiency
+ *  \class RootAngleEfficiency
  *  \brief Uses also TEfficiency object, but the variables are one invariant
  *  mass and the corresponding helicity angle. This avoids binning effects near
  * the phsp boundaries.
@@ -56,19 +52,22 @@ public:
  * helicity angle
  *  between 1 and 2 are used!
  */
-class DalitzAngleHistEfficiency : public DalitzHistEfficiency {
+class RootAngleEfficiency : public RootEfficiency {
 public:
-  DalitzAngleHistEfficiency(TEfficiency *eff) : DalitzHistEfficiency(eff){};
-  DalitzAngleHistEfficiency(TH2D *passed, TH2D *total)
-      : DalitzHistEfficiency(passed, total){};
-  DalitzAngleHistEfficiency(const DalitzAngleHistEfficiency &p)
-      : DalitzHistEfficiency(p){};
-  ~DalitzAngleHistEfficiency(){};
+  RootAngleEfficiency(TEfficiency *eff) : RootEfficiency(eff){};
+  
+  RootAngleEfficiency(TH1 *passed, TH1 *total)
+      : RootEfficiency(passed, total){};
+  
+  RootAngleEfficiency(const RootAngleEfficiency &p)
+      : RootEfficiency(p){};
+  
+  ~RootAngleEfficiency(){};
 
-  virtual double evaluate(const dataPoint &point);
+  virtual double Evaluate(const dataPoint &point) const;
 };
-}
-}
+  
+} /* namespace DataReader */
 } /* namespace ComPWA */
 
 #endif /* ROOTEFFICIENCY_HPP_ */

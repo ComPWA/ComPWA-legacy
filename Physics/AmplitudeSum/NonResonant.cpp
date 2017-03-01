@@ -25,26 +25,8 @@ std::complex<double> NonResonant::dynamicalFunction() {
   return std::complex<double>(1, 0);
 }
 
-//! Configure resonance from ptree
-void NonResonant::Configure(boost::property_tree::ptree::value_type const &v,
-                            ParameterList &list) {
-  if (v.first != "NonResonant")
-    throw BadConfig("");
-
-  boost::property_tree::ptree pt = v.second;
-  AmpAbsDynamicalFunction::Configure(v, list);
-
-  return;
-}
-
-void NonResonant::Save(boost::property_tree::ptree &pt) {
-  boost::property_tree::ptree amp;
-  AmpAbsDynamicalFunction::put(amp);
-  pt.add_child("NonResonant", amp);
-  return;
-}
-
-std::shared_ptr<FunctionTree> NonResonant::SetupTree(ParameterList &sample,
+std::shared_ptr<FunctionTree> NonResonant::GetTree(ParameterList &sample,
+                                                     ParameterList &phspSample,
                                                      ParameterList &toySample,
                                                      std::string suffix) {
   double phspVol = Kinematics::instance()->GetPhspVolume();
@@ -68,9 +50,9 @@ std::shared_ptr<FunctionTree> NonResonant::SetupTree(ParameterList &sample,
   newTree->createHead("Reso_" + _name, mmultStrat, sampleSize);
 
   newTree->createNode("PreFactor_" + _name, complStrat, "Reso_" + _name);
-  newTree->createLeaf("IntensPre_" + _name, std::abs(_prefactor),
+  newTree->createLeaf("IntensPre_" + _name, std::abs(_preFactor),
                       "PreFactor_" + _name);
-  newTree->createLeaf("PhasePre_" + _name, std::arg(_prefactor),
+  newTree->createLeaf("PhasePre_" + _name, std::arg(_preFactor),
                       "PreFactor_" + _name);
 
   newTree->createNode("C_" + _name, complStrat, "Reso_" + _name); // c=r*exp(phi)

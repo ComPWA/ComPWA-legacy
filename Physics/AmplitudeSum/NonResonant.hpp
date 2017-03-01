@@ -35,30 +35,33 @@ public:
     return tmp;
   }
 
-  //! Configure resonance from ptree
-  virtual void Configure(boost::property_tree::ptree::value_type const &v,
-                         ParameterList &list);
-
-  virtual void Save(boost::property_tree::ptree &pt);
   //! Get resonance width
   virtual double GetWidth() const { return 0; }
   //! value of dynamical amplitude at \param point
-  virtual std::complex<double> EvaluateAmp(dataPoint &point) {
+  virtual std::complex<double> EvaluateAmp(const dataPoint &point) const{
     return dynamicalFunction();
   }
   //! value of WignerD amplitude at \param point
-  virtual double EvaluateWignerD(dataPoint &point) { return 1; };
+  virtual double EvaluateWignerD(const dataPoint &point) const { return 1; };
 
   //! Calculation integral |dynamical amplitude|^2
-  virtual double GetIntegral() {
+  virtual double GetIntegral() const{
     return Kinematics::instance()->GetPhspVolume();
   }
 
   static std::complex<double> dynamicalFunction();
 
-  virtual std::shared_ptr<FunctionTree> SetupTree(ParameterList &sample,
+  virtual std::shared_ptr<FunctionTree> GetTree(ParameterList &sample,
+                                                  ParameterList &phspSample,
                                                   ParameterList &toySample,
                                                   std::string suffix);
+  
+  /** Get maximum value of amplitude
+   * Maximum is numerically calculated using a random number generator
+   * @param gen Random number generator
+   * @return
+   */
+  virtual double GetMaxVal(std::shared_ptr<Generator> gen) { return 1; }
 };
 }
 } /* namespace Physics */

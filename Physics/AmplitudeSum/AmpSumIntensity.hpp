@@ -29,12 +29,13 @@
 #include "Core/Generator.hpp"
 
 #include "Physics/AmplitudeSum/AmpAbsDynamicalFunction.hpp"
-#include "Physics/DPKinematics/DalitzKinematics.hpp"
+#include "Physics/AmplitudeSum/DalitzKinematics.hpp"
 
 namespace ComPWA {
 namespace Physics {
 namespace AmplitudeSum {
 
+  
 class AmpSumIntensity : public AmpIntensity {
 
 public:
@@ -60,6 +61,11 @@ public:
    */
   const AmpSumIntensity operator+(const AmpSumIntensity &other) const;
 
+  /**! Add amplitude parameters to list
+   * Add parameters only to list if not already in
+   * @param list Parameter list to be filled
+   */
+  virtual void FillParameterList(ParameterList &list) const { };
   /** Operator for coherent addition of amplitudes
    *
    * @param rhs
@@ -68,12 +74,6 @@ public:
   AmpSumIntensity &operator+=(const AmpSumIntensity &rhs);
 
   //===================== LOAD/SAVE CONFIG ====================
-  //! Configure resonance from ptree
-  virtual void Configure(std::string filepath);
-
-  //! Save resonance from to ptree
-  virtual void Save(std::string fileName);
-
   //! Set prefactor
   virtual void SetPrefactor(std::complex<double> pre);
 
@@ -95,15 +95,14 @@ public:
 
   //==================== NORMALIZATION/INTEGRATION ==============
   //! Get normalization factor
-  virtual const double GetNormalization();
-
+  virtual double GetNormalization() const;
 
   //! Calculate inteference integral of two subresonances of @param A and @param
   //! B
-  virtual const double GetIntegralInterference(resonanceItr A, resonanceItr B);
+  virtual double GetIntegralInterference(ampItr A, ampItr B) const;
 
   //! calculate integral for a list of resonances
-  static const double GetIntegralInterference(std::vector<resonanceItr> resList,
+  static double GetIntegralInterference(std::vector<ampItr> resList,
                                               unsigned int nCalls);
 
   /** Calculation of integral
@@ -113,7 +112,7 @@ public:
    * @param nCalls Monte-Carlo precision (number of calls)
    * @return
    */
-  static double integral(std::vector<resonanceItr> resList,
+  static double integral(std::vector<ampItr> resList,
                          std::shared_ptr<Efficiency> eff, int nCalls = 30000);
 
   //==================== EVALUATION =======================
@@ -122,21 +121,21 @@ public:
    * @param point Point in phase-space
    * @return Complex function value
    */
-  virtual const std::complex<double> Evaluate(dataPoint &point);
+  virtual std::complex<double> Evaluate(const dataPoint &point) const;
 
   /**! Evaluate total amplitude
    * Using current set of parameters at phsp point @param point . Amplitude is
    * multiplied with efficiency of datapoint.
    */
-  virtual const double Intensity(dataPoint &point);
+  virtual double Intensity(const dataPoint &point) const;
 
   /**! Evaluate total amplitude
    * Using current set of parameters at phsp point @param point .
    * No efficiency correction.
    */
-  virtual const double IntensityNoEff(dataPoint &point);
+  virtual double IntensityNoEff(const dataPoint &point) const;
 
-  virtual const double sliceIntensity(dataPoint &dataP, ParameterList &par,
+  virtual double sliceIntensity(dataPoint &dataP, ParameterList &par,
                                       std::complex<double> *reso,
                                       unsigned int nResos, double N,
                                       unsigned int nF0, unsigned int nF2);
@@ -154,33 +153,22 @@ public:
   virtual std::string GetNameOfResonance(unsigned int id);
 
   //! get resonance by @param name
-  virtual std::shared_ptr<Resonance> GetResonance(std::string name);
+  virtual std::shared_ptr<Amplitude> GetAmplitude(std::string name);
 
   //! get resonance by @param id
-  virtual std::shared_ptr<Resonance> GetResonance(unsigned int id);
+  virtual std::shared_ptr<Amplitude> GetAmplitude(unsigned int id);
 
   //! List of resonances (enabled AND disabled)
-  virtual std::vector<std::shared_ptr<Resonance>> &GetFullListOfResonances() {
-    return resoList;
+  virtual std::vector<std::shared_ptr<Amplitude>> &GetAmplitudes() {
+    return _ampList;
   }
 
-  //! Iterator on first resonance (which is enabled)
-  virtual resonanceItr GetResonanceItrFirst() {
-//    return resonanceItr(_resEnabled, resoList.begin(), resoList.end());
+  virtual ampItr begin() {
+    return _ampList.begin();
   }
-
-  //! Iterator on last resonance (which is enabled)
-  virtual resonanceItr GetResonanceItrLast() {
-//    return resonanceItr(_resEnabled, resoList.end(), resoList.end());
-  }
-
-  //! List of resonance iterators
-  virtual const std::vector<resonanceItr> GetResonanceItrList() {
-    std::vector<resonanceItr> resItrList;
-    auto itr = GetResonanceItrFirst();
-    for (; itr != GetResonanceItrLast(); ++itr)
-      resItrList.push_back(itr);
-    return resItrList;
+  
+  virtual ampItr end() {
+    return _ampList.end();
   }
 
   //========== FunctionTree =============
@@ -191,12 +179,12 @@ public:
                                                 ParameterList &phspSample,
                                                 ParameterList &toySample);
 
+  //! Get amplitude integral for a set of (sub-) resonances
+  virtual double Integral(std::vector<ampItr> resoList) const;
+  
 protected:
   //! Get amplitdude integral. Result is not efficiency corrected.
-  virtual const double Integral();
-  
-  //! Get amplitude integral for a set of (sub-) resonances
-  virtual const double Integral(std::vector<resonanceItr> resoList);
+  virtual double Integral() const;
   
   //! Maximum value of amplitude. Necessary for event generation.
   double _maxFcnVal;
@@ -205,7 +193,7 @@ protected:
   //! calculate maximum value of amplitude with current parameters
   virtual void calcMaxVal(std::shared_ptr<Generator> gen);
   //! List of resonances
-  std::vector<std::shared_ptr<Resonance>> resoList;
+  std::vector<std::shared_ptr<Amplitude>> _ampList;
   //! Type of normalization
   normStyle _normStyle;
   //! precision for numeric integration
@@ -223,6 +211,7 @@ protected:
   std::shared_ptr<FunctionTree> setupBasicTree(ParameterList &sample,
                                                ParameterList &phspSample,
                                                std::string suffix = "");
+  
 };
 
 } /* namespace AmplitudeSum */

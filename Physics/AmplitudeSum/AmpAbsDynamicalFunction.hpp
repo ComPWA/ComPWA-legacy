@@ -27,14 +27,14 @@
 #include "Core/DataPoint.hpp"
 #include "Core/FunctionTree.hpp"
 #include "Core/PhysConst.hpp"
-#include "Core/Resonance.hpp"
+#include "Core/Amplitude.hpp"
 #include "Physics/AmplitudeSum/AmpWigner2.hpp"
 
 namespace ComPWA {
 namespace Physics {
 namespace AmplitudeSum {
 
-class AmpAbsDynamicalFunction : public Resonance {
+class AmpAbsDynamicalFunction : public Amplitude {
 public:
   AmpAbsDynamicalFunction(normStyle nS = normStyle::one, int calls = 30000);
 
@@ -61,29 +61,24 @@ public:
 
   virtual ~AmpAbsDynamicalFunction();
 
-  //! Configure resonance from ptree
-  virtual void Configure(boost::property_tree::ptree::value_type const &v,
-                         ParameterList &list);
-  //! Save resonance to ptree
-  virtual void Save(boost::property_tree::ptree &) = 0;
   //! Implementation of interface for streaming info about the strategy
   virtual std::string to_str() const;
   //! value of resonance at \param point
-  virtual std::complex<double> Evaluate(dataPoint &point);
+  virtual std::complex<double> Evaluate(const dataPoint &point) const;
   //! value of dynamical amplitude at \param point
-  virtual std::complex<double> EvaluateAmp(dataPoint &point) = 0;
+  virtual std::complex<double> EvaluateAmp(const dataPoint &point) const = 0;
   //! value of angular distribution at \param point
-  virtual double EvaluateWignerD(dataPoint &point) {
-    return _wignerD.evaluate(point);
+  virtual double EvaluateWignerD(const dataPoint &point)  const {
+    return _wignerD.Evaluate(point);
   };
   //! value of angular distribution at \param point
-  virtual double EvaluateAngular(dataPoint &point) {
+  virtual double EvaluateAngular(const dataPoint &point) const{
     return EvaluateWignerD(point);
   };
 
-  //! Calculation integral |dynamical amplitude|^2
-  //	virtual double GetIntegral() const;
-
+  //! Print amplitude to logging system
+  virtual void to_str() {};
+  
   /** Calculation integral |c * dynamical amplitude * WignerD|^2
    * Used to check the correct normalization of the amplitude. Should always be
    * 1.
@@ -94,45 +89,22 @@ public:
   /**! Get current normalization.
    * In case that resonance parameters has change, it is recalculated.
    */
-  virtual double GetNormalization();
+  virtual double GetNormalization() const;
 
   //! Set normalization style
   virtual void SetNormalizationStyle(normStyle n) { _normStyle = n; };
+  
   //! Get normalization style
   virtual normStyle GetNormalizationStyle() const { return _normStyle; };
+  
   //! Trigger recalculation of normalization
-  virtual void SetModified() { _modified = 1; }
-  //! Trigger recalculation of normalization
-  virtual void CheckModified();
-  //! Enable/Disable resonance
-  virtual void SetEnable(bool s) { _enable = s; }
-  //! Get Enable/Disable status
-  virtual bool GetEnable() const { return _enable; }
-  //! Get resonance name
-  virtual std::string GetName() const { return _name; }
-  //! Set resonance name
-  virtual void SetName(std::string n) { _name = n; }
+  virtual void CheckModified() const;
 
-  //! Set prefactor
-  virtual void SetPrefactor(std::complex<double> pre) { _prefactor = pre; }
-
-  //! Get prefactor
-  virtual std::complex<double> GetPrefactor() const { return _prefactor; }
-
-  //! Get coefficient
-  virtual std::complex<double> GetCoefficient() const;
-  //! Get magnitude
-  virtual double GetMagnitude() const { return _mag->GetValue(); };
-  //! Get magnitude
-  virtual std::shared_ptr<DoubleParameter> GetMagnitudePar() { return _mag; };
-  //! Get phase
-  virtual double GetPhase() const { return _phase->GetValue(); };
-  //! Get phase
-  virtual std::shared_ptr<DoubleParameter> GetPhasePar() { return _phase; };
   //! Get resonance mass
-  virtual double GetMass() const { return _mass->GetValue(); };
+  virtual double GetMassValue() const { return _mass->GetValue(); };
   //! Get resonance mass
-  virtual std::shared_ptr<DoubleParameter> GetMassPar() { return _mass; };
+  virtual std::shared_ptr<DoubleParameter> GetMass() { return _mass; };
+  
   //! Get resonance width
   virtual double GetWidth() const = 0;
   //! Get resonance spin
@@ -159,10 +131,6 @@ public:
   virtual void SetVarIdA(unsigned int id) { _subSys = id; };
 
   virtual void SetVarIdB(unsigned int id) { _wignerD.SetVarId(id); };
-
-  virtual std::shared_ptr<FunctionTree> SetupTree(ParameterList &sample,
-                                                  ParameterList &toySample,
-                                                  std::string suffix) = 0;
 
   /** Convert width of resonance to coupling
    *
@@ -225,25 +193,22 @@ public:
                                               formFactorType type,
                                               std::complex<double> phspFactor);
 
+  //! Calculate & fill fit fractions of this amplitude to ParameterList
+  virtual void GetFitFractions(ParameterList &parList) {};
+  
 protected:
-  virtual void put(boost::property_tree::ptree &pt);
 
   void initialize();
 
   //! Calculation integral |dynamical amplitude|^2
-  virtual double integral() const;
+  virtual double Integral() const;
 
   /** Calculation integral |c * dynamical amplitude * WignerD|^2
    * Used to check the correct normalization of the amplitude. Should
    * always be 1.
    * @return
    */
-  virtual double totalIntegral() const;
-
-  //! Name of resonance
-  std::string _name;
-  //! enable/disable resonance
-  bool _enable;
+  virtual double TotalIntegral() const;
 
   //! Resonance shape was modified (recalculate the normalization)
   bool _modified;
@@ -253,9 +218,6 @@ protected:
 
   //! Precision of MC integration
   int _nCalls;
-
-  //! Pre factor
-  std::complex<double> _prefactor;
 
   //! Mass of mother particle
   double _M;

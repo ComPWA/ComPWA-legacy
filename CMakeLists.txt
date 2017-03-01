@@ -37,5 +37,6 @@ add_subdirectory (DataReader)
 add_subdirectory (Estimator)
 add_subdirectory (Optimizer)
 add_subdirectory (Physics)
+add_subdirectory (Tools)
 add_subdirectory (executables)
 

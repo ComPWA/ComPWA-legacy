@@ -23,7 +23,7 @@
 #include <vector>
 
 #include "Physics/AmplitudeSum/AmpAbsDynamicalFunction.hpp"
-#include "Physics/DPKinematics/DalitzKinematics.hpp"
+#include "Physics/AmplitudeSum/DalitzKinematics.hpp"
 
 namespace ComPWA {
 namespace Physics {
@@ -51,15 +51,15 @@ public:
   ~AmpGausRes();
 
   //! Calculation integral |dynamical amplitude|^2
-  virtual double GetIntegral() { return integral(); }
+  virtual double GetIntegral() const { return Integral(); }
 
   //! Get resonance width
   double GetWidth() const { return _width->GetValue(); }
 
   virtual void Save(boost::property_tree::ptree &){};
 
-  virtual std::complex<double> Evaluate(dataPoint &point);
-  virtual std::complex<double> EvaluateAmp(dataPoint &point);
+  virtual std::complex<double> Evaluate(const dataPoint &point) const;
+  virtual std::complex<double> EvaluateAmp(const dataPoint &point) const;
   virtual double evaluateWignerD(dataPoint &point) const { return 1; };
 
   inline virtual bool isSubSys(const unsigned int subSys) const {
@@ -68,9 +68,9 @@ public:
 
   double GetSpin() const { return 0; };
 
-  virtual std::shared_ptr<FunctionTree> SetupTree(ParameterList &sample,
-                                                  ParameterList &toySample,
-                                                  std::string suffix) {
+  //! Getter function for basic amp tree
+  virtual std::shared_ptr<FunctionTree>
+  GetTree(ParameterList &, ParameterList &, ParameterList &, std::string suffix){
     return std::shared_ptr<FunctionTree>();
   };
 

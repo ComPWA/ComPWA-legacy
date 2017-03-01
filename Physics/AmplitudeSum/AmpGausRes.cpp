@@ -39,7 +39,7 @@ AmpGausRes::AmpGausRes(const char *name, unsigned int varIdA,
 
 AmpGausRes::~AmpGausRes() {}
 
-std::complex<double> AmpGausRes::EvaluateAmp(dataPoint &point) {
+std::complex<double> AmpGausRes::EvaluateAmp(const dataPoint &point) const {
 
   double m0 = _mass->GetValue();
   double width = _width->GetValue();
@@ -51,8 +51,8 @@ std::complex<double> AmpGausRes::EvaluateAmp(dataPoint &point) {
 
   return gaus;
 }
-std::complex<double> AmpGausRes::Evaluate(dataPoint &point) {
-  return EvaluateAmp(point) * evaluateWignerD(point);
+std::complex<double> AmpGausRes::Evaluate(const dataPoint &point) const {
+  return EvaluateAmp(point) * EvaluateWignerD(point);
 }
 
 } /* namespace AmplitudeSum */

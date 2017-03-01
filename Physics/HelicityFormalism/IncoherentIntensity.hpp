@@ -30,7 +30,7 @@ public:
    * @param gen Random number generator
    * @return
    */
-  virtual double GetMaximum(std::shared_ptr<ComPWA::Generator> gen) {
+  virtual double GetMaximum(std::shared_ptr<ComPWA::Generator> gen) const {
     double max = 0;
     for (auto i : _intens) {
       double tmp = i->GetMaximum(gen);
@@ -65,7 +65,7 @@ public:
    * @return
    */
   virtual double Intensity(const ComPWA::dataPoint &point) const {
-    return (IntensityNoEff(point) * _eff->evaluate(point));
+    return (IntensityNoEff(point) * _eff->Evaluate(point));
   };
 
   /** Calculate intensity of amplitude at point in phase-space
@@ -86,15 +86,18 @@ public:
    * Add parameters only to list if not already in
    * @param list Parameter list to be filled
    */
-  virtual void FillParameterList(ComPWA::ParameterList &list) const {};
+  virtual void GetParameters(ComPWA::ParameterList &list) const {};
 
   //! Calculate & fill fit fractions of this amplitude to ParameterList
   virtual void GetFitFractions(ComPWA::ParameterList &parList){};
 
+  //! Check of tree is available
+  virtual bool HasTree() { return 0; }
+  
   //! Getter function for basic amp tree
   virtual std::shared_ptr<ComPWA::FunctionTree>
-  SetupTree(ComPWA::ParameterList &, ComPWA::ParameterList &,
-            ComPWA::ParameterList &) {
+  GetTree(ComPWA::ParameterList &, ComPWA::ParameterList &,
+            ComPWA::ParameterList &, std::string suffix="") {
     return std::shared_ptr<ComPWA::FunctionTree>();
   }
 
@@ -109,19 +112,19 @@ public:
       ComPWA::Physics::HelicityFormalism::CoherentIntensity>>::iterator
       coherentIntItr;
 
-  coherentIntItr begin() { return _intens.begin(); }
+  coherentIntItr First() { return _intens.begin(); }
 
-  coherentIntItr end() { return _intens.end(); }
+  coherentIntItr Last() { return _intens.end(); }
 
   //============= PRINTING =====================
   //! Print amplitude to logging system
-  virtual void to_str() { LOG(info) << "IncoherentIntensity"; }
+  virtual void to_str() const { LOG(info) << "IncoherentIntensity"; }
 
 protected:
   /** Calculate integral of amplitude.
    * The integral does not include efficiency correction
    */
-  virtual const double Integral() {
+  virtual double Integral() const {
     double result = 0;
     for (auto i : _intens) {
       /* Have to call GetNormalization() here since Integral() is protected */

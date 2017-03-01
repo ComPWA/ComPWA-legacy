@@ -63,19 +63,13 @@ public:
     return tmp;
   }
 
-  //! Configure resonance from ptree
-  virtual void Configure(boost::property_tree::ptree::value_type const &v,
-                         ParameterList &list);
-  //! Save resonance from to ptree
-  virtual void Save(boost::property_tree::ptree &pt);
-
   //! Trigger recalculation of normalization
-  virtual void CheckModified();
+  virtual void CheckModified() const;
 
   std::string to_str() const;
 
   //! Calculation integral |dynamical amplitude|^2
-  virtual double GetIntegral();
+  virtual double GetIntegral()const;
 
   //! Get resonance width
   double GetWidth() const { return _width->GetValue(); }
@@ -101,9 +95,10 @@ public:
                     unsigned int J, double mesonRadius,
                     formFactorType ffType = formFactorType::BlattWeisskopf);
 
-  virtual std::complex<double> EvaluateAmp(dataPoint &point);
+  virtual std::complex<double> EvaluateAmp(const dataPoint &point) const;
 
-  virtual std::shared_ptr<FunctionTree> SetupTree(ParameterList &sample,
+  virtual std::shared_ptr<FunctionTree> GetTree(ParameterList &sample,
+                                                  ParameterList &phspSample,
                                                   ParameterList &toySample,
                                                   std::string suffix);
 

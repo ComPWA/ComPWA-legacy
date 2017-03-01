@@ -11,8 +11,7 @@
 //-------------------------------------------------------------------------------
 
 #include <stdlib.h>
-#include "Physics/DPKinematics/DalitzKinematics.hpp"
-//#include "Physics/DPKinematics/DataPoint.hpp"
+#include "Physics/AmplitudeSum/DalitzKinematics.hpp"
 #include "Core/PhysConst.hpp"
 #include "Core/DataPoint.hpp"
 
@@ -25,35 +24,23 @@
 
 namespace ComPWA {
 namespace Physics {
-namespace DPKinematics {
+namespace AmplitudeSum {
 
 DalitzKinematics::DalitzKinematics(std::string _nameMother, std::string _name1,
                                    std::string _name2, std::string _name3)
     : Kinematics(_nameMother, 0.0, 3), name1(_name1), name2(_name2),
       name3(_name3), massIdsSet(false) {
   try {
-    _M = PhysConst::instance()->findParticle(_nameMother).mass_;
-    m1 = PhysConst::instance()->findParticle(_name1).mass_;
-    m2 = PhysConst::instance()->findParticle(_name2).mass_;
-    m3 = PhysConst::instance()->findParticle(_name3).mass_;
+    _M = PhysConst::Instance()->FindParticle(_nameMother).GetMass();
+    m1 = PhysConst::Instance()->FindParticle(_name1).GetMass();
+    m2 = PhysConst::Instance()->FindParticle(_name2).GetMass();
+    m3 = PhysConst::Instance()->FindParticle(_name3).GetMass();
 
     // TODO: What shall we do with half-integer spins
-    _spinM = PhysConst::instance()
-                 ->findParticle(_nameMother)
-                 .getSpinLikeQuantumNumber(QuantumNumberIDs::SPIN)
-                 .GetNumerator();
-    spin1 = PhysConst::instance()
-                ->findParticle(_name1)
-                .getSpinLikeQuantumNumber(QuantumNumberIDs::SPIN)
-                .GetNumerator();
-    spin2 = PhysConst::instance()
-                ->findParticle(_name2)
-                .getSpinLikeQuantumNumber(QuantumNumberIDs::SPIN)
-                .GetNumerator();
-    spin3 = PhysConst::instance()
-                ->findParticle(_name3)
-                .getSpinLikeQuantumNumber(QuantumNumberIDs::SPIN)
-                .GetNumerator();
+    _spinM = PhysConst::Instance()->FindParticle(_nameMother).GetSpin();
+    spin1 = PhysConst::Instance()->FindParticle(_name1).GetSpin();
+    spin2 = PhysConst::Instance()->FindParticle(_name2).GetSpin();
+    spin3 = PhysConst::Instance()->FindParticle(_name3).GetSpin();
 
   } catch (std::exception &ex) {
     LOG(error) << "DalitzKinematics::DalitzKinematics() | "
@@ -75,22 +62,10 @@ DalitzKinematics::DalitzKinematics(double _M, double _Br, double _m1,
     : Kinematics(_nameMother, _Br, 3), name1(_name1), m1(_m1), name2(_name2),
       m2(_m2), name3(_name3), m3(_m3), massIdsSet(false) {
   try {
-    _spinM = PhysConst::instance()
-                 ->findParticle(_nameMother)
-                 .getSpinLikeQuantumNumber(QuantumNumberIDs::SPIN)
-                 .GetNumerator();
-    spin1 = PhysConst::instance()
-                ->findParticle(_name1)
-                .getSpinLikeQuantumNumber(QuantumNumberIDs::SPIN)
-                .GetNumerator();
-    spin2 = PhysConst::instance()
-                ->findParticle(_name2)
-                .getSpinLikeQuantumNumber(QuantumNumberIDs::SPIN)
-                .GetNumerator();
-    spin3 = PhysConst::instance()
-                ->findParticle(_name3)
-                .getSpinLikeQuantumNumber(QuantumNumberIDs::SPIN)
-                .GetNumerator();
+    _spinM = PhysConst::Instance()->FindParticle(_nameMother).GetSpin();
+    spin1 = PhysConst::Instance()->FindParticle(_name1).GetSpin();
+    spin2 = PhysConst::Instance()->FindParticle(_name2).GetSpin();
+    spin3 = PhysConst::Instance()->FindParticle(_name3).GetSpin();
   } catch (std::exception &ex) {
     LOG(error) << "DalitzKinematics::DalitzKinematics() | "
                   "One or more particles can not be initialized: "

@@ -40,6 +40,7 @@
 #include "Core/DataPoint.hpp"
 #include "Core/Efficiency.hpp"
 #include "Core/Generator.hpp"
+#include "Core/Amplitude.hpp"
 
 namespace ComPWA {
   
@@ -77,17 +78,17 @@ public:
    * @param gen Random number generator
    * @return
    */
-  virtual double GetMaximum(std::shared_ptr<Generator> gen) = 0;
+  virtual double GetMaximum(std::shared_ptr<Generator> gen) const = 0;
 
   //============= PRINTING =====================
   //! Print amplitude to logging system
-  virtual void to_str() = 0;
+  virtual void to_str() const = 0;
 
   //=========== INTEGRATION/NORMALIZATION =================
   /** Calculate normalization of amplitude.
    * The integral includes efficiency correction
    */
-  virtual const double GetNormalization() { return 1/Integral(); }
+  virtual double GetNormalization() const { return 1/Integral(); }
 
   //=========== EVALUATION =================
   /** Calculate intensity of amplitude at point in phase-space
@@ -104,44 +105,68 @@ public:
    */
   virtual double IntensityNoEff(const dataPoint &point) const = 0;
 
-  //=========== PARAMETERS =================
-  /**! Add amplitude parameters to list
-   * Add parameters only to list if not already in
-   * @param list Parameter list to be filled
-   */
-  virtual void FillParameterList(ParameterList &list) const = 0;
+  //! Add parameters to list
+  virtual void GetParameters(ParameterList &list) const = 0;
 
-  //! Calculate & fill fit fractions of this amplitude to ParameterList
+  //! Fill ParameterList with fit fractions
   virtual void GetFitFractions(ParameterList &parList) = 0;
 
   //========== FUNCTIONTREE =============
   //! Check of tree is available
-  virtual bool hasTree() { return 0; }
+  virtual bool HasTree() { return 0; }
 
   //! Getter function for basic amp tree
   virtual std::shared_ptr<FunctionTree>
-  SetupTree(ParameterList &, ParameterList &, ParameterList &) {
+  GetTree(ParameterList &, ParameterList &, ParameterList &, std::string suffix="") {
     return std::shared_ptr<FunctionTree>();
   }
 
-  /**! Return Precision of Monte-Carlo Normalization
-   *
-   * @return integer value of used precision
-   */
-  unsigned int GetMcPrecision() { return 30000; } // Todo: fixed?
+  /**
+   Get strength parameter
 
+   @return strength parameter
+   */
+  std::shared_ptr<ComPWA::DoubleParameter> GetStrength() {
+    return _strength;
+  }
+
+  /**
+   Get strength parameter
+
+   @return strength parameter
+   */
+  double GetStrengthValue() const { return _strength->GetValue(); }
+
+  /**
+   Set strength parameter
+
+   @param par Strength parameter
+   */
+  void SetStrength(std::shared_ptr<ComPWA::DoubleParameter> par) {
+    _strength = par;
+  }
+
+  /**
+   Set strength parameter
+
+   @param par Strength parameter
+   */
+  void SetStrength(double par) { _strength->SetValue(par); }
+  
 protected:
   
   /** Calculate integral of amplitude.
    * The integral does not include efficiency correction
    */
-  virtual const double Integral() = 0;
+  virtual double Integral() const = 0;
 
   //! Name
   std::string _name;
 
   //! Efficiency object
   std::shared_ptr<Efficiency> _eff;
+  
+  std::shared_ptr<ComPWA::DoubleParameter> _strength;
 };
 //-----------------------------------------------------------------------------
 
@@ -184,11 +209,11 @@ public:
     return tmp;
   }
 
-  virtual void to_str(){};
+  virtual void to_str() const {};
 
   virtual const double GetNormalization() { return 1/Integral(); }
 
-  virtual double GetMaximum(std::shared_ptr<Generator> gen) {
+  virtual double GetMaximum(std::shared_ptr<Generator> gen) const {
     double mass = params.GetDoubleParameter(0)->GetValue();
     std::vector<double> m;
     m.push_back(mass * mass);
@@ -196,7 +221,7 @@ public:
     return Intensity(p);
   }
 
-  virtual void FillParameterList(ParameterList &list) const { };
+  virtual void GetParameters(ParameterList &list) const { };
   
   virtual double Intensity(const dataPoint &point) const {
 
@@ -218,7 +243,7 @@ public:
   
 protected:
   //! Get integral
-  virtual const double Integral() {
+  virtual double Integral() const{
     return (params.GetDoubleParameter(1)->GetValue() * std::sqrt(2 * M_PI));
   }
   
@@ -248,9 +273,9 @@ public:
     return tmp;
   }
 
-  virtual void to_str() {}
+  virtual void to_str() const {}
 
-  virtual double GetMaximum(std::shared_ptr<Generator> gen) { return 1; }
+  virtual double GetMaximum(std::shared_ptr<Generator> gen) const { return 1; }
 
 
   virtual const double GetNormalization() {
@@ -260,10 +285,10 @@ public:
   }
 
   virtual double Intensity(const dataPoint &point) const {
-    return _eff->evaluate(point);
+    return _eff->Evaluate(point);
   }
 
-  virtual void FillParameterList(ParameterList &list) const { };
+  virtual void GetParameters(ParameterList &list) const { };
   
   virtual double IntensityNoEff(const dataPoint &point) const {
     return 1.0;
@@ -272,12 +297,12 @@ public:
 
   //========== FunctionTree =============
   //! Check of tree is available
-  virtual bool hasTree() { return 1; }
+  virtual bool HasTree() { return 1; }
 
   //! Getter function for basic amp tree
   //! Getter function for basic amp tree
   virtual std::shared_ptr<FunctionTree>
-  SetupTree(ParameterList& sample, ParameterList& toySample, ParameterList& sample3) {
+  GetTree(ParameterList& sample, ParameterList& toySample, ParameterList& sample3) {
        return setupBasicTree(sample, toySample, "");
   }
 
@@ -315,7 +340,7 @@ protected:
     return newTree;
   }
   
-  virtual const double Integral() {
+  virtual double Integral() const{
     return Kinematics::instance()->GetPhspVolume();
   }
 };
