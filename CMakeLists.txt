@@ -15,7 +15,7 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib)
 set (CMAKE_CXX_STANDARD 11)
 
 #Add Boost
-find_package(Boost COMPONENTS system filesystem serialization thread chrono date_time log log_setup program_options regex python REQUIRED)
+find_package(Boost COMPONENTS system filesystem serialization thread chrono date_time log log_setup program_options regex REQUIRED)
 include_directories(${Boost_INCLUDE_DIR})
 link_directories(${Boost_LIBRARY_DIR})
 
