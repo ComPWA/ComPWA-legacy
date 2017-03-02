@@ -3,6 +3,7 @@
 # The REQUIRED statement is somehow not working
 find_package( ROOT REQUIRED )
 find_package( Boost REQUIRED )
+find_package( Geneva )
 
 FILE(GLOB lib_srcs PolyFit.cpp)
 FILE(GLOB lib_headers PolyFit.hpp)
@@ -23,14 +24,15 @@ add_executable ( dataiftestApp DataIFTestApp.cpp ${lib_headers})
 target_link_libraries( dataiftestApp ComPWA_Core ComPWA_RootReader ${ROOT_LIBRARIES} pthread )
 target_include_directories( dataiftestApp PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${ROOT_INCLUDE_DIR} )
 
-#Todo: if geneva
-#add_executable ( optimizertestApp OptimizerTestApp.cpp ${lib_headers})
-#target_link_libraries( optimizertestApp ComPWA_testApps ComPWA_Core ComPWA_RootReader ComPWA_MinLogLH ComPWA_Minuit2IF ComPWA_GenevaIF ${Boost_LIBRARIES} pthread )
-#target_include_directories( optimizertestApp PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} )
+IF(GENEVA_FOUND)
+    add_executable ( optimizertestApp OptimizerTestApp.cpp ${lib_headers})
+    target_link_libraries( optimizertestApp ComPWA_testApps ComPWA_Core ComPWA_RootReader ComPWA_MinLogLH ComPWA_Minuit2IF ComPWA_GenevaIF ${Boost_LIBRARIES} pthread )
+    target_include_directories( optimizertestApp PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} )
+ENDIF()
 
-add_executable ( optimizertestApp MinuitTestApp.cpp ${lib_headers})
-target_link_libraries( optimizertestApp ComPWA_testApps ComPWA_Core ComPWA_RootReader ComPWA_MinLogLH ComPWA_Minuit2IF ${Boost_LIBRARIES} pthread )
-target_include_directories( optimizertestApp PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} )
+add_executable ( minuittestApp MinuitTestApp.cpp ${lib_headers})
+target_link_libraries( minuittestApp ComPWA_testApps ComPWA_Core ComPWA_RootReader ComPWA_MinLogLH ComPWA_Minuit2IF ${Boost_LIBRARIES} pthread )
+target_include_directories( minuittestApp PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} )
 
 add_executable ( physicstestApp PhysicsTestApp.cpp ${lib_headers})
 target_link_libraries( physicstestApp ComPWA_Core ComPWA_BreitWigner ${ROOT_LIBRARIES} pthread )

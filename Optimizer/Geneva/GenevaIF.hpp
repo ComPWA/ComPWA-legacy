@@ -29,7 +29,7 @@
 #include <memory>
 #include <iostream>
 //#include <boost/shared_ptr.hpp>
-#include "Optimizer/ControlParameter.hpp"
+#include "Core/ControlParameter.hpp"
 #include "Optimizer/Optimizer.hpp"
 #include "Core/ParameterList.hpp"
 #include "Core/Parameter.hpp"
