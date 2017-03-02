@@ -1,7 +1,0 @@
-########### SliceFit lib #############
-lib SliceFit : [ glob *.cpp ]	
-	: <library>$(TOP)//qft++
-;
-
-install dist : SliceFit : <location>$(TOP)/lib ;
-

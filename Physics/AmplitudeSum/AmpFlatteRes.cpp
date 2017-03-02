@@ -345,7 +345,7 @@ std::complex<double> AmpFlatteRes::dynamicalFunction(
   std::complex<double> result =
       std::complex<double>(gA * g_production, 0) / denom;
 
-#ifdef DEBUG
+#ifndef NDEBUG
   if (std::isnan(result.real()) || std::isnan(result.imag())) {
     std::cout << "AmpFlatteRes::dynamicalFunction() | " << mR << " " << mSq
               << " " << termA << " " << termB << " " << termC << std::endl;
@@ -563,7 +563,7 @@ std::shared_ptr<FunctionTree> FlatteStrategy::SetupTree(
 
 bool FlatteStrategy::execute(ParameterList &paras,
                              std::shared_ptr<AbsParameter> &out) {
-#ifdef DEBUG
+#ifndef NDEBUG
   // Check parameter type
   if (checkType != out->type())
     throw(WrongParType("FlatteStrategy::execute() | "

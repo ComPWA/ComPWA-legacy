@@ -77,7 +77,7 @@ using namespace ComPWA::Physics::AmplitudeSum;
 using Physics::DPKinematics::DalitzKinematics;
 
 using Physics::AmplitudeSum::AmpSumIntensity;
-using DataReader::RootReader::RootReader;
+using ComPWA::DataReader::RootReader;
 using DataReader::JakeReader::JakeReader;
 using Estimator::SliceFit::SliceFit;
 

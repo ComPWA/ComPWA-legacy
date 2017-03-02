@@ -32,6 +32,8 @@ double AmpWigner2::evaluate(dataPoint &point) {
 
 double AmpWigner2::dynamicalFunction(ComPWA::Spin J, ComPWA::Spin mu,
                                      ComPWA::Spin muPrime, double cosTheta) {
+  assert(!std::isnan(cosTheta));
+  
   /* We assume that we have spin 0 particles only and the Wigner_d functions
    * simplifies to
    * ordinary Legendre polynomials. We normalize the square of these to one by
@@ -40,6 +42,7 @@ double AmpWigner2::dynamicalFunction(ComPWA::Spin J, ComPWA::Spin mu,
    * thats the
    * normalization.  */
   //	double norm = 1/sqrt(2*J+1);
+  
   double norm = 1;
   if ((double)J == 0)
     return norm; // assure that angular term is properly normalized
@@ -50,12 +53,8 @@ double AmpWigner2::dynamicalFunction(ComPWA::Spin J, ComPWA::Spin mu,
 
   double result = 1.0;
   result = Wigner_d(J, mu, muPrime, acos(cosTheta));
-
-#ifdef DEBUG
-  if ((result != result))
-    throw std::runtime_error(
-        "AmpWigner2::dynamicalFunction() | Result is NaN!");
-#endif
+  
+  assert(!std::isnan(result));
 
   return (norm * (2 * J.GetSpin() + 1) * result);
 }
@@ -66,7 +65,11 @@ AmpWigner2::dynamicalFunction(double cosAlpha, double cosBeta, double cosGamma,
                               ComPWA::Spin muPrime) {
   if ((double)J == 0)
     return 1.0;
-
+  
+  assert(!std::isnan(cosAlpha));
+  assert(!std::isnan(cosBeta));
+  assert(!std::isnan(cosGamma));
+  
   std::complex<double> i(0, 1);
 
   double tmp = AmpWigner2::dynamicalFunction(J, mu, muPrime, cosBeta);
@@ -74,11 +77,8 @@ AmpWigner2::dynamicalFunction(double cosAlpha, double cosBeta, double cosGamma,
       tmp * std::exp(-i * (mu.GetSpin() * acos(cosAlpha) +
                            muPrime.GetSpin() * acos(cosGamma)));
 
-#ifdef DEBUG
-  if ((result.real != result.real || result.imag != result.imag))
-    throw std::runtime_error(
-        "AmpWigner2::dynamicalFunction() | Result is NaN!");
-#endif
+  assert(!std::isnan(result.real()));
+  assert(!std::isnan(result.imag()));
 
   return result;
 }
@@ -104,7 +104,7 @@ std::shared_ptr<FunctionTree> AmpWigner2::SetupTree(ParameterList &sample,
 
 bool WignerDStrategy::execute(ParameterList &paras,
                               std::shared_ptr<AbsParameter> &out) {
-#ifdef DEBUG
+#ifndef NDEBUG
   if (checkType != out->type()) {
     throw(WrongParType(std::string("Output Type ") + ParNames[out->type()] +
                        std::string(" conflicts expected type ") +

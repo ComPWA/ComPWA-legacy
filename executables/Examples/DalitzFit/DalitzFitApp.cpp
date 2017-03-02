@@ -77,7 +77,7 @@ unsigned int nStartEvent = 0;
 using namespace ComPWA;
 using Physics::DPKinematics::DalitzKinematics;
 using Physics::AmplitudeSum::AmpSumIntensity;
-using DataReader::RootReader::RootReader;
+using DataReader::RootReader;
 using DataReader::JakeReader::JakeReader;
 using Estimator::MinLogLH::MinLogLH;
 
@@ -250,7 +250,7 @@ int main(int argc, char **argv) {
 	//return 0;
 	BOOST_LOG_TRIVIAL(info)<< "LH with optimal parameters: " << esti->controlParameter(par);
 	if (useFctTree)
-		BOOST_LOG_TRIVIAL(info)<<tree;
+		BOOST_LOG_TRIVIAL(info)<<tree->head()->to_str();
 		//exit(1);
 	double startInt[par.GetNDouble()], optiInt[par.GetNDouble()];
 	for (unsigned int i = 0; i < par.GetNDouble(); i++) {

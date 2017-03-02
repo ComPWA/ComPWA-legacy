@@ -1,3 +1,5 @@
+
+
 /*! Dalitz plot analysis of the decay D0->K_S0 K_ K-
  * @file DalitzFitApp.cpp
  * Fit application for D0->K_S0 K_ K- analysis. A model with BW and flatte
@@ -51,6 +53,7 @@
 
 using namespace std;
 using namespace ComPWA;
+using ComPWA::DataReader::RootReader;
 
 BOOST_CLASS_EXPORT(Optimizer::Minuit2::MinuitResult)
 
@@ -67,9 +70,10 @@ int main(int argc, char **argv) {
 
   std::string config_file;
   po::options_description generic("Generic options");
-  generic.add_options()("help,h", "produce help message")(
-      "config,c", po::value<string>(&config_file)->default_value(""),
-      "name of a file of a configuration.");
+  generic.add_options()("help,h", "produce help message");
+  generic.add_options()("config,c",
+                        po::value<string>(&config_file)->default_value(""),
+                        "name of a file of a configuration.");
 
   int seed;      // initial seed
   int numEvents; // data size to be generated
@@ -81,20 +85,26 @@ int main(int argc, char **argv) {
   po::options_description config("General settings");
   config.add_options()("nEvents",
                        po::value<int>(&numEvents)->default_value(1000),
-                       "set of events per fit")(
+                       "set of events per fit");
+  config.add_options()(
       "seed", po::value<int>(&seed)->default_value(-1),
-      "set random number seed; default is to used unique seed for every job")(
+      "set random number seed; default is to used unique seed for every job");
+  config.add_options()(
       "logLevel", po::value<std::string>(&logLevel)->default_value("trace"),
-      "set log level: error|warning|info|debug")(
-      "disableFileLog", po::value<bool>(&disableFileLog)->default_value(0),
-      "write log file? 0/1")(
+      "set log level: error|warning|info|debug");
+  config.add_options()("disableFileLog",
+                       po::value<bool>(&disableFileLog)->default_value(0),
+                       "write log file? 0/1");
+  config.add_options()(
       "outputFile",
       po::value<std::string>(&outputFileName)->default_value("out"),
-      "set output file name x. The files x.root and .log are created")(
-      "outputDir", po::value<std::string>(&outputDir)->default_value("./"),
-      "set output directory")("smearNEvents",
-                              po::value<bool>(&smearNEvents)->default_value(0),
-                              "smear NEvents for sqrt(NEvents)");
+      "set output file name x. The files x.root and .log are created");
+  config.add_options()("outputDir",
+                       po::value<std::string>(&outputDir)->default_value("./"),
+                       "set output directory");
+  config.add_options()("smearNEvents",
+                       po::value<bool>(&smearNEvents)->default_value(0),
+                       "smear NEvents for sqrt(NEvents)");
 
   std::string dataFile, dataFileTreeName;
   std::string bkgFile, bkgFileTreeName;
@@ -106,30 +116,39 @@ int main(int argc, char **argv) {
   po::options_description config_inout("Input/Generate settings");
   config_inout.add_options()(
       "dataFile", po::value<std::string>(&dataFile)->default_value(""),
-      "set input data; leave blank for toy mc generation")(
+      "set input data; leave blank for toy mc generation");
+  config_inout.add_options()(
       "dataFileTreeName",
       po::value<std::string>(&dataFileTreeName)->default_value("data"),
-      "set tree name in data file")(
+      "set tree name in data file");
+  config_inout.add_options()(
       "bkgFile", po::value<std::string>(&bkgFile)->default_value(""),
-      "set bkg sample; leave blank if we fit data")(
+      "set bkg sample; leave blank if we fit data");
+  config_inout.add_options()(
       "bkgFileTreeName",
       po::value<std::string>(&bkgFileTreeName)->default_value("data"),
-      "set tree name in bkg file")(
+      "set tree name in bkg file");
+  config_inout.add_options()(
       "trueModelFile",
       po::value<std::string>(&trueModelFile)->default_value("model.xml"),
-      "set XML model file of true distribution")(
+      "set XML model file of true distribution");
+  config_inout.add_options()(
       "trueBkgFile",
       po::value<std::string>(&trueBkgModelFile)->default_value(""),
-      "set XML model file of true distribution")(
+      "set XML model file of true distribution");
+  config_inout.add_options()(
       "trueSignalFraction",
       po::value<double>(&trueSignalFraction)->default_value(1.),
       "add this number of background events: Nbkg=(1-f)*NSignal; only makes "
-      "sense together with bkgFile; ")(
+      "sense together with bkgFile; ");
+  config_inout.add_options()(
       "trueAmpOption",
       po::value<std::string>(&trueAmpOption)->default_value(""),
-      "Use nocorrection=2/tagged=1/untagged=0")(
-      "resetWeights", po::value<bool>(&resetWeights)->default_value(0),
-      "should we reset all weights to one?")(
+      "Use nocorrection=2/tagged=1/untagged=0");
+  config_inout.add_options()("resetWeights",
+                             po::value<bool>(&resetWeights)->default_value(0),
+                             "should we reset all weights to one?");
+  config_inout.add_options()(
       "inputResult", po::value<std::string>(&inputResult)->default_value(""),
       "input file for MinuitResult");
 
@@ -188,7 +207,7 @@ int main(int argc, char **argv) {
       po::value<unsigned int>(&ampMcPrecision)->default_value(0),
       "Precision for MC integration and normalization")(
       "fittingMethod",
-      po::value<std::string>(&fittingMethod)->default_value("tree"),
+      po::value<std::string>(&fittingMethod)->default_value("plotOnly"),
       "choose between 'tree', 'amplitude' and 'plotOnly'")(
       "useMinos", po::value<bool>(&useMinos)->default_value(0),
       "Run MINOS for each parameter")(
@@ -223,16 +242,13 @@ int main(int argc, char **argv) {
   bool plotCorrectEfficiency;
   int plotNBins;
   bool plotAmplitude;
-  bool gof_enable;
-  int gof_mcPrecision;
-  int gof_size;
   po::options_description config_plot("Plot settings");
   config_plot.add_options()("plotting",
                             po::value<bool>(&enablePlotting)->default_value(1),
                             "Enable/Disable plotting")(
       "plotData", po::value<bool>(&plotDataSample)->default_value(1),
       "Enable/Disable plotting of data")(
-      "plotSize", po::value<int>(&plotSize)->default_value(1000000),
+      "plotSize", po::value<int>(&plotSize)->default_value(100000),
       "Size of sample for amplitude plot")(
       "plotNBins", po::value<int>(&plotNBins)->default_value(100),
       "Number of bins")(
@@ -240,13 +256,7 @@ int main(int argc, char **argv) {
       po::value<bool>(&plotCorrectEfficiency)->default_value(0),
       "Number of bins")("plotAmplitude",
                         po::value<bool>(&plotAmplitude)->default_value(1),
-                        "Enable/Disable plotting of amplitude")(
-      "enableGoF", po::value<bool>(&gof_enable)->default_value(0),
-      "Enable/Disable calculation of goodness-of-fit value")(
-      "GoF_mcPrecision", po::value<int>(&gof_mcPrecision)->default_value(-1),
-      "Number of MC events for PointToPoint GoF test calculation")(
-      "GoF_size", po::value<int>(&gof_size)->default_value(10000),
-      "Number of MC events for PointToPoint GoF test calculation");
+                        "Enable/Disable plotting of amplitude");
 
   po::options_description cmdline_options;
   cmdline_options.add(generic).add(config).add(config_inout);
@@ -331,7 +341,7 @@ int main(int argc, char **argv) {
   std::shared_ptr<Data> phspData, phspTrueData;
   if (!phspEfficiencyFile.empty()) {
     // sample with accepted phsp events
-    phspData = std::shared_ptr<Data>(new DataReader::RootReader::RootReader(
+    phspData = std::shared_ptr<Data>(new RootReader(
         phspEfficiencyFile, phspEfficiencyFileTreeName, mcPrecision));
     phspData->reduceToPhsp();
   }
@@ -348,14 +358,11 @@ int main(int argc, char **argv) {
     createAmp("trueDzeroAmp", trueAmpVec, trueModelFile, eff, ampMcPrecision,
               trueAmpOption);
     if (trueAmpVec.size() == 1) {
-      trueDataVec.push_back(
-          std::shared_ptr<Data>(new DataReader::RootReader::RootReader()));
+      trueDataVec.push_back(std::shared_ptr<Data>(new RootReader()));
       trueFraction.push_back(trueSignalFraction);
     } else if (trueAmpVec.size() == 2) {
-      trueDataVec.push_back(
-          std::shared_ptr<Data>(new DataReader::RootReader::RootReader()));
-      trueDataVec.push_back(
-          std::shared_ptr<Data>(new DataReader::RootReader::RootReader()));
+      trueDataVec.push_back(std::shared_ptr<Data>(new RootReader()));
+      trueDataVec.push_back(std::shared_ptr<Data>(new RootReader()));
       trueFraction.push_back(0.5 * trueSignalFraction);
       trueFraction.push_back(0.5 * trueSignalFraction);
     } else {
@@ -366,14 +373,11 @@ int main(int argc, char **argv) {
   if (!fitModelFile.empty()) {
     createAmp("DzeroAmp", ampVec, fitModelFile, eff, ampMcPrecision, ampOption);
     if (ampVec.size() == 1) {
-      dataVec.push_back(
-          std::shared_ptr<Data>(new DataReader::RootReader::RootReader()));
+      dataVec.push_back(std::shared_ptr<Data>(new RootReader()));
       fraction.push_back(fitSignalFraction);
     } else if (ampVec.size() == 2) {
-      dataVec.push_back(
-          std::shared_ptr<Data>(new DataReader::RootReader::RootReader()));
-      dataVec.push_back(
-          std::shared_ptr<Data>(new DataReader::RootReader::RootReader()));
+      dataVec.push_back(std::shared_ptr<Data>(new RootReader()));
+      dataVec.push_back(std::shared_ptr<Data>(new RootReader()));
       fraction.push_back(0.5 * fitSignalFraction);
       fraction.push_back(0.5 * fitSignalFraction);
     } else {
@@ -386,8 +390,7 @@ int main(int argc, char **argv) {
   if (trueSignalFraction != 1. && !trueBkgModelFile.empty()) {
     createAmp("trueBkg", trueAmpVec, trueBkgModelFile, eff, ampMcPrecision,
               "none");
-    trueDataVec.push_back(
-        std::shared_ptr<Data>(new DataReader::RootReader::RootReader()));
+    trueDataVec.push_back(std::shared_ptr<Data>(new RootReader()));
     trueFraction.push_back(1 - trueSignalFraction);
   } else if (trueSignalFraction != 1. && trueBkgModelFile.empty() &&
              bkgFile.empty()) {
@@ -404,14 +407,13 @@ int main(int argc, char **argv) {
                                "but no background model");
 
     createAmp("Bkg", ampVec, fitBkgFile, eff, ampMcPrecision, "none");
-    dataVec.push_back(
-        std::shared_ptr<Data>(new DataReader::RootReader::RootReader()));
+    dataVec.push_back(std::shared_ptr<Data>(new RootReader()));
     fraction.push_back(1 - fitSignalFraction);
   }
 
   //======================= READING DATA =============================
   // sample is used for minimization
-  std::shared_ptr<Data> sample(new DataReader::RootReader::RootReader());
+  std::shared_ptr<Data> sample(new RootReader());
 
   // temporary samples for signal and background
   std::shared_ptr<Data> inputData, inputBkg;
@@ -423,8 +425,7 @@ int main(int argc, char **argv) {
   if (trueSignalFraction != 1. && !bkgFile.empty()) {
     int numBkgEvents = (int)((1 - trueSignalFraction) * numEvents);
     LOG(info) << "Reading background file...";
-    std::shared_ptr<Data> inBkg(
-        new DataReader::RootReader::RootReader(bkgFile, bkgFileTreeName));
+    std::shared_ptr<Data> inBkg(new RootReader(bkgFile, bkgFileTreeName));
     inBkg->reduceToPhsp();
     if (resetWeights)
       inBkg->resetWeights(); // resetting weights of requested
@@ -438,8 +439,7 @@ int main(int argc, char **argv) {
     if (inputBkg)
       numSignalEvents -= inputBkg->getNEvents();
     LOG(info) << "Reading data file...";
-    std::shared_ptr<Data> inD(
-        new DataReader::RootReader::RootReader(dataFile, dataFileTreeName));
+    std::shared_ptr<Data> inD(new RootReader(dataFile, dataFileTreeName));
     inD->reduceToPhsp();
     if (resetWeights)
       inD->resetWeights(); // resetting weights of requested
@@ -451,8 +451,7 @@ int main(int argc, char **argv) {
   }
 
   //======================== GENERATION =====================
-  std::shared_ptr<Data> toyPhspData(
-      new DataReader::RootReader::RootReader()); // Toy sample
+  std::shared_ptr<Data> toyPhspData(new RootReader()); // Toy sample
   run.setPhspSample(toyPhspData);
   run.generatePhsp(mcPrecision);
   toyPhspData->setEfficiency(eff); // set efficiency values for each event
@@ -462,14 +461,12 @@ int main(int argc, char **argv) {
     // assume that efficiency of hit&miss is large 0.5%
     double phspSampleSize = numEvents / 0.005;
 
-    std::shared_ptr<Data> fullPhsp(new DataReader::RootReader::RootReader(
+    std::shared_ptr<Data> fullPhsp(new RootReader(
         phspEfficiencyFile, phspEfficiencyFileTreeName, phspSampleSize));
     std::shared_ptr<Data> fullTruePhsp;
     if (!phspEfficiencyFileTrueTreeName.empty()) {
-      fullTruePhsp =
-          std::shared_ptr<Data>(new DataReader::RootReader::RootReader(
-              phspEfficiencyFile, phspEfficiencyFileTrueTreeName,
-              phspSampleSize));
+      fullTruePhsp = std::shared_ptr<Data>(new RootReader(
+          phspEfficiencyFile, phspEfficiencyFileTrueTreeName, phspSampleSize));
       // Data* fullPhspRed = fullPhsp->EmptyClone();
       // Data* fullPhspTrueRed = fullTruePhsp->EmptyClone();
       // rndReduceSet(phspSampleSize,gen,fullPhsp.get(),fullPhspRed,
@@ -556,12 +553,6 @@ int main(int argc, char **argv) {
   LOG(info) << "Use MINOS: " << useMinos;
   LOG(info) << "Accurate errors on fit fractions: " << fitFractionError;
   LOG(info) << "Penalty scale: " << penaltyScale;
-  LOG(info) << "==== GOF";
-  LOG(info) << "enable gof: " << gof_enable;
-  if (gof_enable) {
-    LOG(info) << "size of sample: " << gof_size;
-    LOG(info) << "mc precision: " << gof_mcPrecision;
-  }
 
   LOG(info) << "==== PLOTTING";
   LOG(info) << "enable plotting: " << enablePlotting;
@@ -599,12 +590,12 @@ int main(int argc, char **argv) {
       contrPar->setUseFunctionTree(1);
       LOG(debug) << contrPar->getTree()->head()->to_str(20);
       //			auto trNode =
-      //contrPar->getTree()->head()->getChildNode("N");
+      // contrPar->getTree()->head()->getChildNode("N");
       //			LOG(info) <<"Compare normalization: (asmndj)"
       //				<<" Tree:
       //"<<trNode->getChildSingleValue("normFactor")
       //				<<" Amplitude(VEGAS): "<<
-      //ampVec.at(0)->GetNormalization();
+      // ampVec.at(0)->GetNormalization();
     }
 
     if (useRandomStartValues)
@@ -618,7 +609,7 @@ int main(int argc, char **argv) {
       setErrorOnParameterList(fitPar, 0.5, useMinos);
       //			preOpti = std::shared_ptr<Optimizer>(
       //					new
-      //GenevaIF(esti,dkskkDir+"/PWA/geneva-config/")
+      // GenevaIF(esti,dkskkDir+"/PWA/geneva-config/")
       //			);
       preResult = preOpti->exec(fitPar);
       preResult->setTrueParameters(truePar);
@@ -702,20 +693,17 @@ int main(int argc, char **argv) {
       Amplitude::UpdateAmpParameterList(ampVec, finalParList);
 
     //------- phase-space sample
-    std::shared_ptr<Data> pl_phspSample(
-        new DataReader::RootReader::RootReader());
+    std::shared_ptr<Data> pl_phspSample(new RootReader());
     LOG(info) << "Plotting results...";
     if (!phspEfficiencyFile.empty()) { // unbinned plotting
       // sample with accepted phsp events
-      pl_phspSample =
-          std::shared_ptr<Data>(new DataReader::RootReader::RootReader(
-              phspEfficiencyFile, phspEfficiencyFileTreeName, plotSize));
+      pl_phspSample = std::shared_ptr<Data>(new RootReader(
+          phspEfficiencyFile, phspEfficiencyFileTreeName, plotSize));
 
       std::shared_ptr<Data> plotTruePhsp;
       if (!phspEfficiencyFileTrueTreeName.empty())
-        plotTruePhsp =
-            std::shared_ptr<Data>(new DataReader::RootReader::RootReader(
-                phspEfficiencyFile, phspEfficiencyFileTrueTreeName, plotSize));
+        plotTruePhsp = std::shared_ptr<Data>(new RootReader(
+            phspEfficiencyFile, phspEfficiencyFileTrueTreeName, plotSize));
       run.setPhspSample(pl_phspSample, plotTruePhsp);
       // make sure no efficiency is set
       Amplitude::SetAmpEfficiency(
@@ -753,4 +741,3 @@ int main(int argc, char **argv) {
     return result->hasFailed();
   return 0;
 }
-

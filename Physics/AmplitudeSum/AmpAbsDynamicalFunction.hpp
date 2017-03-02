@@ -347,7 +347,7 @@ public:
   virtual bool execute(ParameterList &paras,
                        std::shared_ptr<AbsParameter> &out) {
 
-#ifdef DEBUG
+#ifndef NDEBUG
     // Check parameter type
     if (checkType != out->type())
       throw(WrongParType("phspFactorStrat::execute() | "
@@ -361,6 +361,8 @@ public:
     int check_nInt = 0;
     int check_nComplex = 0;
     int check_nDouble = 2;
+    int check_nMComplex = 0;
+    int check_nMDouble = 1;
 
     // Check size of parameter list
     if (paras.GetNBool() != check_nBool)
@@ -456,7 +458,7 @@ public:
   virtual bool execute(ParameterList &paras,
                        std::shared_ptr<AbsParameter> &out) {
 
-#ifdef DEBUG
+#ifndef NDEBUG
     // Check parameter type
     if (checkType != out->type())
       throw(WrongParType("barrierStrat::execute() | "

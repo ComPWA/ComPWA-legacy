@@ -41,6 +41,8 @@ public:
   void SetStats(bool b);
   //! Fill event
   void Fill(Event &event, double w = 1);
+    //! Fill dataPoint
+    void Fill(dataPoint &point, double w = 1);
   //! Scale all distributions
   void Scale(double w);
   //! Get 1D histogram

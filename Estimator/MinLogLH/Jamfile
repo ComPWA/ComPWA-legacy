@@ -1,5 +1,0 @@
-########### MinLogLH lib #############
-lib MinLogLH : [ glob *.cpp ] ;
-
-install dist : MinLogLH : <location>$(TOP)/lib ;
-

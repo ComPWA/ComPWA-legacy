@@ -41,7 +41,7 @@
 
 using namespace ComPWA;
 using Physics::DPKinematics::DalitzKinematics;
-using DataReader::RootReader::RootReader;
+using DataReader::RootReader;
 using DataReader::JakeReader::JakeReader;
 
 unsigned int nBins = 400;

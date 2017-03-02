@@ -83,7 +83,7 @@ int main(int argc, char **argv){
 
 	//empty file: run generation before fit
 	std::shared_ptr<Data> inputData(
-			new DataReader::RootReader::RootReader()
+			new DataReader::RootReader()
 	);
 
 	//======================= EFFICIENCY =============================
@@ -93,29 +93,22 @@ int main(int argc, char **argv){
 	//true amplitude model
 	std::string trueModelFile = "test/CompareTreeAmp-model.xml";
 
-	boost::property_tree::ptree pt;
-	read_xml(
-			trueModelFile, pt, boost::property_tree::xml_parser::trim_whitespace
-	);
-
 	auto a = new Physics::AmplitudeSum::AmpSumIntensity(
 			"amp", normStyle::one, eff, mcPrecision
 	);
-	a->Configure(pt);
+	a->Configure(trueModelFile);
 	std::shared_ptr<Amplitude> trueAmp(a);
 
 	//fit amplitude model
 	std::string fitModelFile = trueModelFile;
-	boost::property_tree::ptree pt2;
-	read_xml(fitModelFile, pt2, boost::property_tree::xml_parser::trim_whitespace);
 	auto fitAmpPtr = new Physics::AmplitudeSum::AmpSumIntensity(
 			"fitAmp", normStyle::one, eff, mcPrecision
 	);
-	fitAmpPtr->Configure(pt2);
+	fitAmpPtr->Configure(fitModelFile);
 	auto fitAmpTreePtr = new Physics::AmplitudeSum::AmpSumIntensity(
 			"fitAmpTree", normStyle::one, eff, mcPrecision
 	);
-	fitAmpTreePtr->Configure(pt2);
+	fitAmpTreePtr->Configure(fitModelFile);
 	//	AmplitudeSetup ini(fitModelFile);//put start parameters here
 	//	AmplitudeSetup iniTree(fitModelFile);//put start parameters here
 	//	AmpSumIntensity* fitAmpPtr = new AmpSumIntensity(ini, normStyle::one, eff, mcPrecision);
@@ -127,7 +120,7 @@ int main(int argc, char **argv){
 
 	//empty phsp sample
 	std::shared_ptr<Data> toyPhspData(
-			new DataReader::RootReader::RootReader()
+			new DataReader::RootReader()
 	);
 
 	run.setPhspSample(toyPhspData);
@@ -166,7 +159,7 @@ int main(int argc, char **argv){
 	BOOST_LOG_TRIVIAL(info)<<"Fit model file: "<<fitModelFile ;
 
 	//======================= TREE FIT =============================
-	std::shared_ptr<Optimizer::ControlParameter> esti(Estimator::MinLogLH::MinLogLH::createInstance(
+	std::shared_ptr<ControlParameter> esti(Estimator::MinLogLH::MinLogLH::createInstance(
 			fitAmpTree, inputData, toyPhspData));
 	Estimator::MinLogLH::MinLogLH* minLog = dynamic_cast<Estimator::MinLogLH::MinLogLH*>(&*(esti->Instance()));
 	minLog->setUseFunctionTree(1);
@@ -264,7 +257,7 @@ int main(int argc, char **argv){
 
 	//======================= AMPLITUDE FIT =============================
 	esti->resetInstance();
-	esti = std::shared_ptr<Optimizer::ControlParameter>(
+	esti = std::shared_ptr<ControlParameter>(
 			Estimator::MinLogLH::MinLogLH::createInstance(
 					fitAmp, inputData, toyPhspData)
 	);

@@ -90,7 +90,7 @@ int main(int argc, char **argv){
 	run.setGenerator(gen);
 	std::shared_ptr<Efficiency> eff(new UnitEfficiency());
 
-	std::shared_ptr<Data> toyPhspData(new DataReader::RootReader::RootReader());//empty phsp sample
+	std::shared_ptr<Data> toyPhspData(new DataReader::RootReader());//empty phsp sample
 	run.setPhspSample(toyPhspData);
 	if( !toyPhspData->getNEvents() ) {
 		run.generatePhsp(num);
@@ -99,7 +99,7 @@ int main(int argc, char **argv){
 
 	std::shared_ptr<Amplitude> unitAmp(new UnitAmp());
 	ParameterList list;
-	std::shared_ptr<Optimizer::ControlParameter> esti;
+	std::shared_ptr<ControlParameter> esti;
 	//Use unit amplitude
 	//	esti = std::shared_ptr<ControlParameter>(MinLogLH::createInstance(unitAmp,
 	//		toyPhspData, toyPhspData));
@@ -107,13 +107,11 @@ int main(int argc, char **argv){
 
 	//Use example model with 3 resonances
 	std::string trueModelFile = "test/CompareTreeAmp-model.xml";
-	boost::property_tree::ptree pt;
-	read_xml(trueModelFile, pt, boost::property_tree::xml_parser::trim_whitespace);
 	auto fitAmpPtr = new AmpSumIntensity("amp",normStyle::none, eff, num);
-	fitAmpPtr->Configure(pt);
+	fitAmpPtr->Configure(trueModelFile);
 	std::shared_ptr<Amplitude> trueAmp( fitAmpPtr );
 	trueAmp->FillParameterList(list);
-	esti = std::shared_ptr<Optimizer::ControlParameter>(
+	esti = std::shared_ptr<ControlParameter>(
 			Estimator::MinLogLH::MinLogLH::createInstance(trueAmp,toyPhspData , toyPhspData)
 	);
 
