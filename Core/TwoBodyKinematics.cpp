@@ -4,20 +4,21 @@
 
 namespace ComPWA {
 
-TwoBodyKinematics::TwoBodyKinematics(std::string _nameMother,
-                                     std::string _name1, std::string _name2,
+TwoBodyKinematics::TwoBodyKinematics(int idMother, std::vector<int> finalState,
                                      double deltaMassWindow)
-    : Kinematics(_nameMother, 0.0, 2), name1(_name1), name2(_name2) {
-  _M = ComPWA::PhysConst::Instance()->FindParticle(_nameMother).GetMass();
-  m1 = ComPWA::PhysConst::Instance()->FindParticle(_name1).GetMass();
-  m2 = ComPWA::PhysConst::Instance()->FindParticle(_name2).GetMass();
+  : Kinematics(std::vector<int>(idMother), finalState) {
+    
+    assert( finalState.size() == 2 );
+  _M = ComPWA::PhysConst::Instance()->FindParticle(idMother).GetMass();
+  m1 = ComPWA::PhysConst::Instance()->FindParticle(finalState.at(0)).GetMass();
+  m2 = ComPWA::PhysConst::Instance()->FindParticle(finalState.at(1)).GetMass();
 
   _spinM = ComPWA::PhysConst::Instance()
-      ->FindParticle(_nameMother).GetSpin();
+      ->FindParticle(idMother).GetSpin();
   spin1 = ComPWA::PhysConst::Instance()
-      ->FindParticle(_name1).GetSpin();
+      ->FindParticle(finalState.at(0)).GetSpin();
     spin2 = ComPWA::PhysConst::Instance()
-      ->FindParticle(_name2).GetSpin();
+      ->FindParticle(finalState.at(1)).GetSpin();
  
 
   if (_M == -999 || m1 == -999 || m2 == -999)
@@ -62,20 +63,6 @@ double TwoBodyKinematics::GetMass(unsigned int num) const {
     return m2;
   throw std::runtime_error("TwoBodyKinematics::getMass(int) | "
                            "Wrong particle requested!");
-  return -999;
-}
-
-//! get mass of paticles
-double TwoBodyKinematics::GetMass(std::string name) const {
-  if (name == _nameMother)
-    return _M;
-  if (name == name1)
-    return m1;
-  if (name == name2)
-    return m2;
-  throw std::runtime_error("TwoBodyKinematics::getMass(int) | "
-                           "Wrong particle " +
-                           name + " requested!");
   return -999;
 }
 

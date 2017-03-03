@@ -23,10 +23,10 @@ double CoherentIntensity::Intensity(const dataPoint &point) const {
 }
 
 double CoherentIntensity::IntensityNoEff(const dataPoint &point) const {
-  std::complex<double> result(0.0, 0.0);
+  std::complex<double> result(0., 0.);
   for (auto i : _seqDecays)
     result += i->Evaluate(point);
-  return std::norm(result);
+  return GetStrengthValue()*std::norm(result);
 };
 
 std::shared_ptr<CoherentIntensity>

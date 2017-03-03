@@ -69,7 +69,7 @@ public:
     for (auto i : _intens) {
       result += i->IntensityNoEff(point);
     }
-    return result;
+    return GetStrengthValue()*result;
   }
 
   //=========== PARAMETERS =================

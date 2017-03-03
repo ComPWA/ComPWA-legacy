@@ -9,17 +9,13 @@ class dataPoint;
 
 class TwoBodyKinematics : public Kinematics {
 public:
-  TwoBodyKinematics(std::string _nameMother, std::string _name1,
-                    std::string _name2, double deltaMassWindow = 0.5);
-
   void init();
 
-  static Kinematics *createInstance(std::string _nameMother, std::string _name1,
-                                    std::string _name2,
-                                    double massWindow = 0.5) {
-    if (_inst)
-      return _inst;
-    _inst = new TwoBodyKinematics(_nameMother, _name1, _name2, massWindow);
+  static Kinematics *createInstance(int idMother, std::vector<int> finalState,
+                  double deltaMassWindow = 0.5) {
+    if( _inst )
+      throw std::runtime_error("TwoBodyKinematics::createInstance() | Instance already exists!");
+    _inst = new TwoBodyKinematics(idMother, finalState, deltaMassWindow );
     return _inst;
   }
 
@@ -49,16 +45,17 @@ public:
   //! get mass of particles
   virtual double GetMass(unsigned int num) const;
 
-  //! get mass of paticles
-  virtual double GetMass(std::string name) const;
-
 protected:
-  std::string name1;  //! name of daughter 1
+  
+  TwoBodyKinematics(int idMother, std::vector<int> finalState,
+                  double deltaMassWindow);
+  
+  double _M;
+  ComPWA::Spin _spinM;
   double mSq1;        //! masse squared of daughter 1
   double m1;          //! masses of daughter 1
   unsigned int spin1; //! spin of daughter 1
 
-  std::string name2;  //! name of daughter 2
   double mSq2;        //! masse squared of daughter 2
   double m2;          //! masses of daughter 2
   unsigned int spin2; //! spin of daughter 2

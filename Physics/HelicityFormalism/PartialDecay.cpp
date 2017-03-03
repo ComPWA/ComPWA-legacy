@@ -34,8 +34,6 @@ PartialDecay::Factory(const boost::property_tree::ptree &pt) {
   auto partProp = PhysConst::Instance()->FindParticle(id);
   std::string decayType = partProp.GetDecayType();
   
-  
-  
   if (decayType == "stable") {
     throw std::runtime_error("PartialDecay::Factory() | Stable particle is "
                              "given as mother particle of a decay. Makes no "
@@ -48,8 +46,12 @@ PartialDecay::Factory(const boost::property_tree::ptree &pt) {
   }
   obj->SetDynamicalFunction(dynObj);
 
+  //TODO: Need to get data poistion from Kinematics
+  //obj->SetDataPosition(mPos, cosThetaPos, phiPos)
+  
   return obj;
 }
+  
 }
 }
 }

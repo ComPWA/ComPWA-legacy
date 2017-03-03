@@ -19,16 +19,16 @@ void dataPoint::init() {
   var = std::vector<double>(Kinematics::instance()->GetNVars(), 0);
 }
 
-dataPoint::dataPoint(int a, int b, double invMassSqA, double invMassSqB)
-    : weight(1.0), eff(1.0) {
-  init();
-  Set(a, b, invMassSqA, invMassSqB);
-}
+//dataPoint::dataPoint(int a, int b, double invMassSqA, double invMassSqB)
+//    : weight(1.0), eff(1.0) {
+//  init();
+//  Set(a, b, invMassSqA, invMassSqB);
+//}
 
-void dataPoint::Set(int a, int b, double invMassSqA, double invMassSqB) {
-  Kinematics::instance()->FillDataPoint(a, b, invMassSqA, invMassSqB, *this);
-  return;
-}
+//void dataPoint::Set(int a, int b, double invMassSqA, double invMassSqB) {
+//  Kinematics::instance()->FillDataPoint(a, b, invMassSqA, invMassSqB, *this);
+//  return;
+//}
 
 dataPoint::dataPoint(std::vector<double> vec) : weight(1.), eff(1.) {
   init();

@@ -32,31 +32,25 @@ double AmpWignerD::Evaluate(const dataPoint &point, int pos1, int pos2) const {
 
 double AmpWignerD::dynamicalFunction(ComPWA::Spin J, ComPWA::Spin mu,
                                      ComPWA::Spin muPrime, double cosTheta) {
+  
+  if( (double)J == 0 )
+    return 1.0;
+  
   assert(!std::isnan(cosTheta));
   
-  /* We assume that we have spin 0 particles only and the Wigner_d functions
-   * simplifies to
-   * ordinary Legendre polynomials. We normalize the square of these to one by
-   * the pre factor
-   * sqrt(2J+1). The factor was obtained by trial and error. No idea for why
-   * thats the
-   * normalization.  */
-  //	double norm = 1/sqrt(2*J+1);
-  
-  double norm = 1;
-  if ((double)J == 0)
-    return norm; // assure that angular term is properly normalized
   if (cosTheta > 1 || cosTheta < -1)
     throw std::runtime_error(
         "AmpWignerD::dynamicalFunction() | "
         "scattering angle out of range! Datapoint beyond phsp?");
 
-  double result = 1.0;
-  result = Wigner_d(J, mu, muPrime, acos(cosTheta));
-  
+  double result = Wigner_d(J, mu, muPrime, acos(cosTheta));
   assert(!std::isnan(result));
 
-  return (norm * (2 * J.GetSpin() + 1) * result);
+  //Not quite sure what the correct prefactor is in this case.
+  //	double norm = 1/sqrt(2*J.GetSpin()+1);
+  double norm = (2 * J.GetSpin() + 1);
+  
+  return norm*result;
 }
 
 std::complex<double>

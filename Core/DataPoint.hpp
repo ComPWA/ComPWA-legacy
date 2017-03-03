@@ -41,7 +41,7 @@ public:
   /**! Initialize dataPoint with invariant masses.
    * Missing values are filled by Kinematics
    */
-  dataPoint(int a, int b, double invMassSqA, double invMassSqB);
+//  dataPoint(int a, int b, double invMassSqA, double invMassSqB);
 
   //! Construct dataPoint from Event
   dataPoint(const Event &ev);
@@ -52,7 +52,7 @@ public:
   /**! Fill dataPoint with invariant masses.
    * Missing values are filled by Kinematics
    */
-  void Set(int a, int b, double invMassSqA, double invMassSqB);
+  //void Set(int a, int b, double invMassSqA, double invMassSqB);
 
   void reset(unsigned int size);
 

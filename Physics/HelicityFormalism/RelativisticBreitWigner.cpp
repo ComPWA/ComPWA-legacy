@@ -41,6 +41,7 @@ std::complex<double> RelativisticBreitWigner::Evaluate(const dataPoint &point,
 std::complex<double> RelativisticBreitWigner::dynamicalFunction(
     double mSq, double mR, double ma, double mb, double width, unsigned int J,
     double mesonRadius, formFactorType ffType) {
+
   std::complex<double> i(0, 1);
   double sqrtS = sqrt(mSq);
 
@@ -82,14 +83,14 @@ std::complex<double> RelativisticBreitWigner::dynamicalFunction(
 std::shared_ptr<RelativisticBreitWigner>
 RelativisticBreitWigner::Factory(const boost::property_tree::ptree &pt) {
   LOG(trace) << "RelativisticBreitWigner::Factory() | Construction....";
-  auto obj = std::make_shared<RelativisticBreitWigner>() ;
+  auto obj = std::make_shared<RelativisticBreitWigner>();
 
   int id = pt.get<double>("DecayParticle.<xmlattr>.Id");
   auto partProp = PhysConst::Instance()->FindParticle(id);
   obj->SetMass(std::make_shared<DoubleParameter>(partProp.GetMassPar()));
 
   auto decayTr = partProp.GetDecayInfo();
-  if( partProp.GetDecayType() != "relativisticBreitWigner")
+  if (partProp.GetDecayType() != "relativisticBreitWigner")
     throw std::runtime_error(
         "RelativisticBreitWigner::Factory() | Decay type does not match! ");
 
@@ -99,26 +100,29 @@ RelativisticBreitWigner::Factory(const boost::property_tree::ptree &pt) {
       ComPWA::DoubleParameterFactory(decayTr.get_child("MesonRadius"));
   obj->SetMesonRadius(std::make_shared<DoubleParameter>(mesonRadius));
 
-
-  //Get masses of decay products
+  // Get masses of decay products
   auto decayProducts = pt.get_child("DecayProducts");
   std::vector<int> daughterId;
   for (auto i : decayProducts) {
-    daughterId.push_back( i.second.get<int>("<xmlattr>.Id") );
+    daughterId.push_back(i.second.get<int>("<xmlattr>.Id"));
   }
   if (daughterId.size() != 2)
     throw boost::property_tree::ptree_error(
         "AmpWignerD::Factory() | Expect exactly two decay products (" +
         std::to_string(decayProducts.size()) + " given)!");
-  
-  obj->SetDecayMassA( PhysConst::Instance()->FindParticle(daughterId.at(0)).GetMass() );
-  obj->SetDecayMassB( PhysConst::Instance()->FindParticle(daughterId.at(1)).GetMass() );
-  
-  LOG(trace) << "RelativisticBreitWigner::Factory() | Construction of the decay "
-  << partProp.GetName() << " -> "
-  <<PhysConst::Instance()->FindParticle(daughterId.at(0)).GetName() <<" + "
-  <<PhysConst::Instance()->FindParticle(daughterId.at(1)).GetName();
-  
+
+  obj->SetDecayMassA(
+      PhysConst::Instance()->FindParticle(daughterId.at(0)).GetMass());
+  obj->SetDecayMassB(
+      PhysConst::Instance()->FindParticle(daughterId.at(1)).GetMass());
+
+  LOG(trace)
+      << "RelativisticBreitWigner::Factory() | Construction of the decay "
+      << partProp.GetName() << " -> "
+      << PhysConst::Instance()->FindParticle(daughterId.at(0)).GetName()
+      << " + "
+      << PhysConst::Instance()->FindParticle(daughterId.at(1)).GetName();
+
   return obj;
 }
 
