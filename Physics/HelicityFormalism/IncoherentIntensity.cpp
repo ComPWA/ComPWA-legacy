@@ -15,13 +15,16 @@ namespace HelicityFormalism {
 
 std::shared_ptr<IncoherentIntensity>
 IncoherentIntensity::Factory(const boost::property_tree::ptree &pt) {
-
   LOG(trace) << " IncoherentIntensity::Factory() | Construction....";
+  
   auto obj = std::make_shared<IncoherentIntensity>();
-  obj->SetName(pt.get<std::string>("AmpIntensity.<xmlattr>.Name", "empty"));
+  
+  //Name is not required - default value 'empty'
+  obj->SetName( pt.get<std::string>("IncoherentIntensity.<xmlattr>.Name", "empty") );
 
-  for (const auto &v : pt.get_child("CoherentIntensity")) {
-    obj->Add(ComPWA::Physics::HelicityFormalism::CoherentIntensity::Factory(
+  for (const auto &v : pt.get_child("IncoherentIntensity")) {
+    if( v.first == "CoherentIntensity" )
+      obj->Add(ComPWA::Physics::HelicityFormalism::CoherentIntensity::Factory(
         v.second));
   }
   return obj;

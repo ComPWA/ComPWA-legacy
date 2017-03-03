@@ -25,7 +25,7 @@ BOOST_AUTO_TEST_CASE(IncoherentConstruction) {
   std::ifstream in("HelicityFormalismTest-input.xml");
   boost::property_tree::xml_parser::read_xml(in, tr);
   
-  auto physConst = ComPWA::PhysConst::CreateInstance(tr);
+  ComPWA::PhysConst::CreateInstance(tr);
 
   auto intens = ComPWA::Physics::HelicityFormalism::IncoherentIntensity::Factory(tr);
   
@@ -45,18 +45,3 @@ BOOST_AUTO_TEST_CASE(IncoherentConstruction) {
 };
 
 BOOST_AUTO_TEST_SUITE_END()
-
-//int main(){
-//ComPWA::Logging log("", boost::log::trivial::severity_level::trace);
-//
-//
-//  boost::property_tree::ptree tr;
-//  std::ifstream in("../HelicityFormalismTest-input.xml");
-//  boost::property_tree::xml_parser::read_xml(in, tr);
-//  
-//  auto physConst = ComPWA::PhysConst::CreateInstance(tr);
-//
-//  auto intens = ComPWA::Physics::HelicityFormalism::IncoherentIntensity::Factory(tr);
-//  
-//
-//};

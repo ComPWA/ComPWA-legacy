@@ -72,16 +72,16 @@ public:
     
     auto decayParticle = pt.get_child("DecayParticle");
     
-    int id = pt.get<double>("DecayParticle.Id");
+    int id = pt.get<double>("DecayParticle.<xmlattr>.Id");
     ComPWA::Spin J = PhysConst::Instance()->FindParticle(id).GetSpin();
     obj->SetSpin( J );
-    ComPWA::Spin mu( pt.get<double>("DecayParticle.Helicity") );
+    ComPWA::Spin mu( pt.get<double>("DecayParticle.<xmlattr>.Helicity") );
     obj->SetMu( mu );
     
     auto decayProducts = pt.get_child("DecayProducts");
     std::vector<ComPWA::Spin> vHelicity;
     for( auto i : decayProducts ){
-      vHelicity.push_back( ComPWA::Spin(i.second.get<double>("Helicity")) );
+      vHelicity.push_back( ComPWA::Spin(i.second.get<double>("<xmlattr>.Helicity")) );
     }
 
     if (vHelicity.size() != 2)
