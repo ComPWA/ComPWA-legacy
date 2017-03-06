@@ -7,6 +7,7 @@ add_subdirectory( AmplitudeSum )
 #add_subdirectory( BreitWigner )
 #add_subdirectory( DecayTree )
 add_subdirectory( HelicityFormalism )
+add_subdirectory( qft++ )
 
 #target_link_libraries( ComPWA_Physics ComPWA_Core ${Boost_LIBRARIES} )
 

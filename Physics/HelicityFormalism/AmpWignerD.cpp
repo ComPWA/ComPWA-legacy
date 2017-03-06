@@ -15,7 +15,7 @@
 
 #include <cmath>
 #include "Physics/HelicityFormalism/AmpWignerD.hpp"
-#include "Physics/WignerD.hpp"
+#include "Physics/qft++/WignerD.hpp"
 
 namespace ComPWA {
 namespace Physics {
