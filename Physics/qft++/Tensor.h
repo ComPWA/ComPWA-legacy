@@ -27,9 +27,14 @@
 #include <complex>
 #include <cstdlib>
 // Local Headers:
-#include "../../include/c++-template-utils.h"
-#include "Tensor_Base.h"
-#include "TensorIndex.h"
+//#include "../../include/c++-template-utils.h"
+#include "Physics/qft++/Type.h"
+#include "Physics/qft++/OperationType.h"
+#include "Physics/qft++/Conversion.h"
+#include "Physics/qft++/SelectiveInclusion.h"
+//#include "Physics/qft++/TemplateUtilFuncs.h"
+#include "Physics/qft++/Tensor_Base.h"
+#include "Physics/qft++/TensorIndex.h"
 //_____________________________________________________________________________
 /** @file Tensor.h
  *  @brief Tensor template class definition file.

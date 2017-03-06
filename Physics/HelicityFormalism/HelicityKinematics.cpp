@@ -19,6 +19,7 @@
 #include "Core/PhysConst.hpp"
 
 #include "Physics/HelicityFormalism/HelicityKinematics.hpp"
+#include "Physics/qft++/Vector4.h"
 
 namespace ComPWA {
 namespace Physics {

@@ -20,7 +20,7 @@
 #ifndef _Tensor_Base_H
 #define _Tensor_Base_H
 
-#include "../c++-template-utils/Conversion.h"
+#include "Physics/qft++/Conversion.h"
 #include <cassert>
 //_____________________________________________________________________________
 /** @file Tensor_Base.h
@@ -94,7 +94,7 @@ public:
 /// Is T a Tensor? (does it inherit from Tensor_Base?)
 #define IsTensor(__T) IsDerived(__T,Tensor_Base)
 
-#include "../matrix/Matrix_Base.h"
+#include "Physics/qft++/Matrix_Base.h"
 /// Is T a scalar? (is it NOT a Tensor or Matrix)
 #define IsScalar(__T) (!IsMatrix(__T) && !IsTensor(__T))
 
