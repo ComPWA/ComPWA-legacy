@@ -13,27 +13,6 @@
 				<Value>0.0</Value>
 				<Fix>1</Fix>
 			</Phase>
-			<Resonance Name="omegaToPi0G">
-				<Magnitude Name='mag_omegaToPi0G'>
-					<Value>1.0</Value>
-					<Fix>1</Fix>
-					<Min>0.5</Min>
-					<Max>1.5</Max>
-					<Error>0</Error>
-				</Magnitude>
-				<Phase Name='Phase_omegaToPi0G'>
-					<Value>1.0</Value>
-					<Fix>1</Fix>
-					<Min>0.5</Min>
-					<Max>1.5</Max>
-					<Error>0</Error>
-				</Phase>
-				<DecayParticle Id='223' Helicity='+1' />
-				<DecayProducts>
-					<Particle Id='210' Helicity='+1' />
-					<Particle Id='22' Helicity='+1' />
-				</DecayProducts>
-			</Resonance>
 			<Resonance Name='jpsiToOmegaPi0'>
 				<Magnitude Name='mag_jpsiToOmegaPi0'>
 					<Value>1.0</Value>
@@ -49,68 +28,33 @@
 					<Max>1.5</Max>
 					<Error>0</Error>
 				</Phase>
-				<DecayParticle Id='443' Helicity='+1' />
+				<DecayParticle Name='jpsi' Helicity='+1' />
+				<!--<RecoilSystem FinalState='2' />-->
 				<DecayProducts>
-					<Particle Id='223' Helicity='+1' />
-					<Particle Id='210' Helicity='+1' />
+					<Particle Name='omega' FinalState='0 1' Helicity='+1' />
+					<Particle Name='pi0' FinalState='2' Helicity='+1' />
 				</DecayProducts>
 			</Resonance>
-		</Amplitude>
-		<Amplitude Name="f0_980">
-			<Magnitude Name='mag_f0_980'>
-				<Value>1.0</Value>
-				<Fix>1</Fix>
-				<Min>0.5</Min>
-				<Max>1.5</Max>
-				<Error>0</Error>
-			</Magnitude>
-			<Phase Name='phase_f0_980'>
-				<Value>1.0</Value>
-				<Fix>1</Fix>
-				<Min>0.5</Min>
-				<Max>1.5</Max>
-				<Error>0</Error>
-			</Phase>
-			<Resonance Name="f0_980_ToPi0Pi0">
-				<Magnitude Name='mag_f0_980_ToPi0Pi0'>
-				<Value>1.0</Value>
-				<Fix>1</Fix>
-				<Min>0.5</Min>
-				<Max>1.5</Max>
-				<Error>0</Error>
-				</Magnitude>
-				<Phase Name='phase_f0_980_ToPi0Pi0'>
-				<Value>1.0</Value>
-				<Fix>1</Fix>
-				<Min>0.5</Min>
-				<Max>1.5</Max>
-				<Error>0</Error>
-				</Phase>
-				<DecayParticle Id='9010221' Helicity='+1' />
-				<DecayProducts>
-					<Particle Id='210' Helicity='+1' />
-					<Particle Id='210' Helicity='+1' />
-				</DecayProducts>
-			</Resonance>
-			<Resonance Name="jpsiTo_f0_980_Gamma">
-				<Magnitude Name='mag_jpsiTo_f0_980_Gamma'>
+			<Resonance Name="omegaToPi0G">
+				<Magnitude Name='mag_omegaToPi0G'>
 					<Value>1.0</Value>
 					<Fix>1</Fix>
 					<Min>0.5</Min>
 					<Max>1.5</Max>
 					<Error>0</Error>
 				</Magnitude>
-				<Phase Name='phase_jpsiTo_f0_980_Gamma'>
+				<Phase Name='Phase_omegaToPi0G'>
 					<Value>1.0</Value>
 					<Fix>1</Fix>
 					<Min>0.5</Min>
 					<Max>1.5</Max>
 					<Error>0</Error>
 				</Phase>
-				<DecayParticle Id='443' Helicity='+1' />
+				<DecayParticle Name='omega' Helicity='+1' />
+				<RecoilSystem FinalState='2' />
 				<DecayProducts>
-					<Particle Id='9010221' Helicity='+1' />
-					<Particle Id='22' Helicity='+1' />
+					<Particle Name='pi0' FinalState='0' Helicity='+1' />
+					<Particle Name='gamma' FinalState='1' Helicity='+1' />
 				</DecayProducts>
 			</Resonance>
 		</Amplitude>

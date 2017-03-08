@@ -53,18 +53,19 @@ PartialDecay::Factory(const boost::property_tree::ptree &pt) {
     auto intFS = stringToVectInt(strFS);
     finalState.insert(finalState.end(), intFS.begin(), intFS.end());
   }
-  std::cout<<obj->GetName() <<" recoilState:";
-  for( auto i : recoilState )
-    std::cout<<i;
-  std::cout<<std::endl<<" finalState:";
-  for( auto i : finalState )
-    std::cout<<i;
+//  std::cout<<obj->GetName() <<" recoilState: ";
+//  for( auto i : recoilState )
+//    std::cout<<i <<" ";
+//  std::cout<<std::endl<<" finalState: ";
+//  for( auto i : finalState )
+//    std::cout<<i <<" ";
+//  std::cout<<std::endl;
   
   obj->SetWignerD(ComPWA::Physics::HelicityFormalism::AmpWignerD::Factory(pt));
 
   auto dynObj = std::shared_ptr<AbstractDynamicalFunction>();
-  int id = pt.get<double>("DecayParticle.<xmlattr>.Id");
-  auto partProp = PhysConst::Instance()->FindParticle(id);
+  std::string name = pt.get<std::string>("DecayParticle.<xmlattr>.Name");
+  auto partProp = PhysConst::Instance()->FindParticle(name);
   std::string decayType = partProp.GetDecayType();
   
   if (decayType == "stable") {
@@ -80,7 +81,8 @@ PartialDecay::Factory(const boost::property_tree::ptree &pt) {
   obj->SetDynamicalFunction(dynObj);
 
   //TODO: Need to get data poistion from Kinematics
-  //obj->SetDataPosition(mPos, cosThetaPos, phiPos)
+//  int pos = Kinematics::Instance()
+//  obj->SetDataPosition(mPos, cosThetaPos, phiPos)
   
   return obj;
 }

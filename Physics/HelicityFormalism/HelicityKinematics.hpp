@@ -67,8 +67,8 @@ public:
   //! Get number of particles
   virtual unsigned int GetNumberOfParticles() const { return _finalState.size(); }
   
-  virtual std::vector<int> GetDataID( int id1, int id2 ){
-    return std::vector<int>(1,1);
+  virtual int GetDataID( std::vector<int> recoilS, std::vector<int> finalS ) const {
+    return 1;
   }
   
 //  FinalStateParticleCombinatorics fsp_combinatorics_;
@@ -109,19 +109,19 @@ public:
 //  IndexList convertParticleIDToEventIndexList(const IndexList& particle_id_list,
 //      const IndexMapping& fs_particle_mapping) const;
 //
-  std::vector<Vector4<double> > createRequired4Vectors(
-      const Event& event) const;
-
-  void addParticleToCMS4Vector(const Particle& event_particle,
-      Vector4<double>& cms_4vector) const;
-
-  void fillPointWithBoostedKinematicVariables(dataPoint& point,
-      const std::vector<Vector4<double> >& unique_occurring_cms_4vectors,
-      const TwoBodyDecayIndices& two_body_state_indices,
-      unsigned int &data_point_fill_position) const;
-
-  double calculateDecayAngle(const Vector4<double> &p, const Vector4<double> &q,
-      const Vector4<double> &d) const;
+//  std::vector<Vector4<double> > createRequired4Vectors(
+//      const Event& event) const;
+//
+//  void addParticleToCMS4Vector(const Particle& event_particle,
+//      Vector4<double>& cms_4vector) const;
+//
+//  void fillPointWithBoostedKinematicVariables(dataPoint& point,
+//      const std::vector<Vector4<double> >& unique_occurring_cms_4vectors,
+//      const TwoBodyDecayIndices& two_body_state_indices,
+//      unsigned int &data_point_fill_position) const;
+//
+//  double calculateDecayAngle(const Vector4<double> &p, const Vector4<double> &q,
+//      const Vector4<double> &d) const;
 
 protected:
   HelicityKinematics(std::vector<int> initialState, std::vector<int> finalState);
