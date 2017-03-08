@@ -6,7 +6,9 @@
 //
 //
 
-#include <stdio.h>
+//#include <stdio.h>
+#include <sstream>
+
 
 #include "Physics/HelicityFormalism/PartialDecay.hpp"
 #include "Physics/HelicityFormalism/RelativisticBreitWigner.hpp"
@@ -14,6 +16,17 @@
 namespace ComPWA {
 namespace Physics {
 namespace HelicityFormalism {
+  
+  std::vector<int> stringToVectInt( std::string str ){
+    std::vector<int> result;
+    std::istringstream iStr(str);
+    vector<string> stringFrag{istream_iterator<string>{iStr},
+      istream_iterator<string>{}};
+    for( auto i: stringFrag ){
+      result.push_back(std::stoi(i));
+    }
+    return result;
+  }
 
 std::shared_ptr<PartialDecay>
 PartialDecay::Factory(const boost::property_tree::ptree &pt) {
@@ -22,11 +35,31 @@ PartialDecay::Factory(const boost::property_tree::ptree &pt) {
   auto obj = std::make_shared<PartialDecay>();
   obj->SetName(pt.get<string>("<xmlattr>.Name", "empty"));
 
+  
   auto mag = ComPWA::DoubleParameterFactory(pt.get_child("Magnitude"));
   obj->SetMagnitudePar(std::make_shared<DoubleParameter>(mag));
   auto phase = ComPWA::DoubleParameterFactory(pt.get_child("Phase"));
   obj->SetPhasePar(std::make_shared<DoubleParameter>(phase));
 
+  std::vector<int> recoilState;
+  auto recoil = pt.get_optional<std::string>("RecoilSystem.<xmlattr>.FinalState");
+  if( recoil )
+    recoilState = stringToVectInt(recoil.get());
+  
+  std::vector<int> finalState;
+  auto decayProducts = pt.get_child("DecayProducts");
+  for (auto i : decayProducts) {
+    auto strFS = i.second.get<std::string>("<xmlattr>.FinalState");
+    auto intFS = stringToVectInt(strFS);
+    finalState.insert(finalState.end(), intFS.begin(), intFS.end());
+  }
+  std::cout<<obj->GetName() <<" recoilState:";
+  for( auto i : recoilState )
+    std::cout<<i;
+  std::cout<<std::endl<<" finalState:";
+  for( auto i : finalState )
+    std::cout<<i;
+  
   obj->SetWignerD(ComPWA::Physics::HelicityFormalism::AmpWignerD::Factory(pt));
 
   auto dynObj = std::shared_ptr<AbstractDynamicalFunction>();

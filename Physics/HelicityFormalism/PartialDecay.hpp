@@ -40,8 +40,8 @@ public:
   std::complex<double> Evaluate(const dataPoint &point) const {
     std::complex<double> result =
         std::polar(_magnitude->GetValue(), _phase->GetValue());
-    result *= _angD->Evaluate(point, pos_cosTheta, pos_phi);
-    result *= _dynamic->Evaluate(point, pos_m);
+    result *= _angD->Evaluate(point, _dataPos+1, _dataPos+2);
+    result *= _dynamic->Evaluate(point, _dataPos);
 
     return result;
   };
@@ -54,12 +54,6 @@ public:
     return std::shared_ptr<FunctionTree>();
   };
 
-  void SetDataPosition( int mPos, int cosThetaPos, int phiPos){
-    pos_m = mPos;
-    pos_cosTheta = cosThetaPos;
-    pos_phi = phiPos;
-  }
-  
   /**
    Factory for PartialDecay
 
@@ -190,7 +184,10 @@ public:
   }
   
 protected:
-  int pos_m, pos_cosTheta, pos_phi;
+  /**! Position where variables are stored in dataPoint
+   * We expect to find the invariant mass of the system at @param _dataPos, 
+   * cosTheta at @param _dataPos+1 and phi at @param _dataPos+2 */
+  int _dataPos;
   
   std::shared_ptr<ComPWA::DoubleParameter> _magnitude;
   std::shared_ptr<ComPWA::DoubleParameter> _phase;
