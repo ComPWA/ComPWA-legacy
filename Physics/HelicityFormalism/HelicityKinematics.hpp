@@ -12,12 +12,12 @@
 #ifndef PHYSICS_HELICITYAMPLITUDE_HELICITYKINEMATICS_HPP_
 #define PHYSICS_HELICITYAMPLITUDE_HELICITYKINEMATICS_HPP_
 
-//#include "qft++.h"
-
 #include "Core/Kinematics.hpp"
 
 //#include "Physics/HelicityAmplitude/ParticleStateDefinitions.hpp"
 //#include "Physics/HelicityAmplitude/FinalStateParticleCombinatorics.hpp"
+
+#include "Physics/qft++/Vector4.h"
 
 class Particle;
 
@@ -67,8 +67,8 @@ public:
   //! Get number of particles
   virtual unsigned int GetNumberOfParticles() const { return _finalState.size(); }
   
-  virtual std::vector<int> GetDataID( int id1, int id2 ){
-    return std::vector<int>(1,1);
+  virtual int GetDataID( std::vector<int> recoilS, std::vector<int> finalS ) const {
+    return 1;
   }
   
 //  FinalStateParticleCombinatorics fsp_combinatorics_;

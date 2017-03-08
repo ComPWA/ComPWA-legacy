@@ -72,8 +72,8 @@ public:
     
     auto decayParticle = pt.get_child("DecayParticle");
     
-    int id = pt.get<double>("DecayParticle.<xmlattr>.Id");
-    ComPWA::Spin J = PhysConst::Instance()->FindParticle(id).GetSpin();
+    std::string name = pt.get<std::string>("DecayParticle.<xmlattr>.Name");
+    ComPWA::Spin J = PhysConst::Instance()->FindParticle(name).GetSpin();
     obj->SetSpin( J );
     ComPWA::Spin mu( pt.get<double>("DecayParticle.<xmlattr>.Helicity") );
     obj->SetMu( mu );

@@ -85,8 +85,8 @@ RelativisticBreitWigner::Factory(const boost::property_tree::ptree &pt) {
   LOG(trace) << "RelativisticBreitWigner::Factory() | Construction....";
   auto obj = std::make_shared<RelativisticBreitWigner>();
 
-  int id = pt.get<double>("DecayParticle.<xmlattr>.Id");
-  auto partProp = PhysConst::Instance()->FindParticle(id);
+  std::string name = pt.get<std::string>("DecayParticle.<xmlattr>.Name");
+  auto partProp = PhysConst::Instance()->FindParticle(name);
   obj->SetMass(std::make_shared<DoubleParameter>(partProp.GetMassPar()));
 
   auto decayTr = partProp.GetDecayInfo();
@@ -102,26 +102,24 @@ RelativisticBreitWigner::Factory(const boost::property_tree::ptree &pt) {
 
   // Get masses of decay products
   auto decayProducts = pt.get_child("DecayProducts");
-  std::vector<int> daughterId;
+  std::vector<std::string> daughterNames;
   for (auto i : decayProducts) {
-    daughterId.push_back(i.second.get<int>("<xmlattr>.Id"));
+    daughterNames.push_back(i.second.get<std::string>("<xmlattr>.Name"));
   }
-  if (daughterId.size() != 2)
+  if (daughterNames.size() != 2)
     throw boost::property_tree::ptree_error(
         "AmpWignerD::Factory() | Expect exactly two decay products (" +
         std::to_string(decayProducts.size()) + " given)!");
 
   obj->SetDecayMassA(
-      PhysConst::Instance()->FindParticle(daughterId.at(0)).GetMass());
+      PhysConst::Instance()->FindParticle(daughterNames.at(0)).GetMass());
   obj->SetDecayMassB(
-      PhysConst::Instance()->FindParticle(daughterId.at(1)).GetMass());
+      PhysConst::Instance()->FindParticle(daughterNames.at(1)).GetMass());
 
   LOG(trace)
       << "RelativisticBreitWigner::Factory() | Construction of the decay "
       << partProp.GetName() << " -> "
-      << PhysConst::Instance()->FindParticle(daughterId.at(0)).GetName()
-      << " + "
-      << PhysConst::Instance()->FindParticle(daughterId.at(1)).GetName();
+      << daughterNames.at(0) << " + " << daughterNames.at(1);
 
   return obj;
 }
