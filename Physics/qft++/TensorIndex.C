@@ -22,6 +22,9 @@
  *  @brief TensorIndex class source file.
  */
 //_____________________________________________________________________________
+namespace ComPWA {
+  namespace Physics {
+    namespace QFT {
 
 TensorIndex& TensorIndex::Permute() {
 
@@ -53,12 +56,13 @@ TensorIndex& TensorIndex::Permute() {
 }
 //_____________________________________________________________________________
 
-void TensorIndex::Print(ostream &__os){
+void TensorIndex::Print(std::ostream &__os){
   __os << "(" ;
   for(unsigned int i = 0; i < _rank; i++){
     __os << (*this)[i];
-    if(i < (_rank - 1)) cout << "," ;
+    if(i < (_rank - 1)) std::cout << "," ;
   }
-  __os << ")" << endl;
+  __os << ")" << std::endl;
 }
 //_____________________________________________________________________________
+    }}}

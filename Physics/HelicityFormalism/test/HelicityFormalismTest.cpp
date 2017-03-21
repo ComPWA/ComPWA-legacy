@@ -15,6 +15,7 @@
 #include "Core/PhysConst.hpp"
 #include "Core/Logging.hpp"
 #include "Physics/HelicityFormalism/IncoherentIntensity.hpp"
+#include "Physics/HelicityFormalism/HelicityKinematics.hpp"
 
 BOOST_AUTO_TEST_SUITE(HelicityFormalism)
 
@@ -26,7 +27,17 @@ BOOST_AUTO_TEST_CASE(IncoherentConstruction) {
   boost::property_tree::xml_parser::read_xml(in, tr);
   
   ComPWA::PhysConst::CreateInstance(tr);
-
+  
+  std::vector<int> finalState, initialState;
+  initialState.push_back(443);
+  finalState.push_back(210);
+  finalState.push_back(210);
+  finalState.push_back(22);
+  
+  //Create HelicityInstance here
+  ComPWA::Physics::HelicityFormalism::HelicityKinematics::CreateInstance(initialState,finalState);
+  
+  //Create amplitude
   auto intens = ComPWA::Physics::HelicityFormalism::IncoherentIntensity::Factory(tr);
   
 //  auto part = physConst->FindParticle("gamma");

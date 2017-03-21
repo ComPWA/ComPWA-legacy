@@ -32,6 +32,7 @@
 #include "Physics/qft++/OperationType.h"
 #include "Physics/qft++/Conversion.h"
 #include "Physics/qft++/SelectiveInclusion.h"
+#include "Physics/qft++/Matrix_Base.h"
 //#include "Physics/qft++/TemplateUtilFuncs.h"
 #include "Physics/qft++/Tensor_Base.h"
 #include "Physics/qft++/TensorIndex.h"
@@ -40,8 +41,32 @@
  *  @brief Tensor template class definition file.
  */
 //_____________________________________________________________________________
+namespace ComPWA {
+  namespace Physics {
+    namespace QFT {
 
-using namespace std;
+// Some utility functions templates:
+
+/// Return @a zero for the type (defaults to numeric 0)
+template <typename _Tp>
+inline _Tp zero(const _Tp &__var){return 0;}
+
+///// Return the conjugate for the type (defualts to the variable itself)
+//template <typename _Tp> inline _Tp conj(const _Tp &__var){return __var;}
+
+/// Return the conjugate for the type (defualts to the variable itself)
+inline int conj(const int &__var){return __var;}
+
+/// Return the conjugate for the type (defualts to the variable itself)
+inline double conj(const double &__var){return __var;}
+
+/// Return the imaginary part of the type (defaults to 0)
+template <typename _Tp> inline _Tp imag(const _Tp &__var){return 0;}
+
+/// Return @a unity for the type (defaults to numeric 1)
+template <typename _Tp>
+inline _Tp unity(const _Tp &__var){return 1;}
+
 //_____________________________________________________________________________
 /** @class Tensor
  *  @author Mike Williams
@@ -69,7 +94,7 @@ template <typename _Tp> class Tensor : public Tensor_Base {
 protected:
 
   // attributes:
-  vector<_Tp> _data; ///< Tensor elements (type _Tp)
+  std::vector<_Tp> _data; ///< Tensor elements (type _Tp)
 
 private:
 
@@ -150,7 +175,7 @@ public:
 
   /// Boost the Tensor to the rest frame of the 4-momentum @a p4.
   void Boost(const Tensor<double> &__p4) {
-    if(__p4.Rank() != 1) cout << "Error! 4-momentum NOT rank 1." << endl;
+    if(__p4.Rank() != 1) std::cout << "Error! 4-momentum NOT rank 1." << std::endl;
     assert(__p4.Rank() == 1);
 
     this->Boost(-(__p4(1)/__p4(0)),-(__p4(2)/__p4(0)),-(__p4(3)/__p4(0)));
@@ -198,7 +223,7 @@ public:
       + (__nu << 2) + __mu;
     bool valid = index < this->Size();
     if(!valid) 
-      cout << "Error! Attempt to access non-existant Tensor element." << endl;
+      std::cout << "Error! Attempt to access non-existant Tensor element." << std::endl;
     assert(valid);
     return _data[index];
   }
@@ -214,7 +239,7 @@ public:
       + (__nu << 2) + __mu;
     bool valid = index < this->Size();
     if(!valid) 
-      cout << "Error! Attempt to access non-existant Tensor element." << endl;
+      std::cout << "Error! Attempt to access non-existant Tensor element." << std::endl;
     assert(valid);
     return _data[index];
   }
@@ -274,7 +299,7 @@ public:
   template<typename T> 
   typename DisableIf<IsTensor(T),Tensor<_Tp>&>::Type operator=(const T &__x){
     if(_rank != 0) 
-      cout << "Error! Attempt to assign tensor (rank > 0) to a scalar" << endl;
+      std::cout << "Error! Attempt to assign tensor (rank > 0) to a scalar" << std::endl;
     assert(_rank == 0);
     _data[0] = __x;
 
@@ -284,8 +309,8 @@ public:
   /// Conversion operator to type @a Tp (valid only for rank 0)
   operator _Tp () const {
     if(_rank != 0) {
-      cout << "Error! Attempt to convert a tensor (rank != 0) to a scalar." 
-	   << endl;
+      std::cout << "Error! Attempt to convert a tensor (rank != 0) to a scalar."
+	   << std::endl;
     }
     assert(_rank == 0);
     return _data[0];
@@ -351,7 +376,7 @@ public:
    * Note: Legal if @a Tp * @a T is a legal operation.
    */
   template<typename T> 
-  typename EnableIf<IsScalar(T),Tensor<typename MultType<_Tp,T>::Type> >::Type 
+  typename EnableIf<IsScalar(T),Tensor<typename MultType<_Tp,T>::Type> >::Type
   operator*(const T &__x) const {
     Tensor<typename MultType<_Tp,T>::Type> ret(_rank);
     int size = this->Size();
@@ -377,7 +402,7 @@ public:
   template<typename T> Tensor<typename AddType<_Tp,T>::Type>
   operator+(const Tensor<T> &__tensor) const {
     if(this->Rank() != __tensor.Rank())
-      cout << "Error! Attempt to add tensors w/ different ranks." << endl;
+      std::cout << "Error! Attempt to add tensors w/ different ranks." << std::endl;
     assert(_rank == __tensor._rank);
     Tensor<typename AddType<_Tp,T>::Type> ret(_rank); 
     int size = this->Size();
@@ -392,7 +417,7 @@ public:
   template<typename T> Tensor<typename SubType<_Tp,T>::Type>
   operator-(const Tensor<T> &__tensor) const {
     if(this->Rank() != __tensor.Rank())
-      cout << "Error! Attempt to subtract tensors w/ different ranks." << endl;
+      std::cout << "Error! Attempt to subtract tensors w/ different ranks." << std::endl;
     assert(_rank == __tensor._rank);
     Tensor<typename SubType<_Tp,T>::Type> ret(_rank); 
     int size = this->Size();
@@ -408,7 +433,7 @@ public:
   typename EnableIf<IsScalar(T),Tensor<typename AddType<_Tp,T>::Type> >::Type
   operator+(const T &__x) const {
     if(_rank != 0) 
-      cout << "Error! Attempt to add tensor (rank > 0) to a scalar" << endl;
+      std::cout << "Error! Attempt to add tensor (rank > 0) to a scalar" << std::endl;
     assert(_rank == 0);
     Tensor<typename AddType<_Tp,T>::Type> ret(0);
     ret() = _data[0] + __x;
@@ -422,8 +447,8 @@ public:
   typename EnableIf<IsScalar(T),Tensor<typename SubType<_Tp,T>::Type> >::Type
   operator-(const T &__x) const {
     if(_rank != 0){ 
-      cout << "Error! Attempt to subtract tensor (rank > 0) from a scalar" 
-	   << endl;
+      std::cout << "Error! Attempt to subtract tensor (rank > 0) from a scalar"
+	   << std::endl;
     }
     assert(_rank == 0);
     Tensor<typename SubType<_Tp,T>::Type> ret(0);
@@ -516,7 +541,7 @@ public:
    * 
    */
   template<typename T> Tensor<typename MultType<_Tp,T>::Type>
-  Contract(const Tensor<T> &__tensor,int __num_indicies = -1) const; 
+  Contract(const Tensor<T> &__tensor,int __num_indicies = -1) const;
 
   // some miscelaneous functions:
 
@@ -593,6 +618,34 @@ public:
   void Transform(const Tensor<double> &__lt);
 
 };
+
+
+//_____________________________________________________________________________
+//
+// Specifications of functions in TemplateUtilFuncs.h for the Tensor class 
+//_____________________________________________________________________________
+
+/// Returns a Tensor = T.Zero() (of the same rank as @a tensor)
+template <typename T> inline Tensor<T> zero(const Tensor<T> &__tensor) {
+  Tensor<T> ret(__tensor.Rank());
+  ret.Zero();
+  return ret;
+}
+//_____________________________________________________________________________
+
+/// Same as Tensor::Conjugate
+template <typename T> inline Tensor<T> conj(const Tensor<T> &__tensor) {
+  return __tensor.Conjugate();
+}
+//_____________________________________________________________________________
+
+/// Returns a rank 0 tensor with value unity(_Tp)
+template <typename T> inline Tensor<T> unity(const Tensor<T> &__tensor) {
+  Tensor<T> ret(0);
+  T var_type;
+  ret() = unity(var_type);
+  return ret;
+}
 //_____________________________________________________________________________
 
 /// Scalar * tensor (see Tensor::operator*)
@@ -632,37 +685,12 @@ inline std::ostream& operator<<(std::ostream& __os,const Tensor<T> &__tensor){
 
 /// Return the real part of the tensor
 template <typename T>
-Tensor<T> Real(const Tensor<complex<T> > &__tensor){
+Tensor<T> Real(const Tensor<std::complex<T> > &__tensor){
   Tensor<T> real(__tensor.Rank());
   for(int i = 0; i < __tensor.Size(); i++) real[i] = __tensor[i].real();
   return real;
 }
 //_____________________________________________________________________________
-//
-// Specifications of functions in TemplateUtilFuncs.h for the Tensor class 
-//_____________________________________________________________________________
 
-/// Returns a Tensor = T.Zero() (of the same rank as @a tensor)
-template <typename T> inline Tensor<T> zero(const Tensor<T> &__tensor) {
-  Tensor<T> ret(__tensor.Rank());
-  ret.Zero();
-  return ret;
-}
-//_____________________________________________________________________________
-
-/// Same as Tensor::Conjugate
-template <typename T> inline Tensor<T> conj(const Tensor<T> &__tensor) {
-  return __tensor.Conjugate();
-}
-//_____________________________________________________________________________
-
-/// Returns a rank 0 tensor with value unity(_Tp)
-template <typename T> inline Tensor<T> unity(const Tensor<T> &__tensor) {
-  Tensor<T> ret(0);
-  T var_type;
-  ret() = unity(var_type);
-  return ret;
-}
-//_____________________________________________________________________________
-
+    }}}
 #endif /* _Tensor_H */

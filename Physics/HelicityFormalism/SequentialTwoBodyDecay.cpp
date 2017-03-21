@@ -17,7 +17,7 @@ namespace HelicityFormalism {
   SequentialTwoBodyDecay::Factory(const boost::property_tree::ptree &pt) {
   LOG(trace) << " SequentialTwoBodyDecay::Factory() | Construction....";
     auto obj = std::make_shared<SequentialTwoBodyDecay>();
-    obj->SetName( pt.get<string>("Amplitude.<xmlattr>.Name","empty") );
+    obj->SetName( pt.get<std::string>("Amplitude.<xmlattr>.Name","empty") );
     
       auto mag= ComPWA::DoubleParameterFactory( pt.get_child("Magnitude") );
       obj->SetMagnitude( std::make_shared<DoubleParameter>(mag) );

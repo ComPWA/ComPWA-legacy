@@ -12,6 +12,7 @@
 
 #include "Physics/HelicityFormalism/PartialDecay.hpp"
 #include "Physics/HelicityFormalism/RelativisticBreitWigner.hpp"
+#include "Physics/HelicityFormalism/HelicityKinematics.hpp"
 
 namespace ComPWA {
 namespace Physics {
@@ -20,8 +21,8 @@ namespace HelicityFormalism {
   std::vector<int> stringToVectInt( std::string str ){
     std::vector<int> result;
     std::istringstream iStr(str);
-    vector<string> stringFrag{istream_iterator<string>{iStr},
-      istream_iterator<string>{}};
+    std::vector<std::string> stringFrag{std::istream_iterator<std::string>{iStr},
+      std::istream_iterator<std::string>{}};
     for( auto i: stringFrag ){
       result.push_back(std::stoi(i));
     }
@@ -33,34 +34,32 @@ PartialDecay::Factory(const boost::property_tree::ptree &pt) {
 
   LOG(trace) << "PartialDecay::Factory() |";
   auto obj = std::make_shared<PartialDecay>();
-  obj->SetName(pt.get<string>("<xmlattr>.Name", "empty"));
+  obj->SetName(pt.get<std::string>("<xmlattr>.Name", "empty"));
 
-  
   auto mag = ComPWA::DoubleParameterFactory(pt.get_child("Magnitude"));
   obj->SetMagnitudePar(std::make_shared<DoubleParameter>(mag));
   auto phase = ComPWA::DoubleParameterFactory(pt.get_child("Phase"));
   obj->SetPhasePar(std::make_shared<DoubleParameter>(phase));
 
+  //Read subSystem definition
   std::vector<int> recoilState;
   auto recoil = pt.get_optional<std::string>("RecoilSystem.<xmlattr>.FinalState");
   if( recoil )
     recoilState = stringToVectInt(recoil.get());
   
-  std::vector<int> finalState;
   auto decayProducts = pt.get_child("DecayProducts");
-  for (auto i : decayProducts) {
-    auto strFS = i.second.get<std::string>("<xmlattr>.FinalState");
-    auto intFS = stringToVectInt(strFS);
-    finalState.insert(finalState.end(), intFS.begin(), intFS.end());
-  }
-//  std::cout<<obj->GetName() <<" recoilState: ";
-//  for( auto i : recoilState )
-//    std::cout<<i <<" ";
-//  std::cout<<std::endl<<" finalState: ";
-//  for( auto i : finalState )
-//    std::cout<<i <<" ";
-//  std::cout<<std::endl;
+  if( decayProducts.size() != 2 )
+    throw std::runtime_error("PartialDecay::Factory() | Number of decay productes != 2.");
   
+  auto itr = decayProducts.begin();
+  auto finalStateA = stringToVectInt(itr->second.get<std::string>("<xmlattr>.FinalState"));
+  auto finalStateB = stringToVectInt((++itr)->second.get<std::string>("<xmlattr>.FinalState"));
+  SubSystem subSys(recoilState, finalStateA, finalStateB);
+  obj->SetDataPosition(
+                       dynamic_cast<HelicityKinematics*>(Kinematics::instance())->GetDataID(subSys)
+  );
+  
+  //Create WignerD object
   obj->SetWignerD(ComPWA::Physics::HelicityFormalism::AmpWignerD::Factory(pt));
 
   auto dynObj = std::shared_ptr<AbstractDynamicalFunction>();
@@ -80,9 +79,6 @@ PartialDecay::Factory(const boost::property_tree::ptree &pt) {
   }
   obj->SetDynamicalFunction(dynObj);
 
-  //TODO: Need to get data poistion from Kinematics
-//  int pos = Kinematics::Instance()
-//  obj->SetDataPosition(mPos, cosThetaPos, phiPos)
   
   return obj;
 }

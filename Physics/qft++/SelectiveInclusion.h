@@ -24,8 +24,10 @@
  *  @brief Utilities for selectively including overloaded template functions.
  */
 //_____________________________________________________________________________
+namespace ComPWA {
+  namespace Physics {
+    namespace QFT {
 
-using namespace std;
 //_____________________________________________________________________________
 /** @class DisableIf
  *  @author Mike Williams
@@ -92,4 +94,5 @@ template <typename _Tp> class EnableIf<false,_Tp>{};
 #endif /* DOXYGEN_SKIP_THIS */
 //_____________________________________________________________________________
 
+    }}}
 #endif /* _SelectiveInclusion_H */

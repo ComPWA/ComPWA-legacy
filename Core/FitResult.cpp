@@ -124,7 +124,7 @@ void FitResult::printFitParameters(TableFormater *tableResult) {
 
     // Is parameter an angle?
     bool isAngle = 0;
-    if (outPar->GetName().find("phase") != string::npos)
+    if (outPar->GetName().find("phase") != std::string::npos)
       isAngle = 1;
     // ... then shift the value to the domain [-pi;pi]
     if (isAngle && !isFixed) {
@@ -137,7 +137,7 @@ void FitResult::printFitParameters(TableFormater *tableResult) {
 
     // Is parameter a magnitude?
     bool isMag = 0;
-    if (outPar->GetName().find("mag") != string::npos)
+    if (outPar->GetName().find("mag") != std::string::npos)
       isMag = 1;
     // ... then make sure that it is positive
     if (isMag && !isFixed) {

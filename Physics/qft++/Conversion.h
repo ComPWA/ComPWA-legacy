@@ -43,10 +43,12 @@
  */
 //_____________________________________________________________________________
 
-using namespace std;
 //_____________________________________________________________________________
 
-// default template: 
+namespace ComPWA {
+  namespace Physics {
+    namespace QFT {
+// default template:
 template <typename _T,typename _U> class Conversion {
 
 private:
@@ -92,4 +94,5 @@ public:
 /// Should @a T be passed by value?
 #define PassByValue(__T) Conversion<__T,typename Type<__T>::ParamType>::same_type
 //_____________________________________________________________________________
+    }}}
 #endif /* _Conversion_H */

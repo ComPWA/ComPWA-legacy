@@ -27,8 +27,10 @@
  *  @brief Matrix_Base class definition file (also defines IsMatrix macro).
  */
 //_____________________________________________________________________________
+namespace ComPWA {
+  namespace Physics {
+    namespace QFT {
 
-using namespace std;
 //_____________________________________________________________________________
 /** @class Matrix_Base
  *  @author Mike Williams
@@ -119,4 +121,5 @@ public:
 
 //_____________________________________________________________________________
 
+    }}}
 #endif /* _Matrix_Base_H */

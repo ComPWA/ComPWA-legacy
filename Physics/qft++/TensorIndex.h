@@ -25,12 +25,15 @@
 #include <cassert>
 #include <iostream>
 
-using namespace std;
 //_____________________________________________________________________________
 /** @file TensorIndex.h
  *  @brief TensorIndex class definition file.
  */
 //_____________________________________________________________________________
+namespace ComPWA {
+  namespace Physics {
+    namespace QFT {
+
 /** @class TensorIndex
  *  @author Mike Williams
  *  @author Matt Shepherd
@@ -174,8 +177,9 @@ public:
   /** Print to screen the current set of indicies.
    *  Format is: \f$ (\mu,\nu,\rho,...,\pi) \f$ 
    */
-  void Print(ostream &__os = cout);
+  void Print(std::ostream &__os = std::cout);
 };
 //_____________________________________________________________________________
 
+    }}}
 #endif /* _TensorIndex_H */

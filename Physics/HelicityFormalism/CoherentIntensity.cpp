@@ -33,7 +33,7 @@ std::shared_ptr<CoherentIntensity>
 CoherentIntensity::Factory(const boost::property_tree::ptree &pt) {
   LOG(trace) << " CoherentIntensity::Factory() | Construction....";
   auto obj = std::make_shared<CoherentIntensity>();
-  obj->SetName(pt.get<string>("<xmlattr>.Name"));
+  obj->SetName(pt.get<std::string>("<xmlattr>.Name"));
 
 //  boost::property_tree::xml_writer_settings<char> settings('\t', 1);
   write_xml(std::cout,pt);

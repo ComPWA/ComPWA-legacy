@@ -28,8 +28,6 @@
 
 namespace ComPWA {
 
-using namespace std;
-
 class Particle {
 public:
   //! Default constructor
@@ -63,18 +61,26 @@ public:
     return sqrt(E * E - px * px + py * py + pz * pz);
   }
 
-  virtual const inline void setPx(double _px) { px = _px; }
-  virtual const inline void setPy(double _py) { py = _py; }
-  virtual const inline void setPz(double _pz) { pz = _pz; }
-  virtual const inline void setE(double _e) { E = _e; }
-  virtual const inline void setPid(int _pid) { pid = _pid; }
-  virtual const inline void setCharge(int _c) { charge = _c; }
-  virtual const inline double getPx() const { return px; }
-  virtual const inline double getPy() const { return py; }
-  virtual const inline double getPz() const { return pz; }
-  virtual const inline double getE() const { return E; }
-  virtual const inline int getPid() const { return pid; }
-  virtual const inline int getCharge() const { return charge; }
+  virtual inline void setPx(double _px) { px = _px; }
+  virtual inline void setPy(double _py) { py = _py; }
+  virtual inline void setPz(double _pz) { pz = _pz; }
+  virtual inline void setE(double _e) { E = _e; }
+  virtual inline void setPid(int _pid) { pid = _pid; }
+  virtual inline void setCharge(int _c) { charge = _c; }
+  virtual inline double getPx() const { return px; }
+  virtual inline double getPy() const { return py; }
+  virtual inline double getPz() const { return pz; }
+  virtual inline double getE() const { return E; }
+  virtual inline int getPid() const { return pid; }
+  virtual inline int getCharge() const { return charge; }
+  virtual inline std::vector<double> getFourMomentum() const {
+    std::vector<double> fourV;
+    fourV.push_back(E);
+    fourV.push_back(px);
+    fourV.push_back(py);
+    fourV.push_back(pz);
+    return fourV;
+  }
 
   friend std::ostream &operator<<(std::ostream &stream, const Particle &p);
 

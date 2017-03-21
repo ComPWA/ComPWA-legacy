@@ -33,7 +33,8 @@
 #include <map>
 
 namespace ComPWA {
-namespace Physics {
+  namespace Physics {
+    namespace QFT {
 
 inline int factorial(int __i) {
   int f = 1;
@@ -148,11 +149,11 @@ double Wigner_d(const double _J, const double _M, const double _N,
   double kk;
 
   if (J < 0 || abs(M) > J || abs(N) > J) {
-    cerr << endl;
-    cerr << "d: you have entered an illegal number for J, M, N." << endl;
-    cerr << "Must follow these rules: J >= 0, abs(M) <= J, and abs(N) <= J."
-         << endl;
-    cerr << "J = " << J << " M = " << M << " N = " << N << endl;
+    std::cerr << std::endl;
+    std::cerr << "d: you have entered an illegal number for J, M, N." << std::endl;
+    std::cerr << "Must follow these rules: J >= 0, abs(M) <= J, and abs(N) <= J."
+    << std::endl;
+    std::cerr << "J = " << J << " M = " << M << " N = " << N << std::endl;
     return 0.;
   }
 
@@ -204,15 +205,15 @@ double Wigner_d(const Spin &__j, const Spin &__m, const Spin &__n,
  *  This function uses the single spin Wigner_d function, thus it shares its
  *  limitations regarding higher spins.
  */
-inline complex<double> Wigner_D(double __alpha, double __beta, double __gamma,
+inline std::complex<double> Wigner_D(double __alpha, double __beta, double __gamma,
                                 const double __j, const double __m,
                                 const double __n) {
-  complex<double> i(0., 1.);
+  std::complex<double> i(0., 1.);
   return exp(-i * __m * __alpha + __n * __gamma) *
          Wigner_d(__j, __m, __n, __beta);
 }
 
-inline complex<double> Wigner_D(double __alpha, double __beta, double __gamma,
+inline std::complex<double> Wigner_D(double __alpha, double __beta, double __gamma,
                                 const Spin &__j, const Spin &__m,
                                 const Spin &__n) {
   return Wigner_D(__alpha, __beta, __gamma, (double)__j, (double)__m,
@@ -225,7 +226,7 @@ inline complex<double> Wigner_D(double __alpha, double __beta, double __gamma,
  *  single-spin version.
  */
 void Wigner_d(const Spin &__jmax, double __beta,
-              map<Spin, map<Spin, map<Spin, double>>> &__d) {
+              std::map<Spin, std::map<Spin, std::map<Spin, double>>> &__d) {
   __d.clear();
   Spin jmin, one_half = 1 / 2.;
   if ((double)__jmax == 0.) {
@@ -235,7 +236,7 @@ void Wigner_d(const Spin &__jmax, double __beta,
   double cb = cos(__beta);
   double sb = sin(__beta);
   // j=1 d's
-  map<Spin, map<Spin, double>> d1;
+  std::map<Spin, std::map<Spin, double>> d1;
   d1[1][1] = (1 + cb) / 2.;
   d1[1][0] = -sb / sqrt(2.);
   d1[1][-1] = (1 - cb) / 2.;
@@ -297,10 +298,10 @@ void Wigner_d(const Spin &__jmax, double __beta,
  *  spin version.
  */
 void Wigner_D(const Spin &__jmax, double __alpha, double __beta, double __gamma,
-              map<Spin, map<Spin, map<Spin, complex<double>>>> &__D) {
+              std::map<Spin, std::map<Spin, std::map<Spin, std::complex<double>>>> &__D) {
 
-  complex<double> i(0., 1.);
-  map<Spin, map<Spin, map<Spin, double>>> d;
+  std::complex<double> i(0., 1.);
+  std::map<Spin, std::map<Spin, std::map<Spin, double>>> d;
   Wigner_d(__jmax, __beta, d);
   Spin jmin;
   if (d.find(0) != d.end())
@@ -316,6 +317,7 @@ void Wigner_D(const Spin &__jmax, double __alpha, double __beta, double __gamma,
   }
 }
 
+} /* namespace QFT */
 } /* namespace Physics */
 } /* namespace ComPWA */
 #endif /* _Utils_H */

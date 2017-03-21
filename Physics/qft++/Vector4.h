@@ -26,7 +26,10 @@
 //_____________________________________________________________________________
 #include <cmath>
 #include "Tensor.h"
-using namespace std;
+namespace ComPWA {
+  namespace Physics {
+    namespace QFT {
+
 //_____________________________________________________________________________
 /** @class Vector4
  *  @brief \f$ x_{\mu}, p_{\mu} \f$ : 4-vectors and 4-momenta.
@@ -50,6 +53,13 @@ public:
 	  typename Type<_Tp>::ParamType __y,typename Type<_Tp>::ParamType __z)
     : Tensor<_Tp>::Tensor(1) {
     this->SetV4(__t,__x,__y,__z);
+  }
+  
+  Vector4(std::vector<_Tp> __v)
+    : Tensor<_Tp>::Tensor(1) {
+      if(__v.size() !=4)
+        throw std::runtime_error("Vector4::Vector4 | Vector doen't seem to be a 4-Vector.`");
+    this->SetV4(__v.at(0),__v.at(1),__v.at(2),__v.at(3));
   }
 
   /// Copy Constructor
@@ -165,8 +175,8 @@ public:
   /// Assignment operator 
   template <typename T> Vector4<_Tp>& operator=(const Tensor<T> &__tensor){
     if(__tensor.Rank() != 1) {
-      cout << "Error! Attempt to set Vector4 equal to a tensor w/ rank != 1"
-	   << endl;
+      std::cout << "Error! Attempt to set Vector4 equal to a tensor w/ rank != 1"
+      << std::endl;
     }
     assert(__tensor.Rank() == 1);
     this->SetV4(__tensor(0),__tensor(1),__tensor(2),__tensor(3));
@@ -178,6 +188,13 @@ public:
   template <typename T> Vector4<_Tp>& operator+=(const Vector4<T> &__v4){
     *this = (*this) + __v4;
     return *this;
+  }
+  
+    /// Sets @a this = @a this + @a v4
+  template <typename T> Vector4<_Tp> operator+(const Vector4<T> &__v4){
+    Vector4<_Tp> ret(*this);
+    ret += __v4;
+    return ret;
   }
     
   /// Sets @a this = @a this - @a v4
@@ -318,4 +335,5 @@ operator*(const Vector4<T1> &__v4a,const Vector4<T2> &__v4b) {
 }
 //_____________________________________________________________________________
 
+    }}}
 #endif /* _Vector4_H  */

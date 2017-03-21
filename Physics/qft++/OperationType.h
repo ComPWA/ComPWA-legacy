@@ -24,8 +24,10 @@
  *  @brief OperationType classes definition file (MultType,AddType,etc...)
  */
 //_____________________________________________________________________________
+namespace ComPWA {
+  namespace Physics {
+    namespace QFT {
 
-using namespace std;
 //_____________________________________________________________________________
 
 /** @class MultType
@@ -112,4 +114,5 @@ public:
 };
 //_____________________________________________________________________________
 
+    }}}
 #endif /* _OperationType_H */

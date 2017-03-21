@@ -29,7 +29,6 @@
 					<Error>0</Error>
 				</Phase>
 				<DecayParticle Name='jpsi' Helicity='+1' />
-				<!--<RecoilSystem FinalState='2' />-->
 				<DecayProducts>
 					<Particle Name='omega' FinalState='0 1' Helicity='+1' />
 					<Particle Name='pi0' FinalState='2' Helicity='+1' />

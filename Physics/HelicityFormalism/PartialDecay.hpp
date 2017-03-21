@@ -183,6 +183,12 @@ public:
       return tmp;
   }
   
+  //! Set position of variables within dataPoint
+  void SetDataPosition( int pos ) { _dataPos = pos; }
+  
+  //! Get position of variables within dataPoint
+  int GetDataPosition( ) { return _dataPos; }
+  
 protected:
   /**! Position where variables are stored in dataPoint
    * We expect to find the invariant mass of the system at @param _dataPos, 

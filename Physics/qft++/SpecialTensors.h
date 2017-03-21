@@ -23,12 +23,15 @@
 
 #include "Tensor.h"
 
-using namespace std;
 //_____________________________________________________________________________
 /** @file SpecialTensors.h
  *  @brief Definition file for some special tensors derived from Tensor.
  */
 //_____________________________________________________________________________
+namespace ComPWA {
+  namespace Physics {
+    namespace QFT {
+
 /** @class MetricTensor 
  *  @author Mike Williams
  *
@@ -105,4 +108,5 @@ public:
 };
 //_____________________________________________________________________________
 
+    }}}
 #endif /* _SpecialTensors_H */

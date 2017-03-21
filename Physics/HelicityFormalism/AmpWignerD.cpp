@@ -43,7 +43,7 @@ double AmpWignerD::dynamicalFunction(ComPWA::Spin J, ComPWA::Spin mu,
         "AmpWignerD::dynamicalFunction() | "
         "scattering angle out of range! Datapoint beyond phsp?");
 
-  double result = Wigner_d(J, mu, muPrime, acos(cosTheta));
+  double result = QFT::Wigner_d(J, mu, muPrime, acos(cosTheta));
   assert(!std::isnan(result));
 
   //Not quite sure what the correct prefactor is in this case.

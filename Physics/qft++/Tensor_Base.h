@@ -27,8 +27,10 @@
  *  @brief Tensor_Base class definition file.
  */
 //_____________________________________________________________________________
+namespace ComPWA {
+  namespace Physics {
+    namespace QFT {
 
-using namespace std;
 //_____________________________________________________________________________
 /** @class Tensor_Base
  *  @author Mike Williams
@@ -106,4 +108,5 @@ public:
 
 //_____________________________________________________________________________
 
+    }}}
 #endif /* _Tensor_Base_H */

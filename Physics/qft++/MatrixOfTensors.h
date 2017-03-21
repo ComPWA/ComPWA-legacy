@@ -23,7 +23,10 @@
 #include "../../include/matrix.h"
 #include "../../include/tensor.h"
 
-using namespace std;
+namespace ComPWA {
+  namespace Physics {
+    namespace QFT {
+      
 //_____________________________________________________________________________
 /** @file MatrixOfTensors.h
  *  @brief Defines functions for Matrix/Tensor class interactions.
@@ -87,5 +90,8 @@ Matrix<Tensor<T> > BoostMatrix(const Matrix<Tensor<T> > &__matrix,
   return ret;
 }
 //_____________________________________________________________________________
+    }
+  }
+}
 
 #endif /* _MatrixOfTensors_H */
