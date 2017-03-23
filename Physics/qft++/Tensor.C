@@ -30,132 +30,136 @@ namespace ComPWA {
   namespace Physics {
     namespace QFT {
 
-template <typename _Tp> template<typename T>
-Tensor<typename MultType<_Tp,T>::Type>
-Tensor<_Tp>::Contract(const Tensor<T> &__tensor,int __num_indicies) const {
-
-  int ind1max,ind2st,sumsize,nterm,rank;
-  Tensor<typename MultType<_Tp,T>::Type> ret;
-  MetricTensor g;
-  double gFactors;
-  typename MultType<_Tp,T>::Type element;
-  ind1max = 0;
-  ind2st = 0;
-  sumsize = 0;
-
-  if(_rank == 0){ // if this is rank 0, just multiply __tensor by this' value
-    ret.SetRank(__tensor._rank);
-    ret = _data[0] * __tensor;
-    return ret;
-  }
-  else if(__tensor._rank == 0){//__tensor is rank 0...
-    ret.SetRank(_rank);
-    ret = (*this) * __tensor._data[0];
-    return ret;
-  }
-
-  if(__num_indicies > _rank || __num_indicies > __tensor._rank){
-    std::cout << "<Tensor::Contract> Error! Can't contract " << __num_indicies
-	 << " between a " << _rank << " rank and a " << __tensor._rank
-	 << " rank tensor." << std::endl;
-    abort();
-  }
-  
-  if(__num_indicies > 0) rank = _rank + __tensor._rank - 2*__num_indicies;
-  else rank = abs(_rank - __tensor._rank);
-
-  // set ret's rank and create the summed TensorIndex
-  ret.SetRank(rank);
-  TensorIndex indSummed;
-
-  if(__num_indicies < 0){
-    // check to see which tensor has the smaller rank (calculate how many 
-    // summed indicies are needed)
-    if(_rank <= __tensor._rank) sumsize = _rank;
-    else sumsize = __tensor._rank;
-  }
-  else sumsize = __num_indicies;
-  indSummed.Resize(2*sumsize);
-
-  TensorIndex ind1(this->_rank);
-  TensorIndex ind2(__tensor._rank);
-
-  int size1 = ind1.Size();
-  int size2 = ind2.Size();
-
-  if(rank > 0){ // rank > 0, we need to do all the loops
-    TensorIndex index(rank);
-
-    while(index.IsValid()){ // loop over ret's elements
-
-      // check to see if this will have any free indicies
-      if((size1 - sumsize) > 0) ind1max = size1 - sumsize;
-      else ind1max = 0;
-       
-      // set this index (except last ??(number of summed indicies) indicies)
-      for(int i = 0; i < ind1max; i++) ind1.SetIndex(i,index[i]);
-
-      // set __tensor index (except 1st ??(summed indicies) indicies)
-      ind2st = sumsize;
-      for(int i = ind2st; i < size2; i++) 
-	ind2.SetIndex(i,index[ind1max+(i-ind2st)]);
-
-      nterm = 0;
-      while(indSummed.IsValid()){ // loop over summed indicies
-
-	gFactors = g(indSummed[0],indSummed[0 + indSummed.Size()/2]);
-	// get the needed amount of metric tensor factors
-	for(int i = 1; i < indSummed.Size()/2; i++){
-	  gFactors *= g(indSummed[i],indSummed[i + indSummed.Size()/2]);
-	}
-	if(gFactors != 0.0){
-	  nterm++;
-	  // set up last ?? this and 1st ?? __tensor indicies
-	  for(int i = ind1max; i < size1;i++) 
-	    ind1.SetIndex(i,indSummed[i-ind1max]);
-	  for(int i = size1 - ind1max; i < indSummed.Size(); i++)
-	    ind2.SetIndex(i - (size1 - ind1max),indSummed[i]);
-
-	  // multiply the metric tensor factor by this and __tensor elements
-	  element = (this->Element(ind1))*(__tensor(ind2))*gFactors;
-
-	  // add to each element this*__tensor*g*g...*g with correct # of g's
-	  if(nterm == 1) ret(index) = element;	    
-	  else ret(index) += element;	    
-	}
-	++indSummed;
-      }
-      // reset the summed indicies, step up index to next ret element
-      indSummed.Reset();
-      ++index;
-    }
-  }
-  else{ // both are same rank tensors (R is rank 0)
-    nterm = 0;
-
-    // loop over summed indicies (only loop needed in this case)
-    while(indSummed.IsValid()){
-      gFactors = g(indSummed[0],indSummed[0 + indSummed.Size()/2]);
+template class Tensor<double>;
+//template class Tensor<MultType<double,double>::Type>;
+//template class Tensor<MultType<int,int>::Type>;
       
-      // get the needed amount of metric tensor factors
-      for(int i = 1; i < indSummed.Size()/2; i++)
-	gFactors *= g(indSummed[i],indSummed[i + indSummed.Size()/2]);
-      
-      if(gFactors != 0.0){
-	nterm++;
-	for(int i = 0; i < indSummed.Size()/2 ;i++){
-	  ind1.SetIndex(i,indSummed[i]);
-	  ind2.SetIndex(i,indSummed[i + indSummed.Size()/2]);
-	}
-	element = (this->Element(ind1))*(__tensor(ind2))*gFactors;
-	if(nterm == 1) ret() = element;
-	else ret() += element;	  
-      }
-      indSummed++;
-    } 
-  }      
-  return ret;
-}
+//template <typename _Tp> template<typename T>
+//Tensor<typename MultType<_Tp,T>::Type>
+//Tensor<_Tp>::Contract(const Tensor<T> &__tensor,int __num_indicies) const {
+//
+//  int ind1max,ind2st,sumsize,nterm,rank;
+//  Tensor<typename MultType<_Tp,T>::Type> ret;
+//  MetricTensor g;
+//  double gFactors;
+//  typename MultType<_Tp,T>::Type element;
+//  ind1max = 0;
+//  ind2st = 0;
+//  sumsize = 0;
+//
+//  if(_rank == 0){ // if this is rank 0, just multiply __tensor by this' value
+//    ret.SetRank(__tensor._rank);
+//    ret = _data[0] * __tensor;
+//    return ret;
+//  }
+//  else if(__tensor._rank == 0){//__tensor is rank 0...
+//    ret.SetRank(_rank);
+//    ret = (*this) * __tensor._data[0];
+//    return ret;
+//  }
+//
+//  if(__num_indicies > _rank || __num_indicies > __tensor._rank){
+//    std::cout << "<Tensor::Contract> Error! Can't contract " << __num_indicies
+//	 << " between a " << _rank << " rank and a " << __tensor._rank
+//	 << " rank tensor." << std::endl;
+//    abort();
+//  }
+//  
+//  if(__num_indicies > 0) rank = _rank + __tensor._rank - 2*__num_indicies;
+//  else rank = abs(_rank - __tensor._rank);
+//
+//  // set ret's rank and create the summed TensorIndex
+//  ret.SetRank(rank);
+//  TensorIndex indSummed;
+//
+//  if(__num_indicies < 0){
+//    // check to see which tensor has the smaller rank (calculate how many 
+//    // summed indicies are needed)
+//    if(_rank <= __tensor._rank) sumsize = _rank;
+//    else sumsize = __tensor._rank;
+//  }
+//  else sumsize = __num_indicies;
+//  indSummed.Resize(2*sumsize);
+//
+//  TensorIndex ind1(this->_rank);
+//  TensorIndex ind2(__tensor._rank);
+//
+//  int size1 = ind1.Size();
+//  int size2 = ind2.Size();
+//
+//  if(rank > 0){ // rank > 0, we need to do all the loops
+//    TensorIndex index(rank);
+//
+//    while(index.IsValid()){ // loop over ret's elements
+//
+//      // check to see if this will have any free indicies
+//      if((size1 - sumsize) > 0) ind1max = size1 - sumsize;
+//      else ind1max = 0;
+//       
+//      // set this index (except last ??(number of summed indicies) indicies)
+//      for(int i = 0; i < ind1max; i++) ind1.SetIndex(i,index[i]);
+//
+//      // set __tensor index (except 1st ??(summed indicies) indicies)
+//      ind2st = sumsize;
+//      for(int i = ind2st; i < size2; i++) 
+//	ind2.SetIndex(i,index[ind1max+(i-ind2st)]);
+//
+//      nterm = 0;
+//      while(indSummed.IsValid()){ // loop over summed indicies
+//
+//	gFactors = g(indSummed[0],indSummed[0 + indSummed.Size()/2]);
+//	// get the needed amount of metric tensor factors
+//	for(int i = 1; i < indSummed.Size()/2; i++){
+//	  gFactors *= g(indSummed[i],indSummed[i + indSummed.Size()/2]);
+//	}
+//	if(gFactors != 0.0){
+//	  nterm++;
+//	  // set up last ?? this and 1st ?? __tensor indicies
+//	  for(int i = ind1max; i < size1;i++) 
+//	    ind1.SetIndex(i,indSummed[i-ind1max]);
+//	  for(int i = size1 - ind1max; i < indSummed.Size(); i++)
+//	    ind2.SetIndex(i - (size1 - ind1max),indSummed[i]);
+//
+//	  // multiply the metric tensor factor by this and __tensor elements
+//	  element = (this->Element(ind1))*(__tensor(ind2))*gFactors;
+//
+//	  // add to each element this*__tensor*g*g...*g with correct # of g's
+//	  if(nterm == 1) ret(index) = element;	    
+//	  else ret(index) += element;	    
+//	}
+//	++indSummed;
+//      }
+//      // reset the summed indicies, step up index to next ret element
+//      indSummed.Reset();
+//      ++index;
+//    }
+//  }
+//  else{ // both are same rank tensors (R is rank 0)
+//    nterm = 0;
+//
+//    // loop over summed indicies (only loop needed in this case)
+//    while(indSummed.IsValid()){
+//      gFactors = g(indSummed[0],indSummed[0 + indSummed.Size()/2]);
+//      
+//      // get the needed amount of metric tensor factors
+//      for(int i = 1; i < indSummed.Size()/2; i++)
+//	gFactors *= g(indSummed[i],indSummed[i + indSummed.Size()/2]);
+//      
+//      if(gFactors != 0.0){
+//	nterm++;
+//	for(int i = 0; i < indSummed.Size()/2 ;i++){
+//	  ind1.SetIndex(i,indSummed[i]);
+//	  ind2.SetIndex(i,indSummed[i + indSummed.Size()/2]);
+//	}
+//	element = (this->Element(ind1))*(__tensor(ind2))*gFactors;
+//	if(nterm == 1) ret() = element;
+//	else ret() += element;	  
+//      }
+//      indSummed++;
+//    } 
+//  }      
+//  return ret;
+//}
 //_____________________________________________________________________________
 
 template <typename _Tp> 
@@ -542,10 +546,6 @@ template<typename _Tp> void Tensor<_Tp>::Transform(const Tensor<double> &__lt){
 //_____________________________________________________________________________
 
 
-template class Tensor<double>;
-//template class Tensor<MultType<double,double>::Type>;
-//template class Tensor<MultType<int,int>::Type>;
-      
     } /* namespace QFT */
   }
 }
