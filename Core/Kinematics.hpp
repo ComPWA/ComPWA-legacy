@@ -64,6 +64,12 @@ public:
   //! Get number of variables
   virtual unsigned int GetNVars() const { return _varNames.size(); }
 
+  //! Get final state
+  virtual std::vector<int> GetFinalState() { return _finalState; }
+  
+  //! Get inital state
+  virtual std::vector<int> GetInitialState() { return _initialState; }
+  
   /** Calculate Break-up momentum squared
    *
    * Calculate Break-up momentum at energy @param sqrtS for particles with
@@ -76,6 +82,7 @@ public:
    * @return |break-up momentum|
    */
   static double qSqValue(double sqrtS, double ma, double mb);
+  
   /** Calculate Break-up momentum
    *
    * Calculate Break-up momentum at energy @param sqrtS for particles with

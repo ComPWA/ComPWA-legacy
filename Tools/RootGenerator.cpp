@@ -8,6 +8,7 @@
 #include <stdexcept>
 
 #include "Core/DataPoint.hpp"
+#include "Core/PhysConst.hpp"
 #include "Tools/RootGenerator.hpp"
 
 namespace ComPWA {
@@ -18,7 +19,10 @@ RootGenerator::RootGenerator(int seed) {
   if (seed != -1)
     setSeed(seed);
   Kinematics *kin = Kinematics::instance();
-  nPart = kin->GetNumberOfParticles();
+  auto physConst = PhysConst::Instance();
+  auto finalS = kin->GetFinalState();
+  auto initialS = kin->GetInitialState();
+  nPart = finalS.size();
   if (nPart < 2)
     throw std::runtime_error(
         "RootGenerator::RootGenerator() | one particle is not enough!");
@@ -26,10 +30,14 @@ RootGenerator::RootGenerator(int seed) {
     LOG(info)
         << "RootGenerator::RootGenerator() | only 2 particles in the final"
            " state! There are no degrees of freedom!";
+  if (initialS.size() != 1)
+    throw std::runtime_error(
+        "RootGenerator::RootGenerator() | More than one particle in initial State!");
+  
   masses = new Double_t[nPart];
-  TLorentzVector W(0.0, 0.0, 0.0, kin->GetMotherMass()); //= beam + target;
+  TLorentzVector W(0.0, 0.0, 0.0, physConst->FindParticle(initialS.at(0)).GetMass()); //= beam + target;
   for (unsigned int t = 0; t < nPart; t++) { // particle 0 is mother particle
-    masses[t] = kin->GetMass(t + 1);
+    masses[t] = physConst->FindParticle(finalS.at(t)).GetMass();
   }
   event.SetDecay(W, nPart, masses);
 };

@@ -14,7 +14,7 @@ namespace ComPWA {
 MomentumCorrection::MomentumCorrection(std::vector<CorrectionTable> inCorr,
                                        std::string t)
     : corrections(inCorr), title(t) {
-  if (corrections.size() != Kinematics::instance()->GetNumberOfParticles())
+  if (corrections.size() != Kinematics::instance()->GetFinalState().size() )
     throw std::runtime_error(
         "RootCorrection::RootCorrection() | Number of histograms is "
         "expected to be number of final state particles!");

@@ -7,6 +7,7 @@
 //
 #define BOOST_TEST_MODULE                                                      \
   HelicityFormalism/* this can only be define once within the same library ?! */
+#include <vector>
 
 #include <boost/test/unit_test.hpp>
 #include <boost/property_tree/ptree.hpp>
@@ -14,6 +15,9 @@
 
 #include "Core/PhysConst.hpp"
 #include "Core/Logging.hpp"
+#include "Core/RunManager.hpp"
+#include "Tools/RootGenerator.hpp"
+#include "DataReader/RootReader/RootReader.hpp"
 #include "Physics/HelicityFormalism/IncoherentIntensity.hpp"
 #include "Physics/HelicityFormalism/HelicityKinematics.hpp"
 
@@ -39,6 +43,16 @@ BOOST_AUTO_TEST_CASE(IncoherentConstruction) {
   
   //Create amplitude
   auto intens = ComPWA::Physics::HelicityFormalism::IncoherentIntensity::Factory(tr);
+  
+  // Generate phsp sample
+  std::shared_ptr<ComPWA::Generator> gen( new ComPWA::Tools::RootGenerator(0) );
+  std::shared_ptr<ComPWA::DataReader::Data> sample( new ComPWA::DataReader::RootReader() );
+  ComPWA::RunManager r;
+  r.setGenerator(gen);
+  r.setPhspSample(sample);
+  r.generatePhsp(10);
+  auto dataP = sample->getDataPoints();
+  
   
 //  auto part = physConst->FindParticle("gamma");
 //  BOOST_CHECK_EQUAL(part.GetMass(), 0.);

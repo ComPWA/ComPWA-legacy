@@ -198,7 +198,33 @@ public:
    *  @param os ostream object (defaults to cout)
    *  Note: This function will only print tensors with rank <= 2
    */
-  void Print(std::ostream& __os = std::cout) const;
+  void Print(std::ostream& __os = std::cout) const{
+  if(_rank == 0) __os << "{Rank = 0 " << _data[0] << " }";
+  else if(_rank == 1){
+    __os << "{Rank = 1 ( " ;
+    for(int mu = 0; mu < 3; mu++) __os << _data[mu] << ",";
+    __os << _data[3] << ") } ";
+  }
+  else if(_rank == 2){
+    int index;
+    __os << "{Rank = 2 ";
+    for(int mu = 0; mu < 4; mu++){
+      __os << "(";
+      for(int nu = 0; nu < 4; nu++){
+	index = 4*nu + mu;
+	__os << _data[index];
+	if(nu < 3) __os << ",";
+      }
+      __os << ")";
+      if(mu < 3) __os << ",";
+    }
+    __os << "}";
+  }
+  else{
+    std::cout << "<Tensor::Print(ostream&)> Error! Can NOT print a Tensor with "
+	 << " Rank > 2." << std::endl;
+  }
+}
 
   // Getters:
 

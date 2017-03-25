@@ -189,14 +189,7 @@ public:
     *this = (*this) + __v4;
     return *this;
   }
-  
-    /// Sets @a this = @a this + @a v4
-  template <typename T> Vector4<_Tp> operator+(const Vector4<T> &__v4){
-    Vector4<_Tp> ret(*this);
-    ret += __v4;
-    return ret;
-  }
-    
+
   /// Sets @a this = @a this - @a v4
   template <typename T> Vector4<_Tp>& operator-=(const Vector4<T> &__v4){
     *this = (*this) - __v4;

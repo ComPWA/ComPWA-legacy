@@ -53,7 +53,8 @@ RunManager::RunManager(unsigned int size, std::shared_ptr<AmpIntensity> inP,
     : amp_(inP), gen_(gen) {}
 
 RunManager::~RunManager() {
-  LOG(debug) << "~RunManager: Last seed: " << gen_->getSeed();
+  if( gen_ )
+    LOG(debug) << "~RunManager: Last seed: " << gen_->getSeed();
 }
 
 std::shared_ptr<FitResult> RunManager::startFit(ParameterList &inPar) {

@@ -115,8 +115,9 @@ void HelicityKinematics::EventToDataPoint(const Event& event,
       finalB += QFT::Vector4<double>(event.getParticle(s).getFourMomentum());
     }
     QFT::Vector4<double> dd = finalA+finalB;
-    
+
     double invmass = (dd).Mass2();
+    std::cout<<invmass<<std::endl;
   }
 //  point.reset(
 //      GetNumberOfVariables()

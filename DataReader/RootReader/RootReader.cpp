@@ -24,6 +24,7 @@
 #include "Core/Kinematics.hpp"
 #include "Core/Generator.hpp"
 #include "Core/Logging.hpp"
+#include "Core/PhysConst.hpp"
 #include "DataReader/RootReader/RootReader.hpp"
 
 #include "TParticle.h"
@@ -154,9 +155,14 @@ void RootReader::writeData(std::string file, std::string trName) {
   fTree->Branch("charge", &fCharge, "charge/I");
   fTree->Branch("flavour", &fFlavour, "flavour/I");
   TClonesArray &partArray = *fParticles;
-
-  TLorentzVector motherMomentum(0, 0, 0,
-                                Kinematics::instance()->GetMotherMass());
+  
+  if(Kinematics::instance()->GetInitialState().size() != 1)
+    throw std::runtime_error("RootReaer::writeData() | More then one initial state particle. No idea what to do!");
+  
+  int pid = Kinematics::instance()->GetInitialState().at(0);
+  double mass = PhysConst::Instance()->FindParticle(pid).GetMass();
+  TLorentzVector motherMomentum(0, 0, 0, mass );
+  
   auto it = fEvents.begin();
   for (; it != fEvents.end(); ++it) {
     fParticles->Clear();

@@ -36,7 +36,7 @@ CoherentIntensity::Factory(const boost::property_tree::ptree &pt) {
   obj->SetName(pt.get<std::string>("<xmlattr>.Name"));
 
 //  boost::property_tree::xml_writer_settings<char> settings('\t', 1);
-  write_xml(std::cout,pt);
+//  write_xml(std::cout,pt);
   
   auto ptCh = pt.get_child_optional("Strength");
   if (ptCh) {
