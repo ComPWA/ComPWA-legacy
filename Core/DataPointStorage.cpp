@@ -28,7 +28,7 @@ void DataPointStorage::layoutDataStorageStructure(
   dataPoint dp(evt);
   expected_number_of_events_[storage_index] = expected_number_of_events;
   number_of_events_[storage_index] = 0;
-  for (unsigned int i = 0; i < dp.size(); ++i) {
+  for (unsigned int i = 0; i < dp.Size(); ++i) {
     data_storage_[storage_index][i].reserve(
         expected_number_of_events_.at(storage_index));
   }
@@ -40,7 +40,7 @@ void DataPointStorage::layoutDataStorageStructure(
   // reserve storage to have fast filling later on
   expected_number_of_events_[storage_index] = expected_number_of_events;
   number_of_events_[storage_index] = 0;
-  for (unsigned int i = 0; i < dp.size(); ++i) {
+  for (unsigned int i = 0; i < dp.Size(); ++i) {
     data_storage_[storage_index][i].reserve(
         expected_number_of_events_.at(storage_index));
   }
@@ -66,8 +66,8 @@ void DataPointStorage::addEvent(unsigned storage_index, const Event &evt) {
 void DataPointStorage::addDataPoint(unsigned storage_index,
                                     const dataPoint &dp) {
   auto &chosen_storage = data_storage_.at(storage_index);
-  for (unsigned int i = 0; i < dp.size(); ++i) {
-    chosen_storage[i].push_back(dp.getVal(i));
+  for (unsigned int i = 0; i < dp.Size(); ++i) {
+    chosen_storage[i].push_back(dp.GetValue(i));
   }
   ++(number_of_events_.at(storage_index));
 }

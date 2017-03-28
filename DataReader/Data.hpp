@@ -74,7 +74,7 @@ public:
    *
    * @return Vector of all events
    */
-  virtual std::vector<Event> getEvents() { return fEvents; }
+  virtual std::vector<Event>& getEvents() { return fEvents; }
 
   /**! Get list of data
    * A 'horizontal' list of dataPoints is obtained. Each variable

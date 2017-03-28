@@ -89,6 +89,8 @@ public:
   
   virtual double GetDecayMassB() const { return _massB; }
   
+  virtual ComPWA::Spin GetSpin() const { return _spin; }
+  virtual void SetSpin( ComPWA::Spin spin ) { _spin = spin; }
 protected:
   //! Name of resonance
   std::string _name;

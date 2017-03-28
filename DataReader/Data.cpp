@@ -175,16 +175,18 @@ const ParameterList &Data::getListOfData() {
     } catch (BeyondPhsp &ex) {
       continue;
     }
-    eff.push_back(point.getEfficiency());
+    eff.push_back(point.GetEfficiency());
     weight.push_back(point.getWeight());
     for (int i = 0; i < size; ++i)
-      data.at(i).push_back(point.getVal(i));
+      data.at(i).push_back(point.GetValue(i));
   }
 
   // Add data vector to ParameterList
   for (int i = 0; i < size; ++i) {
+    //std::shared_ptr<MultiDouble> tmp(new MultiDouble(
+    //  Kinematics::instance()->GetVarNames().at(i), data.at(i)));
     std::shared_ptr<MultiDouble> tmp(new MultiDouble(
-        Kinematics::instance()->GetVarNames().at(i), data.at(i)));
+        "", data.at(i)));
     dataList.AddParameter(tmp);
   }
 

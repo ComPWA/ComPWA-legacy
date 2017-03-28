@@ -21,6 +21,8 @@
 #include "Physics/HelicityFormalism/IncoherentIntensity.hpp"
 #include "Physics/HelicityFormalism/HelicityKinematics.hpp"
 
+using namespace ComPWA::Physics::HelicityFormalism;
+
 BOOST_AUTO_TEST_SUITE(HelicityFormalism)
 
 BOOST_AUTO_TEST_CASE(IncoherentConstruction) {
@@ -39,20 +41,37 @@ BOOST_AUTO_TEST_CASE(IncoherentConstruction) {
   finalState.push_back(22);
   
   //Create HelicityInstance here
-  ComPWA::Physics::HelicityFormalism::HelicityKinematics::CreateInstance(initialState,finalState);
+  HelicityKinematics::CreateInstance(initialState,finalState);
+  HelicityKinematics::instance()->GetPhspVolume();
   
   //Create amplitude
-  auto intens = ComPWA::Physics::HelicityFormalism::IncoherentIntensity::Factory(tr);
+  auto intens = IncoherentIntensity::Factory(tr);
   
   // Generate phsp sample
   std::shared_ptr<ComPWA::Generator> gen( new ComPWA::Tools::RootGenerator(0) );
   std::shared_ptr<ComPWA::DataReader::Data> sample( new ComPWA::DataReader::RootReader() );
+  
   ComPWA::RunManager r;
   r.setGenerator(gen);
   r.setPhspSample(sample);
-  r.generatePhsp(10);
-  auto dataP = sample->getDataPoints();
+  r.generatePhsp(200);
   
+  LOG(info) << "Loop over phsp events....";
+  for(auto i : sample->getEvents()){
+    ComPWA::dataPoint p;
+    try{
+      p = ComPWA::dataPoint(i);
+    } catch(std::exception& ex){
+      //Test if events outside the phase space boundaries are generated
+      LOG(trace) << "Event outside phase space. This should not happen since we use a Monte-Carlo sample!";
+      BOOST_TEST(false);
+      continue;
+    }
+    
+    double w = intens->Intensity(p);
+    i.setWeight(w);
+    LOG(trace)<<"point = "<<p<<" intensity = "<<w;
+  }
   
 //  auto part = physConst->FindParticle("gamma");
 //  BOOST_CHECK_EQUAL(part.GetMass(), 0.);

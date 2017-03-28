@@ -32,8 +32,8 @@ RootEfficiency::RootEfficiency(const RootEfficiency &) {}
 double RootEfficiency::Evaluate(const dataPoint &point) const {
   //	double m13sq = point.getVal("m13sq");
   //	double m23sq = point.getVal("m23sq");
-  double m13sq = point.getVal(1);
-  double m23sq = point.getVal(0);
+  double m13sq = point.GetValue(1);
+  double m23sq = point.GetValue(0);
 
   TH2D *test = (TH2D *)effHist->GetPassedHistogram();
   int globalBin = test->FindBin(m23sq, m13sq);
@@ -44,8 +44,8 @@ double RootEfficiency::Evaluate(const dataPoint &point) const {
   // ------------------ ROOTANGLEEFFICIENCY ---------------------
 
 double RootAngleEfficiency::Evaluate(const dataPoint &point) const {
-  double m23sq = point.getVal(0);
-  double angle = point.getVal(8);
+  double m23sq = point.GetValue(0);
+  double angle = point.GetValue(8);
 
   TH2D *test = (TH2D *)effHist->GetPassedHistogram();
   int globalBin = test->FindBin(m23sq, angle);

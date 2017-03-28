@@ -102,6 +102,7 @@
 		<IsoSpin>0</IsoSpin>
 		<IsoSpinZ>0</IsoSpinZ>
 		<DecayInfo Type='relativisticBreitWigner'>
+			<FormFactor type='0' />
 			<Width Name='width_jpsi'>
 				<Value>0.0000929</Value>
 				<Error>0.0000028</Error>
@@ -131,6 +132,7 @@
 		<IsoSpin>0.0</IsoSpin>
 		<IsoSpinZ>0.0</IsoSpinZ>
 		<DecayInfo Type='relativisticBreitWigner'>
+			<FormFactor type='0' />
 			<Width Name='width_omega'>
 				<Value>0.01849</Value>
 				<Fix>1</Fix>
@@ -164,6 +166,7 @@
 		<IsoSpin>0.0</IsoSpin>
 		<IsoSpinZ>0.0</IsoSpinZ>
 		<DecayInfo Type='relativisticBreitWigner'>
+			<FormFactor type='0' />
 			<Width Name='width_f0_980'>
 				<Value>0.05</Value>
 				<Fix>1</Fix>

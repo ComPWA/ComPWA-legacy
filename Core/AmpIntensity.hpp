@@ -49,9 +49,9 @@ class AmpIntensity {
 public:
   //! Constructor with an optional, unique name and an optional efficiency
   AmpIntensity(std::string name = "",
-            std::shared_ptr<Efficiency> eff =
-                std::shared_ptr<Efficiency>(new UnitEfficiency))
-      : _name(name), _eff(eff) {}
+               std::shared_ptr<DoubleParameter> strength = std::shared_ptr<DoubleParameter>(new DoubleParameter("strength",1.0)),
+            std::shared_ptr<Efficiency> eff = std::shared_ptr<Efficiency>(new UnitEfficiency))
+      : _name(name), _eff(eff), _strength(strength) {}
 
   //! Destructor
   virtual ~AmpIntensity() { /* nothing */
@@ -227,7 +227,7 @@ public:
 
     double mass = params.GetDoubleParameter(0)->GetValue();
     double width = params.GetDoubleParameter(1)->GetValue();
-    double sqrtS = std::sqrt(point.getVal(0));
+    double sqrtS = std::sqrt(point.GetValue(0));
 
     std::complex<double> gaus(
         std::exp(-1 * (sqrtS - mass) * (sqrtS - mass) / width / width / 2.), 0);

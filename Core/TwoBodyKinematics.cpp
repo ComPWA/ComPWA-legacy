@@ -28,7 +28,6 @@ TwoBodyKinematics::TwoBodyKinematics(int idMother, std::vector<int> finalState,
   mass_max = ((_M + deltaMassWindow));
   mass_sq_max = mass_max * mass_max;
   mass_sq_min = mass_min * mass_max;
-  _varNames.push_back("msq");
 
   init();
 }
@@ -37,7 +36,7 @@ void TwoBodyKinematics::init() {}
 
 bool TwoBodyKinematics::IsWithinPhsp(const dataPoint &point) const {
   return 1;
-  if (point.getVal(0) >= mass_sq_min && point.getVal(0) <= mass_sq_max)
+  if (point.GetValue(0) >= mass_sq_min && point.GetValue(0) <= mass_sq_max)
     return 1;
   return 0;
 }
@@ -45,11 +44,11 @@ bool TwoBodyKinematics::IsWithinPhsp(const dataPoint &point) const {
 void TwoBodyKinematics::EventToDataPoint(const Event &ev,
                                          dataPoint &point) const {
   double weight = ev.getWeight();
-  point.setWeight(weight); // reset weight
+  point.SetWeight(weight); // reset weight
   const Particle &part1 = ev.getParticle(0);
   const Particle &part2 = ev.getParticle(1);
   double msq = Particle::invariantMass(part1, part2);
-  point.setVal(0, msq);
+  point.SetValue(0, msq);
   return;
 }
 

@@ -40,6 +40,20 @@ namespace ComPWA {
         SubSystem(std::vector<int> recoilS, std::vector<int> finalA, std::vector<int> finalB) :
         _recoilState(recoilS), _finalStateA(finalA), _finalStateB(finalB){
           
+          //Creating unique title
+          std::stringstream stream;
+          stream <<"(";
+          for( auto i : _recoilState )
+            stream << std::to_string(i);
+          stream <<")->(";
+          for( auto i : _finalStateA)
+            stream << std::to_string(i);
+          stream <<")+(";
+          for( auto i : _finalStateB)
+            stream << std::to_string(i);
+          stream <<")";
+            title = stream.str();
+          //LOG(trace) << "SubSystem::SubSystem() | Creating sub system "<<title;
         }
         
         bool operator ==(const SubSystem &b) const{
@@ -67,6 +81,7 @@ namespace ComPWA {
         void SetFinalStateB( std::vector<int> f ) { _finalStateB = f; }
         
       protected:
+        std::string title;
         std::vector<int> _recoilState;
         std::vector<int> _finalStateA;
         std::vector<int> _finalStateB;
@@ -123,9 +138,30 @@ namespace ComPWA {
         }
         
         //! Get ID of data for subsystem defined by recoilS and finalS
-        virtual int GetDataID( std::vector<int> recoilS, std::vector<int> finalA, std::vector<int> finalB ) {
+        virtual int GetDataID( std::vector<int> recoilS, std::vector<int> finalA,
+                              std::vector<int> finalB ) {
           return GetDataID( SubSystem(recoilS, finalA, finalB) );
         }
+        
+        //! Get ID of data for SubSystem s
+        virtual SubSystem GetSubSystem( int pos ) const{
+          return _listSubSystem.at(pos);
+        }
+        
+        //! Get number of variables
+        virtual unsigned int GetNVars() const { return _listSubSystem.size()*3; }
+        
+        //! Calculate form factor
+        static double
+        FormFactor(double sqrtS, double ma, double mb, double spin,
+                   double mesonRadius,
+                   formFactorType type = formFactorType::BlattWeisskopf);
+        
+        //! Calculate form factor
+        static double
+        FormFactor(double sqrtS, double ma, double mb, double spin,
+                   double mesonRadius, std::complex<double> qValue,
+                   formFactorType type = formFactorType::BlattWeisskopf);
         
       protected:
         HelicityKinematics(std::vector<int> initialState, std::vector<int> finalState);

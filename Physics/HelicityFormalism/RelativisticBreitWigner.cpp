@@ -22,8 +22,7 @@
 
 #include "boost/property_tree/ptree.hpp"
 
-#include "Core/DataPointStorage.hpp"
-#include "Core/Kinematics.hpp"
+#include "Physics/HelicityFormalism/HelicityKinematics.hpp"
 #include "Physics/HelicityFormalism/RelativisticBreitWigner.hpp"
 
 namespace ComPWA {
@@ -33,7 +32,7 @@ namespace HelicityFormalism {
 std::complex<double> RelativisticBreitWigner::Evaluate(const dataPoint &point,
                                                        int pos) const {
   std::complex<double> result = dynamicalFunction(
-      point.getVal(pos), _mass->GetValue(), _massA, _massB, _width->GetValue(),
+      point.GetValue(pos), _mass->GetValue(), _massA, _massB, _width->GetValue(),
       (double)_spin, _mesonRadius->GetValue(), _ffType);
   return result;
 }
@@ -46,8 +45,8 @@ std::complex<double> RelativisticBreitWigner::dynamicalFunction(
   double sqrtS = sqrt(mSq);
 
   double barrier =
-      Kinematics::FormFactor(sqrtS, ma, mb, J, mesonRadius, ffType) /
-      Kinematics::FormFactor(mR, ma, mb, J, mesonRadius, ffType);
+      HelicityKinematics::FormFactor(sqrtS, ma, mb, J, mesonRadius, ffType) /
+      HelicityKinematics::FormFactor(mR, ma, mb, J, mesonRadius, ffType);
 
   std::complex<double> qTerm = std::pow((Kinematics::phspFactor(sqrtS, ma, mb) /
                                          Kinematics::phspFactor(mR, ma, mb)) *
@@ -94,6 +93,12 @@ RelativisticBreitWigner::Factory(const boost::property_tree::ptree &pt) {
     throw std::runtime_error(
         "RelativisticBreitWigner::Factory() | Decay type does not match! ");
 
+  auto spin = partProp.GetSpin();
+  obj->SetSpin(spin);
+  
+  auto ffType = formFactorType(decayTr.get<int>("FormFactor.<xmlattr>.type"));
+  obj->SetFormFactorType(ffType);
+  
   auto width = ComPWA::DoubleParameterFactory(decayTr.get_child("Width"));
   obj->SetWidth(std::make_shared<DoubleParameter>(width));
   auto mesonRadius =

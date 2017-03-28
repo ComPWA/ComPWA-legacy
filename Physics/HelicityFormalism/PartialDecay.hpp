@@ -40,8 +40,8 @@ public:
   std::complex<double> Evaluate(const dataPoint &point) const {
     std::complex<double> result =
         std::polar(_magnitude->GetValue(), _phase->GetValue());
-    result *= _angD->Evaluate(point, _dataPos+1, _dataPos+2);
-    result *= _dynamic->Evaluate(point, _dataPos);
+    result *= _angD->Evaluate(point, (_dataPos*3)+1, (_dataPos*3)+2);
+    result *= _dynamic->Evaluate(point, (_dataPos*3));
 
     return result;
   };
@@ -187,7 +187,7 @@ public:
   void SetDataPosition( int pos ) { _dataPos = pos; }
   
   //! Get position of variables within dataPoint
-  int GetDataPosition( ) { return _dataPos; }
+  int GetDataPosition( ) const { return _dataPos; }
   
 protected:
   /**! Position where variables are stored in dataPoint

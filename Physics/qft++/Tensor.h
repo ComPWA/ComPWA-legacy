@@ -171,7 +171,43 @@ public:
    *  \Lambda^{\delta}{}_{\mu}(\vec{\beta})\Lambda^{\pi}{}_{\nu}(\vec{\beta}) 
    *  \ldots \f$.
    */
-  void Boost(double __bx,double __by,double __bz);
+  void Boost(double __bx,double __by,double __bz) {
+
+  // check to see if bx,by,bz are all less than 1
+  if(std::abs(__bx) >= 1 || std::abs(__by) >= 1 || std::abs(__bz) >= 1)
+    std::cout << "Error! Attempt to boost using invalid boost vector." << std::endl;
+  assert((std::abs(__bx) < 1)&&(std::abs(__by)<1)&&(std::abs(__bz)<1));
+
+  Tensor<double> lt(2); // Lorentz transformation tensor
+  double gamma = 1.0/sqrt(1.0 - __bx*__bx - __by*__by - __bz*__bz);
+  double gamFact = (gamma*gamma)/(gamma + 1.0);
+
+  // set up the Lorentz transformation tensor
+  lt.Zero();
+
+  lt(0,0) = gamma;
+  lt(0,1) = gamma*__bx;
+  lt(0,2) = gamma*__by;
+  lt(0,3) = gamma*__bz;
+  
+  lt(1,1) = (__bx*__bx*gamFact)+1;
+  lt(1,2) = __bx*__by*gamFact;
+  lt(1,3) = __bx*__bz*gamFact;
+  
+  lt(2,2) = (__by*__by*gamFact)+1;
+  lt(2,3) = __by*__bz*gamFact;
+  
+  lt(3,3) = (__bz*__bz*gamFact)+1;
+  
+  lt(1,0) = lt(0,1);
+  lt(2,0) = lt(0,2);
+  lt(2,1) = lt(1,2);
+  lt(3,0) = lt(0,3);
+  lt(3,1) = lt(1,3);
+  lt(3,2) = lt(2,3);
+
+  this->Transform(lt);
+}
 
   /// Boost the Tensor to the rest frame of the 4-momentum @a p4.
   void Boost(const Tensor<double> &__p4) {
@@ -182,16 +218,89 @@ public:
   }
 
   /// Rotate the tensor using Euler angles \f$ \alpha,\beta,\gamma \f$.
-  void Rotate(double __alpha,double __beta,double __gamma);
+  void Rotate(double __alpha,double __beta,double __gamma) {
+    
+  double ca = cos(__alpha);
+  double sa = sin(__alpha);
+  double cb = cos(__beta);
+  double sb = sin(__beta);
+  double cg = cos(__gamma);
+  double sg = sin(__gamma);
+
+  Tensor<double> lt(2); // Lorentz transformation tensor
+
+  lt.Zero();
+
+  lt(0,0) = 1.0;
+  
+  lt(1,1) = ca*cb*cg - sa*sg;
+  lt(1,2) = sa*cb*cg + ca*sg;
+  lt(1,3) = -sb*cg;
+
+  lt(2,1) = -ca*cb*sg - sa*cg;
+  lt(2,2) = -sa*cb*sg + ca*cg;
+  lt(2,3) = sb*sg;
+
+  lt(3,1) = ca*sb;
+  lt(3,2) = sa*sb;
+  lt(3,3) = cb;
+
+  this->Transform(lt);
+}
 
   /// Rotate about the x-axis
-  void RotateX(double __alpha);
+  void RotateX(double __alpha) {
+  double ca = cos(__alpha);
+  double sa = sin(__alpha);
+  Tensor<double> lt(2); // Lorentz transformation tensor
+  lt.Zero();
+
+  lt(0,0) = 1.0;
+  lt(1,1) = 1.0;
+  lt(2,2) = ca;
+  lt(2,3) = -sa;
+  lt(3,2) = sa;
+  lt(3,3) = ca;
+
+  this->Transform(lt);
+}
+//_____________________________________________________________________________
 
   /// Rotate about the y-axis
-  void RotateY(double __alpha);
+  void RotateY(double __alpha){
+
+  double ca = cos(__alpha);
+  double sa = sin(__alpha);
+  Tensor<double> lt(2); // Lorentz transformation tensor
+  lt.Zero();
+
+  lt(0,0) = 1.0;
+  lt(1,1) = ca;
+  lt(1,3) = sa;
+  lt(2,2) = 1.0;
+  lt(3,1) = -sa;
+  lt(3,3) = ca;
+
+  this->Transform(lt);
+}
+//_____________________________________________________________________________
 
   /// Rotate about the z-axis
-  void RotateZ(double __alpha);
+  void RotateZ(double __alpha){
+  double ca = cos(__alpha);
+  double sa = sin(__alpha);
+  Tensor<double> lt(2); // Lorentz transformation tensor
+  lt.Zero();
+
+  lt(0,0) = 1.0;
+  lt(1,1) = ca;
+  lt(1,2) = -sa;
+  lt(2,1) = sa;
+  lt(2,2) = ca;
+  lt(3,3) = 1.0;
+
+  this->Transform(lt);
+}
   
   /** Send the values of the tensor elements to @a os.
    *
@@ -396,7 +505,36 @@ public:
    * where A%B = \f$ A_{\mu\nu} B_{\rho\pi\delta} \f$
    */
   template<typename T> Tensor<typename MultType<_Tp,T>::Type>
-  operator%(const Tensor<T> &__tensor) const;
+  operator%(const Tensor<T> &__tensor) const {
+  
+  int rank = this->_rank + __tensor._rank;
+  Tensor<typename MultType<_Tp,T>::Type> ret(rank);
+  
+  // if either tensor is rank 0, just return this*__tensor
+  if((_rank == 0) || (__tensor._rank == 0)) return (*this)*__tensor;  
+  else{ // we actually have to do some work
+    TensorIndex index(rank);
+    TensorIndex ind1(this->_rank);
+    TensorIndex ind2(__tensor._rank);
+
+    int size1 = ind1.Size();
+    //    int size2 = ind2.Size(); 
+
+    while(index.IsValid()){ // loop over ret's elements
+
+      // set up this' indicies
+      for(int i = 0; i < size1; i++) ind1.SetIndex(i,index[i]);     
+      // set up _tensor's indicies
+      for(int i = size1; i < index.Size(); i++) 
+	ind2.SetIndex(i-size1,index[i]);
+      
+      // set element to product of this and __tensor elements
+      ret(index) = (this->Element(ind1))*(__tensor(ind2));
+      index++;
+    }
+  }
+  return ret;
+}
 
   /** Returns \f$ R_{\mu\nu\ldots} = X_{\mu\nu\ldots} \times x \f$
    * Note: Legal if @a Tp * @a T is a legal operation.
@@ -770,8 +908,40 @@ public:
    *  by \f$ X_{\mu_1 \mu_2 ...} \Lambda^{\mu_1}{}_{\nu_1} 
    *  \Lambda^{\mu_2}{}_{\nu_2} ... \f$
    */
-  void Transform(const Tensor<double> &__lt);
+  void Transform(const Tensor<double> &__lt) {
 
+  if(__lt.Rank() != 2)
+    std::cout << "Error! Lorentz transformation tensor NOT rank 2." << std::endl;
+  assert(__lt.Rank() == 2);
+  int rank = this->Rank();
+  if(rank > 0) { // if rank 0 no transformation needed
+    TensorIndex index(rank);
+    TensorIndex indSummed(rank);
+    int nterm;
+    double lamFact;
+    // make a copy
+    Tensor<_Tp> copy(*this);
+   
+    while(index.IsValid()){  // loop over elements of this tensor
+      nterm = 0;
+      while(indSummed.IsValid()){
+	// get the appropriate number of Lambda_mu_nu factors
+	lamFact = __lt(index[0],indSummed[0]);
+	for(int i = 1; i < rank; i++) lamFact *= __lt(index[i],indSummed[i]);
+	if(lamFact != 0.0){
+	  nterm++;
+	  // add to each element this*Lambda*Lambda*...*Lambda 
+	  if(nterm == 1) (*this)(index) = lamFact*(copy(indSummed));	
+	  else (*this)(index) += lamFact*(copy(indSummed));	  
+	}
+	++indSummed;
+      }
+      // reset summed indicies, step up index to next element
+      indSummed.Reset();
+      ++index;
+    }
+  }
+}
 };
 
 

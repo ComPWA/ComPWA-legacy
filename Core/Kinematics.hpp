@@ -40,21 +40,6 @@ public:
   virtual void EventToDataPoint(const ComPWA::Event &ev,
                                 dataPoint &point) const = 0;
 
-  //! vector with names of variables, e.g. vec[0]=m23sq, vec[1]=m13sq
-  std::vector<std::string> GetVarNames() const { return _varNames; }
-
-  //! vector with names of variables, e.g. vec[0]=m23sq, vec[1]=m13sq
-  std::string GetVarName(unsigned int pos) const { return _varNames.at(pos); }
-
-  //! vector with names of variables, e.g. vec[0]=m23sq, vec[1]=m13sq
-  std::vector<std::string> GetVarTitles() const { return _varTitles; }
-
-  //! vector with names of variables, e.g. vec[0]=m23sq, vec[1]=m13sq
-  std::string GetVarTitle(unsigned int pos) const { return _varTitles.at(pos); }
-
-  //! Get position of variable @param varName
-  unsigned int FindVariable(std::string varName) const;
-
   //! Checks of data point is within phase space boundaries
   virtual bool IsWithinPhsp(const dataPoint &point) const = 0;
 
@@ -105,17 +90,6 @@ public:
    */
   static std::complex<double> phspFactor(double sqrtS, double ma, double mb);
 
-  //! Calculate form factor
-  static double
-  FormFactor(double sqrtS, double ma, double mb, double spin,
-             double mesonRadius,
-             formFactorType type = formFactorType::BlattWeisskopf);
-
-  //! Calculate form factor
-  static double
-  FormFactor(double sqrtS, double ma, double mb, double spin,
-             double mesonRadius, std::complex<double> qValue,
-             formFactorType type = formFactorType::BlattWeisskopf);
 
 protected:
   std::vector<int> _initialState;

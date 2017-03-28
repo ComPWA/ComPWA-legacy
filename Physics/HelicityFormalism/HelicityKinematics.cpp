@@ -9,9 +9,6 @@
 //   Stefan Pflueger - initial API and implementation
 //-------------------------------------------------------------------------------
 
-//#include "gsl/gsl_monte.h"
-//#include "gsl/gsl_monte_vegas.h"
-
 #include "Core/Event.hpp"
 #include "Core/DataPoint.hpp"
 #include "Core/Particle.hpp"
@@ -19,6 +16,7 @@
 
 #include "Physics/HelicityFormalism/HelicityKinematics.hpp"
 #include "Physics/qft++/Vector4.h"
+#include "Tools/RootGenerator.hpp"
 
 namespace ComPWA {
 namespace Physics {
@@ -39,65 +37,37 @@ HelicityKinematics::~HelicityKinematics() {
 }
 
 bool HelicityKinematics::IsWithinPhsp(const dataPoint& point) const{
-//  for (unsigned int i = 0;
-//      i < unique_occurring_decay_product_index_list_links_.size(); ++i) {
-//    double mother_mass(sqrt(point.getVal((i * getNumberOfVariables()))));
-//    double particle1_mass(point.getVal((i * getNumberOfVariables()) + 1));
-//    double particle2_mass(point.getVal((i * getNumberOfVariables()) + 2));
-//
-//    if (mother_mass < particle1_mass + particle2_mass)
-//      return false;
-//  }
+  //TODO: implementation
 
   return true;
 }
-
+  
 double HelicityKinematics::calculatePSArea() {
-  /*size_t dim = 2;
-   double res = 0.0, err = 0.0;
-
-   //set limits: we assume that x[0]=m13sq and x[1]=m23sq
-   double xLimit_low[2] = { m13_sq_min, m23_sq_min };
-   double xLimit_high[2] = { m13_sq_max, m23_sq_max };
-
-   size_t calls = 2000000;
-   gsl_rng_env_setup();
-   const gsl_rng_type *T = gsl_rng_default;    //type of random generator
-   gsl_rng *r = gsl_rng_alloc(T);    //random generator
-
-   gsl_monte_function F = { &heliphspFunc, dim, const_cast<HelicityKinematics*>(this) };
-
-   gsl_monte_vegas_state *s = gsl_monte_vegas_alloc(dim);
-   gsl_monte_vegas_integrate(&F, xLimit_low, xLimit_high, 2, calls, r, s, &res,
-   &err);
-   gsl_monte_vegas_free(s);
-
-   BOOST_LOG_TRIVIAL(debug)
-   << "HelicityKinematics::calculatePSArea() phase space area (MC integration): " << "("
-   << res << "+-" << err << ") relAcc [%]: " << 100 * err / res;*/
-
-  /*TGenPhaseSpace gen;
-   TLorentzVector mother;
-   double *masses = {};
-   gen.SetDecay(mother, num_particles, masses);
-
-   double precision(1e-5);
-   unsigned int max_calls(10000000);
-
-   double added_weights(0.0);
-   unsigned int counter(0);
-   double integral(1.0);
-   double previous_value(0.0);
-
-   while(std::fabs((integral-previous_value)/integral) > precision && counter < max_calls) {
-   previous_value = integral;
-   added_weights += gen.Generate();
-   ++counter;
-   integral = added_weights/counter;
-   }
-
-   return integral;*/
-  return 1.0;
+  double result(0);
+  double precision(1); //relative uncertainty
+  double weights(0);
+  double precisionLimit(1e-5);
+  unsigned int maxCalls(1e6);
+  unsigned int call(0);
+  
+  std::shared_ptr<ComPWA::Generator> gen( new ComPWA::Tools::RootGenerator(0) );
+  
+  while( precision > precisionLimit && call < maxCalls ){
+    precision = result;
+    ComPWA::Event ev;
+    gen->generate(ev);
+    weights += ev.getWeight();
+    call++;
+    result = weights/call;
+    precision = std::fabs(result - precision)/result;
+  }
+  
+  LOG(debug)
+      << "HelicityKinematics::calculatePSarea() | "
+      << "(" << result << "+-" << precision*result << ") GeV^4 relAcc [%]: "
+      << 100 * precision;
+  
+  return result;
 }
 
 void HelicityKinematics::EventToDataPoint(const Event& event,
@@ -115,166 +85,98 @@ void HelicityKinematics::EventToDataPoint(const Event& event,
       finalB += QFT::Vector4<double>(event.getParticle(s).getFourMomentum());
     }
     QFT::Vector4<double> dd = finalA+finalB;
-
-    double invmass = (dd).Mass2();
-    std::cout<<invmass<<std::endl;
+    double mSq = dd.Mass2();
+    
+    finalA.Boost(dd);
+    finalA.Rotate(dd.Phi(), dd.Theta(), (-1)*dd.Phi());
+    double cosTheta = std::cos(finalA.Theta());
+    double phi = finalA.Phi();
+    if( cosTheta > 1 || cosTheta < -1 || phi > M_PI || phi < (-1)*M_PI  || std::isnan(cosTheta) || std::isnan(phi)){
+      LOG(trace) << mSq<<" "<< cosTheta <<" "<<phi;
+      throw BeyondPhsp("HelicityKinematics::EventToDataPoint() |"
+                               " Point beypond phase space boundaries!");
+    }
+    
+    //std::cout<<dd.Mass2()<< " " <<std::cos(finalA.Theta())<<" "<<finalA.Phi()<<std::endl;
+    
+    point.GetPoint().push_back(mSq);
+    point.GetPoint().push_back(cosTheta);
+    point.GetPoint().push_back(phi);
   }
-//  point.reset(
-//      GetNumberOfVariables()
-//          * unique_occurring_decay_product_index_list_links_.size());
-  // create all needed cms frame 4 vectors
-//  std::vector<Vector4<double> > unique_occurring_cms_4vectors =
-//      createRequired4Vectors(event);
-  // then just loop over all occurring decays and determine the kinematic
-  // variables and append them to the dataPoint in the same order
-//  unsigned int fill_position = 0;
-//  for (unsigned int decay_index = 0;
-//      decay_index < unique_occurring_decay_product_index_list_links_.size();
-//      ++decay_index) {
-//    fillPointWithBoostedKinematicVariables(point, unique_occurring_cms_4vectors,
-//        unique_occurring_decay_product_index_list_links_[decay_index],
-//        fill_position);
-//  }
-
-//   check event to data point translation
-  /*std::cout << "event:\n";
-   for (unsigned int i = 0; i < event.getNParticles(); ++i) {
-   std::cout << event.getParticle(i).E << ", " << event.getParticle(i).px
-   << ", " << event.getParticle(i).py << ", " << event.getParticle(i).pz
-   << std::endl;
-   }
-   std::cout << "4vectors:\n";
-   for (unsigned int i = 0; i < unique_occurring_cms_4vectors.size(); ++i) {
-   unique_occurring_cms_4vectors[i].Print(std::cout);
-   }
-   std::cout << "\ndata point:\n[";
-   for (unsigned int i = 0; i < point.size(); ++i) {
-   std::cout << point.getVal(i) << ", ";
-   }
-   std::cout << "]\n" << std::endl;*/
 }
 
-// IMPORTANT: the ordering of the 4 vectors is exactly the same as in the
-// unique_occurring_decay_event_fs_index_lists_
-//std::vector<Vector4<double> > HelicityKinematics::createRequired4Vectors(
-//    const Event& event) const {
-//  std::vector<Vector4<double> > unique_occurring_cms_4vectors;
-//  // we create 3 vectors for each unique decay. Mother state + the two daughters = 3
-//  unique_occurring_cms_4vectors.reserve(
-//      3 * unique_occurring_decay_event_fs_index_lists_.size());
-//
-//  for (auto const& fs_particle_list : unique_occurring_decay_event_fs_index_lists_) {
-//    Vector4<double> temp_vector(0.0, 0.0, 0.0, 0.0);
-//
-//    if (fs_particle_list.size() == 1) {
-//      const Particle& p = event.getParticle(fs_particle_list[0]);
-//      temp_vector.SetP4(p.E, p.px, p.py, p.pz);
-//    }
-//    else {
-//      for (unsigned int event_particle_list_index = 0;
-//          event_particle_list_index < fs_particle_list.size();
-//          ++event_particle_list_index) {
-//
-//        addParticleToCMS4Vector(
-//            event.getParticle(fs_particle_list[event_particle_list_index]),
-//            temp_vector);
-//      }
-//    }
-//    unique_occurring_cms_4vectors.push_back(temp_vector);
-//  }
-//
-//  return unique_occurring_cms_4vectors;
-//}
-//
-//void HelicityKinematics::addParticleToCMS4Vector(const Particle& event_particle,
-//    Vector4<double>& cms_4vector) const {
-//  double px(cms_4vector.Px());
-//  double py(cms_4vector.Py());
-//  double pz(cms_4vector.Pz());
-//  double E(cms_4vector.E());
-//
-//  px += event_particle.px;
-//  py += event_particle.py;
-//  pz += event_particle.pz;
-//  E += event_particle.E;
-//
-//  cms_4vector.SetP4(E, px, py, pz);
-//}
+double HelicityKinematics::FormFactor(double sqrtS, double ma, double mb, double spin,
+                              double mesonRadius, formFactorType type) {
+  if (type == formFactorType::BlattWeisskopf && spin == 0) {
+    return 1.0;
+  }
 
-/**
- * Calculates theta, phi and the invariant mass square which are required for
- * the evaluation of the amplitudes in the helicity formalism.
- */
-//void HelicityKinematics::fillPointWithBoostedKinematicVariables(
-//    dataPoint& point,
-//    const std::vector<Vector4<double> >& unique_occurring_cms_4vectors,
-//    const TwoBodyDecayIndices& two_body_state_indices,
-//    unsigned int& data_point_fill_position) const {
-//  
-//  // define particle products of the two body decay
-//  Vector4<double> daughter1_4vector(
-//      unique_occurring_cms_4vectors[two_body_state_indices.decay_products_.first]);
-//  Vector4<double> daughter2_4vector(
-//      unique_occurring_cms_4vectors[two_body_state_indices.decay_products_.second]);
-//  // define the two body state
-//  Vector4<double> decaying_state(
-//      unique_occurring_cms_4vectors[two_body_state_indices.decay_state_index_]);
-//
-//  // at first add the invariant mass squared to the data point
-//  point.setVal(data_point_fill_position, decaying_state.Mass2());
-//
-//  // boost particle1 into the rest frame of the two body state
-//  daughter1_4vector.Boost(decaying_state);
-//
-//  // if this decay node is the not the top level decay we have to do some
-//  // boosting
-//  if (two_body_state_indices.decay_state_index_
-//      != two_body_state_indices.mother_index_) {
-//    // define mother state
-//    Vector4<double> mother(
-//        unique_occurring_cms_4vectors[two_body_state_indices.mother_index_]);
-//
-//    // then boost the two body state into the rest frame of its mother
-//    decaying_state.Boost(mother);
-//    // now determine the theta and phi values of the boosted particle1 vector
-//    // with respect to direction of flight of the boosted two body state
-//    // so we need to rotate
-//    //double rotation_theta = daughter1_4vector.Theta();
-//    //double rotation_phi = daughter1_4vector.Phi();
-//    //daughter1_4vector.RotateZ(-rotation_phi);
-//    //daughter1_4vector.RotateY(-rotation_theta);
-//    daughter1_4vector.Rotate(decaying_state.Phi(), decaying_state.Theta(), -decaying_state.Phi());
-//    //daughter1_4vector.RotateY(rotation_theta);
-//    //daughter1_4vector.RotateZ(rotation_phi);
-//  }
-//
-//   /*Vector4<double> mother(std::sqrt(decaying_state.Mass2() + 1.0), 0., 0., 1.0);
-//
-//   if (two_body_state_indices.decay_state_index_
-//   != two_body_state_indices.mother_index_) {
-//   mother =
-//   unique_occurring_cms_4vectors[two_body_state_indices.mother_index_];
-//   }
-//
-//   decaying_state.Boost(mother);
-//
-//   Vector4<double> decaying_state_rot(decaying_state);
-//   decaying_state_rot.RotateZ(-decaying_state.Phi());
-//   decaying_state_rot.RotateY(-decaying_state.Theta());
-//
-//   particle1_4vector.Boost(mother);
-//   particle1_4vector.RotateZ(-decaying_state.Phi());
-//   particle1_4vector.RotateY(-decaying_state.Theta());
-//
-//   particle1_4vector.Boost(decaying_state_rot);*/
-//
-//  // now just get the theta and phi angles of the boosted particle 1
-//  point.setVal(++data_point_fill_position, daughter1_4vector.Theta());
-//
-//  point.setVal(++data_point_fill_position, daughter1_4vector.Phi());
-//  ++data_point_fill_position;
-//}
+  std::complex<double> qValue = Kinematics::qValue(sqrtS, ma, mb);
+  return HelicityKinematics::FormFactor(sqrtS, ma, mb, spin, mesonRadius, qValue, type);
+}
 
+double HelicityKinematics::FormFactor(double sqrtS, double ma, double mb, double spin,
+                              double mesonRadius, std::complex<double> qValue,
+                              formFactorType type) {
+  if (mesonRadius == 0)
+    return 1; // disable form factors
+  if (type == formFactorType::noFormFactor)
+    return 1; // disable form factors
+  if (type == formFactorType::BlattWeisskopf && spin == 0) {
+    return 1.0;
+  }
+
+  // From factor for a0(980) used by Crystal Barrel Phys.Rev.D78-074023
+  if (type == formFactorType::CrystalBarrel) {
+    if (spin == 0) {
+      double qSq = std::norm(qValue);
+      double alpha = mesonRadius * mesonRadius / 6;
+      return std::exp(-alpha * qSq);
+    } else
+      throw std::runtime_error("Kinematics::FormFactor() | "
+                               "Form factors of type " +
+                               std::string(formFactorTypeString[type]) +
+                               " are implemented for spin 0 only!");
+  }
+
+  // Blatt-Weisskopt form factors with normalization F(x=mR) = 1.
+  // Reference: S.U.Chung Annalen der Physik 4(1995) 404-430
+  // z = q / (interaction range). For the interaction range we assume
+  // 1/mesonRadius
+  if (type == formFactorType::BlattWeisskopf) {
+    if (spin == 0)
+      return 1;
+    double qSq = std::norm(qValue);
+    double z = qSq * mesonRadius * mesonRadius;
+    /* Events below threshold
+     * What should we do if event is below threshold? Shouldn't really influence
+     * the result
+     * because resonances at threshold don't have spin(?) */
+    z = std::fabs(z);
+
+    if (spin == 1) {
+      return (sqrt(2 * z / (z + 1)));
+    } else if (spin == 2) {
+      return (sqrt(13 * z * z / ((z - 3) * (z - 3) + 9 * z)));
+    } else if (spin == 3) {
+      return (
+          sqrt(277 * z * z * z / (z * (z - 15) * (z - 15) + 9 * (2 * z - 5))));
+    } else if (spin == 4) {
+      return (sqrt(12746 * z * z * z * z /
+                   ((z * z - 45 * z + 105) * (z * z - 45 * z + 105) +
+                    25 * z * (2 * z - 21) * (2 * z - 21))));
+    } else
+      throw std::runtime_error(
+          "Kinematics::FormFactor() | Form factors of type " +
+          std::string(formFactorTypeString[type]) +
+          " are implemented for spins up to 4!");
+  }
+  throw std::runtime_error("Kinematics::FormFactor() | Form factor type " +
+                           std::to_string((long long int)type) +
+                           " not specified!");
+
+  return 0;
+}
 
 } /* namespace HelicityFormalism */
 } /* namespace Physics */
