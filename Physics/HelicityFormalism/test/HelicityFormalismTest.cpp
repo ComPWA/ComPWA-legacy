@@ -48,7 +48,7 @@ BOOST_AUTO_TEST_CASE(IncoherentConstruction) {
   auto intens = IncoherentIntensity::Factory(tr);
   
   // Generate phsp sample
-  std::shared_ptr<ComPWA::Generator> gen( new ComPWA::Tools::RootGenerator(0) );
+  std::shared_ptr<ComPWA::Generator> gen( new ComPWA::Tools::RootGenerator(123) );
   std::shared_ptr<ComPWA::DataReader::Data> sample( new ComPWA::DataReader::RootReader() );
   
   ComPWA::RunManager r;

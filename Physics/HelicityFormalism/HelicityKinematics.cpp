@@ -92,12 +92,11 @@ void HelicityKinematics::EventToDataPoint(const Event& event,
     double cosTheta = std::cos(finalA.Theta());
     double phi = finalA.Phi();
     if( cosTheta > 1 || cosTheta < -1 || phi > M_PI || phi < (-1)*M_PI  || std::isnan(cosTheta) || std::isnan(phi)){
-      LOG(trace) << mSq<<" "<< cosTheta <<" "<<phi;
       throw BeyondPhsp("HelicityKinematics::EventToDataPoint() |"
                                " Point beypond phase space boundaries!");
     }
     
-    //std::cout<<dd.Mass2()<< " " <<std::cos(finalA.Theta())<<" "<<finalA.Phi()<<std::endl;
+    //LOG(trace)<<dd.Mass2()<< " " <<std::cos(finalA.Theta())<<" "<<finalA.Phi();
     
     point.GetPoint().push_back(mSq);
     point.GetPoint().push_back(cosTheta);

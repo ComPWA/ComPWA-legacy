@@ -287,6 +287,7 @@ public:
   
   /// Returns \f$ \theta = cos^{-1}(\frac{z}{r}) \f$
   inline _Tp Theta() const {
+    if( this->Z() == 0 ) return acos(0); //return value is nan for Z=0 and R=0
     return acos(this->Z()/this->R());
   }
 
