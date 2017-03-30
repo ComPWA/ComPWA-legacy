@@ -105,6 +105,15 @@ public:
     _inst = new HelicityKinematics(initialState, finalStateIds);
     return _inst;
   }
+  
+  static Kinematics *CreateInstance(boost::property_tree::ptree pt) {
+    if (_inst) {
+      throw std::runtime_error(
+          "HelicityKinematics::createInstance() | Instance already exists!");
+    }
+    _inst = new HelicityKinematics(pt);
+    return _inst;
+  }
 
   //! converts Event to dataPoint
   void EventToDataPoint(const Event &event, dataPoint &point) const;
@@ -177,11 +186,11 @@ protected:
   HelicityKinematics(std::vector<int> initialState,
                      std::vector<int> finalState);
 
+  HelicityKinematics(boost::property_tree::ptree pt);
+  
   virtual ~HelicityKinematics();
 
   double calculatePSArea();
-
-  std::vector<std::string> _finalState;
 
   // Parameters of decaying mother particle (we assume that we have a decay)
   std::string _nameMother; //! name of mother particle

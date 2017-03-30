@@ -34,7 +34,7 @@
 #include "Core/Parameter.hpp"
 #include "Core/ParameterList.hpp"
 #include "DataReader/Data.hpp"
-#include "Core/Amplitude.hpp"
+#include "Core/AmpIntensity.hpp"
 
 namespace ComPWA {
 
@@ -50,10 +50,10 @@ struct dataInfo {
 
 struct ampInfo {
   std::string name;
-  std::shared_ptr<Amplitude> amplitude;
+  std::shared_ptr<AmpIntensity> amplitude;
   std::vector<std::string> inputNeeded;
 
-  ampInfo(std::string inN, std::shared_ptr<Amplitude> inD,
+  ampInfo(std::string inN, std::shared_ptr<AmpIntensity> inD,
           std::vector<std::string> inP)
       : name(inN), amplitude(inD), inputNeeded(inP){};
 };
@@ -93,7 +93,7 @@ public:
    * \sa std::string introduce(std::shared_ptr<Data> inData, std::string
    * inName="");
   */
-  virtual std::string introduce(std::shared_ptr<Amplitude> inAmp,
+  virtual std::string introduce(std::shared_ptr<AmpIntensity> inAmp,
                                 std::string inName = "");
 
   //! Check if name already used for a Data Module

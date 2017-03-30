@@ -1,3 +1,10 @@
+ 
+            
+          
+        
+      
+    
+  
 
 
 //-------------------------------------------------------------------------------
@@ -51,10 +58,10 @@ public:
 
   //! Get final state
   virtual std::vector<int> GetFinalState() { return _finalState; }
-  
+
   //! Get inital state
   virtual std::vector<int> GetInitialState() { return _initialState; }
-  
+
   /** Calculate Break-up momentum squared
    *
    * Calculate Break-up momentum at energy @param sqrtS for particles with
@@ -67,7 +74,7 @@ public:
    * @return |break-up momentum|
    */
   static double qSqValue(double sqrtS, double ma, double mb);
-  
+
   /** Calculate Break-up momentum
    *
    * Calculate Break-up momentum at energy @param sqrtS for particles with
@@ -90,11 +97,10 @@ public:
    */
   static std::complex<double> phspFactor(double sqrtS, double ma, double mb);
 
-
 protected:
   std::vector<int> _initialState;
   std::vector<int> _finalState;
-  
+
   //! Internal names of variabes
   std::vector<std::string> _varNames;
   //! Latex titles for variables
@@ -104,17 +110,18 @@ protected:
   static Kinematics *_inst;
 
   //! Constructor
-  Kinematics(std::vector<int> initial, std::vector<int> finalS)
-      : _initialState(initial), _finalState(finalS), is_PS_area_calculated_(false),
-        PS_area_(0.0) {
-          
-  };
+  Kinematics(std::vector<int> initial = std::vector<int>(),
+             std::vector<int> finalS = std::vector<int>())
+      : _initialState(initial), _finalState(finalS),
+        is_PS_area_calculated_(false), PS_area_(0.0){
+
+                                       };
 
   //! Delete Copy constructor
   Kinematics(const Kinematics &) = delete;
 
   //! Default destructor
-  virtual ~Kinematics() {};
+  virtual ~Kinematics(){};
 
   //! Delete assignment operator
   void operator=(const Kinematics &) = delete;

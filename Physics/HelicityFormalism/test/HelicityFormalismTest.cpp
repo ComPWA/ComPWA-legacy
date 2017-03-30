@@ -35,14 +35,15 @@ BOOST_AUTO_TEST_CASE(IncoherentConstruction) {
 
   ComPWA::PhysConst::CreateInstance(tr);
 
-  std::vector<int> finalState, initialState;
-  initialState.push_back(443);
-  finalState.push_back(210);
-  finalState.push_back(210);
-  finalState.push_back(22);
+//  std::vector<int> finalState, initialState;
+//  initialState.push_back(443);
+//  finalState.push_back(210);
+//  finalState.push_back(210);
+//  finalState.push_back(22);
+//  HelicityKinematics::CreateInstance(initialState, finalState);
 
   // Create HelicityInstance here
-  HelicityKinematics::CreateInstance(initialState, finalState);
+  HelicityKinematics::CreateInstance(tr);
   HelicityKinematics::Instance()->GetPhspVolume();
 
   // Create amplitude

@@ -221,7 +221,7 @@ void MinLogLH::iniLHtree() {
     return;
   auto it = _ampVec.begin();
   for (; it != _ampVec.end(); ++it)
-    if (!(*it)->hasTree())
+    if (!(*it)->HasTree())
       throw std::runtime_error("MinLogLH::iniLHtree() amplitude has no tree");
 
   //----Strategies needed
@@ -251,7 +251,7 @@ void MinLogLH::iniLHtree() {
   _tree = std::shared_ptr<FunctionTree>(new FunctionTree());
   int sampleSize = _dataSampleList.GetMultiDouble(0)->GetNValues();
 
-  unsigned int weightId = Kinematics::instance()->GetNVars() + 1;
+  unsigned int weightId = Kinematics::Instance()->GetNVars() + 1;
   std::shared_ptr<MultiDouble> weight =
       _dataSampleList.GetMultiDouble(weightId);
 
@@ -275,7 +275,7 @@ void MinLogLH::iniLHtree() {
     _tree->createNode("Intens_" + name, mmultDStrat, "Add", sampleSize, false);
     _tree->createLeaf("frac_" + name, _fraction.at(i), "Intens_" + name);
     // Expect that intensity is calculated and normalised within AmpAbsDyn
-    _tree->insertTree(_ampVec.at(i)->SetupTree(
+    _tree->insertTree(_ampVec.at(i)->GetTree(
                           _dataSampleList, _phspAccSampleList, _phspSampleList),
                       "Intens_" + name);
   }
@@ -295,7 +295,7 @@ double MinLogLH::controlParameter(ParameterList &minPar) {
   double lh = 0;
   if (!_useFunctionTree) {
     // Calculate normalization
-    double vol = Kinematics::instance()->GetPhspVolume();
+    double vol = Kinematics::Instance()->GetPhspVolume();
     std::vector<double> normVec(_ampVec.size(), 0.0);
 
     std::shared_ptr<DataReader::Data> sam;
@@ -386,21 +386,22 @@ void MinLogLH::setPenaltyScale(double sc, int ampID) {
 }
 
 double MinLogLH::calcPenalty() {
-  if (_penaltyLambda <= 0)
-    return 0; // penalty term disabled
-  double magSum = 0;
-  auto amp = _ampVec.at(_penaltyAmpID);
-  auto it = amp->GetResonanceItrFirst();
-  std::vector<resonanceItr> resoList;
-  for (; it != amp->GetResonanceItrLast(); ++it) {
-    if ((*it)->GetName().find("_CP") != std::string::npos)
-      continue;
-    double v = std::fabs((*it)->GetMagnitude());
-    magSum += v;
-    resoList.push_back(it);
-  }
-  return (_penaltyLambda * magSum / std::sqrt(amp->GetIntegral(resoList)));
+//  if (_penaltyLambda <= 0)
+//    return 0; // penalty term disabled
+//  double magSum = 0;
+//  auto amp = _ampVec.at(_penaltyAmpID);
+//  auto it = amp->GetResonanceItrFirst();
+//  std::vector<resonanceItr> resoList;
+//  for (; it != amp->GetResonanceItrLast(); ++it) {
+//    if ((*it)->GetName().find("_CP") != std::string::npos)
+//      continue;
+//    double v = std::fabs((*it)->GetMagnitude());
+//    magSum += v;
+//    resoList.push_back(it);
+//  }
+//  return (_penaltyLambda * magSum / std::sqrt(amp->GetIntegral(resoList)));
   //	return (_penaltyLambda*magSum);
+  return 1.0;
 }
 
 // double MinLogLH::calcPenalty()

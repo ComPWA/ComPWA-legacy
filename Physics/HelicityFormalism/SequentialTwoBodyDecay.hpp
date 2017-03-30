@@ -15,8 +15,8 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 
-#include "Core/Amplitude.hpp"
 #include "Core/Parameter.hpp"
+#include "Physics/Amplitude.hpp"
 #include "Physics/HelicityFormalism/PartialDecay.hpp"
 
 namespace ComPWA {

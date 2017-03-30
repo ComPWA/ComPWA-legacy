@@ -152,7 +152,7 @@ void MinuitResult::calcFractionError(ParameterList &parList,
 
   std::vector<ParameterList> fracVect;
   progressBar bar(nSets);
-  stringstream outFraction;
+  std::stringstream outFraction;
   //	for(unsigned int i=0; i<nSets; i++){
   int i = 0;
   while (i < nSets) {
@@ -361,17 +361,17 @@ void MinuitResult::createInterferenceTable(std::ostream &out,
   tableInterf->addColumn("Value", 15);
   tableInterf->header();
   double sumInfTerms = 0;
-  auto it = amp->GetResonanceItrFirst();
-  for (; it != amp->GetResonanceItrLast(); ++it) {
-    auto it2 = it;
-    for (; it2 != amp->GetResonanceItrLast(); ++it2) {
-      *tableInterf << (*it)->GetName();
-      *tableInterf << (*it2)->GetName();
-      double inf = amp->GetIntegralInterference(it, it2);
-      *tableInterf << inf;
-      sumInfTerms += inf;
-    }
-  }
+//  auto it = amp->GetResonanceItrFirst();
+//  for (; it != amp->GetResonanceItrLast(); ++it) {
+//    auto it2 = it;
+//    for (; it2 != amp->GetResonanceItrLast(); ++it2) {
+//      *tableInterf << (*it)->GetName();
+//      *tableInterf << (*it2)->GetName();
+//      double inf = amp->GetIntegralInterference(it, it2);
+//      *tableInterf << inf;
+//      sumInfTerms += inf;
+//    }
+//  }
   tableInterf->delim();
   *tableInterf << " "
                << "Sum: " << sumInfTerms;

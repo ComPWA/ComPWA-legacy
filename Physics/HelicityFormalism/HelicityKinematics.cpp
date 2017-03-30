@@ -25,8 +25,59 @@ namespace HelicityFormalism {
 HelicityKinematics::HelicityKinematics(std::vector<int> initialState,
                                        std::vector<int> finalState)
     : Kinematics(initialState, finalState) {
-  assert(initialState.size() == 1);
-  _idMother = initialState.at(0);
+  assert(_initialState.size() == 1);
+  _idMother = _initialState.at(0);
+  auto motherProp = PhysConst::Instance()->FindParticle(_idMother);
+  _nameMother = motherProp.GetName();
+  _M = motherProp.GetMass();
+  _Msq = _M * _M;
+  _spinM = motherProp.GetSpin();
+
+  // Creating unique title
+  std::stringstream stream;
+  stream << "(";
+  for (auto i : _initialState)
+    stream << std::to_string(i) << " ";
+  stream << ")->(";
+  for (auto i : _finalState)
+    stream << std::to_string(i) << " ";
+  stream << ")";
+
+  LOG(info) << "HelicityKinematics::HelicityKinematics() | Initialize reaction "
+            << stream.str();
+}
+
+HelicityKinematics::HelicityKinematics(boost::property_tree::ptree pt) {
+
+  auto initialS = pt.get_child("HelicityKinematics.InitialState");
+  for (auto i : initialS) {
+    std::string name = i.second.get<std::string>("<xmlattr>.Name");
+    auto partP = PhysConst::Instance()->FindParticle(name);
+    _initialState.push_back(partP.GetId());
+  }
+
+  auto finalS = pt.get_child("HelicityKinematics.FinalState");
+  for (auto i : finalS) {
+    std::string name = i.second.get<std::string>("<xmlattr>.Name");
+    auto partP = PhysConst::Instance()->FindParticle(name);
+    _finalState.push_back(partP.GetId());
+  }
+
+  // Creating unique title
+  std::stringstream stream;
+  stream << "(";
+  for (auto i : _initialState)
+    stream << std::to_string(i) << " ";
+  stream << ")->(";
+  for (auto i : _finalState)
+    stream << std::to_string(i) << " ";
+  stream << ")";
+
+  LOG(info) << "HelicityKinematics::HelicityKinematics() | Initialize reaction "
+            << stream.str();
+
+  assert(_initialState.size() == 1);
+  _idMother = _initialState.at(0);
   auto motherProp = PhysConst::Instance()->FindParticle(_idMother);
   _nameMother = motherProp.GetName();
   _M = motherProp.GetMass();

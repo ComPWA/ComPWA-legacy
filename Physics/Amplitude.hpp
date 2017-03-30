@@ -32,7 +32,7 @@
 #include <memory>
 #include <math.h>
 
-#include "Core/Resonance.hpp"
+//#include "Core/Resonance.hpp"
 #include "Core/ParameterList.hpp"
 #include "Core/FunctionTree.hpp"
 #include "DataReader/Data.hpp"
@@ -78,10 +78,13 @@ public:
    *
    * @param par New list of parameters
    */
-  virtual void UpdateParameters(ParameterList &par);
+  virtual void UpdateParameters(ParameterList &par) { /* TODO */ }
 
   //! Add parameters to list
-  virtual void GetParameters(ParameterList &list) const;
+  virtual void GetParameters(ParameterList &list) const{
+	  list.AddParameter(_magnitude);
+	  list.AddParameter(_phase);
+  }
 
   //! Fill ParameterList with fit fractions
   virtual void GetFitFractions(ParameterList &parList) = 0;

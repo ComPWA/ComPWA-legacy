@@ -15,7 +15,7 @@
 #include <memory>
 #include <boost/property_tree/ptree.hpp>
 
-#include "Core/Resonance.hpp"
+#include "Physics/Resonance.hpp"
 #include "Physics/HelicityFormalism/AbstractDynamicalFunction.hpp"
 #include "Physics/HelicityFormalism/AmpWignerD.hpp"
 
