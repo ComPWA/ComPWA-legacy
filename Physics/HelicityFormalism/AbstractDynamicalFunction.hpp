@@ -21,6 +21,7 @@
 #include "Core/ParameterList.hpp"
 #include "Core/Spin.hpp"
 #include "Core/FunctionTree.hpp"
+#include "Physics/HelicityFormalism/HelicityKinematics.hpp"
 
 namespace ComPWA {
 namespace Physics {
@@ -39,20 +40,29 @@ public:
 
   virtual ~AbstractDynamicalFunction();
 
-  virtual std::complex<double> Evaluate(const ComPWA::dataPoint &, int pos) const = 0;
+  virtual std::complex<double> Evaluate(const ComPWA::dataPoint &point,
+                                        int pos) const = 0;
 
   /**! Get current normalization.  */
-  virtual double GetNormalization() = 0;
-  
+  virtual double GetNormalization() const = 0;
+
+  void CheckModified() const {
+    if (_mass->GetValue() != _current_mass) {
+      const_cast<bool &>(_modified) = 1;
+      const_cast<double &>(_current_mass) = _mass->GetValue();
+    }
+    return;
+  }
+
   virtual bool HasTree() const { return false; }
 
   /**! Setup function tree */
-  virtual std::shared_ptr<ComPWA::FunctionTree> GetTree(ComPWA::ParameterList &sample,
-                                                  ComPWA::ParameterList &toySample,
-                                                        std::string suffix) {
+  virtual std::shared_ptr<ComPWA::FunctionTree>
+  GetTree(ComPWA::ParameterList &sample, ComPWA::ParameterList &toySample,
+          std::string suffix) {
     return std::shared_ptr<ComPWA::FunctionTree>();
   };
-  
+
   /**
    Set decay width
 
@@ -80,17 +90,26 @@ public:
    @return Decay mass
    */
   virtual double GetMassValue() const { return _mass->GetValue(); }
-  
-  virtual void SetDecayMassA( double mass ){ _massA = mass; }
-  
+
+  virtual void SetDecayMassA(double mass) { _massA = mass; }
+
   virtual double GetDecayMassA() const { return _massA; }
-  
-  virtual void SetDecayMassB( double mass ){ _massB = mass; }
-  
+
+  virtual void SetDecayMassB(double mass) { _massB = mass; }
+
   virtual double GetDecayMassB() const { return _massB; }
-  
+
   virtual ComPWA::Spin GetSpin() const { return _spin; }
-  virtual void SetSpin( ComPWA::Spin spin ) { _spin = spin; }
+
+  virtual void SetSpin(ComPWA::Spin spin) { _spin = spin; }
+
+  virtual void SetModified(bool b = true) const {
+    const_cast<bool &>(_modified) = b;
+    const_cast<double &>(_current_mass) = _mass->GetValue();
+  }
+
+  virtual bool GetModified() const { return _modified; }
+
 protected:
   //! Name of resonance
   std::string _name;
@@ -102,7 +121,7 @@ protected:
   int _mcPrecision;
 
   //! Integral
-  virtual double Integral() { return 1.0; };
+  virtual double Integral() const { return 1.0; };
 
   //! Masses of daughter particles
   double _massA, _massB;
@@ -116,16 +135,98 @@ protected:
   //! Resonance spin
   ComPWA::Spin _spin;
 
+  //! Integral value (temporary)
+  double _current_integral;
+
 private:
   //! Resonance shape was modified (recalculate the normalization)
   bool _modified;
 
-  //! Integral value (temporary)
-  double _integral;
-
   //! Temporary value of mass (used to trigger recalculation of normalization)
   double _current_mass;
 };
+
+inline std::complex<double> widthToCoupling(double mSq, double mR, double width,
+                                            double ma, double mb, double spin,
+                                            double mesonRadius,
+                                            formFactorType type) {
+  double sqrtS = sqrt(mSq);
+
+  // calculate gammaA(s_R)
+  std::complex<double> gammaA(1, 0); // spin==0
+  if (spin > 0) {
+    std::complex<double> qValue = Kinematics::qValue(mR, ma, mb);
+    double ffR = HelicityKinematics::FormFactor(mR, ma, mb, spin, mesonRadius,
+                                                qValue, type);
+    std::complex<double> qR = std::pow(qValue, spin);
+    gammaA = ffR * qR;
+  }
+
+  // calculate phsp factor
+  std::complex<double> rho = Kinematics::phspFactor(sqrtS, ma, mb);
+
+  std::complex<double> denom = gammaA * sqrt(rho);
+  std::complex<double> res = std::complex<double>(sqrt(mR * width), 0) / denom;
+
+#ifndef NDEBUG
+  // check for NaN
+  //	if( std::isnan(res.real()) || std::isnan(res.imag()) )
+  //		throw
+  // std::runtime_error("AmpAbsDynamicalFunction::widthToCoupling()
+  //| "
+  //				"Result is NaN!");
+  // check for inf
+  if (std::isinf(res.real()) || std::isinf(res.imag()))
+    throw std::runtime_error("AmpAbsDynamicalFunction::widthToCoupling() | "
+                             "Result is inf!");
+#endif
+
+  return res;
+}
+
+inline std::complex<double> couplingToWidth(double mSq, double mR, double g,
+                                            double ma, double mb, double spin,
+                                            double mesonRadius,
+                                            formFactorType type,
+                                            std::complex<double> phspFactor) {
+  // calculate gammaA(s_R)
+  std::complex<double> gammaA(1, 0); // spin==0
+
+  if (spin > 0 || type == formFactorType::CrystalBarrel) {
+    std::complex<double> qValue = Kinematics::qValue(mR, ma, mb);
+    double ffR = HelicityKinematics::FormFactor(mR, ma, mb, spin, mesonRadius,
+                                                qValue, type);
+    std::complex<double> qR = std::pow(qValue, spin);
+    gammaA = ffR * qR;
+  }
+
+  // calculate phsp factor
+  std::complex<double> res = std::norm(gammaA) * g * g * phspFactor / mR;
+
+#ifndef NDEBUG
+  // check for NaN
+  if (std::isnan(res.real()) || std::isnan(res.imag()))
+    throw std::runtime_error("AmpAbsDynamicalFunction::couplingToWidth() | "
+                             "Result is NaN!");
+  // check for inf
+  if (std::isinf(res.real()) || std::isinf(res.imag()))
+    throw std::runtime_error("AmpAbsDynamicalFunction::couplingToWidth() | "
+                             "Result is inf!");
+#endif
+
+  return res;
+}
+
+inline std::complex<double> couplingToWidth(double mSq, double mR, double g,
+                                            double ma, double mb, double spin,
+                                            double mesonRadius,
+                                            formFactorType type) {
+  double sqrtM = sqrt(mSq);
+  std::complex<double> phspFactor = Kinematics::phspFactor(sqrtM, ma, mb);
+
+  return couplingToWidth(mSq, mR, g, ma, mb, spin, mesonRadius, type,
+                         phspFactor);
+}
 
 } /* namespace DynamicalFunctions */
 } /* namespace Physics */

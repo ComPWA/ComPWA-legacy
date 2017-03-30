@@ -160,7 +160,7 @@ const ParameterList &Data::getListOfData() {
   if (dataList.GetNParameter() != 0)
     return dataList;
 
-  int size = Kinematics::instance()->GetNVars();
+  int size = Kinematics::Instance()->GetNVars();
   std::vector<std::vector<double>> data(size, std::vector<double>());
   std::vector<double> eff;
   eff.reserve(fEvents.size());

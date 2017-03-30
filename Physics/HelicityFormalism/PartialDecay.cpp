@@ -56,7 +56,7 @@ PartialDecay::Factory(const boost::property_tree::ptree &pt) {
   auto finalStateB = stringToVectInt((++itr)->second.get<std::string>("<xmlattr>.FinalState"));
   SubSystem subSys(recoilState, finalStateA, finalStateB);
   obj->SetDataPosition(
-                       dynamic_cast<HelicityKinematics*>(Kinematics::instance())->GetDataID(subSys)
+                       dynamic_cast<HelicityKinematics*>(Kinematics::Instance())->GetDataID(subSys)
   );
   
   //Create WignerD object

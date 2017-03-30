@@ -75,7 +75,7 @@ public:
     std::vector<double> ret;
     if (!v.size())
       return ret;
-    if (n >= Kinematics::instance()->GetNVars())
+    if (n >= Kinematics::Instance()->GetNVars())
       throw std::runtime_error("dataPoint::getRow() | out of range!");
     for (int i = 0; i < v.size(); i++)
       ret.push_back(v.at(i).GetValue(n));

@@ -8,7 +8,7 @@
 // Contributors:
 //     Mathias Michel - initial API and implementation
 //		Peter Weidenkaff - correct nominator, using dataPoint for data
-// handling
+//handling
 //-------------------------------------------------------------------------------
 //****************************************************************************
 // Class for defining the relativistic Breit-Wigner resonance model, which
@@ -19,67 +19,45 @@
 // Class for defining the relativistic Breit-Wigner resonance model, which
 // includes the use of Blatt-Weisskopf barrier factors.
 
-#ifndef PHYSICS_HELICITYAMPLITUDE_RELATIVISTICBREITWIGNER_HPP_
-#define PHYSICS_HELICITYAMPLITUDE_RELATIVISTICBREITWIGNER_HPP_
+#ifndef AMP_REL_BREIT_WIGNER_RES
+#define AMP_REL_BREIT_WIGNER_RES
 
 #include <vector>
-#include <memory>
-#include <boost/property_tree/ptree.hpp>
 
-#include "Core/Spin.hpp"
 #include "Core/Functions.hpp"
 #include "Core/Exceptions.hpp"
+#include "Core/FunctionTree.hpp"
 #include "Physics/HelicityFormalism/AbstractDynamicalFunction.hpp"
-#include "Physics/HelicityFormalism/AmpWignerD.hpp"
 
 namespace ComPWA {
 namespace Physics {
 namespace HelicityFormalism {
 
-  class PartialDecay;
-/**
- * Relativistic Breit-Wigner
- * (Breit Wigner with Blatt-Weisskopf barrier factors)
- *
- * The dynamical function implemented here is taken from PDG2014 (Eq.47-22) for
- * the one channel case.
- *
- * The three required parameters are defined in this model and can be
- * retrieved via the #getParameterList() function:
- * @param resonance_width_ width of the resonance
- * @param resonance_mass_ mass of the resonance
- * @param meson_radius_ Scale of interaction range
- *
- * The remaining required parameter is the angular momentum param J_ of the two
- * particle state.
- *
- * Additional informations from the event are extracted from the data point
- * within the #evaluate() function. For example the invariant mass and the
- * daughter masses.
- */
-class RelativisticBreitWigner : public AbstractDynamicalFunction {
-
+class AmpRelBreitWignerRes : public AbstractDynamicalFunction {
 public:
-  RelativisticBreitWigner() {};
+  AmpRelBreitWignerRes() {};
 
-  virtual ~RelativisticBreitWigner() {};
+  virtual ~AmpRelBreitWignerRes();
 
-  std::complex<double> Evaluate(const dataPoint &point, int pos) const;
+  virtual std::complex<double> Evaluate(const dataPoint &point, int pos) const;
+  
+  //! Clone function
+  virtual AmpRelBreitWignerRes *Clone(std::string newName = "") const {
+    auto tmp = (new AmpRelBreitWignerRes(*this));
+//    if (newName != "")
+//      tmp->SetName(newName);
+    return tmp;
+  }
 
-  /**! Get current normalization.  */
+  //! Trigger recalculation of normalization
+  virtual void CheckModified() const;
+
+  std::string to_str() const;
+
+  //! Calculation integral |dynamical amplitude|^2
   virtual double GetNormalization() const;
 
-  //! Check of parameters have changed and normalization has to be recalculatecd
-  virtual void CheckModified() const;
-  
-  /**! Setup function tree */
-  virtual std::shared_ptr<FunctionTree> SetupTree(ParameterList &sample,
-                                                  ParameterList &toySample,
-                                                  std::string suffix) {
-    return std::shared_ptr<FunctionTree>();
-  };
-
-  // --------------------------- Set/Get functions ---------------------------
+   // --------------------------- Set/Get functions ---------------------------
 
   /**
    Set decay width
@@ -162,45 +140,41 @@ public:
    @return From factor type
    */
   formFactorType GetFormFactorType() { return _ffType; }
-
-  /**
-   Dynamical Breit-Wigner function
-
-   @param mSq Invariant mass squared
-   @param mR Mass of the resonant state
-   @param ma Mass of daughter particle
-   @param mb Mass of daughter particle
-   @param width Decay width
-   @param J Spin
-   @param mesonRadius Meson Radius
-   @param ffType Form factor type
-   @return Amplitude value
+  
+   // --------------------------------------------------------------------
+  
+  /** Breit-Wigner function
+   *
+   * The dynamical function implemented here is taken from PDG2014 (Eq.47-22)
+   * for
+   * the one channel case.
+   * @J is angular momentum between A&B. In case A&B have spin 0 this is the
+   * spin for the resonace.
+   *
+   * @param mSq Invariant mass
+   * @param mR Resonance mass
+   * @param ma Mass particle A
+   * @param mb Mass particle B
+   * @param width  Width of resonance
+   * @param J Angular momentum between A&B
+   * @param mesonRadius Scale of interaction range
+   * @return
    */
   static std::complex<double>
   dynamicalFunction(double mSq, double mR, double ma, double mb, double width,
-                    unsigned int J, double mesonRadius, formFactorType ffType);
+                    unsigned int J, double mesonRadius,
+                    formFactorType ffType = formFactorType::BlattWeisskopf);
 
-  /**
-   Factory for RelativisticBreitWigner
 
-   @param pt Configuration tree
-   @return Constructed object
-   */
-  static std::shared_ptr<RelativisticBreitWigner>
-  Factory(const boost::property_tree::ptree &pt);
-
-  std::shared_ptr<ComPWA::Physics::HelicityFormalism::PartialDecay>
-  operator*(std::shared_ptr<ComPWA::Physics::HelicityFormalism::AmpWignerD> wigner) {
-//    auto obj =std::make_shared<ComPWA::Physics::HelicityFormalism::PartialDecay>();
-//    std::shared_ptr<ComPWA::Physics::HelicityFormalism::PartialDecay>
-//    partDecay(std::make_shared<PartialDecay>(this), wigner);
-//    return obj;
-  }
+  virtual std::shared_ptr<FunctionTree> GetTree(ParameterList &sample,
+                                                  ParameterList &phspSample,
+                                                  ParameterList &toySample,
+                                                  std::string suffix);
 
 protected:
-  //! Decay width of resonante state
+  //! Resonance width
   std::shared_ptr<DoubleParameter> _width;
-
+  
   //! Meson radius of resonant state
   std::shared_ptr<DoubleParameter> _mesonRadius;
 
@@ -213,8 +187,24 @@ private:
   double _current_width;
 };
 
-} /* namespace DynamicalFunctions */
+class BreitWignerStrategy : public Strategy {
+public:
+  BreitWignerStrategy(const std::string resonanceName)
+      : Strategy(ParType::MCOMPLEX), name(resonanceName) {}
+
+  virtual const std::string to_str() const {
+    return ("relativistic BreitWigner of " + name);
+  }
+
+  virtual bool execute(ParameterList &paras,
+                       std::shared_ptr<AbsParameter> &out);
+
+protected:
+  std::string name;
+};
+
+} /* namespace HelicityFormalism */
 } /* namespace Physics */
 } /* namespace ComPWA */
 
-#endif /* PHYSICS_HELICITYAMPLITUDE_RELATIVISTICBREITWIGNER_HPP_ */
+#endif

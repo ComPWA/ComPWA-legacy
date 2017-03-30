@@ -62,7 +62,7 @@ class UniformTwoBodyGenerator : public RootGenerator {
 public:
   UniformTwoBodyGenerator(double minSq_, double maxSq_, int seed = -1)
       : RootGenerator(seed), minSq(minSq_), maxSq(maxSq_) {
-    if (Kinematics::instance()->GetFinalState().size() != 2)
+    if (Kinematics::Instance()->GetFinalState().size() != 2)
       throw std::runtime_error("UniformTwoBodyGenerator::"
                                "UniformTwoBodyGenerator() | Not a two body "
                                "decay!");

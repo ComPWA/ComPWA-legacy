@@ -18,7 +18,7 @@ RootGenerator::RootGenerator(int seed) {
   gRandom = new TRandom3(0);
   if (seed != -1)
     setSeed(seed);
-  Kinematics *kin = Kinematics::instance();
+  Kinematics *kin = Kinematics::Instance();
   auto physConst = PhysConst::Instance();
   auto finalS = kin->GetFinalState();
   auto initialS = kin->GetInitialState();

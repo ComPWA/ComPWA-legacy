@@ -21,102 +21,106 @@
 namespace ComPWA {
 namespace Physics {
 namespace HelicityFormalism {
-  
-  HelicityKinematics::HelicityKinematics(std::vector<int> initialState, std::vector<int> finalState) :
-  Kinematics(initialState, finalState) {
-    assert(initialState.size() == 1);
-    _idMother = initialState.at(0);
-    auto motherProp = PhysConst::Instance()->FindParticle(_idMother);
-    _nameMother = motherProp.GetName();
-    _M = motherProp.GetMass();
-    _Msq = _M * _M;
-    _spinM = motherProp.GetSpin();
-  }
-  
-HelicityKinematics::~HelicityKinematics() {
+
+HelicityKinematics::HelicityKinematics(std::vector<int> initialState,
+                                       std::vector<int> finalState)
+    : Kinematics(initialState, finalState) {
+  assert(initialState.size() == 1);
+  _idMother = initialState.at(0);
+  auto motherProp = PhysConst::Instance()->FindParticle(_idMother);
+  _nameMother = motherProp.GetName();
+  _M = motherProp.GetMass();
+  _Msq = _M * _M;
+  _spinM = motherProp.GetSpin();
 }
 
-bool HelicityKinematics::IsWithinPhsp(const dataPoint& point) const{
-  //TODO: implementation
+HelicityKinematics::~HelicityKinematics() {}
+
+bool HelicityKinematics::IsWithinPhsp(const dataPoint &point) const {
+  // TODO: implementation
 
   return true;
 }
-  
+
 double HelicityKinematics::calculatePSArea() {
   double result(0);
-  double precision(1); //relative uncertainty
+  double precision(1); // relative uncertainty
   double weights(0);
   double precisionLimit(1e-5);
   unsigned int maxCalls(1e6);
   unsigned int call(0);
-  
-  std::shared_ptr<ComPWA::Generator> gen( new ComPWA::Tools::RootGenerator(0) );
-  
-  while( precision > precisionLimit && call < maxCalls ){
+
+  std::shared_ptr<ComPWA::Generator> gen(new ComPWA::Tools::RootGenerator(0));
+
+  while (precision > precisionLimit && call < maxCalls) {
     precision = result;
     ComPWA::Event ev;
     gen->generate(ev);
     weights += ev.getWeight();
     call++;
-    result = weights/call;
-    precision = std::fabs(result - precision)/result;
+    result = weights / call;
+    precision = std::fabs(result - precision) / result;
   }
-  
-  LOG(debug)
-      << "HelicityKinematics::calculatePSarea() | "
-      << "(" << result << "+-" << precision*result << ") GeV^4 relAcc [%]: "
-      << 100 * precision;
-  
+
+  LOG(debug) << "HelicityKinematics::calculatePSarea() | "
+             << "(" << result << "+-" << precision * result
+             << ") GeV^4 relAcc [%]: " << 100 * precision;
+
   return result;
 }
 
-void HelicityKinematics::EventToDataPoint(const Event& event,
-    dataPoint& point) const {
-  
-  for( auto i : _listSubSystem ){
+void HelicityKinematics::EventToDataPoint(const Event &event,
+                                          dataPoint &point) const {
+
+  for (auto i : _listSubSystem) {
     QFT::Vector4<double> recoil, finalA, finalB;
-    for( auto s : i.GetRecoilState() ){
+    for (auto s : i.GetRecoilState()) {
       recoil += QFT::Vector4<double>(event.getParticle(s).getFourMomentum());
     }
-    for( auto s : i.GetFinalStateA() ){
+    for (auto s : i.GetFinalStateA()) {
       finalA += QFT::Vector4<double>(event.getParticle(s).getFourMomentum());
     }
-    for( auto s : i.GetFinalStateB() ){
+    for (auto s : i.GetFinalStateB()) {
       finalB += QFT::Vector4<double>(event.getParticle(s).getFourMomentum());
     }
-    QFT::Vector4<double> dd = finalA+finalB;
+    QFT::Vector4<double> dd = finalA + finalB;
     double mSq = dd.Mass2();
-    
+
     finalA.Boost(dd);
-    finalA.Rotate(dd.Phi(), dd.Theta(), (-1)*dd.Phi());
-    double cosTheta = std::cos(finalA.Theta());
+    finalA.Rotate(dd.Phi(), dd.Theta(), (-1) * dd.Phi());
+    double cosTheta = finalA.CosTheta();
     double phi = finalA.Phi();
-    if( cosTheta > 1 || cosTheta < -1 || phi > M_PI || phi < (-1)*M_PI  || std::isnan(cosTheta) || std::isnan(phi)){
+    if (cosTheta > 1 || cosTheta < -1 || phi > M_PI || phi < (-1) * M_PI ||
+        std::isnan(cosTheta) || std::isnan(phi)) {
       throw BeyondPhsp("HelicityKinematics::EventToDataPoint() |"
-                               " Point beypond phase space boundaries!");
+                       " Point beypond phase space boundaries!");
     }
-    
-    //LOG(trace)<<dd.Mass2()<< " " <<std::cos(finalA.Theta())<<" "<<finalA.Phi();
-    
+
+    // LOG(trace)<<dd.Mass2()<< " " <<std::cos(finalA.Theta())<<"
+    // "<<finalA.Phi();
+
     point.GetPoint().push_back(mSq);
     point.GetPoint().push_back(cosTheta);
     point.GetPoint().push_back(phi);
   }
 }
 
-double HelicityKinematics::FormFactor(double sqrtS, double ma, double mb, double spin,
-                              double mesonRadius, formFactorType type) {
+double HelicityKinematics::FormFactor(double sqrtS, double ma, double mb,
+                                      double spin, double mesonRadius,
+                                      formFactorType type) {
   if (type == formFactorType::BlattWeisskopf && spin == 0) {
     return 1.0;
   }
 
   std::complex<double> qValue = Kinematics::qValue(sqrtS, ma, mb);
-  return HelicityKinematics::FormFactor(sqrtS, ma, mb, spin, mesonRadius, qValue, type);
+  return HelicityKinematics::FormFactor(sqrtS, ma, mb, spin, mesonRadius,
+                                        qValue, type);
 }
 
-double HelicityKinematics::FormFactor(double sqrtS, double ma, double mb, double spin,
-                              double mesonRadius, std::complex<double> qValue,
-                              formFactorType type) {
+double HelicityKinematics::FormFactor(double sqrtS, double ma, double mb,
+                                      double spin, double mesonRadius,
+                                      std::complex<double> qValue,
+                                      formFactorType type) {
   if (mesonRadius == 0)
     return 1; // disable form factors
   if (type == formFactorType::noFormFactor)

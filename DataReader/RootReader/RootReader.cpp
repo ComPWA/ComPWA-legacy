@@ -156,10 +156,10 @@ void RootReader::writeData(std::string file, std::string trName) {
   fTree->Branch("flavour", &fFlavour, "flavour/I");
   TClonesArray &partArray = *fParticles;
   
-  if(Kinematics::instance()->GetInitialState().size() != 1)
+  if(Kinematics::Instance()->GetInitialState().size() != 1)
     throw std::runtime_error("RootReaer::writeData() | More then one initial state particle. No idea what to do!");
   
-  int pid = Kinematics::instance()->GetInitialState().at(0);
+  int pid = Kinematics::Instance()->GetInitialState().at(0);
   double mass = PhysConst::Instance()->FindParticle(pid).GetMass();
   TLorentzVector motherMomentum(0, 0, 0, mass );
   

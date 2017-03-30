@@ -198,7 +198,7 @@ public:
   }
 
   virtual void initialise() {
-    if (Kinematics::instance()->GetNVars() != 1)
+    if (Kinematics::Instance()->GetNVars() != 1)
       throw std::runtime_error("GaussAmp::initialize() | "
                                "this amplitude is for two body decays only!");
   };
@@ -341,7 +341,7 @@ protected:
   }
   
   virtual double Integral() const{
-    return Kinematics::instance()->GetPhspVolume();
+    return Kinematics::Instance()->GetPhspVolume();
   }
 };
 

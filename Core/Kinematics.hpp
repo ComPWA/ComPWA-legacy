@@ -34,7 +34,7 @@ enum formFactorType { noFormFactor = 0, BlattWeisskopf = 1, CrystalBarrel = 2 };
 class Kinematics {
 public:
   //! singleton pattern
-  static Kinematics *instance();
+  static Kinematics *Instance();
 
   //! converts Event to dataPoint
   virtual void EventToDataPoint(const ComPWA::Event &ev,

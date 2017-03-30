@@ -32,9 +32,30 @@ namespace HelicityFormalism {
 std::complex<double> RelativisticBreitWigner::Evaluate(const dataPoint &point,
                                                        int pos) const {
   std::complex<double> result = dynamicalFunction(
-      point.GetValue(pos), _mass->GetValue(), _massA, _massB, _width->GetValue(),
-      (double)_spin, _mesonRadius->GetValue(), _ffType);
+      point.GetValue(pos), _mass->GetValue(), _massA, _massB,
+      _width->GetValue(), (double)_spin, _mesonRadius->GetValue(), _ffType);
   return result;
+}
+
+double RelativisticBreitWigner::GetNormalization() const {
+  CheckModified();
+  if (GetModified()) {
+    const_cast<double &>(_current_integral) =
+        AbstractDynamicalFunction::Integral();
+    SetModified(false);
+  }
+  return 1. / _current_integral;
+}
+
+void RelativisticBreitWigner::CheckModified() const {
+  AbstractDynamicalFunction::CheckModified();
+  if (_width->GetValue() != _current_width ||
+      _mesonRadius->GetValue() != _current_mesonRadius) {
+    SetModified();
+    const_cast<double &>(_current_width) = _width->GetValue();
+    const_cast<double &>(_current_mesonRadius) = _mesonRadius->GetValue();
+  }
+  return;
 }
 
 std::complex<double> RelativisticBreitWigner::dynamicalFunction(
@@ -95,10 +116,10 @@ RelativisticBreitWigner::Factory(const boost::property_tree::ptree &pt) {
 
   auto spin = partProp.GetSpin();
   obj->SetSpin(spin);
-  
+
   auto ffType = formFactorType(decayTr.get<int>("FormFactor.<xmlattr>.type"));
   obj->SetFormFactorType(ffType);
-  
+
   auto width = ComPWA::DoubleParameterFactory(decayTr.get_child("Width"));
   obj->SetWidth(std::make_shared<DoubleParameter>(width));
   auto mesonRadius =
@@ -123,8 +144,8 @@ RelativisticBreitWigner::Factory(const boost::property_tree::ptree &pt) {
 
   LOG(trace)
       << "RelativisticBreitWigner::Factory() | Construction of the decay "
-      << partProp.GetName() << " -> "
-      << daughterNames.at(0) << " + " << daughterNames.at(1);
+      << partProp.GetName() << " -> " << daughterNames.at(0) << " + "
+      << daughterNames.at(1);
 
   return obj;
 }

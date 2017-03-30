@@ -17,7 +17,7 @@
 
 namespace ComPWA {
 
-Kinematics *Kinematics::instance() {
+Kinematics *Kinematics::Instance() {
   if (!_inst) {
     throw std::runtime_error("No instance of Kinematics created! "
                              "Create one first!");
