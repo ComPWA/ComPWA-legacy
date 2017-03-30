@@ -24,24 +24,22 @@ namespace Physics {
 namespace HelicityFormalism {
 
 class SequentialTwoBodyDecay : Amplitude {
-  
+
 public:
   /**! Evaluate decay */
   virtual std::complex<double> Evaluate(const dataPoint &point) const {
     std::complex<double> result =
         std::polar(_magnitude->GetValue(), _phase->GetValue());
-    for( auto i : _partDecays)
+    for (auto i : _partDecays)
       result *= i->Evaluate(point);
     return result;
   };
 
   /**! Setup function tree */
   virtual std::shared_ptr<FunctionTree> GetTree(ParameterList &sample,
-                                                  ParameterList &phspSample,
-                                                  ParameterList &toySample,
-                                                  std::string suffix) {
-    return std::shared_ptr<FunctionTree>();
-  };
+                                                ParameterList &phspSample,
+                                                ParameterList &toySample,
+                                                std::string suffix);
 
   /**
    Factory for SequentialTwoBodyDecay
@@ -57,68 +55,65 @@ public:
 
    @param d Partial decay
    */
-  void Add( std::shared_ptr<ComPWA::Physics::HelicityFormalism::PartialDecay> d ) {
+  void
+  Add(std::shared_ptr<ComPWA::Physics::HelicityFormalism::PartialDecay> d) {
     _partDecays.push_back(d);
   }
-  
+
   /**
    Get Magnitude parameter
-   
+
    @return Magnitude parameter
    */
-  std::shared_ptr<ComPWA::DoubleParameter> GetMagnitude() {
-    return _magnitude;
-  }
-  
+  std::shared_ptr<ComPWA::DoubleParameter> GetMagnitude() { return _magnitude; }
+
   /**
    Get Magnitude parameter
-   
+
    @return Magnitude parameter
    */
   double GetMagnitudeValue() const { return _magnitude->GetValue(); }
-  
+
   /**
    Set Magnitude parameter
-   
+
    @param par Magnitude parameter
    */
   void SetMagnitude(std::shared_ptr<ComPWA::DoubleParameter> par) {
     _magnitude = par;
   }
-  
+
   /**
    Set Magnitude parameter
-   
+
    @param par Magnitude parameter
    */
   void SetMagnitude(double par) { _magnitude->SetValue(par); }
-  
+
   /**
    Get phase parameter
-   
+
    @return Phase parameter
    */
-  std::shared_ptr<ComPWA::DoubleParameter> GetPhase() {
-    return _phase;
-  }
-  
+  std::shared_ptr<ComPWA::DoubleParameter> GetPhase() { return _phase; }
+
   /**
    Get phase parameter
-   
+
    @return Phase parameter
    */
   double GetPhaseValue() const { return _phase->GetValue(); }
-  
+
   /**
    Set phase parameter
-   
+
    @param par Phase parameter
    */
   void SetPhase(std::shared_ptr<ComPWA::DoubleParameter> par) { _phase = par; }
-  
+
   /**
    Set phase parameter
-   
+
    @param par Phase parameter
    */
   void SetPhase(double par) { _phase->SetValue(par); }
@@ -128,26 +123,25 @@ public:
     auto tmp = (new SequentialTwoBodyDecay(*this));
     tmp->SetName(newName);
     return tmp;
-    
   };
-  
+
   //! Print amplitude to logging system
   virtual void to_str() { LOG(info) << "SequentialTwoBodyDecay "; }
-  
+
   //! Fill ParameterList with fit fractions
-  virtual void GetFitFractions(ParameterList &parList) { };
-  
+  virtual void GetFitFractions(ParameterList &parList){};
+
   /**
    Get number of partial decays
 
    @return Number of partial decays
    */
   size_t size() { return _partDecays.size(); };
-  
-  typedef std::vector<std::shared_ptr<PartialDecay> >::iterator partDecayItr;
-  
+
+  typedef std::vector<std::shared_ptr<PartialDecay>>::iterator partDecayItr;
+
   partDecayItr begin() { return _partDecays.begin(); }
-  
+
   partDecayItr end() { return _partDecays.end(); }
 
 protected:
@@ -158,8 +152,7 @@ protected:
   std::pair<ParticleStateInfo, std::pair<ParticleStateInfo, ParticleStateInfo>>
       decay_spin_info_;
 
-  std::vector<std::shared_ptr<PartialDecay> > _partDecays;
-
+  std::vector<std::shared_ptr<PartialDecay>> _partDecays;
 };
 
 } /* namespace HelicityFormalism */

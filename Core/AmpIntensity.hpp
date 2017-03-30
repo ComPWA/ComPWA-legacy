@@ -121,7 +121,7 @@ public:
   GetTree(ParameterList &, ParameterList &, ParameterList &, std::string suffix="") {
     return std::shared_ptr<FunctionTree>();
   }
-
+  
   /**
    Get strength parameter
 

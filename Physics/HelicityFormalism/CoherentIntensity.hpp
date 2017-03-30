@@ -26,10 +26,12 @@ namespace HelicityFormalism {
 class CoherentIntensity : public ComPWA::AmpIntensity {
 
 public:
-  CoherentIntensity() {};
-  virtual ~CoherentIntensity() {};
+  CoherentIntensity(){};
+  virtual ~CoherentIntensity(){};
 
-  virtual double GetMaximum(std::shared_ptr<ComPWA::Generator> gen) const { return 1.0; }
+  virtual double GetMaximum(std::shared_ptr<ComPWA::Generator> gen) const {
+    return 1.0;
+  }
 
   virtual double Intensity(const ComPWA::dataPoint &point) const;
 
@@ -41,10 +43,8 @@ public:
 
   //! Getter function for basic amp tree
   virtual std::shared_ptr<ComPWA::FunctionTree>
-  GetTree(ComPWA::ParameterList &, ComPWA::ParameterList &,
-          ComPWA::ParameterList &, std::string suffix="") {
-    return std::shared_ptr<ComPWA::FunctionTree>();
-  }
+  GetTree(ComPWA::ParameterList &sample, ComPWA::ParameterList &phspSample,
+          ComPWA::ParameterList &toySample, std::string suffix = "");
 
   /**
    Clone function
@@ -95,6 +95,9 @@ public:
 protected:
   virtual double Integral() const { return 1.0; }
 
+  virtual std::shared_ptr<FunctionTree>
+  setupBasicTree(ParameterList &sample, ParameterList &phspSample,
+                 std::string suffix="") const;
 
   std::vector<std::shared_ptr<
       ComPWA::Physics::HelicityFormalism::SequentialTwoBodyDecay>>

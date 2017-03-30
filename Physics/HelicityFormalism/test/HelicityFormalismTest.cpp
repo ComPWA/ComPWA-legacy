@@ -15,6 +15,7 @@
 #include <boost/property_tree/xml_parser.hpp>
 
 #include "Core/PhysConst.hpp"
+#include "Core/ParameterList.hpp"
 #include "Core/Logging.hpp"
 #include "Core/RunManager.hpp"
 #include "Tools/RootGenerator.hpp"
@@ -66,7 +67,7 @@ BOOST_AUTO_TEST_CASE(IncoherentConstruction) {
       p = ComPWA::dataPoint(i);
     } catch (std::exception &ex) {
       // Test if events outside the phase space boundaries are generated
-      LOG(trace) << "Event outside phase space. This should not happen since "
+      LOG(error) << "Event outside phase space. This should not happen since "
                     "we use a Monte-Carlo sample!";
       BOOST_TEST(false);
       continue;
@@ -74,8 +75,15 @@ BOOST_AUTO_TEST_CASE(IncoherentConstruction) {
 
     double w = intens->Intensity(p);
     i.setWeight(w);
-    LOG(trace) << "point = " << p << " intensity = " << w;
+    LOG(info) << "point = " << p << " intensity = " << w;
   }
+    
+    ComPWA::ParameterList sampleList(sample->getListOfData());
+    // Testing function tree
+    auto tree = intens->GetTree(sampleList, sampleList, sampleList);
+    
+    std::stringstream printTree; printTree << tree;
+    LOG(info) << std::endl << printTree.str();
 
   //  auto part = physConst->FindParticle("gamma");
   //  BOOST_CHECK_EQUAL(part.GetMass(), 0.);

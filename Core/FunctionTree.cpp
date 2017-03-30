@@ -29,7 +29,13 @@ void FunctionTree::insertNode(std::shared_ptr<TreeNode> inNode,
                          inNode->getName() + "!");
 
   // Assign new parent to head of new tree, create links
-  std::shared_ptr<TreeNode> parentNode = nodes_.at(parent);
+  std::shared_ptr<TreeNode> parentNode;
+  try{
+    parentNode = nodes_.at(parent);
+  } catch (std::out_of_range& ex){
+    LOG(error) << "FunctionTree::insertNode() | Parent node "<<parent<<" not found in FunctionTree!";
+    throw;
+  }
 
   /* In case of an existing node, it is possible that this node
    * already have parents. Do need to consider this here? */

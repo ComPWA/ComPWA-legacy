@@ -87,11 +87,9 @@ public:
 
   //! Getter function for basic amp tree
   virtual std::shared_ptr<ComPWA::FunctionTree>
-  GetTree(ComPWA::ParameterList &, ComPWA::ParameterList &,
-          ComPWA::ParameterList &, std::string suffix = "") {
-    return std::shared_ptr<ComPWA::FunctionTree>();
-  }
-
+  GetTree(ComPWA::ParameterList &sample, ComPWA::ParameterList &phspSample,
+          ComPWA::ParameterList &toySample, std::string suffix = "");
+  
   /**
    Get number of partial decays
 
