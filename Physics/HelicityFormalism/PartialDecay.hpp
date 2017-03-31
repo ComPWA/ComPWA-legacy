@@ -50,9 +50,7 @@ public:
   virtual std::shared_ptr<FunctionTree> GetTree(ParameterList &sample,
                                                   ParameterList &phspSample,
                                                   ParameterList &toySample,
-                                                  std::string suffix) {
-    return std::shared_ptr<FunctionTree>();
-  };
+                                                std::string suffix);
 
   /**
    Factory for PartialDecay

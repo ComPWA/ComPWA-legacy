@@ -21,8 +21,7 @@ namespace ComPWA {
 namespace Physics {
 namespace HelicityFormalism {
 
-AmpWignerD::AmpWignerD(ComPWA::Spin spin, unsigned int mu,
-                       unsigned int muPrime)
+AmpWignerD::AmpWignerD(ComPWA::Spin spin, unsigned int mu, unsigned int muPrime)
     : _spin(spin), _mu(mu), _muPrime(muPrime) {}
 
 double AmpWignerD::Evaluate(const dataPoint &point, int pos1, int pos2) const {
@@ -32,12 +31,12 @@ double AmpWignerD::Evaluate(const dataPoint &point, int pos1, int pos2) const {
 
 double AmpWignerD::dynamicalFunction(ComPWA::Spin J, ComPWA::Spin mu,
                                      ComPWA::Spin muPrime, double cosTheta) {
-  
-  if( (double)J == 0 )
+
+  if ((double)J == 0)
     return 1.0;
-  
+
   assert(!std::isnan(cosTheta));
-  
+
   if (cosTheta > 1 || cosTheta < -1)
     throw std::runtime_error(
         "AmpWignerD::dynamicalFunction() | "
@@ -46,11 +45,11 @@ double AmpWignerD::dynamicalFunction(ComPWA::Spin J, ComPWA::Spin mu,
   double result = QFT::Wigner_d(J, mu, muPrime, acos(cosTheta));
   assert(!std::isnan(result));
 
-  //Not quite sure what the correct prefactor is in this case.
+  // Not quite sure what the correct prefactor is in this case.
   //	double norm = 1/sqrt(2*J.GetSpin()+1);
   double norm = (2 * J.GetSpin() + 1);
-  
-  return norm*result;
+
+  return norm * result;
 }
 
 std::complex<double>
@@ -59,11 +58,11 @@ AmpWignerD::dynamicalFunction(double cosAlpha, double cosBeta, double cosGamma,
                               ComPWA::Spin muPrime) {
   if ((double)J == 0)
     return 1.0;
-  
+
   assert(!std::isnan(cosAlpha));
   assert(!std::isnan(cosBeta));
   assert(!std::isnan(cosGamma));
-  
+
   std::complex<double> i(0, 1);
 
   double tmp = AmpWignerD::dynamicalFunction(J, mu, muPrime, cosBeta);
@@ -77,21 +76,26 @@ AmpWignerD::dynamicalFunction(double cosAlpha, double cosBeta, double cosGamma,
   return result;
 }
 
-std::shared_ptr<FunctionTree> AmpWignerD::SetupTree(ParameterList &sample,
-                                                    std::string suffix) {
+std::shared_ptr<FunctionTree> AmpWignerD::GetTree(ParameterList &sample, int posTheta, int posPhi,
+                                                  std::string suffix) {
   std::shared_ptr<FunctionTree> newTree(new FunctionTree());
 
   int sampleSize = sample.GetMultiDouble(0)->GetNValues();
   //----Strategies needed
   std::shared_ptr<WignerDStrategy> angdStrat(
       new WignerDStrategy("AngD" + suffix));
-  newTree->createHead("AngD_" + suffix, angdStrat, sampleSize);
+  newTree->createHead(
+      "WignerD" + suffix,
+      std::shared_ptr<WignerDStrategy>(new WignerDStrategy("WignerD" + suffix)),
+      sampleSize);
 
-  newTree->createLeaf("spin", (double)_spin, "AngD_" + suffix); // spin
-  newTree->createLeaf("m", _mu, "AngD_" + suffix);              // OutSpin 1
-  newTree->createLeaf("n", _muPrime, "AngD_" + suffix);         // OutSpin 2
-//  newTree->createLeaf("AngD_sample", sample.GetMultiDouble(_varId),
-//                      "AngD_" + suffix);
+  newTree->createLeaf("spin", (double)_spin, "WignerD" + suffix); // spin
+  newTree->createLeaf("m", (double)_mu, "WignerD" + suffix);      // OutSpin 1
+  newTree->createLeaf("n", (double)_muPrime, "WignerD" + suffix); // OutSpin 2
+  newTree->createLeaf("data_cosTheta[" + std::to_string(posTheta) + "]",
+                      sample.GetMultiDouble(posTheta), "WignerD" + suffix);
+  newTree->createLeaf("data_phi[" + std::to_string(posPhi) + "]",
+                      sample.GetMultiDouble(posPhi), "WignerD" + suffix);
 
   return newTree;
 }

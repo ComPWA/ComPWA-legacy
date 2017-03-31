@@ -57,7 +57,7 @@ public:
                                                 ComPWA::Spin muPrime);
 
   virtual std::shared_ptr<ComPWA::FunctionTree>
-  SetupTree(ComPWA::ParameterList &sample, std::string suffix = "");
+  GetTree(ComPWA::ParameterList &sample, int posTheta, int posPhi, std::string suffix = "");
 
   /**
    Factory for AmpWignerD

@@ -187,21 +187,21 @@ private:
   double _current_width;
 };
 
-class BreitWignerStrategy : public Strategy {
-public:
-  BreitWignerStrategy(const std::string resonanceName)
-      : Strategy(ParType::MCOMPLEX), name(resonanceName) {}
-
-  virtual const std::string to_str() const {
-    return ("relativistic BreitWigner of " + name);
-  }
-
-  virtual bool execute(ParameterList &paras,
-                       std::shared_ptr<AbsParameter> &out);
-
-protected:
-  std::string name;
-};
+//class BreitWignerStrategy : public Strategy {
+//public:
+//  BreitWignerStrategy(const std::string resonanceName)
+//      : Strategy(ParType::MCOMPLEX), name(resonanceName) {}
+//
+//  virtual const std::string to_str() const {
+//    return ("relativistic BreitWigner of " + name);
+//  }
+//
+//  virtual bool execute(ParameterList &paras,
+//                       std::shared_ptr<AbsParameter> &out);
+//
+//protected:
+//  std::string name;
+//};
 
 } /* namespace HelicityFormalism */
 } /* namespace Physics */

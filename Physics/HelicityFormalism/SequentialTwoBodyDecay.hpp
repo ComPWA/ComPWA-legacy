@@ -145,8 +145,6 @@ public:
   partDecayItr end() { return _partDecays.end(); }
 
 protected:
-  std::string name; // for full coherent amplitude construction reasons
-
   // TODO: we add this particle state info for the coherent sum stuff
   // the whole design is fucked up because of that, change that someday
   std::pair<ParticleStateInfo, std::pair<ParticleStateInfo, ParticleStateInfo>>

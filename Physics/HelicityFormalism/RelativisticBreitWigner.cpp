@@ -19,6 +19,7 @@
 // includes the use of Blatt-Weisskopf barrier factors.
 
 #include <cmath>
+#include <numeric>
 
 #include "boost/property_tree/ptree.hpp"
 
@@ -150,6 +151,165 @@ RelativisticBreitWigner::Factory(const boost::property_tree::ptree &pt) {
   return obj;
 }
 
+/**! Setup function tree */
+std::shared_ptr<FunctionTree>
+RelativisticBreitWigner::GetTree(ParameterList &sample,
+                                 ParameterList &toySample, int pos,
+                                 std::string suffix) {
+  
+  int sampleSize = sample.GetMultiDouble(0)->GetNValues();
+//  unsigned int effId = Kinematics::Instance()->GetNVars();
+  unsigned int weightId = Kinematics::Instance()->GetNVars() + 1;
+  int phspSampleSize = toySample.GetMultiDouble(0)->GetNValues();
+
+  std::shared_ptr<MultiDouble> weightPhsp = toySample.GetMultiDouble(weightId);
+  double sumWeights =
+      std::accumulate(weightPhsp->Begin(), weightPhsp->End(), 0.0);
+//  std::shared_ptr<MultiDouble> eff = toySample.GetMultiDouble(effId);
+  
+  //------------Setup Tree---------------------
+  std::shared_ptr<FunctionTree> tr(new FunctionTree());
+  tr->createHead("DynamicalFunction",
+                 std::shared_ptr<Strategy>(new MultAll(ParType::COMPLEX)));
+
+  tr->createNode("RelBreitWigner",
+                 std::shared_ptr<Strategy>(new BreitWignerStrategy("")),
+                 "DynamicalFunction", sampleSize);
+  tr->createLeaf("mass", _mass, "RelBreitWigner");               // m0
+  tr->createLeaf("width", _width, "RelBreitWigner");             // resWidth
+  tr->createLeaf("spin", (double)_spin, "RelBreitWigner");       // spin
+  tr->createLeaf("mesonRadius", _mesonRadius, "RelBreitWigner"); // d
+  tr->createLeaf("formFactorType", _ffType, "RelBreitWigner");   // d
+  tr->createLeaf("ma", _massA, "RelBreitWigner");                // ma
+  tr->createLeaf("mb", _massB, "RelBreitWigner");                // mb
+  tr->createLeaf("data_mSq["+std::to_string(pos)+"]", sample.GetMultiDouble(pos),
+                 "RelBreitWigner"); // mc
+  // Normalization
+  tr->createNode("N", std::shared_ptr<Strategy>(new Inverse(ParType::DOUBLE)),
+                 "DynamicalFunction"); // 1/normLH
+  // normLH = phspVolume/N_{mc} |T_{evPHSP}|^2
+  tr->createNode("normFactor",
+                 std::shared_ptr<Strategy>(new MultAll(ParType::DOUBLE)), "N");
+  // sumAmp = \sum_{evPHSP} |T_{evPHSP}|^2
+  tr->createNode("Sum",
+                 std::shared_ptr<Strategy>(new AddAll(ParType::DOUBLE)),
+                 "normFactor");
+  tr->createLeaf("phspVolume", Kinematics::Instance()->GetPhspVolume(),
+                 "normFactor");
+  tr->createLeaf("InvNmc", 1 / ((double)sumWeights), "normFactor");
+  tr->createNode("IntensPhspEff",
+                 std::shared_ptr<Strategy>(new MultAll(ParType::MDOUBLE)),
+                 "Sum", phspSampleSize,
+                 false);                       //|T_{ev}|^2
+//  tr->createLeaf("eff", eff, "IntensPhspEff"); // efficiency
+  tr->createLeaf("weightPhsp", weightPhsp, "IntensPhspEff");
+  tr->createNode("IntensPhsp",
+                 std::shared_ptr<Strategy>(new AbsSquare(ParType::MDOUBLE)),
+                 "IntensPhspEff", phspSampleSize,
+                 false); //|T_{ev}|^2
+  tr->createNode("NormRelBreitWigner",
+                 std::shared_ptr<Strategy>(new BreitWignerStrategy("")),
+                 "IntensPhsp", phspSampleSize);
+  tr->createLeaf("mass", _mass, "NormRelBreitWigner");               // m0
+  tr->createLeaf("width", _width, "NormRelBreitWigner");             // resWidth
+  tr->createLeaf("spin", (double)_spin, "NormRelBreitWigner");       // spin
+  tr->createLeaf("mesonRadius", _mesonRadius, "NormRelBreitWigner"); // d
+  tr->createLeaf("formFactorType", _ffType, "NormRelBreitWigner");   // d
+  tr->createLeaf("ma", _massA, "NormRelBreitWigner");                // ma
+  tr->createLeaf("mb", _massB, "NormRelBreitWigner");                // mb
+  tr->createLeaf("data_mSq["+std::to_string(pos)+"]", toySample.GetMultiDouble(pos),
+                 "NormRelBreitWigner"); // mc
+  
+
+  return tr;
+};
+
+bool BreitWignerStrategy::execute(ParameterList &paras,
+                                  std::shared_ptr<AbsParameter> &out) {
+#ifndef NDEBUG
+  // Check parameter type
+  if (checkType != out->type())
+    throw(WrongParType("BreitWignerStrat::execute() | "
+                       "Output parameter is of type " +
+                       std::string(ParNames[out->type()]) +
+                       " and conflicts with expected type " +
+                       std::string(ParNames[checkType])));
+
+  // How many parameters do we expect?
+  int check_nBool = 0;
+  int check_nInt = 0;
+  int check_nComplex = 0;
+  int check_nDouble = 7;
+  int check_nMDouble = 1;
+  int check_nMComplex = 0;
+
+  // Check size of parameter list
+  if (paras.GetNBool() != check_nBool)
+    throw(BadParameter("BreitWignerStrat::execute() | "
+                       "Number of BoolParameters does not match: " +
+                       std::to_string(paras.GetNBool()) + " given but " +
+                       std::to_string(check_nBool) + " expected."));
+  if (paras.GetNInteger() != check_nInt)
+    throw(BadParameter("BreitWignerStrat::execute() | "
+                       "Number of IntParameters does not match: " +
+                       std::to_string(paras.GetNInteger()) + " given but " +
+                       std::to_string(check_nInt) + " expected."));
+  if (paras.GetNDouble() != check_nDouble)
+    throw(BadParameter("BreitWignerStrat::execute() | "
+                       "Number of DoubleParameters does not match: " +
+                       std::to_string(paras.GetNDouble()) + " given but " +
+                       std::to_string(check_nDouble) + " expected."));
+  if (paras.GetNComplex() != check_nComplex)
+    throw(BadParameter("BreitWignerStrat::execute() | "
+                       "Number of ComplexParameters does not match: " +
+                       std::to_string(paras.GetNComplex()) + " given but " +
+                       std::to_string(check_nComplex) + " expected."));
+  if (paras.GetNMultiDouble() != check_nMDouble)
+    throw(BadParameter("BreitWignerStrat::execute() | "
+                       "Number of MultiDoubles does not match: " +
+                       std::to_string(paras.GetNMultiDouble()) + " given but " +
+                       std::to_string(check_nMDouble) + " expected."));
+  if (paras.GetNMultiComplex() != check_nMComplex)
+    throw(BadParameter("BreitWignerStrat::execute() | "
+                       "Number of MultiComplexes does not match: " +
+                       std::to_string(paras.GetNMultiComplex()) +
+                       " given but " + std::to_string(check_nMComplex) +
+                       " expected."));
+#endif
+
+  /** Get parameters from ParameterList:
+   * We use the same order of the parameters as was used during tree
+   * construction
+   */
+  double m0 = paras.GetDoubleParameter(0)->GetValue();
+  double Gamma0 = paras.GetDoubleParameter(1)->GetValue();
+  unsigned int spin = (unsigned int)paras.GetDoubleParameter(2)->GetValue();
+  double d = paras.GetDoubleParameter(3)->GetValue();
+  formFactorType ffType =
+      formFactorType(paras.GetDoubleParameter(4)->GetValue());
+  double ma = paras.GetDoubleParameter(5)->GetValue();
+  double mb = paras.GetDoubleParameter(6)->GetValue();
+
+  std::vector<double> mp = paras.GetMultiDouble(0)->GetValues();
+
+  std::vector<std::complex<double>> results(mp.size(),
+                                            std::complex<double>(0., 0.));
+
+  // calc function for each point
+  for (unsigned int ele = 0; ele < mp.size(); ele++) {
+    try {
+      results.at(ele) = RelativisticBreitWigner::dynamicalFunction(
+          mp.at(ele), m0, ma, mb, Gamma0, spin, d, ffType);
+    } catch (std::exception &ex) {
+      LOG(error) << "BreitWignerStrategy::execute() | " << ex.what();
+      throw(std::runtime_error("BreitWignerStrategy::execute() | "
+                               "Evaluation of dynamic function failed!"));
+    }
+  }
+  out =
+      std::shared_ptr<AbsParameter>(new MultiComplex(out->GetName(), results));
+  return true;
+}
 } /* namespace DynamicalFunctions */
 } /* namespace Physics */
 } /* namespace ComPWA */

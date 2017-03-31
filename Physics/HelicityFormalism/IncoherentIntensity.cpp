@@ -37,13 +37,13 @@ std::shared_ptr<ComPWA::FunctionTree> IncoherentIntensity::GetTree(
 
   std::shared_ptr<FunctionTree> tr(new FunctionTree());
   
-  tr->createHead("IncoherentSum",
+  tr->createHead("IncoherentIntens("+GetName()+")"+suffix,
                  std::shared_ptr<Strategy>(new MultAll(ParType::DOUBLE)));
-  tr->createLeaf("Strength", _strength, "IncoherentSum");
-  tr->createNode("SumCoherent",
-                 std::shared_ptr<Strategy>(new AddAll(ParType::DOUBLE)),"IncoherentSum");
+  tr->createLeaf("Strength", _strength,"IncoherentIntens("+GetName()+")"+suffix);
+  tr->createNode("SumOfCoherentIntens",
+                 std::shared_ptr<Strategy>(new AddAll(ParType::DOUBLE)),"IncoherentIntens("+GetName()+")"+suffix);
   for (auto i : _intens) {
-    tr->insertTree(i->GetTree(sample, phspSample, toySample), "SumCoherent");
+    tr->insertTree(i->GetTree(sample, phspSample, toySample), "SumOfCoherentIntens");
   }
   return tr;
 }

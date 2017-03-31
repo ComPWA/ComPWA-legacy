@@ -73,11 +73,9 @@ public:
   virtual void CheckModified() const;
   
   /**! Setup function tree */
-  virtual std::shared_ptr<FunctionTree> SetupTree(ParameterList &sample,
-                                                  ParameterList &toySample,
-                                                  std::string suffix) {
-    return std::shared_ptr<FunctionTree>();
-  };
+  virtual std::shared_ptr<FunctionTree> GetTree(ParameterList &sample,
+                                                  ParameterList &toySample, int pos,
+                                                std::string suffix="");
 
   // --------------------------- Set/Get functions ---------------------------
 
@@ -212,7 +210,23 @@ private:
   double _current_mesonRadius;
   double _current_width;
 };
+  
+class BreitWignerStrategy : public Strategy {
+public:
+  BreitWignerStrategy(const std::string resonanceName)
+      : Strategy(ParType::MCOMPLEX), name(resonanceName) {}
 
+  virtual const std::string to_str() const {
+    return ("relativistic BreitWigner of " + name);
+  }
+
+  virtual bool execute(ParameterList &paras,
+                       std::shared_ptr<AbsParameter> &out);
+
+protected:
+  std::string name;
+};
+  
 } /* namespace DynamicalFunctions */
 } /* namespace Physics */
 } /* namespace ComPWA */

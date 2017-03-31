@@ -72,17 +72,18 @@ std::shared_ptr<ComPWA::FunctionTree> CoherentIntensity::GetTree(
 
   std::shared_ptr<FunctionTree> tr(new FunctionTree());
 
-  tr->createHead("CoherentSum",
+  tr->createHead("CoherentIntens(" + GetName() + ")" + suffix,
                  std::shared_ptr<Strategy>(new MultAll(ParType::MDOUBLE)));
-  tr->createLeaf("Strength", _strength, "CoherentSum");
-  tr->createNode("AmpSq",
+  tr->createLeaf("Strength", _strength,
+                 "CoherentIntens(" + GetName() + ")" + suffix);
+  tr->createNode("SumSquared",
                  std::shared_ptr<Strategy>(new AbsSquare(ParType::MDOUBLE)),
-                 "CoherentSum");
-  tr->insertTree(setupBasicTree(sample, toySample), "AmpSq");
+                 "CoherentIntens(" + GetName() + ")" + suffix);
+  tr->insertTree(setupBasicTree(sample, toySample), "SumSquared");
 
   // Normalization
   tr->createNode("N", std::shared_ptr<Strategy>(new Inverse(ParType::DOUBLE)),
-                 "CoherentSum"); // 1/normLH
+                 "CoherentIntens(" + GetName() + ")" + suffix); // 1/normLH
   // normLH = phspVolume/N_{mc} |T_{evPHSP}|^2
   tr->createNode("normFactor",
                  std::shared_ptr<Strategy>(new MultAll(ParType::DOUBLE)), "N");
@@ -107,10 +108,12 @@ std::shared_ptr<ComPWA::FunctionTree> CoherentIntensity::GetTree(
 
   return tr;
 }
-  
+
 std::shared_ptr<FunctionTree>
 CoherentIntensity::setupBasicTree(ParameterList &sample,
-                                ParameterList &phspSample, std::string suffix) const {
+                                  ParameterList &phspSample,
+                                  std::string suffix) const {
+  
   int sampleSize = sample.GetMultiDouble(0)->GetNValues();
   int phspSampleSize = phspSample.GetMultiDouble(0)->GetNValues();
 
@@ -131,22 +134,22 @@ CoherentIntensity::setupBasicTree(ParameterList &sample,
   //----Strategies needed
   std::shared_ptr<AddAll> maddStrat(new AddAll(ParType::MCOMPLEX));
 
-  newTree->createHead("Amplitude" + suffix, maddStrat, sampleSize);
+  newTree->createHead("SumOfAmplitudes" + suffix, maddStrat, sampleSize);
 
-  for ( auto i : _seqDecays ) {
+  for (auto i : _seqDecays) {
     std::shared_ptr<FunctionTree> resTree =
-        i->GetTree(sample, phspSample, phspSample,"" );
+        i->GetTree(sample, phspSample, phspSample, "");
     if (!resTree->sanityCheck())
       throw std::runtime_error("AmpSumIntensity::setupBasicTree() | "
                                "Resonance tree didn't pass sanity check!");
     resTree->recalculate();
-    newTree->insertTree(resTree, "Amplitude" + suffix);
+    newTree->insertTree(resTree, "SumOfAmplitudes" + suffix);
   }
 
   LOG(debug) << "AmpSumIntensity::setupBasicTree(): tree constructed!!";
   return newTree;
 }
-  
+
 } /* namespace HelicityFormalism */
 } /* namespace Physics */
 } /* namespace ComPWA */

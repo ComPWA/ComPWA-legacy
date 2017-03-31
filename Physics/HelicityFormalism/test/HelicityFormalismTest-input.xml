@@ -134,30 +134,30 @@
 	</FinalState>
 </HelicityKinematics>
 
-<IncoherentIntensity Name='jpsiToPi0Pi0Gamma_inc'>
-	<CoherentIntensity Name='jpsiToPi0Pi0Gamma'>
-		<Strength Name='strength_jpsiToPi0Pi0Gamma'>
+<IncoherentIntensity Name='jpsi->Pi0Pi0Gamma_inc'>
+	<CoherentIntensity Name='jpsi->Pi0Pi0Gamma'>
+		<Strength Name='strength_jpsi->Pi0Pi0Gamma'>
 			<Value>0.99</Value>
 			<Fix>1</Fix>
 		</Strength>
 		<Amplitude Name='omega'>
-			<Magnitude Name='mag_omegaToPi0G'>
+			<Magnitude Name='Magnitude_omega->Pi0G'>
 				<Value>1.0</Value>
 				<Fix>1</Fix>
 			</Magnitude>
-			<Phase Name='Phase_omegaToPi0G'>
+			<Phase Name='Phase_omega->Pi0Gamma'>
 				<Value>0.0</Value>
 				<Fix>1</Fix>
 			</Phase>
-			<Resonance Name='jpsiToOmegaPi0'>
-				<Magnitude Name='mag_jpsiToOmegaPi0'>
+			<Resonance Name='jpsi->OmegaPi0'>
+				<Magnitude Name='Magnitude_jpsi->OmegaPi0'>
 					<Value>1.0</Value>
 					<Fix>1</Fix>
 					<Min>0.5</Min>
 					<Max>1.5</Max>
 					<Error>0</Error>
 				</Magnitude>
-				<Phase Name='Phase_jpsiToOmegaPi0'>
+				<Phase Name='Phase_jpsi->OmegaPi0'>
 					<Value>1.0</Value>
 					<Fix>1</Fix>
 					<Min>0.5</Min>
@@ -170,15 +170,15 @@
 					<Particle Name='pi0' FinalState='2' Helicity='+1' />
 				</DecayProducts>
 			</Resonance>
-			<Resonance Name="omegaToPi0G">
-				<Magnitude Name='mag_omegaToPi0G'>
+			<Resonance Name="omega->Pi0G">
+				<Magnitude Name='Magnitude_omega->Pi0G'>
 					<Value>1.0</Value>
 					<Fix>1</Fix>
 					<Min>0.5</Min>
 					<Max>1.5</Max>
 					<Error>0</Error>
 				</Magnitude>
-				<Phase Name='Phase_omegaToPi0G'>
+				<Phase Name='Phase_omega->Pi0G'>
 					<Value>1.0</Value>
 					<Fix>1</Fix>
 					<Min>0.5</Min>

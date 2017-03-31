@@ -178,6 +178,19 @@ public:
 
   //! Create a leaf for the FcnTree
   /*!
+   * Create and add a static node to the function tree if not existing yet
+   * Adds Top-Down-Linking to the node
+   * \param name identifier of node
+   * \param extPar the parameter this node represents
+   * \param parent the parent of this node (for linking)
+   * \sa addNode(), createHead(), createNode()
+   */
+  virtual void createLeaf(const std::string name,
+                          const std::complex<double> extPar,
+                          std::string parent);
+
+  //! Create a leaf for the FcnTree
+  /*!
    * Create and add a node to the function tree if not existing yet
    * Adds Top-Down-Linking to the node
    * Attaches the Node as Observer to the external parameter
