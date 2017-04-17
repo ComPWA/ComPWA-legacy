@@ -45,7 +45,7 @@ SequentialTwoBodyDecay::GetTree(ParameterList &sample,
 
   std::shared_ptr<FunctionTree> tr(new FunctionTree());
   tr->createHead("Amplitude("+GetName()+")"+suffix,
-                 std::shared_ptr<Strategy>(new MultAll(ParType::COMPLEX)));
+                 std::shared_ptr<Strategy>(new MultAll(ParType::MCOMPLEX)));
 
   for (auto i : _partDecays) {
     std::shared_ptr<FunctionTree> resTree =

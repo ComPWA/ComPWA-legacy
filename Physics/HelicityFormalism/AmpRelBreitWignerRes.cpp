@@ -115,8 +115,8 @@ std::complex<double> AmpRelBreitWignerRes::dynamicalFunction(
 }
 
 std::shared_ptr<FunctionTree>
-AmpRelBreitWignerRes::GetTree(ParameterList &sample, ParameterList &phspSample,
-                              ParameterList &toySample, std::string suffix) {
+AmpRelBreitWignerRes::GetTree(ParameterList &sample,
+                              ParameterList &toySample, int pos, std::string suffix) {
   return std::shared_ptr<FunctionTree>();
   
 //    auto kin = dynamic_cast<DalitzKinematics *>(Kinematics::instance());

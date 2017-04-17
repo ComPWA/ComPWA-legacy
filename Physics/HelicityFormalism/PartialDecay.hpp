@@ -34,7 +34,7 @@ namespace HelicityFormalism {
 class PartialDecay : ComPWA::Resonance {
 
 public:
-  PartialDecay() {};
+  PartialDecay() : _preFactor(1,0) {};
   
   /**! Evaluate decay */
   std::complex<double> Evaluate(const dataPoint &point) const {

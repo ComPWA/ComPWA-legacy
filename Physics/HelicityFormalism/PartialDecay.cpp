@@ -92,7 +92,7 @@ std::shared_ptr<FunctionTree> PartialDecay::GetTree(ParameterList &sample,
                                                     std::string suffix) {
   std::shared_ptr<FunctionTree> tr(new FunctionTree());
   tr->createHead("Resonance(" + GetName() + ")" + suffix,
-                 std::shared_ptr<Strategy>(new MultAll(ParType::COMPLEX)));
+                 std::shared_ptr<Strategy>(new MultAll(ParType::MCOMPLEX)));
   tr->createNode("Strength",
                  std::shared_ptr<Strategy>(new Complexify(ParType::COMPLEX)),
                  "Resonance(" + GetName() + ")" + suffix);

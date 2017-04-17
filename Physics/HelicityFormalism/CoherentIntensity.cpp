@@ -81,31 +81,33 @@ std::shared_ptr<ComPWA::FunctionTree> CoherentIntensity::GetTree(
                  "CoherentIntens(" + GetName() + ")" + suffix);
   tr->insertTree(setupBasicTree(sample, toySample), "SumSquared");
 
+  std::shared_ptr<FunctionTree> trNorm(new FunctionTree());
   // Normalization
-  tr->createNode("N", std::shared_ptr<Strategy>(new Inverse(ParType::DOUBLE)),
-                 "CoherentIntens(" + GetName() + ")" + suffix); // 1/normLH
-  // normLH = phspVolume/N_{mc} |T_{evPHSP}|^2
-  tr->createNode("normFactor",
-                 std::shared_ptr<Strategy>(new MultAll(ParType::DOUBLE)), "N");
-  // sumAmp = \sum_{evPHSP} |T_{evPHSP}|^2
-  tr->createNode("sumAmp",
-                 std::shared_ptr<Strategy>(new AddAll(ParType::DOUBLE)),
-                 "normFactor");
-  tr->createLeaf("phspVolume", Kinematics::Instance()->GetPhspVolume(),
-                 "normFactor");
-  tr->createLeaf("InvNmc", 1 / ((double)sumWeights), "normFactor");
-  tr->createNode("IntensPhspEff",
-                 std::shared_ptr<Strategy>(new MultAll(ParType::MDOUBLE)),
-                 "sumAmp", phspSampleSize,
-                 false);                       //|T_{ev}|^2
-  tr->createLeaf("eff", eff, "IntensPhspEff"); // efficiency
-  tr->createLeaf("weightPhsp", weightPhsp, "IntensPhspEff");
-  tr->createNode("IntensPhsp",
-                 std::shared_ptr<Strategy>(new AbsSquare(ParType::MDOUBLE)),
-                 "IntensPhspEff", phspSampleSize,
-                 false); //|T_{ev}|^2
-  tr->insertTree(setupBasicTree(phspSample, toySample, "_norm"), "IntensPhsp");
+  trNorm->createHead(
+      "CoherentIntensNorm",
+      std::shared_ptr<Strategy>(new Inverse(ParType::DOUBLE))); // 1/normLH
+  trNorm->createNode("normFactor",
+                     std::shared_ptr<Strategy>(new MultAll(ParType::DOUBLE)),
+                     "CoherentIntensNorm");
+  trNorm->createLeaf("phspVolume", Kinematics::Instance()->GetPhspVolume(),
+                     "normFactor");
+  trNorm->createLeaf("InvNmc", 1 / ((double)sumWeights), "normFactor");
+  trNorm->createNode("sumAmp",
+                     std::shared_ptr<Strategy>(new AddAll(ParType::DOUBLE)),
+                     "normFactor");
+  trNorm->createNode("IntensPhspEff",
+                     std::shared_ptr<Strategy>(new MultAll(ParType::MDOUBLE)),
+                     "sumAmp", phspSampleSize, false);
+  trNorm->createLeaf("eff", eff, "IntensPhspEff");
+  trNorm->createLeaf("weightPhsp", weightPhsp, "IntensPhspEff");
+  trNorm->createNode("IntensPhsp",
+                     std::shared_ptr<Strategy>(new AbsSquare(ParType::MDOUBLE)),
+                     "IntensPhspEff", phspSampleSize,
+                     false); //|T_{ev}|^2
+  trNorm->insertTree(setupBasicTree(phspSample, toySample, "_norm"),
+                     "IntensPhsp");
 
+  tr->insertTree(trNorm, "CoherentIntens(" + GetName() + ")" + suffix);
   return tr;
 }
 
@@ -113,7 +115,7 @@ std::shared_ptr<FunctionTree>
 CoherentIntensity::setupBasicTree(ParameterList &sample,
                                   ParameterList &phspSample,
                                   std::string suffix) const {
-  
+
   int sampleSize = sample.GetMultiDouble(0)->GetNValues();
   int phspSampleSize = phspSample.GetMultiDouble(0)->GetNValues();
 

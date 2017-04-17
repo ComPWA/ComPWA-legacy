@@ -81,6 +81,7 @@ BOOST_AUTO_TEST_CASE(IncoherentConstruction) {
     ComPWA::ParameterList sampleList(sample->getListOfData());
     // Testing function tree
     auto tree = intens->GetTree(sampleList, sampleList, sampleList);
+    tree->recalculate();
     
     std::stringstream printTree; printTree << tree;
     LOG(info) << std::endl << printTree.str();

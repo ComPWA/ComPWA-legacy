@@ -60,9 +60,7 @@ public:
   /**! Setup function tree */
   virtual std::shared_ptr<ComPWA::FunctionTree>
   GetTree(ComPWA::ParameterList &sample,
-          ComPWA::ParameterList &toySample, int pos, std::string suffix="") {
-    return std::shared_ptr<ComPWA::FunctionTree>();
-  };
+          ComPWA::ParameterList &toySample, int pos, std::string suffix="") = 0;
 
   /**
    Set decay width

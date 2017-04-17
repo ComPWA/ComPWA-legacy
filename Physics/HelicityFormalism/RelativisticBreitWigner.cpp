@@ -90,9 +90,12 @@ std::complex<double> RelativisticBreitWigner::dynamicalFunction(
 
   std::complex<double> result = g_final * g_production / denom;
 
+  assert(!std::isnan(result.real()));
+  assert(!std::isnan(result.imag()));
 #ifndef NDEBUG
   if (std::isnan(result.real()) || std::isnan(result.imag())) {
-    std::cout << "RelativisticBreitWigner::dynamicalFunction() | " << barrier
+    LOG(error) << "RelativisticBreitWigner::dynamicalFunction() |"
+    <<"Result is NaN! Parameters:" << barrier
               << " " << mR << " " << mSq << " " << ma << " " << mb << std::endl;
     return 0;
   }
@@ -170,7 +173,7 @@ RelativisticBreitWigner::GetTree(ParameterList &sample,
   //------------Setup Tree---------------------
   std::shared_ptr<FunctionTree> tr(new FunctionTree());
   tr->createHead("DynamicalFunction",
-                 std::shared_ptr<Strategy>(new MultAll(ParType::COMPLEX)));
+                 std::shared_ptr<Strategy>(new MultAll(ParType::MCOMPLEX)));
 
   tr->createNode("RelBreitWigner",
                  std::shared_ptr<Strategy>(new BreitWignerStrategy("")),
@@ -310,6 +313,7 @@ bool BreitWignerStrategy::execute(ParameterList &paras,
       std::shared_ptr<AbsParameter>(new MultiComplex(out->GetName(), results));
   return true;
 }
+  
 } /* namespace DynamicalFunctions */
 } /* namespace Physics */
 } /* namespace ComPWA */

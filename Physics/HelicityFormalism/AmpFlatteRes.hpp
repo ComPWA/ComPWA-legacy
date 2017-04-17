@@ -156,8 +156,8 @@ public:
 
 
   virtual std::shared_ptr<FunctionTree> GetTree(ParameterList &sample,
-                                                  ParameterList &phspSample,
                                                   ParameterList &toySample,
+                                                int pos,
                                                 std::string suffix);
 
   /**

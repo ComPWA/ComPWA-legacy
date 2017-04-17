@@ -180,8 +180,8 @@ AmpFlatteRes::dynamicalFunction(double mSq, double mR, double massA1,
 }
 
 std::shared_ptr<FunctionTree> AmpFlatteRes::GetTree(ParameterList &sample,
-                                                    ParameterList &phspSample,
                                                     ParameterList &toySample,
+                                                    int pos,
                                                     std::string suffix) {
     return std::shared_ptr<FunctionTree>();
   //  DalitzKinematics *kin =
