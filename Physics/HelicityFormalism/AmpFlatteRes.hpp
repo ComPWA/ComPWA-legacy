@@ -37,6 +37,8 @@ public:
 
   virtual std::complex<double> Evaluate(const dataPoint &point, int pos) const;
   
+  virtual std::complex<double> EvaluateNoNorm(double mSq) const;
+  
   //! Clone function
   virtual AmpFlatteRes *Clone(std::string newName = "") const {
     auto tmp = (new AmpFlatteRes(*this));

@@ -66,6 +66,8 @@ public:
 
   std::complex<double> Evaluate(const dataPoint &point, int pos) const;
 
+  virtual std::complex<double> EvaluateNoNorm(double mSq) const;
+  
   /**! Get current normalization.  */
   virtual double GetNormalization() const;
 

@@ -68,8 +68,10 @@ double AmpFlatteRes::GetNormalization() const {
 
 std::complex<double> AmpFlatteRes::Evaluate(const dataPoint &point,
                                             int pos) const {
-  double mSq = point.GetValue(pos);
-
+  return EvaluateNoNorm(point.GetValue(pos));
+}
+  
+std::complex<double> AmpFlatteRes::EvaluateNoNorm(double mSq) const {
   std::complex<double> result;
   try {
     result = dynamicalFunction(
@@ -84,6 +86,7 @@ std::complex<double> AmpFlatteRes::Evaluate(const dataPoint &point,
   }
   return result;
 }
+  
 std::complex<double> AmpFlatteRes::dynamicalFunction(
     double mSq, double mR, double gA, std::complex<double> termA,
     std::complex<double> termB, std::complex<double> termC) {

@@ -58,7 +58,7 @@ BOOST_AUTO_TEST_CASE(IncoherentConstruction) {
   ComPWA::RunManager r;
   r.setGenerator(gen);
   r.setPhspSample(sample);
-  r.generatePhsp(200);
+  r.generatePhsp(20);
 
   LOG(info) << "Loop over phsp events....";
   for (auto i : sample->getEvents()) {

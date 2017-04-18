@@ -129,8 +129,8 @@
 	</InitialState>
 	<FinalState>
 		<Particle Name='pi0' />
-		<Particle Name='pi0' />
 		<Particle Name='gamma' />
+		<Particle Name='pi0' />
 	</FinalState>
 </HelicityKinematics>
 

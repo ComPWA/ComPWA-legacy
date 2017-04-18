@@ -38,6 +38,8 @@ int createIndex(std::vector<T> &references, T const &newValue) {
 
 class SubSystem {
 public:
+  SubSystem() {};
+  
   SubSystem(std::vector<int> recoilS, std::vector<int> finalA,
             std::vector<int> finalB)
       : _recoilState(recoilS), _finalStateA(finalA), _finalStateB(finalB) {
@@ -66,13 +68,13 @@ public:
   }
 
   friend std::ostream &operator<<(std::ostream &stream, const SubSystem &s) {
-    stream << "recoilParticles -> (";
+    stream << "( ";
     for (auto i : s._recoilState)
       stream << i << " ";
-    stream << ") finalParticlesA -> (";
+    stream << ") <-> ( ";
     for (auto i : s._finalStateA)
       stream << i << " ";
-    stream << ") finalParticlesB -> (";
+    stream << ")( ";
     for (auto i : s._finalStateB)
       stream << i << " ";
     stream << ")";
@@ -170,6 +172,9 @@ public:
   //! Get number of variables
   virtual unsigned int GetNVars() const { return _listSubSystem.size() * 3; }
 
+  //! Get phase space bounds for the invariant mass of particle A and B
+  virtual std::pair<double,double> GetInvMassBounds(SubSystem sys);
+  
   //! Calculate form factor
   static double
   FormFactor(double sqrtS, double ma, double mb, double spin,

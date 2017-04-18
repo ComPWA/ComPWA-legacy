@@ -32,12 +32,16 @@ namespace HelicityFormalism {
 
 std::complex<double> RelativisticBreitWigner::Evaluate(const dataPoint &point,
                                                        int pos) const {
+  return EvaluateNoNorm(point.GetValue(pos))*GetNormalization();
+}
+  
+std::complex<double> RelativisticBreitWigner::EvaluateNoNorm(double mSq) const {
   std::complex<double> result = dynamicalFunction(
-      point.GetValue(pos), _mass->GetValue(), _massA, _massB,
+      mSq, _mass->GetValue(), _massA, _massB,
       _width->GetValue(), (double)_spin, _mesonRadius->GetValue(), _ffType);
   return result;
 }
-
+  
 double RelativisticBreitWigner::GetNormalization() const {
   CheckModified();
   if (GetModified()) {
@@ -110,6 +114,7 @@ RelativisticBreitWigner::Factory(const boost::property_tree::ptree &pt) {
   auto obj = std::make_shared<RelativisticBreitWigner>();
 
   std::string name = pt.get<std::string>("DecayParticle.<xmlattr>.Name");
+  obj->SetName(name);
   auto partProp = PhysConst::Instance()->FindParticle(name);
   obj->SetMass(std::make_shared<DoubleParameter>(partProp.GetMassPar()));
 

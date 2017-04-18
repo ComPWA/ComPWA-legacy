@@ -93,6 +93,28 @@ bool HelicityKinematics::IsWithinPhsp(const dataPoint &point) const {
   return true;
 }
 
+std::pair<double, double> HelicityKinematics::GetInvMassBounds(SubSystem sys) {
+
+  /* We use the formulae from (PDG2016 Kinematics Fig.47.3). I hope the
+   * generalization to n-body decays is correct.
+   */
+  double min = 0; // min = (m1+m2)^2 (Dalitz decay)
+  for (auto i : sys.GetFinalStateA())
+    min += PhysConst::Instance()->FindParticle(_finalState.at(i)).GetMass();
+  for (auto i : sys.GetFinalStateB())
+    min += PhysConst::Instance()->FindParticle(_finalState.at(i)).GetMass();
+  min = min * min;
+
+  double max = _M; // max = (M-m3)^2 (Dalitz decay)
+  for (auto i : sys.GetRecoilState())
+    max -= PhysConst::Instance()->FindParticle(_finalState.at(i)).GetMass();
+  max = max * max;
+
+  LOG(trace) << "HelicityKinematics::GetInvMassBounds() | Bounds for SubSystem "
+             << sys << " are [" << min << "," << max << "]";
+  return std::pair<double, double>(min, max);
+}
+
 double HelicityKinematics::calculatePSArea() {
   double result(0);
   double precision(1); // relative uncertainty

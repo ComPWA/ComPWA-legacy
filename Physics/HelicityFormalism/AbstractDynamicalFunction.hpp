@@ -1,4 +1,4 @@
- 
+
 //-------------------------------------------------------------------------------
 // Copyright (c) 2013 Stefan Pflueger.
 // All rights reserved. This program and the accompanying materials
@@ -28,22 +28,19 @@ namespace ComPWA {
 namespace Physics {
 namespace HelicityFormalism {
 
-enum normStyle {
-  none, /*!< no normaliztion between Amplitudes. */
-  /*!< all amplitudes are normalized to one.
-   *  The normalization factor is \f$ 1/\sqrt(\int |A|^2)\f$ */
-  one
-};
-
 class AbstractDynamicalFunction {
 public:
-  AbstractDynamicalFunction();
+  AbstractDynamicalFunction(){};
 
-  virtual ~AbstractDynamicalFunction();
+  virtual ~AbstractDynamicalFunction(){};
 
   virtual std::complex<double> Evaluate(const ComPWA::dataPoint &point,
                                         int pos) const = 0;
 
+  virtual std::complex<double> EvaluateNoNorm(double mSq) const = 0;
+
+  virtual double operator()(double mSq) const { return std::norm(EvaluateNoNorm(mSq)); }
+  
   /**! Get current normalization.  */
   virtual double GetNormalization() const = 0;
 
@@ -55,12 +52,16 @@ public:
     return;
   }
 
+  virtual void SetName( std::string n ) { _name = n; }
+  
+  virtual std::string GetName() { return _name; }
+  
   virtual bool HasTree() const { return false; }
 
   /**! Setup function tree */
   virtual std::shared_ptr<ComPWA::FunctionTree>
-  GetTree(ComPWA::ParameterList &sample,
-          ComPWA::ParameterList &toySample, int pos, std::string suffix="") = 0;
+  GetTree(ComPWA::ParameterList &sample, ComPWA::ParameterList &toySample,
+          int pos, std::string suffix = "") = 0;
 
   /**
    Set decay width
@@ -109,27 +110,33 @@ public:
 
   virtual bool GetModified() const { return _modified; }
 
+  virtual void SetLimits(std::pair<double, double> lim) {
+    LOG(trace) << "AbstractDynamicalFunction::SetLimits() | Setting invariant "
+                  "mass limits for "<<_name<<" to "
+               << "[" << lim.first << "," << lim.second << "].";
+    _limits = lim;
+  }
+
+  virtual std::pair<double, double> GetLimits() { return _limits; }
+
 protected:
   //! Name of resonance
   std::string _name;
-
-  //! Type of resonance normalization
-  normStyle _normStyle;
 
   //! Precision of MC integration
   int _mcPrecision;
 
   //! Integral
-  virtual double Integral() const { return 1.0; };
+  virtual double Integral() const;
 
   //! Masses of daughter particles
   double _massA, _massB;
 
+  //! Minimum and Maximum of invariant mass
+  std::pair<double, double> _limits;
+
   //! Resonance mass
   std::shared_ptr<ComPWA::DoubleParameter> _mass;
-
-  //! Resonance sub system
-  unsigned int _dataIndex;
 
   //! Resonance spin
   ComPWA::Spin _spin;

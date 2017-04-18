@@ -10,18 +10,20 @@
 //----------------------------------------------------------------------------------
 
 #include "Physics/HelicityFormalism/AbstractDynamicalFunction.hpp"
+#include "Tools/Integration.hpp"
 
 namespace ComPWA {
 namespace Physics {
 namespace HelicityFormalism {
 
-AbstractDynamicalFunction::AbstractDynamicalFunction() {
-  // TODO Auto-generated constructor stub
-
-}
-
-AbstractDynamicalFunction::~AbstractDynamicalFunction() {
-  // TODO Auto-generated destructor stub
+//! Integral
+double AbstractDynamicalFunction::Integral() const {
+  auto intAlg = ComPWA::Tools::IntegralByQuadrature<AbstractDynamicalFunction>(
+      *this, _limits);
+  double integral = intAlg.Integral();
+  LOG(trace) << "AbstractDynamicalFunction::Integral() | Integral is "
+             << integral << ".";
+  return integral;
 }
 
 } /* namespace DynamicalFunctions */

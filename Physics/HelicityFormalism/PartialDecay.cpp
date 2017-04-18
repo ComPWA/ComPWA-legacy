@@ -58,9 +58,6 @@ PartialDecay::Factory(const boost::property_tree::ptree &pt) {
   auto finalStateB =
       stringToVectInt((++itr)->second.get<std::string>("<xmlattr>.FinalState"));
   SubSystem subSys(recoilState, finalStateA, finalStateB);
-  obj->SetDataPosition(
-      dynamic_cast<HelicityKinematics *>(Kinematics::Instance())
-          ->GetDataID(subSys));
 
   // Create WignerD object
   obj->SetWignerD(ComPWA::Physics::HelicityFormalism::AmpWignerD::Factory(pt));
@@ -80,8 +77,13 @@ PartialDecay::Factory(const boost::property_tree::ptree &pt) {
     throw std::runtime_error("PartialDecay::Factory() | Unknown decay type " +
                              decayType + "!");
   }
+  
+  
   obj->SetDynamicalFunction(dynObj);
 
+  //make sure dynamical function is created and set first
+  obj->SetSubSystem(subSys);
+  
   return obj;
 }
 

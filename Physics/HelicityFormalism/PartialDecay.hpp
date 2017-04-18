@@ -21,8 +21,8 @@
 
 namespace ComPWA {
 
-//static DoubleParameter
-//DoubleParameterFactory(const boost::property_tree::ptree &pt) {
+// static DoubleParameter
+// DoubleParameterFactory(const boost::property_tree::ptree &pt) {
 //  auto obj = std::shared_ptr<DoubleParameter>();
 //  obj->SetValue( pt.get<double>("value") );
 //  return obj;
@@ -34,22 +34,22 @@ namespace HelicityFormalism {
 class PartialDecay : ComPWA::Resonance {
 
 public:
-  PartialDecay() : _preFactor(1,0) {};
-  
+  PartialDecay() : _preFactor(1, 0){};
+
   /**! Evaluate decay */
   std::complex<double> Evaluate(const dataPoint &point) const {
     std::complex<double> result =
         std::polar(_magnitude->GetValue(), _phase->GetValue());
-    result *= _angD->Evaluate(point, (_dataPos*3)+1, (_dataPos*3)+2);
-    result *= _dynamic->Evaluate(point, (_dataPos*3));
+    result *= _angD->Evaluate(point, (_dataPos * 3) + 1, (_dataPos * 3) + 2);
+    result *= _dynamic->Evaluate(point, (_dataPos * 3));
 
     return result;
   };
 
   /**! Setup function tree */
   virtual std::shared_ptr<FunctionTree> GetTree(ParameterList &sample,
-                                                  ParameterList &phspSample,
-                                                  ParameterList &toySample,
+                                                ParameterList &phspSample,
+                                                ParameterList &toySample,
                                                 std::string suffix);
 
   /**
@@ -107,7 +107,9 @@ public:
 
    @return strength parameter
    */
-  std::shared_ptr<ComPWA::DoubleParameter> GetMagnitudePar() { return _magnitude; }
+  std::shared_ptr<ComPWA::DoubleParameter> GetMagnitudePar() {
+    return _magnitude;
+  }
 
   /**
    Get strength parameter
@@ -151,7 +153,9 @@ public:
 
    @param par Phase parameter
    */
-  void SetPhasePar(std::shared_ptr<ComPWA::DoubleParameter> par) { _phase = par; }
+  void SetPhasePar(std::shared_ptr<ComPWA::DoubleParameter> par) {
+    _phase = par;
+  }
 
   /**
    Set phase parameter
@@ -159,7 +163,7 @@ public:
    @param par Phase parameter
    */
   void SetPhase(double par) { _phase->SetValue(par); }
-  
+
   //! Get coefficient
   virtual std::complex<double> GetCoefficient() const {
     return std::polar(_magnitude->GetValue(), _phase->GetValue());
@@ -167,32 +171,48 @@ public:
 
   //! Set prefactor
   virtual void SetPrefactor(std::complex<double> pre) { _preFactor = pre; }
-  
+
   //! Get prefactor
   virtual std::complex<double> GetPrefactor() const { return _preFactor; }
-  
+
   //! Implementation of interface for streaming info about the strategy
   virtual std::string to_str() const { return std::string("PartialDecay"); }
-  
+
   //! Clone function
   virtual PartialDecay *Clone(std::string newName = "") const {
-      auto tmp = new PartialDecay(*this);
-      tmp->SetName(newName);
-      return tmp;
+    auto tmp = new PartialDecay(*this);
+    tmp->SetName(newName);
+    return tmp;
   }
-  
+
   //! Set position of variables within dataPoint
-  void SetDataPosition( int pos ) { _dataPos = pos; }
-  
+  void SetDataPosition(int pos) { _dataPos = pos; }
+
   //! Get position of variables within dataPoint
-  int GetDataPosition( ) const { return _dataPos; }
-  
+  int GetDataPosition() const { return _dataPos; }
+
+  //! Set position of variables within dataPoint
+  void SetSubSystem(SubSystem sys) {
+    _subSystem = sys;
+    _dataPos = dynamic_cast<HelicityKinematics *>(Kinematics::Instance())
+                   ->GetDataID(_subSystem);
+    auto invMassLimit =
+        dynamic_cast<HelicityKinematics *>(Kinematics::Instance())
+            ->GetInvMassBounds(_subSystem);
+    _dynamic->SetLimits(invMassLimit);
+  }
+
+  //! Get position of variables within dataPoint
+  SubSystem GetSubSystem() const { return _subSystem; }
+
 protected:
   /**! Position where variables are stored in dataPoint
-   * We expect to find the invariant mass of the system at @param _dataPos, 
+   * We expect to find the invariant mass of the system at @param _dataPos,
    * cosTheta at @param _dataPos+1 and phi at @param _dataPos+2 */
   int _dataPos;
-  
+
+  SubSystem _subSystem;
+
   std::shared_ptr<ComPWA::DoubleParameter> _magnitude;
   std::shared_ptr<ComPWA::DoubleParameter> _phase;
   std::complex<double> _preFactor;

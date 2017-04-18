@@ -59,7 +59,10 @@ double AmpRelBreitWignerRes::GetNormalization() const {
 
 std::complex<double> AmpRelBreitWignerRes::Evaluate(const dataPoint &point,
                                                     int pos) const {
-  double mSq = point.GetValue(pos);
+  return EvaluateNoNorm(point.GetValue(pos))*GetNormalization();
+}
+  
+std::complex<double> AmpRelBreitWignerRes::EvaluateNoNorm(double mSq) const {
   std::complex<double> result;
   try {
     result = dynamicalFunction(mSq, _mass->GetValue(), _massA, _massB,
@@ -73,7 +76,7 @@ std::complex<double> AmpRelBreitWignerRes::Evaluate(const dataPoint &point,
   }
   return result;
 }
-
+  
 std::complex<double> AmpRelBreitWignerRes::dynamicalFunction(
     double mSq, double mR, double ma, double mb, double width, unsigned int J,
     double mesonRadius, formFactorType ffType) {
