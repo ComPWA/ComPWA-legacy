@@ -1,12 +1,3 @@
- 
-            
-          
-        
-      
-    
-  
-
-
 //-------------------------------------------------------------------------------
 // Copyright (c) 2013 Peter Weidenkaff.
 // All rights reserved. This program and the accompanying materials
@@ -33,11 +24,6 @@ namespace ComPWA {
 
 class dataPoint;
 
-static const char *formFactorTypeString[] = {"noFormFactor", "BlattWeisskopf",
-                                             "CrystalBarrel"};
-
-enum formFactorType { noFormFactor = 0, BlattWeisskopf = 1, CrystalBarrel = 2 };
-
 class Kinematics {
 public:
   //! singleton pattern
@@ -57,10 +43,10 @@ public:
   virtual unsigned int GetNVars() const { return _varNames.size(); }
 
   //! Get final state
-  virtual std::vector<int> GetFinalState() { return _finalState; }
+  virtual std::vector<pid> GetFinalState() { return _finalState; }
 
   //! Get inital state
-  virtual std::vector<int> GetInitialState() { return _initialState; }
+  virtual std::vector<pid> GetInitialState() { return _initialState; }
 
   /** Calculate Break-up momentum squared
    *
@@ -98,8 +84,8 @@ public:
   static std::complex<double> phspFactor(double sqrtS, double ma, double mb);
 
 protected:
-  std::vector<int> _initialState;
-  std::vector<int> _finalState;
+  std::vector<pid> _initialState;
+  std::vector<pid> _finalState;
 
   //! Internal names of variabes
   std::vector<std::string> _varNames;
@@ -110,12 +96,10 @@ protected:
   static Kinematics *_inst;
 
   //! Constructor
-  Kinematics(std::vector<int> initial = std::vector<int>(),
-             std::vector<int> finalS = std::vector<int>())
+  Kinematics(std::vector<pid> initial = std::vector<pid>(),
+             std::vector<pid> finalS = std::vector<pid>())
       : _initialState(initial), _finalState(finalS),
-        is_PS_area_calculated_(false), PS_area_(0.0){
-
-                                       };
+        is_PS_area_calculated_(false), PS_area_(0.0){};
 
   //! Delete Copy constructor
   Kinematics(const Kinematics &) = delete;

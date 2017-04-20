@@ -23,7 +23,7 @@ double AbstractDynamicalFunction::Integral() const {
   double integral = intAlg.Integral();
   LOG(trace) << "AbstractDynamicalFunction::Integral() | Integral is "
              << integral << ".";
-  return integral;
+  return std::sqrt(integral);
 }
 
 } /* namespace DynamicalFunctions */

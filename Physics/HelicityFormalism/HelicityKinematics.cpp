@@ -9,10 +9,13 @@
 //   Stefan Pflueger - initial API and implementation
 //-------------------------------------------------------------------------------
 
+#include <numeric>
+#include <cmath>
 #include "Core/Event.hpp"
 #include "Core/DataPoint.hpp"
 #include "Core/Particle.hpp"
 #include "Core/PhysConst.hpp"
+#include "DataReader/RootReader/RootReader.hpp"
 
 #include "Physics/HelicityFormalism/HelicityKinematics.hpp"
 #include "Physics/qft++/Vector4.h"
@@ -22,23 +25,22 @@ namespace ComPWA {
 namespace Physics {
 namespace HelicityFormalism {
 
-HelicityKinematics::HelicityKinematics(std::vector<int> initialState,
-                                       std::vector<int> finalState)
+HelicityKinematics::HelicityKinematics(std::vector<pid> initialState,
+                                       std::vector<pid> finalState)
     : Kinematics(initialState, finalState) {
   assert(_initialState.size() == 1);
-  _idMother = _initialState.at(0);
-  auto motherProp = PhysConst::Instance()->FindParticle(_idMother);
-  _nameMother = motherProp.GetName();
+  pid idMother = _initialState.at(0);
+  auto motherProp = PhysConst::Instance()->FindParticle(idMother);
   _M = motherProp.GetMass();
   _Msq = _M * _M;
   _spinM = motherProp.GetSpin();
 
   // Creating unique title
   std::stringstream stream;
-  stream << "(";
+  stream << "( ";
   for (auto i : _initialState)
     stream << std::to_string(i) << " ";
-  stream << ")->(";
+  stream << ")->( ";
   for (auto i : _finalState)
     stream << std::to_string(i) << " ";
   stream << ")";
@@ -77,9 +79,8 @@ HelicityKinematics::HelicityKinematics(boost::property_tree::ptree pt) {
             << stream.str();
 
   assert(_initialState.size() == 1);
-  _idMother = _initialState.at(0);
-  auto motherProp = PhysConst::Instance()->FindParticle(_idMother);
-  _nameMother = motherProp.GetName();
+  pid idMother = _initialState.at(0);
+  auto motherProp = PhysConst::Instance()->FindParticle(idMother);
   _M = motherProp.GetMass();
   _Msq = _M * _M;
   _spinM = motherProp.GetSpin();
@@ -115,31 +116,74 @@ std::pair<double, double> HelicityKinematics::GetInvMassBounds(SubSystem sys) {
   return std::pair<double, double>(min, max);
 }
 
+double HelicityKinematics::EventDistance(Event &evA, Event &evB) const {
+  dataPoint pointA, pointB;
+  EventToDataPoint(evA, pointA);
+  EventToDataPoint(evB, pointB);
+
+  /* We assume that variables in dataPoint are orders like (m1,theta1,phi1),
+   * (m2,theta2,phi2),... Therefore, the dataPoint size needs to be a multiple 
+   * of 3. */
+  assert( pointA.Size()%3 == 0 );
+  
+  double distSq = 0;
+  int pos = 0;
+  while( pos<pointA.Size() ){
+    double dist = (pointA.GetValue(pos)-pointB.GetValue(pos));
+    distSq += dist*dist;
+    pos += 2;
+  }
+  return std::sqrt(distSq);
+}
+
 double HelicityKinematics::calculatePSArea() {
-  double result(0);
-  double precision(1); // relative uncertainty
-  double weights(0);
-  double precisionLimit(1e-5);
-  unsigned int maxCalls(1e6);
-  unsigned int call(0);
+  /* We estimate the volume of the phase space for arbirary decays.
+   */
 
-  std::shared_ptr<ComPWA::Generator> gen(new ComPWA::Tools::RootGenerator(0));
+  int precision = 100; // sample size
+  int localDensityNumber =
+      precision / 10; // number of points within a n-dim sphere
 
-  while (precision > precisionLimit && call < maxCalls) {
-    precision = result;
-    ComPWA::Event ev;
-    gen->generate(ev);
-    weights += ev.getWeight();
-    call++;
-    result = weights / call;
-    precision = std::fabs(result - precision) / result;
+  // Generate phase space sample
+  auto gen = ComPWA::Tools::RootGenerator(0);
+  auto sample = ComPWA::DataReader::RootReader();
+  int i = 0;
+  while (i < precision) {
+    Event tmp;
+    gen.generate(tmp);
+    double ampRnd = gen.getUniform();
+    if (ampRnd > tmp.getWeight())
+      continue;
+    i++;
+    sample.pushEvent(tmp);
   }
 
-  LOG(debug) << "HelicityKinematics::calculatePSarea() | "
-             << "(" << result << "+-" << precision * result
-             << ") GeV^4 relAcc [%]: " << 100 * precision;
+  std::vector<double> localDistance;
+  for (int n = 0; n < sample.getNEvents(); n++) {
+    std::vector<double> dist;
+    for (int m = 0; m < sample.getNEvents(); m++) {
+      double d = EventDistance(sample.getEvent(n), sample.getEvent(m));
+      dist.push_back(d);
+    }
+    std::sort(dist.begin(), dist.end()); //ascending
+    localDistance.push_back(dist.at(localDensityNumber));
+  }
 
-  return result;
+  // Calculate average distance that contains @localDensityNumber events
+  double avgDistance =
+      std::accumulate(localDistance.begin(), localDistance.end(), 0.0) /
+      localDistance.size();
+
+  int nDim = GetIrreducibleSetOfVariables().size();
+  // N-dimensional sphere with avgDististance as radius
+  double avgVolume = std::pow(M_PI, nDim / 2) / std::tgamma(nDim / 2 + 1) *
+                     std::pow(avgDistance, nDim);
+  double avgDensity = localDensityNumber / avgVolume;
+
+  double phspVolume = sample.getNEvents() / avgDensity;
+  LOG(info) << "HelicityKinematics::calculatePSArea() | Phase space volume: "
+            << phspVolume;
+  return phspVolume;
 }
 
 void HelicityKinematics::EventToDataPoint(const Event &event,

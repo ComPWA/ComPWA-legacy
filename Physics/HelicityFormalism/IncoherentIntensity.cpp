@@ -36,18 +36,21 @@ std::shared_ptr<ComPWA::FunctionTree> IncoherentIntensity::GetTree(
     ComPWA::ParameterList &toySample, std::string suffix) {
 
   std::shared_ptr<FunctionTree> tr(new FunctionTree());
-  
-  tr->createHead("IncoherentIntens("+GetName()+")"+suffix,
-                 std::shared_ptr<Strategy>(new MultAll(ParType::DOUBLE)));
-  tr->createLeaf("Strength", _strength,"IncoherentIntens("+GetName()+")"+suffix);
+
+  tr->createHead("IncoherentIntens(" + GetName() + ")" + suffix,
+                 std::shared_ptr<Strategy>(new MultAll(ParType::MDOUBLE)));
+  tr->createLeaf("Strength", _strength,
+                 "IncoherentIntens(" + GetName() + ")" + suffix);
   tr->createNode("SumOfCoherentIntens",
-                 std::shared_ptr<Strategy>(new AddAll(ParType::DOUBLE)),"IncoherentIntens("+GetName()+")"+suffix);
+                 std::shared_ptr<Strategy>(new AddAll(ParType::MDOUBLE)),
+                 "IncoherentIntens(" + GetName() + ")" + suffix);
   for (auto i : _intens) {
-    tr->insertTree(i->GetTree(sample, phspSample, toySample), "SumOfCoherentIntens");
+    tr->insertTree(i->GetTree(sample, phspSample, toySample),
+                   "SumOfCoherentIntens");
   }
   return tr;
 }
-  
+
 } /* namespace HelicityFormalism */
 } /* namespace Physics */
 } /* namespace ComPWA */

@@ -33,28 +33,34 @@
 
 namespace ComPWA {
 
+  /*! Particle ID.
+   * Usually the pid's from PDG are used here: 
+   * http://pdg.lbl.gov/mc_particle_id_contents.html
+   */
+  typedef int pid;
+  
 class Properties {
 public:
-  Properties(std::string name = "test", int id = -999) : _name(name), _id(id){};
+  Properties(std::string name = "test", pid id = -999) : _name(name), _id(id){};
 
   void SetName(std::string n) { _name = n; }
   std::string GetName() const { return _name; }
 
-  void SetId(int id) { _id = id; }
-  int GetId() const { return _id; }
+  void SetId(pid id) { _id = id; }
+  pid GetId() const { return _id; }
 
 protected:
   std::string _name;
-  int _id;
+  pid _id;
 };
 
 class ParticleProperties : public Properties {
 public:
-  ParticleProperties(std::string name = "test", int id = -999)
+  ParticleProperties(std::string name = "test", pid id = -999)
       : Properties(name, id){};
 
   ParticleProperties(boost::property_tree::ptree pt)
-      : Properties(pt.get<std::string>("<xmlattr>.Name"), pt.get<int>("Id")) {
+      : Properties(pt.get<std::string>("<xmlattr>.Name"), pt.get<pid>("Id")) {
 
     SetMass(DoubleParameterFactory(pt.get_child("Mass")));
     // Parameters optional. Shall we require them?
@@ -135,6 +141,7 @@ protected:
 };
 
 class PhysConst {
+  
 public:
   static PhysConst *CreateInstance(std::string file = "./particles.xml") {
     if (_inst)
@@ -171,10 +178,7 @@ public:
 
   const ParticleProperties &FindParticle(const std::string &name) const;
 
-  const ParticleProperties &FindParticle(int pid) const;
-
-  //  std::vector<ParticleProperties>
-  //  findParticlesWithQN(const ParticleProperties &qn) const;
+  const ParticleProperties &FindParticle(pid id) const;
 
   bool ParticleExists(const std::string &name) const;
 

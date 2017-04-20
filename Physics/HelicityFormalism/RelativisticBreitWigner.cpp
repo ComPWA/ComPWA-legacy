@@ -46,7 +46,7 @@ double RelativisticBreitWigner::GetNormalization() const {
   CheckModified();
   if (GetModified()) {
     const_cast<double &>(_current_integral) =
-        AbstractDynamicalFunction::Integral();
+    AbstractDynamicalFunction::Integral();
     SetModified(false);
   }
   return 1. / _current_integral;
@@ -183,34 +183,36 @@ RelativisticBreitWigner::GetTree(ParameterList &sample,
   tr->createNode("RelBreitWigner",
                  std::shared_ptr<Strategy>(new BreitWignerStrategy("")),
                  "DynamicalFunction", sampleSize);
-  tr->createLeaf("mass", _mass, "RelBreitWigner");               // m0
-  tr->createLeaf("width", _width, "RelBreitWigner");             // resWidth
-  tr->createLeaf("spin", (double)_spin, "RelBreitWigner");       // spin
-  tr->createLeaf("mesonRadius", _mesonRadius, "RelBreitWigner"); // d
-  tr->createLeaf("formFactorType", _ffType, "RelBreitWigner");   // d
-  tr->createLeaf("ma", _massA, "RelBreitWigner");                // ma
-  tr->createLeaf("mb", _massB, "RelBreitWigner");                // mb
-  tr->createLeaf("data_mSq["+std::to_string(pos)+"]", sample.GetMultiDouble(pos),
+  tr->createLeaf("Mass", _mass, "RelBreitWigner");               // m0
+  tr->createLeaf("Width", _width, "RelBreitWigner");             // resWidth
+  tr->createLeaf("Spin", (double)_spin, "RelBreitWigner");       // spin
+  tr->createLeaf("MesonRadius", _mesonRadius, "RelBreitWigner"); // d
+  tr->createLeaf("FormFactorType", _ffType, "RelBreitWigner");   // d
+  tr->createLeaf("MassA", _massA, "RelBreitWigner");                // ma
+  tr->createLeaf("MassB", _massB, "RelBreitWigner");                // mb
+  tr->createLeaf("Data_mSq["+std::to_string(pos)+"]", sample.GetMultiDouble(pos),
                  "RelBreitWigner"); // mc
   // Normalization
   tr->createNode("N", std::shared_ptr<Strategy>(new Inverse(ParType::DOUBLE)),
                  "DynamicalFunction"); // 1/normLH
   // normLH = phspVolume/N_{mc} |T_{evPHSP}|^2
-  tr->createNode("normFactor",
+  tr->createNode("NormFactor",
                  std::shared_ptr<Strategy>(new MultAll(ParType::DOUBLE)), "N");
   // sumAmp = \sum_{evPHSP} |T_{evPHSP}|^2
   tr->createNode("Sum",
                  std::shared_ptr<Strategy>(new AddAll(ParType::DOUBLE)),
-                 "normFactor");
-  tr->createLeaf("phspVolume", Kinematics::Instance()->GetPhspVolume(),
-                 "normFactor");
-  tr->createLeaf("InvNmc", 1 / ((double)sumWeights), "normFactor");
+                 "NormFactor");
+  tr->createLeaf("Range", _limits.second-_limits.first,
+                 "NormFactor");
+//  tr->createLeaf("phspVolume", Kinematics::Instance()->GetPhspVolume(),
+//                 "NormFactor");
+  tr->createLeaf("InvNmc", 1 / ((double)sumWeights), "NormFactor");
   tr->createNode("IntensPhspEff",
                  std::shared_ptr<Strategy>(new MultAll(ParType::MDOUBLE)),
                  "Sum", phspSampleSize,
                  false);                       //|T_{ev}|^2
 //  tr->createLeaf("eff", eff, "IntensPhspEff"); // efficiency
-  tr->createLeaf("weightPhsp", weightPhsp, "IntensPhspEff");
+  tr->createLeaf("WeightPhsp", weightPhsp, "IntensPhspEff");
   tr->createNode("IntensPhsp",
                  std::shared_ptr<Strategy>(new AbsSquare(ParType::MDOUBLE)),
                  "IntensPhspEff", phspSampleSize,
@@ -218,14 +220,14 @@ RelativisticBreitWigner::GetTree(ParameterList &sample,
   tr->createNode("NormRelBreitWigner",
                  std::shared_ptr<Strategy>(new BreitWignerStrategy("")),
                  "IntensPhsp", phspSampleSize);
-  tr->createLeaf("mass", _mass, "NormRelBreitWigner");               // m0
-  tr->createLeaf("width", _width, "NormRelBreitWigner");             // resWidth
-  tr->createLeaf("spin", (double)_spin, "NormRelBreitWigner");       // spin
-  tr->createLeaf("mesonRadius", _mesonRadius, "NormRelBreitWigner"); // d
-  tr->createLeaf("formFactorType", _ffType, "NormRelBreitWigner");   // d
-  tr->createLeaf("ma", _massA, "NormRelBreitWigner");                // ma
-  tr->createLeaf("mb", _massB, "NormRelBreitWigner");                // mb
-  tr->createLeaf("data_mSq["+std::to_string(pos)+"]", toySample.GetMultiDouble(pos),
+  tr->createLeaf("Mass", _mass, "NormRelBreitWigner");               // m0
+  tr->createLeaf("Width", _width, "NormRelBreitWigner");             // resWidth
+  tr->createLeaf("Spin", (double)_spin, "NormRelBreitWigner");       // spin
+  tr->createLeaf("MesonRadius", _mesonRadius, "NormRelBreitWigner"); // d
+  tr->createLeaf("FormFactorType", _ffType, "NormRelBreitWigner");   // d
+  tr->createLeaf("MassA", _massA, "NormRelBreitWigner");                // ma
+  tr->createLeaf("MassB", _massB, "NormRelBreitWigner");                // mb
+  tr->createLeaf("Data_mSq["+std::to_string(pos)+"]", toySample.GetMultiDouble(pos),
                  "NormRelBreitWigner"); // mc
   
 

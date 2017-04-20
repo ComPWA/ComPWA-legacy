@@ -11,13 +11,10 @@
 
 #ifndef PHYSICS_HELICITYAMPLITUDE_HELICITYKINEMATICS_HPP_
 #define PHYSICS_HELICITYAMPLITUDE_HELICITYKINEMATICS_HPP_
+
 #include <vector>
 
 #include "Core/Kinematics.hpp"
-
-//#include "Physics/HelicityAmplitude/ParticleStateDefinitions.hpp"
-//#include "Physics/HelicityAmplitude/FinalStateParticleCombinatorics.hpp"
-
 #include "Physics/qft++/Vector4.h"
 
 class Particle;
@@ -25,6 +22,12 @@ class Particle;
 namespace ComPWA {
 namespace Physics {
 namespace HelicityFormalism {
+  
+static const char *formFactorTypeString[] = {"noFormFactor", "BlattWeisskopf",
+                                             "CrystalBarrel"};
+
+enum formFactorType { noFormFactor = 0, BlattWeisskopf = 1, CrystalBarrel = 2 };
+
 
 template <typename T>
 int createIndex(std::vector<T> &references, T const &newValue) {
@@ -38,8 +41,8 @@ int createIndex(std::vector<T> &references, T const &newValue) {
 
 class SubSystem {
 public:
-  SubSystem() {};
-  
+  SubSystem(){};
+
   SubSystem(std::vector<int> recoilS, std::vector<int> finalA,
             std::vector<int> finalB)
       : _recoilState(recoilS), _finalStateA(finalA), _finalStateB(finalB) {
@@ -107,7 +110,7 @@ public:
     _inst = new HelicityKinematics(initialState, finalStateIds);
     return _inst;
   }
-  
+
   static Kinematics *CreateInstance(boost::property_tree::ptree pt) {
     if (_inst) {
       throw std::runtime_error(
@@ -117,7 +120,10 @@ public:
     return _inst;
   }
 
-  //! converts Event to dataPoint
+  /*! Fill dataPoint point.
+   * The triple (\f$m^2,cos\Theta, \phi\f$) is added to dataPoint for each
+   * SubSystem that was requested via GetDataID(SubSystem).
+   */
   void EventToDataPoint(const Event &event, dataPoint &point) const;
 
   // delete methods to ensure that there will only be one instance
@@ -140,9 +146,6 @@ public:
   //! get mass of particles
   virtual double GetMass(std::string name) const { return 0; }
 
-  //! Get name of mother particle
-  virtual std::string GetMotherName() const { return _nameMother; };
-
   //! Get mass of mother particle
   virtual double GetMotherMass() const { return _M; }
 
@@ -151,30 +154,37 @@ public:
     return _finalState.size();
   }
 
-  //! Get ID of data for SubSystem s
+  /*! Get ID of data for SubSystem #s.
+   * Incase that the ID was not requested before the subsystem is added to the 
+   * list and variables (m^2, cosTheta, phi) are calculated in #EventToDataPoint() 
+   * and added to each dataPoint.
+   */
   virtual int GetDataID(SubSystem s) {
     int pos = createIndex(_listSubSystem, s);
     LOG(trace) << " Subsystem " << s << " has dataID " << pos;
     return pos;
   }
 
-  //! Get ID of data for subsystem defined by recoilS and finalS
+  /*! Get ID of data for subsystem defined by recoilS and finalS.
+   * @see GetDataID(SubSystem s)
+   */
   virtual int GetDataID(std::vector<int> recoilS, std::vector<int> finalA,
                         std::vector<int> finalB) {
     return GetDataID(SubSystem(recoilS, finalA, finalB));
   }
 
-  //! Get ID of data for SubSystem s
+  //! Get SubSystem from pos in list
   virtual SubSystem GetSubSystem(int pos) const {
     return _listSubSystem.at(pos);
   }
 
-  //! Get number of variables
+  //! Get number of variables that are added to dataPoint
   virtual unsigned int GetNVars() const { return _listSubSystem.size() * 3; }
 
-  //! Get phase space bounds for the invariant mass of particle A and B
-  virtual std::pair<double,double> GetInvMassBounds(SubSystem sys);
-  
+  /*! Get phase space bounds for the invariant mass of SubSystem sys.
+   */
+  virtual std::pair<double, double> GetInvMassBounds(SubSystem sys);
+
   //! Calculate form factor
   static double
   FormFactor(double sqrtS, double ma, double mb, double spin,
@@ -187,24 +197,74 @@ public:
              double mesonRadius, std::complex<double> qValue,
              formFactorType type = formFactorType::BlattWeisskopf);
 
+  /*! Specify an irreducible set of variables.
+   * An irreducible set of variables that represent a phase space position.
+   * @see _irreducibleSetOfVariables
+   */
+  virtual void SetIrreducibleSetOfVariables(std::vector<int> set) {
+    _irreducibleSetOfVariables = set;
+  }
+
+  /*! Get an irreducible set of variables.
+   * @see SetIrreducibleSetOfVariables(std::vector<int> set)
+   * @see _irreducibleSetOfVariables
+   */
+  virtual std::vector<int> GetIrreducibleSetOfVariables() const {
+    return _irreducibleSetOfVariables;
+  }
+
 protected:
-  HelicityKinematics(std::vector<int> initialState,
-                     std::vector<int> finalState);
+  HelicityKinematics(std::vector<pid> initialState,
+                     std::vector<pid> finalState);
 
   HelicityKinematics(boost::property_tree::ptree pt);
-  
+
   virtual ~HelicityKinematics();
 
+  /*! Calculation of n-dimensional phase space volume.
+   * We calculate the phase space volume using an estimate of the (constant) 
+   * event density in phase space. We follow this procedure:
+   *   1. Generate phase space sample
+   *   2. For each event calculate the distance to each other event using 
+   *      #EventDistance and store it in a vector
+   *   3. Sort the vector and select the distance within which 
+   *      #localDensityNumber of events are found
+   *   4. Calculate the volume of a n-dimensional sphere with radius according 
+   *      to 3.
+   *   5. Calculate local density using #localDensityNumber and the volume
+   *   6. Calculate the average density. At this point we assume that points
+   *      are distributed uniformly across phase space. Therefore, the set 
+   *      #_irreducibleSetOfVariables needs to represent a flat phase space.
+   *   7. From the event density in phase space and the number of events in the
+   *      sample the volume can be calculated.
+   */
   double calculatePSArea();
 
-  // Parameters of decaying mother particle (we assume that we have a decay)
-  std::string _nameMother; //! name of mother particle
-  int _idMother;           //! name of mother particle
-  double _M;               //! mass of mother particle
-  double _Msq;             //! mass of mother particle
-  ComPWA::Spin _spinM;     //! spin of mother particle
+  /*! Calculate distance in phase space of two events.
+   * We calculate the eucleadean distance of the variables listed in 
+   * #_irreducibleSetOfVariables for both events. This procedure does not make 
+   * sense if the set is not irreducible.
+   */
+  double EventDistance(Event &evA, Event &evB) const;
 
-  // list of subsystems for which invariant mass and angles are calculated
+  /*! Irreducible set of variable that represent a position in phase space.
+   * Listed are the positions in dataPoint. The size of the set corresponds to 
+   * the degrees of freedom of the decay.
+   * It is important that phase space is distributed uniformly in those
+   * variables otherwise the normalization of intensities is not correct.
+   */
+  std::vector<int> _irreducibleSetOfVariables;
+
+  //! Invariant mass
+  double _M;
+  
+  //! Invariant mass squared
+  double _Msq;
+  
+  //! Spin of initial state
+  ComPWA::Spin _spinM; 
+
+  //! List of subsystems for which invariant mass and angles are calculated
   std::vector<SubSystem> _listSubSystem;
 };
 

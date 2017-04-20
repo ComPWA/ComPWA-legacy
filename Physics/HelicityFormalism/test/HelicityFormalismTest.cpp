@@ -58,7 +58,7 @@ BOOST_AUTO_TEST_CASE(IncoherentConstruction) {
   ComPWA::RunManager r;
   r.setGenerator(gen);
   r.setPhspSample(sample);
-  r.generatePhsp(20);
+  r.generatePhsp(200000);
 
   LOG(info) << "Loop over phsp events....";
   for (auto i : sample->getEvents()) {
@@ -75,7 +75,7 @@ BOOST_AUTO_TEST_CASE(IncoherentConstruction) {
 
     double w = intens->Intensity(p);
     i.setWeight(w);
-    LOG(info) << "point = " << p << " intensity = " << w;
+//    LOG(info) << "point = " << p << " intensity = " << w;
   }
     
     ComPWA::ParameterList sampleList(sample->getListOfData());

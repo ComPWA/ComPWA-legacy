@@ -91,14 +91,14 @@ const ComPWA::Constant &PhysConst::FindConstant(const std::string &name) const {
   return *result;
 }
 
-const ParticleProperties &PhysConst::FindParticle(int pid) const {
+const ParticleProperties &PhysConst::FindParticle(pid id) const {
   auto result = std::find_if(
       _partList.begin(), _partList.end(),
-      [&](const ParticleProperties &lhs) { return lhs.GetId() == pid; });
+      [&](const ParticleProperties &lhs) { return lhs.GetId() == id; });
 
   if (result == _partList.end()) {
     std::stringstream ss;
-    ss << "PhysConst::FindParticle() | Particle id=" << pid
+    ss << "PhysConst::FindParticle() | Particle id=" << id
        << " not found in list!";
     throw std::runtime_error(ss.str());
   }
@@ -119,22 +119,6 @@ PhysConst::FindParticle(const std::string &name) const {
   }
   return *result;
 }
-
-// std::vector<ParticleProperties>
-// PhysConst::findParticlesWithQN(const ParticleProperties &qn) const {
-//  std::vector<ParticleProperties> particle_list;
-//
-//  auto result = _partList.begin();
-//  while (result != _partList.end()) {
-//    result = std::find(result, _partList.end(), qn);
-//    if (result != _partList.end()) {
-//      particle_list.push_back(*result);
-//      ++result;
-//    }
-//  }
-//
-//  return particle_list;
-//}
 
 bool PhysConst::ParticleExists(const std::string &name) const {
   try {
