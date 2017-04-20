@@ -22,12 +22,11 @@ class Particle;
 namespace ComPWA {
 namespace Physics {
 namespace HelicityFormalism {
-  
+
 static const char *formFactorTypeString[] = {"noFormFactor", "BlattWeisskopf",
                                              "CrystalBarrel"};
 
 enum formFactorType { noFormFactor = 0, BlattWeisskopf = 1, CrystalBarrel = 2 };
-
 
 template <typename T>
 int createIndex(std::vector<T> &references, T const &newValue) {
@@ -39,6 +38,11 @@ int createIndex(std::vector<T> &references, T const &newValue) {
   return results;
 }
 
+/*! Definition of a two-body decay node within a sequential decay tree.
+ Class contains lists for both final states of the two-body decay and a list 
+ for all recoiling particles. This information is needed to calculate
+ invariant mass and angles at a two-body decay node.
+ */
 class SubSystem {
 public:
   SubSystem(){};
@@ -98,9 +102,16 @@ protected:
   std::vector<int> _finalStateB;
 };
 
+/*! HelicityKinematics class.
+   Implementation of the ComPWA::Kinematics interface for amplitude models
+   using the helicity formalism.
+ */
 class HelicityKinematics : public ComPWA::Kinematics {
 
 public:
+  /*! Create instance of HelicityKinematics.
+   * @see HelicityKinematics(std::vector<pid>, std::vector<pid>);
+   */
   static Kinematics *CreateInstance(std::vector<int> initialState,
                                     std::vector<int> finalStateIds) {
     if (_inst) {
@@ -111,6 +122,9 @@ public:
     return _inst;
   }
 
+  /*! Create instance of HelicityKinematics.
+   * @see HelicityKinematics(std::vector<pid>, std::vector<pid>);
+   */
   static Kinematics *CreateInstance(boost::property_tree::ptree pt) {
     if (_inst) {
       throw std::runtime_error(
@@ -133,6 +147,7 @@ public:
 
   void operator=(const HelicityKinematics &) = delete;
 
+  //! Check if dataPoint is within phase space boundaries.
   bool IsWithinPhsp(const dataPoint &point) const;
 
   virtual bool IsWithinBoxPhsp(int idA, int idB, double varA,
@@ -155,8 +170,9 @@ public:
   }
 
   /*! Get ID of data for SubSystem #s.
-   * Incase that the ID was not requested before the subsystem is added to the 
-   * list and variables (m^2, cosTheta, phi) are calculated in #EventToDataPoint() 
+   * Incase that the ID was not requested before the subsystem is added to the
+   * list and variables (m^2, cosTheta, phi) are calculated in
+   * #EventToDataPoint()
    * and added to each dataPoint.
    */
   virtual int GetDataID(SubSystem s) {
@@ -183,7 +199,7 @@ public:
 
   /*! Get phase space bounds for the invariant mass of SubSystem sys.
    */
-  virtual std::pair<double, double> GetInvMassBounds(SubSystem sys);
+  virtual std::pair<double, double> GetInvMassBounds(SubSystem sys) const;
 
   //! Calculate form factor
   static double
@@ -214,26 +230,48 @@ public:
   }
 
 protected:
+  /*! Create HelicityKinematics from inital and final state particle lists.
+   * The lists contain the pid of initial and final state. The position of a
+   * particle in initial or final state list is used later on for
+   * identification.
+   */
   HelicityKinematics(std::vector<pid> initialState,
                      std::vector<pid> finalState);
 
+  /*! Create HelicityKinematics from a property_tree.
+   * The tree is expected to contain something like:
+   * @code
+    <HelicityKinematics>
+      <InitialState>
+        <Particle Name='jpsi' />
+      </InitialState>
+      <FinalState>
+        <Particle Name='pi0' />
+        <Particle Name='gamma' />
+        <Particle Name='pi0' />
+      </FinalState>
+    </HelicityKinematics>
+    @endcode
+   * @see HelicityKinematics(std::vector<pid> initialState, std::vector<pid>
+   finalState)
+   */
   HelicityKinematics(boost::property_tree::ptree pt);
 
   virtual ~HelicityKinematics();
 
   /*! Calculation of n-dimensional phase space volume.
-   * We calculate the phase space volume using an estimate of the (constant) 
+   * We calculate the phase space volume using an estimate of the (constant)
    * event density in phase space. We follow this procedure:
    *   1. Generate phase space sample
-   *   2. For each event calculate the distance to each other event using 
+   *   2. For each event calculate the distance to each other event using
    *      #EventDistance and store it in a vector
-   *   3. Sort the vector and select the distance within which 
+   *   3. Sort the vector and select the distance within which
    *      #localDensityNumber of events are found
-   *   4. Calculate the volume of a n-dimensional sphere with radius according 
+   *   4. Calculate the volume of a n-dimensional sphere with radius according
    *      to 3.
    *   5. Calculate local density using #localDensityNumber and the volume
    *   6. Calculate the average density. At this point we assume that points
-   *      are distributed uniformly across phase space. Therefore, the set 
+   *      are distributed uniformly across phase space. Therefore, the set
    *      #_irreducibleSetOfVariables needs to represent a flat phase space.
    *   7. From the event density in phase space and the number of events in the
    *      sample the volume can be calculated.
@@ -241,14 +279,14 @@ protected:
   double calculatePSArea();
 
   /*! Calculate distance in phase space of two events.
-   * We calculate the eucleadean distance of the variables listed in 
-   * #_irreducibleSetOfVariables for both events. This procedure does not make 
+   * We calculate the eucleadean distance of the variables listed in
+   * #_irreducibleSetOfVariables for both events. This procedure does not make
    * sense if the set is not irreducible.
    */
   double EventDistance(Event &evA, Event &evB) const;
 
   /*! Irreducible set of variable that represent a position in phase space.
-   * Listed are the positions in dataPoint. The size of the set corresponds to 
+   * Listed are the positions in dataPoint. The size of the set corresponds to
    * the degrees of freedom of the decay.
    * It is important that phase space is distributed uniformly in those
    * variables otherwise the normalization of intensities is not correct.
@@ -257,12 +295,12 @@ protected:
 
   //! Invariant mass
   double _M;
-  
+
   //! Invariant mass squared
   double _Msq;
-  
+
   //! Spin of initial state
-  ComPWA::Spin _spinM; 
+  ComPWA::Spin _spinM;
 
   //! List of subsystems for which invariant mass and angles are calculated
   std::vector<SubSystem> _listSubSystem;

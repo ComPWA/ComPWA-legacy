@@ -89,12 +89,27 @@ HelicityKinematics::HelicityKinematics(boost::property_tree::ptree pt) {
 HelicityKinematics::~HelicityKinematics() {}
 
 bool HelicityKinematics::IsWithinPhsp(const dataPoint &point) const {
-  // TODO: implementation
+  int subSystemID = 0;
+  int pos = 0;
+  while ((pos + 2) < point.Size()) {
+    auto invMassBounds = GetInvMassBounds(GetSubSystem(subSystemID));
+    if (point.GetValue(pos) < invMassBounds.first ||
+        point.GetValue(pos) > invMassBounds.second)
+      return false;
+    if (point.GetValue(pos + 1) < -1 || point.GetValue(pos + 1) > +1)
+      return false;
+    if (point.GetValue(pos + 2) < 0 || point.GetValue(pos + 2) > 2 * M_PI)
+      return false;
+
+    pos += 3;
+    subSystemID++;
+  }
 
   return true;
 }
 
-std::pair<double, double> HelicityKinematics::GetInvMassBounds(SubSystem sys) {
+std::pair<double, double>
+HelicityKinematics::GetInvMassBounds(SubSystem sys) const {
 
   /* We use the formulae from (PDG2016 Kinematics Fig.47.3). I hope the
    * generalization to n-body decays is correct.
@@ -122,24 +137,21 @@ double HelicityKinematics::EventDistance(Event &evA, Event &evB) const {
   EventToDataPoint(evB, pointB);
 
   /* We assume that variables in dataPoint are orders like (m1,theta1,phi1),
-   * (m2,theta2,phi2),... Therefore, the dataPoint size needs to be a multiple 
+   * (m2,theta2,phi2),... Therefore, the dataPoint size needs to be a multiple
    * of 3. */
-  assert( pointA.Size()%3 == 0 );
-  
+  assert(pointA.Size() % 3 == 0);
+
   double distSq = 0;
   int pos = 0;
-  while( pos<pointA.Size() ){
-    double dist = (pointA.GetValue(pos)-pointB.GetValue(pos));
-    distSq += dist*dist;
+  while (pos < pointA.Size()) {
+    double dist = (pointA.GetValue(pos) - pointB.GetValue(pos));
+    distSq += dist * dist;
     pos += 2;
   }
   return std::sqrt(distSq);
 }
 
 double HelicityKinematics::calculatePSArea() {
-  /* We estimate the volume of the phase space for arbirary decays.
-   */
-
   int precision = 100; // sample size
   int localDensityNumber =
       precision / 10; // number of points within a n-dim sphere
@@ -165,7 +177,7 @@ double HelicityKinematics::calculatePSArea() {
       double d = EventDistance(sample.getEvent(n), sample.getEvent(m));
       dist.push_back(d);
     }
-    std::sort(dist.begin(), dist.end()); //ascending
+    std::sort(dist.begin(), dist.end()); // ascending
     localDistance.push_back(dist.at(localDensityNumber));
   }
 
