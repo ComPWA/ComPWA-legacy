@@ -63,7 +63,7 @@ void rndReduceSet(unsigned int size, std::shared_ptr<Generator> gen, Data *in1,
     //		dataPoint point(in1->getEvent(i)); //use first sample for
     //hit&miss
     //		if(!Kinematics::instance()->isWithinPhsp(point)) continue;
-    if (gen->getUniform() < threshold) {
+    if (gen->GetUniform(0,1) < threshold) {
       out1->pushEvent(in1->getEvent(i));
       // write second sample if event from first sample were accepted
       if (in2)

@@ -139,6 +139,12 @@ public:
    * SubSystem that was requested via GetDataID(SubSystem).
    */
   void EventToDataPoint(const Event &event, dataPoint &point) const;
+  
+  /*! Fill dataPoint point with variables for SubSystem.
+   * The triple (\f$m^2,cos\Theta, \phi\f$) is added to dataPoint for 
+   * SubSystem sys.
+   */
+  void EventToDataPoint(const Event &event, dataPoint &point, SubSystem sys) const;
 
   // delete methods to ensure that there will only be one instance
   HelicityKinematics() = delete;
@@ -147,7 +153,8 @@ public:
 
   void operator=(const HelicityKinematics &) = delete;
 
-  //! Check if dataPoint is within phase space boundaries.
+  /*! Check if dataPoint is within phase space boundaries.
+   */
   bool IsWithinPhsp(const dataPoint &point) const;
 
   virtual bool IsWithinBoxPhsp(int idA, int idB, double varA,

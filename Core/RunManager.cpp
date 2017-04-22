@@ -54,7 +54,7 @@ RunManager::RunManager(unsigned int size, std::shared_ptr<AmpIntensity> inP,
 
 RunManager::~RunManager() {
   if( gen_ )
-    LOG(debug) << "~RunManager: Last seed: " << gen_->getSeed();
+    LOG(debug) << "~RunManager: Last seed: " << gen_->GetSeed();
 }
 
 std::shared_ptr<FitResult> RunManager::startFit(ParameterList &inPar) {
@@ -238,7 +238,7 @@ bool RunManager::gen(int number, std::shared_ptr<Generator> gen,
       evt = phsp->getEvent(i);
       evtTrue = evt;
     } else { // otherwise generate event
-      gen->generate(evt);
+      gen->Generate(evt);
       evtTrue = evt;
     }
     if (number <= 0)
@@ -257,7 +257,7 @@ bool RunManager::gen(int number, std::shared_ptr<Generator> gen,
     //		if(!Kinematics::instance()->isWithinPhsp(point)) continue;
 
     totalCalls++;
-    double ampRnd = gen->getUniform() * generationMaxValue;
+    double ampRnd = gen->GetUniform(0, generationMaxValue);
     AMPpdf = amp->Intensity(point); // unfortunatly not thread safe
 
     if (generationMaxValue < (AMPpdf * weight))
@@ -315,8 +315,8 @@ bool RunManager::generatePhsp(int number) {
     if (i > 0)
       i--;
     Event tmp;
-    gen_->generate(tmp);
-    double ampRnd = gen_->getUniform();
+    gen_->Generate(tmp);
+    double ampRnd = gen_->GetUniform(0,1);
     if (ampRnd > tmp.getWeight())
       continue;
 

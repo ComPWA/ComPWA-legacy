@@ -1,4 +1,6 @@
-/*
+
+                                  
+                              /*
  * RootGenerator.cpp
  *
  *  Created on: Jun 18, 2015
@@ -17,7 +19,7 @@ namespace Tools {
 RootGenerator::RootGenerator(int seed) {
   gRandom = new TRandom3(0);
   if (seed != -1)
-    setSeed(seed);
+    SetSeed(seed);
   Kinematics *kin = Kinematics::Instance();
   auto physConst = PhysConst::Instance();
   auto finalS = kin->GetFinalState();
@@ -31,11 +33,13 @@ RootGenerator::RootGenerator(int seed) {
         << "RootGenerator::RootGenerator() | only 2 particles in the final"
            " state! There are no degrees of freedom!";
   if (initialS.size() != 1)
-    throw std::runtime_error(
-        "RootGenerator::RootGenerator() | More than one particle in initial State!");
-  
+    throw std::runtime_error("RootGenerator::RootGenerator() | More than one "
+                             "particle in initial State!");
+
   masses = new Double_t[nPart];
-  TLorentzVector W(0.0, 0.0, 0.0, physConst->FindParticle(initialS.at(0)).GetMass()); //= beam + target;
+  TLorentzVector W(
+      0.0, 0.0, 0.0,
+      physConst->FindParticle(initialS.at(0)).GetMass()); //= beam + target;
   for (unsigned int t = 0; t < nPart; t++) { // particle 0 is mother particle
     masses[t] = physConst->FindParticle(finalS.at(t)).GetMass();
   }
@@ -44,7 +48,7 @@ RootGenerator::RootGenerator(int seed) {
 
 RootGenerator *RootGenerator::Clone() { return (new RootGenerator(*this)); }
 
-void RootGenerator::generate(Event &evt) {
+void RootGenerator::Generate(Event &evt) {
   const double weight = event.Generate();
 
   Event tmp(weight, "");
@@ -56,21 +60,23 @@ void RootGenerator::generate(Event &evt) {
   return;
 }
 
-void RootGenerator::setSeed(unsigned int seed) { gRandom->SetSeed(seed); }
+void RootGenerator::SetSeed(unsigned int seed) { gRandom->SetSeed(seed); }
 
-unsigned int RootGenerator::getSeed() { return gRandom->GetSeed(); }
+unsigned int RootGenerator::GetSeed() const { return gRandom->GetSeed(); }
 
-double RootGenerator::getGaussDist(double mu, double sigma) {
+double RootGenerator::GetGaussDist(double mu, double sigma) const {
   return gRandom->Gaus(mu, sigma);
 }
 
-double RootGenerator::getUniform() { return gRandom->Uniform(0, 1); }
+double RootGenerator::GetUniform(double min, double max) const {
+  return gRandom->Uniform(min, max);
+}
 
-void UniformTwoBodyGenerator::generate(Event &evt) {
-  double s = RootGenerator::getUniform() * (maxSq - minSq) + minSq;
+void UniformTwoBodyGenerator::Generate(Event &evt) {
+  double s = RootGenerator::GetUniform(minSq, maxSq);
   TLorentzVector W(0.0, 0.0, 0.0, sqrt(s)); //= beam + target;
-  RootGenerator::getGenerator()->SetDecay(W, nPart, masses);
-  RootGenerator::generate(evt);
+  RootGenerator::GetGenerator()->SetDecay(W, nPart, masses);
+  RootGenerator::Generate(evt);
 }
 } /* namespace Tools */
 } /* namespace ComPWA */

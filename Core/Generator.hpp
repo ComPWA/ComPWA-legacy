@@ -24,12 +24,12 @@ private:
 public:
   Generator(){};
   virtual ~Generator(){};
-  virtual void generate(Event &) = 0;
+  virtual void Generate(Event &) = 0;
   virtual Generator *Clone() = 0;
-  virtual void setSeed(unsigned int) = 0;
-  virtual unsigned int getSeed() = 0;
-  virtual double getUniform() = 0;
-  virtual double getGaussDist(double mu, double sigma) { return 0; }
+  virtual void SetSeed(unsigned int) = 0;
+  virtual unsigned int GetSeed() const = 0;
+  virtual double GetUniform(double min, double max) const = 0;
+  virtual double GetGaussDist(double mu, double sigma) const { return 0; }
 };
 
 } /* namespace ComPWA */

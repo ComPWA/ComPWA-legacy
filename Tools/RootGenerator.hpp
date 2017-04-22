@@ -44,12 +44,12 @@ public:
   ~RootGenerator() { delete[] masses; };
 
   virtual RootGenerator *Clone();
-  virtual void generate(Event &evt);
-  virtual void setSeed(unsigned int seed);
-  virtual unsigned int getSeed();
-  virtual double getUniform();
-  virtual double getGaussDist(double mu, double sigma);
-  virtual TGenPhaseSpace *getGenerator() { return &event; }
+  virtual void Generate(Event &evt);
+  virtual void SetSeed(unsigned int seed);
+  virtual unsigned int GetSeed() const;
+  virtual double GetUniform(double min, double max) const;
+  virtual double GetGaussDist(double mu, double sigma) const;
+  virtual TGenPhaseSpace *GetGenerator() { return &event; }
   
 protected:
   TGenPhaseSpace event;
@@ -67,7 +67,7 @@ public:
                                "UniformTwoBodyGenerator() | Not a two body "
                                "decay!");
   }
-  virtual void generate(Event &evt);
+  virtual void Generate(Event &evt);
   virtual UniformTwoBodyGenerator *Clone() {
     return (new UniformTwoBodyGenerator(*this));
   }
