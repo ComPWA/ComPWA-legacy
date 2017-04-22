@@ -99,6 +99,14 @@ public:
 
   virtual double GetDecayMassB() const { return _massB; }
 
+  virtual void SetDecayNameA(std::string name) { _nameA = name; }
+
+  virtual std::string GetDecayNameA() const { return _nameA; }
+
+  virtual void SetDecayNameB(std::string name) { _nameB = name; }
+
+  virtual std::string GetDecayNameB() const { return _nameB; }
+  
   virtual ComPWA::Spin GetSpin() const { return _spin; }
 
   virtual void SetSpin(ComPWA::Spin spin) { _spin = spin; }
@@ -132,6 +140,9 @@ protected:
   //! Masses of daughter particles
   double _massA, _massB;
 
+  //! Names of daughter particles
+  std::string _nameA, _nameB;
+  
   //! Minimum and Maximum of invariant mass
   std::pair<double, double> _limits;
 

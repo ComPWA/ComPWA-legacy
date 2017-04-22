@@ -50,6 +50,9 @@ public:
   static std::shared_ptr<SequentialTwoBodyDecay>
   Factory(const boost::property_tree::ptree &pt);
 
+  static boost::property_tree::ptree
+  Save(std::shared_ptr<SequentialTwoBodyDecay> obj);
+
   /**
    Add a partial decay to Sequential decay
 
@@ -60,6 +63,17 @@ public:
     _partDecays.push_back(d);
   }
 
+  std::shared_ptr<ComPWA::Physics::HelicityFormalism::PartialDecay>
+  GetDecay(int pos) {
+    return _partDecays.at(pos);
+  }
+
+  std::vector<std::shared_ptr<
+      ComPWA::Physics::HelicityFormalism::PartialDecay>> &
+  GetDecays() {
+    return _partDecays;
+  }
+  
   /**
    Get Magnitude parameter
 

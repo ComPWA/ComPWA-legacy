@@ -150,6 +150,8 @@ RelativisticBreitWigner::Factory(const boost::property_tree::ptree &pt) {
       PhysConst::Instance()->FindParticle(daughterNames.at(0)).GetMass());
   obj->SetDecayMassB(
       PhysConst::Instance()->FindParticle(daughterNames.at(1)).GetMass());
+  obj->SetDecayNameA(daughterNames.at(0));
+  obj->SetDecayNameB(daughterNames.at(1));
 
   LOG(trace)
       << "RelativisticBreitWigner::Factory() | Construction of the decay "

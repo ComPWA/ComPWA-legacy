@@ -1,3 +1,5 @@
+
+
 //
 //  PhysConstTest.cpp
 //  COMPWA
@@ -7,12 +9,15 @@
 //
 #define BOOST_TEST_MODULE                                                      \
   HelicityFormalism /* this can only be define once within the same library ?! \
-                       */
+  */
 #include <vector>
 
+#include <locale>
 #include <boost/test/unit_test.hpp>
+#include <boost/locale/utf.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
+//#include <boost/property_tree/xml_parser_writer_settings.hpp>
 
 #include "Core/PhysConst.hpp"
 #include "Core/ParameterList.hpp"
@@ -25,23 +30,28 @@
 
 using namespace ComPWA::Physics::HelicityFormalism;
 
+#include <boost/property_tree/ptree.hpp>
+#include <boost/foreach.hpp>
+#include <iostream>
+
 BOOST_AUTO_TEST_SUITE(HelicityFormalism)
 
 BOOST_AUTO_TEST_CASE(IncoherentConstruction) {
+  
   ComPWA::Logging log("", boost::log::trivial::severity_level::trace);
 
   boost::property_tree::ptree tr;
-  std::ifstream in("HelicityFormalismTest-input.xml");
-  boost::property_tree::xml_parser::read_xml(in, tr);
+  boost::property_tree::xml_parser::read_xml("HelicityFormalismTest-input.xml",
+                                             tr);
 
   ComPWA::PhysConst::CreateInstance(tr);
 
-//  std::vector<int> finalState, initialState;
-//  initialState.push_back(443);
-//  finalState.push_back(210);
-//  finalState.push_back(210);
-//  finalState.push_back(22);
-//  HelicityKinematics::CreateInstance(initialState, finalState);
+  //  std::vector<int> finalState, initialState;
+  //  initialState.push_back(443);
+  //  finalState.push_back(210);
+  //  finalState.push_back(210);
+  //  finalState.push_back(22);
+  //  HelicityKinematics::CreateInstance(initialState, finalState);
 
   // Create HelicityInstance here
   HelicityKinematics::CreateInstance(tr);
@@ -58,7 +68,7 @@ BOOST_AUTO_TEST_CASE(IncoherentConstruction) {
   ComPWA::RunManager r;
   r.setGenerator(gen);
   r.setPhspSample(sample);
-  r.generatePhsp(200000);
+  r.generatePhsp(2000);
 
   LOG(info) << "Loop over phsp events....";
   for (auto i : sample->getEvents()) {
@@ -75,30 +85,32 @@ BOOST_AUTO_TEST_CASE(IncoherentConstruction) {
 
     double w = intens->Intensity(p);
     i.setWeight(w);
-//    LOG(info) << "point = " << p << " intensity = " << w;
+    //    LOG(info) << "point = " << p << " intensity = " << w;
   }
-    
-    ComPWA::ParameterList sampleList(sample->getListOfData());
-    // Testing function tree
-    auto tree = intens->GetTree(sampleList, sampleList, sampleList);
-    tree->recalculate();
-    
-    std::stringstream printTree; printTree << tree;
-    LOG(info) << std::endl << printTree.str();
 
-  //  auto part = physConst->FindParticle("gamma");
-  //  BOOST_CHECK_EQUAL(part.GetMass(), 0.);
-  //  BOOST_CHECK_EQUAL((double)part.GetSpin(), 1.);
-  //  BOOST_CHECK_EQUAL(part.GetParity(), -1);
-  //  BOOST_CHECK_EQUAL(part.GetCparity(), -1);
-  //  BOOST_CHECK_EQUAL(part.GetDecayType(), "stable");
-  //
-  //  part = physConst->FindParticle(9010221);
-  //  BOOST_CHECK_EQUAL(part.GetMass(), 0.99);
-  //  BOOST_CHECK_EQUAL((double)part.GetSpin(), 0.);
-  //  BOOST_CHECK_EQUAL(part.GetParity(), 1);
-  //  BOOST_CHECK_EQUAL(part.GetCparity(), 1);
-  //  BOOST_CHECK_EQUAL(part.GetDecayType(), "relativisticBreitWigner");
+  ComPWA::ParameterList sampleList(sample->getListOfData());
+  // Testing function tree
+  auto tree = intens->GetTree(sampleList, sampleList, sampleList);
+  tree->recalculate();
+
+  std::stringstream printTree;
+  printTree << tree;
+  LOG(info) << std::endl << printTree.str();
+
+  auto ptout = IncoherentIntensity::Save(intens);
+//  if (ptout != tr) {
+//    BOOST_CHECK(false);
+//    LOG(error) << "Read-in tree and write-out tree are not the same. This is "
+//                  "most likely due to an encoding problem but could also "
+//                  "point to a bug in reading and writing amplitudes.";
+//  }
+  
+  // Write the property tree to the XML file. Add a line break at the end of each
+  // line.
+  boost::property_tree::xml_parser::write_xml(
+      "HelicityFormalismTest-output.xml", ptout, std::locale(),
+      boost::property_tree::xml_writer_make_settings<std::string>(
+          ' ', 4, "utf-8"));
 };
 
 BOOST_AUTO_TEST_SUITE_END()

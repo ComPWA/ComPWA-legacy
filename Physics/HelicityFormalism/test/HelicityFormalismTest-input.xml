@@ -3,7 +3,7 @@
 		<Id>22</Id>
 		<Mass Name='mass_gamma'>
 			<Value>0.</Value>
-			<Fix>1</Fix>
+			<Fix>true</Fix>
 		</Mass>
 		<Charge>0</Charge>
 		<Spin>1.0</Spin>
@@ -17,7 +17,7 @@
 		<Id>210</Id>
 		<Mass Name='mass_pi0'>
 			<Value>0.1349766</Value>
-			<Fix>1</Fix>
+			<Fix>true</Fix>
 		</Mass>
 		<Charge>0</Charge>
 		<Spin>0.0</Spin>
@@ -47,7 +47,7 @@
 			</Width>
 			<MesonRadius Name='radius_jpsi'>
 				<Value>2.5</Value>
-				<Fix>1</Fix>
+				<Fix>true</Fix>
 				<Min>2.0</Min>
 				<Max>3.0</Max>
 			</MesonRadius>
@@ -57,7 +57,7 @@
 		<Id>223</Id>
 		<Mass Name='Mass_omega'>
 			<Value>0.78265</Value>
-			<Fix>1</Fix>
+			<Fix>true</Fix>
 			<Min>0.5</Min>
 			<Max>1.5</Max>
 			<Error>0.00012</Error>
@@ -73,14 +73,14 @@
 			<FormFactor type='0' />
 			<Width Name='width_omega'>
 				<Value>0.01849</Value>
-				<Fix>1</Fix>
+				<Fix>true</Fix>
 				<Min>0.0</Min>
 				<Max>1.0</Max>
 				<Error>0.00008</Error>
 			</Width>
 			<MesonRadius Name='radius_f0_980'>
 				<Value>1.5</Value>
-				<Fix>1</Fix>
+				<Fix>true</Fix>
 				<Min>1.0</Min>
 				<Max>2.0</Max>
 				<Error>0</Error>
@@ -91,7 +91,7 @@
 		<Id>9010221</Id>
 		<Mass Name='mass_f0_980'>
 			<Value>0.99</Value>
-			<Fix>1</Fix>
+			<Fix>true</Fix>
 			<Min>0.5</Min>
 			<Max>1.5</Max>
 			<Error>0</Error>
@@ -107,14 +107,14 @@
 			<FormFactor type='0' />
 			<Width Name='width_f0_980'>
 				<Value>0.05</Value>
-				<Fix>1</Fix>
+				<Fix>true</Fix>
 				<Min>0.</Min>
 				<Max>.5</Max>
 				<Error>0</Error>
 			</Width>
 			<MesonRadius Name='radius_f0_980'>
 				<Value>1.5</Value>
-				<Fix>1</Fix>
+				<Fix>true</Fix>
 				<Min>1.0</Min>
 				<Max>2.0</Max>
 				<Error>0</Error>
@@ -134,32 +134,36 @@
 	</FinalState>
 </HelicityKinematics>
 
-<IncoherentIntensity Name='jpsi->Pi0Pi0Gamma_inc'>
-	<CoherentIntensity Name='jpsi->Pi0Pi0Gamma'>
-		<Strength Name='strength_jpsi->Pi0Pi0Gamma'>
+<IncoherentIntensity Name='jpsitoPi0Pi0Gamma_inc'>
+	<Strength Name="">
+		<Value>1</Value>
+		<Fix>true</Fix>
+	</Strength>
+	<CoherentIntensity Name='jpsitoPi0Pi0Gamma'>
+		<Strength Name='strength_jpsitoPi0Pi0Gamma'>
 			<Value>0.99</Value>
-			<Fix>1</Fix>
+			<Fix>true</Fix>
 		</Strength>
 		<Amplitude Name='omega'>
-			<Magnitude Name='Magnitude_omega->Pi0G'>
+			<Magnitude Name='Magnitude_omegatoPi0G'>
 				<Value>1.0</Value>
-				<Fix>1</Fix>
+				<Fix>true</Fix>
 			</Magnitude>
-			<Phase Name='Phase_omega->Pi0Gamma'>
+			<Phase Name='Phase_omegatoPi0Gamma'>
 				<Value>0.0</Value>
-				<Fix>1</Fix>
+				<Fix>true</Fix>
 			</Phase>
-			<Resonance Name='jpsi->OmegaPi0'>
-				<Magnitude Name='Magnitude_jpsi->OmegaPi0'>
+			<Resonance Name='jpsitoOmegaPi0'>
+				<Magnitude Name='Magnitude_jpsitoOmegaPi0'>
 					<Value>1.0</Value>
-					<Fix>1</Fix>
+					<Fix>true</Fix>
 					<Min>0.5</Min>
 					<Max>1.5</Max>
 					<Error>0</Error>
 				</Magnitude>
-				<Phase Name='Phase_jpsi->OmegaPi0'>
+				<Phase Name='Phase_jpsitoOmegaPi0'>
 					<Value>1.0</Value>
-					<Fix>1</Fix>
+					<Fix>true</Fix>
 					<Min>0.5</Min>
 					<Max>1.5</Max>
 					<Error>0</Error>
@@ -170,17 +174,17 @@
 					<Particle Name='pi0' FinalState='2' Helicity='+1' />
 				</DecayProducts>
 			</Resonance>
-			<Resonance Name="omega->Pi0G">
-				<Magnitude Name='Magnitude_omega->Pi0G'>
+			<Resonance Name="omegatoPi0G">
+				<Magnitude Name='Magnitude_omegatoPi0G'>
 					<Value>1.0</Value>
-					<Fix>1</Fix>
+					<Fix>true</Fix>
 					<Min>0.5</Min>
 					<Max>1.5</Max>
 					<Error>0</Error>
 				</Magnitude>
-				<Phase Name='Phase_omega->Pi0G'>
+				<Phase Name='Phase_omegatoPi0G'>
 					<Value>1.0</Value>
-					<Fix>1</Fix>
+					<Fix>true</Fix>
 					<Min>0.5</Min>
 					<Max>1.5</Max>
 					<Error>0</Error>

@@ -44,15 +44,20 @@
 //#include "Core/Resonance.hpp"
 
 namespace ComPWA {
-  
+
 class AmpIntensity {
 
 public:
   //! Constructor with an optional, unique name and an optional efficiency
   AmpIntensity(std::string name = "",
-               std::shared_ptr<DoubleParameter> strength = std::shared_ptr<DoubleParameter>(new DoubleParameter("strength",1.0)),
-            std::shared_ptr<Efficiency> eff = std::shared_ptr<Efficiency>(new UnitEfficiency))
-      : _name(name), _eff(eff), _strength(strength) {}
+               std::shared_ptr<DoubleParameter> strength =
+                   std::shared_ptr<DoubleParameter>(
+                       new DoubleParameter("", 1.0)),
+               std::shared_ptr<Efficiency> eff =
+                   std::shared_ptr<Efficiency>(new UnitEfficiency))
+      : _name(name), _eff(eff), _strength(strength) {
+        _strength->FixParameter(true);
+      }
 
   //! Destructor
   virtual ~AmpIntensity() { /* nothing */
@@ -89,7 +94,7 @@ public:
   /** Calculate normalization of amplitude.
    * The integral includes efficiency correction
    */
-  virtual double GetNormalization() const { return 1/Integral(); }
+  virtual double GetNormalization() const { return 1 / Integral(); }
 
   //=========== EVALUATION =================
   /** Calculate intensity of amplitude at point in phase-space
@@ -117,19 +122,19 @@ public:
   virtual bool HasTree() { return 0; }
 
   //! Getter function for basic amp tree
-  virtual std::shared_ptr<FunctionTree>
-  GetTree(ParameterList &, ParameterList &, ParameterList &, std::string suffix="") {
+  virtual std::shared_ptr<FunctionTree> GetTree(ParameterList &,
+                                                ParameterList &,
+                                                ParameterList &,
+                                                std::string suffix = "") {
     return std::shared_ptr<FunctionTree>();
   }
-  
+
   /**
    Get strength parameter
 
    @return strength parameter
    */
-  std::shared_ptr<ComPWA::DoubleParameter> GetStrength() {
-    return _strength;
-  }
+  std::shared_ptr<ComPWA::DoubleParameter> GetStrength() { return _strength; }
 
   /**
    Get strength parameter
@@ -153,9 +158,8 @@ public:
    @param par Strength parameter
    */
   void SetStrength(double par) { _strength->SetValue(par); }
-  
+
 protected:
-  
   /** Calculate integral of amplitude.
    * The integral does not include efficiency correction
    */
@@ -166,7 +170,7 @@ protected:
 
   //! Efficiency object
   std::shared_ptr<Efficiency> _eff;
-  
+
   std::shared_ptr<ComPWA::DoubleParameter> _strength;
 };
 //-----------------------------------------------------------------------------
@@ -212,7 +216,7 @@ public:
 
   virtual void to_str() const {};
 
-  virtual const double GetNormalization() { return 1/Integral(); }
+  virtual const double GetNormalization() { return 1 / Integral(); }
 
   virtual double GetMaximum(std::shared_ptr<Generator> gen) const {
     double mass = params.GetDoubleParameter(0)->GetValue();
@@ -222,8 +226,8 @@ public:
     return Intensity(p);
   }
 
-  virtual void GetParameters(ParameterList &list) const { };
-  
+  virtual void GetParameters(ParameterList &list) const {};
+
   virtual double Intensity(const dataPoint &point) const {
 
     double mass = params.GetDoubleParameter(0)->GetValue();
@@ -241,13 +245,13 @@ public:
   }
 
   virtual void GetFitFractions(ParameterList &parList) {}
-  
+
 protected:
   //! Get integral
-  virtual double Integral() const{
+  virtual double Integral() const {
     return (params.GetDoubleParameter(1)->GetValue() * std::sqrt(2 * M_PI));
   }
-  
+
   //! List of interal parameters
   ParameterList params;
 };
@@ -261,9 +265,7 @@ protected:
  */
 class UnitAmp : public AmpIntensity {
 public:
-  UnitAmp() {
-    _eff = std::shared_ptr<Efficiency>(new UnitEfficiency());
-  }
+  UnitAmp() { _eff = std::shared_ptr<Efficiency>(new UnitEfficiency()); }
 
   virtual ~UnitAmp() { /* nothing */
   }
@@ -278,7 +280,6 @@ public:
 
   virtual double GetMaximum(std::shared_ptr<Generator> gen) const { return 1; }
 
-
   virtual const double GetNormalization() {
     LOG(info) << "UnitAmp::normalization() | "
                  "normalization not implemented!";
@@ -289,11 +290,9 @@ public:
     return _eff->Evaluate(point);
   }
 
-  virtual void GetParameters(ParameterList &list) const { };
-  
-  virtual double IntensityNoEff(const dataPoint &point) const {
-    return 1.0;
-  }
+  virtual void GetParameters(ParameterList &list) const {};
+
+  virtual double IntensityNoEff(const dataPoint &point) const { return 1.0; }
   virtual void GetFitFractions(ParameterList &parList) {}
 
   //========== FunctionTree =============
@@ -302,11 +301,11 @@ public:
 
   //! Getter function for basic amp tree
   //! Getter function for basic amp tree
-  virtual std::shared_ptr<FunctionTree>
-  GetTree(ParameterList& sample, ParameterList& toySample, ParameterList& sample3) {
-       return setupBasicTree(sample, toySample, "");
+  virtual std::shared_ptr<FunctionTree> GetTree(ParameterList &sample,
+                                                ParameterList &toySample,
+                                                ParameterList &sample3) {
+    return setupBasicTree(sample, toySample, "");
   }
-
 
 protected:
   /**Setup Basic Tree
@@ -340,8 +339,8 @@ protected:
     std::cout << newTree->head()->to_str(10) << std::endl;
     return newTree;
   }
-  
-  virtual double Integral() const{
+
+  virtual double Integral() const {
     return Kinematics::Instance()->GetPhspVolume();
   }
 };

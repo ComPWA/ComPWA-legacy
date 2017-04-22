@@ -57,7 +57,8 @@ public:
                                                 ComPWA::Spin muPrime);
 
   virtual std::shared_ptr<ComPWA::FunctionTree>
-  GetTree(ComPWA::ParameterList &sample, int posTheta, int posPhi, std::string suffix = "");
+  GetTree(ComPWA::ParameterList &sample, int posTheta, int posPhi,
+          std::string suffix = "");
 
   /**
    Factory for AmpWignerD
@@ -67,30 +68,31 @@ public:
    */
   static std::shared_ptr<AmpWignerD>
   Factory(const boost::property_tree::ptree &pt) {
-  LOG(trace) << "AmpWignerD::Factory() | Construction....";
+    LOG(trace) << "AmpWignerD::Factory() | Construction....";
     auto obj = std::make_shared<AmpWignerD>();
-    
+
     auto decayParticle = pt.get_child("DecayParticle");
-    
+
     std::string name = pt.get<std::string>("DecayParticle.<xmlattr>.Name");
     ComPWA::Spin J = PhysConst::Instance()->FindParticle(name).GetSpin();
-    obj->SetSpin( J );
-    ComPWA::Spin mu( pt.get<double>("DecayParticle.<xmlattr>.Helicity") );
-    obj->SetMu( mu );
-    
+    obj->SetSpin(J);
+    ComPWA::Spin mu(pt.get<double>("DecayParticle.<xmlattr>.Helicity"));
+    obj->SetMu(mu);
+
     auto decayProducts = pt.get_child("DecayProducts");
     std::vector<ComPWA::Spin> vHelicity;
-    for( auto i : decayProducts ){
-      vHelicity.push_back( ComPWA::Spin(i.second.get<double>("<xmlattr>.Helicity")) );
+    for (auto i : decayProducts) {
+      vHelicity.push_back(
+          ComPWA::Spin(i.second.get<double>("<xmlattr>.Helicity")));
     }
 
     if (vHelicity.size() != 2)
       throw boost::property_tree::ptree_error(
           "AmpWignerD::Factory() | Expect exactly two decay products (" +
           std::to_string(decayProducts.size()) + " given)!");
-    
-    obj->SetMuPrime( vHelicity.at(0)-vHelicity.at(1) );
-    
+
+    obj->SetMuPrime(vHelicity.at(0) - vHelicity.at(1));
+
     return obj;
   }
 
@@ -100,13 +102,25 @@ public:
   void SetMu(ComPWA::Spin s) { _mu = s; }
   ComPWA::Spin GetMu() const { return _mu; }
 
-  void SetMuPrime(ComPWA::Spin s) { _muPrime = s; }
-  ComPWA::Spin GetMuPrime() const { return _muPrime; }
+  void SetMuPrime(ComPWA::Spin s) {
+    _helicities = std::pair<ComPWA::Spin, ComPWA::Spin>(0, s);
+  }
+  ComPWA::Spin GetMuPrime() const {
+    return _helicities.first - _helicities.second;
+  }
+
+  void SetHelicities(std::pair<ComPWA::Spin, ComPWA::Spin> hel) {
+    _helicities = hel;
+  }
+  
+  std::pair<ComPWA::Spin, ComPWA::Spin> GetHelicities() const {
+    return _helicities;
+  }
 
 protected:
   ComPWA::Spin _spin;
   ComPWA::Spin _mu;
-  ComPWA::Spin _muPrime;
+  std::pair<ComPWA::Spin, ComPWA::Spin> _helicities;
 };
 
 class WignerDStrategy : public Strategy {

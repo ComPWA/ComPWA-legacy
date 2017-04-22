@@ -1,9 +1,3 @@
- 
-            
-          
-        
-      
-    
   //
 //  SequentialTwoBodyDecay.cpp
 //  COMPWA
@@ -36,7 +30,22 @@ SequentialTwoBodyDecay::Factory(const boost::property_tree::ptree &pt) {
   }
   return obj;
 }
+  
+boost::property_tree::ptree
+SequentialTwoBodyDecay::Save(std::shared_ptr<SequentialTwoBodyDecay> obj) {
 
+  boost::property_tree::ptree pt;
+  pt.put<std::string>("<xmlattr>.Name",obj->GetName());
+  pt.add_child("Magnitude",
+               ComPWA::DoubleParameterSave(*obj->GetMagnitude().get()));
+  pt.add_child("Phase", ComPWA::DoubleParameterSave(*obj->GetPhase().get()));
+  
+  for( auto i : obj->GetDecays() ) {
+    pt.add_child("Resonance", PartialDecay::Save(i));
+  }
+  return pt;
+}
+  
 /**! Setup function tree */
 std::shared_ptr<FunctionTree>
 SequentialTwoBodyDecay::GetTree(ParameterList &sample,

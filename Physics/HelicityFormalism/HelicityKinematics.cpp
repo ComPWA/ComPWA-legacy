@@ -241,7 +241,14 @@ return phspVolume;
 */
 
 double HelicityKinematics::calculatePSArea() {
-  int precision = 500; // sample size
+  //TODO: fix calculation of phase space volume
+  double phspVolume = 1.0;
+  LOG(info) << "HelicityKinematics::calculatePSArea() | Phase space volume: "
+            << phspVolume;
+  LOG(info) << "HelicityKinematics::calculatePSArea() | Note that the phase space volume calculation is currently NOT CORRECT!";
+  return phspVolume;
+  
+  int precision = 100; // sample size
   int numNearestN = 10; //Number of nearest neighbours
 
   // Generate phase space sample
@@ -283,13 +290,14 @@ double HelicityKinematics::calculatePSArea() {
   for(int i=0; i<localDistance.size(); i++)
     avgVecDensity.at(i) = sample.getNEvents() / (i / avgVecVol.at(i));
   
-  std::cout<<"Average distance | volume | density:"<<std::endl;
-  for(int i=0; i<precision/4; i++)
-    std::cout<<i<<" "<<localDistance.at(i)<<" "<<avgVecVol.at(i)<<" "<<avgVecDensity.at(i)<<std::endl;
+//  std::cout<<"Average distance | volume | density:"<<std::endl;
+//  for(int i=0; i<precision/4; i++)
+//    std::cout<<i<<" "<<localDistance.at(i)<<" "<<avgVecVol.at(i)<<" "<<avgVecDensity.at(i)<<std::endl;
   
-  double phspVolume = avgVecDensity.at(numNearestN);
+  phspVolume = avgVecDensity.at(numNearestN);
   LOG(info) << "HelicityKinematics::calculatePSArea() | Phase space volume: "
             << phspVolume;
+  LOG(info) << "HelicityKinematics::calculatePSArea() | Note that the phase space volume calculation is currently NOT CORRECT!";
   return phspVolume;
 }
 

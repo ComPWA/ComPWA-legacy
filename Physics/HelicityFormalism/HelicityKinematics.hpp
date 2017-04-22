@@ -39,7 +39,7 @@ int createIndex(std::vector<T> &references, T const &newValue) {
 }
 
 /*! Definition of a two-body decay node within a sequential decay tree.
- Class contains lists for both final states of the two-body decay and a list 
+ Class contains lists for both final states of the two-body decay and a list
  for all recoiling particles. This information is needed to calculate
  invariant mass and angles at a two-body decay node.
  */
@@ -48,25 +48,36 @@ public:
   SubSystem(){};
 
   SubSystem(std::vector<int> recoilS, std::vector<int> finalA,
-            std::vector<int> finalB)
-      : _recoilState(recoilS), _finalStateA(finalA), _finalStateB(finalB) {
+            std::vector<int> finalB, pid decayParticle = 0)
+      : _recoilState(recoilS), _finalStateA(finalA), _finalStateB(finalB),
+        _decayParticle(0) {
 
+          title = to_string();
+    // LOG(trace) << "SubSystem::SubSystem() | Creating sub system "<<title;
+  }
+
+  virtual std::string to_string() const {
     // Creating unique title
     std::stringstream stream;
     stream << "(";
     for (auto i : _recoilState)
       stream << std::to_string(i);
     stream << ")->(";
+
+    if (_decayParticle != 0)
+      stream << PhysConst::Instance()->FindParticle(_decayParticle).GetName();
+    stream << ")+(";
+
     for (auto i : _finalStateA)
       stream << std::to_string(i);
     stream << ")+(";
     for (auto i : _finalStateB)
       stream << std::to_string(i);
     stream << ")";
-    title = stream.str();
-    // LOG(trace) << "SubSystem::SubSystem() | Creating sub system "<<title;
+    
+    return stream.str();
   }
-
+  
   bool operator==(const SubSystem &b) const {
     if (_recoilState == b._recoilState && _finalStateA == b._finalStateA &&
         _finalStateB == b._finalStateB)
@@ -75,31 +86,26 @@ public:
   }
 
   friend std::ostream &operator<<(std::ostream &stream, const SubSystem &s) {
-    stream << "( ";
-    for (auto i : s._recoilState)
-      stream << i << " ";
-    stream << ") <-> ( ";
-    for (auto i : s._finalStateA)
-      stream << i << " ";
-    stream << ")( ";
-    for (auto i : s._finalStateB)
-      stream << i << " ";
-    stream << ")";
+    stream << s.to_string();
     return stream;
   }
 
-  std::vector<int> GetRecoilState() const { return _recoilState; }
-  std::vector<int> GetFinalStateA() const { return _finalStateA; }
-  std::vector<int> GetFinalStateB() const { return _finalStateB; }
-  void SetRecoilState(std::vector<int> r) { _recoilState = r; }
-  void SetFinalStateA(std::vector<int> f) { _finalStateA = f; }
-  void SetFinalStateB(std::vector<int> f) { _finalStateB = f; }
+  virtual std::vector<int> GetRecoilState() const { return _recoilState; }
+  virtual std::vector<int> GetFinalStateA() const { return _finalStateA; }
+  virtual std::vector<int> GetFinalStateB() const { return _finalStateB; }
+  virtual void SetRecoilState(std::vector<int> r) { _recoilState = r; }
+  virtual void SetFinalStateA(std::vector<int> f) { _finalStateA = f; }
+  virtual void SetFinalStateB(std::vector<int> f) { _finalStateB = f; }
+
+  virtual void SetDecayParticle(pid id) { _decayParticle = id; }
+  virtual pid GetDecayParticle() const { return _decayParticle; }
 
 protected:
   std::string title;
   std::vector<int> _recoilState;
   std::vector<int> _finalStateA;
   std::vector<int> _finalStateB;
+  pid _decayParticle;
 };
 
 /*! HelicityKinematics class.
@@ -139,12 +145,13 @@ public:
    * SubSystem that was requested via GetDataID(SubSystem).
    */
   void EventToDataPoint(const Event &event, dataPoint &point) const;
-  
+
   /*! Fill dataPoint point with variables for SubSystem.
-   * The triple (\f$m^2,cos\Theta, \phi\f$) is added to dataPoint for 
+   * The triple (\f$m^2,cos\Theta, \phi\f$) is added to dataPoint for
    * SubSystem sys.
    */
-  void EventToDataPoint(const Event &event, dataPoint &point, SubSystem sys) const;
+  void EventToDataPoint(const Event &event, dataPoint &point,
+                        SubSystem sys) const;
 
   // delete methods to ensure that there will only be one instance
   HelicityKinematics() = delete;

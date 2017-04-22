@@ -699,9 +699,7 @@ public:
    */
   DoubleParameter(std::string inName = "")
       : AbsParameter(inName, ParType::DOUBLE), fixed_(0), val_(0), min_(0),
-        max_(0) {
-    SetError(0);
-    bounds_ = usebounds_ = false;
+        max_(0), bounds_(false), errorType(ErrorType::NOTDEF) {
   }
 
   //! Standard constructor with a value
@@ -713,9 +711,7 @@ public:
    */
   DoubleParameter(std::string inName, const double value)
       : AbsParameter(inName, ParType::DOUBLE), fixed_(0), val_(value), min_(0),
-        max_(0) {
-    SetError(0);
-    bounds_ = usebounds_ = false;
+        max_(0), bounds_(false), errorType(ErrorType::NOTDEF) {
   }
 
   //! Standard constructor with value and error
@@ -728,9 +724,8 @@ public:
    */
   DoubleParameter(std::string inName, const double value, const double error)
       : AbsParameter(inName, ParType::DOUBLE), fixed_(0), val_(value), min_(0),
-        max_(0), errorType(ErrorType::NOTDEF) {
+        max_(0), bounds_(false), errorType(ErrorType::NOTDEF) {
     SetError(error);
-    bounds_ = usebounds_ = false;
   }
 
   //! Standard constructor with value and bounds
@@ -747,9 +742,7 @@ public:
   DoubleParameter(std::string inName, const double value, const double min,
                   const double max)
       : AbsParameter(inName, ParType::DOUBLE), fixed_(0), val_(value), min_(0),
-        max_(0) {
-    SetError(0);
-    bounds_ = usebounds_ = false;
+        max_(0), bounds_(false), errorType(ErrorType::NOTDEF) {
     SetMinMax(min, max);
   }
 
@@ -768,9 +761,8 @@ public:
   DoubleParameter(std::string inName, const double value, const double min,
                   const double max, const double error)
       : AbsParameter(inName, ParType::DOUBLE), fixed_(0), val_(value), min_(0),
-        max_(0) {
+        max_(0), bounds_(false), errorType(ErrorType::NOTDEF) {
     SetError(error);
-    bounds_ = usebounds_ = false;
     SetMinMax(min, max);
   }
   DoubleParameter(const DoubleParameter &in)
@@ -786,16 +778,8 @@ public:
 
   //! Check if parameter has bounds
   virtual inline bool HasBounds() const { return bounds_; }
-  //! Check if bounds should be used
-  virtual inline bool UseBounds() const {
-    if (bounds_)
-      return usebounds_;
-    return false;
-  }
   //! Check if parameter is fixed
   virtual inline bool IsFixed() const { return fixed_; }
-  //! Set if bounds should be used
-  virtual inline void SetUseBounds(const bool use) { usebounds_ = use; }
   //! Call to fix parameter
   virtual inline void SetParameterFixed() { fixed_ = true; }
   //! Call to free parameter
@@ -815,9 +799,8 @@ public:
       } catch (std::exception &ex) {
         // ignore if bound can not be set
       }
-      SetUseBounds(newPar->UseBounds());
     } else
-      bounds_ = usebounds_ = 0;
+      bounds_ = 0;
 
     bool isFix = newPar->IsFixed();
     // copy value
@@ -871,7 +854,7 @@ public:
     if (val_ == inVal)
       return;
 
-    if (usebounds_ && (inVal < GetMinValue() || inVal > GetMaxValue()))
+    if (bounds_ && (inVal < GetMinValue() || inVal > GetMaxValue()))
       throw ParameterOutOfBound(
           "DoubleParameter::SetValue() | "
           "Parameter " +
@@ -885,9 +868,9 @@ public:
 
   //! Setter for bounds of parameter
   virtual void SetRange(const double min, const double max) {
-    SetMinMax(min,max);
+    SetMinMax(min, max);
   }
-  
+
   //! Setter for bounds of parameter
   virtual void SetMinMax(const double min, const double max) {
     try {
@@ -904,7 +887,7 @@ public:
                                GetName() + ": " + std::to_string(GetValue()) +
                                " [" + std::to_string((long double)min_) + ";" +
                                std::to_string((long double)max_) + "]!");
-    bounds_ = usebounds_ = true;
+    bounds_ = true;
   }
   /*! Setter for lower bound
    * Setter for lower bound of the parameter. If a check for valid bounds
@@ -921,7 +904,7 @@ public:
                                 "Boundary not valid: [" +
                                 std::to_string(GetMinValue()) + ", " +
                                 std::to_string(GetMaxValue()) + "]!");
-    bounds_ = usebounds_ = true;
+    bounds_ = true;
   }
   /*! Setter for upper bound
    * Setter for upper bound of the parameter. If a check for valid bounds
@@ -938,7 +921,7 @@ public:
                                 "Boundary not valid: [" +
                                 std::to_string(GetMinValue()) + ", " +
                                 std::to_string(GetMaxValue()) + "]!");
-    bounds_ = usebounds_ = true;
+    bounds_ = true;
   }
   //====== PARAMETER ERROR ========
   //! Check if parameter has an error
@@ -970,10 +953,10 @@ public:
                                name_ + " has no errors defined!");
     //		if(GetErrorType()==ErrorType::SYM){
     //			LOG(info) << "DoubleParameter::GetErrorHigh() |
-    //Parameter
+    // Parameter
     //"<<name_
     //					<<" has no asymmetric errors! Returning
-    //symmetric
+    // symmetric
     // error";
     //			return GetError();
     //		}
@@ -988,10 +971,10 @@ public:
                                name_ + " has no errors defined!");
     //		if(GetErrorType()==ErrorType::SYM){
     //			LOG(info) << "DoubleParameter::GetErrorHigh() |
-    //Parameter
+    // Parameter
     //"<<name_
     //					<<" has no assymetric errors! Returning
-    //symmetric
+    // symmetric
     // error";
     //			return GetError();
     //		}
@@ -1029,7 +1012,6 @@ protected:
    */
   virtual std::string TypeName() const { return "double"; }
   bool bounds_;            /*!< Are valid bounds defined for this parameter? */
-  bool usebounds_;         /*!< Do you want to restrict your parameter? */
   bool fixed_;             /*!< Do you want to keep parameter fixed? */
   double val_, min_, max_; /*!< Current value, bounds*/
   //! error type
@@ -1105,7 +1087,6 @@ private:
     ar &boost::serialization::make_nvp(
         "AbsParameter", boost::serialization::base_object<AbsParameter>(*this));
     ar &make_nvp("bounds", bounds_);
-    ar &make_nvp("usebounds", usebounds_);
     ar &make_nvp("isFixed", fixed_);
     ar &make_nvp("value", val_);
     ar &make_nvp("min_value", min_);
@@ -1131,14 +1112,13 @@ BOOST_SERIALIZATION_SHARED_PTR(ComPWA::DoubleParameter)
  @param pt Input property tree
  @return Parameter
  */
-static DoubleParameter
-     DoubleParameterFactory(boost::property_tree::ptree pt) {
+static DoubleParameter DoubleParameterFactory(boost::property_tree::ptree pt) {
   DoubleParameter obj;
-       
+
   // Require that name and value are provided
-  obj.SetName( pt.get<std::string>("<xmlattr>.Name") );
-  obj.SetValue( pt.get<double>("Value") );
-  
+  obj.SetName(pt.get<std::string>("<xmlattr>.Name"));
+  obj.SetValue(pt.get<double>("Value"));
+
   // Optional settings
   if (pt.get_optional<double>("Error")) {
     obj.SetError(pt.get<double>("Error"));
@@ -1155,7 +1135,7 @@ static DoubleParameter
   } else { /* Do not set a asymmetric errors */
   }
 
-  if( pt.get_optional<bool>("Fix") )
+  if (pt.get_optional<bool>("Fix"))
     obj.FixParameter(pt.get<bool>("Fix"));
 
   if (pt.get_optional<double>("Min")) {
@@ -1172,6 +1152,38 @@ static DoubleParameter
   }
 
   return obj;
+}
+
+/**
+ Save a DoubleParameter object from a ptree. This approach is more or
+ less equivalent to the serialization of a parameter but provides a better
+ readable format.
+
+ @param pt Input parameter
+ @return property_tree
+ */
+static boost::property_tree::ptree DoubleParameterSave(DoubleParameter par) {
+  boost::property_tree::ptree pt;
+  DoubleParameter obj;
+
+  // Require that name and value are provided
+  pt.put("<xmlattr>.Name", par.GetName());
+  pt.put("Value", par.GetValue());
+  pt.put("Fix", par.IsFixed());
+  if( par.HasBounds() ) {
+    pt.put("Min", par.GetMinValue());
+    pt.put("Max", par.GetMaxValue());
+  }
+  if (par.HasError()) {
+    if (par.GetErrorLow() == par.GetErrorHigh())
+      pt.put("Error", par.GetError());
+    else {
+      pt.put("ErrorLow", par.GetErrorLow());
+      pt.put("ErrorHigh", par.GetErrorHigh());
+    }
+  }
+
+  return pt;
 }
 
 class IntegerParameter : public AbsParameter {

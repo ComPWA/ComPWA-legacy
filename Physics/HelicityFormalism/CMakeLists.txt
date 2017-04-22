@@ -43,11 +43,11 @@ foreach(testSrc ${TEST_SRCS})
   foreach( TestIn ${TestInput} )
     get_filename_component( TestInName ${TestIn} NAME )
 
-#add_custom_command(
-#      TARGET ${testName} POST_BUILD
-#      COMMAND ${CMAKE_COMMAND} -E copy
-#      ${CMAKE_CURRENT_SOURCE_DIR}/test/${TestInName}
-#      ${EXECUTABLE_OUTPUT_PATH}/testBin/${TestInName} )
+  add_custom_command(
+      TARGET ${testName} POST_BUILD
+      COMMAND ${CMAKE_COMMAND} -E copy
+      ${CMAKE_CURRENT_SOURCE_DIR}/test/${TestInName}
+      ${EXECUTABLE_OUTPUT_PATH}/testBin/${TestInName} )
   endforeach( TestIn )
 
   #Finally add it to test execution -

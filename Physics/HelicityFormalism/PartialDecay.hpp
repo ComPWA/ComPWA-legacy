@@ -61,6 +61,8 @@ public:
   static std::shared_ptr<PartialDecay>
   Factory(const boost::property_tree::ptree &pt);
 
+  static boost::property_tree::ptree Save(std::shared_ptr<PartialDecay> obj);
+  
   /**
    Get WignerD function
 
@@ -86,7 +88,7 @@ public:
    @return Shared_ptr<AbstractDynamicalFunction>
    */
   std::shared_ptr<ComPWA::Physics::HelicityFormalism::AbstractDynamicalFunction>
-  SetDynamicalFunction() {
+  GetDynamicalFunction() {
     return _dynamic;
   }
 

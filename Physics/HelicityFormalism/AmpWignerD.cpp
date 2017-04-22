@@ -1,3 +1,11 @@
+ 
+                                                                           
+                                                                       
+        
+      
+    
+  
+
 //-------------------------------------------------------------------------------
 // Copyright (c) 2013 Peter Weidenkaff.
 // All rights reserved. This program and the accompanying materials
@@ -22,10 +30,10 @@ namespace Physics {
 namespace HelicityFormalism {
 
 AmpWignerD::AmpWignerD(ComPWA::Spin spin, unsigned int mu, unsigned int muPrime)
-    : _spin(spin), _mu(mu), _muPrime(muPrime) {}
+    : _spin(spin), _mu(mu), _helicities(muPrime, 0) {}
 
 double AmpWignerD::Evaluate(const dataPoint &point, int pos1, int pos2) const {
-  return dynamicalFunction(_spin, Spin(_mu), Spin(_muPrime),
+  return dynamicalFunction(_spin, _mu, (_helicities.first - _helicities.second),
                            point.GetValue(pos1));
 }
 
@@ -76,7 +84,8 @@ AmpWignerD::dynamicalFunction(double cosAlpha, double cosBeta, double cosGamma,
   return result;
 }
 
-std::shared_ptr<FunctionTree> AmpWignerD::GetTree(ParameterList &sample, int posTheta, int posPhi,
+std::shared_ptr<FunctionTree> AmpWignerD::GetTree(ParameterList &sample,
+                                                  int posTheta, int posPhi,
                                                   std::string suffix) {
   std::shared_ptr<FunctionTree> newTree(new FunctionTree());
 
@@ -91,7 +100,8 @@ std::shared_ptr<FunctionTree> AmpWignerD::GetTree(ParameterList &sample, int pos
 
   newTree->createLeaf("spin", (double)_spin, "WignerD" + suffix); // spin
   newTree->createLeaf("m", (double)_mu, "WignerD" + suffix);      // OutSpin 1
-  newTree->createLeaf("n", (double)_muPrime, "WignerD" + suffix); // OutSpin 2
+  newTree->createLeaf("n", (double)(_helicities.first - _helicities.second),
+                      "WignerD" + suffix); // OutSpin 2
   newTree->createLeaf("data_cosTheta[" + std::to_string(posTheta) + "]",
                       sample.GetMultiDouble(posTheta), "WignerD" + suffix);
   newTree->createLeaf("data_phi[" + std::to_string(posPhi) + "]",

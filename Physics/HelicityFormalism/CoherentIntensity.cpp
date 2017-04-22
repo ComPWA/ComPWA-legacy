@@ -55,6 +55,18 @@ CoherentIntensity::Factory(const boost::property_tree::ptree &pt) {
   }
   return obj;
 }
+  
+boost::property_tree::ptree
+CoherentIntensity::Save(std::shared_ptr<CoherentIntensity> obj) {
+
+  boost::property_tree::ptree pt;
+  pt.put<std::string>("<xmlattr>.Name",obj->GetName());
+  pt.add_child("Strength", ComPWA::DoubleParameterSave(*obj->GetStrength().get()));
+  for( auto i : obj->GetDecays() ) {
+    pt.add_child("Amplitude", SequentialTwoBodyDecay::Save(i));
+  }
+  return pt;
+}
 
 //! Getter function for basic amp tree
 std::shared_ptr<ComPWA::FunctionTree> CoherentIntensity::GetTree(

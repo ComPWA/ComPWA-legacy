@@ -18,6 +18,8 @@ namespace HelicityFormalism {
 
 class IncoherentIntensity : public ComPWA::AmpIntensity {
 public:
+  
+  IncoherentIntensity() : ComPWA::AmpIntensity() {}
   //! Function to create a full copy of the amplitude
   ComPWA::AmpIntensity *Clone(std::string newName = "") const {
     auto tmp = (new IncoherentIntensity(*this));
@@ -46,8 +48,22 @@ public:
     _intens.push_back(d);
   }
 
+  std::shared_ptr<ComPWA::Physics::HelicityFormalism::CoherentIntensity>
+  GetIntensity(int pos) {
+    return _intens.at(pos);
+  }
+
+  std::vector<
+      std::shared_ptr<ComPWA::Physics::HelicityFormalism::CoherentIntensity>> &
+  GetIntensities() {
+    return _intens;
+  }
+
   static std::shared_ptr<IncoherentIntensity>
   Factory(const boost::property_tree::ptree &pt);
+
+  static boost::property_tree::ptree
+  Save(std::shared_ptr<IncoherentIntensity> intens);
 
   //=========== EVALUATION =================
   /** Calculate intensity of amplitude at point in phase-space
@@ -69,7 +85,7 @@ public:
     for (auto i : _intens) {
       result += i->IntensityNoEff(point);
     }
-    return GetStrengthValue()*result;
+    return GetStrengthValue() * result;
   }
 
   //=========== PARAMETERS =================
@@ -89,7 +105,7 @@ public:
   virtual std::shared_ptr<ComPWA::FunctionTree>
   GetTree(ComPWA::ParameterList &sample, ComPWA::ParameterList &phspSample,
           ComPWA::ParameterList &toySample, std::string suffix = "");
-  
+
   /**
    Get number of partial decays
 

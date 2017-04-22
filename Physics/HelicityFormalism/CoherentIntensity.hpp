@@ -61,10 +61,24 @@ public:
   static std::shared_ptr<CoherentIntensity>
   Factory(const boost::property_tree::ptree &pt);
 
+  static boost::property_tree::ptree
+  Save(std::shared_ptr<CoherentIntensity> intens);
+
   void Add(std::shared_ptr<
            ComPWA::Physics::HelicityFormalism::SequentialTwoBodyDecay>
                d) {
     _seqDecays.push_back(d);
+  }
+
+  std::shared_ptr<ComPWA::Physics::HelicityFormalism::SequentialTwoBodyDecay>
+  GetDecay(int pos) {
+    return _seqDecays.at(pos);
+  }
+
+  std::vector<std::shared_ptr<
+      ComPWA::Physics::HelicityFormalism::SequentialTwoBodyDecay>> &
+  GetDecays() {
+    return _seqDecays;
   }
 
   //! Get number of partial decays
@@ -97,7 +111,7 @@ protected:
 
   virtual std::shared_ptr<FunctionTree>
   setupBasicTree(ParameterList &sample, ParameterList &phspSample,
-                 std::string suffix="") const;
+                 std::string suffix = "") const;
 
   std::vector<std::shared_ptr<
       ComPWA::Physics::HelicityFormalism::SequentialTwoBodyDecay>>
