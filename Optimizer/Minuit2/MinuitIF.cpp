@@ -84,7 +84,7 @@ std::shared_ptr<FitResult> MinuitIF::exec(ParameterList &par) {
         actPat->GetName().find("phase") != actPat->GetName().npos)
       actPat->SetValue(shiftAngle(actPat->GetValue()));
 
-    if (actPat->UseBounds()) {
+    if (actPat->HasBounds()) {
       upar.Add(actPat->GetName(), actPat->GetValue(), error,
                actPat->GetMinValue(), actPat->GetMaxValue());
     } else {

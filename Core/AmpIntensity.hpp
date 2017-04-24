@@ -10,20 +10,8 @@
 //
 // Contributors:
 //     Mathias Michel - initial API and implementation
-//		Peter Weidenkaff - adding UnitAmp
+//		 Peter Weidenkaff - adding UnitAmp
 //-------------------------------------------------------------------------------
-//! Physics Interface Base-Class.
-/*! \class AmpIntensity
- * @file AmpIntensity.hpp
- * This class provides the interface to the model which tries to describe the
- * intensity. As it is pure virtual, one needs at least one implementation to
- * provide an model for the analysis which calculates intensities for an event
- * on
- * basis model parameters. If a new physics-model is derived from and fulfills
- * this base-class, no change in other modules are necessary to work with the
- * new
- * physics module.
- */
 
 #ifndef AMPINTENSITY_HPP_
 #define AMPINTENSITY_HPP_
@@ -40,37 +28,41 @@
 #include "Core/Efficiency.hpp"
 #include "Core/Generator.hpp"
 
-//#include "Core/Amplitude.hpp"
-//#include "Core/Resonance.hpp"
-
 namespace ComPWA {
 
+/*! \class AmpIntensity
+ * This class provides the interface an amplitude intensity. The intensity can 
+ * be moduled with a (double) strength parameter. The intensity has
+ * to be normalized to one when integrated over the phase space. 
+ * Since the intensity is a physically observable quantity it has to be 
+ * corrected for the space depended reconstruction efficiency. The normalization
+ * has to take this into account as well.
+ */
 class AmpIntensity {
 
 public:
-  //! Constructor with an optional, unique name and an optional efficiency
+  //! Constructor with an optional name, strength and efficiency
   AmpIntensity(std::string name = "",
                std::shared_ptr<DoubleParameter> strength =
-                   std::shared_ptr<DoubleParameter>(
-                       new DoubleParameter("", 1.0)),
+                   std::shared_ptr<DoubleParameter>(new DoubleParameter("",
+                                                                        1.0)),
                std::shared_ptr<Efficiency> eff =
                    std::shared_ptr<Efficiency>(new UnitEfficiency))
       : _name(name), _eff(eff), _strength(strength) {
-        _strength->FixParameter(true);
-      }
+    _strength->FixParameter(true);
+  }
 
-  //! Destructor
   virtual ~AmpIntensity() { /* nothing */
   }
 
-  //! Function to create a full copy of the amplitude
+  //! Function to create a full copy
   virtual AmpIntensity *Clone(std::string newName = "") const = 0;
 
   //============ SET/GET =================
-  //! Get name of amplitude
+  //! Get name
   virtual std::string GetName() const { return _name; }
 
-  //! Set name of amplitude
+  //! Set name
   virtual void SetName(std::string name) { _name = name; }
 
   //! Get efficiency
@@ -79,39 +71,33 @@ public:
   //! Set efficiency
   virtual void SetEfficiency(std::shared_ptr<Efficiency> eff) { _eff = eff; };
 
-  /** Get maximum value of amplitude
+  /*! Get maximum value of amplitude.
    * Maximum is numerically calculated using a random number generator
-   * @param gen Random number generator
-   * @return
    */
   virtual double GetMaximum(std::shared_ptr<Generator> gen) const = 0;
 
   //============= PRINTING =====================
-  //! Print amplitude to logging system
+  //! Print identifier to logging system
   virtual void to_str() const = 0;
 
   //=========== INTEGRATION/NORMALIZATION =================
-  /** Calculate normalization of amplitude.
-   * The integral includes efficiency correction
-   */
+  //! Calculate normalization
   virtual double GetNormalization() const { return 1 / Integral(); }
 
   //=========== EVALUATION =================
-  /** Calculate intensity of amplitude at point in phase-space
-   *
+  /*! Evaluate intensity at dataPoint in phase-space
    * @param point Data point
-   * @return
+   * @return Intensity
    */
   virtual double Intensity(const dataPoint &point) const = 0;
 
-  /** Calculate intensity of amplitude at point in phase-space
-   * Intensity is calculated excluding efficiency correction
+  /*! Evaluate intensity at dataPoint in phase-space (excluding efficiency correction).
    * @param point Data point
-   * @return
+   * @return Intensity
    */
   virtual double IntensityNoEff(const dataPoint &point) const = 0;
 
-  //! Add parameters to list
+  //! Fill ParameterList
   virtual void GetParameters(ParameterList &list) = 0;
 
   //! Fill ParameterList with fit fractions
@@ -119,56 +105,45 @@ public:
 
   //========== FUNCTIONTREE =============
   //! Check of tree is available
-  virtual bool HasTree() { return 0; }
+  virtual bool HasTree() { return false; }
 
-  //! Getter function for basic amp tree
-  virtual std::shared_ptr<FunctionTree> GetTree(ParameterList &,
-                                                ParameterList &,
-                                                ParameterList &,
+  /*! Get FunctionTree
+   * @param sample Data sample
+   * @param phspSample Sample of phase space distributed events including efficiency.
+   * @param toySample Sample of phase space distributed events without efficiency.
+   */
+  virtual std::shared_ptr<FunctionTree> GetTree(ParameterList & sample,
+                                                ParameterList & phspSample,
+                                                ParameterList & toySample,
                                                 std::string suffix = "") {
     return std::shared_ptr<FunctionTree>();
   }
 
-  /**
-   Get strength parameter
-
-   @return strength parameter
-   */
+  //! Get strength parameter
   std::shared_ptr<ComPWA::DoubleParameter> GetStrength() { return _strength; }
 
-  /**
-   Get strength parameter
-
-   @return strength parameter
-   */
+  //! Get strength parameter
   double GetStrengthValue() const { return _strength->GetValue(); }
 
-  /**
-   Set strength parameter
-
-   @param par Strength parameter
-   */
+  //! Set strength parameter
   void SetStrength(std::shared_ptr<ComPWA::DoubleParameter> par) {
     _strength = par;
   }
 
-  /**
-   Set strength parameter
-
-   @param par Strength parameter
-   */
+  //! Set strength parameter
   void SetStrength(double par) { _strength->SetValue(par); }
 
 protected:
-  /** Calculate integral of amplitude.
-   * The integral does not include efficiency correction
+  /*! Calculate integral.
+   * Since AmpIntensity represents an intensity the integration has to
+   * incorporate the phase space depended efficiency.
    */
   virtual double Integral() const = 0;
 
   //! Name
   std::string _name;
 
-  //! Efficiency object
+  //! Phase space depended efficiency
   std::shared_ptr<Efficiency> _eff;
 
   std::shared_ptr<ComPWA::DoubleParameter> _strength;
@@ -226,7 +201,7 @@ public:
     return Intensity(p);
   }
 
-  virtual void GetParameters(ParameterList &list) {};
+  virtual void GetParameters(ParameterList &list){};
 
   virtual double Intensity(const dataPoint &point) const {
 
@@ -290,7 +265,7 @@ public:
     return _eff->Evaluate(point);
   }
 
-  virtual void GetParameters(ParameterList &list) {};
+  virtual void GetParameters(ParameterList &list){};
 
   virtual double IntensityNoEff(const dataPoint &point) const { return 1.0; }
   virtual void GetFitFractions(ParameterList &parList) {}

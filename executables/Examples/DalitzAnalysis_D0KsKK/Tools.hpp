@@ -35,19 +35,6 @@ inline std::string expand_user(std::string p) {
   return path;
 }
 
-inline void createAmp(std::string name,
-                      std::vector<std::shared_ptr<ComPWA::AmpIntensity>> &ampV,
-                      std::string xmlInput,
-                      std::shared_ptr<ComPWA::Efficiency> eff,
-                      double mcPrecision, std::string ampOption) {
-  auto DzeroAmp = new ComPWA::Physics::AmplitudeSum::AmpSumIntensity(
-      name, ComPWA::normStyle::one, eff, mcPrecision);
-  DzeroAmp->Configure(expand_user(xmlInput));
-  auto tmpAmp =
-      std::shared_ptr<ComPWA::Physics::AmplitudeSum::AmpSumIntensity>(DzeroAmp);
-  ampV.push_back(tmpAmp);
-}
-
 inline void setErrorOnParameterList(ComPWA::ParameterList &list, double error,
                                     bool asym) {
   for (unsigned int i = 0; i < list.GetNDouble(); i++) {
@@ -69,7 +56,7 @@ inline void randomStartValues(ComPWA::ParameterList &fitPar) {
     if (p->IsFixed())
       continue;
     double min = -999, max = 999;
-    if (p->UseBounds()) {
+    if (p->HasBounds()) {
       min = p->GetMinValue();
       max = p->GetMaxValue();
     }
