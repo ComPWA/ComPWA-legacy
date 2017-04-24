@@ -62,7 +62,7 @@ public:
   ParticleProperties(boost::property_tree::ptree pt)
       : Properties(pt.get<std::string>("<xmlattr>.Name"), pt.get<pid>("Id")) {
 
-    SetMass(DoubleParameterFactory(pt.get_child("Mass")));
+    SetMassPar(DoubleParameterFactory(pt.get_child("Mass")));
     // Parameters optional. Shall we require them?
     SetSpin(ComPWA::Spin(pt.get<double>("Spin", 0.)));
     SetIsoSpin(ComPWA::Spin(pt.get<double>("IsoSpin", 0.)));

@@ -99,4 +99,12 @@ double Kinematics::GetPhspVolume() {
   return PS_area_;
 }
 
+void Kinematics::SetPhspVolume(double vol) {
+  PS_area_ = vol;
+  is_PS_area_calculated_ = true;
+  
+  LOG(info)<<"Kinematics::SetPhspVolume() | Setting phase space "
+  "volume to "<<std::to_string(GetPhspVolume())<<".";
+}
+
 } /* namespace ComPWA */

@@ -699,8 +699,7 @@ public:
    */
   DoubleParameter(std::string inName = "")
       : AbsParameter(inName, ParType::DOUBLE), fixed_(0), val_(0), min_(0),
-        max_(0), bounds_(false), errorType(ErrorType::NOTDEF) {
-  }
+        max_(0), bounds_(false), errorType(ErrorType::NOTDEF) {}
 
   //! Standard constructor with a value
   /*!
@@ -711,8 +710,7 @@ public:
    */
   DoubleParameter(std::string inName, const double value)
       : AbsParameter(inName, ParType::DOUBLE), fixed_(0), val_(value), min_(0),
-        max_(0), bounds_(false), errorType(ErrorType::NOTDEF) {
-  }
+        max_(0), bounds_(false), errorType(ErrorType::NOTDEF) {}
 
   //! Standard constructor with value and error
   /*!
@@ -1003,6 +1001,50 @@ public:
     SetErrorLow(err);
   }
 
+  bool operator==(DoubleParameter otherPar) const {
+    if (this->type() != otherPar.type())
+      return false;
+    if (this->GetName() != otherPar.GetName())
+      return false;
+    if (this->GetValue() != otherPar.GetValue())
+      return false;
+
+    /* We assume that if name and value are the same both parameters match. In
+     * case that other properties of the parameterts differ we throw an
+     * exception since we assume that this is a user mistake.
+     */
+    if (bounds_ != otherPar.bounds_ ||
+        this->GetMinValue() != otherPar.GetMinValue() ||
+        this->GetMaxValue() != otherPar.GetMaxValue())
+      throw std::runtime_error("DoubleParameter::operator==() | Parameters "
+                               "match by name (" +
+                               GetName() + ") and value (" +
+                               std::to_string(GetValue()) +
+                               ") but differs in "
+                               "parameter bounds. We assume that there is a "
+                               "mistake. Check your input files!");
+    
+    if (fixed_ != otherPar.fixed_)
+      throw std::runtime_error(
+          "DoubleParameter::operator==() | Parameters "
+          "match by name (" +
+          GetName() + ") and value (" + std::to_string(GetValue()) +
+          ") but one is fixed the other not. "
+          "We assume that there is a mistake. Check your input files!");
+    
+    if (errorType != otherPar.errorType || errorLow != otherPar.errorLow ||
+        errorHigh != otherPar.errorHigh)
+      throw std::runtime_error("DoubleParameter::operator==() | Parameters "
+                               "match by name (" +
+                               GetName() + ") and value (" +
+                               std::to_string(GetValue()) +
+                               ") but differs in "
+                               "parameter error. We assume that there is a "
+                               "mistake. Check your input files!");
+
+    return true;
+  }
+
 protected:
   //	std::string out_; /*!< Output string to print information */
   /*! A public function returning a string naming its type
@@ -1020,6 +1062,7 @@ protected:
   double errorLow;
   //! upper parameter error
   double errorHigh;
+
   //! Setter for upper error of parameter
   virtual void SetErrorHigh(double errHigh) { errorHigh = errHigh; }
   //! Setter for lower error of parameter
@@ -1170,7 +1213,7 @@ static boost::property_tree::ptree DoubleParameterSave(DoubleParameter par) {
   pt.put("<xmlattr>.Name", par.GetName());
   pt.put("Value", par.GetValue());
   pt.put("Fix", par.IsFixed());
-  if( par.HasBounds() ) {
+  if (par.HasBounds()) {
     pt.put("Min", par.GetMinValue());
     pt.put("Max", par.GetMaxValue());
   }

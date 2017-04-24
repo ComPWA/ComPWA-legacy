@@ -34,8 +34,20 @@ namespace HelicityFormalism {
 class PartialDecay : ComPWA::Resonance {
 
 public:
-  PartialDecay() : _preFactor(1, 0){};
+  PartialDecay() {};
+  
+  //! Clone function
+  virtual PartialDecay *Clone(std::string newName = "") const {
+    auto tmp = new PartialDecay(*this);
+    tmp->SetName(newName);
+    return tmp;
+  }
 
+  //! Implementation of interface for streaming info about the strategy
+  virtual std::string to_str() const { return std::string("PartialDecay"); }
+  
+  virtual void GetParameters(ParameterList& list);
+  
   /**! Evaluate decay */
   std::complex<double> Evaluate(const dataPoint &point) const {
     std::complex<double> result =
@@ -104,89 +116,6 @@ public:
     _dynamic = f;
   }
 
-  /**
-   Get strength parameter
-
-   @return strength parameter
-   */
-  std::shared_ptr<ComPWA::DoubleParameter> GetMagnitudePar() {
-    return _magnitude;
-  }
-
-  /**
-   Get strength parameter
-
-   @return strength parameter
-   */
-  double GetMagnitude() const { return _magnitude->GetValue(); }
-
-  /**
-   Set strength parameter
-
-   @param par Strength parameter
-   */
-  void SetMagnitudePar(std::shared_ptr<ComPWA::DoubleParameter> par) {
-    _magnitude = par;
-  }
-
-  /**
-   Set strength parameter
-
-   @param par Strength parameter
-   */
-  void SetMagnitude(double par) { _magnitude->SetValue(par); }
-
-  /**
-   Get phase parameter
-
-   @return Phase parameter
-   */
-  std::shared_ptr<ComPWA::DoubleParameter> GetPhasePar() { return _phase; }
-
-  /**
-   Get phase parameter
-
-   @return Phase parameter
-   */
-  double GetPhase() const { return _phase->GetValue(); }
-
-  /**
-   Set phase parameter
-
-   @param par Phase parameter
-   */
-  void SetPhasePar(std::shared_ptr<ComPWA::DoubleParameter> par) {
-    _phase = par;
-  }
-
-  /**
-   Set phase parameter
-
-   @param par Phase parameter
-   */
-  void SetPhase(double par) { _phase->SetValue(par); }
-
-  //! Get coefficient
-  virtual std::complex<double> GetCoefficient() const {
-    return std::polar(_magnitude->GetValue(), _phase->GetValue());
-  }
-
-  //! Set prefactor
-  virtual void SetPrefactor(std::complex<double> pre) { _preFactor = pre; }
-
-  //! Get prefactor
-  virtual std::complex<double> GetPrefactor() const { return _preFactor; }
-
-  //! Implementation of interface for streaming info about the strategy
-  virtual std::string to_str() const { return std::string("PartialDecay"); }
-
-  //! Clone function
-  virtual PartialDecay *Clone(std::string newName = "") const {
-    auto tmp = new PartialDecay(*this);
-    tmp->SetName(newName);
-    return tmp;
-  }
-
   //! Set position of variables within dataPoint
   void SetDataPosition(int pos) { _dataPos = pos; }
 
@@ -215,9 +144,6 @@ protected:
 
   SubSystem _subSystem;
 
-  std::shared_ptr<ComPWA::DoubleParameter> _magnitude;
-  std::shared_ptr<ComPWA::DoubleParameter> _phase;
-  std::complex<double> _preFactor;
   std::shared_ptr<ComPWA::Physics::HelicityFormalism::AmpWignerD> _angD;
   std::shared_ptr<ComPWA::Physics::HelicityFormalism::AbstractDynamicalFunction>
       _dynamic;

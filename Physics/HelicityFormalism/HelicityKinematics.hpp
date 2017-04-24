@@ -256,6 +256,7 @@ protected:
    * The tree is expected to contain something like:
    * @code
     <HelicityKinematics>
+      <PhspVolume>1.45</PhspVolume>
       <InitialState>
         <Particle Name='jpsi' />
       </InitialState>

@@ -145,6 +145,9 @@ public:
   //! Fill ParameterList with fit fractions
   virtual void GetFitFractions(ParameterList &parList){};
 
+  //! Fill ParameterList with fit fractions
+  virtual void GetParameters(ParameterList &list);
+  
   /**
    Get number of partial decays
 

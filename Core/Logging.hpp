@@ -48,10 +48,10 @@ public:
     init(outFileName, minLevel);
   };
 
-  void setLogLevel(boost::log::trivial::severity_level minLevel);
+  void SetLogLevel(boost::log::trivial::severity_level minLevel);
 
-  void setLogLevel(std::string minLevel) {
-    setLogLevel(stringToLoggingLevel(minLevel));
+  void SetLogLevel(std::string minLevel) {
+    SetLogLevel(stringToLoggingLevel(minLevel));
   };
 
 private:

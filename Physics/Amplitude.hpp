@@ -81,7 +81,7 @@ public:
   virtual void UpdateParameters(ParameterList &par) { /* TODO */ }
 
   //! Add parameters to list
-  virtual void GetParameters(ParameterList &list) const{
+  virtual void GetParameters(ParameterList &list) {
 	  list.AddParameter(_magnitude);
 	  list.AddParameter(_phase);
   }

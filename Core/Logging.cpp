@@ -45,10 +45,10 @@ void Logging::init(std::string out, trivial::severity_level minLevel) {
              << expressions::format_date_time<boost::posix_time::ptime>(
                     "TimeStamp", "%Y-%m-%d %H:%M:%S")
              << " [" << trivial::severity << "] : " << expressions::smessage));
-    core::get()->set_filter(trivial::severity >= minLevel);
     LOG(info) << "Logging: using output filename: " << out
               << ", Severity level: " << minLevel;
   }
+  core::get()->set_filter(trivial::severity >= minLevel);
 
   // Print local time and date at the beginning
   boost::posix_time::ptime todayUtc(
@@ -58,7 +58,7 @@ void Logging::init(std::string out, trivial::severity_level minLevel) {
             << boost::posix_time::to_simple_string(todayUtc);
 }
 
-void Logging::setLogLevel(trivial::severity_level minLevel) {
+void Logging::SetLogLevel(trivial::severity_level minLevel) {
   core::get()->set_filter(trivial::severity >= minLevel);
   LOG(info) << "New severity level: " << minLevel;
 }

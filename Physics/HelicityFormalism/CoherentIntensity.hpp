@@ -97,7 +97,7 @@ public:
    * Add parameters only to list if not already in
    * @param list Parameter list to be filled
    */
-  virtual void GetParameters(ComPWA::ParameterList &list) const {};
+  virtual void GetParameters(ComPWA::ParameterList &list);
 
   //! Calculate & fill fit fractions of this amplitude to ParameterList
   virtual void GetFitFractions(ComPWA::ParameterList &parList){};

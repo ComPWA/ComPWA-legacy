@@ -176,6 +176,13 @@ std::shared_ptr<FunctionTree> PartialDecay::GetTree(ParameterList &sample,
 
   return tr;
 }
+  
+  void PartialDecay::GetParameters(ParameterList& list){
+    Resonance::GetParameters(list);
+//    _angD->GetParameters(list);
+    _dynamic->GetParameters(list);
+  }
+  
 } /* namespace HelicityFormalism */
 } /* namespace Physics */
 } /* namespace ComPWA */

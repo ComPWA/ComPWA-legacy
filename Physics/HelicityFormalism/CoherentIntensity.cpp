@@ -166,6 +166,12 @@ CoherentIntensity::setupBasicTree(ParameterList &sample,
   return newTree;
 }
 
+  void CoherentIntensity::GetParameters(ComPWA::ParameterList &list){
+    list.AddParameter(GetStrength());
+    for( auto i:_seqDecays){
+      i->GetParameters(list);
+    }
+  }
 } /* namespace HelicityFormalism */
 } /* namespace Physics */
 } /* namespace ComPWA */

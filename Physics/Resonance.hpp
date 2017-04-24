@@ -29,7 +29,7 @@ enum normStyle {
 
 class Resonance {
 public:
-  Resonance(){};
+  Resonance(): _preFactor(1, 0){};
   virtual ~Resonance(){};
 
   //! Clone function
@@ -45,26 +45,83 @@ public:
   virtual std::string to_str() const = 0;
 
   //! Set prefactor
-  virtual void SetPrefactor(std::complex<double> pre) = 0;
+  virtual void SetPrefactor(std::complex<double> pre) { _preFactor = pre; }
 
   //! Get prefactor
-  virtual std::complex<double> GetPrefactor() const = 0;
+  virtual std::complex<double> GetPrefactor() const { return _preFactor; }
 
   //! Get coefficient
-  virtual std::complex<double> GetCoefficient() const = 0;
+  virtual std::complex<double> GetCoefficient() const {
+    return std::polar(_magnitude->GetValue(), _phase->GetValue());
+  }
 
-  //! Get magnitude of resonance name
-  virtual double GetMagnitude() const = 0;
+  /**
+   Get strength parameter
 
-  //! Get magnitude of resonance id
-  virtual std::shared_ptr<DoubleParameter> GetMagnitudePar() = 0;
+   @return strength parameter
+   */
+  std::shared_ptr<ComPWA::DoubleParameter> GetMagnitudePar() {
+    return _magnitude;
+  }
 
-  //! Get phase of resonance name
-  virtual double GetPhase() const = 0;
+  /**
+   Get strength parameter
 
-  //! Get phase of resonance id
-  virtual std::shared_ptr<DoubleParameter> GetPhasePar() = 0;
+   @return strength parameter
+   */
+  double GetMagnitude() const { return _magnitude->GetValue(); }
 
+  /**
+   Set strength parameter
+
+   @param par Strength parameter
+   */
+  void SetMagnitudePar(std::shared_ptr<ComPWA::DoubleParameter> par) {
+    _magnitude = par;
+  }
+
+  /**
+   Set strength parameter
+
+   @param par Strength parameter
+   */
+  void SetMagnitude(double par) { _magnitude->SetValue(par); }
+
+  /**
+   Get phase parameter
+
+   @return Phase parameter
+   */
+  std::shared_ptr<ComPWA::DoubleParameter> GetPhasePar() { return _phase; }
+
+  /**
+   Get phase parameter
+
+   @return Phase parameter
+   */
+  double GetPhase() const { return _phase->GetValue(); }
+
+  /**
+   Set phase parameter
+
+   @param par Phase parameter
+   */
+  void SetPhasePar(std::shared_ptr<ComPWA::DoubleParameter> par) {
+    _phase = par;
+  }
+
+  /**
+   Set phase parameter
+
+   @param par Phase parameter
+   */
+  void SetPhase(double par) { _phase->SetValue(par); }
+  
+  virtual void GetParameters(ParameterList& list) {
+    list.AddParameter(GetMagnitudePar());
+    list.AddParameter(GetPhasePar());
+  }
+  
   //! value of resonance at \param point
   virtual std::complex<double> Evaluate(const dataPoint &point) const = 0;
 
@@ -72,8 +129,13 @@ public:
                                                   ParameterList &phspSample,
                                                   ParameterList &toySample,
                                                   std::string suffix) = 0;
+  
+  
 protected:
   std::string _name;
+  std::shared_ptr<ComPWA::DoubleParameter> _magnitude;
+  std::shared_ptr<ComPWA::DoubleParameter> _phase;
+  std::complex<double> _preFactor;
 };
   
 } /* namespace ComPWA */

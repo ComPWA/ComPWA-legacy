@@ -21,7 +21,7 @@ IncoherentIntensity::Factory(const boost::property_tree::ptree &pt) {
 
   // Name is not required - default value 'empty'
   obj->SetName(
-      pt.get<std::string>("IncoherentIntensity.<xmlattr>.Name", "empty"));
+      pt.get<std::string>("<xmlattr>.Name", "empty"));
 
   auto ptCh = pt.get_child_optional("Strength");
   if (ptCh) {
@@ -32,7 +32,7 @@ IncoherentIntensity::Factory(const boost::property_tree::ptree &pt) {
     obj->GetStrength()->SetParameterFixed();
   }
   
-  for (const auto &v : pt.get_child("IncoherentIntensity")) {
+  for (const auto &v : pt.get_child("")) {
     if (v.first == "CoherentIntensity")
       obj->Add(ComPWA::Physics::HelicityFormalism::CoherentIntensity::Factory(
           v.second));
@@ -49,10 +49,7 @@ IncoherentIntensity::Save(std::shared_ptr<IncoherentIntensity> obj) {
   for( auto i : obj->GetIntensities() ) {
     pt.add_child("CoherentIntensity", CoherentIntensity::Save(i));
   }
-  
-  boost::property_tree::ptree ptOut;
-  ptOut.add_child("IncoherentIntensity",pt);
-  return ptOut;
+  return pt;
 }
 
 std::shared_ptr<ComPWA::FunctionTree> IncoherentIntensity::GetTree(
@@ -74,7 +71,16 @@ std::shared_ptr<ComPWA::FunctionTree> IncoherentIntensity::GetTree(
   }
   return tr;
 }
-
+  
+  void IncoherentIntensity::GetParameters(ComPWA::ParameterList &list){
+    
+    list.AddParameter(GetStrength());
+    for( auto i : GetIntensities() ) {
+      i->GetParameters(list);
+    }
+    
+  }
+  
 } /* namespace HelicityFormalism */
 } /* namespace Physics */
 } /* namespace ComPWA */

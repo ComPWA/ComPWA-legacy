@@ -112,7 +112,7 @@ public:
   virtual double IntensityNoEff(const dataPoint &point) const = 0;
 
   //! Add parameters to list
-  virtual void GetParameters(ParameterList &list) const = 0;
+  virtual void GetParameters(ParameterList &list) = 0;
 
   //! Fill ParameterList with fit fractions
   virtual void GetFitFractions(ParameterList &parList) = 0;
@@ -226,7 +226,7 @@ public:
     return Intensity(p);
   }
 
-  virtual void GetParameters(ParameterList &list) const {};
+  virtual void GetParameters(ParameterList &list) {};
 
   virtual double Intensity(const dataPoint &point) const {
 
@@ -290,7 +290,7 @@ public:
     return _eff->Evaluate(point);
   }
 
-  virtual void GetParameters(ParameterList &list) const {};
+  virtual void GetParameters(ParameterList &list) {};
 
   virtual double IntensityNoEff(const dataPoint &point) const { return 1.0; }
   virtual void GetFitFractions(ParameterList &parList) {}

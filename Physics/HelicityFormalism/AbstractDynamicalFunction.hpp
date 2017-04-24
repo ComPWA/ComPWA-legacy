@@ -58,6 +58,8 @@ public:
   
   virtual bool HasTree() const { return false; }
 
+  virtual void GetParameters(ParameterList& list);
+  
   /**! Setup function tree */
   virtual std::shared_ptr<ComPWA::FunctionTree>
   GetTree(ComPWA::ParameterList &sample, ComPWA::ParameterList &toySample,

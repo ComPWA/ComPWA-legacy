@@ -39,6 +39,9 @@ public:
   //! calculated the PHSP volume of the current decay by MC integration
   virtual double GetPhspVolume();
 
+  //! calculated the PHSP volume of the current decay by MC integration
+  virtual void SetPhspVolume( double phsp );
+  
   //! Get number of variables
   virtual unsigned int GetNVars() const { return _varNames.size(); }
 

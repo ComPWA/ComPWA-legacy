@@ -74,6 +74,8 @@ public:
   //! Check of parameters have changed and normalization has to be recalculatecd
   virtual void CheckModified() const;
   
+  virtual void GetParameters(ParameterList& list);
+  
   /**! Setup function tree */
   virtual std::shared_ptr<FunctionTree> GetTree(ParameterList &sample,
                                                   ParameterList &toySample, int pos,

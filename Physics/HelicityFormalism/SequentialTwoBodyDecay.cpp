@@ -69,6 +69,13 @@ SequentialTwoBodyDecay::GetTree(ParameterList &sample,
   return tr;
 };
   
+void SequentialTwoBodyDecay::GetParameters(ParameterList &list) {
+  Amplitude::GetParameters(list);
+  for( auto i: _partDecays){
+    i->GetParameters(list);
+  }
+}
+  
 } /* namespace HelicityFormalism */
 } /* namespace Physics */
 } /* namespace ComPWA */
