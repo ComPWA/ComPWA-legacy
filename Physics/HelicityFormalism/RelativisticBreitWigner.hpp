@@ -36,7 +36,7 @@ namespace ComPWA {
 namespace Physics {
 namespace HelicityFormalism {
 
-  class PartialDecay;
+class PartialDecay;
 /**
  * Relativistic Breit-Wigner
  * (Breit Wigner with Blatt-Weisskopf barrier factors)
@@ -60,26 +60,30 @@ namespace HelicityFormalism {
 class RelativisticBreitWigner : public AbstractDynamicalFunction {
 
 public:
-  RelativisticBreitWigner() {};
+  RelativisticBreitWigner(){};
 
-  virtual ~RelativisticBreitWigner() {};
+  virtual ~RelativisticBreitWigner(){};
 
   std::complex<double> Evaluate(const dataPoint &point, int pos) const;
 
   virtual std::complex<double> EvaluateNoNorm(double mSq) const;
-  
+
   /**! Get current normalization.  */
   virtual double GetNormalization() const;
 
   //! Check of parameters have changed and normalization has to be recalculatecd
   virtual void CheckModified() const;
-  
-  virtual void GetParameters(ParameterList& list);
-  
+
+  virtual void GetParameters(ParameterList &list);
+
+  //! Check of tree is available
+  virtual bool HasTree() const { return true; }
+
   /**! Setup function tree */
   virtual std::shared_ptr<FunctionTree> GetTree(ParameterList &sample,
-                                                  ParameterList &toySample, int pos,
-                                                std::string suffix="");
+                                                ParameterList &toySample,
+                                                int pos,
+                                                std::string suffix = "");
 
   // --------------------------- Set/Get functions ---------------------------
 
@@ -191,12 +195,13 @@ public:
   static std::shared_ptr<RelativisticBreitWigner>
   Factory(const boost::property_tree::ptree &pt);
 
-  std::shared_ptr<ComPWA::Physics::HelicityFormalism::PartialDecay>
-  operator*(std::shared_ptr<ComPWA::Physics::HelicityFormalism::AmpWignerD> wigner) {
-//    auto obj =std::make_shared<ComPWA::Physics::HelicityFormalism::PartialDecay>();
-//    std::shared_ptr<ComPWA::Physics::HelicityFormalism::PartialDecay>
-//    partDecay(std::make_shared<PartialDecay>(this), wigner);
-//    return obj;
+  std::shared_ptr<ComPWA::Physics::HelicityFormalism::PartialDecay> operator*(
+      std::shared_ptr<ComPWA::Physics::HelicityFormalism::AmpWignerD> wigner) {
+    //    auto obj
+    //    =std::make_shared<ComPWA::Physics::HelicityFormalism::PartialDecay>();
+    //    std::shared_ptr<ComPWA::Physics::HelicityFormalism::PartialDecay>
+    //    partDecay(std::make_shared<PartialDecay>(this), wigner);
+    //    return obj;
   }
 
 protected:
@@ -208,13 +213,13 @@ protected:
 
   //! Form factor type
   formFactorType _ffType;
-  
+
 private:
   //! Temporary values (used to trigger recalculation of normalization)
   double _current_mesonRadius;
   double _current_width;
 };
-  
+
 class BreitWignerStrategy : public Strategy {
 public:
   BreitWignerStrategy(const std::string resonanceName)
@@ -230,7 +235,7 @@ public:
 protected:
   std::string name;
 };
-  
+
 } /* namespace DynamicalFunctions */
 } /* namespace Physics */
 } /* namespace ComPWA */

@@ -125,10 +125,15 @@ public:
   //! value of resonance at \param point
   virtual std::complex<double> Evaluate(const dataPoint &point) const = 0;
 
+  //! Check of tree is available
+  virtual bool HasTree() const { return false; }
+  
   virtual std::shared_ptr<FunctionTree> GetTree(ParameterList &sample,
                                                   ParameterList &phspSample,
                                                   ParameterList &toySample,
-                                                  std::string suffix) = 0;
+                                                std::string suffix){
+    return std::shared_ptr<FunctionTree>();
+  }
   
   
 protected:

@@ -58,6 +58,9 @@ public:
     return result;
   };
 
+  //! Check of tree is available
+  virtual bool HasTree() { return true; }
+  
   /**! Setup function tree */
   virtual std::shared_ptr<FunctionTree> GetTree(ParameterList &sample,
                                                 ParameterList &phspSample,

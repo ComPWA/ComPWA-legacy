@@ -27,7 +27,7 @@ double CoherentIntensity::IntensityNoEff(const dataPoint &point) const {
   std::complex<double> result(0., 0.);
   for (auto i : _seqDecays)
     result += i->Evaluate(point);
-  return GetStrengthValue() * std::norm(result);
+  return GetStrengthValue() * std::norm(result) * GetNormalization();
 };
 
 std::shared_ptr<CoherentIntensity>
@@ -55,14 +55,15 @@ CoherentIntensity::Factory(const boost::property_tree::ptree &pt) {
   }
   return obj;
 }
-  
+
 boost::property_tree::ptree
 CoherentIntensity::Save(std::shared_ptr<CoherentIntensity> obj) {
 
   boost::property_tree::ptree pt;
-  pt.put<std::string>("<xmlattr>.Name",obj->GetName());
-  pt.add_child("Strength", ComPWA::DoubleParameterSave(*obj->GetStrength().get()));
-  for( auto i : obj->GetDecays() ) {
+  pt.put<std::string>("<xmlattr>.Name", obj->GetName());
+  pt.add_child("Strength",
+               ComPWA::DoubleParameterSave(*obj->GetStrength().get()));
+  for (auto i : obj->GetDecays()) {
     pt.add_child("Amplitude", SequentialTwoBodyDecay::Save(i));
   }
   return pt;
@@ -166,12 +167,61 @@ CoherentIntensity::setupBasicTree(ParameterList &sample,
   return newTree;
 }
 
-  void CoherentIntensity::GetParameters(ComPWA::ParameterList &list){
-    list.AddParameter(GetStrength());
-    for( auto i:_seqDecays){
-      i->GetParameters(list);
-    }
+void CoherentIntensity::GetParameters(ComPWA::ParameterList &list) {
+  list.AddParameter(GetStrength());
+  for (auto i : _seqDecays) {
+    i->GetParameters(list);
   }
+}
+
+double CoherentIntensity::GetNormalization() const {
+  // Check if parameters were modified
+  ParameterList list;
+  const_cast<CoherentIntensity *>(this)->GetParameters(list);
+  if (const_cast<ParameterList &>(_currentParList) == list && _integral > 0 &&
+      _maxIntens > 0)
+    return 1 / _integral;
+
+  const_cast<ParameterList &>(_currentParList).DeepCopy(list);
+  // Parameters have changed. We have to recalculate the normalization.
+  const_cast<double &>(_integral) = Integral();
+
+  return 1 / _integral;
+}
+  
+double CoherentIntensity::Integral() const {
+
+  if (!_phspSample.size())
+    throw std::runtime_error(
+        "CoherentIntensity::Integral() | Phase space sample"
+        " not set or empty. Integral can not be calculated!");
+
+  double sumIntens = 0;
+  double maxVal = 0;
+  for (auto i : _phspSample) {
+    std::complex<double> result(0., 0.);
+    for (auto d : _seqDecays)
+      result += d->Evaluate(i);
+    double intens = std::norm(result);
+    
+    if (intens > maxVal)
+      maxVal = intens;
+    
+    if (_phspSampleEff)
+      intens *= _eff->Evaluate(i);
+    
+    sumIntens += intens;
+  }
+
+  double phspVol = Kinematics::Instance()->GetPhspVolume();
+  double integral = (sumIntens * phspVol / _phspSample.size());
+  LOG(trace) << "CoherentIntensity::Integral() | Integral is " << integral
+             << " and the maximum value of intensity is " << maxVal<< ".";
+  
+  const_cast<double &>(_maxIntens) = maxVal;
+  return integral;
+}
+
 } /* namespace HelicityFormalism */
 } /* namespace Physics */
 } /* namespace ComPWA */

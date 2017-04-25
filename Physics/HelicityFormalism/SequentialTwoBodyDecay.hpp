@@ -34,6 +34,9 @@ public:
       result *= i->Evaluate(point);
     return result;
   };
+  
+  //! Check of tree is available
+  virtual bool HasTree() const { return true; }
 
   /**! Setup function tree */
   virtual std::shared_ptr<FunctionTree> GetTree(ParameterList &sample,

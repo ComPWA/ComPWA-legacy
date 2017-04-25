@@ -1,7 +1,5 @@
- 
-        
-    
-  
+
+
 //-------------------------------------------------------------------------------
 // Copyright (c) 2013 Mathias Michel.
 //
@@ -256,7 +254,6 @@ public:
    * all parameter information. The string gets created using the outstream
    * of the PWAParameter class.
    * \return string with parameter information
-   * \sa operator<<
    */
   virtual std::vector<std::shared_ptr<IntegerParameter>>::const_iterator
   FindIntegerParameter(const std::string name) const;
@@ -338,7 +335,6 @@ public:
    * all parameter information. The string gets created using the outstream
    * of the PWAParameter class.
    * \return string with parameter information
-   * \sa operator<<
    */
   virtual std::vector<std::shared_ptr<DoubleParameter>>::const_iterator
   FindDoubleParameter(const std::string name) const;
@@ -420,7 +416,6 @@ public:
    * all parameter information. The string gets created using the outstream
    * of the PWAParameter class.
    * \return string with parameter information
-   * \sa operator<<
    */
   virtual std::vector<std::shared_ptr<ComplexParameter>>::const_iterator
   FindComplexParameter(const std::string name) const;
@@ -506,7 +501,6 @@ public:
    * all parameter information. The string gets created using the outstream
    * of the PWAParameter class.
    * \return string with parameter information
-   * \sa operator<<
    */
   virtual std::vector<std::shared_ptr<MultiDouble>>::const_iterator
   FindMultiDouble(const std::string name) const;
@@ -571,7 +565,6 @@ public:
    * all parameter information. The string gets created using the outstream
    * of the PWAParameter class.
    * \return string with parameter information
-   * \sa operator<<
    */
   virtual std::vector<std::shared_ptr<MultiComplex>>::const_iterator
   FindMultiComplex(const std::string name) const;
@@ -636,7 +629,6 @@ public:
    * all parameter information. The string gets created using the outstream
    * of the PWAParameter class.
    * \return string with parameter information
-   * \sa operator<<
    */
   virtual std::vector<std::shared_ptr<MultiUnsignedInteger>>::const_iterator
   FindMultiUnsignedInteger(const std::string name) const;
@@ -691,6 +683,56 @@ public:
 *\param id identification of the paramter to be removed
    */
   virtual void RemoveMultiUnsignedInteger(const unsigned int id);
+
+  bool operator==(const ParameterList &p) const {
+    if (!std::equal(vBool_.begin(), vBool_.end(), p.vBool_.begin(),
+                    [](const std::shared_ptr<BoolParameter> &item1,
+                       const std::shared_ptr<BoolParameter> &item2) -> bool {
+                      return (*item1 == *item2);
+                    }))
+      return false;
+    if (!std::equal(vInt_.begin(), vInt_.end(), p.vInt_.begin(),
+                    [](const std::shared_ptr<IntegerParameter> &item1,
+                       const std::shared_ptr<IntegerParameter> &item2) -> bool {
+                      return (*item1 == *item2);
+                    }))
+      return false;
+    if (!std::equal(vDouble_.begin(), vDouble_.end(), p.vDouble_.begin(),
+                    [](const std::shared_ptr<DoubleParameter> &item1,
+                       const std::shared_ptr<DoubleParameter> &item2) -> bool {
+                      return (*item1 == *item2);
+                    }))
+      return false;
+    if (!std::equal(vComplex_.begin(), vComplex_.end(), p.vComplex_.begin(),
+                    [](const std::shared_ptr<ComplexParameter> &item1,
+                       const std::shared_ptr<ComplexParameter> &item2) -> bool {
+                      return (*item1 == *item2);
+                    }))
+      return false;
+    if (!std::equal(vMultiDouble_.begin(), vMultiDouble_.end(),
+                    p.vMultiDouble_.begin(),
+                    [](const std::shared_ptr<MultiDouble> &item1,
+                       const std::shared_ptr<MultiDouble> &item2) -> bool {
+                      return (*item1 == *item2);
+                    }))
+      return false;
+    if (!std::equal(vMultiComplex_.begin(), vMultiComplex_.end(),
+                    p.vMultiComplex_.begin(),
+                    [](const std::shared_ptr<MultiComplex> &item1,
+                       const std::shared_ptr<MultiComplex> &item2) -> bool {
+                      return (*item1 == *item2);
+                    }))
+      return false;
+    if (!std::equal(
+            vMultiUnsignedInteger_.begin(), vMultiUnsignedInteger_.end(),
+            p.vMultiUnsignedInteger_.begin(),
+            [](const std::shared_ptr<MultiUnsignedInteger> &item1,
+               const std::shared_ptr<MultiUnsignedInteger> &item2) -> bool {
+              return (*item1 == *item2);
+            }))
+      return false;
+    return true;
+  }
 
 protected:
   /*!< Vector of boolean parameters */

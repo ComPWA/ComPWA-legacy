@@ -43,21 +43,21 @@ using namespace boost::log;
 
 RunManager::RunManager() {}
 
-RunManager::RunManager(std::shared_ptr<DataReader::Data> inD,
-                       std::shared_ptr<AmpIntensity> inP,
-                       std::shared_ptr<Optimizer::Optimizer> inO)
-    : sampleData_(inD), amp_(inP), opti_(inO) {}
+RunManager::RunManager(std::shared_ptr<DataReader::Data> data,
+                       std::shared_ptr<AmpIntensity> intens,
+                       std::shared_ptr<Optimizer::Optimizer> optimizer)
+    : sampleData_(data), opti_(optimizer), intens_(intens){}
 
-RunManager::RunManager(unsigned int size, std::shared_ptr<AmpIntensity> inP,
+RunManager::RunManager(unsigned int size, std::shared_ptr<AmpIntensity> intens,
                        std::shared_ptr<Generator> gen)
-    : amp_(inP), gen_(gen) {}
+    :  gen_(gen), intens_(intens) {}
 
 RunManager::~RunManager() {
   if( gen_ )
     LOG(debug) << "~RunManager: Last seed: " << gen_->GetSeed();
 }
 
-std::shared_ptr<FitResult> RunManager::startFit(ParameterList &inPar) {
+std::shared_ptr<FitResult> RunManager::Fit(ParameterList &inPar) {
   LOG(info) << "RunManager::startFit() | Starting minimization.";
 
   // MINIMIZATION
@@ -70,7 +70,7 @@ std::shared_ptr<FitResult> RunManager::startFit(ParameterList &inPar) {
   return result;
 }
 
-void RunManager::setPhspSample(std::shared_ptr<Data> phsp,
+void RunManager::SetPhspSample(std::shared_ptr<Data> phsp,
                                std::shared_ptr<DataReader::Data> truePhsp) {
   if (truePhsp && truePhsp->getNEvents() != phsp->getNEvents())
     throw std::runtime_error(
@@ -80,7 +80,7 @@ void RunManager::setPhspSample(std::shared_ptr<Data> phsp,
   sampleTruePhsp_ = truePhsp;
 }
 
-void RunManager::setTruePhspSample(std::shared_ptr<DataReader::Data> truePhsp) {
+void RunManager::SetTruePhspSample(std::shared_ptr<DataReader::Data> truePhsp) {
   if (truePhsp && samplePhsp_ &&
       truePhsp->getNEvents() != samplePhsp_->getNEvents())
     throw std::runtime_error(
@@ -90,86 +90,12 @@ void RunManager::setTruePhspSample(std::shared_ptr<DataReader::Data> truePhsp) {
   sampleTruePhsp_ = truePhsp;
 }
 
-bool RunManager::generate(int number) {
+bool RunManager::Generate(int number) {
   LOG(info) << "RunManager::generate() | "
                "Generating "
             << number << " signal events!";
 
-  return gen(number, gen_, amp_, sampleData_, samplePhsp_, sampleTruePhsp_);
-}
-
-bool RunManager::generateBkg(int number) {
-  LOG(info) << "RunManager::generateBkg() | "
-               "Generating "
-            << number << " background events!";
-
-  return gen(number, gen_, ampBkg_, sampleBkg_, samplePhsp_, sampleTruePhsp_);
-}
-
-void RunManager::SetAmplitudesData(
-    std::vector<std::shared_ptr<AmpIntensity>> ampVec,
-    std::vector<double> fraction,
-    std::vector<std::shared_ptr<DataReader::Data>> dataVec) {
-  _ampVec = ampVec;
-  _fraction = fraction;
-  _dataVec = dataVec;
-
-  double sumFraction = std::accumulate(_fraction.begin(), _fraction.end(), 0.0);
-
-  if (sumFraction > 1.0)
-    throw std::runtime_error("RunManager::SetAmpltiudesData() | "
-                             "Fractions sum larger 1.0!");
-
-  if (_fraction.size() == _ampVec.size() - 1)
-    _fraction.push_back(1 - sumFraction);
-
-  // check size
-  if (_fraction.size() != _ampVec.size())
-    throw std::runtime_error("RunManager::SetAmpltiudesData() | "
-                             "List of fractions (" +
-                             std::to_string(_fraction.size()) +
-                             ")"
-                             " does not match with list of amplitudes"
-                             "(" +
-                             std::to_string(_ampVec.size()) + ")"
-                                                              "!");
-
-  if (_dataVec.size() != _ampVec.size())
-    throw std::runtime_error("RunManager::SetAmpltiudesData() | "
-                             "List of data samples (" +
-                             std::to_string(_dataVec.size()) +
-                             ")"
-                             " does not match with list of amplitudes"
-                             "(" +
-                             std::to_string(_ampVec.size()) + ")"
-                                                              "!");
-}
-
-void RunManager::GenAmplitudesData(int nEvents) {
-  if (nEvents <= 0)
-    throw std::runtime_error(
-        "RunManager::GenAmpltiudesData() | "
-        "Number of events is small 0. Don't know how much to generate!");
-
-  if (!_ampVec.size() || !_fraction.size() || !_dataVec.size())
-    throw std::runtime_error(
-        "RunManager::GenAmpltiudesData() | "
-        "Amplitudes, fractions or data samples are not properly set!");
-
-  if (_dataVec.size() != _ampVec.size() || _dataVec.size() != _fraction.size())
-    throw std::runtime_error(
-        "RunManager::GenAmpltiudesData() | "
-        "Lists of data samples, fractions and amplitudes do "
-        "not have the same size!");
-
-  for (int i = 0; i < _ampVec.size(); ++i) {
-    LOG(info) << "RunManager::GenAmplitudesData() | "
-                 "Generating "
-              << (int)(nEvents * _fraction.at(i)) << " events for amplitude "
-              << _ampVec.at(i)->GetName();
-    gen((int)(nEvents * _fraction.at(i)), gen_, _ampVec.at(i), _dataVec.at(i),
-        samplePhsp_, sampleTruePhsp_);
-  }
+  return gen(number, gen_, intens_, sampleData_, samplePhsp_, sampleTruePhsp_);
 }
 
 bool RunManager::gen(int number, std::shared_ptr<Generator> gen,
@@ -254,11 +180,10 @@ bool RunManager::gen(int number, std::shared_ptr<Generator> gen,
     } catch (BeyondPhsp &ex) { // event outside phase, remove
       continue;
     }
-    //		if(!Kinematics::instance()->isWithinPhsp(point)) continue;
 
     totalCalls++;
     double ampRnd = gen->GetUniform(0, generationMaxValue);
-    AMPpdf = amp->Intensity(point); // unfortunatly not thread safe
+    AMPpdf = amp->Intensity(point);
 
     if (generationMaxValue < (AMPpdf * weight))
       throw std::runtime_error(
@@ -298,7 +223,7 @@ bool RunManager::gen(int number, std::shared_ptr<Generator> gen,
   return true;
 }
 
-bool RunManager::generatePhsp(int number) {
+bool RunManager::GeneratePhsp(int number) {
   if (number == 0)
     return 0;
   if (!samplePhsp_)

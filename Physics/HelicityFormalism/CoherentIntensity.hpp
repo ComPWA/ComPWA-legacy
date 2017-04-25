@@ -17,6 +17,7 @@
 #include <boost/property_tree/xml_parser.hpp>
 
 #include "Core/AmpIntensity.hpp"
+#include "DataReader/Data.hpp"
 #include "Physics/HelicityFormalism/SequentialTwoBodyDecay.hpp"
 
 namespace ComPWA {
@@ -26,12 +27,17 @@ namespace HelicityFormalism {
 class CoherentIntensity : public ComPWA::AmpIntensity {
 
 public:
-  CoherentIntensity(){};
+  CoherentIntensity()
+      : _maxIntens(0.), _integral(0.){};
   virtual ~CoherentIntensity(){};
 
   virtual double GetMaximum(std::shared_ptr<ComPWA::Generator> gen) const {
-    return 1.0;
+    if (_maxIntens <= 0)
+      Integral(); //_maxIntens is updated in Integral()
+    return _maxIntens;
   }
+  //! Calculate normalization
+  virtual double GetNormalization() const;
 
   virtual double Intensity(const ComPWA::dataPoint &point) const;
 
@@ -39,7 +45,7 @@ public:
 
   //========== FUNCTIONTREE =============
   //! Check of tree is available
-  virtual bool HasTree() { return 0; }
+  virtual bool HasTree() const { return true; }
 
   //! Getter function for basic amp tree
   virtual std::shared_ptr<ComPWA::FunctionTree>
@@ -106,8 +112,20 @@ public:
   //! Print amplitude to logging system
   virtual void to_str() const { LOG(info) << "CoherentIntensity"; }
 
+  /*! Set phase space sample
+   * We use a phase space sample to calculate the normalization and determine
+   * the maximum of the amplitude. In case that the efficiency is already
+   * applied
+   * to the sample set fEff to false.
+   */
+  void SetPhspSample(std::shared_ptr<ComPWA::DataReader::Data> phspSample,
+                     bool fEff = true) {
+    _phspSampleEff = fEff;
+    _phspSample = phspSample->getDataPoints();
+  };
+
 protected:
-  virtual double Integral() const { return 1.0; }
+  virtual double Integral() const;
 
   virtual std::shared_ptr<FunctionTree>
   setupBasicTree(ParameterList &sample, ParameterList &phspSample,
@@ -116,6 +134,22 @@ protected:
   std::vector<std::shared_ptr<
       ComPWA::Physics::HelicityFormalism::SequentialTwoBodyDecay>>
       _seqDecays;
+  
+  //! Phase space sample to calculate the normalization and maximum value.
+  std::vector<ComPWA::dataPoint> _phspSample;
+//  std::shared_ptr<ComPWA::DataReader::Data> _phspSample;
+  bool _phspSampleEff;
+  
+  //! Maximum value
+  double _maxIntens;
+  double _integral;
+  
+private:
+  /*! List with all parameters of the intensity. 
+   * We use it to check if parameters were modified and if we have to 
+   * recalculated the normalization.
+   */
+  ParameterList _currentParList;
 };
 
 } /* namespace HelicityFormalism */

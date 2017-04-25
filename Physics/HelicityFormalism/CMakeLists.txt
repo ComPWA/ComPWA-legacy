@@ -11,11 +11,22 @@ SET( lib_headers IncoherentIntensity.hpp CoherentIntensity.hpp
     SequentialTwoBodyDecay.hpp AmpWignerD.hpp HelicityKinematics.hpp NonResonant.hpp
     AmpFlatteRes.hpp ../Amplitude.hpp ../Resonance.hpp )
 
-add_library ( ComPWA_HelicityFormalism SHARED ${lib_srcs} ${lib_headers})
-target_link_libraries( ComPWA_HelicityFormalism ComPWA_Core ComPWA_qft++ ComPWA_Tools ComPWA_RootReader ${Boost_LIBRARIES} )
-target_include_directories( ComPWA_HelicityFormalism PUBLIC ${Boost_INCLUDE_DIR} )
+add_library( ComPWA_HelicityFormalism
+  SHARED ${lib_srcs} ${lib_headers}
+)
 
-#install (TARGETS ComPWA_HelicityAmplitude DESTINATION lib/ComPWA)
+target_link_libraries( ComPWA_HelicityFormalism
+  ComPWA_Core
+  ComPWA_qft++
+  ComPWA_Tools
+  ComPWA_RootReader
+  ${Boost_LIBRARIES}
+)
+
+target_include_directories( ComPWA_HelicityFormalism
+  PUBLIC ${Boost_INCLUDE_DIR}
+)
+
 install (FILES ${lib_headers} DESTINATION include/ComPWA)
 
 # ------ TESTING ----- #

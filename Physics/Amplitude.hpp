@@ -91,7 +91,7 @@ public:
 
   //========== FUNCTIONTREE =============
   //! Check of tree is available
-  virtual bool HasTree() { return 0; }
+  virtual bool HasTree() const { return 0; }
 
   //! Getter function for basic amp tree
   virtual std::shared_ptr<FunctionTree>

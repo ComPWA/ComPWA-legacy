@@ -9,13 +9,54 @@
 #include "Core/DataPoint.hpp"
 #include "Core/Logging.hpp"
 #include "Core/ProgressBar.hpp"
-#include "Physics/DPKinematics/DalitzKinematics.hpp"
+#include "Physics/Resonance.hpp"
+#include "Physics/HelicityFormalism/HelicityKinematics.hpp"
 
 #include "PlotData.hpp"
 
 #include "Tools.hpp"
 
 using namespace ComPWA;
+using namespace ComPWA::Physics::HelicityFormalism;
+
+void phspContour(unsigned int xsys,unsigned int ysys,
+                                   unsigned int n, double* xcoord, double* ycoord)
+{
+  auto *kin = dynamic_cast<HelicityKinematics*>( Kinematics::Instance() );
+  
+  unsigned int num=n;
+  if(num%2!=0) {
+    num-=1;
+    BOOST_LOG_TRIVIAL(info)<<"DalitzKinematics::phspContour() | "
+    "Setting size to a even number. Assure that the size of "
+    "your arrays is "<<num*2+1<<"!";
+  }
+  
+//  std::pair<double,double> xlimits = GetMinMax(xsys);
+//  double binw = (xlimits.second-xlimits.first)/(double)(num);
+//  double ymin,ymax,x;
+//  unsigned int i=0;
+//  
+//  for (; i<num; i++)
+//    {
+//    x = i*binw + xlimits.first;
+//    while(x<=xlimits.first) { x+=binw/100; }
+//    while(x>=xlimits.second) { x-=binw/100; }
+//    auto lim = GetMinMaxLocal(ysys,xsys,x);
+//    //      ymin = invMassMin(ysys,xsys,x);
+//    //      ymax = invMassMax(ysys,xsys,x);
+//    
+//    xcoord[i]=x; ycoord[i]=lim.first;
+//    xcoord[num*2-i]=x; ycoord[num*2-i]=lim.second;
+//    }
+//  //adding last datapoint
+//  x = i*binw + xlimits.first;
+//  while(x<=xlimits.first) { x+=binw/100; }
+//  while(x>=xlimits.second) { x-=binw/100; }
+//  
+//  xcoord[i]=x; ycoord[i]=GetMinMaxLocal(ysys,xsys,x).first;
+  return;
+}
 
 plotData::plotData(std::string name, int bins)
     : _name(name), _isFilled(0), _bins(bins), _globalScale(1.0),
@@ -36,13 +77,10 @@ plotData::plotData(std::string name, int bins)
   fitDiagrams.SetStats(0);
   phspDiagrams.SetStats(0);
 
-  ComPWA::Physics::DPKinematics::DalitzKinematics *kin =
-      dynamic_cast<ComPWA::Physics::DPKinematics::DalitzKinematics *>(
-          Kinematics::instance());
 
   //=== generate contour
   double xpoints[4001], ypoints[4001];
-  kin->phspContour(0, 1, 2000, xpoints, ypoints);
+  phspContour(0, 1, 2000, xpoints, ypoints);
   m23m13_contour = TGraph(4001, xpoints, ypoints);
   m23m13_contour.SetMarkerStyle(1);
   m23m13_contour.SetLineColor(kRed);
@@ -50,7 +88,7 @@ plotData::plotData(std::string name, int bins)
   m23m13_contour.SetMarkerSize(0.0);
   m23m13_contour.SetTitle("phspContour");
   m23m13_contour.SetFillColor(kWhite);
-  kin->phspContour(0, 2, 2000, xpoints, ypoints);
+  phspContour(0, 2, 2000, xpoints, ypoints);
   m23m12_contour = TGraph(4001, xpoints, ypoints);
   m23m12_contour.SetMarkerStyle(1);
   m23m12_contour.SetLineColor(kRed);
@@ -58,7 +96,7 @@ plotData::plotData(std::string name, int bins)
   m23m12_contour.SetMarkerSize(0.0);
   m23m12_contour.SetTitle("phspContour");
   m23m12_contour.SetFillColor(kWhite);
-  kin->phspContour(2, 1, 2000, xpoints, ypoints);
+  phspContour(2, 1, 2000, xpoints, ypoints);
   m12m13_contour = TGraph(4001, xpoints, ypoints);
   m12m13_contour.SetMarkerStyle(1);
   m12m13_contour.SetLineColor(kRed);
@@ -70,85 +108,8 @@ plotData::plotData(std::string name, int bins)
 
 plotData::~plotData() {}
 
-// TH2Poly* plotData::getAdBinHist(int bins)
-//{
-//    LOG(info)<<"Creating adaptively binned histogram";
-//
-//    if( !s_data )
-//        throw std::runtime_error("plotData::getAdBinHist() | No data sample
-//        set!");
-//
-//    //Which sample do we use for calculation of binning? Use Hit&Miss sample
-//    of available
-//    std::shared_ptr<ComPWA::DataReader::Data> adaptiveBinningSample = s_data;
-//    //	if(s_hitMiss) adaptiveBinningSample = s_hitMiss;
-//
-//    Double_t* tmpArray = new
-//    Double_t[2*(adaptiveBinningSample->getNEvents())]; //create array on the
-//    heap
-//    for(unsigned int i = 0; i < adaptiveBinningSample->getNEvents();
-//    i++){//loop over data
-//        dataPoint point(adaptiveBinningSample->getEvent(i));
-//        double mSq = point.getVal(0);
-//        double phi = point.getVal(8);
-//        tmpArray[i]=mSq; //mKKsq
-//        tmpArray[adaptiveBinningSample->getNEvents()+i]=phi; //mKSK+sq
-//    }
-//    //Create adaptive histogram for data
-////    TH2Poly* hist =
-/// adaptiveBinning(adaptiveBinningSample->getNEvents(),2,tmpArray,bins);
-////    if( !hist )
-////        throw std::runtime_error("plotData::getAdBinHist() | Can not create"
-////                                 "adaptively binned histogram!");
-//
-//    hist->SetName("dataAdaptiveBinned");
-//    hist->GetXaxis()->SetTitle("m_{KK}^{2} [GeV^{2}/c^{4}]");
-//    hist->GetXaxis()->SetNdivisions(508);
-//    hist->GetXaxis()->SetTitleSize(0.06);
-//    hist->GetXaxis()->SetLabelSize(0.05);
-//    hist->GetYaxis()->SetTitle("cos#Theta_{KK}");
-//    hist->GetYaxis()->SetRangeUser(-1,1);
-//    hist->GetYaxis()->SetTitleSize(0.06);
-//    hist->GetYaxis()->SetLabelSize(0.05);
-//    hist->Reset("");
-//
-//    return hist;
-//}
-
-void plotData::setFitAmp(std::vector<std::shared_ptr<AmpIntensity>> ampVec,
-                         std::vector<double> fraction) {
-  _ampVec = ampVec;
-  _fraction = fraction;
-
-  double sumFraction = std::accumulate(_fraction.begin(), _fraction.end(), 0.0);
-
-  if (sumFraction > 1.0)
-    throw std::runtime_error(
-        "plotData::setFitAmp() | Fractions sum larger 1.0!");
-
-  if (_fraction.size() == _ampVec.size() - 1)
-    _fraction.push_back(1 - sumFraction);
-
-  // check size
-  if (_fraction.size() != _ampVec.size())
-    throw std::runtime_error("plotData::setFitAmp() | List of fractions "
-                             "does not match with list of amplitudes!");
-
-  auto it = _ampVec.begin();
-  for (; it != _ampVec.end(); ++it) {
-    ampHistos.push_back(dalitzHisto((*it)->GetName(), (*it)->GetName(), _bins));
-    ampHistos.back().setColor(kBlack);
-    ampHistos.back().SetStats(0);
-  }
-  resonanceItr resit = _ampVec.at(0)->GetResonanceItrFirst();
-  for (; resit != _ampVec.at(0)->GetResonanceItrLast(); ++resit) {
-    if ((*resit)->GetName().find("_CP") != std::string::npos)
-      continue;
-    signalComponents.push_back(
-        dalitzHisto((*resit)->GetName(), (*resit)->GetName(), _bins));
-    signalComponents.back().setColor(kBlack);
-    signalComponents.back().SetStats(0);
-  }
+void plotData::SetFitAmp(std::shared_ptr<AmpIntensity> intens) {
+  _intens = intens;
   _isFilled = 0;
 }
 
@@ -180,8 +141,7 @@ void plotData::Fill() {
   //===== Plot amplitude
   LOG(info) << "PlotData::plot | Evaluating amplitude...";
 
-  if (_ampVec.size() && s_phsp) {
-    std::vector<double> ampHistos_integral(_ampVec.size(), 0);
+  if (_intens && s_phsp) {
 
     /* Loop over all events in phase space sample */
     progressBar bar(s_phsp->getNEvents());
@@ -200,7 +160,7 @@ void plotData::Fill() {
       }
       //double evWeight = event.getWeight();
 
-      /* Construct DataPoint from Event and check if dataPoint is within the
+      /* Construct DataPoint from Event to check if dataPoint is within the
        * phase space boundaries */
       dataPoint point;
       try {
@@ -210,70 +170,64 @@ void plotData::Fill() {
       }
 
       // Fill diagrams with pure phase space events
-      phspDiagrams.Fill(point, 1 / eff); // scale phsp to data size
+      phspDiagrams.Fill(event, 1 / eff); // scale phsp to data size
 
-      for (int t = 0; t < signalComponents.size(); ++t) {
-        resonanceItr res = _ampVec.at(0)->GetResonanceItrFirst();
-        for (int j = 0; j < t; ++j)
-          res++;
-
-        // skip CP partner of resonance
-        if ((*res)->GetName().find("_CP") != std::string::npos)
-          continue;
-
-        std::complex<double> val = (*res)->Evaluate(point);
-
-        try { // trying to find a CP partner and add it
-          std::shared_ptr<Resonance> cpRes;
-          std::shared_ptr<ComPWA::Physics::AmplitudeSum::AmpSumIntensity>
-              tmpAmp = std::dynamic_pointer_cast<
-                  ComPWA::Physics::AmplitudeSum::AmpSumIntensity>(
-                  _ampVec.at(0));
-          cpRes = tmpAmp->GetResonance((*res)->GetName() + "_CP");
-          val += cpRes->Evaluate(point);
-        } catch (std::exception &ex) {
-        }
-        signalComponents.at(t).Fill(point, std::norm(val) / eff);
-      }
+//      for (int t = 0; t < signalComponents.size(); ++t) {
+//        resonanceItr res = _ampVec.at(0)->GetResonanceItrFirst();
+//        for (int j = 0; j < t; ++j)
+//          res++;
+//
+//        // skip CP partner of resonance
+//        if ((*res)->GetName().find("_CP") != std::string::npos)
+//          continue;
+//
+//        std::complex<double> val = (*res)->Evaluate(point);
+//
+//        try { // trying to find a CP partner and add it
+//          std::shared_ptr<Resonance> cpRes;
+//          std::shared_ptr<ComPWA::Physics::AmplitudeSum::AmpSumIntensity>
+//              tmpAmp = std::dynamic_pointer_cast<
+//                  ComPWA::Physics::AmplitudeSum::AmpSumIntensity>(
+//                  _ampVec.at(0));
+//          cpRes = tmpAmp->GetResonance((*res)->GetName() + "_CP");
+//          val += cpRes->Evaluate(point);
+//        } catch (std::exception &ex) {
+//        }
+//        signalComponents.at(t).Fill(point, std::norm(val) / eff);
+//      }
 
       /* Loop over all resonances of first amplitude. This is supposed to be our
        * signal intensity */
-      std::complex<double> tmp_intens2(0, 0);
-      auto it = _ampVec.at(0)->GetResonanceItrFirst();
-      for (; it != _ampVec.at(0)->GetResonanceItrLast(); ++it) {
-        if ((*it)->GetName().find("_CP") != std::string::npos)
-          continue;
-        tmp_intens2 += (*it)->Evaluate(point);
-      }
-      ampHistos.at(0).Fill(point, std::norm(tmp_intens2) / eff);
+//      std::complex<double> tmp_intens2(0, 0);
+//      auto it = _ampVec.at(0)->GetResonanceItrFirst();
+//      for (; it != _ampVec.at(0)->GetResonanceItrLast(); ++it) {
+//        if ((*it)->GetName().find("_CP") != std::string::npos)
+//          continue;
+//        tmp_intens2 += (*it)->Evaluate(point);
+//      }
+//      ampHistos.at(0).Fill(point, std::norm(tmp_intens2) / eff);
 
       /* Loop over all amplitudes. This is supposed to be our total intensity
        * (usually signal+background) */
       double intens = 0;
-      for (int t = 0; t < _ampVec.size(); ++t) {
-        double tmp_intens = _ampVec.at(t)->Intensity(point);
-        tmp_intens = tmp_intens * _fraction.at(t);
-        intens += tmp_intens;
-        if (t == 1) // fill background
-          ampHistos.at(t).Fill(point, tmp_intens / eff);
-      }
-      fitDiagrams.Fill(point, intens / eff);
+      intens += _intens->Intensity(point);
+      fitDiagrams.Fill(event, intens / eff);
     }
 
     // Scale histograms to match data sample
     fitDiagrams.Scale(_globalScale / fitDiagrams.GetIntegral());
     phspDiagrams.Scale(_globalScale / phspDiagrams.GetIntegral());
 
-    for (int t = 0; t < _ampVec.size(); ++t) {
-      double scale =
-          _globalScale / ampHistos.at(t).GetIntegral() * _fraction.at(t);
-      ampHistos.at(t).Scale(scale);
-    }
-    for (int t = 0; t < signalComponents.size(); ++t) {
-      double scale =
-          _globalScale / ampHistos.at(0).GetIntegral() * _fraction.at(0);
-      signalComponents.at(t).Scale(scale);
-    }
+//    for (int t = 0; t < _ampVec.size(); ++t) {
+//      double scale =
+//          _globalScale / ampHistos.at(t).GetIntegral() * _fraction.at(t);
+//      ampHistos.at(t).Scale(scale);
+//    }
+//    for (int t = 0; t < signalComponents.size(); ++t) {
+//      double scale =
+//          _globalScale / ampHistos.at(0).GetIntegral() * _fraction.at(0);
+//      signalComponents.at(t).Scale(scale);
+//    }
   }
 
   //===== Plot hit&miss data
@@ -347,21 +301,21 @@ void plotData::Plot() {
   CreateHist2(2);// Plotting mKSK+sq
 
   //----- Helicity angle distributions -----
-  TCanvas *c3 =
-      new TCanvas("helicityAngle", "helicity angle", 50, 50, 2400, 1600);
-  c3->Divide(3, 2);
-  c3->cd(1);
-  CreateHist(3);
-  c3->cd(2);
-  CreateHist(4);
-  c3->cd(3);
-  CreateHist(5);
-  c3->cd(4);
-  CreateHist(6);
-  c3->cd(5);
-  CreateHist(7);
-  c3->cd(6);
-  CreateHist(8);
+//  TCanvas *c3 =
+//      new TCanvas("helicityAngle", "helicity angle", 50, 50, 2400, 1600);
+//  c3->Divide(3, 2);
+//  c3->cd(1);
+//  CreateHist(3);
+//  c3->cd(2);
+//  CreateHist(4);
+//  c3->cd(3);
+//  CreateHist(5);
+//  c3->cd(4);
+//  CreateHist(6);
+//  c3->cd(5);
+//  CreateHist(7);
+//  c3->cd(6);
+//  CreateHist(8);
 
   //----- Weights distributions -----
   TCanvas *c4 = new TCanvas("weights", "weights", 50, 50, 2400, 800);
@@ -380,7 +334,7 @@ void plotData::Plot() {
   c1->Write("dalitz", TObject::kOverwrite, 0);
   c2->Write("invmass", TObject::kOverwrite, 0);
   c5->Write("signalInvmass", TObject::kOverwrite, 0);
-  c3->Write("helicityAngle", TObject::kOverwrite, 0);
+//  c3->Write("helicityAngle", TObject::kOverwrite, 0);
 
   // Save data trees and histograms
   tf2->mkdir("hist");
@@ -414,16 +368,16 @@ void plotData::CreateHist(unsigned int id) {
     v.push_back(dataDiagrams.getHistogram(id));
     options.push_back("E1");
   }
-  if (_ampVec.size()) {
-    v.push_back(fitDiagrams.getHistogram(id));
-    options.push_back("Sames,Hist");
-    for (unsigned int i = 0; i < plotComponent.size(); ++i) {
-      ampHistos.at(plotComponent.at(i).first)
-          .setColor(plotComponent.at(i).second);
-      v.push_back(ampHistos.at(plotComponent.at(i).first).getHistogram(id));
-      options.push_back("Sames,Hist");
-    }
-  }
+//  if (_ampVec.size()) {
+//    v.push_back(fitDiagrams.getHistogram(id));
+//    options.push_back("Sames,Hist");
+//    for (unsigned int i = 0; i < plotComponent.size(); ++i) {
+//      ampHistos.at(plotComponent.at(i).first)
+//          .setColor(plotComponent.at(i).second);
+//      v.push_back(ampHistos.at(plotComponent.at(i).first).getHistogram(id));
+//      options.push_back("Sames,Hist");
+//    }
+//  }
   pad = drawPull(v, options);
 }
 
@@ -447,9 +401,7 @@ void plotData::CreateHist2(unsigned int id) {
 //===================== dalitzHisto =====================
 dalitzHisto::dalitzHisto(std::string n, std::string t, unsigned int bins)
     : name(n), title(t), nBins(bins), _integral(0.0) {
-  ComPWA::Physics::DPKinematics::DalitzKinematics *kin =
-      dynamic_cast<ComPWA::Physics::DPKinematics::DalitzKinematics *>(
-          Kinematics::instance());
+  auto *kin = dynamic_cast<HelicityKinematics *>( Kinematics::Instance() );
 
   // Initialize TTree
   tree = std::unique_ptr<TTree>(new TTree(TString(name), TString(title)));
@@ -460,32 +412,47 @@ dalitzHisto::dalitzHisto(std::string n, std::string t, unsigned int bins)
   tree->Branch("weight", &t_weight, "weight/D");
 
   char label[60];
-  for (int i = 0; i < kin->GetNVars(); ++i) {
-    TString varName(kin->GetVarName(i));
-    TString varTitle(kin->GetVarTitle(i));
 
-    // Creating TH1D for each variable
-    auto limit = kin->GetMinMax(i);
-
-    arr.push_back(TH1D(name + varName, TString(title + " ") + varTitle, nBins,
-                       limit.first, limit.second));
-    double binWidth = (double)(limit.second - limit.first) / nBins;
-    sprintf(label, "Entries /%f.3", binWidth);
-    arr.back().GetYaxis()->SetTitle(label);
-    arr.back().GetXaxis()->SetTitle(varTitle);
-    arr.back().Sumw2();
-  }
-
-  auto m23sq_limit = kin->GetMinMax(0);
-  auto m13sq_limit = kin->GetMinMax(1);
-  auto m12sq_limit = kin->GetMinMax(2);
+      //mass23sq
+  SubSystem sys23({0}, {1}, {2});
+  auto m23sq_limit = kin->GetInvMassBounds(sys23);
   double m23sq_min = m23sq_limit.first;
   double m23sq_max = m23sq_limit.second;
+
+  arr.push_back(TH1D("m23sq", "m_{23}^{2} [GeV/c^{2}]", nBins,
+                     m23sq_min, m23sq_max));
+  double binWidth = (double)(m23sq_min - m23sq_max) / nBins;
+  sprintf(label, "Entries /%f.3", binWidth);
+  arr.back().GetYaxis()->SetTitle("# [" + TString(label) + "]");
+  arr.back().GetXaxis()->SetTitle("m_{23}^{2} [GeV/c^{2}]");
+  arr.back().Sumw2();
+      //mass13sq
+  SubSystem sys13({1}, {0}, {2});
+  auto m13sq_limit = kin->GetInvMassBounds(sys13);
   double m13sq_min = m13sq_limit.first;
   double m13sq_max = m13sq_limit.second;
+
+  arr.push_back(TH1D("m13sq", "m_{13}^{2} [GeV/c^{2}]", nBins,
+                     m13sq_min, m13sq_max));
+  binWidth = (double)(m13sq_min - m13sq_max) / nBins;
+  sprintf(label, "Entries /%f.3", binWidth);
+  arr.back().GetYaxis()->SetTitle("# [" + TString(label) + "]");
+  arr.back().GetXaxis()->SetTitle("m_{13}^{2} [GeV/c^{2}]");
+  arr.back().Sumw2();
+        //mass12sq
+  SubSystem sys12({0}, {0}, {1});
+  auto m12sq_limit = kin->GetInvMassBounds(sys12);
   double m12sq_min = m12sq_limit.first;
   double m12sq_max = m12sq_limit.second;
 
+  arr.push_back(TH1D("m12sq", "m_{12}^{2} [GeV/c^{2}]", nBins,
+                     m12sq_min, m12sq_max));
+  binWidth = (double)(m12sq_min - m12sq_max) / nBins;
+  sprintf(label, "Entries /%f.3", binWidth);
+  arr.back().GetYaxis()->SetTitle("# [" + TString(label) + "]");
+  arr.back().GetXaxis()->SetTitle("m_{12}^{2} [GeV/c^{2}]");
+  arr.back().Sumw2();
+      
   arr2D.push_back(TH2D(TString(name + "_m23sqm13sq"), TString(title), nBins,
                        m23sq_min, m23sq_max, nBins, m13sq_min, m13sq_max));
   arr2D.push_back(TH2D(TString(name + "_m23sqm12sq"), TString(title), nBins,
@@ -512,29 +479,33 @@ dalitzHisto::dalitzHisto(std::string n, std::string t, unsigned int bins)
   return;
 }
 void dalitzHisto::Fill(Event &event, double w) {
-  dataPoint point(event);
-  Fill(point, w);
-}
 
-void dalitzHisto::Fill(dataPoint &point, double w) {
-  double weight = point.getWeight() * w; // use event weights?
+  double weight = event.getWeight() * w; // use event weights?
 
   _integral += weight;
-  for (int i = 0; i < Kinematics::instance()->GetNVars(); ++i) {
-    arr.at(i).Fill(point.getVal(i), weight);
-  }
-  t_eff = point.getEfficiency();
-  t_weight = weight;
-  t_point = point.getPoint();
-  //	tree->Fill();
-
-  double m12sq = point.getVal(2);
-  double m13sq = point.getVal(1);
-  double m23sq = point.getVal(0);
-  //	double cos12 = point.getVal(4);
-  //	double cos13 = point.getVal(5);
-  double cos23 = point.getVal(8);
-
+  
+  auto *kin = dynamic_cast<HelicityKinematics*>( Kinematics::Instance() );
+  
+  SubSystem sys23({0}, {1}, {2});
+  SubSystem sys13({1}, {0}, {2});
+  SubSystem sys12({2}, {0}, {1});
+  
+  dataPoint point;
+  kin->EventToDataPoint(event, point, sys23);
+  kin->EventToDataPoint(event, point, sys13);
+  kin->EventToDataPoint(event, point, sys12);
+  
+  double m23sq = point.GetValue(0);
+  double cos23 = point.GetValue(1);
+  double m13sq = point.GetValue(3);
+  //	double cos13 = point.getVal(4);
+  double m12sq = point.GetValue(6);
+  //	double cos12 = point.getVal(7);
+  
+  arr.at(0).Fill(m23sq, weight);
+  arr.at(1).Fill(m13sq, weight);
+  arr.at(2).Fill(m12sq, weight);
+  
   arr2D.at(0).Fill(m23sq, m13sq, weight);
   arr2D.at(1).Fill(m23sq, m12sq, weight);
   arr2D.at(2).Fill(m12sq, m13sq, weight);

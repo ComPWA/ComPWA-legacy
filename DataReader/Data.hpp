@@ -11,16 +11,6 @@
 // Contributors:
 //     michel - initial API and implementation
 //-------------------------------------------------------------------------------
-//! Data Interface Base-Class.
-/*! \class Data
- * @file Data.hpp
- * This class provides the interface to experimental data. As it is pure
- * virtual,
- * one needs at least one implementation to provide data for the other modules.
- * If
- * a new reader is derived from and fulfills this base-class, no change in other
- * modules are necessary to work with the new dataset.
- */
 
 #ifndef DATA_HPP_
 #define DATA_HPP_
@@ -39,6 +29,11 @@
 namespace ComPWA {
 namespace DataReader {
 
+/*! \class Data
+ * This class provides the interface to experimental data. It does not provide 
+ * any funktionality for data read in and write out. This funktionality is
+ * in derived classes. See @RootReader, @AsciiReader.
+ */
 class Data {
 public:
   //! Default constructor
@@ -49,10 +44,10 @@ public:
   }
 
   //! Create clone
-  virtual Data *Clone() const = 0;
+  virtual Data *Clone() const { return new Data(*this); };
 
   //! Create empty clone
-  virtual Data *EmptyClone() const = 0;
+  virtual Data *EmptyClone() const { return new Data(); };
 
   //! Append data sample
   virtual void Add(Data &otherSample);
@@ -145,7 +140,10 @@ public:
    * @param file output file name
    * @param trName name of output tree
    */
-  virtual void writeData(std::string file = "", std::string trName = "") = 0;
+  virtual void writeData(std::string file = "", std::string trName = "") {
+    LOG(error) << "Data::writeData() | Base class does not provide functionality"
+    "to write data to file.";
+  };
 
   //! Obsolete?
   virtual const unsigned int getNBins() const { return fBins.size(); }

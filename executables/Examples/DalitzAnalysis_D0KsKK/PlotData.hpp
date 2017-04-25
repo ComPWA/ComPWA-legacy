@@ -14,11 +14,14 @@
 #include "Core/Particle.hpp"
 #include "Core/Parameter.hpp"
 #include "Core/ParameterList.hpp"
+#include "Core/AmpIntensity.hpp"
 #include "DataReader/RootReader/RootReader.hpp"
-#include "Physics/AmplitudeSum/AmpSumIntensity.hpp"
 
 using namespace ComPWA;
 
+/* \class dalitzHisto
+ *! Simple class to create and fill Dalitz plots
+ */
 class dalitzHisto {
 public:
   ~dalitzHisto() {
@@ -40,8 +43,6 @@ public:
   void SetStats(bool b);
   //! Fill event
   void Fill(Event &event, double w = 1);
-    //! Fill dataPoint
-    void Fill(dataPoint &point, double w = 1);
   //! Scale all distributions
   void Scale(double w);
   //! Get 1D histogram
@@ -77,26 +78,25 @@ public:
 
   virtual ~plotData();
 
-  void setCorrectEfficiency(bool s) { _correctForEfficiency = s; }
+  void SetCorrectEfficiency(bool s) { _correctForEfficiency = s; }
 
-  void setData(std::shared_ptr<DataReader::Data> dataSample) {
+  void SetData(std::shared_ptr<DataReader::Data> dataSample) {
     s_data = dataSample;
   }
 
-  void setPhspData(std::shared_ptr<DataReader::Data> phsp) { s_phsp = phsp; }
+  void SetPhspData(std::shared_ptr<DataReader::Data> phsp) { s_phsp = phsp; }
 
-  void setFitData(std::shared_ptr<DataReader::Data> fit) { s_fit = fit; }
+  void SetFitData(std::shared_ptr<DataReader::Data> fit) { s_fit = fit; }
 
-  void setHitMissData(std::shared_ptr<DataReader::Data> hitMiss) {
+  void SetHitMissData(std::shared_ptr<DataReader::Data> hitMiss) {
     s_hitMiss = hitMiss;
   }
 
-  void setFitAmp(std::vector<std::shared_ptr<ComPWA::AmpIntensity> > ampVec,
-                 std::vector<double> fraction);
+  void SetFitAmp(std::shared_ptr<ComPWA::AmpIntensity> intens);
 
-  TH2Poly *getAdBinHist(int bins = 30);
+  TH2Poly *GetAdBinHist(int bins = 30);
 
-  void setGlobalScale(double s) { _globalScale = s; }
+  void SetGlobalScale(double s) { _globalScale = s; }
 
   void Fill();
 
@@ -137,8 +137,7 @@ protected:
   std::shared_ptr<DataReader::Data> s_phsp;
   std::shared_ptr<DataReader::Data> s_fit;
   std::shared_ptr<DataReader::Data> s_hitMiss;
-  std::vector<std::shared_ptr<AmpIntensity> > _ampVec;
-  std::vector<double> _fraction;
+  std::shared_ptr<AmpIntensity> _intens;
 };
 
 #endif

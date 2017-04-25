@@ -48,9 +48,9 @@ public:
   SubSystem(){};
 
   SubSystem(std::vector<int> recoilS, std::vector<int> finalA,
-            std::vector<int> finalB, pid decayParticle = 0)
-      : _recoilState(recoilS), _finalStateA(finalA), _finalStateB(finalB),
-        _decayParticle(0) {
+            std::vector<int> finalB)
+      : _recoilState(recoilS), _finalStateA(finalA), _finalStateB(finalB)
+        {
 
           title = to_string();
     // LOG(trace) << "SubSystem::SubSystem() | Creating sub system "<<title;
@@ -63,11 +63,6 @@ public:
     for (auto i : _recoilState)
       stream << std::to_string(i);
     stream << ")->(";
-
-    if (_decayParticle != 0)
-      stream << PhysConst::Instance()->FindParticle(_decayParticle).GetName();
-    stream << ")+(";
-
     for (auto i : _finalStateA)
       stream << std::to_string(i);
     stream << ")+(";
@@ -97,15 +92,11 @@ public:
   virtual void SetFinalStateA(std::vector<int> f) { _finalStateA = f; }
   virtual void SetFinalStateB(std::vector<int> f) { _finalStateB = f; }
 
-  virtual void SetDecayParticle(pid id) { _decayParticle = id; }
-  virtual pid GetDecayParticle() const { return _decayParticle; }
-
 protected:
   std::string title;
   std::vector<int> _recoilState;
   std::vector<int> _finalStateA;
   std::vector<int> _finalStateB;
-  pid _decayParticle;
 };
 
 /*! HelicityKinematics class.

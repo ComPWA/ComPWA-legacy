@@ -31,10 +31,10 @@
 namespace ComPWA {
 
 /*! \class AmpIntensity
- * This class provides the interface an amplitude intensity. The intensity can 
+ * This class provides the interface an amplitude intensity. The intensity can
  * be moduled with a (double) strength parameter. The intensity has
- * to be normalized to one when integrated over the phase space. 
- * Since the intensity is a physically observable quantity it has to be 
+ * to be normalized to one when integrated over the phase space.
+ * Since the intensity is a physically observable quantity it has to be
  * corrected for the space depended reconstruction efficiency. The normalization
  * has to take this into account as well.
  */
@@ -91,7 +91,8 @@ public:
    */
   virtual double Intensity(const dataPoint &point) const = 0;
 
-  /*! Evaluate intensity at dataPoint in phase-space (excluding efficiency correction).
+  /*! Evaluate intensity at dataPoint in phase-space (excluding efficiency
+   * correction).
    * @param point Data point
    * @return Intensity
    */
@@ -105,16 +106,18 @@ public:
 
   //========== FUNCTIONTREE =============
   //! Check of tree is available
-  virtual bool HasTree() { return false; }
+  virtual bool HasTree() const { return false; }
 
   /*! Get FunctionTree
    * @param sample Data sample
-   * @param phspSample Sample of phase space distributed events including efficiency.
-   * @param toySample Sample of phase space distributed events without efficiency.
+   * @param phspSample Sample of phase space distributed events including
+   * efficiency.
+   * @param toySample Sample of phase space distributed events without
+   * efficiency.
    */
-  virtual std::shared_ptr<FunctionTree> GetTree(ParameterList & sample,
-                                                ParameterList & phspSample,
-                                                ParameterList & toySample,
+  virtual std::shared_ptr<FunctionTree> GetTree(ParameterList &sample,
+                                                ParameterList &phspSample,
+                                                ParameterList &toySample,
                                                 std::string suffix = "") {
     return std::shared_ptr<FunctionTree>();
   }
@@ -132,6 +135,15 @@ public:
 
   //! Set strength parameter
   void SetStrength(double par) { _strength->SetValue(par); }
+
+  /*! Set phase space sample
+   * We use a phase space sample to calculate the normalization and determine
+   * the maximum of the amplitude. In case that the efficiency is already
+   * applied
+   * to the sample set fEff to false.
+   */
+  void SetPhspSample(std::shared_ptr<ComPWA::DataReader::Data> phspSample,
+                     bool fEff) {};
 
 protected:
   /*! Calculate integral.
@@ -272,7 +284,7 @@ public:
 
   //========== FunctionTree =============
   //! Check of tree is available
-  virtual bool HasTree() { return 1; }
+  virtual bool HasTree() const { return 1; }
 
   //! Getter function for basic amp tree
   //! Getter function for basic amp tree

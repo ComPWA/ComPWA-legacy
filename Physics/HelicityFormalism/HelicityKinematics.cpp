@@ -327,6 +327,11 @@ void HelicityKinematics::EventToDataPoint(const Event &event, dataPoint &point,
   }
   QFT::Vector4<double> dd = finalA + finalB;
   double mSq = dd.Mass2();
+  auto massLimits = GetInvMassBounds(sys);
+  if ( mSq < massLimits.first || mSq > massLimits.second ) {
+    throw BeyondPhsp("HelicityKinematics::EventToDataPoint() |"
+                     " Point beypond phase space boundaries!");
+  }
 
   finalA.Boost(dd);
   finalA.Rotate(dd.Phi(), dd.Theta(), (-1) * dd.Phi());
