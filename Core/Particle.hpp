@@ -22,11 +22,87 @@
 #define _PARTICLE_HPP_
 
 #include <vector>
+#include <array>
+#include <numeric>
+#include <algorithm>
 #include <cmath>
 #include <iostream>
 #include <stdexcept>
 
 namespace ComPWA {
+
+class FourMomentum {
+
+public:
+  FourMomentum(double px = 0, double py = 0, double pz = 0, double E = 0)
+      : _p4(std::array<double, 4>{{px, py, pz, E}}) {
+    //    _p4.at(0) = px;
+    //    _p4.at(1) = py;
+    //    _p4.at(2) = pz;
+    //    _p4.at(3) = E;
+  }
+  FourMomentum(std::array<double, 4> p4) : _p4(p4) {}
+
+  void SetPx(double px) { _p4.at(0) = px; }
+  void SetPy(double py) { _p4.at(1) = py; }
+  void SetPz(double pz) { _p4.at(2) = pz; }
+  void SetE(double E) { _p4.at(3) = E; }
+  double GetPx() const { return _p4.at(0); }
+  double GetPy() const { return _p4.at(1); }
+  double GetPz() const { return _p4.at(2); }
+  double GetE() const { return _p4.at(3); }
+
+  FourMomentum operator+(const FourMomentum &pB) const {
+    FourMomentum newP(*this);
+    newP += pB;
+    return newP;
+  }
+
+  void operator+=(const FourMomentum &pB) {
+    std::transform(_p4.begin(), _p4.end(), pB._p4.begin(), _p4.begin(),
+                   std::plus<double>());
+  }
+  bool operator==(const FourMomentum &pB) const {
+    if (_p4 == pB._p4)
+      return true;
+    return false;
+  }
+
+  friend std::ostream &operator<<(std::ostream &stream,
+                                  const FourMomentum &p4) {
+    stream << "(" << p4.GetPx() << "," << p4.GetPy() << "," << p4.GetPz() << ","
+           << p4.GetE() << ")";
+    return stream;
+  }
+
+  virtual inline const std::array<double, 4> &GetFourMomentum() const {
+    return _p4;
+  }
+
+  virtual void SetFourMomentum(std::array<double, 4> p4) { _p4 = p4; }
+
+  inline double GetMassSq() const { return InvariantMass(*this); }
+
+  static double InvariantMass(const FourMomentum &p4A,
+                              const FourMomentum &p4B) {
+    return InvariantMass(p4A + p4B);
+  }
+
+  static double InvariantMass(const FourMomentum &p4) {
+    auto vec = p4.GetFourMomentum();
+    return ((-1) * (vec.at(0) * vec.at(0) + vec.at(1) * vec.at(1) +
+                    vec.at(2) * vec.at(2) - vec.at(3) * vec.at(3)));
+  }
+
+  static double ThreeMomentumSq(const FourMomentum &p4) {
+    auto vec = p4.GetFourMomentum();
+    return (vec.at(0) * vec.at(0) + vec.at(1) * vec.at(1) +
+            vec.at(2) * vec.at(2));
+  }
+
+protected:
+  std::array<double, 4> _p4;
+};
 
 class Particle {
 public:
@@ -34,66 +110,57 @@ public:
   Particle(double inPx = 0, double inPy = 0, double inPz = 0, double inE = 0,
            int inpid = 0, int c = 0);
 
+  Particle(std::array<double, 4> p4, int inpid = 0, int c = 0)
+      : _p4(p4), pid(inpid), charge(c){};
+
   //! Copy constructor
-  Particle(Particle const&);
+  Particle(Particle const &);
 
   //! Default destructor
   virtual ~Particle();
 
-  //! Invariant mass of this particle and @param in
-  inline double invariantMass(const Particle &in) const {
-    return (
-        std::pow(getE() + in.getE(), 2) - std::pow(getPx() + in.getPx(), 2) -
-        std::pow(getPy() + in.getPy(), 2) - std::pow(getPz() + in.getPz(), 2));
+  virtual inline void SetPx(double px) { _p4.SetPx(px); }
+  virtual inline void SetPy(double py) { _p4.SetPy(py); }
+  virtual inline void SetPz(double pz) { _p4.SetPz(pz); }
+  virtual inline void SetE(double E) { _p4.SetE(E); }
+  virtual inline double GetPx() const { return _p4.GetPx(); }
+  virtual inline double GetPy() const { return _p4.GetPy(); }
+  virtual inline double GetPz() const { return _p4.GetPz(); }
+  virtual inline double GetE() const { return _p4.GetE(); }
+
+  virtual inline void SetPid(int _pid) { pid = _pid; }
+  virtual inline void SetCharge(int _c) { charge = _c; }
+  virtual inline int GetPid() const { return pid; }
+  virtual inline int GetCharge() const { return charge; }
+
+  virtual inline const FourMomentum &GetFourMomentum() const { return _p4; }
+
+  friend std::ostream &operator<<(std::ostream &stream, const Particle &p);
+
+  //  Particle &operator+=(const Particle &rhs);
+
+  //  Particle operator+(const Particle &c2);
+
+  //! Get magnitude of three momentum
+  double GetThreeMomentum() const {
+    return std::sqrt(FourMomentum::ThreeMomentumSq(_p4));
   }
+
+  //! Get invariant mass
+  double GetMass() const { return std::sqrt(GetMassSq()); }
+
+  inline double GetMassSq() const { return FourMomentum::InvariantMass(_p4); }
+
   /**! Invariant mass
    *
    * @param inPa Particle A
    * @param inPb Particle B
    * @return
    */
-  static double invariantMass(const Particle &inPa, const Particle &inPb);
+  static double InvariantMass(const Particle &inPa, const Particle &inPb);
 
-  //! Get magnitude of three momentum
-  double getThreeMomentum() const { return sqrt(px * px + py * py + pz * pz); }
-  //! Get invariant mass
-  double getInvMass() const {
-    return sqrt(E * E - px * px + py * py + pz * pz);
-  }
-
-  virtual inline void setPx(double _px) { px = _px; }
-  virtual inline void setPy(double _py) { py = _py; }
-  virtual inline void setPz(double _pz) { pz = _pz; }
-  virtual inline void setE(double _e) { E = _e; }
-  virtual inline void setPid(int _pid) { pid = _pid; }
-  virtual inline void setCharge(int _c) { charge = _c; }
-  virtual inline double getPx() const { return px; }
-  virtual inline double getPy() const { return py; }
-  virtual inline double getPz() const { return pz; }
-  virtual inline double getE() const { return E; }
-  virtual inline int getPid() const { return pid; }
-  virtual inline int getCharge() const { return charge; }
-  virtual inline std::vector<double> getFourMomentum() const {
-    std::vector<double> fourV;
-    fourV.push_back(E);
-    fourV.push_back(px);
-    fourV.push_back(py);
-    fourV.push_back(pz);
-    return fourV;
-  }
-
-  friend std::ostream &operator<<(std::ostream &stream, const Particle &p);
-
-  Particle &operator+=(const Particle &rhs);
-
-  Particle operator+(const Particle &c2);
-
-  inline double getMassSquare() const {
-    return E * E - px * px - py * py - pz * pz;
-  }
-
-  // protected:
-  double px, py, pz, E;
+protected:
+  FourMomentum _p4;
   int pid;
   int charge;
 };

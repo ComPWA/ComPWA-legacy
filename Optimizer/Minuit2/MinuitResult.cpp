@@ -30,9 +30,9 @@ MinuitResult::MinuitResult(std::shared_ptr<ControlParameter> esti,
                            ROOT::Minuit2::FunctionMinimum result)
     : calcInterference(0), initialLH(0), finalLH(0), trueLH(0) {
   est = std::static_pointer_cast<Estimator>(esti);
-  _ampVec = est->getAmplitudes();
-  penalty = est->calcPenalty();
-  penaltyScale = est->getPenaltyScale();
+  _intens = est->GetIntensity();
+//  penalty = est->calcPenalty();
+//  penaltyScale = est->getPenaltyScale();
   nEvents = est->getNEvents();
   init(result);
 }
@@ -40,9 +40,9 @@ MinuitResult::MinuitResult(std::shared_ptr<ControlParameter> esti,
 void MinuitResult::setResult(std::shared_ptr<ControlParameter> esti,
                              ROOT::Minuit2::FunctionMinimum result) {
   est = std::static_pointer_cast<Estimator>(esti);
-  _ampVec = est->getAmplitudes();
-  penalty = est->calcPenalty();
-  penaltyScale = est->getPenaltyScale();
+  _intens = est->GetIntensity();
+//  penalty = est->calcPenalty();
+//  penaltyScale = est->getPenaltyScale();
   nEvents = est->getNEvents();
   init(result);
 }
@@ -95,7 +95,7 @@ void MinuitResult::init(ROOT::Minuit2::FunctionMinimum min) {
 }
 
 //! Set list of true parameters
-void MinuitResult::setTrueParameters(ParameterList truePars) {
+void MinuitResult::SetTrueParameters(ParameterList truePars) {
   trueParameters = truePars;
   if (trueParameters.GetNDouble() && est) {
     // Setting true parameter and calculate LH value
@@ -106,7 +106,7 @@ void MinuitResult::setTrueParameters(ParameterList truePars) {
 }
 
 //! Set list of initial parameters
-void MinuitResult::setInitialParameters(ParameterList iniPars) {
+void MinuitResult::SetInitialParameters(ParameterList iniPars) {
   initialParameters = iniPars;
   if (initialParameters.GetNDouble() && est) {
     // Setting initial parameter and calculate LH value
@@ -283,7 +283,7 @@ void MinuitResult::genOutput(std::ostream &out, std::string opt) {
   if (printParam) {
     out << "PARAMETERS:" << std::endl;
     TableFormater *tableResult = new TableFormater(&out);
-    printFitParameters(tableResult);
+    PrintFitParameters(tableResult);
   }
 
   if (!hasValidCov)
@@ -299,12 +299,12 @@ void MinuitResult::genOutput(std::ostream &out, std::string opt) {
     if (printCovMatrix) {
       out << "COVARIANCE MATRIX:" << std::endl;
       TableFormater *tableCov = new TableFormater(&out);
-      printCovarianceMatrix(tableCov);
+      PrintCovarianceMatrix(tableCov);
     }
     if (printCorrMatrix) {
       out << "CORRELATION MATRIX:" << std::endl;
       TableFormater *tableCorr = new TableFormater(&out);
-      printCorrelationMatrix(tableCorr);
+      PrintCorrelationMatrix(tableCorr);
     }
   }
   out << "FIT FRACTIONS:" << std::endl;
@@ -313,27 +313,28 @@ void MinuitResult::genOutput(std::ostream &out, std::string opt) {
   // Calculate fit fractions for all amplitudes
   //	printFitFractions(&tab);
   // Calculate fit fractions for first amplitude only
-  printFitFractions(&tab, _ampVec.at(0), nSetsFractionError);
+//  PrintFitFractions(&tab, _ampVec.at(0), nSetsFractionError);
+  PrintFitFractions(&tab, _intens, nSetsFractionError);
 
   out << std::setprecision(10);
-  out << "Final penalty term: " << penalty << std::endl;
-  out << "FinalLH w/o penalty: " << finalLH - penalty << std::endl;
-  out << "FinalLH w/ penalty: " << finalLH << std::endl;
+//  out << "Final penalty term: " << penalty << std::endl;
+//  out << "FinalLH w/o penalty: " << finalLH - penalty << std::endl;
+  out << "FinalLH: " << finalLH << std::endl;
   /* The Akaike (AIC) and Bayesian (BIC) information criteria are described in
    * Schwarz, Anals of Statistics 6 No.2: 461-464 (1978)
    * and
    * IEEE Transacrions on Automatic Control 19, No.6:716-723 (1974) */
   ParameterList frac;
-  try {
-    _ampVec.at(0)->GetFitFractions(frac);
-  } catch (std::exception &ex) {
-    LOG(error) << "MinuitResult::genOutput() | Can not "
-                  "calculate fit fractions for amplitude 0.";
-  }
-  AIC = calcAIC(frac) - penalty;
-  BIC = calcBIC(frac) - penalty;
-  out << "AIC: " << AIC << std::endl;
-  out << "BIC: " << BIC << std::endl;
+//  try {
+//    _ampVec.at(0)->GetFitFractions(frac);
+//  } catch (std::exception &ex) {
+//    LOG(error) << "MinuitResult::genOutput() | Can not "
+//                  "calculate fit fractions for amplitude 0.";
+//  }
+//  AIC = calcAIC(frac) - penalty;
+//  BIC = calcBIC(frac) - penalty;
+//  out << "AIC: " << AIC << std::endl;
+//  out << "BIC: " << BIC << std::endl;
   double r = 0;
   for (int i = 0; i < fractionList.GetNDouble(); i++) {
     double val = std::fabs(fractionList.GetDoubleParameter(i)->GetValue());
@@ -342,11 +343,11 @@ void MinuitResult::genOutput(std::ostream &out, std::string opt) {
   }
   out << "Number of Resonances > 10^-3: " << r << std::endl;
 
-  if (calcInterference) {
-    auto ampItr = _ampVec.begin();
-    for (; ampItr != _ampVec.end(); ++ampItr)
-      createInterferenceTable(out, (*ampItr));
-  }
+//  if (calcInterference) {
+//    auto ampItr = _ampVec.begin();
+//    for (; ampItr != _ampVec.end(); ++ampItr)
+//      createInterferenceTable(out, (*ampItr));
+//  }
 
   out << std::setprecision(5); // reset cout precision
   return;
@@ -379,27 +380,27 @@ void MinuitResult::createInterferenceTable(std::ostream &out,
   out << std::endl;
 }
 
-double MinuitResult::calcAIC(ParameterList &frac) {
-  double r = 0;
-  for (int i = 0; i < frac.GetNDouble(); i++) {
-    double val = frac.GetDoubleParameter(i)->GetValue();
-    if (val > 0.001)
-      r++;
-  }
-  return (finalLH + 2 * r);
-}
+//double MinuitResult::calcAIC(ParameterList &frac) {
+//  double r = 0;
+//  for (int i = 0; i < frac.GetNDouble(); i++) {
+//    double val = frac.GetDoubleParameter(i)->GetValue();
+//    if (val > 0.001)
+//      r++;
+//  }
+//  return (finalLH + 2 * r);
+//}
+//
+//double MinuitResult::calcBIC(ParameterList &frac) {
+//  double r = 0;
+//  for (int i = 0; i < frac.GetNDouble(); i++) {
+//    double val = frac.GetDoubleParameter(i)->GetValue();
+//    if (val > 0.001)
+//      r++;
+//  }
+//  return (finalLH + r * std::log(nEvents));
+//}
 
-double MinuitResult::calcBIC(ParameterList &frac) {
-  double r = 0;
-  for (int i = 0; i < frac.GetNDouble(); i++) {
-    double val = frac.GetDoubleParameter(i)->GetValue();
-    if (val > 0.001)
-      r++;
-  }
-  return (finalLH + r * std::log(nEvents));
-}
-
-void MinuitResult::printCorrelationMatrix(TableFormater *tableCorr) {
+void MinuitResult::PrintCorrelationMatrix(TableFormater *tableCorr) {
   if (!hasValidCov)
     return;
   tableCorr->addColumn(" ", 15);        // add empty first column
@@ -439,7 +440,7 @@ void MinuitResult::printCorrelationMatrix(TableFormater *tableCorr) {
   return;
 }
 
-void MinuitResult::printCovarianceMatrix(TableFormater *tableCov) {
+void MinuitResult::PrintCovarianceMatrix(TableFormater *tableCov) {
   if (!hasValidCov)
     return;
   tableCov->addColumn(" ", 17); // add empty first column
@@ -473,7 +474,7 @@ void MinuitResult::printCovarianceMatrix(TableFormater *tableCov) {
   return;
 }
 
-void MinuitResult::writeXML(std::string filename) {
+void MinuitResult::WriteXML(std::string filename) {
   std::ofstream ofs(filename);
   boost::archive::xml_oarchive oa(ofs);
   // TODO: Compile error due to serialization
@@ -483,24 +484,24 @@ void MinuitResult::writeXML(std::string filename) {
   return;
 }
 
-void MinuitResult::writeTeX(std::string filename) {
+void MinuitResult::WriteTeX(std::string filename) {
   std::ofstream out(filename);
   TableFormater *tableResult = new TexTableFormater(&out);
-  printFitParameters(tableResult);
+  PrintFitParameters(tableResult);
   if (hasValidCov) {
     TableFormater *tableCov = new TexTableFormater(&out);
-    printCovarianceMatrix(tableCov);
+    PrintCovarianceMatrix(tableCov);
     TableFormater *tableCorr = new TexTableFormater(&out);
-    printCorrelationMatrix(tableCorr);
+    PrintCorrelationMatrix(tableCorr);
   }
   TableFormater *fracTable = new TexTableFormater(&out);
   // calculate and print fractions if amplitude is set
-  printFitFractions(fracTable);
+  PrintFitFractions(fracTable);
   out.close();
   return;
 }
 
-bool MinuitResult::hasFailed() {
+bool MinuitResult::HasFailed() {
   bool failed = 0;
   if (!isValid)
     failed = 1;

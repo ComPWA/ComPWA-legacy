@@ -47,7 +47,7 @@ void TwoBodyKinematics::EventToDataPoint(const Event &ev,
   point.SetWeight(weight); // reset weight
   const Particle &part1 = ev.getParticle(0);
   const Particle &part2 = ev.getParticle(1);
-  double msq = Particle::invariantMass(part1, part2);
+  double msq = Particle::InvariantMass(part1, part2);
   point.SetValue(0, msq);
   return;
 }

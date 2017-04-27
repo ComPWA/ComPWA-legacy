@@ -155,7 +155,7 @@ CoherentIntensity::setupBasicTree(ParameterList &sample,
 
   for (auto i : _seqDecays) {
     std::shared_ptr<FunctionTree> resTree =
-        i->GetTree(sample, phspSample, phspSample, "");
+        i->GetTree(sample, phspSample, "");
     if (!resTree->sanityCheck())
       throw std::runtime_error("AmpSumIntensity::setupBasicTree() | "
                                "Resonance tree didn't pass sanity check!");
@@ -175,6 +175,8 @@ void CoherentIntensity::GetParameters(ComPWA::ParameterList &list) {
 }
 
 double CoherentIntensity::GetNormalization() const {
+  if( _integral ) return 1/_integral;
+  
   // Check if parameters were modified
   ParameterList list;
   const_cast<CoherentIntensity *>(this)->GetParameters(list);

@@ -219,9 +219,9 @@ std::shared_ptr<FitResult> MinuitIF::exec(ParameterList &par) {
 
   // Create fit result
   std::shared_ptr<FitResult> result(new MinuitResult(estimator, minMin));
-  result->setFinalParameters(finalParList);
-  result->setInitialParameters(initialParList);
-  result->setTime(time.elapsed());
+  result->SetFinalParameters(finalParList);
+  result->SetInitialParameters(initialParList);
+  result->SetTime(time.elapsed());
 
   // update parameters in amplitude
 //  Amplitude::UpdateAmpParameterList(estimator->getAmplitudes(), finalParList);

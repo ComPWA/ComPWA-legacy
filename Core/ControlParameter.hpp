@@ -43,13 +43,11 @@ public:
     instance_ = std::shared_ptr<ControlParameter>();
   }
 
-  virtual std::shared_ptr<FunctionTree> getTree() {
-    return std::shared_ptr<FunctionTree>();
-  }
+  virtual bool HasTree() = 0;
+  
+  virtual std::shared_ptr<FunctionTree> GetTree() = 0;
 
-  virtual std::vector<std::shared_ptr<AmpIntensity>> getAmplitudes() {
-    return std::vector<std::shared_ptr<AmpIntensity>>();
-  }
+  virtual std::shared_ptr<AmpIntensity> GetIntensity() = 0;
 
   virtual int nCalls() { return calls; }
 

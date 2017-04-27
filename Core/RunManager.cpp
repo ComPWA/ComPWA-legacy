@@ -65,7 +65,7 @@ std::shared_ptr<FitResult> RunManager::Fit(ParameterList &inPar) {
 
   LOG(info) << "RunManager::startFit() | Minimization finished!"
                " Result = "
-            << result->getResult() << ".";
+            << result->GetResult() << ".";
 
   return result;
 }
@@ -138,8 +138,9 @@ bool RunManager::gen(int number, std::shared_ptr<Generator> gen,
   /* Maximum value for random number generation. We introduce an arbitrary
    * factor of 1.2 to make sure that the maximum value is never reached.
    */
-  double generationMaxValue = 1.2 * amp->GetMaximum(gen) * maxSampleWeight;
+  double generationMaxValue = 5 * amp->GetMaximum(gen) * maxSampleWeight;
 
+  unsigned int initialSeed = gen->GetSeed();
   unsigned int totalCalls = 0;
   //	unsigned int startTime = clock();
   double AMPpdf;
@@ -185,11 +186,21 @@ bool RunManager::gen(int number, std::shared_ptr<Generator> gen,
     double ampRnd = gen->GetUniform(0, generationMaxValue);
     AMPpdf = amp->Intensity(point);
 
-    if (generationMaxValue < (AMPpdf * weight))
-      throw std::runtime_error(
-          "RunManager::gen() | Error in HitMiss "
+    if (generationMaxValue < (AMPpdf * weight)){
+      LOG(error) << "RunManager::gen() | Error in HitMiss "
           "procedure: Maximum value of random number generation "
-          "smaller then amplitude maximum!");
+          "smaller then amplitude maximum! We raise the maximum value and restart generation!";
+      i=0;
+      bar = progressBar(number);
+      gen->SetSeed(initialSeed);
+      generationMaxValue = 2 * (AMPpdf * weight);
+      data->Clear();
+      continue;
+//      throw std::runtime_error(
+//          "RunManager::gen() | Error in HitMiss "
+//          "procedure: Maximum value of random number generation "
+//          "smaller then amplitude maximum!");
+    }
 
     if (ampRnd > (weight * AMPpdf))
       continue;

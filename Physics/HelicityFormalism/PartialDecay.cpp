@@ -28,7 +28,7 @@ std::vector<int> stringToVectInt(std::string str) {
   return result;
 }
 
-std::shared_ptr<PartialDecay>
+std::shared_ptr<Resonance>
 PartialDecay::Factory(const boost::property_tree::ptree &pt) {
 
   LOG(trace) << "PartialDecay::Factory() |";
@@ -84,12 +84,13 @@ PartialDecay::Factory(const boost::property_tree::ptree &pt) {
   // make sure dynamical function is created and set first
   obj->SetSubSystem(subSys);
 
-  return obj;
+  return std::static_pointer_cast<Resonance>(obj);
 }
 
 boost::property_tree::ptree
-PartialDecay::Save(std::shared_ptr<PartialDecay> obj) {
+PartialDecay::Save(std::shared_ptr<Resonance> res) {
 
+  auto obj = std::static_pointer_cast<PartialDecay>(res);
   boost::property_tree::ptree pt;
   pt.put<std::string>("<xmlattr>.Name", obj->GetName());
   pt.add_child("Magnitude",
@@ -155,7 +156,6 @@ PartialDecay::Save(std::shared_ptr<PartialDecay> obj) {
 
 /**! Setup function tree */
 std::shared_ptr<FunctionTree> PartialDecay::GetTree(ParameterList &sample,
-                                                    ParameterList &phspSample,
                                                     ParameterList &toySample,
                                                     std::string suffix) {
   std::shared_ptr<FunctionTree> tr(new FunctionTree());

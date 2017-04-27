@@ -24,6 +24,8 @@
 #include "Physics/qft++/Vector4.h"
 #include "Tools/RootGenerator.hpp"
 
+#include <boost/timer.hpp>
+
 namespace ComPWA {
 namespace Physics {
 namespace HelicityFormalism {
@@ -67,9 +69,9 @@ HelicityKinematics::HelicityKinematics(boost::property_tree::ptree pt) {
     auto partP = PhysConst::Instance()->FindParticle(name);
     _finalState.push_back(partP.GetId());
   }
-  
+
   auto phspVal = pt.get_optional<double>("PhspVolume");
-  if( phspVal ){
+  if (phspVal) {
     SetPhspVolume(phspVal.get());
   }
 
@@ -115,29 +117,38 @@ bool HelicityKinematics::IsWithinPhsp(const dataPoint &point) const {
 
   return true;
 }
+const std::pair<double, double> &
+HelicityKinematics::GetInvMassBounds(const SubSystem sys) const {
+  return GetInvMassBounds(
+      const_cast<HelicityKinematics *>(this)->GetDataID(sys));
+}
+
+const std::pair<double, double> &
+HelicityKinematics::GetInvMassBounds(int sysID) const {
+  return _invMassBounds.at(sysID);
+}
 
 std::pair<double, double>
-HelicityKinematics::GetInvMassBounds(SubSystem sys) const {
+HelicityKinematics::CalculateInvMassBounds(const SubSystem sys) const {
 
   /* We use the formulae from (PDG2016 Kinematics Fig.47.3). I hope the
    * generalization to n-body decays is correct.
    */
-  double min = 0; // min = (m1+m2)^2 (Dalitz decay)
+  std::pair<double, double> lim(0, _M);
   for (auto i : sys.GetFinalStateA())
-    min += PhysConst::Instance()->FindParticle(_finalState.at(i)).GetMass();
+    lim.first +=
+        PhysConst::Instance()->FindParticle(_finalState.at(i)).GetMass();
   for (auto i : sys.GetFinalStateB())
-    min += PhysConst::Instance()->FindParticle(_finalState.at(i)).GetMass();
-  min = min * min;
+    lim.first +=
+        PhysConst::Instance()->FindParticle(_finalState.at(i)).GetMass();
+  lim.first *= lim.first;
 
-  double max = _M; // max = (M-m3)^2 (Dalitz decay)
   for (auto i : sys.GetRecoilState())
-    max -= PhysConst::Instance()->FindParticle(_finalState.at(i)).GetMass();
-  max = max * max;
+    lim.second -=
+        PhysConst::Instance()->FindParticle(_finalState.at(i)).GetMass();
+  lim.second *= lim.second;
 
-  //  LOG(trace) << "HelicityKinematics::GetInvMassBounds() | Bounds for
-  //  SubSystem "
-  //             << sys << " are [" << min << "," << max << "]";
-  return std::pair<double, double>(min, max);
+  return lim;
 }
 
 double HelicityKinematics::EventDistance(Event &evA, Event &evB) const {
@@ -246,15 +257,16 @@ return phspVolume;
 */
 
 double HelicityKinematics::calculatePSArea() {
-  //TODO: fix calculation of phase space volume
+  // TODO: fix calculation of phase space volume
   double phspVolume = 1.0;
   LOG(info) << "HelicityKinematics::calculatePSArea() | Phase space volume: "
             << phspVolume;
-  LOG(info) << "HelicityKinematics::calculatePSArea() | Note that the phase space volume calculation is currently NOT CORRECT!";
+  LOG(info) << "HelicityKinematics::calculatePSArea() | Note that the phase "
+               "space volume calculation is currently NOT CORRECT!";
   return phspVolume;
-  
-  int precision = 100; // sample size
-  int numNearestN = 10; //Number of nearest neighbours
+
+  int precision = 100;  // sample size
+  int numNearestN = 10; // Number of nearest neighbours
 
   // Generate phase space sample
   auto gen = ComPWA::Tools::RootGenerator(123456);
@@ -263,14 +275,14 @@ double HelicityKinematics::calculatePSArea() {
   while (m < precision) {
     Event tmp;
     gen.Generate(tmp);
-    double ampRnd = gen.GetUniform(0,1);
+    double ampRnd = gen.GetUniform(0, 1);
     if (ampRnd > tmp.getWeight())
       continue;
     m++;
     sample.pushEvent(tmp);
   }
 
-  std::vector<double> localDistance(sample.getNEvents(),0.0);
+  std::vector<double> localDistance(sample.getNEvents(), 0.0);
   for (int n = 0; n < sample.getNEvents(); n++) {
     std::vector<double> dist;
     for (int m = 0; m < sample.getNEvents(); m++) {
@@ -278,73 +290,105 @@ double HelicityKinematics::calculatePSArea() {
       dist.push_back(d);
     }
     std::sort(dist.begin(), dist.end()); // ascending
-    for(int i = 0; i<localDistance.size(); i++)
+    for (int i = 0; i < localDistance.size(); i++)
       localDistance.at(i) += dist.at(i);
   }
-  for(int i=0; i<localDistance.size(); i++)
+  for (int i = 0; i < localDistance.size(); i++)
     localDistance.at(i) /= sample.getNEvents();
 
   int nDim = _finalState.size() - 1;
-  
+
   std::vector<double> avgVecVol(sample.getNEvents());
-  for(int i=0; i<localDistance.size(); i++)
+  for (int i = 0; i < localDistance.size(); i++)
     avgVecVol.at(i) = std::pow(M_PI, nDim / 2) / std::tgamma(nDim / 2 + 1) *
-                     std::pow(localDistance.at(i), nDim);
-  
+                      std::pow(localDistance.at(i), nDim);
+
   std::vector<double> avgVecDensity(sample.getNEvents());
-  for(int i=0; i<localDistance.size(); i++)
+  for (int i = 0; i < localDistance.size(); i++)
     avgVecDensity.at(i) = sample.getNEvents() / (i / avgVecVol.at(i));
-  
-//  std::cout<<"Average distance | volume | density:"<<std::endl;
-//  for(int i=0; i<precision/4; i++)
-//    std::cout<<i<<" "<<localDistance.at(i)<<" "<<avgVecVol.at(i)<<" "<<avgVecDensity.at(i)<<std::endl;
-  
+
+  //  std::cout<<"Average distance | volume | density:"<<std::endl;
+  //  for(int i=0; i<precision/4; i++)
+  //    std::cout<<i<<" "<<localDistance.at(i)<<" "<<avgVecVol.at(i)<<"
+  //    "<<avgVecDensity.at(i)<<std::endl;
+
   phspVolume = avgVecDensity.at(numNearestN);
   LOG(info) << "HelicityKinematics::calculatePSArea() | Phase space volume: "
             << phspVolume;
-  LOG(info) << "HelicityKinematics::calculatePSArea() | Note that the phase space volume calculation is currently NOT CORRECT!";
+  LOG(info) << "HelicityKinematics::calculatePSArea() | Note that the phase "
+               "space volume calculation is currently NOT CORRECT!";
   return phspVolume;
 }
 
 void HelicityKinematics::EventToDataPoint(const Event &event,
                                           dataPoint &point) const {
-  for (auto i : _listSubSystem)
-    EventToDataPoint(event, point, i);
+  assert(_listSubSystem.size() == _invMassBounds.size());
+
+  for (int i = 0; i < _listSubSystem.size(); i++)
+    EventToDataPoint(event, point, _listSubSystem.at(i), _invMassBounds.at(i));
   return;
 }
 
 void HelicityKinematics::EventToDataPoint(const Event &event, dataPoint &point,
-                                          SubSystem sys) const {
-  QFT::Vector4<double> recoil, finalA, finalB;
-  for (auto s : sys.GetRecoilState()) {
-    recoil += QFT::Vector4<double>(event.getParticle(s).getFourMomentum());
-  }
-  for (auto s : sys.GetFinalStateA()) {
-    finalA += QFT::Vector4<double>(event.getParticle(s).getFourMomentum());
-  }
-  for (auto s : sys.GetFinalStateB()) {
-    finalB += QFT::Vector4<double>(event.getParticle(s).getFourMomentum());
-  }
-  QFT::Vector4<double> dd = finalA + finalB;
-  double mSq = dd.Mass2();
+                                          const SubSystem sys) const {
   auto massLimits = GetInvMassBounds(sys);
-  if ( mSq < massLimits.first || mSq > massLimits.second ) {
+  EventToDataPoint(event, point, sys, massLimits);
+}
+
+void HelicityKinematics::EventToDataPoint(
+    const Event &event, dataPoint &point, const SubSystem sys,
+    const std::pair<double, double> limits) const {
+  
+  FourMomentum finalA, totalP4;
+  for (auto s : sys.GetFinalStateA()) {
+    finalA += event.getParticle(s).GetFourMomentum();
+  }
+  for (auto s : sys.GetFinalStateB())
+    totalP4 += event.getParticle(s).GetFourMomentum();
+
+  totalP4 += finalA;
+  double mSq = totalP4.GetMassSq();
+
+  if (mSq <= limits.first || mSq >= limits.second) {
     throw BeyondPhsp("HelicityKinematics::EventToDataPoint() |"
                      " Point beypond phase space boundaries!");
   }
 
-  finalA.Boost(dd);
-  finalA.Rotate(dd.Phi(), dd.Theta(), (-1) * dd.Phi());
-  double cosTheta = finalA.CosTheta();
-  double phi = finalA.Phi();
+  // When using finalB here the WignerD changes sign. In the end this does not
+  // matter
+  QFT::Vector4<double> vA(finalA);
+  QFT::Vector4<double> dd(totalP4);
+  vA.Boost(dd);
+  vA.Rotate(dd.Phi(), dd.Theta(), (-1) * dd.Phi());
+  double cosTheta = vA.CosTheta();
+  double phi = vA.Phi();
   if (cosTheta > 1 || cosTheta < -1 || phi > M_PI || phi < (-1) * M_PI ||
       std::isnan(cosTheta) || std::isnan(phi)) {
     throw BeyondPhsp("HelicityKinematics::EventToDataPoint() |"
                      " Point beypond phase space boundaries!");
   }
 
-  // LOG(trace)<<dd.Mass2()<< " " <<std::cos(finalA.Theta())<<"
-  // "<<finalA.Phi();
+  //  QFT::Vector4<double> tmp_finalA;
+  //  for (auto s : sys.GetFinalStateA()) {
+  //    tmp_finalA +=
+  //    QFT::Vector4<double>(event.getParticle(s).GetFourMomentum());
+  //  }
+  //  QFT::Vector4<double> tmp_finalB;
+  //  for (auto s : sys.GetFinalStateB()) {
+  //    tmp_finalB +=
+  //    QFT::Vector4<double>(event.getParticle(s).GetFourMomentum());
+  //  }
+  //  auto tmp_totalP4 = tmp_finalA + tmp_finalB;
+  //  double tmp_mSq = tmp_totalP4.M2();
+  //  tmp_finalA.Boost(tmp_totalP4);
+  //  tmp_finalA.Rotate(tmp_totalP4.Phi(), tmp_totalP4.Theta(), (-1) *
+  //  tmp_totalP4.Phi());
+  //  double tmp_cosTheta = tmp_finalA.CosTheta();
+  //  double tmp_phi = tmp_finalA.Phi();
+  //  double time2 = time.elapsed();
+
+  //  std::cout<<mSq<<"/"<<tmp_mSq<<","<<cosTheta<<"/"<<tmp_cosTheta<<","<<phi<<"/"<<tmp_phi<<std::endl;
+  //  std::cout<<"Time difference: [s] "<<time1-time2<<std::endl;
 
   point.GetPoint().push_back(mSq);
   point.GetPoint().push_back(cosTheta);

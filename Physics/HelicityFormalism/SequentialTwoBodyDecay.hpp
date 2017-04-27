@@ -23,7 +23,7 @@ namespace ComPWA {
 namespace Physics {
 namespace HelicityFormalism {
 
-class SequentialTwoBodyDecay : Amplitude {
+class SequentialTwoBodyDecay : public Amplitude {
 
 public:
   /**! Evaluate decay */
@@ -40,7 +40,6 @@ public:
 
   /**! Setup function tree */
   virtual std::shared_ptr<FunctionTree> GetTree(ParameterList &sample,
-                                                ParameterList &phspSample,
                                                 ParameterList &toySample,
                                                 std::string suffix);
 
@@ -50,11 +49,11 @@ public:
    @param pt Configuration tree
    @return Constructed object
    */
-  static std::shared_ptr<SequentialTwoBodyDecay>
+  static std::shared_ptr<ComPWA::Physics::Amplitude>
   Factory(const boost::property_tree::ptree &pt);
 
   static boost::property_tree::ptree
-  Save(std::shared_ptr<SequentialTwoBodyDecay> obj);
+  Save(std::shared_ptr<ComPWA::Physics::Amplitude> obj);
 
   /**
    Add a partial decay to Sequential decay
@@ -62,17 +61,17 @@ public:
    @param d Partial decay
    */
   void
-  Add(std::shared_ptr<ComPWA::Physics::HelicityFormalism::PartialDecay> d) {
+  Add(std::shared_ptr<ComPWA::Physics::Resonance> d) {
     _partDecays.push_back(d);
   }
 
-  std::shared_ptr<ComPWA::Physics::HelicityFormalism::PartialDecay>
+  std::shared_ptr<ComPWA::Physics::Resonance>
   GetDecay(int pos) {
     return _partDecays.at(pos);
   }
 
   std::vector<std::shared_ptr<
-      ComPWA::Physics::HelicityFormalism::PartialDecay>> &
+      ComPWA::Physics::Resonance>> &
   GetDecays() {
     return _partDecays;
   }
@@ -158,19 +157,15 @@ public:
    */
   size_t size() { return _partDecays.size(); };
 
-  typedef std::vector<std::shared_ptr<PartialDecay>>::iterator partDecayItr;
+  typedef std::vector<std::shared_ptr<ComPWA::Physics::Resonance>>::iterator partDecayItr;
 
   partDecayItr begin() { return _partDecays.begin(); }
 
   partDecayItr end() { return _partDecays.end(); }
 
 protected:
-  // TODO: we add this particle state info for the coherent sum stuff
-  // the whole design is fucked up because of that, change that someday
-  std::pair<ParticleStateInfo, std::pair<ParticleStateInfo, ParticleStateInfo>>
-      decay_spin_info_;
 
-  std::vector<std::shared_ptr<PartialDecay>> _partDecays;
+  std::vector<std::shared_ptr<ComPWA::Physics::Resonance>> _partDecays;
 };
 
 } /* namespace HelicityFormalism */

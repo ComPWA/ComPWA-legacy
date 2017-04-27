@@ -1,5 +1,4 @@
- 
-            /*
+ /*
  * DataCorrection.cpp
  *
  *  Created on: Aug 27, 2015
@@ -24,8 +23,8 @@ double MomentumCorrection::getCorrection(Event &ev) {
   double w = 1;
   for (int i = 0; i < ev.getNParticles(); i++) {
     Particle p = ev.getParticle(i);
-    int charge = p.getCharge();
-    double mom = p.getThreeMomentum();
+    int charge = p.GetCharge();
+    double mom = p.GetThreeMomentum();
     double corr;
     try {
       corr = corrections.at(i).GetValue(charge, mom) + 1;

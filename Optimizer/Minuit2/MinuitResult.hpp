@@ -67,7 +67,7 @@ public:
                  ROOT::Minuit2::FunctionMinimum result);
 
   //! Return final likelihood value
-  double getResult() { return finalLH; }
+  double GetResult() { return finalLH; }
 
   //! Set initial likelihood value
   virtual void SetInitialLH(double iniLH) { initialLH = iniLH; }
@@ -83,10 +83,10 @@ public:
   virtual double GetTrueLH() { return trueLH; }
 
   //! Set list of true parameters
-  virtual void setTrueParameters(ParameterList truePars);
+  virtual void SetTrueParameters(ParameterList truePars);
 
   //! Set list of initial parameters
-  virtual void setInitialParameters(ParameterList iniPars);
+  virtual void SetInitialParameters(ParameterList iniPars);
 
   //! Convert to double and return final LH values
   operator double() const { return finalLH; }
@@ -99,14 +99,14 @@ public:
 
   //! Write list of fit parameters and list of fitfractions to XML file @param
   //! filename
-  virtual void writeXML(std::string filename);
+  virtual void WriteXML(std::string filename);
 
   //! Write fit parameters, fit fractions and cov matrix as TeX to file @param
   //! filename
-  virtual void writeTeX(std::string filename);
+  virtual void WriteTeX(std::string filename);
 
   //! Any errors during minimization?
-  virtual bool hasFailed();
+  virtual bool HasFailed();
 
   //! Is minimum valid?
   virtual bool MinimumIsValid() { return isValid; }
@@ -128,17 +128,17 @@ public:
   //! Get estimated distrance to minimum
   virtual double GetEDM() { return edm; }
 
-  //! Get AIC
-  virtual double GetAIC() { return AIC; }
-
-  //! Get BIC
-  virtual double GetBIC() { return BIC; }
-
-  //! Get penalty scale
-  virtual double GetPenaltyScale() { return penaltyScale; }
-
-  //! Get penalty term
-  virtual double GetPenalty() { return penalty; }
+//  //! Get AIC
+//  virtual double GetAIC() { return AIC; }
+//
+//  //! Get BIC
+//  virtual double GetBIC() { return BIC; }
+//
+//  //! Get penalty scale
+//  virtual double GetPenaltyScale() { return penaltyScale; }
+//
+//  //! Get penalty term
+//  virtual double GetPenalty() { return penalty; }
 
 protected:
   //! Initialize result with Minuit2::FunctionMinimum
@@ -157,7 +157,7 @@ protected:
   std::shared_ptr<ComPWA::Estimator::Estimator> est;
 
   //====== MINUIT FIT RESULT =======
-  double getCorr(unsigned int n, unsigned int t) {
+  double GetCorr(unsigned int n, unsigned int t) {
     std::cout << "WARNING: not sure if row and column are choose correctly!"
               << std::endl;
     if (n < corr.size() && t < corr.at(1).size() && t >= n)
@@ -180,8 +180,8 @@ private:
   double initialLH;
   double finalLH;
   double trueLH;
-  double penalty;
-  double penaltyScale;
+//  double penalty;
+//  double penaltyScale;
   double edm; // estimated distance to minimum
   //! Covariance matrix
   std::vector<std::vector<double>> cov;
@@ -190,8 +190,8 @@ private:
   //! Global correlation coefficients
   std::vector<double> globalCC;
 
-  double AIC;
-  double BIC;
+//  double AIC;
+//  double BIC;
 
   //====== OUTPUT =====
   //! Simplified fit result output
@@ -205,10 +205,10 @@ private:
                                std::shared_ptr<AmpIntensity> amp);
 
   //! Table with correlation matrix
-  void printCorrelationMatrix(TableFormater *fracTable);
+  void PrintCorrelationMatrix(TableFormater *fracTable);
 
   //! Table with covariance matrix
-  void printCovarianceMatrix(TableFormater *fracTable);
+  void PrintCovarianceMatrix(TableFormater *fracTable);
 
   /** Calculate errors on fit result
    * The error of normalization due the the fit error on magnitudes and phases
@@ -229,10 +229,10 @@ private:
                                  std::shared_ptr<AmpIntensity> amp, int nSets);
 
   //! Calculate information criterion AIC
-  double calcAIC(ParameterList &frac);
+//  double calcAIC(ParameterList &frac);
 
   //! Calculate information criterion BIC
-  double calcBIC(ParameterList &frac);
+//  double calcBIC(ParameterList &frac);
 
 private:
   friend class boost::serialization::access;
@@ -254,10 +254,10 @@ private:
     ar &BOOST_SERIALIZATION_NVP(initialLH);
     ar &BOOST_SERIALIZATION_NVP(finalLH);
     ar &BOOST_SERIALIZATION_NVP(trueLH);
-    ar &BOOST_SERIALIZATION_NVP(penalty);
-    ar &BOOST_SERIALIZATION_NVP(penaltyScale);
-    ar &BOOST_SERIALIZATION_NVP(AIC);
-    ar &BOOST_SERIALIZATION_NVP(BIC);
+//    ar &BOOST_SERIALIZATION_NVP(penalty);
+//    ar &BOOST_SERIALIZATION_NVP(penaltyScale);
+//    ar &BOOST_SERIALIZATION_NVP(AIC);
+//    ar &BOOST_SERIALIZATION_NVP(BIC);
     ar &BOOST_SERIALIZATION_NVP(nEvents);
     ar &BOOST_SERIALIZATION_NVP(edm);
     ar &BOOST_SERIALIZATION_NVP(cov);

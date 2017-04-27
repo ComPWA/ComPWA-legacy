@@ -9,7 +9,7 @@
 
 namespace ComPWA {
 
-void FitResult::writeText(std::string filename) {
+void FitResult::WriteText(std::string filename) {
   std::ofstream myfile;
   myfile.open(filename, std::ios::app);
   genOutput(myfile);
@@ -17,7 +17,7 @@ void FitResult::writeText(std::string filename) {
   return;
 };
 
-void FitResult::writeSimpleText(std::string filename) {
+void FitResult::WriteSimpleText(std::string filename) {
   std::ofstream myfile;
   myfile.open(filename);
   genSimpleOutput(myfile);
@@ -50,25 +50,25 @@ void FitResult::genSimpleOutput(std::ostream &out) {
   return;
 }
 
-void FitResult::setFinalParameters(ParameterList finPars) {
+void FitResult::SetFinalParameters(ParameterList finPars) {
   finalParameters.DeepCopy(finPars);
 }
 
-void FitResult::setUseCorrelatedErrors(int nSets) {
+void FitResult::SetUseCorrelatedErrors(int nSets) {
   if (nSets < 0)
     nSetsFractionError = 0;
   nSetsFractionError = nSets;
   return;
 }
 
-void FitResult::print(std::string opt) {
+void FitResult::Print(std::string opt) {
   std::stringstream s;
   genOutput(s, opt);
   std::string str = s.str();
   LOG(info) << str;
 }
 
-void FitResult::printFitParameters(TableFormater *tableResult) {
+void FitResult::PrintFitParameters(TableFormater *tableResult) {
   bool printTrue = 0, printInitial = 0;
   if (trueParameters.GetNParameter())
     printTrue = 1;
@@ -202,16 +202,17 @@ void FitResult::printFitParameters(TableFormater *tableResult) {
   return;
 }
 
-void FitResult::printFitFractions(TableFormater *tab) {
+void FitResult::PrintFitFractions(TableFormater *tab) {
   LOG(info) << " FitResult::printFitFractions() | "
                "Calculating fit fractions!";
-  auto itrAmp = _ampVec.begin();
-  for (; itrAmp != _ampVec.end(); ++itrAmp) {
-    printFitFractions(tab, (*itrAmp), nSetsFractionError);
-  }
+//  auto itrAmp = _ampVec.begin();
+//  for (; itrAmp != _ampVec.end(); ++itrAmp) {
+//    PrintFitFractions(tab, (*itrAmp), nSetsFractionError);
+//  }
+  PrintFitFractions(tab, _intens, nSetsFractionError);
 }
 
-void FitResult::printFitFractions(TableFormater *fracTable,
+void FitResult::PrintFitFractions(TableFormater *fracTable,
                                   std::shared_ptr<AmpIntensity> amp,
                                   int nErrorSets) {
   ParameterList ffList;

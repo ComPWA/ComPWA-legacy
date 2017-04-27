@@ -27,8 +27,7 @@ namespace HelicityFormalism {
 class CoherentIntensity : public ComPWA::AmpIntensity {
 
 public:
-  CoherentIntensity()
-      : _maxIntens(0.), _integral(0.){};
+  CoherentIntensity() : _maxIntens(0.), _integral(0.){};
   virtual ~CoherentIntensity(){};
 
   virtual double GetMaximum(std::shared_ptr<ComPWA::Generator> gen) const {
@@ -70,28 +69,22 @@ public:
   static boost::property_tree::ptree
   Save(std::shared_ptr<CoherentIntensity> intens);
 
-  void Add(std::shared_ptr<
-           ComPWA::Physics::HelicityFormalism::SequentialTwoBodyDecay>
-               d) {
+  void Add(std::shared_ptr<ComPWA::Physics::Amplitude> d) {
     _seqDecays.push_back(d);
   }
 
-  std::shared_ptr<ComPWA::Physics::HelicityFormalism::SequentialTwoBodyDecay>
-  GetDecay(int pos) {
+  std::shared_ptr<ComPWA::Physics::Amplitude> GetDecay(int pos) {
     return _seqDecays.at(pos);
   }
 
-  std::vector<std::shared_ptr<
-      ComPWA::Physics::HelicityFormalism::SequentialTwoBodyDecay>> &
-  GetDecays() {
+  std::vector<std::shared_ptr<ComPWA::Physics::Amplitude>> &GetDecays() {
     return _seqDecays;
   }
 
   //! Get number of partial decays
   size_t size() const { return _seqDecays.size(); }
 
-  typedef std::vector<std::shared_ptr<
-      ComPWA::Physics::HelicityFormalism::SequentialTwoBodyDecay>>::iterator
+  typedef std::vector<std::shared_ptr<ComPWA::Physics::Amplitude>>::iterator
       seqDecayItr;
 
   seqDecayItr First() { return _seqDecays.begin(); }
@@ -131,22 +124,20 @@ protected:
   setupBasicTree(ParameterList &sample, ParameterList &phspSample,
                  std::string suffix = "") const;
 
-  std::vector<std::shared_ptr<
-      ComPWA::Physics::HelicityFormalism::SequentialTwoBodyDecay>>
-      _seqDecays;
-  
+  std::vector<std::shared_ptr<ComPWA::Physics::Amplitude>> _seqDecays;
+
   //! Phase space sample to calculate the normalization and maximum value.
   std::vector<ComPWA::dataPoint> _phspSample;
-//  std::shared_ptr<ComPWA::DataReader::Data> _phspSample;
+  //  std::shared_ptr<ComPWA::DataReader::Data> _phspSample;
   bool _phspSampleEff;
-  
+
   //! Maximum value
   double _maxIntens;
   double _integral;
-  
+
 private:
-  /*! List with all parameters of the intensity. 
-   * We use it to check if parameters were modified and if we have to 
+  /*! List with all parameters of the intensity.
+   * We use it to check if parameters were modified and if we have to
    * recalculated the normalization.
    */
   ParameterList _currentParList;

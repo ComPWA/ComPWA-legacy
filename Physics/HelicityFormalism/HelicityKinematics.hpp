@@ -28,15 +28,7 @@ static const char *formFactorTypeString[] = {"noFormFactor", "BlattWeisskopf",
 
 enum formFactorType { noFormFactor = 0, BlattWeisskopf = 1, CrystalBarrel = 2 };
 
-template <typename T>
-int createIndex(std::vector<T> &references, T const &newValue) {
-  int results = std::find(references.begin(), references.end(), newValue) -
-                references.begin();
-  if (results == references.size()) {
-    references.push_back(newValue);
-  }
-  return results;
-}
+
 
 /*! Definition of a two-body decay node within a sequential decay tree.
  Class contains lists for both final states of the two-body decay and a list
@@ -85,9 +77,9 @@ public:
     return stream;
   }
 
-  virtual std::vector<int> GetRecoilState() const { return _recoilState; }
-  virtual std::vector<int> GetFinalStateA() const { return _finalStateA; }
-  virtual std::vector<int> GetFinalStateB() const { return _finalStateB; }
+  virtual const std::vector<int>& GetRecoilState() const { return _recoilState; }
+  virtual const std::vector<int>& GetFinalStateA() const { return _finalStateA; }
+  virtual const std::vector<int>& GetFinalStateB() const { return _finalStateB; }
   virtual void SetRecoilState(std::vector<int> r) { _recoilState = r; }
   virtual void SetFinalStateA(std::vector<int> f) { _finalStateA = f; }
   virtual void SetFinalStateB(std::vector<int> f) { _finalStateB = f; }
@@ -142,8 +134,10 @@ public:
    * SubSystem sys.
    */
   void EventToDataPoint(const Event &event, dataPoint &point,
-                        SubSystem sys) const;
+                        SubSystem sys, const std::pair<double,double> limits) const;
 
+  void EventToDataPoint(const Event &event, dataPoint &point,
+                        SubSystem sys) const;
   // delete methods to ensure that there will only be one instance
   HelicityKinematics() = delete;
 
@@ -153,7 +147,7 @@ public:
 
   /*! Check if dataPoint is within phase space boundaries.
    */
-  bool IsWithinPhsp(const dataPoint &point) const;
+  bool IsWithinPhsp(const dataPoint &point)const;
 
   virtual bool IsWithinBoxPhsp(int idA, int idB, double varA,
                                double varB) const {
@@ -180,8 +174,8 @@ public:
    * #EventToDataPoint()
    * and added to each dataPoint.
    */
-  virtual int GetDataID(SubSystem s) {
-    int pos = createIndex(_listSubSystem, s);
+  virtual int GetDataID(const SubSystem s) {
+    int pos = createIndex(s);
     LOG(trace) << " Subsystem " << s << " has dataID " << pos;
     return pos;
   }
@@ -204,7 +198,8 @@ public:
 
   /*! Get phase space bounds for the invariant mass of SubSystem sys.
    */
-  virtual std::pair<double, double> GetInvMassBounds(SubSystem sys) const;
+  virtual const std::pair<double, double>& GetInvMassBounds(const SubSystem sys) const;
+  virtual const std::pair<double, double>& GetInvMassBounds(int sysID) const;
 
   //! Calculate form factor
   static double
@@ -310,6 +305,19 @@ protected:
 
   //! List of subsystems for which invariant mass and angles are calculated
   std::vector<SubSystem> _listSubSystem;
+  std::vector<std::pair<double,double>> _invMassBounds;
+  
+  std::pair<double, double> CalculateInvMassBounds( const SubSystem sys) const;
+   
+  int createIndex(SubSystem const &newValue) {
+    int results = std::find(_listSubSystem.begin(), _listSubSystem.end(), newValue) -
+    _listSubSystem.begin();
+    if (results == _listSubSystem.size()) {
+      _listSubSystem.push_back( newValue );
+      _invMassBounds.push_back( CalculateInvMassBounds(newValue) );
+    }
+    return results;
+  }
 };
 
 } /* namespace HelicityFormalism */

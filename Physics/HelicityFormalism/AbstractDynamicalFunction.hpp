@@ -173,8 +173,9 @@ inline std::complex<double> widthToCoupling(double mSq, double mR, double width,
 
   // calculate gammaA(s_R)
   std::complex<double> gammaA(1, 0); // spin==0
+  std::complex<double> qValue;
   if (spin > 0) {
-    std::complex<double> qValue = Kinematics::qValue(mR, ma, mb);
+    qValue = Kinematics::qValue(mR, ma, mb);
     double ffR = HelicityKinematics::FormFactor(mR, ma, mb, spin, mesonRadius,
                                                 qValue, type);
     std::complex<double> qR = std::pow(qValue, spin);
@@ -196,7 +197,7 @@ inline std::complex<double> widthToCoupling(double mSq, double mR, double width,
   //				"Result is NaN!");
   // check for inf
   if (std::isinf(res.real()) || std::isinf(res.imag()))
-    throw std::runtime_error("AmpAbsDynamicalFunction::widthToCoupling() | "
+    throw std::runtime_error("AbstractDynamicalFunction::widthToCoupling() | "
                              "Result is inf!");
 #endif
 

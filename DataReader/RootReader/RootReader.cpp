@@ -172,9 +172,9 @@ void RootReader::writeData(std::string file, std::string trName) {
     feventEff = (*it).getEfficiency();
     for (unsigned int i = 0; i < numPart; i++) {
       const Particle oldParticle = (*it).getParticle(i);
-      TLorentzVector oldMomentum(oldParticle.px, oldParticle.py, oldParticle.pz,
-                                 oldParticle.E);
-      new (partArray[i]) TParticle(oldParticle.pid, 1, 0, 0, 0, 0, oldMomentum,
+      TLorentzVector oldMomentum(oldParticle.GetPx(), oldParticle.GetPy(), oldParticle.GetPz(),
+                                 oldParticle.GetE());
+      new (partArray[i]) TParticle(oldParticle.GetPid(), 1, 0, 0, 0, 0, oldMomentum,
                                    motherMomentum);
     }
     fTree->Fill();

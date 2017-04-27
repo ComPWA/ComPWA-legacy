@@ -22,7 +22,6 @@ using namespace ComPWA::Physics::HelicityFormalism;
 void phspContour(unsigned int xsys,unsigned int ysys,
                                    unsigned int n, double* xcoord, double* ycoord)
 {
-  auto *kin = dynamic_cast<HelicityKinematics*>( Kinematics::Instance() );
   
   unsigned int num=n;
   if(num%2!=0) {

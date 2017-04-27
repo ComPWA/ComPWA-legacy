@@ -20,22 +20,14 @@
 #include "Physics/HelicityFormalism/AmpWignerD.hpp"
 
 namespace ComPWA {
-
-// static DoubleParameter
-// DoubleParameterFactory(const boost::property_tree::ptree &pt) {
-//  auto obj = std::shared_ptr<DoubleParameter>();
-//  obj->SetValue( pt.get<double>("value") );
-//  return obj;
-//}
-
 namespace Physics {
 namespace HelicityFormalism {
 
-class PartialDecay : ComPWA::Resonance {
+class PartialDecay : public ComPWA::Physics::Resonance {
 
 public:
-  PartialDecay() {};
-  
+  PartialDecay(){};
+
   //! Clone function
   virtual PartialDecay *Clone(std::string newName = "") const {
     auto tmp = new PartialDecay(*this);
@@ -45,9 +37,9 @@ public:
 
   //! Implementation of interface for streaming info about the strategy
   virtual std::string to_str() const { return std::string("PartialDecay"); }
-  
-  virtual void GetParameters(ParameterList& list);
-  
+
+  virtual void GetParameters(ParameterList &list);
+
   /**! Evaluate decay */
   std::complex<double> Evaluate(const dataPoint &point) const {
     std::complex<double> result =
@@ -59,13 +51,11 @@ public:
   };
 
   //! Check of tree is available
-  virtual bool HasTree() { return true; }
-  
+  virtual bool HasTree() const { return true; }
+
   /**! Setup function tree */
-  virtual std::shared_ptr<FunctionTree> GetTree(ParameterList &sample,
-                                                ParameterList &phspSample,
-                                                ParameterList &toySample,
-                                                std::string suffix);
+  virtual std::shared_ptr<FunctionTree>
+  GetTree(ParameterList &sample, ParameterList &toySample, std::string suffix);
 
   /**
    Factory for PartialDecay
@@ -73,11 +63,11 @@ public:
    @param pt Configuration tree
    @return Constructed object
    */
-  static std::shared_ptr<PartialDecay>
+  static std::shared_ptr<ComPWA::Physics::Resonance>
   Factory(const boost::property_tree::ptree &pt);
 
-  static boost::property_tree::ptree Save(std::shared_ptr<PartialDecay> obj);
-  
+  static boost::property_tree::ptree Save(std::shared_ptr<Resonance> obj);
+
   /**
    Get WignerD function
 

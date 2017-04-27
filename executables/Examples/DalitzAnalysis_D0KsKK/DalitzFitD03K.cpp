@@ -524,20 +524,15 @@ int main(int argc, char **argv) {
     intens->GetParameters(fitPar);
     LOG(debug)<<"Fit parameters: "<<std::endl<<fitPar;
 
+    bool useTree = (fittingMethod=="tree")? 1 : 0;
     //=== Constructing likelihood
-    auto esti = Estimator::MinLogLH::MinLogLH::createInstance(
-        intens, sample, toyPhspData, phspData, 0, 0);
-
-    auto *contrPar =
-        dynamic_cast<Estimator::MinLogLH::MinLogLH *>(&*(esti->Instance()));
-
-    contrPar->setAmplitude(intens, sample, toyPhspData, phspData, 0, 0,
-                           false); // setting new trees in ControlParameter
-    //    contrPar->setPenaltyScale(penaltyScale, 0);
+    auto esti = Estimator::MinLogLH::MinLogLH::CreateInstance(
+        intens, sample, toyPhspData, phspData, useTree, 0, 0);
 
     if (fittingMethod == "tree") {
-      contrPar->setUseFunctionTree(1);
-      LOG(debug) << contrPar->getTree()->head()->to_str(20);
+      auto *contrPar =
+          dynamic_cast<Estimator::MinLogLH::MinLogLH *>(&*(esti->Instance()));
+      LOG(debug) << contrPar->GetTree()->head()->to_str(25);
     }
 
     if (useRandomStartValues)
@@ -574,13 +569,13 @@ int main(int argc, char **argv) {
     //====== FIT RESULT =======
     Optimizer::Minuit2::MinuitResult *minuitResult =
         dynamic_cast<Optimizer::Minuit2::MinuitResult *>(&*result);
-    finalParList = result->getFinalParameters();
+    finalParList = result->GetFinalParameters();
     //    Amplitude::UpdateAmpParameterList(esti->getAmplitudes(),
     //    finalParList);
-    result->setTrueParameters(truePar);
-    minuitResult->setUseCorrelatedErrors(fitFractionError);
+    result->SetTrueParameters(truePar);
+    minuitResult->SetUseCorrelatedErrors(fitFractionError);
     minuitResult->SetCalcInterference(calculateInterference);
-    result->print();
+    result->Print();
 
     std::ofstream ofs(fileNamePrefix + std::string("-fitResult.xml"));
     boost::archive::xml_oarchive oa(ofs);
@@ -619,13 +614,13 @@ int main(int argc, char **argv) {
     ia >> BOOST_SERIALIZATION_NVP(inResult);
     ifs.close();
 
-    inResult->SetAmplitude(intens);
-    inResult->setUseCorrelatedErrors(fitFractionError);
+    inResult->SetIntensity(intens);
+    inResult->SetUseCorrelatedErrors(fitFractionError);
     if (calculateInterference)
       inResult->SetCalcInterference(0);
-    inResult->setFractions(ParameterList()); // reset fractions list
+    inResult->SetFractions(ParameterList()); // reset fractions list
     result = inResult;
-    result->print();
+    result->Print();
   }
 
   // Fill final parameters if minimization was not run
@@ -686,6 +681,6 @@ int main(int argc, char **argv) {
 
   // Exit code is exit code of fit routine. 0 is good/ 1 is bad
   if (result)
-    return result->hasFailed();
+    return result->HasFailed();
   return 0;
 }

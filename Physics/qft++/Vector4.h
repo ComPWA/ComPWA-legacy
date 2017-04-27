@@ -26,6 +26,7 @@
 //_____________________________________________________________________________
 #include <cmath>
 #include "Tensor.h"
+#include "Core/Particle.hpp"
 namespace ComPWA {
   namespace Physics {
     namespace QFT {
@@ -60,6 +61,11 @@ public:
       if(__v.size() !=4)
         throw std::runtime_error("Vector4::Vector4 | Vector doen't seem to be a 4-Vector.`");
     this->SetV4(__v.at(0),__v.at(1),__v.at(2),__v.at(3));
+  }
+  
+  Vector4(FourMomentum __v)
+    : Tensor<_Tp>::Tensor(1) {
+    this->SetV4(__v.GetE(), __v.GetPx(), __v.GetPy(), __v.GetPz());
   }
 
   /// Copy Constructor

@@ -1,4 +1,4 @@
-  //
+//
 //  SequentialTwoBodyDecay.cpp
 //  COMPWA
 //
@@ -6,14 +6,15 @@
 //
 //
 
-#include <stdio.h>
+//#include <stdio.h>
+#include <memory>
 #include "Physics/HelicityFormalism/SequentialTwoBodyDecay.hpp"
 
 namespace ComPWA {
 namespace Physics {
 namespace HelicityFormalism {
 
-std::shared_ptr<SequentialTwoBodyDecay>
+std::shared_ptr<ComPWA::Physics::Amplitude>
 SequentialTwoBodyDecay::Factory(const boost::property_tree::ptree &pt) {
   LOG(trace) << " SequentialTwoBodyDecay::Factory() | Construction....";
   auto obj = std::make_shared<SequentialTwoBodyDecay>();
@@ -28,12 +29,14 @@ SequentialTwoBodyDecay::Factory(const boost::property_tree::ptree &pt) {
     if (v.first == "Resonance")
       obj->Add(PartialDecay::Factory(v.second));
   }
-  return obj;
+  
+  return std::static_pointer_cast<ComPWA::Physics::Amplitude>(obj);
 }
   
 boost::property_tree::ptree
-SequentialTwoBodyDecay::Save(std::shared_ptr<SequentialTwoBodyDecay> obj) {
+SequentialTwoBodyDecay::Save(std::shared_ptr<ComPWA::Physics::Amplitude> amp) {
 
+  auto obj = std::static_pointer_cast<SequentialTwoBodyDecay>(amp);
   boost::property_tree::ptree pt;
   pt.put<std::string>("<xmlattr>.Name",obj->GetName());
   pt.add_child("Magnitude",
@@ -49,7 +52,6 @@ SequentialTwoBodyDecay::Save(std::shared_ptr<SequentialTwoBodyDecay> obj) {
 /**! Setup function tree */
 std::shared_ptr<FunctionTree>
 SequentialTwoBodyDecay::GetTree(ParameterList &sample,
-                                ParameterList &phspSample,
                                 ParameterList &toySample, std::string suffix) {
 
   std::shared_ptr<FunctionTree> tr(new FunctionTree());
@@ -63,7 +65,7 @@ SequentialTwoBodyDecay::GetTree(ParameterList &sample,
 
   for (auto i : _partDecays) {
     std::shared_ptr<FunctionTree> resTree =
-        i->GetTree(sample, phspSample, phspSample, "");
+        i->GetTree(sample, toySample, "");
     if (!resTree->sanityCheck())
       throw std::runtime_error("AmpSumIntensity::setupBasicTree() | "
                                "Amplitude tree didn't pass sanity check!");

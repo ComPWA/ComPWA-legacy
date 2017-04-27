@@ -42,6 +42,7 @@
 #include "Core/Generator.hpp"
 
 namespace ComPWA {
+namespace Physics {
 
   
 class Amplitude {
@@ -95,7 +96,7 @@ public:
 
   //! Getter function for basic amp tree
   virtual std::shared_ptr<FunctionTree>
-  GetTree(ParameterList &, ParameterList &, ParameterList &, std::string suffix) = 0;
+  GetTree(ParameterList &sample, ParameterList &toySample, std::string suffix) = 0;
 
   /**
    Get Magnitude parameter
@@ -185,5 +186,6 @@ protected:
   
   typedef  std::vector<std::shared_ptr<Amplitude>>::iterator ampItr ;
 
+} /* namespace Physics */
 } /* namespace ComPWA */
 #endif

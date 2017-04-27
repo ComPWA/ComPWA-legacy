@@ -4,27 +4,11 @@
 find_package( ROOT REQUIRED )
 find_package( Boost REQUIRED )
 
-add_library( DalitzFitD03K
-  PlotData.cpp PlotData.hpp
+add_executable( DalitzFitD03K
+  DalitzFitD03K.cpp PlotData.cpp
 )
 
-target_link_libraries( ComPWA_DalitzFitD03K
-  ComPWA_HelicityFormalism
-  ComPWA_Minuit2IF
-  ComPWA_MinLogLH
-  ComPWA_RootReader
-  ComPWA_Core
-  ${ROOT_LIBRARIES}
-  ${Boost_LIBRARIES}
-  pthread
-)
-
-add_executable( DalitzFitD03KApp
-  DalitzFitD03K.cpp Tools.hpp
-)
-
-target_link_libraries( DalitzFitD03KApp
-  ComPWA_DalitzFitD03K
+target_link_libraries( DalitzFitD03K
   ComPWA_HelicityFormalism
   ComPWA_Minuit2IF
   ComPWA_MinLogLH

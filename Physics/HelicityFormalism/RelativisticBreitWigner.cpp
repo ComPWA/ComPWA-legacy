@@ -70,19 +70,23 @@ std::complex<double> RelativisticBreitWigner::dynamicalFunction(
   std::complex<double> i(0, 1);
   double sqrtS = sqrt(mSq);
 
+  auto phspFactorSqrtS = Kinematics::phspFactor(sqrtS, ma, mb);
+  auto phspFactormR = Kinematics::phspFactor(mR, ma, mb);
+  
+  // Check if we have an event which is exactly at the phase space boundary
+  if(phspFactorSqrtS == std::complex<double>(0,0))
+    return std::complex<double>(0,0);
+  
+  std::complex<double> qTerm = std::pow(( phspFactorSqrtS / phspFactormR ) * mR / sqrtS,
+                                        (2 * J + 1));
   double barrier =
       HelicityKinematics::FormFactor(sqrtS, ma, mb, J, mesonRadius, ffType) /
       HelicityKinematics::FormFactor(mR, ma, mb, J, mesonRadius, ffType);
 
-  std::complex<double> qTerm = std::pow((Kinematics::phspFactor(sqrtS, ma, mb) /
-                                         Kinematics::phspFactor(mR, ma, mb)) *
-                                            mR / sqrtS,
-                                        (2 * J + 1));
 
   // Calculate coupling constant to final state
-  //  std::complex<double> g_final =
-  //      widthToCoupling(mSq, mR, width, ma, mb, J, mesonRadius, ffType);
-  std::complex<double> g_final = 1.0;
+  std::complex<double> g_final =
+      widthToCoupling(mSq, mR, width, ma, mb, J, mesonRadius, ffType);
 
   /*Coupling constant from production reaction. In case of a particle decay
    * the production coupling doesn't depend in energy since the CM energy
@@ -96,14 +100,6 @@ std::complex<double> RelativisticBreitWigner::dynamicalFunction(
 
   assert(!std::isnan(result.real()));
   assert(!std::isnan(result.imag()));
-#ifndef NDEBUG
-  if (std::isnan(result.real()) || std::isnan(result.imag())) {
-    LOG(error) << "RelativisticBreitWigner::dynamicalFunction() |"
-               << "Result is NaN! Parameters:" << barrier << " " << mR << " "
-               << mSq << " " << ma << " " << mb << std::endl;
-    return 0;
-  }
-#endif
 
   return result;
 }
@@ -168,17 +164,10 @@ RelativisticBreitWigner::GetTree(ParameterList &sample,
                                  std::string suffix) {
 
   int sampleSize = sample.GetMultiDouble(0)->GetNValues();
-  //  unsigned int effId = Kinematics::Instance()->GetNVars();
-  unsigned int weightId = Kinematics::Instance()->GetNVars() + 1;
   int phspSampleSize = toySample.GetMultiDouble(0)->GetNValues();
 
-  std::shared_ptr<MultiDouble> weightPhsp = toySample.GetMultiDouble(weightId);
-  double sumWeights =
-      std::accumulate(weightPhsp->Begin(), weightPhsp->End(), 0.0);
-  //  std::shared_ptr<MultiDouble> eff = toySample.GetMultiDouble(effId);
-
-  //------------Setup Tree---------------------
   std::shared_ptr<FunctionTree> tr(new FunctionTree());
+
   tr->createHead("DynamicalFunction",
                  std::shared_ptr<Strategy>(new MultAll(ParType::MCOMPLEX)));
 
@@ -193,42 +182,34 @@ RelativisticBreitWigner::GetTree(ParameterList &sample,
   tr->createLeaf("MassA", _massA, "RelBreitWigner");             // ma
   tr->createLeaf("MassB", _massB, "RelBreitWigner");             // mb
   tr->createLeaf("Data_mSq[" + std::to_string(pos) + "]",
-                 sample.GetMultiDouble(pos),
-                 "RelBreitWigner"); // mc
-                                    // Normalization
-  tr->createNode("N", std::shared_ptr<Strategy>(new Inverse(ParType::DOUBLE)),
+                 sample.GetMultiDouble(pos), "RelBreitWigner");
+
+  // Normalization
+  tr->createNode("Normalization",
+                 std::shared_ptr<Strategy>(new Inverse(ParType::DOUBLE)),
                  "DynamicalFunction"); // 1/normLH
-  // normLH = phspVolume/N_{mc} |T_{evPHSP}|^2
-  tr->createNode("NormFactor",
-                 std::shared_ptr<Strategy>(new MultAll(ParType::DOUBLE)), "N");
-  // sumAmp = \sum_{evPHSP} |T_{evPHSP}|^2
+  tr->createNode("Integral",
+                 std::shared_ptr<Strategy>(new MultAll(ParType::DOUBLE)),
+                 "Normalization");
   tr->createNode("Sum", std::shared_ptr<Strategy>(new AddAll(ParType::DOUBLE)),
-                 "NormFactor");
-  tr->createLeaf("Range", _limits.second - _limits.first, "NormFactor");
-  //  tr->createLeaf("phspVolume", Kinematics::Instance()->GetPhspVolume(),
-  //                 "NormFactor");
-  tr->createLeaf("InvNmc", 1 / ((double)sumWeights), "NormFactor");
-  tr->createNode("IntensPhspEff",
-                 std::shared_ptr<Strategy>(new MultAll(ParType::MDOUBLE)),
-                 "Sum", phspSampleSize,
-                 false); //|T_{ev}|^2
-  //  tr->createLeaf("eff", eff, "IntensPhspEff"); // efficiency
-  tr->createLeaf("WeightPhsp", weightPhsp, "IntensPhspEff");
+                 "Integral");
+  tr->createLeaf("Range", _limits.second - _limits.first, "Integral");
+  tr->createLeaf("InvNmc", 1 / ((double)phspSampleSize), "Integral");
   tr->createNode("IntensPhsp",
                  std::shared_ptr<Strategy>(new AbsSquare(ParType::MDOUBLE)),
-                 "IntensPhspEff", phspSampleSize,
+                 "Sum", phspSampleSize,
                  false); //|T_{ev}|^2
   tr->createNode("NormRelBreitWigner",
                  std::shared_ptr<Strategy>(new BreitWignerStrategy("")),
                  "IntensPhsp", phspSampleSize);
-  tr->createLeaf("Mass", _mass, "NormRelBreitWigner");               // m0
-  tr->createLeaf("Width", _width, "NormRelBreitWigner");             // resWidth
-  tr->createLeaf("Spin", (double)_spin, "NormRelBreitWigner");       // spin
-  tr->createLeaf("MesonRadius", _mesonRadius, "NormRelBreitWigner"); // d
-  tr->createLeaf("FormFactorType", _ffType, "NormRelBreitWigner");   // d
-  tr->createLeaf("MassA", _massA, "NormRelBreitWigner");             // ma
-  tr->createLeaf("MassB", _massB, "NormRelBreitWigner");             // mb
-  tr->createLeaf("Data_mSq[" + std::to_string(pos) + "]",
+  tr->createLeaf("Mass", _mass, "NormRelBreitWigner");               
+  tr->createLeaf("Width", _width, "NormRelBreitWigner");
+  tr->createLeaf("Spin", (double)_spin, "NormRelBreitWigner");
+  tr->createLeaf("MesonRadius", _mesonRadius, "NormRelBreitWigner"); 
+  tr->createLeaf("FormFactorType", _ffType, "NormRelBreitWigner");   
+  tr->createLeaf("MassA", _massA, "NormRelBreitWigner");             
+  tr->createLeaf("MassB", _massB, "NormRelBreitWigner");
+  tr->createLeaf("PhspSample_mSq[" + std::to_string(pos) + "]",
                  toySample.GetMultiDouble(pos),
                  "NormRelBreitWigner"); // mc
 

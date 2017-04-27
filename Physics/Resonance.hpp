@@ -19,6 +19,7 @@
 #include "Core/FunctionTree.hpp"
 
 namespace ComPWA {
+namespace Physics {
 
 enum normStyle {
   none, /*!< no normaliztion between Amplitudes. */
@@ -129,7 +130,6 @@ public:
   virtual bool HasTree() const { return false; }
   
   virtual std::shared_ptr<FunctionTree> GetTree(ParameterList &sample,
-                                                  ParameterList &phspSample,
                                                   ParameterList &toySample,
                                                 std::string suffix){
     return std::shared_ptr<FunctionTree>();
@@ -143,5 +143,6 @@ protected:
   std::complex<double> _preFactor;
 };
   
+} /* namespace Physics */
 } /* namespace ComPWA */
 #endif /* CORE_RESONANCE_HPP_ */

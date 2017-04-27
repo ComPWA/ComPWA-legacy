@@ -29,53 +29,23 @@ namespace ComPWA {
 namespace Estimator {
 namespace MinLogLH {
 
-MinLogLH::MinLogLH(std::shared_ptr<AmpIntensity> amp,
+MinLogLH::MinLogLH(std::shared_ptr<AmpIntensity> intens,
                    std::shared_ptr<DataReader::Data> data,
                    std::shared_ptr<DataReader::Data> phspSample,
                    std::shared_ptr<DataReader::Data> accSample,
-                   unsigned int startEvent, unsigned int nEvents)
-    : _useFunctionTree(0), nEvts_(0), nPhsp_(0), nStartEvt_(startEvent),
+                   bool useFunctionTree, unsigned int startEvent,
+                   unsigned int nEvents)
+    : _intens(intens), nEvts_(0), nPhsp_(0), nStartEvt_(startEvent),
       nUseEvt_(nEvents), _dataSample(data), _phspSample(phspSample),
-      _phspAccSample(accSample), _penaltyLambda(0.0) {
-  _ampVec.push_back(amp);
-  Init();
+      _phspAccSample(accSample) {
 
-  return;
-}
-
-MinLogLH::MinLogLH(std::vector<std::shared_ptr<AmpIntensity>> ampVec,
-                   std::vector<double> fraction,
-                   std::shared_ptr<DataReader::Data> data,
-                   std::shared_ptr<DataReader::Data> phspSample,
-                   std::shared_ptr<DataReader::Data> accSample,
-                   unsigned int startEvent, unsigned int nEvents)
-    : _useFunctionTree(0), nEvts_(0), nPhsp_(0), nStartEvt_(startEvent),
-      nUseEvt_(nEvents), _ampVec(ampVec), _fraction(fraction),
-      _dataSample(data), _phspSample(phspSample), _phspAccSample(accSample),
-      _penaltyLambda(0.0) {
   Init();
+  IniLHtree();
 
   return;
 }
 
 void MinLogLH::Init() {
-  double sumFraction = std::accumulate(_fraction.begin(), _fraction.end(), 0.0);
-  if (sumFraction > 1.0)
-    throw std::runtime_error("MinLogLH::init() | Fractions sum larger 1.0!");
-
-  if (_fraction.size() == _ampVec.size() - 1)
-    _fraction.push_back(1 - sumFraction);
-
-  // check size
-  if (_fraction.size() != _ampVec.size())
-    throw std::runtime_error("MinLogLH::init() | List of fractions "
-                             "(" +
-                             std::to_string(_fraction.size()) +
-                             ")"
-                             " does not match with list of amplitudes"
-                             "(" +
-                             std::to_string(_ampVec.size()) + ")"
-                                                              "!");
 
   nEvts_ = _dataSample->getNEvents();
   nPhsp_ = _phspSample->getNEvents();
@@ -94,14 +64,13 @@ void MinLogLH::Init() {
   else
     _phspAccSampleList = _phspSample->getListOfData();
 
-  calcSumOfWeights();
+  CalcSumOfWeights();
 
   calls = 0; // member of ControlParameter
 }
 
 void MinLogLH::Reset() {
-  _ampVec.clear();
-  _fraction.clear();
+  _intens = std::shared_ptr<AmpIntensity>();
   _dataSample = std::shared_ptr<DataReader::Data>();
   _phspSample = std::shared_ptr<DataReader::Data>();
   _phspAccSample = std::shared_ptr<DataReader::Data>();
@@ -109,17 +78,18 @@ void MinLogLH::Reset() {
 }
 
 std::shared_ptr<ComPWA::ControlParameter>
-MinLogLH::createInstance(std::shared_ptr<AmpIntensity> amp,
+MinLogLH::CreateInstance(std::shared_ptr<AmpIntensity> intens,
                          std::shared_ptr<DataReader::Data> data,
                          std::shared_ptr<DataReader::Data> phspSample,
-                         unsigned int startEvent, unsigned int nEvents) {
+                         bool useFunctionTree, unsigned int startEvent,
+                         unsigned int nEvents) {
   if (!instance_) {
     std::shared_ptr<DataReader::Data> accSample_ =
         std::shared_ptr<DataReader::Data>();
     instance_ = std::shared_ptr<ComPWA::ControlParameter>(
-        new MinLogLH(amp, data, phspSample,
+        new MinLogLH(intens, data, phspSample,
                      std::shared_ptr<DataReader::Data>(), // empty sample
-                     startEvent, nEvents));
+                     useFunctionTree, startEvent, nEvents));
     LOG(debug) << "MinLogLH::createInstance() | "
                   "Creating instance from amplitude and dataset!";
   }
@@ -127,76 +97,21 @@ MinLogLH::createInstance(std::shared_ptr<AmpIntensity> amp,
 }
 
 std::shared_ptr<ComPWA::ControlParameter>
-MinLogLH::createInstance(std::shared_ptr<AmpIntensity> amp,
+MinLogLH::CreateInstance(std::shared_ptr<AmpIntensity> intens,
                          std::shared_ptr<DataReader::Data> data,
                          std::shared_ptr<DataReader::Data> phspSample,
                          std::shared_ptr<DataReader::Data> accSample,
-                         unsigned int startEvent, unsigned int nEvents) {
+                         bool useFunctionTree, unsigned int startEvent,
+                         unsigned int nEvents) {
   if (!instance_) {
     instance_ = std::shared_ptr<ControlParameter>(
-        new MinLogLH(amp, data, phspSample, accSample, startEvent, nEvents));
+        new MinLogLH(intens, data, phspSample, accSample, useFunctionTree,
+                     startEvent, nEvents));
   }
   return instance_;
 }
 
-std::shared_ptr<ComPWA::ControlParameter>
-MinLogLH::createInstance(std::vector<std::shared_ptr<AmpIntensity>> ampVec,
-                         std::vector<double> frac,
-                         std::shared_ptr<DataReader::Data> data_,
-                         std::shared_ptr<DataReader::Data> phspSample_,
-                         std::shared_ptr<DataReader::Data> accSample_,
-                         unsigned int startEvent, unsigned int nEvents) {
-  if (!instance_) {
-    instance_ = std::shared_ptr<ControlParameter>(new MinLogLH(
-        ampVec, frac, data_, phspSample_, accSample_, startEvent, nEvents));
-  }
-  return instance_;
-}
-
-void MinLogLH::setAmplitude(std::shared_ptr<AmpIntensity> amp,
-                            std::shared_ptr<DataReader::Data> data,
-                            std::shared_ptr<DataReader::Data> phspSample,
-                            std::shared_ptr<DataReader::Data> accSample,
-                            unsigned int startEvent, unsigned int nEvents,
-                            bool useFuncTr) {
-  Reset();
-
-  _ampVec.push_back(amp);
-  _dataSample = data;
-  _phspSample = phspSample;
-  _phspAccSample = accSample;
-
-  nStartEvt_ = startEvent;
-  nUseEvt_ = nEvents;
-
-  Init();
-
-  return;
-}
-
-void MinLogLH::setAmplitude(std::vector<std::shared_ptr<AmpIntensity>> ampVec,
-                            std::vector<double> frac,
-                            std::shared_ptr<DataReader::Data> data,
-                            std::shared_ptr<DataReader::Data> phspSample,
-                            std::shared_ptr<DataReader::Data> accSample,
-                            unsigned int startEvent, unsigned int nEvents,
-                            bool useFuncTr) {
-  _ampVec.clear();
-
-  _ampVec = ampVec;
-  _dataSample = data;
-  _phspSample = phspSample;
-  _phspAccSample = accSample;
-
-  nStartEvt_ = startEvent;
-  nUseEvt_ = nEvents;
-
-  Init();
-
-  return;
-}
-
-void MinLogLH::calcSumOfWeights() {
+void MinLogLH::CalcSumOfWeights() {
   _sumOfWeights = 0;
   for (unsigned int evt = nStartEvt_; evt < nUseEvt_ + nStartEvt_; evt++) {
     Event ev(_dataSample->getEvent(evt));
@@ -207,22 +122,20 @@ void MinLogLH::calcSumOfWeights() {
   return;
 }
 
-void MinLogLH::setUseFunctionTree(bool t) {
+void MinLogLH::SetUseFunctionTree(bool t) {
   if (t == 0)
     _useFunctionTree = 0;
   else
-    iniLHtree();
+    IniLHtree();
 }
 
-void MinLogLH::iniLHtree() {
+void MinLogLH::IniLHtree() {
   LOG(debug) << "MinLogLH::iniLHtree() constructing the LH tree";
 
   if (_useFunctionTree)
     return;
-  auto it = _ampVec.begin();
-  for (; it != _ampVec.end(); ++it)
-    if (!(*it)->HasTree())
-      throw std::runtime_error("MinLogLH::iniLHtree() amplitude has no tree");
+  if (!_intens->HasTree())
+    throw std::runtime_error("MinLogLH::iniLHtree() amplitude has no tree");
 
   //----Strategies needed
   std::shared_ptr<Strategy> mmultDStrat(new MultAll(ParType::MDOUBLE));
@@ -267,18 +180,9 @@ void MinLogLH::iniLHtree() {
                     false); // w_{ev} * log( I_{ev} )
   _tree->createLeaf("weight", weight, "weightLog");
   _tree->createNode("Log", mlogStrat, "weightLog", sampleSize, false);
-  // I_{ev} = x_{ev} + (1-f_{bkg})
-  _tree->createNode("Add", multiDoubleAddStrat, "Log", sampleSize, false);
-
-  for (int i = 0; i < _ampVec.size(); i++) {
-    std::string name = _ampVec.at(i)->GetName();
-    _tree->createNode("Intens_" + name, mmultDStrat, "Add", sampleSize, false);
-    _tree->createLeaf("frac_" + name, _fraction.at(i), "Intens_" + name);
-    // Expect that intensity is calculated and normalised within AmpAbsDyn
-    _tree->insertTree(_ampVec.at(i)->GetTree(
-                          _dataSampleList, _phspAccSampleList, _phspSampleList),
-                      "Intens_" + name);
-  }
+  _tree->insertTree(
+      _intens->GetTree(_dataSampleList, _phspAccSampleList, _phspSampleList),
+      "Log");
 
   _tree->recalculate();
   if (!_tree->sanityCheck()) {
@@ -294,66 +198,14 @@ void MinLogLH::iniLHtree() {
 double MinLogLH::controlParameter(ParameterList &minPar) {
   double lh = 0;
   if (!_useFunctionTree) {
-    // Calculate normalization
-    double vol = Kinematics::Instance()->GetPhspVolume();
-    std::vector<double> normVec(_ampVec.size(), 0.0);
-
-    std::shared_ptr<DataReader::Data> sam;
-    if (_phspAccSample)
-      sam = _phspAccSample;
-    else
-      sam = _phspSample;
-
-    int size = sam->getNEvents();
-    for (unsigned int phsp = 0; phsp < size; phsp++) { // loop over phspSample
-      Event ev(sam->getEvent(phsp));
-      dataPoint point;
-      try {
-        point = dataPoint(ev);
-      } catch (BeyondPhsp &ex) { // event outside phase, remove
-        continue;
-      }
-      for (unsigned int i = 0; i < _ampVec.size(); ++i) {
-        double intens = _ampVec.at(i)->Intensity(point);
-        if (intens > 0)
-          normVec.at(i) += intens;
-      }
-    }
-    for (auto it = normVec.begin(); it != normVec.end(); ++it) {
-      if (!(*it)) {
-        std::cout << "Amps: " << _ampVec.size() << " Norms: " << normVec.size()
-                  << " Norm " << normVec.at(0) << std::endl;
-        throw std::runtime_error(
-            "MinLogLH::controlParameter() | "
-            "Normalization can not be calculated for at least one "
-            "resonance ");
-      }
-      (*it) *= vol / (double)size;
-    }
-
-    /* Approximate error of integration, see (Numerical Recipes Vol3,
-     * p398, Eq. 7.7.1)
-     * double normError = sqrt(
-     * 			( vol*vol*normSq/sam_size - norm*norm) / sam_size
-     * 		);
-     */
-
-    // Use internal amplitude integration - no unbinned eff correction
-    // norm = amp->normalization();
-
     // Calculate \Sum_{ev} log()
     double sumLog = 0;
     // loop over data sample
     for (unsigned int evt = nStartEvt_; evt < nUseEvt_ + nStartEvt_; evt++) {
       Event ev(_dataSample->getEvent(evt));
       dataPoint point(ev);
-      double val = 0;
-      for (unsigned int i = 0; i < _ampVec.size(); ++i) {
-        double tmp = _ampVec.at(i)->IntensityNoEff(point);
-        val += tmp * _fraction.at(i) / normVec.at(i);
-      }
-      if (val > 0)
-        sumLog += std::log(val) * ev.getWeight();
+      double val = _intens->Intensity(point);
+      sumLog += std::log(val) * ev.getWeight();
     }
     lh = (-1) * ((double)nUseEvt_) / _sumOfWeights * sumLog;
   } else {
@@ -362,63 +214,10 @@ double MinLogLH::controlParameter(ParameterList &minPar) {
         std::dynamic_pointer_cast<DoubleParameter>(_tree->head()->getValue());
     lh = logLH->GetValue();
   }
-  lh += calcPenalty();
+//  lh += calcPenalty();
   calls++;
   return lh; // return -logLH
 }
-
-void MinLogLH::setPenaltyScale(double sc, int ampID) {
-  if (sc < 0) {
-    LOG(info) << "MinLogLH::setPenaltyScale | "
-                 "Penalty scale cannot be negative!";
-    return;
-  }
-  if (ampID < 0 || ampID >= _ampVec.size())
-    LOG(info) << "MinLogLH::setPenaltyScale | "
-                 "Amplitude ID not valid!";
-
-  _penaltyAmpID = ampID;
-  _penaltyLambda = sc;
-
-  LOG(info) << "MinLogLH::setPenaltyScale | "
-               "Setting scale of penalty term to "
-            << sc << " for amplitude " << ampID << "!";
-}
-
-double MinLogLH::calcPenalty() {
-//  if (_penaltyLambda <= 0)
-//    return 0; // penalty term disabled
-//  double magSum = 0;
-//  auto amp = _ampVec.at(_penaltyAmpID);
-//  auto it = amp->GetResonanceItrFirst();
-//  std::vector<resonanceItr> resoList;
-//  for (; it != amp->GetResonanceItrLast(); ++it) {
-//    if ((*it)->GetName().find("_CP") != std::string::npos)
-//      continue;
-//    double v = std::fabs((*it)->GetMagnitude());
-//    magSum += v;
-//    resoList.push_back(it);
-//  }
-//  return (_penaltyLambda * magSum / std::sqrt(amp->GetIntegral(resoList)));
-  //	return (_penaltyLambda*magSum);
-  return 1.0;
-}
-
-// double MinLogLH::calcPenalty()
-//{
-//	if(_penaltyLambda<=0) return 0; //penalty term disabled
-//	double ffSum = 0;
-//	auto amp = _ampVec.at(_penaltyAmpID);
-//	ParameterList ffList;
-//	amp->GetFitFractions(ffList);
-//
-//	for(unsigned int i=0;i<ffList.GetNDouble(); ++i){
-//		double norm = amp->GetIntegral(resoList);
-//
-//		ffSum += ffList.GetDoubleParameter(i)->GetValue();
-//	}
-//	return (_penaltyLambda*ffSum);
-//}
 
 } /* namespace MinLogLH */
 } /* namespace Estimator */
