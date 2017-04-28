@@ -163,6 +163,16 @@ public:
 
   partDecayItr end() { return _partDecays.end(); }
 
+  /*! Set phase space sample
+   * We use the phase space sample to calculate the normalization. The sample
+   * should be without efficiency applied.
+   */
+  virtual void
+  SetPhspSample(std::shared_ptr<std::vector<ComPWA::dataPoint>> phspSample){
+    for( auto i: _partDecays )
+      i->SetPhspSample(phspSample);
+  }
+  
 protected:
 
   std::vector<std::shared_ptr<ComPWA::Physics::Resonance>> _partDecays;

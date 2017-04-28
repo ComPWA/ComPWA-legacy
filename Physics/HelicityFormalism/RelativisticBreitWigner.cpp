@@ -20,6 +20,8 @@
 
 #include <cmath>
 #include <numeric>
+#include <iterator>
+#include <vector>
 
 #include "boost/property_tree/ptree.hpp"
 
@@ -30,14 +32,13 @@ namespace ComPWA {
 namespace Physics {
 namespace HelicityFormalism {
 
-std::complex<double> RelativisticBreitWigner::Evaluate(const dataPoint &point,
-                                                       int pos) const {
-  return EvaluateNoNorm(point.GetValue(pos)) * GetNormalization();
+std::complex<double> RelativisticBreitWigner::Evaluate(const dataPoint &point) const {
+  return EvaluateNoNorm(point.GetValue(_dataPos)) * GetNormalization();
 }
 
 std::complex<double> RelativisticBreitWigner::EvaluateNoNorm(double mSq) const {
   std::complex<double> result = dynamicalFunction(
-      mSq, _mass->GetValue(), _massA, _massB, _width->GetValue(), (double)_spin,
+      mSq, _mass->GetValue(), _daughterMasses.first, _daughterMasses.second, _width->GetValue(), (double)_spin,
       _mesonRadius->GetValue(), _ffType);
   return result;
 }
@@ -104,12 +105,12 @@ std::complex<double> RelativisticBreitWigner::dynamicalFunction(
   return result;
 }
 
-std::shared_ptr<RelativisticBreitWigner>
+std::shared_ptr<AbstractDynamicalFunction>
 RelativisticBreitWigner::Factory(const boost::property_tree::ptree &pt) {
-  LOG(trace) << "RelativisticBreitWigner::Factory() | Construction....";
   auto obj = std::make_shared<RelativisticBreitWigner>();
 
   std::string name = pt.get<std::string>("DecayParticle.<xmlattr>.Name");
+  LOG(trace) << "RelativisticBreitWigner::Factory() | Construction of "<<name<<".";
   obj->SetName(name);
   auto partProp = PhysConst::Instance()->FindParticle(name);
   obj->SetMass(std::make_shared<DoubleParameter>(partProp.GetMassPar()));
@@ -133,34 +134,37 @@ RelativisticBreitWigner::Factory(const boost::property_tree::ptree &pt) {
 
   // Get masses of decay products
   auto decayProducts = pt.get_child("DecayProducts");
-  std::vector<std::string> daughterNames;
-  for (auto i : decayProducts) {
-    daughterNames.push_back(i.second.get<std::string>("<xmlattr>.Name"));
-  }
-  if (daughterNames.size() != 2)
+  if (decayProducts.size() != 2)
     throw boost::property_tree::ptree_error(
-        "AmpWignerD::Factory() | Expect exactly two decay products (" +
+        "RelativisticBreitWigner::Factory() | Expect exactly two decay products (" +
         std::to_string(decayProducts.size()) + " given)!");
-
-  obj->SetDecayMassA(
-      PhysConst::Instance()->FindParticle(daughterNames.at(0)).GetMass());
-  obj->SetDecayMassB(
-      PhysConst::Instance()->FindParticle(daughterNames.at(1)).GetMass());
-  obj->SetDecayNameA(daughterNames.at(0));
-  obj->SetDecayNameB(daughterNames.at(1));
-
+  
+  auto firstItr = decayProducts.begin();
+  //auto secondItr = decayProducts.begin()+1; //compile error, no idea for why
+  auto secondItr = decayProducts.begin();
+  secondItr++;
+  
+  std::pair<std::string, std::string> daughterNames(
+      firstItr->second.get<std::string>("<xmlattr>.Name"),
+      secondItr->second.get<std::string>("<xmlattr>.Name"));
+  std::pair<double, double> daughterMasses(
+      PhysConst::Instance()->FindParticle(daughterNames.first).GetMass(),
+      PhysConst::Instance()->FindParticle(daughterNames.second).GetMass());
+  obj->SetDecayMasses(daughterMasses);
+  obj->SetDecayNames(daughterNames);
+  
   LOG(trace)
       << "RelativisticBreitWigner::Factory() | Construction of the decay "
-      << partProp.GetName() << " -> " << daughterNames.at(0) << " + "
-      << daughterNames.at(1);
+      << partProp.GetName() << " -> " << daughterNames.first << " + "
+      << daughterNames.second;
 
-  return obj;
+  return std::static_pointer_cast<AbstractDynamicalFunction>(obj);
 }
 
 /**! Setup function tree */
 std::shared_ptr<FunctionTree>
 RelativisticBreitWigner::GetTree(ParameterList &sample,
-                                 ParameterList &toySample, int pos,
+                                 ParameterList &toySample,
                                  std::string suffix) {
 
   int sampleSize = sample.GetMultiDouble(0)->GetNValues();
@@ -179,10 +183,10 @@ RelativisticBreitWigner::GetTree(ParameterList &sample,
   tr->createLeaf("Spin", (double)_spin, "RelBreitWigner");       // spin
   tr->createLeaf("MesonRadius", _mesonRadius, "RelBreitWigner"); // d
   tr->createLeaf("FormFactorType", _ffType, "RelBreitWigner");   // d
-  tr->createLeaf("MassA", _massA, "RelBreitWigner");             // ma
-  tr->createLeaf("MassB", _massB, "RelBreitWigner");             // mb
-  tr->createLeaf("Data_mSq[" + std::to_string(pos) + "]",
-                 sample.GetMultiDouble(pos), "RelBreitWigner");
+  tr->createLeaf("MassA", _daughterMasses.first, "RelBreitWigner");             // ma
+  tr->createLeaf("MassB", _daughterMasses.second, "RelBreitWigner");             // mb
+  tr->createLeaf("Data_mSq[" + std::to_string(_dataPos) + "]",
+                 sample.GetMultiDouble(_dataPos), "RelBreitWigner");
 
   // Normalization
   tr->createNode("Normalization",
@@ -207,10 +211,10 @@ RelativisticBreitWigner::GetTree(ParameterList &sample,
   tr->createLeaf("Spin", (double)_spin, "NormRelBreitWigner");
   tr->createLeaf("MesonRadius", _mesonRadius, "NormRelBreitWigner"); 
   tr->createLeaf("FormFactorType", _ffType, "NormRelBreitWigner");   
-  tr->createLeaf("MassA", _massA, "NormRelBreitWigner");             
-  tr->createLeaf("MassB", _massB, "NormRelBreitWigner");
-  tr->createLeaf("PhspSample_mSq[" + std::to_string(pos) + "]",
-                 toySample.GetMultiDouble(pos),
+  tr->createLeaf("MassA", _daughterMasses.first, "NormRelBreitWigner");
+  tr->createLeaf("MassB", _daughterMasses.second, "NormRelBreitWigner");
+  tr->createLeaf("PhspSample_mSq[" + std::to_string(_dataPos) + "]",
+                 toySample.GetMultiDouble(_dataPos),
                  "NormRelBreitWigner"); // mc
 
   return tr;

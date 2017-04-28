@@ -12,7 +12,6 @@ namespace Physics {
 namespace HelicityFormalism {
 
 std::shared_ptr<FunctionTree> NonResonant::GetTree(ParameterList &sample,
-                                                     ParameterList &phspSample,
                                                      ParameterList &toySample,
                                                      std::string suffix) {
     return std::shared_ptr<FunctionTree>();

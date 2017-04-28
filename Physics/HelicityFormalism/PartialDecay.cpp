@@ -11,6 +11,7 @@
 
 #include "Physics/HelicityFormalism/PartialDecay.hpp"
 #include "Physics/HelicityFormalism/RelativisticBreitWigner.hpp"
+#include "Physics/HelicityFormalism/AmpFlatteRes.hpp"
 #include "Physics/HelicityFormalism/HelicityKinematics.hpp"
 
 namespace ComPWA {
@@ -74,6 +75,8 @@ PartialDecay::Factory(const boost::property_tree::ptree &pt) {
                              "sense!");
   } else if (decayType == "relativisticBreitWigner") {
     dynObj = RelativisticBreitWigner::Factory(pt);
+  } else if (decayType == "flatte") {
+    dynObj = AmpFlatteRes::Factory(pt);
   } else {
     throw std::runtime_error("PartialDecay::Factory() | Unknown decay type " +
                              decayType + "!");
@@ -114,10 +117,11 @@ PartialDecay::Save(std::shared_ptr<Resonance> res) {
 
   boost::property_tree::ptree daughterTr,chTrA,chTrB;
 
+  auto names = obj->GetDynamicalFunction()->GetDecayNames();
+  
   //Information daugher final state A
   auto finalA = obj->GetSubSystem().GetFinalStateA();
   std::string strA;
-  std::string nameA = obj->GetDynamicalFunction()->GetDecayNameA();
   if (finalA.size()) {
     for (auto i = 0; i < finalA.size(); i++) {
       strA += std::to_string(finalA.at(i));
@@ -126,7 +130,7 @@ PartialDecay::Save(std::shared_ptr<Resonance> res) {
     }
   }
 
-  chTrA.put("<xmlattr>.Name", nameA);
+  chTrA.put("<xmlattr>.Name", names.first);
   chTrA.put("<xmlattr>.FinalState", strA);
   chTrA.put("<xmlattr>.Helicity",
                  std::to_string((int)obj->GetWignerD()->GetHelicities().first));
@@ -135,7 +139,6 @@ PartialDecay::Save(std::shared_ptr<Resonance> res) {
   //Information daugher final state B
   auto finalB = obj->GetSubSystem().GetFinalStateB();
   std::string strB;
-  std::string nameB = obj->GetDynamicalFunction()->GetDecayNameB();
   if (finalB.size()) {
     for (auto i = 0; i < finalB.size(); i++) {
       strB += std::to_string(finalB.at(i));
@@ -144,7 +147,7 @@ PartialDecay::Save(std::shared_ptr<Resonance> res) {
     }
   }
 
-  chTrB.put("<xmlattr>.Name", nameB);
+  chTrB.put("<xmlattr>.Name", names.second);
   chTrB.put("<xmlattr>.FinalState", strB);
   chTrB.put("<xmlattr>.Helicity",
                  std::to_string((int)obj->GetWignerD()->GetHelicities().second));
@@ -171,7 +174,7 @@ std::shared_ptr<FunctionTree> PartialDecay::GetTree(ParameterList &sample,
 
   tr->insertTree(_angD->GetTree(sample, (_dataPos * 3) + 1, (_dataPos * 3) + 2),
                  "Resonance(" + GetName() + ")" + suffix);
-  tr->insertTree(_dynamic->GetTree(sample, toySample, (_dataPos * 3)),
+  tr->insertTree(_dynamic->GetTree(sample, toySample),
                  "Resonance(" + GetName() + ")" + suffix);
 
   return tr;

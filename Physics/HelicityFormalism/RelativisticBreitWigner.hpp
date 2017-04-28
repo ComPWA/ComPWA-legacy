@@ -45,17 +45,10 @@ class PartialDecay;
  * the one channel case.
  *
  * The three required parameters are defined in this model and can be
- * retrieved via the #getParameterList() function:
- * @param resonance_width_ width of the resonance
- * @param resonance_mass_ mass of the resonance
+ * retrieved via the #GetParameters() function:
+ * @param resonance_width_ Width of the resonance
+ * @param resonance_mass_ Mass of the resonance
  * @param meson_radius_ Scale of interaction range
- *
- * The remaining required parameter is the angular momentum param J_ of the two
- * particle state.
- *
- * Additional informations from the event are extracted from the data point
- * within the #evaluate() function. For example the invariant mass and the
- * daughter masses.
  */
 class RelativisticBreitWigner : public AbstractDynamicalFunction {
 
@@ -64,7 +57,7 @@ public:
 
   virtual ~RelativisticBreitWigner(){};
 
-  std::complex<double> Evaluate(const dataPoint &point, int pos) const;
+  std::complex<double> Evaluate(const dataPoint &point) const;
 
   virtual std::complex<double> EvaluateNoNorm(double mSq) const;
 
@@ -82,7 +75,6 @@ public:
   /**! Setup function tree */
   virtual std::shared_ptr<FunctionTree> GetTree(ParameterList &sample,
                                                 ParameterList &toySample,
-                                                int pos,
                                                 std::string suffix = "");
 
   // --------------------------- Set/Get functions ---------------------------
@@ -192,17 +184,18 @@ public:
    @param pt Configuration tree
    @return Constructed object
    */
-  static std::shared_ptr<RelativisticBreitWigner>
+  static std::shared_ptr<AbstractDynamicalFunction>
   Factory(const boost::property_tree::ptree &pt);
 
-  std::shared_ptr<ComPWA::Physics::HelicityFormalism::PartialDecay> operator*(
-      std::shared_ptr<ComPWA::Physics::HelicityFormalism::AmpWignerD> wigner) {
+//  std::shared_ptr<ComPWA::Physics::HelicityFormalism::PartialDecay> operator*(
+//      std::shared_ptr<ComPWA::Physics::HelicityFormalism::AmpWignerD> wigner) {
     //    auto obj
     //    =std::make_shared<ComPWA::Physics::HelicityFormalism::PartialDecay>();
     //    std::shared_ptr<ComPWA::Physics::HelicityFormalism::PartialDecay>
     //    partDecay(std::make_shared<PartialDecay>(this), wigner);
     //    return obj;
-  }
+//  }
+
 
 protected:
   //! Decay width of resonante state

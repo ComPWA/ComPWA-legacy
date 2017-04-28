@@ -1,10 +1,4 @@
- 
-                                                                           
-                                                                       
-        
-      
-    
-  
+
 
 //-------------------------------------------------------------------------------
 // Copyright (c) 2013 Peter Weidenkaff.
@@ -90,6 +84,12 @@ std::shared_ptr<FunctionTree> AmpWignerD::GetTree(ParameterList &sample,
   std::shared_ptr<FunctionTree> newTree(new FunctionTree());
 
   int sampleSize = sample.GetMultiDouble(0)->GetNValues();
+  if ((double)_spin == 0) { //in case of spin zero do not explicitly include the WignerD
+    std::shared_ptr<MultiUnsignedInteger> one(
+        new MultiUnsignedInteger( "", std::vector<unsigned int>(sampleSize, 1) ));
+    newTree->createLeaf("WignerD" + suffix, one, ""); // spin
+    return newTree;
+  }
   //----Strategies needed
   std::shared_ptr<WignerDStrategy> angdStrat(
       new WignerDStrategy("AngD" + suffix));

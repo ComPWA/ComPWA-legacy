@@ -136,14 +136,15 @@ public:
   //! Set strength parameter
   void SetStrength(double par) { _strength->SetValue(par); }
 
-  /*! Set phase space sample
-   * We use a phase space sample to calculate the normalization and determine
-   * the maximum of the amplitude. In case that the efficiency is already
-   * applied
-   * to the sample set fEff to false.
+  /*! Set phase space samples
+   * We use phase space samples to calculate the normalizations. In case of
+   * intensities we phase space sample phspSample includes the event efficiency.
+   * The sample toySample is used for normalization calculation for e.g.
+   * Resonacnes without efficiency.
    */
-  void SetPhspSample(std::shared_ptr<ComPWA::DataReader::Data> phspSample,
-                     bool fEff) {};
+  void
+  SetPhspSample(std::shared_ptr<std::vector<ComPWA::dataPoint>> phspSample,
+                std::shared_ptr<std::vector<ComPWA::dataPoint>> toySample) {}
 
 protected:
   /*! Calculate integral.

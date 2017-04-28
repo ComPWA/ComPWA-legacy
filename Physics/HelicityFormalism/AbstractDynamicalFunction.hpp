@@ -30,12 +30,11 @@ namespace HelicityFormalism {
 
 class AbstractDynamicalFunction {
 public:
-  AbstractDynamicalFunction(){};
+  AbstractDynamicalFunction() : _daughterMasses(std::pair<double,double>(-999,-999)) {};
 
   virtual ~AbstractDynamicalFunction(){};
 
-  virtual std::complex<double> Evaluate(const ComPWA::dataPoint &point,
-                                        int pos) const = 0;
+  virtual std::complex<double> Evaluate(const ComPWA::dataPoint &point) const = 0;
 
   virtual std::complex<double> EvaluateNoNorm(double mSq) const = 0;
 
@@ -63,7 +62,7 @@ public:
   /**! Setup function tree */
   virtual std::shared_ptr<ComPWA::FunctionTree>
   GetTree(ComPWA::ParameterList &sample, ComPWA::ParameterList &toySample,
-          int pos, std::string suffix = "") = 0;
+          std::string suffix = "") = 0;
 
   /**
    Set decay width
@@ -93,22 +92,14 @@ public:
    */
   virtual double GetMassValue() const { return _mass->GetValue(); }
 
-  virtual void SetDecayMassA(double mass) { _massA = mass; }
+  virtual void SetDecayMasses(std::pair<double,double> m) { _daughterMasses = m;}
 
-  virtual double GetDecayMassA() const { return _massA; }
+  virtual std::pair<double,double> GetDecayMasses() const { return _daughterMasses; }
 
-  virtual void SetDecayMassB(double mass) { _massB = mass; }
+  virtual void SetDecayNames(std::pair<std::string,std::string> n) { _daughterNames = n; }
 
-  virtual double GetDecayMassB() const { return _massB; }
+  virtual std::pair<std::string,std::string> GetDecayNames() const { return _daughterNames; }
 
-  virtual void SetDecayNameA(std::string name) { _nameA = name; }
-
-  virtual std::string GetDecayNameA() const { return _nameA; }
-
-  virtual void SetDecayNameB(std::string name) { _nameB = name; }
-
-  virtual std::string GetDecayNameB() const { return _nameB; }
-  
   virtual ComPWA::Spin GetSpin() const { return _spin; }
 
   virtual void SetSpin(ComPWA::Spin spin) { _spin = spin; }
@@ -129,6 +120,27 @@ public:
 
   virtual std::pair<double, double> GetLimits() { return _limits; }
 
+  /*! Set phase space sample
+   * We use the phase space sample to calculate the normalization. The sample 
+   * should be without efficiency applied.
+   */
+  virtual void
+  SetPhspSample( std::shared_ptr<std::vector<ComPWA::dataPoint>> phspSample ) {
+    _phspSample = phspSample;
+  };
+  
+  //! Set position of variables within dataPoint
+  void SetDataPosition(int pos) { _dataPos = pos; }
+
+  //! Get position of variables within dataPoint
+  int GetDataPosition() const { return _dataPos; }
+
+  //! Set position of variables within dataPoint
+  void SetSubSystem(SubSystem sys) {
+    _dataPos = dynamic_cast<HelicityKinematics *>(Kinematics::Instance())
+                   ->GetDataID(sys);
+  }
+  
 protected:
   //! Name of resonance
   std::string _name;
@@ -140,20 +152,26 @@ protected:
   virtual double Integral() const;
 
   //! Masses of daughter particles
-  double _massA, _massB;
+  std::pair<double,double> _daughterMasses;
 
   //! Names of daughter particles
-  std::string _nameA, _nameB;
+  std::pair<std::string,std::string> _daughterNames;
   
-  //! Minimum and Maximum of invariant mass
-  std::pair<double, double> _limits;
-
   //! Resonance mass
   std::shared_ptr<ComPWA::DoubleParameter> _mass;
+
+  //! Minimum and Maximum of invariant mass
+  std::pair<double, double> _limits;
 
   //! Resonance spin
   ComPWA::Spin _spin;
 
+  //! Position of invariant mass in dataPoint
+  int _dataPos;
+  
+  //! Phsp sample for numerical integration
+  std::shared_ptr<std::vector<ComPWA::dataPoint>> _phspSample;
+  
   //! Integral value (temporary)
   double _current_integral;
 

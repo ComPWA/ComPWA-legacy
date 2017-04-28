@@ -154,8 +154,7 @@ CoherentIntensity::setupBasicTree(ParameterList &sample,
   newTree->createHead("SumOfAmplitudes" + suffix, maddStrat, sampleSize);
 
   for (auto i : _seqDecays) {
-    std::shared_ptr<FunctionTree> resTree =
-        i->GetTree(sample, phspSample, "");
+    std::shared_ptr<FunctionTree> resTree = i->GetTree(sample, phspSample, "");
     if (!resTree->sanityCheck())
       throw std::runtime_error("AmpSumIntensity::setupBasicTree() | "
                                "Resonance tree didn't pass sanity check!");
@@ -175,8 +174,9 @@ void CoherentIntensity::GetParameters(ComPWA::ParameterList &list) {
 }
 
 double CoherentIntensity::GetNormalization() const {
-  if( _integral ) return 1/_integral;
-  
+  if (_integral)
+    return 1 / _integral;
+
   // Check if parameters were modified
   ParameterList list;
   const_cast<CoherentIntensity *>(this)->GetParameters(list);
@@ -190,36 +190,36 @@ double CoherentIntensity::GetNormalization() const {
 
   return 1 / _integral;
 }
-  
+
 double CoherentIntensity::Integral() const {
 
-  if (!_phspSample.size())
-    throw std::runtime_error(
-        "CoherentIntensity::Integral() | Phase space sample"
-        " not set or empty. Integral can not be calculated!");
+  if (!_phspSample->size()) {
+    LOG(debug)
+        << "CoherentIntensity::Integral() | Integral can not be calculated "
+           "since no phsp sample is set. Set a sample using "
+           "SetPhspSamples(phspSample, toySample)!";
+    return 1.0;
+  }
 
   double sumIntens = 0;
   double maxVal = 0;
-  for (auto i : _phspSample) {
+  for (auto i : *_phspSample.get()) {
     std::complex<double> result(0., 0.);
     for (auto d : _seqDecays)
       result += d->Evaluate(i);
     double intens = std::norm(result);
-    
+
     if (intens > maxVal)
       maxVal = intens;
-    
-    if (_phspSampleEff)
-      intens *= _eff->Evaluate(i);
-    
+
     sumIntens += intens;
   }
 
   double phspVol = Kinematics::Instance()->GetPhspVolume();
-  double integral = (sumIntens * phspVol / _phspSample.size());
+  double integral = (sumIntens * phspVol / _phspSample->size());
   LOG(trace) << "CoherentIntensity::Integral() | Integral is " << integral
-             << " and the maximum value of intensity is " << maxVal<< ".";
-  
+             << " and the maximum value of intensity is " << maxVal << ".";
+
   const_cast<double &>(_maxIntens) = maxVal;
   return integral;
 }

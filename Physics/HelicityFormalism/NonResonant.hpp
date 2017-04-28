@@ -19,31 +19,32 @@ namespace ComPWA {
 namespace Physics {
 namespace HelicityFormalism {
 
-class NonResonant: public AbstractDynamicalFunction {
+class NonResonant : public AbstractDynamicalFunction {
 
 public:
   NonResonant();
   virtual ~NonResonant();
 
-  virtual std::complex<double> Evaluate(const dataPoint &, int pos = 0) const {
-    return std::complex<double>(1.0,0.0);
+  virtual std::complex<double> Evaluate(const dataPoint &p) const {
+    return std::complex<double>(1.0, 0.0);
   }
-  
+
   /**! Get current normalization.  */
-  virtual double GetNormalization() const {
-    return ( 1 / Integral() );
-  };
-  
-std::shared_ptr<FunctionTree> GetTree(ParameterList &sample,
-                                                     ParameterList &phspSample,
-                                                     ParameterList &toySample,
-                                                   std::string suffix);
+  virtual double GetNormalization() const { return (1 / Integral()); };
+
+  virtual std::shared_ptr<FunctionTree> GetTree(ParameterList &sample,
+                                        ParameterList &toySample,
+                                        std::string suffix);
+
 protected:
-  virtual double Integral() const { return Kinematics::Instance()->GetPhspVolume(); }
+  virtual double Integral() const {
+    return Kinematics::Instance()->GetPhspVolume();
+  }
 };
 
 } /* namespace DynamicalFunctions */
 } /* namespace Physics */
 } /* namespace ComPWA */
 
-#endif /* PHYSICS_DYNAMICALDECAYFUNCTIONS_TWOBODYDECAY_TOPNODECONSTANTVALUE_HPP_ */
+#endif /* PHYSICS_DYNAMICALDECAYFUNCTIONS_TWOBODYDECAY_TOPNODECONSTANTVALUE_HPP_ \
+          */

@@ -174,6 +174,13 @@ public:
    */
   virtual std::complex<double> GetPreFactor() const { return _preFactor; }
   
+  /*! Set phase space sample
+   * We use the phase space sample to calculate the normalization. The sample
+   * should be without efficiency applied.
+   */
+  virtual void
+  SetPhspSample(std::shared_ptr<std::vector<ComPWA::dataPoint>> phspSample) = 0;
+
 protected:
   std::string _name;
 

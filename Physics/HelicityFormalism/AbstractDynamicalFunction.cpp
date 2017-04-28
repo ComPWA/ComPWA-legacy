@@ -18,12 +18,41 @@ namespace HelicityFormalism {
 
 //! Integral
 double AbstractDynamicalFunction::Integral() const {
-  auto intAlg = ComPWA::Tools::IntegralByQuadrature<AbstractDynamicalFunction>(
-      *this, _limits);
-  double integral = intAlg.Integral();
-  LOG(trace) << "AbstractDynamicalFunction::Integral() | Integral is "
-             << integral << ".";
-  return std::sqrt(integral);
+  if (!_phspSample->size()) {
+    LOG(debug)
+        << "CoherentIntensity::Integral() | Integral can not be calculated "
+           "since no phsp sample is set. Set a sample using "
+           "SetPhspSamples(phspSample, toySample)!";
+    return 1.0;
+  }
+
+  double sumIntens = 0;
+  double maxVal = 0;
+  for (auto i : *_phspSample.get())
+    sumIntens += std::norm(EvaluateNoNorm(i.GetValue(_dataPos)));
+  
+  double phspVol = Kinematics::Instance()->GetPhspVolume();
+  double integral = (sumIntens * phspVol / _phspSample->size());
+  LOG(trace) << "AbstractDynamicalFunction::Integral() | Integral is " << integral
+             << ".";
+
+  return integral;
+
+//Numeric integration in (1-dim) invariant mass range
+//  double phspVol = Kinematics::Instance()->GetPhspVolume();
+//  double integral = (sumIntens * phspVol / _phspSample->size());
+//  LOG(trace) << "CoherentIntensity::Integral() | Integral is " << integral
+//             << " and the maximum value of intensity is " << maxVal << ".";
+//
+//  const_cast<double &>(_maxIntens) = maxVal;
+//  return integral;
+//  
+//  auto intAlg = ComPWA::Tools::IntegralByQuadrature<AbstractDynamicalFunction>(
+//      *this, _limits);
+//  double integral = intAlg.Integral();
+//  LOG(trace) << "AbstractDynamicalFunction::Integral() | Integral is "
+//             << integral << ".";
+//  return std::sqrt(integral);
 }
 
 void AbstractDynamicalFunction::GetParameters(ParameterList &list) {

@@ -45,7 +45,7 @@ public:
     std::complex<double> result =
         std::polar(_magnitude->GetValue(), _phase->GetValue());
     result *= _angD->Evaluate(point, (_dataPos * 3) + 1, (_dataPos * 3) + 2);
-    result *= _dynamic->Evaluate(point, (_dataPos * 3));
+    result *= _dynamic->Evaluate(point);
 
     return result;
   };
@@ -128,6 +128,15 @@ public:
 
   //! Get position of variables within dataPoint
   SubSystem GetSubSystem() const { return _subSystem; }
+
+  /*! Set phase space sample
+   * We use the phase space sample to calculate the normalization. The sample
+   * should be without efficiency applied.
+   */
+  virtual void
+  SetPhspSample(std::shared_ptr<std::vector<ComPWA::dataPoint>> phspSample) {
+    _dynamic->SetPhspSample(phspSample);
+  };
 
 protected:
   /**! Position where variables are stored in dataPoint

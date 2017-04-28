@@ -344,29 +344,32 @@ int main(int argc, char **argv) {
         phspEfficiencyFile, phspEfficiencyFileTreeName, mcPrecision));
     phspData->reduceToPhsp();
   }
-  
+
   //========== Generation of toy phase space sample ==
   std::shared_ptr<Data> toyPhspData(new RootReader()); // Toy sample
   run.SetPhspSample(toyPhspData);
   run.GeneratePhsp(mcPrecision);
   toyPhspData->setEfficiency(eff); // set efficiency values for each event
 
-  // ========= Construction of AmpIntensity ========
+  // ========= AmpIntensity ========
   auto intens = IncoherentIntensity::Factory(
       fitModelTree.get_child("IncoherentIntensity"));
-  if (phspData)
-    intens->SetPhspSample(phspData, false);
-  else
-    intens->SetPhspSample(toyPhspData, false);
 
   boost::property_tree::ptree trueModelTree;
   boost::property_tree::xml_parser::read_xml(trueModelFile, trueModelTree);
   auto trueIntens = IncoherentIntensity::Factory(
       trueModelTree.get_child("IncoherentIntensity"));
-  if (phspData)
-    trueIntens->SetPhspSample(phspData, false);
-  else
-    trueIntens->SetPhspSample(toyPhspData, false);
+
+  // Setting samples for normalization
+  auto toyPoints =
+      std::make_shared<std::vector<dataPoint>>(toyPhspData->getDataPoints());
+  auto phspPoints = toyPoints;
+  if (phspData) {
+    auto phspPoints =
+        std::make_shared<std::vector<dataPoint>>(phspData->getDataPoints());
+  }
+  trueIntens->SetPhspSample(phspPoints, toyPoints);
+  intens->SetPhspSample(phspPoints, toyPoints);
 
   //======================= READING DATA =============================
   // Sample is used for minimization
@@ -522,17 +525,15 @@ int main(int argc, char **argv) {
     ParameterList truePar, fitPar;
     trueIntens->GetParameters(truePar);
     intens->GetParameters(fitPar);
-    LOG(debug)<<"Fit parameters: "<<std::endl<<fitPar;
+    LOG(debug) << "Fit parameters: " << std::endl << fitPar;
 
-    bool useTree = (fittingMethod=="tree")? 1 : 0;
+    bool useTree = (fittingMethod == "tree") ? 1 : 0;
     //=== Constructing likelihood
     auto esti = Estimator::MinLogLH::MinLogLH::CreateInstance(
         intens, sample, toyPhspData, phspData, useTree, 0, 0);
 
     if (fittingMethod == "tree") {
-      auto *contrPar =
-          dynamic_cast<Estimator::MinLogLH::MinLogLH *>(&*(esti->Instance()));
-      LOG(debug) << contrPar->GetTree()->head()->to_str(25);
+      LOG(debug) << esti->GetTree()->head()->to_str(25);
     }
 
     if (useRandomStartValues)
@@ -631,52 +632,52 @@ int main(int argc, char **argv) {
   }
 
   //======================= PLOTTING =============================
-    if (enablePlotting) {
-      //    if (fittingMethod != "plotOnly")
-      //      Amplitude::UpdateAmpParameterList(ampVec, finalParList);
-  
-      //------- phase-space sample
-      std::shared_ptr<ComPWA::Data> pl_phspSample(new RootReader());
-      LOG(info) << "Plotting results...";
-      if (!phspEfficiencyFile.empty()) { // unbinned plotting
-        // sample with accepted phsp events
-        pl_phspSample = std::shared_ptr<Data>(new RootReader(
-            phspEfficiencyFile, phspEfficiencyFileTreeName, plotSize));
-  
-        std::shared_ptr<Data> plotTruePhsp;
-        if (!phspEfficiencyFileTrueTreeName.empty())
-          plotTruePhsp = std::shared_ptr<Data>(new RootReader(
-              phspEfficiencyFile, phspEfficiencyFileTrueTreeName, plotSize));
-        run.SetPhspSample(pl_phspSample, plotTruePhsp);
-        // make sure no efficiency is set
-        //      Amplitude::SetAmpEfficiency(
-        //          ampVec, std::shared_ptr<Efficiency>(new UnitEfficiency));
-      } else { // binned plotting
-        run.SetPhspSample(pl_phspSample);
-        run.GeneratePhsp(plotSize); // we generate a very large sample for
-                                    // plotting
-      }
-      // reduce sample to phsp
-      pl_phspSample->reduceToPhsp();
-      pl_phspSample->setEfficiency(eff);
-  
-      //-------- Instance of plotData
-      plotData pl(fileNamePrefix, plotNBins);
-      // set data sample
-      pl.SetData(sample);
-      // set amplitude
-      pl.SetFitAmp(intens);
-      // select components to plot
-//      if (fitBkgFile != "")
-//        pl.DrawComponent(ampVec.size() - 1, kRed);
-//      pl.DrawComponent(ampVec.size() - 2, kOrange);
-      //		pl.setHitMissData(pl_sample);
-      pl.SetPhspData(pl_phspSample);
-  
-//      pl.setCorrectEfficiency(plotCorrectEfficiency);
-      // Fill histograms and create canvases
-      pl.Plot();
+  if (enablePlotting) {
+    //    if (fittingMethod != "plotOnly")
+    //      Amplitude::UpdateAmpParameterList(ampVec, finalParList);
+
+    //------- phase-space sample
+    std::shared_ptr<ComPWA::Data> pl_phspSample(new RootReader());
+    LOG(info) << "Plotting results...";
+    if (!phspEfficiencyFile.empty()) { // unbinned plotting
+      // sample with accepted phsp events
+      pl_phspSample = std::shared_ptr<Data>(new RootReader(
+          phspEfficiencyFile, phspEfficiencyFileTreeName, plotSize));
+
+      std::shared_ptr<Data> plotTruePhsp;
+      if (!phspEfficiencyFileTrueTreeName.empty())
+        plotTruePhsp = std::shared_ptr<Data>(new RootReader(
+            phspEfficiencyFile, phspEfficiencyFileTrueTreeName, plotSize));
+      run.SetPhspSample(pl_phspSample, plotTruePhsp);
+      // make sure no efficiency is set
+      //      Amplitude::SetAmpEfficiency(
+      //          ampVec, std::shared_ptr<Efficiency>(new UnitEfficiency));
+    } else { // binned plotting
+      run.SetPhspSample(pl_phspSample);
+      run.GeneratePhsp(plotSize); // we generate a very large sample for
+                                  // plotting
     }
+    // reduce sample to phsp
+    pl_phspSample->reduceToPhsp();
+    pl_phspSample->setEfficiency(eff);
+
+    //-------- Instance of plotData
+    plotData pl(fileNamePrefix, plotNBins);
+    // set data sample
+    pl.SetData(sample);
+    // set amplitude
+    pl.SetFitAmp(intens);
+    // select components to plot
+    //      if (fitBkgFile != "")
+    //        pl.DrawComponent(ampVec.size() - 1, kRed);
+    //      pl.DrawComponent(ampVec.size() - 2, kOrange);
+    //		pl.setHitMissData(pl_sample);
+    pl.SetPhspData(pl_phspSample);
+
+    //      pl.setCorrectEfficiency(plotCorrectEfficiency);
+    // Fill histograms and create canvases
+    pl.Plot();
+  }
   LOG(info) << "FINISHED!";
 
   // Exit code is exit code of fit routine. 0 is good/ 1 is bad

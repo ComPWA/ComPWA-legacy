@@ -111,10 +111,12 @@ public:
    * applied
    * to the sample set fEff to false.
    */
-  void SetPhspSample(std::shared_ptr<ComPWA::DataReader::Data> phspSample,
-                     bool fEff = true) {
-    _phspSampleEff = fEff;
-    _phspSample = phspSample->getDataPoints();
+  void SetPhspSample(std::shared_ptr<std::vector<ComPWA::dataPoint>> phspSample,
+                     std::shared_ptr<std::vector<ComPWA::dataPoint>> toySample) {
+    _phspSample = phspSample;
+    
+    for( auto i: _seqDecays )
+      i->SetPhspSample(toySample);
   };
 
 protected:
@@ -127,9 +129,7 @@ protected:
   std::vector<std::shared_ptr<ComPWA::Physics::Amplitude>> _seqDecays;
 
   //! Phase space sample to calculate the normalization and maximum value.
-  std::vector<ComPWA::dataPoint> _phspSample;
-  //  std::shared_ptr<ComPWA::DataReader::Data> _phspSample;
-  bool _phspSampleEff;
+  std::shared_ptr<std::vector<ComPWA::dataPoint>> _phspSample;
 
   //! Maximum value
   double _maxIntens;

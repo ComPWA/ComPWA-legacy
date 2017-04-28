@@ -29,21 +29,56 @@ namespace ComPWA {
 namespace Physics {
 namespace HelicityFormalism {
 
+class Coupling {
+public:
+  Coupling() : _g(new DoubleParameter("", 0.0)){};
+
+  Coupling(const boost::property_tree::ptree tr) {
+    _g = std::make_shared<DoubleParameter>(
+        ComPWA::DoubleParameterFactory(tr.get_child("")));
+    std::string nameA = tr.get<std::string>("ParticleA");
+    std::string nameB = tr.get<std::string>("ParticleB");
+    _massA = PhysConst::Instance()->FindParticle(nameA).GetMass();
+    _massB = PhysConst::Instance()->FindParticle(nameB).GetMass();
+  };
+
+  void SetValueParameter(std::shared_ptr<DoubleParameter> g) { _g = g; }
+
+  std::shared_ptr<DoubleParameter> GetValueParameter() { return _g; }
+
+  double GetValue() const { return _g->GetValue(); }
+
+  double GetMassA() const { return _massA; }
+
+  double GetMassB() const { return _massB; }
+
+  void SetMassA(double m) { _massA = m; }
+
+  void SetMassB(double m) { _massB = m; }
+
+protected:
+  std::shared_ptr<DoubleParameter> _g;
+
+  double _massA;
+
+  double _massB;
+};
+
 class AmpFlatteRes : public HelicityFormalism::AbstractDynamicalFunction {
 public:
-  AmpFlatteRes() {};
+  AmpFlatteRes() : AbstractDynamicalFunction(){};
 
   virtual ~AmpFlatteRes();
 
-  virtual std::complex<double> Evaluate(const dataPoint &point, int pos) const;
-  
+  virtual std::complex<double> Evaluate(const dataPoint &point) const;
+
   virtual std::complex<double> EvaluateNoNorm(double mSq) const;
-  
+
   //! Clone function
   virtual AmpFlatteRes *Clone(std::string newName = "") const {
     auto tmp = (new AmpFlatteRes(*this));
-    //if (newName != "")
-    //tmp->SetName(newName);
+    // if (newName != "")
+    // tmp->SetName(newName);
     return tmp;
   }
 
@@ -55,21 +90,14 @@ public:
 
   /**! Get current normalization.  */
   virtual double GetNormalization() const;
-  
-  //! Get resonance width
-  virtual double GetWidth() const {
-    return std::abs(HelicityFormalism::couplingToWidth(
-        _mass->GetValue(), _mass->GetValue(), _g1->GetValue(), _massA, _massB,
-        (double)_spin, _mesonRadius->GetValue(), _ffType));
-  }
 
-   /**
-   Set meson radius
-   The meson radius is a measure of the size of the resonant state. It is used
-   to calculate the angular momentum barrier factors.
+  /**
+  Set meson radius
+  The meson radius is a measure of the size of the resonant state. It is used
+  to calculate the angular momentum barrier factors.
 
-   @param r Meson radius
-   */
+  @param r Meson radius
+  */
   void SetMesonRadius(std::shared_ptr<DoubleParameter> r) { _mesonRadius = r; }
 
   /**
@@ -116,7 +144,52 @@ public:
    @return From factor type
    */
   formFactorType GetFormFactorType() { return _ffType; }
-  
+
+  /*! Set coupling parameter to signal channel.
+  */
+  void SetCoupling(Coupling g1, Coupling g2 = Coupling(),
+                   Coupling g3 = Coupling()) {
+    _g = std::vector<Coupling>{g1, g2, g3};
+  }
+
+  /*! Get coupling parameter to channel @channel.
+   */
+  Coupling GetCoupling(int channel) { return _g.at(channel); }
+
+  /*! Get coupling parameter.
+   */
+  std::vector<Coupling> GetCouplings(int i) const { return _g; }
+
+  /*! Set coupling parameters.
+   */
+  void SetCouplings(std::vector<Coupling> vC) {
+    if (vC.size() != 2 && vC.size() != 3)
+      throw std::runtime_error(
+          "AmpFlatteRes::SetCouplings() | Vector with "
+          "couplings has a wrong size. We expect either 2 or 3 couplings.");
+
+    _g = vC;
+
+    if(_g.size() == 2) _g.push_back(Coupling());
+    // Check if one of the  coupling match the final state (_daughterMasses)
+    auto mm = GetDecayMasses();
+    if (mm == std::pair<double, double>(-999, -999))
+      LOG(info)
+          << "AmpFlatteRes::SetCouplings() | Masses of decay products not set. "
+             " Can not determine if correct couplings were set.";
+
+    bool ok = false;
+    for (auto i : _g) {
+      if (i.GetMassA() == mm.first && i.GetMassB() == mm.second)
+        ok = true;
+      if (i.GetMassB() == mm.first && i.GetMassA() == mm.second)
+        ok = true;
+    }
+    if (!ok)
+      throw std::runtime_error("AmpFlatteRes::SetCouplings() | No couplings "
+                               "for the current decay particles set!");
+  }
+
   /** Dynamical function for two coupled channel approach
    *
    * @param mSq center-of-mass energy^2 (=s)
@@ -156,10 +229,8 @@ public:
                     std::complex<double> termA, std::complex<double> termB,
                     std::complex<double> termC = std::complex<double>(0, 0));
 
-
   virtual std::shared_ptr<FunctionTree> GetTree(ParameterList &sample,
-                                                  ParameterList &toySample,
-                                                int pos,
+                                                ParameterList &toySample,
                                                 std::string suffix);
 
   /**
@@ -168,26 +239,23 @@ public:
    @param pt Configuration tree
    @return Constructed object
    */
-  static std::shared_ptr<AmpFlatteRes>
+  static std::shared_ptr<AbstractDynamicalFunction>
   Factory(const boost::property_tree::ptree &pt);
-  
+
 protected:
   // Initialize masses
   void initialize();
 
-  double _g2_massA, _g2_massB, _g3_massA, _g3_massB;
-  std::shared_ptr<DoubleParameter> _g1, _g2, _g3;
-  std::string _g2_idA, _g2_idB, _g3_idA, _g3_idB;
-
   //! Meson radius of resonant state
   std::shared_ptr<DoubleParameter> _mesonRadius;
-  
+
+  std::vector<Coupling> _g;
+
   //! Form factor type
   formFactorType _ffType;
-  
+
 private:
-  double _current_g3, _current_g2, _current_g1;
-  
+  double _current_g, _current_gHidden, _current_gHidden2;
 };
 
 class FlatteStrategy : public Strategy {
@@ -198,15 +266,6 @@ public:
   virtual const std::string to_str() const {
     return ("flatte amplitude of " + name);
   }
-
-  static std::shared_ptr<FunctionTree>
-  SetupTree(std::string name, std::shared_ptr<MultiDouble> mSq,
-            std::shared_ptr<DoubleParameter> mR,
-            std::shared_ptr<DoubleParameter> g, double ma, double mb,
-            std::shared_ptr<DoubleParameter> g2, double g2_ma, double g2_mb,
-            std::shared_ptr<DoubleParameter> g3, double g3_ma, double g3_mb,
-            Spin spin, std::shared_ptr<DoubleParameter> mesonRadius,
-            formFactorType type);
 
   virtual bool execute(ParameterList &paras,
                        std::shared_ptr<AbsParameter> &out);

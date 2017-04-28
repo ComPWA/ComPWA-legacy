@@ -130,10 +130,10 @@ public:
    * applied
    * to the sample set fEff to false.
    */
-  void SetPhspSample(std::shared_ptr<ComPWA::DataReader::Data> phspSample,
-                     bool fEff) {
+  void SetPhspSample(std::shared_ptr<std::vector<ComPWA::dataPoint>> phspSample
+                     , std::shared_ptr<std::vector<ComPWA::dataPoint>> toySample) {
     for (auto i : _intens) {
-      i->SetPhspSample(phspSample,fEff);
+      i->SetPhspSample(phspSample,toySample);
     }
   };
   

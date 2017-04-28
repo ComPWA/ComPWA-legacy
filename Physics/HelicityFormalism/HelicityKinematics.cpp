@@ -398,6 +398,9 @@ void HelicityKinematics::EventToDataPoint(
 double HelicityKinematics::FormFactor(double sqrtS, double ma, double mb,
                                       double spin, double mesonRadius,
                                       formFactorType type) {
+  if (type == formFactorType::noFormFactor) {
+    return 1.0;
+  }
   if (type == formFactorType::BlattWeisskopf && spin == 0) {
     return 1.0;
   }
@@ -412,14 +415,14 @@ double HelicityKinematics::FormFactor(double sqrtS, double ma, double mb,
                                       std::complex<double> qValue,
                                       formFactorType type) {
   if (mesonRadius == 0)
-    return 1; // disable form factors
+    return 1.0; // disable form factors
   if (type == formFactorType::noFormFactor)
-    return 1; // disable form factors
+    return 1.0; // disable form factors
   if (type == formFactorType::BlattWeisskopf && spin == 0) {
     return 1.0;
   }
 
-  // From factor for a0(980) used by Crystal Barrel Phys.Rev.D78-074023
+  // Form factor for a0(980) used by Crystal Barrel (Phys.Rev.D78-074023)
   if (type == formFactorType::CrystalBarrel) {
     if (spin == 0) {
       double qSq = std::norm(qValue);
