@@ -55,7 +55,7 @@ void PhysConst::readTree(boost::property_tree::ptree pt) {
     for (auto const &v : particleTree.get()) {
       _partList.push_back(ParticleProperties(v.second));
       auto last = _partList.back();
-      LOG(debug) << "PhysConst::readTree() | Adding particle " << last.GetName()
+      LOG(info) << "PhysConst::readTree() | Adding particle " << last.GetName()
                  << " (id=" << last.GetId() << ") "
                  << " J(PC)=" << last.GetSpin() << "(" << last.GetParity()
                  << last.GetCparity() << ") "
@@ -69,7 +69,7 @@ void PhysConst::readTree(boost::property_tree::ptree pt) {
     for (auto const &v : constTree.get()) {
       _constList.push_back(Constant(v.second));
       auto last = _constList.back();
-      LOG(debug) << "PhysConst::readTree() | Adding constant " << last.GetName()
+      LOG(info) << "PhysConst::readTree() | Adding constant " << last.GetName()
                  << " value=" << last.GetValue();
     }
   }

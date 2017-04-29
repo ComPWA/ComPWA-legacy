@@ -186,7 +186,7 @@ RelativisticBreitWigner::GetTree(ParameterList &sample,
   tr->createLeaf("MassA", _daughterMasses.first, "RelBreitWigner");             // ma
   tr->createLeaf("MassB", _daughterMasses.second, "RelBreitWigner");             // mb
   tr->createLeaf("Data_mSq[" + std::to_string(_dataPos) + "]",
-                 sample.GetMultiDouble(_dataPos), "RelBreitWigner");
+                 sample.GetMultiDouble(_dataPos*3), "RelBreitWigner");
 
   // Normalization
   tr->createNode("Normalization",
@@ -213,8 +213,8 @@ RelativisticBreitWigner::GetTree(ParameterList &sample,
   tr->createLeaf("FormFactorType", _ffType, "NormRelBreitWigner");   
   tr->createLeaf("MassA", _daughterMasses.first, "NormRelBreitWigner");
   tr->createLeaf("MassB", _daughterMasses.second, "NormRelBreitWigner");
-  tr->createLeaf("PhspSample_mSq[" + std::to_string(_dataPos) + "]",
-                 toySample.GetMultiDouble(_dataPos),
+  tr->createLeaf("PhspSample_mSq[" + std::to_string(_dataPos*3) + "]",
+                 toySample.GetMultiDouble(_dataPos*3),
                  "NormRelBreitWigner"); // mc
 
   return tr;

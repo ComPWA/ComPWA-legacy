@@ -82,6 +82,7 @@ PartialDecay::Factory(const boost::property_tree::ptree &pt) {
                              decayType + "!");
   }
 
+  dynObj->SetSubSystem(subSys);
   obj->SetDynamicalFunction(dynObj);
 
   // make sure dynamical function is created and set first

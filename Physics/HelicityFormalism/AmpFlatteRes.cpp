@@ -268,7 +268,7 @@ std::shared_ptr<FunctionTree> AmpFlatteRes::GetTree(ParameterList &sample,
   tr->createLeaf("MassA", _daughterMasses.first, "Flatte");
   tr->createLeaf("MassB", _daughterMasses.second, "Flatte");
   tr->createLeaf("Data_mSq[" + std::to_string(_dataPos) + "]",
-                 sample.GetMultiDouble(_dataPos), "Flatte");
+                 sample.GetMultiDouble(_dataPos*3), "Flatte");
 
   // Normalization
   tr->createNode("Normalization",
@@ -303,8 +303,8 @@ std::shared_ptr<FunctionTree> AmpFlatteRes::GetTree(ParameterList &sample,
   //_daughterMasses actually not used here. But we put it in as a cross check.
   tr->createLeaf("MassA", _daughterMasses.first, "NormFlatte");
   tr->createLeaf("MassB", _daughterMasses.second, "NormFlatte");
-  tr->createLeaf("PhspSample_mSq[" + std::to_string(_dataPos) + "]",
-                 toySample.GetMultiDouble(_dataPos), "NormFlatte");
+  tr->createLeaf("PhspSample_mSq[" + std::to_string(_dataPos*3) + "]",
+                 toySample.GetMultiDouble(_dataPos*3), "NormFlatte");
 
   return tr;
 }

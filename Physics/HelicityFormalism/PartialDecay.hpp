@@ -120,10 +120,16 @@ public:
     _subSystem = sys;
     _dataPos = dynamic_cast<HelicityKinematics *>(Kinematics::Instance())
                    ->GetDataID(_subSystem);
-    auto invMassLimit =
-        dynamic_cast<HelicityKinematics *>(Kinematics::Instance())
-            ->GetInvMassBounds(_subSystem);
-    _dynamic->SetLimits(invMassLimit);
+    if (_dynamic) {
+      auto invMassLimit =
+          dynamic_cast<HelicityKinematics *>(Kinematics::Instance())
+              ->GetInvMassBounds(_subSystem);
+      _dynamic->SetLimits(invMassLimit);
+      _dynamic->SetDataPosition(_dataPos);
+    } else {
+      LOG(error) << "PartialDecay::SetSubSystem() | Dynamic function not set "
+                    "yet so we can not set limits and data position.";
+    }
   }
 
   //! Get position of variables within dataPoint
