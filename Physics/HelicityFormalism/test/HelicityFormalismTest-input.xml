@@ -1,6 +1,6 @@
 <ParticleList>
 	<Particle Name='gamma'>
-		<Id>22</Id>
+		<Pid>22</Pid>
 		<Mass Name='mass_gamma'>
 			<Value>0.</Value>
 			<Fix>true</Fix>
@@ -14,7 +14,7 @@
 		<IsoSpinZ>0</IsoSpinZ>
 	</Particle>
 	<Particle Name='pi0'>
-		<Id>210</Id>
+		<Pid>210</Pid>
 		<Mass Name='mass_pi0'>
 			<Value>0.1349766</Value>
 			<Fix>true</Fix>
@@ -27,7 +27,7 @@
 		<IsoSpin>1</IsoSpin>
 	</Particle>
 	<Particle Name='jpsi'>
-		<Id>443</Id>
+		<Pid>443</Pid>
 		<Mass Name='Mass_jpsi'>
 			<Value>3.0969</Value>
 			<Error>0.0</Error>
@@ -54,7 +54,7 @@
 		</DecayInfo>
 	</Particle>
 	<Particle Name='omega'>
-		<Id>223</Id>
+		<Pid>223</Pid>
 		<Mass Name='Mass_omega'>
 			<Value>0.78265</Value>
 			<Fix>true</Fix>
@@ -88,7 +88,7 @@
 		</DecayInfo>
 	</Particle>
 	<Particle Name='f0_980'>
-		<Id>9010221</Id>
+		<Pid>9010221</Pid>
 		<Mass Name='Mass_f0_980'>
 			<Value>0.99</Value>
 			<Fix>true</Fix>
@@ -126,12 +126,12 @@
 <HelicityKinematics>
 	<PhspVolume>0.123</PhspVolume>
 	<InitialState>
-		<Particle Name='jpsi' />
+		<Particle Name='jpsi' Id='0'/>
 	</InitialState>
 	<FinalState>
-		<Particle Name='pi0' />
-		<Particle Name='gamma' />
-		<Particle Name='pi0' />
+		<Particle Name='pi0' Id='0'/>
+		<Particle Name='gamma' Id='1'/>
+		<Particle Name='pi0' Id='2'/>
 	</FinalState>
 </HelicityKinematics>
 

@@ -43,7 +43,7 @@ public:
   virtual void SetPhspVolume( double phsp );
   
   //! Get number of variables
-  virtual unsigned int GetNVars() const { return _varNames.size(); }
+  virtual std::size_t GetNVars() const { return _varNames.size(); }
 
   //! Get final state
   virtual std::vector<pid> GetFinalState() { return _finalState; }

@@ -245,6 +245,7 @@ std::shared_ptr<FunctionTree> AmpFlatteRes::GetTree(ParameterList &sample,
 
   int sampleSize = sample.GetMultiDouble(0)->GetNValues();
   int toySampleSize = toySample.GetMultiDouble(0)->GetNValues();
+  double phspVol = Kinematics::Instance()->GetPhspVolume();
 
   std::shared_ptr<FunctionTree> tr(new FunctionTree());
   tr->createHead("DynamicalFunction",
@@ -268,43 +269,46 @@ std::shared_ptr<FunctionTree> AmpFlatteRes::GetTree(ParameterList &sample,
   tr->createLeaf("MassA", _daughterMasses.first, "Flatte");
   tr->createLeaf("MassB", _daughterMasses.second, "Flatte");
   tr->createLeaf("Data_mSq[" + std::to_string(_dataPos) + "]",
-                 sample.GetMultiDouble(_dataPos*3), "Flatte");
+                 sample.GetMultiDouble(_dataPos), "Flatte");
 
   // Normalization
   tr->createNode("Normalization",
                  std::shared_ptr<Strategy>(new Inverse(ParType::DOUBLE)),
                  "DynamicalFunction"); // 1/normLH
+  tr->createNode("SqrtIntegral",
+                 std::shared_ptr<Strategy>(new SquareRoot(ParType::DOUBLE)),
+                 "Normalization");
   tr->createNode("Integral",
                  std::shared_ptr<Strategy>(new MultAll(ParType::DOUBLE)),
-                 "Normalization");
+                 "SqrtIntegral");
+  tr->createLeaf("PhspVolume", phspVol, "Integral");
+  tr->createLeaf("InverseSampleSize", 1 / ((double)toySampleSize), "Integral");
   tr->createNode("Sum", std::shared_ptr<Strategy>(new AddAll(ParType::DOUBLE)),
                  "Integral");
-  tr->createLeaf("Range", _limits.second - _limits.first, "Integral");
-  tr->createLeaf("InvNmc", 1 / ((double)toySampleSize), "Integral");
-  tr->createNode("IntensPhsp",
+  tr->createNode("Intensity",
                  std::shared_ptr<Strategy>(new AbsSquare(ParType::MDOUBLE)),
                  "Sum", toySampleSize,
                  false); //|T_{ev}|^2
-  tr->createNode("NormFlatte",
+  tr->createNode("NormalizationFlatte",
                  std::shared_ptr<Strategy>(new FlatteStrategy("")),
-                 "IntensPhsp", toySampleSize);
-  tr->createLeaf("Mass", _mass, "NormFlatte");
+                 "Intensity", toySampleSize);
+  tr->createLeaf("Mass", _mass, "NormalizationFlatte");
   for (int i = 0; i < _g.size(); i++) {
     tr->createLeaf("g_" + std::to_string(i) + "_massA", _g.at(i).GetMassA(),
-                   "NormFlatte");
+                   "NormalizationFlatte");
     tr->createLeaf("g_" + std::to_string(i) + "_massB", _g.at(i).GetMassB(),
-                   "NormFlatte");
+                   "NormalizationFlatte");
     tr->createLeaf("g_" + std::to_string(i), _g.at(i).GetValueParameter(),
-                   "NormFlatte");
+                   "NormalizationFlatte");
   }
-  tr->createLeaf("Spin", (double)_spin, "NormFlatte");
-  tr->createLeaf("MesonRadius", _mesonRadius, "NormFlatte");
-  tr->createLeaf("FormFactorType", _ffType, "NormFlatte");
+  tr->createLeaf("Spin", (double)_spin, "NormalizationFlatte");
+  tr->createLeaf("MesonRadius", _mesonRadius, "NormalizationFlatte");
+  tr->createLeaf("FormFactorType", _ffType, "NormalizationFlatte");
   //_daughterMasses actually not used here. But we put it in as a cross check.
-  tr->createLeaf("MassA", _daughterMasses.first, "NormFlatte");
-  tr->createLeaf("MassB", _daughterMasses.second, "NormFlatte");
-  tr->createLeaf("PhspSample_mSq[" + std::to_string(_dataPos*3) + "]",
-                 toySample.GetMultiDouble(_dataPos*3), "NormFlatte");
+  tr->createLeaf("MassA", _daughterMasses.first, "NormalizationFlatte");
+  tr->createLeaf("MassB", _daughterMasses.second, "NormalizationFlatte");
+  tr->createLeaf("PhspSample_mSq[" + std::to_string(_dataPos) + "]",
+                 toySample.GetMultiDouble(_dataPos), "NormalizationFlatte");
 
   return tr;
 }

@@ -85,7 +85,7 @@ public:
   //! Set binning vector
   void SetBins(std::vector<std::pair<double, double>> b) { bins = b; }
   //! Get number of bins
-  int GetNbins() { return bins.size(); }
+  std::size_t GetNbins() { return bins.size(); }
   //! Get systematics vector
   std::vector<double> GetSystematics() { return sys; }
   //! Get systematics error vector

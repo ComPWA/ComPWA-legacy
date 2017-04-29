@@ -60,7 +60,7 @@ public:
       : Properties(name, id){};
 
   ParticleProperties(boost::property_tree::ptree pt)
-      : Properties(pt.get<std::string>("<xmlattr>.Name"), pt.get<pid>("Id")) {
+      : Properties(pt.get<std::string>("<xmlattr>.Name"), pt.get<pid>("Pid")) {
 
     SetMassPar(DoubleParameterFactory(pt.get_child("Mass")));
     // Parameters optional. Shall we require them?

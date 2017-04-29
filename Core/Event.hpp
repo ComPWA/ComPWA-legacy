@@ -57,7 +57,7 @@ public:
   virtual double inline getEfficiency() const { return fEff; }
   virtual void inline setEfficiency(double eff) { fEff = eff; }
 
-  virtual const inline unsigned int getNParticles() const {
+  virtual const inline unsigned long getNParticles() const {
     return fParticles.size();
   }
   virtual const Particle &getParticle(const unsigned int id) const;

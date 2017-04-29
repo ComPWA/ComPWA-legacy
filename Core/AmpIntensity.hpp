@@ -204,7 +204,7 @@ public:
 
   virtual void to_str() const {};
 
-  virtual const double GetNormalization() { return 1 / Integral(); }
+  virtual double GetNormalization() const { return 1 / Integral(); }
 
   virtual double GetMaximum(std::shared_ptr<Generator> gen) const {
     double mass = params.GetDoubleParameter(0)->GetValue();
@@ -268,7 +268,7 @@ public:
 
   virtual double GetMaximum(std::shared_ptr<Generator> gen) const { return 1; }
 
-  virtual const double GetNormalization() {
+  virtual double GetNormalization() const {
     LOG(info) << "UnitAmp::normalization() | "
                  "normalization not implemented!";
     return 1;
@@ -291,7 +291,8 @@ public:
   //! Getter function for basic amp tree
   virtual std::shared_ptr<FunctionTree> GetTree(ParameterList &sample,
                                                 ParameterList &toySample,
-                                                ParameterList &sample3) {
+                                                ParameterList &sample3,
+                                                std::string suffix = "") {
     return setupBasicTree(sample, toySample, "");
   }
 

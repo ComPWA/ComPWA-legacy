@@ -261,7 +261,7 @@ public:
   std::string print(unsigned int lv = -1) { return head_->print(lv); };
 
   //! Get number of nodes
-  int GetNumberOfNodes() { return nodes_.size(); }
+  std::size_t GetNumberOfNodes() { return nodes_.size(); }
 
 protected:
   /** List of child tree's

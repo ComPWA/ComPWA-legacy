@@ -56,7 +56,7 @@ public:
   virtual void pushEvent(const Event &evt);
 
   //! Get number of events in data sample
-  virtual const unsigned int getNEvents() const { return fEvents.size(); }
+  virtual const std::size_t getNEvents() const { return fEvents.size(); }
 
   /**! Get event
    *
@@ -146,7 +146,7 @@ public:
   };
 
   //! Obsolete?
-  virtual const unsigned int getNBins() const { return fBins.size(); }
+  virtual const std::size_t getNBins() const { return fBins.size(); }
 
   //! Obsolete?
   virtual const int getBin(const int, double &, double &);

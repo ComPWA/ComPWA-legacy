@@ -144,7 +144,7 @@ protected:
   virtual std::string make_str() {
     std::stringstream oss;
     oss << name_;
-    unsigned int max = val_.size();
+    size_t max = val_.size();
     if (max > 5)
       max = 5; // display only 5 variables
     oss << "\t Val = ";
@@ -165,7 +165,7 @@ protected:
    */
   virtual std::string make_val_str() {
     std::stringstream ovs;
-    unsigned int max = val_.size();
+    size_t max = val_.size();
     if (max > 0) {
       if (max > 3)
         max = 3; // display only 10 variables
@@ -281,7 +281,7 @@ protected:
   virtual std::string make_str() {
     std::stringstream oss;
     oss << name_;
-    unsigned int max = val_.size();
+    size_t max = val_.size();
     if (max > 5)
       max = 5; // display only 10 variables
     oss << "\t Val = ";
@@ -302,7 +302,7 @@ protected:
    */
   virtual std::string make_val_str() {
     std::stringstream ovs;
-    unsigned int max = val_.size();
+    size_t max = val_.size();
     if (max > 0) {
       if (max > 5)
         max = 5; // display only 5 variables
@@ -403,7 +403,7 @@ protected:
   virtual std::string make_str() {
     std::stringstream oss;
     oss << name_;
-    unsigned int max = val_.size();
+    size_t max = val_.size();
     if (max > 5)
       max = 5; // display only 10 variables
     oss << "\t Val = ";
@@ -424,7 +424,7 @@ protected:
    */
   virtual std::string make_val_str() {
     std::stringstream ovs;
-    unsigned int max = val_.size();
+    size_t max = val_.size();
     if (max > 5)
       max = 5; // display only 5 variables
     for (unsigned int i = 0; i < max - 1; i++)
@@ -777,8 +777,8 @@ public:
    * \param inName internal string identifier of this parameter
    */
   DoubleParameter(std::string inName = "")
-      : AbsParameter(inName, ParType::DOUBLE), fixed_(0), val_(0), min_(0),
-        max_(0), bounds_(false), errorType(ErrorType::NOTDEF), errorLow(0.),
+      : AbsParameter(inName, ParType::DOUBLE), bounds_(false), fixed_(0),
+        val_(0), min_(0), max_(0), errorType(ErrorType::NOTDEF), errorLow(0.),
         errorHigh(0.) {}
 
   //! Standard constructor with a value
@@ -789,9 +789,9 @@ public:
    * \param value input value of the parameter
    */
   DoubleParameter(std::string inName, const double value)
-      : AbsParameter(inName, ParType::DOUBLE), fixed_(0), val_(value), min_(0),
-        max_(0), bounds_(false), errorType(ErrorType::NOTDEF), errorLow(0.),
-        errorHigh(0.) {}
+      : AbsParameter(inName, ParType::DOUBLE), bounds_(false), fixed_(0),
+        val_(value), min_(0), max_(0), errorType(ErrorType::NOTDEF),
+        errorLow(0.), errorHigh(0.) {}
 
   //! Standard constructor with value and error
   /*!
@@ -802,9 +802,9 @@ public:
    * \param error input error of the parameter
    */
   DoubleParameter(std::string inName, const double value, const double error)
-      : AbsParameter(inName, ParType::DOUBLE), fixed_(0), val_(value), min_(0),
-        max_(0), bounds_(false), errorType(ErrorType::NOTDEF), errorLow(0.),
-        errorHigh(0.) {
+      : AbsParameter(inName, ParType::DOUBLE), bounds_(false), fixed_(0),
+        val_(value), min_(0), max_(0), errorType(ErrorType::NOTDEF),
+        errorLow(0.), errorHigh(0.) {
     SetError(error);
   }
 
@@ -821,9 +821,9 @@ public:
    */
   DoubleParameter(std::string inName, const double value, const double min,
                   const double max)
-      : AbsParameter(inName, ParType::DOUBLE), fixed_(0), val_(value), min_(0),
-        max_(0), bounds_(false), errorType(ErrorType::NOTDEF), errorLow(0.),
-        errorHigh(0.) {
+      : AbsParameter(inName, ParType::DOUBLE), bounds_(false), fixed_(0),
+        val_(value), min_(0), max_(0), errorType(ErrorType::NOTDEF),
+        errorLow(0.), errorHigh(0.) {
     SetMinMax(min, max);
   }
 
@@ -841,9 +841,9 @@ public:
    */
   DoubleParameter(std::string inName, const double value, const double min,
                   const double max, const double error)
-      : AbsParameter(inName, ParType::DOUBLE), fixed_(0), val_(value), min_(0),
-        max_(0), bounds_(false), errorType(ErrorType::NOTDEF), errorLow(0.),
-        errorHigh(0.) {
+      : AbsParameter(inName, ParType::DOUBLE), bounds_(false), fixed_(0),
+        val_(value), min_(0), max_(0), errorType(ErrorType::NOTDEF),
+        errorLow(0.), errorHigh(0.) {
     SetError(error);
     SetMinMax(min, max);
   }
@@ -1241,7 +1241,8 @@ BOOST_SERIALIZATION_SHARED_PTR(ComPWA::DoubleParameter)
  @param pt Input property tree
  @return Parameter
  */
-static DoubleParameter DoubleParameterFactory(const boost::property_tree::ptree pt) {
+static DoubleParameter
+DoubleParameterFactory(const boost::property_tree::ptree pt) {
   DoubleParameter obj;
 
   // Require that name and value are provided

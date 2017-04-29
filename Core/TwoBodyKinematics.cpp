@@ -35,7 +35,6 @@ TwoBodyKinematics::TwoBodyKinematics(int idMother, std::vector<int> finalState,
 void TwoBodyKinematics::init() {}
 
 bool TwoBodyKinematics::IsWithinPhsp(const dataPoint &point) const {
-  return 1;
   if (point.GetValue(0) >= mass_sq_min && point.GetValue(0) <= mass_sq_max)
     return 1;
   return 0;

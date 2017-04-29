@@ -22,10 +22,13 @@ namespace HelicityFormalism {
 class NonResonant : public AbstractDynamicalFunction {
 
 public:
-  NonResonant();
-  virtual ~NonResonant();
+  NonResonant() {};
+  virtual ~NonResonant() {};
 
   virtual std::complex<double> Evaluate(const dataPoint &p) const {
+    return EvaluateNoNorm(0.0) * GetNormalization();
+  }
+  virtual std::complex<double> EvaluateNoNorm(double mSq) const {
     return std::complex<double>(1.0, 0.0);
   }
 

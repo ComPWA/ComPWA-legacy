@@ -27,7 +27,6 @@ double AbstractDynamicalFunction::Integral() const {
   }
 
   double sumIntens = 0;
-  double maxVal = 0;
   for (auto i : *_phspSample.get())
     sumIntens += std::norm(EvaluateNoNorm(i.GetValue(_dataPos)));
   

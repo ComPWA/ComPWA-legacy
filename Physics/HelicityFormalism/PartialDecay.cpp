@@ -6,12 +6,12 @@
 //
 //
 
-//#include <stdio.h>
 #include <sstream>
 
 #include "Physics/HelicityFormalism/PartialDecay.hpp"
 #include "Physics/HelicityFormalism/RelativisticBreitWigner.hpp"
 #include "Physics/HelicityFormalism/AmpFlatteRes.hpp"
+#include "Physics/HelicityFormalism/NonResonant.hpp"
 #include "Physics/HelicityFormalism/HelicityKinematics.hpp"
 
 namespace ComPWA {
@@ -49,50 +49,50 @@ PartialDecay::Factory(const boost::property_tree::ptree &pt) {
     recoilState = stringToVectInt(recoil.get());
 
   auto decayProducts = pt.get_child("DecayProducts");
-  if (decayProducts.size() != 2)
-    throw std::runtime_error(
-        "PartialDecay::Factory() | Number of decay productes != 2.");
+  std::vector<std::vector<int>> finalStates;
+  for (auto i : decayProducts)
+    finalStates.push_back(
+        stringToVectInt(i.second.get<std::string>("<xmlattr>.FinalState")));
 
-  auto itr = decayProducts.begin();
-  auto finalStateA =
-      stringToVectInt(itr->second.get<std::string>("<xmlattr>.FinalState"));
-  auto finalStateB =
-      stringToVectInt((++itr)->second.get<std::string>("<xmlattr>.FinalState"));
+  if (finalStates.size() == 2) {
+    SubSystem subSys(recoilState, finalStates.at(0), finalStates.at(1));
 
-  SubSystem subSys(recoilState, finalStateA, finalStateB);
+    // Create WignerD object
+    obj->SetWignerD(
+        ComPWA::Physics::HelicityFormalism::AmpWignerD::Factory(pt));
 
-  // Create WignerD object
-  obj->SetWignerD(ComPWA::Physics::HelicityFormalism::AmpWignerD::Factory(pt));
+    auto dynObj = std::shared_ptr<AbstractDynamicalFunction>();
+    std::string name = pt.get<std::string>("DecayParticle.<xmlattr>.Name");
+    auto partProp = PhysConst::Instance()->FindParticle(name);
+    std::string decayType = partProp.GetDecayType();
 
-  auto dynObj = std::shared_ptr<AbstractDynamicalFunction>();
-  std::string name = pt.get<std::string>("DecayParticle.<xmlattr>.Name");
-  auto partProp = PhysConst::Instance()->FindParticle(name);
-  std::string decayType = partProp.GetDecayType();
+    if (decayType == "stable") {
+      throw std::runtime_error("PartialDecay::Factory() | Stable particle is "
+                               "given as mother particle of a decay. Makes no "
+                               "sense!");
+    } else if (decayType == "relativisticBreitWigner") {
+      dynObj = RelativisticBreitWigner::Factory(pt);
+    } else if (decayType == "flatte") {
+      dynObj = AmpFlatteRes::Factory(pt);
+    } else {
+      throw std::runtime_error("PartialDecay::Factory() | Unknown decay type " +
+                               decayType + "!");
+    }
+    dynObj->SetSubSystem(subSys);
+    obj->SetDynamicalFunction(dynObj);
 
-  if (decayType == "stable") {
-    throw std::runtime_error("PartialDecay::Factory() | Stable particle is "
-                             "given as mother particle of a decay. Makes no "
-                             "sense!");
-  } else if (decayType == "relativisticBreitWigner") {
-    dynObj = RelativisticBreitWigner::Factory(pt);
-  } else if (decayType == "flatte") {
-    dynObj = AmpFlatteRes::Factory(pt);
+    // make sure dynamical function is created and set first
+    obj->SetSubSystem(subSys);
   } else {
-    throw std::runtime_error("PartialDecay::Factory() | Unknown decay type " +
-                             decayType + "!");
+    // We assume the we have a multi-body decay and assume that the decay
+    // proceeds via constant (non-resonant) dynamics
+    obj->SetDynamicalFunction(std::shared_ptr<AbstractDynamicalFunction>(new NonResonant));
   }
-
-  dynObj->SetSubSystem(subSys);
-  obj->SetDynamicalFunction(dynObj);
-
-  // make sure dynamical function is created and set first
-  obj->SetSubSystem(subSys);
 
   return std::static_pointer_cast<Resonance>(obj);
 }
 
-boost::property_tree::ptree
-PartialDecay::Save(std::shared_ptr<Resonance> res) {
+boost::property_tree::ptree PartialDecay::Save(std::shared_ptr<Resonance> res) {
 
   auto obj = std::static_pointer_cast<PartialDecay>(res);
   boost::property_tree::ptree pt;
@@ -116,11 +116,11 @@ PartialDecay::Save(std::shared_ptr<Resonance> res) {
     pt.put("RecoilSystem.<xmlattr>.FinalState", recoilStr);
   }
 
-  boost::property_tree::ptree daughterTr,chTrA,chTrB;
+  boost::property_tree::ptree daughterTr, chTrA, chTrB;
 
   auto names = obj->GetDynamicalFunction()->GetDecayNames();
-  
-  //Information daugher final state A
+
+  // Information daugher final state A
   auto finalA = obj->GetSubSystem().GetFinalStateA();
   std::string strA;
   if (finalA.size()) {
@@ -134,10 +134,10 @@ PartialDecay::Save(std::shared_ptr<Resonance> res) {
   chTrA.put("<xmlattr>.Name", names.first);
   chTrA.put("<xmlattr>.FinalState", strA);
   chTrA.put("<xmlattr>.Helicity",
-                 std::to_string((int)obj->GetWignerD()->GetHelicities().first));
+            std::to_string((int)obj->GetWignerD()->GetHelicities().first));
   daughterTr.add_child("Particle", chTrA);
 
-  //Information daugher final state B
+  // Information daugher final state B
   auto finalB = obj->GetSubSystem().GetFinalStateB();
   std::string strB;
   if (finalB.size()) {
@@ -151,7 +151,7 @@ PartialDecay::Save(std::shared_ptr<Resonance> res) {
   chTrB.put("<xmlattr>.Name", names.second);
   chTrB.put("<xmlattr>.FinalState", strB);
   chTrB.put("<xmlattr>.Helicity",
-                 std::to_string((int)obj->GetWignerD()->GetHelicities().second));
+            std::to_string((int)obj->GetWignerD()->GetHelicities().second));
   daughterTr.add_child("Particle", chTrB);
 
   pt.add_child("DecayProducts", daughterTr);
@@ -180,13 +180,13 @@ std::shared_ptr<FunctionTree> PartialDecay::GetTree(ParameterList &sample,
 
   return tr;
 }
-  
-  void PartialDecay::GetParameters(ParameterList& list){
-    Resonance::GetParameters(list);
-//    _angD->GetParameters(list);
-    _dynamic->GetParameters(list);
-  }
-  
+
+void PartialDecay::GetParameters(ParameterList &list) {
+  Resonance::GetParameters(list);
+  //    _angD->GetParameters(list);
+  _dynamic->GetParameters(list);
+}
+
 } /* namespace HelicityFormalism */
 } /* namespace Physics */
 } /* namespace ComPWA */

@@ -57,17 +57,19 @@ HelicityKinematics::HelicityKinematics(std::vector<pid> initialState,
 HelicityKinematics::HelicityKinematics(boost::property_tree::ptree pt) {
 
   auto initialS = pt.get_child("InitialState");
+  _initialState = std::vector<int>(initialS.size());
   for (auto i : initialS) {
     std::string name = i.second.get<std::string>("<xmlattr>.Name");
     auto partP = PhysConst::Instance()->FindParticle(name);
-    _initialState.push_back(partP.GetId());
+    _initialState.at(i.second.get<int>("<xmlattr>.Id")) = partP.GetId();
   }
 
   auto finalS = pt.get_child("FinalState");
+  _finalState = std::vector<int>(finalS.size());
   for (auto i : finalS) {
     std::string name = i.second.get<std::string>("<xmlattr>.Name");
     auto partP = PhysConst::Instance()->FindParticle(name);
-    _finalState.push_back(partP.GetId());
+    _finalState.at(i.second.get<int>("<xmlattr>.Id")) = partP.GetId();
   }
 
   auto phspVal = pt.get_optional<double>("PhspVolume");

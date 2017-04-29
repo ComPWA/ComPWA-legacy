@@ -44,7 +44,7 @@ public:
   std::complex<double> Evaluate(const dataPoint &point) const {
     std::complex<double> result =
         std::polar(_magnitude->GetValue(), _phase->GetValue());
-    result *= _angD->Evaluate(point, (_dataPos * 3) + 1, (_dataPos * 3) + 2);
+    result *= _angD->Evaluate(point, _dataPos + 1, _dataPos + 2);
     result *= _dynamic->Evaluate(point);
 
     return result;
@@ -118,7 +118,7 @@ public:
   //! Set position of variables within dataPoint
   void SetSubSystem(SubSystem sys) {
     _subSystem = sys;
-    _dataPos = dynamic_cast<HelicityKinematics *>(Kinematics::Instance())
+    _dataPos = 3*dynamic_cast<HelicityKinematics *>(Kinematics::Instance())
                    ->GetDataID(_subSystem);
     if (_dynamic) {
       auto invMassLimit =

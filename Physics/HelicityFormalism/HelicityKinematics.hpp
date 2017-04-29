@@ -164,7 +164,7 @@ public:
   virtual double GetMotherMass() const { return _M; }
 
   //! Get number of particles
-  virtual unsigned int GetNumberOfParticles() const {
+  virtual std::size_t GetNumberOfParticles() const {
     return _finalState.size();
   }
 
@@ -194,7 +194,7 @@ public:
   }
 
   //! Get number of variables that are added to dataPoint
-  virtual unsigned int GetNVars() const { return _listSubSystem.size() * 3; }
+  virtual size_t GetNVars() const { return _listSubSystem.size() * 3; }
 
   /*! Get phase space bounds for the invariant mass of SubSystem sys.
    */

@@ -41,7 +41,7 @@ public:
                                double varB) const {
     return 0;
   };
-  virtual unsigned int GetNVars() const { return 1; }
+  virtual std::size_t GetNVars() const { return 1; }
 
   //! get mass of particles
   virtual double GetMass(unsigned int num) const;

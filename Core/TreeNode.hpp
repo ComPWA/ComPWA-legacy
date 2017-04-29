@@ -85,7 +85,7 @@ public:
   };
 
   //! Get dimension
-  const unsigned int getDim() { return _value.size(); };
+  const std::size_t getDim() { return _value.size(); };
 
   //! Get node name
   const std::string &getName() { return _name; };

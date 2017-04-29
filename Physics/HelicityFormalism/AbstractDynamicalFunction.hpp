@@ -137,7 +137,7 @@ public:
 
   //! Set position of variables within dataPoint
   void SetSubSystem(SubSystem sys) {
-    _dataPos = dynamic_cast<HelicityKinematics *>(Kinematics::Instance())
+    _dataPos = 3*dynamic_cast<HelicityKinematics*>(Kinematics::Instance())
                    ->GetDataID(sys);
   }
   

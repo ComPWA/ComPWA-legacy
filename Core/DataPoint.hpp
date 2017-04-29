@@ -48,7 +48,7 @@ public:
 
   void Reset(unsigned int size);
 
-  unsigned int Size() const { return var.size(); }
+  std::size_t Size() const { return var.size(); }
 
   //! Set value of coordinate num
   void SetValue(unsigned int pos, double val);
