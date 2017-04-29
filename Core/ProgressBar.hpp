@@ -17,7 +17,7 @@ class progressBar {
 public:
   progressBar() : hasStarted(0){};
   ~progressBar() { std::cout << std::endl; };
-  progressBar(int size, int update = 1);
+  progressBar(std::size_t size, int update = 1);
   void nextEvent();
 
 protected:
@@ -26,7 +26,7 @@ protected:
   time_t endTime();
   void update();
 
-  int numEvents;
+  std::size_t numEvents;
   int updateInterval;
   bool hasStarted;
   time_t startTime;

@@ -41,7 +41,7 @@ public:
 class UnitEfficiency : public Efficiency {
 private:
 public:
-  UnitEfficiency() { LOG(info) << "Efficiency: creating UnitEfficiency!"; };
+  UnitEfficiency() { LOG(debug) << "Efficiency: creating UnitEfficiency!"; };
   ~UnitEfficiency(){};
   virtual double Evaluate(const dataPoint &point) const { return 1; };
 };

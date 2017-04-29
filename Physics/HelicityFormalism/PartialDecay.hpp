@@ -43,7 +43,7 @@ public:
   /**! Evaluate decay */
   std::complex<double> Evaluate(const dataPoint &point) const {
     std::complex<double> result =
-        std::polar(_magnitude->GetValue(), _phase->GetValue());
+        std::polar(GetMagnitude(),GetPhase());
     result *= _angD->Evaluate(point, _dataPos + 1, _dataPos + 2);
     result *= _dynamic->Evaluate(point);
 

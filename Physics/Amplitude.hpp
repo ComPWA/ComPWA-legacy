@@ -112,7 +112,7 @@ public:
    
    @return Magnitude parameter
    */
-  virtual double GetMagnitudeValue() const { return _magnitude->GetValue(); }
+  virtual double GetMagnitudeValue() const { return std::fabs(_magnitude->GetValue()); }
   
   /**
    Set Magnitude parameter

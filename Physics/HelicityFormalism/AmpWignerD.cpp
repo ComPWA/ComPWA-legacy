@@ -27,6 +27,8 @@ AmpWignerD::AmpWignerD(ComPWA::Spin spin, unsigned int mu, unsigned int muPrime)
     : _spin(spin), _mu(mu), _helicities(muPrime, 0) {}
 
 double AmpWignerD::Evaluate(const dataPoint &point, int pos1, int pos2) const {
+  if ((double)_spin == 0)
+    return 1.0;
   return dynamicalFunction(_spin, _mu, (_helicities.first - _helicities.second),
                            point.GetValue(pos1));
 }

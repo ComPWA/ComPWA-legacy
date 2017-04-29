@@ -29,7 +29,7 @@ public:
   /**! Evaluate decay */
   virtual std::complex<double> Evaluate(const dataPoint &point) const {
     std::complex<double> result =
-        std::polar(_magnitude->GetValue(), _phase->GetValue());
+    std::polar(GetMagnitudeValue(), GetPhaseValue());
     for (auto i : _partDecays)
       result *= i->Evaluate(point);
     return result;
@@ -75,64 +75,6 @@ public:
   GetDecays() {
     return _partDecays;
   }
-  
-  /**
-   Get Magnitude parameter
-
-   @return Magnitude parameter
-   */
-  std::shared_ptr<ComPWA::DoubleParameter> GetMagnitude() { return _magnitude; }
-
-  /**
-   Get Magnitude parameter
-
-   @return Magnitude parameter
-   */
-  double GetMagnitudeValue() const { return _magnitude->GetValue(); }
-
-  /**
-   Set Magnitude parameter
-
-   @param par Magnitude parameter
-   */
-  void SetMagnitude(std::shared_ptr<ComPWA::DoubleParameter> par) {
-    _magnitude = par;
-  }
-
-  /**
-   Set Magnitude parameter
-
-   @param par Magnitude parameter
-   */
-  void SetMagnitude(double par) { _magnitude->SetValue(par); }
-
-  /**
-   Get phase parameter
-
-   @return Phase parameter
-   */
-  std::shared_ptr<ComPWA::DoubleParameter> GetPhase() { return _phase; }
-
-  /**
-   Get phase parameter
-
-   @return Phase parameter
-   */
-  double GetPhaseValue() const { return _phase->GetValue(); }
-
-  /**
-   Set phase parameter
-
-   @param par Phase parameter
-   */
-  void SetPhase(std::shared_ptr<ComPWA::DoubleParameter> par) { _phase = par; }
-
-  /**
-   Set phase parameter
-
-   @param par Phase parameter
-   */
-  void SetPhase(double par) { _phase->SetValue(par); }
 
   //! Function to create a full copy of the amplitude
   virtual Amplitude *Clone(std::string newName = "") const {

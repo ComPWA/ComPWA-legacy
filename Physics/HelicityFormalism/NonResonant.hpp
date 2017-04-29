@@ -39,6 +39,8 @@ public:
                                         ParameterList &toySample,
                                         std::string suffix);
 
+  virtual void GetParameters(ParameterList &list) {};
+  
 protected:
   virtual double Integral() const {
     return Kinematics::Instance()->GetPhspVolume();

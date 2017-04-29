@@ -86,7 +86,9 @@ PartialDecay::Factory(const boost::property_tree::ptree &pt) {
   } else {
     // We assume the we have a multi-body decay and assume that the decay
     // proceeds via constant (non-resonant) dynamics
-    obj->SetDynamicalFunction(std::shared_ptr<AbstractDynamicalFunction>(new NonResonant));
+    obj->SetDynamicalFunction(
+        std::shared_ptr<AbstractDynamicalFunction>(new NonResonant));
+    obj->SetWignerD(std::shared_ptr<AmpWignerD>(new AmpWignerD()));
   }
 
   return std::static_pointer_cast<Resonance>(obj);
@@ -173,7 +175,7 @@ std::shared_ptr<FunctionTree> PartialDecay::GetTree(ParameterList &sample,
   tr->createLeaf("PreFactor", _preFactor,
                  "Resonance(" + GetName() + ")" + suffix);
 
-  tr->insertTree(_angD->GetTree(sample, (_dataPos * 3) + 1, (_dataPos * 3) + 2),
+  tr->insertTree(_angD->GetTree(sample, _dataPos + 1, _dataPos + 2),
                  "Resonance(" + GetName() + ")" + suffix);
   tr->insertTree(_dynamic->GetTree(sample, toySample),
                  "Resonance(" + GetName() + ")" + suffix);

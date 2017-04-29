@@ -341,6 +341,10 @@ void HelicityKinematics::EventToDataPoint(
     const Event &event, dataPoint &point, const SubSystem sys,
     const std::pair<double, double> limits) const {
   
+  FourMomentum recoilP4;
+  for (auto s : sys.GetRecoilState())
+    recoilP4 += event.getParticle(s).GetFourMomentum();
+    
   FourMomentum finalA, totalP4;
   for (auto s : sys.GetFinalStateA()) {
     finalA += event.getParticle(s).GetFourMomentum();
@@ -359,9 +363,12 @@ void HelicityKinematics::EventToDataPoint(
   // When using finalB here the WignerD changes sign. In the end this does not
   // matter
   QFT::Vector4<double> vA(finalA);
+  QFT::Vector4<double> vR(recoilP4);
   QFT::Vector4<double> dd(totalP4);
   vA.Boost(dd);
-  vA.Rotate(dd.Phi(), dd.Theta(), (-1) * dd.Phi());
+  vR.Boost(dd);
+  vR *= (-1);
+  vA.Rotate(vR.Phi(), vR.Theta(), (-1) * vR.Phi());
   double cosTheta = vA.CosTheta();
   double phi = vA.Phi();
   if (cosTheta > 1 || cosTheta < -1 || phi > M_PI || phi < (-1) * M_PI ||

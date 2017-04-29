@@ -70,7 +70,7 @@ public:
 
    @return strength parameter
    */
-  double GetMagnitude() const { return _magnitude->GetValue(); }
+  double GetMagnitude() const { return std::fabs(_magnitude->GetValue()); }
 
   /**
    Set strength parameter
