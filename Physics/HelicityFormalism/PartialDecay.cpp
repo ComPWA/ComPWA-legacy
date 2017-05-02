@@ -37,32 +37,38 @@ PartialDecay::Factory(const boost::property_tree::ptree &pt) {
   obj->SetName(pt.get<std::string>("<xmlattr>.Name", "empty"));
 
   auto mag = ComPWA::DoubleParameterFactory(pt.get_child("Magnitude"));
-  obj->SetMagnitudePar(std::make_shared<DoubleParameter>(mag));
+  obj->SetMagnitudeParameter(std::make_shared<DoubleParameter>(mag));
   auto phase = ComPWA::DoubleParameterFactory(pt.get_child("Phase"));
-  obj->SetPhasePar(std::make_shared<DoubleParameter>(phase));
+  obj->SetPhaseParameter(std::make_shared<DoubleParameter>(phase));
 
   // Read subSystem definition
   std::vector<int> recoilState;
   auto recoil =
       pt.get_optional<std::string>("RecoilSystem.<xmlattr>.FinalState");
-  if (recoil)
+  if (recoil){
     recoilState = stringToVectInt(recoil.get());
+  }
 
   auto decayProducts = pt.get_child("DecayProducts");
   std::vector<std::vector<int>> finalStates;
-  for (auto i : decayProducts)
+  std::vector<std::string> finalStatesNames;
+  for (auto i : decayProducts){
     finalStates.push_back(
         stringToVectInt(i.second.get<std::string>("<xmlattr>.FinalState")));
+    finalStatesNames.push_back( i.second.get<std::string>("<xmlattr>.Name") );
+  }
+  SubSystem subSys(recoilState, finalStates);
+  subSys.SetFinalStatesNames(finalStatesNames);
 
+  auto dynObj = std::shared_ptr<AbstractDynamicalFunction>();
+  std::string name = pt.get<std::string>("DecayParticle.<xmlattr>.Name");
+  
   if (finalStates.size() == 2) {
-    SubSystem subSys(recoilState, finalStates.at(0), finalStates.at(1));
 
     // Create WignerD object
     obj->SetWignerD(
         ComPWA::Physics::HelicityFormalism::AmpWignerD::Factory(pt));
 
-    auto dynObj = std::shared_ptr<AbstractDynamicalFunction>();
-    std::string name = pt.get<std::string>("DecayParticle.<xmlattr>.Name");
     auto partProp = PhysConst::Instance()->FindParticle(name);
     std::string decayType = partProp.GetDecayType();
 
@@ -79,17 +85,18 @@ PartialDecay::Factory(const boost::property_tree::ptree &pt) {
                                decayType + "!");
     }
     dynObj->SetSubSystem(subSys);
-    obj->SetDynamicalFunction(dynObj);
 
     // make sure dynamical function is created and set first
-    obj->SetSubSystem(subSys);
   } else {
+    dynObj = std::shared_ptr<AbstractDynamicalFunction>(new NonResonant);
+    dynObj->SetName(name);
     // We assume the we have a multi-body decay and assume that the decay
     // proceeds via constant (non-resonant) dynamics
-    obj->SetDynamicalFunction(
-        std::shared_ptr<AbstractDynamicalFunction>(new NonResonant));
     obj->SetWignerD(std::shared_ptr<AmpWignerD>(new AmpWignerD()));
   }
+  
+  obj->SetDynamicalFunction(dynObj);
+  obj->SetSubSystem(subSys);
 
   return std::static_pointer_cast<Resonance>(obj);
 }
@@ -100,8 +107,8 @@ boost::property_tree::ptree PartialDecay::Save(std::shared_ptr<Resonance> res) {
   boost::property_tree::ptree pt;
   pt.put<std::string>("<xmlattr>.Name", obj->GetName());
   pt.add_child("Magnitude",
-               ComPWA::DoubleParameterSave(*obj->GetMagnitudePar().get()));
-  pt.add_child("Phase", ComPWA::DoubleParameterSave(*obj->GetPhasePar().get()));
+               ComPWA::DoubleParameterSave(*obj->GetMagnitudeParameter().get()));
+  pt.add_child("Phase", ComPWA::DoubleParameterSave(*obj->GetPhaseParameter().get()));
 
   pt.put("DecayParticle.<xmlattr>.Name",
          obj->GetDynamicalFunction()->GetName());
@@ -120,50 +127,38 @@ boost::property_tree::ptree PartialDecay::Save(std::shared_ptr<Resonance> res) {
 
   boost::property_tree::ptree daughterTr, chTrA, chTrB;
 
-  auto names = obj->GetDynamicalFunction()->GetDecayNames();
-
   // Information daugher final state A
-  auto finalA = obj->GetSubSystem().GetFinalStateA();
-  std::string strA;
-  if (finalA.size()) {
-    for (auto i = 0; i < finalA.size(); i++) {
-      strA += std::to_string(finalA.at(i));
-      if (i < finalA.size() - 1)
-        strA += " ";
+  auto finalS = obj->GetSubSystem().GetFinalStates();
+  auto finalSNames = obj->GetSubSystem().GetFinalStatesNames();
+  for (int j=0; j< finalS.size(); j++) {
+    std::string strA;
+    if (finalS.at(j).size()) {
+      for (auto i = 0; i < finalS.at(j).size(); i++) {
+        strA += std::to_string(finalS.at(j).at(i));
+        if (i < finalS.at(j).size() - 1)
+          strA += " ";
+      }
     }
+
+    chTrA.put("<xmlattr>.Name", finalSNames.at(j));
+    chTrA.put("<xmlattr>.FinalState", strA);
+    chTrA.put("<xmlattr>.Helicity",
+              std::to_string((int)obj->GetWignerD()->GetHelicities().first));
+    daughterTr.add_child("Particle", chTrA);
   }
-
-  chTrA.put("<xmlattr>.Name", names.first);
-  chTrA.put("<xmlattr>.FinalState", strA);
-  chTrA.put("<xmlattr>.Helicity",
-            std::to_string((int)obj->GetWignerD()->GetHelicities().first));
-  daughterTr.add_child("Particle", chTrA);
-
-  // Information daugher final state B
-  auto finalB = obj->GetSubSystem().GetFinalStateB();
-  std::string strB;
-  if (finalB.size()) {
-    for (auto i = 0; i < finalB.size(); i++) {
-      strB += std::to_string(finalB.at(i));
-      if (i < finalB.size() - 1)
-        strB += " ";
-    }
-  }
-
-  chTrB.put("<xmlattr>.Name", names.second);
-  chTrB.put("<xmlattr>.FinalState", strB);
-  chTrB.put("<xmlattr>.Helicity",
-            std::to_string((int)obj->GetWignerD()->GetHelicities().second));
-  daughterTr.add_child("Particle", chTrB);
 
   pt.add_child("DecayProducts", daughterTr);
   return pt;
 }
 
 /**! Setup function tree */
-std::shared_ptr<FunctionTree> PartialDecay::GetTree(ParameterList &sample,
-                                                    ParameterList &toySample,
+std::shared_ptr<FunctionTree> PartialDecay::GetTree(const ParameterList &sample,
+                                                    const ParameterList &toySample,
                                                     std::string suffix) {
+
+  int phspSampleSize = toySample.GetMultiDouble(0)->GetNValues();
+  double phspVol = Kinematics::Instance()->GetPhspVolume();
+
   std::shared_ptr<FunctionTree> tr(new FunctionTree());
   tr->createHead("Resonance(" + GetName() + ")" + suffix,
                  std::shared_ptr<Strategy>(new MultAll(ParType::MCOMPLEX)));
@@ -174,12 +169,37 @@ std::shared_ptr<FunctionTree> PartialDecay::GetTree(ParameterList &sample,
   tr->createLeaf("Phase", _phase, "Strength");
   tr->createLeaf("PreFactor", _preFactor,
                  "Resonance(" + GetName() + ")" + suffix);
-
   tr->insertTree(_angD->GetTree(sample, _dataPos + 1, _dataPos + 2),
                  "Resonance(" + GetName() + ")" + suffix);
-  tr->insertTree(_dynamic->GetTree(sample, toySample),
+  tr->insertTree(_dynamic->GetTree(sample),
                  "Resonance(" + GetName() + ")" + suffix);
 
+  tr->recalculate();
+  tr->createNode("Normalization",
+                 std::shared_ptr<Strategy>(new Inverse(ParType::DOUBLE)),
+                 "Resonance(" + GetName() + ")" + suffix); // 1/normLH
+  tr->createNode("SqrtIntegral",
+                 std::shared_ptr<Strategy>(new SquareRoot(ParType::DOUBLE)),
+                 "Normalization");
+  tr->createNode("Integral",
+                 std::shared_ptr<Strategy>(new MultAll(ParType::DOUBLE)),
+                 "SqrtIntegral");
+  tr->createLeaf("PhspVolume", phspVol, "Integral");
+  tr->createLeaf("InverseSampleSize", 1 / ((double)phspSampleSize), "Integral");
+  tr->createNode("Sum", std::shared_ptr<Strategy>(new AddAll(ParType::DOUBLE)),
+                 "Integral");
+  tr->createNode("Intensity",
+                 std::shared_ptr<Strategy>(new AbsSquare(ParType::MDOUBLE)),
+                 "Sum", phspSampleSize,
+                 false); //|T_{ev}|^2
+  tr->createNode("mult",
+                 std::shared_ptr<Strategy>(new MultAll(ParType::MCOMPLEX)),
+                 "Intensity");
+  tr->insertTree(_angD->GetTree(toySample, _dataPos + 1, _dataPos + 2, "_norm"),
+                 "mult" + suffix);
+  tr->insertTree(_dynamic->GetTree(toySample, "_norm"), "mult" + suffix);
+
+  tr->recalculate();
   return tr;
 }
 

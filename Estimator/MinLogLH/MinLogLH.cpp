@@ -65,6 +65,9 @@ void MinLogLH::Init() {
     _phspAccSampleList = _phspSample->getListOfData();
 
   CalcSumOfWeights();
+  
+  LOG(info) << "MinLogLH::Init() |  Size of data sample = " << nUseEvt_
+            << " ( Sum of weights = " << _sumOfWeights << " ).";
 
   calls = 0; // member of ControlParameter
 }
@@ -83,6 +86,7 @@ MinLogLH::CreateInstance(std::shared_ptr<AmpIntensity> intens,
                          std::shared_ptr<DataReader::Data> phspSample,
                          bool useFunctionTree, unsigned int startEvent,
                          unsigned int nEvents) {
+  
   if (!instance_) {
     std::shared_ptr<DataReader::Data> accSample_ =
         std::shared_ptr<DataReader::Data>();
@@ -117,8 +121,6 @@ void MinLogLH::CalcSumOfWeights() {
     Event ev(_dataSample->getEvent(evt));
     _sumOfWeights += ev.getWeight();
   }
-  LOG(info) << "MinLogLH: for current data set: numEvents = " << nUseEvt_
-            << " sumOfWeights=" << _sumOfWeights << " for current data set.";
   return;
 }
 
@@ -130,22 +132,15 @@ void MinLogLH::SetUseFunctionTree(bool t) {
 }
 
 void MinLogLH::IniLHtree() {
-  LOG(debug) << "MinLogLH::iniLHtree() constructing the LH tree";
-
+  LOG(debug) << "MinLogLH::IniLHtree() | Constructing FunctionTree!";
+  //ToDo: we get sometimes a seg fault here if the project is compiled w/o debug
+  // symbols
   if (_useFunctionTree)
     return;
   if (!_intens->HasTree())
-    throw std::runtime_error("MinLogLH::iniLHtree() amplitude has no tree");
+    throw std::runtime_error("MinLogLH::IniLHtree() |  AmpIntensity does not "
+                             "provide a FunctionTree!");
 
-  //----Strategies needed
-  std::shared_ptr<Strategy> mmultDStrat(new MultAll(ParType::MDOUBLE));
-  std::shared_ptr<Strategy> multiDoubleAddStrat(new AddAll(ParType::MDOUBLE));
-  std::shared_ptr<Strategy> mlogStrat(new LogOf(ParType::MDOUBLE));
-  std::shared_ptr<Strategy> multDStrat(new MultAll(ParType::DOUBLE));
-  std::shared_ptr<Strategy> addStrat(new AddAll(ParType::DOUBLE));
-  std::shared_ptr<Strategy> invStrat(new Inverse(ParType::DOUBLE));
-
-  LOG(debug) << "MinLogLH::iniLHTree() construction LH tree";
   /* CONSTRUCTION OF THE LIKELIHOOD:
    * We denote the coherent sum over all resonances with T:
    * 		T := \sum_{i,j} c_i c_j^*A_iA_j^*
@@ -169,27 +164,38 @@ void MinLogLH::IniLHtree() {
       _dataSampleList.GetMultiDouble(weightId);
 
   //-log L = (-1)*N/(\sum_{ev} w_{ev}) \sum_{ev} ...
-  _tree->createHead("LH", multDStrat);
+  _tree->createHead("LH",
+                    std::shared_ptr<Strategy>(new MultAll(ParType::DOUBLE)));
   _tree->createLeaf("minusOne", -1, "LH");
   _tree->createLeaf("nEvents", sampleSize, "LH");
-  _tree->createNode("invSumWeights", invStrat, "LH");
-  _tree->createNode("sumEvents", addStrat, "LH");
-  _tree->createNode("sumWeights", addStrat, "invSumWeights");
+  _tree->createNode("invSumWeights",
+                    std::shared_ptr<Strategy>(new Inverse(ParType::DOUBLE)),
+                    "LH");
+  _tree->createNode("sumEvents",
+                    std::shared_ptr<Strategy>(new AddAll(ParType::DOUBLE)),
+                    "LH");
+  _tree->createNode("sumWeights",
+                    std::shared_ptr<Strategy>(new AddAll(ParType::DOUBLE)),
+                    "invSumWeights");
   _tree->createLeaf("weight", weight, "sumWeights");
-  _tree->createNode("weightLog", mmultDStrat, "sumEvents", sampleSize,
+  _tree->createNode("weightLog",
+                    std::shared_ptr<Strategy>(new MultAll(ParType::MDOUBLE)),
+                    "sumEvents", sampleSize,
                     false); // w_{ev} * log( I_{ev} )
   _tree->createLeaf("weight", weight, "weightLog");
-  _tree->createNode("Log", mlogStrat, "weightLog", sampleSize, false);
+  _tree->createNode("Log",
+                    std::shared_ptr<Strategy>(new LogOf(ParType::MDOUBLE)),
+                    "weightLog", sampleSize, false);
   _tree->insertTree(
       _intens->GetTree(_dataSampleList, _phspAccSampleList, _phspSampleList),
       "Log");
 
   _tree->recalculate();
   if (!_tree->sanityCheck()) {
-    throw std::runtime_error("MinLogLH::iniLHtree() | Tree has structural "
+    throw std::runtime_error("MinLogLH::IniLHtree() | Tree has structural "
                              "problems. Sanity check not passed!");
   }
-  LOG(debug) << "MinLogLH::iniLHtree() | "
+  LOG(debug) << "MinLogLH::IniLHtree() | "
                 "Construction of LH tree finished!";
   _useFunctionTree = 1;
   return;
@@ -214,7 +220,7 @@ double MinLogLH::controlParameter(ParameterList &minPar) {
         std::dynamic_pointer_cast<DoubleParameter>(_tree->head()->getValue());
     lh = logLH->GetValue();
   }
-//  lh += calcPenalty();
+  //  lh += calcPenalty();
   calls++;
   return lh; // return -logLH
 }

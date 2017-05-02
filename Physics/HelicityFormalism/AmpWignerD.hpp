@@ -40,11 +40,23 @@ namespace HelicityFormalism {
 
 class AmpWignerD {
 public:
+  //============ CONSTRUCTION ==================
   AmpWignerD(ComPWA::Spin spin = ComPWA::Spin(0), unsigned int mu = 0,
              unsigned int muPrime = 0);
 
   virtual ~AmpWignerD(){};
 
+  /**
+   Factory for AmpWignerD
+
+   @param pt Configuration tree
+   @return Constructed object
+   */
+  static std::shared_ptr<AmpWignerD>
+  Factory(const boost::property_tree::ptree &pt);
+  
+  //================ EVALUATION =================
+  
   virtual double Evaluate(const ComPWA::dataPoint &point, int pos1,
                           int pos2) const;
 
@@ -56,45 +68,7 @@ public:
                                                 ComPWA::Spin mu,
                                                 ComPWA::Spin muPrime);
 
-  virtual std::shared_ptr<ComPWA::FunctionTree>
-  GetTree(ComPWA::ParameterList &sample, int posTheta, int posPhi,
-          std::string suffix = "");
-
-  /**
-   Factory for AmpWignerD
-
-   @param pt Configuration tree
-   @return Constructed object
-   */
-  static std::shared_ptr<AmpWignerD>
-  Factory(const boost::property_tree::ptree &pt) {
-    LOG(trace) << "AmpWignerD::Factory() | Construction....";
-    auto obj = std::make_shared<AmpWignerD>();
-
-    auto decayParticle = pt.get_child("DecayParticle");
-
-    std::string name = pt.get<std::string>("DecayParticle.<xmlattr>.Name");
-    ComPWA::Spin J = PhysConst::Instance()->FindParticle(name).GetSpin();
-    obj->SetSpin(J);
-    ComPWA::Spin mu(pt.get<double>("DecayParticle.<xmlattr>.Helicity"));
-    obj->SetMu(mu);
-
-    auto decayProducts = pt.get_child("DecayProducts");
-    std::vector<ComPWA::Spin> vHelicity;
-    for (auto i : decayProducts) {
-      vHelicity.push_back(
-          ComPWA::Spin(i.second.get<double>("<xmlattr>.Helicity")));
-    }
-
-    if (vHelicity.size() != 2)
-      throw boost::property_tree::ptree_error(
-          "AmpWignerD::Factory() | Expect exactly two decay products (" +
-          std::to_string(decayProducts.size()) + " given)!");
-
-    obj->SetMuPrime(vHelicity.at(0) - vHelicity.at(1));
-
-    return obj;
-  }
+  //============ SET/GET =================
 
   void SetSpin(ComPWA::Spin s) { _spin = s; }
   ComPWA::Spin GetSpin() const { return _spin; }
@@ -116,6 +90,12 @@ public:
   std::pair<ComPWA::Spin, ComPWA::Spin> GetHelicities() const {
     return _helicities;
   }
+
+  //=========== FUNCTIONTREE =================
+  
+  virtual std::shared_ptr<ComPWA::FunctionTree>
+  GetTree(const ComPWA::ParameterList &sample, int posTheta, int posPhi,
+          std::string suffix = "");
 
 protected:
   ComPWA::Spin _spin;

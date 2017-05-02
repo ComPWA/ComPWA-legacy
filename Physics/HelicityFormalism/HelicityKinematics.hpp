@@ -1,3 +1,9 @@
+ 
+        
+    
+  
+
+
 //-------------------------------------------------------------------------------
 // Copyright (c) 2013 Stefan Pflueger.
 // All rights reserved. This program and the accompanying materials
@@ -28,8 +34,6 @@ static const char *formFactorTypeString[] = {"noFormFactor", "BlattWeisskopf",
 
 enum formFactorType { noFormFactor = 0, BlattWeisskopf = 1, CrystalBarrel = 2 };
 
-
-
 /*! Definition of a two-body decay node within a sequential decay tree.
  Class contains lists for both final states of the two-body decay and a list
  for all recoiling particles. This information is needed to calculate
@@ -39,12 +43,22 @@ class SubSystem {
 public:
   SubSystem(){};
 
+  SubSystem(std::vector<int> recoilS, std::vector<std::vector<int>> finalStates)
+      : _recoilState(recoilS), _finalStates(finalStates) {
+
+    title = to_string();
+    // LOG(trace) << "SubSystem::SubSystem() | Creating sub system "<<title;
+  }
+
   SubSystem(std::vector<int> recoilS, std::vector<int> finalA,
             std::vector<int> finalB)
-      : _recoilState(recoilS), _finalStateA(finalA), _finalStateB(finalB)
-        {
+      : _recoilState(recoilS) {
+    std::vector<std::vector<int>> tmp;
+    tmp.push_back(finalA);
+    tmp.push_back(finalB);
+    SetFinalStates(tmp);
 
-          title = to_string();
+    title = to_string();
     // LOG(trace) << "SubSystem::SubSystem() | Creating sub system "<<title;
   }
 
@@ -55,19 +69,17 @@ public:
     for (auto i : _recoilState)
       stream << std::to_string(i);
     stream << ")->(";
-    for (auto i : _finalStateA)
-      stream << std::to_string(i);
-    stream << ")+(";
-    for (auto i : _finalStateB)
-      stream << std::to_string(i);
-    stream << ")";
-    
+    for (auto j : _finalStates) {
+      for (auto i : j)
+        stream << std::to_string(i);
+      stream << ")+(";
+    }
+
     return stream.str();
   }
-  
+
   bool operator==(const SubSystem &b) const {
-    if (_recoilState == b._recoilState && _finalStateA == b._finalStateA &&
-        _finalStateB == b._finalStateB)
+    if (_recoilState == b._recoilState && _finalStates == b._finalStates)
       return true;
     return false;
   }
@@ -77,18 +89,38 @@ public:
     return stream;
   }
 
-  virtual const std::vector<int>& GetRecoilState() const { return _recoilState; }
-  virtual const std::vector<int>& GetFinalStateA() const { return _finalStateA; }
-  virtual const std::vector<int>& GetFinalStateB() const { return _finalStateB; }
-  virtual void SetRecoilState(std::vector<int> r) { _recoilState = r; }
-  virtual void SetFinalStateA(std::vector<int> f) { _finalStateA = f; }
-  virtual void SetFinalStateB(std::vector<int> f) { _finalStateB = f; }
+  virtual void SetFinalStates(std::vector<std::vector<int>> v) {
+    _finalStates = v;
+  }
+
+  virtual const std::vector<std::string> &GetFinalStatesNames() const {
+    return _finalStatesNames;
+  }
+
+  virtual void SetFinalStatesNames(std::vector<std::string> n) {
+    if (n.size() != _finalStates.size()) {
+      throw std::runtime_error("SubSystem::SetFinalStatesNames() | Length of "
+                               "vectors does not match with the number of "
+                               "final states.");
+    }
+    _finalStatesNames = n;
+  }
+
+  virtual const std::vector<std::vector<int>> &GetFinalStates() const {
+    return _finalStates;
+  }
+
+  virtual void SetRecoilState(const std::vector<int> r) { _recoilState = r; }
+
+  virtual const std::vector<int> &GetRecoilState() const {
+    return _recoilState;
+  }
 
 protected:
   std::string title;
   std::vector<int> _recoilState;
-  std::vector<int> _finalStateA;
-  std::vector<int> _finalStateB;
+  std::vector<std::vector<int>> _finalStates;
+  std::vector<std::string> _finalStatesNames;
 };
 
 /*! HelicityKinematics class.
@@ -133,8 +165,8 @@ public:
    * The triple (\f$m^2,cos\Theta, \phi\f$) is added to dataPoint for
    * SubSystem sys.
    */
-  void EventToDataPoint(const Event &event, dataPoint &point,
-                        SubSystem sys, const std::pair<double,double> limits) const;
+  void EventToDataPoint(const Event &event, dataPoint &point, SubSystem sys,
+                        const std::pair<double, double> limits) const;
 
   void EventToDataPoint(const Event &event, dataPoint &point,
                         SubSystem sys) const;
@@ -147,7 +179,7 @@ public:
 
   /*! Check if dataPoint is within phase space boundaries.
    */
-  bool IsWithinPhsp(const dataPoint &point)const;
+  bool IsWithinPhsp(const dataPoint &point) const;
 
   virtual bool IsWithinBoxPhsp(int idA, int idB, double varA,
                                double varB) const {
@@ -175,6 +207,8 @@ public:
    * and added to each dataPoint.
    */
   virtual int GetDataID(const SubSystem s) {
+    //We calculate the variables currently for two-body decays
+    if( s.GetFinalStates().size() != 2) return 0;
     int pos = createIndex(s);
     LOG(trace) << " Subsystem " << s << " has dataID " << pos;
     return pos;
@@ -198,8 +232,9 @@ public:
 
   /*! Get phase space bounds for the invariant mass of SubSystem sys.
    */
-  virtual const std::pair<double, double>& GetInvMassBounds(const SubSystem sys) const;
-  virtual const std::pair<double, double>& GetInvMassBounds(int sysID) const;
+  virtual const std::pair<double, double> &
+  GetInvMassBounds(const SubSystem sys) const;
+  virtual const std::pair<double, double> &GetInvMassBounds(int sysID) const;
 
   //! Calculate form factor
   static double
@@ -212,22 +247,6 @@ public:
   FormFactor(double sqrtS, double ma, double mb, double spin,
              double mesonRadius, std::complex<double> qValue,
              formFactorType type = formFactorType::BlattWeisskopf);
-
-  /*! Specify an irreducible set of variables.
-   * An irreducible set of variables that represent a phase space position.
-   * @see _irreducibleSetOfVariables
-   */
-  virtual void SetIrreducibleSetOfVariables(std::vector<int> set) {
-    _irreducibleSetOfVariables = set;
-  }
-
-  /*! Get an irreducible set of variables.
-   * @see SetIrreducibleSetOfVariables(std::vector<int> set)
-   * @see _irreducibleSetOfVariables
-   */
-  virtual std::vector<int> GetIrreducibleSetOfVariables() const {
-    return _irreducibleSetOfVariables;
-  }
 
 protected:
   /*! Create HelicityKinematics from inital and final state particle lists.
@@ -244,15 +263,16 @@ protected:
     <HelicityKinematics>
       <PhspVolume>1.45</PhspVolume>
       <InitialState>
-        <Particle Name='jpsi' />
+        <Particle Name='jpsi' Id='0'/>
       </InitialState>
       <FinalState>
-        <Particle Name='pi0' />
-        <Particle Name='gamma' />
-        <Particle Name='pi0' />
+        <Particle Name='pi0' Id='1'/>
+        <Particle Name='gamma' Id='0'/>
+        <Particle Name='pi0' Id='2'/>
       </FinalState>
     </HelicityKinematics>
     @endcode
+   * The Id is the position of the particle in input data.
    * @see HelicityKinematics(std::vector<pid> initialState, std::vector<pid>
    finalState)
    */
@@ -274,7 +294,8 @@ protected:
    *   6. Calculate the average density. At this point we assume that points
    *      are distributed uniformly across phase space. Therefore, the set
    *      #_irreducibleSetOfVariables needs to represent a flat phase space.
-   *   7. From the event density in phase space and the number of events in the
+   *   7. From the event density in phase space and the number of events in
+   * the
    *      sample the volume can be calculated.
    */
   double calculatePSArea();
@@ -285,14 +306,6 @@ protected:
    * sense if the set is not irreducible.
    */
   double EventDistance(Event &evA, Event &evB) const;
-
-  /*! Irreducible set of variable that represent a position in phase space.
-   * Listed are the positions in dataPoint. The size of the set corresponds to
-   * the degrees of freedom of the decay.
-   * It is important that phase space is distributed uniformly in those
-   * variables otherwise the normalization of intensities is not correct.
-   */
-  std::vector<int> _irreducibleSetOfVariables;
 
   //! Invariant mass
   double _M;
@@ -305,16 +318,17 @@ protected:
 
   //! List of subsystems for which invariant mass and angles are calculated
   std::vector<SubSystem> _listSubSystem;
-  std::vector<std::pair<double,double>> _invMassBounds;
-  
-  std::pair<double, double> CalculateInvMassBounds( const SubSystem sys) const;
-   
+  std::vector<std::pair<double, double>> _invMassBounds;
+
+  std::pair<double, double> CalculateInvMassBounds(const SubSystem sys) const;
+
   int createIndex(SubSystem const &newValue) {
-    int results = std::find(_listSubSystem.begin(), _listSubSystem.end(), newValue) -
-    _listSubSystem.begin();
+    int results =
+        std::find(_listSubSystem.begin(), _listSubSystem.end(), newValue) -
+        _listSubSystem.begin();
     if (results == _listSubSystem.size()) {
-      _listSubSystem.push_back( newValue );
-      _invMassBounds.push_back( CalculateInvMassBounds(newValue) );
+      _listSubSystem.push_back(newValue);
+      _invMassBounds.push_back(CalculateInvMassBounds(newValue));
     }
     return results;
   }

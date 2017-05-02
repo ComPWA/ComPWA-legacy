@@ -17,8 +17,12 @@ namespace Physics {
 namespace HelicityFormalism {
 
 class IncoherentIntensity : public ComPWA::AmpIntensity {
+
 public:
+  //============ CONSTRUCTION ==================
+
   IncoherentIntensity() : ComPWA::AmpIntensity() {}
+
   //! Function to create a full copy of the amplitude
   ComPWA::AmpIntensity *Clone(std::string newName = "") const {
     auto tmp = (new IncoherentIntensity(*this));
@@ -26,8 +30,54 @@ public:
     return tmp;
   }
 
+  static std::shared_ptr<IncoherentIntensity>
+  Factory(const boost::property_tree::ptree &pt);
+
+  static boost::property_tree::ptree
+  Save(std::shared_ptr<IncoherentIntensity> intens);
+
+  //======= INTEGRATION/NORMALIZATION ===========
+
+  //! Check if parameters of this class or one of its members have changed
+  bool CheckModified() const {
+    if (AmpIntensity::CheckModified())
+      return true;
+    for (auto i : _intens)
+      if (i->CheckModified())
+        return true;
+
+    return false;
+  }
+
+  //================ EVALUATION =================
+
+  /** Calculate intensity of amplitude at point in phase-space
+   *
+   * @param point Data point
+   * @return
+   */
+  virtual double Intensity(const ComPWA::dataPoint &point) const {
+    return (IntensityNoEff(point) * _eff->Evaluate(point));
+  };
+
+  /** Calculate intensity of amplitude at point in phase-space
+   * Intensity is calculated excluding efficiency correction
+   * @param point Data point
+   * @return
+   */
+  virtual double IntensityNoEff(const ComPWA::dataPoint &point) const {
+    double result = 0;
+    for (auto i : _intens) {
+      result += i->IntensityNoEff(point);
+    }
+    return GetStrength() * result;
+  }
+
+  //================== SET/GET =================
+
   /** Get maximum value of amplitude
-   * We ask for the maximum of the coherent intensities and use the largest value
+   * We ask for the maximum of the coherent intensities and use the largest
+   * value
    * @param gen Random number generator
    * @return
    */
@@ -58,36 +108,6 @@ public:
     return _intens;
   }
 
-  static std::shared_ptr<IncoherentIntensity>
-  Factory(const boost::property_tree::ptree &pt);
-
-  static boost::property_tree::ptree
-  Save(std::shared_ptr<IncoherentIntensity> intens);
-
-  //=========== EVALUATION =================
-  /** Calculate intensity of amplitude at point in phase-space
-   *
-   * @param point Data point
-   * @return
-   */
-  virtual double Intensity(const ComPWA::dataPoint &point) const {
-    return (IntensityNoEff(point) * _eff->Evaluate(point));
-  };
-
-  /** Calculate intensity of amplitude at point in phase-space
-   * Intensity is calculated excluding efficiency correction
-   * @param point Data point
-   * @return
-   */
-  virtual double IntensityNoEff(const ComPWA::dataPoint &point) const {
-    double result = 0;
-    for (auto i : _intens) {
-      result += i->IntensityNoEff(point);
-    }
-    return GetStrengthValue() * result;
-  }
-
-  //=========== PARAMETERS =================
   /**! Add amplitude parameters to list
    * Add parameters only to list if not already in
    * @param list Parameter list to be filled
@@ -97,21 +117,21 @@ public:
   //! Calculate & fill fit fractions of this amplitude to ParameterList
   virtual void GetFitFractions(ComPWA::ParameterList &parList){};
 
-  //! Check of tree is available
-  virtual bool HasTree() const { return true; }
-
-  //! Getter function for basic amp tree
-  virtual std::shared_ptr<ComPWA::FunctionTree>
-  GetTree(ComPWA::ParameterList &sample, ComPWA::ParameterList &phspSample,
-          ComPWA::ParameterList &toySample, std::string suffix = "");
-
-  /**
-   Get number of partial decays
-
-   @return Number of partial decays
+  /*! Set phase space sample
+   * We use a phase space sample to calculate the normalization and determine
+   * the maximum of the amplitude. In case that the efficiency is already
+   * applied
+   * to the sample set fEff to false.
    */
-  size_t size() { return _intens.size(); }
-
+  virtual void
+  SetPhspSample(std::shared_ptr<std::vector<ComPWA::dataPoint>> phspSample,
+                std::shared_ptr<std::vector<ComPWA::dataPoint>> toySample) {
+    for (auto i : _intens) {
+      i->SetPhspSample(phspSample, toySample);
+    }
+  };
+  
+  //======== ITERATORS/OPERATORS =============
   typedef std::vector<std::shared_ptr<
       ComPWA::Physics::HelicityFormalism::CoherentIntensity>>::iterator
       coherentIntItr;
@@ -120,23 +140,18 @@ public:
 
   coherentIntItr Last() { return _intens.end(); }
 
-  //============= PRINTING =====================
-  //! Print amplitude to logging system
-  virtual void to_str() const { LOG(info) << "IncoherentIntensity"; }
 
-  /*! Set phase space sample
-   * We use a phase space sample to calculate the normalization and determine
-   * the maximum of the amplitude. In case that the efficiency is already
-   * applied
-   * to the sample set fEff to false.
-   */
-  void SetPhspSample(std::shared_ptr<std::vector<ComPWA::dataPoint>> phspSample
-                     , std::shared_ptr<std::vector<ComPWA::dataPoint>> toySample) {
-    for (auto i : _intens) {
-      i->SetPhspSample(phspSample,toySample);
-    }
-  };
-  
+  //=========== FUNCTIONTREE =================
+
+  //! Check of tree is available
+  virtual bool HasTree() const { return true; }
+
+  //! Get FunctionTree
+  virtual std::shared_ptr<ComPWA::FunctionTree>
+  GetTree(const ComPWA::ParameterList &sample,
+          const ComPWA::ParameterList &phspSample,
+          const ComPWA::ParameterList &toySample, std::string suffix = "");
+
 protected:
   /*! Calculate integral of amplitude.
    * CoherentIntensities are required to be normalized. Therefore, we
@@ -145,7 +160,7 @@ protected:
   virtual double Integral() const {
     double fractionSum = 0;
     for (auto i : _intens) {
-      fractionSum += i->GetStrengthValue();
+      fractionSum += i->GetStrength();
     }
     return fractionSum;
   };

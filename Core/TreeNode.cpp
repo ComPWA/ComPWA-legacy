@@ -37,7 +37,7 @@ TreeNode::TreeNode(std::string name,
                    std::shared_ptr<TreeNode> parent)
     : _name(name), _changed(true), _strat(strat) {
   for (unsigned int i = 0; i < intResult.size(); i++) {
-    _value.push_back(intResult[i]);
+    _value.push_back(intResult.at(i));
   }
   if (parent) {
     _parents.push_back(parent);
@@ -58,7 +58,7 @@ void TreeNode::Update() { // sollte nur von kindern oder observed objects
   //}  //end children-loop
   // changeVal(myStrat->execute(newVals));
   for (unsigned int i = 0; i < _parents.size(); i++)
-    _parents[i]->Update();
+    _parents.at(i)->Update();
   _changed = true;
 }; // end update()
 
@@ -87,7 +87,7 @@ void TreeNode::recalculate() {
     }
     _changed = false;
     try {
-      _strat->execute(newVals, _value[0]);
+      _strat->execute(newVals, _value.at(0));
     } catch (std::exception &ex) {
       LOG(error) << "TreeNode::recalculate() | Strategy " << _strat
                  << " failed on node " << this->getName() << ": " << ex.what();
@@ -118,7 +118,7 @@ void TreeNode::recalculate() {
         newVals.AddParameter(para);
       } // end children-loop
       try {
-        _strat->execute(newVals, _value[ele]);
+        _strat->execute(newVals, _value.at(ele));
       } catch (std::exception &ex) {
         LOG(error) << "TreeNode::recalculate() | Strategy " << _strat
                    << " failed on node " << this->getName() << ": "
@@ -168,7 +168,7 @@ const void TreeNode::deleteLinks() {
   _children.clear();
   _parents.clear();
   for (unsigned int i = 0; i < _value.size(); i++) {
-    _value[i]->Detach(shared_from_this());
+    _value.at(i)->Detach(shared_from_this());
   }
 };
 

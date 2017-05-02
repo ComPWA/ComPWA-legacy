@@ -137,12 +137,11 @@ HelicityKinematics::CalculateInvMassBounds(const SubSystem sys) const {
    * generalization to n-body decays is correct.
    */
   std::pair<double, double> lim(0, _M);
-  for (auto i : sys.GetFinalStateA())
-    lim.first +=
-        PhysConst::Instance()->FindParticle(_finalState.at(i)).GetMass();
-  for (auto i : sys.GetFinalStateB())
-    lim.first +=
-        PhysConst::Instance()->FindParticle(_finalState.at(i)).GetMass();
+  // Sum up masses of all final state particles
+  for (auto j : sys.GetFinalStates())
+    for (auto i : j)
+      lim.first +=
+          PhysConst::Instance()->FindParticle(_finalState.at(i)).GetMass();
   lim.first *= lim.first;
 
   for (auto i : sys.GetRecoilState())
@@ -340,16 +339,18 @@ void HelicityKinematics::EventToDataPoint(const Event &event, dataPoint &point,
 void HelicityKinematics::EventToDataPoint(
     const Event &event, dataPoint &point, const SubSystem sys,
     const std::pair<double, double> limits) const {
+
+  if( sys.GetFinalStates().size() !=2 ) return;
   
   FourMomentum recoilP4;
   for (auto s : sys.GetRecoilState())
     recoilP4 += event.getParticle(s).GetFourMomentum();
-    
+
   FourMomentum finalA, totalP4;
-  for (auto s : sys.GetFinalStateA()) {
+  for (auto s : sys.GetFinalStates().at(0))
     finalA += event.getParticle(s).GetFourMomentum();
-  }
-  for (auto s : sys.GetFinalStateB())
+
+  for (auto s : sys.GetFinalStates().at(1))
     totalP4 += event.getParticle(s).GetFourMomentum();
 
   totalP4 += finalA;
@@ -362,42 +363,29 @@ void HelicityKinematics::EventToDataPoint(
 
   // When using finalB here the WignerD changes sign. In the end this does not
   // matter
-  QFT::Vector4<double> vA(finalA);
-  QFT::Vector4<double> vR(recoilP4);
-  QFT::Vector4<double> dd(totalP4);
-  vA.Boost(dd);
-  vR.Boost(dd);
-  vR *= (-1);
-  vA.Rotate(vR.Phi(), vR.Theta(), (-1) * vR.Phi());
-  double cosTheta = vA.CosTheta();
-  double phi = vA.Phi();
+  QFT::Vector4<double> qftTotalP4(totalP4);
+  QFT::Vector4<double> qftFinalA(finalA);
+  QFT::Vector4<double> qftRecoilP4(recoilP4);
+
+  /* Boost one final state four momentum and the four momentum of the recoil
+   * system to the center of mass system of the two-body decay
+   */
+  qftFinalA.Boost(qftTotalP4);
+  qftRecoilP4.Boost(qftTotalP4);
+  qftRecoilP4 *= (-1);
+
+  // Calculate the angles between recoil system and final state.
+  qftFinalA.Rotate(qftRecoilP4.Phi(), qftRecoilP4.Theta(),
+                   (-1) * qftRecoilP4.Phi());
+  double cosTheta = qftFinalA.CosTheta();
+  double phi = qftFinalA.Phi();
+
+  // Check if values are within allowed range.
   if (cosTheta > 1 || cosTheta < -1 || phi > M_PI || phi < (-1) * M_PI ||
       std::isnan(cosTheta) || std::isnan(phi)) {
     throw BeyondPhsp("HelicityKinematics::EventToDataPoint() |"
                      " Point beypond phase space boundaries!");
   }
-
-  //  QFT::Vector4<double> tmp_finalA;
-  //  for (auto s : sys.GetFinalStateA()) {
-  //    tmp_finalA +=
-  //    QFT::Vector4<double>(event.getParticle(s).GetFourMomentum());
-  //  }
-  //  QFT::Vector4<double> tmp_finalB;
-  //  for (auto s : sys.GetFinalStateB()) {
-  //    tmp_finalB +=
-  //    QFT::Vector4<double>(event.getParticle(s).GetFourMomentum());
-  //  }
-  //  auto tmp_totalP4 = tmp_finalA + tmp_finalB;
-  //  double tmp_mSq = tmp_totalP4.M2();
-  //  tmp_finalA.Boost(tmp_totalP4);
-  //  tmp_finalA.Rotate(tmp_totalP4.Phi(), tmp_totalP4.Theta(), (-1) *
-  //  tmp_totalP4.Phi());
-  //  double tmp_cosTheta = tmp_finalA.CosTheta();
-  //  double tmp_phi = tmp_finalA.Phi();
-  //  double time2 = time.elapsed();
-
-  //  std::cout<<mSq<<"/"<<tmp_mSq<<","<<cosTheta<<"/"<<tmp_cosTheta<<","<<phi<<"/"<<tmp_phi<<std::endl;
-  //  std::cout<<"Time difference: [s] "<<time1-time2<<std::endl;
 
   point.GetPoint().push_back(mSq);
   point.GetPoint().push_back(cosTheta);

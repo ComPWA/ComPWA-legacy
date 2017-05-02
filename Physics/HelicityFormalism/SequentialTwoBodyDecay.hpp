@@ -26,23 +26,15 @@ namespace HelicityFormalism {
 class SequentialTwoBodyDecay : public Amplitude {
 
 public:
-  /**! Evaluate decay */
-  virtual std::complex<double> Evaluate(const dataPoint &point) const {
-    std::complex<double> result =
-    std::polar(GetMagnitudeValue(), GetPhaseValue());
-    for (auto i : _partDecays)
-      result *= i->Evaluate(point);
-    return result;
+  //============ CONSTRUCTION ==================
+
+  //! Function to create a full copy of the amplitude
+  virtual Amplitude *Clone(std::string newName = "") const {
+    auto tmp = (new SequentialTwoBodyDecay(*this));
+    tmp->SetName(newName);
+    return tmp;
   };
   
-  //! Check of tree is available
-  virtual bool HasTree() const { return true; }
-
-  /**! Setup function tree */
-  virtual std::shared_ptr<FunctionTree> GetTree(ParameterList &sample,
-                                                ParameterList &toySample,
-                                                std::string suffix);
-
   /**
    Factory for SequentialTwoBodyDecay
 
@@ -55,36 +47,48 @@ public:
   static boost::property_tree::ptree
   Save(std::shared_ptr<ComPWA::Physics::Amplitude> obj);
 
+  //======= INTEGRATION/NORMALIZATION ===========
+  
+  //! Check of parameters have changed and normalization has to be recalculatecd
+  bool CheckModified() const {
+    if (Amplitude::CheckModified())
+      return true;
+    for (auto i : _partDecays)
+      if (i->CheckModified())
+        return true;
+    return false;
+  }
+  
+  //================ EVALUATION =================
+  
+  /**! Evaluate decay */
+  virtual std::complex<double> Evaluate(const dataPoint &point) const {
+    std::complex<double> result = GetCoefficient();
+    for (auto i : _partDecays)
+      result *= i->Evaluate(point);
+
+    assert(!std::isnan(result.real()) && !std::isnan(result.imag()));
+    return result;
+  };
+
+  //============ SET/GET =================
+
   /**
    Add a partial decay to Sequential decay
 
    @param d Partial decay
    */
-  void
-  Add(std::shared_ptr<ComPWA::Physics::Resonance> d) {
+  void Add(std::shared_ptr<ComPWA::Physics::Resonance> d) {
     _partDecays.push_back(d);
   }
 
-  std::shared_ptr<ComPWA::Physics::Resonance>
-  GetDecay(int pos) {
+  std::shared_ptr<ComPWA::Physics::Resonance> GetDecay(int pos) {
     return _partDecays.at(pos);
   }
 
-  std::vector<std::shared_ptr<
-      ComPWA::Physics::Resonance>> &
-  GetDecays() {
+  std::vector<std::shared_ptr<ComPWA::Physics::Resonance>> &GetDecays() {
     return _partDecays;
   }
-
-  //! Function to create a full copy of the amplitude
-  virtual Amplitude *Clone(std::string newName = "") const {
-    auto tmp = (new SequentialTwoBodyDecay(*this));
-    tmp->SetName(newName);
-    return tmp;
-  };
-
-  //! Print amplitude to logging system
-  virtual void to_str() { LOG(info) << "SequentialTwoBodyDecay "; }
 
   //! Fill ParameterList with fit fractions
   virtual void GetFitFractions(ParameterList &parList){};
@@ -92,31 +96,36 @@ public:
   //! Fill ParameterList with fit fractions
   virtual void GetParameters(ParameterList &list);
   
-  /**
-   Get number of partial decays
-
-   @return Number of partial decays
-   */
-  size_t size() { return _partDecays.size(); };
-
-  typedef std::vector<std::shared_ptr<ComPWA::Physics::Resonance>>::iterator partDecayItr;
-
-  partDecayItr begin() { return _partDecays.begin(); }
-
-  partDecayItr end() { return _partDecays.end(); }
-
   /*! Set phase space sample
    * We use the phase space sample to calculate the normalization. The sample
    * should be without efficiency applied.
    */
   virtual void
-  SetPhspSample(std::shared_ptr<std::vector<ComPWA::dataPoint>> phspSample){
-    for( auto i: _partDecays )
+  SetPhspSample(std::shared_ptr<std::vector<ComPWA::dataPoint>> phspSample) {
+    for (auto i : _partDecays)
       i->SetPhspSample(phspSample);
   }
-  
-protected:
 
+  //======== ITERATORS/OPERATORS =============
+  
+  typedef std::vector<std::shared_ptr<ComPWA::Physics::Resonance>>::iterator
+      partDecayItr;
+
+  partDecayItr begin() { return _partDecays.begin(); }
+
+  partDecayItr end() { return _partDecays.end(); }
+
+  //=========== FUNCTIONTREE =================
+  
+  //! Check of tree is available
+  virtual bool HasTree() const { return true; }
+
+  /**! Setup function tree */
+  virtual std::shared_ptr<FunctionTree> GetTree(const ParameterList &sample,
+                                                const ParameterList &toySample,
+                                                std::string suffix);
+
+protected:
   std::vector<std::shared_ptr<ComPWA::Physics::Resonance>> _partDecays;
 };
 

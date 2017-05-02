@@ -53,31 +53,47 @@ class PartialDecay;
 class RelativisticBreitWigner : public AbstractDynamicalFunction {
 
 public:
+  //============ CONSTRUCTION ==================
+  
   RelativisticBreitWigner(){};
 
   virtual ~RelativisticBreitWigner(){};
 
+  /**
+   Factory for RelativisticBreitWigner
+
+   @param pt Configuration tree
+   @return Constructed object
+   */
+  static std::shared_ptr<AbstractDynamicalFunction>
+  Factory(const boost::property_tree::ptree &pt);
+  
+  //======= INTEGRATION/NORMALIZATION ===========
+  
+  //! Check of parameters have changed and normalization has to be recalculatecd
+  virtual bool CheckModified() const;
+
+  //================ EVALUATION =================
   std::complex<double> Evaluate(const dataPoint &point) const;
 
-  virtual std::complex<double> EvaluateNoNorm(double mSq) const;
+  /**
+   Dynamical Breit-Wigner function
 
-  /**! Get current normalization.  */
-  virtual double GetNormalization() const;
+   @param mSq Invariant mass squared
+   @param mR Mass of the resonant state
+   @param ma Mass of daughter particle
+   @param mb Mass of daughter particle
+   @param width Decay width
+   @param J Spin
+   @param mesonRadius Meson Radius
+   @param ffType Form factor type
+   @return Amplitude value
+   */
+  static std::complex<double>
+  dynamicalFunction(double mSq, double mR, double ma, double mb, double width,
+                    unsigned int J, double mesonRadius, formFactorType ffType);
 
-  //! Check of parameters have changed and normalization has to be recalculatecd
-  virtual void CheckModified() const;
-
-  virtual void GetParameters(ParameterList &list);
-
-  //! Check of tree is available
-  virtual bool HasTree() const { return true; }
-
-  /**! Setup function tree */
-  virtual std::shared_ptr<FunctionTree> GetTree(ParameterList &sample,
-                                                ParameterList &toySample,
-                                                std::string suffix = "");
-
-  // --------------------------- Set/Get functions ---------------------------
+  //============ SET/GET =================
 
   /**
    Set decay width
@@ -161,41 +177,16 @@ public:
    */
   formFactorType GetFormFactorType() { return _ffType; }
 
-  /**
-   Dynamical Breit-Wigner function
+  virtual void GetParameters(ParameterList &list);
 
-   @param mSq Invariant mass squared
-   @param mR Mass of the resonant state
-   @param ma Mass of daughter particle
-   @param mb Mass of daughter particle
-   @param width Decay width
-   @param J Spin
-   @param mesonRadius Meson Radius
-   @param ffType Form factor type
-   @return Amplitude value
-   */
-  static std::complex<double>
-  dynamicalFunction(double mSq, double mR, double ma, double mb, double width,
-                    unsigned int J, double mesonRadius, formFactorType ffType);
+  //=========== FUNCTIONTREE =================
+  
+  //! Check of tree is available
+  virtual bool HasTree() const { return true; }
 
-  /**
-   Factory for RelativisticBreitWigner
-
-   @param pt Configuration tree
-   @return Constructed object
-   */
-  static std::shared_ptr<AbstractDynamicalFunction>
-  Factory(const boost::property_tree::ptree &pt);
-
-//  std::shared_ptr<ComPWA::Physics::HelicityFormalism::PartialDecay> operator*(
-//      std::shared_ptr<ComPWA::Physics::HelicityFormalism::AmpWignerD> wigner) {
-    //    auto obj
-    //    =std::make_shared<ComPWA::Physics::HelicityFormalism::PartialDecay>();
-    //    std::shared_ptr<ComPWA::Physics::HelicityFormalism::PartialDecay>
-    //    partDecay(std::make_shared<PartialDecay>(this), wigner);
-    //    return obj;
-//  }
-
+  /**! Setup function tree */
+  virtual std::shared_ptr<FunctionTree> GetTree(const ParameterList &sample,
+                                                std::string suffix = "");
 
 protected:
   //! Decay width of resonante state

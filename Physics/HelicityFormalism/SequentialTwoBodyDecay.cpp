@@ -6,7 +6,6 @@
 //
 //
 
-//#include <stdio.h>
 #include <memory>
 #include "Physics/HelicityFormalism/SequentialTwoBodyDecay.hpp"
 
@@ -21,9 +20,9 @@ SequentialTwoBodyDecay::Factory(const boost::property_tree::ptree &pt) {
   obj->SetName(pt.get<std::string>("<xmlattr>.Name", "empty"));
 
   auto mag = ComPWA::DoubleParameterFactory(pt.get_child("Magnitude"));
-  obj->SetMagnitude(std::make_shared<DoubleParameter>(mag));
+  obj->SetMagnitudeParameter(std::make_shared<DoubleParameter>(mag));
   auto phase = ComPWA::DoubleParameterFactory(pt.get_child("Phase"));
-  obj->SetPhase(std::make_shared<DoubleParameter>(phase));
+  obj->SetPhaseParameter(std::make_shared<DoubleParameter>(phase));
 
   for (const auto &v : pt.get_child("")) {
     if (v.first == "Resonance")
@@ -40,8 +39,8 @@ SequentialTwoBodyDecay::Save(std::shared_ptr<ComPWA::Physics::Amplitude> amp) {
   boost::property_tree::ptree pt;
   pt.put<std::string>("<xmlattr>.Name",obj->GetName());
   pt.add_child("Magnitude",
-               ComPWA::DoubleParameterSave(*obj->GetMagnitude().get()));
-  pt.add_child("Phase", ComPWA::DoubleParameterSave(*obj->GetPhase().get()));
+               ComPWA::DoubleParameterSave(*obj->GetMagnitudeParameter().get()));
+  pt.add_child("Phase", ComPWA::DoubleParameterSave(*obj->GetPhaseParameter().get()));
   
   for( auto i : obj->GetDecays() ) {
     pt.add_child("Resonance", PartialDecay::Save(i));
@@ -51,8 +50,8 @@ SequentialTwoBodyDecay::Save(std::shared_ptr<ComPWA::Physics::Amplitude> amp) {
   
 /**! Setup function tree */
 std::shared_ptr<FunctionTree>
-SequentialTwoBodyDecay::GetTree(ParameterList &sample,
-                                ParameterList &toySample, std::string suffix) {
+SequentialTwoBodyDecay::GetTree(const ParameterList &sample,
+                                const ParameterList &toySample, std::string suffix) {
 
   std::shared_ptr<FunctionTree> tr(new FunctionTree());
   tr->createHead("Amplitude("+GetName()+")"+suffix,

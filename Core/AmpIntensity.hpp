@@ -41,6 +41,8 @@ namespace ComPWA {
 class AmpIntensity {
 
 public:
+  //============ CONSTRUCTION ==================
+
   //! Constructor with an optional name, strength and efficiency
   AmpIntensity(std::string name = "",
                std::shared_ptr<DoubleParameter> strength =
@@ -58,33 +60,22 @@ public:
   //! Function to create a full copy
   virtual AmpIntensity *Clone(std::string newName = "") const = 0;
 
-  //============ SET/GET =================
-  //! Get name
-  virtual std::string GetName() const { return _name; }
+  //======= INTEGRATION/NORMALIZATION ===========
 
-  //! Set name
-  virtual void SetName(std::string name) { _name = name; }
-
-  //! Get efficiency
-  virtual std::shared_ptr<Efficiency> GetEfficiency() { return _eff; };
-
-  //! Set efficiency
-  virtual void SetEfficiency(std::shared_ptr<Efficiency> eff) { _eff = eff; };
-
-  /*! Get maximum value of amplitude.
-   * Maximum is numerically calculated using a random number generator
-   */
-  virtual double GetMaximum(std::shared_ptr<Generator> gen) const = 0;
-
-  //============= PRINTING =====================
-  //! Print identifier to logging system
-  virtual void to_str() const = 0;
-
-  //=========== INTEGRATION/NORMALIZATION =================
   //! Calculate normalization
-  virtual double GetNormalization() const { return 1 / Integral(); }
+  virtual double GetNormalization() const { return 1.0 / Integral(); }
 
-  //=========== EVALUATION =================
+  //! Check if parameters have changed
+  bool CheckModified() const {
+    if (GetStrength() != _current_strength) {
+      const_cast<double &>(_current_strength) = GetStrength();
+      return true;
+    }
+    return false;
+  }
+
+  //================ EVALUATION =================
+
   /*! Evaluate intensity at dataPoint in phase-space
    * @param point Data point
    * @return Intensity
@@ -98,13 +89,58 @@ public:
    */
   virtual double IntensityNoEff(const dataPoint &point) const = 0;
 
+  //============ SET/GET =================
+  //! Get name
+  virtual std::string GetName() const { return _name; }
+
+  //! Set name
+  virtual void SetName(std::string name) { _name = name; }
+
+  //! Get efficiency
+  virtual std::shared_ptr<Efficiency> GetEfficiency() { return _eff; };
+
+  //! Set efficiency
+  virtual void SetEfficiency(std::shared_ptr<Efficiency> eff) { _eff = eff; };
+
+  //! Get strength parameter
+  std::shared_ptr<ComPWA::DoubleParameter> GetStrengthParameter() {
+    return _strength;
+  }
+
+  //! Get strength parameter
+  double GetStrength() const { return _strength->GetValue(); }
+
+  //! Set strength parameter
+  void SetStrengthParameter(std::shared_ptr<ComPWA::DoubleParameter> par) {
+    _strength = par;
+  }
+
+  //! Set strength parameter
+  void SetStrength(double par) { _strength->SetValue(par); }
+
+  /*! Get maximum value of amplitude.
+   * Maximum is numerically calculated using a random number generator
+   */
+  virtual double GetMaximum(std::shared_ptr<Generator> gen) const = 0;
+
   //! Fill ParameterList
   virtual void GetParameters(ParameterList &list) = 0;
 
   //! Fill ParameterList with fit fractions
   virtual void GetFitFractions(ParameterList &parList) = 0;
 
+  /*! Set phase space samples
+   * We use phase space samples to calculate the normalizations. In case of
+   * intensities we phase space sample phspSample includes the event efficiency.
+   * The sample toySample is used for normalization calculation for e.g.
+   * Resonacnes without efficiency.
+   */
+  virtual void
+  SetPhspSample(std::shared_ptr<std::vector<ComPWA::dataPoint>> phspSample,
+                std::shared_ptr<std::vector<ComPWA::dataPoint>> toySample) = 0;
+
   //========== FUNCTIONTREE =============
+
   //! Check of tree is available
   virtual bool HasTree() const { return false; }
 
@@ -115,36 +151,14 @@ public:
    * @param toySample Sample of phase space distributed events without
    * efficiency.
    */
-  virtual std::shared_ptr<FunctionTree> GetTree(ParameterList &sample,
-                                                ParameterList &phspSample,
-                                                ParameterList &toySample,
+  virtual std::shared_ptr<FunctionTree> GetTree(const ParameterList &sample,
+                                                const ParameterList &phspSample,
+                                                const ParameterList &toySample,
                                                 std::string suffix = "") {
     return std::shared_ptr<FunctionTree>();
   }
 
-  //! Get strength parameter
-  std::shared_ptr<ComPWA::DoubleParameter> GetStrength() { return _strength; }
-
-  //! Get strength parameter
-  double GetStrengthValue() const { return _strength->GetValue(); }
-
-  //! Set strength parameter
-  void SetStrength(std::shared_ptr<ComPWA::DoubleParameter> par) {
-    _strength = par;
-  }
-
-  //! Set strength parameter
-  void SetStrength(double par) { _strength->SetValue(par); }
-
-  /*! Set phase space samples
-   * We use phase space samples to calculate the normalizations. In case of
-   * intensities we phase space sample phspSample includes the event efficiency.
-   * The sample toySample is used for normalization calculation for e.g.
-   * Resonacnes without efficiency.
-   */
-  void
-  SetPhspSample(std::shared_ptr<std::vector<ComPWA::dataPoint>> phspSample,
-                std::shared_ptr<std::vector<ComPWA::dataPoint>> toySample) {}
+  //======== ITERATORS/OPERATORS =============
 
 protected:
   /*! Calculate integral.
@@ -160,6 +174,10 @@ protected:
   std::shared_ptr<Efficiency> _eff;
 
   std::shared_ptr<ComPWA::DoubleParameter> _strength;
+
+private:
+  //! temporary strength
+  double _current_strength;
 };
 //-----------------------------------------------------------------------------
 
@@ -234,6 +252,16 @@ public:
 
   virtual void GetFitFractions(ParameterList &parList) {}
 
+  /*! Set phase space samples
+   * We use phase space samples to calculate the normalizations. In case of
+   * intensities we phase space sample phspSample includes the event efficiency.
+   * The sample toySample is used for normalization calculation for e.g.
+   * Resonacnes without efficiency.
+   */
+  virtual void
+  SetPhspSample(std::shared_ptr<std::vector<ComPWA::dataPoint>> phspSample,
+                std::shared_ptr<std::vector<ComPWA::dataPoint>> toySample) {}
+
 protected:
   //! Get integral
   virtual double Integral() const {
@@ -289,13 +317,23 @@ public:
 
   //! Getter function for basic amp tree
   //! Getter function for basic amp tree
-  virtual std::shared_ptr<FunctionTree> GetTree(ParameterList &sample,
-                                                ParameterList &toySample,
-                                                ParameterList &sample3,
+  virtual std::shared_ptr<FunctionTree> GetTree(const ParameterList &sample,
+                                                const ParameterList &toySample,
+                                                const ParameterList &sample3,
                                                 std::string suffix = "") {
     return setupBasicTree(sample, toySample, "");
   }
 
+  /*! Set phase space samples
+   * We use phase space samples to calculate the normalizations. In case of
+   * intensities we phase space sample phspSample includes the event efficiency.
+   * The sample toySample is used for normalization calculation for e.g.
+   * Resonacnes without efficiency.
+   */
+  virtual void
+  SetPhspSample(std::shared_ptr<std::vector<ComPWA::dataPoint>> phspSample,
+                std::shared_ptr<std::vector<ComPWA::dataPoint>> toySample) {}
+  
 protected:
   /**Setup Basic Tree
    *
@@ -308,8 +346,8 @@ protected:
    * with sample
    * of accepted flat phsp events
    */
-  std::shared_ptr<FunctionTree> setupBasicTree(ParameterList &sample,
-                                               ParameterList &toySample,
+  std::shared_ptr<FunctionTree> setupBasicTree(const ParameterList &sample,
+                                               const ParameterList &toySample,
                                                std::string suffix) {
 
     int sampleSize = sample.GetMultiDouble(0)->GetNValues();

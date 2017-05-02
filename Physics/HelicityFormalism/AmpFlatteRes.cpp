@@ -38,7 +38,7 @@ AmpFlatteRes::Factory(const boost::property_tree::ptree &pt) {
   LOG(trace) << "AmpFlatteRes::Factory() | Construction of " << name << ".";
   obj->SetName(name);
   auto partProp = PhysConst::Instance()->FindParticle(name);
-  obj->SetMass(std::make_shared<DoubleParameter>(partProp.GetMassPar()));
+  obj->SetMassParameter(std::make_shared<DoubleParameter>(partProp.GetMassPar()));
 
   auto decayTr = partProp.GetDecayInfo();
   if (partProp.GetDecayType() != "flatte")
@@ -92,23 +92,8 @@ AmpFlatteRes::Factory(const boost::property_tree::ptree &pt) {
   return std::static_pointer_cast<AbstractDynamicalFunction>(obj);
 }
 
-std::string AmpFlatteRes::to_str() const {
-  std::string dynAmp; // = AmpAbsDynamicalFunction::to_str();
-  std::stringstream str;
-  //  str << _g->to_str() << std::endl;
-  //  str << _gHidden->to_str() << std::endl;
-  //  if (_gHidden2->GetValue())
-  //    str << _gHidden2->to_str() << std::endl;
-  //  str << "massB1=" << _massHiddenA<< " massB2=" << _massHiddenB;
-  //  if (_gHidden2->GetValue())
-  //    str << " massC1=" << _massHidden2A<< " massC2=" << _massHidden2B<<
-  //    std::endl;
-
-  return dynAmp + str.str();
-}
-
-void AmpFlatteRes::CheckModified() const {
-  AbstractDynamicalFunction::CheckModified();
+bool AmpFlatteRes::CheckModified() const {
+  if( AbstractDynamicalFunction::CheckModified() ) return true;
   if (_g.at(0).GetValue() != _current_g ||
       _g.at(1).GetValue() != _current_gHidden ||
       _g.at(2).GetValue() != _current_gHidden2) {
@@ -116,38 +101,28 @@ void AmpFlatteRes::CheckModified() const {
     const_cast<double &>(_current_g) = _g.at(0).GetValue();
     const_cast<double &>(_current_gHidden) = _g.at(1).GetValue();
     const_cast<double &>(_current_gHidden2) = _g.at(2).GetValue();
+    return true;
   }
-  return;
-}
-
-double AmpFlatteRes::GetNormalization() const {
-  CheckModified();
-  if (GetModified()) {
-    const_cast<double &>(_current_integral) =
-        AbstractDynamicalFunction::Integral();
-    SetModified(false);
-  }
-  return 1. / _current_integral;
+  return false;
 }
 
 std::complex<double> AmpFlatteRes::Evaluate(const dataPoint &point) const {
-  return EvaluateNoNorm(point.GetValue(_dataPos));
-}
 
-std::complex<double> AmpFlatteRes::EvaluateNoNorm(double mSq) const {
   std::complex<double> result;
   try {
     result = dynamicalFunction(
-        mSq, _mass->GetValue(), _g.at(0).GetMassA(), _g.at(0).GetMassB(),
-        _g.at(0).GetValue(), _g.at(1).GetMassA(), _g.at(1).GetMassB(),
-        _g.at(1).GetValue(), _g.at(2).GetMassA(), _g.at(2).GetMassB(),
-        _g.at(2).GetValue(), (double)_spin, _mesonRadius->GetValue(), _ffType);
+        point.GetValue(_dataPos), _mass->GetValue(), _g.at(0).GetMassA(),
+        _g.at(0).GetMassB(), _g.at(0).GetValue(), _g.at(1).GetMassA(),
+        _g.at(1).GetMassB(), _g.at(1).GetValue(), _g.at(2).GetMassA(),
+        _g.at(2).GetMassB(), _g.at(2).GetValue(), (double)_spin,
+        _mesonRadius->GetValue(), _ffType);
   } catch (std::exception &ex) {
     LOG(error) << "AmpFlatteRes::EvaluateAmp() | "
                   "Dynamical function can not be evalutated: "
                << ex.what();
     throw;
   }
+  assert( !std::isnan(result.real()) && !std::isnan(result.imag()) );
   return result;
 }
 
@@ -239,76 +214,82 @@ AmpFlatteRes::dynamicalFunction(double mSq, double mR, double massA1,
   return dynamicalFunction(mSq, mR, gA, termA, termB, termC);
 }
 
-std::shared_ptr<FunctionTree> AmpFlatteRes::GetTree(ParameterList &sample,
-                                                    ParameterList &toySample,
+std::shared_ptr<FunctionTree> AmpFlatteRes::GetTree(const ParameterList &sample,
                                                     std::string suffix) {
 
   int sampleSize = sample.GetMultiDouble(0)->GetNValues();
-  int toySampleSize = toySample.GetMultiDouble(0)->GetNValues();
-  double phspVol = Kinematics::Instance()->GetPhspVolume();
 
   std::shared_ptr<FunctionTree> tr(new FunctionTree());
-  tr->createHead("DynamicalFunction",
-                 std::shared_ptr<Strategy>(new MultAll(ParType::MCOMPLEX)));
+  //  tr->createHead("DynamicalFunction",
+  //                 std::shared_ptr<Strategy>(new MultAll(ParType::MCOMPLEX)));
+  tr->createHead("Flatte" + suffix,
+                 std::shared_ptr<Strategy>(new FlatteStrategy("")));
 
-  tr->createNode("Flatte", std::shared_ptr<Strategy>(new FlatteStrategy("")),
-                 "DynamicalFunction", sampleSize);
-  tr->createLeaf("Mass", _mass, "Flatte");
+  //  tr->createNode("Flatte", std::shared_ptr<Strategy>(new
+  //  FlatteStrategy("")),
+  //                 "DynamicalFunction", sampleSize);
+  tr->createLeaf("Mass", _mass, "Flatte" + suffix);
   for (int i = 0; i < _g.size(); i++) {
     tr->createLeaf("g_" + std::to_string(i) + "_massA", _g.at(i).GetMassA(),
-                   "Flatte");
+                   "Flatte" + suffix);
     tr->createLeaf("g_" + std::to_string(i) + "_massB", _g.at(i).GetMassB(),
-                   "Flatte");
+                   "Flatte" + suffix);
     tr->createLeaf("g_" + std::to_string(i), _g.at(i).GetValueParameter(),
-                   "Flatte");
+                   "Flatte" + suffix);
   }
-  tr->createLeaf("Spin", (double)_spin, "Flatte");
-  tr->createLeaf("MesonRadius", _mesonRadius, "Flatte");
-  tr->createLeaf("FormFactorType", _ffType, "Flatte");
+  tr->createLeaf("Spin", (double)_spin, "Flatte" + suffix);
+  tr->createLeaf("MesonRadius", _mesonRadius, "Flatte" + suffix);
+  tr->createLeaf("FormFactorType", _ffType, "Flatte" + suffix);
   //_daughterMasses actually not used here. But we put it in as a cross check.
-  tr->createLeaf("MassA", _daughterMasses.first, "Flatte");
-  tr->createLeaf("MassB", _daughterMasses.second, "Flatte");
+  tr->createLeaf("MassA", _daughterMasses.first, "Flatte" + suffix);
+  tr->createLeaf("MassB", _daughterMasses.second, "Flatte" + suffix);
   tr->createLeaf("Data_mSq[" + std::to_string(_dataPos) + "]",
-                 sample.GetMultiDouble(_dataPos), "Flatte");
+                 sample.GetMultiDouble(_dataPos), "Flatte" + suffix);
 
   // Normalization
-  tr->createNode("Normalization",
-                 std::shared_ptr<Strategy>(new Inverse(ParType::DOUBLE)),
-                 "DynamicalFunction"); // 1/normLH
-  tr->createNode("SqrtIntegral",
-                 std::shared_ptr<Strategy>(new SquareRoot(ParType::DOUBLE)),
-                 "Normalization");
-  tr->createNode("Integral",
-                 std::shared_ptr<Strategy>(new MultAll(ParType::DOUBLE)),
-                 "SqrtIntegral");
-  tr->createLeaf("PhspVolume", phspVol, "Integral");
-  tr->createLeaf("InverseSampleSize", 1 / ((double)toySampleSize), "Integral");
-  tr->createNode("Sum", std::shared_ptr<Strategy>(new AddAll(ParType::DOUBLE)),
-                 "Integral");
-  tr->createNode("Intensity",
-                 std::shared_ptr<Strategy>(new AbsSquare(ParType::MDOUBLE)),
-                 "Sum", toySampleSize,
-                 false); //|T_{ev}|^2
-  tr->createNode("NormalizationFlatte",
-                 std::shared_ptr<Strategy>(new FlatteStrategy("")),
-                 "Intensity", toySampleSize);
-  tr->createLeaf("Mass", _mass, "NormalizationFlatte");
-  for (int i = 0; i < _g.size(); i++) {
-    tr->createLeaf("g_" + std::to_string(i) + "_massA", _g.at(i).GetMassA(),
-                   "NormalizationFlatte");
-    tr->createLeaf("g_" + std::to_string(i) + "_massB", _g.at(i).GetMassB(),
-                   "NormalizationFlatte");
-    tr->createLeaf("g_" + std::to_string(i), _g.at(i).GetValueParameter(),
-                   "NormalizationFlatte");
-  }
-  tr->createLeaf("Spin", (double)_spin, "NormalizationFlatte");
-  tr->createLeaf("MesonRadius", _mesonRadius, "NormalizationFlatte");
-  tr->createLeaf("FormFactorType", _ffType, "NormalizationFlatte");
-  //_daughterMasses actually not used here. But we put it in as a cross check.
-  tr->createLeaf("MassA", _daughterMasses.first, "NormalizationFlatte");
-  tr->createLeaf("MassB", _daughterMasses.second, "NormalizationFlatte");
-  tr->createLeaf("PhspSample_mSq[" + std::to_string(_dataPos) + "]",
-                 toySample.GetMultiDouble(_dataPos), "NormalizationFlatte");
+  //  int toySampleSize = toySample.GetMultiDouble(0)->GetNValues();
+  //  double phspVol = Kinematics::Instance()->GetPhspVolume();
+  //  tr->createNode("Normalization",
+  //                 std::shared_ptr<Strategy>(new Inverse(ParType::DOUBLE)),
+  //                 "DynamicalFunction"); // 1/normLH
+  //  tr->createNode("SqrtIntegral",
+  //                 std::shared_ptr<Strategy>(new SquareRoot(ParType::DOUBLE)),
+  //                 "Normalization");
+  //  tr->createNode("Integral",
+  //                 std::shared_ptr<Strategy>(new MultAll(ParType::DOUBLE)),
+  //                 "SqrtIntegral");
+  //  tr->createLeaf("PhspVolume", phspVol, "Integral");
+  //  tr->createLeaf("InverseSampleSize", 1 / ((double)toySampleSize),
+  //  "Integral");
+  //  tr->createNode("Sum", std::shared_ptr<Strategy>(new
+  //  AddAll(ParType::DOUBLE)),
+  //                 "Integral");
+  //  tr->createNode("Intensity",
+  //                 std::shared_ptr<Strategy>(new AbsSquare(ParType::MDOUBLE)),
+  //                 "Sum", toySampleSize,
+  //                 false); //|T_{ev}|^2
+  //  tr->createNode("NormalizationFlatte",
+  //                 std::shared_ptr<Strategy>(new FlatteStrategy("")),
+  //                 "Intensity",
+  //                 toySampleSize);
+  //  tr->createLeaf("Mass", _mass, "NormalizationFlatte");
+  //  for (int i = 0; i < _g.size(); i++) {
+  //    tr->createLeaf("g_" + std::to_string(i) + "_massA", _g.at(i).GetMassA(),
+  //                   "NormalizationFlatte");
+  //    tr->createLeaf("g_" + std::to_string(i) + "_massB", _g.at(i).GetMassB(),
+  //                   "NormalizationFlatte");
+  //    tr->createLeaf("g_" + std::to_string(i), _g.at(i).GetValueParameter(),
+  //                   "NormalizationFlatte");
+  //  }
+  //  tr->createLeaf("Spin", (double)_spin, "NormalizationFlatte");
+  //  tr->createLeaf("MesonRadius", _mesonRadius, "NormalizationFlatte");
+  //  tr->createLeaf("FormFactorType", _ffType, "NormalizationFlatte");
+  //  //_daughterMasses actually not used here. But we put it in as a cross
+  //  check.
+  //  tr->createLeaf("MassA", _daughterMasses.first, "NormalizationFlatte");
+  //  tr->createLeaf("MassB", _daughterMasses.second, "NormalizationFlatte");
+  //  tr->createLeaf("PhspSample_mSq[" + std::to_string(_dataPos) + "]",
+  //                 toySample.GetMultiDouble(_dataPos), "NormalizationFlatte");
 
   return tr;
 }
@@ -392,7 +373,7 @@ bool FlatteStrategy::execute(ParameterList &paras,
           paras.GetDoubleParameter(9)->GetValue(),  // g3
           paras.GetDoubleParameter(10)->GetValue(), // Spin
           paras.GetDoubleParameter(11)->GetValue(), // mesonRadius
-          formFactorType(paras.GetDoubleParameter(12)->GetValue())  // ffType
+          formFactorType(paras.GetDoubleParameter(12)->GetValue()) // ffType
           );
     } catch (std::exception &ex) {
       LOG(error) << "FlatteStrategy::execute() | " << ex.what();
@@ -403,6 +384,45 @@ bool FlatteStrategy::execute(ParameterList &paras,
   out =
       std::shared_ptr<AbsParameter>(new MultiComplex(out->GetName(), results));
   return true;
+}
+
+void AmpFlatteRes::GetParameters(ParameterList &list) {
+  AbstractDynamicalFunction::GetParameters(list);
+  /* We check of for each parameter if a parameter of the same name exists in
+   * list. If so we check if both are equal and set the local parameter to the
+   * parameter from the list. In this way we connect parameters that occur on
+   * different positions in the amplitude.
+   */
+  std::shared_ptr<DoubleParameter> tmp;
+  for (auto i : _g) {
+    if(i.GetValue() == 0.0)
+      continue;
+    try { // catch BadParameter
+      tmp = list.GetDoubleParameter(i.GetValueParameter()->GetName());
+      try { // catch and throw std::runtime_error due to failed parameter
+            // comparisson
+        if (*tmp == *i.GetValueParameter())
+          i.GetValueParameter() = tmp;
+      } catch (std::exception &ex) {
+        throw;
+      }
+    } catch (BadParameter &ex) {
+      list.AddParameter(i.GetValueParameter());
+    }
+  }
+
+  try { // catch BadParameter
+    tmp = list.GetDoubleParameter(GetMesonRadius()->GetName());
+    try { // catch and throw std::runtime_error due to failed parameter
+          // comparisson
+      if (*tmp == *_mesonRadius)
+        SetMesonRadius(tmp);
+    } catch (std::exception &ex) {
+      throw;
+    }
+  } catch (BadParameter &ex) {
+    list.AddParameter(GetMesonRadius());
+  }
 }
 
 } /* namespace AmplitudeSum */

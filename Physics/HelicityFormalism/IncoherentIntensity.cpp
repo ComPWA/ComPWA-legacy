@@ -26,10 +26,10 @@ IncoherentIntensity::Factory(const boost::property_tree::ptree &pt) {
   auto ptCh = pt.get_child_optional("Strength");
   if (ptCh) {
     auto strength = ComPWA::DoubleParameterFactory(ptCh.get());
-    obj->SetStrength(std::make_shared<DoubleParameter>(strength));
+    obj->SetStrengthParameter(std::make_shared<DoubleParameter>(strength));
   } else {
-    obj->SetStrength(std::make_shared<ComPWA::DoubleParameter>("", 1.0));
-    obj->GetStrength()->SetParameterFixed();
+    obj->SetStrengthParameter(std::make_shared<ComPWA::DoubleParameter>("", 1.0));
+    obj->GetStrengthParameter()->SetParameterFixed();
   }
   
   for (const auto &v : pt.get_child("")) {
@@ -45,7 +45,7 @@ IncoherentIntensity::Save(std::shared_ptr<IncoherentIntensity> obj) {
 
   boost::property_tree::ptree pt;
   pt.put<std::string>("<xmlattr>.Name",obj->GetName());
-  pt.add_child("Strength", ComPWA::DoubleParameterSave(*obj->GetStrength().get()));
+  pt.add_child("Strength", ComPWA::DoubleParameterSave(*obj->GetStrengthParameter().get()));
   for( auto i : obj->GetIntensities() ) {
     pt.add_child("CoherentIntensity", CoherentIntensity::Save(i));
   }
@@ -53,8 +53,8 @@ IncoherentIntensity::Save(std::shared_ptr<IncoherentIntensity> obj) {
 }
 
 std::shared_ptr<ComPWA::FunctionTree> IncoherentIntensity::GetTree(
-    ComPWA::ParameterList &sample, ComPWA::ParameterList &phspSample,
-    ComPWA::ParameterList &toySample, std::string suffix) {
+    const ComPWA::ParameterList &sample, const ComPWA::ParameterList &phspSample,
+    const ComPWA::ParameterList &toySample, std::string suffix) {
 
   std::shared_ptr<FunctionTree> tr(new FunctionTree());
 
@@ -74,7 +74,7 @@ std::shared_ptr<ComPWA::FunctionTree> IncoherentIntensity::GetTree(
   
   void IncoherentIntensity::GetParameters(ComPWA::ParameterList &list){
     
-    list.AddParameter(GetStrength());
+    list.AddParameter(GetStrengthParameter());
     for( auto i : GetIntensities() ) {
       i->GetParameters(list);
     }

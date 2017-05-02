@@ -80,15 +80,46 @@ AmpWignerD::dynamicalFunction(double cosAlpha, double cosBeta, double cosGamma,
   return result;
 }
 
-std::shared_ptr<FunctionTree> AmpWignerD::GetTree(ParameterList &sample,
+std::shared_ptr<AmpWignerD>
+AmpWignerD::Factory(const boost::property_tree::ptree &pt) {
+  LOG(trace) << "AmpWignerD::Factory() | Construction....";
+  auto obj = std::make_shared<AmpWignerD>();
+
+  auto decayParticle = pt.get_child("DecayParticle");
+
+  std::string name = pt.get<std::string>("DecayParticle.<xmlattr>.Name");
+  ComPWA::Spin J = PhysConst::Instance()->FindParticle(name).GetSpin();
+  obj->SetSpin(J);
+  ComPWA::Spin mu(pt.get<double>("DecayParticle.<xmlattr>.Helicity"));
+  obj->SetMu(mu);
+
+  auto decayProducts = pt.get_child("DecayProducts");
+  std::vector<ComPWA::Spin> vHelicity;
+  for (auto i : decayProducts) {
+    vHelicity.push_back(
+        ComPWA::Spin(i.second.get<double>("<xmlattr>.Helicity")));
+  }
+
+  if (vHelicity.size() != 2)
+    throw boost::property_tree::ptree_error(
+        "AmpWignerD::Factory() | Expect exactly two decay products (" +
+        std::to_string(decayProducts.size()) + " given)!");
+
+  obj->SetMuPrime(vHelicity.at(0) - vHelicity.at(1));
+
+  return obj;
+}
+
+std::shared_ptr<FunctionTree> AmpWignerD::GetTree(const ParameterList &sample,
                                                   int posTheta, int posPhi,
                                                   std::string suffix) {
   std::shared_ptr<FunctionTree> newTree(new FunctionTree());
 
   int sampleSize = sample.GetMultiDouble(0)->GetNValues();
-  if ((double)_spin == 0) { //in case of spin zero do not explicitly include the WignerD
+  if ((double)_spin ==
+      0) { // in case of spin zero do not explicitly include the WignerD
     std::shared_ptr<MultiUnsignedInteger> one(
-        new MultiUnsignedInteger( "", std::vector<unsigned int>(sampleSize, 1) ));
+        new MultiUnsignedInteger("", std::vector<unsigned int>(sampleSize, 1)));
     newTree->createLeaf("WignerD" + suffix, one, ""); // spin
     return newTree;
   }

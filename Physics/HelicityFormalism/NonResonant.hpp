@@ -9,8 +9,8 @@
 //     Stefan Pflueger - initial API and implementation
 //-------------------------------------------------------------------------------
 
-#ifndef PHYSICS_DYNAMICALDECAYFUNCTIONS_TWOBODYDECAY_TOPNODECONSTANTVALUE_HPP_
-#define PHYSICS_DYNAMICALDECAYFUNCTIONS_TWOBODYDECAY_TOPNODECONSTANTVALUE_HPP_
+#ifndef PHYSICS_HELICITYFORMALISM_NONRESONANT
+#define PHYSICS_HELICITYFORMALISM_NONRESONANT
 
 #include "Physics/HelicityFormalism/AbstractDynamicalFunction.hpp"
 #include "Core/Kinematics.hpp"
@@ -22,34 +22,25 @@ namespace HelicityFormalism {
 class NonResonant : public AbstractDynamicalFunction {
 
 public:
-  NonResonant() {};
-  virtual ~NonResonant() {};
+  NonResonant() {
+    SetMassParameter(
+        std::shared_ptr<DoubleParameter>(new DoubleParameter("", 0.0)));
+  };
+
+  virtual ~NonResonant(){};
 
   virtual std::complex<double> Evaluate(const dataPoint &p) const {
-    return EvaluateNoNorm(0.0) * GetNormalization();
-  }
-  virtual std::complex<double> EvaluateNoNorm(double mSq) const {
     return std::complex<double>(1.0, 0.0);
   }
-
-  /**! Get current normalization.  */
-  virtual double GetNormalization() const { return (1 / Integral()); };
-
-  virtual std::shared_ptr<FunctionTree> GetTree(ParameterList &sample,
-                                        ParameterList &toySample,
-                                        std::string suffix);
-
-  virtual void GetParameters(ParameterList &list) {};
   
-protected:
-  virtual double Integral() const {
-    return Kinematics::Instance()->GetPhspVolume();
-  }
+  virtual std::shared_ptr<FunctionTree> GetTree(const ParameterList &sample,
+                                                std::string suffix);
+
+  virtual void GetParameters(ParameterList &list) { };
 };
 
 } /* namespace DynamicalFunctions */
 } /* namespace Physics */
 } /* namespace ComPWA */
 
-#endif /* PHYSICS_DYNAMICALDECAYFUNCTIONS_TWOBODYDECAY_TOPNODECONSTANTVALUE_HPP_ \
-          */
+#endif /* PHYSICS_HELICITYFORMALISM_NONRESONANT */

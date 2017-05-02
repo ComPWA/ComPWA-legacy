@@ -303,7 +303,7 @@ int main(int argc, char **argv) {
     return 1;
   }
 
-  LOG(info) << "Current path: " << getenv("PWD");
+//  LOG(info) << "Current path: " << getenv("PWD");
   po::notify(vm);
 
   if (ampMcPrecision == 0)
@@ -409,7 +409,6 @@ int main(int argc, char **argv) {
     inD = std::shared_ptr<Data>();
     sample->Add(*inputData);
   }
-
   //========== Generation of data sample ===========
   // generation with unbinned efficiency correction - use full sample
   if (!phspEfficiencyFile.empty() && (!inputData || !inputBkg)) {
@@ -447,6 +446,11 @@ int main(int argc, char **argv) {
   run.SetPhspSample(std::shared_ptr<Data>());
 
   sample->reduceToPhsp();
+  
+  auto fcnTree = intens->GetTree(sample->getListOfData(), phspData->getListOfData(), toyPhspData->getListOfData() );
+  std::cout<<fcnTree->head()->to_str(20)<<std::endl;
+  exit(1);
+
 
   LOG(info) << "================== SETTINGS =================== ";
 
@@ -524,7 +528,7 @@ int main(int argc, char **argv) {
     //========================FITTING =====================
     ParameterList truePar, fitPar;
     trueIntens->GetParameters(truePar);
-    intens->GetParameters(fitPar);
+//    intens->GetParameters(fitPar);
     LOG(debug) << "Fit parameters: " << std::endl << fitPar;
 
     bool useTree = (fittingMethod == "tree") ? 1 : 0;
@@ -532,10 +536,12 @@ int main(int argc, char **argv) {
     auto esti = Estimator::MinLogLH::MinLogLH::CreateInstance(
         intens, sample, toyPhspData, phspData, useTree, 0, 0);
 
+    std::cout<<"asdfasdf"<<std::endl;
     if (fittingMethod == "tree") {
       LOG(debug) << esti->GetTree()->head()->to_str(25);
     }
 
+    exit(1);
     if (useRandomStartValues)
       randomStartValues(fitPar);
     LOG(debug) << "Initial LH=" << esti->controlParameter(fitPar) << ".";

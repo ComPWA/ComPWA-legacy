@@ -39,12 +39,12 @@ public:
 
   virtual double controlParameter(ParameterList &minPar) = 0;
 
-  virtual void resetInstance() {
+  virtual void ResetInstance() {
     instance_ = std::shared_ptr<ControlParameter>();
   }
 
   virtual bool HasTree() = 0;
-  
+
   virtual std::shared_ptr<FunctionTree> GetTree() = 0;
 
   virtual std::shared_ptr<AmpIntensity> GetIntensity() = 0;
@@ -52,12 +52,14 @@ public:
   virtual int nCalls() { return calls; }
 
 protected:
+  ControlParameter() { /* nothing */ }
+  
+  virtual ~ControlParameter() { /* nothing */ }
+  
   static std::shared_ptr<ControlParameter> instance_;
+  
   std::shared_ptr<FunctionTree> f;
-  ControlParameter() { /* nothing */
-  }
-  virtual ~ControlParameter() { /* nothing */
-  }
+  
   int calls;
 };
 

@@ -27,7 +27,8 @@ double CoherentIntensity::IntensityNoEff(const dataPoint &point) const {
   std::complex<double> result(0., 0.);
   for (auto i : _seqDecays)
     result += i->Evaluate(point);
-  return GetStrengthValue() * std::norm(result) * GetNormalization();
+  assert( !std::isnan(result.real()) && !std::isnan(result.imag()) );
+  return GetStrength() * std::norm(result) * GetNormalization();
 };
 
 std::shared_ptr<CoherentIntensity>
@@ -42,9 +43,9 @@ CoherentIntensity::Factory(const boost::property_tree::ptree &pt) {
   auto ptCh = pt.get_child_optional("Strength");
   if (ptCh) {
     auto strength = ComPWA::DoubleParameterFactory(ptCh.get());
-    obj->SetStrength(std::make_shared<DoubleParameter>(strength));
+    obj->SetStrengthParameter(std::make_shared<DoubleParameter>(strength));
   } else {
-    obj->SetStrength(std::make_shared<ComPWA::DoubleParameter>("", 1.0));
+    obj->SetStrengthParameter(std::make_shared<ComPWA::DoubleParameter>("", 1.0));
   }
 
   for (const auto &v : pt.get_child("")) {
@@ -62,7 +63,7 @@ CoherentIntensity::Save(std::shared_ptr<CoherentIntensity> obj) {
   boost::property_tree::ptree pt;
   pt.put<std::string>("<xmlattr>.Name", obj->GetName());
   pt.add_child("Strength",
-               ComPWA::DoubleParameterSave(*obj->GetStrength().get()));
+               ComPWA::DoubleParameterSave(*obj->GetStrengthParameter().get()));
   for (auto i : obj->GetDecays()) {
     pt.add_child("Amplitude", SequentialTwoBodyDecay::Save(i));
   }
@@ -71,8 +72,8 @@ CoherentIntensity::Save(std::shared_ptr<CoherentIntensity> obj) {
 
 //! Getter function for basic amp tree
 std::shared_ptr<ComPWA::FunctionTree> CoherentIntensity::GetTree(
-    ComPWA::ParameterList &sample, ComPWA::ParameterList &phspSample,
-    ComPWA::ParameterList &toySample, std::string suffix) {
+    const ComPWA::ParameterList &sample, const ComPWA::ParameterList &phspSample,
+    const ComPWA::ParameterList &toySample, std::string suffix) {
 
   unsigned int effId = Kinematics::Instance()->GetNVars();
   unsigned int weightId = Kinematics::Instance()->GetNVars() + 1;
@@ -127,8 +128,8 @@ std::shared_ptr<ComPWA::FunctionTree> CoherentIntensity::GetTree(
 }
 
 std::shared_ptr<FunctionTree>
-CoherentIntensity::setupBasicTree(ParameterList &sample,
-                                  ParameterList &phspSample,
+CoherentIntensity::setupBasicTree(const ParameterList &sample,
+                                  const ParameterList &phspSample,
                                   std::string suffix) const {
 
   int sampleSize = sample.GetMultiDouble(0)->GetNValues();
@@ -167,27 +168,18 @@ CoherentIntensity::setupBasicTree(ParameterList &sample,
 }
 
 void CoherentIntensity::GetParameters(ComPWA::ParameterList &list) {
-  list.AddParameter(GetStrength());
+  list.AddParameter(GetStrengthParameter());
   for (auto i : _seqDecays) {
     i->GetParameters(list);
   }
 }
 
 double CoherentIntensity::GetNormalization() const {
-  if (_integral)
-    return 1 / _integral;
+  bool modified = false;
+  for (auto i : _seqDecays)
+    if( i->CheckModified() ) modified=true;
 
-  // Check if parameters were modified
-  ParameterList list;
-  const_cast<CoherentIntensity *>(this)->GetParameters(list);
-  if (const_cast<ParameterList &>(_currentParList) == list && _integral > 0 &&
-      _maxIntens > 0)
-    return 1 / _integral;
-
-  const_cast<ParameterList &>(_currentParList).DeepCopy(list);
-  // Parameters have changed. We have to recalculate the normalization.
-  const_cast<double &>(_integral) = Integral();
-
+  if( modified ) const_cast<double&>(_integral) = Integral();
   return 1 / _integral;
 }
 
