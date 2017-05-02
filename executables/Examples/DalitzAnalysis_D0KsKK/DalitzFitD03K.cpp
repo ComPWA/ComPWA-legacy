@@ -303,7 +303,7 @@ int main(int argc, char **argv) {
     return 1;
   }
 
-//  LOG(info) << "Current path: " << getenv("PWD");
+  //  LOG(info) << "Current path: " << getenv("PWD");
   po::notify(vm);
 
   if (ampMcPrecision == 0)
@@ -446,11 +446,6 @@ int main(int argc, char **argv) {
   run.SetPhspSample(std::shared_ptr<Data>());
 
   sample->reduceToPhsp();
-  
-  auto fcnTree = intens->GetTree(sample->getListOfData(), phspData->getListOfData(), toyPhspData->getListOfData() );
-  std::cout<<fcnTree->head()->to_str(20)<<std::endl;
-  exit(1);
-
 
   LOG(info) << "================== SETTINGS =================== ";
 
@@ -528,17 +523,27 @@ int main(int argc, char **argv) {
     //========================FITTING =====================
     ParameterList truePar, fitPar;
     trueIntens->GetParameters(truePar);
-//    intens->GetParameters(fitPar);
+    //    intens->GetParameters(fitPar);
     LOG(debug) << "Fit parameters: " << std::endl << fitPar;
 
     bool useTree = (fittingMethod == "tree") ? 1 : 0;
+    
     //=== Constructing likelihood
     auto esti = Estimator::MinLogLH::MinLogLH::CreateInstance(
         intens, sample, toyPhspData, phspData, useTree, 0, 0);
 
-    std::cout<<"asdfasdf"<<std::endl;
+
+//    auto fcnTree =
+//        intens->GetTree(sample->getListOfData(), phspData->getListOfData(),
+//                        toyPhspData->getListOfData());
+//    std::cout << fcnTree->head()->to_str(20) << std::endl;
+//    exit(1);
+    std::cout.setf(std::ios::unitbuf);
+    std::cout << "asdfasdf" << std::endl;
     if (fittingMethod == "tree") {
-      LOG(debug) << esti->GetTree()->head()->to_str(25);
+      auto treeStr =  esti->GetTree()->head()->to_str(25);
+      
+//      LOG(debug) << treeStr;
     }
 
     exit(1);
@@ -646,7 +651,7 @@ int main(int argc, char **argv) {
     std::shared_ptr<ComPWA::Data> pl_phspSample(new RootReader());
     LOG(info) << "Plotting results...";
     if (!phspEfficiencyFile.empty()) { // unbinned plotting
-      // sample with accepted phsp events
+                                       // sample with accepted phsp events
       pl_phspSample = std::shared_ptr<Data>(new RootReader(
           phspEfficiencyFile, phspEfficiencyFileTreeName, plotSize));
 

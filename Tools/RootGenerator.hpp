@@ -52,8 +52,9 @@ public:
   virtual TGenPhaseSpace *GetGenerator() { return &event; }
   
 protected:
+  double sqrtS;
   TGenPhaseSpace event;
-  unsigned int nPart;
+  size_t nPart;
   Double_t *masses;
 
 };

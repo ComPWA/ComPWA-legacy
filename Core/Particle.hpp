@@ -31,6 +31,12 @@
 
 namespace ComPWA {
 
+inline bool equal(double x, double y, int nEpsilon) {
+  return std::abs(x - y) < std::numeric_limits<double>::epsilon() *
+                               std::abs(x + y) * nEpsilon ||
+         std::abs(x - y) < std::numeric_limits<double>::min();
+}
+
 class FourMomentum {
 
 public:
@@ -81,7 +87,9 @@ public:
 
   virtual void SetFourMomentum(std::array<double, 4> p4) { _p4 = p4; }
 
-  inline double GetMassSq() const { return InvariantMass(*this); }
+  inline double GetInvMassSq() const { return InvariantMass(*this); }
+
+  inline double GetInvMass() const { return std::sqrt(GetInvMassSq()); }
 
   static double InvariantMass(const FourMomentum &p4A,
                               const FourMomentum &p4B) {

@@ -354,9 +354,21 @@ void HelicityKinematics::EventToDataPoint(
     totalP4 += event.getParticle(s).GetFourMomentum();
 
   totalP4 += finalA;
-  double mSq = totalP4.GetMassSq();
+  double mSq = totalP4.GetInvMassSq();
 
-  if (mSq <= limits.first || mSq >= limits.second) {
+  if ( mSq <= limits.first ) {
+    //We allow for a deviation from the limits of two times the numerical precision
+    if( ComPWA::equal(mSq, limits.first, 100) )
+      mSq = limits.first;
+    else
+      throw BeyondPhsp("HelicityKinematics::EventToDataPoint() |"
+                       " Point beypond phase space boundaries!");
+  }
+  if (mSq >= limits.second ) {
+    //We allow for a deviation from the limits of two times the numerical precision
+    if( ComPWA::equal(mSq, limits.second, 100) )
+      mSq = limits.second;
+    else 
     throw BeyondPhsp("HelicityKinematics::EventToDataPoint() |"
                      " Point beypond phase space boundaries!");
   }

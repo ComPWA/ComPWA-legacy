@@ -127,10 +127,13 @@ BOOST_AUTO_TEST_CASE(AmpTreeCorrespondence) {
       new ComPWA::DataReader::RootReader());
 
   ComPWA::RunManager r;
-  r.setGenerator(gen);
-  r.setPhspSample(sample);
-  r.generatePhsp(20);
+  r.SetGenerator(gen);
+  r.SetPhspSample(sample);
+  r.GeneratePhsp(200);
 
+  auto phspSample = std::make_shared<std::vector<dataPoint>>(r.GetPhspSample()->getDataPoints());
+  intens->SetPhspSample(phspSample, phspSample);
+  
   LOG(info) << "Loop over phsp events....";
   for (auto i : sample->getEvents()) {
     ComPWA::dataPoint p;

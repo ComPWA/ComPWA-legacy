@@ -1,11 +1,14 @@
+ 
+      
+  
 
-                                  
-                              /*
- * RootGenerator.cpp
- *
- *  Created on: Jun 18, 2015
- *      Author: weidenka
- */
+
+/*
+* RootGenerator.cpp
+*
+*  Created on: Jun 18, 2015
+*      Author: weidenka
+*/
 
 #include <stdexcept>
 
@@ -33,13 +36,14 @@ RootGenerator::RootGenerator(int seed) {
         << "RootGenerator::RootGenerator() | only 2 particles in the final"
            " state! There are no degrees of freedom!";
   if (initialS.size() != 1)
-    throw std::runtime_error("RootGenerator::RootGenerator() | More than one "
-                             "particle in initial State!");
+    throw std::runtime_error(
+        "RootGenerator::RootGenerator() | More than one "
+        "particle in initial State! Currently we can not deal with that!");
+
+  sqrtS = physConst->FindParticle(initialS.at(0)).GetMass();
 
   masses = new Double_t[nPart];
-  TLorentzVector W(
-      0.0, 0.0, 0.0,
-      physConst->FindParticle(initialS.at(0)).GetMass()); //= beam + target;
+  TLorentzVector W(0.0, 0.0, 0.0, sqrtS);    //= beam + target;
   for (unsigned int t = 0; t < nPart; t++) { // particle 0 is mother particle
     masses[t] = physConst->FindParticle(finalS.at(t)).GetMass();
   }
@@ -51,12 +55,27 @@ RootGenerator *RootGenerator::Clone() { return (new RootGenerator(*this)); }
 void RootGenerator::Generate(Event &evt) {
   const double weight = event.Generate();
 
-  Event tmp(weight, "");
   for (unsigned int t = 0; t < nPart; t++) {
     TLorentzVector *p = event.GetDecay(t);
-    tmp.addParticle(Particle(p->X(), p->Y(), p->Z(), p->E()));
+    evt.addParticle(Particle(p->X(), p->Y(), p->Z(), p->E()));
   }
-  evt = tmp;
+  evt.setWeight(weight);
+
+#ifndef _NDEBUG
+  ComPWA::FourMomentum pFour;
+  for (int i = 0; i < evt.getNParticles(); i++)
+    pFour += evt.getParticle(i).GetFourMomentum();
+  if (pFour.GetInvMass() != sqrtS)
+    if (!ComPWA::equal(pFour.GetInvMass(), sqrtS, 100)) {
+      LOG(error) << pFour.GetInvMass() << " - " << sqrtS << " = "
+                 << pFour.GetInvMass() - sqrtS;
+      throw std::runtime_error(
+          "RootGenerator::Generate() | Invariant mass of "
+          "all generate particles does not sum up to the mass of the decaying particle. "
+          "The difference in larger than two times the numerical precision.");
+    }
+#endif
+
   return;
 }
 

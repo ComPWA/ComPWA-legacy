@@ -23,6 +23,7 @@ class NonResonant : public AbstractDynamicalFunction {
 
 public:
   NonResonant() {
+    // Set the mass parameter to make shure the pointer is set.
     SetMassParameter(
         std::shared_ptr<DoubleParameter>(new DoubleParameter("", 0.0)));
   };
@@ -32,11 +33,11 @@ public:
   virtual std::complex<double> Evaluate(const dataPoint &p) const {
     return std::complex<double>(1.0, 0.0);
   }
-  
+
   virtual std::shared_ptr<FunctionTree> GetTree(const ParameterList &sample,
                                                 std::string suffix);
 
-  virtual void GetParameters(ParameterList &list) { };
+  virtual void GetParameters(ParameterList &list){};
 };
 
 } /* namespace DynamicalFunctions */
