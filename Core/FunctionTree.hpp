@@ -224,7 +224,6 @@ public:
    */
   virtual const std::shared_ptr<TreeNode> head() const {
     return head_;
-    // TODO: return double? ;
   }
 
   //! trigger calculation

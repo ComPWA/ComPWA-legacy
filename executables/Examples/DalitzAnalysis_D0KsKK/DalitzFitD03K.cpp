@@ -523,30 +523,19 @@ int main(int argc, char **argv) {
     //========================FITTING =====================
     ParameterList truePar, fitPar;
     trueIntens->GetParameters(truePar);
-    //    intens->GetParameters(fitPar);
+    intens->GetParameters(fitPar);
     LOG(debug) << "Fit parameters: " << std::endl << fitPar;
 
-    bool useTree = (fittingMethod == "tree") ? 1 : 0;
-    
     //=== Constructing likelihood
-    auto esti = Estimator::MinLogLH::MinLogLH::CreateInstance(
-        intens, sample, toyPhspData, phspData, useTree, 0, 0);
+    auto esti = Estimator::MinLogLH::CreateInstance(
+        intens, sample, toyPhspData, phspData, 0, 0);
 
-
-//    auto fcnTree =
-//        intens->GetTree(sample->getListOfData(), phspData->getListOfData(),
-//                        toyPhspData->getListOfData());
-//    std::cout << fcnTree->head()->to_str(20) << std::endl;
-//    exit(1);
     std::cout.setf(std::ios::unitbuf);
-    std::cout << "asdfasdf" << std::endl;
     if (fittingMethod == "tree") {
-      auto treeStr =  esti->GetTree()->head()->to_str(25);
-      
-//      LOG(debug) << treeStr;
+      dynamic_pointer_cast<ComPWA::Estimator::MinLogLH>(esti)->UseFunctionTree(true);
+      LOG(debug) << esti->GetTree()->head()->to_str(25);
     }
 
-    exit(1);
     if (useRandomStartValues)
       randomStartValues(fitPar);
     LOG(debug) << "Initial LH=" << esti->controlParameter(fitPar) << ".";
@@ -572,19 +561,16 @@ int main(int argc, char **argv) {
 
     auto minuitif = new Optimizer::Minuit2::MinuitIF(esti, fitPar);
     minuitif->SetHesse(useHesse);
-    opti = std::shared_ptr<Optimizer::Optimizer>(minuitif);
-    run.SetOptimizer(opti);
+    run.SetOptimizer( std::shared_ptr<Optimizer::Optimizer>(minuitif) );
 
     //====== STARTING MINIMIZATION ======
     result = run.Fit(fitPar);
 
     //====== FIT RESULT =======
-    Optimizer::Minuit2::MinuitResult *minuitResult =
+    auto minuitResult =
         dynamic_cast<Optimizer::Minuit2::MinuitResult *>(&*result);
     finalParList = result->GetFinalParameters();
-    //    Amplitude::UpdateAmpParameterList(esti->getAmplitudes(),
-    //    finalParList);
-    result->SetTrueParameters(truePar);
+//    result->SetTrueParameters(truePar);
     minuitResult->SetUseCorrelatedErrors(fitFractionError);
     minuitResult->SetCalcInterference(calculateInterference);
     result->Print();
@@ -592,10 +578,7 @@ int main(int argc, char **argv) {
     std::ofstream ofs(fileNamePrefix + std::string("-fitResult.xml"));
     boost::archive::xml_oarchive oa(ofs);
     oa << BOOST_SERIALIZATION_NVP(result);
-    // ofs.close(); don't close! Otherwise file is not correctly written
     if (!disableFileLog) { // Write fit result
-      // result->writeTeX(fileNamePrefix+std::string("-fitResult.tex"));
-
       // Save final amplitude
       boost::property_tree::ptree ptout;
       ptout.add_child("IncoherentIntensity", IncoherentIntensity::Save(intens));

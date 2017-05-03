@@ -69,10 +69,11 @@ public:
     for (auto i : _recoilState)
       stream << std::to_string(i);
     stream << ")->(";
-    for (auto j : _finalStates) {
-      for (auto i : j)
+    for (auto j=_finalStates.begin(); j != _finalStates.end(); ++j) {
+      for (auto i : *j)
         stream << std::to_string(i);
-      stream << ")+(";
+      if( j != _finalStates.end()-1 ) stream << ")+(";
+      else stream << ")";
     }
 
     return stream.str();
@@ -210,7 +211,7 @@ public:
     //We calculate the variables currently for two-body decays
     if( s.GetFinalStates().size() != 2) return 0;
     int pos = createIndex(s);
-    LOG(trace) << " Subsystem " << s << " has dataID " << pos;
+    //    LOG(trace) << " Subsystem " << s << " has dataID " << pos;
     return pos;
   }
 

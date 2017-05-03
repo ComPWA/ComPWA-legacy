@@ -27,20 +27,17 @@
 
 namespace ComPWA {
 namespace Estimator {
-namespace MinLogLH {
 
 MinLogLH::MinLogLH(std::shared_ptr<AmpIntensity> intens,
                    std::shared_ptr<DataReader::Data> data,
                    std::shared_ptr<DataReader::Data> phspSample,
                    std::shared_ptr<DataReader::Data> accSample,
-                   bool useFunctionTree, unsigned int startEvent,
-                   unsigned int nEvents)
+                   unsigned int startEvent, unsigned int nEvents)
     : _intens(intens), nEvts_(0), nPhsp_(0), nStartEvt_(startEvent),
       nUseEvt_(nEvents), _dataSample(data), _phspSample(phspSample),
       _phspAccSample(accSample) {
 
   Init();
-  IniLHtree();
 
   return;
 }
@@ -65,7 +62,7 @@ void MinLogLH::Init() {
     _phspAccSampleList = _phspSample->getListOfData();
 
   CalcSumOfWeights();
-  
+
   LOG(info) << "MinLogLH::Init() |  Size of data sample = " << nUseEvt_
             << " ( Sum of weights = " << _sumOfWeights << " ).";
 
@@ -84,16 +81,15 @@ std::shared_ptr<ComPWA::ControlParameter>
 MinLogLH::CreateInstance(std::shared_ptr<AmpIntensity> intens,
                          std::shared_ptr<DataReader::Data> data,
                          std::shared_ptr<DataReader::Data> phspSample,
-                         bool useFunctionTree, unsigned int startEvent,
-                         unsigned int nEvents) {
-  
+                         unsigned int startEvent, unsigned int nEvents) {
+
   if (!instance_) {
     std::shared_ptr<DataReader::Data> accSample_ =
         std::shared_ptr<DataReader::Data>();
     instance_ = std::shared_ptr<ComPWA::ControlParameter>(
         new MinLogLH(intens, data, phspSample,
                      std::shared_ptr<DataReader::Data>(), // empty sample
-                     useFunctionTree, startEvent, nEvents));
+                     startEvent, nEvents));
     LOG(debug) << "MinLogLH::createInstance() | "
                   "Creating instance from amplitude and dataset!";
   }
@@ -105,12 +101,10 @@ MinLogLH::CreateInstance(std::shared_ptr<AmpIntensity> intens,
                          std::shared_ptr<DataReader::Data> data,
                          std::shared_ptr<DataReader::Data> phspSample,
                          std::shared_ptr<DataReader::Data> accSample,
-                         bool useFunctionTree, unsigned int startEvent,
-                         unsigned int nEvents) {
+                         unsigned int startEvent, unsigned int nEvents) {
   if (!instance_) {
     instance_ = std::shared_ptr<ControlParameter>(
-        new MinLogLH(intens, data, phspSample, accSample, useFunctionTree,
-                     startEvent, nEvents));
+        new MinLogLH(intens, data, phspSample, accSample, startEvent, nEvents));
   }
   return instance_;
 }
@@ -124,19 +118,8 @@ void MinLogLH::CalcSumOfWeights() {
   return;
 }
 
-void MinLogLH::SetUseFunctionTree(bool t) {
-  if (t == 0)
-    _useFunctionTree = 0;
-  else
-    IniLHtree();
-}
-
 void MinLogLH::IniLHtree() {
   LOG(debug) << "MinLogLH::IniLHtree() | Constructing FunctionTree!";
-  //ToDo: we get sometimes a seg fault here if the project is compiled w/o debug
-  // symbols
-  if (_useFunctionTree)
-    return;
   if (!_intens->HasTree())
     throw std::runtime_error("MinLogLH::IniLHtree() |  AmpIntensity does not "
                              "provide a FunctionTree!");
@@ -159,7 +142,7 @@ void MinLogLH::IniLHtree() {
   _tree = std::shared_ptr<FunctionTree>(new FunctionTree());
   int sampleSize = _dataSampleList.GetMultiDouble(0)->GetNValues();
 
-  unsigned int weightId = Kinematics::Instance()->GetNVars() + 1;
+  std::size_t weightId = Kinematics::Instance()->GetNVars() + 1;
   std::shared_ptr<MultiDouble> weight =
       _dataSampleList.GetMultiDouble(weightId);
 
@@ -197,13 +180,12 @@ void MinLogLH::IniLHtree() {
   }
   LOG(debug) << "MinLogLH::IniLHtree() | "
                 "Construction of LH tree finished!";
-  _useFunctionTree = 1;
   return;
 }
 
 double MinLogLH::controlParameter(ParameterList &minPar) {
   double lh = 0;
-  if (!_useFunctionTree) {
+  if (!_tree) {
     // Calculate \Sum_{ev} log()
     double sumLog = 0;
     // loop over data sample
@@ -225,6 +207,5 @@ double MinLogLH::controlParameter(ParameterList &minPar) {
   return lh; // return -logLH
 }
 
-} /* namespace MinLogLH */
 } /* namespace Estimator */
 } /* namespace ComPWA */

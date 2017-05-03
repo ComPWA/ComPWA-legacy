@@ -80,7 +80,8 @@ void TreeNode::recalculate() {
         }
         std::shared_ptr<AbsParameter> para = _children.at(i)->getValue(ele);
         if (!para)
-          std::cout << this->getName() << " child failed: " << i << std::endl;
+          LOG(error) << "TreeNode::Update() | In node "<<this->getName()
+          << " recalculation of child "<<i<<" failed.";
         // para->type();
         newVals.AddParameter(para);
       } // end children-loop
@@ -113,7 +114,9 @@ void TreeNode::recalculate() {
         }
 
         if (!para)
-          std::cout << this->getName() << " " << i << std::endl;
+          LOG(error) << "TreeNode::Update() | In node "<<this->getName()
+          << " recalculation of child "<<i<<" failed.";
+        
         // para->type();
         newVals.AddParameter(para);
       } // end children-loop
@@ -134,9 +137,9 @@ void TreeNode::recalculate() {
 
 std::string TreeNode::to_str(int lv, std::string beginning) {
   std::stringstream oss;
-  if (_changed && _children.size())
+  if (_changed && _children.size()) {
     oss << beginning << _name << " = ?";
-  else {
+  } else {
     oss << beginning << _name;
     auto it = _value.begin();
     for (; it != _value.end(); ++it) {

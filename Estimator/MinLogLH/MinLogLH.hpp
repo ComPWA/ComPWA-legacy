@@ -35,7 +35,6 @@
 
 namespace ComPWA {
 namespace Estimator {
-namespace MinLogLH {
 
 class MinLogLH : public ComPWA::Estimator::Estimator {
 
@@ -65,7 +64,6 @@ public:
   CreateInstance(std::shared_ptr<AmpIntensity> intens,
                  std::shared_ptr<DataReader::Data> data,
                  std::shared_ptr<DataReader::Data> phspSample,
-                 bool useFunctionTree = false,
                  unsigned int startEvent = 0, unsigned int nEvents = 0);
 
   /** Create instance of MinLogLH.
@@ -86,18 +84,37 @@ public:
                  std::shared_ptr<DataReader::Data> data,
                  std::shared_ptr<DataReader::Data> phspSample,
                  std::shared_ptr<DataReader::Data> accSample,
-                 bool useFunctionTree = false,
                  unsigned int startEvent = 0, unsigned int nEvents = 0);
 
   //! Check if tree for LH calculation is available
-  virtual bool HasTree() { return _useFunctionTree; }
+  virtual bool HasTree() { return (_tree) ? 1 : 0; }
+
+  virtual void UseFunctionTree(bool onoff) {
+    if (onoff && _tree)
+      return;     // Tree already exists
+    if (!onoff) { // disable tree
+      _tree = std::shared_ptr<FunctionTree>();
+      return;
+    }
+    try {
+      IniLHtree();
+    } catch (std::exception &ex) {
+      throw std::runtime_error(
+          "MinLogLH::UseFunctionTree()| FunctionTree can not be "
+          "constructed! Error: " +
+          std::string(ex.what()));
+    }
+    return;
+  }
 
   //! Get FunctionTree for LH calculation. Check first if its available using
   //! MinLogLH::hasTree().
   virtual std::shared_ptr<FunctionTree> GetTree() {
-    if (!_useFunctionTree)
-      throw std::runtime_error("MinLogLH::getTree()  | You requested a "
-                               "tree which was not constructed!");
+    if (!_tree) {
+      throw std::runtime_error("MinLogLH::GetTree()| FunctionTree does not "
+                               "exists. Enable it first using "
+                               "UseFunctionTree(true)!");
+    }
     return _tree;
   }
 
@@ -105,10 +122,6 @@ public:
   virtual std::shared_ptr<ComPWA::AmpIntensity> GetIntensity() {
     return _intens;
   }
-
-  //! Should we try to use the function tree? Function tree needs to be
-  //! implemented in Amplitude
-  virtual void SetUseFunctionTree(bool t);
 
   //! Get number of events in data set
   virtual int GetNEvents() { return nEvts_; }
@@ -121,9 +134,7 @@ protected:
   MinLogLH(std::shared_ptr<AmpIntensity> amp,
            std::shared_ptr<DataReader::Data> data,
            std::shared_ptr<DataReader::Data> phspSample,
-           std::shared_ptr<DataReader::Data> accSample,
-           bool useFunctionTree,
-           unsigned int startEvent,
+           std::shared_ptr<DataReader::Data> accSample, unsigned int startEvent,
            unsigned int nEvents);
 
   //! Uses ampTree and creates a tree that calculates the full LH
@@ -142,9 +153,6 @@ private:
   //! Intensity
   std::shared_ptr<AmpIntensity> _intens;
 
-  //! Use FunctionTree for LH calculation (yes/no)?
-  bool _useFunctionTree;
-
   //! FunctionTree for Likelihood calculation
   std::shared_ptr<FunctionTree> _tree;
 
@@ -152,7 +160,7 @@ private:
   unsigned int nEvts_;
   //! Number of event in phsp sample
   unsigned int nPhsp_;
-  
+
   //! Process data sample from position #nStartEvt_ on
   unsigned int nStartEvt_;
   //! Number of events to process in _dataSample sample
@@ -173,7 +181,6 @@ private:
   double _phspAccSampleEff; //! Total efficiency of phsp with applied efficency
 };
 
-} /* namespace MinLogLH */
 } /* namespace Estimator */
 } /* namespace ComPWA */
 
