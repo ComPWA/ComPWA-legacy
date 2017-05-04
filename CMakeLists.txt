@@ -22,7 +22,8 @@ set (CMAKE_CXX_STANDARD 11)
 #LINK_DIRECTORIES(${PYTHON_LIBRARIES})
 
 #Add Boost
-find_package(Boost COMPONENTS python system filesystem serialization thread chrono date_time log log_setup program_options regex REQUIRED)
+#find_package(Boost COMPONENTS python system filesystem serialization thread chrono date_time log log_setup program_options regex REQUIRED)
+find_package(Boost COMPONENTS system filesystem serialization thread chrono date_time log log_setup program_options regex REQUIRED)
 include_directories(${Boost_INCLUDE_DIR})
 link_directories(${Boost_LIBRARY_DIR})
 
