@@ -3,7 +3,7 @@
 # The REQUIRED statement is somehow not working
 find_package( ROOT REQUIRED )
 find_package( Boost REQUIRED )
-find_package( Geneva )
+#find_package( Geneva )
 
 FILE(GLOB lib_srcs PolyFit.cpp)
 FILE(GLOB lib_headers PolyFit.hpp)
