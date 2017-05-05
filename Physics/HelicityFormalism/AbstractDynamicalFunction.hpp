@@ -70,6 +70,10 @@ public:
 
   virtual void GetParameters(ParameterList &list);
 
+  //! Fill vector with parameters
+  virtual void GetParametersFast(std::vector<double> &list) const {
+    list.push_back(GetMass());
+  }
 
   /**
    Set decay mass

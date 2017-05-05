@@ -100,14 +100,14 @@ public:
 
    @param w Decay width
    */
-  void SetWidth(std::shared_ptr<DoubleParameter> w) { _width = w; }
+  void SetWidthParameter(std::shared_ptr<DoubleParameter> w) { _width = w; }
 
   /**
    Get decay width
 
    @return Decay width
    */
-  std::shared_ptr<DoubleParameter> GetWidth() { return _width; }
+  std::shared_ptr<DoubleParameter> GetWidthParameter() { return _width; }
 
   /**
    Set decay width
@@ -121,7 +121,7 @@ public:
 
    @return Decay width
    */
-  double GetWidthValue() { return _width->GetValue(); }
+  double GetWidth() const { return _width->GetValue(); }
 
   /**
    Set meson radius
@@ -130,7 +130,7 @@ public:
 
    @param r Meson radius
    */
-  void SetMesonRadius(std::shared_ptr<DoubleParameter> r) { _mesonRadius = r; }
+  void SetMesonRadiusParameter(std::shared_ptr<DoubleParameter> r) { _mesonRadius = r; }
 
   /**
    Get meson radius
@@ -139,7 +139,7 @@ public:
 
    @return Meson radius
    */
-  std::shared_ptr<DoubleParameter> GetMesonRadius() { return _mesonRadius; }
+  std::shared_ptr<DoubleParameter> GetMesonRadiusParameter() { return _mesonRadius; }
 
   /**
    Set meson radius
@@ -157,7 +157,7 @@ public:
 
    @return Meson radius
    */
-  double GetMesonRadiusValue() { return _mesonRadius->GetValue(); }
+  double GetMesonRadius() const { return _mesonRadius->GetValue(); }
 
   /**
    Set form factor type
@@ -179,6 +179,13 @@ public:
 
   virtual void GetParameters(ParameterList &list);
 
+  //! Fill vector with parameters
+  virtual void GetParametersFast(std::vector<double> &list) const {
+    AbstractDynamicalFunction::GetParametersFast(list);
+    list.push_back(GetWidth());
+    list.push_back(GetMesonRadius());
+  }
+  
   //=========== FUNCTIONTREE =================
   
   //! Check of tree is available

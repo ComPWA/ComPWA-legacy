@@ -152,6 +152,12 @@ public:
     list.AddParameter(GetMagnitudeParameter());
     list.AddParameter(GetPhaseParameter());
   }
+  
+  //! Fill vector with parameters
+  virtual void GetParametersFast(std::vector<double> &list) const {
+    list.push_back(GetMagnitude());
+    list.push_back(GetPhase());
+  }
 
   /*! Set phase space sample
    * We use the phase space sample to calculate the normalization. The sample

@@ -20,15 +20,11 @@ namespace Physics {
 namespace HelicityFormalism {
 
 double CoherentIntensity::Intensity(const dataPoint &point) const {
-  return IntensityNoEff(point) * _eff->Evaluate(point);
-}
-
-double CoherentIntensity::IntensityNoEff(const dataPoint &point) const {
   std::complex<double> result(0., 0.);
   for (auto i : _seqDecays)
     result += i->Evaluate(point);
-  assert( !std::isnan(result.real()) && !std::isnan(result.imag()) );
-  return GetStrength() * std::norm(result) * GetNormalization();
+  assert(!std::isnan(result.real()) && !std::isnan(result.imag()));
+  return GetStrength() * std::norm(result) * _eff->Evaluate(point);
 };
 
 std::shared_ptr<CoherentIntensity>
@@ -45,12 +41,13 @@ CoherentIntensity::Factory(const boost::property_tree::ptree &pt) {
     auto strength = ComPWA::DoubleParameterFactory(ptCh.get());
     obj->SetStrengthParameter(std::make_shared<DoubleParameter>(strength));
   } else {
-    obj->SetStrengthParameter(std::make_shared<ComPWA::DoubleParameter>("", 1.0));
+    obj->SetStrengthParameter(
+        std::make_shared<ComPWA::DoubleParameter>("", 1.0));
   }
 
   for (const auto &v : pt.get_child("")) {
     if (v.first == "Amplitude")
-      obj->Add(
+      obj->AddAmplitude(
           ComPWA::Physics::HelicityFormalism::SequentialTwoBodyDecay::Factory(
               v.second));
   }
@@ -64,16 +61,52 @@ CoherentIntensity::Save(std::shared_ptr<CoherentIntensity> obj) {
   pt.put<std::string>("<xmlattr>.Name", obj->GetName());
   pt.add_child("Strength",
                ComPWA::DoubleParameterSave(*obj->GetStrengthParameter().get()));
-  for (auto i : obj->GetDecays()) {
+  for (auto i : obj->GetAmplitudes()) {
     pt.add_child("Amplitude", SequentialTwoBodyDecay::Save(i));
   }
   return pt;
 }
 
+std::shared_ptr<AmpIntensity>
+CoherentIntensity::GetComponent(std::string name) {
+
+  // The whole object?
+  if (name == GetName()) {
+    LOG(error) << "CoherentIntensity::GetComponent() | You're requesting the "
+                  "full object! So just copy it!";
+    return std::shared_ptr<AmpIntensity>();
+  }
+
+  bool found = false;
+  // Do we want to have a combination of coherentintensities?
+  std::vector<std::string> splitNames = splitString(name);
+  auto icIn = std::shared_ptr<AmpIntensity>(this->Clone(name));
+  icIn->Reset(); //delete all existing amplitudes
+  for (auto i : splitNames) {
+    for (auto j : _seqDecays) {
+      if (i == j->GetName()) {
+        std::dynamic_pointer_cast<CoherentIntensity>(icIn)->AddAmplitude(j);
+        found = true;
+      }
+    }
+  }
+
+  // Nothing found
+  if (!found) {
+    throw std::runtime_error(
+        "CoherentIntensity::GetComponent() | Component " + name +
+        " could not be found in CoherentIntensity " + GetName() + ".");
+  }
+  
+  return icIn;
+}
+
 //! Getter function for basic amp tree
-std::shared_ptr<ComPWA::FunctionTree> CoherentIntensity::GetTree(
-    const ComPWA::ParameterList &sample, const ComPWA::ParameterList &phspSample,
-    const ComPWA::ParameterList &toySample, std::string suffix) {
+std::shared_ptr<ComPWA::FunctionTree>
+CoherentIntensity::GetTree(const ComPWA::ParameterList &sample,
+                           const ComPWA::ParameterList &phspSample,
+                           const ComPWA::ParameterList &toySample,
+                           std::string suffix) {
 
   unsigned int effId = Kinematics::Instance()->GetNVars();
   unsigned int weightId = Kinematics::Instance()->GetNVars() + 1;
@@ -175,11 +208,14 @@ void CoherentIntensity::GetParameters(ComPWA::ParameterList &list) {
 }
 
 double CoherentIntensity::GetNormalization() const {
-  bool modified = false;
+  bool modified = CheckModified();
+  
   for (auto i : _seqDecays)
-    if( i->CheckModified() ) modified=true;
+    if (i->CheckModified())
+      modified = true;
 
-  if( modified ) const_cast<double&>(_integral) = Integral();
+  if (modified)
+    const_cast<double &>(_integral) = Integral();
   return 1 / _integral;
 }
 

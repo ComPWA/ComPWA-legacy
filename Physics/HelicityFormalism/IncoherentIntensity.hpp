@@ -8,6 +8,7 @@
 
 #include "Core/AmpIntensity.hpp"
 #include "Physics/HelicityFormalism/CoherentIntensity.hpp"
+#include "Tools/Integration.hpp"
 
 #ifndef INCOHERENT_INTENSITY_HPP
 #define INCOHERENT_INTENSITY_HPP
@@ -15,6 +16,8 @@
 namespace ComPWA {
 namespace Physics {
 namespace HelicityFormalism {
+
+  
 
 class IncoherentIntensity : public ComPWA::AmpIntensity {
 
@@ -25,6 +28,9 @@ public:
 
   //! Function to create a full copy of the amplitude
   ComPWA::AmpIntensity *Clone(std::string newName = "") const {
+    // make sure normalization is calculated before copy operation
+    GetNormalization();
+
     auto tmp = (new IncoherentIntensity(*this));
     tmp->SetName(newName);
     return tmp;
@@ -42,9 +48,10 @@ public:
   bool CheckModified() const {
     if (AmpIntensity::CheckModified())
       return true;
-    for (auto i : _intens)
+    for (auto i : _intens) {
       if (i->CheckModified())
         return true;
+    }
 
     return false;
   }
@@ -57,20 +64,30 @@ public:
    * @return
    */
   virtual double Intensity(const ComPWA::dataPoint &point) const {
-    return (IntensityNoEff(point) * _eff->Evaluate(point));
-  };
-
-  /** Calculate intensity of amplitude at point in phase-space
-   * Intensity is calculated excluding efficiency correction
-   * @param point Data point
-   * @return
-   */
-  virtual double IntensityNoEff(const ComPWA::dataPoint &point) const {
+    
+    std::vector<std::vector<double>> parameters(_parameters);
+    std::vector<double> normValues(_normValues);
+    if(_intens.size() != parameters.size() )
+      parameters = std::vector<std::vector<double>>(_intens.size());
+    if(_intens.size() != normValues.size() )
+      normValues = std::vector<double>(_intens.size());
+    
     double result = 0;
-    for (auto i : _intens) {
-      result += i->IntensityNoEff(point);
+    for(int i=0; i< _intens.size(); i++){
+      std::vector<double> params;
+      _intens.at(i)->GetParametersFast(params);
+      if ( parameters.at(i) != params ) { //recalculate normalization
+        parameters.at(i) = params;
+        normValues.at(i) = 1/Tools::Integral(_intens.at(i), _phspSample);
+        normValues.at(i) *= _intens.at(i)->GetStrength();
+      }
+      result += _intens.at(i)->Intensity(point) * normValues.at(i);
     }
-    return GetStrength() * result;
+    
+    const_cast<std::vector<std::vector<double>>&>(_parameters) = parameters;
+    const_cast<std::vector<double>&>(_normValues) = normValues;
+
+    return (GetStrength() * result);
   }
 
   //================== SET/GET =================
@@ -91,29 +108,36 @@ public:
     return max;
   }
 
-  void
-  Add(std::shared_ptr<ComPWA::Physics::HelicityFormalism::CoherentIntensity>
-          d) {
-    _intens.push_back(d);
+  void AddIntensity(std::shared_ptr<ComPWA::AmpIntensity> intens) {
+    _intens.push_back(intens);
   }
 
-  std::shared_ptr<ComPWA::Physics::HelicityFormalism::CoherentIntensity>
-  GetIntensity(int pos) {
+  std::shared_ptr<ComPWA::AmpIntensity> GetIntensity(int pos) {
     return _intens.at(pos);
   }
 
-  std::vector<
-      std::shared_ptr<ComPWA::Physics::HelicityFormalism::CoherentIntensity>> &
-  GetIntensities() {
+  std::vector<std::shared_ptr<ComPWA::AmpIntensity>> &GetIntensities() {
     return _intens;
   }
 
+  virtual void Reset() {
+    _intens.clear();
+    return;
+  }
   /**! Add amplitude parameters to list
    * Add parameters only to list if not already in
    * @param list Parameter list to be filled
    */
   virtual void GetParameters(ComPWA::ParameterList &list);
 
+  //! Fill vector with parameters
+  virtual void GetParametersFast(std::vector<double> &list) const {
+    AmpIntensity::GetParametersFast(list);
+    for (auto i : _intens) {
+      i->GetParametersFast(list);
+    }
+  }
+  
   //! Calculate & fill fit fractions of this amplitude to ParameterList
   virtual void GetFitFractions(ComPWA::ParameterList &parList){};
 
@@ -126,20 +150,21 @@ public:
   virtual void
   SetPhspSample(std::shared_ptr<std::vector<ComPWA::dataPoint>> phspSample,
                 std::shared_ptr<std::vector<ComPWA::dataPoint>> toySample) {
+    _phspSample = phspSample;
     for (auto i : _intens) {
       i->SetPhspSample(phspSample, toySample);
     }
   };
-  
+
+  virtual std::shared_ptr<AmpIntensity> GetComponent(std::string name);
+
   //======== ITERATORS/OPERATORS =============
-  typedef std::vector<std::shared_ptr<
-      ComPWA::Physics::HelicityFormalism::CoherentIntensity>>::iterator
+  typedef std::vector<std::shared_ptr<ComPWA::AmpIntensity>>::iterator
       coherentIntItr;
 
   coherentIntItr First() { return _intens.begin(); }
 
   coherentIntItr Last() { return _intens.end(); }
-
 
   //=========== FUNCTIONTREE =================
 
@@ -158,16 +183,24 @@ protected:
    * sum up the strength's to get the integral.
    */
   virtual double Integral() const {
+    return 1.0;
     double fractionSum = 0;
     for (auto i : _intens) {
       fractionSum += i->GetStrength();
     }
     return fractionSum;
   };
+  
+  //! Phase space sample to calculate the normalization and maximum value.
+  std::shared_ptr<std::vector<ComPWA::dataPoint>> _phspSample;
+  
+  // Caching of normalization values
+  std::vector<double> _normValues;
+  
+  // Temporary storage of the para
+  std::vector<std::vector<double>> _parameters;
 
-  std::vector<
-      std::shared_ptr<ComPWA::Physics::HelicityFormalism::CoherentIntensity>>
-      _intens;
+  std::vector<std::shared_ptr<ComPWA::AmpIntensity>> _intens;
 };
 
 } /* namespace HelicityFormalism */

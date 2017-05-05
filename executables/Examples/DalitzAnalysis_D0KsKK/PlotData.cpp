@@ -1,3 +1,5 @@
+
+
 #include <stdio.h>
 #include <numeric>
 
@@ -63,18 +65,15 @@ plotData::plotData(std::string name, int bins)
       h_weights("h_weights", "h_weights", bins, 0, 1.01),
       dataDiagrams("data", "Data", bins),
       phspDiagrams("phsp", "Phase-space", bins),
-      fitDiagrams("fit", "Model", bins),
       fitHitMissDiagrams("fitHitMiss", "HitMiss", bins) {
   gStyle->SetOptStat(10); // entries only
   //	gStyle->SetOptStat(1000001); //name and integral
   gStyle->SetOptTitle(0);
 
   // Full intensity blue
-  fitDiagrams.setColor(kBlue - 4);
   // Phase-space green
   phspDiagrams.setColor(kGreen);
 
-  fitDiagrams.SetStats(0);
   phspDiagrams.SetStats(0);
 
   //=== generate contour
@@ -107,8 +106,14 @@ plotData::plotData(std::string name, int bins)
 
 plotData::~plotData() {}
 
-void plotData::SetFitAmp(std::shared_ptr<AmpIntensity> intens) {
-  _intens = intens;
+void plotData::SetFitAmp(std::shared_ptr<AmpIntensity> intens,
+                         std::string title, Color_t color) {
+  _plotComponents.clear();
+  _plotComponents.push_back(intens);
+  _plotHistograms.push_back(
+      dalitzHisto(intens->GetName(), title, _bins, color));
+  _plotHistograms.back().SetStats(0);
+  _plotLegend.push_back("Fit");
   _isFilled = 0;
 }
 
@@ -138,9 +143,11 @@ void plotData::Fill() {
   }
 
   //===== Plot amplitude
-  LOG(info) << "PlotData::plot | Evaluating amplitude...";
+  if (s_phsp) {
+    LOG(info)
+        << "PlotData::plot | Plotting phase space sample and intensity...";
 
-  if (_intens && s_phsp) {
+    double weightsSum = 0.0;
 
     /* Loop over all events in phase space sample */
     progressBar bar(s_phsp->getNEvents());
@@ -148,6 +155,7 @@ void plotData::Fill() {
          i++) { // loop over phsp MC
       bar.nextEvent();
       Event event(s_phsp->getEvent(i));
+      double evWeight = event.getWeight();
       double eff = 1.0;
       if (_correctForEfficiency)
         eff = event.getEfficiency();
@@ -157,7 +165,9 @@ void plotData::Fill() {
                       "This should not happen! We skip it!";
         continue;
       }
-      // double evWeight = event.getWeight();
+
+      double evBase = evWeight / eff;
+      weightsSum += evBase;
 
       /* Construct DataPoint from Event to check if dataPoint is within the
        * phase space boundaries */
@@ -169,64 +179,22 @@ void plotData::Fill() {
       }
 
       // Fill diagrams with pure phase space events
-      phspDiagrams.Fill(event, 1 / eff); // scale phsp to data size
+      phspDiagrams.Fill(event, evBase); // scale phsp to data size
 
-      //      for (int t = 0; t < signalComponents.size(); ++t) {
-      //        resonanceItr res = _ampVec.at(0)->GetResonanceItrFirst();
-      //        for (int j = 0; j < t; ++j)
-      //          res++;
-      //
-      //        // skip CP partner of resonance
-      //        if ((*res)->GetName().find("_CP") != std::string::npos)
-      //          continue;
-      //
-      //        std::complex<double> val = (*res)->Evaluate(point);
-      //
-      //        try { // trying to find a CP partner and add it
-      //          std::shared_ptr<Resonance> cpRes;
-      //          std::shared_ptr<ComPWA::Physics::AmplitudeSum::AmpSumIntensity>
-      //              tmpAmp = std::dynamic_pointer_cast<
-      //                  ComPWA::Physics::AmplitudeSum::AmpSumIntensity>(
-      //                  _ampVec.at(0));
-      //          cpRes = tmpAmp->GetResonance((*res)->GetName() + "_CP");
-      //          val += cpRes->Evaluate(point);
-      //        } catch (std::exception &ex) {
-      //        }
-      //        signalComponents.at(t).Fill(point, std::norm(val) / eff);
-      //      }
-
-      /* Loop over all resonances of first amplitude. This is supposed to be our
-       * signal intensity */
-      //      std::complex<double> tmp_intens2(0, 0);
-      //      auto it = _ampVec.at(0)->GetResonanceItrFirst();
-      //      for (; it != _ampVec.at(0)->GetResonanceItrLast(); ++it) {
-      //        if ((*it)->GetName().find("_CP") != std::string::npos)
-      //          continue;
-      //        tmp_intens2 += (*it)->Evaluate(point);
-      //      }
-      //      ampHistos.at(0).Fill(point, std::norm(tmp_intens2) / eff);
-
-      /* Loop over all amplitudes. This is supposed to be our total intensity
-       * (usually signal+background) */
-      double intens = 0;
-      intens += _intens->Intensity(point);
-      fitDiagrams.Fill(event, intens / eff);
+      // Loop over all components that we want to plot
+      for (int t = 0; t < _plotHistograms.size(); t++)
+        _plotHistograms.at(t).Fill(
+            event, _plotComponents.at(t)->Intensity(point) * evBase);
     }
 
     // Scale histograms to match data sample
-    fitDiagrams.Scale(_globalScale / fitDiagrams.GetIntegral());
     phspDiagrams.Scale(_globalScale / phspDiagrams.GetIntegral());
-
-    //    for (int t = 0; t < _ampVec.size(); ++t) {
-    //      double scale =
-    //          _globalScale / ampHistos.at(t).GetIntegral() * _fraction.at(t);
-    //      ampHistos.at(t).Scale(scale);
-    //    }
-    //    for (int t = 0; t < signalComponents.size(); ++t) {
-    //      double scale =
-    //          _globalScale / ampHistos.at(0).GetIntegral() * _fraction.at(0);
-    //      signalComponents.at(t).Scale(scale);
-    //    }
+    double scale = _globalScale / _plotHistograms.at(0).GetIntegral() ;
+    _plotHistograms.at(0).Scale(scale);
+    
+    for (int t = 1; t < _plotHistograms.size(); t++) {
+      _plotHistograms.at(t).Scale(scale);
+    }
   }
 
   //===== Plot hit&miss data
@@ -267,7 +235,7 @@ void plotData::Plot() {
   fitHitMissDiagrams.getHistogram2D(0)->Draw("COLZ");
   m23m13_contour.Draw("P");
   c1->cd(3);
-  fitDiagrams.getHistogram2D(0)->Draw("COLZ");
+  _plotHistograms.at(0).getHistogram2D(0)->Draw("COLZ");
   m23m13_contour.Draw("P");
 
   //----- plotting invariant mass distributions -----
@@ -282,9 +250,10 @@ void plotData::Plot() {
   c2->cd(3);
   TLegend *leg = new TLegend(0.15, 0.6, 0.50, 0.85);
   leg->AddEntry(dataDiagrams.getHistogram(2), "Data");
-  leg->AddEntry(fitDiagrams.getHistogram(2), "Model");
-  if (ampHistos.size())
-    leg->AddEntry(ampHistos.back().getHistogram(2), "Background");
+  leg->AddEntry(_plotHistograms.at(0).getHistogram(2), "Model");
+  for (int i = 1; i < _plotComponents.size(); i++)
+    leg->AddEntry(_plotHistograms.at(i).getHistogram(2),
+                  TString(_plotLegend.at(i)));
   leg->SetFillStyle(0);
   leg->Draw(); // Plot legend
 
@@ -340,15 +309,10 @@ void plotData::Plot() {
   tf2->cd("hist");
   dataDiagrams.Write();
   phspDiagrams.Write();
-  fitDiagrams.Write();
   fitHitMissDiagrams.Write();
-  auto itAmp = ampHistos.begin();
-  for (; itAmp != ampHistos.end(); ++itAmp)
-    (*itAmp).Write();
 
-  itAmp = signalComponents.begin();
-  for (; itAmp != signalComponents.end(); ++itAmp)
-    (*itAmp).Write();
+  for (int t = 0; t < _plotHistograms.size(); t++)
+    _plotHistograms.at(t).Write();
 
   // Write some canvas to single files
   c2->Print(_name + "-invmass.root");
@@ -367,18 +331,11 @@ void plotData::CreateHist(unsigned int id) {
     v.push_back(dataDiagrams.getHistogram(id));
     options.push_back("E1");
   }
-  v.push_back(fitDiagrams.getHistogram(id));
-  options.push_back("Sames,Hist");
-  //  if (_ampVec.size()) {
-  //    v.push_back(fitDiagrams.getHistogram(id));
-  //    options.push_back("Sames,Hist");
-  //    for (unsigned int i = 0; i < plotComponent.size(); ++i) {
-  //      ampHistos.at(plotComponent.at(i).first)
-  //          .setColor(plotComponent.at(i).second);
-  //      v.push_back(ampHistos.at(plotComponent.at(i).first).getHistogram(id));
-  //      options.push_back("Sames,Hist");
-  //    }
-  //  }
+  for (int t = 0; t < _plotHistograms.size(); t++) {
+    v.push_back(_plotHistograms.at(t).getHistogram(id));
+    options.push_back("Sames,Hist");
+  }
+
   pad = drawPull(v, options);
 }
 
@@ -386,31 +343,30 @@ void plotData::CreateHist2(unsigned int id) {
   TPad *pad;
   std::vector<TH1D *> v;
   std::vector<TString> options;
-  //	v.push_back(ampHistos.at(0).getHistogram(id));
-  v.push_back(fitDiagrams.getHistogram(id));
-  options.push_back("Hist");
 
-  if (signalComponents.size()) {
-    for (unsigned int i = 0; i < signalComponents.size(); ++i) {
-      v.push_back(signalComponents.at(i).getHistogram(id));
-      options.push_back("Sames,Hist");
-    }
+  v.push_back(_plotHistograms.at(0).getHistogram(id));
+  options.push_back("Hist");
+  for (int t = 1; t < _plotHistograms.size(); t++) {
+    v.push_back(_plotHistograms.at(t).getHistogram(id));
+    options.push_back("Sames,Hist");
   }
+
   pad = drawHist(v, options);
 }
 
 //===================== dalitzHisto =====================
-dalitzHisto::dalitzHisto(std::string n, std::string t, unsigned int bins)
-    : name(n), title(t), nBins(bins), _integral(0.0) {
+dalitzHisto::dalitzHisto(std::string name, std::string title, unsigned int bins,
+                         Color_t color)
+    : _name(name), _title(title), _nBins(bins), _integral(0.0), _color(color) {
   auto *kin = dynamic_cast<HelicityKinematics *>(Kinematics::Instance());
 
   // Initialize TTree
-  tree = std::unique_ptr<TTree>(new TTree(TString(name), TString(title)));
+  _tree = std::unique_ptr<TTree>(new TTree(TString(_name), TString(_title)));
 
   // Adding branches to TTree
-  tree->Branch(TString(name), &t_point);
-  tree->Branch("efficiency", &t_eff, "eff/D");
-  tree->Branch("weight", &t_weight, "weight/D");
+  _tree->Branch(TString(_name), &t_point);
+  _tree->Branch("efficiency", &t_eff, "eff/D");
+  _tree->Branch("weight", &t_weight, "weight/D");
 
   char label[60];
 
@@ -420,65 +376,68 @@ dalitzHisto::dalitzHisto(std::string n, std::string t, unsigned int bins)
   double m23sq_min = m23sq_limit.first;
   double m23sq_max = m23sq_limit.second;
 
-  arr.push_back(
-      TH1D("m23sq", "m_{23}^{2} [GeV/c^{2}]", nBins, m23sq_min, m23sq_max));
-  double binWidth = (double)(m23sq_min - m23sq_max) / nBins;
+  _arr.push_back(
+      TH1D("m23sq", "m_{23}^{2} [GeV/c^{2}]", _nBins, m23sq_min, m23sq_max));
+  double binWidth = (double)(m23sq_min - m23sq_max) / _nBins;
   sprintf(label, "Entries /%f.3", binWidth);
-  arr.back().GetYaxis()->SetTitle("# [" + TString(label) + "]");
-  arr.back().GetXaxis()->SetTitle("m_{23}^{2} [GeV/c^{2}]");
-  arr.back().Sumw2();
+  _arr.back().GetYaxis()->SetTitle("# [" + TString(label) + "]");
+  _arr.back().GetXaxis()->SetTitle("m_{23}^{2} [GeV/c^{2}]");
+  _arr.back().Sumw2();
   // mass13sq
   SubSystem sys13({1}, {0}, {2});
   auto m13sq_limit = kin->GetInvMassBounds(sys13);
   double m13sq_min = m13sq_limit.first;
   double m13sq_max = m13sq_limit.second;
 
-  arr.push_back(
-      TH1D("m13sq", "m_{13}^{2} [GeV/c^{2}]", nBins, m13sq_min, m13sq_max));
-  binWidth = (double)(m13sq_min - m13sq_max) / nBins;
+  _arr.push_back(
+      TH1D("m13sq", "m_{13}^{2} [GeV/c^{2}]", _nBins, m13sq_min, m13sq_max));
+  binWidth = (double)(m13sq_min - m13sq_max) / _nBins;
   sprintf(label, "Entries /%f.3", binWidth);
-  arr.back().GetYaxis()->SetTitle("# [" + TString(label) + "]");
-  arr.back().GetXaxis()->SetTitle("m_{13}^{2} [GeV/c^{2}]");
-  arr.back().Sumw2();
+  _arr.back().GetYaxis()->SetTitle("# [" + TString(label) + "]");
+  _arr.back().GetXaxis()->SetTitle("m_{13}^{2} [GeV/c^{2}]");
+  _arr.back().Sumw2();
   // mass12sq
   SubSystem sys12({0}, {0}, {1});
   auto m12sq_limit = kin->GetInvMassBounds(sys12);
   double m12sq_min = m12sq_limit.first;
   double m12sq_max = m12sq_limit.second;
 
-  arr.push_back(
-      TH1D("m12sq", "m_{12}^{2} [GeV/c^{2}]", nBins, m12sq_min, m12sq_max));
-  binWidth = (double)(m12sq_min - m12sq_max) / nBins;
+  _arr.push_back(
+      TH1D("m12sq", "m_{12}^{2} [GeV/c^{2}]", _nBins, m12sq_min, m12sq_max));
+  binWidth = (double)(m12sq_min - m12sq_max) / _nBins;
   sprintf(label, "Entries /%f.3", binWidth);
-  arr.back().GetYaxis()->SetTitle("# [" + TString(label) + "]");
-  arr.back().GetXaxis()->SetTitle("m_{12}^{2} [GeV/c^{2}]");
-  arr.back().Sumw2();
+  _arr.back().GetYaxis()->SetTitle("# [" + TString(label) + "]");
+  _arr.back().GetXaxis()->SetTitle("m_{12}^{2} [GeV/c^{2}]");
+  _arr.back().Sumw2();
 
-  arr2D.push_back(TH2D(TString(name + "_m23sqm13sq"), TString(title), nBins,
-                       m23sq_min, m23sq_max, nBins, m13sq_min, m13sq_max));
-  arr2D.push_back(TH2D(TString(name + "_m23sqm12sq"), TString(title), nBins,
-                       m23sq_min, m23sq_max, nBins, m12sq_min, m12sq_max));
-  arr2D.push_back(TH2D(TString(name + "_m12sqm13sq"), TString(title), nBins,
-                       m12sq_min, m12sq_max, nBins, m13sq_min, m13sq_max));
-  arr2D.push_back(TH2D(TString(name + "_m23sqCosTheta"), TString(title), nBins,
-                       m23sq_min, m23sq_max, nBins, -1, 1));
+  _arr2D.push_back(TH2D(TString(name + "_m23sqm13sq"), TString(title), _nBins,
+                        m23sq_min, m23sq_max, _nBins, m13sq_min, m13sq_max));
+  _arr2D.push_back(TH2D(TString(name + "_m23sqm12sq"), TString(title), _nBins,
+                        m23sq_min, m23sq_max, _nBins, m12sq_min, m12sq_max));
+  _arr2D.push_back(TH2D(TString(name + "_m12sqm13sq"), TString(title), _nBins,
+                        m12sq_min, m12sq_max, _nBins, m13sq_min, m13sq_max));
+  _arr2D.push_back(TH2D(TString(name + "_m23sqCosTheta"), TString(title),
+                        _nBins, m23sq_min, m23sq_max, _nBins, -1, 1));
 
-  arr2D.at(0).GetXaxis()->SetTitle("m_{KK}^{2} [GeV^{2}/c^{4}]");
-  arr2D.at(0).GetYaxis()->SetTitle("m_{K_{S}K^{+}}^{2} [GeV^{2}/c^{4}]");
-  arr2D.at(1).GetXaxis()->SetTitle("m_{KK}^{2} [GeV^{2}/c^{4}");
-  arr2D.at(1).GetYaxis()->SetTitle("m_{K_{S}K^{-}}^{2} [GeV^{2}/c^{4}]");
-  arr2D.at(2).GetXaxis()->SetTitle("m_{K_{S}K^{-}}^{2} [GeV^{2}/c^{4}]");
-  arr2D.at(2).GetYaxis()->SetTitle("m_{K_{S}K^{+}}^{2} [GeV^{2}/c^{4}]");
-  arr2D.at(3).GetXaxis()->SetTitle("m_{KK}^{2} [GeV^{2}/c^{4}]");
-  arr2D.at(3).GetYaxis()->SetTitle("#cos(#Theta)_{KK}");
+  _arr2D.at(0).GetXaxis()->SetTitle("m_{KK}^{2} [GeV^{2}/c^{4}]");
+  _arr2D.at(0).GetYaxis()->SetTitle("m_{K_{S}K^{+}}^{2} [GeV^{2}/c^{4}]");
+  _arr2D.at(1).GetXaxis()->SetTitle("m_{KK}^{2} [GeV^{2}/c^{4}");
+  _arr2D.at(1).GetYaxis()->SetTitle("m_{K_{S}K^{-}}^{2} [GeV^{2}/c^{4}]");
+  _arr2D.at(2).GetXaxis()->SetTitle("m_{K_{S}K^{-}}^{2} [GeV^{2}/c^{4}]");
+  _arr2D.at(2).GetYaxis()->SetTitle("m_{K_{S}K^{+}}^{2} [GeV^{2}/c^{4}]");
+  _arr2D.at(3).GetXaxis()->SetTitle("m_{KK}^{2} [GeV^{2}/c^{4}]");
+  _arr2D.at(3).GetYaxis()->SetTitle("#cos(#Theta)_{KK}");
 
-  auto itr = arr2D.begin();
-  for (; itr != arr2D.end(); ++itr) {
+  auto itr = _arr2D.begin();
+  for (; itr != _arr2D.end(); ++itr) {
     (*itr).GetXaxis()->SetNdivisions(508);
     (*itr).GetZaxis()->SetTitle("Entries");
   }
+
+  setColor(_color);
   return;
 }
+
 void dalitzHisto::Fill(Event &event, double w) {
 
   double weight = event.getWeight() * w; // use event weights?
@@ -503,96 +462,61 @@ void dalitzHisto::Fill(Event &event, double w) {
   double m12sq = point.GetValue(6);
   //	double cos12 = point.getVal(7);
 
-  arr.at(0).Fill(m23sq, weight);
-  arr.at(1).Fill(m13sq, weight);
-  arr.at(2).Fill(m12sq, weight);
+  _arr.at(0).Fill(m23sq, weight);
+  _arr.at(1).Fill(m13sq, weight);
+  _arr.at(2).Fill(m12sq, weight);
 
-  arr2D.at(0).Fill(m23sq, m13sq, weight);
-  arr2D.at(1).Fill(m23sq, m12sq, weight);
-  arr2D.at(2).Fill(m12sq, m13sq, weight);
-  arr2D.at(3).Fill(m23sq, cos23, weight);
+  _arr2D.at(0).Fill(m23sq, m13sq, weight);
+  _arr2D.at(1).Fill(m23sq, m12sq, weight);
+  _arr2D.at(2).Fill(m12sq, m13sq, weight);
+  _arr2D.at(3).Fill(m23sq, cos23, weight);
 }
 
 void dalitzHisto::SetStats(bool b) {
-  auto n = arr.size();
+  auto n = _arr.size();
   for (int i = 0; i < n; ++i) {
-    arr.at(i).SetStats(b);
+    _arr.at(i).SetStats(b);
   }
-  auto n2 = arr2D.size();
+  auto n2 = _arr2D.size();
   for (int i = 0; i < n2; ++i) {
-    arr2D.at(i).SetStats(b);
+    _arr2D.at(i).SetStats(b);
   }
 }
 
 void dalitzHisto::Scale(double w) {
-  auto n = arr.size();
+  auto n = _arr.size();
   for (int i = 0; i < n; ++i) {
-    arr.at(i).Scale(w);
+    _arr.at(i).Scale(w);
   }
-  auto n2 = arr2D.size();
+  auto n2 = _arr2D.size();
   for (int i = 0; i < n2; ++i) {
-    arr2D.at(i).Scale(w);
+    _arr2D.at(i).Scale(w);
   }
 }
 
 void dalitzHisto::setColor(Color_t color) {
-  auto n = arr.size();
+  auto n = _arr.size();
   for (int i = 0; i < n; ++i) {
-    arr.at(i).SetLineColor(color);
-    arr.at(i).SetMarkerColor(color);
+    _arr.at(i).SetLineColor(color);
+    _arr.at(i).SetMarkerColor(color);
   }
 }
 
-TH1D *dalitzHisto::getHistogram(unsigned int num) { return &arr.at(num); }
+TH1D *dalitzHisto::getHistogram(unsigned int num) { return &_arr.at(num); }
 
-TH2D *dalitzHisto::getHistogram2D(unsigned int num) { return &arr2D.at(num); }
-
-TH2Poly *dalitzHisto::getTH2PolyPull(TH2Poly *hist1, TH2Poly *hist2,
-                                     TString name) {
-  if (hist1->GetBins()->GetEntries() != hist2->GetBins()->GetEntries()) {
-    std::cout << "binning doesnt match" << std::endl;
-    return 0;
-  }
-  TH2Poly *resHist = (TH2Poly *)hist1->Clone(name + hist1->GetName());
-  resHist->Reset("");
-
-  hist2->Scale(hist1->Integral() / hist2->Integral());
-  double limit = 0;
-  for (int bin = 1; bin <= hist1->GetBins()->GetEntries(); bin++) {
-    double c1 = hist1->GetBinContent(bin);
-    double c2 = hist2->GetBinContent(bin);
-    double c1Err = hist1->GetBinError(bin);
-    double c2Err = hist2->GetBinError(bin);
-    if (c1 > 0 && c2 > 0) {
-      double pull = (c1 - c2) / sqrt(c1Err * c1Err + c2Err * c2Err);
-      resHist->SetBinContent(bin, pull);
-      if (std::abs(pull) > limit)
-        limit = std::abs(pull);
-    } else
-      resHist->SetBinContent(bin, -999); // empty bins are set to error value
-    resHist->SetBinError(bin, 0);
-  }
-  limit = 4;
-  limit += 1;
-  resHist->GetZaxis()->SetRangeUser(
-      -limit, limit); // symmetric range including all values
-  resHist->GetZaxis()->SetTitle("deviation [#sigma]");
-  resHist->GetZaxis()->SetTitleOffset(0.5);
-
-  return resHist;
-}
+TH2D *dalitzHisto::getHistogram2D(unsigned int num) { return &_arr2D.at(num); }
 
 void dalitzHisto::Write() {
-  tree->Write(TString(name) + "_tree");
-  gDirectory->mkdir(TString(name) + "_hist");
-  gDirectory->cd(TString(name) + "_hist");
-  auto n = arr.size();
+  _tree->Write(TString(_name) + "_tree");
+  gDirectory->mkdir(TString(_name) + "_hist");
+  gDirectory->cd(TString(_name) + "_hist");
+  auto n = _arr.size();
   for (int i = 0; i < n; ++i) {
-    arr.at(i).Write();
+    _arr.at(i).Write();
   }
-  auto n2 = arr2D.size();
+  auto n2 = _arr2D.size();
   for (int i = 0; i < n2; ++i) {
-    arr2D.at(i).Write();
+    _arr2D.at(i).Write();
   }
   gDirectory->cd("../");
 }

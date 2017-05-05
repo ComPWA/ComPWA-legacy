@@ -96,6 +96,13 @@ public:
   //! Fill ParameterList with fit fractions
   virtual void GetParameters(ParameterList &list);
   
+  //! Fill vector with parameters
+  virtual void GetParametersFast(std::vector<double> &list) const {
+    Amplitude::GetParametersFast(list);
+    for( auto i:_partDecays)
+      i->GetParametersFast(list);
+  }
+  
   /*! Set phase space sample
    * We use the phase space sample to calculate the normalization. The sample
    * should be without efficiency applied.

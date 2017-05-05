@@ -659,16 +659,18 @@ int main(int argc, char **argv) {
     plotData pl(fileNamePrefix, plotNBins);
     // set data sample
     pl.SetData(sample);
-    // set amplitude
-    pl.SetFitAmp(intens);
-    // select components to plot
-    //      if (fitBkgFile != "")
-    //        pl.DrawComponent(ampVec.size() - 1, kRed);
-    //      pl.DrawComponent(ampVec.size() - 2, kOrange);
-    //		pl.setHitMissData(pl_sample);
+    // set phsp sample
     pl.SetPhspData(pl_phspSample);
+    // set amplitude
+    pl.SetFitAmp(intens, "", kBlue-4);
+    // select components to plot
+    pl.DrawComponent("D0toKSK+K-", "Signal", kGreen);
+    pl.DrawComponent("BkgD0toKSK+K-", "Background", kRed);
+    pl.DrawComponent("a0(980)0", "a_{0}(980)^{0}", kMagenta+2);
+    pl.DrawComponent("phi(1020)", "#phi(1020)", kMagenta);
 
-    //      pl.setCorrectEfficiency(plotCorrectEfficiency);
+    //pl.setCorrectEfficiency(plotCorrectEfficiency);
+    
     // Fill histograms and create canvases
     pl.Plot();
   }

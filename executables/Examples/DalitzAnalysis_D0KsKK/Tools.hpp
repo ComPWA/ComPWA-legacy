@@ -188,6 +188,9 @@ inline TPad *drawPull(std::vector<TH1D *> hist, std::vector<TString> drawOption,
     throw std::runtime_error("drawPull() | Number of histograms and number "
                              "of draw options does not match!");
 
+  if (!hist.size())
+    LOG(error) << "drawPull() | No histograms given.";
+    
   Int_t optTitle = gStyle->GetOptTitle();
   Int_t optStat = gStyle->GetOptStat();
   gStyle->SetOptTitle(0);
@@ -197,7 +200,7 @@ inline TPad *drawPull(std::vector<TH1D *> hist, std::vector<TString> drawOption,
   if (hist.size() == 1) {
     pad = new TPad();
     hist.at(0)->Draw(drawOption.at(0));
-  } else if (hist.size() == 2) {
+  } else {
     pad = new TPad("hist", "hist", 0.0, 0.3, 1, 1);
     pad->Draw();
     pad->SetMargin(0.1, 0.05, 0.0, 0.05);

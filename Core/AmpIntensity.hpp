@@ -50,7 +50,7 @@ public:
                                                                         1.0)),
                std::shared_ptr<Efficiency> eff =
                    std::shared_ptr<Efficiency>(new UnitEfficiency))
-      : _name(name), _eff(eff), _strength(strength) {
+      : _name(name), _eff(eff), _strength(strength), _current_strength(-999) {
     _strength->FixParameter(true);
   }
 
@@ -82,12 +82,11 @@ public:
    */
   virtual double Intensity(const dataPoint &point) const = 0;
 
-  /*! Evaluate intensity at dataPoint in phase-space (excluding efficiency
-   * correction).
+  /*! Evaluate intensity at dataPoint in phase-space (excluding normalization).
    * @param point Data point
    * @return Intensity
    */
-  virtual double IntensityNoEff(const dataPoint &point) const = 0;
+  virtual double IntensityNoNorm(const dataPoint &point) const {return 1.0;};
 
   //============ SET/GET =================
   //! Get name
@@ -123,8 +122,12 @@ public:
    */
   virtual double GetMaximum(std::shared_ptr<Generator> gen) const = 0;
 
-  //! Fill ParameterList
   virtual void GetParameters(ParameterList &list) = 0;
+  
+  //! Fill vector with parameters
+  virtual void GetParametersFast(std::vector<double> &list) const {
+    list.push_back(GetStrength());
+  }
 
   //! Fill ParameterList with fit fractions
   virtual void GetFitFractions(ParameterList &parList) = 0;
@@ -139,6 +142,9 @@ public:
   SetPhspSample(std::shared_ptr<std::vector<ComPWA::dataPoint>> phspSample,
                 std::shared_ptr<std::vector<ComPWA::dataPoint>> toySample) = 0;
 
+  virtual std::shared_ptr<AmpIntensity> GetComponent(std::string name){};
+  
+  virtual void Reset() {};
   //========== FUNCTIONTREE =============
 
   //! Check of tree is available
@@ -246,7 +252,7 @@ public:
     return std::norm(gaus);
   }
 
-  virtual double IntensityNoEff(const dataPoint &point) const {
+  virtual double IntensityNoNorm(const dataPoint &point) const {
     return Intensity(point);
   }
 
@@ -308,7 +314,8 @@ public:
 
   virtual void GetParameters(ParameterList &list){};
 
-  virtual double IntensityNoEff(const dataPoint &point) const { return 1.0; }
+  virtual double IntensityNoNorm(const dataPoint &point) const { return 1.0; }
+  
   virtual void GetFitFractions(ParameterList &parList) {}
 
   //========== FunctionTree =============
@@ -333,7 +340,7 @@ public:
   virtual void
   SetPhspSample(std::shared_ptr<std::vector<ComPWA::dataPoint>> phspSample,
                 std::shared_ptr<std::vector<ComPWA::dataPoint>> toySample) {}
-  
+
 protected:
   /**Setup Basic Tree
    *
@@ -371,6 +378,18 @@ protected:
     return Kinematics::Instance()->GetPhspVolume();
   }
 };
+
+  //! Split string into pieces which are separated by blanks
+inline std::vector<std::string> splitString(std::string str) {
+  std::vector<std::string> result;
+  std::istringstream iStr(str);
+  std::vector<std::string> stringFrag{std::istream_iterator<std::string>{iStr},
+                                      std::istream_iterator<std::string>{}};
+  for (auto i : stringFrag) {
+    result.push_back(i);
+  }
+  return result;
+}
 
 } /* namespace ComPWA */
 #endif

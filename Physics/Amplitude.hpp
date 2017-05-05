@@ -105,6 +105,12 @@ public:
     list.AddParameter(_magnitude);
     list.AddParameter(_phase);
   }
+  
+  //! Fill vector with parameters
+  virtual void GetParametersFast(std::vector<double> &list) const {
+    list.push_back(GetMagnitude());
+    list.push_back(GetPhase());
+  }
 
   //! Fill ParameterList with fit fractions
   virtual void GetFitFractions(ParameterList &parList) = 0;

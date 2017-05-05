@@ -41,6 +41,9 @@ public:
 
   //! Clone function
   ComPWA::AmpIntensity *Clone(std::string newName = "") const {
+    //make sure normalization is calculated before copy operation
+    GetNormalization();
+    
     auto tmp = (new CoherentIntensity(*this));
     tmp->SetName(newName);
     return tmp;
@@ -77,13 +80,6 @@ public:
    */
   virtual double Intensity(const ComPWA::dataPoint &point) const;
 
-  /** Calculate intensity of amplitude at point in phase-space
-   * Intensity is calculated excluding efficiency correction
-   * @param point Data point
-   * @return
-   */
-  virtual double IntensityNoEff(const ComPWA::dataPoint &point) const;
-
   //============ SET/GET =================
 
   virtual double GetMaximum(std::shared_ptr<ComPWA::Generator> gen) const {
@@ -92,16 +88,21 @@ public:
     return _maxIntens;
   }
 
-  void Add(std::shared_ptr<ComPWA::Physics::Amplitude> d) {
-    _seqDecays.push_back(d);
+  void AddAmplitude(std::shared_ptr<ComPWA::Physics::Amplitude> decay) {
+    _seqDecays.push_back(decay);
   }
 
-  std::shared_ptr<ComPWA::Physics::Amplitude> GetDecay(int pos) {
+  std::shared_ptr<ComPWA::Physics::Amplitude> GetAmplitude(int pos) {
     return _seqDecays.at(pos);
   }
 
-  std::vector<std::shared_ptr<ComPWA::Physics::Amplitude>> &GetDecays() {
+  std::vector<std::shared_ptr<ComPWA::Physics::Amplitude>> &GetAmplitudes() {
     return _seqDecays;
+  }
+  
+  virtual void Reset() {
+    _seqDecays.clear();
+    return;
   }
 
   /**! Add amplitude parameters to list
@@ -110,6 +111,14 @@ public:
    */
   virtual void GetParameters(ComPWA::ParameterList &list);
 
+  //! Fill vector with parameters
+  virtual void GetParametersFast(std::vector<double> &list) const {
+    AmpIntensity::GetParametersFast(list);
+    for (auto i : _seqDecays) {
+      i->GetParametersFast(list);
+    }
+  }
+  
   //! Calculate & fill fit fractions of this amplitude to ParameterList
   virtual void GetFitFractions(ComPWA::ParameterList &parList){};
 
@@ -128,6 +137,8 @@ public:
       i->SetPhspSample(toySample);
   };
 
+  virtual std::shared_ptr<AmpIntensity> GetComponent(std::string name);
+  
   //======== ITERATORS/OPERATORS =============
 
   typedef std::vector<std::shared_ptr<ComPWA::Physics::Amplitude>>::iterator
@@ -164,12 +175,6 @@ protected:
   double _maxIntens;
   double _integral;
 
-private:
-  /*! List with all parameters of the intensity.
-   * We use it to check if parameters were modified and if we have to
-   * recalculated the normalization.
-   */
-  ParameterList _currentParList;
 };
 
 } /* namespace HelicityFormalism */

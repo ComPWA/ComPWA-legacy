@@ -53,7 +53,7 @@ AmpFlatteRes::Factory(const boost::property_tree::ptree &pt) {
 
   auto mesonRadius =
       ComPWA::DoubleParameterFactory(decayTr.get_child("MesonRadius"));
-  obj->SetMesonRadius(std::make_shared<DoubleParameter>(mesonRadius));
+  obj->SetMesonRadiusParameter(std::make_shared<DoubleParameter>(mesonRadius));
 
   // Get masses of decay products
   auto decayProducts = pt.get_child("DecayProducts");
@@ -412,16 +412,16 @@ void AmpFlatteRes::GetParameters(ParameterList &list) {
   }
 
   try { // catch BadParameter
-    tmp = list.GetDoubleParameter(GetMesonRadius()->GetName());
+    tmp = list.GetDoubleParameter(GetMesonRadiusParameter()->GetName());
     try { // catch and throw std::runtime_error due to failed parameter
           // comparisson
       if (*tmp == *_mesonRadius)
-        SetMesonRadius(tmp);
+        SetMesonRadiusParameter(tmp);
     } catch (std::exception &ex) {
       throw;
     }
   } catch (BadParameter &ex) {
-    list.AddParameter(GetMesonRadius());
+    list.AddParameter(GetMesonRadiusParameter());
   }
 }
 

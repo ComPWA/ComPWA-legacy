@@ -140,6 +140,15 @@ public:
   //============ SET/GET =================
   
   virtual void GetParameters(ParameterList &list) ;
+  
+  //! Fill vector with parameters
+  virtual void GetParametersFast(std::vector<double> &list) const {
+    AbstractDynamicalFunction::GetParametersFast(list);
+    for( auto i : _g)
+    list.push_back(i.GetValue());
+    list.push_back(GetMesonRadius());
+  }
+  
   /**
   Set meson radius
   The meson radius is a measure of the size of the resonant state. It is used
@@ -147,7 +156,7 @@ public:
 
   @param r Meson radius
   */
-  void SetMesonRadius(std::shared_ptr<DoubleParameter> r) { _mesonRadius = r; }
+  void SetMesonRadiusParameter(std::shared_ptr<DoubleParameter> r) { _mesonRadius = r; }
 
   /**
    Get meson radius
@@ -156,7 +165,7 @@ public:
 
    @return Meson radius
    */
-  std::shared_ptr<DoubleParameter> GetMesonRadius() { return _mesonRadius; }
+  std::shared_ptr<DoubleParameter> GetMesonRadiusParameter() { return _mesonRadius; }
 
   /**
    Set meson radius
@@ -174,7 +183,7 @@ public:
 
    @return Meson radius
    */
-  double GetMesonRadiusValue() { return _mesonRadius->GetValue(); }
+  double GetMesonRadius() const { return _mesonRadius->GetValue(); }
 
   /**
    Set form factor type

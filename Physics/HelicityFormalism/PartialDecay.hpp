@@ -86,6 +86,12 @@ public:
 
   virtual void GetParameters(ParameterList &list);
 
+  //! Fill vector with parameters
+  virtual void GetParametersFast(std::vector<double> &list) const {
+    Resonance::GetParametersFast(list);
+    _dynamic->GetParametersFast(list);
+  }
+  
   /**
    Get WignerD function
 

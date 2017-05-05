@@ -109,10 +109,10 @@ RelativisticBreitWigner::Factory(const boost::property_tree::ptree &pt) {
   obj->SetFormFactorType(ffType);
 
   auto width = ComPWA::DoubleParameterFactory(decayTr.get_child("Width"));
-  obj->SetWidth(std::make_shared<DoubleParameter>(width));
+  obj->SetWidthParameter(std::make_shared<DoubleParameter>(width));
   auto mesonRadius =
       ComPWA::DoubleParameterFactory(decayTr.get_child("MesonRadius"));
-  obj->SetMesonRadius(std::make_shared<DoubleParameter>(mesonRadius));
+  obj->SetMesonRadiusParameter(std::make_shared<DoubleParameter>(mesonRadius));
 
   // Get masses of decay products
   auto decayProducts = pt.get_child("DecayProducts");
@@ -303,14 +303,14 @@ void RelativisticBreitWigner::GetParameters(ParameterList &list) {
    * different positions in the amplitude.
    */
   std::shared_ptr<DoubleParameter> tmp, width, radius;
-  width = GetWidth();
-  radius = GetMesonRadius();
+  width = GetWidthParameter();
+  radius = GetMesonRadiusParameter();
   try { // catch BadParameter
     tmp = list.GetDoubleParameter(width->GetName());
     try { // catch and throw std::runtime_error due to failed parameter
           // comparisson
       if (*tmp == *width)
-        SetWidth(tmp);
+        SetWidthParameter(tmp);
     } catch (std::exception &ex) {
       throw;
     }
@@ -323,7 +323,7 @@ void RelativisticBreitWigner::GetParameters(ParameterList &list) {
     try { // catch and throw std::runtime_error due to failed parameter
           // comparisson
       if (*tmp == *radius)
-        SetMesonRadius(tmp);
+        SetMesonRadiusParameter(tmp);
     } catch (std::exception &ex) {
       throw;
     }
