@@ -64,6 +64,12 @@ public:
 
   friend std::ostream &operator<<(std::ostream &stream, const Event &ev);
 
+  virtual void clear() {
+    fParticles.clear();
+    fWeight = 1.0;
+    fEff = 1.0;
+    fName = "";
+  }
 protected:
   std::vector<Particle> fParticles;
   double fWeight;

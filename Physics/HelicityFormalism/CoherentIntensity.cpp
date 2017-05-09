@@ -207,51 +207,6 @@ void CoherentIntensity::GetParameters(ComPWA::ParameterList &list) {
   }
 }
 
-double CoherentIntensity::GetNormalization() const {
-  bool modified = CheckModified();
-  
-  for (auto i : _seqDecays)
-    if (i->CheckModified())
-      modified = true;
-
-  if (modified)
-    const_cast<double &>(_integral) = Integral();
-  return 1 / _integral;
-}
-
-double CoherentIntensity::Integral() const {
-
-  if (!_phspSample->size()) {
-    LOG(debug)
-        << "CoherentIntensity::Integral() | Integral can not be calculated "
-           "since no phsp sample is set. Set a sample using "
-           "SetPhspSamples(phspSample, toySample)!";
-    return 1.0;
-  }
-
-  double sumIntens = 0;
-  double maxVal = 0;
-  for (auto i : *_phspSample.get()) {
-    std::complex<double> result(0., 0.);
-    for (auto d : _seqDecays)
-      result += d->Evaluate(i);
-    double intens = std::norm(result);
-
-    if (intens > maxVal)
-      maxVal = intens;
-
-    sumIntens += intens;
-  }
-
-  double phspVol = Kinematics::Instance()->GetPhspVolume();
-  double integral = (sumIntens * phspVol / _phspSample->size());
-  LOG(trace) << "CoherentIntensity::Integral() | Integral is " << integral
-             << " and the maximum value of intensity is " << maxVal << ".";
-
-  const_cast<double &>(_maxIntens) = maxVal;
-  return integral;
-}
-
 } /* namespace HelicityFormalism */
 } /* namespace Physics */
 } /* namespace ComPWA */

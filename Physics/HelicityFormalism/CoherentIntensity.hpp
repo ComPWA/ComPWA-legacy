@@ -35,15 +35,12 @@ public:
           std::shared_ptr<DoubleParameter>(new DoubleParameter("", 1.0)),
       std::shared_ptr<Efficiency> eff =
           std::shared_ptr<Efficiency>(new UnitEfficiency))
-      : AmpIntensity(name, strength, eff), _maxIntens(0.), _integral(0.){};
+      : AmpIntensity(name, strength, eff) {};
 
   virtual ~CoherentIntensity(){};
 
   //! Clone function
   ComPWA::AmpIntensity *Clone(std::string newName = "") const {
-    //make sure normalization is calculated before copy operation
-    GetNormalization();
-    
     auto tmp = (new CoherentIntensity(*this));
     tmp->SetName(newName);
     return tmp;
@@ -55,22 +52,6 @@ public:
   static boost::property_tree::ptree
   Save(std::shared_ptr<CoherentIntensity> intens);
 
-  //======= INTEGRATION/NORMALIZATION ===========
-
-  //! Check if parameters of this class or of one of its members have changed
-  bool CheckModified() const {
-    if (AmpIntensity::CheckModified())
-      return true;
-    for (auto i : _seqDecays)
-      if (i->CheckModified())
-        return true;
-
-    return false;
-  }
-
-  //! Calculate normalization
-  virtual double GetNormalization() const;
-
   //================ EVALUATION =================
 
   /** Calculate intensity of amplitude at point in phase-space
@@ -81,13 +62,7 @@ public:
   virtual double Intensity(const ComPWA::dataPoint &point) const;
 
   //============ SET/GET =================
-
-  virtual double GetMaximum(std::shared_ptr<ComPWA::Generator> gen) const {
-    if (_maxIntens <= 0)
-      Integral(); //_maxIntens is updated in Integral()
-    return _maxIntens;
-  }
-
+  
   void AddAmplitude(std::shared_ptr<ComPWA::Physics::Amplitude> decay) {
     _seqDecays.push_back(decay);
   }
@@ -160,7 +135,6 @@ public:
           const ComPWA::ParameterList &toySample, std::string suffix = "");
 
 protected:
-  virtual double Integral() const;
 
   virtual std::shared_ptr<FunctionTree>
   setupBasicTree(const ParameterList &sample, const ParameterList &phspSample,
@@ -170,10 +144,6 @@ protected:
 
   //! Phase space sample to calculate the normalization and maximum value.
   std::shared_ptr<std::vector<ComPWA::dataPoint>> _phspSample;
-
-  //! Maximum value
-  double _maxIntens;
-  double _integral;
 
 };
 

@@ -32,8 +32,7 @@ namespace ComPWA {
 
 /*! \class AmpIntensity
  * This class provides the interface an amplitude intensity. The intensity can
- * be moduled with a (double) strength parameter. The intensity has
- * to be normalized to one when integrated over the phase space.
+ * be moduled with a (double) strength parameter.
  * Since the intensity is a physically observable quantity it has to be
  * corrected for the space depended reconstruction efficiency. The normalization
  * has to take this into account as well.
@@ -60,20 +59,6 @@ public:
   //! Function to create a full copy
   virtual AmpIntensity *Clone(std::string newName = "") const = 0;
 
-  //======= INTEGRATION/NORMALIZATION ===========
-
-  //! Calculate normalization
-  virtual double GetNormalization() const { return 1.0 / Integral(); }
-
-  //! Check if parameters have changed
-  bool CheckModified() const {
-    if (GetStrength() != _current_strength) {
-      const_cast<double &>(_current_strength) = GetStrength();
-      return true;
-    }
-    return false;
-  }
-
   //================ EVALUATION =================
 
   /*! Evaluate intensity at dataPoint in phase-space
@@ -81,12 +66,6 @@ public:
    * @return Intensity
    */
   virtual double Intensity(const dataPoint &point) const = 0;
-
-  /*! Evaluate intensity at dataPoint in phase-space (excluding normalization).
-   * @param point Data point
-   * @return Intensity
-   */
-  virtual double IntensityNoNorm(const dataPoint &point) const {return 1.0;};
 
   //============ SET/GET =================
   //! Get name
@@ -116,11 +95,6 @@ public:
 
   //! Set strength parameter
   void SetStrength(double par) { _strength->SetValue(par); }
-
-  /*! Get maximum value of amplitude.
-   * Maximum is numerically calculated using a random number generator
-   */
-  virtual double GetMaximum(std::shared_ptr<Generator> gen) const = 0;
 
   virtual void GetParameters(ParameterList &list) = 0;
   
@@ -167,12 +141,6 @@ public:
   //======== ITERATORS/OPERATORS =============
 
 protected:
-  /*! Calculate integral.
-   * Since AmpIntensity represents an intensity the integration has to
-   * incorporate the phase space depended efficiency.
-   */
-  virtual double Integral() const = 0;
-
   //! Name
   std::string _name;
 

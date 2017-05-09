@@ -22,7 +22,7 @@ Particle::~Particle() {}
 
 std::ostream &operator<<(std::ostream &stream, const Particle &p) {
   stream << "Particle id=" << p.pid << " charge=" << p.charge
-         << " p4=" << &p.GetFourMomentum();
+         << " p4=" << p.GetFourMomentum();
   return stream;
 }
 

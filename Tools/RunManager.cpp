@@ -11,7 +11,7 @@
 // Contributors:
 //     Mathias Michel - initial API and implementation
 //		Peter Weidenkaff - adding functionality to generate set of
-//events
+// events
 //-------------------------------------------------------------------------------
 #include <memory>
 #include <ctime>
@@ -34,8 +34,9 @@
 #include "Core/Event.hpp"
 #include "Core/Generator.hpp"
 #include "Core/ProgressBar.hpp"
+#include "Tools/Integration.hpp"
 
-#include "Core/RunManager.hpp"
+#include "Tools/RunManager.hpp"
 
 namespace ComPWA {
 
@@ -46,14 +47,14 @@ RunManager::RunManager() {}
 RunManager::RunManager(std::shared_ptr<DataReader::Data> data,
                        std::shared_ptr<AmpIntensity> intens,
                        std::shared_ptr<Optimizer::Optimizer> optimizer)
-    : sampleData_(data), opti_(optimizer), intens_(intens){}
+    : sampleData_(data), opti_(optimizer), intens_(intens) {}
 
 RunManager::RunManager(unsigned int size, std::shared_ptr<AmpIntensity> intens,
                        std::shared_ptr<Generator> gen)
-    :  gen_(gen), intens_(intens) {}
+    : gen_(gen), intens_(intens) {}
 
 RunManager::~RunManager() {
-  if( gen_ )
+  if (gen_)
     LOG(debug) << "~RunManager: Last seed: " << gen_->GetSeed();
 }
 
@@ -136,22 +137,24 @@ bool RunManager::gen(int number, std::shared_ptr<Generator> gen,
     maxSampleWeight = phspTrue->getMaxWeight();
 
   /* Maximum value for random number generation. We introduce an arbitrary
-   * factor of 1.2 to make sure that the maximum value is never reached.
+   * factor of 5 to make sure that the maximum value is never reached.
    */
-  double generationMaxValue = 5 * amp->GetMaximum(gen) * maxSampleWeight;
+  double generationMaxValue = 5* maxSampleWeight;
 
   unsigned int initialSeed = gen->GetSeed();
   unsigned int totalCalls = 0;
-  //	unsigned int startTime = clock();
-  double AMPpdf;
 
   unsigned int limit;
-  unsigned int acceptedEvents = 0;
   if (phsp) {
     limit = phsp->getNEvents();
-  } else
+    generationMaxValue *= Tools::Maximum(amp, phsp) ;
+  } else {
     limit = 100000000; // set large limit, should never be reached
+  }
 
+  LOG(trace) << "RunMananger::gen() | Using " << generationMaxValue
+             << " as maximum value of the intensity.";
+  
   Event evt;     // event that we fill into generated sample
   Event evtTrue; // event that is used to evalutate amplitude
   progressBar bar(number);
@@ -184,22 +187,21 @@ bool RunManager::gen(int number, std::shared_ptr<Generator> gen,
 
     totalCalls++;
     double ampRnd = gen->GetUniform(0, generationMaxValue);
-    AMPpdf = amp->Intensity(point);
+    double AMPpdf = amp->Intensity(point);
 
-    if (generationMaxValue < (AMPpdf * weight)){
-      LOG(error) << "RunManager::gen() | Error in HitMiss "
-          "procedure: Maximum value of random number generation "
-          "smaller then amplitude maximum! We raise the maximum value and restart generation!";
-      i=0;
+    // If maximum of intensity is reached we have to restart the procedure
+    if (generationMaxValue < (AMPpdf * weight)) {
+      LOG(trace) << "RunManager::gen() | Error in HitMiss "
+                    "procedure: Maximum value of random number generation "
+                    "smaller then amplitude maximum! We raise the maximum "
+                    "value and restart generation!";
+      i = 0;
       bar = progressBar(number);
       gen->SetSeed(initialSeed);
       generationMaxValue = 2 * (AMPpdf * weight);
       data->Clear();
+      totalCalls = 0;
       continue;
-//      throw std::runtime_error(
-//          "RunManager::gen() | Error in HitMiss "
-//          "procedure: Maximum value of random number generation "
-//          "smaller then amplitude maximum!");
     }
 
     if (ampRnd > (weight * AMPpdf))
@@ -211,22 +213,18 @@ bool RunManager::gen(int number, std::shared_ptr<Generator> gen,
      * sample is therefore unweighted */
     evt.setWeight(1.);     // reset weight
     evt.setEfficiency(1.); // reset weight
-    data->pushEvent(evt);  // unfortunatly not thread safe
+    data->pushEvent(evt);
 
-    // some statistics
-    acceptedEvents++;
     if (number > 0)
       bar.nextEvent();
     // break if we have a sufficienct number of events
-    if (acceptedEvents >= number)
+    if (data->getNEvents() >= number)
       i = limit;
   }
   if (data->getNEvents() < number)
     LOG(error) << "RunManager::gen() | Not able to generate "
-                  " "
                << number << " events. Phsp sample too small. Current size "
-                            "of sample is now "
-               << data->getNEvents();
+                            "of sample is now " << data->getNEvents();
 
   LOG(info) << "Efficiency of toy MC generation: "
             << (double)data->getNEvents() / totalCalls;
@@ -252,7 +250,7 @@ bool RunManager::GeneratePhsp(int number) {
       i--;
     Event tmp;
     gen_->Generate(tmp);
-    double ampRnd = gen_->GetUniform(0,1);
+    double ampRnd = gen_->GetUniform(0, 1);
     if (ampRnd > tmp.getWeight())
       continue;
 

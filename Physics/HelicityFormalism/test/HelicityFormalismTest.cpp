@@ -1,14 +1,3 @@
- 
-      
-    
-  
-//
-//  PhysConstTest.cpp
-//  COMPWA
-//
-//  Created by Peter Weidenkaff on 24/02/2017.
-//
-//
 #define BOOST_TEST_MODULE                                                      \
   HelicityFormalism /* this can only be define once within the same library ?! \
   */
@@ -24,7 +13,7 @@
 #include "Core/PhysConst.hpp"
 #include "Core/ParameterList.hpp"
 #include "Core/Logging.hpp"
-#include "Core/RunManager.hpp"
+#include "Tools/RunManager.hpp"
 #include "Tools/RootGenerator.hpp"
 #include "DataReader/RootReader/RootReader.hpp"
 #include "Physics/HelicityFormalism/IncoherentIntensity.hpp"
@@ -43,13 +32,6 @@ BOOST_AUTO_TEST_SUITE(HelicityFormalism)
 BOOST_AUTO_TEST_CASE(KinematicsConstructionFromXML) {
   ComPWA::Logging log("", boost::log::trivial::severity_level::trace);
 
-  // Construct HelicityKinematics by hand
-  //  std::vector<int> finalState, initialState;
-  //  initialState.push_back(443);
-  //  finalState.push_back(210);
-  //  finalState.push_back(210);
-  //  finalState.push_back(22);
-  //  HelicityKinematics::CreateInstance(initialState, finalState);
 
   // Construct HelicityKinematics from XML tree
   boost::property_tree::ptree tr;

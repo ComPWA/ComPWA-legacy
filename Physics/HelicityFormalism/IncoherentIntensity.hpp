@@ -28,9 +28,6 @@ public:
 
   //! Function to create a full copy of the amplitude
   ComPWA::AmpIntensity *Clone(std::string newName = "") const {
-    // make sure normalization is calculated before copy operation
-    GetNormalization();
-
     auto tmp = (new IncoherentIntensity(*this));
     tmp->SetName(newName);
     return tmp;
@@ -42,20 +39,6 @@ public:
   static boost::property_tree::ptree
   Save(std::shared_ptr<IncoherentIntensity> intens);
 
-  //======= INTEGRATION/NORMALIZATION ===========
-
-  //! Check if parameters of this class or one of its members have changed
-  bool CheckModified() const {
-    if (AmpIntensity::CheckModified())
-      return true;
-    for (auto i : _intens) {
-      if (i->CheckModified())
-        return true;
-    }
-
-    return false;
-  }
-
   //================ EVALUATION =================
 
   /** Calculate intensity of amplitude at point in phase-space
@@ -65,6 +48,7 @@ public:
    */
   virtual double Intensity(const ComPWA::dataPoint &point) const {
     
+    // We have to get around the constness of the interface definition.
     std::vector<std::vector<double>> parameters(_parameters);
     std::vector<double> normValues(_normValues);
     if(_intens.size() != parameters.size() )
@@ -92,22 +76,6 @@ public:
 
   //================== SET/GET =================
 
-  /** Get maximum value of amplitude
-   * We ask for the maximum of the coherent intensities and use the largest
-   * value
-   * @param gen Random number generator
-   * @return
-   */
-  virtual double GetMaximum(std::shared_ptr<ComPWA::Generator> gen) const {
-    double max = 0;
-    for (auto i : _intens) {
-      double tmp = i->GetMaximum(gen);
-      if (max < tmp)
-        max = tmp;
-    }
-    return max;
-  }
-
   void AddIntensity(std::shared_ptr<ComPWA::AmpIntensity> intens) {
     _intens.push_back(intens);
   }
@@ -124,6 +92,7 @@ public:
     _intens.clear();
     return;
   }
+  
   /**! Add amplitude parameters to list
    * Add parameters only to list if not already in
    * @param list Parameter list to be filled
@@ -178,19 +147,6 @@ public:
           const ComPWA::ParameterList &toySample, std::string suffix = "");
 
 protected:
-  /*! Calculate integral of amplitude.
-   * CoherentIntensities are required to be normalized. Therefore, we
-   * sum up the strength's to get the integral.
-   */
-  virtual double Integral() const {
-    return 1.0;
-    double fractionSum = 0;
-    for (auto i : _intens) {
-      fractionSum += i->GetStrength();
-    }
-    return fractionSum;
-  };
-  
   //! Phase space sample to calculate the normalization and maximum value.
   std::shared_ptr<std::vector<ComPWA::dataPoint>> _phspSample;
   

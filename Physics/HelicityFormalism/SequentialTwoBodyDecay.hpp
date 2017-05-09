@@ -63,7 +63,7 @@ public:
   
   /**! Evaluate decay */
   virtual std::complex<double> Evaluate(const dataPoint &point) const {
-    std::complex<double> result = GetCoefficient();
+    std::complex<double> result = GetCoefficient()*GetPreFactor();
     for (auto i : _partDecays)
       result *= i->Evaluate(point);
 

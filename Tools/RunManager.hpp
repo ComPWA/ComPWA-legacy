@@ -91,6 +91,7 @@
 #include "Core/Efficiency.hpp"
 #include "Core/Generator.hpp"
 
+#include "Tools/FitFractions.hpp"
 namespace ComPWA {
 
 using namespace DataReader;

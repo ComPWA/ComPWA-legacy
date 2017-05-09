@@ -1,5 +1,3 @@
-
-
 /*! Dalitz plot analysis of the decay D0->K_S0 K_ K-
  * @file DalitzFitApp.cpp
  * Fit application for D0->K_S0 K_ K- analysis. A model with BW and flatte
@@ -27,7 +25,6 @@
 #include "Core/Particle.hpp"
 #include "Core/Parameter.hpp"
 #include "Core/ParameterList.hpp"
-#include "Core/RunManager.hpp"
 #include "Core/FunctionTree.hpp"
 #include "Core/TableFormater.hpp"
 #include "Core/AbsParameter.hpp"
@@ -42,10 +39,14 @@
 #include "Optimizer/Minuit2/MinuitIF.hpp"
 #include "Optimizer/Minuit2/MinuitResult.hpp"
 #include "Physics/HelicityFormalism.hpp"
+
+#include "Tools/RunManager.hpp"
 #include "Tools/RootGenerator.hpp"
+#include "Tools/FitFractions.hpp"
 
 #include "PlotData.hpp"
 #include "Tools.hpp"
+#include "systematics.hpp"
 
 using namespace std;
 using namespace ComPWA;
@@ -400,6 +401,19 @@ int main(int argc, char **argv) {
     //      numSignalEvents -= inputBkg->getNEvents();
     LOG(info) << "Reading data file...";
     std::shared_ptr<Data> inD(new RootReader(dataFile, dataFileTreeName));
+    std::cout<<"------------------------------------------------------"<<std::endl;
+    
+    SubSystem s(std::vector<int>{1}, std::vector<int>{0}, std::vector<int>{2});
+    int id = dynamic_cast<HelicityKinematics*>(Kinematics::Instance())->GetDataID(s);
+    for( int i=0; i<10 ; i++){
+      std::cout<<inD->getEvent(i)<<std::endl;
+      dataPoint p(inD->getEvent(i));
+      std::cout<<p<<std::endl;
+      std::cout<<"mSq="<<p.GetValue(id*3)<<" cosTheta="<<p.GetValue(id*3+1)<<std::endl;
+      std::cout<<"-------"<<std::endl;
+    }
+//    exit(1);
+    
     inD->reduceToPhsp();
     if (resetWeights)
       inD->resetWeights(); // resetting weights if requested
@@ -417,6 +431,14 @@ int main(int argc, char **argv) {
 
     std::shared_ptr<Data> fullPhsp(new RootReader(
         phspEfficiencyFile, phspEfficiencyFileTreeName, phspSampleSize));
+    if (applySysCorrection) {
+      MomentumCorrection *trkSys = getTrackingCorrection();
+      MomentumCorrection *pidSys = getPidCorrection();
+      trkSys->Print();
+      pidSys->Print();
+      fullPhsp->applyCorrection(*trkSys);
+      fullPhsp->applyCorrection(*pidSys);
+    }
     std::shared_ptr<Data> fullTruePhsp;
     if (!phspEfficiencyFileTrueTreeName.empty()) {
       fullTruePhsp = std::shared_ptr<Data>(new RootReader(
@@ -527,13 +549,15 @@ int main(int argc, char **argv) {
     LOG(debug) << "Fit parameters: " << std::endl << fitPar;
 
     //=== Constructing likelihood
-    auto esti = Estimator::MinLogLH::CreateInstance(
-        intens, sample, toyPhspData, phspData, 0, 0);
+    auto esti = Estimator::MinLogLH::CreateInstance(intens, sample, toyPhspData,
+                                                    phspData, 0, 0);
 
     std::cout.setf(std::ios::unitbuf);
     if (fittingMethod == "tree") {
-      dynamic_pointer_cast<ComPWA::Estimator::MinLogLH>(esti)->UseFunctionTree(true);
+      dynamic_pointer_cast<ComPWA::Estimator::MinLogLH>(esti)->UseFunctionTree(
+          true);
       LOG(debug) << esti->GetTree()->head()->to_str(25);
+      exit(1);
     }
 
     if (useRandomStartValues)
@@ -561,18 +585,32 @@ int main(int argc, char **argv) {
 
     auto minuitif = new Optimizer::Minuit2::MinuitIF(esti, fitPar);
     minuitif->SetHesse(useHesse);
-    run.SetOptimizer( std::shared_ptr<Optimizer::Optimizer>(minuitif) );
+    run.SetOptimizer(std::shared_ptr<Optimizer::Optimizer>(minuitif));
 
     //====== STARTING MINIMIZATION ======
     result = run.Fit(fitPar);
 
     //====== FIT RESULT =======
-    auto minuitResult =
-        dynamic_cast<Optimizer::Minuit2::MinuitResult *>(&*result);
+//    auto minuitResult =
+//        dynamic_cast<Optimizer::Minuit2::MinuitResult *>(&*result);
     finalParList = result->GetFinalParameters();
-//    result->SetTrueParameters(truePar);
-    minuitResult->SetUseCorrelatedErrors(fitFractionError);
-    minuitResult->SetCalcInterference(calculateInterference);
+
+    // Calculation of fit fractions
+    std::vector<std::pair<std::string, std::string>> fitComponents;
+    fitComponents.push_back(
+        std::pair<std::string, std::string>("phi(1020)", "D0toKSK+K-"));
+    fitComponents.push_back(std::pair<std::string, std::string>(
+        "phi(1020) a0(980)0", "D0toKSK+K-"));
+    fitComponents.push_back(
+        std::pair<std::string, std::string>("a0(980)0", "D0toKSK+K-"));
+    fitComponents.push_back(
+        std::pair<std::string, std::string>("a0(980)+", "D0toKSK+K-"));
+    fitComponents.push_back(
+        std::pair<std::string, std::string>("a2(1320)-", "D0toKSK+K-"));
+    ParameterList ff =
+        Tools::CalculateFitFractions(intens, toyPoints, fitComponents);
+
+    result->SetFitFractions(ff);
     result->Print();
 
     std::ofstream ofs(fileNamePrefix + std::string("-fitResult.xml"));
@@ -610,10 +648,10 @@ int main(int argc, char **argv) {
     ifs.close();
 
     inResult->SetIntensity(intens);
-    inResult->SetUseCorrelatedErrors(fitFractionError);
+    //    inResult->SetUseCorrelatedErrors(fitFractionError);
     if (calculateInterference)
       inResult->SetCalcInterference(0);
-    inResult->SetFractions(ParameterList()); // reset fractions list
+    //    inResult->SetFitFractions(ParameterList()); // reset fractions list
     result = inResult;
     result->Print();
   }
@@ -662,15 +700,15 @@ int main(int argc, char **argv) {
     // set phsp sample
     pl.SetPhspData(pl_phspSample);
     // set amplitude
-    pl.SetFitAmp(intens, "", kBlue-4);
+    pl.SetFitAmp(intens, "", kBlue - 4);
     // select components to plot
     pl.DrawComponent("D0toKSK+K-", "Signal", kGreen);
     pl.DrawComponent("BkgD0toKSK+K-", "Background", kRed);
-    pl.DrawComponent("a0(980)0", "a_{0}(980)^{0}", kMagenta+2);
-    pl.DrawComponent("phi(1020)", "#phi(1020)", kMagenta);
+    //    pl.DrawComponent("a0(980)0", "a_{0}(980)^{0}", kMagenta+2);
+    //    pl.DrawComponent("phi(1020)", "#phi(1020)", kMagenta);
 
-    //pl.setCorrectEfficiency(plotCorrectEfficiency);
-    
+    // pl.setCorrectEfficiency(plotCorrectEfficiency);
+
     // Fill histograms and create canvases
     pl.Plot();
   }

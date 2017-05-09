@@ -31,9 +31,6 @@ MinuitResult::MinuitResult(std::shared_ptr<ControlParameter> esti,
     : calcInterference(0), initialLH(0), finalLH(0), trueLH(0) {
   est = std::static_pointer_cast<Estimator>(esti);
   _intens = est->GetIntensity();
-//  penalty = est->calcPenalty();
-//  penaltyScale = est->getPenaltyScale();
-  nEvents = est->getNEvents();
   init(result);
 }
 
@@ -41,9 +38,6 @@ void MinuitResult::setResult(std::shared_ptr<ControlParameter> esti,
                              ROOT::Minuit2::FunctionMinimum result) {
   est = std::static_pointer_cast<Estimator>(esti);
   _intens = est->GetIntensity();
-//  penalty = est->calcPenalty();
-//  penaltyScale = est->getPenaltyScale();
-  nEvents = est->getNEvents();
   init(result);
 }
 
@@ -94,28 +88,6 @@ void MinuitResult::init(ROOT::Minuit2::FunctionMinimum min) {
   return;
 }
 
-//! Set list of true parameters
-void MinuitResult::SetTrueParameters(ParameterList truePars) {
-  trueParameters = truePars;
-  if (trueParameters.GetNDouble() && est) {
-    // Setting true parameter and calculate LH value
-//    Amplitude::UpdateAmpParameterList(_ampVec, trueParameters);
-    SetTrueLH(est->controlParameter(trueParameters));
-//    Amplitude::UpdateAmpParameterList(_ampVec, finalParameters);
-  }
-}
-
-//! Set list of initial parameters
-void MinuitResult::SetInitialParameters(ParameterList iniPars) {
-  initialParameters = iniPars;
-  if (initialParameters.GetNDouble() && est) {
-    // Setting initial parameter and calculate LH value
-//    Amplitude::UpdateAmpParameterList(_ampVec, initialParameters);
-    SetInitialLH(est->controlParameter(initialParameters));
-//    Amplitude::UpdateAmpParameterList(_ampVec, finalParameters);
-  }
-}
-
 void MinuitResult::genSimpleOutput(std::ostream &out) {
   for (unsigned int o = 0; o < finalParameters.GetNDouble(); o++) {
     std::shared_ptr<DoubleParameter> outPar =
@@ -126,129 +98,6 @@ void MinuitResult::genSimpleOutput(std::ostream &out) {
   }
   out << "\n";
 
-  return;
-}
-
-void MinuitResult::calcFractionError(ParameterList &parList,
-                                     std::shared_ptr<AmpIntensity> amp,
-                                     int nSets) {
-  if (nSets <= 0)
-    return;
-  if (!parList.GetNDouble())
-    return;
-  LOG(info) << "Calculating errors of fit fractions using " << nSets
-            << " sets of parameters...";
-
-  // Setting up random number generator
-  const gsl_rng_type *T;
-  gsl_rng_env_setup();
-  T = gsl_rng_default;
-  gsl_rng *rnd = gsl_rng_alloc(T);
-
-  // convert to GSL objects
-  gsl_vector *gslFinalPar = gsl_parameterList2Vec(finalParameters);
-  gsl_matrix *gslCov = gsl_vecVec2Matrix(cov);
-  gsl_matrix_print(gslCov); // DEBUG
-
-  std::vector<ParameterList> fracVect;
-  progressBar bar(nSets);
-  std::stringstream outFraction;
-  //	for(unsigned int i=0; i<nSets; i++){
-  int i = 0;
-  while (i < nSets) {
-    bool error = 0;
-    bar.nextEvent();
-    gsl_vector *gslNewPar = gsl_vector_alloc(nFreeParameter);
-    // generate set of smeared parameters
-    multivariateGaussian(rnd, nFreeParameter, gslFinalPar, gslCov, gslNewPar);
-    gsl_vector_print(gslNewPar);
-
-    // deep copy of finalParameters
-    ParameterList newPar;
-    newPar.DeepCopy(finalParameters);
-
-    std::size_t t = 0;
-    for (std::size_t o = 0; o < newPar.GetNDouble(); o++) {
-      std::shared_ptr<DoubleParameter> outPar = newPar.GetDoubleParameter(o);
-      if (outPar->IsFixed())
-        continue;
-      // set floating values to smeared values
-      try { // catch out-of-bound
-        outPar->SetValue(gslNewPar->data[t]);
-      } catch (ParameterOutOfBound &ex) {
-        error = 1;
-      }
-      t++;
-    }
-    if (error)
-      continue; // skip this set if one parameter is out of bound
-
-    // free vector
-    gsl_vector_free(gslNewPar);
-    // update amplitude with smeared parameters
-    try {
-//      Amplitude::UpdateAmpParameterList(_ampVec, newPar);
-    } catch (ParameterOutOfBound &ex) {
-      continue;
-    }
-    ParameterList tmp;
-    amp->GetFitFractions(tmp);
-    fracVect.push_back(tmp);
-    i++;
-
-    /******* DEBUGGING *******/
-    //			if(i==0){
-    //				for(int t=0; t<newPar.GetNDouble(); t++){
-    //					if( newPar.GetDoubleParameter(t)->IsFixed())
-    //continue;
-    //					outFraction <<
-    //newPar.GetDoubleParameter(t)->GetName()<<":";
-    //				}
-    //				for(int t=0; t<tmp.GetNDouble(); t++)
-    //					outFraction <<
-    //tmp.GetDoubleParameter(t)->GetName()<<":";
-    //				outFraction << "norm" << std::endl;
-    //			}
-    //			for(int t=0; t<newPar.GetNDouble(); t++){
-    //				if( newPar.GetDoubleParameter(t)->IsFixed())
-    //continue;
-    //				outFraction << newPar.GetDoubleParameter(t)->GetValue()<<"
-    //";
-    //			}
-    //			for(int t=0; t<tmp.GetNDouble(); t++)
-    //				outFraction << tmp.GetDoubleParameter(t)->GetValue()<<"
-    //";
-    //			double norm = _amp->GetIntegral();
-    //			outFraction << norm;
-    //			outFraction << std::endl;
-    /******* DEBUGGING *******/
-  }
-  LOG(info) << " ------- " << outFraction.str();
-
-  // free objects
-  gsl_vector_free(gslFinalPar);
-  gsl_matrix_free(gslCov);
-  gsl_rng_free(rnd);
-
-  int nRes = parList.GetNDouble();
-  // Calculate standard deviation
-  for (unsigned int o = 0; o < nRes; o++) {
-    double mean = 0, sqSum = 0., stdev = 0;
-    for (unsigned int i = 0; i < fracVect.size(); i++) {
-      double tmp = fracVect.at(i).GetDoubleParameter(o)->GetValue();
-      mean += tmp;
-      sqSum += tmp * tmp;
-    }
-    unsigned int s = fracVect.size();
-    sqSum /= s;
-    mean /= s;
-    // this is cross-checked with the RMS of the distribution
-    stdev = std::sqrt(sqSum - mean * mean);
-    parList.GetDoubleParameter(o)->SetError(stdev);
-  }
-
-  // Set correct fit result
-//  Amplitude::UpdateAmpParameterList(_ampVec, finalParameters);
   return;
 }
 
@@ -308,46 +157,11 @@ void MinuitResult::genOutput(std::ostream &out, std::string opt) {
     }
   }
   out << "FIT FRACTIONS:" << std::endl;
-  // Calculate and print fractions
   TableFormater tab(&out);
-  // Calculate fit fractions for all amplitudes
-  //	printFitFractions(&tab);
-  // Calculate fit fractions for first amplitude only
-//  PrintFitFractions(&tab, _ampVec.at(0), nSetsFractionError);
-  PrintFitFractions(&tab, _intens, nSetsFractionError);
+  PrintFitFractions(&tab);
 
   out << std::setprecision(10);
-//  out << "Final penalty term: " << penalty << std::endl;
-//  out << "FinalLH w/o penalty: " << finalLH - penalty << std::endl;
   out << "FinalLH: " << finalLH << std::endl;
-  /* The Akaike (AIC) and Bayesian (BIC) information criteria are described in
-   * Schwarz, Anals of Statistics 6 No.2: 461-464 (1978)
-   * and
-   * IEEE Transacrions on Automatic Control 19, No.6:716-723 (1974) */
-  ParameterList frac;
-//  try {
-//    _ampVec.at(0)->GetFitFractions(frac);
-//  } catch (std::exception &ex) {
-//    LOG(error) << "MinuitResult::genOutput() | Can not "
-//                  "calculate fit fractions for amplitude 0.";
-//  }
-//  AIC = calcAIC(frac) - penalty;
-//  BIC = calcBIC(frac) - penalty;
-//  out << "AIC: " << AIC << std::endl;
-//  out << "BIC: " << BIC << std::endl;
-  double r = 0;
-  for (int i = 0; i < fractionList.GetNDouble(); i++) {
-    double val = std::fabs(fractionList.GetDoubleParameter(i)->GetValue());
-    if (val > 0.001)
-      r++;
-  }
-  out << "Number of Resonances > 10^-3: " << r << std::endl;
-
-//  if (calcInterference) {
-//    auto ampItr = _ampVec.begin();
-//    for (; ampItr != _ampVec.end(); ++ampItr)
-//      createInterferenceTable(out, (*ampItr));
-//  }
 
   out << std::setprecision(5); // reset cout precision
   return;
@@ -379,26 +193,6 @@ void MinuitResult::createInterferenceTable(std::ostream &out,
   tableInterf->footer();
   out << std::endl;
 }
-
-//double MinuitResult::calcAIC(ParameterList &frac) {
-//  double r = 0;
-//  for (int i = 0; i < frac.GetNDouble(); i++) {
-//    double val = frac.GetDoubleParameter(i)->GetValue();
-//    if (val > 0.001)
-//      r++;
-//  }
-//  return (finalLH + 2 * r);
-//}
-//
-//double MinuitResult::calcBIC(ParameterList &frac) {
-//  double r = 0;
-//  for (int i = 0; i < frac.GetNDouble(); i++) {
-//    double val = frac.GetDoubleParameter(i)->GetValue();
-//    if (val > 0.001)
-//      r++;
-//  }
-//  return (finalLH + r * std::log(nEvents));
-//}
 
 void MinuitResult::PrintCorrelationMatrix(TableFormater *tableCorr) {
   if (!hasValidCov)
@@ -479,7 +273,7 @@ void MinuitResult::WriteXML(std::string filename) {
   boost::archive::xml_oarchive oa(ofs);
   // TODO: Compile error due to serialization
   oa << boost::serialization::make_nvp("FitParameters", finalParameters);
-  oa << boost::serialization::make_nvp("FitFractions", fractionList);
+  oa << boost::serialization::make_nvp("FitFractions", _fitFractions);
   ofs.close();
   return;
 }

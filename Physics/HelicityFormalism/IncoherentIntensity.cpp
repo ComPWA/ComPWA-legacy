@@ -78,6 +78,7 @@ IncoherentIntensity::GetComponent(std::string name) {
       if (name == _intens.at(j)->GetName()) {
         std::dynamic_pointer_cast<IncoherentIntensity>(icIn)->AddIntensity(
             _intens.at(j));
+        if( names.size() == 1 ) return _intens.at(j);
         found = true;
       }
     }

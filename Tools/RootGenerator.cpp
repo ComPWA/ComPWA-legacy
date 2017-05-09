@@ -53,6 +53,7 @@ RootGenerator::RootGenerator(int seed) {
 RootGenerator *RootGenerator::Clone() { return (new RootGenerator(*this)); }
 
 void RootGenerator::Generate(Event &evt) {
+  evt.clear();
   const double weight = event.Generate();
 
   for (unsigned int t = 0; t < nPart; t++) {

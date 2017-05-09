@@ -54,13 +54,6 @@ void FitResult::SetFinalParameters(ParameterList finPars) {
   finalParameters.DeepCopy(finPars);
 }
 
-void FitResult::SetUseCorrelatedErrors(int nSets) {
-  if (nSets < 0)
-    nSetsFractionError = 0;
-  nSetsFractionError = nSets;
-  return;
-}
-
 void FitResult::Print(std::string opt) {
   std::stringstream s;
   genOutput(s, opt);
@@ -202,80 +195,41 @@ void FitResult::PrintFitParameters(TableFormater *tableResult) {
   return;
 }
 
-void FitResult::PrintFitFractions(TableFormater *tab) {
+void FitResult::PrintFitFractions(TableFormater *fracTable) {
   LOG(info) << " FitResult::printFitFractions() | "
                "Calculating fit fractions!";
-//  auto itrAmp = _ampVec.begin();
-//  for (; itrAmp != _ampVec.end(); ++itrAmp) {
-//    PrintFitFractions(tab, (*itrAmp), nSetsFractionError);
-//  }
-  PrintFitFractions(tab, _intens, nSetsFractionError);
-}
-
-void FitResult::PrintFitFractions(TableFormater *fracTable,
-                                  std::shared_ptr<AmpIntensity> amp,
-                                  int nErrorSets) {
-  ParameterList ffList;
-  amp->GetFitFractions(ffList);
-  calcFractionError(ffList, amp, nErrorSets);
+  
   double sum = 0, sumErrorSq = 0;
 
   fracTable->Reset();
 
-  std::string ampName = amp->GetName();
   // print matrix
-  fracTable->addColumn("Resonance: " + ampName, 40); // add empty first column
+  fracTable->addColumn("Fit fractions [%]", 40); // add empty first column
   fracTable->addColumn("Fraction", 15);              // add empty first column
   fracTable->addColumn("Error", 15);                 // add empty first column
   fracTable->header();
-  for (unsigned int i = 0; i < ffList.GetNDouble(); ++i) {
-    std::shared_ptr<DoubleParameter> tmpPar = ffList.GetDoubleParameter(i);
+  for (unsigned int i = 0; i < _fitFractions.GetNDouble(); ++i) {
+    std::shared_ptr<DoubleParameter> tmpPar = _fitFractions.GetDoubleParameter(i);
     std::string resName = tmpPar->GetName();
 
-    // Remove amplitude name from string
-    std::string::size_type strPos = resName.find(ampName);
-    if (strPos != std::string::npos)
-      resName.erase(strPos, ampName.length());
-
-    *fracTable << resName << tmpPar->GetValue()
-               << tmpPar->GetError(); // assume symmetric errors here
+    *fracTable << resName << tmpPar->GetValue();
+    try {
+     *fracTable << tmpPar->GetError(); // assume symmetric errors here
+    } catch(std::exception& ex) {
+      *fracTable << 0.0;
+    }
+    
     sum += tmpPar->GetValue();
     sumErrorSq += tmpPar->GetError() * tmpPar->GetError();
   }
   fracTable->delim();
   *fracTable << "Total" << sum << sqrt(sumErrorSq);
   fracTable->footer();
-  fractionList = ffList;
   sumFractions = sum;
   sumFractionsError = sqrt(sumErrorSq);
 
   return;
 }
 
-// void FitResult::calcFraction(ParameterList& parList, int nSets)
-//{
-//	if( !_ampVec.size() )
-//		throw std::runtime_error("FitResult::calcFractions() | "
-//				"No amplitude set, can't calculate fractions!");
-//
-//	if(parList.GetNDouble())
-//		throw std::runtime_error("FitResult::calcFractions() | "
-//				"ParameterList not empty!");
-//
-//	//	_amp->UpdateParameters(finalParameters); //update parameters in
-//amplitude
-//	double norm =-1;
-//
-//	//Start loop over amplitudes
-//	auto ampItr = _ampVec.begin();
-//	for( ; ampItr != _ampVec.end(); ++ampItr){
-////		calcFraction(parList, (*ampItr));
-//		(*ampItr)->GetFitFractions(parList);
-//		if( parList.GetNDouble() )
-//			calcFractionError(parList, (*ampItr), nSets);
-//	}
-//
-//	return;
-//}
 } /* namespace ComPWA */
 

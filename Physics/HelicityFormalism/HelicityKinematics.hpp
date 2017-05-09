@@ -1,9 +1,3 @@
- 
-        
-    
-  
-
-
 //-------------------------------------------------------------------------------
 // Copyright (c) 2013 Stefan Pflueger.
 // All rights reserved. This program and the accompanying materials
@@ -200,6 +194,9 @@ public:
   virtual std::size_t GetNumberOfParticles() const {
     return _finalState.size();
   }
+  
+  double HelicityAngle(double M, double m, double m2, double mSpec,
+                       double invMassSqA, double invMassSqB) const;
 
   /*! Get ID of data for SubSystem #s.
    * Incase that the ID was not requested before the subsystem is added to the

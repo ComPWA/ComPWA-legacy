@@ -73,7 +73,7 @@ protected:
 };
 
 inline double Integral(std::shared_ptr<AmpIntensity> intens,
-                std::shared_ptr<std::vector<dataPoint> > sample) {
+                       std::shared_ptr<std::vector<dataPoint>> sample) {
 
   if (!sample->size()) {
     LOG(debug) << "Integral() | Integral can not be calculated "
@@ -84,11 +84,50 @@ inline double Integral(std::shared_ptr<AmpIntensity> intens,
   for (auto i : *sample.get())
     sumIntens += intens->Intensity(i);
 
-  double integral = (sumIntens * Kinematics::Instance()->GetPhspVolume() / sample->size());
-  
+  double integral =
+      (sumIntens * Kinematics::Instance()->GetPhspVolume() / sample->size());
+
   return integral;
 }
-  
+
+inline double Maximum(std::shared_ptr<AmpIntensity> intens,
+                      std::shared_ptr<std::vector<dataPoint>> sample) {
+
+  if (!sample->size()) {
+    LOG(debug)
+        << "Maximum() | MAximum can not be determined since sample is empty.";
+    return 1.0;
+  }
+
+  double max = 0;
+  for (auto i : *sample.get()) {
+    double val = intens->Intensity(i);
+    if (val > max)
+      max = val;
+  }
+
+  return max;
+}
+
+inline double Maximum(std::shared_ptr<AmpIntensity> intens,
+                      std::shared_ptr<DataReader::Data> sample) {
+
+  if (!sample->getNEvents()) {
+    LOG(debug)
+        << "Maximum() | MAximum can not be determined since sample is empty.";
+    return 1.0;
+  }
+
+  auto data = sample->getDataPoints();
+  double max = 0;
+  for (auto i : data ) {
+    double val = intens->Intensity(i);
+    if (val > max)
+      max = val;
+  }
+
+  return max;
+}
 }
 }
 #endif /* Integration_h */
