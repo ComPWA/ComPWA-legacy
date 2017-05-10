@@ -64,8 +64,11 @@ MinuitIF::MinuitIF(std::shared_ptr<ControlParameter> esti, ParameterList &par)
 MinuitIF::~MinuitIF() {}
 
 std::shared_ptr<FitResult> MinuitIF::exec(ParameterList &par) {
+  LOG(debug) << "MinuitIF::exec() | Start";
   boost::timer time;
   par.RemoveDuplicates();
+
+  LOG(debug) << "MinuitIF::exec() | Begin ParameterList::DeepCopy()";
 
   ParameterList initialParList;
   initialParList.DeepCopy(par);

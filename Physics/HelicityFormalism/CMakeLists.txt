@@ -42,7 +42,7 @@ foreach(testSrc ${TEST_SRCS})
   add_executable(${testName} ${testSrc})
 
   #link to Boost libraries AND your targets and dependencies
-  target_link_libraries( ${testName} ${Boost_LIBRARIES} ComPWA_HelicityFormalism ComPWA_Core )
+  target_link_libraries( ${testName} ${Boost_LIBRARIES} ComPWA_HelicityFormalism ComPWA_Core pthread )
 
   #I like to move testing binaries into a testBin directory
   set_target_properties(${testName} PROPERTIES

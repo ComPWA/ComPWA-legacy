@@ -24,6 +24,7 @@ if( GSL_VERSION GREATER 1.9 )
 #target_link_libraries( multiVariateGaussianTestApp ComPWA_Core ComPWA_Minuit2IF ${ROOT_LIBRARIES} ${GSL_LIBRARIES} )
 #target_include_directories( multiVariateGaussianTestApp PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${ROOT_INCLUDE_DIR} ${GSL_INCLUDE_DIR})
 #MESSAGE( STATUS "GSL version " ${GSL_VERSION})
+
 endif()
 
 #add_executable (serializeApp SerializationApp.cpp)

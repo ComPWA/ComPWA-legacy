@@ -8,7 +8,7 @@ namespace Geneva {
 void GenevaResult::init(boost::shared_ptr<Gem::Geneva::GStartIndividual> min)
 {
 	//	finalLH = min->getBestCase();
-	finalLH = min->getBestKnownFitness();
+	finalLH = get<1>(min->getBestKnownPrimaryFitness()); //TODO: Check if correct way to get result
 	min->getPar(finalParameters);
     //ToDO: extract more info
 	return;
