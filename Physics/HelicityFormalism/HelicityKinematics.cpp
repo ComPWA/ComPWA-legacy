@@ -427,37 +427,37 @@ void HelicityKinematics::EventToDataPoint(
   double cosTheta = qftFinalA.CosTheta();
   double phi = qftFinalA.Phi();
 
-  double cc;
-  if (sys.GetRecoilState().size() == 1 &&
-      sys.GetFinalStates().at(0).size() == 1 &&
-      sys.GetFinalStates().at(1).size() == 1) {
-    double invMassSqA = mSq;
-    double invMassSqB = (recoilP4 + finalA).GetInvMassSq();
-    auto mspec = PhysConst::Instance()
-                     ->FindParticle(_finalState.at(sys.GetRecoilState().at(0)))
-                     .GetMass();
-    auto ma =
-        PhysConst::Instance()
-            ->FindParticle(_finalState.at(sys.GetFinalStates().at(0).at(0)))
-            .GetMass();
-    auto mb =
-        PhysConst::Instance()
-            ->FindParticle(_finalState.at(sys.GetFinalStates().at(1).at(0)))
-            .GetMass();
-    auto M = PhysConst::Instance()->FindParticle(_initialState.at(0)).GetMass();
-
-    cc = HelicityAngle(M, ma, mb, mspec, invMassSqA, invMassSqB);
-//    std::cout << sys << std::endl;
-//    std::cout << _initialState.at(0) << "/ (" << sys.GetFinalStates().at(0).at(0)
-//              << sys.GetFinalStates().at(1).at(0) << ") angle ("<< sys.GetFinalStates().at(0).at(0)
-//              << sys.GetRecoilState().at(0) << ") - "
-//              << " (ma=" << ma<<" mb="<<mb<<" mSpec="<<mspec<<" mABSq="<<invMassSqA << " mASpecSq=" << invMassSqB << ") = " << cc
-//              << " " << cosTheta << std::endl;
-
-  } else {
-    cc = 1.0;
-    phi = 0.0;
-  }
+//  double cc;
+//  if (sys.GetRecoilState().size() == 1 &&
+//      sys.GetFinalStates().at(0).size() == 1 &&
+//      sys.GetFinalStates().at(1).size() == 1) {
+//    double invMassSqA = mSq;
+//    double invMassSqB = (recoilP4 + finalA).GetInvMassSq();
+//    auto mspec = PhysConst::Instance()
+//                     ->FindParticle(_finalState.at(sys.GetRecoilState().at(0)))
+//                     .GetMass();
+//    auto ma =
+//        PhysConst::Instance()
+//            ->FindParticle(_finalState.at(sys.GetFinalStates().at(0).at(0)))
+//            .GetMass();
+//    auto mb =
+//        PhysConst::Instance()
+//            ->FindParticle(_finalState.at(sys.GetFinalStates().at(1).at(0)))
+//            .GetMass();
+//    auto M = PhysConst::Instance()->FindParticle(_initialState.at(0)).GetMass();
+//
+//    cc = HelicityAngle(M, ma, mb, mspec, invMassSqA, invMassSqB);
+////    std::cout << sys << std::endl;
+////    std::cout << _initialState.at(0) << "/ (" << sys.GetFinalStates().at(0).at(0)
+////              << sys.GetFinalStates().at(1).at(0) << ") angle ("<< sys.GetFinalStates().at(0).at(0)
+////              << sys.GetRecoilState().at(0) << ") - "
+////              << " (ma=" << ma<<" mb="<<mb<<" mSpec="<<mspec<<" mABSq="<<invMassSqA << " mASpecSq=" << invMassSqB << ") = " << cc
+////              << " " << cosTheta << std::endl;
+//
+//  } else {
+//    cc = 1.0;
+//    phi = 0.0;
+//  }
   cosTheta = cc;
   
   //   Check if values are within allowed range.
