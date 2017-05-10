@@ -122,19 +122,19 @@ void plotData::Fill() {
 
   //===== Fill data histograms
   if (s_data) {
-    for (unsigned int i = 0; i < s_data->getNEvents(); i++) { // loop over data
-      Event event(s_data->getEvent(i));
+    for (unsigned int i = 0; i < s_data->GetNEvents(); i++) { // loop over data
+      Event event(s_data->GetEvent(i));
 
       double eff = 1.0;
       if (_correctForEfficiency)
-        eff = event.getEfficiency();
+        eff = event.GetEfficiency();
       if (eff == 0.0) {
         LOG(error) << "plotData::Fill() | Loop over "
                       "data sample: An event with zero efficiency was found! "
                       "This should not happen! We skip it!";
         continue;
       }
-      double evWeight = event.getWeight();
+      double evWeight = event.GetWeight();
 
       dataDiagrams.Fill(event, evWeight * 1 / eff);
       h_weights.Fill(evWeight * 1 / eff);
@@ -150,15 +150,15 @@ void plotData::Fill() {
     double weightsSum = 0.0;
 
     /* Loop over all events in phase space sample */
-    progressBar bar(s_phsp->getNEvents());
-    for (unsigned int i = 0; i < s_phsp->getNEvents();
+    progressBar bar(s_phsp->GetNEvents());
+    for (unsigned int i = 0; i < s_phsp->GetNEvents();
          i++) { // loop over phsp MC
       bar.nextEvent();
-      Event event(s_phsp->getEvent(i));
-      double evWeight = event.getWeight();
+      Event event(s_phsp->GetEvent(i));
+      double evWeight = event.GetWeight();
       double eff = 1.0;
       if (_correctForEfficiency)
-        eff = event.getEfficiency();
+        eff = event.GetEfficiency();
       if (eff == 0.0) {
         LOG(error) << "plotData::Fill() | Loop over "
                       "phsp sample: An event with zero efficiency was found! "
@@ -199,19 +199,19 @@ void plotData::Fill() {
 
   //===== Plot hit&miss data
   if (s_hitMiss) {
-    for (unsigned int i = 0; i < s_hitMiss->getNEvents();
+    for (unsigned int i = 0; i < s_hitMiss->GetNEvents();
          i++) { // loop over data
-      Event event(s_hitMiss->getEvent(i));
+      Event event(s_hitMiss->GetEvent(i));
       double eff = 1.0;
       if (_correctForEfficiency)
-        eff = event.getEfficiency();
+        eff = event.GetEfficiency();
       if (eff == 0.0) {
         LOG(error) << "plotData::Fill() | Loop over "
                       "Hit&Miss sample: An event with zero efficiency was "
                       "found! This should not happen! We skip it!";
         continue;
       }
-      double evWeight = event.getWeight();
+      double evWeight = event.GetWeight();
 
       fitHitMissDiagrams.Fill(event, evWeight * 1 / eff);
     }
@@ -440,7 +440,7 @@ dalitzHisto::dalitzHisto(std::string name, std::string title, unsigned int bins,
 
 void dalitzHisto::Fill(Event &event, double w) {
 
-  double weight = event.getWeight() * w; // use event weights?
+  double weight = event.GetWeight() * w; // use event weights?
 
   _integral += weight;
 

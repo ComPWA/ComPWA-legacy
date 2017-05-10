@@ -436,7 +436,7 @@
 				<DecayParticle Name='jpsi' Helicity='+1' />
 				<DecayProducts>
 					<Particle Name='omega' FinalState='0 1' Helicity='+1' />
-					<Particle Name='pi0' FinalState='2' Helicity='+1' />
+					<Particle Name='pi0' FinalState='2' Helicity='0' />
 				</DecayProducts>
 			</Resonance>
 			<Resonance Name="omegatoPi0G">
@@ -457,8 +457,8 @@
 				<DecayParticle Name='omega' Helicity='+1' />
 				<RecoilSystem FinalState='2' />
 				<DecayProducts>
-					<Particle Name='pi0' FinalState='0' Helicity='+1' />
 					<Particle Name='gamma' FinalState='1' Helicity='+1' />
+					<Particle Name='pi0' FinalState='0' Helicity='0' />
 				</DecayProducts>
 			</Resonance>
 		</Amplitude>

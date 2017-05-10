@@ -21,8 +21,8 @@ MomentumCorrection::MomentumCorrection(std::vector<CorrectionTable> inCorr,
 
 double MomentumCorrection::getCorrection(Event &ev) {
   double w = 1;
-  for (int i = 0; i < ev.getNParticles(); i++) {
-    Particle p = ev.getParticle(i);
+  for (int i = 0; i < ev.GetNParticles(); i++) {
+    Particle p = ev.GetParticle(i);
     int charge = p.GetCharge();
     double mom = p.GetThreeMomentum();
     double corr;

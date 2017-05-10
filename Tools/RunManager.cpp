@@ -73,7 +73,7 @@ std::shared_ptr<FitResult> RunManager::Fit(ParameterList &inPar) {
 
 void RunManager::SetPhspSample(std::shared_ptr<Data> phsp,
                                std::shared_ptr<DataReader::Data> truePhsp) {
-  if (truePhsp && truePhsp->getNEvents() != phsp->getNEvents())
+  if (truePhsp && truePhsp->GetNEvents() != phsp->GetNEvents())
     throw std::runtime_error(
         "RunManager::setPhspSample() | "
         "Reconstructed sample and true sample have not the same size!");
@@ -83,7 +83,7 @@ void RunManager::SetPhspSample(std::shared_ptr<Data> phsp,
 
 void RunManager::SetTruePhspSample(std::shared_ptr<DataReader::Data> truePhsp) {
   if (truePhsp && samplePhsp_ &&
-      truePhsp->getNEvents() != samplePhsp_->getNEvents())
+      truePhsp->GetNEvents() != samplePhsp_->GetNEvents())
     throw std::runtime_error(
         "RunManager::setPhspSample() | "
         "Reconstructed sample and true sample have not the same size!");
@@ -119,12 +119,12 @@ bool RunManager::gen(int number, std::shared_ptr<Generator> gen,
     throw std::runtime_error("RunManager::gen() | Generator not valid");
   if (!data)
     throw std::runtime_error("RunManager::gen() | Sample not valid");
-  if (data->getNEvents() > 0)
+  if (data->GetNEvents() > 0)
     throw std::runtime_error("RunManager::gen() | Sample not empty!");
   if (phspTrue && !phsp)
     throw std::runtime_error("RunManager::gen() | We have a sample of true"
                              " phsp events, but no phsp sample!");
-  if (phspTrue && phspTrue->getNEvents() != phsp->getNEvents())
+  if (phspTrue && phspTrue->GetNEvents() != phsp->GetNEvents())
     throw std::runtime_error(
         "RunManager::gen() | We have a sample of true "
         "phsp events, but the sample size doesn't match that one of "
@@ -132,9 +132,9 @@ bool RunManager::gen(int number, std::shared_ptr<Generator> gen,
 
   double maxSampleWeight = 1.0;
   if (phsp)
-    maxSampleWeight = phsp->getMaxWeight();
-  if (phspTrue && phspTrue->getMaxWeight() > maxSampleWeight)
-    maxSampleWeight = phspTrue->getMaxWeight();
+    maxSampleWeight = phsp->GetMaxWeight();
+  if (phspTrue && phspTrue->GetMaxWeight() > maxSampleWeight)
+    maxSampleWeight = phspTrue->GetMaxWeight();
 
   /* Maximum value for random number generation. We introduce an arbitrary
    * factor of 5 to make sure that the maximum value is never reached.
@@ -146,7 +146,7 @@ bool RunManager::gen(int number, std::shared_ptr<Generator> gen,
 
   unsigned int limit;
   if (phsp) {
-    limit = phsp->getNEvents();
+    limit = phsp->GetNEvents();
     generationMaxValue *= Tools::Maximum(amp, phsp) ;
   } else {
     limit = 100000000; // set large limit, should never be reached
@@ -162,10 +162,10 @@ bool RunManager::gen(int number, std::shared_ptr<Generator> gen,
     bar = progressBar(limit);
   for (unsigned int i = 0; i < limit; i++) {
     if (phsp && phspTrue) { // phsp and true sample is set
-      evtTrue = phspTrue->getEvent(i);
-      evt = phsp->getEvent(i);
+      evtTrue = phspTrue->GetEvent(i);
+      evt = phsp->GetEvent(i);
     } else if (phsp) { // phsp sample is set
-      evt = phsp->getEvent(i);
+      evt = phsp->GetEvent(i);
       evtTrue = evt;
     } else { // otherwise generate event
       gen->Generate(evt);
@@ -175,7 +175,7 @@ bool RunManager::gen(int number, std::shared_ptr<Generator> gen,
       bar.nextEvent();
 
     // use reconstructed position for weights
-    double weight = evt.getWeight();
+    double weight = evt.GetWeight();
 
     // use true position for amplitude value
     dataPoint point;
@@ -211,23 +211,23 @@ bool RunManager::gen(int number, std::shared_ptr<Generator> gen,
     /* reset weights: the weights are taken into account by hit and miss. The
      * resulting
      * sample is therefore unweighted */
-    evt.setWeight(1.);     // reset weight
-    evt.setEfficiency(1.); // reset weight
-    data->pushEvent(evt);
+    evt.SetWeight(1.);     // reset weight
+    evt.SetEfficiency(1.); // reset weight
+    data->PushEvent(evt);
 
     if (number > 0)
       bar.nextEvent();
     // break if we have a sufficienct number of events
-    if (data->getNEvents() >= number)
+    if (data->GetNEvents() >= number)
       i = limit;
   }
-  if (data->getNEvents() < number)
+  if (data->GetNEvents() < number)
     LOG(error) << "RunManager::gen() | Not able to generate "
                << number << " events. Phsp sample too small. Current size "
-                            "of sample is now " << data->getNEvents();
+                            "of sample is now " << data->GetNEvents();
 
   LOG(info) << "Efficiency of toy MC generation: "
-            << (double)data->getNEvents() / totalCalls;
+            << (double)data->GetNEvents() / totalCalls;
 
   return true;
 }
@@ -238,7 +238,7 @@ bool RunManager::GeneratePhsp(int number) {
   if (!samplePhsp_)
     throw std::runtime_error("RunManager: generatePhsp() | "
                              "No phase-space sample set");
-  if (samplePhsp_->getNEvents() > 0)
+  if (samplePhsp_->GetNEvents() > 0)
     throw std::runtime_error("RunManager: generatePhsp() | "
                              "Dataset not empty! abort!");
 
@@ -251,17 +251,17 @@ bool RunManager::GeneratePhsp(int number) {
     Event tmp;
     gen_->Generate(tmp);
     double ampRnd = gen_->GetUniform(0, 1);
-    if (ampRnd > tmp.getWeight())
+    if (ampRnd > tmp.GetWeight())
       continue;
 
     /* Reset weights: weights are taken into account by hit&miss. The
      * resulting sample is therefore unweighted
      */
-    tmp.setWeight(1.);
+    tmp.SetWeight(1.);
 
-    tmp.setEfficiency(1.);
+    tmp.SetEfficiency(1.);
     i++;
-    samplePhsp_->pushEvent(tmp); // unfortunatly not thread safe
+    samplePhsp_->PushEvent(tmp); // unfortunatly not thread safe
     bar.nextEvent();
   }
   return true;

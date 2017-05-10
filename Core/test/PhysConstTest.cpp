@@ -23,7 +23,7 @@ BOOST_AUTO_TEST_CASE(XMLInput) {
   std::stringstream XMLIn;
   XMLIn << "<ParticleList> \
   <Particle Name='gamma'> \
-  <Id>22</Id> \
+  <Pid>22</Pid> \
   <Mass Name='mass_gamma'> \
   <Value>0.</Value> \
   </Mass> \
@@ -36,7 +36,7 @@ BOOST_AUTO_TEST_CASE(XMLInput) {
   <IsoSpinZ>0</IsoSpinZ> \
   </Particle> \
   <Particle Name='f0_980'> \
-  <Id>9010221</Id> \
+  <Pid>9010221</Pid> \
   <Mass Name='mass_f0_980'> \
   <Value>0.99</Value> \
   <Fix>1</Fix> \

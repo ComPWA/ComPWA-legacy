@@ -134,7 +134,7 @@
 			<Coupling Name='gKK_a0(980)'>
 				<Value>3.121343843602647</Value>
 				<Error>0.001</Error>
-				<Fix>true</Fix>
+				<Fix>false</Fix>
 				<ParticleA>K+</ParticleA>
 				<ParticleB>K-</ParticleB>
 			</Coupling>
@@ -148,7 +148,7 @@
 			<Coupling Name='gKK_a0(980)'>
 				<Value>3.121343843602647</Value>
 				<Error>0.001</Error>
-				<Fix>true</Fix>
+				<Fix>false</Fix>
 				<ParticleA>K_S0</ParticleA>
 				<ParticleB>K_S0</ParticleB>
 			</Coupling>
@@ -175,7 +175,7 @@
 			<Coupling Name='gKK_a0(980)'>
 				<Value>3.121343843602647</Value>
 				<Error>0.001</Error>
-				<Fix>true</Fix>
+				<Fix>false</Fix>
 				<ParticleA>K_S0</ParticleA>
 				<ParticleB>K+</ParticleB>
 			</Coupling>
@@ -194,6 +194,31 @@
 			</MesonRadius>
 		</DecayInfo>
 	</Particle>
+	<Particle Name='Bkgphi(1020)'>
+		<Pid>3339999</Pid>
+		<Mass Name='mass_phi'>
+			<Value>1.019461</Value>
+			<Error>0.000019</Error>
+			<Fix>true</Fix>
+		</Mass>
+		<Charge>0</Charge>
+		<Spin>0.0</Spin>
+		<Parity>-1</Parity>
+		<DecayInfo Type='relativisticBreitWigner'>
+			<FormFactor type='1' />
+			<Width Name='width_phi'>
+				<Value>0.004266</Value>
+				<Error>0.000031</Error>
+				<Fix>true</Fix>
+			</Width>
+			<MesonRadius Name='radius_phi'>
+				<Value>1.5</Value>
+				<Fix>true</Fix>
+				<Min>1.0</Min>
+				<Max>2.0</Max>
+			</MesonRadius>
+		</DecayInfo>
+	</Particle>
 	<Particle Name='something'>
 		<Pid>123456</Pid>
 		<Mass Name='mass_something'>
@@ -201,7 +226,7 @@
 			<Fix>true</Fix>
 		</Mass>
 		<Charge>0</Charge>
-		<Spin>1.0</Spin>
+		<Spin>0.0</Spin>
 		<Parity>-1</Parity>
 		<DecayInfo Type='relativisticBreitWigner'>
 			<FormFactor type='1' />
@@ -210,6 +235,28 @@
 				<Fix>true</Fix>
 			</Width>
 			<MesonRadius Name='radius_something'>
+				<Value>1.5</Value>
+				<Fix>true</Fix>
+			</MesonRadius>
+		</DecayInfo>
+	</Particle>
+	<Particle Name='a2(1320)-'>
+		<Pid>215</Pid>
+		<Mass Name='mass_a2(1320)'>
+			<Value>1.3181</Value>
+			<Fix>true</Fix>
+		</Mass>
+		<Charge>0</Charge>
+		<Spin>2.0</Spin>
+		<Parity>+1</Parity>
+		<Cparity>+1</Cparity>
+		<DecayInfo Type='relativisticBreitWigner'>
+			<FormFactor type='1' />
+			<Width Name='width_a2(1320)'>
+				<Value>0.1098</Value>
+				<Fix>true</Fix>
+			</Width>
+			<MesonRadius Name='radius_a2(1320)'>
 				<Value>1.5</Value>
 				<Fix>true</Fix>
 			</MesonRadius>
@@ -239,6 +286,62 @@
 			<Value>0.963665</Value>
 			<Fix>true</Fix>
 		</Strength>
+		<Amplitude Name='a0(980)0'>
+			<Magnitude Name='Magnitude_a0(980)0'>
+				<Value>1.0</Value>
+				<Fix>true</Fix>
+			</Magnitude>
+			<Phase Name='Phase_a0(980)0'>
+				<Value>0.0</Value>
+				<Fix>true</Fix>
+			</Phase>
+			<Resonance Name="a00ToKK">
+				<Magnitude Name='Magnitude_a00ToKK'>
+					<Value>1.0</Value>
+					<Fix>true</Fix>
+				</Magnitude>
+				<Phase Name='Phase_a00ToKK'>
+					<Value>0.0</Value>
+					<Fix>true</Fix>
+				</Phase>
+				<DecayParticle Name='a0(980)0' Helicity='0'/>
+				<RecoilSystem FinalState='0' />
+				<DecayProducts>
+					<Particle Name='K-' FinalState='1'  Helicity='0'/>
+					<Particle Name='K+' FinalState='2'  Helicity='0'/>
+				</DecayProducts>
+			</Resonance>
+		</Amplitude>
+		<Amplitude Name='a0(980)+'>
+			<Magnitude Name='Magnitude_a0(980)+'>
+				<Value>0.6</Value>
+				<Min>-3</Min>
+				<Max>3</Max>
+				<Fix>false</Fix>
+			</Magnitude>
+			<Phase Name='Phase_a0(980)+'>
+				<Value>-3.0</Value>
+				<Min>-100</Min>
+				<Max>100</Max>
+				<Fix>false</Fix>
+			</Phase>
+			<Resonance Name="a0+ToKK">
+				<Magnitude Name='Magnitude_a0+ToKK'>
+					<Value>1.0</Value>
+					<Fix>true</Fix>
+				</Magnitude>
+				<Phase Name='Phase_a0+ToKK'>
+					<Value>0.0</Value>
+					<Fix>true</Fix>
+				</Phase>
+				<DecayParticle Name='a0(980)+' Helicity='0'/>
+				<RecoilSystem FinalState='1' />
+				<DecayProducts>
+					<Particle Name='K_S0' FinalState='0'  Helicity='0'/>
+					<Particle Name='K+' FinalState='2'  Helicity='0'/>
+				</DecayProducts>
+			</Resonance>
+		</Amplitude>
 		<Amplitude Name='phi(1020)'>
 			<Magnitude Name='Magnitude_phi(1020)'>
 				<Value>0.7</Value>
@@ -247,7 +350,7 @@
 				<Fix>false</Fix>
 			</Magnitude>
 			<Phase Name='Phase_phi(1020)'>
-				<Value>1.8</Value>
+				<Value>2.0</Value>
 				<Min>-100</Min>
 				<Max>100</Max>
 				<Fix>false</Fix>
@@ -264,12 +367,43 @@
 				<DecayParticle Name='phi(1020)' Helicity='0'/>
 				<RecoilSystem FinalState='0' />
 				<DecayProducts>
+					<Particle Name='K-' FinalState='1'  Helicity='0'/>
 					<Particle Name='K+' FinalState='2'  Helicity='0'/>
+				</DecayProducts>
+			</Resonance>
+		</Amplitude>
+		<Amplitude Name='a2(1320)-'>
+			<Magnitude Name='Magnitude_a2(1320)-'>
+				<Value>0.0000001</Value>
+				<Min>-3</Min>
+				<Max>3</Max>
+				<Fix>false</Fix>
+			</Magnitude>
+			<Phase Name='Phase_a2(1320)-'>
+				<Value>0.0</Value>
+				<Min>-100</Min>
+				<Max>100</Max>
+				<Fix>false</Fix>
+			</Phase>
+			<Resonance Name="a2(1320)MinusToKK">
+				<Magnitude Name='Magnitude_a2(1320)MinusToKK'>
+					<Value>1.0</Value>
+					<Fix>true</Fix>
+				</Magnitude>
+				<Phase Name='Phase_a2(1320)MinusToKK'>
+					<Value>0.0</Value>
+					<Fix>true</Fix>
+				</Phase>
+				<DecayParticle Name='a2(1320)-' Helicity='0'/>
+				<RecoilSystem FinalState='2' />
+				<DecayProducts>
+					<Particle Name='K_S0' FinalState='0'  Helicity='0'/>
 					<Particle Name='K-' FinalState='1'  Helicity='0'/>
 				</DecayProducts>
 			</Resonance>
 		</Amplitude>
-		<Amplitude Name='a0(980)0'>
+		<Amplitude Name='a0(980)0_CP'>
+			<PreFactor Magnitude='0.0591608' Phase='-0.2618' />
 			<Magnitude Name='Magnitude_a0(980)0'>
 				<Value>1.0</Value>
 				<Fix>true</Fix>
@@ -295,20 +429,21 @@
 				</DecayProducts>
 			</Resonance>
 		</Amplitude>
-		<Amplitude Name='a0(980)+'>
+		<Amplitude Name='a0(980)+_CP'>
+			<PreFactor Magnitude='0.0591608' Phase='-0.2618' />
 			<Magnitude Name='Magnitude_a0(980)+'>
-				<Value> 0.68722</Value>
+				<Value>0.6</Value>
 				<Min>-3</Min>
 				<Max>3</Max>
 				<Fix>false</Fix>
 			</Magnitude>
 			<Phase Name='Phase_a0(980)+'>
-				<Value>-2.87848</Value>
+				<Value>-3.0</Value>
 				<Min>-100</Min>
 				<Max>100</Max>
 				<Fix>false</Fix>
 			</Phase>
-			<Resonance Name="a0+ToKK">
+			<Resonance Name="a0+ToKK_CP">
 				<Magnitude Name='Magnitude_a0+ToKK'>
 					<Value>1.0</Value>
 					<Fix>true</Fix>
@@ -318,6 +453,68 @@
 					<Fix>true</Fix>
 				</Phase>
 				<DecayParticle Name='a0(980)+' Helicity='0'/>
+				<RecoilSystem FinalState='2' />
+				<DecayProducts>
+					<Particle Name='K_S0' FinalState='0'  Helicity='0'/>
+					<Particle Name='K-' FinalState='1'  Helicity='0'/>
+				</DecayProducts>
+			</Resonance>
+		</Amplitude>
+		<Amplitude Name='phi(1020)_CP'>
+			<PreFactor Magnitude='0.0591608' Phase='-0.2618' />
+			<Magnitude Name='Magnitude_phi(1020)'>
+				<Value>0.7</Value>
+				<Min>-3</Min>
+				<Max>3</Max>
+				<Fix>false</Fix>
+			</Magnitude>
+			<Phase Name='Phase_phi(1020)'>
+				<Value>2.0</Value>
+				<Min>-100</Min>
+				<Max>100</Max>
+				<Fix>false</Fix>
+			</Phase>
+			<Resonance Name="phiToKK_CP">
+				<Magnitude Name='Magnitude_phiToKK'>
+					<Value>1.0</Value>
+					<Fix>true</Fix>
+				</Magnitude>
+				<Phase Name='Phase_phiToKK'>
+					<Value>0.0</Value>
+					<Fix>true</Fix>
+				</Phase>
+				<DecayParticle Name='phi(1020)' Helicity='0'/>
+				<RecoilSystem FinalState='0' />
+				<DecayProducts>
+					<Particle Name='K+' FinalState='2'  Helicity='0'/>
+					<Particle Name='K-' FinalState='1'  Helicity='0'/>
+				</DecayProducts>
+			</Resonance>
+		</Amplitude>
+		<Amplitude Name='a2(1320)-_CP'>
+			<PreFactor Magnitude='0.0591608' Phase='-0.2618' />
+			<Magnitude Name='Magnitude_a2(1320)-'>
+				<Value>0.0000001</Value>
+				<Min>-3</Min>
+				<Max>3</Max>
+				<Fix>false</Fix>
+			</Magnitude>
+			<Phase Name='Phase_a2(1320)-'>
+				<Value>0.0</Value>
+				<Min>-100</Min>
+				<Max>100</Max>
+				<Fix>false</Fix>
+			</Phase>
+			<Resonance Name="a2(1320)MinusToKK_CP">
+				<Magnitude Name='Magnitude_a2(1320)MinusToKK'>
+					<Value>1.0</Value>
+					<Fix>true</Fix>
+				</Magnitude>
+				<Phase Name='Phase_a2(1320)MinusToKK'>
+					<Value>0.0</Value>
+					<Fix>true</Fix>
+				</Phase>
+				<DecayParticle Name='a2(1320)-' Helicity='0'/>
 				<RecoilSystem FinalState='1' />
 				<DecayProducts>
 					<Particle Name='K_S0' FinalState='0'  Helicity='0'/>
@@ -326,13 +523,42 @@
 			</Resonance>
 		</Amplitude>
 	</CoherentIntensity>
-
 	<!-- Background  model -->
 	<CoherentIntensity Name='BkgD0toKSK+K-'>
 		<Strength Name='strength_bkgd0tokkk'>
 			<Value>0.036335</Value>
 			<Fix>true</Fix>
 		</Strength>
+		<Amplitude Name='BkgNonRes'>
+			<Magnitude Name='Magnitude_BkgNonRes'>
+				<Value>1.0</Value>
+				<Min>-3</Min>
+				<Max>3</Max>
+				<Fix>true</Fix>
+			</Magnitude>
+			<Phase Name='Phase_BkgNonRes'>
+				<Value>0.0</Value>
+				<Min>-100</Min>
+				<Max>100</Max>
+				<Fix>true</Fix>
+			</Phase>
+			<Resonance Name="nonRes3K">
+				<Magnitude Name='Magnitude_nonRes3K'>
+					<Value>1.0</Value>
+					<Fix>true</Fix>
+				</Magnitude>
+				<Phase Name='Phase_nonRes3K'>
+					<Value>0.0</Value>
+					<Fix>true</Fix>
+				</Phase>
+				<DecayParticle Name='D0' Helicity='0'/>
+				<DecayProducts>
+					<Particle Name='K+' FinalState='2'  Helicity='0'/>
+					<Particle Name='K-' FinalState='1'  Helicity='0'/>
+					<Particle Name='K_S0' FinalState='0'  Helicity='0'/>
+				</DecayProducts>
+			</Resonance>
+		</Amplitude>
 		<Amplitude Name='BkgPhi(1020)'>
 			<Magnitude Name='Magnitude_BkgPhi(1020)'>
 				<Value>0.6231278542584409</Value>
@@ -355,7 +581,7 @@
 					<Value>0.0</Value>
 					<Fix>true</Fix>
 				</Phase>
-				<DecayParticle Name='phi(1020)' Helicity='0'/>
+				<DecayParticle Name='Bkgphi(1020)' Helicity='0'/>
 				<RecoilSystem FinalState='0' />
 				<DecayProducts>
 					<Particle Name='K+' FinalState='2'  Helicity='0'/>
@@ -390,36 +616,6 @@
 				<DecayProducts>
 					<Particle Name='K+' FinalState='2'  Helicity='0'/>
 					<Particle Name='K-' FinalState='1'  Helicity='0'/>
-				</DecayProducts>
-			</Resonance>
-		</Amplitude>
-		<Amplitude Name='BkgNonRes'>
-			<Magnitude Name='Magnitude_BkgNonRes'>
-				<Value>1.0</Value>
-				<Min>-3</Min>
-				<Max>3</Max>
-				<Fix>true</Fix>
-			</Magnitude>
-			<Phase Name='Phase_BkgNonRes'>
-				<Value>0.0</Value>
-				<Min>-100</Min>
-				<Max>100</Max>
-				<Fix>true</Fix>
-			</Phase>
-			<Resonance Name="nonRes3K">
-				<Magnitude Name='Magnitude_nonRes3K'>
-					<Value>1.0</Value>
-					<Fix>true</Fix>
-				</Magnitude>
-				<Phase Name='Phase_nonRes3K'>
-					<Value>0.0</Value>
-					<Fix>true</Fix>
-				</Phase>
-				<DecayParticle Name='D0' Helicity='0'/>
-				<DecayProducts>
-					<Particle Name='K+' FinalState='2'  Helicity='0'/>
-					<Particle Name='K-' FinalState='1'  Helicity='0'/>
-					<Particle Name='K_S0' FinalState='0'  Helicity='0'/>
 				</DecayProducts>
 			</Resonance>
 		</Amplitude>

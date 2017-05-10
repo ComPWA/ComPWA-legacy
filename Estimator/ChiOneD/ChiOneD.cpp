@@ -40,17 +40,16 @@ ChiOneD::createInstance(std::shared_ptr<AmpIntensity> inPIF,
 }
 
 double ChiOneD::controlParameter(ParameterList &minPar) {
-  unsigned int nBins = pDIF_->getNBins();
+  unsigned int nBins = pDIF_->GetNBins();
 
   double chi = 0;
   for (unsigned int bin = 0; bin < nBins; bin++) {
     double m12, weight;
-    pDIF_->getBin(bin, m12, weight);
+    pDIF_->GetBin(bin, m12, weight);
 
     std::vector<double> x;
     x.push_back(m12);
-    ParameterList intensL = pPIF_->intensity(x);
-    double intens = intensL.GetDoubleParameter(0)->GetValue();
+    double intens = pPIF_->Intensity(x);
     // double intens = pPIF_->intensity(x, minPar);
 
     chi += (weight - intens) * (weight - intens) /

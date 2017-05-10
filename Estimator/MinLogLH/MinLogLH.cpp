@@ -44,8 +44,8 @@ MinLogLH::MinLogLH(std::shared_ptr<AmpIntensity> intens,
 
 void MinLogLH::Init() {
 
-  nEvts_ = _dataSample->getNEvents();
-  nPhsp_ = _phspSample->getNEvents();
+  nEvts_ = _dataSample->GetNEvents();
+  nPhsp_ = _phspSample->GetNEvents();
   if (!nUseEvt_)
     nUseEvt_ = nEvts_ - nStartEvt_;
   if (!(nStartEvt_ + nUseEvt_ <= nEvts_))
@@ -54,12 +54,12 @@ void MinLogLH::Init() {
     nUseEvt_ = nPhsp_ - nStartEvt_;
 
   // Get data as ParameterList
-  _dataSampleList = _dataSample->getListOfData();
-  _phspSampleList = _phspSample->getListOfData();
+  _dataSampleList = _dataSample->GetListOfData();
+  _phspSampleList = _phspSample->GetListOfData();
   if (_phspAccSample)
-    _phspAccSampleList = _phspAccSample->getListOfData();
+    _phspAccSampleList = _phspAccSample->GetListOfData();
   else
-    _phspAccSampleList = _phspSample->getListOfData();
+    _phspAccSampleList = _phspSample->GetListOfData();
 
   CalcSumOfWeights();
 
@@ -112,8 +112,8 @@ MinLogLH::CreateInstance(std::shared_ptr<AmpIntensity> intens,
 void MinLogLH::CalcSumOfWeights() {
   _sumOfWeights = 0;
   for (unsigned int evt = nStartEvt_; evt < nUseEvt_ + nStartEvt_; evt++) {
-    Event ev(_dataSample->getEvent(evt));
-    _sumOfWeights += ev.getWeight();
+    Event ev(_dataSample->GetEvent(evt));
+    _sumOfWeights += ev.GetWeight();
   }
   return;
 }
@@ -190,10 +190,10 @@ double MinLogLH::controlParameter(ParameterList &minPar) {
     double sumLog = 0;
     // loop over data sample
     for (unsigned int evt = nStartEvt_; evt < nUseEvt_ + nStartEvt_; evt++) {
-      Event ev(_dataSample->getEvent(evt));
+      Event ev(_dataSample->GetEvent(evt));
       dataPoint point(ev);
       double val = _intens->Intensity(point);
-      sumLog += std::log(val) * ev.getWeight();
+      sumLog += std::log(val) * ev.GetWeight();
     }
     lh = (-1) * ((double)nUseEvt_) / _sumOfWeights * sumLog;
   } else {

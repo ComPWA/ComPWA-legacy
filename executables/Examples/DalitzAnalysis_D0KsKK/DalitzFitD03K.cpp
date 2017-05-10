@@ -343,14 +343,14 @@ int main(int argc, char **argv) {
     // sample with accepted phsp events
     phspData = std::shared_ptr<Data>(new RootReader(
         phspEfficiencyFile, phspEfficiencyFileTreeName, mcPrecision));
-    phspData->reduceToPhsp();
+    phspData->ReduceToPhsp();
   }
 
   //========== Generation of toy phase space sample ==
   std::shared_ptr<Data> toyPhspData(new RootReader()); // Toy sample
   run.SetPhspSample(toyPhspData);
   run.GeneratePhsp(mcPrecision);
-  toyPhspData->setEfficiency(eff); // set efficiency values for each event
+  toyPhspData->SetEfficiency(eff); // set efficiency values for each event
 
   // ========= AmpIntensity ========
   auto intens = IncoherentIntensity::Factory(
@@ -363,11 +363,11 @@ int main(int argc, char **argv) {
 
   // Setting samples for normalization
   auto toyPoints =
-      std::make_shared<std::vector<dataPoint>>(toyPhspData->getDataPoints());
+      std::make_shared<std::vector<dataPoint>>(toyPhspData->GetDataPoints());
   auto phspPoints = toyPoints;
   if (phspData) {
     auto phspPoints =
-        std::make_shared<std::vector<dataPoint>>(phspData->getDataPoints());
+        std::make_shared<std::vector<dataPoint>>(phspData->GetDataPoints());
   }
   trueIntens->SetPhspSample(phspPoints, toyPoints);
   intens->SetPhspSample(phspPoints, toyPoints);
@@ -401,24 +401,23 @@ int main(int argc, char **argv) {
     //      numSignalEvents -= inputBkg->getNEvents();
     LOG(info) << "Reading data file...";
     std::shared_ptr<Data> inD(new RootReader(dataFile, dataFileTreeName));
-    std::cout<<"------------------------------------------------------"<<std::endl;
     
-    SubSystem s(std::vector<int>{1}, std::vector<int>{0}, std::vector<int>{2});
-    int id = dynamic_cast<HelicityKinematics*>(Kinematics::Instance())->GetDataID(s);
-    for( int i=0; i<10 ; i++){
-      std::cout<<inD->getEvent(i)<<std::endl;
-      dataPoint p(inD->getEvent(i));
-      std::cout<<p<<std::endl;
-      std::cout<<"mSq="<<p.GetValue(id*3)<<" cosTheta="<<p.GetValue(id*3+1)<<std::endl;
-      std::cout<<"-------"<<std::endl;
-    }
+//    SubSystem s(std::vector<int>{1}, std::vector<int>{0}, std::vector<int>{2});
+//    int id = dynamic_cast<HelicityKinematics*>(Kinematics::Instance())->GetDataID(s);
+//    for( int i=0; i<10 ; i++){
+//      std::cout<<inD->getEvent(i)<<std::endl;
+//      dataPoint p(inD->getEvent(i));
+//      std::cout<<p<<std::endl;
+//      std::cout<<"mSq="<<p.GetValue(id*3)<<" cosTheta="<<p.GetValue(id*3+1)<<std::endl;
+//      std::cout<<"-------"<<std::endl;
+//    }
 //    exit(1);
     
-    inD->reduceToPhsp();
+    inD->ReduceToPhsp();
     if (resetWeights)
-      inD->resetWeights(); // resetting weights if requested
-    inputData = inD->rndSubSet(numSignalEvents, gen);
-    inputData->setEfficiency(eff);
+      inD->ResetWeights(); // resetting weights if requested
+    inputData = inD->RndSubSet(numSignalEvents, gen);
+    inputData->SetEfficiency(eff);
     run.SetData(inputData);
     inD = std::shared_ptr<Data>();
     sample->Add(*inputData);
@@ -436,8 +435,8 @@ int main(int argc, char **argv) {
       MomentumCorrection *pidSys = getPidCorrection();
       trkSys->Print();
       pidSys->Print();
-      fullPhsp->applyCorrection(*trkSys);
-      fullPhsp->applyCorrection(*pidSys);
+      fullPhsp->ApplyCorrection(*trkSys);
+      fullPhsp->ApplyCorrection(*pidSys);
     }
     std::shared_ptr<Data> fullTruePhsp;
     if (!phspEfficiencyFileTrueTreeName.empty()) {
@@ -462,12 +461,12 @@ int main(int argc, char **argv) {
     run.SetAmplitude(trueIntens);
     run.SetPhspSample(std::shared_ptr<Data>());
     run.Generate(numEvents);
-    LOG(info) << "Sample size: " << sample->getNEvents();
+    LOG(info) << "Sample size: " << sample->GetNEvents();
   }
   // Reset phsp sample to save memory
   run.SetPhspSample(std::shared_ptr<Data>());
 
-  sample->reduceToPhsp();
+  sample->ReduceToPhsp();
 
   LOG(info) << "================== SETTINGS =================== ";
 
@@ -493,7 +492,7 @@ int main(int argc, char **argv) {
       LOG(info) << "True background model file: " << trueBkgModelFile;
     }
   }
-  LOG(info) << "Total events in input sample: " << sample->getNEvents();
+  LOG(info) << "Total events in input sample: " << sample->GetNEvents();
 
   LOG(info) << "==== EFFICIENCY";
   if (!efficiencyFile.empty())
@@ -557,7 +556,6 @@ int main(int argc, char **argv) {
       dynamic_pointer_cast<ComPWA::Estimator::MinLogLH>(esti)->UseFunctionTree(
           true);
       LOG(debug) << esti->GetTree()->head()->to_str(25);
-      exit(1);
     }
 
     if (useRandomStartValues)
@@ -690,8 +688,8 @@ int main(int argc, char **argv) {
                                   // plotting
     }
     // reduce sample to phsp
-    pl_phspSample->reduceToPhsp();
-    pl_phspSample->setEfficiency(eff);
+    pl_phspSample->ReduceToPhsp();
+    pl_phspSample->SetEfficiency(eff);
 
     //-------- Instance of plotData
     plotData pl(fileNamePrefix, plotNBins);

@@ -72,7 +72,7 @@ public:
   //! Create empty clone
   virtual RootReader *EmptyClone() const;
 
-  virtual void writeData(std::string file = "", std::string trName = "");
+  virtual void WriteData(std::string file = "", std::string trName = "");
 
 protected:
   // Open ROOT file and set branch addresses to TTree

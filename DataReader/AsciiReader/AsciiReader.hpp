@@ -51,7 +51,7 @@ public:
 
   virtual AsciiReader *EmptyClone() const;
 
-  virtual void writeData(std::string file = "", std::string trName = ""){};
+  virtual void WriteData(std::string file = "", std::string trName = ""){};
 };
 
 } /* namespace AsciiReader */

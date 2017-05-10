@@ -116,13 +116,13 @@ void RootReader::storeEvents() {
       int charge = partN->GetPDG()->Charge();
       if (charge != 0)
         charge /= std::fabs(charge);
-      tmp.addParticle(Particle(inN.X(), inN.Y(), inN.Z(), inN.E(),
+      tmp.AddParticle(Particle(inN.X(), inN.Y(), inN.Z(), inN.E(),
                                partN->GetPdgCode(), charge));
     } // particle loop
-    tmp.setWeight(feventWeight);
-    tmp.setCharge(fCharge);
-    tmp.setFlavour(fFlavour);
-    tmp.setEfficiency(feventEff);
+    tmp.SetWeight(feventWeight);
+    tmp.SetCharge(fCharge);
+    tmp.SetFlavour(fFlavour);
+    tmp.SetEfficiency(feventEff);
 
     fEvents.push_back(tmp);
     if (feventWeight > maxWeight)
@@ -130,7 +130,7 @@ void RootReader::storeEvents() {
   } // event loop
 }
 
-void RootReader::writeData(std::string file, std::string trName) {
+void RootReader::WriteData(std::string file, std::string trName) {
   if (file != "")
     fileName = file;
   if (trName != "")
@@ -147,7 +147,7 @@ void RootReader::writeData(std::string file, std::string trName) {
                              fileName);
 
   fTree = new TTree(treeName.c_str(), treeName.c_str());
-  unsigned int numPart = fEvents[0].getNParticles();
+  unsigned int numPart = fEvents[0].GetNParticles();
   fParticles = new TClonesArray("TParticle", numPart);
   fTree->Branch("Particles", &fParticles);
   fTree->Branch("weight", &feventWeight, "weight/D");
@@ -166,12 +166,12 @@ void RootReader::writeData(std::string file, std::string trName) {
   auto it = fEvents.begin();
   for (; it != fEvents.end(); ++it) {
     fParticles->Clear();
-    feventWeight = (*it).getWeight();
-    fCharge = (*it).getCharge();
-    fFlavour = (*it).getFlavour();
-    feventEff = (*it).getEfficiency();
+    feventWeight = (*it).GetWeight();
+    fCharge = (*it).GetCharge();
+    fFlavour = (*it).GetFlavour();
+    feventEff = (*it).GetEfficiency();
     for (unsigned int i = 0; i < numPart; i++) {
-      const Particle oldParticle = (*it).getParticle(i);
+      const Particle oldParticle = (*it).GetParticle(i);
       TLorentzVector oldMomentum(oldParticle.GetPx(), oldParticle.GetPy(), oldParticle.GetPz(),
                                  oldParticle.GetE());
       new (partArray[i]) TParticle(oldParticle.GetPid(), 1, 0, 0, 0, 0, oldMomentum,

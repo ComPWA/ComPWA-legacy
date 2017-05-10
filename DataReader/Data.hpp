@@ -53,23 +53,23 @@ public:
   virtual void Add(Data &otherSample);
 
   //! Add event to data sample
-  virtual void pushEvent(const Event &evt);
+  virtual void PushEvent(const Event &evt);
 
   //! Get number of events in data sample
-  virtual const std::size_t getNEvents() const { return fEvents.size(); }
+  virtual const std::size_t GetNEvents() const { return fEvents.size(); }
 
   /**! Get event
    *
    * @param id Event id
    * @return reference to event
    */
-  virtual Event &getEvent(const int id) { return fEvents.at(id); }
+  virtual Event& GetEvent(const int id) { return fEvents.at(id); }
 
   /**! Get events
    *
    * @return Vector of all events
    */
-  virtual std::vector<Event>& getEvents() { return fEvents; }
+  virtual std::vector<Event>& GetEvents() { return fEvents; }
 
   /**! Get list of data
    * A 'horizontal' list of dataPoints is obtained. Each variable
@@ -77,24 +77,24 @@ public:
    * This ParameterList is used to build the FunctionTree
    * @return List of data
    */
-  virtual const ParameterList &getListOfData();
+  virtual const ParameterList& GetListOfData();
 
-  std::vector<dataPoint> getDataPoints() const;
+  std::vector<dataPoint> GetDataPoints() const;
 
   /**! Set correction value for all events.
    *
    * @param corr Correction function
    */
-  virtual void applyCorrection(DataCorrection &corr);
+  virtual void ApplyCorrection(DataCorrection &corr);
 
   //! Remove all events outside phase-space boundaries
-  virtual void reduceToPhsp();
+  virtual void ReduceToPhsp();
 
   /**! Reduce data set
    * Select first @param newSize events from full sample.
    * @param newSize
    */
-  virtual void reduce(unsigned int newSize);
+  virtual void Reduce(unsigned int newSize);
 
   /**! Select random subset of events
    *
@@ -102,35 +102,35 @@ public:
    * @param gen Generator
    * @return Sub set
    */
-  virtual std::shared_ptr<Data> rndSubSet(unsigned int size,
+  virtual std::shared_ptr<Data> RndSubSet(unsigned int size,
                                           std::shared_ptr<Generator> gen);
 
   /**! Set resolution value for all events.
    *
    * @param res Resolution object
    */
-  void setResolution(std::shared_ptr<Resolution> res);
+  void SetResolution(std::shared_ptr<Resolution> res);
 
   /**! Set efficiency value for all events.
    *
    * @param eff Efficiency object
    */
-  virtual void setEfficiency(std::shared_ptr<Efficiency> eff);
+  virtual void SetEfficiency(std::shared_ptr<Efficiency> eff);
 
   //! Reset effciencies of all events
-  virtual void resetEfficiency(double e = 1.);
+  virtual void ResetEfficiency(double e = 1.);
 
   //! Get maximum weight
-  virtual double getMaxWeight() const;
+  virtual double GetMaxWeight() const;
 
   /**! Reset all weights to a default value
    *
    * @param weight default weight
    */
-  virtual void resetWeights(double weight = 1.);
+  virtual void ResetWeights(double weight = 1.);
 
   //! Check of weights are stored
-  virtual bool hasWeights();
+  virtual bool HasWeights();
 
   //! Clear Data
   virtual void Clear();
@@ -140,16 +140,16 @@ public:
    * @param file output file name
    * @param trName name of output tree
    */
-  virtual void writeData(std::string file = "", std::string trName = "") {
+  virtual void WriteData(std::string file = "", std::string trName = "") {
     LOG(error) << "Data::writeData() | Base class does not provide functionality"
     "to write data to file.";
   };
 
   //! Obsolete?
-  virtual const std::size_t getNBins() const { return fBins.size(); }
+  virtual const std::size_t GetNBins() const { return fBins.size(); }
 
   //! Obsolete?
-  virtual const int getBin(const int, double &, double &);
+  virtual const int GetBin(const int, double &, double &);
 
 protected:
   // DataPoints are stored as 'horizontal' structure

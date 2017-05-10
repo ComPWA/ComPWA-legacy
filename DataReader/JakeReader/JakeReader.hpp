@@ -48,7 +48,9 @@ class JakeReader : public Data {
 public:
   //! Default Constructor: Empty object, can be filled
   JakeReader();
+  
   JakeReader(TTree *tr, int size = -1, const bool binned = false);
+  
   /*! Read constructor.
    *
    * @param inRootFile Input file name
@@ -58,27 +60,7 @@ public:
    */
   JakeReader(const std::string inRootFile, const std::string inTreeName = "kin",
              int size = -1, const bool binned = false);
-
-  virtual const std::vector<std::string> &getVariableNames();
-
-  //  virtual void writeToFile();
-  virtual void pushEvent(const Event &evt) { fEvents.push_back(evt); };
-  virtual Event &getEvent(const int);
-  virtual const int getBin(const int, double &, double &);
-  // virtual const int getEvent(const int, TLorentzVector& , TLorentzVector& ,
-  // double&);
-  virtual void writeData(std::string file = "", std::string trName = "");
-  virtual void Clear();
-
-  virtual const unsigned int getNEvents() const { return fEvents.size(); };
-  virtual const unsigned int getNBins() const { return fmaxBins; };
-
-  virtual std::vector<Event> getEvents() { return fEvents; }
-  virtual std::vector<dataPoint> getDataPoints();
-  virtual void Add(Data &otherSample) {
-    std::vector<Event> otherEvents = otherSample.getEvents();
-    fEvents.insert(fEvents.end(), otherEvents.begin(), otherEvents.end());
-  }
+  
   //! Destructor
   virtual ~JakeReader();
 
@@ -88,15 +70,8 @@ public:
   //! Create empty clone
   virtual JakeReader *EmptyClone() const;
 
-  //! Set efficiency value for all stored events. Efficiency is taken from
-  //! Efficiency object.
-  void setEfficiency(std::shared_ptr<Efficiency> eff);
-  //! Reset effciencies of all events
-  void resetEfficiency(double e = 1.);
-  //! Reset weights
-  void resetWeights(double w = 1.);
-  //! Weights set?
-  bool hasWeights();
+
+  virtual void WriteData(std::string file = "", std::string trName = "");
 
 protected:
   void read();

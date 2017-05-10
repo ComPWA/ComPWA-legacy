@@ -53,19 +53,19 @@ RootGenerator::RootGenerator(int seed) {
 RootGenerator *RootGenerator::Clone() { return (new RootGenerator(*this)); }
 
 void RootGenerator::Generate(Event &evt) {
-  evt.clear();
+  evt.Clear();
   const double weight = event.Generate();
 
   for (unsigned int t = 0; t < nPart; t++) {
     TLorentzVector *p = event.GetDecay(t);
-    evt.addParticle(Particle(p->X(), p->Y(), p->Z(), p->E()));
+    evt.AddParticle(Particle(p->X(), p->Y(), p->Z(), p->E()));
   }
-  evt.setWeight(weight);
+  evt.SetWeight(weight);
 
 #ifndef _NDEBUG
   ComPWA::FourMomentum pFour;
-  for (int i = 0; i < evt.getNParticles(); i++)
-    pFour += evt.getParticle(i).GetFourMomentum();
+  for (int i = 0; i < evt.GetNParticles(); i++)
+    pFour += evt.GetParticle(i).GetFourMomentum();
   if (pFour.GetInvMass() != sqrtS)
     if (!ComPWA::equal(pFour.GetInvMass(), sqrtS, 100)) {
       LOG(error) << pFour.GetInvMass() << " - " << sqrtS << " = "

@@ -25,7 +25,7 @@ dataPoint::dataPoint(std::vector<double> vec) : weight(1.), eff(1.) {
 
 dataPoint::dataPoint(const Event &ev) : weight(1.), eff(1.) {
   Kinematics::Instance()->EventToDataPoint(ev, *this);
-  weight = ev.getWeight();
+  weight = ev.GetWeight();
   return;
 }
 

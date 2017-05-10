@@ -64,7 +64,7 @@ public:
 
   /**! Get current normalization.  */
   virtual double GetNormalization() const {
-    if (_dynamic->CheckModified())
+    if (_dynamic->CheckModified() || !_current_integral)
       const_cast<double &>(_current_integral) = Integral();
     _dynamic->SetModified(false);
     assert(_current_integral != 0.0);

@@ -26,12 +26,12 @@ BOOST_AUTO_TEST_SUITE(RootReaderSuite);
 
 BOOST_AUTO_TEST_CASE(ReadingCheck)
 {
-  std::string file = "DataTest-input.root";
+  std::string file = "../DataTest-input.root";
   RootReader myReader(file);
-  BOOST_CHECK_EQUAL(myReader.getNEvents(), (unsigned int)100000);
+  BOOST_CHECK_EQUAL(myReader.GetNEvents(), (unsigned int)100000);
 
   Event event;
-  BOOST_CHECK( event.getName() != myReader.getEvent(5).getName());
+  BOOST_CHECK( event.GetName() != myReader.GetEvent(5).GetName());
 }
 
 BOOST_AUTO_TEST_SUITE_END();

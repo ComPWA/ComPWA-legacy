@@ -42,10 +42,10 @@ bool TwoBodyKinematics::IsWithinPhsp(const dataPoint &point) const {
 
 void TwoBodyKinematics::EventToDataPoint(const Event &ev,
                                          dataPoint &point) const {
-  double weight = ev.getWeight();
+  double weight = ev.GetWeight();
   point.SetWeight(weight); // reset weight
-  const Particle &part1 = ev.getParticle(0);
-  const Particle &part2 = ev.getParticle(1);
+  const Particle &part1 = ev.GetParticle(0);
+  const Particle &part2 = ev.GetParticle(1);
   double msq = Particle::InvariantMass(part1, part2);
   point.SetValue(0, msq);
   return;

@@ -277,17 +277,17 @@ double HelicityKinematics::calculatePSArea() {
     Event tmp;
     gen.Generate(tmp);
     double ampRnd = gen.GetUniform(0, 1);
-    if (ampRnd > tmp.getWeight())
+    if (ampRnd > tmp.GetWeight())
       continue;
     m++;
-    sample.pushEvent(tmp);
+    sample.PushEvent(tmp);
   }
 
-  std::vector<double> localDistance(sample.getNEvents(), 0.0);
-  for (int n = 0; n < sample.getNEvents(); n++) {
+  std::vector<double> localDistance(sample.GetNEvents(), 0.0);
+  for (int n = 0; n < sample.GetNEvents(); n++) {
     std::vector<double> dist;
-    for (int m = 0; m < sample.getNEvents(); m++) {
-      double d = EventDistance(sample.getEvent(n), sample.getEvent(m));
+    for (int m = 0; m < sample.GetNEvents(); m++) {
+      double d = EventDistance(sample.GetEvent(n), sample.GetEvent(m));
       dist.push_back(d);
     }
     std::sort(dist.begin(), dist.end()); // ascending
@@ -295,18 +295,18 @@ double HelicityKinematics::calculatePSArea() {
       localDistance.at(i) += dist.at(i);
   }
   for (int i = 0; i < localDistance.size(); i++)
-    localDistance.at(i) /= sample.getNEvents();
+    localDistance.at(i) /= sample.GetNEvents();
 
   int nDim = _finalState.size() - 1;
 
-  std::vector<double> avgVecVol(sample.getNEvents());
+  std::vector<double> avgVecVol(sample.GetNEvents());
   for (int i = 0; i < localDistance.size(); i++)
     avgVecVol.at(i) = std::pow(M_PI, nDim / 2) / std::tgamma(nDim / 2 + 1) *
                       std::pow(localDistance.at(i), nDim);
 
-  std::vector<double> avgVecDensity(sample.getNEvents());
+  std::vector<double> avgVecDensity(sample.GetNEvents());
   for (int i = 0; i < localDistance.size(); i++)
-    avgVecDensity.at(i) = sample.getNEvents() / (i / avgVecVol.at(i));
+    avgVecDensity.at(i) = sample.GetNEvents() / (i / avgVecVol.at(i));
 
   //  std::cout<<"Average distance | volume | density:"<<std::endl;
   //  for(int i=0; i<precision/4; i++)
@@ -377,14 +377,14 @@ void HelicityKinematics::EventToDataPoint(
 
   FourMomentum recoilP4;
   for (auto s : sys.GetRecoilState())
-    recoilP4 += event.getParticle(s).GetFourMomentum();
+    recoilP4 += event.GetParticle(s).GetFourMomentum();
 
   FourMomentum finalA,finalB;
   for (auto s : sys.GetFinalStates().at(0))
-    finalA += event.getParticle(s).GetFourMomentum();
+    finalA += event.GetParticle(s).GetFourMomentum();
 
   for (auto s : sys.GetFinalStates().at(1))
-    finalB += event.getParticle(s).GetFourMomentum();
+    finalB += event.GetParticle(s).GetFourMomentum();
 
   FourMomentum totalP4 = finalA+finalB;
   double mSq = totalP4.GetInvMassSq();
@@ -427,38 +427,38 @@ void HelicityKinematics::EventToDataPoint(
   double cosTheta = qftFinalA.CosTheta();
   double phi = qftFinalA.Phi();
 
-//  double cc;
-//  if (sys.GetRecoilState().size() == 1 &&
-//      sys.GetFinalStates().at(0).size() == 1 &&
-//      sys.GetFinalStates().at(1).size() == 1) {
-//    double invMassSqA = mSq;
-//    double invMassSqB = (recoilP4 + finalA).GetInvMassSq();
-//    auto mspec = PhysConst::Instance()
-//                     ->FindParticle(_finalState.at(sys.GetRecoilState().at(0)))
-//                     .GetMass();
-//    auto ma =
-//        PhysConst::Instance()
-//            ->FindParticle(_finalState.at(sys.GetFinalStates().at(0).at(0)))
-//            .GetMass();
-//    auto mb =
-//        PhysConst::Instance()
-//            ->FindParticle(_finalState.at(sys.GetFinalStates().at(1).at(0)))
-//            .GetMass();
-//    auto M = PhysConst::Instance()->FindParticle(_initialState.at(0)).GetMass();
-//
-//    cc = HelicityAngle(M, ma, mb, mspec, invMassSqA, invMassSqB);
-////    std::cout << sys << std::endl;
-////    std::cout << _initialState.at(0) << "/ (" << sys.GetFinalStates().at(0).at(0)
-////              << sys.GetFinalStates().at(1).at(0) << ") angle ("<< sys.GetFinalStates().at(0).at(0)
-////              << sys.GetRecoilState().at(0) << ") - "
-////              << " (ma=" << ma<<" mb="<<mb<<" mSpec="<<mspec<<" mABSq="<<invMassSqA << " mASpecSq=" << invMassSqB << ") = " << cc
-////              << " " << cosTheta << std::endl;
-//
-//  } else {
-//    cc = 1.0;
-//    phi = 0.0;
-//  }
-//  cosTheta = cc;
+  double cc;
+  if (sys.GetRecoilState().size() == 1 &&
+      sys.GetFinalStates().at(0).size() == 1 &&
+      sys.GetFinalStates().at(1).size() == 1) {
+    double invMassSqA = mSq;
+    double invMassSqB = (recoilP4 + finalA).GetInvMassSq();
+    auto mspec = PhysConst::Instance()
+                     ->FindParticle(_finalState.at(sys.GetRecoilState().at(0)))
+                     .GetMass();
+    auto ma =
+        PhysConst::Instance()
+            ->FindParticle(_finalState.at(sys.GetFinalStates().at(0).at(0)))
+            .GetMass();
+    auto mb =
+        PhysConst::Instance()
+            ->FindParticle(_finalState.at(sys.GetFinalStates().at(1).at(0)))
+            .GetMass();
+    auto M = PhysConst::Instance()->FindParticle(_initialState.at(0)).GetMass();
+
+    cc = HelicityAngle(M, ma, mb, mspec, invMassSqA, invMassSqB);
+//    std::cout << sys << std::endl;
+//    std::cout << _initialState.at(0) << "/ (" << sys.GetFinalStates().at(0).at(0)
+//              << sys.GetFinalStates().at(1).at(0) << ") angle ("<< sys.GetFinalStates().at(0).at(0)
+//              << sys.GetRecoilState().at(0) << ") - "
+//              << " (ma=" << ma<<" mb="<<mb<<" mSpec="<<mspec<<" mABSq="<<invMassSqA << " mASpecSq=" << invMassSqB << ") = " << cc
+//              << " " << cosTheta << std::endl;
+
+  } else {
+    cc = 1.0;
+    phi = 0.0;
+  }
+  cosTheta = cc;
   
   //   Check if values are within allowed range.
   if (cosTheta > 1 || cosTheta < -1 || phi > M_PI || phi < (-1) * M_PI ||

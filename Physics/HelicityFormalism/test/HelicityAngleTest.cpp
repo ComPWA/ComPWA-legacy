@@ -36,11 +36,11 @@ BOOST_AUTO_TEST_SUITE(HelicityFormalism)
  * precision. Every not an then even with float precision the test fails.
  */
 BOOST_AUTO_TEST_CASE(HelicityAngleTest) {
-  ComPWA::Logging log("", boost::log::trivial::severity_level::error);
+  ComPWA::Logging log("", boost::log::trivial::severity_level::debug);
 
   // Construct HelicityKinematics from XML tree
   boost::property_tree::ptree tr;
-  boost::property_tree::xml_parser::read_xml("HelicityFormalismTest-input.xml",
+  boost::property_tree::xml_parser::read_xml("../HelicityFormalismTest-input.xml",
                                              tr);
 
   ComPWA::PhysConst::CreateInstance(tr);
@@ -85,16 +85,16 @@ BOOST_AUTO_TEST_CASE(HelicityAngleTest) {
    * cosTheta13_12=0.219724 cosTheta13_CP=-0.13337
    * cosTheta23_12=0.356843 cosTheta23_CP=-0.318779
    */
-  //  ev.addParticle(ComPWA::Particle(
-  //      std::array<double, 4>{{-0.00827061, -0.242581, -0.335833, 0.636104}},
-  //      310));
-  //  ev.addParticle(ComPWA::Particle(
-  //      std::array<double, 4>{{-0.158637, -0.149132, 0.199913, 0.575405}},
-  //      321));
-  //  ev.addParticle(ComPWA::Particle(
-  //      std::array<double, 4>{{-0.0236227, 0.453598, -0.0330521, 0.671656}},
-  //      -321));
-  //  sample->pushEvent(ev);
+//    ev.addParticle(ComPWA::Particle(
+//        std::array<double, 4>{{-0.00827061, -0.242581, -0.335833, 0.636104}},
+//        310));
+//    ev.addParticle(ComPWA::Particle(
+//        std::array<double, 4>{{-0.158637, -0.149132, 0.199913, 0.575405}},
+//        321));
+//    ev.addParticle(ComPWA::Particle(
+//        std::array<double, 4>{{-0.0236227, 0.453598, -0.0330521, 0.671656}},
+//        -321));
+//    sample->pushEvent(ev);
 
   auto kin = dynamic_cast<HelicityKinematics *>(Kinematics::Instance());
 
@@ -125,7 +125,7 @@ BOOST_AUTO_TEST_CASE(HelicityAngleTest) {
                      std::vector<int>{1});
 
   LOG(info) << "Loop over phsp events....";
-  for (auto i : sample->getEvents()) {
+  for (auto i : sample->GetEvents()) {
     // Calculate masses from FourMomentum to make sure that the correct masses
     // are used for the calculation of the helicity angle
     //    BOOST_CHECK_EQUAL((float)m1,
@@ -139,18 +139,18 @@ BOOST_AUTO_TEST_CASE(HelicityAngleTest) {
     //                              i.getParticle(2).GetFourMomentum())
     //                                 .GetInvMass());
 
-    double m23sq = (i.getParticle(1).GetFourMomentum() +
-                    i.getParticle(2).GetFourMomentum())
+    double m23sq = (i.GetParticle(1).GetFourMomentum() +
+                    i.GetParticle(2).GetFourMomentum())
                        .GetInvMassSq();
-    double m13sq = (i.getParticle(0).GetFourMomentum() +
-                    i.getParticle(2).GetFourMomentum())
+    double m13sq = (i.GetParticle(0).GetFourMomentum() +
+                    i.GetParticle(2).GetFourMomentum())
                        .GetInvMassSq();
     double m12sq;
     if (useDerivedMassSq)
       m12sq = (sqrtS * sqrtS + m1 * m1 + m2 * m2 + m3 * m3 - m23sq - m13sq);
     else
-      m12sq = (i.getParticle(0).GetFourMomentum() +
-               i.getParticle(1).GetFourMomentum())
+      m12sq = (i.GetParticle(0).GetFourMomentum() +
+               i.GetParticle(1).GetFourMomentum())
                   .GetInvMassSq();
 
     //------------ Restframe (12) -------------

@@ -65,34 +65,9 @@ JakeReader::JakeReader(const std::string inRootFile,
 
 JakeReader::~JakeReader() {}
 
-bool JakeReader::hasWeights() {
-  bool has = 0;
-  for (unsigned int evt = 0; evt < fEvents.size(); evt++) {
-    if (fEvents.at(evt).getWeight() != 1.) {
-      has = 1;
-      break;
-    }
-  }
-  return has;
-}
-
 JakeReader *JakeReader::Clone() const { return new JakeReader(*this); }
 
 JakeReader *JakeReader::EmptyClone() const { return new JakeReader(); }
-
-void JakeReader::Clear() { fEvents.clear(); }
-void JakeReader::setEfficiency(std::shared_ptr<Efficiency> eff) {
-  for (unsigned int evt = 0; evt < fEvents.size(); evt++) {
-    dataPoint e(fEvents.at(evt));
-    double val = eff->evaluate(e);
-    fEvents.at(evt).setEfficiency(val);
-  }
-}
-void JakeReader::resetEfficiency(double e) {
-  for (unsigned int evt = 0; evt < fEvents.size(); evt++) {
-    fEvents.at(evt).setEfficiency(e);
-  }
-}
 
 void JakeReader::read() {
   // fParticles = new TClonesArray("TParticle");
@@ -105,31 +80,6 @@ void JakeReader::read() {
   //	fEvent=0;
   bin();
   storeEvents();
-}
-
-const std::vector<std::string> &JakeReader::getVariableNames() {
-  if (!fVarNames.size()) { // TODO: init
-    fVarNames.push_back("dataname1");
-    fVarNames.push_back("dataname2");
-  }
-  return fVarNames;
-}
-void JakeReader::resetWeights(double w) {
-  for (unsigned int i = 0; i < fEvents.size(); i++)
-    fEvents.at(i).setWeight(w);
-  return;
-}
-
-Event &JakeReader::getEvent(const int i) { return fEvents.at(i); }
-
-const int JakeReader::getBin(const int i, double &m12, double &weight) {
-  if (!fBinned)
-    return -1;
-
-  m12 = fBins[i].first;
-  weight = fBins[i].second;
-
-  return 1;
 }
 
 void JakeReader::storeEvents() {
@@ -150,18 +100,18 @@ void JakeReader::storeEvents() {
       // partN = (TParticle*) fParticles->At(part);
       // if(!partN) continue;
       // partN->Momentum(inN);
-      tmp.addParticle(Particle(fpx[part], fpy[part], fpz[part], fe[part], 0));
+      tmp.AddParticle(Particle(fpx[part], fpy[part], fpz[part], fe[part], 0));
     } // particle loop
-    tmp.setWeight(feventWeight);
-    tmp.setCharge(0);
-    tmp.setFlavour(0);
-    tmp.setEfficiency(1.);
+    tmp.SetWeight(feventWeight);
+    tmp.SetCharge(0);
+    tmp.SetFlavour(0);
+    tmp.SetEfficiency(1.);
 
     fEvents.push_back(tmp);
   } // event loop
 }
 
-void JakeReader::writeData(std::string file, std::string trName) {
+void JakeReader::WriteData(std::string file, std::string trName) {
   if (file != "")
     fileName = file;
   if (trName != "")
@@ -264,13 +214,6 @@ void JakeReader::bin() {
                int bin = (int)((inm12-min)/step);
                fBins[bin].second += 1.;
        }*/
-}
-
-std::vector<dataPoint> JakeReader::getDataPoints() {
-  std::vector<dataPoint> vecPoint;
-  for (int i = 0; i < fEvents.size(); i++)
-    vecPoint.push_back(dataPoint(fEvents.at(i)));
-  return vecPoint;
 }
 
 } /* namespace JakeReader */

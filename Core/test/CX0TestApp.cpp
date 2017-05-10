@@ -126,19 +126,20 @@ int main(int argc, char **argv) {
   string input;
   regex integer("(\\+|-)?[[:digit:]]+");
   //As long as the input is correct ask for another number
-  while(true)
-  {
+//  while(true)
+//  {
     cout<<"Give me an integer!"<<endl;
-    cin>>input;
+//    cin>>input;
+//  input = "1"; //we do not want user interaction in test cases
     //Exit when the user inputs q
-    if(input=="q")
-      break;
-    if(regex_match(input,integer))
-      cout<<"integer"<<endl;
-    else{
-      cout<<"Invalid input"<<endl;
-    }
-  }
+//    if(input=="q")
+//      break;
+//    if(regex_match(input,integer))
+//      cout<<"integer"<<endl;
+//    else{
+//      cout<<"Invalid input"<<endl;
+//    }
+//  }
   cout << endl;
 
   return 0;

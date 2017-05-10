@@ -112,13 +112,13 @@ inline double Maximum(std::shared_ptr<AmpIntensity> intens,
 inline double Maximum(std::shared_ptr<AmpIntensity> intens,
                       std::shared_ptr<DataReader::Data> sample) {
 
-  if (!sample->getNEvents()) {
+  if (!sample->GetNEvents()) {
     LOG(debug)
         << "Maximum() | MAximum can not be determined since sample is empty.";
     return 1.0;
   }
 
-  auto data = sample->getDataPoints();
+  auto data = sample->GetDataPoints();
   double max = 0;
   for (auto i : data ) {
     double val = intens->Intensity(i);
