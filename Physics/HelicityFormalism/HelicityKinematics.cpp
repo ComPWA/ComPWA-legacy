@@ -458,7 +458,7 @@ void HelicityKinematics::EventToDataPoint(
 //    cc = 1.0;
 //    phi = 0.0;
 //  }
-  cosTheta = cc;
+//  cosTheta = cc;
   
   //   Check if values are within allowed range.
   if (cosTheta > 1 || cosTheta < -1 || phi > M_PI || phi < (-1) * M_PI ||
