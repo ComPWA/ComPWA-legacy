@@ -1,6 +1,5 @@
 
-        
-  
+
 #define BOOST_TEST_MODULE                                                      \
   HelicityFormalism /* this can only be define once within the same library ?! \
   */
@@ -80,8 +79,13 @@ BOOST_AUTO_TEST_CASE(ConstructionFromXML) {
   // Write the property tree to the XML file. Add a line break at the end of
   // each line.
   boost::property_tree::xml_parser::write_xml(
-      "../HelicityFormalismTest-output.xml", ptout, std::locale(),
-      boost::property_tree::xml_writer_make_settings<std::string>(' ', 4));
+      "../HelicityFormalismTest-output.xml", ptout, std::locale());
+
+  // Compile error for some boost/compiler versions
+  //  boost::property_tree::xml_parser::write_xml(
+  //      "../HelicityFormalismTest-output.xml", ptout, std::locale(),
+  //         boost::property_tree::xml_writer_make_settings<std::string>(' ',
+  //         4));
 };
 
 BOOST_AUTO_TEST_CASE(AmpTreeCorrespondence) {
@@ -127,7 +131,8 @@ BOOST_AUTO_TEST_CASE(AmpTreeCorrespondence) {
       // Test if events outside the phase space boundaries are generated
       LOG(error) << "Event outside phase space. This should not happen since "
                     "we use a Monte-Carlo sample!";
-      BOOST_TEST(false);
+      BOOST_FAIL("Event outside phase space. This should not happen since "
+                    "we use a Monte-Carlo sample!");
       continue;
     }
 
