@@ -105,7 +105,7 @@ BOOST_AUTO_TEST_CASE(AmpTreeCorrespondence) {
 
   ParameterList list;
   intens->GetParameters(list);
-  LOG(info) << "List of parameters: " << std::endl << list;
+  LOG(info) << "List of parameters: " << std::endl << list.to_str();
   BOOST_CHECK_EQUAL(list.GetNDouble(), 14);
 
   // Generate phsp sample
