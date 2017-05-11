@@ -14,6 +14,9 @@ target_link_libraries(
 )
 
 install (FILES ${lib_headers} DESTINATION include/ComPWA)
+install(TARGETS MinLogLH
+        LIBRARY DESTINATION lib
+)
 
 #Run through each source
 foreach(testSrc ${TEST_SRCS})
@@ -23,6 +26,9 @@ foreach(testSrc ${TEST_SRCS})
 
   #Add compile target
   add_executable( ${testName} ${testSrc})
+  #install(TARGETS ${testName}
+  #  RUNTIME DESTINATION bin
+  #)
 
   #link to Boost libraries AND your targets and dependencies
   target_link_libraries( ${testName}

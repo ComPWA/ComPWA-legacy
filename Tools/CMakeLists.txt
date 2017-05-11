@@ -34,6 +34,9 @@ target_include_directories( Tools
 
 
 install (FILES ${lib_headers} DESTINATION include/ComPWA)
+install(TARGETS Tools
+        LIBRARY DESTINATION lib
+)
 
 
 # ------ TESTING ----- #
@@ -48,6 +51,9 @@ foreach(testSrc ${TEST_SRCS})
 
   #Add compile target
   add_executable( ${testName} ${testSrc})
+  #install(TARGETS ${testName}
+  #  RUNTIME DESTINATION bin
+  #)
 
   #link to Boost libraries AND your targets and dependencies
   target_link_libraries( ${testName}
