@@ -545,7 +545,7 @@ int main(int argc, char **argv) {
     ParameterList truePar, fitPar;
     trueIntens->GetParameters(truePar);
     intens->GetParameters(fitPar);
-    LOG(debug) << "Fit parameters: " << std::endl << fitPar;
+    LOG(debug) << "Fit parameters: " << std::endl << fitPar.to_str();
 
     //=== Constructing likelihood
     auto esti = Estimator::MinLogLH::CreateInstance(intens, sample, toyPhspData,
@@ -619,9 +619,12 @@ int main(int argc, char **argv) {
       boost::property_tree::ptree ptout;
       ptout.add_child("IncoherentIntensity", IncoherentIntensity::Save(intens));
       boost::property_tree::xml_parser::write_xml(
-          fileNamePrefix + std::string("-Model.xml"), ptout, std::locale(),
-          boost::property_tree::xml_writer_make_settings<std::string>(' ', 4,
-                                                                      "utf-8"));
+          fileNamePrefix + std::string("-Model.xml"), ptout, std::locale());
+          //Does not compile with boost1.54
+//      boost::property_tree::xml_parser::write_xml(
+//          fileNamePrefix + std::string("-Model.xml"), ptout, std::locale(),
+//          boost::property_tree::xml_writer_make_settings<std::string>(' ', 4,
+//                                                                      "utf-8"));
 
       //      LOG(info) << "Average resonance width of fit model: "
       //                << fitAmpSum->averageWidth();
