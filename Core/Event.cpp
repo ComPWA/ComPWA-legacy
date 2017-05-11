@@ -38,7 +38,7 @@ void Event::AddParticle(Particle inParticle) {
 Event::~Event() { /* nothing */
 }
 
-const Particle& Event::GetParticle(const unsigned int id) const {
+const Particle &Event::GetParticle(const unsigned int id) const {
   if (id >= GetNParticles()) {
     throw std::runtime_error(
         "Event::getParticle() | Particle id does not match!");
@@ -57,4 +57,13 @@ std::ostream &operator<<(std::ostream &stream, const Event &ev) {
 
   return stream;
 }
+
+double Event::GetCMSEnergy() const {
+
+  FourMomentum p4;
+  for (auto i : fParticles)
+    p4 += i.GetFourMomentum();
+  return p4.GetInvMass();
+}
+
 } /* namespace ComPWA */

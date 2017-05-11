@@ -39,24 +39,38 @@ namespace ComPWA {
 namespace Tools {
 
 class RootGenerator : public Generator {
+
 public:
+  //! Constructor for a three particle decay with given masses
+  RootGenerator(double sqrtS, double m1, double m2, double m3, int seed = -1);
+  
+  //! Default Constructor. Information on the decay is obtained from Kinematics
   RootGenerator(int seed = -1);
+  
   ~RootGenerator() { delete[] masses; };
 
   virtual RootGenerator *Clone();
-  virtual void Generate(Event &evt);
-  virtual void SetSeed(unsigned int seed);
-  virtual unsigned int GetSeed() const;
-  virtual double GetUniform(double min, double max) const;
-  virtual double GetGaussDist(double mu, double sigma) const;
-  virtual TGenPhaseSpace *GetGenerator() { return &event; }
   
+  virtual void Generate(Event &evt);
+  
+  virtual void SetSeed(unsigned int seed);
+  
+  virtual unsigned int GetSeed() const;
+  
+  virtual double GetUniform(double min, double max) const;
+  
+  virtual double GetGaussDist(double mu, double sigma) const;
+  
+  virtual TGenPhaseSpace *GetGenerator() { return &event; }
+
 protected:
   double sqrtS;
+  
   TGenPhaseSpace event;
+  
   size_t nPart;
+  
   Double_t *masses;
-
 };
 
 class UniformTwoBodyGenerator : public RootGenerator {
@@ -76,7 +90,7 @@ public:
 protected:
   double minSq, maxSq;
 };
-    
+
 } /* namespace Tools*/
 } /* namespace ComPWA */
 

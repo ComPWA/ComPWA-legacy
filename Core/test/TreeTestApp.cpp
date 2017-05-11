@@ -33,33 +33,39 @@
 
 using namespace ComPWA;
 
-//This function will be called from a thread
+// This function will be called from a thread
 
 int main(int argc, char **argv) {
   std::cout << "  ComPWA Copyright (C) 2013  Mathias Michel " << std::endl;
-  std::cout << "  This program comes with ABSOLUTELY NO WARRANTY; for details see license.txt" << std::endl;
+  std::cout << "  This program comes with ABSOLUTELY NO WARRANTY; for details "
+               "see license.txt"
+            << std::endl;
   std::cout << std::endl;
 
-  bool autonodes=true;
+  bool autonodes = true;
 
   //------------SetUp some operations for R = a * ( b + c * d)-----------
-  std::shared_ptr<Strategy> add = std::shared_ptr<Strategy>(new AddAll(ParType::DOUBLE));
-  std::shared_ptr<Strategy> mult = std::shared_ptr<Strategy>(new MultAll(ParType::DOUBLE));
-  std::shared_ptr<Strategy> madd = std::shared_ptr<Strategy>(new AddAll(ParType::MDOUBLE));
-  std::shared_ptr<Strategy> mmult = std::shared_ptr<Strategy>(new MultAll(ParType::MDOUBLE));
+  std::shared_ptr<Strategy> add =
+      std::shared_ptr<Strategy>(new AddAll(ParType::DOUBLE));
+  std::shared_ptr<Strategy> mult =
+      std::shared_ptr<Strategy>(new MultAll(ParType::DOUBLE));
+  std::shared_ptr<Strategy> madd =
+      std::shared_ptr<Strategy>(new AddAll(ParType::MDOUBLE));
+  std::shared_ptr<Strategy> mmult =
+      std::shared_ptr<Strategy>(new MultAll(ParType::MDOUBLE));
 
   //------------SetUp the parameters for R = a * ( b + c * d)-----------
-  std::shared_ptr<DoubleParameter> parA(new DoubleParameter("parA",5.));
-  std::shared_ptr<DoubleParameter> parB(new DoubleParameter("parB",2.));
-  std::shared_ptr<DoubleParameter> parC(new DoubleParameter("parC",3.));
-  std::shared_ptr<DoubleParameter> parD(new DoubleParameter("parD",1.));
+  std::shared_ptr<DoubleParameter> parA(new DoubleParameter("parA", 5.));
+  std::shared_ptr<DoubleParameter> parB(new DoubleParameter("parB", 2.));
+  std::shared_ptr<DoubleParameter> parC(new DoubleParameter("parC", 3.));
+  std::shared_ptr<DoubleParameter> parD(new DoubleParameter("parD", 1.));
 
- // std::cout << parA << std::endl;
-  //std::cout << " ValToStr: " << parA->val_to_str() << std::endl;
+  // std::cout << parA << std::endl;
+  // std::cout << " ValToStr: " << parA->val_to_str() << std::endl;
 
   std::shared_ptr<FunctionTree> myTree, subTree;
 
-  if(autonodes){ //Let FunctionTree manage the creation of the tree
+  if (autonodes) { // Let FunctionTree manage the creation of the tree
 
     myTree = std::shared_ptr<FunctionTree>(new FunctionTree());
     myTree->createHead("R", mult);
@@ -74,31 +80,33 @@ int main(int argc, char **argv) {
 
     myTree->insertTree(subTree, "bcd");
 
-  }else{ //create Tree manually
+  } else { // create Tree manually
 
-    //parameter container for intermediate results and final result
-    std::shared_ptr<DoubleParameter> finalA(new DoubleParameter("finalA",0.));
-    std::shared_ptr<DoubleParameter> interBCD(new DoubleParameter("interBCD",0.));
-    std::shared_ptr<DoubleParameter> interCD(new DoubleParameter("interCD",0.));
+    // parameter container for intermediate results and final result
+    std::shared_ptr<DoubleParameter> finalA(new DoubleParameter("finalA", 0.));
+    std::shared_ptr<DoubleParameter> interBCD(
+        new DoubleParameter("interBCD", 0.));
+    std::shared_ptr<DoubleParameter> interCD(
+        new DoubleParameter("interCD", 0.));
 
     //------------SetUp some nodes for R = a * ( b + c * d)----------------
-    std::shared_ptr<TreeNode> R =
-        std::shared_ptr<TreeNode>(new TreeNode("R", finalA, mult, std::shared_ptr<TreeNode>()));
-    std::shared_ptr<TreeNode> A =
-        std::shared_ptr<TreeNode>(new TreeNode("a", parA, std::shared_ptr<Strategy>(), R));
+    std::shared_ptr<TreeNode> R = std::shared_ptr<TreeNode>(
+        new TreeNode("R", finalA, mult, std::shared_ptr<TreeNode>()));
+    std::shared_ptr<TreeNode> A = std::shared_ptr<TreeNode>(
+        new TreeNode("a", parA, std::shared_ptr<Strategy>(), R));
     parA->Attach(A);
     std::shared_ptr<TreeNode> BCD =
         std::shared_ptr<TreeNode>(new TreeNode("bcd", interBCD, add, R));
-    std::shared_ptr<TreeNode> B =
-        std::shared_ptr<TreeNode>(new TreeNode("b", parB, std::shared_ptr<Strategy>(), BCD));
+    std::shared_ptr<TreeNode> B = std::shared_ptr<TreeNode>(
+        new TreeNode("b", parB, std::shared_ptr<Strategy>(), BCD));
     parB->Attach(B);
     std::shared_ptr<TreeNode> CD =
         std::shared_ptr<TreeNode>(new TreeNode("cd", interCD, add, BCD));
-    std::shared_ptr<TreeNode> C =
-        std::shared_ptr<TreeNode>(new TreeNode("c", parC, std::shared_ptr<Strategy>(), CD));
+    std::shared_ptr<TreeNode> C = std::shared_ptr<TreeNode>(
+        new TreeNode("c", parC, std::shared_ptr<Strategy>(), CD));
     parC->Attach(C);
-    std::shared_ptr<TreeNode> D =
-        std::shared_ptr<TreeNode>(new TreeNode("d", parD, std::shared_ptr<Strategy>(), CD));
+    std::shared_ptr<TreeNode> D = std::shared_ptr<TreeNode>(
+        new TreeNode("d", parD, std::shared_ptr<Strategy>(), CD));
     parD->Attach(D);
     myTree = std::shared_ptr<FunctionTree>(new FunctionTree(R));
     myTree->addNode(A);
@@ -107,7 +115,6 @@ int main(int argc, char **argv) {
     myTree->addNode(CD);
     myTree->addNode(C);
     myTree->addNode(D);
-
   }
 
   //------------Finished SetUp, now check Tree----------------
@@ -131,8 +138,7 @@ int main(int argc, char **argv) {
   std::cout << "Changed d from 1 to 2 and recalculated " << std::endl;
   std::cout << std::endl << myTree << std::endl << std::endl;
 
-
-  std::cout << std::endl << std::endl ;
+  std::cout << std::endl << std::endl;
 
   //------------new Tree with more dimensions----------------
 
@@ -141,71 +147,75 @@ int main(int argc, char **argv) {
 
   //------------SetUp the parameters for R = Sum of (a * b)-----------
   std::vector<std::shared_ptr<AbsParameter>> nVecParA;
-  std::shared_ptr<AbsParameter> nParB(new DoubleParameter("parB",2));
-  for(unsigned int i=0; i<nElements; i++){
-    std::shared_ptr<DoubleParameter> tmpA(new DoubleParameter("parA_"+i,i+1));
+  std::shared_ptr<AbsParameter> nParB(new DoubleParameter("parB", 2));
+  for (unsigned int i = 0; i < nElements; i++) {
+    std::shared_ptr<DoubleParameter> tmpA(
+        new DoubleParameter("parA_" + std::to_string(i), i + 1));
     nVecParA.push_back(tmpA);
   }
 
-//   if(autonodes){ //Let FunctionTree manage the creation of the tree
-    myTreeMult = std::shared_ptr<FunctionTree>(new FunctionTree());
-    myTreeMult->createHead("R", add);
-    myTreeMult->createNode("ab", mult, "R", nElements, true);
-    myTreeMult->createLeaf("a", nVecParA, "ab");
-    myTreeMult->createLeaf("b", nParB, "ab");
+  //   if(autonodes){ //Let FunctionTree manage the creation of the tree
+  myTreeMult = std::shared_ptr<FunctionTree>(new FunctionTree());
+  myTreeMult->createHead("R", add);
+  myTreeMult->createNode("ab", mult, "R", nElements, true);
+  myTreeMult->createLeaf("a", nVecParA, "ab");
+  myTreeMult->createLeaf("b", nParB, "ab");
 
   // }
 
-   //------------Trigger Calculation----------------
-    myTreeMult->recalculate();
+  //------------Trigger Calculation----------------
+  myTreeMult->recalculate();
 
-    std::cout << std::endl << "Multitree Setup and calculated R = Sum[a*b] with one leaf containing " << nElements << " elements" << std::endl;
-    std::cout << std::endl << myTreeMult << std::endl << std::endl;
+  std::cout
+      << std::endl
+      << "Multitree Setup and calculated R = Sum[a*b] with one leaf containing "
+      << nElements << " elements" << std::endl;
+  std::cout << std::endl << myTreeMult << std::endl << std::endl;
 
+  //------------new Tree with multiDouble Par----------------
+  nElements = 5;
+  std::shared_ptr<FunctionTree> myTreeMultD;
 
+  //------------SetUp the parameters for R = Sum of (a * b)-----------
+  std::vector<double> nMasses, nPhsp;
+  std::shared_ptr<AbsParameter> mParB(new DoubleParameter("parB", 2));
+  std::shared_ptr<AbsParameter> mParD(new DoubleParameter("parD", 3));
+  for (unsigned int i = 0; i < nElements; i++) {
+    // std::shared_ptr<DoubleParameter> tmpA(new
+    // DoubleParameter("parA_"+i,i+1));
+    nMasses.push_back(i + 1);
+    nPhsp.push_back(2 * i + 1);
+    nPhsp.push_back(2 * i + 2);
+  }
+  std::shared_ptr<MultiDouble> mParA(new MultiDouble("parA", nMasses));
+  std::shared_ptr<MultiDouble> mParC(new MultiDouble("parC", nPhsp));
 
-    //------------new Tree with multiDouble Par----------------
-    nElements = 5;
-    std::shared_ptr<FunctionTree> myTreeMultD;
+  myTreeMultD = std::shared_ptr<FunctionTree>(new FunctionTree());
+  myTreeMultD->createHead("R", add);
+  myTreeMultD->createNode("Rmass", mmult, "R", nElements);
+  myTreeMultD->createNode("ab", mmult, "Rmass", nElements, false);
+  myTreeMultD->createLeaf("a", mParA, "ab");
+  myTreeMultD->createLeaf("b", mParB, "ab");
+  myTreeMultD->createNode("Rphsp", add, "Rmass");
+  myTreeMultD->createNode("cd", mmult, "Rphsp", nElements * 2, false);
+  myTreeMultD->createLeaf("c", mParC, "cd");
+  myTreeMultD->createLeaf("d", mParD, "cd");
 
-    //------------SetUp the parameters for R = Sum of (a * b)-----------
-    std::vector<double> nMasses, nPhsp;
-    std::shared_ptr<AbsParameter> mParB(new DoubleParameter("parB",2));
-    std::shared_ptr<AbsParameter> mParD(new DoubleParameter("parD",3));
-    for(unsigned int i=0; i<nElements; i++){
-      //std::shared_ptr<DoubleParameter> tmpA(new DoubleParameter("parA_"+i,i+1));
-      nMasses.push_back(i+1);
-      nPhsp.push_back(2*i+1);
-      nPhsp.push_back(2*i+2);
-    }
-    std::shared_ptr<MultiDouble> mParA(new MultiDouble("parA",nMasses));
-    std::shared_ptr<MultiDouble> mParC(new MultiDouble("parC",nPhsp));
+  //------------Trigger Calculation----------------
+  myTreeMultD->recalculate();
 
-    myTreeMultD = std::shared_ptr<FunctionTree>(new FunctionTree());
-    myTreeMultD->createHead("R", add);
-    myTreeMultD->createNode("Rmass", mmult, "R", nElements);
-    myTreeMultD->createNode("ab", mmult, "Rmass", nElements, false);
-    myTreeMultD->createLeaf("a", mParA, "ab");
-    myTreeMultD->createLeaf("b", mParB, "ab");
-    myTreeMultD->createNode("Rphsp", add, "Rmass");
-    myTreeMultD->createNode("cd", mmult, "Rphsp", nElements*2, false);
-    myTreeMultD->createLeaf("c", mParC, "cd");
-    myTreeMultD->createLeaf("d", mParD, "cd");
-
-    //------------Trigger Calculation----------------
-     myTreeMultD->recalculate();
-
-     std::cout << std::endl << "MultiDouble Setup and calculated R = Sum[a*b] with one leaf containing " << nElements << " elements" << std::endl;
-     std::cout << std::endl << myTreeMultD << std::endl << std::endl;
-
-
+  std::cout << std::endl
+            << "MultiDouble Setup and calculated R = Sum[a*b] with one leaf "
+               "containing "
+            << nElements << " elements" << std::endl;
+  std::cout << std::endl << myTreeMultD << std::endl << std::endl;
 
   return 0;
 }
 
-
 /*struct TreeNode{
-  TreeNode(double inValue, std::string inName, std::shared_ptr<Strategy> strat, std::shared_ptr<TreeNode> parent)
+  TreeNode(double inValue, std::string inName, std::shared_ptr<Strategy> strat,
+std::shared_ptr<TreeNode> parent)
     :value(inValue),name(inName),changed(true),myStrat(strat){
     if(parent){
         parents.push_back(parent);
@@ -268,7 +278,8 @@ int main(int argc, char **argv) {
     return oss.str();
   };
 
-  friend std::ostream & operator<<(std::ostream &os, std::shared_ptr<TreeNode> p);
+  friend std::ostream & operator<<(std::ostream &os, std::shared_ptr<TreeNode>
+p);
 
   std::vector<std::shared_ptr<TreeNode> > parents;
   std::vector<std::shared_ptr<TreeNode> > children;

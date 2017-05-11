@@ -1,6 +1,3 @@
- 
-      
-  
 
 
 /*
@@ -19,6 +16,23 @@
 namespace ComPWA {
 namespace Tools {
 
+RootGenerator::RootGenerator(double cmsEnergy, double m1, double m2, double m3, int seed) {
+  gRandom = new TRandom3(0);
+  if (seed != -1)
+    SetSeed(seed);
+  
+  nPart = 3;
+
+  masses = new Double_t[nPart];
+  masses[0] = m1;
+  masses[1] = m2;
+  masses[2] = m3;
+  
+  sqrtS = cmsEnergy;
+  TLorentzVector W(0.0, 0.0, 0.0, sqrtS);
+  event.SetDecay(W, nPart, masses);
+}
+
 RootGenerator::RootGenerator(int seed) {
   gRandom = new TRandom3(0);
   if (seed != -1)
@@ -35,6 +49,7 @@ RootGenerator::RootGenerator(int seed) {
     LOG(info)
         << "RootGenerator::RootGenerator() | only 2 particles in the final"
            " state! There are no degrees of freedom!";
+  
   if (initialS.size() != 1)
     throw std::runtime_error(
         "RootGenerator::RootGenerator() | More than one "
@@ -72,7 +87,8 @@ void RootGenerator::Generate(Event &evt) {
                  << pFour.GetInvMass() - sqrtS;
       throw std::runtime_error(
           "RootGenerator::Generate() | Invariant mass of "
-          "all generate particles does not sum up to the mass of the decaying particle. "
+          "all generate particles does not sum up to the mass of the decaying "
+          "particle. "
           "The difference in larger than two times the numerical precision.");
     }
 #endif

@@ -9,11 +9,11 @@ add_executable( DalitzFitD03K
 )
 
 target_link_libraries( DalitzFitD03K
-  ComPWA_HelicityFormalism
-  ComPWA_Minuit2IF
-  ComPWA_MinLogLH
-  ComPWA_RootReader
-  ComPWA_Core
+  HelicityFormalism
+  Minuit2IF
+  MinLogLH
+  RootReader
+  Core
   ${ROOT_LIBRARIES}
   ${Boost_LIBRARIES}
   pthread
