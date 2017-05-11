@@ -11,15 +11,17 @@
 
 // Core header files go here
 #include "Core/Event.hpp"
-#include "Core/Amplitude.hpp"
 #include "Core/Particle.hpp"
 #include "Core/Parameter.hpp"
 #include "Core/ParameterList.hpp"
+#include "Core/AmpIntensity.hpp"
 #include "DataReader/RootReader/RootReader.hpp"
-#include "Physics/AmplitudeSum/AmpSumIntensity.hpp"
 
 using namespace ComPWA;
 
+/* \class dalitzHisto
+ *! Simple class to create and fill Dalitz plots
+ */
 class dalitzHisto {
 public:
   ~dalitzHisto() {
@@ -34,15 +36,12 @@ public:
   //! Default move constructor
   dalitzHisto(dalitzHisto &&other) = default; // C++11 move constructor
 
-  dalitzHisto() : _integral(0.0){};
-
-  dalitzHisto(std::string n, std::string t, unsigned int bins);
+  dalitzHisto(std::string name, std::string title, unsigned int bins,
+              Color_t color = kBlack);
   //! Switch on/off stats
   void SetStats(bool b);
   //! Fill event
   void Fill(Event &event, double w = 1);
-    //! Fill dataPoint
-    void Fill(dataPoint &point, double w = 1);
   //! Scale all distributions
   void Scale(double w);
   //! Get 1D histogram
@@ -56,20 +55,18 @@ public:
   //! GetIntegral
   double GetIntegral() { return _integral; }
 
-  static TH2Poly *getTH2PolyPull(TH2Poly *hist1, TH2Poly *hist2,
-                                 TString name = "residual_");
-
 private:
-  std::vector<TH1D> arr;
-  std::vector<TH2D> arr2D;
-  std::string name, title;
-  unsigned int nBins;
+  std::vector<TH1D> _arr;
+  std::vector<TH2D> _arr2D;
+  std::string _name, _title;
+  unsigned int _nBins;
 
-  std::unique_ptr<TTree> tree;
+  std::unique_ptr<TTree> _tree;
   // tree branches
   std::vector<double> t_point;
   double t_eff, t_weight;
   double _integral;
+  Color_t _color;
 };
 
 class plotData {
@@ -78,68 +75,78 @@ public:
 
   virtual ~plotData();
 
-  void setCorrectEfficiency(bool s) { _correctForEfficiency = s; }
+  void UseEfficiencyCorrection(bool s) { _correctForEfficiency = s; }
 
-  void setData(std::shared_ptr<DataReader::Data> dataSample) {
+  void SetData(std::shared_ptr<DataReader::Data> dataSample) {
     s_data = dataSample;
   }
 
-  void setPhspData(std::shared_ptr<DataReader::Data> phsp) { s_phsp = phsp; }
+  void SetPhspData(std::shared_ptr<DataReader::Data> phsp) { s_phsp = phsp; }
 
-  void setFitData(std::shared_ptr<DataReader::Data> fit) { s_fit = fit; }
-
-  void setHitMissData(std::shared_ptr<DataReader::Data> hitMiss) {
+  void SetHitMissData(std::shared_ptr<DataReader::Data> hitMiss) {
     s_hitMiss = hitMiss;
   }
 
-  void setFitAmp(std::vector<std::shared_ptr<Amplitude>> ampVec,
-                 std::vector<double> fraction);
+  void SetFitAmp(std::shared_ptr<ComPWA::AmpIntensity> intens,
+                 std::string title = "", Color_t color = kBlack);
 
-  TH2Poly *getAdBinHist(int bins = 30);
-
-  void setGlobalScale(double s) { _globalScale = s; }
+  void SetGlobalScale(double s) { _globalScale = s; }
 
   void Fill();
 
   void Plot();
 
-  void DrawComponent(unsigned int i, Color_t color) {
-    if (i >= ampHistos.size())
+  void DrawComponent(std::string name, std::string title = "",
+                     Color_t color = kBlack) {
+    if (!_plotComponents.size())
+      throw std::runtime_error("PlotData::DrawComponent() | AmpIntensity not "
+                               "set! Set the full model first using "
+                               "SetFitAmp()!");
+    std::shared_ptr<AmpIntensity> comp;
+    try{
+      comp = _plotComponents.at(0)->GetComponent(name);
+    } catch (std::exception& ex) {
+      LOG(error) << "plotData::DrawComponent() | Component " << name
+                 << " not found in AmpIntensity "
+                 << _plotComponents.at(0)->GetName() << ".";
       return;
-    plotComponent.push_back(std::make_pair(i, color));
+    }
+    _plotComponents.push_back(comp);
+    _plotHistograms.push_back(dalitzHisto(name, title, _bins, color));
+    _plotHistograms.back().SetStats(0);
+    _plotLegend.push_back(title);
   }
 
 protected:
   TString _name;
+
   bool _isFilled;
+
   unsigned int _bins;
 
   double _globalScale;
+
   bool _correctForEfficiency;
+
   void CreateHist(unsigned int id);
   void CreateHist2(unsigned int id);
 
-  TH2Poly *dataAdaptiveBinningHist;
-  TH2Poly *fitAdaptiveBinningHist;
   TH1D h_weights;
   TGraph m23m13_contour;
   TGraph m23m12_contour;
   TGraph m12m13_contour;
 
-  std::vector<dalitzHisto> ampHistos;
-  std::vector<dalitzHisto> signalComponents;
-  std::vector<std::pair<unsigned int, Color_t>> plotComponent;
+  std::vector<std::shared_ptr<AmpIntensity>> _plotComponents;
+  std::vector<dalitzHisto> _plotHistograms;
+  std::vector<std::string> _plotLegend;
+
   dalitzHisto dataDiagrams;
   dalitzHisto phspDiagrams;
-  dalitzHisto fitDiagrams;
   dalitzHisto fitHitMissDiagrams;
 
   std::shared_ptr<DataReader::Data> s_data;
   std::shared_ptr<DataReader::Data> s_phsp;
-  std::shared_ptr<DataReader::Data> s_fit;
   std::shared_ptr<DataReader::Data> s_hitMiss;
-  std::vector<std::shared_ptr<Amplitude>> _ampVec;
-  std::vector<double> _fraction;
 };
 
 #endif

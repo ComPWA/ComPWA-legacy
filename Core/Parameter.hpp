@@ -30,6 +30,8 @@
 #include <stdexcept>
 #include <cmath>
 
+#include <boost/property_tree/ptree.hpp>
+
 #include "Core/AbsParameter.hpp"
 #include "Core/Exceptions.hpp"
 #include "Core/Logging.hpp"
@@ -116,6 +118,17 @@ public:
   std::vector<std::complex<double>>::iterator Begin() { return val_.begin(); }
   std::vector<std::complex<double>>::iterator End() { return val_.end(); }
 
+  bool operator==(const MultiComplex otherPar) const {
+    if (this->type() != otherPar.type())
+      return false;
+    if (this->GetName() != otherPar.GetName())
+      return false;
+    if (this->GetValue() != otherPar.GetValue())
+      return false;
+
+    return true;
+  }
+
 protected:
   virtual std::string TypeName() const { return "complex collection"; }
   // std::string out_; /*!< Output string to print information */
@@ -131,7 +144,7 @@ protected:
   virtual std::string make_str() {
     std::stringstream oss;
     oss << name_;
-    unsigned int max = val_.size();
+    size_t max = val_.size();
     if (max > 5)
       max = 5; // display only 5 variables
     oss << "\t Val = ";
@@ -152,7 +165,7 @@ protected:
    */
   virtual std::string make_val_str() {
     std::stringstream ovs;
-    unsigned int max = val_.size();
+    size_t max = val_.size();
     if (max > 0) {
       if (max > 3)
         max = 3; // display only 10 variables
@@ -200,7 +213,7 @@ public:
       : AbsParameter(in.name_, ParType::MDOUBLE) {
     *this = in;
     //		error_ = std::shared_ptr<ParError<double>>(new
-    //ParError<double>(*in.error_));
+    // ParError<double>(*in.error_));
   }
 
   //! Empty Destructor
@@ -243,6 +256,17 @@ public:
   std::vector<double>::iterator Begin() { return val_.begin(); }
   std::vector<double>::iterator End() { return val_.end(); }
 
+  bool operator==(const MultiDouble otherPar) const {
+    if (this->type() != otherPar.type())
+      return false;
+    if (this->GetName() != otherPar.GetName())
+      return false;
+    if (this->GetValue() != otherPar.GetValue())
+      return false;
+
+    return true;
+  }
+
 protected:
   virtual std::string TypeName() const { return "double collection"; }
   // std::string out_; /*!< Output string to print information */
@@ -257,7 +281,7 @@ protected:
   virtual std::string make_str() {
     std::stringstream oss;
     oss << name_;
-    unsigned int max = val_.size();
+    size_t max = val_.size();
     if (max > 5)
       max = 5; // display only 10 variables
     oss << "\t Val = ";
@@ -278,7 +302,7 @@ protected:
    */
   virtual std::string make_val_str() {
     std::stringstream ovs;
-    unsigned int max = val_.size();
+    size_t max = val_.size();
     if (max > 0) {
       if (max > 5)
         max = 5; // display only 5 variables
@@ -354,6 +378,17 @@ public:
     Notify();
   }
 
+  bool operator==(const MultiUnsignedInteger otherPar) const {
+    if (this->type() != otherPar.type())
+      return false;
+    if (this->GetName() != otherPar.GetName())
+      return false;
+    if (this->GetValue() != otherPar.GetValue())
+      return false;
+
+    return true;
+  }
+
 protected:
   virtual std::string TypeName() const { return "unsigned int collection"; }
   // std::string out_; /*!< Output string to print information */
@@ -368,7 +403,7 @@ protected:
   virtual std::string make_str() {
     std::stringstream oss;
     oss << name_;
-    unsigned int max = val_.size();
+    size_t max = val_.size();
     if (max > 5)
       max = 5; // display only 10 variables
     oss << "\t Val = ";
@@ -389,7 +424,7 @@ protected:
    */
   virtual std::string make_val_str() {
     std::stringstream ovs;
-    unsigned int max = val_.size();
+    size_t max = val_.size();
     if (max > 5)
       max = 5; // display only 5 variables
     for (unsigned int i = 0; i < max - 1; i++)
@@ -625,6 +660,52 @@ public:
    */
   virtual std::string TypeName() const { return "complex double"; }
 
+  bool operator==(const ComplexParameter otherPar) const {
+    if (this->type() != otherPar.type())
+      return false;
+    if (this->GetName() != otherPar.GetName())
+      return false;
+    if (this->GetValue() != otherPar.GetValue())
+      return false;
+
+    /* We assume that if name and value are the same both parameters match. In
+     * case that other properties of the parameterts differ we throw an
+     * exception since we assume that this is a user mistake.
+     */
+    if (bounds_ != otherPar.bounds_ || usebounds_ != otherPar.usebounds_ ||
+        this->GetMinValue() != otherPar.GetMinValue() ||
+        this->GetMaxValue() != otherPar.GetMaxValue())
+      throw std::runtime_error("ComplexParameter::operator==() | Parameters "
+                               "match by name (" +
+                               GetName() + ") and value (" +
+                               std::to_string(GetValue().real()) + "+i*" +
+                               std::to_string(GetValue().imag()) +
+                               ") but differs in "
+                               "parameter bounds. We assume that there is a "
+                               "mistake. Check your input files!");
+
+    if (fixed_ != otherPar.fixed_)
+      throw std::runtime_error(
+          "ComplexParameter::operator==() | Parameters "
+          "match by name (" +
+          GetName() + ") and value (" + std::to_string(GetValue().real()) +
+          "+i*" + std::to_string(GetValue().imag()) +
+          ") but one is fixed the other not. "
+          "We assume that there is a mistake. Check your input files!");
+
+    if (hasError_ != otherPar.hasError_ || err_ != otherPar.err_)
+      throw std::runtime_error("ComplexParameter::operator==() | Parameters "
+                               "match by name (" +
+                               GetName() + ") and value (" +
+                               std::to_string(GetValue().real()) + "+i*" +
+                               std::to_string(GetValue().imag()) +
+                               ") but differs in "
+                               "parameter error. We assume that there is a "
+                               "mistake. Check your input files!");
+
+    return true;
+  }
+
 protected:
   bool bounds_;    /*!< Are valid bounds defined for this parameter? */
   bool hasError_;  /*!< Is an error defined for this parameter? */
@@ -696,11 +777,9 @@ public:
    * \param inName internal string identifier of this parameter
    */
   DoubleParameter(std::string inName = "")
-      : AbsParameter(inName, ParType::DOUBLE), fixed_(0), val_(0), min_(0),
-        max_(0) {
-    SetError(0);
-    bounds_ = usebounds_ = false;
-  }
+      : AbsParameter(inName, ParType::DOUBLE), bounds_(false), fixed_(0),
+        val_(0), min_(0), max_(0), errorType(ErrorType::NOTDEF), errorLow(0.),
+        errorHigh(0.) {}
 
   //! Standard constructor with a value
   /*!
@@ -710,11 +789,9 @@ public:
    * \param value input value of the parameter
    */
   DoubleParameter(std::string inName, const double value)
-      : AbsParameter(inName, ParType::DOUBLE), fixed_(0), val_(value), min_(0),
-        max_(0) {
-    SetError(0);
-    bounds_ = usebounds_ = false;
-  }
+      : AbsParameter(inName, ParType::DOUBLE), bounds_(false), fixed_(0),
+        val_(value), min_(0), max_(0), errorType(ErrorType::NOTDEF),
+        errorLow(0.), errorHigh(0.) {}
 
   //! Standard constructor with value and error
   /*!
@@ -725,10 +802,10 @@ public:
    * \param error input error of the parameter
    */
   DoubleParameter(std::string inName, const double value, const double error)
-      : AbsParameter(inName, ParType::DOUBLE), fixed_(0), val_(value), min_(0),
-        max_(0), errorType(ErrorType::NOTDEF) {
+      : AbsParameter(inName, ParType::DOUBLE), bounds_(false), fixed_(0),
+        val_(value), min_(0), max_(0), errorType(ErrorType::NOTDEF),
+        errorLow(0.), errorHigh(0.) {
     SetError(error);
-    bounds_ = usebounds_ = false;
   }
 
   //! Standard constructor with value and bounds
@@ -744,10 +821,9 @@ public:
    */
   DoubleParameter(std::string inName, const double value, const double min,
                   const double max)
-      : AbsParameter(inName, ParType::DOUBLE), fixed_(0), val_(value), min_(0),
-        max_(0) {
-    SetError(0);
-    bounds_ = usebounds_ = false;
+      : AbsParameter(inName, ParType::DOUBLE), bounds_(false), fixed_(0),
+        val_(value), min_(0), max_(0), errorType(ErrorType::NOTDEF),
+        errorLow(0.), errorHigh(0.) {
     SetMinMax(min, max);
   }
 
@@ -765,16 +841,18 @@ public:
    */
   DoubleParameter(std::string inName, const double value, const double min,
                   const double max, const double error)
-      : AbsParameter(inName, ParType::DOUBLE), fixed_(0), val_(value), min_(0),
-        max_(0) {
+      : AbsParameter(inName, ParType::DOUBLE), bounds_(false), fixed_(0),
+        val_(value), min_(0), max_(0), errorType(ErrorType::NOTDEF),
+        errorLow(0.), errorHigh(0.) {
     SetError(error);
-    bounds_ = usebounds_ = false;
     SetMinMax(min, max);
   }
+
   DoubleParameter(const DoubleParameter &in)
       : AbsParameter(in.name_, ParType::DOUBLE) {
     *this = in;
   }
+
   //! Empty Destructor
   virtual ~DoubleParameter() { /* nothing */
   }
@@ -784,16 +862,8 @@ public:
 
   //! Check if parameter has bounds
   virtual inline bool HasBounds() const { return bounds_; }
-  //! Check if bounds should be used
-  virtual inline bool UseBounds() const {
-    if (bounds_)
-      return usebounds_;
-    return false;
-  }
   //! Check if parameter is fixed
   virtual inline bool IsFixed() const { return fixed_; }
-  //! Set if bounds should be used
-  virtual inline void SetUseBounds(const bool use) { usebounds_ = use; }
   //! Call to fix parameter
   virtual inline void SetParameterFixed() { fixed_ = true; }
   //! Call to free parameter
@@ -813,9 +883,8 @@ public:
       } catch (std::exception &ex) {
         // ignore if bound can not be set
       }
-      SetUseBounds(newPar->UseBounds());
     } else
-      bounds_ = usebounds_ = 0;
+      bounds_ = 0;
 
     bool isFix = newPar->IsFixed();
     // copy value
@@ -869,7 +938,7 @@ public:
     if (val_ == inVal)
       return;
 
-    if (usebounds_ && (inVal < GetMinValue() || inVal > GetMaxValue()))
+    if (bounds_ && (inVal < GetMinValue() || inVal > GetMaxValue()))
       throw ParameterOutOfBound(
           "DoubleParameter::SetValue() | "
           "Parameter " +
@@ -879,6 +948,11 @@ public:
 
     val_ = inVal;
     Notify();
+  }
+
+  //! Setter for bounds of parameter
+  virtual void SetRange(const double min, const double max) {
+    SetMinMax(min, max);
   }
 
   //! Setter for bounds of parameter
@@ -897,7 +971,7 @@ public:
                                GetName() + ": " + std::to_string(GetValue()) +
                                " [" + std::to_string((long double)min_) + ";" +
                                std::to_string((long double)max_) + "]!");
-    bounds_ = usebounds_ = true;
+    bounds_ = true;
   }
   /*! Setter for lower bound
    * Setter for lower bound of the parameter. If a check for valid bounds
@@ -914,7 +988,7 @@ public:
                                 "Boundary not valid: [" +
                                 std::to_string(GetMinValue()) + ", " +
                                 std::to_string(GetMaxValue()) + "]!");
-    bounds_ = usebounds_ = true;
+    bounds_ = true;
   }
   /*! Setter for upper bound
    * Setter for upper bound of the parameter. If a check for valid bounds
@@ -931,7 +1005,7 @@ public:
                                 "Boundary not valid: [" +
                                 std::to_string(GetMinValue()) + ", " +
                                 std::to_string(GetMaxValue()) + "]!");
-    bounds_ = usebounds_ = true;
+    bounds_ = true;
   }
   //====== PARAMETER ERROR ========
   //! Check if parameter has an error
@@ -962,10 +1036,12 @@ public:
                                "Parameter " +
                                name_ + " has no errors defined!");
     //		if(GetErrorType()==ErrorType::SYM){
-    //			LOG(info) << "DoubleParameter::GetErrorHigh() | Parameter
+    //			LOG(info) << "DoubleParameter::GetErrorHigh() |
+    // Parameter
     //"<<name_
-    //					<<" has no asymmetric errors! Returning symmetric
-    //error";
+    //					<<" has no asymmetric errors! Returning
+    // symmetric
+    // error";
     //			return GetError();
     //		}
     return errorHigh;
@@ -978,10 +1054,12 @@ public:
                                "Parameter " +
                                name_ + " has no errors defined!");
     //		if(GetErrorType()==ErrorType::SYM){
-    //			LOG(info) << "DoubleParameter::GetErrorHigh() | Parameter
+    //			LOG(info) << "DoubleParameter::GetErrorHigh() |
+    // Parameter
     //"<<name_
-    //					<<" has no assymetric errors! Returning symmetric
-    //error";
+    //					<<" has no assymetric errors! Returning
+    // symmetric
+    // error";
     //			return GetError();
     //		}
     if (!HasError())
@@ -994,7 +1072,7 @@ public:
   virtual void SetError(double errLow, double errHigh) {
     // if(fixed_)
     //	throw ParameterFixed("DoubleParameter::SetError(double, double) |
-    //Parameter "+GetName()+" is fixed!");
+    // Parameter "+GetName()+" is fixed!");
     SetErrorType(ErrorType::ASYM);
     SetErrorHigh(errHigh);
     SetErrorLow(errLow);
@@ -1009,6 +1087,50 @@ public:
     SetErrorLow(err);
   }
 
+  bool operator==(const DoubleParameter otherPar) const {
+    if (this->type() != otherPar.type())
+      return false;
+    if (this->GetName() != otherPar.GetName())
+      return false;
+    if (this->GetValue() != otherPar.GetValue())
+      return false;
+
+    /* We assume that if name and value are the same both parameters match. In
+     * case that other properties of the parameterts differ we throw an
+     * exception since we assume that this is a user mistake.
+     */
+    if (bounds_ != otherPar.bounds_ ||
+        this->GetMinValue() != otherPar.GetMinValue() ||
+        this->GetMaxValue() != otherPar.GetMaxValue())
+      throw std::runtime_error("DoubleParameter::operator==() | Parameters "
+                               "match by name (" +
+                               GetName() + ") and value (" +
+                               std::to_string(GetValue()) +
+                               ") but differs in "
+                               "parameter bounds. We assume that there is a "
+                               "mistake. Check your input files!");
+
+    if (fixed_ != otherPar.fixed_)
+      throw std::runtime_error(
+          "DoubleParameter::operator==() | Parameters "
+          "match by name (" +
+          GetName() + ") and value (" + std::to_string(GetValue()) +
+          ") but one is fixed the other not. "
+          "We assume that there is a mistake. Check your input files!");
+
+    if (errorType != otherPar.errorType || errorLow != otherPar.errorLow ||
+        errorHigh != otherPar.errorHigh)
+      throw std::runtime_error("DoubleParameter::operator==() | Parameters "
+                               "match by name (" +
+                               GetName() + ") and value (" +
+                               std::to_string(GetValue()) +
+                               ") but differs in "
+                               "parameter error. We assume that there is a "
+                               "mistake. Check your input files!");
+
+    return true;
+  }
+
 protected:
   //	std::string out_; /*!< Output string to print information */
   /*! A public function returning a string naming its type
@@ -1018,7 +1140,6 @@ protected:
    */
   virtual std::string TypeName() const { return "double"; }
   bool bounds_;            /*!< Are valid bounds defined for this parameter? */
-  bool usebounds_;         /*!< Do you want to restrict your parameter? */
   bool fixed_;             /*!< Do you want to keep parameter fixed? */
   double val_, min_, max_; /*!< Current value, bounds*/
   //! error type
@@ -1027,6 +1148,7 @@ protected:
   double errorLow;
   //! upper parameter error
   double errorHigh;
+
   //! Setter for upper error of parameter
   virtual void SetErrorHigh(double errHigh) { errorHigh = errHigh; }
   //! Setter for lower error of parameter
@@ -1094,7 +1216,6 @@ private:
     ar &boost::serialization::make_nvp(
         "AbsParameter", boost::serialization::base_object<AbsParameter>(*this));
     ar &make_nvp("bounds", bounds_);
-    ar &make_nvp("usebounds", usebounds_);
     ar &make_nvp("isFixed", fixed_);
     ar &make_nvp("value", val_);
     ar &make_nvp("min_value", min_);
@@ -1112,32 +1233,88 @@ private:
 };
 BOOST_SERIALIZATION_SHARED_PTR(ComPWA::DoubleParameter)
 
-//    BOOST_CLASS_IMPLEMENTATION(
-//                               ComPWA::DoubleParameter,
-//                               ::boost::serialization::object_serializable
-//                               )
-//    BOOST_CLASS_TRACKING(
-//                         ComPWA::DoubleParameter,
-//                         ::boost::serialization::track_never
-//                         )
-//    BOOST_CLASS_IMPLEMENTATION(
-//                               std::shared_ptr<ComPWA::DoubleParameter>,
-//                               ::boost::serialization::object_serializable
-//                               )
-//    BOOST_CLASS_TRACKING(
-//                         std::shared_ptr<ComPWA::DoubleParameter>,
-//                         ::boost::serialization::track_never
-//                         )
-//    BOOST_CLASS_IMPLEMENTATION(
-//                               std::vector<std::shared_ptr<ComPWA::DoubleParameter>
-//                               >,
-//                               ::boost::serialization::object_serializable
-//                               )
-//    BOOST_CLASS_TRACKING(
-//                         std::vector<std::shared_ptr<ComPWA::DoubleParameter>
-//                         >,
-//                         ::boost::serialization::track_never
-//                         )
+/**
+ Create a DoubleParameter object from a ptree. This approach is more or
+ less equivalent to the serialization of a parameter but provides a better
+ readable format.
+
+ @param pt Input property tree
+ @return Parameter
+ */
+static DoubleParameter
+DoubleParameterFactory(const boost::property_tree::ptree pt) {
+  DoubleParameter obj;
+
+  // Require that name and value are provided
+  obj.SetName(pt.get<std::string>("<xmlattr>.Name"));
+  obj.SetValue(pt.get<double>("Value"));
+
+  // Optional settings
+  if (pt.get_optional<double>("Error")) {
+    obj.SetError(pt.get<double>("Error"));
+  }
+  if (pt.get_optional<double>("ErrorLow")) {
+    if (pt.get_optional<double>("ErrorHigh"))
+      obj.SetError(pt.get<double>("ErrorLow"), pt.get<double>("ErrorHigh"));
+    else
+      throw std::runtime_error("DoubleParameterFactory() | Parameter asymmetic "
+                               "error not properly set!");
+  } else if (pt.get_optional<double>("ErrorHigh")) {
+    throw std::runtime_error("DoubleParameterFactory() | Parameter asymmetic "
+                             "error not properly set!");
+  } else { /* Do not set a asymmetric errors */
+  }
+
+  if (pt.get_optional<bool>("Fix"))
+    obj.FixParameter(pt.get<bool>("Fix"));
+
+  if (pt.get_optional<double>("Min")) {
+    if (pt.get_optional<double>("Max")) {
+      obj.SetRange(pt.get<double>("Min"), pt.get<double>("Max"));
+    } else {
+      throw std::runtime_error(
+          "DoubleParameterFactory() | Parameter range not properly set!");
+    }
+  } else if (pt.get_optional<double>("Max")) {
+    throw std::runtime_error(
+        "DoubleParameterFactory() | Parameter range not properly set!");
+  } else { /* Do not set a parameter range */
+  }
+
+  return obj;
+}
+
+/**
+ Save a DoubleParameter object from a ptree. This approach is more or
+ less equivalent to the serialization of a parameter but provides a better
+ readable format.
+
+ @param pt Input parameter
+ @return property_tree
+ */
+static boost::property_tree::ptree DoubleParameterSave(DoubleParameter par) {
+  boost::property_tree::ptree pt;
+  DoubleParameter obj;
+
+  // Require that name and value are provided
+  pt.put("<xmlattr>.Name", par.GetName());
+  pt.put("Value", par.GetValue());
+  pt.put("Fix", par.IsFixed());
+  if (par.HasBounds()) {
+    pt.put("Min", par.GetMinValue());
+    pt.put("Max", par.GetMaxValue());
+  }
+  if (par.HasError()) {
+    if (par.GetErrorLow() == par.GetErrorHigh())
+      pt.put("Error", par.GetError());
+    else {
+      pt.put("ErrorLow", par.GetErrorLow());
+      pt.put("ErrorHigh", par.GetErrorHigh());
+    }
+  }
+
+  return pt;
+}
 
 class IntegerParameter : public AbsParameter {
 
@@ -1358,6 +1535,49 @@ public:
 
   virtual std::string TypeName() const { return "integer"; }
 
+  bool operator==(const IntegerParameter otherPar) const {
+    if (this->type() != otherPar.type())
+      return false;
+    if (this->GetName() != otherPar.GetName())
+      return false;
+    if (this->GetValue() != otherPar.GetValue())
+      return false;
+
+    /* We assume that if name and value are the same both parameters match. In
+     * case that other properties of the parameterts differ we throw an
+     * exception since we assume that this is a user mistake.
+     */
+    if (bounds_ != otherPar.bounds_ || usebounds_ != otherPar.usebounds_ ||
+        this->GetMinValue() != otherPar.GetMinValue() ||
+        this->GetMaxValue() != otherPar.GetMaxValue())
+      throw std::runtime_error("IntegerParameter::operator==() | Parameters "
+                               "match by name (" +
+                               GetName() + ") and value (" +
+                               std::to_string(GetValue()) +
+                               ") but differs in "
+                               "parameter bounds. We assume that there is a "
+                               "mistake. Check your input files!");
+
+    if (fixed_ != otherPar.fixed_)
+      throw std::runtime_error(
+          "IntegerParameter::operator==() | Parameters "
+          "match by name (" +
+          GetName() + ") and value (" + std::to_string(GetValue()) +
+          ") but one is fixed the other not. "
+          "We assume that there is a mistake. Check your input files!");
+
+    if (err_ != otherPar.err_)
+      throw std::runtime_error("IntegerParameter::operator==() | Parameters "
+                               "match by name (" +
+                               GetName() + ") and value (" +
+                               std::to_string(GetValue()) +
+                               ") but differs in "
+                               "parameter error. We assume that there is a "
+                               "mistake. Check your input files!");
+
+    return true;
+  }
+
 protected:
   // std::string out_; /*!< Output string to print information */
   bool bounds_;    /*!< Are valid bounds defined for this parameter? */
@@ -1522,6 +1742,34 @@ public:
    * \sa operator<<, to_str(), make_str()
    */
   virtual std::string TypeName() const { return "boolean"; }
+
+  bool operator==(const BoolParameter otherPar) const {
+    if (this->type() != otherPar.type())
+      return false;
+    if (this->GetName() != otherPar.GetName())
+      return false;
+    if (this->GetValue() != otherPar.GetValue())
+      return false;
+
+    if (fixed_ != otherPar.fixed_)
+      throw std::runtime_error(
+          "BoolParameter::operator==() | Parameters "
+          "match by name (" +
+          GetName() + ") and value (" + std::to_string(GetValue()) +
+          ") but one is fixed the other not. "
+          "We assume that there is a mistake. Check your input files!");
+
+    if (err_ != otherPar.err_)
+      throw std::runtime_error("BoolParameter::operator==() | Parameters "
+                               "match by name (" +
+                               GetName() + ") and value (" +
+                               std::to_string(GetValue()) +
+                               ") but differs in "
+                               "parameter error. We assume that there is a "
+                               "mistake. Check your input files!");
+
+    return true;
+  }
 
 protected:
   // std::string out_; /*!< Output string to print information */

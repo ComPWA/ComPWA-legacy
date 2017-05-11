@@ -4,26 +4,22 @@
 
 namespace ComPWA {
 
-TwoBodyKinematics::TwoBodyKinematics(std::string _nameMother,
-                                     std::string _name1, std::string _name2,
+TwoBodyKinematics::TwoBodyKinematics(int idMother, std::vector<int> finalState,
                                      double deltaMassWindow)
-    : Kinematics(_nameMother, 0.0, 2), name1(_name1), name2(_name2) {
-  _M = ComPWA::PhysConst::instance()->findParticle(_nameMother).mass_;
-  m1 = ComPWA::PhysConst::instance()->findParticle(_name1).mass_;
-  m2 = ComPWA::PhysConst::instance()->findParticle(_name2).mass_;
+  : Kinematics(std::vector<int>(idMother), finalState) {
+    
+    assert( finalState.size() == 2 );
+  _M = ComPWA::PhysConst::Instance()->FindParticle(idMother).GetMass();
+  m1 = ComPWA::PhysConst::Instance()->FindParticle(finalState.at(0)).GetMass();
+  m2 = ComPWA::PhysConst::Instance()->FindParticle(finalState.at(1)).GetMass();
 
-  _spinM = ComPWA::PhysConst::instance()
-               ->findParticle(_nameMother)
-               .getSpinLikeQuantumNumber(QuantumNumberIDs::SPIN)
-               .GetNumerator();
-  spin1 = ComPWA::PhysConst::instance()
-              ->findParticle(_name1)
-              .getSpinLikeQuantumNumber(QuantumNumberIDs::SPIN)
-              .GetNumerator();
-  spin2 = ComPWA::PhysConst::instance()
-              ->findParticle(_name2)
-              .getSpinLikeQuantumNumber(QuantumNumberIDs::SPIN)
-              .GetNumerator();
+  _spinM = ComPWA::PhysConst::Instance()
+      ->FindParticle(idMother).GetSpin();
+  spin1 = ComPWA::PhysConst::Instance()
+      ->FindParticle(finalState.at(0)).GetSpin();
+    spin2 = ComPWA::PhysConst::Instance()
+      ->FindParticle(finalState.at(1)).GetSpin();
+ 
 
   if (_M == -999 || m1 == -999 || m2 == -999)
     throw std::runtime_error("TwoBodyKinematics(): Masses not set!");
@@ -32,7 +28,6 @@ TwoBodyKinematics::TwoBodyKinematics(std::string _nameMother,
   mass_max = ((_M + deltaMassWindow));
   mass_sq_max = mass_max * mass_max;
   mass_sq_min = mass_min * mass_max;
-  _varNames.push_back("msq");
 
   init();
 }
@@ -40,20 +35,19 @@ TwoBodyKinematics::TwoBodyKinematics(std::string _nameMother,
 void TwoBodyKinematics::init() {}
 
 bool TwoBodyKinematics::IsWithinPhsp(const dataPoint &point) const {
-  return 1;
-  if (point.getVal(0) >= mass_sq_min && point.getVal(0) <= mass_sq_max)
+  if (point.GetValue(0) >= mass_sq_min && point.GetValue(0) <= mass_sq_max)
     return 1;
   return 0;
 }
 
 void TwoBodyKinematics::EventToDataPoint(const Event &ev,
                                          dataPoint &point) const {
-  double weight = ev.getWeight();
-  point.setWeight(weight); // reset weight
-  const Particle &part1 = ev.getParticle(0);
-  const Particle &part2 = ev.getParticle(1);
-  double msq = Particle::invariantMass(part1, part2);
-  point.setVal(0, msq);
+  double weight = ev.GetWeight();
+  point.SetWeight(weight); // reset weight
+  const Particle &part1 = ev.GetParticle(0);
+  const Particle &part2 = ev.GetParticle(1);
+  double msq = Particle::InvariantMass(part1, part2);
+  point.SetValue(0, msq);
   return;
 }
 
@@ -67,20 +61,6 @@ double TwoBodyKinematics::GetMass(unsigned int num) const {
     return m2;
   throw std::runtime_error("TwoBodyKinematics::getMass(int) | "
                            "Wrong particle requested!");
-  return -999;
-}
-
-//! get mass of paticles
-double TwoBodyKinematics::GetMass(std::string name) const {
-  if (name == _nameMother)
-    return _M;
-  if (name == name1)
-    return m1;
-  if (name == name2)
-    return m2;
-  throw std::runtime_error("TwoBodyKinematics::getMass(int) | "
-                           "Wrong particle " +
-                           name + " requested!");
   return -999;
 }
 

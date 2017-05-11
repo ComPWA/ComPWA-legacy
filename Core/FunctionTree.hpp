@@ -178,6 +178,19 @@ public:
 
   //! Create a leaf for the FcnTree
   /*!
+   * Create and add a static node to the function tree if not existing yet
+   * Adds Top-Down-Linking to the node
+   * \param name identifier of node
+   * \param extPar the parameter this node represents
+   * \param parent the parent of this node (for linking)
+   * \sa addNode(), createHead(), createNode()
+   */
+  virtual void createLeaf(const std::string name,
+                          const std::complex<double> extPar,
+                          std::string parent);
+
+  //! Create a leaf for the FcnTree
+  /*!
    * Create and add a node to the function tree if not existing yet
    * Adds Top-Down-Linking to the node
    * Attaches the Node as Observer to the external parameter
@@ -211,7 +224,6 @@ public:
    */
   virtual const std::shared_ptr<TreeNode> head() const {
     return head_;
-    // TODO: return double? ;
   }
 
   //! trigger calculation
@@ -248,7 +260,7 @@ public:
   std::string print(unsigned int lv = -1) { return head_->print(lv); };
 
   //! Get number of nodes
-  int GetNumberOfNodes() { return nodes_.size(); }
+  std::size_t GetNumberOfNodes() { return nodes_.size(); }
 
 protected:
   /** List of child tree's

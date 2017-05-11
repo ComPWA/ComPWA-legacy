@@ -22,15 +22,21 @@ set (CMAKE_CXX_STANDARD 11)
 #LINK_DIRECTORIES(${PYTHON_LIBRARIES})
 
 #Add Boost
-#find_package(Boost COMPONENTS python system filesystem serialization thread chrono date_time log log_setup program_options regex REQUIRED)
-find_package(Boost COMPONENTS system filesystem serialization thread chrono date_time log log_setup program_options regex REQUIRED)
+find_package(Boost COMPONENTS unit_test_framework system filesystem
+serialization thread chrono date_time log log_setup program_options REQUIRED)
+#find_package(Boost COMPONENTS python system filesystem serialization 
+#thread chrono date_time log log_setup program_options regex REQUIRED)
 include_directories(${Boost_INCLUDE_DIR})
 link_directories(${Boost_LIBRARY_DIR})
 
 INCLUDE_DIRECTORIES(${COMPWA_SOURCE_DIR})
 #LINK_DIRECTORIES(${COMPWA_SOURCE_DIR}/lib)
 
+#Setup CMake to run tests
+enable_testing()
+
 add_definitions(-DBOOST_LOG_DYN_LINK)
+add_definitions(-DBOOST_TEST_DYN_LINK)
 add_definitions(-DBOOST_SERIALIZATION_DYN_LINK)
 
 # Recurse into subdirectories.
@@ -39,15 +45,16 @@ add_subdirectory (DataReader)
 add_subdirectory (Estimator)
 add_subdirectory (Optimizer)
 add_subdirectory (Physics)
+add_subdirectory (Tools)
 add_subdirectory (executables)
 
 # add a target to generate API documentation with Doxygen
 find_package(Doxygen)
 if(DOXYGEN_FOUND)
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/doc/Doxyfile ${CMAKE_CURRENT_BINARY_DIR}/doc/Doxyfile @ONLY)
-add_custom_target(doc
-${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/doc/Doxyfile
-WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-COMMENT "Generating API documentation with Doxygen" VERBATIM
-)
+	configure_file(${CMAKE_CURRENT_SOURCE_DIR}/doc/Doxyfile ${CMAKE_CURRENT_BINARY_DIR}/doc/Doxyfile @ONLY)
+	add_custom_target(doc
+		${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/doc/Doxyfile
+		WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+		COMMENT "Generating API documentation with Doxygen" VERBATIM
+		)
 endif(DOXYGEN_FOUND)

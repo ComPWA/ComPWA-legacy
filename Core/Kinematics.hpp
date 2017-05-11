@@ -1,10 +1,3 @@
- 
-                                                                                                                
-                                                                                                            
-                                                                                   
-                                                                               
-                                                       
-    
 //-------------------------------------------------------------------------------
 // Copyright (c) 2013 Peter Weidenkaff.
 // All rights reserved. This program and the accompanying materials
@@ -24,75 +17,39 @@
 #include <complex>
 
 #include "Core/Event.hpp"
-#include "Core/Utility.hpp"
+#include "Core/PhysConst.hpp"
+#include "Core/Spin.hpp"
 
 namespace ComPWA {
 
 class dataPoint;
 
-static const char *formFactorTypeString[] = {"noFormFactor", "BlattWeisskopf",
-                                             "CrystalBarrel"};
-
-enum formFactorType { noFormFactor = 0, BlattWeisskopf = 1, CrystalBarrel = 2 };
-
 class Kinematics {
 public:
   //! singleton pattern
-  static Kinematics *instance();
+  static Kinematics *Instance();
 
   //! converts Event to dataPoint
   virtual void EventToDataPoint(const ComPWA::Event &ev,
                                 dataPoint &point) const = 0;
 
-  //! Event to dataPoint conversion
-  virtual void FillDataPoint(int a, int b, double invMassSqA, double invMassSqB,
-                             dataPoint &point) const = 0;
-
-  //! vector with names of variables, e.g. vec[0]=m23sq, vec[1]=m13sq
-  std::vector<std::string> GetVarNames() const { return _varNames; }
-
-  //! vector with names of variables, e.g. vec[0]=m23sq, vec[1]=m13sq
-  std::string GetVarName(unsigned int pos) const { return _varNames.at(pos); }
-
-  //! vector with names of variables, e.g. vec[0]=m23sq, vec[1]=m13sq
-  std::vector<std::string> GetVarTitles() const { return _varTitles; }
-
-  //! vector with names of variables, e.g. vec[0]=m23sq, vec[1]=m13sq
-  std::string GetVarTitle(unsigned int pos) const { return _varTitles.at(pos); }
-
-  //! Get position of variable @param varName
-  unsigned int FindVariable(std::string varName) const;
-
   //! Checks of data point is within phase space boundaries
-  virtual bool IsWithinPhsp(const dataPoint &point) const { return 0; };
+  virtual bool IsWithinPhsp(const dataPoint &point) const = 0;
 
-  /**! Checks if the position is within the phase-space boundaries.
-   * This only works correctly if both variables are orthogonal to each other.
-   * E.g. and invariant mass and an angle.
-   * @param idA Variable id of invariant mass
-   * @param idB Variable id of angle
-   * @param varA Invariant mass
-   * @param varB Helicity angle
-   * @return
-   */
-  virtual bool IsWithinBoxPhsp(int idA, int idB, double varA,
-                               double varB) const = 0;
-
-  //! Get name of mother particle
-  virtual std::string GetMotherName() const { return _nameMother; };
-  //! Get mass of mother particle
-  virtual double GetMotherMass() const { return _M; }
   //! calculated the PHSP volume of the current decay by MC integration
   virtual double GetPhspVolume();
 
-  //! get mass of particles
-  virtual double GetMass(unsigned int num) const = 0;
-  //! get mass of particles
-  virtual double GetMass(std::string name) const = 0;
-  //! Get number of particles
-  virtual unsigned int GetNumberOfParticles() const { return _nPart; }
+  //! calculated the PHSP volume of the current decay by MC integration
+  virtual void SetPhspVolume( double phsp );
+  
   //! Get number of variables
-  virtual unsigned int GetNVars() const { return _varNames.size(); }
+  virtual std::size_t GetNVars() const { return _varNames.size(); }
+
+  //! Get final state
+  virtual std::vector<pid> GetFinalState() { return _finalState; }
+
+  //! Get inital state
+  virtual std::vector<pid> GetInitialState() { return _initialState; }
 
   /** Calculate Break-up momentum squared
    *
@@ -106,6 +63,7 @@ public:
    * @return |break-up momentum|
    */
   static double qSqValue(double sqrtS, double ma, double mb);
+
   /** Calculate Break-up momentum
    *
    * Calculate Break-up momentum at energy @param sqrtS for particles with
@@ -128,43 +86,25 @@ public:
    */
   static std::complex<double> phspFactor(double sqrtS, double ma, double mb);
 
-  //! Calculate form factor
-  static double
-  FormFactor(double sqrtS, double ma, double mb, double spin,
-             double mesonRadius,
-             formFactorType type = formFactorType::BlattWeisskopf);
-
-  //! Calculate form factor
-  static double
-  FormFactor(double sqrtS, double ma, double mb, double spin,
-             double mesonRadius, std::complex<double> qValue,
-             formFactorType type = formFactorType::BlattWeisskopf);
-
 protected:
-  //! Number of particles in reaction
-  unsigned int _nPart;
+  std::vector<pid> _initialState;
+  std::vector<pid> _finalState;
 
   //! Internal names of variabes
   std::vector<std::string> _varNames;
   //! Latex titles for variables
   std::vector<std::string> _varTitles;
 
-  // Parameters of decaying mother particle (we assume that we have a decay)
-  std::string _nameMother; //! name of mother particle
-  double _M;               //! mass of mother particle
-  double _Msq;             //! mass of mother particle
-  ComPWA::Spin _spinM;     //! spin of mother particle
-  double _Br;              //! width of decaying particle
-
   // Singleton stuff
   static Kinematics *_inst;
 
-  //! Default constructor (protected)
-  Kinematics(std::string nameM = "", double widthM = 0.0, unsigned int n = 3)
-      : _nPart(n), _nameMother(nameM), _M(1.0), _Msq(1.0), _spinM(0),
-        _Br(widthM), is_PS_area_calculated_(false), PS_area_(0.0){};
+  //! Constructor
+  Kinematics(std::vector<pid> initial = std::vector<pid>(),
+             std::vector<pid> finalS = std::vector<pid>())
+      : _initialState(initial), _finalState(finalS),
+        is_PS_area_calculated_(false), PS_area_(0.0){};
 
-  //! Delete Copy constructor (protected)
+  //! Delete Copy constructor
   Kinematics(const Kinematics &) = delete;
 
   //! Default destructor

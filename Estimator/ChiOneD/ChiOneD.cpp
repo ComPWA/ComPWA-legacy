@@ -25,13 +25,13 @@ using ComPWA::ControlParameter;
 namespace Estimator {
 namespace ChiOneD {
 
-ChiOneD::ChiOneD(std::shared_ptr<Amplitude> inPIF, std::shared_ptr<Data> inDIF)
+ChiOneD::ChiOneD(std::shared_ptr<AmpIntensity> inPIF, std::shared_ptr<Data> inDIF)
     : pPIF_(inPIF), pDIF_(inDIF) {}
 
 ChiOneD::~ChiOneD() {}
 
 std::shared_ptr<ControlParameter>
-ChiOneD::createInstance(std::shared_ptr<Amplitude> inPIF,
+ChiOneD::createInstance(std::shared_ptr<AmpIntensity> inPIF,
                         std::shared_ptr<Data> inDIF) {
   if (!instance_)
     instance_ = std::shared_ptr<ControlParameter>(new ChiOneD(inPIF, inDIF));
@@ -40,17 +40,16 @@ ChiOneD::createInstance(std::shared_ptr<Amplitude> inPIF,
 }
 
 double ChiOneD::controlParameter(ParameterList &minPar) {
-  unsigned int nBins = pDIF_->getNBins();
+  unsigned int nBins = pDIF_->GetNBins();
 
   double chi = 0;
   for (unsigned int bin = 0; bin < nBins; bin++) {
     double m12, weight;
-    pDIF_->getBin(bin, m12, weight);
+    pDIF_->GetBin(bin, m12, weight);
 
     std::vector<double> x;
     x.push_back(m12);
-    ParameterList intensL = pPIF_->intensity(x);
-    double intens = intensL.GetDoubleParameter(0)->GetValue();
+    double intens = pPIF_->Intensity(x);
     // double intens = pPIF_->intensity(x, minPar);
 
     chi += (weight - intens) * (weight - intens) /

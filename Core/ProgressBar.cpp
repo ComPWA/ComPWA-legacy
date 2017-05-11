@@ -9,7 +9,7 @@
 
 namespace ComPWA {
 
-progressBar::progressBar(int size, int update)
+  progressBar::progressBar(std::size_t size, int update)
     : numEvents(size), updateInterval(update), hasStarted(0), lastUpdate(0) {
   if (update == 0)
     updateInterval = 1;

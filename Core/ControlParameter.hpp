@@ -28,7 +28,7 @@
 
 #include "Core/ParameterList.hpp"
 #include "Core/FunctionTree.hpp"
-#include "Core/Amplitude.hpp"
+#include "Core/AmpIntensity.hpp"
 
 namespace ComPWA {
 
@@ -39,27 +39,27 @@ public:
 
   virtual double controlParameter(ParameterList &minPar) = 0;
 
-  virtual void resetInstance() {
+  virtual void ResetInstance() {
     instance_ = std::shared_ptr<ControlParameter>();
   }
 
-  virtual std::shared_ptr<FunctionTree> getTree() {
-    return std::shared_ptr<FunctionTree>();
-  }
+  virtual bool HasTree() = 0;
 
-  virtual std::vector<std::shared_ptr<Amplitude>> getAmplitudes() {
-    return std::vector<std::shared_ptr<Amplitude>>();
-  }
+  virtual std::shared_ptr<FunctionTree> GetTree() = 0;
+
+  virtual std::shared_ptr<AmpIntensity> GetIntensity() = 0;
 
   virtual int nCalls() { return calls; }
 
 protected:
+  ControlParameter() { /* nothing */ }
+  
+  virtual ~ControlParameter() { /* nothing */ }
+  
   static std::shared_ptr<ControlParameter> instance_;
+  
   std::shared_ptr<FunctionTree> f;
-  ControlParameter() { /* nothing */
-  }
-  virtual ~ControlParameter() { /* nothing */
-  }
+  
   int calls;
 };
 

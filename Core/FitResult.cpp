@@ -9,7 +9,7 @@
 
 namespace ComPWA {
 
-void FitResult::writeText(std::string filename) {
+void FitResult::WriteText(std::string filename) {
   std::ofstream myfile;
   myfile.open(filename, std::ios::app);
   genOutput(myfile);
@@ -17,7 +17,7 @@ void FitResult::writeText(std::string filename) {
   return;
 };
 
-void FitResult::writeSimpleText(std::string filename) {
+void FitResult::WriteSimpleText(std::string filename) {
   std::ofstream myfile;
   myfile.open(filename);
   genSimpleOutput(myfile);
@@ -28,7 +28,7 @@ void FitResult::writeSimpleText(std::string filename) {
 double FitResult::shiftAngle(double v) {
   double originalVal = v;
   double val = originalVal;
-  double pi = PhysConst::instance()->findConstant("Pi").value_;
+  double pi = PhysConst::Instance()->FindConstant("Pi").GetValue();
   while (val > pi)
     val -= 2 * pi;
   while (val < -pi)
@@ -50,25 +50,18 @@ void FitResult::genSimpleOutput(std::ostream &out) {
   return;
 }
 
-void FitResult::setFinalParameters(ParameterList finPars) {
+void FitResult::SetFinalParameters(ParameterList finPars) {
   finalParameters.DeepCopy(finPars);
 }
 
-void FitResult::setUseCorrelatedErrors(int nSets) {
-  if (nSets < 0)
-    nSetsFractionError = 0;
-  nSetsFractionError = nSets;
-  return;
-}
-
-void FitResult::print(std::string opt) {
+void FitResult::Print(std::string opt) {
   std::stringstream s;
   genOutput(s, opt);
   std::string str = s.str();
   LOG(info) << str;
 }
 
-void FitResult::printFitParameters(TableFormater *tableResult) {
+void FitResult::PrintFitParameters(TableFormater *tableResult) {
   bool printTrue = 0, printInitial = 0;
   if (trueParameters.GetNParameter())
     printTrue = 1;
@@ -85,7 +78,7 @@ void FitResult::printFitParameters(TableFormater *tableResult) {
       parErrorWidth = 33;
 
   tableResult->addColumn("Nr");
-  tableResult->addColumn("Name", 15);
+  tableResult->addColumn("Name", 20);
   if (printInitial)
     tableResult->addColumn("Initial Value", parErrorWidth);
   tableResult->addColumn("Final Value", parErrorWidth);
@@ -124,7 +117,7 @@ void FitResult::printFitParameters(TableFormater *tableResult) {
 
     // Is parameter an angle?
     bool isAngle = 0;
-    if (outPar->GetName().find("phase") != string::npos)
+    if (outPar->GetName().find("phase") != std::string::npos)
       isAngle = 1;
     // ... then shift the value to the domain [-pi;pi]
     if (isAngle && !isFixed) {
@@ -137,7 +130,7 @@ void FitResult::printFitParameters(TableFormater *tableResult) {
 
     // Is parameter a magnitude?
     bool isMag = 0;
-    if (outPar->GetName().find("mag") != string::npos)
+    if (outPar->GetName().find("mag") != std::string::npos)
       isMag = 1;
     // ... then make sure that it is positive
     if (isMag && !isFixed) {
@@ -170,7 +163,7 @@ void FitResult::printFitParameters(TableFormater *tableResult) {
     if (printTrue) {
       if (truePar) {
         *tableResult << *truePar;
-        double pi = PhysConst::instance()->findConstant("Pi").value_;
+        double pi = PhysConst::Instance()->FindConstant("Pi").GetValue();
         double pull = (truePar->GetValue() - outPar->GetValue());
         // Shift pull by 2*pi if that reduces the deviation
         if (isAngle && !isFixed) {
@@ -202,79 +195,41 @@ void FitResult::printFitParameters(TableFormater *tableResult) {
   return;
 }
 
-void FitResult::printFitFractions(TableFormater *tab) {
+void FitResult::PrintFitFractions(TableFormater *fracTable) {
   LOG(info) << " FitResult::printFitFractions() | "
                "Calculating fit fractions!";
-  auto itrAmp = _ampVec.begin();
-  for (; itrAmp != _ampVec.end(); ++itrAmp) {
-    printFitFractions(tab, (*itrAmp), nSetsFractionError);
-  }
-}
-
-void FitResult::printFitFractions(TableFormater *fracTable,
-                                  std::shared_ptr<Amplitude> amp,
-                                  int nErrorSets) {
-  ParameterList ffList;
-  amp->GetFitFractions(ffList);
-  calcFractionError(ffList, amp, nErrorSets);
+  
   double sum = 0, sumErrorSq = 0;
 
   fracTable->Reset();
 
-  std::string ampName = amp->GetName();
   // print matrix
-  fracTable->addColumn("Resonance: " + ampName, 40); // add empty first column
+  fracTable->addColumn("Fit fractions [%]", 40); // add empty first column
   fracTable->addColumn("Fraction", 15);              // add empty first column
   fracTable->addColumn("Error", 15);                 // add empty first column
   fracTable->header();
-  for (unsigned int i = 0; i < ffList.GetNDouble(); ++i) {
-    std::shared_ptr<DoubleParameter> tmpPar = ffList.GetDoubleParameter(i);
+  for (unsigned int i = 0; i < _fitFractions.GetNDouble(); ++i) {
+    std::shared_ptr<DoubleParameter> tmpPar = _fitFractions.GetDoubleParameter(i);
     std::string resName = tmpPar->GetName();
 
-    // Remove amplitude name from string
-    std::string::size_type strPos = resName.find(ampName);
-    if (strPos != std::string::npos)
-      resName.erase(strPos, ampName.length());
-
-    *fracTable << resName << tmpPar->GetValue()
-               << tmpPar->GetError(); // assume symmetric errors here
+    *fracTable << resName << tmpPar->GetValue();
+    try {
+     *fracTable << tmpPar->GetError(); // assume symmetric errors here
+    } catch(std::exception& ex) {
+      *fracTable << 0.0;
+    }
+    
     sum += tmpPar->GetValue();
     sumErrorSq += tmpPar->GetError() * tmpPar->GetError();
   }
   fracTable->delim();
   *fracTable << "Total" << sum << sqrt(sumErrorSq);
   fracTable->footer();
-  fractionList = ffList;
   sumFractions = sum;
   sumFractionsError = sqrt(sumErrorSq);
 
   return;
 }
 
-// void FitResult::calcFraction(ParameterList& parList, int nSets)
-//{
-//	if( !_ampVec.size() )
-//		throw std::runtime_error("FitResult::calcFractions() | "
-//				"No amplitude set, can't calculate fractions!");
-//
-//	if(parList.GetNDouble())
-//		throw std::runtime_error("FitResult::calcFractions() | "
-//				"ParameterList not empty!");
-//
-//	//	_amp->UpdateParameters(finalParameters); //update parameters in
-//amplitude
-//	double norm =-1;
-//
-//	//Start loop over amplitudes
-//	auto ampItr = _ampVec.begin();
-//	for( ; ampItr != _ampVec.end(); ++ampItr){
-////		calcFraction(parList, (*ampItr));
-//		(*ampItr)->GetFitFractions(parList);
-//		if( parList.GetNDouble() )
-//			calcFractionError(parList, (*ampItr), nSets);
-//	}
-//
-//	return;
-//}
 } /* namespace ComPWA */
 

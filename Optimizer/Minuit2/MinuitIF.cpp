@@ -45,7 +45,7 @@ using namespace ROOT::Minuit2;
 double shiftAngle(double v) {
   double originalVal = v;
   double val = originalVal;
-  double pi = ComPWA::PhysConst::instance()->findConstant("Pi").value_;
+  double pi = ComPWA::PhysConst::Instance()->FindConstant("Pi").GetValue();
   while (val > pi)
     val -= 2 * pi;
   while (val < -pi)
@@ -87,7 +87,7 @@ std::shared_ptr<FitResult> MinuitIF::exec(ParameterList &par) {
         actPat->GetName().find("phase") != actPat->GetName().npos)
       actPat->SetValue(shiftAngle(actPat->GetValue()));
 
-    if (actPat->UseBounds()) {
+    if (actPat->HasBounds()) {
       upar.Add(actPat->GetName(), actPat->GetValue(), error,
                actPat->GetMinValue(), actPat->GetMaxValue());
     } else {
@@ -222,12 +222,12 @@ std::shared_ptr<FitResult> MinuitIF::exec(ParameterList &par) {
 
   // Create fit result
   std::shared_ptr<FitResult> result(new MinuitResult(estimator, minMin));
-  result->setFinalParameters(finalParList);
-  result->setInitialParameters(initialParList);
-  result->setTime(time.elapsed());
+  result->SetFinalParameters(finalParList);
+  result->SetInitialParameters(initialParList);
+  result->SetTime(time.elapsed());
 
   // update parameters in amplitude
-  Amplitude::UpdateAmpParameterList(estimator->getAmplitudes(), finalParList);
+//  Amplitude::UpdateAmpParameterList(estimator->getAmplitudes(), finalParList);
 
   return result;
 }

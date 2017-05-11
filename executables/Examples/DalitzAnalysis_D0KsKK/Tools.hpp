@@ -35,19 +35,6 @@ inline std::string expand_user(std::string p) {
   return path;
 }
 
-inline void createAmp(std::string name,
-                      std::vector<std::shared_ptr<ComPWA::Amplitude>> &ampV,
-                      std::string xmlInput,
-                      std::shared_ptr<ComPWA::Efficiency> eff,
-                      double mcPrecision, std::string ampOption) {
-  auto DzeroAmp = new ComPWA::Physics::AmplitudeSum::AmpSumIntensity(
-      name, ComPWA::normStyle::one, eff, mcPrecision);
-  DzeroAmp->Configure(expand_user(xmlInput));
-  auto tmpAmp =
-      std::shared_ptr<ComPWA::Physics::AmplitudeSum::AmpSumIntensity>(DzeroAmp);
-  ampV.push_back(tmpAmp);
-}
-
 inline void setErrorOnParameterList(ComPWA::ParameterList &list, double error,
                                     bool asym) {
   for (unsigned int i = 0; i < list.GetNDouble(); i++) {
@@ -69,7 +56,7 @@ inline void randomStartValues(ComPWA::ParameterList &fitPar) {
     if (p->IsFixed())
       continue;
     double min = -999, max = 999;
-    if (p->UseBounds()) {
+    if (p->HasBounds()) {
       min = p->GetMinValue();
       max = p->GetMaxValue();
     }
@@ -201,6 +188,9 @@ inline TPad *drawPull(std::vector<TH1D *> hist, std::vector<TString> drawOption,
     throw std::runtime_error("drawPull() | Number of histograms and number "
                              "of draw options does not match!");
 
+  if (!hist.size())
+    LOG(error) << "drawPull() | No histograms given.";
+    
   Int_t optTitle = gStyle->GetOptTitle();
   Int_t optStat = gStyle->GetOptStat();
   gStyle->SetOptTitle(0);
@@ -210,7 +200,7 @@ inline TPad *drawPull(std::vector<TH1D *> hist, std::vector<TString> drawOption,
   if (hist.size() == 1) {
     pad = new TPad();
     hist.at(0)->Draw(drawOption.at(0));
-  } else if (hist.size() == 2) {
+  } else {
     pad = new TPad("hist", "hist", 0.0, 0.3, 1, 1);
     pad->Draw();
     pad->SetMargin(0.1, 0.05, 0.0, 0.05);

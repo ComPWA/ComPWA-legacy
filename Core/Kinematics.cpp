@@ -17,7 +17,7 @@
 
 namespace ComPWA {
 
-Kinematics *Kinematics::instance() {
+Kinematics *Kinematics::Instance() {
   if (!_inst) {
     throw std::runtime_error("No instance of Kinematics created! "
                              "Create one first!");
@@ -41,78 +41,6 @@ std::complex<double> Kinematics::qValue(double sqrtS, double ma, double mb) {
   return Kinematics::phspFactor(sqrtS, ma, mb) * 8.0 * M_PI * sqrtS;
 }
 
-double Kinematics::FormFactor(double sqrtS, double ma, double mb, double spin,
-                              double mesonRadius, formFactorType type) {
-  if (type == formFactorType::BlattWeisskopf && spin == 0) {
-    return 1.0;
-  }
-
-  std::complex<double> qValue = Kinematics::qValue(sqrtS, ma, mb);
-  return Kinematics::FormFactor(sqrtS, ma, mb, spin, mesonRadius, qValue, type);
-}
-
-double Kinematics::FormFactor(double sqrtS, double ma, double mb, double spin,
-                              double mesonRadius, std::complex<double> qValue,
-                              formFactorType type) {
-  if (mesonRadius == 0)
-    return 1; // disable form factors
-  if (type == formFactorType::noFormFactor)
-    return 1; // disable form factors
-  if (type == formFactorType::BlattWeisskopf && spin == 0) {
-    return 1.0;
-  }
-
-  // From factor for a0(980) used by Crystal Barrel Phys.Rev.D78-074023
-  if (type == formFactorType::CrystalBarrel) {
-    if (spin == 0) {
-      double qSq = std::norm(qValue);
-      double alpha = mesonRadius * mesonRadius / 6;
-      return std::exp(-alpha * qSq);
-    } else
-      throw std::runtime_error("Kinematics::FormFactor() | "
-                               "Form factors of type " +
-                               std::string(formFactorTypeString[type]) +
-                               " are implemented for spin 0 only!");
-  }
-
-  // Blatt-Weisskopt form factors with normalization F(x=mR) = 1.
-  // Reference: S.U.Chung Annalen der Physik 4(1995) 404-430
-  // z = q / (interaction range). For the interaction range we assume
-  // 1/mesonRadius
-  if (type == formFactorType::BlattWeisskopf) {
-    if (spin == 0)
-      return 1;
-    double qSq = std::norm(qValue);
-    double z = qSq * mesonRadius * mesonRadius;
-    /* Events below threshold
-     * What should we do if event is below threshold? Shouldn't really influence
-     * the result
-     * because resonances at threshold don't have spin(?) */
-    z = std::fabs(z);
-
-    if (spin == 1) {
-      return (sqrt(2 * z / (z + 1)));
-    } else if (spin == 2) {
-      return (sqrt(13 * z * z / ((z - 3) * (z - 3) + 9 * z)));
-    } else if (spin == 3) {
-      return (
-          sqrt(277 * z * z * z / (z * (z - 15) * (z - 15) + 9 * (2 * z - 5))));
-    } else if (spin == 4) {
-      return (sqrt(12746 * z * z * z * z /
-                   ((z * z - 45 * z + 105) * (z * z - 45 * z + 105) +
-                    25 * z * (2 * z - 21) * (2 * z - 21))));
-    } else
-      throw std::runtime_error(
-          "Kinematics::FormFactor() | Form factors of type " +
-          std::string(formFactorTypeString[type]) +
-          " are implemented for spins up to 4!");
-  }
-  throw std::runtime_error("Kinematics::FormFactor() | Form factor type " +
-                           std::to_string((long long int)type) +
-                           " not specified!");
-
-  return 0;
-}
 
 std::complex<double> Kinematics::phspFactor(double sqrtS, double ma,
                                             double mb) {
@@ -151,22 +79,16 @@ std::complex<double> Kinematics::phspFactor(double sqrtS, double ma,
     throw std::runtime_error("Kinematics::phspFactor| PhspFactor not "
                              "defined at sqrtS = " +
                              std::to_string((long double)sqrtS));
-
-  if (rho.real() != rho.real() || rho.imag() != rho.imag())
+  
+#ifndef NDEBUG
+  if (rho.real() != rho.real() || rho.imag() != rho.imag()){
     throw std::runtime_error("Kinematics::phspFactor| Result invalid (NaN)!");
+  }
+#endif
 
   return rho; // correct analytical continuation
 }
-
-unsigned int Kinematics::FindVariable(std::string varName) const {
-  for (unsigned int i = 0; i < _varNames.size(); i++)
-    if (_varNames.at(i) == varName)
-      return i;
-  throw BadParameter("Kinematics::findVariable() | "
-                     "Variable" +
-                     varName + " not found!");
-  return -999;
-}
+  
 
 //! calculated the PHSP volume of the current decay by MC integration
 double Kinematics::GetPhspVolume() {
@@ -175,6 +97,14 @@ double Kinematics::GetPhspVolume() {
     is_PS_area_calculated_ = true;
   }
   return PS_area_;
+}
+
+void Kinematics::SetPhspVolume(double vol) {
+  PS_area_ = vol;
+  is_PS_area_calculated_ = true;
+  
+  LOG(info)<<"Kinematics::SetPhspVolume() | Setting phase space "
+  "volume to "<<std::to_string(GetPhspVolume())<<".";
 }
 
 } /* namespace ComPWA */

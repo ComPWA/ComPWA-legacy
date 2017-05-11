@@ -25,7 +25,7 @@
 
 //PWA-Headers
 #include "Estimator/Estimator.hpp"
-#include "Core/Amplitude.hpp"
+#include "Core/AmpIntensity.hpp"
 #include "DataReader/Data.hpp"
 #include "Core/Event.hpp"
 #include "Core/ParameterList.hpp"
@@ -38,19 +38,23 @@ class ChiOneD : public Estimator {
 
 public:
   static std::shared_ptr<ComPWA::ControlParameter>
-      createInstance(std::shared_ptr<Amplitude>,
+      createInstance(std::shared_ptr<AmpIntensity>,
                      std::shared_ptr<DataReader::Data>);
   virtual double controlParameter(ParameterList& minPar);
 
   /** Destructor */
   virtual ~ChiOneD();
+  
+  virtual bool HasTree(){ return false; }
+  virtual std::shared_ptr<FunctionTree> GetTree() { return std::shared_ptr<FunctionTree>(); }
+  virtual std::shared_ptr<AmpIntensity> GetIntensity() { return std::shared_ptr<AmpIntensity>(); }
 
 protected:
   /// Default Constructor (0x0)
-  ChiOneD(std::shared_ptr<Amplitude>, std::shared_ptr<DataReader::Data>);
+  ChiOneD(std::shared_ptr<AmpIntensity>, std::shared_ptr<DataReader::Data>);
 
 private:
-  std::shared_ptr<Amplitude> pPIF_;
+  std::shared_ptr<AmpIntensity> pPIF_;
   std::shared_ptr<DataReader::Data> pDIF_;
 
 };

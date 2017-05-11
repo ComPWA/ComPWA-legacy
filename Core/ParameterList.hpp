@@ -1,7 +1,5 @@
- 
-        
-    
-  
+
+
 //-------------------------------------------------------------------------------
 // Copyright (c) 2013 Mathias Michel.
 //
@@ -131,7 +129,7 @@ public:
   virtual ~ParameterList();
 
   //! Get number of parameters
-  virtual const inline unsigned int GetNParameter() const {
+  virtual const inline std::size_t GetNParameter() const {
     return (vDouble_.size() + vInt_.size() + vBool_.size() +
             vMultiDouble_.size() + vMultiComplex_.size());
   }
@@ -170,7 +168,7 @@ public:
 
   //================= Bool Parameter ==================
   //! Getter for number of boolean parameter
-  virtual const inline unsigned int GetNBool() const { return vBool_.size(); }
+  virtual const inline std::size_t GetNBool() const { return vBool_.size(); }
   /**! A public function returning a string with parameter information
    * This function simply returns the member string out_, which contains
    * all parameter information. The string gets created using the outstream
@@ -250,13 +248,12 @@ public:
 
   //================= Integer Parameter ==================
   //! Getter for number of integer parameter
-  virtual const inline unsigned int GetNInteger() const { return vInt_.size(); }
+  virtual const inline std::size_t GetNInteger() const { return vInt_.size(); }
   /**! A public function returning a string with parameter information
    * This function simply returns the member string out_, which contains
    * all parameter information. The string gets created using the outstream
    * of the PWAParameter class.
    * \return string with parameter information
-   * \sa operator<<
    */
   virtual std::vector<std::shared_ptr<IntegerParameter>>::const_iterator
   FindIntegerParameter(const std::string name) const;
@@ -330,7 +327,7 @@ public:
 
   //================= Double Parameter ==================
   //! Getter for number of double parameter
-  virtual const inline unsigned int GetNDouble() const {
+  virtual const inline std::size_t GetNDouble() const {
     return vDouble_.size();
   }
   /**! A public function returning a string with parameter information
@@ -338,7 +335,6 @@ public:
    * all parameter information. The string gets created using the outstream
    * of the PWAParameter class.
    * \return string with parameter information
-   * \sa operator<<
    */
   virtual std::vector<std::shared_ptr<DoubleParameter>>::const_iterator
   FindDoubleParameter(const std::string name) const;
@@ -412,7 +408,7 @@ public:
 
   //================= Complex Parameter ==================
   //! Getter for number of complex parameter
-  virtual const inline unsigned int GetNComplex() const {
+  virtual const inline std::size_t GetNComplex() const {
     return vComplex_.size();
   }
   /**! A public function returning a string with parameter information
@@ -420,7 +416,6 @@ public:
    * all parameter information. The string gets created using the outstream
    * of the PWAParameter class.
    * \return string with parameter information
-   * \sa operator<<
    */
   virtual std::vector<std::shared_ptr<ComplexParameter>>::const_iterator
   FindComplexParameter(const std::string name) const;
@@ -498,7 +493,7 @@ public:
 
   //================= MultiDouble Parameter ==================
   //! Getter for number of multi-double parameter
-  virtual const inline unsigned int GetNMultiDouble() const {
+  virtual const inline std::size_t GetNMultiDouble() const {
     return vMultiDouble_.size();
   }
   /**! A public function returning a string with parameter information
@@ -506,7 +501,6 @@ public:
    * all parameter information. The string gets created using the outstream
    * of the PWAParameter class.
    * \return string with parameter information
-   * \sa operator<<
    */
   virtual std::vector<std::shared_ptr<MultiDouble>>::const_iterator
   FindMultiDouble(const std::string name) const;
@@ -563,7 +557,7 @@ public:
 
   //================= MultiComplex Parameter ==================
   //! Getter for number of multi-complex parameter
-  virtual const inline unsigned int GetNMultiComplex() const {
+  virtual const inline std::size_t GetNMultiComplex() const {
     return vMultiComplex_.size();
   }
   /**! A public function returning a string with parameter information
@@ -571,7 +565,6 @@ public:
    * all parameter information. The string gets created using the outstream
    * of the PWAParameter class.
    * \return string with parameter information
-   * \sa operator<<
    */
   virtual std::vector<std::shared_ptr<MultiComplex>>::const_iterator
   FindMultiComplex(const std::string name) const;
@@ -628,7 +621,7 @@ public:
 
   //================= MultiUnsigedInteger Parameter ==================
   //! Getter for number of multi-complex parameter
-  virtual const inline unsigned int GetNMultiUnsignedInteger() const {
+  virtual const inline std::size_t GetNMultiUnsignedInteger() const {
     return vMultiUnsignedInteger_.size();
   }
   /**! A public function returning a string with parameter information
@@ -636,7 +629,6 @@ public:
    * all parameter information. The string gets created using the outstream
    * of the PWAParameter class.
    * \return string with parameter information
-   * \sa operator<<
    */
   virtual std::vector<std::shared_ptr<MultiUnsignedInteger>>::const_iterator
   FindMultiUnsignedInteger(const std::string name) const;
@@ -691,6 +683,56 @@ public:
 *\param id identification of the paramter to be removed
    */
   virtual void RemoveMultiUnsignedInteger(const unsigned int id);
+
+  bool operator==(const ParameterList &p) const {
+    if (!std::equal(vBool_.begin(), vBool_.end(), p.vBool_.begin(),
+                    [](const std::shared_ptr<BoolParameter> &item1,
+                       const std::shared_ptr<BoolParameter> &item2) -> bool {
+                      return (*item1 == *item2);
+                    }))
+      return false;
+    if (!std::equal(vInt_.begin(), vInt_.end(), p.vInt_.begin(),
+                    [](const std::shared_ptr<IntegerParameter> &item1,
+                       const std::shared_ptr<IntegerParameter> &item2) -> bool {
+                      return (*item1 == *item2);
+                    }))
+      return false;
+    if (!std::equal(vDouble_.begin(), vDouble_.end(), p.vDouble_.begin(),
+                    [](const std::shared_ptr<DoubleParameter> &item1,
+                       const std::shared_ptr<DoubleParameter> &item2) -> bool {
+                      return (*item1 == *item2);
+                    }))
+      return false;
+    if (!std::equal(vComplex_.begin(), vComplex_.end(), p.vComplex_.begin(),
+                    [](const std::shared_ptr<ComplexParameter> &item1,
+                       const std::shared_ptr<ComplexParameter> &item2) -> bool {
+                      return (*item1 == *item2);
+                    }))
+      return false;
+    if (!std::equal(vMultiDouble_.begin(), vMultiDouble_.end(),
+                    p.vMultiDouble_.begin(),
+                    [](const std::shared_ptr<MultiDouble> &item1,
+                       const std::shared_ptr<MultiDouble> &item2) -> bool {
+                      return (*item1 == *item2);
+                    }))
+      return false;
+    if (!std::equal(vMultiComplex_.begin(), vMultiComplex_.end(),
+                    p.vMultiComplex_.begin(),
+                    [](const std::shared_ptr<MultiComplex> &item1,
+                       const std::shared_ptr<MultiComplex> &item2) -> bool {
+                      return (*item1 == *item2);
+                    }))
+      return false;
+    if (!std::equal(
+            vMultiUnsignedInteger_.begin(), vMultiUnsignedInteger_.end(),
+            p.vMultiUnsignedInteger_.begin(),
+            [](const std::shared_ptr<MultiUnsignedInteger> &item1,
+               const std::shared_ptr<MultiUnsignedInteger> &item2) -> bool {
+              return (*item1 == *item2);
+            }))
+      return false;
+    return true;
+  }
 
 protected:
   /*!< Vector of boolean parameters */

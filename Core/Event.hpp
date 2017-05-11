@@ -40,30 +40,34 @@ public:
 
   Event(Event const&);
 
-  virtual void addParticle(Particle inParticle);
-
-  virtual void setParticleAt(const Particle &particle, unsigned int index);
+  virtual void AddParticle(Particle inParticle);
 
   virtual ~Event();
 
-  virtual void inline setName(const std::string &name) { fName = name; }
-  virtual const inline std::string &getName() const { return fName; }
-  virtual double inline getWeight() const { return fWeight; }
-  virtual void inline setWeight(double w) { fWeight = w; }
-  virtual int inline getFlavour() const { return fFlavour; }
-  virtual void inline setFlavour(int fl) { fFlavour = fl; }
-  virtual int inline getCharge() const { return fCharge; }
-  virtual void inline setCharge(int ch) { fCharge = ch; }
-  virtual double inline getEfficiency() const { return fEff; }
-  virtual void inline setEfficiency(double eff) { fEff = eff; }
+  virtual void inline SetName(const std::string &name) { fName = name; }
+  virtual const inline std::string &GetName() const { return fName; }
+  virtual double inline GetWeight() const { return fWeight; }
+  virtual void inline SetWeight(double w) { fWeight = w; }
+  virtual int inline GetFlavour() const { return fFlavour; }
+  virtual void inline SetFlavour(int fl) { fFlavour = fl; }
+  virtual int inline GetCharge() const { return fCharge; }
+  virtual void inline SetCharge(int ch) { fCharge = ch; }
+  virtual double inline GetEfficiency() const { return fEff; }
+  virtual void inline SetEfficiency(double eff) { fEff = eff; }
 
-  virtual const inline unsigned int getNParticles() const {
+  virtual const inline unsigned long GetNParticles() const {
     return fParticles.size();
   }
-  virtual const Particle &getParticle(const unsigned int id) const;
+  virtual const Particle& GetParticle(const unsigned int id) const;
 
   friend std::ostream &operator<<(std::ostream &stream, const Event &ev);
 
+  virtual void Clear() {
+    fParticles.clear();
+    fWeight = 1.0;
+    fEff = 1.0;
+    fName = "";
+  }
 protected:
   std::vector<Particle> fParticles;
   double fWeight;

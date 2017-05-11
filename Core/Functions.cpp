@@ -5,6 +5,7 @@
  *      Author: weidenka
  */
 
+#include <numeric>
 #include "Core/Functions.hpp"
 
 namespace ComPWA {
@@ -90,6 +91,20 @@ bool SquareRoot::execute(ParameterList &paras,
   return true;
 }
 
+struct KahanSummation{
+  double sum;
+  double correction;
+};
+
+KahanSummation KahanSum(KahanSummation accumulation, double value) {
+  KahanSummation result;
+  double y = value - accumulation.correction;
+  double t = accumulation.sum + y;
+  result.correction = (t - accumulation.sum) - y;
+  result.sum = t;
+  return result;
+}
+
 bool AddAll::execute(ParameterList &paras, std::shared_ptr<AbsParameter> &out) {
   if (checkType != out->type())
     return false;
@@ -135,13 +150,13 @@ bool AddAll::execute(ParameterList &paras, std::shared_ptr<AbsParameter> &out) {
     for (unsigned int i = 0; i < nMD; i++) {
       const std::vector<double> v_tmp = paras.GetMultiDouble(i)->GetValues();
       for (unsigned int ele = 0; ele < v_tmp.size(); ele++)
-        results[ele] += v_tmp.at(ele);
+        results.at(ele) += v_tmp.at(ele);
     }
     for (unsigned int i = 0; i < nMC; i++) {
       const std::vector<std::complex<double>> v_tmp =
           paras.GetMultiComplex(i)->GetValues();
       for (unsigned int ele = 0; ele < v_tmp.size(); ele++)
-        results[ele] += v_tmp.at(ele);
+        results.at(ele) += v_tmp.at(ele);
     }
 
     out = std::shared_ptr<AbsParameter>(
@@ -173,7 +188,7 @@ bool AddAll::execute(ParameterList &paras, std::shared_ptr<AbsParameter> &out) {
     for (unsigned int i = 0; i < nMD; i++) {
       std::vector<double> v_tmp = paras.GetMultiDouble(i)->GetValues();
       for (unsigned int ele = 0; ele < v_tmp.size(); ele++)
-        results[ele] += v_tmp.at(ele);
+        results.at(ele) += v_tmp.at(ele);
     }
     out =
         std::shared_ptr<AbsParameter>(new MultiDouble(out->GetName(), results));
@@ -229,9 +244,12 @@ bool AddAll::execute(ParameterList &paras, std::shared_ptr<AbsParameter> &out) {
     }
     // collapse MultiDoubles parameter
     for (unsigned int i = 0; i < nMD; i++) {
-      std::shared_ptr<MultiDouble> tmp = paras.GetMultiDouble(i);
-      for (unsigned int ele = 0; ele < tmp->GetNValues(); ele++)
-        result += tmp->GetValue(ele);
+      auto tmp = paras.GetMultiDouble(i)->GetValues();
+      KahanSummation kaSum = { result };
+      auto kaResult = std::accumulate(tmp.begin(), tmp.end(), kaSum, KahanSum);
+      result = kaResult.sum;
+      //      for (unsigned int ele = 0; ele < tmp->GetNValues(); ele++)
+      //        result += tmp->GetValue(ele);
     }
 
     out = std::shared_ptr<AbsParameter>(
@@ -295,13 +313,13 @@ bool MultAll::execute(ParameterList &paras,
     for (unsigned int i = 0; i < nMD; i++) {
       const std::vector<double> tmpVec = paras.GetMultiDouble(i)->GetValues();
       for (unsigned int ele = 0; ele < tmpVec.size(); ele++)
-        results[ele] *= tmpVec.at(ele);
+        results.at(ele) *= tmpVec.at(ele);
     }
     for (unsigned int i = 0; i < nMC; i++) {
       const std::vector<std::complex<double>> v_tmp =
           paras.GetMultiComplex(i)->GetValues();
       for (unsigned int ele = 0; ele < v_tmp.size(); ele++)
-        results[ele] *= v_tmp.at(ele);
+        results.at(ele) *= v_tmp.at(ele);
     }
 
     out = std::shared_ptr<AbsParameter>(
@@ -332,7 +350,7 @@ bool MultAll::execute(ParameterList &paras,
     for (unsigned int i = 0; i < nMD; i++) {
       std::vector<double> v_tmp = paras.GetMultiDouble(i)->GetValues();
       for (unsigned int ele = 0; ele < v_tmp.size(); ele++)
-        results[ele] *= v_tmp.at(ele);
+        results.at(ele) *= v_tmp.at(ele);
     }
     out =
         std::shared_ptr<AbsParameter>(new MultiDouble(out->GetName(), results));
@@ -442,7 +460,7 @@ bool LogOf::execute(ParameterList &paras, std::shared_ptr<AbsParameter> &out) {
     const std::vector<double> tmp = paras.GetMultiDouble(0)->GetValues();
     std::vector<double> results(tmp.size(), 0.);
     for (unsigned int ele = 0; ele < tmp.size(); ele++)
-      results[ele] = std::log(tmp.at(ele));
+      results.at(ele) = std::log(tmp.at(ele));
 
     out =
         std::shared_ptr<AbsParameter>(new MultiDouble(out->GetName(), results));
@@ -510,7 +528,7 @@ bool Complexify::execute(ParameterList &paras,
                                               std::complex<double>(0., 0.));
 
     for (unsigned int ele = 0; ele < v_mag.size(); ele++)
-      results[ele] = std::complex<double>(
+      results.at(ele) = std::complex<double>(
           std::fabs(v_mag.at(ele)) * std::cos(v_phi.at(ele)), // a*cos(phi)
           std::fabs(v_mag.at(ele)) * std::sin(v_phi.at(ele))  // a*sin(phi)
           );
@@ -662,7 +680,7 @@ bool Power::execute(ParameterList &paras, std::shared_ptr<AbsParameter> &out) {
                                               std::complex<double>(0., 0.));
 
     for (unsigned int ele = 0; ele < v_base.size(); ele++)
-      results[ele] = std::pow(v_base.at(ele), v_exp.at(ele));
+      results.at(ele) = std::pow(v_base.at(ele), v_exp.at(ele));
 
     out = std::shared_ptr<AbsParameter>(
         new MultiComplex(out->GetName(), results));
@@ -683,7 +701,7 @@ bool Power::execute(ParameterList &paras, std::shared_ptr<AbsParameter> &out) {
     std::vector<double> results(v_base.size(), 0.);
 
     for (unsigned int ele = 0; ele < v_base.size(); ele++)
-      results[ele] = std::pow(v_base.at(ele), v_exp.at(ele));
+      results.at(ele) = std::pow(v_base.at(ele), v_exp.at(ele));
 
     out =
         std::shared_ptr<AbsParameter>(new MultiDouble(out->GetName(), results));

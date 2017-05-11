@@ -67,7 +67,7 @@ public:
   //! Add this node to parents children-list
   void linkParents() {
     for (unsigned int i = 0; i < _parents.size(); i++)
-      _parents[i]->_children.push_back(shared_from_this());
+      _parents.at(i)->_children.push_back(shared_from_this());
   }
 
   //! Check if recalculation is needed
@@ -81,11 +81,11 @@ public:
 
   //! Get pointer to node value
   const std::shared_ptr<AbsParameter> getValue(unsigned int ele = 0) {
-    return _value[ele];
+    return _value.at(ele);
   };
 
   //! Get dimension
-  const unsigned int getDim() { return _value.size(); };
+  const std::size_t getDim() { return _value.size(); };
 
   //! Get node name
   const std::string &getName() { return _name; };
@@ -103,14 +103,15 @@ public:
 
   //! return parents names
   void getParentNames(std::vector<std::string> &names) {
-    for (unsigned int i = 0; i < _parents.size(); i++)
-      names.push_back(_parents[i]->getName());
+    for ( auto i : _parents ){
+      names.push_back(i->getName());
+    }
   };
 
   //! return children names
   void getChildrenNames(std::vector<std::string> &names) {
     for (unsigned int i = 0; i < _children.size(); i++)
-      names.push_back(_children[i]->getName());
+      names.push_back(_children.at(i)->getName());
   };
 
   //! return children pointer

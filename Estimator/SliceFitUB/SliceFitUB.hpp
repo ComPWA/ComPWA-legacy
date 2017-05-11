@@ -32,7 +32,7 @@
 
 //PWA-Header
 #include "Estimator/Estimator.hpp"
-#include "Core/Amplitude.hpp"
+#include "Core/AmpIntensity.hpp"
 #include "Physics/AmplitudeSum/AmpSumIntensity.hpp"
 #include "DataReader/Data.hpp"
 #include "Core/Event.hpp"

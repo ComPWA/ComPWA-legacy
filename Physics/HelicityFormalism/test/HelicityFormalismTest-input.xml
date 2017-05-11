@@ -1,0 +1,466 @@
+<ParticleList>
+	<Particle Name='gamma'>
+		<Pid>22</Pid>
+		<Mass Name='mass_gamma'>
+			<Value>0.</Value>
+			<Fix>true</Fix>
+		</Mass>
+		<Charge>0</Charge>
+		<Spin>1.0</Spin>
+		<Parity>-1</Parity>
+		<Cparity>-1</Cparity>
+		<Gparity>1</Gparity>
+		<IsoSpin>0</IsoSpin>
+		<IsoSpinZ>0</IsoSpinZ>
+	</Particle>
+	<Particle Name='pi0'>
+		<Pid>210</Pid>
+		<Mass Name='mass_pi0'>
+			<Value>0.1349766</Value>
+			<Fix>true</Fix>
+		</Mass>
+		<Charge>0</Charge>
+		<Spin>0.0</Spin>
+		<Parity>-1</Parity>
+		<Cparity>1</Cparity>
+		<Gparity>1</Gparity>
+		<IsoSpin>1</IsoSpin>
+	</Particle>
+	<Particle Name='jpsi'>
+		<Pid>443</Pid>
+		<Mass Name='Mass_jpsi'>
+			<Value>3.0969</Value>
+			<Error>0.0</Error>
+		</Mass>
+		<Charge>0</Charge>
+		<Spin>1.0</Spin>
+		<Parity>-1</Parity>
+		<Cparity>-1</Cparity>
+		<Gparity>1</Gparity>
+		<IsoSpin>0</IsoSpin>
+		<IsoSpinZ>0</IsoSpinZ>
+		<DecayInfo Type='relativisticBreitWigner'>
+			<FormFactor type='0' />
+			<Width Name='Width_jpsi'>
+				<Value>0.0000929</Value>
+				<Error>0.0000028</Error>
+			</Width>
+			<MesonRadius Name='Radius_jpsi'>
+				<Value>2.5</Value>
+				<Fix>true</Fix>
+				<Min>2.0</Min>
+				<Max>3.0</Max>
+			</MesonRadius>
+		</DecayInfo>
+	</Particle>
+	<Particle Name='omega'>
+		<Pid>223</Pid>
+		<Mass Name='Mass_omega'>
+			<Value>0.78265</Value>
+			<Fix>true</Fix>
+			<Min>0.5</Min>
+			<Max>1.5</Max>
+			<Error>0.00012</Error>
+		</Mass>
+		<Charge>0</Charge>
+		<Spin>1.0</Spin>
+		<Parity>-1</Parity>
+		<Cparity>-1</Cparity>
+		<Gparity>1</Gparity>
+		<IsoSpin>0.0</IsoSpin>
+		<IsoSpinZ>0.0</IsoSpinZ>
+		<DecayInfo Type='relativisticBreitWigner'>
+			<FormFactor type='0' />
+			<Width Name='Width_omega'>
+				<Value>0.01849</Value>
+				<Fix>true</Fix>
+				<Min>0.0</Min>
+				<Max>1.0</Max>
+				<Error>0.00008</Error>
+			</Width>
+			<MesonRadius Name='Radius_omega'>
+				<Value>1.5</Value>
+				<Fix>true</Fix>
+				<Min>1.0</Min>
+				<Max>2.0</Max>
+				<Error>0</Error>
+			</MesonRadius>
+		</DecayInfo>
+	</Particle>
+	<Particle Name='f0_980'>
+		<Pid>9010221</Pid>
+		<Mass Name='Mass_f0_980'>
+			<Value>0.99</Value>
+			<Fix>true</Fix>
+			<Min>0.5</Min>
+			<Max>1.5</Max>
+			<Error>0</Error>
+		</Mass>
+		<Charge>0</Charge>
+		<Spin>0.0</Spin>
+		<Parity>1</Parity>
+		<Cparity>1</Cparity>
+		<Gparity>1</Gparity>
+		<IsoSpin>0.0</IsoSpin>
+		<IsoSpinZ>0.0</IsoSpinZ>
+		<DecayInfo Type='relativisticBreitWigner'>
+			<FormFactor type='0' />
+			<Width Name='Width_f0_980'>
+				<Value>0.05</Value>
+				<Fix>true</Fix>
+				<Min>0.</Min>
+				<Max>.5</Max>
+				<Error>0</Error>
+			</Width>
+			<MesonRadius Name='Radius_f0_980'>
+				<Value>1.5</Value>
+				<Fix>true</Fix>
+				<Min>1.0</Min>
+				<Max>2.0</Max>
+				<Error>0</Error>
+			</MesonRadius>
+		</DecayInfo>
+	</Particle>
+	<Particle Name='K+'>
+		<Pid>321</Pid>
+		<Mass Name='mass_k+'>
+			<Value>0.493677</Value>
+			<Fix>true</Fix>
+		</Mass>
+		<Charge>0</Charge>
+		<Spin>0</Spin>
+		<Parity>-1</Parity>
+		<IsoSpin>0.5</IsoSpin>
+		<IsoSpinZ>0.5</IsoSpinZ>
+	</Particle>
+	<Particle Name='K-'>
+		<Pid>-321</Pid>
+		<Mass Name='mass_kpm'>
+			<Value>0.493677</Value>
+			<Fix>true</Fix>
+		</Mass>
+		<Charge>0</Charge>
+		<Spin>0</Spin>
+		<Parity>-1</Parity>
+		<IsoSpin>0.5</IsoSpin>
+		<IsoSpinZ>-0.5</IsoSpinZ>
+	</Particle>
+	<Particle Name='pi0'>
+		<Pid>111</Pid>
+		<Mass Name='mass_pi0'>
+			<Value>0.1349766</Value>
+			<Error>0.0000006</Error>
+		</Mass>
+		<Charge>0</Charge>
+		<Spin>0</Spin>
+		<Parity>-1</Parity>
+		<Cparity>+1</Cparity>
+	</Particle>
+	<Particle Name='eta'>
+		<Pid>221</Pid>
+		<Mass Name='mass_eta'>
+			<Value>0.547862</Value>
+			<Error>0.000018</Error>
+		</Mass>
+		<Charge>0</Charge>
+		<Spin>0</Spin>
+		<Parity>-1</Parity>
+		<Cparity>+1</Cparity>
+		<!--<DecayInfo Type='relativisticBreitWigner'>-->
+			<!--<FormFactor type='0' />-->
+			<!--<Width Name='width_eta'>-->
+				<!--<Value>0.00000131</Value>-->
+				<!--<Error>0.00000005</Error>-->
+				<!--<Fix>true</Fix>-->
+			<!--</Width>-->
+			<!--<MesonRadius Name='radius_d0'>-->
+				<!--<Value>2.5</Value>-->
+				<!--<Fix>true</Fix>-->
+				<!--<Min>2.0</Min>-->
+				<!--<Max>3.0</Max>-->
+			<!--</MesonRadius>-->
+		<!--</DecayInfo>-->
+	</Particle>
+	<Particle Name='K_S0'>
+		<Pid>310</Pid>
+		<Mass Name='mass_k0'>
+			<Value>0.497614</Value>
+			<Fix>true</Fix>
+		</Mass>
+		<Charge>0</Charge>
+		<Spin>0.0</Spin>
+		<Parity>-1</Parity>
+		<IsoSpin>0.5</IsoSpin>
+		<IsoSpinZ>0.5</IsoSpinZ>
+	</Particle>
+	<Particle Name='D0'>
+		<Pid>421</Pid>
+		<Mass Name='mass_d0'>
+			<Value>1.86484</Value>
+			<Fix>true</Fix>
+		</Mass>
+		<Charge>0</Charge>
+		<Spin>0.0</Spin>
+		<Parity>-1</Parity>
+		<DecayInfo Type='relativisticBreitWigner'>
+			<FormFactor type='0' />
+			<Width Name='width_d0'>
+				<Value>0.000623</Value>
+				<Fix>true</Fix>
+			</Width>
+			<MesonRadius Name='radius_d0'>
+				<Value>2.5</Value>
+				<Fix>true</Fix>
+				<Min>2.0</Min>
+				<Max>3.0</Max>
+			</MesonRadius>
+		</DecayInfo>
+	</Particle>
+	<Particle Name='phi(1020)'>
+		<Pid>333</Pid>
+		<Mass Name='mass_phi'>
+			<Value>1.019461</Value>
+			<Error>0.000019</Error>
+			<Fix>true</Fix>
+		</Mass>
+		<Charge>0</Charge>
+		<Spin>1.0</Spin>
+		<Parity>-1</Parity>
+		<DecayInfo Type='relativisticBreitWigner'>
+			<FormFactor type='1' />
+			<Width Name='width_phi'>
+				<Value>0.004266</Value>
+				<Error>0.000031</Error>
+				<Fix>true</Fix>
+			</Width>
+			<MesonRadius Name='radius_phi'>
+				<Value>1.5</Value>
+				<Fix>true</Fix>
+				<Min>1.0</Min>
+				<Max>2.0</Max>
+			</MesonRadius>
+		</DecayInfo>
+	</Particle>
+	<Particle Name='a0(980)0'>
+		<Pid>9000111</Pid>
+		<Mass Name='mass_a0(980)'>
+			<Value>0.994</Value>
+			<Error>0.001</Error>
+			<Fix>true</Fix>
+		</Mass>
+		<Charge>0</Charge>
+		<Spin>0</Spin>
+		<Parity>+1</Parity>
+		<DecayInfo Type='flatte'>
+			<FormFactor type='0' />
+			<Coupling Name='gKK_a0(980)'>
+				<Value>3.121343843602647</Value>
+				<Error>0.001</Error>
+				<Fix>false</Fix>
+				<ParticleA>K+</ParticleA>
+				<ParticleB>K-</ParticleB>
+			</Coupling>
+			<Coupling Name='gEtaPi_a0(980)'>
+				<Value>2.66</Value>
+				<Error>0.001</Error>
+				<Fix>true</Fix>
+				<ParticleA>eta</ParticleA>
+				<ParticleB>pi0</ParticleB>
+			</Coupling>
+			<Coupling Name='gKK_a0(980)'>
+				<Value>3.121343843602647</Value>
+				<Error>0.001</Error>
+				<Fix>false</Fix>
+				<ParticleA>K_S0</ParticleA>
+				<ParticleB>K_S0</ParticleB>
+			</Coupling>
+			<MesonRadius Name='radius_a0(980)'>
+				<Value>1.5</Value>
+				<Fix>true</Fix>
+				<Min>1.0</Min>
+				<Max>2.0</Max>
+			</MesonRadius>
+		</DecayInfo>
+	</Particle>
+	<Particle Name='a0(980)+'>
+		<Pid>9000211</Pid>
+		<Mass Name='mass_a0(980)'>
+			<Value>0.994</Value>
+			<Error>0.001</Error>
+			<Fix>true</Fix>
+		</Mass>
+		<Charge>0</Charge>
+		<Spin>0</Spin>
+		<Parity>+1</Parity>
+		<DecayInfo Type='flatte'>
+			<FormFactor type='0' />
+			<Coupling Name='gKK_a0(980)'>
+				<Value>3.121343843602647</Value>
+				<Error>0.001</Error>
+				<Fix>false</Fix>
+				<ParticleA>K_S0</ParticleA>
+				<ParticleB>K+</ParticleB>
+			</Coupling>
+			<Coupling Name='gEtaPi_a0(980)'>
+				<Value>2.66</Value>
+				<Error>0.001</Error>
+				<Fix>true</Fix>
+				<ParticleA>eta</ParticleA>
+				<ParticleB>pi0</ParticleB>
+			</Coupling>
+			<MesonRadius Name='radius_a0(980)'>
+				<Value>1.5</Value>
+				<Fix>true</Fix>
+				<Min>1.0</Min>
+				<Max>2.0</Max>
+			</MesonRadius>
+		</DecayInfo>
+	</Particle>
+	<Particle Name='Bkgphi(1020)'>
+		<Pid>3339999</Pid>
+		<Mass Name='mass_phi'>
+			<Value>1.019461</Value>
+			<Error>0.000019</Error>
+			<Fix>true</Fix>
+		</Mass>
+		<Charge>0</Charge>
+		<Spin>0.0</Spin>
+		<Parity>-1</Parity>
+		<DecayInfo Type='relativisticBreitWigner'>
+			<FormFactor type='1' />
+			<Width Name='width_phi'>
+				<Value>0.004266</Value>
+				<Error>0.000031</Error>
+				<Fix>true</Fix>
+			</Width>
+			<MesonRadius Name='radius_phi'>
+				<Value>1.5</Value>
+				<Fix>true</Fix>
+				<Min>1.0</Min>
+				<Max>2.0</Max>
+			</MesonRadius>
+		</DecayInfo>
+	</Particle>
+	<Particle Name='something'>
+		<Pid>123456</Pid>
+		<Mass Name='mass_something'>
+			<Value>1.024654338170585</Value>
+			<Fix>true</Fix>
+		</Mass>
+		<Charge>0</Charge>
+		<Spin>0.0</Spin>
+		<Parity>-1</Parity>
+		<DecayInfo Type='relativisticBreitWigner'>
+			<FormFactor type='1' />
+			<Width Name='width_something'>
+				<Value>0.01909658663476588</Value>
+				<Fix>true</Fix>
+			</Width>
+			<MesonRadius Name='radius_something'>
+				<Value>1.5</Value>
+				<Fix>true</Fix>
+			</MesonRadius>
+		</DecayInfo>
+	</Particle>
+	<Particle Name='a2(1320)-'>
+		<Pid>215</Pid>
+		<Mass Name='mass_a2(1320)'>
+			<Value>1.3181</Value>
+			<Fix>true</Fix>
+		</Mass>
+		<Charge>0</Charge>
+		<Spin>2.0</Spin>
+		<Parity>+1</Parity>
+		<Cparity>+1</Cparity>
+		<DecayInfo Type='relativisticBreitWigner'>
+			<FormFactor type='1' />
+			<Width Name='width_a2(1320)'>
+				<Value>0.1098</Value>
+				<Fix>true</Fix>
+			</Width>
+			<MesonRadius Name='radius_a2(1320)'>
+				<Value>1.5</Value>
+				<Fix>true</Fix>
+			</MesonRadius>
+		</DecayInfo>
+	</Particle>
+
+</ParticleList>
+
+<HelicityKinematics>
+	<PhspVolume>0.123</PhspVolume>
+	<InitialState>
+		<Particle Name='jpsi' Id='0'/>
+	</InitialState>
+	<FinalState>
+		<Particle Name='pi0' Id='0'/>
+		<Particle Name='gamma' Id='1'/>
+		<Particle Name='pi0' Id='2'/>
+	</FinalState>
+</HelicityKinematics>
+
+<IncoherentIntensity Name='jpsiToPi0Pi0Gamma_inc'>
+	<Strength Name="Strength_jpsiToPi0Pi0Gamm_inc">
+		<Value>1</Value>
+		<Fix>true</Fix>
+	</Strength>
+	<CoherentIntensity Name='jpsiToPi0Pi0Gamma'>
+		<Strength Name='Strength_jpsiToPi0Pi0Gamma'>
+			<Value>0.99</Value>
+			<Fix>true</Fix>
+		</Strength>
+		<Amplitude Name='omega'>
+			<Magnitude Name='Magnitude_omegaToPi0Gamma'>
+				<Value>1.0</Value>
+				<Fix>true</Fix>
+			</Magnitude>
+			<Phase Name='Phase_omegaToPi0Gamma'>
+				<Value>0.0</Value>
+				<Fix>true</Fix>
+			</Phase>
+			<Resonance Name='jpsitoOmegaPi0'>
+				<Magnitude Name='Magnitude_jpsitoOmegaPi0'>
+					<Value>1.0</Value>
+					<Fix>true</Fix>
+					<Min>0.5</Min>
+					<Max>1.5</Max>
+					<Error>0</Error>
+				</Magnitude>
+				<Phase Name='Phase_jpsitoOmegaPi0'>
+					<Value>1.0</Value>
+					<Fix>true</Fix>
+					<Min>0.5</Min>
+					<Max>1.5</Max>
+					<Error>0</Error>
+				</Phase>
+				<DecayParticle Name='jpsi' Helicity='+1' />
+				<DecayProducts>
+					<Particle Name='omega' FinalState='0 1' Helicity='+1' />
+					<Particle Name='pi0' FinalState='2' Helicity='0' />
+				</DecayProducts>
+			</Resonance>
+			<Resonance Name="omegatoPi0G">
+				<Magnitude Name='Magnitude_omegaToPi0Gamma'>
+					<Value>1.0</Value>
+					<Fix>true</Fix>
+					<Min>0.5</Min>
+					<Max>1.5</Max>
+					<Error>0</Error>
+				</Magnitude>
+				<Phase Name='Phase_omegaToPi0Gamma'>
+					<Value>1.0</Value>
+					<Fix>true</Fix>
+					<Min>0.5</Min>
+					<Max>1.5</Max>
+					<Error>0</Error>
+				</Phase>
+				<DecayParticle Name='omega' Helicity='+1' />
+				<RecoilSystem FinalState='2' />
+				<DecayProducts>
+					<Particle Name='gamma' FinalState='1' Helicity='+1' />
+					<Particle Name='pi0' FinalState='0' Helicity='0' />
+				</DecayProducts>
+			</Resonance>
+		</Amplitude>
+	</CoherentIntensity>
+</IncoherentIntensity>

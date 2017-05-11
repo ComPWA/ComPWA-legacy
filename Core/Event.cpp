@@ -27,23 +27,19 @@ Event::Event(const double inWeight, const std::string &name = "",
     : fWeight(inWeight), fEff(inEff), fName(name), fFlavour(0), fCharge(0) {}
 
 Event::Event(const Event &in)
-    : fParticles(in.fParticles), fWeight(in.getWeight()),
-      fEff(in.getEfficiency()), fName(in.getName()), fFlavour(in.getFlavour()),
-      fCharge(in.getCharge()) {}
+    : fParticles(in.fParticles), fWeight(in.GetWeight()),
+      fEff(in.GetEfficiency()), fName(in.GetName()), fFlavour(in.GetFlavour()),
+      fCharge(in.GetCharge()) {}
 
-void Event::addParticle(Particle inParticle) {
+void Event::AddParticle(Particle inParticle) {
   fParticles.push_back(inParticle);
-}
-
-void Event::setParticleAt(const Particle &particle, unsigned int index) {
-  fParticles[index] = particle;
 }
 
 Event::~Event() { /* nothing */
 }
 
-const Particle &Event::getParticle(const unsigned int id) const {
-  if (id >= getNParticles()) {
+const Particle& Event::GetParticle(const unsigned int id) const {
+  if (id >= GetNParticles()) {
     throw std::runtime_error(
         "Event::getParticle() | Particle id does not match!");
   }

@@ -20,7 +20,6 @@
 #include "Core/Parameter.hpp"
 #include "Core/ParameterList.hpp"
 #include "DataReader/Data.hpp"
-#include "Core/Amplitude.hpp"
 
 #include "Core/Dictionary.hpp"
 
@@ -43,7 +42,7 @@ std::string Dictionary::introduce(std::shared_ptr<DataReader::Data> inData,
   return inName;
 }
 
-std::string Dictionary::introduce(std::shared_ptr<Amplitude> inAmp,
+std::string Dictionary::introduce(std::shared_ptr<AmpIntensity> inAmp,
                                   std::string inName) {
   if (inName == "" || amplitudeNameUsed(inName)) {
     inName = "test"; // TODO: Generate new name, check available

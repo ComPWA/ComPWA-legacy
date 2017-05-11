@@ -68,7 +68,10 @@ public:
   virtual ~AbsParameter() {}
 
   //! Getter for name of object
-  virtual const std::string &GetName() const { return name_; }
+  virtual std::string GetName() const { return name_; }
+  
+  //! Getter for name of object
+  virtual void SetName( std::string n ) { name_ = n; }
 
   //! Getter for type of object
   virtual ParType type() const { return type_; }

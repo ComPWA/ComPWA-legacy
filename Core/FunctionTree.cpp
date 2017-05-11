@@ -29,7 +29,14 @@ void FunctionTree::insertNode(std::shared_ptr<TreeNode> inNode,
                          inNode->getName() + "!");
 
   // Assign new parent to head of new tree, create links
-  std::shared_ptr<TreeNode> parentNode = nodes_.at(parent);
+  std::shared_ptr<TreeNode> parentNode;
+  try {
+    parentNode = nodes_.at(parent);
+  } catch (std::out_of_range &ex) {
+    LOG(error) << "FunctionTree::insertNode() | Parent node " << parent
+               << " not found in FunctionTree!";
+    throw;
+  }
 
   /* In case of an existing node, it is possible that this node
    * already have parents. Do need to consider this here? */
@@ -44,10 +51,8 @@ void FunctionTree::addChildNodes(std::shared_ptr<TreeNode> startNode) {
   std::vector<std::shared_ptr<TreeNode>> newChildren = startNode->getChildren();
 
   for (unsigned int i = 0; i < newChildren.size(); i++) {
-    bool ret = nodes_
-                   .insert(std::pair<std::string, std::shared_ptr<TreeNode>>(
-                       newChildren.at(i)->getName(), newChildren.at(i)))
-                   .second;
+    nodes_.insert(std::pair<std::string, std::shared_ptr<TreeNode>>(
+        newChildren.at(i)->getName(), newChildren.at(i)));
     //        if( !ret )
     //            throw TreeBuildError("FunctionTree::addChildNodes | "
     //                                 "Can not insert node
@@ -204,6 +209,46 @@ void FunctionTree::createLeaf(const std::string name, const double extPar,
   std::shared_ptr<TreeNode> leaf;
   std::shared_ptr<DoubleParameter> staticVal(
       new DoubleParameter("ParOfNode_" + name, extPar));
+
+  // check if Leaf already exists
+  bool exists = true;
+  if (nodes_.find(name) == nodes_.end()) {
+    exists = false;
+  } else {
+    leaf = nodes_.at(name);
+  }
+
+  // setup connections
+  if (exists) {
+    leaf->addParent(parentNode);
+    // TODO: check if also static?
+  } else {
+    leaf = std::shared_ptr<TreeNode>(
+        new TreeNode(name, staticVal, std::shared_ptr<Strategy>(), parentNode));
+    nodes_.insert(
+        std::pair<std::string, std::shared_ptr<TreeNode>>(name, leaf));
+    leaf->linkParents();
+    if (parent == "")
+      head_ = leaf; // if we created a head redirect pointer
+  }
+}
+
+void FunctionTree::createLeaf(const std::string name,
+                              const std::complex<double> extPar,
+                              std::string parent) {
+  if (parent == "" && head_)
+    throw std::runtime_error("FunctionTree::createNode() | "
+                             "Head node already exists!");
+
+  std::shared_ptr<TreeNode> parentNode;
+  if (parent == "") // is this a head node?
+    parentNode = std::shared_ptr<TreeNode>();
+  else
+    parentNode = nodes_.at(parent);
+  //		std::shared_ptr<TreeNode> parentNode = nodes_.at(parent);
+  std::shared_ptr<TreeNode> leaf;
+  std::shared_ptr<ComplexParameter> staticVal(
+      new ComplexParameter("ParOfNode_" + name, extPar));
 
   // check if Leaf already exists
   bool exists = true;

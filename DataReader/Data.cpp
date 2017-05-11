@@ -13,19 +13,19 @@ void rndReduceSet(unsigned int size, std::shared_ptr<Generator> gen, Data *in1,
     throw std::runtime_error("rndSubSet() | No input data set!");
   if (!out1)
     throw std::runtime_error("rndSubSet() | No output data set!");
-  if (out1->getNEvents())
+  if (out1->GetNEvents())
     throw std::runtime_error("rndSubSet() | First output sample not empty!");
   if (in2) {
-    if (in1->getNEvents() != in2->getNEvents())
+    if (in1->GetNEvents() != in2->GetNEvents())
       throw std::runtime_error(
           "rndSubSet() | Samples have different event count!");
     if (!out2)
       throw std::runtime_error("rndSubSet() | Second output set is NULL!");
-    if (out2->getNEvents())
+    if (out2->GetNEvents())
       throw std::runtime_error("rndSubSet() | Second output sample not empty!");
   }
 
-  unsigned int totalSize = in1->getNEvents();
+  unsigned int totalSize = in1->GetNEvents();
   unsigned int newSize = totalSize;
   /* 1th method: new Sample has exact size, but possibly events are added twice.
    * We would have to store all used events in a vector and search the vector at
@@ -44,7 +44,7 @@ void rndReduceSet(unsigned int size, std::shared_ptr<Generator> gen, Data *in1,
        i++) { // count how many events are not within PHSP
     dataPoint point;
     try {
-      point = dataPoint(in1->getEvent(i));
+      point = dataPoint(in1->GetEvent(i));
     } catch (BeyondPhsp &ex) { // event outside phase, remove
       newSize--;
       continue;
@@ -56,45 +56,45 @@ void rndReduceSet(unsigned int size, std::shared_ptr<Generator> gen, Data *in1,
   for (unsigned int i = 0; i < totalSize; i++) {
     dataPoint point;
     try {
-      point = dataPoint(in1->getEvent(i));
+      point = dataPoint(in1->GetEvent(i));
     } catch (BeyondPhsp &ex) { // event outside phase, remove
       continue;
     }
     //		dataPoint point(in1->getEvent(i)); //use first sample for
     //hit&miss
     //		if(!Kinematics::instance()->isWithinPhsp(point)) continue;
-    if (gen->getUniform() < threshold) {
-      out1->pushEvent(in1->getEvent(i));
+    if (gen->GetUniform(0,1) < threshold) {
+      out1->PushEvent(in1->GetEvent(i));
       // write second sample if event from first sample were accepted
       if (in2)
-        out2->pushEvent(in2->getEvent(i));
+        out2->PushEvent(in2->GetEvent(i));
     }
   }
   if (out2)
-    assert(out1->getNEvents() == out2->getNEvents());
+    assert(out1->GetNEvents() == out2->GetNEvents());
 
   LOG(debug) << "DataReader::rndReduceSet() | sample size reduced to "
-             << out1->getNEvents();
+             << out1->GetNEvents();
   return;
 }
 
-std::shared_ptr<Data> Data::rndSubSet(unsigned int size,
+std::shared_ptr<Data> Data::RndSubSet(unsigned int size,
                                       std::shared_ptr<Generator> gen) {
   std::shared_ptr<Data> out(this->EmptyClone());
   rndReduceSet(size, gen, this, out.get());
   return out;
 }
 
-void Data::resetWeights(double w) {
+void Data::ResetWeights(double w) {
   for (unsigned int i = 0; i < fEvents.size(); i++)
-    fEvents.at(i).setWeight(w);
+    fEvents.at(i).SetWeight(w);
   maxWeight = w;
   return;
 }
 
-double Data::getMaxWeight() const { return maxWeight; }
+double Data::GetMaxWeight() const { return maxWeight; }
 
-void Data::reduceToPhsp() {
+void Data::ReduceToPhsp() {
   std::vector<Event> tmp;
   LOG(info) << "Data::reduceToPhsp() | "
                "Remove all events outside PHSP boundary from data sample.";
@@ -115,12 +115,12 @@ void Data::reduceToPhsp() {
   fEvents = tmp;
   return;
 }
-void Data::resetEfficiency(double e) {
+void Data::ResetEfficiency(double e) {
   for (unsigned int evt = 0; evt < fEvents.size(); evt++) {
-    fEvents.at(evt).setEfficiency(e);
+    fEvents.at(evt).SetEfficiency(e);
   }
 }
-void Data::reduce(unsigned int newSize) {
+void Data::Reduce(unsigned int newSize) {
   if (newSize >= fEvents.size()) {
     LOG(error)
         << "RooReader::reduce() requested size too large, cant reduce sample!";
@@ -129,7 +129,7 @@ void Data::reduce(unsigned int newSize) {
   fEvents.resize(newSize);
 }
 
-void Data::setEfficiency(std::shared_ptr<Efficiency> eff) {
+void Data::SetEfficiency(std::shared_ptr<Efficiency> eff) {
   for (unsigned int evt = 0; evt < fEvents.size(); evt++) {
     dataPoint point;
     try {
@@ -138,16 +138,16 @@ void Data::setEfficiency(std::shared_ptr<Efficiency> eff) {
       continue;
     }
     //		dataPoint point(fEvents.at(evt));
-    double val = eff->evaluate(point);
-    fEvents.at(evt).setEfficiency(val);
+    double val = eff->Evaluate(point);
+    fEvents.at(evt).SetEfficiency(val);
   }
 }
 void Data::Clear() { fEvents.clear(); }
 
-bool Data::hasWeights() {
+bool Data::HasWeights() {
   bool has = 0;
   for (unsigned int evt = 0; evt < fEvents.size(); evt++) {
-    if (fEvents.at(evt).getWeight() != 1.) {
+    if (fEvents.at(evt).GetWeight() != 1.) {
       has = 1;
       break;
     }
@@ -155,12 +155,12 @@ bool Data::hasWeights() {
   return has;
 }
 
-const ParameterList &Data::getListOfData() {
+const ParameterList &Data::GetListOfData() {
   // dataList already filled? return filled one
   if (dataList.GetNParameter() != 0)
     return dataList;
 
-  int size = Kinematics::instance()->GetNVars();
+  int size = Kinematics::Instance()->GetNVars();
   std::vector<std::vector<double>> data(size, std::vector<double>());
   std::vector<double> eff;
   eff.reserve(fEvents.size());
@@ -175,16 +175,18 @@ const ParameterList &Data::getListOfData() {
     } catch (BeyondPhsp &ex) {
       continue;
     }
-    eff.push_back(point.getEfficiency());
+    eff.push_back(point.GetEfficiency());
     weight.push_back(point.getWeight());
     for (int i = 0; i < size; ++i)
-      data.at(i).push_back(point.getVal(i));
+      data.at(i).push_back(point.GetValue(i));
   }
 
   // Add data vector to ParameterList
   for (int i = 0; i < size; ++i) {
+    //std::shared_ptr<MultiDouble> tmp(new MultiDouble(
+    //  Kinematics::instance()->GetVarNames().at(i), data.at(i)));
     std::shared_ptr<MultiDouble> tmp(new MultiDouble(
-        Kinematics::instance()->GetVarNames().at(i), data.at(i)));
+        "", data.at(i)));
     dataList.AddParameter(tmp);
   }
 
@@ -199,7 +201,7 @@ const ParameterList &Data::getListOfData() {
   return dataList;
 }
 
-std::vector<dataPoint> Data::getDataPoints() const {
+std::vector<dataPoint> Data::GetDataPoints() const {
   std::vector<dataPoint> vecPoint;
   for (int i = 0; i < fEvents.size(); i++) {
     dataPoint point;
@@ -213,20 +215,20 @@ std::vector<dataPoint> Data::getDataPoints() const {
   return vecPoint;
 }
 
-void Data::setResolution(std::shared_ptr<Resolution> res) {
+void Data::SetResolution(std::shared_ptr<Resolution> res) {
   for (int i = 0; i < fEvents.size(); i++)
     res->resolution(fEvents.at(i));
 }
 
 void Data::Add(Data &otherSample) {
-  std::vector<Event> otherEvents = otherSample.getEvents();
+  std::vector<Event> otherEvents = otherSample.GetEvents();
   fEvents.insert(fEvents.end(), otherEvents.begin(), otherEvents.end());
-  if (otherSample.getMaxWeight() > maxWeight)
-    maxWeight = otherSample.getMaxWeight();
+  if (otherSample.GetMaxWeight() > maxWeight)
+    maxWeight = otherSample.GetMaxWeight();
   return;
 }
 
-void Data::applyCorrection(DataCorrection &corr) {
+void Data::ApplyCorrection(DataCorrection &corr) {
   double sumWeightSq = 0;
   for (int i = 0; i < fEvents.size(); i++) {
     double w = corr.getCorrection(fEvents.at(i));
@@ -234,10 +236,10 @@ void Data::applyCorrection(DataCorrection &corr) {
       throw std::runtime_error("Data::applyCorrection() | "
                                "Negative weight!");
     sumWeightSq += w * w;
-    double oldW = fEvents.at(i).getWeight();
+    double oldW = fEvents.at(i).GetWeight();
     if (w * oldW > maxWeight)
       maxWeight = w * oldW;
-    fEvents.at(i).setWeight(w * oldW);
+    fEvents.at(i).SetWeight(w * oldW);
   }
   LOG(info) << "Data::applyCorrection() | "
                "Sample corrected! Sum of weights squared is "
@@ -245,7 +247,7 @@ void Data::applyCorrection(DataCorrection &corr) {
   return;
 }
 
-const int Data::getBin(const int i, double &m12, double &weight) {
+const int Data::GetBin(const int i, double &m12, double &weight) {
   if (!fBinned)
     return -1;
 
@@ -256,10 +258,10 @@ const int Data::getBin(const int i, double &m12, double &weight) {
 }
 
 //! Add event to data sample
-void Data::pushEvent(const Event &evt) {
+void Data::PushEvent(const Event &evt) {
   fEvents.push_back(evt);
-  if (evt.getWeight() > maxWeight)
-    maxWeight = evt.getWeight();
+  if (evt.GetWeight() > maxWeight)
+    maxWeight = evt.GetWeight();
 }
     
 } /* namespace DataReader */

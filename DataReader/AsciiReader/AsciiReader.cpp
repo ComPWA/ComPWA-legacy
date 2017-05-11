@@ -48,7 +48,7 @@ AsciiReader::AsciiReader(const std::string inConfigFile, const int particles) {
 
     for (int parts = 0; parts < particles; parts++) {
       currentStream >> px >> py >> pz >> e;
-      newEvent.addParticle(Particle(px, py, pz, e));
+      newEvent.AddParticle(Particle(px, py, pz, e));
     }
 
     if (!currentStream.fail()) {

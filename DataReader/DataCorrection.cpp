@@ -1,5 +1,4 @@
- 
-            /*
+ /*
  * DataCorrection.cpp
  *
  *  Created on: Aug 27, 2015
@@ -14,7 +13,7 @@ namespace ComPWA {
 MomentumCorrection::MomentumCorrection(std::vector<CorrectionTable> inCorr,
                                        std::string t)
     : corrections(inCorr), title(t) {
-  if (corrections.size() != Kinematics::instance()->GetNumberOfParticles())
+  if (corrections.size() != Kinematics::Instance()->GetFinalState().size() )
     throw std::runtime_error(
         "RootCorrection::RootCorrection() | Number of histograms is "
         "expected to be number of final state particles!");
@@ -22,10 +21,10 @@ MomentumCorrection::MomentumCorrection(std::vector<CorrectionTable> inCorr,
 
 double MomentumCorrection::getCorrection(Event &ev) {
   double w = 1;
-  for (int i = 0; i < ev.getNParticles(); i++) {
-    Particle p = ev.getParticle(i);
-    int charge = p.getCharge();
-    double mom = p.getThreeMomentum();
+  for (int i = 0; i < ev.GetNParticles(); i++) {
+    Particle p = ev.GetParticle(i);
+    int charge = p.GetCharge();
+    double mom = p.GetThreeMomentum();
     double corr;
     try {
       corr = corrections.at(i).GetValue(charge, mom) + 1;

@@ -30,9 +30,7 @@ public:
 
   virtual ~Efficiency();
 
-  virtual double evaluate(std::vector<double> x) = 0;
-
-  virtual double evaluate(const dataPoint &point) = 0;
+  virtual double Evaluate(const dataPoint &point) const = 0;
 };
 
 /**
@@ -43,10 +41,9 @@ public:
 class UnitEfficiency : public Efficiency {
 private:
 public:
-  UnitEfficiency() { LOG(info) << "Efficiency: creating UnitEfficiency!"; };
+  UnitEfficiency() { LOG(debug) << "Efficiency: creating UnitEfficiency!"; };
   ~UnitEfficiency(){};
-  virtual double evaluate(std::vector<double> x) { return 1; };
-  virtual double evaluate(const dataPoint &point) { return 1; };
+  virtual double Evaluate(const dataPoint &point) const { return 1; };
 };
 
 } /* namespace ComPWA */

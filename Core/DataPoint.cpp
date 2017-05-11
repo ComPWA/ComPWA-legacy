@@ -13,101 +13,41 @@
 #include "Core/Exceptions.hpp"
 #include "Core/Kinematics.hpp"
 #include "Core/DataPoint.hpp"
+
 namespace ComPWA {
 
-void dataPoint::init() {
-  var = std::vector<double>(Kinematics::instance()->GetNVars(), 0);
-}
-
-dataPoint::dataPoint(int a, int b, double invMassSqA, double invMassSqB)
-    : weight(1.0), eff(1.0) {
-  init();
-  Set(a, b, invMassSqA, invMassSqB);
-}
-
-void dataPoint::Set(int a, int b, double invMassSqA, double invMassSqB) {
-  Kinematics::instance()->FillDataPoint(a, b, invMassSqA, invMassSqB, *this);
-  return;
-}
-
 dataPoint::dataPoint(std::vector<double> vec) : weight(1.), eff(1.) {
-  init();
-  if (Kinematics::instance()->GetNVars() != vec.size())
+  if (Kinematics::Instance()->GetNVars() != vec.size())
     throw std::runtime_error("dataPoint::dataPoint() vector has wrong length!");
   var = vec;
   return;
 }
 
 dataPoint::dataPoint(const Event &ev) : weight(1.), eff(1.) {
-  init();
-  Kinematics::instance()->EventToDataPoint(ev, *this);
-  weight = ev.getWeight();
+  Kinematics::Instance()->EventToDataPoint(ev, *this);
+  weight = ev.GetWeight();
   return;
 }
 
 dataPoint::dataPoint() : weight(1.), eff(1.) {
-  init();
   return;
 }
 
-unsigned int dataPoint::getID(std::string name) const {
-  std::vector<std::string> varNames = Kinematics::instance()->GetVarNames();
-  unsigned int size = varNames.size();
-  unsigned int pos =
-      find(varNames.begin(), varNames.end(), name) - varNames.begin();
-  if (pos > size - 1) {
-    LOG(error) << "dataPoint::getVal() | "
-                  "Variable with name "
-               << name << " not found!";
-    return 999;
-  }
-  return pos;
-}
+void dataPoint::Reset(unsigned int size) { var = std::vector<double>(size); }
 
-double dataPoint::getVal(std::string name) const {
-  std::vector<std::string> varNames = Kinematics::instance()->GetVarNames();
-  unsigned int size = varNames.size();
-  unsigned int pos =
-      find(varNames.begin(), varNames.end(), name) - varNames.begin();
-  if (pos > size - 1) {
-    LOG(error) << "dataPoint::getVal() | "
-                  "Variable with name "
-               << name << " not found!";
-    return -999;
-  }
-  return getVal(pos);
-}
-
-void dataPoint::setVal(std::string name, double val) {
-  std::vector<std::string> varNames = Kinematics::instance()->GetVarNames();
-  unsigned int size = varNames.size();
-  unsigned int pos =
-      find(varNames.begin(), varNames.end(), name) - varNames.begin();
-  if (pos > size - 1) {
-    LOG(error) << "dataPoint::setVal() | "
-                  "Variable with name "
-               << name << " not found!";
-    return;
-  }
-  setVal(pos, val);
-  return;
-}
-
-void dataPoint::reset(unsigned int size) { var = std::vector<double>(size); }
-
-void dataPoint::setVal(unsigned int num, double val) {
+void dataPoint::SetValue(unsigned int pos, double val) {
   try {
-    var.at(num) = val;
+    var.at(pos) = val;
   } catch (...) {
     LOG(error) << "dataPoint::setVal() | "
                   "Can not access index "
-               << num << "!";
+               << pos << "!";
     throw;
   }
   return;
 }
 
-double dataPoint::getVal(unsigned int num) const {
+double dataPoint::GetValue(unsigned int num) const {
   double rt;
 
   try {
@@ -121,17 +61,22 @@ double dataPoint::getVal(unsigned int num) const {
   return rt;
 }
 
-void dataPoint::setPoint(std::vector<double> values) {
-  if (Kinematics::instance()->GetNVars() != values.size())
+void dataPoint::SetPoint(std::vector<double> values) {
+  if (Kinematics::Instance()->GetNVars() != values.size())
     throw std::runtime_error("dataPoint::setPoint() vector has wrong length!");
   var = std::vector<double>(values);
   return;
 }
 
 std::ostream &operator<<(std::ostream &os, const dataPoint &p) {
-  std::vector<std::string> varNames = Kinematics::instance()->GetVarNames();
-  for (int i = 0; i < varNames.size(); i++)
-    os << varNames.at(i) << "=" << p.getVal(i) << " ";
+  os << "(";
+  for (int i = 0; i < p.Size(); i++){
+    os << p.GetValue(i);
+  if( i == p.Size()-1 )
+    os << ")";
+  else 
+    os << ", ";
+  }
   return os;
 }
 
