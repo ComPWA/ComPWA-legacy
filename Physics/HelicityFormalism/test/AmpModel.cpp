@@ -81,6 +81,7 @@ BOOST_AUTO_TEST_CASE(ConstructionFromXML) {
   boost::property_tree::xml_parser::write_xml(
       "AmpModel-output.xml", ptout, std::locale());
 
+  std::remove("AmpModel-output.xml"); // delete file
   // Compile error for some boost/compiler versions
   //  boost::property_tree::xml_parser::write_xml(
   //      "../HelicityFormalismTest-output.xml", ptout, std::locale(),
