@@ -14,7 +14,10 @@ target_include_directories( Core
   PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
-install (FILES ${lib_headers} DESTINATION include/ComPWA)
+install(FILES ${lib_headers} DESTINATION include/ComPWA)
+install(TARGETS Core
+        LIBRARY DESTINATION lib
+)
 
 # ------ TESTING ----- #
 #Testing routines are stored in separate directory
@@ -28,6 +31,9 @@ foreach(testSrc ${TEST_SRCS})
 
   #Add compile target
   add_executable( ${testName} ${testSrc})
+  #install(TARGETS ${testName}
+  #  RUNTIME DESTINATION bin
+  #)
 
   #link to Boost libraries AND your targets and dependencies
   target_link_libraries( ${testName}

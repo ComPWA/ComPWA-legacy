@@ -23,6 +23,9 @@ target_include_directories( Minuit2IF
 )
 
 install (FILES ${lib_headers} DESTINATION include/ComPWA)
+install(TARGETS Minuit2IF
+        LIBRARY DESTINATION lib
+)
 
 # ------ TESTING ----- #
 #Testing routines are stored in separate directory
@@ -36,6 +39,9 @@ foreach(testSrc ${TEST_SRCS})
 
   #Add compile target
   add_executable( ${testName} ${testSrc})
+  #install(TARGETS ${testName}
+  #  RUNTIME DESTINATION bin
+  #)
 
   #link to Boost libraries AND your targets and dependencies
   target_link_libraries( ${testName}

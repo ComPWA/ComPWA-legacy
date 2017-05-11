@@ -14,3 +14,6 @@ target_include_directories( AsciiReader
 )
 
 install (FILES ${lib_headers} DESTINATION include/ComPWA)
+install(TARGETS AsciiReader
+        LIBRARY DESTINATION lib
+)

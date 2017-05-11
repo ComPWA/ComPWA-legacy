@@ -22,3 +22,7 @@ target_link_libraries( DalitzFitD03K
 target_include_directories( DalitzFitD03K
   PUBLIC ${ROOT_INCLUDE_DIR} ${Boost_INCLUDE_DIR}
 )
+
+install(TARGETS DalitzFitD03K
+  RUNTIME DESTINATION bin
+)
