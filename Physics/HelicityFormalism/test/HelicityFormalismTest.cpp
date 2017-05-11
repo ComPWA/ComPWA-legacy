@@ -81,8 +81,7 @@ BOOST_AUTO_TEST_CASE(ConstructionFromXML) {
   // each line.
   boost::property_tree::xml_parser::write_xml(
       "../HelicityFormalismTest-output.xml", ptout, std::locale(),
-      boost::property_tree::xml_writer_make_settings<std::string>(' ', 4,
-                                                                  "utf-8"));
+      boost::property_tree::xml_writer_make_settings<std::string>(' ', 4));
 };
 
 BOOST_AUTO_TEST_CASE(AmpTreeCorrespondence) {
