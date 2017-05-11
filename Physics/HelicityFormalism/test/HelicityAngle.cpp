@@ -40,7 +40,7 @@ BOOST_AUTO_TEST_CASE(HelicityAngleTest) {
 
   // Construct HelicityKinematics from XML tree
   boost::property_tree::ptree tr;
-  boost::property_tree::xml_parser::read_xml("../HelicityFormalismTest-input.xml",
+  boost::property_tree::xml_parser::read_xml("AmpModel-input.xml",
                                              tr);
 
   ComPWA::PhysConst::CreateInstance(tr);

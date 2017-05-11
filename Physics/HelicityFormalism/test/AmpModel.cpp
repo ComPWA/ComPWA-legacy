@@ -37,7 +37,7 @@ BOOST_AUTO_TEST_CASE(KinematicsConstructionFromXML) {
   // Construct HelicityKinematics from XML tree
   boost::property_tree::ptree tr;
   boost::property_tree::xml_parser::read_xml(
-      "../HelicityFormalismTest-input.xml", tr);
+      "AmpModel-input.xml", tr);
 
   ComPWA::PhysConst::CreateInstance(tr);
   HelicityKinematics::CreateInstance(tr.get_child("HelicityKinematics"));
@@ -51,7 +51,7 @@ BOOST_AUTO_TEST_CASE(KinematicsConstructionFromXML) {
 BOOST_AUTO_TEST_CASE(ConstructionFromXML) {
   boost::property_tree::ptree tr;
   boost::property_tree::xml_parser::read_xml(
-      "../HelicityFormalismTest-input.xml", tr);
+      "AmpModel-input.xml", tr);
 
   // Due to the structure of Boost.UnitTest the instances already exist from
   // previous test
@@ -79,8 +79,9 @@ BOOST_AUTO_TEST_CASE(ConstructionFromXML) {
   // Write the property tree to the XML file. Add a line break at the end of
   // each line.
   boost::property_tree::xml_parser::write_xml(
-      "../HelicityFormalismTest-output.xml", ptout, std::locale());
+      "AmpModel-output.xml", ptout, std::locale());
 
+  std::remove("AmpModel-output.xml"); // delete file
   // Compile error for some boost/compiler versions
   //  boost::property_tree::xml_parser::write_xml(
   //      "../HelicityFormalismTest-output.xml", ptout, std::locale(),
@@ -91,7 +92,7 @@ BOOST_AUTO_TEST_CASE(ConstructionFromXML) {
 BOOST_AUTO_TEST_CASE(AmpTreeCorrespondence) {
   boost::property_tree::ptree tr;
   boost::property_tree::xml_parser::read_xml(
-      "../HelicityFormalismTest-input.xml", tr);
+      "AmpModel-input.xml", tr);
 
   // Due to the structure of Boost.UnitTest the instances already exist from
   // previous test

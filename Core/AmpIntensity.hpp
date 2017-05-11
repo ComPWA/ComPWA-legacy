@@ -116,7 +116,7 @@ public:
   SetPhspSample(std::shared_ptr<std::vector<ComPWA::dataPoint>> phspSample,
                 std::shared_ptr<std::vector<ComPWA::dataPoint>> toySample) = 0;
 
-  virtual std::shared_ptr<AmpIntensity> GetComponent(std::string name){};
+  virtual std::shared_ptr<AmpIntensity> GetComponent(std::string name) = 0;
   
   virtual void Reset() {};
   //========== FUNCTIONTREE =============
@@ -236,6 +236,10 @@ public:
   SetPhspSample(std::shared_ptr<std::vector<ComPWA::dataPoint>> phspSample,
                 std::shared_ptr<std::vector<ComPWA::dataPoint>> toySample) {}
 
+  virtual std::shared_ptr<AmpIntensity> GetComponent(std::string name) {
+    return std::shared_ptr<AmpIntensity>();
+  }
+  
 protected:
   //! Get integral
   virtual double Integral() const {
@@ -309,6 +313,10 @@ public:
   SetPhspSample(std::shared_ptr<std::vector<ComPWA::dataPoint>> phspSample,
                 std::shared_ptr<std::vector<ComPWA::dataPoint>> toySample) {}
 
+  virtual std::shared_ptr<AmpIntensity> GetComponent(std::string name) {
+    return std::shared_ptr<AmpIntensity>();
+  }
+  
 protected:
   /**Setup Basic Tree
    *

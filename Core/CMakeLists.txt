@@ -2,13 +2,19 @@
 FILE(GLOB lib_srcs *.cpp)
 FILE(GLOB lib_headers *.hpp)
 
-add_library ( ComPWA_Core SHARED ${lib_srcs} ${lib_headers} )
-target_link_libraries( ComPWA_Core ${Boost_LIBRARIES} )
-target_include_directories ( ComPWA_Core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} )
+add_library( Core
+  SHARED ${lib_srcs} ${lib_headers}
+)
 
-#install (TARGETS ComPWA_Core DESTINATION lib/ComPWA)
+target_link_libraries( Core
+  ${Boost_LIBRARIES}
+)
+
+target_include_directories( Core
+  PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
+)
+
 install (FILES ${lib_headers} DESTINATION include/ComPWA)
-
 
 # ------ TESTING ----- #
 #Testing routines are stored in separate directory
@@ -17,21 +23,32 @@ file(GLOB TEST_SRCS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} test/*.cpp)
 #Run through each source
 foreach(testSrc ${TEST_SRCS})
   #Extract the filename without an extension (NAME_WE)
-  get_filename_component(testName ${testSrc} NAME_WE)
+  get_filename_component(fileName ${testSrc} NAME_WE)
+  SET(testName "CoreTest_${fileName}")
 
   #Add compile target
-  add_executable(${testName} ${testSrc})
+  add_executable( ${testName} ${testSrc})
 
   #link to Boost libraries AND your targets and dependencies
-  target_link_libraries( ${testName} ${Boost_LIBRARIES} ComPWA_Core pthread )
+  target_link_libraries( ${testName}
+    Core
+    RootReader
+    ${Boost_LIBRARIES}
+  )
 
   #I like to move testing binaries into a testBin directory
-  set_target_properties(${testName} PROPERTIES
-  RUNTIME_OUTPUT_DIRECTORY  ${EXECUTABLE_OUTPUT_PATH}/testBin)
+  set_target_properties( ${testName}
+    PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${EXECUTABLE_OUTPUT_PATH}/testBin
+  )
+  set_target_properties( ${testName}
+    PROPERTIES PREFIX ""
+  )
 
   # Copy input files for test programs - we assume they have the name
   # ${testName}-input*. Multiple files can be copied.
-  file(GLOB TestInput RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} test/${testName}-input*)
+  file(GLOB TestInput
+    RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} test/${fileName}-input*
+  )
   foreach( TestIn ${TestInput} )
     get_filename_component( TestInName ${TestIn} NAME )
 
@@ -71,7 +88,7 @@ endforeach(testSrc)
 #IF(PYTHONLIBS_FOUND)
     # Define the wrapper library that wraps our library
 #    add_library( Core_ext SHARED Core_ext.cpp )
-#    target_link_libraries( Core_ext ${Boost_LIBRARIES} ComPWA_Core )
+#    target_link_libraries( Core_ext ${Boost_LIBRARIES} Core )
     # don't prepend wrapper library name with lib
 #    set_target_properties( Core_ext PROPERTIES PREFIX "" )
 #ENDIF()

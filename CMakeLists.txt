@@ -35,6 +35,8 @@ INCLUDE_DIRECTORIES(${COMPWA_SOURCE_DIR})
 #Setup CMake to run tests
 enable_testing()
 
+set( CMAKE_SHARED_LIBRARY_PREFIX "libComPWA_" )
+
 add_definitions(-DBOOST_LOG_DYN_LINK)
 add_definitions(-DBOOST_TEST_DYN_LINK)
 add_definitions(-DBOOST_SERIALIZATION_DYN_LINK)
@@ -46,6 +48,7 @@ add_subdirectory (Estimator)
 add_subdirectory (Optimizer)
 add_subdirectory (Physics)
 add_subdirectory (Tools)
+add_subdirectory (Examples)
 add_subdirectory (executables)
 
 # add a target to generate API documentation with Doxygen

@@ -62,6 +62,8 @@ public:
 
   friend std::ostream &operator<<(std::ostream &stream, const Event &ev);
 
+  virtual double GetCMSEnergy() const ;
+
   virtual void Clear() {
     fParticles.clear();
     fWeight = 1.0;

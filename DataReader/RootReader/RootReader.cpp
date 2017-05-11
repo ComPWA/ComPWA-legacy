@@ -1,7 +1,6 @@
- 
-                                                                                                                                   
-    
-  //-------------------------------------------------------------------------------
+
+
+//-------------------------------------------------------------------------------
 // Copyright (c) 2013 Mathias Michel.
 //
 // This file is part of ComPWA
@@ -140,14 +139,13 @@ void RootReader::WriteData(std::string file, std::string trName) {
                "vector of events to file "
             << fileName;
 
-  TFile *fFile = new TFile(fileName.c_str(), "UPDATE");
+  TFile *fFile = new TFile(fileName.c_str(), "RECREATE");
   if (fFile->IsZombie())
-    throw std::runtime_error("RootReader::writeData() | "
-                             "Can't open data file: " +
+    throw std::runtime_error("RootReader::WriteData() | Can't open data file: "+
                              fileName);
 
   fTree = new TTree(treeName.c_str(), treeName.c_str());
-  unsigned int numPart = fEvents[0].GetNParticles();
+  unsigned int numPart = fEvents.at(0).GetNParticles();
   fParticles = new TClonesArray("TParticle", numPart);
   fTree->Branch("Particles", &fParticles);
   fTree->Branch("weight", &feventWeight, "weight/D");
@@ -155,14 +153,7 @@ void RootReader::WriteData(std::string file, std::string trName) {
   fTree->Branch("charge", &fCharge, "charge/I");
   fTree->Branch("flavour", &fFlavour, "flavour/I");
   TClonesArray &partArray = *fParticles;
-  
-  if(Kinematics::Instance()->GetInitialState().size() != 1)
-    throw std::runtime_error("RootReaer::writeData() | More then one initial state particle. No idea what to do!");
-  
-  int pid = Kinematics::Instance()->GetInitialState().at(0);
-  double mass = PhysConst::Instance()->FindParticle(pid).GetMass();
-  TLorentzVector motherMomentum(0, 0, 0, mass );
-  
+
   auto it = fEvents.begin();
   for (; it != fEvents.end(); ++it) {
     fParticles->Clear();
@@ -170,12 +161,14 @@ void RootReader::WriteData(std::string file, std::string trName) {
     fCharge = (*it).GetCharge();
     fFlavour = (*it).GetFlavour();
     feventEff = (*it).GetEfficiency();
+    
+    TLorentzVector motherMomentum(0, 0, 0, (*it).GetCMSEnergy());
     for (unsigned int i = 0; i < numPart; i++) {
       const Particle oldParticle = (*it).GetParticle(i);
-      TLorentzVector oldMomentum(oldParticle.GetPx(), oldParticle.GetPy(), oldParticle.GetPz(),
-                                 oldParticle.GetE());
-      new (partArray[i]) TParticle(oldParticle.GetPid(), 1, 0, 0, 0, 0, oldMomentum,
-                                   motherMomentum);
+      TLorentzVector oldMomentum(oldParticle.GetPx(), oldParticle.GetPy(),
+                                 oldParticle.GetPz(), oldParticle.GetE());
+      new (partArray[i]) TParticle(oldParticle.GetPid(), 1, 0, 0, 0, 0,
+                                   oldMomentum, motherMomentum);
     }
     fTree->Fill();
   }
