@@ -10,7 +10,6 @@
 //-------------------------------------------------------------------------------
 
 /*! \class Spin
- * @file Utility.hpp
  * Basic structures for amplitude calculations
  */
 
