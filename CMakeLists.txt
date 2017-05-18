@@ -12,7 +12,7 @@ set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
 #set the default path for built libraries to the "lib" directory
 set(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib)
 
-#set (CMAKE_CXX_STANDARD 11)
+set (CMAKE_CXX_STANDARD 11)
 
 #using python : 2.7 : /usr/bin : /usr/include/python2.7 : /usr/lib64/python2.7 ;
 #using python : 3.5 : /usr/bin/python3 : /usr/include/python3.5m : /usr/lib64/python3.5 ;
