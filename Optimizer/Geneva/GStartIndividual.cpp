@@ -63,15 +63,15 @@ namespace Gem
 			double max =  1.79768e+307;
 			double err = val;
 			if(p->HasError()) err = p->GetError();
-			if(p->UseBounds()){
+			if(p->HasBounds()){
 				min=p->GetMinValue();
 				max=p->GetMaxValue();
 			}
-			boost::shared_ptr<GConstrainedDoubleObject> gbd_ptr(
+			std::shared_ptr<GConstrainedDoubleObject> gbd_ptr(
 					new GConstrainedDoubleObject(val, min, max) );
 
 			// Create a suitable adaptor (sigma=0.1, sigma-adaption=0.5, min sigma=0, max sigma=0,5)
-			boost::shared_ptr<GDoubleGaussAdaptor> gdga_ptr(new GDoubleGaussAdaptor(
+			std::shared_ptr<GDoubleGaussAdaptor> gdga_ptr(new GDoubleGaussAdaptor(
 					err, 0.5, 0., 3*err));
 			gdga_ptr->setAdaptionThreshold(1); // Adaption parameters are modified after each adaption
 			gdga_ptr->setAdaptionProbability(0.05); // The likelihood for a parameter to be adapted

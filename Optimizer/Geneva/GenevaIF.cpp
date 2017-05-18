@@ -61,8 +61,8 @@ namespace Geneva {
 using namespace Gem::Geneva;
 
 GenevaIF::GenevaIF(std::shared_ptr<ControlParameter> theData, std::string inConfigFileDir)
-  : _myData(theData),configFileDir(inConfigFileDir),parallelizationMode(EXECMODE_SERIAL),
-    serMode(Gem::Common::SERIALIZATIONMODE_BINARY),clientMode(false),ip("localhost"),port(0){
+  : _myData(theData),configFileDir(inConfigFileDir),parallelizationMode(execMode::EXECMODE_SERIAL),
+    serMode(Gem::Common::serializationMode::SERIALIZATIONMODE_BINARY),clientMode(false),ip("localhost"),port(0){
 	BOOST_LOG_TRIVIAL(info) << "GenevaIF::GenevaIF() | "
 			"Starting Geneva interface: config dir="<<configFileDir;
 }
@@ -72,14 +72,14 @@ GenevaIF::~GenevaIF(){
 }
 
 void GenevaIF::setServerMode(){
-  parallelizationMode = Gem::Geneva::EXECMODE_BROKERAGE;
-  serMode = Gem::Common::SERIALIZATIONMODE_BINARY;
+  parallelizationMode = execMode::EXECMODE_BROKERAGE;
+  serMode = Gem::Common::serializationMode::SERIALIZATIONMODE_BINARY;
   clientMode = false;
 }
 
 void GenevaIF::setClientMode(std::string serverip, unsigned int serverport){
-  parallelizationMode = Gem::Geneva::EXECMODE_BROKERAGE;
-  serMode = Gem::Common::SERIALIZATIONMODE_BINARY;
+  parallelizationMode = execMode::EXECMODE_BROKERAGE;
+  serMode = Gem::Common::serializationMode::SERIALIZATIONMODE_BINARY;
   clientMode = true;
   ip = serverip;
   port = serverport;
@@ -98,7 +98,7 @@ std::shared_ptr<FitResult> GenevaIF::exec(ParameterList& par) {
 	  return result;
 	}
 
-	boost::shared_ptr<GStartIndividual> p( new GStartIndividual(_myData, par) );
+	std::shared_ptr<GStartIndividual> p( new GStartIndividual(_myData, par) );
 	go.push_back(p);
 
 	// Add an evolutionary algorithm to the Go2 class.
@@ -106,15 +106,15 @@ std::shared_ptr<FitResult> GenevaIF::exec(ParameterList& par) {
 	go & ea();
 
 	// Perform the actual optimization
-	boost::shared_ptr<GStartIndividual>
+	std::shared_ptr<GStartIndividual>
 		bestIndividual_ptr = go.optimize<GStartIndividual>();
 
 	// Terminate
 	bestIndividual_ptr->getPar(par);
 	result->setResult(bestIndividual_ptr);
-	result->SetAmplitude(_myData->getAmplitudes().at(0));
-	result->setInitialParameters(initialParList);
-	result->setFinalParameters(par);
+	//result->SetAmplitude(_myData->getAmplitudes().at(0));
+	//result->setInitialParameters(initialParList);
+	//result->setFinalParameters(par);
 	//int whattodowiththisidontknow =  go.finalize(); //Go2::finalize();
 
         //write Parameters back
