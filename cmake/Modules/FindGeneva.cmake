@@ -285,7 +285,7 @@ IF (GENEVA_FOUND)
 ENDIF ()
 
 IF (GENEVA_ERROR_REASON)
-	MESSAGE (SEND_ERROR ${GENEVA_ERROR_REASON})
+	MESSAGE (STATUS ${GENEVA_ERROR_REASON})
 ENDIF ()
 
 ###############################################################################

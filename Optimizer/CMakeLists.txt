@@ -2,7 +2,7 @@
 #FILE(GLOB lib_srcs *.cpp)
 #FILE(GLOB lib_headers *.hpp)
 #add_library (ComPWA_Optimizer SHARED ${lib_srcs} ${lib_headers})
-find_package( Geneva QUIET )
+find_package( Geneva )
 
 add_subdirectory(Minuit2)
 IF(GENEVA_FOUND)
