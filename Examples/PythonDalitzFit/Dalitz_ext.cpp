@@ -1,4 +1,4 @@
-#include "executables/Examples/PythonDalitzFit/PythonFit.hpp"
+#include "Examples/PythonDalitzFit/PythonFit.hpp"
 #include <boost/python.hpp>
 
 //using namespace ComPWA;
@@ -18,10 +18,10 @@ BOOST_PYTHON_MODULE(Dalitz_ext)
     //.def("GetNDouble", &ParameterList::GetNDouble)
     ;
 
-    register_ptr_to_python< std::shared_ptr<Data> >();
-    register_ptr_to_python< std::shared_ptr<Amplitude> >();
-    register_ptr_to_python< std::shared_ptr<Optimizer::Optimizer> >();
-    register_ptr_to_python< std::shared_ptr<Generator> >();
+    //register_ptr_to_python< std::shared_ptr<Data> >();
+    //register_ptr_to_python< std::shared_ptr<Amplitude> >();
+    //register_ptr_to_python< std::shared_ptr<Optimizer::Optimizer> >();
+   // register_ptr_to_python< std::shared_ptr<Generator> >();
 }
 
 
