@@ -25,9 +25,15 @@
 
 #include <vector>
 #include <memory>
+#include <string>
 
 #include <boost/program_options.hpp>
 #include <boost/serialization/export.hpp>
+
+#include "TVector3.h"
+#include "TFile.h"
+#include "TTree.h"
+#include "TPython.h"
 
 // Core header files go here
 #include "Core/Event.hpp"
@@ -47,11 +53,36 @@
 #include "Estimator/MinLogLH/MinLogLH.hpp"
 #include "Optimizer/Minuit2/MinuitIF.hpp"
 #include "Optimizer/Minuit2/MinuitResult.hpp"
+#include "Optimizer/Geneva/GenevaIF.hpp"
+#include "Optimizer/Geneva/GenevaResult.hpp"
 #include "Physics/HelicityFormalism.hpp"
 
 #include "Tools/RunManager.hpp"
 #include "Tools/RootGenerator.hpp"
 #include "Tools/FitFractions.hpp"
+
+template<typename T>
+PyObject* convertToPy(const T& cxxObj) {
+	T* newCxxObj = new T(cxxObj);
+	return TPython::ObjectProxy_FromVoidPtr(newCxxObj, newCxxObj->ClassName(), true);
+}
+
+//template<typename T>
+//PyObject* convertToPy(const T* cxxObj) {
+//	return TPython::ObjectProxy_FromVoidPtr(&cxxObj, cxxObj->ClassName());
+//};
+
+template<typename T>
+T convertFromPy(PyObject* pyObj) {
+	TObject* TObj = (TObject*)(TPython::ObjectProxy_AsVoidPtr(pyObj));
+	T cxxObj = dynamic_cast<T>(TObj);
+	return cxxObj;
+}
+
+PyObject* convertTreeToPy(TTree* cxxTree) {
+	TTree* newCxxTree = cxxTree->CloneTree();
+	return TPython::ObjectProxy_FromVoidPtr(newCxxTree, newCxxTree->ClassName(), true);
+};
 
 class PythonFit {
 public:
@@ -61,12 +92,20 @@ public:
 
   virtual int StartFit();
 
+  virtual void setConfigFile(std::string fileName);
+
+  virtual PyObject* testTree();
+
+  virtual PyObject* testTVector3(PyObject* pyObj);
+
+  inline virtual void useGeneva(){geneva=true;};
+
   /**Generate phase space events by Hit&Miss
    *
    * @param number Number of events to generate
    * @return
    */
-  virtual bool generatePhsp(int number);
+  //virtual bool generatePhsp(int number);
 
   /**Generate signal events by Hit&Miss
    * 1) In case no phsp sample is set and the @param number is larger zero,
@@ -77,7 +116,7 @@ public:
    * @param number Number of events to generate
    * @return
    */
-  virtual bool generate(int number);
+  //virtual bool generate(int number);
 
   /**Generate background events by Hit&Miss
    * 1) In case no phsp sample is set and the @param number is larger zero, phsp
@@ -90,11 +129,13 @@ public:
    * @param number Number of events to generate
    * @return
    */
-  virtual bool generateBkg(int number);
+  //virtual bool generateBkg(int number);
 
 protected:
   int argc;
   char ** argv;
+  bool geneva;
+  std::string optConfigFile;
 
 
 };

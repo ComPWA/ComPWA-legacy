@@ -19,7 +19,6 @@
 #include <cmath>
 #include <sstream>
 #include <vector>
-#include <string>
 #include <memory>
 #include <ctime>
 #include <numeric>
@@ -62,7 +61,7 @@
 //#include "Physics/AmplitudeSum/AmpSumIntensity.hpp"
 #include "Estimator/MinLogLH/MinLogLH.hpp"
 #include "Optimizer/Minuit2/MinuitIF.hpp"
-
+#include "Optimizer/Geneva/GenevaIF.hpp"
 
 #include <boost/filesystem.hpp>
 #include <boost/serialization/serialization.hpp>
@@ -90,7 +89,7 @@ using ComPWA::DataReader::RootReader;
 using namespace ComPWA::Physics::HelicityFormalism;
 
 
-PythonFit::PythonFit() : argc(0){
+PythonFit::PythonFit() : argc(0), argv({}), geneva(false), optConfigFile("config.cfg"){
 }
 
 
@@ -103,12 +102,12 @@ int PythonFit::StartFit() {
 
     // Read command line input
     namespace po = boost::program_options;
-
     std::string config_file;
+
     po::options_description generic("Generic options");
     generic.add_options()("help,h", "produce help message");
     generic.add_options()(
-        "config,c", po::value<string>(&config_file)->default_value("config.cfg"),
+        "config,c", po::value<string>(&config_file)->default_value(optConfigFile),
         "name of a file of a configuration.");
 
     int seed;      // initial seed
@@ -619,9 +618,13 @@ int PythonFit::StartFit() {
       // Set start error of 0.05 for parameters
       setErrorOnParameterList(fitPar, 0.05, useMinos);
 
-      auto minuitif = new Optimizer::Minuit2::MinuitIF(esti, fitPar);
-      minuitif->SetHesse(useHesse);
-      run.SetOptimizer(std::shared_ptr<Optimizer::Optimizer>(minuitif));
+      auto optiif = new Optimizer::Minuit2::MinuitIF(esti, fitPar);
+      optiif->SetHesse(useHesse);
+     // if(geneva){
+    //	  auto genevatif = new Optimizer::Geneva::GenevaIF(esti);
+    	  //optiif = genevatif;
+      //}
+      run.SetOptimizer(std::shared_ptr<Optimizer::Optimizer>(optiif));
 
       //====== STARTING MINIMIZATION ======
       result = run.Fit(fitPar);
@@ -757,4 +760,34 @@ int PythonFit::StartFit() {
     if (result)
       return result->HasFailed();
     return 0;
+}
+
+PyObject* PythonFit::testTree(){
+	double feventWeight = 1.;
+
+	TTree *fTree = new TTree("testTree", "testTree");
+	unsigned int numPart = 100;
+
+	fTree->Branch("weight", &feventWeight, "weight/D");
+
+	for (auto it=0; it < numPart; ++it) {
+		feventWeight = (int) (it/10.);
+
+		fTree->Fill();
+	}
+	//fTree->Write("", TObject::kOverwrite, 0);
+
+	return convertTreeToPy(fTree);
+}
+
+PyObject* PythonFit::testTVector3(PyObject* inVec){
+	TVector3* fVec3(convertFromPy<TVector3*>(inVec));
+    std::cout << " pyVec in ComPWA " << fVec3->X() << std::endl;
+	(*fVec3)*=2.;
+    std::cout << " pyVec out ComPWA " << fVec3->X() << std::endl;
+	return convertToPy<TVector3>((*fVec3));
+}
+
+void PythonFit::setConfigFile(std::string fileName){
+	optConfigFile = fileName;
 }

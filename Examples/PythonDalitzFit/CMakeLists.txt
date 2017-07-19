@@ -19,8 +19,14 @@ target_link_libraries( PythonDalitzFit
   ${Boost_LIBRARIES} 
   pthread 
 )
+IF(GENEVA_FOUND)
+    target_link_libraries( PythonDalitzFit 
+      GenevaIF
+    )
+ENDIF()
 target_include_directories( PythonDalitzFit 
   PUBLIC 
+  ${GENEVA_INCLUDE_DIR}
   ${ROOT_INCLUDE_DIR} 
   ${Boost_INCLUDE_DIR} 
 )
