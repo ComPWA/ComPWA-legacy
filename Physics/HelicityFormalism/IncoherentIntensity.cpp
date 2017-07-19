@@ -21,16 +21,16 @@ IncoherentIntensity::Factory(const boost::property_tree::ptree &pt) {
   auto obj = std::make_shared<IncoherentIntensity>();
 
   // Name is not required - default value 'empty'
-  obj->SetName(pt.get<std::string>("<xmlattr>.Name", "empty"));
+  obj->_name=(pt.get<std::string>("<xmlattr>.Name", "empty"));
 
   auto ptCh = pt.get_child_optional("Strength");
   if (ptCh) {
     auto strength = ComPWA::DoubleParameterFactory(ptCh.get());
-    obj->SetStrengthParameter(std::make_shared<DoubleParameter>(strength));
+    obj->_strength=(std::make_shared<DoubleParameter>(strength));
   } else {
-    obj->SetStrengthParameter(
-        std::make_shared<ComPWA::DoubleParameter>("", 1.0));
-    obj->GetStrengthParameter()->SetParameterFixed();
+    obj->_strength=
+        (std::make_shared<ComPWA::DoubleParameter>("", 1.0));
+    obj->_strength->SetParameterFixed();
   }
 
   for (const auto &v : pt.get_child("")) {
@@ -46,9 +46,9 @@ boost::property_tree::ptree
 IncoherentIntensity::Save(std::shared_ptr<IncoherentIntensity> obj) {
 
   boost::property_tree::ptree pt;
-  pt.put<std::string>("<xmlattr>.Name", obj->GetName());
+  pt.put<std::string>("<xmlattr>.Name", obj->Name());
   pt.add_child("Strength",
-               ComPWA::DoubleParameterSave(*obj->GetStrengthParameter().get()));
+               ComPWA::DoubleParameterSave(*obj->_strength.get()));
   for (auto i : obj->GetIntensities()) {
     // TODO: we have to implement a memeber function Save() in AmpIntensity
     // interface and use it here
@@ -62,7 +62,7 @@ std::shared_ptr<AmpIntensity>
 IncoherentIntensity::GetComponent(std::string name) {
 
   // The whole object?
-  if (name == GetName()) {
+  if (name == Name()) {
     LOG(error) << "IncoherentIntensity::GetComponent() | You're requesting the "
                   "full object! So just copy it!";
     return std::shared_ptr<AmpIntensity>();
@@ -75,7 +75,7 @@ IncoherentIntensity::GetComponent(std::string name) {
   icIn->Reset();
   for (auto i : names) {
     for (int j = 0; j < _intens.size(); j++) {
-      if (name == _intens.at(j)->GetName()) {
+      if (name == _intens.at(j)->Name()) {
         std::dynamic_pointer_cast<IncoherentIntensity>(icIn)->AddIntensity(
             _intens.at(j));
         if( names.size() == 1 ) return _intens.at(j);
@@ -101,7 +101,7 @@ IncoherentIntensity::GetComponent(std::string name) {
   if (!found) {
     throw std::runtime_error(
         "InCoherentIntensity::GetComponent() | Component " + name +
-        " could not be found in IncoherentIntensity " + GetName() + ".");
+        " could not be found in IncoherentIntensity " + Name() + ".");
   }
 
   return icIn;
@@ -115,13 +115,13 @@ IncoherentIntensity::GetTree(const ComPWA::ParameterList &sample,
 
   std::shared_ptr<FunctionTree> tr(new FunctionTree());
 
-  tr->createHead("IncoherentIntens(" + GetName() + ")" + suffix,
+  tr->createHead("IncoherentIntens(" + Name() + ")" + suffix,
                  std::shared_ptr<Strategy>(new MultAll(ParType::MDOUBLE)));
   tr->createLeaf("Strength", _strength,
-                 "IncoherentIntens(" + GetName() + ")" + suffix);
+                 "IncoherentIntens(" + Name() + ")" + suffix);
   tr->createNode("SumOfCoherentIntens",
                  std::shared_ptr<Strategy>(new AddAll(ParType::MDOUBLE)),
-                 "IncoherentIntens(" + GetName() + ")" + suffix);
+                 "IncoherentIntens(" + Name() + ")" + suffix);
   for (auto i : _intens) {
     tr->insertTree(i->GetTree(sample, phspSample, toySample),
                    "SumOfCoherentIntens");
@@ -130,7 +130,7 @@ IncoherentIntensity::GetTree(const ComPWA::ParameterList &sample,
 }
 
 void IncoherentIntensity::GetParameters(ComPWA::ParameterList &list) {
-  list.AddParameter(GetStrengthParameter());
+  list.AddParameter(_strength);
   for (auto i : GetIntensities()) {
     i->GetParameters(list);
   }

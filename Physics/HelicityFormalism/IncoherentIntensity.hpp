@@ -29,7 +29,7 @@ public:
   //! Function to create a full copy of the amplitude
   ComPWA::AmpIntensity *Clone(std::string newName = "") const {
     auto tmp = (new IncoherentIntensity(*this));
-    tmp->SetName(newName);
+    tmp->_name=newName;
     return tmp;
   }
 
@@ -63,7 +63,7 @@ public:
       if ( parameters.at(i) != params ) { //recalculate normalization
         parameters.at(i) = params;
         normValues.at(i) = 1/Tools::Integral(_intens.at(i), _phspSample);
-        normValues.at(i) *= _intens.at(i)->GetStrength();
+        normValues.at(i) *= _intens.at(i)->Strength();
       }
       result += _intens.at(i)->Intensity(point) * normValues.at(i);
     }
@@ -71,7 +71,7 @@ public:
     const_cast<std::vector<std::vector<double>>&>(_parameters) = parameters;
     const_cast<std::vector<double>&>(_normValues) = normValues;
 
-    return (GetStrength() * result);
+    return (Strength() * result);
   }
 
   //================== SET/GET =================
