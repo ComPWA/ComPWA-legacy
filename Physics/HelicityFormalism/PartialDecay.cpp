@@ -84,7 +84,6 @@ PartialDecay::Factory(const boost::property_tree::ptree &pt) {
       throw std::runtime_error("PartialDecay::Factory() | Unknown decay type " +
                                decayType + "!");
     }
-    dynObj->SetSubSystem(subSys);
 
     // make sure dynamical function is created and set first
   } else {
@@ -171,7 +170,7 @@ std::shared_ptr<FunctionTree> PartialDecay::GetTree(const ParameterList &sample,
                  "Resonance(" + GetName() + ")" + suffix);
   tr->insertTree(_angD->GetTree(sample, _dataPos + 1, _dataPos + 2),
                  "Resonance(" + GetName() + ")" + suffix);
-  tr->insertTree(_dynamic->GetTree(sample),
+  tr->insertTree(_dynamic->GetTree(sample,_dataPos),
                  "Resonance(" + GetName() + ")" + suffix);
 
   tr->recalculate();
@@ -197,7 +196,7 @@ std::shared_ptr<FunctionTree> PartialDecay::GetTree(const ParameterList &sample,
                  "Intensity");
   tr->insertTree(_angD->GetTree(toySample, _dataPos + 1, _dataPos + 2, "_norm"),
                  "mult" + suffix);
-  tr->insertTree(_dynamic->GetTree(toySample, "_norm"), "mult" + suffix);
+  tr->insertTree(_dynamic->GetTree(toySample, _dataPos, "_norm"), "mult" + suffix);
 
   tr->recalculate();
   return tr;

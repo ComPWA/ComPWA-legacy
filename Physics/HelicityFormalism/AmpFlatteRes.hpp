@@ -65,7 +65,7 @@ protected:
 };
 
 class AmpFlatteRes : public HelicityFormalism::AbstractDynamicalFunction {
-  
+
 public:
   //============ CONSTRUCTION ==================
   AmpFlatteRes() : AbstractDynamicalFunction(){};
@@ -79,7 +79,7 @@ public:
     // tmp->SetName(newName);
     return tmp;
   }
-  
+
   /**
    Factory for AmpFlatteRes
 
@@ -90,13 +90,13 @@ public:
   Factory(const boost::property_tree::ptree &pt);
 
   //======= INTEGRATION/NORMALIZATION ===========
-  
+
   //! Check of parameters have changed and normalization has to be recalculatecd
   virtual bool CheckModified() const;
 
   //================ EVALUATION =================
-  
-  virtual std::complex<double> Evaluate(const dataPoint &point) const;
+
+  virtual std::complex<double> Evaluate(const dataPoint &point, int pos) const;
 
   /** Dynamical function for two coupled channel approach
    *
@@ -138,17 +138,17 @@ public:
                     std::complex<double> termC = std::complex<double>(0, 0));
 
   //============ SET/GET =================
-  
-  virtual void GetParameters(ParameterList &list) ;
-  
+
+  virtual void GetParameters(ParameterList &list);
+
   //! Fill vector with parameters
   virtual void GetParametersFast(std::vector<double> &list) const {
     AbstractDynamicalFunction::GetParametersFast(list);
-    for( auto i : _g)
-    list.push_back(i.GetValue());
+    for (auto i : _g)
+      list.push_back(i.GetValue());
     list.push_back(GetMesonRadius());
   }
-  
+
   /**
   Set meson radius
   The meson radius is a measure of the size of the resonant state. It is used
@@ -156,7 +156,9 @@ public:
 
   @param r Meson radius
   */
-  void SetMesonRadiusParameter(std::shared_ptr<DoubleParameter> r) { _mesonRadius = r; }
+  void SetMesonRadiusParameter(std::shared_ptr<DoubleParameter> r) {
+    _mesonRadius = r;
+  }
 
   /**
    Get meson radius
@@ -165,7 +167,9 @@ public:
 
    @return Meson radius
    */
-  std::shared_ptr<DoubleParameter> GetMesonRadiusParameter() { return _mesonRadius; }
+  std::shared_ptr<DoubleParameter> GetMesonRadiusParameter() {
+    return _mesonRadius;
+  }
 
   /**
    Set meson radius
@@ -228,7 +232,8 @@ public:
 
     _g = vC;
 
-    if(_g.size() == 2) _g.push_back(Coupling());
+    if (_g.size() == 2)
+      _g.push_back(Coupling());
     // Check if one of the  coupling match the final state (_daughterMasses)
     auto mm = GetDecayMasses();
     if (mm == std::pair<double, double>(-999, -999))
@@ -249,9 +254,9 @@ public:
   }
 
   //=========== FUNCTIONTREE =================
-  
+
   virtual std::shared_ptr<FunctionTree> GetTree(const ParameterList &sample,
-                                                std::string suffix);
+                                                int pos, std::string suffix);
 
 protected:
   // Initialize masses

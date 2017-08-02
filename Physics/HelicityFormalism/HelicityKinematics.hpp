@@ -232,19 +232,8 @@ public:
    */
   virtual const std::pair<double, double> &
   GetInvMassBounds(const SubSystem sys) const;
+  
   virtual const std::pair<double, double> &GetInvMassBounds(int sysID) const;
-
-  //! Calculate form factor
-  static double
-  FormFactor(double sqrtS, double ma, double mb, double spin,
-             double mesonRadius,
-             formFactorType type = formFactorType::BlattWeisskopf);
-
-  //! Calculate form factor
-  static double
-  FormFactor(double sqrtS, double ma, double mb, double spin,
-             double mesonRadius, std::complex<double> qValue,
-             formFactorType type = formFactorType::BlattWeisskopf);
 
 protected:
   /*! Create HelicityKinematics from inital and final state particle lists.

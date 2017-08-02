@@ -54,7 +54,7 @@ class RelativisticBreitWigner : public AbstractDynamicalFunction {
 
 public:
   //============ CONSTRUCTION ==================
-  
+
   RelativisticBreitWigner(){};
 
   virtual ~RelativisticBreitWigner(){};
@@ -67,14 +67,14 @@ public:
    */
   static std::shared_ptr<AbstractDynamicalFunction>
   Factory(const boost::property_tree::ptree &pt);
-  
+
   //======= INTEGRATION/NORMALIZATION ===========
-  
+
   //! Check of parameters have changed and normalization has to be recalculatecd
   virtual bool CheckModified() const;
 
   //================ EVALUATION =================
-  std::complex<double> Evaluate(const dataPoint &point) const;
+  std::complex<double> Evaluate(const dataPoint &point, int pos) const;
 
   /**
    Dynamical Breit-Wigner function
@@ -130,7 +130,9 @@ public:
 
    @param r Meson radius
    */
-  void SetMesonRadiusParameter(std::shared_ptr<DoubleParameter> r) { _mesonRadius = r; }
+  void SetMesonRadiusParameter(std::shared_ptr<DoubleParameter> r) {
+    _mesonRadius = r;
+  }
 
   /**
    Get meson radius
@@ -139,7 +141,9 @@ public:
 
    @return Meson radius
    */
-  std::shared_ptr<DoubleParameter> GetMesonRadiusParameter() { return _mesonRadius; }
+  std::shared_ptr<DoubleParameter> GetMesonRadiusParameter() {
+    return _mesonRadius;
+  }
 
   /**
    Set meson radius
@@ -185,15 +189,15 @@ public:
     list.push_back(GetWidth());
     list.push_back(GetMesonRadius());
   }
-  
+
   //=========== FUNCTIONTREE =================
-  
+
   //! Check of tree is available
   virtual bool HasTree() const { return true; }
 
   /**! Setup function tree */
-  virtual std::shared_ptr<FunctionTree> GetTree(const ParameterList &sample,
-                                                std::string suffix = "");
+  virtual std::shared_ptr<FunctionTree>
+  GetTree(const ParameterList &sample, int pos, std::string suffix = "");
 
 protected:
   //! Decay width of resonante state

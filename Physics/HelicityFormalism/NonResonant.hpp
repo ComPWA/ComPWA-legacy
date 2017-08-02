@@ -30,12 +30,12 @@ public:
 
   virtual ~NonResonant(){};
 
-  virtual std::complex<double> Evaluate(const dataPoint &p) const {
+  virtual std::complex<double> Evaluate(const dataPoint &p, int pos) const {
     return std::complex<double>(1.0, 0.0);
   }
 
   virtual std::shared_ptr<FunctionTree> GetTree(const ParameterList &sample,
-                                                std::string suffix);
+                                                int pos, std::string suffix);
 
   virtual void GetParameters(ParameterList &list){};
 };
