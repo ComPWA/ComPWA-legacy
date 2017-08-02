@@ -10,20 +10,6 @@
  * Namespace for all ComPWA Data modules.
  */
 
-/*!
- * @namespace ComPWA::DataReader::AsciiReader
- * Classes of the Module for reading Ascii input files.
- */
-
-/*!
- * @namespace ComPWA::DataReader::JakeReader
- * Classes of the Module for reading BESIII root files.
- */
-
-/*!
- * @namespace ComPWA::DataReader::RootReader
- * Classes of the Module for reading Root input files.
- */
 
 /*!
  * @namespace ComPWA::Estimator
@@ -73,40 +59,6 @@
  */
 
 /*!
- * @namespace ComPWA::Physics::AmplitudeSum
- * Module to calculate a coherent Amplitude with BreitWigner and Flatte
- * resonances for three-body final states.
- */
-
-/*!
- * @namespace ComPWA::Physics::BreitWigner
- * Module to calculate a single relativistic BreitWigner for a two-body final
- * state.
- */
-
-/*!
- * @namespace ComPWA::Physics::DecayTree
- * Module to provide decay trees for the calculation of helicity amplitudes for
- * general final states
- */
-
-/*!
- * @namespace ComPWA::Physics::DPKinematics
- * Helper classes providing container for kinematic information of three-body
- * final states.
- */
-
-/*!
- * @namespace ComPWA::Physics::DynamicalFunctions
- * Namespace for classes calculating dynamical functions for various modules.
- */
-
-/*!
  * @namespace ComPWA::Physics::HelicityFormalism
  * Module to calculate helicity amplitudes for general final states.
- */
-
-/*!
- * @namespace NeatPlotting
- * Helper classes for creating root histograms and graphs.
  */
