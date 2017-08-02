@@ -111,7 +111,7 @@ void plotData::SetFitAmp(std::shared_ptr<AmpIntensity> intens,
   _plotComponents.clear();
   _plotComponents.push_back(intens);
   _plotHistograms.push_back(
-      dalitzHisto(intens->Name(), title, _bins, color));
+      dalitzHisto(intens->GetName(), title, _bins, color));
   _plotHistograms.back().SetStats(0);
   _plotLegend.push_back("Fit");
   _isFilled = 0;

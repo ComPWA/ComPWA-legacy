@@ -42,7 +42,7 @@ public:
   //! Clone function
   ComPWA::AmpIntensity *Clone(std::string newName = "") const {
     auto tmp = (new CoherentIntensity(*this));
-    tmp->SetName(newName);
+    tmp->_name=newName;
     return tmp;
   }
 

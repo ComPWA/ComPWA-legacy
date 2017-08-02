@@ -39,6 +39,7 @@ foreach(testSrc ${TEST_SRCS})
   target_link_libraries( ${testName}
     Core
     RootReader
+    pthread
     ${Boost_LIBRARIES}
   )
 

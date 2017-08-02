@@ -24,14 +24,14 @@ double CoherentIntensity::Intensity(const dataPoint &point) const {
   for (auto i : _seqDecays)
     result += i->Evaluate(point);
   assert(!std::isnan(result.real()) && !std::isnan(result.imag()));
-  return GetStrength() * std::norm(result) * _eff->Evaluate(point);
+  return Strength() * std::norm(result) * _eff->Evaluate(point);
 };
 
 std::shared_ptr<CoherentIntensity>
 CoherentIntensity::Factory(const boost::property_tree::ptree &pt) {
   LOG(trace) << " CoherentIntensity::Factory() | Construction....";
   auto obj = std::make_shared<CoherentIntensity>();
-  obj->SetName(pt.get<std::string>("<xmlattr>.Name"));
+  obj->_name=(pt.get<std::string>("<xmlattr>.Name"));
 
   //  boost::property_tree::xml_writer_settings<char> settings('\t', 1);
   //  write_xml(std::cout,pt);
@@ -39,9 +39,9 @@ CoherentIntensity::Factory(const boost::property_tree::ptree &pt) {
   auto ptCh = pt.get_child_optional("Strength");
   if (ptCh) {
     auto strength = ComPWA::DoubleParameterFactory(ptCh.get());
-    obj->SetStrengthParameter(std::make_shared<DoubleParameter>(strength));
+    obj->_strength=(std::make_shared<DoubleParameter>(strength));
   } else {
-    obj->SetStrengthParameter(
+    obj->_strength=(
         std::make_shared<ComPWA::DoubleParameter>("", 1.0));
   }
 
@@ -58,9 +58,9 @@ boost::property_tree::ptree
 CoherentIntensity::Save(std::shared_ptr<CoherentIntensity> obj) {
 
   boost::property_tree::ptree pt;
-  pt.put<std::string>("<xmlattr>.Name", obj->GetName());
+  pt.put<std::string>("<xmlattr>.Name", obj->Name());
   pt.add_child("Strength",
-               ComPWA::DoubleParameterSave(*obj->GetStrengthParameter().get()));
+               ComPWA::DoubleParameterSave(*obj->_strength.get()));
   for (auto i : obj->GetAmplitudes()) {
     pt.add_child("Amplitude", SequentialTwoBodyDecay::Save(i));
   }
@@ -71,7 +71,7 @@ std::shared_ptr<AmpIntensity>
 CoherentIntensity::GetComponent(std::string name) {
 
   // The whole object?
-  if (name == GetName()) {
+  if (name == Name()) {
     LOG(error) << "CoherentIntensity::GetComponent() | You're requesting the "
                   "full object! So just copy it!";
     return std::shared_ptr<AmpIntensity>();
@@ -95,7 +95,7 @@ CoherentIntensity::GetComponent(std::string name) {
   if (!found) {
     throw std::runtime_error(
         "CoherentIntensity::GetComponent() | Component " + name +
-        " could not be found in CoherentIntensity " + GetName() + ".");
+        " could not be found in CoherentIntensity " + Name() + ".");
   }
   
   return icIn;
@@ -119,24 +119,24 @@ CoherentIntensity::GetTree(const ComPWA::ParameterList &sample,
 
   std::shared_ptr<FunctionTree> tr(new FunctionTree());
 
-  tr->createHead("CoherentIntensity(" + GetName() + ")" + suffix,
+  tr->createHead("CoherentIntensity(" + Name() + ")" + suffix,
                  std::shared_ptr<Strategy>(new MultAll(ParType::MDOUBLE)));
   tr->createLeaf("Strength", _strength,
-                 "CoherentIntensity(" + GetName() + ")" + suffix);
+                 "CoherentIntensity(" + Name() + ")" + suffix);
   tr->createNode("SumSquared",
                  std::shared_ptr<Strategy>(new AbsSquare(ParType::MDOUBLE)),
-                 "CoherentIntensity(" + GetName() + ")" + suffix);
+                 "CoherentIntensity(" + Name() + ")" + suffix);
   tr->insertTree(setupBasicTree(sample, toySample), "SumSquared");
 
   // Normalization
   // create a new FunctionTree to make sure that nodes with the same name do
   // not interfere
   std::shared_ptr<FunctionTree> trNorm(new FunctionTree());
-  trNorm->createHead("Normalization(" + GetName() + ")" + suffix,
+  trNorm->createHead("Normalization(" + Name() + ")" + suffix,
                      std::shared_ptr<Strategy>(new Inverse(ParType::DOUBLE)));
   trNorm->createNode("Integral",
                      std::shared_ptr<Strategy>(new MultAll(ParType::DOUBLE)),
-                     "Normalization(" + GetName() + ")" + suffix);
+                     "Normalization(" + Name() + ")" + suffix);
   trNorm->createLeaf("PhspVolume", Kinematics::Instance()->GetPhspVolume(),
                      "Integral");
   trNorm->createLeaf("InverseSampleWeights", 1 / ((double)sumWeights),
@@ -156,7 +156,7 @@ CoherentIntensity::GetTree(const ComPWA::ParameterList &sample,
   trNorm->insertTree(setupBasicTree(phspSample, toySample, "_norm"),
                      "Intensity");
 
-  tr->insertTree(trNorm, "CoherentIntensity(" + GetName() + ")" + suffix);
+  tr->insertTree(trNorm, "CoherentIntensity(" + Name() + ")" + suffix);
   return tr;
 }
 
@@ -201,7 +201,7 @@ CoherentIntensity::setupBasicTree(const ParameterList &sample,
 }
 
 void CoherentIntensity::GetParameters(ComPWA::ParameterList &list) {
-  list.AddParameter(GetStrengthParameter());
+  list.AddParameter(_strength);
   for (auto i : _seqDecays) {
     i->GetParameters(list);
   }

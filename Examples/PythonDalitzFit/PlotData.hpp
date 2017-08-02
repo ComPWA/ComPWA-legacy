@@ -108,7 +108,7 @@ public:
     } catch (std::exception& ex) {
       LOG(error) << "plotData::DrawComponent() | Component " << name
                  << " not found in AmpIntensity "
-                 << _plotComponents.at(0)->Name() << ".";
+                 << _plotComponents.at(0)->GetName() << ".";
       return;
     }
     _plotComponents.push_back(comp);

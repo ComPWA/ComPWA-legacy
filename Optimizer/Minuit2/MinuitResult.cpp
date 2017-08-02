@@ -169,7 +169,7 @@ void MinuitResult::genOutput(std::ostream &out, std::string opt) {
 
 void MinuitResult::createInterferenceTable(std::ostream &out,
                                            std::shared_ptr<AmpIntensity> amp) {
-  out << "INTERFERENCE terms for " << amp->GetName() << ": " << std::endl;
+  out << "INTERFERENCE terms for " << amp->Name() << ": " << std::endl;
   TableFormater *tableInterf = new TableFormater(&out);
   tableInterf->addColumn("Name 1", 15);
   tableInterf->addColumn("Name 2", 15);

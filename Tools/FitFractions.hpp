@@ -127,12 +127,12 @@ CalculateFitFraction(std::shared_ptr<ComPWA::AmpIntensity> intens,
                      const std::pair<std::string, std::string> def) {
 
   std::shared_ptr<ComPWA::AmpIntensity> numer, denom;
-  if (def.first == intens->GetName())
+  if (def.first == intens->Name())
     numer = intens;
   else
     numer = intens->GetComponent(def.first);
 
-  if (def.second == intens->GetName())
+  if (def.second == intens->Name())
     denom = intens;
   else
     denom = intens->GetComponent(def.second);
