@@ -93,7 +93,7 @@ public:
     Resonance::GetParametersFast(list);
     _dynamic->GetParametersFast(list);
   }
-  
+
   std::shared_ptr<ComPWA::Physics::HelicityFormalism::AmpWignerD> GetWignerD() {
     return _angD;
   }
@@ -109,32 +109,24 @@ public:
   }
 
   void SetDynamicalFunction(
-      std::shared_ptr<
-          ComPWA::Physics::DecayDynamics::AbstractDynamicalFunction>
+      std::shared_ptr<ComPWA::Physics::DecayDynamics::AbstractDynamicalFunction>
           f) {
     _dynamic = f;
   }
 
   /// Set position of variables within dataPoint
-  void SetDataPosition(int pos) { _dataPos = pos; }
+  virtual void SetDataPosition(int pos) { _dataPos = pos; }
 
   /// Get position of variables within dataPoint
-  int GetDataPosition() const { return _dataPos; }
+  virtual int GetDataPosition() const { return _dataPos; }
 
-  /// Set position of variables within dataPoint
-  void SetSubSystem(SubSystem sys) {
-    _subSystem = sys;
-    _dataPos = 3 *
-               dynamic_cast<HelicityKinematics *>(Kinematics::Instance())
-                   ->GetDataID(_subSystem);
-  }
+  virtual void SetSubSystem(SubSystem sys) { _subSystem = sys; }
 
-  //! Get position of variables within dataPoint
-  SubSystem GetSubSystem() const { return _subSystem; }
+  virtual SubSystem GetSubSystem() const { return _subSystem; }
 
   //=========== FUNCTIONTREE =================
 
-  //! Check of tree is available
+  //! Check if tree is available
   virtual bool HasTree() const { return true; }
 
   /**! Setup function tree */

@@ -1,9 +1,9 @@
 /*! Dalitz plot analysis of the decay D0->K_S0 K_ K-
- * @file DalitzFitApp.cpp
- * Fit application for D0->K_S0 K_ K- analysis. A model with BW and flatte
- * formalism is used to
- * describe the data.
- */
+* @file DalitzFitApp.cpp
+* Fit application for D0->K_S0 K_ K- analysis. A model with BW and flatte
+* formalism is used to
+* describe the data.
+*/
 
 // Standard header files go here
 #include <iostream>
@@ -319,8 +319,9 @@ int main(int argc, char **argv) {
       fitModelTree.get_child("HelicityKinematics"));
 
   // initialize random generator
-  std::shared_ptr<Generator> gen =
-      std::shared_ptr<Generator>(new Tools::RootGenerator(seed));
+  std::shared_ptr<Generator> gen = std::shared_ptr<Generator>(
+      new Tools::RootGenerator(Kinematics::Instance()->GetInitialState(),
+                               Kinematics::Instance()->GetFinalState(), seed));
 
   RunManager run;
   run.SetGenerator(gen);
@@ -401,18 +402,21 @@ int main(int argc, char **argv) {
     //      numSignalEvents -= inputBkg->getNEvents();
     LOG(info) << "Reading data file...";
     std::shared_ptr<Data> inD(new RootReader(dataFile, dataFileTreeName));
-    
-//    SubSystem s(std::vector<int>{1}, std::vector<int>{0}, std::vector<int>{2});
-//    int id = dynamic_cast<HelicityKinematics*>(Kinematics::Instance())->GetDataID(s);
-//    for( int i=0; i<10 ; i++){
-//      std::cout<<inD->getEvent(i)<<std::endl;
-//      dataPoint p(inD->getEvent(i));
-//      std::cout<<p<<std::endl;
-//      std::cout<<"mSq="<<p.GetValue(id*3)<<" cosTheta="<<p.GetValue(id*3+1)<<std::endl;
-//      std::cout<<"-------"<<std::endl;
-//    }
-//    exit(1);
-    
+
+    //    SubSystem s(std::vector<int>{1}, std::vector<int>{0},
+    //    std::vector<int>{2});
+    //    int id =
+    //    dynamic_cast<HelicityKinematics*>(Kinematics::Instance())->GetDataID(s);
+    //    for( int i=0; i<10 ; i++){
+    //      std::cout<<inD->getEvent(i)<<std::endl;
+    //      dataPoint p(inD->getEvent(i));
+    //      std::cout<<p<<std::endl;
+    //      std::cout<<"mSq="<<p.GetValue(id*3)<<"
+    //      cosTheta="<<p.GetValue(id*3+1)<<std::endl;
+    //      std::cout<<"-------"<<std::endl;
+    //    }
+    //    exit(1);
+
     inD->ReduceToPhsp();
     if (resetWeights)
       inD->ResetWeights(); // resetting weights if requested
@@ -548,8 +552,8 @@ int main(int argc, char **argv) {
     LOG(debug) << "Fit parameters: " << std::endl << fitPar.to_str();
 
     //=== Constructing likelihood
-    auto esti = Estimator::MinLogLH::CreateInstance(intens, sample, toyPhspData,
-                                                    phspData, 0, 0);
+    auto esti = Estimator::MinLogLH::CreateInstance(Kinematics::Instance(), intens, sample,
+        toyPhspData, phspData, 0, 0);
 
     std::cout.setf(std::ios::unitbuf);
     if (fittingMethod == "tree") {
@@ -589,8 +593,8 @@ int main(int argc, char **argv) {
     result = run.Fit(fitPar);
 
     //====== FIT RESULT =======
-//    auto minuitResult =
-//        dynamic_cast<Optimizer::Minuit2::MinuitResult *>(&*result);
+    //    auto minuitResult =
+    //        dynamic_cast<Optimizer::Minuit2::MinuitResult *>(&*result);
     finalParList = result->GetFinalParameters();
 
     // Calculation of fit fractions
@@ -620,11 +624,13 @@ int main(int argc, char **argv) {
       ptout.add_child("IncoherentIntensity", IncoherentIntensity::Save(intens));
       boost::property_tree::xml_parser::write_xml(
           fileNamePrefix + std::string("-Model.xml"), ptout, std::locale());
-          //Does not compile with boost1.54
-//      boost::property_tree::xml_parser::write_xml(
-//          fileNamePrefix + std::string("-Model.xml"), ptout, std::locale(),
-//          boost::property_tree::xml_writer_make_settings<std::string>(' ', 4,
-//                                                                      "utf-8"));
+      // Does not compile with boost1.54
+      //      boost::property_tree::xml_parser::write_xml(
+      //          fileNamePrefix + std::string("-Model.xml"), ptout,
+      //          std::locale(),
+      //          boost::property_tree::xml_writer_make_settings<std::string>('
+      //          ', 4,
+      //                                                                      "utf-8"));
 
       //      LOG(info) << "Average resonance width of fit model: "
       //                << fitAmpSum->averageWidth();

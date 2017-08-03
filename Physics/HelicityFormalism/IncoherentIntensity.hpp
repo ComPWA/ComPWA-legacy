@@ -17,8 +17,6 @@ namespace ComPWA {
 namespace Physics {
 namespace HelicityFormalism {
 
-  
-
 class IncoherentIntensity : public ComPWA::AmpIntensity {
 
 public:
@@ -29,7 +27,7 @@ public:
   //! Function to create a full copy of the amplitude
   ComPWA::AmpIntensity *Clone(std::string newName = "") const {
     auto tmp = (new IncoherentIntensity(*this));
-    tmp->_name=newName;
+    tmp->_name = newName;
     return tmp;
   }
 
@@ -47,29 +45,29 @@ public:
    * @return
    */
   virtual double Intensity(const ComPWA::dataPoint &point) const {
-    
+
     // We have to get around the constness of the interface definition.
     std::vector<std::vector<double>> parameters(_parameters);
     std::vector<double> normValues(_normValues);
-    if(_intens.size() != parameters.size() )
+    if (_intens.size() != parameters.size())
       parameters = std::vector<std::vector<double>>(_intens.size());
-    if(_intens.size() != normValues.size() )
+    if (_intens.size() != normValues.size())
       normValues = std::vector<double>(_intens.size());
-    
+
     double result = 0;
-    for(int i=0; i< _intens.size(); i++){
+    for (int i = 0; i < _intens.size(); i++) {
       std::vector<double> params;
       _intens.at(i)->GetParametersFast(params);
-      if ( parameters.at(i) != params ) { //recalculate normalization
+      if (parameters.at(i) != params) { // recalculate normalization
         parameters.at(i) = params;
-        normValues.at(i) = 1/Tools::Integral(_intens.at(i), _phspSample);
+        normValues.at(i) = 1 / Tools::Integral(_intens.at(i), _phspSample);
         normValues.at(i) *= _intens.at(i)->Strength();
       }
       result += _intens.at(i)->Intensity(point) * normValues.at(i);
     }
-    
-    const_cast<std::vector<std::vector<double>>&>(_parameters) = parameters;
-    const_cast<std::vector<double>&>(_normValues) = normValues;
+
+    const_cast<std::vector<std::vector<double>> &>(_parameters) = parameters;
+    const_cast<std::vector<double> &>(_normValues) = normValues;
 
     return (Strength() * result);
   }
@@ -92,7 +90,7 @@ public:
     _intens.clear();
     return;
   }
-  
+
   /**! Add amplitude parameters to list
    * Add parameters only to list if not already in
    * @param list Parameter list to be filled
@@ -106,7 +104,7 @@ public:
       i->GetParametersFast(list);
     }
   }
-  
+
   //! Calculate & fill fit fractions of this amplitude to ParameterList
   virtual void GetFitFractions(ComPWA::ParameterList &parList){};
 
@@ -144,15 +142,16 @@ public:
   virtual std::shared_ptr<ComPWA::FunctionTree>
   GetTree(const ComPWA::ParameterList &sample,
           const ComPWA::ParameterList &phspSample,
-          const ComPWA::ParameterList &toySample, std::string suffix = "");
+          const ComPWA::ParameterList &toySample, unsigned int nEvtVar,
+          std::string suffix = "");
 
 protected:
   //! Phase space sample to calculate the normalization and maximum value.
   std::shared_ptr<std::vector<ComPWA::dataPoint>> _phspSample;
-  
+
   // Caching of normalization values
   std::vector<double> _normValues;
-  
+
   // Temporary storage of the para
   std::vector<std::vector<double>> _parameters;
 

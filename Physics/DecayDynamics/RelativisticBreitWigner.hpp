@@ -6,7 +6,7 @@
 // http://www.gnu.org/licenses/gpl.html
 //
 // Contributors:
-//     Mathias Michel - initial API and implementation
+//    Mathias Michel - initial API and implementation
 //		Peter Weidenkaff - correct nominator, using dataPoint for data
 // handling
 //-------------------------------------------------------------------------------

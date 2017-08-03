@@ -75,7 +75,7 @@ public:
   double Strength() const { return _strength->GetValue(); }
 
   virtual void GetParameters(ParameterList &list) = 0;
-  
+
   //! Fill vector with parameters
   virtual void GetParametersFast(std::vector<double> &list) const {
     list.push_back(_strength->GetValue());
@@ -95,8 +95,8 @@ public:
                 std::shared_ptr<std::vector<ComPWA::dataPoint>> toySample) = 0;
 
   virtual std::shared_ptr<AmpIntensity> GetComponent(std::string name) = 0;
-  
-  virtual void Reset() {};
+
+  virtual void Reset(){};
   //========== FUNCTIONTREE =============
 
   //! Check of tree is available
@@ -112,6 +112,7 @@ public:
   virtual std::shared_ptr<FunctionTree> GetTree(const ParameterList &sample,
                                                 const ParameterList &phspSample,
                                                 const ParameterList &toySample,
+                                                unsigned int nEvtVar,
                                                 std::string suffix = "") {
     return std::shared_ptr<FunctionTree>();
   }
@@ -119,7 +120,6 @@ public:
   //======== ITERATORS/OPERATORS =============
 
 public:
-
 protected:
   //! Name
   std::string _name;
@@ -134,16 +134,16 @@ protected:
 //-----------------------------------------------------------------------------
 
 //! Split string into pieces which are separated by blanks
-//Todo: wohin?
+// Todo: wohin?
 static std::vector<std::string> splitString(std::string str) {
-std::vector<std::string> result;
-std::istringstream iStr(str);
-std::vector<std::string> stringFrag{std::istream_iterator<std::string>{iStr},
-                                    std::istream_iterator<std::string>{}};
-for (auto i : stringFrag) {
-  result.push_back(i);
-}
-return result;
+  std::vector<std::string> result;
+  std::istringstream iStr(str);
+  std::vector<std::string> stringFrag{std::istream_iterator<std::string>{iStr},
+                                      std::istream_iterator<std::string>{}};
+  for (auto i : stringFrag) {
+    result.push_back(i);
+  }
+  return result;
 }
 
 } /* namespace ComPWA */

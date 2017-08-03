@@ -111,7 +111,7 @@ std::shared_ptr<ComPWA::FunctionTree>
 IncoherentIntensity::GetTree(const ComPWA::ParameterList &sample,
                              const ComPWA::ParameterList &phspSample,
                              const ComPWA::ParameterList &toySample,
-                             std::string suffix) {
+                             unsigned int nEvtVar, std::string suffix) {
 
   std::shared_ptr<FunctionTree> tr(new FunctionTree());
 
@@ -123,7 +123,7 @@ IncoherentIntensity::GetTree(const ComPWA::ParameterList &sample,
                  std::shared_ptr<Strategy>(new AddAll(ParType::MDOUBLE)),
                  "IncoherentIntens(" + Name() + ")" + suffix);
   for (auto i : _intens) {
-    tr->insertTree(i->GetTree(sample, phspSample, toySample),
+    tr->insertTree(i->GetTree(sample, phspSample, toySample, nEvtVar),
                    "SumOfCoherentIntens");
   }
   return tr;
