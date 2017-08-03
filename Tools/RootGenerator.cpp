@@ -16,28 +16,58 @@
 namespace ComPWA {
 namespace Tools {
 
-RootGenerator::RootGenerator(double cmsEnergy, double m1, double m2, double m3, int seed) {
+RootGenerator::RootGenerator(double cmsEnergy, double m1, double m2, double m3,
+                             int seed) {
   gRandom = new TRandom3(0);
   if (seed != -1)
     SetSeed(seed);
-  
+
   nPart = 3;
 
   masses = new Double_t[nPart];
   masses[0] = m1;
   masses[1] = m2;
   masses[2] = m3;
-  
+
   sqrtS = cmsEnergy;
   TLorentzVector W(0.0, 0.0, 0.0, sqrtS);
   event.SetDecay(W, nPart, masses);
 }
 
-RootGenerator::RootGenerator(int seed) {
+RootGenerator::RootGenerator(std::vector<pid> initialS, std::vector<pid> finalS,
+                             int seed) {
   gRandom = new TRandom3(0);
   if (seed != -1)
     SetSeed(seed);
-  Kinematics *kin = Kinematics::Instance();
+  auto physConst = PhysConst::Instance();
+  nPart = finalS.size();
+  if (nPart < 2)
+    throw std::runtime_error(
+        "RootGenerator::RootGenerator() | one particle is not enough!");
+  if (nPart == 2)
+    LOG(info)
+        << "RootGenerator::RootGenerator() | only 2 particles in the final"
+           " state! There are no degrees of freedom!";
+
+  if (initialS.size() != 1)
+    throw std::runtime_error(
+        "RootGenerator::RootGenerator() | More than one "
+        "particle in initial State! Currently we can not deal with that!");
+
+  sqrtS = physConst->FindParticle(initialS.at(0)).GetMass();
+
+  masses = new Double_t[nPart];
+  TLorentzVector W(0.0, 0.0, 0.0, sqrtS);    //= beam + target;
+  for (unsigned int t = 0; t < nPart; t++) { // particle 0 is mother particle
+    masses[t] = physConst->FindParticle(finalS.at(t)).GetMass();
+  }
+  event.SetDecay(W, nPart, masses);
+};
+
+RootGenerator::RootGenerator(std::shared_ptr<Kinematics> kin, int seed) {
+  gRandom = new TRandom3(0);
+  if (seed != -1)
+    SetSeed(seed);
   auto physConst = PhysConst::Instance();
   auto finalS = kin->GetFinalState();
   auto initialS = kin->GetInitialState();
@@ -49,7 +79,7 @@ RootGenerator::RootGenerator(int seed) {
     LOG(info)
         << "RootGenerator::RootGenerator() | only 2 particles in the final"
            " state! There are no degrees of freedom!";
-  
+
   if (initialS.size() != 1)
     throw std::runtime_error(
         "RootGenerator::RootGenerator() | More than one "

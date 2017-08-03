@@ -35,14 +35,14 @@ public:
           std::shared_ptr<DoubleParameter>(new DoubleParameter("", 1.0)),
       std::shared_ptr<Efficiency> eff =
           std::shared_ptr<Efficiency>(new UnitEfficiency))
-      : AmpIntensity(name, strength, eff) {};
+      : AmpIntensity(name, strength, eff){};
 
   virtual ~CoherentIntensity(){};
 
   //! Clone function
   ComPWA::AmpIntensity *Clone(std::string newName = "") const {
     auto tmp = (new CoherentIntensity(*this));
-    tmp->_name=newName;
+    tmp->_name = newName;
     return tmp;
   }
 
@@ -62,7 +62,7 @@ public:
   virtual double Intensity(const ComPWA::dataPoint &point) const;
 
   //============ SET/GET =================
-  
+
   void AddAmplitude(std::shared_ptr<ComPWA::Physics::Amplitude> decay) {
     _seqDecays.push_back(decay);
   }
@@ -74,7 +74,7 @@ public:
   std::vector<std::shared_ptr<ComPWA::Physics::Amplitude>> &GetAmplitudes() {
     return _seqDecays;
   }
-  
+
   virtual void Reset() {
     _seqDecays.clear();
     return;
@@ -93,7 +93,7 @@ public:
       i->GetParametersFast(list);
     }
   }
-  
+
   //! Calculate & fill fit fractions of this amplitude to ParameterList
   virtual void GetFitFractions(ComPWA::ParameterList &parList){};
 
@@ -113,7 +113,7 @@ public:
   };
 
   virtual std::shared_ptr<AmpIntensity> GetComponent(std::string name);
-  
+
   //======== ITERATORS/OPERATORS =============
 
   typedef std::vector<std::shared_ptr<ComPWA::Physics::Amplitude>>::iterator
@@ -132,10 +132,10 @@ public:
   virtual std::shared_ptr<ComPWA::FunctionTree>
   GetTree(const ComPWA::ParameterList &sample,
           const ComPWA::ParameterList &phspSample,
-          const ComPWA::ParameterList &toySample, std::string suffix = "");
+          const ComPWA::ParameterList &toySample, unsigned int nEvtVar,
+          std::string suffix = "");
 
 protected:
-
   virtual std::shared_ptr<FunctionTree>
   setupBasicTree(const ParameterList &sample, const ParameterList &phspSample,
                  std::string suffix = "") const;
@@ -144,7 +144,6 @@ protected:
 
   //! Phase space sample to calculate the normalization and maximum value.
   std::shared_ptr<std::vector<ComPWA::dataPoint>> _phspSample;
-
 };
 
 } /* namespace HelicityFormalism */

@@ -270,7 +270,8 @@ double HelicityKinematics::calculatePSArea() {
   int numNearestN = 10; // Number of nearest neighbours
 
   // Generate phase space sample
-  auto gen = ComPWA::Tools::RootGenerator(123456);
+  auto gen =
+      ComPWA::Tools::RootGenerator(GetInitialState(), GetFinalState(), 123456);
   auto sample = ComPWA::DataReader::RootReader();
   int m = 0;
   while (m < precision) {
@@ -336,8 +337,9 @@ void HelicityKinematics::EventToDataPoint(const Event &event, dataPoint &point,
   EventToDataPoint(event, point, sys, massLimits);
 }
 
-  double HelicityKinematics::HelicityAngle(double M, double m, double m2, double mSpec,
-                     double invMassSqA, double invMassSqB) const {
+double HelicityKinematics::HelicityAngle(double M, double m, double m2,
+                                         double mSpec, double invMassSqA,
+                                         double invMassSqB) const {
   // Calculate energy and momentum of m1/m2 in the invMassSqA rest frame
   double eCms = (invMassSqA + m * m - m2 * m2) / (2 * sqrt(invMassSqA));
   double pCms = eCms * eCms - m * m;
@@ -360,11 +362,11 @@ void HelicityKinematics::EventToDataPoint(const Event &event, dataPoint &point,
   //      +" mSqA="+std::to_string((long double) invMassSqA)
   //      +" mSqB="+std::to_string((long double) invMassSqB) );
   //  }
-    if (cosAngle > 1 || cosAngle < -1) { // faster
-      throw BeyondPhsp("DalitzKinematics::helicityAngle() | "
-                       "scattering angle out of range! Datapoint beyond"
-                       "phsp?");
-    }
+  if (cosAngle > 1 || cosAngle < -1) { // faster
+    throw BeyondPhsp("DalitzKinematics::helicityAngle() | "
+                     "scattering angle out of range! Datapoint beyond"
+                     "phsp?");
+  }
   return cosAngle;
 }
 
@@ -379,14 +381,14 @@ void HelicityKinematics::EventToDataPoint(
   for (auto s : sys.GetRecoilState())
     recoilP4 += event.GetParticle(s).GetFourMomentum();
 
-  FourMomentum finalA,finalB;
+  FourMomentum finalA, finalB;
   for (auto s : sys.GetFinalStates().at(0))
     finalA += event.GetParticle(s).GetFourMomentum();
 
   for (auto s : sys.GetFinalStates().at(1))
     finalB += event.GetParticle(s).GetFourMomentum();
 
-  FourMomentum totalP4 = finalA+finalB;
+  FourMomentum totalP4 = finalA + finalB;
   double mSq = totalP4.GetInvMassSq();
 
   if (mSq <= limits.first) {
@@ -419,7 +421,7 @@ void HelicityKinematics::EventToDataPoint(
    */
   qftFinalA.Boost(qftTotalP4);
   qftRecoilP4.Boost(qftTotalP4);
-//    qftRecoilP4 *= (-1);
+  //    qftRecoilP4 *= (-1);
 
   // Calculate the angles between recoil system and final state.
   qftFinalA.Rotate(qftRecoilP4.Phi(), qftRecoilP4.Theta(),
@@ -427,39 +429,43 @@ void HelicityKinematics::EventToDataPoint(
   double cosTheta = qftFinalA.CosTheta();
   double phi = qftFinalA.Phi();
 
-//  double cc;
-//  if (sys.GetRecoilState().size() == 1 &&
-//      sys.GetFinalStates().at(0).size() == 1 &&
-//      sys.GetFinalStates().at(1).size() == 1) {
-//    double invMassSqA = mSq;
-//    double invMassSqB = (recoilP4 + finalA).GetInvMassSq();
-//    auto mspec = PhysConst::Instance()
-//                     ->FindParticle(_finalState.at(sys.GetRecoilState().at(0)))
-//                     .GetMass();
-//    auto ma =
-//        PhysConst::Instance()
-//            ->FindParticle(_finalState.at(sys.GetFinalStates().at(0).at(0)))
-//            .GetMass();
-//    auto mb =
-//        PhysConst::Instance()
-//            ->FindParticle(_finalState.at(sys.GetFinalStates().at(1).at(0)))
-//            .GetMass();
-//    auto M = PhysConst::Instance()->FindParticle(_initialState.at(0)).GetMass();
-//
-//    cc = HelicityAngle(M, ma, mb, mspec, invMassSqA, invMassSqB);
-////    std::cout << sys << std::endl;
-////    std::cout << _initialState.at(0) << "/ (" << sys.GetFinalStates().at(0).at(0)
-////              << sys.GetFinalStates().at(1).at(0) << ") angle ("<< sys.GetFinalStates().at(0).at(0)
-////              << sys.GetRecoilState().at(0) << ") - "
-////              << " (ma=" << ma<<" mb="<<mb<<" mSpec="<<mspec<<" mABSq="<<invMassSqA << " mASpecSq=" << invMassSqB << ") = " << cc
-////              << " " << cosTheta << std::endl;
-//
-//  } else {
-//    cc = 1.0;
-//    phi = 0.0;
-//  }
-//  cosTheta = cc;
-  
+  //  double cc;
+  //  if (sys.GetRecoilState().size() == 1 &&
+  //      sys.GetFinalStates().at(0).size() == 1 &&
+  //      sys.GetFinalStates().at(1).size() == 1) {
+  //    double invMassSqA = mSq;
+  //    double invMassSqB = (recoilP4 + finalA).GetInvMassSq();
+  //    auto mspec = PhysConst::Instance()
+  //                     ->FindParticle(_finalState.at(sys.GetRecoilState().at(0)))
+  //                     .GetMass();
+  //    auto ma =
+  //        PhysConst::Instance()
+  //            ->FindParticle(_finalState.at(sys.GetFinalStates().at(0).at(0)))
+  //            .GetMass();
+  //    auto mb =
+  //        PhysConst::Instance()
+  //            ->FindParticle(_finalState.at(sys.GetFinalStates().at(1).at(0)))
+  //            .GetMass();
+  //    auto M =
+  //    PhysConst::Instance()->FindParticle(_initialState.at(0)).GetMass();
+  //
+  //    cc = HelicityAngle(M, ma, mb, mspec, invMassSqA, invMassSqB);
+  ////    std::cout << sys << std::endl;
+  ////    std::cout << _initialState.at(0) << "/ (" <<
+  ///sys.GetFinalStates().at(0).at(0)
+  ////              << sys.GetFinalStates().at(1).at(0) << ") angle ("<<
+  ///sys.GetFinalStates().at(0).at(0)
+  ////              << sys.GetRecoilState().at(0) << ") - "
+  ////              << " (ma=" << ma<<" mb="<<mb<<" mSpec="<<mspec<<"
+  ///mABSq="<<invMassSqA << " mASpecSq=" << invMassSqB << ") = " << cc
+  ////              << " " << cosTheta << std::endl;
+  //
+  //  } else {
+  //    cc = 1.0;
+  //    phi = 0.0;
+  //  }
+  //  cosTheta = cc;
+
   //   Check if values are within allowed range.
   if (cosTheta > 1 || cosTheta < -1 || phi > M_PI || phi < (-1) * M_PI ||
       std::isnan(cosTheta) || std::isnan(phi)) {
@@ -470,85 +476,6 @@ void HelicityKinematics::EventToDataPoint(
   point.GetPoint().push_back(mSq);
   point.GetPoint().push_back(cosTheta);
   point.GetPoint().push_back(phi);
-}
-
-double HelicityKinematics::FormFactor(double sqrtS, double ma, double mb,
-                                      double spin, double mesonRadius,
-                                      formFactorType type) {
-  if (type == formFactorType::noFormFactor) {
-    return 1.0;
-  }
-  if (type == formFactorType::BlattWeisskopf && spin == 0) {
-    return 1.0;
-  }
-
-  std::complex<double> qValue = Kinematics::qValue(sqrtS, ma, mb);
-  return HelicityKinematics::FormFactor(sqrtS, ma, mb, spin, mesonRadius,
-                                        qValue, type);
-}
-
-double HelicityKinematics::FormFactor(double sqrtS, double ma, double mb,
-                                      double spin, double mesonRadius,
-                                      std::complex<double> qValue,
-                                      formFactorType type) {
-  if (mesonRadius == 0)
-    return 1.0; // disable form factors
-  if (type == formFactorType::noFormFactor)
-    return 1.0; // disable form factors
-  if (type == formFactorType::BlattWeisskopf && spin == 0) {
-    return 1.0;
-  }
-
-  // Form factor for a0(980) used by Crystal Barrel (Phys.Rev.D78-074023)
-  if (type == formFactorType::CrystalBarrel) {
-    if (spin == 0) {
-      double qSq = std::norm(qValue);
-      double alpha = mesonRadius * mesonRadius / 6;
-      return std::exp(-alpha * qSq);
-    } else
-      throw std::runtime_error("Kinematics::FormFactor() | "
-                               "Form factors of type " +
-                               std::string(formFactorTypeString[type]) +
-                               " are implemented for spin 0 only!");
-  }
-
-  // Blatt-Weisskopt form factors with normalization F(x=mR) = 1.
-  // Reference: S.U.Chung Annalen der Physik 4(1995) 404-430
-  // z = q / (interaction range). For the interaction range we assume
-  // 1/mesonRadius
-  if (type == formFactorType::BlattWeisskopf) {
-    if (spin == 0)
-      return 1;
-    double qSq = std::norm(qValue);
-    double z = qSq * mesonRadius * mesonRadius;
-    /* Events below threshold
-     * What should we do if event is below threshold? Shouldn't really influence
-     * the result
-     * because resonances at threshold don't have spin(?) */
-    z = std::fabs(z);
-
-    if (spin == 1) {
-      return (sqrt(2 * z / (z + 1)));
-    } else if (spin == 2) {
-      return (sqrt(13 * z * z / ((z - 3) * (z - 3) + 9 * z)));
-    } else if (spin == 3) {
-      return (
-          sqrt(277 * z * z * z / (z * (z - 15) * (z - 15) + 9 * (2 * z - 5))));
-    } else if (spin == 4) {
-      return (sqrt(12746 * z * z * z * z /
-                   ((z * z - 45 * z + 105) * (z * z - 45 * z + 105) +
-                    25 * z * (2 * z - 21) * (2 * z - 21))));
-    } else
-      throw std::runtime_error(
-          "Kinematics::FormFactor() | Form factors of type " +
-          std::string(formFactorTypeString[type]) +
-          " are implemented for spins up to 4!");
-  }
-  throw std::runtime_error("Kinematics::FormFactor() | Form factor type " +
-                           std::to_string((long long int)type) +
-                           " not specified!");
-
-  return 0;
 }
 
 } /* namespace HelicityFormalism */

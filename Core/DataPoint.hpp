@@ -33,15 +33,14 @@
 namespace ComPWA {
 
 class dataPoint {
-private:
+
 public:
-  //! Default constructor
   dataPoint();
 
-  //! Construct dataPoint from Event
+  /// Construct dataPoint from Event
   dataPoint(const Event &ev);
   
-  //! Construct dataPoint from vector of invariant masses
+  /// Construct dataPoint from vector of invariant masses
   dataPoint(std::vector<double> vec);
   
   ~dataPoint(){};
@@ -50,37 +49,19 @@ public:
 
   std::size_t Size() const { return var.size(); }
 
-  //! Set value of coordinate num
   void SetValue(unsigned int pos, double val);
   
-  //! Get value of coordinate num
   double GetValue(unsigned int num) const;
 
-  //! Set coordinates by vector
-  void SetPoint(std::vector<double> values);
-  
-  //! Get vector of coordinates
   std::vector<double>& GetPoint() { return var; };
 
-  //! Set weight
   void SetWeight(double w) { weight = w; };
-  //! Get weight
+  
   double getWeight() const { return weight; };
-  //! Set efficiency
+  
   void SetEfficiency(double e) { eff = e; };
-  //! Get efficiency
+  
   double GetEfficiency() const { return eff; };
-
-  static std::vector<double> GetRow(int n, std::vector<dataPoint> v) {
-    std::vector<double> ret;
-    if (!v.size())
-      return ret;
-    if (n >= Kinematics::Instance()->GetNVars())
-      throw std::runtime_error("dataPoint::getRow() | out of range!");
-    for (int i = 0; i < v.size(); i++)
-      ret.push_back(v.at(i).GetValue(n));
-    return ret;
-  }
 
 protected:
   std::vector<double> var;

@@ -40,8 +40,7 @@ BOOST_AUTO_TEST_CASE(HelicityAngleTest) {
 
   // Construct HelicityKinematics from XML tree
   boost::property_tree::ptree tr;
-  boost::property_tree::xml_parser::read_xml("AmpModel-input.xml",
-                                             tr);
+  boost::property_tree::xml_parser::read_xml("AmpModel-input.xml", tr);
 
   ComPWA::PhysConst::CreateInstance(tr);
 
@@ -54,7 +53,9 @@ BOOST_AUTO_TEST_CASE(HelicityAngleTest) {
   HelicityKinematics::CreateInstance(initialState, finalState);
 
   // Generate phsp sample
-  std::shared_ptr<ComPWA::Generator> gen(new ComPWA::Tools::RootGenerator(123));
+  std::shared_ptr<ComPWA::Generator> gen(new ComPWA::Tools::RootGenerator(
+      Kinematics::Instance()->GetInitialState(),
+      Kinematics::Instance()->GetFinalState(), 123));
   std::shared_ptr<ComPWA::DataReader::Data> sample(
       new ComPWA::DataReader::RootReader());
 
@@ -85,16 +86,17 @@ BOOST_AUTO_TEST_CASE(HelicityAngleTest) {
    * cosTheta13_12=0.219724 cosTheta13_CP=-0.13337
    * cosTheta23_12=0.356843 cosTheta23_CP=-0.318779
    */
-//    ev.addParticle(ComPWA::Particle(
-//        std::array<double, 4>{{-0.00827061, -0.242581, -0.335833, 0.636104}},
-//        310));
-//    ev.addParticle(ComPWA::Particle(
-//        std::array<double, 4>{{-0.158637, -0.149132, 0.199913, 0.575405}},
-//        321));
-//    ev.addParticle(ComPWA::Particle(
-//        std::array<double, 4>{{-0.0236227, 0.453598, -0.0330521, 0.671656}},
-//        -321));
-//    sample->pushEvent(ev);
+  //    ev.addParticle(ComPWA::Particle(
+  //        std::array<double, 4>{{-0.00827061, -0.242581, -0.335833,
+  //        0.636104}},
+  //        310));
+  //    ev.addParticle(ComPWA::Particle(
+  //        std::array<double, 4>{{-0.158637, -0.149132, 0.199913, 0.575405}},
+  //        321));
+  //    ev.addParticle(ComPWA::Particle(
+  //        std::array<double, 4>{{-0.0236227, 0.453598, -0.0330521, 0.671656}},
+  //        -321));
+  //    sample->pushEvent(ev);
 
   auto kin = dynamic_cast<HelicityKinematics *>(Kinematics::Instance());
 

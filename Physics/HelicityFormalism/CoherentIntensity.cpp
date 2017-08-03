@@ -31,7 +31,7 @@ std::shared_ptr<CoherentIntensity>
 CoherentIntensity::Factory(const boost::property_tree::ptree &pt) {
   LOG(trace) << " CoherentIntensity::Factory() | Construction....";
   auto obj = std::make_shared<CoherentIntensity>();
-  obj->_name=(pt.get<std::string>("<xmlattr>.Name"));
+  obj->_name = (pt.get<std::string>("<xmlattr>.Name"));
 
   //  boost::property_tree::xml_writer_settings<char> settings('\t', 1);
   //  write_xml(std::cout,pt);
@@ -39,10 +39,9 @@ CoherentIntensity::Factory(const boost::property_tree::ptree &pt) {
   auto ptCh = pt.get_child_optional("Strength");
   if (ptCh) {
     auto strength = ComPWA::DoubleParameterFactory(ptCh.get());
-    obj->_strength=(std::make_shared<DoubleParameter>(strength));
+    obj->_strength = (std::make_shared<DoubleParameter>(strength));
   } else {
-    obj->_strength=(
-        std::make_shared<ComPWA::DoubleParameter>("", 1.0));
+    obj->_strength = (std::make_shared<ComPWA::DoubleParameter>("", 1.0));
   }
 
   for (const auto &v : pt.get_child("")) {
@@ -59,8 +58,7 @@ CoherentIntensity::Save(std::shared_ptr<CoherentIntensity> obj) {
 
   boost::property_tree::ptree pt;
   pt.put<std::string>("<xmlattr>.Name", obj->Name());
-  pt.add_child("Strength",
-               ComPWA::DoubleParameterSave(*obj->_strength.get()));
+  pt.add_child("Strength", ComPWA::DoubleParameterSave(*obj->_strength.get()));
   for (auto i : obj->GetAmplitudes()) {
     pt.add_child("Amplitude", SequentialTwoBodyDecay::Save(i));
   }
@@ -81,7 +79,7 @@ CoherentIntensity::GetComponent(std::string name) {
   // Do we want to have a combination of coherentintensities?
   std::vector<std::string> splitNames = splitString(name);
   auto icIn = std::shared_ptr<AmpIntensity>(this->Clone(name));
-  icIn->Reset(); //delete all existing amplitudes
+  icIn->Reset(); // delete all existing amplitudes
   for (auto i : splitNames) {
     for (auto j : _seqDecays) {
       if (i == j->GetName()) {
@@ -97,7 +95,7 @@ CoherentIntensity::GetComponent(std::string name) {
         "CoherentIntensity::GetComponent() | Component " + name +
         " could not be found in CoherentIntensity " + Name() + ".");
   }
-  
+
   return icIn;
 }
 
@@ -106,10 +104,10 @@ std::shared_ptr<ComPWA::FunctionTree>
 CoherentIntensity::GetTree(const ComPWA::ParameterList &sample,
                            const ComPWA::ParameterList &phspSample,
                            const ComPWA::ParameterList &toySample,
-                           std::string suffix) {
+                           unsigned int nEvtVar, std::string suffix) {
 
-  unsigned int effId = Kinematics::Instance()->GetNVars();
-  unsigned int weightId = Kinematics::Instance()->GetNVars() + 1;
+  unsigned int effId = nEvtVar;
+  unsigned int weightId = nEvtVar + 1;
   int phspSampleSize = phspSample.GetMultiDouble(0)->GetNValues();
 
   std::shared_ptr<MultiDouble> weightPhsp = phspSample.GetMultiDouble(weightId);
