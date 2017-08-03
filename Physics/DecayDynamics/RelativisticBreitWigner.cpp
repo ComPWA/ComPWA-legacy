@@ -18,11 +18,12 @@
 #include "boost/property_tree/ptree.hpp"
 
 #include "Physics/HelicityFormalism/HelicityKinematics.hpp"
-#include "Physics/HelicityFormalism/RelativisticBreitWigner.hpp"
+#include "Physics/DecayDynamics/RelativisticBreitWigner.hpp"
+#include "Physics/DecayDynamics/Coupling.hpp"
 
 namespace ComPWA {
 namespace Physics {
-namespace HelicityFormalism {
+namespace DecayDynamics {
 
 std::complex<double> RelativisticBreitWigner::Evaluate(const dataPoint &point,
                                                        int pos) const {
@@ -54,8 +55,8 @@ std::complex<double> RelativisticBreitWigner::dynamicalFunction(
   std::complex<double> i(0, 1);
   double sqrtS = sqrt(mSq);
 
-  auto phspFactorSqrtS = Kinematics::phspFactor(sqrtS, ma, mb);
-  auto phspFactormR = Kinematics::phspFactor(mR, ma, mb);
+  auto phspFactorSqrtS = phspFactor(sqrtS, ma, mb);
+  auto phspFactormR = phspFactor(mR, ma, mb);
 
   // Check if we have an event which is exactly at the phase space boundary
   if (phspFactorSqrtS == std::complex<double>(0, 0))
@@ -294,6 +295,6 @@ void RelativisticBreitWigner::GetParameters(ParameterList &list) {
   }
 }
 
-} /* namespace DynamicalFunctions */
+} /* namespace DecayDynamics */
 } /* namespace Physics */
 } /* namespace ComPWA */

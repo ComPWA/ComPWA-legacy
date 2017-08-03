@@ -32,14 +32,9 @@
 #include <memory>
 #include <math.h>
 
-//#include "Core/Resonance.hpp"
 #include "Core/ParameterList.hpp"
 #include "Core/FunctionTree.hpp"
-#include "DataReader/Data.hpp"
-
 #include "Core/DataPoint.hpp"
-#include "Core/Efficiency.hpp"
-#include "Core/Generator.hpp"
 
 namespace ComPWA {
 namespace Physics {

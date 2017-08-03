@@ -22,11 +22,11 @@
 
 #include <cmath>
 #include <math.h>
-#include "Physics/HelicityFormalism/AmpFlatteRes.hpp"
+#include "Physics/DecayDynamics/AmpFlatteRes.hpp"
 
 namespace ComPWA {
 namespace Physics {
-namespace HelicityFormalism {
+namespace DecayDynamics {
 
 AmpFlatteRes::~AmpFlatteRes() {}
 
@@ -169,7 +169,7 @@ AmpFlatteRes::dynamicalFunction(double mSq, double mR, double massA1,
              FormFactor(
                  mR, massA1, massA2, J, mesonRadius, ffType);
   // convert coupling to partial width of channel A
-  gammaA = HelicityFormalism::couplingToWidth(mSq, mR, gA, massA1, massA2, J,
+  gammaA = couplingToWidth(mSq, mR, gA, massA1, massA2, J,
                                               mesonRadius, ffType);
   // including the factor qTermA, as suggested by PDG, leads to an amplitude
   // that doesn't converge.
@@ -188,7 +188,7 @@ AmpFlatteRes::dynamicalFunction(double mSq, double mR, double massA1,
                  mR, massB1, massB2, J, mesonRadius, ffType);
   gB = couplingB;
   // convert coupling to partial width of channel B
-  gammaB = HelicityFormalism::couplingToWidth(mSq, mR, gB, massB1, massB2, J,
+  gammaB = couplingToWidth(mSq, mR, gB, massB1, massB2, J,
                                               mesonRadius, ffType);
   //		qTermB = Kinematics::qValue(sqrtS,massB1,massB2) /
   // Kinematics::qValue(mR,massB1,massB2);
@@ -206,7 +206,7 @@ AmpFlatteRes::dynamicalFunction(double mSq, double mR, double massA1,
                    mR, massC1, massC2, J, mesonRadius, ffType);
     gC = couplingC;
     // convert coupling to partial width of channel C
-    gammaC = HelicityFormalism::couplingToWidth(mSq, mR, gC, massC1, massC2, J,
+    gammaC = couplingToWidth(mSq, mR, gC, massC1, massC2, J,
                                                 mesonRadius, ffType);
     //		qTermC = Kinematics::qValue(sqrtS,massC1,massC2) /
     // Kinematics::qValue(mR,massC1,massC2);

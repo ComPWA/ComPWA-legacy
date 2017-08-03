@@ -5,11 +5,11 @@
  *      Author: weidenka
  */
 
-#include "Physics/HelicityFormalism/NonResonant.hpp"
+#include "Physics/DecayDynamics/NonResonant.hpp"
 
 namespace ComPWA {
 namespace Physics {
-namespace HelicityFormalism {
+namespace DecayDynamics {
 
 std::shared_ptr<FunctionTree>
 NonResonant::GetTree(const ParameterList &sample, int pos, std::string suffix) {
@@ -27,6 +27,6 @@ NonResonant::GetTree(const ParameterList &sample, int pos, std::string suffix) {
   return newTree;
 }
 
-} /* namespace HelicityFormalism */
+} /* namespace DecayDynamics */
 } /* namespace Physics */
 } /* namespace ComPWA */

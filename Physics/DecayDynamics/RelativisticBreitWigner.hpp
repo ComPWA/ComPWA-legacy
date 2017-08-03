@@ -29,12 +29,12 @@
 #include "Core/Spin.hpp"
 #include "Core/Functions.hpp"
 #include "Core/Exceptions.hpp"
-#include "Physics/HelicityFormalism/AbstractDynamicalFunction.hpp"
+#include "Physics/DecayDynamics/AbstractDynamicalFunction.hpp"
 #include "Physics/HelicityFormalism/AmpWignerD.hpp"
 
 namespace ComPWA {
 namespace Physics {
-namespace HelicityFormalism {
+namespace DecayDynamics {
 
 class PartialDecay;
 /**
@@ -231,7 +231,7 @@ protected:
   std::string name;
 };
 
-} /* namespace DynamicalFunctions */
+} /* namespace DecayDynamics */
 } /* namespace Physics */
 } /* namespace ComPWA */
 

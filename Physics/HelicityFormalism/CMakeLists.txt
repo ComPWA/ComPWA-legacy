@@ -1,15 +1,13 @@
 # Create HelicityAmplitude library.
 
 SET( lib_srcs IncoherentIntensity.cpp CoherentIntensity.cpp
-    AbstractDynamicalFunction.cpp RelativisticBreitWigner.cpp AmpWignerD.cpp
-    PartialDecay.cpp SequentialTwoBodyDecay.cpp HelicityKinematics.cpp NonResonant.cpp
-    AmpFlatteRes.cpp )
+    AmpWignerD.cpp PartialDecay.cpp SequentialTwoBodyDecay.cpp
+    HelicityKinematics.cpp )
 
 SET( lib_headers IncoherentIntensity.hpp CoherentIntensity.hpp
-    SequentialTwoBodyDecay.hpp PartialDecay.hpp AbstractDynamicalFunction.hpp
-    NonResonant.hpp PartialDecay.hpp RelativisticBreitWigner.hpp
-    SequentialTwoBodyDecay.hpp AmpWignerD.hpp HelicityKinematics.hpp NonResonant.hpp
-    AmpFlatteRes.hpp ../Amplitude.hpp ../Resonance.hpp )
+    SequentialTwoBodyDecay.hpp PartialDecay.hpp PartialDecay.hpp
+    SequentialTwoBodyDecay.hpp AmpWignerD.hpp HelicityKinematics.hpp
+    ../Amplitude.hpp ../Resonance.hpp )
 
 add_library( HelicityFormalism
   SHARED ${lib_srcs} ${lib_headers}
@@ -20,6 +18,7 @@ target_link_libraries( HelicityFormalism
   qft++
   Tools
   RootReader
+  DecayDynamics
   ${Boost_LIBRARIES}
 )
 

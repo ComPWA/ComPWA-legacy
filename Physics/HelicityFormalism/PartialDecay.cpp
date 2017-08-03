@@ -8,10 +8,11 @@
 
 #include <sstream>
 
+#include "Physics/DecayDynamics/RelativisticBreitWigner.hpp"
+#include "Physics/DecayDynamics/AmpFlatteRes.hpp"
+#include "Physics/DecayDynamics/NonResonant.hpp"
+
 #include "Physics/HelicityFormalism/PartialDecay.hpp"
-#include "Physics/HelicityFormalism/RelativisticBreitWigner.hpp"
-#include "Physics/HelicityFormalism/AmpFlatteRes.hpp"
-#include "Physics/HelicityFormalism/NonResonant.hpp"
 #include "Physics/HelicityFormalism/HelicityKinematics.hpp"
 
 namespace ComPWA {
@@ -60,7 +61,7 @@ PartialDecay::Factory(const boost::property_tree::ptree &pt) {
   SubSystem subSys(recoilState, finalStates);
   subSys.SetFinalStatesNames(finalStatesNames);
 
-  auto dynObj = std::shared_ptr<AbstractDynamicalFunction>();
+  auto dynObj = std::shared_ptr<DecayDynamics::AbstractDynamicalFunction>();
   std::string name = pt.get<std::string>("DecayParticle.<xmlattr>.Name");
   
   if (finalStates.size() == 2) {
@@ -77,9 +78,9 @@ PartialDecay::Factory(const boost::property_tree::ptree &pt) {
                                "given as mother particle of a decay. Makes no "
                                "sense!");
     } else if (decayType == "relativisticBreitWigner") {
-      dynObj = RelativisticBreitWigner::Factory(pt);
+      dynObj = DecayDynamics::RelativisticBreitWigner::Factory(pt);
     } else if (decayType == "flatte") {
-      dynObj = AmpFlatteRes::Factory(pt);
+      dynObj = DecayDynamics::AmpFlatteRes::Factory(pt);
     } else {
       throw std::runtime_error("PartialDecay::Factory() | Unknown decay type " +
                                decayType + "!");
@@ -87,7 +88,7 @@ PartialDecay::Factory(const boost::property_tree::ptree &pt) {
 
     // make sure dynamical function is created and set first
   } else {
-    dynObj = std::shared_ptr<AbstractDynamicalFunction>(new NonResonant);
+    dynObj = std::shared_ptr<DecayDynamics::AbstractDynamicalFunction>(new DecayDynamics::NonResonant);
     dynObj->SetName(name);
     // We assume the we have a multi-body decay and assume that the decay
     // proceeds via constant (non-resonant) dynamics

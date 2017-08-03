@@ -51,41 +51,6 @@ public:
   //! Get inital state
   virtual std::vector<pid> GetInitialState() { return _initialState; }
 
-  /** Calculate Break-up momentum squared
-   *
-   * Calculate Break-up momentum at energy @param sqrtS for particles with
-   * masses @param ma and @param mb .
-   * From PDG2014 Eq.46-20a. Below threshold the function is analytically
-   * continued.
-   * @param sqrtS center-of-mass energy
-   * @param ma mass particle A
-   * @param mb mass particle B
-   * @return |break-up momentum|
-   */
-  static double qSqValue(double sqrtS, double ma, double mb);
-
-  /** Calculate Break-up momentum
-   *
-   * Calculate Break-up momentum at energy @param sqrtS for particles with
-   * masses @param ma and @param mb .
-   * From PDG2014 Eq.46-20a. Below threshold the function is analytically
-   * continued.
-   * @param sqrtS center-of-mass energy
-   * @param ma mass particle A
-   * @param mb mass particle B
-   * @return |break-up momentum|
-   */
-  static std::complex<double> qValue(double sqrtS, double ma, double mb);
-  /** Two body phsp factor
-   *
-   * From PDG2014 Eqn.47-2
-   * @param sqrtS invariant mass of particles A and B
-   * @param ma Mass of particle A
-   * @param mb Mass of particle B
-   * @return
-   */
-  static std::complex<double> phspFactor(double sqrtS, double ma, double mb);
-
 protected:
   std::vector<pid> _initialState;
   std::vector<pid> _finalState;

@@ -9,12 +9,12 @@
 //   Stefan Pflueger - initial API and implementation
 //----------------------------------------------------------------------------------
 
-#include "Physics/HelicityFormalism/AbstractDynamicalFunction.hpp"
+#include "Physics/DecayDynamics/AbstractDynamicalFunction.hpp"
 #include "Tools/Integration.hpp"
 
 namespace ComPWA {
 namespace Physics {
-namespace HelicityFormalism {
+namespace DecayDynamics {
 
 void AbstractDynamicalFunction::GetParameters(ParameterList &list) {
   /* We check of for each parameter if a parameter of the same name exists in
@@ -37,6 +37,6 @@ void AbstractDynamicalFunction::GetParameters(ParameterList &list) {
   }
 }
 
-} /* namespace DynamicalFunctions */
+} /* namespace DecayDynamics */
 } /* namespace Physics */
 } /* namespace ComPWA */

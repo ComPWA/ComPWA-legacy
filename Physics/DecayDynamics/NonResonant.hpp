@@ -12,12 +12,12 @@
 #ifndef PHYSICS_HELICITYFORMALISM_NONRESONANT
 #define PHYSICS_HELICITYFORMALISM_NONRESONANT
 
-#include "Physics/HelicityFormalism/AbstractDynamicalFunction.hpp"
+#include "Physics/DecayDynamics/AbstractDynamicalFunction.hpp"
 #include "Core/Kinematics.hpp"
 
 namespace ComPWA {
 namespace Physics {
-namespace HelicityFormalism {
+namespace DecayDynamics {
 
 class NonResonant : public AbstractDynamicalFunction {
 
@@ -40,7 +40,7 @@ public:
   virtual void GetParameters(ParameterList &list){};
 };
 
-} /* namespace DynamicalFunctions */
+} /* namespace DecayDynamics */
 } /* namespace Physics */
 } /* namespace ComPWA */
 

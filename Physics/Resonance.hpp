@@ -5,13 +5,11 @@
  *      Author: weidenka
  */
 
-#ifndef CORE_RESONANCE_HPP_
-#define CORE_RESONANCE_HPP_
+#ifndef PHYSICS_RESONANCE_HPP_
+#define PHYSICS_RESONANCE_HPP_
 
 #include <vector>
 #include <memory>
-
-#include <boost/iterator/filter_iterator.hpp>
 
 #include "Core/AbsParameter.hpp"
 #include "Core/Parameter.hpp"
@@ -20,13 +18,6 @@
 
 namespace ComPWA {
 namespace Physics {
-
-enum normStyle {
-  none, /*!< no normaliztion between Amplitudes. */
-  /*!< all amplitudes are normalized to one.
-   *  The normalization factor is \f$ 1/\sqrt(\int |A|^2)\f$ */
-  one
-};
 
 class Resonance {
 
@@ -218,4 +209,4 @@ private:
 
 } /* namespace Physics */
 } /* namespace ComPWA */
-#endif /* CORE_RESONANCE_HPP_ */
+#endif /* PHYSICS_RESONANCE_HPP_ */

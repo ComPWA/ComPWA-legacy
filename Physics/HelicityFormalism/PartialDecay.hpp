@@ -16,8 +16,10 @@
 #include <boost/property_tree/ptree.hpp>
 
 #include "Physics/Resonance.hpp"
-#include "Physics/HelicityFormalism/AbstractDynamicalFunction.hpp"
+#include "Physics/DecayDynamics/AbstractDynamicalFunction.hpp"
 #include "Physics/HelicityFormalism/AmpWignerD.hpp"
+#include "Physics/HelicityFormalism/SubSystem.hpp"
+#include "Physics/HelicityFormalism/HelicityKinematics.hpp"
 
 namespace ComPWA {
 namespace Physics {
@@ -101,14 +103,14 @@ public:
     _angD = w;
   }
 
-  std::shared_ptr<ComPWA::Physics::HelicityFormalism::AbstractDynamicalFunction>
+  std::shared_ptr<ComPWA::Physics::DecayDynamics::AbstractDynamicalFunction>
   GetDynamicalFunction() {
     return _dynamic;
   }
 
   void SetDynamicalFunction(
       std::shared_ptr<
-          ComPWA::Physics::HelicityFormalism::AbstractDynamicalFunction>
+          ComPWA::Physics::DecayDynamics::AbstractDynamicalFunction>
           f) {
     _dynamic = f;
   }
@@ -150,7 +152,7 @@ protected:
 
   std::shared_ptr<ComPWA::Physics::HelicityFormalism::AmpWignerD> _angD;
 
-  std::shared_ptr<ComPWA::Physics::HelicityFormalism::AbstractDynamicalFunction>
+  std::shared_ptr<ComPWA::Physics::DecayDynamics::AbstractDynamicalFunction>
       _dynamic;
 };
 

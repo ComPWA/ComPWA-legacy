@@ -23,48 +23,15 @@
 
 #include <vector>
 #include <cmath>
-#include "Physics/HelicityFormalism/AbstractDynamicalFunction.hpp"
+#include "Physics/DecayDynamics/AbstractDynamicalFunction.hpp"
+#include "Physics/DecayDynamics/FormFactor.hpp"
+#include "Physics/DecayDynamics/Coupling.hpp"
 
 namespace ComPWA {
 namespace Physics {
-namespace HelicityFormalism {
+namespace DecayDynamics {
 
-class Coupling {
-public:
-  Coupling() : _g(new DoubleParameter("", 0.0)){};
-
-  Coupling(const boost::property_tree::ptree tr) {
-    _g = std::make_shared<DoubleParameter>(
-        ComPWA::DoubleParameterFactory(tr.get_child("")));
-    std::string nameA = tr.get<std::string>("ParticleA");
-    std::string nameB = tr.get<std::string>("ParticleB");
-    _massA = PhysConst::Instance()->FindParticle(nameA).GetMass();
-    _massB = PhysConst::Instance()->FindParticle(nameB).GetMass();
-  };
-
-  void SetValueParameter(std::shared_ptr<DoubleParameter> g) { _g = g; }
-
-  std::shared_ptr<DoubleParameter> GetValueParameter() { return _g; }
-
-  double GetValue() const { return _g->GetValue(); }
-
-  double GetMassA() const { return _massA; }
-
-  double GetMassB() const { return _massB; }
-
-  void SetMassA(double m) { _massA = m; }
-
-  void SetMassB(double m) { _massB = m; }
-
-protected:
-  std::shared_ptr<DoubleParameter> _g;
-
-  double _massA;
-
-  double _massB;
-};
-
-class AmpFlatteRes : public HelicityFormalism::AbstractDynamicalFunction {
+class AmpFlatteRes : public DecayDynamics::AbstractDynamicalFunction {
 
 public:
   //============ CONSTRUCTION ==================
@@ -290,7 +257,7 @@ protected:
   std::string name;
 };
 
-} /* namespace AmplitudeSum */
+} /* namespace DecayDynamics */
 } /* namespace Physics */
 } /* namespace ComPWA */
 

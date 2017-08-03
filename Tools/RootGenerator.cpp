@@ -33,11 +33,10 @@ RootGenerator::RootGenerator(double cmsEnergy, double m1, double m2, double m3, 
   event.SetDecay(W, nPart, masses);
 }
 
-RootGenerator::RootGenerator(int seed) {
+RootGenerator::RootGenerator(std::shared_ptr<Kinematics> kin, int seed) {
   gRandom = new TRandom3(0);
   if (seed != -1)
     SetSeed(seed);
-  Kinematics *kin = Kinematics::Instance();
   auto physConst = PhysConst::Instance();
   auto finalS = kin->GetFinalState();
   auto initialS = kin->GetInitialState();
