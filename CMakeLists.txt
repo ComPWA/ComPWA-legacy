@@ -22,9 +22,7 @@ INCLUDE_DIRECTORIES(${PYTHON_INCLUDE_PATH})
 LINK_DIRECTORIES(${PYTHON_LIBRARIES})
 
 #Add Boost
-#find_package(Boost COMPONENTS unit_test_framework system filesystem
-#serialization thread chrono date_time log log_setup program_options REQUIRED)
-find_package(Boost COMPONENTS unit_test_framework python system filesystem  
+find_package(Boost COMPONENTS unit_test_framework python system filesystem
 serialization thread chrono date_time log log_setup program_options regex REQUIRED)
 include_directories(${Boost_INCLUDE_DIR})
 link_directories(${Boost_LIBRARY_DIR})
