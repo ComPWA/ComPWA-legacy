@@ -16,10 +16,19 @@ set (CMAKE_CXX_STANDARD 11)
 
 #using python : 2.7 : /usr/bin : /usr/include/python2.7 : /usr/lib64/python2.7 ;
 #using python : 3.5 : /usr/bin/python3 : /usr/include/python3.5m : /usr/lib64/python3.5 ;
-find_package(PythonLibs 2.7 EXACT)
-#message(${PYTHON_LIBRARIES})
-INCLUDE_DIRECTORIES(${PYTHON_INCLUDE_PATH})
-LINK_DIRECTORIES(${PYTHON_LIBRARIES})
+if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+  # using Clang
+  # no python for now
+  find_package(Boost COMPONENTS unit_test_framework system filesystem  
+  serialization thread chrono date_time log log_setup program_options regex REQUIRED)
+else ()
+  find_package(PythonLibs 2.7 EXACT)
+  #message(${PYTHON_LIBRARIES})
+  INCLUDE_DIRECTORIES(${PYTHON_INCLUDE_PATH})
+  LINK_DIRECTORIES(${PYTHON_LIBRARIES})
+  find_package(Boost COMPONENTS unit_test_framework python system filesystem  
+  serialization thread chrono date_time log log_setup program_options regex REQUIRED)
+endif()
 
 #Add Boost
 find_package(Boost COMPONENTS unit_test_framework python system filesystem
