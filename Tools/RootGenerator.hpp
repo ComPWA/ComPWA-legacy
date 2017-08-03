@@ -41,11 +41,16 @@ namespace Tools {
 class RootGenerator : public Generator {
 
 public:
-  //! Constructor for a three particle decay with given masses
+  /// Constructor for a three particle decay with given masses
   RootGenerator(double sqrtS, double m1, double m2, double m3, int seed = -1);
 
-  //! Default Constructor. Information on the decay is obtained from Kinematics
+  /// Constructor: Information on the decay is obtained from Kinematics
   RootGenerator(std::shared_ptr<Kinematics> kin, int seed = -1);
+
+  /// Constructor: Information on the decay is provides via lists of initial and
+  /// final states
+  RootGenerator(std::vector<pid> finalS, std::vector<pid> initialS,
+                int seed = -1);
 
   ~RootGenerator() { delete[] masses; };
 

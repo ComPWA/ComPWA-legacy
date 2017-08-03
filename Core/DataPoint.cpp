@@ -61,13 +61,6 @@ double dataPoint::GetValue(unsigned int num) const {
   return rt;
 }
 
-void dataPoint::SetPoint(std::vector<double> values) {
-  if (Kinematics::Instance()->GetNVars() != values.size())
-    throw std::runtime_error("dataPoint::setPoint() vector has wrong length!");
-  var = std::vector<double>(values);
-  return;
-}
-
 std::ostream &operator<<(std::ostream &os, const dataPoint &p) {
   os << "(";
   for (int i = 0; i < p.Size(); i++){

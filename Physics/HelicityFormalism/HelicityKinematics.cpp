@@ -270,7 +270,8 @@ double HelicityKinematics::calculatePSArea() {
   int numNearestN = 10; // Number of nearest neighbours
 
   // Generate phase space sample
-  auto gen = ComPWA::Tools::RootGenerator(123456);
+  auto gen =
+      ComPWA::Tools::RootGenerator(GetInitialState(), GetFinalState(), 123456);
   auto sample = ComPWA::DataReader::RootReader();
   int m = 0;
   while (m < precision) {
@@ -336,8 +337,9 @@ void HelicityKinematics::EventToDataPoint(const Event &event, dataPoint &point,
   EventToDataPoint(event, point, sys, massLimits);
 }
 
-  double HelicityKinematics::HelicityAngle(double M, double m, double m2, double mSpec,
-                     double invMassSqA, double invMassSqB) const {
+double HelicityKinematics::HelicityAngle(double M, double m, double m2,
+                                         double mSpec, double invMassSqA,
+                                         double invMassSqB) const {
   // Calculate energy and momentum of m1/m2 in the invMassSqA rest frame
   double eCms = (invMassSqA + m * m - m2 * m2) / (2 * sqrt(invMassSqA));
   double pCms = eCms * eCms - m * m;
@@ -360,11 +362,11 @@ void HelicityKinematics::EventToDataPoint(const Event &event, dataPoint &point,
   //      +" mSqA="+std::to_string((long double) invMassSqA)
   //      +" mSqB="+std::to_string((long double) invMassSqB) );
   //  }
-    if (cosAngle > 1 || cosAngle < -1) { // faster
-      throw BeyondPhsp("DalitzKinematics::helicityAngle() | "
-                       "scattering angle out of range! Datapoint beyond"
-                       "phsp?");
-    }
+  if (cosAngle > 1 || cosAngle < -1) { // faster
+    throw BeyondPhsp("DalitzKinematics::helicityAngle() | "
+                     "scattering angle out of range! Datapoint beyond"
+                     "phsp?");
+  }
   return cosAngle;
 }
 
@@ -379,14 +381,14 @@ void HelicityKinematics::EventToDataPoint(
   for (auto s : sys.GetRecoilState())
     recoilP4 += event.GetParticle(s).GetFourMomentum();
 
-  FourMomentum finalA,finalB;
+  FourMomentum finalA, finalB;
   for (auto s : sys.GetFinalStates().at(0))
     finalA += event.GetParticle(s).GetFourMomentum();
 
   for (auto s : sys.GetFinalStates().at(1))
     finalB += event.GetParticle(s).GetFourMomentum();
 
-  FourMomentum totalP4 = finalA+finalB;
+  FourMomentum totalP4 = finalA + finalB;
   double mSq = totalP4.GetInvMassSq();
 
   if (mSq <= limits.first) {
@@ -419,7 +421,7 @@ void HelicityKinematics::EventToDataPoint(
    */
   qftFinalA.Boost(qftTotalP4);
   qftRecoilP4.Boost(qftTotalP4);
-//    qftRecoilP4 *= (-1);
+  //    qftRecoilP4 *= (-1);
 
   // Calculate the angles between recoil system and final state.
   qftFinalA.Rotate(qftRecoilP4.Phi(), qftRecoilP4.Theta(),
@@ -427,39 +429,43 @@ void HelicityKinematics::EventToDataPoint(
   double cosTheta = qftFinalA.CosTheta();
   double phi = qftFinalA.Phi();
 
-//  double cc;
-//  if (sys.GetRecoilState().size() == 1 &&
-//      sys.GetFinalStates().at(0).size() == 1 &&
-//      sys.GetFinalStates().at(1).size() == 1) {
-//    double invMassSqA = mSq;
-//    double invMassSqB = (recoilP4 + finalA).GetInvMassSq();
-//    auto mspec = PhysConst::Instance()
-//                     ->FindParticle(_finalState.at(sys.GetRecoilState().at(0)))
-//                     .GetMass();
-//    auto ma =
-//        PhysConst::Instance()
-//            ->FindParticle(_finalState.at(sys.GetFinalStates().at(0).at(0)))
-//            .GetMass();
-//    auto mb =
-//        PhysConst::Instance()
-//            ->FindParticle(_finalState.at(sys.GetFinalStates().at(1).at(0)))
-//            .GetMass();
-//    auto M = PhysConst::Instance()->FindParticle(_initialState.at(0)).GetMass();
-//
-//    cc = HelicityAngle(M, ma, mb, mspec, invMassSqA, invMassSqB);
-////    std::cout << sys << std::endl;
-////    std::cout << _initialState.at(0) << "/ (" << sys.GetFinalStates().at(0).at(0)
-////              << sys.GetFinalStates().at(1).at(0) << ") angle ("<< sys.GetFinalStates().at(0).at(0)
-////              << sys.GetRecoilState().at(0) << ") - "
-////              << " (ma=" << ma<<" mb="<<mb<<" mSpec="<<mspec<<" mABSq="<<invMassSqA << " mASpecSq=" << invMassSqB << ") = " << cc
-////              << " " << cosTheta << std::endl;
-//
-//  } else {
-//    cc = 1.0;
-//    phi = 0.0;
-//  }
-//  cosTheta = cc;
-  
+  //  double cc;
+  //  if (sys.GetRecoilState().size() == 1 &&
+  //      sys.GetFinalStates().at(0).size() == 1 &&
+  //      sys.GetFinalStates().at(1).size() == 1) {
+  //    double invMassSqA = mSq;
+  //    double invMassSqB = (recoilP4 + finalA).GetInvMassSq();
+  //    auto mspec = PhysConst::Instance()
+  //                     ->FindParticle(_finalState.at(sys.GetRecoilState().at(0)))
+  //                     .GetMass();
+  //    auto ma =
+  //        PhysConst::Instance()
+  //            ->FindParticle(_finalState.at(sys.GetFinalStates().at(0).at(0)))
+  //            .GetMass();
+  //    auto mb =
+  //        PhysConst::Instance()
+  //            ->FindParticle(_finalState.at(sys.GetFinalStates().at(1).at(0)))
+  //            .GetMass();
+  //    auto M =
+  //    PhysConst::Instance()->FindParticle(_initialState.at(0)).GetMass();
+  //
+  //    cc = HelicityAngle(M, ma, mb, mspec, invMassSqA, invMassSqB);
+  ////    std::cout << sys << std::endl;
+  ////    std::cout << _initialState.at(0) << "/ (" <<
+  ///sys.GetFinalStates().at(0).at(0)
+  ////              << sys.GetFinalStates().at(1).at(0) << ") angle ("<<
+  ///sys.GetFinalStates().at(0).at(0)
+  ////              << sys.GetRecoilState().at(0) << ") - "
+  ////              << " (ma=" << ma<<" mb="<<mb<<" mSpec="<<mspec<<"
+  ///mABSq="<<invMassSqA << " mASpecSq=" << invMassSqB << ") = " << cc
+  ////              << " " << cosTheta << std::endl;
+  //
+  //  } else {
+  //    cc = 1.0;
+  //    phi = 0.0;
+  //  }
+  //  cosTheta = cc;
+
   //   Check if values are within allowed range.
   if (cosTheta > 1 || cosTheta < -1 || phi > M_PI || phi < (-1) * M_PI ||
       std::isnan(cosTheta) || std::isnan(phi)) {
@@ -471,7 +477,6 @@ void HelicityKinematics::EventToDataPoint(
   point.GetPoint().push_back(cosTheta);
   point.GetPoint().push_back(phi);
 }
-
 
 } /* namespace HelicityFormalism */
 } /* namespace Physics */
