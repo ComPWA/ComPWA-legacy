@@ -180,8 +180,8 @@ inline double FormFactor(double sqrtS, double ma, double mb, double spin,
     return 1.0;
   }
 
-  std::complex<double> qValue = qSqValue(sqrtS, ma, mb);
-  return FormFactor(sqrtS, ma, mb, spin, mesonRadius, qValue, type);
+  std::complex<double> qV = qValue(sqrtS, ma, mb);
+  return FormFactor(sqrtS, ma, mb, spin, mesonRadius, qV, type);
 }
 
 } /* namespace DecayDynamics */
