@@ -93,7 +93,8 @@ boost::property_tree::ptree PartialDecay::Save(std::shared_ptr<Resonance> res) {
          obj->GetDynamicalFunction()->GetName());
   pt.put("DecayParticle.<xmlattr>.Helicity", obj->GetWignerD()->GetMu());
 
-  pt.add_child("SubSystem", SubSystemSave(obj->GetSubSystem()));
+  auto subTr = SubSystemSave(obj->GetSubSystem());
+  pt.add_child("SubSystem", subTr);
 
   return pt;
 }

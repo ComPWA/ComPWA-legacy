@@ -50,12 +50,12 @@ BOOST_AUTO_TEST_CASE(HelicityAngleTest) {
   finalState.push_back(310);
   finalState.push_back(-321);
   finalState.push_back(321);
-  HelicityKinematics::CreateInstance(initialState, finalState);
+  auto kin = std::make_shared<HelicityKinematics>(initialState, finalState);
 
   // Generate phsp sample
   std::shared_ptr<ComPWA::Generator> gen(new ComPWA::Tools::RootGenerator(
-      Kinematics::Instance()->GetInitialState(),
-      Kinematics::Instance()->GetFinalState(), 123));
+      kin->GetInitialState(),
+      kin->GetFinalState(), 123));
   std::shared_ptr<ComPWA::DataReader::Data> sample(
       new ComPWA::DataReader::RootReader());
 
@@ -97,8 +97,6 @@ BOOST_AUTO_TEST_CASE(HelicityAngleTest) {
   //        std::array<double, 4>{{-0.0236227, 0.453598, -0.0330521, 0.671656}},
   //        -321));
   //    sample->pushEvent(ev);
-
-  auto kin = dynamic_cast<HelicityKinematics *>(Kinematics::Instance());
 
   double m1 = PhysConst::Instance()->FindParticle(finalState.at(0)).GetMass();
   double m2 = PhysConst::Instance()->FindParticle(finalState.at(1)).GetMass();

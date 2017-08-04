@@ -146,9 +146,6 @@ protected:
   void CalcSumOfWeights();
 
 private:
-  //! Initialize
-  void Init();
-
   //! Reset instance
   void Reset();
 

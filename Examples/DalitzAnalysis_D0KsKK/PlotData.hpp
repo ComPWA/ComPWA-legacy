@@ -71,7 +71,7 @@ private:
 
 class plotData {
 public:
-  plotData(std::string name, int bins = 100);
+  plotData(std::shared_ptr<Kinematics> kin, std::string name, int bins = 100);
 
   virtual ~plotData();
 
@@ -112,7 +112,7 @@ public:
       return;
     }
     _plotComponents.push_back(comp);
-    _plotHistograms.push_back(dalitzHisto(name, title, _bins, color));
+    _plotHistograms.push_back(dalitzHisto(kin_, name, title, _bins, color));
     _plotHistograms.back().SetStats(0);
     _plotLegend.push_back(title);
   }
@@ -120,6 +120,7 @@ public:
 protected:
   TString _name;
 
+  std::shared_ptr<Kinematics> kin_;
   bool _isFilled;
 
   unsigned int _bins;

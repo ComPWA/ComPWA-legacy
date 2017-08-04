@@ -194,6 +194,8 @@ inline boost::property_tree::ptree SubSystemSave(SubSystem sys) {
   }
 
   pt.add_child("DecayProducts", daughterTr);
+  
+  return pt;
 }
 
 } /* namespace HelicityFormalism */

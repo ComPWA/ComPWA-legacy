@@ -38,20 +38,17 @@ MinLogLH::MinLogLH(std::shared_ptr<Kinematics> kin,
       nUseEvt_(nEvents), _dataSample(data), _phspSample(phspSample),
       _phspAccSample(accSample) {
 
-  Init();
-
-  return;
-}
-
-void MinLogLH::Init() {
-
   nPhsp_ = _phspSample->GetNEvents();
-  if (!nUseEvt_)
+  nEvts_ = _dataSample->GetNEvents();
+  
+  //use the full sample of both are zero
+  if (!nUseEvt_ && !nStartEvt_) { 
+    nUseEvt_ = nEvts_;
+    nStartEvt_ = 0;
+  }
+  
+  if (nStartEvt_ + nUseEvt_ > nEvts_)
     nUseEvt_ = nEvts_ - nStartEvt_;
-  if (!(nStartEvt_ + nUseEvt_ <= nEvts_))
-    nUseEvt_ = nEvts_ - nStartEvt_;
-  if (!(nStartEvt_ + nUseEvt_ <= nPhsp_))
-    nUseEvt_ = nPhsp_ - nStartEvt_;
 
   // Get data as ParameterList
   _dataSampleList = _dataSample->GetListOfData(kin_);
@@ -67,6 +64,8 @@ void MinLogLH::Init() {
             << " ( Sum of weights = " << _sumOfWeights << " ).";
 
   calls = 0; // member of ControlParameter
+
+  return;
 }
 
 void MinLogLH::Reset() {

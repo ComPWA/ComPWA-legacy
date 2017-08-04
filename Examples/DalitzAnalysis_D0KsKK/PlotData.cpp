@@ -60,12 +60,12 @@ void phspContour(unsigned int xsys, unsigned int ysys, unsigned int n,
   return;
 }
 
-plotData::plotData(std::string name, int bins)
-    : _name(name), _isFilled(0), _bins(bins), _globalScale(1.0),
+plotData::plotData(std::shared_ptr<Kinematics> kin, std::string name, int bins)
+    : _name(name), kin_(kin), _isFilled(0), _bins(bins), _globalScale(1.0),
       h_weights("h_weights", "h_weights", bins, 0, 1.01),
-      dataDiagrams("data", "Data", bins),
-      phspDiagrams("phsp", "Phase-space", bins),
-      fitHitMissDiagrams("fitHitMiss", "HitMiss", bins) {
+      dataDiagrams(kin, "data", "Data", bins),
+      phspDiagrams(kin, "phsp", "Phase-space", bins),
+      fitHitMissDiagrams(kin, "fitHitMiss", "HitMiss", bins) {
   gStyle->SetOptStat(10); // entries only
   //	gStyle->SetOptStat(1000001); //name and integral
   gStyle->SetOptTitle(0);
@@ -111,7 +111,7 @@ void plotData::SetFitAmp(std::shared_ptr<AmpIntensity> intens,
   _plotComponents.clear();
   _plotComponents.push_back(intens);
   _plotHistograms.push_back(
-      dalitzHisto(intens->Name(), title, _bins, color));
+      dalitzHisto(kin_, intens->Name(), title, _bins, color));
   _plotHistograms.back().SetStats(0);
   _plotLegend.push_back("Fit");
   _isFilled = 0;
@@ -213,7 +213,7 @@ void plotData::Fill(std::shared_ptr<Kinematics> kin) {
       }
       double evWeight = event.GetWeight();
 
-      fitHitMissDiagrams.Fill(event, evWeight * 1 / eff);
+      fitHitMissDiagrams.Fill(kin, event, evWeight * 1 / eff);
     }
   }
 
@@ -222,7 +222,7 @@ void plotData::Fill(std::shared_ptr<Kinematics> kin) {
 
 void plotData::Plot() {
   if (!_isFilled)
-    Fill();
+    Fill(kin_);
 
   //----- plotting 2D dalitz distributions -----
   TCanvas *c1 = new TCanvas("dalitz", "dalitz", 50, 50, 1600, 1600);
@@ -445,21 +445,20 @@ void dalitzHisto::Fill(std::shared_ptr<Kinematics> kin, Event &event, double w) 
 
   _integral += weight;
 
-  SubSystem sys23({0}, {1}, {2});
-  SubSystem sys13({1}, {0}, {2});
-  SubSystem sys12({2}, {0}, {1});
+  auto helkin = std::dynamic_pointer_cast<HelicityKinematics>(kin);
+  int id23 = helkin->GetDataID(SubSystem({0}, {1}, {2}));
+  int id13 = helkin->GetDataID(SubSystem({1}, {0}, {2}));
+  int id12 = helkin->GetDataID(SubSystem({2}, {0}, {1}));
 
   dataPoint point;
-  kin->EventToDataPoint(event, point, sys23);
-  kin->EventToDataPoint(event, point, sys13);
-  kin->EventToDataPoint(event, point, sys12);
+  kin->EventToDataPoint(event, point);
 
-  double m23sq = point.GetValue(0);
-  double cos23 = point.GetValue(1);
-  double m13sq = point.GetValue(3);
-  //	double cos13 = point.getVal(4);
-  double m12sq = point.GetValue(6);
-  //	double cos12 = point.getVal(7);
+  double m23sq = point.GetValue(id23);
+  double cos23 = point.GetValue(id23+1);
+  double m13sq = point.GetValue(id13);
+  //	double cos13 = point.getVal(id13+1);
+  double m12sq = point.GetValue(id12);
+  //	double cos12 = point.getVal(id12+1);
 
   _arr.at(0).Fill(m23sq, weight);
   _arr.at(1).Fill(m13sq, weight);
