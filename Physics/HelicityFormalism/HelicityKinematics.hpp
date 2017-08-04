@@ -31,30 +31,35 @@ namespace HelicityFormalism {
 class HelicityKinematics : public ComPWA::Kinematics {
 
 public:
-  /*! Create instance of HelicityKinematics.
-   * @see HelicityKinematics(std::vector<pid>, std::vector<pid>);
-   */
-  static Kinematics *CreateInstance(std::vector<int> initialState,
-                                    std::vector<int> finalStateIds) {
-    if (_inst) {
-      throw std::runtime_error(
-          "HelicityKinematics::createInstance() | Instance already exists!");
-    }
-    _inst = new HelicityKinematics(initialState, finalStateIds);
-    return _inst;
-  }
 
-  /*! Create instance of HelicityKinematics.
-   * @see HelicityKinematics(std::vector<pid>, std::vector<pid>);
+  /*! Create HelicityKinematics from inital and final state particle lists.
+   * The lists contain the pid of initial and final state. The position of a
+   * particle in initial or final state list is used later on for
+   * identification.
    */
-  static Kinematics *CreateInstance(boost::property_tree::ptree pt) {
-    if (_inst) {
-      throw std::runtime_error(
-          "HelicityKinematics::createInstance() | Instance already exists!");
-    }
-    _inst = new HelicityKinematics(pt);
-    return _inst;
-  }
+  HelicityKinematics(std::vector<pid> initialState,
+                     std::vector<pid> finalState);
+  
+  /*! Create HelicityKinematics from a property_tree.
+   * The tree is expected to contain something like:
+   * @code
+    <HelicityKinematics>
+      <PhspVolume>1.45</PhspVolume>
+      <InitialState>
+        <Particle Name='jpsi' Id='0'/>
+      </InitialState>
+      <FinalState>
+        <Particle Name='pi0' Id='1'/>
+        <Particle Name='gamma' Id='0'/>
+        <Particle Name='pi0' Id='2'/>
+      </FinalState>
+    </HelicityKinematics>
+    @endcode
+   * The Id is the position of the particle in input data.
+   * @see HelicityKinematics(std::vector<pid> initialState, std::vector<pid>
+   finalState)
+   */
+  HelicityKinematics(boost::property_tree::ptree pt);
 
   /*! Fill dataPoint point.
    * The triple (\f$m^2,cos\Theta, \phi\f$) is added to dataPoint for each
@@ -71,13 +76,7 @@ public:
 
   void EventToDataPoint(const Event &event, dataPoint &point,
                         SubSystem sys) const;
-  // delete methods to ensure that there will only be one instance
-  HelicityKinematics() = delete;
-
-  HelicityKinematics(const HelicityKinematics &) = delete;
-
-  void operator=(const HelicityKinematics &) = delete;
-
+  
   /*! Check if dataPoint is within phase space boundaries.
    */
   bool IsWithinPhsp(const dataPoint &point) const;
@@ -142,37 +141,6 @@ public:
   virtual const std::pair<double, double> &GetInvMassBounds(int sysID) const;
 
 protected:
-  /*! Create HelicityKinematics from inital and final state particle lists.
-   * The lists contain the pid of initial and final state. The position of a
-   * particle in initial or final state list is used later on for
-   * identification.
-   */
-  HelicityKinematics(std::vector<pid> initialState,
-                     std::vector<pid> finalState);
-
-  /*! Create HelicityKinematics from a property_tree.
-   * The tree is expected to contain something like:
-   * @code
-    <HelicityKinematics>
-      <PhspVolume>1.45</PhspVolume>
-      <InitialState>
-        <Particle Name='jpsi' Id='0'/>
-      </InitialState>
-      <FinalState>
-        <Particle Name='pi0' Id='1'/>
-        <Particle Name='gamma' Id='0'/>
-        <Particle Name='pi0' Id='2'/>
-      </FinalState>
-    </HelicityKinematics>
-    @endcode
-   * The Id is the position of the particle in input data.
-   * @see HelicityKinematics(std::vector<pid> initialState, std::vector<pid>
-   finalState)
-   */
-  HelicityKinematics(boost::property_tree::ptree pt);
-
-  virtual ~HelicityKinematics();
-
   /*! Calculation of n-dimensional phase space volume.
    * We calculate the phase space volume using an estimate of the (constant)
    * event density in phase space. We follow this procedure:

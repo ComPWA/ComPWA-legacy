@@ -35,6 +35,7 @@
 #include "Core/ParameterList.hpp"
 #include "Core/FunctionTree.hpp"
 #include "Core/DataPoint.hpp"
+#include "Core/Kinematics.hpp"
 
 namespace ComPWA {
 namespace Physics {
@@ -43,7 +44,7 @@ class Amplitude {
 
 public:
   //============ CONSTRUCTION ==================
-  
+
   //! Constructor with an optional, unique name and an optional efficiency
   Amplitude(std::string name = "") : _name(name), _preFactor(1, 0) {}
 
@@ -55,7 +56,7 @@ public:
   virtual Amplitude *Clone(std::string newName = "") const = 0;
 
   //======= INTEGRATION/NORMALIZATION ===========
-  
+
   //! Check of parameters have changed and normalization has to be recalculatecd
   bool CheckModified() const {
     if (GetMagnitude() != _current_magnitude || GetPhase() != _current_phase) {
@@ -65,9 +66,9 @@ public:
     }
     return false;
   }
-  
+
   //================ EVALUATION =================
-  
+
   /** Calculate value of amplitude at point in phase space
    *
    * @param point Data point
@@ -76,7 +77,7 @@ public:
   virtual std::complex<double> Evaluate(const dataPoint &point) const = 0;
 
   //============ SET/GET =================
-  
+
   //! Get name of amplitude
   virtual std::string GetName() const { return _name; }
 
@@ -87,7 +88,7 @@ public:
   virtual std::complex<double> GetCoefficient() const {
     return std::polar(GetMagnitude(), GetPhase());
   }
-  
+
   /** Update parameters
    *
    * @param par New list of parameters
@@ -100,7 +101,7 @@ public:
     list.AddParameter(_magnitude);
     list.AddParameter(_phase);
   }
-  
+
   //! Fill vector with parameters
   virtual void GetParametersFast(std::vector<double> &list) const {
     list.push_back(GetMagnitude());
@@ -109,7 +110,7 @@ public:
 
   //! Fill ParameterList with fit fractions
   virtual void GetFitFractions(ParameterList &parList) = 0;
-  
+
   /**
    Get Magnitude parameter
 
@@ -199,15 +200,15 @@ public:
   SetPhspSample(std::shared_ptr<std::vector<ComPWA::dataPoint>> phspSample) = 0;
 
   //=========== FUNCTIONTREE =================
-  
+
   //! Check of tree is available
   virtual bool HasTree() const { return 0; }
 
   //! Getter function for basic amp tree
-  virtual std::shared_ptr<FunctionTree> GetTree(const ParameterList &sample,
+  virtual std::shared_ptr<FunctionTree> GetTree(std::shared_ptr<Kinematics> kin,
+                                                const ParameterList &sample,
                                                 const ParameterList &toySample,
                                                 std::string suffix) = 0;
-
 
 protected:
   std::string _name;

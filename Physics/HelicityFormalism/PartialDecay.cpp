@@ -20,7 +20,8 @@ namespace Physics {
 namespace HelicityFormalism {
 
 std::shared_ptr<Resonance>
-PartialDecay::Factory(const boost::property_tree::ptree &pt) {
+PartialDecay::Factory(std::shared_ptr<Kinematics> kin,
+                      const boost::property_tree::ptree &pt) {
 
   LOG(trace) << "PartialDecay::Factory() |";
   auto obj = std::make_shared<PartialDecay>();
@@ -31,7 +32,7 @@ PartialDecay::Factory(const boost::property_tree::ptree &pt) {
   auto phase = ComPWA::DoubleParameterFactory(pt.get_child("Phase"));
   obj->SetPhaseParameter(std::make_shared<DoubleParameter>(phase));
 
-  obj->SetPhspVolume(Kinematics::Instance()->GetPhspVolume());
+  obj->SetPhspVolume(kin->GetPhspVolume());
 
   SubSystem subSys = SubSystemFactory(pt);
 
@@ -73,9 +74,7 @@ PartialDecay::Factory(const boost::property_tree::ptree &pt) {
   obj->SetDynamicalFunction(dynObj);
   obj->SetSubSystem(subSys);
   obj->SetDataPosition(
-      3 *
-      dynamic_cast<HelicityKinematics *>(Kinematics::Instance())
-          ->GetDataID(subSys));
+      3 * std::dynamic_pointer_cast<HelicityKinematics>(kin)->GetDataID(subSys));
 
   return std::static_pointer_cast<Resonance>(obj);
 }
@@ -101,7 +100,8 @@ boost::property_tree::ptree PartialDecay::Save(std::shared_ptr<Resonance> res) {
 
 /**! Setup function tree */
 std::shared_ptr<FunctionTree>
-PartialDecay::GetTree(const ParameterList &sample,
+PartialDecay::GetTree(std::shared_ptr<Kinematics> kin,
+                    const ParameterList &sample,
                       const ParameterList &toySample, std::string suffix) {
 
   int phspSampleSize = toySample.GetMultiDouble(0)->GetNValues();

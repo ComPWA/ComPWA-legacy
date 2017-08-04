@@ -1,14 +1,14 @@
- 
-                
 #include "DataReader/Data.hpp"
+
 namespace ComPWA {
 namespace DataReader {
 
 Data::Data(bool binning, unsigned int maxBins, double maxW)
     : maxWeight(maxW), fBinned(binning), fmaxBins(maxBins) {}
 
-void rndReduceSet(unsigned int size, std::shared_ptr<Generator> gen, Data *in1,
-                  Data *out1, Data *in2, Data *out2) {
+void rndReduceSet(std::shared_ptr<Kinematics> kin, unsigned int size,
+                  std::shared_ptr<Generator> gen, Data *in1, Data *out1,
+                  Data *in2, Data *out2) {
   if (!in1)
     throw std::runtime_error("rndSubSet() | No input data set!");
   if (!out1)
@@ -44,7 +44,7 @@ void rndReduceSet(unsigned int size, std::shared_ptr<Generator> gen, Data *in1,
        i++) { // count how many events are not within PHSP
     dataPoint point;
     try {
-      point = dataPoint(in1->GetEvent(i));
+      kin->EventToDataPoint(in1->GetEvent(i), point);
     } catch (BeyondPhsp &ex) { // event outside phase, remove
       newSize--;
       continue;
@@ -56,14 +56,14 @@ void rndReduceSet(unsigned int size, std::shared_ptr<Generator> gen, Data *in1,
   for (unsigned int i = 0; i < totalSize; i++) {
     dataPoint point;
     try {
-      point = dataPoint(in1->GetEvent(i));
+      kin->EventToDataPoint(in1->GetEvent(i), point);
     } catch (BeyondPhsp &ex) { // event outside phase, remove
       continue;
     }
     //		dataPoint point(in1->getEvent(i)); //use first sample for
-    //hit&miss
+    // hit&miss
     //		if(!Kinematics::instance()->isWithinPhsp(point)) continue;
-    if (gen->GetUniform(0,1) < threshold) {
+    if (gen->GetUniform(0, 1) < threshold) {
       out1->PushEvent(in1->GetEvent(i));
       // write second sample if event from first sample were accepted
       if (in2)
@@ -78,10 +78,10 @@ void rndReduceSet(unsigned int size, std::shared_ptr<Generator> gen, Data *in1,
   return;
 }
 
-std::shared_ptr<Data> Data::RndSubSet(unsigned int size,
+std::shared_ptr<Data> Data::RndSubSet(std::shared_ptr<Kinematics> kin, unsigned int size,
                                       std::shared_ptr<Generator> gen) {
   std::shared_ptr<Data> out(this->EmptyClone());
-  rndReduceSet(size, gen, this, out.get());
+  rndReduceSet(kin, size, gen, this, out.get());
   return out;
 }
 
@@ -94,7 +94,7 @@ void Data::ResetWeights(double w) {
 
 double Data::GetMaxWeight() const { return maxWeight; }
 
-void Data::ReduceToPhsp() {
+void Data::ReduceToPhsp(std::shared_ptr<Kinematics> kin) {
   std::vector<Event> tmp;
   LOG(info) << "Data::reduceToPhsp() | "
                "Remove all events outside PHSP boundary from data sample.";
@@ -102,7 +102,7 @@ void Data::ReduceToPhsp() {
   for (unsigned int evt = 0; evt < fEvents.size(); evt++) {
     dataPoint point;
     try {
-      point = dataPoint(fEvents.at(evt));
+      kin->EventToDataPoint(fEvents.at(evt), point);
     } catch (BeyondPhsp &ex) { // event outside phase, remove
       continue;
     }
@@ -115,11 +115,13 @@ void Data::ReduceToPhsp() {
   fEvents = tmp;
   return;
 }
+
 void Data::ResetEfficiency(double e) {
   for (unsigned int evt = 0; evt < fEvents.size(); evt++) {
     fEvents.at(evt).SetEfficiency(e);
   }
 }
+
 void Data::Reduce(unsigned int newSize) {
   if (newSize >= fEvents.size()) {
     LOG(error)
@@ -129,11 +131,12 @@ void Data::Reduce(unsigned int newSize) {
   fEvents.resize(newSize);
 }
 
-void Data::SetEfficiency(std::shared_ptr<Efficiency> eff) {
+void Data::SetEfficiency(std::shared_ptr<Kinematics> kin,
+                         std::shared_ptr<Efficiency> eff) {
   for (unsigned int evt = 0; evt < fEvents.size(); evt++) {
     dataPoint point;
     try {
-      point = dataPoint(fEvents.at(evt));
+      kin->EventToDataPoint(fEvents.at(evt), point);
     } catch (BeyondPhsp &ex) { // event outside phase, remove
       continue;
     }
@@ -155,12 +158,12 @@ bool Data::HasWeights() {
   return has;
 }
 
-const ParameterList &Data::GetListOfData() {
+const ParameterList &Data::GetListOfData(std::shared_ptr<Kinematics> kin) {
   // dataList already filled? return filled one
   if (dataList.GetNParameter() != 0)
     return dataList;
 
-  int size = Kinematics::Instance()->GetNVars();
+  int size = kin->GetNVars();
   std::vector<std::vector<double>> data(size, std::vector<double>());
   std::vector<double> eff;
   eff.reserve(fEvents.size());
@@ -171,22 +174,21 @@ const ParameterList &Data::GetListOfData() {
   for (; itr != fEvents.end(); ++itr) {
     dataPoint point;
     try {
-      point = dataPoint(*itr);
+      kin->EventToDataPoint(*itr, point);
     } catch (BeyondPhsp &ex) {
       continue;
     }
     eff.push_back(point.GetEfficiency());
-    weight.push_back(point.getWeight());
+    weight.push_back(point.GetWeight());
     for (int i = 0; i < size; ++i)
       data.at(i).push_back(point.GetValue(i));
   }
 
   // Add data vector to ParameterList
   for (int i = 0; i < size; ++i) {
-    //std::shared_ptr<MultiDouble> tmp(new MultiDouble(
+    // std::shared_ptr<MultiDouble> tmp(new MultiDouble(
     //  Kinematics::instance()->GetVarNames().at(i), data.at(i)));
-    std::shared_ptr<MultiDouble> tmp(new MultiDouble(
-        "", data.at(i)));
+    std::shared_ptr<MultiDouble> tmp(new MultiDouble("", data.at(i)));
     dataList.AddParameter(tmp);
   }
 
@@ -201,12 +203,12 @@ const ParameterList &Data::GetListOfData() {
   return dataList;
 }
 
-std::vector<dataPoint> Data::GetDataPoints() const {
+std::vector<dataPoint> Data::GetDataPoints(std::shared_ptr<Kinematics> kin) const {
   std::vector<dataPoint> vecPoint;
   for (int i = 0; i < fEvents.size(); i++) {
     dataPoint point;
     try {
-      point = dataPoint(fEvents.at(i));
+      kin->EventToDataPoint(fEvents.at(i), point);
     } catch (BeyondPhsp &ex) { // event outside phase, remove
       continue;
     }
@@ -263,6 +265,6 @@ void Data::PushEvent(const Event &evt) {
   if (evt.GetWeight() > maxWeight)
     maxWeight = evt.GetWeight();
 }
-    
+
 } /* namespace DataReader */
 } /* namespace ComPWA */

@@ -26,9 +26,6 @@
 #include <math.h>
 #include <vector>
 #include <map>
-#include "Core/Kinematics.hpp"
-#include "Core/Efficiency.hpp"
-#include "Core/Event.hpp"
 
 namespace ComPWA {
 
@@ -36,14 +33,6 @@ class dataPoint {
 
 public:
   dataPoint();
-
-  /// Construct dataPoint from Event
-  dataPoint(const Event &ev);
-  
-  /// Construct dataPoint from vector of invariant masses
-  dataPoint(std::vector<double> vec);
-  
-  ~dataPoint(){};
 
   void Reset(unsigned int size);
 
@@ -57,7 +46,7 @@ public:
 
   void SetWeight(double w) { weight = w; };
   
-  double getWeight() const { return weight; };
+  double GetWeight() const { return weight; };
   
   void SetEfficiency(double e) { eff = e; };
   

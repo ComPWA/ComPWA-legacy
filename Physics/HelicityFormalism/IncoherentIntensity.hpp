@@ -32,7 +32,7 @@ public:
   }
 
   static std::shared_ptr<IncoherentIntensity>
-  Factory(const boost::property_tree::ptree &pt);
+  Factory(std::shared_ptr<Kinematics> kin, const boost::property_tree::ptree &pt);
 
   static boost::property_tree::ptree
   Save(std::shared_ptr<IncoherentIntensity> intens);
@@ -60,7 +60,7 @@ public:
       _intens.at(i)->GetParametersFast(params);
       if (parameters.at(i) != params) { // recalculate normalization
         parameters.at(i) = params;
-        normValues.at(i) = 1 / Tools::Integral(_intens.at(i), _phspSample);
+        normValues.at(i) = 1 / (Tools::Integral(_intens.at(i), _phspSample, phspVolume_));
         normValues.at(i) *= _intens.at(i)->Strength();
       }
       result += _intens.at(i)->Intensity(point) * normValues.at(i);
@@ -140,7 +140,7 @@ public:
 
   //! Get FunctionTree
   virtual std::shared_ptr<ComPWA::FunctionTree>
-  GetTree(const ComPWA::ParameterList &sample,
+  GetTree(std::shared_ptr<Kinematics> kin, const ComPWA::ParameterList &sample,
           const ComPWA::ParameterList &phspSample,
           const ComPWA::ParameterList &toySample, unsigned int nEvtVar,
           std::string suffix = "");
@@ -148,6 +148,8 @@ public:
 protected:
   //! Phase space sample to calculate the normalization and maximum value.
   std::shared_ptr<std::vector<ComPWA::dataPoint>> _phspSample;
+  
+  double phspVolume_;
 
   // Caching of normalization values
   std::vector<double> _normValues;

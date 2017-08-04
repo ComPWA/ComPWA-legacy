@@ -98,8 +98,6 @@ HelicityKinematics::HelicityKinematics(boost::property_tree::ptree pt) {
   _spinM = motherProp.GetSpin();
 }
 
-HelicityKinematics::~HelicityKinematics() {}
-
 bool HelicityKinematics::IsWithinPhsp(const dataPoint &point) const {
   int subSystemID = 0;
   int pos = 0;
@@ -119,6 +117,7 @@ bool HelicityKinematics::IsWithinPhsp(const dataPoint &point) const {
 
   return true;
 }
+
 const std::pair<double, double> &
 HelicityKinematics::GetInvMassBounds(const SubSystem sys) const {
   return GetInvMassBounds(

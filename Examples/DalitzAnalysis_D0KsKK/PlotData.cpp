@@ -117,7 +117,7 @@ void plotData::SetFitAmp(std::shared_ptr<AmpIntensity> intens,
   _isFilled = 0;
 }
 
-void plotData::Fill() {
+void plotData::Fill(std::shared_ptr<Kinematics> kin) {
   // TODO: reset diagrams here
 
   //===== Fill data histograms
@@ -136,7 +136,7 @@ void plotData::Fill() {
       }
       double evWeight = event.GetWeight();
 
-      dataDiagrams.Fill(event, evWeight * 1 / eff);
+      dataDiagrams.Fill(kin, event, evWeight * 1 / eff);
       h_weights.Fill(evWeight * 1 / eff);
     }
     _globalScale = dataDiagrams.GetIntegral();
@@ -173,17 +173,17 @@ void plotData::Fill() {
        * phase space boundaries */
       dataPoint point;
       try {
-        point = dataPoint(event);
+        kin->EventToDataPoint(event, point);
       } catch (BeyondPhsp &ex) { // event outside phase, remove
         continue;
       }
 
       // Fill diagrams with pure phase space events
-      phspDiagrams.Fill(event, evBase); // scale phsp to data size
+      phspDiagrams.Fill(kin, event, evBase); // scale phsp to data size
 
       // Loop over all components that we want to plot
       for (int t = 0; t < _plotHistograms.size(); t++)
-        _plotHistograms.at(t).Fill(
+        _plotHistograms.at(t).Fill( kin,
             event, _plotComponents.at(t)->Intensity(point) * evBase);
     }
 
@@ -355,10 +355,11 @@ void plotData::CreateHist2(unsigned int id) {
 }
 
 //===================== dalitzHisto =====================
-dalitzHisto::dalitzHisto(std::string name, std::string title, unsigned int bins,
+dalitzHisto::dalitzHisto(std::shared_ptr<Kinematics> kin, std::string name, std::string title, unsigned int bins,
                          Color_t color)
     : _name(name), _title(title), _nBins(bins), _integral(0.0), _color(color) {
-  auto *kin = dynamic_cast<HelicityKinematics *>(Kinematics::Instance());
+    
+  auto helkin = std::dynamic_pointer_cast<HelicityKinematics>(kin);
 
   // Initialize TTree
   _tree = std::unique_ptr<TTree>(new TTree(TString(_name), TString(_title)));
@@ -372,7 +373,7 @@ dalitzHisto::dalitzHisto(std::string name, std::string title, unsigned int bins,
 
   // mass23sq
   SubSystem sys23({0}, {1}, {2});
-  auto m23sq_limit = kin->GetInvMassBounds(sys23);
+  auto m23sq_limit = helkin->GetInvMassBounds(sys23);
   double m23sq_min = m23sq_limit.first;
   double m23sq_max = m23sq_limit.second;
 
@@ -385,7 +386,7 @@ dalitzHisto::dalitzHisto(std::string name, std::string title, unsigned int bins,
   _arr.back().Sumw2();
   // mass13sq
   SubSystem sys13({1}, {0}, {2});
-  auto m13sq_limit = kin->GetInvMassBounds(sys13);
+  auto m13sq_limit = helkin->GetInvMassBounds(sys13);
   double m13sq_min = m13sq_limit.first;
   double m13sq_max = m13sq_limit.second;
 
@@ -398,7 +399,7 @@ dalitzHisto::dalitzHisto(std::string name, std::string title, unsigned int bins,
   _arr.back().Sumw2();
   // mass12sq
   SubSystem sys12({0}, {0}, {1});
-  auto m12sq_limit = kin->GetInvMassBounds(sys12);
+  auto m12sq_limit = helkin->GetInvMassBounds(sys12);
   double m12sq_min = m12sq_limit.first;
   double m12sq_max = m12sq_limit.second;
 
@@ -438,13 +439,11 @@ dalitzHisto::dalitzHisto(std::string name, std::string title, unsigned int bins,
   return;
 }
 
-void dalitzHisto::Fill(Event &event, double w) {
+void dalitzHisto::Fill(std::shared_ptr<Kinematics> kin, Event &event, double w) {
 
   double weight = event.GetWeight() * w; // use event weights?
 
   _integral += weight;
-
-  auto *kin = dynamic_cast<HelicityKinematics *>(Kinematics::Instance());
 
   SubSystem sys23({0}, {1}, {2});
   SubSystem sys13({1}, {0}, {2});

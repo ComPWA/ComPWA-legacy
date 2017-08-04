@@ -15,6 +15,7 @@
 #include "Core/Parameter.hpp"
 #include "Core/DataPoint.hpp"
 #include "Core/FunctionTree.hpp"
+#include "Core/Kinematics.hpp"
 
 namespace ComPWA {
 namespace Physics {
@@ -169,7 +170,7 @@ public:
   virtual bool HasTree() const { return false; }
 
   virtual std::shared_ptr<FunctionTree>
-  GetTree(const ComPWA::ParameterList &sample,
+  GetTree(std::shared_ptr<Kinematics> kin, const ComPWA::ParameterList &sample,
           const ComPWA::ParameterList &toySample, std::string suffix) = 0;
 
 protected:

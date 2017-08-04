@@ -1,3 +1,8 @@
+ 
+        
+      
+    
+  
 
 //-------------------------------------------------------------------------------
 // Copyright (c) 2013 Stefan Pflueger.
@@ -47,7 +52,8 @@ public:
   }
 
   static std::shared_ptr<CoherentIntensity>
-  Factory(const boost::property_tree::ptree &pt);
+  Factory(std::shared_ptr<Kinematics> kin,
+          const boost::property_tree::ptree &pt);
 
   static boost::property_tree::ptree
   Save(std::shared_ptr<CoherentIntensity> intens);
@@ -130,14 +136,15 @@ public:
 
   //! Getter function for basic amp tree
   virtual std::shared_ptr<ComPWA::FunctionTree>
-  GetTree(const ComPWA::ParameterList &sample,
+  GetTree(std::shared_ptr<Kinematics> kin, const ComPWA::ParameterList &sample,
           const ComPWA::ParameterList &phspSample,
           const ComPWA::ParameterList &toySample, unsigned int nEvtVar,
           std::string suffix = "");
 
 protected:
   virtual std::shared_ptr<FunctionTree>
-  setupBasicTree(const ParameterList &sample, const ParameterList &phspSample,
+  setupBasicTree(std::shared_ptr<Kinematics> kin, const ParameterList &sample,
+                 const ParameterList &phspSample,
                  std::string suffix = "") const;
 
   std::vector<std::shared_ptr<ComPWA::Physics::Amplitude>> _seqDecays;

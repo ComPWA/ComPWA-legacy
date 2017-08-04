@@ -18,12 +18,11 @@
 
 #ifndef _EIFChiOneD_HPP
 #define _EIFChiOneD_HPP
-
 #include <vector>
 #include <memory>
 #include <string>
 
-//PWA-Headers
+// PWA-Headers
 #include "Estimator/Estimator.hpp"
 #include "Core/AmpIntensity.hpp"
 #include "DataReader/Data.hpp"
@@ -38,25 +37,29 @@ class ChiOneD : public Estimator {
 
 public:
   static std::shared_ptr<ComPWA::ControlParameter>
-      createInstance(std::shared_ptr<AmpIntensity>,
-                     std::shared_ptr<DataReader::Data>);
-  virtual double controlParameter(ParameterList& minPar);
+  CreateInstance(std::shared_ptr<Kinematics> kin, std::shared_ptr<AmpIntensity>,
+                 std::shared_ptr<DataReader::Data>);
 
-  /** Destructor */
+  virtual double controlParameter(ParameterList &minPar);
+
   virtual ~ChiOneD();
-  
-  virtual bool HasTree(){ return false; }
-  virtual std::shared_ptr<FunctionTree> GetTree() { return std::shared_ptr<FunctionTree>(); }
-  virtual std::shared_ptr<AmpIntensity> GetIntensity() { return std::shared_ptr<AmpIntensity>(); }
+
+  virtual bool HasTree() { return false; }
+  virtual std::shared_ptr<FunctionTree> GetTree() {
+    return std::shared_ptr<FunctionTree>();
+  }
+  virtual std::shared_ptr<AmpIntensity> GetIntensity() {
+    return std::shared_ptr<AmpIntensity>();
+  }
 
 protected:
-  /// Default Constructor (0x0)
-  ChiOneD(std::shared_ptr<AmpIntensity>, std::shared_ptr<DataReader::Data>);
+  ChiOneD(std::shared_ptr<Kinematics> kin, std::shared_ptr<AmpIntensity>,
+          std::shared_ptr<DataReader::Data>);
 
 private:
+  std::shared_ptr<Kinematics> kin_;
   std::shared_ptr<AmpIntensity> pPIF_;
   std::shared_ptr<DataReader::Data> pDIF_;
-
 };
 
 } /* namespace ChiOneD */

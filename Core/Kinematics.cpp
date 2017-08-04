@@ -17,17 +17,6 @@
 
 namespace ComPWA {
 
-Kinematics *Kinematics::Instance() {
-  if (!_inst) {
-    throw std::runtime_error("No instance of Kinematics created! "
-                             "Create one first!");
-  }
-
-  return Kinematics::_inst;
-}
-
-Kinematics *Kinematics::_inst = 0;
-
 //! calculated the PHSP volume of the current decay by MC integration
 double Kinematics::GetPhspVolume() {
   if (!is_PS_area_calculated_) {

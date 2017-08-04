@@ -36,12 +36,12 @@ public:
   //! Default move constructor
   dalitzHisto(dalitzHisto &&other) = default; // C++11 move constructor
 
-  dalitzHisto(std::string name, std::string title, unsigned int bins,
+  dalitzHisto(std::shared_ptr<Kinematics> kin, std::string name, std::string title, unsigned int bins,
               Color_t color = kBlack);
   //! Switch on/off stats
   void SetStats(bool b);
   //! Fill event
-  void Fill(Event &event, double w = 1);
+  void Fill(std::shared_ptr<Kinematics> kin, Event &event, double w = 1);
   //! Scale all distributions
   void Scale(double w);
   //! Get 1D histogram
@@ -92,7 +92,7 @@ public:
 
   void SetGlobalScale(double s) { _globalScale = s; }
 
-  void Fill();
+  void Fill(std::shared_ptr<Kinematics> kin);
 
   void Plot();
 

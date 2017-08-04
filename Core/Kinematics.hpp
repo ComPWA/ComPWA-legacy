@@ -26,8 +26,11 @@ class dataPoint;
 
 class Kinematics {
 public:
-  //! singleton pattern
-  static Kinematics *Instance();
+  //! Constructor
+  Kinematics(std::vector<pid> initial = std::vector<pid>(),
+             std::vector<pid> finalS = std::vector<pid>())
+      : _initialState(initial), _finalState(finalS),
+        is_PS_area_calculated_(false), PS_area_(0.0){};
 
   //! converts Event to dataPoint
   virtual void EventToDataPoint(const ComPWA::Event &ev,
@@ -59,24 +62,6 @@ protected:
   std::vector<std::string> _varNames;
   //! Latex titles for variables
   std::vector<std::string> _varTitles;
-
-  // Singleton stuff
-  static Kinematics *_inst;
-
-  //! Constructor
-  Kinematics(std::vector<pid> initial = std::vector<pid>(),
-             std::vector<pid> finalS = std::vector<pid>())
-      : _initialState(initial), _finalState(finalS),
-        is_PS_area_calculated_(false), PS_area_(0.0){};
-
-  //! Delete Copy constructor
-  Kinematics(const Kinematics &) = delete;
-
-  //! Default destructor
-  virtual ~Kinematics(){};
-
-  //! Delete assignment operator
-  void operator=(const Kinematics &) = delete;
 
   virtual double calculatePSArea() = 0;
   bool is_PS_area_calculated_;

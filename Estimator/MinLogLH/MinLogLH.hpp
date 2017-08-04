@@ -61,7 +61,7 @@ public:
    * instance
    */
   static std::shared_ptr<ComPWA::ControlParameter>
-  CreateInstance(Kinematics* kin,
+  CreateInstance(std::shared_ptr<Kinematics> kin,
                  std::shared_ptr<AmpIntensity> intens,
                  std::shared_ptr<DataReader::Data> data,
                  std::shared_ptr<DataReader::Data> phspSample,
@@ -81,7 +81,7 @@ public:
    * instance
    */
   static std::shared_ptr<ComPWA::ControlParameter>
-  CreateInstance(Kinematics* kin,
+  CreateInstance(std::shared_ptr<Kinematics> kin,
                  std::shared_ptr<AmpIntensity> intens,
                  std::shared_ptr<DataReader::Data> data,
                  std::shared_ptr<DataReader::Data> phspSample,
@@ -133,7 +133,7 @@ protected:
   MinLogLH(){};
 
   //! Constructor for a single amplitude
-  MinLogLH(Kinematics* kin, std::shared_ptr<AmpIntensity> amp,
+  MinLogLH(std::shared_ptr<Kinematics> kin, std::shared_ptr<AmpIntensity> amp,
            std::shared_ptr<DataReader::Data> data,
            std::shared_ptr<DataReader::Data> phspSample,
            std::shared_ptr<DataReader::Data> accSample, unsigned int startEvent,
@@ -152,7 +152,7 @@ private:
   //! Reset instance
   void Reset();
 
-  Kinematics* kin_;
+  std::shared_ptr<Kinematics> kin_;
 
   //! Intensity
   std::shared_ptr<AmpIntensity> _intens;
