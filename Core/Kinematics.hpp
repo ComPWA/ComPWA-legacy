@@ -32,6 +32,13 @@ public:
       : _initialState(initial), _finalState(finalS),
         is_PS_area_calculated_(false), PS_area_(0.0){};
 
+  /// Delete copy constructor. For each Kinematics in the analysis only
+  /// one instance should exist since Kinematics does the bookkeeping for which
+  /// SubSystems variables needs to be calculated. That instance can then be
+  /// passed as (smart) pointer. Note: Not sure if we also should delete the
+  /// move constructor.
+  Kinematics(const Kinematics& that) = delete;
+  
   //! converts Event to dataPoint
   virtual void EventToDataPoint(const ComPWA::Event &ev,
                                 dataPoint &point) const = 0;

@@ -40,7 +40,7 @@ public:
   HelicityKinematics(std::vector<pid> initialState,
                      std::vector<pid> finalState);
   
-  /*! Create HelicityKinematics from a property_tree.
+  /*! Create HelicityKinematics from a boost::property_tree.
    * The tree is expected to contain something like:
    * @code
     <HelicityKinematics>
@@ -61,6 +61,14 @@ public:
    */
   HelicityKinematics(boost::property_tree::ptree pt);
 
+  /// Delete copy constructor. For each Kinematics in the analysis only
+  /// one instance should exist since Kinematics does the bookkeeping for which
+  /// SubSystems variables needs to be calculated. That instance can then be
+  /// passed as (smart) pointer.
+  /// Note1: Not sure if we also should delete the move constructor.
+  /// Note2: We have to delete the copy constructor in Base and Derived classes.
+  HelicityKinematics(const HelicityKinematics& that) = delete;
+  
   /*! Fill dataPoint point.
    * The triple (\f$m^2,cos\Theta, \phi\f$) is added to dataPoint for each
    * SubSystem that was requested via GetDataID(SubSystem).
