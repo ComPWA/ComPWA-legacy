@@ -7,23 +7,52 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 
 project( COMPWA )
 
-#set the default path for built executables to the "bin" directory
+# set the default path for built executables to the "bin" directory
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
-#set the default path for built libraries to the "lib" directory
+# set the default path for built libraries to the "lib" directory
 set(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib)
 
 set (CMAKE_CXX_STANDARD 11)
 
-#using python : 2.7 : /usr/bin : /usr/include/python2.7 : /usr/lib64/python2.7 ;
-#using python : 3.5 : /usr/bin/python3 : /usr/include/python3.5m : /usr/lib64/python3.5 ;
-find_package(PythonLibs 2.7 EXACT)
-#message(${PYTHON_LIBRARIES})
-INCLUDE_DIRECTORIES(${PYTHON_INCLUDE_PATH})
-LINK_DIRECTORIES(${PYTHON_LIBRARIES})
+#${CMAKE_CXX_COMPILER_ID} can be one of {GNU Clang AppleClang Intel MSVC}
+if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
+  # Using Clang or AppleClang -> no python for now
+  find_package(Boost COMPONENTS
+               unit_test_framework
+               #python
+               system
+               filesystem
+               serialization
+               thread
+               chrono
+               date_time
+               log
+               log_setup
+               program_options
+               regex
+               REQUIRED
+              )
+else ()
+  find_package(PythonLibs 2.7 EXACT)
+  #message(${PYTHON_LIBRARIES})
+  INCLUDE_DIRECTORIES(${PYTHON_INCLUDE_PATH})
+  LINK_DIRECTORIES(${PYTHON_LIBRARIES})
+  find_package(Boost COMPONENTS
+               unit_test_framework
+               python
+               system
+               filesystem
+               serialization
+               thread chrono
+               date_time
+               log
+               log_setup
+               program_options
+               regex
+               REQUIRED
+              )
+endif()
 
-#Add Boost
-find_package(Boost COMPONENTS unit_test_framework python system filesystem
-serialization thread chrono date_time log log_setup program_options regex REQUIRED)
 include_directories(${Boost_INCLUDE_DIR})
 link_directories(${Boost_LIBRARY_DIR})
 
