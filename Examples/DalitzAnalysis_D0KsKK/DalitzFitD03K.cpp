@@ -600,8 +600,8 @@ int main(int argc, char **argv) {
     std::vector<std::pair<std::string, std::string>> fitComponents;
     fitComponents.push_back(
         std::pair<std::string, std::string>("phi(1020)", "D0toKSK+K-"));
-    fitComponents.push_back(std::pair<std::string, std::string>(
-        "phi(1020) a0(980)0", "D0toKSK+K-"));
+//    fitComponents.push_back(std::pair<std::string, std::string>(
+//        "phi(1020) a0(980)0", "D0toKSK+K-"));
     fitComponents.push_back(
         std::pair<std::string, std::string>("a0(980)0", "D0toKSK+K-"));
     fitComponents.push_back(

@@ -22,10 +22,10 @@ inline std::complex<double> couplingToWidth(double mSq, double mR, double g,
   std::complex<double> gammaA(1, 0); // spin==0
 
   if (spin > 0 || type == formFactorType::CrystalBarrel) {
-    std::complex<double> qValue = qSqValue(mR, ma, mb);
+    std::complex<double> qV = qValue(mR, ma, mb);
     double ffR = FormFactor(mR, ma, mb, spin, mesonRadius,
-                                                qValue, type);
-    std::complex<double> qR = std::pow(qValue, spin);
+                                                qV, type);
+    std::complex<double> qR = std::pow(qV, spin);
     gammaA = ffR * qR;
   }
 
@@ -65,12 +65,12 @@ inline std::complex<double> widthToCoupling(double mSq, double mR, double width,
 
   // calculate gammaA(s_R)
   std::complex<double> gammaA(1, 0); // spin==0
-  std::complex<double> qValue;
+  std::complex<double> qV;
   if (spin > 0) {
-    qValue = qSqValue(mR, ma, mb);
+    qV = qValue(mR, ma, mb);
     double ffR = FormFactor(mR, ma, mb, spin, mesonRadius,
-                                                qValue, type);
-    std::complex<double> qR = std::pow(qValue, spin);
+                                                qV, type);
+    std::complex<double> qR = std::pow(qV, spin);
     gammaA = ffR * qR;
   }
 
