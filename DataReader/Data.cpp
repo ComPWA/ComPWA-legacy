@@ -106,7 +106,6 @@ void Data::ReduceToPhsp(std::shared_ptr<Kinematics> kin) {
     } catch (BeyondPhsp &ex) { // event outside phase, remove
       continue;
     }
-    //		if(Kinematics::instance()->isWithinPhsp(p))
     tmp.push_back(fEvents.at(evt));
   }
   LOG(info) << "Data::reduceToPhsp() | " << tmp.size() << " from "

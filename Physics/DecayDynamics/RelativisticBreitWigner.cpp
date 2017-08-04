@@ -71,9 +71,9 @@ std::complex<double> RelativisticBreitWigner::dynamicalFunction(
   std::complex<double> g_final =
       widthToCoupling(mSq, mR, width, ma, mb, J, mesonRadius, ffType);
 
-  /*Coupling constant from production reaction. In case of a particle decay
-   * the production coupling doesn't depend in energy since the CM energy
-   * is in the (RC) system fixed to the mass of the decaying particle */
+  // Coupling constant from production reaction. In case of a particle decay
+  // the production coupling doesn't depend in energy since the CM energy
+  // is in the (RC) system fixed to the mass of the decaying particle
   double g_production = 1;
 
   std::complex<double> denom = std::complex<double>(mR * mR - mSq, 0) +
@@ -81,8 +81,10 @@ std::complex<double> RelativisticBreitWigner::dynamicalFunction(
 
   std::complex<double> result = g_final * g_production / denom;
 
-  assert(!std::isnan(result.real()));
-  assert(!std::isnan(result.imag()));
+  assert( (!std::isnan(result.real()) || !std::isinf(result.real())) &&
+         "RelativisticBreitWigner::dynamicalFunction() | Result is NaN or Inf!");
+  assert( (!std::isnan(result.imag()) || !std::isinf(result.imag())) &&
+         "RelativisticBreitWigner::dynamicalFunction() | Result is NaN or Inf!");
 
   return result;
 }

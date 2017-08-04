@@ -446,19 +446,23 @@ void dalitzHisto::Fill(std::shared_ptr<Kinematics> kin, Event &event, double w) 
   _integral += weight;
 
   auto helkin = std::dynamic_pointer_cast<HelicityKinematics>(kin);
-  int id23 = helkin->GetDataID(SubSystem({0}, {1}, {2}));
-  int id13 = helkin->GetDataID(SubSystem({1}, {0}, {2}));
-  int id12 = helkin->GetDataID(SubSystem({2}, {0}, {1}));
+  int sysId23 = helkin->GetDataID(SubSystem({0}, {1}, {2}));
+  int sysId13 = helkin->GetDataID(SubSystem({1}, {0}, {2}));
+  int sysId12 = helkin->GetDataID(SubSystem({2}, {0}, {1}));
 
   dataPoint point;
-  kin->EventToDataPoint(event, point);
+  try{
+    kin->EventToDataPoint(event, point);
+  } catch (std::exception& ex){
+    return;
+  }
 
-  double m23sq = point.GetValue(id23);
-  double cos23 = point.GetValue(id23+1);
-  double m13sq = point.GetValue(id13);
-  //	double cos13 = point.getVal(id13+1);
-  double m12sq = point.GetValue(id12);
-  //	double cos12 = point.getVal(id12+1);
+  double m23sq = point.GetValue(3*sysId23);
+  double cos23 = point.GetValue(3*sysId23+1);
+  double m13sq = point.GetValue(3*sysId13);
+  //	double cos13 = point.getVal(3*sysId13+1);
+  double m12sq = point.GetValue(3*sysId12);
+  //	double cos12 = point.getVal(3*sysId12+1);
 
   _arr.at(0).Fill(m23sq, weight);
   _arr.at(1).Fill(m13sq, weight);

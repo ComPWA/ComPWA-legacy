@@ -31,6 +31,8 @@ IncoherentIntensity::Factory(std::shared_ptr<Kinematics> kin,
     obj->_strength = (std::make_shared<ComPWA::DoubleParameter>("", 1.0));
     obj->_strength->SetParameterFixed();
   }
+  
+  obj->SetPhspVolume(kin->GetPhspVolume());
 
   for (const auto &v : pt.get_child("")) {
     if (v.first == "CoherentIntensity")
@@ -54,6 +56,41 @@ IncoherentIntensity::Save(std::shared_ptr<IncoherentIntensity> obj) {
     pt.add_child("CoherentIntensity", CoherentIntensity::Save(ptr));
   }
   return pt;
+}
+
+double IncoherentIntensity::Intensity(const ComPWA::dataPoint &point) const {
+
+  // We have to get around the constness of the interface definition.
+  std::vector<std::vector<double>> parameters(_parameters);
+  
+  std::vector<double> normValues(_normValues);
+  
+  if (_intens.size() != parameters.size())
+    parameters = std::vector<std::vector<double>>(_intens.size());
+  
+  if (_intens.size() != normValues.size())
+    normValues = std::vector<double>(_intens.size());
+
+  double result = 0;
+  for (int i = 0; i < _intens.size(); i++) {
+    std::vector<double> params;
+    _intens.at(i)->GetParametersFast(params);
+    if (parameters.at(i) != params) { // recalculate normalization
+      parameters.at(i) = params;
+      normValues.at(i) =
+          1 / (Tools::Integral(_intens.at(i), _phspSample, phspVolume_));
+      normValues.at(i) *= _intens.at(i)->Strength();
+    }
+    result += _intens.at(i)->Intensity(point) * normValues.at(i);
+  }
+
+  const_cast<std::vector<std::vector<double>> &>(_parameters) = parameters;
+  const_cast<std::vector<double> &>(_normValues) = normValues;
+
+  assert(!std::isnan(result) && "IncoherentIntensity::Intensity() | Result is NaN!");
+  assert(!std::isinf(result) && "IncoherentIntensity::Intensity() | Result is inf!");
+  
+  return (Strength() * result);
 }
 
 std::shared_ptr<AmpIntensity>

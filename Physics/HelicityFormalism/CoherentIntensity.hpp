@@ -1,9 +1,3 @@
- 
-        
-      
-    
-  
-
 //-------------------------------------------------------------------------------
 // Copyright (c) 2013 Stefan Pflueger.
 // All rights reserved. This program and the accompanying materials
@@ -117,6 +111,8 @@ public:
     for (auto i : _seqDecays)
       i->SetPhspSample(toySample);
   };
+  
+  virtual void SetPhspVolume(double vol) { phspVolume_ = vol; };
 
   virtual std::shared_ptr<AmpIntensity> GetComponent(std::string name);
 
@@ -142,6 +138,11 @@ public:
           std::string suffix = "");
 
 protected:
+  //! Phase space sample to calculate the normalization and maximum value.
+  std::shared_ptr<std::vector<ComPWA::dataPoint>> _phspSample;
+  
+  double phspVolume_;
+
   virtual std::shared_ptr<FunctionTree>
   setupBasicTree(std::shared_ptr<Kinematics> kin, const ParameterList &sample,
                  const ParameterList &phspSample,
@@ -149,8 +150,6 @@ protected:
 
   std::vector<std::shared_ptr<ComPWA::Physics::Amplitude>> _seqDecays;
 
-  //! Phase space sample to calculate the normalization and maximum value.
-  std::shared_ptr<std::vector<ComPWA::dataPoint>> _phspSample;
 };
 
 } /* namespace HelicityFormalism */

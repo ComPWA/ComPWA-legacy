@@ -44,6 +44,7 @@ CoherentIntensity::Factory(std::shared_ptr<Kinematics> kin,
   } else {
     obj->_strength = (std::make_shared<ComPWA::DoubleParameter>("", 1.0));
   }
+  obj->SetPhspVolume(kin->GetPhspVolume());
 
   for (const auto &v : pt.get_child("")) {
     if (v.first == "Amplitude")

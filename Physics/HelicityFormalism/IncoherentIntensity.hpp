@@ -22,7 +22,7 @@ class IncoherentIntensity : public ComPWA::AmpIntensity {
 public:
   //============ CONSTRUCTION ==================
 
-  IncoherentIntensity() : ComPWA::AmpIntensity() {}
+  IncoherentIntensity() : ComPWA::AmpIntensity(), phspVolume_(1.0) {}
 
   //! Function to create a full copy of the amplitude
   ComPWA::AmpIntensity *Clone(std::string newName = "") const {
@@ -44,33 +44,7 @@ public:
    * @param point Data point
    * @return
    */
-  virtual double Intensity(const ComPWA::dataPoint &point) const {
-
-    // We have to get around the constness of the interface definition.
-    std::vector<std::vector<double>> parameters(_parameters);
-    std::vector<double> normValues(_normValues);
-    if (_intens.size() != parameters.size())
-      parameters = std::vector<std::vector<double>>(_intens.size());
-    if (_intens.size() != normValues.size())
-      normValues = std::vector<double>(_intens.size());
-
-    double result = 0;
-    for (int i = 0; i < _intens.size(); i++) {
-      std::vector<double> params;
-      _intens.at(i)->GetParametersFast(params);
-      if (parameters.at(i) != params) { // recalculate normalization
-        parameters.at(i) = params;
-        normValues.at(i) = 1 / (Tools::Integral(_intens.at(i), _phspSample, phspVolume_));
-        normValues.at(i) *= _intens.at(i)->Strength();
-      }
-      result += _intens.at(i)->Intensity(point) * normValues.at(i);
-    }
-
-    const_cast<std::vector<std::vector<double>> &>(_parameters) = parameters;
-    const_cast<std::vector<double> &>(_normValues) = normValues;
-
-    return (Strength() * result);
-  }
+  virtual double Intensity(const ComPWA::dataPoint &point) const;
 
   //================== SET/GET =================
 
@@ -122,6 +96,8 @@ public:
       i->SetPhspSample(phspSample, toySample);
     }
   };
+  
+  virtual void SetPhspVolume(double vol) { phspVolume_ = vol; };
 
   virtual std::shared_ptr<AmpIntensity> GetComponent(std::string name);
 
