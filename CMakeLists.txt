@@ -69,22 +69,39 @@ add_definitions(-DBOOST_TEST_DYN_LINK)
 add_definitions(-DBOOST_SERIALIZATION_DYN_LINK)
 
 # Recurse into subdirectories.
-add_subdirectory (Core)
-add_subdirectory (DataReader)
-add_subdirectory (Estimator)
-add_subdirectory (Optimizer)
-add_subdirectory (Physics)
-add_subdirectory (Tools)
-add_subdirectory (Examples)
-add_subdirectory (executables)
+add_subdirectory(Core)
+add_subdirectory(DataReader)
+add_subdirectory(Estimator)
+add_subdirectory(Optimizer)
+add_subdirectory(Physics)
+add_subdirectory(Tools)
+add_subdirectory(Examples)
+add_subdirectory(executables)
 
 # add a target to generate API documentation with Doxygen
 find_package(Doxygen)
 if(DOXYGEN_FOUND)
-	configure_file(${CMAKE_CURRENT_SOURCE_DIR}/doc/Doxyfile ${CMAKE_CURRENT_BINARY_DIR}/doc/Doxyfile @ONLY)
+	configure_file(${CMAKE_CURRENT_SOURCE_DIR}/doc/Doxyfile
+                 ${CMAKE_CURRENT_BINARY_DIR}/doc/Doxyfile @ONLY)
+
 	add_custom_target(doc
-		${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/doc/Doxyfile
-		WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-		COMMENT "Generating API documentation with Doxygen" VERBATIM
-		)
+          ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/doc/Doxyfile
+          WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+          COMMENT "Generating API documentation with Doxygen" VERBATIM)
+
+  # Copy images
+  file(GLOB img
+    RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}/doc/images *
+  )
+  #foreach( i ${img} )
+  #  get_filename_component( TestInName ${i} NAME )
+
+    add_custom_command(
+      TARGET doc PRE_BUILD
+      COMMAND ${CMAKE_COMMAND} -E copy
+      ${CMAKE_CURRENT_SOURCE_DIR}/doc/images/*
+      ${CMAKE_CURRENT_BINARY_DIR}/doc/images/ )
+  #endforeach( i )
+
+    MESSAGE(asd fsdf ${PATH})
 endif(DOXYGEN_FOUND)
