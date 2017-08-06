@@ -38,7 +38,7 @@ HelicityKinematics::HelicityKinematics(std::vector<pid> initialState,
   auto motherProp = PhysConst::Instance()->FindParticle(idMother);
   _M = motherProp.GetMass();
   _Msq = _M * _M;
-  _spinM = motherProp.GetSpin();
+  _spinM = motherProp.GetSpinQuantumNumber("Spin");
 
   // Creating unique title
   std::stringstream stream;
@@ -95,7 +95,7 @@ HelicityKinematics::HelicityKinematics(boost::property_tree::ptree pt) {
   auto motherProp = PhysConst::Instance()->FindParticle(idMother);
   _M = motherProp.GetMass();
   _Msq = _M * _M;
-  _spinM = motherProp.GetSpin();
+  _spinM = motherProp.GetSpinQuantumNumber("Spin");
 }
 
 bool HelicityKinematics::IsWithinPhsp(const dataPoint &point) const {

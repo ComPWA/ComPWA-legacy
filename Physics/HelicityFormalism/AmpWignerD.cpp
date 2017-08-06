@@ -88,7 +88,8 @@ AmpWignerD::Factory(const boost::property_tree::ptree &pt) {
   auto decayParticle = pt.get_child("DecayParticle");
 
   std::string name = pt.get<std::string>("DecayParticle.<xmlattr>.Name");
-  ComPWA::Spin J = PhysConst::Instance()->FindParticle(name).GetSpin();
+  ComPWA::Spin J =
+      PhysConst::Instance()->FindParticle(name).GetSpinQuantumNumber("Spin");
   obj->SetSpin(J);
   ComPWA::Spin mu(pt.get<double>("DecayParticle.<xmlattr>.Helicity"));
   obj->SetMu(mu);

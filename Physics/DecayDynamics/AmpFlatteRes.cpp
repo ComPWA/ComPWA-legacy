@@ -46,7 +46,7 @@ AmpFlatteRes::Factory(const boost::property_tree::ptree &pt) {
     throw std::runtime_error(
         "AmpFlatteRes::Factory() | Decay type does not match! ");
 
-  auto spin = partProp.GetSpin();
+  auto spin = partProp.GetSpinQuantumNumber("Spin");
   obj->SetSpin(spin);
 
   auto ffType = formFactorType(decayTr.get<int>("FormFactor.<xmlattr>.type"));
