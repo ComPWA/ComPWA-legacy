@@ -52,13 +52,17 @@ public:
         z_component_relevant(false) {}
 
   //! Constructor for double spin
-  Spin(double spin) : J_z_numerator_(0), z_component_relevant(false) {
+  Spin(double spin, double spinZ = 0.0){
     if (isInteger(spin)) {
       SetNumerator(spin);
       SetDenominator(1);
+      if (isInteger(spinZ))
+        SetZNumerator(spinZ);
     } else if (isInteger(2 * spin)) {
       SetNumerator(2 * spin);
       SetDenominator(2);
+      if (isInteger(2 * spinZ))
+        SetZNumerator(2 * spinZ);
     } else
       throw BadParameter("Spin::Spin() |" + std::to_string(spin) +
                          " is not a valid spin!");

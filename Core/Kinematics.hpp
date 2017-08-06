@@ -19,10 +19,9 @@
 #include "Core/Event.hpp"
 #include "Core/PhysConst.hpp"
 #include "Core/Spin.hpp"
+#include "Core/DataPoint.hpp"
 
 namespace ComPWA {
-
-class dataPoint;
 
 class Kinematics {
 public:
