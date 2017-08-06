@@ -57,8 +57,9 @@ void PhysConst::readTree(boost::property_tree::ptree pt) {
       auto last = _partList.back();
       LOG(info) << "PhysConst::readTree() | Adding particle " << last.GetName()
                  << " (id=" << last.GetId() << ") "
-                 << " J(PC)=" << last.GetSpin() << "(" << last.GetParity()
-                 << last.GetCparity() << ") "
+                 << " J(PC)=" << last.GetSpinQuantumNumber("Spin")
+                 << "(" << last.GetQuantumNumber("Parity")
+                 << last.GetQuantumNumber("Cparity") << ") "
                  << " mass=" << last.GetMass()
                  << " decayType=" << last.GetDecayType();
     }

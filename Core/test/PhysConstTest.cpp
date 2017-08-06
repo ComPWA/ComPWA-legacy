@@ -27,13 +27,11 @@ BOOST_AUTO_TEST_CASE(XMLInput) {
   <Mass Name='mass_gamma'> \
   <Value>0.</Value> \
   </Mass> \
-  <Charge>0</Charge> \
-  <Spin>1.0</Spin> \
-  <Parity>-1</Parity> \
-  <Cparity>-1</Cparity> \
-  <Gparity>-1</Gparity> \
-  <IsoSpin>0</IsoSpin> \
-  <IsoSpinZ>0</IsoSpinZ> \
+  <QuantumNumber Class='Spin' Type='Spin' Value='1.0'/> \
+  <QuantumNumber Class='Int' Type='Charge' Value='0'/> \
+  <QuantumNumber Class='Int' Type='Parity' Value='-1'/> \
+  <QuantumNumber Class='Int' Type='Cparity' Value='-1'/> \
+  <QuantumNumber Class='Int' Type='Gparity' Value='-1'/> \
   </Particle> \
   <Particle Name='f0_980'> \
   <Pid>9010221</Pid> \
@@ -44,13 +42,11 @@ BOOST_AUTO_TEST_CASE(XMLInput) {
   <Max>1.5</Max> \
   <Error>0</Error> \
   </Mass> \
-  <Charge>0</Charge> \
-  <Spin>0.0</Spin> \
-  <Parity>1</Parity> \
-  <Cparity>1</Cparity> \
-  <Gparity>1</Gparity> \
-  <IsoSpin>0</IsoSpin> \
-  <IsoSpinZ>0</IsoSpinZ> \
+  <QuantumNumber Class='Spin' Type='Spin' Value='0.0'/> \
+  <QuantumNumber Class='Int' Type='Charge' Value='0'/> \
+  <QuantumNumber Class='Int' Type='Parity' Value='1'/> \
+  <QuantumNumber Class='Int' Type='Cparity' Value='1'/> \
+  <QuantumNumber Class='Int' Type='Gparity' Value='1'/> \
   <DecayInfo Type='relativisticBreitWigner'> \
   <Width Name='width_f0_980'> \
   <Value>0.05</Value> \
@@ -77,16 +73,16 @@ BOOST_AUTO_TEST_CASE(XMLInput) {
 
   auto part = inst->FindParticle("gamma");
   BOOST_CHECK_EQUAL(part.GetMass(), 0.);
-  BOOST_CHECK_EQUAL((double)part.GetSpin(), 1.);
-  BOOST_CHECK_EQUAL(part.GetParity(), -1);
-  BOOST_CHECK_EQUAL(part.GetCparity(), -1);
+  BOOST_CHECK_EQUAL((double)part.GetSpinQuantumNumber("Spin"), 1.);
+  BOOST_CHECK_EQUAL(part.GetQuantumNumber("Parity"), -1);
+  BOOST_CHECK_EQUAL(part.GetQuantumNumber("Cparity"), -1);
   BOOST_CHECK_EQUAL(part.GetDecayType(), "stable");
 
   part = inst->FindParticle(9010221);
   BOOST_CHECK_EQUAL(part.GetMass(), 0.99);
-  BOOST_CHECK_EQUAL((double)part.GetSpin(), 0.);
-  BOOST_CHECK_EQUAL(part.GetParity(), 1);
-  BOOST_CHECK_EQUAL(part.GetCparity(), 1);
+  BOOST_CHECK_EQUAL((double)part.GetSpinQuantumNumber("Spin"), 0.);
+  BOOST_CHECK_EQUAL(part.GetQuantumNumber("Parity"), 1);
+  BOOST_CHECK_EQUAL(part.GetQuantumNumber("Cparity"), 1);
   BOOST_CHECK_EQUAL(part.GetDecayType(), "relativisticBreitWigner");
 };
 

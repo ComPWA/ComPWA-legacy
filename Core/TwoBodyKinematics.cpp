@@ -14,11 +14,11 @@ TwoBodyKinematics::TwoBodyKinematics(int idMother, std::vector<int> finalState,
   m2 = ComPWA::PhysConst::Instance()->FindParticle(finalState.at(1)).GetMass();
 
   _spinM = ComPWA::PhysConst::Instance()
-      ->FindParticle(idMother).GetSpin();
+      ->FindParticle(idMother).GetSpinQuantumNumber("Spin");
   spin1 = ComPWA::PhysConst::Instance()
-      ->FindParticle(finalState.at(0)).GetSpin();
+      ->FindParticle(finalState.at(0)).GetSpinQuantumNumber("Spin");
     spin2 = ComPWA::PhysConst::Instance()
-      ->FindParticle(finalState.at(1)).GetSpin();
+      ->FindParticle(finalState.at(1)).GetSpinQuantumNumber("Spin");
  
 
   if (_M == -999 || m1 == -999 || m2 == -999)

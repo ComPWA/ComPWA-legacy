@@ -49,36 +49,34 @@ public:
       : Properties(pt.get<std::string>("<xmlattr>.Name"), pt.get<pid>("Pid")) {
 
     _mass = DoubleParameterFactory(pt.get_child("Mass"));
-    // Parameters optional. Shall we require them?
 
     // Loop over QuantumNumbers which can be of type int or ComPWA::Spin
     for (const auto &v : pt.get_child("")) {
       if (v.first != "QuantumNumber")
         continue;
-      std::string nn = v.second.get<std::string>("<xmlattr>.Name");
+      std::string type = v.second.get<std::string>("<xmlattr>.Type");
 
       // We have to distinguish between spin and integer quantum numbers
-      if (v.second.get<std::string>("<xmlattr>.Type") == "Spin") {
+      if (v.second.get<std::string>("<xmlattr>.Class") == "Spin") {
         auto value = v.second.get<double>("<xmlattr>.Value");
-        auto valueZ = v.second.get<double>("<xmlattr>.Projection");
+        double valueZ = 0.0;
+        try { //Projection of spin is optional (e.g. (I,I3))
+          valueZ = v.second.get<double>("<xmlattr>.Projection");
+        } catch (std::exception& ex){ }
         spinQuantumNumbers_.insert(
-            std::make_pair(nn, ComPWA::Spin(value, valueZ)));
-      } else if (v.second.get<std::string>("<xmlattr>.Type") == "Spin") {
+            std::make_pair(type, ComPWA::Spin(value, valueZ)));
+      } else if (v.second.get<std::string>("<xmlattr>.Class") == "Int") {
         auto value = v.second.get<int>("<xmlattr>.Value");
-        intQuantumNumbers_.insert(std::make_pair(nn, value));
+        intQuantumNumbers_.insert(std::make_pair(type, value));
       } else {
         throw BadParameter("ParticleProperties::ParticleProperties() | "
                           "QuantumNumber is neither of type 'Spin' nor of type "
                           "'Int'!");
       }
     }
-    SetSpin(ComPWA::Spin(pt.get<double>("Spin", 0.)));
-    SetIsoSpin(ComPWA::Spin(pt.get<double>("IsoSpin", 0.)));
-    SetIsoSpinZ(ComPWA::Spin(pt.get<double>("IsoSpinZ", 0.)));
-    SetParity(pt.get<double>("Parity", 0));
-    SetCparity(pt.get<double>("Cparity", 0));
-    SetGparity(pt.get<double>("Gparity", 0));
-
+    
+    // Info on the particle decay is stored as it is as property_tree and later
+    // used by AbstractDynamicalFunctions (e.g. RelativisticBreitWigner).
     auto decayInfo = pt.get_child_optional("DecayInfo");
     if (decayInfo)
       _decayInfo = decayInfo.get();
@@ -114,37 +112,11 @@ public:
   std::string GetDecayType() const {
     return _decayInfo.get<std::string>("<xmlattr>.Type");
   }
-  
-  //Obsolete
-  void SetSpin(ComPWA::Spin s) { _spin = s; }
-  ComPWA::Spin GetSpin() const { return _spin; }
-
-  void SetIsoSpin(ComPWA::Spin s) { _isoSpin = s; }
-  ComPWA::Spin GetIsoSpin() const { return _isoSpin; }
-
-  void SetIsoSpinZ(ComPWA::Spin s) { _isoSpinZ = s; }
-  ComPWA::Spin GetIsoSpinZ() const { return _isoSpinZ; }
-
-  void SetParity(int p) { _parity = p; }
-  int GetParity() const { return _parity; }
-
-  void SetCparity(int p) { _cparity = p; }
-  int GetCparity() const { return _cparity; }
-
-  void SetGparity(int p) { _gparity = p; }
-  int GetGparity() const { return _gparity; }
 
 protected:
   ComPWA::DoubleParameter _mass;
   std::map<std::string, int> intQuantumNumbers_;
   std::map<std::string, ComPWA::Spin> spinQuantumNumbers_;
-
-  ComPWA::Spin _spin;
-  ComPWA::Spin _isoSpin;
-  ComPWA::Spin _isoSpinZ;
-  int _parity;
-  int _cparity;
-  int _gparity;
 
   /* Store decay info in property_tree. The tree is later on passed to the
    * respective class. */
