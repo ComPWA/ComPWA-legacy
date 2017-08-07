@@ -15,9 +15,6 @@
 #include <vector>
 
 #include "Core/Kinematics.hpp"
-#include "Physics/HelicityFormalism/SubSystem.hpp"
-
-// class Particle;
 
 namespace ComPWA {
 namespace Physics {
