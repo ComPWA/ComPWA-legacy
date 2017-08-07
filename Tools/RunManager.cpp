@@ -28,7 +28,7 @@
 #include <boost/progress.hpp>
 
 #include "DataReader/Data.hpp"
-#include "Estimator/Estimator.hpp"
+#include "Core/Estimator.hpp"
 #include "Optimizer/Optimizer.hpp"
 #include "Core/ParameterList.hpp"
 #include "Core/Event.hpp"

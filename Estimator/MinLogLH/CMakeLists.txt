@@ -1,7 +1,7 @@
 # Create MinLogLH library.
 
 SET(lib_srcs MinLogLH.cpp)
-SET(lib_headers MinLogLH.hpp ../Estimator.hpp)
+SET(lib_headers MinLogLH.hpp )
 
 add_library(
   MinLogLH

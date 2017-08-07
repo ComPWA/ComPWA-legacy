@@ -56,7 +56,7 @@ double shiftAngle(double v) {
   return val;
 }
 
-MinuitIF::MinuitIF(std::shared_ptr<ControlParameter> esti, ParameterList &par)
+MinuitIF::MinuitIF(std::shared_ptr<IEstimator> esti, ParameterList &par)
     : _myFcn(esti, par), estimator(esti), enableHesse(true), enableMinos(true) {
 
 }

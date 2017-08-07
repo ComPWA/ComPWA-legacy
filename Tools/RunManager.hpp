@@ -82,16 +82,17 @@
 #include <vector>
 #include <memory>
 
-#include "DataReader/Data.hpp"
-#include "Estimator/Estimator.hpp"
+#include "Core/Estimator.hpp"
 #include "Core/AmpIntensity.hpp"
-#include "Optimizer/Optimizer.hpp"
 #include "Core/FitResult.hpp"
 #include "Core/ParameterList.hpp"
 #include "Core/Efficiency.hpp"
 #include "Core/Generator.hpp"
+#include "DataReader/Data.hpp"
+#include "Optimizer/Optimizer.hpp"
 
 #include "Tools/FitFractions.hpp"
+
 namespace ComPWA {
 
 using namespace DataReader;

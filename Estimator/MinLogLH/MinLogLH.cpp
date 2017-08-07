@@ -63,7 +63,7 @@ MinLogLH::MinLogLH(std::shared_ptr<Kinematics> kin,
   LOG(info) << "MinLogLH::Init() |  Size of data sample = " << nUseEvt_
             << " ( Sum of weights = " << _sumOfWeights << " ).";
 
-  calls = 0; // member of ControlParameter
+  _calls = 0; // member of ControlParameter
 
   return;
 }
@@ -74,40 +74,6 @@ void MinLogLH::Reset() {
   _phspSample = std::shared_ptr<DataReader::Data>();
   _phspAccSample = std::shared_ptr<DataReader::Data>();
   _phspAccSampleEff = 1.0;
-}
-
-std::shared_ptr<ComPWA::ControlParameter>
-MinLogLH::CreateInstance(std::shared_ptr<Kinematics> kin,
-                         std::shared_ptr<AmpIntensity> intens,
-                         std::shared_ptr<DataReader::Data> data,
-                         std::shared_ptr<DataReader::Data> phspSample,
-                         unsigned int startEvent, unsigned int nEvents) {
-
-  if (!instance_) {
-    std::shared_ptr<DataReader::Data> accSample_ =
-        std::shared_ptr<DataReader::Data>();
-    instance_ = std::shared_ptr<ComPWA::ControlParameter>(
-        new MinLogLH(kin, intens, data, phspSample,
-                     std::shared_ptr<DataReader::Data>(), // empty sample
-                     startEvent, nEvents));
-    LOG(debug) << "MinLogLH::createInstance() | "
-                  "Creating instance from amplitude and dataset!";
-  }
-  return instance_;
-}
-
-std::shared_ptr<ComPWA::ControlParameter>
-MinLogLH::CreateInstance(std::shared_ptr<Kinematics> kin,
-                         std::shared_ptr<AmpIntensity> intens,
-                         std::shared_ptr<DataReader::Data> data,
-                         std::shared_ptr<DataReader::Data> phspSample,
-                         std::shared_ptr<DataReader::Data> accSample,
-                         unsigned int startEvent, unsigned int nEvents) {
-  if (!instance_) {
-    instance_ = std::shared_ptr<ControlParameter>(new MinLogLH(
-        kin, intens, data, phspSample, accSample, startEvent, nEvents));
-  }
-  return instance_;
 }
 
 void MinLogLH::CalcSumOfWeights() {
@@ -196,7 +162,7 @@ double MinLogLH::controlParameter(ParameterList &minPar) {
     lh = logLH->GetValue();
   }
   //  lh += calcPenalty();
-  calls++;
+  _calls++;
   return lh; // return -logLH
 }
 

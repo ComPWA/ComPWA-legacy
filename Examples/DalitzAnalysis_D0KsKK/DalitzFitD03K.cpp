@@ -551,13 +551,12 @@ int main(int argc, char **argv) {
     LOG(debug) << "Fit parameters: " << std::endl << fitPar.to_str();
 
     //=== Constructing likelihood
-    auto esti = Estimator::MinLogLH::CreateInstance(kin, intens, sample,
+    auto esti = std::make_shared<Estimator::MinLogLH>(kin, intens, sample,
         toyPhspData, phspData, 0, 0);
 
     std::cout.setf(std::ios::unitbuf);
     if (fittingMethod == "tree") {
-      dynamic_pointer_cast<ComPWA::Estimator::MinLogLH>(esti)->UseFunctionTree(
-          true);
+      esti->UseFunctionTree(true);
       LOG(debug) << esti->GetTree()->head()->to_str(25);
     }
 

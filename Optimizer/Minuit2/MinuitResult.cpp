@@ -21,22 +21,20 @@ namespace Minuit2 {
 
 using namespace boost::log;
 
-using ComPWA::Estimator::Estimator;
-
 MinuitResult::MinuitResult()
     : calcInterference(0), initialLH(0), finalLH(0), trueLH(0) {}
 
-MinuitResult::MinuitResult(std::shared_ptr<ControlParameter> esti,
+MinuitResult::MinuitResult(std::shared_ptr<IEstimator> esti,
                            ROOT::Minuit2::FunctionMinimum result)
     : calcInterference(0), initialLH(0), finalLH(0), trueLH(0) {
-  est = std::static_pointer_cast<Estimator>(esti);
+  est = std::static_pointer_cast<IEstimator>(esti);
   _intens = est->GetIntensity();
   init(result);
 }
 
-void MinuitResult::setResult(std::shared_ptr<ControlParameter> esti,
+void MinuitResult::setResult(std::shared_ptr<IEstimator> esti,
                              ROOT::Minuit2::FunctionMinimum result) {
-  est = std::static_pointer_cast<Estimator>(esti);
+  est = std::static_pointer_cast<IEstimator>(esti);
   _intens = est->GetIntensity();
   init(result);
 }

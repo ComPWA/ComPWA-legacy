@@ -1,6 +1,6 @@
 # Create ChiOneD library.
 SET(lib_srcs ChiOneD.cpp)
-SET(lib_headers ChiOneD.hpp ../Estimator.hpp)
+SET(lib_headers ChiOneD.hpp)
 
 add_library(
   ChiOneD

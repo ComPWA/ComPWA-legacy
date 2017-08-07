@@ -103,5 +103,4 @@ if(DOXYGEN_FOUND)
       ${CMAKE_CURRENT_BINARY_DIR}/doc/images/ )
   #endforeach( i )
 
-    MESSAGE(asd fsdf ${PATH})
 endif(DOXYGEN_FOUND)
