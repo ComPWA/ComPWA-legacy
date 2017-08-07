@@ -60,12 +60,12 @@ void phspContour(unsigned int xsys, unsigned int ysys, unsigned int n,
   return;
 }
 
-plotData::plotData(std::string name, int bins)
-    : _name(name), _isFilled(0), _bins(bins), _globalScale(1.0),
+plotData::plotData(std::shared_ptr<Kinematics> kin, std::string name, int bins)
+    : _name(name), kin_(kin), _isFilled(0), _bins(bins), _globalScale(1.0),
       h_weights("h_weights", "h_weights", bins, 0, 1.01),
-      dataDiagrams("data", "Data", bins),
-      phspDiagrams("phsp", "Phase-space", bins),
-      fitHitMissDiagrams("fitHitMiss", "HitMiss", bins) {
+      dataDiagrams(kin, "data", "Data", bins),
+      phspDiagrams(kin, "phsp", "Phase-space", bins),
+      fitHitMissDiagrams(kin, "fitHitMiss", "HitMiss", bins) {
   gStyle->SetOptStat(10); // entries only
   //	gStyle->SetOptStat(1000001); //name and integral
   gStyle->SetOptTitle(0);
@@ -111,13 +111,13 @@ void plotData::SetFitAmp(std::shared_ptr<AmpIntensity> intens,
   _plotComponents.clear();
   _plotComponents.push_back(intens);
   _plotHistograms.push_back(
-      dalitzHisto(intens->Name(), title, _bins, color));
+      dalitzHisto(kin_, intens->Name(), title, _bins, color));
   _plotHistograms.back().SetStats(0);
   _plotLegend.push_back("Fit");
   _isFilled = 0;
 }
 
-void plotData::Fill() {
+void plotData::Fill(std::shared_ptr<Kinematics> kin) {
   // TODO: reset diagrams here
 
   //===== Fill data histograms
@@ -136,7 +136,7 @@ void plotData::Fill() {
       }
       double evWeight = event.GetWeight();
 
-      dataDiagrams.Fill(event, evWeight * 1 / eff);
+      dataDiagrams.Fill(kin, event, evWeight * 1 / eff);
       h_weights.Fill(evWeight * 1 / eff);
     }
     _globalScale = dataDiagrams.GetIntegral();
@@ -173,17 +173,17 @@ void plotData::Fill() {
        * phase space boundaries */
       dataPoint point;
       try {
-        point = dataPoint(event);
+        kin->EventToDataPoint(event, point);
       } catch (BeyondPhsp &ex) { // event outside phase, remove
         continue;
       }
 
       // Fill diagrams with pure phase space events
-      phspDiagrams.Fill(event, evBase); // scale phsp to data size
+      phspDiagrams.Fill(kin, event, evBase); // scale phsp to data size
 
       // Loop over all components that we want to plot
       for (int t = 0; t < _plotHistograms.size(); t++)
-        _plotHistograms.at(t).Fill(
+        _plotHistograms.at(t).Fill( kin,
             event, _plotComponents.at(t)->Intensity(point) * evBase);
     }
 
@@ -213,7 +213,7 @@ void plotData::Fill() {
       }
       double evWeight = event.GetWeight();
 
-      fitHitMissDiagrams.Fill(event, evWeight * 1 / eff);
+      fitHitMissDiagrams.Fill(kin, event, evWeight * 1 / eff);
     }
   }
 
@@ -222,7 +222,7 @@ void plotData::Fill() {
 
 void plotData::Plot() {
   if (!_isFilled)
-    Fill();
+    Fill(kin_);
 
   //----- plotting 2D dalitz distributions -----
   TCanvas *c1 = new TCanvas("dalitz", "dalitz", 50, 50, 1600, 1600);
@@ -355,10 +355,11 @@ void plotData::CreateHist2(unsigned int id) {
 }
 
 //===================== dalitzHisto =====================
-dalitzHisto::dalitzHisto(std::string name, std::string title, unsigned int bins,
+dalitzHisto::dalitzHisto(std::shared_ptr<Kinematics> kin, std::string name, std::string title, unsigned int bins,
                          Color_t color)
     : _name(name), _title(title), _nBins(bins), _integral(0.0), _color(color) {
-  auto *kin = dynamic_cast<HelicityKinematics *>(Kinematics::Instance());
+    
+  auto helkin = std::dynamic_pointer_cast<HelicityKinematics>(kin);
 
   // Initialize TTree
   _tree = std::unique_ptr<TTree>(new TTree(TString(_name), TString(_title)));
@@ -372,7 +373,7 @@ dalitzHisto::dalitzHisto(std::string name, std::string title, unsigned int bins,
 
   // mass23sq
   SubSystem sys23({0}, {1}, {2});
-  auto m23sq_limit = kin->GetInvMassBounds(sys23);
+  auto m23sq_limit = helkin->GetInvMassBounds(sys23);
   double m23sq_min = m23sq_limit.first;
   double m23sq_max = m23sq_limit.second;
 
@@ -385,7 +386,7 @@ dalitzHisto::dalitzHisto(std::string name, std::string title, unsigned int bins,
   _arr.back().Sumw2();
   // mass13sq
   SubSystem sys13({1}, {0}, {2});
-  auto m13sq_limit = kin->GetInvMassBounds(sys13);
+  auto m13sq_limit = helkin->GetInvMassBounds(sys13);
   double m13sq_min = m13sq_limit.first;
   double m13sq_max = m13sq_limit.second;
 
@@ -398,7 +399,7 @@ dalitzHisto::dalitzHisto(std::string name, std::string title, unsigned int bins,
   _arr.back().Sumw2();
   // mass12sq
   SubSystem sys12({0}, {0}, {1});
-  auto m12sq_limit = kin->GetInvMassBounds(sys12);
+  auto m12sq_limit = helkin->GetInvMassBounds(sys12);
   double m12sq_min = m12sq_limit.first;
   double m12sq_max = m12sq_limit.second;
 
@@ -438,29 +439,30 @@ dalitzHisto::dalitzHisto(std::string name, std::string title, unsigned int bins,
   return;
 }
 
-void dalitzHisto::Fill(Event &event, double w) {
+void dalitzHisto::Fill(std::shared_ptr<Kinematics> kin, Event &event, double w) {
 
   double weight = event.GetWeight() * w; // use event weights?
 
   _integral += weight;
 
-  auto *kin = dynamic_cast<HelicityKinematics *>(Kinematics::Instance());
-
-  SubSystem sys23({0}, {1}, {2});
-  SubSystem sys13({1}, {0}, {2});
-  SubSystem sys12({2}, {0}, {1});
+  auto helkin = std::dynamic_pointer_cast<HelicityKinematics>(kin);
+  int sysId23 = helkin->GetDataID(SubSystem({0}, {1}, {2}));
+  int sysId13 = helkin->GetDataID(SubSystem({1}, {0}, {2}));
+  int sysId12 = helkin->GetDataID(SubSystem({2}, {0}, {1}));
 
   dataPoint point;
-  kin->EventToDataPoint(event, point, sys23);
-  kin->EventToDataPoint(event, point, sys13);
-  kin->EventToDataPoint(event, point, sys12);
+  try{
+    kin->EventToDataPoint(event, point);
+  } catch (std::exception& ex){
+    return;
+  }
 
-  double m23sq = point.GetValue(0);
-  double cos23 = point.GetValue(1);
-  double m13sq = point.GetValue(3);
-  //	double cos13 = point.getVal(4);
-  double m12sq = point.GetValue(6);
-  //	double cos12 = point.getVal(7);
+  double m23sq = point.GetValue(3*sysId23);
+  double cos23 = point.GetValue(3*sysId23+1);
+  double m13sq = point.GetValue(3*sysId13);
+  //	double cos13 = point.getVal(3*sysId13+1);
+  double m12sq = point.GetValue(3*sysId12);
+  //	double cos12 = point.getVal(3*sysId12+1);
 
   _arr.at(0).Fill(m23sq, weight);
   _arr.at(1).Fill(m13sq, weight);

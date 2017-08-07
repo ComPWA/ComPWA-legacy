@@ -22,11 +22,11 @@
 
 #include <cmath>
 #include <math.h>
-#include "Physics/HelicityFormalism/AmpFlatteRes.hpp"
+#include "Physics/DecayDynamics/AmpFlatteRes.hpp"
 
 namespace ComPWA {
 namespace Physics {
-namespace HelicityFormalism {
+namespace DecayDynamics {
 
 AmpFlatteRes::~AmpFlatteRes() {}
 
@@ -37,23 +37,24 @@ AmpFlatteRes::Factory(const boost::property_tree::ptree &pt) {
   std::string name = pt.get<std::string>("DecayParticle.<xmlattr>.Name");
   LOG(trace) << "AmpFlatteRes::Factory() | Construction of " << name << ".";
   obj->SetName(name);
+  
+  // All further information on the decay is stored in a ParticleProperty list
+  // which is globally provided by the PhysConst service.
   auto partProp = PhysConst::Instance()->FindParticle(name);
-  obj->SetMassParameter(std::make_shared<DoubleParameter>(partProp.GetMassPar()));
+  
+  obj->SetMassParameter(
+      std::make_shared<DoubleParameter>(partProp.GetMassPar()));
 
   auto decayTr = partProp.GetDecayInfo();
   if (partProp.GetDecayType() != "flatte")
     throw std::runtime_error(
         "AmpFlatteRes::Factory() | Decay type does not match! ");
 
-  auto spin = partProp.GetSpin();
+  auto spin = partProp.GetSpinQuantumNumber("Spin");
   obj->SetSpin(spin);
 
-  auto ffType = formFactorType(decayTr.get<int>("FormFactor.<xmlattr>.type"));
+  auto ffType = formFactorType(decayTr.get<int>("FormFactor.<xmlattr>.Type"));
   obj->SetFormFactorType(ffType);
-
-  auto mesonRadius =
-      ComPWA::DoubleParameterFactory(decayTr.get_child("MesonRadius"));
-  obj->SetMesonRadiusParameter(std::make_shared<DoubleParameter>(mesonRadius));
 
   // Get masses of decay products
   auto decayProducts = pt.get_child("DecayProducts");
@@ -63,10 +64,10 @@ AmpFlatteRes::Factory(const boost::property_tree::ptree &pt) {
         std::to_string(decayProducts.size()) + " given)!");
 
   auto firstItr = decayProducts.begin();
-  // auto secondItr = decayProducts.begin()+1; //compile error, no idea for why
   auto secondItr = decayProducts.begin();
   secondItr++;
 
+  // Mass of daughter particles needs to be set before the coupling constants
   std::pair<std::string, std::string> daughterNames(
       firstItr->second.get<std::string>("<xmlattr>.Name"),
       secondItr->second.get<std::string>("<xmlattr>.Name"));
@@ -77,10 +78,22 @@ AmpFlatteRes::Factory(const boost::property_tree::ptree &pt) {
   obj->SetDecayMasses(daughterMasses);
   obj->SetDecayNames(daughterNames);
 
+  // Read parameters
   std::vector<Coupling> vC;
   for (const auto &v : decayTr.get_child("")) {
-    if (v.first == "Coupling")
+    if (v.first != "Parameter")
+      continue;
+    std::string type = v.second.get<std::string>("<xmlattr>.Type");
+    if (type == "Coupling") {
       vC.push_back(Coupling(v.second));
+    } else if (type == "MesonRadius") {
+      auto mesonRadius = ComPWA::DoubleParameterFactory(v.second);
+      obj->SetMesonRadiusParameter(
+          std::make_shared<DoubleParameter>(mesonRadius));
+    } else {
+      throw std::runtime_error("AmpFlatteRes::Factory() | Parameter of type " +
+                               type + " is unknown.");
+    }
   }
   obj->SetCouplings(vC);
 
@@ -93,7 +106,8 @@ AmpFlatteRes::Factory(const boost::property_tree::ptree &pt) {
 }
 
 bool AmpFlatteRes::CheckModified() const {
-  if( AbstractDynamicalFunction::CheckModified() ) return true;
+  if (AbstractDynamicalFunction::CheckModified())
+    return true;
   if (_g.at(0).GetValue() != _current_g ||
       _g.at(1).GetValue() != _current_gHidden ||
       _g.at(2).GetValue() != _current_gHidden2) {
@@ -106,12 +120,13 @@ bool AmpFlatteRes::CheckModified() const {
   return false;
 }
 
-std::complex<double> AmpFlatteRes::Evaluate(const dataPoint &point) const {
+std::complex<double> AmpFlatteRes::Evaluate(const dataPoint &point,
+                                            int pos) const {
 
   std::complex<double> result;
   try {
     result = dynamicalFunction(
-        point.GetValue(_dataPos), _mass->GetValue(), _g.at(0).GetMassA(),
+        point.GetValue(pos), _mass->GetValue(), _g.at(0).GetMassA(),
         _g.at(0).GetMassB(), _g.at(0).GetValue(), _g.at(1).GetMassA(),
         _g.at(1).GetMassB(), _g.at(1).GetValue(), _g.at(2).GetMassA(),
         _g.at(2).GetMassB(), _g.at(2).GetValue(), (double)_spin,
@@ -122,7 +137,7 @@ std::complex<double> AmpFlatteRes::Evaluate(const dataPoint &point) const {
                << ex.what();
     throw;
   }
-  assert( !std::isnan(result.real()) && !std::isnan(result.imag()) );
+  assert(!std::isnan(result.real()) && !std::isnan(result.imag()));
   return result;
 }
 
@@ -161,13 +176,10 @@ AmpFlatteRes::dynamicalFunction(double mSq, double mR, double massA1,
   std::complex<double> gammaA, qTermA, termA;
   double barrierA;
   // break-up momentum
-  barrierA = HelicityFormalism::HelicityKinematics::FormFactor(
-                 sqrtS, massA1, massA2, J, mesonRadius, ffType) /
-             HelicityFormalism::HelicityKinematics::FormFactor(
-                 mR, massA1, massA2, J, mesonRadius, ffType);
+  barrierA = FormFactor(sqrtS, massA1, massA2, J, mesonRadius, ffType) /
+             FormFactor(mR, massA1, massA2, J, mesonRadius, ffType);
   // convert coupling to partial width of channel A
-  gammaA = HelicityFormalism::couplingToWidth(mSq, mR, gA, massA1, massA2, J,
-                                              mesonRadius, ffType);
+  gammaA = couplingToWidth(mSq, mR, gA, massA1, massA2, J, mesonRadius, ffType);
   // including the factor qTermA, as suggested by PDG, leads to an amplitude
   // that doesn't converge.
   //		qTermA = Kinematics::qValue(sqrtS,massA1,massA2) /
@@ -179,14 +191,11 @@ AmpFlatteRes::dynamicalFunction(double mSq, double mR, double massA1,
   std::complex<double> gammaB, qTermB, termB;
   double barrierB, gB;
   // break-up momentum
-  barrierB = HelicityFormalism::HelicityKinematics::FormFactor(
-                 sqrtS, massB1, massB2, J, mesonRadius, ffType) /
-             HelicityFormalism::HelicityKinematics::FormFactor(
-                 mR, massB1, massB2, J, mesonRadius, ffType);
+  barrierB = FormFactor(sqrtS, massB1, massB2, J, mesonRadius, ffType) /
+             FormFactor(mR, massB1, massB2, J, mesonRadius, ffType);
   gB = couplingB;
   // convert coupling to partial width of channel B
-  gammaB = HelicityFormalism::couplingToWidth(mSq, mR, gB, massB1, massB2, J,
-                                              mesonRadius, ffType);
+  gammaB = couplingToWidth(mSq, mR, gB, massB1, massB2, J, mesonRadius, ffType);
   //		qTermB = Kinematics::qValue(sqrtS,massB1,massB2) /
   // Kinematics::qValue(mR,massB1,massB2);
   qTermB = std::complex<double>(1, 0);
@@ -197,14 +206,12 @@ AmpFlatteRes::dynamicalFunction(double mSq, double mR, double massA1,
   double barrierC, gC;
   if (couplingC != 0.0) {
     // break-up momentum
-    barrierC = HelicityFormalism::HelicityKinematics::FormFactor(
-                   sqrtS, massC1, massC2, J, mesonRadius, ffType) /
-               HelicityFormalism::HelicityKinematics::FormFactor(
-                   mR, massC1, massC2, J, mesonRadius, ffType);
+    barrierC = FormFactor(sqrtS, massC1, massC2, J, mesonRadius, ffType) /
+               FormFactor(mR, massC1, massC2, J, mesonRadius, ffType);
     gC = couplingC;
     // convert coupling to partial width of channel C
-    gammaC = HelicityFormalism::couplingToWidth(mSq, mR, gC, massC1, massC2, J,
-                                                mesonRadius, ffType);
+    gammaC =
+        couplingToWidth(mSq, mR, gC, massC1, massC2, J, mesonRadius, ffType);
     //		qTermC = Kinematics::qValue(sqrtS,massC1,massC2) /
     // Kinematics::qValue(mR,massC1,massC2);
     qTermC = std::complex<double>(1, 0);
@@ -215,9 +222,10 @@ AmpFlatteRes::dynamicalFunction(double mSq, double mR, double massA1,
 }
 
 std::shared_ptr<FunctionTree> AmpFlatteRes::GetTree(const ParameterList &sample,
+                                                    int pos,
                                                     std::string suffix) {
 
-  int sampleSize = sample.GetMultiDouble(0)->GetNValues();
+  //  int sampleSize = sample.GetMultiDouble(0)->GetNValues();
 
   std::shared_ptr<FunctionTree> tr(new FunctionTree());
   //  tr->createHead("DynamicalFunction",
@@ -243,53 +251,8 @@ std::shared_ptr<FunctionTree> AmpFlatteRes::GetTree(const ParameterList &sample,
   //_daughterMasses actually not used here. But we put it in as a cross check.
   tr->createLeaf("MassA", _daughterMasses.first, "Flatte" + suffix);
   tr->createLeaf("MassB", _daughterMasses.second, "Flatte" + suffix);
-  tr->createLeaf("Data_mSq[" + std::to_string(_dataPos) + "]",
-                 sample.GetMultiDouble(_dataPos), "Flatte" + suffix);
-
-  // Normalization
-  //  int toySampleSize = toySample.GetMultiDouble(0)->GetNValues();
-  //  double phspVol = Kinematics::Instance()->GetPhspVolume();
-  //  tr->createNode("Normalization",
-  //                 std::shared_ptr<Strategy>(new Inverse(ParType::DOUBLE)),
-  //                 "DynamicalFunction"); // 1/normLH
-  //  tr->createNode("SqrtIntegral",
-  //                 std::shared_ptr<Strategy>(new SquareRoot(ParType::DOUBLE)),
-  //                 "Normalization");
-  //  tr->createNode("Integral",
-  //                 std::shared_ptr<Strategy>(new MultAll(ParType::DOUBLE)),
-  //                 "SqrtIntegral");
-  //  tr->createLeaf("PhspVolume", phspVol, "Integral");
-  //  tr->createLeaf("InverseSampleSize", 1 / ((double)toySampleSize),
-  //  "Integral");
-  //  tr->createNode("Sum", std::shared_ptr<Strategy>(new
-  //  AddAll(ParType::DOUBLE)),
-  //                 "Integral");
-  //  tr->createNode("Intensity",
-  //                 std::shared_ptr<Strategy>(new AbsSquare(ParType::MDOUBLE)),
-  //                 "Sum", toySampleSize,
-  //                 false); //|T_{ev}|^2
-  //  tr->createNode("NormalizationFlatte",
-  //                 std::shared_ptr<Strategy>(new FlatteStrategy("")),
-  //                 "Intensity",
-  //                 toySampleSize);
-  //  tr->createLeaf("Mass", _mass, "NormalizationFlatte");
-  //  for (int i = 0; i < _g.size(); i++) {
-  //    tr->createLeaf("g_" + std::to_string(i) + "_massA", _g.at(i).GetMassA(),
-  //                   "NormalizationFlatte");
-  //    tr->createLeaf("g_" + std::to_string(i) + "_massB", _g.at(i).GetMassB(),
-  //                   "NormalizationFlatte");
-  //    tr->createLeaf("g_" + std::to_string(i), _g.at(i).GetValueParameter(),
-  //                   "NormalizationFlatte");
-  //  }
-  //  tr->createLeaf("Spin", (double)_spin, "NormalizationFlatte");
-  //  tr->createLeaf("MesonRadius", _mesonRadius, "NormalizationFlatte");
-  //  tr->createLeaf("FormFactorType", _ffType, "NormalizationFlatte");
-  //  //_daughterMasses actually not used here. But we put it in as a cross
-  //  check.
-  //  tr->createLeaf("MassA", _daughterMasses.first, "NormalizationFlatte");
-  //  tr->createLeaf("MassB", _daughterMasses.second, "NormalizationFlatte");
-  //  tr->createLeaf("PhspSample_mSq[" + std::to_string(_dataPos) + "]",
-  //                 toySample.GetMultiDouble(_dataPos), "NormalizationFlatte");
+  tr->createLeaf("Data_mSq[" + std::to_string(pos) + "]",
+                 sample.GetMultiDouble(pos), "Flatte" + suffix);
 
   return tr;
 }
@@ -395,7 +358,7 @@ void AmpFlatteRes::GetParameters(ParameterList &list) {
    */
   std::shared_ptr<DoubleParameter> tmp;
   for (auto i : _g) {
-    if(i.GetValue() == 0.0)
+    if (i.GetValue() == 0.0)
       continue;
     try { // catch BadParameter
       tmp = list.GetDoubleParameter(i.GetValueParameter()->GetName());

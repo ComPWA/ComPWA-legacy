@@ -5,7 +5,7 @@ find_package( ROOT REQUIRED )
 find_package( Boost REQUIRED )
 
 add_executable( DalitzFitD03K
-  DalitzFitD03K.cpp PlotData.cpp
+  DalitzFitD03K.cpp PlotData.cpp PlotData.hpp Tools.hpp systematics.hpp
 )
 
 target_link_libraries( DalitzFitD03K

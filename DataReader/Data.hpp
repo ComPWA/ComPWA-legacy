@@ -20,6 +20,8 @@
 #include <memory>
 
 #include "Core/Event.hpp"
+#include "Core/Efficiency.hpp"
+#include "Core/Kinematics.hpp"
 #include "Core/ParameterList.hpp"
 #include "Core/Generator.hpp"
 #include "Core/DataPoint.hpp"
@@ -30,7 +32,7 @@ namespace ComPWA {
 namespace DataReader {
 
 /*! \class Data
- * This class provides the interface to experimental data. It does not provide 
+ * This class provides the interface to experimental data. It does not provide
  * any funktionality for data read in and write out. This funktionality is
  * in derived classes. See @RootReader, @AsciiReader.
  */
@@ -63,13 +65,13 @@ public:
    * @param id Event id
    * @return reference to event
    */
-  virtual Event& GetEvent(const int id) { return fEvents.at(id); }
+  virtual Event &GetEvent(const int id) { return fEvents.at(id); }
 
   /**! Get events
    *
    * @return Vector of all events
    */
-  virtual std::vector<Event>& GetEvents() { return fEvents; }
+  virtual std::vector<Event> &GetEvents() { return fEvents; }
 
   /**! Get list of data
    * A 'horizontal' list of dataPoints is obtained. Each variable
@@ -77,9 +79,9 @@ public:
    * This ParameterList is used to build the FunctionTree
    * @return List of data
    */
-  virtual const ParameterList& GetListOfData();
+  virtual const ParameterList &GetListOfData(std::shared_ptr<Kinematics> kin);
 
-  std::vector<dataPoint> GetDataPoints() const;
+  std::vector<dataPoint> GetDataPoints(std::shared_ptr<Kinematics> kin) const;
 
   /**! Set correction value for all events.
    *
@@ -88,7 +90,7 @@ public:
   virtual void ApplyCorrection(DataCorrection &corr);
 
   //! Remove all events outside phase-space boundaries
-  virtual void ReduceToPhsp();
+  virtual void ReduceToPhsp(std::shared_ptr<Kinematics> kin);
 
   /**! Reduce data set
    * Select first @param newSize events from full sample.
@@ -102,7 +104,8 @@ public:
    * @param gen Generator
    * @return Sub set
    */
-  virtual std::shared_ptr<Data> RndSubSet(unsigned int size,
+  virtual std::shared_ptr<Data> RndSubSet(std::shared_ptr<Kinematics> kin,
+                                          unsigned int size,
                                           std::shared_ptr<Generator> gen);
 
   /**! Set resolution value for all events.
@@ -115,7 +118,8 @@ public:
    *
    * @param eff Efficiency object
    */
-  virtual void SetEfficiency(std::shared_ptr<Efficiency> eff);
+  virtual void SetEfficiency(std::shared_ptr<Kinematics> kin,
+                             std::shared_ptr<Efficiency> eff);
 
   //! Reset effciencies of all events
   virtual void ResetEfficiency(double e = 1.);
@@ -141,8 +145,9 @@ public:
    * @param trName name of output tree
    */
   virtual void WriteData(std::string file = "", std::string trName = "") {
-    LOG(error) << "Data::writeData() | Base class does not provide functionality"
-    "to write data to file.";
+    LOG(error)
+        << "Data::writeData() | Base class does not provide functionality"
+           "to write data to file.";
   };
 
   //! Obsolete?
@@ -187,8 +192,10 @@ protected:
  * @param out1 output sub sample from sample 1
  * @param out2 output sub sample from sample 2
  */
-void rndReduceSet(unsigned int size, std::shared_ptr<Generator> gen, Data *in1,
-                  Data *out1, Data *in2 = NULL, Data *out2 = NULL);
+inline void rndReduceSet(std::shared_ptr<Kinematics> kin, unsigned int size,
+                         std::shared_ptr<Generator> gen, Data *in1, Data *out1,
+                         Data *in2 = NULL, Data *out2 = NULL);
+                         
 } /* namespace DataReader */
 } /* namespace ComPWA */
 

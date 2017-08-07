@@ -12,12 +12,12 @@
 #ifndef PHYSICS_HELICITYFORMALISM_NONRESONANT
 #define PHYSICS_HELICITYFORMALISM_NONRESONANT
 
-#include "Physics/HelicityFormalism/AbstractDynamicalFunction.hpp"
+#include "Physics/DecayDynamics/AbstractDynamicalFunction.hpp"
 #include "Core/Kinematics.hpp"
 
 namespace ComPWA {
 namespace Physics {
-namespace HelicityFormalism {
+namespace DecayDynamics {
 
 class NonResonant : public AbstractDynamicalFunction {
 
@@ -30,17 +30,17 @@ public:
 
   virtual ~NonResonant(){};
 
-  virtual std::complex<double> Evaluate(const dataPoint &p) const {
+  virtual std::complex<double> Evaluate(const dataPoint &p, int pos) const {
     return std::complex<double>(1.0, 0.0);
   }
 
   virtual std::shared_ptr<FunctionTree> GetTree(const ParameterList &sample,
-                                                std::string suffix);
+                                                int pos, std::string suffix);
 
   virtual void GetParameters(ParameterList &list){};
 };
 
-} /* namespace DynamicalFunctions */
+} /* namespace DecayDynamics */
 } /* namespace Physics */
 } /* namespace ComPWA */
 

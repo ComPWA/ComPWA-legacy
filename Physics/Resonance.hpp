@@ -5,35 +5,27 @@
  *      Author: weidenka
  */
 
-#ifndef CORE_RESONANCE_HPP_
-#define CORE_RESONANCE_HPP_
+#ifndef PHYSICS_RESONANCE_HPP_
+#define PHYSICS_RESONANCE_HPP_
 
 #include <vector>
 #include <memory>
-
-#include <boost/iterator/filter_iterator.hpp>
 
 #include "Core/AbsParameter.hpp"
 #include "Core/Parameter.hpp"
 #include "Core/DataPoint.hpp"
 #include "Core/FunctionTree.hpp"
+#include "Core/Kinematics.hpp"
 
 namespace ComPWA {
 namespace Physics {
-
-enum normStyle {
-  none, /*!< no normaliztion between Amplitudes. */
-  /*!< all amplitudes are normalized to one.
-   *  The normalization factor is \f$ 1/\sqrt(\int |A|^2)\f$ */
-  one
-};
 
 class Resonance {
 
 public:
   //============ CONSTRUCTION ==================
 
-  Resonance() : _preFactor(1, 0){};
+  Resonance() : _preFactor(1, 0), phspVolume_(1){};
 
   virtual ~Resonance(){};
 
@@ -153,7 +145,7 @@ public:
     list.AddParameter(GetPhaseParameter());
   }
   
-  //! Fill vector with parameters
+  /// Fill vector with parameters
   virtual void GetParametersFast(std::vector<double> &list) const {
     list.push_back(GetMagnitude());
     list.push_back(GetPhase());
@@ -168,13 +160,17 @@ public:
     _phspSample = phspSample;
   };
 
+  virtual void SetPhspVolume(double phspVol) { phspVolume_ = phspVol; }
+  
+  virtual double GetPhspVolume() const { return phspVolume_; }
+  
   //=========== FUNCTIONTREE =================
 
   //! Check of tree is available
   virtual bool HasTree() const { return false; }
 
   virtual std::shared_ptr<FunctionTree>
-  GetTree(const ComPWA::ParameterList &sample,
+  GetTree(std::shared_ptr<Kinematics> kin, const ComPWA::ParameterList &sample,
           const ComPWA::ParameterList &toySample, std::string suffix) = 0;
 
 protected:
@@ -183,10 +179,12 @@ protected:
   std::shared_ptr<ComPWA::DoubleParameter> _phase;
   std::complex<double> _preFactor;
 
-  //! Phsp sample for numerical integration
+  /// Phsp sample for numerical integration
   std::shared_ptr<std::vector<ComPWA::dataPoint>> _phspSample;
 
-  //! Integral
+  /// The phase-space volume is needed for proper normalization of the resonance
+  double phspVolume_;
+
   virtual double Integral() const {
     if (!_phspSample->size()) {
       LOG(debug)
@@ -200,8 +198,7 @@ protected:
     for (auto i : *_phspSample.get())
       sumIntens += std::norm(EvaluateNoNorm(i));
 
-    double phspVol = Kinematics::Instance()->GetPhspVolume();
-    double integral = (sumIntens * phspVol / _phspSample->size());
+    double integral = (sumIntens * phspVolume_ / _phspSample->size());
     LOG(trace) << "Resonance::Integral() | Integral is " << integral << ".";
     assert(!std::isnan(integral));
     return integral;
@@ -218,4 +215,4 @@ private:
 
 } /* namespace Physics */
 } /* namespace ComPWA */
-#endif /* CORE_RESONANCE_HPP_ */
+#endif /* PHYSICS_RESONANCE_HPP_ */

@@ -42,7 +42,7 @@ public:
    @return Constructed object
    */
   static std::shared_ptr<ComPWA::Physics::Amplitude>
-  Factory(const boost::property_tree::ptree &pt);
+  Factory(std::shared_ptr<Kinematics> kin, const boost::property_tree::ptree &pt);
 
   static boost::property_tree::ptree
   Save(std::shared_ptr<ComPWA::Physics::Amplitude> obj);
@@ -128,7 +128,8 @@ public:
   virtual bool HasTree() const { return true; }
 
   /**! Setup function tree */
-  virtual std::shared_ptr<FunctionTree> GetTree(const ParameterList &sample,
+  virtual std::shared_ptr<FunctionTree> GetTree(std::shared_ptr<Kinematics> kin,
+                                                const ParameterList &sample,
                                                 const ParameterList &toySample,
                                                 std::string suffix);
 

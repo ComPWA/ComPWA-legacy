@@ -1,4 +1,3 @@
-
 //-------------------------------------------------------------------------------
 // Copyright (c) 2013 Stefan Pflueger.
 // All rights reserved. This program and the accompanying materials
@@ -35,19 +34,20 @@ public:
           std::shared_ptr<DoubleParameter>(new DoubleParameter("", 1.0)),
       std::shared_ptr<Efficiency> eff =
           std::shared_ptr<Efficiency>(new UnitEfficiency))
-      : AmpIntensity(name, strength, eff) {};
+      : AmpIntensity(name, strength, eff){};
 
   virtual ~CoherentIntensity(){};
 
   //! Clone function
   ComPWA::AmpIntensity *Clone(std::string newName = "") const {
     auto tmp = (new CoherentIntensity(*this));
-    tmp->_name=newName;
+    tmp->_name = newName;
     return tmp;
   }
 
   static std::shared_ptr<CoherentIntensity>
-  Factory(const boost::property_tree::ptree &pt);
+  Factory(std::shared_ptr<Kinematics> kin,
+          const boost::property_tree::ptree &pt);
 
   static boost::property_tree::ptree
   Save(std::shared_ptr<CoherentIntensity> intens);
@@ -62,7 +62,7 @@ public:
   virtual double Intensity(const ComPWA::dataPoint &point) const;
 
   //============ SET/GET =================
-  
+
   void AddAmplitude(std::shared_ptr<ComPWA::Physics::Amplitude> decay) {
     _seqDecays.push_back(decay);
   }
@@ -74,7 +74,7 @@ public:
   std::vector<std::shared_ptr<ComPWA::Physics::Amplitude>> &GetAmplitudes() {
     return _seqDecays;
   }
-  
+
   virtual void Reset() {
     _seqDecays.clear();
     return;
@@ -93,7 +93,7 @@ public:
       i->GetParametersFast(list);
     }
   }
-  
+
   //! Calculate & fill fit fractions of this amplitude to ParameterList
   virtual void GetFitFractions(ComPWA::ParameterList &parList){};
 
@@ -111,9 +111,11 @@ public:
     for (auto i : _seqDecays)
       i->SetPhspSample(toySample);
   };
+  
+  virtual void SetPhspVolume(double vol) { phspVolume_ = vol; };
 
   virtual std::shared_ptr<AmpIntensity> GetComponent(std::string name);
-  
+
   //======== ITERATORS/OPERATORS =============
 
   typedef std::vector<std::shared_ptr<ComPWA::Physics::Amplitude>>::iterator
@@ -130,20 +132,23 @@ public:
 
   //! Getter function for basic amp tree
   virtual std::shared_ptr<ComPWA::FunctionTree>
-  GetTree(const ComPWA::ParameterList &sample,
+  GetTree(std::shared_ptr<Kinematics> kin, const ComPWA::ParameterList &sample,
           const ComPWA::ParameterList &phspSample,
-          const ComPWA::ParameterList &toySample, std::string suffix = "");
+          const ComPWA::ParameterList &toySample, unsigned int nEvtVar,
+          std::string suffix = "");
 
 protected:
+  //! Phase space sample to calculate the normalization and maximum value.
+  std::shared_ptr<std::vector<ComPWA::dataPoint>> _phspSample;
+  
+  double phspVolume_;
 
   virtual std::shared_ptr<FunctionTree>
-  setupBasicTree(const ParameterList &sample, const ParameterList &phspSample,
+  setupBasicTree(std::shared_ptr<Kinematics> kin, const ParameterList &sample,
+                 const ParameterList &phspSample,
                  std::string suffix = "") const;
 
   std::vector<std::shared_ptr<ComPWA::Physics::Amplitude>> _seqDecays;
-
-  //! Phase space sample to calculate the normalization and maximum value.
-  std::shared_ptr<std::vector<ComPWA::dataPoint>> _phspSample;
 
 };
 

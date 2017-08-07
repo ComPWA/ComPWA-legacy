@@ -36,32 +36,30 @@ BOOST_AUTO_TEST_CASE(KinematicsConstructionFromXML) {
 
   // Construct HelicityKinematics from XML tree
   boost::property_tree::ptree tr;
-  boost::property_tree::xml_parser::read_xml(
-      "AmpModel-input.xml", tr);
+  boost::property_tree::xml_parser::read_xml("../AmpModel-input.xml", tr);
 
   ComPWA::PhysConst::CreateInstance(tr);
-  HelicityKinematics::CreateInstance(tr.get_child("HelicityKinematics"));
+  auto kin = std::make_shared<HelicityKinematics>(tr.get_child("HelicityKinematics"));
 
-  auto inst = HelicityKinematics::Instance();
-  BOOST_CHECK_EQUAL(inst->GetPhspVolume(), 0.123);
-  BOOST_CHECK_EQUAL(inst->GetFinalState().size(), 3);
-  BOOST_CHECK_EQUAL(inst->GetInitialState().size(), 1);
+  BOOST_CHECK_EQUAL(kin->GetPhspVolume(), 0.123);
+  BOOST_CHECK_EQUAL(kin->GetFinalState().size(), 3);
+  BOOST_CHECK_EQUAL(kin->GetInitialState().size(), 1);
 }
 
 BOOST_AUTO_TEST_CASE(ConstructionFromXML) {
   boost::property_tree::ptree tr;
-  boost::property_tree::xml_parser::read_xml(
-      "AmpModel-input.xml", tr);
+  boost::property_tree::xml_parser::read_xml("../AmpModel-input.xml", tr);
 
+  auto kin = std::make_shared<HelicityKinematics>(tr.get_child("HelicityKinematics"));
+  
   // Due to the structure of Boost.UnitTest the instances already exist from
   // previous test
   //  ComPWA::Logging log("", boost::log::trivial::severity_level::trace);
   //  ComPWA::PhysConst::CreateInstance(tr);
-  //  HelicityKinematics::CreateInstance(tr.get_child("HelicityKinematics"));
 
   // Create amplitude from property_tree
   auto intens =
-      IncoherentIntensity::Factory(tr.get_child("IncoherentIntensity"));
+      IncoherentIntensity::Factory(kin, tr.get_child("IncoherentIntensity"));
 
   // Save amplitude to property_tree
   boost::property_tree::ptree ptout;
@@ -78,8 +76,8 @@ BOOST_AUTO_TEST_CASE(ConstructionFromXML) {
 
   // Write the property tree to the XML file. Add a line break at the end of
   // each line.
-  boost::property_tree::xml_parser::write_xml(
-      "AmpModel-output.xml", ptout, std::locale());
+  boost::property_tree::xml_parser::write_xml("../AmpModel-output.xml", ptout,
+                                              std::locale());
 
   std::remove("AmpModel-output.xml"); // delete file
   // Compile error for some boost/compiler versions
@@ -91,18 +89,18 @@ BOOST_AUTO_TEST_CASE(ConstructionFromXML) {
 
 BOOST_AUTO_TEST_CASE(AmpTreeCorrespondence) {
   boost::property_tree::ptree tr;
-  boost::property_tree::xml_parser::read_xml(
-      "AmpModel-input.xml", tr);
+  boost::property_tree::xml_parser::read_xml("../AmpModel-input.xml", tr);
 
+  auto kin = std::make_shared<HelicityKinematics>(tr.get_child("HelicityKinematics"));
+  
   // Due to the structure of Boost.UnitTest the instances already exist from
   // previous test
   //  ComPWA::Logging log("", boost::log::trivial::severity_level::trace);
   //  ComPWA::PhysConst::CreateInstance(tr);
-  //  HelicityKinematics::CreateInstance(tr.get_child("HelicityKinematics"));
 
   // Create amplitude
   auto intens =
-      IncoherentIntensity::Factory(tr.get_child("IncoherentIntensity"));
+      IncoherentIntensity::Factory(kin, tr.get_child("IncoherentIntensity"));
 
   ParameterList list;
   intens->GetParameters(list);
@@ -110,7 +108,9 @@ BOOST_AUTO_TEST_CASE(AmpTreeCorrespondence) {
   BOOST_CHECK_EQUAL(list.GetNDouble(), 14);
 
   // Generate phsp sample
-  std::shared_ptr<ComPWA::Generator> gen(new ComPWA::Tools::RootGenerator(123));
+  std::shared_ptr<ComPWA::Generator> gen(new ComPWA::Tools::RootGenerator(
+      kin->GetInitialState(),
+      kin->GetFinalState(), 123));
   std::shared_ptr<ComPWA::DataReader::Data> sample(
       new ComPWA::DataReader::RootReader());
 
@@ -120,20 +120,20 @@ BOOST_AUTO_TEST_CASE(AmpTreeCorrespondence) {
   r.GeneratePhsp(200);
 
   auto phspSample = std::make_shared<std::vector<dataPoint>>(
-      r.GetPhspSample()->GetDataPoints());
+      r.GetPhspSample()->GetDataPoints(kin));
   intens->SetPhspSample(phspSample, phspSample);
 
   LOG(info) << "Loop over phsp events....";
   for (auto i : sample->GetEvents()) {
     ComPWA::dataPoint p;
     try {
-      p = ComPWA::dataPoint(i);
+      kin->EventToDataPoint(i, p);
     } catch (std::exception &ex) {
       // Test if events outside the phase space boundaries are generated
       LOG(error) << "Event outside phase space. This should not happen since "
                     "we use a Monte-Carlo sample!";
       BOOST_FAIL("Event outside phase space. This should not happen since "
-                    "we use a Monte-Carlo sample!");
+                 "we use a Monte-Carlo sample!");
       continue;
     }
 
@@ -142,9 +142,10 @@ BOOST_AUTO_TEST_CASE(AmpTreeCorrespondence) {
     LOG(info) << "point = " << p << " intensity = " << w;
   }
 
-  ComPWA::ParameterList sampleList(sample->GetListOfData());
+  ComPWA::ParameterList sampleList(sample->GetListOfData(kin));
   // Testing function tree
-  auto tree = intens->GetTree(sampleList, sampleList, sampleList);
+  auto tree = intens->GetTree(kin, sampleList, sampleList, sampleList,
+                              kin->GetNVars());
   tree->recalculate();
 
   // TODO: implement checks to ensure that amplitude calculation by FunctionTree

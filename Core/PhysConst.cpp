@@ -55,10 +55,17 @@ void PhysConst::readTree(boost::property_tree::ptree pt) {
     for (auto const &v : particleTree.get()) {
       _partList.push_back(ParticleProperties(v.second));
       auto last = _partList.back();
+      
+      //cparity is optional
+      double cparity = 0.0;
+      try { cparity = last.GetQuantumNumber("Cparity"); }
+      catch (std::exception& ex) { }
+      
       LOG(info) << "PhysConst::readTree() | Adding particle " << last.GetName()
                  << " (id=" << last.GetId() << ") "
-                 << " J(PC)=" << last.GetSpin() << "(" << last.GetParity()
-                 << last.GetCparity() << ") "
+                 << " J(PC)=" << last.GetSpinQuantumNumber("Spin")
+                 << "(" << last.GetQuantumNumber("Parity")
+                 <<  cparity<< ") "
                  << " mass=" << last.GetMass()
                  << " decayType=" << last.GetDecayType();
     }

@@ -61,7 +61,8 @@ public:
    * instance
    */
   static std::shared_ptr<ComPWA::ControlParameter>
-  CreateInstance(std::shared_ptr<AmpIntensity> intens,
+  CreateInstance(std::shared_ptr<Kinematics> kin,
+                 std::shared_ptr<AmpIntensity> intens,
                  std::shared_ptr<DataReader::Data> data,
                  std::shared_ptr<DataReader::Data> phspSample,
                  unsigned int startEvent = 0, unsigned int nEvents = 0);
@@ -80,7 +81,8 @@ public:
    * instance
    */
   static std::shared_ptr<ComPWA::ControlParameter>
-  CreateInstance(std::shared_ptr<AmpIntensity> intens,
+  CreateInstance(std::shared_ptr<Kinematics> kin,
+                 std::shared_ptr<AmpIntensity> intens,
                  std::shared_ptr<DataReader::Data> data,
                  std::shared_ptr<DataReader::Data> phspSample,
                  std::shared_ptr<DataReader::Data> accSample,
@@ -131,7 +133,7 @@ protected:
   MinLogLH(){};
 
   //! Constructor for a single amplitude
-  MinLogLH(std::shared_ptr<AmpIntensity> amp,
+  MinLogLH(std::shared_ptr<Kinematics> kin, std::shared_ptr<AmpIntensity> amp,
            std::shared_ptr<DataReader::Data> data,
            std::shared_ptr<DataReader::Data> phspSample,
            std::shared_ptr<DataReader::Data> accSample, unsigned int startEvent,
@@ -144,11 +146,10 @@ protected:
   void CalcSumOfWeights();
 
 private:
-  //! Initialize
-  void Init();
-
   //! Reset instance
   void Reset();
+
+  std::shared_ptr<Kinematics> kin_;
 
   //! Intensity
   std::shared_ptr<AmpIntensity> _intens;

@@ -16,19 +16,6 @@
 
 namespace ComPWA {
 
-dataPoint::dataPoint(std::vector<double> vec) : weight(1.), eff(1.) {
-  if (Kinematics::Instance()->GetNVars() != vec.size())
-    throw std::runtime_error("dataPoint::dataPoint() vector has wrong length!");
-  var = vec;
-  return;
-}
-
-dataPoint::dataPoint(const Event &ev) : weight(1.), eff(1.) {
-  Kinematics::Instance()->EventToDataPoint(ev, *this);
-  weight = ev.GetWeight();
-  return;
-}
-
 dataPoint::dataPoint() : weight(1.), eff(1.) {
   return;
 }
@@ -59,13 +46,6 @@ double dataPoint::GetValue(unsigned int num) const {
     throw;
   }
   return rt;
-}
-
-void dataPoint::SetPoint(std::vector<double> values) {
-  if (Kinematics::Instance()->GetNVars() != values.size())
-    throw std::runtime_error("dataPoint::setPoint() vector has wrong length!");
-  var = std::vector<double>(values);
-  return;
 }
 
 std::ostream &operator<<(std::ostream &os, const dataPoint &p) {

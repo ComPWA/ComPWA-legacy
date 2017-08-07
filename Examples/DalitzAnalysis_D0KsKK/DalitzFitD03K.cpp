@@ -1,9 +1,9 @@
 /*! Dalitz plot analysis of the decay D0->K_S0 K_ K-
- * @file DalitzFitApp.cpp
- * Fit application for D0->K_S0 K_ K- analysis. A model with BW and flatte
- * formalism is used to
- * describe the data.
- */
+* @file DalitzFitApp.cpp
+* Fit application for D0->K_S0 K_ K- analysis. A model with BW and flatte
+* formalism is used to
+* describe the data.
+*/
 
 // Standard header files go here
 #include <iostream>
@@ -315,12 +315,12 @@ int main(int argc, char **argv) {
 
   PhysConst::CreateInstance(fitModelTree);
   // initialize kinematics of decay
-  HelicityKinematics::CreateInstance(
-      fitModelTree.get_child("HelicityKinematics"));
+  auto kin = std::make_shared<HelicityKinematics>(fitModelTree.get_child("HelicityKinematics"));
 
   // initialize random generator
-  std::shared_ptr<Generator> gen =
-      std::shared_ptr<Generator>(new Tools::RootGenerator(seed));
+  std::shared_ptr<Generator> gen = std::shared_ptr<Generator>(
+      new Tools::RootGenerator(kin->GetInitialState(),
+                               kin->GetFinalState(), seed));
 
   RunManager run;
   run.SetGenerator(gen);
@@ -343,31 +343,31 @@ int main(int argc, char **argv) {
     // sample with accepted phsp events
     phspData = std::shared_ptr<Data>(new RootReader(
         phspEfficiencyFile, phspEfficiencyFileTreeName, mcPrecision));
-    phspData->ReduceToPhsp();
+    phspData->ReduceToPhsp(kin);
   }
 
   //========== Generation of toy phase space sample ==
   std::shared_ptr<Data> toyPhspData(new RootReader()); // Toy sample
   run.SetPhspSample(toyPhspData);
   run.GeneratePhsp(mcPrecision);
-  toyPhspData->SetEfficiency(eff); // set efficiency values for each event
+  toyPhspData->SetEfficiency(kin, eff); // set efficiency values for each event
 
   // ========= AmpIntensity ========
-  auto intens = IncoherentIntensity::Factory(
+  auto intens = IncoherentIntensity::Factory(kin,
       fitModelTree.get_child("IncoherentIntensity"));
 
   boost::property_tree::ptree trueModelTree;
   boost::property_tree::xml_parser::read_xml(trueModelFile, trueModelTree);
-  auto trueIntens = IncoherentIntensity::Factory(
+  auto trueIntens = IncoherentIntensity::Factory(kin,
       trueModelTree.get_child("IncoherentIntensity"));
 
   // Setting samples for normalization
   auto toyPoints =
-      std::make_shared<std::vector<dataPoint>>(toyPhspData->GetDataPoints());
+      std::make_shared<std::vector<dataPoint>>(toyPhspData->GetDataPoints(kin));
   auto phspPoints = toyPoints;
   if (phspData) {
     auto phspPoints =
-        std::make_shared<std::vector<dataPoint>>(phspData->GetDataPoints());
+        std::make_shared<std::vector<dataPoint>>(phspData->GetDataPoints(kin));
   }
   trueIntens->SetPhspSample(phspPoints, toyPoints);
   intens->SetPhspSample(phspPoints, toyPoints);
@@ -401,23 +401,26 @@ int main(int argc, char **argv) {
     //      numSignalEvents -= inputBkg->getNEvents();
     LOG(info) << "Reading data file...";
     std::shared_ptr<Data> inD(new RootReader(dataFile, dataFileTreeName));
-    
-//    SubSystem s(std::vector<int>{1}, std::vector<int>{0}, std::vector<int>{2});
-//    int id = dynamic_cast<HelicityKinematics*>(Kinematics::Instance())->GetDataID(s);
-//    for( int i=0; i<10 ; i++){
-//      std::cout<<inD->getEvent(i)<<std::endl;
-//      dataPoint p(inD->getEvent(i));
-//      std::cout<<p<<std::endl;
-//      std::cout<<"mSq="<<p.GetValue(id*3)<<" cosTheta="<<p.GetValue(id*3+1)<<std::endl;
-//      std::cout<<"-------"<<std::endl;
-//    }
-//    exit(1);
-    
-    inD->ReduceToPhsp();
+
+    //    SubSystem s(std::vector<int>{1}, std::vector<int>{0},
+    //    std::vector<int>{2});
+    //    int id =
+    //    dynamic_cast<HelicityKinematics*>(Kinematics::Instance())->GetDataID(s);
+    //    for( int i=0; i<10 ; i++){
+    //      std::cout<<inD->getEvent(i)<<std::endl;
+    //      dataPoint p(inD->getEvent(i));
+    //      std::cout<<p<<std::endl;
+    //      std::cout<<"mSq="<<p.GetValue(id*3)<<"
+    //      cosTheta="<<p.GetValue(id*3+1)<<std::endl;
+    //      std::cout<<"-------"<<std::endl;
+    //    }
+    //    exit(1);
+
+    inD->ReduceToPhsp(kin);
     if (resetWeights)
       inD->ResetWeights(); // resetting weights if requested
-    inputData = inD->RndSubSet(numSignalEvents, gen);
-    inputData->SetEfficiency(eff);
+    inputData = inD->RndSubSet(kin, numSignalEvents, gen);
+    inputData->SetEfficiency(kin, eff);
     run.SetData(inputData);
     inD = std::shared_ptr<Data>();
     sample->Add(*inputData);
@@ -460,13 +463,13 @@ int main(int argc, char **argv) {
     run.SetData(sample);
     run.SetAmplitude(trueIntens);
     run.SetPhspSample(std::shared_ptr<Data>());
-    run.Generate(numEvents);
+    run.Generate(kin, numEvents);
     LOG(info) << "Sample size: " << sample->GetNEvents();
   }
   // Reset phsp sample to save memory
   run.SetPhspSample(std::shared_ptr<Data>());
 
-  sample->ReduceToPhsp();
+  sample->ReduceToPhsp(kin);
 
   LOG(info) << "================== SETTINGS =================== ";
 
@@ -548,8 +551,8 @@ int main(int argc, char **argv) {
     LOG(debug) << "Fit parameters: " << std::endl << fitPar.to_str();
 
     //=== Constructing likelihood
-    auto esti = Estimator::MinLogLH::CreateInstance(intens, sample, toyPhspData,
-                                                    phspData, 0, 0);
+    auto esti = Estimator::MinLogLH::CreateInstance(kin, intens, sample,
+        toyPhspData, phspData, 0, 0);
 
     std::cout.setf(std::ios::unitbuf);
     if (fittingMethod == "tree") {
@@ -589,16 +592,16 @@ int main(int argc, char **argv) {
     result = run.Fit(fitPar);
 
     //====== FIT RESULT =======
-//    auto minuitResult =
-//        dynamic_cast<Optimizer::Minuit2::MinuitResult *>(&*result);
+    //    auto minuitResult =
+    //        dynamic_cast<Optimizer::Minuit2::MinuitResult *>(&*result);
     finalParList = result->GetFinalParameters();
 
     // Calculation of fit fractions
     std::vector<std::pair<std::string, std::string>> fitComponents;
     fitComponents.push_back(
         std::pair<std::string, std::string>("phi(1020)", "D0toKSK+K-"));
-    fitComponents.push_back(std::pair<std::string, std::string>(
-        "phi(1020) a0(980)0", "D0toKSK+K-"));
+//    fitComponents.push_back(std::pair<std::string, std::string>(
+//        "phi(1020) a0(980)0", "D0toKSK+K-"));
     fitComponents.push_back(
         std::pair<std::string, std::string>("a0(980)0", "D0toKSK+K-"));
     fitComponents.push_back(
@@ -606,7 +609,7 @@ int main(int argc, char **argv) {
     fitComponents.push_back(
         std::pair<std::string, std::string>("a2(1320)-", "D0toKSK+K-"));
     ParameterList ff =
-        Tools::CalculateFitFractions(intens, toyPoints, fitComponents);
+        Tools::CalculateFitFractions(kin, intens, toyPoints, fitComponents);
 
     result->SetFitFractions(ff);
     result->Print();
@@ -620,11 +623,13 @@ int main(int argc, char **argv) {
       ptout.add_child("IncoherentIntensity", IncoherentIntensity::Save(intens));
       boost::property_tree::xml_parser::write_xml(
           fileNamePrefix + std::string("-Model.xml"), ptout, std::locale());
-          //Does not compile with boost1.54
-//      boost::property_tree::xml_parser::write_xml(
-//          fileNamePrefix + std::string("-Model.xml"), ptout, std::locale(),
-//          boost::property_tree::xml_writer_make_settings<std::string>(' ', 4,
-//                                                                      "utf-8"));
+      // Does not compile with boost1.54
+      //      boost::property_tree::xml_parser::write_xml(
+      //          fileNamePrefix + std::string("-Model.xml"), ptout,
+      //          std::locale(),
+      //          boost::property_tree::xml_writer_make_settings<std::string>('
+      //          ', 4,
+      //                                                                      "utf-8"));
 
       //      LOG(info) << "Average resonance width of fit model: "
       //                << fitAmpSum->averageWidth();
@@ -691,11 +696,11 @@ int main(int argc, char **argv) {
                                   // plotting
     }
     // reduce sample to phsp
-    pl_phspSample->ReduceToPhsp();
-    pl_phspSample->SetEfficiency(eff);
+    pl_phspSample->ReduceToPhsp(kin);
+    pl_phspSample->SetEfficiency(kin, eff);
 
     //-------- Instance of plotData
-    plotData pl(fileNamePrefix, plotNBins);
+    plotData pl(kin, fileNamePrefix, plotNBins);
     // set data sample
     pl.SetData(sample);
     // set phsp sample

@@ -16,8 +16,10 @@
 #include <boost/property_tree/ptree.hpp>
 
 #include "Physics/Resonance.hpp"
-#include "Physics/HelicityFormalism/AbstractDynamicalFunction.hpp"
+#include "Physics/DecayDynamics/AbstractDynamicalFunction.hpp"
 #include "Physics/HelicityFormalism/AmpWignerD.hpp"
+#include "Physics/HelicityFormalism/SubSystem.hpp"
+#include "Physics/HelicityFormalism/HelicityKinematics.hpp"
 
 namespace ComPWA {
 namespace Physics {
@@ -44,7 +46,7 @@ public:
    @return Constructed object
    */
   static std::shared_ptr<ComPWA::Physics::Resonance>
-  Factory(const boost::property_tree::ptree &pt);
+  Factory(std::shared_ptr<Kinematics> kin, const boost::property_tree::ptree &pt);
 
   static boost::property_tree::ptree Save(std::shared_ptr<Resonance> obj);
 
@@ -77,7 +79,7 @@ public:
   std::complex<double> EvaluateNoNorm(const dataPoint &point) const {
     std::complex<double> result = GetCoefficient();
     result *= _angD->Evaluate(point, _dataPos + 1, _dataPos + 2);
-    result *= _dynamic->Evaluate(point);
+    result *= _dynamic->Evaluate(point, _dataPos);
 
     assert(!std::isnan(result.real()) && !std::isnan(result.imag()));
     return result;
@@ -91,83 +93,45 @@ public:
     Resonance::GetParametersFast(list);
     _dynamic->GetParametersFast(list);
   }
-  
-  /**
-   Get WignerD function
 
-   @return Shared_ptr<AmpWignerD>
-   */
   std::shared_ptr<ComPWA::Physics::HelicityFormalism::AmpWignerD> GetWignerD() {
     return _angD;
   }
 
-  /**
-   Set WignerD function
-
-   @param w WignerD function
-   */
   void SetWignerD(
       std::shared_ptr<ComPWA::Physics::HelicityFormalism::AmpWignerD> w) {
     _angD = w;
   }
 
-  /**
-   Get dynamical function (e.g. Breit-Wigner parametrization)
-
-   @return Shared_ptr<AbstractDynamicalFunction>
-   */
-  std::shared_ptr<ComPWA::Physics::HelicityFormalism::AbstractDynamicalFunction>
+  std::shared_ptr<ComPWA::Physics::DecayDynamics::AbstractDynamicalFunction>
   GetDynamicalFunction() {
     return _dynamic;
   }
 
-  /**
-   Set dynamical function
-
-   @param f Dynamical function
-   */
   void SetDynamicalFunction(
-      std::shared_ptr<
-          ComPWA::Physics::HelicityFormalism::AbstractDynamicalFunction>
+      std::shared_ptr<ComPWA::Physics::DecayDynamics::AbstractDynamicalFunction>
           f) {
     _dynamic = f;
   }
 
-  //! Set position of variables within dataPoint
-  void SetDataPosition(int pos) { _dataPos = pos; }
+  /// Set position of variables within dataPoint
+  virtual void SetDataPosition(int pos) { _dataPos = pos; }
 
-  //! Get position of variables within dataPoint
-  int GetDataPosition() const { return _dataPos; }
+  /// Get position of variables within dataPoint
+  virtual int GetDataPosition() const { return _dataPos; }
 
-  //! Set position of variables within dataPoint
-  void SetSubSystem(SubSystem sys) {
-    _subSystem = sys;
-    _dataPos = 3 *
-               dynamic_cast<HelicityKinematics *>(Kinematics::Instance())
-                   ->GetDataID(_subSystem);
-    if (_dynamic) {
-      auto invMassLimit =
-          dynamic_cast<HelicityKinematics *>(Kinematics::Instance())
-              ->GetInvMassBounds(_subSystem);
-      _dynamic->SetLimits(invMassLimit);
-      _dynamic->SetDataPosition(_dataPos);
-    } else {
-      LOG(error) << "PartialDecay::SetSubSystem() | Dynamic function not set "
-                    "yet so we can not set limits and data position.";
-    }
-  }
+  virtual void SetSubSystem(SubSystem sys) { _subSystem = sys; }
 
-  //! Get position of variables within dataPoint
-  SubSystem GetSubSystem() const { return _subSystem; }
+  virtual SubSystem GetSubSystem() const { return _subSystem; }
 
   //=========== FUNCTIONTREE =================
 
-  //! Check of tree is available
+  //! Check if tree is available
   virtual bool HasTree() const { return true; }
 
   /**! Setup function tree */
   virtual std::shared_ptr<FunctionTree>
-  GetTree(const ComPWA::ParameterList &sample,
+  GetTree(std::shared_ptr<Kinematics> kin, const ComPWA::ParameterList &sample,
           const ComPWA::ParameterList &toySample, std::string suffix);
 
 protected:
@@ -180,7 +144,7 @@ protected:
 
   std::shared_ptr<ComPWA::Physics::HelicityFormalism::AmpWignerD> _angD;
 
-  std::shared_ptr<ComPWA::Physics::HelicityFormalism::AbstractDynamicalFunction>
+  std::shared_ptr<ComPWA::Physics::DecayDynamics::AbstractDynamicalFunction>
       _dynamic;
 };
 

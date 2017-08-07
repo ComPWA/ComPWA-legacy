@@ -28,38 +28,35 @@
 namespace ComPWA {
 namespace Estimator {
 
-MinLogLH::MinLogLH(std::shared_ptr<AmpIntensity> intens,
+MinLogLH::MinLogLH(std::shared_ptr<Kinematics> kin,
+                   std::shared_ptr<AmpIntensity> intens,
                    std::shared_ptr<DataReader::Data> data,
                    std::shared_ptr<DataReader::Data> phspSample,
                    std::shared_ptr<DataReader::Data> accSample,
                    unsigned int startEvent, unsigned int nEvents)
-    : _intens(intens), nEvts_(0), nPhsp_(0), nStartEvt_(startEvent),
+    : kin_(kin), _intens(intens), nEvts_(0), nPhsp_(0), nStartEvt_(startEvent),
       nUseEvt_(nEvents), _dataSample(data), _phspSample(phspSample),
       _phspAccSample(accSample) {
 
-  Init();
-
-  return;
-}
-
-void MinLogLH::Init() {
-
-  nEvts_ = _dataSample->GetNEvents();
   nPhsp_ = _phspSample->GetNEvents();
-  if (!nUseEvt_)
+  nEvts_ = _dataSample->GetNEvents();
+  
+  //use the full sample of both are zero
+  if (!nUseEvt_ && !nStartEvt_) { 
+    nUseEvt_ = nEvts_;
+    nStartEvt_ = 0;
+  }
+  
+  if (nStartEvt_ + nUseEvt_ > nEvts_)
     nUseEvt_ = nEvts_ - nStartEvt_;
-  if (!(nStartEvt_ + nUseEvt_ <= nEvts_))
-    nUseEvt_ = nEvts_ - nStartEvt_;
-  if (!(nStartEvt_ + nUseEvt_ <= nPhsp_))
-    nUseEvt_ = nPhsp_ - nStartEvt_;
 
   // Get data as ParameterList
-  _dataSampleList = _dataSample->GetListOfData();
-  _phspSampleList = _phspSample->GetListOfData();
+  _dataSampleList = _dataSample->GetListOfData(kin_);
+  _phspSampleList = _phspSample->GetListOfData(kin_);
   if (_phspAccSample)
-    _phspAccSampleList = _phspAccSample->GetListOfData();
+    _phspAccSampleList = _phspAccSample->GetListOfData(kin_);
   else
-    _phspAccSampleList = _phspSample->GetListOfData();
+    _phspAccSampleList = _phspSample->GetListOfData(kin_);
 
   CalcSumOfWeights();
 
@@ -67,6 +64,8 @@ void MinLogLH::Init() {
             << " ( Sum of weights = " << _sumOfWeights << " ).";
 
   calls = 0; // member of ControlParameter
+
+  return;
 }
 
 void MinLogLH::Reset() {
@@ -78,7 +77,8 @@ void MinLogLH::Reset() {
 }
 
 std::shared_ptr<ComPWA::ControlParameter>
-MinLogLH::CreateInstance(std::shared_ptr<AmpIntensity> intens,
+MinLogLH::CreateInstance(std::shared_ptr<Kinematics> kin,
+                         std::shared_ptr<AmpIntensity> intens,
                          std::shared_ptr<DataReader::Data> data,
                          std::shared_ptr<DataReader::Data> phspSample,
                          unsigned int startEvent, unsigned int nEvents) {
@@ -87,7 +87,7 @@ MinLogLH::CreateInstance(std::shared_ptr<AmpIntensity> intens,
     std::shared_ptr<DataReader::Data> accSample_ =
         std::shared_ptr<DataReader::Data>();
     instance_ = std::shared_ptr<ComPWA::ControlParameter>(
-        new MinLogLH(intens, data, phspSample,
+        new MinLogLH(kin, intens, data, phspSample,
                      std::shared_ptr<DataReader::Data>(), // empty sample
                      startEvent, nEvents));
     LOG(debug) << "MinLogLH::createInstance() | "
@@ -97,14 +97,15 @@ MinLogLH::CreateInstance(std::shared_ptr<AmpIntensity> intens,
 }
 
 std::shared_ptr<ComPWA::ControlParameter>
-MinLogLH::CreateInstance(std::shared_ptr<AmpIntensity> intens,
+MinLogLH::CreateInstance(std::shared_ptr<Kinematics> kin,
+                         std::shared_ptr<AmpIntensity> intens,
                          std::shared_ptr<DataReader::Data> data,
                          std::shared_ptr<DataReader::Data> phspSample,
                          std::shared_ptr<DataReader::Data> accSample,
                          unsigned int startEvent, unsigned int nEvents) {
   if (!instance_) {
-    instance_ = std::shared_ptr<ControlParameter>(
-        new MinLogLH(intens, data, phspSample, accSample, startEvent, nEvents));
+    instance_ = std::shared_ptr<ControlParameter>(new MinLogLH(
+        kin, intens, data, phspSample, accSample, startEvent, nEvents));
   }
   return instance_;
 }
@@ -142,10 +143,6 @@ void MinLogLH::IniLHtree() {
   _tree = std::shared_ptr<FunctionTree>(new FunctionTree());
   int sampleSize = _dataSampleList.GetMultiDouble(0)->GetNValues();
 
-  std::size_t weightId = Kinematics::Instance()->GetNVars() + 1;
-  std::shared_ptr<MultiDouble> weight =
-      _dataSampleList.GetMultiDouble(weightId);
-
   //-log L = (-1)*N/(\sum_{ev} w_{ev}) \sum_{ev} ...
   _tree->createHead("LH",
                     std::shared_ptr<Strategy>(new MultAll(ParType::DOUBLE)));
@@ -157,21 +154,17 @@ void MinLogLH::IniLHtree() {
   _tree->createNode("sumEvents",
                     std::shared_ptr<Strategy>(new AddAll(ParType::DOUBLE)),
                     "LH");
-  _tree->createNode("sumWeights",
-                    std::shared_ptr<Strategy>(new AddAll(ParType::DOUBLE)),
-                    "invSumWeights");
-  _tree->createLeaf("weight", weight, "sumWeights");
+  _tree->createLeaf("SumOfWeights", _sumOfWeights, "invSumWeights");
   _tree->createNode("weightLog",
                     std::shared_ptr<Strategy>(new MultAll(ParType::MDOUBLE)),
                     "sumEvents", sampleSize,
                     false); // w_{ev} * log( I_{ev} )
-  _tree->createLeaf("weight", weight, "weightLog");
   _tree->createNode("Log",
                     std::shared_ptr<Strategy>(new LogOf(ParType::MDOUBLE)),
                     "weightLog", sampleSize, false);
-  _tree->insertTree(
-      _intens->GetTree(_dataSampleList, _phspAccSampleList, _phspSampleList),
-      "Log");
+  _tree->insertTree(_intens->GetTree(kin_, _dataSampleList, _phspAccSampleList,
+                                     _phspSampleList, kin_->GetNVars()),
+                    "Log");
 
   _tree->recalculate();
   if (!_tree->sanityCheck()) {
@@ -190,10 +183,10 @@ double MinLogLH::controlParameter(ParameterList &minPar) {
     double sumLog = 0;
     // loop over data sample
     for (unsigned int evt = nStartEvt_; evt < nUseEvt_ + nStartEvt_; evt++) {
-      Event ev(_dataSample->GetEvent(evt));
-      dataPoint point(ev);
+      dataPoint point;
+      kin_->EventToDataPoint(_dataSample->GetEvent(evt), point);
       double val = _intens->Intensity(point);
-      sumLog += std::log(val) * ev.GetWeight();
+      sumLog += std::log(val) * point.GetWeight();
     }
     lh = (-1) * ((double)nUseEvt_) / _sumOfWeights * sumLog;
   } else {

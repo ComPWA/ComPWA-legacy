@@ -23,49 +23,16 @@
 
 #include <vector>
 #include <cmath>
-#include "Physics/HelicityFormalism/AbstractDynamicalFunction.hpp"
+#include "Physics/DecayDynamics/AbstractDynamicalFunction.hpp"
+#include "Physics/DecayDynamics/FormFactor.hpp"
+#include "Physics/DecayDynamics/Coupling.hpp"
 
 namespace ComPWA {
 namespace Physics {
-namespace HelicityFormalism {
+namespace DecayDynamics {
 
-class Coupling {
-public:
-  Coupling() : _g(new DoubleParameter("", 0.0)){};
+class AmpFlatteRes : public DecayDynamics::AbstractDynamicalFunction {
 
-  Coupling(const boost::property_tree::ptree tr) {
-    _g = std::make_shared<DoubleParameter>(
-        ComPWA::DoubleParameterFactory(tr.get_child("")));
-    std::string nameA = tr.get<std::string>("ParticleA");
-    std::string nameB = tr.get<std::string>("ParticleB");
-    _massA = PhysConst::Instance()->FindParticle(nameA).GetMass();
-    _massB = PhysConst::Instance()->FindParticle(nameB).GetMass();
-  };
-
-  void SetValueParameter(std::shared_ptr<DoubleParameter> g) { _g = g; }
-
-  std::shared_ptr<DoubleParameter> GetValueParameter() { return _g; }
-
-  double GetValue() const { return _g->GetValue(); }
-
-  double GetMassA() const { return _massA; }
-
-  double GetMassB() const { return _massB; }
-
-  void SetMassA(double m) { _massA = m; }
-
-  void SetMassB(double m) { _massB = m; }
-
-protected:
-  std::shared_ptr<DoubleParameter> _g;
-
-  double _massA;
-
-  double _massB;
-};
-
-class AmpFlatteRes : public HelicityFormalism::AbstractDynamicalFunction {
-  
 public:
   //============ CONSTRUCTION ==================
   AmpFlatteRes() : AbstractDynamicalFunction(){};
@@ -79,7 +46,7 @@ public:
     // tmp->SetName(newName);
     return tmp;
   }
-  
+
   /**
    Factory for AmpFlatteRes
 
@@ -90,13 +57,13 @@ public:
   Factory(const boost::property_tree::ptree &pt);
 
   //======= INTEGRATION/NORMALIZATION ===========
-  
+
   //! Check of parameters have changed and normalization has to be recalculatecd
   virtual bool CheckModified() const;
 
   //================ EVALUATION =================
-  
-  virtual std::complex<double> Evaluate(const dataPoint &point) const;
+
+  virtual std::complex<double> Evaluate(const dataPoint &point, int pos) const;
 
   /** Dynamical function for two coupled channel approach
    *
@@ -138,17 +105,17 @@ public:
                     std::complex<double> termC = std::complex<double>(0, 0));
 
   //============ SET/GET =================
-  
-  virtual void GetParameters(ParameterList &list) ;
-  
+
+  virtual void GetParameters(ParameterList &list);
+
   //! Fill vector with parameters
   virtual void GetParametersFast(std::vector<double> &list) const {
     AbstractDynamicalFunction::GetParametersFast(list);
-    for( auto i : _g)
-    list.push_back(i.GetValue());
+    for (auto i : _g)
+      list.push_back(i.GetValue());
     list.push_back(GetMesonRadius());
   }
-  
+
   /**
   Set meson radius
   The meson radius is a measure of the size of the resonant state. It is used
@@ -156,7 +123,9 @@ public:
 
   @param r Meson radius
   */
-  void SetMesonRadiusParameter(std::shared_ptr<DoubleParameter> r) { _mesonRadius = r; }
+  void SetMesonRadiusParameter(std::shared_ptr<DoubleParameter> r) {
+    _mesonRadius = r;
+  }
 
   /**
    Get meson radius
@@ -165,7 +134,9 @@ public:
 
    @return Meson radius
    */
-  std::shared_ptr<DoubleParameter> GetMesonRadiusParameter() { return _mesonRadius; }
+  std::shared_ptr<DoubleParameter> GetMesonRadiusParameter() {
+    return _mesonRadius;
+  }
 
   /**
    Set meson radius
@@ -228,7 +199,8 @@ public:
 
     _g = vC;
 
-    if(_g.size() == 2) _g.push_back(Coupling());
+    if (_g.size() == 2)
+      _g.push_back(Coupling());
     // Check if one of the  coupling match the final state (_daughterMasses)
     auto mm = GetDecayMasses();
     if (mm == std::pair<double, double>(-999, -999))
@@ -249,9 +221,9 @@ public:
   }
 
   //=========== FUNCTIONTREE =================
-  
+
   virtual std::shared_ptr<FunctionTree> GetTree(const ParameterList &sample,
-                                                std::string suffix);
+                                                int pos, std::string suffix);
 
 protected:
   // Initialize masses
@@ -285,7 +257,7 @@ protected:
   std::string name;
 };
 
-} /* namespace AmplitudeSum */
+} /* namespace DecayDynamics */
 } /* namespace Physics */
 } /* namespace ComPWA */
 

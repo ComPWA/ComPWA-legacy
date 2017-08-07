@@ -1,9 +1,9 @@
- /*
- * DataCorrection.cpp
- *
- *  Created on: Aug 27, 2015
- *      Author: weidenka
- */
+/*
+* DataCorrection.cpp
+*
+*  Created on: Aug 27, 2015
+*      Author: weidenka
+*/
 
 #include "Core/Kinematics.hpp"
 #include "DataReader/DataCorrection.hpp"
@@ -12,12 +12,7 @@ namespace ComPWA {
 
 MomentumCorrection::MomentumCorrection(std::vector<CorrectionTable> inCorr,
                                        std::string t)
-    : corrections(inCorr), title(t) {
-  if (corrections.size() != Kinematics::Instance()->GetFinalState().size() )
-    throw std::runtime_error(
-        "RootCorrection::RootCorrection() | Number of histograms is "
-        "expected to be number of final state particles!");
-}
+    : corrections(inCorr), title(t) {}
 
 double MomentumCorrection::getCorrection(Event &ev) {
   double w = 1;
@@ -28,8 +23,10 @@ double MomentumCorrection::getCorrection(Event &ev) {
     double corr;
     try {
       corr = corrections.at(i).GetValue(charge, mom) + 1;
-    } catch (...) { // if no correction value is available we set it to one
-      corr = 1.0;
+    } catch (std::exception &ex) {
+      throw std::runtime_error(
+          "RootCorrection::RootCorrection() | Number of histograms is "
+          "expected to be number of final state particles!");
     }
     w *= corr;
   }

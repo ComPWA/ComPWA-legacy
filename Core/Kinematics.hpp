@@ -19,16 +19,25 @@
 #include "Core/Event.hpp"
 #include "Core/PhysConst.hpp"
 #include "Core/Spin.hpp"
+#include "Core/DataPoint.hpp"
 
 namespace ComPWA {
 
-class dataPoint;
-
 class Kinematics {
 public:
-  //! singleton pattern
-  static Kinematics *Instance();
+  //! Constructor
+  Kinematics(std::vector<pid> initial = std::vector<pid>(),
+             std::vector<pid> finalS = std::vector<pid>())
+      : _initialState(initial), _finalState(finalS),
+        is_PS_area_calculated_(false), PS_area_(0.0){};
 
+  /// Delete copy constructor. For each Kinematics in the analysis only
+  /// one instance should exist since Kinematics does the bookkeeping for which
+  /// SubSystems variables needs to be calculated. That instance can then be
+  /// passed as (smart) pointer. Note: Not sure if we also should delete the
+  /// move constructor.
+  Kinematics(const Kinematics& that) = delete;
+  
   //! converts Event to dataPoint
   virtual void EventToDataPoint(const ComPWA::Event &ev,
                                 dataPoint &point) const = 0;
@@ -51,41 +60,6 @@ public:
   //! Get inital state
   virtual std::vector<pid> GetInitialState() { return _initialState; }
 
-  /** Calculate Break-up momentum squared
-   *
-   * Calculate Break-up momentum at energy @param sqrtS for particles with
-   * masses @param ma and @param mb .
-   * From PDG2014 Eq.46-20a. Below threshold the function is analytically
-   * continued.
-   * @param sqrtS center-of-mass energy
-   * @param ma mass particle A
-   * @param mb mass particle B
-   * @return |break-up momentum|
-   */
-  static double qSqValue(double sqrtS, double ma, double mb);
-
-  /** Calculate Break-up momentum
-   *
-   * Calculate Break-up momentum at energy @param sqrtS for particles with
-   * masses @param ma and @param mb .
-   * From PDG2014 Eq.46-20a. Below threshold the function is analytically
-   * continued.
-   * @param sqrtS center-of-mass energy
-   * @param ma mass particle A
-   * @param mb mass particle B
-   * @return |break-up momentum|
-   */
-  static std::complex<double> qValue(double sqrtS, double ma, double mb);
-  /** Two body phsp factor
-   *
-   * From PDG2014 Eqn.47-2
-   * @param sqrtS invariant mass of particles A and B
-   * @param ma Mass of particle A
-   * @param mb Mass of particle B
-   * @return
-   */
-  static std::complex<double> phspFactor(double sqrtS, double ma, double mb);
-
 protected:
   std::vector<pid> _initialState;
   std::vector<pid> _finalState;
@@ -94,24 +68,6 @@ protected:
   std::vector<std::string> _varNames;
   //! Latex titles for variables
   std::vector<std::string> _varTitles;
-
-  // Singleton stuff
-  static Kinematics *_inst;
-
-  //! Constructor
-  Kinematics(std::vector<pid> initial = std::vector<pid>(),
-             std::vector<pid> finalS = std::vector<pid>())
-      : _initialState(initial), _finalState(finalS),
-        is_PS_area_calculated_(false), PS_area_(0.0){};
-
-  //! Delete Copy constructor
-  Kinematics(const Kinematics &) = delete;
-
-  //! Default destructor
-  virtual ~Kinematics(){};
-
-  //! Delete assignment operator
-  void operator=(const Kinematics &) = delete;
 
   virtual double calculatePSArea() = 0;
   bool is_PS_area_calculated_;
