@@ -24,9 +24,9 @@ BOOST_AUTO_TEST_CASE(XMLInput) {
   XMLIn << "<ParticleList> \
   <Particle Name='gamma'> \
   <Pid>22</Pid> \
-  <Mass Name='mass_gamma'> \
+  <Parameter Type='Mass' Name='mass_gamma'> \
   <Value>0.</Value> \
-  </Mass> \
+  </Parameter> \
   <QuantumNumber Class='Spin' Type='Spin' Value='1.0'/> \
   <QuantumNumber Class='Int' Type='Charge' Value='0'/> \
   <QuantumNumber Class='Int' Type='Parity' Value='-1'/> \
@@ -35,13 +35,13 @@ BOOST_AUTO_TEST_CASE(XMLInput) {
   </Particle> \
   <Particle Name='f0_980'> \
   <Pid>9010221</Pid> \
-  <Mass Name='mass_f0_980'> \
+  <Parameter Type='Mass' Name='mass_f0_980'> \
   <Value>0.99</Value> \
   <Fix>1</Fix> \
   <Min>0.5</Min> \
   <Max>1.5</Max> \
   <Error>0</Error> \
-  </Mass> \
+  </Parameter> \
   <QuantumNumber Class='Spin' Type='Spin' Value='0.0'/> \
   <QuantumNumber Class='Int' Type='Charge' Value='0'/> \
   <QuantumNumber Class='Int' Type='Parity' Value='1'/> \

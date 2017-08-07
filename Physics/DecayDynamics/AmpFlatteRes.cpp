@@ -37,7 +37,11 @@ AmpFlatteRes::Factory(const boost::property_tree::ptree &pt) {
   std::string name = pt.get<std::string>("DecayParticle.<xmlattr>.Name");
   LOG(trace) << "AmpFlatteRes::Factory() | Construction of " << name << ".";
   obj->SetName(name);
+  
+  // All further information on the decay is stored in a ParticleProperty list
+  // which is globally provided by the PhysConst service.
   auto partProp = PhysConst::Instance()->FindParticle(name);
+  
   obj->SetMassParameter(
       std::make_shared<DoubleParameter>(partProp.GetMassPar()));
 
@@ -49,12 +53,8 @@ AmpFlatteRes::Factory(const boost::property_tree::ptree &pt) {
   auto spin = partProp.GetSpinQuantumNumber("Spin");
   obj->SetSpin(spin);
 
-  auto ffType = formFactorType(decayTr.get<int>("FormFactor.<xmlattr>.type"));
+  auto ffType = formFactorType(decayTr.get<int>("FormFactor.<xmlattr>.Type"));
   obj->SetFormFactorType(ffType);
-
-  auto mesonRadius =
-      ComPWA::DoubleParameterFactory(decayTr.get_child("MesonRadius"));
-  obj->SetMesonRadiusParameter(std::make_shared<DoubleParameter>(mesonRadius));
 
   // Get masses of decay products
   auto decayProducts = pt.get_child("DecayProducts");
@@ -64,10 +64,10 @@ AmpFlatteRes::Factory(const boost::property_tree::ptree &pt) {
         std::to_string(decayProducts.size()) + " given)!");
 
   auto firstItr = decayProducts.begin();
-  // auto secondItr = decayProducts.begin()+1; //compile error, no idea for why
   auto secondItr = decayProducts.begin();
   secondItr++;
 
+  // Mass of daughter particles needs to be set before the coupling constants
   std::pair<std::string, std::string> daughterNames(
       firstItr->second.get<std::string>("<xmlattr>.Name"),
       secondItr->second.get<std::string>("<xmlattr>.Name"));
@@ -78,10 +78,22 @@ AmpFlatteRes::Factory(const boost::property_tree::ptree &pt) {
   obj->SetDecayMasses(daughterMasses);
   obj->SetDecayNames(daughterNames);
 
+  // Read parameters
   std::vector<Coupling> vC;
   for (const auto &v : decayTr.get_child("")) {
-    if (v.first == "Coupling")
+    if (v.first != "Parameter")
+      continue;
+    std::string type = v.second.get<std::string>("<xmlattr>.Type");
+    if (type == "Coupling") {
       vC.push_back(Coupling(v.second));
+    } else if (type == "MesonRadius") {
+      auto mesonRadius = ComPWA::DoubleParameterFactory(v.second);
+      obj->SetMesonRadiusParameter(
+          std::make_shared<DoubleParameter>(mesonRadius));
+    } else {
+      throw std::runtime_error("AmpFlatteRes::Factory() | Parameter of type " +
+                               type + " is unknown.");
+    }
   }
   obj->SetCouplings(vC);
 
@@ -164,13 +176,10 @@ AmpFlatteRes::dynamicalFunction(double mSq, double mR, double massA1,
   std::complex<double> gammaA, qTermA, termA;
   double barrierA;
   // break-up momentum
-  barrierA = FormFactor(
-                 sqrtS, massA1, massA2, J, mesonRadius, ffType) /
-             FormFactor(
-                 mR, massA1, massA2, J, mesonRadius, ffType);
+  barrierA = FormFactor(sqrtS, massA1, massA2, J, mesonRadius, ffType) /
+             FormFactor(mR, massA1, massA2, J, mesonRadius, ffType);
   // convert coupling to partial width of channel A
-  gammaA = couplingToWidth(mSq, mR, gA, massA1, massA2, J,
-                                              mesonRadius, ffType);
+  gammaA = couplingToWidth(mSq, mR, gA, massA1, massA2, J, mesonRadius, ffType);
   // including the factor qTermA, as suggested by PDG, leads to an amplitude
   // that doesn't converge.
   //		qTermA = Kinematics::qValue(sqrtS,massA1,massA2) /
@@ -182,14 +191,11 @@ AmpFlatteRes::dynamicalFunction(double mSq, double mR, double massA1,
   std::complex<double> gammaB, qTermB, termB;
   double barrierB, gB;
   // break-up momentum
-  barrierB = FormFactor(
-                 sqrtS, massB1, massB2, J, mesonRadius, ffType) /
-             FormFactor(
-                 mR, massB1, massB2, J, mesonRadius, ffType);
+  barrierB = FormFactor(sqrtS, massB1, massB2, J, mesonRadius, ffType) /
+             FormFactor(mR, massB1, massB2, J, mesonRadius, ffType);
   gB = couplingB;
   // convert coupling to partial width of channel B
-  gammaB = couplingToWidth(mSq, mR, gB, massB1, massB2, J,
-                                              mesonRadius, ffType);
+  gammaB = couplingToWidth(mSq, mR, gB, massB1, massB2, J, mesonRadius, ffType);
   //		qTermB = Kinematics::qValue(sqrtS,massB1,massB2) /
   // Kinematics::qValue(mR,massB1,massB2);
   qTermB = std::complex<double>(1, 0);
@@ -200,14 +206,12 @@ AmpFlatteRes::dynamicalFunction(double mSq, double mR, double massA1,
   double barrierC, gC;
   if (couplingC != 0.0) {
     // break-up momentum
-    barrierC = FormFactor(
-                   sqrtS, massC1, massC2, J, mesonRadius, ffType) /
-               FormFactor(
-                   mR, massC1, massC2, J, mesonRadius, ffType);
+    barrierC = FormFactor(sqrtS, massC1, massC2, J, mesonRadius, ffType) /
+               FormFactor(mR, massC1, massC2, J, mesonRadius, ffType);
     gC = couplingC;
     // convert coupling to partial width of channel C
-    gammaC = couplingToWidth(mSq, mR, gC, massC1, massC2, J,
-                                                mesonRadius, ffType);
+    gammaC =
+        couplingToWidth(mSq, mR, gC, massC1, massC2, J, mesonRadius, ffType);
     //		qTermC = Kinematics::qValue(sqrtS,massC1,massC2) /
     // Kinematics::qValue(mR,massC1,massC2);
     qTermC = std::complex<double>(1, 0);

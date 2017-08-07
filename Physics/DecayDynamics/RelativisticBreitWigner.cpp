@@ -81,10 +81,12 @@ std::complex<double> RelativisticBreitWigner::dynamicalFunction(
 
   std::complex<double> result = g_final * g_production / denom;
 
-  assert( (!std::isnan(result.real()) || !std::isinf(result.real())) &&
-         "RelativisticBreitWigner::dynamicalFunction() | Result is NaN or Inf!");
-  assert( (!std::isnan(result.imag()) || !std::isinf(result.imag())) &&
-         "RelativisticBreitWigner::dynamicalFunction() | Result is NaN or Inf!");
+  assert(
+      (!std::isnan(result.real()) || !std::isinf(result.real())) &&
+      "RelativisticBreitWigner::dynamicalFunction() | Result is NaN or Inf!");
+  assert(
+      (!std::isnan(result.imag()) || !std::isinf(result.imag())) &&
+      "RelativisticBreitWigner::dynamicalFunction() | Result is NaN or Inf!");
 
   return result;
 }
@@ -109,14 +111,28 @@ RelativisticBreitWigner::Factory(const boost::property_tree::ptree &pt) {
   auto spin = partProp.GetSpinQuantumNumber("Spin");
   obj->SetSpin(spin);
 
-  auto ffType = formFactorType(decayTr.get<int>("FormFactor.<xmlattr>.type"));
+  auto ffType = formFactorType(decayTr.get<int>("FormFactor.<xmlattr>.Type"));
   obj->SetFormFactorType(ffType);
 
-  auto width = ComPWA::DoubleParameterFactory(decayTr.get_child("Width"));
-  obj->SetWidthParameter(std::make_shared<DoubleParameter>(width));
-  auto mesonRadius =
-      ComPWA::DoubleParameterFactory(decayTr.get_child("MesonRadius"));
-  obj->SetMesonRadiusParameter(std::make_shared<DoubleParameter>(mesonRadius));
+  // Read parameters from tree. Currently parameters of type 'Width' and
+  // 'MesonRadius' are required.
+  for (const auto &v : decayTr.get_child("")) {
+    if (v.first != "Parameter")
+      continue;
+    std::string type = v.second.get<std::string>("<xmlattr>.Type");
+    if (type == "Width") {
+      auto width = ComPWA::DoubleParameterFactory(v.second);
+      obj->SetWidthParameter(std::make_shared<DoubleParameter>(width));
+    } else if (type == "MesonRadius") {
+      auto mesonRadius = ComPWA::DoubleParameterFactory(v.second);
+      obj->SetMesonRadiusParameter(
+          std::make_shared<DoubleParameter>(mesonRadius));
+    } else {
+      throw std::runtime_error(
+          "RelativisticBreitWigner::Factory() | Parameter of type " + type +
+          " is unknown.");
+    }
+  }
 
   // Get masses of decay products
   auto decayProducts = pt.get_child("DecayProducts");

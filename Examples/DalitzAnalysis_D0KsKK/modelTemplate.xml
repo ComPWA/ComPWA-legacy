@@ -216,11 +216,11 @@
 		<QuantumNumber Class='Int' Type='Parity' Value='-1'/>
 		<DecayInfo Type='relativisticBreitWigner'>
 			<FormFactor Type='1' />
-			<Parameter Type='Mass' Name='Width_something'>
+			<Parameter Type='Width' Name='Width_something'>
 				<Value>0.01909658663476588</Value>
 				<Fix>true</Fix>
 			</Parameter>
-			<Parameter Type='Mass' Name='Radius_something'>
+			<Parameter Type='MesonRadius' Name='Radius_something'>
 				<Value>1.5</Value>
 				<Fix>true</Fix>
 			</Parameter>
@@ -241,7 +241,7 @@
 				<Value>0.1098</Value>
 				<Fix>true</Fix>
 			</Parameter>
-			<Parameter Type='MesonRadius ' Name='Radius_a2(1320)'>
+			<Parameter Type='MesonRadius' Name='Radius_a2(1320)'>
 				<Value>1.5</Value>
 				<Fix>true</Fix>
 			</Parameter>
