@@ -1292,7 +1292,7 @@ DoubleParameterFactory(const boost::property_tree::ptree pt) {
  @param pt Input parameter
  @return property_tree
  */
-static boost::property_tree::ptree DoubleParameterSave(DoubleParameter par) {
+inline boost::property_tree::ptree DoubleParameterSave(DoubleParameter par) {
   boost::property_tree::ptree pt;
   DoubleParameter obj;
 

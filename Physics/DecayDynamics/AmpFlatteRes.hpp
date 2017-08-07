@@ -181,7 +181,7 @@ public:
     _g = std::vector<Coupling>{g1, g2, g3};
   }
 
-  /*! Get coupling parameter to channel @channel.
+  /*! Get coupling parameter to channel \p channel.
    */
   Coupling GetCoupling(int channel) { return _g.at(channel); }
 
