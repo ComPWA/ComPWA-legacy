@@ -30,36 +30,33 @@
 #include <vector>
 #include <memory>
 
-#include "Core/ControlParameter.hpp"
 #include "Core/ParameterList.hpp"
 #include "Core/FunctionTree.hpp"
 #include "Core/AmpIntensity.hpp"
 
 namespace ComPWA {
-namespace Estimator {
 
-class Estimator : public ComPWA::ControlParameter {
+class IEstimator {
 
 public:
   virtual double controlParameter(ParameterList &minPar) = 0;
 
+  virtual bool HasTree() = 0;
 
-  //! Get penalty term
-//  virtual double calcPenalty() { return 0.0; }
+  virtual std::shared_ptr<FunctionTree> GetTree() = 0;
 
-  //! Get penalty scale
-//  virtual double getPenaltyScale() { return 1.0; }
+  virtual std::shared_ptr<AmpIntensity> GetIntensity() = 0;
 
-  //! Get number of events in data set
+  virtual int nCalls() { return _calls; }
+
   virtual int getNEvents() { return -999; }
 
 protected:
-  Estimator() {}
-  virtual ~Estimator() { /* nothing */
-  }
+  std::shared_ptr<FunctionTree> f;
+  
+  int _calls;
 };
 
-} /* namespace Estimator */
 } /* namespace ComPWA */
 
 #endif

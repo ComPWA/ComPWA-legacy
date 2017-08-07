@@ -24,10 +24,10 @@
 #include <string>
 #include <map>
 
-#include "Minuit2/FCNBase.h"
-
-#include "Core/ControlParameter.hpp"
+#include "Core/Estimator.hpp"
 #include "Core/ParameterList.hpp"
+
+#include "Minuit2/FCNBase.h"
 
 namespace ROOT {
 namespace Minuit2 {
@@ -35,7 +35,7 @@ namespace Minuit2 {
 class MinuitFcn : public FCNBase {
 
 public:
-  MinuitFcn(std::shared_ptr<ComPWA::ControlParameter> theData,
+  MinuitFcn(std::shared_ptr<ComPWA::IEstimator> theData,
             ComPWA::ParameterList &parList);
   virtual ~MinuitFcn();
 
@@ -60,12 +60,14 @@ public:
   };
 
 private:
-  std::shared_ptr<ComPWA::ControlParameter>
-      _myDataPtr; /*!< pointer to the ControlParameter (e.g. Estimator) */
-  ComPWA::ParameterList
-      &_parList; /*!< List of Parameters the ControlParameter needs */
-  std::map<unsigned int, std::string>
-      _parNames; /*!< mapping of minuit ids to ComPWA names */
+  //// pointer to the ControlParameter (e.g. Estimator)
+  std::shared_ptr<ComPWA::IEstimator> _myDataPtr;
+  
+  /// List of Parameters the ControlParameter needs
+  ComPWA::ParameterList &_parList;
+  
+  /// mapping of minuit ids to ComPWA names 
+  std::map<unsigned int, std::string> _parNames;
 };
 
 } // namespace Minuit2

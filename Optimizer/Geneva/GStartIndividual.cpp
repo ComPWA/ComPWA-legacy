@@ -52,7 +52,7 @@ namespace Gem
 	 * The default constructor. This function will add two double parameters to this individual,
 	 * each of which has a constrained value range [-10:10].
 	 */
-	GStartIndividual::GStartIndividual(std::shared_ptr<ComPWA::ControlParameter> data, ComPWA::ParameterList list)
+	GStartIndividual::GStartIndividual(std::shared_ptr<ComPWA::IEstimator> data, ComPWA::ParameterList list)
 	: GParameterSet(), theData(data), parList(list)
 	{
 		for(std::size_t i=0; i<parList.GetNDouble(); i++) {

@@ -18,15 +18,15 @@
  * interfaces. The class itself fulfills the Estimator interface.
  */
 
-#ifndef _MINLOGLHBKG_HPP
-#define _MINLOGLHBKG_HPP
+#ifndef _MINLOGLH_HPP
+#define _MINLOGLH_HPP
 
 #include <vector>
 #include <memory>
 #include <string>
 
 // PWA-Header
-#include "Estimator/Estimator.hpp"
+#include "Core/Estimator.hpp"
 #include "Core/AmpIntensity.hpp"
 #include "DataReader/Data.hpp"
 #include "Core/Event.hpp"
@@ -36,59 +36,33 @@
 namespace ComPWA {
 namespace Estimator {
 
-class MinLogLH : public ComPWA::Estimator::Estimator {
+class MinLogLH : public ComPWA::IEstimator {
 
 public:
-  //! Destructor
+  MinLogLH(){};
+
+  /// Create instance of MinLogLH.
+  /// An unbinned efficiency correction is applied using accSample.
+  /// 
+  /// \param amp amplitude
+  /// \param data data sample
+  /// \param phspSample phsp sample for normalization
+  /// \param accSample sample of efficiency applied phsp events for unbinned
+  /// efficiency correction
+  /// \param startEvent use @param data from that position on
+  /// \param nEvents number of events to process
+  /// \return std::shared_ptr<Data> of existing instance or newly created
+  /// instance
+  MinLogLH(std::shared_ptr<Kinematics> kin, std::shared_ptr<AmpIntensity> amp,
+           std::shared_ptr<DataReader::Data> data,
+           std::shared_ptr<DataReader::Data> phspSample,
+           std::shared_ptr<DataReader::Data> accSample, unsigned int startEvent,
+           unsigned int nEvents);
+  
   virtual ~MinLogLH(){};
 
-  //! Implementation of ControlParameter::controlParameter
   virtual double controlParameter(ParameterList &minPar);
 
-  /** Create instance of MinLogLH.
-   * A binned efficiency correction is used. We expect that phspSample_ has
-   * efficiency values for
-   * each event.
-   *
-   * @param amp amplitude
-   * @param data data sample
-   * @param phspSample phsp sample for normalization. Efficiency values for each
-   * point needs
-   *  to be set beforehand.
-   * @param startEvent use @param data from that position on
-   * @param nEvents number of events to process
-   * @return std::shared_ptr<Data> of existing instance or newly created
-   * instance
-   */
-  static std::shared_ptr<ComPWA::ControlParameter>
-  CreateInstance(std::shared_ptr<Kinematics> kin,
-                 std::shared_ptr<AmpIntensity> intens,
-                 std::shared_ptr<DataReader::Data> data,
-                 std::shared_ptr<DataReader::Data> phspSample,
-                 unsigned int startEvent = 0, unsigned int nEvents = 0);
-
-  /** Create instance of MinLogLH.
-   * An unbinned efficiency correction is applied using accSample.
-   *
-   * @param amp amplitude
-   * @param data data sample
-   * @param phspSample phsp sample for normalization
-   * @param accSample sample of efficiency applied phsp events for unbinned
-   * efficiency correction
-   * @param startEvent use @param data from that position on
-   * @param nEvents number of events to process
-   * @return std::shared_ptr<Data> of existing instance or newly created
-   * instance
-   */
-  static std::shared_ptr<ComPWA::ControlParameter>
-  CreateInstance(std::shared_ptr<Kinematics> kin,
-                 std::shared_ptr<AmpIntensity> intens,
-                 std::shared_ptr<DataReader::Data> data,
-                 std::shared_ptr<DataReader::Data> phspSample,
-                 std::shared_ptr<DataReader::Data> accSample,
-                 unsigned int startEvent = 0, unsigned int nEvents = 0);
-
-  //! Check if tree for LH calculation is available
   virtual bool HasTree() { return (_tree) ? 1 : 0; }
 
   virtual void UseFunctionTree(bool onoff) {
@@ -120,24 +94,13 @@ public:
     return _tree;
   }
 
-  //! Get intensity
   virtual std::shared_ptr<ComPWA::AmpIntensity> GetIntensity() {
     return _intens;
   }
 
-  //! Get number of events in data set
   virtual int GetNEvents() { return nEvts_; }
 
 protected:
-  //! Default Constructor
-  MinLogLH(){};
-
-  //! Constructor for a single amplitude
-  MinLogLH(std::shared_ptr<Kinematics> kin, std::shared_ptr<AmpIntensity> amp,
-           std::shared_ptr<DataReader::Data> data,
-           std::shared_ptr<DataReader::Data> phspSample,
-           std::shared_ptr<DataReader::Data> accSample, unsigned int startEvent,
-           unsigned int nEvents);
 
   //! Uses ampTree and creates a tree that calculates the full LH
   virtual void IniLHtree();
@@ -185,4 +148,4 @@ private:
 } /* namespace Estimator */
 } /* namespace ComPWA */
 
-#endif /* _MINLOGLHBKG_HPP */
+#endif /* _MINLOGLH_HPP */

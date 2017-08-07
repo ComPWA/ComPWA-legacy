@@ -17,6 +17,7 @@
 #include <complex>
 
 #include "Core/Event.hpp"
+#include "Core/SubSystem.hpp"
 #include "Core/PhysConst.hpp"
 #include "Core/Spin.hpp"
 #include "Core/DataPoint.hpp"
@@ -60,6 +61,8 @@ public:
   //! Get inital state
   virtual std::vector<pid> GetInitialState() { return _initialState; }
 
+  virtual int GetDataID(const ComPWA::SubSystem s) = 0;
+  
 protected:
   std::vector<pid> _initialState;
   std::vector<pid> _finalState;

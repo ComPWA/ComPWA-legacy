@@ -21,11 +21,10 @@ namespace bc = boost::chrono;
 #include "Core/Parameter.hpp"
 #include "Core/Logging.hpp"
 #include "Optimizer/Minuit2/MinuitFcn.hpp"
-#include "Core/ControlParameter.hpp"
 
 using namespace ROOT::Minuit2;
 
-MinuitFcn::MinuitFcn(std::shared_ptr<ComPWA::ControlParameter> myData,
+MinuitFcn::MinuitFcn(std::shared_ptr<ComPWA::IEstimator> myData,
                      ComPWA::ParameterList &parList)
     : _myDataPtr(myData), _parList(parList) {
   if (0 == _myDataPtr)

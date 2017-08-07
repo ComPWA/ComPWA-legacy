@@ -23,7 +23,7 @@
 #include <string>
 
 // PWA-Headers
-#include "Estimator/Estimator.hpp"
+#include "Core/Estimator.hpp"
 #include "Core/AmpIntensity.hpp"
 #include "DataReader/Data.hpp"
 #include "Core/Event.hpp"
@@ -33,28 +33,25 @@ namespace ComPWA {
 namespace Estimator {
 namespace ChiOneD {
 
-class ChiOneD : public Estimator {
+class ChiOneD : public ComPWA::IEstimator {
 
 public:
-  static std::shared_ptr<ComPWA::ControlParameter>
-  CreateInstance(std::shared_ptr<Kinematics> kin, std::shared_ptr<AmpIntensity>,
-                 std::shared_ptr<DataReader::Data>);
+  ChiOneD(std::shared_ptr<Kinematics> kin, std::shared_ptr<AmpIntensity>,
+          std::shared_ptr<DataReader::Data>);
 
   virtual double controlParameter(ParameterList &minPar);
 
-  virtual ~ChiOneD();
-
   virtual bool HasTree() { return false; }
+  
   virtual std::shared_ptr<FunctionTree> GetTree() {
     return std::shared_ptr<FunctionTree>();
   }
+  
   virtual std::shared_ptr<AmpIntensity> GetIntensity() {
     return std::shared_ptr<AmpIntensity>();
   }
 
 protected:
-  ChiOneD(std::shared_ptr<Kinematics> kin, std::shared_ptr<AmpIntensity>,
-          std::shared_ptr<DataReader::Data>);
 
 private:
   std::shared_ptr<Kinematics> kin_;

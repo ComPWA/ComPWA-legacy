@@ -18,7 +18,6 @@
 #include "Physics/Resonance.hpp"
 #include "Physics/DecayDynamics/AbstractDynamicalFunction.hpp"
 #include "Physics/HelicityFormalism/AmpWignerD.hpp"
-#include "Physics/HelicityFormalism/SubSystem.hpp"
 #include "Physics/HelicityFormalism/HelicityKinematics.hpp"
 
 namespace ComPWA {
@@ -140,7 +139,7 @@ protected:
    * cosTheta at @param _dataPos+1 and phi at @param _dataPos+2 */
   int _dataPos;
 
-  ComPWA::Physics::HelicityFormalism::SubSystem _subSystem;
+  ComPWA::SubSystem _subSystem;
 
   std::shared_ptr<ComPWA::Physics::HelicityFormalism::AmpWignerD> _angD;
 
