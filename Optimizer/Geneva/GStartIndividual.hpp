@@ -53,7 +53,7 @@
 
 // ComPWA header files go here
 #include <Core/ParameterList.hpp>
-#include <Core/ControlParameter.hpp>
+#include <Core/Estimator.hpp>
 
 // Geneva header files go here
 #include <geneva/GParameterSet.hpp>
@@ -81,7 +81,7 @@ class GStartIndividual :public GParameterSet
 {
 public:
 	/** @brief The default constructor */
-	GStartIndividual(std::shared_ptr<ComPWA::ControlParameter> data,
+	GStartIndividual(std::shared_ptr<ComPWA::IEstimator> data,
 			ComPWA::ParameterList list);
 
 	/** @brief A standard copy constructor */
@@ -122,7 +122,7 @@ private:
 	/********************************************************************************************/
 	// You can add other variables here. Do not forget to serialize them if necessary
 	// int myVar;
-	std::shared_ptr<ComPWA::ControlParameter> theData;
+	std::shared_ptr<ComPWA::IEstimator> theData;
 
 	/** @brief Make the class accessible to Boost.Serialization */
 	friend class boost::serialization::access;

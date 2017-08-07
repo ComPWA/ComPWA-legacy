@@ -29,7 +29,7 @@
 #include <memory>
 #include <iostream>
 //#include <boost/shared_ptr.hpp>
-#include "Core/ControlParameter.hpp"
+#include "Core/Estimator.hpp"
 #include "Optimizer/Optimizer.hpp"
 #include "Core/ParameterList.hpp"
 #include "Core/Parameter.hpp"
@@ -60,7 +60,7 @@ class GenevaIF : public Optimizer {
 
 public:
   /// Default Constructor (0x0)
-  GenevaIF(std::shared_ptr<ControlParameter> theData, std::string inConfigFileDir="test/config/");
+  GenevaIF(std::shared_ptr<IEstimator> theData, std::string inConfigFileDir="test/config/");
   virtual std::shared_ptr<FitResult> exec(ParameterList& par) ;
 
   /** Destructor */
@@ -72,7 +72,7 @@ public:
  protected:
 
 private:
-  std::shared_ptr<ControlParameter> _myData;
+  std::shared_ptr<IEstimator> _myData;
   std::string configFileDir;
   //Gem::Geneva::parMode parallelizationMode;
   Gem::Geneva::execMode parallelizationMode;
