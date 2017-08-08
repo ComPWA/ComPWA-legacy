@@ -89,16 +89,16 @@ public:
   virtual void SetValue(const std::complex<double> inVal, unsigned int i = 0);
 
   std::vector<std::complex<double>>::iterator Begin() { return val_.begin(); }
-  
+
   std::vector<std::complex<double>>::iterator End() { return val_.end(); }
 
   bool operator==(const MultiComplex otherPar) const;
 
 protected:
   virtual std::string TypeName() const { return "complex collection"; }
-  
+
   /// Parameter values
-  std::vector<std::complex<double> > val_;
+  std::vector<std::complex<double>> val_;
 
   //! A protected function which returns an output string for printing
   /*!
@@ -115,7 +115,6 @@ protected:
    * \sa operator<<, make_str()
    */
   virtual std::string make_val_str() const;
-
 };
 
 class MultiDouble : public AbsParameter {
@@ -161,16 +160,16 @@ public:
   virtual double GetValue(unsigned int i = 0) const;
 
   virtual void SetValue(const double inVal, unsigned int i = 0);
-  
+
   std::vector<double>::iterator Begin() { return val_.begin(); }
-  
+
   std::vector<double>::iterator End() { return val_.end(); }
 
   bool operator==(const MultiDouble otherPar) const;
 
 protected:
   virtual std::string TypeName() const { return "double collection"; }
-  
+
   /// Parameter values
   std::vector<double> val_;
 
@@ -222,9 +221,7 @@ public:
   //! Getter for number of values in this multipar
   virtual double GetNValues() const { return val_.size(); }
 
-  virtual const std::vector<unsigned int> &GetValues() const {
-    return val_;
-  }
+  virtual const std::vector<unsigned int> &GetValues() const { return val_; }
 
   virtual unsigned int GetValue(unsigned int i = 0) const;
 
@@ -234,9 +231,9 @@ public:
 
 protected:
   virtual std::string TypeName() const { return "unsigned int collection"; }
-  
+
   /// Parameter values
-  std::vector<unsigned int> val_; 
+  std::vector<unsigned int> val_;
 
   //! A protected function which returns an output string for printing
   /*!
@@ -331,29 +328,29 @@ public:
 
   //! Check if parameter has bounds
   virtual bool HasBounds() const { return bounds_; }
-  
+
   //! Check if bounds should be used
   virtual bool UseBounds() const {
     if (bounds_)
       return usebounds_;
     return false;
   }
-  
+
   //! Check if parameter has an error
   virtual bool HasError() const { return hasError_; }
-  
+
   //! Check if parameter is fixed
   virtual bool IsFixed() const { return fixed_; }
 
   //! Getter for value of parameter
   virtual std::complex<double> GetValue() const { return val_; }
-  
+
   //! Getter for lower bound of parameter
   virtual std::complex<double> GetMinValue() const { return min_; }
-  
+
   //! Getter for upper bound of parameter
   virtual std::complex<double> GetMaxValue() const { return max_; }
-  
+
   //! Getter for error of parameter
   virtual std::complex<double> GetError() const { return err_; }
 
@@ -385,17 +382,17 @@ public:
   virtual bool SetMaxValue(const std::complex<double> max);
 
   virtual bool SetMinMax(const std::complex<double> inMin,
-                                       const std::complex<double> inMax);
-  
+                         const std::complex<double> inMax);
+
   //! Set if bounds should be used
   virtual void UseBounds(const bool use) { usebounds_ = use; }
-  
+
   //! Call to fix parameter
   virtual void SetParameterFixed() { fixed_ = true; }
-  
+
   //! Call to free parameter
   virtual void SetParameterFree() { fixed_ = false; }
-  
+
   //! Set parameter free or fixed
   virtual void FixParameter(const bool fixed) { fixed_ = fixed; }
 
@@ -403,24 +400,24 @@ public:
 
 protected:
   virtual std::string TypeName() const { return "complex double"; }
-  
-  bool bounds_;    /*!< Are valid bounds defined for this parameter? */
-  
-  bool hasError_;  /*!< Is an error defined for this parameter? */
-  
+
+  bool bounds_; /*!< Are valid bounds defined for this parameter? */
+
+  bool hasError_; /*!< Is an error defined for this parameter? */
+
   bool usebounds_; /*!< Do you want to restrict your parameter? */
-  
-  bool fixed_;     /*!< Do you want to keep parameter fixed? */
-  
+
+  bool fixed_; /*!< Do you want to keep parameter fixed? */
+
   /// Parameter value
   std::complex<double> val_;
-  
+
   /// Parameter error
   std::complex<double> err_;
-  
+
   /// Parameter minimum bound
   std::complex<double> min_;
-  
+
   /// Parameter maximum bound
   std::complex<double> max_;
 
@@ -527,19 +524,19 @@ public:
 
   //! Check if parameter has bounds
   virtual bool HasBounds() const { return bounds_; }
-  
+
   //! Check if parameter is fixed
   virtual bool IsFixed() const { return fixed_; }
-  
+
   //! Call to fix parameter
   virtual void SetParameterFixed() { fixed_ = true; }
-  
+
   //! Call to free parameter
   virtual void SetParameterFree() { fixed_ = false; }
-  
+
   //! Set parameter free or fixed
   virtual void FixParameter(const bool fixed) { fixed_ = fixed; }
-  
+
   /*! Update member variables from other DoubleParameter
    * Do to the Observer pattern we can't use a copy constructor.
    * Therefore we use this workaround. The function ignores if parameter
@@ -550,16 +547,16 @@ public:
   //====== PARAMETER VALUE ========
   //! Getter for value of parameter
   virtual double GetValue() const { return val_; }
-  
+
   //! Getter for value of parameter
   virtual double GetRoundedValue() const { return val_; }
-  
+
   //! Getter for lower bound of parameter
   virtual double GetMinValue() const { return min_; }
-  
+
   //! Getter for upper bound of parameter
   virtual double GetMaxValue() const { return max_; }
-  
+
   //! Setter for value of parameter
   virtual void SetValue(const double inVal);
 
@@ -568,7 +565,7 @@ public:
 
   //! Setter for bounds of parameter
   virtual void SetMinMax(const double min, const double max);
-  
+
   /*! Setter for lower bound
    * Setter for lower bound of the parameter. If a check for valid bounds
    * fails, it returns false and nothing changes. This means if the lower
@@ -578,7 +575,7 @@ public:
    * \sa check_bounds()
    */
   virtual void SetMinValue(const double min);
-  
+
   /*! Setter for upper bound
    * Setter for upper bound of the parameter. If a check for valid bounds
    * fails, it returns false and nothing changes. This means if the upper
@@ -588,31 +585,31 @@ public:
    * \sa check_bounds()
    */
   virtual void SetMaxValue(const double max);
-  
+
   //====== PARAMETER ERROR ========
   //! Check if parameter has an error
   virtual bool HasError() const;
-  
+
   //! Getter for type of parameter error
   virtual ErrorType GetErrorType() const { return errorType; }
-  
+
   //! Getter for parameter error. In case of asymmetric errors the average error
   //! is returned.
   virtual double GetError() const;
-  
+
   //! Get rounded parameter error. In case of asymmetric errors the average
   //! error is returned.
   virtual double GetRoundedError() const { return GetError(); }
-  
+
   //! Getter for upper error of parameter
   virtual double GetErrorHigh() const;
-  
+
   //! Getter for lower error of parameter
   virtual double GetErrorLow() const;
-  
+
   //! Setter for low/high error of parameter
   virtual void SetError(double errLow, double errHigh);
-  
+
   //! Setter for error of parameter
   virtual void SetError(double err);
 
@@ -620,33 +617,33 @@ public:
 
 protected:
   virtual std::string TypeName() const { return "double"; }
-  
-  bool bounds_;  /*!< Are valid bounds defined for this parameter? */
-  
-  bool fixed_;   /*!< Do you want to keep parameter fixed? */
-  
+
+  bool bounds_; /*!< Are valid bounds defined for this parameter? */
+
+  bool fixed_; /*!< Do you want to keep parameter fixed? */
+
   /// Parameter value
   double val_;
-  
+
   /// Parameter lower bound
   double min_;
-  
+
   /// Parameter upper bound
   double max_;
-  
+
   /// error type
   ErrorType errorType;
-  
+
   /// Lower parameter error
   double errorLow;
-  
+
   /// Upper parameter error
   double errorHigh;
 
   virtual void SetErrorHigh(double errHigh) { errorHigh = errHigh; }
-  
+
   virtual void SetErrorLow(double errLow) { errorLow = std::fabs(errLow); }
-  
+
   virtual void SetErrorType(ErrorType t) { errorType = t; }
 
   //! A protected function to check if bounds are valid
@@ -858,38 +855,38 @@ public:
 
   //! Check if parameter has bounds
   virtual bool HasBounds() const { return bounds_; }
-  
+
   //! Check if bounds should be used
   virtual bool UseBounds() const {
     if (bounds_)
       return usebounds_;
     return false;
   }
-  
+
   //! Check if parameter has an error
   virtual bool HasError() const { return hasError_; }
-  
+
   //! Check if parameter is fixed
   virtual bool IsFixed() const { return fixed_; }
 
   //! Getter for value of parameter
   virtual int GetValue() const { return val_; }
-  
+
   //! Getter for lower bound of parameter
   virtual int GetMinValue() const { return min_; }
-  
+
   //! Getter for upper bound of parameter
   virtual int GetMaxValue() const { return max_; }
-  
+
   //! Getter for error of parameter
   virtual int GetError() const { return err_; }
 
   //! Setter for value of parameter
   virtual void SetValue(const int inVal);
-  
+
   //! Setter for error of parameter
   virtual void SetError(const int inErr);
-  
+
   //! Setter for bounds of parameter
   virtual bool SetMinMax(const int inMin, const int inMax);
 
@@ -917,13 +914,13 @@ public:
 
   //! Set if bounds should be used
   virtual void UseBounds(const bool use) { usebounds_ = use; }
-  
+
   //! Call to fix parameter
   virtual void SetParameterFixed() { fixed_ = true; }
-  
+
   //! Call to free parameter
   virtual void SetParameterFree() { fixed_ = false; }
-  
+
   //! Set parameter free or fixed
   virtual void FixParameter(const bool fixed) { fixed_ = fixed; }
 
@@ -939,25 +936,25 @@ public:
 
 protected:
   virtual std::string TypeName() const { return "integer"; }
-  
-  bool bounds_;    /*!< Are valid bounds defined for this parameter? */
-  
-  bool hasError_;  /*!< Is an error defined for this parameter? */
-  
+
+  bool bounds_; /*!< Are valid bounds defined for this parameter? */
+
+  bool hasError_; /*!< Is an error defined for this parameter? */
+
   bool usebounds_; /*!< Do you want to restrict your parameter? */
-  
-  bool fixed_;     /*!< Do you want to keep parameter fixed? */
-  
+
+  bool fixed_; /*!< Do you want to keep parameter fixed? */
+
   /// Parameter value
   int val_;
-  
+
   /// Parameter minimum bound
   int min_;
-  
+
   /// Parameter maximum bound
   int max_;
-  
-  ///Parameter error
+
+  /// Parameter error
   int err_;
 
   //! A protected function to check if bounds are valid
@@ -982,7 +979,7 @@ protected:
    * \sa operator<<, to_str(), type()
    */
   virtual std::string make_str() const;
-  
+
   //! A protected function which returns an output string for printing
   /*!
    * This function uses only the value information about the parameter
@@ -1033,28 +1030,28 @@ public:
 
   //! Check if parameter has an error
   virtual bool HasError() const { return hasError_; }
-  
+
   //! Check if parameter is fixed
   virtual bool IsFixed() const { return fixed_; }
 
   //! Getter for value of parameter
   virtual bool GetValue() const { return val_; }
-  
+
   //! Getter for error of parameter
   virtual bool GetError() const { return err_; }
 
   //! Setter for value of parameter
   virtual void SetValue(const bool inVal);
-  
+
   //! Setter for error of parameter
   virtual void SetError(const bool inErr);
 
   //! Call to fix parameter
   virtual void SetParameterFixed() { fixed_ = true; }
-  
+
   //! Call to free parameter
   virtual void SetParameterFree() { fixed_ = false; }
-  
+
   //! Set parameter free or fixed
   virtual void FixParameter(const bool fixed) { fixed_ = fixed; }
 
@@ -1062,20 +1059,20 @@ public:
 
 protected:
   virtual std::string TypeName() const { return "boolean"; }
-  
-  bool hasError_;  /*!< Is an error defined for this parameter? */
-  
+
+  bool hasError_; /*!< Is an error defined for this parameter? */
+
   bool usebounds_; /*!< Do you want to restrict your parameter? */
-  
-  bool fixed_;     /*!< Do you want to keep parameter fixed? */
-  
+
+  bool fixed_; /*!< Do you want to keep parameter fixed? */
+
   /// Parameter value
   int val_;
-  
+
   /// Parameter error
   int err_;
-  
-   //! A protected function which returns an output string for printing
+
+  //! A protected function which returns an output string for printing
   /*!
    * This function uses all available information about the parameter
    * to create a string which will be streamed via the stream operator <<.

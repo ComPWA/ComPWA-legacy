@@ -187,23 +187,23 @@ std::string MultiUnsignedInteger::make_val_str() const {
 }
 //================================= COMPLEX ==================================
 ComplexParameter::ComplexParameter(std::string inName)
-    : AbsParameter(inName, ParType::COMPLEX), val_(0., 0.), min_(0., 0.),
-      err_(0., 0.), max_(0., 0.) {
+    : AbsParameter(inName, ParType::COMPLEX), val_(0., 0.), err_(0., 0.),
+      min_(0., 0.), max_(0., 0.) {
   bounds_ = usebounds_ = hasError_ = fixed_ = false;
 }
 
 ComplexParameter::ComplexParameter(std::string inName,
                                    const std::complex<double> value)
-    : AbsParameter(inName, ParType::COMPLEX), val_(value), min_(0, 0),
-      err_(0, 0), max_(0, 0) {
+    : AbsParameter(inName, ParType::COMPLEX), val_(value), err_(0, 0),
+      min_(0, 0), max_(0, 0) {
   bounds_ = usebounds_ = hasError_ = fixed_ = false;
 }
 
 ComplexParameter::ComplexParameter(std::string inName,
                                    const std::complex<double> value,
                                    const std::complex<double> error)
-    : AbsParameter(inName, ParType::COMPLEX), val_(value), min_(0, 0),
-      err_(error), max_(0, 0) {
+    : AbsParameter(inName, ParType::COMPLEX), val_(value), err_(error),
+      min_(0, 0), max_(0, 0) {
   bounds_ = usebounds_ = fixed_ = false;
   hasError_ = true;
 }
@@ -212,8 +212,8 @@ ComplexParameter::ComplexParameter(std::string inName,
                                    const std::complex<double> value,
                                    const std::complex<double> min,
                                    const std::complex<double> max)
-    : AbsParameter(inName, ParType::COMPLEX), val_(value), min_(0, 0),
-      err_(0, 0), max_(0, 0) {
+    : AbsParameter(inName, ParType::COMPLEX), val_(value), err_(0, 0),
+      min_(0, 0), max_(0, 0) {
   bounds_ = usebounds_ = hasError_ = fixed_ = false;
   if (check_bounds(min, max)) {
     min_ = min;
@@ -226,8 +226,8 @@ ComplexParameter::ComplexParameter(std::string inName,
                                    const std::complex<double> min,
                                    const std::complex<double> max,
                                    const std::complex<double> error)
-    : AbsParameter(inName, ParType::COMPLEX), val_(value), min_(0, 0),
-      err_(error), max_(0, 0) {
+    : AbsParameter(inName, ParType::COMPLEX), val_(value), err_(error),
+      min_(0, 0), max_(0, 0) {
   bounds_ = usebounds_ = fixed_ = false;
   hasError_ = true;
   if (check_bounds(min, max)) {
@@ -259,7 +259,7 @@ void ComplexParameter::SetError(const std::complex<double> inErr) {
 }
 
 bool ComplexParameter::SetMinMax(const std::complex<double> inMin,
-                                       const std::complex<double> inMax) {
+                                 const std::complex<double> inMax) {
   bool valid = check_bounds(inMin, inMax);
   if (valid) {
     min_ = inMin;
