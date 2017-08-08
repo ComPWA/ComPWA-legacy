@@ -1241,7 +1241,7 @@ BOOST_SERIALIZATION_SHARED_PTR(ComPWA::DoubleParameter)
  @param pt Input property tree
  @return Parameter
  */
-static DoubleParameter
+inline DoubleParameter
 DoubleParameterFactory(const boost::property_tree::ptree pt) {
   DoubleParameter obj;
 
