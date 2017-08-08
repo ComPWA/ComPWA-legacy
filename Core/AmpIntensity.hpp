@@ -136,7 +136,7 @@ protected:
 
 //! Split string into pieces which are separated by blanks
 // Todo: wohin?
-static std::vector<std::string> splitString(std::string str) {
+inline std::vector<std::string> splitString(std::string str) {
   std::vector<std::string> result;
   std::istringstream iStr(str);
   std::vector<std::string> stringFrag{std::istream_iterator<std::string>{iStr},
