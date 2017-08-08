@@ -20,21 +20,22 @@ using namespace boost::log;
 
 namespace ComPWA {
 
-PhysConst *PhysConst::_inst;
+PhysConst *PhysConst::_inst = 0;
 
 PhysConst::PhysConst(std::string filename) {
 
   _constList.push_back(Constant("Pi", M_PI));
-  _constList.push_back(Constant("c", 299792458)); /* Units: m/s */
+  _constList.push_back(Constant("c", 299792458)); // Units: m/s
 
   // Create an empty property tree object
   boost::property_tree::ptree pt;
   try {
-    read_xml(_particleFileName, pt);
-    LOG(info) << "PhysConst: reading particle file " << _particleFileName;
+    read_xml(filename, pt);
+    LOG(info) << "PhysConst: reading particle file " << filename;
   } catch (std::exception &ex) {
     throw;
   }
+  
   readTree(pt);
 }
 
