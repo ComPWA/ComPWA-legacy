@@ -17,18 +17,28 @@
 #include <complex>
 
 #include "Core/Event.hpp"
+#include "Core/SubSystem.hpp"
 #include "Core/PhysConst.hpp"
 #include "Core/Spin.hpp"
+#include "Core/DataPoint.hpp"
 
 namespace ComPWA {
 
-class dataPoint;
-
 class Kinematics {
 public:
-  //! singleton pattern
-  static Kinematics *Instance();
+  //! Constructor
+  Kinematics(std::vector<pid> initial = std::vector<pid>(),
+             std::vector<pid> finalS = std::vector<pid>())
+      : _initialState(initial), _finalState(finalS),
+        is_PS_area_calculated_(false), PS_area_(0.0){};
 
+  /// Delete copy constructor. For each Kinematics in the analysis only
+  /// one instance should exist since Kinematics does the bookkeeping for which
+  /// SubSystems variables needs to be calculated. That instance can then be
+  /// passed as (smart) pointer. Note: Not sure if we also should delete the
+  /// move constructor.
+  Kinematics(const Kinematics& that) = delete;
+  
   //! converts Event to dataPoint
   virtual void EventToDataPoint(const ComPWA::Event &ev,
                                 dataPoint &point) const = 0;
@@ -51,6 +61,8 @@ public:
   //! Get inital state
   virtual std::vector<pid> GetInitialState() { return _initialState; }
 
+  virtual int GetDataID(const ComPWA::SubSystem s) = 0;
+  
 protected:
   std::vector<pid> _initialState;
   std::vector<pid> _finalState;
@@ -59,24 +71,6 @@ protected:
   std::vector<std::string> _varNames;
   //! Latex titles for variables
   std::vector<std::string> _varTitles;
-
-  // Singleton stuff
-  static Kinematics *_inst;
-
-  //! Constructor
-  Kinematics(std::vector<pid> initial = std::vector<pid>(),
-             std::vector<pid> finalS = std::vector<pid>())
-      : _initialState(initial), _finalState(finalS),
-        is_PS_area_calculated_(false), PS_area_(0.0){};
-
-  //! Delete Copy constructor
-  Kinematics(const Kinematics &) = delete;
-
-  //! Default destructor
-  virtual ~Kinematics(){};
-
-  //! Delete assignment operator
-  void operator=(const Kinematics &) = delete;
 
   virtual double calculatePSArea() = 0;
   bool is_PS_area_calculated_;

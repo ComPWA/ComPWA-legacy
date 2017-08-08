@@ -32,7 +32,6 @@
 #include "Minuit2/MnStrategy.h"
 
 #include "Core/ParameterList.hpp"
-#include "Core/ControlParameter.hpp"
 #include "Optimizer/Optimizer.hpp"
 #include "Optimizer/Minuit2/MinuitFcn.hpp"
 #include "Optimizer/Minuit2/MinuitResult.hpp"
@@ -45,7 +44,7 @@ class MinuitIF : public Optimizer {
 
 public:
   /// Default Constructor (0x0)
-  MinuitIF(std::shared_ptr<ComPWA::ControlParameter> esti, ParameterList& par);
+  MinuitIF(std::shared_ptr<ComPWA::IEstimator> esti, ParameterList& par);
   virtual std::shared_ptr<FitResult> exec(ParameterList& par);
 
   /** Destructor */
@@ -59,7 +58,7 @@ public:
 protected:
 private:
   ROOT::Minuit2::MinuitFcn _myFcn;
-  std::shared_ptr<ComPWA::ControlParameter> estimator;
+  std::shared_ptr<ComPWA::IEstimator> estimator;
   bool enableHesse;
   bool enableMinos;
 };

@@ -37,7 +37,7 @@
 #include "Core/PhysConst.hpp"
 #include "Core/FitResult.hpp"
 #include "Core/Logging.hpp"
-#include "Estimator/Estimator.hpp"
+#include "Core/Estimator.hpp"
 #include "Minuit2/MnUserParameterState.h"
 #include "Minuit2/FunctionMinimum.h"
 
@@ -59,11 +59,11 @@ public:
   MinuitResult();
 
   //! Constructor with estimator and result
-  MinuitResult(std::shared_ptr<ControlParameter> esti,
+  MinuitResult(std::shared_ptr<ComPWA::IEstimator> esti,
                ROOT::Minuit2::FunctionMinimum result);
 
   //! Set Minuit2 function minimum
-  void setResult(std::shared_ptr<ControlParameter> esti,
+  void setResult(std::shared_ptr<ComPWA::IEstimator> esti,
                  ROOT::Minuit2::FunctionMinimum result);
 
   //! Return final likelihood value
@@ -136,7 +136,7 @@ protected:
   int nEvents;
 
   //! Pointer to estimator
-  std::shared_ptr<ComPWA::Estimator::Estimator> est;
+  std::shared_ptr<ComPWA::IEstimator> est;
 
   //====== MINUIT FIT RESULT =======
   double GetCorr(unsigned int n, unsigned int t) {

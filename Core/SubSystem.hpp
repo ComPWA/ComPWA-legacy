@@ -6,113 +6,62 @@
 //
 //
 
+///
+/// \file
+/// Contains SubSystem class.
+///
+
 #ifndef SubSystem_h
 #define SubSystem_h
 
-namespace ComPWA {
-namespace Physics {
-namespace HelicityFormalism {
+#include <vector>
+#include <boost/property_tree/ptree.hpp>
 
-/*! Definition of a two-body decay node within a sequential decay tree.
- Class contains lists for both final states of the two-body decay and a list
- for all recoiling particles. This information is needed to calculate
- invariant mass and angles at a two-body decay node.
- */
+namespace ComPWA {
+
+/// \class SubSystem
+/// Definition of a two-body decay node within a sequential decay tree.
+/// Class contains lists for both final states of the two-body decay and a list
+/// for all recoiling particles. This information is needed to calculate
+/// invariant mass and angles at a two-body decay node.
 class SubSystem {
 public:
   SubSystem(){};
 
-  SubSystem(std::vector<int> recoilS, std::vector<std::vector<int>> finalStates)
-      : _recoilState(recoilS), _finalStates(finalStates) {
+  SubSystem(std::vector<int> recoilS,
+            std::vector<std::vector<int>> finalStates);
 
-    title = to_string();
-    // LOG(trace) << "SubSystem::SubSystem() | Creating sub system "<<title;
-  }
-
+  /// Constructor for an isobar model in which it is assumed that particles
+  /// always decay to two final states.
   SubSystem(std::vector<int> recoilS, std::vector<int> finalA,
-            std::vector<int> finalB)
-      : _recoilState(recoilS) {
-    std::vector<std::vector<int>> tmp;
-    tmp.push_back(finalA);
-    tmp.push_back(finalB);
-    SetFinalStates(tmp);
+            std::vector<int> finalB);
 
-    title = to_string();
-    // LOG(trace) << "SubSystem::SubSystem() | Creating sub system "<<title;
-  }
+  virtual std::string to_string() const;
 
-  virtual std::string to_string() const {
-    // Creating unique title
-    std::stringstream stream;
-    stream << "(";
-    for (auto i : _recoilState)
-      stream << std::to_string(i);
-    stream << ")->(";
-    for (auto j = _finalStates.begin(); j != _finalStates.end(); ++j) {
-      for (auto i : *j)
-        stream << std::to_string(i);
-      if (j != _finalStates.end() - 1)
-        stream << ")+(";
-      else
-        stream << ")";
-    }
-
-    return stream.str();
-  }
-
-  bool operator==(const SubSystem &b) const {
-    if (_recoilState == b._recoilState && _finalStates == b._finalStates)
-      return true;
-    return false;
-  }
+  bool operator==(const SubSystem &b) const;
 
   friend std::ostream &operator<<(std::ostream &stream, const SubSystem &s) {
     stream << s.to_string();
     return stream;
   }
+  virtual void SetFinalStates(std::vector<std::vector<int>> v);
 
-  virtual void SetFinalStates(std::vector<std::vector<int>> v) {
-    _finalStates = v;
-  }
+  virtual const std::vector<std::string> &GetFinalStatesNames() const;
 
-  virtual const std::vector<std::string> &GetFinalStatesNames() const {
-    return _finalStatesNames;
-  }
+  virtual void SetFinalStatesNames(std::vector<std::string> n);
 
-  virtual void SetFinalStatesNames(std::vector<std::string> n) {
-    if (n.size() != _finalStates.size()) {
-      throw std::runtime_error("SubSystem::SetFinalStatesNames() | Length of "
-                               "vectors does not match with the number of "
-                               "final states.");
-    }
-    _finalStatesNames = n;
-  }
+  virtual const std::vector<std::vector<int>> &GetFinalStates() const;
 
-  virtual const std::vector<std::vector<int>> &GetFinalStates() const {
-    return _finalStates;
-  }
+  virtual const std::vector<int> GetHelicities() const;
 
-  virtual const std::vector<int> GetHelicities() const {
-    if (helicities_.size() != _finalStates.size())
-      throw std::runtime_error("SubSystem::GetHelicities() | Helicities are "
-                               "not defined for all final states!");
-    return helicities_;
-  }
-  virtual void SetHelicities(std::vector<int> hel) {
-    if (hel.size() != _finalStates.size())
-      throw std::runtime_error("SubSystem::SetHelicities() | Helicities are "
-                               "not defined for all final states!");
-    helicities_ = hel;
-  }
+  virtual void SetHelicities(std::vector<int> hel);
 
-  virtual void SetRecoilState(const std::vector<int> r) { _recoilState = r; }
+  virtual void SetRecoilState(const std::vector<int> r);
 
-  virtual const std::vector<int> &GetRecoilState() const {
-    return _recoilState;
-  }
+  virtual const std::vector<int> &GetRecoilState() const;
 
 protected:
-  std::string title;
+  std::string _title;
   std::vector<int> _recoilState;
   std::vector<std::vector<int>> _finalStates;
   std::vector<int> helicities_;
@@ -194,10 +143,10 @@ inline boost::property_tree::ptree SubSystemSave(SubSystem sys) {
   }
 
   pt.add_child("DecayProducts", daughterTr);
+
+  return pt;
 }
 
-} /* namespace HelicityFormalism */
-} /* namespace Physics */
 } /* namespace ComPWA */
 
 #endif /* SubSystem_h */

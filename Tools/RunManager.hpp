@@ -82,16 +82,17 @@
 #include <vector>
 #include <memory>
 
-#include "DataReader/Data.hpp"
-#include "Estimator/Estimator.hpp"
+#include "Core/Estimator.hpp"
 #include "Core/AmpIntensity.hpp"
-#include "Optimizer/Optimizer.hpp"
 #include "Core/FitResult.hpp"
 #include "Core/ParameterList.hpp"
 #include "Core/Efficiency.hpp"
 #include "Core/Generator.hpp"
+#include "DataReader/Data.hpp"
+#include "Optimizer/Optimizer.hpp"
 
 #include "Tools/FitFractions.hpp"
+
 namespace ComPWA {
 
 using namespace DataReader;
@@ -157,10 +158,10 @@ public:
    * @param number Number of events to generate
    * @return
    */
-  virtual bool Generate(int number);
+  virtual bool Generate(std::shared_ptr<Kinematics> kin, int number);
 
 protected:
-  static bool gen(int number, std::shared_ptr<Generator> gen,
+  static bool gen(int number, std::shared_ptr<Kinematics> kin, std::shared_ptr<Generator> gen,
                   std::shared_ptr<AmpIntensity> amp, std::shared_ptr<Data> data,
                   std::shared_ptr<Data> phsp = std::shared_ptr<Data>(),
                   std::shared_ptr<Data> phspTrue = std::shared_ptr<Data>());

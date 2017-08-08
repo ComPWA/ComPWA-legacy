@@ -60,7 +60,7 @@ namespace Geneva {
 
 using namespace Gem::Geneva;
 
-GenevaIF::GenevaIF(std::shared_ptr<ControlParameter> theData, std::string inConfigFileDir)
+GenevaIF::GenevaIF(std::shared_ptr<IEstimator> theData, std::string inConfigFileDir)
   : _myData(theData),configFileDir(inConfigFileDir),parallelizationMode(execMode::EXECMODE_SERIAL),
     serMode(Gem::Common::serializationMode::SERIALIZATIONMODE_BINARY),clientMode(false),ip("localhost"),port(0){
 	BOOST_LOG_TRIVIAL(info) << "GenevaIF::GenevaIF() | "

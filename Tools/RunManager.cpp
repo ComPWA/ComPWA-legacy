@@ -28,7 +28,7 @@
 #include <boost/progress.hpp>
 
 #include "DataReader/Data.hpp"
-#include "Estimator/Estimator.hpp"
+#include "Core/Estimator.hpp"
 #include "Optimizer/Optimizer.hpp"
 #include "Core/ParameterList.hpp"
 #include "Core/Event.hpp"
@@ -91,15 +91,15 @@ void RunManager::SetTruePhspSample(std::shared_ptr<DataReader::Data> truePhsp) {
   sampleTruePhsp_ = truePhsp;
 }
 
-bool RunManager::Generate(int number) {
+bool RunManager::Generate(std::shared_ptr<Kinematics> kin, int number) {
   LOG(info) << "RunManager::generate() | "
                "Generating "
             << number << " signal events!";
 
-  return gen(number, gen_, intens_, sampleData_, samplePhsp_, sampleTruePhsp_);
+  return gen(number, kin, gen_, intens_, sampleData_, samplePhsp_, sampleTruePhsp_);
 }
 
-bool RunManager::gen(int number, std::shared_ptr<Generator> gen,
+bool RunManager::gen(int number, std::shared_ptr<Kinematics> kin, std::shared_ptr<Generator> gen,
                      std::shared_ptr<AmpIntensity> amp,
                      std::shared_ptr<DataReader::Data> data,
                      std::shared_ptr<DataReader::Data> phsp,
@@ -147,7 +147,7 @@ bool RunManager::gen(int number, std::shared_ptr<Generator> gen,
   unsigned int limit;
   if (phsp) {
     limit = phsp->GetNEvents();
-    generationMaxValue *= Tools::Maximum(amp, phsp) ;
+    generationMaxValue *= Tools::Maximum(kin, amp, phsp) ;
   } else {
     limit = 100000000; // set large limit, should never be reached
   }
@@ -180,7 +180,7 @@ bool RunManager::gen(int number, std::shared_ptr<Generator> gen,
     // use true position for amplitude value
     dataPoint point;
     try {
-      point = dataPoint(evtTrue);
+      kin->EventToDataPoint(evtTrue, point);
     } catch (BeyondPhsp &ex) { // event outside phase, remove
       continue;
     }

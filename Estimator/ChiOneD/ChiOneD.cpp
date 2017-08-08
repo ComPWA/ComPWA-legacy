@@ -20,24 +20,14 @@
 namespace ComPWA {
 
 using DataReader::Data;
-using ComPWA::ControlParameter;
 
 namespace Estimator {
 namespace ChiOneD {
 
-ChiOneD::ChiOneD(std::shared_ptr<AmpIntensity> inPIF, std::shared_ptr<Data> inDIF)
+ChiOneD::ChiOneD(std::shared_ptr<Kinematics> kin,
+                 std::shared_ptr<AmpIntensity> inPIF,
+                 std::shared_ptr<Data> inDIF)
     : pPIF_(inPIF), pDIF_(inDIF) {}
-
-ChiOneD::~ChiOneD() {}
-
-std::shared_ptr<ControlParameter>
-ChiOneD::createInstance(std::shared_ptr<AmpIntensity> inPIF,
-                        std::shared_ptr<Data> inDIF) {
-  if (!instance_)
-    instance_ = std::shared_ptr<ControlParameter>(new ChiOneD(inPIF, inDIF));
-
-  return instance_;
-}
 
 double ChiOneD::controlParameter(ParameterList &minPar) {
   unsigned int nBins = pDIF_->GetNBins();
@@ -49,8 +39,10 @@ double ChiOneD::controlParameter(ParameterList &minPar) {
 
     std::vector<double> x;
     x.push_back(m12);
-    double intens = pPIF_->Intensity(x);
-    // double intens = pPIF_->intensity(x, minPar);
+    double intens;
+    //TODO: How do we solve this?
+    //intens = pPIF_->Intensity(x);
+    assert( 0 && "ChiOneD::controlParameter | Not implemented!");
 
     chi += (weight - intens) * (weight - intens) /
            (double)nBins; // Just for binned data

@@ -109,7 +109,8 @@ public:
    * @param toySample Sample of phase space distributed events without
    * efficiency.
    */
-  virtual std::shared_ptr<FunctionTree> GetTree(const ParameterList &sample,
+  virtual std::shared_ptr<FunctionTree> GetTree(std::shared_ptr<Kinematics> kin,
+                                                const ParameterList &sample,
                                                 const ParameterList &phspSample,
                                                 const ParameterList &toySample,
                                                 unsigned int nEvtVar,

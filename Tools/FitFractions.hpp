@@ -122,7 +122,8 @@ inline void multivariateGaussian(const gsl_rng *rnd, const int vecSize,
 };
 
 inline ComPWA::DoubleParameter
-CalculateFitFraction(std::shared_ptr<ComPWA::AmpIntensity> intens,
+CalculateFitFraction(std::shared_ptr<ComPWA::Kinematics> kin,
+                     std::shared_ptr<ComPWA::AmpIntensity> intens,
                      std::shared_ptr<std::vector<dataPoint>> sample,
                      const std::pair<std::string, std::string> def) {
 
@@ -136,9 +137,11 @@ CalculateFitFraction(std::shared_ptr<ComPWA::AmpIntensity> intens,
     denom = intens;
   else
     denom = intens->GetComponent(def.second);
+  
+  double phspVolume = kin->GetPhspVolume();
 
-  double integral_numerator = ComPWA::Tools::Integral(numer, sample);
-  double integral_denominator = Tools::Integral(denom, sample);
+  double integral_numerator = ComPWA::Tools::Integral(numer, sample, phspVolume);
+  double integral_denominator = ComPWA::Tools::Integral(denom, sample, phspVolume);
   double ffVal = integral_numerator / integral_denominator;
   LOG(trace) << "CalculateFitFraction() | Result for (" << def.first << "/"
              << def.second << ") is " << integral_numerator << "/"
@@ -147,12 +150,13 @@ CalculateFitFraction(std::shared_ptr<ComPWA::AmpIntensity> intens,
 }
 
 inline ComPWA::ParameterList
-CalculateFitFractions(std::shared_ptr<ComPWA::AmpIntensity> intens,
+CalculateFitFractions(std::shared_ptr<ComPWA::Kinematics> kin,
+                    std::shared_ptr<ComPWA::AmpIntensity> intens,
                       std::shared_ptr<std::vector<dataPoint>> sample,
                       std::vector<std::pair<std::string, std::string>> defs) {
   ComPWA::ParameterList ffList;
   for (auto i : defs) {
-    auto par = CalculateFitFraction(intens, sample, i);
+    auto par = CalculateFitFraction(kin, intens, sample, i);
     ffList.AddParameter(std::make_shared<ComPWA::DoubleParameter>(par));
   }
   return ffList;
@@ -190,7 +194,8 @@ CalculateFitFractions(std::shared_ptr<ComPWA::AmpIntensity> intens,
 inline void
 CalcFractionError(ParameterList &parameters,
                   std::vector<std::vector<double>> covariance,
-                  ParameterList &ffList, std::shared_ptr<AmpIntensity> intens,
+                  ParameterList &ffList, std::shared_ptr<ComPWA::Kinematics> kin,
+                  std::shared_ptr<AmpIntensity> intens,
                   std::shared_ptr<std::vector<dataPoint>> sample, int nSets,
                   std::vector<std::pair<std::string, std::string>> defs) {
   if (nSets <= 0)
@@ -254,7 +259,7 @@ CalcFractionError(ParameterList &parameters,
     } catch (ParameterOutOfBound &ex) {
       continue;
     }
-    fracVect.push_back(CalculateFitFractions(intens, sample, defs));
+    fracVect.push_back(CalculateFitFractions(kin, intens, sample, defs));
     i++;
 
     /******* DEBUGGING *******/

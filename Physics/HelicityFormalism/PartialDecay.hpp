@@ -18,7 +18,6 @@
 #include "Physics/Resonance.hpp"
 #include "Physics/DecayDynamics/AbstractDynamicalFunction.hpp"
 #include "Physics/HelicityFormalism/AmpWignerD.hpp"
-#include "Physics/HelicityFormalism/SubSystem.hpp"
 #include "Physics/HelicityFormalism/HelicityKinematics.hpp"
 
 namespace ComPWA {
@@ -46,7 +45,7 @@ public:
    @return Constructed object
    */
   static std::shared_ptr<ComPWA::Physics::Resonance>
-  Factory(const boost::property_tree::ptree &pt);
+  Factory(std::shared_ptr<Kinematics> kin, const boost::property_tree::ptree &pt);
 
   static boost::property_tree::ptree Save(std::shared_ptr<Resonance> obj);
 
@@ -131,7 +130,7 @@ public:
 
   /**! Setup function tree */
   virtual std::shared_ptr<FunctionTree>
-  GetTree(const ComPWA::ParameterList &sample,
+  GetTree(std::shared_ptr<Kinematics> kin, const ComPWA::ParameterList &sample,
           const ComPWA::ParameterList &toySample, std::string suffix);
 
 protected:
@@ -140,7 +139,7 @@ protected:
    * cosTheta at @param _dataPos+1 and phi at @param _dataPos+2 */
   int _dataPos;
 
-  ComPWA::Physics::HelicityFormalism::SubSystem _subSystem;
+  ComPWA::SubSystem _subSystem;
 
   std::shared_ptr<ComPWA::Physics::HelicityFormalism::AmpWignerD> _angD;
 

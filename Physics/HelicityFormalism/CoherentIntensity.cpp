@@ -28,7 +28,8 @@ double CoherentIntensity::Intensity(const dataPoint &point) const {
 };
 
 std::shared_ptr<CoherentIntensity>
-CoherentIntensity::Factory(const boost::property_tree::ptree &pt) {
+CoherentIntensity::Factory(std::shared_ptr<Kinematics> kin,
+                           const boost::property_tree::ptree &pt) {
   LOG(trace) << " CoherentIntensity::Factory() | Construction....";
   auto obj = std::make_shared<CoherentIntensity>();
   obj->_name = (pt.get<std::string>("<xmlattr>.Name"));
@@ -43,12 +44,13 @@ CoherentIntensity::Factory(const boost::property_tree::ptree &pt) {
   } else {
     obj->_strength = (std::make_shared<ComPWA::DoubleParameter>("", 1.0));
   }
+  obj->SetPhspVolume(kin->GetPhspVolume());
 
   for (const auto &v : pt.get_child("")) {
     if (v.first == "Amplitude")
       obj->AddAmplitude(
           ComPWA::Physics::HelicityFormalism::SequentialTwoBodyDecay::Factory(
-              v.second));
+              kin, v.second));
   }
   return obj;
 }
@@ -101,7 +103,8 @@ CoherentIntensity::GetComponent(std::string name) {
 
 //! Getter function for basic amp tree
 std::shared_ptr<ComPWA::FunctionTree>
-CoherentIntensity::GetTree(const ComPWA::ParameterList &sample,
+CoherentIntensity::GetTree(std::shared_ptr<Kinematics> kin,
+                           const ComPWA::ParameterList &sample,
                            const ComPWA::ParameterList &phspSample,
                            const ComPWA::ParameterList &toySample,
                            unsigned int nEvtVar, std::string suffix) {
@@ -124,7 +127,7 @@ CoherentIntensity::GetTree(const ComPWA::ParameterList &sample,
   tr->createNode("SumSquared",
                  std::shared_ptr<Strategy>(new AbsSquare(ParType::MDOUBLE)),
                  "CoherentIntensity(" + Name() + ")" + suffix);
-  tr->insertTree(setupBasicTree(sample, toySample), "SumSquared");
+  tr->insertTree(setupBasicTree(kin, sample, toySample), "SumSquared");
 
   // Normalization
   // create a new FunctionTree to make sure that nodes with the same name do
@@ -135,8 +138,7 @@ CoherentIntensity::GetTree(const ComPWA::ParameterList &sample,
   trNorm->createNode("Integral",
                      std::shared_ptr<Strategy>(new MultAll(ParType::DOUBLE)),
                      "Normalization(" + Name() + ")" + suffix);
-  trNorm->createLeaf("PhspVolume", Kinematics::Instance()->GetPhspVolume(),
-                     "Integral");
+  trNorm->createLeaf("PhspVolume", kin->GetPhspVolume(), "Integral");
   trNorm->createLeaf("InverseSampleWeights", 1 / ((double)sumWeights),
                      "Integral");
   trNorm->createNode("Sum",
@@ -151,17 +153,16 @@ CoherentIntensity::GetTree(const ComPWA::ParameterList &sample,
                      std::shared_ptr<Strategy>(new AbsSquare(ParType::MDOUBLE)),
                      "IntensityWeighted", phspSampleSize,
                      false); //|T_{ev}|^2
-  trNorm->insertTree(setupBasicTree(phspSample, toySample, "_norm"),
+  trNorm->insertTree(setupBasicTree(kin, phspSample, toySample, "_norm"),
                      "Intensity");
 
   tr->insertTree(trNorm, "CoherentIntensity(" + Name() + ")" + suffix);
   return tr;
 }
 
-std::shared_ptr<FunctionTree>
-CoherentIntensity::setupBasicTree(const ParameterList &sample,
-                                  const ParameterList &phspSample,
-                                  std::string suffix) const {
+std::shared_ptr<FunctionTree> CoherentIntensity::setupBasicTree(
+    std::shared_ptr<Kinematics> kin, const ParameterList &sample,
+    const ParameterList &phspSample, std::string suffix) const {
 
   int sampleSize = sample.GetMultiDouble(0)->GetNValues();
   int phspSampleSize = phspSample.GetMultiDouble(0)->GetNValues();
@@ -186,7 +187,8 @@ CoherentIntensity::setupBasicTree(const ParameterList &sample,
   newTree->createHead("SumOfAmplitudes" + suffix, maddStrat, sampleSize);
 
   for (auto i : _seqDecays) {
-    std::shared_ptr<FunctionTree> resTree = i->GetTree(sample, phspSample, "");
+    std::shared_ptr<FunctionTree> resTree =
+        i->GetTree(kin, sample, phspSample, "");
     if (!resTree->sanityCheck())
       throw std::runtime_error("AmpSumIntensity::setupBasicTree() | "
                                "Resonance tree didn't pass sanity check!");

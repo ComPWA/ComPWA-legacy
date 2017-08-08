@@ -11,14 +11,9 @@ class TwoBodyKinematics : public Kinematics {
 public:
   void init();
 
-  static Kinematics *createInstance(int idMother, std::vector<int> finalState,
-                  double deltaMassWindow = 0.5) {
-    if( _inst )
-      throw std::runtime_error("TwoBodyKinematics::createInstance() | Instance already exists!");
-    _inst = new TwoBodyKinematics(idMother, finalState, deltaMassWindow );
-    return _inst;
-  }
-
+  TwoBodyKinematics(int idMother, std::vector<int> finalState,
+                  double deltaMassWindow = 0.5);
+  
   //! Converts Event to dataPoint
   virtual void EventToDataPoint(const Event &ev, dataPoint &point) const;
 
@@ -47,9 +42,6 @@ public:
   virtual double GetMass(unsigned int num) const;
 
 protected:
-  
-  TwoBodyKinematics(int idMother, std::vector<int> finalState,
-                  double deltaMassWindow);
   
   double _M;
   ComPWA::Spin _spinM;

@@ -22,7 +22,7 @@ class IncoherentIntensity : public ComPWA::AmpIntensity {
 public:
   //============ CONSTRUCTION ==================
 
-  IncoherentIntensity() : ComPWA::AmpIntensity() {}
+  IncoherentIntensity() : ComPWA::AmpIntensity(), phspVolume_(1.0) {}
 
   //! Function to create a full copy of the amplitude
   ComPWA::AmpIntensity *Clone(std::string newName = "") const {
@@ -32,7 +32,7 @@ public:
   }
 
   static std::shared_ptr<IncoherentIntensity>
-  Factory(const boost::property_tree::ptree &pt);
+  Factory(std::shared_ptr<Kinematics> kin, const boost::property_tree::ptree &pt);
 
   static boost::property_tree::ptree
   Save(std::shared_ptr<IncoherentIntensity> intens);
@@ -44,33 +44,7 @@ public:
    * @param point Data point
    * @return
    */
-  virtual double Intensity(const ComPWA::dataPoint &point) const {
-
-    // We have to get around the constness of the interface definition.
-    std::vector<std::vector<double>> parameters(_parameters);
-    std::vector<double> normValues(_normValues);
-    if (_intens.size() != parameters.size())
-      parameters = std::vector<std::vector<double>>(_intens.size());
-    if (_intens.size() != normValues.size())
-      normValues = std::vector<double>(_intens.size());
-
-    double result = 0;
-    for (int i = 0; i < _intens.size(); i++) {
-      std::vector<double> params;
-      _intens.at(i)->GetParametersFast(params);
-      if (parameters.at(i) != params) { // recalculate normalization
-        parameters.at(i) = params;
-        normValues.at(i) = 1 / Tools::Integral(_intens.at(i), _phspSample);
-        normValues.at(i) *= _intens.at(i)->Strength();
-      }
-      result += _intens.at(i)->Intensity(point) * normValues.at(i);
-    }
-
-    const_cast<std::vector<std::vector<double>> &>(_parameters) = parameters;
-    const_cast<std::vector<double> &>(_normValues) = normValues;
-
-    return (Strength() * result);
-  }
+  virtual double Intensity(const ComPWA::dataPoint &point) const;
 
   //================== SET/GET =================
 
@@ -122,6 +96,8 @@ public:
       i->SetPhspSample(phspSample, toySample);
     }
   };
+  
+  virtual void SetPhspVolume(double vol) { phspVolume_ = vol; };
 
   virtual std::shared_ptr<AmpIntensity> GetComponent(std::string name);
 
@@ -140,7 +116,7 @@ public:
 
   //! Get FunctionTree
   virtual std::shared_ptr<ComPWA::FunctionTree>
-  GetTree(const ComPWA::ParameterList &sample,
+  GetTree(std::shared_ptr<Kinematics> kin, const ComPWA::ParameterList &sample,
           const ComPWA::ParameterList &phspSample,
           const ComPWA::ParameterList &toySample, unsigned int nEvtVar,
           std::string suffix = "");
@@ -148,6 +124,8 @@ public:
 protected:
   //! Phase space sample to calculate the normalization and maximum value.
   std::shared_ptr<std::vector<ComPWA::dataPoint>> _phspSample;
+  
+  double phspVolume_;
 
   // Caching of normalization values
   std::vector<double> _normValues;
