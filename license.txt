@@ -16,15 +16,23 @@ to reference the authors of ComPWA in every scientific publication
 which is making use even of parts of the software contained in the
 package.
 
-As reference the web-address https://github.com/MathiasMichel/ComPWA should
+As reference the web-address https://github.com/ComPWA/ComPWA should
 be used.
 
 Please also notify the authors of any publication which intends to use
 ComPWA.
 
-Contacts: 
+Contacts: The ComPWA Team
       Mathias Michel
       michel@kph.uni-mainz.de
+      Helmholtz-Institut Mainz, Johann-Joachim-Becherweg 36, 55128 Mainz, DE
+      
+      Peter Weidenkaff
+      weidenka@uni-mainz.de
+      Helmholtz-Institut Mainz, Johann-Joachim-Becherweg 36, 55128 Mainz, DE
+      
+      Stefan Pflüger
+      pflueger@kph.uni-mainz.de
       Helmholtz-Institut Mainz, Johann-Joachim-Becherweg 36, 55128 Mainz, DE
 
 -----------------------------------------------------------------------------

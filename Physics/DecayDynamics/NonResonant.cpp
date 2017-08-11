@@ -1,9 +1,6 @@
-/*
- * NonResonant.cpp
- *
- *  Created on: Jan 13, 2015
- *      Author: weidenka
- */
+// Copyright (c) 2015, 2017 The ComPWA Team.
+// This file is part of the ComPWA framework, check
+// https://github.com/ComPWA/ComPWA/license.txt for details.
 
 #include "Physics/DecayDynamics/NonResonant.hpp"
 

@@ -1,9 +1,6 @@
-/*
- * TableFormater.cpp
- *
- *  Created on: Feb 11, 2015
- *      Author: weidenka
- */
+// Copyright (c) 2015 The ComPWA Team.
+// This file is part of the ComPWA framework, check
+// https://github.com/ComPWA/ComPWA/license.txt for details.
 
 #include "Core/TableFormater.hpp"
 

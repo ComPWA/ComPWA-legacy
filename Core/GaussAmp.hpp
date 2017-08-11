@@ -1,9 +1,6 @@
-/*
- * GaussAmp.hpp
- *
- *  Created on: Jul 19, 2017
- *      Author: michel
- */
+// Copyright (c) 2013, 2017 The ComPWA Team.
+// This file is part of the ComPWA framework, check
+// https://github.com/ComPWA/ComPWA/license.txt for details.
 
 #ifndef GAUSSAMP_HPP_
 #define GAUSSAMP_HPP_

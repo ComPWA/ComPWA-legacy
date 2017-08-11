@@ -1,9 +1,6 @@
-/*
- * progressBar.hpp
- *
- *  Created on: Aug 6, 2014
- *      Author: weidenka
- */
+// Copyright (c) 2014 The ComPWA Team.
+// This file is part of the ComPWA framework, check
+// https://github.com/ComPWA/ComPWA/license.txt for details.
 
 #ifndef PROGRESSBAR_HPP_
 #define PROGRESSBAR_HPP_
