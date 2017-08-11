@@ -160,9 +160,9 @@ protected:
   std::vector<std::shared_ptr<ParObserver>>
       oberservingNodes; /*!< list of observers, e.g. TreeNodes */
   //! Interface to output string, to be implemented by parameter implementations
-  virtual std::string make_str() = 0;
+  virtual std::string make_str() const = 0;
   //! Interface to output value, to be implemented by parameter implementations
-  virtual std::string make_val_str() = 0;
+  virtual std::string make_val_str() const = 0;
 
 private:
   friend class boost::serialization::access;

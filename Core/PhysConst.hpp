@@ -86,11 +86,6 @@ protected:
 
   void readTree(boost::property_tree::ptree pt);
 
-  //! Input file name
-  std::string _particleFileName;
-  //! Input file name
-  std::string _constantFileName;
-
   std::vector<ParticleProperties> _partList;
   std::vector<Constant> _constList;
 };
