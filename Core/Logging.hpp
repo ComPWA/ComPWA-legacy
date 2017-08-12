@@ -1,9 +1,6 @@
-/*
- * Logging.hpp
- *
- *  Created on: Jan 21, 2014
- *      Author: weidenka
- */
+// Copyright (c) 2015, 2017 The ComPWA Team.
+// This file is part of the ComPWA framework, check
+// https://github.com/ComPWA/ComPWA/license.txt for details.
 
 #ifndef LOGGING_HPP_
 #define LOGGING_HPP_

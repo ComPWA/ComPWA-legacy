@@ -1,4 +1,6 @@
-
+// Copyright (c) 2013, 2017 The ComPWA Team.
+// This file is part of the ComPWA framework, check
+// https://github.com/ComPWA/ComPWA/license.txt for details.
 
 #define BOOST_TEST_MODULE                                                      \
   HelicityFormalism /* this can only be define once within the same library ?! \

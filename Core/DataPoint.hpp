@@ -1,13 +1,6 @@
-//-------------------------------------------------------------------------------
-// Copyright (c) 2013 Peter Weidenkaff.
-// All rights reserved. This program and the accompanying materials
-// are made available under the terms of the GNU Public License v3.0
-// which accompanies this distribution, and is available at
-// http://www.gnu.org/licenses/gpl.html
-//
-// Contributors:
-//     Peter Weidenkaff - initial API
-//-------------------------------------------------------------------------------
+// Copyright (c) 2013, 2017 The ComPWA Team.
+// This file is part of the ComPWA framework, check
+// https://github.com/ComPWA/ComPWA/license.txt for details.
 
 //! dataPoint stores kinematic information of a dalitz plot
 /*!

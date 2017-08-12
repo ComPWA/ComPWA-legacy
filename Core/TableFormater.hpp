@@ -1,9 +1,6 @@
-/*
- * TablePrinter.cxx
- *
- *  Created on: Jan 10, 2014
- *      Author: weidenka
- */
+// Copyright (c) 2015 The ComPWA Team.
+// This file is part of the ComPWA framework, check
+// https://github.com/ComPWA/ComPWA/license.txt for details.
 
 #ifndef TABLEFORMATER_CXX_
 #define TABLEFORMATER_CXX_

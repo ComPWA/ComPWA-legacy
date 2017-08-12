@@ -1,11 +1,7 @@
+// Copyright (c) 2017 The ComPWA Team.
+// This file is part of the ComPWA framework, check
+// https://github.com/ComPWA/ComPWA/license.txt for details.
 
-//
-//  FitFractions.hpp
-//  COMPWA
-//
-//  Created by Peter Weidenkaff on 06.05.17.
-//
-//
 #include <memory>
 #include <vector>
 

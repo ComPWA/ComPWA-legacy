@@ -1,10 +1,6 @@
-//
-//  Parameter.cpp
-//  COMPWA
-//
-//  Created by Peter Weidenkaff on 08.08.17.
-//
-//
+// Copyright (c) 2017 The ComPWA Team.
+// This file is part of the ComPWA framework, check
+// https://github.com/ComPWA/ComPWA/license.txt for details.
 
 #include "Core/Parameter.hpp"
 

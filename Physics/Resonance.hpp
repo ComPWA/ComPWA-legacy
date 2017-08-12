@@ -1,9 +1,6 @@
-/*
- * Resonance.hpp
- *
- *  Created on: Mar 3, 2016
- *      Author: weidenka
- */
+// Copyright (c) 2016, 2017 The ComPWA Team.
+// This file is part of the ComPWA framework, check
+// https://github.com/ComPWA/ComPWA/license.txt for details.
 
 #ifndef PHYSICS_RESONANCE_HPP_
 #define PHYSICS_RESONANCE_HPP_

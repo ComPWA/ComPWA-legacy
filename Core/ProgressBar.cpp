@@ -1,9 +1,7 @@
-/*
- * progressBar.cpp
- *
- *  Created on: Aug 6, 2014
- *      Author: weidenka
- */
+// Copyright (c) 2014 The ComPWA Team.
+// This file is part of the ComPWA framework, check
+// https://github.com/ComPWA/ComPWA/license.txt for details.
+
 #include <chrono>
 #include "Core/ProgressBar.hpp"
 
