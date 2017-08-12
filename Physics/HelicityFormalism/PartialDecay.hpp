@@ -31,12 +31,7 @@ public:
     return tmp;
   }
 
-  /**
-   Factory for PartialDecay
-
-   @param pt Configuration tree
-   @return Constructed object
-   */
+  /// Factory for PartialDecay
   static std::shared_ptr<ComPWA::Physics::Resonance>
   Factory(std::shared_ptr<Kinematics> kin, const boost::property_tree::ptree &pt);
 

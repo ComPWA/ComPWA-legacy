@@ -109,81 +109,33 @@ public:
     list.push_back(GetMesonRadius());
   }
 
-  /**
-  Set meson radius
-  The meson radius is a measure of the size of the resonant state. It is used
-  to calculate the angular momentum barrier factors.
-
-  @param r Meson radius
-  */
   void SetMesonRadiusParameter(std::shared_ptr<DoubleParameter> r) {
     _mesonRadius = r;
   }
 
-  /**
-   Get meson radius
-   The meson radius is a measure of the size of the resonant state. It is used
-   to calculate the angular momentum barrier factors.
-
-   @return Meson radius
-   */
   std::shared_ptr<DoubleParameter> GetMesonRadiusParameter() {
     return _mesonRadius;
   }
 
-  /**
-   Set meson radius
-   The meson radius is a measure of the size of the resonant state. It is used
-   to calculate the angular momentum barrier factors.
-
-   @param r Meson radius
-   */
   void SetMesonRadius(double w) { _mesonRadius->SetValue(w); }
 
-  /**
-   Get meson radius
-   The meson radius is a measure of the size of the resonant state. It is used
-   to calculate the angular momentum barrier factors.
-
-   @return Meson radius
-   */
   double GetMesonRadius() const { return _mesonRadius->GetValue(); }
 
-  /**
-   Set form factor type
-   The type of formfactor that is used to calculate the angular momentum barrier
-   factors
-
-   @param t From factor type
-   */
   void SetFormFactorType(formFactorType t) { _ffType = t; }
 
-  /**
-   Get form factor type
-   The type of formfactor that is used to calculate the angular momentum barrier
-   factors
-
-   @return From factor type
-   */
   formFactorType GetFormFactorType() { return _ffType; }
 
-  /*! Set coupling parameter to signal channel.
-  */
+  /// Set coupling parameter to signal channel and up to two more hidden
+  /// channels.
   void SetCoupling(Coupling g1, Coupling g2 = Coupling(),
                    Coupling g3 = Coupling()) {
     _g = std::vector<Coupling>{g1, g2, g3};
   }
 
-  /*! Get coupling parameter to channel \p channel.
-   */
   Coupling GetCoupling(int channel) { return _g.at(channel); }
 
-  /*! Get coupling parameter.
-   */
   std::vector<Coupling> GetCouplings(int i) const { return _g; }
 
-  /*! Set coupling parameters.
-   */
   void SetCouplings(std::vector<Coupling> vC) {
     if (vC.size() != 2 && vC.size() != 3)
       throw std::runtime_error(
@@ -219,15 +171,13 @@ public:
                                                 int pos, std::string suffix);
 
 protected:
-  // Initialize masses
-  void initialize();
-
-  //! Meson radius of resonant state
+  /// Meson radius of resonant state
   std::shared_ptr<DoubleParameter> _mesonRadius;
 
+  /// Coupling parameters and final state masses for multiple channels
   std::vector<Coupling> _g;
 
-  //! Form factor type
+  /// Form factor type
   formFactorType _ffType;
 
 private:

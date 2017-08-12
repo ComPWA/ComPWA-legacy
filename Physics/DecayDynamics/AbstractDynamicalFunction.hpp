@@ -63,39 +63,18 @@ public:
 
   virtual void GetParameters(ParameterList &list);
 
-  //! Fill vector with parameters
   virtual void GetParametersFast(std::vector<double> &list) const {
     list.push_back(GetMass());
   }
 
-  /**
-   Set decay mass
-
-   @param w Decay mass
-   */
   virtual void SetMassParameter(std::shared_ptr<DoubleParameter> mass) {
     _mass = mass;
   }
 
-  /**
-   Get decay mass
-
-   @return Decay mass
-   */
   virtual std::shared_ptr<DoubleParameter> GetMassParameter() { return _mass; }
 
-  /**
-   Set decay mass
-
-   @param w Decay mass
-   */
   virtual void SetMass(double mass) { _mass->SetValue(mass); }
 
-  /**
-   Get decay mass
-
-   @return Decay mass
-   */
   virtual double GetMass() const { return _mass->GetValue(); }
 
   virtual void SetDecayMasses(std::pair<double, double> m) {
@@ -122,34 +101,32 @@ public:
   
   virtual bool HasTree() const { return false; }
   
-  /**! Setup function tree */
   virtual std::shared_ptr<ComPWA::FunctionTree>
   GetTree(const ComPWA::ParameterList &sample, int pos, std::string suffix = "") = 0;
 
 protected:
-  //! Name of resonance
   std::string _name;
 
-  //! Precision of MC integration
+  /// Precision of MC integration
   int _mcPrecision;
 
-  //! Masses of daughter particles
+  /// Masses of daughter particles
   std::pair<double, double> _daughterMasses;
 
-  //! Names of daughter particles
+  /// Names of daughter particles
   std::pair<std::string, std::string> _daughterNames;
 
-  //! Resonance mass
+  /// Resonance mass
   std::shared_ptr<ComPWA::DoubleParameter> _mass;
 
-  //! Resonance spin
+  /// Resonance spin
   ComPWA::Spin _spin;
 
 private:
-  //! Resonance shape was modified (recalculate the normalization)
+  /// Resonance shape was modified (recalculate the normalization)
   bool _modified;
 
-  //! Temporary value of mass (used to trigger recalculation of normalization)
+  /// Temporary value of mass (used to trigger recalculation of normalization)
   double _current_mass;
 };
 

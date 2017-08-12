@@ -21,19 +21,14 @@ class SequentialTwoBodyDecay : public Amplitude {
 public:
   //============ CONSTRUCTION ==================
 
-  //! Function to create a full copy of the amplitude
+  /// Function to create a full copy of the amplitude
   virtual Amplitude *Clone(std::string newName = "") const {
     auto tmp = (new SequentialTwoBodyDecay(*this));
     tmp->SetName(newName);
     return tmp;
   };
   
-  /**
-   Factory for SequentialTwoBodyDecay
-
-   @param pt Configuration tree
-   @return Constructed object
-   */
+  /// Factory for SequentialTwoBodyDecay.
   static std::shared_ptr<ComPWA::Physics::Amplitude>
   Factory(std::shared_ptr<Kinematics> kin, const boost::property_tree::ptree &pt);
 

@@ -133,11 +133,13 @@ CalculateFitFraction(std::shared_ptr<ComPWA::Kinematics> kin,
     denom = intens;
   else
     denom = intens->GetComponent(def.second);
-  
+
   double phspVolume = kin->GetPhspVolume();
 
-  double integral_numerator = ComPWA::Tools::Integral(numer, sample, phspVolume);
-  double integral_denominator = ComPWA::Tools::Integral(denom, sample, phspVolume);
+  double integral_numerator =
+      ComPWA::Tools::Integral(numer, sample, phspVolume);
+  double integral_denominator =
+      ComPWA::Tools::Integral(denom, sample, phspVolume);
   double ffVal = integral_numerator / integral_denominator;
   LOG(trace) << "CalculateFitFraction() | Result for (" << def.first << "/"
              << def.second << ") is " << integral_numerator << "/"
@@ -145,9 +147,17 @@ CalculateFitFraction(std::shared_ptr<ComPWA::Kinematics> kin,
   return DoubleParameter(def.first, ffVal, 0.0);
 }
 
+/// Calculate fit fractions.
+/// Fractions are calculated using the formular:
+/// \f[
+///  f_i = \frac{|c_i|^2 \int A_i A_i^*}{\int \sum c_l c_m^* A_l A_m}
+/// \f]
+/// The \f$c_i\f$ complex coefficienct of the amplitude and the denominatior is
+/// the integral over
+/// the whole amplitude.
 inline ComPWA::ParameterList
 CalculateFitFractions(std::shared_ptr<ComPWA::Kinematics> kin,
-                    std::shared_ptr<ComPWA::AmpIntensity> intens,
+                      std::shared_ptr<ComPWA::AmpIntensity> intens,
                       std::shared_ptr<std::vector<dataPoint>> sample,
                       std::vector<std::pair<std::string, std::string>> defs) {
   ComPWA::ParameterList ffList;
@@ -158,42 +168,19 @@ CalculateFitFractions(std::shared_ptr<ComPWA::Kinematics> kin,
   return ffList;
 }
 
-/** Calculate fit fractions.
- * Fractions are calculated using the formular:
- * \f[
- *  f_i = \frac{|c_i|^2 \int A_i A_i^*}{\int \sum c_l c_m^* A_l A_m}
- * \f]
- * The \f$c_i\f$ complex coefficienct of the amplitude and the denominatior is
- * the integral over
- * the whole amplitude.
- *
- * @param parList result with fit fractions for the single resonances
- * @param amp amplitude with the resonances which share the fit fractions
- * @param nSets Precise error calcucation using @param nSets Monte-Carlo
- * events
- */
-/** Calculate errors on fit fractions
- * The error of normalization due the the fit error on magnitudes and phases
- * is ignored.
- * If we want to calculate the errors correctly we have to generate a set of
- * fit parameters that
- * are smeard by a multidimensional gaussian and the covariance matrix of the
- * fit. For every set
- * we calculate the fit frations and calculate its mean. The can be a very
- * time consuming method,
- * especially if the function tree is not used.
- *
- * @param parList fit parameter
- * @param amp AmpIntensity that was fitted
- * @param nSets number of sets used
- */
-inline void
-CalcFractionError(ParameterList &parameters,
-                  std::vector<std::vector<double>> covariance,
-                  ParameterList &ffList, std::shared_ptr<ComPWA::Kinematics> kin,
-                  std::shared_ptr<AmpIntensity> intens,
-                  std::shared_ptr<std::vector<dataPoint>> sample, int nSets,
-                  std::vector<std::pair<std::string, std::string>> defs) {
+/// Calculate errors on fit fractions
+/// The error of normalization due the the fit error on magnitudes and phases
+/// is ignored. If we want to calculate the errors correctly we have to
+/// generate a set of fit parameters that are smeard by a multidimensional
+/// gaussian and the covariance matrix of the fit. For every set we calculate
+/// the fit frations and calculate its mean. The can be a very time consuming
+/// method, especially if the function tree is not used.
+inline void CalcFractionError(
+    ParameterList &parameters, std::vector<std::vector<double>> covariance,
+    ParameterList &ffList, std::shared_ptr<ComPWA::Kinematics> kin,
+    std::shared_ptr<AmpIntensity> intens,
+    std::shared_ptr<std::vector<dataPoint>> sample, int nSets,
+    std::vector<std::pair<std::string, std::string>> defs) {
   if (nSets <= 0)
     return;
   if (!parameters.GetNDouble())

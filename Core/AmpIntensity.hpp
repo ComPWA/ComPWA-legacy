@@ -88,24 +88,13 @@ public:
   virtual void Reset(){};
   //========== FUNCTIONTREE =============
 
-  //! Check of tree is available
+  /// Check if a FunctionTree is implemented for a certain (derived) class.
   virtual bool HasTree() const { return false; }
 
-  /*! Get FunctionTree
-   * @param sample Data sample
-   * @param phspSample Sample of phase space distributed events including
-   * efficiency.
-   * @param toySample Sample of phase space distributed events without
-   * efficiency.
-   */
-  virtual std::shared_ptr<FunctionTree> GetTree(std::shared_ptr<Kinematics> kin,
-                                                const ParameterList &sample,
-                                                const ParameterList &phspSample,
-                                                const ParameterList &toySample,
-                                                unsigned int nEvtVar,
-                                                std::string suffix = "") {
-    return std::shared_ptr<FunctionTree>();
-  }
+  virtual std::shared_ptr<FunctionTree>
+  GetTree(std::shared_ptr<Kinematics> kin, const ParameterList &sample,
+          const ParameterList &phspSample, const ParameterList &toySample,
+          unsigned int nEvtVar, std::string suffix = "") = 0;
 
   //======== ITERATORS/OPERATORS =============
 

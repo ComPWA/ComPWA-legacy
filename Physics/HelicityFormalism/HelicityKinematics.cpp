@@ -29,7 +29,6 @@ HelicityKinematics::HelicityKinematics(std::vector<pid> initialState,
   pid idMother = _initialState.at(0);
   auto motherProp = PhysConst::Instance()->FindParticle(idMother);
   _M = motherProp.GetMass();
-  _Msq = _M * _M;
   _spinM = motherProp.GetSpinQuantumNumber("Spin");
 
   // Creating unique title
@@ -86,7 +85,6 @@ HelicityKinematics::HelicityKinematics(boost::property_tree::ptree pt) {
   pid idMother = _initialState.at(0);
   auto motherProp = PhysConst::Instance()->FindParticle(idMother);
   _M = motherProp.GetMass();
-  _Msq = _M * _M;
   _spinM = motherProp.GetSpinQuantumNumber("Spin");
 }
 
@@ -108,39 +106,6 @@ bool HelicityKinematics::IsWithinPhsp(const dataPoint &point) const {
   }
 
   return true;
-}
-
-const std::pair<double, double> &
-HelicityKinematics::GetInvMassBounds(const SubSystem sys) const {
-  return GetInvMassBounds(
-      const_cast<HelicityKinematics *>(this)->GetDataID(sys));
-}
-
-const std::pair<double, double> &
-HelicityKinematics::GetInvMassBounds(int sysID) const {
-  return _invMassBounds.at(sysID);
-}
-
-std::pair<double, double>
-HelicityKinematics::CalculateInvMassBounds(const SubSystem sys) const {
-
-  /* We use the formulae from (PDG2016 Kinematics Fig.47.3). I hope the
-   * generalization to n-body decays is correct.
-   */
-  std::pair<double, double> lim(0, _M);
-  // Sum up masses of all final state particles
-  for (auto j : sys.GetFinalStates())
-    for (auto i : j)
-      lim.first +=
-          PhysConst::Instance()->FindParticle(_finalState.at(i)).GetMass();
-  lim.first *= lim.first;
-
-  for (auto i : sys.GetRecoilState())
-    lim.second -=
-        PhysConst::Instance()->FindParticle(_finalState.at(i)).GetMass();
-  lim.second *= lim.second;
-
-  return lim;
 }
 
 void HelicityKinematics::EventToDataPoint(const Event &event,
@@ -297,6 +262,39 @@ void HelicityKinematics::EventToDataPoint(
   point.GetPoint().push_back(mSq);
   point.GetPoint().push_back(cosTheta);
   point.GetPoint().push_back(phi);
+}
+
+const std::pair<double, double> &
+HelicityKinematics::GetInvMassBounds(const SubSystem sys) const {
+  return GetInvMassBounds(
+      const_cast<HelicityKinematics *>(this)->GetDataID(sys));
+}
+
+const std::pair<double, double> &
+HelicityKinematics::GetInvMassBounds(int sysID) const {
+  return _invMassBounds.at(sysID);
+}
+
+std::pair<double, double>
+HelicityKinematics::CalculateInvMassBounds(const SubSystem sys) const {
+
+  /* We use the formulae from (PDG2016 Kinematics Fig.47.3). I hope the
+   * generalization to n-body decays is correct.
+   */
+  std::pair<double, double> lim(0, _M);
+  // Sum up masses of all final state particles
+  for (auto j : sys.GetFinalStates())
+    for (auto i : j)
+      lim.first +=
+          PhysConst::Instance()->FindParticle(_finalState.at(i)).GetMass();
+  lim.first *= lim.first;
+
+  for (auto i : sys.GetRecoilState())
+    lim.second -=
+        PhysConst::Instance()->FindParticle(_finalState.at(i)).GetMass();
+  lim.second *= lim.second;
+
+  return lim;
 }
 
 } /* namespace HelicityFormalism */

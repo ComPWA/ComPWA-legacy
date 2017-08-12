@@ -115,67 +115,32 @@ public:
    */
   double GetWidth() const { return _width->GetValue(); }
 
-  /**
-   Set meson radius
-   The meson radius is a measure of the size of the resonant state. It is used
-   to calculate the angular momentum barrier factors.
-
-   @param r Meson radius
-   */
   void SetMesonRadiusParameter(std::shared_ptr<DoubleParameter> r) {
     _mesonRadius = r;
   }
 
-  /**
-   Get meson radius
-   The meson radius is a measure of the size of the resonant state. It is used
-   to calculate the angular momentum barrier factors.
-
-   @return Meson radius
-   */
   std::shared_ptr<DoubleParameter> GetMesonRadiusParameter() {
     return _mesonRadius;
   }
 
-  /**
-   Set meson radius
-   The meson radius is a measure of the size of the resonant state. It is used
-   to calculate the angular momentum barrier factors.
-
-   @param r Meson radius
-   */
+  /// \see GetMesonRadius() const { return _mesonRadius->GetValue(); }
   void SetMesonRadius(double w) { _mesonRadius->SetValue(w); }
 
-  /**
-   Get meson radius
-   The meson radius is a measure of the size of the resonant state. It is used
-   to calculate the angular momentum barrier factors.
-
-   @return Meson radius
-   */
+  /// Get meson radius.
+  /// The meson radius is a measure of the size of the resonant state. It is
+  /// used to calculate the angular momentum barrier factors.
   double GetMesonRadius() const { return _mesonRadius->GetValue(); }
 
-  /**
-   Set form factor type
-   The type of formfactor that is used to calculate the angular momentum barrier
-   factors
-
-   @param t From factor type
-   */
+  /// \see GetFormFactorType()
   void SetFormFactorType(formFactorType t) { _ffType = t; }
 
-  /**
-   Get form factor type
-   The type of formfactor that is used to calculate the angular momentum barrier
-   factors
-
-   @return From factor type
-   */
+  /// Get form factor type.
+  /// The type of formfactor that is used to calculate the angular momentum
+  /// barrier factors.
   formFactorType GetFormFactorType() { return _ffType; }
 
   virtual void GetParameters(ParameterList &list);
 
-  //! Fill vector with parameters
   virtual void GetParametersFast(std::vector<double> &list) const {
     AbstractDynamicalFunction::GetParametersFast(list);
     list.push_back(GetWidth());
@@ -184,25 +149,23 @@ public:
 
   //=========== FUNCTIONTREE =================
 
-  //! Check of tree is available
   virtual bool HasTree() const { return true; }
 
-  /**! Setup function tree */
   virtual std::shared_ptr<FunctionTree>
   GetTree(const ParameterList &sample, int pos, std::string suffix = "");
 
 protected:
-  //! Decay width of resonante state
+  /// Decay width of resonante state
   std::shared_ptr<DoubleParameter> _width;
 
-  //! Meson radius of resonant state
+  /// Meson radius of resonant state
   std::shared_ptr<DoubleParameter> _mesonRadius;
 
-  //! Form factor type
+  /// Form factor type
   formFactorType _ffType;
 
 private:
-  //! Temporary values (used to trigger recalculation of normalization)
+  /// Temporary values (used to trigger recalculation of normalization)
   double _current_mesonRadius;
   double _current_width;
 };
