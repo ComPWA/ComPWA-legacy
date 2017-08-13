@@ -12,7 +12,7 @@
 #include "Core/Kinematics.hpp"
 #include "Core/Generator.hpp"
 #include "Core/Logging.hpp"
-#include "Core/PhysConst.hpp"
+#include "Core/Properties.hpp"
 #include "DataReader/RootReader/RootReader.hpp"
 
 #include "TParticle.h"

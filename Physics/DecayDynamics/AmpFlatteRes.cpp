@@ -22,7 +22,7 @@ namespace DecayDynamics {
 AmpFlatteRes::~AmpFlatteRes() {}
 
 std::shared_ptr<AbstractDynamicalFunction>
-AmpFlatteRes::Factory(const boost::property_tree::ptree &pt) {
+AmpFlatteRes::Factory(std::shared_ptr<PartList> partL, const boost::property_tree::ptree &pt) {
   auto obj = std::make_shared<AmpFlatteRes>();
 
   std::string name = pt.get<std::string>("DecayParticle.<xmlattr>.Name");
@@ -30,8 +30,7 @@ AmpFlatteRes::Factory(const boost::property_tree::ptree &pt) {
   obj->SetName(name);
   
   // All further information on the decay is stored in a ParticleProperty list
-  // which is globally provided by the PhysConst service.
-  auto partProp = PhysConst::Instance()->FindParticle(name);
+  auto partProp = partL->find(name)->second;
   
   obj->SetMassParameter(
       std::make_shared<DoubleParameter>(partProp.GetMassPar()));
@@ -63,8 +62,8 @@ AmpFlatteRes::Factory(const boost::property_tree::ptree &pt) {
       firstItr->second.get<std::string>("<xmlattr>.Name"),
       secondItr->second.get<std::string>("<xmlattr>.Name"));
   std::pair<double, double> daughterMasses(
-      PhysConst::Instance()->FindParticle(daughterNames.first).GetMass(),
-      PhysConst::Instance()->FindParticle(daughterNames.second).GetMass());
+      partL->find(daughterNames.first)->second.GetMass(),
+      partL->find(daughterNames.second)->second.GetMass());
 
   obj->SetDecayMasses(daughterMasses);
   obj->SetDecayNames(daughterNames);
@@ -76,7 +75,7 @@ AmpFlatteRes::Factory(const boost::property_tree::ptree &pt) {
       continue;
     std::string type = v.second.get<std::string>("<xmlattr>.Type");
     if (type == "Coupling") {
-      vC.push_back(Coupling(v.second));
+      vC.push_back(Coupling(partL, v.second));
     } else if (type == "MesonRadius") {
       auto mesonRadius = ComPWA::DoubleParameterFactory(v.second);
       obj->SetMesonRadiusParameter(

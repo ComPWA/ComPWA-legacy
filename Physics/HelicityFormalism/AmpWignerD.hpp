@@ -2,13 +2,9 @@
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
-//! Angular distribution based on WignerD functions
-/*!
- * @file AmpWignerD.hpp
- *\class AmpWignerD
- *The helicity angle for sub system \_subSys is calculated and the value of the
- *WignerD function is returned
- */
+/// \file
+/// Contains AmpWignerD class which provides WignerD functions.
+///
 
 #ifndef AMPWIGNER_D
 #define AMPWIGNER_D
@@ -24,12 +20,14 @@
 #include "Core/DataPoint.hpp"
 #include "Core/FunctionTree.hpp"
 #include "Core/Spin.hpp"
-#include "Core/PhysConst.hpp"
+#include "Core/Properties.hpp"
 
 namespace ComPWA {
 namespace Physics {
 namespace HelicityFormalism {
 
+/// \class AmpWignerD
+/// Angular distribution based on WignerD functions
 class AmpWignerD {
 public:
   //============ CONSTRUCTION ==================
@@ -38,17 +36,12 @@ public:
 
   virtual ~AmpWignerD(){};
 
-  /**
-   Factory for AmpWignerD
-
-   @param pt Configuration tree
-   @return Constructed object
-   */
   static std::shared_ptr<AmpWignerD>
-  Factory(const boost::property_tree::ptree &pt);
-  
+  Factory(std::shared_ptr<PartList> partL,
+          const boost::property_tree::ptree &pt);
+
   //================ EVALUATION =================
-  
+
   virtual double Evaluate(const ComPWA::dataPoint &point, int pos1,
                           int pos2) const;
 
@@ -78,13 +71,13 @@ public:
   void SetHelicities(std::pair<ComPWA::Spin, ComPWA::Spin> hel) {
     _helicities = hel;
   }
-  
+
   std::pair<ComPWA::Spin, ComPWA::Spin> GetHelicities() const {
     return _helicities;
   }
 
   //=========== FUNCTIONTREE =================
-  
+
   virtual std::shared_ptr<ComPWA::FunctionTree>
   GetTree(const ComPWA::ParameterList &sample, int posTheta, int posPhi,
           std::string suffix = "");

@@ -2,17 +2,8 @@
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
-//****************************************************************************
-// Class for defining the relativistic Breit-Wigner resonance model, which
-// includes the use of Blatt-Weisskopf barrier factors.
-//****************************************************************************
-
-// --CLASS DESCRIPTION [MODEL] --
-// Class for defining the relativistic Breit-Wigner resonance model, which
-// includes the use of Blatt-Weisskopf barrier factors.
-
-#ifndef PHYSICS_HELICITYAMPLITUDE_RELATIVISTICBREITWIGNER_HPP_
-#define PHYSICS_HELICITYAMPLITUDE_RELATIVISTICBREITWIGNER_HPP_
+#ifndef PHYSICS_DECAYDYNAMICS_RELATIVISTICBREITWIGNER_HPP_
+#define PHYSICS_DECAYDYNAMICS_RELATIVISTICBREITWIGNER_HPP_
 
 #include <vector>
 #include <memory>
@@ -29,90 +20,46 @@ namespace Physics {
 namespace DecayDynamics {
 
 class PartialDecay;
-/**
- * Relativistic Breit-Wigner
- * (Breit Wigner with Blatt-Weisskopf barrier factors)
- *
- * The dynamical function implemented here is taken from PDG2014 (Eq.47-22) for
- * the one channel case.
- *
- * The three required parameters are defined in this model and can be
- * retrieved via the #GetParameters() function:
- * @param resonance_width_ Width of the resonance
- * @param resonance_mass_ Mass of the resonance
- * @param meson_radius_ Scale of interaction range
- */
+
+/// \class RelativisticBreitWigner
+/// Relativistic Breit-Wigner model with barrier factors
+/// The dynamical function implemented here is taken from PDG2014 (Eq.47-22) for
+/// the one channel case.
 class RelativisticBreitWigner : public AbstractDynamicalFunction {
 
 public:
-  //============ CONSTRUCTION ==================
-
-  RelativisticBreitWigner(){};
-
-  virtual ~RelativisticBreitWigner(){};
-
-  /**
-   Factory for RelativisticBreitWigner
-
-   @param pt Configuration tree
-   @return Constructed object
-   */
   static std::shared_ptr<AbstractDynamicalFunction>
-  Factory(const boost::property_tree::ptree &pt);
+  Factory(std::shared_ptr<PartList> partL,
+          const boost::property_tree::ptree &pt);
 
-  //======= INTEGRATION/NORMALIZATION ===========
-
-  //! Check of parameters have changed and normalization has to be recalculatecd
+  /// Check of parameters have changed and normalization has to be recalculatecd
   virtual bool CheckModified() const;
 
   //================ EVALUATION =================
   std::complex<double> Evaluate(const dataPoint &point, int pos) const;
 
-  /**
-   Dynamical Breit-Wigner function
-
-   @param mSq Invariant mass squared
-   @param mR Mass of the resonant state
-   @param ma Mass of daughter particle
-   @param mb Mass of daughter particle
-   @param width Decay width
-   @param J Spin
-   @param mesonRadius Meson Radius
-   @param ffType Form factor type
-   @return Amplitude value
-   */
+  /// Dynamical Breit-Wigner function.
+  /// \param mSq Invariant mass squared
+  /// \param mR Mass of the resonant state
+  /// \param ma Mass of daughter particle
+  /// \param mb Mass of daughter particle
+  /// \param width Decay width
+  /// \param J Spin
+  /// \param mesonRadius Meson Radius
+  /// \param ffType Form factor type
+  /// \return Amplitude value
   static std::complex<double>
   dynamicalFunction(double mSq, double mR, double ma, double mb, double width,
                     unsigned int J, double mesonRadius, formFactorType ffType);
 
   //============ SET/GET =================
 
-  /**
-   Set decay width
-
-   @param w Decay width
-   */
   void SetWidthParameter(std::shared_ptr<DoubleParameter> w) { _width = w; }
 
-  /**
-   Get decay width
-
-   @return Decay width
-   */
   std::shared_ptr<DoubleParameter> GetWidthParameter() { return _width; }
 
-  /**
-   Set decay width
-
-   @param w Decay width
-   */
   void SetWidth(double w) { _width->SetValue(w); }
 
-  /**
-   Get decay width
-
-   @return Decay width
-   */
   double GetWidth() const { return _width->GetValue(); }
 
   void SetMesonRadiusParameter(std::shared_ptr<DoubleParameter> r) {
@@ -186,8 +133,8 @@ protected:
   std::string name;
 };
 
-} /* namespace DecayDynamics */
-} /* namespace Physics */
-} /* namespace ComPWA */
+} // namespace DecayDynamics
+} // namespace Physics
+} // namespace ComPWA
 
-#endif /* PHYSICS_HELICITYAMPLITUDE_RELATIVISTICBREITWIGNER_HPP_ */
+#endif

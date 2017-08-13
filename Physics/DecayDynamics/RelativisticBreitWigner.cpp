@@ -17,6 +17,80 @@ namespace ComPWA {
 namespace Physics {
 namespace DecayDynamics {
 
+std::shared_ptr<AbstractDynamicalFunction>
+RelativisticBreitWigner::Factory(std::shared_ptr<PartList> partL,
+                                 const boost::property_tree::ptree &pt) {
+  auto obj = std::make_shared<RelativisticBreitWigner>();
+
+  std::string name = pt.get<std::string>("DecayParticle.<xmlattr>.Name");
+  LOG(trace) << "RelativisticBreitWigner::Factory() | Construction of " << name
+             << ".";
+  obj->SetName(name);
+  auto partProp = partL->find(name)->second;
+  obj->SetMassParameter(
+      std::make_shared<DoubleParameter>(partProp.GetMassPar()));
+
+  auto decayTr = partProp.GetDecayInfo();
+  if (partProp.GetDecayType() != "relativisticBreitWigner")
+    throw std::runtime_error(
+        "RelativisticBreitWigner::Factory() | Decay type does not match! ");
+
+  auto spin = partProp.GetSpinQuantumNumber("Spin");
+  obj->SetSpin(spin);
+
+  auto ffType = formFactorType(decayTr.get<int>("FormFactor.<xmlattr>.Type"));
+  obj->SetFormFactorType(ffType);
+
+  // Read parameters from tree. Currently parameters of type 'Width' and
+  // 'MesonRadius' are required.
+  for (const auto &v : decayTr.get_child("")) {
+    if (v.first != "Parameter")
+      continue;
+    std::string type = v.second.get<std::string>("<xmlattr>.Type");
+    if (type == "Width") {
+      auto width = ComPWA::DoubleParameterFactory(v.second);
+      obj->SetWidthParameter(std::make_shared<DoubleParameter>(width));
+    } else if (type == "MesonRadius") {
+      auto mesonRadius = ComPWA::DoubleParameterFactory(v.second);
+      obj->SetMesonRadiusParameter(
+          std::make_shared<DoubleParameter>(mesonRadius));
+    } else {
+      throw std::runtime_error(
+          "RelativisticBreitWigner::Factory() | Parameter of type " + type +
+          " is unknown.");
+    }
+  }
+
+  // Get masses of decay products
+  auto decayProducts = pt.get_child("DecayProducts");
+  if (decayProducts.size() != 2)
+    throw boost::property_tree::ptree_error(
+        "RelativisticBreitWigner::Factory() | Expect exactly two decay "
+        "products (" +
+        std::to_string(decayProducts.size()) + " given)!");
+
+  auto firstItr = decayProducts.begin();
+  // auto secondItr = decayProducts.begin()+1; //compile error, no idea for why
+  auto secondItr = decayProducts.begin();
+  secondItr++;
+
+  std::pair<std::string, std::string> daughterNames(
+      firstItr->second.get<std::string>("<xmlattr>.Name"),
+      secondItr->second.get<std::string>("<xmlattr>.Name"));
+  std::pair<double, double> daughterMasses(
+      partL->find(daughterNames.first)->second.GetMass(),
+      partL->find(daughterNames.second)->second.GetMass());
+  obj->SetDecayMasses(daughterMasses);
+  obj->SetDecayNames(daughterNames);
+
+  LOG(trace)
+      << "RelativisticBreitWigner::Factory() | Construction of the decay "
+      << partProp.GetName() << " -> " << daughterNames.first << " + "
+      << daughterNames.second;
+
+  return std::static_pointer_cast<AbstractDynamicalFunction>(obj);
+}
+
 std::complex<double> RelativisticBreitWigner::Evaluate(const dataPoint &point,
                                                        int pos) const {
   std::complex<double> result = dynamicalFunction(
@@ -81,79 +155,6 @@ std::complex<double> RelativisticBreitWigner::dynamicalFunction(
       "RelativisticBreitWigner::dynamicalFunction() | Result is NaN or Inf!");
 
   return result;
-}
-
-std::shared_ptr<AbstractDynamicalFunction>
-RelativisticBreitWigner::Factory(const boost::property_tree::ptree &pt) {
-  auto obj = std::make_shared<RelativisticBreitWigner>();
-
-  std::string name = pt.get<std::string>("DecayParticle.<xmlattr>.Name");
-  LOG(trace) << "RelativisticBreitWigner::Factory() | Construction of " << name
-             << ".";
-  obj->SetName(name);
-  auto partProp = PhysConst::Instance()->FindParticle(name);
-  obj->SetMassParameter(
-      std::make_shared<DoubleParameter>(partProp.GetMassPar()));
-
-  auto decayTr = partProp.GetDecayInfo();
-  if (partProp.GetDecayType() != "relativisticBreitWigner")
-    throw std::runtime_error(
-        "RelativisticBreitWigner::Factory() | Decay type does not match! ");
-
-  auto spin = partProp.GetSpinQuantumNumber("Spin");
-  obj->SetSpin(spin);
-
-  auto ffType = formFactorType(decayTr.get<int>("FormFactor.<xmlattr>.Type"));
-  obj->SetFormFactorType(ffType);
-
-  // Read parameters from tree. Currently parameters of type 'Width' and
-  // 'MesonRadius' are required.
-  for (const auto &v : decayTr.get_child("")) {
-    if (v.first != "Parameter")
-      continue;
-    std::string type = v.second.get<std::string>("<xmlattr>.Type");
-    if (type == "Width") {
-      auto width = ComPWA::DoubleParameterFactory(v.second);
-      obj->SetWidthParameter(std::make_shared<DoubleParameter>(width));
-    } else if (type == "MesonRadius") {
-      auto mesonRadius = ComPWA::DoubleParameterFactory(v.second);
-      obj->SetMesonRadiusParameter(
-          std::make_shared<DoubleParameter>(mesonRadius));
-    } else {
-      throw std::runtime_error(
-          "RelativisticBreitWigner::Factory() | Parameter of type " + type +
-          " is unknown.");
-    }
-  }
-
-  // Get masses of decay products
-  auto decayProducts = pt.get_child("DecayProducts");
-  if (decayProducts.size() != 2)
-    throw boost::property_tree::ptree_error(
-        "RelativisticBreitWigner::Factory() | Expect exactly two decay "
-        "products (" +
-        std::to_string(decayProducts.size()) + " given)!");
-
-  auto firstItr = decayProducts.begin();
-  // auto secondItr = decayProducts.begin()+1; //compile error, no idea for why
-  auto secondItr = decayProducts.begin();
-  secondItr++;
-
-  std::pair<std::string, std::string> daughterNames(
-      firstItr->second.get<std::string>("<xmlattr>.Name"),
-      secondItr->second.get<std::string>("<xmlattr>.Name"));
-  std::pair<double, double> daughterMasses(
-      PhysConst::Instance()->FindParticle(daughterNames.first).GetMass(),
-      PhysConst::Instance()->FindParticle(daughterNames.second).GetMass());
-  obj->SetDecayMasses(daughterMasses);
-  obj->SetDecayNames(daughterNames);
-
-  LOG(trace)
-      << "RelativisticBreitWigner::Factory() | Construction of the decay "
-      << partProp.GetName() << " -> " << daughterNames.first << " + "
-      << daughterNames.second;
-
-  return std::static_pointer_cast<AbstractDynamicalFunction>(obj);
 }
 
 std::shared_ptr<FunctionTree>
@@ -270,18 +271,17 @@ bool BreitWignerStrategy::execute(ParameterList &paras,
 void RelativisticBreitWigner::GetParameters(ParameterList &list) {
   AbstractDynamicalFunction::GetParameters(list);
 
-  /* We check of for each parameter if a parameter of the same name exists in
-   * list. If so we check if both are equal and set the local parameter to the
-   * parameter from the list. In this way we connect parameters that occur on
-   * different positions in the amplitude.
-   */
+  // We check of for each parameter if a parameter of the same name exists in
+  // list. If so we check if both are equal and set the local parameter to the
+  // parameter from the list. In this way we connect parameters that occur on
+  // different positions in the amplitude.
   std::shared_ptr<DoubleParameter> tmp, width, radius;
   width = GetWidthParameter();
   radius = GetMesonRadiusParameter();
   try { // catch BadParameter
     tmp = list.GetDoubleParameter(width->GetName());
-    try { // catch and throw std::runtime_error due to failed parameter
-          // comparisson
+    // catch and throw std::runtime_error due to failed parameter comparisson
+    try { 
       if (*tmp == *width)
         SetWidthParameter(tmp);
     } catch (std::exception &ex) {
@@ -293,8 +293,8 @@ void RelativisticBreitWigner::GetParameters(ParameterList &list) {
 
   try { // catch BadParameter
     tmp = list.GetDoubleParameter(radius->GetName());
-    try { // catch and throw std::runtime_error due to failed parameter
-          // comparisson
+    // catch and throw std::runtime_error due to failed parameter comparisson
+    try {
       if (*tmp == *radius)
         SetMesonRadiusParameter(tmp);
     } catch (std::exception &ex) {

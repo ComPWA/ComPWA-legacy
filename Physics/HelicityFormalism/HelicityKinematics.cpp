@@ -9,7 +9,7 @@
 #include "Core/Event.hpp"
 #include "Core/DataPoint.hpp"
 #include "Core/Particle.hpp"
-#include "Core/PhysConst.hpp"
+#include "Core/Properties.hpp"
 #include "DataReader/RootReader/RootReader.hpp"
 
 #include "Physics/HelicityFormalism/HelicityKinematics.hpp"
@@ -22,45 +22,73 @@ namespace ComPWA {
 namespace Physics {
 namespace HelicityFormalism {
 
-HelicityKinematics::HelicityKinematics(std::vector<pid> initialState,
+HelicityKinematics::HelicityKinematics(std::shared_ptr<PartList> partL,
+                                       std::vector<pid> initialState,
                                        std::vector<pid> finalState)
-    : Kinematics(initialState, finalState) {
-  assert(_initialState.size() == 1);
-  pid idMother = _initialState.at(0);
-  auto motherProp = PhysConst::Instance()->FindParticle(idMother);
-  _M = motherProp.GetMass();
-  _spinM = motherProp.GetSpinQuantumNumber("Spin");
+    : Kinematics(initialState, finalState), _partList(partL) {
 
-  // Creating unique title
+  // Currently we can only handle a particle decay.
+  // Note: Whats different for particle scattering?
+  assert(_initialState.size() == 1);
+
+  for (auto i : initialState) {
+    auto prop = FindParticle(partL, i);
+    _initialStateMass.push_back(prop.GetMass());
+    _initialStateName.push_back(prop.GetName());
+  }
+  for (auto i : finalState) {
+    auto prop = FindParticle(partL, i);
+    _finalStateMass.push_back(prop.GetMass());
+    _finalStateName.push_back(prop.GetName());
+  }
+
+  // Create title
   std::stringstream stream;
   stream << "( ";
   for (auto i : _initialState)
-    stream << PhysConst::Instance()->FindParticle(i).GetName() << " ";
+    stream << FindParticle(partL, i).GetName() << " ";
   stream << ")->( ";
   for (auto i : _finalState)
-    stream << PhysConst::Instance()->FindParticle(i).GetName() << " ";
+    stream << FindParticle(partL, i).GetName() << " ";
   stream << ")";
 
   LOG(info) << "HelicityKinematics::HelicityKinematics() | Initialize reaction "
             << stream.str();
+  return;
 }
 
-HelicityKinematics::HelicityKinematics(boost::property_tree::ptree pt) {
+HelicityKinematics::HelicityKinematics(std::shared_ptr<PartList> partL,
+                                       boost::property_tree::ptree pt)
+    : _partList(partL) {
+
+  // Currently we can only handle a particle decay.
+  // Note: Whats different for particle scattering?
+  assert(_initialState.size() == 1);
 
   auto initialS = pt.get_child("InitialState");
   _initialState = std::vector<int>(initialS.size());
+  _initialStateMass = std::vector<double>(initialS.size());
+  _initialStateName = std::vector<std::string>(initialS.size());
   for (auto i : initialS) {
     std::string name = i.second.get<std::string>("<xmlattr>.Name");
-    auto partP = PhysConst::Instance()->FindParticle(name);
-    _initialState.at(i.second.get<int>("<xmlattr>.Id")) = partP.GetId();
+    auto partP = partL->find(name)->second;
+    int pos = i.second.get<int>("<xmlattr>.Id");
+    _initialState.at(pos) = partP.GetId();
+    _initialStateMass.at(pos) = partP.GetMass();
+    _initialStateName.at(pos) = partP.GetName();
   }
 
   auto finalS = pt.get_child("FinalState");
   _finalState = std::vector<int>(finalS.size());
+  _finalStateMass = std::vector<double>(finalS.size());
+  _finalStateName = std::vector<std::string>(finalS.size());
   for (auto i : finalS) {
     std::string name = i.second.get<std::string>("<xmlattr>.Name");
-    auto partP = PhysConst::Instance()->FindParticle(name);
-    _finalState.at(i.second.get<int>("<xmlattr>.Id")) = partP.GetId();
+    auto partP = partL->find(name)->second;
+    int pos = i.second.get<int>("<xmlattr>.Id");
+    _finalState.at(pos) = partP.GetId();
+    _finalStateMass.at(pos) = partP.GetMass();
+    _finalStateName.at(pos) = partP.GetName();
   }
 
   auto phspVal = pt.get_optional<double>("PhspVolume");
@@ -72,20 +100,15 @@ HelicityKinematics::HelicityKinematics(boost::property_tree::ptree pt) {
   std::stringstream stream;
   stream << "( ";
   for (auto i : _initialState)
-    stream << PhysConst::Instance()->FindParticle(i).GetName() << " ";
+    stream << FindParticle(partL, i).GetName() << " ";
   stream << ")->( ";
   for (auto i : _finalState)
-    stream << PhysConst::Instance()->FindParticle(i).GetName() << " ";
+    stream << FindParticle(partL, i).GetName() << " ";
   stream << ")";
 
   LOG(info) << "HelicityKinematics::HelicityKinematics() | Initialize reaction "
             << stream.str();
-
-  assert(_initialState.size() == 1);
-  pid idMother = _initialState.at(0);
-  auto motherProp = PhysConst::Instance()->FindParticle(idMother);
-  _M = motherProp.GetMass();
-  _spinM = motherProp.GetSpinQuantumNumber("Spin");
+  return;
 }
 
 bool HelicityKinematics::IsWithinPhsp(const dataPoint &point) const {
@@ -238,12 +261,12 @@ void HelicityKinematics::EventToDataPoint(
   //    cc = HelicityAngle(M, ma, mb, mspec, invMassSqA, invMassSqB);
   //    std::cout << sys << std::endl;
   //    std::cout << _initialState.at(0) << "/ (" <<
-  //sys.GetFinalStates().at(0).at(0)
+  // sys.GetFinalStates().at(0).at(0)
   //              << sys.GetFinalStates().at(1).at(0) << ") angle ("<<
-  //sys.GetFinalStates().at(0).at(0)
+  // sys.GetFinalStates().at(0).at(0)
   //              << sys.GetRecoilState().at(0) << ") - "
   //              << " (ma=" << ma<<" mb="<<mb<<" mSpec="<<mspec<<"
-  //mABSq="<<invMassSqA << " mASpecSq=" << invMassSqB << ") = " << cc
+  // mABSq="<<invMassSqA << " mASpecSq=" << invMassSqB << ") = " << cc
   //              << " " << cosTheta << std::endl;
   //
   //  } else {
@@ -278,20 +301,17 @@ HelicityKinematics::GetInvMassBounds(int sysID) const {
 std::pair<double, double>
 HelicityKinematics::CalculateInvMassBounds(const SubSystem sys) const {
 
-  /* We use the formulae from (PDG2016 Kinematics Fig.47.3). I hope the
-   * generalization to n-body decays is correct.
-   */
-  std::pair<double, double> lim(0, _M);
+  /// We use the formulae from (PDG2016 Kinematics Fig.47.3). I hope the
+  /// generalization to n-body decays is correct.
+  std::pair<double, double> lim(0, _initialStateMass.at(0));
   // Sum up masses of all final state particles
   for (auto j : sys.GetFinalStates())
     for (auto i : j)
-      lim.first +=
-          PhysConst::Instance()->FindParticle(_finalState.at(i)).GetMass();
+      lim.first += FindParticle(_partList, _finalState.at(i)).GetMass();
   lim.first *= lim.first;
 
   for (auto i : sys.GetRecoilState())
-    lim.second -=
-        PhysConst::Instance()->FindParticle(_finalState.at(i)).GetMass();
+    lim.second -= FindParticle(_partList, _finalState.at(i)).GetMass();
   lim.second *= lim.second;
 
   return lim;

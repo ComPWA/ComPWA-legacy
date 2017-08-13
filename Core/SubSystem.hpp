@@ -22,8 +22,6 @@ namespace ComPWA {
 /// invariant mass and angles at a two-body decay node.
 class SubSystem {
 public:
-  SubSystem(){};
-
   SubSystem(std::vector<int> recoilS,
             std::vector<std::vector<int>> finalStates);
 

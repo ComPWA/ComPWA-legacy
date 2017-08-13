@@ -11,7 +11,8 @@ namespace Physics {
 namespace HelicityFormalism {
 
 std::shared_ptr<IncoherentIntensity>
-IncoherentIntensity::Factory(std::shared_ptr<Kinematics> kin,
+IncoherentIntensity::Factory(std::shared_ptr<PartList> partL,
+                             std::shared_ptr<Kinematics> kin,
                              const boost::property_tree::ptree &pt) {
   LOG(trace) << " IncoherentIntensity::Factory() | Construction....";
 
@@ -28,14 +29,14 @@ IncoherentIntensity::Factory(std::shared_ptr<Kinematics> kin,
     obj->_strength = (std::make_shared<ComPWA::DoubleParameter>("", 1.0));
     obj->_strength->SetParameterFixed();
   }
-  
+
   obj->SetPhspVolume(kin->GetPhspVolume());
 
   for (const auto &v : pt.get_child("")) {
     if (v.first == "CoherentIntensity")
       obj->AddIntensity(
           ComPWA::Physics::HelicityFormalism::CoherentIntensity::Factory(
-              kin, v.second));
+              partL, kin, v.second));
   }
   return obj;
 }
@@ -59,12 +60,12 @@ double IncoherentIntensity::Intensity(const ComPWA::dataPoint &point) const {
 
   // We have to get around the constness of the interface definition.
   std::vector<std::vector<double>> parameters(_parameters);
-  
+
   std::vector<double> normValues(_normValues);
-  
+
   if (_intens.size() != parameters.size())
     parameters = std::vector<std::vector<double>>(_intens.size());
-  
+
   if (_intens.size() != normValues.size())
     normValues = std::vector<double>(_intens.size());
 
@@ -84,9 +85,11 @@ double IncoherentIntensity::Intensity(const ComPWA::dataPoint &point) const {
   const_cast<std::vector<std::vector<double>> &>(_parameters) = parameters;
   const_cast<std::vector<double> &>(_normValues) = normValues;
 
-  assert(!std::isnan(result) && "IncoherentIntensity::Intensity() | Result is NaN!");
-  assert(!std::isinf(result) && "IncoherentIntensity::Intensity() | Result is inf!");
-  
+  assert(!std::isnan(result) &&
+         "IncoherentIntensity::Intensity() | Result is NaN!");
+  assert(!std::isinf(result) &&
+         "IncoherentIntensity::Intensity() | Result is inf!");
+
   return (Strength() * result);
 }
 

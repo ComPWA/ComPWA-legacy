@@ -19,25 +19,22 @@ namespace HelicityFormalism {
 class SequentialTwoBodyDecay : public Amplitude {
 
 public:
-  //============ CONSTRUCTION ==================
-
-  /// Function to create a full copy of the amplitude
   virtual Amplitude *Clone(std::string newName = "") const {
     auto tmp = (new SequentialTwoBodyDecay(*this));
     tmp->SetName(newName);
     return tmp;
   };
-  
-  /// Factory for SequentialTwoBodyDecay.
+
   static std::shared_ptr<ComPWA::Physics::Amplitude>
-  Factory(std::shared_ptr<Kinematics> kin, const boost::property_tree::ptree &pt);
+  Factory(std::shared_ptr<PartList> partL, std::shared_ptr<Kinematics> kin,
+          const boost::property_tree::ptree &pt);
 
   static boost::property_tree::ptree
   Save(std::shared_ptr<ComPWA::Physics::Amplitude> obj);
 
   //======= INTEGRATION/NORMALIZATION ===========
-  
-  //! Check of parameters have changed and normalization has to be recalculatecd
+
+  /// Check of parameters have changed and normalization has to be recalculatecd
   bool CheckModified() const {
     if (Amplitude::CheckModified())
       return true;
@@ -46,12 +43,11 @@ public:
         return true;
     return false;
   }
-  
+
   //================ EVALUATION =================
-  
-  /**! Evaluate decay */
+
   virtual std::complex<double> Evaluate(const dataPoint &point) const {
-    std::complex<double> result = GetCoefficient()*GetPreFactor();
+    std::complex<double> result = GetCoefficient() * GetPreFactor();
     for (auto i : _partDecays)
       result *= i->Evaluate(point);
 
@@ -61,11 +57,6 @@ public:
 
   //============ SET/GET =================
 
-  /**
-   Add a partial decay to Sequential decay
-
-   @param d Partial decay
-   */
   void Add(std::shared_ptr<ComPWA::Physics::Resonance> d) {
     _partDecays.push_back(d);
   }
@@ -78,23 +69,19 @@ public:
     return _partDecays;
   }
 
-  //! Fill ParameterList with fit fractions
   virtual void GetFitFractions(ParameterList &parList){};
 
-  //! Fill ParameterList with fit fractions
   virtual void GetParameters(ParameterList &list);
-  
-  //! Fill vector with parameters
+
   virtual void GetParametersFast(std::vector<double> &list) const {
     Amplitude::GetParametersFast(list);
-    for( auto i:_partDecays)
+    for (auto i : _partDecays)
       i->GetParametersFast(list);
   }
-  
-  /*! Set phase space sample
-   * We use the phase space sample to calculate the normalization. The sample
-   * should be without efficiency applied.
-   */
+
+  /// Set phase space sample
+  /// We use the phase space sample to calculate the normalization. The sample
+  /// should be without efficiency applied.
   virtual void
   SetPhspSample(std::shared_ptr<std::vector<ComPWA::dataPoint>> phspSample) {
     for (auto i : _partDecays)
@@ -102,7 +89,7 @@ public:
   }
 
   //======== ITERATORS/OPERATORS =============
-  
+
   typedef std::vector<std::shared_ptr<ComPWA::Physics::Resonance>>::iterator
       partDecayItr;
 
@@ -111,11 +98,9 @@ public:
   partDecayItr end() { return _partDecays.end(); }
 
   //=========== FUNCTIONTREE =================
-  
-  //! Check of tree is available
+
   virtual bool HasTree() const { return true; }
 
-  /**! Setup function tree */
   virtual std::shared_ptr<FunctionTree> GetTree(std::shared_ptr<Kinematics> kin,
                                                 const ParameterList &sample,
                                                 const ParameterList &toySample,
@@ -125,8 +110,8 @@ protected:
   std::vector<std::shared_ptr<ComPWA::Physics::Resonance>> _partDecays;
 };
 
-} /* namespace HelicityFormalism */
-} /* namespace Physics */
-} /* namespace ComPWA */
+} // namespace HelicityFormalism
+} // namespace Physics
+} // namespace ComPWA
 
-#endif /* SequentialTwoBodyDecay_h */
+#endif

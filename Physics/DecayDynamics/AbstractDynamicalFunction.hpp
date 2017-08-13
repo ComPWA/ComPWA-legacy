@@ -9,7 +9,7 @@
 
 #include <boost/property_tree/ptree.hpp>
 
-#include "Core/PhysConst.hpp"
+#include "Core/Properties.hpp"
 #include "Core/DataPoint.hpp"
 #include "Core/ParameterList.hpp"
 #include "Core/Spin.hpp"

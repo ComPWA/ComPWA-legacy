@@ -22,7 +22,8 @@ double CoherentIntensity::Intensity(const dataPoint &point) const {
 };
 
 std::shared_ptr<CoherentIntensity>
-CoherentIntensity::Factory(std::shared_ptr<Kinematics> kin,
+CoherentIntensity::Factory(std::shared_ptr<PartList> partL,
+                           std::shared_ptr<Kinematics> kin,
                            const boost::property_tree::ptree &pt) {
   LOG(trace) << " CoherentIntensity::Factory() | Construction....";
   auto obj = std::make_shared<CoherentIntensity>();
@@ -44,7 +45,7 @@ CoherentIntensity::Factory(std::shared_ptr<Kinematics> kin,
     if (v.first == "Amplitude")
       obj->AddAmplitude(
           ComPWA::Physics::HelicityFormalism::SequentialTwoBodyDecay::Factory(
-              kin, v.second));
+              partL, kin, v.second));
   }
   return obj;
 }

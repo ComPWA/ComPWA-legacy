@@ -35,11 +35,10 @@ using namespace ROOT::Minuit2;
 double shiftAngle(double v) {
   double originalVal = v;
   double val = originalVal;
-  double pi = ComPWA::PhysConst::Instance()->FindConstant("Pi").GetValue();
-  while (val > pi)
-    val -= 2 * pi;
-  while (val < -pi)
-    val += 2 * pi;
+  while (val > M_PI)
+    val -= 2 * M_PI;
+  while (val < (-1)*M_PI)
+    val += 2 * M_PI;
   if (val != originalVal)
     LOG(info) << "shiftAngle() | Shifting parameter from " << originalVal
               << " to " << val << "!";

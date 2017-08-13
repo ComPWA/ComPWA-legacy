@@ -15,9 +15,9 @@ class TwoBodyKinematics : public Kinematics {
 public:
   void init();
 
-  TwoBodyKinematics(int idMother, std::vector<int> finalState,
-                  double deltaMassWindow = 0.5);
-  
+  TwoBodyKinematics(std::shared_ptr<PartList> partL, int idMother,
+                    std::vector<int> finalState, double deltaMassWindow = 0.5);
+
   //! Converts Event to dataPoint
   virtual void EventToDataPoint(const Event &ev, dataPoint &point) const;
 
@@ -46,7 +46,6 @@ public:
   virtual double GetMass(unsigned int num) const;
 
 protected:
-  
   double _M;
   ComPWA::Spin _spinM;
   double mSq1;        //! masse squared of daughter 1

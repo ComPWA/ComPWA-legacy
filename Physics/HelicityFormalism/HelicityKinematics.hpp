@@ -29,7 +29,8 @@ public:
   /// The lists contain the pid of initial and final state. The position of a
   /// particle in initial or final state list is used later on for
   /// identification.
-  HelicityKinematics(std::vector<pid> initialState,
+  HelicityKinematics(std::shared_ptr<PartList> partL,
+                     std::vector<pid> initialState,
                      std::vector<pid> finalState);
 
   /// Create HelicityKinematics from a boost::property_tree.
@@ -50,7 +51,8 @@ public:
   /// The Id is the position of the particle in input data.
   /// \see HelicityKinematics(std::vector<pid> initialState, std::vector<pid>
   /// finalState)
-  HelicityKinematics(boost::property_tree::ptree pt);
+  HelicityKinematics(std::shared_ptr<PartList> partL,
+                     boost::property_tree::ptree pt);
 
   /// Delete copy constructor. For each Kinematics in the analysis only
   /// one instance should exist since Kinematics does the bookkeeping for which
@@ -75,7 +77,7 @@ public:
 
   /// Fill \p point with variables for \p sys.
   /// \see EventToDataPoint(const Event &event, dataPoint &point, SubSystem sys,
-   ///                     const std::pair<double, double> limits) const;
+  ///                     const std::pair<double, double> limits) const;
   void EventToDataPoint(const Event &event, dataPoint &point,
                         SubSystem sys) const;
 
@@ -129,19 +131,15 @@ public:
   virtual const std::pair<double, double> &GetInvMassBounds(int sysID) const;
 
 protected:
+  std::shared_ptr<PartList> _partList;
+  
   ///  Calculation of n-dimensional phase space volume.
   ///  ToDo: We need to implement an analytical calculation here
   double calculatePSArea() { return 1.0; }
 
-  /// Invariant mass of decaying particle
-  double _M;
-
-  /// Spin of initial state
-  ComPWA::Spin _spinM;
-
   /// List of subsystems for which invariant mass and angles are calculated
   std::vector<SubSystem> _listSubSystem;
-  
+
   /// Invariant mass bounds for each SubSystem
   std::vector<std::pair<double, double>> _invMassBounds;
 

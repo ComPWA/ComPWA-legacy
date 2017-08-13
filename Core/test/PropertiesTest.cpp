@@ -12,7 +12,7 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 
-#include "Core/PhysConst.hpp"
+#include "Core/Properties.hpp"
 #include "Core/Logging.hpp"
 
 BOOST_AUTO_TEST_SUITE(Core)
@@ -69,16 +69,17 @@ BOOST_AUTO_TEST_CASE(XMLInput) {
   boost::property_tree::ptree tr;
   boost::property_tree::xml_parser::read_xml(XMLIn, tr);
 
-  auto inst = ComPWA::PhysConst::CreateInstance(tr);
+  std::shared_ptr<ComPWA::PartList> partL;
+  ReadParticles(partL, tr);
 
-  auto part = inst->FindParticle("gamma");
+  auto part = partL->find("gamma")->second;
   BOOST_CHECK_EQUAL(part.GetMass(), 0.);
   BOOST_CHECK_EQUAL((double)part.GetSpinQuantumNumber("Spin"), 1.);
   BOOST_CHECK_EQUAL(part.GetQuantumNumber("Parity"), -1);
   BOOST_CHECK_EQUAL(part.GetQuantumNumber("Cparity"), -1);
   BOOST_CHECK_EQUAL(part.GetDecayType(), "stable");
 
-  part = inst->FindParticle(9010221);
+  part = FindParticle(partL, 9010221);
   BOOST_CHECK_EQUAL(part.GetMass(), 0.99);
   BOOST_CHECK_EQUAL((double)part.GetSpinQuantumNumber("Spin"), 0.);
   BOOST_CHECK_EQUAL(part.GetQuantumNumber("Parity"), 1);

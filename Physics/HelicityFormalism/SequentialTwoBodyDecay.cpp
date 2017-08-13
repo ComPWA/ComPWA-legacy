@@ -10,7 +10,8 @@ namespace Physics {
 namespace HelicityFormalism {
 
 std::shared_ptr<ComPWA::Physics::Amplitude>
-SequentialTwoBodyDecay::Factory(std::shared_ptr<Kinematics> kin,
+SequentialTwoBodyDecay::Factory(std::shared_ptr<PartList> partL,
+                                std::shared_ptr<Kinematics> kin,
                                 const boost::property_tree::ptree &pt) {
   LOG(trace) << " SequentialTwoBodyDecay::Factory() | Construction....";
   auto obj = std::make_shared<SequentialTwoBodyDecay>();
@@ -31,7 +32,7 @@ SequentialTwoBodyDecay::Factory(std::shared_ptr<Kinematics> kin,
 
   for (const auto &v : pt.get_child("")) {
     if (v.first == "Resonance")
-      obj->Add(PartialDecay::Factory(kin, v.second));
+      obj->Add(PartialDecay::Factory(partL, kin, v.second));
   }
 
   return std::static_pointer_cast<ComPWA::Physics::Amplitude>(obj);

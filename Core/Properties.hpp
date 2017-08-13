@@ -15,10 +15,9 @@
 
 namespace ComPWA {
 
-/*! Particle ID.
- * Usually the pid's from PDG are used here:
- * http://pdg.lbl.gov/mc_particle_id_contents.html
- */
+/// Particle ID.
+/// Usually the pid's from PDG are used here:
+/// http://pdg.lbl.gov/mc_particle_id_contents.html
 typedef int pid;
 
 class Properties {
@@ -36,6 +35,49 @@ protected:
   pid _id;
 };
 
+///
+/// \class Constant
+/// Represents physical constants.
+///
+class Constant : public Properties {
+public:
+  Constant(std::string n = "", double value = 0.0)
+      : Properties(n), _value(n, value) {}
+
+  Constant(boost::property_tree::ptree pt){};
+
+  void SetValue(double m) { _value.SetValue(m); }
+
+  double GetValue() const { return _value.GetValue(); }
+
+  void SetValuePar(ComPWA::DoubleParameter m) { _value = m; }
+
+  ComPWA::DoubleParameter GetValuePar() const { return _value; }
+
+protected:
+  ComPWA::DoubleParameter _value;
+};
+
+///
+/// \class PartInfoShort
+/// In many cases only very basic information on particles is needed.
+/// Therefore, we use this class to store {id, name, mass}
+///
+class PartInfoShort : public Properties {
+public:
+  PartInfoShort(std::string name = "test", pid id = -999, double mass = 0)
+      : Properties(name, id), _mass(mass){};
+
+  void SetMass(double m) { _mass = m; }
+  double GetMass() const { return _mass; }
+
+protected:
+  double _mass;
+};
+
+///
+/// \class ParticleProperties
+///
 class ParticleProperties : public Properties {
 public:
   ParticleProperties(std::string name = "test", pid id = -999)
@@ -62,29 +104,85 @@ protected:
   std::map<std::string, int> intQuantumNumbers_;
   std::map<std::string, ComPWA::Spin> spinQuantumNumbers_;
 
-  /* Store decay info in property_tree. The tree is later on passed to the
-   * respective class. */
+  /// Store decay info in property_tree. The tree is later on passed to the
+  /// respective class.
   boost::property_tree::ptree _decayInfo;
 };
 
-class Constant : public Properties {
-public:
-  Constant(std::string n = "", double value = 0.0)
-      : Properties(n), _value(n, value) {}
-  
-  Constant(boost::property_tree::ptree pt){};
+/// A map of particle properties is used everywhere where particle information
+/// is needed. Properties are accessed by the particle name.
+/// Note: Propably would be better to access particles by their pid?
+typedef std::map<std::string, ParticleProperties> PartList;
 
-  void SetValue(double m) { _value.SetValue(m); }
-  
-  double GetValue() const { return _value.GetValue(); }
+/// Search particle \p list for a specific particle \p id.
+/// The first entry in the list is returned. Be careful in case that multiple
+/// particles have the same pid.
+//const ParticleProperties &FindParticle(std::shared_ptr<PartList> list, pid id);
+inline const ParticleProperties &FindParticle(std::shared_ptr<PartList> list,
+                                              pid id) {
 
-  void SetValuePar(ComPWA::DoubleParameter m) { _value = m; }
-  
-  ComPWA::DoubleParameter GetValuePar() const { return _value; }
+  // position in map
+  int result = -1;
+  for (int i = 0; i < list->size(); ++i) {
+    // if a match is found we skip the rest
+    if (result >= 0)
+      continue;
 
-protected:
-  ComPWA::DoubleParameter _value;
-};
+    auto it = list->begin();
+    std::advance(it, i);
+    if (it->second.GetId() == id) {
+      result = i;
+    }
+  }
+  if (result < 0) {
+    std::stringstream ss;
+    ss << "FindParticle() | Particle id=" << id << " not found in list!";
+    throw std::runtime_error(ss.str());
+  }
+  auto r = list->begin();
+  std::advance(r, result);
+
+  return r->second;
+}
+
+/// Read list of particles from a boost::property_tree
+inline void ReadParticles(std::shared_ptr<PartList> list,
+                          boost::property_tree::ptree pt) {
+
+  auto particleTree = pt.get_child_optional("ParticleList");
+  if (!particleTree)
+    return;
+  
+  for (auto const &v : particleTree.get()) {
+    auto tmp = ParticleProperties(v.second);
+    auto p = std::make_pair(tmp.GetName(), tmp);
+    auto last = list->insert(p);
+
+    if (!last.second) {
+      LOG(info) << "ReadParticles() | Particle " << last.first->first
+                << "already exists in list. We overwrite its parameters!";
+      last.first->second = tmp;
+    }
+    tmp = last.first->second;
+
+    // cparity is optional
+    double cparity = 0.0;
+    try {
+      cparity = tmp.GetQuantumNumber("Cparity");
+    } catch (std::exception &ex) {
+    }
+
+    LOG(info) << "ReadParticles() | Particle " << tmp.GetName()
+              << " (id=" << tmp.GetId() << ") "
+              << " J(PC)=" << tmp.GetSpinQuantumNumber("Spin") << "("
+              << tmp.GetQuantumNumber("Parity") << cparity << ") "
+              << " mass=" << tmp.GetMass()
+              << " decayType=" << tmp.GetDecayType();
+  }
+
+  return;
+}
 
 } // Namespace ComPWA
-#endif /* Properties_h */
+
+#endif

@@ -47,7 +47,8 @@ public:
    @return Constructed object
    */
   static std::shared_ptr<AbstractDynamicalFunction>
-  Factory(const boost::property_tree::ptree &pt);
+  Factory(std::shared_ptr<PartList> partL,
+          const boost::property_tree::ptree &pt);
 
   //======= INTEGRATION/NORMALIZATION ===========
 

@@ -16,11 +16,14 @@ namespace Physics {
 namespace HelicityFormalism {
 
 std::shared_ptr<Resonance>
-PartialDecay::Factory(std::shared_ptr<Kinematics> kin,
+PartialDecay::Factory(std::shared_ptr<PartList> partL,
+                      std::shared_ptr<Kinematics> kin,
                       const boost::property_tree::ptree &pt) {
 
   LOG(trace) << "PartialDecay::Factory() |";
-  auto obj = std::make_shared<PartialDecay>();
+  SubSystem subSys = SubSystemFactory(pt);
+  
+  auto obj = std::make_shared<PartialDecay>(subSys);
   obj->SetName(pt.get<std::string>("<xmlattr>.Name", "empty"));
 
   auto mag = ComPWA::DoubleParameterFactory(pt.get_child("Magnitude"));
@@ -30,7 +33,6 @@ PartialDecay::Factory(std::shared_ptr<Kinematics> kin,
 
   obj->SetPhspVolume(kin->GetPhspVolume());
 
-  SubSystem subSys = SubSystemFactory(pt);
 
   auto dynObj = std::shared_ptr<DecayDynamics::AbstractDynamicalFunction>();
   std::string name = pt.get<std::string>("DecayParticle.<xmlattr>.Name");
@@ -39,9 +41,9 @@ PartialDecay::Factory(std::shared_ptr<Kinematics> kin,
   if (subSys.GetFinalStates().size() == 2) {
     // Create WignerD object
     obj->SetWignerD(
-        ComPWA::Physics::HelicityFormalism::AmpWignerD::Factory(pt));
+        ComPWA::Physics::HelicityFormalism::AmpWignerD::Factory(partL, pt));
 
-    auto partProp = PhysConst::Instance()->FindParticle(name);
+    auto partProp = partL->find(name)->second;
     std::string decayType = partProp.GetDecayType();
 
     if (decayType == "stable") {
@@ -49,9 +51,9 @@ PartialDecay::Factory(std::shared_ptr<Kinematics> kin,
                                "given as mother particle of a decay. Makes no "
                                "sense!");
     } else if (decayType == "relativisticBreitWigner") {
-      dynObj = DecayDynamics::RelativisticBreitWigner::Factory(pt);
+      dynObj = DecayDynamics::RelativisticBreitWigner::Factory(partL, pt);
     } else if (decayType == "flatte") {
-      dynObj = DecayDynamics::AmpFlatteRes::Factory(pt);
+      dynObj = DecayDynamics::AmpFlatteRes::Factory(partL, pt);
     } else {
       throw std::runtime_error("PartialDecay::Factory() | Unknown decay type " +
                                decayType + "!");
@@ -68,9 +70,10 @@ PartialDecay::Factory(std::shared_ptr<Kinematics> kin,
   }
 
   obj->SetDynamicalFunction(dynObj);
-  obj->SetSubSystem(subSys);
+//  obj->SetSubSystem(subSys);
   obj->SetDataPosition(
-      3 * std::dynamic_pointer_cast<HelicityKinematics>(kin)->GetDataID(subSys));
+      3 *
+      std::dynamic_pointer_cast<HelicityKinematics>(kin)->GetDataID(subSys));
 
   return std::static_pointer_cast<Resonance>(obj);
 }
@@ -95,10 +98,28 @@ boost::property_tree::ptree PartialDecay::Save(std::shared_ptr<Resonance> res) {
   return pt;
 }
 
-/**! Setup function tree */
+  bool PartialDecay::CheckModified() const {
+    if (Resonance::CheckModified())
+      return true;
+    if (_dynamic->CheckModified()) {
+      const_cast<double &>(_current_integral) = Integral();
+      _dynamic->SetModified(false);
+      return true;
+    }
+    return false;
+  }
+
+  double PartialDecay::GetNormalization() const {
+    if (_dynamic->CheckModified() || !_current_integral)
+      const_cast<double &>(_current_integral) = Integral();
+    _dynamic->SetModified(false);
+    assert(_current_integral != 0.0);
+    return 1 / std::sqrt(_current_integral);
+  }
+  
 std::shared_ptr<FunctionTree>
 PartialDecay::GetTree(std::shared_ptr<Kinematics> kin,
-                    const ParameterList &sample,
+                      const ParameterList &sample,
                       const ParameterList &toySample, std::string suffix) {
 
   int phspSampleSize = toySample.GetMultiDouble(0)->GetNValues();
@@ -154,6 +175,6 @@ void PartialDecay::GetParameters(ParameterList &list) {
   _dynamic->GetParameters(list);
 }
 
-} /* namespace HelicityFormalism */
-} /* namespace Physics */
-} /* namespace ComPWA */
+} // namespace HelicityFormalism
+} // namespace Physics
+} // namespace ComPWA

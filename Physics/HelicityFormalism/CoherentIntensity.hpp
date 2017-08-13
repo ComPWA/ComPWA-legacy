@@ -39,7 +39,7 @@ public:
   }
 
   static std::shared_ptr<CoherentIntensity>
-  Factory(std::shared_ptr<Kinematics> kin,
+  Factory(std::shared_ptr<PartList> partL, std::shared_ptr<Kinematics> kin,
           const boost::property_tree::ptree &pt);
 
   static boost::property_tree::ptree

@@ -2,6 +2,11 @@
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
+///
+/// \file
+/// Containt PartialDecay class which represents a two-body decay within the
+/// helicity formalism.
+///
 #ifndef PARTIALDECAY_HPP_
 #define PARTIALDECAY_HPP_
 
@@ -17,14 +22,16 @@ namespace ComPWA {
 namespace Physics {
 namespace HelicityFormalism {
 
+///
+/// \class PartialDecay
+/// PartialDecay class represents a two-body decay within the helicity
+/// formalism.
+///
 class PartialDecay : public ComPWA::Physics::Resonance {
 
 public:
-  //============ CONSTRUCTION ==================
-
-  PartialDecay(){};
-
-  //! Clone function
+  PartialDecay(SubSystem sys) : _subSystem(sys) {};
+  
   virtual PartialDecay *Clone(std::string newName = "") const {
     auto tmp = new PartialDecay(*this);
     tmp->SetName(newName);
@@ -33,36 +40,21 @@ public:
 
   /// Factory for PartialDecay
   static std::shared_ptr<ComPWA::Physics::Resonance>
-  Factory(std::shared_ptr<Kinematics> kin, const boost::property_tree::ptree &pt);
+  Factory(std::shared_ptr<PartList> partL, std::shared_ptr<Kinematics> kin,
+          const boost::property_tree::ptree &pt);
 
   static boost::property_tree::ptree Save(std::shared_ptr<Resonance> obj);
 
   //======= INTEGRATION/NORMALIZATION ===========
 
-  //! Check of parameters have changed and normalization has to be recalculatecd
-  bool CheckModified() const {
-    if (Resonance::CheckModified())
-      return true;
-    if (_dynamic->CheckModified()) {
-      const_cast<double &>(_current_integral) = Integral();
-      _dynamic->SetModified(false);
-      return true;
-    }
-    return false;
-  }
+  /// Check of parameters have changed and normalization has to be recalculated
+  virtual bool CheckModified() const;
 
-  /**! Get current normalization.  */
-  virtual double GetNormalization() const {
-    if (_dynamic->CheckModified() || !_current_integral)
-      const_cast<double &>(_current_integral) = Integral();
-    _dynamic->SetModified(false);
-    assert(_current_integral != 0.0);
-    return 1 / std::sqrt(_current_integral);
-  }
+  virtual double GetNormalization() const;
 
   //================ EVALUATION =================
 
-  /**! Evaluate decay */
+  /// Evaluate function without normalization
   std::complex<double> EvaluateNoNorm(const dataPoint &point) const {
     std::complex<double> result = GetCoefficient();
     result *= _angD->Evaluate(point, _dataPos + 1, _dataPos + 2);
@@ -75,7 +67,6 @@ public:
 
   virtual void GetParameters(ParameterList &list);
 
-  //! Fill vector with parameters
   virtual void GetParametersFast(std::vector<double> &list) const {
     Resonance::GetParametersFast(list);
     _dynamic->GetParametersFast(list);
@@ -112,19 +103,16 @@ public:
   virtual SubSystem GetSubSystem() const { return _subSystem; }
 
   //=========== FUNCTIONTREE =================
-
-  //! Check if tree is available
   virtual bool HasTree() const { return true; }
 
-  /**! Setup function tree */
   virtual std::shared_ptr<FunctionTree>
   GetTree(std::shared_ptr<Kinematics> kin, const ComPWA::ParameterList &sample,
           const ComPWA::ParameterList &toySample, std::string suffix);
 
 protected:
-  /**! Position where variables are stored in dataPoint
-   * We expect to find the invariant mass of the system at @param _dataPos,
-   * cosTheta at @param _dataPos+1 and phi at @param _dataPos+2 */
+  /// Position where variables are stored in dataPoint.
+  /// We expect to find the invariant mass of the system at @param _dataPos,
+  /// cosTheta at @param _dataPos+1 and phi at @param _dataPos+2
   int _dataPos;
 
   ComPWA::SubSystem _subSystem;
@@ -135,8 +123,8 @@ protected:
       _dynamic;
 };
 
-} /* namespace HelicityFormalism */
-} /* namespace Physics */
-} /* namespace ComPWA */
+} // namespace HelicityFormalism
+} // namespace Physics
+} // namespace ComPWA
 
-#endif /* PARTIALDECAY_ */
+#endif

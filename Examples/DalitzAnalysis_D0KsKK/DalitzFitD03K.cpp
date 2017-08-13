@@ -294,6 +294,7 @@ int main(int argc, char **argv) {
   assert(!outputDir.empty());
   if (trueModelFile.empty()) {
     LOG(error) << "True model file not set";
+    trueModelFile = fitModelFile;
   }
   if (fitModelFile.empty() && fittingMethod != "plotOnly") {
     LOG(error) << "Fit model file not set";
@@ -312,15 +313,23 @@ int main(int argc, char **argv) {
 
   boost::property_tree::ptree fitModelTree;
   boost::property_tree::xml_parser::read_xml(fitModelFile, fitModelTree);
+  boost::property_tree::ptree trueModelTree;
+  boost::property_tree::xml_parser::read_xml(trueModelFile, trueModelTree);
 
-  PhysConst::CreateInstance(fitModelTree);
+  std::shared_ptr<PartList> fitModelPartL, trueModelPartL;
+  ReadParticles(fitModelPartL, fitModelTree);
+  ReadParticles(trueModelPartL, trueModelTree);
+
   // initialize kinematics of decay
-  auto kin = std::make_shared<HelicityKinematics>(fitModelTree.get_child("HelicityKinematics"));
+  auto fitModelKin = std::make_shared<HelicityKinematics>(
+      fitModelPartL, fitModelTree.get_child("HelicityKinematics"));
+  auto trueModelKin = std::make_shared<HelicityKinematics>(
+      trueModelPartL, trueModelTree.get_child("HelicityKinematics"));
 
-  // initialize random generator
+  // Initialize random generator useing trueModel parameters
   std::shared_ptr<Generator> gen = std::shared_ptr<Generator>(
-      new Tools::RootGenerator(kin->GetInitialState(),
-                               kin->GetFinalState(), seed));
+      new Tools::RootGenerator(trueModelPartL, trueModelKin->GetInitialState(),
+                               trueModelKin->GetFinalState(), seed));
 
   RunManager run;
   run.SetGenerator(gen);
@@ -343,31 +352,32 @@ int main(int argc, char **argv) {
     // sample with accepted phsp events
     phspData = std::shared_ptr<Data>(new RootReader(
         phspEfficiencyFile, phspEfficiencyFileTreeName, mcPrecision));
-    phspData->ReduceToPhsp(kin);
+    phspData->ReduceToPhsp(trueModelKin);
   }
 
   //========== Generation of toy phase space sample ==
   std::shared_ptr<Data> toyPhspData(new RootReader()); // Toy sample
   run.SetPhspSample(toyPhspData);
   run.GeneratePhsp(mcPrecision);
-  toyPhspData->SetEfficiency(kin, eff); // set efficiency values for each event
+  toyPhspData->SetEfficiency(trueModelKin,
+                             eff); // set efficiency values for each event
 
   // ========= AmpIntensity ========
-  auto intens = IncoherentIntensity::Factory(kin,
+  auto intens = IncoherentIntensity::Factory(
+      fitModelPartL, fitModelKin,
       fitModelTree.get_child("IncoherentIntensity"));
 
-  boost::property_tree::ptree trueModelTree;
-  boost::property_tree::xml_parser::read_xml(trueModelFile, trueModelTree);
-  auto trueIntens = IncoherentIntensity::Factory(kin,
+  auto trueIntens = IncoherentIntensity::Factory(
+      trueModelPartL, trueModelKin,
       trueModelTree.get_child("IncoherentIntensity"));
 
   // Setting samples for normalization
-  auto toyPoints =
-      std::make_shared<std::vector<dataPoint>>(toyPhspData->GetDataPoints(kin));
+  auto toyPoints = std::make_shared<std::vector<dataPoint>>(
+      toyPhspData->GetDataPoints(trueModelKin));
   auto phspPoints = toyPoints;
   if (phspData) {
-    auto phspPoints =
-        std::make_shared<std::vector<dataPoint>>(phspData->GetDataPoints(kin));
+    auto phspPoints = std::make_shared<std::vector<dataPoint>>(
+        phspData->GetDataPoints(trueModelKin));
   }
   trueIntens->SetPhspSample(phspPoints, toyPoints);
   intens->SetPhspSample(phspPoints, toyPoints);
@@ -416,11 +426,11 @@ int main(int argc, char **argv) {
     //    }
     //    exit(1);
 
-    inD->ReduceToPhsp(kin);
+    inD->ReduceToPhsp(trueModelKin);
     if (resetWeights)
       inD->ResetWeights(); // resetting weights if requested
-    inputData = inD->RndSubSet(kin, numSignalEvents, gen);
-    inputData->SetEfficiency(kin, eff);
+    inputData = inD->RndSubSet(trueModelKin, numSignalEvents, gen);
+    inputData->SetEfficiency(trueModelKin, eff);
     run.SetData(inputData);
     inD = std::shared_ptr<Data>();
     sample->Add(*inputData);
@@ -463,13 +473,13 @@ int main(int argc, char **argv) {
     run.SetData(sample);
     run.SetAmplitude(trueIntens);
     run.SetPhspSample(std::shared_ptr<Data>());
-    run.Generate(kin, numEvents);
+    run.Generate(trueModelKin, numEvents);
     LOG(info) << "Sample size: " << sample->GetNEvents();
   }
   // Reset phsp sample to save memory
   run.SetPhspSample(std::shared_ptr<Data>());
 
-  sample->ReduceToPhsp(kin);
+  sample->ReduceToPhsp(trueModelKin);
 
   LOG(info) << "================== SETTINGS =================== ";
 
@@ -551,8 +561,8 @@ int main(int argc, char **argv) {
     LOG(debug) << "Fit parameters: " << std::endl << fitPar.to_str();
 
     //=== Constructing likelihood
-    auto esti = std::make_shared<Estimator::MinLogLH>(kin, intens, sample,
-        toyPhspData, phspData, 0, 0);
+    auto esti = std::make_shared<Estimator::MinLogLH>(
+        fitModelKin, intens, sample, toyPhspData, phspData, 0, 0);
 
     std::cout.setf(std::ios::unitbuf);
     if (fittingMethod == "tree") {
@@ -599,8 +609,8 @@ int main(int argc, char **argv) {
     std::vector<std::pair<std::string, std::string>> fitComponents;
     fitComponents.push_back(
         std::pair<std::string, std::string>("phi(1020)", "D0toKSK+K-"));
-//    fitComponents.push_back(std::pair<std::string, std::string>(
-//        "phi(1020) a0(980)0", "D0toKSK+K-"));
+    //    fitComponents.push_back(std::pair<std::string, std::string>(
+    //        "phi(1020) a0(980)0", "D0toKSK+K-"));
     fitComponents.push_back(
         std::pair<std::string, std::string>("a0(980)0", "D0toKSK+K-"));
     fitComponents.push_back(
@@ -608,7 +618,7 @@ int main(int argc, char **argv) {
     fitComponents.push_back(
         std::pair<std::string, std::string>("a2(1320)-", "D0toKSK+K-"));
     ParameterList ff =
-        Tools::CalculateFitFractions(kin, intens, toyPoints, fitComponents);
+        Tools::CalculateFitFractions(fitModelKin, intens, toyPoints, fitComponents);
 
     result->SetFitFractions(ff);
     result->Print();
@@ -695,11 +705,11 @@ int main(int argc, char **argv) {
                                   // plotting
     }
     // reduce sample to phsp
-    pl_phspSample->ReduceToPhsp(kin);
-    pl_phspSample->SetEfficiency(kin, eff);
+    pl_phspSample->ReduceToPhsp(trueModelKin);
+    pl_phspSample->SetEfficiency(trueModelKin, eff);
 
     //-------- Instance of plotData
-    plotData pl(kin, fileNamePrefix, plotNBins);
+    plotData pl(fitModelKin, fileNamePrefix, plotNBins);
     // set data sample
     pl.SetData(sample);
     // set phsp sample

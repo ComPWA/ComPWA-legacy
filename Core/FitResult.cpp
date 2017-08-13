@@ -26,11 +26,10 @@ void FitResult::WriteSimpleText(std::string filename) {
 double FitResult::shiftAngle(double v) {
   double originalVal = v;
   double val = originalVal;
-  double pi = PhysConst::Instance()->FindConstant("Pi").GetValue();
-  while (val > pi)
-    val -= 2 * pi;
-  while (val < -pi)
-    val += 2 * pi;
+  while (val > M_PI)
+    val -= 2 * M_PI;
+  while (val < (-1)*M_PI)
+    val += 2 * M_PI;
   if (val != originalVal)
     LOG(info) << "shiftAngle(): shifting parameter from " << originalVal
               << " to " << val << "!";
@@ -161,14 +160,13 @@ void FitResult::PrintFitParameters(TableFormater *tableResult) {
     if (printTrue) {
       if (truePar) {
         *tableResult << *truePar;
-        double pi = PhysConst::Instance()->FindConstant("Pi").GetValue();
         double pull = (truePar->GetValue() - outPar->GetValue());
         // Shift pull by 2*pi if that reduces the deviation
         if (isAngle && !isFixed) {
-          while (pull < 0 && pull < -pi)
-            pull += 2 * pi;
-          while (pull > 0 && pull > pi)
-            pull -= 2 * pi;
+          while (pull < 0 && pull < -M_PI)
+            pull += 2 * M_PI;
+          while (pull > 0 && pull > M_PI)
+            pull -= 2 * M_PI;
         }
         if (outPar->HasError()) {
           if (errorType == ErrorType::ASYM && pull < 0)

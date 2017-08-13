@@ -31,12 +31,13 @@ public:
   RootGenerator(double sqrtS, double m1, double m2, double m3, int seed = -1);
 
   /// Constructor: Information on the decay is obtained from Kinematics
-  RootGenerator(std::shared_ptr<Kinematics> kin, int seed = -1);
+  RootGenerator(std::shared_ptr<PartList> partL,
+                std::shared_ptr<Kinematics> kin, int seed = -1);
 
   /// Constructor: Information on the decay is provides via lists of initial and
   /// final states
-  RootGenerator(std::vector<pid> finalS, std::vector<pid> initialS,
-                int seed = -1);
+  RootGenerator(std::shared_ptr<PartList> partL, std::vector<pid> finalS,
+                std::vector<pid> initialS, int seed = -1);
 
   ~RootGenerator() { delete[] masses; };
 
@@ -66,9 +67,10 @@ protected:
 
 class UniformTwoBodyGenerator : public RootGenerator {
 public:
-  UniformTwoBodyGenerator(std::shared_ptr<Kinematics> kin, int seed,
+  UniformTwoBodyGenerator(std::shared_ptr<PartList> partL,
+                          std::shared_ptr<Kinematics> kin, int seed,
                           double minSq_, double maxSq_)
-      : RootGenerator(kin, seed), minSq(minSq_), maxSq(maxSq_) {
+      : RootGenerator(partL, kin, seed), minSq(minSq_), maxSq(maxSq_) {
     if (kin->GetFinalState().size() != 2)
       throw std::runtime_error("UniformTwoBodyGenerator::"
                                "UniformTwoBodyGenerator() | Not a two body "

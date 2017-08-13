@@ -4,7 +4,6 @@
 
 #include "Core/Kinematics.hpp"
 #include "Core/Exceptions.hpp"
-#include "Core/PhysConst.hpp"
 #include "Core/DataPoint.hpp"
 #include "Core/Event.hpp"
 

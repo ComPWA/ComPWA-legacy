@@ -2,11 +2,6 @@
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
-//****************************************************************************
-// Class for defining the relativistic Breit-Wigner resonance model, which
-// includes the use of Blatt-Weisskopf barrier factors.
-//****************************************************************************
-
 #include <cmath>
 #include "Physics/HelicityFormalism/AmpWignerD.hpp"
 #include "Physics/qft++/WignerD.h"
@@ -73,15 +68,15 @@ AmpWignerD::dynamicalFunction(double cosAlpha, double cosBeta, double cosGamma,
 }
 
 std::shared_ptr<AmpWignerD>
-AmpWignerD::Factory(const boost::property_tree::ptree &pt) {
+AmpWignerD::Factory(std::shared_ptr<PartList> partL,
+                    const boost::property_tree::ptree &pt) {
   LOG(trace) << "AmpWignerD::Factory() | Construction....";
   auto obj = std::make_shared<AmpWignerD>();
 
   auto decayParticle = pt.get_child("DecayParticle");
 
   std::string name = pt.get<std::string>("DecayParticle.<xmlattr>.Name");
-  ComPWA::Spin J =
-      PhysConst::Instance()->FindParticle(name).GetSpinQuantumNumber("Spin");
+  ComPWA::Spin J = partL->find(name)->second.GetSpinQuantumNumber("Spin");
   obj->SetSpin(J);
   ComPWA::Spin mu(pt.get<double>("DecayParticle.<xmlattr>.Helicity"));
   obj->SetMu(mu);
