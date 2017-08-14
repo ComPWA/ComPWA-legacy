@@ -53,6 +53,31 @@ ParticleProperties::ParticleProperties(boost::property_tree::ptree pt)
   }
 }
 
+boost::property_tree::ptree ParticleProperties::Save(){
+  boost::property_tree::ptree pt;
+  pt.put("<xmlattr>.Name", _name);
+  pt.put("Pid", _id);
+  pt.add_child("Parameter", DoubleParameterSave(_mass));
+  pt.put("Parameter.<xmlattr>.Type","Mass");
+  for( auto& i: spinQuantumNumbers_ ){
+    boost::property_tree::ptree tmp;
+    tmp.put("<xmlattr>.Class","Spin");
+    tmp.put("<xmlattr>.Type",i.first);
+    tmp.put("<xmlattr>.Value",i.second.GetSpin());
+    pt.add_child("QuantumNumber",tmp);
+  }
+  for( auto& i: intQuantumNumbers_ ){
+    boost::property_tree::ptree tmp;
+    tmp.put("<xmlattr>.Class","Int");
+    tmp.put("<xmlattr>.Type",i.first);
+    tmp.put("<xmlattr>.Value",i.second);
+    pt.add_child("QuantumNumber",tmp);
+  }
+  pt.add_child("DecayInfo", _decayInfo);
+  return pt;
+
+}
+
 int ParticleProperties::GetQuantumNumber(std::string type) const {
   auto it = intQuantumNumbers_.find(type);
   if (it == intQuantumNumbers_.end())

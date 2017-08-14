@@ -46,20 +46,20 @@ BOOST_AUTO_TEST_CASE(XMLInput) {
   <QuantumNumber Class='Int' Type='Cparity' Value='1'/> \
   <QuantumNumber Class='Int' Type='Gparity' Value='1'/> \
   <DecayInfo Type='relativisticBreitWigner'> \
-  <Width Name='width_f0_980'> \
+  <Parameter Type='Width' Name='width_f0_980'> \
   <Value>0.05</Value> \
   <Fix>1</Fix> \
   <Min>0.025</Min> \
   <Max>.5</Max> \
   <Error>0</Error> \
-  </Width> \
-  <MesonRadius Name='radius_f0_980'> \
+  </Parameter> \
+  <Parameter Type='MesonRadius' Name='radius_f0_980'> \
   <Value>1.5</Value> \
   <Fix>1</Fix> \
   <Min>1.0</Min> \
   <Max>2.0</Max> \
   <Error>0</Error> \
-  </MesonRadius> \
+  </Parameter> \
   </DecayInfo> \
   </Particle> \
   </ParticleList>";
@@ -83,6 +83,70 @@ BOOST_AUTO_TEST_CASE(XMLInput) {
   BOOST_CHECK_EQUAL(part.GetQuantumNumber("Parity"), 1);
   BOOST_CHECK_EQUAL(part.GetQuantumNumber("Cparity"), 1);
   BOOST_CHECK_EQUAL(part.GetDecayType(), "relativisticBreitWigner");
+};
+
+BOOST_AUTO_TEST_CASE(XMLOutput) {
+  //Do not instantiate twice
+  //  ComPWA::Logging log("", boost::log::trivial::severity_level::trace);
+
+  std::stringstream XMLIn;
+  XMLIn << "<ParticleList> \
+  <Particle Name='gamma'> \
+  <Pid>22</Pid> \
+  <Parameter Type='Mass' Name='mass_gamma'> \
+  <Value>0.</Value> \
+  </Parameter> \
+  <QuantumNumber Class='Spin' Type='Spin' Value='1.0'/> \
+  <QuantumNumber Class='Int' Type='Charge' Value='0'/> \
+  <QuantumNumber Class='Int' Type='Parity' Value='-1'/> \
+  <QuantumNumber Class='Int' Type='Cparity' Value='-1'/> \
+  <QuantumNumber Class='Int' Type='Gparity' Value='-1'/> \
+  </Particle> \
+  <Particle Name='f0_980'> \
+  <Pid>9010221</Pid> \
+  <Parameter Type='Mass' Name='mass_f0_980'> \
+  <Value>0.99</Value> \
+  <Fix>1</Fix> \
+  <Min>0.5</Min> \
+  <Max>1.5</Max> \
+  <Error>0</Error> \
+  </Parameter> \
+  <QuantumNumber Class='Spin' Type='Spin' Value='0.0'/> \
+  <QuantumNumber Class='Int' Type='Charge' Value='0'/> \
+  <QuantumNumber Class='Int' Type='Parity' Value='1'/> \
+  <QuantumNumber Class='Int' Type='Cparity' Value='1'/> \
+  <QuantumNumber Class='Int' Type='Gparity' Value='1'/> \
+  <DecayInfo Type='relativisticBreitWigner'> \
+  <Parameter Type='Width' Name='width_f0_980'> \
+  <Value>0.05</Value> \
+  <Fix>1</Fix> \
+  <Min>0.025</Min> \
+  <Max>.5</Max> \
+  <Error>0</Error> \
+  </Parameter> \
+  <Parameter Type='MesonRadius' Name='radius_f0_980'> \
+  <Value>1.5</Value> \
+  <Fix>1</Fix> \
+  <Min>1.0</Min> \
+  <Max>2.0</Max> \
+  <Error>0</Error> \
+  </Parameter> \
+  </DecayInfo> \
+  </Particle> \
+  </ParticleList>";
+  
+  boost::property_tree::ptree tr;
+  boost::property_tree::xml_parser::read_xml(XMLIn, tr);
+
+  auto partL = std::make_shared<ComPWA::PartList>();
+  ReadParticles(partL, tr);
+  auto ptout = SaveParticles(partL);
+  
+  LOG(info) << "Writing particle list...";
+  boost::property_tree::xml_parser::write_xml("Properties-output.xml", ptout,
+                                              std::locale());
+
+  //  std::remove("Properties-output.xml"); // delete file
 };
 
 BOOST_AUTO_TEST_SUITE_END()

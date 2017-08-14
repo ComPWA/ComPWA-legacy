@@ -84,6 +84,8 @@ public:
       : Properties(name, id){};
 
   ParticleProperties(boost::property_tree::ptree pt);
+  
+  virtual boost::property_tree::ptree Save();
 
   double GetMass() const { return _mass.GetValue(); }
 
@@ -117,7 +119,8 @@ typedef std::map<std::string, ParticleProperties> PartList;
 /// Search particle \p list for a specific particle \p id.
 /// The first entry in the list is returned. Be careful in case that multiple
 /// particles have the same pid.
-//const ParticleProperties &FindParticle(std::shared_ptr<PartList> list, pid id);
+// const ParticleProperties &FindParticle(std::shared_ptr<PartList> list, pid
+// id);
 inline const ParticleProperties &FindParticle(std::shared_ptr<PartList> list,
                                               pid id) {
 
@@ -152,7 +155,7 @@ inline void ReadParticles(std::shared_ptr<PartList> list,
   auto particleTree = pt.get_child_optional("ParticleList");
   if (!particleTree)
     return;
-  
+
   for (auto const &v : particleTree.get()) {
     auto tmp = ParticleProperties(v.second);
     auto p = std::make_pair(tmp.GetName(), tmp);
@@ -181,6 +184,19 @@ inline void ReadParticles(std::shared_ptr<PartList> list,
   }
 
   return;
+}
+
+/// Save particle list to boost::property_tree
+inline boost::property_tree::ptree
+SaveParticles(std::shared_ptr<PartList> list) {
+  boost::property_tree::ptree pt;
+  
+  for( auto& i: *list.get() ){
+    pt.add_child("Particle",i.second.Save());
+  }
+  boost::property_tree::ptree pt2;
+  pt2.add_child("ParticleList",pt);
+  return pt2;
 }
 
 } // Namespace ComPWA
