@@ -2,12 +2,12 @@
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
-#define BOOST_TEST_MODULE                                                      \
-  HelicityFormalism /* this can only be define once within the same library ?! \
-  */
-#include <vector>
+// This can only be define once within the same library ?!
+#define BOOST_TEST_MODULE HelicityFormalism
 
+#include <vector>
 #include <locale>
+
 #include <boost/test/unit_test.hpp>
 #include <boost/locale/utf.hpp>
 #include <boost/property_tree/ptree.hpp>
@@ -37,9 +37,9 @@ BOOST_AUTO_TEST_CASE(KinematicsConstructionFromXML) {
 
   // Construct HelicityKinematics from XML tree
   boost::property_tree::ptree tr;
-  boost::property_tree::xml_parser::read_xml("../AmpModel-input.xml", tr);
+  boost::property_tree::xml_parser::read_xml("AmpModel-input.xml", tr);
 
-  std::shared_ptr<PartList> partL;
+  auto partL = std::make_shared<ComPWA::PartList>();
   ReadParticles(partL, tr);
   auto kin = std::make_shared<HelicityKinematics>(
       partL, tr.get_child("HelicityKinematics"));
@@ -51,9 +51,10 @@ BOOST_AUTO_TEST_CASE(KinematicsConstructionFromXML) {
 
 BOOST_AUTO_TEST_CASE(ConstructionFromXML) {
   boost::property_tree::ptree tr;
-  boost::property_tree::xml_parser::read_xml("../AmpModel-input.xml", tr);
+  boost::property_tree::xml_parser::read_xml("AmpModel-input.xml",
+                                             tr);
 
-  std::shared_ptr<PartList> partL;
+  auto partL = std::make_shared<ComPWA::PartList>();
   ReadParticles(partL, tr);
   auto kin = std::make_shared<HelicityKinematics>(
       partL, tr.get_child("HelicityKinematics"));
@@ -82,7 +83,7 @@ BOOST_AUTO_TEST_CASE(ConstructionFromXML) {
 
   // Write the property tree to the XML file. Add a line break at the end of
   // each line.
-  boost::property_tree::xml_parser::write_xml("../AmpModel-output.xml", ptout,
+  boost::property_tree::xml_parser::write_xml("AmpModel-output.xml", ptout,
                                               std::locale());
 
   std::remove("AmpModel-output.xml"); // delete file
@@ -95,12 +96,12 @@ BOOST_AUTO_TEST_CASE(ConstructionFromXML) {
 
 BOOST_AUTO_TEST_CASE(AmpTreeCorrespondence) {
   boost::property_tree::ptree tr;
-  boost::property_tree::xml_parser::read_xml("../AmpModel-input.xml", tr);
+  boost::property_tree::xml_parser::read_xml("AmpModel-input.xml", tr);
 
-  std::shared_ptr<PartList> partL;
+  auto partL = std::make_shared<ComPWA::PartList>();
   ReadParticles(partL, tr);
-  auto kin =
-      std::make_shared<HelicityKinematics>(partL, tr.get_child("HelicityKinematics"));
+  auto kin = std::make_shared<HelicityKinematics>(
+      partL, tr.get_child("HelicityKinematics"));
 
   // Due to the structure of Boost.UnitTest the instances already exist from
   // previous test
@@ -108,8 +109,8 @@ BOOST_AUTO_TEST_CASE(AmpTreeCorrespondence) {
   //  ComPWA::PhysConst::CreateInstance(tr);
 
   // Create amplitude
-  auto intens =
-      IncoherentIntensity::Factory(partL, kin, tr.get_child("IncoherentIntensity"));
+  auto intens = IncoherentIntensity::Factory(
+      partL, kin, tr.get_child("IncoherentIntensity"));
 
   ParameterList list;
   intens->GetParameters(list);

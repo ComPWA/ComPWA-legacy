@@ -22,17 +22,37 @@ PartialDecay::Factory(std::shared_ptr<PartList> partL,
 
   LOG(trace) << "PartialDecay::Factory() |";
   SubSystem subSys = SubSystemFactory(pt);
-  
+
   auto obj = std::make_shared<PartialDecay>(subSys);
   obj->SetName(pt.get<std::string>("<xmlattr>.Name", "empty"));
 
-  auto mag = ComPWA::DoubleParameterFactory(pt.get_child("Magnitude"));
-  obj->SetMagnitudeParameter(std::make_shared<DoubleParameter>(mag));
-  auto phase = ComPWA::DoubleParameterFactory(pt.get_child("Phase"));
-  obj->SetPhaseParameter(std::make_shared<DoubleParameter>(phase));
+  std::shared_ptr<DoubleParameter> mag, phase;
+  for (const auto &v : pt.get_child("")) {
+    if (v.first == "Parameter") {
+      if (v.second.get<std::string>("<xmlattr>.Type") == "Magnitude") {
+        auto tmp = ComPWA::DoubleParameterFactory(v.second);
+        mag = std::make_shared<DoubleParameter>(tmp);
+      }
+      if (v.second.get<std::string>("<xmlattr>.Type") == "Phase") {
+        auto tmp = ComPWA::DoubleParameterFactory(v.second);
+        phase = std::make_shared<DoubleParameter>(tmp);
+      }
+    } else {
+      // ignored further settings. Should we throw an error?
+    }
+  }
 
-  obj->SetPhspVolume(kin->GetPhspVolume());
+  if (mag)
+    obj->SetMagnitudeParameter(mag);
+  else
+    throw BadParameter(
+        "PartialDecay::Factory() | No magnitude parameter found.");
 
+  if (phase)
+    obj->SetPhaseParameter(phase);
+  else
+    throw BadParameter(
+        "PartialDecay::Factory() | No phase parameter found.");
 
   auto dynObj = std::shared_ptr<DecayDynamics::AbstractDynamicalFunction>();
   std::string name = pt.get<std::string>("DecayParticle.<xmlattr>.Name");
@@ -70,10 +90,11 @@ PartialDecay::Factory(std::shared_ptr<PartList> partL,
   }
 
   obj->SetDynamicalFunction(dynObj);
-//  obj->SetSubSystem(subSys);
   obj->SetDataPosition(
       3 *
       std::dynamic_pointer_cast<HelicityKinematics>(kin)->GetDataID(subSys));
+
+  obj->SetPhspVolume(kin->GetPhspVolume());
 
   return std::static_pointer_cast<Resonance>(obj);
 }
@@ -98,25 +119,25 @@ boost::property_tree::ptree PartialDecay::Save(std::shared_ptr<Resonance> res) {
   return pt;
 }
 
-  bool PartialDecay::CheckModified() const {
-    if (Resonance::CheckModified())
-      return true;
-    if (_dynamic->CheckModified()) {
-      const_cast<double &>(_current_integral) = Integral();
-      _dynamic->SetModified(false);
-      return true;
-    }
-    return false;
-  }
-
-  double PartialDecay::GetNormalization() const {
-    if (_dynamic->CheckModified() || !_current_integral)
-      const_cast<double &>(_current_integral) = Integral();
+bool PartialDecay::CheckModified() const {
+  if (Resonance::CheckModified())
+    return true;
+  if (_dynamic->CheckModified()) {
+    const_cast<double &>(_current_integral) = Integral();
     _dynamic->SetModified(false);
-    assert(_current_integral != 0.0);
-    return 1 / std::sqrt(_current_integral);
+    return true;
   }
-  
+  return false;
+}
+
+double PartialDecay::GetNormalization() const {
+  if (_dynamic->CheckModified() || !_current_integral)
+    const_cast<double &>(_current_integral) = Integral();
+  _dynamic->SetModified(false);
+  assert(_current_integral != 0.0);
+  return 1 / std::sqrt(_current_integral);
+}
+
 std::shared_ptr<FunctionTree>
 PartialDecay::GetTree(std::shared_ptr<Kinematics> kin,
                       const ParameterList &sample,

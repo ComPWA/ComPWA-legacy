@@ -32,21 +32,32 @@ CoherentIntensity::Factory(std::shared_ptr<PartList> partL,
   //  boost::property_tree::xml_writer_settings<char> settings('\t', 1);
   //  write_xml(std::cout,pt);
 
-  auto ptCh = pt.get_child_optional("Strength");
-  if (ptCh) {
-    auto strength = ComPWA::DoubleParameterFactory(ptCh.get());
-    obj->_strength = (std::make_shared<DoubleParameter>(strength));
-  } else {
-    obj->_strength = (std::make_shared<ComPWA::DoubleParameter>("", 1.0));
-  }
-  obj->SetPhspVolume(kin->GetPhspVolume());
-
+  std::shared_ptr<DoubleParameter> strength;
   for (const auto &v : pt.get_child("")) {
-    if (v.first == "Amplitude")
+    if (v.first == "Parameter") {
+      // Parameter (e.g. Mass)
+      if (v.second.get<std::string>("<xmlattr>.Type") != "Strength")
+        continue;
+      auto tmp = ComPWA::DoubleParameterFactory(v.second);
+      strength = std::make_shared<DoubleParameter>(tmp);
+    } else if (v.first == "Amplitude"){
       obj->AddAmplitude(
           ComPWA::Physics::HelicityFormalism::SequentialTwoBodyDecay::Factory(
               partL, kin, v.second));
+    } else {
+      // ignored further settings. Should we throw an error?
+    }
   }
+
+  if (strength)
+    obj->_strength = strength;
+  else {
+    obj->_strength = (std::make_shared<ComPWA::DoubleParameter>("", 1.0));
+    obj->_strength->SetParameterFixed();
+  }
+  
+  obj->SetPhspVolume(kin->GetPhspVolume());
+  
   return obj;
 }
 

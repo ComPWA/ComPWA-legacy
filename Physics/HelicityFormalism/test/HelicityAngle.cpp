@@ -44,9 +44,10 @@ BOOST_AUTO_TEST_CASE(HelicityAngleTest) {
 
   // Construct HelicityKinematics from XML tree
   boost::property_tree::ptree tr;
-  boost::property_tree::xml_parser::read_xml("AmpModel-input.xml", tr);
+  boost::property_tree::xml_parser::read_xml("AmpModel-input.xml",
+                                             tr);
 
-  std::shared_ptr<PartList> partL;
+  auto partL = std::make_shared<ComPWA::PartList>();
   ReadParticles(partL, tr);
 
   // Construct HelicityKinematics by hand
@@ -55,7 +56,8 @@ BOOST_AUTO_TEST_CASE(HelicityAngleTest) {
   finalState.push_back(310);
   finalState.push_back(-321);
   finalState.push_back(321);
-  auto kin = std::make_shared<HelicityKinematics>(partL, initialState, finalState);
+  auto kin =
+      std::make_shared<HelicityKinematics>(partL, initialState, finalState);
 
   // Generate phsp sample
   std::shared_ptr<ComPWA::Generator> gen(new ComPWA::Tools::RootGenerator(

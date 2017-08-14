@@ -21,23 +21,32 @@ IncoherentIntensity::Factory(std::shared_ptr<PartList> partL,
   // Name is not required - default value 'empty'
   obj->_name = (pt.get<std::string>("<xmlattr>.Name", "empty"));
 
-  auto ptCh = pt.get_child_optional("Strength");
-  if (ptCh) {
-    auto strength = ComPWA::DoubleParameterFactory(ptCh.get());
-    obj->_strength = (std::make_shared<DoubleParameter>(strength));
-  } else {
+  std::shared_ptr<DoubleParameter> strength;
+  for (const auto &v : pt.get_child("")) {
+    if (v.first == "Parameter") {
+      // Parameter (e.g. Mass)
+      if (v.second.get<std::string>("<xmlattr>.Type") != "Strength")
+        continue;
+      auto tmp = ComPWA::DoubleParameterFactory(v.second);
+      strength = std::make_shared<DoubleParameter>(tmp);
+    } else if (v.first == "CoherentIntensity"){
+      obj->AddIntensity(
+          ComPWA::Physics::HelicityFormalism::CoherentIntensity::Factory(
+              partL, kin, v.second));
+    } else {
+      // ignored further settings. Should we throw an error?
+    }
+  }
+
+  if (strength)
+    obj->_strength = strength;
+  else {
     obj->_strength = (std::make_shared<ComPWA::DoubleParameter>("", 1.0));
     obj->_strength->SetParameterFixed();
   }
 
   obj->SetPhspVolume(kin->GetPhspVolume());
 
-  for (const auto &v : pt.get_child("")) {
-    if (v.first == "CoherentIntensity")
-      obj->AddIntensity(
-          ComPWA::Physics::HelicityFormalism::CoherentIntensity::Factory(
-              partL, kin, v.second));
-  }
   return obj;
 }
 
@@ -46,7 +55,8 @@ IncoherentIntensity::Save(std::shared_ptr<IncoherentIntensity> obj) {
 
   boost::property_tree::ptree pt;
   pt.put<std::string>("<xmlattr>.Name", obj->Name());
-  pt.add_child("Strength", ComPWA::DoubleParameterSave(*obj->_strength.get()));
+  pt.add_child("Parameter", ComPWA::DoubleParameterSave(*obj->_strength.get()));
+  pt.put("Parameter.<xmlattr>.Type","Strength");
   for (auto i : obj->GetIntensities()) {
     // TODO: we have to implement a memeber function Save() in AmpIntensity
     // interface and use it here

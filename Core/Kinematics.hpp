@@ -58,11 +58,8 @@ public:
 
 protected:
   std::vector<pid> _initialState;
+  
   std::vector<pid> _finalState;
-  std::vector<double> _initialStateMass;
-  std::vector<double> _finalStateMass;
-  std::vector<std::string> _initialStateName;
-  std::vector<std::string> _finalStateName;
 
   //! Internal names of variabes
   std::vector<std::string> _varNames;

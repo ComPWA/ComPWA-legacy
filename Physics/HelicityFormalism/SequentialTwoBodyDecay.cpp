@@ -17,24 +17,43 @@ SequentialTwoBodyDecay::Factory(std::shared_ptr<PartList> partL,
   auto obj = std::make_shared<SequentialTwoBodyDecay>();
   obj->SetName(pt.get<std::string>("<xmlattr>.Name", "empty"));
 
-  auto mag = ComPWA::DoubleParameterFactory(pt.get_child("Magnitude"));
-  obj->SetMagnitudeParameter(std::make_shared<DoubleParameter>(mag));
-  auto phase = ComPWA::DoubleParameterFactory(pt.get_child("Phase"));
-  obj->SetPhaseParameter(std::make_shared<DoubleParameter>(phase));
-
-  auto prefactor = pt.get_child_optional("PreFactor");
-  if (prefactor) {
-    double r = prefactor.get().get<double>("<xmlattr>.Magnitude");
-    double p = prefactor.get().get<double>("<xmlattr>.Phase");
-    auto pref = std::polar(r, p);
-    obj->SetPreFactor(pref);
-  }
-
+  std::shared_ptr<DoubleParameter> mag, phase;
+  std::complex<double> pref(1, 0);
   for (const auto &v : pt.get_child("")) {
-    if (v.first == "Resonance")
+    if (v.first == "Parameter") {
+      if (v.second.get<std::string>("<xmlattr>.Type") == "Magnitude") {
+        auto tmp = ComPWA::DoubleParameterFactory(v.second);
+        mag = std::make_shared<DoubleParameter>(tmp);
+      }
+      if (v.second.get<std::string>("<xmlattr>.Type") == "Phase") {
+        auto tmp = ComPWA::DoubleParameterFactory(v.second);
+        phase = std::make_shared<DoubleParameter>(tmp);
+      }
+    } else if (v.first == "Resonance") {
       obj->Add(PartialDecay::Factory(partL, kin, v.second));
+    } else if (v.first == "PreFactor") {
+      double r = v.second.get<double>("<xmlattr>.Magnitude");
+      double p = v.second.get<double>("<xmlattr>.Phase");
+      pref = std::polar(r, p);
+    } else {
+      // ignored further settings. Should we throw an error?
+    }
   }
 
+  if (mag)
+    obj->SetMagnitudeParameter(mag);
+  else
+    throw BadParameter(
+        "SequentialTwoBodyDecay::Factory() | No magnitude parameter found.");
+
+  if (phase)
+    obj->SetPhaseParameter(phase);
+  else
+    throw BadParameter(
+        "SequentialTwoBodyDecay::Factory() | No phase parameter found.");
+  
+  obj->SetPreFactor(pref);
+  
   return std::static_pointer_cast<ComPWA::Physics::Amplitude>(obj);
 }
 

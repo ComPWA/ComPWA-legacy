@@ -1,12 +1,10 @@
-//
-//  PhysConstTest.cpp
-//  COMPWA
-//
-//  Created by Peter Weidenkaff on 24/02/2017.
-//
-//
+// Copyright (c) 2017 The ComPWA Team.
+// This file is part of the ComPWA framework, check
+// https://github.com/ComPWA/ComPWA/license.txt for details.
+
+// This can only be define once within the same library ?!
 #define BOOST_TEST_MODULE                                                      \
-  Core /* this can only be define once within the same library ?! */
+  Core 
 
 #include <boost/test/unit_test.hpp>
 #include <boost/property_tree/ptree.hpp>
@@ -69,7 +67,7 @@ BOOST_AUTO_TEST_CASE(XMLInput) {
   boost::property_tree::ptree tr;
   boost::property_tree::xml_parser::read_xml(XMLIn, tr);
 
-  std::shared_ptr<ComPWA::PartList> partL;
+  auto partL = std::make_shared<ComPWA::PartList>();
   ReadParticles(partL, tr);
 
   auto part = partL->find("gamma")->second;
@@ -77,7 +75,7 @@ BOOST_AUTO_TEST_CASE(XMLInput) {
   BOOST_CHECK_EQUAL((double)part.GetSpinQuantumNumber("Spin"), 1.);
   BOOST_CHECK_EQUAL(part.GetQuantumNumber("Parity"), -1);
   BOOST_CHECK_EQUAL(part.GetQuantumNumber("Cparity"), -1);
-  BOOST_CHECK_EQUAL(part.GetDecayType(), "stable");
+  BOOST_CHECK_EQUAL(part.GetDecayType(), "Stable");
 
   part = FindParticle(partL, 9010221);
   BOOST_CHECK_EQUAL(part.GetMass(), 0.99);

@@ -316,7 +316,8 @@ int main(int argc, char **argv) {
   boost::property_tree::ptree trueModelTree;
   boost::property_tree::xml_parser::read_xml(trueModelFile, trueModelTree);
 
-  std::shared_ptr<PartList> fitModelPartL, trueModelPartL;
+  auto fitModelPartL = std::make_shared<ComPWA::PartList>();
+  auto trueModelPartL = std::make_shared<ComPWA::PartList>();
   ReadParticles(fitModelPartL, fitModelTree);
   ReadParticles(trueModelPartL, trueModelTree);
 

@@ -31,17 +31,6 @@ HelicityKinematics::HelicityKinematics(std::shared_ptr<PartList> partL,
   // Note: Whats different for particle scattering?
   assert(_initialState.size() == 1);
 
-  for (auto i : initialState) {
-    auto prop = FindParticle(partL, i);
-    _initialStateMass.push_back(prop.GetMass());
-    _initialStateName.push_back(prop.GetName());
-  }
-  for (auto i : finalState) {
-    auto prop = FindParticle(partL, i);
-    _finalStateMass.push_back(prop.GetMass());
-    _finalStateName.push_back(prop.GetName());
-  }
-
   // Create title
   std::stringstream stream;
   stream << "( ";
@@ -61,34 +50,25 @@ HelicityKinematics::HelicityKinematics(std::shared_ptr<PartList> partL,
                                        boost::property_tree::ptree pt)
     : _partList(partL) {
 
-  // Currently we can only handle a particle decay.
-  // Note: Whats different for particle scattering?
-  assert(_initialState.size() == 1);
-
   auto initialS = pt.get_child("InitialState");
   _initialState = std::vector<int>(initialS.size());
-  _initialStateMass = std::vector<double>(initialS.size());
-  _initialStateName = std::vector<std::string>(initialS.size());
   for (auto i : initialS) {
     std::string name = i.second.get<std::string>("<xmlattr>.Name");
     auto partP = partL->find(name)->second;
     int pos = i.second.get<int>("<xmlattr>.Id");
     _initialState.at(pos) = partP.GetId();
-    _initialStateMass.at(pos) = partP.GetMass();
-    _initialStateName.at(pos) = partP.GetName();
   }
+  // Currently we can only handle a particle decay.
+  // Note: Whats different for particle scattering?
+  assert(_initialState.size() == 1);
 
   auto finalS = pt.get_child("FinalState");
   _finalState = std::vector<int>(finalS.size());
-  _finalStateMass = std::vector<double>(finalS.size());
-  _finalStateName = std::vector<std::string>(finalS.size());
   for (auto i : finalS) {
     std::string name = i.second.get<std::string>("<xmlattr>.Name");
     auto partP = partL->find(name)->second;
     int pos = i.second.get<int>("<xmlattr>.Id");
     _finalState.at(pos) = partP.GetId();
-    _finalStateMass.at(pos) = partP.GetMass();
-    _finalStateName.at(pos) = partP.GetName();
   }
 
   auto phspVal = pt.get_optional<double>("PhspVolume");
@@ -303,7 +283,8 @@ HelicityKinematics::CalculateInvMassBounds(const SubSystem sys) const {
 
   /// We use the formulae from (PDG2016 Kinematics Fig.47.3). I hope the
   /// generalization to n-body decays is correct.
-  std::pair<double, double> lim(0, _initialStateMass.at(0));
+  std::pair<double, double> lim(
+      0, FindParticle(_partList, _initialState.at(0)).GetMass());
   // Sum up masses of all final state particles
   for (auto j : sys.GetFinalStates())
     for (auto i : j)
