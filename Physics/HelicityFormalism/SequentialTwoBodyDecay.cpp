@@ -51,9 +51,9 @@ SequentialTwoBodyDecay::Factory(std::shared_ptr<PartList> partL,
   else
     throw BadParameter(
         "SequentialTwoBodyDecay::Factory() | No phase parameter found.");
-  
+
   obj->SetPreFactor(pref);
-  
+
   return std::static_pointer_cast<ComPWA::Physics::Amplitude>(obj);
 }
 
@@ -63,10 +63,15 @@ SequentialTwoBodyDecay::Save(std::shared_ptr<ComPWA::Physics::Amplitude> amp) {
   auto obj = std::static_pointer_cast<SequentialTwoBodyDecay>(amp);
   boost::property_tree::ptree pt;
   pt.put<std::string>("<xmlattr>.Name", obj->GetName());
-  pt.add_child("Magnitude", ComPWA::DoubleParameterSave(
-                                *obj->GetMagnitudeParameter().get()));
-  pt.add_child("Phase",
-               ComPWA::DoubleParameterSave(*obj->GetPhaseParameter().get()));
+
+  boost::property_tree::ptree tmp = ComPWA::DoubleParameterSave(
+                                *obj->GetMagnitudeParameter().get());
+  tmp.put("<xmlattr>.Type", "Magnitude");
+  pt.add_child("Parameter", tmp);
+  
+  tmp = ComPWA::DoubleParameterSave(*obj->GetPhaseParameter().get());
+  tmp.put("<xmlattr>.Type", "Phase");
+  pt.add_child("Parameter", tmp);
 
   auto pref = amp->GetPreFactor();
   if (pref != std::complex<double>(1, 0)) {
@@ -82,7 +87,6 @@ SequentialTwoBodyDecay::Save(std::shared_ptr<ComPWA::Physics::Amplitude> amp) {
   return pt;
 }
 
-/**! Setup function tree */
 std::shared_ptr<FunctionTree> SequentialTwoBodyDecay::GetTree(
     std::shared_ptr<Kinematics> kin, const ParameterList &sample,
     const ParameterList &toySample, std::string suffix) {

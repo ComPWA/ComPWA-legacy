@@ -21,7 +21,7 @@ PartialDecay::Factory(std::shared_ptr<PartList> partL,
                       const boost::property_tree::ptree &pt) {
 
   LOG(trace) << "PartialDecay::Factory() |";
-  SubSystem subSys = SubSystemFactory(pt);
+  SubSystem subSys = SubSystemFactory(pt.get_child("SubSystem"));
 
   auto obj = std::make_shared<PartialDecay>(subSys);
   obj->SetName(pt.get<std::string>("<xmlattr>.Name", "empty"));
@@ -104,11 +104,16 @@ boost::property_tree::ptree PartialDecay::Save(std::shared_ptr<Resonance> res) {
   auto obj = std::static_pointer_cast<PartialDecay>(res);
   boost::property_tree::ptree pt;
   pt.put<std::string>("<xmlattr>.Name", obj->GetName());
-  pt.add_child("Magnitude", ComPWA::DoubleParameterSave(
-                                *obj->GetMagnitudeParameter().get()));
-  pt.add_child("Phase",
-               ComPWA::DoubleParameterSave(*obj->GetPhaseParameter().get()));
-
+  
+  boost::property_tree::ptree tmp = ComPWA::DoubleParameterSave(
+                                *obj->GetMagnitudeParameter().get());
+  tmp.put("<xmlattr>.Type", "Magnitude");
+  pt.add_child("Parameter", tmp);
+  
+  tmp = ComPWA::DoubleParameterSave(*obj->GetPhaseParameter().get());
+  tmp.put("<xmlattr>.Type", "Phase");
+  pt.add_child("Parameter", tmp);
+  
   pt.put("DecayParticle.<xmlattr>.Name",
          obj->GetDynamicalFunction()->GetName());
   pt.put("DecayParticle.<xmlattr>.Helicity", obj->GetWignerD()->GetMu());

@@ -66,7 +66,9 @@ CoherentIntensity::Save(std::shared_ptr<CoherentIntensity> obj) {
 
   boost::property_tree::ptree pt;
   pt.put<std::string>("<xmlattr>.Name", obj->Name());
-  pt.add_child("Strength", ComPWA::DoubleParameterSave(*obj->_strength.get()));
+  pt.add_child("Parameter", ComPWA::DoubleParameterSave(*obj->_strength.get()));
+  pt.put("Parameter.<xmlattr>.Type","Strength");
+  
   for (auto i : obj->GetAmplitudes()) {
     pt.add_child("Amplitude", SequentialTwoBodyDecay::Save(i));
   }
