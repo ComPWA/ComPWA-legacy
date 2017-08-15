@@ -35,9 +35,9 @@ public:
   bool operator==(const SubSystem &b) const;
 
   friend std::ostream &operator<<(std::ostream &stream, const SubSystem &s) {
-    stream << s.to_string();
-    return stream;
+    return stream << s.to_string();
   }
+  
   virtual void SetFinalStates(std::vector<std::vector<int>> v);
 
   virtual const std::vector<std::string> &GetFinalStatesNames() const;
