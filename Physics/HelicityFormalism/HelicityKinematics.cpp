@@ -163,8 +163,8 @@ void HelicityKinematics::EventToDataPoint(
     const Event &event, dataPoint &point, const SubSystem sys,
     const std::pair<double, double> limits) const {
 
-  if (sys.GetFinalStates().size() != 2)
-    return;
+  assert(sys.GetFinalStates().size() != 2 &&
+         "HelicityKinematics::EventToDataPoint() | More then two particles.");
 
   FourMomentum recoilP4;
   for (auto s : sys.GetRecoilState())
@@ -205,16 +205,16 @@ void HelicityKinematics::EventToDataPoint(
   QFT::Vector4<double> qftFinalA(finalA);
   QFT::Vector4<double> qftRecoilP4(recoilP4);
 
-  /* Boost one final state four momentum and the four momentum of the recoil
-   * system to the center of mass system of the two-body decay
-   */
+  // Boost one final state four momentum and the four momentum of the recoil
+  // system to the center of mass system of the two-body decay
   qftFinalA.Boost(qftTotalP4);
   qftRecoilP4.Boost(qftTotalP4);
-  //    qftRecoilP4 *= (-1);
 
   // Calculate the angles between recoil system and final state.
-  qftFinalA.Rotate(qftRecoilP4.Phi(), qftRecoilP4.Theta(),
-                   (-1) * qftRecoilP4.Phi());
+  //  qftFinalA.Rotate(qftRecoilP4.Phi(), qftRecoilP4.Theta(),
+  //                   (-1) * qftRecoilP4.Phi());
+  qftFinalA.RotateZ((-1) * qftRecoilP4.Phi());
+  qftFinalA.RotateY((-1) * qftRecoilP4.Theta());
   double cosTheta = qftFinalA.CosTheta();
   double phi = qftFinalA.Phi();
 
@@ -301,3 +301,4 @@ HelicityKinematics::CalculateInvMassBounds(const SubSystem sys) const {
 } /* namespace HelicityFormalism */
 } /* namespace Physics */
 } /* namespace ComPWA */
+/
