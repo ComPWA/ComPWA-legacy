@@ -163,12 +163,12 @@ void HelicityKinematics::EventToDataPoint(
     const Event &event, dataPoint &point, const SubSystem sys,
     const std::pair<double, double> limits) const {
 
-  assert(sys.GetFinalStates().size() != 2 &&
+  assert(sys.GetFinalStates().size() == 2 &&
          "HelicityKinematics::EventToDataPoint() | More then two particles.");
 
-  FourMomentum recoilP4;
+  FourMomentum cms;
   for (auto s : sys.GetRecoilState())
-    recoilP4 += event.GetParticle(s).GetFourMomentum();
+    cms += event.GetParticle(s).GetFourMomentum();
 
   FourMomentum finalA, finalB;
   for (auto s : sys.GetFinalStates().at(0))
@@ -177,8 +177,12 @@ void HelicityKinematics::EventToDataPoint(
   for (auto s : sys.GetFinalStates().at(1))
     finalB += event.GetParticle(s).GetFourMomentum();
 
-  FourMomentum totalP4 = finalA + finalB;
-  double mSq = totalP4.GetInvMassSq();
+  // Four momentum of the decaying resonance
+  FourMomentum resP4 = finalA + finalB;
+  double mSq = resP4.GetInvMassSq();
+  
+  // Calculate sum of final states four momenta
+  cms += resP4;
 
   if (mSq <= limits.first) {
     // We allow for a deviation from the limits of 10 times the numerical
@@ -199,24 +203,26 @@ void HelicityKinematics::EventToDataPoint(
                        " Point beypond phase space boundaries!");
   }
 
-  // When using finalB here the WignerD changes sign. In the end this does not
-  // matter
-  QFT::Vector4<double> qftTotalP4(totalP4);
-  QFT::Vector4<double> qftFinalA(finalA);
-  QFT::Vector4<double> qftRecoilP4(recoilP4);
+  // When using finalB instead of finalA here, the WignerD changes sign. In
+  // the end this does not matter
+  QFT::Vector4<double> p4QftCms(cms);
+  QFT::Vector4<double> p4QftResonance(resP4);
+  QFT::Vector4<double> p4QftDaughter(finalB);
 
-  // Boost one final state four momentum and the four momentum of the recoil
-  // system to the center of mass system of the two-body decay
-  qftFinalA.Boost(qftTotalP4);
-  qftRecoilP4.Boost(qftTotalP4);
+  // Boost the four momentum of the decaying resonance to total CMS
+  p4QftResonance.Boost(p4QftCms);
+  // Boost the four momentum of one daughter particle to CMS of the resonance
+  p4QftDaughter.Boost(p4QftResonance);
 
   // Calculate the angles between recoil system and final state.
-  //  qftFinalA.Rotate(qftRecoilP4.Phi(), qftRecoilP4.Theta(),
-  //                   (-1) * qftRecoilP4.Phi());
-  qftFinalA.RotateZ((-1) * qftRecoilP4.Phi());
-  qftFinalA.RotateY((-1) * qftRecoilP4.Theta());
-  double cosTheta = qftFinalA.CosTheta();
-  double phi = qftFinalA.Phi();
+  // Use an Euler rotation of the coordinate system (wrong?)
+  //   p4QftDaughter.Rotate(p4QftResonance.Phi(), p4QftResonance.Theta(),
+  //                       (-1) * p4QftResonance.Phi());
+  p4QftDaughter.RotateZ((-1) * p4QftResonance.Phi());
+  p4QftDaughter.RotateY((-1) * p4QftResonance.Theta());
+  
+  double cosTheta = p4QftDaughter.CosTheta();
+  double phi = p4QftDaughter.Phi();
 
   //  double cc;
   //  if (sys.GetRecoilState().size() == 1 &&
@@ -301,4 +307,3 @@ HelicityKinematics::CalculateInvMassBounds(const SubSystem sys) const {
 } /* namespace HelicityFormalism */
 } /* namespace Physics */
 } /* namespace ComPWA */
-/

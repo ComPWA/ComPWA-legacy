@@ -120,6 +120,11 @@ public:
   virtual SubSystem GetSubSystem(int pos) const {
     return _listSubSystem.at(pos);
   }
+  
+  /// Get SubSystem from \p pos in list
+  virtual std::vector<SubSystem> GetSubSystems() const {
+    return _listSubSystem;
+  }
 
   /// Get number of variables that are added to dataPoint
   virtual size_t GetNVars() const { return _listSubSystem.size() * 3; }

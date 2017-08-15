@@ -480,6 +480,15 @@ int main(int argc, char **argv) {
   // Reset phsp sample to save memory
   run.SetPhspSample(std::shared_ptr<Data>());
 
+  for( int i = 0; i< sample->GetNEvents(); ++i){
+    dataPoint p;
+    trueModelKin->EventToDataPoint(sample->GetEvent(i), p);
+    std::cout<<p<<std::endl;
+  }
+  for( auto i : trueModelKin->GetSubSystems() )
+    std::cout<<i<<std::endl;
+  sample->WriteData("test.root","tr");
+  exit(1);
   sample->ReduceToPhsp(trueModelKin);
 
   LOG(info) << "================== SETTINGS =================== ";
