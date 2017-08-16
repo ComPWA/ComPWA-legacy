@@ -4,7 +4,7 @@
 
 ///
 /// \file
-/// Contains HelicityKinematics class
+/// Contains HelicityKinematics class.
 ///
 
 #ifndef PHYSICS_HELICITYFORMALISM_HELICITYKINEMATICS_HPP_
@@ -18,10 +18,50 @@ namespace ComPWA {
 namespace Physics {
 namespace HelicityFormalism {
 
+///
 /// \class HelicityKinematics
 /// Implementation of the ComPWA::Kinematics interface for amplitude models
 /// using the helicity formalism.
-
+/// The basic functionality is the calculatation of the kinematics variables
+/// from four-momenta.
+/// The variables that are used by a Resonance within a
+/// AmpIntensity depend on the SubSystem in which the Resonance appears.
+/// For the helicity formalism for each SubSystem the invariant mass \f$m^2\f$,
+/// and the helicity angles \f$cos\Theta\f$ and \f$\phi\f$ are calculated
+/// (\ref helicityangles).
+///
+/// The SubSystem is basically defined by the four-momenta of the resonance
+/// decay
+/// products and the sum of four-momenta of all other final state particles in
+/// the decay. Since usually a large number of possible SubSystems can be
+/// defined
+/// in a particle decay but only few of them are used, we introuce a bookkeeping
+/// system (\ref dataID). This increases efficiency (cpu+memory) significantly.
+///
+/// \section dataID DataID
+///
+/// lsdafds
+/// \see GetDataID(SubSystem s)
+///
+/// \section helicityangles Helicity Angles
+///
+/// The helicity angles \f$cos\Theta\f$ and \f$\phi\f$ are defined as follows:
+/// A resonance R originating from another particles decays to two final state
+/// particles \f$f_1,f_2\f$.
+/// The momentum of the resonance R is shown in the rest frame of the parent
+/// decay
+/// while the momenta of the final state particles are boosted to the rest frame
+/// of the resonance. The helicity angles \f$cos\Theta\f$ and \f$\phi\f$ are
+/// then
+/// calculated between the momentum direction of \f$f_1\f$ (or \f$f_2\f$) and
+/// the
+/// momentum direction of the resonance.
+/// A (two-dimensional) illustration is given below
+/// \image html HelicityAngle.png "Helicity angle"
+/// \see EventToDataPoint(const Event &event, dataPoint &point, SubSystem sys,
+///                     const std::pair<double, double> limits) const;
+///
+///
 class HelicityKinematics : public ComPWA::Kinematics {
 
 public:
@@ -55,16 +95,17 @@ public:
                      boost::property_tree::ptree pt);
 
   /// Delete copy constructor. For each Kinematics in the analysis only
-  /// one instance should exist since Kinematics does the bookkeeping for which
-  /// SubSystems variables needs to be calculated. That instance can then be
+  /// one instance should exist since Kinematics does the bookkeeping which
+  /// SubSystems variables are needs to be calculated. That instance can then be
   /// passed as (smart) pointer.
   /// Note1: Not sure if we also should delete the move constructor.
   /// Note2: We have to delete the copy constructor in Base and Derived classes.
   HelicityKinematics(const HelicityKinematics &that) = delete;
 
   /// Fill \p point from \p event.
-  /// The triple (\f$m^2,cos\Theta, \phi\f$) is added to dataPoint for each
-  /// SubSystem that was requested via GetDataID(SubSystem). In this way only
+  /// For each SubSystem stored via GetDataID(const SubSystem subSys) function
+  /// #EventToDataPoint(const Event&, dataPoint&, SubSystem,
+  /// const std::pair<double, double>) is called. In this way only
   /// the variables are calculated that are used by the model.
   void EventToDataPoint(const Event &event, dataPoint &point) const;
 
@@ -72,6 +113,19 @@ public:
   /// The triple (\f$m^2, cos\Theta, \phi\f$) is added to dataPoint for
   /// SubSystem \p sys. Invariant mass limits of the SubSystem can be given via
   /// \p limits.
+  /// For a more general introduction see \ref helicityangles. The step-by-step
+  /// procedure to calculate the helicity angles is:
+  ///     -# Calculate four-momenta of center-of-mass system, resonance and of
+  ///        one final state particle  by summing up the corresponding
+  ///        four-momenta given by \p event.
+  ///     -# The invariant mass \f$m^2\f$ is directly calculated from the
+  ///        four-momentum of the resonance.
+  ///     -# Boost the four-momentum of the resonance to the center-of-mass
+  ///        frame of the parent decay.
+  ///     -# Boost the four-momentum of the final state particle in the rest
+  ///        frame of the resonance.
+  ///     -# Calculate \f$cos\Theta\f$ and \f$\phi\f$ between those boosted
+  ///        momenta.
   void EventToDataPoint(const Event &event, dataPoint &point, SubSystem sys,
                         const std::pair<double, double> limits) const;
 
@@ -83,17 +137,6 @@ public:
 
   /// Check if \p point is within phase space boundaries.
   bool IsWithinPhsp(const dataPoint &point) const;
-
-  virtual bool IsWithinBoxPhsp(int idA, int idB, double varA,
-                               double varB) const {
-    return true;
-  }
-
-  /// Calculation of helicity angle.
-  /// Deprecated. Only used as cross-check.
-  /// See (Martin and Spearman, Elementary Particle Theory. 1970)
-  double HelicityAngle(double M, double m, double m2, double mSpec,
-                       double invMassSqA, double invMassSqB) const;
 
   /// Get ID of data for \p subSys.
   /// In case that the ID was not requested before the subsystem is added to
@@ -120,7 +163,7 @@ public:
   virtual SubSystem GetSubSystem(int pos) const {
     return _listSubSystem.at(pos);
   }
-  
+
   /// Get SubSystem from \p pos in list
   virtual std::vector<SubSystem> GetSubSystems() const {
     return _listSubSystem;
@@ -135,9 +178,15 @@ public:
 
   virtual const std::pair<double, double> &GetInvMassBounds(int sysID) const;
 
+  /// Calculation of helicity angle.
+  /// See (Martin and Spearman, Elementary Particle Theory. 1970)
+  /// \deprecated Only used as cross-check.
+  double HelicityAngle(double M, double m, double m2, double mSpec,
+                       double invMassSqA, double invMassSqB) const;
+
 protected:
   std::shared_ptr<PartList> _partList;
-  
+
   ///  Calculation of n-dimensional phase space volume.
   ///  ToDo: We need to implement an analytical calculation here
   double calculatePSArea() { return 1.0; }
