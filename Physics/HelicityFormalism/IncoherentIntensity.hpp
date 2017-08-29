@@ -28,7 +28,8 @@ public:
   }
 
   static std::shared_ptr<IncoherentIntensity>
-  Factory(std::shared_ptr<Kinematics> kin, const boost::property_tree::ptree &pt);
+  Factory(std::shared_ptr<PartList> partL, std::shared_ptr<Kinematics> kin,
+          const boost::property_tree::ptree &pt);
 
   static boost::property_tree::ptree
   Save(std::shared_ptr<IncoherentIntensity> intens);
@@ -92,7 +93,7 @@ public:
       i->SetPhspSample(phspSample, toySample);
     }
   };
-  
+
   virtual void SetPhspVolume(double vol) { phspVolume_ = vol; };
 
   virtual std::shared_ptr<AmpIntensity> GetComponent(std::string name);
@@ -120,7 +121,7 @@ public:
 protected:
   //! Phase space sample to calculate the normalization and maximum value.
   std::shared_ptr<std::vector<ComPWA::dataPoint>> _phspSample;
-  
+
   double phspVolume_;
 
   // Caching of normalization values
@@ -135,4 +136,4 @@ protected:
 } /* namespace HelicityFormalism */
 } /* namespace Physics */
 } /* namespace ComPWA */
-#endif /* Header_h */
+#endif

@@ -153,7 +153,6 @@ double MinLogLH::controlParameter(ParameterList &minPar) {
         std::dynamic_pointer_cast<DoubleParameter>(_tree->head()->getValue());
     lh = logLH->GetValue();
   }
-  //  lh += calcPenalty();
   _calls++;
   return lh; // return -logLH
 }

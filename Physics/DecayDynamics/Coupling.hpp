@@ -19,8 +19,7 @@ inline std::complex<double> couplingToWidth(double mSq, double mR, double g,
 
   if (spin > 0 || type == formFactorType::CrystalBarrel) {
     std::complex<double> qV = qValue(mR, ma, mb);
-    double ffR = FormFactor(mR, ma, mb, spin, mesonRadius,
-                                                qV, type);
+    double ffR = FormFactor(mR, ma, mb, spin, mesonRadius, qV, type);
     std::complex<double> qR = std::pow(qV, spin);
     gammaA = ffR * qR;
   }
@@ -49,8 +48,7 @@ inline std::complex<double> couplingToWidth(double mSq, double mR, double g,
   double sqrtM = sqrt(mSq);
   std::complex<double> phspF = phspFactor(sqrtM, ma, mb);
 
-  return couplingToWidth(mSq, mR, g, ma, mb, spin, mesonRadius, type,
-                         phspF);
+  return couplingToWidth(mSq, mR, g, ma, mb, spin, mesonRadius, type, phspF);
 }
 
 inline std::complex<double> widthToCoupling(double mSq, double mR, double width,
@@ -64,8 +62,7 @@ inline std::complex<double> widthToCoupling(double mSq, double mR, double width,
   std::complex<double> qV;
   if (spin > 0) {
     qV = qValue(mR, ma, mb);
-    double ffR = FormFactor(mR, ma, mb, spin, mesonRadius,
-                                                qV, type);
+    double ffR = FormFactor(mR, ma, mb, spin, mesonRadius, qV, type);
     std::complex<double> qR = std::pow(qV, spin);
     gammaA = ffR * qR;
   }
@@ -78,11 +75,9 @@ inline std::complex<double> widthToCoupling(double mSq, double mR, double width,
 
 #ifndef NDEBUG
   // check for NaN
-  //	if( std::isnan(res.real()) || std::isnan(res.imag()) )
-  //		throw
-  // std::runtime_error("AmpAbsDynamicalFunction::widthToCoupling()
-  //| "
-  //				"Result is NaN!");
+  if (std::isnan(res.real()) || std::isnan(res.imag()))
+    throw std::runtime_error("AmpAbsDynamicalFunction::widthToCoupling() | "
+                             "Result is NaN!");
   // check for inf
   if (std::isinf(res.real()) || std::isinf(res.imag()))
     throw std::runtime_error("AbstractDynamicalFunction::widthToCoupling() | "
@@ -96,13 +91,14 @@ class Coupling {
 public:
   Coupling() : _g(new DoubleParameter("", 0.0)){};
 
-  Coupling(const boost::property_tree::ptree tr) {
+  Coupling(std::shared_ptr<PartList> partL,
+           const boost::property_tree::ptree tr) {
     _g = std::make_shared<DoubleParameter>(
         ComPWA::DoubleParameterFactory(tr.get_child("")));
     std::string nameA = tr.get<std::string>("ParticleA");
     std::string nameB = tr.get<std::string>("ParticleB");
-    _massA = PhysConst::Instance()->FindParticle(nameA).GetMass();
-    _massB = PhysConst::Instance()->FindParticle(nameB).GetMass();
+    _massA = partL->find(nameA)->second.GetMass();
+    _massB = partL->find(nameB)->second.GetMass();
   };
 
   void SetValueParameter(std::shared_ptr<DoubleParameter> g) { _g = g; }

@@ -3,27 +3,25 @@
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
 #include "Core/TwoBodyKinematics.hpp"
-#include "Core/PhysConst.hpp"
+#include "Core/Properties.hpp"
 #include "Core/DataPoint.hpp"
 
 namespace ComPWA {
 
-TwoBodyKinematics::TwoBodyKinematics(int idMother, std::vector<int> finalState,
+TwoBodyKinematics::TwoBodyKinematics(std::shared_ptr<PartList> partL,
+                                     int idMother, std::vector<int> finalState,
                                      double deltaMassWindow)
-  : Kinematics(std::vector<int>(idMother), finalState) {
-    
-    assert( finalState.size() == 2 );
-  _M = ComPWA::PhysConst::Instance()->FindParticle(idMother).GetMass();
-  m1 = ComPWA::PhysConst::Instance()->FindParticle(finalState.at(0)).GetMass();
-  m2 = ComPWA::PhysConst::Instance()->FindParticle(finalState.at(1)).GetMass();
+    : Kinematics(std::vector<int>(idMother), finalState) {
 
-  _spinM = ComPWA::PhysConst::Instance()
-      ->FindParticle(idMother).GetSpinQuantumNumber("Spin");
-  spin1 = ComPWA::PhysConst::Instance()
-      ->FindParticle(finalState.at(0)).GetSpinQuantumNumber("Spin");
-    spin2 = ComPWA::PhysConst::Instance()
-      ->FindParticle(finalState.at(1)).GetSpinQuantumNumber("Spin");
- 
+  assert(finalState.size() == 2);
+  auto propM = FindParticle(partL, idMother);
+  auto propM1 = FindParticle(partL, finalState.at(0));
+  auto propM2 = FindParticle(partL, finalState.at(1));
+  _M = propM.GetMass();
+  m1 = propM1.GetMass();
+  m2 = propM2.GetMass();
+
+  _spinM = propM.GetSpinQuantumNumber("Spin");
 
   if (_M == -999 || m1 == -999 || m2 == -999)
     throw std::runtime_error("TwoBodyKinematics(): Masses not set!");
@@ -33,10 +31,7 @@ TwoBodyKinematics::TwoBodyKinematics(int idMother, std::vector<int> finalState,
   mass_sq_max = mass_max * mass_max;
   mass_sq_min = mass_min * mass_max;
 
-  init();
 }
-
-void TwoBodyKinematics::init() {}
 
 bool TwoBodyKinematics::IsWithinPhsp(const dataPoint &point) const {
   if (point.GetValue(0) >= mass_sq_min && point.GetValue(0) <= mass_sq_max)

@@ -1,390 +1,354 @@
 <ParticleList>
-	<Particle Name='gamma'>
-		<Pid>22</Pid>
-		<Mass Name='mass_gamma'>
-			<Value>0.</Value>
-			<Fix>true</Fix>
-		</Mass>
-		<Charge>0</Charge>
-		<Spin>1.0</Spin>
-		<Parity>-1</Parity>
-		<Cparity>-1</Cparity>
-		<Gparity>1</Gparity>
-		<IsoSpin>0</IsoSpin>
-		<IsoSpinZ>0</IsoSpinZ>
-	</Particle>
-	<Particle Name='pi0'>
-		<Pid>210</Pid>
-		<Mass Name='mass_pi0'>
-			<Value>0.1349766</Value>
-			<Fix>true</Fix>
-		</Mass>
-		<Charge>0</Charge>
-		<Spin>0.0</Spin>
-		<Parity>-1</Parity>
-		<Cparity>1</Cparity>
-		<Gparity>1</Gparity>
-		<IsoSpin>1</IsoSpin>
-	</Particle>
-	<Particle Name='jpsi'>
-		<Pid>443</Pid>
-		<Mass Name='Mass_jpsi'>
-			<Value>3.0969</Value>
-			<Error>0.0</Error>
-		</Mass>
-		<Charge>0</Charge>
-		<Spin>1.0</Spin>
-		<Parity>-1</Parity>
-		<Cparity>-1</Cparity>
-		<Gparity>1</Gparity>
-		<IsoSpin>0</IsoSpin>
-		<IsoSpinZ>0</IsoSpinZ>
-		<DecayInfo Type='relativisticBreitWigner'>
-			<FormFactor type='0' />
-			<Width Name='Width_jpsi'>
-				<Value>0.0000929</Value>
-				<Error>0.0000028</Error>
-			</Width>
-			<MesonRadius Name='Radius_jpsi'>
-				<Value>2.5</Value>
-				<Fix>true</Fix>
-				<Min>2.0</Min>
-				<Max>3.0</Max>
-			</MesonRadius>
-		</DecayInfo>
-	</Particle>
-	<Particle Name='omega'>
-		<Pid>223</Pid>
-		<Mass Name='Mass_omega'>
-			<Value>0.78265</Value>
-			<Fix>true</Fix>
-			<Min>0.5</Min>
-			<Max>1.5</Max>
-			<Error>0.00012</Error>
-		</Mass>
-		<Charge>0</Charge>
-		<Spin>1.0</Spin>
-		<Parity>-1</Parity>
-		<Cparity>-1</Cparity>
-		<Gparity>1</Gparity>
-		<IsoSpin>0.0</IsoSpin>
-		<IsoSpinZ>0.0</IsoSpinZ>
-		<DecayInfo Type='relativisticBreitWigner'>
-			<FormFactor type='0' />
-			<Width Name='Width_omega'>
-				<Value>0.01849</Value>
-				<Fix>true</Fix>
-				<Min>0.0</Min>
-				<Max>1.0</Max>
-				<Error>0.00008</Error>
-			</Width>
-			<MesonRadius Name='Radius_omega'>
-				<Value>1.5</Value>
-				<Fix>true</Fix>
-				<Min>1.0</Min>
-				<Max>2.0</Max>
-				<Error>0</Error>
-			</MesonRadius>
-		</DecayInfo>
-	</Particle>
-	<Particle Name='f0_980'>
-		<Pid>9010221</Pid>
-		<Mass Name='Mass_f0_980'>
-			<Value>0.99</Value>
-			<Fix>true</Fix>
-			<Min>0.5</Min>
-			<Max>1.5</Max>
-			<Error>0</Error>
-		</Mass>
-		<Charge>0</Charge>
-		<Spin>0.0</Spin>
-		<Parity>1</Parity>
-		<Cparity>1</Cparity>
-		<Gparity>1</Gparity>
-		<IsoSpin>0.0</IsoSpin>
-		<IsoSpinZ>0.0</IsoSpinZ>
-		<DecayInfo Type='relativisticBreitWigner'>
-			<FormFactor type='0' />
-			<Width Name='Width_f0_980'>
-				<Value>0.05</Value>
-				<Fix>true</Fix>
-				<Min>0.</Min>
-				<Max>.5</Max>
-				<Error>0</Error>
-			</Width>
-			<MesonRadius Name='Radius_f0_980'>
-				<Value>1.5</Value>
-				<Fix>true</Fix>
-				<Min>1.0</Min>
-				<Max>2.0</Max>
-				<Error>0</Error>
-			</MesonRadius>
-		</DecayInfo>
-	</Particle>
 	<Particle Name='K+'>
 		<Pid>321</Pid>
-		<Mass Name='mass_k+'>
+		<Parameter Type='Mass' Name='Mass_chargedKaon'>
 			<Value>0.493677</Value>
 			<Fix>true</Fix>
-		</Mass>
-		<Charge>0</Charge>
-		<Spin>0</Spin>
-		<Parity>-1</Parity>
-		<IsoSpin>0.5</IsoSpin>
-		<IsoSpinZ>0.5</IsoSpinZ>
+		</Parameter>
+		<QuantumNumber Class='Spin' Type='Spin' Value='0'/>
+		<QuantumNumber Class='Int' Type='Charge' Value='1'/>
+		<QuantumNumber Class='Int' Type='Parity' Value='-1'/>
+		<QuantumNumber Class='Spin' Type='IsoSpin' Value='0.5' Projection='0.5'/>
 	</Particle>
 	<Particle Name='K-'>
 		<Pid>-321</Pid>
-		<Mass Name='mass_kpm'>
+		<Parameter Type='Mass' Name='Mass_chargedKaon'>
 			<Value>0.493677</Value>
 			<Fix>true</Fix>
-		</Mass>
-		<Charge>0</Charge>
-		<Spin>0</Spin>
-		<Parity>-1</Parity>
-		<IsoSpin>0.5</IsoSpin>
-		<IsoSpinZ>-0.5</IsoSpinZ>
+		</Parameter>
+		<QuantumNumber Class='Spin' Type='Spin' Value='0'/>
+		<QuantumNumber Class='Int' Type='Charge' Value='-1'/>
+		<QuantumNumber Class='Int' Type='Parity' Value='-1'/>
+		<QuantumNumber Class='Spin' Type='IsoSpin' Value='0.5' Projection='-0.5'/>
 	</Particle>
 	<Particle Name='pi0'>
 		<Pid>111</Pid>
-		<Mass Name='mass_pi0'>
+		<Parameter Type='Mass' Name='Mass_pi0'>
 			<Value>0.1349766</Value>
 			<Error>0.0000006</Error>
-		</Mass>
-		<Charge>0</Charge>
-		<Spin>0</Spin>
-		<Parity>-1</Parity>
-		<Cparity>+1</Cparity>
+		</Parameter>
+		<QuantumNumber Class='Spin' Type='Spin' Value='0'/>
+		<QuantumNumber Class='Int' Type='Charge' Value='0'/>
+		<QuantumNumber Class='Int' Type='Parity' Value='-1'/>
+		<QuantumNumber Class='Int' Type='Cparity' Value='1'/>
 	</Particle>
 	<Particle Name='eta'>
 		<Pid>221</Pid>
-		<Mass Name='mass_eta'>
+		<Parameter Type='Mass' Name='Mass_eta'>
 			<Value>0.547862</Value>
 			<Error>0.000018</Error>
-		</Mass>
-		<Charge>0</Charge>
-		<Spin>0</Spin>
-		<Parity>-1</Parity>
-		<Cparity>+1</Cparity>
-		<!--<DecayInfo Type='relativisticBreitWigner'>-->
-			<!--<FormFactor type='0' />-->
-			<!--<Width Name='width_eta'>-->
-				<!--<Value>0.00000131</Value>-->
-				<!--<Error>0.00000005</Error>-->
-				<!--<Fix>true</Fix>-->
-			<!--</Width>-->
-			<!--<MesonRadius Name='radius_d0'>-->
-				<!--<Value>2.5</Value>-->
-				<!--<Fix>true</Fix>-->
-				<!--<Min>2.0</Min>-->
-				<!--<Max>3.0</Max>-->
-			<!--</MesonRadius>-->
-		<!--</DecayInfo>-->
+		</Parameter>
+		<QuantumNumber Class='Spin' Type='Spin' Value='0'/>
+		<QuantumNumber Class='Int' Type='Charge' Value='0'/>
+		<QuantumNumber Class='Int' Type='Parity' Value='-1'/>
+		<QuantumNumber Class='Int' Type='Cparity' Value='1'/>
 	</Particle>
 	<Particle Name='K_S0'>
 		<Pid>310</Pid>
-		<Mass Name='mass_k0'>
+		<Parameter Type='Mass' Name='Mass_neutralKaon'>
 			<Value>0.497614</Value>
 			<Fix>true</Fix>
-		</Mass>
-		<Charge>0</Charge>
-		<Spin>0.0</Spin>
-		<Parity>-1</Parity>
-		<IsoSpin>0.5</IsoSpin>
-		<IsoSpinZ>0.5</IsoSpinZ>
+		</Parameter>
+		<QuantumNumber Class='Spin' Type='Spin' Value='0'/>
+		<QuantumNumber Class='Int' Type='Charge' Value='0'/>
+		<QuantumNumber Class='Int' Type='Parity' Value='-1'/>
+		<QuantumNumber Class='Spin' Type='IsoSpin' Value='0.5' Projection='0.5'/>
 	</Particle>
 	<Particle Name='D0'>
 		<Pid>421</Pid>
-		<Mass Name='mass_d0'>
+		<Parameter Type='Mass' Name='Mass_D0'>
 			<Value>1.86484</Value>
 			<Fix>true</Fix>
-		</Mass>
-		<Charge>0</Charge>
-		<Spin>0.0</Spin>
-		<Parity>-1</Parity>
+		</Parameter>
+		<QuantumNumber Class='Spin' Type='Spin' Value='0'/>
+		<QuantumNumber Class='Int' Type='Charge' Value='0'/>
+		<QuantumNumber Class='Int' Type='Parity' Value='-1'/>
 		<DecayInfo Type='relativisticBreitWigner'>
-			<FormFactor type='0' />
-			<Width Name='width_d0'>
+			<FormFactor Type='0' />
+			<Parameter Type='Mass' Name='Width_D0'>
 				<Value>0.000623</Value>
 				<Fix>true</Fix>
-			</Width>
-			<MesonRadius Name='radius_d0'>
+			</Parameter>
+			<Parameter Type='MesonRadius' Name='Radius_D0'>
 				<Value>2.5</Value>
 				<Fix>true</Fix>
 				<Min>2.0</Min>
 				<Max>3.0</Max>
-			</MesonRadius>
+			</Parameter>
 		</DecayInfo>
 	</Particle>
 	<Particle Name='phi(1020)'>
 		<Pid>333</Pid>
-		<Mass Name='mass_phi'>
+		<Parameter Type='Mass' Name='Mass_phi(1020)'>
 			<Value>1.019461</Value>
 			<Error>0.000019</Error>
 			<Fix>true</Fix>
-		</Mass>
-		<Charge>0</Charge>
-		<Spin>1.0</Spin>
-		<Parity>-1</Parity>
+		</Parameter>
+		<QuantumNumber Class='Spin' Type='Spin' Value='1'/>
+		<QuantumNumber Class='Int' Type='Charge' Value='0'/>
+		<QuantumNumber Class='Int' Type='Parity' Value='-1'/>
 		<DecayInfo Type='relativisticBreitWigner'>
-			<FormFactor type='1' />
-			<Width Name='width_phi'>
+			<FormFactor Type='1' />
+			<Parameter Type='Width' Name='Width_phi(1020)'>
 				<Value>0.004266</Value>
 				<Error>0.000031</Error>
 				<Fix>true</Fix>
-			</Width>
-			<MesonRadius Name='radius_phi'>
+			</Parameter>
+			<Parameter Type='MesonRadius' Name='Radius_phi(1020)'>
 				<Value>1.5</Value>
 				<Fix>true</Fix>
 				<Min>1.0</Min>
 				<Max>2.0</Max>
-			</MesonRadius>
+			</Parameter>
 		</DecayInfo>
 	</Particle>
 	<Particle Name='a0(980)0'>
 		<Pid>9000111</Pid>
-		<Mass Name='mass_a0(980)'>
+		<Parameter Type='Mass' Name='Mass_a0(980)'>
 			<Value>0.994</Value>
 			<Error>0.001</Error>
 			<Fix>true</Fix>
-		</Mass>
-		<Charge>0</Charge>
-		<Spin>0</Spin>
-		<Parity>+1</Parity>
+		</Parameter>
+		<QuantumNumber Class='Spin' Type='Spin' Value='0'/>
+		<QuantumNumber Class='Int' Type='Charge' Value='0'/>
+		<QuantumNumber Class='Int' Type='Parity' Value='1'/>
 		<DecayInfo Type='flatte'>
-			<FormFactor type='0' />
-			<Coupling Name='gKK_a0(980)'>
+			<FormFactor Type='0' />
+			<Parameter Type='Coupling' Name='gKK_a0(980)'>
 				<Value>3.121343843602647</Value>
 				<Error>0.001</Error>
 				<Fix>false</Fix>
 				<ParticleA>K+</ParticleA>
 				<ParticleB>K-</ParticleB>
-			</Coupling>
-			<Coupling Name='gEtaPi_a0(980)'>
+			</Parameter>
+			<Parameter Type='Coupling' Name='gEtaPi_a0(980)'>
 				<Value>2.66</Value>
 				<Error>0.001</Error>
 				<Fix>true</Fix>
 				<ParticleA>eta</ParticleA>
 				<ParticleB>pi0</ParticleB>
-			</Coupling>
-			<Coupling Name='gKK_a0(980)'>
+			</Parameter>
+			<Parameter Type='Coupling' Name='gKK_a0(980)'>
 				<Value>3.121343843602647</Value>
 				<Error>0.001</Error>
 				<Fix>false</Fix>
 				<ParticleA>K_S0</ParticleA>
 				<ParticleB>K_S0</ParticleB>
-			</Coupling>
-			<MesonRadius Name='radius_a0(980)'>
+			</Parameter>
+			<Parameter Type='MesonRadius' Name='Radius_a0(980)'>
 				<Value>1.5</Value>
 				<Fix>true</Fix>
 				<Min>1.0</Min>
 				<Max>2.0</Max>
-			</MesonRadius>
+			</Parameter>
 		</DecayInfo>
 	</Particle>
 	<Particle Name='a0(980)+'>
 		<Pid>9000211</Pid>
-		<Mass Name='mass_a0(980)'>
+		<Parameter Type='Mass' Name='Mass_a0(980)'>
 			<Value>0.994</Value>
 			<Error>0.001</Error>
 			<Fix>true</Fix>
-		</Mass>
+		</Parameter>
 		<Charge>0</Charge>
 		<Spin>0</Spin>
 		<Parity>+1</Parity>
+		<QuantumNumber Class='Spin' Type='Spin' Value='0'/>
+		<QuantumNumber Class='Int' Type='Charge' Value='0'/>
+		<QuantumNumber Class='Int' Type='Parity' Value='+1'/>
 		<DecayInfo Type='flatte'>
-			<FormFactor type='0' />
-			<Coupling Name='gKK_a0(980)'>
+			<FormFactor Type='0' />
+			<Parameter Type='Coupling' Name='gKK_a0(980)'>
 				<Value>3.121343843602647</Value>
 				<Error>0.001</Error>
 				<Fix>false</Fix>
 				<ParticleA>K_S0</ParticleA>
 				<ParticleB>K+</ParticleB>
-			</Coupling>
-			<Coupling Name='gEtaPi_a0(980)'>
+			</Parameter>
+			<Parameter Type='Coupling' Name='gEtaPi_a0(980)'>
 				<Value>2.66</Value>
 				<Error>0.001</Error>
 				<Fix>true</Fix>
 				<ParticleA>eta</ParticleA>
 				<ParticleB>pi0</ParticleB>
-			</Coupling>
-			<MesonRadius Name='radius_a0(980)'>
+			</Parameter>
+			<Parameter Type='MesonRadius' Name='Radius_a0(980)'>
 				<Value>1.5</Value>
 				<Fix>true</Fix>
 				<Min>1.0</Min>
 				<Max>2.0</Max>
-			</MesonRadius>
+			</Parameter>
 		</DecayInfo>
 	</Particle>
 	<Particle Name='Bkgphi(1020)'>
 		<Pid>3339999</Pid>
-		<Mass Name='mass_phi'>
+		<Parameter Type='Mass' Name='Mass_phi(1020)'>
 			<Value>1.019461</Value>
 			<Error>0.000019</Error>
 			<Fix>true</Fix>
-		</Mass>
-		<Charge>0</Charge>
-		<Spin>0.0</Spin>
-		<Parity>-1</Parity>
+		</Parameter>
+		<QuantumNumber Class='Spin' Type='Spin' Value='0'/>
+		<QuantumNumber Class='Int' Type='Charge' Value='0'/>
+		<QuantumNumber Class='Int' Type='Parity' Value='-1'/>
 		<DecayInfo Type='relativisticBreitWigner'>
-			<FormFactor type='1' />
-			<Width Name='width_phi'>
+			<FormFactor Type='1' />
+			<Parameter Type='Width' Name='Width_phi(1020)'>
 				<Value>0.004266</Value>
 				<Error>0.000031</Error>
 				<Fix>true</Fix>
-			</Width>
-			<MesonRadius Name='radius_phi'>
+			</Parameter>
+			<Parameter Type='MesonRadius' Name='Radius_phi(1020)'>
 				<Value>1.5</Value>
 				<Fix>true</Fix>
 				<Min>1.0</Min>
 				<Max>2.0</Max>
-			</MesonRadius>
+			</Parameter>
 		</DecayInfo>
 	</Particle>
 	<Particle Name='something'>
 		<Pid>123456</Pid>
-		<Mass Name='mass_something'>
+		<Parameter Type='Mass' Name='Mass_something'>
 			<Value>1.024654338170585</Value>
 			<Fix>true</Fix>
-		</Mass>
-		<Charge>0</Charge>
-		<Spin>0.0</Spin>
-		<Parity>-1</Parity>
+		</Parameter>
+		<QuantumNumber Class='Spin' Type='Spin' Value='0'/>
+		<QuantumNumber Class='Int' Type='Charge' Value='0'/>
+		<QuantumNumber Class='Int' Type='Parity' Value='-1'/>
 		<DecayInfo Type='relativisticBreitWigner'>
-			<FormFactor type='1' />
-			<Width Name='width_something'>
+			<FormFactor Type='1' />
+			<Parameter Type='Width' Name='Width_something'>
 				<Value>0.01909658663476588</Value>
 				<Fix>true</Fix>
-			</Width>
-			<MesonRadius Name='radius_something'>
+			</Parameter>
+			<Parameter Type='MesonRadius' Name='Radius_something'>
 				<Value>1.5</Value>
 				<Fix>true</Fix>
-			</MesonRadius>
+			</Parameter>
 		</DecayInfo>
 	</Particle>
 	<Particle Name='a2(1320)-'>
 		<Pid>215</Pid>
-		<Mass Name='mass_a2(1320)'>
+		<Parameter Type='Mass' Name='Mass_a2(1320)'>
 			<Value>1.3181</Value>
 			<Fix>true</Fix>
-		</Mass>
-		<Charge>0</Charge>
-		<Spin>2.0</Spin>
-		<Parity>+1</Parity>
-		<Cparity>+1</Cparity>
+		</Parameter>
+		<QuantumNumber Class='Spin' Type='Spin' Value='2'/>
+		<QuantumNumber Class='Int' Type='Charge' Value='0'/>
+		<QuantumNumber Class='Int' Type='Parity' Value='1'/>
 		<DecayInfo Type='relativisticBreitWigner'>
-			<FormFactor type='1' />
-			<Width Name='width_a2(1320)'>
+			<FormFactor Type='1' />
+			<Parameter Type='Width' Name='Width_a2(1320)'>
 				<Value>0.1098</Value>
 				<Fix>true</Fix>
-			</Width>
-			<MesonRadius Name='radius_a2(1320)'>
+			</Parameter>
+			<Parameter Type='MesonRadius' Name='Radius_a2(1320)'>
 				<Value>1.5</Value>
 				<Fix>true</Fix>
-			</MesonRadius>
+			</Parameter>
 		</DecayInfo>
 	</Particle>
 
+	<Particle Name='gamma'>
+		<Pid>22</Pid>
+		<Parameter Type='Mass' Name='mass_gamma'>
+			<Value>0.</Value>
+			<Fix>true</Fix>
+		</Parameter>
+		<QuantumNumber Class='Spin' Type='Spin' Value='1'/>
+		<QuantumNumber Class='Int' Type='Charge' Value='0'/>
+		<QuantumNumber Class='Int' Type='Parity' Value='-1'/>
+		<QuantumNumber Class='Int' Type='Cparity' Value='-1'/>
+		<QuantumNumber Class='Int' Type='Gparity' Value='1'/>
+	</Particle>
+	<Particle Name='jpsi'>
+		<Pid>443</Pid>
+		<Parameter Type='Mass' Name='Mass_jpsi'>
+			<Value>3.0969</Value>
+			<Fix>true</Fix>
+		</Parameter>
+		<QuantumNumber Class='Spin' Type='Spin' Value='1'/>
+		<QuantumNumber Class='Int' Type='Charge' Value='0'/>
+		<QuantumNumber Class='Int' Type='Parity' Value='-1'/>
+		<QuantumNumber Class='Int' Type='Cparity' Value='-1'/>
+		<QuantumNumber Class='Int' Type='Gparity' Value='1'/>
+		<DecayInfo Type='relativisticBreitWigner'>
+			<FormFactor Type='0' />
+			<Parameter Type='Width' Name='Width_jpsi'>
+				<Value>0.0000929</Value>
+				<Error>0.0000028</Error>
+			</Parameter>
+			<Parameter Type='MesonRadius' Name='Radius_jpsi'>
+				<Value>2.5</Value>
+				<Fix>true</Fix>
+				<Min>2.0</Min>
+				<Max>3.0</Max>
+			</Parameter>
+		</DecayInfo>
+	</Particle>
+	<Particle Name='omega'>
+		<Pid>223</Pid>
+		<Parameter Type='Mass' Name='Mass_omega'>
+			<Value>0.78265</Value>
+			<Fix>true</Fix>
+			<Min>0.5</Min>
+			<Max>1.5</Max>
+			<Error>0.00012</Error>
+		</Parameter>
+		<QuantumNumber Class='Spin' Type='Spin' Value='1'/>
+		<QuantumNumber Class='Int' Type='Charge' Value='0'/>
+		<QuantumNumber Class='Int' Type='Parity' Value='-1'/>
+		<QuantumNumber Class='Int' Type='Cparity' Value='-1'/>
+		<QuantumNumber Class='Int' Type='Gparity' Value='1'/>
+		<DecayInfo Type='relativisticBreitWigner'>
+			<FormFactor Type='0' />
+			<Parameter Type='Width' Name='Width_omega'>
+				<Value>0.01849</Value>
+				<Fix>true</Fix>
+				<Min>0.0</Min>
+				<Max>1.0</Max>
+				<Error>0.00008</Error>
+			</Parameter>
+			<Parameter Type='MesonRadius' Name='Radius_omega'>
+				<Value>1.5</Value>
+				<Fix>true</Fix>
+				<Min>1.0</Min>
+				<Max>2.0</Max>
+				<Error>0</Error>
+			</Parameter>
+		</DecayInfo>
+	</Particle>
+	<Particle Name='f0_980'>
+		<Pid>9010221</Pid>
+		<Parameter Type='Mass' Name='Mass_f0_980'>
+			<Value>0.99</Value>
+			<Fix>true</Fix>
+			<Min>0.5</Min>
+			<Max>1.5</Max>
+			<Error>0</Error>
+		</Parameter>
+		<QuantumNumber Class='Spin' Type='Spin' Value='0'/>
+		<QuantumNumber Class='Int' Type='Charge' Value='0'/>
+		<QuantumNumber Class='Int' Type='Parity' Value='1'/>
+		<QuantumNumber Class='Int' Type='Cparity' Value='1'/>
+		<QuantumNumber Class='Int' Type='Gparity' Value='1'/>
+		<DecayInfo Type='relativisticBreitWigner'>
+			<FormFactor Type='0' />
+			<Parameter Type='Width' Name='Width_f0_980'>
+				<Value>0.05</Value>
+				<Fix>true</Fix>
+				<Min>0.</Min>
+				<Max>.5</Max>
+				<Error>0</Error>
+			</Parameter>
+			<Parameter Type='MesonRadius' Name='Radius_f0_980'>
+				<Value>1.5</Value>
+				<Fix>true</Fix>
+				<Min>1.0</Min>
+				<Max>2.0</Max>
+				<Error>0</Error>
+			</Parameter>
+		</DecayInfo>
+	</Particle>
 </ParticleList>
 
 <HelicityKinematics>
@@ -400,39 +364,39 @@
 </HelicityKinematics>
 
 <IncoherentIntensity Name='jpsiToPi0Pi0Gamma_inc'>
-	<Strength Name="Strength_jpsiToPi0Pi0Gamm_inc">
+	<Parameter Type='Strength' Name="Strength_jpsiToPi0Pi0Gamm_inc">
 		<Value>1</Value>
 		<Fix>true</Fix>
-	</Strength>
+	</Parameter>
 	<CoherentIntensity Name='jpsiToPi0Pi0Gamma'>
-		<Strength Name='Strength_jpsiToPi0Pi0Gamma'>
+		<Parameter Type='Strength' Name='Strength_jpsiToPi0Pi0Gamma'>
 			<Value>0.99</Value>
 			<Fix>true</Fix>
-		</Strength>
+		</Parameter>
 		<Amplitude Name='omega'>
-			<Magnitude Name='Magnitude_omegaToPi0Gamma'>
+			<Parameter Type='Magnitude' Name='Magnitude_omegaToPi0Gamma'>
 				<Value>1.0</Value>
 				<Fix>true</Fix>
-			</Magnitude>
-			<Phase Name='Phase_omegaToPi0Gamma'>
+			</Parameter>
+			<Parameter Type='Phase' Name='Phase_omegaToPi0Gamma'>
 				<Value>0.0</Value>
 				<Fix>true</Fix>
-			</Phase>
+			</Parameter>
 			<Resonance Name='jpsitoOmegaPi0'>
-				<Magnitude Name='Magnitude_jpsitoOmegaPi0'>
+				<Parameter Type='Magnitude' Name='Magnitude_jpsitoOmegaPi0'>
 					<Value>1.0</Value>
 					<Fix>true</Fix>
 					<Min>0.5</Min>
 					<Max>1.5</Max>
 					<Error>0</Error>
-				</Magnitude>
-				<Phase Name='Phase_jpsitoOmegaPi0'>
+				</Parameter>
+				<Parameter Type='Phase' Name='Phase_jpsitoOmegaPi0'>
 					<Value>1.0</Value>
 					<Fix>true</Fix>
 					<Min>0.5</Min>
 					<Max>1.5</Max>
 					<Error>0</Error>
-				</Phase>
+				</Parameter>
 				<DecayParticle Name='jpsi' Helicity='+1' />
 				<DecayProducts>
 					<Particle Name='omega' FinalState='0 1' Helicity='+1' />
@@ -440,20 +404,20 @@
 				</DecayProducts>
 			</Resonance>
 			<Resonance Name="omegatoPi0G">
-				<Magnitude Name='Magnitude_omegaToPi0Gamma'>
+				<Parameter Type='Magnitude' Name='Magnitude_omegaToPi0Gamma'>
 					<Value>1.0</Value>
 					<Fix>true</Fix>
 					<Min>0.5</Min>
 					<Max>1.5</Max>
 					<Error>0</Error>
-				</Magnitude>
-				<Phase Name='Phase_omegaToPi0Gamma'>
+				</Parameter>
+				<Parameter Type='Phase' Name='Phase_omegaToPi0Gamma'>
 					<Value>1.0</Value>
 					<Fix>true</Fix>
 					<Min>0.5</Min>
 					<Max>1.5</Max>
 					<Error>0</Error>
-				</Phase>
+				</Parameter>
 				<DecayParticle Name='omega' Helicity='+1' />
 				<RecoilSystem FinalState='2' />
 				<DecayProducts>

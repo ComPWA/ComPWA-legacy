@@ -89,18 +89,28 @@ if(DOXYGEN_FOUND)
           WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
           COMMENT "Generating API documentation with Doxygen" VERBATIM)
 
-  # Copy images
-  file(GLOB img
-    RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}/doc/images *
-  )
-  #foreach( i ${img} )
-  #  get_filename_component( TestInName ${i} NAME )
+    # Copy images
+	#file(GLOB img
+    #    RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}/doc/images *
+    #)
 
+    add_custom_command(
+      TARGET doc PRE_BUILD
+      COMMAND ${CMAKE_COMMAND} -E make_directory
+      ${CMAKE_CURRENT_BINARY_DIR}/doc/images/ )
+    add_custom_command(
+      TARGET doc PRE_BUILD
+      COMMAND ${CMAKE_COMMAND} -E make_directory
+      ${CMAKE_CURRENT_BINARY_DIR}/doc/doxygen-theme/ )
     add_custom_command(
       TARGET doc PRE_BUILD
       COMMAND ${CMAKE_COMMAND} -E copy
       ${CMAKE_CURRENT_SOURCE_DIR}/doc/images/*
       ${CMAKE_CURRENT_BINARY_DIR}/doc/images/ )
-  #endforeach( i )
+    add_custom_command(
+      TARGET doc PRE_BUILD
+      COMMAND ${CMAKE_COMMAND} -E copy
+      ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen-theme/*
+      ${CMAKE_CURRENT_BINARY_DIR}/doc/doxygen-theme/ )
 
 endif(DOXYGEN_FOUND)

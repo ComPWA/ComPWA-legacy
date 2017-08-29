@@ -25,7 +25,7 @@
 
 #include "Core/ParameterList.hpp"
 #include "Core/TableFormater.hpp"
-#include "Core/PhysConst.hpp"
+#include "Core/Properties.hpp"
 #include "Core/FitResult.hpp"
 #include "Core/Logging.hpp"
 #include "Core/Estimator.hpp"

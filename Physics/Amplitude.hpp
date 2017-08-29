@@ -47,7 +47,8 @@ public:
 
   //======= INTEGRATION/NORMALIZATION ===========
 
-  //! Check of parameters have changed and normalization has to be recalculatecd
+  /// Check if parameters have changed and ifnormalization has to be
+  /// recalculatecd.
   bool CheckModified() const {
     if (GetMagnitude() != _current_magnitude || GetPhase() != _current_phase) {
       const_cast<double &>(_current_magnitude) = GetMagnitude();
@@ -59,40 +60,31 @@ public:
 
   //================ EVALUATION =================
 
-  /** Calculate value of amplitude at point in phase space
-   *
-   * @param point Data point
-   * @return
-   */
+  /// Calculate value of amplitude at \p point.
   virtual std::complex<double> Evaluate(const dataPoint &point) const = 0;
 
   //============ SET/GET =================
 
-  //! Get name of amplitude
   virtual std::string GetName() const { return _name; }
 
-  //! Set name of amplitude
   virtual void SetName(std::string name) { _name = name; }
 
-  //! Get coefficient
   virtual std::complex<double> GetCoefficient() const {
     return std::polar(GetMagnitude(), GetPhase());
   }
 
-  /** Update parameters
-   *
-   * @param par New list of parameters
-   */
   virtual void UpdateParameters(ParameterList &par) { /* TODO */
   }
 
-  //! Add parameters to list
+  /// Fill parameters to list
   virtual void GetParameters(ParameterList &list) {
     list.AddParameter(_magnitude);
     list.AddParameter(_phase);
   }
 
-  //! Fill vector with parameters
+  /// Fill vector with parameters.
+  /// In comparisson to GetParameters(ParameterList &list) no checks are
+  /// performed here. So this should be much faster.
   virtual void GetParametersFast(std::vector<double> &list) const {
     list.push_back(GetMagnitude());
     list.push_back(GetPhase());
@@ -101,100 +93,47 @@ public:
   //! Fill ParameterList with fit fractions
   virtual void GetFitFractions(ParameterList &parList) = 0;
 
-  /**
-   Get Magnitude parameter
-
-   @return Magnitude parameter
-   */
   virtual std::shared_ptr<ComPWA::DoubleParameter> GetMagnitudeParameter() {
     return _magnitude;
   }
 
-  /**
-   Get Magnitude parameter
-
-   @return Magnitude parameter
-   */
   virtual double GetMagnitude() const {
     return std::fabs(_magnitude->GetValue());
   }
 
-  /**
-   Set Magnitude parameter
-
-   @param par Magnitude parameter
-   */
   virtual void
   SetMagnitudeParameter(std::shared_ptr<ComPWA::DoubleParameter> par) {
     _magnitude = par;
   }
 
-  /**
-   Set Magnitude parameter
-
-   @param par Magnitude parameter
-   */
   virtual void SetMagnitude(double par) { _magnitude->SetValue(par); }
 
-  /**
-   Get phase parameter
-
-   @return Phase parameter
-   */
   virtual std::shared_ptr<ComPWA::DoubleParameter> GetPhaseParameter() {
     return _phase;
   }
 
-  /**
-   Get phase parameter
-
-   @return Phase parameter
-   */
   virtual double GetPhase() const { return _phase->GetValue(); }
 
-  /**
-   Set phase parameter
-
-   @param par Phase parameter
-   */
   virtual void SetPhaseParameter(std::shared_ptr<ComPWA::DoubleParameter> par) {
     _phase = par;
   }
 
-  /**
-   Set phase parameter
-
-   @param par Phase parameter
-   */
   virtual void SetPhase(double par) { _phase->SetValue(par); }
 
-  /**
- Set pre-factor
-
- @param par Pre-factor
- */
   virtual void SetPreFactor(std::complex<double> pre) { _preFactor = pre; }
 
-  /**
- Get pre-factor
-
- @return Pre-factor
- */
   virtual std::complex<double> GetPreFactor() const { return _preFactor; }
 
-  /*! Set phase space sample
-   * We use the phase space sample to calculate the normalization. The sample
-   * should be without efficiency applied.
-   */
+  /// Set phase space sample.
+  /// We use the phase space sample to calculate the normalization. The sample
+  /// should be without efficiency applied.
   virtual void
   SetPhspSample(std::shared_ptr<std::vector<ComPWA::dataPoint>> phspSample) = 0;
 
   //=========== FUNCTIONTREE =================
 
-  //! Check of tree is available
   virtual bool HasTree() const { return 0; }
 
-  //! Getter function for basic amp tree
   virtual std::shared_ptr<FunctionTree> GetTree(std::shared_ptr<Kinematics> kin,
                                                 const ParameterList &sample,
                                                 const ParameterList &toySample,

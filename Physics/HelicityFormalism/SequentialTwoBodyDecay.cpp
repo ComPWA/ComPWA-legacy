@@ -10,29 +10,49 @@ namespace Physics {
 namespace HelicityFormalism {
 
 std::shared_ptr<ComPWA::Physics::Amplitude>
-SequentialTwoBodyDecay::Factory(std::shared_ptr<Kinematics> kin,
+SequentialTwoBodyDecay::Factory(std::shared_ptr<PartList> partL,
+                                std::shared_ptr<Kinematics> kin,
                                 const boost::property_tree::ptree &pt) {
   LOG(trace) << " SequentialTwoBodyDecay::Factory() | Construction....";
   auto obj = std::make_shared<SequentialTwoBodyDecay>();
   obj->SetName(pt.get<std::string>("<xmlattr>.Name", "empty"));
 
-  auto mag = ComPWA::DoubleParameterFactory(pt.get_child("Magnitude"));
-  obj->SetMagnitudeParameter(std::make_shared<DoubleParameter>(mag));
-  auto phase = ComPWA::DoubleParameterFactory(pt.get_child("Phase"));
-  obj->SetPhaseParameter(std::make_shared<DoubleParameter>(phase));
-
-  auto prefactor = pt.get_child_optional("PreFactor");
-  if (prefactor) {
-    double r = prefactor.get().get<double>("<xmlattr>.Magnitude");
-    double p = prefactor.get().get<double>("<xmlattr>.Phase");
-    auto pref = std::polar(r, p);
-    obj->SetPreFactor(pref);
-  }
-
+  std::shared_ptr<DoubleParameter> mag, phase;
+  std::complex<double> pref(1, 0);
   for (const auto &v : pt.get_child("")) {
-    if (v.first == "Resonance")
-      obj->Add(PartialDecay::Factory(kin, v.second));
+    if (v.first == "Parameter") {
+      if (v.second.get<std::string>("<xmlattr>.Type") == "Magnitude") {
+        auto tmp = ComPWA::DoubleParameterFactory(v.second);
+        mag = std::make_shared<DoubleParameter>(tmp);
+      }
+      if (v.second.get<std::string>("<xmlattr>.Type") == "Phase") {
+        auto tmp = ComPWA::DoubleParameterFactory(v.second);
+        phase = std::make_shared<DoubleParameter>(tmp);
+      }
+    } else if (v.first == "Resonance") {
+      obj->Add(PartialDecay::Factory(partL, kin, v.second));
+    } else if (v.first == "PreFactor") {
+      double r = v.second.get<double>("<xmlattr>.Magnitude");
+      double p = v.second.get<double>("<xmlattr>.Phase");
+      pref = std::polar(r, p);
+    } else {
+      // ignored further settings. Should we throw an error?
+    }
   }
+
+  if (mag)
+    obj->SetMagnitudeParameter(mag);
+  else
+    throw BadParameter(
+        "SequentialTwoBodyDecay::Factory() | No magnitude parameter found.");
+
+  if (phase)
+    obj->SetPhaseParameter(phase);
+  else
+    throw BadParameter(
+        "SequentialTwoBodyDecay::Factory() | No phase parameter found.");
+
+  obj->SetPreFactor(pref);
 
   return std::static_pointer_cast<ComPWA::Physics::Amplitude>(obj);
 }
@@ -43,10 +63,15 @@ SequentialTwoBodyDecay::Save(std::shared_ptr<ComPWA::Physics::Amplitude> amp) {
   auto obj = std::static_pointer_cast<SequentialTwoBodyDecay>(amp);
   boost::property_tree::ptree pt;
   pt.put<std::string>("<xmlattr>.Name", obj->GetName());
-  pt.add_child("Magnitude", ComPWA::DoubleParameterSave(
-                                *obj->GetMagnitudeParameter().get()));
-  pt.add_child("Phase",
-               ComPWA::DoubleParameterSave(*obj->GetPhaseParameter().get()));
+
+  boost::property_tree::ptree tmp = ComPWA::DoubleParameterSave(
+                                *obj->GetMagnitudeParameter().get());
+  tmp.put("<xmlattr>.Type", "Magnitude");
+  pt.add_child("Parameter", tmp);
+  
+  tmp = ComPWA::DoubleParameterSave(*obj->GetPhaseParameter().get());
+  tmp.put("<xmlattr>.Type", "Phase");
+  pt.add_child("Parameter", tmp);
 
   auto pref = amp->GetPreFactor();
   if (pref != std::complex<double>(1, 0)) {
@@ -62,7 +87,6 @@ SequentialTwoBodyDecay::Save(std::shared_ptr<ComPWA::Physics::Amplitude> amp) {
   return pt;
 }
 
-/**! Setup function tree */
 std::shared_ptr<FunctionTree> SequentialTwoBodyDecay::GetTree(
     std::shared_ptr<Kinematics> kin, const ParameterList &sample,
     const ParameterList &toySample, std::string suffix) {

@@ -14,7 +14,7 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/foreach.hpp>
 
-#include "Core/PhysConst.hpp"
+#include "Core/Properties.hpp"
 #include "Core/ParameterList.hpp"
 #include "Core/Logging.hpp"
 #include "Core/Particle.hpp"
@@ -44,9 +44,11 @@ BOOST_AUTO_TEST_CASE(HelicityAngleTest) {
 
   // Construct HelicityKinematics from XML tree
   boost::property_tree::ptree tr;
-  boost::property_tree::xml_parser::read_xml("AmpModel-input.xml", tr);
+  boost::property_tree::xml_parser::read_xml("AmpModel-input.xml",
+                                             tr);
 
-  ComPWA::PhysConst::CreateInstance(tr);
+  auto partL = std::make_shared<ComPWA::PartList>();
+  ReadParticles(partL, tr);
 
   // Construct HelicityKinematics by hand
   std::vector<int> finalState, initialState;
@@ -54,12 +56,12 @@ BOOST_AUTO_TEST_CASE(HelicityAngleTest) {
   finalState.push_back(310);
   finalState.push_back(-321);
   finalState.push_back(321);
-  auto kin = std::make_shared<HelicityKinematics>(initialState, finalState);
+  auto kin =
+      std::make_shared<HelicityKinematics>(partL, initialState, finalState);
 
   // Generate phsp sample
   std::shared_ptr<ComPWA::Generator> gen(new ComPWA::Tools::RootGenerator(
-      kin->GetInitialState(),
-      kin->GetFinalState(), 123));
+      partL, kin->GetInitialState(), kin->GetFinalState(), 123));
   std::shared_ptr<ComPWA::DataReader::Data> sample(
       new ComPWA::DataReader::RootReader());
 
@@ -102,11 +104,10 @@ BOOST_AUTO_TEST_CASE(HelicityAngleTest) {
   //        -321));
   //    sample->pushEvent(ev);
 
-  double m1 = PhysConst::Instance()->FindParticle(finalState.at(0)).GetMass();
-  double m2 = PhysConst::Instance()->FindParticle(finalState.at(1)).GetMass();
-  double m3 = PhysConst::Instance()->FindParticle(finalState.at(2)).GetMass();
-  double sqrtS =
-      PhysConst::Instance()->FindParticle(initialState.at(0)).GetMass();
+  double m1 = FindParticle(partL, finalState.at(0)).GetMass();
+  double m2 = FindParticle(partL, finalState.at(1)).GetMass();
+  double m3 = FindParticle(partL, finalState.at(2)).GetMass();
+  double sqrtS = FindParticle(partL, initialState.at(0)).GetMass();
 
   // Define SubSystems that we want to test. The systems denoted my *_CP are
   // the CP conjugate systems the are used in the relation between D0 amplitude

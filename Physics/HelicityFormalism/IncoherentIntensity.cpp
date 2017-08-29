@@ -11,7 +11,8 @@ namespace Physics {
 namespace HelicityFormalism {
 
 std::shared_ptr<IncoherentIntensity>
-IncoherentIntensity::Factory(std::shared_ptr<Kinematics> kin,
+IncoherentIntensity::Factory(std::shared_ptr<PartList> partL,
+                             std::shared_ptr<Kinematics> kin,
                              const boost::property_tree::ptree &pt) {
   LOG(trace) << " IncoherentIntensity::Factory() | Construction....";
 
@@ -20,23 +21,32 @@ IncoherentIntensity::Factory(std::shared_ptr<Kinematics> kin,
   // Name is not required - default value 'empty'
   obj->_name = (pt.get<std::string>("<xmlattr>.Name", "empty"));
 
-  auto ptCh = pt.get_child_optional("Strength");
-  if (ptCh) {
-    auto strength = ComPWA::DoubleParameterFactory(ptCh.get());
-    obj->_strength = (std::make_shared<DoubleParameter>(strength));
-  } else {
+  std::shared_ptr<DoubleParameter> strength;
+  for (const auto &v : pt.get_child("")) {
+    if (v.first == "Parameter") {
+      // Parameter (e.g. Mass)
+      if (v.second.get<std::string>("<xmlattr>.Type") != "Strength")
+        continue;
+      auto tmp = ComPWA::DoubleParameterFactory(v.second);
+      strength = std::make_shared<DoubleParameter>(tmp);
+    } else if (v.first == "CoherentIntensity"){
+      obj->AddIntensity(
+          ComPWA::Physics::HelicityFormalism::CoherentIntensity::Factory(
+              partL, kin, v.second));
+    } else {
+      // ignored further settings. Should we throw an error?
+    }
+  }
+
+  if (strength)
+    obj->_strength = strength;
+  else {
     obj->_strength = (std::make_shared<ComPWA::DoubleParameter>("", 1.0));
     obj->_strength->SetParameterFixed();
   }
-  
+
   obj->SetPhspVolume(kin->GetPhspVolume());
 
-  for (const auto &v : pt.get_child("")) {
-    if (v.first == "CoherentIntensity")
-      obj->AddIntensity(
-          ComPWA::Physics::HelicityFormalism::CoherentIntensity::Factory(
-              kin, v.second));
-  }
   return obj;
 }
 
@@ -45,7 +55,8 @@ IncoherentIntensity::Save(std::shared_ptr<IncoherentIntensity> obj) {
 
   boost::property_tree::ptree pt;
   pt.put<std::string>("<xmlattr>.Name", obj->Name());
-  pt.add_child("Strength", ComPWA::DoubleParameterSave(*obj->_strength.get()));
+  pt.add_child("Parameter", ComPWA::DoubleParameterSave(*obj->_strength.get()));
+  pt.put("Parameter.<xmlattr>.Type","Strength");
   for (auto i : obj->GetIntensities()) {
     // TODO: we have to implement a memeber function Save() in AmpIntensity
     // interface and use it here
@@ -59,12 +70,12 @@ double IncoherentIntensity::Intensity(const ComPWA::dataPoint &point) const {
 
   // We have to get around the constness of the interface definition.
   std::vector<std::vector<double>> parameters(_parameters);
-  
+
   std::vector<double> normValues(_normValues);
-  
+
   if (_intens.size() != parameters.size())
     parameters = std::vector<std::vector<double>>(_intens.size());
-  
+
   if (_intens.size() != normValues.size())
     normValues = std::vector<double>(_intens.size());
 
@@ -84,9 +95,11 @@ double IncoherentIntensity::Intensity(const ComPWA::dataPoint &point) const {
   const_cast<std::vector<std::vector<double>> &>(_parameters) = parameters;
   const_cast<std::vector<double> &>(_normValues) = normValues;
 
-  assert(!std::isnan(result) && "IncoherentIntensity::Intensity() | Result is NaN!");
-  assert(!std::isinf(result) && "IncoherentIntensity::Intensity() | Result is inf!");
-  
+  assert(!std::isnan(result) &&
+         "IncoherentIntensity::Intensity() | Result is NaN!");
+  assert(!std::isinf(result) &&
+         "IncoherentIntensity::Intensity() | Result is inf!");
+
   return (Strength() * result);
 }
 

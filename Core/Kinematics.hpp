@@ -11,7 +11,7 @@
 
 #include "Core/Event.hpp"
 #include "Core/SubSystem.hpp"
-#include "Core/PhysConst.hpp"
+#include "Core/Properties.hpp"
 #include "Core/Spin.hpp"
 #include "Core/DataPoint.hpp"
 
@@ -30,8 +30,8 @@ public:
   /// SubSystems variables needs to be calculated. That instance can then be
   /// passed as (smart) pointer. Note: Not sure if we also should delete the
   /// move constructor.
-  Kinematics(const Kinematics& that) = delete;
-  
+  Kinematics(const Kinematics &that) = delete;
+
   //! converts Event to dataPoint
   virtual void EventToDataPoint(const ComPWA::Event &ev,
                                 dataPoint &point) const = 0;
@@ -43,8 +43,8 @@ public:
   virtual double GetPhspVolume();
 
   //! calculated the PHSP volume of the current decay by MC integration
-  virtual void SetPhspVolume( double phsp );
-  
+  virtual void SetPhspVolume(double phsp);
+
   //! Get number of variables
   virtual std::size_t GetNVars() const { return _varNames.size(); }
 
@@ -55,9 +55,10 @@ public:
   virtual std::vector<pid> GetInitialState() { return _initialState; }
 
   virtual int GetDataID(const ComPWA::SubSystem s) = 0;
-  
+
 protected:
   std::vector<pid> _initialState;
+  
   std::vector<pid> _finalState;
 
   //! Internal names of variabes

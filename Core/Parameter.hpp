@@ -744,14 +744,13 @@ DoubleParameterFactory(const boost::property_tree::ptree pt) {
   return obj;
 }
 
-/**
- Save a DoubleParameter object from a ptree. This approach is more or
- less equivalent to the serialization of a parameter but provides a better
- readable format.
 
- @param pt Input parameter
- @return property_tree
- */
+/// Save a DoubleParameter object from a ptree. This approach is more or
+/// less equivalent to the serialization of a parameter but provides a better
+/// readable format.
+///
+/// @param par Input parameter
+/// @return property_tree
 inline boost::property_tree::ptree DoubleParameterSave(DoubleParameter par) {
   boost::property_tree::ptree pt;
   DoubleParameter obj;

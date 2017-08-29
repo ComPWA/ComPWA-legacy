@@ -106,7 +106,7 @@ plotData::plotData(std::shared_ptr<Kinematics> kin, std::string name, int bins)
 
 plotData::~plotData() {}
 
-void plotData::SetFitAmp(std::shared_ptr<AmpIntensity> intens,
+void plotData::SetFitAmp(std::shared_ptr<ComPWA::AmpIntensity> intens,
                          std::string title, Color_t color) {
   _plotComponents.clear();
   _plotComponents.push_back(intens);

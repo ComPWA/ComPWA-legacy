@@ -2,10 +2,8 @@
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
-#include <stdexcept>
-
 #include "Core/DataPoint.hpp"
-#include "Core/PhysConst.hpp"
+#include "Core/Properties.hpp"
 #include "Tools/RootGenerator.hpp"
 
 namespace ComPWA {
@@ -29,12 +27,12 @@ RootGenerator::RootGenerator(double cmsEnergy, double m1, double m2, double m3,
   event.SetDecay(W, nPart, masses);
 }
 
-RootGenerator::RootGenerator(std::vector<pid> initialS, std::vector<pid> finalS,
+RootGenerator::RootGenerator(std::shared_ptr<PartList> partL,
+                             std::vector<pid> initialS, std::vector<pid> finalS,
                              int seed) {
   gRandom = new TRandom3(0);
   if (seed != -1)
     SetSeed(seed);
-  auto physConst = PhysConst::Instance();
   nPart = finalS.size();
   if (nPart < 2)
     throw std::runtime_error(
@@ -49,21 +47,21 @@ RootGenerator::RootGenerator(std::vector<pid> initialS, std::vector<pid> finalS,
         "RootGenerator::RootGenerator() | More than one "
         "particle in initial State! Currently we can not deal with that!");
 
-  sqrtS = physConst->FindParticle(initialS.at(0)).GetMass();
+  sqrtS = FindParticle(partL, initialS.at(0)).GetMass();
 
   masses = new Double_t[nPart];
   TLorentzVector W(0.0, 0.0, 0.0, sqrtS);    //= beam + target;
   for (unsigned int t = 0; t < nPart; t++) { // particle 0 is mother particle
-    masses[t] = physConst->FindParticle(finalS.at(t)).GetMass();
+    masses[t] = FindParticle(partL, finalS.at(t)).GetMass();
   }
   event.SetDecay(W, nPart, masses);
 };
 
-RootGenerator::RootGenerator(std::shared_ptr<Kinematics> kin, int seed) {
+RootGenerator::RootGenerator(std::shared_ptr<PartList> partL,
+                             std::shared_ptr<Kinematics> kin, int seed) {
   gRandom = new TRandom3(0);
   if (seed != -1)
     SetSeed(seed);
-  auto physConst = PhysConst::Instance();
   auto finalS = kin->GetFinalState();
   auto initialS = kin->GetInitialState();
   nPart = finalS.size();
@@ -80,12 +78,12 @@ RootGenerator::RootGenerator(std::shared_ptr<Kinematics> kin, int seed) {
         "RootGenerator::RootGenerator() | More than one "
         "particle in initial State! Currently we can not deal with that!");
 
-  sqrtS = physConst->FindParticle(initialS.at(0)).GetMass();
+  sqrtS = FindParticle(partL, initialS.at(0)).GetMass();
 
   masses = new Double_t[nPart];
   TLorentzVector W(0.0, 0.0, 0.0, sqrtS);    //= beam + target;
   for (unsigned int t = 0; t < nPart; t++) { // particle 0 is mother particle
-    masses[t] = physConst->FindParticle(finalS.at(t)).GetMass();
+    masses[t] = FindParticle(partL, finalS.at(t)).GetMass();
   }
   event.SetDecay(W, nPart, masses);
 };

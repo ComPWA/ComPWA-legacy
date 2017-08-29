@@ -31,7 +31,7 @@
 #include "Core/AmpIntensity.hpp"
 #include "Core/ParameterList.hpp"
 #include "Core/TableFormater.hpp"
-#include "Core/PhysConst.hpp"
+#include "Core/Properties.hpp"
 
 namespace ComPWA {
 

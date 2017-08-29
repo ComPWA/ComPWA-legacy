@@ -9,7 +9,7 @@
 #include "Core/Event.hpp"
 #include "Core/DataPoint.hpp"
 #include "Core/Particle.hpp"
-#include "Core/PhysConst.hpp"
+#include "Core/Properties.hpp"
 #include "DataReader/RootReader/RootReader.hpp"
 
 #include "Physics/HelicityFormalism/HelicityKinematics.hpp"
@@ -22,46 +22,53 @@ namespace ComPWA {
 namespace Physics {
 namespace HelicityFormalism {
 
-HelicityKinematics::HelicityKinematics(std::vector<pid> initialState,
+HelicityKinematics::HelicityKinematics(std::shared_ptr<PartList> partL,
+                                       std::vector<pid> initialState,
                                        std::vector<pid> finalState)
-    : Kinematics(initialState, finalState) {
-  assert(_initialState.size() == 1);
-  pid idMother = _initialState.at(0);
-  auto motherProp = PhysConst::Instance()->FindParticle(idMother);
-  _M = motherProp.GetMass();
-  _Msq = _M * _M;
-  _spinM = motherProp.GetSpinQuantumNumber("Spin");
+    : Kinematics(initialState, finalState), _partList(partL) {
 
-  // Creating unique title
+  // Currently we can only handle a particle decay.
+  // Note: Whats different for particle scattering?
+  assert(_initialState.size() == 1);
+
+  // Create title
   std::stringstream stream;
   stream << "( ";
   for (auto i : _initialState)
-    stream << PhysConst::Instance()->FindParticle(i).GetName() << " ";
+    stream << FindParticle(partL, i).GetName() << " ";
   stream << ")->( ";
   for (auto i : _finalState)
-    stream << PhysConst::Instance()->FindParticle(i).GetName() << " ";
+    stream << FindParticle(partL, i).GetName() << " ";
   stream << ")";
 
   LOG(info) << "HelicityKinematics::HelicityKinematics() | Initialize reaction "
             << stream.str();
+  return;
 }
 
-HelicityKinematics::HelicityKinematics(boost::property_tree::ptree pt) {
+HelicityKinematics::HelicityKinematics(std::shared_ptr<PartList> partL,
+                                       boost::property_tree::ptree pt)
+    : _partList(partL) {
 
   auto initialS = pt.get_child("InitialState");
   _initialState = std::vector<int>(initialS.size());
   for (auto i : initialS) {
     std::string name = i.second.get<std::string>("<xmlattr>.Name");
-    auto partP = PhysConst::Instance()->FindParticle(name);
-    _initialState.at(i.second.get<int>("<xmlattr>.Id")) = partP.GetId();
+    auto partP = partL->find(name)->second;
+    int pos = i.second.get<int>("<xmlattr>.Id");
+    _initialState.at(pos) = partP.GetId();
   }
+  // Currently we can only handle a particle decay.
+  // Note: Whats different for particle scattering?
+  assert(_initialState.size() == 1);
 
   auto finalS = pt.get_child("FinalState");
   _finalState = std::vector<int>(finalS.size());
   for (auto i : finalS) {
     std::string name = i.second.get<std::string>("<xmlattr>.Name");
-    auto partP = PhysConst::Instance()->FindParticle(name);
-    _finalState.at(i.second.get<int>("<xmlattr>.Id")) = partP.GetId();
+    auto partP = partL->find(name)->second;
+    int pos = i.second.get<int>("<xmlattr>.Id");
+    _finalState.at(pos) = partP.GetId();
   }
 
   auto phspVal = pt.get_optional<double>("PhspVolume");
@@ -73,21 +80,15 @@ HelicityKinematics::HelicityKinematics(boost::property_tree::ptree pt) {
   std::stringstream stream;
   stream << "( ";
   for (auto i : _initialState)
-    stream << PhysConst::Instance()->FindParticle(i).GetName() << " ";
+    stream << FindParticle(partL, i).GetName() << " ";
   stream << ")->( ";
   for (auto i : _finalState)
-    stream << PhysConst::Instance()->FindParticle(i).GetName() << " ";
+    stream << FindParticle(partL, i).GetName() << " ";
   stream << ")";
 
   LOG(info) << "HelicityKinematics::HelicityKinematics() | Initialize reaction "
             << stream.str();
-
-  assert(_initialState.size() == 1);
-  pid idMother = _initialState.at(0);
-  auto motherProp = PhysConst::Instance()->FindParticle(idMother);
-  _M = motherProp.GetMass();
-  _Msq = _M * _M;
-  _spinM = motherProp.GetSpinQuantumNumber("Spin");
+  return;
 }
 
 bool HelicityKinematics::IsWithinPhsp(const dataPoint &point) const {
@@ -108,39 +109,6 @@ bool HelicityKinematics::IsWithinPhsp(const dataPoint &point) const {
   }
 
   return true;
-}
-
-const std::pair<double, double> &
-HelicityKinematics::GetInvMassBounds(const SubSystem sys) const {
-  return GetInvMassBounds(
-      const_cast<HelicityKinematics *>(this)->GetDataID(sys));
-}
-
-const std::pair<double, double> &
-HelicityKinematics::GetInvMassBounds(int sysID) const {
-  return _invMassBounds.at(sysID);
-}
-
-std::pair<double, double>
-HelicityKinematics::CalculateInvMassBounds(const SubSystem sys) const {
-
-  /* We use the formulae from (PDG2016 Kinematics Fig.47.3). I hope the
-   * generalization to n-body decays is correct.
-   */
-  std::pair<double, double> lim(0, _M);
-  // Sum up masses of all final state particles
-  for (auto j : sys.GetFinalStates())
-    for (auto i : j)
-      lim.first +=
-          PhysConst::Instance()->FindParticle(_finalState.at(i)).GetMass();
-  lim.first *= lim.first;
-
-  for (auto i : sys.GetRecoilState())
-    lim.second -=
-        PhysConst::Instance()->FindParticle(_finalState.at(i)).GetMass();
-  lim.second *= lim.second;
-
-  return lim;
 }
 
 void HelicityKinematics::EventToDataPoint(const Event &event,
@@ -195,12 +163,12 @@ void HelicityKinematics::EventToDataPoint(
     const Event &event, dataPoint &point, const SubSystem sys,
     const std::pair<double, double> limits) const {
 
-  if (sys.GetFinalStates().size() != 2)
-    return;
+  assert(sys.GetFinalStates().size() == 2 &&
+         "HelicityKinematics::EventToDataPoint() | More then two particles.");
 
-  FourMomentum recoilP4;
+  FourMomentum cms;
   for (auto s : sys.GetRecoilState())
-    recoilP4 += event.GetParticle(s).GetFourMomentum();
+    cms += event.GetParticle(s).GetFourMomentum();
 
   FourMomentum finalA, finalB;
   for (auto s : sys.GetFinalStates().at(0))
@@ -209,8 +177,12 @@ void HelicityKinematics::EventToDataPoint(
   for (auto s : sys.GetFinalStates().at(1))
     finalB += event.GetParticle(s).GetFourMomentum();
 
-  FourMomentum totalP4 = finalA + finalB;
-  double mSq = totalP4.GetInvMassSq();
+  // Four momentum of the decaying resonance
+  FourMomentum resP4 = finalA + finalB;
+  double mSq = resP4.GetInvMassSq();
+  
+  // Calculate sum of final states four momenta
+  cms += resP4;
 
   if (mSq <= limits.first) {
     // We allow for a deviation from the limits of 10 times the numerical
@@ -231,24 +203,26 @@ void HelicityKinematics::EventToDataPoint(
                        " Point beypond phase space boundaries!");
   }
 
-  // When using finalB here the WignerD changes sign. In the end this does not
-  // matter
-  QFT::Vector4<double> qftTotalP4(totalP4);
-  QFT::Vector4<double> qftFinalA(finalA);
-  QFT::Vector4<double> qftRecoilP4(recoilP4);
+  // When using finalB instead of finalA here, the WignerD changes sign. In
+  // the end this does not matter
+  QFT::Vector4<double> p4QftCms(cms);
+  QFT::Vector4<double> p4QftResonance(resP4);
+  QFT::Vector4<double> p4QftDaughter(finalB);
 
-  /* Boost one final state four momentum and the four momentum of the recoil
-   * system to the center of mass system of the two-body decay
-   */
-  qftFinalA.Boost(qftTotalP4);
-  qftRecoilP4.Boost(qftTotalP4);
-  //    qftRecoilP4 *= (-1);
+  // Boost the four momentum of the decaying resonance to total CMS
+  p4QftResonance.Boost(p4QftCms);
+  // Boost the four momentum of one daughter particle to CMS of the resonance
+  p4QftDaughter.Boost(p4QftResonance);
 
   // Calculate the angles between recoil system and final state.
-  qftFinalA.Rotate(qftRecoilP4.Phi(), qftRecoilP4.Theta(),
-                   (-1) * qftRecoilP4.Phi());
-  double cosTheta = qftFinalA.CosTheta();
-  double phi = qftFinalA.Phi();
+  // Use an Euler rotation of the coordinate system (wrong?)
+  //   p4QftDaughter.Rotate(p4QftResonance.Phi(), p4QftResonance.Theta(),
+  //                       (-1) * p4QftResonance.Phi());
+  p4QftDaughter.RotateZ((-1) * p4QftResonance.Phi());
+  p4QftDaughter.RotateY((-1) * p4QftResonance.Theta());
+  
+  double cosTheta = p4QftDaughter.CosTheta();
+  double phi = p4QftDaughter.Phi();
 
   //  double cc;
   //  if (sys.GetRecoilState().size() == 1 &&
@@ -273,12 +247,12 @@ void HelicityKinematics::EventToDataPoint(
   //    cc = HelicityAngle(M, ma, mb, mspec, invMassSqA, invMassSqB);
   //    std::cout << sys << std::endl;
   //    std::cout << _initialState.at(0) << "/ (" <<
-  //sys.GetFinalStates().at(0).at(0)
+  // sys.GetFinalStates().at(0).at(0)
   //              << sys.GetFinalStates().at(1).at(0) << ") angle ("<<
-  //sys.GetFinalStates().at(0).at(0)
+  // sys.GetFinalStates().at(0).at(0)
   //              << sys.GetRecoilState().at(0) << ") - "
   //              << " (ma=" << ma<<" mb="<<mb<<" mSpec="<<mspec<<"
-  //mABSq="<<invMassSqA << " mASpecSq=" << invMassSqB << ") = " << cc
+  // mABSq="<<invMassSqA << " mASpecSq=" << invMassSqB << ") = " << cc
   //              << " " << cosTheta << std::endl;
   //
   //  } else {
@@ -297,6 +271,37 @@ void HelicityKinematics::EventToDataPoint(
   point.GetPoint().push_back(mSq);
   point.GetPoint().push_back(cosTheta);
   point.GetPoint().push_back(phi);
+}
+
+const std::pair<double, double> &
+HelicityKinematics::GetInvMassBounds(const SubSystem sys) const {
+  return GetInvMassBounds(
+      const_cast<HelicityKinematics *>(this)->GetDataID(sys));
+}
+
+const std::pair<double, double> &
+HelicityKinematics::GetInvMassBounds(int sysID) const {
+  return _invMassBounds.at(sysID);
+}
+
+std::pair<double, double>
+HelicityKinematics::CalculateInvMassBounds(const SubSystem sys) const {
+
+  /// We use the formulae from (PDG2016 Kinematics Fig.47.3). I hope the
+  /// generalization to n-body decays is correct.
+  std::pair<double, double> lim(
+      0, FindParticle(_partList, _initialState.at(0)).GetMass());
+  // Sum up masses of all final state particles
+  for (auto j : sys.GetFinalStates())
+    for (auto i : j)
+      lim.first += FindParticle(_partList, _finalState.at(i)).GetMass();
+  lim.first *= lim.first;
+
+  for (auto i : sys.GetRecoilState())
+    lim.second -= FindParticle(_partList, _finalState.at(i)).GetMass();
+  lim.second *= lim.second;
+
+  return lim;
 }
 
 } /* namespace HelicityFormalism */

@@ -33,9 +33,9 @@ class MinLogLH : public ComPWA::IEstimator {
 public:
   MinLogLH(){};
 
-  /// Create instance of MinLogLH.
-  /// An unbinned efficiency correction is applied using accSample.
-  /// 
+  /// Constructor for MinLohLH.
+  /// An unbinned efficiency correction can be applied using \p accSample.
+  ///
   /// \param amp amplitude
   /// \param data data sample
   /// \param phspSample phsp sample for normalization
@@ -43,14 +43,12 @@ public:
   /// efficiency correction
   /// \param startEvent use @param data from that position on
   /// \param nEvents number of events to process
-  /// \return std::shared_ptr<Data> of existing instance or newly created
-  /// instance
   MinLogLH(std::shared_ptr<Kinematics> kin, std::shared_ptr<AmpIntensity> amp,
            std::shared_ptr<DataReader::Data> data,
            std::shared_ptr<DataReader::Data> phspSample,
            std::shared_ptr<DataReader::Data> accSample, unsigned int startEvent,
            unsigned int nEvents);
-  
+
   virtual ~MinLogLH(){};
 
   virtual double controlParameter(ParameterList &minPar);
@@ -75,8 +73,6 @@ public:
     return;
   }
 
-  //! Get FunctionTree for LH calculation. Check first if its available using
-  //! MinLogLH::hasTree().
   virtual std::shared_ptr<FunctionTree> GetTree() {
     if (!_tree) {
       throw std::runtime_error("MinLogLH::GetTree()| FunctionTree does not "
@@ -93,48 +89,54 @@ public:
   virtual int GetNEvents() { return nEvts_; }
 
 protected:
-
-  //! Uses ampTree and creates a tree that calculates the full LH
   virtual void IniLHtree();
 
-  //! Sum up all weights in data set
   void CalcSumOfWeights();
 
 private:
-  //! Reset instance
   void Reset();
 
   std::shared_ptr<Kinematics> kin_;
 
-  //! Intensity
+  /// Amplitude model
   std::shared_ptr<AmpIntensity> _intens;
 
-  //! FunctionTree for Likelihood calculation
   std::shared_ptr<FunctionTree> _tree;
 
-  //! Number of events in data sample
   unsigned int nEvts_;
-  //! Number of event in phsp sample
   unsigned int nPhsp_;
 
-  //! Process data sample from position #nStartEvt_ on
+  /// Process data sample from position #nStartEvt_ on
   unsigned int nStartEvt_;
-  //! Number of events to process in _dataSample sample
+  
+  /// Number of events to process in _dataSample sample
   unsigned int nUseEvt_;
 
-  // Samples
-  std::shared_ptr<DataReader::Data> _dataSample; //! Data sample
-  ParameterList _dataSampleList; //! _dataSample stored as ParameterList
-  double _sumOfWeights;          //! Sum of weights in _dataSample
+  // ================== Samples =======================
+  
+  /// Data sample
+  std::shared_ptr<DataReader::Data> _dataSample;
+  
+  /// _dataSample stored as ParameterList
+  ParameterList _dataSampleList;
+  
+  /// Sum of weights in _dataSample
+  double _sumOfWeights;
 
-  std::shared_ptr<DataReader::Data>
-      _phspSample;               //! phsp sample for normalization
-  ParameterList _phspSampleList; //! _phspSample stored as ParameterList
+  /// phsp sample for normalization
+  std::shared_ptr<DataReader::Data> _phspSample;
+  
+  /// _phspSample stored as ParameterList
+  ParameterList _phspSampleList;
 
-  std::shared_ptr<DataReader::Data>
-      _phspAccSample;               //! Phsp sample with applied efficency
-  ParameterList _phspAccSampleList; //! _phspAccSample stored as ParameterList
-  double _phspAccSampleEff; //! Total efficiency of phsp with applied efficency
+  /// Phsp sample with applied efficency
+  std::shared_ptr<DataReader::Data> _phspAccSample;
+  
+  /// _phspAccSample stored as ParameterList
+  ParameterList _phspAccSampleList;
+  
+  /// Total efficiency of phsp with applied efficency
+  double _phspAccSampleEff;
 };
 
 } /* namespace Estimator */

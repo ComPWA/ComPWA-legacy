@@ -2,6 +2,11 @@
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
+///
+/// \file
+/// Contains Resonance interface class
+///
+
 #ifndef PHYSICS_RESONANCE_HPP_
 #define PHYSICS_RESONANCE_HPP_
 
@@ -17,6 +22,10 @@
 namespace ComPWA {
 namespace Physics {
 
+///
+/// \class Resonace
+/// Resonance class is an interface classe that resembles a two-mody decay.
+///
 class Resonance {
 
 public:
