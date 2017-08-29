@@ -73,7 +73,11 @@ echo 'Generating Doxygen code documentation...'
 # Redirect both stderr and stdout to the log file AND the console.
 doxygen $DOXYFILE 2>&1 | tee doxygen.log
 
-ls
+#Debugging
+echo "TRAVIS_BUILD_DIR = $TRAVIS_BUILD_DIR"
+echo "ls "; ls 
+echo "ls ../ "; ls 
+
 ################################################################################
 ##### Upload the documentation to the gh-pages branch of the repository.   #####
 # Only upload if Doxygen successfully created the documentation.
