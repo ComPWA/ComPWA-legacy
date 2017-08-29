@@ -23,8 +23,8 @@ namespace ComPWA {
 namespace Physics {
 
 ///
-/// \class Resonace
-/// Resonance class is an interface classe that resembles a two-mody decay.
+/// \class Resonance
+/// Resonance class is an interface classe that resembles a two-body decay.
 ///
 class Resonance {
 

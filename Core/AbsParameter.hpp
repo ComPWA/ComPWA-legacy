@@ -2,15 +2,10 @@
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
-//! Base class for internal parameter.
-/*! \class AbsParameter
- * @file AbsParameter.hpp
- * This class defines the internal container of a parameter.
- * For the use in the function tree, the observer pattern is used and
- * this class takes over the role of the Subject. Therefore the actual
- * implementations of AbsParameter are the ConcreteSubjects of the
- * observer pattern and the TreeNodes take the role of the observers.
- */
+//
+// \file
+// AbsParameter base class.
+//
 
 #ifndef _ABSPARAMETER_HPP_
 #define _ABSPARAMETER_HPP_
@@ -31,8 +26,8 @@
 
 namespace ComPWA {
 
-//! Enums for the type of the parameter, should be extended if an new parameter
-//! type is added
+/// Enums for the type of the parameter, should be extended if an new parameter
+/// type is added
 enum ParType {
   COMPLEX = 1,
   DOUBLE = 2,
@@ -43,12 +38,22 @@ enum ParType {
   MUNSIGNEDINTEGER = 7,
   UNDEFINED = 0
 };
-//! Nems of the parameter types, should be extended if an new parameter type is
-//! added
+
+/// Nems of the parameter types, should be extended if an new parameter type is
+/// added
 static const char *ParNames[8] = {
     "UNDEFINED", "COMPLEX", "DOUBLE",   "INTEGER",
     "BOOL",      "MDOUBLE", "MCOMPLEX", "MUNSIGNEDINTEGER"};
 
+///
+/// \class AbsParameter
+/// Base class for internal parameter.
+/// This class defines the internal container of a parameter. For the use in 
+/// the function tree, the observer pattern is used and this class takes over 
+/// the role of the Subject. Therefore the actual implementations of 
+/// AbsParameter are the ConcreteSubjects of the observer pattern and the 
+/// TreeNodes take the role of the observers.
+/// 
 class AbsParameter {
 public:
   //! Constructor with name of parameter and optional type

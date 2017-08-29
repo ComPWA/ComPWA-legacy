@@ -71,27 +71,6 @@
  * Namespace for all ComPWA Estimator modules.
  */
 
-/*!
- * @namespace ComPWA::Estimator::ChiOneD
- * Classes of the Module calculating a Chi-Square estimate.
- */
-
-/*!
- * @namespace ComPWA::Estimator::MinLogLH
- * Classes of the Module calculating a minimum likelihood estimate.
- */
-
-/*!
- * @namespace ComPWA::Estimator::SliceFit
- * Classes of the Module calculating the model independent slice fit estimates
- * using a binned slices.
- */
-
-/*!
- * @namespace ComPWA::Estimator::SliceFitUb
- * Classes of the Module calculating the model independent slice fit estimates
- * using unbinned slices.
- */
 
 /*!
  * @namespace ComPWA::Optimizer
@@ -116,4 +95,15 @@
 /*!
  * @namespace ComPWA::Physics::HelicityFormalism
  * Module to calculate helicity amplitudes for general final states.
+ */
+
+/*!
+ * @namespace ComPWA::Physics::QFT
+ * qft++ library written by Mike Williams
+ * (http://www-meg.phys.cmu.edu/williams/qft++/index.php/main_page)
+ */
+
+/*!
+ * @namespace ComPWA::Physics::DecayDynamics
+ * Dynamical decay functions (e.g. Breit-Wigner, Flatte ...)
  */
