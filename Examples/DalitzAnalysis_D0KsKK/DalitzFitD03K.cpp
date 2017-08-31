@@ -678,7 +678,6 @@ int main(int argc, char **argv) {
     ia >> BOOST_SERIALIZATION_NVP(inResult);
     ifs.close();
 
-    inResult->SetIntensity(intens);
     //    inResult->SetUseCorrelatedErrors(fitFractionError);
     if (calculateInterference)
       inResult->SetCalcInterference(0);

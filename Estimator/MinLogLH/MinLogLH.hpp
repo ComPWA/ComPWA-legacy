@@ -2,13 +2,9 @@
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
-//! Negative Log Likelihood-Estimator.
-/*! \class MinLogLH
- * @file MinLogLH.hpp
- * This class calculates a simple -log(LH) of a intensity and a dataset.
- * Data and Model are provided in the constructor using the Amplitude and Data
- * interfaces. The class itself fulfills the Estimator interface.
- */
+///
+/// \file MinLogLH.hpp
+///
 
 #ifndef _MINLOGLH_HPP
 #define _MINLOGLH_HPP
@@ -17,7 +13,6 @@
 #include <memory>
 #include <string>
 
-// PWA-Header
 #include "Core/Estimator.hpp"
 #include "Core/AmpIntensity.hpp"
 #include "DataReader/Data.hpp"
@@ -28,118 +23,107 @@
 namespace ComPWA {
 namespace Estimator {
 
+///
+/// \class MinLogLH
+/// Negative Log Likelihood-Estimator. This class calculates a simple
+/// -log(LH) using an AmpIntensity and datasets for data and phase space.
+/// The class fulfills the Estimator interface.
+///
+/// \par Log likelihood
+/// The negative log LH is given by:
+/// \f[
+///    -log \mathcal{L} = - \frac{N}{\sum_{ev} w_{ev}} \sum_{ev} w_{ev}
+///    \log T(ev).
+/// \f]
+/// With the the value of AmpIntensity \f$T(ev)\f$ for a given event \f$ev\f$.
+/// The sum over all weights is necessary to normalize the weights to one.
+/// Otherwise the error estimate would be incorrect. AmpIntensity is normalized
+/// over the phase space region and therefore the likelihood function is also
+/// normalized.
+///
+/// \par Efficiency correction
+/// Efficiency correction is performed within AmpIntensity, more details are
+/// given in AmpIntensity. Either each event in phspSample has its
+/// efficiency stored inside or another phase space sample accSample must be
+/// provided to which the efficiency is applied. That means that accSample
+/// has passed reconstruction and selection.
+///
 class MinLogLH : public ComPWA::IEstimator {
 
 public:
-  MinLogLH(){};
+  /// Constructor for MinLogLH.
+  MinLogLH(std::shared_ptr<ComPWA::Kinematics> kin,
+           std::shared_ptr<ComPWA::AmpIntensity> amp,
+           std::shared_ptr<ComPWA::DataReader::Data> data,
+           std::shared_ptr<ComPWA::DataReader::Data> phspSample,
+           std::shared_ptr<ComPWA::DataReader::Data> accSample,
+           unsigned int firstEvent, unsigned int nEvents);
 
-  /// Constructor for MinLohLH.
-  /// An unbinned efficiency correction can be applied using \p accSample.
-  ///
-  /// \param amp amplitude
-  /// \param data data sample
-  /// \param phspSample phsp sample for normalization
-  /// \param accSample sample of efficiency applied phsp events for unbinned
-  /// efficiency correction
-  /// \param startEvent use @param data from that position on
-  /// \param nEvents number of events to process
-  MinLogLH(std::shared_ptr<Kinematics> kin, std::shared_ptr<AmpIntensity> amp,
-           std::shared_ptr<DataReader::Data> data,
-           std::shared_ptr<DataReader::Data> phspSample,
-           std::shared_ptr<DataReader::Data> accSample, unsigned int startEvent,
-           unsigned int nEvents);
+  /// Value of minimum log likelhood function.
+  virtual double controlParameter(ComPWA::ParameterList &par);
 
-  virtual ~MinLogLH(){};
+  /// Trigger the use of a FunctionTree.
+  /// If no tree is provided by the AmpIntensity implementation an exception
+  /// is thrown.
+  virtual void UseFunctionTree(bool onoff = true);
 
-  virtual double controlParameter(ParameterList &minPar);
+  /// Get the FunctionTree.
+  /// If no FunctionTree is available an std::runtime_error exception is thrown.
+  virtual std::shared_ptr<ComPWA::FunctionTree> GetTree();
 
-  virtual bool HasTree() { return (_tree) ? 1 : 0; }
-
-  virtual void UseFunctionTree(bool onoff) {
-    if (onoff && _tree)
-      return;     // Tree already exists
-    if (!onoff) { // disable tree
-      _tree = std::shared_ptr<FunctionTree>();
-      return;
-    }
-    try {
-      IniLHtree();
-    } catch (std::exception &ex) {
-      throw std::runtime_error(
-          "MinLogLH::UseFunctionTree()| FunctionTree can not be "
-          "constructed! Error: " +
-          std::string(ex.what()));
-    }
-    return;
-  }
-
-  virtual std::shared_ptr<FunctionTree> GetTree() {
-    if (!_tree) {
-      throw std::runtime_error("MinLogLH::GetTree()| FunctionTree does not "
-                               "exists. Enable it first using "
-                               "UseFunctionTree(true)!");
-    }
-    return _tree;
-  }
-
-  virtual std::shared_ptr<ComPWA::AmpIntensity> GetIntensity() {
-    return _intens;
-  }
-
-  virtual int GetNEvents() { return nEvts_; }
+  /// Number of likelihood evaluations
+  virtual int NSteps() { return _nCalls; }
 
 protected:
+  /// Initialize FunctionTree.
+  /// If the AmpIntensity model does not provide a FunctionTree or if a tree
+  /// with error is constructed, an exception is thrown.
   virtual void IniLHtree();
 
-  void CalcSumOfWeights();
+  std::shared_ptr<ComPWA::Kinematics> _kin;
 
-private:
-  void Reset();
+  /// AmpIntensity model
+  std::shared_ptr<ComPWA::AmpIntensity> _intens;
 
-  std::shared_ptr<Kinematics> kin_;
+  std::shared_ptr<ComPWA::FunctionTree> _tree;
 
-  /// Amplitude model
-  std::shared_ptr<AmpIntensity> _intens;
+  /// Process data sample from position _firstEvent on
+  unsigned int _firstEvent;
 
-  std::shared_ptr<FunctionTree> _tree;
-
-  unsigned int nEvts_;
-  unsigned int nPhsp_;
-
-  /// Process data sample from position #nStartEvt_ on
-  unsigned int nStartEvt_;
-  
   /// Number of events to process in _dataSample sample
-  unsigned int nUseEvt_;
+  unsigned int _nEvents;
+
+  /// Number of likelihood evaluations
+  int _nCalls;
 
   // ================== Samples =======================
-  
+
   /// Data sample
-  std::shared_ptr<DataReader::Data> _dataSample;
-  
-  /// _dataSample stored as ParameterList
+  std::shared_ptr<ComPWA::DataReader::Data> _dataSample;
+
+  /// _dataSample stored 'horizontally' as ParameterList
   ParameterList _dataSampleList;
-  
+
   /// Sum of weights in _dataSample
   double _sumOfWeights;
 
   /// phsp sample for normalization
-  std::shared_ptr<DataReader::Data> _phspSample;
-  
-  /// _phspSample stored as ParameterList
+  std::shared_ptr<ComPWA::DataReader::Data> _phspSample;
+
+  /// _phspSample stored 'horizontally' as ParameterList
   ParameterList _phspSampleList;
 
   /// Phsp sample with applied efficency
-  std::shared_ptr<DataReader::Data> _phspAccSample;
-  
-  /// _phspAccSample stored as ParameterList
+  std::shared_ptr<ComPWA::DataReader::Data> _phspAccSample;
+
+  /// _phspAccSample 'horizontally' stored as ParameterList
   ParameterList _phspAccSampleList;
-  
+
   /// Total efficiency of phsp with applied efficency
   double _phspAccSampleEff;
 };
 
-} /* namespace Estimator */
-} /* namespace ComPWA */
+} // namespace Estimator
+} // namespace ComPWA
 
-#endif /* _MINLOGLH_HPP */
+#endif // _MINLOGLH_HPP

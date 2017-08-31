@@ -39,61 +39,54 @@ class FitResult {
 public:
   FitResult() : time(0) {};
   
-  virtual ~FitResult(){};
-  
-  //! Set AmpIntensity.
-  virtual void SetIntensity(std::shared_ptr<AmpIntensity> intens) {
-    _intens = intens;
-  }
-  
-  //! Set list of initial parameters
+  /// Set list of initial parameters
   virtual void SetInitialParameters(ParameterList iniPars) {
     initialParameters.DeepCopy(iniPars);
   }
   
-  //! Get list of initial parameters
+  /// Get list of initial parameters
   virtual ParameterList GetInitialParameters() { return initialParameters; }
   
-  //! Set list of final fit parameters
+  /// Set list of final fit parameters
   virtual void SetFinalParameters(ParameterList finPars);
   
-  //! Get list of final fit parameters
+  /// Get list of final fit parameters
   virtual ParameterList GetFinalParameters() { return finalParameters; }
   
-  //! Set list of true parameters
+  /// Set list of true parameters
   virtual void SetTrueParameters(ParameterList truePars) {
     trueParameters.DeepCopy(truePars);
   }
   
-  //! Get list of true parameters
+  /// Get list of true parameters
   virtual ParameterList GetTrueParameters() { return trueParameters; }
   
-  //! Set processing time for minimization
+  /// Set processing time for minimization
   virtual void SetTime(double t) { time = t; }
   
-  //! Get processing time for minimization
+  /// Get processing time for minimization
   virtual double GetTime() const { return time; }
   
-  //! Get fit result (e.g. likelihood or chi2)
+  /// Get fit result (e.g. likelihood or chi2)
   virtual double GetResult() = 0;
   
-  //! Set list with fit fractions
+  /// Set list with fit fractions
   virtual void SetFitFractions(ParameterList list) {
     _fitFractions.DeepCopy(list);
   }
   
-  //! Get list of fit fractions
+  /// Get list of fit fractions
   virtual ParameterList GetFitFractions() {
     return _fitFractions;
   }
 
-  //! Table with fit parameters
+  /// Table with fit parameters
   virtual void PrintFitParameters(TableFormater *tableResult);
   
-  //! Table with fit fractions
+  /// Table with fit fractions
   virtual void PrintFitFractions(TableFormater *tab);
   
-  //! Print fit result
+  /// Print fit result
   virtual void Print(std::string opt = "");
 
   virtual void WriteTeX(std::string filename){};
@@ -105,7 +98,7 @@ public:
     out << fitres.GetResult();
     return out;
   };
-  //! Any errors during minimization?
+  /// Any errors during minimization?
   virtual bool HasFailed() { return 0; };
 
 protected:
@@ -127,9 +120,6 @@ protected:
   //! True list of parameters
   ParameterList trueParameters;
   
-  //! Fit amplitude (can't be serialized)
-  std::shared_ptr<AmpIntensity> _intens;
-
   ParameterList _fitFractions;
   
   //! List with fit fractions and errors
