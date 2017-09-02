@@ -34,8 +34,8 @@ target_include_directories( Tools
   PUBLIC ${ROOT_INCLUDE_DIR} ${Boost_INCLUDE_DIR} ${GSL_INCLUDE_DIR} )
 
 
-install (FILES ${lib_headers} DESTINATION include/ComPWA)
-install(TARGETS Tools
+install( FILES ${lib_headers} DESTINATION include/ComPWA )
+install( TARGETS Tools
         LIBRARY DESTINATION lib
 )
 
@@ -59,7 +59,6 @@ foreach(testSrc ${TEST_SRCS})
   #link to Boost libraries AND your targets and dependencies
   target_link_libraries( ${testName}
     Core
-    Tools
     ${Boost_LIBRARIES}
     ${ROOT_LIBRARIES}
   )

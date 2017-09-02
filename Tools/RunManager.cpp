@@ -125,9 +125,8 @@ bool RunManager::gen(int number, std::shared_ptr<Kinematics> kin, std::shared_pt
   if (phspTrue && phspTrue->GetMaxWeight() > maxSampleWeight)
     maxSampleWeight = phspTrue->GetMaxWeight();
 
-  /* Maximum value for random number generation. We introduce an arbitrary
-   * factor of 5 to make sure that the maximum value is never reached.
-   */
+  // Maximum value for random number generation. We introduce an arbitrary
+  // factor of 5 to make sure that the maximum value is never reached.
   double generationMaxValue = 5* maxSampleWeight;
 
   unsigned int initialSeed = gen->GetSeed();
@@ -197,9 +196,8 @@ bool RunManager::gen(int number, std::shared_ptr<Kinematics> kin, std::shared_pt
       continue;
 
     // Fill event to sample
-    /* reset weights: the weights are taken into account by hit and miss. The
-     * resulting
-     * sample is therefore unweighted */
+    // reset weights: the weights are taken into account by hit and miss. The
+    // resulting sample is therefore unweighted
     evt.SetWeight(1.);     // reset weight
     evt.SetEfficiency(1.); // reset weight
     data->PushEvent(evt);
@@ -243,9 +241,8 @@ bool RunManager::GeneratePhsp(int number) {
     if (ampRnd > tmp.GetWeight())
       continue;
 
-    /* Reset weights: weights are taken into account by hit&miss. The
-     * resulting sample is therefore unweighted
-     */
+    // Reset weights: weights are taken into account by hit&miss. The
+    // resulting sample is therefore unweighted
     tmp.SetWeight(1.);
 
     tmp.SetEfficiency(1.);

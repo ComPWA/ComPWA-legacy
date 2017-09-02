@@ -738,7 +738,9 @@ DoubleParameterFactory(const boost::property_tree::ptree pt) {
   } else if (pt.get_optional<double>("Max")) {
     throw std::runtime_error(
         "DoubleParameterFactory() | Parameter range not properly set!");
-  } else { /* Do not set a parameter range */
+  } else {
+    // Do not set a parameter range and fix the parameter
+    obj.FixParameter(true);
   }
 
   return obj;

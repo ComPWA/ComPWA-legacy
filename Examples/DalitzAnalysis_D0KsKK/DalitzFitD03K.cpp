@@ -1,9 +1,12 @@
-/*! Dalitz plot analysis of the decay D0->K_S0 K_ K-
-* @file DalitzFitApp.cpp
-* Fit application for D0->K_S0 K_ K- analysis. A model with BW and flatte
-* formalism is used to
-* describe the data.
-*/
+// Copyright (c) 2013, 2017 The ComPWA Team.
+// This file is part of the ComPWA framework, check
+// https://github.com/ComPWA/ComPWA/license.txt for details.
+
+
+///
+/// \file
+/// Executable for Dalitz plot analysis of the decay D0 -> K_S K+ K-
+///
 
 // Standard header files go here
 #include <iostream>
@@ -55,12 +58,9 @@ using namespace ComPWA::Physics::HelicityFormalism;
 
 BOOST_CLASS_EXPORT(Optimizer::Minuit2::MinuitResult)
 
-/*****************************************************************************
- *
- * The main function.
- *
- *****************************************************************************/
-
+///
+///Dalitz plot analysis of the decay D0->K_S0 K_ K-.
+///
 int main(int argc, char **argv) {
 
   // Read command line input
@@ -605,7 +605,6 @@ int main(int argc, char **argv) {
     //      preResult->print();
     //    }
 
-    std::shared_ptr<Optimizer::Optimizer> opti;
     // Set start error of 0.05 for parameters
     setErrorOnParameterList(fitPar, 0.05, useMinos);
 

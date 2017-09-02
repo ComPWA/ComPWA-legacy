@@ -8,6 +8,7 @@
 #include <vector>
 
 #include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/xml_parser.hpp>
 
 #include <Core/Exceptions.hpp>
 #include <Core/Parameter.hpp>
@@ -84,7 +85,7 @@ public:
       : Properties(name, id){};
 
   ParticleProperties(boost::property_tree::ptree pt);
-  
+
   virtual boost::property_tree::ptree Save();
 
   double GetMass() const { return _mass.GetValue(); }
@@ -123,7 +124,6 @@ typedef std::map<std::string, ParticleProperties> PartList;
 // id);
 inline const ParticleProperties &FindParticle(std::shared_ptr<PartList> list,
                                               pid id) {
-
   // position in map
   int result = -1;
   for (int i = 0; i < list->size(); ++i) {
@@ -155,7 +155,6 @@ inline void ReadParticles(std::shared_ptr<PartList> list,
   auto particleTree = pt.get_child_optional("ParticleList");
   if (!particleTree)
     return;
-
   for (auto const &v : particleTree.get()) {
     auto tmp = ParticleProperties(v.second);
     auto p = std::make_pair(tmp.GetName(), tmp);
@@ -175,27 +174,43 @@ inline void ReadParticles(std::shared_ptr<PartList> list,
     } catch (std::exception &ex) {
     }
 
-    LOG(info) << "ReadParticles() | Particle " << tmp.GetName()
-              << " (id=" << tmp.GetId() << ") "
-              << " J(PC)=" << tmp.GetSpinQuantumNumber("Spin") << "("
-              << tmp.GetQuantumNumber("Parity") << cparity << ") "
-              << " mass=" << tmp.GetMass()
-              << " decayType=" << tmp.GetDecayType();
+    LOG(debug) << "ReadParticles() | Particle " << tmp.GetName()
+               << " (id=" << tmp.GetId() << ") "
+               << " J(PC)=" << tmp.GetSpinQuantumNumber("Spin") << "("
+               << tmp.GetQuantumNumber("Parity") << cparity << ") "
+               << " mass=" << tmp.GetMass()
+               << " decayType=" << tmp.GetDecayType();
   }
 
   return;
+}
+
+/// Read list of particles from a stream
+inline void ReadParticles(std::shared_ptr<PartList> list,
+                          std::stringstream &stream) {
+  boost::property_tree::ptree tree;
+  boost::property_tree::xml_parser::read_xml(stream, tree);
+  ReadParticles(list, tree);
+}
+
+/// Read list of particles from a string. Note that the string contains the full
+/// list; it is not a file name!
+inline void ReadParticles(std::shared_ptr<PartList> list, std::string str) {
+  std::stringstream ss;
+  ss << str;
+  ReadParticles(list, ss);
 }
 
 /// Save particle list to boost::property_tree
 inline boost::property_tree::ptree
 SaveParticles(std::shared_ptr<PartList> list) {
   boost::property_tree::ptree pt;
-  
-  for( auto& i: *list.get() ){
-    pt.add_child("Particle",i.second.Save());
+
+  for (auto &i : *list.get()) {
+    pt.add_child("Particle", i.second.Save());
   }
   boost::property_tree::ptree pt2;
-  pt2.add_child("ParticleList",pt);
+  pt2.add_child("ParticleList", pt);
   return pt2;
 }
 

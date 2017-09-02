@@ -10,6 +10,8 @@
 #ifndef ParameterTools_h
 #define ParameterTools_h
 
+#include "TRandom3.h"
+
 ///
 /// Expands '~' in file path to user directory.
 ///

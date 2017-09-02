@@ -11,10 +11,7 @@
 #include <string>
 #include <memory>
 
-#include "TLorentzVector.h"
-#include "TParticle.h"
 #include "TGenPhaseSpace.h"
-#include "TRandom3.h"
 
 #include "Core/Generator.hpp"
 #include "Core/Event.hpp"

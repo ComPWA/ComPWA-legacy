@@ -118,12 +118,16 @@ inline double Maximum(std::shared_ptr<Kinematics> kin,
 
   auto data = sample->GetDataPoints(kin);
   double max = 0;
+  dataPoint maxPoint;
   for (auto i : data) {
     double val = intens->Intensity(i);
-    if (val > max)
+    if (val > max){
+      maxPoint = i;
       max = val;
+    }
   }
 
+  LOG(debug) << "Maximum() | Maximum found at "<<maxPoint<<".";
   return max;
 }
 

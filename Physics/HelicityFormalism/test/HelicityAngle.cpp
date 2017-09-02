@@ -18,10 +18,11 @@
 #include "Core/ParameterList.hpp"
 #include "Core/Logging.hpp"
 #include "Core/Particle.hpp"
+#include "Physics/HelicityFormalism/HelicityKinematics.hpp"
+
 #include "Tools/RunManager.hpp"
 #include "Tools/RootGenerator.hpp"
 #include "DataReader/RootReader/RootReader.hpp"
-#include "Physics/HelicityFormalism/HelicityKinematics.hpp"
 
 using namespace ComPWA;
 using namespace ComPWA::Physics::HelicityFormalism;
