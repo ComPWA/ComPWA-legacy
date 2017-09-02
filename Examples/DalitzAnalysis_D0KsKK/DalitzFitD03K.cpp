@@ -44,8 +44,8 @@
 #include "Tools/RootGenerator.hpp"
 #include "Tools/FitFractions.hpp"
 
-#include "PlotData.hpp"
-#include "Tools.hpp"
+#include "Tools/DalitzPlot.hpp"
+#include "Tools/ParameterTools.hpp"
 #include "systematics.hpp"
 
 using namespace std;
@@ -235,7 +235,7 @@ int main(int argc, char **argv) {
       "disabled, >0 = MC precision");
 
   bool enablePlotting;
-  bool plotDataSample;
+  bool DalitzPlotSample;
   int plotSize;
   bool plotCorrectEfficiency;
   int plotNBins;
@@ -244,7 +244,7 @@ int main(int argc, char **argv) {
   config_plot.add_options()("plotting",
                             po::value<bool>(&enablePlotting)->default_value(1),
                             "Enable/Disable plotting")(
-      "plotData", po::value<bool>(&plotDataSample)->default_value(1),
+      "DalitzPlot", po::value<bool>(&DalitzPlotSample)->default_value(1),
       "Enable/Disable plotting of data")(
       "plotSize", po::value<int>(&plotSize)->default_value(100000),
       "Size of sample for amplitude plot")(
@@ -562,7 +562,7 @@ int main(int argc, char **argv) {
     LOG(info) << "plotting size: " << plotSize;
     LOG(info) << "number of bins: " << plotNBins;
     LOG(info) << "Correct samples for efficiency: " << plotCorrectEfficiency;
-    LOG(info) << "plotDataSample: " << plotDataSample;
+    LOG(info) << "DalitzPlotSample: " << DalitzPlotSample;
     LOG(info) << "plotAmplitude: " << plotAmplitude;
   }
   LOG(info) << "===============================================";
@@ -723,8 +723,8 @@ int main(int argc, char **argv) {
     pl_phspSample->ReduceToPhsp(trueModelKin);
     pl_phspSample->SetEfficiency(trueModelKin, eff);
 
-    //-------- Instance of plotData
-    plotData pl(fitModelKin, fileNamePrefix, plotNBins);
+    //-------- Instance of DalitzPlot
+    DalitzPlot pl(fitModelKin, fileNamePrefix, plotNBins);
     // set data sample
     pl.SetData(sample);
     // set phsp sample

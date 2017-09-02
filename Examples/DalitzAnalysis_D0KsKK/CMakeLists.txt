@@ -5,7 +5,7 @@ find_package( ROOT REQUIRED )
 find_package( Boost REQUIRED )
 
 add_executable( DalitzFitD03K
-  DalitzFitD03K.cpp PlotData.cpp PlotData.hpp Tools.hpp systematics.hpp
+  DalitzFitD03K.cpp systematics.hpp
 )
 
 target_link_libraries( DalitzFitD03K
@@ -13,6 +13,7 @@ target_link_libraries( DalitzFitD03K
   Minuit2IF
   MinLogLH
   RootReader
+  Tools
   Core
   ${ROOT_LIBRARIES}
   ${Boost_LIBRARIES}

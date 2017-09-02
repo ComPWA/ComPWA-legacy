@@ -16,8 +16,6 @@ add_library( HelicityFormalism
 target_link_libraries( HelicityFormalism
   Core
   qft++
-  Tools
-  RootReader
   DecayDynamics
   ${Boost_LIBRARIES}
 )

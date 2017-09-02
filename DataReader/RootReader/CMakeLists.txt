@@ -14,7 +14,8 @@ add_library( RootReader
   SHARED ${lib_srcs} ${lib_headers}
 )
 target_link_libraries( RootReader
-  DataReader ${ROOT_LIBRARIES}
+  DataReader
+  ${ROOT_LIBRARIES}
 )
 
 target_include_directories( RootReader

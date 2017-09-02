@@ -24,6 +24,7 @@ target_link_libraries( Tools
   Core
   DataReader
   RootReader
+  HelicityFormalism
   ${ROOT_LIBRARIES}
   ${Boost_LIBRARIES}
   ${GSL_LIBRARIES}
