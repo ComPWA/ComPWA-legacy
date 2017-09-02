@@ -1,20 +1,7 @@
-//-------------------------------------------------------------------------------
-// Copyright (c) 2013 Mathias Michel.
-// All rights reserved. This program and the accompanying materials
-// are made available under the terms of the GNU Public License v3.0
-// which accompanies this distribution, and is available at
-// http://www.gnu.org/licenses/gpl.html
-//
-// Contributors:
-//     Mathias Michel - initial API and implementation
-//-------------------------------------------------------------------------------
-//! Plotter for three particle final states.
-/*!
- * @file DalitzDataPlotterApp.cpp
- * This tiny application uses the RootReader to read a file with three final
- * particles and plots the invariant masses of the two particle subsystems.
- * The resulting Dalitz-plots are written as histograms to another root file.
- */
+// Copyright (c) 2013, 2017 The ComPWA Team.
+// This file is part of the ComPWA framework, check
+// https://github.com/ComPWA/ComPWA/license.txt for details.
+
 
 // Standard header files go here
 #include <iostream>
@@ -32,35 +19,34 @@
 
 // Data Interface header files go here
 #include "DataReader/RootReader/RootReader.hpp"
-#include "DataReader/JakeReader/JakeReader.hpp"
-#include "Physics/DPKinematics/DalitzKinematics.hpp"
+#include "Physics/HelicityFormalism/HelicityKinematics.hpp"
 
 //Core header files go here
 #include "Core/Event.hpp"
 #include "Core/Particle.hpp"
 
 using namespace ComPWA;
-using Physics::DPKinematics::DalitzKinematics;
+using ComPWA::Physics::HelicityFormalism::HelicityKinematics;
 using DataReader::RootReader;
-using DataReader::JakeReader::JakeReader;
 
 unsigned int nBins = 400;
 
-/************************************************************************************************/
-/**
- * The main function.
- */
+///
+/// Plotter for three particle final states.
+/// This tiny application uses the RootReader to read a file with three final
+/// particles and plots the invariant masses of the two particle subsystems.
+/// The resulting Dalitz-plots are written as histograms to another root file.
+///
 int main(int argc, char **argv){
-	std::cout << "  ComPWA Copyright (C) 2013  Mathias Michel " << std::endl;
-	std::cout << "  This program comes with ABSOLUTELY NO WARRANTY; for details see license.txt" << std::endl;
-	std::cout << std::endl;
 
 	std::cout << "DataIF Root 3Particles started " << std::endl << std::endl;
 
 	DalitzKinematics* kin = dynamic_cast<DalitzKinematics*>(DalitzKinematics::createInstance("jpsi", "gamma", "pi0", "pi0"));
+  auto kin = std::make_shared<HelicityKinematics>(
+      fitModelPartL, fitModelTree.get_child("HelicityKinematics"));
 
 	std::string file = "executables/Examples/DalitzFit/JPSIDATA.ACC.root";
-	JakeReader myReader(file, "kin"); //return 0;
+	RootReader myReader(file, "kin"); //return 0;
 	unsigned int maxEvents = myReader.getNEvents();
 	double masssq12, masssq13, masssq23;
 	TH2D* bw12 = new TH2D("bw12","inv. mass-sq of particles 1&2",nBins,0.,10.,nBins,0.,10.);
