@@ -47,7 +47,7 @@ double MinuitFcn::operator()(const std::vector<double> &x) const {
 
   LOG(info) << "MinuitFcn: -log(L) = " << std::setprecision(10) << result
             << std::setprecision(4) << " Time: " << sec.count() << "s"
-            << " nCalls: " << _myDataPtr->nCalls();
+            << " nCalls: " << _myDataPtr->NSteps();
   LOG(debug) << "Parameters: " << paramOut.str();
 
   return result;

@@ -17,87 +17,111 @@
 #include "Core/Kinematics.hpp"
 #include "Core/FitResult.hpp"
 
-namespace ComPWA {
-namespace Estimator {
+using namespace ComPWA;
+using namespace ComPWA::Estimator;
 
 MinLogLH::MinLogLH(std::shared_ptr<Kinematics> kin,
                    std::shared_ptr<AmpIntensity> intens,
                    std::shared_ptr<DataReader::Data> data,
                    std::shared_ptr<DataReader::Data> phspSample,
                    std::shared_ptr<DataReader::Data> accSample,
-                   unsigned int startEvent, unsigned int nEvents)
-    : kin_(kin), _intens(intens), nEvts_(0), nPhsp_(0), nStartEvt_(startEvent),
-      nUseEvt_(nEvents), _dataSample(data), _phspSample(phspSample),
-      _phspAccSample(accSample) {
+                   unsigned int firstEvent, unsigned int nEvents)
+    : _kin(kin), _intens(intens), _firstEvent(firstEvent), _nEvents(nEvents),
+      _dataSample(data), _phspSample(phspSample), _phspAccSample(accSample) {
 
-  nPhsp_ = _phspSample->GetNEvents();
-  nEvts_ = _dataSample->GetNEvents();
-  
-  //use the full sample of both are zero
-  if (!nUseEvt_ && !nStartEvt_) { 
-    nUseEvt_ = nEvts_;
-    nStartEvt_ = 0;
+  int size = _dataSample->GetNEvents();
+
+  // use the full sample of both are zero
+  if (!_nEvents && !_firstEvent) {
+    _nEvents = size;
+    _firstEvent = 0;
   }
-  
-  if (nStartEvt_ + nUseEvt_ > nEvts_)
-    nUseEvt_ = nEvts_ - nStartEvt_;
+
+  // Are more events requested than available in data sample?
+  if (_firstEvent + _nEvents > size)
+    _nEvents = size - _firstEvent;
 
   // Get data as ParameterList
-  _dataSampleList = _dataSample->GetListOfData(kin_);
-  _phspSampleList = _phspSample->GetListOfData(kin_);
+  _dataSampleList = _dataSample->GetListOfData(_kin);
+  _phspSampleList = _phspSample->GetListOfData(_kin);
   if (_phspAccSample)
-    _phspAccSampleList = _phspAccSample->GetListOfData(kin_);
+    _phspAccSampleList = _phspAccSample->GetListOfData(_kin);
   else
-    _phspAccSampleList = _phspSample->GetListOfData(kin_);
+    _phspAccSampleList = _phspSample->GetListOfData(_kin);
 
-  CalcSumOfWeights();
-
-  LOG(info) << "MinLogLH::Init() |  Size of data sample = " << nUseEvt_
-            << " ( Sum of weights = " << _sumOfWeights << " ).";
-
-  _calls = 0; // member of ControlParameter
-
-  return;
-}
-
-void MinLogLH::Reset() {
-  _intens = std::shared_ptr<AmpIntensity>();
-  _dataSample = std::shared_ptr<DataReader::Data>();
-  _phspSample = std::shared_ptr<DataReader::Data>();
-  _phspAccSample = std::shared_ptr<DataReader::Data>();
-  _phspAccSampleEff = 1.0;
-}
-
-void MinLogLH::CalcSumOfWeights() {
+  // Calculation sum of weights of data sample
   _sumOfWeights = 0;
-  for (unsigned int evt = nStartEvt_; evt < nUseEvt_ + nStartEvt_; evt++) {
+  for (unsigned int evt = _firstEvent; evt < _nEvents + _firstEvent; evt++) {
     Event ev(_dataSample->GetEvent(evt));
     _sumOfWeights += ev.GetWeight();
   }
+
+  LOG(info) << "MinLogLH::Init() |  Size of data sample = " << _nEvents
+            << " ( Sum of weights = " << _sumOfWeights << " ).";
+
+  _nCalls = 0; // member of ControlParameter
+
   return;
+}
+
+double MinLogLH::controlParameter(ParameterList &minPar) {
+  double lh = 0;
+  if (!_tree) {
+    // Calculate \Sum_{ev} log()
+    double sumLog = 0;
+    // loop over data sample
+    for (unsigned int evt = _firstEvent; evt < _nEvents + _firstEvent; evt++) {
+      dataPoint point;
+      _kin->EventToDataPoint(_dataSample->GetEvent(evt), point);
+      double val = _intens->Intensity(point);
+      sumLog += std::log(val) * point.GetWeight();
+    }
+    lh = (-1) * ((double)_nEvents) / _sumOfWeights * sumLog;
+  } else {
+    _tree->recalculate();
+    std::shared_ptr<DoubleParameter> logLH =
+        std::dynamic_pointer_cast<DoubleParameter>(_tree->head()->getValue());
+    lh = logLH->GetValue();
+  }
+  _nCalls++;
+  return lh; // return -logLH
+}
+
+void MinLogLH::UseFunctionTree(bool onoff) {
+  if (onoff && _tree)
+    return;     // Tree already exists
+  if (!onoff) { // disable tree
+    _tree = std::shared_ptr<FunctionTree>();
+    return;
+  }
+  try {
+    IniLHtree();
+  } catch (std::exception &ex) {
+    throw std::runtime_error(
+        "MinLogLH::UseFunctionTree()| FunctionTree can not be "
+        "constructed! Error: " +
+        std::string(ex.what()));
+  }
+  return;
+}
+
+std::shared_ptr<FunctionTree> MinLogLH::GetTree() {
+  if (!_tree) {
+    throw std::runtime_error("MinLogLH::GetTree()| FunctionTree does not "
+                             "exists. Enable it first using "
+                             "UseFunctionTree(true)!");
+  }
+  return _tree;
 }
 
 void MinLogLH::IniLHtree() {
   LOG(debug) << "MinLogLH::IniLHtree() | Constructing FunctionTree!";
+
+  // Ensure that a FunctionTree is provided
   if (!_intens->HasTree())
     throw std::runtime_error("MinLogLH::IniLHtree() |  AmpIntensity does not "
                              "provide a FunctionTree!");
 
-  /* CONSTRUCTION OF THE LIKELIHOOD:
-   * We denote the coherent sum over all resonances with T:
-   * 		T := \sum_{i,j} c_i c_j^*A_iA_j^*
-   * The negative log LH is given by:
-   * 		-log L = - N/(\sum_{ev} w_{ev}) \sum_{ev} w_{ev} \log{f_{bkg}
-   * \frac{|T|^2}{\int_{DP} |T|^2} + (1-f_{bkg})}
-   * The sum over all weights is necessary to normalize the weights to one.
-   * Otherwise the error
-   * estimate is incorrect. The LH normalization is norm_{LH} = \int_{DP} |T|^2.
-   * This formulation includes event weights as well as a flat background
-   * description. f_{bkg} is
-   * the fraction of background in the sample. Using both is of course
-   * non-sense. Set weights to
-   * one OR f_{bkg} to zero.
-   */
   _tree = std::shared_ptr<FunctionTree>(new FunctionTree());
   int sampleSize = _dataSampleList.GetMultiDouble(0)->GetNValues();
 
@@ -120,8 +144,8 @@ void MinLogLH::IniLHtree() {
   _tree->createNode("Log",
                     std::shared_ptr<Strategy>(new LogOf(ParType::MDOUBLE)),
                     "weightLog", sampleSize, false);
-  _tree->insertTree(_intens->GetTree(kin_, _dataSampleList, _phspAccSampleList,
-                                     _phspSampleList, kin_->GetNVars()),
+  _tree->insertTree(_intens->GetTree(_kin, _dataSampleList, _phspAccSampleList,
+                                     _phspSampleList, _kin->GetNVars()),
                     "Log");
 
   _tree->recalculate();
@@ -133,29 +157,3 @@ void MinLogLH::IniLHtree() {
                 "Construction of LH tree finished!";
   return;
 }
-
-double MinLogLH::controlParameter(ParameterList &minPar) {
-  double lh = 0;
-  if (!_tree) {
-    // Calculate \Sum_{ev} log()
-    double sumLog = 0;
-    // loop over data sample
-    for (unsigned int evt = nStartEvt_; evt < nUseEvt_ + nStartEvt_; evt++) {
-      dataPoint point;
-      kin_->EventToDataPoint(_dataSample->GetEvent(evt), point);
-      double val = _intens->Intensity(point);
-      sumLog += std::log(val) * point.GetWeight();
-    }
-    lh = (-1) * ((double)nUseEvt_) / _sumOfWeights * sumLog;
-  } else {
-    _tree->recalculate();
-    std::shared_ptr<DoubleParameter> logLH =
-        std::dynamic_pointer_cast<DoubleParameter>(_tree->head()->getValue());
-    lh = logLH->GetValue();
-  }
-  _calls++;
-  return lh; // return -logLH
-}
-
-} /* namespace Estimator */
-} /* namespace ComPWA */

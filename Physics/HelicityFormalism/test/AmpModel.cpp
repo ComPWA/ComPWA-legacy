@@ -7,11 +7,13 @@
 
 #include <vector>
 #include <locale>
+#include <iostream>
 
 #include <boost/test/unit_test.hpp>
 #include <boost/locale/utf.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
+#include <boost/foreach.hpp>
 
 #include "Core/Properties.hpp"
 #include "Core/ParameterList.hpp"
@@ -24,9 +26,6 @@
 
 using namespace ComPWA::Physics::HelicityFormalism;
 
-#include <boost/property_tree/ptree.hpp>
-#include <boost/foreach.hpp>
-#include <iostream>
 
 using namespace ComPWA;
 

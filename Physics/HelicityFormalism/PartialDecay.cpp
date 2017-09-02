@@ -44,15 +44,17 @@ PartialDecay::Factory(std::shared_ptr<PartList> partL,
 
   if (mag)
     obj->SetMagnitudeParameter(mag);
-  else
-    throw BadParameter(
-        "PartialDecay::Factory() | No magnitude parameter found.");
-
+  else {
+    obj->SetMagnitudeParameter(std::make_shared<ComPWA::DoubleParameter>("", 1.0));
+    obj->GetMagnitudeParameter()->SetParameterFixed();
+  }
+  
   if (phase)
     obj->SetPhaseParameter(phase);
-  else
-    throw BadParameter(
-        "PartialDecay::Factory() | No phase parameter found.");
+  else {
+    obj->SetPhaseParameter(std::make_shared<ComPWA::DoubleParameter>("", 0.0));
+    obj->GetPhaseParameter()->SetParameterFixed();
+  }
 
   auto dynObj = std::shared_ptr<DecayDynamics::AbstractDynamicalFunction>();
   std::string name = pt.get<std::string>("DecayParticle.<xmlattr>.Name");

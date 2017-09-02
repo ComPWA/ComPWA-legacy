@@ -19,19 +19,21 @@
 
 namespace ComPWA {
 
-/*! \class AmpIntensity
- * This class provides the interface an amplitude intensity. The intensity can
- * be moduled with a (double) strength parameter.
- * Since the intensity is a physically observable quantity it has to be
- * corrected for the space depended reconstruction efficiency. The normalization
- * has to take this into account as well.
- */
+///
+/// \class AmpIntensity
+/// This class provides the interface an amplitude intensity. The intensity can
+/// be moduled with a (double) strength parameter.
+/// Since the intensity is a physically observable quantity it has to be
+/// corrected for the space depended reconstruction efficiency. The normalization
+/// has to take this into account as well.
+///
+/// \par Efficiency correction
+/// ToDo: explain unbinned versus binned efficiency correction
+///
 class AmpIntensity {
 
 public:
-  //============ CONSTRUCTION ==================
-
-  //! Constructor with an optional name, strength and efficiency
+  /// Constructor with an optional name, strength and efficiency
   AmpIntensity(std::string name = "",
                std::shared_ptr<DoubleParameter> strength =
                    std::shared_ptr<DoubleParameter>(new DoubleParameter("",
@@ -42,43 +44,36 @@ public:
     _strength->FixParameter(true);
   }
 
-  virtual ~AmpIntensity() { /* nothing */
-  }
-
-  //! Function to create a full copy
+  /// Function to create a full copy
   virtual AmpIntensity *Clone(std::string newName = "") const = 0;
 
-  //================ EVALUATION =================
-
-  /*! Evaluate intensity at dataPoint in phase-space
-   * @param point Data point
-   * @return Intensity
-   */
+  /// Evaluate intensity at dataPoint in phase-space
+  /// \param point Data point
+  /// \return Intensity
   virtual double Intensity(const dataPoint &point) const = 0;
 
   //============ SET/GET =================
-  //! Get name
+  /// Get name
   virtual std::string Name() const { return _name; }
 
-  //! Get strength parameter
+  /// Get strength parameter
   double Strength() const { return _strength->GetValue(); }
 
   virtual void GetParameters(ParameterList &list) = 0;
 
-  //! Fill vector with parameters
+  /// Fill vector with parameters
   virtual void GetParametersFast(std::vector<double> &list) const {
     list.push_back(_strength->GetValue());
   }
 
-  //! Fill ParameterList with fit fractions
+  /// Fill ParameterList with fit fractions
   virtual void GetFitFractions(ParameterList &parList) = 0;
 
-  /*! Set phase space samples
-   * We use phase space samples to calculate the normalizations. In case of
-   * intensities we phase space sample phspSample includes the event efficiency.
-   * The sample toySample is used for normalization calculation for e.g.
-   * Resonacnes without efficiency.
-   */
+  /// Set phase space samples
+  /// We use phase space samples to calculate the normalizations. In case of
+  /// intensities we phase space sample phspSample includes the event efficiency.
+  /// The sample toySample is used for normalization calculation for e.g.
+  /// Resonacnes without efficiency.
   virtual void
   SetPhspSample(std::shared_ptr<std::vector<ComPWA::dataPoint>> phspSample,
                 std::shared_ptr<std::vector<ComPWA::dataPoint>> toySample) = 0;
@@ -96,9 +91,6 @@ public:
           const ParameterList &phspSample, const ParameterList &toySample,
           unsigned int nEvtVar, std::string suffix = "") = 0;
 
-  //======== ITERATORS/OPERATORS =============
-
-public:
 protected:
   //! Name
   std::string _name;

@@ -2,6 +2,9 @@
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
+#include "TLorentzVector.h"
+#include "TRandom3.h"
+
 #include "Core/DataPoint.hpp"
 #include "Core/Properties.hpp"
 #include "Tools/RootGenerator.hpp"

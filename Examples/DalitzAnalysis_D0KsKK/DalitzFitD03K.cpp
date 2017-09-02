@@ -1,9 +1,12 @@
-/*! Dalitz plot analysis of the decay D0->K_S0 K_ K-
-* @file DalitzFitApp.cpp
-* Fit application for D0->K_S0 K_ K- analysis. A model with BW and flatte
-* formalism is used to
-* describe the data.
-*/
+// Copyright (c) 2013, 2017 The ComPWA Team.
+// This file is part of the ComPWA framework, check
+// https://github.com/ComPWA/ComPWA/license.txt for details.
+
+
+///
+/// \file
+/// Executable for Dalitz plot analysis of the decay D0 -> K_S K+ K-
+///
 
 // Standard header files go here
 #include <iostream>
@@ -44,8 +47,8 @@
 #include "Tools/RootGenerator.hpp"
 #include "Tools/FitFractions.hpp"
 
-#include "PlotData.hpp"
-#include "Tools.hpp"
+#include "Tools/DalitzPlot.hpp"
+#include "Tools/ParameterTools.hpp"
 #include "systematics.hpp"
 
 using namespace std;
@@ -55,12 +58,9 @@ using namespace ComPWA::Physics::HelicityFormalism;
 
 BOOST_CLASS_EXPORT(Optimizer::Minuit2::MinuitResult)
 
-/*****************************************************************************
- *
- * The main function.
- *
- *****************************************************************************/
-
+///
+///Dalitz plot analysis of the decay D0->K_S0 K_ K-.
+///
 int main(int argc, char **argv) {
 
   // Read command line input
@@ -235,7 +235,7 @@ int main(int argc, char **argv) {
       "disabled, >0 = MC precision");
 
   bool enablePlotting;
-  bool plotDataSample;
+  bool DalitzPlotSample;
   int plotSize;
   bool plotCorrectEfficiency;
   int plotNBins;
@@ -244,7 +244,7 @@ int main(int argc, char **argv) {
   config_plot.add_options()("plotting",
                             po::value<bool>(&enablePlotting)->default_value(1),
                             "Enable/Disable plotting")(
-      "plotData", po::value<bool>(&plotDataSample)->default_value(1),
+      "DalitzPlot", po::value<bool>(&DalitzPlotSample)->default_value(1),
       "Enable/Disable plotting of data")(
       "plotSize", po::value<int>(&plotSize)->default_value(100000),
       "Size of sample for amplitude plot")(
@@ -562,7 +562,7 @@ int main(int argc, char **argv) {
     LOG(info) << "plotting size: " << plotSize;
     LOG(info) << "number of bins: " << plotNBins;
     LOG(info) << "Correct samples for efficiency: " << plotCorrectEfficiency;
-    LOG(info) << "plotDataSample: " << plotDataSample;
+    LOG(info) << "DalitzPlotSample: " << DalitzPlotSample;
     LOG(info) << "plotAmplitude: " << plotAmplitude;
   }
   LOG(info) << "===============================================";
@@ -605,7 +605,6 @@ int main(int argc, char **argv) {
     //      preResult->print();
     //    }
 
-    std::shared_ptr<Optimizer::Optimizer> opti;
     // Set start error of 0.05 for parameters
     setErrorOnParameterList(fitPar, 0.05, useMinos);
 
@@ -678,7 +677,6 @@ int main(int argc, char **argv) {
     ia >> BOOST_SERIALIZATION_NVP(inResult);
     ifs.close();
 
-    inResult->SetIntensity(intens);
     //    inResult->SetUseCorrelatedErrors(fitFractionError);
     if (calculateInterference)
       inResult->SetCalcInterference(0);
@@ -724,8 +722,8 @@ int main(int argc, char **argv) {
     pl_phspSample->ReduceToPhsp(trueModelKin);
     pl_phspSample->SetEfficiency(trueModelKin, eff);
 
-    //-------- Instance of plotData
-    plotData pl(fitModelKin, fileNamePrefix, plotNBins);
+    //-------- Instance of DalitzPlot
+    DalitzPlot pl(fitModelKin, fileNamePrefix, plotNBins);
     // set data sample
     pl.SetData(sample);
     // set phsp sample

@@ -13,7 +13,6 @@ add_library( DecayDynamics
 
 target_link_libraries( DecayDynamics
   Core
-  Tools
   ${Boost_LIBRARIES}
 )
 

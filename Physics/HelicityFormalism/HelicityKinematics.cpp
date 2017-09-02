@@ -10,11 +10,9 @@
 #include "Core/DataPoint.hpp"
 #include "Core/Particle.hpp"
 #include "Core/Properties.hpp"
-#include "DataReader/RootReader/RootReader.hpp"
 
 #include "Physics/HelicityFormalism/HelicityKinematics.hpp"
 #include "Physics/qft++/Vector4.h"
-#include "Tools/RootGenerator.hpp"
 
 #include <boost/timer.hpp>
 

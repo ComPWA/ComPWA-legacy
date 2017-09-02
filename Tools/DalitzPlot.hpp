@@ -1,6 +1,7 @@
-/*Author: Peter Weidenkaff
- * Date: 2013-08-07
- */
+// Copyright (c) 2013, 2017 The ComPWA Team.
+// This file is part of the ComPWA framework, check
+// https://github.com/ComPWA/ComPWA/license.txt for details.
+
 #ifndef PLOTDATA_HPP_
 #define PLOTDATA_HPP_
 
@@ -9,7 +10,6 @@
 #include <TH2Poly.h>
 #include <TGraph.h>
 
-// Core header files go here
 #include "Core/Event.hpp"
 #include "Core/Particle.hpp"
 #include "Core/Parameter.hpp"
@@ -17,31 +17,30 @@
 #include "Core/AmpIntensity.hpp"
 #include "DataReader/RootReader/RootReader.hpp"
 
-using namespace ComPWA;
-
-/* \class dalitzHisto
- *! Simple class to create and fill Dalitz plots
- */
-class dalitzHisto {
+///
+/// \class DalitzHisto
+///  Simple class to create and fill Dalitz plots
+///
+class DalitzHisto {
 public:
-  ~dalitzHisto() {
+  ~DalitzHisto() {
     // Can't call delete here since there is a problem with copy/move
     // constructor
     //		if(tree) delete tree;
   }
 
   //! Disable copy constructor since TTree is not copyable
-  dalitzHisto(const dalitzHisto &that) = delete;
+  DalitzHisto(const DalitzHisto &that) = delete;
 
   //! Default move constructor
-  dalitzHisto(dalitzHisto &&other) = default; // C++11 move constructor
+  DalitzHisto(DalitzHisto &&other) = default; // C++11 move constructor
 
-  dalitzHisto(std::shared_ptr<Kinematics> kin, std::string name, std::string title, unsigned int bins,
+  DalitzHisto(std::shared_ptr<ComPWA::Kinematics> kin, std::string name, std::string title, unsigned int bins,
               Color_t color = kBlack);
   //! Switch on/off stats
   void SetStats(bool b);
   //! Fill event
-  void Fill(std::shared_ptr<Kinematics> kin, Event &event, double w = 1);
+  void Fill(std::shared_ptr<ComPWA::Kinematics> kin, ComPWA::Event &event, double w = 1);
   //! Scale all distributions
   void Scale(double w);
   //! Get 1D histogram
@@ -69,21 +68,21 @@ private:
   Color_t _color;
 };
 
-class plotData {
+class DalitzPlot {
 public:
-  plotData(std::shared_ptr<Kinematics> kin, std::string name, int bins = 100);
+  DalitzPlot(std::shared_ptr<ComPWA::Kinematics> kin, std::string name, int bins = 100);
 
-  virtual ~plotData();
+  virtual ~DalitzPlot();
 
   void UseEfficiencyCorrection(bool s) { _correctForEfficiency = s; }
 
-  void SetData(std::shared_ptr<DataReader::Data> dataSample) {
+  void SetData(std::shared_ptr<ComPWA::DataReader::Data> dataSample) {
     s_data = dataSample;
   }
 
-  void SetPhspData(std::shared_ptr<DataReader::Data> phsp) { s_phsp = phsp; }
+  void SetPhspData(std::shared_ptr<ComPWA::DataReader::Data> phsp) { s_phsp = phsp; }
 
-  void SetHitMissData(std::shared_ptr<DataReader::Data> hitMiss) {
+  void SetHitMissData(std::shared_ptr<ComPWA::DataReader::Data> hitMiss) {
     s_hitMiss = hitMiss;
   }
 
@@ -92,7 +91,7 @@ public:
 
   void SetGlobalScale(double s) { _globalScale = s; }
 
-  void Fill(std::shared_ptr<Kinematics> kin);
+  void Fill(std::shared_ptr<ComPWA::Kinematics> kin);
 
   void Plot();
 
@@ -102,17 +101,17 @@ public:
       throw std::runtime_error("PlotData::DrawComponent() | AmpIntensity not "
                                "set! Set the full model first using "
                                "SetFitAmp()!");
-    std::shared_ptr<AmpIntensity> comp;
+    std::shared_ptr<ComPWA::AmpIntensity> comp;
     try{
       comp = _plotComponents.at(0)->GetComponent(name);
     } catch (std::exception& ex) {
-      LOG(error) << "plotData::DrawComponent() | Component " << name
+      LOG(error) << "DalitzPlot::DrawComponent() | Component " << name
                  << " not found in AmpIntensity "
                  << _plotComponents.at(0)->Name() << ".";
       return;
     }
     _plotComponents.push_back(comp);
-    _plotHistograms.push_back(dalitzHisto(kin_, name, title, _bins, color));
+    _plotHistograms.push_back(DalitzHisto(kin_, name, title, _bins, color));
     _plotHistograms.back().SetStats(0);
     _plotLegend.push_back(title);
   }
@@ -120,7 +119,7 @@ public:
 protected:
   TString _name;
 
-  std::shared_ptr<Kinematics> kin_;
+  std::shared_ptr<ComPWA::Kinematics> kin_;
   bool _isFilled;
 
   unsigned int _bins;
@@ -137,17 +136,17 @@ protected:
   TGraph m23m12_contour;
   TGraph m12m13_contour;
 
-  std::vector<std::shared_ptr<AmpIntensity>> _plotComponents;
-  std::vector<dalitzHisto> _plotHistograms;
+  std::vector<std::shared_ptr<ComPWA::AmpIntensity>> _plotComponents;
+  std::vector<DalitzHisto> _plotHistograms;
   std::vector<std::string> _plotLegend;
 
-  dalitzHisto dataDiagrams;
-  dalitzHisto phspDiagrams;
-  dalitzHisto fitHitMissDiagrams;
+  DalitzHisto dataDiagrams;
+  DalitzHisto phspDiagrams;
+  DalitzHisto fitHitMissDiagrams;
 
-  std::shared_ptr<DataReader::Data> s_data;
-  std::shared_ptr<DataReader::Data> s_phsp;
-  std::shared_ptr<DataReader::Data> s_hitMiss;
+  std::shared_ptr<ComPWA::DataReader::Data> s_data;
+  std::shared_ptr<ComPWA::DataReader::Data> s_phsp;
+  std::shared_ptr<ComPWA::DataReader::Data> s_hitMiss;
 };
 
 #endif

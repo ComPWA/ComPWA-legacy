@@ -2,6 +2,10 @@
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
+//
+// \file
+// Kinematics inteface class
+//
 #ifndef KINEMATICS_HPP_
 #define KINEMATICS_HPP_
 

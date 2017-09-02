@@ -41,7 +41,7 @@
  *
  * The core Framework only needs a boost installation and a compiler
  * supporting c++11. But for the examples and most likely also for starting
- * some fits and plotting some output, it is recommended to have a root
+ * some fits and plotting some output, it is recommended to have a ROOT
  * installation (for plots and maybe DataReader::Data storage/reading) and a
  * Minuit2
  * (for optimization) installation ready. Besides Minuit2 also Geneva can be
@@ -49,8 +49,8 @@
  *
  * \section starting Getting Started
  * A good point to start learning how ComPWA works is by looking in the
- * IntegrationTestApp.cpp executable, where a simple fit is performed using
- * all modules of the framework. ...
+ * Examples folder. Especially Examples/DalitzFit is a very simple fitting
+ * routine.
  */
 
 #error Documentation only.
@@ -71,27 +71,6 @@
  * Namespace for all ComPWA Estimator modules.
  */
 
-/*!
- * @namespace ComPWA::Estimator::ChiOneD
- * Classes of the Module calculating a Chi-Square estimate.
- */
-
-/*!
- * @namespace ComPWA::Estimator::MinLogLH
- * Classes of the Module calculating a minimum likelihood estimate.
- */
-
-/*!
- * @namespace ComPWA::Estimator::SliceFit
- * Classes of the Module calculating the model independent slice fit estimates
- * using a binned slices.
- */
-
-/*!
- * @namespace ComPWA::Estimator::SliceFitUb
- * Classes of the Module calculating the model independent slice fit estimates
- * using unbinned slices.
- */
 
 /*!
  * @namespace ComPWA::Optimizer
@@ -116,4 +95,15 @@
 /*!
  * @namespace ComPWA::Physics::HelicityFormalism
  * Module to calculate helicity amplitudes for general final states.
+ */
+
+/*!
+ * @namespace ComPWA::Physics::QFT
+ * qft++ library written by Mike Williams
+ * (http://www-meg.phys.cmu.edu/williams/qft++/index.php/main_page)
+ */
+
+/*!
+ * @namespace ComPWA::Physics::DecayDynamics
+ * Dynamical decay functions (e.g. Breit-Wigner, Flatte ...)
  */

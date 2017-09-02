@@ -1,5 +1,8 @@
 # Create HelicityAmplitude library.
 
+# The REQUIRED statement is somehow not working
+find_package( Boost REQUIRED )
+
 SET( lib_srcs IncoherentIntensity.cpp CoherentIntensity.cpp
     AmpWignerD.cpp PartialDecay.cpp SequentialTwoBodyDecay.cpp
     HelicityKinematics.cpp )
@@ -16,8 +19,6 @@ add_library( HelicityFormalism
 target_link_libraries( HelicityFormalism
   Core
   qft++
-  Tools
-  RootReader
   DecayDynamics
   ${Boost_LIBRARIES}
 )
@@ -42,18 +43,24 @@ foreach(testSrc ${TEST_SRCS})
   SET(testName "HelicityFormalismTest_${fileName}")
 
   #Add compile target
-  add_executable( ${testName} ${testSrc})
-  #install(TARGETS ${testName}
-  #  RUNTIME DESTINATION bin
-  #)
+  add_executable( ${testName} ${testSrc} )
+
+  # We need ROOT here since we use some functions from Tools/
+  find_package( ROOT REQUIRED )
 
   #link to Boost libraries AND your targets and dependencies
   target_link_libraries( ${testName}
     Core
     HelicityFormalism
+    Tools
+    RootReader
     pthread
     ${Boost_LIBRARIES}
+    ${ROOT_LIBRARIES}
   )
+  
+  target_include_directories( ${testName}
+    PUBLIC ${ROOT_INCLUDE_DIR} ${Boost_INCLUDE_DIR} )
 
   #I like to move testing binaries into a testBin directory
   set_target_properties( ${testName}
