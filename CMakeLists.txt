@@ -30,16 +30,16 @@ set( CMAKE_SHARED_LIBRARY_PREFIX "libComPWA_" )
 #
 find_package( OpenMP QUIET )
 if (${OPENMP_FOUND})
-  message( "-- OpenMP found!" )
+  message( STATUS "OpenMP found!" )
 else ()
-  message( "-- OpenMP not found!" )
+  message( STATUS "OpenMP not found!" )
 endif()
 
 find_package( TBB )
 if (${TBB_FOUND})
-  message( "-- TBB found version ${TBB_VERSION}" )
+  message( STATUS "TBB found version ${TBB_VERSION}" )
 else ()
-  message( "-- TBB not found!" )
+  message( STATUS "TBB not found!" )
 endif()
 
 #

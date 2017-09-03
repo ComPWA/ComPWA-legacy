@@ -3,7 +3,7 @@
 #
 # FindMinuit2
 #
-find_package( Minuit2 REQUIRED)
+find_package( Minuit2 REQUIRED QUIET )
 
 SET(lib_srcs MinuitFcn.cpp MinuitIF.cpp MinuitResult.cpp)
 SET(lib_headers MinuitFcn.hpp MinuitIF.hpp MinuitResult.hpp ../Optimizer.hpp)
