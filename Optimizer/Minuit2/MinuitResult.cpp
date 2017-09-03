@@ -8,6 +8,8 @@
 
 #include <boost/archive/xml_oarchive.hpp>
 
+#include <Minuit2/MnUserParameterState.h>
+
 #include "Core/ProgressBar.hpp"
 #include "Core/Logging.hpp"
 #include "Optimizer/Minuit2/MinuitResult.hpp"

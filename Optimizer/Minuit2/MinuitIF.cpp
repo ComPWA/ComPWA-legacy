@@ -3,13 +3,13 @@
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
 #include <vector>
-#include <time.h>
+#include <ctime>
 #include <string>
 #include <sstream>
 #include <iostream>
 #include <memory>
 
-#include <boost/timer.hpp>
+#include <boost/archive/xml_iarchive.hpp>
 
 #include "Minuit2/MnUserParameters.h"
 #include "Minuit2/MnMigrad.h"
@@ -54,7 +54,10 @@ MinuitIF::~MinuitIF() {}
 
 std::shared_ptr<FitResult> MinuitIF::exec(ParameterList &par) {
   LOG(debug) << "MinuitIF::exec() | Start";
-  boost::timer time;
+  
+  //Start timing
+  clock_t begin = clock();
+
   par.RemoveDuplicates();
 
   LOG(debug) << "MinuitIF::exec() | Begin ParameterList::DeepCopy()";
@@ -209,11 +212,13 @@ std::shared_ptr<FitResult> MinuitIF::exec(ParameterList &par) {
   }
   LOG(debug) << "MinuitIF::exec() | " << resultsOut.str();
 
+  double elapsed = double(clock() - begin) / CLOCKS_PER_SEC;
+  
   // Create fit result
   std::shared_ptr<FitResult> result(new MinuitResult(estimator, minMin));
   result->SetFinalParameters(finalParList);
   result->SetInitialParameters(initialParList);
-  result->SetTime(time.elapsed());
+  result->SetTime(elapsed);
 
   // update parameters in amplitude
 //  Amplitude::UpdateAmpParameterList(estimator->getAmplitudes(), finalParList);

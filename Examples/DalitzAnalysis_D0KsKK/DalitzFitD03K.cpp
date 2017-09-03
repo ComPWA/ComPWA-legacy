@@ -19,6 +19,8 @@
 
 #include <boost/program_options.hpp>
 #include <boost/serialization/export.hpp>
+#include <boost/archive/xml_iarchive.hpp>
+#include <boost/archive/xml_oarchive.hpp>
 
 // Root header files go here
 #include "TFile.h"

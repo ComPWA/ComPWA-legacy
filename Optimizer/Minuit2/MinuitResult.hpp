@@ -21,7 +21,8 @@
 #include <iostream>
 #include <fstream>
 #include <memory>
-#include <boost/numeric/ublas/io.hpp>
+
+#include <Minuit2/FunctionMinimum.h>
 
 #include "Core/ParameterList.hpp"
 #include "Core/TableFormater.hpp"
@@ -29,16 +30,6 @@
 #include "Core/FitResult.hpp"
 #include "Core/Logging.hpp"
 #include "Core/Estimator.hpp"
-#include "Minuit2/MnUserParameterState.h"
-#include "Minuit2/FunctionMinimum.h"
-
-#include <gsl/gsl_rng.h>
-#include <gsl/gsl_sf_gamma.h>
-#include <gsl/gsl_randist.h>
-#include <gsl/gsl_vector.h>
-#include <gsl/gsl_matrix.h>
-#include <gsl/gsl_blas.h>
-#include <gsl/gsl_linalg.h>
 
 namespace ComPWA {
 namespace Optimizer {

@@ -8,6 +8,8 @@
 
 #include <time.h>
 
+#include <boost/progress.hpp>
+
 #include "DataReader/Data.hpp"
 #include "Core/Estimator.hpp"
 #include "Optimizer/Optimizer.hpp"
@@ -223,7 +225,8 @@ bool RunManager::GeneratePhsp(int number) {
 
   LOG(info) << "Generating phase-space MC: [" << number << " events] ";
 
-  progressBar bar(number);
+ boost::progress_display show_progress(number);
+//  progressBar bar(number);
   for (unsigned int i = 0; i < number; i++) {
     if (i > 0)
       i--;
@@ -240,7 +243,8 @@ bool RunManager::GeneratePhsp(int number) {
     tmp.SetEfficiency(1.);
     i++;
     samplePhsp_->PushEvent(tmp); // unfortunatly not thread safe
-    bar.nextEvent();
+//    bar.nextEvent();
+	  ++show_progress;
   }
   return true;
 }

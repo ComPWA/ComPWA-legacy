@@ -1,5 +1,19 @@
+#
+# FindBoost. Add 'log' dependency. Note
+# that all dependencies have to be listed,
+# even if they already appear in global
+# CMakeLists.txt.
+#
+find_package( Boost COMPONENTS
+               unit_test_framework
+               serialization
+               log
+               REQUIRED
+)
 
+#
 # Create ComPWA Core library.
+#
 FILE(GLOB lib_srcs *.cpp)
 FILE(GLOB lib_headers *.hpp)
 
@@ -12,15 +26,21 @@ target_link_libraries( Core
 )
 
 target_include_directories( Core
-  PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
+  PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${Boost_INCLUDE_DIR}
 )
 
+#
+# Install libraries
+#
 install(FILES ${lib_headers} DESTINATION include/ComPWA)
+
 install(TARGETS Core
         LIBRARY DESTINATION lib
 )
 
-# ------ TESTING ----- #
+#
+# TESTING
+#
 #Testing routines are stored in separate directory
 file(GLOB TEST_SRCS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} test/*.cpp)
 
