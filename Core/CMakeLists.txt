@@ -1,3 +1,4 @@
+
 # Create ComPWA Core library.
 FILE(GLOB lib_srcs *.cpp)
 FILE(GLOB lib_headers *.hpp)

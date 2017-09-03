@@ -7,7 +7,7 @@
 #include <iterator>
 #include <vector>
 
-#include "boost/property_tree/ptree.hpp"
+#include <boost/property_tree/ptree.hpp>
 
 #include "Physics/HelicityFormalism/HelicityKinematics.hpp"
 #include "Physics/DecayDynamics/RelativisticBreitWigner.hpp"

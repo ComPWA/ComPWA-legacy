@@ -1,5 +1,8 @@
 # Create Minuit2IF library.
 
+#
+# FindMinuit2
+#
 find_package( Minuit2 REQUIRED)
 
 SET(lib_srcs MinuitFcn.cpp MinuitIF.cpp MinuitResult.cpp)

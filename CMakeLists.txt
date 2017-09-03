@@ -5,70 +5,85 @@ cmake_minimum_required (VERSION 3.0)
 #set(CMAKE_BUILD_TYPE Debug) 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 
+set (CMAKE_CXX_STANDARD 11)
+
+#
+# ComPWA
+#
 project( COMPWA )
 
 # set the default path for built executables to the "bin" directory
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
+
 # set the default path for built libraries to the "lib" directory
 set(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib)
-
-set (CMAKE_CXX_STANDARD 11)
-
-#${CMAKE_CXX_COMPILER_ID} can be one of {GNU Clang AppleClang Intel MSVC}
-if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
-  # Using Clang or AppleClang -> no python for now
-  find_package(Boost COMPONENTS
-               unit_test_framework
-               #python
-               system
-               filesystem
-               serialization
-               thread
-               chrono
-               date_time
-               log
-               log_setup
-               program_options
-               regex
-               REQUIRED
-              )
-else ()
-  find_package(PythonLibs 2.7 EXACT)
-  #message(${PYTHON_LIBRARIES})
-  INCLUDE_DIRECTORIES(${PYTHON_INCLUDE_PATH})
-  LINK_DIRECTORIES(${PYTHON_LIBRARIES})
-  find_package(Boost COMPONENTS
-               unit_test_framework
-               python
-               system
-               filesystem
-               serialization
-               thread chrono
-               date_time
-               log
-               log_setup
-               program_options
-               regex
-               REQUIRED
-              )
-endif()
-
-include_directories(${Boost_INCLUDE_DIR})
-link_directories(${Boost_LIBRARY_DIR})
 
 INCLUDE_DIRECTORIES(${COMPWA_SOURCE_DIR})
 #LINK_DIRECTORIES(${COMPWA_SOURCE_DIR}/lib)
 
-#Setup CMake to run tests
-enable_testing()
-
+# Setting prefix for libraries
 set( CMAKE_SHARED_LIBRARY_PREFIX "libComPWA_" )
 
+
+#
+# Frameworks for parallelization
+#
+find_package( OpenMP QUIET )
+if (${OPENMP_FOUND})
+  message( "-- OpenMP found!" )
+else ()
+  message( "-- OpenMP not found!" )
+endif()
+
+find_package( TBB )
+if (${TBB_FOUND})
+  message( "-- TBB found version ${TBB_VERSION}" )
+else ()
+  message( "-- TBB not found!" )
+endif()
+
+#
+# FindBoost. unit_test_framework and serialization
+# throughout the software, so we require them here
+# local dependencies should be required in each
+# module
+#
+find_package( Boost COMPONENTS
+               unit_test_framework
+               serialization
+               REQUIRED
+)
+
+# Workaround for clang+boost.python
+# ${CMAKE_CXX_COMPILER_ID} can be one of {GNU Clang AppleClang Intel MSVC}
+if (NOT "${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
+  find_package(PythonLibs 2.7 EXACT)
+  #message(${PYTHON_LIBRARIES})
+  INCLUDE_DIRECTORIES(${PYTHON_INCLUDE_PATH})
+  LINK_DIRECTORIES(${PYTHON_LIBRARIES})
+  find_package( Boost COMPONENTS
+               python
+               REQUIRED
+  )
+endif()
+
+# Use dynamic libraries for log, test and serialization
 add_definitions(-DBOOST_LOG_DYN_LINK)
 add_definitions(-DBOOST_TEST_DYN_LINK)
 add_definitions(-DBOOST_SERIALIZATION_DYN_LINK)
 
-# Recurse into subdirectories.
+include_directories(${Boost_INCLUDE_DIR})
+link_directories(${Boost_LIBRARY_DIR})
+
+#
+# Enable target 'test'
+#
+enable_testing()
+
+
+#
+# Submodules
+#
 add_subdirectory(Core)
 add_subdirectory(DataReader)
 add_subdirectory(Estimator)
@@ -78,6 +93,9 @@ add_subdirectory(Tools)
 add_subdirectory(Examples)
 add_subdirectory(executables)
 
+#
+# Doxygen
+#
 # add a target to generate API documentation with Doxygen
 find_package(Doxygen)
 if(DOXYGEN_FOUND)

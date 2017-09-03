@@ -5,6 +5,10 @@
 #include <numeric>
 #include "Core/Functions.hpp"
 
+#if defined(_OPENMP)
+#include <omp.h>
+#endif
+
 namespace ComPWA {
 
 bool Inverse::execute(ParameterList &paras,

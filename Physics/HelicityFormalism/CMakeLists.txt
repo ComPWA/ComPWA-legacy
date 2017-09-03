@@ -1,8 +1,5 @@
 # Create HelicityAmplitude library.
 
-# The REQUIRED statement is somehow not working
-find_package( Boost REQUIRED )
-
 SET( lib_srcs IncoherentIntensity.cpp CoherentIntensity.cpp
     AmpWignerD.cpp PartialDecay.cpp SequentialTwoBodyDecay.cpp
     HelicityKinematics.cpp )

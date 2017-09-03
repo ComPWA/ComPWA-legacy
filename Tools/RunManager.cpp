@@ -8,14 +8,6 @@
 
 #include <time.h>
 
-#include <boost/random/linear_congruential.hpp>
-#include <boost/random/uniform_int.hpp>
-#include <boost/random/uniform_real.hpp>
-#include <boost/random/variate_generator.hpp>
-#include <boost/generator_iterator.hpp>
-#include <boost/log/trivial.hpp>
-#include <boost/progress.hpp>
-
 #include "DataReader/Data.hpp"
 #include "Core/Estimator.hpp"
 #include "Optimizer/Optimizer.hpp"

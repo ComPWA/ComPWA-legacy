@@ -1,9 +1,5 @@
 # Create executable for Dalitz plot fit of J/psi -> ypipi.
 
-# The REQUIRED statement is somehow not working
-find_package( ROOT REQUIRED )
-find_package( Boost REQUIRED )
-
 FILE( GLOB lib_srcs DalitzFitApp.cpp )
 FILE( GLOB lib_headers ../../Physics/ParticleList.hpp )
 
