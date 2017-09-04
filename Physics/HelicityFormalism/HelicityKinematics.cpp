@@ -14,8 +14,6 @@
 #include "Physics/HelicityFormalism/HelicityKinematics.hpp"
 #include "Physics/qft++/Vector4.h"
 
-#include <boost/timer.hpp>
-
 namespace ComPWA {
 namespace Physics {
 namespace HelicityFormalism {

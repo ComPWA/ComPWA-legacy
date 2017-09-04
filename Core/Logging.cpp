@@ -5,19 +5,14 @@
 #include "Core/Logging.hpp"
 
 #include <boost/log/expressions.hpp>
-#include <boost/log/expressions/formatters/date_time.hpp>
 #include <boost/log/utility/setup/common_attributes.hpp>
 #include <boost/log/utility/setup/file.hpp>
 #include <boost/log/utility/setup/console.hpp>
 #include <boost/log/support/date_time.hpp>
-#include <boost/log/sources/severity_logger.hpp>
-#include <boost/log/sources/record_ostream.hpp>
-#include <boost/date_time/posix_time/ptime.hpp>
-#include <boost/date_time/posix_time/posix_time.hpp>
 
 namespace ComPWA {
 using namespace boost::log;
-  
+
 void Logging::init(std::string out, trivial::severity_level minLevel) {
   add_common_attributes();
   boost::log::add_console_log(
@@ -29,9 +24,9 @@ void Logging::init(std::string out, trivial::severity_level minLevel) {
            << " [" << std::setw(7) << trivial::severity
            << "] : " << expressions::smessage));
   if (out == "") {
-    LOG(info)
-        << "Logging::init() | Logging to file disabled. Console severity level: "
-        << minLevel;
+    LOG(info) << "Logging::init() | Logging to file disabled. Console severity "
+                 "level: "
+              << minLevel;
   } else {
     add_file_log(
         keywords::file_name = out,
@@ -41,7 +36,8 @@ void Logging::init(std::string out, trivial::severity_level minLevel) {
             (expressions::stream
              << expressions::format_date_time<boost::posix_time::ptime>(
                     "TimeStamp", "%Y-%m-%d %H:%M:%S")
-             << " [" << trivial::severity << "] : " << expressions::smessage));
+             << " [" << std::setw(7) << trivial::severity
+             << "] : " << expressions::smessage));
     LOG(info) << "Logging: using output filename: " << out
               << ", Severity level: " << minLevel;
   }
@@ -60,4 +56,4 @@ void Logging::SetLogLevel(boost::log::trivial::severity_level minLevel) {
   LOG(info) << "New severity level: " << minLevel;
 }
 
-} /* namespace ComPWA */
+} // namespace ComPWA

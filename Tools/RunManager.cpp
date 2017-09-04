@@ -1,20 +1,7 @@
-// Copyright (c) 2013, 2017 The ComPWA Team.
+
+  // Copyright (c) 2013, 2017 The ComPWA Team.
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
-
-#include <memory>
-#include <ctime>
-#include <numeric>
-
-#include <time.h>
-
-#include <boost/random/linear_congruential.hpp>
-#include <boost/random/uniform_int.hpp>
-#include <boost/random/uniform_real.hpp>
-#include <boost/random/variate_generator.hpp>
-#include <boost/generator_iterator.hpp>
-#include <boost/log/trivial.hpp>
-#include <boost/progress.hpp>
 
 #include "DataReader/Data.hpp"
 #include "Core/Estimator.hpp"
@@ -30,8 +17,6 @@
 namespace ComPWA {
 
 using namespace boost::log;
-
-RunManager::RunManager() {}
 
 RunManager::RunManager(std::shared_ptr<DataReader::Data> data,
                        std::shared_ptr<AmpIntensity> intens,
@@ -85,10 +70,12 @@ bool RunManager::Generate(std::shared_ptr<Kinematics> kin, int number) {
                "Generating "
             << number << " signal events!";
 
-  return gen(number, kin, gen_, intens_, sampleData_, samplePhsp_, sampleTruePhsp_);
+  return gen(number, kin, gen_, intens_, sampleData_, samplePhsp_,
+             sampleTruePhsp_);
 }
 
-bool RunManager::gen(int number, std::shared_ptr<Kinematics> kin, std::shared_ptr<Generator> gen,
+bool RunManager::gen(int number, std::shared_ptr<Kinematics> kin,
+                     std::shared_ptr<Generator> gen,
                      std::shared_ptr<AmpIntensity> amp,
                      std::shared_ptr<DataReader::Data> data,
                      std::shared_ptr<DataReader::Data> phsp,
@@ -127,7 +114,7 @@ bool RunManager::gen(int number, std::shared_ptr<Kinematics> kin, std::shared_pt
 
   // Maximum value for random number generation. We introduce an arbitrary
   // factor of 5 to make sure that the maximum value is never reached.
-  double generationMaxValue = 5* maxSampleWeight;
+  double generationMaxValue = 5 * maxSampleWeight;
 
   unsigned int initialSeed = gen->GetSeed();
   unsigned int totalCalls = 0;
@@ -135,14 +122,14 @@ bool RunManager::gen(int number, std::shared_ptr<Kinematics> kin, std::shared_pt
   unsigned int limit;
   if (phsp) {
     limit = phsp->GetNEvents();
-    generationMaxValue *= Tools::Maximum(kin, amp, phsp) ;
+    generationMaxValue *= Tools::Maximum(kin, amp, phsp);
   } else {
     limit = 100000000; // set large limit, should never be reached
   }
 
   LOG(trace) << "RunMananger::gen() | Using " << generationMaxValue
              << " as maximum value of the intensity.";
-  
+
   Event evt;     // event that we fill into generated sample
   Event evtTrue; // event that is used to evalutate amplitude
   progressBar bar(number);
@@ -208,10 +195,13 @@ bool RunManager::gen(int number, std::shared_ptr<Kinematics> kin, std::shared_pt
     if (data->GetNEvents() >= number)
       i = limit;
   }
-  if (data->GetNEvents() < number)
-    LOG(error) << "RunManager::gen() | Not able to generate "
-               << number << " events. Phsp sample too small. Current size "
-                            "of sample is now " << data->GetNEvents();
+  if (data->GetNEvents() < number) {
+    std::cout << std::endl;
+    LOG(error) << "RunManager::gen() | Not able to generate " << number
+               << " events. Phsp sample too small. Current size "
+                  "of sample is now "
+               << data->GetNEvents();
+  }
 
   LOG(info) << "Efficiency of toy MC generation: "
             << (double)data->GetNEvents() / totalCalls;
@@ -253,4 +243,4 @@ bool RunManager::GeneratePhsp(int number) {
   return true;
 }
 
-} /* namespace ComPWA */
+} // namespace ComPWA

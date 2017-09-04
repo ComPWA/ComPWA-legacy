@@ -19,6 +19,8 @@
 
 #include <boost/program_options.hpp>
 #include <boost/serialization/export.hpp>
+#include <boost/archive/xml_iarchive.hpp>
+#include <boost/archive/xml_oarchive.hpp>
 
 // Root header files go here
 #include "TFile.h"
@@ -55,8 +57,6 @@ using namespace std;
 using namespace ComPWA;
 using ComPWA::DataReader::RootReader;
 using namespace ComPWA::Physics::HelicityFormalism;
-
-BOOST_CLASS_EXPORT(Optimizer::Minuit2::MinuitResult)
 
 ///
 ///Dalitz plot analysis of the decay D0->K_S0 K_ K-.

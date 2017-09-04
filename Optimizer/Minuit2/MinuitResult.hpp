@@ -21,7 +21,10 @@
 #include <iostream>
 #include <fstream>
 #include <memory>
-#include <boost/numeric/ublas/io.hpp>
+
+#include <boost/serialization/export.hpp>
+
+#include <Minuit2/FunctionMinimum.h>
 
 #include "Core/ParameterList.hpp"
 #include "Core/TableFormater.hpp"
@@ -29,20 +32,11 @@
 #include "Core/FitResult.hpp"
 #include "Core/Logging.hpp"
 #include "Core/Estimator.hpp"
-#include "Minuit2/MnUserParameterState.h"
-#include "Minuit2/FunctionMinimum.h"
-
-#include <gsl/gsl_rng.h>
-#include <gsl/gsl_sf_gamma.h>
-#include <gsl/gsl_randist.h>
-#include <gsl/gsl_vector.h>
-#include <gsl/gsl_matrix.h>
-#include <gsl/gsl_blas.h>
-#include <gsl/gsl_linalg.h>
 
 namespace ComPWA {
 namespace Optimizer {
 namespace Minuit2 {
+
 
 class MinuitResult : public FitResult {
 public:
@@ -153,8 +147,6 @@ private:
   double initialLH;
   double finalLH;
   double trueLH;
-//  double penalty;
-//  double penaltyScale;
   double edm; // estimated distance to minimum
   //! Covariance matrix
   std::vector<std::vector<double>> cov;
@@ -200,10 +192,6 @@ private:
     ar &BOOST_SERIALIZATION_NVP(initialLH);
     ar &BOOST_SERIALIZATION_NVP(finalLH);
     ar &BOOST_SERIALIZATION_NVP(trueLH);
-//    ar &BOOST_SERIALIZATION_NVP(penalty);
-//    ar &BOOST_SERIALIZATION_NVP(penaltyScale);
-//    ar &BOOST_SERIALIZATION_NVP(AIC);
-//    ar &BOOST_SERIALIZATION_NVP(BIC);
     ar &BOOST_SERIALIZATION_NVP(nEvents);
     ar &BOOST_SERIALIZATION_NVP(edm);
     ar &BOOST_SERIALIZATION_NVP(cov);
@@ -213,8 +201,8 @@ private:
   }
 };
 
-} /* namespace Minuit2 */
-} /* namespace Optimizer */
-} /* namespace ComPWA */
+} // namespace Minuit2
+} // namespace Optimizer
+} // namespace ComPWA
 
 #endif

@@ -30,7 +30,11 @@ public:
   virtual std::shared_ptr<FunctionTree> GetTree(const ParameterList &sample,
                                                 int pos, std::string suffix);
 
-  virtual void GetParameters(ParameterList &list){};
+  virtual void GetParameters(ParameterList &list) {};
+  
+  /// Update parameters to the values given in \p par
+  virtual void UpdateParameters(const ParameterList &par) {};
+  
 };
 
 } /* namespace DecayDynamics */

@@ -15,12 +15,7 @@
 
 #include <vector>
 #include <memory>
-#include <fstream>
 
-#include <boost/serialization/string.hpp>
-#include <boost/serialization/map.hpp>
-#include <boost/archive/xml_oarchive.hpp>
-#include <boost/archive/xml_iarchive.hpp>
 #include <boost/serialization/nvp.hpp>
 
 #include "Minuit2/MnStrategy.h"

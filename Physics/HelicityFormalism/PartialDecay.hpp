@@ -71,6 +71,9 @@ public:
     Resonance::GetParametersFast(list);
     _dynamic->GetParametersFast(list);
   }
+  
+  /// Update parameters to the values given in \p list
+  virtual void UpdateParameters(const ParameterList &list);
 
   std::shared_ptr<ComPWA::Physics::HelicityFormalism::AmpWignerD> GetWignerD() {
     return _angD;

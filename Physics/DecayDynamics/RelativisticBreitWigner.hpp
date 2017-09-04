@@ -25,18 +25,19 @@ class PartialDecay;
 /// Relativistic Breit-Wigner model with barrier factors
 /// The dynamical function implemented here is taken from PDG2014 (Eq.47-22) for
 /// the one channel case.
-class RelativisticBreitWigner : public AbstractDynamicalFunction {
+class RelativisticBreitWigner
+    : public ComPWA::Physics::DecayDynamics::AbstractDynamicalFunction {
 
 public:
-  static std::shared_ptr<AbstractDynamicalFunction>
-  Factory(std::shared_ptr<PartList> partL,
+  static std::shared_ptr<ComPWA::Physics::DecayDynamics::AbstractDynamicalFunction>
+  Factory(std::shared_ptr<ComPWA::PartList> partL,
           const boost::property_tree::ptree &pt);
 
   /// Check of parameters have changed and normalization has to be recalculatecd
   virtual bool CheckModified() const;
 
   //================ EVALUATION =================
-  std::complex<double> Evaluate(const dataPoint &point, int pos) const;
+  std::complex<double> Evaluate(const ComPWA::dataPoint &point, int pos) const;
 
   /// Dynamical Breit-Wigner function.
   /// \param mSq Invariant mass squared
@@ -54,19 +55,23 @@ public:
 
   //============ SET/GET =================
 
-  void SetWidthParameter(std::shared_ptr<DoubleParameter> w) { _width = w; }
+  void SetWidthParameter(std::shared_ptr<ComPWA::DoubleParameter> w) {
+    _width = w;
+  }
 
-  std::shared_ptr<DoubleParameter> GetWidthParameter() { return _width; }
+  std::shared_ptr<ComPWA::DoubleParameter> GetWidthParameter() {
+    return _width;
+  }
 
   void SetWidth(double w) { _width->SetValue(w); }
 
   double GetWidth() const { return _width->GetValue(); }
 
-  void SetMesonRadiusParameter(std::shared_ptr<DoubleParameter> r) {
+  void SetMesonRadiusParameter(std::shared_ptr<ComPWA::DoubleParameter> r) {
     _mesonRadius = r;
   }
 
-  std::shared_ptr<DoubleParameter> GetMesonRadiusParameter() {
+  std::shared_ptr<ComPWA::DoubleParameter> GetMesonRadiusParameter() {
     return _mesonRadius;
   }
 
@@ -86,7 +91,7 @@ public:
   /// barrier factors.
   formFactorType GetFormFactorType() { return _ffType; }
 
-  virtual void GetParameters(ParameterList &list);
+  virtual void GetParameters(ComPWA::ParameterList &list);
 
   virtual void GetParametersFast(std::vector<double> &list) const {
     AbstractDynamicalFunction::GetParametersFast(list);
@@ -94,19 +99,22 @@ public:
     list.push_back(GetMesonRadius());
   }
 
+  /// Update parameters to the values given in \p par
+  virtual void UpdateParameters(const ComPWA::ParameterList &par);
+
   //=========== FUNCTIONTREE =================
 
   virtual bool HasTree() const { return true; }
 
-  virtual std::shared_ptr<FunctionTree>
+  virtual std::shared_ptr<ComPWA::FunctionTree>
   GetTree(const ParameterList &sample, int pos, std::string suffix = "");
 
 protected:
   /// Decay width of resonante state
-  std::shared_ptr<DoubleParameter> _width;
+  std::shared_ptr<ComPWA::DoubleParameter> _width;
 
   /// Meson radius of resonant state
-  std::shared_ptr<DoubleParameter> _mesonRadius;
+  std::shared_ptr<ComPWA::DoubleParameter> _mesonRadius;
 
   /// Form factor type
   formFactorType _ffType;
@@ -117,17 +125,17 @@ private:
   double _current_width;
 };
 
-class BreitWignerStrategy : public Strategy {
+class BreitWignerStrategy : public ComPWA::Strategy {
 public:
   BreitWignerStrategy(const std::string resonanceName)
-      : Strategy(ParType::MCOMPLEX), name(resonanceName) {}
+      : ComPWA::Strategy(ParType::MCOMPLEX), name(resonanceName) {}
 
   virtual const std::string to_str() const {
     return ("relativistic BreitWigner of " + name);
   }
 
-  virtual bool execute(ParameterList &paras,
-                       std::shared_ptr<AbsParameter> &out);
+  virtual bool execute(ComPWA::ParameterList &paras,
+                       std::shared_ptr<ComPWA::AbsParameter> &out);
 
 protected:
   std::string name;

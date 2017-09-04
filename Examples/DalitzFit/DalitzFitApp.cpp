@@ -1,4 +1,5 @@
 
+
 // Copyright (c) 2013, 2017 The ComPWA Team.
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
@@ -17,6 +18,8 @@
 
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
+#include <boost/archive/xml_iarchive.hpp>
+#include <boost/archive/xml_oarchive.hpp>
 
 #include "Core/Logging.hpp"
 #include "Core/Properties.hpp"
@@ -33,6 +36,8 @@
 
 using namespace ComPWA;
 using ComPWA::Physics::HelicityFormalism::HelicityKinematics;
+using ComPWA::Physics::HelicityFormalism::IncoherentIntensity;
+using ComPWA::Optimizer::Minuit2::MinuitResult;
 
 // We define an intensity model using a raw string literal. Currently, this is
 // just a toy model without any physical meaning.
@@ -101,6 +106,9 @@ std::string myParticles = R"####(
 		<Parameter Type="Mass" Name="Mass_f2(1270)">
 			<Value>1.2755</Value>
 			<Error>8.0E-04</Error>
+      <Min>0.1</Min>
+      <Max>2.0</Max>
+      <Fix>false</Fix>
 		</Parameter>
 		<QuantumNumber Class="Spin" Type="Spin" Value="2"/>
 		<QuantumNumber Class="Int" Type="Charge" Value="0"/>
@@ -129,10 +137,13 @@ std::string myParticles = R"####(
 		<QuantumNumber Class="Int" Type="Cparity" Value="+1"/>
 		<DecayInfo Type="relativisticBreitWigner">
 			<FormFactor Type="0" />
-			<Parameter Type="Width" Name="Width_f2(1270)">
+			<Parameter Type="Width" Name="Width_myRes">
 				<Value>1.0</Value>
+        <Min>0.1</Min>
+        <Max>1.0</Max>
+        <Fix>false</Fix>
 			</Parameter>
-			<Parameter Type="MesonRadius" Name="Radius_rho">
+			<Parameter Type="MesonRadius" Name="Radius_myRes">
 				<Value>2.5</Value>
 				<Fix>true</Fix>
 			</Parameter>
@@ -154,7 +165,8 @@ std::string myParticles = R"####(
 ///
 int main(int argc, char **argv) {
 
-  Logging log("log", boost::log::trivial::debug); // initialize logging
+  // initialize logging
+  Logging log("DalitzFit-log.txt", boost::log::trivial::debug);
 
   // RunManager is supposed to manage all objects of the analysis. It generates
   // data and starts the fitting procedure.
@@ -180,7 +192,7 @@ int main(int argc, char **argv) {
   run.SetGenerator(gen);
   std::shared_ptr<Data> phspSample(new Data());
   run.SetPhspSample(phspSample);
-  run.GeneratePhsp(1000000);
+  run.GeneratePhsp(100000);
 
   //---------------------------------------------------
   // 3) Create intensity from pre-defined model
@@ -192,9 +204,8 @@ int main(int argc, char **argv) {
   boost::property_tree::xml_parser::read_xml(modelStream, modelTree);
 
   // Construct intensity class from model string
-  auto intens =
-      ComPWA::Physics::HelicityFormalism::IncoherentIntensity::Factory(
-          partL, kin, modelTree.get_child("IncoherentIntensity"));
+  auto intens = IncoherentIntensity::Factory(
+      partL, kin, modelTree.get_child("IncoherentIntensity"));
 
   // Pass phsp sample to intensity for normalization.
   // Convert to dataPoints first.
@@ -208,7 +219,7 @@ int main(int argc, char **argv) {
   //---------------------------------------------------
   std::shared_ptr<Data> sample(new Data());
   run.SetData(sample);
-  run.Generate(kin, 10000);
+  run.Generate(kin, 1000);
 
   //---------------------------------------------------
   // 5) Fit the model to the data and print the result
@@ -229,7 +240,7 @@ int main(int argc, char **argv) {
   run.SetOptimizer(std::shared_ptr<Optimizer::Optimizer>(minuitif));
 
   // STARTING MINIMIZATION
-  auto result = run.Fit(fitPar);
+  auto result = std::dynamic_pointer_cast<MinuitResult>(run.Fit(fitPar));
 
   // Calculate fit fractions
   std::vector<std::pair<std::string, std::string>> fitComponents;
@@ -237,12 +248,33 @@ int main(int argc, char **argv) {
       std::pair<std::string, std::string>("myAmp", "jpsiGammaPiPi"));
   fitComponents.push_back(
       std::pair<std::string, std::string>("f2(1270)", "jpsiGammaPiPi"));
-  ParameterList ff =
-      Tools::CalculateFitFractions(kin, intens, phspPoints, fitComponents);
 
-  result->SetFitFractions(ff);
+  ParameterList fitFracs =
+      Tools::CalculateFitFractions(kin, intens, phspPoints, fitComponents);
+  // A proper calculation of the fit fraction uncertainty requires
+  // the uncertainty of the fit parameters propagated. We do this
+  // using a numerical approach. Using the covariance matrix
+  // 100 independend sets of fit parameters are generated and the fit fractions
+  // are recalculated. In the end we take the RMS.
+  Tools::CalcFractionError(fitPar, result->GetCovarianceMatrix(), fitFracs, kin,
+                           intens, phspPoints, 100, fitComponents);
+
+  result->SetFitFractions(fitFracs);
   result->Print();
-  
+
+  //---------------------------------------------------
+  // 5.1) Save the fit result
+  //---------------------------------------------------
+  std::ofstream ofs("DalitzFit-fitResult.xml");
+  boost::archive::xml_oarchive oa(ofs);
+  oa << BOOST_SERIALIZATION_NVP(result);
+
+  UpdateParticleList(partL, fitPar);
+  boost::property_tree::ptree ptout;
+  ptout.add_child("ParticleList", SaveParticles(partL));
+  ptout.add_child("IncoherentIntensity", IncoherentIntensity::Save(intens));
+  boost::property_tree::xml_parser::write_xml("DalitzFit-Model.xml", ptout,
+                                              std::locale());
   //---------------------------------------------------
   // 6) Plot data sample and intensity
   //---------------------------------------------------

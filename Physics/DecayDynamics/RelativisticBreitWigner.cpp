@@ -7,15 +7,13 @@
 #include <iterator>
 #include <vector>
 
-#include "boost/property_tree/ptree.hpp"
+#include <boost/property_tree/ptree.hpp>
 
 #include "Physics/HelicityFormalism/HelicityKinematics.hpp"
 #include "Physics/DecayDynamics/RelativisticBreitWigner.hpp"
 #include "Physics/DecayDynamics/Coupling.hpp"
 
-namespace ComPWA {
-namespace Physics {
-namespace DecayDynamics {
+using namespace ComPWA::Physics::DecayDynamics;
 
 std::shared_ptr<AbstractDynamicalFunction>
 RelativisticBreitWigner::Factory(std::shared_ptr<PartList> partL,
@@ -157,7 +155,7 @@ std::complex<double> RelativisticBreitWigner::dynamicalFunction(
   return result;
 }
 
-std::shared_ptr<FunctionTree>
+std::shared_ptr<ComPWA::FunctionTree>
 RelativisticBreitWigner::GetTree(const ParameterList &sample, int pos,
                                  std::string suffix) {
 
@@ -305,6 +303,25 @@ void RelativisticBreitWigner::GetParameters(ParameterList &list) {
   }
 }
 
-} /* namespace DecayDynamics */
-} /* namespace Physics */
-} /* namespace ComPWA */
+void RelativisticBreitWigner::UpdateParameters(const ParameterList &par){
+
+  // Try to update mesonRadius
+  std::shared_ptr<DoubleParameter> rad;
+  try {
+    rad = par.GetDoubleParameter(_mesonRadius->GetName());
+  } catch (std::exception &ex) {
+  }
+  if (rad)
+    _mesonRadius->UpdateParameter(rad);
+  
+  // Try to update width
+  std::shared_ptr<DoubleParameter> width;
+  try {
+    width = par.GetDoubleParameter(_width->GetName());
+  } catch (std::exception &ex) {
+  }
+  if (width)
+    _width->UpdateParameter(width);
+  
+  return;
+}

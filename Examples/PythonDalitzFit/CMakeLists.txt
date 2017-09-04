@@ -2,7 +2,6 @@
 
 # The REQUIRED statement is somehow not working
 find_package( ROOT REQUIRED )
-find_package( Boost REQUIRED )
 
 #FILE(GLOB lib_srcs *.cpp)
 #FILE(GLOB lib_headers *.hpp)

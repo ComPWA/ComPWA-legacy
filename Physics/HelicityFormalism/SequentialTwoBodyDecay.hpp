@@ -69,8 +69,6 @@ public:
     return _partDecays;
   }
 
-  virtual void GetFitFractions(ParameterList &parList){};
-
   virtual void GetParameters(ParameterList &list);
 
   virtual void GetParametersFast(std::vector<double> &list) const {
@@ -78,6 +76,9 @@ public:
     for (auto i : _partDecays)
       i->GetParametersFast(list);
   }
+  
+  /// Update parameters to the values given in \p par
+  virtual void UpdateParameters(const ParameterList &par);
 
   /// Set phase space sample
   /// We use the phase space sample to calculate the normalization. The sample

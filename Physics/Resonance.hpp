@@ -29,21 +29,18 @@ namespace Physics {
 class Resonance {
 
 public:
-  //============ CONSTRUCTION ==================
-
   Resonance() : _preFactor(1, 0), phspVolume_(1){};
 
   virtual ~Resonance(){};
 
-  //! Clone function
   virtual Resonance *Clone(std::string newName = "") const = 0;
 
   //======= INTEGRATION/NORMALIZATION ===========
 
-  /**! Get current normalization.  */
+  /// Get current normalization.
   virtual double GetNormalization() const = 0;
 
-  //! Check of parameters have changed and normalization has to be recalculatecd
+  /// Check of parameters have changed and normalization has to be recalculatecd
   bool CheckModified() const {
     if (GetMagnitude() != _current_magnitude || GetPhase() != _current_phase) {
       const_cast<double &>(_current_magnitude) = GetMagnitude();
@@ -55,95 +52,50 @@ public:
 
   //================ EVALUATION =================
 
-  //! value of resonance at \param point
+  /// Value of resonance at \param point with normalization factor
   virtual std::complex<double> Evaluate(const dataPoint &point) const {
     return EvaluateNoNorm(point) * GetNormalization();
   }
 
-  //! value of resonance at \param point
+  /// Value of resonance at \param point without normalization factor
   virtual std::complex<double> EvaluateNoNorm(const dataPoint &point) const = 0;
 
   //============ SET/GET =================
 
-  //! Get resonance name
   virtual std::string GetName() const { return _name; }
 
-  //! Set resonance name
   virtual void SetName(std::string name) { _name = name; }
 
-  //! Set prefactor
   virtual void SetPrefactor(std::complex<double> pre) { _preFactor = pre; }
 
-  //! Get prefactor
   virtual std::complex<double> GetPrefactor() const { return _preFactor; }
 
-  //! Get coefficient
   virtual std::complex<double> GetCoefficient() const {
     return std::polar(GetMagnitude(), GetPhase());
   }
 
-  /**
-   Get strength parameter
-
-   @return strength parameter
-   */
   std::shared_ptr<ComPWA::DoubleParameter> GetMagnitudeParameter() {
     return _magnitude;
   }
 
-  /**
-   Get strength parameter
-
-   @return strength parameter
-   */
   double GetMagnitude() const { return std::fabs(_magnitude->GetValue()); }
 
-  /**
-   Set strength parameter
-
-   @param par Strength parameter
-   */
   void SetMagnitudeParameter(std::shared_ptr<ComPWA::DoubleParameter> par) {
     _magnitude = par;
   }
 
-  /**
-   Set strength parameter
-
-   @param par Strength parameter
-   */
   void SetMagnitude(double par) { _magnitude->SetValue(par); }
 
-  /**
-   Get phase parameter
-
-   @return Phase parameter
-   */
   std::shared_ptr<ComPWA::DoubleParameter> GetPhaseParameter() {
     return _phase;
   }
 
-  /**
-   Get phase parameter
-
-   @return Phase parameter
-   */
   double GetPhase() const { return _phase->GetValue(); }
 
-  /**
-   Set phase parameter
-
-   @param par Phase parameter
-   */
   void SetPhaseParameter(std::shared_ptr<ComPWA::DoubleParameter> par) {
     _phase = par;
   }
 
-  /**
-   Set phase parameter
-
-   @param par Phase parameter
-   */
   void SetPhase(double par) { _phase->SetValue(par); }
 
   virtual void GetParameters(ParameterList &list) {
@@ -151,16 +103,19 @@ public:
     list.AddParameter(GetPhaseParameter());
   }
   
-  /// Fill vector with parameters
+  /// Fill vector with parameters (fast). No check is performed if parameters
+  /// already exist. \see GetParameters(ParameterList &list)
   virtual void GetParametersFast(std::vector<double> &list) const {
     list.push_back(GetMagnitude());
     list.push_back(GetPhase());
   }
+  
+  /// Update parameters to the values given in \p list
+  virtual void UpdateParameters(const ParameterList &list) = 0;
 
-  /*! Set phase space sample
-   * We use the phase space sample to calculate the normalization. The sample
-   * should be without efficiency applied.
-   */
+  /// Set phase space sample.
+  /// We use the phase space sample to calculate the normalization. The sample
+  /// should be without efficiency applied.
   virtual void
   SetPhspSample(std::shared_ptr<std::vector<ComPWA::dataPoint>> phspSample) {
     _phspSample = phspSample;
@@ -172,7 +127,6 @@ public:
   
   //=========== FUNCTIONTREE =================
 
-  //! Check of tree is available
   virtual bool HasTree() const { return false; }
 
   virtual std::shared_ptr<FunctionTree>

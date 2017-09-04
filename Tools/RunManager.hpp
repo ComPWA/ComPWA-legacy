@@ -36,7 +36,7 @@ using namespace DataReader;
 class RunManager {
   
 public:
-  RunManager();
+  RunManager() {};
   
   RunManager(std::shared_ptr<DataReader::Data>, std::shared_ptr<AmpIntensity>,
              std::shared_ptr<Optimizer::Optimizer>); // Fit

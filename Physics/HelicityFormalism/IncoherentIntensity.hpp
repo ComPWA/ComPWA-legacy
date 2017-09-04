@@ -36,11 +36,7 @@ public:
 
   //================ EVALUATION =================
 
-  /** Calculate intensity of amplitude at point in phase-space
-   *
-   * @param point Data point
-   * @return
-   */
+  /// Calculate intensity of amplitude at point in phase-space
   virtual double Intensity(const ComPWA::dataPoint &point) const;
 
   //================== SET/GET =================
@@ -62,29 +58,28 @@ public:
     return;
   }
 
-  /**! Add amplitude parameters to list
-   * Add parameters only to list if not already in
-   * @param list Parameter list to be filled
-   */
+  /// Add parameters to \p list.
+  /// Add parameters to list only if not already in
   virtual void GetParameters(ComPWA::ParameterList &list);
 
-  //! Fill vector with parameters
+  /// Fill vector with parameters
   virtual void GetParametersFast(std::vector<double> &list) const {
     AmpIntensity::GetParametersFast(list);
     for (auto i : _intens) {
       i->GetParametersFast(list);
     }
   }
+  
+  /// Update parameters in AmpIntensity to the values given in \p list
+  virtual void UpdateParameters(const ParameterList &list);
 
-  //! Calculate & fill fit fractions of this amplitude to ParameterList
+  /// Calculate & fill fit fractions of this amplitude to ParameterList
   virtual void GetFitFractions(ComPWA::ParameterList &parList){};
 
-  /*! Set phase space sample
-   * We use a phase space sample to calculate the normalization and determine
-   * the maximum of the amplitude. In case that the efficiency is already
-   * applied
-   * to the sample set fEff to false.
-   */
+  /// Set phase space sample.
+  /// We use a phase space sample to calculate the normalization and determine
+  /// the maximum of the amplitude. In case that the efficiency is already
+  /// applied to the sample set fEff to false.
   virtual void
   SetPhspSample(std::shared_ptr<std::vector<ComPWA::dataPoint>> phspSample,
                 std::shared_ptr<std::vector<ComPWA::dataPoint>> toySample) {
@@ -108,10 +103,10 @@ public:
 
   //=========== FUNCTIONTREE =================
 
-  //! Check of tree is available
+  /// Check of tree is available
   virtual bool HasTree() const { return true; }
 
-  //! Get FunctionTree
+  /// Get FunctionTree
   virtual std::shared_ptr<ComPWA::FunctionTree>
   GetTree(std::shared_ptr<Kinematics> kin, const ComPWA::ParameterList &sample,
           const ComPWA::ParameterList &phspSample,
@@ -119,21 +114,22 @@ public:
           std::string suffix = "");
 
 protected:
-  //! Phase space sample to calculate the normalization and maximum value.
+  /// Phase space sample to calculate the normalization and maximum value.
   std::shared_ptr<std::vector<ComPWA::dataPoint>> _phspSample;
 
   double phspVolume_;
 
-  // Caching of normalization values
+  /// Caching of normalization values
   std::vector<double> _normValues;
 
-  // Temporary storage of the para
+  /// Temporary storage of the para
   std::vector<std::vector<double>> _parameters;
 
   std::vector<std::shared_ptr<ComPWA::AmpIntensity>> _intens;
 };
 
-} /* namespace HelicityFormalism */
-} /* namespace Physics */
-} /* namespace ComPWA */
+} // namespace HelicityFormalism
+} // namespace Physics
+} // namespace ComPWA
+
 #endif

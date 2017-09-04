@@ -746,16 +746,12 @@ DoubleParameterFactory(const boost::property_tree::ptree pt) {
   return obj;
 }
 
-
 /// Save a DoubleParameter object from a ptree. This approach is more or
 /// less equivalent to the serialization of a parameter but provides a better
 /// readable format.
-///
-/// @param par Input parameter
-/// @return property_tree
-inline boost::property_tree::ptree DoubleParameterSave(DoubleParameter par) {
+inline boost::property_tree::ptree
+DoubleParameterSave(const DoubleParameter par) {
   boost::property_tree::ptree pt;
-  DoubleParameter obj;
 
   // Require that name and value are provided
   pt.put("<xmlattr>.Name", par.GetName());
@@ -766,15 +762,20 @@ inline boost::property_tree::ptree DoubleParameterSave(DoubleParameter par) {
     pt.put("Max", par.GetMaxValue());
   }
   if (par.HasError()) {
-    if (par.GetErrorLow() == par.GetErrorHigh())
+    if (par.GetErrorLow() == par.GetErrorHigh()) {
       pt.put("Error", par.GetError());
-    else {
+    } else {
       pt.put("ErrorLow", par.GetErrorLow());
       pt.put("ErrorHigh", par.GetErrorHigh());
     }
   }
 
   return pt;
+}
+
+inline boost::property_tree::ptree
+DoubleParameterSave(std::shared_ptr<DoubleParameter> par) {
+  return DoubleParameterSave(*par.get());
 }
 
 class IntegerParameter : public AbsParameter {

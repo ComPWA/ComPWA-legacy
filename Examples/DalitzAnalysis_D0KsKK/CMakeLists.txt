@@ -1,8 +1,17 @@
 # Create executable for Dalitz plot analysis of D0->KsKK.
 
-# The REQUIRED statement is somehow not working
+#
+# FindRoot
+#
 find_package( ROOT REQUIRED )
-find_package( Boost REQUIRED )
+
+#
+# FindBoost
+#
+find_package(Boost COMPONENTS
+               program_options
+               REQUIRED QUIET
+)
 
 add_executable( DalitzFitD03K
   DalitzFitD03K.cpp systematics.hpp

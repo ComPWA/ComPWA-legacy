@@ -65,7 +65,10 @@ public:
   virtual void GetParametersFast(std::vector<double> &list) const {
     list.push_back(_strength->GetValue());
   }
-
+  
+  /// Update parameters in AmpIntensity to the values given in \p list
+  virtual void UpdateParameters(const ParameterList &list) = 0;
+  
   /// Fill ParameterList with fit fractions
   virtual void GetFitFractions(ParameterList &parList) = 0;
 

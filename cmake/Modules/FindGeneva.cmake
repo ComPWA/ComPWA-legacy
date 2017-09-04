@@ -131,8 +131,8 @@ FIND_PATH (
 # Check that the path was indeed found
 IF (NOT GENEVA_INCLUDE_DIR)
 	SET (GENEVA_ERROR_REASON "Unable to find the Geneva header files. You may"
-	     " need to set GENEVA_INCLUDEDIR to the directory containing Geneva's"
-	     " headers or GENEVA_ROOT to the location of Geneva.\n")
+		" need to set GENEVA_INCLUDEDIR to the directory containing Geneva's"
+		" headers or GENEVA_ROOT to the location of Geneva.\n")
 ENDIF ()
 
 ###############################################################################
@@ -147,7 +147,7 @@ SET ( NAMES
 	"courtier"
 	"hap"
 	"common"
-)
+	)
 
 UNSET (GENEVA_LIBRARIES)
 UNSET (GENEVA_LIBS)
@@ -161,13 +161,13 @@ FOREACH ( name IN LISTS NAMES )
 			GENEVA_${ucname}_LIBRARY
 			NAMES "gemfony-${name}"
 			PATHS ${GENEVA_LIBRARYDIR} NO_DEFAULT_PATH
-		)
+			)
 	ENDIF ()
 	FIND_LIBRARY (
 		GENEVA_${ucname}_LIBRARY
 		NAMES "gemfony-${name}"
 		PATHS ${_INSTALL_DIRS_LIB}
-	)
+		)
 
 	IF (GENEVA_${ucname}_LIBRARY)
 		SET (GENEVA_LIBRARIES ${GENEVA_LIBRARIES} ${GENEVA_${ucname}_LIBRARY})
@@ -196,15 +196,15 @@ IF (NOT GENEVA_LIBS)
 	SET (GENEVA_LIBS "GENEVA_LIBS-NOTFOUND")
 	SET (GENEVA_LIBRARY_DIR "GENEVA_LIBRARY_DIR-NOTFOUND")
 	SET (GENEVA_ERROR_REASON "${GENEVA_ERROR_REASON}"
-	     "No Geneva libraries were found. You may need to set GENEVA_LIBRARYDIR"
-	     " to the directory containing Geneva libraries or GENEVA_ROOT to the"
-	     " location of Geneva.\n")
+		"No Geneva libraries were found. You may need to set GENEVA_LIBRARYDIR"
+		" to the directory containing Geneva libraries or GENEVA_ROOT to the"
+		" location of Geneva.\n")
 ELSE ()
 	GET_FILENAME_COMPONENT (
 		GENEVA_LIBRARY_DIR
 		${GENEVA_COMMON_LIBRARY}
 		PATH
-	)
+		)
 ENDIF ()
 
 # This function sets the <PKG>_FOUND variable if all the given variables
@@ -216,7 +216,7 @@ FIND_PACKAGE_HANDLE_STANDARD_ARGS (
 	GENEVA_INCLUDE_DIR
 	GENEVA_LIBRARY_DIR
 	GENEVA_COMMON_LIBRARY
-)
+	)
 
 ###############################################################################
 # Check that the versions found are consistent
@@ -232,7 +232,7 @@ IF (GENEVA_INCLUDE_DIR)
 		LIMIT_COUNT 100
 		LIMIT_INPUT 10000
 		LIMIT_OUTPUT 100
-	)
+		)
 	STRING ( REPLACE "${_VER_PRE} " "" _RAW_VERSION_2 ${_RAW_VERSION} )
 	STRING ( STRIP ${_RAW_VERSION_2} _RAW_VERSION_3 )
 
@@ -266,27 +266,29 @@ ENDIF ()
 ###############################################################################
 # Report the results
 
-IF (GENEVA_FOUND)
-	IF (GENEVA_VERSION)
-		MESSAGE(STATUS "Geneva version: ${GENEVA_VERSION}")
-	ENDIF ()
-	IF (GENEVA_TESTING)
-		MESSAGE(STATUS "  with testing support")
-	ELSE ()
-		MESSAGE(STATUS "  without testing support")
+IF (NOT Geneva_FIND_QUIETLY )
+	IF (GENEVA_FOUND)
+		IF (GENEVA_VERSION)
+			MESSAGE(STATUS "Geneva version: ${GENEVA_VERSION}")
+		ENDIF ()
+		IF (GENEVA_TESTING)
+			MESSAGE(STATUS "  with testing support")
+		ELSE ()
+			MESSAGE(STATUS "  without testing support")
+		ENDIF ()
+
+		IF (GENEVA_LIBS)
+			MESSAGE(STATUS "Found the following Geneva libraries:")
+			FOREACH ( name IN LISTS GENEVA_LIBS )
+				MESSAGE(STATUS "  ${name}")
+			ENDFOREACH ()
+		ENDIF ()
 	ENDIF ()
 
-	IF (GENEVA_LIBS)
-		MESSAGE(STATUS "Found the following Geneva libraries:")
-		FOREACH ( name IN LISTS GENEVA_LIBS )
-			MESSAGE(STATUS "  ${name}")
-		ENDFOREACH ()
+	IF (GENEVA_ERROR_REASON)
+		MESSAGE (STATUS ${GENEVA_ERROR_REASON})
 	ENDIF ()
-ENDIF ()
-
-IF (GENEVA_ERROR_REASON)
-	MESSAGE (STATUS ${GENEVA_ERROR_REASON})
-ENDIF ()
+ENDIF()
 
 ###############################################################################
 # Done
