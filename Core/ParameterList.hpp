@@ -310,7 +310,7 @@ public:
   //! Remove integer parameter
   /*!
    * Remove an integer parameter from the list
-*\param id identification of the paramter to be removed
+   *\param id identification of the paramter to be removed
    */
   virtual void RemoveInteger(const unsigned int id);
 
@@ -476,7 +476,7 @@ public:
   //! Remove complex parameter
   /*!
    * Remove an complex parameter from the list
-*\param id identification of the paramter to be removed
+   *\param id identification of the paramter to be removed
    */
   virtual void RemoveComplex(const unsigned int id);
 
@@ -604,7 +604,7 @@ public:
   //! Remove multi-complex parameter
   /*!
    * Remove an multi-complex parameter from the list
-*\param id identification of the paramter to be removed
+   *\param id identification of the paramter to be removed
    */
   virtual void RemoveMultiComplex(const unsigned int id);
 
@@ -669,7 +669,7 @@ public:
   //! Remove multi-complex parameter
   /*!
    * Remove an multi-complex parameter from the list
-*\param id identification of the paramter to be removed
+   *\param id identification of the paramter to be removed
    */
   virtual void RemoveMultiUnsignedInteger(const unsigned int id);
 

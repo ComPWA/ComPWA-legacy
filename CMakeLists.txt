@@ -56,15 +56,16 @@ find_package( Boost COMPONENTS
 
 # Workaround for clang+boost.python
 # ${CMAKE_CXX_COMPILER_ID} can be one of {GNU Clang AppleClang Intel MSVC}
+# The python interface is still work in progress, so we disable python by
+# default.
 if (NOT "${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
-  find_package(PythonLibs 2.7 EXACT)
-  #message(${PYTHON_LIBRARIES})
-  INCLUDE_DIRECTORIES(${PYTHON_INCLUDE_PATH})
-  LINK_DIRECTORIES(${PYTHON_LIBRARIES})
-  find_package( Boost COMPONENTS
-               python
-               REQUIRED
-  )
+  #find_package(PythonLibs 2.7 EXACT)
+  #INCLUDE_DIRECTORIES(${PYTHON_INCLUDE_PATH})
+  #LINK_DIRECTORIES(${PYTHON_LIBRARIES})
+  #find_package( Boost COMPONENTS
+  #             python
+  #             REQUIRED
+  #)
 endif()
 
 # Use dynamic libraries for log, test and serialization
