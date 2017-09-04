@@ -8,6 +8,7 @@ find_package( Boost COMPONENTS
                unit_test_framework
                serialization
                log
+               date_time
                REQUIRED
 )
 
