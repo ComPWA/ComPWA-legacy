@@ -1,3 +1,12 @@
+#
+# Find Boost
+#
+find_package( Boost COMPONENTS
+               unit_test_framework
+               system
+               REQUIRED
+)
+
 # Create HelicityAmplitude library.
 
 SET( lib_srcs IncoherentIntensity.cpp CoherentIntensity.cpp

@@ -1,12 +1,17 @@
-# Create DalitzKinematics library.
-
-# The REQUIRED statement is somehow not working
+#
+# Find Boost
+#
+find_package( Boost COMPONENTS
+               unit_test_framework
+               system
+               REQUIRED
+)
 find_package( ROOT REQUIRED )
 find_package( GSL REQUIRED gsl gslcblas )
 
 FILE(GLOB lib_srcs *.cpp)
-FILE(GLOB lib_headers *.hpp)
 
+FILE(GLOB lib_headers *.hpp)
 
 ### Generator dictionaries
 # Currently we do not generate dictionaries of compatibility reasons
