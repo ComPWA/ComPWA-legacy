@@ -203,6 +203,32 @@ void PartialDecay::GetParameters(ParameterList &list) {
   _dynamic->GetParameters(list);
 }
 
+void PartialDecay::UpdateParameters(const ParameterList &list){
+
+  // Try to update magnitude
+  std::shared_ptr<DoubleParameter> mag;
+  try {
+    mag = list.GetDoubleParameter(_magnitude->GetName());
+  } catch (std::exception &ex) {
+  }
+  if (mag)
+    _magnitude->UpdateParameter(mag);
+  std::shared_ptr<DoubleParameter> phase;
+  
+  // Try to update phase
+  try {
+    phase = list.GetDoubleParameter(_phase->GetName());
+  } catch (std::exception &ex) {
+  }
+  if (phase)
+    _phase->UpdateParameter(phase);
+
+  _dynamic->UpdateParameters(list);
+  
+  return;
+
+}
+
 } // namespace HelicityFormalism
 } // namespace Physics
 } // namespace ComPWA

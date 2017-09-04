@@ -2,36 +2,26 @@
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
-//****************************************************************************
-// Class for defining the relativistic Breit-Wigner resonance model, which
-// includes the use of Blatt-Weisskopf barrier factors.
-//****************************************************************************
-
-// --CLASS DESCRIPTION [MODEL] --
-// Class for defining the relativistic Breit-Wigner resonance model, which
-// includes the use of Blatt-Weisskopf barrier factors.
-
 #include <cmath>
 #include <math.h>
 #include "Physics/DecayDynamics/AmpFlatteRes.hpp"
 
-namespace ComPWA {
-namespace Physics {
-namespace DecayDynamics {
+using namespace ComPWA::Physics::DecayDynamics;
 
 AmpFlatteRes::~AmpFlatteRes() {}
 
 std::shared_ptr<AbstractDynamicalFunction>
-AmpFlatteRes::Factory(std::shared_ptr<PartList> partL, const boost::property_tree::ptree &pt) {
+AmpFlatteRes::Factory(std::shared_ptr<PartList> partL,
+                      const boost::property_tree::ptree &pt) {
   auto obj = std::make_shared<AmpFlatteRes>();
 
   std::string name = pt.get<std::string>("DecayParticle.<xmlattr>.Name");
   LOG(trace) << "AmpFlatteRes::Factory() | Construction of " << name << ".";
   obj->SetName(name);
-  
+
   // All further information on the decay is stored in a ParticleProperty list
   auto partProp = partL->find(name)->second;
-  
+
   obj->SetMassParameter(
       std::make_shared<DoubleParameter>(partProp.GetMassPar()));
 
@@ -211,9 +201,9 @@ AmpFlatteRes::dynamicalFunction(double mSq, double mR, double massA1,
   return dynamicalFunction(mSq, mR, gA, termA, termB, termC);
 }
 
-std::shared_ptr<FunctionTree> AmpFlatteRes::GetTree(const ParameterList &sample,
-                                                    int pos,
-                                                    std::string suffix) {
+std::shared_ptr<ComPWA::FunctionTree>
+AmpFlatteRes::GetTree(const ParameterList &sample, int pos,
+                      std::string suffix) {
 
   //  int sampleSize = sample.GetMultiDouble(0)->GetNValues();
 
@@ -339,13 +329,41 @@ bool FlatteStrategy::execute(ParameterList &paras,
   return true;
 }
 
+void AmpFlatteRes::SetCouplings(std::vector<Coupling> vC) {
+  if (vC.size() != 2 && vC.size() != 3)
+    throw std::runtime_error(
+        "AmpFlatteRes::SetCouplings() | Vector with "
+        "couplings has a wrong size. We expect either 2 or 3 couplings.");
+
+  _g = vC;
+
+  if (_g.size() == 2)
+    _g.push_back(Coupling());
+  // Check if one of the  coupling match the final state (_daughterMasses)
+  auto mm = GetDecayMasses();
+  if (mm == std::pair<double, double>(-999, -999))
+    LOG(info)
+        << "AmpFlatteRes::SetCouplings() | Masses of decay products not set. "
+           " Can not determine if correct couplings were set.";
+
+  bool ok = false;
+  for (auto i : _g) {
+    if (i.GetMassA() == mm.first && i.GetMassB() == mm.second)
+      ok = true;
+    if (i.GetMassB() == mm.first && i.GetMassA() == mm.second)
+      ok = true;
+  }
+  if (!ok)
+    throw std::runtime_error("AmpFlatteRes::SetCouplings() | No couplings "
+                             "for the current decay particles set!");
+}
+
 void AmpFlatteRes::GetParameters(ParameterList &list) {
   AbstractDynamicalFunction::GetParameters(list);
-  /* We check of for each parameter if a parameter of the same name exists in
-   * list. If so we check if both are equal and set the local parameter to the
-   * parameter from the list. In this way we connect parameters that occur on
-   * different positions in the amplitude.
-   */
+  // We check of for each parameter if a parameter of the same name exists in
+  // list. If so we check if both are equal and set the local parameter to the
+  // parameter from the list. In this way we connect parameters that occur on
+  // different positions in the amplitude.
   std::shared_ptr<DoubleParameter> tmp;
   for (auto i : _g) {
     if (i.GetValue() == 0.0)
@@ -378,6 +396,27 @@ void AmpFlatteRes::GetParameters(ParameterList &list) {
   }
 }
 
-} /* namespace AmplitudeSum */
-} /* namespace Physics */
-} /* namespace ComPWA */
+void AmpFlatteRes::UpdateParameters(const ParameterList &par) {
+
+  // Try to update mesonRadius
+  std::shared_ptr<DoubleParameter> rad;
+  try {
+    rad = par.GetDoubleParameter(_mesonRadius->GetName());
+  } catch (std::exception &ex) {
+  }
+  if (rad)
+    _mesonRadius->UpdateParameter(rad);
+
+  // Try to update Couplings
+  for (auto i : _g) {
+    std::shared_ptr<DoubleParameter> c;
+    try {
+      c = par.GetDoubleParameter(i.GetValueParameter()->GetName());
+    } catch (std::exception &ex) {
+    }
+    if (c)
+      i.GetValueParameter()->UpdateParameter(rad);
+  }
+
+  return;
+}

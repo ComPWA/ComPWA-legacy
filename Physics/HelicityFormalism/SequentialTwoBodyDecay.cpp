@@ -5,9 +5,7 @@
 #include <memory>
 #include "Physics/HelicityFormalism/SequentialTwoBodyDecay.hpp"
 
-namespace ComPWA {
-namespace Physics {
-namespace HelicityFormalism {
+using namespace ComPWA::Physics::HelicityFormalism;
 
 std::shared_ptr<ComPWA::Physics::Amplitude>
 SequentialTwoBodyDecay::Factory(std::shared_ptr<PartList> partL,
@@ -64,11 +62,11 @@ SequentialTwoBodyDecay::Save(std::shared_ptr<ComPWA::Physics::Amplitude> amp) {
   boost::property_tree::ptree pt;
   pt.put<std::string>("<xmlattr>.Name", obj->GetName());
 
-  boost::property_tree::ptree tmp = ComPWA::DoubleParameterSave(
-                                *obj->GetMagnitudeParameter().get());
+  boost::property_tree::ptree tmp =
+      ComPWA::DoubleParameterSave(*obj->GetMagnitudeParameter().get());
   tmp.put("<xmlattr>.Type", "Magnitude");
   pt.add_child("Parameter", tmp);
-  
+
   tmp = ComPWA::DoubleParameterSave(*obj->GetPhaseParameter().get());
   tmp.put("<xmlattr>.Type", "Phase");
   pt.add_child("Parameter", tmp);
@@ -87,7 +85,7 @@ SequentialTwoBodyDecay::Save(std::shared_ptr<ComPWA::Physics::Amplitude> amp) {
   return pt;
 }
 
-std::shared_ptr<FunctionTree> SequentialTwoBodyDecay::GetTree(
+std::shared_ptr<ComPWA::FunctionTree> SequentialTwoBodyDecay::GetTree(
     std::shared_ptr<Kinematics> kin, const ParameterList &sample,
     const ParameterList &toySample, std::string suffix) {
 
@@ -113,7 +111,7 @@ std::shared_ptr<FunctionTree> SequentialTwoBodyDecay::GetTree(
   }
 
   return tr;
-};
+}
 
 void SequentialTwoBodyDecay::GetParameters(ParameterList &list) {
   Amplitude::GetParameters(list);
@@ -122,6 +120,27 @@ void SequentialTwoBodyDecay::GetParameters(ParameterList &list) {
   }
 }
 
-} /* namespace HelicityFormalism */
-} /* namespace Physics */
-} /* namespace ComPWA */
+void SequentialTwoBodyDecay::UpdateParameters(const ParameterList &par) {
+  // Try to update magnitude
+  std::shared_ptr<DoubleParameter> mag;
+  try {
+    mag = par.GetDoubleParameter(_magnitude->GetName());
+  } catch (std::exception &ex) {
+  }
+  if (mag)
+    _magnitude->UpdateParameter(mag);
+  std::shared_ptr<DoubleParameter> phase;
+  
+  // Try to update phase
+  try {
+    phase = par.GetDoubleParameter(_phase->GetName());
+  } catch (std::exception &ex) {
+  }
+  if (phase)
+    _phase->UpdateParameter(phase);
+  
+  for (auto i : _partDecays)
+    i->UpdateParameters(par);
+
+  return;
+}

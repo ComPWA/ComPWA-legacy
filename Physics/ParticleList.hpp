@@ -416,17 +416,6 @@ const std::string defaultParticleList = R"####(
 		<QuantumNumber Class="Int" Type="Parity" Value="-1"/>
 		<QuantumNumber Class="Spin" Type="IsoSpin" Value="0.5" Projection="0.5"/>
 	</Particle>
-	<Particle Name="K-">
-		<Pid>-321</Pid>
-		<Parameter Type="Mass" Name="Mass_chargedKaon">
-			<Value>0.493677</Value>
-			<Fix>true</Fix>
-		</Parameter>
-		<QuantumNumber Class="Spin" Type="Spin" Value="0"/>
-		<QuantumNumber Class="Int" Type="Charge" Value="-1"/>
-		<QuantumNumber Class="Int" Type="Parity" Value="-1"/>
-		<QuantumNumber Class="Spin" Type="IsoSpin" Value="0.5" Projection="-0.5"/>
-	</Particle>
 	<Particle Name="K_S0">
 		<Pid>310</Pid>
 		<Parameter Type="Mass" Name="Mass_neutralKaon">
@@ -437,6 +426,17 @@ const std::string defaultParticleList = R"####(
 		<QuantumNumber Class="Int" Type="Charge" Value="0"/>
 		<QuantumNumber Class="Int" Type="Parity" Value="-1"/>
 		<QuantumNumber Class="Spin" Type="IsoSpin" Value="0.5" Projection="0.5"/>
+	</Particle>
+	<Particle Name="K_L0">
+		<Pid>130</Pid>
+		<Parameter Type="Mass" Name="Mass_neutralKaon">
+			<Value>0.497614</Value>
+			<Fix>true</Fix>
+		</Parameter>
+		<QuantumNumber Class="Spin" Type="Spin" Value="0"/>
+		<QuantumNumber Class="Int" Type="Charge" Value="0"/>
+		<QuantumNumber Class="Int" Type="Parity" Value="-1"/>
+		<QuantumNumber Class="Spin" Type="IsoSpin" Value="0.5" Projection="-0.5"/>
 	</Particle>
 
 	# Heavy flavour mesons

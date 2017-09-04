@@ -14,11 +14,7 @@
 #include "Core/Logging.hpp"
 #include "Optimizer/Minuit2/MinuitResult.hpp"
 
-namespace ComPWA {
-namespace Optimizer {
-namespace Minuit2 {
-
-using namespace boost::log;
+using namespace ComPWA::Optimizer::Minuit2;
 
 MinuitResult::MinuitResult()
     : calcInterference(0), initialLH(0), finalLH(0), trueLH(0) {}
@@ -304,6 +300,6 @@ bool MinuitResult::HasFailed() {
   return failed;
 }
 
-} /* namespace Minuit2 */
-} /* namespace Optimizer */
-} /* namespace ComPWA */
+// Enable serialization of MinuitResult. For some reason has to be outside
+// any namespaces.
+BOOST_CLASS_EXPORT(ComPWA::Optimizer::Minuit2::MinuitResult)

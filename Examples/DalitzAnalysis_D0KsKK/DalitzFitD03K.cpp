@@ -58,8 +58,6 @@ using namespace ComPWA;
 using ComPWA::DataReader::RootReader;
 using namespace ComPWA::Physics::HelicityFormalism;
 
-BOOST_CLASS_EXPORT(Optimizer::Minuit2::MinuitResult)
-
 ///
 ///Dalitz plot analysis of the decay D0->K_S0 K_ K-.
 ///

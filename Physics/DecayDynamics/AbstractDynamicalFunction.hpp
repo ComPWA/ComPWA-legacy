@@ -66,6 +66,9 @@ public:
   virtual void GetParametersFast(std::vector<double> &list) const {
     list.push_back(GetMass());
   }
+  
+  /// Update parameters to the values given in \p par
+  virtual void UpdateParameters(const ParameterList &par) = 0;
 
   virtual void SetMassParameter(std::shared_ptr<DoubleParameter> mass) {
     _mass = mass;

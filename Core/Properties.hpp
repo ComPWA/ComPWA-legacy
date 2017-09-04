@@ -1,3 +1,6 @@
+
+
+
 // Copyright (c) 2017 The ComPWA Team.
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
@@ -12,6 +15,7 @@
 
 #include <Core/Exceptions.hpp>
 #include <Core/Parameter.hpp>
+#include <Core/ParameterList.hpp>
 #include <Core/Spin.hpp>
 
 namespace ComPWA {
@@ -150,7 +154,7 @@ inline const ParticleProperties &FindParticle(std::shared_ptr<PartList> list,
 
 /// Read list of particles from a boost::property_tree
 inline void ReadParticles(std::shared_ptr<PartList> list,
-                          boost::property_tree::ptree pt) {
+                          const boost::property_tree::ptree &pt) {
 
   auto particleTree = pt.get_child_optional("ParticleList");
   if (!particleTree)
@@ -162,7 +166,7 @@ inline void ReadParticles(std::shared_ptr<PartList> list,
 
     if (!last.second) {
       LOG(info) << "ReadParticles() | Particle " << last.first->first
-                << "already exists in list. We overwrite its parameters!";
+                << " already exists in list. We overwrite its parameters!";
       last.first->second = tmp;
     }
     tmp = last.first->second;
@@ -209,9 +213,59 @@ SaveParticles(std::shared_ptr<PartList> list) {
   for (auto &i : *list.get()) {
     pt.add_child("Particle", i.second.Save());
   }
-  boost::property_tree::ptree pt2;
-  pt2.add_child("ParticleList", pt);
-  return pt2;
+  return pt;
+}
+
+/// Save particle list to file
+inline void SaveParticles(std::shared_ptr<PartList> list,
+                          std::string fileName) {
+  boost::property_tree::ptree pt;
+  pt.add_child("ParticleList", SaveParticles(list));
+  boost::property_tree::xml_parser::write_xml(fileName, pt, std::locale());
+  return;
+}
+
+inline void UpdateNode(std::shared_ptr<DoubleParameter> p,
+                       boost::property_tree::ptree &tr) {
+  for (auto &v : tr.get_child("")) {
+    if (v.first == "Parameter") {
+      std::string nn = v.second.get<std::string>("<xmlattr>.Name");
+      std::string tt = v.second.get<std::string>("<xmlattr>.Type");
+      if (nn == p->GetName()) {
+        //        LOG(debug) << "UpdateNode() | Updating node " << v.first
+        //        << "." << nn << " to " << p->GetValue();
+        v.second = DoubleParameterSave(*p.get());
+        v.second.put("<xmlattr>.Type", tt);
+      }
+    } else {
+      // Call this function recursively to find multiple matches.
+      UpdateNode(p, v.second);
+    }
+  }
+  return;
+}
+
+/// Update particle list. Note that \p partL is modified!
+inline void UpdateParticleList(std::shared_ptr<PartList> &partL,
+                               ParameterList &pars) {
+
+  boost::property_tree::ptree partTr;
+  partTr.add_child("ParticleList", SaveParticles(partL));
+  // Loop over (double) parameters
+  for (auto i : pars.GetDoubleParameters()) {
+    auto name = i->GetName();
+    // Some default values may not have a name. We skip those.
+    if (name == "")
+      continue;
+    // Search for parameter in tree and update it
+    UpdateNode(i, partTr);
+  }
+
+  // Create new list from modified tree and assign it to \p partL
+  auto newList = std::make_shared<PartList>();
+  ReadParticles(newList, partTr);
+  partL = newList;
+  return;
 }
 
 } // Namespace ComPWA

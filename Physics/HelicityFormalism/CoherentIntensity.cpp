@@ -186,10 +186,10 @@ std::shared_ptr<FunctionTree> CoherentIntensity::setupBasicTree(
     return std::shared_ptr<FunctionTree>();
   }
 
-  //------------Setup Tree---------------------
+  //------------ Setup FunctionTree ---------------------
   std::shared_ptr<FunctionTree> newTree(new FunctionTree());
 
-  //----Strategies needed
+  // Strategies needed
   std::shared_ptr<AddAll> maddStrat(new AddAll(ParType::MCOMPLEX));
 
   newTree->createHead("SumOfAmplitudes" + suffix, maddStrat, sampleSize);
@@ -215,6 +215,21 @@ void CoherentIntensity::GetParameters(ComPWA::ParameterList &list) {
   }
 }
 
-} /* namespace HelicityFormalism */
-} /* namespace Physics */
-} /* namespace ComPWA */
+void CoherentIntensity::UpdateParameters(const ParameterList &list){
+  std::shared_ptr<DoubleParameter> p;
+  try {
+    p = list.GetDoubleParameter(_strength->GetName());
+  } catch (std::exception &ex) {
+  }
+  if (p)
+    _strength->UpdateParameter(p);
+
+  for (auto i : _seqDecays)
+    i->UpdateParameters(list);
+  
+  return;
+}
+
+} // namespace HelicityFormalism
+} // namespace Physics
+} // namespace ComPWA

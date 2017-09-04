@@ -398,31 +398,21 @@ DoubleParameter::DoubleParameter(const DoubleParameter &in)
 }
 
 void DoubleParameter::UpdateParameter(std::shared_ptr<DoubleParameter> newPar) {
-  // copy bounds
-  if (newPar->HasBounds()) {
-    try {
-      SetMinMax(newPar->GetMinValue(), newPar->GetMaxValue());
-    } catch (std::exception &ex) {
-      // ignore if bound can not be set
-    }
+
+  // Copy bounds
+  if (newPar->HasBounds()){
+    bounds_ = 1;
+    SetMinMax(newPar->GetMinValue(), newPar->GetMaxValue());
   } else
     bounds_ = 0;
 
   bool isFix = newPar->IsFixed();
-  // copy value
   FixParameter(0); // we ignore here if parameter is fixed
+  
+  // Copy value
   SetValue(newPar->GetValue());
 
-  // Check if bounds are valid and value is within bounds
-  if (!check_bounds(GetMinValue(), GetMaxValue()))
-    throw std::runtime_error("DoubleParameter::UpdateParameter() | "
-                             "Bounds not valid for parameter " +
-                             GetName() + ": " + std::to_string(GetValue()) +
-                             " [" + std::to_string((long double)GetMinValue()) +
-                             ";" + std::to_string((long double)GetMaxValue()) +
-                             "]!");
-
-  // copy error
+  // Copy uncertainty
   if (newPar->GetErrorType() == ErrorType::SYM)
     SetError(newPar->GetError());
   else if (newPar->GetErrorType() == ErrorType::ASYM)
@@ -430,7 +420,7 @@ void DoubleParameter::UpdateParameter(std::shared_ptr<DoubleParameter> newPar) {
   else
     SetErrorType(ErrorType::NOTDEF);
 
-  // copy fix parameter
+  // Copy fix parameter
   FixParameter(isFix);
   return;
 }
@@ -439,10 +429,8 @@ void DoubleParameter::SetValue(const double inVal) {
   if (fixed_)
     throw ParameterFixed("DoubleParameter::SetValue() | Parameter " +
                          GetName() + " is fixed!");
-  /*Call notify only if value has changed! Otherwise tree is
-   * recalculated also in case where current parameter is not changed
-   */
-  // if(std::fabs(val_-inVal) < 0.0000001) return;
+  // Call notify only if value has changed! Otherwise tree is
+  // recalculated also in case where current parameter is not changed
   if (val_ == inVal)
     return;
 
@@ -472,7 +460,7 @@ void DoubleParameter::SetMinMax(const double min, const double max) {
   } catch (ParameterOutOfBound &ex) {
   }
   if (!check_bounds(min_, max_))
-    throw std::runtime_error("DoubleParameter::SetMinMaxValue() | "
+    throw ParameterOutOfBound("DoubleParameter::SetMinMaxValue() | "
                              "Bounds not valid for parameter " +
                              GetName() + ": " + std::to_string(GetValue()) +
                              " [" + std::to_string((long double)min_) + ";" +

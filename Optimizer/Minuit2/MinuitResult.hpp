@@ -22,6 +22,8 @@
 #include <fstream>
 #include <memory>
 
+#include <boost/serialization/export.hpp>
+
 #include <Minuit2/FunctionMinimum.h>
 
 #include "Core/ParameterList.hpp"
@@ -34,6 +36,7 @@
 namespace ComPWA {
 namespace Optimizer {
 namespace Minuit2 {
+
 
 class MinuitResult : public FitResult {
 public:
@@ -144,8 +147,6 @@ private:
   double initialLH;
   double finalLH;
   double trueLH;
-//  double penalty;
-//  double penaltyScale;
   double edm; // estimated distance to minimum
   //! Covariance matrix
   std::vector<std::vector<double>> cov;
@@ -191,10 +192,6 @@ private:
     ar &BOOST_SERIALIZATION_NVP(initialLH);
     ar &BOOST_SERIALIZATION_NVP(finalLH);
     ar &BOOST_SERIALIZATION_NVP(trueLH);
-//    ar &BOOST_SERIALIZATION_NVP(penalty);
-//    ar &BOOST_SERIALIZATION_NVP(penaltyScale);
-//    ar &BOOST_SERIALIZATION_NVP(AIC);
-//    ar &BOOST_SERIALIZATION_NVP(BIC);
     ar &BOOST_SERIALIZATION_NVP(nEvents);
     ar &BOOST_SERIALIZATION_NVP(edm);
     ar &BOOST_SERIALIZATION_NVP(cov);
@@ -204,8 +201,8 @@ private:
   }
 };
 
-} /* namespace Minuit2 */
-} /* namespace Optimizer */
-} /* namespace ComPWA */
+} // namespace Minuit2
+} // namespace Optimizer
+} // namespace ComPWA
 
 #endif

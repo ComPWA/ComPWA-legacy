@@ -73,8 +73,8 @@ public:
     return std::polar(GetMagnitude(), GetPhase());
   }
 
-  virtual void UpdateParameters(ParameterList &par) { /* TODO */
-  }
+  /// Update parameters to the values given in \p list
+  virtual void UpdateParameters(const ParameterList &par) = 0;
 
   /// Fill parameters to list
   virtual void GetParameters(ParameterList &list) {
@@ -89,9 +89,6 @@ public:
     list.push_back(GetMagnitude());
     list.push_back(GetPhase());
   }
-
-  //! Fill ParameterList with fit fractions
-  virtual void GetFitFractions(ParameterList &parList) = 0;
 
   virtual std::shared_ptr<ComPWA::DoubleParameter> GetMagnitudeParameter() {
     return _magnitude;

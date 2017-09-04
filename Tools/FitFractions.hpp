@@ -168,13 +168,13 @@ CalculateFitFractions(std::shared_ptr<ComPWA::Kinematics> kin,
   return ffList;
 }
 
-/// Calculate errors on fit fractions
+/// Calculate errors on fit fractions.
 /// The error of normalization due the the fit error on magnitudes and phases
 /// is ignored. If we want to calculate the errors correctly we have to
 /// generate a set of fit parameters that are smeard by a multidimensional
 /// gaussian and the covariance matrix of the fit. For every set we calculate
 /// the fit frations and calculate its mean. The can be a very time consuming
-/// method, especially if the function tree is not used.
+/// method, especially if the FunctionTree is not used.
 inline void CalcFractionError(
     ParameterList &parameters, std::vector<std::vector<double>> covariance,
     ParameterList &ffList, std::shared_ptr<ComPWA::Kinematics> kin,
@@ -197,22 +197,22 @@ inline void CalcFractionError(
   // convert to GSL objects
   gsl_vector *gslFinalPar = gsl_parameterList2Vec(parameters);
   gsl_matrix *gslCov = gsl_vecVec2Matrix(covariance);
-  gsl_matrix_print(gslCov); // DEBUG
+  //gsl_matrix_print(gslCov); // DEBUG
 
   int nFreeParameter = covariance.size();
 
+  ParameterList originalPar;
+  originalPar.DeepCopy(parameters);
+  
   std::vector<ParameterList> fracVect;
   progressBar bar(nSets);
-  std::stringstream outFraction;
-  //	for(unsigned int i=0; i<nSets; i++){
   int i = 0;
   while (i < nSets) {
     bool error = 0;
-    bar.nextEvent();
     gsl_vector *gslNewPar = gsl_vector_alloc(nFreeParameter);
     // generate set of smeared parameters
     multivariateGaussian(rnd, nFreeParameter, gslFinalPar, gslCov, gslNewPar);
-    gsl_vector_print(gslNewPar);
+    //gsl_vector_print(gslNewPar); // Debug
 
     // deep copy of finalParameters
     ParameterList newPar;
@@ -238,11 +238,12 @@ inline void CalcFractionError(
     gsl_vector_free(gslNewPar);
     // update amplitude with smeared parameters
     try {
-      //      Amplitude::UpdateAmpParameterList(_ampVec, newPar);
+      intens->UpdateParameters(newPar);
     } catch (ParameterOutOfBound &ex) {
       continue;
     }
     fracVect.push_back(CalculateFitFractions(kin, intens, sample, defs));
+    bar.nextEvent();
     i++;
 
     /******* DEBUGGING *******/
@@ -277,18 +278,16 @@ inline void CalcFractionError(
     //			outFraction << std::endl;
     /******* DEBUGGING *******/
   }
-  LOG(info) << " ------- " << outFraction.str();
 
   // free objects
   gsl_vector_free(gslFinalPar);
   gsl_matrix_free(gslCov);
   gsl_rng_free(rnd);
 
-  int nRes = parameters.GetNDouble();
   // Calculate standard deviation
-  for (unsigned int o = 0; o < nRes; o++) {
+  for (unsigned int o = 0; o < ffList.GetNDouble(); ++o) {
     double mean = 0, sqSum = 0., stdev = 0;
-    for (unsigned int i = 0; i < fracVect.size(); i++) {
+    for (unsigned int i = 0; i < fracVect.size(); ++i) {
       double tmp = fracVect.at(i).GetDoubleParameter(o)->GetValue();
       mean += tmp;
       sqSum += tmp * tmp;
@@ -296,15 +295,17 @@ inline void CalcFractionError(
     unsigned int s = fracVect.size();
     sqSum /= s;
     mean /= s;
-    // this is cross-checked with the RMS of the distribution
+    // Equivalent to RMS of the distribution
     stdev = std::sqrt(sqSum - mean * mean);
-    parameters.GetDoubleParameter(o)->SetError(stdev);
+    ffList.GetDoubleParameter(o)->SetError(stdev);
   }
 
   // Set correct fit result
-  //  intens->UpdateParameters(parameters);
+  intens->UpdateParameters(originalPar);
   return;
 }
-} /* namespace Tools */
-} /* namespace ComPWA */
-#endif /* FitFractions_h */
+
+} // namespace Tools
+} // namespace ComPWA
+
+#endif

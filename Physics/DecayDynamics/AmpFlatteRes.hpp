@@ -100,15 +100,6 @@ public:
 
   //============ SET/GET =================
 
-  virtual void GetParameters(ParameterList &list);
-
-  //! Fill vector with parameters
-  virtual void GetParametersFast(std::vector<double> &list) const {
-    AbstractDynamicalFunction::GetParametersFast(list);
-    for (auto i : _g)
-      list.push_back(i.GetValue());
-    list.push_back(GetMesonRadius());
-  }
 
   void SetMesonRadiusParameter(std::shared_ptr<DoubleParameter> r) {
     _mesonRadius = r;
@@ -137,34 +128,20 @@ public:
 
   std::vector<Coupling> GetCouplings(int i) const { return _g; }
 
-  void SetCouplings(std::vector<Coupling> vC) {
-    if (vC.size() != 2 && vC.size() != 3)
-      throw std::runtime_error(
-          "AmpFlatteRes::SetCouplings() | Vector with "
-          "couplings has a wrong size. We expect either 2 or 3 couplings.");
+  void SetCouplings(std::vector<Coupling> vC);
+  
+  virtual void GetParameters(ParameterList &list);
 
-    _g = vC;
-
-    if (_g.size() == 2)
-      _g.push_back(Coupling());
-    // Check if one of the  coupling match the final state (_daughterMasses)
-    auto mm = GetDecayMasses();
-    if (mm == std::pair<double, double>(-999, -999))
-      LOG(info)
-          << "AmpFlatteRes::SetCouplings() | Masses of decay products not set. "
-             " Can not determine if correct couplings were set.";
-
-    bool ok = false;
-    for (auto i : _g) {
-      if (i.GetMassA() == mm.first && i.GetMassB() == mm.second)
-        ok = true;
-      if (i.GetMassB() == mm.first && i.GetMassA() == mm.second)
-        ok = true;
-    }
-    if (!ok)
-      throw std::runtime_error("AmpFlatteRes::SetCouplings() | No couplings "
-                               "for the current decay particles set!");
+  //! Fill vector with parameters
+  virtual void GetParametersFast(std::vector<double> &list) const {
+    AbstractDynamicalFunction::GetParametersFast(list);
+    for (auto i : _g)
+      list.push_back(i.GetValue());
+    list.push_back(GetMesonRadius());
   }
+  
+  /// Update parameters to the values given in \p par
+  virtual void UpdateParameters(const ParameterList &par);
 
   //=========== FUNCTIONTREE =================
 

@@ -29,7 +29,7 @@ IncoherentIntensity::Factory(std::shared_ptr<PartList> partL,
         continue;
       auto tmp = ComPWA::DoubleParameterFactory(v.second);
       strength = std::make_shared<DoubleParameter>(tmp);
-    } else if (v.first == "CoherentIntensity"){
+    } else if (v.first == "CoherentIntensity") {
       obj->AddIntensity(
           ComPWA::Physics::HelicityFormalism::CoherentIntensity::Factory(
               partL, kin, v.second));
@@ -56,7 +56,7 @@ IncoherentIntensity::Save(std::shared_ptr<IncoherentIntensity> obj) {
   boost::property_tree::ptree pt;
   pt.put<std::string>("<xmlattr>.Name", obj->Name());
   pt.add_child("Parameter", ComPWA::DoubleParameterSave(*obj->_strength.get()));
-  pt.put("Parameter.<xmlattr>.Type","Strength");
+  pt.put("Parameter.<xmlattr>.Type", "Strength");
   for (auto i : obj->GetIntensities()) {
     // TODO: we have to implement a memeber function Save() in AmpIntensity
     // interface and use it here
@@ -181,6 +181,20 @@ void IncoherentIntensity::GetParameters(ComPWA::ParameterList &list) {
   for (auto i : GetIntensities()) {
     i->GetParameters(list);
   }
+}
+
+void IncoherentIntensity::UpdateParameters(const ParameterList &list) {
+  std::shared_ptr<DoubleParameter> p;
+  try {
+    p = list.GetDoubleParameter(_strength->GetName());
+  } catch (std::exception &ex) {
+  }
+  if (p)
+    _strength->UpdateParameter(p);
+  for (auto i : _intens)
+    i->UpdateParameters(list);
+
+  return;
 }
 
 } /* namespace HelicityFormalism */
