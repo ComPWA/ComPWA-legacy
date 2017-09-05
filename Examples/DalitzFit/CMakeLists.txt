@@ -30,7 +30,6 @@ target_link_libraries( DalitzFit
     HelicityFormalism
     ${ROOT_LIBRARIES}
     ${Boost_LIBRARIES} 
-    pthread 
 )
 
 target_include_directories( DalitzFit

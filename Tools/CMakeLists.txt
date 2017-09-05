@@ -8,9 +8,17 @@
 find_package( Boost COMPONENTS
                unit_test_framework
                system
-               REQUIRED
+               REQUIRED QUIET
 )
+
+#
+# Find ROOT
+#
 find_package( ROOT REQUIRED )
+
+#
+# Find GSL
+#
 find_package( GSL REQUIRED gsl gslcblas )
 
 FILE(GLOB lib_srcs *.cpp)
@@ -27,7 +35,8 @@ FILE(GLOB lib_headers *.hpp)
 #add_library ( DPKinematics SHARED ${lib_srcs} G__Dict.cxx ${lib_headers} )
 
 add_library ( Tools
-  SHARED ${lib_srcs} ${lib_headers} )
+  SHARED ${lib_srcs} ${lib_headers}
+)
 
 target_link_libraries( Tools
   Core
