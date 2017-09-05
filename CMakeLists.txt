@@ -29,8 +29,8 @@ set( CMAKE_SHARED_LIBRARY_PREFIX "libComPWA_" )
 # Frameworks for parallelization
 #
 find_package( OpenMP QUIET )
-if (${OPENMP_FOUND})
-  message( STATUS "OpenMP found!" )
+if (${OPENMP_CXX_FOUND})
+  message( STATUS "OpenMP version " ${OpenMP_CXX_VERSION} )
 else ()
   message( STATUS "OpenMP not found!" )
 endif()
