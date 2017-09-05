@@ -6,10 +6,8 @@
 #include <memory>
 #include <iostream>
 #include <cmath>
+#include <ctime>
 #include <iomanip>
-
-#include <boost/chrono.hpp>
-namespace bc = boost::chrono;
 
 #include "Core/ParameterList.hpp"
 #include "Core/Parameter.hpp"
@@ -41,12 +39,13 @@ double MinuitFcn::operator()(const std::vector<double> &x) const {
         paramOut << x[i] << " "; // print only free parameters
       }
   }
-  bc::system_clock::time_point start = bc::system_clock::now();
+  // Start timing
+  clock_t begin = clock();
   double result = _myDataPtr->controlParameter(_parList);
-  bc::duration<double> sec = bc::system_clock::now() - start;
+  double sec = double(clock() - begin) / CLOCKS_PER_SEC;
 
   LOG(info) << "MinuitFcn: -log(L) = " << std::setprecision(10) << result
-            << std::setprecision(4) << " Time: " << sec.count() << "s"
+            << std::setprecision(4) << " Time: " << sec << "s"
             << " nCalls: " << _myDataPtr->NSteps();
   LOG(debug) << "Parameters: " << paramOut.str();
 

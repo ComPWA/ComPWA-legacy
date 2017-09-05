@@ -28,7 +28,7 @@ target_link_libraries( DalitzFitD03K
   Core
   ${ROOT_LIBRARIES}
   ${Boost_LIBRARIES}
-  pthread
+  pthread # We need it here, no ideo why!
 )
 
 target_include_directories( DalitzFitD03K
