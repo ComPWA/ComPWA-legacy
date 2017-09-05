@@ -1,9 +1,12 @@
-# Create qft++ target.
+########################
+# Create qft++ library #
+########################
 
 SET( lib_srcs
   TensorIndex.C
   Tensor.C
 )
+
 SET( lib_headers
   MatrixOfTensors.h
   SpecialTensors.h

@@ -1,5 +1,11 @@
-# Create RootReader library.
-find_package( ROOT REQUIRED )
+#############################
+# Create RootReader library #
+#############################
+
+#
+# Find ROOT
+#
+find_package( ROOT REQUIRED QUIET )
 
 SET(lib_srcs
   RootReader.cpp

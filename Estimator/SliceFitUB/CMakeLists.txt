@@ -1,5 +1,5 @@
 # Create SliceFitUB library.
-find_package( ROOT REQUIRED )
+find_package( ROOT REQUIRED QUIET )
 
 SET(lib_srcs SliceFitUB.cpp)
 SET(lib_headers SliceFitUB.hpp ../Estimator.hpp)

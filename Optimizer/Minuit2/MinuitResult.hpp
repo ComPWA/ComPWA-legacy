@@ -133,7 +133,6 @@ protected:
       return -9000;
   };
 
-private:
   bool isValid;             // result valid
   bool covPosDef;           // covariance matrix pos.-def.
   bool hasValidParameters;  // valid parameters

@@ -1,4 +1,15 @@
-# Create HelicityAmplitude library.
+##############################
+# Helicity Formalism library #
+##############################
+
+#
+# Find Boost
+#
+find_package( Boost COMPONENTS
+               unit_test_framework
+               system
+               REQUIRED QUIET
+)
 
 SET( lib_srcs IncoherentIntensity.cpp CoherentIntensity.cpp
     AmpWignerD.cpp PartialDecay.cpp SequentialTwoBodyDecay.cpp
@@ -43,7 +54,7 @@ foreach(testSrc ${TEST_SRCS})
   add_executable( ${testName} ${testSrc} )
 
   # We need ROOT here since we use some functions from Tools/
-  find_package( ROOT REQUIRED )
+  find_package( ROOT REQUIRED QUIET )
 
   #link to Boost libraries AND your targets and dependencies
   target_link_libraries( ${testName}

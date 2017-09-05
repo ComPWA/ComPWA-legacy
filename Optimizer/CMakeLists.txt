@@ -1,17 +1,15 @@
-# Minuit2 minimizer module. Check first if 
-# library is available.
-find_package( Minuit2 )
-IF( Minuit2_FOUND )
-	add_subdirectory(Minuit2)
+# Minuit2 minimizer module. Check first if library is available.
+FIND_PACKAGE( Minuit2 QUIET )
+IF( ${MINUIT2_FOUND} )
+	ADD_SUBDIRECTORY(Minuit2)
 ELSE ()
-	message(WARNING "Minuit2 not found! Not building Minuit2 interface!")
+	MESSAGE(WARNING "Minuit2 not found! Not building Minuit2 interface!")
 ENDIF()
 
-# Geneva minimizer module. Check first if 
-# library is available.
-find_package( Geneva QUIET )
-IF( GENEVA_FOUND )
-    add_subdirectory(Geneva)
+# Geneva minimizer module. Check first if library is available.
+FIND_PACKAGE( Geneva QUIET )
+IF( ${GENEVA_FOUND} )
+    ADD_SUBDIRECTORY(Geneva)
 ELSE ()
-	message(WARNING "Geneva not found! Not building Geneva interface!")
+	MESSAGE(WARNING "Geneva not found! Not building Geneva interface!")
 ENDIF()

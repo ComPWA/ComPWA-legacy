@@ -1,4 +1,19 @@
-# Create executable for Dalitz plot fit of J/psi -> ypipi.
+###########################################################
+# Create executable for Dalitz plot fit of J/psi -> ypipi #
+###########################################################
+
+#
+# FindRoot
+#
+find_package( ROOT REQUIRED QUIET )
+
+#
+# FindBoost
+#
+find_package(Boost COMPONENTS
+               program_options
+               REQUIRED QUIET
+)
 
 FILE( GLOB lib_srcs DalitzFitApp.cpp )
 FILE( GLOB lib_headers ../../Physics/ParticleList.hpp )
@@ -14,8 +29,8 @@ target_link_libraries( DalitzFit
     Tools
     HelicityFormalism
     ${ROOT_LIBRARIES}
-    ${Boost_LIBRARIES} 
-    pthread 
+    ${Boost_LIBRARIES}
+    pthread # We need it here, no ideo why!
 )
 
 target_include_directories( DalitzFit

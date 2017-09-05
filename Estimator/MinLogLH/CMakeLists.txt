@@ -14,7 +14,7 @@ target_link_libraries(
 )
 
 install (FILES ${lib_headers} DESTINATION include/ComPWA)
-install(TARGETS MinLogLH
+install (TARGETS MinLogLH
         LIBRARY DESTINATION lib
 )
 

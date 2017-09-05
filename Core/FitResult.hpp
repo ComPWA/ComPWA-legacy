@@ -39,6 +39,8 @@ class FitResult {
 public:
   FitResult() : time(0) {};
   
+  virtual ~FitResult(){};
+  
   /// Set list of initial parameters
   virtual void SetInitialParameters(ParameterList iniPars) {
     initialParameters.DeepCopy(iniPars);

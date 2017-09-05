@@ -1,12 +1,29 @@
-# Create DalitzKinematics library.
+#################
+# Tools Library #
+#################
 
-# The REQUIRED statement is somehow not working
-find_package( ROOT REQUIRED )
-find_package( GSL REQUIRED gsl gslcblas )
+#
+# Find Boost
+#
+find_package( Boost COMPONENTS
+               unit_test_framework
+               system
+               REQUIRED QUIET
+)
+
+#
+# Find ROOT
+#
+find_package( ROOT REQUIRED QUIET )
+
+#
+# Find GSL
+#
+find_package( GSL REQUIRED gsl gslcblas QUIET )
 
 FILE(GLOB lib_srcs *.cpp)
-FILE(GLOB lib_headers *.hpp)
 
+FILE(GLOB lib_headers *.hpp)
 
 ### Generator dictionaries
 # Currently we do not generate dictionaries of compatibility reasons
@@ -18,7 +35,8 @@ FILE(GLOB lib_headers *.hpp)
 #add_library ( DPKinematics SHARED ${lib_srcs} G__Dict.cxx ${lib_headers} )
 
 add_library ( Tools
-  SHARED ${lib_srcs} ${lib_headers} )
+  SHARED ${lib_srcs} ${lib_headers}
+)
 
 target_link_libraries( Tools
   Core

@@ -1,9 +1,11 @@
-# Create executable for Dalitz plot analysis of D0->KsKK.
+##########################################################
+# Create executable for Dalitz plot analysis of D0->KsKK #
+##########################################################
 
 #
 # FindRoot
 #
-find_package( ROOT REQUIRED )
+find_package( ROOT REQUIRED QUIET )
 
 #
 # FindBoost
@@ -26,7 +28,7 @@ target_link_libraries( DalitzFitD03K
   Core
   ${ROOT_LIBRARIES}
   ${Boost_LIBRARIES}
-  pthread
+  pthread # We need it here, no ideo why!
 )
 
 target_include_directories( DalitzFitD03K

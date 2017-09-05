@@ -29,8 +29,8 @@ set( CMAKE_SHARED_LIBRARY_PREFIX "libComPWA_" )
 # Frameworks for parallelization
 #
 find_package( OpenMP QUIET )
-if (${OPENMP_FOUND})
-  message( STATUS "OpenMP found!" )
+if (${OPENMP_CXX_FOUND})
+  message( STATUS "OpenMP version " ${OpenMP_CXX_VERSION} )
 else ()
   message( STATUS "OpenMP not found!" )
 endif()
@@ -41,6 +41,12 @@ if (${TBB_FOUND})
 else ()
   message( STATUS "TBB not found!" )
 endif()
+
+#
+# ROOT installation
+#
+find_package( ROOT )
+find_package( Minuit2 )
 
 #
 # FindBoost. unit_test_framework and serialization

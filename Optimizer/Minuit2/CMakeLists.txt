@@ -1,11 +1,23 @@
-# Create Minuit2IF library.
+####################################
+# Create Minuit2 interface library #
+####################################
 
 #
 # FindMinuit2
 #
 find_package( Minuit2 REQUIRED QUIET )
+#
+# Find Boost
+#
+find_package( Boost COMPONENTS
+               unit_test_framework
+               system
+               serialization
+               REQUIRED QUIET
+)
 
 SET(lib_srcs MinuitFcn.cpp MinuitIF.cpp MinuitResult.cpp)
+
 SET(lib_headers MinuitFcn.hpp MinuitIF.hpp MinuitResult.hpp ../Optimizer.hpp)
 
 add_library( Minuit2IF
@@ -19,11 +31,11 @@ target_link_libraries( Minuit2IF
 )
 
 target_include_directories( Minuit2IF
-  PUBLIC ${MINUIT2_INCLUDE_DIR}
+  PUBLIC ${MINUIT2_INCLUDE_DIR} ${Boost_INCLUDE_DIR}
 )
 
 install (FILES ${lib_headers} DESTINATION include/ComPWA)
-install(TARGETS Minuit2IF
+install (TARGETS Minuit2IF
         LIBRARY DESTINATION lib
 )
 
