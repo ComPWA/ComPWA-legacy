@@ -13,3 +13,5 @@ IF( ${GENEVA_FOUND} )
 ELSE ()
 	MESSAGE(WARNING "Geneva not found! Not building Geneva interface!")
 ENDIF()
+
+MESSAGE(STATUS " " ${Minuit2_FOUND} " " ${GENEVA_FOUND})
