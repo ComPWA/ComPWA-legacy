@@ -46,9 +46,7 @@ endif()
 # ROOT installation
 #
 find_package( ROOT )
-MESSAGE(STATUS "asdfasdf")
 find_package( Minuit2 )
-MESSAGE(STATUS "asdfasdf")
 
 #
 # FindBoost. unit_test_framework and serialization
