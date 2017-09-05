@@ -10,7 +10,7 @@ find_package( Boost COMPONENTS
                log
                system
                date_time
-               REQUIRED
+               REQUIRED QUIET
 )
 
 #

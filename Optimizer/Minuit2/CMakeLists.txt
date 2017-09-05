@@ -1,11 +1,23 @@
-# Create Minuit2IF library.
+####################################
+# Create Minuit2 interface library #
+####################################
 
 #
 # FindMinuit2
 #
 find_package( Minuit2 REQUIRED QUIET )
+#
+# Find Boost
+#
+find_package( Boost COMPONENTS
+               unit_test_framework
+               system
+               serialization
+               REQUIRED
+)
 
 SET(lib_srcs MinuitFcn.cpp MinuitIF.cpp MinuitResult.cpp)
+
 SET(lib_headers MinuitFcn.hpp MinuitIF.hpp MinuitResult.hpp ../Optimizer.hpp)
 
 add_library( Minuit2IF

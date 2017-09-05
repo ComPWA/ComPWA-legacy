@@ -1,5 +1,18 @@
 # Create executable for Dalitz plot fit of J/psi -> ypipi.
 
+#
+# FindRoot
+#
+find_package( ROOT REQUIRED )
+
+#
+# FindBoost
+#
+find_package(Boost COMPONENTS
+               program_options
+               REQUIRED QUIET
+)
+
 FILE( GLOB lib_srcs DalitzFitApp.cpp )
 FILE( GLOB lib_headers ../../Physics/ParticleList.hpp )
 

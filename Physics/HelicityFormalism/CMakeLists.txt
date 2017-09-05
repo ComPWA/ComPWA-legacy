@@ -9,6 +9,15 @@ find_package( Boost COMPONENTS
 
 # Create HelicityAmplitude library.
 
+#
+# Find Boost
+#
+find_package( Boost COMPONENTS
+               unit_test_framework
+               system
+               REQUIRED
+)
+
 SET( lib_srcs IncoherentIntensity.cpp CoherentIntensity.cpp
     AmpWignerD.cpp PartialDecay.cpp SequentialTwoBodyDecay.cpp
     HelicityKinematics.cpp )
