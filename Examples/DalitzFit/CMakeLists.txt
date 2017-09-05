@@ -5,7 +5,7 @@
 #
 # FindRoot
 #
-find_package( ROOT REQUIRED )
+find_package( ROOT REQUIRED QUIET )
 
 #
 # FindBoost

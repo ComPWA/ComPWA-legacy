@@ -14,12 +14,12 @@ find_package( Boost COMPONENTS
 #
 # Find ROOT
 #
-find_package( ROOT REQUIRED )
+find_package( ROOT REQUIRED QUIET )
 
 #
 # Find GSL
 #
-find_package( GSL REQUIRED gsl gslcblas )
+find_package( GSL REQUIRED gsl gslcblas QUIET )
 
 FILE(GLOB lib_srcs *.cpp)
 

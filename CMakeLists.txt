@@ -43,6 +43,11 @@ else ()
 endif()
 
 #
+# ROOT installation
+#
+find_package( ROOT )
+
+#
 # FindBoost. unit_test_framework and serialization
 # throughout the software, so we require them here
 # local dependencies should be required in each

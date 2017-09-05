@@ -1,5 +1,5 @@
-find_package( ROOT REQUIRED )
-find_package( GSL REQUIRED gslcblas gsl )
+find_package( ROOT REQUIRED QUIET )
+find_package( GSL REQUIRED gslcblas gsl QUIET )
 
 #add_executable (gentwopartApp GenTwoPartApp.cpp)
 #target_link_libraries( gentwopartApp ComPWA_Core ComPWA_BreitWigner pthread ${ROOT_LIBRARIES} )

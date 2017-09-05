@@ -8,7 +8,7 @@
 # even if they already appear in global
 # CMakeLists.txt.
 #
-find_package( Boost COMPONENTS
+FIND_PACKAGE( Boost COMPONENTS
                unit_test_framework
                serialization
                log
@@ -23,24 +23,24 @@ find_package( Boost COMPONENTS
 FILE(GLOB lib_srcs *.cpp)
 FILE(GLOB lib_headers *.hpp)
 
-add_library( Core
+ADD_LIBRARY( Core
   SHARED ${lib_srcs} ${lib_headers}
 )
 
-target_link_libraries( Core
+TARGET_LINK_LIBRARIES( Core
   ${Boost_LIBRARIES}
 )
 
-target_include_directories( Core
+TARGET_INCLUDE_DIRECTORIES( Core
   PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${Boost_INCLUDE_DIR}
 )
 
 #
 # Install libraries
 #
-install(FILES ${lib_headers} DESTINATION include/ComPWA)
+INSTALL(FILES ${lib_headers} DESTINATION include/ComPWA)
 
-install(TARGETS Core
+INSTALL(TARGETS Core
         LIBRARY DESTINATION lib
 )
 
@@ -48,7 +48,7 @@ install(TARGETS Core
 # TESTING
 #
 #Testing routines are stored in separate directory
-file(GLOB TEST_SRCS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} test/*.cpp)
+FILE(GLOB TEST_SRCS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} test/*.cpp)
 
 #Run through each source
 foreach(testSrc ${TEST_SRCS})
@@ -58,12 +58,12 @@ foreach(testSrc ${TEST_SRCS})
 
   #Add compile target
   add_executable( ${testName} ${testSrc})
-  #install(TARGETS ${testName}
+  #INSTALL(TARGETS ${testName}
   #  RUNTIME DESTINATION bin
   #)
 
   #link to Boost libraries AND your targets and dependencies
-  target_link_libraries( ${testName}
+  TARGET_LINK_LIBRARIES( ${testName}
     Core
     RootReader
     pthread
@@ -80,7 +80,7 @@ foreach(testSrc ${TEST_SRCS})
 
   # Copy input files for test programs - we assume they have the name
   # ${testName}-input*. Multiple files can be copied.
-  file(GLOB TestInput
+  FILE(GLOB TestInput
     RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} test/${fileName}-input*
   )
   foreach( TestIn ${TestInput} )
@@ -100,11 +100,11 @@ foreach(testSrc ${TEST_SRCS})
     COMMAND ${EXECUTABLE_OUTPUT_PATH}/testBin/${testName} )
 endforeach(testSrc)
 
-#find_package( SWIG )
+#FIND_PACKAGE( SWIG )
 #IF(SWIG_FOUND)
 #    INCLUDE(${SWIG_USE_FILE})
 #
-#    find_package(PythonLibs)
+#    FIND_PACKAGE(PythonLibs)
 #    IF(PYTHONLIBS_FOUND)
 #        INCLUDE_DIRECTORIES(${PYTHON_INCLUDE_PATH})
 #
@@ -121,8 +121,8 @@ endforeach(testSrc)
 
 #IF(PYTHONLIBS_FOUND)
     # Define the wrapper library that wraps our library
-#    add_library( Core_ext SHARED Core_ext.cpp )
-#    target_link_libraries( Core_ext ${Boost_LIBRARIES} Core )
+#    ADD_LIBRARY( Core_ext SHARED Core_ext.cpp )
+#    TARGET_LINK_LIBRARIES( Core_ext ${Boost_LIBRARIES} Core )
     # don't prepend wrapper library name with lib
 #    set_target_properties( Core_ext PROPERTIES PREFIX "" )
 #ENDIF()

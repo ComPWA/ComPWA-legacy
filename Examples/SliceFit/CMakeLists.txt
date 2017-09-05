@@ -1,6 +1,6 @@
 # Create executable for slice fit of J/psi -> ypipi.
 
-find_package( ROOT REQUIRED )
+find_package( ROOT REQUIRED QUIET )
 
 FILE(GLOB lib_srcs *.cpp)
 FILE(GLOB lib_headers *.hpp)

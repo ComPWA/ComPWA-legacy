@@ -1,5 +1,5 @@
 # Create SliceFit library.
-find_package( ROOT REQUIRED )
+find_package( ROOT REQUIRED QUIET )
 
 SET(lib_srcs SliceFit.cpp)
 SET(lib_headers SliceFit.hpp ../Estimator.hpp)
