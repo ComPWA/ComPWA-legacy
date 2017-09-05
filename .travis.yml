@@ -23,8 +23,7 @@ env:
         - GH_REPO_REF: github.com/ComPWA/ComPWA.git
         - OMP_NUM_THREADS: 1
         - LANG: en_US.UTF-8
-        #- ROOTSYS: $TRAVIS_BUILD_DIR/rootbuild/root
-        - BASEPATH: /home/travis/build/ComPWA
+        - BASEPATH: $HOME/build/ComPWA
         - ROOTSYS: $BASEPATH/root
 
 # Install dependencies
@@ -51,7 +50,7 @@ before_script:
 script:
     - cmake ../ComPWA/
     #- make -j2 VERBOSE=1
-    #- make -j2 # TravisCI container-based nodes provide two CPUs
+    - make -j2 # TravisCI container-based nodes provide two CPUs
 
 # Generate and deploy documentation
 after_success:

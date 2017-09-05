@@ -46,6 +46,7 @@ endif()
 # ROOT installation
 #
 find_package( ROOT )
+find_package( Minuit2 )
 
 #
 # FindBoost. unit_test_framework and serialization
