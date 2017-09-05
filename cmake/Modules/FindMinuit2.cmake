@@ -21,6 +21,7 @@
 # Module for handling standard arguments given through FIND_PACKAGE()
 INCLUDE(FindPackageHandleStandardArgs)
 
+MESSAGE(STATUS "Searching for Minuit2")
 # If the CMake variables are not set, we check and use the corresponding
 # environment variables
 IF (NOT DEFINED MINUIT2_ROOT AND DEFINED ENV{MINUIT2_ROOT})

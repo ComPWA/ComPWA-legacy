@@ -50,7 +50,6 @@ before_script:
 # Build your code e.g. by calling make
 script:
     - cmake ../ComPWA/
-    - env
     #- make -j2 VERBOSE=1
     #- make -j2 # TravisCI container-based nodes provide two CPUs
 
