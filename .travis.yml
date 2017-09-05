@@ -50,7 +50,7 @@ before_script:
 script:
     - cmake ../ComPWA/
     #- make -j2 VERBOSE=1
-    - make -j2 # TravisCI container-based nodes provide two CPUs
+    #- make -j2 # TravisCI container-based nodes provide two CPUs
 
 # Generate and deploy documentation
 after_success:

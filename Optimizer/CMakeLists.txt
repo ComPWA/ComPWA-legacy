@@ -1,5 +1,6 @@
 # Minuit2 minimizer module. Check first if library is available.
 FIND_PACKAGE( Minuit2 QUIET )
+MESSAGE(STATUS "ddd " ${Minuit2_FOUND} "--" ${MINUIT2_LIBRARIES})
 IF( ${Minuit2_FOUND} )
 	ADD_SUBDIRECTORY(Minuit2)
 ELSE ()
