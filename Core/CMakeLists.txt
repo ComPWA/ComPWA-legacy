@@ -1,3 +1,7 @@
+#######################
+# ComPWA Core library #
+#######################
+
 #
 # FindBoost. Add 'log' dependency. Note
 # that all dependencies have to be listed,
@@ -14,7 +18,7 @@ find_package( Boost COMPONENTS
 )
 
 #
-# Create ComPWA Core library.
+# Create library
 #
 FILE(GLOB lib_srcs *.cpp)
 FILE(GLOB lib_headers *.hpp)

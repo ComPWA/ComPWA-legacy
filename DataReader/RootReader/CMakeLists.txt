@@ -1,4 +1,10 @@
-# Create RootReader library.
+#############################
+# Create RootReader library #
+#############################
+
+#
+# Find ROOT
+#
 find_package( ROOT REQUIRED )
 
 SET(lib_srcs

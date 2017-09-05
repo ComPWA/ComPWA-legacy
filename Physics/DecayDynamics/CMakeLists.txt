@@ -1,4 +1,6 @@
-# Create HelicityAmplitude library.
+################################
+# Create DecayDynamics library #
+################################
 
 SET( lib_srcs AbstractDynamicalFunction.cpp RelativisticBreitWigner.cpp
     NonResonant.cpp AmpFlatteRes.cpp )
@@ -13,7 +15,6 @@ add_library( DecayDynamics
 
 target_link_libraries( DecayDynamics
   Core
-  ${Boost_LIBRARIES}
 )
 
 target_include_directories( DecayDynamics

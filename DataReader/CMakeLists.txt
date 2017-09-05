@@ -1,4 +1,7 @@
-# Create DataReader library.
+#############################
+# Create DataReader library #
+#############################
+
 SET(lib_srcs
   Data.cpp
   DataCorrection.cpp

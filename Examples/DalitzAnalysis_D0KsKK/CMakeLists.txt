@@ -1,4 +1,6 @@
-# Create executable for Dalitz plot analysis of D0->KsKK.
+##########################################################
+# Create executable for Dalitz plot analysis of D0->KsKK #
+##########################################################
 
 #
 # FindRoot

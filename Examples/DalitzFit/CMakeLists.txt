@@ -1,4 +1,6 @@
-# Create executable for Dalitz plot fit of J/psi -> ypipi.
+###########################################################
+# Create executable for Dalitz plot fit of J/psi -> ypipi #
+###########################################################
 
 #
 # FindRoot
