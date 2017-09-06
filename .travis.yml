@@ -24,54 +24,65 @@ addons:
         packages:
             - libboost-all-dev # Version 1.54 for trusty
             - libgsl0-dev
+
+matrix:
+  allow_failures: 
+    - os: linux
+      env: NAME="Build documentation"
+    - os: osx
+
+  include:
+    - os: linux
+      dist: trusty
+      env: NAME="Build documentation"
+      addons:
+        apt:
+          packages:
             - doxygen
             - doxygen-doc
             - doxygen-gui
             - graphviz
 
-matrix:
-  include:
+      script:
+        # Generate and deploy documentation
+        - cd $BASEPATH
+        - chmod +x $TRAVIS_BUILD_DIR/doc/generateDoxygen.sh
+        # Do not update doxygen for pull requests
+        - if [[ "$TRAVIS_PULL_REQUEST" == "false" ]]; then 
+          $TRAVIS_BUILD_DIR/doc/generateDoxygen.sh; 
+          fi
     - os: linux
       dist: trusty  #Ubuntu14.04 LTS
+      env: NAME="ROOT v6.10"
       compiler: 
         - gcc
         - clang
       before_script:
         - env
         - cd $BASEPATH
-        - echo "Installing ROOT in path $PWD"
           # ROOT v6.10
         - wget https://root.cern.ch/download/root_v6.10.02.Linux-ubuntu14-x86_64-gcc4.8.tar.gz
         - tar xpvfz root_*.tar.gz > /dev/null 2>&1
-      after_success:
-        # Generate and deploy documentation
-        - cd $BASEPATH
-        - chmod +x $TRAVIS_BUILD_DIR/doc/generateDoxygen.sh
-        # Do not update doxygen for pull requests
-        - if [[ "$TRAVIS_PULL_REQUEST" == "false" ] && [ "$CXX" == "clang++" ]]; then 
-          $TRAVIS_BUILD_DIR/doc/generateDoxygen.sh; 
-          fi
     - os: linux
       dist: trusty  #Ubuntu14.04 LTS
       compiler: gcc
+      env: NAME="ROOT v6.10"
       before_script:
         - env
         - cd $BASEPATH
-        - echo "Installing ROOT in path $PWD"
           # ROOT v5.34  
         - wget https://root.cern.ch/download/root_v5.34.36.Linux-ubuntu14-x86_64-gcc4.8.tar.gz
         - tar xpvfz root_*.tar.gz > /dev/null 2>&1
     - os: osx
       osx_image: xcode8.3
+      env: NAME="ROOT v6.10"
+      allow_failures: true
       before_script:
         - env
         - cd $BASEPATH
-        - echo "Installing ROOT in path $PWD"
-        - brew install gsl boost
-        - wget https://root.cern.ch/download/root_v6.10.02.macosx64-10.12-clang81.tar.gz
-        - tar xpvfz root_*.tar.gz > /dev/null 2>&1
-  allow_failures:
-    - os: osx
+        - brew install gsl boost root
+        #- wget https://root.cern.ch/download/root_v6.10.02.macosx64-10.12-clang81.tar.gz
+        #- tar xpvfz root_*.tar.gz > /dev/null 2>&1
 
 # Build your code e.g. by calling make
 script:
