@@ -19,11 +19,6 @@ env:
         - ROOTSYS: $BASEPATH/root
 
 # Install dependencies - linux only
-addons:
-    apt:
-        packages:
-            - libboost-all-dev # Version 1.54 for trusty
-            - libgsl0-dev
 
 matrix:
   allow_failures: 
@@ -33,13 +28,11 @@ matrix:
     - os: linux
       dist: trusty
       env: TASK="Build documentation"
-      addons:
-        apt:
-          packages:
-            - doxygen
-            - doxygen-doc
-            - doxygen-gui
-            - graphviz
+      addons: apt: packages:
+        - doxygen
+        - doxygen-doc
+        - doxygen-gui
+        - graphviz
       script:
         # Generate and deploy documentation
         - cd $BASEPATH
@@ -49,6 +42,9 @@ matrix:
     - os: linux
       dist: trusty  #Ubuntu14.04 LTS
       env: TASK="ROOT v6.10"
+      addons: apt: packages:
+        - libboost-all-dev # Version 1.54 for trusty
+        - libgsl0-dev
       compiler: 
         - gcc
         - clang
@@ -62,20 +58,26 @@ matrix:
       dist: trusty  #Ubuntu14.04 LTS
       compiler: gcc
       env: TASK="ROOT v5.34"
+      addons: apt: packages:
+        - libboost-all-dev # Version 1.54 for trusty
+        - libgsl0-dev
+        - root-system # ROOT v.5.34 
       before_script:
         - env
-        - cd $BASEPATH
-          # ROOT v5.34  
-        - wget https://root.cern.ch/download/root_v5.34.36.Linux-ubuntu14-x86_64-gcc4.8.tar.gz
-        - tar xpvfz root_*.tar.gz > /dev/null 2>&1
     - os: osx
       osx_image: xcode8.3
       env: TASK="ROOT v6.10"
       allow_failures: true
       before_script:
-        - env
-        - cd $BASEPATH
-        - brew install gsl boost root
+        - env # Debugging
+          # We have to check first of a package is install, otherwise an error
+          # is thrown.
+        - if brew ls --versions boost > /dev/null; then echo 'Boost installed!'
+          else brew install boost; fi
+        - if brew ls --versions gsl > /dev/null; then echo 'GSL installed!';
+          else brew install gsl; fi
+        - if brew ls --versions root > /dev/null; then echo 'ROOT installed!';
+          else brew install root; fi
         #- wget https://root.cern.ch/download/root_v6.10.02.macosx64-10.12-clang81.tar.gz
         #- tar xpvfz root_*.tar.gz > /dev/null 2>&1
 
