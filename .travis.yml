@@ -10,7 +10,7 @@ branches:
 # Environment variables
 env:
     global:
-        - GH_REPO_NAME: ComPWA
+        - GH_REPO_TASK: ComPWA
         - DOXYFILE: $TRAVIS_BUILD_DIR/doc/Doxyfile.travisCI
         - GH_REPO_REF: github.com/ComPWA/ComPWA.git
         - OMP_NUM_THREADS: 1
@@ -27,14 +27,12 @@ addons:
 
 matrix:
   allow_failures: 
-    - os: linux
-      env: NAME="Build documentation"
     - os: osx
 
   include:
     - os: linux
       dist: trusty
-      env: NAME="Build documentation"
+      env: TASK="Build documentation"
       addons:
         apt:
           packages:
@@ -42,18 +40,15 @@ matrix:
             - doxygen-doc
             - doxygen-gui
             - graphviz
-
       script:
         # Generate and deploy documentation
         - cd $BASEPATH
         - chmod +x $TRAVIS_BUILD_DIR/doc/generateDoxygen.sh
         # Do not update doxygen for pull requests
-        - if [[ "$TRAVIS_PULL_REQUEST" == "false" ]]; then 
-          $TRAVIS_BUILD_DIR/doc/generateDoxygen.sh; 
-          fi
+        - $TRAVIS_BUILD_DIR/doc/generateDoxygen.sh; 
     - os: linux
       dist: trusty  #Ubuntu14.04 LTS
-      env: NAME="ROOT v6.10"
+      env: TASK="ROOT v6.10"
       compiler: 
         - gcc
         - clang
@@ -66,7 +61,7 @@ matrix:
     - os: linux
       dist: trusty  #Ubuntu14.04 LTS
       compiler: gcc
-      env: NAME="ROOT v6.10"
+      env: TASK="ROOT v5.34"
       before_script:
         - env
         - cd $BASEPATH
@@ -75,7 +70,7 @@ matrix:
         - tar xpvfz root_*.tar.gz > /dev/null 2>&1
     - os: osx
       osx_image: xcode8.3
-      env: NAME="ROOT v6.10"
+      env: TASK="ROOT v6.10"
       allow_failures: true
       before_script:
         - env
@@ -92,5 +87,5 @@ script:
     #- make -j2 VERBOSE=1
     - make -j2 # TravisCI container-based nodes provide two CPUs
     # Job failure for testing osx
-    - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then return 1; fi
+    - if [[ "$TRAVIS_OS_TASK" == "osx" ]]; then return 1; fi
 

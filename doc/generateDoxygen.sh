@@ -15,6 +15,7 @@ __AUTHOR__="Jeroen de Bruijn"
 # Required global variables:
 # - TRAVIS_BUILD_NUMBER : The number of the current build.
 # - TRAVIS_COMMIT       : The commit that the current build is testing.
+# - TRAVIS_PULL_REQUEST : Is the current run initiated by a pull request?
 # - DOXYFILE            : The Doxygen configuration file.
 # - GH_REPO_NAME        : The name of the repository.
 # - GH_REPO_REF         : The GitHub reference to the repository.
@@ -80,10 +81,12 @@ echo "ls ../ "; ls
 
 ################################################################################
 ##### Upload the documentation to the gh-pages branch of the repository.   #####
-# Only upload if Doxygen successfully created the documentation.
+# Only if this is not a pull request and 
+# only upload if Doxygen successfully created the documentation.
 # Check this by verifying that the html directory and the file html/index.html
 # both exist. This is a good indication that Doxygen did it's work.
-if [ -f "index.html" ] || [ -f "html/index.html" ]; then
+if [[ "$TRAVIS_PULL_REQUEST" == "false" ]]; then 
+  if [ -f "index.html" ] || [ -f "html/index.html" ]; then
 
 	echo 'Uploading documentation to the gh-pages branch...'
 	# Add everything in this directory (the Doxygen code documentation) to the
@@ -100,9 +103,10 @@ if [ -f "index.html" ] || [ -f "html/index.html" ]; then
 	# The ouput is redirected to /dev/null to hide any sensitive credential data
 	# that might otherwise be exposed.
 	git push --force "https://${GH_REPO_TOKEN}@${GH_REPO_REF}" > /dev/null 2>&1
-else
+  else
 	echo '' >&2
 	echo 'Warning: No documentation (html) files have been found!' >&2
 	echo 'Warning: Not going to push the documentation to GitHub!' >&2
 	exit 1
+  fi
 fi
