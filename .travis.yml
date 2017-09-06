@@ -71,10 +71,14 @@ matrix:
               - libgsl0-dev
               - root-system # ROOT v.5.34 
               - root-plugin-math-minuit2
+              - libroot-math-minuit-dev
+              - libroot-io-dev
+              - libroot-hist-dev
+              - libroot-tree-dev
       before_script:
         - env
         - echo $ROOTSYS
-        - ls /usr/include
+        - ls /usr/include/root
 
     - os: osx
       osx_image: xcode8.3
