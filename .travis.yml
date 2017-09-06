@@ -16,6 +16,9 @@ env:
         - OMP_NUM_THREADS: 1
         - LANG: en_US.UTF-8
         - BASEPATH: $HOME/build/ComPWA
+          # The next declaration is the encrypted COVERITY_SCAN_TOKEN, created
+          #   via the "travis encrypt" command using the project repo's public key
+        - secure: "I1LwO65P4q89f31HYnFlrlJ9yHyJ/QIAOXR5CtPfMo5FnestBtlQg6fX3p1vLNi5XdYXP4QpP51FFGJ5suz1aigC45JRaMzO98WQmMvIqYufrhkYej6lNevL0z/tHeI0aURH7N1SfSZaLwkepErssOsdjJAqP538ldA3Zz9g2gM="
 
 addons:
   coverity_scan:
@@ -24,8 +27,11 @@ addons:
       description: "Build submitted via Travis CI"
     notification_email: peter.weidenkaff@mailbox.org
     build_command_prepend: "cmake ../ComPWA/"
-    build_command:   "make -j2"
-    branch_pattern: coverity_scan
+    build_command: "make -j2"
+    branch_pattern: master
+
+before_install:
+      - echo -n | openssl s_client -connect scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-
 
 matrix:
   allow_failures: 
@@ -73,24 +79,31 @@ matrix:
     - os: linux
       dist: trusty  #Ubuntu14.04 LTS
       compiler: gcc
-      env: TASK="ROOT v5.34"
+      env: 
+        - TASK="ROOT v5.34"
+        - ROOTSYS=$BASEPATH/root
       addons: 
         apt: 
             packages:
               - libboost-all-dev # Version 1.54 for trusty
               - libgsl0-dev
-              - root-system # ROOT v.5.34 
-              - root-plugin-math-minuit2
-              - libroot-math-minuit-dev
-              - libroot-io-dev
-              - libroot-hist-dev
-              - libroot-tree-dev
-              - libroot-montecarlo-eg-dev
-              - libroot-math-physics-dev
+                # ubuntu trusty does not provide Minuit2 header files
+              #- root-system # ROOT v.5.34 
+              #- root-plugin-math-minuit2 
+              #- libroot-math-minuit-dev
+              #- libroot-io-dev
+              #- libroot-hist-dev
+              #- libroot-tree-dev
+              #- libroot-montecarlo-eg-dev
+              #- libroot-math-physics-dev
       before_script:
         - env
         - echo $ROOTSYS
         - ls /usr/include/root
+        - cd $BASEPATH
+          # ROOT v5.34
+        - wget https://root.cern.ch/download/root_v5.34.36.Linux-ubuntu14-x86_64-gcc4.8.tar.gz
+        - tar xpvfz root_*.tar.gz > /dev/null 2>&1
 
     - os: osx
       osx_image: xcode8.3
