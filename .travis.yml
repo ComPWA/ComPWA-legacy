@@ -4,9 +4,7 @@ language: c++
 
 # Blacklist
 branches:
-    only: 
-      - master
-      - coverity_scan
+    only: master
     except: gh-pages
 
 # Environment variables
