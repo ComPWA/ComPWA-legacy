@@ -40,12 +40,9 @@ matrix:
         - env
         - cd $BASEPATH
         - echo "Installing ROOT in path $PWD"
+          # ROOT v6.10
         - wget https://root.cern.ch/download/root_v6.10.02.Linux-ubuntu14-x86_64-gcc4.8.tar.gz
-          # ROOT v5.34  
-          #- wget https://root.cern.ch/download/root_v5.34.36.Linux-ubuntu14-x86_64-gcc4.8.tar.gz
         - tar xpvfz root_*.tar.gz > /dev/null 2>&1
-        - mkdir $BASEPATH/build
-        - cd $BASEPATH/build
       after_success:
         # Generate and deploy documentation
         - cd $BASEPATH
@@ -54,6 +51,16 @@ matrix:
         - if [[ "$TRAVIS_PULL_REQUEST" == "false" ] && [ "$CXX" == "clang++" ]]; then 
           $TRAVIS_BUILD_DIR/doc/generateDoxygen.sh; 
           fi
+    - os: linux
+      dist: trusty  #Ubuntu14.04 LTS
+      compiler: gcc
+      before_script:
+        - env
+        - cd $BASEPATH
+        - echo "Installing ROOT in path $PWD"
+          # ROOT v5.34  
+        - wget https://root.cern.ch/download/root_v5.34.36.Linux-ubuntu14-x86_64-gcc4.8.tar.gz
+        - tar xpvfz root_*.tar.gz > /dev/null 2>&1
     - os: osx
       osx_image: xcode8.3
       before_script:
@@ -63,13 +70,13 @@ matrix:
         - brew install gsl boost
         - wget https://root.cern.ch/download/root_v6.10.02.macosx64-10.12-clang81.tar.gz
         - tar xpvfz root_*.tar.gz > /dev/null 2>&1
-        - mkdir $BASEPATH/build
-        - cd $BASEPATH/build
   allow_failures:
     - os: osx
 
 # Build your code e.g. by calling make
 script:
+    - mkdir $BASEPATH/build
+    - cd $BASEPATH/build
     - cmake ../ComPWA/
     #- make -j2 VERBOSE=1
     - make -j2 # TravisCI container-based nodes provide two CPUs
