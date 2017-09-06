@@ -22,7 +22,7 @@ env:
 addons:
     apt:
         packages:
-            - libboost-all-dev
+            - libboost-all-dev # Version 1.54 for trusty
             - libgsl0-dev
             - doxygen
             - doxygen-doc
@@ -61,7 +61,8 @@ matrix:
         # Generate and deploy documentation
         - cd $BASEPATH
         - chmod +x $TRAVIS_BUILD_DIR/doc/generateDoxygen.sh
-        - $TRAVIS_BUILD_DIR/doc/generateDoxygen.sh
+        # Do not update doxygen for pull requests
+        - if [[ "$TRAVIS_PULL_REQUEST" == "false" ]]; then $TRAVIS_BUILD_DIR/doc/generateDoxygen.sh; fi
     - os: osx
       osx_image: xcode8.3
       before_script:
@@ -73,10 +74,14 @@ matrix:
         - tar xpvfz root_*.tar.gz > /dev/null 2>&1
         - mkdir $BASEPATH/build
         - cd $BASEPATH/build
+  allow_failures:
+    - os: osx
 
 # Build your code e.g. by calling make
 script:
     - cmake ../ComPWA/
     #- make -j2 VERBOSE=1
-    #- make -j2 # TravisCI container-based nodes provide two CPUs
+    - make -j2 # TravisCI container-based nodes provide two CPUs
+    # Job failure for testing osx
+    - if [[ "$TRAVIS_OS_NAME" == "osx ]]; then return 1; fi
 
