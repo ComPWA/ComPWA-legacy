@@ -33,10 +33,6 @@ addons:
 before_install:
       - echo -n | openssl s_client -connect scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-
 
-compiler: 
-      - clang
-      - gcc
-
 matrix:
   allow_failures: 
     - os: osx
@@ -61,6 +57,25 @@ matrix:
         - $TRAVIS_BUILD_DIR/doc/generateDoxygen.sh; 
 
     - os: linux
+      compiler: gcc
+      dist: trusty  #Ubuntu14.04 LTS
+      env: 
+        - TASK="ROOT v6.10"
+        - ROOTSYS=$BASEPATH/root
+      addons: 
+        apt: 
+            packages:
+              - libboost-all-dev # Version 1.54 for trusty
+              - libgsl0-dev
+      before_script:
+        - env
+        - cd $BASEPATH
+          # ROOT v6.10
+        - wget https://root.cern.ch/download/root_v6.10.02.Linux-ubuntu14-x86_64-gcc4.8.tar.gz
+        - tar xpvfz root_*.tar.gz > /dev/null 2>&1
+
+    - os: linux
+      compiler: clang
       dist: trusty  #Ubuntu14.04 LTS
       env: 
         - TASK="ROOT v6.10"
