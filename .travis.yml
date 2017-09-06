@@ -54,7 +54,7 @@ matrix:
         - gcc
       before_script:
         - env
-        - cd $BASEPATH
+        - cd $ASEPATH
           # ROOT v6.10
         - wget https://root.cern.ch/download/root_v6.10.02.Linux-ubuntu14-x86_64-gcc4.8.tar.gz
         - tar xpvfz root_*.tar.gz > /dev/null 2>&1
@@ -94,8 +94,8 @@ script:
     - mkdir $BASEPATH/build
     - cd $BASEPATH/build
     - cmake ../ComPWA/
-    #- make -j2 VERBOSE=1
-    - make -j2 # TravisCI container-based nodes provide two CPUs
+    - make -j2 VERBOSE=1
+    #- make -j2 # TravisCI container-based nodes provide two CPUs
     # Job failure for testing osx
     - if [[ "$TRAVIS_OS_TASK" == "osx" ]]; then return 1; fi
 
