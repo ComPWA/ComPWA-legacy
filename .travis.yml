@@ -1,12 +1,16 @@
 # This will run on Travis' 'new' container-based infrastructure
 sudo: false
 language: c++
-os: linux
-dist: trusty  #Ubuntu14.04 LTS
+matrix:
+  include:
+    - os: linux
+      dist: trusty  #Ubuntu14.04 LTS
+      compiler:
+        - gcc
+        - clang
+    - os: osx
+      osx_image: xcode8.3
 
-compiler:
-      - gcc
-      - clang
 
 # Blacklist
 branches:
@@ -26,7 +30,7 @@ env:
         - BASEPATH: $HOME/build/ComPWA
         - ROOTSYS: $BASEPATH/root
 
-# Install dependencies
+# Install dependencies - linux only
 addons:
     apt:
         packages:
@@ -41,8 +45,16 @@ before_script:
     - env
     - cd $BASEPATH
     - echo "Installing ROOT in path $PWD"
-    - wget https://root.cern.ch/download/root_v5.34.36.Linux-ubuntu14-x86_64-gcc4.8.tar.gz
-    - tar xpvfz root_v5.34* > /dev/null 2>&1
+    - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then 
+      brew install gsl boost;
+      wget https://root.cern.ch/download/root_v6.10.02.macosx64-10.12-clang81.tar.gz;
+      fi
+    - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
+      wget https://root.cern.ch/download/root_v6.10.02.Linux-ubuntu14-x86_64-gcc4.8.tar.gz;
+      fi
+    # ROOT v5.34  
+    #- wget https://root.cern.ch/download/root_v5.34.36.Linux-ubuntu14-x86_64-gcc4.8.tar.gz
+    - tar xpvfz root_*.tar.gz > /dev/null 2>&1
     - mkdir $BASEPATH/build
     - cd $BASEPATH/build
 
@@ -50,11 +62,13 @@ before_script:
 script:
     - cmake ../ComPWA/
     #- make -j2 VERBOSE=1
-    - make -j2 # TravisCI container-based nodes provide two CPUs
+    #- make -j2 # TravisCI container-based nodes provide two CPUs
 
 # Generate and deploy documentation
 after_success:
     - cd $BASEPATH
     - chmod +x $TRAVIS_BUILD_DIR/doc/generateDoxygen.sh
       #only generate doxygen in one of two jobs
-    - if [[ "$CXX" == "clang++" ]]; then $TRAVIS_BUILD_DIR/doc/generateDoxygen.sh; fi
+    - if [[ "$TRAVIS_OS_NAME" == "linux" && "$CXX" == "clang++" ]]; then 
+      $TRAVIS_BUILD_DIR/doc/generateDoxygen.sh; 
+      fi
