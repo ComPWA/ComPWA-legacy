@@ -75,6 +75,7 @@ matrix:
               - libroot-io-dev
               - libroot-hist-dev
               - libroot-tree-dev
+              - libroot-montecarlo-eg-dev
       before_script:
         - env
         - echo $ROOTSYS
