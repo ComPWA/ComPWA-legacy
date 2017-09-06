@@ -17,6 +17,16 @@ env:
         - LANG: en_US.UTF-8
         - BASEPATH: $HOME/build/ComPWA
 
+addons:
+  coverity_scan:
+    project:
+      name: "ComPWA/ComPWA"
+      description: "Build submitted via Travis CI"
+    notification_email: peter.weidenkaff@mailbox.org
+    build_command_prepend: "cmake ../ComPWA/"
+    build_command:   "make -j2"
+    branch_pattern: coverity_scan
+
 matrix:
   allow_failures: 
     - os: osx
@@ -76,6 +86,7 @@ matrix:
               - libroot-hist-dev
               - libroot-tree-dev
               - libroot-montecarlo-eg-dev
+              - libroot-math-physics-dev
       before_script:
         - env
         - echo $ROOTSYS
