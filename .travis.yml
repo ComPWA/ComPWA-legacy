@@ -69,6 +69,7 @@ matrix:
               - libboost-all-dev # Version 1.54 for trusty
               - libgsl0-dev
               - root-system # ROOT v.5.34 
+              - root-plugin-math-minuit2
       before_script:
         - env
 

@@ -22,7 +22,7 @@
 
 #include "Tools/RunManager.hpp"
 #include "Tools/RootGenerator.hpp"
-#include "DataReader/RootReader/RootReader.hpp"
+#include "DataReader/Data.hpp"
 
 using namespace ComPWA;
 using namespace ComPWA::Physics::HelicityFormalism;
@@ -64,7 +64,7 @@ BOOST_AUTO_TEST_CASE(HelicityAngleTest) {
   std::shared_ptr<ComPWA::Generator> gen(new ComPWA::Tools::RootGenerator(
       partL, kin->GetInitialState(), kin->GetFinalState(), 123));
   std::shared_ptr<ComPWA::DataReader::Data> sample(
-      new ComPWA::DataReader::RootReader());
+      new ComPWA::DataReader::Data());
 
   ComPWA::RunManager r;
   r.SetGenerator(gen);
