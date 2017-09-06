@@ -38,6 +38,7 @@ SequentialTwoBodyDecay::Factory(std::shared_ptr<PartList> partL,
     }
   }
 
+
   if (mag)
     obj->SetMagnitudeParameter(mag);
   else
