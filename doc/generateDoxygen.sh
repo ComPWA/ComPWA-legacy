@@ -109,5 +109,6 @@ if [[ "$TRAVIS_PULL_REQUEST" == "false" ]]; then
 	echo 'Warning: Not going to push the documentation to GitHub!' >&2
 	exit 1
   fi
+else
   echo 'Documentation not pushed to gh-pages since this is a pull request!' >&2
 fi

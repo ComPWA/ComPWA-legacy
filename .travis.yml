@@ -37,8 +37,10 @@ matrix:
         # Generate and deploy documentation
         - cd $BASEPATH
         - chmod +x $TRAVIS_BUILD_DIR/doc/generateDoxygen.sh
-        # Do not update doxygen for pull requests
+        # Documentation is generated and deployed to gh-pages 
+        # (only if this is not a pull request).
         - $TRAVIS_BUILD_DIR/doc/generateDoxygen.sh; 
+
     - os: linux
       dist: trusty  #Ubuntu14.04 LTS
       env: TASK="ROOT v6.10"
@@ -46,14 +48,15 @@ matrix:
         - libboost-all-dev # Version 1.54 for trusty
         - libgsl0-dev
       compiler: 
-        - gcc
         - clang
+        - gcc
       before_script:
         - env
         - cd $BASEPATH
           # ROOT v6.10
         - wget https://root.cern.ch/download/root_v6.10.02.Linux-ubuntu14-x86_64-gcc4.8.tar.gz
         - tar xpvfz root_*.tar.gz > /dev/null 2>&1
+
     - os: linux
       dist: trusty  #Ubuntu14.04 LTS
       compiler: gcc
@@ -64,6 +67,7 @@ matrix:
         - root-system # ROOT v.5.34 
       before_script:
         - env
+
     - os: osx
       osx_image: xcode8.3
       env: TASK="ROOT v6.10"
