@@ -83,5 +83,5 @@ script:
     #- make -j2 VERBOSE=1
     - make -j2 # TravisCI container-based nodes provide two CPUs
     # Job failure for testing osx
-    - if [[ "$TRAVIS_OS_NAME" == "osx ]]; then return 1; fi
+    - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then return 1; fi
 
