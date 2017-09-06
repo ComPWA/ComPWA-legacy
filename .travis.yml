@@ -10,7 +10,7 @@ branches:
 # Environment variables
 env:
     global:
-        - GH_REPO_TASK: ComPWA
+        - GH_REPO_NAME: ComPWA
         - DOXYFILE: $TRAVIS_BUILD_DIR/doc/Doxyfile.travisCI
         - GH_REPO_REF: github.com/ComPWA/ComPWA.git
         - OMP_NUM_THREADS: 1
