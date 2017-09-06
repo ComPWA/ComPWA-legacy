@@ -143,7 +143,6 @@ script:
     - cd $BASEPATH/build
     - cmake ../ComPWA/
     - if [ "${COVERITY_SCAN_BRANCH}" != 1 ]; then
-      make -j2 # TravisCI container-based nodes provide two CPUs
       make -j2 VERBOSE=1
       fi
     # Job failure for testing osx
