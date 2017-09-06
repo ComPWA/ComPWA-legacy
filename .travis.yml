@@ -54,7 +54,7 @@ matrix:
         - gcc
       before_script:
         - env
-        - cd $ASEPATH
+        - cd $BASEPATH
           # ROOT v6.10
         - wget https://root.cern.ch/download/root_v6.10.02.Linux-ubuntu14-x86_64-gcc4.8.tar.gz
         - tar xpvfz root_*.tar.gz > /dev/null 2>&1
