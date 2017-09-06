@@ -1,23 +1,11 @@
 # This will run on Travis' 'new' container-based infrastructure
 sudo: false
 language: c++
-matrix:
-  include:
-    - os: linux
-      dist: trusty  #Ubuntu14.04 LTS
-      compiler:
-        - gcc
-        - clang
-    - os: osx
-      osx_image: xcode8.3
-
 
 # Blacklist
 branches:
-    only:
-        - master
-    except:
-        - gh-pages
+    only: master
+    except: gh-pages
 
 # Environment variables
 env:
@@ -41,22 +29,50 @@ addons:
             - doxygen-gui
             - graphviz
 
-before_script:
-    - env
-    - cd $BASEPATH
-    - echo "Installing ROOT in path $PWD"
-    - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then 
-      brew install gsl boost;
-      wget https://root.cern.ch/download/root_v6.10.02.macosx64-10.12-clang81.tar.gz;
-      fi
-    - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
-      wget https://root.cern.ch/download/root_v6.10.02.Linux-ubuntu14-x86_64-gcc4.8.tar.gz;
-      fi
-    # ROOT v5.34  
-    #- wget https://root.cern.ch/download/root_v5.34.36.Linux-ubuntu14-x86_64-gcc4.8.tar.gz
-    - tar xpvfz root_*.tar.gz > /dev/null 2>&1
-    - mkdir $BASEPATH/build
-    - cd $BASEPATH/build
+matrix:
+  include:
+    - os: linux
+      dist: trusty  #Ubuntu14.04 LTS
+      compiler: gcc
+      before_script:
+        - env
+        - cd $BASEPATH
+        - echo "Installing ROOT in path $PWD"
+        - wget https://root.cern.ch/download/root_v6.10.02.Linux-ubuntu14-x86_64-gcc4.8.tar.gz
+          # ROOT v5.34  
+          #- wget https://root.cern.ch/download/root_v5.34.36.Linux-ubuntu14-x86_64-gcc4.8.tar.gz
+        - tar xpvfz root_*.tar.gz > /dev/null 2>&1
+        - mkdir $BASEPATH/build
+        - cd $BASEPATH/build
+    - os: linux
+      dist: trusty  #Ubuntu14.04 LTS
+      compiler: clang
+      before_script:
+        - env
+        - cd $BASEPATH
+        - echo "Installing ROOT in path $PWD"
+        - wget https://root.cern.ch/download/root_v6.10.02.Linux-ubuntu14-x86_64-gcc4.8.tar.gz
+          # ROOT v5.34  
+          #- wget https://root.cern.ch/download/root_v5.34.36.Linux-ubuntu14-x86_64-gcc4.8.tar.gz
+        - tar xpvfz root_*.tar.gz > /dev/null 2>&1
+        - mkdir $BASEPATH/build
+        - cd $BASEPATH/build
+      after_success:
+        # Generate and deploy documentation
+        - cd $BASEPATH
+        - chmod +x $TRAVIS_BUILD_DIR/doc/generateDoxygen.sh
+        - $TRAVIS_BUILD_DIR/doc/generateDoxygen.sh
+    - os: osx
+      osx_image: xcode8.3
+      before_script:
+        - env
+        - cd $BASEPATH
+        - echo "Installing ROOT in path $PWD"
+        - brew install gsl boost
+        - wget https://root.cern.ch/download/root_v6.10.02.macosx64-10.12-clang81.tar.gz
+        - tar xpvfz root_*.tar.gz > /dev/null 2>&1
+        - mkdir $BASEPATH/build
+        - cd $BASEPATH/build
 
 # Build your code e.g. by calling make
 script:
@@ -64,11 +80,3 @@ script:
     #- make -j2 VERBOSE=1
     #- make -j2 # TravisCI container-based nodes provide two CPUs
 
-# Generate and deploy documentation
-after_success:
-    - cd $BASEPATH
-    - chmod +x $TRAVIS_BUILD_DIR/doc/generateDoxygen.sh
-      #only generate doxygen in one of two jobs
-    - if [[ "$TRAVIS_OS_NAME" == "linux" && "$CXX" == "clang++" ]]; then 
-      $TRAVIS_BUILD_DIR/doc/generateDoxygen.sh; 
-      fi
