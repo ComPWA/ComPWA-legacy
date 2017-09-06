@@ -16,7 +16,6 @@ env:
         - OMP_NUM_THREADS: 1
         - LANG: en_US.UTF-8
         - BASEPATH: $HOME/build/ComPWA
-        - ROOTSYS: $BASEPATH/root
 
 matrix:
   allow_failures: 
@@ -43,7 +42,9 @@ matrix:
 
     - os: linux
       dist: trusty  #Ubuntu14.04 LTS
-      env: TASK="ROOT v6.10"
+      env: 
+        - TASK="ROOT v6.10"
+        - ROOTSYS=$BASEPATH/root
       addons: 
         apt: 
             packages:
@@ -72,6 +73,8 @@ matrix:
               - root-plugin-math-minuit2
       before_script:
         - env
+        - echo $ROOTSYS
+        - ls /usr/include
 
     - os: osx
       osx_image: xcode8.3
