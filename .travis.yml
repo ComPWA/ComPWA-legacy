@@ -26,7 +26,7 @@ addons:
       name: "ComPWA/ComPWA"
       description: "Build submitted via Travis CI"
     notification_email: peter.weidenkaff@mailbox.org
-    build_command_prepend: "cmake ../ComPWA/"
+    build_command_prepend: "cmake ."
     build_command: "make -j2"
     branch_pattern: coverity_scan
 
