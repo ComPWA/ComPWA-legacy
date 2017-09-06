@@ -26,13 +26,11 @@ matrix:
     - os: linux
       dist: trusty
       env: TASK="Build documentation"
-      addons: 
-        apt: 
-            packages:
-              - doxygen
-              - doxygen-doc
-              - doxygen-gui
-              - graphviz
+      addons.apt.packages:
+        - doxygen
+        - doxygen-doc
+        - doxygen-gui
+        - graphviz
       script:
         # Generate and deploy documentation
         - cd $BASEPATH
@@ -44,11 +42,9 @@ matrix:
     - os: linux
       dist: trusty  #Ubuntu14.04 LTS
       env: TASK="ROOT v6.10"
-      addons: 
-        apt: 
-            packages:
-              - libboost-all-dev # Version 1.54 for trusty
-              - libgsl0-dev
+      addons.apt.packages:
+        - libboost-all-dev # Version 1.54 for trusty
+        - libgsl0-dev
       compiler: 
         - clang
         - gcc
@@ -63,12 +59,10 @@ matrix:
       dist: trusty  #Ubuntu14.04 LTS
       compiler: gcc
       env: TASK="ROOT v5.34"
-      addons: 
-        apt: 
-            packages:
-              - libboost-all-dev # Version 1.54 for trusty
-              - libgsl0-dev
-              - root-system # ROOT v.5.34 
+      addons.apt.packages:
+        - libboost-all-dev # Version 1.54 for trusty
+        - libgsl0-dev
+        - root-system # ROOT v.5.34 
       before_script:
         - env
 
