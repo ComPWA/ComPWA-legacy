@@ -33,6 +33,10 @@ addons:
 before_install:
       - echo -n | openssl s_client -connect scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-
 
+compiler: 
+      - clang
+      - gcc
+
 matrix:
   allow_failures: 
     - os: osx
@@ -66,9 +70,6 @@ matrix:
             packages:
               - libboost-all-dev # Version 1.54 for trusty
               - libgsl0-dev
-      compiler: 
-        - clang
-        - gcc
       before_script:
         - env
         - cd $BASEPATH
