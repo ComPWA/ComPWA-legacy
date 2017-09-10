@@ -3,7 +3,7 @@
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
 ///
-/// \file MinLogLH.hpp
+/// \file
 ///
 
 #ifndef _MINLOGLH_HPP

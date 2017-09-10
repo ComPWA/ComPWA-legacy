@@ -1,7 +1,7 @@
 # Create MinLogLH library.
 
-SET(lib_srcs MinLogLH.cpp)
-SET(lib_headers MinLogLH.hpp )
+SET(lib_srcs MinLogLH.cpp SumMinLogLH.cpp )
+SET(lib_headers MinLogLH.hpp SumMinLogLH.hpp )
 
 add_library(
   MinLogLH
