@@ -154,5 +154,3 @@ script:
     - if [ "${COVERITY_SCAN_BRANCH}" != 1 ]; then
       make -j2 VERBOSE=1;
       fi
-    # Job failure for testing osx
-    - if [[ "$TRAVIS_OS_TASK" == "osx" ]]; then return 1; fi
