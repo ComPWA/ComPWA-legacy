@@ -65,6 +65,7 @@ void phspContour(unsigned int xsys, unsigned int ysys, unsigned int n,
 DalitzPlot::DalitzPlot(std::shared_ptr<Kinematics> kin, std::string name,
                        int bins)
     : _name(name), kin_(kin), _isFilled(0), _bins(bins), _globalScale(1.0),
+      _correctForEfficiency(false),
       h_weights("h_weights", "h_weights", bins, 0, 1.01),
       dataDiagrams(kin, "data", "Data", bins),
       phspDiagrams(kin, "phsp", "Phase-space", bins),

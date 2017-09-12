@@ -114,15 +114,17 @@ double CorrectionTable::GetError(int charge, double momentum) const {
     throw std::runtime_error(
         "momentumSys::GetError() no bin found for momentum value " +
         std::to_string((long double)momentum) + "!");
+
+  double err = 0.0;
   if (charge > 0) // D0->K0bar K+K-
-    return sysError[binNumber];
+    err = sysError[binNumber];
   else if (charge < 0) // D0->K0bar K+K-
-    return antiSysError[binNumber];
+    err = antiSysError[binNumber];
   else if (charge == 0) { // charge unknown -> average value
-    return (0.5 * std::sqrt(antiSysError[binNumber] * antiSysError[binNumber] +
+    err = (0.5 * std::sqrt(antiSysError[binNumber] * antiSysError[binNumber] +
                             sysError[binNumber] * sysError[binNumber]));
   }
-  return 0.;
+  return err;
 }
 
 void CorrectionTable::AddToTotalError(int charge, double momentum) {

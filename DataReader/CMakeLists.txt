@@ -9,8 +9,8 @@ SET(lib_srcs
 )
 SET(lib_headers
   Data.hpp
-  DataCorrection.cpp
-  CorrectionTable.cpp
+  DataCorrection.hpp
+  CorrectionTable.hpp
 )
 
 add_library( DataReader

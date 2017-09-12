@@ -43,6 +43,8 @@ public:
       : _name(name), _eff(eff), _strength(strength), _current_strength(-999) {
     _strength->FixParameter(true);
   }
+  
+  virtual ~AmpIntensity() {};
 
   /// Function to create a full copy
   virtual AmpIntensity *Clone(std::string newName = "") const = 0;

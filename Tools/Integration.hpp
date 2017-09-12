@@ -30,7 +30,7 @@ template <typename T> class IntegralByQuadrature {
 
 public:
   IntegralByQuadrature(const T &func, std::pair<double, double> lim)
-      : _func(func), _limits(lim), _depth(1) {}
+      : _func(func), _limits(lim), _depth(1), _integral(0.0) {}
 
   double Integral(int precision = 100) {
     while (_depth < precision) {

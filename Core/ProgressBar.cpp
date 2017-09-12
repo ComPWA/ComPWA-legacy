@@ -1,4 +1,4 @@
-// Copyright (c) 2014 The ComPWA Team.
+// Copyright (c) 2013 The ComPWA Team.
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
@@ -7,8 +7,9 @@
 
 namespace ComPWA {
 
-  progressBar::progressBar(std::size_t size, int update)
-    : numEvents(size), updateInterval(update), hasStarted(0), lastUpdate(0) {
+progressBar::progressBar(std::size_t size, int update)
+    : numEvents(size), updateInterval(update), hasStarted(0), currentEvent(0),
+      lastUpdate(0) {
   if (update == 0)
     updateInterval = 1;
 }
@@ -75,4 +76,4 @@ time_t progressBar::endTime() {
   return estEndTime;
 }
 
-} /* namespace ComPWA */
+} // namespace

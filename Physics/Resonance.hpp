@@ -29,7 +29,9 @@ namespace Physics {
 class Resonance {
 
 public:
-  Resonance() : _preFactor(1, 0), phspVolume_(1){};
+  Resonance()
+      : _preFactor(1, 0), phspVolume_(1), _current_integral(1.0),
+        _current_magnitude(0.0), _current_phase(0.0){};
 
   virtual ~Resonance(){};
 
@@ -102,14 +104,14 @@ public:
     list.AddParameter(GetMagnitudeParameter());
     list.AddParameter(GetPhaseParameter());
   }
-  
+
   /// Fill vector with parameters (fast). No check is performed if parameters
   /// already exist. \see GetParameters(ParameterList &list)
   virtual void GetParametersFast(std::vector<double> &list) const {
     list.push_back(GetMagnitude());
     list.push_back(GetPhase());
   }
-  
+
   /// Update parameters to the values given in \p list
   virtual void UpdateParameters(const ParameterList &list) = 0;
 
@@ -122,9 +124,9 @@ public:
   };
 
   virtual void SetPhspVolume(double phspVol) { phspVolume_ = phspVol; }
-  
+
   virtual double GetPhspVolume() const { return phspVolume_; }
-  
+
   //=========== FUNCTIONTREE =================
 
   virtual bool HasTree() const { return false; }

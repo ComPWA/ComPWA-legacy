@@ -52,15 +52,15 @@ void TwoBodyKinematics::EventToDataPoint(const Event &ev,
 
 //! get mass of particles
 double TwoBodyKinematics::GetMass(unsigned int num) const {
+  if( num > 2 )
+  throw std::runtime_error("TwoBodyKinematics::getMass(int) | "
+                           "Wrong particle requested!");
   if (num == 0)
     return _M;
   if (num == 1)
     return m1;
-  if (num == 2)
-    return m2;
-  throw std::runtime_error("TwoBodyKinematics::getMass(int) | "
-                           "Wrong particle requested!");
-  return -999;
+  
+  return m2;
 }
 
 } /* namespace ComPWA */

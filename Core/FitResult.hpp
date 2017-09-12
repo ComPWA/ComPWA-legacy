@@ -37,7 +37,7 @@ namespace ComPWA {
 
 class FitResult {
 public:
-  FitResult() : time(0) {};
+  FitResult() : time(0), sumFractions(0.0), sumFractionsError(0.0) {};
   
   virtual ~FitResult(){};
   
@@ -50,15 +50,13 @@ public:
   virtual ParameterList GetInitialParameters() { return initialParameters; }
   
   /// Set list of final fit parameters
-  virtual void SetFinalParameters(ParameterList finPars);
+  virtual void SetFinalParameters(ParameterList &finPars);
   
   /// Get list of final fit parameters
   virtual ParameterList GetFinalParameters() { return finalParameters; }
   
   /// Set list of true parameters
-  virtual void SetTrueParameters(ParameterList truePars) {
-    trueParameters.DeepCopy(truePars);
-  }
+  virtual void SetTrueParameters(ParameterList &truePars);
   
   /// Get list of true parameters
   virtual ParameterList GetTrueParameters() { return trueParameters; }
@@ -73,9 +71,7 @@ public:
   virtual double GetResult() = 0;
   
   /// Set list with fit fractions
-  virtual void SetFitFractions(ParameterList list) {
-    _fitFractions.DeepCopy(list);
-  }
+  virtual void SetFitFractions(ParameterList &list);
   
   /// Get list of fit fractions
   virtual ParameterList GetFitFractions() {

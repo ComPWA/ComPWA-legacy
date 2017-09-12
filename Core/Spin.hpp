@@ -44,8 +44,11 @@ public:
       : J_numerator_(intSpin), J_denominator_(1), J_z_numerator_(0),
         z_component_relevant(false) {}
 
-  //! Constructor for double spin
-  Spin(double spin, double spinZ = 0.0){
+  /// Constructor for double spin
+  Spin(double spin, double spinZ = 0.0)
+      : J_numerator_(0), J_denominator_(1), J_z_numerator_(0),
+        z_component_relevant(false) {
+        // Make sure all variables are initialized
     if (isInteger(spin)) {
       SetNumerator(spin);
       SetDenominator(1);
