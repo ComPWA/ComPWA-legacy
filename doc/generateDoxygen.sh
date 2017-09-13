@@ -85,7 +85,7 @@ echo "ls ../ "; ls
 # only upload if Doxygen successfully created the documentation.
 # Check this by verifying that the html directory and the file html/index.html
 # both exist. This is a good indication that Doxygen did it's work.
-if [[ "$TRAVIS_PULL_REQUEST" == "false" ]]; then 
+if  ! $TRAVIS_PULL_REQUEST; then 
   if [ -f "index.html" ] || [ -f "html/index.html" ]; then
 
 	echo 'Uploading documentation to the gh-pages branch...'
