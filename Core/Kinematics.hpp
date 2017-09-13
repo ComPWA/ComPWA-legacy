@@ -58,7 +58,7 @@ public:
   //! Get inital state
   virtual std::vector<pid> GetInitialState() { return _initialState; }
 
-  virtual int GetDataID(const ComPWA::SubSystem s) = 0;
+  virtual int GetDataID(const ComPWA::SubSystem &sys) = 0;
 
 protected:
   std::vector<pid> _initialState;

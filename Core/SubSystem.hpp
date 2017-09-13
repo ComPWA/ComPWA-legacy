@@ -100,7 +100,7 @@ inline SubSystem SubSystemFactory(const boost::property_tree::ptree pt) {
   return subSys;
 }
 
-inline boost::property_tree::ptree SubSystemSave(SubSystem sys) {
+inline boost::property_tree::ptree SubSystemSave(const SubSystem &sys) {
   boost::property_tree::ptree pt;
   auto recoilV = sys.GetRecoilState();
   if (recoilV.size()) {

@@ -34,6 +34,8 @@ namespace ComPWA {
 class IEstimator {
 
 public:
+  virtual ~IEstimator() {};
+  
   /// Calculate value of Estimator given parameters \p par
   virtual double controlParameter(ParameterList &par) = 0;
 

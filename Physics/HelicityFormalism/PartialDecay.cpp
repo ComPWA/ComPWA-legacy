@@ -23,7 +23,8 @@ PartialDecay::Factory(std::shared_ptr<PartList> partL,
   LOG(trace) << "PartialDecay::Factory() |";
   SubSystem subSys = SubSystemFactory(pt.get_child("SubSystem"));
 
-  auto obj = std::make_shared<PartialDecay>(subSys);
+  // Create object. Setting dataPos to invalid, will be set later
+  auto obj = std::make_shared<PartialDecay>(-1, subSys);
   obj->SetName(pt.get<std::string>("<xmlattr>.Name", "empty"));
 
   std::shared_ptr<DoubleParameter> mag, phase;

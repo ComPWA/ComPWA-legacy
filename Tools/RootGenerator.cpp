@@ -13,19 +13,17 @@ namespace ComPWA {
 namespace Tools {
 
 RootGenerator::RootGenerator(double cmsEnergy, double m1, double m2, double m3,
-                             int seed) {
+                             int seed) : sqrtS(cmsEnergy), nPart(3){
   gRandom = new TRandom3(0);
   if (seed != -1)
     SetSeed(seed);
 
-  nPart = 3;
 
   masses = new Double_t[nPart];
   masses[0] = m1;
   masses[1] = m2;
   masses[2] = m3;
 
-  sqrtS = cmsEnergy;
   TLorentzVector W(0.0, 0.0, 0.0, sqrtS);
   event.SetDecay(W, nPart, masses);
 }

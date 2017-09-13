@@ -127,13 +127,14 @@ inline double FormFactor(double sqrtS, double ma, double mb, double spin,
                                " are implemented for spin 0 only!");
   }
 
+  double ff = 0.0;
   // Blatt-Weisskopt form factors with normalization F(x=mR) = 1.
   // Reference: S.U.Chung Annalen der Physik 4(1995) 404-430
   // z = q / (interaction range). For the interaction range we assume
   // 1/mesonRadius
   if (type == formFactorType::BlattWeisskopf) {
     if (spin == 0)
-      return 1;
+      return 1.0;
     double qSq = std::norm(qValue);
     double z = qSq * mesonRadius * mesonRadius;
     /* Events below threshold
@@ -143,14 +144,14 @@ inline double FormFactor(double sqrtS, double ma, double mb, double spin,
     z = std::fabs(z);
 
     if (spin == 1) {
-      return (sqrt(2 * z / (z + 1)));
+      ff = (sqrt(2 * z / (z + 1)));
     } else if (spin == 2) {
-      return (sqrt(13 * z * z / ((z - 3) * (z - 3) + 9 * z)));
+      ff = (sqrt(13 * z * z / ((z - 3) * (z - 3) + 9 * z)));
     } else if (spin == 3) {
-      return (
+      ff = (
           sqrt(277 * z * z * z / (z * (z - 15) * (z - 15) + 9 * (2 * z - 5))));
     } else if (spin == 4) {
-      return (sqrt(12746 * z * z * z * z /
+      ff = (sqrt(12746 * z * z * z * z /
                    ((z * z - 45 * z + 105) * (z * z - 45 * z + 105) +
                     25 * z * (2 * z - 21) * (2 * z - 21))));
     } else
@@ -163,7 +164,7 @@ inline double FormFactor(double sqrtS, double ma, double mb, double spin,
                            std::to_string((long long int)type) +
                            " not specified!");
 
-  return 0;
+  return ff;
 }
 
 /// Calculate form factor

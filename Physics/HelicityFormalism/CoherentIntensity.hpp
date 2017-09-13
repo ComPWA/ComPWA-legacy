@@ -27,7 +27,7 @@ public:
           std::shared_ptr<DoubleParameter>(new DoubleParameter("", 1.0)),
       std::shared_ptr<Efficiency> eff =
           std::shared_ptr<Efficiency>(new UnitEfficiency))
-      : AmpIntensity(name, strength, eff){};
+      : AmpIntensity(name, strength, eff), phspVolume_(0.0){};
 
   virtual ~CoherentIntensity(){};
 

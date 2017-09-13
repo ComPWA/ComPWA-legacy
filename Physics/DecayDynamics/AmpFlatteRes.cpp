@@ -338,7 +338,7 @@ void AmpFlatteRes::SetCouplings(std::vector<Coupling> vC) {
   _g = vC;
 
   if (_g.size() == 2)
-    _g.push_back(Coupling());
+    _g.push_back( Coupling(0.0, 0.0, 0.0) );
   // Check if one of the  coupling match the final state (_daughterMasses)
   auto mm = GetDecayMasses();
   if (mm == std::pair<double, double>(-999, -999))

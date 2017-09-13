@@ -1,5 +1,5 @@
 
-  // Copyright (c) 2013, 2017 The ComPWA Team.
+// Copyright (c) 2013, 2017 The ComPWA Team.
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
@@ -119,12 +119,10 @@ bool RunManager::gen(int number, std::shared_ptr<Kinematics> kin,
   unsigned int initialSeed = gen->GetSeed();
   unsigned int totalCalls = 0;
 
-  unsigned int limit;
+  unsigned int limit = 100000000; // set large limit, should never be reached;
   if (phsp) {
     limit = phsp->GetNEvents();
     generationMaxValue *= Tools::Maximum(kin, amp, phsp);
-  } else {
-    limit = 100000000; // set large limit, should never be reached
   }
 
   LOG(trace) << "RunMananger::gen() | Using " << generationMaxValue
@@ -203,8 +201,12 @@ bool RunManager::gen(int number, std::shared_ptr<Kinematics> kin,
                << data->GetNEvents();
   }
 
-  LOG(info) << "Efficiency of toy MC generation: "
-            << (double)data->GetNEvents() / totalCalls;
+  if (!totalCalls)
+    throw std::runtime_error("RunManager::gen() | Number of calls is zero! "
+                             "There ust be something wrong!");
+  
+  double genEff = (double)data->GetNEvents() / totalCalls;
+  LOG(info) << "Efficiency of toy MC generation: " << genEff << ".";
 
   return true;
 }

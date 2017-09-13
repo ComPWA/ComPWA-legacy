@@ -63,6 +63,9 @@ protected:
         x += stepSize;
         n++;
       }
+      if (n <= 0)
+        throw std::runtime_error(
+            "IntegralByQuadrature::Next() | Dividsion by zero!");
       _integral = 0.5 * (_integral + range * s / n);
     }
     return _integral;
@@ -121,13 +124,13 @@ inline double Maximum(std::shared_ptr<Kinematics> kin,
   dataPoint maxPoint;
   for (auto i : data) {
     double val = intens->Intensity(i);
-    if (val > max){
+    if (val > max) {
       maxPoint = i;
       max = val;
     }
   }
 
-  LOG(debug) << "Maximum() | Maximum found at "<<maxPoint<<".";
+  LOG(debug) << "Maximum() | Maximum found at " << maxPoint << ".";
   return max;
 }
 

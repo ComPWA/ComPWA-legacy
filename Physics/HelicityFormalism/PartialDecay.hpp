@@ -30,8 +30,9 @@ namespace HelicityFormalism {
 class PartialDecay : public ComPWA::Physics::Resonance {
 
 public:
-  PartialDecay(SubSystem sys) : _subSystem(sys) {};
-  
+  PartialDecay(int dataPos, const SubSystem &sys)
+      : _dataPos(dataPos), _subSystem(sys){};
+
   virtual PartialDecay *Clone(std::string newName = "") const {
     auto tmp = new PartialDecay(*this);
     tmp->SetName(newName);
@@ -71,7 +72,7 @@ public:
     Resonance::GetParametersFast(list);
     _dynamic->GetParametersFast(list);
   }
-  
+
   /// Update parameters to the values given in \p list
   virtual void UpdateParameters(const ParameterList &list);
 
@@ -101,7 +102,7 @@ public:
   /// Get position of variables within dataPoint
   virtual int GetDataPosition() const { return _dataPos; }
 
-  virtual void SetSubSystem(SubSystem sys) { _subSystem = sys; }
+  virtual void SetSubSystem(const SubSystem &sys) { _subSystem = sys; }
 
   virtual SubSystem GetSubSystem() const { return _subSystem; }
 

@@ -89,7 +89,8 @@ inline std::complex<double> widthToCoupling(double mSq, double mR, double width,
 
 class Coupling {
 public:
-  Coupling() : _g(new DoubleParameter("", 0.0)){};
+  Coupling(double c, double massA, double massB)
+      : _g(new DoubleParameter("", c)), _massA(massA), _massB(massB){};
 
   Coupling(std::shared_ptr<PartList> partL,
            const boost::property_tree::ptree tr) {

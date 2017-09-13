@@ -117,7 +117,7 @@ void HelicityKinematics::EventToDataPoint(const Event &event,
 }
 
 void HelicityKinematics::EventToDataPoint(const Event &event, dataPoint &point,
-                                          const SubSystem sys) const {
+                                          const SubSystem &sys) const {
   auto massLimits = GetInvMassBounds(sys);
   EventToDataPoint(event, point, sys, massLimits);
 }
@@ -156,7 +156,7 @@ double HelicityKinematics::HelicityAngle(double M, double m, double m2,
 }
 
 void HelicityKinematics::EventToDataPoint(
-    const Event &event, dataPoint &point, const SubSystem sys,
+    const Event &event, dataPoint &point, const SubSystem &sys,
     const std::pair<double, double> limits) const {
 
   assert(sys.GetFinalStates().size() == 2 &&
@@ -270,7 +270,7 @@ void HelicityKinematics::EventToDataPoint(
 }
 
 const std::pair<double, double> &
-HelicityKinematics::GetInvMassBounds(const SubSystem sys) const {
+HelicityKinematics::GetInvMassBounds(const SubSystem &sys) const {
   return GetInvMassBounds(
       const_cast<HelicityKinematics *>(this)->GetDataID(sys));
 }
@@ -281,7 +281,7 @@ HelicityKinematics::GetInvMassBounds(int sysID) const {
 }
 
 std::pair<double, double>
-HelicityKinematics::CalculateInvMassBounds(const SubSystem sys) const {
+HelicityKinematics::CalculateInvMassBounds(const SubSystem &sys) const {
 
   /// We use the formulae from (PDG2016 Kinematics Fig.47.3). I hope the
   /// generalization to n-body decays is correct.

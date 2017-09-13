@@ -22,7 +22,8 @@ MinLogLH::MinLogLH(std::shared_ptr<Kinematics> kin,
                    std::shared_ptr<DataReader::Data> accSample,
                    unsigned int firstEvent, unsigned int nEvents)
     : _kin(kin), _intens(intens), _firstEvent(firstEvent), _nEvents(nEvents),
-      _dataSample(data), _phspSample(phspSample), _phspAccSample(accSample) {
+      _dataSample(data), _phspSample(phspSample), _phspAccSample(accSample),
+      _phspAccSampleEff(1.0) {
 
   int size = _dataSample->GetNEvents();
 

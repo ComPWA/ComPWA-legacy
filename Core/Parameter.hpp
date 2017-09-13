@@ -387,7 +387,7 @@ public:
   //! Set parameter free or fixed
   virtual void FixParameter(const bool fixed) { fixed_ = fixed; }
 
-  bool operator==(const ComplexParameter otherPar) const;
+  bool operator==(const ComplexParameter &otherPar) const;
 
 protected:
   virtual std::string TypeName() const { return "complex double"; }

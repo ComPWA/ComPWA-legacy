@@ -59,6 +59,8 @@ public:
            std::shared_ptr<ComPWA::DataReader::Data> accSample,
            unsigned int firstEvent, unsigned int nEvents);
 
+  virtual ~MinLogLH() {};
+  
   /// Value of minimum log likelhood function.
   virtual double controlParameter(ComPWA::ParameterList &par);
 

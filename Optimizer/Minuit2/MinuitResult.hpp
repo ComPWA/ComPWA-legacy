@@ -40,7 +40,7 @@ namespace Minuit2 {
 
 class MinuitResult : public FitResult {
 public:
-  //! Default constructor
+  /// Default constructor needed for boost::serialization.
   MinuitResult();
 
   //! Constructor with estimator and result
@@ -118,7 +118,6 @@ protected:
   int nFreeParameter;
 
   //! Number of events
-  int nEvents;
 
   //! Pointer to estimator
   std::shared_ptr<ComPWA::IEstimator> est;
@@ -191,7 +190,6 @@ private:
     ar &BOOST_SERIALIZATION_NVP(initialLH);
     ar &BOOST_SERIALIZATION_NVP(finalLH);
     ar &BOOST_SERIALIZATION_NVP(trueLH);
-    ar &BOOST_SERIALIZATION_NVP(nEvents);
     ar &BOOST_SERIALIZATION_NVP(edm);
     ar &BOOST_SERIALIZATION_NVP(cov);
     ar &BOOST_SERIALIZATION_NVP(corr);
