@@ -22,15 +22,6 @@ env:
           #   via the "travis encrypt" command using the project repo's public key
         - secure: "I1LwO65P4q89f31HYnFlrlJ9yHyJ/QIAOXR5CtPfMo5FnestBtlQg6fX3p1vLNi5XdYXP4QpP51FFGJ5suz1aigC45JRaMzO98WQmMvIqYufrhkYej6lNevL0z/tHeI0aURH7N1SfSZaLwkepErssOsdjJAqP538ldA3Zz9g2gM="
 
-addons:
-  coverity_scan:
-    project:
-      name: "ComPWA/ComPWA"
-      description: "Build submitted via Travis CI"
-    notification_email: peter.weidenkaff@mailbox.org
-    build_command_prepend: "cmake ."
-    build_command: "make -j2"
-    branch_pattern: coverity_scan
 
 before_install:
       - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then 
@@ -76,6 +67,15 @@ matrix:
               - doxygen-doc
               - doxygen-gui
               - graphviz
+        coverity_scan:
+            project:
+                name: "ComPWA/ComPWA"
+                description: "Build submitted via Travis CI"
+        notification_email: peter.weidenkaff@mailbox.org
+        build_command_prepend: "cmake ."
+        build_command: "make -j2"
+        branch_pattern: coverity_scan
+        
       script:
         # Generate and deploy documentation
         - cd $BASEPATH
