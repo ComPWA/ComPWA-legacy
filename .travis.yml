@@ -42,6 +42,30 @@ matrix:
     - os: osx
 
   include:
+    - os: osx
+      osx_image: xcode8.3
+      env: TASK="ROOT v6.10"
+      allow_failures: true
+      before_script:
+        - env # Debugging
+        - brew tap homebrew/science
+          # We have to check first if a package is installed, otherwise an error
+          # is thrown.
+        - if brew ls --versions boost > /dev/null; then echo 'Boost installed!'
+          else brew install boost; fi
+        - if brew ls --versions gsl > /dev/null; then echo 'GSL installed!';
+          else brew install gsl; fi
+        - if brew ls --versions root > /dev/null; then echo 'ROOT installed!';
+          else 
+            if brew install root; then echo "top";
+            else 
+              brew link --overwrite gcc;
+              brew install root;
+            fi
+          fi
+        #- wget https://root.cern.ch/download/root_v6.10.02.macosx64-10.12-clang81.tar.gz
+        #- tar xpvfz root_*.tar.gz > /dev/null 2>&1
+        
     - os: linux
       dist: trusty
       env: TASK="Build documentation"
@@ -123,30 +147,6 @@ matrix:
           # ROOT v5.34
         - wget https://root.cern.ch/download/root_v5.34.36.Linux-ubuntu14-x86_64-gcc4.8.tar.gz
         - tar xpvfz root_*.tar.gz > /dev/null 2>&1
-
-    - os: osx
-      osx_image: xcode8.3
-      env: TASK="ROOT v6.10"
-      allow_failures: true
-      before_script:
-        - env # Debugging
-        - brew tap homebrew/science
-          # We have to check first if a package is installed, otherwise an error
-          # is thrown.
-        - if brew ls --versions boost > /dev/null; then echo 'Boost installed!'
-          else brew install boost; fi
-        - if brew ls --versions gsl > /dev/null; then echo 'GSL installed!';
-          else brew install gsl; fi
-        - if brew ls --versions root > /dev/null; then echo 'ROOT installed!';
-          else 
-            if brew install root; then echo "top";
-            else 
-              brew link --overwrite gcc;
-              brew install root;
-            fi
-          fi
-        #- wget https://root.cern.ch/download/root_v6.10.02.macosx64-10.12-clang81.tar.gz
-        #- tar xpvfz root_*.tar.gz > /dev/null 2>&1
 
 # Build your code e.g. by calling make
 script:
