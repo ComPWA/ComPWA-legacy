@@ -151,5 +151,5 @@ matrix:
 script:
     - mkdir $BASEPATH/build
     - cd $BASEPATH/build
-    - cmake ../ComPWA/
+    - cmake $BASEPATH/ComPWA/
     - make -j2 VERBOSE=1
