@@ -149,10 +149,10 @@ matrix:
 
 # Build your code e.g. by calling make
 script:
-    - mkdir $BASEPATH/build
-    - cd $BASEPATH/build
-    - cmake $BASEPATH/ComPWA/
-    - env
-    - pwd
-    - ls
-    - make -j2 VERBOSE=1
+    # Skip compilation in case we are on the coverity_scan branch
+    - if [[ "$COVERITY_SCAN_BRANCH" != "1" ]]; then 
+         mkdir $BASEPATH/build
+         cd $BASEPATH/build
+         cmake $BASEPATH/ComPWA/
+         make -j2 VERBOSE=1
+      fi  
