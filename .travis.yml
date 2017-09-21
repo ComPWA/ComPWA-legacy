@@ -151,8 +151,8 @@ matrix:
 script:
     # Skip compilation in case we are on the coverity_scan branch
     - if [[ "$COVERITY_SCAN_BRANCH" != "1" ]]; then 
-         mkdir $BASEPATH/build
-         cd $BASEPATH/build
-         cmake $BASEPATH/ComPWA/
-         make -j2 VERBOSE=1
+         mkdir $BASEPATH/build;
+         cd $BASEPATH/build;
+         cmake $BASEPATH/ComPWA/;
+         make -j2 VERBOSE=1;
       fi  
