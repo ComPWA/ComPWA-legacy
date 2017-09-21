@@ -152,4 +152,7 @@ script:
     - mkdir $BASEPATH/build
     - cd $BASEPATH/build
     - cmake $BASEPATH/ComPWA/
+    - env
+    - pwd
+    - ls
     - make -j2 VERBOSE=1
