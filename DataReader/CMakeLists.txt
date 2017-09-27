@@ -17,8 +17,21 @@ add_library( DataReader
   SHARED ${lib_srcs} ${lib_headers}
 )
 
-add_subdirectory (RootReader)
+#
+# AsciiReader module
+#
 add_subdirectory (AsciiReader)
+
+#
+# RootReader module
+#
+find_package( ROOT QUIET )
+IF( ${ROOT_FOUND} )
+    add_subdirectory (RootReader)
+ELSE ()
+  MESSAGE(WARNING "ROOT not found! Not building RootReader module!")
+ENDIF()
+
 
 target_link_libraries( DataReader
   Core ${Boost_LIBRARIES}

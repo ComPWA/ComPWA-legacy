@@ -5,7 +5,7 @@
 #
 # Find ROOT
 #
-find_package( ROOT REQUIRED QUIET )
+find_package( ROOT QUIET )
 
 SET(lib_srcs
   RootReader.cpp

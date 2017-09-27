@@ -3,17 +3,16 @@
 ###########################################################
 
 #
-# FindRoot
-#
-find_package( ROOT REQUIRED QUIET )
-
-#
 # FindBoost
 #
 find_package(Boost COMPONENTS
                program_options
                REQUIRED QUIET
 )
+
+IF( TARGET Minuit2IF AND TARGET MinLogLH AND TARGET RootReader
+    AND TARGET Tools AND TARGET HelicityFormalism
+  )
 
 FILE( GLOB lib_srcs DalitzFitApp.cpp )
 FILE( GLOB lib_headers ../../Physics/ParticleList.hpp )
@@ -35,3 +34,8 @@ target_link_libraries( DalitzFit
 
 target_include_directories( DalitzFit
     PUBLIC ${ROOT_INCLUDE_DIR} ${Boost_INCLUDE_DIR} )
+
+ELSE ()
+  MESSAGE( WARNING "Required targets not found! Not building\
+                    DalitzFit executable!")
+ENDIF()

@@ -6,6 +6,7 @@
 # FindMinuit2
 #
 find_package( Minuit2 REQUIRED QUIET )
+
 #
 # Find Boost
 #

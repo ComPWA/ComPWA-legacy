@@ -15,7 +15,6 @@
 #include "Core/Parameter.hpp"
 #include "Core/ParameterList.hpp"
 #include "Core/AmpIntensity.hpp"
-#include "DataReader/RootReader/RootReader.hpp"
 
 ///
 /// \class DalitzHisto
