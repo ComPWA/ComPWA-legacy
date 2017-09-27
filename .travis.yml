@@ -68,12 +68,14 @@ matrix:
               - doxygen-gui
               - graphviz
       script:
-        # Generate and deploy documentation
-        - cd $BASEPATH
-        - chmod +x $TRAVIS_BUILD_DIR/doc/generateDoxygen.sh
-        # Documentation is generated and deployed to gh-pages 
-        # (only if this is not a pull request).
-        - $TRAVIS_BUILD_DIR/doc/generateDoxygen.sh; 
+        # Generate and deploy documentation to gh-pages 
+        # Only in case that this is not a pull request
+        # and we are on branch master
+        - if [[ "$TRAVIS_BRANCH" == "master" ]]; then 
+              cd $BASEPATH;
+              chmod +x $TRAVIS_BUILD_DIR/doc/generateDoxygen.sh;
+              $TRAVIS_BUILD_DIR/doc/generateDoxygen.sh; 
+          fi  
 
     - os: linux
       compiler: gcc
@@ -149,7 +151,10 @@ matrix:
 
 # Build your code e.g. by calling make
 script:
-    - mkdir $BASEPATH/build
-    - cd $BASEPATH/build
-    - cmake ../ComPWA/
-    - make -j2 VERBOSE=1
+    # Skip compilation in case we are on the coverity_scan branch
+    - if [[ "$COVERITY_SCAN_BRANCH" != "1" ]]; then 
+         mkdir $BASEPATH/build;
+         cd $BASEPATH/build;
+         cmake $BASEPATH/ComPWA/;
+         make -j2 VERBOSE=1;
+      fi  
