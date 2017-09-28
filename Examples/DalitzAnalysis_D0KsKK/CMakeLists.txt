@@ -10,9 +10,10 @@ find_package(Boost COMPONENTS
                REQUIRED QUIET
 )
 
-IF( TARGET Minuit2IF AND TARGET MinLogLH AND TARGET RootReader
+# Make sure all necessary targets are build
+if( TARGET Minuit2IF AND TARGET MinLogLH AND TARGET RootReader
     AND TARGET Tools AND TARGET HelicityFormalism
-  )
+)
 
 add_executable( DalitzFitD03K
   DalitzFitD03K.cpp systematics.hpp

@@ -10,7 +10,7 @@ find_package(Boost COMPONENTS
                REQUIRED QUIET
 )
 
-IF( TARGET Minuit2IF AND TARGET MinLogLH AND TARGET RootReader
+IF( TARGET Minuit2IF AND TARGET MinLogLH
     AND TARGET Tools AND TARGET HelicityFormalism
   )
 
@@ -23,8 +23,7 @@ add_executable ( DalitzFit
 target_link_libraries( DalitzFit
     Core 
     Minuit2IF
-    MinLogLH 
-    RootReader
+    MinLogLH
     Tools
     HelicityFormalism
     ${ROOT_LIBRARIES}

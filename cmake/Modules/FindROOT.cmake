@@ -49,7 +49,7 @@ foreach(_cpt ${rootlibs} ${ROOT_FIND_COMPONENTS})
 	list(REMOVE_ITEM ROOT_FIND_COMPONENTS ${_cpt})
   endif()
 endforeach()
-if(${ROOT_LIBRARIES})
+if( ROOT_LIBRARIES )
   list(REMOVE_DUPLICATES ROOT_LIBRARIES)
 endif()
 

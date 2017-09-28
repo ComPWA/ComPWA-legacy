@@ -9,6 +9,7 @@
 #include <TH2D.h>
 #include <TH2Poly.h>
 #include <TGraph.h>
+#include <TTree.h>
 
 #include "Core/Event.hpp"
 #include "Core/Particle.hpp"

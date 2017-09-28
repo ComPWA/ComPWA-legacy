@@ -22,7 +22,9 @@ find_package( ROOT QUIET )
 find_package( GSL COMPONENTS gsl gslcblas QUIET )
 
 # Check if all requirements are found. Skip modules otherwise.
-IF( ${ROOT_FOUND} AND ${GSL_FOUND} )
+IF( ${ROOT_FOUND} AND ${GSL_FOUND}
+    AND TARGET DataReader AND TARGET HelicityFormalism
+)
 
 FILE(GLOB lib_srcs *.cpp)
 
@@ -43,7 +45,11 @@ add_library ( Tools
 
 target_link_libraries( Tools
   Core
+  DataReader
+  HelicityFormalism
   ${Boost_LIBRARIES}
+  ${ROOT_LIBRARIES}
+  ${GSL_LIBRARIES}
 )
 
 target_include_directories( Tools
