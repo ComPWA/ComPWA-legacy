@@ -4,6 +4,7 @@
 
 ///
 /// \file
+/// SumMinLogLH class.
 ///
 
 #ifndef _SUMMINLOGLH_HPP
@@ -27,16 +28,28 @@ namespace Estimator {
 
 ///
 /// \class SumMinLogLH
+/// Calculates the combined likelihood of multiple MinLogLH.
 ///
 class SumMinLogLH : public ComPWA::IEstimator {
 
 public:
   SumMinLogLH();
 
+  /// Value of minimum log likelhood function.
+  virtual double ControlParameter(ComPWA::ParameterList &par);
+
+  virtual void AddLogLh(std::shared_ptr<ComPWA::Estimator::MinLogLH> logLh) {
+    _minLogLh.push_back(logLh);
+  }
+  
+  virtual void UseFunctionTree(bool onoff);
+
 protected:
-  std::vector<std::shared_ptr<MinLogLH>> _minLogLh;
+  std::vector<std::shared_ptr<ComPWA::Estimator::MinLogLH>> _minLogLh;
+
+  std::shared_ptr<ComPWA::FunctionTree> _tree;
 };
 
 } // ns::Estimator
 } // ns::ComPWA
-#endif /* SumMinLogLH_hpp */
+#endif

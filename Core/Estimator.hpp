@@ -37,7 +37,7 @@ public:
   virtual ~IEstimator() {};
   
   /// Calculate value of Estimator given parameters \p par
-  virtual double controlParameter(ParameterList &par) = 0;
+  virtual double ControlParameter(ParameterList &par) = 0;
 
   /// Get the FunctionTree.
   /// If no FunctionTree is available an exception is thrown.

@@ -30,25 +30,25 @@ class FunctionTree;
 /// This class acts as a container for a parameter in a function tree. It has a
 /// Strategy to calculate its value and a name.
 ///
-class TreeNode : public std::enable_shared_from_this<TreeNode>,
-                 public ParObserver {
+class TreeNode : public std::enable_shared_from_this<ComPWA::TreeNode>,
+                 public ComPWA::ParObserver {
   /// We add FunctionTree as a friend so we can declare some functionts as
   /// protected which deal with the linking between parents and children.
-  friend class FunctionTree;
+  friend class ComPWA::FunctionTree;
 
 public:
   /// Constructor for tree using a \p name, a \p parameter, a \p strategy and
   /// an identifier for the parent node.
-  TreeNode(std::string name, std::shared_ptr<AbsParameter> parameter,
-           std::shared_ptr<Strategy> strategy,
-           std::shared_ptr<TreeNode> parent);
+  TreeNode(std::string name, std::shared_ptr<ComPWA::AbsParameter> parameter,
+           std::shared_ptr<ComPWA::Strategy> strategy,
+           std::shared_ptr<ComPWA::TreeNode> parent);
 
   /// Constructor for multidimensional TreeNode using a \p name, a vector of
   /// \p parameters, a \p strategy and an identifier for the parent node.
   TreeNode(std::string name,
-           std::vector<std::shared_ptr<AbsParameter>> &parameters,
-           std::shared_ptr<Strategy> strategy,
-           std::shared_ptr<TreeNode> parent);
+           std::vector<std::shared_ptr<ComPWA::AbsParameter>> &parameters,
+           std::shared_ptr<ComPWA::Strategy> strategy,
+           std::shared_ptr<ComPWA::TreeNode> parent);
 
   virtual ~TreeNode();
 
@@ -62,14 +62,14 @@ public:
   virtual void Recalculate();
 
   /// Get child parameter at \p position
-  virtual std::shared_ptr<AbsParameter> Parameter(unsigned int position = 0);
+  virtual std::shared_ptr<ComPWA::AbsParameter> Parameter(unsigned int position = 0);
 
   /// Get list of child parameters
-  virtual std::vector<std::shared_ptr<AbsParameter>> &Parameters();
+  virtual std::vector<std::shared_ptr<ComPWA::AbsParameter>> &Parameters();
   
   /// Fill ParameterList with parameters. The function is intended to be filled
   /// with fit parameters, so we add only DoubleParameters.
-  virtual void FillParameters(ParameterList &list);
+  virtual void FillParameters(ComPWA::ParameterList &list);
 
   /// Dimension of node (= number of parameters)
   virtual std::size_t Dimension() const { return _parameters.size(); };
@@ -78,22 +78,22 @@ public:
 
   /// Add link to children list. This function is intended to be used in
   /// debugging and testing.
-  virtual void AddChild(std::shared_ptr<TreeNode> childNode);
+  virtual void AddChild(std::shared_ptr<ComPWA::TreeNode> childNode);
 
   /// Add link to parents list. This function is intended to be used in
   /// debugging and testing.
-  virtual void AddParent(std::shared_ptr<TreeNode> parentNode);
+  virtual void AddParent(std::shared_ptr<ComPWA::TreeNode> parentNode);
 
   /// Get list of child nodes
-  virtual std::vector<std::shared_ptr<TreeNode>> &GetChildNodes();
+  virtual std::vector<std::shared_ptr<ComPWA::TreeNode>> &GetChildNodes();
 
   /// Find node with \p name within all downstream nodes. The first match is
   /// returned. In case no node exisits a NULL pointer is returned.
-  virtual std::shared_ptr<TreeNode> FindChildNode(std::string name) const;
+  virtual std::shared_ptr<ComPWA::TreeNode> FindChildNode(std::string name) const;
 
   //  /// Find node \p name are return its parameter. The first match is
   //  /// returned. In case no node exisits a NULL pointer is returned.
-  //  virtual std::shared_ptr<AbsParameter> ChildValue(std::string name) const;
+  //  virtual std::shared_ptr<ComPWA::AbsParameter> ChildValue(std::string name) const;
   //
   //  /** Return value of certain child node
   //   * We go recursively through out tree to find the specified node and
@@ -109,9 +109,15 @@ public:
   //   */
   //  virtual std::complex<double> getChildSingleValue(std::string name) const;
 
+  /// Streaming operator
+  friend std::ostream &operator<<(std::ostream &out,
+                                  const ComPWA::TreeNode &p) {
+    return out << p.Print(-1);
+  }
+
   /// Stream operator
   friend std::ostream &operator<<(std::ostream &os,
-                                  std::shared_ptr<TreeNode> p) {
+                                  std::shared_ptr<ComPWA::TreeNode> p) {
     return os << p->Print(-1);
   }
 
@@ -122,13 +128,13 @@ public:
 
 protected:
   /// List of parent nodes
-  std::vector<std::shared_ptr<TreeNode>> _parents;
+  std::vector<std::shared_ptr<ComPWA::TreeNode>> _parents;
 
   //// List of child nodes
-  std::vector<std::shared_ptr<TreeNode>> _children;
+  std::vector<std::shared_ptr<ComPWA::TreeNode>> _children;
 
   /// List of child leafes
-  std::vector<std::shared_ptr<AbsParameter>> _parameters;
+  std::vector<std::shared_ptr<ComPWA::AbsParameter>> _parameters;
 
   std::string _name;
 
@@ -137,7 +143,7 @@ protected:
 
   /// Node strategy. Strategy defines how the node value calculated given its
   /// child nodes and child leafs.
-  std::shared_ptr<Strategy> _strat;
+  std::shared_ptr<ComPWA::Strategy> _strat;
   
   /// Add this node to parents children-list
   virtual void LinkParents();

@@ -62,7 +62,7 @@ public:
   virtual ~MinLogLH() {};
   
   /// Value of minimum log likelhood function.
-  virtual double controlParameter(ComPWA::ParameterList &par);
+  virtual double ControlParameter(ComPWA::ParameterList &par);
 
   /// Trigger the use of a FunctionTree.
   /// If no tree is provided by the AmpIntensity implementation an exception

@@ -34,6 +34,11 @@ class FunctionTree {
 public:
   FunctionTree(){};
 
+  /// Create FunctionTree with head node.
+  FunctionTree(const std::string &name,
+               std::shared_ptr<ComPWA::Strategy> strategy,
+               unsigned int dimension = 1, bool useVec = false);
+  
   /// Constructor with the top node provided.
   /// \p head is used as FunctionTree's head node
   FunctionTree(std::shared_ptr<ComPWA::TreeNode> head);
@@ -103,7 +108,7 @@ public:
              std::string parent);
 
   /// Get the head of FunctionTree
-  virtual const std::shared_ptr<TreeNode> Head() const { return _head; }
+  virtual const std::shared_ptr<ComPWA::TreeNode> Head() const { return _head; }
 
   /// Recalculate those parts of the tree that have been changed.
   virtual void Recalculate() { _head->Recalculate(); }
@@ -113,16 +118,17 @@ public:
 
   /// Fill ParameterList with parameters. The function is intended to be filled
   /// with fit parameters, so we add only DoubleParameters.
-  virtual void FillParameters(ParameterList &list);
+  virtual void FillParameters(ComPWA::ParameterList &list);
 
   /// Streaming operator
-  friend std::ostream &operator<<(std::ostream &out, const FunctionTree &b) {
+  friend std::ostream &operator<<(std::ostream &out,
+                                  const ComPWA::FunctionTree &b) {
     return out << b.Head();
   }
 
   /// Streaming operator
   friend std::ostream &operator<<(std::ostream &out,
-                                  std::shared_ptr<FunctionTree> b) {
+                                  std::shared_ptr<ComPWA::FunctionTree> b) {
     return out << b->Head();
   }
 
@@ -137,25 +143,25 @@ protected:
   // We need to store the childTreee that were added via insertTree() here.
   // Because otherwise the
   // destructor of these tree's would delete the linking of the tree nodes.
-  std::vector<std::shared_ptr<FunctionTree>> _childTrees;
+  std::vector<std::shared_ptr<ComPWA::FunctionTree>> _childTrees;
 
   // Head node storing the absolute result
-  std::shared_ptr<TreeNode> _head;
+  std::shared_ptr<ComPWA::TreeNode> _head;
 
   // Store the TreeNodes is std::map. TreeNodes of childTrees in \p _childTrees
   // are not included here
-  std::map<std::string, std::shared_ptr<TreeNode>> _nodes;
+  std::map<std::string, std::shared_ptr<ComPWA::TreeNode>> _nodes;
 
   /// Recursive function to get all used NodeNames
-  void GetNamesDownward(std::shared_ptr<TreeNode> start,
+  void GetNamesDownward(std::shared_ptr<ComPWA::TreeNode> start,
                         std::vector<std::string> &childNames,
                         std::vector<std::string> &parentNames);
 
   /// Helper function to recursively add child nodes of a new tree
-  virtual void AddChildNodes(std::shared_ptr<TreeNode> startNode);
+  virtual void AddChildNodes(std::shared_ptr<ComPWA::TreeNode> startNode);
 
   /// Helper function to set all nodes to status changed
-  virtual void UpdateAll(std::shared_ptr<TreeNode> startNode);
+  virtual void UpdateAll(std::shared_ptr<ComPWA::TreeNode> startNode);
 };
 
 } // namespace ComPWA

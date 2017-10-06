@@ -60,7 +60,7 @@ MinLogLH::MinLogLH(std::shared_ptr<Kinematics> kin,
   return;
 }
 
-double MinLogLH::controlParameter(ParameterList &minPar) {
+double MinLogLH::ControlParameter(ParameterList &minPar) {
   double lh = 0;
   if (!_tree) {
     // Calculate \Sum_{ev} log()

@@ -588,7 +588,7 @@ int main(int argc, char **argv) {
 
     if (useRandomStartValues)
       randomStartValues(fitPar);
-    LOG(debug) << "Initial LH=" << esti->controlParameter(fitPar) << ".";
+    LOG(debug) << "Initial LH=" << esti->ControlParameter(fitPar) << ".";
 
     // Use Geneva as pre fitter
     //    std::shared_ptr<Optimizer::Optimizer> preOpti;

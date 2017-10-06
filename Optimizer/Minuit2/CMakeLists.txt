@@ -40,8 +40,6 @@ target_include_directories( Minuit2IF
   /Users/weidenka/work/external/root-build/include
 )
 
-MESSAGE ( "asdfadf -> " ${MINUIT2_INCLUDE_DIR} " -> " $ENV{ROOTSYS} " -> " ${Boost_INCLUDE_DIR})
-
 install (FILES ${lib_headers} DESTINATION include/ComPWA)
 
 install (TARGETS Minuit2IF

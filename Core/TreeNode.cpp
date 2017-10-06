@@ -77,12 +77,14 @@ void TreeNode::Recalculate() {
       ParameterList newVals;
 
       for (auto ch : _children) {
-        if (ch->Dimension() != _parameters.size())
+        ch->Recalculate();
+        if (ch->Dimension() == 1)
+          newVals.AddParameter(ch->Parameter(0));
+        else if (ch->Dimension() != _parameters.size())
+          newVals.AddParameter(ch->Parameter(ele));
+        else
           throw std::runtime_error("TreeNode::Recalculate() | Dimension of "
                                    "child nodes does not match");
-
-        ch->Recalculate();
-        newVals.AddParameter(ch->Parameter(ele));
       }
 
       try {

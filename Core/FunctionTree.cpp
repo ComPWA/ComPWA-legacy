@@ -6,6 +6,12 @@
 #include "Core/Logging.hpp"
 
 using namespace ComPWA;
+  /// Create FunctionTree with head node.
+  FunctionTree::FunctionTree(const std::string &name,
+               std::shared_ptr<ComPWA::Strategy> strategy,
+               unsigned int dimension, bool useVec){
+    CreateHead(name, strategy, dimension, useVec);
+  }
 
 FunctionTree::FunctionTree(std::shared_ptr<ComPWA::TreeNode> head)
     : _head(head) {
