@@ -233,7 +233,7 @@ int main(int argc, char **argv) {
       kin, intens, sample, phspSample, phspSample, 0, 0);
 
   esti->UseFunctionTree(true);
-  LOG(debug) << esti->GetTree()->Head()->to_str(25);
+  LOG(debug) << esti->GetTree()->Head()->Print(25);
 
   auto minuitif = new Optimizer::Minuit2::MinuitIF(esti, fitPar);
   minuitif->SetHesse(true);

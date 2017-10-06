@@ -76,7 +76,7 @@ double MinLogLH::controlParameter(ParameterList &minPar) {
   } else {
     _tree->Recalculate();
     std::shared_ptr<DoubleParameter> logLH =
-        std::dynamic_pointer_cast<DoubleParameter>(_tree->Head()->getValue());
+        std::dynamic_pointer_cast<DoubleParameter>(_tree->Head()->Parameter());
     lh = logLH->GetValue();
   }
   _nCalls++;

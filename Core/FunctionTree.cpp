@@ -10,7 +10,7 @@ using namespace ComPWA;
 FunctionTree::FunctionTree(std::shared_ptr<ComPWA::TreeNode> head)
     : _head(head) {
   _nodes.insert(std::pair<std::string, std::shared_ptr<ComPWA::TreeNode>>(
-      head->getName(), head));
+      head->Name(), head));
 }
 
 FunctionTree::~FunctionTree() {
@@ -18,7 +18,7 @@ FunctionTree::~FunctionTree() {
   // on shared pointers and those can not be deleted.
   auto iter = _nodes.begin();
   for (; iter != _nodes.end(); ++iter) {
-    iter->second->deleteLinks();
+    iter->second->DeleteLinks();
   }
 }
 
@@ -49,15 +49,15 @@ void FunctionTree::CreateHead(const std::string &name,
 
 void FunctionTree::InsertNode(std::shared_ptr<TreeNode> node,
                               std::string parent) {
-  std::string n = node->getName();
+  std::string n = node->Name();
   bool ret = _nodes
                  .insert(std::pair<std::string, std::shared_ptr<TreeNode>>(
-                     node->getName(), node))
+                     node->Name(), node))
                  .second;
   if (!ret)
     throw TreeBuildError("FunctionTree::insertNode | "
                          "Can not insert node " +
-                         node->getName() + "!");
+                         node->Name() + "!");
 
   // Assign new parent to head of new tree, create links
   std::shared_ptr<TreeNode> parentNode;
@@ -71,7 +71,7 @@ void FunctionTree::InsertNode(std::shared_ptr<TreeNode> node,
 
   // In case of an existing node, it is possible that this node
   // already have parents. Do need to consider this here?
-  node->addParent(parentNode);
+  node->AddParent(parentNode);
   //  inNode->linkParents();
 
   // Subtree already linked, but need to be added to list of nodes
@@ -88,8 +88,8 @@ void FunctionTree::InsertTree(std::shared_ptr<FunctionTree> tree,
 void FunctionTree::AddNode(std::shared_ptr<ComPWA::TreeNode> newNode) {
   // TODO: check existence, throw exception
   _nodes.insert(std::pair<std::string, std::shared_ptr<TreeNode>>(
-      newNode->getName(), newNode));
-  newNode->linkParents();
+      newNode->Name(), newNode));
+  newNode->LinkParents();
 }
 
 void FunctionTree::CreateNode(const std::string &name,
@@ -186,7 +186,7 @@ void FunctionTree::CreateNode(const std::string &name,
 
   _nodes.insert(
       std::pair<std::string, std::shared_ptr<TreeNode>>(name, newNode));
-  newNode->linkParents();
+  newNode->LinkParents();
   if (parent == "")
     _head = newNode; // if we created a head redirect pointer
 }
@@ -215,13 +215,13 @@ void FunctionTree::CreateLeaf(const std::string name,
 
   // setup connections
   if (exists) {
-    leaf->addParent(parentNode);
+    leaf->AddParent(parentNode);
   } else {
     leaf = std::shared_ptr<TreeNode>(
         new TreeNode(name, parameter, std::shared_ptr<Strategy>(), parentNode));
     _nodes.insert(
         std::pair<std::string, std::shared_ptr<TreeNode>>(name, leaf));
-    leaf->linkParents();
+    leaf->LinkParents();
     parameter->Attach(leaf);
     if (parent == "")
       _head = leaf; // if we created a head, redirect pointer
@@ -295,25 +295,30 @@ bool FunctionTree::SanityCheck() {
   return isSane;
 }
 
+void FunctionTree::FillParameters(ParameterList &list) {
+  _head->FillParameters(list);
+}
+
 void FunctionTree::GetNamesDownward(std::shared_ptr<TreeNode> start,
                                     std::vector<std::string> &childNames,
                                     std::vector<std::string> &parentNames) {
 
-  start->getParentNames(parentNames);
-  start->getChildrenNames(childNames);
+  start->FillParentNames(parentNames);
+  start->FillChildNames(childNames);
 
-  const std::vector<std::shared_ptr<TreeNode>> childs = start->getChildren();
+  const std::vector<std::shared_ptr<TreeNode>> childs = start->GetChildNodes();
   for (unsigned int i = 0; i < childs.size(); i++)
     GetNamesDownward(childs[i], childNames, parentNames);
   return;
 }
 
 void FunctionTree::AddChildNodes(std::shared_ptr<TreeNode> startNode) {
-  std::vector<std::shared_ptr<TreeNode>> newChildren = startNode->getChildren();
+  std::vector<std::shared_ptr<TreeNode>> newChildren =
+      startNode->GetChildNodes();
 
   for (unsigned int i = 0; i < newChildren.size(); i++) {
     _nodes.insert(std::pair<std::string, std::shared_ptr<TreeNode>>(
-        newChildren.at(i)->getName(), newChildren.at(i)));
+        newChildren.at(i)->Name(), newChildren.at(i)));
     //        if( !ret )
     //            throw TreeBuildError("FunctionTree::addChildNodes | "
     //                                 "Can not insert node
@@ -325,7 +330,8 @@ void FunctionTree::AddChildNodes(std::shared_ptr<TreeNode> startNode) {
 }
 
 void FunctionTree::UpdateAll(std::shared_ptr<TreeNode> startNode) {
-  std::vector<std::shared_ptr<TreeNode>> newChildren = startNode->getChildren();
+  std::vector<std::shared_ptr<TreeNode>> newChildren =
+      startNode->GetChildNodes();
   for (unsigned int i = 0; i < newChildren.size(); i++) {
     newChildren[i]->Update();
     UpdateAll(newChildren[i]);

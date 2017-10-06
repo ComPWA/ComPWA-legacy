@@ -106,10 +106,14 @@ public:
   virtual const std::shared_ptr<TreeNode> Head() const { return _head; }
 
   /// Recalculate those parts of the tree that have been changed.
-  void Recalculate() { _head->recalculate(); }
+  virtual void Recalculate() { _head->Recalculate(); }
 
   /// Check if FunctionTree is properly linked and some further checks.
-  bool SanityCheck();
+  virtual bool SanityCheck();
+
+  /// Fill ParameterList with parameters. The function is intended to be filled
+  /// with fit parameters, so we add only DoubleParameters.
+  virtual void FillParameters(ParameterList &list);
 
   /// Streaming operator
   friend std::ostream &operator<<(std::ostream &out, const FunctionTree &b) {
@@ -124,7 +128,9 @@ public:
 
   /// Print structure of tree and its values.
   /// Print down to \p level, level = -1 print the whole tree
-  std::string Print(unsigned int level = -1) { return _head->print(level); };
+  virtual std::string Print(unsigned int level = -1) {
+    return _head->Print(level);
+  };
 
 protected:
   // List of child tree's
@@ -140,17 +146,18 @@ protected:
   // are not included here
   std::map<std::string, std::shared_ptr<TreeNode>> _nodes;
 
-  //! Recursive function to get all used NodeNames
+  /// Recursive function to get all used NodeNames
   void GetNamesDownward(std::shared_ptr<TreeNode> start,
                         std::vector<std::string> &childNames,
                         std::vector<std::string> &parentNames);
 
-  //! Helper function to recursively add child nodes of a new tree
+  /// Helper function to recursively add child nodes of a new tree
   virtual void AddChildNodes(std::shared_ptr<TreeNode> startNode);
 
-  //! Helper function to set all nodes to status changed
+  /// Helper function to set all nodes to status changed
   virtual void UpdateAll(std::shared_ptr<TreeNode> startNode);
 };
 
 } // namespace ComPWA
 #endif
+
