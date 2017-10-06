@@ -162,15 +162,15 @@ IncoherentIntensity::GetTree(std::shared_ptr<Kinematics> kin,
 
   std::shared_ptr<FunctionTree> tr(new FunctionTree());
 
-  tr->createHead("IncoherentIntens(" + Name() + ")" + suffix,
+  tr->CreateHead("IncoherentIntens(" + Name() + ")" + suffix,
                  std::shared_ptr<Strategy>(new MultAll(ParType::MDOUBLE)));
-  tr->createLeaf("Strength", _strength,
+  tr->CreateLeaf("Strength", _strength,
                  "IncoherentIntens(" + Name() + ")" + suffix);
-  tr->createNode("SumOfCoherentIntens",
+  tr->CreateNode("SumOfCoherentIntens",
                  std::shared_ptr<Strategy>(new AddAll(ParType::MDOUBLE)),
                  "IncoherentIntens(" + Name() + ")" + suffix);
   for (auto i : _intens) {
-    tr->insertTree(i->GetTree(kin, sample, phspSample, toySample, nEvtVar),
+    tr->InsertTree(i->GetTree(kin, sample, phspSample, toySample, nEvtVar),
                    "SumOfCoherentIntens");
   }
   return tr;

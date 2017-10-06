@@ -5,12 +5,13 @@
 #
 # Find ROOT
 #
-find_package( ROOT QUIET )
+find_package( ROOT REQUIRED QUIET )
 
 SET(lib_srcs
   RootReader.cpp
   RootEfficiency.cpp
 )
+
 SET(lib_headers
   RootReader.hpp
   RootEfficiency.hpp
@@ -19,6 +20,7 @@ SET(lib_headers
 add_library( RootReader
   SHARED ${lib_srcs} ${lib_headers}
 )
+
 target_link_libraries( RootReader
   DataReader
   ${ROOT_LIBRARIES}

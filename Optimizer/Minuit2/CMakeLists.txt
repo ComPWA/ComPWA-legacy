@@ -17,9 +17,13 @@ find_package( Boost COMPONENTS
                REQUIRED QUIET
 )
 
-SET(lib_srcs MinuitFcn.cpp MinuitIF.cpp MinuitResult.cpp)
+set( lib_srcs
+     MinuitFcn.cpp MinuitIF.cpp MinuitResult.cpp
+)
 
-SET(lib_headers MinuitFcn.hpp MinuitIF.hpp MinuitResult.hpp ../Optimizer.hpp)
+set( lib_headers
+     MinuitFcn.hpp MinuitIF.hpp MinuitResult.hpp ../Optimizer.hpp
+)
 
 add_library( Minuit2IF
   SHARED ${lib_srcs} ${lib_headers}
@@ -33,9 +37,13 @@ target_link_libraries( Minuit2IF
 
 target_include_directories( Minuit2IF
   PUBLIC ${MINUIT2_INCLUDE_DIR} ${Boost_INCLUDE_DIR}
+  /Users/weidenka/work/external/root-build/include
 )
 
+MESSAGE ( "asdfadf -> " ${MINUIT2_INCLUDE_DIR} " -> " $ENV{ROOTSYS} " -> " ${Boost_INCLUDE_DIR})
+
 install (FILES ${lib_headers} DESTINATION include/ComPWA)
+
 install (TARGETS Minuit2IF
         LIBRARY DESTINATION lib
 )

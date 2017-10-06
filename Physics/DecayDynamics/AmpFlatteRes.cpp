@@ -210,28 +210,28 @@ AmpFlatteRes::GetTree(const ParameterList &sample, int pos,
   std::shared_ptr<FunctionTree> tr(new FunctionTree());
   //  tr->createHead("DynamicalFunction",
   //                 std::shared_ptr<Strategy>(new MultAll(ParType::MCOMPLEX)));
-  tr->createHead("Flatte" + suffix,
+  tr->CreateHead("Flatte" + suffix,
                  std::shared_ptr<Strategy>(new FlatteStrategy("")));
 
   //  tr->createNode("Flatte", std::shared_ptr<Strategy>(new
   //  FlatteStrategy("")),
   //                 "DynamicalFunction", sampleSize);
-  tr->createLeaf("Mass", _mass, "Flatte" + suffix);
+  tr->CreateLeaf("Mass", _mass, "Flatte" + suffix);
   for (int i = 0; i < _g.size(); i++) {
-    tr->createLeaf("g_" + std::to_string(i) + "_massA", _g.at(i).GetMassA(),
+    tr->CreateLeaf("g_" + std::to_string(i) + "_massA", _g.at(i).GetMassA(),
                    "Flatte" + suffix);
-    tr->createLeaf("g_" + std::to_string(i) + "_massB", _g.at(i).GetMassB(),
+    tr->CreateLeaf("g_" + std::to_string(i) + "_massB", _g.at(i).GetMassB(),
                    "Flatte" + suffix);
-    tr->createLeaf("g_" + std::to_string(i), _g.at(i).GetValueParameter(),
+    tr->CreateLeaf("g_" + std::to_string(i), _g.at(i).GetValueParameter(),
                    "Flatte" + suffix);
   }
-  tr->createLeaf("Spin", (double)_spin, "Flatte" + suffix);
-  tr->createLeaf("MesonRadius", _mesonRadius, "Flatte" + suffix);
-  tr->createLeaf("FormFactorType", _ffType, "Flatte" + suffix);
+  tr->CreateLeaf("Spin", (double)_spin, "Flatte" + suffix);
+  tr->CreateLeaf("MesonRadius", _mesonRadius, "Flatte" + suffix);
+  tr->CreateLeaf("FormFactorType", _ffType, "Flatte" + suffix);
   //_daughterMasses actually not used here. But we put it in as a cross check.
-  tr->createLeaf("MassA", _daughterMasses.first, "Flatte" + suffix);
-  tr->createLeaf("MassB", _daughterMasses.second, "Flatte" + suffix);
-  tr->createLeaf("Data_mSq[" + std::to_string(pos) + "]",
+  tr->CreateLeaf("MassA", _daughterMasses.first, "Flatte" + suffix);
+  tr->CreateLeaf("MassB", _daughterMasses.second, "Flatte" + suffix);
+  tr->CreateLeaf("Data_mSq[" + std::to_string(pos) + "]",
                  sample.GetMultiDouble(pos), "Flatte" + suffix);
 
   return tr;

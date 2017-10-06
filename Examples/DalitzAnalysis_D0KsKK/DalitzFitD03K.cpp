@@ -583,7 +583,7 @@ int main(int argc, char **argv) {
     std::cout.setf(std::ios::unitbuf);
     if (fittingMethod == "tree") {
       esti->UseFunctionTree(true);
-      LOG(debug) << esti->GetTree()->head()->to_str(25);
+      LOG(debug) << esti->GetTree()->Head()->to_str(25);
     }
 
     if (useRandomStartValues)
