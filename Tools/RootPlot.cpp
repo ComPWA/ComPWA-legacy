@@ -20,7 +20,6 @@ void RootPlot::SetFitAmp(std::shared_ptr<ComPWA::AmpIntensity> intens) {
   _plotComponents.push_back(intens);
   _componentNames.clear();
   _componentNames.push_back("Intensity");
-  _isFilled = 0;
 }
 
 void RootPlot::Write(std::string treePrefix, std::string fileName,
@@ -123,7 +122,5 @@ void RootPlot::Write(std::string treePrefix, std::string fileName,
     }
     phspTree->Write();
   }
-  _isFilled = 1;
-
   tf->Close();
 }

@@ -197,14 +197,14 @@ int main(int argc, char **argv) {
   sqrtS4230._pl =
       std::make_shared<RootPlot>(sqrtS4230._kin);
         sqrtS4230._pl->SetData(sqrtS4230._data);
-  sqrtS4230._pl->SetPhspData(sqrtS4230._mcSample);
+  sqrtS4230._pl->SetPhspSample(sqrtS4230._mcSample);
   sqrtS4230._pl->SetFitAmp(sqrtS4230._amp);
   sqrtS4230._pl->Write("4230", "plot.root", "RECREATE");
 
   sqrtS4260._pl =
       std::make_shared<RootPlot>(sqrtS4260._kin);
         sqrtS4260._pl->SetData(sqrtS4260._data);
-  sqrtS4260._pl->SetPhspData(sqrtS4260._mcSample);
+  sqrtS4260._pl->SetPhspSample(sqrtS4260._mcSample);
   sqrtS4260._pl->SetFitAmp(sqrtS4260._amp);
   sqrtS4260._pl->Write("4260", "plot.root", "UPDATE");
 
