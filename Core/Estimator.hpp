@@ -45,7 +45,7 @@ public:
 
   /// Kind for status flag during the minimization process.
   /// (e.g. number of likelihood evaluations)
-  virtual int NSteps() = 0 ;
+  virtual int NSteps() const = 0 ;
 
 protected:
   std::shared_ptr<FunctionTree> f;

@@ -74,7 +74,7 @@ public:
   virtual std::shared_ptr<ComPWA::FunctionTree> GetTree();
 
   /// Number of likelihood evaluations
-  virtual int NSteps() { return _nCalls; }
+  virtual int NSteps() const { return _nCalls; }
 
 protected:
   /// Initialize FunctionTree.

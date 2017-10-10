@@ -13,11 +13,11 @@ namespace ComPWA {
 namespace Tools {
 
 RootGenerator::RootGenerator(double cmsEnergy, double m1, double m2, double m3,
-                             int seed) : sqrtS(cmsEnergy), nPart(3){
+                             int seed)
+    : sqrtS(cmsEnergy), nPart(3) {
   gRandom = new TRandom3(0);
   if (seed != -1)
     SetSeed(seed);
-
 
   masses = new Double_t[nPart];
   masses[0] = m1;
@@ -73,16 +73,12 @@ RootGenerator::RootGenerator(std::shared_ptr<PartList> partL,
     LOG(info)
         << "RootGenerator::RootGenerator() | only 2 particles in the final"
            " state! There are no degrees of freedom!";
-
-  if (initialS.size() != 1)
-    throw std::runtime_error(
-        "RootGenerator::RootGenerator() | More than one "
-        "particle in initial State! Currently we can not deal with that!");
-
-  sqrtS = FindParticle(partL, initialS.at(0)).GetMass();
+  
+  auto p4 = kin->GetInitialFourMomentum();
+  sqrtS = p4.GetInvMass();
+  TLorentzVector W(p4.GetPx(), p4.GetPy(), p4.GetPz(), p4.GetE());
 
   masses = new Double_t[nPart];
-  TLorentzVector W(0.0, 0.0, 0.0, sqrtS);    //= beam + target;
   for (unsigned int t = 0; t < nPart; t++) { // particle 0 is mother particle
     masses[t] = FindParticle(partL, finalS.at(t)).GetMass();
   }
@@ -138,5 +134,5 @@ void UniformTwoBodyGenerator::Generate(Event &evt) {
   RootGenerator::GetGenerator()->SetDecay(W, nPart, masses);
   RootGenerator::Generate(evt);
 }
-} /* namespace Tools */
-} /* namespace ComPWA */
+} // namespace Tools
+} // namespace ComPWA

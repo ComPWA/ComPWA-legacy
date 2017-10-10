@@ -28,20 +28,18 @@ SubSystem::SubSystem(std::vector<int> recoilS, std::vector<int> finalA,
   // LOG(trace) << "SubSystem::SubSystem() | Creating sub system "<<title;
 }
 
- std::string SubSystem::to_string() const {
+std::string SubSystem::to_string() const {
   // Creating unique title
   std::stringstream stream;
-  stream << "(";
+  //  stream << "(";
   for (auto i : _recoilState)
     stream << std::to_string(i);
-  stream << ")->(";
+  stream << "_vs_";
   for (auto j = _finalStates.begin(); j != _finalStates.end(); ++j) {
     for (auto i : *j)
       stream << std::to_string(i);
     if (j != _finalStates.end() - 1)
-      stream << ")+(";
-    else
-      stream << ")";
+      stream << "_";
   }
 
   return stream.str();
@@ -52,8 +50,6 @@ bool SubSystem::operator==(const SubSystem &b) const {
     return true;
   return false;
 }
-
-
 
 void SubSystem::SetFinalStates(std::vector<std::vector<int>> v) {
   _finalStates = v;
@@ -89,9 +85,7 @@ void SubSystem::SetHelicities(std::vector<int> hel) {
   helicities_ = hel;
 }
 
-void SubSystem::SetRecoilState(const std::vector<int> r) {
-  _recoilState = r;
-}
+void SubSystem::SetRecoilState(const std::vector<int> r) { _recoilState = r; }
 
 const std::vector<int> &SubSystem::GetRecoilState() const {
   return _recoilState;

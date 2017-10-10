@@ -1,3 +1,5 @@
+
+
 // Copyright (c) 2013, 2015, 2017 The ComPWA Team.
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
@@ -52,3 +54,5 @@ void SumMinLogLH::UseFunctionTree(bool onoff) {
   }
   return;
 }
+
+std::shared_ptr<ComPWA::FunctionTree> SumMinLogLH::GetTree() { return _tree; }

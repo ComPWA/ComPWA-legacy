@@ -37,7 +37,7 @@ double AmpWignerD::dynamicalFunction(ComPWA::Spin J, ComPWA::Spin mu,
   assert(!std::isnan(result));
 
   // Not quite sure what the correct prefactor is in this case.
-  //	double norm = 1/sqrt(2*J.GetSpin()+1);
+  //  double norm = 1/sqrt(2*J.GetSpin()+1);
   double norm = (2 * J.GetSpin() + 1);
 
   return norm * result;
@@ -76,7 +76,12 @@ AmpWignerD::Factory(std::shared_ptr<PartList> partL,
   auto decayParticle = pt.get_child("DecayParticle");
 
   std::string name = pt.get<std::string>("DecayParticle.<xmlattr>.Name");
-  ComPWA::Spin J = partL->find(name)->second.GetSpinQuantumNumber("Spin");
+  auto partItr = partL->find(name);
+  if (partItr == partL->end())
+    throw std::runtime_error("AmpWignerD::Factory() | Particle " + name +
+                             " not found in list!");
+
+  ComPWA::Spin J = partItr->second.GetSpinQuantumNumber("Spin");
   obj->SetSpin(J);
   ComPWA::Spin mu(pt.get<double>("DecayParticle.<xmlattr>.Helicity"));
   obj->SetMu(mu);

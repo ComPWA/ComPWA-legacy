@@ -76,6 +76,8 @@ public:
 
   virtual std::string Name() const { return _name; };
 
+  virtual void SetName(std::string name) { _name = name; };
+
   /// Add link to children list. This function is intended to be used in
   /// debugging and testing.
   virtual void AddChild(std::shared_ptr<ComPWA::TreeNode> childNode);

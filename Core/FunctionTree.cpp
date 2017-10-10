@@ -6,12 +6,12 @@
 #include "Core/Logging.hpp"
 
 using namespace ComPWA;
-  /// Create FunctionTree with head node.
-  FunctionTree::FunctionTree(const std::string &name,
-               std::shared_ptr<ComPWA::Strategy> strategy,
-               unsigned int dimension, bool useVec){
-    CreateHead(name, strategy, dimension, useVec);
-  }
+/// Create FunctionTree with head node.
+FunctionTree::FunctionTree(const std::string &name,
+                           std::shared_ptr<ComPWA::Strategy> strategy,
+                           unsigned int dimension, bool useVec) {
+  CreateHead(name, strategy, dimension, useVec);
+}
 
 FunctionTree::FunctionTree(std::shared_ptr<ComPWA::TreeNode> head)
     : _head(head) {
@@ -61,8 +61,7 @@ void FunctionTree::InsertNode(std::shared_ptr<TreeNode> node,
                      node->Name(), node))
                  .second;
   if (!ret)
-    throw TreeBuildError("FunctionTree::insertNode | "
-                         "Can not insert node " +
+    throw TreeBuildError("FunctionTree::insertNode | Can not insert node " +
                          node->Name() + "!");
 
   // Assign new parent to head of new tree, create links
@@ -262,7 +261,6 @@ void FunctionTree::CreateLeaf(
 }
 
 bool FunctionTree::SanityCheck() {
-  bool isSane = true;
   if (!_head)
     throw std::runtime_error("FunctionTree::sanityCheck() | "
                              "This tree has no head!");
@@ -298,7 +296,7 @@ bool FunctionTree::SanityCheck() {
     return false;
   }
 
-  return isSane;
+  return true;
 }
 
 void FunctionTree::FillParameters(ParameterList &list) {

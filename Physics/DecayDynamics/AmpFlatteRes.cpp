@@ -360,7 +360,7 @@ void AmpFlatteRes::SetCouplings(std::vector<Coupling> vC) {
 
 void AmpFlatteRes::GetParameters(ParameterList &list) {
   AbstractDynamicalFunction::GetParameters(list);
-  // We check of for each parameter if a parameter of the same name exists in
+  // We check for each parameter if a parameter of the same name exists in
   // list. If so we check if both are equal and set the local parameter to the
   // parameter from the list. In this way we connect parameters that occur on
   // different positions in the amplitude.

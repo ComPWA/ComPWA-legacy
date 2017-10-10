@@ -20,6 +20,8 @@
 #include <iostream>
 #include <stdexcept>
 
+#include <boost/property_tree/ptree.hpp>
+
 namespace ComPWA {
 
 inline bool equal(double x, double y, int nEpsilon) {
@@ -102,6 +104,47 @@ public:
 protected:
   std::array<double, 4> _p4;
 };
+
+/// Read-in FourMomentum from a ptree. For each element we search for an
+/// attribute first, if non is found we search for members.
+inline FourMomentum FourMomentumFactory(const boost::property_tree::ptree pt) {
+  FourMomentum obj;
+  double px, py, pz, E;
+  
+  auto tmp = pt.get_optional<double>("<xmlattr>.x");
+  if( tmp ){
+    px = tmp.get();
+  } else {
+    px = pt.get<double>("x");
+  }
+  
+  tmp = pt.get_optional<double>("<xmlattr>.y");
+  if( tmp ){
+    py = tmp.get();
+  } else {
+    py = pt.get<double>("y");
+  }
+
+  tmp = pt.get_optional<double>("<xmlattr>.z");
+  if( tmp ){
+    pz = tmp.get();
+  } else {
+    pz = pt.get<double>("z");
+  }
+
+  tmp = pt.get_optional<double>("<xmlattr>.E");
+  if( tmp ){
+    E = tmp.get();
+  } else {
+    E = pt.get<double>("E");
+  }
+
+  obj.SetPx(px);
+  obj.SetPy(py);
+  obj.SetPz(pz);
+  obj.SetE(E);
+  return obj;
+}
 
 class Particle {
 public:

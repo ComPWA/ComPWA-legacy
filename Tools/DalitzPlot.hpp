@@ -17,6 +17,9 @@
 #include "Core/ParameterList.hpp"
 #include "Core/AmpIntensity.hpp"
 
+namespace ComPWA {
+namespace Tools {
+
 ///
 /// \class DalitzHisto
 ///  Simple class to create and fill Dalitz plots
@@ -148,5 +151,8 @@ protected:
   std::shared_ptr<ComPWA::DataReader::Data> s_phsp;
   std::shared_ptr<ComPWA::DataReader::Data> s_hitMiss;
 };
+
+} // ns::Tools
+} // ns::ComPWA
 
 #endif

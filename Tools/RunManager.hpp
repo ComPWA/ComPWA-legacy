@@ -34,46 +34,48 @@ using namespace DataReader;
 /// all modules you want to use and provide them to the RunManger. It checks
 /// for compatibility and if set up correctly it starts the fitting procedure.
 class RunManager {
-  
+
 public:
-  RunManager() {};
-  
+  RunManager(){};
+
   RunManager(std::shared_ptr<DataReader::Data>, std::shared_ptr<AmpIntensity>,
              std::shared_ptr<Optimizer::Optimizer>); // Fit
-  
+
   RunManager(unsigned int size, std::shared_ptr<AmpIntensity>,
              std::shared_ptr<Generator>); // Generate
 
   virtual ~RunManager();
 
   virtual void SetData(std::shared_ptr<Data> d) { sampleData_ = d; };
-  
+
   virtual std::shared_ptr<Data> GetData() { return sampleData_; };
-  
+
   virtual void
   SetPhspSample(std::shared_ptr<Data> phsp,
                 std::shared_ptr<Data> truePhsp = std::shared_ptr<Data>());
-  
+
   virtual std::shared_ptr<Data> GetPhspSample() { return samplePhsp_; };
-  
+
   virtual void SetTruePhspSample(std::shared_ptr<Data>);
-  
+
   virtual std::shared_ptr<Data> GetTruePhspSample() { return sampleTruePhsp_; };
 
-  virtual void SetAmplitude(std::shared_ptr<AmpIntensity> intens) { intens_ = intens; };
-  
+  virtual void SetAmplitude(std::shared_ptr<AmpIntensity> intens) {
+    intens_ = intens;
+  };
+
   virtual std::shared_ptr<AmpIntensity> GetAmplitude() { return intens_; };
-  
+
   virtual void SetOptimizer(std::shared_ptr<Optimizer::Optimizer> d) {
     opti_ = d;
   };
-  
+
   virtual std::shared_ptr<Optimizer::Optimizer> GetOptimizer() {
     return opti_;
   };
-  
+
   virtual void SetGenerator(std::shared_ptr<Generator> d) { gen_ = d; };
-  
+
   virtual std::shared_ptr<Generator> GetGenerator() { return gen_; };
 
   virtual std::shared_ptr<FitResult> Fit(ParameterList &);
@@ -94,14 +96,18 @@ public:
    * @param number Number of events to generate
    * @return
    */
-  virtual bool Generate(std::shared_ptr<Kinematics> kin, int number);
+  virtual bool Generate(std::shared_ptr<Kinematics> kin, int nEvents);
 
-protected:
-  static bool gen(int number, std::shared_ptr<Kinematics> kin, std::shared_ptr<Generator> gen,
+  static bool gen(int number, std::shared_ptr<Kinematics> kin,
+                  std::shared_ptr<Generator> gen,
                   std::shared_ptr<AmpIntensity> amp, std::shared_ptr<Data> data,
                   std::shared_ptr<Data> phsp = std::shared_ptr<Data>(),
                   std::shared_ptr<Data> phspTrue = std::shared_ptr<Data>());
 
+  static bool genPhsp(int nEvents, std::shared_ptr<Generator> gen,
+                      std::shared_ptr<Data> sample);
+
+protected:
   std::shared_ptr<Data> sampleData_; /*!< Pointer to data sample */
 
   std::shared_ptr<Data> samplePhsp_;     /*!< Pointer to phsp sample */

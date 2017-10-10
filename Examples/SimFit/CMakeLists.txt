@@ -25,6 +25,7 @@ target_link_libraries( SimFit
     Minuit2IF
     MinLogLH
     Tools
+    RootReader
     HelicityFormalism
     ${ROOT_LIBRARIES}
     ${Boost_LIBRARIES}

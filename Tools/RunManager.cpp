@@ -204,32 +204,37 @@ bool RunManager::gen(int number, std::shared_ptr<Kinematics> kin,
   if (!totalCalls)
     throw std::runtime_error("RunManager::gen() | Number of calls is zero! "
                              "There ust be something wrong!");
-  
+
   double genEff = (double)data->GetNEvents() / totalCalls;
   LOG(info) << "Efficiency of toy MC generation: " << genEff << ".";
 
   return true;
 }
 
-bool RunManager::GeneratePhsp(int number) {
-  if (number == 0)
+bool RunManager::GeneratePhsp(int nEvents) {
+  return genPhsp(nEvents, gen_, samplePhsp_);
+}
+
+bool RunManager::genPhsp(int nEvents, std::shared_ptr<Generator> gen,
+                         std::shared_ptr<Data> sample) {
+  if (nEvents == 0)
     return 0;
-  if (!samplePhsp_)
+  if (!sample)
     throw std::runtime_error("RunManager: generatePhsp() | "
                              "No phase-space sample set");
-  if (samplePhsp_->GetNEvents() > 0)
+  if (sample->GetNEvents() > 0)
     throw std::runtime_error("RunManager: generatePhsp() | "
                              "Dataset not empty! abort!");
 
-  LOG(info) << "Generating phase-space MC: [" << number << " events] ";
+  LOG(info) << "Generating phase-space MC: [" << nEvents << " events] ";
 
-  progressBar bar(number);
-  for (unsigned int i = 0; i < number; i++) {
+  progressBar bar(nEvents);
+  for (unsigned int i = 0; i < nEvents; i++) {
     if (i > 0)
       i--;
     Event tmp;
-    gen_->Generate(tmp);
-    double ampRnd = gen_->GetUniform(0, 1);
+    gen->Generate(tmp);
+    double ampRnd = gen->GetUniform(0, 1);
     if (ampRnd > tmp.GetWeight())
       continue;
 
@@ -239,7 +244,7 @@ bool RunManager::GeneratePhsp(int number) {
 
     tmp.SetEfficiency(1.);
     i++;
-    samplePhsp_->PushEvent(tmp); // unfortunatly not thread safe
+    sample->PushEvent(tmp); // unfortunatly not thread safe
     bar.nextEvent();
   }
   return true;

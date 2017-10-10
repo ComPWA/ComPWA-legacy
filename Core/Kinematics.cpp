@@ -7,13 +7,12 @@
 #include "Core/DataPoint.hpp"
 #include "Core/Event.hpp"
 
-namespace ComPWA {
+using namespace ComPWA;
 
-//! calculated the PHSP volume of the current decay by MC integration
-double Kinematics::GetPhspVolume() {
+double Kinematics::GetPhspVolume() const {
   if (!is_PS_area_calculated_) {
-    PS_area_ = calculatePSArea();
-    is_PS_area_calculated_ = true;
+    const_cast<double &>(PS_area_) = calculatePSArea();
+    const_cast<bool &>(is_PS_area_calculated_) = true;
   }
   return PS_area_;
 }
@@ -25,5 +24,3 @@ void Kinematics::SetPhspVolume(double vol) {
   LOG(info)<<"Kinematics::SetPhspVolume() | Setting phase space "
   "volume to "<<std::to_string(GetPhspVolume())<<".";
 }
-
-} /* namespace ComPWA */
