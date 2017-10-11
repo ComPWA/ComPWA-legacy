@@ -70,8 +70,9 @@ public:
   /// particle in initial or final state list is used later on for
   /// identification.
   HelicityKinematics(std::shared_ptr<PartList> partL,
-                     std::vector<pid> initialState,
-                     std::vector<pid> finalState);
+                     std::vector<pid> initialState, std::vector<pid> finalState,
+                     ComPWA::FourMomentum cmsP4 = ComPWA::FourMomentum(0, 0, 0,
+                                                                       0));
 
   /// Create HelicityKinematics from a boost::property_tree.
   /// The tree is expected to contain something like:

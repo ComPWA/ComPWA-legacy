@@ -20,12 +20,19 @@ namespace HelicityFormalism {
 
 HelicityKinematics::HelicityKinematics(std::shared_ptr<PartList> partL,
                                        std::vector<pid> initialState,
-                                       std::vector<pid> finalState)
-    : Kinematics(initialState, finalState), _partList(partL) {
+                                       std::vector<pid> finalState,
+                                       ComPWA::FourMomentum cmsP4)
+    : Kinematics(initialState, finalState, cmsP4), _partList(partL) {
 
-  // Currently we can only handle a particle decay.
-  // Note: Whats different for particle scattering?
-  assert(_initialState.size() == 1);
+  // If the cms four-momentum is not set of set it here
+  if (_initialP4 == FourMomentum(0, 0, 0, 0) && _initialState.size() == 1) {
+      double sqrtS = FindParticle(partL, _initialState.at(0)).GetMass();
+      _initialP4 = ComPWA::FourMomentum(0, 0, 0, sqrtS);
+  }
+
+  // Make sure cms momentum is set
+  if (_initialP4 == FourMomentum(0, 0, 0, 0))
+    assert(false);
 
   // Create title
   std::stringstream stream;
@@ -62,6 +69,10 @@ HelicityKinematics::HelicityKinematics(std::shared_ptr<PartList> partL,
     // initial four momentum is specified
     _initialP4 = FourMomentumFactory(pt.get_child("InitialFourMomentum"));
   }
+
+  // Make sure cms momentum is set
+  if (_initialP4 == FourMomentum(0, 0, 0, 0))
+    assert(false);
 
   auto finalS = pt.get_child("FinalState");
   _finalState = std::vector<int>(finalS.size());

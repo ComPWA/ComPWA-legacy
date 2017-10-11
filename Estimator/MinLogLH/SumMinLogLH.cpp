@@ -8,7 +8,7 @@
 
 using namespace ComPWA::Estimator;
 
-SumMinLogLH::SumMinLogLH() {}
+SumMinLogLH::SumMinLogLH() : _nCalls(0) {}
 
 double SumMinLogLH::ControlParameter(ParameterList &minPar) {
   double lh = 0;
@@ -21,6 +21,7 @@ double SumMinLogLH::ControlParameter(ParameterList &minPar) {
         std::dynamic_pointer_cast<DoubleParameter>(_tree->Head()->Parameter());
     lh = logLH->GetValue();
   }
+  _nCalls++;
   return lh; // return -logLH
 }
 

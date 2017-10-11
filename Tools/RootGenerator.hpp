@@ -53,13 +53,12 @@ public:
   virtual TGenPhaseSpace *GetGenerator() { return &event; }
 
 protected:
-  double sqrtS;
-
   TGenPhaseSpace event;
 
   size_t nPart;
 
   Double_t *masses;
+  FourMomentum cmsP4;
 };
 
 class UniformTwoBodyGenerator : public RootGenerator {
@@ -82,7 +81,7 @@ protected:
   double minSq, maxSq;
 };
 
-} /* namespace Tools */
-} /* namespace ComPWA */
+} // ns::Tools
+} // ns::ComPWA
 
-#endif /* TOOLS_ROOTGENERATOR_HPP_ */
+#endif

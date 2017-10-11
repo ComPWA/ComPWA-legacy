@@ -2,12 +2,10 @@
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
-//! Internal container representing a particle.
-/*! \class Particle
- * @file Particle.hpp
- * This class provides a internal container for information of a particle. The
- * class provides the momentum 4-vector and pid of the particle.
- */
+///
+/// \file
+/// Particle and FourMomentum class.
+///
 
 #ifndef _PARTICLE_HPP_
 #define _PARTICLE_HPP_
@@ -24,22 +22,24 @@
 
 namespace ComPWA {
 
+/// Check of numbers \p x and \p are equal within \p nEpsion times the numerical
+/// limit.
 inline bool equal(double x, double y, int nEpsilon) {
   return std::abs(x - y) < std::numeric_limits<double>::epsilon() *
                                std::abs(x + y) * nEpsilon ||
          std::abs(x - y) < std::numeric_limits<double>::min();
 }
 
+///
+/// \class FourMomentum
+/// ComPWA four momentum class.
+///
 class FourMomentum {
 
 public:
   FourMomentum(double px = 0, double py = 0, double pz = 0, double E = 0)
-      : _p4(std::array<double, 4>{{px, py, pz, E}}) {
-    //    _p4.at(0) = px;
-    //    _p4.at(1) = py;
-    //    _p4.at(2) = pz;
-    //    _p4.at(3) = E;
-  }
+      : _p4(std::array<double, 4>{{px, py, pz, E}}) {}
+
   FourMomentum(std::array<double, 4> p4) : _p4(p4) {}
 
   void SetPx(double px) { _p4.at(0) = px; }
@@ -110,30 +110,30 @@ protected:
 inline FourMomentum FourMomentumFactory(const boost::property_tree::ptree pt) {
   FourMomentum obj;
   double px, py, pz, E;
-  
+
   auto tmp = pt.get_optional<double>("<xmlattr>.x");
-  if( tmp ){
+  if (tmp) {
     px = tmp.get();
   } else {
     px = pt.get<double>("x");
   }
-  
+
   tmp = pt.get_optional<double>("<xmlattr>.y");
-  if( tmp ){
+  if (tmp) {
     py = tmp.get();
   } else {
     py = pt.get<double>("y");
   }
 
   tmp = pt.get_optional<double>("<xmlattr>.z");
-  if( tmp ){
+  if (tmp) {
     pz = tmp.get();
   } else {
     pz = pt.get<double>("z");
   }
 
   tmp = pt.get_optional<double>("<xmlattr>.E");
-  if( tmp ){
+  if (tmp) {
     E = tmp.get();
   } else {
     E = pt.get<double>("E");
@@ -146,19 +146,22 @@ inline FourMomentum FourMomentumFactory(const boost::property_tree::ptree pt) {
   return obj;
 }
 
+///
+/// \class Particle
+/// ComPWA particle class.
+/// This class provides a internal container for information of a particle. The
+/// class provides the momentum 4-vector and pid of the particle.
+///
 class Particle {
 public:
-  //! Default constructor
   Particle(double inPx = 0, double inPy = 0, double inPz = 0, double inE = 0,
            int inpid = 0, int c = 0);
 
   Particle(std::array<double, 4> p4, int inpid = 0, int c = 0)
       : _p4(p4), pid(inpid), charge(c){};
 
-  //! Copy constructor
   Particle(Particle const &);
 
-  //! Default destructor
   virtual ~Particle();
 
   virtual inline void SetPx(double px) { _p4.SetPx(px); }
@@ -179,26 +182,17 @@ public:
 
   friend std::ostream &operator<<(std::ostream &stream, const Particle &p);
 
-  //  Particle &operator+=(const Particle &rhs);
-
-  //  Particle operator+(const Particle &c2);
-
-  //! Get magnitude of three momentum
+  /// Magnitude of three momentum
   double GetThreeMomentum() const {
     return std::sqrt(FourMomentum::ThreeMomentumSq(_p4));
   }
 
-  //! Get invariant mass
+  /// Get invariant mass
   double GetMass() const { return std::sqrt(GetMassSq()); }
 
   inline double GetMassSq() const { return FourMomentum::InvariantMass(_p4); }
 
-  /**! Invariant mass
-   *
-   * @param inPa Particle A
-   * @param inPb Particle B
-   * @return
-   */
+  /// Invariant mass of \p inPa and \p inPb.
   static double InvariantMass(const Particle &inPa, const Particle &inPb);
 
 protected:
@@ -207,5 +201,5 @@ protected:
   int charge;
 };
 
-} /* namespace ComPWA */
+} // ns::ComPWA
 #endif

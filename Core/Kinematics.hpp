@@ -27,8 +27,9 @@ class Kinematics {
 public:
   //! Constructor
   Kinematics(std::vector<pid> initial = std::vector<pid>(),
-             std::vector<pid> finalS = std::vector<pid>())
-      : _initialState(initial), _finalState(finalS),
+             std::vector<pid> finalS = std::vector<pid>(),
+             ComPWA::FourMomentum cmsP4 = ComPWA::FourMomentum(0,0,0,0))
+      : _initialState(initial), _finalState(finalS), _initialP4(cmsP4),
         is_PS_area_calculated_(false), PS_area_(0.0){};
 
   /// Delete copy constructor. For each Kinematics in the analysis only
@@ -63,7 +64,7 @@ public:
   virtual int GetDataID(const ComPWA::SubSystem &sys) = 0;
 
   virtual std::vector<std::string> GetVarNames() const { return _varNames; }
-  
+
   virtual std::vector<std::string> GetVarTitles() const { return _varTitles; }
 
 protected:

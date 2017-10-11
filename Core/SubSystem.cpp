@@ -29,18 +29,17 @@ SubSystem::SubSystem(std::vector<int> recoilS, std::vector<int> finalA,
 }
 
 std::string SubSystem::to_string() const {
-  // Creating unique title
   std::stringstream stream;
-  //  stream << "(";
-  for (auto i : _recoilState)
-    stream << std::to_string(i);
-  stream << "_vs_";
+
   for (auto j = _finalStates.begin(); j != _finalStates.end(); ++j) {
     for (auto i : *j)
       stream << std::to_string(i);
     if (j != _finalStates.end() - 1)
       stream << "_";
   }
+  stream << "_vs_";
+  for (auto i : _recoilState)
+    stream << std::to_string(i);
 
   return stream.str();
 }

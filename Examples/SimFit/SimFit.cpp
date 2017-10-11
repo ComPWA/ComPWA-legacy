@@ -45,6 +45,204 @@ using namespace ComPWA::Physics::HelicityFormalism;
 using ComPWA::Physics::HelicityFormalism::IncoherentIntensity;
 using ComPWA::Optimizer::Minuit2::MinuitResult;
 
+std::string partList = R"####(
+<ParticleList>
+  <Particle Name="f0(980)">
+    <Pid>9000111</Pid>
+    <Parameter Type="Mass" Name="Mass_f0(980)">
+      <Value>0.994</Value>
+      <Error>0.001</Error>
+      <Fix>false</Fix>
+    </Parameter>
+    <QuantumNumber Class="Spin" Type="Spin" Value="0"/>
+    <QuantumNumber Class="Int" Type="Charge" Value="0"/>
+    <QuantumNumber Class="Int" Type="Parity" Value="1"/>
+    <DecayInfo Type="flatte">
+      <FormFactor Type="0" />
+      <Parameter Type="Coupling" Name="gPiPi_f0(980)">
+        <Value>2.66</Value>
+        <Error>0.001</Error>
+        <Fix>true</Fix>
+        <ParticleA>pi+</ParticleA>
+        <ParticleB>pi-</ParticleB>
+      </Parameter>
+      <Parameter Type="Coupling" Name="gKK_f0(980)">
+        <Value>3.121343843602647</Value>
+        <Error>0.001</Error>
+        <Fix>true</Fix>
+        <ParticleA>K+</ParticleA>
+        <ParticleB>K-</ParticleB>
+      </Parameter>
+      <Parameter Type="Coupling" Name="gKK_f0(980)">
+        <Value>3.121343843602647</Value>
+        <Error>0.001</Error>
+        <Fix>true</Fix>
+        <ParticleA>K_S0</ParticleA>
+        <ParticleB>K_S0</ParticleB>
+      </Parameter>
+      <Parameter Type="MesonRadius" Name="Radius_f0(980)">
+        <Value>1.5</Value>
+        <Fix>true</Fix>
+        <Min>1.0</Min>
+        <Max>2.0</Max>
+      </Parameter>
+    </DecayInfo>
+  </Particle>
+    <Particle Name="Zc(3900)">
+    <Pid>999999999</Pid>
+    <Parameter Type="Mass" Name="Mass_Zc(3900)">
+      <Value>3.900</Value>
+      <Error>0.001</Error>
+      <Fix>false</Fix>
+    </Parameter>
+    <QuantumNumber Class="Spin" Type="Spin" Value="0"/>
+    <QuantumNumber Class="Int" Type="Charge" Value="0"/>
+    <QuantumNumber Class="Int" Type="Parity" Value="1"/>
+    <DecayInfo Type="flatte">
+      <FormFactor Type="0" />
+      <Parameter Type="Coupling" Name="gPiJPsi_Zc(3900)">
+        <Value>0.075</Value>
+        <Error>0.001</Error>
+        <Fix>true</Fix>
+        <ParticleA>pi+</ParticleA>
+        <ParticleB>J/psi</ParticleB>
+      </Parameter>
+      <Parameter Type="Coupling" Name="gDD_Zc(3900)">
+        <Value>2.03</Value>
+        <Error>0.001</Error>
+        <Fix>true</Fix>
+        <ParticleA>D+</ParticleA>
+        <ParticleB>D-</ParticleB>
+      </Parameter>
+      <Parameter Type="MesonRadius" Name="Radius_Zc(3900)">
+        <Value>1.5</Value>
+        <Fix>true</Fix>
+        <Min>1.0</Min>
+        <Max>2.0</Max>
+      </Parameter>
+    </DecayInfo>
+  </Particle>
+</ParticleList>
+)####";
+
+std::string modelSqrtS4230 = R"####(
+<IncoherentIntensity Name="sqrtS4230_inc">
+  <Parameter Type="Strength" Name="strength_sqrtS4230_inc">
+  <Value>1.</Value>
+  <Fix>true</Fix>
+  </Parameter>
+  <CoherentIntensity Name="sqrtS4230">
+  <Parameter Type="Strength" Name="strength_d0tokkk">
+    <Value>1.</Value>
+    <Fix>true</Fix>
+  </Parameter>
+  <Amplitude Name="f0(980)">
+    <Parameter Type="Magnitude" Name="Magnitude_f0(980)0">
+    <Value>1.</Value>
+    <Fix>true</Fix>
+    </Parameter>
+    <Parameter Type="Phase" Name="Phase_f0(980)0">
+    <Value>0.</Value>
+    <Fix>true</Fix>
+    </Parameter>
+    <Resonance Name="f0(980)ToKK">
+    <DecayParticle Name="f0(980)" Helicity="0"/>
+    <SubSystem>
+      <RecoilSystem FinalState="2" />
+      <DecayProducts>
+      <Particle Name="pi+" FinalState="0"  Helicity="0"/>
+      <Particle Name="pi-" FinalState="1"  Helicity="0"/>
+      </DecayProducts>
+    </SubSystem>
+    </Resonance>
+  </Amplitude>
+  <Amplitude Name="Zc(3900)_JpsiPiMinus">
+    <Parameter Type="Magnitude" Name="Magnitude_Zc(3900)_JpsiPiMinus">
+    <Value>1.</Value>
+    <Fix>true</Fix>
+    </Parameter>
+    <Parameter Type="Phase" Name="Phase_Zc(3900)_JpsiPiMinus">
+    <Value>0.</Value>
+    <Fix>true</Fix>
+    </Parameter>
+    <Resonance Name="Zc(3900)_JpsiPiMinusRes">
+    <DecayParticle Name="Zc(3900)" Helicity="0"/>
+    <SubSystem>
+      <RecoilSystem FinalState="0" />
+      <DecayProducts>
+        <Particle Name="pi-" FinalState="1"  Helicity="0"/>
+        <Particle Name="J/psi" FinalState="2"  Helicity="0"/>
+      </DecayProducts>
+    </SubSystem>
+    </Resonance>
+  </Amplitude>
+  <Amplitude Name="Zc(3900)_JpsiPiPlus">
+    <Parameter Type="Magnitude" Name="Magnitude_Zc(3900)_JpsiPiPlus">
+    <Value>1.</Value>
+    <Fix>true</Fix>
+    </Parameter>
+    <Parameter Type="Phase" Name="Phase_Zc(3900)_JpsiPiPlus">
+    <Value>0.</Value>
+    <Fix>true</Fix>
+    </Parameter>
+    <Resonance Name="Zc(3900)_JpsiPiPlusRes">
+    <DecayParticle Name="Zc(3900)" Helicity="0"/>
+    <SubSystem>
+      <RecoilSystem FinalState="1" />
+      <DecayProducts>
+        <Particle Name="pi+" FinalState="0"  Helicity="0"/>
+        <Particle Name="J/psi" FinalState="2"  Helicity="0"/>
+      </DecayProducts>
+    </SubSystem>
+    </Resonance>
+  </Amplitude>
+  </CoherentIntensity>
+</IncoherentIntensity>
+)####";
+
+std::string modelSqrtS4260 = R"####(
+<IncoherentIntensity Name="sqrtS4260_inc">
+  <Parameter Type="Strength" Name="strength_sqrtS4260_inc">
+  <Value>1.</Value>
+  <Fix>true</Fix>
+  </Parameter>
+  <CoherentIntensity Name="sqrtS4260">
+  <Parameter Type="Strength" Name="strength_d0tokkk">
+    <Value>1.</Value>
+    <Fix>true</Fix>
+  </Parameter>
+  <Amplitude Name="f0(980)">
+    <Parameter Type="Magnitude" Name="Magnitude_f0(980)0">
+    <Value>1.</Value>
+    <Fix>true</Fix>
+    </Parameter>
+    <Parameter Type="Phase" Name="Phase_f0(980)0">
+    <Value>0.</Value>
+    <Fix>true</Fix>
+    </Parameter>
+    <Resonance Name="f0(980)ToKK">
+    <Parameter Type="Magnitude" Name="Magnitude_f0(980)ToPiPi">
+      <Value>1.</Value>
+      <Fix>true</Fix>
+    </Parameter>
+    <Parameter Type="Phase" Name="Phase_f0(980)ToPiPi">
+      <Value>0.</Value>
+      <Fix>true</Fix>
+    </Parameter>
+    <DecayParticle Name="f0(980)" Helicity="0"/>
+    <SubSystem>
+      <RecoilSystem FinalState="2" />
+      <DecayProducts>
+      <Particle Name="pi+" FinalState="0"  Helicity="0"/>
+      <Particle Name="pi-" FinalState="1"  Helicity="0"/>
+      </DecayProducts>
+    </SubSystem>
+    </Resonance>
+  </Amplitude>
+  </CoherentIntensity>
+</IncoherentIntensity>
+)####";
+
 struct energyPar {
   int _nEvents;
   std::shared_ptr<ComPWA::Physics::HelicityFormalism::HelicityKinematics> _kin;
@@ -66,40 +264,49 @@ struct energyPar {
 int main(int argc, char **argv) {
 
   // initialize logging
-  Logging log("DalitzFit-log.txt", boost::log::trivial::debug);
+  Logging log("log.txt", boost::log::trivial::debug);
 
   ptree tmpTr;
+  std::stringstream modelStream;
 
   // List with all particle information needed
   auto partL = std::make_shared<ComPWA::PartList>();
   ReadParticles(partL, defaultParticleList);
-  xml_parser::read_xml("particles.xml", tmpTr);
+  modelStream << partList;
+  xml_parser::read_xml(modelStream, tmpTr);
+  modelStream.clear();
   ReadParticles(partL, tmpTr);
 
   auto esti = std::make_shared<Estimator::SumMinLogLH>();
   ParameterList fitPar;
 
+  std::vector<pid> initialState({11, -11});
+  std::vector<pid> finalState({211, -211, 443});
+  FourMomentum cmsP4;
+
   //---------------------------------------------------
   // sqrtS = 4230
   //---------------------------------------------------
   energyPar sqrtS4230;
+  cmsP4 = FourMomentum(0, 0, 0, 4.230);
   sqrtS4230._nEvents = 1000;
-  xml_parser::read_xml("model4230.xml", tmpTr);
-  sqrtS4230._kin = std::make_shared<HelicityKinematics>(
-      partL, tmpTr.get_child("HelicityKinematics"));
-    sqrtS4230._gen =
-      std::make_shared<ComPWA::Tools::RootGenerator>(partL, sqrtS4230._kin);
-  
-  xml_parser::read_xml("model4230.xml", tmpTr);
+
+  sqrtS4230._kin = std::make_shared<HelicityKinematics>(partL, initialState,
+                                                        finalState, cmsP4);
+  sqrtS4230._gen = std::make_shared<ComPWA::Tools::RootGenerator>(
+      partL, sqrtS4230._kin, 123);
+
+  modelStream << modelSqrtS4230;
+  xml_parser::read_xml(modelStream, tmpTr);
+  modelStream.clear();
 
   //  sqrtS4230._data =
   //      std::make_shared<ComPWA::DataReader::RootReader>("data4230.root",
   //      "data");
   sqrtS4230._data = std::make_shared<Data>();
   sqrtS4230._mcSample = std::make_shared<Data>();
-  ComPWA::Tools::GeneratePhsp(100000, sqrtS4230._gen,
-                              sqrtS4230._mcSample);
-  
+  ComPWA::Tools::GeneratePhsp(100000, sqrtS4230._gen, sqrtS4230._mcSample);
+
   // Construct intensity class from model string
   sqrtS4230._amp = IncoherentIntensity::Factory(
       partL, sqrtS4230._kin, tmpTr.get_child("IncoherentIntensity"));
@@ -125,25 +332,25 @@ int main(int argc, char **argv) {
   //---------------------------------------------------
   // sqrtS = 4260
   //---------------------------------------------------
-
   energyPar sqrtS4260;
+  cmsP4 = FourMomentum(0, 0, 0, 4.260);
   sqrtS4260._nEvents = 1000;
-  xml_parser::read_xml("model4230.xml", tmpTr);
-  sqrtS4260._kin = std::make_shared<HelicityKinematics>(
-      partL, tmpTr.get_child("HelicityKinematics"));
-    sqrtS4260._gen =
-      std::make_shared<ComPWA::Tools::RootGenerator>(partL, sqrtS4260._kin);
-  
-  xml_parser::read_xml("model4230.xml", tmpTr);
+
+  sqrtS4260._kin = std::make_shared<HelicityKinematics>(partL, initialState,
+                                                        finalState, cmsP4);
+  sqrtS4260._gen = std::make_shared<ComPWA::Tools::RootGenerator>(
+      partL, sqrtS4260._kin, 456);
+
+  modelStream << modelSqrtS4260;
+  xml_parser::read_xml(modelStream, tmpTr);
 
   //  sqrtS4260._data =
   //      std::make_shared<ComPWA::DataReader::RootReader>("data4230.root",
   //      "data");
   sqrtS4260._data = std::make_shared<Data>();
   sqrtS4260._mcSample = std::make_shared<Data>();
-  ComPWA::Tools::GeneratePhsp(100000, sqrtS4260._gen,
-                              sqrtS4260._mcSample);
-  
+  ComPWA::Tools::GeneratePhsp(100000, sqrtS4260._gen, sqrtS4260._mcSample);
+
   // Construct intensity class from model string
   sqrtS4260._amp = IncoherentIntensity::Factory(
       partL, sqrtS4260._kin, tmpTr.get_child("IncoherentIntensity"));
@@ -196,16 +403,14 @@ int main(int argc, char **argv) {
   //---------------------------------------------------
   // 6) Plot data sample and intensity
   //---------------------------------------------------
-  sqrtS4230._pl =
-      std::make_shared<RootPlot>(sqrtS4230._kin);
-        sqrtS4230._pl->SetData(sqrtS4230._data);
+  sqrtS4230._pl = std::make_shared<RootPlot>(sqrtS4230._kin);
+  sqrtS4230._pl->SetData(sqrtS4230._data);
   sqrtS4230._pl->SetPhspSample(sqrtS4230._mcSample);
   sqrtS4230._pl->SetFitAmp(sqrtS4230._amp);
   sqrtS4230._pl->Write("4230", "plot.root", "RECREATE");
 
-  sqrtS4260._pl =
-      std::make_shared<RootPlot>(sqrtS4260._kin);
-        sqrtS4260._pl->SetData(sqrtS4260._data);
+  sqrtS4260._pl = std::make_shared<RootPlot>(sqrtS4260._kin);
+  sqrtS4260._pl->SetData(sqrtS4260._data);
   sqrtS4260._pl->SetPhspSample(sqrtS4260._mcSample);
   sqrtS4260._pl->SetFitAmp(sqrtS4260._amp);
   sqrtS4260._pl->Write("4260", "plot.root", "UPDATE");

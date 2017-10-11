@@ -84,7 +84,7 @@ void FitResult::PrintFitParameters(TableFormater *tableResult) {
       parErrorWidth = 33;
 
   tableResult->addColumn("Nr");
-  tableResult->addColumn("Name", 20);
+  tableResult->addColumn("Name", 30);
   if (printInitial)
     tableResult->addColumn("Initial Value", parErrorWidth);
   tableResult->addColumn("Final Value", parErrorWidth);
