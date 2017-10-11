@@ -35,6 +35,10 @@ target_link_libraries( SimFit
 target_include_directories( SimFit
     PUBLIC ${ROOT_INCLUDE_DIR} ${Boost_INCLUDE_DIR} )
 
+install(TARGETS SimFit
+    RUNTIME DESTINATION bin
+)
+
 ELSE ()
   MESSAGE( WARNING "Required targets not found! Not building\
                     SimFit executable!")

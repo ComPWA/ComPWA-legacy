@@ -34,6 +34,10 @@ target_link_libraries( DalitzFit
 target_include_directories( DalitzFit
     PUBLIC ${ROOT_INCLUDE_DIR} ${Boost_INCLUDE_DIR} )
 
+install(TARGETS DalitzFit
+    RUNTIME DESTINATION bin
+)
+
 ELSE ()
   MESSAGE( WARNING "Required targets not found! Not building\
                     DalitzFit executable!")
