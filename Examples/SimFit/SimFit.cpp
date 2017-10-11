@@ -21,12 +21,13 @@
 
 #include "Core/Logging.hpp"
 #include "Core/Properties.hpp"
+#include "Core/ProgressBar.hpp"
 #include "DataReader/RootReader/RootReader.hpp"
 #include "Physics/ParticleList.hpp"
 #include "Physics/HelicityFormalism/HelicityKinematics.hpp"
 #include "Physics/HelicityFormalism/IncoherentIntensity.hpp"
 #include "Tools/RootGenerator.hpp"
-#include "Tools/RunManager.hpp"
+#include "Tools/Generate.hpp"
 #include "Tools/DalitzPlot.hpp"
 #include "Tools/RootPlot.hpp"
 #include "Tools/ParameterTools.hpp"
@@ -38,6 +39,7 @@
 using namespace boost::property_tree;
 
 using namespace ComPWA;
+using namespace ComPWA::DataReader;
 using namespace ComPWA::Tools;
 using namespace ComPWA::Physics::HelicityFormalism;
 using ComPWA::Physics::HelicityFormalism::IncoherentIntensity;
@@ -95,7 +97,7 @@ int main(int argc, char **argv) {
   //      "data");
   sqrtS4230._data = std::make_shared<Data>();
   sqrtS4230._mcSample = std::make_shared<Data>();
-  ComPWA::RunManager::genPhsp(100000, sqrtS4230._gen,
+  ComPWA::Tools::GeneratePhsp(100000, sqrtS4230._gen,
                               sqrtS4230._mcSample);
   
   // Construct intensity class from model string
@@ -109,7 +111,7 @@ int main(int argc, char **argv) {
       sqrtS4230._mcSample->GetDataPoints(sqrtS4230._kin));
   sqrtS4230._amp->SetPhspSample(sqrtS4230._mcPoints, sqrtS4230._mcPoints);
 
-  ComPWA::RunManager::gen(sqrtS4230._nEvents, sqrtS4230._kin, sqrtS4230._gen,
+  ComPWA::Tools::Generate(sqrtS4230._nEvents, sqrtS4230._kin, sqrtS4230._gen,
                           sqrtS4230._amp, sqrtS4230._data, sqrtS4230._mcSample);
 
   sqrtS4230._minLH = std::make_shared<Estimator::MinLogLH>(
@@ -139,7 +141,7 @@ int main(int argc, char **argv) {
   //      "data");
   sqrtS4260._data = std::make_shared<Data>();
   sqrtS4260._mcSample = std::make_shared<Data>();
-  ComPWA::RunManager::genPhsp(100000, sqrtS4260._gen,
+  ComPWA::Tools::GeneratePhsp(100000, sqrtS4260._gen,
                               sqrtS4260._mcSample);
   
   // Construct intensity class from model string
@@ -153,7 +155,7 @@ int main(int argc, char **argv) {
       sqrtS4260._mcSample->GetDataPoints(sqrtS4260._kin));
   sqrtS4260._amp->SetPhspSample(sqrtS4260._mcPoints, sqrtS4260._mcPoints);
 
-  ComPWA::RunManager::gen(sqrtS4260._nEvents, sqrtS4260._kin, sqrtS4260._gen,
+  ComPWA::Tools::Generate(sqrtS4260._nEvents, sqrtS4260._kin, sqrtS4260._gen,
                           sqrtS4260._amp, sqrtS4260._data, sqrtS4260._mcSample);
 
   sqrtS4260._minLH = std::make_shared<Estimator::MinLogLH>(
