@@ -55,11 +55,11 @@
 
 using namespace std;
 using namespace ComPWA;
-using ComPWA::DataReader::RootReader;
+using namespace ComPWA::DataReader;
 using namespace ComPWA::Physics::HelicityFormalism;
 
 ///
-///Dalitz plot analysis of the decay D0->K_S0 K_ K-.
+/// Dalitz plot analysis of the decay D0->K_S0 K_ K-.
 ///
 int main(int argc, char **argv) {
 
@@ -332,7 +332,7 @@ int main(int argc, char **argv) {
       new Tools::RootGenerator(trueModelPartL, trueModelKin->GetInitialState(),
                                trueModelKin->GetFinalState(), seed));
 
-  RunManager run;
+  ComPWA::Tools::RunManager run;
   run.SetGenerator(gen);
   //======================= EFFICIENCY =============================
   auto eff = std::shared_ptr<Efficiency>(new UnitEfficiency());
@@ -344,7 +344,7 @@ int main(int argc, char **argv) {
     TH1 *h_total = (TH1 *)tf->Get(TString(efficiencyObject) + "_total");
     DataReader::RootEfficiency rootEff(h_passed, h_total);
     tf->Close();
-    std::shared_ptr<Efficiency> eff = std::make_shared<RootEfficiency>(rootEff);
+    auto eff = std::make_shared<ComPWA::DataReader::RootEfficiency>(rootEff);
   }
 
   // Unbinned efficiency
@@ -698,7 +698,7 @@ int main(int argc, char **argv) {
     //      Amplitude::UpdateAmpParameterList(ampVec, finalParList);
 
     //------- phase-space sample
-    std::shared_ptr<ComPWA::Data> pl_phspSample(new RootReader());
+    std::shared_ptr<Data> pl_phspSample(new RootReader());
     LOG(info) << "Plotting results...";
     if (!phspEfficiencyFile.empty()) { // unbinned plotting
                                        // sample with accepted phsp events
@@ -723,7 +723,7 @@ int main(int argc, char **argv) {
     pl_phspSample->SetEfficiency(trueModelKin, eff);
 
     //-------- Instance of DalitzPlot
-    DalitzPlot pl(fitModelKin, fileNamePrefix, plotNBins);
+    ComPWA::Tools::DalitzPlot pl(fitModelKin, fileNamePrefix, plotNBins);
     // set data sample
     pl.SetData(sample);
     // set phsp sample
