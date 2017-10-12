@@ -40,7 +40,9 @@ target_include_directories( Minuit2IF
   /Users/weidenka/work/external/root-build/include
 )
 
-install (FILES ${lib_headers} DESTINATION include/ComPWA)
+install (FILES ${lib_headers}
+    DESTINATION include/ComPWA/Optimizer/Minuit2IF
+)
 
 install (TARGETS Minuit2IF
         LIBRARY DESTINATION lib

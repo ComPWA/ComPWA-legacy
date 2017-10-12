@@ -16,7 +16,10 @@ target_include_directories(
   PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
-install (FILES ${lib_headers} DESTINATION include/ComPWA)
+install (FILES ${lib_headers}
+    DESTINATION include/ComPWA/Estimator/ChiOneD
+)
+
 install(TARGETS ChiOneD
         LIBRARY DESTINATION lib
 )

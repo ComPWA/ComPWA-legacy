@@ -41,7 +41,10 @@ target_include_directories( DataReader
   PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
-install (FILES ${lib_headers} DESTINATION include/ComPWA)
+install (FILES ${lib_headers}
+    DESTINATION include/ComPWA/DataReader
+)
+
 install(TARGETS DataReader
         LIBRARY DESTINATION lib
 )

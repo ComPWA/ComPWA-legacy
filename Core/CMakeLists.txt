@@ -38,7 +38,9 @@ TARGET_INCLUDE_DIRECTORIES( Core
 #
 # Install libraries
 #
-INSTALL(FILES ${lib_headers} DESTINATION include/ComPWA)
+INSTALL(FILES ${lib_headers}
+    DESTINATION include/ComPWA/Core
+)
 
 INSTALL(TARGETS Core
         LIBRARY DESTINATION lib

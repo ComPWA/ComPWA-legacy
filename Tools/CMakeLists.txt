@@ -56,7 +56,10 @@ target_include_directories( Tools
   PUBLIC ${ROOT_INCLUDE_DIR} ${Boost_INCLUDE_DIR} ${GSL_INCLUDE_DIR} )
 
 
-install( FILES ${lib_headers} DESTINATION include/ComPWA )
+install( FILES ${lib_headers}
+    DESTINATION include/ComPWA/Tools
+)
+
 install( TARGETS Tools
         LIBRARY DESTINATION lib
 )

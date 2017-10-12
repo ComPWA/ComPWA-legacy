@@ -29,7 +29,10 @@ target_link_libraries( RootReader
 target_include_directories( RootReader
   PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${ROOT_INCLUDE_DIR})
 
-install (FILES ${lib_headers} DESTINATION include/ComPWA)
+install (FILES ${lib_headers}
+    DESTINATION include/ComPWA/DataReader/RootReader
+)
+
 install(TARGETS RootReader
         LIBRARY DESTINATION lib
 )

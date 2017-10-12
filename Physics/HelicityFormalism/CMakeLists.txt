@@ -35,7 +35,10 @@ target_include_directories( HelicityFormalism
   PUBLIC ${Boost_INCLUDE_DIR}
 )
 
-install (FILES ${lib_headers} DESTINATION include/ComPWA)
+install (FILES ${lib_headers}
+    DESTINATION include/ComPWA/Physics/HelicityFormalism
+)
+
 install(TARGETS HelicityFormalism
         LIBRARY DESTINATION lib
 )
