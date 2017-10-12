@@ -41,7 +41,7 @@ target_include_directories( Minuit2IF
 )
 
 install (FILES ${lib_headers}
-    DESTINATION include/ComPWA/Optimizer/Minuit2IF
+    DESTINATION include/ComPWA/Optimizer/Minuit2
 )
 
 install (TARGETS Minuit2IF

@@ -57,7 +57,7 @@ protected:
   double mass_min;    //! minimum value of masssq
   double mass_max;    //! maximum value of masssq
 
-  virtual double calculatePSArea() { return (mass_max - mass_min); }
+  virtual double calculatePSArea() const { return (mass_max - mass_min); }
 };
 
 } /* namespace ComPWA */

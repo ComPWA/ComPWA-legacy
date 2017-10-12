@@ -18,7 +18,7 @@ SET( lib_srcs IncoherentIntensity.cpp CoherentIntensity.cpp
 SET( lib_headers IncoherentIntensity.hpp CoherentIntensity.hpp
     SequentialTwoBodyDecay.hpp PartialDecay.hpp PartialDecay.hpp
     SequentialTwoBodyDecay.hpp AmpWignerD.hpp HelicityKinematics.hpp
-    ../Amplitude.hpp ../Resonance.hpp )
+    ../Amplitude.hpp ../Resonance.hpp ../ParticleList.hpp)
 
 add_library( HelicityFormalism
   SHARED ${lib_srcs} ${lib_headers}
