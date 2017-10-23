@@ -6,6 +6,7 @@
 # FindBoost
 #
 find_package(Boost COMPONENTS
+               log
                program_options
                REQUIRED QUIET
 )
