@@ -43,12 +43,12 @@ inline std::complex<double> phspFactor(double sqrtS, double ma, double mb) {
 
   // == Two types of analytic continuation
   // 1) Complex sqrt
-  //	std::complex<double> rhoOld;
-  //	rhoOld = sqrt(std::complex<double>(qSqValue(sqrtS,ma,mb))) /
+  //  std::complex<double> rhoOld;
+  //  rhoOld = sqrt(std::complex<double>(qSqValue(sqrtS,ma,mb))) /
   //(8*M_PI*sqrtS); //PDG definition
-  //	rhoOld = sqrt(std::complex<double>(qSqValue(sqrtS,ma,mb))) /
+  //  rhoOld = sqrt(std::complex<double>(qSqValue(sqrtS,ma,mb))) /
   //(0.5*sqrtS); //BaBar definition
-  //	return rhoOld; //complex sqrt
+  //  return rhoOld; //complex sqrt
 
   /* 2) Correct analytic continuation
    * proper analytic continuation (PDG 2014 - Resonances (47.2.2))
@@ -113,34 +113,32 @@ inline double FormFactor(double sqrtS, double ma, double mb, double spin,
   if (type == formFactorType::BlattWeisskopf && spin == 0) {
     return 1.0;
   }
+  
+  double ff = 0.0;
 
-  // Form factor for a0(980) used by Crystal Barrel (Phys.Rev.D78-074023)
   if (type == formFactorType::CrystalBarrel) {
+    // Form factor for a0(980) used by Crystal Barrel (Phys.Rev.D78-074023)
     if (spin == 0) {
       double qSq = std::norm(qValue);
       double alpha = mesonRadius * mesonRadius / 6;
-      return std::exp(-alpha * qSq);
+      ff = std::exp(-alpha * qSq);
     } else
       throw std::runtime_error("Kinematics::FormFactor() | "
                                "Form factors of type " +
                                std::string(formFactorTypeString[type]) +
                                " are implemented for spin 0 only!");
-  }
-
-  double ff = 0.0;
-  // Blatt-Weisskopt form factors with normalization F(x=mR) = 1.
-  // Reference: S.U.Chung Annalen der Physik 4(1995) 404-430
-  // z = q / (interaction range). For the interaction range we assume
-  // 1/mesonRadius
-  if (type == formFactorType::BlattWeisskopf) {
+  } else if (type == formFactorType::BlattWeisskopf) {
+    // Blatt-Weisskopt form factors with normalization F(x=mR) = 1.
+    // Reference: S.U.Chung Annalen der Physik 4(1995) 404-430
+    // z = q / (interaction range). For the interaction range we assume
+    // 1/mesonRadius
     if (spin == 0)
       return 1.0;
     double qSq = std::norm(qValue);
     double z = qSq * mesonRadius * mesonRadius;
-    /* Events below threshold
-     * What should we do if event is below threshold? Shouldn't really influence
-     * the result
-     * because resonances at threshold don't have spin(?) */
+    // Events below threshold. What should we do if event is below threshold?
+    // Shouldn't really influence the result because resonances at threshold
+    // don't have spin(?).
     z = std::fabs(z);
 
     if (spin == 1) {
@@ -148,21 +146,22 @@ inline double FormFactor(double sqrtS, double ma, double mb, double spin,
     } else if (spin == 2) {
       ff = (sqrt(13 * z * z / ((z - 3) * (z - 3) + 9 * z)));
     } else if (spin == 3) {
-      ff = (
-          sqrt(277 * z * z * z / (z * (z - 15) * (z - 15) + 9 * (2 * z - 5))));
+      ff =
+          (sqrt(277 * z * z * z / (z * (z - 15) * (z - 15) + 9 * (2 * z - 5))));
     } else if (spin == 4) {
       ff = (sqrt(12746 * z * z * z * z /
-                   ((z * z - 45 * z + 105) * (z * z - 45 * z + 105) +
-                    25 * z * (2 * z - 21) * (2 * z - 21))));
+                 ((z * z - 45 * z + 105) * (z * z - 45 * z + 105) +
+                  25 * z * (2 * z - 21) * (2 * z - 21))));
     } else
       throw std::runtime_error(
           "Kinematics::FormFactor() | Form factors of type " +
           std::string(formFactorTypeString[type]) +
           " are implemented for spins up to 4!");
+  } else {
+    throw std::runtime_error("Kinematics::FormFactor() | Form factor type " +
+                             std::to_string((long long int)type) +
+                             " not specified!");
   }
-  throw std::runtime_error("Kinematics::FormFactor() | Form factor type " +
-                           std::to_string((long long int)type) +
-                           " not specified!");
 
   return ff;
 }
