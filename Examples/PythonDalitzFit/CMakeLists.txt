@@ -3,16 +3,22 @@
 # The REQUIRED statement is somehow not working
 find_package( ROOT REQUIRED QUIET )
 
+find_package(Boost COMPONENTS
+               program_options
+               REQUIRED QUIET
+)
+
 #FILE(GLOB lib_srcs *.cpp)
 #FILE(GLOB lib_headers *.hpp)
 add_library ( PythonDalitzFit SHARED 
-  PythonFit.cpp PlotData.cpp PythonFit.hpp PlotData.hpp Tools.hpp systematics.hpp
+  PythonFit.cpp PythonFit.hpp
 )
 target_link_libraries( PythonDalitzFit 
   HelicityFormalism
   Minuit2IF
   MinLogLH
   RootReader
+  Tools
   Core
   ${ROOT_LIBRARIES} 
   ${Boost_LIBRARIES} 
@@ -27,16 +33,33 @@ target_include_directories( PythonDalitzFit
   PUBLIC 
   ${GENEVA_INCLUDE_DIR}
   ${ROOT_INCLUDE_DIR} 
-  ${Boost_INCLUDE_DIR} 
+  ${Boost_INCLUDE_DIR}
+  ${PYTHON_INCLUDE_DIRS}
 )
 
 install (TARGETS PythonDalitzFit DESTINATION lib/ )
 install (FILES ${lib_headers} DESTINATION include/ComPWA/ )
 
-IF(PYTHONLIBS_FOUND)
+add_subdirectory("/home/michel/workspace/pybind11-master" "${CMAKE_CURRENT_BINARY_DIR}/pybind11_build")
+pybind11_add_module(Dalitz_ext MODULE Dalitz_ext.cpp)
+target_link_libraries( Dalitz_ext 
+  PUBLIC
+  Core 
+  PythonDalitzFit 
+  ${Boost_LIBRARIES}
+)
+target_include_directories( Dalitz_ext 
+  PUBLIC 
+  ${GENEVA_INCLUDE_DIR}
+  ${ROOT_INCLUDE_DIR} 
+  ${Boost_INCLUDE_DIR}
+  ${PYTHON_INCLUDE_DIRS}
+)
+
+#IF(PYTHONLIBS_FOUND)
     # Define the wrapper library that wraps our library
-    add_library( Dalitz_ext SHARED Dalitz_ext.cpp )
-    target_link_libraries( Dalitz_ext Core PythonDalitzFit ${Boost_LIBRARIES} )
+  #  add_library( Dalitz_ext SHARED Dalitz_ext.cpp )
+  #  target_link_libraries( Dalitz_ext Core PythonDalitzFit ${Boost_LIBRARIES} )
     # don't prepend wrapper library name with lib
-    set_target_properties( Dalitz_ext PROPERTIES PREFIX "" )
-ENDIF()
+  #  set_target_properties( Dalitz_ext PROPERTIES PREFIX "" )
+#ENDIF()

@@ -21,7 +21,6 @@
 
 #include "Core/ParameterList.hpp"
 #include "Core/TableFormater.hpp"
-#include "Core/PhysConst.hpp"
 #include "Core/FitResult.hpp"
 
 #include "Optimizer/Geneva/GStartIndividual.hpp"

@@ -60,6 +60,9 @@ find_package( Boost COMPONENTS
                REQUIRED
 )
 
+#Find Python
+#find_package( PythonLibs )
+
 # Workaround for clang+boost.python
 # ${CMAKE_CXX_COMPILER_ID} can be one of {GNU Clang AppleClang Intel MSVC}
 # The python interface is still work in progress, so we disable python by
