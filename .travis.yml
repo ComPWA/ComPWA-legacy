@@ -67,6 +67,8 @@ matrix:
               - doxygen-doc
               - doxygen-gui
               - graphviz
+      before_script:
+        - env
       script:
         # Generate and deploy documentation to gh-pages 
         # Only in case that this is not a pull request
