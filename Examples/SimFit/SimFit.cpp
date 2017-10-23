@@ -382,7 +382,7 @@ int main(int argc, char **argv) {
   //---------------------------------------------------
   esti->UseFunctionTree(true);
   LOG(debug) << esti->GetTree()->Head()->Print(25);
-  LOG(info) << "Fit parameter list: " << fitPar;
+  LOG(info) << "Fit parameter list: " << fitPar.to_str();
   auto minuitif = new Optimizer::Minuit2::MinuitIF(esti, fitPar);
   minuitif->SetHesse(true);
   auto result = minuitif->exec(fitPar);
