@@ -58,6 +58,11 @@ using namespace ComPWA;
 using namespace ComPWA::DataReader;
 using namespace ComPWA::Physics::HelicityFormalism;
 
+
+// Enable serialization of MinuitResult. For some reason has to be outside
+// any namespaces.
+BOOST_CLASS_EXPORT(ComPWA::Optimizer::Minuit2::MinuitResult)
+
 ///
 /// Dalitz plot analysis of the decay D0->K_S0 K_ K-.
 ///
@@ -356,13 +361,6 @@ int main(int argc, char **argv) {
     phspData->ReduceToPhsp(trueModelKin);
   }
 
-  //========== Generation of toy phase space sample ==
-  std::shared_ptr<Data> toyPhspData(new RootReader()); // Toy sample
-  run.SetPhspSample(toyPhspData);
-  run.GeneratePhsp(mcPrecision);
-  toyPhspData->SetEfficiency(trueModelKin,
-                             eff); // set efficiency values for each event
-
   // ========= AmpIntensity ========
   auto intens = IncoherentIntensity::Factory(
       fitModelPartL, fitModelKin,
@@ -371,6 +369,13 @@ int main(int argc, char **argv) {
   auto trueIntens = IncoherentIntensity::Factory(
       trueModelPartL, trueModelKin,
       trueModelTree.get_child("IncoherentIntensity"));
+
+  //========== Generation of toy phase space sample ==
+  std::shared_ptr<Data> toyPhspData(new RootReader()); // Toy sample
+  run.SetPhspSample(toyPhspData);
+  run.GeneratePhsp(mcPrecision);
+  toyPhspData->SetEfficiency(trueModelKin,
+                             eff); // set efficiency values for each event
 
   // Setting samples for normalization
   auto toyPoints = std::make_shared<std::vector<dataPoint>>(
@@ -641,6 +646,7 @@ int main(int argc, char **argv) {
     std::ofstream ofs(fileNamePrefix + std::string("-fitResult.xml"));
     boost::archive::xml_oarchive oa(ofs);
     oa << BOOST_SERIALIZATION_NVP(result);
+    
     if (!disableFileLog) { // Write fit result
       // Save final amplitude
       boost::property_tree::ptree ptout;
@@ -735,8 +741,6 @@ int main(int argc, char **argv) {
     pl.DrawComponent("BkgD0toKSK+K-", "Background", kRed);
     //    pl.DrawComponent("a0(980)0", "a_{0}(980)^{0}", kMagenta+2);
     //    pl.DrawComponent("phi(1020)", "#phi(1020)", kMagenta);
-
-    // pl.setCorrectEfficiency(plotCorrectEfficiency);
 
     // Fill histograms and create canvases
     pl.Plot();
