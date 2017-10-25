@@ -202,13 +202,19 @@ void MinuitResult::PrintCorrelationMatrix(TableFormater *tableCorr) {
 
   unsigned int n = 0;
   tableCorr->header();
+std::cout << " Corr: " << corr.size() << " " << corr.at(0).size() << std::endl;
   for (unsigned int o = 0; o < finalParameters.GetNDouble(); o++) {
     std::shared_ptr<DoubleParameter> ppp =
         finalParameters.GetDoubleParameter(o);
     if (ppp->IsFixed())
       continue;
     *tableCorr << ppp->GetName();
-    *tableCorr << globalCC.at(n);
+    try{
+      *tableCorr << globalCC.at(n);
+    }catch(...){
+      *tableCorr << "?";
+    }
+
     for (unsigned int t = 0; t < corr.size(); t++) {
       if (n >= corr.at(0).size()) {
         *tableCorr << " ";
@@ -222,6 +228,7 @@ void MinuitResult::PrintCorrelationMatrix(TableFormater *tableCorr) {
     n++;
   }
   tableCorr->footer();
+std::cout << " nach problem " << std::endl;
   return;
 }
 
