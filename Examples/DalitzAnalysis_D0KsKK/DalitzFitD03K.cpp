@@ -642,7 +642,6 @@ int main(int argc, char **argv) {
 
     result->SetFitFractions(ff);
     result->Print();
-
     std::ofstream ofs(fileNamePrefix + std::string("-fitResult.xml"));
     boost::archive::xml_oarchive oa(ofs);
     oa << BOOST_SERIALIZATION_NVP(result);
