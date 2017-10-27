@@ -2,7 +2,6 @@
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
-
 ///
 /// \file
 /// Executable for Dalitz plot analysis of the decay D0 -> K_S K+ K-
@@ -57,7 +56,6 @@ using namespace std;
 using namespace ComPWA;
 using namespace ComPWA::DataReader;
 using namespace ComPWA::Physics::HelicityFormalism;
-
 
 // Enable serialization of MinuitResult. For some reason has to be outside
 // any namespaces.
@@ -386,6 +384,14 @@ int main(int argc, char **argv) {
         phspData->GetDataPoints(trueModelKin));
   }
   trueIntens->SetPhspSample(phspPoints, toyPoints);
+
+  toyPoints = std::make_shared<std::vector<dataPoint>>(
+      toyPhspData->GetDataPoints(fitModelKin));
+  phspPoints = toyPoints;
+  if (phspData) {
+    auto phspPoints = std::make_shared<std::vector<dataPoint>>(
+        phspData->GetDataPoints(fitModelKin));
+  }
   intens->SetPhspSample(phspPoints, toyPoints);
 
   //======================= READING DATA =============================
@@ -486,20 +492,20 @@ int main(int argc, char **argv) {
   run.SetPhspSample(std::shared_ptr<Data>());
 
   LOG(info) << "Subsystems used by true model:";
-  for( auto i : trueModelKin->GetSubSystems() ){
+  for (auto i : trueModelKin->GetSubSystems()) {
     // Have to add " " here (bug in boost 1.59)
-    LOG(info) << " " <<i;
+    LOG(info) << " " << i;
   }
   std::stringstream s;
   s << "Printing the first 10 events of data sample:\n";
-  for( int i = 0; (i< sample->GetNEvents() && i<10); ++i){
+  for (int i = 0; (i < sample->GetNEvents() && i < 10); ++i) {
     dataPoint p;
     trueModelKin->EventToDataPoint(sample->GetEvent(i), p);
-    s<<p<<"\n";
+    s << p << "\n";
   }
   LOG(info) << s.str();
-  
-  //sample->WriteData("test.root","tr");
+
+  // sample->WriteData("test.root","tr");
   sample->ReduceToPhsp(trueModelKin);
 
   LOG(info) << "================== SETTINGS =================== ";
@@ -588,6 +594,7 @@ int main(int argc, char **argv) {
     std::cout.setf(std::ios::unitbuf);
     if (fittingMethod == "tree") {
       esti->UseFunctionTree(true);
+      esti->GetTree()->Recalculate();
       LOG(debug) << esti->GetTree()->Head()->Print(25);
     }
 
@@ -601,10 +608,10 @@ int main(int argc, char **argv) {
     //    if (usePreFitter) {
     //      LOG(info) << "Running Geneva as pre fitter!";
     //      setErrorOnParameterList(fitPar, 0.5, useMinos);
-    //      //			preOpti = std::shared_ptr<Optimizer>(
-    //      //					new
+    //      //      preOpti = std::shared_ptr<Optimizer>(
+    //      //          new
     //      // GenevaIF(esti,dkskkDir+"/PWA/geneva-config/")
-    //      //			);
+    //      //      );
     //      preResult = preOpti->exec(fitPar);
     //      preResult->setTrueParameters(truePar);
     //      preResult->print();
@@ -637,8 +644,8 @@ int main(int argc, char **argv) {
         std::pair<std::string, std::string>("a0(980)+", "D0toKSK+K-"));
     fitComponents.push_back(
         std::pair<std::string, std::string>("a2(1320)-", "D0toKSK+K-"));
-    ParameterList ff =
-        Tools::CalculateFitFractions(fitModelKin, intens, toyPoints, fitComponents);
+    ParameterList ff = Tools::CalculateFitFractions(fitModelKin, intens,
+                                                    toyPoints, fitComponents);
 
     result->SetFitFractions(ff);
     result->Print();
@@ -646,7 +653,7 @@ int main(int argc, char **argv) {
     std::ofstream ofs(fileNamePrefix + std::string("-fitResult.xml"));
     boost::archive::xml_oarchive oa(ofs);
     oa << BOOST_SERIALIZATION_NVP(result);
-    
+
     if (!disableFileLog) { // Write fit result
       // Save final amplitude
       boost::property_tree::ptree ptout;

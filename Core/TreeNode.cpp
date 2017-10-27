@@ -48,8 +48,6 @@ void TreeNode::Update() {
 };
 
 void TreeNode::Recalculate() {
-  if (_changed == false)
-    return;
 
   if (_children.size() < 1) {
     _changed = false;
