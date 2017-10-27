@@ -70,8 +70,9 @@ public:
   /// particle in initial or final state list is used later on for
   /// identification.
   HelicityKinematics(std::shared_ptr<PartList> partL,
-                     std::vector<pid> initialState,
-                     std::vector<pid> finalState);
+                     std::vector<pid> initialState, std::vector<pid> finalState,
+                     ComPWA::FourMomentum cmsP4 = ComPWA::FourMomentum(0, 0, 0,
+                                                                       0));
 
   /// Create HelicityKinematics from a boost::property_tree.
   /// The tree is expected to contain something like:
@@ -190,7 +191,7 @@ protected:
 
   ///  Calculation of n-dimensional phase space volume.
   ///  ToDo: We need to implement an analytical calculation here
-  double calculatePSArea() { return 1.0; }
+  double calculatePSArea() const { return 1.0; }
 
   /// List of subsystems for which invariant mass and angles are calculated
   std::vector<SubSystem> _listSubSystem;
@@ -203,20 +204,11 @@ protected:
   /// Add \p newSys to list of SubSystems and return its ID.
   /// In case that this SubSystem is already in the list only the ID is
   /// returned.
-  int createIndex(const SubSystem &newSys) {
-    int results =
-        std::find(_listSubSystem.begin(), _listSubSystem.end(), newSys) -
-        _listSubSystem.begin();
-    if (results == _listSubSystem.size()) {
-      _listSubSystem.push_back(newSys);
-      _invMassBounds.push_back(CalculateInvMassBounds(newSys));
-    }
-    return results;
-  }
+  int createIndex(const SubSystem &newSys);
 };
 
-} /* namespace HelicityFormalism */
-} /* namespace Physics */
-} /* namespace ComPWA */
+} // namespace HelicityFormalism
+} // namespace Physics
+} // namespace ComPWA
 
-#endif /* PHYSICS_HELICITYFORMALISM_HELICITYKINEMATICS_HPP_ */
+#endif

@@ -55,11 +55,16 @@
 
 using namespace std;
 using namespace ComPWA;
-using ComPWA::DataReader::RootReader;
+using namespace ComPWA::DataReader;
 using namespace ComPWA::Physics::HelicityFormalism;
 
+
+// Enable serialization of MinuitResult. For some reason has to be outside
+// any namespaces.
+BOOST_CLASS_EXPORT(ComPWA::Optimizer::Minuit2::MinuitResult)
+
 ///
-///Dalitz plot analysis of the decay D0->K_S0 K_ K-.
+/// Dalitz plot analysis of the decay D0->K_S0 K_ K-.
 ///
 int main(int argc, char **argv) {
 
@@ -332,7 +337,7 @@ int main(int argc, char **argv) {
       new Tools::RootGenerator(trueModelPartL, trueModelKin->GetInitialState(),
                                trueModelKin->GetFinalState(), seed));
 
-  RunManager run;
+  ComPWA::Tools::RunManager run;
   run.SetGenerator(gen);
   //======================= EFFICIENCY =============================
   auto eff = std::shared_ptr<Efficiency>(new UnitEfficiency());
@@ -344,7 +349,7 @@ int main(int argc, char **argv) {
     TH1 *h_total = (TH1 *)tf->Get(TString(efficiencyObject) + "_total");
     DataReader::RootEfficiency rootEff(h_passed, h_total);
     tf->Close();
-    std::shared_ptr<Efficiency> eff = std::make_shared<RootEfficiency>(rootEff);
+    auto eff = std::make_shared<ComPWA::DataReader::RootEfficiency>(rootEff);
   }
 
   // Unbinned efficiency
@@ -356,13 +361,6 @@ int main(int argc, char **argv) {
     phspData->ReduceToPhsp(trueModelKin);
   }
 
-  //========== Generation of toy phase space sample ==
-  std::shared_ptr<Data> toyPhspData(new RootReader()); // Toy sample
-  run.SetPhspSample(toyPhspData);
-  run.GeneratePhsp(mcPrecision);
-  toyPhspData->SetEfficiency(trueModelKin,
-                             eff); // set efficiency values for each event
-
   // ========= AmpIntensity ========
   auto intens = IncoherentIntensity::Factory(
       fitModelPartL, fitModelKin,
@@ -371,6 +369,13 @@ int main(int argc, char **argv) {
   auto trueIntens = IncoherentIntensity::Factory(
       trueModelPartL, trueModelKin,
       trueModelTree.get_child("IncoherentIntensity"));
+
+  //========== Generation of toy phase space sample ==
+  std::shared_ptr<Data> toyPhspData(new RootReader()); // Toy sample
+  run.SetPhspSample(toyPhspData);
+  run.GeneratePhsp(mcPrecision);
+  toyPhspData->SetEfficiency(trueModelKin,
+                             eff); // set efficiency values for each event
 
   // Setting samples for normalization
   auto toyPoints = std::make_shared<std::vector<dataPoint>>(
@@ -583,12 +588,12 @@ int main(int argc, char **argv) {
     std::cout.setf(std::ios::unitbuf);
     if (fittingMethod == "tree") {
       esti->UseFunctionTree(true);
-      LOG(debug) << esti->GetTree()->head()->to_str(25);
+      LOG(debug) << esti->GetTree()->Head()->Print(25);
     }
 
     if (useRandomStartValues)
       randomStartValues(fitPar);
-    LOG(debug) << "Initial LH=" << esti->controlParameter(fitPar) << ".";
+    LOG(debug) << "Initial LH=" << esti->ControlParameter(fitPar) << ".";
 
     // Use Geneva as pre fitter
     //    std::shared_ptr<Optimizer::Optimizer> preOpti;
@@ -641,6 +646,7 @@ int main(int argc, char **argv) {
     std::ofstream ofs(fileNamePrefix + std::string("-fitResult.xml"));
     boost::archive::xml_oarchive oa(ofs);
     oa << BOOST_SERIALIZATION_NVP(result);
+    
     if (!disableFileLog) { // Write fit result
       // Save final amplitude
       boost::property_tree::ptree ptout;
@@ -698,7 +704,7 @@ int main(int argc, char **argv) {
     //      Amplitude::UpdateAmpParameterList(ampVec, finalParList);
 
     //------- phase-space sample
-    std::shared_ptr<ComPWA::Data> pl_phspSample(new RootReader());
+    std::shared_ptr<Data> pl_phspSample(new RootReader());
     LOG(info) << "Plotting results...";
     if (!phspEfficiencyFile.empty()) { // unbinned plotting
                                        // sample with accepted phsp events
@@ -723,7 +729,7 @@ int main(int argc, char **argv) {
     pl_phspSample->SetEfficiency(trueModelKin, eff);
 
     //-------- Instance of DalitzPlot
-    DalitzPlot pl(fitModelKin, fileNamePrefix, plotNBins);
+    ComPWA::Tools::DalitzPlot pl(fitModelKin, fileNamePrefix, plotNBins);
     // set data sample
     pl.SetData(sample);
     // set phsp sample
@@ -735,8 +741,6 @@ int main(int argc, char **argv) {
     pl.DrawComponent("BkgD0toKSK+K-", "Background", kRed);
     //    pl.DrawComponent("a0(980)0", "a_{0}(980)^{0}", kMagenta+2);
     //    pl.DrawComponent("phi(1020)", "#phi(1020)", kMagenta);
-
-    // pl.setCorrectEfficiency(plotCorrectEfficiency);
 
     // Fill histograms and create canvases
     pl.Plot();

@@ -38,7 +38,9 @@ TARGET_INCLUDE_DIRECTORIES( Core
 #
 # Install libraries
 #
-INSTALL(FILES ${lib_headers} DESTINATION include/ComPWA)
+INSTALL(FILES ${lib_headers}
+    DESTINATION include/ComPWA/Core
+)
 
 INSTALL(TARGETS Core
         LIBRARY DESTINATION lib
@@ -65,7 +67,6 @@ foreach(testSrc ${TEST_SRCS})
   #link to Boost libraries AND your targets and dependencies
   TARGET_LINK_LIBRARIES( ${testName}
     Core
-    RootReader
     pthread
     ${Boost_LIBRARIES}
   )

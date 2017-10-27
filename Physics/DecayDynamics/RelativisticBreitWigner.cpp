@@ -163,17 +163,17 @@ RelativisticBreitWigner::GetTree(const ParameterList &sample, int pos,
 
   std::shared_ptr<FunctionTree> tr(new FunctionTree());
 
-  tr->createHead("RelBreitWigner" + suffix,
+  tr->CreateHead("RelBreitWigner" + suffix,
                  std::shared_ptr<Strategy>(new BreitWignerStrategy("")));
 
-  tr->createLeaf("Mass", _mass, "RelBreitWigner" + suffix);
-  tr->createLeaf("Width", _width, "RelBreitWigner" + suffix);
-  tr->createLeaf("Spin", (double)_spin, "RelBreitWigner" + suffix);
-  tr->createLeaf("MesonRadius", _mesonRadius, "RelBreitWigner" + suffix);
-  tr->createLeaf("FormFactorType", _ffType, "RelBreitWigner" + suffix);
-  tr->createLeaf("MassA", _daughterMasses.first, "RelBreitWigner" + suffix);
-  tr->createLeaf("MassB", _daughterMasses.second, "RelBreitWigner" + suffix);
-  tr->createLeaf("Data_mSq[" + std::to_string(pos) + "]",
+  tr->CreateLeaf("Mass", _mass, "RelBreitWigner" + suffix);
+  tr->CreateLeaf("Width", _width, "RelBreitWigner" + suffix);
+  tr->CreateLeaf("Spin", (double)_spin, "RelBreitWigner" + suffix);
+  tr->CreateLeaf("MesonRadius", _mesonRadius, "RelBreitWigner" + suffix);
+  tr->CreateLeaf("FormFactorType", _ffType, "RelBreitWigner" + suffix);
+  tr->CreateLeaf("MassA", _daughterMasses.first, "RelBreitWigner" + suffix);
+  tr->CreateLeaf("MassB", _daughterMasses.second, "RelBreitWigner" + suffix);
+  tr->CreateLeaf("Data_mSq[" + std::to_string(pos) + "]",
                  sample.GetMultiDouble(pos), "RelBreitWigner" + suffix);
 
   return tr;

@@ -65,7 +65,7 @@ protected:
       }
       if (n <= 0)
         throw std::runtime_error(
-            "IntegralByQuadrature::Next() | Dividsion by zero!");
+            "Tools::IntegralByQuadrature::Next() | Dividsion by zero!");
       _integral = 0.5 * (_integral + range * s / n);
     }
     return _integral;
@@ -73,21 +73,27 @@ protected:
 };
 
 inline double Integral(std::shared_ptr<AmpIntensity> intens,
-                       std::shared_ptr<std::vector<dataPoint>> sample,
+                       std::vector<dataPoint> &sample,
                        double phspVolume = 1.0) {
 
-  if (!sample->size()) {
-    LOG(debug) << "Integral() | Integral can not be calculated "
+  if (!sample.size()) {
+    LOG(debug) << "Tools::Integral() | Integral can not be calculated "
                   "since phsp sample is empty.";
     return 1.0;
   }
   double sumIntens = 0;
-  for (auto i : *sample.get())
+  for (auto i : sample)
     sumIntens += intens->Intensity(i);
 
-  double integral = (sumIntens * phspVolume / sample->size());
+  double integral = (sumIntens * phspVolume / sample.size());
 
   return integral;
+}
+
+inline double Integral(std::shared_ptr<AmpIntensity> intens,
+                       std::shared_ptr<std::vector<dataPoint>> sample,
+                       double phspVolume = 1.0) {
+  return Integral(intens, *sample.get(), phspVolume);
 }
 
 inline double Maximum(std::shared_ptr<AmpIntensity> intens,
@@ -95,7 +101,7 @@ inline double Maximum(std::shared_ptr<AmpIntensity> intens,
 
   if (!sample->size()) {
     LOG(debug)
-        << "Maximum() | MAximum can not be determined since sample is empty.";
+        << "Tools::Maximum() | Maximum can not be determined since sample is empty.";
     return 1.0;
   }
 

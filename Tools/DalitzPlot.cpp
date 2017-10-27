@@ -22,6 +22,7 @@
 
 using namespace ComPWA;
 using namespace ComPWA::Physics::HelicityFormalism;
+using namespace ComPWA::Tools;
 
 void phspContour(unsigned int xsys, unsigned int ysys, unsigned int n,
                  double *xcoord, double *ycoord) {
@@ -153,7 +154,7 @@ void DalitzPlot::Fill(std::shared_ptr<Kinematics> kin) {
 
     double weightsSum = 0.0;
 
-    /* Loop over all events in phase space sample */
+    // Loop over all events in phase space sample
     progressBar bar(s_phsp->GetNEvents());
     for (unsigned int i = 0; i < s_phsp->GetNEvents();
          i++) { // loop over phsp MC

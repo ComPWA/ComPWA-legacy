@@ -9,13 +9,16 @@
 #include <TH2D.h>
 #include <TH2Poly.h>
 #include <TGraph.h>
+#include <TTree.h>
 
 #include "Core/Event.hpp"
 #include "Core/Particle.hpp"
 #include "Core/Parameter.hpp"
 #include "Core/ParameterList.hpp"
 #include "Core/AmpIntensity.hpp"
-#include "DataReader/RootReader/RootReader.hpp"
+
+namespace ComPWA {
+namespace Tools {
 
 ///
 /// \class DalitzHisto
@@ -148,5 +151,8 @@ protected:
   std::shared_ptr<ComPWA::DataReader::Data> s_phsp;
   std::shared_ptr<ComPWA::DataReader::Data> s_hitMiss;
 };
+
+} // ns::Tools
+} // ns::ComPWA
 
 #endif

@@ -22,3 +22,4 @@ doc/doxygen/
 build.cfg
 /Default/
 build
+install

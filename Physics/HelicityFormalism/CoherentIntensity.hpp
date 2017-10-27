@@ -31,7 +31,7 @@ public:
 
   virtual ~CoherentIntensity(){};
 
-  //! Clone function
+  /// Clone pattern
   ComPWA::AmpIntensity *Clone(std::string newName = "") const {
     auto tmp = (new CoherentIntensity(*this));
     tmp->_name = newName;
@@ -47,7 +47,7 @@ public:
 
   //================ EVALUATION =================
 
-  ///  Calculate intensity of amplitude at point in phase-space
+  /// Calculate intensity of amplitude at point in phase-space
   virtual double Intensity(const ComPWA::dataPoint &point) const;
 
   //============ SET/GET =================

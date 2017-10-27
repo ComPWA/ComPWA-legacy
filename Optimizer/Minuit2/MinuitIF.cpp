@@ -25,9 +25,7 @@
 #include "Core/Parameter.hpp"
 #include "Core/FitResult.hpp"
 
-namespace ComPWA {
-namespace Optimizer {
-namespace Minuit2 {
+using namespace ComPWA::Optimizer::Minuit2;
 
 using namespace boost::log;
 using namespace ROOT::Minuit2;
@@ -52,7 +50,7 @@ MinuitIF::MinuitIF(std::shared_ptr<IEstimator> esti, ParameterList &par)
 
 MinuitIF::~MinuitIF() {}
 
-std::shared_ptr<FitResult> MinuitIF::exec(ParameterList &par) {
+std::shared_ptr<ComPWA::FitResult> MinuitIF::exec(ParameterList &par) {
   LOG(debug) << "MinuitIF::exec() | Start";
 
   // Start timing
@@ -67,23 +65,23 @@ std::shared_ptr<FitResult> MinuitIF::exec(ParameterList &par) {
 
   MnUserParameters upar;
   int freePars = 0;
-  for (unsigned int i = 0; i < par.GetNDouble();
-       ++i) { // only doubles for minuit
+  for (unsigned int i = 0; i < par.GetNDouble(); ++i) {
     std::shared_ptr<DoubleParameter> actPat = par.GetDoubleParameter(i);
-    // if no error is set or error set to 0 we use a default error,
+
+    // If no error is set or error set to 0 we use a default error,
     // otherwise minuit treads this parameter as fixed
-    double error = actPat->GetError();
-    if (error <= 0)
-      error = 0.01;
+    if (!actPat->HasError() || actPat->GetError() <= 0)
+      actPat->SetError(0.001);
+
     if (!actPat->IsFixed() &&
         actPat->GetName().find("phase") != actPat->GetName().npos)
       actPat->SetValue(shiftAngle(actPat->GetValue()));
 
     if (actPat->HasBounds()) {
-      upar.Add(actPat->GetName(), actPat->GetValue(), error,
+      upar.Add(actPat->GetName(), actPat->GetValue(), actPat->GetError(),
                actPat->GetMinValue(), actPat->GetMaxValue());
     } else {
-      upar.Add(actPat->GetName(), actPat->GetValue(), error);
+      upar.Add(actPat->GetName(), actPat->GetValue(), actPat->GetError());
     }
 
     if (!actPat->IsFixed())
@@ -210,14 +208,15 @@ std::shared_ptr<FitResult> MinuitIF::exec(ParameterList &par) {
           std::to_string((long long int)finalPar->GetErrorType()));
     }
   }
-  
-  //Update the original parameter list
+
+  // Update the original parameter list
   for (unsigned int i = 0; i < finalParList.GetNDouble(); ++i) {
     auto finalPar = finalParList.GetDoubleParameter(i);
-    if( finalPar->IsFixed() ) continue;
+    if (finalPar->IsFixed())
+      continue;
     par.GetDoubleParameter(i)->UpdateParameter(finalPar);
   }
-  
+
   LOG(debug) << "MinuitIF::exec() | " << resultsOut.str();
 
   double elapsed = double(clock() - begin) / CLOCKS_PER_SEC;
@@ -234,7 +233,3 @@ std::shared_ptr<FitResult> MinuitIF::exec(ParameterList &par) {
 
   return result;
 }
-
-} /* namespace Minuit2 */
-} /* namespace Optimizer */
-} /* namespace ComPWA */

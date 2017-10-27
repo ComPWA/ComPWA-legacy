@@ -6,6 +6,7 @@
 // \file
 // Kinematics inteface class
 //
+
 #ifndef KINEMATICS_HPP_
 #define KINEMATICS_HPP_
 
@@ -14,6 +15,7 @@
 #include <complex>
 
 #include "Core/Event.hpp"
+#include "Core/Particle.hpp"
 #include "Core/SubSystem.hpp"
 #include "Core/Properties.hpp"
 #include "Core/Spin.hpp"
@@ -25,8 +27,9 @@ class Kinematics {
 public:
   //! Constructor
   Kinematics(std::vector<pid> initial = std::vector<pid>(),
-             std::vector<pid> finalS = std::vector<pid>())
-      : _initialState(initial), _finalState(finalS),
+             std::vector<pid> finalS = std::vector<pid>(),
+             ComPWA::FourMomentum cmsP4 = ComPWA::FourMomentum(0,0,0,0))
+      : _initialState(initial), _finalState(finalS), _initialP4(cmsP4),
         is_PS_area_calculated_(false), PS_area_(0.0){};
 
   /// Delete copy constructor. For each Kinematics in the analysis only
@@ -36,44 +39,52 @@ public:
   /// move constructor.
   Kinematics(const Kinematics &that) = delete;
 
-  //! converts Event to dataPoint
+  /// Convert Event to dataPoint
   virtual void EventToDataPoint(const ComPWA::Event &ev,
                                 dataPoint &point) const = 0;
 
-  //! Checks of data point is within phase space boundaries
+  /// Check if dataPoint is within phase space boundaries
   virtual bool IsWithinPhsp(const dataPoint &point) const = 0;
 
-  //! calculated the PHSP volume of the current decay by MC integration
-  virtual double GetPhspVolume();
+  virtual double GetPhspVolume() const;
 
-  //! calculated the PHSP volume of the current decay by MC integration
+  /// Specify a phase space volume
   virtual void SetPhspVolume(double phsp);
 
-  //! Get number of variables
   virtual std::size_t GetNVars() const { return _varNames.size(); }
 
-  //! Get final state
-  virtual std::vector<pid> GetFinalState() { return _finalState; }
+  virtual std::vector<pid> GetFinalState() const { return _finalState; }
 
-  //! Get inital state
-  virtual std::vector<pid> GetInitialState() { return _initialState; }
+  virtual std::vector<pid> GetInitialState() const { return _initialState; }
+
+  virtual ComPWA::FourMomentum GetInitialFourMomentum() const {
+    return _initialP4;
+  }
 
   virtual int GetDataID(const ComPWA::SubSystem &sys) = 0;
 
+  virtual std::vector<std::string> GetVarNames() const { return _varNames; }
+
+  virtual std::vector<std::string> GetVarTitles() const { return _varTitles; }
+
 protected:
   std::vector<pid> _initialState;
-  
+
   std::vector<pid> _finalState;
 
-  //! Internal names of variabes
+  /// Four momentum of the initial particle reaction
+  ComPWA::FourMomentum _initialP4;
+
+  /// Names of variabes
   std::vector<std::string> _varNames;
-  //! Latex titles for variables
+
+  /// (Latex) Titles of variables
   std::vector<std::string> _varTitles;
 
-  virtual double calculatePSArea() = 0;
+  virtual double calculatePSArea() const = 0;
   bool is_PS_area_calculated_;
   double PS_area_;
 };
 
-} /* namespace ComPWA */
-#endif /* KINEMATICS_HPP_ */
+} // namespace ComPWA
+#endif

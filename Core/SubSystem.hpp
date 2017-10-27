@@ -15,11 +15,13 @@
 
 namespace ComPWA {
 
+///
 /// \class SubSystem
 /// Definition of a two-body decay node within a sequential decay tree.
 /// Class contains lists for both final states of the two-body decay and a list
 /// for all recoiling particles. This information is needed to calculate
 /// invariant mass and angles at a two-body decay node.
+///
 class SubSystem {
 public:
   SubSystem(std::vector<int> recoilS,
@@ -30,6 +32,7 @@ public:
   SubSystem(std::vector<int> recoilS, std::vector<int> finalA,
             std::vector<int> finalB);
 
+  // Create a unique title
   virtual std::string to_string() const;
 
   bool operator==(const SubSystem &b) const;
@@ -141,6 +144,6 @@ inline boost::property_tree::ptree SubSystemSave(const SubSystem &sys) {
   return pt;
 }
 
-} /* namespace ComPWA */
+} // ns::ComPWA
 
-#endif /* SubSystem_h */
+#endif

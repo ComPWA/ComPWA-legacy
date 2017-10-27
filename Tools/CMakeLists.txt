@@ -14,12 +14,17 @@ find_package( Boost COMPONENTS
 #
 # Find ROOT
 #
-find_package( ROOT REQUIRED QUIET )
+find_package( ROOT QUIET )
 
 #
 # Find GSL
 #
-find_package( GSL REQUIRED gsl gslcblas QUIET )
+find_package( GSL COMPONENTS gsl gslcblas QUIET )
+
+# Check if all requirements are found. Skip modules otherwise.
+IF( ${ROOT_FOUND} AND ${GSL_FOUND}
+    AND TARGET DataReader AND TARGET HelicityFormalism
+)
 
 FILE(GLOB lib_srcs *.cpp)
 
@@ -41,10 +46,9 @@ add_library ( Tools
 target_link_libraries( Tools
   Core
   DataReader
-  RootReader
   HelicityFormalism
-  ${ROOT_LIBRARIES}
   ${Boost_LIBRARIES}
+  ${ROOT_LIBRARIES}
   ${GSL_LIBRARIES}
 )
 
@@ -52,7 +56,10 @@ target_include_directories( Tools
   PUBLIC ${ROOT_INCLUDE_DIR} ${Boost_INCLUDE_DIR} ${GSL_INCLUDE_DIR} )
 
 
-install( FILES ${lib_headers} DESTINATION include/ComPWA )
+install( FILES ${lib_headers}
+    DESTINATION include/ComPWA/Tools
+)
+
 install( TARGETS Tools
         LIBRARY DESTINATION lib
 )
@@ -107,3 +114,7 @@ foreach(testSrc ${TEST_SRCS})
     WORKING_DIRECTORY ${EXECUTABLE_OUTPUT_PATH}/testBin
     COMMAND ${EXECUTABLE_OUTPUT_PATH}/testBin/${testName} )
 endforeach(testSrc)
+
+ELSE ()
+  MESSAGE(WARNING "Requirements not found! Not building Tools module!")
+ENDIF()

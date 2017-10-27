@@ -68,17 +68,17 @@ int main(int argc, char **argv) {
   if (autonodes) { // Let FunctionTree manage the creation of the tree
 
     myTree = std::shared_ptr<FunctionTree>(new FunctionTree());
-    myTree->createHead("R", mult);
-    myTree->createLeaf("a", parA, "R");
-    myTree->createNode("bcd", add, "R");
-    myTree->createLeaf("b", parB, "bcd");
+    myTree->CreateHead("R", mult);
+    myTree->CreateLeaf("a", parA, "R");
+    myTree->CreateNode("bcd", add, "R");
+    myTree->CreateLeaf("b", parB, "bcd");
 
     subTree = std::shared_ptr<FunctionTree>(new FunctionTree());
-    subTree->createHead("cd", mult);
-    subTree->createLeaf("c", parC, "cd");
-    subTree->createLeaf("d", parD, "cd");
+    subTree->CreateHead("cd", mult);
+    subTree->CreateLeaf("c", parC, "cd");
+    subTree->CreateLeaf("d", parD, "cd");
 
-    myTree->insertTree(subTree, "bcd");
+    myTree->InsertTree(subTree, "bcd");
 
   } else { // create Tree manually
 
@@ -109,12 +109,12 @@ int main(int argc, char **argv) {
         new TreeNode("d", parD, std::shared_ptr<Strategy>(), CD));
     parD->Attach(D);
     myTree = std::shared_ptr<FunctionTree>(new FunctionTree(R));
-    myTree->addNode(A);
-    myTree->addNode(BCD);
-    myTree->addNode(B);
-    myTree->addNode(CD);
-    myTree->addNode(C);
-    myTree->addNode(D);
+    myTree->AddNode(A);
+    myTree->AddNode(BCD);
+    myTree->AddNode(B);
+    myTree->AddNode(CD);
+    myTree->AddNode(C);
+    myTree->AddNode(D);
   }
 
   //------------Finished SetUp, now check Tree----------------
@@ -123,7 +123,7 @@ int main(int argc, char **argv) {
   std::cout << std::endl << myTree << std::endl << std::endl;
 
   //------------Trigger Calculation----------------
-  myTree->recalculate();
+  myTree->Recalculate();
 
   std::cout << "Tree calculated" << std::endl;
   std::cout << std::endl << myTree << std::endl << std::endl;
@@ -133,7 +133,7 @@ int main(int argc, char **argv) {
   std::cout << "Changed d from 1 to 2 " << std::endl;
   std::cout << std::endl << myTree << std::endl << std::endl;
 
-  myTree->recalculate();
+  myTree->Recalculate();
 
   std::cout << "Changed d from 1 to 2 and recalculated " << std::endl;
   std::cout << std::endl << myTree << std::endl << std::endl;
@@ -156,15 +156,15 @@ int main(int argc, char **argv) {
 
   //   if(autonodes){ //Let FunctionTree manage the creation of the tree
   myTreeMult = std::shared_ptr<FunctionTree>(new FunctionTree());
-  myTreeMult->createHead("R", add);
-  myTreeMult->createNode("ab", mult, "R", nElements, true);
-  myTreeMult->createLeaf("a", nVecParA, "ab");
-  myTreeMult->createLeaf("b", nParB, "ab");
+  myTreeMult->CreateHead("R", add);
+  myTreeMult->CreateNode("ab", mult, "R", nElements, true);
+  myTreeMult->CreateLeaf("a", nVecParA, "ab");
+  myTreeMult->CreateLeaf("b", nParB, "ab");
 
   // }
 
   //------------Trigger Calculation----------------
-  myTreeMult->recalculate();
+  myTreeMult->Recalculate();
 
   std::cout
       << std::endl
@@ -191,18 +191,18 @@ int main(int argc, char **argv) {
   std::shared_ptr<MultiDouble> mParC(new MultiDouble("parC", nPhsp));
 
   myTreeMultD = std::shared_ptr<FunctionTree>(new FunctionTree());
-  myTreeMultD->createHead("R", add);
-  myTreeMultD->createNode("Rmass", mmult, "R", nElements);
-  myTreeMultD->createNode("ab", mmult, "Rmass", nElements, false);
-  myTreeMultD->createLeaf("a", mParA, "ab");
-  myTreeMultD->createLeaf("b", mParB, "ab");
-  myTreeMultD->createNode("Rphsp", add, "Rmass");
-  myTreeMultD->createNode("cd", mmult, "Rphsp", nElements * 2, false);
-  myTreeMultD->createLeaf("c", mParC, "cd");
-  myTreeMultD->createLeaf("d", mParD, "cd");
+  myTreeMultD->CreateHead("R", add);
+  myTreeMultD->CreateNode("Rmass", mmult, "R", nElements);
+  myTreeMultD->CreateNode("ab", mmult, "Rmass", nElements, false);
+  myTreeMultD->CreateLeaf("a", mParA, "ab");
+  myTreeMultD->CreateLeaf("b", mParB, "ab");
+  myTreeMultD->CreateNode("Rphsp", add, "Rmass");
+  myTreeMultD->CreateNode("cd", mmult, "Rphsp", nElements * 2, false);
+  myTreeMultD->CreateLeaf("c", mParC, "cd");
+  myTreeMultD->CreateLeaf("d", mParD, "cd");
 
   //------------Trigger Calculation----------------
-  myTreeMultD->recalculate();
+  myTreeMultD->Recalculate();
 
   std::cout << std::endl
             << "MultiDouble Setup and calculated R = Sum[a*b] with one leaf "

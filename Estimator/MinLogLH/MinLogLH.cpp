@@ -60,7 +60,7 @@ MinLogLH::MinLogLH(std::shared_ptr<Kinematics> kin,
   return;
 }
 
-double MinLogLH::controlParameter(ParameterList &minPar) {
+double MinLogLH::ControlParameter(ParameterList &minPar) {
   double lh = 0;
   if (!_tree) {
     // Calculate \Sum_{ev} log()
@@ -74,9 +74,9 @@ double MinLogLH::controlParameter(ParameterList &minPar) {
     }
     lh = (-1) * ((double)_nEvents) / _sumOfWeights * sumLog;
   } else {
-    _tree->recalculate();
+    _tree->Recalculate();
     std::shared_ptr<DoubleParameter> logLH =
-        std::dynamic_pointer_cast<DoubleParameter>(_tree->head()->getValue());
+        std::dynamic_pointer_cast<DoubleParameter>(_tree->Head()->Parameter());
     lh = logLH->GetValue();
   }
   _nCalls++;
@@ -122,30 +122,30 @@ void MinLogLH::IniLHtree() {
   int sampleSize = _dataSampleList.GetMultiDouble(0)->GetNValues();
 
   //-log L = (-1)*N/(\sum_{ev} w_{ev}) \sum_{ev} ...
-  _tree->createHead("LH",
+  _tree->CreateHead("LH",
                     std::shared_ptr<Strategy>(new MultAll(ParType::DOUBLE)));
-  _tree->createLeaf("minusOne", -1, "LH");
-  _tree->createLeaf("nEvents", sampleSize, "LH");
-  _tree->createNode("invSumWeights",
+  _tree->CreateLeaf("minusOne", -1, "LH");
+  _tree->CreateLeaf("nEvents", sampleSize, "LH");
+  _tree->CreateNode("invSumWeights",
                     std::shared_ptr<Strategy>(new Inverse(ParType::DOUBLE)),
                     "LH");
-  _tree->createNode("sumEvents",
+  _tree->CreateNode("sumEvents",
                     std::shared_ptr<Strategy>(new AddAll(ParType::DOUBLE)),
                     "LH");
-  _tree->createLeaf("SumOfWeights", _sumOfWeights, "invSumWeights");
-  _tree->createNode("weightLog",
+  _tree->CreateLeaf("SumOfWeights", _sumOfWeights, "invSumWeights");
+  _tree->CreateNode("weightLog",
                     std::shared_ptr<Strategy>(new MultAll(ParType::MDOUBLE)),
                     "sumEvents", sampleSize,
                     false); // w_{ev} * log( I_{ev} )
-  _tree->createNode("Log",
+  _tree->CreateNode("Log",
                     std::shared_ptr<Strategy>(new LogOf(ParType::MDOUBLE)),
                     "weightLog", sampleSize, false);
-  _tree->insertTree(_intens->GetTree(_kin, _dataSampleList, _phspAccSampleList,
+  _tree->InsertTree(_intens->GetTree(_kin, _dataSampleList, _phspAccSampleList,
                                      _phspSampleList, _kin->GetNVars()),
                     "Log");
 
-  _tree->recalculate();
-  if (!_tree->sanityCheck()) {
+  _tree->Recalculate();
+  if (!_tree->SanityCheck()) {
     throw std::runtime_error("MinLogLH::IniLHtree() | Tree has structural "
                              "problems. Sanity check not passed!");
   }

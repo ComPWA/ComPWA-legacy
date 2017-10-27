@@ -37,7 +37,7 @@ double AmpWignerD::dynamicalFunction(ComPWA::Spin J, ComPWA::Spin mu,
   assert(!std::isnan(result));
 
   // Not quite sure what the correct prefactor is in this case.
-  //	double norm = 1/sqrt(2*J.GetSpin()+1);
+  //  double norm = 1/sqrt(2*J.GetSpin()+1);
   double norm = (2 * J.GetSpin() + 1);
 
   return norm * result;
@@ -76,7 +76,12 @@ AmpWignerD::Factory(std::shared_ptr<PartList> partL,
   auto decayParticle = pt.get_child("DecayParticle");
 
   std::string name = pt.get<std::string>("DecayParticle.<xmlattr>.Name");
-  ComPWA::Spin J = partL->find(name)->second.GetSpinQuantumNumber("Spin");
+  auto partItr = partL->find(name);
+  if (partItr == partL->end())
+    throw std::runtime_error("AmpWignerD::Factory() | Particle " + name +
+                             " not found in list!");
+
+  ComPWA::Spin J = partItr->second.GetSpinQuantumNumber("Spin");
   obj->SetSpin(J);
   ComPWA::Spin mu(pt.get<double>("DecayParticle.<xmlattr>.Helicity"));
   obj->SetMu(mu);
@@ -108,24 +113,24 @@ std::shared_ptr<FunctionTree> AmpWignerD::GetTree(const ParameterList &sample,
       0) { // in case of spin zero do not explicitly include the WignerD
     std::shared_ptr<MultiUnsignedInteger> one(
         new MultiUnsignedInteger("", std::vector<unsigned int>(sampleSize, 1)));
-    newTree->createLeaf("WignerD" + suffix, one, ""); // spin
+    newTree->CreateLeaf("WignerD" + suffix, one, ""); // spin
     return newTree;
   }
   //----Strategies needed
   std::shared_ptr<WignerDStrategy> angdStrat(
       new WignerDStrategy("AngD" + suffix));
-  newTree->createHead(
+  newTree->CreateHead(
       "WignerD" + suffix,
       std::shared_ptr<WignerDStrategy>(new WignerDStrategy("WignerD" + suffix)),
       sampleSize);
 
-  newTree->createLeaf("spin", (double)_spin, "WignerD" + suffix); // spin
-  newTree->createLeaf("m", (double)_mu, "WignerD" + suffix);      // OutSpin 1
-  newTree->createLeaf("n", (double)(_helicities.first - _helicities.second),
+  newTree->CreateLeaf("spin", (double)_spin, "WignerD" + suffix); // spin
+  newTree->CreateLeaf("m", (double)_mu, "WignerD" + suffix);      // OutSpin 1
+  newTree->CreateLeaf("n", (double)(_helicities.first - _helicities.second),
                       "WignerD" + suffix); // OutSpin 2
-  newTree->createLeaf("data_cosTheta[" + std::to_string(posTheta) + "]",
+  newTree->CreateLeaf("data_cosTheta[" + std::to_string(posTheta) + "]",
                       sample.GetMultiDouble(posTheta), "WignerD" + suffix);
-  newTree->createLeaf("data_phi[" + std::to_string(posPhi) + "]",
+  newTree->CreateLeaf("data_phi[" + std::to_string(posPhi) + "]",
                       sample.GetMultiDouble(posPhi), "WignerD" + suffix);
 
   return newTree;

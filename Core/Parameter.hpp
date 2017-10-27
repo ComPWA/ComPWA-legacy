@@ -139,7 +139,7 @@ public:
   MultiDouble(const MultiDouble &in)
       : AbsParameter(in.name_, ParType::MDOUBLE) {
     *this = in;
-    //		error_ = std::shared_ptr<ParError<double>>(new
+    //    error_ = std::shared_ptr<ParError<double>>(new
     // ParError<double>(*in.error_));
   }
 
@@ -722,25 +722,23 @@ DoubleParameterFactory(const boost::property_tree::ptree pt) {
   } else if (pt.get_optional<double>("ErrorHigh")) {
     throw std::runtime_error("DoubleParameterFactory() | Parameter asymmetic "
                              "error not properly set!");
-  } else { /* Do not set a asymmetric errors */
+  } else { // Do not set a asymmetric errors
   }
 
-  if (pt.get_optional<bool>("Fix"))
-    obj.FixParameter(pt.get<bool>("Fix"));
+  auto fix = pt.get_optional<bool>("Fix");
+  if (fix)
+    obj.FixParameter(fix.get());
+  else
+    obj.FixParameter(true);
 
-  if (pt.get_optional<double>("Min")) {
-    if (pt.get_optional<double>("Max")) {
-      obj.SetRange(pt.get<double>("Min"), pt.get<double>("Max"));
-    } else {
-      throw std::runtime_error(
-          "DoubleParameterFactory() | Parameter range not properly set!");
-    }
-  } else if (pt.get_optional<double>("Max")) {
+  auto min = pt.get_optional<double>("Min");
+  auto max = pt.get_optional<double>("Max");
+  if (min && max) {
+    obj.SetRange(min.get(), max.get());
+  } else if (min || max) { // Range not completely specified
     throw std::runtime_error(
         "DoubleParameterFactory() | Parameter range not properly set!");
-  } else {
-    // Do not set a parameter range and fix the parameter
-    obj.FixParameter(true);
+  } else { // No range specified
   }
 
   return obj;

@@ -41,7 +41,7 @@ double MinuitFcn::operator()(const std::vector<double> &x) const {
   }
   // Start timing
   clock_t begin = clock();
-  double result = _myDataPtr->controlParameter(_parList);
+  double result = _myDataPtr->ControlParameter(_parList);
   double sec = double(clock() - begin) / CLOCKS_PER_SEC;
 
   LOG(info) << "MinuitFcn: -log(L) = " << std::setprecision(10) << result

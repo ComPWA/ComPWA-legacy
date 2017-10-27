@@ -20,12 +20,19 @@ namespace HelicityFormalism {
 
 HelicityKinematics::HelicityKinematics(std::shared_ptr<PartList> partL,
                                        std::vector<pid> initialState,
-                                       std::vector<pid> finalState)
-    : Kinematics(initialState, finalState), _partList(partL) {
+                                       std::vector<pid> finalState,
+                                       ComPWA::FourMomentum cmsP4)
+    : Kinematics(initialState, finalState, cmsP4), _partList(partL) {
 
-  // Currently we can only handle a particle decay.
-  // Note: Whats different for particle scattering?
-  assert(_initialState.size() == 1);
+  // If the cms four-momentum is not set of set it here
+  if (_initialP4 == FourMomentum(0, 0, 0, 0) && _initialState.size() == 1) {
+      double sqrtS = FindParticle(partL, _initialState.at(0)).GetMass();
+      _initialP4 = ComPWA::FourMomentum(0, 0, 0, sqrtS);
+  }
+
+  // Make sure cms momentum is set
+  if (_initialP4 == FourMomentum(0, 0, 0, 0))
+    assert(false);
 
   // Create title
   std::stringstream stream;
@@ -54,9 +61,18 @@ HelicityKinematics::HelicityKinematics(std::shared_ptr<PartList> partL,
     int pos = i.second.get<int>("<xmlattr>.Id");
     _initialState.at(pos) = partP.GetId();
   }
-  // Currently we can only handle a particle decay.
-  // Note: Whats different for particle scattering?
-  assert(_initialState.size() == 1);
+  if (_initialState.size() == 1) {
+    double sqrtS = FindParticle(partL, _initialState.at(0)).GetMass();
+    _initialP4 = ComPWA::FourMomentum(0, 0, 0, sqrtS);
+  } else {
+    // If the initial state has more than one particle we require that the
+    // initial four momentum is specified
+    _initialP4 = FourMomentumFactory(pt.get_child("InitialFourMomentum"));
+  }
+
+  // Make sure cms momentum is set
+  if (_initialP4 == FourMomentum(0, 0, 0, 0))
+    assert(false);
 
   auto finalS = pt.get_child("FinalState");
   _finalState = std::vector<int>(finalS.size());
@@ -111,6 +127,10 @@ void HelicityKinematics::EventToDataPoint(const Event &event,
                                           dataPoint &point) const {
   assert(_listSubSystem.size() == _invMassBounds.size());
 
+  if (!_listSubSystem.size()) {
+    LOG(error) << "HelicityKinematics::EventToDataPoint() | No variabels were "
+                  "requested before. Therefore this function is doing nothing!";
+  }
   for (int i = 0; i < _listSubSystem.size(); i++)
     EventToDataPoint(event, point, _listSubSystem.at(i), _invMassBounds.at(i));
   return;
@@ -176,7 +196,7 @@ void HelicityKinematics::EventToDataPoint(
   // Four momentum of the decaying resonance
   FourMomentum resP4 = finalA + finalB;
   double mSq = resP4.GetInvMassSq();
-  
+
   // Calculate sum of final states four momenta
   cms += resP4;
 
@@ -216,7 +236,7 @@ void HelicityKinematics::EventToDataPoint(
   //                       (-1) * p4QftResonance.Phi());
   p4QftDaughter.RotateZ((-1) * p4QftResonance.Phi());
   p4QftDaughter.RotateY((-1) * p4QftResonance.Theta());
-  
+
   double cosTheta = p4QftDaughter.CosTheta();
   double phi = p4QftDaughter.Phi();
 
@@ -285,8 +305,7 @@ HelicityKinematics::CalculateInvMassBounds(const SubSystem &sys) const {
 
   /// We use the formulae from (PDG2016 Kinematics Fig.47.3). I hope the
   /// generalization to n-body decays is correct.
-  std::pair<double, double> lim(
-      0, FindParticle(_partList, _initialState.at(0)).GetMass());
+  std::pair<double, double> lim(0, _initialP4.GetInvMass());
   // Sum up masses of all final state particles
   for (auto j : sys.GetFinalStates())
     for (auto i : j)
@@ -300,6 +319,21 @@ HelicityKinematics::CalculateInvMassBounds(const SubSystem &sys) const {
   return lim;
 }
 
-} /* namespace HelicityFormalism */
-} /* namespace Physics */
-} /* namespace ComPWA */
+int HelicityKinematics::createIndex(const SubSystem &newSys) {
+  int results =
+      std::find(_listSubSystem.begin(), _listSubSystem.end(), newSys) -
+      _listSubSystem.begin();
+  if (results == _listSubSystem.size()) {
+    _listSubSystem.push_back(newSys);
+    _invMassBounds.push_back(CalculateInvMassBounds(newSys));
+
+    _varNames.push_back("mSq_" + newSys.to_string());
+    _varNames.push_back("cosTheta_" + newSys.to_string());
+    _varNames.push_back("phi_" + newSys.to_string());
+  }
+  return results;
+}
+
+} // ns::HelicityFormalism
+} // ns::Physics
+} // ns::ComPWA

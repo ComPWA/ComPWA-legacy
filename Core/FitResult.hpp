@@ -2,16 +2,10 @@
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
-//! Optimizer Interface Base-Class.
-/*! \class Optimizer
- * @file Optimizer.hpp
- * This class provides the interface to (external) optimization libraries or
- * routines. As it is pure virtual, one needs at least one implementation to
- * provide an optimizer for the analysis which varies free model-parameters. If
- * a new optimizer is derived from and fulfills this base-class, no change in
- * other modules are necessary to work with the new optimizer library or
- * routine.
- */
+///
+/// \file
+/// Base class FitResult.
+///
 
 #ifndef _FITRESULT_HPP_
 #define _FITRESULT_HPP_
@@ -106,21 +100,21 @@ protected:
 
   virtual double GetCorr(unsigned int n, unsigned int t) { return -9000; };
   
-  //! Time for minimization
+  /// Time for minimization
   double time;
   
-  //! Initial list of parameters
+  /// Initial list of parameters
   ParameterList initialParameters;
   
-  //! Final list of parameters
+  /// Final list of parameters
   ParameterList finalParameters;
   
-  //! True list of parameters
+  /// True list of parameters
   ParameterList trueParameters;
   
   ParameterList _fitFractions;
   
-  //! List with fit fractions and errors
+  /// List with fit fractions and errors
   double sumFractions;
   double sumFractionsError;
 
@@ -138,6 +132,6 @@ private:
   }
 };
 BOOST_SERIALIZATION_ASSUME_ABSTRACT(FitResult);
-} /* namespace ComPWA */
+} // ns::ComPWA
 
 #endif
