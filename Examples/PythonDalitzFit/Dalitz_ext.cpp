@@ -55,6 +55,23 @@ std::vector<std::pair<std::string, std::string>> fitComponents(){
   return components;
 }
 
+ComPWA::ParameterList calculateFitFractions(std::shared_ptr<ComPWA::Kinematics> kin,
+		std::shared_ptr<ComPWA::AmpIntensity> intens, std::shared_ptr<ComPWA::Data> phspSample){
+  auto phspPoints =
+		  std::make_shared<std::vector<ComPWA::dataPoint>>(phspSample->GetDataPoints(kin));
+  return ComPWA::Tools::CalculateFitFractions(kin, intens, phspPoints, fitComponents());
+}
+
+void calcFractionError(ComPWA::ParameterList& fitPar, std::shared_ptr<ComPWA::FitResult> result,
+		ComPWA::ParameterList& fitFracs, std::shared_ptr<ComPWA::AmpIntensity> intens, std::shared_ptr<ComPWA::Kinematics> kin,
+		std::shared_ptr<ComPWA::Data> phspSample, int nSets){
+  auto resultM = std::dynamic_pointer_cast<MinuitResult>(result);
+  auto phspPoints =
+		  std::make_shared<std::vector<ComPWA::dataPoint>>(phspSample->GetDataPoints(kin));
+  ComPWA::Tools::CalcFractionError(fitPar, resultM->GetCovarianceMatrix(), fitFracs, kin,
+	                       intens, phspPoints, nSets, fitComponents());
+}
+
 void saveResults(std::string file, std::shared_ptr<ComPWA::FitResult> result){
   std::ofstream ofs(file);
   boost::archive::xml_oarchive oa(ofs);
@@ -103,14 +120,15 @@ PYBIND11_MODULE(Dalitz_ext, m)
 	m.def("fitComponents",  (std::vector< std::pair<std::string, std::string> > (*) ()) &fitComponents);
 	m.def("saveResults",  (void (*) (std::string, std::shared_ptr<ComPWA::FitResult>)) &saveResults);
 	m.def("saveModel",  (void (*) (std::string, std::shared_ptr<ComPWA::PartList>, ComPWA::ParameterList&, std::shared_ptr<ComPWA::AmpIntensity>)) &saveModel);
-	//m.def("CalculateFitFractions", (ComPWA::ParameterList (*)
-	//        (std::shared_ptr<ComPWA::Kinematics>, std::shared_ptr<ComPWA::AmpIntensity>,
-	//          std::shared_ptr<std::vector<ComPWA::dataPoint> >, std::vector<std::pair<std::string, std::string> > ))
-	//		&ComPWA::Tools::CalculateFitFractions);
-	//m.def("CalcFractionError", (void (*)
-	//        (ParameterList&, std::vector<std::vector<double> >, ParameterList&, std::shared_ptr<AmpIntensity>,
-	//          std::shared_ptr<std::vector<ComPWA::dataPoint> >, int, std::vector<std::pair<std::string, std::string> > ))
-	//		&ComPWA::Tools::CalcFractionError);
+	m.def("CalculateFitFractions", (ComPWA::ParameterList (*)
+	        (std::shared_ptr<ComPWA::Kinematics>, std::shared_ptr<ComPWA::AmpIntensity>,
+	        		std::shared_ptr<ComPWA::Data> ))
+			&calculateFitFractions);
+	m.def("CalcFractionError", (void (*)
+	        (ComPWA::ParameterList&, std::shared_ptr<ComPWA::FitResult>, ComPWA::ParameterList&,
+	        		std::shared_ptr<ComPWA::AmpIntensity>, std::shared_ptr<ComPWA::Kinematics>,
+	        		std::shared_ptr<ComPWA::Data>, int))
+			&calcFractionError);
 
 	// ComPWA Interfaces
 	py::class_<ComPWA::Kinematics, std::shared_ptr<ComPWA::Kinematics> >(m, "Kinematics");
@@ -174,6 +192,7 @@ PYBIND11_MODULE(Dalitz_ext, m)
 	;
 
 	py::class_<ComPWA::Optimizer::Minuit2::MinuitResult, ComPWA::FitResult, std::shared_ptr<ComPWA::Optimizer::Minuit2::MinuitResult> >(m, "MinuitResult")
+	  .def("SetFitFractions", &ComPWA::Optimizer::Minuit2::MinuitResult::SetFitFractions)
 	  .def("Print", &ComPWA::Optimizer::Minuit2::MinuitResult::Print, py::arg("opt") = "")
 	;
 

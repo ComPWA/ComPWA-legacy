@@ -1,6 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+import ROOT
+from ROOT import gROOT, TCanvas, TF1, TVector3, TTree
+
+import numpy as np
+
 from Dalitz_ext import *
 
 import numpy as np
@@ -173,9 +178,10 @@ run.SetOptimizer(minuitif)
 
 result = run.Fit(fitPar)
 
-#fitFracs = CalculateFitFractions(kin, intens, phspPoints, fitComponents);
-#CalcFractionError(fitPar, result.GetCovarianceMatrix(), fitFracs, kin,
-#                           intens, phspPoints, 100, fitComponents);
+fitFracs = CalculateFitFractions(kin, intens, phspSample);
+CalcFractionError(fitPar, result, fitFracs, intens, kin,
+                            phspSample, 100);
+result.SetFitFractions(fitFracs);  
 
 result.Print()
 
