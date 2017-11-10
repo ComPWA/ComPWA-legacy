@@ -108,7 +108,7 @@ void RootGenerator::Generate(Event &evt) {
     // phase space region. Haven't found a solution yet.
     // You can increase the numerical precison in the following compare
     // function.
-    if (!ComPWA::equal(pFour.GetInvMass(), sqrtS, 10)) {
+    if (!ComPWA::equal(pFour.GetInvMass(), sqrtS, 100)) {
       LOG(error) << pFour.GetInvMass() << " - " << sqrtS << " = "
                  << pFour.GetInvMass() - sqrtS;
       throw std::runtime_error(
