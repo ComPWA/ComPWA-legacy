@@ -17,6 +17,7 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 #include <pybind11/stl_bind.h>
+#include <pybind11/numpy.h>
 
 namespace py = pybind11;
 //using namespace ComPWA;
@@ -26,8 +27,34 @@ using ComPWA::Optimizer::Minuit2::MinuitResult;
 
 PYBIND11_MAKE_OPAQUE(ComPWA::PartList);
 
-//BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(X_returnsame_overloads, X::returnsame, 0, 1)
-//BOOST_PYTHON_FUNCTION_OVERLOADS(X_returnsum_overloads, X::returnsum, 1, 2)
+py::array_t<double> result_values(std::shared_ptr<ComPWA::FitResult> fitRes){
+  ComPWA::ParameterList resPar = fitRes->GetFinalParameters();
+  //std::vector<double> ret;
+ // for(unsigned int i=0; i<resPar.GetNParameter(); i++){
+  //  ret.push_back(resPar.GetDoubleParameterValue(i));
+ // }
+
+  std::size_t size = resPar.GetNParameter();
+  double *foo = new double[size];
+  for (std::size_t i = 0; i < size; i++) {
+      foo[i] = resPar.GetDoubleParameterValue(i);
+  }
+
+  // Create a Python object that will free the allocated
+  // memory when destroyed:
+  py::capsule free_when_done(foo, [](void *f) {
+      double *foo = reinterpret_cast<double *>(f);
+      //std::cerr << "Element [0] = " << foo[0] << "\n";
+      //std::cerr << "freeing memory @ " << f << "\n";
+      delete[] foo;
+  });
+
+  return py::array_t<double>(
+      {size}, // shape
+      {8}, // C-style contiguous strides for double
+      foo, // the data pointer
+      free_when_done); // numpy array references this parent
+}
 
 std::shared_ptr<ComPWA::AmpIntensity> createIntens(
 		std::string modelStr,
@@ -129,13 +156,16 @@ PYBIND11_MODULE(Dalitz_ext, m)
 	        		std::shared_ptr<ComPWA::AmpIntensity>, std::shared_ptr<ComPWA::Kinematics>,
 	        		std::shared_ptr<ComPWA::Data>, int))
 			&calcFractionError);
+	m.def("result_values",  (py::array_t<double> (*) (std::shared_ptr<ComPWA::FitResult>)) &result_values);
 
 	// ComPWA Interfaces
 	py::class_<ComPWA::Kinematics, std::shared_ptr<ComPWA::Kinematics> >(m, "Kinematics");
 	py::class_<ComPWA::Generator, std::shared_ptr<ComPWA::Generator> >(m, "Generator");
 	py::class_<ComPWA::IEstimator, std::shared_ptr<ComPWA::IEstimator> >(m, "IEstimator");
 	py::class_<ComPWA::Optimizer::Optimizer, std::shared_ptr<ComPWA::Optimizer::Optimizer> >(m, "Optimizer");
-	py::class_<ComPWA::FitResult, std::shared_ptr<ComPWA::FitResult> >(m, "FitResult");
+	py::class_<ComPWA::FitResult, std::shared_ptr<ComPWA::FitResult> >(m, "FitResult")
+	  .def("GetFinalParameters", &ComPWA::FitResult::GetFinalParameters)
+	;
 
 	// ComPWA Classes
 	py::class_<ComPWA::AmpIntensity, std::shared_ptr<ComPWA::AmpIntensity> >(m, "AmpIntensity")
@@ -156,6 +186,7 @@ PYBIND11_MODULE(Dalitz_ext, m)
 
 	py::class_<ComPWA::ParameterList>(m, "ParameterList")
       .def(py::init<>())
+	  .def("GetNParameter", &ComPWA::ParameterList::GetNParameter)
 	;
 
 	py::class_<HelicityKinematics, ComPWA::Kinematics, std::shared_ptr<HelicityKinematics> >(m, "HelicityKinematics")

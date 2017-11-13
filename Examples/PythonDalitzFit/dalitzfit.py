@@ -4,13 +4,16 @@
 import ROOT
 from ROOT import gROOT, TCanvas, TF1, TVector3, TTree
 
+from rootpy.interactive import wait
+
 import numpy as np
+import matplotlib.pyplot as plt
 
 from Dalitz_ext import *
 
 import numpy as np
 
-
+import time
 
 ############################# Configuration ##############
 
@@ -192,7 +195,26 @@ saveResults("PyDalitzFit-fitResult.xml", result)
 saveModel("PyDalitzFit-Model.xml", partL, fitPar, intens)
 
 
-print("     TODO: Plot ?")
+print("     Plot")
+
+resultPar = result.GetFinalParameters()
+
+parPlotX = np.arange(0, resultPar.GetNParameter(), 1)
+parPlotY = result_values(result)
+plt.plot(parPlotX, parPlotY)
+
+plt.xlabel('Parameter ID')
+plt.ylabel('Parameter Value')
+plt.title('Parameter after fit')
+plt.grid(True)
+plt.savefig("testPyPlot.png")
+plt.show()
+
+resultFile = ROOT.TFile("DalitzFit.root")
+invMassPlot = resultFile.Get("invmass")
+invMassPlot.Draw()
+wait()
+#time.sleep(60)
 
 ############################# Complete C++ Fit ##############
 
