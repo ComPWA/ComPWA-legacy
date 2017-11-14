@@ -104,7 +104,7 @@ using ComPWA::DataReader::RootReader;
 
 
 
-PythonFit::PythonFit() : argc(0), argv({}), geneva(false), optConfigFile("config.cfg"){
+PythonFit::PythonFit() : argc(0), argv({}){
 }
 
 
@@ -119,7 +119,7 @@ int PythonFit::StartFit() {
 
 	  // RunManager is supposed to manage all objects of the analysis. It generates
 	  // data and starts the fitting procedure.
-	  ComPWA::RunManager run;
+	  ComPWA::Tools::RunManager run;
 
 	  // List with all particle information needed
 	  auto partL = std::make_shared<ComPWA::PartList>();
@@ -139,7 +139,7 @@ int PythonFit::StartFit() {
 	  //---------------------------------------------------
 	  auto gen = std::make_shared<ComPWA::Tools::RootGenerator>(partL, kin);
 	  run.SetGenerator(gen);
-	  std::shared_ptr<Data> phspSample(new Data());
+	  std::shared_ptr<ComPWA::DataReader::Data> phspSample(new ComPWA::DataReader::Data());
 	  run.SetPhspSample(phspSample);
 	  run.GeneratePhsp(100000);
 
@@ -166,7 +166,7 @@ int PythonFit::StartFit() {
 	  //---------------------------------------------------
 	  // 4) Generate a data sample given intensity and kinematics
 	  //---------------------------------------------------
-	  std::shared_ptr<Data> sample(new Data());
+	  std::shared_ptr<ComPWA::DataReader::Data> sample(new ComPWA::DataReader::Data());
 	  run.SetData(sample);
 	  run.Generate(kin, 1000);
 
@@ -182,7 +182,7 @@ int PythonFit::StartFit() {
 	      kin, intens, sample, phspSample, phspSample, 0, 0);
 
 	  esti->UseFunctionTree(true);
-	  LOG(debug) << esti->GetTree()->head()->to_str(25);
+	  LOG(debug) << esti->GetTree()->Head()->Print(25);
 
 	  auto minuitif = new Optimizer::Minuit2::MinuitIF(esti, fitPar);
 	  minuitif->SetHesse(true);
@@ -227,7 +227,7 @@ int PythonFit::StartFit() {
 	  //---------------------------------------------------
 	  // 6) Plot data sample and intensity
 	  //---------------------------------------------------
-	  DalitzPlot pl(kin, "DalitzFit", 100);
+	  ComPWA::Tools::DalitzPlot pl(kin, "DalitzFit", 100);
 	  pl.SetData(sample);
 	  pl.SetPhspData(phspSample);
 	  pl.SetFitAmp(intens, "", kBlue - 4);
@@ -235,34 +235,4 @@ int PythonFit::StartFit() {
 	  LOG(info) << "Done";
 
 	  return 0;
-}
-
-/*PyObject* PythonFit::testTree(){
-	double feventWeight = 1.;
-
-	TTree *fTree = new TTree("testTree", "testTree");
-	unsigned int numPart = 100;
-
-	fTree->Branch("weight", &feventWeight, "weight/D");
-
-	for (auto it=0; it < numPart; ++it) {
-		feventWeight = (int) (it/10.);
-
-		fTree->Fill();
-	}
-	//fTree->Write("", TObject::kOverwrite, 0);
-
-	return convertTreeToPy(fTree);
-}
-
-PyObject* PythonFit::testTVector3(PyObject* inVec){
-	TVector3* fVec3(convertFromPy<TVector3*>(inVec));
-    std::cout << " pyVec in ComPWA " << fVec3->X() << std::endl;
-	(*fVec3)*=2.;
-    std::cout << " pyVec out ComPWA " << fVec3->X() << std::endl;
-	return convertToPy<TVector3>((*fVec3));
-}*/
-
-void PythonFit::setConfigFile(std::string fileName){
-	optConfigFile = fileName;
 }

@@ -216,13 +216,5 @@ invMassPlot.Draw()
 wait()
 #time.sleep(60)
 
-############################# Complete C++ Fit ##############
-
-#print("     test ComPWA c++ fit")
-
-#fit = PythonFit()
-
-#fit.StartFit()
-
 exit()
  

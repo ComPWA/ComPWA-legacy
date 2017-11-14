@@ -175,7 +175,7 @@ namespace Gem
 	 */
 	double GStartIndividual::fitnessCalculation(){
 		updatePar();
-		return theData->controlParameter(parList);
+		return theData->ControlParameter(parList);
 	}
 
 	/********************************************************************************************/

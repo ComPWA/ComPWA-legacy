@@ -60,7 +60,7 @@ std::shared_ptr<ComPWA::AmpIntensity> createIntens(
 		std::string modelStr,
 		std::shared_ptr<ComPWA::PartList> partL,
 		std::shared_ptr<ComPWA::Kinematics> kin,
-		std::shared_ptr<ComPWA::Data> phspSample){
+		std::shared_ptr<ComPWA::DataReader::Data> phspSample){
   std::stringstream modelStream;
   modelStream << modelStr;
   boost::property_tree::ptree modelTree;
@@ -83,7 +83,7 @@ std::vector<std::pair<std::string, std::string>> fitComponents(){
 }
 
 ComPWA::ParameterList calculateFitFractions(std::shared_ptr<ComPWA::Kinematics> kin,
-		std::shared_ptr<ComPWA::AmpIntensity> intens, std::shared_ptr<ComPWA::Data> phspSample){
+		std::shared_ptr<ComPWA::AmpIntensity> intens, std::shared_ptr<ComPWA::DataReader::Data> phspSample){
   auto phspPoints =
 		  std::make_shared<std::vector<ComPWA::dataPoint>>(phspSample->GetDataPoints(kin));
   return ComPWA::Tools::CalculateFitFractions(kin, intens, phspPoints, fitComponents());
@@ -91,7 +91,7 @@ ComPWA::ParameterList calculateFitFractions(std::shared_ptr<ComPWA::Kinematics> 
 
 void calcFractionError(ComPWA::ParameterList& fitPar, std::shared_ptr<ComPWA::FitResult> result,
 		ComPWA::ParameterList& fitFracs, std::shared_ptr<ComPWA::AmpIntensity> intens, std::shared_ptr<ComPWA::Kinematics> kin,
-		std::shared_ptr<ComPWA::Data> phspSample, int nSets){
+		std::shared_ptr<ComPWA::DataReader::Data> phspSample, int nSets){
   auto resultM = std::dynamic_pointer_cast<MinuitResult>(result);
   auto phspPoints =
 		  std::make_shared<std::vector<ComPWA::dataPoint>>(phspSample->GetDataPoints(kin));
@@ -125,11 +125,11 @@ PYBIND11_MODULE(Dalitz_ext, m)
 	py::class_<PythonFit>(m, "PythonFit")
       .def(py::init<>())
       .def("StartFit", &PythonFit::StartFit)
-	  .def("setConfigFile", &PythonFit::setConfigFile)
+	  //.def("setConfigFile", &PythonFit::setConfigFile)
 	  //.def("testTree", &PythonFit::testTree, return_value_policy<manage_new_object>())
 	  //.def("testTree", &PythonFit::testTree)
 	  //.def("testVec", &PythonFit::testTVector3)
-	  .def("useGeneva", &PythonFit::useGeneva)
+	  //.def("useGeneva", &PythonFit::useGeneva)
       //.def("AddParameter", &ParameterList::AddParameter)
       //.def("to_str", &ParameterList::to_str)
       //.def("GetNDouble", &ParameterList::GetNDouble)
@@ -141,7 +141,7 @@ PYBIND11_MODULE(Dalitz_ext, m)
 	m.def("GetInitialState", [](int id) { std::vector<ComPWA::pid> initialState = {id}; return initialState; } );
 	m.def("GetFinalState", [](int idA, int idB, int idC) { std::vector<ComPWA::pid> finalState = {idA, idB, idC}; return finalState; } );
 	m.def("GetIncoherentIntensity",  (std::shared_ptr<ComPWA::AmpIntensity>  (*)
-			(std::string, std::shared_ptr<ComPWA::PartList>, std::shared_ptr<ComPWA::Kinematics>, std::shared_ptr<ComPWA::Data>))
+			(std::string, std::shared_ptr<ComPWA::PartList>, std::shared_ptr<ComPWA::Kinematics>, std::shared_ptr<ComPWA::DataReader::Data>))
 			&createIntens);
 	m.def("setErrorOnParameterList", (void (*) (ComPWA::ParameterList&, double, bool)) &setErrorOnParameterList);
 	m.def("fitComponents",  (std::vector< std::pair<std::string, std::string> > (*) ()) &fitComponents);
@@ -149,12 +149,12 @@ PYBIND11_MODULE(Dalitz_ext, m)
 	m.def("saveModel",  (void (*) (std::string, std::shared_ptr<ComPWA::PartList>, ComPWA::ParameterList&, std::shared_ptr<ComPWA::AmpIntensity>)) &saveModel);
 	m.def("CalculateFitFractions", (ComPWA::ParameterList (*)
 	        (std::shared_ptr<ComPWA::Kinematics>, std::shared_ptr<ComPWA::AmpIntensity>,
-	        		std::shared_ptr<ComPWA::Data> ))
+	        		std::shared_ptr<ComPWA::DataReader::Data> ))
 			&calculateFitFractions);
 	m.def("CalcFractionError", (void (*)
 	        (ComPWA::ParameterList&, std::shared_ptr<ComPWA::FitResult>, ComPWA::ParameterList&,
 	        		std::shared_ptr<ComPWA::AmpIntensity>, std::shared_ptr<ComPWA::Kinematics>,
-	        		std::shared_ptr<ComPWA::Data>, int))
+	        		std::shared_ptr<ComPWA::DataReader::Data>, int))
 			&calcFractionError);
 	m.def("result_values",  (py::array_t<double> (*) (std::shared_ptr<ComPWA::FitResult>)) &result_values);
 
@@ -193,17 +193,17 @@ PYBIND11_MODULE(Dalitz_ext, m)
       .def(py::init<std::shared_ptr<ComPWA::PartList>, std::vector<ComPWA::pid>, std::vector<ComPWA::pid> >())
 	;
 
-	py::class_<ComPWA::RunManager>(m, "RunManager")
+	py::class_<ComPWA::Tools::RunManager>(m, "RunManager")
       .def(py::init<>())
-      .def("SetGenerator", &ComPWA::RunManager::SetGenerator)
-	  .def("SetPhspSample", &ComPWA::RunManager::SetPhspSample, py::arg("phsp"),
+      .def("SetGenerator", &ComPWA::Tools::RunManager::SetGenerator)
+	  .def("SetPhspSample", &ComPWA::Tools::RunManager::SetPhspSample, py::arg("phsp"),
 			  py::arg("truePhsp") = std::shared_ptr<ComPWA::DataReader::Data>() )
-	  .def("GeneratePhsp", &ComPWA::RunManager::GeneratePhsp)
-	  .def("SetData", &ComPWA::RunManager::SetData)
-	  .def("Generate", &ComPWA::RunManager::Generate)
-	  .def("SetAmplitude", &ComPWA::RunManager::SetAmplitude)
-	  .def("SetOptimizer", &ComPWA::RunManager::SetOptimizer)
-	  .def("Fit", &ComPWA::RunManager::Fit)
+	  .def("GeneratePhsp", &ComPWA::Tools::RunManager::GeneratePhsp)
+	  .def("SetData", &ComPWA::Tools::RunManager::SetData)
+	  .def("Generate", &ComPWA::Tools::RunManager::Generate)
+	  .def("SetAmplitude", &ComPWA::Tools::RunManager::SetAmplitude)
+	  .def("SetOptimizer", &ComPWA::Tools::RunManager::SetOptimizer)
+	  .def("Fit", &ComPWA::Tools::RunManager::Fit)
     ;
 
 	py::class_<ComPWA::Tools::RootGenerator, ComPWA::Generator, std::shared_ptr<ComPWA::Tools::RootGenerator> >(m, "RootGenerator")
