@@ -70,8 +70,9 @@ public:
   /// particle in initial or final state list is used later on for
   /// identification.
   HelicityKinematics(std::shared_ptr<PartList> partL,
-                     std::vector<pid> initialState,
-                     std::vector<pid> finalState);
+                     std::vector<pid> initialState, std::vector<pid> finalState,
+                     ComPWA::FourMomentum cmsP4 = ComPWA::FourMomentum(0, 0, 0,
+                                                                       0));
 
   /// Create HelicityKinematics from a boost::property_tree.
   /// The tree is expected to contain something like:
@@ -126,14 +127,15 @@ public:
   ///        frame of the resonance.
   ///     -# Calculate \f$cos\Theta\f$ and \f$\phi\f$ between those boosted
   ///        momenta.
-  void EventToDataPoint(const Event &event, dataPoint &point, SubSystem sys,
+  void EventToDataPoint(const Event &event, dataPoint &point,
+                        const SubSystem &sys,
                         const std::pair<double, double> limits) const;
 
   /// Fill \p point with variables for \p sys.
   /// \see EventToDataPoint(const Event &event, dataPoint &point, SubSystem sys,
   ///                     const std::pair<double, double> limits) const;
   void EventToDataPoint(const Event &event, dataPoint &point,
-                        SubSystem sys) const;
+                        const SubSystem &sys) const;
 
   /// Check if \p point is within phase space boundaries.
   bool IsWithinPhsp(const dataPoint &point) const;
@@ -143,12 +145,12 @@ public:
   /// the list and variables (m^2, cosTheta, phi) are calculated in
   /// #EventToDataPoint()
   /// and added to each dataPoint.
-  virtual int GetDataID(const SubSystem subSys) {
+  virtual int GetDataID(const SubSystem &subSys) {
     // We calculate the variables currently for two-body decays
     if (subSys.GetFinalStates().size() != 2)
       return 0;
     int pos = createIndex(subSys);
-    //    LOG(trace) << " Subsystem " << s << " has dataID " << pos;
+    //    LOG(trace) << " SubSystem " << s << " has dataID " << pos;
     return pos;
   }
 
@@ -174,7 +176,7 @@ public:
 
   /// Get phase space bounds for the invariant mass of \p subSys.
   virtual const std::pair<double, double> &
-  GetInvMassBounds(const SubSystem subSys) const;
+  GetInvMassBounds(const SubSystem &subSys) const;
 
   virtual const std::pair<double, double> &GetInvMassBounds(int sysID) const;
 
@@ -189,7 +191,7 @@ protected:
 
   ///  Calculation of n-dimensional phase space volume.
   ///  ToDo: We need to implement an analytical calculation here
-  double calculatePSArea() { return 1.0; }
+  double calculatePSArea() const { return 1.0; }
 
   /// List of subsystems for which invariant mass and angles are calculated
   std::vector<SubSystem> _listSubSystem;
@@ -197,25 +199,16 @@ protected:
   /// Invariant mass bounds for each SubSystem
   std::vector<std::pair<double, double>> _invMassBounds;
 
-  std::pair<double, double> CalculateInvMassBounds(const SubSystem sys) const;
+  std::pair<double, double> CalculateInvMassBounds(const SubSystem &sys) const;
 
   /// Add \p newSys to list of SubSystems and return its ID.
   /// In case that this SubSystem is already in the list only the ID is
   /// returned.
-  int createIndex(SubSystem const &newSys) {
-    int results =
-        std::find(_listSubSystem.begin(), _listSubSystem.end(), newSys) -
-        _listSubSystem.begin();
-    if (results == _listSubSystem.size()) {
-      _listSubSystem.push_back(newSys);
-      _invMassBounds.push_back(CalculateInvMassBounds(newSys));
-    }
-    return results;
-  }
+  int createIndex(const SubSystem &newSys);
 };
 
-} /* namespace HelicityFormalism */
-} /* namespace Physics */
-} /* namespace ComPWA */
+} // namespace HelicityFormalism
+} // namespace Physics
+} // namespace ComPWA
 
-#endif /* PHYSICS_HELICITYFORMALISM_HELICITYKINEMATICS_HPP_ */
+#endif

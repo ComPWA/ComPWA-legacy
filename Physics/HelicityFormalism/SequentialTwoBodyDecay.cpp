@@ -91,24 +91,24 @@ std::shared_ptr<ComPWA::FunctionTree> SequentialTwoBodyDecay::GetTree(
     const ParameterList &toySample, std::string suffix) {
 
   std::shared_ptr<FunctionTree> tr(new FunctionTree());
-  tr->createHead("Amplitude(" + GetName() + ")" + suffix,
+  tr->CreateHead("Amplitude(" + GetName() + ")" + suffix,
                  std::shared_ptr<Strategy>(new MultAll(ParType::MCOMPLEX)));
-  tr->createNode("Strength",
+  tr->CreateNode("Strength",
                  std::shared_ptr<Strategy>(new Complexify(ParType::COMPLEX)),
                  "Amplitude(" + GetName() + ")" + suffix);
-  tr->createLeaf("Magnitude", _magnitude, "Strength");
-  tr->createLeaf("Phase", _phase, "Strength");
-  tr->createLeaf("PreFactor", GetPreFactor(),
+  tr->CreateLeaf("Magnitude", _magnitude, "Strength");
+  tr->CreateLeaf("Phase", _phase, "Strength");
+  tr->CreateLeaf("PreFactor", GetPreFactor(),
                  "Amplitude(" + GetName() + ")" + suffix);
 
   for (auto i : _partDecays) {
     std::shared_ptr<FunctionTree> resTree =
         i->GetTree(kin, sample, toySample, "");
-    if (!resTree->sanityCheck())
+    if (!resTree->SanityCheck())
       throw std::runtime_error("AmpSumIntensity::setupBasicTree() | "
                                "Amplitude tree didn't pass sanity check!");
-    resTree->recalculate();
-    tr->insertTree(resTree, "Amplitude(" + GetName() + ")" + suffix);
+    resTree->Recalculate();
+    tr->InsertTree(resTree, "Amplitude(" + GetName() + ")" + suffix);
   }
 
   return tr;

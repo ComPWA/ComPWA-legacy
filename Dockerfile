@@ -17,8 +17,5 @@ RUN echo "Before installation" && \
 	cmake ../ComPWA &&\
 	#cmake -DROOTSYS=/rootbuild/root ../ComPWA &&\
 	make -j5 &&\
-	cp ../ComPWA/executables/Examples/DalitzAnalysis_D0KsKK/model.xml . &&\
-	cp ../ComPWA/Physics/particlesDefault.xml particles.xml &&\
-	cp ../ComPWA/Physics/physConstants.xml . &&\
 	echo "ComPWA ready!"
 CMD echo "ComPWA start!"

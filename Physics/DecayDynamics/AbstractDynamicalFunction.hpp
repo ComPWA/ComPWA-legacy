@@ -28,7 +28,7 @@ public:
   
   AbstractDynamicalFunction()
       : _daughterMasses(std::pair<double, double>(-999, -999)),
-        _current_mass(-999){};
+        _current_mass(-999), _mcPrecision(1000000), _modified(true){};
 
   virtual ~AbstractDynamicalFunction(){};
 

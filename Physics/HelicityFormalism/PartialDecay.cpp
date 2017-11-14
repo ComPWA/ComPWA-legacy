@@ -23,7 +23,8 @@ PartialDecay::Factory(std::shared_ptr<PartList> partL,
   LOG(trace) << "PartialDecay::Factory() |";
   SubSystem subSys = SubSystemFactory(pt.get_child("SubSystem"));
 
-  auto obj = std::make_shared<PartialDecay>(subSys);
+  // Create object. Setting dataPos to invalid, will be set later
+  auto obj = std::make_shared<PartialDecay>(-1, subSys);
   obj->SetName(pt.get<std::string>("<xmlattr>.Name", "empty"));
 
   std::shared_ptr<DoubleParameter> mag, phase;
@@ -153,47 +154,47 @@ PartialDecay::GetTree(std::shared_ptr<Kinematics> kin,
   int phspSampleSize = toySample.GetMultiDouble(0)->GetNValues();
 
   std::shared_ptr<FunctionTree> tr(new FunctionTree());
-  tr->createHead("Resonance(" + GetName() + ")" + suffix,
+  tr->CreateHead("Resonance(" + GetName() + ")" + suffix,
                  std::shared_ptr<Strategy>(new MultAll(ParType::MCOMPLEX)));
-  tr->createNode("Strength",
+  tr->CreateNode("Strength",
                  std::shared_ptr<Strategy>(new Complexify(ParType::COMPLEX)),
                  "Resonance(" + GetName() + ")" + suffix);
-  tr->createLeaf("Magnitude", _magnitude, "Strength");
-  tr->createLeaf("Phase", _phase, "Strength");
-  tr->createLeaf("PreFactor", _preFactor,
+  tr->CreateLeaf("Magnitude", _magnitude, "Strength");
+  tr->CreateLeaf("Phase", _phase, "Strength");
+  tr->CreateLeaf("PreFactor", _preFactor,
                  "Resonance(" + GetName() + ")" + suffix);
-  tr->insertTree(_angD->GetTree(sample, _dataPos + 1, _dataPos + 2),
+  tr->InsertTree(_angD->GetTree(sample, _dataPos + 1, _dataPos + 2),
                  "Resonance(" + GetName() + ")" + suffix);
-  tr->insertTree(_dynamic->GetTree(sample, _dataPos),
+  tr->InsertTree(_dynamic->GetTree(sample, _dataPos),
                  "Resonance(" + GetName() + ")" + suffix);
 
-  tr->recalculate();
-  tr->createNode("Normalization",
+  tr->Recalculate();
+  tr->CreateNode("Normalization",
                  std::shared_ptr<Strategy>(new Inverse(ParType::DOUBLE)),
                  "Resonance(" + GetName() + ")" + suffix); // 1/normLH
-  tr->createNode("SqrtIntegral",
+  tr->CreateNode("SqrtIntegral",
                  std::shared_ptr<Strategy>(new SquareRoot(ParType::DOUBLE)),
                  "Normalization");
-  tr->createNode("Integral",
+  tr->CreateNode("Integral",
                  std::shared_ptr<Strategy>(new MultAll(ParType::DOUBLE)),
                  "SqrtIntegral");
-  tr->createLeaf("PhspVolume", phspVolume_, "Integral");
-  tr->createLeaf("InverseSampleSize", 1 / ((double)phspSampleSize), "Integral");
-  tr->createNode("Sum", std::shared_ptr<Strategy>(new AddAll(ParType::DOUBLE)),
+  tr->CreateLeaf("PhspVolume", phspVolume_, "Integral");
+  tr->CreateLeaf("InverseSampleSize", 1 / ((double)phspSampleSize), "Integral");
+  tr->CreateNode("Sum", std::shared_ptr<Strategy>(new AddAll(ParType::DOUBLE)),
                  "Integral");
-  tr->createNode("Intensity",
+  tr->CreateNode("Intensity",
                  std::shared_ptr<Strategy>(new AbsSquare(ParType::MDOUBLE)),
                  "Sum", phspSampleSize,
                  false); //|T_{ev}|^2
-  tr->createNode("mult",
+  tr->CreateNode("mult",
                  std::shared_ptr<Strategy>(new MultAll(ParType::MCOMPLEX)),
                  "Intensity");
-  tr->insertTree(_angD->GetTree(toySample, _dataPos + 1, _dataPos + 2, "_norm"),
+  tr->InsertTree(_angD->GetTree(toySample, _dataPos + 1, _dataPos + 2, "_norm"),
                  "mult" + suffix);
-  tr->insertTree(_dynamic->GetTree(toySample, _dataPos, "_norm"),
+  tr->InsertTree(_dynamic->GetTree(toySample, _dataPos, "_norm"),
                  "mult" + suffix);
 
-  tr->recalculate();
+  tr->Recalculate();
   return tr;
 }
 

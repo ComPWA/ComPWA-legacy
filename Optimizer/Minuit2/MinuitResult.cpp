@@ -7,7 +7,6 @@
 #include <cstdlib>
 
 #include <boost/archive/xml_oarchive.hpp>
-
 #include <Minuit2/MnUserParameterState.h>
 
 #include "Core/ProgressBar.hpp"
@@ -15,6 +14,7 @@
 #include "Optimizer/Minuit2/MinuitResult.hpp"
 
 using namespace ComPWA::Optimizer::Minuit2;
+
 
 MinuitResult::MinuitResult()
     : calcInterference(0), initialLH(0), finalLH(0), trueLH(0) {}
@@ -37,13 +37,12 @@ void MinuitResult::init(ROOT::Minuit2::FunctionMinimum min) {
 
   if (minState.HasCovariance()) {
     ROOT::Minuit2::MnUserCovariance minuitCovMatrix = minState.Covariance();
-    /* Size of Minuit covariance vector is given by dim*(dim+1)/2.
-     * dim is the dimension of the covariance matrix.
-     * The dimension can therefore be calculated as
-     * dim = -0.5+-0.5 sqrt(8*size+1)
-     */
+    // Size of Minuit covariance vector is given by dim*(dim+1)/2.
+     // dim is the dimension of the covariance matrix.
+     // The dimension can therefore be calculated as
+     // dim = -0.5+-0.5 sqrt(8*size+1)
+     //
     nFreeParameter = minuitCovMatrix.Nrow();
-    globalCC = minState.GlobalCC().GlobalCC();
     cov = std::vector<std::vector<double>>(nFreeParameter,
                                            std::vector<double>(nFreeParameter));
     corr = std::vector<std::vector<double>>(
@@ -62,6 +61,12 @@ void MinuitResult::init(ROOT::Minuit2::FunctionMinimum min) {
 
   } else
     LOG(error) << "MinuitResult: no valid correlation matrix available!";
+  if(minState.HasGlobalCC()){
+    globalCC = minState.GlobalCC().GlobalCC();
+  }else{
+    globalCC = std::vector<double>(nFreeParameter, 0);
+    LOG(error) << "MinuitResult: no valid global correlation available!";
+  }
   initialLH = -1;
   finalLH = minState.Fval();
   edm = minState.Edm();
@@ -208,7 +213,12 @@ void MinuitResult::PrintCorrelationMatrix(TableFormater *tableCorr) {
     if (ppp->IsFixed())
       continue;
     *tableCorr << ppp->GetName();
-    *tableCorr << globalCC.at(n);
+    try{
+      *tableCorr << globalCC.at(n);
+    }catch(...){
+      *tableCorr << "?";
+    }
+
     for (unsigned int t = 0; t < corr.size(); t++) {
       if (n >= corr.at(0).size()) {
         *tableCorr << " ";
@@ -299,7 +309,3 @@ bool MinuitResult::HasFailed() {
 
   return failed;
 }
-
-// Enable serialization of MinuitResult. For some reason has to be outside
-// any namespaces.
-BOOST_CLASS_EXPORT(ComPWA::Optimizer::Minuit2::MinuitResult)

@@ -2,26 +2,29 @@
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
-//! Base class parameter observer.
-/*! \class ParObserver
- * @file ParObserver.hpp
- * For the use in the function tree, the observer pattern is used.
- * This class takes the role of the Observer. It's implemented by the
- * TreeNode class, which then are able to observe a parameter and note
- * changes.
-*/
+///
+/// \file
+/// ParObserver class
+///
 
 #ifndef _PAROBSERVER_HPP_
 #define _PAROBSERVER_HPP_
 
 namespace ComPWA {
 
+///
+/// \class ParObserver Base class parameter observer.
+/// For the use in the function tree, the observer pattern is used.
+/// This class takes the role of the Observer. It's implemented by the
+/// TreeNode class, which then are able to observe a parameter and note
+///changes.
+///
 class ParObserver {
 public:
-  //! This function gets called by the parameter to inform observing TreeNodes
+  /// Call this function to mark the observing node as modified.
   virtual void Update() = 0;
 };
 
-} /* namespace ComPWA */
+} // namespace ComPWA
 
 #endif

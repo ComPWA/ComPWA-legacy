@@ -9,16 +9,29 @@ SET(lib_srcs
 )
 SET(lib_headers
   Data.hpp
-  DataCorrection.cpp
-  CorrectionTable.cpp
+  DataCorrection.hpp
+  CorrectionTable.hpp
 )
 
 add_library( DataReader
   SHARED ${lib_srcs} ${lib_headers}
 )
 
-add_subdirectory (RootReader)
+#
+# AsciiReader module
+#
 add_subdirectory (AsciiReader)
+
+#
+# RootReader module
+#
+find_package( ROOT QUIET )
+IF( ${ROOT_FOUND} )
+    add_subdirectory (RootReader)
+ELSE ()
+  MESSAGE(WARNING "ROOT not found! Not building RootReader module!")
+ENDIF()
+
 
 target_link_libraries( DataReader
   Core ${Boost_LIBRARIES}
@@ -28,7 +41,10 @@ target_include_directories( DataReader
   PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
-install (FILES ${lib_headers} DESTINATION include/ComPWA)
+install (FILES ${lib_headers}
+    DESTINATION include/ComPWA/DataReader
+)
+
 install(TARGETS DataReader
         LIBRARY DESTINATION lib
 )

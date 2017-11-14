@@ -3,15 +3,16 @@
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 #include "DataReader/Data.hpp"
 
-namespace ComPWA {
-namespace DataReader {
+using namespace ComPWA::DataReader;
 
 Data::Data(bool binning, unsigned int maxBins, double maxW)
     : maxWeight(maxW), fBinned(binning), fmaxBins(maxBins) {}
 
-void rndReduceSet(std::shared_ptr<Kinematics> kin, unsigned int size,
-                  std::shared_ptr<Generator> gen, Data *in1, Data *out1,
-                  Data *in2, Data *out2) {
+void ComPWA::DataReader::rndReduceSet(std::shared_ptr<ComPWA::Kinematics> kin,
+                                      unsigned int size,
+                                      std::shared_ptr<ComPWA::Generator> gen,
+                                      Data *in1, Data *out1, Data *in2,
+                                      Data *out2) {
   if (!in1)
     throw std::runtime_error("rndSubSet() | No input data set!");
   if (!out1)
@@ -45,27 +46,27 @@ void rndReduceSet(std::shared_ptr<Kinematics> kin, unsigned int size,
    * with sqrt(N) */
   for (unsigned int i = 0; i < totalSize;
        i++) { // count how many events are not within PHSP
-    dataPoint point;
+    ComPWA::dataPoint point;
     try {
       kin->EventToDataPoint(in1->GetEvent(i), point);
-    } catch (BeyondPhsp &ex) { // event outside phase, remove
+    } catch (ComPWA::BeyondPhsp &ex) { // event outside phase, remove
       newSize--;
       continue;
     }
-    //		dataPoint point(in1->getEvent(i));
-    //		if(!Kinematics::instance()->isWithinPhsp(point)) newSize--;
+    //    dataPoint point(in1->getEvent(i));
+    //    if(!Kinematics::instance()->isWithinPhsp(point)) newSize--;
   }
   double threshold = (double)size / newSize; // calculate threshold
   for (unsigned int i = 0; i < totalSize; i++) {
-    dataPoint point;
+    ComPWA::dataPoint point;
     try {
       kin->EventToDataPoint(in1->GetEvent(i), point);
-    } catch (BeyondPhsp &ex) { // event outside phase, remove
+    } catch (ComPWA::BeyondPhsp &ex) { // event outside phase, remove
       continue;
     }
-    //		dataPoint point(in1->getEvent(i)); //use first sample for
+    //    dataPoint point(in1->getEvent(i)); //use first sample for
     // hit&miss
-    //		if(!Kinematics::instance()->isWithinPhsp(point)) continue;
+    //    if(!Kinematics::instance()->isWithinPhsp(point)) continue;
     if (gen->GetUniform(0, 1) < threshold) {
       out1->PushEvent(in1->GetEvent(i));
       // write second sample if event from first sample were accepted
@@ -81,7 +82,8 @@ void rndReduceSet(std::shared_ptr<Kinematics> kin, unsigned int size,
   return;
 }
 
-std::shared_ptr<Data> Data::RndSubSet(std::shared_ptr<Kinematics> kin, unsigned int size,
+std::shared_ptr<Data> Data::RndSubSet(std::shared_ptr<Kinematics> kin,
+                                      unsigned int size,
                                       std::shared_ptr<Generator> gen) {
   std::shared_ptr<Data> out(this->EmptyClone());
   rndReduceSet(kin, size, gen, this, out.get());
@@ -142,7 +144,7 @@ void Data::SetEfficiency(std::shared_ptr<Kinematics> kin,
     } catch (BeyondPhsp &ex) { // event outside phase, remove
       continue;
     }
-    //		dataPoint point(fEvents.at(evt));
+    //    dataPoint point(fEvents.at(evt));
     double val = eff->Evaluate(point);
     fEvents.at(evt).SetEfficiency(val);
   }
@@ -160,7 +162,8 @@ bool Data::HasWeights() {
   return has;
 }
 
-const ParameterList &Data::GetListOfData(std::shared_ptr<Kinematics> kin) {
+const ComPWA::ParameterList &
+Data::GetListOfData(std::shared_ptr<ComPWA::Kinematics> kin) {
   // dataList already filled? return filled one
   if (dataList.GetNParameter() != 0)
     return dataList;
@@ -205,7 +208,8 @@ const ParameterList &Data::GetListOfData(std::shared_ptr<Kinematics> kin) {
   return dataList;
 }
 
-std::vector<dataPoint> Data::GetDataPoints(std::shared_ptr<Kinematics> kin) const {
+std::vector<ComPWA::dataPoint>
+Data::GetDataPoints(std::shared_ptr<ComPWA::Kinematics> kin) const {
   std::vector<dataPoint> vecPoint;
   for (int i = 0; i < fEvents.size(); i++) {
     dataPoint point;
@@ -261,12 +265,8 @@ const int Data::GetBin(const int i, double &m12, double &weight) {
   return 1;
 }
 
-//! Add event to data sample
 void Data::PushEvent(const Event &evt) {
   fEvents.push_back(evt);
   if (evt.GetWeight() > maxWeight)
     maxWeight = evt.GetWeight();
 }
-
-} /* namespace DataReader */
-} /* namespace ComPWA */

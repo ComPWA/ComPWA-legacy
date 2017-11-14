@@ -128,43 +128,43 @@ CoherentIntensity::GetTree(std::shared_ptr<Kinematics> kin,
 
   std::shared_ptr<FunctionTree> tr(new FunctionTree());
 
-  tr->createHead("CoherentIntensity(" + Name() + ")" + suffix,
+  tr->CreateHead("CoherentIntensity(" + Name() + ")" + suffix,
                  std::shared_ptr<Strategy>(new MultAll(ParType::MDOUBLE)));
-  tr->createLeaf("Strength", _strength,
+  tr->CreateLeaf("Strength", _strength,
                  "CoherentIntensity(" + Name() + ")" + suffix);
-  tr->createNode("SumSquared",
+  tr->CreateNode("SumSquared",
                  std::shared_ptr<Strategy>(new AbsSquare(ParType::MDOUBLE)),
                  "CoherentIntensity(" + Name() + ")" + suffix);
-  tr->insertTree(setupBasicTree(kin, sample, toySample), "SumSquared");
+  tr->InsertTree(setupBasicTree(kin, sample, toySample), "SumSquared");
 
   // Normalization
   // create a new FunctionTree to make sure that nodes with the same name do
   // not interfere
   std::shared_ptr<FunctionTree> trNorm(new FunctionTree());
-  trNorm->createHead("Normalization(" + Name() + ")" + suffix,
+  trNorm->CreateHead("Normalization(" + Name() + ")" + suffix,
                      std::shared_ptr<Strategy>(new Inverse(ParType::DOUBLE)));
-  trNorm->createNode("Integral",
+  trNorm->CreateNode("Integral",
                      std::shared_ptr<Strategy>(new MultAll(ParType::DOUBLE)),
                      "Normalization(" + Name() + ")" + suffix);
-  trNorm->createLeaf("PhspVolume", kin->GetPhspVolume(), "Integral");
-  trNorm->createLeaf("InverseSampleWeights", 1 / ((double)sumWeights),
+  trNorm->CreateLeaf("PhspVolume", kin->GetPhspVolume(), "Integral");
+  trNorm->CreateLeaf("InverseSampleWeights", 1 / ((double)sumWeights),
                      "Integral");
-  trNorm->createNode("Sum",
+  trNorm->CreateNode("Sum",
                      std::shared_ptr<Strategy>(new AddAll(ParType::DOUBLE)),
                      "Integral");
-  trNorm->createNode("IntensityWeighted",
+  trNorm->CreateNode("IntensityWeighted",
                      std::shared_ptr<Strategy>(new MultAll(ParType::MDOUBLE)),
                      "Sum", phspSampleSize, false);
-  trNorm->createLeaf("Efficiency", eff, "IntensityWeighted");
-  trNorm->createLeaf("EventWeight", weightPhsp, "IntensityWeighted");
-  trNorm->createNode("Intensity",
+  trNorm->CreateLeaf("Efficiency", eff, "IntensityWeighted");
+  trNorm->CreateLeaf("EventWeight", weightPhsp, "IntensityWeighted");
+  trNorm->CreateNode("Intensity",
                      std::shared_ptr<Strategy>(new AbsSquare(ParType::MDOUBLE)),
                      "IntensityWeighted", phspSampleSize,
                      false); //|T_{ev}|^2
-  trNorm->insertTree(setupBasicTree(kin, phspSample, toySample, "_norm"),
+  trNorm->InsertTree(setupBasicTree(kin, phspSample, toySample, "_norm"),
                      "Intensity");
 
-  tr->insertTree(trNorm, "CoherentIntensity(" + Name() + ")" + suffix);
+  tr->InsertTree(trNorm, "CoherentIntensity(" + Name() + ")" + suffix);
   return tr;
 }
 
@@ -192,16 +192,16 @@ std::shared_ptr<FunctionTree> CoherentIntensity::setupBasicTree(
   // Strategies needed
   std::shared_ptr<AddAll> maddStrat(new AddAll(ParType::MCOMPLEX));
 
-  newTree->createHead("SumOfAmplitudes" + suffix, maddStrat, sampleSize);
+  newTree->CreateHead("SumOfAmplitudes" + suffix, maddStrat, sampleSize);
 
   for (auto i : _seqDecays) {
     std::shared_ptr<FunctionTree> resTree =
         i->GetTree(kin, sample, phspSample, "");
-    if (!resTree->sanityCheck())
+    if (!resTree->SanityCheck())
       throw std::runtime_error("AmpSumIntensity::setupBasicTree() | "
                                "Resonance tree didn't pass sanity check!");
-    resTree->recalculate();
-    newTree->insertTree(resTree, "SumOfAmplitudes" + suffix);
+    resTree->Recalculate();
+    newTree->InsertTree(resTree, "SumOfAmplitudes" + suffix);
   }
 
   LOG(debug) << "AmpSumIntensity::setupBasicTree(): tree constructed!!";

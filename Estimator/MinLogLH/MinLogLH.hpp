@@ -3,7 +3,7 @@
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
 ///
-/// \file MinLogLH.hpp
+/// \file
 ///
 
 #ifndef _MINLOGLH_HPP
@@ -59,8 +59,10 @@ public:
            std::shared_ptr<ComPWA::DataReader::Data> accSample,
            unsigned int firstEvent, unsigned int nEvents);
 
+  virtual ~MinLogLH() {};
+  
   /// Value of minimum log likelhood function.
-  virtual double controlParameter(ComPWA::ParameterList &par);
+  virtual double ControlParameter(ComPWA::ParameterList &par);
 
   /// Trigger the use of a FunctionTree.
   /// If no tree is provided by the AmpIntensity implementation an exception
@@ -72,7 +74,7 @@ public:
   virtual std::shared_ptr<ComPWA::FunctionTree> GetTree();
 
   /// Number of likelihood evaluations
-  virtual int NSteps() { return _nCalls; }
+  virtual int NSteps() const { return _nCalls; }
 
 protected:
   /// Initialize FunctionTree.

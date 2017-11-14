@@ -2,10 +2,10 @@
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
-//
-// \file
-// AbsParameter base class.
-//
+///
+/// \file
+/// AbsParameter base class.
+///
 
 #ifndef _ABSPARAMETER_HPP_
 #define _ABSPARAMETER_HPP_

@@ -35,6 +35,7 @@
 #include "Optimizer/Minuit2/MinuitIF.hpp"
 
 using namespace ComPWA;
+using namespace ComPWA::DataReader;
 using ComPWA::Physics::HelicityFormalism::HelicityKinematics;
 using ComPWA::Physics::HelicityFormalism::IncoherentIntensity;
 using ComPWA::Optimizer::Minuit2::MinuitResult;
@@ -170,7 +171,7 @@ int main(int argc, char **argv) {
 
   // RunManager is supposed to manage all objects of the analysis. It generates
   // data and starts the fitting procedure.
-  ComPWA::RunManager run;
+  ComPWA::Tools::RunManager run;
 
   // List with all particle information needed
   auto partL = std::make_shared<ComPWA::PartList>();
@@ -233,7 +234,7 @@ int main(int argc, char **argv) {
       kin, intens, sample, phspSample, phspSample, 0, 0);
 
   esti->UseFunctionTree(true);
-  LOG(debug) << esti->GetTree()->head()->to_str(25);
+  LOG(debug) << esti->GetTree()->Head()->Print(25);
 
   auto minuitif = new Optimizer::Minuit2::MinuitIF(esti, fitPar);
   minuitif->SetHesse(true);
@@ -278,7 +279,7 @@ int main(int argc, char **argv) {
   //---------------------------------------------------
   // 6) Plot data sample and intensity
   //---------------------------------------------------
-  DalitzPlot pl(kin, "DalitzFit", 100);
+  ComPWA::Tools::DalitzPlot pl(kin, "DalitzFit", 100);
   pl.SetData(sample);
   pl.SetPhspData(phspSample);
   pl.SetFitAmp(intens, "", kBlue - 4);

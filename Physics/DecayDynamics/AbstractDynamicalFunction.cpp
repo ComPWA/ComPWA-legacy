@@ -10,11 +10,10 @@ namespace Physics {
 namespace DecayDynamics {
 
 void AbstractDynamicalFunction::GetParameters(ParameterList &list) {
-  /* We check of for each parameter if a parameter of the same name exists in
-   *list. If so we check if both are equal and set the local parameter to the
-   *parameter from the list. In this way we connect parameters that occur on
-   *different positions in the amplitude.
-   */
+  // We check of for each parameter if a parameter of the same name exists in
+  // list. If so we check if both are equal and set the local parameter to the
+  // parameter from the list. In this way we connect parameters that occur on
+  // different positions in the amplitude.
   std::shared_ptr<DoubleParameter> tmp;
   auto mass = GetMassParameter();
   try { // catch BadParameter
@@ -30,6 +29,6 @@ void AbstractDynamicalFunction::GetParameters(ParameterList &list) {
   }
 }
 
-} /* namespace DecayDynamics */
-} /* namespace Physics */
-} /* namespace ComPWA */
+} // namespace DecayDynamics
+} // namespace Physics
+} // namespace ComPWA

@@ -1,7 +1,7 @@
 # Create MinLogLH library.
 
-SET(lib_srcs MinLogLH.cpp)
-SET(lib_headers MinLogLH.hpp )
+SET(lib_srcs MinLogLH.cpp SumMinLogLH.cpp )
+SET(lib_headers MinLogLH.hpp SumMinLogLH.hpp )
 
 add_library(
   MinLogLH
@@ -13,7 +13,10 @@ target_link_libraries(
   Core
 )
 
-install (FILES ${lib_headers} DESTINATION include/ComPWA)
+install (FILES ${lib_headers}
+    DESTINATION include/ComPWA/Estimator/MinLogLH
+)
+
 install (TARGETS MinLogLH
         LIBRARY DESTINATION lib
 )

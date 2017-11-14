@@ -48,20 +48,16 @@ public:
 protected:
   double _M;
   ComPWA::Spin _spinM;
-  double mSq1;        //! masse squared of daughter 1
   double m1;          //! masses of daughter 1
-  unsigned int spin1; //! spin of daughter 1
 
-  double mSq2;        //! masse squared of daughter 2
   double m2;          //! masses of daughter 2
-  unsigned int spin2; //! spin of daughter 2
 
   double mass_sq_min; //! minimum value of masssq
   double mass_sq_max; //! maximum value of masssq
   double mass_min;    //! minimum value of masssq
   double mass_max;    //! maximum value of masssq
 
-  virtual double calculatePSArea() { return (mass_max - mass_min); }
+  virtual double calculatePSArea() const { return (mass_max - mass_min); }
 };
 
 } /* namespace ComPWA */

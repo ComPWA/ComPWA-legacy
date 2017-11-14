@@ -2,8 +2,8 @@
 # refer to the root source directory of the project as ${COMPWA_SOURCE_DIR} and
 # to the root binary directory of the project as ${COMPWA_BINARY_DIR}.
 cmake_minimum_required (VERSION 3.0)
-#set(CMAKE_BUILD_TYPE Debug) 
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
+#set (CMAKE_BUILD_TYPE Debug)
+set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 
 set (CMAKE_CXX_STANDARD 11)
 
@@ -31,15 +31,11 @@ set( CMAKE_SHARED_LIBRARY_PREFIX "libComPWA_" )
 find_package( OpenMP QUIET )
 if (${OPENMP_CXX_FOUND})
   message( STATUS "OpenMP version " ${OpenMP_CXX_VERSION} )
-else ()
-  message( STATUS "OpenMP not found!" )
 endif()
 
 find_package( TBB )
 if (${TBB_FOUND})
   message( STATUS "TBB found version ${TBB_VERSION}" )
-else ()
-  message( STATUS "TBB not found!" )
 endif()
 
 #
@@ -47,6 +43,7 @@ endif()
 #
 find_package( ROOT )
 find_package( Minuit2 )
+
 
 #
 # FindBoost. unit_test_framework and serialization

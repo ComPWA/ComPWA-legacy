@@ -13,20 +13,18 @@ namespace ComPWA {
 namespace Tools {
 
 RootGenerator::RootGenerator(double cmsEnergy, double m1, double m2, double m3,
-                             int seed) {
+                             int seed)
+    : nPart(3), cmsP4(0, 0, 0, cmsEnergy) {
   gRandom = new TRandom3(0);
   if (seed != -1)
     SetSeed(seed);
-
-  nPart = 3;
 
   masses = new Double_t[nPart];
   masses[0] = m1;
   masses[1] = m2;
   masses[2] = m3;
 
-  sqrtS = cmsEnergy;
-  TLorentzVector W(0.0, 0.0, 0.0, sqrtS);
+  TLorentzVector W(cmsP4.GetPx(), cmsP4.GetPy(), cmsP4.GetPz(), cmsP4.GetE());
   event.SetDecay(W, nPart, masses);
 }
 
@@ -48,9 +46,10 @@ RootGenerator::RootGenerator(std::shared_ptr<PartList> partL,
   if (initialS.size() != 1)
     throw std::runtime_error(
         "RootGenerator::RootGenerator() | More than one "
-        "particle in initial State! Currently we can not deal with that!");
+        "particle in initial State! You need to specify a cms four-momentum");
 
-  sqrtS = FindParticle(partL, initialS.at(0)).GetMass();
+  double sqrtS = FindParticle(partL, initialS.at(0)).GetMass();
+  cmsP4 = FourMomentum(0, 0, 0, sqrtS);
 
   masses = new Double_t[nPart];
   TLorentzVector W(0.0, 0.0, 0.0, sqrtS);    //= beam + target;
@@ -76,15 +75,10 @@ RootGenerator::RootGenerator(std::shared_ptr<PartList> partL,
         << "RootGenerator::RootGenerator() | only 2 particles in the final"
            " state! There are no degrees of freedom!";
 
-  if (initialS.size() != 1)
-    throw std::runtime_error(
-        "RootGenerator::RootGenerator() | More than one "
-        "particle in initial State! Currently we can not deal with that!");
-
-  sqrtS = FindParticle(partL, initialS.at(0)).GetMass();
+  cmsP4 = kin->GetInitialFourMomentum();
+  TLorentzVector W(cmsP4.GetPx(), cmsP4.GetPy(), cmsP4.GetPz(), cmsP4.GetE());
 
   masses = new Double_t[nPart];
-  TLorentzVector W(0.0, 0.0, 0.0, sqrtS);    //= beam + target;
   for (unsigned int t = 0; t < nPart; t++) { // particle 0 is mother particle
     masses[t] = FindParticle(partL, finalS.at(t)).GetMass();
   }
@@ -96,7 +90,6 @@ RootGenerator *RootGenerator::Clone() { return (new RootGenerator(*this)); }
 void RootGenerator::Generate(Event &evt) {
   evt.Clear();
   const double weight = event.Generate();
-
   for (unsigned int t = 0; t < nPart; t++) {
     TLorentzVector *p = event.GetDecay(t);
     evt.AddParticle(Particle(p->X(), p->Y(), p->Z(), p->E()));
@@ -105,18 +98,25 @@ void RootGenerator::Generate(Event &evt) {
 
 #ifndef _NDEBUG
   ComPWA::FourMomentum pFour;
+  double sqrtS = cmsP4.GetInvMass();
+
   for (int i = 0; i < evt.GetNParticles(); i++)
     pFour += evt.GetParticle(i).GetFourMomentum();
-  if (pFour.GetInvMass() != sqrtS)
+  if (pFour.GetInvMass() != cmsP4.GetInvMass()) {
+    // TGenPhaseSpace calculates momenta with float precision. This can lead
+    // to the case that generated events are outside the available
+    // phase space region. Haven't found a solution yet.
+    // You can increase the numerical precison in the following compare
+    // function.
     if (!ComPWA::equal(pFour.GetInvMass(), sqrtS, 100)) {
       LOG(error) << pFour.GetInvMass() << " - " << sqrtS << " = "
                  << pFour.GetInvMass() - sqrtS;
       throw std::runtime_error(
           "RootGenerator::Generate() | Invariant mass of "
           "all generate particles does not sum up to the mass of the decaying "
-          "particle. "
-          "The difference in larger than two times the numerical precision.");
+          "particle.");
     }
+  }
 #endif
 
   return;
@@ -140,5 +140,5 @@ void UniformTwoBodyGenerator::Generate(Event &evt) {
   RootGenerator::GetGenerator()->SetDecay(W, nPart, masses);
   RootGenerator::Generate(evt);
 }
-} /* namespace Tools */
-} /* namespace ComPWA */
+} // ns::Tools
+} // ns::ComPWA

@@ -22,15 +22,6 @@ env:
           #   via the "travis encrypt" command using the project repo's public key
         - secure: "I1LwO65P4q89f31HYnFlrlJ9yHyJ/QIAOXR5CtPfMo5FnestBtlQg6fX3p1vLNi5XdYXP4QpP51FFGJ5suz1aigC45JRaMzO98WQmMvIqYufrhkYej6lNevL0z/tHeI0aURH7N1SfSZaLwkepErssOsdjJAqP538ldA3Zz9g2gM="
 
-addons:
-  coverity_scan:
-    project:
-      name: "ComPWA/ComPWA"
-      description: "Build submitted via Travis CI"
-    notification_email: peter.weidenkaff@mailbox.org
-    build_command_prepend: "cmake ."
-    build_command: "make -j2"
-    branch_pattern: coverity_scan
 
 before_install:
       - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then 
@@ -42,6 +33,30 @@ matrix:
     - os: osx
 
   include:
+    - os: osx
+      osx_image: xcode8.3
+      env: TASK="ROOT v6.10"
+      allow_failures: true
+      before_script:
+        - env # Debugging
+        - brew tap homebrew/science
+          # We have to check first if a package is installed, otherwise an error
+          # is thrown.
+        - if brew ls --versions boost > /dev/null; then echo 'Boost installed!'
+          else brew install boost; fi
+        - if brew ls --versions gsl > /dev/null; then echo 'GSL installed!';
+          else brew install gsl; fi
+        - if brew ls --versions root > /dev/null; then echo 'ROOT installed!';
+          else 
+            if brew install root; then echo "top";
+            else 
+              brew link --overwrite gcc;
+              brew install root;
+            fi
+          fi
+        #- wget https://root.cern.ch/download/root_v6.10.02.macosx64-10.12-clang81.tar.gz
+        #- tar xpvfz root_*.tar.gz > /dev/null 2>&1
+        
     - os: linux
       dist: trusty
       env: TASK="Build documentation"
@@ -52,13 +67,17 @@ matrix:
               - doxygen-doc
               - doxygen-gui
               - graphviz
+      before_script:
+        - env
       script:
-        # Generate and deploy documentation
-        - cd $BASEPATH
-        - chmod +x $TRAVIS_BUILD_DIR/doc/generateDoxygen.sh
-        # Documentation is generated and deployed to gh-pages 
-        # (only if this is not a pull request).
-        - $TRAVIS_BUILD_DIR/doc/generateDoxygen.sh; 
+        # Generate and deploy documentation to gh-pages 
+        # Only in case that this is not a pull request
+        # and we are on branch master
+        - if [[ "$TRAVIS_BRANCH" == "master" ]]; then 
+              cd $BASEPATH;
+              chmod +x $TRAVIS_BUILD_DIR/doc/generateDoxygen.sh;
+              $TRAVIS_BUILD_DIR/doc/generateDoxygen.sh; 
+          fi  
 
     - os: linux
       compiler: gcc
@@ -71,6 +90,14 @@ matrix:
             packages:
               - libboost-all-dev # Version 1.54 for trusty
               - libgsl0-dev
+        coverity_scan:
+            project:
+                name: "ComPWA/ComPWA"
+                description: "Build submitted via Travis CI"
+            notification_email: peter.weidenkaff@mailbox.org
+            build_command_prepend: "cd $BASEPATH/ComPWA; cmake ./"
+            build_command: "make -j2"
+            branch_pattern: coverity_scan
       before_script:
         - env
         - cd $BASEPATH
@@ -124,37 +151,12 @@ matrix:
         - wget https://root.cern.ch/download/root_v5.34.36.Linux-ubuntu14-x86_64-gcc4.8.tar.gz
         - tar xpvfz root_*.tar.gz > /dev/null 2>&1
 
-    - os: osx
-      osx_image: xcode8.3
-      env: TASK="ROOT v6.10"
-      allow_failures: true
-      before_script:
-        - env # Debugging
-        - brew tap homebrew/science
-          # We have to check first if a package is installed, otherwise an error
-          # is thrown.
-        - if brew ls --versions boost > /dev/null; then echo 'Boost installed!'
-          else brew install boost; fi
-        - if brew ls --versions gsl > /dev/null; then echo 'GSL installed!';
-          else brew install gsl; fi
-        - if brew ls --versions root > /dev/null; then echo 'ROOT installed!';
-          else 
-            if brew install root; then echo "top";
-            else 
-              brew link --overwrite gcc;
-              brew install root;
-            fi
-          fi
-        #- wget https://root.cern.ch/download/root_v6.10.02.macosx64-10.12-clang81.tar.gz
-        #- tar xpvfz root_*.tar.gz > /dev/null 2>&1
-
 # Build your code e.g. by calling make
 script:
-    - mkdir $BASEPATH/build
-    - cd $BASEPATH/build
-    - cmake ../ComPWA/
-    - if [ "${COVERITY_SCAN_BRANCH}" != 1 ]; then
-      make -j2 VERBOSE=1;
-      fi
-    # Job failure for testing osx
-    - if [[ "$TRAVIS_OS_TASK" == "osx" ]]; then return 1; fi
+    # Skip compilation in case we are on the coverity_scan branch
+    - if [[ "$COVERITY_SCAN_BRANCH" != "1" ]]; then 
+         mkdir $BASEPATH/build;
+         cd $BASEPATH/build;
+         cmake $BASEPATH/ComPWA/;
+         make -j2 VERBOSE=1;
+      fi  

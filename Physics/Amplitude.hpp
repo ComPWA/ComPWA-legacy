@@ -36,7 +36,9 @@ public:
   //============ CONSTRUCTION ==================
 
   //! Constructor with an optional, unique name and an optional efficiency
-  Amplitude(std::string name = "") : _name(name), _preFactor(1, 0) {}
+  Amplitude(std::string name = "")
+      : _name(name), _preFactor(1, 0), _current_magnitude(0.0),
+        _current_phase(0.0){};
 
   //! Destructor
   virtual ~Amplitude() { /* nothing */

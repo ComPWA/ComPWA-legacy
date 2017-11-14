@@ -1,3 +1,4 @@
+ 
 // Copyright (c) 2015, 2017 The ComPWA Team.
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
@@ -28,7 +29,7 @@ double FitResult::shiftAngle(double v) {
   double val = originalVal;
   while (val > M_PI)
     val -= 2 * M_PI;
-  while (val < (-1)*M_PI)
+  while (val < (-1) * M_PI)
     val += 2 * M_PI;
   if (val != originalVal)
     LOG(info) << "shiftAngle(): shifting parameter from " << originalVal
@@ -47,8 +48,16 @@ void FitResult::genSimpleOutput(std::ostream &out) {
   return;
 }
 
-void FitResult::SetFinalParameters(ParameterList finPars) {
+void FitResult::SetFinalParameters(ParameterList &finPars) {
   finalParameters.DeepCopy(finPars);
+}
+
+void FitResult::SetTrueParameters(ParameterList &truePars) {
+  trueParameters.DeepCopy(truePars);
+}
+
+void FitResult::SetFitFractions(ParameterList &list) {
+  _fitFractions.DeepCopy(list);
 }
 
 void FitResult::Print(std::string opt) {
@@ -75,7 +84,7 @@ void FitResult::PrintFitParameters(TableFormater *tableResult) {
       parErrorWidth = 33;
 
   tableResult->addColumn("Nr");
-  tableResult->addColumn("Name", 20);
+  tableResult->addColumn("Name", 30);
   if (printInitial)
     tableResult->addColumn("Initial Value", parErrorWidth);
   tableResult->addColumn("Final Value", parErrorWidth);
@@ -105,7 +114,7 @@ void FitResult::PrintFitParameters(TableFormater *tableResult) {
       try {
         truePar = trueParameters.GetDoubleParameter(outPar->GetName());
       } catch (BadParameter &bad) {
-        iniPar.reset();
+        truePar.reset();
       }
     }
 
@@ -194,27 +203,28 @@ void FitResult::PrintFitParameters(TableFormater *tableResult) {
 void FitResult::PrintFitFractions(TableFormater *fracTable) {
   LOG(info) << " FitResult::printFitFractions() | "
                "Calculating fit fractions!";
-  
+
   double sum = 0, sumErrorSq = 0;
 
   fracTable->Reset();
 
   // print matrix
   fracTable->addColumn("Fit fractions [%]", 40); // add empty first column
-  fracTable->addColumn("Fraction", 15);              // add empty first column
-  fracTable->addColumn("Error", 15);                 // add empty first column
+  fracTable->addColumn("Fraction", 15);          // add empty first column
+  fracTable->addColumn("Error", 15);             // add empty first column
   fracTable->header();
   for (unsigned int i = 0; i < _fitFractions.GetNDouble(); ++i) {
-    std::shared_ptr<DoubleParameter> tmpPar = _fitFractions.GetDoubleParameter(i);
+    std::shared_ptr<DoubleParameter> tmpPar =
+        _fitFractions.GetDoubleParameter(i);
     std::string resName = tmpPar->GetName();
 
     *fracTable << resName << tmpPar->GetValue();
     try {
-     *fracTable << tmpPar->GetError(); // assume symmetric errors here
-    } catch(std::exception& ex) {
+      *fracTable << tmpPar->GetError(); // assume symmetric errors here
+    } catch (std::exception &ex) {
       *fracTable << 0.0;
     }
-    
+
     sum += tmpPar->GetValue();
     sumErrorSq += tmpPar->GetError() * tmpPar->GetError();
   }
@@ -227,5 +237,4 @@ void FitResult::PrintFitFractions(TableFormater *fracTable) {
   return;
 }
 
-} /* namespace ComPWA */
-
+} // namespace 

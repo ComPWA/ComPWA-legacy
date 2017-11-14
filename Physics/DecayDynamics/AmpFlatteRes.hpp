@@ -28,7 +28,9 @@ class AmpFlatteRes : public DecayDynamics::AbstractDynamicalFunction {
 
 public:
   //============ CONSTRUCTION ==================
-  AmpFlatteRes() : AbstractDynamicalFunction(){};
+  AmpFlatteRes()
+      : AbstractDynamicalFunction(), _ffType(noFormFactor), _current_g(0.0),
+        _current_gHidden(0.0), _current_gHidden2(0.0){};
 
   virtual ~AmpFlatteRes();
 
@@ -100,7 +102,6 @@ public:
 
   //============ SET/GET =================
 
-
   void SetMesonRadiusParameter(std::shared_ptr<DoubleParameter> r) {
     _mesonRadius = r;
   }
@@ -119,8 +120,8 @@ public:
 
   /// Set coupling parameter to signal channel and up to two more hidden
   /// channels.
-  void SetCoupling(Coupling g1, Coupling g2 = Coupling(),
-                   Coupling g3 = Coupling()) {
+  void SetCoupling(Coupling g1, Coupling g2 = Coupling(0.0, 0.0, 0.0),
+                   Coupling g3 = Coupling(0.0, 0.0, 0.0)) {
     _g = std::vector<Coupling>{g1, g2, g3};
   }
 
@@ -129,7 +130,7 @@ public:
   std::vector<Coupling> GetCouplings(int i) const { return _g; }
 
   void SetCouplings(std::vector<Coupling> vC);
-  
+
   virtual void GetParameters(ParameterList &list);
 
   //! Fill vector with parameters
@@ -139,7 +140,7 @@ public:
       list.push_back(i.GetValue());
     list.push_back(GetMesonRadius());
   }
-  
+
   /// Update parameters to the values given in \p par
   virtual void UpdateParameters(const ParameterList &par);
 

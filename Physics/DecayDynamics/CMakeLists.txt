@@ -21,7 +21,10 @@ target_include_directories( DecayDynamics
   PUBLIC ${Boost_INCLUDE_DIR}
 )
 
-install (FILES ${lib_headers} DESTINATION include/ComPWA)
+install (FILES ${lib_headers}
+    DESTINATION include/ComPWA/Physics/DecayDynamics
+)
+
 install(TARGETS DecayDynamics
         LIBRARY DESTINATION lib
 )

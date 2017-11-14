@@ -282,7 +282,7 @@ bool ComplexParameter::SetMaxValue(const std::complex<double> max) {
   }
   return valid;
 }
-bool ComplexParameter::operator==(const ComplexParameter otherPar) const {
+bool ComplexParameter::operator==(const ComplexParameter &otherPar) const {
   if (this->type() != otherPar.type())
     return false;
   if (this->GetName() != otherPar.GetName())

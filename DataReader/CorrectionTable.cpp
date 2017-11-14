@@ -99,14 +99,16 @@ double CorrectionTable::GetValue(int charge, double momentum) const {
     throw std::runtime_error(
         "momentumSys::GetValue() no bin found for momentum value " +
         std::to_string((long double)momentum) + "!");
-  if (charge > 0) // D0->K0bar K+K-
-    return sys[binNumber];
-  else if (charge < 0) // D0bar->K0 K+K-
-    return antiSys[binNumber];
+  
+  double val = 0.0;
+  if (charge > 0)
+    val = sys.at(binNumber);
+  else if (charge < 0)
+    val = antiSys.at(binNumber);
   else if (charge == 0) { // charge unknown -> average value
-    return (antiSys[binNumber] + sys[binNumber]) / 2;
+    val = (antiSys.at(binNumber) + sys.at(binNumber)) / 2;
   }
-  return 0.;
+  return val;
 }
 double CorrectionTable::GetError(int charge, double momentum) const {
   int binNumber = findBin(momentum);
@@ -114,15 +116,17 @@ double CorrectionTable::GetError(int charge, double momentum) const {
     throw std::runtime_error(
         "momentumSys::GetError() no bin found for momentum value " +
         std::to_string((long double)momentum) + "!");
+
+  double err = 0.0;
   if (charge > 0) // D0->K0bar K+K-
-    return sysError[binNumber];
+    err = sysError.at(binNumber);
   else if (charge < 0) // D0->K0bar K+K-
-    return antiSysError[binNumber];
+    err = antiSysError.at(binNumber);
   else if (charge == 0) { // charge unknown -> average value
-    return (0.5 * std::sqrt(antiSysError[binNumber] * antiSysError[binNumber] +
-                            sysError[binNumber] * sysError[binNumber]));
+    err = (0.5 * std::sqrt(antiSysError.at(binNumber) * antiSysError.at(binNumber) +
+                           sysError.at(binNumber) * sysError.at(binNumber)));
   }
-  return 0.;
+  return err;
 }
 
 void CorrectionTable::AddToTotalError(int charge, double momentum) {

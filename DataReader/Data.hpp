@@ -38,6 +38,8 @@ namespace DataReader {
 class Data {
 public:
   Data(bool binning = 0, unsigned int maxBins = 0, double maxW = 0.0);
+  
+  virtual ~Data() {};
 
   virtual Data *Clone() const { return new Data(*this); };
 

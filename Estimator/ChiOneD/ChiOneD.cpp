@@ -23,7 +23,7 @@ ChiOneD::ChiOneD(std::shared_ptr<Kinematics> kin,
                  std::shared_ptr<Data> inDIF)
     : pPIF_(inPIF), pDIF_(inDIF) {}
 
-double ChiOneD::controlParameter(ParameterList &minPar) {
+double ChiOneD::ControlParameter(ParameterList &minPar) {
   unsigned int nBins = pDIF_->GetNBins();
 
   double chi = 0;

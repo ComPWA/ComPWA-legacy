@@ -72,11 +72,9 @@ FIND_PACKAGE_HANDLE_STANDARD_ARGS( Minuit2 REQUIRED_VARS
 # Report some results
 IF( NOT Minuit2_FIND_QUIETLY )
   IF( MINUIT2_FOUND )
-		#MESSAGE(STATUS "Minuit2 include dir: " ${MINUIT2_INCLUDE_DIR})
-		#MESSAGE(STATUS "Minuit2 library dir: " ${MINUIT2_LIBRARY_DIR})
 		MESSAGE(STATUS "Minuit2 libraries: " ${MINUIT2_LIBRARIES})
-	ELSE()
-		MESSAGE(STATUS "Minuit2 installation could not be found!")
+	#ELSE()
+		#MESSAGE(STATUS "Minuit2 installation could not be found!")
 	ENDIF()
 ENDIF()
 

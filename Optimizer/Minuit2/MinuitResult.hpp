@@ -2,16 +2,10 @@
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
-//! Optimizer Interface Base-Class.
-/*! \class Optimizer
- * @file Optimizer.hpp
- * This class provides the interface to (external) optimization libraries or
- * routines. As it is pure virtual, one needs at least one implementation to
- * provide an optimizer for the analysis which varies free model-parameters. If
- * a new optimizer is derived from and fulfills this base-class, no change in
- * other modules are necessary to work with the new optimizer library or
- * routine.
- */
+///
+/// \file
+/// MinuitResult. Implementation of FitResult.
+///
 
 #ifndef _MINUITRESULT_HPP_
 #define _MINUITRESULT_HPP_
@@ -40,87 +34,86 @@ namespace Minuit2 {
 
 class MinuitResult : public FitResult {
 public:
-  //! Default constructor
+  /// Default constructor needed for boost::serialization.
   MinuitResult();
 
-  //! Constructor with estimator and result
+  /// Constructor with estimator and result
   MinuitResult(std::shared_ptr<ComPWA::IEstimator> esti,
                ROOT::Minuit2::FunctionMinimum result);
 
-  //! Set Minuit2 function minimum
+  /// Set Minuit2 function minimum
   void setResult(std::shared_ptr<ComPWA::IEstimator> esti,
                  ROOT::Minuit2::FunctionMinimum result);
 
-  //! Return final likelihood value
+  /// Return final likelihood value
   double GetResult() { return finalLH; }
 
-  //! Set initial likelihood value
+  /// Set initial likelihood value
   virtual void SetInitialLH(double iniLH) { initialLH = iniLH; }
-  //! Get initial likelihood value
+  /// Get initial likelihood value
   virtual double GetInitialLH() { return initialLH; }
-  //! Set final likelihood value
+  /// Set final likelihood value
   virtual void SetFinalLH(double iniLH) { finalLH = iniLH; }
-  //! Get final likelihood value
+  /// Get final likelihood value
   virtual double GetFinalLH() { return finalLH; }
-  //! Set true likelihood value
+  /// Set true likelihood value
   virtual void SetTrueLH(double iniLH) { trueLH = iniLH; }
-  //! Get true likelihood value
+  /// Get true likelihood value
   virtual double GetTrueLH() { return trueLH; }
 
-  //! Convert to double and return final LH values
+  /// Convert to double and return final LH values
   operator double() const { return finalLH; }
 
-  //! Set calculation of interference terms
+  /// Set calculation of interference terms
   void SetCalcInterference(bool b) { calcInterference = b; }
 
-  //! Get calculation of interference terms
+  /// Get calculation of interference terms
   bool GetCalcInterference() { return calcInterference; }
 
-  //! Write list of fit parameters and list of fitfractions to XML file @param
-  //! filename
+  /// Write list of fit parameters and list of fitfractions to XML file @param
+  /// filename
   virtual void WriteXML(std::string filename);
 
-  //! Write fit parameters, fit fractions and cov matrix as TeX to file @param
-  //! filename
+  /// Write fit parameters, fit fractions and cov matrix as TeX to file @param
+  /// filename
   virtual void WriteTeX(std::string filename);
 
-  //! Any errors during minimization?
+  /// Any errors during minimization?
   virtual bool HasFailed();
 
-  //! Is minimum valid?
+  /// Is minimum valid?
   virtual bool MinimumIsValid() { return isValid; }
 
-  //! Number of free parameters
+  /// Number of free parameters
   virtual int GetNDF() { return nFreeParameter; }
 
-  //! Get covariance matrix
+  /// Get covariance matrix
   virtual std::vector<std::vector<double>> GetCovarianceMatrix() { return cov; }
   
-  //! Get correlation matrix
+  /// Get correlation matrix
   virtual std::vector<std::vector<double>> GetCorrelationMatrix() {
     return corr;
   }
   
-  //! Get global correlation coefficiencts
+  /// Get global correlation coefficiencts
   virtual std::vector<double> GetGlobalCC() { return globalCC; }
   
-  //! Get estimated distrance to minimum
+  /// Get estimated distrance to minimum
   virtual double GetEDM() { return edm; }
 
 protected:
-  //! Initialize result with Minuit2::FunctionMinimum
+  /// Initialize result with Minuit2::FunctionMinimum
   void init(ROOT::Minuit2::FunctionMinimum);
 
-  //! Calculate interference terms
+  /// Calculate interference terms
   bool calcInterference;
 
-  //! Number of floating parameters
+  /// Number of floating parameters
   int nFreeParameter;
 
-  //! Number of events
-  int nEvents;
+  /// Number of events
 
-  //! Pointer to estimator
+  /// Pointer to estimator
   std::shared_ptr<ComPWA::IEstimator> est;
 
   //====== MINUIT FIT RESULT =======
@@ -155,20 +148,20 @@ protected:
   std::vector<double> globalCC;
 
   //====== OUTPUT =====
-  //! Simplified fit result output
+  /// Simplified fit result output
   void genSimpleOutput(std::ostream &out);
 
-  //! Full fit result output
+  /// Full fit result output
   void genOutput(std::ostream &out, std::string opt = "");
 
-  //! Create table with interference terms for each AmpIntensity
+  /// Create table with interference terms for each AmpIntensity
   void createInterferenceTable(std::ostream &out,
                                std::shared_ptr<AmpIntensity> amp);
 
-  //! Table with correlation matrix
+  /// Table with correlation matrix
   void PrintCorrelationMatrix(TableFormater *fracTable);
 
-  //! Table with covariance matrix
+  /// Table with covariance matrix
   void PrintCovarianceMatrix(TableFormater *fracTable);
 
 private:
@@ -191,7 +184,6 @@ private:
     ar &BOOST_SERIALIZATION_NVP(initialLH);
     ar &BOOST_SERIALIZATION_NVP(finalLH);
     ar &BOOST_SERIALIZATION_NVP(trueLH);
-    ar &BOOST_SERIALIZATION_NVP(nEvents);
     ar &BOOST_SERIALIZATION_NVP(edm);
     ar &BOOST_SERIALIZATION_NVP(cov);
     ar &BOOST_SERIALIZATION_NVP(corr);

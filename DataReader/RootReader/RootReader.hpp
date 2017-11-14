@@ -2,13 +2,10 @@
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
-//! Reader for data in Root-files.
-/*! \class RootReader
- * @file RootReader.hpp
- * This class reads event-based data from root-files. It implements the
- * interface of Data.hpp.
- */
-
+///
+/// \file
+/// Reader for data in Root-files.
+///
 #ifndef _RootReader_HPP
 #define _RootReader_HPP
 
@@ -32,76 +29,46 @@
 namespace ComPWA {
 namespace DataReader {
 
+///
+/// \class RootReader
+/// Data class for read/write of ROOT files.
+/// This class reads event-based data from root-files. It implements the
+/// interface of Data.hpp.
+///
 class RootReader : public Data {
 
 public:
-  //! Destructor
   virtual ~RootReader();
 
-  //! Default constructor
   RootReader();
 
-  /**! Constructor read from TTree
-   *
-   * @param tr 		TTree to read
-   * @param size 		Number of events to read
-   * @param binned 	Create binned/unbinned data set
-   */
-  RootReader(TTree *tr, int size = -1, const bool binned = false);
+  /// Constructor read from TTree
+  /// \param tr 		TTree to read
+  /// \param size 		Number of events to read
+  RootReader(TTree *tr, int size = -1);
 
-  /*! Read constructor.
-   *
-   * @param inRootFile Input file name
-   * @param inTreeName Name of tree in input file
-   * @param size 		 Number of events to read in
-   * @param binned	 Create binning
-   */
+  /// Read constructor.
+  /// 
+  /// \param inRootFile Input file name
+  /// \param inTreeName Name of tree in input file
+  /// \param size 		 Number of events to read in
   RootReader(const std::string inRootFile,
-             const std::string inTreeName = "data", int size = -1,
-             const bool binned = false);
+             const std::string inTreeName = "data", int size = -1);
 
-  //! Create clone
   virtual RootReader *Clone() const;
 
-  //! Create empty clone
+  /// Create empty clone
   virtual RootReader *EmptyClone() const;
 
   virtual void WriteData(std::string file = "", std::string trName = "");
 
 protected:
-  // Open ROOT file and set branch addresses to TTree
-  void read();
+  /// Open ROOT file and set branch addresses to TTree
+  void read(TTree* tr, double readSize = -1);
 
-  // Read TTree and store Events in fEvents
-  virtual void storeEvents();
-
-  // Create binning (obsolete?)
-  virtual void bin();
-
-  // Number of events to read from TTree
-  int readSize;
-
-  // Input file name
-  std::string fileName;
-
-  // Input tree name
-  std::string treeName;
-
-  // Pointer to Tfile
-  TFile *fFile;
-
-  // Pointer to TTree
-  TTree *fTree;
-
-  // TTree branch variables
-  TClonesArray *fParticles;
-  double feventWeight;
-  double feventEff;
-  int fCharge;
-  int fFlavour;
 };
 
-} /* namespace DataReader */
-} /* namespace ComPWA */
+} // namespace DataReader
+} // namespace ComPWA
 
-#endif /* _RootReader_HPP */
+#endif

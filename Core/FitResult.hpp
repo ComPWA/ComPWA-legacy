@@ -2,16 +2,10 @@
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
-//! Optimizer Interface Base-Class.
-/*! \class Optimizer
- * @file Optimizer.hpp
- * This class provides the interface to (external) optimization libraries or
- * routines. As it is pure virtual, one needs at least one implementation to
- * provide an optimizer for the analysis which varies free model-parameters. If
- * a new optimizer is derived from and fulfills this base-class, no change in
- * other modules are necessary to work with the new optimizer library or
- * routine.
- */
+///
+/// \file
+/// Base class FitResult.
+///
 
 #ifndef _FITRESULT_HPP_
 #define _FITRESULT_HPP_
@@ -37,7 +31,7 @@ namespace ComPWA {
 
 class FitResult {
 public:
-  FitResult() : time(0) {};
+  FitResult() : time(0), sumFractions(0.0), sumFractionsError(0.0) {};
   
   virtual ~FitResult(){};
   
@@ -50,15 +44,13 @@ public:
   virtual ParameterList GetInitialParameters() { return initialParameters; }
   
   /// Set list of final fit parameters
-  virtual void SetFinalParameters(ParameterList finPars);
+  virtual void SetFinalParameters(ParameterList &finPars);
   
   /// Get list of final fit parameters
   virtual ParameterList GetFinalParameters() { return finalParameters; }
   
   /// Set list of true parameters
-  virtual void SetTrueParameters(ParameterList truePars) {
-    trueParameters.DeepCopy(truePars);
-  }
+  virtual void SetTrueParameters(ParameterList &truePars);
   
   /// Get list of true parameters
   virtual ParameterList GetTrueParameters() { return trueParameters; }
@@ -73,9 +65,7 @@ public:
   virtual double GetResult() = 0;
   
   /// Set list with fit fractions
-  virtual void SetFitFractions(ParameterList list) {
-    _fitFractions.DeepCopy(list);
-  }
+  virtual void SetFitFractions(ParameterList &list);
   
   /// Get list of fit fractions
   virtual ParameterList GetFitFractions() {
@@ -110,21 +100,21 @@ protected:
 
   virtual double GetCorr(unsigned int n, unsigned int t) { return -9000; };
   
-  //! Time for minimization
+  /// Time for minimization
   double time;
   
-  //! Initial list of parameters
+  /// Initial list of parameters
   ParameterList initialParameters;
   
-  //! Final list of parameters
+  /// Final list of parameters
   ParameterList finalParameters;
   
-  //! True list of parameters
+  /// True list of parameters
   ParameterList trueParameters;
   
   ParameterList _fitFractions;
   
-  //! List with fit fractions and errors
+  /// List with fit fractions and errors
   double sumFractions;
   double sumFractionsError;
 
@@ -142,6 +132,6 @@ private:
   }
 };
 BOOST_SERIALIZATION_ASSUME_ABSTRACT(FitResult);
-} /* namespace ComPWA */
+} // ns::ComPWA
 
 #endif
