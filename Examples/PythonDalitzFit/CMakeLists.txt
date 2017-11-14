@@ -40,7 +40,7 @@ target_include_directories( PythonDalitzFit
 install (TARGETS PythonDalitzFit DESTINATION lib/ )
 install (FILES ${lib_headers} DESTINATION include/ComPWA/ )
 
-add_subdirectory("/home/michel/workspace/pybind11-master" "${CMAKE_CURRENT_BINARY_DIR}/pybind11_build")
+add_subdirectory("${COMPWA_SOURCE_DIR}/Tools/pybind11" "${CMAKE_CURRENT_BINARY_DIR}/pybind11_build")
 pybind11_add_module(Dalitz_ext MODULE Dalitz_ext.cpp)
 target_link_libraries( Dalitz_ext 
   PUBLIC
