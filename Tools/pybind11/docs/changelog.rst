@@ -6,52 +6,6 @@ Changelog
 Starting with version 1.8.0, pybind11 releases use a `semantic versioning
 <http://semver.org>`_ policy.
 
-v2.3.0 (Not yet released)
------------------------------------------------------
-
-* Significantly reduced module binary size (10-20%) when compiled in C++11 mode
-  with GCC/Clang, or in any mode with MSVC. Function signatures are now always
-  precomputed at compile time (this was previously only available in C++14 mode
-  for non-MSVC compilers).
-  `#934 <https://github.com/pybind/pybind11/pull/934>`_.
-
-v2.2.1 (September 14, 2017)
------------------------------------------------------
-
-* Added ``py::module::reload()`` member function for reloading a module.
-  `#1040 <https://github.com/pybind/pybind11/pull/1040>`_.
-
-* Fixed a reference leak in the number converter.
-  `#1078 <https://github.com/pybind/pybind11/pull/1078>`_.
-
-* Fixed compilation with Clang on host GCC < 5 (old libstdc++ which isn't fully
-  C++11 compliant). `#1062 <https://github.com/pybind/pybind11/pull/1062>`_.
-
-* Fixed a regression where the automatic ``std::vector<bool>`` caster would
-  fail to compile. The same fix also applies to any container which returns
-  element proxies instead of references.
-  `#1053 <https://github.com/pybind/pybind11/pull/1053>`_.
-
-* Fixed a regression where the ``py::keep_alive`` policy could not be applied
-  to constructors. `#1065 <https://github.com/pybind/pybind11/pull/1065>`_.
-
-* Fixed a nullptr dereference when loading a ``py::module_local`` type
-  that's only registered in an external module.
-  `#1058 <https://github.com/pybind/pybind11/pull/1058>`_.
-
-* Fixed implicit conversion of accessors to types derived from ``py::object``.
-  `#1076 <https://github.com/pybind/pybind11/pull/1076>`_.
-
-* The ``name`` in ``PYBIND11_MODULE(name, variable)`` can now be a macro.
-  `#1082 <https://github.com/pybind/pybind11/pull/1082>`_.
-
-* Relaxed overly strict ``py::pickle()`` check for matching get and set types.
-  `#1064 <https://github.com/pybind/pybind11/pull/1064>`_.
-
-* Conversion errors now try to be more informative when it's likely that
-  a missing header is the cause (e.g. forgetting ``<pybind11/stl.h>``).
-  `#1077 <https://github.com/pybind/pybind11/pull/1077>`_.
-
 v2.2.0 (August 31, 2017)
 -----------------------------------------------------
 
