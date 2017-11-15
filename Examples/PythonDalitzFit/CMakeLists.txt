@@ -26,18 +26,20 @@ find_package(Boost COMPONENTS
     ${Boost_LIBRARIES} 
     pthread 
   )
-  IF(GENEVA_FOUND)
-      target_link_libraries( PythonDalitzFit 
-        GenevaIF
-      )
-  ENDIF()
   target_include_directories( PythonDalitzFit 
     PUBLIC 
-    ${GENEVA_INCLUDE_DIR}
     ${ROOT_INCLUDE_DIR} 
     ${Boost_INCLUDE_DIR}
     ${PYTHON_INCLUDE_DIRS}
   )
+  IF(GENEVA_FOUND)
+      target_link_libraries( PythonDalitzFit 
+        GenevaIF
+      )
+      target_include_directories( PythonDalitzFit 
+        ${GENEVA_INCLUDE_DIR}
+      )
+  ENDIF()
 
   install (TARGETS PythonDalitzFit DESTINATION lib/ )
   install (FILES ${lib_headers} DESTINATION include/ComPWA/ )
