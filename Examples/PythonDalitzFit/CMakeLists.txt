@@ -32,14 +32,14 @@ find_package(Boost COMPONENTS
     ${Boost_INCLUDE_DIR}
     ${PYTHON_INCLUDE_DIRS}
   )
-  IF(GENEVA_FOUND)
-      target_link_libraries( PythonDalitzFit 
-        GenevaIF
-      )
-      target_include_directories( PythonDalitzFit 
-        ${GENEVA_INCLUDE_DIR}
-      )
-  ENDIF()
+  #IF(GENEVA_FOUND)
+  #  target_link_libraries( PythonDalitzFit 
+  #    GenevaIF
+  #  )
+  #  target_include_directories( PythonDalitzFit 
+  #    ${GENEVA_INCLUDE_DIR}
+  #  )
+  #ENDIF()
 
   install (TARGETS PythonDalitzFit DESTINATION lib/ )
   install (FILES ${lib_headers} DESTINATION include/ComPWA/ )
@@ -48,16 +48,30 @@ find_package(Boost COMPONENTS
   pybind11_add_module(Dalitz_ext MODULE Dalitz_ext.cpp)
   target_link_libraries( Dalitz_ext 
     PUBLIC
-    Core 
+    HelicityFormalism
+    Minuit2IF
+    MinLogLH
+    RootReader
+    Tools
+    Core
+    ${ROOT_LIBRARIES} 
+    ${Boost_LIBRARIES} 
+    pthread 
     PythonDalitzFit 
-    ${Boost_LIBRARIES}
   )
   target_include_directories( Dalitz_ext 
     PUBLIC 
-    ${GENEVA_INCLUDE_DIR}
     ${ROOT_INCLUDE_DIR} 
     ${Boost_INCLUDE_DIR}
     ${PYTHON_INCLUDE_DIRS}
   )
+  #IF(GENEVA_FOUND)
+  #  target_link_libraries( Dalitz_ext 
+  #    GenevaIF
+  #  )
+  #  target_include_directories( Dalitz_ext  
+  #    ${GENEVA_INCLUDE_DIR}
+  #  )
+  #ENDIF()
 
 #ENDIF()
