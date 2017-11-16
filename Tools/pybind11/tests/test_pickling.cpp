@@ -115,7 +115,7 @@ TEST_SUBMODULE(pickling, m) {
             [](py::object self) {
                 return py::make_tuple(self.attr("value"), self.attr("extra"), self.attr("__dict__"));
             },
-            [](const py::tuple &t) {
+            [](py::tuple t) {
                 if (t.size() != 3)
                     throw std::runtime_error("Invalid state!");
 

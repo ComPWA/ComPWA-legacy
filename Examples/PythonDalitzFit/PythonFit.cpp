@@ -61,7 +61,7 @@
 //#include "Physics/AmplitudeSum/AmpSumIntensity.hpp"
 #include "Estimator/MinLogLH/MinLogLH.hpp"
 #include "Optimizer/Minuit2/MinuitIF.hpp"
-#include "Optimizer/Geneva/GenevaIF.hpp"
+//#include "Optimizer/Geneva/GenevaIF.hpp"
 
 #include "Core/Logging.hpp"
 #include "Core/Properties.hpp"
@@ -104,7 +104,7 @@ using ComPWA::DataReader::RootReader;
 
 
 
-PythonFit::PythonFit() : argc(0), argv({}){
+PythonFit::PythonFit() : argc(0), argv{}{
 }
 
 

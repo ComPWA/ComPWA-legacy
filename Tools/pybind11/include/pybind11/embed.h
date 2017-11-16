@@ -44,11 +44,11 @@
         }
  \endrst */
 #define PYBIND11_EMBEDDED_MODULE(name, variable)                              \
-    static void PYBIND11_CONCAT(pybind11_init_, name)(pybind11::module &);    \
-    static PyObject PYBIND11_CONCAT(*pybind11_init_wrapper_, name)() {        \
-        auto m = pybind11::module(PYBIND11_TOSTRING(name));                   \
+    static void pybind11_init_##name(pybind11::module &);                     \
+    static PyObject *pybind11_init_wrapper_##name() {                         \
+        auto m = pybind11::module(#name);                                     \
         try {                                                                 \
-            PYBIND11_CONCAT(pybind11_init_, name)(m);                         \
+            pybind11_init_##name(m);                                          \
             return m.ptr();                                                   \
         } catch (pybind11::error_already_set &e) {                            \
             PyErr_SetString(PyExc_ImportError, e.what());                     \
@@ -59,9 +59,8 @@
         }                                                                     \
     }                                                                         \
     PYBIND11_EMBEDDED_MODULE_IMPL(name)                                       \
-    pybind11::detail::embedded_module name(PYBIND11_TOSTRING(name),           \
-                               PYBIND11_CONCAT(pybind11_init_impl_, name));   \
-    void PYBIND11_CONCAT(pybind11_init_, name)(pybind11::module &variable)
+    pybind11::detail::embedded_module name(#name, pybind11_init_impl_##name); \
+    void pybind11_init_##name(pybind11::module &variable)
 
 
 NAMESPACE_BEGIN(PYBIND11_NAMESPACE)
