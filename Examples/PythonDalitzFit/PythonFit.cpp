@@ -104,7 +104,7 @@ using ComPWA::DataReader::RootReader;
 
 
 
-PythonFit::PythonFit() : argc(0), argv({}){
+PythonFit::PythonFit() : argc(0), argv{}{
 }
 
 
