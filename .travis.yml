@@ -54,6 +54,7 @@ matrix:
               brew install root;
             fi
           fi
+        - brew install python3
         #- wget https://root.cern.ch/download/root_v6.10.02.macosx64-10.12-clang81.tar.gz
         #- tar xpvfz root_*.tar.gz > /dev/null 2>&1
         
@@ -90,12 +91,13 @@ matrix:
             packages:
               - libboost-all-dev # Version 1.54 for trusty
               - libgsl0-dev
+              - python3
         coverity_scan:
             project:
                 name: "ComPWA/ComPWA"
                 description: "Build submitted via Travis CI"
             notification_email: peter.weidenkaff@mailbox.org
-            build_command_prepend: "cd $BASEPATH/ComPWA; cmake ./"
+            build_command_prepend: "cd $BASEPATH/ComPWA; cmake -DPYBIND11_PYTHON_VERSION=3.4 ./"
             build_command: "make -j2"
             branch_pattern: coverity_scan
       before_script:
@@ -116,6 +118,7 @@ matrix:
             packages:
               - libboost-all-dev # Version 1.54 for trusty
               - libgsl0-dev
+              - python3
       before_script:
         - env
         - cd $BASEPATH
@@ -134,6 +137,7 @@ matrix:
             packages:
               - libboost-all-dev # Version 1.54 for trusty
               - libgsl0-dev
+              - python3
                 # ubuntu trusty does not provide Minuit2 header files
               #- root-system # ROOT v.5.34 
               #- root-plugin-math-minuit2 
@@ -157,6 +161,6 @@ script:
     - if [[ "$COVERITY_SCAN_BRANCH" != "1" ]]; then 
          mkdir $BASEPATH/build;
          cd $BASEPATH/build;
-         cmake $BASEPATH/ComPWA/;
+         cmake -DPYBIND11_PYTHON_VERSION=3.4 $BASEPATH/ComPWA/;
          make -j2 VERBOSE=1;
       fi  

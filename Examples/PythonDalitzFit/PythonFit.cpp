@@ -54,19 +54,28 @@
 
 // ComPWA header files go here
 #include "DataReader/Data.hpp"
-#include "Estimator/Estimator.hpp"
+#include "Core/Estimator.hpp"
 #include "Optimizer/Optimizer.hpp"
 #include "DataReader/RootReader/RootReader.hpp"
 //#include "DataReader/JakeReader/JakeReader.hpp"
 //#include "Physics/AmplitudeSum/AmpSumIntensity.hpp"
 #include "Estimator/MinLogLH/MinLogLH.hpp"
 #include "Optimizer/Minuit2/MinuitIF.hpp"
-#include "Optimizer/Geneva/GenevaIF.hpp"
+//#include "Optimizer/Geneva/GenevaIF.hpp"
 
+#include "Core/Logging.hpp"
+#include "Core/Properties.hpp"
+#include "Physics/ParticleList.hpp"
+#include "Physics/HelicityFormalism/HelicityKinematics.hpp"
+#include "Physics/HelicityFormalism/IncoherentIntensity.hpp"
+
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/xml_parser.hpp>
+#include <boost/archive/xml_iarchive.hpp>
+#include <boost/archive/xml_oarchive.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/serialization/serialization.hpp>
 #include <boost/serialization/export.hpp>
-#include <boost/property_tree/xml_parser.hpp>
 #include <boost/random/linear_congruential.hpp>
 #include <boost/random/uniform_int.hpp>
 #include <boost/random/uniform_real.hpp>
@@ -77,19 +86,25 @@
 
 #include "Examples/PythonDalitzFit/PythonFit.hpp"
 
-#include "PlotData.hpp"
-#include "Tools.hpp"
-#include "systematics.hpp"
+#include "Tools/HistTools.hpp"
+#include "Tools/ParameterTools.hpp"
+#include "Tools/DalitzPlot.hpp"
+#include "Tools/RootGenerator.hpp"
+#include "Tools/RunManager.hpp"
+#include "Tools/DalitzPlot.hpp"
 
 using namespace boost::log;
 
 using namespace std;
 using namespace ComPWA;
+using ComPWA::Physics::HelicityFormalism::HelicityKinematics;
+using ComPWA::Physics::HelicityFormalism::IncoherentIntensity;
+using ComPWA::Optimizer::Minuit2::MinuitResult;
 using ComPWA::DataReader::RootReader;
-using namespace ComPWA::Physics::HelicityFormalism;
 
 
-PythonFit::PythonFit() : argc(0), argv({}), geneva(false), optConfigFile("config.cfg"){
+
+PythonFit::PythonFit() : argc(0), argv{}{
 }
 
 
@@ -98,696 +113,126 @@ PythonFit::~PythonFit() {
 }
 
 int PythonFit::StartFit() {
-    LOG(info) << "PythonFit::StartFit() | call PythonFit::startFit";
 
-    // Read command line input
-    namespace po = boost::program_options;
-    std::string config_file;
-
-    po::options_description generic("Generic options");
-    generic.add_options()("help,h", "produce help message");
-    generic.add_options()(
-        "config,c", po::value<string>(&config_file)->default_value(optConfigFile),
-        "name of a file of a configuration.");
-
-    int seed;      // initial seed
-    int numEvents; // data size to be generated
-    bool smearNEvents;
-    std::string logLevel;
-    bool disableFileLog;
-    std::string outputDir;
-    std::string outputFileName;
-    po::options_description config("General settings");
-    config.add_options()("nEvents",
-                         po::value<int>(&numEvents)->default_value(1000),
-                         "set of events per fit");
-    config.add_options()(
-        "seed", po::value<int>(&seed)->default_value(-1),
-        "set random number seed; default is to used unique seed for every job");
-    config.add_options()(
-        "logLevel", po::value<std::string>(&logLevel)->default_value("trace"),
-        "set log level: error|warning|info|debug");
-    config.add_options()("disableFileLog",
-                         po::value<bool>(&disableFileLog)->default_value(0),
-                         "write log file? 0/1");
-    config.add_options()(
-        "outputFile",
-        po::value<std::string>(&outputFileName)->default_value("out"),
-        "set output file name x. The files x.root and .log are created");
-    config.add_options()("outputDir",
-                         po::value<std::string>(&outputDir)->default_value("./"),
-                         "set output directory");
-    config.add_options()("smearNEvents",
-                         po::value<bool>(&smearNEvents)->default_value(0),
-                         "smear NEvents for sqrt(NEvents)");
-
-    std::string dataFile, dataFileTreeName;
-    std::string bkgFile, bkgFileTreeName;
-    std::string trueModelFile, trueBkgModelFile;
-    double trueSignalFraction;
-    std::string trueAmpOption;
-    bool resetWeights;
-    std::string inputResult;
-    po::options_description config_inout("Input/Generate settings");
-    config_inout.add_options()(
-        "dataFile", po::value<std::string>(&dataFile)->default_value(""),
-        "set input data; leave blank for toy mc generation");
-    config_inout.add_options()(
-        "dataFileTreeName",
-        po::value<std::string>(&dataFileTreeName)->default_value("data"),
-        "set tree name in data file");
-    config_inout.add_options()(
-        "bkgFile", po::value<std::string>(&bkgFile)->default_value(""),
-        "set bkg sample; leave blank if we fit data");
-    config_inout.add_options()(
-        "bkgFileTreeName",
-        po::value<std::string>(&bkgFileTreeName)->default_value("data"),
-        "set tree name in bkg file");
-    config_inout.add_options()(
-        "trueModelFile",
-        po::value<std::string>(&trueModelFile)->default_value("model.xml"),
-        "set XML model file of true distribution");
-    config_inout.add_options()(
-        "trueBkgFile",
-        po::value<std::string>(&trueBkgModelFile)->default_value(""),
-        "set XML model file of true distribution");
-    config_inout.add_options()(
-        "trueSignalFraction",
-        po::value<double>(&trueSignalFraction)->default_value(1.),
-        "add this number of background events: Nbkg=(1-f)*NSignal; only makes "
-        "sense together with bkgFile; ");
-    config_inout.add_options()(
-        "trueAmpOption",
-        po::value<std::string>(&trueAmpOption)->default_value(""),
-        "Use nocorrection=2/tagged=1/untagged=0");
-    config_inout.add_options()("resetWeights",
-                               po::value<bool>(&resetWeights)->default_value(0),
-                               "should we reset all weights to one?");
-    config_inout.add_options()(
-        "inputResult", po::value<std::string>(&inputResult)->default_value(""),
-        "input file for MinuitResult");
-
-    std::string efficiencyFile;
-    std::string efficiencyObject;
-    std::string phspEfficiencyFile;
-    std::string phspEfficiencyFileTreeName;
-    std::string phspEfficiencyFileTrueTreeName;
-    bool applySysCorrection;
-    po::options_description config_eff("Efficiency settings");
-    config_eff.add_options()(
-        "efficiencyFile",
-        po::value<std::string>(&efficiencyFile)->default_value(""),
-        "root file with binned efficiency class. If none is specified uniform "
-        "efficiency is assumed.")("efficiencyObject",
-                                  po::value<std::string>(&efficiencyObject)
-                                      ->default_value("efficiency_m23cosTheta23"),
-                                  "name of TObject inside efficiencyFile")(
-        "phspEfficiencyFile",
-        po::value<std::string>(&phspEfficiencyFile)->default_value(""),
-        "root file with reconstructed unbinned data from flat PHSP sample. We "
-        "use this for "
-        "an unbinned efficiency correction. Leave blank to use binned "
-        "efficiency")(
-        "phspEfficiencyFileTreeName",
-        po::value<std::string>(&phspEfficiencyFileTreeName)->default_value("mc"),
-        "set tree name for unbinned efficiency correction")(
-        "phspEfficiencyFileTrueTreeName",
-        po::value<std::string>(&phspEfficiencyFileTrueTreeName)
-            ->default_value(""),
-        "set tree name for tree with true values")(
-        "applySysCorrection",
-        po::value<bool>(&applySysCorrection)->default_value(0),
-        "apply correction for data/MC difference");
-
-    unsigned int mcPrecision;
-    unsigned int ampMcPrecision;
-    bool usePreFitter;
-    bool useMinos;
-    bool useHesse;
-    bool useRandomStartValues;
-    bool calculateInterference;
-    int fitFractionError;
-    double fitSignalFraction;
-    std::string fitModelFile;
-    std::string fitBkgFile;
-    std::string fittingMethod;
-    std::string ampOption;
-    double penaltyScale;
-    po::options_description config_fit("Fit settings");
-    config_fit.add_options()(
-        "mcPrecision",
-        po::value<unsigned int>(&mcPrecision)->default_value(100000),
-        "Precision for MC integration and normalization")(
-        "ampMcPrecision",
-        po::value<unsigned int>(&ampMcPrecision)->default_value(0),
-        "Precision for MC integration and normalization")(
-        "fittingMethod",
-        po::value<std::string>(&fittingMethod)->default_value("plotOnly"),
-        "choose between 'tree', 'amplitude' and 'plotOnly'")(
-        "useMinos", po::value<bool>(&useMinos)->default_value(0),
-        "Run MINOS for each parameter")(
-        "useHesse", po::value<bool>(&useHesse)->default_value(1),
-        "Run HESSE after MIGRAD")(
-        "fitModelFile",
-        po::value<std::string>(&fitModelFile)->default_value("model.xml"),
-        "Set XML model file of fit distribution")(
-        "fitBkgFile", po::value<std::string>(&fitBkgFile)->default_value(""),
-        "Set XML background model file")(
-        "ampOption", po::value<std::string>(&ampOption)->default_value("none"),
-        "Use none/tagged/taggedSym/untagged")(
-        "fitSignalFraction",
-        po::value<double>(&fitSignalFraction)->default_value(1.),
-        "Signal fraction")("usePreFitter",
-                           po::value<bool>(&usePreFitter)->default_value(0),
-                           "Run Geneva as prefitter")(
-        "useRandomStartValues",
-        po::value<bool>(&useRandomStartValues)->default_value(0),
-        "Randomize start values")(
-        "penaltyScale", po::value<double>(&penaltyScale)->default_value(0))(
-        "calculateInterference",
-        po::value<bool>(&calculateInterference)->default_value(0),
-        "Calculate interference terms")(
-        "fitFractionError", po::value<int>(&fitFractionError)->default_value(0),
-        "Fit fraction errors are calculated by Monte-Carlo approach. 0 = "
-        "disabled, >0 = MC precision");
-
-    bool enablePlotting;
-    bool plotDataSample;
-    int plotSize;
-    bool plotCorrectEfficiency;
-    int plotNBins;
-    bool plotAmplitude;
-    po::options_description config_plot("Plot settings");
-    config_plot.add_options()("plotting",
-                              po::value<bool>(&enablePlotting)->default_value(1),
-                              "Enable/Disable plotting")(
-        "plotData", po::value<bool>(&plotDataSample)->default_value(1),
-        "Enable/Disable plotting of data")(
-        "plotSize", po::value<int>(&plotSize)->default_value(100000),
-        "Size of sample for amplitude plot")(
-        "plotNBins", po::value<int>(&plotNBins)->default_value(100),
-        "Number of bins")(
-        "plotCorrectEfficiency",
-        po::value<bool>(&plotCorrectEfficiency)->default_value(0),
-        "Number of bins")("plotAmplitude",
-                          po::value<bool>(&plotAmplitude)->default_value(1),
-                          "Enable/Disable plotting of amplitude");
-
-    po::options_description cmdline_options;
-    cmdline_options.add(generic).add(config).add(config_inout);
-    cmdline_options.add(config_eff).add(config_fit).add(config_plot);
-    po::options_description config_file_options;
-    config_file_options.add(config).add(config_inout).add(config_eff);
-    config_file_options.add(config_fit).add(config_plot);
-
-    po::variables_map vm;
-    po::store(po::parse_command_line(argc, argv, cmdline_options), vm);
-
-    po::positional_options_description p;
-    store(po::command_line_parser(argc, argv)
-              .options(cmdline_options)
-              .positional(p)
-              .run(),
-          vm);
-    notify(vm);
-    if (vm.count("help")) {
-      cout << cmdline_options << "\n";
-      return 1;
-    }
-
-    ifstream ifs(config_file.c_str());
-    if (ifs) {
-      store(parse_config_file(ifs, config_file_options), vm);
-      notify(vm);
-    }
-    std::string fileNamePrefix = outputDir + std::string("/") + outputFileName;
-    std::string logFileName = fileNamePrefix + std::string(".log");
-    if (disableFileLog)
-      logFileName = "";
-    Logging log(logFileName, boost::log::trivial::info); // initialize logging
-    log.SetLogLevel(logLevel);
-
-    // check configuration
-    assert(!outputDir.empty());
-    if (trueModelFile.empty()) {
-      LOG(error) << "True model file not set";
-    }
-    if (fitModelFile.empty() && fittingMethod != "plotOnly") {
-      LOG(error) << "Fit model file not set";
-    }
-    if (fittingMethod != "tree" && fittingMethod != "amplitude" &&
-        fittingMethod != "plotOnly") {
-      LOG(error) << "Unknown fitting method: " << fittingMethod;
-      return 1;
-    }
-
-    //  LOG(info) << "Current path: " << getenv("PWD");
-    po::notify(vm);
-
-    if (ampMcPrecision == 0)
-      ampMcPrecision = mcPrecision;
-
-    boost::property_tree::ptree fitModelTree;
-    boost::property_tree::xml_parser::read_xml(fitModelFile, fitModelTree);
-
-    PhysConst::CreateInstance(fitModelTree);
-    // initialize kinematics of decay
-    HelicityKinematics::CreateInstance(
-        fitModelTree.get_child("HelicityKinematics"));
-
-    // initialize random generator
-    std::shared_ptr<Generator> gen =
-        std::shared_ptr<Generator>(new Tools::RootGenerator(seed));
-
-    RunManager run;
-    run.SetGenerator(gen);
-    //======================= EFFICIENCY =============================
-    auto eff = std::shared_ptr<Efficiency>(new UnitEfficiency());
-
-    // Binned efficiency
-    if (!efficiencyFile.empty()) {
-      TFile *tf = new TFile(TString(efficiencyFile));
-      TH1 *h_passed = (TH1 *)tf->Get(TString(efficiencyObject) + "_passed");
-      TH1 *h_total = (TH1 *)tf->Get(TString(efficiencyObject) + "_total");
-      DataReader::RootEfficiency rootEff(h_passed, h_total);
-      tf->Close();
-      std::shared_ptr<Efficiency> eff = std::make_shared<RootEfficiency>(rootEff);
-    }
-
-    // Unbinned efficiency
-    std::shared_ptr<Data> phspData, phspTrueData;
-    if (!phspEfficiencyFile.empty()) {
-      // sample with accepted phsp events
-      phspData = std::shared_ptr<Data>(new RootReader(
-          phspEfficiencyFile, phspEfficiencyFileTreeName, mcPrecision));
-      phspData->ReduceToPhsp();
-    }
-
-    //========== Generation of toy phase space sample ==
-    std::shared_ptr<Data> toyPhspData(new RootReader()); // Toy sample
-    run.SetPhspSample(toyPhspData);
-    run.GeneratePhsp(mcPrecision);
-    toyPhspData->SetEfficiency(eff); // set efficiency values for each event
-
-    // ========= AmpIntensity ========
-    auto intens = IncoherentIntensity::Factory(
-        fitModelTree.get_child("IncoherentIntensity"));
-
-    boost::property_tree::ptree trueModelTree;
-    boost::property_tree::xml_parser::read_xml(trueModelFile, trueModelTree);
-    auto trueIntens = IncoherentIntensity::Factory(
-        trueModelTree.get_child("IncoherentIntensity"));
-
-    // Setting samples for normalization
-    auto toyPoints =
-        std::make_shared<std::vector<dataPoint>>(toyPhspData->GetDataPoints());
-    auto phspPoints = toyPoints;
-    if (phspData) {
-      auto phspPoints =
-          std::make_shared<std::vector<dataPoint>>(phspData->GetDataPoints());
-    }
-    trueIntens->SetPhspSample(phspPoints, toyPoints);
-    intens->SetPhspSample(phspPoints, toyPoints);
-
-    //======================= READING DATA =============================
-    // Sample is used for minimization
-    std::shared_ptr<Data> sample(new Data());
-
-    // Temporary samples for signal and background
-    std::shared_ptr<Data> inputData, inputBkg;
-
-    // Smear total number of events
-    if (smearNEvents && numEvents > 0)
-      numEvents += (int)gen->GetGaussDist(0, sqrt(numEvents));
-
-    //  if (trueSignalFraction != 1. && !bkgFile.empty()) {
-    //    int numBkgEvents = (int)((1 - trueSignalFraction) * numEvents);
-    //    LOG(info) << "Reading background file...";
-    //    std::shared_ptr<Data> inBkg(new RootReader(bkgFile, bkgFileTreeName));
-    //    inBkg->reduceToPhsp();
-    //    if (resetWeights)
-    //      inBkg->resetWeights(); // resetting weights of requested
-    //    inputBkg = inBkg->rndSubSet(numBkgEvents, gen);
-    //    run.setBackground(inputBkg);
-    //    inBkg = std::shared_ptr<Data>();
-    //    sample->Add(*inputBkg);
-    //  }
-    if (!dataFile.empty()) {
-      int numSignalEvents = numEvents;
-      //    if (inputBkg)
-      //      numSignalEvents -= inputBkg->getNEvents();
-      LOG(info) << "Reading data file...";
-      std::shared_ptr<Data> inD(new RootReader(dataFile, dataFileTreeName));
-
-  //    SubSystem s(std::vector<int>{1}, std::vector<int>{0}, std::vector<int>{2});
-  //    int id = dynamic_cast<HelicityKinematics*>(Kinematics::Instance())->GetDataID(s);
-  //    for( int i=0; i<10 ; i++){
-  //      std::cout<<inD->getEvent(i)<<std::endl;
-  //      dataPoint p(inD->getEvent(i));
-  //      std::cout<<p<<std::endl;
-  //      std::cout<<"mSq="<<p.GetValue(id*3)<<" cosTheta="<<p.GetValue(id*3+1)<<std::endl;
-  //      std::cout<<"-------"<<std::endl;
-  //    }
-  //    exit(1);
-
-      inD->ReduceToPhsp();
-      if (resetWeights)
-        inD->ResetWeights(); // resetting weights if requested
-      inputData = inD->RndSubSet(numSignalEvents, gen);
-      inputData->SetEfficiency(eff);
-      run.SetData(inputData);
-      inD = std::shared_ptr<Data>();
-      sample->Add(*inputData);
-    }
-    //========== Generation of data sample ===========
-    // generation with unbinned efficiency correction - use full sample
-    if (!phspEfficiencyFile.empty() && (!inputData || !inputBkg)) {
-      // assume that efficiency of hit&miss is large 0.5%
-      double phspSampleSize = numEvents / 0.005;
-
-      std::shared_ptr<Data> fullPhsp(new RootReader(
-          phspEfficiencyFile, phspEfficiencyFileTreeName, phspSampleSize));
-      if (applySysCorrection) {
-        MomentumCorrection *trkSys = getTrackingCorrection();
-        MomentumCorrection *pidSys = getPidCorrection();
-        trkSys->Print();
-        pidSys->Print();
-        fullPhsp->ApplyCorrection(*trkSys);
-        fullPhsp->ApplyCorrection(*pidSys);
-      }
-      std::shared_ptr<Data> fullTruePhsp;
-      if (!phspEfficiencyFileTrueTreeName.empty()) {
-        fullTruePhsp = std::shared_ptr<Data>(new RootReader(
-            phspEfficiencyFile, phspEfficiencyFileTrueTreeName, phspSampleSize));
-        // Data* fullPhspRed = fullPhsp->EmptyClone();
-        // Data* fullPhspTrueRed = fullTruePhsp->EmptyClone();
-        // rndReduceSet(phspSampleSize,gen,fullPhsp.get(),fullPhspRed,
-        // fullTruePhsp.get(),fullPhspTrueRed);
-        // fullPhsp = std::shared_ptr<Data>(fullPhspRed);
-        // fullTruePhsp = std::shared_ptr<Data>(fullPhspTrueRed);
-      } else {
-        // Data* fullPhspRed = fullPhsp->EmptyClone();
-        // rndReduceSet(phspSampleSize,gen,fullPhsp.get(),fullPhspRed);
-        // fullPhsp = std::shared_ptr<Data>(fullPhspRed);
-      }
-      run.SetPhspSample(fullPhsp, fullTruePhsp);
-    }
-    if (!inputData) {
-      LOG(info) << "Generating sample!";
-      run.SetData(sample);
-      run.SetAmplitude(trueIntens);
-      run.SetPhspSample(std::shared_ptr<Data>());
-      run.Generate(numEvents);
-      LOG(info) << "Sample size: " << sample->GetNEvents();
-    }
-    // Reset phsp sample to save memory
-    run.SetPhspSample(std::shared_ptr<Data>());
-
-    sample->ReduceToPhsp();
-
-    LOG(info) << "================== SETTINGS =================== ";
-
-    LOG(info) << "==== GENERAL";
-    LOG(info) << "Number of events: " << numEvents;
-    LOG(info) << "Initial seed: " << seed;
-    LOG(info) << "Log level: " << logLevel;
-    LOG(info) << "Output file: " << fileNamePrefix << "-* [*.root,*.pdf,*.tex]";
-    LOG(info) << "==== INPUT/GENERATION";
-    if (!dataFile.empty()) { // read in data
-      LOG(info) << "Data file: " << dataFile << " [tree=" << dataFileTreeName
-                << " ]";
-    } else { // generate signal
-      LOG(info) << "true signal fraction: " << trueSignalFraction;
-      LOG(info) << "True model file: " << trueModelFile;
-      LOG(info) << "True amplitude option: " << trueAmpOption;
-    }
-    if (trueSignalFraction != 1.0) {
-      if (!bkgFile.empty()) { // read in background
-        LOG(info) << "Background file: " << bkgFile
-                  << " [tree=" << bkgFileTreeName << " ]";
-      } else { // generate background
-        LOG(info) << "True background model file: " << trueBkgModelFile;
-      }
-    }
-    LOG(info) << "Total events in input sample: " << sample->GetNEvents();
-
-    LOG(info) << "==== EFFICIENCY";
-    if (!efficiencyFile.empty())
-      LOG(info) << "Binned Efficiency file: " << efficiencyFile
-                << " [obj=" << efficiencyObject << "]";
-    if (!phspEfficiencyFile.empty()) {
-      LOG(info) << "PHSP data input file: " << phspEfficiencyFile
-                << " [tree=" << phspEfficiencyFileTreeName << "]";
-      if (!phspEfficiencyFileTrueTreeName.empty())
-        LOG(info) << "True tree name: " << phspEfficiencyFileTrueTreeName;
-      if (applySysCorrection)
-        LOG(info) << "Unbinned efficiency is corrected "
-                     "for tracking systematics!";
-      LOG(info) << "Unbinned efficiency correction is used!";
-    }
-    if (phspEfficiencyFile.empty() && !efficiencyFile.empty())
-      LOG(info) << "Binned efficiency correction is used!";
-    if (!phspEfficiencyFile.empty() && !efficiencyFile.empty())
-      LOG(info) << "No efficiency correction!";
-
-    LOG(info) << "==== FIT";
-    LOG(info) << "MC precision: " << mcPrecision;
-    LOG(info) << "Amplitude MC precision: " << ampMcPrecision;
-    LOG(info) << "Fitting method: " << fittingMethod;
-    LOG(info) << "Fit signal fraction: " << fitSignalFraction;
-    LOG(info) << "Amplitude option: " << ampOption;
-    LOG(info) << "Fit model file: " << fitModelFile;
-    if (!fitBkgFile.empty())
-      LOG(info) << "Fit bkg model file: " << fitBkgFile;
-    LOG(info) << "Using Geneva as pre fitter: " << usePreFitter;
-    LOG(info) << "Use MINOS: " << useMinos;
-    LOG(info) << "Accurate errors on fit fractions: " << fitFractionError;
-    LOG(info) << "Penalty scale: " << penaltyScale;
-
-    LOG(info) << "==== PLOTTING";
-    LOG(info) << "enable plotting: " << enablePlotting;
-    if (enablePlotting) {
-      LOG(info) << "plotting size: " << plotSize;
-      LOG(info) << "number of bins: " << plotNBins;
-      LOG(info) << "Correct samples for efficiency: " << plotCorrectEfficiency;
-      LOG(info) << "plotDataSample: " << plotDataSample;
-      LOG(info) << "plotAmplitude: " << plotAmplitude;
-    }
-    LOG(info) << "===============================================";
-
-    std::shared_ptr<FitResult> result;
-    ParameterList finalParList;
-    if (fittingMethod != "plotOnly") {
-      //========================FITTING =====================
-      ParameterList truePar, fitPar;
-      trueIntens->GetParameters(truePar);
-      intens->GetParameters(fitPar);
-      LOG(debug) << "Fit parameters: " << std::endl << fitPar.to_str();
-
-      //=== Constructing likelihood
-      auto esti = Estimator::MinLogLH::CreateInstance(intens, sample, toyPhspData,
-                                                      phspData, 0, 0);
-
-      std::cout.setf(std::ios::unitbuf);
-      if (fittingMethod == "tree") {
-        dynamic_pointer_cast<ComPWA::Estimator::MinLogLH>(esti)->UseFunctionTree(
-            true);
-        LOG(debug) << esti->GetTree()->head()->to_str(25);
-      }
-
-      if (useRandomStartValues)
-        randomStartValues(fitPar);
-      LOG(debug) << "Initial LH=" << esti->controlParameter(fitPar) << ".";
-
-      // Use Geneva as pre fitter
-      //    std::shared_ptr<Optimizer::Optimizer> preOpti;
-      //    std::shared_ptr<FitResult> preResult;
-      //    if (usePreFitter) {
-      //      LOG(info) << "Running Geneva as pre fitter!";
-      //      setErrorOnParameterList(fitPar, 0.5, useMinos);
-      //      //			preOpti = std::shared_ptr<Optimizer>(
-      //      //					new
-      //      // GenevaIF(esti,dkskkDir+"/PWA/geneva-config/")
-      //      //			);
-      //      preResult = preOpti->exec(fitPar);
-      //      preResult->setTrueParameters(truePar);
-      //      preResult->print();
-      //    }
-
-      std::shared_ptr<Optimizer::Optimizer> opti;
-      // Set start error of 0.05 for parameters
-      setErrorOnParameterList(fitPar, 0.05, useMinos);
-
-      auto optiif = new Optimizer::Minuit2::MinuitIF(esti, fitPar);
-      optiif->SetHesse(useHesse);
-     // if(geneva){
-    //	  auto genevatif = new Optimizer::Geneva::GenevaIF(esti);
-    	  //optiif = genevatif;
-      //}
-      run.SetOptimizer(std::shared_ptr<Optimizer::Optimizer>(optiif));
-
-      //====== STARTING MINIMIZATION ======
-      result = run.Fit(fitPar);
-
-      //====== FIT RESULT =======
-  //    auto minuitResult =
-  //        dynamic_cast<Optimizer::Minuit2::MinuitResult *>(&*result);
-      finalParList = result->GetFinalParameters();
-
-      // Calculation of fit fractions
-      std::vector<std::pair<std::string, std::string>> fitComponents;
-      fitComponents.push_back(
-          std::pair<std::string, std::string>("phi(1020)", "D0toKSK+K-"));
-      fitComponents.push_back(std::pair<std::string, std::string>(
-          "phi(1020) a0(980)0", "D0toKSK+K-"));
-      fitComponents.push_back(
-          std::pair<std::string, std::string>("a0(980)0", "D0toKSK+K-"));
-      fitComponents.push_back(
-          std::pair<std::string, std::string>("a0(980)+", "D0toKSK+K-"));
-      fitComponents.push_back(
-          std::pair<std::string, std::string>("a2(1320)-", "D0toKSK+K-"));
-      ParameterList ff =
-          Tools::CalculateFitFractions(intens, toyPoints, fitComponents);
-
-      result->SetFitFractions(ff);
-      result->Print();
-
-      std::ofstream ofs(fileNamePrefix + std::string("-fitResult.xml"));
-      boost::archive::xml_oarchive oa(ofs);
-      oa << BOOST_SERIALIZATION_NVP(result);
-      if (!disableFileLog) { // Write fit result
-        // Save final amplitude
-        boost::property_tree::ptree ptout;
-        ptout.add_child("IncoherentIntensity", IncoherentIntensity::Save(intens));
-        boost::property_tree::xml_parser::write_xml(
-            fileNamePrefix + std::string("-Model.xml"), ptout, std::locale());
-            //Does not compile with boost1.54
-  //      boost::property_tree::xml_parser::write_xml(
-  //          fileNamePrefix + std::string("-Model.xml"), ptout, std::locale(),
-  //          boost::property_tree::xml_writer_make_settings<std::string>(' ', 4,
-  //                                                                      "utf-8"));
-
-        //      LOG(info) << "Average resonance width of fit model: "
-        //                << fitAmpSum->averageWidth();
-      }
-
-      //    if (!trueModelFile.empty()) {
-      //      double confLevel = std::sqrt(
-      //          2 * (minuitResult->GetTrueLH() - minuitResult->GetFinalLH()));
-      //      LOG(info) << "CHI2 TEST: "
-      //                << " finalLH = " << minuitResult->GetFinalLH()
-      //                << " trueLH = " << minuitResult->GetTrueLH()
-      //                << " -> confLevel [sigma] = " << confLevel;
-      //    }
-    } else if (!inputResult.empty()) {
-      LOG(info) << "Reading MinuitResult from " << inputResult;
-      std::shared_ptr<Optimizer::Minuit2::MinuitResult> inResult;
-      std::ifstream ifs(inputResult);
-      if (!ifs.good())
-        throw std::runtime_error("input stream not good!");
-      boost::archive::xml_iarchive ia(ifs);
-      ia >> BOOST_SERIALIZATION_NVP(inResult);
-      ifs.close();
-
-      inResult->SetIntensity(intens);
-      //    inResult->SetUseCorrelatedErrors(fitFractionError);
-      if (calculateInterference)
-        inResult->SetCalcInterference(0);
-      //    inResult->SetFitFractions(ParameterList()); // reset fractions list
-      result = inResult;
-      result->Print();
-    }
-
-    // Fill final parameters if minimization was not run
-    if (!finalParList.GetNParameter()) {
-      ParameterList tmpList;
-      //    Amplitude::FillAmpParameterToList(ampVec, tmpList);
-      finalParList.DeepCopy(tmpList);
-    }
-
-    //======================= PLOTTING =============================
-    if (enablePlotting) {
-      //    if (fittingMethod != "plotOnly")
-      //      Amplitude::UpdateAmpParameterList(ampVec, finalParList);
-
-      //------- phase-space sample
-      std::shared_ptr<ComPWA::Data> pl_phspSample(new RootReader());
-      LOG(info) << "Plotting results...";
-      if (!phspEfficiencyFile.empty()) { // unbinned plotting
-                                         // sample with accepted phsp events
-        pl_phspSample = std::shared_ptr<Data>(new RootReader(
-            phspEfficiencyFile, phspEfficiencyFileTreeName, plotSize));
-
-        std::shared_ptr<Data> plotTruePhsp;
-        if (!phspEfficiencyFileTrueTreeName.empty())
-          plotTruePhsp = std::shared_ptr<Data>(new RootReader(
-              phspEfficiencyFile, phspEfficiencyFileTrueTreeName, plotSize));
-        run.SetPhspSample(pl_phspSample, plotTruePhsp);
-        // make sure no efficiency is set
-        //      Amplitude::SetAmpEfficiency(
-        //          ampVec, std::shared_ptr<Efficiency>(new UnitEfficiency));
-      } else { // binned plotting
-        run.SetPhspSample(pl_phspSample);
-        run.GeneratePhsp(plotSize); // we generate a very large sample for
-                                    // plotting
-      }
-      // reduce sample to phsp
-      pl_phspSample->ReduceToPhsp();
-      pl_phspSample->SetEfficiency(eff);
-
-      //-------- Instance of plotData
-      plotData pl(fileNamePrefix, plotNBins);
-      // set data sample
-      pl.SetData(sample);
-      // set phsp sample
-      pl.SetPhspData(pl_phspSample);
-      // set amplitude
-      pl.SetFitAmp(intens, "", kBlue - 4);
-      // select components to plot
-      pl.DrawComponent("D0toKSK+K-", "Signal", kGreen);
-      pl.DrawComponent("BkgD0toKSK+K-", "Background", kRed);
-      //    pl.DrawComponent("a0(980)0", "a_{0}(980)^{0}", kMagenta+2);
-      //    pl.DrawComponent("phi(1020)", "#phi(1020)", kMagenta);
-
-      // pl.setCorrectEfficiency(plotCorrectEfficiency);
-
-      // Fill histograms and create canvases
-      pl.Plot();
-    }
-    LOG(info) << "FINISHED!";
-
-    // Exit code is exit code of fit routine. 0 is good/ 1 is bad
-    if (result)
-      return result->HasFailed();
-    return 0;
-}
-
-PyObject* PythonFit::testTree(){
-	double feventWeight = 1.;
-
-	TTree *fTree = new TTree("testTree", "testTree");
-	unsigned int numPart = 100;
-
-	fTree->Branch("weight", &feventWeight, "weight/D");
-
-	for (auto it=0; it < numPart; ++it) {
-		feventWeight = (int) (it/10.);
-
-		fTree->Fill();
-	}
-	//fTree->Write("", TObject::kOverwrite, 0);
-
-	return convertTreeToPy(fTree);
-}
-
-PyObject* PythonFit::testTVector3(PyObject* inVec){
-	TVector3* fVec3(convertFromPy<TVector3*>(inVec));
-    std::cout << " pyVec in ComPWA " << fVec3->X() << std::endl;
-	(*fVec3)*=2.;
-    std::cout << " pyVec out ComPWA " << fVec3->X() << std::endl;
-	return convertToPy<TVector3>((*fVec3));
-}
-
-void PythonFit::setConfigFile(std::string fileName){
-	optConfigFile = fileName;
+	 // initialize logging
+	  Logging log("DalitzFit-log.txt", boost::log::trivial::debug);
+
+	  // RunManager is supposed to manage all objects of the analysis. It generates
+	  // data and starts the fitting procedure.
+	  ComPWA::Tools::RunManager run;
+
+	  // List with all particle information needed
+	  auto partL = std::make_shared<ComPWA::PartList>();
+	  ReadParticles(partL, defaultParticleList);
+	  ReadParticles(partL, myParticles);
+
+	  //---------------------------------------------------
+	  // 1) Create Kinematics object
+	  //---------------------------------------------------
+	  std::vector<pid> initialState = {443};
+	  std::vector<pid> finalState = {22, 111, 111};
+	  auto kin =
+	      std::make_shared<HelicityKinematics>(partL, initialState, finalState);
+
+	  //---------------------------------------------------
+	  // 2) Generate a large phase space sample
+	  //---------------------------------------------------
+	  auto gen = std::make_shared<ComPWA::Tools::RootGenerator>(partL, kin);
+	  run.SetGenerator(gen);
+	  std::shared_ptr<ComPWA::DataReader::Data> phspSample(new ComPWA::DataReader::Data());
+	  run.SetPhspSample(phspSample);
+	  run.GeneratePhsp(100000);
+
+	  //---------------------------------------------------
+	  // 3) Create intensity from pre-defined model
+	  //---------------------------------------------------
+	  // Read in model property_tree
+	  std::stringstream modelStream;
+	  modelStream << amplitudeModel;
+	  boost::property_tree::ptree modelTree;
+	  boost::property_tree::xml_parser::read_xml(modelStream, modelTree);
+
+	  // Construct intensity class from model string
+	  auto intens = IncoherentIntensity::Factory(
+	      partL, kin, modelTree.get_child("IncoherentIntensity"));
+
+	  // Pass phsp sample to intensity for normalization.
+	  // Convert to dataPoints first.
+	  auto phspPoints =
+	      std::make_shared<std::vector<dataPoint>>(phspSample->GetDataPoints(kin));
+	  intens->SetPhspSample(phspPoints, phspPoints);
+	  run.SetAmplitude(intens);
+
+	  //---------------------------------------------------
+	  // 4) Generate a data sample given intensity and kinematics
+	  //---------------------------------------------------
+	  std::shared_ptr<ComPWA::DataReader::Data> sample(new ComPWA::DataReader::Data());
+	  run.SetData(sample);
+	  run.Generate(kin, 1000);
+
+	  //---------------------------------------------------
+	  // 5) Fit the model to the data and print the result
+	  //---------------------------------------------------
+	  ParameterList fitPar;
+	  intens->GetParameters(fitPar);
+	  // Set start error of 0.05 for parameters, run Minos?
+	  setErrorOnParameterList(fitPar, 0.05, false);
+
+	  auto esti = std::make_shared<Estimator::MinLogLH>(
+	      kin, intens, sample, phspSample, phspSample, 0, 0);
+
+	  esti->UseFunctionTree(true);
+	  LOG(debug) << esti->GetTree()->Head()->Print(25);
+
+	  auto minuitif = new Optimizer::Minuit2::MinuitIF(esti, fitPar);
+	  minuitif->SetHesse(true);
+	  run.SetOptimizer(std::shared_ptr<Optimizer::Optimizer>(minuitif));
+
+	  // STARTING MINIMIZATION
+	  auto result = std::dynamic_pointer_cast<MinuitResult>(run.Fit(fitPar));
+
+	  // Calculate fit fractions
+	  std::vector<std::pair<std::string, std::string>> fitComponents;
+	  fitComponents.push_back(
+	      std::pair<std::string, std::string>("myAmp", "jpsiGammaPiPi"));
+	  fitComponents.push_back(
+	      std::pair<std::string, std::string>("f2(1270)", "jpsiGammaPiPi"));
+
+	  ParameterList fitFracs =
+	      Tools::CalculateFitFractions(kin, intens, phspPoints, fitComponents);
+	  // A proper calculation of the fit fraction uncertainty requires
+	  // the uncertainty of the fit parameters propagated. We do this
+	  // using a numerical approach. Using the covariance matrix
+	  // 100 independend sets of fit parameters are generated and the fit fractions
+	  // are recalculated. In the end we take the RMS.
+	  Tools::CalcFractionError(fitPar, result->GetCovarianceMatrix(), fitFracs, kin,
+	                           intens, phspPoints, 100, fitComponents);
+
+	  result->SetFitFractions(fitFracs);
+	  result->Print();
+
+	  //---------------------------------------------------
+	  // 5.1) Save the fit result
+	  //---------------------------------------------------
+	  std::ofstream ofs("DalitzFit-fitResult.xml");
+	  boost::archive::xml_oarchive oa(ofs);
+	  oa << BOOST_SERIALIZATION_NVP(result);
+
+	  UpdateParticleList(partL, fitPar);
+	  boost::property_tree::ptree ptout;
+	  ptout.add_child("ParticleList", SaveParticles(partL));
+	  ptout.add_child("IncoherentIntensity", IncoherentIntensity::Save(intens));
+	  boost::property_tree::xml_parser::write_xml("DalitzFit-Model.xml", ptout,
+	                                              std::locale());
+	  //---------------------------------------------------
+	  // 6) Plot data sample and intensity
+	  //---------------------------------------------------
+	  ComPWA::Tools::DalitzPlot pl(kin, "DalitzFit", 100);
+	  pl.SetData(sample);
+	  pl.SetPhspData(phspSample);
+	  pl.SetFitAmp(intens, "", kBlue - 4);
+	  pl.Plot();
+	  LOG(info) << "Done";
+
+	  return 0;
 }
