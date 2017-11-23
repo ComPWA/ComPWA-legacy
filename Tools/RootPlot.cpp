@@ -1,7 +1,5 @@
 
 
-
-
 // Copyright (c) 2013, 2017 The ComPWA Team.
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
@@ -30,13 +28,16 @@ void RootPlot::Write(std::string treePrefix, std::string fileName,
   auto varNames = kin_->GetVarNames();
   varNames.push_back("weight");
   varNames.push_back("eff");
+  
+  auto varTitles = kin_->GetVarTitles();
+  varTitles.push_back("weight");
+  varTitles.push_back("#epsilon");
 
   size_t dataPointSize = varNames.size();
   double dataIntegral = 0.;
   // Data
   if (s_data.size()) {
-    TTree *dataTree =
-        new TTree(TString(treePrefix + "_data"), "dataSample");
+    TTree *dataTree = new TTree(TString(treePrefix + "_data"), "dataSample");
     auto t_dataSample = std::vector<double>(dataPointSize, 0.0);
     for (int i = 0; i < varNames.size(); i++)
       dataTree->Branch(TString(varNames.at(i)), &t_dataSample.at(i),

@@ -40,6 +40,10 @@ using ComPWA::Physics::HelicityFormalism::HelicityKinematics;
 using ComPWA::Physics::HelicityFormalism::IncoherentIntensity;
 using ComPWA::Optimizer::Minuit2::MinuitResult;
 
+// Enable serialization of MinuitResult. For some reason has to be outside
+// any namespaces.
+BOOST_CLASS_EXPORT(ComPWA::Optimizer::Minuit2::MinuitResult)
+
 // We define an intensity model using a raw string literal. Currently, this is
 // just a toy model without any physical meaning.
 // (comments within the string are ignored!). This is convenient since we

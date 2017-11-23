@@ -52,14 +52,19 @@ public:
 
   /// Add sub component of the Intensity. For each event in the phase space
   /// sample each component is evaluated and its value is added to the TTree.
-  void AddComponent(std::string name, std::string title = "component") {
+  void AddComponent(std::string name, std::string title = "") {
+    std::string t = title;
+    if (t == "")
+      t = name;
+    
     if (!_plotComponents.size())
       throw std::runtime_error("PlotData::DrawComponent() | AmpIntensity not "
                                "set! Set the full model first using "
                                "SetFitAmp()!");
+    
     std::shared_ptr<ComPWA::AmpIntensity> comp;
     try {
-      comp = _plotComponents.at(0)->GetComponent(name);
+        comp = _plotComponents.at(0)->GetComponent(name);
     } catch (std::exception &ex) {
       LOG(error) << "DalitzPlot::DrawComponent() | Component " << name
                  << " not found in AmpIntensity "
@@ -67,7 +72,7 @@ public:
       return;
     }
     _plotComponents.push_back(comp);
-    _componentNames.push_back(title);
+    _componentNames.push_back(t);
   }
 
   /// Create the TTree's, fill and write them to \p fileName.

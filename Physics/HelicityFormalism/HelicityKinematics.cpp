@@ -330,6 +330,9 @@ int HelicityKinematics::createIndex(const SubSystem &newSys) {
     _varNames.push_back("mSq_" + newSys.to_string());
     _varNames.push_back("cosTheta_" + newSys.to_string());
     _varNames.push_back("phi_" + newSys.to_string());
+    _varTitles.push_back("m^{2}(" + newSys.to_string() + ")");
+    _varTitles.push_back("#cos#Theta(" + newSys.to_string() + ")");
+    _varTitles.push_back("#phi(" + newSys.to_string() + ")");
   }
   return results;
 }
