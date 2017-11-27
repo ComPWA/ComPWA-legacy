@@ -45,6 +45,10 @@ using namespace ComPWA::Physics::HelicityFormalism;
 using ComPWA::Physics::HelicityFormalism::IncoherentIntensity;
 using ComPWA::Optimizer::Minuit2::MinuitResult;
 
+// Enable serialization of MinuitResult. For some reason has to be outside
+// any namespaces.
+BOOST_CLASS_EXPORT(ComPWA::Optimizer::Minuit2::MinuitResult)
+
 std::string partList = R"####(
 <ParticleList>
   <Particle Name="f0(980)">
@@ -407,13 +411,17 @@ int main(int argc, char **argv) {
   sqrtS4230._pl->SetData(sqrtS4230._data);
   sqrtS4230._pl->SetPhspSample(sqrtS4230._mcSample);
   sqrtS4230._pl->SetFitAmp(sqrtS4230._amp);
-  sqrtS4230._pl->Write("4230", "plot.root", "RECREATE");
+  sqrtS4230._pl->AddComponent("f0(980)", "f0_980");
+  sqrtS4230._pl->AddComponent("Zc(3900)_JpsiPiPlus + Zc(3900)_JpsiPiMinus",
+                              "Zc3900");
+  sqrtS4230._pl->Write("sqrtS4230", "plot.root", "RECREATE");
 
   sqrtS4260._pl = std::make_shared<RootPlot>(sqrtS4260._kin);
   sqrtS4260._pl->SetData(sqrtS4260._data);
   sqrtS4260._pl->SetPhspSample(sqrtS4260._mcSample);
   sqrtS4260._pl->SetFitAmp(sqrtS4260._amp);
-  sqrtS4260._pl->Write("4260", "plot.root", "UPDATE");
+  sqrtS4260._pl->AddComponent("f0(980)", "f0_980");
+  sqrtS4260._pl->Write("sqrtS4260", "plot.root", "UPDATE");
 
   LOG(info) << "Done";
 

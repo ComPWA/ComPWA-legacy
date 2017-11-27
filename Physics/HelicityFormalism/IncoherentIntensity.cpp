@@ -120,16 +120,13 @@ IncoherentIntensity::GetComponent(std::string name) {
   icIn->Reset();
   for (auto i : names) {
     for (int j = 0; j < _intens.size(); j++) {
-      if (name == _intens.at(j)->Name()) {
+      if (i == _intens.at(j)->Name()) {
         std::dynamic_pointer_cast<IncoherentIntensity>(icIn)->AddIntensity(
             _intens.at(j));
-        if (names.size() == 1)
-          return _intens.at(j);
         found = true;
       }
     }
   }
-
   // Did we find something?
   if (found)
     return icIn;
@@ -137,7 +134,8 @@ IncoherentIntensity::GetComponent(std::string name) {
   // Search for components in subsequent intensities
   for (auto i : _intens) {
     try {
-      icIn = i->GetComponent(name);
+      auto r = i->GetComponent(name);
+      std::dynamic_pointer_cast<IncoherentIntensity>(icIn)->AddIntensity(r);
       found = true;
     } catch (std::exception &ex) {
     }

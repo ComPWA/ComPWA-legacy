@@ -138,7 +138,7 @@ void MinLogLH::IniLHtree() {
                     "sumEvents", sampleSize,
                     false); // w_{ev} * log( I_{ev} )
   _tree->CreateLeaf("Weight",
-                    _phspAccSampleList.GetMultiDouble("Weight"), "weightLog");
+                    _dataSampleList.GetMultiDouble("Weight"), "weightLog");
   _tree->CreateNode("Log",
                     std::shared_ptr<Strategy>(new LogOf(ParType::MDOUBLE)),
                     "weightLog", sampleSize, false);
