@@ -2,25 +2,25 @@
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
-#ifndef SequentialTwoBodyDecay_h
-#define SequentialTwoBodyDecay_h
+#ifndef SequentialPartialAmplitude_h
+#define SequentialPartialAmplitude_h
 
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 
 #include "Core/Parameter.hpp"
 #include "Physics/Amplitude.hpp"
-#include "Physics/HelicityFormalism/PartialDecay.hpp"
+#include "Physics/HelicityFormalism/HelicityDecay.hpp"
 
 namespace ComPWA {
 namespace Physics {
 namespace HelicityFormalism {
 
-class SequentialTwoBodyDecay : public Amplitude {
+class SequentialPartialAmplitude : public Amplitude {
 
 public:
   virtual Amplitude *Clone(std::string newName = "") const {
-    auto tmp = (new SequentialTwoBodyDecay(*this));
+    auto tmp = (new SequentialPartialAmplitude(*this));
     tmp->SetName(newName);
     return tmp;
   };
@@ -57,15 +57,15 @@ public:
 
   //============ SET/GET =================
 
-  void Add(std::shared_ptr<ComPWA::Physics::Resonance> d) {
+  void Add(std::shared_ptr<ComPWA::Physics::PartialAmplitude> d) {
     _partDecays.push_back(d);
   }
 
-  std::shared_ptr<ComPWA::Physics::Resonance> GetDecay(int pos) {
+  std::shared_ptr<ComPWA::Physics::PartialAmplitude> GetDecay(int pos) {
     return _partDecays.at(pos);
   }
 
-  std::vector<std::shared_ptr<ComPWA::Physics::Resonance>> &GetDecays() {
+  std::vector<std::shared_ptr<ComPWA::Physics::PartialAmplitude>> &GetDecays() {
     return _partDecays;
   }
 
@@ -91,7 +91,7 @@ public:
 
   //======== ITERATORS/OPERATORS =============
 
-  typedef std::vector<std::shared_ptr<ComPWA::Physics::Resonance>>::iterator
+  typedef std::vector<std::shared_ptr<ComPWA::Physics::PartialAmplitude>>::iterator
       partDecayItr;
 
   partDecayItr begin() { return _partDecays.begin(); }
@@ -108,7 +108,7 @@ public:
                                                 std::string suffix);
 
 protected:
-  std::vector<std::shared_ptr<ComPWA::Physics::Resonance>> _partDecays;
+  std::vector<std::shared_ptr<ComPWA::Physics::PartialAmplitude>> _partDecays;
 };
 
 } // namespace HelicityFormalism

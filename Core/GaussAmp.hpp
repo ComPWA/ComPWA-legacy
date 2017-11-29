@@ -209,7 +209,7 @@ protected:
     // std::shared_ptr<MultAll> mmultDStrat(new MultAll(ParType::MDOUBLE));
 
     std::vector<double> oneVec(sampleSize, 1.0);
-    std::shared_ptr<AbsParameter> one(new MultiDouble("one", oneVec));
+    std::shared_ptr<Parameter> one(new MultiDouble("one", oneVec));
     newTree->createHead("AmpIntensity" + suffix, one);
     std::cout << newTree->head()->to_str(10) << std::endl;
     return newTree;

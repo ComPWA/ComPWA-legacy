@@ -31,7 +31,7 @@
 #include "Core/ParameterList.hpp"
 #include "Core/FunctionTree.hpp"
 #include "Core/TableFormater.hpp"
-#include "Core/AbsParameter.hpp"
+#include "Core/Parameter.hpp"
 #include "Core/Logging.hpp"
 
 // ComPWA header files go here

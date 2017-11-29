@@ -16,7 +16,6 @@
 
 #include "Core/Functions.hpp"
 #include "Core/ParameterList.hpp"
-#include "Core/AbsParameter.hpp"
 #include "Core/Parameter.hpp"
 #include "Core/ParObserver.hpp"
 
@@ -39,14 +38,14 @@ class TreeNode : public std::enable_shared_from_this<ComPWA::TreeNode>,
 public:
   /// Constructor for tree using a \p name, a \p parameter, a \p strategy and
   /// an identifier for the parent node.
-  TreeNode(std::string name, std::shared_ptr<ComPWA::AbsParameter> parameter,
+  TreeNode(std::string name, std::shared_ptr<ComPWA::Parameter> parameter,
            std::shared_ptr<ComPWA::Strategy> strategy,
            std::shared_ptr<ComPWA::TreeNode> parent);
 
   /// Constructor for multidimensional TreeNode using a \p name, a vector of
   /// \p parameters, a \p strategy and an identifier for the parent node.
   TreeNode(std::string name,
-           std::vector<std::shared_ptr<ComPWA::AbsParameter>> &parameters,
+           std::vector<std::shared_ptr<ComPWA::Parameter>> &parameters,
            std::shared_ptr<ComPWA::Strategy> strategy,
            std::shared_ptr<ComPWA::TreeNode> parent);
 
@@ -62,10 +61,10 @@ public:
   virtual void Recalculate();
 
   /// Get child parameter at \p position
-  virtual std::shared_ptr<ComPWA::AbsParameter> Parameter(unsigned int position = 0);
+  virtual std::shared_ptr<ComPWA::Parameter> Parameter(unsigned int position = 0);
 
   /// Get list of child parameters
-  virtual std::vector<std::shared_ptr<ComPWA::AbsParameter>> &Parameters();
+  virtual std::vector<std::shared_ptr<ComPWA::Parameter>> &Parameters();
   
   /// Fill ParameterList with parameters. The function is intended to be filled
   /// with fit parameters, so we add only DoubleParameters.
@@ -95,7 +94,7 @@ public:
 
   //  /// Find node \p name are return its parameter. The first match is
   //  /// returned. In case no node exisits a NULL pointer is returned.
-  //  virtual std::shared_ptr<ComPWA::AbsParameter> ChildValue(std::string name) const;
+  //  virtual std::shared_ptr<ComPWA::Parameter> ChildValue(std::string name) const;
   //
   //  /** Return value of certain child node
   //   * We go recursively through out tree to find the specified node and
@@ -136,7 +135,7 @@ protected:
   std::vector<std::shared_ptr<ComPWA::TreeNode>> _children;
 
   /// List of child leafes
-  std::vector<std::shared_ptr<ComPWA::AbsParameter>> _parameters;
+  std::vector<std::shared_ptr<ComPWA::Parameter>> _parameters;
 
   std::string _name;
 

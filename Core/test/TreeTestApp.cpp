@@ -146,8 +146,8 @@ int main(int argc, char **argv) {
   std::shared_ptr<FunctionTree> myTreeMult;
 
   //------------SetUp the parameters for R = Sum of (a * b)-----------
-  std::vector<std::shared_ptr<AbsParameter>> nVecParA;
-  std::shared_ptr<AbsParameter> nParB(new DoubleParameter("parB", 2));
+  std::vector<std::shared_ptr<Parameter>> nVecParA;
+  std::shared_ptr<Parameter> nParB(new DoubleParameter("parB", 2));
   for (unsigned int i = 0; i < nElements; i++) {
     std::shared_ptr<DoubleParameter> tmpA(
         new DoubleParameter("parA_" + std::to_string(i), i + 1));
@@ -178,8 +178,8 @@ int main(int argc, char **argv) {
 
   //------------SetUp the parameters for R = Sum of (a * b)-----------
   std::vector<double> nMasses, nPhsp;
-  std::shared_ptr<AbsParameter> mParB(new DoubleParameter("parB", 2));
-  std::shared_ptr<AbsParameter> mParD(new DoubleParameter("parD", 3));
+  std::shared_ptr<Parameter> mParB(new DoubleParameter("parB", 2));
+  std::shared_ptr<Parameter> mParD(new DoubleParameter("parD", 3));
   for (unsigned int i = 0; i < nElements; i++) {
     // std::shared_ptr<DoubleParameter> tmpA(new
     // DoubleParameter("parA_"+i,i+1));

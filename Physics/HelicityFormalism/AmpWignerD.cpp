@@ -137,7 +137,7 @@ std::shared_ptr<FunctionTree> AmpWignerD::GetTree(const ParameterList &sample,
 }
 
 bool WignerDStrategy::execute(ParameterList &paras,
-                              std::shared_ptr<AbsParameter> &out) {
+                              std::shared_ptr<Parameter> &out) {
 #ifndef NDEBUG
   if (checkType != out->type()) {
     throw(WrongParType(std::string("Output Type ") + ParNames[out->type()] +
@@ -165,7 +165,7 @@ bool WignerDStrategy::execute(ParameterList &paras,
                                "Evaluation of dynamical function failed!");
     }
   } // end element loop
-  out = std::shared_ptr<AbsParameter>(new MultiDouble(out->GetName(), results));
+  out = std::shared_ptr<Parameter>(new MultiDouble(out->GetName(), results));
 
   return true;
 }

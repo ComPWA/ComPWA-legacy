@@ -8,23 +8,23 @@
 #include "Physics/DecayDynamics/AmpFlatteRes.hpp"
 #include "Physics/DecayDynamics/NonResonant.hpp"
 
-#include "Physics/HelicityFormalism/PartialDecay.hpp"
+#include "Physics/HelicityFormalism/HelicityDecay.hpp"
 #include "Physics/HelicityFormalism/HelicityKinematics.hpp"
 
 namespace ComPWA {
 namespace Physics {
 namespace HelicityFormalism {
 
-std::shared_ptr<Resonance>
-PartialDecay::Factory(std::shared_ptr<PartList> partL,
+std::shared_ptr<PartialAmplitude>
+HelicityDecay::Factory(std::shared_ptr<PartList> partL,
                       std::shared_ptr<Kinematics> kin,
                       const boost::property_tree::ptree &pt) {
 
-  LOG(trace) << "PartialDecay::Factory() |";
+  LOG(trace) << "HelicityDecay::Factory() |";
   SubSystem subSys = SubSystemFactory(pt.get_child("SubSystem"));
 
   // Create object. Setting dataPos to invalid, will be set later
-  auto obj = std::make_shared<PartialDecay>(-1, subSys);
+  auto obj = std::make_shared<HelicityDecay>(-1, subSys);
   obj->SetName(pt.get<std::string>("<xmlattr>.Name", "empty"));
 
   std::shared_ptr<DoubleParameter> mag, phase;
@@ -70,7 +70,7 @@ PartialDecay::Factory(std::shared_ptr<PartList> partL,
     std::string decayType = partProp.GetDecayType();
 
     if (decayType == "stable") {
-      throw std::runtime_error("PartialDecay::Factory() | Stable particle is "
+      throw std::runtime_error("HelicityDecay::Factory() | Stable particle is "
                                "given as mother particle of a decay. Makes no "
                                "sense!");
     } else if (decayType == "relativisticBreitWigner") {
@@ -78,7 +78,7 @@ PartialDecay::Factory(std::shared_ptr<PartList> partL,
     } else if (decayType == "flatte") {
       dynObj = DecayDynamics::AmpFlatteRes::Factory(partL, pt);
     } else {
-      throw std::runtime_error("PartialDecay::Factory() | Unknown decay type " +
+      throw std::runtime_error("HelicityDecay::Factory() | Unknown decay type " +
                                decayType + "!");
     }
 
@@ -99,12 +99,12 @@ PartialDecay::Factory(std::shared_ptr<PartList> partL,
 
   obj->SetPhspVolume(kin->GetPhspVolume());
 
-  return std::static_pointer_cast<Resonance>(obj);
+  return std::static_pointer_cast<PartialAmplitude>(obj);
 }
 
-boost::property_tree::ptree PartialDecay::Save(std::shared_ptr<Resonance> res) {
+boost::property_tree::ptree HelicityDecay::Save(std::shared_ptr<PartialAmplitude> res) {
 
-  auto obj = std::static_pointer_cast<PartialDecay>(res);
+  auto obj = std::static_pointer_cast<HelicityDecay>(res);
   boost::property_tree::ptree pt;
   pt.put<std::string>("<xmlattr>.Name", obj->GetName());
   
@@ -127,8 +127,8 @@ boost::property_tree::ptree PartialDecay::Save(std::shared_ptr<Resonance> res) {
   return pt;
 }
 
-bool PartialDecay::CheckModified() const {
-  if (Resonance::CheckModified())
+bool HelicityDecay::CheckModified() const {
+  if (PartialAmplitude::CheckModified())
     return true;
   if (_dynamic->CheckModified()) {
     const_cast<double &>(_current_integral) = Integral();
@@ -138,7 +138,7 @@ bool PartialDecay::CheckModified() const {
   return false;
 }
 
-double PartialDecay::GetNormalization() const {
+double HelicityDecay::GetNormalization() const {
   if (_dynamic->CheckModified() || !_current_integral)
     const_cast<double &>(_current_integral) = Integral();
   _dynamic->SetModified(false);
@@ -147,31 +147,31 @@ double PartialDecay::GetNormalization() const {
 }
 
 std::shared_ptr<FunctionTree>
-PartialDecay::GetTree(std::shared_ptr<Kinematics> kin,
+HelicityDecay::GetTree(std::shared_ptr<Kinematics> kin,
                       const ParameterList &sample,
                       const ParameterList &toySample, std::string suffix) {
 
   int phspSampleSize = toySample.GetMultiDouble(0)->GetNValues();
 
   std::shared_ptr<FunctionTree> tr(new FunctionTree());
-  tr->CreateHead("Resonance(" + GetName() + ")" + suffix,
+  tr->CreateHead("PartialAmplitude(" + GetName() + ")" + suffix,
                  std::shared_ptr<Strategy>(new MultAll(ParType::MCOMPLEX)));
   tr->CreateNode("Strength",
                  std::shared_ptr<Strategy>(new Complexify(ParType::COMPLEX)),
-                 "Resonance(" + GetName() + ")" + suffix);
+                 "PartialAmplitude(" + GetName() + ")" + suffix);
   tr->CreateLeaf("Magnitude", _magnitude, "Strength");
   tr->CreateLeaf("Phase", _phase, "Strength");
   tr->CreateLeaf("PreFactor", _preFactor,
-                 "Resonance(" + GetName() + ")" + suffix);
+                 "PartialAmplitude(" + GetName() + ")" + suffix);
   tr->InsertTree(_angD->GetTree(sample, _dataPos + 1, _dataPos + 2),
-                 "Resonance(" + GetName() + ")" + suffix);
+                 "PartialAmplitude(" + GetName() + ")" + suffix);
   tr->InsertTree(_dynamic->GetTree(sample, _dataPos),
-                 "Resonance(" + GetName() + ")" + suffix);
+                 "PartialAmplitude(" + GetName() + ")" + suffix);
 
   tr->Recalculate();
   tr->CreateNode("Normalization",
                  std::shared_ptr<Strategy>(new Inverse(ParType::DOUBLE)),
-                 "Resonance(" + GetName() + ")" + suffix); // 1/normLH
+                 "PartialAmplitude(" + GetName() + ")" + suffix); // 1/normLH
   tr->CreateNode("SqrtIntegral",
                  std::shared_ptr<Strategy>(new SquareRoot(ParType::DOUBLE)),
                  "Normalization");
@@ -198,13 +198,13 @@ PartialDecay::GetTree(std::shared_ptr<Kinematics> kin,
   return tr;
 }
 
-void PartialDecay::GetParameters(ParameterList &list) {
-  Resonance::GetParameters(list);
+void HelicityDecay::GetParameters(ParameterList &list) {
+  PartialAmplitude::GetParameters(list);
   //    _angD->GetParameters(list);
   _dynamic->GetParameters(list);
 }
 
-void PartialDecay::UpdateParameters(const ParameterList &list){
+void HelicityDecay::UpdateParameters(const ParameterList &list){
 
   // Try to update magnitude
   std::shared_ptr<DoubleParameter> mag;

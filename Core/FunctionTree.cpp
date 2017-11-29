@@ -36,7 +36,7 @@ void FunctionTree::CreateHead(const std::string &name, const double value) {
 }
 
 void FunctionTree::CreateHead(const std::string &name,
-                              std::shared_ptr<ComPWA::AbsParameter> parameter) {
+                              std::shared_ptr<ComPWA::Parameter> parameter) {
   if (_head) // if head exists throw exception
     throw std::runtime_error(
         "FunctionTree::CreateNode() | head node already exists!");
@@ -108,17 +108,17 @@ void FunctionTree::CreateNode(const std::string &name,
     throw std::runtime_error("FunctionTree::createNode() | "
                              "Head node already exists!");
 
-  std::vector<std::shared_ptr<AbsParameter>> inter;
+  std::vector<std::shared_ptr<Parameter>> inter;
 
   switch (strategy->OutType()) {
   case ParType::MCOMPLEX: {
-    inter.push_back(std::shared_ptr<AbsParameter>(new MultiComplex(
+    inter.push_back(std::shared_ptr<Parameter>(new MultiComplex(
         "par" + name, std::vector<std::complex<double>>(
                           dimension, std::complex<double>(0., 0.)))));
     break;
   }
   case ParType::MDOUBLE: {
-    inter.push_back(std::shared_ptr<AbsParameter>(
+    inter.push_back(std::shared_ptr<Parameter>(
         new MultiDouble("par" + name, std::vector<double>(dimension, 0.))));
     break;
   }
@@ -126,10 +126,10 @@ void FunctionTree::CreateNode(const std::string &name,
     std::complex<double> start(0., 0.);
     if (useVec) {
       for (unsigned int i = 0; i < dimension; i++)
-        inter.push_back(std::shared_ptr<AbsParameter>(
+        inter.push_back(std::shared_ptr<Parameter>(
             new ComplexParameter("par" + name, start)));
     } else {
-      inter.push_back(std::shared_ptr<AbsParameter>(
+      inter.push_back(std::shared_ptr<Parameter>(
           new ComplexParameter("par" + name, start)));
     }
     break;
@@ -138,10 +138,10 @@ void FunctionTree::CreateNode(const std::string &name,
     double start(0.);
     if (useVec) {
       for (unsigned int i = 0; i < dimension; i++)
-        inter.push_back(std::shared_ptr<AbsParameter>(
+        inter.push_back(std::shared_ptr<Parameter>(
             new DoubleParameter("par" + name, start)));
     } else {
-      inter.push_back(std::shared_ptr<AbsParameter>(
+      inter.push_back(std::shared_ptr<Parameter>(
           new DoubleParameter("par" + name, start)));
     }
     break;
@@ -150,10 +150,10 @@ void FunctionTree::CreateNode(const std::string &name,
     int start(0);
     if (useVec) {
       for (unsigned int i = 0; i < dimension; i++)
-        inter.push_back(std::shared_ptr<AbsParameter>(
+        inter.push_back(std::shared_ptr<Parameter>(
             new IntegerParameter("par" + name, start)));
     } else {
-      inter.push_back(std::shared_ptr<AbsParameter>(
+      inter.push_back(std::shared_ptr<Parameter>(
           new IntegerParameter("par" + name, start)));
     }
     break;
@@ -162,10 +162,10 @@ void FunctionTree::CreateNode(const std::string &name,
     bool start = false;
     if (useVec) {
       for (unsigned int i = 0; i < dimension; i++)
-        inter.push_back(std::shared_ptr<AbsParameter>(
+        inter.push_back(std::shared_ptr<Parameter>(
             new BoolParameter("par" + name, start)));
     } else {
-      inter.push_back(std::shared_ptr<AbsParameter>(
+      inter.push_back(std::shared_ptr<Parameter>(
           new BoolParameter("par" + name, start)));
     }
     break;
@@ -197,7 +197,7 @@ void FunctionTree::CreateNode(const std::string &name,
 }
 
 void FunctionTree::CreateLeaf(const std::string name,
-                              std::shared_ptr<AbsParameter> parameter,
+                              std::shared_ptr<Parameter> parameter,
                               std::string parent) {
   if (parent == "" && _head)
     throw std::runtime_error("FunctionTree::createNode() | "
@@ -252,7 +252,7 @@ void FunctionTree::CreateLeaf(const std::string name,
 
 void FunctionTree::CreateLeaf(
     const std::string name,
-    std::vector<std::shared_ptr<AbsParameter>> &parameters,
+    std::vector<std::shared_ptr<Parameter>> &parameters,
     std::string parent) {
 
   for (auto i : parameters) {

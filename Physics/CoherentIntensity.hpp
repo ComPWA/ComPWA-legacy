@@ -1,60 +1,71 @@
-// Copyright (c) 2017 The ComPWA Team.
+// Copyright (c) 2013, 2017 The ComPWA Team.
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
-#include "Core/AmpIntensity.hpp"
-#include "Physics/HelicityFormalism/CoherentIntensity.hpp"
-#include "Tools/Integration.hpp"
+#ifndef PHYSICS_HELICITYAMPLITUDE_COHERENTAMPLITUDE_HPP_
+#define PHYSICS_HELICITYAMPLITUDE_COHERENTAMPLITUDE_HPP_
 
-#ifndef INCOHERENT_INTENSITY_HPP
-#define INCOHERENT_INTENSITY_HPP
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/xml_parser.hpp>
+
+#include "Core/AmpIntensity.hpp"
+#include "DataReader/Data.hpp"
+#include "Physics/SequentialPartialAmplitude.hpp"
 
 namespace ComPWA {
 namespace Physics {
 namespace HelicityFormalism {
 
-class IncoherentIntensity : public ComPWA::AmpIntensity {
+class CoherentIntensity : public ComPWA::AmpIntensity {
 
 public:
   //============ CONSTRUCTION ==================
 
-  IncoherentIntensity() : ComPWA::AmpIntensity(), phspVolume_(1.0) {}
+  CoherentIntensity(
+      std::string name = "",
+      std::shared_ptr<DoubleParameter> strength =
+          std::shared_ptr<DoubleParameter>(new DoubleParameter("", 1.0)),
+      std::shared_ptr<Efficiency> eff =
+          std::shared_ptr<Efficiency>(new UnitEfficiency))
+      : AmpIntensity(name, strength, eff), phspVolume_(0.0){};
 
-  //! Function to create a full copy of the amplitude
+  virtual ~CoherentIntensity(){};
+
+  /// Clone pattern
   ComPWA::AmpIntensity *Clone(std::string newName = "") const {
-    auto tmp = (new IncoherentIntensity(*this));
+    auto tmp = (new CoherentIntensity(*this));
     tmp->_name = newName;
     return tmp;
   }
 
-  static std::shared_ptr<IncoherentIntensity>
+  static std::shared_ptr<CoherentIntensity>
   Factory(std::shared_ptr<PartList> partL, std::shared_ptr<Kinematics> kin,
           const boost::property_tree::ptree &pt);
 
   static boost::property_tree::ptree
-  Save(std::shared_ptr<IncoherentIntensity> intens);
+  Save(std::shared_ptr<CoherentIntensity> intens);
 
   //================ EVALUATION =================
 
   /// Calculate intensity of amplitude at point in phase-space
   virtual double Intensity(const ComPWA::dataPoint &point) const;
 
-  //================== SET/GET =================
+  //============ SET/GET =================
 
-  void AddIntensity(std::shared_ptr<ComPWA::AmpIntensity> intens) {
-    _intens.push_back(intens);
+  void AddAmplitude(std::shared_ptr<ComPWA::Physics::Amplitude> decay) {
+    _seqDecays.push_back(decay);
   }
 
-  std::shared_ptr<ComPWA::AmpIntensity> GetIntensity(int pos) {
-    return _intens.at(pos);
+  std::shared_ptr<ComPWA::Physics::Amplitude> GetAmplitude(int pos) {
+    return _seqDecays.at(pos);
   }
 
-  std::vector<std::shared_ptr<ComPWA::AmpIntensity>> &GetIntensities() {
-    return _intens;
+  std::vector<std::shared_ptr<ComPWA::Physics::Amplitude>> &GetAmplitudes() {
+    return _seqDecays;
   }
 
   virtual void Reset() {
-    _intens.clear();
+    _seqDecays.clear();
     return;
   }
 
@@ -65,7 +76,7 @@ public:
   /// Fill vector with parameters
   virtual void GetParametersFast(std::vector<double> &list) const {
     AmpIntensity::GetParametersFast(list);
-    for (auto i : _intens) {
+    for (auto i : _seqDecays) {
       i->GetParametersFast(list);
     }
   }
@@ -80,33 +91,34 @@ public:
   /// We use a phase space sample to calculate the normalization and determine
   /// the maximum of the amplitude. In case that the efficiency is already
   /// applied to the sample set fEff to false.
-  virtual void
+  void
   SetPhspSample(std::shared_ptr<std::vector<ComPWA::dataPoint>> phspSample,
                 std::shared_ptr<std::vector<ComPWA::dataPoint>> toySample) {
     _phspSample = phspSample;
-    for (auto i : _intens) {
-      i->SetPhspSample(phspSample, toySample);
-    }
-  };
 
+    for (auto i : _seqDecays)
+      i->SetPhspSample(toySample);
+  };
+  
   virtual void SetPhspVolume(double vol) { phspVolume_ = vol; };
 
   virtual std::shared_ptr<AmpIntensity> GetComponent(std::string name);
 
   //======== ITERATORS/OPERATORS =============
-  typedef std::vector<std::shared_ptr<ComPWA::AmpIntensity>>::iterator
-      coherentIntItr;
 
-  coherentIntItr First() { return _intens.begin(); }
+  typedef std::vector<std::shared_ptr<ComPWA::Physics::Amplitude>>::iterator
+      seqDecayItr;
 
-  coherentIntItr Last() { return _intens.end(); }
+  seqDecayItr First() { return _seqDecays.begin(); }
 
-  //=========== FUNCTIONTREE =================
+  seqDecayItr Last() { return _seqDecays.end(); }
+
+  //========== FUNCTIONTREE =============
 
   /// Check of tree is available
   virtual bool HasTree() const { return true; }
 
-  /// Get FunctionTree
+  /// Getter function for basic amp tree
   virtual std::shared_ptr<ComPWA::FunctionTree>
   GetTree(std::shared_ptr<Kinematics> kin, const ComPWA::ParameterList &sample,
           const ComPWA::ParameterList &phspSample,
@@ -116,16 +128,16 @@ public:
 protected:
   /// Phase space sample to calculate the normalization and maximum value.
   std::shared_ptr<std::vector<ComPWA::dataPoint>> _phspSample;
-
+  
   double phspVolume_;
 
-  /// Caching of normalization values
-  std::vector<double> _normValues;
+  virtual std::shared_ptr<FunctionTree>
+  setupBasicTree(std::shared_ptr<Kinematics> kin, const ParameterList &sample,
+                 const ParameterList &phspSample,
+                 std::string suffix = "") const;
 
-  /// Temporary storage of the para
-  std::vector<std::vector<double>> _parameters;
+  std::vector<std::shared_ptr<ComPWA::Physics::Amplitude>> _seqDecays;
 
-  std::vector<std::shared_ptr<ComPWA::AmpIntensity>> _intens;
 };
 
 } // namespace HelicityFormalism

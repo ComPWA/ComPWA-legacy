@@ -173,7 +173,7 @@ public:
   }
 
   virtual bool execute(ParameterList &paras,
-                       std::shared_ptr<AbsParameter> &out);
+                       std::shared_ptr<Parameter> &out);
 
 protected:
   std::string name;

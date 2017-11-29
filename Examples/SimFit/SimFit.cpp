@@ -25,7 +25,7 @@
 #include "DataReader/RootReader/RootReader.hpp"
 #include "Physics/ParticleList.hpp"
 #include "Physics/HelicityFormalism/HelicityKinematics.hpp"
-#include "Physics/HelicityFormalism/IncoherentIntensity.hpp"
+#include "Physics/IncoherentIntensity.hpp"
 #include "Tools/RootGenerator.hpp"
 #include "Tools/Generate.hpp"
 #include "Tools/DalitzPlot.hpp"

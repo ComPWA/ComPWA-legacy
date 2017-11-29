@@ -17,7 +17,6 @@
 
 #include "Core/Functions.hpp"
 #include "Core/TreeNode.hpp"
-#include "Core/AbsParameter.hpp"
 #include "Core/Parameter.hpp"
 
 namespace ComPWA {
@@ -57,7 +56,7 @@ public:
   /// Create head node of FunctionTree. A tree with a single parameter as leaf
   /// is created. This FunctionTree represents a constant value.
   virtual void CreateHead(const std::string &name,
-                          std::shared_ptr<ComPWA::AbsParameter> parameter);
+                          std::shared_ptr<ComPWA::Parameter> parameter);
 
   /// Add an existing node to FunctionTree. Can be used to link tree's to each
   /// other: simply insert head node of tree A to tree B
@@ -90,7 +89,7 @@ public:
   /// the corresponding linking is added. If it already exists a link to the
   /// existing element is added to \p parent.
   virtual void CreateLeaf(const std::string name,
-                          std::shared_ptr<ComPWA::AbsParameter> parameter,
+                          std::shared_ptr<ComPWA::Parameter> parameter,
                           std::string parent);
 
   /// Create a leaf in FunctionTree. A DoubleParamter is created and added.
@@ -104,7 +103,7 @@ public:
   /// Add multiple leafs in FunctionTree.
   virtual void
   CreateLeaf(const std::string name,
-             std::vector<std::shared_ptr<ComPWA::AbsParameter>> &parameter,
+             std::vector<std::shared_ptr<ComPWA::Parameter>> &parameter,
              std::string parent);
 
   /// Get the head of FunctionTree

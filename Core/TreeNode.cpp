@@ -11,7 +11,7 @@
 
 using namespace ComPWA;
 
-TreeNode::TreeNode(std::string name, std::shared_ptr<AbsParameter> parameter,
+TreeNode::TreeNode(std::string name, std::shared_ptr<ComPWA::Parameter> parameter,
                    std::shared_ptr<Strategy> strategy,
                    std::shared_ptr<TreeNode> parent)
     : _name(name), _changed(true), _strat(strategy) {
@@ -22,7 +22,7 @@ TreeNode::TreeNode(std::string name, std::shared_ptr<AbsParameter> parameter,
 }
 
 TreeNode::TreeNode(std::string name,
-                   std::vector<std::shared_ptr<AbsParameter>> &parameters,
+                   std::vector<std::shared_ptr<ComPWA::Parameter>> &parameters,
                    std::shared_ptr<Strategy> strategy,
                    std::shared_ptr<TreeNode> parent)
     : _name(name), _changed(true), _strat(strategy) {
@@ -97,11 +97,11 @@ void TreeNode::Recalculate() {
   _changed = false;
 }
 
-std::shared_ptr<AbsParameter> TreeNode::Parameter(unsigned int position) {
+std::shared_ptr<Parameter> TreeNode::Parameter(unsigned int position) {
   return _parameters.at(position);
 }
 
-std::vector<std::shared_ptr<AbsParameter>> &TreeNode::Parameters() {
+std::vector<std::shared_ptr<Parameter>> &TreeNode::Parameters() {
   return _parameters;
 }
 
@@ -130,19 +130,19 @@ std::shared_ptr<TreeNode> TreeNode::FindChildNode(std::string name) const {
   return node;
 }
 
-// std::shared_ptr<AbsParameter> TreeNode::ChildValue(std::string name) const {
+// std::shared_ptr<Parameter> TreeNode::ChildValue(std::string name) const {
 //  std::shared_ptr<TreeNode> node = FindChildNode(name);
 //  if (node)
 //    return node->Parameter();
 //
-//  return std::shared_ptr<AbsParameter>();
+//  return std::shared_ptr<Parameter>();
 //}
 //
 // std::complex<double> TreeNode::getChildSingleValue(std::string name) const {
 //  std::shared_ptr<TreeNode> node = std::shared_ptr<TreeNode>();
 //  node = FindChildNode(name);
 //  if (node) {
-//    std::shared_ptr<AbsParameter> val = node->Parameter();
+//    std::shared_ptr<Parameter> val = node->Parameter();
 //    if (val->type() == ParType::DOUBLE)
 //      return std::complex<double>(
 //          (std::dynamic_pointer_cast<DoubleParameter>(val))->GetValue(), 0);

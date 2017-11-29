@@ -180,7 +180,7 @@ RelativisticBreitWigner::GetTree(const ParameterList &sample, int pos,
 };
 
 bool BreitWignerStrategy::execute(ParameterList &paras,
-                                  std::shared_ptr<AbsParameter> &out) {
+                                  std::shared_ptr<Parameter> &out) {
 #ifndef NDEBUG
   // Check parameter type
   if (checkType != out->type())
@@ -262,7 +262,7 @@ bool BreitWignerStrategy::execute(ParameterList &paras,
     }
   }
   out =
-      std::shared_ptr<AbsParameter>(new MultiComplex(out->GetName(), results));
+      std::shared_ptr<Parameter>(new MultiComplex(out->GetName(), results));
   return true;
 }
 

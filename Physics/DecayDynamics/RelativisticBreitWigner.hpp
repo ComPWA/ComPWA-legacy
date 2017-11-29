@@ -19,7 +19,7 @@ namespace ComPWA {
 namespace Physics {
 namespace DecayDynamics {
 
-class PartialDecay;
+class HelicityDecay;
 
 /// \class RelativisticBreitWigner
 /// Relativistic Breit-Wigner model with barrier factors
@@ -135,7 +135,7 @@ public:
   }
 
   virtual bool execute(ComPWA::ParameterList &paras,
-                       std::shared_ptr<ComPWA::AbsParameter> &out);
+                       std::shared_ptr<ComPWA::Parameter> &out);
 
 protected:
   std::string name;

@@ -3,16 +3,16 @@
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
 #include <memory>
-#include "Physics/HelicityFormalism/SequentialTwoBodyDecay.hpp"
+#include "Physics/SequentialPartialAmplitude.hpp"
 
 using namespace ComPWA::Physics::HelicityFormalism;
 
 std::shared_ptr<ComPWA::Physics::Amplitude>
-SequentialTwoBodyDecay::Factory(std::shared_ptr<PartList> partL,
+SequentialPartialAmplitude::Factory(std::shared_ptr<PartList> partL,
                                 std::shared_ptr<Kinematics> kin,
                                 const boost::property_tree::ptree &pt) {
-  LOG(trace) << " SequentialTwoBodyDecay::Factory() | Construction....";
-  auto obj = std::make_shared<SequentialTwoBodyDecay>();
+  LOG(trace) << " SequentialPartialAmplitude::Factory() | Construction....";
+  auto obj = std::make_shared<SequentialPartialAmplitude>();
   obj->SetName(pt.get<std::string>("<xmlattr>.Name", "empty"));
 
   std::shared_ptr<DoubleParameter> mag, phase;
@@ -27,8 +27,8 @@ SequentialTwoBodyDecay::Factory(std::shared_ptr<PartList> partL,
         auto tmp = ComPWA::DoubleParameterFactory(v.second);
         phase = std::make_shared<DoubleParameter>(tmp);
       }
-    } else if (v.first == "Resonance") {
-      obj->Add(PartialDecay::Factory(partL, kin, v.second));
+    } else if (v.first == "PartialAmplitude" && v.second.get<std::string>("<xmlattr>.Class") == "HelicityDecay") {
+      obj->Add(HelicityDecay::Factory(partL, kin, v.second));
     } else if (v.first == "PreFactor") {
       double r = v.second.get<double>("<xmlattr>.Magnitude");
       double p = v.second.get<double>("<xmlattr>.Phase");
@@ -43,13 +43,13 @@ SequentialTwoBodyDecay::Factory(std::shared_ptr<PartList> partL,
     obj->SetMagnitudeParameter(mag);
   else
     throw BadParameter(
-        "SequentialTwoBodyDecay::Factory() | No magnitude parameter found.");
+        "SequentialPartialAmplitude::Factory() | No magnitude parameter found.");
 
   if (phase)
     obj->SetPhaseParameter(phase);
   else
     throw BadParameter(
-        "SequentialTwoBodyDecay::Factory() | No phase parameter found.");
+        "SequentialPartialAmplitude::Factory() | No phase parameter found.");
 
   obj->SetPreFactor(pref);
 
@@ -57,9 +57,9 @@ SequentialTwoBodyDecay::Factory(std::shared_ptr<PartList> partL,
 }
 
 boost::property_tree::ptree
-SequentialTwoBodyDecay::Save(std::shared_ptr<ComPWA::Physics::Amplitude> amp) {
+SequentialPartialAmplitude::Save(std::shared_ptr<ComPWA::Physics::Amplitude> amp) {
 
-  auto obj = std::static_pointer_cast<SequentialTwoBodyDecay>(amp);
+  auto obj = std::static_pointer_cast<SequentialPartialAmplitude>(amp);
   boost::property_tree::ptree pt;
   pt.put<std::string>("<xmlattr>.Name", obj->GetName());
 
@@ -81,12 +81,12 @@ SequentialTwoBodyDecay::Save(std::shared_ptr<ComPWA::Physics::Amplitude> amp) {
   }
 
   for (auto i : obj->GetDecays()) {
-    pt.add_child("Resonance", PartialDecay::Save(i));
+    pt.add_child("PartialAmplitude", HelicityDecay::Save(i));
   }
   return pt;
 }
 
-std::shared_ptr<ComPWA::FunctionTree> SequentialTwoBodyDecay::GetTree(
+std::shared_ptr<ComPWA::FunctionTree> SequentialPartialAmplitude::GetTree(
     std::shared_ptr<Kinematics> kin, const ParameterList &sample,
     const ParameterList &toySample, std::string suffix) {
 
@@ -114,14 +114,14 @@ std::shared_ptr<ComPWA::FunctionTree> SequentialTwoBodyDecay::GetTree(
   return tr;
 }
 
-void SequentialTwoBodyDecay::GetParameters(ParameterList &list) {
+void SequentialPartialAmplitude::GetParameters(ParameterList &list) {
   Amplitude::GetParameters(list);
   for (auto i : _partDecays) {
     i->GetParameters(list);
   }
 }
 
-void SequentialTwoBodyDecay::UpdateParameters(const ParameterList &par) {
+void SequentialPartialAmplitude::UpdateParameters(const ParameterList &par) {
   // Try to update magnitude
   std::shared_ptr<DoubleParameter> mag;
   try {

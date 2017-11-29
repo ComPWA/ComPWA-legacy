@@ -4,7 +4,7 @@
 //
 
 #include <numeric>
-#include "Physics/HelicityFormalism/IncoherentIntensity.hpp"
+#include "Physics/IncoherentIntensity.hpp"
 
 namespace ComPWA {
 namespace Physics {

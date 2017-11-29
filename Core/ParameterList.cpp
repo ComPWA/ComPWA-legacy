@@ -8,7 +8,7 @@
 #include <vector>
 #include <map>
 
-#include "Core/AbsParameter.hpp"
+#include "Core/Parameter.hpp"
 #include "Core/Exceptions.hpp"
 
 #include "Core/ParameterList.hpp"
@@ -71,7 +71,7 @@ void ParameterList::DeepCopy(const ParameterList &in) {
 
 ParameterList::~ParameterList() { /* nothing */ }
 
-std::shared_ptr<AbsParameter>
+std::shared_ptr<Parameter>
 ParameterList::GetParameter(const unsigned int i) const {
   if (i >= GetNParameter())
     throw BadParameter("ParameterList::GetParameter() | Parameter ID=" +
@@ -113,7 +113,7 @@ bool ParameterList::ParameterExists(const std::string parname) const {
   return false;
 }
 
-std::shared_ptr<AbsParameter>
+std::shared_ptr<Parameter>
 ParameterList::GetParameter(const std::string parname) const {
   return (*FindBoolParameter(parname));
   return (*FindIntegerParameter(parname));
@@ -153,7 +153,7 @@ void ParameterList::RemoveDuplicates() {
     }
     for (int j = i + 1; j < GetNParameter(); j++) {
       std::string name2;
-      std::shared_ptr<AbsParameter> delPar;
+      std::shared_ptr<Parameter> delPar;
       try {
         delPar = GetParameter(j);
         name2 = GetParameter(j)->GetName();
@@ -200,7 +200,7 @@ void ParameterList::RemoveDuplicates() {
   }
 }
 
-void ParameterList::AddParameter(std::shared_ptr<AbsParameter> par) {
+void ParameterList::AddParameter(std::shared_ptr<Parameter> par) {
   switch (par->type()) {
   case ParType::BOOL: {
     AddParameter(std::dynamic_pointer_cast<BoolParameter>(par));

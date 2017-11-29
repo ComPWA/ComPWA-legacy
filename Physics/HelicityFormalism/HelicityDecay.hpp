@@ -4,16 +4,16 @@
 
 ///
 /// \file
-/// Containt PartialDecay class which represents a two-body decay within the
+/// Containt HelicityDecay class which represents a two-body decay within the
 /// helicity formalism.
 ///
-#ifndef PARTIALDECAY_HPP_
-#define PARTIALDECAY_HPP_
+#ifndef HelicityDecay_HPP_
+#define HelicityDecay_HPP_
 
 #include <memory>
 #include <boost/property_tree/ptree.hpp>
 
-#include "Physics/Resonance.hpp"
+#include "Physics/PartialAmplitude.hpp"
 #include "Physics/DecayDynamics/AbstractDynamicalFunction.hpp"
 #include "Physics/HelicityFormalism/AmpWignerD.hpp"
 #include "Physics/HelicityFormalism/HelicityKinematics.hpp"
@@ -23,28 +23,28 @@ namespace Physics {
 namespace HelicityFormalism {
 
 ///
-/// \class PartialDecay
-/// PartialDecay class represents a two-body decay within the helicity
+/// \class HelicityDecay
+/// HelicityDecay class represents a two-body decay within the helicity
 /// formalism.
 ///
-class PartialDecay : public ComPWA::Physics::Resonance {
+class HelicityDecay : public ComPWA::Physics::PartialAmplitude {
 
 public:
-  PartialDecay(int dataPos, const SubSystem &sys)
+  HelicityDecay(int dataPos, const SubSystem &sys)
       : _dataPos(dataPos), _subSystem(sys){};
 
-  virtual PartialDecay *Clone(std::string newName = "") const {
-    auto tmp = new PartialDecay(*this);
+  virtual HelicityDecay *Clone(std::string newName = "") const {
+    auto tmp = new HelicityDecay(*this);
     tmp->SetName(newName);
     return tmp;
   }
 
-  /// Factory for PartialDecay
-  static std::shared_ptr<ComPWA::Physics::Resonance>
+  /// Factory for HelicityDecay
+  static std::shared_ptr<ComPWA::Physics::PartialAmplitude>
   Factory(std::shared_ptr<PartList> partL, std::shared_ptr<Kinematics> kin,
           const boost::property_tree::ptree &pt);
 
-  static boost::property_tree::ptree Save(std::shared_ptr<Resonance> obj);
+  static boost::property_tree::ptree Save(std::shared_ptr<PartialAmplitude> obj);
 
   //======= INTEGRATION/NORMALIZATION ===========
 
@@ -69,7 +69,7 @@ public:
   virtual void GetParameters(ParameterList &list);
 
   virtual void GetParametersFast(std::vector<double> &list) const {
-    Resonance::GetParametersFast(list);
+    PartialAmplitude::GetParametersFast(list);
     _dynamic->GetParametersFast(list);
   }
 

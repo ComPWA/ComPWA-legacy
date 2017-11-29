@@ -22,7 +22,6 @@
 #include <boost/serialization/vector.hpp>
 #include <boost/serialization/shared_ptr.hpp>
 
-#include "Core/AbsParameter.hpp"
 #include "Core/Parameter.hpp"
 #include "Core/Exceptions.hpp"
 #include "Core/Logging.hpp"
@@ -123,10 +122,10 @@ public:
             vMultiDouble_.size() + vMultiComplex_.size());
   }
 
-  virtual std::shared_ptr<AbsParameter>
+  virtual std::shared_ptr<Parameter>
   GetParameter(const unsigned int i) const;
 
-  virtual std::shared_ptr<AbsParameter>
+  virtual std::shared_ptr<Parameter>
   GetParameter(const std::string parname) const;
 
   /**! Remove duplicate entries
@@ -143,7 +142,7 @@ public:
    * Adds a parameter with to be defined type to the list
    * \param par input parameter
    */
-  virtual void AddParameter(std::shared_ptr<AbsParameter> par);
+  virtual void AddParameter(std::shared_ptr<Parameter> par);
 
   //! Get string
   std::string const &to_str();

@@ -7,7 +7,7 @@
 #include <boost/property_tree/xml_parser.hpp>
 
 #include "Core/Efficiency.hpp"
-#include "Physics/HelicityFormalism/CoherentIntensity.hpp"
+#include "Physics/CoherentIntensity.hpp"
 
 namespace ComPWA {
 namespace Physics {
@@ -40,10 +40,12 @@ CoherentIntensity::Factory(std::shared_ptr<PartList> partL,
         continue;
       auto tmp = ComPWA::DoubleParameterFactory(v.second);
       strength = std::make_shared<DoubleParameter>(tmp);
-    } else if (v.first == "Amplitude"){
+    } else if (v.first == "Amplitude" &&
+               v.second.get<std::string>("<xmlattr>.Class") ==
+                   "SequentialPartialAmplitude") {
       obj->AddAmplitude(
-          ComPWA::Physics::HelicityFormalism::SequentialTwoBodyDecay::Factory(
-              partL, kin, v.second));
+          ComPWA::Physics::HelicityFormalism::SequentialPartialAmplitude::
+              Factory(partL, kin, v.second));
     } else {
       // ignored further settings. Should we throw an error?
     }
@@ -55,9 +57,9 @@ CoherentIntensity::Factory(std::shared_ptr<PartList> partL,
     obj->_strength = (std::make_shared<ComPWA::DoubleParameter>("", 1.0));
     obj->_strength->SetParameterFixed();
   }
-  
+
   obj->SetPhspVolume(kin->GetPhspVolume());
-  
+
   return obj;
 }
 
@@ -67,10 +69,10 @@ CoherentIntensity::Save(std::shared_ptr<CoherentIntensity> obj) {
   boost::property_tree::ptree pt;
   pt.put<std::string>("<xmlattr>.Name", obj->Name());
   pt.add_child("Parameter", ComPWA::DoubleParameterSave(*obj->_strength.get()));
-  pt.put("Parameter.<xmlattr>.Type","Strength");
-  
+  pt.put("Parameter.<xmlattr>.Type", "Strength");
+
   for (auto i : obj->GetAmplitudes()) {
-    pt.add_child("Amplitude", SequentialTwoBodyDecay::Save(i));
+    pt.add_child("Amplitude", SequentialPartialAmplitude::Save(i));
   }
   return pt;
 }
@@ -215,7 +217,7 @@ void CoherentIntensity::GetParameters(ComPWA::ParameterList &list) {
   }
 }
 
-void CoherentIntensity::UpdateParameters(const ParameterList &list){
+void CoherentIntensity::UpdateParameters(const ParameterList &list) {
   std::shared_ptr<DoubleParameter> p;
   try {
     p = list.GetDoubleParameter(_strength->GetName());
@@ -226,7 +228,7 @@ void CoherentIntensity::UpdateParameters(const ParameterList &list){
 
   for (auto i : _seqDecays)
     i->UpdateParameters(list);
-  
+
   return;
 }
 

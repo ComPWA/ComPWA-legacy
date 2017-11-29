@@ -25,7 +25,7 @@
 #include "Core/Properties.hpp"
 #include "Physics/ParticleList.hpp"
 #include "Physics/HelicityFormalism/HelicityKinematics.hpp"
-#include "Physics/HelicityFormalism/IncoherentIntensity.hpp"
+#include "Physics/IncoherentIntensity.hpp"
 #include "Tools/RootGenerator.hpp"
 #include "Tools/RunManager.hpp"
 #include "Tools/DalitzPlot.hpp"

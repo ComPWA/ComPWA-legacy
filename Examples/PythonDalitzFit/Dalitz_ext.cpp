@@ -3,7 +3,7 @@
 #include "Tools/ParameterTools.hpp"
 #include "Physics/ParticleList.hpp"
 #include "Physics/HelicityFormalism/HelicityKinematics.hpp"
-#include "Physics/HelicityFormalism/IncoherentIntensity.hpp"
+#include "Physics/IncoherentIntensity.hpp"
 #include "Tools/RootGenerator.hpp"
 #include "Core/Generator.hpp"
 #include "Core/Event.hpp"

@@ -4,11 +4,11 @@
 
 ///
 /// \file
-/// AbsParameter base class.
+/// Parameter base class.
 ///
 
-#ifndef _ABSPARAMETER_HPP_
-#define _ABSPARAMETER_HPP_
+#ifndef _Parameter_HPP_
+#define _Parameter_HPP_
 
 #include <string>
 #include <vector>
@@ -46,22 +46,22 @@ static const char *ParNames[8] = {
     "BOOL",      "MDOUBLE", "MCOMPLEX", "MUNSIGNEDINTEGER"};
 
 ///
-/// \class AbsParameter
+/// \class Parameter
 /// Base class for internal parameter.
 /// This class defines the internal container of a parameter. For the use in 
 /// the function tree, the observer pattern is used and this class takes over 
 /// the role of the Subject. Therefore the actual implementations of 
-/// AbsParameter are the ConcreteSubjects of the observer pattern and the 
+/// Parameter are the ConcreteSubjects of the observer pattern and the
 /// TreeNodes take the role of the observers.
 /// 
-class AbsParameter {
+class Parameter {
 public:
   //! Constructor with name of parameter and optional type
-  AbsParameter(std::string name, ParType type = ParType::UNDEFINED)
+  Parameter(std::string name, ParType type = ParType::UNDEFINED)
       : name_(name), type_(type) {}
 
   //! Destructor
-  virtual ~AbsParameter() {}
+  virtual ~Parameter() {}
 
   //! Getter for name of object
   virtual std::string GetName() const { return name_; }
@@ -104,7 +104,7 @@ public:
   }
 
   //! Return shared_pointer pointing to this Parameter
-  // std::shared_ptr<AbsParameter> getptr() {
+  // std::shared_ptr<Parameter> getptr() {
   //    return shared_from_this();
   //}
 
@@ -115,7 +115,7 @@ public:
    * \sa make_str(), to_str()
    */
   friend std::ostream &operator<<(std::ostream &out,
-                                  std::shared_ptr<AbsParameter> b) {
+                                  std::shared_ptr<Parameter> b) {
     return out << b->to_str();
   }
 
@@ -125,7 +125,7 @@ public:
    * information to the output as easily as a generic type.
    * \sa make_str(), to_str()
    */
-  friend std::ostream &operator<<(std::ostream &out, AbsParameter &b) {
+  friend std::ostream &operator<<(std::ostream &out, Parameter &b) {
     return out << b.to_str();
   }
 
@@ -170,13 +170,13 @@ private:
 };
 } /* namespace ComPWA */
 
-BOOST_SERIALIZATION_SHARED_PTR(AbsParameter);
+BOOST_SERIALIZATION_SHARED_PTR(Parameter);
 
 BOOST_CLASS_IMPLEMENTATION(
-    ComPWA::AbsParameter, boost::serialization::level_type::object_serializable)
+    ComPWA::Parameter, boost::serialization::level_type::object_serializable)
 
 // BOOST_CLASS_TRACKING(
-//		ComPWA::AbsParameter,
+//		ComPWA::Parameter,
 //		boost::serialization::tracking_type::track_never
 //)
 

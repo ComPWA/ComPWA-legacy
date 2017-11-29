@@ -4,16 +4,16 @@
 
 ///
 /// \file
-/// Contains Resonance interface class
+/// Contains PartialAmplitude interface class
 ///
 
-#ifndef PHYSICS_RESONANCE_HPP_
-#define PHYSICS_RESONANCE_HPP_
+#ifndef PHYSICS_PartialAmplitude_HPP_
+#define PHYSICS_PartialAmplitude_HPP_
 
 #include <vector>
 #include <memory>
 
-#include "Core/AbsParameter.hpp"
+#include "Core/Parameter.hpp"
 #include "Core/Parameter.hpp"
 #include "Core/DataPoint.hpp"
 #include "Core/FunctionTree.hpp"
@@ -23,19 +23,19 @@ namespace ComPWA {
 namespace Physics {
 
 ///
-/// \class Resonance
-/// Resonance class is an interface classe that resembles a two-body decay.
+/// \class PartialAmplitude
+/// PartialAmplitude class is an interface classe that resembles a two-body decay.
 ///
-class Resonance {
+class PartialAmplitude {
 
 public:
-  Resonance()
+  PartialAmplitude()
       : _preFactor(1, 0), phspVolume_(1), _current_integral(1.0),
         _current_magnitude(0.0), _current_phase(0.0){};
 
-  virtual ~Resonance(){};
+  virtual ~PartialAmplitude(){};
 
-  virtual Resonance *Clone(std::string newName = "") const = 0;
+  virtual PartialAmplitude *Clone(std::string newName = "") const = 0;
 
   //======= INTEGRATION/NORMALIZATION ===========
 
@@ -54,12 +54,12 @@ public:
 
   //================ EVALUATION =================
 
-  /// Value of resonance at \param point with normalization factor
+  /// Value of PartialAmplitude at \param point with normalization factor
   virtual std::complex<double> Evaluate(const dataPoint &point) const {
     return EvaluateNoNorm(point) * GetNormalization();
   }
 
-  /// Value of resonance at \param point without normalization factor
+  /// Value of PartialAmplitude at \param point without normalization factor
   virtual std::complex<double> EvaluateNoNorm(const dataPoint &point) const = 0;
 
   //============ SET/GET =================
@@ -144,7 +144,7 @@ protected:
   /// Phsp sample for numerical integration
   std::shared_ptr<std::vector<ComPWA::dataPoint>> _phspSample;
 
-  /// The phase-space volume is needed for proper normalization of the resonance
+  /// The phase-space volume is needed for proper normalization of the PartialAmplitude
   double phspVolume_;
 
   virtual double Integral() const {
@@ -161,7 +161,7 @@ protected:
       sumIntens += std::norm(EvaluateNoNorm(i));
 
     double integral = (sumIntens * phspVolume_ / _phspSample->size());
-    LOG(trace) << "Resonance::Integral() | Integral is " << integral << ".";
+    LOG(trace) << "PartialAmplitude::Integral() | Integral is " << integral << ".";
     assert(!std::isnan(integral));
     return integral;
   }
@@ -177,4 +177,4 @@ private:
 
 } /* namespace Physics */
 } /* namespace ComPWA */
-#endif /* PHYSICS_RESONANCE_HPP_ */
+#endif /* PHYSICS_PartialAmplitude_HPP_ */

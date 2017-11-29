@@ -31,7 +31,7 @@ enum ErrorType { SYM = 1, ASYM = 2, LHSCAN = 3, NOTDEF = 0 };
 
 namespace ComPWA {
 
-class MultiComplex : public AbsParameter {
+class MultiComplex : public Parameter {
 
 public:
   //! Standard constructor without information
@@ -40,7 +40,7 @@ public:
    * with value 0 but without bounds or an error.
    * \param inName internal string identifier of this parameter
    */
-  // MultiComplex(std::string inName):AbsParameter(inName, ParType::MDOUBLE){
+  // MultiComplex(std::string inName):Parameter(inName, ParType::MDOUBLE){
   //}
   //! Standard constructor with a value
   /*!
@@ -51,7 +51,7 @@ public:
    */
   MultiComplex(std::string inName,
                const std::vector<std::complex<double>> &values)
-      : AbsParameter(inName, ParType::MCOMPLEX), val_(values) {}
+      : Parameter(inName, ParType::MCOMPLEX), val_(values) {}
 
   //! Copy constructor using = operator
   /*!
@@ -61,7 +61,7 @@ public:
    * \param in input PWAParameter which variables will be copied
    */
   MultiComplex(const MultiComplex &in)
-      : AbsParameter(in.name_, ParType::MCOMPLEX) {
+      : Parameter(in.name_, ParType::MCOMPLEX) {
     *this = in;
     //      error_ = std::shared_ptr<ParError<double>>(new
     //      ParError<double>(*in.error_));
@@ -108,7 +108,7 @@ protected:
   virtual std::string make_val_str() const;
 };
 
-class MultiDouble : public AbsParameter {
+class MultiDouble : public Parameter {
 
 public:
   //! Standard constructor without information
@@ -117,7 +117,7 @@ public:
    * with value 0 but without bounds or an error.
    * \param inName internal string identifier of this parameter
    */
-  // MultiDouble(std::string inName):AbsParameter(inName, ParType::MDOUBLE){
+  // MultiDouble(std::string inName):Parameter(inName, ParType::MDOUBLE){
   //}
   //! Standard constructor with a value
   /*!
@@ -127,7 +127,7 @@ public:
    * \param values input vector of values of the parameter
    */
   MultiDouble(std::string inName, const std::vector<double> &values)
-      : AbsParameter(inName, ParType::MDOUBLE), val_(values) {}
+      : Parameter(inName, ParType::MDOUBLE), val_(values) {}
 
   //! Copy constructor using = operator
   /*!
@@ -137,7 +137,7 @@ public:
    * \param in input PWAParameter which variables will be copied
    */
   MultiDouble(const MultiDouble &in)
-      : AbsParameter(in.name_, ParType::MDOUBLE) {
+      : Parameter(in.name_, ParType::MDOUBLE) {
     *this = in;
     //    error_ = std::shared_ptr<ParError<double>>(new
     // ParError<double>(*in.error_));
@@ -181,7 +181,7 @@ protected:
   virtual std::string make_val_str() const;
 };
 
-class MultiUnsignedInteger : public AbsParameter {
+class MultiUnsignedInteger : public Parameter {
 
 public:
   //! Standard constructor with a value
@@ -193,7 +193,7 @@ public:
    */
   MultiUnsignedInteger(std::string inName,
                        const std::vector<unsigned int> &values)
-      : AbsParameter(inName, ParType::MUNSIGNEDINTEGER), val_(values) {}
+      : Parameter(inName, ParType::MUNSIGNEDINTEGER), val_(values) {}
 
   //! Copy constructor using = operator
   /*!
@@ -203,7 +203,7 @@ public:
    * \param in input PWAParameter which variables will be copied
    */
   MultiUnsignedInteger(const MultiUnsignedInteger &in)
-      : AbsParameter(in.name_, ParType::MUNSIGNEDINTEGER) {
+      : Parameter(in.name_, ParType::MUNSIGNEDINTEGER) {
     *this = in;
     //    error_ = std::shared_ptr<ParError<double>>(new
     //    ParError<double>(*in.error_));
@@ -245,7 +245,7 @@ protected:
 private:
 };
 
-class ComplexParameter : public AbsParameter {
+class ComplexParameter : public Parameter {
 
 public:
   //! Standard constructor without information
@@ -449,7 +449,7 @@ protected:
 //================================= DOUBLE ===================================
 //============================================================================
 
-class DoubleParameter : public AbsParameter {
+class DoubleParameter : public Parameter {
 
 public:
   //! Standard constructor without information
@@ -674,7 +674,7 @@ private:
   void serialize(archive &ar, const unsigned int version) {
     using namespace boost::serialization;
     ar &boost::serialization::make_nvp(
-        "AbsParameter", boost::serialization::base_object<AbsParameter>(*this));
+        "Parameter", boost::serialization::base_object<Parameter>(*this));
     ar &make_nvp("bounds", bounds_);
     ar &make_nvp("isFixed", fixed_);
     ar &make_nvp("value", val_);
@@ -776,7 +776,7 @@ DoubleParameterSave(std::shared_ptr<DoubleParameter> par) {
   return DoubleParameterSave(*par.get());
 }
 
-class IntegerParameter : public AbsParameter {
+class IntegerParameter : public Parameter {
 
 public:
   //! Standard constructor without information
@@ -980,7 +980,7 @@ protected:
   virtual std::string make_val_str() const;
 };
 
-class BoolParameter : public AbsParameter {
+class BoolParameter : public Parameter {
 
 public:
   //! Standard constructor without information

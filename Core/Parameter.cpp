@@ -183,14 +183,14 @@ std::string MultiUnsignedInteger::make_val_str() const {
 }
 //================================= COMPLEX ==================================
 ComplexParameter::ComplexParameter(std::string inName)
-    : AbsParameter(inName, ParType::COMPLEX), val_(0., 0.), err_(0., 0.),
+    : Parameter(inName, ParType::COMPLEX), val_(0., 0.), err_(0., 0.),
       min_(0., 0.), max_(0., 0.) {
   bounds_ = usebounds_ = hasError_ = fixed_ = false;
 }
 
 ComplexParameter::ComplexParameter(std::string inName,
                                    const std::complex<double> value)
-    : AbsParameter(inName, ParType::COMPLEX), val_(value), err_(0, 0),
+    : Parameter(inName, ParType::COMPLEX), val_(value), err_(0, 0),
       min_(0, 0), max_(0, 0) {
   bounds_ = usebounds_ = hasError_ = fixed_ = false;
 }
@@ -198,7 +198,7 @@ ComplexParameter::ComplexParameter(std::string inName,
 ComplexParameter::ComplexParameter(std::string inName,
                                    const std::complex<double> value,
                                    const std::complex<double> error)
-    : AbsParameter(inName, ParType::COMPLEX), val_(value), err_(error),
+    : Parameter(inName, ParType::COMPLEX), val_(value), err_(error),
       min_(0, 0), max_(0, 0) {
   bounds_ = usebounds_ = fixed_ = false;
   hasError_ = true;
@@ -208,7 +208,7 @@ ComplexParameter::ComplexParameter(std::string inName,
                                    const std::complex<double> value,
                                    const std::complex<double> min,
                                    const std::complex<double> max)
-    : AbsParameter(inName, ParType::COMPLEX), val_(value), err_(0, 0),
+    : Parameter(inName, ParType::COMPLEX), val_(value), err_(0, 0),
       min_(0, 0), max_(0, 0) {
   bounds_ = usebounds_ = hasError_ = fixed_ = false;
   if (check_bounds(min, max)) {
@@ -222,7 +222,7 @@ ComplexParameter::ComplexParameter(std::string inName,
                                    const std::complex<double> min,
                                    const std::complex<double> max,
                                    const std::complex<double> error)
-    : AbsParameter(inName, ParType::COMPLEX), val_(value), err_(error),
+    : Parameter(inName, ParType::COMPLEX), val_(value), err_(error),
       min_(0, 0), max_(0, 0) {
   bounds_ = usebounds_ = fixed_ = false;
   hasError_ = true;
@@ -234,7 +234,7 @@ ComplexParameter::ComplexParameter(std::string inName,
 }
 
 ComplexParameter::ComplexParameter(const ComplexParameter &in)
-    : AbsParameter(in.name_, ParType::COMPLEX) {
+    : Parameter(in.name_, ParType::COMPLEX) {
   *this = in;
 }
 
@@ -357,18 +357,18 @@ std::string ComplexParameter::make_val_str() const {
 //================================= DOUBLE ===================================
 
 DoubleParameter::DoubleParameter(std::string inName)
-    : AbsParameter(inName, ParType::DOUBLE), bounds_(false), fixed_(0), val_(0),
+    : Parameter(inName, ParType::DOUBLE), bounds_(false), fixed_(0), val_(0),
       min_(0), max_(0), errorType(ErrorType::NOTDEF), errorLow(0.),
       errorHigh(0.) {}
 
 DoubleParameter::DoubleParameter(std::string inName, const double value)
-    : AbsParameter(inName, ParType::DOUBLE), bounds_(false), fixed_(0),
+    : Parameter(inName, ParType::DOUBLE), bounds_(false), fixed_(0),
       val_(value), min_(0), max_(0), errorType(ErrorType::NOTDEF), errorLow(0.),
       errorHigh(0.) {}
 
 DoubleParameter::DoubleParameter(std::string inName, const double value,
                                  const double error)
-    : AbsParameter(inName, ParType::DOUBLE), bounds_(false), fixed_(0),
+    : Parameter(inName, ParType::DOUBLE), bounds_(false), fixed_(0),
       val_(value), min_(0), max_(0), errorType(ErrorType::NOTDEF), errorLow(0.),
       errorHigh(0.) {
   SetError(error);
@@ -376,7 +376,7 @@ DoubleParameter::DoubleParameter(std::string inName, const double value,
 
 DoubleParameter::DoubleParameter(std::string inName, const double value,
                                  const double min, const double max)
-    : AbsParameter(inName, ParType::DOUBLE), bounds_(false), fixed_(0),
+    : Parameter(inName, ParType::DOUBLE), bounds_(false), fixed_(0),
       val_(value), min_(0), max_(0), errorType(ErrorType::NOTDEF), errorLow(0.),
       errorHigh(0.) {
   SetMinMax(min, max);
@@ -385,7 +385,7 @@ DoubleParameter::DoubleParameter(std::string inName, const double value,
 DoubleParameter::DoubleParameter(std::string inName, const double value,
                                  const double min, const double max,
                                  const double error)
-    : AbsParameter(inName, ParType::DOUBLE), bounds_(false), fixed_(0),
+    : Parameter(inName, ParType::DOUBLE), bounds_(false), fixed_(0),
       val_(value), min_(0), max_(0), errorType(ErrorType::NOTDEF), errorLow(0.),
       errorHigh(0.) {
   SetError(error);
@@ -393,7 +393,7 @@ DoubleParameter::DoubleParameter(std::string inName, const double value,
 }
 
 DoubleParameter::DoubleParameter(const DoubleParameter &in)
-    : AbsParameter(in.name_, ParType::DOUBLE) {
+    : Parameter(in.name_, ParType::DOUBLE) {
   *this = in;
 }
 
@@ -632,20 +632,20 @@ std::string DoubleParameter::make_val_str() const {
 
 //================================= INTEGER ==================================
 IntegerParameter::IntegerParameter(std::string inName)
-    : AbsParameter(inName, ParType::INTEGER), val_(0), min_(0), max_(0),
+    : Parameter(inName, ParType::INTEGER), val_(0), min_(0), max_(0),
       err_(0) {
   bounds_ = usebounds_ = hasError_ = fixed_ = false;
 }
 
 IntegerParameter::IntegerParameter(std::string inName, const int value)
-    : AbsParameter(inName, ParType::INTEGER), val_(value), min_(0), max_(0),
+    : Parameter(inName, ParType::INTEGER), val_(value), min_(0), max_(0),
       err_(0) {
   bounds_ = usebounds_ = hasError_ = fixed_ = false;
 }
 
 IntegerParameter::IntegerParameter(std::string inName, const int value,
                                    const int error)
-    : AbsParameter(inName, ParType::INTEGER), val_(value), min_(0), max_(0),
+    : Parameter(inName, ParType::INTEGER), val_(value), min_(0), max_(0),
       err_(error) {
   bounds_ = usebounds_ = fixed_ = false;
   hasError_ = true;
@@ -653,7 +653,7 @@ IntegerParameter::IntegerParameter(std::string inName, const int value,
 
 IntegerParameter::IntegerParameter(std::string inName, const int value,
                                    const int min, const int max)
-    : AbsParameter(inName, ParType::INTEGER), val_(value), min_(0), max_(0),
+    : Parameter(inName, ParType::INTEGER), val_(value), min_(0), max_(0),
       err_(0) {
   bounds_ = usebounds_ = hasError_ = fixed_ = false;
   if (check_bounds(min, max)) {
@@ -666,7 +666,7 @@ IntegerParameter::IntegerParameter(std::string inName, const int value,
 IntegerParameter::IntegerParameter(std::string inName, const int value,
                                    const int min, const int max,
                                    const int error)
-    : AbsParameter(inName, ParType::INTEGER), val_(value), min_(0), max_(0),
+    : Parameter(inName, ParType::INTEGER), val_(value), min_(0), max_(0),
       err_(error) {
   bounds_ = usebounds_ = fixed_ = false;
   hasError_ = true;
@@ -678,7 +678,7 @@ IntegerParameter::IntegerParameter(std::string inName, const int value,
 }
 
 IntegerParameter::IntegerParameter(const IntegerParameter &in)
-    : AbsParameter(in.name_, ParType::INTEGER) {
+    : Parameter(in.name_, ParType::INTEGER) {
   *this = in;
 }
 
@@ -795,25 +795,25 @@ std::string IntegerParameter::make_val_str() const {
 //================================== BOOL ====================================
 
 BoolParameter::BoolParameter(std::string inName)
-    : AbsParameter(inName, ParType::BOOL), val_(0), err_(0) {
+    : Parameter(inName, ParType::BOOL), val_(0), err_(0) {
   hasError_ = fixed_ = usebounds_ = false;
 }
 
 BoolParameter::BoolParameter(std::string inName, const bool value)
-    : AbsParameter(inName, ParType::BOOL), val_(value), err_(0) {
+    : Parameter(inName, ParType::BOOL), val_(value), err_(0) {
   hasError_ = fixed_ = usebounds_ = false;
 }
 
 BoolParameter::BoolParameter(std::string inName, const bool value,
                              const bool error)
-    : AbsParameter(inName, ParType::BOOL), val_(value), err_(error) {
+    : Parameter(inName, ParType::BOOL), val_(value), err_(error) {
   usebounds_ = false;
   fixed_ = false;
   hasError_ = true;
 }
 
 BoolParameter::BoolParameter(const BoolParameter &in)
-    : AbsParameter(in.name_, ParType::BOOL) {
+    : Parameter(in.name_, ParType::BOOL) {
   *this = in;
 }
 

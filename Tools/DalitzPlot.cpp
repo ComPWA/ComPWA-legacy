@@ -13,7 +13,7 @@
 #include "Core/DataPoint.hpp"
 #include "Core/Logging.hpp"
 #include "Core/ProgressBar.hpp"
-#include "Physics/Resonance.hpp"
+#include "Physics/PartialAmplitude.hpp"
 #include "Physics/HelicityFormalism/HelicityKinematics.hpp"
 
 #include "Tools/DalitzPlot.hpp"
