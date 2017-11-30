@@ -35,12 +35,12 @@ bool Inverse::execute(ParameterList &paras,
     double var = paras.GetDoubleParameterValue(0);
     if (var == 0) {
       out =
-          std::shared_ptr<Parameter>(new DoubleParameter(out->GetName(), 0));
+          std::shared_ptr<Parameter>(new DoubleParameter(out->name(), 0));
       // TODO: exception dividion by 0
       LOG(error) << "Inverse::execute() | Division by zero";
     } else
       out = std::shared_ptr<Parameter>(
-          new DoubleParameter(out->GetName(), 1 / var));
+          new DoubleParameter(out->name(), 1 / var));
     break;
   } // end double
   default: {
@@ -75,13 +75,13 @@ bool SquareRoot::execute(ParameterList &paras,
     double var = paras.GetDoubleParameterValue(0);
     if (var < 0) {
       out = std::shared_ptr<Parameter>(
-          new DoubleParameter(out->GetName(), -1));
+          new DoubleParameter(out->name(), -1));
       // TODO: exception argument <0
       LOG(error) << "SquareRoot::execute() | Argument "
                     "negative! Returning -1";
     } else
       out = std::shared_ptr<Parameter>(
-          new DoubleParameter(out->GetName(), sqrt(var)));
+          new DoubleParameter(out->name(), sqrt(var)));
     break;
   } // end double
   default: {
@@ -130,38 +130,38 @@ bool AddAll::execute(ParameterList &paras, std::shared_ptr<Parameter> &out) {
       return false;
     }
 
-    unsigned int nElements = paras.GetMultiComplex(0)->GetNValues();
+    unsigned int nElements = paras.GetMultiComplex(0)->numValues();
 
     std::complex<double> result(0, 0); // sum up all 1-dim input
     // sum up complex parameter
     for (unsigned int i = 0; i < nC; i++) {
-      result += paras.GetComplexParameter(i)->GetValue();
+      result += paras.GetComplexParameter(i)->value();
     }
     // sum up double parameter
     for (unsigned int i = 0; i < nD; i++) {
-      result += paras.GetDoubleParameter(i)->GetValue();
+      result += paras.GetDoubleParameter(i)->value();
     }
     // sum up integer parameter
     for (unsigned int i = 0; i < nI; i++) {
-      result += paras.GetIntegerParameter(i)->GetValue();
+      result += paras.GetIntegerParameter(i)->value();
     }
 
     // fill MultiComplex parameter
     std::vector<std::complex<double>> results(nElements, result);
     for (unsigned int i = 0; i < nMD; i++) {
-      const std::vector<double> v_tmp = paras.GetMultiDouble(i)->GetValues();
+      const std::vector<double> v_tmp = paras.GetMultiDouble(i)->values();
       for (unsigned int ele = 0; ele < v_tmp.size(); ele++)
         results.at(ele) += v_tmp.at(ele);
     }
     for (unsigned int i = 0; i < nMC; i++) {
       const std::vector<std::complex<double>> v_tmp =
-          paras.GetMultiComplex(i)->GetValues();
+          paras.GetMultiComplex(i)->values();
       for (unsigned int ele = 0; ele < v_tmp.size(); ele++)
         results.at(ele) += v_tmp.at(ele);
     }
 
     out = std::shared_ptr<Parameter>(
-        new MultiComplex(out->GetName(), results));
+        new MultiComplex(out->name(), results));
 
     break;
   } // end multi complex
@@ -173,26 +173,26 @@ bool AddAll::execute(ParameterList &paras, std::shared_ptr<Parameter> &out) {
       // TODO: exception wrong input
       return false;
     }
-    unsigned int nElements = paras.GetMultiDouble(0)->GetNValues();
+    unsigned int nElements = paras.GetMultiDouble(0)->numValues();
     double result = 0; // sum up all 1-dim input
     // sum up double parameter
     for (unsigned int i = 0; i < nD; i++) {
-      result += paras.GetDoubleParameter(i)->GetValue();
+      result += paras.GetDoubleParameter(i)->value();
     }
     // sum up integer parameter
     for (unsigned int i = 0; i < nI; i++) {
-      result += paras.GetIntegerParameter(i)->GetValue();
+      result += paras.GetIntegerParameter(i)->value();
     }
 
     // fill MultiDouble parameter
     std::vector<double> results(nElements, result);
     for (unsigned int i = 0; i < nMD; i++) {
-      std::vector<double> v_tmp = paras.GetMultiDouble(i)->GetValues();
+      std::vector<double> v_tmp = paras.GetMultiDouble(i)->values();
       for (unsigned int ele = 0; ele < v_tmp.size(); ele++)
         results.at(ele) += v_tmp.at(ele);
     }
     out =
-        std::shared_ptr<Parameter>(new MultiDouble(out->GetName(), results));
+        std::shared_ptr<Parameter>(new MultiDouble(out->name(), results));
 
     break;
   } // end multi double
@@ -203,31 +203,31 @@ bool AddAll::execute(ParameterList &paras, std::shared_ptr<Parameter> &out) {
 
     // sum up complex parameter
     for (unsigned int i = 0; i < nC; i++) {
-      result += paras.GetComplexParameter(i)->GetValue();
+      result += paras.GetComplexParameter(i)->value();
     }
     // sum up double parameter
     for (unsigned int i = 0; i < nD; i++) {
-      result += paras.GetDoubleParameter(i)->GetValue();
+      result += paras.GetDoubleParameter(i)->value();
     }
     // sum up integer parameter
     for (unsigned int i = 0; i < nI; i++) {
-      result += paras.GetIntegerParameter(i)->GetValue();
+      result += paras.GetIntegerParameter(i)->value();
     }
     // collapse MultiComplex parameter
     for (unsigned int i = 0; i < nMC; i++) {
       std::shared_ptr<MultiComplex> tmp = paras.GetMultiComplex(i);
-      for (unsigned int ele = 0; ele < tmp->GetNValues(); ele++)
-        result += tmp->GetValue(ele);
+      for (unsigned int ele = 0; ele < tmp->numValues(); ele++)
+        result += tmp->value(ele);
     }
     // collapse MultiDoubles parameter
     for (unsigned int i = 0; i < nMD; i++) {
       std::shared_ptr<MultiDouble> tmp = paras.GetMultiDouble(i);
-      for (unsigned int ele = 0; ele < tmp->GetNValues(); ele++)
-        result += tmp->GetValue(ele);
+      for (unsigned int ele = 0; ele < tmp->numValues(); ele++)
+        result += tmp->value(ele);
     }
 
     out = std::shared_ptr<Parameter>(
-        new ComplexParameter(out->GetName(), result));
+        new ComplexParameter(out->name(), result));
     break;
   } // end complex
 
@@ -237,24 +237,24 @@ bool AddAll::execute(ParameterList &paras, std::shared_ptr<Parameter> &out) {
 
     // sum up double parameter
     for (unsigned int i = 0; i < nD; i++) {
-      result += paras.GetDoubleParameter(i)->GetValue();
+      result += paras.GetDoubleParameter(i)->value();
     }
     // sum up integer parameter
     for (unsigned int i = 0; i < nI; i++) {
-      result += paras.GetIntegerParameter(i)->GetValue();
+      result += paras.GetIntegerParameter(i)->value();
     }
     // collapse MultiDoubles parameter
     for (unsigned int i = 0; i < nMD; i++) {
-      auto tmp = paras.GetMultiDouble(i)->GetValues();
+      auto tmp = paras.GetMultiDouble(i)->values();
       KahanSummation kaSum = { result };
       auto kaResult = std::accumulate(tmp.begin(), tmp.end(), kaSum, KahanSum);
       result = kaResult.sum;
-      //      for (unsigned int ele = 0; ele < tmp->GetNValues(); ele++)
-      //        result += tmp->GetValue(ele);
+      //      for (unsigned int ele = 0; ele < tmp->numValues(); ele++)
+      //        result += tmp->value(ele);
     }
 
     out = std::shared_ptr<Parameter>(
-        new DoubleParameter(out->GetName(), result));
+        new DoubleParameter(out->name(), result));
     break;
   } // end double
 
@@ -293,38 +293,38 @@ bool MultAll::execute(ParameterList &paras,
       return false;
     }
 
-    unsigned int nElements = paras.GetMultiComplex(0)->GetNValues();
+    unsigned int nElements = paras.GetMultiComplex(0)->numValues();
 
     std::complex<double> result(1., 0.); // mult up all 1-dim input
     // mult up complex parameter
     for (unsigned int i = 0; i < nC; i++) {
-      result *= paras.GetComplexParameter(i)->GetValue();
+      result *= paras.GetComplexParameter(i)->value();
     }
     // mult up double parameter
     for (unsigned int i = 0; i < nD; i++) {
-      result *= paras.GetDoubleParameter(i)->GetValue();
+      result *= paras.GetDoubleParameter(i)->value();
     }
     // mult up integer parameter
     for (unsigned int i = 0; i < nI; i++) {
-      result *= paras.GetIntegerParameter(i)->GetValue();
+      result *= paras.GetIntegerParameter(i)->value();
     }
 
     // fill MultiComplex parameter
     std::vector<std::complex<double>> results(nElements, result);
     for (unsigned int i = 0; i < nMD; i++) {
-      const std::vector<double> tmpVec = paras.GetMultiDouble(i)->GetValues();
+      const std::vector<double> tmpVec = paras.GetMultiDouble(i)->values();
       for (unsigned int ele = 0; ele < tmpVec.size(); ele++)
         results.at(ele) *= tmpVec.at(ele);
     }
     for (unsigned int i = 0; i < nMC; i++) {
       const std::vector<std::complex<double>> v_tmp =
-          paras.GetMultiComplex(i)->GetValues();
+          paras.GetMultiComplex(i)->values();
       for (unsigned int ele = 0; ele < v_tmp.size(); ele++)
         results.at(ele) *= v_tmp.at(ele);
     }
 
     out = std::shared_ptr<Parameter>(
-        new MultiComplex(out->GetName(), results));
+        new MultiComplex(out->name(), results));
 
     break;
   } // end multi complex
@@ -336,25 +336,25 @@ bool MultAll::execute(ParameterList &paras,
       // TODO: exception wrong input
       return false;
     }
-    unsigned int nElements = paras.GetMultiDouble(0)->GetNValues();
+    unsigned int nElements = paras.GetMultiDouble(0)->numValues();
     double result = 1.; // sum up all 1-dim input
     // mult up double parameter
     for (unsigned int i = 0; i < nD; i++) {
-      result *= paras.GetDoubleParameter(i)->GetValue();
+      result *= paras.GetDoubleParameter(i)->value();
     }
     // mult up integer parameter
     for (unsigned int i = 0; i < nI; i++) {
-      result *= paras.GetIntegerParameter(i)->GetValue();
+      result *= paras.GetIntegerParameter(i)->value();
     }
     // fill MultiDouble parameter
     std::vector<double> results(nElements, result);
     for (unsigned int i = 0; i < nMD; i++) {
-      std::vector<double> v_tmp = paras.GetMultiDouble(i)->GetValues();
+      std::vector<double> v_tmp = paras.GetMultiDouble(i)->values();
       for (unsigned int ele = 0; ele < v_tmp.size(); ele++)
         results.at(ele) *= v_tmp.at(ele);
     }
     out =
-        std::shared_ptr<Parameter>(new MultiDouble(out->GetName(), results));
+        std::shared_ptr<Parameter>(new MultiDouble(out->name(), results));
 
     break;
   } // end multi double
@@ -365,32 +365,32 @@ bool MultAll::execute(ParameterList &paras,
 
     // mult up complex parameter
     for (unsigned int i = 0; i < nC; i++) {
-      result *= paras.GetComplexParameter(i)->GetValue();
+      result *= paras.GetComplexParameter(i)->value();
     }
     // mult up double parameter
     for (unsigned int i = 0; i < nD; i++) {
-      result *= paras.GetDoubleParameter(i)->GetValue();
+      result *= paras.GetDoubleParameter(i)->value();
     }
     // mult up integer parameter
     for (unsigned int i = 0; i < nI; i++) {
-      result *= paras.GetIntegerParameter(i)->GetValue();
+      result *= paras.GetIntegerParameter(i)->value();
     }
     // collapse MultiComplex parameter
     for (unsigned int i = 0; i < nMC; i++) {
       std::vector<std::complex<double>> v_tmp =
-          paras.GetMultiComplex(i)->GetValues();
+          paras.GetMultiComplex(i)->values();
       for (unsigned int ele = 0; ele < v_tmp.size(); ele++)
         result *= v_tmp.at(ele);
     }
     // collapse MultiDoubles parameter
     for (unsigned int i = 0; i < nMD; i++) {
-      std::vector<double> v_tmp = paras.GetMultiDouble(i)->GetValues();
+      std::vector<double> v_tmp = paras.GetMultiDouble(i)->values();
       for (unsigned int ele = 0; ele < v_tmp.size(); ele++)
         result *= v_tmp.at(ele);
     }
 
     out = std::shared_ptr<Parameter>(
-        new ComplexParameter(out->GetName(), result));
+        new ComplexParameter(out->name(), result));
     break;
   } // end complex
 
@@ -400,21 +400,21 @@ bool MultAll::execute(ParameterList &paras,
 
     // mult up double parameter
     for (unsigned int i = 0; i < nD; i++) {
-      result *= paras.GetDoubleParameter(i)->GetValue();
+      result *= paras.GetDoubleParameter(i)->value();
     }
     // mult up integer parameter
     for (unsigned int i = 0; i < nI; i++) {
-      result *= paras.GetIntegerParameter(i)->GetValue();
+      result *= paras.GetIntegerParameter(i)->value();
     }
     // collapse MultiDoubles parameter
     for (unsigned int i = 0; i < nMD; i++) {
-      std::vector<double> v_tmp = paras.GetMultiDouble(i)->GetValues();
+      std::vector<double> v_tmp = paras.GetMultiDouble(i)->values();
       for (unsigned int ele = 0; ele < v_tmp.size(); ele++)
         result *= v_tmp.at(ele);
     }
 
     out = std::shared_ptr<Parameter>(
-        new DoubleParameter(out->GetName(), result));
+        new DoubleParameter(out->name(), result));
     break;
   } // end double
 
@@ -458,13 +458,13 @@ bool LogOf::execute(ParameterList &paras, std::shared_ptr<Parameter> &out) {
       return false;
     }
     // fill MultiDouble parameter
-    const std::vector<double> tmp = paras.GetMultiDouble(0)->GetValues();
+    const std::vector<double> tmp = paras.GetMultiDouble(0)->values();
     std::vector<double> results(tmp.size(), 0.);
     for (unsigned int ele = 0; ele < tmp.size(); ele++)
       results.at(ele) = std::log(tmp.at(ele));
 
     out =
-        std::shared_ptr<Parameter>(new MultiDouble(out->GetName(), results));
+        std::shared_ptr<Parameter>(new MultiDouble(out->name(), results));
     break;
   } // end multi double
 
@@ -475,7 +475,7 @@ bool LogOf::execute(ParameterList &paras, std::shared_ptr<Parameter> &out) {
     }
     // output double: log of one double input
     out = std::shared_ptr<Parameter>(new DoubleParameter(
-        out->GetName(), std::log(paras.GetDoubleParameterValue(0))));
+        out->name(), std::log(paras.GetDoubleParameterValue(0))));
     break;
   } // end double
 
@@ -519,8 +519,8 @@ bool Complexify::execute(ParameterList &paras,
       return false;
     }
     // fill MultiDouble parameter
-    const std::vector<double> v_mag = paras.GetMultiDouble(0)->GetValues();
-    const std::vector<double> v_phi = paras.GetMultiDouble(1)->GetValues();
+    const std::vector<double> v_mag = paras.GetMultiDouble(0)->values();
+    const std::vector<double> v_phi = paras.GetMultiDouble(1)->values();
     if (v_mag.size() == v_phi.size())
       throw std::runtime_error("Complexify::execute() | "
                                "Vector sizes do not match!");
@@ -535,7 +535,7 @@ bool Complexify::execute(ParameterList &paras,
           );
 
     out = std::shared_ptr<Parameter>(
-        new MultiComplex(out->GetName(), results));
+        new MultiComplex(out->name(), results));
 
     break;
   } // end multi complex
@@ -546,10 +546,10 @@ bool Complexify::execute(ParameterList &paras,
       // TODO: exception wrong input
       return false;
     }
-    double a = std::fabs(paras.GetDoubleParameter(0)->GetValue());
-    double phi = paras.GetDoubleParameter(1)->GetValue();
+    double a = std::fabs(paras.GetDoubleParameter(0)->value());
+    double phi = paras.GetDoubleParameter(1)->value();
     out = std::shared_ptr<Parameter>(new ComplexParameter(
-        out->GetName(),
+        out->name(),
         std::complex<double>(a * std::cos(phi), a * std::sin(phi))));
     break;
   } // end double
@@ -592,24 +592,24 @@ bool AbsSquare::execute(ParameterList &paras,
           "AbsSquare::execute() | Requested output is"
           " MDOUBLE but no MDOUBLE or MCOMPLEX was given as input!");
     if (nMD) {
-      const std::vector<double> v_tmp = paras.GetMultiDouble(0)->GetValues();
+      const std::vector<double> v_tmp = paras.GetMultiDouble(0)->values();
 
       std::vector<double> results(v_tmp.size(), 0.);
       for (unsigned int ele = 0; ele < v_tmp.size(); ele++)
         results.at(ele) = std::norm(v_tmp.at(ele));
 
       out = std::shared_ptr<Parameter>(
-          new MultiDouble(out->GetName(), results));
+          new MultiDouble(out->name(), results));
     } else if (nMC) {
       const std::vector<std::complex<double>> v_tmp =
-          paras.GetMultiComplex(0)->GetValues();
+          paras.GetMultiComplex(0)->values();
 
       std::vector<double> results(v_tmp.size(), 0.);
       for (unsigned int ele = 0; ele < v_tmp.size(); ele++)
         results.at(ele) = std::norm(v_tmp.at(ele));
 
       out = std::shared_ptr<Parameter>(
-          new MultiDouble(out->GetName(), results));
+          new MultiDouble(out->name(), results));
     }
 
     break;
@@ -624,11 +624,11 @@ bool AbsSquare::execute(ParameterList &paras,
     if (nD) {
       std::shared_ptr<DoubleParameter> tmp = paras.GetDoubleParameter(0);
       out = std::shared_ptr<Parameter>(
-          new DoubleParameter(out->GetName(), std::norm(tmp->GetValue())));
+          new DoubleParameter(out->name(), std::norm(tmp->value())));
     } else if (nC) {
       std::shared_ptr<ComplexParameter> tmp = paras.GetComplexParameter(0);
       out = std::shared_ptr<Parameter>(
-          new DoubleParameter(out->GetName(), std::norm(tmp->GetValue())));
+          new DoubleParameter(out->name(), std::norm(tmp->value())));
     }
     break;
   } // end double
@@ -673,9 +673,9 @@ bool Power::execute(ParameterList &paras, std::shared_ptr<Parameter> &out) {
     }
 
     const std::vector<std::complex<double>> v_base =
-        paras.GetMultiComplex(0)->GetValues();
+        paras.GetMultiComplex(0)->values();
     const std::vector<std::complex<double>> v_exp =
-        paras.GetMultiComplex(1)->GetValues();
+        paras.GetMultiComplex(1)->values();
 
     std::vector<std::complex<double>> results(v_base.size(),
                                               std::complex<double>(0., 0.));
@@ -684,7 +684,7 @@ bool Power::execute(ParameterList &paras, std::shared_ptr<Parameter> &out) {
       results.at(ele) = std::pow(v_base.at(ele), v_exp.at(ele));
 
     out = std::shared_ptr<Parameter>(
-        new MultiComplex(out->GetName(), results));
+        new MultiComplex(out->name(), results));
 
     break;
   } // end multi complex
@@ -696,8 +696,8 @@ bool Power::execute(ParameterList &paras, std::shared_ptr<Parameter> &out) {
       return false;
     }
     // TODO: integer exponent can be calculated much faster
-    const std::vector<double> v_base = paras.GetMultiDouble(0)->GetValues();
-    const std::vector<double> v_exp = paras.GetMultiDouble(1)->GetValues();
+    const std::vector<double> v_base = paras.GetMultiDouble(0)->values();
+    const std::vector<double> v_exp = paras.GetMultiDouble(1)->values();
 
     std::vector<double> results(v_base.size(), 0.);
 
@@ -705,7 +705,7 @@ bool Power::execute(ParameterList &paras, std::shared_ptr<Parameter> &out) {
       results.at(ele) = std::pow(v_base.at(ele), v_exp.at(ele));
 
     out =
-        std::shared_ptr<Parameter>(new MultiDouble(out->GetName(), results));
+        std::shared_ptr<Parameter>(new MultiDouble(out->name(), results));
 
     break;
   } // end multi double
@@ -719,7 +719,7 @@ bool Power::execute(ParameterList &paras, std::shared_ptr<Parameter> &out) {
     std::shared_ptr<ComplexParameter> tmpA = paras.GetComplexParameter(0);
     std::shared_ptr<ComplexParameter> tmpB = paras.GetComplexParameter(1);
     out = std::shared_ptr<Parameter>(new ComplexParameter(
-        out->GetName(), std::pow(tmpA->GetValue(), tmpB->GetValue())));
+        out->name(), std::pow(tmpA->value(), tmpB->value())));
     break;
   } // end double
 
@@ -732,7 +732,7 @@ bool Power::execute(ParameterList &paras, std::shared_ptr<Parameter> &out) {
     std::shared_ptr<DoubleParameter> tmpA = paras.GetDoubleParameter(0);
     std::shared_ptr<DoubleParameter> tmpB = paras.GetDoubleParameter(1);
     out = std::shared_ptr<Parameter>(new DoubleParameter(
-        out->GetName(), std::pow(tmpA->GetValue(), tmpB->GetValue())));
+        out->name(), std::pow(tmpA->value(), tmpB->value())));
     break;
   } // end double
 

@@ -202,7 +202,7 @@ void MinuitResult::PrintCorrelationMatrix(TableFormater *tableCorr) {
         finalParameters.GetDoubleParameter(o);
     if (ppp->IsFixed())
       continue;
-    tableCorr->addColumn(ppp->GetName(), 15);
+    tableCorr->addColumn(ppp->name(), 15);
   }
 
   unsigned int n = 0;
@@ -212,7 +212,7 @@ void MinuitResult::PrintCorrelationMatrix(TableFormater *tableCorr) {
         finalParameters.GetDoubleParameter(o);
     if (ppp->IsFixed())
       continue;
-    *tableCorr << ppp->GetName();
+    *tableCorr << ppp->name();
     try{
       *tableCorr << globalCC.at(n);
     }catch(...){
@@ -242,7 +242,7 @@ void MinuitResult::PrintCovarianceMatrix(TableFormater *tableCov) {
   // add columns first
   for (unsigned int o = 0; o < finalParameters.GetNDouble(); o++) {
     if (!finalParameters.GetDoubleParameter(o)->IsFixed())
-      tableCov->addColumn(finalParameters.GetDoubleParameter(o)->GetName(), 17);
+      tableCov->addColumn(finalParameters.GetDoubleParameter(o)->name(), 17);
   }
 
   unsigned int n = 0;
@@ -252,7 +252,7 @@ void MinuitResult::PrintCovarianceMatrix(TableFormater *tableCov) {
         finalParameters.GetDoubleParameter(o);
     if (ppp->IsFixed())
       continue;
-    *tableCov << ppp->GetName();
+    *tableCov << ppp->name();
     for (unsigned int t = 0; t < cov.size(); t++) {
       if (n >= cov.at(0).size()) {
         *tableCov << " ";

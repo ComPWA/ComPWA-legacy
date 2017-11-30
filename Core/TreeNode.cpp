@@ -174,7 +174,7 @@ std::string TreeNode::Print(int level, std::string prefix) const {
     auto it = _parameters.begin();
     for (; it != _parameters.end(); ++it) {
       if (!_children.size()) // print parameter name for leafs
-        oss << " [" << (*it)->GetName() << "]";
+        oss << " [" << (*it)->name() << "]";
       oss << " = " << (*it)->val_to_str();
       if (it != _parameters.end())
         oss << ", ";

@@ -38,7 +38,8 @@ ParticleProperties::ParticleProperties(boost::property_tree::ptree pt)
       // Parameter (e.g. Mass)
       if (v.second.get<std::string>("<xmlattr>.Type") != "Mass")
         continue;
-      _mass = DoubleParameterFactory(v.second);
+      _mass = DoubleParameter();
+      _mass.load(v.second);
     } else {
     }
   }
@@ -57,7 +58,7 @@ boost::property_tree::ptree ParticleProperties::Save(){
   boost::property_tree::ptree pt;
   pt.put("<xmlattr>.Name", _name);
   pt.put("Pid", _id);
-  pt.add_child("Parameter", DoubleParameterSave(_mass));
+  pt.add_child("Parameter", _mass.save());
   pt.put("Parameter.<xmlattr>.Type","Mass");
   for( auto& i: spinQuantumNumbers_ ){
     boost::property_tree::ptree tmp;

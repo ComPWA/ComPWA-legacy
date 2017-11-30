@@ -51,9 +51,9 @@ public:
 
   Constant(boost::property_tree::ptree pt){};
 
-  void SetValue(double m) { _value.SetValue(m); }
+  void SetValue(double m) { _value.setValue(m); }
 
-  double GetValue() const { return _value.GetValue(); }
+  double GetValue() const { return _value.value(); }
 
   void SetValuePar(ComPWA::DoubleParameter m) { _value = m; }
 
@@ -92,7 +92,7 @@ public:
 
   virtual boost::property_tree::ptree Save();
 
-  double GetMass() const { return _mass.GetValue(); }
+  double GetMass() const { return _mass.value(); }
 
   ComPWA::DoubleParameter GetMassPar() const { return _mass; }
 
@@ -231,10 +231,10 @@ inline void UpdateNode(std::shared_ptr<DoubleParameter> p,
     if (v.first == "Parameter") {
       std::string nn = v.second.get<std::string>("<xmlattr>.Name");
       std::string tt = v.second.get<std::string>("<xmlattr>.Type");
-      if (nn == p->GetName()) {
+      if (nn == p->name()) {
         //        LOG(debug) << "UpdateNode() | Updating node " << v.first
         //        << "." << nn << " to " << p->GetValue();
-        v.second = DoubleParameterSave(*p.get());
+        v.second = p->save();
         v.second.put("<xmlattr>.Type", tt);
       }
     } else {
@@ -253,7 +253,7 @@ inline void UpdateParticleList(std::shared_ptr<PartList> &partL,
   partTr.add_child("ParticleList", SaveParticles(partL));
   // Loop over (double) parameters
   for (auto i : pars.GetDoubleParameters()) {
-    auto name = i->GetName();
+    auto name = i->name();
     // Some default values may not have a name. We skip those.
     if (name == "")
       continue;

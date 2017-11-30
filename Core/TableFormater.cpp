@@ -54,31 +54,31 @@ TableFormater &TableFormater::operator<<(DoubleParameter in) {
     *out << firstSep + " ";
   else
     *out << " " << sep << " ";
-  if (in.HasError()) {
+  if (in.hasError()) {
     std::string tmp;
-    if (in.GetErrorType() == ErrorType::SYM && in.GetError() != 0) {
+    if (in.errorType() == ErrorType::SYM && in.error().first != 0) {
       unsigned int halfWidth =
           (unsigned int)(columnWidth[curCol]) / 2; // divide column width
-      *out << std::setw(halfWidth) << in.GetValue();
-      tmp = pm + std::to_string((long double)in.GetError());
+      *out << std::setw(halfWidth) << in.value();
+      tmp = pm + std::to_string((long double)in.error().first);
       trimString(tmp);
       *out << std::setw(halfWidth) << tmp;
-    } else if (in.GetErrorType() == ErrorType::ASYM) {
+    } else if (in.errorType() == ErrorType::ASYM) {
       unsigned int w =
           (unsigned int)(columnWidth[curCol]) / 3; // take 1/3 of column width
-      tmp = std::to_string((long double)in.GetValue());
+      tmp = std::to_string((long double)in.value());
       trimString(tmp);
       *out << std::setw(w) << tmp;
-      tmp = "-" + std::to_string((long double)in.GetErrorLow());
+      tmp = "-" + std::to_string((long double)in.error().first);
       trimString(tmp);
       *out << std::setw(w) << tmp;
-      tmp = "+" + std::to_string((long double)in.GetErrorHigh());
+      tmp = "+" + std::to_string((long double)in.error().second);
       trimString(tmp);
       *out << std::setw(w) << tmp;
     } else
-      *out << std::setw(columnWidth[curCol]) << in.GetValue();
+      *out << std::setw(columnWidth[curCol]) << in.value();
   } else {
-    *out << std::setw(columnWidth[curCol]) << in.GetValue();
+    *out << std::setw(columnWidth[curCol]) << in.value();
   }
   curCol++;
   if (curCol == columnWidth.size()) {

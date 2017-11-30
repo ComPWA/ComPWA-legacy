@@ -325,7 +325,7 @@ bool FlatteStrategy::execute(ParameterList &paras,
     }
   }
   out =
-      std::shared_ptr<Parameter>(new MultiComplex(out->GetName(), results));
+      std::shared_ptr<Parameter>(new MultiComplex(out->name(), results));
   return true;
 }
 
@@ -369,7 +369,7 @@ void AmpFlatteRes::GetParameters(ParameterList &list) {
     if (i.GetValue() == 0.0)
       continue;
     try { // catch BadParameter
-      tmp = list.GetDoubleParameter(i.GetValueParameter()->GetName());
+      tmp = list.GetDoubleParameter(i.GetValueParameter()->name());
       try { // catch and throw std::runtime_error due to failed parameter
             // comparisson
         if (*tmp == *i.GetValueParameter())
@@ -383,7 +383,7 @@ void AmpFlatteRes::GetParameters(ParameterList &list) {
   }
 
   try { // catch BadParameter
-    tmp = list.GetDoubleParameter(GetMesonRadiusParameter()->GetName());
+    tmp = list.GetDoubleParameter(GetMesonRadiusParameter()->name());
     try { // catch and throw std::runtime_error due to failed parameter
           // comparisson
       if (*tmp == *_mesonRadius)
@@ -401,7 +401,7 @@ void AmpFlatteRes::UpdateParameters(const ParameterList &par) {
   // Try to update mesonRadius
   std::shared_ptr<DoubleParameter> rad;
   try {
-    rad = par.GetDoubleParameter(_mesonRadius->GetName());
+    rad = par.GetDoubleParameter(_mesonRadius->name());
   } catch (std::exception &ex) {
   }
   if (rad)
@@ -411,7 +411,7 @@ void AmpFlatteRes::UpdateParameters(const ParameterList &par) {
   for (auto i : _g) {
     std::shared_ptr<DoubleParameter> c;
     try {
-      c = par.GetDoubleParameter(i.GetValueParameter()->GetName());
+      c = par.GetDoubleParameter(i.GetValueParameter()->name());
     } catch (std::exception &ex) {
     }
     if (c)

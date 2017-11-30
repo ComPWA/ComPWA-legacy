@@ -41,7 +41,7 @@ public:
                std::shared_ptr<Efficiency> eff =
                    std::shared_ptr<Efficiency>(new UnitEfficiency))
       : _name(name), _eff(eff), _strength(strength), _current_strength(-999) {
-    _strength->FixParameter(true);
+    _strength->fixParameter(true);
   }
   
   virtual ~AmpIntensity() {};
@@ -59,13 +59,13 @@ public:
   virtual std::string Name() const { return _name; }
 
   /// Get strength parameter
-  double Strength() const { return _strength->GetValue(); }
+  double Strength() const { return _strength->value(); }
 
   virtual void GetParameters(ParameterList &list) = 0;
 
   /// Fill vector with parameters
   virtual void GetParametersFast(std::vector<double> &list) const {
-    list.push_back(_strength->GetValue());
+    list.push_back(_strength->value());
   }
   
   /// Update parameters in AmpIntensity to the values given in \p list

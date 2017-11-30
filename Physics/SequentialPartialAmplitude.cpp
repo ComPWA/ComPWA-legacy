@@ -125,7 +125,7 @@ void SequentialPartialAmplitude::UpdateParameters(const ParameterList &par) {
   // Try to update magnitude
   std::shared_ptr<DoubleParameter> mag;
   try {
-    mag = par.GetDoubleParameter(_magnitude->GetName());
+    mag = par.GetDoubleParameter(_magnitude->name());
   } catch (std::exception &ex) {
   }
   if (mag)
@@ -134,7 +134,7 @@ void SequentialPartialAmplitude::UpdateParameters(const ParameterList &par) {
   
   // Try to update phase
   try {
-    phase = par.GetDoubleParameter(_phase->GetName());
+    phase = par.GetDoubleParameter(_phase->name());
   } catch (std::exception &ex) {
   }
   if (phase)

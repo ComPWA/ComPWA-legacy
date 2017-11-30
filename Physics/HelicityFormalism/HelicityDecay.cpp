@@ -209,7 +209,7 @@ void HelicityDecay::UpdateParameters(const ParameterList &list){
   // Try to update magnitude
   std::shared_ptr<DoubleParameter> mag;
   try {
-    mag = list.GetDoubleParameter(_magnitude->GetName());
+    mag = list.GetDoubleParameter(_magnitude->name());
   } catch (std::exception &ex) {
   }
   if (mag)
@@ -218,7 +218,7 @@ void HelicityDecay::UpdateParameters(const ParameterList &list){
   
   // Try to update phase
   try {
-    phase = list.GetDoubleParameter(_phase->GetName());
+    phase = list.GetDoubleParameter(_phase->name());
   } catch (std::exception &ex) {
   }
   if (phase)

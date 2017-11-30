@@ -18,6 +18,10 @@
 #include <vector>
 
 #include <boost/test/unit_test.hpp>
+#include <boost/serialization/export.hpp>
+#include <boost/archive/xml_iarchive.hpp>
+#include <boost/archive/xml_oarchive.hpp>
+
 #include <Core/Parameter.hpp>
 #include <Core/Exceptions.hpp>
 #include <Core/ParameterList.hpp>
@@ -28,38 +32,32 @@ BOOST_AUTO_TEST_SUITE(ParameterTest);
 
 BOOST_AUTO_TEST_CASE(BoundsCheck) {
   IntegerParameter parWrong("wrongPar", 7, 10, 5, 1);
-  BOOST_CHECK(!parWrong.HasBounds());
-  parWrong.SetMaxValue(-1);
-  BOOST_CHECK(!parWrong.HasBounds());
-  parWrong.SetMaxValue(6);
-  BOOST_CHECK(!parWrong.HasBounds());
-  parWrong.SetMinMax(10, 5);
-  BOOST_CHECK(!parWrong.HasBounds());
-  parWrong.SetMinMax(5, 10);
-  BOOST_CHECK(parWrong.HasBounds());
+  BOOST_CHECK(!parWrong.hasBounds());
+  parWrong.setBounds(5, 10);
+  BOOST_CHECK(parWrong.hasBounds());
 }
 
 BOOST_AUTO_TEST_CASE(SetGetCheck) {
   IntegerParameter emptyInt("emptyIntPar");
-  emptyInt.SetValue(7);
-  emptyInt.SetMinMax(0, 10);
-  emptyInt.SetError(1);
-  BOOST_CHECK_CLOSE(emptyInt.GetValue(), 7., 0.0001);
-  BOOST_CHECK_CLOSE(emptyInt.GetMinValue(), 0., 0.0001);
-  BOOST_CHECK_CLOSE(emptyInt.GetMaxValue(), 10., 0.0001);
-  BOOST_CHECK_CLOSE(emptyInt.GetError(), 1., 0.0001);
+  emptyInt.setValue(7);
+  emptyInt.setBounds(0, 10);
+  emptyInt.setError(1);
+  BOOST_CHECK_CLOSE(emptyInt.value(), 7., 0.0001);
+  BOOST_CHECK_CLOSE(emptyInt.bounds().first, 0., 0.0001);
+  BOOST_CHECK_CLOSE(emptyInt.bounds().second, 10., 0.0001);
+  BOOST_CHECK_CLOSE(emptyInt.error().first, 1., 0.0001);
 }
 
 BOOST_AUTO_TEST_CASE(FixValueCheck) {
   DoubleParameter emptyFloat("emptFloatPar");
-  emptyFloat.SetValue(7.);
-  emptyFloat.SetMinMax(0., 10.);
-  emptyFloat.SetError(1.);
-  BOOST_CHECK(!emptyFloat.IsFixed());
-  emptyFloat.SetParameterFixed();
-  BOOST_CHECK(emptyFloat.IsFixed());
-  BOOST_CHECK_THROW(emptyFloat.SetValue(8.), ParameterFixed);
-  BOOST_CHECK_CLOSE(emptyFloat.GetValue(), 7., 0.0001);
+  emptyFloat.setValue(7.);
+  emptyFloat.setBounds(0., 10.);
+  emptyFloat.setError(1.);
+  BOOST_CHECK(!emptyFloat.isFixed());
+  emptyFloat.fixParameter(true);
+  BOOST_CHECK(emptyFloat.isFixed());
+  BOOST_CHECK_THROW(emptyFloat.setValue(8.), ParameterFixed);
+  BOOST_CHECK_CLOSE(emptyFloat.value(), 7., 0.0001);
 }
 
 BOOST_AUTO_TEST_CASE(ConstructorCheck2) {
@@ -76,17 +74,17 @@ BOOST_AUTO_TEST_CASE(ConstructorCheck2) {
         std::string("listPar") + std::to_string(par), par, 0, 10, 1));
   vecParIntCopy = vecParInt; // copy vector
 
-  BOOST_CHECK_CLOSE(emptyInt.GetValue(), 0., 0.0001);
-  BOOST_CHECK_CLOSE(emptyFloat.GetValue(), 0., 0.0001);
-  BOOST_CHECK_CLOSE(parInt.GetValue(), 2., 0.0001);
-  BOOST_CHECK_CLOSE(parCopy.GetValue(), 2., 0.0001);
-  BOOST_CHECK(!parWrong.HasBounds());
-  BOOST_CHECK_CLOSE(pParInt->GetValue(), 3., 0.0001);
+  BOOST_CHECK_CLOSE(emptyInt.value(), 0., 0.0001);
+  BOOST_CHECK_CLOSE(emptyFloat.value(), 0., 0.0001);
+  BOOST_CHECK_CLOSE(parInt.value(), 2., 0.0001);
+  BOOST_CHECK_CLOSE(parCopy.value(), 2., 0.0001);
+  BOOST_CHECK(!parWrong.hasBounds());
+  BOOST_CHECK_CLOSE(pParInt->value(), 3., 0.0001);
   for (unsigned int par = 0; par < 10; par++)
-    BOOST_CHECK_CLOSE(vecParInt[par].GetValue(), vecParIntCopy[par].GetValue(),
+    BOOST_CHECK_CLOSE(vecParInt[par].value(), vecParIntCopy[par].value(),
                       0.0001);
 }
-  /* ----------- Testing ParameterList ------------ */
+  // ----------- Testing ParameterList ------------
 
 BOOST_AUTO_TEST_CASE(ConstructorCheck) {
   std::vector<std::shared_ptr<IntegerParameter>> vecParInt;
@@ -105,14 +103,25 @@ BOOST_AUTO_TEST_CASE(ConstructorCheck) {
   BOOST_CHECK_CLOSE(testList.GetNInteger(), 10., 0.0001);
   BOOST_CHECK_CLOSE(testList.GetNBool(), 1., 0.0001);
 
-  BOOST_CHECK_CLOSE(testList.GetIntegerParameter(4)->GetValue(), 4., 0.0001);
-  BOOST_CHECK(testList.GetBoolParameter(0)->GetValue());
+  BOOST_CHECK_CLOSE(testList.GetIntegerParameter(4)->value(), 4., 0.0001);
+  BOOST_CHECK(testList.GetBoolParameter(0)->value());
 
   BOOST_CHECK_THROW(testList.GetBoolParameter(4), BadParameter);
 
   BOOST_CHECK_THROW(testList.SetParameterValue(2, 5.), BadParameter);
   testList.SetParameterValue(0, 1.1);
-  BOOST_CHECK_CLOSE(testList.GetDoubleParameter(0)->GetValue(), 1.1, 0.0001);
+  BOOST_CHECK_CLOSE(testList.GetDoubleParameter(0)->value(), 1.1, 0.0001);
+}
+
+BOOST_AUTO_TEST_CASE(Serialization) {
+  auto shrpar = std::make_shared<DoubleParameter>("NNNNN", 2.5, 1.0, 3.0, 0.3);
+  auto par = DoubleParameter("par", 2.5, 1.0, 3.0, 0.3);
+  std::ofstream ofs("paramter.xml");
+  boost::archive::xml_oarchive oa(ofs, boost::archive::no_header);
+//  boost::archive::text_oarchive oa(ofs, boost::archive::no_header);
+  oa << BOOST_SERIALIZATION_NVP(*shrpar.get());
+//  oa & par;
+
 }
 
 BOOST_AUTO_TEST_SUITE_END();

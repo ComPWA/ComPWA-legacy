@@ -262,7 +262,7 @@ bool BreitWignerStrategy::execute(ParameterList &paras,
     }
   }
   out =
-      std::shared_ptr<Parameter>(new MultiComplex(out->GetName(), results));
+      std::shared_ptr<Parameter>(new MultiComplex(out->name(), results));
   return true;
 }
 
@@ -277,7 +277,7 @@ void RelativisticBreitWigner::GetParameters(ParameterList &list) {
   width = GetWidthParameter();
   radius = GetMesonRadiusParameter();
   try { // catch BadParameter
-    tmp = list.GetDoubleParameter(width->GetName());
+    tmp = list.GetDoubleParameter(width->name());
     // catch and throw std::runtime_error due to failed parameter comparisson
     try { 
       if (*tmp == *width)
@@ -290,7 +290,7 @@ void RelativisticBreitWigner::GetParameters(ParameterList &list) {
   }
 
   try { // catch BadParameter
-    tmp = list.GetDoubleParameter(radius->GetName());
+    tmp = list.GetDoubleParameter(radius->name());
     // catch and throw std::runtime_error due to failed parameter comparisson
     try {
       if (*tmp == *radius)
@@ -308,7 +308,7 @@ void RelativisticBreitWigner::UpdateParameters(const ParameterList &par){
   // Try to update mesonRadius
   std::shared_ptr<DoubleParameter> rad;
   try {
-    rad = par.GetDoubleParameter(_mesonRadius->GetName());
+    rad = par.GetDoubleParameter(_mesonRadius->name());
   } catch (std::exception &ex) {
   }
   if (rad)
@@ -317,7 +317,7 @@ void RelativisticBreitWigner::UpdateParameters(const ParameterList &par){
   // Try to update width
   std::shared_ptr<DoubleParameter> width;
   try {
-    width = par.GetDoubleParameter(_width->GetName());
+    width = par.GetDoubleParameter(_width->name());
   } catch (std::exception &ex) {
   }
   if (width)

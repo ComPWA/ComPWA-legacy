@@ -48,12 +48,12 @@ static const char *ParNames[8] = {
 ///
 /// \class Parameter
 /// Base class for internal parameter.
-/// This class defines the internal container of a parameter. For the use in 
-/// the function tree, the observer pattern is used and this class takes over 
-/// the role of the Subject. Therefore the actual implementations of 
+/// This class defines the internal container of a parameter. For the use in
+/// the function tree, the observer pattern is used and this class takes over
+/// the role of the Subject. Therefore the actual implementations of
 /// Parameter are the ConcreteSubjects of the observer pattern and the
 /// TreeNodes take the role of the observers.
-/// 
+///
 class Parameter {
 public:
   //! Constructor with name of parameter and optional type
@@ -64,16 +64,16 @@ public:
   virtual ~Parameter() {}
 
   //! Getter for name of object
-  virtual std::string GetName() const { return name_; }
+  virtual std::string name() const { return name_; }
   
   //! Getter for name of object
-  virtual void SetName( std::string n ) { name_ = n; }
+  virtual void setName( std::string n ) { name_ = n; }
 
   //! Getter for type of object
   virtual ParType type() const { return type_; }
 
   //! Getter for typename of object, to be defined by the actual implementation
-  virtual std::string TypeName() const = 0;
+  virtual std::string className() const = 0;
 
   // Observer Pattern Functions
 
@@ -129,36 +129,21 @@ public:
     return out << b.to_str();
   }
 
-  //! A public function returning a string with parameter information
-  /*!
-   * This function simply returns the member string out_, which contains
-   * all parameter information. The string gets rebuild with every change
-   * of the parameter.
-   * \return string with parameter information
-   * \sa operator<<, make_str()
-   */
-  virtual std::string to_str() { return make_str(); }
+  /// A public function returning a string with parameter information
+  virtual std::string to_str() const = 0;
 
-  //! A public function returning a string with parameter value
-  /*!
-   * This function simply returns the member string outVal_, which contains
-   * the parameter value. The string gets rebuild with every change
-   * of the parameter.
-   * \return string with parameter information
-   * \sa make_str()
-   */
-  virtual std::string val_to_str() { return make_val_str(); }
-
+  /// A public function returning a string with parameter value
+  virtual std::string val_to_str() const = 0;
+  
 protected:
-  std::string name_; /*!< internal name of the parameter */
-  ParType type_;     /*!< ParType enum for type of parameter */
+  /// Name of parameter
+  std::string name_;
+  
+  /// Type of parameter (e.g. Double, Integer, ...)
+  ParType type_;
 
-  std::vector<std::shared_ptr<ParObserver>>
-      oberservingNodes; /*!< list of observers, e.g. TreeNodes */
-  //! Interface to output string, to be implemented by parameter implementations
-  virtual std::string make_str() const = 0;
-  //! Interface to output value, to be implemented by parameter implementations
-  virtual std::string make_val_str() const = 0;
+  /// List of observers, e.g. TreeNodes
+  std::vector<std::shared_ptr<ParObserver>> oberservingNodes;
 
 private:
   friend class boost::serialization::access;
@@ -168,16 +153,11 @@ private:
     ar &BOOST_SERIALIZATION_NVP(type_);
   }
 };
-} /* namespace ComPWA */
+} // ns::ComPWA
 
 BOOST_SERIALIZATION_SHARED_PTR(Parameter);
 
 BOOST_CLASS_IMPLEMENTATION(
     ComPWA::Parameter, boost::serialization::level_type::object_serializable)
-
-// BOOST_CLASS_TRACKING(
-//		ComPWA::Parameter,
-//		boost::serialization::tracking_type::track_never
-//)
 
 #endif

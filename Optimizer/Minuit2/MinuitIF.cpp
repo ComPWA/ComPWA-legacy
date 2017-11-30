@@ -74,20 +74,20 @@ std::shared_ptr<ComPWA::FitResult> MinuitIF::exec(ParameterList &par) {
       actPat->SetError(0.001);
 
     if (!actPat->IsFixed() &&
-        actPat->GetName().find("phase") != actPat->GetName().npos)
+        actPat->name().find("phase") != actPat->name().npos)
       actPat->SetValue(shiftAngle(actPat->GetValue()));
 
     if (actPat->HasBounds()) {
-      upar.Add(actPat->GetName(), actPat->GetValue(), actPat->GetError(),
+      upar.Add(actPat->name(), actPat->GetValue(), actPat->GetError(),
                actPat->GetMinValue(), actPat->GetMaxValue());
     } else {
-      upar.Add(actPat->GetName(), actPat->GetValue(), actPat->GetError());
+      upar.Add(actPat->name(), actPat->GetValue(), actPat->GetError());
     }
 
     if (!actPat->IsFixed())
       freePars++;
     if (actPat->IsFixed())
-      upar.Fix(actPat->GetName());
+      upar.Fix(actPat->name());
   }
 
   LOG(info) << "MinuitIF::exec() | Number of parameters (free): "
@@ -174,21 +174,21 @@ std::shared_ptr<ComPWA::FitResult> MinuitIF::exec(ParameterList &par) {
       continue;
 
     // central value
-    double val = minState.Value(finalPar->GetName());
+    double val = minState.Value(finalPar->name());
 
     // shift to [-pi;pi] if parameter is a phase
-    if (finalPar->GetName().find("phase") != finalPar->GetName().npos)
+    if (finalPar->name().find("phase") != finalPar->name().npos)
       val = shiftAngle(val);
     finalPar->SetValue(val);
 
-    resultsOut << finalPar->GetName() << " " << val << std::endl;
+    resultsOut << finalPar->name() << " " << val << std::endl;
     if (finalPar->GetErrorType() == ErrorType::ASYM) {
       // Skip minos and fill symmetic errors
       if (!minMin.IsValid() || !enableMinos) {
         LOG(info) << "MinuitIF::exec() | Skip Minos "
                      "for parameter "
                   << i << "...";
-        finalPar->SetError(minState.Error(finalPar->GetName()));
+        finalPar->SetError(minState.Error(finalPar->name()));
         continue;
       }
       // asymmetric errors -> run minos
@@ -201,7 +201,7 @@ std::shared_ptr<ComPWA::FitResult> MinuitIF::exec(ParameterList &par) {
       finalPar->SetError(assymErrors.first, assymErrors.second);
     } else if (finalPar->GetErrorType() == ErrorType::SYM) {
       // symmetric errors -> migrad/hesse error
-      finalPar->SetError(minState.Error(finalPar->GetName()));
+      finalPar->SetError(minState.Error(finalPar->name()));
     } else {
       throw std::runtime_error(
           "MinuitIF::exec() | Unknown error type of parameter: " +

@@ -165,7 +165,7 @@ bool WignerDStrategy::execute(ParameterList &paras,
                                "Evaluation of dynamical function failed!");
     }
   } // end element loop
-  out = std::shared_ptr<Parameter>(new MultiDouble(out->GetName(), results));
+  out = std::shared_ptr<Parameter>(new MultiDouble(out->name(), results));
 
   return true;
 }

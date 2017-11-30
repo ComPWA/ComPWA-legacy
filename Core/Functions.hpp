@@ -127,17 +127,17 @@ public:
         // TODO: exception wrong input
         return false;
       }
-      unsigned int nElements = paras.GetMultiComplex(0)->GetNValues();
+      unsigned int nElements = paras.GetMultiComplex(0)->numValues();
       // fill MultiDouble parameter
       std::vector<double> results;
       results.reserve(nElements);
       for (auto const &complex_element :
-           paras.GetMultiComplex(0)->GetValues()) {
+           paras.GetMultiComplex(0)->values()) {
         results.push_back(complex_element.real());
       }
 
       out = std::shared_ptr<Parameter>(
-          new MultiDouble(out->GetName(), results));
+          new MultiDouble(out->name(), results));
 
       break;
     } // end multi complex
@@ -149,7 +149,7 @@ public:
       }
 
       out = std::shared_ptr<Parameter>(new DoubleParameter(
-          out->GetName(), paras.GetComplexParameter(0)->GetValue().real()));
+          out->name(), paras.GetComplexParameter(0)->value().real()));
 
       break;
     } // end double
@@ -203,15 +203,15 @@ public:
       }
 
       for (auto const &multi_complex : paras.GetMultiComplexs()) {
-        unsigned int nElements = multi_complex->GetNValues();
+        unsigned int nElements = multi_complex->numValues();
         // fill MultiDouble parameter
         std::vector<std::complex<double>> results;
         results.reserve(nElements);
         for (unsigned int ele = 0; ele < nElements; ele++) {
-          results.push_back(std::conj(multi_complex->GetValue(ele)));
+          results.push_back(std::conj(multi_complex->value(ele)));
         }
         out = std::shared_ptr<Parameter>(
-            new MultiComplex(out->GetName(), results));
+            new MultiComplex(out->name(), results));
       }
       break;
     } // end multi complex
@@ -223,7 +223,7 @@ public:
         return false;
       }
       out = std::shared_ptr<Parameter>(new ComplexParameter(
-          out->GetName(), std::conj(paras.GetComplexParameter(0)->GetValue())));
+          out->name(), std::conj(paras.GetComplexParameter(0)->value())));
       break;
     } // end double
 

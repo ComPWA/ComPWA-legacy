@@ -41,7 +41,7 @@ void FitResult::genSimpleOutput(std::ostream &out) {
   for (unsigned int o = 0; o < finalParameters.GetNDouble(); o++) {
     std::shared_ptr<DoubleParameter> outPar =
         finalParameters.GetDoubleParameter(o);
-    out << outPar->GetValue() << " " << outPar->GetError() << " ";
+    out << outPar->value() << " " << outPar->error().first << " ";
   }
   out << "\n";
 
@@ -79,7 +79,7 @@ void FitResult::PrintFitParameters(TableFormater *tableResult) {
 
   // Do we have a parameter with assymetric errors?
   for (unsigned int o = 0; o < finalParameters.GetNDouble(); o++)
-    if (finalParameters.GetDoubleParameter(o)->GetErrorType() ==
+    if (finalParameters.GetDoubleParameter(o)->errorType() ==
         ErrorType::ASYM)
       parErrorWidth = 33;
 
@@ -105,50 +105,50 @@ void FitResult::PrintFitParameters(TableFormater *tableResult) {
     }
     if (printInitial) {
       try {
-        iniPar = initialParameters.GetDoubleParameter(outPar->GetName());
+        iniPar = initialParameters.GetDoubleParameter(outPar->name());
       } catch (BadParameter &bad) {
         iniPar.reset();
       }
     }
     if (printTrue) {
       try {
-        truePar = trueParameters.GetDoubleParameter(outPar->GetName());
+        truePar = trueParameters.GetDoubleParameter(outPar->name());
       } catch (BadParameter &bad) {
         truePar.reset();
       }
     }
 
-    ErrorType errorType = outPar->GetErrorType();
-    bool isFixed = outPar->IsFixed();
+    ErrorType errorType = outPar->errorType();
+    bool isFixed = outPar->isFixed();
 
     // Is parameter an angle?
     bool isAngle = 0;
-    if (outPar->GetName().find("phase") != std::string::npos)
+    if (outPar->name().find("phase") != std::string::npos)
       isAngle = 1;
     // ... then shift the value to the domain [-pi;pi]
     if (isAngle && !isFixed) {
-      outPar->SetValue(shiftAngle(outPar->GetValue()));
+      outPar->setValue(shiftAngle(outPar->value()));
       if (printInitial)
-        iniPar->SetValue(shiftAngle(iniPar->GetValue()));
+        iniPar->setValue(shiftAngle(iniPar->value()));
       if (printTrue)
-        truePar->SetValue(shiftAngle(truePar->GetValue()));
+        truePar->setValue(shiftAngle(truePar->value()));
     }
 
     // Is parameter a magnitude?
     bool isMag = 0;
-    if (outPar->GetName().find("mag") != std::string::npos)
+    if (outPar->name().find("mag") != std::string::npos)
       isMag = 1;
     // ... then make sure that it is positive
     if (isMag && !isFixed) {
-      outPar->SetValue(std::fabs(outPar->GetValue()));
+      outPar->setValue(std::fabs(outPar->value()));
       if (printInitial && iniPar)
-        iniPar->SetValue(std::fabs(iniPar->GetValue()));
+        iniPar->setValue(std::fabs(iniPar->value()));
       if (printTrue && truePar)
-        truePar->SetValue(std::fabs(truePar->GetValue()));
+        truePar->setValue(std::fabs(truePar->value()));
     }
 
     // Print parameter name
-    *tableResult << o << outPar->GetName();
+    *tableResult << o << outPar->name();
 
     // Print initial values
     if (printInitial) {
@@ -169,7 +169,7 @@ void FitResult::PrintFitParameters(TableFormater *tableResult) {
     if (printTrue) {
       if (truePar) {
         *tableResult << *truePar;
-        double pull = (truePar->GetValue() - outPar->GetValue());
+        double pull = (truePar->value() - outPar->value());
         // Shift pull by 2*pi if that reduces the deviation
         if (isAngle && !isFixed) {
           while (pull < 0 && pull < -M_PI)
@@ -177,13 +177,13 @@ void FitResult::PrintFitParameters(TableFormater *tableResult) {
           while (pull > 0 && pull > M_PI)
             pull -= 2 * M_PI;
         }
-        if (outPar->HasError()) {
+        if (outPar->hasError()) {
           if (errorType == ErrorType::ASYM && pull < 0)
-            pull /= outPar->GetErrorLow();
+            pull /= outPar->error().first;
           else if (errorType == ErrorType::ASYM && pull > 0)
-            pull /= outPar->GetErrorHigh();
+            pull /= outPar->error().second;
           else
-            pull /= outPar->GetError();
+            pull /= outPar->error().first;
         }
         if (!std::isnan(pull))
           (*tableResult) << pull;
@@ -216,17 +216,17 @@ void FitResult::PrintFitFractions(TableFormater *fracTable) {
   for (unsigned int i = 0; i < _fitFractions.GetNDouble(); ++i) {
     std::shared_ptr<DoubleParameter> tmpPar =
         _fitFractions.GetDoubleParameter(i);
-    std::string resName = tmpPar->GetName();
+    std::string resName = tmpPar->name();
 
-    *fracTable << resName << tmpPar->GetValue();
+    *fracTable << resName << tmpPar->value();
     try {
-      *fracTable << tmpPar->GetError(); // assume symmetric errors here
+      *fracTable << tmpPar->error().first; // assume symmetric errors here
     } catch (std::exception &ex) {
       *fracTable << 0.0;
     }
 
-    sum += tmpPar->GetValue();
-    sumErrorSq += tmpPar->GetError() * tmpPar->GetError();
+    sum += tmpPar->value();
+    sumErrorSq += tmpPar->error().first * tmpPar->error().first;
   }
   fracTable->delim();
   *fracTable << "Total" << sum << sqrt(sumErrorSq);

@@ -220,7 +220,7 @@ void CoherentIntensity::GetParameters(ComPWA::ParameterList &list) {
 void CoherentIntensity::UpdateParameters(const ParameterList &list) {
   std::shared_ptr<DoubleParameter> p;
   try {
-    p = list.GetDoubleParameter(_strength->GetName());
+    p = list.GetDoubleParameter(_strength->name());
   } catch (std::exception &ex) {
   }
   if (p)
