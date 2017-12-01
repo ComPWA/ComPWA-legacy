@@ -17,10 +17,10 @@ NonResonant::GetTree(const ParameterList &sample, int pos, std::string suffix) {
                                    sampleSize, std::complex<double>(1, 0))));
 
   std::shared_ptr<FunctionTree> newTree(new FunctionTree());
-  newTree->CreateHead("NonResonant" + suffix,
+  newTree->createHead("NonResonant" + suffix,
                       std::shared_ptr<Strategy>(new MultAll(ParType::MCOMPLEX)),
                       sampleSize);
-  newTree->CreateLeaf("unit", unitVec, "NonResonant" + suffix); // nonReso
+  newTree->createLeaf("unit", unitVec, "NonResonant" + suffix); // nonReso
   return newTree;
 }
 

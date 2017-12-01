@@ -30,23 +30,23 @@ class PartialAmplitude {
 
 public:
   PartialAmplitude()
-      : _preFactor(1, 0), phspVolume_(1), _current_integral(1.0),
-        _current_magnitude(0.0), _current_phase(0.0){};
+      : _preFactor(1, 0), phspVolume_(1), CurrentIntegral(1.0),
+        CurrentMagnitude(0.0), CurrentPhase(0.0){};
 
   virtual ~PartialAmplitude(){};
 
-  virtual PartialAmplitude *Clone(std::string newName = "") const = 0;
+  virtual PartialAmplitude *clone(std::string newName = "") const = 0;
 
   //======= INTEGRATION/NORMALIZATION ===========
 
   /// Get current normalization.
-  virtual double GetNormalization() const = 0;
+  virtual double normalization() const = 0;
 
   /// Check of parameters have changed and normalization has to be recalculatecd
-  bool CheckModified() const {
-    if (GetMagnitude() != _current_magnitude || GetPhase() != _current_phase) {
-      const_cast<double &>(_current_magnitude) = GetMagnitude();
-      const_cast<double &>(_current_phase) = GetPhase();
+  bool isModified() const {
+    if (magnitude() != CurrentMagnitude || phase() != CurrentPhase) {
+      const_cast<double &>(CurrentMagnitude) = magnitude();
+      const_cast<double &>(CurrentPhase) = phase();
       return true;
     }
     return false;
@@ -55,84 +55,84 @@ public:
   //================ EVALUATION =================
 
   /// Value of PartialAmplitude at \param point with normalization factor
-  virtual std::complex<double> Evaluate(const dataPoint &point) const {
-    return EvaluateNoNorm(point) * GetNormalization();
+  virtual std::complex<double> evaluate(const DataPoint &point) const {
+    return evaluateNoNorm(point) * normalization();
   }
 
   /// Value of PartialAmplitude at \param point without normalization factor
-  virtual std::complex<double> EvaluateNoNorm(const dataPoint &point) const = 0;
+  virtual std::complex<double> evaluateNoNorm(const DataPoint &point) const = 0;
 
   //============ SET/GET =================
 
-  virtual std::string GetName() const { return _name; }
+  virtual std::string name() const { return _name; }
 
-  virtual void SetName(std::string name) { _name = name; }
+  virtual void setName(std::string name) { _name = name; }
 
-  virtual void SetPrefactor(std::complex<double> pre) { _preFactor = pre; }
+  virtual void setPrefactor(std::complex<double> pre) { _preFactor = pre; }
 
-  virtual std::complex<double> GetPrefactor() const { return _preFactor; }
+  virtual std::complex<double> prefactor() const { return _preFactor; }
 
-  virtual std::complex<double> GetCoefficient() const {
-    return std::polar(GetMagnitude(), GetPhase());
+  virtual std::complex<double> coefficient() const {
+    return std::polar(magnitude(), phase());
   }
 
-  std::shared_ptr<ComPWA::DoubleParameter> GetMagnitudeParameter() {
+  std::shared_ptr<ComPWA::DoubleParameter> magnitudeParameter() {
     return _magnitude;
   }
 
-  double GetMagnitude() const { return std::fabs(_magnitude->value()); }
+  double magnitude() const { return std::fabs(_magnitude->value()); }
 
-  void SetMagnitudeParameter(std::shared_ptr<ComPWA::DoubleParameter> par) {
+  void setMagnitudeParameter(std::shared_ptr<ComPWA::DoubleParameter> par) {
     _magnitude = par;
   }
 
-  void SetMagnitude(double par) { _magnitude->setValue(par); }
+  void setMagnitude(double par) { _magnitude->setValue(par); }
 
-  std::shared_ptr<ComPWA::DoubleParameter> GetPhaseParameter() {
+  std::shared_ptr<ComPWA::DoubleParameter> phaseParameter() {
     return _phase;
   }
 
-  double GetPhase() const { return _phase->value(); }
+  double phase() const { return _phase->value(); }
 
-  void SetPhaseParameter(std::shared_ptr<ComPWA::DoubleParameter> par) {
+  void setPhaseParameter(std::shared_ptr<ComPWA::DoubleParameter> par) {
     _phase = par;
   }
 
-  void SetPhase(double par) { _phase->setValue(par); }
+  void setPhase(double par) { _phase->setValue(par); }
 
-  virtual void GetParameters(ParameterList &list) {
-    list.AddParameter(GetMagnitudeParameter());
-    list.AddParameter(GetPhaseParameter());
+  virtual void parameters(ParameterList &list) {
+    list.AddParameter(magnitudeParameter());
+    list.AddParameter(phaseParameter());
   }
 
   /// Fill vector with parameters (fast). No check is performed if parameters
   /// already exist. \see GetParameters(ParameterList &list)
-  virtual void GetParametersFast(std::vector<double> &list) const {
-    list.push_back(GetMagnitude());
-    list.push_back(GetPhase());
+  virtual void parametersFast(std::vector<double> &list) const {
+    list.push_back(magnitude());
+    list.push_back(phase());
   }
 
   /// Update parameters to the values given in \p list
-  virtual void UpdateParameters(const ParameterList &list) = 0;
+  virtual void updateParameters(const ParameterList &list) = 0;
 
   /// Set phase space sample.
   /// We use the phase space sample to calculate the normalization. The sample
   /// should be without efficiency applied.
   virtual void
-  SetPhspSample(std::shared_ptr<std::vector<ComPWA::dataPoint>> phspSample) {
+  setPhspSample(std::shared_ptr<std::vector<ComPWA::DataPoint>> phspSample) {
     _phspSample = phspSample;
   };
 
-  virtual void SetPhspVolume(double phspVol) { phspVolume_ = phspVol; }
+  virtual void setPhspVolume(double phspVol) { phspVolume_ = phspVol; }
 
-  virtual double GetPhspVolume() const { return phspVolume_; }
+  virtual double phspVolume() const { return phspVolume_; }
 
   //=========== FUNCTIONTREE =================
 
-  virtual bool HasTree() const { return false; }
+  virtual bool hasTree() const { return false; }
 
   virtual std::shared_ptr<FunctionTree>
-  GetTree(std::shared_ptr<Kinematics> kin, const ComPWA::ParameterList &sample,
+  tree(std::shared_ptr<Kinematics> kin, const ComPWA::ParameterList &sample,
           const ComPWA::ParameterList &toySample, std::string suffix) = 0;
 
 protected:
@@ -142,12 +142,12 @@ protected:
   std::complex<double> _preFactor;
 
   /// Phsp sample for numerical integration
-  std::shared_ptr<std::vector<ComPWA::dataPoint>> _phspSample;
+  std::shared_ptr<std::vector<ComPWA::DataPoint>> _phspSample;
 
   /// The phase-space volume is needed for proper normalization of the PartialAmplitude
   double phspVolume_;
 
-  virtual double Integral() const {
+  virtual double integral() const {
     if (!_phspSample->size()) {
       LOG(debug)
           << "CoherentIntensity::Integral() | Integral can not be calculated "
@@ -158,7 +158,7 @@ protected:
 
     double sumIntens = 0;
     for (auto i : *_phspSample.get())
-      sumIntens += std::norm(EvaluateNoNorm(i));
+      sumIntens += std::norm(evaluateNoNorm(i));
 
     double integral = (sumIntens * phspVolume_ / _phspSample->size());
     LOG(trace) << "PartialAmplitude::Integral() | Integral is " << integral << ".";
@@ -167,12 +167,12 @@ protected:
   }
 
   //! Integral value (temporary)
-  double _current_integral;
+  double CurrentIntegral;
 
 private:
   //! Temporary value of mass (used to trigger recalculation of normalization)
-  double _current_magnitude;
-  double _current_phase;
+  double CurrentMagnitude;
+  double CurrentPhase;
 };
 
 } /* namespace Physics */

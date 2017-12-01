@@ -11,7 +11,8 @@
 
 using namespace ComPWA;
 
-TreeNode::TreeNode(std::string name, std::shared_ptr<ComPWA::Parameter> parameter,
+TreeNode::TreeNode(std::string name,
+                   std::shared_ptr<ComPWA::Parameter> parameter,
                    std::shared_ptr<Strategy> strategy,
                    std::shared_ptr<TreeNode> parent)
     : _name(name), _changed(true), _strat(strategy) {
@@ -36,18 +37,13 @@ TreeNode::TreeNode(std::string name,
 
 TreeNode::~TreeNode() {}
 
-void TreeNode::LinkParents() {
+void TreeNode::update() {
   for (unsigned int i = 0; i < _parents.size(); i++)
-    _parents.at(i)->_children.push_back(shared_from_this());
-}
-
-void TreeNode::Update() {
-  for (unsigned int i = 0; i < _parents.size(); i++)
-    _parents.at(i)->Update();
+    _parents.at(i)->update();
   _changed = true;
 };
 
-void TreeNode::Recalculate() {
+void TreeNode::recalculate() {
 
   if (_children.size() < 1) {
     _changed = false;
@@ -57,8 +53,8 @@ void TreeNode::Recalculate() {
   if (_parameters.size() == 1) { // Single dimension
     ParameterList newVals;
     for (auto ch : _children) {
-      ch->Recalculate();
-      for (auto p : ch->Parameters()) {
+      ch->recalculate();
+      for (auto p : ch->parameters()) {
         newVals.AddParameter(p);
       }
     }
@@ -67,7 +63,7 @@ void TreeNode::Recalculate() {
       _strat->execute(newVals, _parameters.at(0));
     } catch (std::exception &ex) {
       LOG(error) << "TreeNode::Recalculate() | Strategy " << _strat
-                 << " failed on node " << Name() << ": " << ex.what();
+                 << " failed on node " << name() << ": " << ex.what();
       throw;
     }
   } else { // Multi dimensions
@@ -75,11 +71,11 @@ void TreeNode::Recalculate() {
       ParameterList newVals;
 
       for (auto ch : _children) {
-        ch->Recalculate();
-        if (ch->Dimension() == 1)
-          newVals.AddParameter(ch->Parameter(0));
-        else if (ch->Dimension() != _parameters.size())
-          newVals.AddParameter(ch->Parameter(ele));
+        ch->recalculate();
+        if (ch->dimension() == 1)
+          newVals.AddParameter(ch->parameter(0));
+        else if (ch->dimension() != _parameters.size())
+          newVals.AddParameter(ch->parameter(ele));
         else
           throw std::runtime_error("TreeNode::Recalculate() | Dimension of "
                                    "child nodes does not match");
@@ -89,7 +85,7 @@ void TreeNode::Recalculate() {
         _strat->execute(newVals, _parameters.at(ele));
       } catch (std::exception &ex) {
         LOG(error) << "TreeNode::recalculate() | Strategy " << _strat
-                   << " failed on node " << Name() << ": " << ex.what();
+                   << " failed on node " << name() << ": " << ex.what();
         throw;
       }
     }
@@ -97,17 +93,17 @@ void TreeNode::Recalculate() {
   _changed = false;
 }
 
-std::shared_ptr<Parameter> TreeNode::Parameter(unsigned int position) {
+std::shared_ptr<Parameter> TreeNode::parameter(unsigned int position) {
   return _parameters.at(position);
 }
 
-std::vector<std::shared_ptr<Parameter>> &TreeNode::Parameters() {
+std::vector<std::shared_ptr<Parameter>> &TreeNode::parameters() {
   return _parameters;
 }
 
-void TreeNode::FillParameters(ComPWA::ParameterList &list) {
+void TreeNode::fillParameters(ComPWA::ParameterList &list) {
   for (auto ch : _children) {
-    ch->FillParameters(list);
+    ch->fillParameters(list);
   }
   for (auto i : _parameters) {
     if (i->type() == ComPWA::ParType::DOUBLE)
@@ -115,15 +111,15 @@ void TreeNode::FillParameters(ComPWA::ParameterList &list) {
   }
 }
 
-std::shared_ptr<TreeNode> TreeNode::FindChildNode(std::string name) const {
+std::shared_ptr<TreeNode> TreeNode::findChildNode(std::string name) const {
   std::shared_ptr<TreeNode> node;
   if (!_children.size())
     node = std::shared_ptr<TreeNode>();
   for (unsigned int i = 0; i < _children.size(); i++) {
-    if (_children.at(i)->Name() == name) {
+    if (_children.at(i)->name() == name) {
       return _children.at(i);
     } else
-      node = _children.at(i)->FindChildNode(name);
+      node = _children.at(i)->findChildNode(name);
     if (node)
       return node;
   }
@@ -165,7 +161,7 @@ std::shared_ptr<TreeNode> TreeNode::FindChildNode(std::string name) const {
 //  return std::complex<double>(-999, 0);
 //}
 
-std::string TreeNode::Print(int level, std::string prefix) const {
+std::string TreeNode::print(int level, std::string prefix) const {
   std::stringstream oss;
   if (_changed && _children.size()) {
     oss << prefix << _name << " = ?";
@@ -190,39 +186,44 @@ std::string TreeNode::Print(int level, std::string prefix) const {
   if (level == 0)
     return oss.str();
   for (unsigned int i = 0; i < _children.size(); i++) {
-    oss << _children.at(i)->Print(level - 1, prefix + ". ");
+    oss << _children.at(i)->print(level - 1, prefix + ". ");
   }
   return oss.str();
 }
 
-void TreeNode::AddChild(std::shared_ptr<TreeNode> childNode) {
+void TreeNode::addChild(std::shared_ptr<TreeNode> childNode) {
   _children.push_back(childNode);
 }
 
-void TreeNode::AddParent(std::shared_ptr<TreeNode> parentNode) {
+void TreeNode::addParent(std::shared_ptr<TreeNode> parentNode) {
   _parents.push_back(parentNode);
   parentNode->_children.push_back(shared_from_this());
 }
 
-void TreeNode::FillParentNames(std::vector<std::string> &names) const {
+void TreeNode::fillParentNames(std::vector<std::string> &names) const {
   for (auto i : _parents) {
-    names.push_back(i->Name());
+    names.push_back(i->name());
   }
 }
 
-void TreeNode::FillChildNames(std::vector<std::string> &names) const {
-  for (unsigned int i = 0; i < _children.size(); i++)
-    names.push_back(_children.at(i)->Name());
+void TreeNode::linkParents() {
+  for (unsigned int i = 0; i < _parents.size(); i++)
+    _parents.at(i)->_children.push_back(shared_from_this());
 }
 
-std::vector<std::shared_ptr<TreeNode>> &TreeNode::GetChildNodes() {
-  return _children;
-}
-
-void TreeNode::DeleteLinks() {
+void TreeNode::deleteLinks() {
   _children.clear();
   _parents.clear();
   for (unsigned int i = 0; i < _parameters.size(); i++) {
     _parameters.at(i)->Detach(shared_from_this());
   }
+}
+
+std::vector<std::shared_ptr<TreeNode>> &TreeNode::childNodes() {
+  return _children;
+}
+
+void TreeNode::fillChildNames(std::vector<std::string> &names) const {
+  for (unsigned int i = 0; i < _children.size(); i++)
+    names.push_back(_children.at(i)->name());
 }

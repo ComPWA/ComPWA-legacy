@@ -25,23 +25,23 @@ HelicityKinematics::HelicityKinematics(std::shared_ptr<PartList> partL,
     : Kinematics(initialState, finalState, cmsP4), _partList(partL) {
 
   // If the cms four-momentum is not set of set it here
-  if (_initialP4 == FourMomentum(0, 0, 0, 0) && _initialState.size() == 1) {
-      double sqrtS = FindParticle(partL, _initialState.at(0)).GetMass();
-      _initialP4 = ComPWA::FourMomentum(0, 0, 0, sqrtS);
+  if (InitialStateP4 == FourMomentum(0, 0, 0, 0) && InitialState.size() == 1) {
+      double sqrtS = FindParticle(partL, InitialState.at(0)).GetMass();
+      InitialStateP4 = ComPWA::FourMomentum(0, 0, 0, sqrtS);
   }
 
   // Make sure cms momentum is set
-  if (_initialP4 == FourMomentum(0, 0, 0, 0))
+  if (InitialStateP4 == FourMomentum(0, 0, 0, 0))
     assert(false);
 
   // Create title
   std::stringstream stream;
   stream << "( ";
-  for (auto i : _initialState)
-    stream << FindParticle(partL, i).GetName() << " ";
+  for (auto i : InitialState)
+    stream << FindParticle(partL, i).name() << " ";
   stream << ")->( ";
-  for (auto i : _finalState)
-    stream << FindParticle(partL, i).GetName() << " ";
+  for (auto i : InitialState)
+    stream << FindParticle(partL, i).name() << " ";
   stream << ")";
 
   LOG(info) << "HelicityKinematics::HelicityKinematics() | Initialize reaction "
@@ -54,48 +54,48 @@ HelicityKinematics::HelicityKinematics(std::shared_ptr<PartList> partL,
     : _partList(partL) {
 
   auto initialS = pt.get_child("InitialState");
-  _initialState = std::vector<int>(initialS.size());
+  InitialState = std::vector<int>(initialS.size());
   for (auto i : initialS) {
     std::string name = i.second.get<std::string>("<xmlattr>.Name");
     auto partP = partL->find(name)->second;
     int pos = i.second.get<int>("<xmlattr>.Id");
-    _initialState.at(pos) = partP.GetId();
+    InitialState.at(pos) = partP.GetId();
   }
-  if (_initialState.size() == 1) {
-    double sqrtS = FindParticle(partL, _initialState.at(0)).GetMass();
-    _initialP4 = ComPWA::FourMomentum(0, 0, 0, sqrtS);
+  if (InitialState.size() == 1) {
+    double sqrtS = FindParticle(partL, InitialState.at(0)).GetMass();
+    InitialStateP4 = ComPWA::FourMomentum(0, 0, 0, sqrtS);
   } else {
     // If the initial state has more than one particle we require that the
     // initial four momentum is specified
-    _initialP4 = FourMomentumFactory(pt.get_child("InitialFourMomentum"));
+    InitialStateP4 = FourMomentumFactory(pt.get_child("InitialFourMomentum"));
   }
 
   // Make sure cms momentum is set
-  if (_initialP4 == FourMomentum(0, 0, 0, 0))
+  if (InitialStateP4 == FourMomentum(0, 0, 0, 0))
     assert(false);
 
   auto finalS = pt.get_child("FinalState");
-  _finalState = std::vector<int>(finalS.size());
+  FinalState = std::vector<int>(finalS.size());
   for (auto i : finalS) {
     std::string name = i.second.get<std::string>("<xmlattr>.Name");
     auto partP = partL->find(name)->second;
     int pos = i.second.get<int>("<xmlattr>.Id");
-    _finalState.at(pos) = partP.GetId();
+    FinalState.at(pos) = partP.GetId();
   }
 
   auto phspVal = pt.get_optional<double>("PhspVolume");
   if (phspVal) {
-    SetPhspVolume(phspVal.get());
+    setPhspVolume(phspVal.get());
   }
 
   // Creating unique title
   std::stringstream stream;
   stream << "( ";
-  for (auto i : _initialState)
-    stream << FindParticle(partL, i).GetName() << " ";
+  for (auto i : InitialState)
+    stream << FindParticle(partL, i).name() << " ";
   stream << ")->( ";
-  for (auto i : _finalState)
-    stream << FindParticle(partL, i).GetName() << " ";
+  for (auto i : FinalState)
+    stream << FindParticle(partL, i).name() << " ";
   stream << ")";
 
   LOG(info) << "HelicityKinematics::HelicityKinematics() | Initialize reaction "
@@ -103,17 +103,17 @@ HelicityKinematics::HelicityKinematics(std::shared_ptr<PartList> partL,
   return;
 }
 
-bool HelicityKinematics::IsWithinPhsp(const dataPoint &point) const {
+bool HelicityKinematics::isWithinPhsp(const DataPoint &point) const {
   int subSystemID = 0;
   int pos = 0;
-  while ((pos + 2) < point.Size()) {
+  while ((pos + 2) < point.size()) {
     auto invMassBounds = GetInvMassBounds(GetSubSystem(subSystemID));
-    if (point.GetValue(pos) < invMassBounds.first ||
-        point.GetValue(pos) > invMassBounds.second)
+    if (point.value(pos) < invMassBounds.first ||
+        point.value(pos) > invMassBounds.second)
       return false;
-    if (point.GetValue(pos + 1) < -1 || point.GetValue(pos + 1) > +1)
+    if (point.value(pos + 1) < -1 || point.value(pos + 1) > +1)
       return false;
-    if (point.GetValue(pos + 2) < 0 || point.GetValue(pos + 2) > 2 * M_PI)
+    if (point.value(pos + 2) < 0 || point.value(pos + 2) > 2 * M_PI)
       return false;
 
     pos += 3;
@@ -123,23 +123,23 @@ bool HelicityKinematics::IsWithinPhsp(const dataPoint &point) const {
   return true;
 }
 
-void HelicityKinematics::EventToDataPoint(const Event &event,
-                                          dataPoint &point) const {
+void HelicityKinematics::convert(const Event &event,
+                                          DataPoint &point) const {
   assert(_listSubSystem.size() == _invMassBounds.size());
 
   if (!_listSubSystem.size()) {
-    LOG(error) << "HelicityKinematics::EventToDataPoint() | No variabels were "
+    LOG(error) << "HelicityKinematics::convert() | No variabels were "
                   "requested before. Therefore this function is doing nothing!";
   }
   for (int i = 0; i < _listSubSystem.size(); i++)
-    EventToDataPoint(event, point, _listSubSystem.at(i), _invMassBounds.at(i));
+    convert(event, point, _listSubSystem.at(i), _invMassBounds.at(i));
   return;
 }
 
-void HelicityKinematics::EventToDataPoint(const Event &event, dataPoint &point,
+void HelicityKinematics::convert(const Event &event, DataPoint &point,
                                           const SubSystem &sys) const {
   auto massLimits = GetInvMassBounds(sys);
-  EventToDataPoint(event, point, sys, massLimits);
+  convert(event, point, sys, massLimits);
 }
 
 double HelicityKinematics::HelicityAngle(double M, double m, double m2,
@@ -175,23 +175,23 @@ double HelicityKinematics::HelicityAngle(double M, double m, double m2,
   return cosAngle;
 }
 
-void HelicityKinematics::EventToDataPoint(
-    const Event &event, dataPoint &point, const SubSystem &sys,
+void HelicityKinematics::convert(
+    const Event &event, DataPoint &point, const SubSystem &sys,
     const std::pair<double, double> limits) const {
 
   assert(sys.GetFinalStates().size() == 2 &&
-         "HelicityKinematics::EventToDataPoint() | More then two particles.");
+         "HelicityKinematics::convert() | More then two particles.");
 
   FourMomentum cms;
   for (auto s : sys.GetRecoilState())
-    cms += event.GetParticle(s).GetFourMomentum();
+    cms += event.particle(s).GetFourMomentum();
 
   FourMomentum finalA, finalB;
   for (auto s : sys.GetFinalStates().at(0))
-    finalA += event.GetParticle(s).GetFourMomentum();
+    finalA += event.particle(s).GetFourMomentum();
 
   for (auto s : sys.GetFinalStates().at(1))
-    finalB += event.GetParticle(s).GetFourMomentum();
+    finalB += event.particle(s).GetFourMomentum();
 
   // Four momentum of the decaying resonance
   FourMomentum resP4 = finalA + finalB;
@@ -206,7 +206,7 @@ void HelicityKinematics::EventToDataPoint(
     if (ComPWA::equal(mSq, limits.first, 10))
       mSq = limits.first;
     else
-      throw BeyondPhsp("HelicityKinematics::EventToDataPoint() |"
+      throw BeyondPhsp("HelicityKinematics::convert() |"
                        " Point beypond phase space boundaries!");
   }
   if (mSq >= limits.second) {
@@ -215,7 +215,7 @@ void HelicityKinematics::EventToDataPoint(
     if (ComPWA::equal(mSq, limits.second, 10))
       mSq = limits.second;
     else
-      throw BeyondPhsp("HelicityKinematics::EventToDataPoint() |"
+      throw BeyondPhsp("HelicityKinematics::convert() |"
                        " Point beypond phase space boundaries!");
   }
 
@@ -280,19 +280,19 @@ void HelicityKinematics::EventToDataPoint(
   //   Check if values are within allowed range.
   if (cosTheta > 1 || cosTheta < -1 || phi > M_PI || phi < (-1) * M_PI ||
       std::isnan(cosTheta) || std::isnan(phi)) {
-    throw BeyondPhsp("HelicityKinematics::EventToDataPoint() |"
+    throw BeyondPhsp("HelicityKinematics::convert() |"
                      " Point beypond phase space boundaries!");
   }
 
-  point.GetPoint().push_back(mSq);
-  point.GetPoint().push_back(cosTheta);
-  point.GetPoint().push_back(phi);
+  point.values().push_back(mSq);
+  point.values().push_back(cosTheta);
+  point.values().push_back(phi);
 }
 
 const std::pair<double, double> &
 HelicityKinematics::GetInvMassBounds(const SubSystem &sys) const {
   return GetInvMassBounds(
-      const_cast<HelicityKinematics *>(this)->GetDataID(sys));
+      const_cast<HelicityKinematics *>(this)->dataID(sys));
 }
 
 const std::pair<double, double> &
@@ -305,15 +305,15 @@ HelicityKinematics::CalculateInvMassBounds(const SubSystem &sys) const {
 
   /// We use the formulae from (PDG2016 Kinematics Fig.47.3). I hope the
   /// generalization to n-body decays is correct.
-  std::pair<double, double> lim(0, _initialP4.GetInvMass());
+  std::pair<double, double> lim(0, InitialStateP4.GetInvMass());
   // Sum up masses of all final state particles
   for (auto j : sys.GetFinalStates())
     for (auto i : j)
-      lim.first += FindParticle(_partList, _finalState.at(i)).GetMass();
+      lim.first += FindParticle(_partList, FinalState.at(i)).GetMass();
   lim.first *= lim.first;
 
   for (auto i : sys.GetRecoilState())
-    lim.second -= FindParticle(_partList, _finalState.at(i)).GetMass();
+    lim.second -= FindParticle(_partList, FinalState.at(i)).GetMass();
   lim.second *= lim.second;
 
   return lim;
@@ -327,12 +327,12 @@ int HelicityKinematics::createIndex(const SubSystem &newSys) {
     _listSubSystem.push_back(newSys);
     _invMassBounds.push_back(CalculateInvMassBounds(newSys));
 
-    _varNames.push_back("mSq_" + newSys.to_string());
-    _varNames.push_back("cosTheta_" + newSys.to_string());
-    _varNames.push_back("phi_" + newSys.to_string());
-    _varTitles.push_back("m^{2}(" + newSys.to_string() + ")");
-    _varTitles.push_back("#cos#Theta(" + newSys.to_string() + ")");
-    _varTitles.push_back("#phi(" + newSys.to_string() + ")");
+    VariableNames.push_back("mSq_" + newSys.to_string());
+    VariableNames.push_back("cosTheta_" + newSys.to_string());
+    VariableNames.push_back("phi_" + newSys.to_string());
+    VariableTitles.push_back("m^{2}(" + newSys.to_string() + ")");
+    VariableTitles.push_back("#cos#Theta(" + newSys.to_string() + ")");
+    VariableTitles.push_back("#phi(" + newSys.to_string() + ")");
   }
   return results;
 }

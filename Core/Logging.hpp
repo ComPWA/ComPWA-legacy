@@ -51,16 +51,16 @@ public:
     init(outFileName, minLevel);
   };
 
-  void SetLogLevel(boost::log::trivial::severity_level minLevel);
+  void setLogLevel(boost::log::trivial::severity_level minLevel);
 
-  void SetLogLevel(std::string minLevel) {
-    SetLogLevel(stringToLoggingLevel(minLevel));
+  void setLogLevel(std::string minLevel) {
+    setLogLevel(stringToLoggingLevel(minLevel));
   };
 
 private:
   void init(std::string out, boost::log::trivial::severity_level minLevel);
 };
 
-} /* namespace ComPWA */
+} // namespace ComPWA
 
-#endif /* LOGGING_HPP_ */
+#endif

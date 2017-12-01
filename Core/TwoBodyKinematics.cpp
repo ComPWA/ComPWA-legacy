@@ -33,20 +33,20 @@ TwoBodyKinematics::TwoBodyKinematics(std::shared_ptr<PartList> partL,
 
 }
 
-bool TwoBodyKinematics::IsWithinPhsp(const dataPoint &point) const {
-  if (point.GetValue(0) >= mass_sq_min && point.GetValue(0) <= mass_sq_max)
+bool TwoBodyKinematics::isWithinPhsp(const DataPoint &point) const {
+  if (point.value(0) >= mass_sq_min && point.value(0) <= mass_sq_max)
     return 1;
   return 0;
 }
 
-void TwoBodyKinematics::EventToDataPoint(const Event &ev,
-                                         dataPoint &point) const {
-  double weight = ev.GetWeight();
-  point.SetWeight(weight); // reset weight
-  const Particle &part1 = ev.GetParticle(0);
-  const Particle &part2 = ev.GetParticle(1);
+void TwoBodyKinematics::convert(const Event &ev,
+                                         DataPoint &point) const {
+  double weight = ev.weight();
+  point.setWeight(weight); // reset weight
+  const Particle &part1 = ev.particle(0);
+  const Particle &part2 = ev.particle(1);
   double msq = Particle::InvariantMass(part1, part2);
-  point.SetValue(0, msq);
+  point.setValue(0, msq);
   return;
 }
 

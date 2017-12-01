@@ -98,7 +98,7 @@ public:
          iter != oberservingNodes.end(); ++iter) {
       if (*iter != std::shared_ptr<ParObserver>()) // Ist das richtig????
       {
-        (*iter)->Update();
+        (*iter)->update();
       }
     }
   }

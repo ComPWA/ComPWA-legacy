@@ -37,7 +37,7 @@ public:
   virtual bool CheckModified() const;
 
   //================ EVALUATION =================
-  std::complex<double> Evaluate(const ComPWA::dataPoint &point, int pos) const;
+  std::complex<double> evaluate(const ComPWA::DataPoint &point, int pos) const;
 
   /// Dynamical Breit-Wigner function.
   /// \param mSq Invariant mass squared
@@ -100,7 +100,7 @@ public:
   }
 
   /// Update parameters to the values given in \p par
-  virtual void UpdateParameters(const ComPWA::ParameterList &par);
+  virtual void updateParameters(const ComPWA::ParameterList &par);
 
   //=========== FUNCTIONTREE =================
 

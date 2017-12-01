@@ -88,19 +88,19 @@ inline bool Generate(int number, std::shared_ptr<ComPWA::Kinematics> kin,
       bar.nextEvent();
 
     // use reconstructed position for weights
-    double weight = evt.GetWeight();
+    double weight = evt.weight();
 
     // use true position for amplitude value
-    ComPWA::dataPoint point;
+    ComPWA::DataPoint point;
     try {
-      kin->EventToDataPoint(evtTrue, point);
+      kin->convert(evtTrue, point);
     } catch (ComPWA::BeyondPhsp &ex) { // event outside phase, remove
       continue;
     }
 
     totalCalls++;
     double ampRnd = gen->GetUniform(0, generationMaxValue);
-    double AMPpdf = amp->Intensity(point);
+    double AMPpdf = amp->intensity(point);
 
     // If maximum of intensity is reached we have to restart the procedure
     if (generationMaxValue < (AMPpdf * weight)) {
@@ -123,8 +123,8 @@ inline bool Generate(int number, std::shared_ptr<ComPWA::Kinematics> kin,
     // Fill event to sample
     // reset weights: the weights are taken into account by hit and miss. The
     // resulting sample is therefore unweighted
-    evt.SetWeight(1.);     // reset weight
-    evt.SetEfficiency(1.); // reset weight
+    evt.setWeight(1.);     // reset weight
+    evt.setEfficiency(1.); // reset weight
     data->PushEvent(evt);
 
     if (number > 0)
@@ -171,14 +171,14 @@ inline bool GeneratePhsp(int nEvents, std::shared_ptr<ComPWA::Generator> gen,
     ComPWA::Event tmp;
     gen->Generate(tmp);
     double ampRnd = gen->GetUniform(0, 1);
-    if (ampRnd > tmp.GetWeight())
+    if (ampRnd > tmp.weight())
       continue;
 
     // Reset weights: weights are taken into account by hit&miss. The
     // resulting sample is therefore unweighted
-    tmp.SetWeight(1.);
+    tmp.setWeight(1.);
 
-    tmp.SetEfficiency(1.);
+    tmp.setEfficiency(1.);
     i++;
     sample->PushEvent(tmp); // unfortunatly not thread safe
     bar.nextEvent();

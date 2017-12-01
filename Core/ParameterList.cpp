@@ -43,7 +43,6 @@ ParameterList::ParameterList(
 }
 
 void ParameterList::DeepCopy(const ParameterList &in) {
-  out_ = in.out_;
   vMultiComplex_.clear();
   vMultiDouble_.clear();
   vDouble_.clear();
@@ -72,8 +71,8 @@ void ParameterList::DeepCopy(const ParameterList &in) {
 ParameterList::~ParameterList() { /* nothing */ }
 
 std::shared_ptr<Parameter>
-ParameterList::GetParameter(const unsigned int i) const {
-  if (i >= GetNParameter())
+ParameterList::parameter(const unsigned int i) const {
+  if (i >= numParameters())
     throw BadParameter("ParameterList::GetParameter() | Parameter ID=" +
                        std::to_string(i) + " not in list");
 
@@ -105,7 +104,7 @@ ParameterList::GetParameter(const unsigned int i) const {
 
 bool ParameterList::ParameterExists(const std::string parname) const {
   try {
-    GetParameter(parname);
+    parameter(parname);
     return true;
   } catch (std::exception &ex) {
     return false;
@@ -114,7 +113,7 @@ bool ParameterList::ParameterExists(const std::string parname) const {
 }
 
 std::shared_ptr<Parameter>
-ParameterList::GetParameter(const std::string parname) const {
+ParameterList::parameter(const std::string parname) const {
   return (*FindBoolParameter(parname));
   return (*FindIntegerParameter(parname));
   return (*FindDoubleParameter(parname));
@@ -144,19 +143,19 @@ void ParameterList::Append(const ParameterList &addList) {
 void ParameterList::RemoveDuplicates() {
   // We loop over the list of parameters and delete some. Therefore the size
   // changes during to loop. We enclose GetParameter in try...catch
-  for (int i = 0; i < GetNParameter(); i++) {
+  for (int i = 0; i < numParameters(); i++) {
     std::string name;
     try {
-      name = GetParameter(i)->name();
+      name = parameter(i)->name();
     } catch (...) {
       continue;
     }
-    for (int j = i + 1; j < GetNParameter(); j++) {
+    for (int j = i + 1; j < numParameters(); j++) {
       std::string name2;
       std::shared_ptr<Parameter> delPar;
       try {
-        delPar = GetParameter(j);
-        name2 = GetParameter(j)->name();
+        delPar = parameter(j);
+        name2 = parameter(j)->name();
       } catch (...) {
         continue;
       }
@@ -234,19 +233,14 @@ void ParameterList::AddParameter(std::shared_ptr<Parameter> par) {
   }
 }
 
-std::string const &ParameterList::to_str() {
-  make_str();
-  return out_;
-}
-
 std::ostream &operator<<(std::ostream &os, ParameterList &p) {
   return os << p.to_str();
 }
 
-void ParameterList::make_str() {
+std::string ParameterList::to_str() const {
   std::stringstream oss;
 
-  if (GetNParameter()) {
+  if (numParameters()) {
     oss << "Parameter List:" << std::endl;
     // print list of complex, float, int and bool parameter
     if (vComplex_.size()) {
@@ -297,7 +291,7 @@ void ParameterList::make_str() {
   } else
     oss << "Parameter List empty!";
 
-  out_ = oss.str();
+  return oss.str();
 }
 
 //******************************************************************************

@@ -46,13 +46,13 @@ public:
   //================ EVALUATION =================
   
   virtual std::complex<double>
-  Evaluate(const ComPWA::dataPoint &point, int pos) const = 0;
+  evaluate(const ComPWA::DataPoint &point, int pos) const = 0;
 
   //============ SET/GET =================
   
-  virtual void SetName(std::string n) { _name = n; }
+  virtual void setName(std::string n) { _name = n; }
 
-  virtual std::string GetName() { return _name; }
+  virtual std::string name() { return _name; }
 
   virtual void SetModified(bool b = true) const {
     const_cast<bool &>(_modified) = b;
@@ -68,7 +68,7 @@ public:
   }
   
   /// Update parameters to the values given in \p par
-  virtual void UpdateParameters(const ParameterList &par) = 0;
+  virtual void updateParameters(const ParameterList &par) = 0;
 
   virtual void SetMassParameter(std::shared_ptr<DoubleParameter> mass) {
     _mass = mass;

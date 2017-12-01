@@ -120,21 +120,21 @@ inline void multivariateGaussian(const gsl_rng *rnd, const int vecSize,
 inline ComPWA::DoubleParameter
 CalculateFitFraction(std::shared_ptr<ComPWA::Kinematics> kin,
                      std::shared_ptr<ComPWA::AmpIntensity> intens,
-                     std::shared_ptr<std::vector<dataPoint>> sample,
+                     std::shared_ptr<std::vector<DataPoint>> sample,
                      const std::pair<std::string, std::string> def) {
 
   std::shared_ptr<ComPWA::AmpIntensity> numer, denom;
-  if (def.first == intens->Name())
+  if (def.first == intens->name())
     numer = intens;
   else
-    numer = intens->GetComponent(def.first);
+    numer = intens->component(def.first);
 
-  if (def.second == intens->Name())
+  if (def.second == intens->name())
     denom = intens;
   else
-    denom = intens->GetComponent(def.second);
+    denom = intens->component(def.second);
 
-  double phspVolume = kin->GetPhspVolume();
+  double phspVolume = kin->phspVolume();
 
   double integral_numerator =
       ComPWA::Tools::Integral(numer, sample, phspVolume);
@@ -158,7 +158,7 @@ CalculateFitFraction(std::shared_ptr<ComPWA::Kinematics> kin,
 inline ComPWA::ParameterList
 CalculateFitFractions(std::shared_ptr<ComPWA::Kinematics> kin,
                       std::shared_ptr<ComPWA::AmpIntensity> intens,
-                      std::shared_ptr<std::vector<dataPoint>> sample,
+                      std::shared_ptr<std::vector<DataPoint>> sample,
                       std::vector<std::pair<std::string, std::string>> defs) {
   ComPWA::ParameterList ffList;
   for (auto i : defs) {
@@ -179,7 +179,7 @@ inline void CalcFractionError(
     ParameterList &parameters, std::vector<std::vector<double>> covariance,
     ParameterList &ffList, std::shared_ptr<ComPWA::Kinematics> kin,
     std::shared_ptr<AmpIntensity> intens,
-    std::shared_ptr<std::vector<dataPoint>> sample, int nSets,
+    std::shared_ptr<std::vector<DataPoint>> sample, int nSets,
     std::vector<std::pair<std::string, std::string>> defs) {
   if (nSets <= 0)
     return;
@@ -238,7 +238,7 @@ inline void CalcFractionError(
     gsl_vector_free(gslNewPar);
     // update amplitude with smeared parameters
     try {
-      intens->UpdateParameters(newPar);
+      intens->updateParameters(newPar);
     } catch (ParameterOutOfBound &ex) {
       continue;
     }
@@ -254,11 +254,11 @@ inline void CalcFractionError(
     // newPar.GetDoubleParameter(t)->IsFixed())
     // continue;
     //					outFraction <<
-    // newPar.GetDoubleParameter(t)->GetName()<<":";
+    // newPar.GetDoubleParameter(t)->name()<<":";
     //				}
     //				for(int t=0; t<tmp.GetNDouble(); t++)
     //					outFraction <<
-    // tmp.GetDoubleParameter(t)->GetName()<<":";
+    // tmp.GetDoubleParameter(t)->name()<<":";
     //				outFraction << "norm" << std::endl;
     //			}
     //			for(int t=0; t<newPar.GetNDouble(); t++){
@@ -301,7 +301,7 @@ inline void CalcFractionError(
   }
 
   // Set correct fit result
-  intens->UpdateParameters(originalPar);
+  intens->updateParameters(originalPar);
   return;
 }
 

@@ -69,9 +69,9 @@ void FitResult::Print(std::string opt) {
 
 void FitResult::PrintFitParameters(TableFormater *tableResult) {
   bool printTrue = 0, printInitial = 0;
-  if (trueParameters.GetNParameter())
+  if (trueParameters.numParameters())
     printTrue = 1;
-  if (initialParameters.GetNParameter())
+  if (initialParameters.numParameters())
     printInitial = 1;
 
   // Column width for parameter with symmetric error

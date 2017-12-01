@@ -98,7 +98,7 @@ BOOST_AUTO_TEST_CASE(ConstructorCheck) {
   std::shared_ptr<BoolParameter> bTest(new BoolParameter("boolPar", true));
   testList.AddParameter(bTest);
 
-  BOOST_CHECK_CLOSE(testList.GetNParameter(), 12., 0.0001);
+  BOOST_CHECK_CLOSE(testList.numParameters(), 12., 0.0001);
   BOOST_CHECK_CLOSE(testList.GetNDouble(), 1., 0.0001);
   BOOST_CHECK_CLOSE(testList.GetNInteger(), 10., 0.0001);
   BOOST_CHECK_CLOSE(testList.GetNBool(), 1., 0.0001);

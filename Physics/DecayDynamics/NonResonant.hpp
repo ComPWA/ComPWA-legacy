@@ -23,7 +23,7 @@ public:
 
   virtual ~NonResonant(){};
 
-  virtual std::complex<double> Evaluate(const dataPoint &p, int pos) const {
+  virtual std::complex<double> evaluate(const DataPoint &p, int pos) const {
     return std::complex<double>(1.0, 0.0);
   }
 
@@ -33,7 +33,7 @@ public:
   virtual void GetParameters(ParameterList &list) {};
   
   /// Update parameters to the values given in \p par
-  virtual void UpdateParameters(const ParameterList &par) {};
+  virtual void updateParameters(const ParameterList &par) {};
   
 };
 

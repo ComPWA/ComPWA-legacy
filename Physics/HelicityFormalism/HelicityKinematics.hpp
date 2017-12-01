@@ -41,7 +41,7 @@ namespace HelicityFormalism {
 /// \section dataID DataID
 ///
 /// lsdafds
-/// \see GetDataID(SubSystem s)
+/// \see dataID(SubSystem s)
 ///
 /// \section helicityangles Helicity Angles
 ///
@@ -58,7 +58,7 @@ namespace HelicityFormalism {
 /// momentum direction of the resonance.
 /// A (two-dimensional) illustration is given below
 /// \image html HelicityAngle.png "Helicity angle"
-/// \see EventToDataPoint(const Event &event, dataPoint &point, SubSystem sys,
+/// \see convert(const Event &event, dataPoint &point, SubSystem sys,
 ///                     const std::pair<double, double> limits) const;
 ///
 ///
@@ -104,11 +104,11 @@ public:
   HelicityKinematics(const HelicityKinematics &that) = delete;
 
   /// Fill \p point from \p event.
-  /// For each SubSystem stored via GetDataID(const SubSystem subSys) function
-  /// #EventToDataPoint(const Event&, dataPoint&, SubSystem,
+  /// For each SubSystem stored via dataID(const SubSystem subSys) function
+  /// #convert(const Event&, dataPoint&, SubSystem,
   /// const std::pair<double, double>) is called. In this way only
   /// the variables are calculated that are used by the model.
-  void EventToDataPoint(const Event &event, dataPoint &point) const;
+  void convert(const Event &event, DataPoint &point) const;
 
   /// Fill \p point with variables for \p sys.
   /// The triple (\f$m^2, cos\Theta, \phi\f$) is added to dataPoint for
@@ -127,25 +127,25 @@ public:
   ///        frame of the resonance.
   ///     -# Calculate \f$cos\Theta\f$ and \f$\phi\f$ between those boosted
   ///        momenta.
-  void EventToDataPoint(const Event &event, dataPoint &point,
+  void convert(const Event &event, DataPoint &point,
                         const SubSystem &sys,
                         const std::pair<double, double> limits) const;
 
   /// Fill \p point with variables for \p sys.
-  /// \see EventToDataPoint(const Event &event, dataPoint &point, SubSystem sys,
+  /// \see convert(const Event &event, dataPoint &point, SubSystem sys,
   ///                     const std::pair<double, double> limits) const;
-  void EventToDataPoint(const Event &event, dataPoint &point,
+  void convert(const Event &event, DataPoint &point,
                         const SubSystem &sys) const;
 
   /// Check if \p point is within phase space boundaries.
-  bool IsWithinPhsp(const dataPoint &point) const;
+  bool isWithinPhsp(const DataPoint &point) const;
 
   /// Get ID of data for \p subSys.
   /// In case that the ID was not requested before the subsystem is added to
   /// the list and variables (m^2, cosTheta, phi) are calculated in
-  /// #EventToDataPoint()
+  /// #convert()
   /// and added to each dataPoint.
-  virtual int GetDataID(const SubSystem &subSys) {
+  virtual int dataID(const SubSystem &subSys) {
     // We calculate the variables currently for two-body decays
     if (subSys.GetFinalStates().size() != 2)
       return 0;
@@ -155,10 +155,10 @@ public:
   }
 
   /// Get ID of data for subsystem defined by \p recoilS and \p finalS.
-  /// \see GetDataID(SubSystem s)
-  virtual int GetDataID(std::vector<int> recoilS, std::vector<int> finalA,
+  /// \see dataID(SubSystem s)
+  virtual int dataID(std::vector<int> recoilS, std::vector<int> finalA,
                         std::vector<int> finalB) {
-    return GetDataID(SubSystem(recoilS, finalA, finalB));
+    return dataID(SubSystem(recoilS, finalA, finalB));
   }
 
   /// Get SubSystem from \p pos in list
@@ -172,7 +172,7 @@ public:
   }
 
   /// Get number of variables that are added to dataPoint
-  virtual size_t GetNVars() const { return _listSubSystem.size() * 3; }
+  virtual size_t numVariables() const { return _listSubSystem.size() * 3; }
 
   /// Get phase space bounds for the invariant mass of \p subSys.
   virtual const std::pair<double, double> &
@@ -191,7 +191,7 @@ protected:
 
   ///  Calculation of n-dimensional phase space volume.
   ///  ToDo: We need to implement an analytical calculation here
-  double calculatePSArea() const { return 1.0; }
+  double calculatePhspVolume() const { return 1.0; }
 
   /// List of subsystems for which invariant mass and angles are calculated
   std::vector<SubSystem> _listSubSystem;

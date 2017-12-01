@@ -10,13 +10,13 @@ using namespace ComPWA;
 FunctionTree::FunctionTree(const std::string &name,
                            std::shared_ptr<ComPWA::Strategy> strategy,
                            unsigned int dimension, bool useVec) {
-  CreateHead(name, strategy, dimension, useVec);
+  createHead(name, strategy, dimension, useVec);
 }
 
 FunctionTree::FunctionTree(std::shared_ptr<ComPWA::TreeNode> head)
     : _head(head) {
   _nodes.insert(std::pair<std::string, std::shared_ptr<ComPWA::TreeNode>>(
-      head->Name(), head));
+      head->name(), head));
 }
 
 FunctionTree::~FunctionTree() {
@@ -24,45 +24,45 @@ FunctionTree::~FunctionTree() {
   // on shared pointers and those can not be deleted.
   auto iter = _nodes.begin();
   for (; iter != _nodes.end(); ++iter) {
-    iter->second->DeleteLinks();
+    iter->second->deleteLinks();
   }
 }
 
-void FunctionTree::CreateHead(const std::string &name, const double value) {
+void FunctionTree::createHead(const std::string &name, const double value) {
   if (_head) // if head exists throw exception
     throw std::runtime_error(
-        "FunctionTree::CreateNode() | head node already exists!");
-  CreateLeaf(name, value, "");
+        "FunctionTree::createNode() | head node already exists!");
+  createLeaf(name, value, "");
 }
 
-void FunctionTree::CreateHead(const std::string &name,
+void FunctionTree::createHead(const std::string &name,
                               std::shared_ptr<ComPWA::Parameter> parameter) {
   if (_head) // if head exists throw exception
     throw std::runtime_error(
-        "FunctionTree::CreateNode() | head node already exists!");
-  CreateLeaf(name, parameter, "");
+        "FunctionTree::createNode() | head node already exists!");
+  createLeaf(name, parameter, "");
 }
 
-void FunctionTree::CreateHead(const std::string &name,
+void FunctionTree::createHead(const std::string &name,
                               std::shared_ptr<Strategy> strategy,
                               unsigned int dimension, bool useVec) {
   if (_head) // if head exists throw exception
     throw std::runtime_error("FunctionTree::createNode() | "
                              "Head node already exists!");
 
-  CreateNode(name, strategy, "", dimension, useVec);
+  createNode(name, strategy, "", dimension, useVec);
 }
 
-void FunctionTree::InsertNode(std::shared_ptr<TreeNode> node,
+void FunctionTree::insertNode(std::shared_ptr<TreeNode> node,
                               std::string parent) {
-  std::string n = node->Name();
+  std::string n = node->name();
   bool ret = _nodes
                  .insert(std::pair<std::string, std::shared_ptr<TreeNode>>(
-                     node->Name(), node))
+                     node->name(), node))
                  .second;
   if (!ret)
     throw TreeBuildError("FunctionTree::insertNode | Can not insert node " +
-                         node->Name() + "!");
+                         node->name() + "!");
 
   // Assign new parent to head of new tree, create links
   std::shared_ptr<TreeNode> parentNode;
@@ -76,28 +76,28 @@ void FunctionTree::InsertNode(std::shared_ptr<TreeNode> node,
 
   // In case of an existing node, it is possible that this node
   // already have parents. Do need to consider this here?
-  node->AddParent(parentNode);
+  node->addParent(parentNode);
   //  inNode->linkParents();
 
   // Subtree already linked, but need to be added to list of nodes
   AddChildNodes(node);
 }
 
-void FunctionTree::InsertTree(std::shared_ptr<FunctionTree> tree,
+void FunctionTree::insertTree(std::shared_ptr<FunctionTree> tree,
                               std::string parent) {
   _childTrees.push_back(tree);
-  InsertNode(tree->Head(), parent);
+  insertNode(tree->head(), parent);
   return;
 }
 
-void FunctionTree::AddNode(std::shared_ptr<ComPWA::TreeNode> newNode) {
+void FunctionTree::addNode(std::shared_ptr<ComPWA::TreeNode> newNode) {
   // TODO: check existence, throw exception
   _nodes.insert(std::pair<std::string, std::shared_ptr<TreeNode>>(
-      newNode->Name(), newNode));
-  newNode->LinkParents();
+      newNode->name(), newNode));
+  newNode->linkParents();
 }
 
-void FunctionTree::CreateNode(const std::string &name,
+void FunctionTree::createNode(const std::string &name,
                               std::shared_ptr<Strategy> strategy,
                               std::string parent, unsigned int dimension,
                               bool useVec) {
@@ -191,12 +191,12 @@ void FunctionTree::CreateNode(const std::string &name,
 
   _nodes.insert(
       std::pair<std::string, std::shared_ptr<TreeNode>>(name, newNode));
-  newNode->LinkParents();
+  newNode->linkParents();
   if (parent == "")
     _head = newNode; // if we created a head redirect pointer
 }
 
-void FunctionTree::CreateLeaf(const std::string name,
+void FunctionTree::createLeaf(const std::string name,
                               std::shared_ptr<Parameter> parameter,
                               std::string parent) {
   if (parent == "" && _head)
@@ -220,47 +220,47 @@ void FunctionTree::CreateLeaf(const std::string name,
 
   // setup connections
   if (exists) {
-    leaf->AddParent(parentNode);
+    leaf->addParent(parentNode);
   } else {
     leaf = std::shared_ptr<TreeNode>(
         new TreeNode(name, parameter, std::shared_ptr<Strategy>(), parentNode));
     _nodes.insert(
         std::pair<std::string, std::shared_ptr<TreeNode>>(name, leaf));
-    leaf->LinkParents();
+    leaf->linkParents();
     parameter->Attach(leaf);
     if (parent == "")
       _head = leaf; // if we created a head, redirect pointer
   }
 }
 
-void FunctionTree::CreateLeaf(const std::string name, const double value,
+void FunctionTree::createLeaf(const std::string name, const double value,
                               std::string parent) {
 
   std::shared_ptr<DoubleParameter> staticVal(
       new DoubleParameter("ParOfNode_" + name, value));
-  CreateLeaf(name, staticVal, parent);
+  createLeaf(name, staticVal, parent);
 }
 
-void FunctionTree::CreateLeaf(const std::string name,
+void FunctionTree::createLeaf(const std::string name,
                               const std::complex<double> value,
                               std::string parent) {
 
   std::shared_ptr<ComplexParameter> staticVal(
       new ComplexParameter("ParOfNode_" + name, value));
-  CreateLeaf(name, staticVal, parent);
+  createLeaf(name, staticVal, parent);
 }
 
-void FunctionTree::CreateLeaf(
+void FunctionTree::createLeaf(
     const std::string name,
     std::vector<std::shared_ptr<Parameter>> &parameters,
     std::string parent) {
 
   for (auto i : parameters) {
-    CreateLeaf(name, i, parent);
+    createLeaf(name, i, parent);
   }
 }
 
-bool FunctionTree::SanityCheck() {
+bool FunctionTree::sanityCheck() {
   if (!_head)
     throw std::runtime_error("FunctionTree::sanityCheck() | "
                              "This tree has no head!");
@@ -299,30 +299,30 @@ bool FunctionTree::SanityCheck() {
   return true;
 }
 
-void FunctionTree::FillParameters(ParameterList &list) {
-  _head->FillParameters(list);
+void FunctionTree::fillParameters(ParameterList &list) {
+  _head->fillParameters(list);
 }
 
 void FunctionTree::GetNamesDownward(std::shared_ptr<TreeNode> start,
                                     std::vector<std::string> &childNames,
                                     std::vector<std::string> &parentNames) {
 
-  start->FillParentNames(parentNames);
-  start->FillChildNames(childNames);
+  start->fillParentNames(parentNames);
+  start->fillChildNames(childNames);
 
-  const std::vector<std::shared_ptr<TreeNode>> childs = start->GetChildNodes();
+  const std::vector<std::shared_ptr<TreeNode>> childs = start->childNodes();
   for (unsigned int i = 0; i < childs.size(); i++)
-    GetNamesDownward(childs[i], childNames, parentNames);
+    GetNamesDownward(childs.at(i), childNames, parentNames);
   return;
 }
 
 void FunctionTree::AddChildNodes(std::shared_ptr<TreeNode> startNode) {
   std::vector<std::shared_ptr<TreeNode>> newChildren =
-      startNode->GetChildNodes();
+      startNode->childNodes();
 
   for (unsigned int i = 0; i < newChildren.size(); i++) {
     _nodes.insert(std::pair<std::string, std::shared_ptr<TreeNode>>(
-        newChildren.at(i)->Name(), newChildren.at(i)));
+        newChildren.at(i)->name(), newChildren.at(i)));
     //        if( !ret )
     //            throw TreeBuildError("FunctionTree::addChildNodes | "
     //                                 "Can not insert node
@@ -335,9 +335,9 @@ void FunctionTree::AddChildNodes(std::shared_ptr<TreeNode> startNode) {
 
 void FunctionTree::UpdateAll(std::shared_ptr<TreeNode> startNode) {
   std::vector<std::shared_ptr<TreeNode>> newChildren =
-      startNode->GetChildNodes();
+      startNode->childNodes();
   for (unsigned int i = 0; i < newChildren.size(); i++) {
-    newChildren[i]->Update();
+    newChildren.at(i)->update();
     UpdateAll(newChildren[i]);
   }
   return;

@@ -6,9 +6,7 @@
 #include <numeric>
 #include "Physics/IncoherentIntensity.hpp"
 
-namespace ComPWA {
-namespace Physics {
-namespace HelicityFormalism {
+using namespace ComPWA::Physics;
 
 std::shared_ptr<IncoherentIntensity>
 IncoherentIntensity::Factory(std::shared_ptr<PartList> partL,
@@ -19,7 +17,7 @@ IncoherentIntensity::Factory(std::shared_ptr<PartList> partL,
   auto obj = std::make_shared<IncoherentIntensity>();
 
   // Name is not required - default value 'empty'
-  obj->_name = (pt.get<std::string>("<xmlattr>.Name", "empty"));
+  obj->Name = (pt.get<std::string>("<xmlattr>.Name", "empty"));
 
   std::shared_ptr<DoubleParameter> strength;
   for (const auto &v : pt.get_child("")) {
@@ -31,22 +29,21 @@ IncoherentIntensity::Factory(std::shared_ptr<PartList> partL,
       tmp.load(v.second);
       strength = std::make_shared<DoubleParameter>(tmp);
     } else if (v.first == "CoherentIntensity") {
-      obj->AddIntensity(
-          ComPWA::Physics::HelicityFormalism::CoherentIntensity::Factory(
-              partL, kin, v.second));
+      obj->addIntensity(
+          ComPWA::Physics::CoherentIntensity::Factory(partL, kin, v.second));
     } else {
       // ignored further settings. Should we throw an error?
     }
   }
 
   if (strength)
-    obj->_strength = strength;
+    obj->Strength = strength;
   else {
-    obj->_strength = (std::make_shared<ComPWA::DoubleParameter>("", 1.0));
-    obj->_strength->fixParameter(true);
+    obj->Strength = (std::make_shared<ComPWA::DoubleParameter>("", 1.0));
+    obj->Strength->fixParameter(true);
   }
 
-  obj->SetPhspVolume(kin->GetPhspVolume());
+  obj->setPhspVolume(kin->phspVolume());
 
   return obj;
 }
@@ -55,10 +52,10 @@ boost::property_tree::ptree
 IncoherentIntensity::Save(std::shared_ptr<IncoherentIntensity> obj) {
 
   boost::property_tree::ptree pt;
-  pt.put<std::string>("<xmlattr>.Name", obj->Name());
-  pt.add_child("Parameter", obj->_strength->save());
+  pt.put<std::string>("<xmlattr>.Name", obj->name());
+  pt.add_child("Parameter", obj->Strength->save());
   pt.put("Parameter.<xmlattr>.Type", "Strength");
-  for (auto i : obj->GetIntensities()) {
+  for (auto i : obj->intensities()) {
     // TODO: we have to implement a memeber function Save() in AmpIntensity
     // interface and use it here
     auto ptr = std::dynamic_pointer_cast<CoherentIntensity>(i);
@@ -67,48 +64,48 @@ IncoherentIntensity::Save(std::shared_ptr<IncoherentIntensity> obj) {
   return pt;
 }
 
-double IncoherentIntensity::Intensity(const ComPWA::dataPoint &point) const {
+double IncoherentIntensity::intensity(const ComPWA::DataPoint &point) const {
 
   // We have to get around the constness of the interface definition.
-  std::vector<std::vector<double>> parameters(_parameters);
+  std::vector<std::vector<double>> parameters(Parameters);
 
-  std::vector<double> normValues(_normValues);
+  std::vector<double> normValues(NormalizationValues);
 
-  if (_intens.size() != parameters.size())
-    parameters = std::vector<std::vector<double>>(_intens.size());
+  if (Intensities.size() != parameters.size())
+    parameters = std::vector<std::vector<double>>(Intensities.size());
 
-  if (_intens.size() != normValues.size())
-    normValues = std::vector<double>(_intens.size());
+  if (Intensities.size() != normValues.size())
+    normValues = std::vector<double>(Intensities.size());
 
   double result = 0;
-  for (int i = 0; i < _intens.size(); i++) {
+  for (int i = 0; i < Intensities.size(); i++) {
     std::vector<double> params;
-    _intens.at(i)->GetParametersFast(params);
+    Intensities.at(i)->parametersFast(params);
     if (parameters.at(i) != params) { // recalculate normalization
       parameters.at(i) = params;
       normValues.at(i) =
-          1 / (Tools::Integral(_intens.at(i), _phspSample, phspVolume_));
-      normValues.at(i) *= _intens.at(i)->Strength();
+          1 / (Tools::Integral(Intensities.at(i), PhspSample, PhspVolume));
+      normValues.at(i) *= Intensities.at(i)->strength();
     }
-    result += _intens.at(i)->Intensity(point) * normValues.at(i);
+    result += Intensities.at(i)->intensity(point) * normValues.at(i);
   }
 
-  const_cast<std::vector<std::vector<double>> &>(_parameters) = parameters;
-  const_cast<std::vector<double> &>(_normValues) = normValues;
+  const_cast<std::vector<std::vector<double>> &>(Parameters) = parameters;
+  const_cast<std::vector<double> &>(NormalizationValues) = normValues;
 
   assert(!std::isnan(result) &&
          "IncoherentIntensity::Intensity() | Result is NaN!");
   assert(!std::isinf(result) &&
          "IncoherentIntensity::Intensity() | Result is inf!");
 
-  return (Strength() * result);
+  return (strength() * result);
 }
 
-std::shared_ptr<AmpIntensity>
-IncoherentIntensity::GetComponent(std::string name) {
+std::shared_ptr<ComPWA::AmpIntensity>
+IncoherentIntensity::component(std::string name) {
 
   // The whole object?
-  if (name == Name()) {
+  if (name == Name) {
     LOG(error) << "IncoherentIntensity::GetComponent() | You're requesting the "
                   "full object! So just copy it!";
     return std::shared_ptr<AmpIntensity>();
@@ -117,13 +114,13 @@ IncoherentIntensity::GetComponent(std::string name) {
   bool found = false;
   // Do we want to have a combination of CoherentIntensities?
   std::vector<std::string> names = splitString(name);
-  auto icIn = std::shared_ptr<AmpIntensity>(this->Clone(name));
-  icIn->Reset();
+  auto icIn = std::shared_ptr<AmpIntensity>(this->clone(name));
+  icIn->reset();
   for (auto i : names) {
-    for (int j = 0; j < _intens.size(); j++) {
-      if (i == _intens.at(j)->Name()) {
-        std::dynamic_pointer_cast<IncoherentIntensity>(icIn)->AddIntensity(
-            _intens.at(j));
+    for (int j = 0; j < Intensities.size(); j++) {
+      if (i == Intensities.at(j)->name()) {
+        std::dynamic_pointer_cast<IncoherentIntensity>(icIn)->addIntensity(
+            Intensities.at(j));
         found = true;
       }
     }
@@ -133,10 +130,10 @@ IncoherentIntensity::GetComponent(std::string name) {
     return icIn;
 
   // Search for components in subsequent intensities
-  for (auto i : _intens) {
+  for (auto i : Intensities) {
     try {
-      auto r = i->GetComponent(name);
-      std::dynamic_pointer_cast<IncoherentIntensity>(icIn)->AddIntensity(r);
+      auto r = i->component(name);
+      std::dynamic_pointer_cast<IncoherentIntensity>(icIn)->addIntensity(r);
       found = true;
     } catch (std::exception &ex) {
     }
@@ -146,14 +143,14 @@ IncoherentIntensity::GetComponent(std::string name) {
   if (!found) {
     throw std::runtime_error(
         "InCoherentIntensity::GetComponent() | Component " + name +
-        " could not be found in IncoherentIntensity " + Name() + ".");
+        " could not be found in IncoherentIntensity " + Name + ".");
   }
 
   return icIn;
 }
 
 std::shared_ptr<ComPWA::FunctionTree>
-IncoherentIntensity::GetTree(std::shared_ptr<Kinematics> kin,
+IncoherentIntensity::tree(std::shared_ptr<Kinematics> kin,
                              const ComPWA::ParameterList &sample,
                              const ComPWA::ParameterList &phspSample,
                              const ComPWA::ParameterList &toySample,
@@ -161,41 +158,37 @@ IncoherentIntensity::GetTree(std::shared_ptr<Kinematics> kin,
 
   std::shared_ptr<FunctionTree> tr(new FunctionTree());
 
-  tr->CreateHead("IncoherentIntens(" + Name() + ")" + suffix,
+  tr->createHead("IncoherentIntens(" + name() + ")" + suffix,
                  std::shared_ptr<Strategy>(new MultAll(ParType::MDOUBLE)));
-  tr->CreateLeaf("Strength", _strength,
-                 "IncoherentIntens(" + Name() + ")" + suffix);
-  tr->CreateNode("SumOfCoherentIntens",
+  tr->createLeaf("Strength", Strength,
+                 "IncoherentIntens(" + name() + ")" + suffix);
+  tr->createNode("SumOfCoherentIntens",
                  std::shared_ptr<Strategy>(new AddAll(ParType::MDOUBLE)),
-                 "IncoherentIntens(" + Name() + ")" + suffix);
-  for (auto i : _intens) {
-    tr->InsertTree(i->GetTree(kin, sample, phspSample, toySample, nEvtVar),
+                 "IncoherentIntens(" + name() + ")" + suffix);
+  for (auto i : Intensities) {
+    tr->insertTree(i->tree(kin, sample, phspSample, toySample, nEvtVar),
                    "SumOfCoherentIntens");
   }
   return tr;
 }
 
-void IncoherentIntensity::GetParameters(ComPWA::ParameterList &list) {
-  list.AddParameter(_strength);
-  for (auto i : GetIntensities()) {
-    i->GetParameters(list);
+void IncoherentIntensity::parameters(ComPWA::ParameterList &list) {
+  list.AddParameter(Strength);
+  for (auto i : Intensities) {
+    i->parameters(list);
   }
 }
 
-void IncoherentIntensity::UpdateParameters(const ParameterList &list) {
+void IncoherentIntensity::updateParameters(const ParameterList &list) {
   std::shared_ptr<DoubleParameter> p;
   try {
-    p = list.GetDoubleParameter(_strength->name());
+    p = list.GetDoubleParameter(Strength->name());
   } catch (std::exception &ex) {
   }
   if (p)
-    _strength->updateParameter(p);
-  for (auto i : _intens)
-    i->UpdateParameters(list);
+    Strength->updateParameter(p);
+  for (auto i : Intensities)
+    i->updateParameters(list);
 
   return;
 }
-
-} // namespace HelicityFormalism
-} // namespace Physics
-} // namespace ComPWA

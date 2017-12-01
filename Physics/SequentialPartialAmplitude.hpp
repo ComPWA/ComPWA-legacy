@@ -19,9 +19,9 @@ namespace HelicityFormalism {
 class SequentialPartialAmplitude : public Amplitude {
 
 public:
-  virtual Amplitude *Clone(std::string newName = "") const {
+  virtual Amplitude *clone(std::string newName = "") const {
     auto tmp = (new SequentialPartialAmplitude(*this));
-    tmp->SetName(newName);
+    tmp->setName(newName);
     return tmp;
   };
 
@@ -35,21 +35,21 @@ public:
   //======= INTEGRATION/NORMALIZATION ===========
 
   /// Check of parameters have changed and normalization has to be recalculatecd
-  bool CheckModified() const {
-    if (Amplitude::CheckModified())
+  bool isModified() const {
+    if (Amplitude::isModified())
       return true;
-    for (auto i : _partDecays)
-      if (i->CheckModified())
+    for (auto i : PartialAmplitudes)
+      if (i->isModified())
         return true;
     return false;
   }
 
   //================ EVALUATION =================
 
-  virtual std::complex<double> Evaluate(const dataPoint &point) const {
-    std::complex<double> result = GetCoefficient() * GetPreFactor();
-    for (auto i : _partDecays)
-      result *= i->Evaluate(point);
+  virtual std::complex<double> evaluate(const DataPoint &point) const {
+    std::complex<double> result = coefficient() * preFactor();
+    for (auto i : PartialAmplitudes)
+      result *= i->evaluate(point);
 
     assert(!std::isnan(result.real()) && !std::isnan(result.imag()));
     return result;
@@ -57,58 +57,61 @@ public:
 
   //============ SET/GET =================
 
-  void Add(std::shared_ptr<ComPWA::Physics::PartialAmplitude> d) {
-    _partDecays.push_back(d);
+  void
+  addPartialAmplitude(std::shared_ptr<ComPWA::Physics::PartialAmplitude> d) {
+    PartialAmplitudes.push_back(d);
   }
 
-  std::shared_ptr<ComPWA::Physics::PartialAmplitude> GetDecay(int pos) {
-    return _partDecays.at(pos);
+  std::shared_ptr<ComPWA::Physics::PartialAmplitude> partialAmplitude(int pos) {
+    return PartialAmplitudes.at(pos);
   }
 
-  std::vector<std::shared_ptr<ComPWA::Physics::PartialAmplitude>> &GetDecays() {
-    return _partDecays;
+  std::vector<std::shared_ptr<ComPWA::Physics::PartialAmplitude>> &
+  partialAmplitudes() {
+    return PartialAmplitudes;
   }
 
-  virtual void GetParameters(ParameterList &list);
+  virtual void parameters(ParameterList &list);
 
-  virtual void GetParametersFast(std::vector<double> &list) const {
-    Amplitude::GetParametersFast(list);
-    for (auto i : _partDecays)
-      i->GetParametersFast(list);
+  virtual void parametersFast(std::vector<double> &list) const {
+    Amplitude::parametersFast(list);
+    for (auto i : PartialAmplitudes)
+      i->parametersFast(list);
   }
-  
+
   /// Update parameters to the values given in \p par
-  virtual void UpdateParameters(const ParameterList &par);
+  virtual void updateParameters(const ParameterList &par);
 
   /// Set phase space sample
   /// We use the phase space sample to calculate the normalization. The sample
   /// should be without efficiency applied.
   virtual void
-  SetPhspSample(std::shared_ptr<std::vector<ComPWA::dataPoint>> phspSample) {
-    for (auto i : _partDecays)
-      i->SetPhspSample(phspSample);
+  setPhspSample(std::shared_ptr<std::vector<ComPWA::DataPoint>> phspSample) {
+    for (auto i : PartialAmplitudes)
+      i->setPhspSample(phspSample);
   }
 
   //======== ITERATORS/OPERATORS =============
 
-  typedef std::vector<std::shared_ptr<ComPWA::Physics::PartialAmplitude>>::iterator
-      partDecayItr;
+  typedef std::vector<std::shared_ptr<ComPWA::Physics::PartialAmplitude>>::
+      iterator partDecayItr;
 
-  partDecayItr begin() { return _partDecays.begin(); }
+  partDecayItr first() { return PartialAmplitudes.begin(); }
 
-  partDecayItr end() { return _partDecays.end(); }
+  partDecayItr last() { return PartialAmplitudes.end(); }
 
   //=========== FUNCTIONTREE =================
 
-  virtual bool HasTree() const { return true; }
+  virtual bool hasTree() const { return true; }
 
-  virtual std::shared_ptr<FunctionTree> GetTree(std::shared_ptr<Kinematics> kin,
-                                                const ParameterList &sample,
-                                                const ParameterList &toySample,
-                                                std::string suffix);
+  virtual std::shared_ptr<FunctionTree> tree(std::shared_ptr<Kinematics> kin,
+                                             const ParameterList &sample,
+                                             const ParameterList &toySample,
+                                             std::string suffix);
 
 protected:
-  std::vector<std::shared_ptr<ComPWA::Physics::PartialAmplitude>> _partDecays;
+  std::vector<std::shared_ptr<ComPWA::Physics::PartialAmplitude>>
+      PartialAmplitudes;
 };
 
 } // namespace HelicityFormalism

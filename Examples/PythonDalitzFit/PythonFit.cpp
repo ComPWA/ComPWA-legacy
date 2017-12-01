@@ -98,7 +98,7 @@ using namespace boost::log;
 using namespace std;
 using namespace ComPWA;
 using ComPWA::Physics::HelicityFormalism::HelicityKinematics;
-using ComPWA::Physics::HelicityFormalism::IncoherentIntensity;
+using ComPWA::Physics::IncoherentIntensity;
 using ComPWA::Optimizer::Minuit2::MinuitResult;
 using ComPWA::DataReader::RootReader;
 
@@ -159,8 +159,8 @@ int PythonFit::StartFit() {
 	  // Pass phsp sample to intensity for normalization.
 	  // Convert to dataPoints first.
 	  auto phspPoints =
-	      std::make_shared<std::vector<dataPoint>>(phspSample->GetDataPoints(kin));
-	  intens->SetPhspSample(phspPoints, phspPoints);
+	      std::make_shared<std::vector<DataPoint>>(phspSample->GetDataPoints(kin));
+	  intens->setPhspSample(phspPoints, phspPoints);
 	  run.SetAmplitude(intens);
 
 	  //---------------------------------------------------
@@ -174,7 +174,7 @@ int PythonFit::StartFit() {
 	  // 5) Fit the model to the data and print the result
 	  //---------------------------------------------------
 	  ParameterList fitPar;
-	  intens->GetParameters(fitPar);
+	  intens->parameters(fitPar);
 	  // Set start error of 0.05 for parameters, run Minos?
 	  setErrorOnParameterList(fitPar, 0.05, false);
 
@@ -182,7 +182,7 @@ int PythonFit::StartFit() {
 	      kin, intens, sample, phspSample, phspSample, 0, 0);
 
 	  esti->UseFunctionTree(true);
-	  LOG(debug) << esti->GetTree()->Head()->Print(25);
+	  LOG(debug) << esti->tree()->head()->print(25);
 
 	  auto minuitif = new Optimizer::Minuit2::MinuitIF(esti, fitPar);
 	  minuitif->SetHesse(true);

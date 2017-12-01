@@ -9,7 +9,7 @@
 
 namespace ComPWA {
 
-class dataPoint;
+class DataPoint;
 
 class TwoBodyKinematics : public Kinematics {
 public:
@@ -19,13 +19,13 @@ public:
                     std::vector<int> finalState, double deltaMassWindow = 0.5);
 
   //! Converts Event to dataPoint
-  virtual void EventToDataPoint(const Event &ev, dataPoint &point) const;
+  virtual void convert(const Event &ev, DataPoint &point) const;
 
   virtual void FillDataPoint(int a, int b, double invMassSqA, double invMassSqB,
-                             dataPoint &point) const {};
+                             DataPoint &point) const {};
 
   //! checks of data point is within phase space boundaries
-  virtual bool IsWithinPhsp(const dataPoint &point) const;
+  virtual bool isWithinPhsp(const DataPoint &point) const;
 
   /**! Checks if the position is within the phase-space boundaries.
    * This only works correctly if both variables are orthogonal to each other.
@@ -40,7 +40,7 @@ public:
                                double varB) const {
     return 0;
   };
-  virtual std::size_t GetNVars() const { return 1; }
+  virtual std::size_t numVariables() const { return 1; }
 
   //! get mass of particles
   virtual double GetMass(unsigned int num) const;
@@ -57,7 +57,7 @@ protected:
   double mass_min;    //! minimum value of masssq
   double mass_max;    //! maximum value of masssq
 
-  virtual double calculatePSArea() const { return (mass_max - mass_min); }
+  virtual double calculatePhspVolume() const { return (mass_max - mass_min); }
 };
 
 } /* namespace ComPWA */

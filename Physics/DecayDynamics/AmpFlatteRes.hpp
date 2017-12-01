@@ -38,7 +38,7 @@ public:
   virtual AmpFlatteRes *Clone(std::string newName = "") const {
     auto tmp = (new AmpFlatteRes(*this));
     // if (newName != "")
-    // tmp->SetName(newName);
+    // tmp->setName(newName);
     return tmp;
   }
 
@@ -59,7 +59,7 @@ public:
 
   //================ EVALUATION =================
 
-  virtual std::complex<double> Evaluate(const dataPoint &point, int pos) const;
+  virtual std::complex<double> evaluate(const DataPoint &point, int pos) const;
 
   /** Dynamical function for two coupled channel approach
    *
@@ -142,7 +142,7 @@ public:
   }
 
   /// Update parameters to the values given in \p par
-  virtual void UpdateParameters(const ParameterList &par);
+  virtual void updateParameters(const ParameterList &par);
 
   //=========== FUNCTIONTREE =================
 

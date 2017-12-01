@@ -62,7 +62,7 @@ public:
   virtual ~MinLogLH() {};
   
   /// Value of minimum log likelhood function.
-  virtual double ControlParameter(ComPWA::ParameterList &par);
+  virtual double controlParameter(ComPWA::ParameterList &par);
 
   /// Trigger the use of a FunctionTree.
   /// If no tree is provided by the AmpIntensity implementation an exception
@@ -71,10 +71,10 @@ public:
 
   /// Get the FunctionTree.
   /// If no FunctionTree is available an std::runtime_error exception is thrown.
-  virtual std::shared_ptr<ComPWA::FunctionTree> GetTree();
+  virtual std::shared_ptr<ComPWA::FunctionTree> tree();
 
   /// Number of likelihood evaluations
-  virtual int NSteps() const { return _nCalls; }
+  virtual int status() const { return _nCalls; }
 
 protected:
   /// Initialize FunctionTree.

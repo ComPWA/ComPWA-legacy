@@ -52,80 +52,61 @@ public:
   virtual ~TreeNode();
 
   /// Check if recalculation is needed (obsolete)
-  virtual bool Modified() const { return _changed; };
+  virtual bool isModified() const { return _changed; };
 
   /// Flags the node as modified. Should only be called from its child nodes.
-  virtual void Update();
+  virtual void update();
 
   /// Recalculate node and all of its child nodes
-  virtual void Recalculate();
+  virtual void recalculate();
 
   /// Get child parameter at \p position
-  virtual std::shared_ptr<ComPWA::Parameter> Parameter(unsigned int position = 0);
+  virtual std::shared_ptr<ComPWA::Parameter> parameter(unsigned int position);
 
   /// Get list of child parameters
-  virtual std::vector<std::shared_ptr<ComPWA::Parameter>> &Parameters();
-  
+  virtual std::vector<std::shared_ptr<ComPWA::Parameter>> &parameters();
+
   /// Fill ParameterList with parameters. The function is intended to be filled
   /// with fit parameters, so we add only DoubleParameters.
-  virtual void FillParameters(ComPWA::ParameterList &list);
+  virtual void fillParameters(ComPWA::ParameterList &list);
 
   /// Dimension of node (= number of parameters)
-  virtual std::size_t Dimension() const { return _parameters.size(); };
+  virtual std::size_t dimension() const { return _parameters.size(); };
 
-  virtual std::string Name() const { return _name; };
+  virtual std::string name() const { return _name; };
 
-  virtual void SetName(std::string name) { _name = name; };
+  virtual void setName(std::string name) { _name = name; };
 
   /// Add link to children list. This function is intended to be used in
   /// debugging and testing.
-  virtual void AddChild(std::shared_ptr<ComPWA::TreeNode> childNode);
+  virtual void addChild(std::shared_ptr<ComPWA::TreeNode> childNode);
 
   /// Add link to parents list. This function is intended to be used in
   /// debugging and testing.
-  virtual void AddParent(std::shared_ptr<ComPWA::TreeNode> parentNode);
+  virtual void addParent(std::shared_ptr<ComPWA::TreeNode> parentNode);
 
   /// Get list of child nodes
-  virtual std::vector<std::shared_ptr<ComPWA::TreeNode>> &GetChildNodes();
+  virtual std::vector<std::shared_ptr<ComPWA::TreeNode>> &childNodes();
 
   /// Find node with \p name within all downstream nodes. The first match is
   /// returned. In case no node exisits a NULL pointer is returned.
-  virtual std::shared_ptr<ComPWA::TreeNode> FindChildNode(std::string name) const;
+  virtual std::shared_ptr<ComPWA::TreeNode>
+  findChildNode(std::string name) const;
 
-  //  /// Find node \p name are return its parameter. The first match is
-  //  /// returned. In case no node exisits a NULL pointer is returned.
-  //  virtual std::shared_ptr<ComPWA::Parameter> ChildValue(std::string name) const;
-  //
-  //  /** Return value of certain child node
-  //   * We go recursively through out tree to find the specified node and
-  //   return
-  //   * its value. In case
-  //   * of a node with multiple values we return the first one. Currently we
-  //   assume
-  //   * that the variable
-  //   * is a std::complex<double> or can be converted to it.
-  //   *
-  //   * @param name node specifier
-  //   * @return current value of node
-  //   */
-  //  virtual std::complex<double> getChildSingleValue(std::string name) const;
-
-  /// Streaming operator
   friend std::ostream &operator<<(std::ostream &out,
                                   const ComPWA::TreeNode &p) {
-    return out << p.Print(-1);
+    return out << p.print(-1);
   }
 
-  /// Stream operator
   friend std::ostream &operator<<(std::ostream &os,
                                   std::shared_ptr<ComPWA::TreeNode> p) {
-    return os << p->Print(-1);
+    return os << p->print(-1);
   }
 
   /// Print node and its child nodes to std::string. The recursion goes down
   /// until \p level is reached. A \p prefix can be added inorder to create
   /// a tree like output.
-  virtual std::string Print(int level = -1, std::string prefix = "") const;
+  virtual std::string print(int level = -1, std::string prefix = "") const;
 
 protected:
   /// List of parent nodes
@@ -145,21 +126,20 @@ protected:
   /// Node strategy. Strategy defines how the node value calculated given its
   /// child nodes and child leafs.
   std::shared_ptr<ComPWA::Strategy> _strat;
-  
+
   /// Add this node to parents children-list
-  virtual void LinkParents();
+  virtual void linkParents();
 
   /// Delete links to child and parent nodes
-  virtual void DeleteLinks();
-  
+  virtual void deleteLinks();
+
   /// Fill list with names of parent nodes
-  virtual void FillParentNames(std::vector<std::string> &names) const;
+  virtual void fillParentNames(std::vector<std::string> &names) const;
 
   /// Fill list with names of children nodes
-  virtual void FillChildNames(std::vector<std::string> &names) const;
-  
+  virtual void fillChildNames(std::vector<std::string> &names) const;
 };
 
-} // namespace ComPWA
+} // ns::ComPWA
 
 #endif

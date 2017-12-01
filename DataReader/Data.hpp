@@ -65,7 +65,7 @@ public:
   virtual const ParameterList &GetListOfData(std::shared_ptr<Kinematics> kin);
 
   /// Get 'vertical' list of dataPoints.
-  std::vector<dataPoint> GetDataPoints(std::shared_ptr<Kinematics> kin) const;
+  std::vector<DataPoint> GetDataPoints(std::shared_ptr<Kinematics> kin) const;
 
   /// Apply a correction to the sample.
   /// E.g. correction for efficiency differences between data and Monte-Carlo.

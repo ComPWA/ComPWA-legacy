@@ -49,7 +49,7 @@ MinLogLH::MinLogLH(std::shared_ptr<Kinematics> kin,
   _sumOfWeights = 0;
   for (unsigned int evt = _firstEvent; evt < _nEvents + _firstEvent; evt++) {
     Event ev(_dataSample->GetEvent(evt));
-    _sumOfWeights += ev.GetWeight();
+    _sumOfWeights += ev.weight();
   }
 
   LOG(info) << "MinLogLH::Init() |  Size of data sample = " << _nEvents
@@ -60,23 +60,23 @@ MinLogLH::MinLogLH(std::shared_ptr<Kinematics> kin,
   return;
 }
 
-double MinLogLH::ControlParameter(ParameterList &minPar) {
+double MinLogLH::controlParameter(ParameterList &minPar) {
   double lh = 0;
   if (!_tree) {
     // Calculate \Sum_{ev} log()
     double sumLog = 0;
     // loop over data sample
     for (unsigned int evt = _firstEvent; evt < _nEvents + _firstEvent; evt++) {
-      dataPoint point;
-      _kin->EventToDataPoint(_dataSample->GetEvent(evt), point);
-      double val = _intens->Intensity(point);
-      sumLog += std::log(val) * point.GetWeight();
+      DataPoint point;
+      _kin->convert(_dataSample->GetEvent(evt), point);
+      double val = _intens->intensity(point);
+      sumLog += std::log(val) * point.weight();
     }
     lh = (-1) * ((double)_nEvents) / _sumOfWeights * sumLog;
   } else {
-    _tree->Recalculate();
+    _tree->recalculate();
     std::shared_ptr<DoubleParameter> logLH =
-        std::dynamic_pointer_cast<DoubleParameter>(_tree->Head()->Parameter());
+        std::dynamic_pointer_cast<DoubleParameter>(_tree->head()->parameter(0));
     lh = logLH->value();
   }
   _nCalls++;
@@ -101,7 +101,7 @@ void MinLogLH::UseFunctionTree(bool onoff) {
   return;
 }
 
-std::shared_ptr<FunctionTree> MinLogLH::GetTree() {
+std::shared_ptr<FunctionTree> MinLogLH::tree() {
   if (!_tree) {
     throw std::runtime_error("MinLogLH::GetTree()| FunctionTree does not "
                              "exists. Enable it first using "
@@ -114,7 +114,7 @@ void MinLogLH::IniLHtree() {
   LOG(debug) << "MinLogLH::IniLHtree() | Constructing FunctionTree!";
 
   // Ensure that a FunctionTree is provided
-  if (!_intens->HasTree())
+  if (!_intens->hasTree())
     throw std::runtime_error("MinLogLH::IniLHtree() |  AmpIntensity does not "
                              "provide a FunctionTree!");
 
@@ -122,32 +122,32 @@ void MinLogLH::IniLHtree() {
   int sampleSize = _dataSampleList.GetMultiDouble(0)->numValues();
 
   //-log L = (-1)*N/(\sum_{ev} w_{ev}) \sum_{ev} ...
-  _tree->CreateHead("LH",
+  _tree->createHead("LH",
                     std::shared_ptr<Strategy>(new MultAll(ParType::DOUBLE)));
-  _tree->CreateLeaf("minusOne", -1, "LH");
-  _tree->CreateLeaf("nEvents", sampleSize, "LH");
-  _tree->CreateNode("invSumWeights",
+  _tree->createLeaf("minusOne", -1, "LH");
+  _tree->createLeaf("nEvents", sampleSize, "LH");
+  _tree->createNode("invSumWeights",
                     std::shared_ptr<Strategy>(new Inverse(ParType::DOUBLE)),
                     "LH");
-  _tree->CreateNode("sumEvents",
+  _tree->createNode("sumEvents",
                     std::shared_ptr<Strategy>(new AddAll(ParType::DOUBLE)),
                     "LH");
-  _tree->CreateLeaf("SumOfWeights", _sumOfWeights, "invSumWeights");
-  _tree->CreateNode("weightLog",
+  _tree->createLeaf("SumOfWeights", _sumOfWeights, "invSumWeights");
+  _tree->createNode("weightLog",
                     std::shared_ptr<Strategy>(new MultAll(ParType::MDOUBLE)),
                     "sumEvents", sampleSize,
                     false); // w_{ev} * log( I_{ev} )
-  _tree->CreateLeaf("Weight",
+  _tree->createLeaf("Weight",
                     _dataSampleList.GetMultiDouble("Weight"), "weightLog");
-  _tree->CreateNode("Log",
+  _tree->createNode("Log",
                     std::shared_ptr<Strategy>(new LogOf(ParType::MDOUBLE)),
                     "weightLog", sampleSize, false);
-  _tree->InsertTree(_intens->GetTree(_kin, _dataSampleList, _phspAccSampleList,
-                                     _phspSampleList, _kin->GetNVars()),
+  _tree->insertTree(_intens->tree(_kin, _dataSampleList, _phspAccSampleList,
+                                     _phspSampleList, _kin->numVariables()),
                     "Log");
 
-  _tree->Recalculate();
-  if (!_tree->SanityCheck()) {
+  _tree->recalculate();
+  if (!_tree->sanityCheck()) {
     throw std::runtime_error("MinLogLH::IniLHtree() | Tree has structural "
                              "problems. Sanity check not passed!");
   }

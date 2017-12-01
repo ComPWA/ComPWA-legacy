@@ -37,7 +37,7 @@
 using namespace ComPWA;
 using namespace ComPWA::DataReader;
 using ComPWA::Physics::HelicityFormalism::HelicityKinematics;
-using ComPWA::Physics::HelicityFormalism::IncoherentIntensity;
+using ComPWA::Physics::IncoherentIntensity;
 using ComPWA::Optimizer::Minuit2::MinuitResult;
 
 // Enable serialization of MinuitResult. For some reason has to be outside
@@ -52,7 +52,7 @@ BOOST_CLASS_EXPORT(ComPWA::Optimizer::Minuit2::MinuitResult)
 std::string amplitudeModel = R"####(
 <IncoherentIntensity Name="jpsiGammaPiPi_inc">
 	<CoherentIntensity Name="jpsiGammaPiPi">
-  	<Amplitude Name="f2(1270)">
+  	<Amplitude Class="SequentialPartialAmplitude" Name="f2(1270)">
 			<Parameter Type="Magnitude"	Name="Magnitude_f2">
 				<Value>1.0</Value>
         <Min>-1.0</Min>
@@ -65,18 +65,16 @@ std::string amplitudeModel = R"####(
         <Max>100</Max>
 				<Fix>false</Fix>
 			</Parameter>
-			<Resonance Name="f2ToPiPi">
+			<PartialAmplitude Class="HelicityDecay" Name="f2ToPiPi">
 				<DecayParticle Name="f2(1270)" Helicity="0"/>
-				<SubSystem>
-					<RecoilSystem FinalState="0" />
-					<DecayProducts>
-						<Particle Name="pi0" FinalState="1"  Helicity="0"/>
-						<Particle Name="pi0" FinalState="2"  Helicity="0"/>
-					</DecayProducts>
-				</SubSystem>
-			</Resonance>
+				<RecoilSystem FinalState="0" />
+				<DecayProducts>
+					<Particle Name="pi0" FinalState="1"  Helicity="0"/>
+					<Particle Name="pi0" FinalState="2"  Helicity="0"/>
+				</DecayProducts>
+			</PartialAmplitude>
 		</Amplitude>
-		<Amplitude Name="myAmp">
+		<Amplitude Class="SequentialPartialAmplitude" Name="myAmp">
 			<Parameter Type="Magnitude"	Name="Magnitude_my">
 				<Value>1.0</Value>
         <Min>-1.0</Min>
@@ -89,16 +87,14 @@ std::string amplitudeModel = R"####(
         <Max>100</Max>
 				<Fix>true</Fix>
 			</Parameter>
-			<Resonance Name="MyResToPiPi">
+			<PartialAmplitude Class="HelicityDecay" Name="MyResToPiPi">
 				<DecayParticle Name="myRes" Helicity="0"/>
-				<SubSystem>
-					<RecoilSystem FinalState="0" />
-					<DecayProducts>
-						<Particle Name="pi0" FinalState="1"  Helicity="0"/>
-						<Particle Name="pi0" FinalState="2"  Helicity="0"/>
-					</DecayProducts>
-				</SubSystem>
-			</Resonance>
+				<RecoilSystem FinalState="0" />
+				<DecayProducts>
+					<Particle Name="pi0" FinalState="1"  Helicity="0"/>
+					<Particle Name="pi0" FinalState="2"  Helicity="0"/>
+				</DecayProducts>
+			</PartialAmplitude>
 		</Amplitude>
 	</CoherentIntensity>
 </IncoherentIntensity>
@@ -215,8 +211,8 @@ int main(int argc, char **argv) {
   // Pass phsp sample to intensity for normalization.
   // Convert to dataPoints first.
   auto phspPoints =
-      std::make_shared<std::vector<dataPoint>>(phspSample->GetDataPoints(kin));
-  intens->SetPhspSample(phspPoints, phspPoints);
+      std::make_shared<std::vector<DataPoint>>(phspSample->GetDataPoints(kin));
+  intens->setPhspSample(phspPoints, phspPoints);
   run.SetAmplitude(intens);
 
   //---------------------------------------------------
@@ -230,7 +226,7 @@ int main(int argc, char **argv) {
   // 5) Fit the model to the data and print the result
   //---------------------------------------------------
   ParameterList fitPar;
-  intens->GetParameters(fitPar);
+  intens->parameters(fitPar);
   // Set start error of 0.05 for parameters, run Minos?
   setErrorOnParameterList(fitPar, 0.05, false);
 
@@ -238,7 +234,7 @@ int main(int argc, char **argv) {
       kin, intens, sample, phspSample, phspSample, 0, 0);
 
   esti->UseFunctionTree(true);
-  LOG(debug) << esti->GetTree()->Head()->Print(25);
+  LOG(debug) << esti->tree()->head()->print(25);
 
   auto minuitif = new Optimizer::Minuit2::MinuitIF(esti, fitPar);
   minuitif->SetHesse(true);

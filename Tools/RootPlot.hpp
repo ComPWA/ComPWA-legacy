@@ -44,9 +44,9 @@ public:
     s_phsp = sample->GetDataPoints(kin_);
   }
 
-  void SetData(std::vector<dataPoint> &points) { s_data = points; }
+  void SetData(std::vector<DataPoint> &points) { s_data = points; }
 
-  void SetPhspSample(std::vector<dataPoint> &points) { s_phsp = points; }
+  void SetPhspSample(std::vector<DataPoint> &points) { s_phsp = points; }
 
   void SetFitAmp(std::shared_ptr<ComPWA::AmpIntensity> intens);
 
@@ -64,11 +64,11 @@ public:
     
     std::shared_ptr<ComPWA::AmpIntensity> comp;
     try {
-        comp = _plotComponents.at(0)->GetComponent(name);
+        comp = _plotComponents.at(0)->component(name);
     } catch (std::exception &ex) {
       LOG(error) << "DalitzPlot::DrawComponent() | Component " << name
                  << " not found in AmpIntensity "
-                 << _plotComponents.at(0)->Name() << ".";
+                 << _plotComponents.at(0)->name() << ".";
       return;
     }
     _plotComponents.push_back(comp);
@@ -89,9 +89,9 @@ protected:
   
   std::vector<std::string> _componentNames;
 
-  std::vector<dataPoint> s_data;
+  std::vector<DataPoint> s_data;
   
-  std::vector<dataPoint> s_phsp;
+  std::vector<DataPoint> s_phsp;
 };
 } // ns::Tools
 } // ns::ComPWA

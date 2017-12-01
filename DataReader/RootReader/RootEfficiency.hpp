@@ -34,7 +34,7 @@ public:
   ~RootEfficiency(){};
 
   //! returns efficiency for current datapoint
-  virtual double Evaluate(const dataPoint &point) const;
+  virtual double evaluate(const DataPoint &point) const;
 };
 
 /**
@@ -58,7 +58,7 @@ public:
   
   ~RootAngleEfficiency(){};
 
-  virtual double Evaluate(const dataPoint &point) const;
+  virtual double evaluate(const DataPoint &point) const;
 };
   
 } /* namespace DataReader */

@@ -211,6 +211,8 @@ public:
   /// \param inName internal string identifier of this parameter
   DoubleParameter(std::string inName = "");
 
+  /// Construct parameter from a property tree. The expected tree layout is
+  /// described in load().
   DoubleParameter(const boost::property_tree::ptree pt);
 
   /// Standard constructor with just a value provided. Creates parameter

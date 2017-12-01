@@ -91,13 +91,12 @@ void RootReader::read(TTree *fTree, double readSize) {
       int charge = partN->GetPDG()->Charge();
       if (charge != 0)
         charge /= std::fabs(charge);
-      tmp.AddParticle(Particle(inN.X(), inN.Y(), inN.Z(), inN.E(),
+      tmp.addParticle(Particle(inN.X(), inN.Y(), inN.Z(), inN.E(),
                                partN->GetPdgCode(), charge));
     } // particle loop
-    tmp.SetWeight(feventWeight);
-    tmp.SetCharge(fCharge);
-    tmp.SetFlavour(fFlavour);
-    tmp.SetEfficiency(feventEff);
+    tmp.setWeight(feventWeight);
+    tmp.setCharge(fCharge);
+    tmp.setEfficiency(feventEff);
 
     fEvents.push_back(tmp);
     if (feventWeight > maxWeight)
@@ -124,7 +123,7 @@ void RootReader::WriteData(std::string fileName, std::string treeName) {
   int fFlavour;
 
   TTree* fTree = new TTree(treeName.c_str(), treeName.c_str());
-  unsigned int numPart = fEvents.at(0).GetNParticles();
+  unsigned int numPart = fEvents.at(0).numParticles();
   fParticles = new TClonesArray("TParticle", numPart);
   fTree->Branch("Particles", &fParticles);
   fTree->Branch("weight", &feventWeight, "weight/D");
@@ -136,14 +135,13 @@ void RootReader::WriteData(std::string fileName, std::string treeName) {
   auto it = fEvents.begin();
   for (; it != fEvents.end(); ++it) {
     fParticles->Clear();
-    feventWeight = (*it).GetWeight();
-    fCharge = (*it).GetCharge();
-    fFlavour = (*it).GetFlavour();
-    feventEff = (*it).GetEfficiency();
+    feventWeight = (*it).weight();
+    fCharge = (*it).charge();
+    feventEff = (*it).efficiency();
 
-    TLorentzVector motherMomentum(0, 0, 0, (*it).GetCMSEnergy());
+    TLorentzVector motherMomentum(0, 0, 0, (*it).cmsEnergy());
     for (unsigned int i = 0; i < numPart; i++) {
-      const Particle oldParticle = (*it).GetParticle(i);
+      Particle oldParticle = (*it).particle(i);
       TLorentzVector oldMomentum(oldParticle.GetPx(), oldParticle.GetPy(),
                                  oldParticle.GetPz(), oldParticle.GetE());
       new (partArray[i]) TParticle(oldParticle.GetPid(), 1, 0, 0, 0, 0,

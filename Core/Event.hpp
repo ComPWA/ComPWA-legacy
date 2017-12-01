@@ -2,12 +2,10 @@
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
-//! Internal container for event information.
-/*! \class Event
- * @file Event.hpp
- * This class provides a internal container for event-based information. The
- * class provides a list of particles of the event.
-*/
+///
+/// \file
+/// Event class
+///
 
 #ifndef _Event_HPP_
 #define _Event_HPP_
@@ -19,6 +17,12 @@
 
 namespace ComPWA {
 
+///
+/// \class Event
+/// Internal container for event information. This class provides a internal
+/// container for event-based information. The class provides a list of
+/// particles of the event.
+///
 class Event {
 
 public:
@@ -29,47 +33,46 @@ public:
   Event(const double inWeight, const std::string &name,
         const double inEff = 1.);
 
-  Event(Event const&);
+  virtual void addParticle(Particle inParticle);
 
-  virtual void AddParticle(Particle inParticle);
+  virtual ~Event(){};
 
-  virtual ~Event();
+  virtual double inline weight() const { return Weight; }
 
-  virtual void inline SetName(const std::string &name) { fName = name; }
-  virtual const inline std::string &GetName() const { return fName; }
-  virtual double inline GetWeight() const { return fWeight; }
-  virtual void inline SetWeight(double w) { fWeight = w; }
-  virtual int inline GetFlavour() const { return fFlavour; }
-  virtual void inline SetFlavour(int fl) { fFlavour = fl; }
-  virtual int inline GetCharge() const { return fCharge; }
-  virtual void inline SetCharge(int ch) { fCharge = ch; }
-  virtual double inline GetEfficiency() const { return fEff; }
-  virtual void inline SetEfficiency(double eff) { fEff = eff; }
+  virtual void inline setWeight(double w) { Weight = w; }
 
-  virtual const inline unsigned long GetNParticles() const {
-    return fParticles.size();
-  }
-  virtual const Particle& GetParticle(const unsigned int id) const;
+  virtual int inline charge() const { return Charge; }
+
+  virtual void inline setCharge(int ch) { Charge = ch; }
+
+  virtual double inline efficiency() const { return Eff; }
+
+  virtual void inline setEfficiency(double eff) { Eff = eff; }
+
+  virtual size_t numParticles() const { return Particles.size(); }
+
+  virtual Particle particle(size_t id) const;
+
+  virtual std::vector<Particle> &particles() { return Particles; }
 
   friend std::ostream &operator<<(std::ostream &stream, const Event &ev);
 
-  virtual double GetCMSEnergy() const ;
+  /// Invariant mass of all particles in the event
+  virtual double cmsEnergy() const;
 
-  virtual void Clear() {
-    fParticles.clear();
-    fWeight = 1.0;
-    fEff = 1.0;
-    fName = "";
-  }
+  virtual void clear();
+
+  std::vector<Particle>::iterator first() { return Particles.begin(); }
+
+  std::vector<Particle>::iterator last() { return Particles.end(); }
+
 protected:
-  std::vector<Particle> fParticles;
-  double fWeight;
-  double fEff;
-  std::string fName;
-  int fFlavour; // 1 -> particle, 0 -> unknown, -1 anti-particle
-  int fCharge;
+  std::vector<Particle> Particles;
+  double Weight;
+  double Eff;
+  int Charge;
 };
 
-} /* namespace ComPWA */
+} // namespace ComPWA
 
 #endif

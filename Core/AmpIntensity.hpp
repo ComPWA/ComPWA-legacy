@@ -38,41 +38,41 @@ public:
                std::shared_ptr<DoubleParameter> strength =
                    std::shared_ptr<DoubleParameter>(new DoubleParameter("",
                                                                         1.0)),
-               std::shared_ptr<Efficiency> eff =
-                   std::shared_ptr<Efficiency>(new UnitEfficiency))
-      : _name(name), _eff(eff), _strength(strength), _current_strength(-999) {
-    _strength->fixParameter(true);
+               std::shared_ptr<ComPWA::Efficiency> eff =
+                   std::shared_ptr<ComPWA::Efficiency>(new UnitEfficiency))
+      : Name(name), Eff(eff), Strength(strength), CurrentStrength(-999) {
+    Strength->fixParameter(true);
   }
   
   virtual ~AmpIntensity() {};
 
   /// Function to create a full copy
-  virtual AmpIntensity *Clone(std::string newName = "") const = 0;
+  virtual AmpIntensity *clone(std::string newName = "") const = 0;
 
   /// Evaluate intensity at dataPoint in phase-space
   /// \param point Data point
   /// \return Intensity
-  virtual double Intensity(const dataPoint &point) const = 0;
+  virtual double intensity(const DataPoint &point) const = 0;
 
   //============ SET/GET =================
   /// Get name
-  virtual std::string Name() const { return _name; }
+  virtual std::string name() const { return Name; }
 
   /// Get strength parameter
-  double Strength() const { return _strength->value(); }
+  double strength() const { return Strength->value(); }
 
-  virtual void GetParameters(ParameterList &list) = 0;
+  virtual void parameters(ParameterList &list) = 0;
 
   /// Fill vector with parameters
-  virtual void GetParametersFast(std::vector<double> &list) const {
-    list.push_back(_strength->value());
+  virtual void parametersFast(std::vector<double> &list) const {
+    list.push_back(Strength->value());
   }
   
   /// Update parameters in AmpIntensity to the values given in \p list
-  virtual void UpdateParameters(const ParameterList &list) = 0;
+  virtual void updateParameters(const ParameterList &list) = 0;
   
   /// Fill ParameterList with fit fractions
-  virtual void GetFitFractions(ParameterList &parList) = 0;
+  virtual void fitFractions(ParameterList &parList) = 0;
 
   /// Set phase space samples
   /// We use phase space samples to calculate the normalizations. In case of
@@ -80,32 +80,33 @@ public:
   /// The sample toySample is used for normalization calculation for e.g.
   /// Resonacnes without efficiency.
   virtual void
-  SetPhspSample(std::shared_ptr<std::vector<ComPWA::dataPoint>> phspSample,
-                std::shared_ptr<std::vector<ComPWA::dataPoint>> toySample) = 0;
+  setPhspSample(std::shared_ptr<std::vector<ComPWA::DataPoint>> phspSample,
+                std::shared_ptr<std::vector<ComPWA::DataPoint>> toySample) = 0;
 
-  virtual std::shared_ptr<AmpIntensity> GetComponent(std::string name) = 0;
+  virtual std::shared_ptr<AmpIntensity> component(std::string name) = 0;
 
-  virtual void Reset(){};
+  virtual void reset(){};
   //========== FUNCTIONTREE =============
 
   /// Check if a FunctionTree is implemented for a certain (derived) class.
-  virtual bool HasTree() const { return false; }
+  virtual bool hasTree() const { return false; }
 
   virtual std::shared_ptr<FunctionTree>
-  GetTree(std::shared_ptr<Kinematics> kin, const ParameterList &sample,
+  tree(std::shared_ptr<Kinematics> kin, const ParameterList &sample,
           const ParameterList &phspSample, const ParameterList &toySample,
           unsigned int nEvtVar, std::string suffix = "") = 0;
 
 protected:
-  //! Name
-  std::string _name;
+  /// Name
+  std::string Name;
 
-  //! Phase space depended efficiency
-  std::shared_ptr<Efficiency> _eff;
+  /// Phase space depended efficiency
+  std::shared_ptr<Efficiency> Eff;
 
-  std::shared_ptr<ComPWA::DoubleParameter> _strength;
-  //! temporary strength
-  double _current_strength;
+  std::shared_ptr<ComPWA::DoubleParameter> Strength;
+  
+  /// temporary strength
+  double CurrentStrength;
 };
 //-----------------------------------------------------------------------------
 
@@ -122,5 +123,5 @@ inline std::vector<std::string> splitString(std::string str) {
   return result;
 }
 
-} /* namespace ComPWA */
+} // namespace ComPWA
 #endif

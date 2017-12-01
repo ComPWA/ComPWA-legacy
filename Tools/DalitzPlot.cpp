@@ -116,7 +116,7 @@ void DalitzPlot::SetFitAmp(std::shared_ptr<ComPWA::AmpIntensity> intens,
   _plotComponents.clear();
   _plotComponents.push_back(intens);
   _plotHistograms.push_back(
-      DalitzHisto(kin_, intens->Name(), title, _bins, color));
+      DalitzHisto(kin_, intens->name(), title, _bins, color));
   _plotHistograms.back().SetStats(0);
   _plotLegend.push_back("Fit");
   _isFilled = 0;
@@ -132,14 +132,14 @@ void DalitzPlot::Fill(std::shared_ptr<Kinematics> kin) {
 
       double eff = 1.0;
       if (_correctForEfficiency)
-        eff = event.GetEfficiency();
+        eff = event.efficiency();
       if (eff == 0.0) {
         LOG(error) << "DalitzPlot::Fill() | Loop over "
                       "data sample: An event with zero efficiency was found! "
                       "This should not happen! We skip it!";
         continue;
       }
-      double evWeight = event.GetWeight();
+      double evWeight = event.weight();
 
       dataDiagrams.Fill(kin, event, evWeight * 1 / eff);
       h_weights.Fill(evWeight * 1 / eff);
@@ -160,10 +160,10 @@ void DalitzPlot::Fill(std::shared_ptr<Kinematics> kin) {
          i++) { // loop over phsp MC
       bar.nextEvent();
       Event event(s_phsp->GetEvent(i));
-      double evWeight = event.GetWeight();
+      double evWeight = event.weight();
       double eff = 1.0;
       if (_correctForEfficiency)
-        eff = event.GetEfficiency();
+        eff = event.efficiency();
       if (eff == 0.0) {
         LOG(error) << "DalitzPlot::Fill() | Loop over "
                       "phsp sample: An event with zero efficiency was found! "
@@ -176,9 +176,9 @@ void DalitzPlot::Fill(std::shared_ptr<Kinematics> kin) {
 
       /* Construct DataPoint from Event to check if dataPoint is within the
        * phase space boundaries */
-      dataPoint point;
+      DataPoint point;
       try {
-        kin->EventToDataPoint(event, point);
+        kin->convert(event, point);
       } catch (BeyondPhsp &ex) { // event outside phase, remove
         continue;
       }
@@ -189,7 +189,7 @@ void DalitzPlot::Fill(std::shared_ptr<Kinematics> kin) {
       // Loop over all components that we want to plot
       for (int t = 0; t < _plotHistograms.size(); t++)
         _plotHistograms.at(t).Fill(
-            kin, event, _plotComponents.at(t)->Intensity(point) * evBase);
+            kin, event, _plotComponents.at(t)->intensity(point) * evBase);
     }
 
     // Scale histograms to match data sample
@@ -209,14 +209,14 @@ void DalitzPlot::Fill(std::shared_ptr<Kinematics> kin) {
       Event event(s_hitMiss->GetEvent(i));
       double eff = 1.0;
       if (_correctForEfficiency)
-        eff = event.GetEfficiency();
+        eff = event.efficiency();
       if (eff == 0.0) {
         LOG(error) << "DalitzPlot::Fill() | Loop over "
                       "Hit&Miss sample: An event with zero efficiency was "
                       "found! This should not happen! We skip it!";
         continue;
       }
-      double evWeight = event.GetWeight();
+      double evWeight = event.weight();
 
       fitHitMissDiagrams.Fill(kin, event, evWeight * 1 / eff);
     }
@@ -449,26 +449,26 @@ DalitzHisto::DalitzHisto(std::shared_ptr<Kinematics> kin, std::string name,
 void DalitzHisto::Fill(std::shared_ptr<Kinematics> kin, Event &event,
                        double w) {
 
-  double weight = event.GetWeight() * w; // use event weights?
+  double weight = event.weight() * w; // use event weights?
 
   _integral += weight;
 
-  int sysId23 = kin->GetDataID(SubSystem({0}, {1}, {2}));
-  int sysId13 = kin->GetDataID(SubSystem({1}, {0}, {2}));
-  int sysId12 = kin->GetDataID(SubSystem({2}, {0}, {1}));
+  int sysId23 = kin->dataID(SubSystem({0}, {1}, {2}));
+  int sysId13 = kin->dataID(SubSystem({1}, {0}, {2}));
+  int sysId12 = kin->dataID(SubSystem({2}, {0}, {1}));
 
-  dataPoint point;
+  DataPoint point;
   try {
-    kin->EventToDataPoint(event, point);
+    kin->convert(event, point);
   } catch (std::exception &ex) {
     return;
   }
 
-  double m23sq = point.GetValue(3 * sysId23);
-  double cos23 = point.GetValue(3 * sysId23 + 1);
-  double m13sq = point.GetValue(3 * sysId13);
+  double m23sq = point.value(3 * sysId23);
+  double cos23 = point.value(3 * sysId23 + 1);
+  double m13sq = point.value(3 * sysId13);
   //	double cos13 = point.getVal(3*sysId13+1);
-  double m12sq = point.GetValue(3 * sysId12);
+  double m12sq = point.value(3 * sysId12);
   //	double cos12 = point.getVal(3*sysId12+1);
 
   _arr.at(0).Fill(m23sq, weight);

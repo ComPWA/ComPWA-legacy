@@ -2,18 +2,13 @@
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
-//! dataPoint stores kinematic information of a dalitz plot
-/*!
- * @file DataPoint.hpp
- *\class dataPoint
- *      dataPoint is a singleton class which provides a
- *      certain phase space point to all classes of the framework. The point can
- *be set anywhere in
- *      the framework and can be read by any amplitude class.
- */
+///
+/// \file
+/// DataPoint class.
+///
 
-#ifndef DPPOINT2_HPP_
-#define DPPOINT2_HPP_
+#ifndef DATAPOINT_HPP_
+#define DATAPOINT_HPP_
 
 #include <cstdlib>
 #include <math.h>
@@ -22,35 +17,45 @@
 
 namespace ComPWA {
 
-class dataPoint {
+///
+/// \class DataPoint
+/// DataPoint stores the values that are needed to evaluate an AmpIntensity.
+/// In case of the HelicityFormalism is would be a triple (m,theta,phi) for
+/// each relevant SubSysyem.
+///
+class DataPoint {
 
 public:
-  dataPoint();
+  DataPoint();
 
-  void Reset(unsigned int size);
+  void reset(unsigned int size);
 
-  std::size_t Size() const { return var.size(); }
+  std::size_t size() const { return Values.size(); }
 
-  void SetValue(unsigned int pos, double val);
+  void setValue(unsigned int pos, double val);
   
-  double GetValue(unsigned int num) const;
+  double value(unsigned int num) const;
 
-  std::vector<double>& GetPoint() { return var; };
+  std::vector<double>& values() { return Values; };
 
-  void SetWeight(double w) { weight = w; };
+  void setWeight(double w) { Weight = w; };
   
-  double GetWeight() const { return weight; };
+  double weight() const { return Weight; };
   
-  void SetEfficiency(double e) { eff = e; };
+  void setEfficiency(double e) { Eff = e; };
   
-  double GetEfficiency() const { return eff; };
+  double efficiency() const { return Eff; };
+
+  std::vector<double>::iterator first() { return Values.begin(); }
+
+  std::vector<double>::iterator last() { return Values.end(); }
 
 protected:
-  std::vector<double> var;
-  double weight;
-  double eff;
-  friend std::ostream &operator<<(std::ostream &os, const dataPoint &p);
+  std::vector<double> Values;
+  double Weight;
+  double Eff;
+  friend std::ostream &operator<<(std::ostream &os, const DataPoint &p);
 };
 
-} /* namespace ComPWA */
-#endif /*DPPOINT2_HPP_*/
+} // namespace ComPWA
+#endif

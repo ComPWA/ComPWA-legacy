@@ -9,16 +9,14 @@
 #include "Core/Efficiency.hpp"
 #include "Physics/CoherentIntensity.hpp"
 
-namespace ComPWA {
-namespace Physics {
-namespace HelicityFormalism {
+using namespace ComPWA::Physics;
 
-double CoherentIntensity::Intensity(const dataPoint &point) const {
+double CoherentIntensity::intensity(const DataPoint &point) const {
   std::complex<double> result(0., 0.);
-  for (auto i : _seqDecays)
-    result += i->Evaluate(point);
+  for (auto i : Amplitudes)
+    result += i->evaluate(point);
   assert(!std::isnan(result.real()) && !std::isnan(result.imag()));
-  return Strength() * std::norm(result) * _eff->Evaluate(point);
+  return strength() * std::norm(result) * Eff->evaluate(point);
 };
 
 std::shared_ptr<CoherentIntensity>
@@ -27,7 +25,7 @@ CoherentIntensity::Factory(std::shared_ptr<PartList> partL,
                            const boost::property_tree::ptree &pt) {
   LOG(trace) << " CoherentIntensity::Factory() | Construction....";
   auto obj = std::make_shared<CoherentIntensity>();
-  obj->_name = (pt.get<std::string>("<xmlattr>.Name"));
+  obj->Name = (pt.get<std::string>("<xmlattr>.Name"));
 
   //  boost::property_tree::xml_writer_settings<char> settings('\t', 1);
   //  write_xml(std::cout,pt);
@@ -44,7 +42,7 @@ CoherentIntensity::Factory(std::shared_ptr<PartList> partL,
     } else if (v.first == "Amplitude" &&
                v.second.get<std::string>("<xmlattr>.Class") ==
                    "SequentialPartialAmplitude") {
-      obj->AddAmplitude(
+      obj->addAmplitude(
           ComPWA::Physics::HelicityFormalism::SequentialPartialAmplitude::
               Factory(partL, kin, v.second));
     } else {
@@ -53,13 +51,13 @@ CoherentIntensity::Factory(std::shared_ptr<PartList> partL,
   }
 
   if (strength)
-    obj->_strength = strength;
+    obj->Strength = strength;
   else {
-    obj->_strength = (std::make_shared<ComPWA::DoubleParameter>("", 1.0));
-    obj->_strength->fixParameter(true);
+    obj->Strength = (std::make_shared<ComPWA::DoubleParameter>("", 1.0));
+    obj->Strength->fixParameter(true);
   }
 
-  obj->SetPhspVolume(kin->GetPhspVolume());
+  obj->setPhspVolume(kin->phspVolume());
 
   return obj;
 }
@@ -68,21 +66,22 @@ boost::property_tree::ptree
 CoherentIntensity::Save(std::shared_ptr<CoherentIntensity> obj) {
 
   boost::property_tree::ptree pt;
-  pt.put<std::string>("<xmlattr>.Name", obj->Name());
-  pt.add_child("Parameter", obj->_strength->save());
+  pt.put<std::string>("<xmlattr>.Name", obj->name());
+  pt.add_child("Parameter", obj->Strength->save());
   pt.put("Parameter.<xmlattr>.Type", "Strength");
 
-  for (auto i : obj->GetAmplitudes()) {
-    pt.add_child("Amplitude", SequentialPartialAmplitude::Save(i));
+  for (auto i : obj->amplitudes()) {
+    pt.add_child("Amplitude",
+                 HelicityFormalism::SequentialPartialAmplitude::Save(i));
   }
   return pt;
 }
 
-std::shared_ptr<AmpIntensity>
-CoherentIntensity::GetComponent(std::string name) {
+std::shared_ptr<ComPWA::AmpIntensity>
+CoherentIntensity::component(std::string name) {
 
   // The whole object?
-  if (name == Name()) {
+  if (name == Name) {
     LOG(error) << "CoherentIntensity::GetComponent() | You're requesting the "
                   "full object! So just copy it!";
     return std::shared_ptr<AmpIntensity>();
@@ -91,12 +90,12 @@ CoherentIntensity::GetComponent(std::string name) {
   bool found = false;
   // Do we want to have a combination of coherentintensities?
   std::vector<std::string> splitNames = splitString(name);
-  auto icIn = std::shared_ptr<AmpIntensity>(this->Clone(name));
-  icIn->Reset(); // delete all existing amplitudes
+  auto icIn = std::shared_ptr<AmpIntensity>(this->clone(name));
+  icIn->reset(); // delete all existing amplitudes
   for (auto i : splitNames) {
-    for (auto j : _seqDecays) {
-      if (i == j->GetName()) {
-        std::dynamic_pointer_cast<CoherentIntensity>(icIn)->AddAmplitude(j);
+    for (auto j : Amplitudes) {
+      if (i == j->name()) {
+        std::dynamic_pointer_cast<CoherentIntensity>(icIn)->addAmplitude(j);
         found = true;
       }
     }
@@ -106,7 +105,7 @@ CoherentIntensity::GetComponent(std::string name) {
   if (!found) {
     throw std::runtime_error(
         "CoherentIntensity::GetComponent() | Component " + name +
-        " could not be found in CoherentIntensity " + Name() + ".");
+        " could not be found in CoherentIntensity " + Name + ".");
   }
 
   return icIn;
@@ -114,7 +113,7 @@ CoherentIntensity::GetComponent(std::string name) {
 
 //! Getter function for basic amp tree
 std::shared_ptr<ComPWA::FunctionTree>
-CoherentIntensity::GetTree(std::shared_ptr<Kinematics> kin,
+CoherentIntensity::tree(std::shared_ptr<Kinematics> kin,
                            const ComPWA::ParameterList &sample,
                            const ComPWA::ParameterList &phspSample,
                            const ComPWA::ParameterList &toySample,
@@ -131,47 +130,47 @@ CoherentIntensity::GetTree(std::shared_ptr<Kinematics> kin,
 
   std::shared_ptr<FunctionTree> tr(new FunctionTree());
 
-  tr->CreateHead("CoherentIntensity(" + Name() + ")" + suffix,
+  tr->createHead("CoherentIntensity(" + name() + ")" + suffix,
                  std::shared_ptr<Strategy>(new MultAll(ParType::MDOUBLE)));
-  tr->CreateLeaf("Strength", _strength,
-                 "CoherentIntensity(" + Name() + ")" + suffix);
-  tr->CreateNode("SumSquared",
+  tr->createLeaf("Strength", Strength,
+                 "CoherentIntensity(" + name() + ")" + suffix);
+  tr->createNode("SumSquared",
                  std::shared_ptr<Strategy>(new AbsSquare(ParType::MDOUBLE)),
-                 "CoherentIntensity(" + Name() + ")" + suffix);
-  tr->InsertTree(setupBasicTree(kin, sample, toySample), "SumSquared");
+                 "CoherentIntensity(" + name() + ")" + suffix);
+  tr->insertTree(setupBasicTree(kin, sample, toySample), "SumSquared");
 
   // Normalization
   // create a new FunctionTree to make sure that nodes with the same name do
   // not interfere
   std::shared_ptr<FunctionTree> trNorm(new FunctionTree());
-  trNorm->CreateHead("Normalization(" + Name() + ")" + suffix,
+  trNorm->createHead("Normalization(" + name() + ")" + suffix,
                      std::shared_ptr<Strategy>(new Inverse(ParType::DOUBLE)));
-  trNorm->CreateNode("Integral",
+  trNorm->createNode("Integral",
                      std::shared_ptr<Strategy>(new MultAll(ParType::DOUBLE)),
-                     "Normalization(" + Name() + ")" + suffix);
-  trNorm->CreateLeaf("PhspVolume", kin->GetPhspVolume(), "Integral");
-  trNorm->CreateLeaf("InverseSampleWeights", 1 / ((double)sumWeights),
+                     "Normalization(" + name() + ")" + suffix);
+  trNorm->createLeaf("PhspVolume", kin->phspVolume(), "Integral");
+  trNorm->createLeaf("InverseSampleWeights", 1 / ((double)sumWeights),
                      "Integral");
-  trNorm->CreateNode("Sum",
+  trNorm->createNode("Sum",
                      std::shared_ptr<Strategy>(new AddAll(ParType::DOUBLE)),
                      "Integral");
-  trNorm->CreateNode("IntensityWeighted",
+  trNorm->createNode("IntensityWeighted",
                      std::shared_ptr<Strategy>(new MultAll(ParType::MDOUBLE)),
                      "Sum", phspSampleSize, false);
-  trNorm->CreateLeaf("Efficiency", eff, "IntensityWeighted");
-  trNorm->CreateLeaf("EventWeight", weightPhsp, "IntensityWeighted");
-  trNorm->CreateNode("Intensity",
+  trNorm->createLeaf("Efficiency", eff, "IntensityWeighted");
+  trNorm->createLeaf("EventWeight", weightPhsp, "IntensityWeighted");
+  trNorm->createNode("Intensity",
                      std::shared_ptr<Strategy>(new AbsSquare(ParType::MDOUBLE)),
                      "IntensityWeighted", phspSampleSize,
                      false); //|T_{ev}|^2
-  trNorm->InsertTree(setupBasicTree(kin, phspSample, toySample, "_norm"),
+  trNorm->insertTree(setupBasicTree(kin, phspSample, toySample, "_norm"),
                      "Intensity");
 
-  tr->InsertTree(trNorm, "CoherentIntensity(" + Name() + ")" + suffix);
+  tr->insertTree(trNorm, "CoherentIntensity(" + name() + ")" + suffix);
   return tr;
 }
 
-std::shared_ptr<FunctionTree> CoherentIntensity::setupBasicTree(
+std::shared_ptr<ComPWA::FunctionTree> CoherentIntensity::setupBasicTree(
     std::shared_ptr<Kinematics> kin, const ParameterList &sample,
     const ParameterList &phspSample, std::string suffix) const {
 
@@ -195,44 +194,40 @@ std::shared_ptr<FunctionTree> CoherentIntensity::setupBasicTree(
   // Strategies needed
   std::shared_ptr<AddAll> maddStrat(new AddAll(ParType::MCOMPLEX));
 
-  newTree->CreateHead("SumOfAmplitudes" + suffix, maddStrat, sampleSize);
+  newTree->createHead("SumOfAmplitudes" + suffix, maddStrat, sampleSize);
 
-  for (auto i : _seqDecays) {
-    std::shared_ptr<FunctionTree> resTree =
-        i->GetTree(kin, sample, phspSample, "");
-    if (!resTree->SanityCheck())
+  for (auto i : Amplitudes) {
+    std::shared_ptr<ComPWA::FunctionTree> resTree =
+        i->tree(kin, sample, phspSample, "");
+    if (!resTree->sanityCheck())
       throw std::runtime_error("AmpSumIntensity::setupBasicTree() | "
                                "Resonance tree didn't pass sanity check!");
-    resTree->Recalculate();
-    newTree->InsertTree(resTree, "SumOfAmplitudes" + suffix);
+    resTree->recalculate();
+    newTree->insertTree(resTree, "SumOfAmplitudes" + suffix);
   }
 
   LOG(debug) << "AmpSumIntensity::setupBasicTree(): tree constructed!!";
   return newTree;
 }
 
-void CoherentIntensity::GetParameters(ComPWA::ParameterList &list) {
-  list.AddParameter(_strength);
-  for (auto i : _seqDecays) {
-    i->GetParameters(list);
+void CoherentIntensity::parameters(ComPWA::ParameterList &list) {
+  list.AddParameter(Strength);
+  for (auto i : Amplitudes) {
+    i->parameters(list);
   }
 }
 
-void CoherentIntensity::UpdateParameters(const ParameterList &list) {
+void CoherentIntensity::updateParameters(const ParameterList &list) {
   std::shared_ptr<DoubleParameter> p;
   try {
-    p = list.GetDoubleParameter(_strength->name());
+    p = list.GetDoubleParameter(Strength->name());
   } catch (std::exception &ex) {
   }
   if (p)
-    _strength->updateParameter(p);
+    Strength->updateParameter(p);
 
-  for (auto i : _seqDecays)
-    i->UpdateParameters(list);
+  for (auto i : Amplitudes)
+    i->updateParameters(list);
 
   return;
 }
-
-} // namespace HelicityFormalism
-} // namespace Physics
-} // namespace ComPWA

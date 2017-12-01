@@ -106,11 +106,11 @@ public:
                                "SetFitAmp()!");
     std::shared_ptr<ComPWA::AmpIntensity> comp;
     try{
-      comp = _plotComponents.at(0)->GetComponent(name);
+      comp = _plotComponents.at(0)->component(name);
     } catch (std::exception& ex) {
       LOG(error) << "DalitzPlot::DrawComponent() | Component " << name
                  << " not found in AmpIntensity "
-                 << _plotComponents.at(0)->Name() << ".";
+                 << _plotComponents.at(0)->name() << ".";
       return;
     }
     _plotComponents.push_back(comp);

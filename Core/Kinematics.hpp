@@ -28,9 +28,9 @@ public:
   //! Constructor
   Kinematics(std::vector<pid> initial = std::vector<pid>(),
              std::vector<pid> finalS = std::vector<pid>(),
-             ComPWA::FourMomentum cmsP4 = ComPWA::FourMomentum(0,0,0,0))
-      : _initialState(initial), _finalState(finalS), _initialP4(cmsP4),
-        is_PS_area_calculated_(false), PS_area_(0.0){};
+             ComPWA::FourMomentum cmsP4 = ComPWA::FourMomentum(0, 0, 0, 0))
+      : InitialState(initial), FinalState(finalS), InitialStateP4(cmsP4),
+        HasPhspVolume(false), PhspVolume(1.0){};
 
   /// Delete copy constructor. For each Kinematics in the analysis only
   /// one instance should exist since Kinematics does the bookkeeping for which
@@ -40,50 +40,52 @@ public:
   Kinematics(const Kinematics &that) = delete;
 
   /// Convert Event to dataPoint
-  virtual void EventToDataPoint(const ComPWA::Event &ev,
-                                dataPoint &point) const = 0;
+  virtual void convert(const ComPWA::Event &ev, DataPoint &point) const = 0;
 
   /// Check if dataPoint is within phase space boundaries
-  virtual bool IsWithinPhsp(const dataPoint &point) const = 0;
+  virtual bool isWithinPhsp(const DataPoint &point) const = 0;
 
-  virtual double GetPhspVolume() const;
+  virtual double phspVolume() const;
 
-  /// Specify a phase space volume
-  virtual void SetPhspVolume(double phsp);
+  virtual void setPhspVolume(double phsp);
 
-  virtual std::size_t GetNVars() const { return _varNames.size(); }
+  virtual std::size_t numVariables() const { return VariableNames.size(); }
 
-  virtual std::vector<pid> GetFinalState() const { return _finalState; }
+  virtual std::vector<pid> finalState() const { return FinalState; }
 
-  virtual std::vector<pid> GetInitialState() const { return _initialState; }
+  virtual std::vector<pid> initialState() const { return InitialState; }
 
-  virtual ComPWA::FourMomentum GetInitialFourMomentum() const {
-    return _initialP4;
+  virtual ComPWA::FourMomentum initialStateFourMomentum() const {
+    return InitialStateP4;
   }
 
-  virtual int GetDataID(const ComPWA::SubSystem &sys) = 0;
+  virtual int dataID(const ComPWA::SubSystem &sys) = 0;
 
-  virtual std::vector<std::string> GetVarNames() const { return _varNames; }
+  virtual std::vector<std::string> variableNames() const {
+    return VariableNames;
+  }
 
-  virtual std::vector<std::string> GetVarTitles() const { return _varTitles; }
+  virtual std::vector<std::string> variableTitles() const {
+    return VariableTitles;
+  }
 
 protected:
-  std::vector<pid> _initialState;
+  std::vector<pid> InitialState;
 
-  std::vector<pid> _finalState;
+  std::vector<pid> FinalState;
 
   /// Four momentum of the initial particle reaction
-  ComPWA::FourMomentum _initialP4;
+  ComPWA::FourMomentum InitialStateP4;
 
   /// Names of variabes
-  std::vector<std::string> _varNames;
+  std::vector<std::string> VariableNames;
 
   /// (Latex) Titles of variables
-  std::vector<std::string> _varTitles;
+  std::vector<std::string> VariableTitles;
 
-  virtual double calculatePSArea() const = 0;
-  bool is_PS_area_calculated_;
-  double PS_area_;
+  virtual double calculatePhspVolume() const = 0;
+  bool HasPhspVolume;
+  double PhspVolume;
 };
 
 } // namespace ComPWA

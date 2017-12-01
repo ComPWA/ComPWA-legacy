@@ -31,7 +31,7 @@ double MinuitFcn::operator()(const std::vector<double> &x) const {
   for (unsigned int i = 0; i < x.size(); i++) {
     std::shared_ptr<ComPWA::DoubleParameter> actPat =
         _parList.GetDoubleParameter(i);
-    // std::cout<<i<<" "<<actPat->GetName()<<" "<<actPat->value()
+    // std::cout<<i<<" "<<actPat->name()<<" "<<actPat->value()
     //<<" "<<x[i]<<" "<<actPat->IsFixed()<<std::endl;
     if (!actPat->isFixed())
       if (x[i] == x[i]) {
@@ -41,12 +41,12 @@ double MinuitFcn::operator()(const std::vector<double> &x) const {
   }
   // Start timing
   clock_t begin = clock();
-  double result = _myDataPtr->ControlParameter(_parList);
+  double result = _myDataPtr->controlParameter(_parList);
   double sec = double(clock() - begin) / CLOCKS_PER_SEC;
 
   LOG(info) << "MinuitFcn: -log(L) = " << std::setprecision(10) << result
             << std::setprecision(4) << " Time: " << sec << "s"
-            << " nCalls: " << _myDataPtr->NSteps();
+            << " nCalls: " << _myDataPtr->status();
   LOG(debug) << "Parameters: " << paramOut.str();
 
   return result;

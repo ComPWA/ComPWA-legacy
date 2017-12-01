@@ -165,7 +165,7 @@ void MinuitResult::genOutput(std::ostream &out, std::string opt) {
 
 void MinuitResult::createInterferenceTable(std::ostream &out,
                                            std::shared_ptr<AmpIntensity> amp) {
-  out << "INTERFERENCE terms for " << amp->Name() << ": " << std::endl;
+  out << "INTERFERENCE terms for " << amp->name() << ": " << std::endl;
   TableFormater *tableInterf = new TableFormater(&out);
   tableInterf->addColumn("Name 1", 15);
   tableInterf->addColumn("Name 2", 15);
@@ -176,8 +176,8 @@ void MinuitResult::createInterferenceTable(std::ostream &out,
 //  for (; it != amp->GetResonanceItrLast(); ++it) {
 //    auto it2 = it;
 //    for (; it2 != amp->GetResonanceItrLast(); ++it2) {
-//      *tableInterf << (*it)->GetName();
-//      *tableInterf << (*it2)->GetName();
+//      *tableInterf << (*it)->name();
+//      *tableInterf << (*it2)->name();
 //      double inf = amp->GetIntegralInterference(it, it2);
 //      *tableInterf << inf;
 //      sumInfTerms += inf;

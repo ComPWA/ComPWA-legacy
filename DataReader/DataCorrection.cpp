@@ -13,8 +13,8 @@ MomentumCorrection::MomentumCorrection(std::vector<CorrectionTable> inCorr,
 
 double MomentumCorrection::getCorrection(Event &ev) {
   double w = 1;
-  for (int i = 0; i < ev.GetNParticles(); i++) {
-    Particle p = ev.GetParticle(i);
+  for (int i = 0; i < ev.numParticles(); i++) {
+    Particle p = ev.particle(i);
     int charge = p.GetCharge();
     double mom = p.GetThreeMomentum();
     double corr;
@@ -22,7 +22,7 @@ double MomentumCorrection::getCorrection(Event &ev) {
       corr = corrections.at(i).GetValue(charge, mom) + 1;
     } catch (std::exception &ex) {
       throw std::runtime_error(
-          "RootCorrection::RootCorrection() | Number of histograms is "
+          "MomentumCorrection::getCorrection() | Number of histograms is "
           "expected to be number of final state particles!");
     }
     w *= corr;

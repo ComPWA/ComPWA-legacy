@@ -73,7 +73,7 @@ protected:
 };
 
 inline double Integral(std::shared_ptr<AmpIntensity> intens,
-                       std::vector<dataPoint> &sample,
+                       std::vector<DataPoint> &sample,
                        double phspVolume = 1.0) {
 
   if (!sample.size()) {
@@ -83,7 +83,7 @@ inline double Integral(std::shared_ptr<AmpIntensity> intens,
   }
   double sumIntens = 0;
   for (auto i : sample)
-    sumIntens += intens->Intensity(i);
+    sumIntens += intens->intensity(i);
 
   double integral = (sumIntens * phspVolume / sample.size());
 
@@ -91,13 +91,13 @@ inline double Integral(std::shared_ptr<AmpIntensity> intens,
 }
 
 inline double Integral(std::shared_ptr<AmpIntensity> intens,
-                       std::shared_ptr<std::vector<dataPoint>> sample,
+                       std::shared_ptr<std::vector<DataPoint>> sample,
                        double phspVolume = 1.0) {
   return Integral(intens, *sample.get(), phspVolume);
 }
 
 inline double Maximum(std::shared_ptr<AmpIntensity> intens,
-                      std::shared_ptr<std::vector<dataPoint>> sample) {
+                      std::shared_ptr<std::vector<DataPoint>> sample) {
 
   if (!sample->size()) {
     LOG(debug)
@@ -107,7 +107,7 @@ inline double Maximum(std::shared_ptr<AmpIntensity> intens,
 
   double max = 0;
   for (auto i : *sample.get()) {
-    double val = intens->Intensity(i);
+    double val = intens->intensity(i);
     if (val > max)
       max = val;
   }
@@ -127,9 +127,9 @@ inline double Maximum(std::shared_ptr<Kinematics> kin,
 
   auto data = sample->GetDataPoints(kin);
   double max = 0;
-  dataPoint maxPoint;
+  DataPoint maxPoint;
   for (auto i : data) {
-    double val = intens->Intensity(i);
+    double val = intens->intensity(i);
     if (val > max) {
       maxPoint = i;
       max = val;

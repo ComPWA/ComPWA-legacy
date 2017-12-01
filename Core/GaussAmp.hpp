@@ -48,7 +48,7 @@ public:
   }
 
   virtual void initialise() {
-    if (Kinematics::Instance()->GetNVars() != 1)
+    if (Kinematics::Instance()->numVariables() != 1)
       throw std::runtime_error("GaussAmp::initialize() | "
                                "this amplitude is for two body decays only!");
   };
@@ -68,12 +68,12 @@ public:
     std::vector<double> m;
     m.push_back(mass * mass);
     dataPoint p(m);
-    return Intensity(p);
+    return intensity(p);
   }
 
   virtual void GetParameters(ParameterList &list){};
 
-  virtual double Intensity(const dataPoint &point) const {
+  virtual double intensity(const dataPoint &point) const {
 
     double mass = params.GetDoubleParameter(0)->value();
     double width = params.GetDoubleParameter(1)->value();
@@ -86,7 +86,7 @@ public:
   }
 
   virtual double IntensityNoNorm(const dataPoint &point) const {
-    return Intensity(point);
+    return intensity(point);
   }
 
   virtual void GetFitFractions(ParameterList &parList) {}
@@ -145,8 +145,8 @@ public:
     return 1;
   }
 
-  virtual double Intensity(const dataPoint &point) const {
-    return _eff->Evaluate(point);
+  virtual double intensity(const dataPoint &point) const {
+    return _eff->evaluate(point);
   }
 
   virtual void GetParameters(ParameterList &list){};
@@ -216,7 +216,7 @@ protected:
   }
 
   virtual double Integral() const {
-    return Kinematics::Instance()->GetPhspVolume();
+    return Kinematics::Instance()->phspVolume();
   }
 };
 

@@ -42,7 +42,7 @@ public:
 
   //================ EVALUATION =================
 
-  virtual double Evaluate(const ComPWA::dataPoint &point, int pos1,
+  virtual double evaluate(const ComPWA::DataPoint &point, int pos1,
                           int pos2) const;
 
   static double dynamicalFunction(ComPWA::Spin J, ComPWA::Spin mu,

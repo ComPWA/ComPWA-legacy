@@ -55,6 +55,7 @@
 using namespace std;
 using namespace ComPWA;
 using namespace ComPWA::DataReader;
+using namespace ComPWA::Physics;
 using namespace ComPWA::Physics::HelicityFormalism;
 
 // Enable serialization of MinuitResult. For some reason has to be outside
@@ -291,7 +292,7 @@ int main(int argc, char **argv) {
   if (disableFileLog)
     logFileName = "";
   Logging log(logFileName, boost::log::trivial::info); // initialize logging
-  log.SetLogLevel(logLevel);
+  log.setLogLevel(logLevel);
 
   // check configuration
   assert(!outputDir.empty());
@@ -332,8 +333,8 @@ int main(int argc, char **argv) {
 
   // Initialize random generator useing trueModel parameters
   std::shared_ptr<Generator> gen = std::shared_ptr<Generator>(
-      new Tools::RootGenerator(trueModelPartL, trueModelKin->GetInitialState(),
-                               trueModelKin->GetFinalState(), seed));
+      new Tools::RootGenerator(trueModelPartL, trueModelKin->initialState(),
+                               trueModelKin->finalState(), seed));
 
   ComPWA::Tools::RunManager run;
   run.SetGenerator(gen);
@@ -376,23 +377,23 @@ int main(int argc, char **argv) {
                              eff); // set efficiency values for each event
 
   // Setting samples for normalization
-  auto toyPoints = std::make_shared<std::vector<dataPoint>>(
+  auto toyPoints = std::make_shared<std::vector<DataPoint>>(
       toyPhspData->GetDataPoints(trueModelKin));
   auto phspPoints = toyPoints;
   if (phspData) {
-    auto phspPoints = std::make_shared<std::vector<dataPoint>>(
+    auto phspPoints = std::make_shared<std::vector<DataPoint>>(
         phspData->GetDataPoints(trueModelKin));
   }
-  trueIntens->SetPhspSample(phspPoints, toyPoints);
+  trueIntens->setPhspSample(phspPoints, toyPoints);
 
-  toyPoints = std::make_shared<std::vector<dataPoint>>(
+  toyPoints = std::make_shared<std::vector<DataPoint>>(
       toyPhspData->GetDataPoints(fitModelKin));
   phspPoints = toyPoints;
   if (phspData) {
-    auto phspPoints = std::make_shared<std::vector<dataPoint>>(
+    auto phspPoints = std::make_shared<std::vector<DataPoint>>(
         phspData->GetDataPoints(fitModelKin));
   }
-  intens->SetPhspSample(phspPoints, toyPoints);
+  intens->setPhspSample(phspPoints, toyPoints);
 
   //======================= READING DATA =============================
   // Sample is used for minimization
@@ -427,7 +428,7 @@ int main(int argc, char **argv) {
     //    SubSystem s(std::vector<int>{1}, std::vector<int>{0},
     //    std::vector<int>{2});
     //    int id =
-    //    dynamic_cast<HelicityKinematics*>(Kinematics::Instance())->GetDataID(s);
+    //    dynamic_cast<HelicityKinematics*>(Kinematics::Instance())->dataID(s);
     //    for( int i=0; i<10 ; i++){
     //      std::cout<<inD->getEvent(i)<<std::endl;
     //      dataPoint p(inD->getEvent(i));
@@ -499,8 +500,8 @@ int main(int argc, char **argv) {
   std::stringstream s;
   s << "Printing the first 10 events of data sample:\n";
   for (int i = 0; (i < sample->GetNEvents() && i < 10); ++i) {
-    dataPoint p;
-    trueModelKin->EventToDataPoint(sample->GetEvent(i), p);
+    DataPoint p;
+    trueModelKin->convert(sample->GetEvent(i), p);
     s << p << "\n";
   }
   LOG(info) << s.str();
@@ -583,8 +584,8 @@ int main(int argc, char **argv) {
   if (fittingMethod != "plotOnly") {
     //========================FITTING =====================
     ParameterList truePar, fitPar;
-    trueIntens->GetParameters(truePar);
-    intens->GetParameters(fitPar);
+    trueIntens->parameters(truePar);
+    intens->parameters(fitPar);
     LOG(debug) << "Fit parameters: " << std::endl << fitPar.to_str();
 
     //=== Constructing likelihood
@@ -594,13 +595,13 @@ int main(int argc, char **argv) {
     std::cout.setf(std::ios::unitbuf);
     if (fittingMethod == "tree") {
       esti->UseFunctionTree(true);
-      esti->GetTree()->Recalculate();
-      LOG(debug) << esti->GetTree()->Head()->Print(25);
+      esti->tree()->recalculate();
+      LOG(debug) << esti->tree()->head()->print(25);
     }
 
     if (useRandomStartValues)
       randomStartValues(fitPar);
-    LOG(debug) << "Initial LH=" << esti->ControlParameter(fitPar) << ".";
+    LOG(debug) << "Initial LH=" << esti->controlParameter(fitPar) << ".";
 
     // Use Geneva as pre fitter
     //    std::shared_ptr<Optimizer::Optimizer> preOpti;
@@ -698,7 +699,7 @@ int main(int argc, char **argv) {
   }
 
   // Fill final parameters if minimization was not run
-  if (!finalParList.GetNParameter()) {
+  if (!finalParList.numParameters()) {
     ParameterList tmpList;
     //    Amplitude::FillAmpParameterToList(ampVec, tmpList);
     finalParList.DeepCopy(tmpList);

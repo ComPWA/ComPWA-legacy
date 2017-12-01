@@ -64,8 +64,8 @@ RootGenerator::RootGenerator(std::shared_ptr<PartList> partL,
   gRandom = new TRandom3(0);
   if (seed != -1)
     SetSeed(seed);
-  auto finalS = kin->GetFinalState();
-  auto initialS = kin->GetInitialState();
+  auto finalS = kin->finalState();
+  auto initialS = kin->initialState();
   nPart = finalS.size();
   if (nPart < 2)
     throw std::runtime_error(
@@ -75,7 +75,7 @@ RootGenerator::RootGenerator(std::shared_ptr<PartList> partL,
         << "RootGenerator::RootGenerator() | only 2 particles in the final"
            " state! There are no degrees of freedom!";
 
-  cmsP4 = kin->GetInitialFourMomentum();
+  cmsP4 = kin->initialStateFourMomentum();
   TLorentzVector W(cmsP4.GetPx(), cmsP4.GetPy(), cmsP4.GetPz(), cmsP4.GetE());
 
   masses = new Double_t[nPart];
@@ -88,20 +88,20 @@ RootGenerator::RootGenerator(std::shared_ptr<PartList> partL,
 RootGenerator *RootGenerator::Clone() { return (new RootGenerator(*this)); }
 
 void RootGenerator::Generate(Event &evt) {
-  evt.Clear();
+  evt.clear();
   const double weight = event.Generate();
   for (unsigned int t = 0; t < nPart; t++) {
     TLorentzVector *p = event.GetDecay(t);
-    evt.AddParticle(Particle(p->X(), p->Y(), p->Z(), p->E()));
+    evt.addParticle(Particle(p->X(), p->Y(), p->Z(), p->E()));
   }
-  evt.SetWeight(weight);
+  evt.setWeight(weight);
 
 #ifndef _NDEBUG
   ComPWA::FourMomentum pFour;
   double sqrtS = cmsP4.GetInvMass();
 
-  for (int i = 0; i < evt.GetNParticles(); i++)
-    pFour += evt.GetParticle(i).GetFourMomentum();
+  for (int i = 0; i < evt.numParticles(); i++)
+    pFour += evt.particle(i).GetFourMomentum();
   if (pFour.GetInvMass() != cmsP4.GetInvMass()) {
     // TGenPhaseSpace calculates momenta with float precision. This can lead
     // to the case that generated events are outside the available

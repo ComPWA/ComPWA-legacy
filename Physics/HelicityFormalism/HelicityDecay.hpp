@@ -31,11 +31,11 @@ class HelicityDecay : public ComPWA::Physics::PartialAmplitude {
 
 public:
   HelicityDecay(int dataPos, const SubSystem &sys)
-      : _dataPos(dataPos), _subSystem(sys){};
+      : DataPosition(dataPos), SubSys(sys){};
 
-  virtual HelicityDecay *Clone(std::string newName = "") const {
+  virtual HelicityDecay *clone(std::string newName = "") const {
     auto tmp = new HelicityDecay(*this);
-    tmp->SetName(newName);
+    tmp->setName(newName);
     return tmp;
   }
 
@@ -49,82 +49,82 @@ public:
   //======= INTEGRATION/NORMALIZATION ===========
 
   /// Check of parameters have changed and normalization has to be recalculated
-  virtual bool CheckModified() const;
+  virtual bool isModified() const;
 
-  virtual double GetNormalization() const;
+  virtual double normalization() const;
 
   //================ EVALUATION =================
 
   /// Evaluate function without normalization
-  std::complex<double> EvaluateNoNorm(const dataPoint &point) const {
-    std::complex<double> result = GetCoefficient();
-    result *= _angD->Evaluate(point, _dataPos + 1, _dataPos + 2);
-    result *= _dynamic->Evaluate(point, _dataPos);
+  std::complex<double> evaluateNoNorm(const DataPoint &point) const {
+    std::complex<double> result = coefficient();
+    result *= AngularDist->evaluate(point, DataPosition + 1, DataPosition + 2);
+    result *= DynamicFcn->evaluate(point, DataPosition);
 
     assert(!std::isnan(result.real()) && !std::isnan(result.imag()));
     return result;
   };
   //============ SET/GET =================
 
-  virtual void GetParameters(ParameterList &list);
+  virtual void parameters(ParameterList &list);
 
-  virtual void GetParametersFast(std::vector<double> &list) const {
-    PartialAmplitude::GetParametersFast(list);
-    _dynamic->GetParametersFast(list);
+  virtual void parametersFast(std::vector<double> &list) const {
+    PartialAmplitude::parametersFast(list);
+    DynamicFcn->GetParametersFast(list);
   }
 
   /// Update parameters to the values given in \p list
-  virtual void UpdateParameters(const ParameterList &list);
+  virtual void updateParameters(const ParameterList &list);
 
-  std::shared_ptr<ComPWA::Physics::HelicityFormalism::AmpWignerD> GetWignerD() {
-    return _angD;
+  std::shared_ptr<ComPWA::Physics::HelicityFormalism::AmpWignerD> wignerD() {
+    return AngularDist;
   }
 
-  void SetWignerD(
+  void setWignerD(
       std::shared_ptr<ComPWA::Physics::HelicityFormalism::AmpWignerD> w) {
-    _angD = w;
+    AngularDist = w;
   }
 
   std::shared_ptr<ComPWA::Physics::DecayDynamics::AbstractDynamicalFunction>
-  GetDynamicalFunction() {
-    return _dynamic;
+  dynamicalFunction() {
+    return DynamicFcn;
   }
 
-  void SetDynamicalFunction(
+  void setDynamicalFunction(
       std::shared_ptr<ComPWA::Physics::DecayDynamics::AbstractDynamicalFunction>
           f) {
-    _dynamic = f;
+    DynamicFcn = f;
   }
 
   /// Set position of variables within dataPoint
-  virtual void SetDataPosition(int pos) { _dataPos = pos; }
+  virtual void setDataPosition(int pos) { DataPosition = pos; }
 
   /// Get position of variables within dataPoint
-  virtual int GetDataPosition() const { return _dataPos; }
+  virtual int dataPosition() const { return DataPosition; }
 
-  virtual void SetSubSystem(const SubSystem &sys) { _subSystem = sys; }
+  virtual void setSubSystem(const SubSystem &sys) { SubSys = sys; }
 
-  virtual SubSystem GetSubSystem() const { return _subSystem; }
+  virtual SubSystem subSystem() const { return SubSys; }
 
   //=========== FUNCTIONTREE =================
-  virtual bool HasTree() const { return true; }
+  virtual bool hasTree() const { return true; }
 
   virtual std::shared_ptr<FunctionTree>
-  GetTree(std::shared_ptr<Kinematics> kin, const ComPWA::ParameterList &sample,
+  tree(std::shared_ptr<Kinematics> kin, const ComPWA::ParameterList &sample,
           const ComPWA::ParameterList &toySample, std::string suffix);
 
 protected:
   /// Position where variables are stored in dataPoint.
-  /// We expect to find the invariant mass of the system at @param _dataPos,
-  /// cosTheta at @param _dataPos+1 and phi at @param _dataPos+2
-  int _dataPos;
+  /// We expect to find the invariant mass of the system at @param DataPosition,
+  /// cosTheta at @param DataPosition+1 and phi at @param DataPosition+2
+  int DataPosition;
 
-  ComPWA::SubSystem _subSystem;
+  ComPWA::SubSystem SubSys;
 
-  std::shared_ptr<ComPWA::Physics::HelicityFormalism::AmpWignerD> _angD;
+  std::shared_ptr<ComPWA::Physics::HelicityFormalism::AmpWignerD> AngularDist;
 
   std::shared_ptr<ComPWA::Physics::DecayDynamics::AbstractDynamicalFunction>
-      _dynamic;
+      DynamicFcn;
 };
 
 } // namespace HelicityFormalism

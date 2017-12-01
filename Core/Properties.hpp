@@ -29,8 +29,8 @@ class Properties {
 public:
   Properties(std::string name = "test", pid id = -999) : _name(name), _id(id){};
 
-  void SetName(std::string n) { _name = n; }
-  std::string GetName() const { return _name; }
+  void setName(std::string n) { _name = n; }
+  std::string name() const { return _name; }
 
   void SetId(pid id) { _id = id; }
   pid GetId() const { return _id; }
@@ -161,7 +161,7 @@ inline void ReadParticles(std::shared_ptr<PartList> list,
     return;
   for (auto const &v : particleTree.get()) {
     auto tmp = ParticleProperties(v.second);
-    auto p = std::make_pair(tmp.GetName(), tmp);
+    auto p = std::make_pair(tmp.name(), tmp);
     auto last = list->insert(p);
 
     if (!last.second) {
@@ -178,7 +178,7 @@ inline void ReadParticles(std::shared_ptr<PartList> list,
     } catch (std::exception &ex) {
     }
 
-    LOG(debug) << "ReadParticles() | Particle " << tmp.GetName()
+    LOG(debug) << "ReadParticles() | Particle " << tmp.name()
                << " (id=" << tmp.GetId() << ") "
                << " J(PC)=" << tmp.GetSpinQuantumNumber("Spin") << "("
                << tmp.GetQuantumNumber("Parity") << cparity << ") "

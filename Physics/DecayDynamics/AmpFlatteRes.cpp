@@ -17,7 +17,7 @@ AmpFlatteRes::Factory(std::shared_ptr<PartList> partL,
 
   std::string name = pt.get<std::string>("DecayParticle.<xmlattr>.Name");
   LOG(trace) << "AmpFlatteRes::Factory() | Construction of " << name << ".";
-  obj->SetName(name);
+  obj->setName(name);
 
   // All further information on the decay is stored in a ParticleProperty list
   auto partProp = partL->find(name)->second;
@@ -80,7 +80,7 @@ AmpFlatteRes::Factory(std::shared_ptr<PartList> partL,
 
   LOG(trace)
       << "RelativisticBreitWigner::Factory() | Construction of the decay "
-      << partProp.GetName() << " -> " << daughterNames.first << " + "
+      << partProp.name() << " -> " << daughterNames.first << " + "
       << daughterNames.second;
 
   return std::static_pointer_cast<AbstractDynamicalFunction>(obj);
@@ -101,13 +101,13 @@ bool AmpFlatteRes::CheckModified() const {
   return false;
 }
 
-std::complex<double> AmpFlatteRes::Evaluate(const dataPoint &point,
+std::complex<double> AmpFlatteRes::evaluate(const DataPoint &point,
                                             int pos) const {
 
   std::complex<double> result;
   try {
     result = dynamicalFunction(
-        point.GetValue(pos), _mass->value(), _g.at(0).GetMassA(),
+        point.value(pos), _mass->value(), _g.at(0).GetMassA(),
         _g.at(0).GetMassB(), _g.at(0).value(), _g.at(1).GetMassA(),
         _g.at(1).GetMassB(), _g.at(1).value(), _g.at(2).GetMassA(),
         _g.at(2).GetMassB(), _g.at(2).value(), (double)_spin,
@@ -211,28 +211,28 @@ AmpFlatteRes::GetTree(const ParameterList &sample, int pos,
   std::shared_ptr<FunctionTree> tr(new FunctionTree());
   //  tr->createHead("DynamicalFunction",
   //                 std::shared_ptr<Strategy>(new MultAll(ParType::MCOMPLEX)));
-  tr->CreateHead("Flatte" + suffix,
+  tr->createHead("Flatte" + suffix,
                  std::shared_ptr<Strategy>(new FlatteStrategy("")));
 
   //  tr->createNode("Flatte", std::shared_ptr<Strategy>(new
   //  FlatteStrategy("")),
   //                 "DynamicalFunction", sampleSize);
-  tr->CreateLeaf("Mass", _mass, "Flatte" + suffix);
+  tr->createLeaf("Mass", _mass, "Flatte" + suffix);
   for (int i = 0; i < _g.size(); i++) {
-    tr->CreateLeaf("g_" + std::to_string(i) + "_massA", _g.at(i).GetMassA(),
+    tr->createLeaf("g_" + std::to_string(i) + "_massA", _g.at(i).GetMassA(),
                    "Flatte" + suffix);
-    tr->CreateLeaf("g_" + std::to_string(i) + "_massB", _g.at(i).GetMassB(),
+    tr->createLeaf("g_" + std::to_string(i) + "_massB", _g.at(i).GetMassB(),
                    "Flatte" + suffix);
-    tr->CreateLeaf("g_" + std::to_string(i), _g.at(i).GetValueParameter(),
+    tr->createLeaf("g_" + std::to_string(i), _g.at(i).GetValueParameter(),
                    "Flatte" + suffix);
   }
-  tr->CreateLeaf("Spin", (double)_spin, "Flatte" + suffix);
-  tr->CreateLeaf("MesonRadius", _mesonRadius, "Flatte" + suffix);
-  tr->CreateLeaf("FormFactorType", _ffType, "Flatte" + suffix);
+  tr->createLeaf("Spin", (double)_spin, "Flatte" + suffix);
+  tr->createLeaf("MesonRadius", _mesonRadius, "Flatte" + suffix);
+  tr->createLeaf("FormFactorType", _ffType, "Flatte" + suffix);
   //_daughterMasses actually not used here. But we put it in as a cross check.
-  tr->CreateLeaf("MassA", _daughterMasses.first, "Flatte" + suffix);
-  tr->CreateLeaf("MassB", _daughterMasses.second, "Flatte" + suffix);
-  tr->CreateLeaf("Data_mSq[" + std::to_string(pos) + "]",
+  tr->createLeaf("MassA", _daughterMasses.first, "Flatte" + suffix);
+  tr->createLeaf("MassB", _daughterMasses.second, "Flatte" + suffix);
+  tr->createLeaf("Data_mSq[" + std::to_string(pos) + "]",
                  sample.GetMultiDouble(pos), "Flatte" + suffix);
 
   return tr;
@@ -397,7 +397,7 @@ void AmpFlatteRes::GetParameters(ParameterList &list) {
   }
 }
 
-void AmpFlatteRes::UpdateParameters(const ParameterList &par) {
+void AmpFlatteRes::updateParameters(const ParameterList &par) {
 
   // Try to update mesonRadius
   std::shared_ptr<DoubleParameter> rad;

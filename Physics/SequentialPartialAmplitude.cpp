@@ -9,11 +9,11 @@ using namespace ComPWA::Physics::HelicityFormalism;
 
 std::shared_ptr<ComPWA::Physics::Amplitude>
 SequentialPartialAmplitude::Factory(std::shared_ptr<PartList> partL,
-                                std::shared_ptr<Kinematics> kin,
-                                const boost::property_tree::ptree &pt) {
+                                    std::shared_ptr<Kinematics> kin,
+                                    const boost::property_tree::ptree &pt) {
   LOG(trace) << " SequentialPartialAmplitude::Factory() | Construction....";
   auto obj = std::make_shared<SequentialPartialAmplitude>();
-  obj->SetName(pt.get<std::string>("<xmlattr>.Name", "empty"));
+  obj->setName(pt.get<std::string>("<xmlattr>.Name", "empty"));
 
   std::shared_ptr<DoubleParameter> mag, phase;
   std::complex<double> pref(1, 0);
@@ -29,8 +29,10 @@ SequentialPartialAmplitude::Factory(std::shared_ptr<PartList> partL,
         tmp.load(v.second);
         phase = std::make_shared<DoubleParameter>(tmp);
       }
-    } else if (v.first == "PartialAmplitude" && v.second.get<std::string>("<xmlattr>.Class") == "HelicityDecay") {
-      obj->Add(HelicityDecay::Factory(partL, kin, v.second));
+    } else if (v.first == "PartialAmplitude" &&
+               v.second.get<std::string>("<xmlattr>.Class") ==
+                   "HelicityDecay") {
+      obj->addPartialAmplitude(HelicityDecay::Factory(partL, kin, v.second));
     } else if (v.first == "PreFactor") {
       double r = v.second.get<double>("<xmlattr>.Magnitude");
       double p = v.second.get<double>("<xmlattr>.Phase");
@@ -40,40 +42,39 @@ SequentialPartialAmplitude::Factory(std::shared_ptr<PartList> partL,
     }
   }
 
-
   if (mag)
-    obj->SetMagnitudeParameter(mag);
+    obj->setMagnitudeParameter(mag);
   else
-    throw BadParameter(
-        "SequentialPartialAmplitude::Factory() | No magnitude parameter found.");
+    throw BadParameter("SequentialPartialAmplitude::Factory() | No magnitude "
+                       "parameter found.");
 
   if (phase)
-    obj->SetPhaseParameter(phase);
+    obj->setPhaseParameter(phase);
   else
     throw BadParameter(
         "SequentialPartialAmplitude::Factory() | No phase parameter found.");
 
-  obj->SetPreFactor(pref);
+  obj->setPreFactor(pref);
 
   return std::static_pointer_cast<ComPWA::Physics::Amplitude>(obj);
 }
 
-boost::property_tree::ptree
-SequentialPartialAmplitude::Save(std::shared_ptr<ComPWA::Physics::Amplitude> amp) {
+boost::property_tree::ptree SequentialPartialAmplitude::Save(
+    std::shared_ptr<ComPWA::Physics::Amplitude> amp) {
 
   auto obj = std::static_pointer_cast<SequentialPartialAmplitude>(amp);
   boost::property_tree::ptree pt;
-  pt.put<std::string>("<xmlattr>.Name", obj->GetName());
+  pt.put<std::string>("<xmlattr>.Name", obj->name());
 
-  boost::property_tree::ptree tmp = obj->GetMagnitudeParameter()->save();
+  boost::property_tree::ptree tmp = obj->magnitudeParameter()->save();
   tmp.put("<xmlattr>.Type", "Magnitude");
   pt.add_child("Parameter", tmp);
 
-  tmp = obj->GetPhaseParameter()->save();
+  tmp = obj->phaseParameter()->save();
   tmp.put("<xmlattr>.Type", "Phase");
   pt.add_child("Parameter", tmp);
 
-  auto pref = amp->GetPreFactor();
+  auto pref = amp->preFactor();
   if (pref != std::complex<double>(1, 0)) {
     boost::property_tree::ptree ppp;
     ppp.put("<xmlattr>.Magnitude", std::abs(pref));
@@ -81,68 +82,68 @@ SequentialPartialAmplitude::Save(std::shared_ptr<ComPWA::Physics::Amplitude> amp
     pt.add_child("PreFactor", ppp);
   }
 
-  for (auto i : obj->GetDecays()) {
+  for (auto i : obj->partialAmplitudes()) {
     pt.add_child("PartialAmplitude", HelicityDecay::Save(i));
   }
   return pt;
 }
 
-std::shared_ptr<ComPWA::FunctionTree> SequentialPartialAmplitude::GetTree(
+std::shared_ptr<ComPWA::FunctionTree> SequentialPartialAmplitude::tree(
     std::shared_ptr<Kinematics> kin, const ParameterList &sample,
     const ParameterList &toySample, std::string suffix) {
 
   std::shared_ptr<FunctionTree> tr(new FunctionTree());
-  tr->CreateHead("Amplitude(" + GetName() + ")" + suffix,
+  tr->createHead("Amplitude(" + name() + ")" + suffix,
                  std::shared_ptr<Strategy>(new MultAll(ParType::MCOMPLEX)));
-  tr->CreateNode("Strength",
+  tr->createNode("Strength",
                  std::shared_ptr<Strategy>(new Complexify(ParType::COMPLEX)),
-                 "Amplitude(" + GetName() + ")" + suffix);
-  tr->CreateLeaf("Magnitude", _magnitude, "Strength");
-  tr->CreateLeaf("Phase", _phase, "Strength");
-  tr->CreateLeaf("PreFactor", GetPreFactor(),
-                 "Amplitude(" + GetName() + ")" + suffix);
+                 "Amplitude(" + name() + ")" + suffix);
+  tr->createLeaf("Magnitude", Magnitude, "Strength");
+  tr->createLeaf("Phase", Phase, "Strength");
+  tr->createLeaf("PreFactor", preFactor(),
+                 "Amplitude(" + name() + ")" + suffix);
 
-  for (auto i : _partDecays) {
+  for (auto i : PartialAmplitudes) {
     std::shared_ptr<FunctionTree> resTree =
-        i->GetTree(kin, sample, toySample, "");
-    if (!resTree->SanityCheck())
+        i->tree(kin, sample, toySample, "");
+    if (!resTree->sanityCheck())
       throw std::runtime_error("AmpSumIntensity::setupBasicTree() | "
                                "Amplitude tree didn't pass sanity check!");
-    resTree->Recalculate();
-    tr->InsertTree(resTree, "Amplitude(" + GetName() + ")" + suffix);
+    resTree->recalculate();
+    tr->insertTree(resTree, "Amplitude(" + name() + ")" + suffix);
   }
 
   return tr;
 }
 
-void SequentialPartialAmplitude::GetParameters(ParameterList &list) {
-  Amplitude::GetParameters(list);
-  for (auto i : _partDecays) {
-    i->GetParameters(list);
+void SequentialPartialAmplitude::parameters(ParameterList &list) {
+  Amplitude::parameters(list);
+  for (auto i : PartialAmplitudes) {
+    i->parameters(list);
   }
 }
 
-void SequentialPartialAmplitude::UpdateParameters(const ParameterList &par) {
+void SequentialPartialAmplitude::updateParameters(const ParameterList &par) {
   // Try to update magnitude
   std::shared_ptr<DoubleParameter> mag;
   try {
-    mag = par.GetDoubleParameter(_magnitude->name());
+    mag = par.GetDoubleParameter(Magnitude->name());
   } catch (std::exception &ex) {
   }
   if (mag)
-    _magnitude->updateParameter(mag);
+    Magnitude->updateParameter(mag);
   std::shared_ptr<DoubleParameter> phase;
-  
+
   // Try to update phase
   try {
-    phase = par.GetDoubleParameter(_phase->name());
+    phase = par.GetDoubleParameter(Phase->name());
   } catch (std::exception &ex) {
   }
   if (phase)
-    _phase->updateParameter(phase);
-  
-  for (auto i : _partDecays)
-    i->UpdateParameters(par);
+    Phase->updateParameter(phase);
+
+  for (auto i : PartialAmplitudes)
+    i->updateParameters(par);
 
   return;
 }

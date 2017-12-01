@@ -31,102 +31,61 @@ namespace ComPWA {
 class ParameterList {
 
 public:
-  //! Standard constructor with empty parameter vector
-  /*!
-   * Standard constructor without input. The vectors of parameters are empty.
-   */
   ParameterList();
 
-  //! Standard constructor with a vector of ComplexParameter
-  /*!
-   * Standard constructor with list of PWAParameter provided. The vector gets
-   * copied to the internal vector. To avoid copying, use the addParameter()
-   * functions and empty constructor PWAParameterList. Non-double parameter
-   * are empty
-   * \param inVec input vector of complex parameters
-   * \sa addParameter(PWAParameter<double>&)
-   */
+  /// Standard constructor with list of PWAParameter provided. The vector gets
+  /// copied to the internal vector. To avoid copying, use the addParameter()
+  /// functions and empty constructor PWAParameterList. Non-double parameter
+  /// are empty.
   ParameterList(const std::vector<std::shared_ptr<ComplexParameter>> &inVec);
 
-  //! Standard constructor with a vector of DoubleParameter
-  /*!
-   * Standard constructor with list of PWAParameter provided. The vector gets
-   * copied to the internal vector. To avoid copying, use the addParameter()
-   * functions and empty constructor PWAParameterList. Non-double parameter
-   * are empty
-   * \param inVec input vector of double parameters
-   * \sa addParameter(PWAParameter<double>&)
-   */
+  /// Standard constructor with list of PWAParameter provided. The vector gets
+  /// copied to the internal vector. To avoid copying, use the addParameter()
+  /// functions and empty constructor PWAParameterList. Non-double parameter
+  /// are empty.
   ParameterList(const std::vector<std::shared_ptr<DoubleParameter>> &inVec);
 
-  //! Standard constructor with a vector of IntegerParameter
-  /*!
-   * Standard constructor with list of PWAParameter provided. The vector gets
-   * copied to the internal vector. To avoid copying, use the addParameter()
-   * functions and empty constructor PWAParameterList. Non-integer parameter
-   * are empty
-   * \param inVec input vector of integer parameters
-   * \sa addParameter(PWAParameter<integer>&)
-   */
+  /// Standard constructor with list of PWAParameter provided. The vector gets
+  /// copied to the internal vector. To avoid copying, use the addParameter()
+  /// functions and empty constructor PWAParameterList. Non-integer parameter
+  /// are empty.
   ParameterList(const std::vector<std::shared_ptr<IntegerParameter>> &inVec);
 
-  //! Standard constructor with a vector of BoolParameter
-  /*!
-   * Standard constructor with list of PWAParameter provided. The vector gets
-   * copied to the internal vector. To avoid copying, use the addParameter()
-   * functions and empty constructor PWAParameterList. Non-boolean parameter
-   * are empty
-   * \param inVec input vector of boolean parameters
-   * \sa addParameter(PWAParameter<bool>&)
-   */
+  /// Standard constructor with list of PWAParameter provided. The vector gets
+  /// copied to the internal vector. To avoid copying, use the addParameter()
+  /// functions and empty constructor PWAParameterList. Non-boolean parameter
+  /// are empty.
   ParameterList(const std::vector<std::shared_ptr<BoolParameter>> &inVec);
 
-  //! Standard constructor with a vector of bool, int, double and complex
-  //! PWAParameter
-  /*!
-   * Standard constructor with list of PWAParameter provided. The vectors get
-   * copied to the internal vectors. To avoid copying, use the addParameter()
-   * functions and empty constructor PWAParameterList.
-   * \param inC input vector of complex parameters
-   * \param inD input vector of floating point parameters
-   * \param inI input vector of integer parameters
-   * \param inB input vector of boolean parameters
-   * \sa addParameter(PWAParameter<double>&, PWAParameter<int>&,
-   * PWAParameter<bool>&)
-   */
+  /// Standard constructor with list of PWAParameter provided. The vectors get
+  /// copied to the internal vectors. To avoid copying, use the addParameter()
+  /// functions and empty constructor PWAParameterList.
   ParameterList(const std::vector<std::shared_ptr<ComplexParameter>> &inC,
                 const std::vector<std::shared_ptr<DoubleParameter>> &inD,
                 const std::vector<std::shared_ptr<IntegerParameter>> &inI,
                 const std::vector<std::shared_ptr<BoolParameter>> &inB);
 
-  /**! Copy constructor using = operator
-   *
-   * Simple copy constructor using the = operator. As this operator is not
-   * overloaded in this class, c++ will copy every member variable. As this
-   * is a container class, this should be fine.
-   * \param in input PWAParameterList which variables will be copied
-   */
+  /// Only shared_ptr are copied. Those still point to the same object.
+  /// See DeepCopy(const ParameterList &in).
   ParameterList(const ParameterList &in) = default;
 
+  /// Clear this parameter and deep-copy all parameters from \p in. Deep-copy
+  /// means that for each parameter a new object is created (not only the
+  /// shared_ptr is copied).
   void DeepCopy(const ParameterList &in);
 
-  //! Empty Destructor
-  /*!
-   * There is nothing to destroy :(
-   */
   virtual ~ParameterList();
 
-  //! Get number of parameters
-  virtual const inline std::size_t GetNParameter() const {
+  virtual const inline std::size_t numParameters() const {
     return (vDouble_.size() + vInt_.size() + vBool_.size() +
             vMultiDouble_.size() + vMultiComplex_.size());
   }
 
-  virtual std::shared_ptr<Parameter>
-  GetParameter(const unsigned int i) const;
+  virtual std::shared_ptr<Parameter> parameter(const unsigned int i) const;
 
+  /// Be aware that names are not unique
   virtual std::shared_ptr<Parameter>
-  GetParameter(const std::string parname) const;
+  parameter(const std::string parname) const;
 
   /**! Remove duplicate entries
    * If a parameter name is found multiple times only the fist occurance is
@@ -137,17 +96,11 @@ public:
 
   virtual bool ParameterExists(const std::string parname) const;
 
-  //! Add parameter via abstract pointer
-  /*!
-   * Adds a parameter with to be defined type to the list
-   * \param par input parameter
-   */
   virtual void AddParameter(std::shared_ptr<Parameter> par);
 
-  //! Get string
-  std::string const &to_str();
+  std::string to_str() const;
 
-  //! Append ParameterList to (*this). Shared_ptr are not(!) deep copied
+  /// Append ParameterList to (*this). Shared_ptr's are not(!) deep copied.
   virtual void Append(const ParameterList &addList);
 
   //**************************************************************************
@@ -157,6 +110,7 @@ public:
   //================= Bool Parameter ==================
   //! Getter for number of boolean parameter
   virtual const inline std::size_t GetNBool() const { return vBool_.size(); }
+  
   /**! A public function returning a string with parameter information
    * This function simply returns the member string out_, which contains
    * all parameter information. The string gets created using the outstream
@@ -723,39 +677,27 @@ public:
   }
 
 protected:
-  /*!< Vector of boolean parameters */
+  /// Vector of boolean parameters
   std::vector<std::shared_ptr<BoolParameter>> vBool_;
-  /*!< Vector of integer parameters */
+  
+  /// Vector of integer parameters
   std::vector<std::shared_ptr<IntegerParameter>> vInt_;
-  /*!< Vector of floating point parameters */
+  
+  /// Vector of floating point parameters
   std::vector<std::shared_ptr<DoubleParameter>> vDouble_;
-  /*!< Vector of complex parameters */
+  
+  /// Vector of complex parameters
   std::vector<std::shared_ptr<ComplexParameter>> vComplex_;
-  /*!< Vector of floating point parameter lists */
+  
+  /// Vector of floating point parameter lists
   std::vector<std::shared_ptr<MultiDouble>> vMultiDouble_;
-  /*!< Vector of complex parameter lists */
+  
+  /// Vector of complex parameter lists
   std::vector<std::shared_ptr<MultiComplex>> vMultiComplex_;
-  /*!< Vector of unsigned int parameter lists */
+  
+  /// Vector of unsigned int parameter lists
   std::vector<std::shared_ptr<MultiUnsignedInteger>> vMultiUnsignedInteger_;
 
-  /*!< Output string to print information */
-  std::string out_;
-
-  //! A protected function which creates an output string for printing
-  /*!
-   * This function uses all available information about the parameterlist
-   * to create a string which will be streamed via the stream operator <<.
-   * \sa operator<<, to_str()
-   */
-  void make_str();
-
-  //! friend function to stream parameter information to output
-  /*!
-   * Declaring the stream-operator << as friend allows to stream parameter
-   * information to the output as easily as a generic type. The definition
-   * of this function has to be outside the namespace of the class.
-   * \sa make_str(), to_str()
-   */
   friend std::ostream &operator<<(std::ostream &os, ParameterList &p);
 
 private:
@@ -765,7 +707,6 @@ private:
     using namespace boost::serialization;
     // currently only DoubleParameters can be serialized
     ar &make_nvp("DoubleParameters", vDouble_);
-    ar &make_nvp("OutString", out_);
   }
 };
 
@@ -796,7 +737,7 @@ void load(Archive &archive, std::shared_ptr<Type> &value,
           const unsigned int version) {
   Type *data;
   archive >> make_nvp("shared_ptr", data);
-  //	archive >>data;
+  //  archive >>data;
 
   typedef std::weak_ptr<Type> WeakPtr;
   static boost::unordered_map<void *, WeakPtr> hash;
@@ -816,6 +757,6 @@ inline void serialize(Archive &archive, std::shared_ptr<Type> &value,
 
 } // ns:serialization
 } // ns:boost
-#endif
+#endif // END serialization work-a-round
 
 #endif
