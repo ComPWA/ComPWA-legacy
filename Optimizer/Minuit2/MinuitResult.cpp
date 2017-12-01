@@ -88,9 +88,9 @@ void MinuitResult::genSimpleOutput(std::ostream &out) {
   for (unsigned int o = 0; o < finalParameters.GetNDouble(); o++) {
     std::shared_ptr<DoubleParameter> outPar =
         finalParameters.GetDoubleParameter(o);
-    out << outPar->GetValue() << " ";
-    if (outPar->HasError())
-      out << outPar->GetError() << " ";
+    out << outPar->value() << " ";
+    if (outPar->hasError())
+      out << outPar->error().first << " ";
   }
   out << "\n";
 
@@ -200,7 +200,7 @@ void MinuitResult::PrintCorrelationMatrix(TableFormater *tableCorr) {
   for (unsigned int o = 0; o < finalParameters.GetNDouble(); o++) {
     std::shared_ptr<DoubleParameter> ppp =
         finalParameters.GetDoubleParameter(o);
-    if (ppp->IsFixed())
+    if (ppp->isFixed())
       continue;
     tableCorr->addColumn(ppp->name(), 15);
   }
@@ -210,7 +210,7 @@ void MinuitResult::PrintCorrelationMatrix(TableFormater *tableCorr) {
   for (unsigned int o = 0; o < finalParameters.GetNDouble(); o++) {
     std::shared_ptr<DoubleParameter> ppp =
         finalParameters.GetDoubleParameter(o);
-    if (ppp->IsFixed())
+    if (ppp->isFixed())
       continue;
     *tableCorr << ppp->name();
     try{
@@ -241,7 +241,7 @@ void MinuitResult::PrintCovarianceMatrix(TableFormater *tableCov) {
   tableCov->addColumn(" ", 17); // add empty first column
   // add columns first
   for (unsigned int o = 0; o < finalParameters.GetNDouble(); o++) {
-    if (!finalParameters.GetDoubleParameter(o)->IsFixed())
+    if (!finalParameters.GetDoubleParameter(o)->isFixed())
       tableCov->addColumn(finalParameters.GetDoubleParameter(o)->name(), 17);
   }
 
@@ -250,7 +250,7 @@ void MinuitResult::PrintCovarianceMatrix(TableFormater *tableCov) {
   for (unsigned int o = 0; o < finalParameters.GetNDouble(); o++) {
     std::shared_ptr<DoubleParameter> ppp =
         finalParameters.GetDoubleParameter(o);
-    if (ppp->IsFixed())
+    if (ppp->isFixed())
       continue;
     *tableCov << ppp->name();
     for (unsigned int t = 0; t < cov.size(); t++) {

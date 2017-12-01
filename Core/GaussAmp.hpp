@@ -64,7 +64,7 @@ public:
   virtual double GetNormalization() const { return 1 / Integral(); }
 
   virtual double GetMaximum(std::shared_ptr<Generator> gen) const {
-    double mass = params.GetDoubleParameter(0)->GetValue();
+    double mass = params.GetDoubleParameter(0)->value();
     std::vector<double> m;
     m.push_back(mass * mass);
     dataPoint p(m);
@@ -75,8 +75,8 @@ public:
 
   virtual double Intensity(const dataPoint &point) const {
 
-    double mass = params.GetDoubleParameter(0)->GetValue();
-    double width = params.GetDoubleParameter(1)->GetValue();
+    double mass = params.GetDoubleParameter(0)->value();
+    double width = params.GetDoubleParameter(1)->value();
     double sqrtS = std::sqrt(point.GetValue(0));
 
     std::complex<double> gaus(
@@ -108,7 +108,7 @@ public:
 protected:
   //! Get integral
   virtual double Integral() const {
-    return (params.GetDoubleParameter(1)->GetValue() * std::sqrt(2 * M_PI));
+    return (params.GetDoubleParameter(1)->value() * std::sqrt(2 * M_PI));
   }
 
   //! List of interal parameters
@@ -198,7 +198,7 @@ protected:
                                                const ParameterList &toySample,
                                                std::string suffix) {
 
-    int sampleSize = sample.GetMultiDouble(0)->GetNValues();
+    int sampleSize = sample.GetMultiDouble(0)->numValues();
 
     LOG(debug) << "UnitAmp::setupBasicTree() generating new tree!";
     if (sampleSize == 0) {

@@ -70,23 +70,23 @@ std::shared_ptr<ComPWA::FitResult> MinuitIF::exec(ParameterList &par) {
 
     // If no error is set or error set to 0 we use a default error,
     // otherwise minuit treads this parameter as fixed
-    if (!actPat->HasError() || actPat->GetError() <= 0)
-      actPat->SetError(0.001);
+    if (!actPat->hasError())
+      actPat->setError(0.001);
 
-    if (!actPat->IsFixed() &&
+    if (!actPat->isFixed() &&
         actPat->name().find("phase") != actPat->name().npos)
-      actPat->SetValue(shiftAngle(actPat->GetValue()));
+      actPat->setValue(shiftAngle(actPat->value()));
 
-    if (actPat->HasBounds()) {
-      upar.Add(actPat->name(), actPat->GetValue(), actPat->GetError(),
-               actPat->GetMinValue(), actPat->GetMaxValue());
+    if (actPat->hasBounds()) {
+      upar.Add(actPat->name(), actPat->value(), actPat->error().first,
+               actPat->bounds().first, actPat->bounds().second);
     } else {
-      upar.Add(actPat->name(), actPat->GetValue(), actPat->GetError());
+      upar.Add(actPat->name(), actPat->value(), actPat->error().first);
     }
 
-    if (!actPat->IsFixed())
+    if (!actPat->isFixed())
       freePars++;
-    if (actPat->IsFixed())
+    if (actPat->isFixed())
       upar.Fix(actPat->name());
   }
 
@@ -170,7 +170,7 @@ std::shared_ptr<ComPWA::FitResult> MinuitIF::exec(ParameterList &par) {
   resultsOut << "Central values of floating paramters:" << std::endl;
   for (unsigned int i = 0; i < finalParList.GetNDouble(); ++i) {
     auto finalPar = finalParList.GetDoubleParameter(i);
-    if (finalPar->IsFixed())
+    if (finalPar->isFixed())
       continue;
 
     // central value
@@ -179,16 +179,16 @@ std::shared_ptr<ComPWA::FitResult> MinuitIF::exec(ParameterList &par) {
     // shift to [-pi;pi] if parameter is a phase
     if (finalPar->name().find("phase") != finalPar->name().npos)
       val = shiftAngle(val);
-    finalPar->SetValue(val);
+    finalPar->setValue(val);
 
     resultsOut << finalPar->name() << " " << val << std::endl;
-    if (finalPar->GetErrorType() == ErrorType::ASYM) {
+    if (finalPar->errorType() == ErrorType::ASYM) {
       // Skip minos and fill symmetic errors
       if (!minMin.IsValid() || !enableMinos) {
         LOG(info) << "MinuitIF::exec() | Skip Minos "
                      "for parameter "
                   << i << "...";
-        finalPar->SetError(minState.Error(finalPar->name()));
+        finalPar->setError(minState.Error(finalPar->name()));
         continue;
       }
       // asymmetric errors -> run minos
@@ -198,23 +198,23 @@ std::shared_ptr<ComPWA::FitResult> MinuitIF::exec(ParameterList &par) {
       MinosError err = minos.Minos(i);
       // lower = pair.first, upper= pair.second
       std::pair<double, double> assymErrors = err();
-      finalPar->SetError(assymErrors.first, assymErrors.second);
-    } else if (finalPar->GetErrorType() == ErrorType::SYM) {
+      finalPar->setError(assymErrors.first, assymErrors.second);
+    } else if (finalPar->errorType() == ErrorType::SYM) {
       // symmetric errors -> migrad/hesse error
-      finalPar->SetError(minState.Error(finalPar->name()));
+      finalPar->setError(minState.Error(finalPar->name()));
     } else {
       throw std::runtime_error(
           "MinuitIF::exec() | Unknown error type of parameter: " +
-          std::to_string((long long int)finalPar->GetErrorType()));
+          std::to_string((long long int)finalPar->errorType()));
     }
   }
 
   // Update the original parameter list
   for (unsigned int i = 0; i < finalParList.GetNDouble(); ++i) {
     auto finalPar = finalParList.GetDoubleParameter(i);
-    if (finalPar->IsFixed())
+    if (finalPar->isFixed())
       continue;
-    par.GetDoubleParameter(i)->UpdateParameter(finalPar);
+    par.GetDoubleParameter(i)->updateParameter(finalPar);
   }
 
   LOG(debug) << "MinuitIF::exec() | " << resultsOut.str();

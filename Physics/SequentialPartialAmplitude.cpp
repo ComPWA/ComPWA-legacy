@@ -20,11 +20,13 @@ SequentialPartialAmplitude::Factory(std::shared_ptr<PartList> partL,
   for (const auto &v : pt.get_child("")) {
     if (v.first == "Parameter") {
       if (v.second.get<std::string>("<xmlattr>.Type") == "Magnitude") {
-        auto tmp = ComPWA::DoubleParameterFactory(v.second);
+        auto tmp = DoubleParameter();
+        tmp.load(v.second);
         mag = std::make_shared<DoubleParameter>(tmp);
       }
       if (v.second.get<std::string>("<xmlattr>.Type") == "Phase") {
-        auto tmp = ComPWA::DoubleParameterFactory(v.second);
+        auto tmp = DoubleParameter();
+        tmp.load(v.second);
         phase = std::make_shared<DoubleParameter>(tmp);
       }
     } else if (v.first == "PartialAmplitude" && v.second.get<std::string>("<xmlattr>.Class") == "HelicityDecay") {
@@ -63,12 +65,11 @@ SequentialPartialAmplitude::Save(std::shared_ptr<ComPWA::Physics::Amplitude> amp
   boost::property_tree::ptree pt;
   pt.put<std::string>("<xmlattr>.Name", obj->GetName());
 
-  boost::property_tree::ptree tmp =
-      ComPWA::DoubleParameterSave(*obj->GetMagnitudeParameter().get());
+  boost::property_tree::ptree tmp = obj->GetMagnitudeParameter()->save();
   tmp.put("<xmlattr>.Type", "Magnitude");
   pt.add_child("Parameter", tmp);
 
-  tmp = ComPWA::DoubleParameterSave(*obj->GetPhaseParameter().get());
+  tmp = obj->GetPhaseParameter()->save();
   tmp.put("<xmlattr>.Type", "Phase");
   pt.add_child("Parameter", tmp);
 
@@ -129,7 +130,7 @@ void SequentialPartialAmplitude::UpdateParameters(const ParameterList &par) {
   } catch (std::exception &ex) {
   }
   if (mag)
-    _magnitude->UpdateParameter(mag);
+    _magnitude->updateParameter(mag);
   std::shared_ptr<DoubleParameter> phase;
   
   // Try to update phase
@@ -138,7 +139,7 @@ void SequentialPartialAmplitude::UpdateParameters(const ParameterList &par) {
   } catch (std::exception &ex) {
   }
   if (phase)
-    _phase->UpdateParameter(phase);
+    _phase->updateParameter(phase);
   
   for (auto i : _partDecays)
     i->UpdateParameters(par);

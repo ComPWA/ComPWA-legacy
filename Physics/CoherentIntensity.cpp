@@ -38,7 +38,8 @@ CoherentIntensity::Factory(std::shared_ptr<PartList> partL,
       // Parameter (e.g. Mass)
       if (v.second.get<std::string>("<xmlattr>.Type") != "Strength")
         continue;
-      auto tmp = ComPWA::DoubleParameterFactory(v.second);
+      auto tmp = DoubleParameter();
+      tmp.load(v.second);
       strength = std::make_shared<DoubleParameter>(tmp);
     } else if (v.first == "Amplitude" &&
                v.second.get<std::string>("<xmlattr>.Class") ==
@@ -55,7 +56,7 @@ CoherentIntensity::Factory(std::shared_ptr<PartList> partL,
     obj->_strength = strength;
   else {
     obj->_strength = (std::make_shared<ComPWA::DoubleParameter>("", 1.0));
-    obj->_strength->SetParameterFixed();
+    obj->_strength->fixParameter(true);
   }
 
   obj->SetPhspVolume(kin->GetPhspVolume());
@@ -68,7 +69,7 @@ CoherentIntensity::Save(std::shared_ptr<CoherentIntensity> obj) {
 
   boost::property_tree::ptree pt;
   pt.put<std::string>("<xmlattr>.Name", obj->Name());
-  pt.add_child("Parameter", ComPWA::DoubleParameterSave(*obj->_strength.get()));
+  pt.add_child("Parameter", obj->_strength->save());
   pt.put("Parameter.<xmlattr>.Type", "Strength");
 
   for (auto i : obj->GetAmplitudes()) {
@@ -121,11 +122,11 @@ CoherentIntensity::GetTree(std::shared_ptr<Kinematics> kin,
 
   unsigned int effId = nEvtVar;
   unsigned int weightId = nEvtVar + 1;
-  int phspSampleSize = phspSample.GetMultiDouble(0)->GetNValues();
+  int phspSampleSize = phspSample.GetMultiDouble(0)->numValues();
 
   std::shared_ptr<MultiDouble> weightPhsp = phspSample.GetMultiDouble(weightId);
   double sumWeights =
-      std::accumulate(weightPhsp->Begin(), weightPhsp->End(), 0.0);
+      std::accumulate(weightPhsp->first(), weightPhsp->last(), 0.0);
   std::shared_ptr<MultiDouble> eff = phspSample.GetMultiDouble(effId);
 
   std::shared_ptr<FunctionTree> tr(new FunctionTree());
@@ -174,8 +175,8 @@ std::shared_ptr<FunctionTree> CoherentIntensity::setupBasicTree(
     std::shared_ptr<Kinematics> kin, const ParameterList &sample,
     const ParameterList &phspSample, std::string suffix) const {
 
-  int sampleSize = sample.GetMultiDouble(0)->GetNValues();
-  int phspSampleSize = phspSample.GetMultiDouble(0)->GetNValues();
+  int sampleSize = sample.GetMultiDouble(0)->numValues();
+  int phspSampleSize = phspSample.GetMultiDouble(0)->numValues();
 
   if (sampleSize == 0) {
     LOG(error) << "AmpSumIntensity::setupBasicTree() | "
@@ -224,7 +225,7 @@ void CoherentIntensity::UpdateParameters(const ParameterList &list) {
   } catch (std::exception &ex) {
   }
   if (p)
-    _strength->UpdateParameter(p);
+    _strength->updateParameter(p);
 
   for (auto i : _seqDecays)
     i->UpdateParameters(list);

@@ -46,9 +46,9 @@ inline gsl_vector *gsl_parameterList2Vec(const ParameterList &list) {
   unsigned int t = 0;
   for (unsigned int o = 0; o < list.GetNDouble(); o++) {
     std::shared_ptr<DoubleParameter> outPar = list.GetDoubleParameter(o);
-    if (outPar->IsFixed())
+    if (outPar->isFixed())
       continue;
-    gsl_vector_set(tmp, t, outPar->GetValue());
+    gsl_vector_set(tmp, t, outPar->value());
     t++;
   }
   // resize vector
@@ -221,11 +221,11 @@ inline void CalcFractionError(
     std::size_t t = 0;
     for (std::size_t o = 0; o < newPar.GetNDouble(); o++) {
       std::shared_ptr<DoubleParameter> outPar = newPar.GetDoubleParameter(o);
-      if (outPar->IsFixed())
+      if (outPar->isFixed())
         continue;
       // set floating values to smeared values
       try { // catch out-of-bound
-        outPar->SetValue(gslNewPar->data[t]);
+        outPar->setValue(gslNewPar->data[t]);
       } catch (ParameterOutOfBound &ex) {
         error = 1;
       }
@@ -266,12 +266,12 @@ inline void CalcFractionError(
     // newPar.GetDoubleParameter(t)->IsFixed())
     // continue;
     //				outFraction <<
-    // newPar.GetDoubleParameter(t)->GetValue()<<"
+    // newPar.GetDoubleParameter(t)->value()<<"
     //";
     //			}
     //			for(int t=0; t<tmp.GetNDouble(); t++)
     //				outFraction <<
-    // tmp.GetDoubleParameter(t)->GetValue()<<"
+    // tmp.GetDoubleParameter(t)->value()<<"
     //";
     //			double norm = _amp->GetIntegral();
     //			outFraction << norm;
@@ -288,7 +288,7 @@ inline void CalcFractionError(
   for (unsigned int o = 0; o < ffList.GetNDouble(); ++o) {
     double mean = 0, sqSum = 0., stdev = 0;
     for (unsigned int i = 0; i < fracVect.size(); ++i) {
-      double tmp = fracVect.at(i).GetDoubleParameter(o)->GetValue();
+      double tmp = fracVect.at(i).GetDoubleParameter(o)->value();
       mean += tmp;
       sqSum += tmp * tmp;
     }
@@ -297,7 +297,7 @@ inline void CalcFractionError(
     mean /= s;
     // Equivalent to RMS of the distribution
     stdev = std::sqrt(sqSum - mean * mean);
-    ffList.GetDoubleParameter(o)->SetError(stdev);
+    ffList.GetDoubleParameter(o)->setError(stdev);
   }
 
   // Set correct fit result

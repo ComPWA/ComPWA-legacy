@@ -97,7 +97,7 @@ double CorrectionTable::GetValue(int charge, double momentum) const {
   int binNumber = findBin(momentum);
   if (binNumber < 0)
     throw std::runtime_error(
-        "momentumSys::GetValue() no bin found for momentum value " +
+        "momentumSys::value() no bin found for momentum value " +
         std::to_string((long double)momentum) + "!");
   
   double val = 0.0;

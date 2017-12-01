@@ -145,16 +145,16 @@ std::shared_ptr<TreeNode> TreeNode::FindChildNode(std::string name) const {
 //    std::shared_ptr<Parameter> val = node->Parameter();
 //    if (val->type() == ParType::DOUBLE)
 //      return std::complex<double>(
-//          (std::dynamic_pointer_cast<DoubleParameter>(val))->GetValue(), 0);
+//          (std::dynamic_pointer_cast<DoubleParameter>(val))->value(), 0);
 //    if (val->type() == ParType::COMPLEX)
 //      return std::complex<double>(
-//          (std::dynamic_pointer_cast<ComplexParameter>(val))->GetValue());
+//          (std::dynamic_pointer_cast<ComplexParameter>(val))->value());
 //    if (val->type() == ParType::INTEGER)
 //      return std::complex<double>(
-//          (std::dynamic_pointer_cast<IntegerParameter>(val))->GetValue(), 0);
+//          (std::dynamic_pointer_cast<IntegerParameter>(val))->value(), 0);
 //    if (val->type() == ParType::BOOL)
 //      return std::complex<double>(
-//          (std::dynamic_pointer_cast<BoolParameter>(val))->GetValue(), 0);
+//          (std::dynamic_pointer_cast<BoolParameter>(val))->value(), 0);
 //    if (val->type() == ParType::MDOUBLE)
 //      return std::complex<double>(
 //          (std::dynamic_pointer_cast<MultiDouble>(val))->GetValue(0), 0);

@@ -94,8 +94,8 @@ public:
 
   Coupling(std::shared_ptr<PartList> partL,
            const boost::property_tree::ptree tr) {
-    _g = std::make_shared<DoubleParameter>(
-        ComPWA::DoubleParameterFactory(tr.get_child("")));
+    _g = std::make_shared<DoubleParameter>();
+    _g->load(tr.get_child(""));
     std::string nameA = tr.get<std::string>("ParticleA");
     std::string nameB = tr.get<std::string>("ParticleB");
     _massA = partL->find(nameA)->second.GetMass();
@@ -106,7 +106,7 @@ public:
 
   std::shared_ptr<DoubleParameter> GetValueParameter() { return _g; }
 
-  double GetValue() const { return _g->GetValue(); }
+  double value() const { return _g->value(); }
 
   double GetMassA() const { return _massA; }
 
@@ -124,8 +124,8 @@ protected:
   double _massB;
 };
 
-} /* namespace DecayDynamics */
-} /* namespace Physics */
-} /* namespace ComPWA */
+} // ns::DecayDynamics
+} // ns::Physics
+} // ns::ComPWA
 
-#endif /* Coupling_h */
+#endif

@@ -37,7 +37,7 @@ public:
   bool CheckModified() const {
     if (GetMass() != _current_mass) {
       SetModified();
-      const_cast<double &>(_current_mass) = _mass->GetValue();
+      const_cast<double &>(_current_mass) = _mass->value();
       return true;
     }
     return false;
@@ -56,7 +56,7 @@ public:
 
   virtual void SetModified(bool b = true) const {
     const_cast<bool &>(_modified) = b;
-    const_cast<double &>(_current_mass) = _mass->GetValue();
+    const_cast<double &>(_current_mass) = _mass->value();
   }
 
   virtual bool GetModified() const { return _modified; }
@@ -76,9 +76,9 @@ public:
 
   virtual std::shared_ptr<DoubleParameter> GetMassParameter() { return _mass; }
 
-  virtual void SetMass(double mass) { _mass->SetValue(mass); }
+  virtual void SetMass(double mass) { _mass->setValue(mass); }
 
-  virtual double GetMass() const { return _mass->GetValue(); }
+  virtual double GetMass() const { return _mass->value(); }
 
   virtual void SetDecayMasses(std::pair<double, double> m) {
     _daughterMasses = m;

@@ -31,11 +31,13 @@ HelicityDecay::Factory(std::shared_ptr<PartList> partL,
   for (const auto &v : pt.get_child("")) {
     if (v.first == "Parameter") {
       if (v.second.get<std::string>("<xmlattr>.Type") == "Magnitude") {
-        auto tmp = ComPWA::DoubleParameterFactory(v.second);
+        auto tmp = DoubleParameter();
+        tmp.load(v.second);
         mag = std::make_shared<DoubleParameter>(tmp);
       }
       if (v.second.get<std::string>("<xmlattr>.Type") == "Phase") {
-        auto tmp = ComPWA::DoubleParameterFactory(v.second);
+        auto tmp = DoubleParameter();
+        tmp.load(v.second);
         phase = std::make_shared<DoubleParameter>(tmp);
       }
     } else {
@@ -47,14 +49,14 @@ HelicityDecay::Factory(std::shared_ptr<PartList> partL,
     obj->SetMagnitudeParameter(mag);
   else {
     obj->SetMagnitudeParameter(std::make_shared<ComPWA::DoubleParameter>("", 1.0));
-    obj->GetMagnitudeParameter()->SetParameterFixed();
+    obj->GetMagnitudeParameter()->fixParameter(true);
   }
   
   if (phase)
     obj->SetPhaseParameter(phase);
   else {
     obj->SetPhaseParameter(std::make_shared<ComPWA::DoubleParameter>("", 0.0));
-    obj->GetPhaseParameter()->SetParameterFixed();
+    obj->GetPhaseParameter()->fixParameter(true);
   }
 
   auto dynObj = std::shared_ptr<DecayDynamics::AbstractDynamicalFunction>();
@@ -108,12 +110,11 @@ boost::property_tree::ptree HelicityDecay::Save(std::shared_ptr<PartialAmplitude
   boost::property_tree::ptree pt;
   pt.put<std::string>("<xmlattr>.Name", obj->GetName());
   
-  boost::property_tree::ptree tmp = ComPWA::DoubleParameterSave(
-                                *obj->GetMagnitudeParameter().get());
+  boost::property_tree::ptree tmp = obj->GetMagnitudeParameter()->save();
   tmp.put("<xmlattr>.Type", "Magnitude");
   pt.add_child("Parameter", tmp);
   
-  tmp = ComPWA::DoubleParameterSave(*obj->GetPhaseParameter().get());
+  tmp = obj->GetPhaseParameter()->save();
   tmp.put("<xmlattr>.Type", "Phase");
   pt.add_child("Parameter", tmp);
   
@@ -151,7 +152,7 @@ HelicityDecay::GetTree(std::shared_ptr<Kinematics> kin,
                       const ParameterList &sample,
                       const ParameterList &toySample, std::string suffix) {
 
-  int phspSampleSize = toySample.GetMultiDouble(0)->GetNValues();
+  int phspSampleSize = toySample.GetMultiDouble(0)->numValues();
 
   std::shared_ptr<FunctionTree> tr(new FunctionTree());
   tr->CreateHead("PartialAmplitude(" + GetName() + ")" + suffix,
@@ -213,7 +214,7 @@ void HelicityDecay::UpdateParameters(const ParameterList &list){
   } catch (std::exception &ex) {
   }
   if (mag)
-    _magnitude->UpdateParameter(mag);
+    _magnitude->updateParameter(mag);
   std::shared_ptr<DoubleParameter> phase;
   
   // Try to update phase
@@ -222,7 +223,7 @@ void HelicityDecay::UpdateParameters(const ParameterList &list){
   } catch (std::exception &ex) {
   }
   if (phase)
-    _phase->UpdateParameter(phase);
+    _phase->updateParameter(phase);
 
   _dynamic->UpdateParameters(list);
   

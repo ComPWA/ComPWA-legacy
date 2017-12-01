@@ -128,7 +128,7 @@ int main(int argc, char **argv) {
   std::cout << "Tree calculated" << std::endl;
   std::cout << std::endl << myTree << std::endl << std::endl;
 
-  parD->SetValue(2.);
+  parD->setValue(2.);
 
   std::cout << "Changed d from 1 to 2 " << std::endl;
   std::cout << std::endl << myTree << std::endl << std::endl;

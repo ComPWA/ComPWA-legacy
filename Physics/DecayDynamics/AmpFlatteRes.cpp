@@ -67,7 +67,8 @@ AmpFlatteRes::Factory(std::shared_ptr<PartList> partL,
     if (type == "Coupling") {
       vC.push_back(Coupling(partL, v.second));
     } else if (type == "MesonRadius") {
-      auto mesonRadius = ComPWA::DoubleParameterFactory(v.second);
+      auto mesonRadius = DoubleParameter();
+      mesonRadius.load(v.second);
       obj->SetMesonRadiusParameter(
           std::make_shared<DoubleParameter>(mesonRadius));
     } else {
@@ -88,13 +89,13 @@ AmpFlatteRes::Factory(std::shared_ptr<PartList> partL,
 bool AmpFlatteRes::CheckModified() const {
   if (AbstractDynamicalFunction::CheckModified())
     return true;
-  if (_g.at(0).GetValue() != _current_g ||
-      _g.at(1).GetValue() != _current_gHidden ||
-      _g.at(2).GetValue() != _current_gHidden2) {
+  if (_g.at(0).value() != _current_g ||
+      _g.at(1).value() != _current_gHidden ||
+      _g.at(2).value() != _current_gHidden2) {
     SetModified();
-    const_cast<double &>(_current_g) = _g.at(0).GetValue();
-    const_cast<double &>(_current_gHidden) = _g.at(1).GetValue();
-    const_cast<double &>(_current_gHidden2) = _g.at(2).GetValue();
+    const_cast<double &>(_current_g) = _g.at(0).value();
+    const_cast<double &>(_current_gHidden) = _g.at(1).value();
+    const_cast<double &>(_current_gHidden2) = _g.at(2).value();
     return true;
   }
   return false;
@@ -106,11 +107,11 @@ std::complex<double> AmpFlatteRes::Evaluate(const dataPoint &point,
   std::complex<double> result;
   try {
     result = dynamicalFunction(
-        point.GetValue(pos), _mass->GetValue(), _g.at(0).GetMassA(),
-        _g.at(0).GetMassB(), _g.at(0).GetValue(), _g.at(1).GetMassA(),
-        _g.at(1).GetMassB(), _g.at(1).GetValue(), _g.at(2).GetMassA(),
-        _g.at(2).GetMassB(), _g.at(2).GetValue(), (double)_spin,
-        _mesonRadius->GetValue(), _ffType);
+        point.GetValue(pos), _mass->value(), _g.at(0).GetMassA(),
+        _g.at(0).GetMassB(), _g.at(0).value(), _g.at(1).GetMassA(),
+        _g.at(1).GetMassB(), _g.at(1).value(), _g.at(2).GetMassA(),
+        _g.at(2).GetMassB(), _g.at(2).value(), (double)_spin,
+        _mesonRadius->value(), _ffType);
   } catch (std::exception &ex) {
     LOG(error) << "AmpFlatteRes::EvaluateAmp() | "
                   "Dynamical function can not be evalutated: "
@@ -205,7 +206,7 @@ std::shared_ptr<ComPWA::FunctionTree>
 AmpFlatteRes::GetTree(const ParameterList &sample, int pos,
                       std::string suffix) {
 
-  //  int sampleSize = sample.GetMultiDouble(0)->GetNValues();
+  //  int sampleSize = sample.GetMultiDouble(0)->numValues();
 
   std::shared_ptr<FunctionTree> tr(new FunctionTree());
   //  tr->createHead("DynamicalFunction",
@@ -291,7 +292,7 @@ bool FlatteStrategy::execute(ParameterList &paras,
 #endif
 
   // invariant masses
-  std::vector<double> mSq = paras.GetMultiDouble(0)->GetValues();
+  std::vector<double> mSq = paras.GetMultiDouble(0)->values();
 
   std::vector<std::complex<double>> results(mSq.size(),
                                             std::complex<double>(0., 0.));
@@ -304,19 +305,19 @@ bool FlatteStrategy::execute(ParameterList &paras,
        * But since Flatte resonances are usually J=0 we neglect it here.*/
       results.at(ele) = AmpFlatteRes::dynamicalFunction(
           mSq.at(ele),
-          paras.GetDoubleParameter(0)->GetValue(),  // mass
-          paras.GetDoubleParameter(1)->GetValue(),  // g1_massA
-          paras.GetDoubleParameter(2)->GetValue(),  // g1_massB
-          paras.GetDoubleParameter(3)->GetValue(),  // g1
-          paras.GetDoubleParameter(4)->GetValue(),  // g2_massA
-          paras.GetDoubleParameter(5)->GetValue(),  // g2_massB
-          paras.GetDoubleParameter(6)->GetValue(),  // g2
-          paras.GetDoubleParameter(7)->GetValue(),  // g3_massA
-          paras.GetDoubleParameter(8)->GetValue(),  // g3_massB
-          paras.GetDoubleParameter(9)->GetValue(),  // g3
-          paras.GetDoubleParameter(10)->GetValue(), // Spin
-          paras.GetDoubleParameter(11)->GetValue(), // mesonRadius
-          formFactorType(paras.GetDoubleParameter(12)->GetValue()) // ffType
+          paras.GetDoubleParameter(0)->value(),  // mass
+          paras.GetDoubleParameter(1)->value(),  // g1_massA
+          paras.GetDoubleParameter(2)->value(),  // g1_massB
+          paras.GetDoubleParameter(3)->value(),  // g1
+          paras.GetDoubleParameter(4)->value(),  // g2_massA
+          paras.GetDoubleParameter(5)->value(),  // g2_massB
+          paras.GetDoubleParameter(6)->value(),  // g2
+          paras.GetDoubleParameter(7)->value(),  // g3_massA
+          paras.GetDoubleParameter(8)->value(),  // g3_massB
+          paras.GetDoubleParameter(9)->value(),  // g3
+          paras.GetDoubleParameter(10)->value(), // Spin
+          paras.GetDoubleParameter(11)->value(), // mesonRadius
+          formFactorType(paras.GetDoubleParameter(12)->value()) // ffType
           );
     } catch (std::exception &ex) {
       LOG(error) << "FlatteStrategy::execute() | " << ex.what();
@@ -366,7 +367,7 @@ void AmpFlatteRes::GetParameters(ParameterList &list) {
   // different positions in the amplitude.
   std::shared_ptr<DoubleParameter> tmp;
   for (auto i : _g) {
-    if (i.GetValue() == 0.0)
+    if (i.value() == 0.0)
       continue;
     try { // catch BadParameter
       tmp = list.GetDoubleParameter(i.GetValueParameter()->name());
@@ -405,7 +406,7 @@ void AmpFlatteRes::UpdateParameters(const ParameterList &par) {
   } catch (std::exception &ex) {
   }
   if (rad)
-    _mesonRadius->UpdateParameter(rad);
+    _mesonRadius->updateParameter(rad);
 
   // Try to update Couplings
   for (auto i : _g) {
@@ -415,7 +416,7 @@ void AmpFlatteRes::UpdateParameters(const ParameterList &par) {
     } catch (std::exception &ex) {
     }
     if (c)
-      i.GetValueParameter()->UpdateParameter(rad);
+      i.GetValueParameter()->updateParameter(rad);
   }
 
   return;

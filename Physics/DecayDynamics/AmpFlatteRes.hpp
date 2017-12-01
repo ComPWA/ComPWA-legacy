@@ -110,9 +110,9 @@ public:
     return _mesonRadius;
   }
 
-  void SetMesonRadius(double w) { _mesonRadius->SetValue(w); }
+  void SetMesonRadius(double w) { _mesonRadius->setValue(w); }
 
-  double GetMesonRadius() const { return _mesonRadius->GetValue(); }
+  double GetMesonRadius() const { return _mesonRadius->value(); }
 
   void SetFormFactorType(formFactorType t) { _ffType = t; }
 
@@ -133,11 +133,11 @@ public:
 
   virtual void GetParameters(ParameterList &list);
 
-  //! Fill vector with parameters
+  /// Fill vector with parameters
   virtual void GetParametersFast(std::vector<double> &list) const {
     AbstractDynamicalFunction::GetParametersFast(list);
     for (auto i : _g)
-      list.push_back(i.GetValue());
+      list.push_back(i.value());
     list.push_back(GetMesonRadius());
   }
 
@@ -179,8 +179,8 @@ protected:
   std::string name;
 };
 
-} /* namespace DecayDynamics */
-} /* namespace Physics */
-} /* namespace ComPWA */
+} // ns::DecayDynamics
+} // ns::Physics
+} // ns::ComPWA
 
 #endif

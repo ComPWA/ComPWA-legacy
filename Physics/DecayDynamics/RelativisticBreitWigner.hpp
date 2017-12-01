@@ -63,9 +63,9 @@ public:
     return _width;
   }
 
-  void SetWidth(double w) { _width->SetValue(w); }
+  void SetWidth(double w) { _width->setValue(w); }
 
-  double GetWidth() const { return _width->GetValue(); }
+  double GetWidth() const { return _width->value(); }
 
   void SetMesonRadiusParameter(std::shared_ptr<ComPWA::DoubleParameter> r) {
     _mesonRadius = r;
@@ -75,13 +75,13 @@ public:
     return _mesonRadius;
   }
 
-  /// \see GetMesonRadius() const { return _mesonRadius->GetValue(); }
-  void SetMesonRadius(double w) { _mesonRadius->SetValue(w); }
+  /// \see GetMesonRadius() const { return _mesonRadius->value(); }
+  void SetMesonRadius(double w) { _mesonRadius->setValue(w); }
 
   /// Get meson radius.
   /// The meson radius is a measure of the size of the resonant state. It is
   /// used to calculate the angular momentum barrier factors.
-  double GetMesonRadius() const { return _mesonRadius->GetValue(); }
+  double GetMesonRadius() const { return _mesonRadius->value(); }
 
   /// \see GetFormFactorType()
   void SetFormFactorType(formFactorType t) { _ffType = t; }

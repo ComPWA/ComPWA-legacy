@@ -97,7 +97,7 @@ public:
   }
 
   virtual double GetMagnitude() const {
-    return std::fabs(_magnitude->GetValue());
+    return std::fabs(_magnitude->value());
   }
 
   virtual void
@@ -105,19 +105,19 @@ public:
     _magnitude = par;
   }
 
-  virtual void SetMagnitude(double par) { _magnitude->SetValue(par); }
+  virtual void SetMagnitude(double par) { _magnitude->setValue(par); }
 
   virtual std::shared_ptr<ComPWA::DoubleParameter> GetPhaseParameter() {
     return _phase;
   }
 
-  virtual double GetPhase() const { return _phase->GetValue(); }
+  virtual double GetPhase() const { return _phase->value(); }
 
   virtual void SetPhaseParameter(std::shared_ptr<ComPWA::DoubleParameter> par) {
     _phase = par;
   }
 
-  virtual void SetPhase(double par) { _phase->SetValue(par); }
+  virtual void SetPhase(double par) { _phase->setValue(par); }
 
   virtual void SetPreFactor(std::complex<double> pre) { _preFactor = pre; }
 

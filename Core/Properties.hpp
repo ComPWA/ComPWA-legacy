@@ -53,7 +53,7 @@ public:
 
   void SetValue(double m) { _value.setValue(m); }
 
-  double GetValue() const { return _value.value(); }
+  double value() const { return _value.value(); }
 
   void SetValuePar(ComPWA::DoubleParameter m) { _value = m; }
 
@@ -233,7 +233,7 @@ inline void UpdateNode(std::shared_ptr<DoubleParameter> p,
       std::string tt = v.second.get<std::string>("<xmlattr>.Type");
       if (nn == p->name()) {
         //        LOG(debug) << "UpdateNode() | Updating node " << v.first
-        //        << "." << nn << " to " << p->GetValue();
+        //        << "." << nn << " to " << p->value();
         v.second = p->save();
         v.second.put("<xmlattr>.Type", tt);
       }

@@ -77,7 +77,7 @@ double MinLogLH::ControlParameter(ParameterList &minPar) {
     _tree->Recalculate();
     std::shared_ptr<DoubleParameter> logLH =
         std::dynamic_pointer_cast<DoubleParameter>(_tree->Head()->Parameter());
-    lh = logLH->GetValue();
+    lh = logLH->value();
   }
   _nCalls++;
   return lh; // return -logLH
@@ -119,7 +119,7 @@ void MinLogLH::IniLHtree() {
                              "provide a FunctionTree!");
 
   _tree = std::shared_ptr<FunctionTree>(new FunctionTree());
-  int sampleSize = _dataSampleList.GetMultiDouble(0)->GetNValues();
+  int sampleSize = _dataSampleList.GetMultiDouble(0)->numValues();
 
   //-log L = (-1)*N/(\sum_{ev} w_{ev}) \sum_{ev} ...
   _tree->CreateHead("LH",

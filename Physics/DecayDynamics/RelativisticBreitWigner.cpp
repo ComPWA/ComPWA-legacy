@@ -46,10 +46,12 @@ RelativisticBreitWigner::Factory(std::shared_ptr<PartList> partL,
       continue;
     std::string type = v.second.get<std::string>("<xmlattr>.Type");
     if (type == "Width") {
-      auto width = ComPWA::DoubleParameterFactory(v.second);
+      auto width = DoubleParameter();
+      width.load(v.second);
       obj->SetWidthParameter(std::make_shared<DoubleParameter>(width));
     } else if (type == "MesonRadius") {
-      auto mesonRadius = ComPWA::DoubleParameterFactory(v.second);
+      auto mesonRadius = DoubleParameter();
+      mesonRadius.load(v.second);
       obj->SetMesonRadiusParameter(
           std::make_shared<DoubleParameter>(mesonRadius));
     } else {
@@ -92,9 +94,9 @@ RelativisticBreitWigner::Factory(std::shared_ptr<PartList> partL,
 std::complex<double> RelativisticBreitWigner::Evaluate(const dataPoint &point,
                                                        int pos) const {
   std::complex<double> result = dynamicalFunction(
-      point.GetValue(pos), _mass->GetValue(), _daughterMasses.first,
-      _daughterMasses.second, _width->GetValue(), (double)_spin,
-      _mesonRadius->GetValue(), _ffType);
+      point.GetValue(pos), _mass->value(), _daughterMasses.first,
+      _daughterMasses.second, _width->value(), (double)_spin,
+      _mesonRadius->value(), _ffType);
   assert(!std::isnan(result.real()) && !std::isnan(result.imag()));
   return result;
 }
@@ -102,11 +104,11 @@ std::complex<double> RelativisticBreitWigner::Evaluate(const dataPoint &point,
 bool RelativisticBreitWigner::CheckModified() const {
   if (AbstractDynamicalFunction::CheckModified())
     return true;
-  if (_width->GetValue() != _current_width ||
-      _mesonRadius->GetValue() != _current_mesonRadius) {
+  if (_width->value() != _current_width ||
+      _mesonRadius->value() != _current_mesonRadius) {
     SetModified();
-    const_cast<double &>(_current_width) = _width->GetValue();
-    const_cast<double &>(_current_mesonRadius) = _mesonRadius->GetValue();
+    const_cast<double &>(_current_width) = _width->value();
+    const_cast<double &>(_current_mesonRadius) = _mesonRadius->value();
     return true;
   }
   return false;
@@ -159,7 +161,7 @@ std::shared_ptr<ComPWA::FunctionTree>
 RelativisticBreitWigner::GetTree(const ParameterList &sample, int pos,
                                  std::string suffix) {
 
-  //  int sampleSize = sample.GetMultiDouble(0)->GetNValues();
+  //  int sampleSize = sample.GetMultiDouble(0)->numValues();
 
   std::shared_ptr<FunctionTree> tr(new FunctionTree());
 
@@ -236,16 +238,16 @@ bool BreitWignerStrategy::execute(ParameterList &paras,
    * We use the same order of the parameters as was used during tree
    * construction
    */
-  double m0 = paras.GetDoubleParameter(0)->GetValue();
-  double Gamma0 = paras.GetDoubleParameter(1)->GetValue();
-  unsigned int spin = (unsigned int)paras.GetDoubleParameter(2)->GetValue();
-  double d = paras.GetDoubleParameter(3)->GetValue();
+  double m0 = paras.GetDoubleParameter(0)->value();
+  double Gamma0 = paras.GetDoubleParameter(1)->value();
+  unsigned int spin = (unsigned int)paras.GetDoubleParameter(2)->value();
+  double d = paras.GetDoubleParameter(3)->value();
   formFactorType ffType =
-      formFactorType(paras.GetDoubleParameter(4)->GetValue());
-  double ma = paras.GetDoubleParameter(5)->GetValue();
-  double mb = paras.GetDoubleParameter(6)->GetValue();
+      formFactorType(paras.GetDoubleParameter(4)->value());
+  double ma = paras.GetDoubleParameter(5)->value();
+  double mb = paras.GetDoubleParameter(6)->value();
 
-  std::vector<double> mp = paras.GetMultiDouble(0)->GetValues();
+  std::vector<double> mp = paras.GetMultiDouble(0)->values();
 
   std::vector<std::complex<double>> results(mp.size(),
                                             std::complex<double>(0., 0.));
@@ -312,7 +314,7 @@ void RelativisticBreitWigner::UpdateParameters(const ParameterList &par){
   } catch (std::exception &ex) {
   }
   if (rad)
-    _mesonRadius->UpdateParameter(rad);
+    _mesonRadius->updateParameter(rad);
   
   // Try to update width
   std::shared_ptr<DoubleParameter> width;
@@ -321,7 +323,7 @@ void RelativisticBreitWigner::UpdateParameters(const ParameterList &par){
   } catch (std::exception &ex) {
   }
   if (width)
-    _width->UpdateParameter(width);
+    _width->updateParameter(width);
   
   return;
 }

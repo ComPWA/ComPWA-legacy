@@ -80,25 +80,25 @@ public:
     return _magnitude;
   }
 
-  double GetMagnitude() const { return std::fabs(_magnitude->GetValue()); }
+  double GetMagnitude() const { return std::fabs(_magnitude->value()); }
 
   void SetMagnitudeParameter(std::shared_ptr<ComPWA::DoubleParameter> par) {
     _magnitude = par;
   }
 
-  void SetMagnitude(double par) { _magnitude->SetValue(par); }
+  void SetMagnitude(double par) { _magnitude->setValue(par); }
 
   std::shared_ptr<ComPWA::DoubleParameter> GetPhaseParameter() {
     return _phase;
   }
 
-  double GetPhase() const { return _phase->GetValue(); }
+  double GetPhase() const { return _phase->value(); }
 
   void SetPhaseParameter(std::shared_ptr<ComPWA::DoubleParameter> par) {
     _phase = par;
   }
 
-  void SetPhase(double par) { _phase->SetValue(par); }
+  void SetPhase(double par) { _phase->setValue(par); }
 
   virtual void GetParameters(ParameterList &list) {
     list.AddParameter(GetMagnitudeParameter());

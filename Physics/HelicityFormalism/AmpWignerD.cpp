@@ -108,7 +108,7 @@ std::shared_ptr<FunctionTree> AmpWignerD::GetTree(const ParameterList &sample,
                                                   std::string suffix) {
   std::shared_ptr<FunctionTree> newTree(new FunctionTree());
 
-  int sampleSize = sample.GetMultiDouble(0)->GetNValues();
+  int sampleSize = sample.GetMultiDouble(0)->numValues();
   if ((double)_spin ==
       0) { // in case of spin zero do not explicitly include the WignerD
     std::shared_ptr<MultiUnsignedInteger> one(
@@ -148,17 +148,17 @@ bool WignerDStrategy::execute(ParameterList &paras,
   }
 #endif
 
-  double _inSpin = paras.GetDoubleParameter(0)->GetValue();
-  double _outSpin1 = paras.GetDoubleParameter(1)->GetValue();
-  double _outSpin2 = paras.GetDoubleParameter(2)->GetValue();
+  double _inSpin = paras.GetDoubleParameter(0)->value();
+  double _outSpin1 = paras.GetDoubleParameter(1)->value();
+  double _outSpin2 = paras.GetDoubleParameter(2)->value();
 
   std::shared_ptr<MultiDouble> _angle = paras.GetMultiDouble(0);
 
-  std::vector<double> results(_angle->GetNValues(), 0.);
-  for (unsigned int ele = 0; ele < _angle->GetNValues(); ele++) {
+  std::vector<double> results(_angle->numValues(), 0.);
+  for (unsigned int ele = 0; ele < _angle->numValues(); ele++) {
     try {
       results.at(ele) = AmpWignerD::dynamicalFunction(
-          _inSpin, _outSpin1, _outSpin2, _angle->GetValue(ele));
+          _inSpin, _outSpin1, _outSpin2, _angle->value(ele));
     } catch (std::exception &ex) {
       LOG(error) << "WignerDStrategy::execute() | " << ex.what();
       throw std::runtime_error("WignerDStrategy::execute() | "
@@ -170,6 +170,6 @@ bool WignerDStrategy::execute(ParameterList &paras,
   return true;
 }
 
-} /* namespace AmplitudeSum */
-} /* namespace Physics */
-} /* namespace ComPWA */
+} // namespace AmplitudeSum
+} // namespace Physics
+} // namespace ComPWA

@@ -39,14 +39,14 @@ inline void setErrorOnParameterList(ComPWA::ParameterList &list, double error,
                                     bool asym) {
   for (unsigned int i = 0; i < list.GetNDouble(); i++) {
     std::shared_ptr<ComPWA::DoubleParameter> p = list.GetDoubleParameter(i);
-    if (p->IsFixed()) {
-      p->SetError(0.0);
+    if (p->isFixed()) {
+      p->setError(0.0);
       continue;
     }
     if (asym)
-      list.GetDoubleParameter(i)->SetError(error, error);
+      list.GetDoubleParameter(i)->setError(error, error);
     else
-      list.GetDoubleParameter(i)->SetError(error);
+      list.GetDoubleParameter(i)->setError(error);
   }
 }
 
@@ -57,18 +57,17 @@ inline void setErrorOnParameterList(ComPWA::ParameterList &list, double error,
 inline void randomStartValues(ComPWA::ParameterList &fitPar) {
   for (unsigned int i = 0; i < fitPar.GetNDouble(); i++) {
     std::shared_ptr<ComPWA::DoubleParameter> p = fitPar.GetDoubleParameter(i);
-    if (p->IsFixed())
+    if (p->isFixed())
       continue;
-    double min = -999, max = 999;
-    if (p->HasBounds()) {
-      min = p->GetMinValue();
-      max = p->GetMaxValue();
+    std::pair<double, double> bounds(-999,-999);
+    if (p->hasBounds()) {
+      bounds = p->error();
     }
-    p->SetValue(gRandom->Uniform(min, max));
+    p->setValue(gRandom->Uniform(bounds.first, bounds.second));
   }
   std::cout << "Randomizing parameter list. New list:" << fitPar << std::endl;
   return;
 }
 
 
-#endif /* ParameterTools_h */
+#endif

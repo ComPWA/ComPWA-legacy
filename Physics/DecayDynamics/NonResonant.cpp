@@ -11,7 +11,7 @@ namespace DecayDynamics {
 std::shared_ptr<FunctionTree>
 NonResonant::GetTree(const ParameterList &sample, int pos, std::string suffix) {
 
-  int sampleSize = sample.GetMultiDouble(0)->GetNValues();
+  int sampleSize = sample.GetMultiDouble(0)->numValues();
   std::shared_ptr<MultiComplex> unitVec(
       new MultiComplex("unit", std::vector<std::complex<double>>(
                                    sampleSize, std::complex<double>(1, 0))));
@@ -24,6 +24,6 @@ NonResonant::GetTree(const ParameterList &sample, int pos, std::string suffix) {
   return newTree;
 }
 
-} /* namespace DecayDynamics */
-} /* namespace Physics */
-} /* namespace ComPWA */
+} // ns::DecayDynamics
+} // ns::Physics
+} // ns::ComPWA

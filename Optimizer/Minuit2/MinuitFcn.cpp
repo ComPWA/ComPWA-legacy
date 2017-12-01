@@ -31,11 +31,11 @@ double MinuitFcn::operator()(const std::vector<double> &x) const {
   for (unsigned int i = 0; i < x.size(); i++) {
     std::shared_ptr<ComPWA::DoubleParameter> actPat =
         _parList.GetDoubleParameter(i);
-    // std::cout<<i<<" "<<actPat->GetName()<<" "<<actPat->GetValue()
+    // std::cout<<i<<" "<<actPat->GetName()<<" "<<actPat->value()
     //<<" "<<x[i]<<" "<<actPat->IsFixed()<<std::endl;
-    if (!actPat->IsFixed())
+    if (!actPat->isFixed())
       if (x[i] == x[i]) {
-        actPat->SetValue(x[i]);
+        actPat->setValue(x[i]);
         paramOut << x[i] << " "; // print only free parameters
       }
   }

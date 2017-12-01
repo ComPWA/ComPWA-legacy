@@ -19,7 +19,7 @@ double SumMinLogLH::ControlParameter(ParameterList &minPar) {
     _tree->Recalculate();
     auto logLH =
         std::dynamic_pointer_cast<DoubleParameter>(_tree->Head()->Parameter());
-    lh = logLH->GetValue();
+    lh = logLH->value();
   }
   _nCalls++;
   return lh; // return -logLH
