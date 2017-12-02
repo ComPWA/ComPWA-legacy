@@ -2,6 +2,7 @@
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
+///
 /// \file
 /// Contains AmpWignerD class which provides WignerD functions.
 ///
@@ -26,8 +27,10 @@ namespace ComPWA {
 namespace Physics {
 namespace HelicityFormalism {
 
+///
 /// \class AmpWignerD
 /// Angular distribution based on WignerD functions
+///
 class AmpWignerD {
 public:
   //============ CONSTRUCTION ==================
@@ -102,8 +105,8 @@ protected:
   std::string name;
 };
 
-} /* namespace AmplitudeSum */
-} /* namespace Physics */
-} /* namespace ComPWA */
+} // namespace AmplitudeSum
+} // namespace Physics
+} // namespace ComPWA
 
 #endif

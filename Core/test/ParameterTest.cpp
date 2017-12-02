@@ -23,6 +23,7 @@
 #include <boost/archive/xml_oarchive.hpp>
 
 #include <Core/Parameter.hpp>
+#include <Core/ParameterT.hpp>
 #include <Core/Exceptions.hpp>
 #include <Core/ParameterList.hpp>
 
@@ -39,6 +40,7 @@ BOOST_AUTO_TEST_CASE(BoundsCheck) {
 
 BOOST_AUTO_TEST_CASE(SetGetCheck) {
   IntegerParameter emptyInt("emptyIntPar");
+  emptyInt.fixParameter(false);
   emptyInt.setValue(7);
   emptyInt.setBounds(0, 10);
   emptyInt.setError(1);
@@ -118,12 +120,14 @@ BOOST_AUTO_TEST_CASE(Serialization) {
   auto par = DoubleParameter("par", 2.5, 1.0, 3.0, 0.3);
   std::ofstream ofs("paramter.xml");
   boost::archive::xml_oarchive oa(ofs, boost::archive::no_header);
-//  boost::archive::text_oarchive oa(ofs, boost::archive::no_header);
-  oa << BOOST_SERIALIZATION_NVP(*shrpar.get());
-//  oa & par;
+//  oa << BOOST_SERIALIZATION_NVP(*shrpar.get());
+}
 
+BOOST_AUTO_TEST_CASE(ParameterT) {
+  ComPWA::ParameterT<std::vector<std::complex<double>>> par;
+std::cout<<"asfdasdfaS"<<std::endl;
 }
 
 BOOST_AUTO_TEST_SUITE_END();
 
-} /* namespace ComPWA */
+} // ns::ComPWA

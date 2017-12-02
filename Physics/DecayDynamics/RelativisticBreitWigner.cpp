@@ -62,7 +62,7 @@ RelativisticBreitWigner::Factory(std::shared_ptr<PartList> partL,
   }
 
   // Get masses of decay products
-  auto decayProducts = pt.get_child("SubSystem.DecayProducts");
+  auto decayProducts = pt.get_child("DecayProducts");
   if (decayProducts.size() != 2)
     throw boost::property_tree::ptree_error(
         "RelativisticBreitWigner::Factory() | Expect exactly two decay "

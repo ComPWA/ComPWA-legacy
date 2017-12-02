@@ -39,11 +39,13 @@ enum ParType {
   UNDEFINED = 0
 };
 
-/// Nems of the parameter types, should be extended if an new parameter type is
+/// Names of the parameter types, should be extended if an new parameter type is
 /// added
 static const char *ParNames[8] = {
     "UNDEFINED", "COMPLEX", "DOUBLE",   "INTEGER",
     "BOOL",      "MDOUBLE", "MCOMPLEX", "MUNSIGNEDINTEGER"};
+
+
 
 ///
 /// \class Parameter
@@ -56,34 +58,33 @@ static const char *ParNames[8] = {
 ///
 class Parameter {
 public:
-  //! Constructor with name of parameter and optional type
+  /// Constructor with name of parameter and optional type
   Parameter(std::string name, ParType type = ParType::UNDEFINED)
-      : name_(name), type_(type) {}
+      : Name(name), Type(type) {}
 
-  //! Destructor
   virtual ~Parameter() {}
 
-  //! Getter for name of object
-  virtual std::string name() const { return name_; }
+  /// Getter for name of object
+  virtual std::string name() const { return Name; }
   
-  //! Getter for name of object
-  virtual void setName( std::string n ) { name_ = n; }
+  /// Getter for name of object
+  virtual void setName( std::string n ) { Name = n; }
 
-  //! Getter for type of object
-  virtual ParType type() const { return type_; }
+  /// Getter for type of object
+  virtual ParType type() const { return Type; }
 
-  //! Getter for typename of object, to be defined by the actual implementation
+  /// Getter for typename of object, to be defined by the actual implementation
   virtual std::string className() const = 0;
 
   // Observer Pattern Functions
 
-  //! Attaches a new TreeNode as Observer
+  /// Attaches a new TreeNode as Observer
   void Attach(std::shared_ptr<ParObserver> newObserver) {
     oberservingNodes.push_back(newObserver);
     ;
   }
 
-  //! Removes TreeNodes not needed as Observer anymore
+  /// Removes TreeNodes not needed as Observer anymore
   void Detach(std::shared_ptr<ParObserver> obsoleteObserver) {
     oberservingNodes.erase(std::remove(oberservingNodes.begin(),
                                        oberservingNodes.end(),
@@ -91,7 +92,7 @@ public:
                            oberservingNodes.end());
   }
 
-  //! Notify all observing TreeNodes that parameter changed
+  /// Notify all observing TreeNodes that parameter changed
   void Notify() {
     for (std::vector<std::shared_ptr<ParObserver>>::const_iterator iter =
              oberservingNodes.begin();
@@ -103,28 +104,11 @@ public:
     }
   }
 
-  //! Return shared_pointer pointing to this Parameter
-  // std::shared_ptr<Parameter> getptr() {
-  //    return shared_from_this();
-  //}
-
-  //! friend function to stream parameter information to output
-  /*!
-   * Declaring the stream-operator << as friend allows to stream parameter
-   * information to the output as easily as a generic type.
-   * \sa make_str(), to_str()
-   */
   friend std::ostream &operator<<(std::ostream &out,
                                   std::shared_ptr<Parameter> b) {
     return out << b->to_str();
   }
 
-  //! friend function to stream parameter information to output
-  /*!
-   * Declaring the stream-operator << as friend allows to stream parameter
-   * information to the output as easily as a generic type.
-   * \sa make_str(), to_str()
-   */
   friend std::ostream &operator<<(std::ostream &out, Parameter &b) {
     return out << b.to_str();
   }
@@ -137,10 +121,10 @@ public:
   
 protected:
   /// Name of parameter
-  std::string name_;
+  std::string Name;
   
   /// Type of parameter (e.g. Double, Integer, ...)
-  ParType type_;
+  ParType Type;
 
   /// List of observers, e.g. TreeNodes
   std::vector<std::shared_ptr<ParObserver>> oberservingNodes;
@@ -149,8 +133,8 @@ private:
   friend class boost::serialization::access;
   template <class archive>
   void serialize(archive &ar, const unsigned int version) {
-    ar &BOOST_SERIALIZATION_NVP(name_);
-    ar &BOOST_SERIALIZATION_NVP(type_);
+    ar &BOOST_SERIALIZATION_NVP(Name);
+    ar &BOOST_SERIALIZATION_NVP(Type);
   }
 };
 } // ns::ComPWA

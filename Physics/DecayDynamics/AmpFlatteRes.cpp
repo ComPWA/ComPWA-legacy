@@ -37,7 +37,7 @@ AmpFlatteRes::Factory(std::shared_ptr<PartList> partL,
   obj->SetFormFactorType(ffType);
 
   // Get masses of decay products
-  auto decayProducts = pt.get_child("SubSystem.DecayProducts");
+  auto decayProducts = pt.get_child("DecayProducts");
   if (decayProducts.size() != 2)
     throw boost::property_tree::ptree_error(
         "AmpWignerD::Factory() | Expect exactly two decay products (" +

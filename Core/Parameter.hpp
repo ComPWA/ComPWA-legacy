@@ -2,14 +2,10 @@
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
-//! Implementations for internal parameter.
-/*! \class DoubleParameter
- * \class IntegerParameter
- * \class BoolParameter
- * @file Parameter.hpp
- * This class implements some internal container of parameters.
- * A parameter consists of a value with optional bounds and error.
- */
+///
+/// \file
+/// Implementations of Parameter for various data types.
+///
 
 #ifndef _PARAMETER_HPP_
 #define _PARAMETER_HPP_
@@ -33,6 +29,10 @@ enum ErrorType { SYM = 1, ASYM = 2, LHSCAN = 3, NOTDEF = 0 };
 
 namespace ComPWA {
 
+///
+/// \class MultiComplex
+/// Implementation of Parameter for std::vector<std::complex>> => MultiComplex.
+///
 class MultiComplex : public Parameter {
 
 public:
@@ -46,7 +46,7 @@ public:
   /// overloaded in this class, c++ will copy every member variable. As this
   /// is a container class, this should be fine.
   MultiComplex(const MultiComplex &in)
-      : Parameter(in.name_, ParType::MCOMPLEX) {
+      : Parameter(in.Name, ParType::MCOMPLEX) {
     *this = in;
   }
 
@@ -92,7 +92,7 @@ public:
   /// overloaded in this class, c++ will copy every member variable. As this
   /// is a container class, this should be fine.
   /// \p in input PWAParameter which variables will be copied
-  MultiDouble(const MultiDouble &in) : Parameter(in.name_, ParType::MDOUBLE) {
+  MultiDouble(const MultiDouble &in) : Parameter(in.Name, ParType::MDOUBLE) {
     *this = in;
   }
 
@@ -137,7 +137,7 @@ public:
   /// is a container class, this should be fine.
   /// param in input PWAParameter which variables will be copied
   MultiUnsignedInteger(const MultiUnsignedInteger &in)
-      : Parameter(in.name_, ParType::MUNSIGNEDINTEGER) {
+      : Parameter(in.Name, ParType::MUNSIGNEDINTEGER) {
     *this = in;
   }
 
@@ -339,7 +339,7 @@ private:
     using namespace boost::serialization;
     //    ar &boost::serialization::make_nvp(
     //        "Parameter", boost::serialization::base_object<Parameter>(*this));
-    ar &make_nvp("Name", name_);
+    ar &make_nvp("Name", Name);
     ar &make_nvp("Bounds", Bounds);
     ar &make_nvp("Fix", IsFixed);
     ar &make_nvp("Value", Value);

@@ -86,7 +86,7 @@ AmpWignerD::Factory(std::shared_ptr<PartList> partL,
   ComPWA::Spin mu(pt.get<double>("DecayParticle.<xmlattr>.Helicity"));
   obj->SetMu(mu);
 
-  auto decayProducts = pt.get_child("SubSystem.DecayProducts");
+  auto decayProducts = pt.get_child("DecayProducts");
   std::vector<ComPWA::Spin> vHelicity;
   for (auto i : decayProducts) {
     vHelicity.push_back(

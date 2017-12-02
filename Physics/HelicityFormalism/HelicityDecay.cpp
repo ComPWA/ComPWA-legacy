@@ -107,24 +107,24 @@ HelicityDecay::Factory(std::shared_ptr<PartList> partL,
 boost::property_tree::ptree HelicityDecay::Save(std::shared_ptr<PartialAmplitude> res) {
 
   auto obj = std::static_pointer_cast<HelicityDecay>(res);
-  boost::property_tree::ptree pt;
+  auto pt = SubSystemSave(obj->subSystem());
   pt.put<std::string>("<xmlattr>.Name", obj->name());
   
   boost::property_tree::ptree tmp = obj->magnitudeParameter()->save();
   tmp.put("<xmlattr>.Type", "Magnitude");
+  tmp.put("<xmlattr>.Class", "Double");
   pt.add_child("Parameter", tmp);
   
   tmp = obj->phaseParameter()->save();
   tmp.put("<xmlattr>.Type", "Phase");
+  tmp.put("<xmlattr>.Class", "Double");
   pt.add_child("Parameter", tmp);
   
   pt.put("DecayParticle.<xmlattr>.Name",
          obj->dynamicalFunction()->name());
   pt.put("DecayParticle.<xmlattr>.Helicity", obj->wignerD()->GetMu());
 
-  auto subTr = SubSystemSave(obj->subSystem());
-  pt.add_child("SubSystem", subTr);
-
+  //TODO: put helicities of daughter particles
   return pt;
 }
 

@@ -37,7 +37,7 @@ bool MultiComplex::operator==(const MultiComplex otherPar) const {
 
 std::string MultiComplex::to_str() const {
   std::stringstream oss;
-  oss << name_;
+  oss << Name;
   size_t max = val_.size();
   if (max > 5)
     max = 5; // display only 5 variables
@@ -95,7 +95,7 @@ bool MultiDouble::operator==(const MultiDouble otherPar) const {
 
 std::string MultiDouble::to_str() const {
   std::stringstream oss;
-  oss << name_;
+  oss << Name;
   size_t max = val_.size();
   if (max > 5)
     max = 5; // display only 10 variables
@@ -155,7 +155,7 @@ operator==(const MultiUnsignedInteger otherPar) const {
 }
 std::string MultiUnsignedInteger::to_str() const {
   std::stringstream oss;
-  oss << name_;
+  oss << Name;
   size_t max = val_.size();
   if (max > 5)
     max = 5; // display only 10 variables
@@ -192,7 +192,7 @@ ComplexParameter::ComplexParameter(std::string inName,
 }
 
 ComplexParameter::ComplexParameter(const ComplexParameter &in)
-    : Parameter(in.name_, ParType::COMPLEX) {
+    : Parameter(in.Name, ParType::COMPLEX) {
   *this = in;
 }
 
@@ -215,7 +215,7 @@ bool ComplexParameter::operator==(const ComplexParameter &otherPar) const {
 
 std::string ComplexParameter::to_str() const {
   std::stringstream oss;
-  oss << name_;
+  oss << Name;
   oss << "\t Val = " << val_;
   oss << "\t Type = " << className();
   return oss.str();
@@ -270,7 +270,7 @@ DoubleParameter::DoubleParameter(std::string inName, const double value,
 }
 
 DoubleParameter::DoubleParameter(const DoubleParameter &in)
-    : Parameter(in.name_, ParType::DOUBLE) {
+    : Parameter(in.Name, ParType::DOUBLE) {
   *this = in;
 }
 
@@ -347,7 +347,7 @@ bool DoubleParameter::hasError() const {
 std::pair<double,double> DoubleParameter::error() const {
   if (!hasError())
     throw std::runtime_error("DoubleParameter::error() | "
-                             "Parameter " + name_ + " has no errors defined!");
+                             "Parameter " + Name + " has no errors defined!");
   return Error;
 }
 
@@ -415,7 +415,7 @@ bool DoubleParameter::check_bounds(const std::pair<double, double> bounds) const
 
 std::string DoubleParameter::to_str() const {
   std::stringstream oss;
-  oss << name_;
+  oss << Name;
   oss << "\t Val = " << Value;
   if ( ErrType == ErrorType::SYM) {
    oss << " (+-" << Error.first << ")";
@@ -539,7 +539,7 @@ IntegerParameter::IntegerParameter(std::string inName, const int value,
 }
 
 IntegerParameter::IntegerParameter(const IntegerParameter &in)
-    : Parameter(in.name_, ParType::INTEGER) {
+    : Parameter(in.Name, ParType::INTEGER) {
   *this = in;
 }
 
@@ -634,7 +634,7 @@ bool IntegerParameter::check_bounds(const int min, const int max) const {
 
 std::string IntegerParameter::to_str() const {
   std::stringstream oss;
-  oss << name_;
+  oss << Name;
   oss << "\t Val = " << Value;
   oss << "\t Type = " << className();
   return oss.str();
@@ -656,7 +656,7 @@ BoolParameter::BoolParameter(std::string inName, const bool value)
 }
 
 BoolParameter::BoolParameter(const BoolParameter &in)
-    : Parameter(in.name_, ParType::BOOL) {
+    : Parameter(in.Name, ParType::BOOL) {
   *this = in;
 }
 
@@ -680,7 +680,7 @@ bool BoolParameter::operator==(const BoolParameter otherPar) const {
 
 std::string BoolParameter::to_str() const {
   std::stringstream oss;
-  oss << name_;
+  oss << Name;
   oss << "\t Val = " << Value;
   oss << "\t Type = " << className();
   return oss.str();
