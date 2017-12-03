@@ -80,23 +80,23 @@ public:
 
   /// Attaches a new TreeNode as Observer
   void Attach(std::shared_ptr<ParObserver> newObserver) {
-    oberservingNodes.push_back(newObserver);
+    OberservingNodes.push_back(newObserver);
     ;
   }
 
   /// Removes TreeNodes not needed as Observer anymore
   void Detach(std::shared_ptr<ParObserver> obsoleteObserver) {
-    oberservingNodes.erase(std::remove(oberservingNodes.begin(),
-                                       oberservingNodes.end(),
+    OberservingNodes.erase(std::remove(OberservingNodes.begin(),
+                                       OberservingNodes.end(),
                                        obsoleteObserver),
-                           oberservingNodes.end());
+                           OberservingNodes.end());
   }
 
   /// Notify all observing TreeNodes that parameter changed
   void Notify() {
     for (std::vector<std::shared_ptr<ParObserver>>::const_iterator iter =
-             oberservingNodes.begin();
-         iter != oberservingNodes.end(); ++iter) {
+             OberservingNodes.begin();
+         iter != OberservingNodes.end(); ++iter) {
       if (*iter != std::shared_ptr<ParObserver>()) // Ist das richtig????
       {
         (*iter)->update();
@@ -127,7 +127,7 @@ protected:
   ParType Type;
 
   /// List of observers, e.g. TreeNodes
-  std::vector<std::shared_ptr<ParObserver>> oberservingNodes;
+  std::vector<std::shared_ptr<ParObserver>> OberservingNodes;
 
 private:
   friend class boost::serialization::access;

@@ -23,7 +23,7 @@
 #include <boost/archive/xml_oarchive.hpp>
 
 #include <Core/Parameter.hpp>
-#include <Core/ParameterT.hpp>
+#include <Core/Value.hpp>
 #include <Core/Exceptions.hpp>
 #include <Core/ParameterList.hpp>
 
@@ -124,7 +124,7 @@ BOOST_AUTO_TEST_CASE(Serialization) {
 }
 
 BOOST_AUTO_TEST_CASE(ParameterT) {
-  ComPWA::ParameterT<std::vector<std::complex<double>>> par;
+  ComPWA::Value<std::vector<std::complex<double>>> par;
 std::cout<<"asfdasdfaS"<<std::endl;
 }
 

@@ -485,6 +485,6 @@ protected:
   int Value;
 };
 
-} /* namespace ComPWA */
+} // namespace ComPWA
 
 #endif
