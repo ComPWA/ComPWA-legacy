@@ -1,3 +1,4 @@
+
 // Copyright (c) 2017 The ComPWA Team.
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
@@ -183,13 +184,11 @@ std::string MultiUnsignedInteger::val_to_str() const {
 }
 //================================= COMPLEX ==================================
 ComplexParameter::ComplexParameter(std::string inName)
-    : Parameter(inName, ParType::COMPLEX), val_(0., 0.) {
-}
+    : Parameter(inName, ParType::COMPLEX), val_(0., 0.) {}
 
 ComplexParameter::ComplexParameter(std::string inName,
                                    const std::complex<double> value)
-    : Parameter(inName, ParType::COMPLEX), val_(value){
-}
+    : Parameter(inName, ParType::COMPLEX), val_(value) {}
 
 ComplexParameter::ComplexParameter(const ComplexParameter &in)
     : Parameter(in.Name, ParType::COMPLEX) {
@@ -247,15 +246,13 @@ DoubleParameter::DoubleParameter(std::string inName, const double value,
                                  const double error)
     : Parameter(inName, ParType::DOUBLE), HasBounds(false), IsFixed(0),
       Value(value), Bounds(std::pair<double, double>(0, 0)),
-      ErrType(ErrorType::SYM), Error(std::pair<double, double>(error, error)) {
-
-}
+      ErrType(ErrorType::SYM), Error(std::pair<double, double>(error, error)) {}
 
 DoubleParameter::DoubleParameter(std::string inName, const double value,
                                  const double min, const double max)
     : Parameter(inName, ParType::DOUBLE), HasBounds(false), IsFixed(0),
       Value(value), Bounds(std::pair<double, double>(0, 0)),
-      ErrType(ErrorType::NOTDEF), Error(std::pair<double, double>(0, 0)){
+      ErrType(ErrorType::NOTDEF), Error(std::pair<double, double>(0, 0)) {
   setBounds(min, max);
 }
 
@@ -277,7 +274,7 @@ DoubleParameter::DoubleParameter(const DoubleParameter &in)
 void DoubleParameter::updateParameter(std::shared_ptr<DoubleParameter> newPar) {
 
   // Copy bounds
-  if (newPar->hasBounds()){
+  if (newPar->hasBounds()) {
     HasBounds = 1;
     setBounds(newPar->bounds());
   } else
@@ -285,7 +282,7 @@ void DoubleParameter::updateParameter(std::shared_ptr<DoubleParameter> newPar) {
 
   bool isFix = newPar->isFixed();
   fixParameter(0); // we ignore here if parameter is fixed
-  
+
   // Copy value
   setValue(newPar->value());
 
@@ -304,20 +301,19 @@ void DoubleParameter::updateParameter(std::shared_ptr<DoubleParameter> newPar) {
 
 void DoubleParameter::setValue(const double inVal) {
   if (IsFixed)
-    throw ParameterFixed("DoubleParameter:: () | Parameter " +
-                         name() + " is fixed!");
+    throw ParameterFixed("DoubleParameter:: () | Parameter " + name() +
+                         " is fixed!");
   // Call notify only if value has changed! Otherwise tree is
   // recalculated also in case where current parameter is not changed
   if (Value == inVal)
     return;
 
   if (HasBounds && (inVal < bounds().first || inVal > bounds().second))
-    throw ParameterOutOfBound(
-        "DoubleParameter::setValue() | "
-        "Parameter " +
-        name() + " not within bounds: val=" + std::to_string(inVal) + " [" +
-        std::to_string(error().first) + ";" + std::to_string(error().second) +
-        "]");
+    throw ParameterOutOfBound("DoubleParameter::setValue() | Parameter " +
+                              name() + " not within bounds: val=" +
+                              std::to_string(inVal) + " [" +
+                              std::to_string(bounds().first) + ";" +
+                              std::to_string(bounds().second) + "]");
 
   Value = inVal;
   Notify();
@@ -344,10 +340,11 @@ bool DoubleParameter::hasError() const {
   return false;
 }
 
-std::pair<double,double> DoubleParameter::error() const {
+std::pair<double, double> DoubleParameter::error() const {
   if (!hasError())
     throw std::runtime_error("DoubleParameter::error() | "
-                             "Parameter " + Name + " has no errors defined!");
+                             "Parameter " +
+                             Name + " has no errors defined!");
   return Error;
 }
 
@@ -379,11 +376,12 @@ bool DoubleParameter::operator==(const DoubleParameter otherPar) const {
   // We assume that if name and value are the same both parameters match. In
   // case that other properties of the parameterts differ we throw an
   // exception since we assume that this is a user mistake.
-  if (HasBounds != otherPar.HasBounds ||
-      this->bounds() != otherPar.bounds())
+  if (HasBounds != otherPar.HasBounds || this->bounds() != otherPar.bounds())
     throw std::runtime_error("DoubleParameter::operator==() | Parameters "
-                             "match by name (" + name() + ") and value (" +
-                             std::to_string(value()) + ") but differs in "
+                             "match by name (" +
+                             name() + ") and value (" +
+                             std::to_string(value()) +
+                             ") but differs in "
                              "parameter bounds. We assume that there is a "
                              "mistake. Check your input files!");
 
@@ -407,8 +405,10 @@ bool DoubleParameter::operator==(const DoubleParameter otherPar) const {
   return true;
 }
 
-bool DoubleParameter::check_bounds(const std::pair<double, double> bounds) const {
-  if ((bounds.second > bounds.first) && (bounds.second >= Value) && (bounds.first <= Value))
+bool DoubleParameter::check_bounds(
+    const std::pair<double, double> bounds) const {
+  if ((bounds.second > bounds.first) && (bounds.second >= Value) &&
+      (bounds.first <= Value))
     return true;
   return false;
 }
@@ -417,10 +417,10 @@ std::string DoubleParameter::to_str() const {
   std::stringstream oss;
   oss << Name;
   oss << "\t Val = " << Value;
-  if ( ErrType == ErrorType::SYM) {
-   oss << " (+-" << Error.first << ")";
-  } else if ( ErrType == ErrorType::ASYM){
-     oss << " (+" << Error.second << " -" << Error.first << ")";
+  if (ErrType == ErrorType::SYM) {
+    oss << " (+-" << Error.first << ")";
+  } else if (ErrType == ErrorType::ASYM) {
+    oss << " (+" << Error.second << " -" << Error.first << ")";
   }
 
   if (HasBounds)
@@ -500,21 +500,18 @@ boost::property_tree::ptree DoubleParameter::save() const {
 IntegerParameter::IntegerParameter(std::string inName)
     : Parameter(inName, ParType::INTEGER), Value(0), IsFixed(true),
       HasBounds(false), Bounds(std::pair<double, double>(0, 0)),
-      ErrType(ErrorType::NOTDEF), Error(std::pair<double, double>(0, 0)) {
-}
+      ErrType(ErrorType::NOTDEF), Error(std::pair<double, double>(0, 0)) {}
 
 IntegerParameter::IntegerParameter(std::string inName, const int value)
     : Parameter(inName, ParType::INTEGER), Value(value), IsFixed(true),
       HasBounds(false), Bounds(std::pair<double, double>(0, 0)),
-      ErrType(ErrorType::NOTDEF), Error(std::pair<double, double>(0, 0)) {
-}
+      ErrType(ErrorType::NOTDEF), Error(std::pair<double, double>(0, 0)) {}
 
 IntegerParameter::IntegerParameter(std::string inName, const int value,
                                    const int error)
     : Parameter(inName, ParType::INTEGER), Value(value), IsFixed(true),
       HasBounds(false), Bounds(std::pair<double, double>(0, 0)),
-      ErrType(ErrorType::SYM), Error(std::pair<double, double>(error, error)) {
-}
+      ErrType(ErrorType::SYM), Error(std::pair<double, double>(error, error)) {}
 
 IntegerParameter::IntegerParameter(std::string inName, const int value,
                                    const int min, const int max)
@@ -554,12 +551,11 @@ void IntegerParameter::setValue(const int inVal) {
   Notify();
 }
 
-  bool IntegerParameter::hasError() const {
-    if (ErrType != ErrorType::NOTDEF)
+bool IntegerParameter::hasError() const {
+  if (ErrType != ErrorType::NOTDEF)
     return true;
   return false;
-  }
-
+}
 
 void IntegerParameter::setError(const int inErr) {
   ErrType = ErrorType::SYM;
@@ -567,20 +563,20 @@ void IntegerParameter::setError(const int inErr) {
   Error.second = inErr;
 }
 
-void IntegerParameter::setError(const std::pair<int,int> inErr) {
+void IntegerParameter::setError(const std::pair<int, int> inErr) {
   ErrType = ErrorType::ASYM;
   Error = inErr;
 }
 
 void IntegerParameter::setBounds(const int min, const int max) {
-    if (check_bounds(min, max)) {
+  if (check_bounds(min, max)) {
     Bounds = std::pair<double, double>(min, max);
     HasBounds = true;
   }
 }
 
 void IntegerParameter::setBounds(const std::pair<int, int> r) {
-    if (check_bounds(r.first, r.second)) {
+  if (check_bounds(r.first, r.second)) {
     Bounds = r;
     HasBounds = true;
   }
@@ -648,12 +644,10 @@ std::string IntegerParameter::val_to_str() const {
 //================================== BOOL ====================================
 
 BoolParameter::BoolParameter(std::string inName)
-    : Parameter(inName, ParType::BOOL), Value(0) {
-}
+    : Parameter(inName, ParType::BOOL), Value(0) {}
 
 BoolParameter::BoolParameter(std::string inName, const bool value)
-    : Parameter(inName, ParType::BOOL), Value(value) {
-}
+    : Parameter(inName, ParType::BOOL), Value(value) {}
 
 BoolParameter::BoolParameter(const BoolParameter &in)
     : Parameter(in.Name, ParType::BOOL) {

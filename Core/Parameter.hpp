@@ -25,9 +25,11 @@
 #include "Core/Exceptions.hpp"
 #include "Core/Logging.hpp"
 
-enum ErrorType { SYM = 1, ASYM = 2, LHSCAN = 3, NOTDEF = 0 };
 
 namespace ComPWA {
+
+
+enum ErrorType { SYM = 1, ASYM = 2, LHSCAN = 3, NOTDEF = 0 };
 
 ///
 /// \class MultiComplex
@@ -275,6 +277,10 @@ public:
 
   /// Parameter error.
   virtual std::pair<double, double> error() const;
+
+  /// Average arameter error (in case of asymmetric errors) or simpli parameter
+  /// error.
+  virtual double avgError() const { return 0.5 * (Error.first + Error.second); }
 
   /// Set parameter error and assume that this parameter has asymmetri errors.
   virtual void setError(double errLow, double errHigh);

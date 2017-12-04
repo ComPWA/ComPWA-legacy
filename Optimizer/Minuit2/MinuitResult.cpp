@@ -90,7 +90,7 @@ void MinuitResult::genSimpleOutput(std::ostream &out) {
         finalParameters.GetDoubleParameter(o);
     out << outPar->value() << " ";
     if (outPar->hasError())
-      out << outPar->error().first << " ";
+      out << outPar->avgError() << " ";
   }
   out << "\n";
 

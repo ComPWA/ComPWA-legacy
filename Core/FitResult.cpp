@@ -1,4 +1,4 @@
- 
+
 // Copyright (c) 2015, 2017 The ComPWA Team.
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
@@ -183,7 +183,7 @@ void FitResult::PrintFitParameters(TableFormater *tableResult) {
           else if (errorType == ErrorType::ASYM && pull > 0)
             pull /= outPar->error().second;
           else
-            pull /= outPar->error().first;
+            pull /= outPar->avgError();
         }
         if (!std::isnan(pull))
           (*tableResult) << pull;
@@ -220,7 +220,7 @@ void FitResult::PrintFitFractions(TableFormater *fracTable) {
 
     *fracTable << resName << tmpPar->value();
     try {
-      *fracTable << tmpPar->error().first; // assume symmetric errors here
+      *fracTable << tmpPar->avgError(); // assume symmetric errors here
     } catch (std::exception &ex) {
       *fracTable << 0.0;
     }
@@ -237,4 +237,4 @@ void FitResult::PrintFitFractions(TableFormater *fracTable) {
   return;
 }
 
-} // namespace 
+} // namespace

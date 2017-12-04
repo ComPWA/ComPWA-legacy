@@ -78,10 +78,10 @@ std::shared_ptr<ComPWA::FitResult> MinuitIF::exec(ParameterList &par) {
       actPat->setValue(shiftAngle(actPat->value()));
 
     if (actPat->hasBounds()) {
-      upar.Add(actPat->name(), actPat->value(), actPat->error().first,
+      upar.Add(actPat->name(), actPat->value(), actPat->avgError(),
                actPat->bounds().first, actPat->bounds().second);
     } else {
-      upar.Add(actPat->name(), actPat->value(), actPat->error().first);
+      upar.Add(actPat->name(), actPat->value(), actPat->avgError());
     }
 
     if (!actPat->isFixed())

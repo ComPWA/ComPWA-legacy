@@ -86,7 +86,7 @@ BOOST_AUTO_TEST_CASE(ConstructorCheck2) {
     BOOST_CHECK_CLOSE(vecParInt[par].value(), vecParIntCopy[par].value(),
                       0.0001);
 }
-  // ----------- Testing ParameterList ------------
+// ----------- Testing ParameterList ------------
 
 BOOST_AUTO_TEST_CASE(ConstructorCheck) {
   std::vector<std::shared_ptr<IntegerParameter>> vecParInt;
@@ -120,12 +120,23 @@ BOOST_AUTO_TEST_CASE(Serialization) {
   auto par = DoubleParameter("par", 2.5, 1.0, 3.0, 0.3);
   std::ofstream ofs("paramter.xml");
   boost::archive::xml_oarchive oa(ofs, boost::archive::no_header);
-//  oa << BOOST_SERIALIZATION_NVP(*shrpar.get());
+  //  oa << BOOST_SERIALIZATION_NVP(*shrpar.get());
+}
+
+BOOST_AUTO_TEST_CASE(ParameterError) {
+  auto par = DoubleParameter("test", 1.5, 0.5);
+  BOOST_CHECK_EQUAL(par.errorType(), ComPWA::ErrorType::SYM);
+  BOOST_CHECK_EQUAL(par.error().first, par.error().second);
+  BOOST_CHECK_EQUAL(par.hasError(), true);
+  par.setError(0.2, 0.3);
+  BOOST_CHECK_EQUAL(par.errorType(), ErrorType::ASYM);
+  BOOST_CHECK_EQUAL(par.error().first, 0.2);
+  BOOST_CHECK_EQUAL(par.error().second, 0.3);
 }
 
 BOOST_AUTO_TEST_CASE(ParameterT) {
   ComPWA::Value<std::vector<std::complex<double>>> par;
-std::cout<<"asfdasdfaS"<<std::endl;
+//  std::cout << "asfdasdfaS" << std::endl;
 }
 
 BOOST_AUTO_TEST_SUITE_END();

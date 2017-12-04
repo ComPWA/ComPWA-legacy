@@ -56,11 +56,11 @@ TableFormater &TableFormater::operator<<(DoubleParameter in) {
     *out << " " << sep << " ";
   if (in.hasError()) {
     std::string tmp;
-    if (in.errorType() == ErrorType::SYM && in.error().first != 0) {
+    if (in.errorType() == ErrorType::SYM && in.avgError() != 0) {
       unsigned int halfWidth =
           (unsigned int)(columnWidth[curCol]) / 2; // divide column width
       *out << std::setw(halfWidth) << in.value();
-      tmp = pm + std::to_string((long double)in.error().first);
+      tmp = pm + std::to_string((long double)in.avgError());
       trimString(tmp);
       *out << std::setw(halfWidth) << tmp;
     } else if (in.errorType() == ErrorType::ASYM) {

@@ -61,7 +61,7 @@ inline void randomStartValues(ComPWA::ParameterList &fitPar) {
       continue;
     std::pair<double, double> bounds(-999,-999);
     if (p->hasBounds()) {
-      bounds = p->error();
+      bounds = p->bounds();
     }
     p->setValue(gRandom->Uniform(bounds.first, bounds.second));
   }
