@@ -20,6 +20,7 @@
 #include "Core/Particle.hpp"
 #include "DataReader/Data.hpp"
 #include "Physics/HelicityFormalism/HelicityKinematics.hpp"
+#include "Physics/HelicityFormalism/test/AmpModelTest.hpp"
 
 #include "Tools/RunManager.hpp"
 #include "Tools/RootGenerator.hpp"
@@ -45,9 +46,10 @@ BOOST_AUTO_TEST_CASE(HelicityAngleTest) {
 
   // Construct HelicityKinematics from XML tree
   boost::property_tree::ptree tr;
-  boost::property_tree::xml_parser::read_xml("AmpModel-input.xml",
-                                             tr);
-
+  std::stringstream modelStream;
+  // Construct particle list from XML tree
+  modelStream << HelicityTestParticles;
+  boost::property_tree::xml_parser::read_xml(modelStream, tr);
   auto partL = std::make_shared<ComPWA::PartList>();
   ReadParticles(partL, tr);
 
@@ -62,11 +64,11 @@ BOOST_AUTO_TEST_CASE(HelicityAngleTest) {
 
   // Generate phsp sample
   std::shared_ptr<ComPWA::Generator> gen(new ComPWA::Tools::RootGenerator(
-      partL, kin->GetInitialState(), kin->GetFinalState(), 123));
+      partL, kin->initialState(), kin->finalState(), 123));
   std::shared_ptr<ComPWA::DataReader::Data> sample(
       new ComPWA::DataReader::Data());
 
-  ComPWA::RunManager r;
+  Tools::RunManager r;
   r.SetGenerator(gen);
   r.SetPhspSample(sample);
   r.GeneratePhsp(20);
@@ -74,25 +76,24 @@ BOOST_AUTO_TEST_CASE(HelicityAngleTest) {
   bool useDerivedMassSq = false;
 
   Event ev;
-  /* We add an event of D0->KsK-K+ from data. Since the decay KS->pipi is not
-   * constraint to the KS mass we use the relation:
-   * (sqrtS * sqrtS + m1 * m1 + m2 * m2 + m3 * m3 - m23sq - m13sq)
-   * to calculated the third invariant mass. The results for the sub systems
-   * listed below are:
-   * m23sq=1.4014 m13sq=1.52861 m12sq=1.28267
-   * cosTheta12_23=0.151776 cosTheta12_CP=-0.178456
-   * cosTheta13_12=0.178456 cosTheta13_CP=-0.151776
-   * cosTheta23_12=0.318779 cosTheta23_CP=-0.318779
-   * Angles are symmetric! Set @useDerivedMassSq = true.
-
-   * In case all invariant masses are calculated independently
-   * (@useDerivedMassSq = false)the angles are not symmetric anymore.
-   * In this case a couple of tests are supposed to fail.
-   * m23sq=1.4014 m13sq=1.52861 m12sq=1.26798
-   * cosTheta12_23=0.171554 cosTheta12_CP=-0.178456
-   * cosTheta13_12=0.219724 cosTheta13_CP=-0.13337
-   * cosTheta23_12=0.356843 cosTheta23_CP=-0.318779
-   */
+  // We add an event of D0->KsK-K+ from data. Since the decay KS->pipi is not
+  // constraint to the KS mass we use the relation:
+  // (sqrtS * sqrtS + m1 * m1 + m2 * m2 + m3 * m3 - m23sq - m13sq)
+  // to calculated the third invariant mass. The results for the sub systems
+  // listed below are:
+  // m23sq=1.4014 m13sq=1.52861 m12sq=1.28267
+  // cosTheta12_23=0.151776 cosTheta12_CP=-0.178456
+  // cosTheta13_12=0.178456 cosTheta13_CP=-0.151776
+  // cosTheta23_12=0.318779 cosTheta23_CP=-0.318779
+  // Angles are symmetric! Set @useDerivedMassSq = true.
+  //
+  // In case all invariant masses are calculated independently
+  // (@useDerivedMassSq = false)the angles are not symmetric anymore.
+  // In this case a couple of tests are supposed to fail.
+  // m23sq=1.4014 m13sq=1.52861 m12sq=1.26798
+  // cosTheta12_23=0.171554 cosTheta12_CP=-0.178456
+  // cosTheta13_12=0.219724 cosTheta13_CP=-0.13337
+  // cosTheta23_12=0.356843 cosTheta23_CP=-0.318779
   //    ev.addParticle(ComPWA::Particle(
   //        std::array<double, 4>{{-0.00827061, -0.242581, -0.335833,
   //        0.636104}},
@@ -145,19 +146,19 @@ BOOST_AUTO_TEST_CASE(HelicityAngleTest) {
     //                              i.getParticle(2).GetFourMomentum())
     //                                 .GetInvMass());
 
-    double m23sq = (i.GetParticle(1).GetFourMomentum() +
-                    i.GetParticle(2).GetFourMomentum())
-                       .GetInvMassSq();
-    double m13sq = (i.GetParticle(0).GetFourMomentum() +
-                    i.GetParticle(2).GetFourMomentum())
-                       .GetInvMassSq();
+    double m23sq =
+        (i.particle(1).GetFourMomentum() + i.particle(2).GetFourMomentum())
+            .GetInvMassSq();
+    double m13sq =
+        (i.particle(0).GetFourMomentum() + i.particle(2).GetFourMomentum())
+            .GetInvMassSq();
     double m12sq;
     if (useDerivedMassSq)
       m12sq = (sqrtS * sqrtS + m1 * m1 + m2 * m2 + m3 * m3 - m23sq - m13sq);
     else
-      m12sq = (i.GetParticle(0).GetFourMomentum() +
-               i.GetParticle(1).GetFourMomentum())
-                  .GetInvMassSq();
+      m12sq =
+          (i.particle(0).GetFourMomentum() + i.particle(1).GetFourMomentum())
+              .GetInvMassSq();
 
     //------------ Restframe (12) -------------
     // Angle in the rest frame of (12) between (1) and (3)
@@ -211,12 +212,13 @@ BOOST_AUTO_TEST_CASE(HelicityAngleTest) {
     // Check if calculation of helicity angles correspongs the the previously
     // calculated values
 
-    dataPoint p12, p12_CP, p13, p13_CP, p23, p23_CP;
+    DataPoint p12, p12_CP, p13, p13_CP, p23, p23_CP;
 
     LOG(debug) << "-------- NEW EVENT ----------";
-    kin->EventToDataPoint(i, p12, sys12);
-    kin->EventToDataPoint(i, p12_CP, sys12_CP);
-    BOOST_CHECK_EQUAL((float)p12.GetValue(1), (float)cosTheta12_23);
+    kin->convert(i, p12, sys12);
+    kin->convert(i, p12_CP, sys12_CP);
+    // BOOST_CHECK_EQUAL((float)p12.value(1), (float)cosTheta12_23);
+    BOOST_CHECK(ComPWA::equal(p12.value(1), cosTheta12_23, 1000));
 
     LOG(debug) << "-------- (12) ----------";
     LOG(debug) << sys12.to_string() << " : " << p12;
@@ -225,12 +227,12 @@ BOOST_AUTO_TEST_CASE(HelicityAngleTest) {
                << kin->HelicityAngle(sqrtS, m2, m1, m3, m12sq, m23sq) << " CP: "
                << kin->HelicityAngle(sqrtS, m3, m1, m2, m13sq, m23sq);
 
-    kin->EventToDataPoint(i, p13, sys13);
-    kin->EventToDataPoint(i, p13_CP, sys13_CP);
-    BOOST_CHECK_EQUAL((float)p13.GetValue(1), (float)cosTheta13_12);
+    kin->convert(i, p13, sys13);
+    kin->convert(i, p13_CP, sys13_CP);
+    BOOST_CHECK_EQUAL((float)p13.value(1), (float)cosTheta13_12);
 
-    BOOST_CHECK_EQUAL((float)p13.GetValue(1), (-1) * (float)p12_CP.GetValue(1));
-    BOOST_CHECK_EQUAL((float)p12.GetValue(1), (-1) * (float)p13_CP.GetValue(1));
+    BOOST_CHECK_EQUAL((float)p13.value(1), (-1) * (float)p12_CP.value(1));
+    BOOST_CHECK_EQUAL((float)p12.value(1), (-1) * (float)p13_CP.value(1));
 
     LOG(debug) << "-------- (13) ----------";
     LOG(debug) << sys13.to_string() << " : " << p13;
@@ -239,12 +241,11 @@ BOOST_AUTO_TEST_CASE(HelicityAngleTest) {
                << kin->HelicityAngle(sqrtS, m1, m3, m2, m13sq, m12sq) << " CP: "
                << kin->HelicityAngle(sqrtS, m1, m2, m3, m12sq, m13sq);
 
-    kin->EventToDataPoint(i, p23, sys23);
-    kin->EventToDataPoint(i, p23_CP, sys23_CP);
-    BOOST_CHECK_EQUAL((float)p23.GetValue(1), (float)cosTheta23_12);
+    kin->convert(i, p23, sys23);
+    kin->convert(i, p23_CP, sys23_CP);
+    BOOST_CHECK_EQUAL((float)p23.value(1), (float)cosTheta23_12);
 
-    BOOST_CHECK_EQUAL((float)p23.GetValue(1),
-                      (-1) * ((float)p23_CP.GetValue(1)));
+    BOOST_CHECK_EQUAL((float)p23.value(1), (-1) * ((float)p23_CP.value(1)));
 
     LOG(debug) << "-------- (23) ----------";
     LOG(debug) << sys23.to_string() << " : " << p23;
@@ -256,3 +257,5 @@ BOOST_AUTO_TEST_CASE(HelicityAngleTest) {
 }
 
 BOOST_AUTO_TEST_SUITE_END()
+
+)
