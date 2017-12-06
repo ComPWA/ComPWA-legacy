@@ -14,13 +14,6 @@
 #include "Core/Parameter.hpp"
 namespace ComPWA {
 
-template <typename T> inline ParType typeName(void) {
-  return ParType::UNDEFINED;
-}
-
-template <> inline ParType typeName<std::vector<std::complex<double>>>(void) {
-  return ParType::MCOMPLEX;
-}
 
 template <class T> class Value : public ComPWA::Parameter {
 public:

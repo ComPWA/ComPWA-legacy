@@ -6,15 +6,12 @@
 
 using namespace ComPWA;
 
-template class ComPWA::Value<std::vector<std::complex<double>>>;
-//template class ComPWA::Value<std::vector<std::complex<int>>>;
-//template class ComPWA::Value<std::vector<std::complex<bool>>>;
-template class ComPWA::Value<std::vector<double>>;
-template class ComPWA::Value<std::vector<int>>;
-template class ComPWA::Value<std::vector<bool>>;
 template class ComPWA::Value<std::complex<double>>;
-//template class ComPWA::Value<std::complex<int>>;
-//template class ComPWA::Value<std::complex<bool>>;
 template class ComPWA::Value<double>;
 template class ComPWA::Value<int>;
 template class ComPWA::Value<bool>;
+template class ComPWA::Value<std::vector<double>>;
+template class ComPWA::Value<std::vector<std::complex<double>>>;
+template class ComPWA::Value<std::vector<unsigned int>>;
+template class ComPWA::Value<std::vector<int>>;
+template class ComPWA::Value<std::vector<bool>>;

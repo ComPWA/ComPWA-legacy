@@ -15,6 +15,77 @@
 
 namespace ComPWA {
 
+void ParameterList2::addParameters(std::vector<std::shared_ptr<Parameter>> pars) {
+  for (auto i : pars)
+    addParameter(i);
+}
+
+void ParameterList2::addParameter(std::shared_ptr<Parameter> par) {
+  switch (par->type()) {
+  case ParType::DOUBLE: {
+    DoubleParameters.push_back(std::dynamic_pointer_cast<DoubleParameter>(par));
+    break;
+  }
+  default: { break; }
+  }
+}
+
+void ParameterList2::addValues(std::vector<std::shared_ptr<Parameter>> values) {
+  for (auto i : values)
+    addValue(i);
+}
+
+void ParameterList2::addValue(std::shared_ptr<Parameter> par) {
+  switch (par->type()) {
+  case ParType::BOOL: {
+    BoolValues.push_back(std::dynamic_pointer_cast<ComPWA::Value<bool>>(par));
+    break;
+  }
+  case ParType::INTEGER: {
+    IntValues.push_back(std::dynamic_pointer_cast<ComPWA::Value<int>>(par));
+    break;
+  }
+  case ParType::DOUBLE: {
+    DoubleValues.push_back(
+        std::dynamic_pointer_cast<ComPWA::Value<double>>(par));
+    break;
+  }
+  case ParType::COMPLEX: {
+    ComplexValues.push_back(
+        std::dynamic_pointer_cast<ComPWA::Value<std::complex<double>>>(par));
+    break;
+  }
+  case ParType::MBOOL: {
+    MultiBoolValues.push_back(
+        std::dynamic_pointer_cast<ComPWA::Value<std::vector<bool>>>(par));
+    break;
+  }
+  case ParType::MINTEGER: {
+    MultiIntValues.push_back(
+        std::dynamic_pointer_cast<ComPWA::Value<std::vector<int>>>(par));
+    break;
+  }
+  case ParType::MUNSIGNEDINTEGER: {
+    MultiUnsignedIntValues.push_back(
+        std::dynamic_pointer_cast<ComPWA::Value<std::vector<unsigned int>>>(
+            par));
+    break;
+  }
+  case ParType::MDOUBLE: {
+    MultiDoubleValues.push_back(
+        std::dynamic_pointer_cast<ComPWA::Value<std::vector<double>>>(par));
+    break;
+  }
+  case ParType::MCOMPLEX: {
+    MultiComplexValues.push_back(
+        std::dynamic_pointer_cast<
+            ComPWA::Value<std::vector<std::complex<double>>>>(par));
+    break;
+  }
+  default: { break; }
+  }
+}
+
 ParameterList::ParameterList() {}
 
 ParameterList::ParameterList(
@@ -68,7 +139,8 @@ void ParameterList::DeepCopy(const ParameterList &in) {
         std::shared_ptr<BoolParameter>(new BoolParameter(*(in.vBool_[i]))));
 }
 
-ParameterList::~ParameterList() { /* nothing */ }
+ParameterList::~ParameterList() { /* nothing */
+}
 
 std::shared_ptr<Parameter>
 ParameterList::parameter(const unsigned int i) const {
@@ -295,7 +367,8 @@ std::string ParameterList::to_str() const {
 }
 
 //******************************************************************************
-//************* Functions to access individual parameter types *****************
+//************* Functions to access individual parameter types
+//*****************
 //******************************************************************************
 
 //---------- BOOL PARAMETER ----------
@@ -762,9 +835,9 @@ ParameterList::FindMultiUnsignedInteger(const std::string name) const {
     if ((*it)->name() == name)
       return it;
   }
-  throw BadParameter(
-      "ParameterList::FindMultiUnsignedInteger() | UnsignedInteger parameter " +
-      name + " can not be found in list!");
+  throw BadParameter("ParameterList::FindMultiUnsignedInteger() | "
+                     "UnsignedInteger parameter " +
+                     name + " can not be found in list!");
 }
 
 unsigned int ParameterList::FindMultiUnsignedIntegerId(const std::string name) {

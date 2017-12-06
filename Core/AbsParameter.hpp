@@ -36,16 +36,45 @@ enum ParType {
   MDOUBLE = 5,
   MCOMPLEX = 6,
   MUNSIGNEDINTEGER = 7,
+  MINTEGER = 8,
+  MBOOL = 9,
   UNDEFINED = 0
 };
 
 /// Names of the parameter types, should be extended if an new parameter type is
 /// added
-static const char *ParNames[8] = {
-    "UNDEFINED", "COMPLEX", "DOUBLE",   "INTEGER",
-    "BOOL",      "MDOUBLE", "MCOMPLEX", "MUNSIGNEDINTEGER"};
+static const char *ParNames[10] = {
+    "UNDEFINED", "COMPLEX",  "DOUBLE",           "INTEGER",  "BOOL",
+    "MDOUBLE",   "MCOMPLEX", "MUNSIGNEDINTEGER", "MINTEGER", "MBOOL"};
 
-
+/// Template functions which return above specified parameter types
+template <typename T> inline ParType typeName(void) {
+  return ParType::UNDEFINED;
+}
+template <> inline ParType typeName<std::complex<double>>(void) {
+  return ParType::COMPLEX;
+}
+template <> inline ParType typeName<int>(void) {
+  return ParType::INTEGER;
+}
+template <> inline ParType typeName<bool>(void) {
+  return ParType::BOOL;
+}
+template <> inline ParType typeName<std::vector<double>>(void) {
+  return ParType::MDOUBLE;
+}
+template <> inline ParType typeName<std::vector<std::complex<double>>>(void) {
+  return ParType::MCOMPLEX;
+}
+template <> inline ParType typeName<std::vector<unsigned int>>(void) {
+  return ParType::MUNSIGNEDINTEGER;
+}
+template <> inline ParType typeName<std::vector<int>>(void) {
+  return ParType::MINTEGER;
+}
+template <> inline ParType typeName<std::vector<bool>>(void) {
+  return ParType::MBOOL;
+}
 
 ///
 /// \class Parameter

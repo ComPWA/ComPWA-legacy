@@ -1,3 +1,5 @@
+
+
 // Copyright (c) 2013, 2017 The ComPWA Team.
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
@@ -25,8 +27,155 @@
 #include "Core/Parameter.hpp"
 #include "Core/Exceptions.hpp"
 #include "Core/Logging.hpp"
+#include "Core/Value.hpp"
 
 namespace ComPWA {
+
+class ParameterList2 {
+public:
+  /// Only shared_ptr are copied. Those still point to the same object.
+  /// See DeepCopy(const ParameterList &in).
+  ParameterList2(const ParameterList2 &in) = default;
+
+  /// Clear this parameter and deep-copy all parameters from \p in. Deep-copy
+  /// means that for each parameter a new object is created (not only the
+  /// shared_ptr is copied).
+  void DeepCopy(const ParameterList2 &in){};
+
+  virtual ~ParameterList2(){};
+
+  virtual std::size_t numParameters() const { return 1; }
+
+  virtual void addParameter(std::shared_ptr<Parameter> par);
+
+  virtual void addParameters(std::vector<std::shared_ptr<Parameter>> pars);
+
+  virtual void addValue(std::shared_ptr<Parameter> value);
+
+  virtual void addValues(std::vector<std::shared_ptr<Parameter>> values);
+
+  // Parameter
+  virtual std::shared_ptr<DoubleParameter> doubleParameter(size_t i) {
+    return DoubleParameters.at(i);
+  };
+
+  virtual std::vector<std::shared_ptr<DoubleParameter>> &doubleParameters() {
+    return DoubleParameters;
+  };
+
+  // Value
+  // Single sized values
+  virtual std::shared_ptr<ComPWA::Value<bool>> boolValue(size_t i) {
+    return BoolValues.at(i);
+  };
+
+  virtual std::vector<std::shared_ptr<ComPWA::Value<bool>>> &boolValues() {
+    return BoolValues;
+  };
+
+  virtual std::shared_ptr<ComPWA::Value<int>> intValue(size_t i) {
+    return IntValues.at(i);
+  };
+
+  virtual std::vector<std::shared_ptr<ComPWA::Value<int>>> &intValues() {
+    return IntValues;
+  };
+
+  virtual std::shared_ptr<ComPWA::Value<double>> doubleValue(size_t i) {
+    return DoubleValues.at(i);
+  };
+
+  virtual std::vector<std::shared_ptr<ComPWA::Value<double>>> &doubleValues() {
+    return DoubleValues;
+  };
+
+  virtual std::shared_ptr<ComPWA::Value<std::complex<double>>>
+  complexValue(size_t i) {
+    return ComplexValues.at(i);
+  };
+
+  virtual std::vector<std::shared_ptr<ComPWA::Value<std::complex<double>>>> &
+  complexValues() {
+    return ComplexValues;
+  };
+
+  // multi sized values
+  virtual std::shared_ptr<ComPWA::Value<std::vector<bool>>>
+  mBoolValue(size_t i) {
+    return MultiBoolValues.at(i);
+  };
+
+  virtual std::vector<std::shared_ptr<ComPWA::Value<std::vector<bool>>>> &
+  mBoolValues() {
+    return MultiBoolValues;
+  };
+
+  virtual std::shared_ptr<ComPWA::Value<std::vector<int>>> mIntValue(size_t i) {
+    return MultiIntValues.at(i);
+  };
+
+  virtual std::vector<std::shared_ptr<ComPWA::Value<std::vector<int>>>> &
+  mIntValues() {
+    return MultiIntValues;
+  };
+
+  virtual std::shared_ptr<ComPWA::Value<std::vector<unsigned int>>>
+  mUnsignedIntValue(size_t i) {
+    return MultiUnsignedIntValues.at(i);
+  };
+
+  virtual std::vector<std::shared_ptr<ComPWA::Value<std::vector<unsigned int>>>>
+      &mUnsignedIntValues() {
+    return MultiUnsignedIntValues;
+  };
+
+  virtual std::shared_ptr<ComPWA::Value<std::vector<double>>>
+  mDoubleValue(size_t i) {
+    return MultiDoubleValues.at(i);
+  };
+
+  virtual std::vector<std::shared_ptr<ComPWA::Value<std::vector<double>>>> &
+  mDoubleValues() {
+    return MultiDoubleValues;
+  };
+
+  virtual std::shared_ptr<ComPWA::Value<std::vector<std::complex<double>>>>
+  mComplexValue(size_t i) {
+    return MultiComplexValues.at(i);
+  };
+
+  virtual std::vector<
+      std::shared_ptr<ComPWA::Value<std::vector<std::complex<double>>>>> &
+  mComplexValues() {
+    return MultiComplexValues;
+  };
+
+protected:
+  std::vector<std::shared_ptr<ComPWA::Value<bool>>> BoolValues;
+
+  std::vector<std::shared_ptr<ComPWA::Value<int>>> IntValues;
+
+  std::vector<std::shared_ptr<ComPWA::Value<double>>> DoubleValues;
+
+  std::vector<std::shared_ptr<ComPWA::Value<std::complex<double>>>>
+      ComplexValues;
+
+  std::vector<std::shared_ptr<ComPWA::Value<std::vector<bool>>>>
+      MultiBoolValues;
+
+  std::vector<std::shared_ptr<ComPWA::Value<std::vector<int>>>> MultiIntValues;
+
+  std::vector<std::shared_ptr<ComPWA::Value<std::vector<unsigned int>>>>
+      MultiUnsignedIntValues;
+
+  std::vector<std::shared_ptr<ComPWA::Value<std::vector<double>>>>
+      MultiDoubleValues;
+
+  std::vector<std::shared_ptr<ComPWA::Value<std::vector<std::complex<double>>>>>
+      MultiComplexValues;
+
+  std::vector<std::shared_ptr<ComPWA::DoubleParameter>> DoubleParameters;
+};
 
 class ParameterList {
 
@@ -84,14 +233,11 @@ public:
   virtual std::shared_ptr<Parameter> parameter(const unsigned int i) const;
 
   /// Be aware that names are not unique
-  virtual std::shared_ptr<Parameter>
-  parameter(const std::string parname) const;
+  virtual std::shared_ptr<Parameter> parameter(const std::string parname) const;
 
-  /**! Remove duplicate entries
-   * If a parameter name is found multiple times only the fist occurance is
-   * kept.
-   * The parameter values of parameters with the same name are not compared.
-   */
+  /// Remove duplicate entries. If a parameter name is found multiple times
+  /// only the fist occurance is kept.
+  /// The parameter values of parameters with the same name are not compared.
   virtual void RemoveDuplicates();
 
   virtual bool ParameterExists(const std::string parname) const;
@@ -110,7 +256,7 @@ public:
   //================= Bool Parameter ==================
   //! Getter for number of boolean parameter
   virtual const inline std::size_t GetNBool() const { return vBool_.size(); }
-  
+
   /**! A public function returning a string with parameter information
    * This function simply returns the member string out_, which contains
    * all parameter information. The string gets created using the outstream
@@ -679,22 +825,22 @@ public:
 protected:
   /// Vector of boolean parameters
   std::vector<std::shared_ptr<BoolParameter>> vBool_;
-  
+
   /// Vector of integer parameters
   std::vector<std::shared_ptr<IntegerParameter>> vInt_;
-  
+
   /// Vector of floating point parameters
   std::vector<std::shared_ptr<DoubleParameter>> vDouble_;
-  
+
   /// Vector of complex parameters
   std::vector<std::shared_ptr<ComplexParameter>> vComplex_;
-  
+
   /// Vector of floating point parameter lists
   std::vector<std::shared_ptr<MultiDouble>> vMultiDouble_;
-  
+
   /// Vector of complex parameter lists
   std::vector<std::shared_ptr<MultiComplex>> vMultiComplex_;
-  
+
   /// Vector of unsigned int parameter lists
   std::vector<std::shared_ptr<MultiUnsignedInteger>> vMultiUnsignedInteger_;
 
