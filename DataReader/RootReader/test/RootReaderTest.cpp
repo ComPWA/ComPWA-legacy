@@ -12,7 +12,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include "DataReader/RootReader/RootReader.hpp"
-#include "Tools/RunManager.hpp"
+#include "Tools/Generate.hpp"
 #include "Tools/RootGenerator.hpp"
 
 namespace ComPWA {
@@ -30,10 +30,11 @@ BOOST_AUTO_TEST_CASE(WriteReadCheck) {
   std::shared_ptr<ComPWA::DataReader::Data> sample(
       new ComPWA::DataReader::RootReader());
 
-  ComPWA::Tools::RunManager r;
-  r.SetGenerator(gen);
-  r.SetPhspSample(sample);
-  r.GeneratePhsp(200);
+  //ComPWA::Tools::RunManager r;
+  //r.SetGenerator(gen);
+  //r.SetPhspSample(sample);
+  //r.GeneratePhsp(200);
+  ComPWA::Tools::GeneratePhsp(200, gen, sample);
 
   sample->WriteData("RootReaderTest-output.root", "trtr");
 

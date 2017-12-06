@@ -7,6 +7,12 @@
 /// Collection of useful routines to modify ParameterLists
 ///
 
+#include <vector>
+#include <memory>
+#include <cassert>
+
+#include "Core/ParameterList.hpp"
+
 #ifndef ParameterTools_h
 #define ParameterTools_h
 
@@ -18,7 +24,7 @@
 inline std::string expand_user(std::string p) {
   std::string path = p;
   if (not path.empty() and path[0] == '~') {
-    assert(path.size() == 1 or path[1] == '/'); // or other error handling
+	  assert(path.size() == 1 or path[1] == '/'); // or other error handling
     char const *home = getenv("HOME");
     if (home || home == getenv("USERPROFILE")) {
       path.replace(0, 1, home);

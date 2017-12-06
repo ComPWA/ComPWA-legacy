@@ -15,6 +15,11 @@ import numpy as np
 
 import time
 
+from histogrammar.tutorial import cmsdata
+events = cmsdata.EventIterator()
+
+from histogrammar import *
+
 ############################# Configuration ##############
 
 amplitudeModel = '''
@@ -127,9 +132,9 @@ myParticles = '''
 
 ############################# Start Fit ##############
 
-print("     Create RunManager")
+###print("     Create RunManager")
 
-run = RunManager()
+###run = RunManager()
 
   
 print("     Create Particle List")
@@ -147,44 +152,48 @@ kin = HelicityKinematics(partL, GetInitialState(443), GetFinalState(22, 111, 111
 print("     Generate Phasespace")
 
 gen = RootGenerator(partL, kin)
-run.SetGenerator(gen)
+###run.SetGenerator(gen)
 phspSample = Data()
-run.SetPhspSample(phspSample);
-run.GeneratePhsp(100000)
+###run.SetPhspSample(phspSample)
+###run.GeneratePhsp(100000)
+GeneratePhsp(100000, gen, phspSample)
 
 
 print("     Create Amplitude")
 
 intens = GetIncoherentIntensity(amplitudeModel, partL, kin, phspSample)
-run.SetAmplitude(intens)
+###run.SetAmplitude(intens)
 
 
 print("     Generate Data")
 
 sample = Data()
-run.SetData(sample)
-run.Generate(kin, 1000)
+###run.SetData(sample)
+###run.Generate(kin, 1000)
+Generate(1000, kin, gen, intens, sample, phspSample, phspSample)
 
 
 print("     Fit model to data")
 
 fitPar = ParameterList()
 intens.GetParameters(fitPar)
-setErrorOnParameterList(fitPar, 0.05, False);
+setErrorOnParameterList(fitPar, 0.05, False)
+print(fitPar.ToString())
 
 esti = MinLogLH(kin, intens, sample, phspSample, phspSample, 0, 0)
 esti.UseFunctionTree(True)
 
 minuitif = MinuitIF(esti, fitPar)
 minuitif.SetHesse(True)
-run.SetOptimizer(minuitif)
+###run.SetOptimizer(minuitif)
 
-result = run.Fit(fitPar)
+###result = run.Fit(fitPar)
+result = minuitif.exec(fitPar)
 
-fitFracs = CalculateFitFractions(kin, intens, phspSample);
+fitFracs = CalculateFitFractions(kin, intens, phspSample)
 CalcFractionError(fitPar, result, fitFracs, intens, kin,
-                            phspSample, 100);
-result.SetFitFractions(fitFracs);  
+                            phspSample, 100)
+result.SetFitFractions(fitFracs)  
 
 result.Print()
 
@@ -194,27 +203,47 @@ print("     Save results")
 saveResults("PyDalitzFit-fitResult.xml", result)
 saveModel("PyDalitzFit-Model.xml", partL, fitPar, intens)
 
+print("     Get results")
+
+mydatapoints = DataPoints(sample, kin)
+mynumpydata = np.array(mydatapoints, copy = False)
 
 print("     Plot")
 
-resultPar = result.GetFinalParameters()
+#resultPar = result.GetFinalParameters()
 
-parPlotX = np.arange(0, resultPar.GetNParameter(), 1)
-parPlotY = result_values(result)
+parPlotX = np.arange(0, mynumpydata.shape[0], 1)
+parPlotY = mynumpydata[:,0]
 plt.plot(parPlotX, parPlotY)
 
-plt.xlabel('Parameter ID')
-plt.ylabel('Parameter Value')
-plt.title('Parameter after fit')
+plt.xlabel('Event ID')
+plt.ylabel('Event weight')
+plt.title('Event weights')
 plt.grid(True)
 plt.savefig("testPyPlot.png")
 plt.show()
 
-resultFile = ROOT.TFile("DalitzFit.root")
-invMassPlot = resultFile.Get("invmass")
-invMassPlot.Draw()
-wait()
+#rootpl = RootPlot(kin)
+#rootpl.SetData(sample)
+#rootpl.SetPhspSample(phspSample)
+#rootpl.SetFitAmp(intens)
+#rootpl.Write("PyTestFit", "PyRootPlot.root", "RECREATE")
+
+#resultFile = ROOT.TFile("DalitzFit.root")
+#invMassPlot = resultFile.Get("invmass")
+#invMassPlot.Draw()
+#wait()
 #time.sleep(60)
+
+#hist2d = Bin(10, -100, 100, lambda event: event.met.px,
+#             value = Bin(10, -100, 100, lambda event: event.met.py))
+
+#for i, event in enumerate(events):
+#    if i == 1000: break
+#    hist2d.fill(event)
+
+#roothist = hist2d.plot.root("name2", "title")
+#roothist.Draw("colz")
 
 exit()
  
