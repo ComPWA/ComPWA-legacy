@@ -9,9 +9,7 @@ from rootpy.interactive import wait
 import numpy as np
 import matplotlib.pyplot as plt
 
-from Dalitz_ext import *
-
-import numpy as np
+import PyComPWA as pwa
 
 import time
 
@@ -131,67 +129,54 @@ myParticles = '''
 '''
 
 ############################# Start Fit ##############
-
-###print("     Create RunManager")
-
-###run = RunManager()
-
   
 print("     Create Particle List")
 
-partL = PartList()
-ReadParticles(partL, GetDefaultParticles())
-ReadParticles(partL, myParticles)
+partL = pwa.PartList()
+pwa.ReadParticles(partL, pwa.GetDefaultParticles())
+pwa.ReadParticles(partL, myParticles)
 
 
 print("     Create Kinematics")
 
-kin = HelicityKinematics(partL, GetInitialState(443), GetFinalState(22, 111, 111))
+kin = pwa.HelicityKinematics(partL, pwa.GetInitialState(443), pwa.GetFinalState(22, 111, 111))
 
 
 print("     Generate Phasespace")
 
-gen = RootGenerator(partL, kin)
-###run.SetGenerator(gen)
-phspSample = Data()
-###run.SetPhspSample(phspSample)
-###run.GeneratePhsp(100000)
-GeneratePhsp(100000, gen, phspSample)
+gen = pwa.RootGenerator(partL, kin)
+phspSample = pwa.Data()
+pwa.GeneratePhsp(100000, gen, phspSample)
 
 
 print("     Create Amplitude")
 
-intens = GetIncoherentIntensity(amplitudeModel, partL, kin, phspSample)
-###run.SetAmplitude(intens)
+intens = pwa.GetIncoherentIntensity(amplitudeModel, partL, kin, phspSample)
 
 
 print("     Generate Data")
 
-sample = Data()
-###run.SetData(sample)
-###run.Generate(kin, 1000)
-Generate(1000, kin, gen, intens, sample, phspSample, phspSample)
+sample = pwa.Data()
+pwa.Generate(1000, kin, gen, intens, sample, phspSample, phspSample)
 
 
 print("     Fit model to data")
 
-fitPar = ParameterList()
+fitPar = pwa.ParameterList()
 intens.GetParameters(fitPar)
-setErrorOnParameterList(fitPar, 0.05, False)
+pwa.setErrorOnParameterList(fitPar, 0.05, False)
 print(fitPar.ToString())
 
-esti = MinLogLH(kin, intens, sample, phspSample, phspSample, 0, 0)
+esti = pwa.MinLogLH(kin, intens, sample, phspSample, phspSample, 0, 0)
 esti.UseFunctionTree(True)
 
-minuitif = MinuitIF(esti, fitPar)
+minuitif = pwa.MinuitIF(esti, fitPar)
 minuitif.SetHesse(True)
-###run.SetOptimizer(minuitif)
 
-###result = run.Fit(fitPar)
 result = minuitif.exec(fitPar)
 
-fitFracs = CalculateFitFractions(kin, intens, phspSample)
-CalcFractionError(fitPar, result, fitFracs, intens, kin,
+fitFracs = pwa.CalculateFitFractions(kin, intens, phspSample)
+pwa.CalcFractionError(fitPar, result, fitFracs, intens, kin,
                             phspSample, 100)
 result.SetFitFractions(fitFracs)  
 
@@ -200,12 +185,12 @@ result.Print()
 
 print("     Save results")
 
-saveResults("PyDalitzFit-fitResult.xml", result)
-saveModel("PyDalitzFit-Model.xml", partL, fitPar, intens)
+pwa.saveResults("PyDalitzFit-fitResult.xml", result)
+pwa.saveModel("PyDalitzFit-Model.xml", partL, fitPar, intens)
 
 print("     Get results")
 
-mydatapoints = DataPoints(sample, kin)
+mydatapoints = pwa.DataPoints(sample, kin)
 mynumpydata = np.array(mydatapoints, copy = False)
 
 print("     Plot")
@@ -223,7 +208,7 @@ plt.grid(True)
 plt.savefig("testPyPlot.png")
 plt.show()
 
-#rootpl = RootPlot(kin)
+#rootpl = pwa.RootPlot(kin)
 #rootpl.SetData(sample)
 #rootpl.SetPhspSample(phspSample)
 #rootpl.SetFitAmp(intens)
