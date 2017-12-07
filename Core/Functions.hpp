@@ -150,7 +150,7 @@ public:
       // fill MultiDouble parameter
       std::vector<double> results;
       results.reserve(nElements);
-      for (auto const &complex_element :
+      for (auto &complex_element :
            paras.GetMultiComplex(0)->GetValues()) {
         results.push_back(complex_element.real());
       }
