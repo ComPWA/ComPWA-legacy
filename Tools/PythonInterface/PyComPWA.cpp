@@ -242,8 +242,10 @@ PYBIND11_MODULE(PyComPWA, m)
 	  .def("SetParameterValue", (void (ComPWA::ParameterList::*) (const unsigned int, const double)) &ComPWA::ParameterList::SetParameterValue)
 	  .def("SetParameterValue", (void (ComPWA::ParameterList::*) (std::string, const double)) &ComPWA::ParameterList::SetParameterValue)
 	  .def("AddParameter", (void (ComPWA::ParameterList::*) (std::shared_ptr<ComPWA::DoubleParameter>)) &ComPWA::ParameterList::AddParameter)
-	  .def("GetDoubleParameter", py::overload_cast<const unsigned int>(&ComPWA::ParameterList::GetDoubleParameter, py::const_))
-	  .def("GetDoubleParameter", py::overload_cast<const std::string>(&ComPWA::ParameterList::GetDoubleParameter, py::const_))
+	  //.def("GetDoubleParameter", (std::shared_ptr<ComPWA::DoubleParameter> (ComPWA::ParameterList::*) (const unsigned int)) &ComPWA::ParameterList::GetDoubleParameter)
+	  //.def("GetDoubleParameter", (std::shared_ptr<ComPWA::DoubleParameter> (ComPWA::ParameterList::*) (std::string))  &ComPWA::ParameterList::GetDoubleParameter)
+	  //.def("GetDoubleParameter", py::overload_cast<const unsigned int>(&ComPWA::ParameterList::GetDoubleParameter, py::const_))
+	  //.def("GetDoubleParameter", py::overload_cast<const std::string>(&ComPWA::ParameterList::GetDoubleParameter, py::const_))
 	  .def("ToString", &ComPWA::ParameterList::to_str)
 	;
 
