@@ -55,7 +55,7 @@ void TreeNode::recalculate() {
     for (auto ch : _children) {
       ch->recalculate();
       for (auto p : ch->parameters()) {
-        newVals.AddParameter(p);
+        newVals.addParameter(p);
       }
     }
 
@@ -73,9 +73,9 @@ void TreeNode::recalculate() {
       for (auto ch : _children) {
         ch->recalculate();
         if (ch->dimension() == 1)
-          newVals.AddParameter(ch->parameter(0));
+          newVals.addParameter(ch->parameter(0));
         else if (ch->dimension() != _parameters.size())
-          newVals.AddParameter(ch->parameter(ele));
+          newVals.addParameter(ch->parameter(ele));
         else
           throw std::runtime_error("TreeNode::Recalculate() | Dimension of "
                                    "child nodes does not match");
@@ -107,7 +107,7 @@ void TreeNode::fillParameters(ComPWA::ParameterList &list) {
   }
   for (auto i : _parameters) {
     if (i->type() == ComPWA::ParType::DOUBLE)
-      list.AddParameter(i);
+      list.addParameter(i);
   }
 }
 

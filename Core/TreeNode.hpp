@@ -120,7 +120,7 @@ protected:
 
   std::string _name;
 
-  /// Node has changed and needs to call Recalculate()
+  /// Node has changed and needs to call recalculate()
   bool _changed;
 
   /// Node strategy. Strategy defines how the node value calculated given its
