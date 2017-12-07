@@ -68,6 +68,7 @@ find_package( Boost COMPONENTS
 # The python interface is still work in progress, so we disable python by
 # default.
 if (NOT "${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
+  set(CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} -std=c++1y")
   #find_package(PythonLibs 2.7 EXACT)
   #INCLUDE_DIRECTORIES(${PYTHON_INCLUDE_PATH})
   #LINK_DIRECTORIES(${PYTHON_LIBRARIES})
