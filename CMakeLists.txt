@@ -8,7 +8,6 @@ set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/"
 
 set (CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
 
 #
 # ComPWA
@@ -68,6 +67,7 @@ find_package( Boost COMPONENTS
 # The python interface is still work in progress, so we disable python by
 # default.
 if (NOT "${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
+  set(CMAKE_CXX_EXTENSIONS OFF)
   #find_package(PythonLibs 2.7 EXACT)
   #INCLUDE_DIRECTORIES(${PYTHON_INCLUDE_PATH})
   #LINK_DIRECTORIES(${PYTHON_LIBRARIES})
