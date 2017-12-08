@@ -6,8 +6,17 @@ cmake_minimum_required (VERSION 3.0)
 set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 
 
-set (CMAKE_CXX_STANDARD 14)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
+if (NOT "${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
+  set (CMAKE_CXX_STANDARD 14)
+  set(CMAKE_CXX_STANDARD_REQUIRED ON)
+  set(CMAKE_CXX_EXTENSIONS OFF)
+endif()
+
+# Workaround for clang+ c++14/pybind11
+if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
+  set (CMAKE_CXX_STANDARD 11)
+#  set(CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} -std=c++1y")
+endif()
 
 #
 # ComPWA
@@ -67,7 +76,6 @@ find_package( Boost COMPONENTS
 # The python interface is still work in progress, so we disable python by
 # default.
 if (NOT "${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
-  set(CMAKE_CXX_EXTENSIONS OFF)
   #find_package(PythonLibs 2.7 EXACT)
   #INCLUDE_DIRECTORIES(${PYTHON_INCLUDE_PATH})
   #LINK_DIRECTORIES(${PYTHON_LIBRARIES})
@@ -75,11 +83,6 @@ if (NOT "${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
   #             python
   #             REQUIRED
   #)
-endif()
-
-# Workaround for clang+ c++14/pybind11
-if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
-  set(CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} -std=c++1y")
 endif()
 
 # Use dynamic libraries for log, test and serialization
