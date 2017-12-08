@@ -152,7 +152,7 @@ public:
       results.reserve(nElements);
       for (auto &complex_element :
            paras.GetMultiComplex(0)->GetValues()) {
-        double re = complex_element.real();
+        double re = ((MultiComplex)complex_element).real();
         results.push_back(re);
       }
 
