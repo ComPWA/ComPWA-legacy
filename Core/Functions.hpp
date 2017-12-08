@@ -152,7 +152,8 @@ public:
       results.reserve(nElements);
       for (auto &complex_element :
            paras.GetMultiComplex(0)->GetValues()) {
-        results.push_back(complex_element.real());
+        double re = complex_element.real();
+        results.push_back(re);
       }
 
       out = std::shared_ptr<AbsParameter>(
