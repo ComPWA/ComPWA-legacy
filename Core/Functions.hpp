@@ -150,7 +150,7 @@ public:
       // fill MultiDouble parameter
       std::vector<double> results;
       results.reserve(nElements);
-      for (auto &complex_element :
+      for (auto complex_element :
            paras.GetMultiComplex(0)->GetValues()) {
         double re = ((std::complex<double>)complex_element).real();
         results.push_back(re);
@@ -224,13 +224,13 @@ public:
         return false;
       }
 
-      for (auto const &multi_complex : paras.GetMultiComplexs()) {
+      for (auto multi_complex : paras.GetMultiComplexs()) {
         unsigned int nElements = multi_complex->GetNValues();
         // fill MultiDouble parameter
         std::vector<std::complex<double>> results;
         results.reserve(nElements);
         for (unsigned int ele = 0; ele < nElements; ele++) {
-          const std::complex<double> compele = multi_complex->GetValue(ele);
+          std::complex<double> compele = multi_complex->GetValue(ele);
           results.push_back(std::conj(compele));
         }
         out = std::shared_ptr<AbsParameter>(
