@@ -35,9 +35,8 @@ void ParameterList::addParameter(std::shared_ptr<Parameter> par) {
   }
 }
 std::size_t ParameterList::numValues() const {
-  return BoolValues.size() + IntValues.size() + DoubleValues.size() +
-         ComplexValues.size() + MultiBoolValues.size() + MultiIntValues.size() +
-         MultiUnsignedIntValues.size() + MultiDoubleValues.size() +
+  return IntValues.size() + DoubleValues.size() + ComplexValues.size() +
+         MultiIntValues.size() + MultiDoubleValues.size() +
          MultiComplexValues.size();
 }
 void ParameterList::addValues(std::vector<std::shared_ptr<Parameter>> values) {
@@ -47,10 +46,6 @@ void ParameterList::addValues(std::vector<std::shared_ptr<Parameter>> values) {
 
 void ParameterList::addValue(std::shared_ptr<Parameter> par) {
   switch (par->type()) {
-  case ParType::BOOL: {
-    BoolValues.push_back(std::dynamic_pointer_cast<ComPWA::Value<bool>>(par));
-    break;
-  }
   case ParType::INTEGER: {
     IntValues.push_back(std::dynamic_pointer_cast<ComPWA::Value<int>>(par));
     break;
@@ -65,20 +60,9 @@ void ParameterList::addValue(std::shared_ptr<Parameter> par) {
         std::dynamic_pointer_cast<ComPWA::Value<std::complex<double>>>(par));
     break;
   }
-  case ParType::MBOOL: {
-    MultiBoolValues.push_back(
-        std::dynamic_pointer_cast<ComPWA::Value<std::vector<bool>>>(par));
-    break;
-  }
   case ParType::MINTEGER: {
     MultiIntValues.push_back(
         std::dynamic_pointer_cast<ComPWA::Value<std::vector<int>>>(par));
-    break;
-  }
-  case ParType::MUNSIGNEDINTEGER: {
-    MultiUnsignedIntValues.push_back(
-        std::dynamic_pointer_cast<ComPWA::Value<std::vector<unsigned int>>>(
-            par));
     break;
   }
   case ParType::MDOUBLE: {

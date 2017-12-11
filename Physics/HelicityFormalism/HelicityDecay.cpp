@@ -181,7 +181,7 @@ HelicityDecay::tree(std::shared_ptr<Kinematics> kin,
                  "SqrtIntegral");
   tr->createLeaf("PhspVolume", phspVolume_, "Integral");
   tr->createLeaf("InverseSampleSize", 1 / ((double)phspSampleSize), "Integral");
-  tr->createNode("Sum", std::shared_ptr<Strategy>(new AddAll(ParType::DOUBLE)),
+  tr->createNode("Sum", std::make_shared<AddAll>(ParType::DOUBLE),
                  "Integral");
   tr->createNode("Intensity",
                  std::shared_ptr<Strategy>(new AbsSquare(ParType::MDOUBLE)),

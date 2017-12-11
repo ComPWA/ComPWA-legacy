@@ -31,32 +31,41 @@ namespace ComPWA {
 ///
 class FunctionTree {
 public:
-  FunctionTree(){};
+  //  FunctionTree(){};
 
   /// Create FunctionTree with head node.
-  FunctionTree(const std::string &name,
-               std::shared_ptr<ComPWA::Strategy> strategy,
-               unsigned int dimension = 1, bool useVec = false);
-  
+  FunctionTree(std::string name, std::shared_ptr<ComPWA::Parameter> parameter,
+               std::shared_ptr<ComPWA::Strategy> strategy);
+
+  /// Create FunctionTree with head leaf.
+  FunctionTree(std::string name, std::shared_ptr<ComPWA::Parameter> parameter);
+
+  /// Create FunctionTree with head leaf.
+  FunctionTree(std::string name, double value);
+
+  /// Create FunctionTree with head leaf.
+  FunctionTree(std::string name, std::complex<double> value);
+
   /// Constructor with the top node provided.
   /// \p head is used as FunctionTree's head node
   FunctionTree(std::shared_ptr<ComPWA::TreeNode> head);
 
   virtual ~FunctionTree();
 
-  /// Create head node of FunctionTree. Add top node to the function tree.
-  virtual void createHead(const std::string &name,
-                          std::shared_ptr<ComPWA::Strategy> strategy,
-                          unsigned int dimension = 1, bool useVec = false);
-
-  /// Create head node of FunctionTree. Constant parameter! We use this to
-  /// generate an empty tree.
-  virtual void createHead(const std::string &name, const double value);
-
-  /// Create head node of FunctionTree. A tree with a single parameter as leaf
-  /// is created. This FunctionTree represents a constant value.
-  virtual void createHead(const std::string &name,
-                          std::shared_ptr<ComPWA::Parameter> parameter);
+//  /// Create head node of FunctionTree. Add top node to the function tree.
+//  virtual void createHead(std::string name,
+//                          std::shared_ptr<ComPWA::Parameter> parameter,
+//                          std::shared_ptr<ComPWA::Strategy> strategy);
+//
+//
+//  /// Create head node of FunctionTree. A tree with a single parameter as leaf
+//  /// is created. This FunctionTree represents a constant value.
+//  virtual void createHead(std::string name,
+//                          std::shared_ptr<ComPWA::Parameter> parameter);
+//
+//  /// Create head node of FunctionTree. Constant parameter! We use this to
+//  /// generate an empty tree.
+//  virtual void createHead(std::string name, double value);
 
   /// Add an existing node to FunctionTree. Can be used to link tree's to each
   /// other: simply insert head node of tree A to tree B
@@ -73,44 +82,41 @@ public:
   /// insertNode(std::shared_ptr<ComPWA::TreeNode> inNode, std::string parent)!
   virtual void addNode(std::shared_ptr<ComPWA::TreeNode> node);
 
-  /// Create and add a node to the function tree.
-  /// Adds Top-Down-Linking to the node
-  /// \param name identifier of node
-  /// \param strat Strategy with which the node calculates its value
-  /// \param parent the parent of this node (for linking)
-  /// \param dim dimension of the head node
-  /// \param useVec true if value is a vector
-  virtual void createNode(const std::string &name,
+  /// Create and add a node to the function tree. Adds Top-Down-Linking to the
+  /// node. For this node the caching is disabled.
+  virtual void createNode(std::string name,
                           std::shared_ptr<ComPWA::Strategy> strategy,
-                          std::string parent, unsigned int dimension = 1,
-                          bool useVec = false);
+                          std::string parent);
+
+  /// Create and add a node to the function tree. Adds Top-Down-Linking to the
+  /// node.
+  virtual void createNode(std::string name,
+                          std::shared_ptr<ComPWA::Parameter> parameter,
+                          std::shared_ptr<ComPWA::Strategy> strategy,
+                          std::string parent);
 
   /// Create a leaf in FunctionTree. If leaf does not exist it is created and
   /// the corresponding linking is added. If it already exists a link to the
   /// existing element is added to \p parent.
-  virtual void createLeaf(const std::string name,
+  virtual void createLeaf(std::string name,
                           std::shared_ptr<ComPWA::Parameter> parameter,
                           std::string parent);
 
   /// Create a leaf in FunctionTree. A DoubleParamter is created and added.
-  virtual void createLeaf(const std::string name, const double value,
+  virtual void createLeaf(std::string name, double value,
                           std::string parent);
 
   /// Create a leaf in FunctionTree. A ComplexParameter is created and added.
-  virtual void createLeaf(const std::string name,
-                          const std::complex<double> value, std::string parent);
-
-  /// Add multiple leafs in FunctionTree.
-  virtual void
-  createLeaf(const std::string name,
-             std::vector<std::shared_ptr<ComPWA::Parameter>> &parameter,
-             std::string parent);
+  virtual void createLeaf(std::string name, std::complex<double> value,
+                          std::string parent);
 
   /// Get the head of FunctionTree
-  virtual const std::shared_ptr<ComPWA::TreeNode> head() const { return _head; }
+  virtual std::shared_ptr<ComPWA::TreeNode> head() const { return Head; }
 
   /// Recalculate those parts of the tree that have been changed.
-  virtual void recalculate() { _head->recalculate(); }
+  virtual std::shared_ptr<ComPWA::Parameter> parameter() {
+    return Head->parameter();
+  }
 
   /// Check if FunctionTree is properly linked and some further checks.
   virtual bool sanityCheck();
@@ -134,7 +140,7 @@ public:
   /// Print structure of tree and its values.
   /// Print down to \p level, level = -1 print the whole tree
   virtual std::string print(unsigned int level = -1) {
-    return _head->print(level);
+    return Head->print(level);
   };
 
 protected:
@@ -142,14 +148,14 @@ protected:
   // We need to store the childTreee that were added via insertTree() here.
   // Because otherwise the
   // destructor of these tree's would delete the linking of the tree nodes.
-  std::vector<std::shared_ptr<ComPWA::FunctionTree>> _childTrees;
+  std::vector<std::shared_ptr<ComPWA::FunctionTree>> ChildTrees;
 
   // Head node storing the absolute result
-  std::shared_ptr<ComPWA::TreeNode> _head;
+  std::shared_ptr<ComPWA::TreeNode> Head;
 
   // Store the TreeNodes is std::map. TreeNodes of childTrees in \p _childTrees
   // are not included here
-  std::map<std::string, std::shared_ptr<ComPWA::TreeNode>> _nodes;
+  std::map<std::string, std::shared_ptr<ComPWA::TreeNode>> Nodes;
 
   /// Recursive function to get all used NodeNames
   void GetNamesDownward(std::shared_ptr<ComPWA::TreeNode> start,
@@ -165,4 +171,3 @@ protected:
 
 } // namespace ComPWA
 #endif
-

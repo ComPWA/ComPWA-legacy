@@ -15,215 +15,175 @@ TreeNode::TreeNode(std::string name,
                    std::shared_ptr<ComPWA::Parameter> parameter,
                    std::shared_ptr<Strategy> strategy,
                    std::shared_ptr<TreeNode> parent)
-    : _name(name), _changed(true), _strat(strategy) {
-  _parameters.push_back(parameter);
+    : Name(name), Parameter(parameter), HasChanged(true), UseCache(true),
+      Strat(strategy) {
+  if (!parameter)
+    UseCache = false;
+  if (!parameter && !strategy)
+    throw std::runtime_error(
+        "TreeNode::TreeNode() | Neither strategy nor parameter given!");
+
   if (parent) {
-    _parents.push_back(parent);
+    Parents.push_back(parent);
   }
 }
 
-TreeNode::TreeNode(std::string name,
-                   std::vector<std::shared_ptr<ComPWA::Parameter>> &parameters,
-                   std::shared_ptr<Strategy> strategy,
+TreeNode::TreeNode(std::string name, std::shared_ptr<Strategy> strategy,
                    std::shared_ptr<TreeNode> parent)
-    : _name(name), _changed(true), _strat(strategy) {
-  for (unsigned int i = 0; i < parameters.size(); i++) {
-    _parameters.push_back(parameters.at(i));
-  }
+    : Name(name), Parameter(std::shared_ptr<ComPWA::Parameter>()),
+      HasChanged(true), UseCache(false), Strat(strategy) {
+
+  if (!strategy)
+    throw std::runtime_error(
+        "TreeNode::TreeNode() | Neither strategy nor parameter given!");
+
   if (parent) {
-    _parents.push_back(parent);
+    Parents.push_back(parent);
   }
 }
 
 TreeNode::~TreeNode() {}
 
 void TreeNode::update() {
-  for (unsigned int i = 0; i < _parents.size(); i++)
-    _parents.at(i)->update();
-  _changed = true;
+  for (unsigned int i = 0; i < Parents.size(); i++)
+    Parents.at(i)->update();
+  HasChanged = true;
 };
 
-void TreeNode::recalculate() {
+std::shared_ptr<ComPWA::Parameter> TreeNode::parameter() {
+  if (UseCache && !Parameter)
+    throw std::runtime_error("TreeNode::parameter() | Caching is requested but "
+                             "Parameter is not initialized!");
 
-  if (_children.size() < 1) {
-    _changed = false;
-    return;
-  }
+  if (!UseCache && !ChildNodes.size())
+    throw std::runtime_error("TreeNode::parameter() | Caching is disabled but "
+                             "Node is a lead node!");
 
-  if (_parameters.size() == 1) { // Single dimension
-    ParameterList newVals;
-    for (auto ch : _children) {
-      ch->recalculate();
-      for (auto p : ch->parameters()) {
-        newVals.addParameter(p);
-      }
-    }
+  // has been changed or is lead node -> return Parameter
+  if (Parameter && (!HasChanged || !ChildNodes.size()))
+    return Parameter;
 
-    try {
-      _strat->execute(newVals, _parameters.at(0));
-    } catch (std::exception &ex) {
-      LOG(error) << "TreeNode::Recalculate() | Strategy " << _strat
-                 << " failed on node " << name() << ": " << ex.what();
-      throw;
-    }
-  } else { // Multi dimensions
-    for (unsigned int ele = 0; ele < _parameters.size(); ele++) {
-      ParameterList newVals;
+  auto result = recalculate();
+  HasChanged = false;
 
-      for (auto ch : _children) {
-        ch->recalculate();
-        if (ch->dimension() == 1)
-          newVals.addParameter(ch->parameter(0));
-        else if (ch->dimension() != _parameters.size())
-          newVals.addParameter(ch->parameter(ele));
-        else
-          throw std::runtime_error("TreeNode::Recalculate() | Dimension of "
-                                   "child nodes does not match");
-      }
+  return result;
+}
 
-      try {
-        _strat->execute(newVals, _parameters.at(ele));
+std::shared_ptr<ComPWA::Parameter> TreeNode::recalculate() const {
+  // has been changed or is lead node -> return Parameter
+  if (Parameter && (!HasChanged || !ChildNodes.size()))
+    return Parameter;
+  
+  std::shared_ptr<ComPWA::Parameter> result;
+  if (Parameter)
+    result = Parameter;
+
+  ParameterList newVals;
+  for (auto ch : ChildNodes)
+    if (ch->childNodes().size()) // in case child is not a leaf node its value
+                                 // is not a parameter and we can add it using
+                                 // addValue
+      newVals.addValue(ch->parameter());
+    else {
+      try { // in case that the child is a leaf node we need to figure out if
+            // parameter is a DoubleParameter or a Value<T>
+        newVals.addParameter(
+            std::dynamic_pointer_cast<DoubleParameter>(ch->parameter()));
       } catch (std::exception &ex) {
-        LOG(error) << "TreeNode::recalculate() | Strategy " << _strat
-                   << " failed on node " << name() << ": " << ex.what();
-        throw;
+        newVals.addValue(ch->parameter());
       }
     }
+  try {
+    Strat->execute(newVals, result);
+  } catch (std::exception &ex) {
+    LOG(error) << "TreeNode::Recalculate() | Strategy " << Strat
+               << " failed on node " << name() << ": " << ex.what();
+    throw;
   }
-  _changed = false;
-}
 
-std::shared_ptr<Parameter> TreeNode::parameter(unsigned int position) {
-  return _parameters.at(position);
-}
-
-std::vector<std::shared_ptr<Parameter>> &TreeNode::parameters() {
-  return _parameters;
+  return result;
 }
 
 void TreeNode::fillParameters(ComPWA::ParameterList &list) {
-  for (auto ch : _children) {
+  for (auto ch : ChildNodes) {
     ch->fillParameters(list);
   }
-  for (auto i : _parameters) {
-    if (i->type() == ComPWA::ParType::DOUBLE)
-      list.addParameter(i);
-  }
+  list.addParameter(parameter());
 }
 
 std::shared_ptr<TreeNode> TreeNode::findChildNode(std::string name) const {
   std::shared_ptr<TreeNode> node;
-  if (!_children.size())
+  if (!ChildNodes.size())
     node = std::shared_ptr<TreeNode>();
-  for (unsigned int i = 0; i < _children.size(); i++) {
-    if (_children.at(i)->name() == name) {
-      return _children.at(i);
+  for (unsigned int i = 0; i < ChildNodes.size(); i++) {
+    if (ChildNodes.at(i)->name() == name) {
+      return ChildNodes.at(i);
     } else
-      node = _children.at(i)->findChildNode(name);
+      node = ChildNodes.at(i)->findChildNode(name);
     if (node)
       return node;
   }
   return node;
 }
 
-// std::shared_ptr<Parameter> TreeNode::ChildValue(std::string name) const {
-//  std::shared_ptr<TreeNode> node = FindChildNode(name);
-//  if (node)
-//    return node->Parameter();
-//
-//  return std::shared_ptr<Parameter>();
-//}
-//
-// std::complex<double> TreeNode::getChildSingleValue(std::string name) const {
-//  std::shared_ptr<TreeNode> node = std::shared_ptr<TreeNode>();
-//  node = FindChildNode(name);
-//  if (node) {
-//    std::shared_ptr<Parameter> val = node->Parameter();
-//    if (val->type() == ParType::DOUBLE)
-//      return std::complex<double>(
-//          (std::dynamic_pointer_cast<DoubleParameter>(val))->value(), 0);
-//    if (val->type() == ParType::COMPLEX)
-//      return std::complex<double>(
-//          (std::dynamic_pointer_cast<ComplexParameter>(val))->value());
-//    if (val->type() == ParType::INTEGER)
-//      return std::complex<double>(
-//          (std::dynamic_pointer_cast<IntegerParameter>(val))->value(), 0);
-//    if (val->type() == ParType::BOOL)
-//      return std::complex<double>(
-//          (std::dynamic_pointer_cast<BoolParameter>(val))->value(), 0);
-//    if (val->type() == ParType::MDOUBLE)
-//      return std::complex<double>(
-//          (std::dynamic_pointer_cast<MultiDouble>(val))->GetValue(0), 0);
-//    if (val->type() == ParType::MCOMPLEX)
-//      return std::complex<double>(
-//          (std::dynamic_pointer_cast<MultiComplex>(val))->GetValue(0));
-//  }
-//  return std::complex<double>(-999, 0);
-//}
-
 std::string TreeNode::print(int level, std::string prefix) const {
   std::stringstream oss;
-  if (_changed && _children.size()) {
-    oss << prefix << _name << " = ?";
+  if (HasChanged && ChildNodes.size()) {
+    oss << prefix << Name << " = ?";
   } else {
-    oss << prefix << _name;
-    auto it = _parameters.begin();
-    for (; it != _parameters.end(); ++it) {
-      if (!_children.size()) // print parameter name for leafs
-        oss << " [" << (*it)->name() << "]";
-      oss << " = " << (*it)->val_to_str();
-      if (it != _parameters.end())
-        oss << ", ";
-    }
+    oss << prefix << Name;
+    auto p = recalculate();
+    if (!ChildNodes.size()) // print parameter name for leafs
+      oss << " [" << p->name() << "]";
+    oss << " = " << p->val_to_str();
   }
 
-  if (_children.size())
-    oss << " (" << _children.size() << " children/" << _parameters.size()
+  if (ChildNodes.size())
+    oss << " (" << ChildNodes.size() << " children/"
         << " values)" << std::endl;
   else
     oss << std::endl;
 
   if (level == 0)
     return oss.str();
-  for (unsigned int i = 0; i < _children.size(); i++) {
-    oss << _children.at(i)->print(level - 1, prefix + ". ");
+  for (unsigned int i = 0; i < ChildNodes.size(); i++) {
+    oss << ChildNodes.at(i)->print(level - 1, prefix + ". ");
   }
   return oss.str();
 }
 
 void TreeNode::addChild(std::shared_ptr<TreeNode> childNode) {
-  _children.push_back(childNode);
+  ChildNodes.push_back(childNode);
 }
 
 void TreeNode::addParent(std::shared_ptr<TreeNode> parentNode) {
-  _parents.push_back(parentNode);
-  parentNode->_children.push_back(shared_from_this());
+  Parents.push_back(parentNode);
+  parentNode->ChildNodes.push_back(shared_from_this());
 }
 
 void TreeNode::fillParentNames(std::vector<std::string> &names) const {
-  for (auto i : _parents) {
+  for (auto i : Parents) {
     names.push_back(i->name());
   }
 }
 
 void TreeNode::linkParents() {
-  for (unsigned int i = 0; i < _parents.size(); i++)
-    _parents.at(i)->_children.push_back(shared_from_this());
+  for (auto p : Parents)
+    p->ChildNodes.push_back(shared_from_this());
 }
 
 void TreeNode::deleteLinks() {
-  _children.clear();
-  _parents.clear();
-  for (unsigned int i = 0; i < _parameters.size(); i++) {
-    _parameters.at(i)->Detach(shared_from_this());
-  }
+  ChildNodes.clear();
+  Parents.clear();
+  if (Parameter)
+    this->parameter()->Detach(shared_from_this());
 }
 
 std::vector<std::shared_ptr<TreeNode>> &TreeNode::childNodes() {
-  return _children;
+  return ChildNodes;
 }
 
 void TreeNode::fillChildNames(std::vector<std::string> &names) const {
-  for (unsigned int i = 0; i < _children.size(); i++)
-    names.push_back(_children.at(i)->name());
+  for (auto ch : ChildNodes)
+    names.push_back(ch->name());
 }

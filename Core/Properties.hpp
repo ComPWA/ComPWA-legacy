@@ -252,7 +252,7 @@ inline void UpdateParticleList(std::shared_ptr<PartList> &partL,
   boost::property_tree::ptree partTr;
   partTr.add_child("ParticleList", SaveParticles(partL));
   // Loop over (double) parameters
-  for (auto i : pars.GetDoubleParameters()) {
+  for (auto i : pars.doubleParameters()) {
     auto name = i->name();
     // Some default values may not have a name. We skip those.
     if (name == "")
@@ -268,6 +268,6 @@ inline void UpdateParticleList(std::shared_ptr<PartList> &partL,
   return;
 }
 
-} // Namespace ComPWA
+} // ns::ComPWA
 
 #endif

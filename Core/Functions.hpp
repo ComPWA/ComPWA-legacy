@@ -38,7 +38,7 @@ public:
   virtual const ParType OutType() const { return checkType; }
 
   /// Strategy execution
-  virtual bool execute(ParameterList &paras,
+  virtual void execute(ParameterList &paras,
                        std::shared_ptr<Parameter> &out) = 0;
 
   std::string str() const { return Op; }
@@ -67,7 +67,7 @@ public:
 
   virtual ~Inverse(){};
 
-  virtual bool execute(ParameterList &paras, std::shared_ptr<Parameter> &out);
+  virtual void execute(ParameterList &paras, std::shared_ptr<Parameter> &out);
 };
 
 ///
@@ -81,7 +81,7 @@ public:
 
   virtual ~SquareRoot() {}
 
-  virtual bool execute(ParameterList &paras, std::shared_ptr<Parameter> &out);
+  virtual void execute(ParameterList &paras, std::shared_ptr<Parameter> &out);
 };
 
 ///
@@ -102,7 +102,7 @@ public:
 ///     element and the previous result from the single values is added to
 ///     each element.
 ///   - ParType::MDOUBLE: same ad MCOMPLEX except that complex 
-  virtual bool execute(ParameterList &paras, std::shared_ptr<Parameter> &out);
+  virtual void execute(ParameterList &paras, std::shared_ptr<Parameter> &out);
 };
 
 class MultAll : public Strategy {
@@ -111,7 +111,7 @@ public:
 
   virtual ~MultAll() {}
 
-  virtual bool execute(ParameterList &paras, std::shared_ptr<Parameter> &out);
+  virtual void execute(ParameterList &paras, std::shared_ptr<Parameter> &out);
 };
 
 class LogOf : public Strategy {
@@ -120,7 +120,7 @@ public:
 
   virtual ~LogOf(){};
 
-  virtual bool execute(ParameterList &paras, std::shared_ptr<Parameter> &out);
+  virtual void execute(ParameterList &paras, std::shared_ptr<Parameter> &out);
 };
 
 class Complexify : public Strategy {
@@ -129,7 +129,7 @@ public:
 
   virtual ~Complexify() {}
 
-  virtual bool execute(ParameterList &paras, std::shared_ptr<Parameter> &out);
+  virtual void execute(ParameterList &paras, std::shared_ptr<Parameter> &out);
 };
 
 class ComplexConjugate : public Strategy {
@@ -138,7 +138,7 @@ public:
 
   virtual ~ComplexConjugate() {}
   
-  virtual bool execute(ParameterList &paras, std::shared_ptr<Parameter> &out);
+  virtual void execute(ParameterList &paras, std::shared_ptr<Parameter> &out);
 };
 
 class AbsSquare : public Strategy {
@@ -147,16 +147,7 @@ public:
 
   virtual ~AbsSquare() {}
 
-  virtual bool execute(ParameterList &paras, std::shared_ptr<Parameter> &out);
-};
-
-class Power : public Strategy {
-public:
-  Power(ParType in) : Strategy(in, "PowerTo"){};
-
-  virtual ~Power() {}
-
-  virtual bool execute(ParameterList &paras, std::shared_ptr<Parameter> &out);
+  virtual void execute(ParameterList &paras, std::shared_ptr<Parameter> &out);
 };
 
 } // ns::ComPWA

@@ -134,7 +134,7 @@ public:
     return ("relativistic BreitWigner of " + name);
   }
 
-  virtual bool execute(ComPWA::ParameterList &paras,
+  virtual void execute(ComPWA::ParameterList &paras,
                        std::shared_ptr<ComPWA::Parameter> &out);
 
 protected:

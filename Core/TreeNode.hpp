@@ -42,40 +42,35 @@ public:
            std::shared_ptr<ComPWA::Strategy> strategy,
            std::shared_ptr<ComPWA::TreeNode> parent);
 
-  /// Constructor for multidimensional TreeNode using a \p name, a vector of
-  /// \p parameters, a \p strategy and an identifier for the parent node.
-  TreeNode(std::string name,
-           std::vector<std::shared_ptr<ComPWA::Parameter>> &parameters,
-           std::shared_ptr<ComPWA::Strategy> strategy,
+  /// Constructor for tree using a \p name, a \p strategy and
+  /// an identifier for the parent node. Since no parameter is passed the
+  /// values of this node are not cached and are recalculated every time
+  /// parameter() is called.
+  TreeNode(std::string name, std::shared_ptr<ComPWA::Strategy> strategy,
            std::shared_ptr<ComPWA::TreeNode> parent);
 
   virtual ~TreeNode();
 
-  /// Check if recalculation is needed (obsolete)
-  virtual bool isModified() const { return _changed; };
+  virtual std::string name() const { return Name; };
 
-  /// Flags the node as modified. Should only be called from its child nodes.
-  virtual void update();
+  virtual void setName(std::string name) { Name = name; };
 
-  /// Recalculate node and all of its child nodes
-  virtual void recalculate();
+  /// Shall we store the node value or recalculate it every time parameter() is
+  /// called?. The default is to use the cache but is could be beneficial to
+  /// switch it of in case that memory is short.
+  virtual void useCache(bool c) { UseCache = c; }
 
-  /// Get child parameter at \p position
-  virtual std::shared_ptr<ComPWA::Parameter> parameter(unsigned int position);
-
-  /// Get list of child parameters
-  virtual std::vector<std::shared_ptr<ComPWA::Parameter>> &parameters();
+  /// Obtain parameter of node. In case child nodes have changed, child nodes
+  /// are recalculated and Parameter is updated
+  virtual std::shared_ptr<ComPWA::Parameter> parameter();
 
   /// Fill ParameterList with parameters. The function is intended to be filled
   /// with fit parameters, so we add only DoubleParameters.
   virtual void fillParameters(ComPWA::ParameterList &list);
 
-  /// Dimension of node (= number of parameters)
-  virtual std::size_t dimension() const { return _parameters.size(); };
 
-  virtual std::string name() const { return _name; };
-
-  virtual void setName(std::string name) { _name = name; };
+  /// Flags the node as modified. Should only be called from its child nodes.
+  virtual void update();
 
   /// Add link to children list. This function is intended to be used in
   /// debugging and testing.
@@ -109,23 +104,26 @@ public:
   virtual std::string print(int level = -1, std::string prefix = "") const;
 
 protected:
+  std::string Name;
+  
   /// List of parent nodes
-  std::vector<std::shared_ptr<ComPWA::TreeNode>> _parents;
+  std::vector<std::shared_ptr<ComPWA::TreeNode>> Parents;
 
   //// List of child nodes
-  std::vector<std::shared_ptr<ComPWA::TreeNode>> _children;
+  std::vector<std::shared_ptr<ComPWA::TreeNode>> ChildNodes;
 
-  /// List of child leafes
-  std::vector<std::shared_ptr<ComPWA::Parameter>> _parameters;
-
-  std::string _name;
+  /// (cached) node value
+  std::shared_ptr<ComPWA::Parameter> Parameter;
 
   /// Node has changed and needs to call recalculate()
-  bool _changed;
+  bool HasChanged;
+
+  /// Node has changed and needs to call recalculate()
+  bool UseCache;
 
   /// Node strategy. Strategy defines how the node value calculated given its
   /// child nodes and child leafs.
-  std::shared_ptr<ComPWA::Strategy> _strat;
+  std::shared_ptr<ComPWA::Strategy> Strat;
 
   /// Add this node to parents children-list
   virtual void linkParents();
@@ -138,6 +136,10 @@ protected:
 
   /// Fill list with names of children nodes
   virtual void fillChildNames(std::vector<std::string> &names) const;
+  
+    /// Obtain parameter of node. In case child nodes have changed, child nodes
+  /// are recalculated and Parameter is updated
+  virtual std::shared_ptr<ComPWA::Parameter> recalculate() const;
 };
 
 } // ns::ComPWA

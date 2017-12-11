@@ -32,49 +32,36 @@ enum ParType {
   COMPLEX = 1,
   DOUBLE = 2,
   INTEGER = 3,
-  BOOL = 4,
-  MDOUBLE = 5,
   MCOMPLEX = 6,
-  MUNSIGNEDINTEGER = 7,
+  MDOUBLE = 5,
   MINTEGER = 8,
-  MBOOL = 9,
   UNDEFINED = 0
 };
 
 /// Names of the parameter types, should be extended if an new parameter type is
 /// added
-static const char *ParNames[10] = {
-    "UNDEFINED", "COMPLEX",  "DOUBLE",           "INTEGER",  "BOOL",
-    "MDOUBLE",   "MCOMPLEX", "MUNSIGNEDINTEGER", "MINTEGER", "MBOOL"};
+static const char *ParNames[10] = {"UNDEFINED", "COMPLEX", "DOUBLE",  "INTEGER",
+                                   "MCOMPLEX",  "MDOUBLE", "MINTEGER"};
 
 /// Template functions which return above specified parameter types
 template <typename T> inline ParType typeName(void) {
   return ParType::UNDEFINED;
 }
-template <> inline ParType typeName<std::complex<double>>(void) {
-  return ParType::COMPLEX;
-}
-template <> inline ParType typeName<int>(void) {
-  return ParType::INTEGER;
-}
-template <> inline ParType typeName<bool>(void) {
-  return ParType::BOOL;
+
+template <> inline ParType typeName<std::vector<std::complex<double>>>(void) {
+  return ParType::MCOMPLEX;
 }
 template <> inline ParType typeName<std::vector<double>>(void) {
   return ParType::MDOUBLE;
 }
-template <> inline ParType typeName<std::vector<std::complex<double>>>(void) {
-  return ParType::MCOMPLEX;
-}
-template <> inline ParType typeName<std::vector<unsigned int>>(void) {
-  return ParType::MUNSIGNEDINTEGER;
-}
 template <> inline ParType typeName<std::vector<int>>(void) {
   return ParType::MINTEGER;
 }
-template <> inline ParType typeName<std::vector<bool>>(void) {
-  return ParType::MBOOL;
+template <> inline ParType typeName<std::complex<double>>(void) {
+  return ParType::COMPLEX;
 }
+template <> inline ParType typeName<double>(void) { return ParType::DOUBLE; }
+template <> inline ParType typeName<int>(void) { return ParType::INTEGER; }
 
 ///
 /// \class Parameter
@@ -95,9 +82,9 @@ public:
 
   /// Getter for name of object
   virtual std::string name() const { return Name; }
-  
+
   /// Getter for name of object
-  virtual void setName( std::string n ) { Name = n; }
+  virtual void setName(std::string n) { Name = n; }
 
   /// Getter for type of object
   virtual ParType type() const { return Type; }
@@ -110,7 +97,6 @@ public:
   /// Attaches a new TreeNode as Observer
   void Attach(std::shared_ptr<ParObserver> newObserver) {
     OberservingNodes.push_back(newObserver);
-    ;
   }
 
   /// Removes TreeNodes not needed as Observer anymore
@@ -147,11 +133,16 @@ public:
 
   /// A public function returning a string with parameter value
   virtual std::string val_to_str() const = 0;
-  
+
+//  template <typename T>
+//  std::shared_ptr<T> GetComponent() {
+//    return std::dynamic_pointer_cast<T>(shared_from_this());
+//  }
+
 protected:
   /// Name of parameter
   std::string Name;
-  
+
   /// Type of parameter (e.g. Double, Integer, ...)
   ParType Type;
 

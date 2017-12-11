@@ -33,7 +33,7 @@ namespace ComPWA {
 ///
 class ParameterList {
 public:
-  ParameterList() {};
+  ParameterList(){};
   /// Only shared_ptr are copied. Those still point to the same object.
   /// See DeepCopy(const ParameterList &in).
   ParameterList(const ParameterList &in) = default;
@@ -151,6 +151,38 @@ private:
     ar &make_nvp("DoubleParameters", DoubleParameters);
   }
 };
+
+/// Search ParameterList for a DoubleParameter with \p name. The first match is
+/// returned. Be aware that name are not unique. In case no match is found
+/// a BadParameter exception is thrown.
+inline std::shared_ptr<DoubleParameter> FindParameter(std::string name,
+                                               ComPWA::ParameterList &v) {
+  auto it =
+      std::find_if(v.doubleParameters().begin(), v.doubleParameters().end(),
+                   [name](const std::shared_ptr<DoubleParameter> &s) {
+                     return s->name() == name;
+                   });
+  if (it == v.doubleParameters().end())
+    throw BadParameter("FindParameter() | Parameter not in list!");
+  return *it;
+}
+
+/// Search list for a DoubleParameter with \p name. The first match is
+/// returned. Be aware that name are not unique. In case no match is found
+/// a BadParameter exception is thrown.
+inline std::shared_ptr<DoubleParameter>
+FindParameter(std::string name,
+              std::vector<std::shared_ptr<DoubleParameter>> &v) {
+  auto it =
+      std::find_if(v.begin(), v.end(),
+                   [name](const std::shared_ptr<DoubleParameter> &s) {
+                     return s->name() == name;
+                   });
+  if (it == v.end())
+    throw BadParameter("FindParameter() | Parameter not in list!");
+  return *it;
+}
+
 
 } // namespace ComPWA
 

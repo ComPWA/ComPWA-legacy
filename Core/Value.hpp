@@ -19,8 +19,10 @@ public:
   Value(std::string name = "") : Parameter(name) { Type = typeName<T>(); }
 
   Value(T val) : Parameter(""), Val(val) { Type = typeName<T>(); }
-  
-  Value(std::string name, T val) : Parameter(name), Val(val) { Type = typeName<T>(); }
+
+  Value(std::string name, T val) : Parameter(name), Val(val) {
+    Type = typeName<T>();
+  }
 
   virtual T value() const { return Val; }
 
@@ -32,22 +34,19 @@ public:
 
   /// Conversion operator for internal type
   operator T() const { return Val; };
-  
-  /// Conversion operators for different types
-  template <typename T2>
-    operator T2() { return Val; };
 
-  T& operator()() const { return Val; };
+  /// Conversion operators for different types
+  template <typename T2> operator T2() { return Val; };
+
+  const T &operator()() const { return Val; };
 
   T &operator()() { return Val; };
 
-  bool operator==(const BoolParameter otherPar) const;
   /// A public function returning a string with parameter information
-  virtual std::string to_str() const { return ""; };
+  virtual std::string to_str() const { return "to be implemented"; };
 
-  
   /// A public function returning a string with parameter value
-  virtual std::string val_to_str() const { return ""; };
+  virtual std::string val_to_str() const { return "to be implemented"; };
 
 protected:
   virtual std::string className() const {
@@ -56,6 +55,64 @@ protected:
 
   T Val;
 };
+
+inline std::shared_ptr<Parameter> ValueFactory(ParType t,
+                                               std::string name = "") {
+  std::shared_ptr<Parameter> p;
+  switch (t) {
+  case ParType::MCOMPLEX: {
+    p = std::make_shared<Value<std::vector<std::complex<double>>>>(name);
+    break;
+  }
+  case ParType::MDOUBLE: {
+    p = std::make_shared<Value<std::vector<double>>>(name);
+    break;
+  }
+  case ParType::MINTEGER: {
+    p = std::make_shared<Value<std::vector<int>>>(name);
+    break;
+  }
+  case ParType::COMPLEX: {
+    p = std::make_shared<Value<std::complex<double>>>(name);
+    break;
+  }
+  case ParType::DOUBLE: {
+    p = std::make_shared<Value<double>>(name);
+    break;
+  }
+  case ParType::INTEGER: {
+    p = std::make_shared<Value<int>>(name);
+    break;
+  }
+  default: {
+    throw BadParameter("ValueFactory() | Parameter type " + std::to_string(t) +
+                       " unknown!");
+  }
+  }
+  return p;
+}
+
+inline std::shared_ptr<Value<std::vector<std::complex<double>>>>
+MComplex(std::string name, size_t s,
+         std::complex<double> el = std::complex<double>(0., 0.)) {
+
+  return std::make_shared<Value<std::vector<std::complex<double>>>>(
+      name, std::vector<std::complex<double>>(s, el));
+}
+
+inline std::shared_ptr<Value<std::vector<double>>>
+MDouble(std::string name, size_t s, double el = 0.) {
+
+  return std::make_shared<Value<std::vector<double>>>(
+      name, std::vector<double>(s, el));
+}
+
+inline std::shared_ptr<Value<std::vector<int>>>
+MInteger(std::string name, size_t s, int el = 0.) {
+
+  return std::make_shared<Value<std::vector<int>>>(name,
+                                                   std::vector<int>(s, el));
+}
 
 } // ns::ComPWA
 #endif
