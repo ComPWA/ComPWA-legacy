@@ -230,7 +230,7 @@ public:
         std::vector<std::complex<double>> results;
         results.reserve(nElements);
         for (unsigned int ele = 0; ele < nElements; ele++) {
-          std::complex<double> compele(multi_complex->GetValue(ele).real(),-1*multi_complex->GetValue(ele).imag());
+          std::complex<double> compele(multi_complex->GetValue(ele).real(),-1.*multi_complex->GetValue(ele).imag());
           results.push_back(compele);
         }
         out = std::shared_ptr<AbsParameter>(
@@ -245,8 +245,8 @@ public:
         // TODO: exception wrong input
         return false;
       }
-      out = std::shared_ptr<AbsParameter>(new ComplexParameter(
-          out->GetName(), std::conj(paras.GetComplexParameter(0)->GetValue())));
+      std::complex<double> compele(paras.GetComplexParameter(0)->GetValue().real(),-1.*paras.GetComplexParameter(0)->GetValue().imag());
+      out = std::shared_ptr<AbsParameter>(new ComplexParameter(out->GetName(), compele));
       break;
     } // end double
 
