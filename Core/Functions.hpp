@@ -230,8 +230,8 @@ public:
         std::vector<std::complex<double>> results;
         results.reserve(nElements);
         for (unsigned int ele = 0; ele < nElements; ele++) {
-          std::complex<double> compele = multi_complex->GetValue(ele);
-          results.push_back(std::conj(compele));
+          std::complex<double> compele(multi_complex->GetValue(ele).real(),-1*multi_complex->GetValue(ele).imag());
+          results.push_back(compele);
         }
         out = std::shared_ptr<AbsParameter>(
             new MultiComplex(out->GetName(), results));
