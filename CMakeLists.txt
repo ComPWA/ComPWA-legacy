@@ -11,7 +11,7 @@ set (CMAKE_CXX_STANDARD 11)
 message( STATUS "Compiler ID:")
 message( STATUS "$ENV{CC}")
 
-if (NOT "${CC}" STREQUAL "clang")
+if (NOT "$ENV{CC}" STREQUAL "clang")
   set(CMAKE_CXX_STANDARD 14)
   set(CMAKE_CXX_STANDARD_REQUIRED ON)
   set(CMAKE_CXX_EXTENSIONS OFF)
