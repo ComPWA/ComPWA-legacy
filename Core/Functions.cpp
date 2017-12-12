@@ -22,7 +22,7 @@ void Inverse::execute(ParameterList &paras, std::shared_ptr<Parameter> &out) {
   switch (checkType) {
   case ParType::DOUBLE: {
     auto par = std::static_pointer_cast<Value<double>>(out);
-    auto result = par->operator()();
+    auto& result = par->operator()();
     double var;
     if (paras.doubleValues().size() == 1) {
       var = paras.doubleValue(0)->value();
@@ -60,7 +60,7 @@ void SquareRoot::execute(ParameterList &paras,
   switch (checkType) {
   case ParType::DOUBLE: {
     auto par = std::static_pointer_cast<Value<double>>(out);
-    auto result = par->operator()();
+    auto& result = par->operator()();
     double var = 0;
     if (paras.doubleValues().size() == 1) {
       var = paras.doubleValue(0)->value();
@@ -121,7 +121,7 @@ void AddAll::execute(ParameterList &paras, std::shared_ptr<Parameter> &out) {
     // fill MultiComplex parameter
     auto par =
         std::static_pointer_cast<Value<std::vector<std::complex<double>>>>(out);
-    auto results = par->values(); // reference
+    auto& results = par->values(); // reference
     std::fill(results.begin(), results.end(),
               std::complex<double>(0., 0.)); // reset
 
@@ -164,7 +164,7 @@ void AddAll::execute(ParameterList &paras, std::shared_ptr<Parameter> &out) {
 
     // fill MultiComplex parameter
     auto par = std::static_pointer_cast<Value<std::vector<double>>>(out);
-    auto results = par->values(); // reference
+    auto& results = par->values(); // reference
     std::fill(results.begin(), results.end(), 0.); // reset
 
     for (auto dv : paras.mDoubleValues()) {
@@ -199,7 +199,7 @@ void AddAll::execute(ParameterList &paras, std::shared_ptr<Parameter> &out) {
 
     // fill multi integer parameter
     auto par = std::static_pointer_cast<Value<std::vector<int>>>(out);
-    auto results = par->values(); // reference
+    auto& results = par->values(); // reference
     std::fill(results.begin(), results.end(), 0); // reset
 
     for (auto dv : paras.mIntValues()) {
@@ -219,7 +219,7 @@ void AddAll::execute(ParameterList &paras, std::shared_ptr<Parameter> &out) {
           "AddAll::execute() | COMPLEX: expecting at least one single value!");
 
     auto par = std::static_pointer_cast<Value<std::complex<double>>>(out);
-    auto result = par->values(); // reference
+    auto& result = par->values(); // reference
     result = std::complex<double>(0, 0); //reset
     
     for (auto dv : paras.complexValues())
@@ -248,7 +248,7 @@ void AddAll::execute(ParameterList &paras, std::shared_ptr<Parameter> &out) {
 
   case ParType::DOUBLE: {
     auto par = std::static_pointer_cast<Value<double>>(out);
-    auto result = par->values(); // reference
+    auto& result = par->values(); // reference
     result = 0.; //reset
     
     for (auto dv : paras.doubleValues())
@@ -276,7 +276,7 @@ void AddAll::execute(ParameterList &paras, std::shared_ptr<Parameter> &out) {
 
   case ParType::INTEGER: {
     auto par = std::static_pointer_cast<Value<double>>(out);
-    auto result = par->values(); // reference
+    auto&  result = par->values(); // reference
     result = 0; //reset
     for (auto dv : paras.intValues())
       result += dv->value();
@@ -333,7 +333,7 @@ void MultAll::execute(ParameterList &paras, std::shared_ptr<Parameter> &out) {
     // fill MultiComplex parameter
     auto par =
         std::static_pointer_cast<Value<std::vector<std::complex<double>>>>(out);
-    auto results = par->values(); // reference
+    auto&  results = par->values(); // reference
     std::fill(results.begin(), results.end(), result); // reset
 
     for (auto p : paras.mComplexValues()) {
@@ -367,7 +367,7 @@ void MultAll::execute(ParameterList &paras, std::shared_ptr<Parameter> &out) {
 
     // fill MultiComplex parameter
     auto par = std::static_pointer_cast<Value<std::vector<double>>>(out);
-    auto results = par->values(); // reference
+    auto&  results = par->values(); // reference
     std::fill(results.begin(), results.end(), result); // reset
     
     for (auto p : paras.mDoubleValues()) {
@@ -394,7 +394,7 @@ void MultAll::execute(ParameterList &paras, std::shared_ptr<Parameter> &out) {
 
     // fill MultiComplex parameter
     auto par = std::static_pointer_cast<Value<std::vector<int>>>(out);
-    auto results = par->values(); // reference
+    auto&  results = par->values(); // reference
     std::fill(results.begin(), results.end(), result); // reset
 
     for (auto p : paras.mIntValues()) {
@@ -412,7 +412,7 @@ void MultAll::execute(ParameterList &paras, std::shared_ptr<Parameter> &out) {
                          "one multi complex value!");
 
     auto par = std::static_pointer_cast<Value<std::complex<double>>>(out);
-    auto result = par->values(); // reference
+    auto&  result = par->values(); // reference
     result = std::complex<double>(1., 0.); //reset
     
     for (auto p : paras.complexValues())
@@ -432,7 +432,7 @@ void MultAll::execute(ParameterList &paras, std::shared_ptr<Parameter> &out) {
                          "one multi complex value!");
 
     auto par = std::static_pointer_cast<Value<double>>(out);
-    auto result = par->values(); // reference
+    auto& result = par->values(); // reference
     result = 1.; //reset
 
     for (auto p : paras.doubleValues())
@@ -448,7 +448,7 @@ void MultAll::execute(ParameterList &paras, std::shared_ptr<Parameter> &out) {
       throw BadParameter("MultAll::execute() | INTEGER: expecting at least "
                          "one multi complex value!");
     auto par = std::static_pointer_cast<Value<int>>(out);
-    auto result = par->values(); // reference
+    auto&  result = par->values(); // reference
     result = 1; //reset
 
     for (auto p : paras.intValues())
@@ -487,7 +487,7 @@ void LogOf::execute(ParameterList &paras, std::shared_ptr<Parameter> &out) {
           "LogOf::execute() | MDOUBLE: Number and/or types do not match");
 
     auto par = std::static_pointer_cast<Value<std::vector<double>>>(out);
-    auto results = par->values(); // reference
+    auto& results = par->values(); // reference
     std::fill(results.begin(), results.end(), 0.); // reset
 
     std::transform(paras.mDoubleValue(0)->operator()().begin(),
@@ -505,7 +505,7 @@ void LogOf::execute(ParameterList &paras, std::shared_ptr<Parameter> &out) {
           "LogOf::execute() | DOUBLE: Number and/or types do not match");
 
     auto par = std::static_pointer_cast<Value<double>>(out);
-    auto result = par->values(); // reference
+    auto& result = par->values(); // reference
 
     // output double: log of one double input
     if (paras.doubleValues().size())
@@ -551,7 +551,7 @@ void Complexify::execute(ParameterList &paras,
     // fill MultiComplex parameter
     auto par =
         std::static_pointer_cast<Value<std::vector<std::complex<double>>>>(out);
-    auto results = par->values(); // reference
+    auto& results = par->values(); // reference
 
     // We have to assume here that the magnitude is the first parameter and
     // the phase the second one. We cannot check that.
@@ -570,7 +570,7 @@ void Complexify::execute(ParameterList &paras,
           "Complexify::execute() | COMPLEX: Number and/or types do not match");
 
     auto par = std::static_pointer_cast<Value<std::complex<double>>>(out);
-    auto result = par->values(); // reference
+    auto& result = par->values(); // reference
 
     if (paras.doubleValues().size() == 2) {
       result = std::polar(std::abs(paras.doubleValue(0)->value()),
@@ -621,7 +621,7 @@ void ComplexConjugate::execute(ParameterList &paras,
 
     auto par =
         std::static_pointer_cast<Value<std::vector<std::complex<double>>>>(out);
-    auto results = par->values(); // reference
+    auto& results = par->values(); // reference
 
     std::transform(paras.mComplexValue(0)->operator()().begin(),
                    paras.mComplexValue(0)->operator()().begin(),
@@ -636,7 +636,7 @@ void ComplexConjugate::execute(ParameterList &paras,
                          "types do not match");
 
     auto par = std::static_pointer_cast<Value<std::complex<double>>>(out);
-    auto result = par->values(); // reference
+    auto& result = par->values(); // reference
     result = std::conj(paras.complexValue(0)->value()); //reset
     break;
   } // end double
@@ -669,7 +669,7 @@ void AbsSquare::execute(ParameterList &paras, std::shared_ptr<Parameter> &out) {
 
   case ParType::MDOUBLE: {
     auto par = std::static_pointer_cast<Value<std::vector<double>>>(out);
-    auto results = par->values(); // reference
+    auto& results = par->values(); // reference
     if (nMD == 1) {
       std::transform(paras.mDoubleValue(0)->operator()().begin(),
                      paras.mDoubleValue(0)->operator()().begin(),
@@ -694,7 +694,7 @@ void AbsSquare::execute(ParameterList &paras, std::shared_ptr<Parameter> &out) {
       throw BadParameter("AbsSquare::execute() | MINTEGER: Number and/or "
                          "types do not match");
     auto par = std::static_pointer_cast<Value<std::vector<int>>>(out);
-    auto results = par->values(); // reference
+    auto& results = par->values(); // reference
 
     std::transform(paras.mDoubleValue(0)->operator()().begin(),
                    paras.mDoubleValue(0)->operator()().begin(), results.begin(),

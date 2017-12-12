@@ -1,3 +1,19 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // Copyright (c) 2013, 2017 The ComPWA Team.
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
@@ -92,6 +108,8 @@ public:
   /// Getter for typename of object, to be defined by the actual implementation
   virtual std::string className() const = 0;
 
+  virtual bool isParameter() const { return false; }
+  
   // Observer Pattern Functions
 
   /// Attaches a new TreeNode as Observer
@@ -134,10 +152,10 @@ public:
   /// A public function returning a string with parameter value
   virtual std::string val_to_str() const = 0;
 
-//  template <typename T>
-//  std::shared_ptr<T> GetComponent() {
-//    return std::dynamic_pointer_cast<T>(shared_from_this());
-//  }
+  //  template <typename T>
+  //  std::shared_ptr<T> GetComponent() {
+  //    return std::dynamic_pointer_cast<T>(shared_from_this());
+  //  }
 
 protected:
   /// Name of parameter
@@ -165,3 +183,4 @@ BOOST_CLASS_IMPLEMENTATION(
     ComPWA::Parameter, boost::serialization::level_type::object_serializable)
 
 #endif
+

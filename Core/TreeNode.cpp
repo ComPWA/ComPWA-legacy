@@ -73,26 +73,19 @@ std::shared_ptr<ComPWA::Parameter> TreeNode::recalculate() const {
   // has been changed or is lead node -> return Parameter
   if (Parameter && (!HasChanged || !ChildNodes.size()))
     return Parameter;
-  
+
   std::shared_ptr<ComPWA::Parameter> result;
   if (Parameter)
     result = Parameter;
 
   ParameterList newVals;
-  for (auto ch : ChildNodes)
-    if (ch->childNodes().size()) // in case child is not a leaf node its value
-                                 // is not a parameter and we can add it using
-                                 // addValue
-      newVals.addValue(ch->parameter());
-    else {
-      try { // in case that the child is a leaf node we need to figure out if
-            // parameter is a DoubleParameter or a Value<T>
-        newVals.addParameter(
-            std::dynamic_pointer_cast<DoubleParameter>(ch->parameter()));
-      } catch (std::exception &ex) {
-        newVals.addValue(ch->parameter());
-      }
-    }
+  for (auto ch : ChildNodes) {
+    auto p = ch->parameter();
+    if (p->isParameter())
+      newVals.addParameter(p);
+    else
+      newVals.addValue(p);
+  }
   try {
     Strat->execute(newVals, result);
   } catch (std::exception &ex) {

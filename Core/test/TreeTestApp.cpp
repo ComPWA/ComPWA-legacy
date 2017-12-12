@@ -41,6 +41,8 @@ using namespace ComPWA;
 BOOST_AUTO_TEST_SUITE(FunctionTreeTest);
 
 BOOST_AUTO_TEST_CASE(SubTree) {
+  ComPWA::Logging log("", boost::log::trivial::severity_level::trace);
+
   std::shared_ptr<DoubleParameter> parA(new DoubleParameter("parA", 5.));
   std::shared_ptr<DoubleParameter> parB(new DoubleParameter("parB", 2.));
   std::shared_ptr<DoubleParameter> parC(new DoubleParameter("parC", 3.));
@@ -49,8 +51,7 @@ BOOST_AUTO_TEST_CASE(SubTree) {
   // Calculate R = a * ( b + c * d)
   auto result = std::make_shared<Value<double>>();
   auto myTree = std::make_shared<FunctionTree>(
-      "R", result,
-      std::make_shared<MultAll>(ParType::DOUBLE));
+      "R", result, std::make_shared<MultAll>(ParType::DOUBLE));
   myTree->createLeaf("a", parA, "R");
   myTree->createNode("bcd", std::make_shared<AddAll>(ParType::DOUBLE),
                      "R"); // node is not cached since no parameter is passed
@@ -74,13 +75,13 @@ BOOST_AUTO_TEST_CASE(SubTree) {
   BOOST_CHECK_EQUAL(result->value(), 40);
 }
 
-BOOST_AUTO_TEST_CASE(MultiParameter) {
+BOOST_AUTO_TEST_CASE(SingleParameters) {
   size_t nElements = 10;
 
   // Calculate R = Sum of (a * b)
-  auto myTreeMult =
-      std::make_shared<FunctionTree>("R", std::make_shared<Value<double>>(),
-                                     std::make_shared<AddAll>(ParType::DOUBLE));
+  auto result = std::make_shared<Value<double>>();
+  auto myTreeMult = std::make_shared<FunctionTree>(
+      "R", result, std::make_shared<AddAll>(ParType::DOUBLE));
   myTreeMult->createNode("ab", std::make_shared<Value<double>>(),
                          std::make_shared<MultAll>(ParType::DOUBLE), "R");
 
@@ -91,17 +92,18 @@ BOOST_AUTO_TEST_CASE(MultiParameter) {
     myTreeMult->createLeaf(n, std::make_shared<DoubleParameter>(n, i + 1),
                            "ab");
   }
-
   myTreeMult->parameter(); // Trigger recalculation
-
-  std::cout << std::endl
-            << "Multitree Setup and calculated R = Sum[a*b] with one leaf "
+  BOOST_CHECK_EQUAL(result->value(), 7.2576e+06);
+  
+  LOG(info) << "Multitree Setup and calculated R = Sum[a*b] with one leaf "
                "containing "
-            << nElements << " elements" << std::endl;
-  std::cout << std::endl << myTreeMult << std::endl << std::endl;
+            << nElements << " elements";
+  LOG(info) << std::endl << myTreeMult;
+}
+BOOST_AUTO_TEST_CASE(MultiParameters) {
 
   //------------new Tree with multiDouble Par----------------
-  nElements = 5;
+  size_t nElements = 5;
   std::shared_ptr<FunctionTree> myTreeMultD;
 
   //------------SetUp the parameters for R = Sum of (a * b)-----------
@@ -117,10 +119,10 @@ BOOST_AUTO_TEST_CASE(MultiParameter) {
   }
   auto mParA = std::make_shared<Value<std::vector<double>>>("parA", nMasses);
   auto mParC = std::make_shared<Value<std::vector<double>>>("parC", nPhsp);
-
-  myTreeMultD =
-      std::make_shared<FunctionTree>("R", std::make_shared<Value<double>>(),
-                                     std::make_shared<AddAll>(ParType::DOUBLE));
+  auto result = std::make_shared<Value<double>>();
+  
+  myTreeMultD = std::make_shared<FunctionTree>(
+      "R", result, std::make_shared<AddAll>(ParType::DOUBLE));
   myTreeMultD->createNode("Rmass", MDouble("par_Rnass", nElements),
                           std::make_shared<MultAll>(ParType::MDOUBLE), "R");
   myTreeMultD->createNode("ab", MDouble("par_ab", nElements),
@@ -137,11 +139,12 @@ BOOST_AUTO_TEST_CASE(MultiParameter) {
   //------------Trigger Calculation----------------
   myTreeMultD->parameter();
 
-  std::cout << std::endl
-            << "MultiDouble Setup and calculated R = Sum[a*b] with one leaf "
+  BOOST_CHECK_EQUAL(result->value(), 4950);
+
+  LOG(info) << "MultiDouble Setup and calculated R = Sum[a*b] with one leaf "
                "containing "
-            << nElements << " elements" << std::endl;
-  std::cout << std::endl << myTreeMultD << std::endl << std::endl;
+            << nElements << " elements";
+  LOG(info) << std::endl << myTreeMultD;
 }
 
 BOOST_AUTO_TEST_SUITE_END();

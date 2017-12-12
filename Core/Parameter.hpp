@@ -61,6 +61,8 @@ public:
                   const double max, const double error);
 
   DoubleParameter(const DoubleParameter &in);
+  
+  virtual bool isParameter() const { return true; }
 
   operator double() const { return Value; };
 

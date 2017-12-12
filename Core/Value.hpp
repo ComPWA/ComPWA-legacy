@@ -14,6 +14,16 @@
 #include "Core/Parameter.hpp"
 namespace ComPWA {
 
+template<class T>
+  std::ostream& operator<<(std::ostream& stream, const std::vector<T>& values)
+{
+    stream << "[ ";
+    std::copy(begin(values), end(values),
+              std::ostream_iterator<T>(stream, " "));
+    stream << "]";
+    return stream;
+}
+
 template <class T> class Value : public ComPWA::Parameter {
 public:
   Value(std::string name = "") : Parameter(name) { Type = typeName<T>(); }
@@ -43,10 +53,14 @@ public:
   T &operator()() { return Val; };
 
   /// A public function returning a string with parameter information
-  virtual std::string to_str() const { return "to be implemented"; };
+  virtual std::string to_str() const { return Name+" ["+ParNames[Type]+"]"; };
 
   /// A public function returning a string with parameter value
-  virtual std::string val_to_str() const { return "to be implemented"; };
+  virtual std::string val_to_str() const {
+    std::stringstream stream;
+    stream << Val;
+    return stream.str();
+  };
 
 protected:
   virtual std::string className() const {
