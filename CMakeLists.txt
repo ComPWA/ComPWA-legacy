@@ -15,10 +15,10 @@ if (NOT "${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
 endif()
 
 # Workaround for clang+ c++14/pybind11
-#if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
+if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
  # set (CMAKE_CXX_STANDARD 11)
-#  set(CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} -std=c++1y")
-#endif()
+  set(CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} -std=c++0x")
+endif()
 
 #
 # ComPWA
