@@ -150,10 +150,9 @@ public:
       // fill MultiDouble parameter
       std::vector<double> results;
       results.reserve(nElements);
-      for (auto complex_element :
+      for (auto const &complex_element :
            paras.GetMultiComplex(0)->GetValues()) {
-        double re = ((std::complex<double>)complex_element).real();
-        results.push_back(re);
+        results.push_back(complex_element.real());
       }
 
       out = std::shared_ptr<AbsParameter>(
@@ -224,14 +223,13 @@ public:
         return false;
       }
 
-      for (auto multi_complex : paras.GetMultiComplexs()) {
+      for (auto const &multi_complex : paras.GetMultiComplexs()) {
         unsigned int nElements = multi_complex->GetNValues();
         // fill MultiDouble parameter
         std::vector<std::complex<double>> results;
         results.reserve(nElements);
         for (unsigned int ele = 0; ele < nElements; ele++) {
-          std::complex<double> compele(multi_complex->GetValue(ele).real(),-1.*multi_complex->GetValue(ele).imag());
-          results.push_back(compele);
+          results.push_back(std::conj(multi_complex->GetValue(ele)));
         }
         out = std::shared_ptr<AbsParameter>(
             new MultiComplex(out->GetName(), results));
@@ -245,8 +243,8 @@ public:
         // TODO: exception wrong input
         return false;
       }
-      std::complex<double> compele(paras.GetComplexParameter(0)->GetValue().real(),-1.*paras.GetComplexParameter(0)->GetValue().imag());
-      out = std::shared_ptr<AbsParameter>(new ComplexParameter(out->GetName(), compele));
+      out = std::shared_ptr<AbsParameter>(new ComplexParameter(
+          out->GetName(), std::conj(paras.GetComplexParameter(0)->GetValue())));
       break;
     } // end double
 
