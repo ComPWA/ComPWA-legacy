@@ -27,9 +27,10 @@
 #include "Physics/HelicityFormalism/HelicityKinematics.hpp"
 #include "Physics/HelicityFormalism/IncoherentIntensity.hpp"
 #include "Tools/RootGenerator.hpp"
-#include "Tools/RunManager.hpp"
+#include "Tools/Generate.hpp"
 #include "Tools/DalitzPlot.hpp"
 #include "Tools/ParameterTools.hpp"
+#include "Tools/FitFractions.hpp"
 
 #include "Estimator/MinLogLH/MinLogLH.hpp"
 #include "Optimizer/Minuit2/MinuitIF.hpp"
@@ -169,10 +170,6 @@ int main(int argc, char **argv) {
   // initialize logging
   Logging log("DalitzFit-log.txt", boost::log::trivial::debug);
 
-  // RunManager is supposed to manage all objects of the analysis. It generates
-  // data and starts the fitting procedure.
-  ComPWA::Tools::RunManager run;
-
   // List with all particle information needed
   auto partL = std::make_shared<ComPWA::PartList>();
   ReadParticles(partL, defaultParticleList);
@@ -190,10 +187,8 @@ int main(int argc, char **argv) {
   // 2) Generate a large phase space sample
   //---------------------------------------------------
   auto gen = std::make_shared<ComPWA::Tools::RootGenerator>(partL, kin);
-  run.SetGenerator(gen);
   std::shared_ptr<Data> phspSample(new Data());
-  run.SetPhspSample(phspSample);
-  run.GeneratePhsp(100000);
+  ComPWA::Tools::GeneratePhsp(100000, gen, phspSample);
 
   //---------------------------------------------------
   // 3) Create intensity from pre-defined model
@@ -213,14 +208,12 @@ int main(int argc, char **argv) {
   auto phspPoints =
       std::make_shared<std::vector<dataPoint>>(phspSample->GetDataPoints(kin));
   intens->SetPhspSample(phspPoints, phspPoints);
-  run.SetAmplitude(intens);
 
   //---------------------------------------------------
   // 4) Generate a data sample given intensity and kinematics
   //---------------------------------------------------
   std::shared_ptr<Data> sample(new Data());
-  run.SetData(sample);
-  run.Generate(kin, 1000);
+  ComPWA::Tools::Generate(1000, kin, gen, intens, sample, phspSample, phspSample);
 
   //---------------------------------------------------
   // 5) Fit the model to the data and print the result
@@ -238,10 +231,9 @@ int main(int argc, char **argv) {
 
   auto minuitif = new Optimizer::Minuit2::MinuitIF(esti, fitPar);
   minuitif->SetHesse(true);
-  run.SetOptimizer(std::shared_ptr<Optimizer::Optimizer>(minuitif));
 
   // STARTING MINIMIZATION
-  auto result = std::dynamic_pointer_cast<MinuitResult>(run.Fit(fitPar));
+  auto result = std::dynamic_pointer_cast<MinuitResult>(minuitif->exec(fitPar));
 
   // Calculate fit fractions
   std::vector<std::pair<std::string, std::string>> fitComponents;
