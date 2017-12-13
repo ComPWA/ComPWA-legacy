@@ -23,6 +23,8 @@
 #include "DataReader/Data.hpp"
 #include "Physics/IncoherentIntensity.hpp"
 #include "Physics/HelicityFormalism/HelicityKinematics.hpp"
+
+// Amplitude model
 #include "Physics/HelicityFormalism/test/AmpModelTest.hpp"
 
 using namespace ComPWA;

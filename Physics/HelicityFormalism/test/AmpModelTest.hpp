@@ -12,7 +12,7 @@ const std::string HelicityTestParticles = R"####(
 <ParticleList>
   <Particle Name='K+'>
     <Pid>321</Pid>
-    <Parameter Type='Mass' Name='Mass_chargedKaon'>
+    <Parameter Class='Double' Type='Mass' Name='Mass_chargedKaon'>
       <Value>0.493677</Value>
       <Fix>true</Fix>
     </Parameter>
@@ -23,7 +23,7 @@ const std::string HelicityTestParticles = R"####(
   </Particle>
   <Particle Name='K-'>
     <Pid>-321</Pid>
-    <Parameter Type='Mass' Name='Mass_chargedKaon'>
+    <Parameter Class='Double' Type='Mass' Name='Mass_chargedKaon'>
       <Value>0.493677</Value>
       <Fix>true</Fix>
     </Parameter>
@@ -34,7 +34,7 @@ const std::string HelicityTestParticles = R"####(
   </Particle>
   <Particle Name='pi0'>
     <Pid>111</Pid>
-    <Parameter Type='Mass' Name='Mass_pi0'>
+    <Parameter Class='Double' Type='Mass' Name='Mass_pi0'>
       <Value>0.1349766</Value>
       <Error>0.0000006</Error>
     </Parameter>
@@ -45,7 +45,7 @@ const std::string HelicityTestParticles = R"####(
   </Particle>
   <Particle Name='eta'>
     <Pid>221</Pid>
-    <Parameter Type='Mass' Name='Mass_eta'>
+    <Parameter Class='Double' Type='Mass' Name='Mass_eta'>
       <Value>0.547862</Value>
       <Error>0.000018</Error>
     </Parameter>
@@ -56,7 +56,7 @@ const std::string HelicityTestParticles = R"####(
   </Particle>
   <Particle Name='K_S0'>
     <Pid>310</Pid>
-    <Parameter Type='Mass' Name='Mass_neutralKaon'>
+    <Parameter Class='Double' Type='Mass' Name='Mass_neutralKaon'>
       <Value>0.497614</Value>
       <Fix>true</Fix>
     </Parameter>
@@ -76,11 +76,11 @@ const std::string HelicityTestParticles = R"####(
     <QuantumNumber Class='Int' Type='Parity' Value='-1'/>
     <DecayInfo Type='relativisticBreitWigner'>
       <FormFactor Type='0' />
-      <Parameter Type='Mass' Name='Width_D0'>
+      <Parameter Class='Double' Type='Mass' Name='Width_D0'>
         <Value>0.000623</Value>
         <Fix>true</Fix>
       </Parameter>
-      <Parameter Type='MesonRadius' Name='Radius_D0'>
+      <Parameter Class='Double' Type='MesonRadius' Name='Radius_D0'>
         <Value>2.5</Value>
         <Fix>true</Fix>
         <Min>2.0</Min>
@@ -90,7 +90,7 @@ const std::string HelicityTestParticles = R"####(
   </Particle>
   <Particle Name='phi(1020)'>
     <Pid>333</Pid>
-    <Parameter Type='Mass' Name='Mass_phi(1020)'>
+    <Parameter Class='Double' Type='Mass' Name='Mass_phi(1020)'>
       <Value>1.019461</Value>
       <Error>0.000019</Error>
       <Fix>true</Fix>
@@ -100,12 +100,12 @@ const std::string HelicityTestParticles = R"####(
     <QuantumNumber Class='Int' Type='Parity' Value='-1'/>
     <DecayInfo Type='relativisticBreitWigner'>
       <FormFactor Type='1' />
-      <Parameter Type='Width' Name='Width_phi(1020)'>
+      <Parameter Class='Double' Type='Width' Name='Width_phi(1020)'>
         <Value>0.004266</Value>
         <Error>0.000031</Error>
         <Fix>true</Fix>
       </Parameter>
-      <Parameter Type='MesonRadius' Name='Radius_phi(1020)'>
+      <Parameter Class='Double' Type='MesonRadius' Name='Radius_phi(1020)'>
         <Value>1.5</Value>
         <Fix>true</Fix>
         <Min>1.0</Min>
@@ -115,7 +115,7 @@ const std::string HelicityTestParticles = R"####(
   </Particle>
   <Particle Name='a0(980)0'>
     <Pid>9000111</Pid>
-    <Parameter Type='Mass' Name='Mass_a0(980)'>
+    <Parameter Class='Double' Type='Mass' Name='Mass_a0(980)'>
       <Value>0.994</Value>
       <Error>0.001</Error>
       <Fix>true</Fix>
@@ -125,28 +125,28 @@ const std::string HelicityTestParticles = R"####(
     <QuantumNumber Class='Int' Type='Parity' Value='1'/>
     <DecayInfo Type='flatte'>
       <FormFactor Type='0' />
-      <Parameter Type='Coupling' Name='gKK_a0(980)'>
+      <Parameter Class='Double' Type='Coupling' Name='gKK_a0(980)'>
         <Value>3.121343843602647</Value>
         <Error>0.001</Error>
         <Fix>false</Fix>
         <ParticleA>K+</ParticleA>
         <ParticleB>K-</ParticleB>
       </Parameter>
-      <Parameter Type='Coupling' Name='gEtaPi_a0(980)'>
+      <Parameter Class='Double' Type='Coupling' Name='gEtaPi_a0(980)'>
         <Value>2.66</Value>
         <Error>0.001</Error>
         <Fix>true</Fix>
         <ParticleA>eta</ParticleA>
         <ParticleB>pi0</ParticleB>
       </Parameter>
-      <Parameter Type='Coupling' Name='gKK_a0(980)'>
+      <Parameter Class='Double' Type='Coupling' Name='gKK_a0(980)'>
         <Value>3.121343843602647</Value>
         <Error>0.001</Error>
         <Fix>false</Fix>
         <ParticleA>K_S0</ParticleA>
         <ParticleB>K_S0</ParticleB>
       </Parameter>
-      <Parameter Type='MesonRadius' Name='Radius_a0(980)'>
+      <Parameter Class='Double' Type='MesonRadius' Name='Radius_a0(980)'>
         <Value>1.5</Value>
         <Fix>true</Fix>
         <Min>1.0</Min>
@@ -156,7 +156,7 @@ const std::string HelicityTestParticles = R"####(
   </Particle>
   <Particle Name='a0(980)+'>
     <Pid>9000211</Pid>
-    <Parameter Type='Mass' Name='Mass_a0(980)'>
+    <Parameter Class='Double' Type='Mass' Name='Mass_a0(980)'>
       <Value>0.994</Value>
       <Error>0.001</Error>
       <Fix>true</Fix>
@@ -169,21 +169,21 @@ const std::string HelicityTestParticles = R"####(
     <QuantumNumber Class='Int' Type='Parity' Value='+1'/>
     <DecayInfo Type='flatte'>
       <FormFactor Type='0' />
-      <Parameter Type='Coupling' Name='gKK_a0(980)'>
+      <Parameter Class='Double' Type='Coupling' Name='gKK_a0(980)'>
         <Value>3.121343843602647</Value>
         <Error>0.001</Error>
         <Fix>false</Fix>
         <ParticleA>K_S0</ParticleA>
         <ParticleB>K+</ParticleB>
       </Parameter>
-      <Parameter Type='Coupling' Name='gEtaPi_a0(980)'>
+      <Parameter Class='Double' Type='Coupling' Name='gEtaPi_a0(980)'>
         <Value>2.66</Value>
         <Error>0.001</Error>
         <Fix>true</Fix>
         <ParticleA>eta</ParticleA>
         <ParticleB>pi0</ParticleB>
       </Parameter>
-      <Parameter Type='MesonRadius' Name='Radius_a0(980)'>
+      <Parameter Class='Double' Type='MesonRadius' Name='Radius_a0(980)'>
         <Value>1.5</Value>
         <Fix>true</Fix>
         <Min>1.0</Min>
@@ -193,7 +193,7 @@ const std::string HelicityTestParticles = R"####(
   </Particle>
   <Particle Name='Bkgphi(1020)'>
     <Pid>3339999</Pid>
-    <Parameter Type='Mass' Name='Mass_phi(1020)'>
+    <Parameter Class='Double' Type='Mass' Name='Mass_phi(1020)'>
       <Value>1.019461</Value>
       <Error>0.000019</Error>
       <Fix>true</Fix>
@@ -203,12 +203,12 @@ const std::string HelicityTestParticles = R"####(
     <QuantumNumber Class='Int' Type='Parity' Value='-1'/>
     <DecayInfo Type='relativisticBreitWigner'>
       <FormFactor Type='1' />
-      <Parameter Type='Width' Name='Width_phi(1020)'>
+      <Parameter Class='Double' Type='Width' Name='Width_phi(1020)'>
         <Value>0.004266</Value>
         <Error>0.000031</Error>
         <Fix>true</Fix>
       </Parameter>
-      <Parameter Type='MesonRadius' Name='Radius_phi(1020)'>
+      <Parameter Class='Double' Type='MesonRadius' Name='Radius_phi(1020)'>
         <Value>1.5</Value>
         <Fix>true</Fix>
         <Min>1.0</Min>
@@ -218,7 +218,7 @@ const std::string HelicityTestParticles = R"####(
   </Particle>
   <Particle Name='something'>
     <Pid>123456</Pid>
-    <Parameter Type='Mass' Name='Mass_something'>
+    <Parameter Class='Double' Type='Mass' Name='Mass_something'>
       <Value>1.024654338170585</Value>
       <Fix>true</Fix>
     </Parameter>
@@ -227,11 +227,11 @@ const std::string HelicityTestParticles = R"####(
     <QuantumNumber Class='Int' Type='Parity' Value='-1'/>
     <DecayInfo Type='relativisticBreitWigner'>
       <FormFactor Type='1' />
-      <Parameter Type='Width' Name='Width_something'>
+      <Parameter Class='Double' Type='Width' Name='Width_something'>
         <Value>0.01909658663476588</Value>
         <Fix>true</Fix>
       </Parameter>
-      <Parameter Type='MesonRadius' Name='Radius_something'>
+      <Parameter Class='Double' Type='MesonRadius' Name='Radius_something'>
         <Value>1.5</Value>
         <Fix>true</Fix>
       </Parameter>
@@ -239,7 +239,7 @@ const std::string HelicityTestParticles = R"####(
   </Particle>
   <Particle Name='a2(1320)-'>
     <Pid>215</Pid>
-    <Parameter Type='Mass' Name='Mass_a2(1320)'>
+    <Parameter Class='Double' Type='Mass' Name='Mass_a2(1320)'>
       <Value>1.3181</Value>
       <Fix>true</Fix>
     </Parameter>
@@ -248,11 +248,11 @@ const std::string HelicityTestParticles = R"####(
     <QuantumNumber Class='Int' Type='Parity' Value='1'/>
     <DecayInfo Type='relativisticBreitWigner'>
       <FormFactor Type='1' />
-      <Parameter Type='Width' Name='Width_a2(1320)'>
+      <Parameter Class='Double' Type='Width' Name='Width_a2(1320)'>
         <Value>0.1098</Value>
         <Fix>true</Fix>
       </Parameter>
-      <Parameter Type='MesonRadius' Name='Radius_a2(1320)'>
+      <Parameter Class='Double' Type='MesonRadius' Name='Radius_a2(1320)'>
         <Value>1.5</Value>
         <Fix>true</Fix>
       </Parameter>
@@ -261,7 +261,7 @@ const std::string HelicityTestParticles = R"####(
 
   <Particle Name='gamma'>
     <Pid>22</Pid>
-    <Parameter Type='Mass' Name='mass_gamma'>
+    <Parameter Class='Double' Type='Mass' Name='mass_gamma'>
       <Value>0.</Value>
       <Fix>true</Fix>
     </Parameter>
@@ -273,7 +273,7 @@ const std::string HelicityTestParticles = R"####(
   </Particle>
   <Particle Name='jpsi'>
     <Pid>443</Pid>
-    <Parameter Type='Mass' Name='Mass_jpsi'>
+    <Parameter Class='Double' Type='Mass' Name='Mass_jpsi'>
       <Value>3.0969</Value>
       <Fix>true</Fix>
     </Parameter>
@@ -284,11 +284,11 @@ const std::string HelicityTestParticles = R"####(
     <QuantumNumber Class='Int' Type='Gparity' Value='1'/>
     <DecayInfo Type='relativisticBreitWigner'>
       <FormFactor Type='0' />
-      <Parameter Type='Width' Name='Width_jpsi'>
+      <Parameter Class='Double' Type='Width' Name='Width_jpsi'>
         <Value>0.0000929</Value>
         <Error>0.0000028</Error>
       </Parameter>
-      <Parameter Type='MesonRadius' Name='Radius_jpsi'>
+      <Parameter Class='Double' Type='MesonRadius' Name='Radius_jpsi'>
         <Value>2.5</Value>
         <Fix>true</Fix>
         <Min>2.0</Min>
@@ -298,7 +298,7 @@ const std::string HelicityTestParticles = R"####(
   </Particle>
   <Particle Name='omega'>
     <Pid>223</Pid>
-    <Parameter Type='Mass' Name='Mass_omega'>
+    <Parameter Class='Double' Type='Mass' Name='Mass_omega'>
       <Value>0.78265</Value>
       <Fix>true</Fix>
       <Min>0.5</Min>
@@ -312,14 +312,14 @@ const std::string HelicityTestParticles = R"####(
     <QuantumNumber Class='Int' Type='Gparity' Value='1'/>
     <DecayInfo Type='relativisticBreitWigner'>
       <FormFactor Type='0' />
-      <Parameter Type='Width' Name='Width_omega'>
+      <Parameter Class='Double' Type='Width' Name='Width_omega'>
         <Value>0.01849</Value>
         <Fix>true</Fix>
         <Min>0.0</Min>
         <Max>1.0</Max>
         <Error>0.00008</Error>
       </Parameter>
-      <Parameter Type='MesonRadius' Name='Radius_omega'>
+      <Parameter Class='Double' Type='MesonRadius' Name='Radius_omega'>
         <Value>1.5</Value>
         <Fix>true</Fix>
         <Min>1.0</Min>
@@ -330,7 +330,7 @@ const std::string HelicityTestParticles = R"####(
   </Particle>
   <Particle Name='f0_980'>
     <Pid>9010221</Pid>
-    <Parameter Type='Mass' Name='Mass_f0_980'>
+    <Parameter Class='Double' Type='Mass' Name='Mass_f0_980'>
       <Value>0.99</Value>
       <Fix>true</Fix>
       <Min>0.5</Min>
@@ -344,14 +344,14 @@ const std::string HelicityTestParticles = R"####(
     <QuantumNumber Class='Int' Type='Gparity' Value='1'/>
     <DecayInfo Type='relativisticBreitWigner'>
       <FormFactor Type='0' />
-      <Parameter Type='Width' Name='Width_f0_980'>
+      <Parameter Class='Double' Type='Width' Name='Width_f0_980'>
         <Value>0.05</Value>
         <Fix>true</Fix>
         <Min>0.</Min>
         <Max>.5</Max>
         <Error>0</Error>
       </Parameter>
-      <Parameter Type='MesonRadius' Name='Radius_f0_980'>
+      <Parameter Class='Double' Type='MesonRadius' Name='Radius_f0_980'>
         <Value>1.5</Value>
         <Fix>true</Fix>
         <Min>1.0</Min>
@@ -378,34 +378,34 @@ const std::string HelicityTestKinematics = R"####(
 )####";
 
 const std::string HelicityTestModel = R"####(
-<IncoherentIntensity Name='jpsiToPi0Pi0Gamma_inc'>
-  <Parameter Type='Strength' Name="Strength_jpsiToPi0Pi0Gamm_inc">
+<Intensity Class='Incoherent' Name='jpsiToPi0Pi0Gamma_inc'>
+  <Parameter Class='Double' Type='Strength' Name="Strength_jpsiToPi0Pi0Gamm_inc">
     <Value>1</Value>
     <Fix>true</Fix>
   </Parameter>
-  <CoherentIntensity Name='jpsiToPi0Pi0Gamma'>
-    <Parameter Type='Strength' Name='Strength_jpsiToPi0Pi0Gamma'>
+  <Intensity Class='Coherent' Name='jpsiToPi0Pi0Gamma'>
+    <Parameter Class='Double' Type='Strength' Name='Strength_jpsiToPi0Pi0Gamma'>
       <Value>0.99</Value>
       <Fix>true</Fix>
     </Parameter>
     <Amplitude Name='omega'>
-      <Parameter Type='Magnitude' Name='Magnitude_omegaToPi0Gamma'>
+      <Parameter Class='Double' Type='Magnitude' Name='Magnitude_omegaToPi0Gamma'>
         <Value>1.0</Value>
         <Fix>true</Fix>
       </Parameter>
-      <Parameter Type='Phase' Name='Phase_omegaToPi0Gamma'>
+      <Parameter Class='Double' Type='Phase' Name='Phase_omegaToPi0Gamma'>
         <Value>0.0</Value>
         <Fix>true</Fix>
       </Parameter>
-      <Resonance Name='jpsitoOmegaPi0'>
-        <Parameter Type='Magnitude' Name='Magnitude_jpsitoOmegaPi0'>
+      <PartialAmplitude Name='jpsitoOmegaPi0'>
+        <Parameter Class='Double' Type='Magnitude' Name='Magnitude_jpsitoOmegaPi0'>
           <Value>1.0</Value>
           <Fix>true</Fix>
           <Min>0.5</Min>
           <Max>1.5</Max>
           <Error>0</Error>
         </Parameter>
-        <Parameter Type='Phase' Name='Phase_jpsitoOmegaPi0'>
+        <Parameter Class='Double' Type='Phase' Name='Phase_jpsitoOmegaPi0'>
           <Value>1.0</Value>
           <Fix>true</Fix>
           <Min>0.5</Min>
@@ -417,16 +417,16 @@ const std::string HelicityTestModel = R"####(
           <Particle Name='omega' FinalState='0 1' Helicity='+1' />
           <Particle Name='pi0' FinalState='2' Helicity='0' />
         </DecayProducts>
-      </Resonance>
-      <Resonance Name="omegatoPi0G">
-        <Parameter Type='Magnitude' Name='Magnitude_omegaToPi0Gamma'>
+      </PartialAmplitude>
+      <PartialAmplitude Name="omegatoPi0G">
+        <Parameter Class='Double' Type='Magnitude' Name='Magnitude_omegaToPi0Gamma'>
           <Value>1.0</Value>
           <Fix>true</Fix>
           <Min>0.5</Min>
           <Max>1.5</Max>
           <Error>0</Error>
         </Parameter>
-        <Parameter Type='Phase' Name='Phase_omegaToPi0Gamma'>
+        <Parameter Class='Double' Type='Phase' Name='Phase_omegaToPi0Gamma'>
           <Value>1.0</Value>
           <Fix>true</Fix>
           <Min>0.5</Min>
@@ -439,10 +439,10 @@ const std::string HelicityTestModel = R"####(
           <Particle Name='gamma' FinalState='1' Helicity='+1' />
           <Particle Name='pi0' FinalState='0' Helicity='0' />
         </DecayProducts>
-      </Resonance>
+      </PartialAmplitude>
     </Amplitude>
-  </CoherentIntensity>
-</IncoherentIntensity>
+  </Intensity>
+</Intensity>
 )####";
 
 #endif

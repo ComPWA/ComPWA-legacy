@@ -51,16 +51,16 @@ BOOST_CLASS_EXPORT(ComPWA::Optimizer::Minuit2::MinuitResult)
 // do not have to configure the build system to copy input files somewhere.
 // In practise you may want to use a normal XML input file instead.
 std::string amplitudeModel = R"####(
-<IncoherentIntensity Name="jpsiGammaPiPi_inc">
-	<CoherentIntensity Name="jpsiGammaPiPi">
+<Intensity Class='Incoherent' Name="jpsiGammaPiPi_inc">
+	<Intensity Class='Coherent' Name="jpsiGammaPiPi">
   	<Amplitude Class="SequentialPartialAmplitude" Name="f2(1270)">
-			<Parameter Type="Magnitude"	Name="Magnitude_f2">
+			<Parameter Class='Double' Type="Magnitude"	Name="Magnitude_f2">
 				<Value>1.0</Value>
         <Min>-1.0</Min>
         <Max>2.0</Max>
 				<Fix>false</Fix>
 			</Parameter>
-			<Parameter Type="Phase" Name="Phase_f2">
+			<Parameter Class='Double' Type="Phase" Name="Phase_f2">
 				<Value>0.0</Value>
         <Min>-100</Min>
         <Max>100</Max>
@@ -76,13 +76,13 @@ std::string amplitudeModel = R"####(
 			</PartialAmplitude>
 		</Amplitude>
 		<Amplitude Class="SequentialPartialAmplitude" Name="myAmp">
-			<Parameter Type="Magnitude"	Name="Magnitude_my">
+			<Parameter Class='Double' Type="Magnitude"	Name="Magnitude_my">
 				<Value>1.0</Value>
         <Min>-1.0</Min>
         <Max>2.0</Max>
 				<Fix>true</Fix>
 			</Parameter>
-			<Parameter Type="Phase" Name="Phase_my`">
+			<Parameter Class='Double' Type="Phase" Name="Phase_my`">
 				<Value>0.0</Value>
         <Min>-100</Min>
         <Max>100</Max>
@@ -97,15 +97,15 @@ std::string amplitudeModel = R"####(
 				</DecayProducts>
 			</PartialAmplitude>
 		</Amplitude>
-	</CoherentIntensity>
-</IncoherentIntensity>
+	</Intensity>
+</Intensity>
 )####";
 
 std::string myParticles = R"####(
 <ParticleList>
 	<Particle Name="f2(1270)">
 		<Pid>225</Pid>
-		<Parameter Type="Mass" Name="Mass_f2(1270)">
+		<Parameter Class='Double' Type="Mass" Name="Mass_f2(1270)">
 			<Value>1.2755</Value>
 			<Error>8.0E-04</Error>
       <Min>0.1</Min>
@@ -118,10 +118,10 @@ std::string myParticles = R"####(
 		<QuantumNumber Class="Int" Type="Cparity" Value="+1"/>
 		<DecayInfo Type="relativisticBreitWigner">
 			<FormFactor Type="0" />
-			<Parameter Type="Width" Name="Width_f2(1270)">
+			<Parameter Class='Double' Type="Width" Name="Width_f2(1270)">
 				<Value>0.1867</Value>
 			</Parameter>
-			<Parameter Type="MesonRadius" Name="Radius_rho">
+			<Parameter Class='Double' Type="MesonRadius" Name="Radius_rho">
 				<Value>2.5</Value>
 				<Fix>true</Fix>
 			</Parameter>
@@ -129,7 +129,7 @@ std::string myParticles = R"####(
 	</Particle>
 	<Particle Name="myRes">
 		<Pid>999999</Pid>
-		<Parameter Type="Mass" Name="Mass_myRes">
+		<Parameter Class='Double' Type="Mass" Name="Mass_myRes">
 			<Value>2.0</Value>
 			<Error>8.0E-04</Error>
 		</Parameter>
@@ -139,13 +139,13 @@ std::string myParticles = R"####(
 		<QuantumNumber Class="Int" Type="Cparity" Value="+1"/>
 		<DecayInfo Type="relativisticBreitWigner">
 			<FormFactor Type="0" />
-			<Parameter Type="Width" Name="Width_myRes">
+			<Parameter Class='Double' Type="Width" Name="Width_myRes">
 				<Value>1.0</Value>
         <Min>0.1</Min>
         <Max>1.0</Max>
         <Fix>false</Fix>
 			</Parameter>
-			<Parameter Type="MesonRadius" Name="Radius_myRes">
+			<Parameter Class='Double' Type="MesonRadius" Name="Radius_myRes">
 				<Value>2.5</Value>
 				<Fix>true</Fix>
 			</Parameter>
