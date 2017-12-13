@@ -10,6 +10,13 @@
 #ifndef Generate_hpp
 #define Generate_hpp
 
+#include "Core/ProgressBar.hpp"
+#include "Core/Generator.hpp"
+#include "DataReader/Data.hpp"
+#include "Core/AmpIntensity.hpp"
+#include "Core/Kinematics.hpp"
+#include "Tools/Integration.hpp"
+
 namespace ComPWA {
 namespace Tools {
 

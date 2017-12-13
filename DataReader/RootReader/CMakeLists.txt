@@ -60,6 +60,7 @@ foreach(testSrc ${TEST_SRCS})
     Tools
     ${Boost_LIBRARIES}
     ${ROOT_LIBRARIES}
+    pthread # We need it here, no ideo why!
   )
 
   #I like to move testing binaries into a testBin directory

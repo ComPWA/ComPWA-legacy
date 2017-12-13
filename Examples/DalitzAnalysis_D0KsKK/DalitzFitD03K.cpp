@@ -44,8 +44,8 @@
 #include "Optimizer/Minuit2/MinuitResult.hpp"
 #include "Physics/HelicityFormalism.hpp"
 
-#include "Tools/RunManager.hpp"
 #include "Tools/RootGenerator.hpp"
+#include "Tools/Generate.hpp"
 #include "Tools/FitFractions.hpp"
 
 #include "Tools/DalitzPlot.hpp"
@@ -336,8 +336,8 @@ int main(int argc, char **argv) {
       new Tools::RootGenerator(trueModelPartL, trueModelKin->initialState(),
                                trueModelKin->finalState(), seed));
 
-  ComPWA::Tools::RunManager run;
-  run.SetGenerator(gen);
+  //ComPWA::Tools::RunManager run;
+  //run.SetGenerator(gen);
   //======================= EFFICIENCY =============================
   auto eff = std::shared_ptr<Efficiency>(new UnitEfficiency());
 
@@ -371,8 +371,9 @@ int main(int argc, char **argv) {
 
   //========== Generation of toy phase space sample ==
   std::shared_ptr<Data> toyPhspData(new RootReader()); // Toy sample
-  run.SetPhspSample(toyPhspData);
-  run.GeneratePhsp(mcPrecision);
+  //run.SetPhspSample(toyPhspData);
+  //run.GeneratePhsp(mcPrecision);
+  ComPWA::Tools::GeneratePhsp(mcPrecision, gen, toyPhspData);
   toyPhspData->SetEfficiency(trueModelKin,
                              eff); // set efficiency values for each event
 
@@ -444,7 +445,7 @@ int main(int argc, char **argv) {
       inD->ResetWeights(); // resetting weights if requested
     inputData = inD->RndSubSet(trueModelKin, numSignalEvents, gen);
     inputData->SetEfficiency(trueModelKin, eff);
-    run.SetData(inputData);
+    //run.SetData(inputData);
     inD = std::shared_ptr<Data>();
     sample->Add(*inputData);
   }
@@ -479,18 +480,19 @@ int main(int argc, char **argv) {
       // rndReduceSet(phspSampleSize,gen,fullPhsp.get(),fullPhspRed);
       // fullPhsp = std::shared_ptr<Data>(fullPhspRed);
     }
-    run.SetPhspSample(fullPhsp, fullTruePhsp);
+    //run.SetPhspSample(fullPhsp, fullTruePhsp);
   }
   if (!inputData) {
     LOG(info) << "Generating sample!";
-    run.SetData(sample);
-    run.SetAmplitude(trueIntens);
-    run.SetPhspSample(std::shared_ptr<Data>());
-    run.Generate(trueModelKin, numEvents);
+    //run.SetData(sample);
+    //run.SetAmplitude(trueIntens);
+    //run.SetPhspSample(std::shared_ptr<Data>());
+    //run.Generate(trueModelKin, numEvents);
+    ComPWA::Tools::Generate(numEvents, trueModelKin, gen, trueIntens, sample, std::shared_ptr<Data>(), std::shared_ptr<Data>());
     LOG(info) << "Sample size: " << sample->GetNEvents();
   }
   // Reset phsp sample to save memory
-  run.SetPhspSample(std::shared_ptr<Data>());
+  //run.SetPhspSample(std::shared_ptr<Data>());
 
   LOG(info) << "Subsystems used by true model:";
   for (auto i : trueModelKin->GetSubSystems()) {
@@ -623,10 +625,11 @@ int main(int argc, char **argv) {
 
     auto minuitif = new Optimizer::Minuit2::MinuitIF(esti, fitPar);
     minuitif->SetHesse(useHesse);
-    run.SetOptimizer(std::shared_ptr<Optimizer::Optimizer>(minuitif));
+    //run.SetOptimizer(std::shared_ptr<Optimizer::Optimizer>(minuitif));
 
     //====== STARTING MINIMIZATION ======
-    result = run.Fit(fitPar);
+    //result = run.Fit(fitPar);
+    result = minuitif->exec(fitPar);
 
     //====== FIT RESULT =======
     //    auto minuitResult =
@@ -722,14 +725,15 @@ int main(int argc, char **argv) {
       if (!phspEfficiencyFileTrueTreeName.empty())
         plotTruePhsp = std::shared_ptr<Data>(new RootReader(
             phspEfficiencyFile, phspEfficiencyFileTrueTreeName, plotSize));
-      run.SetPhspSample(pl_phspSample, plotTruePhsp);
+      //run.SetPhspSample(pl_phspSample, plotTruePhsp);
       // make sure no efficiency is set
       //      Amplitude::SetAmpEfficiency(
       //          ampVec, std::shared_ptr<Efficiency>(new UnitEfficiency));
     } else { // binned plotting
-      run.SetPhspSample(pl_phspSample);
-      run.GeneratePhsp(plotSize); // we generate a very large sample for
+      //run.SetPhspSample(pl_phspSample);
+      //run.GeneratePhsp(plotSize); // we generate a very large sample for
                                   // plotting
+      ComPWA::Tools::GeneratePhsp(plotSize, gen, pl_phspSample);
     }
     // reduce sample to phsp
     pl_phspSample->ReduceToPhsp(trueModelKin);

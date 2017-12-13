@@ -18,16 +18,15 @@
 #include "Core/Properties.hpp"
 #include "Core/ParameterList.hpp"
 #include "Core/Logging.hpp"
-#include "Tools/RunManager.hpp"
 #include "Tools/RootGenerator.hpp"
+#include "Tools/Generate.hpp"
 #include "DataReader/Data.hpp"
 #include "Physics/IncoherentIntensity.hpp"
 #include "Physics/HelicityFormalism/HelicityKinematics.hpp"
 #include "Physics/HelicityFormalism/test/AmpModelTest.hpp"
 
-using namespace ComPWA::Physics::HelicityFormalism;
-
 using namespace ComPWA;
+using namespace ComPWA::Physics::HelicityFormalism;
 
 BOOST_AUTO_TEST_SUITE(HelicityFormalism)
 
@@ -148,14 +147,11 @@ BOOST_AUTO_TEST_CASE(AmpTreeCorrespondence) {
       partL, kin->initialState(), kin->finalState(), 123));
   std::shared_ptr<ComPWA::DataReader::Data> sample(
       new ComPWA::DataReader::Data());
+  
+  ComPWA::Tools::GeneratePhsp(200, gen, sample);
 
-  ComPWA::Tools::RunManager r;
-  r.SetGenerator(gen);
-  r.SetPhspSample(sample);
-  r.GeneratePhsp(200);
-
-  auto phspSample = std::make_shared<std::vector<DataPoint>>(
-      r.GetPhspSample()->GetDataPoints(kin));
+  auto phspSample =
+      std::make_shared<std::vector<DataPoint>>(sample->GetDataPoints(kin));
   intens->setPhspSample(phspSample, phspSample);
 
   LOG(info) << "Loop over phsp events....";
