@@ -17,8 +17,8 @@ namespace HelicityFormalism {
 
 std::shared_ptr<PartialAmplitude>
 HelicityDecay::Factory(std::shared_ptr<PartList> partL,
-                      std::shared_ptr<Kinematics> kin,
-                      const boost::property_tree::ptree &pt) {
+                       std::shared_ptr<Kinematics> kin,
+                       const boost::property_tree::ptree &pt) {
 
   LOG(trace) << "HelicityDecay::Factory() |";
   SubSystem subSys = SubSystemFactory(pt);
@@ -48,10 +48,11 @@ HelicityDecay::Factory(std::shared_ptr<PartList> partL,
   if (mag)
     obj->setMagnitudeParameter(mag);
   else {
-    obj->setMagnitudeParameter(std::make_shared<ComPWA::DoubleParameter>("", 1.0));
+    obj->setMagnitudeParameter(
+        std::make_shared<ComPWA::DoubleParameter>("", 1.0));
     obj->magnitudeParameter()->fixParameter(true);
   }
-  
+
   if (phase)
     obj->setPhaseParameter(phase);
   else {
@@ -80,8 +81,8 @@ HelicityDecay::Factory(std::shared_ptr<PartList> partL,
     } else if (decayType == "flatte") {
       dynObj = DecayDynamics::AmpFlatteRes::Factory(partL, pt);
     } else {
-      throw std::runtime_error("HelicityDecay::Factory() | Unknown decay type " +
-                               decayType + "!");
+      throw std::runtime_error(
+          "HelicityDecay::Factory() | Unknown decay type " + decayType + "!");
     }
 
     // make sure dynamical function is created and set first
@@ -96,35 +97,34 @@ HelicityDecay::Factory(std::shared_ptr<PartList> partL,
 
   obj->setDynamicalFunction(dynObj);
   obj->setDataPosition(
-      3 *
-      std::dynamic_pointer_cast<HelicityKinematics>(kin)->dataID(subSys));
+      3 * std::dynamic_pointer_cast<HelicityKinematics>(kin)->dataID(subSys));
 
   obj->setPhspVolume(kin->phspVolume());
 
   return std::static_pointer_cast<PartialAmplitude>(obj);
 }
 
-boost::property_tree::ptree HelicityDecay::Save(std::shared_ptr<PartialAmplitude> res) {
+boost::property_tree::ptree
+HelicityDecay::Save(std::shared_ptr<PartialAmplitude> res) {
 
   auto obj = std::static_pointer_cast<HelicityDecay>(res);
   auto pt = SubSystemSave(obj->subSystem());
   pt.put<std::string>("<xmlattr>.Name", obj->name());
-  
+
   boost::property_tree::ptree tmp = obj->magnitudeParameter()->save();
   tmp.put("<xmlattr>.Type", "Magnitude");
   tmp.put("<xmlattr>.Class", "Double");
   pt.add_child("Parameter", tmp);
-  
+
   tmp = obj->phaseParameter()->save();
   tmp.put("<xmlattr>.Type", "Phase");
   tmp.put("<xmlattr>.Class", "Double");
   pt.add_child("Parameter", tmp);
-  
-  pt.put("DecayParticle.<xmlattr>.Name",
-         obj->dynamicalFunction()->name());
+
+  pt.put("DecayParticle.<xmlattr>.Name", obj->dynamicalFunction()->name());
   pt.put("DecayParticle.<xmlattr>.Helicity", obj->wignerD()->GetMu());
 
-  //TODO: put helicities of daughter particles
+  // TODO: put helicities of daughter particles
   return pt;
 }
 
@@ -149,53 +149,53 @@ double HelicityDecay::normalization() const {
 
 std::shared_ptr<FunctionTree>
 HelicityDecay::tree(std::shared_ptr<Kinematics> kin,
-                      const ParameterList &sample,
-                      const ParameterList &toySample, std::string suffix) {
+                    const ParameterList &sample, const ParameterList &toySample,
+                    std::string suffix) {
 
-  int phspSampleSize = toySample.GetMultiDouble(0)->numValues();
+  size_t n = sample.mDoubleValue(0)->values().size();
+  size_t phspSize = toySample.mDoubleValue(0)->values().size();
 
-  std::shared_ptr<FunctionTree> tr(new FunctionTree());
-  tr->createHead("PartialAmplitude(" + name() + ")" + suffix,
-                 std::shared_ptr<Strategy>(new MultAll(ParType::MCOMPLEX)));
-  tr->createNode("Strength",
-                 std::shared_ptr<Strategy>(new Complexify(ParType::COMPLEX)),
+  auto tr = std::make_shared<FunctionTree>(
+      "PartialAmplitude(" + name() + ")" + suffix, MComplex("", n),
+      std::make_shared<MultAll>(ParType::MCOMPLEX));
+  tr->createNode("Strength", std::make_shared<Value<double>>(),
+                 std::make_shared<Complexify>(ParType::COMPLEX),
                  "PartialAmplitude(" + name() + ")" + suffix);
   tr->createLeaf("Magnitude", _magnitude, "Strength");
   tr->createLeaf("Phase", _phase, "Strength");
   tr->createLeaf("PreFactor", _preFactor,
                  "PartialAmplitude(" + name() + ")" + suffix);
-  tr->insertTree(AngularDist->GetTree(sample, DataPosition + 1, DataPosition + 2),
-                 "PartialAmplitude(" + name() + ")" + suffix);
+  tr->insertTree(
+      AngularDist->GetTree(sample, DataPosition + 1, DataPosition + 2),
+      "PartialAmplitude(" + name() + ")" + suffix);
   tr->insertTree(DynamicFcn->GetTree(sample, DataPosition),
                  "PartialAmplitude(" + name() + ")" + suffix);
 
-  tr->recalculate();
-  tr->createNode("Normalization",
-                 std::shared_ptr<Strategy>(new Inverse(ParType::DOUBLE)),
+  tr->parameter();
+  tr->createNode("Normalization", std::make_shared<Value<double>>(),
+                 std::make_shared<Inverse>(ParType::DOUBLE),
                  "PartialAmplitude(" + name() + ")" + suffix); // 1/normLH
-  tr->createNode("SqrtIntegral",
-                 std::shared_ptr<Strategy>(new SquareRoot(ParType::DOUBLE)),
+  tr->createNode("SqrtIntegral", std::make_shared<Value<double>>(),
+                 std::make_shared<SquareRoot>(ParType::DOUBLE),
                  "Normalization");
-  tr->createNode("Integral",
-                 std::shared_ptr<Strategy>(new MultAll(ParType::DOUBLE)),
-                 "SqrtIntegral");
+  tr->createNode("Integral", std::make_shared<Value<double>>(),
+                 std::make_shared<MultAll>(ParType::DOUBLE), "SqrtIntegral");
   tr->createLeaf("PhspVolume", phspVolume_, "Integral");
-  tr->createLeaf("InverseSampleSize", 1 / ((double)phspSampleSize), "Integral");
-  tr->createNode("Sum", std::make_shared<AddAll>(ParType::DOUBLE),
-                 "Integral");
-  tr->createNode("Intensity",
-                 std::shared_ptr<Strategy>(new AbsSquare(ParType::MDOUBLE)),
-                 "Sum", phspSampleSize,
-                 false); //|T_{ev}|^2
-  tr->createNode("mult",
-                 std::shared_ptr<Strategy>(new MultAll(ParType::MCOMPLEX)),
-                 "Intensity");
-  tr->insertTree(AngularDist->GetTree(toySample, DataPosition + 1, DataPosition + 2, "_norm"),
+  tr->createLeaf("InverseSampleSize", 1 / ((double)phspSize), "Integral");
+  tr->createNode("Sum", std::make_shared<Value<double>>(),
+                 std::make_shared<AddAll>(ParType::DOUBLE), "Integral");
+  tr->createNode("Intensity", MDouble("", phspSize),
+                 std::make_shared<AbsSquare>(ParType::MDOUBLE),
+                 "Sum"); //|T_{ev}|^2
+  tr->createNode("mult", MComplex("", phspSize),
+                 std::make_shared<MultAll>(ParType::MCOMPLEX), "Intensity");
+  tr->insertTree(AngularDist->GetTree(toySample, DataPosition + 1,
+                                      DataPosition + 2, "_norm"),
                  "mult" + suffix);
   tr->insertTree(DynamicFcn->GetTree(toySample, DataPosition, "_norm"),
                  "mult" + suffix);
 
-  tr->recalculate();
+  tr->parameter();
   return tr;
 }
 
@@ -205,30 +205,29 @@ void HelicityDecay::parameters(ParameterList &list) {
   DynamicFcn->GetParameters(list);
 }
 
-void HelicityDecay::updateParameters(const ParameterList &list){
+void HelicityDecay::updateParameters(const ParameterList &list) {
 
   // Try to update magnitude
   std::shared_ptr<DoubleParameter> mag;
   try {
-    mag = list.GetDoubleParameter(_magnitude->name());
+    mag = FindParameter(_magnitude->name(), list);
   } catch (std::exception &ex) {
   }
   if (mag)
     _magnitude->updateParameter(mag);
   std::shared_ptr<DoubleParameter> phase;
-  
+
   // Try to update phase
   try {
-    phase = list.GetDoubleParameter(_phase->name());
+    phase = FindParameter(_phase->name(), list);
   } catch (std::exception &ex) {
   }
   if (phase)
     _phase->updateParameter(phase);
 
   DynamicFcn->updateParameters(list);
-  
-  return;
 
+  return;
 }
 
 } // namespace HelicityFormalism

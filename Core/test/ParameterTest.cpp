@@ -32,14 +32,17 @@ namespace ComPWA {
 BOOST_AUTO_TEST_SUITE(ParameterTest);
 
 BOOST_AUTO_TEST_CASE(BoundsCheck) {
-  IntegerParameter parWrong("wrongPar", 7, 10, 5, 1);
-  BOOST_CHECK(!parWrong.hasBounds());
-  parWrong.setBounds(5, 10);
+  ComPWA::Logging log("", boost::log::trivial::severity_level::trace);
+
+  DoubleParameter parWrong("wrongPar", 7, 1);
+  BOOST_CHECK_EXCEPTION(parWrong.setBounds(20, -1), BadParameter,
+                        [](const BadParameter &ex) { return true; });
+  parWrong.setBounds(0, 20);
   BOOST_CHECK(parWrong.hasBounds());
 }
 
 BOOST_AUTO_TEST_CASE(SetGetCheck) {
-  IntegerParameter emptyInt("emptyIntPar");
+  DoubleParameter emptyInt("emptyIntPar");
   emptyInt.fixParameter(false);
   emptyInt.setValue(7);
   emptyInt.setBounds(0, 10);
@@ -63,24 +66,23 @@ BOOST_AUTO_TEST_CASE(FixValueCheck) {
 }
 
 BOOST_AUTO_TEST_CASE(ConstructorCheck2) {
-  IntegerParameter emptyInt("emptyIntPar");
+  Value<int> emptyInt("emptyIntPar", 1);
   DoubleParameter emptyFloat("emptyFloatPar");
-  IntegerParameter parInt("intPar", 2, 0, 5, 1);
-  IntegerParameter parCopy(parInt);
-  IntegerParameter parWrong("wrongPar", 7, 10, 5, 1);
-  std::shared_ptr<IntegerParameter> pParInt(
-      new IntegerParameter("intPointerPar", 3, 0, 5, 1));
+  DoubleParameter parD("parD", 2, 0);
+  DoubleParameter parCopy(parD);
+  DoubleParameter parWrong("wrongPar", 7);
+  std::shared_ptr<DoubleParameter> pParInt(
+      new DoubleParameter("intPointerPar", 3));
   std::vector<DoubleParameter> vecParInt, vecParIntCopy;
   for (unsigned int par = 0; par < 10; par++)
     vecParInt.push_back(DoubleParameter(
-        std::string("listPar") + std::to_string(par), par, 0, 10, 1));
+        std::string("listPar") + std::to_string(par), par));
   vecParIntCopy = vecParInt; // copy vector
 
-  BOOST_CHECK_CLOSE(emptyInt.value(), 0., 0.0001);
+  BOOST_CHECK_EQUAL(emptyInt.value(), 1);
   BOOST_CHECK_CLOSE(emptyFloat.value(), 0., 0.0001);
-  BOOST_CHECK_CLOSE(parInt.value(), 2., 0.0001);
+  BOOST_CHECK_CLOSE(parD.value(), 2., 0.0001);
   BOOST_CHECK_CLOSE(parCopy.value(), 2., 0.0001);
-  BOOST_CHECK(!parWrong.hasBounds());
   BOOST_CHECK_CLOSE(pParInt->value(), 3., 0.0001);
   for (unsigned int par = 0; par < 10; par++)
     BOOST_CHECK_CLOSE(vecParInt[par].value(), vecParIntCopy[par].value(),
@@ -88,31 +90,21 @@ BOOST_AUTO_TEST_CASE(ConstructorCheck2) {
 }
 // ----------- Testing ParameterList ------------
 
-BOOST_AUTO_TEST_CASE(ConstructorCheck) {
-  std::vector<std::shared_ptr<IntegerParameter>> vecParInt;
+BOOST_AUTO_TEST_CASE(FillParameterList) {
+
+  ParameterList list;
   for (unsigned int par = 0; par < 10; par++)
-    vecParInt.push_back(std::make_shared<IntegerParameter>(
+    list.addParameter(std::make_shared<DoubleParameter>(
         std::string("listPar") + std::to_string(par), par, 0, 10, 1));
 
-  ParameterList testList(vecParInt);
   std::shared_ptr<DoubleParameter> dTest(new DoubleParameter("doublePAr", 2.2));
-  testList.AddParameter(dTest);
-  std::shared_ptr<BoolParameter> bTest(new BoolParameter("boolPar", true));
-  testList.AddParameter(bTest);
+  list.addParameter(dTest);
 
-  BOOST_CHECK_CLOSE(testList.numParameters(), 12., 0.0001);
-  BOOST_CHECK_CLOSE(testList.GetNDouble(), 1., 0.0001);
-  BOOST_CHECK_CLOSE(testList.GetNInteger(), 10., 0.0001);
-  BOOST_CHECK_CLOSE(testList.GetNBool(), 1., 0.0001);
+  auto bTest = std::make_shared<Value<int>>("IntPar", 1);
+  list.addValue(bTest);
 
-  BOOST_CHECK_CLOSE(testList.GetIntegerParameter(4)->value(), 4., 0.0001);
-  BOOST_CHECK(testList.GetBoolParameter(0)->value());
-
-  BOOST_CHECK_THROW(testList.GetBoolParameter(4), BadParameter);
-
-  BOOST_CHECK_THROW(testList.SetParameterValue(2, 5.), BadParameter);
-  testList.SetParameterValue(0, 1.1);
-  BOOST_CHECK_CLOSE(testList.GetDoubleParameter(0)->value(), 1.1, 0.0001);
+  BOOST_CHECK_EQUAL(list.numParameters(), 11);
+  BOOST_CHECK_EQUAL(list.numValues(), 1);
 }
 
 BOOST_AUTO_TEST_CASE(Serialization) {
@@ -134,9 +126,13 @@ BOOST_AUTO_TEST_CASE(ParameterError) {
   BOOST_CHECK_EQUAL(par.error().second, 0.3);
 }
 
-BOOST_AUTO_TEST_CASE(ParameterT) {
-  ComPWA::Value<std::vector<std::complex<double>>> par;
-//  std::cout << "asfdasdfaS" << std::endl;
+BOOST_AUTO_TEST_CASE(TemplateValue) {
+  auto par =
+      std::make_shared<ComPWA::Value<std::vector<std::complex<double>>>>();
+  ParameterList l;
+  l.addValue(par);
+  par->values().push_back(std::complex<double>(3,4));
+  BOOST_CHECK_EQUAL(par->value().at(0), std::complex<double>(3,4));
 }
 
 BOOST_AUTO_TEST_SUITE_END();

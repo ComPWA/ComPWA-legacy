@@ -15,7 +15,6 @@
 
 using namespace ComPWA::Optimizer::Minuit2;
 
-
 MinuitResult::MinuitResult()
     : calcInterference(0), initialLH(0), finalLH(0), trueLH(0) {}
 
@@ -38,10 +37,10 @@ void MinuitResult::init(ROOT::Minuit2::FunctionMinimum min) {
   if (minState.HasCovariance()) {
     ROOT::Minuit2::MnUserCovariance minuitCovMatrix = minState.Covariance();
     // Size of Minuit covariance vector is given by dim*(dim+1)/2.
-     // dim is the dimension of the covariance matrix.
-     // The dimension can therefore be calculated as
-     // dim = -0.5+-0.5 sqrt(8*size+1)
-     //
+    // dim is the dimension of the covariance matrix.
+    // The dimension can therefore be calculated as
+    // dim = -0.5+-0.5 sqrt(8*size+1)
+    //
     nFreeParameter = minuitCovMatrix.Nrow();
     cov = std::vector<std::vector<double>>(nFreeParameter,
                                            std::vector<double>(nFreeParameter));
@@ -61,9 +60,9 @@ void MinuitResult::init(ROOT::Minuit2::FunctionMinimum min) {
 
   } else
     LOG(error) << "MinuitResult: no valid correlation matrix available!";
-  if(minState.HasGlobalCC()){
+  if (minState.HasGlobalCC()) {
     globalCC = minState.GlobalCC().GlobalCC();
-  }else{
+  } else {
     globalCC = std::vector<double>(nFreeParameter, 0);
     LOG(error) << "MinuitResult: no valid global correlation available!";
   }
@@ -84,19 +83,6 @@ void MinuitResult::init(ROOT::Minuit2::FunctionMinimum min) {
   return;
 }
 
-void MinuitResult::genSimpleOutput(std::ostream &out) {
-  for (unsigned int o = 0; o < finalParameters.GetNDouble(); o++) {
-    std::shared_ptr<DoubleParameter> outPar =
-        finalParameters.GetDoubleParameter(o);
-    out << outPar->value() << " ";
-    if (outPar->hasError())
-      out << outPar->avgError() << " ";
-  }
-  out << "\n";
-
-  return;
-}
-
 void MinuitResult::genOutput(std::ostream &out, std::string opt) {
   bool printParam = 1, printCorrMatrix = 1, printCovMatrix = 1;
   if (opt == "P") { // print only parameters
@@ -106,7 +92,7 @@ void MinuitResult::genOutput(std::ostream &out, std::string opt) {
   out << std::endl;
   out << "--------------MINUIT2 FIT RESULT----------------" << std::endl;
   if (!isValid)
-    out << "		*** MINIMUM NOT VALID! ***" << std::endl;
+    out << "    *** MINIMUM NOT VALID! ***" << std::endl;
   out << std::setprecision(10);
   out << "Initial Likelihood: " << initialLH << std::endl;
   out << "Final Likelihood: " << finalLH << std::endl;
@@ -115,16 +101,16 @@ void MinuitResult::genOutput(std::ostream &out, std::string opt) {
 
   out << "Estimated distance to minimumn: " << edm << std::endl;
   if (edmAboveMax)
-    out << "		*** EDM IS ABOVE MAXIMUM! ***" << std::endl;
+    out << "    *** EDM IS ABOVE MAXIMUM! ***" << std::endl;
   out << "Error definition: " << errorDef << std::endl;
   out << "Number of calls: " << nFcn << std::endl;
   if (hasReachedCallLimit)
-    out << "		*** LIMIT OF MAX CALLS REACHED! ***" << std::endl;
+    out << "    *** LIMIT OF MAX CALLS REACHED! ***" << std::endl;
   out << "CPU Time : " << time / 60 << "min" << std::endl;
   out << std::setprecision(5) << std::endl;
 
   if (!hasValidParameters)
-    out << "		*** NO VALID SET OF PARAMETERS! ***" << std::endl;
+    out << "    *** NO VALID SET OF PARAMETERS! ***" << std::endl;
   if (printParam) {
     out << "PARAMETERS:" << std::endl;
     TableFormater *tableResult = new TableFormater(&out);
@@ -132,14 +118,13 @@ void MinuitResult::genOutput(std::ostream &out, std::string opt) {
   }
 
   if (!hasValidCov)
-    out << "		*** COVARIANCE MATRIX NOT VALID! ***" << std::endl;
+    out << "    *** COVARIANCE MATRIX NOT VALID! ***" << std::endl;
   if (!hasAccCov)
-    out << "		*** COVARIANCE MATRIX NOT ACCURATE! ***" << std::endl;
+    out << "    *** COVARIANCE MATRIX NOT ACCURATE! ***" << std::endl;
   if (!covPosDef)
-    out << "		*** COVARIANCE MATRIX NOT POSITIVE DEFINITE! ***"
-        << std::endl;
+    out << "    *** COVARIANCE MATRIX NOT POSITIVE DEFINITE! ***" << std::endl;
   if (hesseFailed)
-    out << "		*** HESSE FAILED! ***" << std::endl;
+    out << "    *** HESSE FAILED! ***" << std::endl;
   if (hasValidCov) {
     if (printCovMatrix) {
       out << "COVARIANCE MATRIX:" << std::endl;
@@ -172,17 +157,6 @@ void MinuitResult::createInterferenceTable(std::ostream &out,
   tableInterf->addColumn("Value", 15);
   tableInterf->header();
   double sumInfTerms = 0;
-//  auto it = amp->GetResonanceItrFirst();
-//  for (; it != amp->GetResonanceItrLast(); ++it) {
-//    auto it2 = it;
-//    for (; it2 != amp->GetResonanceItrLast(); ++it2) {
-//      *tableInterf << (*it)->name();
-//      *tableInterf << (*it2)->name();
-//      double inf = amp->GetIntegralInterference(it, it2);
-//      *tableInterf << inf;
-//      sumInfTerms += inf;
-//    }
-//  }
   tableInterf->delim();
   *tableInterf << " "
                << "Sum: " << sumInfTerms;
@@ -197,25 +171,21 @@ void MinuitResult::PrintCorrelationMatrix(TableFormater *tableCorr) {
   tableCorr->addColumn("GlobalCC", 10); // global correlation coefficient
 
   // add columns in correlation matrix
-  for (unsigned int o = 0; o < finalParameters.GetNDouble(); o++) {
-    std::shared_ptr<DoubleParameter> ppp =
-        finalParameters.GetDoubleParameter(o);
-    if (ppp->isFixed())
+  for (auto p : finalParameters.doubleParameters()) {
+    if (p->isFixed())
       continue;
-    tableCorr->addColumn(ppp->name(), 15);
+    tableCorr->addColumn(p->name(), 15);
   }
 
   unsigned int n = 0;
   tableCorr->header();
-  for (unsigned int o = 0; o < finalParameters.GetNDouble(); o++) {
-    std::shared_ptr<DoubleParameter> ppp =
-        finalParameters.GetDoubleParameter(o);
-    if (ppp->isFixed())
+  for (auto p : finalParameters.doubleParameters()) {
+    if (p->isFixed())
       continue;
-    *tableCorr << ppp->name();
-    try{
+    *tableCorr << p->name();
+    try {
       *tableCorr << globalCC.at(n);
-    }catch(...){
+    } catch (...) {
       *tableCorr << "?";
     }
 
@@ -238,21 +208,23 @@ void MinuitResult::PrintCorrelationMatrix(TableFormater *tableCorr) {
 void MinuitResult::PrintCovarianceMatrix(TableFormater *tableCov) {
   if (!hasValidCov)
     return;
+    // Create table structure first
   tableCov->addColumn(" ", 17); // add empty first column
-  // add columns first
-  for (unsigned int o = 0; o < finalParameters.GetNDouble(); o++) {
-    if (!finalParameters.GetDoubleParameter(o)->isFixed())
-      tableCov->addColumn(finalParameters.GetDoubleParameter(o)->name(), 17);
+                                // add columns first
+  for (auto p : finalParameters.doubleParameters()) {
+    if (p->isFixed())
+      continue;
+    tableCov->addColumn(p->name(), 17);
   }
 
+  // Fill table
   unsigned int n = 0;
   tableCov->header();
-  for (unsigned int o = 0; o < finalParameters.GetNDouble(); o++) {
-    std::shared_ptr<DoubleParameter> ppp =
-        finalParameters.GetDoubleParameter(o);
-    if (ppp->isFixed())
+  for (auto p : finalParameters.doubleParameters()) {
+    if (p->isFixed())
       continue;
-    *tableCov << ppp->name();
+
+    *tableCov << p->name();
     for (unsigned int t = 0; t < cov.size(); t++) {
       if (n >= cov.at(0).size()) {
         *tableCov << " ";
@@ -297,15 +269,7 @@ void MinuitResult::WriteTeX(std::string filename) {
 }
 
 bool MinuitResult::HasFailed() {
-  bool failed = 0;
   if (!isValid)
-    failed = 1;
-  //	if(!covPosDef) failed=1;
-  //	if(!hasValidParameters) failed=1;
-  //	if(!hasValidCov) failed=1;
-  //	if(!hasAccCov) failed=1;
-  //	if(hasReachedCallLimit) failed=1;
-  //	if(hesseFailed) failed=1;
-
-  return failed;
+    return false;
+  return true;
 }

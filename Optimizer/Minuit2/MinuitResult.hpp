@@ -148,9 +148,6 @@ protected:
   std::vector<double> globalCC;
 
   //====== OUTPUT =====
-  /// Simplified fit result output
-  void genSimpleOutput(std::ostream &out);
-
   /// Full fit result output
   void genOutput(std::ostream &out, std::string opt = "");
 

@@ -138,8 +138,10 @@ BOOST_AUTO_TEST_CASE(AmpTreeCorrespondence) {
 
   ParameterList list;
   intens->parameters(list);
-  LOG(info) << "List of parameters: " << std::endl << list.to_str();
-  BOOST_CHECK_EQUAL(list.GetNDouble(), 14);
+  LOG(info) << "List of parameters: ";
+  for( auto p : list.doubleParameters() )
+    LOG(info) << p->to_str();
+  BOOST_CHECK_EQUAL(list.doubleParameters().size(), 14);
 
   // Generate phsp sample
   std::shared_ptr<ComPWA::Generator> gen(new ComPWA::Tools::RootGenerator(
@@ -179,7 +181,7 @@ BOOST_AUTO_TEST_CASE(AmpTreeCorrespondence) {
   // Testing function tree
   auto tree = intens->tree(kin, sampleList, sampleList, sampleList,
                            kin->numVariables());
-  tree->recalculate();
+  tree->parameter();
 
   // TODO: implement checks to ensure that amplitude calculation by FunctionTree
   //      and by Evaluate() are the same

@@ -105,12 +105,14 @@ void DoubleParameter::setBounds(const double min, const double max) {
     throw BadParameter("DoubleParameter::setBounds() | Bounds no valid!");
   Bounds.first = min;
   Bounds.second = max;
+  HasBounds = true;
 }
 
 void DoubleParameter::setBounds(const std::pair<double, double> r) {
   if (!check_bounds(r))
     throw BadParameter("DoubleParameter::setBounds() | Bounds no valid!");
   Bounds = r;
+  HasBounds = true;
 }
 
 bool DoubleParameter::hasError() const {

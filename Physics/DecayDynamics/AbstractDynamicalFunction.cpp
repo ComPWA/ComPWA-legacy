@@ -17,7 +17,7 @@ void AbstractDynamicalFunction::GetParameters(ParameterList &list) {
   std::shared_ptr<DoubleParameter> tmp;
   auto mass = GetMassParameter();
   try { // catch BadParameter
-    tmp = list.GetDoubleParameter(mass->name());
+    tmp = FindParameter(mass->name(), list);
     try { //catch and throw std::runtime_error due to failed parameter comparisson
       if (*tmp == *mass)
         SetMassParameter(tmp);
@@ -25,7 +25,7 @@ void AbstractDynamicalFunction::GetParameters(ParameterList &list) {
       throw;
     }
   } catch (BadParameter &ex) {
-    list.AddParameter(mass);
+    list.addParameter(mass);
   }
 }
 

@@ -156,14 +156,16 @@ IncoherentIntensity::tree(std::shared_ptr<Kinematics> kin,
                              const ComPWA::ParameterList &toySample,
                              unsigned int nEvtVar, std::string suffix) {
 
-  std::shared_ptr<FunctionTree> tr(new FunctionTree());
+  size_t sampleSize = sample.mDoubleValue(0)->values().size();
 
-  tr->createHead("IncoherentIntens(" + name() + ")" + suffix,
-                 std::shared_ptr<Strategy>(new MultAll(ParType::MDOUBLE)));
+
+  auto tr = std::make_shared<FunctionTree>(
+      "IncoherentIntens(" + name() + ")" + suffix, MDouble("",sampleSize),
+      std::shared_ptr<Strategy>(new MultAll(ParType::MDOUBLE)));
   tr->createLeaf("Strength", Strength,
                  "IncoherentIntens(" + name() + ")" + suffix);
-  tr->createNode("SumOfCoherentIntens",
-                 std::shared_ptr<Strategy>(new AddAll(ParType::MDOUBLE)),
+  tr->createNode("SumOfCoherentIntens", MDouble("",sampleSize),
+                 std::make_shared<AddAll>(ParType::MDOUBLE),
                  "IncoherentIntens(" + name() + ")" + suffix);
   for (auto i : Intensities) {
     tr->insertTree(i->tree(kin, sample, phspSample, toySample, nEvtVar),
@@ -173,7 +175,7 @@ IncoherentIntensity::tree(std::shared_ptr<Kinematics> kin,
 }
 
 void IncoherentIntensity::parameters(ComPWA::ParameterList &list) {
-  list.AddParameter(Strength);
+  list.addParameter(Strength);
   for (auto i : Intensities) {
     i->parameters(list);
   }
@@ -182,7 +184,7 @@ void IncoherentIntensity::parameters(ComPWA::ParameterList &list) {
 void IncoherentIntensity::updateParameters(const ParameterList &list) {
   std::shared_ptr<DoubleParameter> p;
   try {
-    p = list.GetDoubleParameter(Strength->name());
+    p = FindParameter(Strength->name(), list);
   } catch (std::exception &ex) {
   }
   if (p)

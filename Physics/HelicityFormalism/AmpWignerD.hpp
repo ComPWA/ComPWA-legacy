@@ -98,7 +98,7 @@ public:
 
   virtual const std::string to_str() const { return ("WignerD of " + name); }
 
-  virtual bool execute(ParameterList &paras,
+  virtual void execute(ParameterList &paras,
                        std::shared_ptr<Parameter> &out);
 
 protected:

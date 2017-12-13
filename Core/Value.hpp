@@ -46,7 +46,7 @@ public:
   operator T() const { return Val; };
 
   /// Conversion operators for different types
-  template <typename T2> operator T2() { return Val; };
+//  template <typename T2> operator T2() { return Val; };
 
   const T &operator()() const { return Val; };
 
@@ -114,6 +114,12 @@ MComplex(std::string name, size_t s,
       name, std::vector<std::complex<double>>(s, el));
 }
 
+inline std::shared_ptr<Value<std::vector<std::complex<double>>>>
+MComplex(std::string name, std::vector<std::complex<double>> v) {
+
+  return std::make_shared<Value<std::vector<std::complex<double>>>>(name, v);
+}
+
 inline std::shared_ptr<Value<std::vector<double>>>
 MDouble(std::string name, size_t s, double el = 0.) {
 
@@ -121,11 +127,23 @@ MDouble(std::string name, size_t s, double el = 0.) {
       name, std::vector<double>(s, el));
 }
 
+inline std::shared_ptr<Value<std::vector<double>>>
+MDouble(std::string name, std::vector<double> v) {
+
+  return std::make_shared<Value<std::vector<double>>>(name, v);
+}
+
 inline std::shared_ptr<Value<std::vector<int>>>
 MInteger(std::string name, size_t s, int el = 0.) {
 
   return std::make_shared<Value<std::vector<int>>>(name,
                                                    std::vector<int>(s, el));
+}
+
+inline std::shared_ptr<Value<std::vector<int>>>
+MInteger(std::string name, std::vector<int> v) {
+
+  return std::make_shared<Value<std::vector<int>>>(name,v);
 }
 
 } // ns::ComPWA

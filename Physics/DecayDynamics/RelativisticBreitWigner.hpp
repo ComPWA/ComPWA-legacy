@@ -127,8 +127,8 @@ private:
 
 class BreitWignerStrategy : public ComPWA::Strategy {
 public:
-  BreitWignerStrategy(const std::string resonanceName)
-      : ComPWA::Strategy(ParType::MCOMPLEX), name(resonanceName) {}
+  BreitWignerStrategy(std::string namee = "")
+      : ComPWA::Strategy(ParType::MCOMPLEX), name(namee) {}
 
   virtual const std::string to_str() const {
     return ("relativistic BreitWigner of " + name);

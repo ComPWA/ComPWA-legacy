@@ -58,11 +58,16 @@ public:
   virtual void addValues(std::vector<std::shared_ptr<Parameter>> values);
 
   // Parameter
-  virtual std::shared_ptr<DoubleParameter> doubleParameter(size_t i) {
+  virtual std::shared_ptr<DoubleParameter> doubleParameter(size_t i) const {
     return DoubleParameters.at(i);
   };
 
   virtual std::vector<std::shared_ptr<DoubleParameter>> &doubleParameters() {
+    return DoubleParameters;
+  };
+
+  virtual const std::vector<std::shared_ptr<DoubleParameter>> &
+  doubleParameters() const {
     return DoubleParameters;
   };
 
@@ -76,7 +81,12 @@ public:
     return IntValues;
   };
 
-  virtual std::shared_ptr<ComPWA::Value<double>> doubleValue(size_t i) {
+  virtual const std::vector<std::shared_ptr<ComPWA::Value<int>>> &
+  intValues() const {
+    return IntValues;
+  };
+
+  virtual std::shared_ptr<ComPWA::Value<double>> doubleValue(size_t i) const {
     return DoubleValues.at(i);
   };
 
@@ -84,8 +94,13 @@ public:
     return DoubleValues;
   };
 
+  virtual const std::vector<std::shared_ptr<ComPWA::Value<double>>> &
+  doubleValues() const {
+    return DoubleValues;
+  };
+
   virtual std::shared_ptr<ComPWA::Value<std::complex<double>>>
-  complexValue(size_t i) {
+  complexValue(size_t i) const {
     return ComplexValues.at(i);
   };
 
@@ -94,7 +109,14 @@ public:
     return ComplexValues;
   };
 
-  virtual std::shared_ptr<ComPWA::Value<std::vector<int>>> mIntValue(size_t i) {
+  virtual const std::vector<
+      std::shared_ptr<ComPWA::Value<std::complex<double>>>> &
+  complexValues() const {
+    return ComplexValues;
+  };
+
+  virtual std::shared_ptr<ComPWA::Value<std::vector<int>>>
+  mIntValue(size_t i) const {
     return MultiIntValues.at(i);
   };
 
@@ -103,8 +125,13 @@ public:
     return MultiIntValues;
   };
 
+  virtual const std::vector<std::shared_ptr<ComPWA::Value<std::vector<int>>>> &
+  mIntValues() const {
+    return MultiIntValues;
+  };
+
   virtual std::shared_ptr<ComPWA::Value<std::vector<double>>>
-  mDoubleValue(size_t i) {
+  mDoubleValue(size_t i) const {
     return MultiDoubleValues.at(i);
   };
 
@@ -113,8 +140,13 @@ public:
     return MultiDoubleValues;
   };
 
+  virtual const std::vector<std::shared_ptr<ComPWA::Value<std::vector<double>>>>
+      &mDoubleValues() const {
+    return MultiDoubleValues;
+  };
+
   virtual std::shared_ptr<ComPWA::Value<std::vector<std::complex<double>>>>
-  mComplexValue(size_t i) {
+  mComplexValue(size_t i) const {
     return MultiComplexValues.at(i);
   };
 
@@ -122,6 +154,52 @@ public:
       std::shared_ptr<ComPWA::Value<std::vector<std::complex<double>>>>> &
   mComplexValues() {
     return MultiComplexValues;
+  };
+
+  virtual const std::vector<
+      std::shared_ptr<ComPWA::Value<std::vector<std::complex<double>>>>> &
+  mComplexValues() const {
+    return MultiComplexValues;
+  };
+
+  friend std::ostream &operator<<(std::ostream &out, const ParameterList &b) {
+    return out << b.to_str();
+  }
+
+  /// A public function returning a string with parameter information
+  virtual std::string to_str() const {
+    std::stringstream s;
+    if (IntValues.size()) {
+      s << "Integer values:" << std::endl;
+      for (auto p : IntValues)
+        s << p->to_str();
+    }
+    if (DoubleValues.size()) {
+      s << "Double values:" << std::endl;
+      for (auto p : DoubleValues)
+        s << p->to_str();
+    }
+    if (ComplexValues.size()) {
+      s << "Complex values:" << std::endl;
+      for (auto p : ComplexValues)
+        s << p->to_str();
+    }
+    if (MultiIntValues.size()) {
+      s << "Multi integer values:" << std::endl;
+      for (auto p : MultiIntValues)
+        s << p->to_str();
+    }
+    if (MultiDoubleValues.size()) {
+      s << "Multi double values:" << std::endl;
+      for (auto p : MultiDoubleValues)
+        s << p->to_str();
+    }
+    if (MultiComplexValues.size()) {
+      s << "Multi complex values:" << std::endl;
+      for (auto p : MultiComplexValues)
+        s << p->to_str();
+    }
+    return s.str();
   };
 
 protected:
@@ -155,8 +233,8 @@ private:
 /// Search ParameterList for a DoubleParameter with \p name. The first match is
 /// returned. Be aware that name are not unique. In case no match is found
 /// a BadParameter exception is thrown.
-inline std::shared_ptr<DoubleParameter> FindParameter(std::string name,
-                                               ComPWA::ParameterList &v) {
+inline std::shared_ptr<DoubleParameter>
+FindParameter(std::string name, const ComPWA::ParameterList &v) {
   auto it =
       std::find_if(v.doubleParameters().begin(), v.doubleParameters().end(),
                    [name](const std::shared_ptr<DoubleParameter> &s) {
@@ -173,16 +251,14 @@ inline std::shared_ptr<DoubleParameter> FindParameter(std::string name,
 inline std::shared_ptr<DoubleParameter>
 FindParameter(std::string name,
               std::vector<std::shared_ptr<DoubleParameter>> &v) {
-  auto it =
-      std::find_if(v.begin(), v.end(),
-                   [name](const std::shared_ptr<DoubleParameter> &s) {
-                     return s->name() == name;
-                   });
+  auto it = std::find_if(v.begin(), v.end(),
+                         [name](const std::shared_ptr<DoubleParameter> &s) {
+                           return s->name() == name;
+                         });
   if (it == v.end())
     throw BadParameter("FindParameter() | Parameter not in list!");
   return *it;
 }
-
 
 } // namespace ComPWA
 

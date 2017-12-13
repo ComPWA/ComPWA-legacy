@@ -38,10 +38,11 @@ double FitResult::shiftAngle(double v) {
 }
 
 void FitResult::genSimpleOutput(std::ostream &out) {
-  //  for (auto p : finalParameters.doubleValues())
-  //    out << p->value() << " ";
-  for (auto p : finalParameters.doubleParameters())
-    out << p->value() << " " << p->error().first << " ";
+  for (auto p : finalParameters.doubleParameters()) {
+    out << p->value() << " ";
+    if (p->hasError())
+      out << p->avgError() << " ";
+  }
   out << "\n";
 
   return;

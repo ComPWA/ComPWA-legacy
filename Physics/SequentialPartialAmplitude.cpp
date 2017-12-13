@@ -92,11 +92,13 @@ std::shared_ptr<ComPWA::FunctionTree> SequentialPartialAmplitude::tree(
     std::shared_ptr<Kinematics> kin, const ParameterList &sample,
     const ParameterList &toySample, std::string suffix) {
 
-  std::shared_ptr<FunctionTree> tr(new FunctionTree());
-  tr->createHead("Amplitude(" + name() + ")" + suffix,
-                 std::shared_ptr<Strategy>(new MultAll(ParType::MCOMPLEX)));
-  tr->createNode("Strength",
-                 std::shared_ptr<Strategy>(new Complexify(ParType::COMPLEX)),
+  size_t n = sample.mDoubleValue(0)->values().size();
+
+  auto tr = std::make_shared<FunctionTree>(
+      "Amplitude(" + name() + ")" + suffix, MComplex("",n),
+      std::make_shared<MultAll>(ParType::MCOMPLEX));
+  tr->createNode("Strength", std::make_shared<Value<std::complex<double>>>(),
+                 std::make_shared<Complexify>(ParType::COMPLEX),
                  "Amplitude(" + name() + ")" + suffix);
   tr->createLeaf("Magnitude", Magnitude, "Strength");
   tr->createLeaf("Phase", Phase, "Strength");
@@ -109,7 +111,7 @@ std::shared_ptr<ComPWA::FunctionTree> SequentialPartialAmplitude::tree(
     if (!resTree->sanityCheck())
       throw std::runtime_error("AmpSumIntensity::setupBasicTree() | "
                                "Amplitude tree didn't pass sanity check!");
-    resTree->recalculate();
+    resTree->parameter();
     tr->insertTree(resTree, "Amplitude(" + name() + ")" + suffix);
   }
 
@@ -123,11 +125,11 @@ void SequentialPartialAmplitude::parameters(ParameterList &list) {
   }
 }
 
-void SequentialPartialAmplitude::updateParameters(const ParameterList &par) {
+void SequentialPartialAmplitude::updateParameters(const ParameterList &list) {
   // Try to update magnitude
   std::shared_ptr<DoubleParameter> mag;
   try {
-    mag = par.GetDoubleParameter(Magnitude->name());
+    mag = FindParameter(Magnitude->name(), list);
   } catch (std::exception &ex) {
   }
   if (mag)
@@ -136,14 +138,14 @@ void SequentialPartialAmplitude::updateParameters(const ParameterList &par) {
 
   // Try to update phase
   try {
-    phase = par.GetDoubleParameter(Phase->name());
+    phase = FindParameter(Phase->name(), list);
   } catch (std::exception &ex) {
   }
   if (phase)
     Phase->updateParameter(phase);
 
   for (auto i : PartialAmplitudes)
-    i->updateParameters(par);
+    i->updateParameters(list);
 
   return;
 }

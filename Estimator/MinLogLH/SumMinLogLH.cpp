@@ -1,5 +1,3 @@
-
-
 // Copyright (c) 2013, 2015, 2017 The ComPWA Team.
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
@@ -16,9 +14,7 @@ double SumMinLogLH::controlParameter(ParameterList &minPar) {
     for (auto i : _minLogLh)
       lh = +i->controlParameter(minPar);
   } else {
-    _tree->recalculate();
-    auto logLH =
-    std::dynamic_pointer_cast<DoubleParameter>(_tree->head()->parameter(0));
+    auto logLH = std::dynamic_pointer_cast<DoubleParameter>(_tree->parameter());
     lh = logLH->value();
   }
   _nCalls++;
@@ -33,7 +29,8 @@ void SumMinLogLH::UseFunctionTree(bool onoff) {
     return;
   }
   _tree = std::make_shared<FunctionTree>(
-      "SumLogLh", std::shared_ptr<Strategy>(new AddAll(ParType::DOUBLE)));
+      "SumLogLh", std::make_shared<Value<double>>(),
+      std::make_shared<AddAll>(ParType::DOUBLE));
   for (auto tr : _minLogLh) {
     try {
       tr->UseFunctionTree(true);
@@ -47,7 +44,7 @@ void SumMinLogLH::UseFunctionTree(bool onoff) {
     _tree->insertTree(tr->tree(), "SumLogLh");
   }
 
-  _tree->recalculate();
+  _tree->parameter();
   if (!_tree->sanityCheck()) {
     throw std::runtime_error(
         "SumMinLogLH::UseFunctionTree() | Tree has structural "

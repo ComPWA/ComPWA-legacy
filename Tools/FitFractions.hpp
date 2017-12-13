@@ -22,7 +22,7 @@
 namespace ComPWA {
 namespace Tools {
 
-/** Print gsl_matrix **/
+/// Print gsl_matrix
 inline void gsl_matrix_print(const gsl_matrix *m) {
   for (size_t i = 0; i < m->size1; i++) {
     for (size_t j = 0; j < m->size2; j++) {
@@ -32,7 +32,7 @@ inline void gsl_matrix_print(const gsl_matrix *m) {
   }
 };
 
-/** Print gsl_vector **/
+/// Print gsl_vector
 inline void gsl_vector_print(const gsl_vector *m) {
   for (size_t i = 0; i < m->size; i++) {
     std::printf("%g ", gsl_vector_get(m, i));
@@ -40,12 +40,13 @@ inline void gsl_vector_print(const gsl_vector *m) {
   std::printf("\n");
 };
 
-/** Convert ParameterList to gsl vector **/
+/// Convert ParameterList to gsl vector
 inline gsl_vector *gsl_parameterList2Vec(const ParameterList &list) {
-  gsl_vector *tmp = gsl_vector_alloc(list.GetNDouble());
-  unsigned int t = 0;
-  for (unsigned int o = 0; o < list.GetNDouble(); o++) {
-    std::shared_ptr<DoubleParameter> outPar = list.GetDoubleParameter(o);
+  size_t n = list.doubleParameters().size();
+  gsl_vector *tmp = gsl_vector_alloc(n);
+  size_t t = 0;
+  for (size_t o = 0; o < n; o++) {
+    auto outPar = list.doubleParameter(o);
     if (outPar->isFixed())
       continue;
     gsl_vector_set(tmp, t, outPar->value());
@@ -58,7 +59,7 @@ inline gsl_vector *gsl_parameterList2Vec(const ParameterList &list) {
   return vec;
 };
 
-/** Convert std::vector matrix to gsl matrix **/
+/// Convert std::vector matrix to gsl matrix
 inline gsl_matrix *
 gsl_vecVec2Matrix(const std::vector<std::vector<double>> &m) {
   gsl_matrix *tmp = gsl_matrix_alloc(m.size(), m.at(0).size());
@@ -70,15 +71,14 @@ gsl_vecVec2Matrix(const std::vector<std::vector<double>> &m) {
   return tmp;
 };
 
-/** Multivariate Gaussian using cholesky decomposition
- * A test application can be found at test/MultiVariateGaussianTestApp.cpp
- *
- * @param rnd Random number generator
- * @param vecSize Size of data vector
- * @param in Mean value(s)
- * @param cov Covariance matrix
- * @param res Resulting Vector
- */
+/// Multivariate Gaussian using cholesky decomposition
+/// A test application can be found at test/MultiVariateGaussianTestApp.cpp
+///
+/// \param rnd Random number generator
+/// \param vecSize Size of data vector
+/// \param in Mean value(s)
+/// \param cov Covariance matrix
+/// \param res Resulting Vector
 inline void multivariateGaussian(const gsl_rng *rnd, const int vecSize,
                                  const gsl_vector *in, const gsl_matrix *cov,
                                  gsl_vector *res) {
@@ -96,20 +96,19 @@ inline void multivariateGaussian(const gsl_rng *rnd, const int vecSize,
     gsl_vector_set(res, i, gsl_ran_ugaussian(rnd));
 
   // Debug
-  //	gsl_matrix_print(cov);
-  //	gsl_vector_print(in);
-  //	gsl_vector_print(res);
-  //	gsl_matrix_print(tmpM);
+  //  gsl_matrix_print(cov);
+  //  gsl_vector_print(in);
+  //  gsl_vector_print(res);
+  //  gsl_matrix_print(tmpM);
 
-  /*From the GNU GSL Documentation:
-   * The function dtrmv compute the matrix-vector product x = op(A) x for the
-   * triangular matrix A, where op(A) = A, A^T, A^H for TransA = CblasNoTrans,
-   * CblasTrans, CblasConjTrans. When Uplo is CblasUpper then the upper
-   * triangle of A is used, and when Uplo is CblasLower then the lower
-   * triangle of A is used. If Diag is CblasNonUnit then the diagonal of
-   * the matrix is used, but if Diag is CblasUnit then the diagonal elements
-   * of the matrix A are taken as unity and are not referenced.
-   */
+  // From the GNU GSL Documentation:
+  // The function dtrmv compute the matrix-vector product x = op(A) x for the
+  // triangular matrix A, where op(A) = A, A^T, A^H for TransA = CblasNoTrans,
+  // CblasTrans, CblasConjTrans. When Uplo is CblasUpper then the upper
+  // triangle of A is used, and when Uplo is CblasLower then the lower
+  // triangle of A is used. If Diag is CblasNonUnit then the diagonal of
+  // the matrix is used, but if Diag is CblasUnit then the diagonal elements
+  // of the matrix A are taken as unity and are not referenced.
   gsl_blas_dtrmv(CblasLower, CblasNoTrans, CblasNonUnit, tmpM, res);
 
   gsl_vector_add(res, in);
@@ -163,7 +162,7 @@ CalculateFitFractions(std::shared_ptr<ComPWA::Kinematics> kin,
   ComPWA::ParameterList ffList;
   for (auto i : defs) {
     auto par = CalculateFitFraction(kin, intens, sample, i);
-    ffList.AddParameter(std::make_shared<ComPWA::DoubleParameter>(par));
+    ffList.addParameter(std::make_shared<ComPWA::DoubleParameter>(par));
   }
   return ffList;
 }
@@ -183,7 +182,7 @@ inline void CalcFractionError(
     std::vector<std::pair<std::string, std::string>> defs) {
   if (nSets <= 0)
     return;
-  if (!parameters.GetNDouble())
+  if (!parameters.doubleParameters().size())
     return;
   LOG(info) << "Calculating errors of fit fractions using " << nSets
             << " sets of parameters...";
@@ -219,8 +218,8 @@ inline void CalcFractionError(
     newPar.DeepCopy(parameters);
 
     std::size_t t = 0;
-    for (std::size_t o = 0; o < newPar.GetNDouble(); o++) {
-      std::shared_ptr<DoubleParameter> outPar = newPar.GetDoubleParameter(o);
+    for (std::size_t o = 0; o < newPar.doubleParameters().size(); o++) {
+      std::shared_ptr<DoubleParameter> outPar = newPar.doubleParameter(o);
       if (outPar->isFixed())
         continue;
       // set floating values to smeared values
@@ -247,35 +246,35 @@ inline void CalcFractionError(
     i++;
 
     /******* DEBUGGING *******/
-    //			if(i==0){
-    //				for(int t=0; t<newPar.GetNDouble();
+    //      if(i==0){
+    //        for(int t=0; t<newPar.GetNDouble();
     // t++){
-    //					if(
+    //          if(
     // newPar.GetDoubleParameter(t)->IsFixed())
     // continue;
-    //					outFraction <<
+    //          outFraction <<
     // newPar.GetDoubleParameter(t)->name()<<":";
-    //				}
-    //				for(int t=0; t<tmp.GetNDouble(); t++)
-    //					outFraction <<
+    //        }
+    //        for(int t=0; t<tmp.GetNDouble(); t++)
+    //          outFraction <<
     // tmp.GetDoubleParameter(t)->name()<<":";
-    //				outFraction << "norm" << std::endl;
-    //			}
-    //			for(int t=0; t<newPar.GetNDouble(); t++){
-    //				if(
+    //        outFraction << "norm" << std::endl;
+    //      }
+    //      for(int t=0; t<newPar.GetNDouble(); t++){
+    //        if(
     // newPar.GetDoubleParameter(t)->IsFixed())
     // continue;
-    //				outFraction <<
+    //        outFraction <<
     // newPar.GetDoubleParameter(t)->value()<<"
     //";
-    //			}
-    //			for(int t=0; t<tmp.GetNDouble(); t++)
-    //				outFraction <<
+    //      }
+    //      for(int t=0; t<tmp.GetNDouble(); t++)
+    //        outFraction <<
     // tmp.GetDoubleParameter(t)->value()<<"
     //";
-    //			double norm = _amp->GetIntegral();
-    //			outFraction << norm;
-    //			outFraction << std::endl;
+    //      double norm = _amp->GetIntegral();
+    //      outFraction << norm;
+    //      outFraction << std::endl;
     /******* DEBUGGING *******/
   }
 
@@ -285,10 +284,10 @@ inline void CalcFractionError(
   gsl_rng_free(rnd);
 
   // Calculate standard deviation
-  for (unsigned int o = 0; o < ffList.GetNDouble(); ++o) {
+  for (unsigned int o = 0; o < ffList.doubleParameters().size(); ++o) {
     double mean = 0, sqSum = 0., stdev = 0;
     for (unsigned int i = 0; i < fracVect.size(); ++i) {
-      double tmp = fracVect.at(i).GetDoubleParameter(o)->value();
+      double tmp = fracVect.at(i).doubleParameter(o)->value();
       mean += tmp;
       sqSum += tmp * tmp;
     }
@@ -297,7 +296,7 @@ inline void CalcFractionError(
     mean /= s;
     // Equivalent to RMS of the distribution
     stdev = std::sqrt(sqSum - mean * mean);
-    ffList.GetDoubleParameter(o)->setError(stdev);
+    ffList.doubleParameter(o)->setError(stdev);
   }
 
   // Set correct fit result
@@ -305,7 +304,7 @@ inline void CalcFractionError(
   return;
 }
 
-} // namespace Tools
-} // namespace ComPWA
+} // ns::Tools
+} // ns::ComPWA
 
 #endif

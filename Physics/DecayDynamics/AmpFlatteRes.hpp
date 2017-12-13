@@ -172,7 +172,7 @@ public:
     return ("flatte amplitude of " + name);
   }
 
-  virtual bool execute(ParameterList &paras,
+  virtual void execute(ParameterList &paras,
                        std::shared_ptr<Parameter> &out);
 
 protected:

@@ -101,8 +101,8 @@ public:
   void setPhase(double par) { _phase->setValue(par); }
 
   virtual void parameters(ParameterList &list) {
-    list.AddParameter(magnitudeParameter());
-    list.AddParameter(phaseParameter());
+    list.addParameter(magnitudeParameter());
+    list.addParameter(phaseParameter());
   }
 
   /// Fill vector with parameters (fast). No check is performed if parameters

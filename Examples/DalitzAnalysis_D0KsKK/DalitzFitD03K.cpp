@@ -595,7 +595,7 @@ int main(int argc, char **argv) {
     std::cout.setf(std::ios::unitbuf);
     if (fittingMethod == "tree") {
       esti->UseFunctionTree(true);
-      esti->tree()->recalculate();
+      esti->tree()->parameter();
       LOG(debug) << esti->tree()->head()->print(25);
     }
 

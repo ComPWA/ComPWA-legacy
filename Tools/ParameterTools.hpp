@@ -37,16 +37,15 @@ inline std::string expand_user(std::string p) {
 ///
 inline void setErrorOnParameterList(ComPWA::ParameterList &list, double error,
                                     bool asym) {
-  for (unsigned int i = 0; i < list.GetNDouble(); i++) {
-    std::shared_ptr<ComPWA::DoubleParameter> p = list.GetDoubleParameter(i);
+  for (auto p : list.doubleParameters() ) {
     if (p->isFixed()) {
       p->setError(0.0);
       continue;
     }
     if (asym)
-      list.GetDoubleParameter(i)->setError(error, error);
+      p->setError(error, error);
     else
-      list.GetDoubleParameter(i)->setError(error);
+      p->setError(error);
   }
 }
 
@@ -55,8 +54,8 @@ inline void setErrorOnParameterList(ComPWA::ParameterList &list, double error,
 /// random value is uniformly choosen within the parameter bounds
 ///
 inline void randomStartValues(ComPWA::ParameterList &fitPar) {
-  for (unsigned int i = 0; i < fitPar.GetNDouble(); i++) {
-    std::shared_ptr<ComPWA::DoubleParameter> p = fitPar.GetDoubleParameter(i);
+  std::cout << "Randomizing parameter list. New list:" <<std::endl;
+  for (auto p : fitPar.doubleParameters() ) {
     if (p->isFixed())
       continue;
     std::pair<double, double> bounds(-999,-999);
@@ -64,8 +63,8 @@ inline void randomStartValues(ComPWA::ParameterList &fitPar) {
       bounds = p->bounds();
     }
     p->setValue(gRandom->Uniform(bounds.first, bounds.second));
+    std::cout << p->to_str() << std::endl;
   }
-  std::cout << "Randomizing parameter list. New list:" << fitPar << std::endl;
   return;
 }
 

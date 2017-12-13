@@ -80,8 +80,8 @@ public:
 
   /// Fill parameters to list
   virtual void parameters(ParameterList &list) {
-    list.AddParameter(Magnitude);
-    list.AddParameter(Phase);
+    list.addParameter(Magnitude);
+    list.addParameter(Phase);
   }
 
   /// Fill vector with parameters.

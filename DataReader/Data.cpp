@@ -190,20 +190,12 @@ Data::GetListOfData(std::shared_ptr<ComPWA::Kinematics> kin) {
   }
 
   // Add data vector to ParameterList
-  for (int i = 0; i < size; ++i) {
-    // std::shared_ptr<MultiDouble> tmp(new MultiDouble(
-    //  Kinematics::instance()->variableNames().at(i), data.at(i)));
-    std::shared_ptr<MultiDouble> tmp(new MultiDouble("", data.at(i)));
-    dataList.AddParameter(tmp);
-  }
-
+  for (auto i : data)
+    dataList.addValue(MDouble("", i));
   // Adding efficiency at the end
-  dataList.AddParameter(
-      std::shared_ptr<MultiDouble>(new MultiDouble("Efficiency", eff)));
-
+  dataList.addValue(MDouble("Efficiency", eff));
   // Adding weight at the end
-  dataList.AddParameter(
-      std::shared_ptr<MultiDouble>(new MultiDouble("Weight", weight)));
+  dataList.addValue(MDouble("Weight", weight));
 
   return dataList;
 }

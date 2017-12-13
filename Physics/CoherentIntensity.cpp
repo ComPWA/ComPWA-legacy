@@ -118,20 +118,25 @@ CoherentIntensity::tree(std::shared_ptr<Kinematics> kin,
                            const ComPWA::ParameterList &phspSample,
                            const ComPWA::ParameterList &toySample,
                            unsigned int nEvtVar, std::string suffix) {
+  
+  size_t n = sample.mDoubleValue(0)->values().size();
+  size_t phspSize = phspSample.mDoubleValue(0)->values().size();
 
-  unsigned int effId = nEvtVar;
-  unsigned int weightId = nEvtVar + 1;
-  int phspSampleSize = phspSample.GetMultiDouble(0)->numValues();
+  // Efficiency values are stored on the next to last element of the
+  // ParameterList
+  std::shared_ptr<Value<std::vector<double>>> eff =
+      phspSample.mDoubleValues().end()[-2];
+  // Weights are stored on the last element of the ParameterList
+  std::shared_ptr<Value<std::vector<double>>> weightPhsp =
+      phspSample.mDoubleValues().end()[-1];
+  
+  double sumWeights = std::accumulate(weightPhsp->values().begin(),
+                                      weightPhsp->values().end(), 0.0);
 
-  std::shared_ptr<MultiDouble> weightPhsp = phspSample.GetMultiDouble(weightId);
-  double sumWeights =
-      std::accumulate(weightPhsp->first(), weightPhsp->last(), 0.0);
-  std::shared_ptr<MultiDouble> eff = phspSample.GetMultiDouble(effId);
+  auto tr = std::make_shared<FunctionTree>(
+      "CoherentIntensity(" + name() + ")" + suffix, MDouble("", n),
+      std::make_shared<MultAll>(ParType::MDOUBLE));
 
-  std::shared_ptr<FunctionTree> tr(new FunctionTree());
-
-  tr->createHead("CoherentIntensity(" + name() + ")" + suffix,
-                 std::shared_ptr<Strategy>(new MultAll(ParType::MDOUBLE)));
   tr->createLeaf("Strength", Strength,
                  "CoherentIntensity(" + name() + ")" + suffix);
   tr->createNode("SumSquared",
@@ -142,9 +147,10 @@ CoherentIntensity::tree(std::shared_ptr<Kinematics> kin,
   // Normalization
   // create a new FunctionTree to make sure that nodes with the same name do
   // not interfere
-  std::shared_ptr<FunctionTree> trNorm(new FunctionTree());
-  trNorm->createHead("Normalization(" + name() + ")" + suffix,
-                     std::shared_ptr<Strategy>(new Inverse(ParType::DOUBLE)));
+  auto trNorm = std::make_shared<FunctionTree>(
+      "Normalization(" + name() + ")" + suffix,
+      std::make_shared<Value<double>>(),
+      std::make_shared<Inverse>(ParType::DOUBLE));
   trNorm->createNode("Integral",
                      std::shared_ptr<Strategy>(new MultAll(ParType::DOUBLE)),
                      "Normalization(" + name() + ")" + suffix);
@@ -154,15 +160,13 @@ CoherentIntensity::tree(std::shared_ptr<Kinematics> kin,
   trNorm->createNode("Sum",
                      std::shared_ptr<Strategy>(new AddAll(ParType::DOUBLE)),
                      "Integral");
-  trNorm->createNode("IntensityWeighted",
-                     std::shared_ptr<Strategy>(new MultAll(ParType::MDOUBLE)),
-                     "Sum", phspSampleSize, false);
+  trNorm->createNode("IntensityWeighted", MDouble("", phspSize),
+                     std::make_shared<MultAll>(ParType::MDOUBLE), "Sum");
   trNorm->createLeaf("Efficiency", eff, "IntensityWeighted");
   trNorm->createLeaf("EventWeight", weightPhsp, "IntensityWeighted");
-  trNorm->createNode("Intensity",
-                     std::shared_ptr<Strategy>(new AbsSquare(ParType::MDOUBLE)),
-                     "IntensityWeighted", phspSampleSize,
-                     false); //|T_{ev}|^2
+  trNorm->createNode("Intensity", MDouble("", phspSize),
+                     std::make_shared<AbsSquare>(ParType::MDOUBLE),
+                     "IntensityWeighted"); //|T_{ev}|^2
   trNorm->insertTree(setupBasicTree(kin, phspSample, toySample, "_norm"),
                      "Intensity");
 
@@ -174,27 +178,18 @@ std::shared_ptr<ComPWA::FunctionTree> CoherentIntensity::setupBasicTree(
     std::shared_ptr<Kinematics> kin, const ParameterList &sample,
     const ParameterList &phspSample, std::string suffix) const {
 
-  int sampleSize = sample.GetMultiDouble(0)->numValues();
-  int phspSampleSize = phspSample.GetMultiDouble(0)->numValues();
+  size_t n = sample.mDoubleValue(0)->values().size();
 
-  if (sampleSize == 0) {
+  if (n == 0) {
     LOG(error) << "AmpSumIntensity::setupBasicTree() | "
                   "Data sample empty!";
     return std::shared_ptr<FunctionTree>();
   }
-  if (phspSampleSize == 0) {
-    LOG(error) << "AmpSumIntensity::setupBasicTree() | "
-                  "Phsp sample empty!";
-    return std::shared_ptr<FunctionTree>();
-  }
 
   //------------ Setup FunctionTree ---------------------
-  std::shared_ptr<FunctionTree> newTree(new FunctionTree());
-
-  // Strategies needed
-  std::shared_ptr<AddAll> maddStrat(new AddAll(ParType::MCOMPLEX));
-
-  newTree->createHead("SumOfAmplitudes" + suffix, maddStrat, sampleSize);
+  auto newTree = std::make_shared<FunctionTree>(
+      "SumOfAmplitudes" + suffix, MComplex("", n),
+      std::make_shared<AddAll>(ParType::MCOMPLEX));
 
   for (auto i : Amplitudes) {
     std::shared_ptr<ComPWA::FunctionTree> resTree =
@@ -202,7 +197,7 @@ std::shared_ptr<ComPWA::FunctionTree> CoherentIntensity::setupBasicTree(
     if (!resTree->sanityCheck())
       throw std::runtime_error("AmpSumIntensity::setupBasicTree() | "
                                "Resonance tree didn't pass sanity check!");
-    resTree->recalculate();
+    resTree->parameter();
     newTree->insertTree(resTree, "SumOfAmplitudes" + suffix);
   }
 
@@ -211,7 +206,7 @@ std::shared_ptr<ComPWA::FunctionTree> CoherentIntensity::setupBasicTree(
 }
 
 void CoherentIntensity::parameters(ComPWA::ParameterList &list) {
-  list.AddParameter(Strength);
+  list.addParameter(Strength);
   for (auto i : Amplitudes) {
     i->parameters(list);
   }
@@ -220,7 +215,7 @@ void CoherentIntensity::parameters(ComPWA::ParameterList &list) {
 void CoherentIntensity::updateParameters(const ParameterList &list) {
   std::shared_ptr<DoubleParameter> p;
   try {
-    p = list.GetDoubleParameter(Strength->name());
+    p = FindParameter(Strength->name(),list);
   } catch (std::exception &ex) {
   }
   if (p)

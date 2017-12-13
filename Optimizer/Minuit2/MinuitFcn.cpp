@@ -26,18 +26,18 @@ MinuitFcn::MinuitFcn(std::shared_ptr<ComPWA::IEstimator> myData,
 MinuitFcn::~MinuitFcn() {}
 
 double MinuitFcn::operator()(const std::vector<double> &x) const {
-  // ParameterList par;
+  assert( x.size() == _parList.numParameters() );
+  
   std::ostringstream paramOut;
+
   for (unsigned int i = 0; i < x.size(); i++) {
-    std::shared_ptr<ComPWA::DoubleParameter> actPat =
-        _parList.GetDoubleParameter(i);
-    // std::cout<<i<<" "<<actPat->name()<<" "<<actPat->value()
-    //<<" "<<x[i]<<" "<<actPat->IsFixed()<<std::endl;
-    if (!actPat->isFixed())
-      if (x[i] == x[i]) {
-        actPat->setValue(x[i]);
-        paramOut << x[i] << " "; // print only free parameters
-      }
+    auto actPat = _parList.doubleParameter(i);
+    if (actPat->isFixed())
+      continue;
+    if (std::isnan(x.at(i)))
+      continue;
+    actPat->setValue(x[i]);
+    paramOut << x[i] << " "; // print only free parameters
   }
   // Start timing
   clock_t begin = clock();

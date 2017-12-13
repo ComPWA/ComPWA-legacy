@@ -50,24 +50,20 @@ MinuitIF::MinuitIF(std::shared_ptr<IEstimator> esti, ParameterList &par)
 
 MinuitIF::~MinuitIF() {}
 
-std::shared_ptr<ComPWA::FitResult> MinuitIF::exec(ParameterList &par) {
+std::shared_ptr<ComPWA::FitResult> MinuitIF::exec(ParameterList &list) {
   LOG(debug) << "MinuitIF::exec() | Start";
 
   // Start timing
   clock_t begin = clock();
 
-  par.RemoveDuplicates();
-
   LOG(debug) << "MinuitIF::exec() | Begin ParameterList::DeepCopy()";
 
   ParameterList initialParList;
-  initialParList.DeepCopy(par);
+  initialParList.DeepCopy(list);
 
   MnUserParameters upar;
   int freePars = 0;
-  for (unsigned int i = 0; i < par.GetNDouble(); ++i) {
-    std::shared_ptr<DoubleParameter> actPat = par.GetDoubleParameter(i);
-
+  for( auto actPat : list.doubleParameters() ) {
     // If no error is set or error set to 0 we use a default error,
     // otherwise minuit treads this parameter as fixed
     if (!actPat->hasError())
@@ -91,7 +87,7 @@ std::shared_ptr<ComPWA::FitResult> MinuitIF::exec(ParameterList &par) {
   }
 
   LOG(info) << "MinuitIF::exec() | Number of parameters (free): "
-            << par.GetNDouble() << " (" << freePars << ")";
+            << list.numParameters() << " (" << freePars << ")";
 
   // use MnStrategy class to set all options for the fit
   MinuitStrategy strat(1); // using default strategy = 1 (medium)
@@ -162,17 +158,16 @@ std::shared_ptr<ComPWA::FitResult> MinuitIF::exec(ParameterList &par) {
   // ParameterList can be changed by minos. We have to do a deep copy here
   // to preserve the original parameters at the minimum.
   ParameterList finalParList;
-  finalParList.DeepCopy(par);
+  finalParList.DeepCopy(list);
 
   // We directly write the central values of the fit result to check if the
   // parameters change later on
   std::stringstream resultsOut;
   resultsOut << "Central values of floating paramters:" << std::endl;
-  for (unsigned int i = 0; i < finalParList.GetNDouble(); ++i) {
-    auto finalPar = finalParList.GetDoubleParameter(i);
+  size_t id = 0;
+  for ( auto finalPar : finalParList.doubleParameters() ){
     if (finalPar->isFixed())
       continue;
-
     // central value
     double val = minState.Value(finalPar->name());
 
@@ -186,16 +181,14 @@ std::shared_ptr<ComPWA::FitResult> MinuitIF::exec(ParameterList &par) {
       // Skip minos and fill symmetic errors
       if (!minMin.IsValid() || !enableMinos) {
         LOG(info) << "MinuitIF::exec() | Skip Minos "
-                     "for parameter "
-                  << i << "...";
+                     "for parameter " << finalPar->name()<<"...";
         finalPar->setError(minState.Error(finalPar->name()));
         continue;
       }
       // asymmetric errors -> run minos
       LOG(info) << "MinuitIF::exec() | Run minos "
-                   "for parameter "
-                << i << "...";
-      MinosError err = minos.Minos(i);
+                   "for parameter ["<<id<<"] " << finalPar->name()<<"...";
+      MinosError err = minos.Minos(id);
       // lower = pair.first, upper= pair.second
       std::pair<double, double> assymErrors = err();
       finalPar->setError(assymErrors.first, assymErrors.second);
@@ -207,14 +200,15 @@ std::shared_ptr<ComPWA::FitResult> MinuitIF::exec(ParameterList &par) {
           "MinuitIF::exec() | Unknown error type of parameter: " +
           std::to_string((long long int)finalPar->errorType()));
     }
+    id++;
   }
 
   // Update the original parameter list
-  for (unsigned int i = 0; i < finalParList.GetNDouble(); ++i) {
-    auto finalPar = finalParList.GetDoubleParameter(i);
+  for (size_t i = 0; i < finalParList.numParameters(); ++i) {
+    auto finalPar = finalParList.doubleParameter(i);
     if (finalPar->isFixed())
       continue;
-    par.GetDoubleParameter(i)->updateParameter(finalPar);
+    list.doubleParameter(i)->updateParameter(finalPar);
   }
 
   LOG(debug) << "MinuitIF::exec() | " << resultsOut.str();

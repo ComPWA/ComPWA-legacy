@@ -52,7 +52,7 @@ py::array_t<double> result_values(std::shared_ptr<ComPWA::FitResult> fitRes){
   std::size_t size = resPar.numParameters();
   double *foo = new double[size];
   for (std::size_t i = 0; i < size; i++) {
-      foo[i] = resPar.GetDoubleParameterValue(i);
+      foo[i] = resPar.doubleParameter(i)->value();
   }
 
   // Create a Python object that will free the allocated
