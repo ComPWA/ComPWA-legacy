@@ -2,18 +2,11 @@
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
-//! Physics Interface Base-Class.
-/*! \class Amplitude
- * @file Amplitude.hpp
- * This class provides the interface to the model which tries to describe the
- * intensity. As it is pure virtual, one needs at least one implementation to
- * provide an model for the analysis which calculates intensities for an event
- * on
- * basis model parameters. If a new physics-model is derived from and fulfills
- * this base-class, no change in other modules are necessary to work with the
- * new
- * physics module.
- */
+///
+/// \file
+/// Amplitude base class.
+///
+
 
 #ifndef AMPLITUDE_HPP_
 #define AMPLITUDE_HPP_
@@ -30,23 +23,27 @@
 namespace ComPWA {
 namespace Physics {
 
+///
+/// \class Amplitude
+/// Amplitude is a base class. It describes a complex function which resembles
+/// the transition probability of a initial state to a final state via a certain
+/// process.
+///
 class Amplitude {
 
 public:
   //============ CONSTRUCTION ==================
 
-  //! Constructor with an optional, unique name and an optional efficiency
   Amplitude(std::string name = "")
       : Name(name), PreFactor(1, 0), CurrentMagnitude(0.0),
         CurrentPhase(0.0){};
 
-  //! Destructor
-  virtual ~Amplitude() { /* nothing */
-  }
+  virtual ~Amplitude() {}
 
-  //! Function to create a full copy of the amplitude
+  /// Create a full copy of the amplitude
   virtual Amplitude *clone(std::string newName = "") const = 0;
 
+  virtual boost::property_tree::ptree save() const = 0;
   //======= INTEGRATION/NORMALIZATION ===========
 
   /// Check if parameters have changed and ifnormalization has to be
@@ -154,6 +151,6 @@ private:
 
 typedef std::vector<std::shared_ptr<Amplitude>>::iterator ampItr;
 
-} // namespace Physics
-} // namespace ComPWA
+} // ns::Physics
+} // ns::ComPWA
 #endif

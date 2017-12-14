@@ -19,19 +19,21 @@ public:
 
   IncoherentIntensity() : ComPWA::AmpIntensity(), PhspVolume(1.0) {}
 
-  //! Function to create a full copy of the amplitude
+  IncoherentIntensity(std::shared_ptr<PartList> partL,
+                      std::shared_ptr<Kinematics> kin,
+                      const boost::property_tree::ptree &pt);
+
+  /// Function to create a full copy of the amplitude
   ComPWA::AmpIntensity *clone(std::string newName = "") const {
     auto tmp = (new IncoherentIntensity(*this));
     tmp->Name = newName;
     return tmp;
   }
 
-  static std::shared_ptr<IncoherentIntensity>
-  Factory(std::shared_ptr<PartList> partL, std::shared_ptr<Kinematics> kin,
+  void load(std::shared_ptr<PartList> partL, std::shared_ptr<Kinematics> kin,
           const boost::property_tree::ptree &pt);
 
-  static boost::property_tree::ptree
-  Save(std::shared_ptr<IncoherentIntensity> intens);
+  virtual boost::property_tree::ptree save() const;
 
   //================ EVALUATION =================
 

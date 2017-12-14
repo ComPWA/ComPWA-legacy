@@ -26,19 +26,22 @@ MinuitFcn::MinuitFcn(std::shared_ptr<ComPWA::IEstimator> myData,
 MinuitFcn::~MinuitFcn() {}
 
 double MinuitFcn::operator()(const std::vector<double> &x) const {
-  assert( x.size() == _parList.numParameters() );
-  
   std::ostringstream paramOut;
 
-  for (unsigned int i = 0; i < x.size(); i++) {
-    auto actPat = _parList.doubleParameter(i);
-    if (actPat->isFixed())
+  size_t pos = 0;
+  for (auto p : _parList.doubleParameters()) {
+    if (p->isFixed()) {
+      pos++;
       continue;
-    if (std::isnan(x.at(i)))
-      continue;
-    actPat->setValue(x[i]);
-    paramOut << x[i] << " "; // print only free parameters
+    }
+    paramOut << x.at(pos) << " "; // print only free parameters
+    p->setValue(x.at(pos));
+    pos++;
   }
+  assert(x.size() == pos && "MinuitFcn::operator() | Number is (internal) "
+                            "Minuit parameters and number of ComPWA "
+                            "parameters does not match!");
+
   // Start timing
   clock_t begin = clock();
   double result = _myDataPtr->controlParameter(_parList);

@@ -32,30 +32,20 @@ public:
       : AbstractDynamicalFunction(), _ffType(noFormFactor), _current_g(0.0),
         _current_gHidden(0.0), _current_gHidden2(0.0){};
 
+  AmpFlatteRes(std::string name, std::pair<std::string,std::string> daughters,
+               std::shared_ptr<ComPWA::PartList> partL);
+
   virtual ~AmpFlatteRes();
 
-  //! Clone function
   virtual AmpFlatteRes *Clone(std::string newName = "") const {
     auto tmp = (new AmpFlatteRes(*this));
-    // if (newName != "")
-    // tmp->setName(newName);
     return tmp;
   }
-
-  /**
-   Factory for AmpFlatteRes
-
-   @param pt Configuration tree
-   @return Constructed object
-   */
-  static std::shared_ptr<AbstractDynamicalFunction>
-  Factory(std::shared_ptr<PartList> partL,
-          const boost::property_tree::ptree &pt);
 
   //======= INTEGRATION/NORMALIZATION ===========
 
   //! Check of parameters have changed and normalization has to be recalculatecd
-  virtual bool CheckModified() const;
+  virtual bool isModified() const;
 
   //================ EVALUATION =================
 
@@ -146,7 +136,7 @@ public:
 
   //=========== FUNCTIONTREE =================
 
-  virtual std::shared_ptr<FunctionTree> GetTree(const ParameterList &sample,
+  virtual std::shared_ptr<FunctionTree> tree(const ParameterList &sample,
                                                 int pos, std::string suffix);
 
 protected:

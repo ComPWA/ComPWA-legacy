@@ -15,17 +15,15 @@
 
 using namespace ComPWA::Physics::DecayDynamics;
 
-std::shared_ptr<AbstractDynamicalFunction>
-RelativisticBreitWigner::Factory(std::shared_ptr<PartList> partL,
-                                 const boost::property_tree::ptree &pt) {
-  auto obj = std::make_shared<RelativisticBreitWigner>();
+RelativisticBreitWigner::RelativisticBreitWigner(
+   std::string name, std::pair<std::string,std::string> daughters,
+               std::shared_ptr<ComPWA::PartList> partL) {
 
-  std::string name = pt.get<std::string>("DecayParticle.<xmlattr>.Name");
   LOG(trace) << "RelativisticBreitWigner::Factory() | Construction of " << name
              << ".";
-  obj->setName(name);
+  setName(name);
   auto partProp = partL->find(name)->second;
-  obj->SetMassParameter(
+  SetMassParameter(
       std::make_shared<DoubleParameter>(partProp.GetMassPar()));
 
   auto decayTr = partProp.GetDecayInfo();
@@ -34,10 +32,10 @@ RelativisticBreitWigner::Factory(std::shared_ptr<PartList> partL,
         "RelativisticBreitWigner::Factory() | Decay type does not match! ");
 
   auto spin = partProp.GetSpinQuantumNumber("Spin");
-  obj->SetSpin(spin);
+  SetSpin(spin);
 
   auto ffType = formFactorType(decayTr.get<int>("FormFactor.<xmlattr>.Type"));
-  obj->SetFormFactorType(ffType);
+  SetFormFactorType(ffType);
 
   // Read parameters from tree. Currently parameters of type 'Width' and
   // 'MesonRadius' are required.
@@ -46,14 +44,10 @@ RelativisticBreitWigner::Factory(std::shared_ptr<PartList> partL,
       continue;
     std::string type = v.second.get<std::string>("<xmlattr>.Type");
     if (type == "Width") {
-      auto width = DoubleParameter();
-      width.load(v.second);
-      obj->SetWidthParameter(std::make_shared<DoubleParameter>(width));
+      SetWidthParameter(std::make_shared<DoubleParameter>(v.second));
     } else if (type == "MesonRadius") {
-      auto mesonRadius = DoubleParameter();
-      mesonRadius.load(v.second);
-      obj->SetMesonRadiusParameter(
-          std::make_shared<DoubleParameter>(mesonRadius));
+      SetMesonRadiusParameter(
+          std::make_shared<DoubleParameter>(v.second));
     } else {
       throw std::runtime_error(
           "RelativisticBreitWigner::Factory() | Parameter of type " + type +
@@ -61,34 +55,16 @@ RelativisticBreitWigner::Factory(std::shared_ptr<PartList> partL,
     }
   }
 
-  // Get masses of decay products
-  auto decayProducts = pt.get_child("DecayProducts");
-  if (decayProducts.size() != 2)
-    throw boost::property_tree::ptree_error(
-        "RelativisticBreitWigner::Factory() | Expect exactly two decay "
-        "products (" +
-        std::to_string(decayProducts.size()) + " given)!");
-
-  auto firstItr = decayProducts.begin();
-  // auto secondItr = decayProducts.begin()+1; //compile error, no idea for why
-  auto secondItr = decayProducts.begin();
-  secondItr++;
-
-  std::pair<std::string, std::string> daughterNames(
-      firstItr->second.get<std::string>("<xmlattr>.Name"),
-      secondItr->second.get<std::string>("<xmlattr>.Name"));
   std::pair<double, double> daughterMasses(
-      partL->find(daughterNames.first)->second.GetMass(),
-      partL->find(daughterNames.second)->second.GetMass());
-  obj->SetDecayMasses(daughterMasses);
-  obj->SetDecayNames(daughterNames);
+      partL->find(daughters.first)->second.GetMass(),
+      partL->find(daughters.second)->second.GetMass());
+  SetDecayMasses(daughterMasses);
+  SetDecayNames(daughters);
 
   LOG(trace)
       << "RelativisticBreitWigner::Factory() | Construction of the decay "
-      << partProp.name() << " -> " << daughterNames.first << " + "
-      << daughterNames.second;
-
-  return std::static_pointer_cast<AbstractDynamicalFunction>(obj);
+      << partProp.name() << " -> " << daughters.first << " + "
+      << daughters.second;
 }
 
 std::complex<double> RelativisticBreitWigner::evaluate(const DataPoint &point,
@@ -101,12 +77,12 @@ std::complex<double> RelativisticBreitWigner::evaluate(const DataPoint &point,
   return result;
 }
 
-bool RelativisticBreitWigner::CheckModified() const {
-  if (AbstractDynamicalFunction::CheckModified())
+bool RelativisticBreitWigner::isModified() const {
+  if (AbstractDynamicalFunction::isModified())
     return true;
   if (_width->value() != _current_width ||
       _mesonRadius->value() != _current_mesonRadius) {
-    SetModified();
+    setModified();
     const_cast<double &>(_current_width) = _width->value();
     const_cast<double &>(_current_mesonRadius) = _mesonRadius->value();
     return true;
@@ -158,7 +134,7 @@ std::complex<double> RelativisticBreitWigner::dynamicalFunction(
 }
 
 std::shared_ptr<ComPWA::FunctionTree>
-RelativisticBreitWigner::GetTree(const ParameterList &sample, int pos,
+RelativisticBreitWigner::tree(const ParameterList &sample, int pos,
                                  std::string suffix) {
 
   size_t sampleSize = sample.mDoubleValue(pos)->values().size();
@@ -198,7 +174,7 @@ void BreitWignerStrategy::execute(ParameterList &paras,
   // How many parameters do we expect?
   size_t check_nInt = 0;
   size_t nInt = paras.intValues().size();
-  size_t check_nDouble = 15;
+  size_t check_nDouble = 7;
   size_t nDouble = paras.doubleValues().size();
   nDouble += paras.doubleParameters().size();
   size_t check_nComplex = 0;
@@ -226,7 +202,7 @@ void BreitWignerStrategy::execute(ParameterList &paras,
                        "Number of ComplexParameters does not match: " +
                        std::to_string(nComplex) + " given but " +
                        std::to_string(check_nComplex) + " expected."));
-  if (nMInteger != check_nMDouble)
+  if (nMInteger != check_nMInteger)
     throw(BadParameter("BreitWignerStrat::execute() | "
                        "Number of MultiInt does not match: " +
                        std::to_string(nMInteger) + " given but " +
@@ -255,11 +231,11 @@ void BreitWignerStrategy::execute(ParameterList &paras,
   // construction.
   double m0 = paras.doubleParameter(0)->value();
   double Gamma0 = paras.doubleParameter(1)->value();
-  unsigned int spin = (unsigned int)paras.doubleParameter(2)->value();
-  double d = paras.doubleParameter(3)->value();
-  formFactorType ffType = formFactorType(paras.doubleParameter(4)->value());
-  double ma = paras.doubleParameter(5)->value();
-  double mb = paras.doubleParameter(6)->value();
+  double d = paras.doubleParameter(2)->value();
+  unsigned int spin = paras.doubleValue(0)->value();
+  formFactorType ffType = formFactorType(paras.doubleValue(1)->value());
+  double ma = paras.doubleValue(2)->value();
+  double mb = paras.doubleValue(3)->value();
 
   // calc function for each point
   for (unsigned int ele = 0; ele < n; ele++) {

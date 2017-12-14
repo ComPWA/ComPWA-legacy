@@ -29,13 +29,12 @@ class RelativisticBreitWigner
     : public ComPWA::Physics::DecayDynamics::AbstractDynamicalFunction {
 
 public:
-  static std::shared_ptr<ComPWA::Physics::DecayDynamics::AbstractDynamicalFunction>
-  Factory(std::shared_ptr<ComPWA::PartList> partL,
-          const boost::property_tree::ptree &pt);
+  RelativisticBreitWigner(std::string name, std::pair<std::string,std::string> daughters,
+               std::shared_ptr<ComPWA::PartList> partL);
 
   /// Check of parameters have changed and normalization has to be recalculatecd
-  virtual bool CheckModified() const;
-
+  virtual bool isModified() const;
+   
   //================ EVALUATION =================
   std::complex<double> evaluate(const ComPWA::DataPoint &point, int pos) const;
 
@@ -104,10 +103,10 @@ public:
 
   //=========== FUNCTIONTREE =================
 
-  virtual bool HasTree() const { return true; }
+  virtual bool hasTree() const { return true; }
 
   virtual std::shared_ptr<ComPWA::FunctionTree>
-  GetTree(const ParameterList &sample, int pos, std::string suffix = "");
+  tree(const ParameterList &sample, int pos, std::string suffix = "");
 
 protected:
   /// Decay width of resonante state

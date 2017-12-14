@@ -304,7 +304,7 @@ int main(int argc, char **argv) {
   ComPWA::Tools::GeneratePhsp(100000, sqrtS4230._gen, sqrtS4230._mcSample);
 
   // Construct intensity class from model string
-  sqrtS4230._amp = IncoherentIntensity::Factory(
+  sqrtS4230._amp = std::make_shared<IncoherentIntensity>(
       partL, sqrtS4230._kin, tmpTr.get_child("IncoherentIntensity"));
   sqrtS4230._amp->parameters(fitPar);
 
@@ -348,7 +348,7 @@ int main(int argc, char **argv) {
   ComPWA::Tools::GeneratePhsp(100000, sqrtS4260._gen, sqrtS4260._mcSample);
 
   // Construct intensity class from model string
-  sqrtS4260._amp = IncoherentIntensity::Factory(
+  sqrtS4260._amp = std::make_shared<IncoherentIntensity>(
       partL, sqrtS4260._kin, tmpTr.get_child("IncoherentIntensity"));
   sqrtS4260._amp->parameters(fitPar);
 

@@ -30,6 +30,10 @@ namespace HelicityFormalism {
 class HelicityDecay : public ComPWA::Physics::PartialAmplitude {
 
 public:
+  HelicityDecay(std::shared_ptr<PartList> partL,
+                std::shared_ptr<Kinematics> kin,
+                const boost::property_tree::ptree &pt);
+
   HelicityDecay(int dataPos, const SubSystem &sys)
       : DataPosition(dataPos), SubSys(sys){};
 
@@ -39,12 +43,10 @@ public:
     return tmp;
   }
 
-  /// Factory for HelicityDecay
-  static std::shared_ptr<ComPWA::Physics::PartialAmplitude>
-  Factory(std::shared_ptr<PartList> partL, std::shared_ptr<Kinematics> kin,
+  void load(std::shared_ptr<PartList> partL, std::shared_ptr<Kinematics> kin,
           const boost::property_tree::ptree &pt);
 
-  static boost::property_tree::ptree Save(std::shared_ptr<PartialAmplitude> obj);
+  virtual boost::property_tree::ptree save() const;
 
   //======= INTEGRATION/NORMALIZATION ===========
 
@@ -125,6 +127,10 @@ protected:
 
   std::shared_ptr<ComPWA::Physics::DecayDynamics::AbstractDynamicalFunction>
       DynamicFcn;
+  
+  std::pair<std::string, std::string> DecayProducts;
+  
+  std::pair<ComPWA::Spin, ComPWA::Spin> DecayHelicities;
 };
 
 } // namespace HelicityFormalism

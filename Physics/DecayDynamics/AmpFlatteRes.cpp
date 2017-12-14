@@ -9,21 +9,17 @@
 
 using namespace ComPWA::Physics::DecayDynamics;
 
-AmpFlatteRes::~AmpFlatteRes() {}
+AmpFlatteRes::AmpFlatteRes(std::string name,
+                           std::pair<std::string, std::string> daughters,
+                           std::shared_ptr<ComPWA::PartList> partL) {
 
-std::shared_ptr<AbstractDynamicalFunction>
-AmpFlatteRes::Factory(std::shared_ptr<PartList> partL,
-                      const boost::property_tree::ptree &pt) {
-  auto obj = std::make_shared<AmpFlatteRes>();
-
-  std::string name = pt.get<std::string>("DecayParticle.<xmlattr>.Name");
   LOG(trace) << "AmpFlatteRes::Factory() | Construction of " << name << ".";
-  obj->setName(name);
+  setName(name);
 
   // All further information on the decay is stored in a ParticleProperty list
   auto partProp = partL->find(name)->second;
 
-  obj->SetMassParameter(
+  SetMassParameter(
       std::make_shared<DoubleParameter>(partProp.GetMassPar()));
 
   auto decayTr = partProp.GetDecayInfo();
@@ -32,32 +28,17 @@ AmpFlatteRes::Factory(std::shared_ptr<PartList> partL,
         "AmpFlatteRes::Factory() | Decay type does not match! ");
 
   auto spin = partProp.GetSpinQuantumNumber("Spin");
-  obj->SetSpin(spin);
+  SetSpin(spin);
 
   auto ffType = formFactorType(decayTr.get<int>("FormFactor.<xmlattr>.Type"));
-  obj->SetFormFactorType(ffType);
+  SetFormFactorType(ffType);
 
-  // Get masses of decay products
-  auto decayProducts = pt.get_child("DecayProducts");
-  if (decayProducts.size() != 2)
-    throw boost::property_tree::ptree_error(
-        "AmpWignerD::Factory() | Expect exactly two decay products (" +
-        std::to_string(decayProducts.size()) + " given)!");
-
-  auto firstItr = decayProducts.begin();
-  auto secondItr = decayProducts.begin();
-  secondItr++;
-
-  // Mass of daughter particles needs to be set before the coupling constants
-  std::pair<std::string, std::string> daughterNames(
-      firstItr->second.get<std::string>("<xmlattr>.Name"),
-      secondItr->second.get<std::string>("<xmlattr>.Name"));
   std::pair<double, double> daughterMasses(
-      partL->find(daughterNames.first)->second.GetMass(),
-      partL->find(daughterNames.second)->second.GetMass());
+      partL->find(daughters.first)->second.GetMass(),
+      partL->find(daughters.second)->second.GetMass());
 
-  obj->SetDecayMasses(daughterMasses);
-  obj->SetDecayNames(daughterNames);
+  SetDecayMasses(daughterMasses);
+  SetDecayNames(daughters);
 
   // Read parameters
   std::vector<Coupling> vC;
@@ -70,29 +51,29 @@ AmpFlatteRes::Factory(std::shared_ptr<PartList> partL,
     } else if (type == "MesonRadius") {
       auto mesonRadius = DoubleParameter();
       mesonRadius.load(v.second);
-      obj->SetMesonRadiusParameter(
+      SetMesonRadiusParameter(
           std::make_shared<DoubleParameter>(mesonRadius));
     } else {
       throw std::runtime_error("AmpFlatteRes::Factory() | Parameter of type " +
                                type + " is unknown.");
     }
   }
-  obj->SetCouplings(vC);
+  SetCouplings(vC);
 
   LOG(trace)
       << "RelativisticBreitWigner::Factory() | Construction of the decay "
-      << partProp.name() << " -> " << daughterNames.first << " + "
-      << daughterNames.second;
-
-  return std::static_pointer_cast<AbstractDynamicalFunction>(obj);
+      << partProp.name() << " -> " << daughters.first << " + "
+      << daughters.second;
 }
 
-bool AmpFlatteRes::CheckModified() const {
-  if (AbstractDynamicalFunction::CheckModified())
+AmpFlatteRes::~AmpFlatteRes() {}
+
+bool AmpFlatteRes::isModified() const {
+  if (AbstractDynamicalFunction::isModified())
     return true;
   if (_g.at(0).value() != _current_g || _g.at(1).value() != _current_gHidden ||
       _g.at(2).value() != _current_gHidden2) {
-    SetModified();
+    setModified();
     const_cast<double &>(_current_g) = _g.at(0).value();
     const_cast<double &>(_current_gHidden) = _g.at(1).value();
     const_cast<double &>(_current_gHidden2) = _g.at(2).value();
@@ -203,7 +184,7 @@ AmpFlatteRes::dynamicalFunction(double mSq, double mR, double massA1,
 }
 
 std::shared_ptr<ComPWA::FunctionTree>
-AmpFlatteRes::GetTree(const ParameterList &sample, int pos,
+AmpFlatteRes::tree(const ParameterList &sample, int pos,
                       std::string suffix) {
 
   size_t sampleSize = sample.mDoubleValue(pos)->values().size();

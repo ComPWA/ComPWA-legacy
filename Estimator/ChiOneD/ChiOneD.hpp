@@ -35,7 +35,7 @@ public:
 
   virtual double controlParameter(ParameterList &minPar);
 
-  virtual bool HasTree() { return false; }
+  virtual bool hasTree() { return false; }
   
   virtual std::shared_ptr<FunctionTree> tree() {
     return std::shared_ptr<FunctionTree>();

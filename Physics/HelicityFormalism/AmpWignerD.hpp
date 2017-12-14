@@ -34,15 +34,9 @@ namespace HelicityFormalism {
 class AmpWignerD {
 public:
   //============ CONSTRUCTION ==================
-  AmpWignerD(ComPWA::Spin spin = ComPWA::Spin(0), unsigned int mu = 0,
-             unsigned int muPrime = 0);
+  AmpWignerD(ComPWA::Spin spin, ComPWA::Spin mu, ComPWA::Spin muPrime);
 
   virtual ~AmpWignerD(){};
-
-  static std::shared_ptr<AmpWignerD>
-  Factory(std::shared_ptr<PartList> partL,
-          const boost::property_tree::ptree &pt);
-
   //================ EVALUATION =================
 
   virtual double evaluate(const ComPWA::DataPoint &point, int pos1,
@@ -58,37 +52,25 @@ public:
 
   //============ SET/GET =================
 
-  void SetSpin(ComPWA::Spin s) { _spin = s; }
-  ComPWA::Spin GetSpin() const { return _spin; }
+  void setSpin(ComPWA::Spin s) { J = s; }
+  ComPWA::Spin spin() const { return J; }
 
-  void SetMu(ComPWA::Spin s) { _mu = s; }
-  ComPWA::Spin GetMu() const { return _mu; }
+  void setMu(ComPWA::Spin s) { Mu = s; }
+  ComPWA::Spin mu() const { return Mu; }
 
-  void SetMuPrime(ComPWA::Spin s) {
-    _helicities = std::pair<ComPWA::Spin, ComPWA::Spin>(0, s);
-  }
-  ComPWA::Spin GetMuPrime() const {
-    return _helicities.first - _helicities.second;
-  }
+  void setMuPrime(ComPWA::Spin s) { MuPrime = s; }
 
-  void SetHelicities(std::pair<ComPWA::Spin, ComPWA::Spin> hel) {
-    _helicities = hel;
-  }
-
-  std::pair<ComPWA::Spin, ComPWA::Spin> GetHelicities() const {
-    return _helicities;
-  }
+  ComPWA::Spin muPrime() const { return MuPrime; }
 
   //=========== FUNCTIONTREE =================
-
   virtual std::shared_ptr<ComPWA::FunctionTree>
-  GetTree(const ComPWA::ParameterList &sample, int posTheta, int posPhi,
+  tree(const ComPWA::ParameterList &sample, int posTheta, int posPhi,
           std::string suffix = "");
 
 protected:
-  ComPWA::Spin _spin;
-  ComPWA::Spin _mu;
-  std::pair<ComPWA::Spin, ComPWA::Spin> _helicities;
+  ComPWA::Spin J;
+  ComPWA::Spin Mu;
+  ComPWA::Spin MuPrime;
 };
 
 class WignerDStrategy : public Strategy {

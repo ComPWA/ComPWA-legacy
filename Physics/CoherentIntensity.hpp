@@ -28,6 +28,10 @@ public:
           std::shared_ptr<Efficiency>(new UnitEfficiency))
       : AmpIntensity(name, strength, eff), PhspVolume(1.0){};
 
+  CoherentIntensity(std::shared_ptr<PartList> partL,
+                    std::shared_ptr<Kinematics> kin,
+                    const boost::property_tree::ptree &pt);
+
   virtual ~CoherentIntensity(){};
 
   /// Clone pattern
@@ -37,12 +41,10 @@ public:
     return tmp;
   }
 
-  static std::shared_ptr<CoherentIntensity>
-  Factory(std::shared_ptr<PartList> partL, std::shared_ptr<Kinematics> kin,
+  void load(std::shared_ptr<PartList> partL, std::shared_ptr<Kinematics> kin,
           const boost::property_tree::ptree &pt);
 
-  static boost::property_tree::ptree
-  Save(std::shared_ptr<CoherentIntensity> intens);
+  virtual boost::property_tree::ptree save() const;
 
   //================ EVALUATION =================
 
@@ -79,7 +81,7 @@ public:
       i->parametersFast(list);
     }
   }
-  
+
   /// Update parameters in AmpIntensity to the values given in \p list
   virtual void updateParameters(const ParameterList &list);
 
@@ -98,7 +100,7 @@ public:
     for (auto i : Amplitudes)
       i->setPhspSample(toySample);
   };
-  
+
   virtual void setPhspVolume(double vol) { PhspVolume = vol; };
 
   virtual std::shared_ptr<AmpIntensity> component(std::string name);
@@ -120,14 +122,14 @@ public:
   /// Getter function for basic amp tree
   virtual std::shared_ptr<ComPWA::FunctionTree>
   tree(std::shared_ptr<Kinematics> kin, const ComPWA::ParameterList &sample,
-          const ComPWA::ParameterList &phspSample,
-          const ComPWA::ParameterList &toySample, unsigned int nEvtVar,
-          std::string suffix = "");
+       const ComPWA::ParameterList &phspSample,
+       const ComPWA::ParameterList &toySample, unsigned int nEvtVar,
+       std::string suffix = "");
 
 protected:
   /// Phase space sample to calculate the normalization and maximum value.
   std::shared_ptr<std::vector<ComPWA::DataPoint>> PhspSample;
-  
+
   double PhspVolume;
 
   virtual std::shared_ptr<FunctionTree>
@@ -136,7 +138,6 @@ protected:
                  std::string suffix = "") const;
 
   std::vector<std::shared_ptr<ComPWA::Physics::Amplitude>> Amplitudes;
-
 };
 
 } // namespace Physics

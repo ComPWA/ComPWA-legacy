@@ -22,21 +22,21 @@ namespace Physics {
 namespace DecayDynamics {
 
 class AbstractDynamicalFunction {
-  
+
 public:
   //============ CONSTRUCTION ==================
-  
-  AbstractDynamicalFunction()
-      : _daughterMasses(std::pair<double, double>(-999, -999)),
+
+  AbstractDynamicalFunction(std::string name = "")
+      : _name(name), _daughterMasses(std::pair<double, double>(-999, -999)),
         _current_mass(-999), _mcPrecision(1000000), _modified(true){};
 
   virtual ~AbstractDynamicalFunction(){};
 
   //======= INTEGRATION/NORMALIZATION ===========
-  
-  bool CheckModified() const {
+
+  bool isModified() const {
     if (GetMass() != _current_mass) {
-      SetModified();
+      setModified();
       const_cast<double &>(_current_mass) = _mass->value();
       return true;
     }
@@ -44,17 +44,17 @@ public:
   }
 
   //================ EVALUATION =================
-  
-  virtual std::complex<double>
-  evaluate(const ComPWA::DataPoint &point, int pos) const = 0;
+
+  virtual std::complex<double> evaluate(const ComPWA::DataPoint &point,
+                                        int pos) const = 0;
 
   //============ SET/GET =================
-  
+
   virtual void setName(std::string n) { _name = n; }
 
   virtual std::string name() { return _name; }
 
-  virtual void SetModified(bool b = true) const {
+  virtual void setModified(bool b = true) const {
     const_cast<bool &>(_modified) = b;
     const_cast<double &>(_current_mass) = _mass->value();
   }
@@ -66,7 +66,7 @@ public:
   virtual void GetParametersFast(std::vector<double> &list) const {
     list.push_back(GetMass());
   }
-  
+
   /// Update parameters to the values given in \p par
   virtual void updateParameters(const ParameterList &par) = 0;
 
@@ -101,11 +101,12 @@ public:
   virtual void SetSpin(ComPWA::Spin spin) { _spin = spin; }
 
   //=========== FUNCTIONTREE =================
-  
-  virtual bool HasTree() const { return false; }
-  
+
+  virtual bool hasTree() const { return false; }
+
   virtual std::shared_ptr<ComPWA::FunctionTree>
-  GetTree(const ComPWA::ParameterList &sample, int pos, std::string suffix = "") = 0;
+  tree(const ComPWA::ParameterList &sample, int pos,
+       std::string suffix = "") = 0;
 
 protected:
   std::string _name;

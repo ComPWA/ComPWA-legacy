@@ -69,6 +69,7 @@ std::shared_ptr<ComPWA::FitResult> MinuitIF::exec(ParameterList &list) {
     if (!actPat->hasError())
       actPat->setError(0.001);
 
+    // Shift phase parameters to the range [-Pi,Pi]
     if (!actPat->isFixed() &&
         actPat->name().find("phase") != actPat->name().npos)
       actPat->setValue(shiftAngle(actPat->value()));
@@ -116,15 +117,14 @@ std::shared_ptr<ComPWA::FitResult> MinuitIF::exec(ParameterList &list) {
   double maxfcn = 0.0;
   double tolerance = 0.1;
 
-  /* From the MINUIT2 Documentation:
-   * Minimize the function MnMigrad()(maxfcn, tolerance)
-   *    @param maxfcn : max number of function calls (if = 0) default is
-   *           used which is set to 200 + 100 * npar + 5 * npar**2
-   *    @param tolerance : value used for terminating iteration procedure.
-   *           For example, MIGRAD will stop iterating when edm (expected
-   *           distance from minimum) will be: edm < tolerance * 10**-3
-   *           Default value of tolerance used is 0.1
-   */
+  // From the MINUIT2 Documentation:
+  // Minimize the function MnMigrad()(maxfcn, tolerance)
+  // \param maxfcn : max number of function calls (if = 0) default is
+  //           used which is set to 200 + 100 * npar + 5 * npar**2
+  // \param tolerance : value used for terminating iteration procedure.
+  //           For example, MIGRAD will stop iterating when edm (expected
+  //           distance from minimum) will be: edm < tolerance * 10**-3
+  //           Default value of tolerance used is 0.1
   LOG(info) << "MinuitIF::exec() | Starting migrad: "
                "maxCalls="
             << maxfcn << " tolerance=" << tolerance;

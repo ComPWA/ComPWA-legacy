@@ -1,19 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 // Copyright (c) 2013, 2017 The ComPWA Team.
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
@@ -45,18 +29,18 @@ namespace ComPWA {
 /// Enums for the type of the parameter, should be extended if an new parameter
 /// type is added
 enum ParType {
+  UNDEFINED = 0,
   COMPLEX = 1,
   DOUBLE = 2,
   INTEGER = 3,
-  MCOMPLEX = 6,
+  MCOMPLEX = 4,
   MDOUBLE = 5,
-  MINTEGER = 8,
-  UNDEFINED = 0
+  MINTEGER = 6
 };
 
 /// Names of the parameter types, should be extended if an new parameter type is
 /// added
-static const char *ParNames[10] = {"UNDEFINED", "COMPLEX", "DOUBLE",  "INTEGER",
+static const char *ParNames[7] = {"UNDEFINED", "COMPLEX", "DOUBLE",  "INTEGER",
                                    "MCOMPLEX",  "MDOUBLE", "MINTEGER"};
 
 /// Template functions which return above specified parameter types

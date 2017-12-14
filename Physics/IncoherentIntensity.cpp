@@ -8,18 +8,26 @@
 
 using namespace ComPWA::Physics;
 
-std::shared_ptr<IncoherentIntensity>
-IncoherentIntensity::Factory(std::shared_ptr<PartList> partL,
-                             std::shared_ptr<Kinematics> kin,
-                             const boost::property_tree::ptree &pt) {
-  LOG(trace) << " IncoherentIntensity::Factory() | Construction....";
+IncoherentIntensity::IncoherentIntensity(
+    std::shared_ptr<PartList> partL, std::shared_ptr<Kinematics> kin,
+    const boost::property_tree::ptree &pt) {
+  load(partL, kin, pt);
+}
 
-  auto obj = std::make_shared<IncoherentIntensity>();
+void IncoherentIntensity::load(std::shared_ptr<PartList> partL,
+                               std::shared_ptr<Kinematics> kin,
+                               const boost::property_tree::ptree &pt) {
+  LOG(trace) << " IncoherentIntensity::Factory() | Construction....";
+  if (pt.get<std::string>("<xmlattr>.Class") != "Incoherent")
+    throw BadConfig("IncoherentIntensity::Factory() | Property tree seems to "
+                    "not containt a configuration for an "
+                    "IncoherentIntensity!");
 
   // Name is not required - default value 'empty'
-  obj->Name = (pt.get<std::string>("<xmlattr>.Name", "empty"));
+  Name = (pt.get<std::string>("<xmlattr>.Name", "empty"));
+  Strength = (std::make_shared<ComPWA::DoubleParameter>("Strength_"+Name, 1.0));
+  setPhspVolume(kin->phspVolume());
 
-  std::shared_ptr<DoubleParameter> strength;
   for (const auto &v : pt.get_child("")) {
     if (v.first == "Parameter") {
       // Parameter (e.g. Mass)
@@ -27,40 +35,24 @@ IncoherentIntensity::Factory(std::shared_ptr<PartList> partL,
         continue;
       auto tmp = DoubleParameter();
       tmp.load(v.second);
-      strength = std::make_shared<DoubleParameter>(tmp);
-    } else if (v.first == "CoherentIntensity") {
-      obj->addIntensity(
-          ComPWA::Physics::CoherentIntensity::Factory(partL, kin, v.second));
+      Strength = std::make_shared<DoubleParameter>(tmp);
+    } else if (v.first == "Intensity" &&
+               v.second.get<std::string>("<xmlattr>.Class") == "Coherent") {
+      addIntensity(std::make_shared<CoherentIntensity>(partL, kin, v.second));
     } else {
       // ignored further settings. Should we throw an error?
     }
   }
-
-  if (strength)
-    obj->Strength = strength;
-  else {
-    obj->Strength = (std::make_shared<ComPWA::DoubleParameter>("", 1.0));
-    obj->Strength->fixParameter(true);
-  }
-
-  obj->setPhspVolume(kin->phspVolume());
-
-  return obj;
 }
 
-boost::property_tree::ptree
-IncoherentIntensity::Save(std::shared_ptr<IncoherentIntensity> obj) {
-
+boost::property_tree::ptree IncoherentIntensity::save() const{
   boost::property_tree::ptree pt;
-  pt.put<std::string>("<xmlattr>.Name", obj->name());
-  pt.add_child("Parameter", obj->Strength->save());
+  pt.put<std::string>("<xmlattr>.Name", name());
+  pt.add_child("Parameter", Strength->save());
   pt.put("Parameter.<xmlattr>.Type", "Strength");
-  for (auto i : obj->intensities()) {
-    // TODO: we have to implement a memeber function Save() in AmpIntensity
-    // interface and use it here
-    auto ptr = std::dynamic_pointer_cast<CoherentIntensity>(i);
-    pt.add_child("CoherentIntensity", CoherentIntensity::Save(ptr));
-  }
+  for (auto i : Intensities)
+    pt.add_child("CoherentIntensity", i->save());
+  
   return pt;
 }
 
@@ -151,20 +143,19 @@ IncoherentIntensity::component(std::string name) {
 
 std::shared_ptr<ComPWA::FunctionTree>
 IncoherentIntensity::tree(std::shared_ptr<Kinematics> kin,
-                             const ComPWA::ParameterList &sample,
-                             const ComPWA::ParameterList &phspSample,
-                             const ComPWA::ParameterList &toySample,
-                             unsigned int nEvtVar, std::string suffix) {
+                          const ComPWA::ParameterList &sample,
+                          const ComPWA::ParameterList &phspSample,
+                          const ComPWA::ParameterList &toySample,
+                          unsigned int nEvtVar, std::string suffix) {
 
   size_t sampleSize = sample.mDoubleValue(0)->values().size();
 
-
   auto tr = std::make_shared<FunctionTree>(
-      "IncoherentIntens(" + name() + ")" + suffix, MDouble("",sampleSize),
+      "IncoherentIntens(" + name() + ")" + suffix, MDouble("", sampleSize),
       std::shared_ptr<Strategy>(new MultAll(ParType::MDOUBLE)));
   tr->createLeaf("Strength", Strength,
                  "IncoherentIntens(" + name() + ")" + suffix);
-  tr->createNode("SumOfCoherentIntens", MDouble("",sampleSize),
+  tr->createNode("SumOfCoherentIntens", MDouble("", sampleSize),
                  std::make_shared<AddAll>(ParType::MDOUBLE),
                  "IncoherentIntens(" + name() + ")" + suffix);
   for (auto i : Intensities) {
@@ -194,3 +185,4 @@ void IncoherentIntensity::updateParameters(const ParameterList &list) {
 
   return;
 }
+

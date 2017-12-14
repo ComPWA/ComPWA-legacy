@@ -10,14 +10,13 @@ namespace ComPWA {
 namespace Physics {
 namespace HelicityFormalism {
 
-AmpWignerD::AmpWignerD(ComPWA::Spin spin, unsigned int mu, unsigned int muPrime)
-    : _spin(spin), _mu(mu), _helicities(muPrime, 0) {}
+AmpWignerD::AmpWignerD(ComPWA::Spin spin, ComPWA::Spin mu, ComPWA::Spin muPrime)
+    : J(spin), Mu(mu), MuPrime(muPrime) {}
 
 double AmpWignerD::evaluate(const DataPoint &point, int pos1, int pos2) const {
-  if ((double)_spin == 0)
+  if ((double)J == 0)
     return 1.0;
-  return dynamicalFunction(_spin, _mu, (_helicities.first - _helicities.second),
-                           point.value(pos1));
+  return dynamicalFunction(J, Mu, MuPrime, point.value(pos1));
 }
 
 double AmpWignerD::dynamicalFunction(ComPWA::Spin J, ComPWA::Spin mu,
@@ -67,63 +66,24 @@ AmpWignerD::dynamicalFunction(double cosAlpha, double cosBeta, double cosGamma,
   return result;
 }
 
-std::shared_ptr<AmpWignerD>
-AmpWignerD::Factory(std::shared_ptr<PartList> partL,
-                    const boost::property_tree::ptree &pt) {
-  LOG(trace) << "AmpWignerD::Factory() | Construction....";
-  auto obj = std::make_shared<AmpWignerD>();
-
-  auto decayParticle = pt.get_child("DecayParticle");
-
-  std::string name = pt.get<std::string>("DecayParticle.<xmlattr>.Name");
-  auto partItr = partL->find(name);
-  if (partItr == partL->end())
-    throw std::runtime_error("AmpWignerD::Factory() | Particle " + name +
-                             " not found in list!");
-
-  ComPWA::Spin J = partItr->second.GetSpinQuantumNumber("Spin");
-  obj->SetSpin(J);
-  ComPWA::Spin mu(pt.get<double>("DecayParticle.<xmlattr>.Helicity"));
-  obj->SetMu(mu);
-
-  auto decayProducts = pt.get_child("DecayProducts");
-  std::vector<ComPWA::Spin> vHelicity;
-  for (auto i : decayProducts) {
-    vHelicity.push_back(
-        ComPWA::Spin(i.second.get<double>("<xmlattr>.Helicity")));
-  }
-
-  if (vHelicity.size() != 2)
-    throw boost::property_tree::ptree_error(
-        "AmpWignerD::Factory() | Expect exactly two decay products (" +
-        std::to_string(decayProducts.size()) + " given)!");
-
-  obj->SetMuPrime(vHelicity.at(0) - vHelicity.at(1));
-
-  return obj;
-}
-
-std::shared_ptr<FunctionTree> AmpWignerD::GetTree(const ParameterList &sample,
+std::shared_ptr<FunctionTree> AmpWignerD::tree(const ParameterList &sample,
                                                   int posTheta, int posPhi,
                                                   std::string suffix) {
 
   size_t n = sample.mDoubleValue(0)->values().size();
 
   // in case of spin zero do not explicitly include the WignerD
-  if ((double)_spin == 0)
+  if ((double)J == 0)
     return std::make_shared<FunctionTree>("WignerD" + suffix,
                                           MInteger("", n, 1));
-  //----Strategies needed
-  std::shared_ptr<WignerDStrategy> angdStrat(
-      new WignerDStrategy("AngD" + suffix));
+
   auto tr = std::make_shared<FunctionTree>(
-      "WignerD" + suffix, MComplex("", n),
+      "WignerD" + suffix, MDouble("", n),
       std::make_shared<WignerDStrategy>("WignerD" + suffix));
 
-  tr->createLeaf("spin", (double)_spin, "WignerD" + suffix); // spin
-  tr->createLeaf("m", (double)_mu, "WignerD" + suffix);      // OutSpin 1
-  tr->createLeaf("n", (double)(_helicities.first - _helicities.second),
-                 "WignerD" + suffix); // OutSpin 2
+  tr->createLeaf("spin", (double)J, "WignerD" + suffix); // spin
+  tr->createLeaf("m", (double)Mu, "WignerD" + suffix);      // OutSpin 1
+  tr->createLeaf("n", (double)(MuPrime), "WignerD" + suffix); // OutSpin 2
   tr->createLeaf("data_cosTheta[" + std::to_string(posTheta) + "]",
                  sample.mDoubleValue(posTheta), "WignerD" + suffix);
   tr->createLeaf("data_phi[" + std::to_string(posPhi) + "]",
@@ -135,7 +95,7 @@ std::shared_ptr<FunctionTree> AmpWignerD::GetTree(const ParameterList &sample,
 void WignerDStrategy::execute(ParameterList &paras,
                               std::shared_ptr<Parameter> &out) {
 #ifndef NDEBUG
-  if (checkType != out->type()) {
+  if (out && checkType != out->type()) {
     throw(WrongParType(std::string("Output Type ") + ParNames[out->type()] +
                        std::string(" conflicts expected type ") +
                        ParNames[checkType] + std::string(" of ") + name +
@@ -143,9 +103,9 @@ void WignerDStrategy::execute(ParameterList &paras,
   }
 #endif
 
-  double _inSpin = paras.doubleParameter(0)->value();
-  double _outSpin1 = paras.doubleParameter(1)->value();
-  double _outSpin2 = paras.doubleParameter(2)->value();
+  double J = paras.doubleValue(0)->value();
+  double mu = paras.doubleValue(1)->value();
+  double muPrime = paras.doubleValue(2)->value();
 
   auto data = paras.mDoubleValue(0);
 
@@ -158,7 +118,7 @@ void WignerDStrategy::execute(ParameterList &paras,
   for (unsigned int ele = 0; ele < n; ele++) {
     try {
       results.at(ele) = AmpWignerD::dynamicalFunction(
-          _inSpin, _outSpin1, _outSpin2, data->values().at(ele));
+          J, mu, muPrime, data->values().at(ele));
     } catch (std::exception &ex) {
       LOG(error) << "WignerDStrategy::execute() | " << ex.what();
       throw std::runtime_error("WignerDStrategy::execute() | "

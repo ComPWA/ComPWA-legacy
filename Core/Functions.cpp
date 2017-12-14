@@ -12,8 +12,6 @@ namespace ComPWA {
 void Inverse::execute(ParameterList &paras, std::shared_ptr<Parameter> &out) {
   if (out && checkType != out->type())
     throw BadParameter("Inverse::execute() | Parameter type mismatch!");
-  if (!out)
-    out = ValueFactory(checkType);
 
   if ((paras.doubleValues().size() + paras.doubleParameters().size()) != 1)
     throw BadParameter(
@@ -21,8 +19,11 @@ void Inverse::execute(ParameterList &paras, std::shared_ptr<Parameter> &out) {
 
   switch (checkType) {
   case ParType::DOUBLE: {
+    // Create parameter if not there
+    if (!out)
+      out = std::make_shared<Value<double>>();
     auto par = std::static_pointer_cast<Value<double>>(out);
-    auto& result = par->operator()();
+    auto &result = par->operator()();
     double var;
     if (paras.doubleValues().size() == 1) {
       var = paras.doubleValue(0)->value();
@@ -48,19 +49,20 @@ void Inverse::execute(ParameterList &paras, std::shared_ptr<Parameter> &out) {
 
 void SquareRoot::execute(ParameterList &paras,
                          std::shared_ptr<Parameter> &out) {
-  if (out &&checkType != out->type())
+  if (out && checkType != out->type())
     throw BadParameter("Inverse::SquareRoot() | Parameter type mismatch!");
-  if (!out)
-    out = ValueFactory(checkType);
-  
-  if ((paras.doubleValues().size()+ paras.doubleParameters().size()) != 1)
+
+  if ((paras.doubleValues().size() + paras.doubleParameters().size()) != 1)
     throw BadParameter(
         "SquareRoot::execute() | Expecting a single parameter in list");
 
   switch (checkType) {
   case ParType::DOUBLE: {
+    // Create parameter if not there
+    if (!out)
+      out = std::make_shared<Value<double>>();
     auto par = std::static_pointer_cast<Value<double>>(out);
-    auto& result = par->operator()();
+    auto &result = par->operator()();
     double var = 0;
     if (paras.doubleValues().size() == 1) {
       var = paras.doubleValue(0)->value();
@@ -98,11 +100,9 @@ KahanSummation KahanSum(KahanSummation accumulation, double value) {
 }
 
 void AddAll::execute(ParameterList &paras, std::shared_ptr<Parameter> &out) {
-  if (out &&checkType != out->type())
+  if (out && checkType != out->type())
     throw BadParameter("AddAll::SquareRoot() | Parameter type mismatch!");
-  if (!out)
-    out = ValueFactory(checkType);
-  
+
   switch (checkType) {
   // For multi values we perform a vector addition. All multi values are added
   // and casted to the respective return
@@ -118,10 +118,13 @@ void AddAll::execute(ParameterList &paras, std::shared_ptr<Parameter> &out) {
       throw BadParameter(
           "AddAll::execute() | Expecting at least one multi value.");
 
+    if (!out)
+      out = MComplex("", n);
+
     // fill MultiComplex parameter
     auto par =
         std::static_pointer_cast<Value<std::vector<std::complex<double>>>>(out);
-    auto& results = par->values(); // reference
+    auto &results = par->values(); // reference
     std::fill(results.begin(), results.end(),
               std::complex<double>(0., 0.)); // reset
 
@@ -161,10 +164,11 @@ void AddAll::execute(ParameterList &paras, std::shared_ptr<Parameter> &out) {
     else
       throw BadParameter(
           "AddAll::execute() | Expecting at least one multi value.");
-
-    // fill MultiComplex parameter
+    // Create parameter if not there
+    if (!out)
+      out = MDouble("", n);
     auto par = std::static_pointer_cast<Value<std::vector<double>>>(out);
-    auto& results = par->values(); // reference
+    auto &results = par->values();                 // reference
     std::fill(results.begin(), results.end(), 0.); // reset
 
     for (auto dv : paras.mDoubleValues()) {
@@ -196,12 +200,15 @@ void AddAll::execute(ParameterList &paras, std::shared_ptr<Parameter> &out) {
     else
       throw BadParameter(
           "AddAll::execute() | Expecting at least one multi value.");
+    // Create parameter if not there
+    if (!out)
+      out = MInteger("", n);
 
-    // fill multi integer parameter
     auto par = std::static_pointer_cast<Value<std::vector<int>>>(out);
-    auto& results = par->values(); // reference
+    auto &results = par->values();                // reference
     std::fill(results.begin(), results.end(), 0); // reset
 
+    // fill multi integer parameter
     for (auto dv : paras.mIntValues()) {
       if (dv->values().size() != results.size())
         throw BadParameter("AddAll::execute() | MDOUBLE: Size of multi double "
@@ -217,11 +224,13 @@ void AddAll::execute(ParameterList &paras, std::shared_ptr<Parameter> &out) {
           paras.intValues().size()))
       throw BadParameter(
           "AddAll::execute() | COMPLEX: expecting at least one single value!");
-
+    // Create parameter if not there
+    if (!out)
+      out = std::make_shared<Value<std::complex<double>>>();
     auto par = std::static_pointer_cast<Value<std::complex<double>>>(out);
-    auto& result = par->values(); // reference
-    result = std::complex<double>(0, 0); //reset
-    
+    auto &result = par->values();        // reference
+    result = std::complex<double>(0, 0); // reset
+
     for (auto dv : paras.complexValues())
       result += dv->value();
     for (auto dv : paras.doubleValues())
@@ -247,10 +256,13 @@ void AddAll::execute(ParameterList &paras, std::shared_ptr<Parameter> &out) {
   } // end complex
 
   case ParType::DOUBLE: {
+    // Create parameter if not there
+    if (!out)
+      out = std::make_shared<Value<double>>();
     auto par = std::static_pointer_cast<Value<double>>(out);
-    auto& result = par->values(); // reference
-    result = 0.; //reset
-    
+    auto &result = par->values(); // reference
+    result = 0.;                  // reset
+
     for (auto dv : paras.doubleValues())
       result += dv->value();
     for (auto dv : paras.doubleParameters())
@@ -275,15 +287,18 @@ void AddAll::execute(ParameterList &paras, std::shared_ptr<Parameter> &out) {
   } // end double
 
   case ParType::INTEGER: {
-    auto par = std::static_pointer_cast<Value<double>>(out);
-    auto&  result = par->values(); // reference
-    result = 0; //reset
+    // Create parameter if not there
+    if (!out)
+      out = std::make_shared<Value<int>>();
+    auto par = std::static_pointer_cast<Value<int>>(out);
+    auto &result = par->values(); // reference
+    result = 0;                   // reset
     for (auto dv : paras.intValues())
       result += dv->value();
 
     // collapse multi values
     for (auto dv : paras.mIntValues()) {
-      KahanSummation kaSum = {result};
+      KahanSummation kaSum = {(double)result};
       auto kaResult = std::accumulate(dv->values().begin(), dv->values().end(),
                                       kaSum, KahanSum);
       result = kaResult.sum;
@@ -300,15 +315,12 @@ void AddAll::execute(ParameterList &paras, std::shared_ptr<Parameter> &out) {
 void MultAll::execute(ParameterList &paras, std::shared_ptr<Parameter> &out) {
   if (out && checkType != out->type())
     throw BadParameter("MultAll::execute() | Parameter type mismatch!");
-  if (!out)
-    out = ValueFactory(checkType);
-  
+
   size_t nMC = paras.mComplexValues().size();
   size_t nMD = paras.mDoubleValues().size();
   size_t nMI = paras.mIntValues().size();
   size_t nC = paras.complexValues().size();
-  size_t nD =
-      paras.doubleValues().size() + paras.doubleParameters().size();
+  size_t nD = paras.doubleValues().size() + paras.doubleParameters().size();
   size_t nI = paras.intValues().size();
 
   switch (checkType) {
@@ -330,10 +342,11 @@ void MultAll::execute(ParameterList &paras, std::shared_ptr<Parameter> &out) {
     for (auto p : paras.intValues())
       result *= p->value();
 
-    // fill MultiComplex parameter
+    if (!out)
+      out = MComplex("", paras.mComplexValue(0)->values().size());
     auto par =
         std::static_pointer_cast<Value<std::vector<std::complex<double>>>>(out);
-    auto&  results = par->values(); // reference
+    auto &results = par->values();                     // reference
     std::fill(results.begin(), results.end(), result); // reset
 
     for (auto p : paras.mComplexValues()) {
@@ -365,11 +378,13 @@ void MultAll::execute(ParameterList &paras, std::shared_ptr<Parameter> &out) {
     for (auto p : paras.intValues())
       result *= p->value();
 
+    if (!out)
+      out = MDouble("", paras.mDoubleValue(0)->values().size());
     // fill MultiComplex parameter
     auto par = std::static_pointer_cast<Value<std::vector<double>>>(out);
-    auto&  results = par->values(); // reference
+    auto &results = par->values();                     // reference
     std::fill(results.begin(), results.end(), result); // reset
-    
+
     for (auto p : paras.mDoubleValues()) {
       std::transform(p->values().begin(), p->values().end(), results.begin(),
                      results.begin(), std::multiplies<double>());
@@ -392,9 +407,12 @@ void MultAll::execute(ParameterList &paras, std::shared_ptr<Parameter> &out) {
     for (auto p : paras.intValues())
       result *= p->value();
 
+    if (!out)
+      out = MInteger("", paras.mIntValue(0)->values().size());
+
     // fill MultiComplex parameter
     auto par = std::static_pointer_cast<Value<std::vector<int>>>(out);
-    auto&  results = par->values(); // reference
+    auto &results = par->values();                     // reference
     std::fill(results.begin(), results.end(), result); // reset
 
     for (auto p : paras.mIntValues()) {
@@ -410,11 +428,12 @@ void MultAll::execute(ParameterList &paras, std::shared_ptr<Parameter> &out) {
     if (!nC || nMD || nMC || nMI)
       throw BadParameter("MultAll::execute() | COMPLEX: expecting at least "
                          "one multi complex value!");
-
+    if (!out)
+      out = std::make_shared<Value<std::complex<double>>>();
     auto par = std::static_pointer_cast<Value<std::complex<double>>>(out);
-    auto&  result = par->values(); // reference
-    result = std::complex<double>(1., 0.); //reset
-    
+    auto &result = par->values();          // reference
+    result = std::complex<double>(1., 0.); // reset
+
     for (auto p : paras.complexValues())
       result *= p->value();
     for (auto p : paras.doubleValues())
@@ -430,10 +449,11 @@ void MultAll::execute(ParameterList &paras, std::shared_ptr<Parameter> &out) {
     if (!nD || nC || nMD || nMC || nMI)
       throw BadParameter("MultAll::execute() | DOUBLE: expecting at least "
                          "one multi complex value!");
-
+    if (!out)
+      out = std::make_shared<Value<double>>();
     auto par = std::static_pointer_cast<Value<double>>(out);
-    auto& result = par->values(); // reference
-    result = 1.; //reset
+    auto &result = par->values(); // reference
+    result = 1.;                  // reset
 
     for (auto p : paras.doubleValues())
       result *= p->value();
@@ -447,9 +467,11 @@ void MultAll::execute(ParameterList &paras, std::shared_ptr<Parameter> &out) {
     if (!nI || nD || nC || nMD || nMC || nMI)
       throw BadParameter("MultAll::execute() | INTEGER: expecting at least "
                          "one multi complex value!");
+    if (!out)
+      out = std::make_shared<Value<int>>();
     auto par = std::static_pointer_cast<Value<int>>(out);
-    auto&  result = par->values(); // reference
-    result = 1; //reset
+    auto &result = par->values(); // reference
+    result = 1;                   // reset
 
     for (auto p : paras.intValues())
       result *= p->value();
@@ -463,20 +485,17 @@ void MultAll::execute(ParameterList &paras, std::shared_ptr<Parameter> &out) {
 }
 
 void LogOf::execute(ParameterList &paras, std::shared_ptr<Parameter> &out) {
-  if (out &&checkType != out->type())
+  if (out && checkType != out->type())
     throw BadParameter("LogOf::execute() | Parameter type mismatch!");
-  if (!out)
-    out = ValueFactory(checkType);
   
-  if (paras.numParameters() != 1)
+  if (paras.numParameters() + paras.numValues() != 1)
     throw BadParameter("LogOf::execute() | Expecting only one parameter");
 
   size_t nMC = paras.mComplexValues().size();
   size_t nMD = paras.mDoubleValues().size();
   size_t nMI = paras.mIntValues().size();
   size_t nC = paras.complexValues().size();
-  size_t nD =
-      paras.doubleValues().size() + paras.doubleParameters().size();
+  size_t nD = paras.doubleValues().size() + paras.doubleParameters().size();
   size_t nI = paras.intValues().size();
 
   switch (checkType) {
@@ -486,16 +505,25 @@ void LogOf::execute(ParameterList &paras, std::shared_ptr<Parameter> &out) {
       throw BadParameter(
           "LogOf::execute() | MDOUBLE: Number and/or types do not match");
 
-    auto par = std::static_pointer_cast<Value<std::vector<double>>>(out);
-    auto& results = par->values(); // reference
-    std::fill(results.begin(), results.end(), 0.); // reset
-
-    std::transform(paras.mDoubleValue(0)->operator()().begin(),
-                   paras.mDoubleValue(0)->operator()().end(), results.begin(),
-                   [](double x) { return std::log(x); });
-    std::transform(paras.mIntValue(0)->operator()().begin(),
-                   paras.mIntValue(0)->operator()().end(), results.begin(),
-                   [](double x) { return std::log(x); });
+    if (nMD) {
+      if (!out)
+        out = MDouble("", paras.mDoubleValue(0)->values().size());
+      auto par = std::static_pointer_cast<Value<std::vector<double>>>(out);
+      auto &results = par->values();                 // reference
+      std::fill(results.begin(), results.end(), 0.); // reset
+      std::transform(paras.mDoubleValue(0)->operator()().begin(),
+                     paras.mDoubleValue(0)->operator()().end(), results.begin(),
+                     [](double x) { return std::log(x); });
+    }
+    if (nMI) {
+      if (!out)
+        out = MDouble("", paras.mIntValue(0)->values().size());
+      auto par = std::static_pointer_cast<Value<std::vector<double>>>(out);
+      auto &results = par->values(); // reference
+      std::transform(paras.mIntValue(0)->operator()().begin(),
+                     paras.mIntValue(0)->operator()().end(), results.begin(),
+                     [](double x) { return std::log(x); });
+    }
     break;
   } // end multi double
 
@@ -504,8 +532,10 @@ void LogOf::execute(ParameterList &paras, std::shared_ptr<Parameter> &out) {
       throw BadParameter(
           "LogOf::execute() | DOUBLE: Number and/or types do not match");
 
+    if (!out)
+      out = std::make_shared<Value<double>>();
     auto par = std::static_pointer_cast<Value<double>>(out);
-    auto& result = par->values(); // reference
+    auto &result = par->values(); // reference
 
     // output double: log of one double input
     if (paras.doubleValues().size())
@@ -528,17 +558,14 @@ void LogOf::execute(ParameterList &paras, std::shared_ptr<Parameter> &out) {
 
 void Complexify::execute(ParameterList &paras,
                          std::shared_ptr<Parameter> &out) {
-  if (out &&checkType != out->type())
+  if (out && checkType != out->type())
     throw BadParameter("Complexify::SquareRoot() | Parameter type mismatch!");
-  if (!out)
-    out = ValueFactory(checkType);
-  
+
   size_t nMC = paras.mComplexValues().size();
   size_t nMD = paras.mDoubleValues().size();
   size_t nMI = paras.mIntValues().size();
   size_t nC = paras.complexValues().size();
-  size_t nD =
-      paras.doubleValues().size() + paras.doubleParameters().size();
+  size_t nD = paras.doubleValues().size() + paras.doubleParameters().size();
   size_t nI = paras.intValues().size();
 
   switch (checkType) {
@@ -547,11 +574,11 @@ void Complexify::execute(ParameterList &paras,
     if (nMD != 2 || nMC || nMI || nC || nD || nI)
       throw BadParameter(
           "Complexify::execute() | MCOMPLEX: Number and/or types do not match");
-
-    // fill MultiComplex parameter
+    if (!out)
+      out = MComplex("", paras.mDoubleValue(0)->values().size());
     auto par =
         std::static_pointer_cast<Value<std::vector<std::complex<double>>>>(out);
-    auto& results = par->values(); // reference
+    auto &results = par->values(); // reference
 
     // We have to assume here that the magnitude is the first parameter and
     // the phase the second one. We cannot check that.
@@ -568,9 +595,10 @@ void Complexify::execute(ParameterList &paras,
     if (nD != 2 || nMC || nMD || nMI || nC || nI)
       throw BadParameter(
           "Complexify::execute() | COMPLEX: Number and/or types do not match");
-
+    if (!out)
+      out = std::make_shared<Value<std::complex<double>>>();
     auto par = std::static_pointer_cast<Value<std::complex<double>>>(out);
-    auto& result = par->values(); // reference
+    auto &result = par->values(); // reference
 
     if (paras.doubleValues().size() == 2) {
       result = std::polar(std::abs(paras.doubleValue(0)->value()),
@@ -593,18 +621,15 @@ void Complexify::execute(ParameterList &paras,
 
 void ComplexConjugate::execute(ParameterList &paras,
                                std::shared_ptr<Parameter> &out) {
-  if (out &&checkType != out->type())
+  if (out && checkType != out->type())
     throw BadParameter(
         "ComplexConjugate::SquareRoot() | Parameter type mismatch!");
-  if (!out)
-    out = ValueFactory(checkType);
-  
+
   size_t nMC = paras.mComplexValues().size();
   size_t nMD = paras.mDoubleValues().size();
   size_t nMI = paras.mIntValues().size();
   size_t nC = paras.complexValues().size();
-  size_t nD =
-      paras.doubleValues().size() + paras.doubleParameters().size();
+  size_t nD = paras.doubleValues().size() + paras.doubleParameters().size();
   size_t nI = paras.intValues().size();
 
   if (nMD || nMI || nD || nI)
@@ -618,14 +643,14 @@ void ComplexConjugate::execute(ParameterList &paras,
     if (nMC != 1 || nC)
       throw BadParameter("ComplexConjugate::execute() | MCOMPLEX: Number "
                          "and/or types do not match");
-
+    if (!out)
+      out = MComplex("", paras.mComplexValue(0)->values().size());
     auto par =
         std::static_pointer_cast<Value<std::vector<std::complex<double>>>>(out);
-    auto& results = par->values(); // reference
+    auto &results = par->values(); // reference
 
     std::transform(paras.mComplexValue(0)->operator()().begin(),
-                   paras.mComplexValue(0)->operator()().begin(),
-                   results.begin(),
+                   paras.mComplexValue(0)->operator()().end(), results.begin(),
                    [](std::complex<double> c) { return std::conj(c); });
     break;
   } // end multi complex
@@ -634,10 +659,11 @@ void ComplexConjugate::execute(ParameterList &paras,
     if (nC != 1 || nMC)
       throw BadParameter("ComplexConjugate::execute() | COMPLEX: Number and/or "
                          "types do not match");
-
+    if (!out)
+      out = std::make_shared<Value<std::complex<double>>>();
     auto par = std::static_pointer_cast<Value<std::complex<double>>>(out);
-    auto& result = par->values(); // reference
-    result = std::conj(paras.complexValue(0)->value()); //reset
+    auto &result = par->values();                       // reference
+    result = std::conj(paras.complexValue(0)->value()); // reset
     break;
   } // end double
   default: {
@@ -650,39 +676,45 @@ void ComplexConjugate::execute(ParameterList &paras,
 void AbsSquare::execute(ParameterList &paras, std::shared_ptr<Parameter> &out) {
   if (out && checkType != out->type())
     throw BadParameter("AbsSquare::SquareRoot() | Parameter type mismatch!");
-  if (!out)
-    out = ValueFactory(checkType);
-  
+
   size_t nMC = paras.mComplexValues().size();
   size_t nMD = paras.mDoubleValues().size();
   size_t nMI = paras.mIntValues().size();
   size_t nC = paras.complexValues().size();
-  size_t nD =
-      paras.doubleValues().size() + paras.doubleParameters().size();
+  size_t nD = paras.doubleValues().size() + paras.doubleParameters().size();
   size_t nI = paras.intValues().size();
 
-  if (paras.numParameters() != 1)
+  if (paras.numParameters() + paras.numValues() != 1)
     throw std::runtime_error("AbsSquare::execute() | Input parameter list "
                              "contains more than one parameter!");
 
   switch (checkType) {
 
   case ParType::MDOUBLE: {
-    auto par = std::static_pointer_cast<Value<std::vector<double>>>(out);
-    auto& results = par->values(); // reference
     if (nMD == 1) {
+      if (!out)
+        out = MDouble("", paras.mDoubleValue(0)->values().size());
+      auto par = std::static_pointer_cast<Value<std::vector<double>>>(out);
+      auto &results = par->values(); // reference
       std::transform(paras.mDoubleValue(0)->operator()().begin(),
-                     paras.mDoubleValue(0)->operator()().begin(),
-                     results.begin(), [](double c) { return std::norm(c); });
+                     paras.mDoubleValue(0)->operator()().end(), results.begin(),
+                     [](double c) { return std::norm(c); });
     } else if (nMC == 1) {
-      std::transform(paras.mDoubleValue(0)->operator()().begin(),
-                     paras.mDoubleValue(0)->operator()().begin(),
-                     results.begin(),
+      if (!out)
+        out = MDouble("", paras.mComplexValue(0)->values().size());
+      auto par = std::static_pointer_cast<Value<std::vector<double>>>(out);
+      auto &results = par->values(); // reference
+      std::transform(paras.mComplexValue(0)->values().begin(),
+                     paras.mComplexValue(0)->values().end(), results.begin(),
                      [](std::complex<double> c) { return std::norm(c); });
     } else if (nMI == 1) {
-      std::transform(paras.mDoubleValue(0)->operator()().begin(),
-                     paras.mDoubleValue(0)->operator()().begin(),
-                     results.begin(), [](int c) { return std::norm(c); });
+      if (!out)
+        out = MDouble("", paras.mIntValue(0)->values().size());
+      auto par = std::static_pointer_cast<Value<std::vector<double>>>(out);
+      auto &results = par->values(); // reference
+      std::transform(paras.mIntValue(0)->operator()().begin(),
+                     paras.mIntValue(0)->operator()().end(), results.begin(),
+                     [](int c) { return std::norm(c); });
     } else {
       throw BadParameter("AbsSquare::execute() | MDOUBLE: Number and/or "
                          "types do not match");
@@ -693,11 +725,13 @@ void AbsSquare::execute(ParameterList &paras, std::shared_ptr<Parameter> &out) {
     if (nMI != 1)
       throw BadParameter("AbsSquare::execute() | MINTEGER: Number and/or "
                          "types do not match");
+    if (!out)
+      out = MInteger("", paras.mIntValue(0)->values().size());
     auto par = std::static_pointer_cast<Value<std::vector<int>>>(out);
-    auto& results = par->values(); // reference
+    auto &results = par->values(); // reference
 
     std::transform(paras.mDoubleValue(0)->operator()().begin(),
-                   paras.mDoubleValue(0)->operator()().begin(), results.begin(),
+                   paras.mDoubleValue(0)->operator()().end(), results.begin(),
                    [](int c) { return std::norm(c); });
   }
   case ParType::INTEGER: {

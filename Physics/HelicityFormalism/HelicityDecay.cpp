@@ -14,60 +14,70 @@
 namespace ComPWA {
 namespace Physics {
 namespace HelicityFormalism {
+HelicityDecay::HelicityDecay(std::shared_ptr<PartList> partL,
+                             std::shared_ptr<Kinematics> kin,
+                             const boost::property_tree::ptree &pt)
+    : SubSys(pt) {
+  load(partL, kin, pt);
+}
 
-std::shared_ptr<PartialAmplitude>
-HelicityDecay::Factory(std::shared_ptr<PartList> partL,
-                       std::shared_ptr<Kinematics> kin,
-                       const boost::property_tree::ptree &pt) {
+void HelicityDecay::load(std::shared_ptr<PartList> partL,
+                         std::shared_ptr<Kinematics> kin,
+                         const boost::property_tree::ptree &pt) {
 
   LOG(trace) << "HelicityDecay::Factory() |";
-  SubSystem subSys = SubSystemFactory(pt);
+  SubSys = SubSystem(pt);
+  DataPosition =
+      3 * std::dynamic_pointer_cast<HelicityKinematics>(kin)->dataID(SubSys);
+  setPhspVolume(kin->phspVolume());
 
-  // Create object. Setting dataPos to invalid, will be set later
-  auto obj = std::make_shared<HelicityDecay>(-1, subSys);
-  obj->setName(pt.get<std::string>("<xmlattr>.Name", "empty"));
-
+  _name = pt.get<std::string>("<xmlattr>.Name", "empty");
+  _magnitude =
+      std::make_shared<ComPWA::DoubleParameter>("Magnitude_" + _name, 1.0);
+  _phase = std::make_shared<ComPWA::DoubleParameter>("Phase_" + _name, 0.0);
   std::shared_ptr<DoubleParameter> mag, phase;
   for (const auto &v : pt.get_child("")) {
     if (v.first == "Parameter") {
       if (v.second.get<std::string>("<xmlattr>.Type") == "Magnitude") {
-        auto tmp = DoubleParameter();
-        tmp.load(v.second);
-        mag = std::make_shared<DoubleParameter>(tmp);
+        _magnitude = std::make_shared<DoubleParameter>(v.second);
       }
       if (v.second.get<std::string>("<xmlattr>.Type") == "Phase") {
-        auto tmp = DoubleParameter();
-        tmp.load(v.second);
-        phase = std::make_shared<DoubleParameter>(tmp);
+        _phase = std::make_shared<DoubleParameter>(v.second);
       }
     } else {
       // ignored further settings. Should we throw an error?
     }
   }
 
-  if (mag)
-    obj->setMagnitudeParameter(mag);
-  else {
-    obj->setMagnitudeParameter(
-        std::make_shared<ComPWA::DoubleParameter>("", 1.0));
-    obj->magnitudeParameter()->fixParameter(true);
-  }
-
-  if (phase)
-    obj->setPhaseParameter(phase);
-  else {
-    obj->setPhaseParameter(std::make_shared<ComPWA::DoubleParameter>("", 0.0));
-    obj->phaseParameter()->fixParameter(true);
-  }
-
-  auto dynObj = std::shared_ptr<DecayDynamics::AbstractDynamicalFunction>();
   std::string name = pt.get<std::string>("DecayParticle.<xmlattr>.Name");
+  auto partItr = partL->find(name);
+  if (partItr == partL->end())
+    throw std::runtime_error("HelicityDecay::load | Particle " + name +
+                             " not found in list!");
+  ComPWA::Spin J = partItr->second.GetSpinQuantumNumber("Spin");
+  ComPWA::Spin mu(pt.get<double>("DecayParticle.<xmlattr>.Helicity"));
+
+  // Read name and helicities from decay products
+  auto decayProducts = pt.get_child("DecayProducts");
+  if (decayProducts.size() != 2)
+    throw boost::property_tree::ptree_error(
+        "HelicityDecay::load() | Expect exactly two decay products (" +
+        std::to_string(decayProducts.size()) + " given)!");
+
+  auto p = decayProducts.begin();
+  DecayProducts.first = p->second.get<std::string>("<xmlattr>.Name");
+  DecayHelicities.first =
+      ComPWA::Spin(p->second.get<int>("<xmlattr>.Helicity"));
+  ++p;
+  DecayProducts.second = p->second.get<std::string>("<xmlattr>.Name");
+  DecayHelicities.second =
+      ComPWA::Spin(p->second.get<double>("<xmlattr>.Helicity"));
 
   // Two-body decay
-  if (subSys.GetFinalStates().size() == 2) {
+  if (SubSys.GetFinalStates().size() == 2) {
     // Create WignerD object
-    obj->setWignerD(
-        ComPWA::Physics::HelicityFormalism::AmpWignerD::Factory(partL, pt));
+    AngularDist = std::make_shared<HelicityFormalism::AmpWignerD>(
+        J, mu, DecayHelicities.first - DecayHelicities.second);
 
     auto partProp = partL->find(name)->second;
     std::string decayType = partProp.GetDecayType();
@@ -77,9 +87,11 @@ HelicityDecay::Factory(std::shared_ptr<PartList> partL,
                                "given as mother particle of a decay. Makes no "
                                "sense!");
     } else if (decayType == "relativisticBreitWigner") {
-      dynObj = DecayDynamics::RelativisticBreitWigner::Factory(partL, pt);
+      DynamicFcn = std::make_shared<DecayDynamics::RelativisticBreitWigner>(
+          name, DecayProducts, partL);
     } else if (decayType == "flatte") {
-      dynObj = DecayDynamics::AmpFlatteRes::Factory(partL, pt);
+      DynamicFcn = std::make_shared<DecayDynamics::AmpFlatteRes>(
+          name, DecayProducts, partL);
     } else {
       throw std::runtime_error(
           "HelicityDecay::Factory() | Unknown decay type " + decayType + "!");
@@ -87,42 +99,28 @@ HelicityDecay::Factory(std::shared_ptr<PartList> partL,
 
     // make sure dynamical function is created and set first
   } else { // Multi-body decay
-    dynObj = std::shared_ptr<DecayDynamics::AbstractDynamicalFunction>(
-        new DecayDynamics::NonResonant);
-    dynObj->setName(name);
+    DynamicFcn = std::make_shared<DecayDynamics::NonResonant>(name);
     // We assume the we have a multi-body decay and assume that the decay
     // proceeds via constant (non-resonant) dynamics
-    obj->setWignerD(std::shared_ptr<AmpWignerD>(new AmpWignerD()));
+    AngularDist = std::make_shared<AmpWignerD>(ComPWA::Spin(0), ComPWA::Spin(0),
+                                               ComPWA::Spin(0));
   }
-
-  obj->setDynamicalFunction(dynObj);
-  obj->setDataPosition(
-      3 * std::dynamic_pointer_cast<HelicityKinematics>(kin)->dataID(subSys));
-
-  obj->setPhspVolume(kin->phspVolume());
-
-  return std::static_pointer_cast<PartialAmplitude>(obj);
 }
 
-boost::property_tree::ptree
-HelicityDecay::Save(std::shared_ptr<PartialAmplitude> res) {
+boost::property_tree::ptree HelicityDecay::save() const {
+  auto pt = SubSys.save();
+  pt.put<std::string>("<xmlattr>.Name", name());
 
-  auto obj = std::static_pointer_cast<HelicityDecay>(res);
-  auto pt = SubSystemSave(obj->subSystem());
-  pt.put<std::string>("<xmlattr>.Name", obj->name());
-
-  boost::property_tree::ptree tmp = obj->magnitudeParameter()->save();
+  boost::property_tree::ptree tmp = _magnitude->save();
   tmp.put("<xmlattr>.Type", "Magnitude");
-  tmp.put("<xmlattr>.Class", "Double");
   pt.add_child("Parameter", tmp);
 
-  tmp = obj->phaseParameter()->save();
+  tmp = _phase->save();
   tmp.put("<xmlattr>.Type", "Phase");
-  tmp.put("<xmlattr>.Class", "Double");
   pt.add_child("Parameter", tmp);
 
-  pt.put("DecayParticle.<xmlattr>.Name", obj->dynamicalFunction()->name());
-  pt.put("DecayParticle.<xmlattr>.Helicity", obj->wignerD()->GetMu());
+  pt.put("DecayParticle.<xmlattr>.Name", DynamicFcn->name());
+  pt.put("DecayParticle.<xmlattr>.Helicity", AngularDist->mu());
 
   // TODO: put helicities of daughter particles
   return pt;
@@ -131,18 +129,18 @@ HelicityDecay::Save(std::shared_ptr<PartialAmplitude> res) {
 bool HelicityDecay::isModified() const {
   if (PartialAmplitude::isModified())
     return true;
-  if (DynamicFcn->CheckModified()) {
+  if (DynamicFcn->isModified()) {
     const_cast<double &>(CurrentIntegral) = integral();
-    DynamicFcn->SetModified(false);
+    DynamicFcn->setModified(false);
     return true;
   }
   return false;
 }
 
 double HelicityDecay::normalization() const {
-  if (DynamicFcn->CheckModified() || !CurrentIntegral)
+  if (DynamicFcn->isModified() || !CurrentIntegral)
     const_cast<double &>(CurrentIntegral) = integral();
-  DynamicFcn->SetModified(false);
+  DynamicFcn->setModified(false);
   assert(CurrentIntegral != 0.0);
   return 1 / std::sqrt(CurrentIntegral);
 }
@@ -155,26 +153,22 @@ HelicityDecay::tree(std::shared_ptr<Kinematics> kin,
   size_t n = sample.mDoubleValue(0)->values().size();
   size_t phspSize = toySample.mDoubleValue(0)->values().size();
 
+  std::string nodeName = "PartialAmplitude(" + name() + ")" + suffix;
+
   auto tr = std::make_shared<FunctionTree>(
-      "PartialAmplitude(" + name() + ")" + suffix, MComplex("", n),
-      std::make_shared<MultAll>(ParType::MCOMPLEX));
-  tr->createNode("Strength", std::make_shared<Value<double>>(),
-                 std::make_shared<Complexify>(ParType::COMPLEX),
-                 "PartialAmplitude(" + name() + ")" + suffix);
+      nodeName, MComplex("", n), std::make_shared<MultAll>(ParType::MCOMPLEX));
+  tr->createNode("Strength", std::make_shared<Value<std::complex<double>>>(),
+                 std::make_shared<Complexify>(ParType::COMPLEX), nodeName);
   tr->createLeaf("Magnitude", _magnitude, "Strength");
   tr->createLeaf("Phase", _phase, "Strength");
-  tr->createLeaf("PreFactor", _preFactor,
-                 "PartialAmplitude(" + name() + ")" + suffix);
-  tr->insertTree(
-      AngularDist->GetTree(sample, DataPosition + 1, DataPosition + 2),
-      "PartialAmplitude(" + name() + ")" + suffix);
-  tr->insertTree(DynamicFcn->GetTree(sample, DataPosition),
-                 "PartialAmplitude(" + name() + ")" + suffix);
+  tr->createLeaf("PreFactor", _preFactor, nodeName);
+  tr->insertTree(AngularDist->tree(sample, DataPosition + 1, DataPosition + 2),
+                 nodeName);
+  tr->insertTree(DynamicFcn->tree(sample, DataPosition), nodeName);
 
-  tr->parameter();
   tr->createNode("Normalization", std::make_shared<Value<double>>(),
                  std::make_shared<Inverse>(ParType::DOUBLE),
-                 "PartialAmplitude(" + name() + ")" + suffix); // 1/normLH
+                 nodeName); // 1/normLH
   tr->createNode("SqrtIntegral", std::make_shared<Value<double>>(),
                  std::make_shared<SquareRoot>(ParType::DOUBLE),
                  "Normalization");
@@ -189,10 +183,10 @@ HelicityDecay::tree(std::shared_ptr<Kinematics> kin,
                  "Sum"); //|T_{ev}|^2
   tr->createNode("mult", MComplex("", phspSize),
                  std::make_shared<MultAll>(ParType::MCOMPLEX), "Intensity");
-  tr->insertTree(AngularDist->GetTree(toySample, DataPosition + 1,
-                                      DataPosition + 2, "_norm"),
-                 "mult" + suffix);
-  tr->insertTree(DynamicFcn->GetTree(toySample, DataPosition, "_norm"),
+  tr->insertTree(
+      AngularDist->tree(toySample, DataPosition + 1, DataPosition + 2, "_norm"),
+      "mult" + suffix);
+  tr->insertTree(DynamicFcn->tree(toySample, DataPosition, "_norm"),
                  "mult" + suffix);
 
   tr->parameter();

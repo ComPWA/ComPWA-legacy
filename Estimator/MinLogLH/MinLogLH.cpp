@@ -74,7 +74,7 @@ double MinLogLH::controlParameter(ParameterList &minPar) {
     }
     lh = (-1) * ((double)_nEvents) / _sumOfWeights * sumLog;
   } else {
-    auto logLH = std::dynamic_pointer_cast<DoubleParameter>(_tree->parameter());
+    auto logLH = std::dynamic_pointer_cast<Value<double>>(_tree->parameter());
     lh = logLH->value();
   }
   _nCalls++;
@@ -101,7 +101,7 @@ void MinLogLH::UseFunctionTree(bool onoff) {
 
 std::shared_ptr<FunctionTree> MinLogLH::tree() {
   if (!_tree) {
-    throw std::runtime_error("MinLogLH::GetTree()| FunctionTree does not "
+    throw std::runtime_error("MinLogLH::tree()| FunctionTree does not "
                              "exists. Enable it first using "
                              "UseFunctionTree(true)!");
   }

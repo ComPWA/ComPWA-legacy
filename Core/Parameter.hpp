@@ -59,7 +59,7 @@ public:
   /// fails, just value and error are used.
   DoubleParameter(std::string inName, const double value, const double min,
                   const double max, const double error);
-
+                  
   DoubleParameter(const DoubleParameter &in);
   
   virtual bool isParameter() const { return true; }

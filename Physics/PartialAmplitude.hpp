@@ -37,6 +37,7 @@ public:
 
   virtual PartialAmplitude *clone(std::string newName = "") const = 0;
 
+  virtual boost::property_tree::ptree save() const = 0;
   //======= INTEGRATION/NORMALIZATION ===========
 
   /// Get current normalization.

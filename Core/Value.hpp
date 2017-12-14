@@ -4,23 +4,29 @@
 
 ///
 /// \file
-/// Template implementation of Parameter.
+/// Template implementation of Parameter for simple values.
 ///
 
 #ifndef ParameterT_hpp
 #define ParameterT_hpp
 
-#include <stdio.h>
+#include <iterator>
 #include "Core/Parameter.hpp"
 namespace ComPWA {
 
 template<class T>
   std::ostream& operator<<(std::ostream& stream, const std::vector<T>& values)
 {
-    stream << "[ ";
-    std::copy(begin(values), end(values),
-              std::ostream_iterator<T>(stream, " "));
-    stream << "]";
+    auto n = values.size();
+    if (n > 5)
+      n = 5;    // Print first 5 elements
+    auto first = values.begin();
+    auto last = values.begin();
+    std::advance(last, n);
+    std::copy(first, last, std::ostream_iterator<T>(stream, ", "));
+    if (values.size() > n)
+      stream << "...";
+
     return stream;
 }
 
@@ -44,9 +50,6 @@ public:
 
   /// Conversion operator for internal type
   operator T() const { return Val; };
-
-  /// Conversion operators for different types
-//  template <typename T2> operator T2() { return Val; };
 
   const T &operator()() const { return Val; };
 

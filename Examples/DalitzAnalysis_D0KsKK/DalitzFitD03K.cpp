@@ -361,11 +361,11 @@ int main(int argc, char **argv) {
   }
 
   // ========= AmpIntensity ========
-  auto intens = IncoherentIntensity::Factory(
+  auto intens = std::make_shared<IncoherentIntensity>(
       fitModelPartL, fitModelKin,
       fitModelTree.get_child("IncoherentIntensity"));
 
-  auto trueIntens = IncoherentIntensity::Factory(
+  auto trueIntens = std::make_shared<IncoherentIntensity>(
       trueModelPartL, trueModelKin,
       trueModelTree.get_child("IncoherentIntensity"));
 
@@ -660,7 +660,7 @@ int main(int argc, char **argv) {
     if (!disableFileLog) { // Write fit result
       // Save final amplitude
       boost::property_tree::ptree ptout;
-      ptout.add_child("IncoherentIntensity", IncoherentIntensity::Save(intens));
+      ptout.add_child("IncoherentIntensity", intens->save());
       boost::property_tree::xml_parser::write_xml(
           fileNamePrefix + std::string("-Model.xml"), ptout, std::locale());
       // Does not compile with boost1.54

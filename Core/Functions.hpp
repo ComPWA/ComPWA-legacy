@@ -91,7 +91,7 @@ public:
 ///
 class AddAll : public Strategy {
 public:
-  AddAll(ParType in) : Strategy(in, "Add"){};
+  AddAll(ParType in) : Strategy(in, "AddAll"){};
 
   virtual ~AddAll() {}
 
@@ -107,7 +107,7 @@ public:
 
 class MultAll : public Strategy {
 public:
-  MultAll(ParType in) : Strategy(in, "Mult"){};
+  MultAll(ParType in) : Strategy(in, "MultAll"){};
 
   virtual ~MultAll() {}
 
@@ -143,7 +143,7 @@ public:
 
 class AbsSquare : public Strategy {
 public:
-  AbsSquare(ParType in) : Strategy(in, "Abs"){};
+  AbsSquare(ParType in) : Strategy(in, "AbsSquare"){};
 
   virtual ~AbsSquare() {}
 

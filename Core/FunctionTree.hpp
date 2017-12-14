@@ -76,12 +76,6 @@ public:
   virtual void insertTree(std::shared_ptr<ComPWA::FunctionTree> tree,
                           std::string parent);
 
-  /// Add a node to the FunctionTree. Adds node \p newNode to the list of
-  /// nodes. No links between the nodes are created, those needs to be
-  /// set beforehand. If you do not know what that means use
-  /// insertNode(std::shared_ptr<ComPWA::TreeNode> inNode, std::string parent)!
-  virtual void addNode(std::shared_ptr<ComPWA::TreeNode> node);
-
   /// Create and add a node to the function tree. Adds Top-Down-Linking to the
   /// node. For this node the caching is disabled.
   virtual void createNode(std::string name,

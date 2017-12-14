@@ -9,7 +9,7 @@ namespace Physics {
 namespace DecayDynamics {
 
 std::shared_ptr<FunctionTree>
-NonResonant::GetTree(const ParameterList &sample, int pos, std::string suffix) {
+NonResonant::tree(const ParameterList &sample, int pos, std::string suffix) {
 
   int n = sample.mDoubleValue(0)->values().size();
   auto unitVec = MComplex("unit", n, std::complex<double>(1, 0));

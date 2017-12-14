@@ -91,7 +91,7 @@ void FunctionTree::insertNode(std::shared_ptr<TreeNode> node,
   // already have parents. Do need to consider this here?
   node->addParent(parentNode);
   //  inNode->linkParents();
-
+  parentNode->update();
   // Subtree already linked, but need to be added to list of nodes
   AddChildNodes(node);
 }
@@ -101,13 +101,6 @@ void FunctionTree::insertTree(std::shared_ptr<FunctionTree> tree,
   ChildTrees.push_back(tree);
   insertNode(tree->head(), parent);
   return;
-}
-
-void FunctionTree::addNode(std::shared_ptr<ComPWA::TreeNode> newNode) {
-  // TODO: check existence, throw exception
-  Nodes.insert(std::pair<std::string, std::shared_ptr<TreeNode>>(
-      newNode->name(), newNode));
-  newNode->linkParents();
 }
 
 void FunctionTree::createNode(std::string name,
@@ -131,6 +124,8 @@ void FunctionTree::createNode(std::string name,
   Nodes.insert(
       std::pair<std::string, std::shared_ptr<TreeNode>>(name, newNode));
   newNode->linkParents();
+  if(parentNode)
+    parentNode->update();
   if (parent == "")
     Head = newNode; // if we created a head redirect pointer
 }
@@ -166,6 +161,8 @@ void FunctionTree::createLeaf(std::string name,
   // setup connections
   if (exists) {
     leaf->addParent(parentNode);
+    if(parentNode)
+    parentNode->update();
   } else {
     leaf = std::shared_ptr<TreeNode>(
         new TreeNode(name, parameter, std::shared_ptr<Strategy>(), parentNode));
@@ -173,6 +170,8 @@ void FunctionTree::createLeaf(std::string name,
         std::pair<std::string, std::shared_ptr<TreeNode>>(name, leaf));
     leaf->linkParents();
     parameter->Attach(leaf);
+    if(parentNode)
+    parentNode->update();
     if (parent == "")
       Head = leaf; // if we created a head, redirect pointer
   }

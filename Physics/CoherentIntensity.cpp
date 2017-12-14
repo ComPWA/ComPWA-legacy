@@ -9,7 +9,15 @@
 #include "Core/Efficiency.hpp"
 #include "Physics/CoherentIntensity.hpp"
 
+using namespace ComPWA;
 using namespace ComPWA::Physics;
+using namespace ComPWA::Physics::HelicityFormalism;
+
+CoherentIntensity::CoherentIntensity(std::shared_ptr<ComPWA::PartList> partL,
+                  std::shared_ptr<ComPWA::Kinematics> kin,
+                  const boost::property_tree::ptree &pt) : PhspVolume(1.0) {
+  load(partL, kin, pt);
+}
 
 double CoherentIntensity::intensity(const DataPoint &point) const {
   std::complex<double> result(0., 0.);
@@ -19,61 +27,44 @@ double CoherentIntensity::intensity(const DataPoint &point) const {
   return strength() * std::norm(result) * Eff->evaluate(point);
 };
 
-std::shared_ptr<CoherentIntensity>
-CoherentIntensity::Factory(std::shared_ptr<PartList> partL,
-                           std::shared_ptr<Kinematics> kin,
-                           const boost::property_tree::ptree &pt) {
+void CoherentIntensity::load(std::shared_ptr<PartList> partL,
+                             std::shared_ptr<Kinematics> kin,
+                             const boost::property_tree::ptree &pt) {
   LOG(trace) << " CoherentIntensity::Factory() | Construction....";
-  auto obj = std::make_shared<CoherentIntensity>();
-  obj->Name = (pt.get<std::string>("<xmlattr>.Name"));
-
-  //  boost::property_tree::xml_writer_settings<char> settings('\t', 1);
-  //  write_xml(std::cout,pt);
-
-  std::shared_ptr<DoubleParameter> strength;
+  if (pt.get<std::string>("<xmlattr>.Class") != "Coherent")
+    throw BadConfig("CoherentIntensity::Factory() | Property tree seems to "
+                    "not containt a configuration for an "
+                    "CoherentIntensity!");
+  Name = (pt.get<std::string>("<xmlattr>.Name"));
+  Strength = std::make_shared<ComPWA::DoubleParameter>("Strength_"+Name, 1.0);
+  setPhspVolume(kin->phspVolume());
+  
   for (const auto &v : pt.get_child("")) {
-    if (v.first == "Parameter") {
-      // Parameter (e.g. Mass)
-      if (v.second.get<std::string>("<xmlattr>.Type") != "Strength")
-        continue;
-      auto tmp = DoubleParameter();
-      tmp.load(v.second);
-      strength = std::make_shared<DoubleParameter>(tmp);
+    // Mass parameter
+    if (v.first == "Parameter" &&
+        v.second.get<std::string>("<xmlattr>.Type") != "Strength") {
+      Strength = std::make_shared<DoubleParameter>(v.second);
     } else if (v.first == "Amplitude" &&
                v.second.get<std::string>("<xmlattr>.Class") ==
                    "SequentialPartialAmplitude") {
-      obj->addAmplitude(
-          ComPWA::Physics::HelicityFormalism::SequentialPartialAmplitude::
-              Factory(partL, kin, v.second));
+      addAmplitude(
+          std::make_shared<SequentialPartialAmplitude>(partL, kin, v.second));
     } else {
       // ignored further settings. Should we throw an error?
     }
   }
 
-  if (strength)
-    obj->Strength = strength;
-  else {
-    obj->Strength = (std::make_shared<ComPWA::DoubleParameter>("", 1.0));
-    obj->Strength->fixParameter(true);
-  }
-
-  obj->setPhspVolume(kin->phspVolume());
-
-  return obj;
 }
 
-boost::property_tree::ptree
-CoherentIntensity::Save(std::shared_ptr<CoherentIntensity> obj) {
-
+boost::property_tree::ptree CoherentIntensity::save() const {
   boost::property_tree::ptree pt;
-  pt.put<std::string>("<xmlattr>.Name", obj->name());
-  pt.add_child("Parameter", obj->Strength->save());
+  pt.put<std::string>("<xmlattr>.Name", name());
+  pt.add_child("Parameter", Strength->save());
   pt.put("Parameter.<xmlattr>.Type", "Strength");
 
-  for (auto i : obj->amplitudes()) {
-    pt.add_child("Amplitude",
-                 HelicityFormalism::SequentialPartialAmplitude::Save(i));
-  }
+  for (auto i : Amplitudes)
+    pt.add_child("Amplitude", i->save());
+  
   return pt;
 }
 
@@ -114,11 +105,11 @@ CoherentIntensity::component(std::string name) {
 //! Getter function for basic amp tree
 std::shared_ptr<ComPWA::FunctionTree>
 CoherentIntensity::tree(std::shared_ptr<Kinematics> kin,
-                           const ComPWA::ParameterList &sample,
-                           const ComPWA::ParameterList &phspSample,
-                           const ComPWA::ParameterList &toySample,
-                           unsigned int nEvtVar, std::string suffix) {
-  
+                        const ComPWA::ParameterList &sample,
+                        const ComPWA::ParameterList &phspSample,
+                        const ComPWA::ParameterList &toySample,
+                        unsigned int nEvtVar, std::string suffix) {
+
   size_t n = sample.mDoubleValue(0)->values().size();
   size_t phspSize = phspSample.mDoubleValue(0)->values().size();
 
@@ -129,7 +120,7 @@ CoherentIntensity::tree(std::shared_ptr<Kinematics> kin,
   // Weights are stored on the last element of the ParameterList
   std::shared_ptr<Value<std::vector<double>>> weightPhsp =
       phspSample.mDoubleValues().end()[-1];
-  
+
   double sumWeights = std::accumulate(weightPhsp->values().begin(),
                                       weightPhsp->values().end(), 0.0);
 
@@ -140,7 +131,7 @@ CoherentIntensity::tree(std::shared_ptr<Kinematics> kin,
   tr->createLeaf("Strength", Strength,
                  "CoherentIntensity(" + name() + ")" + suffix);
   tr->createNode("SumSquared",
-                 std::shared_ptr<Strategy>(new AbsSquare(ParType::MDOUBLE)),
+                 std::make_shared<AbsSquare>(ParType::MDOUBLE),
                  "CoherentIntensity(" + name() + ")" + suffix);
   tr->insertTree(setupBasicTree(kin, sample, toySample), "SumSquared");
 
@@ -215,7 +206,7 @@ void CoherentIntensity::parameters(ComPWA::ParameterList &list) {
 void CoherentIntensity::updateParameters(const ParameterList &list) {
   std::shared_ptr<DoubleParameter> p;
   try {
-    p = FindParameter(Strength->name(),list);
+    p = FindParameter(Strength->name(), list);
   } catch (std::exception &ex) {
   }
   if (p)

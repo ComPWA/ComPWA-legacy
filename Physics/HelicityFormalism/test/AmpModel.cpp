@@ -82,13 +82,12 @@ BOOST_AUTO_TEST_CASE(ConstructionFromXML) {
   modelStream << HelicityTestModel;
   boost::property_tree::xml_parser::read_xml(modelStream, tr);
   // Create amplitude from property_tree
-  auto intens = ComPWA::Physics::IncoherentIntensity::Factory(
+  auto intens = std::make_shared<ComPWA::Physics::IncoherentIntensity>(
       partL, kin, tr.get_child("IncoherentIntensity"));
 
   // Save amplitude to property_tree
   boost::property_tree::ptree ptout;
-  ptout.add_child("IncoherentIntensity",
-                  ComPWA::Physics::IncoherentIntensity::Save(intens));
+  ptout.add_child("IncoherentIntensity",intens->save());
 
   //  if (ptout != tr) {
   //    BOOST_CHECK(false);
@@ -134,7 +133,7 @@ BOOST_AUTO_TEST_CASE(AmpTreeCorrespondence) {
   modelStream << HelicityTestModel;
   boost::property_tree::xml_parser::read_xml(modelStream, tr);
   // Create amplitude from property_tree
-  auto intens = ComPWA::Physics::IncoherentIntensity::Factory(
+  auto intens = std::make_shared<ComPWA::Physics::IncoherentIntensity>(
       partL, kin, tr.get_child("IncoherentIntensity"));
 
   ParameterList list;

@@ -200,8 +200,8 @@ int main(int argc, char **argv) {
   boost::property_tree::xml_parser::read_xml(modelStream, modelTree);
 
   // Construct intensity class from model string
-  auto intens = IncoherentIntensity::Factory(
-      partL, kin, modelTree.get_child("IncoherentIntensity"));
+  auto intens = std::make_shared<IncoherentIntensity>(
+      partL, kin, modelTree.get_child("Intensity"));
 
   // Pass phsp sample to intensity for normalization.
   // Convert to dataPoints first.
@@ -227,6 +227,7 @@ int main(int argc, char **argv) {
       kin, intens, sample, phspSample, phspSample, 0, 0);
 
   esti->UseFunctionTree(true);
+  esti->tree()->parameter();
   LOG(debug) << esti->tree()->head()->print(25);
 
   auto minuitif = new Optimizer::Minuit2::MinuitIF(esti, fitPar);
@@ -265,7 +266,7 @@ int main(int argc, char **argv) {
   UpdateParticleList(partL, fitPar);
   boost::property_tree::ptree ptout;
   ptout.add_child("ParticleList", SaveParticles(partL));
-  ptout.add_child("IncoherentIntensity", IncoherentIntensity::Save(intens));
+  ptout.add_child("IncoherentIntensity", intens->save());
   boost::property_tree::xml_parser::write_xml("DalitzFit-Model.xml", ptout,
                                               std::locale());
   //---------------------------------------------------

@@ -7,29 +7,31 @@
 using namespace ComPWA;
 
 DoubleParameter::DoubleParameter(std::string inName)
-    : Parameter(inName, ParType::DOUBLE), HasBounds(false), IsFixed(0),
+    : Parameter(inName, ParType::DOUBLE), HasBounds(false), IsFixed(true),
       Value(0), Bounds(std::pair<double, double>(0, 0)),
       ErrType(ErrorType::NOTDEF), Error(std::pair<double, double>(0, 0)) {}
 
 DoubleParameter::DoubleParameter(const boost::property_tree::ptree pt)
-    : Parameter("", ParType::DOUBLE) {
+    : Parameter("", ParType::DOUBLE), HasBounds(false), IsFixed(true),
+      Value(0), Bounds(std::pair<double, double>(0, 0)),
+      ErrType(ErrorType::NOTDEF), Error(std::pair<double, double>(0, 0)) {
   load(pt);
 }
 
 DoubleParameter::DoubleParameter(std::string inName, const double value)
-    : Parameter(inName, ParType::DOUBLE), HasBounds(false), IsFixed(0),
+    : Parameter(inName, ParType::DOUBLE), HasBounds(false), IsFixed(true),
       Value(value), Bounds(std::pair<double, double>(0, 0)),
       ErrType(ErrorType::NOTDEF), Error(std::pair<double, double>(0, 0)) {}
 
 DoubleParameter::DoubleParameter(std::string inName, const double value,
                                  const double error)
-    : Parameter(inName, ParType::DOUBLE), HasBounds(false), IsFixed(0),
+    : Parameter(inName, ParType::DOUBLE), HasBounds(false), IsFixed(true),
       Value(value), Bounds(std::pair<double, double>(0, 0)),
       ErrType(ErrorType::SYM), Error(std::pair<double, double>(error, error)) {}
 
 DoubleParameter::DoubleParameter(std::string inName, const double value,
                                  const double min, const double max)
-    : Parameter(inName, ParType::DOUBLE), HasBounds(false), IsFixed(0),
+    : Parameter(inName, ParType::DOUBLE), HasBounds(false), IsFixed(false),
       Value(value), Bounds(std::pair<double, double>(0, 0)),
       ErrType(ErrorType::NOTDEF), Error(std::pair<double, double>(0, 0)) {
   setBounds(min, max);
@@ -38,7 +40,7 @@ DoubleParameter::DoubleParameter(std::string inName, const double value,
 DoubleParameter::DoubleParameter(std::string inName, const double value,
                                  const double min, const double max,
                                  const double error)
-    : Parameter(inName, ParType::DOUBLE), HasBounds(false), IsFixed(0),
+    : Parameter(inName, ParType::DOUBLE), HasBounds(false), IsFixed(false),
       Value(value), Bounds(std::pair<double, double>(0, 0)),
       ErrType(ErrorType::NOTDEF), Error(std::pair<double, double>(0, 0)) {
   setError(error);
@@ -219,9 +221,16 @@ std::string DoubleParameter::val_to_str() const {
 
 void DoubleParameter::load(const boost::property_tree::ptree pt) {
 
+  // Class attribute is not required. But if it is specified we expect 'Double'
+  // here.
+  auto c = pt.get_optional<std::string>("<xmlattr>.Class");
+  if (c && c.get() != "Double")
+    throw BadConfig("CoherentIntensity::Factory() | Property tree seems to "
+                    "not containt a configuration for an CoherentIntensity!");
+
   // Require that name and value are provided
-  this->setName(pt.get<std::string>("<xmlattr>.Name"));
-  this->setValue(pt.get<double>("Value"));
+  Name = pt.get<std::string>("<xmlattr>.Name");
+  Value = pt.get<double>("Value");
 
   // Optional settings
   if (pt.get_optional<double>("Error")) {
@@ -261,6 +270,7 @@ boost::property_tree::ptree DoubleParameter::save() const {
   boost::property_tree::ptree pt;
 
   // Require that name and value are provided
+  pt.put("<xmlattr>.Class", "Double");
   pt.put("<xmlattr>.Name", name());
   pt.put("Value", value());
   pt.put("Fix", isFixed());

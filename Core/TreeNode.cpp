@@ -64,7 +64,11 @@ std::shared_ptr<ComPWA::Parameter> TreeNode::parameter() {
     return Parameter;
 
   auto result = recalculate();
-  HasChanged = false;
+  
+  if(UseCache){
+    Parameter = result;
+    HasChanged = false;
+  }
 
   return result;
 }
@@ -121,10 +125,13 @@ std::shared_ptr<TreeNode> TreeNode::findChildNode(std::string name) const {
 
 std::string TreeNode::print(int level, std::string prefix) const {
   std::stringstream oss;
-  if (HasChanged && ChildNodes.size()) {
-    oss << prefix << Name << " = ?";
-  } else {
-    oss << prefix << Name;
+  oss << prefix << Name;
+
+  if (UseCache && HasChanged && ChildNodes.size()) {
+     oss << " = ?";
+  } else  {
+    if (!UseCache)
+      oss << "[-]";
     auto p = recalculate();
     if (!ChildNodes.size()) // print parameter name for leafs
       oss << " [" << p->name() << "]";
