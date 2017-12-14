@@ -14,13 +14,19 @@
 #include <string>
 
 #include "Core/Estimator.hpp"
-#include "Core/AmpIntensity.hpp"
-#include "DataReader/Data.hpp"
-#include "Core/Event.hpp"
-#include "Core/ParameterList.hpp"
-#include "Core/FunctionTree.hpp"
 
 namespace ComPWA {
+
+namespace DataReader {
+class Data;
+}
+
+class AmpIntensity;
+class Event;
+class ParameterList;
+class FunctionTree;
+class Kinematics;
+
 namespace Estimator {
 
 ///
