@@ -7,19 +7,19 @@
 
 namespace ComPWA {
 
-MomentumCorrection::MomentumCorrection(std::vector<CorrectionTable> inCorr,
-                                       std::string t)
-    : corrections(inCorr), title(t) {}
+MomentumCorrection::MomentumCorrection(
+    std::vector<ComPWA::DataReader::CorrectionTable> inCorr, std::string t)
+    : Corrections(inCorr), Title(t) {}
 
-double MomentumCorrection::getCorrection(Event &ev) {
+double MomentumCorrection::correction(Event &ev) {
   double w = 1;
   for (int i = 0; i < ev.numParticles(); i++) {
     Particle p = ev.particle(i);
-    int charge = p.GetCharge();
-    double mom = p.GetThreeMomentum();
+    int charge = p.charge();
+    double mom = p.threeMomentum();
     double corr;
     try {
-      corr = corrections.at(i).GetValue(charge, mom) + 1;
+      corr = Corrections.at(i).GetValue(charge, mom) + 1;
     } catch (std::exception &ex) {
       throw std::runtime_error(
           "MomentumCorrection::getCorrection() | Number of histograms is "
@@ -30,10 +30,10 @@ double MomentumCorrection::getCorrection(Event &ev) {
   return w;
 }
 
-void MomentumCorrection::Print() const {
-  LOG(info) << "MomentumCorrection::Print() | " << title;
-  for (int i = 0; i < corrections.size(); i++)
-    corrections.at(i).Print();
+void MomentumCorrection::print() const {
+  LOG(info) << "MomentumCorrection::Print() | " << Title;
+  for (int i = 0; i < Corrections.size(); i++)
+    Corrections.at(i).Print();
   return;
 }
 }

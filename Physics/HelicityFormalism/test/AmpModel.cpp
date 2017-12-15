@@ -152,11 +152,11 @@ BOOST_AUTO_TEST_CASE(AmpTreeCorrespondence) {
   ComPWA::Tools::GeneratePhsp(200, gen, sample);
 
   auto phspSample =
-      std::make_shared<std::vector<DataPoint>>(sample->GetDataPoints(kin));
+      std::make_shared<std::vector<DataPoint>>(sample->dataPoints(kin));
   intens->setPhspSample(phspSample, phspSample);
 
   LOG(info) << "Loop over phsp events....";
-  for (auto i : sample->GetEvents()) {
+  for (auto i : sample->events()) {
     ComPWA::DataPoint p;
     try {
       kin->convert(i, p);
@@ -174,7 +174,7 @@ BOOST_AUTO_TEST_CASE(AmpTreeCorrespondence) {
     LOG(info) << "point = " << p << " intensity = " << w;
   }
 
-  ComPWA::ParameterList sampleList(sample->GetListOfData(kin));
+  ComPWA::ParameterList sampleList(sample->dataList(kin));
   // Testing function tree
   auto tree = intens->tree(kin, sampleList, sampleList, sampleList,
                            kin->numVariables());

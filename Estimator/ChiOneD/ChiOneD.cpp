@@ -24,12 +24,12 @@ ChiOneD::ChiOneD(std::shared_ptr<Kinematics> kin,
     : pPIF_(inPIF), pDIF_(inDIF) {}
 
 double ChiOneD::controlParameter(ParameterList &minPar) {
-  unsigned int nBins = pDIF_->GetNBins();
+  unsigned int nBins = pDIF_->numBins();
 
   double chi = 0;
   for (unsigned int bin = 0; bin < nBins; bin++) {
     double m12, weight;
-    pDIF_->GetBin(bin, m12, weight);
+    pDIF_->bin(bin, m12, weight);
 
     std::vector<double> x;
     x.push_back(m12);

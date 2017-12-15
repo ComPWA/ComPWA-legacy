@@ -16,7 +16,7 @@
 
 #include "Core/Functions.hpp"
 #include "Core/ParameterList.hpp"
-#include "Core/Parameter.hpp"
+#include "Core/FitParameter.hpp"
 #include "Core/ParObserver.hpp"
 
 namespace ComPWA {
@@ -65,7 +65,7 @@ public:
   virtual std::shared_ptr<ComPWA::Parameter> parameter();
 
   /// Fill ParameterList with parameters. The function is intended to be filled
-  /// with fit parameters, so we add only DoubleParameters.
+  /// with fit parameters, so we add only FitParameters.
   virtual void fillParameters(ComPWA::ParameterList &list);
 
 

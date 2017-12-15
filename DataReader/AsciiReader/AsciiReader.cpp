@@ -36,7 +36,7 @@ AsciiReader::AsciiReader(const std::string inConfigFile, const int particles) {
     }
 
     if (!currentStream.fail()) {
-      fEvents.push_back(newEvent);
+      Events.push_back(newEvent);
       // for ( parts = 0; parts < linesToSkip; parts++ )
       //   currentStream >> px >> py >> pz >> e;
     }
@@ -44,13 +44,13 @@ AsciiReader::AsciiReader(const std::string inConfigFile, const int particles) {
   currentStream.close();
 }
 
-AsciiReader::~AsciiReader() { fEvents.clear(); }
+AsciiReader::~AsciiReader() { Events.clear(); }
 
-AsciiReader *AsciiReader::Clone() const {
+AsciiReader *AsciiReader::clone() const {
   // TODO: implement virtual functions and uncomment the following
   //	return new AsciiReader(*this);
   return new AsciiReader();
 }
 
-AsciiReader *AsciiReader::EmptyClone() const { return new AsciiReader(); }
+AsciiReader *AsciiReader::emptyClone() const { return new AsciiReader(); }
 

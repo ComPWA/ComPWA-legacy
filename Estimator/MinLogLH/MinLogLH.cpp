@@ -25,7 +25,7 @@ MinLogLH::MinLogLH(std::shared_ptr<Kinematics> kin,
       _dataSample(data), _phspSample(phspSample), _phspAccSample(accSample),
       _phspAccSampleEff(1.0) {
 
-  int size = _dataSample->GetNEvents();
+  int size = _dataSample->numEvents();
 
   // use the full sample of both are zero
   if (!_nEvents && !_firstEvent) {
@@ -38,17 +38,17 @@ MinLogLH::MinLogLH(std::shared_ptr<Kinematics> kin,
     _nEvents = size - _firstEvent;
 
   // Get data as ParameterList
-  _dataSampleList = _dataSample->GetListOfData(_kin);
-  _phspSampleList = _phspSample->GetListOfData(_kin);
+  _dataSampleList = _dataSample->dataList(_kin);
+  _phspSampleList = _phspSample->dataList(_kin);
   if (_phspAccSample)
-    _phspAccSampleList = _phspAccSample->GetListOfData(_kin);
+    _phspAccSampleList = _phspAccSample->dataList(_kin);
   else
-    _phspAccSampleList = _phspSample->GetListOfData(_kin);
+    _phspAccSampleList = _phspSample->dataList(_kin);
 
   // Calculation sum of weights of data sample
   _sumOfWeights = 0;
   for (unsigned int evt = _firstEvent; evt < _nEvents + _firstEvent; evt++) {
-    Event ev(_dataSample->GetEvent(evt));
+    Event ev(_dataSample->event(evt));
     _sumOfWeights += ev.weight();
   }
 
@@ -68,7 +68,7 @@ double MinLogLH::controlParameter(ParameterList &minPar) {
     // loop over data sample
     for (unsigned int evt = _firstEvent; evt < _nEvents + _firstEvent; evt++) {
       DataPoint point;
-      _kin->convert(_dataSample->GetEvent(evt), point);
+      _kin->convert(_dataSample->event(evt), point);
       double val = _intens->intensity(point);
       sumLog += std::log(val) * point.weight();
     }

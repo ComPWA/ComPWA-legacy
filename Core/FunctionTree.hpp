@@ -17,7 +17,7 @@
 
 #include "Core/Functions.hpp"
 #include "Core/TreeNode.hpp"
-#include "Core/Parameter.hpp"
+#include "Core/FitParameter.hpp"
 
 namespace ComPWA {
 
@@ -51,21 +51,6 @@ public:
   FunctionTree(std::shared_ptr<ComPWA::TreeNode> head);
 
   virtual ~FunctionTree();
-
-//  /// Create head node of FunctionTree. Add top node to the function tree.
-//  virtual void createHead(std::string name,
-//                          std::shared_ptr<ComPWA::Parameter> parameter,
-//                          std::shared_ptr<ComPWA::Strategy> strategy);
-//
-//
-//  /// Create head node of FunctionTree. A tree with a single parameter as leaf
-//  /// is created. This FunctionTree represents a constant value.
-//  virtual void createHead(std::string name,
-//                          std::shared_ptr<ComPWA::Parameter> parameter);
-//
-//  /// Create head node of FunctionTree. Constant parameter! We use this to
-//  /// generate an empty tree.
-//  virtual void createHead(std::string name, double value);
 
   /// Add an existing node to FunctionTree. Can be used to link tree's to each
   /// other: simply insert head node of tree A to tree B
@@ -116,7 +101,7 @@ public:
   virtual bool sanityCheck();
 
   /// Fill ParameterList with parameters. The function is intended to be filled
-  /// with fit parameters, so we add only DoubleParameters.
+  /// with fit parameters, so we add only FitParameters.
   virtual void fillParameters(ComPWA::ParameterList &list);
 
   /// Streaming operator

@@ -20,31 +20,22 @@
 
 namespace ComPWA {
 
-//-----------------------------------------------------------------------------
 class GaussAmp : public AmpIntensity {
 public:
-  GaussAmp(const char *name, DoubleParameter _resMass,
-           DoubleParameter _resWidth) {
+  GaussAmp(const char *name, FitParameter _resMass, FitParameter _resWidth) {
     params.AddParameter(
-        std::shared_ptr<DoubleParameter>(new DoubleParameter(_resMass)));
+        std::shared_ptr<FitParameter>(new FitParameter(_resMass)));
     params.AddParameter(
-        std::shared_ptr<DoubleParameter>(new DoubleParameter(_resWidth)));
+        std::shared_ptr<FitParameter>(new FitParameter(_resWidth)));
     initialise();
   }
 
   GaussAmp(const char *name, double _resMass, double _resWidth) {
-    params.AddParameter(std::shared_ptr<DoubleParameter>(
-        new DoubleParameter("mass", _resMass)));
-    params.AddParameter(std::shared_ptr<DoubleParameter>(
-        new DoubleParameter("width", _resWidth)));
+    params.AddParameter(
+        std::shared_ptr<FitParameter>(new FitParameter("mass", _resMass)));
+    params.AddParameter(
+        std::shared_ptr<FitParameter>(new FitParameter("width", _resWidth)));
     initialise();
-  }
-
-  //! Clone function
-  GaussAmp *Clone(std::string newName = "") const {
-    auto tmp = (new GaussAmp(*this));
-    tmp->_name(newName);
-    return tmp;
   }
 
   virtual void initialise() {
@@ -52,8 +43,8 @@ public:
       throw std::runtime_error("GaussAmp::initialize() | "
                                "this amplitude is for two body decays only!");
   };
-  //! Clone function
-  virtual GaussAmp *Clone(std::string newName = "") {
+
+  virtual GaussAmp *clone(std::string newName = "") const {
     auto tmp = (new GaussAmp(*this));
     tmp->_name(newName);
     return tmp;
@@ -64,7 +55,7 @@ public:
   virtual double GetNormalization() const { return 1 / Integral(); }
 
   virtual double GetMaximum(std::shared_ptr<Generator> gen) const {
-    double mass = params.GetDoubleParameter(0)->value();
+    double mass = params.GetFitParameter(0)->value();
     std::vector<double> m;
     m.push_back(mass * mass);
     dataPoint p(m);
@@ -75,8 +66,8 @@ public:
 
   virtual double intensity(const dataPoint &point) const {
 
-    double mass = params.GetDoubleParameter(0)->value();
-    double width = params.GetDoubleParameter(1)->value();
+    double mass = params.GetFitParameter(0)->value();
+    double width = params.GetFitParameter(1)->value();
     double sqrtS = std::sqrt(point.GetValue(0));
 
     std::complex<double> gaus(
@@ -106,22 +97,19 @@ public:
   }
 
 protected:
-  //! Get integral
   virtual double Integral() const {
-    return (params.GetDoubleParameter(1)->value() * std::sqrt(2 * M_PI));
+    return (params.GetFitParameter(1)->value() * std::sqrt(2 * M_PI));
   }
 
-  //! List of interal parameters
+  /// List of interal parameters
   ParameterList params;
 };
-//-----------------------------------------------------------------------------
 
-//-----------------------------------------------------------------------------
-/**! UnitAmp
- *
- * Example implementation of AmpIntensity with the function value 1.0 at all
- * points in PHSP. It is used to test the likelihood normalization.
- */
+///
+/// \class UnitAmp
+/// UnitAmp. Example implementation of AmpIntensity with the function value
+/// 1.0 at all points in PHSP. It is used to test the likelihood normalization.
+///
 class UnitAmp : public AmpIntensity {
 public:
   UnitAmp() { _eff = std::shared_ptr<Efficiency>(new UnitEfficiency()); }
@@ -156,24 +144,21 @@ public:
   virtual void GetFitFractions(ParameterList &parList) {}
 
   //========== FunctionTree =============
-  //! Check of tree is available
+
   virtual bool hasTree() const { return 1; }
 
-  //! Getter function for basic amp tree
-  //! Getter function for basic amp tree
   virtual std::shared_ptr<FunctionTree> tree(const ParameterList &sample,
-                                                const ParameterList &toySample,
-                                                const ParameterList &sample3,
-                                                std::string suffix = "") {
+                                             const ParameterList &toySample,
+                                             const ParameterList &sample3,
+                                             std::string suffix = "") {
     return setupBasicTree(sample, toySample, "");
   }
 
-  /*! Set phase space samples
-   * We use phase space samples to calculate the normalizations. In case of
-   * intensities we phase space sample phspSample includes the event efficiency.
-   * The sample toySample is used for normalization calculation for e.g.
-   * Resonacnes without efficiency.
-   */
+  // Set phase space samples
+  // We use phase space samples to calculate the normalizations. In case of
+  // intensities we phase space sample phspSample includes the event efficiency.
+  // The sample toySample is used for normalization calculation for e.g.
+  // Resonacnes without efficiency.
   virtual void
   SetPhspSample(std::shared_ptr<std::vector<ComPWA::dataPoint>> phspSample,
                 std::shared_ptr<std::vector<ComPWA::dataPoint>> toySample) {}
@@ -183,17 +168,6 @@ public:
   }
 
 protected:
-  /**Setup Basic Tree
-   *
-   * @param sample data sample
-   * @param toySample sample of flat toy MC events for normalization of the
-   * resonances
-   * @param suffix Which tree should be created? "data" data Tree, "norm"
-   * normalization tree
-   * with efficiency corrected toy phsp sample or "normAcc" normalization tree
-   * with sample
-   * of accepted flat phsp events
-   */
   std::shared_ptr<FunctionTree> setupBasicTree(const ParameterList &sample,
                                                const ParameterList &toySample,
                                                std::string suffix) {
@@ -206,10 +180,9 @@ protected:
       return std::shared_ptr<FunctionTree>();
     }
     std::shared_ptr<FunctionTree> newTree(new FunctionTree());
-    // std::shared_ptr<MultAll> mmultDStrat(new MultAll(ParType::MDOUBLE));
 
     std::vector<double> oneVec(sampleSize, 1.0);
-    std::shared_ptr<Parameter> one(new MultiDouble("one", oneVec));
+    auto one = std::make_shared<MultiDouble>("one", oneVec);
     newTree->createHead("AmpIntensity" + suffix, one);
     std::cout << newTree->head()->to_str(10) << std::endl;
     return newTree;
@@ -220,7 +193,7 @@ protected:
   }
 };
 
-} /* namespace ComPWA */
+} // ns::ComPWA
+#endif
 
-
-#endif /* CORE_GAUSSAMP_HPP_ */
+f

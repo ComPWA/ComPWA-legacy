@@ -24,7 +24,7 @@ RelativisticBreitWigner::RelativisticBreitWigner(
   setName(name);
   auto partProp = partL->find(name)->second;
   SetMassParameter(
-      std::make_shared<DoubleParameter>(partProp.GetMassPar()));
+      std::make_shared<FitParameter>(partProp.GetMassPar()));
 
   auto decayTr = partProp.GetDecayInfo();
   if (partProp.GetDecayType() != "relativisticBreitWigner")
@@ -44,10 +44,10 @@ RelativisticBreitWigner::RelativisticBreitWigner(
       continue;
     std::string type = v.second.get<std::string>("<xmlattr>.Type");
     if (type == "Width") {
-      SetWidthParameter(std::make_shared<DoubleParameter>(v.second));
+      SetWidthParameter(std::make_shared<FitParameter>(v.second));
     } else if (type == "MesonRadius") {
       SetMesonRadiusParameter(
-          std::make_shared<DoubleParameter>(v.second));
+          std::make_shared<FitParameter>(v.second));
     } else {
       throw std::runtime_error(
           "RelativisticBreitWigner::Factory() | Parameter of type " + type +
@@ -194,7 +194,7 @@ void BreitWignerStrategy::execute(ParameterList &paras,
                        std::to_string(check_nInt) + " expected."));
   if (nDouble != check_nDouble)
     throw(BadParameter("BreitWignerStrat::execute() | "
-                       "Number of DoubleParameters does not match: " +
+                       "Number of FitParameters does not match: " +
                        std::to_string(nDouble) + " given but " +
                        std::to_string(check_nDouble) + " expected."));
   if (nComplex != check_nComplex)
@@ -258,7 +258,7 @@ void RelativisticBreitWigner::GetParameters(ParameterList &list) {
   // list. If so we check if both are equal and set the local parameter to the
   // parameter from the list. In this way we connect parameters that occur on
   // different positions in the amplitude.
-  std::shared_ptr<DoubleParameter> tmp, width, radius;
+  std::shared_ptr<FitParameter> tmp, width, radius;
   width = GetWidthParameter();
   radius = GetMesonRadiusParameter();
   try { // catch BadParameter
@@ -291,7 +291,7 @@ void RelativisticBreitWigner::GetParameters(ParameterList &list) {
 void RelativisticBreitWigner::updateParameters(const ParameterList &list) {
 
   // Try to update mesonRadius
-  std::shared_ptr<DoubleParameter> rad;
+  std::shared_ptr<FitParameter> rad;
   try {
     rad = FindParameter(_mesonRadius->name(), list);
   } catch (std::exception &ex) {
@@ -300,7 +300,7 @@ void RelativisticBreitWigner::updateParameters(const ParameterList &list) {
     _mesonRadius->updateParameter(rad);
 
   // Try to update width
-  std::shared_ptr<DoubleParameter> width;
+  std::shared_ptr<FitParameter> width;
   try {
     width = FindParameter(_width->name(), list);
   } catch (std::exception &ex) {

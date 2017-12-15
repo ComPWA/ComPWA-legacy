@@ -130,7 +130,7 @@ BOOST_AUTO_TEST_CASE(HelicityAngleTest) {
                      std::vector<int>{1});
 
   LOG(info) << "Loop over phsp events....";
-  for (auto i : sample->GetEvents()) {
+  for (auto i : sample->events()) {
     // Calculate masses from FourMomentum to make sure that the correct masses
     // are used for the calculation of the helicity angle
     //    BOOST_CHECK_EQUAL((float)m1,
@@ -145,18 +145,18 @@ BOOST_AUTO_TEST_CASE(HelicityAngleTest) {
     //                                 .GetInvMass());
 
     double m23sq =
-        (i.particle(1).GetFourMomentum() + i.particle(2).GetFourMomentum())
-            .GetInvMassSq();
+        (i.particle(1).fourMomentum() + i.particle(2).fourMomentum())
+            .invMassSq();
     double m13sq =
-        (i.particle(0).GetFourMomentum() + i.particle(2).GetFourMomentum())
-            .GetInvMassSq();
+        (i.particle(0).fourMomentum() + i.particle(2).fourMomentum())
+            .invMassSq();
     double m12sq;
     if (useDerivedMassSq)
       m12sq = (sqrtS * sqrtS + m1 * m1 + m2 * m2 + m3 * m3 - m23sq - m13sq);
     else
       m12sq =
-          (i.particle(0).GetFourMomentum() + i.particle(1).GetFourMomentum())
-              .GetInvMassSq();
+          (i.particle(0).fourMomentum() + i.particle(1).fourMomentum())
+              .invMassSq();
 
     //------------ Restframe (12) -------------
     // Angle in the rest frame of (12) between (1) and (3)

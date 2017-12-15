@@ -184,18 +184,18 @@ void HelicityKinematics::convert(
 
   FourMomentum cms;
   for (auto s : sys.GetRecoilState())
-    cms += event.particle(s).GetFourMomentum();
+    cms += event.particle(s).fourMomentum();
 
   FourMomentum finalA, finalB;
   for (auto s : sys.GetFinalStates().at(0))
-    finalA += event.particle(s).GetFourMomentum();
+    finalA += event.particle(s).fourMomentum();
 
   for (auto s : sys.GetFinalStates().at(1))
-    finalB += event.particle(s).GetFourMomentum();
+    finalB += event.particle(s).fourMomentum();
 
   // Four momentum of the decaying resonance
   FourMomentum resP4 = finalA + finalB;
-  double mSq = resP4.GetInvMassSq();
+  double mSq = resP4.invMassSq();
 
   // Calculate sum of final states four momenta
   cms += resP4;
@@ -305,7 +305,7 @@ HelicityKinematics::CalculateInvMassBounds(const SubSystem &sys) const {
 
   /// We use the formulae from (PDG2016 Kinematics Fig.47.3). I hope the
   /// generalization to n-body decays is correct.
-  std::pair<double, double> lim(0, InitialStateP4.GetInvMass());
+  std::pair<double, double> lim(0, InitialStateP4.invMass());
   // Sum up masses of all final state particles
   for (auto j : sys.GetFinalStates())
     for (auto i : j)

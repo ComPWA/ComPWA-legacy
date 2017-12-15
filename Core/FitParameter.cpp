@@ -2,34 +2,34 @@
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
-#include "Core/Parameter.hpp"
+#include "Core/FitParameter.hpp"
 
 using namespace ComPWA;
 
-DoubleParameter::DoubleParameter(std::string inName)
+FitParameter::FitParameter(std::string inName)
     : Parameter(inName, ParType::DOUBLE), HasBounds(false), IsFixed(true),
       Value(0), Bounds(std::pair<double, double>(0, 0)),
       ErrType(ErrorType::NOTDEF), Error(std::pair<double, double>(0, 0)) {}
 
-DoubleParameter::DoubleParameter(const boost::property_tree::ptree pt)
+FitParameter::FitParameter(const boost::property_tree::ptree pt)
     : Parameter("", ParType::DOUBLE), HasBounds(false), IsFixed(true),
       Value(0), Bounds(std::pair<double, double>(0, 0)),
       ErrType(ErrorType::NOTDEF), Error(std::pair<double, double>(0, 0)) {
   load(pt);
 }
 
-DoubleParameter::DoubleParameter(std::string inName, const double value)
+FitParameter::FitParameter(std::string inName, const double value)
     : Parameter(inName, ParType::DOUBLE), HasBounds(false), IsFixed(true),
       Value(value), Bounds(std::pair<double, double>(0, 0)),
       ErrType(ErrorType::NOTDEF), Error(std::pair<double, double>(0, 0)) {}
 
-DoubleParameter::DoubleParameter(std::string inName, const double value,
+FitParameter::FitParameter(std::string inName, const double value,
                                  const double error)
     : Parameter(inName, ParType::DOUBLE), HasBounds(false), IsFixed(true),
       Value(value), Bounds(std::pair<double, double>(0, 0)),
       ErrType(ErrorType::SYM), Error(std::pair<double, double>(error, error)) {}
 
-DoubleParameter::DoubleParameter(std::string inName, const double value,
+FitParameter::FitParameter(std::string inName, const double value,
                                  const double min, const double max)
     : Parameter(inName, ParType::DOUBLE), HasBounds(false), IsFixed(false),
       Value(value), Bounds(std::pair<double, double>(0, 0)),
@@ -37,7 +37,7 @@ DoubleParameter::DoubleParameter(std::string inName, const double value,
   setBounds(min, max);
 }
 
-DoubleParameter::DoubleParameter(std::string inName, const double value,
+FitParameter::FitParameter(std::string inName, const double value,
                                  const double min, const double max,
                                  const double error)
     : Parameter(inName, ParType::DOUBLE), HasBounds(false), IsFixed(false),
@@ -47,12 +47,12 @@ DoubleParameter::DoubleParameter(std::string inName, const double value,
   setBounds(min, max);
 }
 
-DoubleParameter::DoubleParameter(const DoubleParameter &in)
+FitParameter::FitParameter(const FitParameter &in)
     : Parameter(in.Name, ParType::DOUBLE) {
   *this = in;
 }
 
-void DoubleParameter::updateParameter(std::shared_ptr<DoubleParameter> newPar) {
+void FitParameter::updateParameter(std::shared_ptr<FitParameter> newPar) {
 
   // Copy bounds
   if (newPar->hasBounds()) {
@@ -80,9 +80,9 @@ void DoubleParameter::updateParameter(std::shared_ptr<DoubleParameter> newPar) {
   return;
 }
 
-void DoubleParameter::setValue(const double inVal) {
+void FitParameter::setValue(const double inVal) {
   if (IsFixed)
-    throw ParameterFixed("DoubleParameter:: () | Parameter " + name() +
+    throw ParameterFixed("FitParameter:: () | Parameter " + name() +
                          " is fixed!");
   // Call notify only if value has changed! Otherwise tree is
   // recalculated also in case where current parameter is not changed
@@ -90,7 +90,7 @@ void DoubleParameter::setValue(const double inVal) {
     return;
 
   if (HasBounds && (inVal < bounds().first || inVal > bounds().second))
-    throw ParameterOutOfBound("DoubleParameter::setValue() | Parameter " +
+    throw ParameterOutOfBound("FitParameter::setValue() | Parameter " +
                               name() + " not within bounds: val=" +
                               std::to_string(inVal) + " [" +
                               std::to_string(bounds().first) + ";" +
@@ -100,55 +100,55 @@ void DoubleParameter::setValue(const double inVal) {
   Notify();
 }
 
-std::pair<double, double> DoubleParameter::bounds() const { return Bounds; }
+std::pair<double, double> FitParameter::bounds() const { return Bounds; }
 
-void DoubleParameter::setBounds(const double min, const double max) {
+void FitParameter::setBounds(const double min, const double max) {
   if (!check_bounds(std::pair<double, double>(min, max)))
-    throw BadParameter("DoubleParameter::setBounds() | Bounds no valid!");
+    throw BadParameter("FitParameter::setBounds() | Bounds no valid!");
   Bounds.first = min;
   Bounds.second = max;
   HasBounds = true;
 }
 
-void DoubleParameter::setBounds(const std::pair<double, double> r) {
+void FitParameter::setBounds(const std::pair<double, double> r) {
   if (!check_bounds(r))
-    throw BadParameter("DoubleParameter::setBounds() | Bounds no valid!");
+    throw BadParameter("FitParameter::setBounds() | Bounds no valid!");
   Bounds = r;
   HasBounds = true;
 }
 
-bool DoubleParameter::hasError() const {
+bool FitParameter::hasError() const {
   if (ErrType != ErrorType::NOTDEF)
     return true;
   return false;
 }
 
-std::pair<double, double> DoubleParameter::error() const {
+std::pair<double, double> FitParameter::error() const {
   if (!hasError())
-    throw std::runtime_error("DoubleParameter::error() | "
+    throw std::runtime_error("FitParameter::error() | "
                              "Parameter " +
                              Name + " has no errors defined!");
   return Error;
 }
 
-void DoubleParameter::setError(double errLow, double errHigh) {
+void FitParameter::setError(double errLow, double errHigh) {
   SetErrorType(ErrorType::ASYM);
   Error.first = errLow;
   Error.second = errHigh;
 }
 
-void DoubleParameter::setError(std::pair<double, double> err) {
+void FitParameter::setError(std::pair<double, double> err) {
   SetErrorType(ErrorType::ASYM);
   Error = err;
 }
 
-void DoubleParameter::setError(double err) {
+void FitParameter::setError(double err) {
   SetErrorType(ErrorType::SYM);
   Error.first = err;
   Error.second = err;
 }
 
-bool DoubleParameter::operator==(const DoubleParameter otherPar) const {
+bool FitParameter::operator==(const FitParameter otherPar) const {
   if (this->type() != otherPar.type())
     return false;
   if (this->name() != otherPar.name())
@@ -160,7 +160,7 @@ bool DoubleParameter::operator==(const DoubleParameter otherPar) const {
   // case that other properties of the parameterts differ we throw an
   // exception since we assume that this is a user mistake.
   if (HasBounds != otherPar.HasBounds || this->bounds() != otherPar.bounds())
-    throw std::runtime_error("DoubleParameter::operator==() | Parameters "
+    throw std::runtime_error("FitParameter::operator==() | Parameters "
                              "match by name (" +
                              name() + ") and value (" +
                              std::to_string(value()) +
@@ -170,14 +170,14 @@ bool DoubleParameter::operator==(const DoubleParameter otherPar) const {
 
   if (IsFixed != otherPar.IsFixed)
     throw std::runtime_error(
-        "DoubleParameter::operator==() | Parameters "
+        "FitParameter::operator==() | Parameters "
         "match by name (" +
         name() + ") and value (" + std::to_string(value()) +
         ") but one is fixed the other not. "
         "We assume that there is a mistake. Check your input files!");
 
   if (ErrType != otherPar.ErrType || Error != otherPar.Error)
-    throw std::runtime_error("DoubleParameter::operator==() | Parameters "
+    throw std::runtime_error("FitParameter::operator==() | Parameters "
                              "match by name (" +
                              name() + ") and value (" +
                              std::to_string(value()) +
@@ -188,7 +188,7 @@ bool DoubleParameter::operator==(const DoubleParameter otherPar) const {
   return true;
 }
 
-bool DoubleParameter::check_bounds(
+bool FitParameter::check_bounds(
     const std::pair<double, double> bounds) const {
   if ((bounds.second > bounds.first) && (bounds.second >= Value) &&
       (bounds.first <= Value))
@@ -196,7 +196,7 @@ bool DoubleParameter::check_bounds(
   return false;
 }
 
-std::string DoubleParameter::to_str() const {
+std::string FitParameter::to_str() const {
   std::stringstream oss;
   oss << Name;
   oss << "\t Val = " << Value;
@@ -213,13 +213,13 @@ std::string DoubleParameter::to_str() const {
   return oss.str();
 }
 
-std::string DoubleParameter::val_to_str() const {
+std::string FitParameter::val_to_str() const {
   std::stringstream ovs;
   ovs << Value;
   return ovs.str();
 }
 
-void DoubleParameter::load(const boost::property_tree::ptree pt) {
+void FitParameter::load(const boost::property_tree::ptree pt) {
 
   // Class attribute is not required. But if it is specified we expect 'Double'
   // here.
@@ -241,10 +241,10 @@ void DoubleParameter::load(const boost::property_tree::ptree pt) {
       this->setError(std::pair<double, double>(pt.get<double>("ErrorLow"),
                                                pt.get<double>("ErrorHigh")));
     else
-      throw std::runtime_error("DoubleParameterFactory() | Parameter asymmetic "
+      throw std::runtime_error("FitParameterFactory() | Parameter asymmetic "
                                "error not properly set!");
   } else if (pt.get_optional<double>("ErrorHigh")) {
-    throw std::runtime_error("DoubleParameterFactory() | Parameter asymmetic "
+    throw std::runtime_error("FitParameterFactory() | Parameter asymmetic "
                              "error not properly set!");
   } else { // Do not set a asymmetric errors
   }
@@ -261,12 +261,12 @@ void DoubleParameter::load(const boost::property_tree::ptree pt) {
     this->setBounds(min.get(), max.get());
   } else if (min || max) { // Bounds not completely specified
     throw std::runtime_error(
-        "DoubleParameterFactory() | Parameter bounds not properly set!");
+        "FitParameterFactory() | Parameter bounds not properly set!");
   } else { // No bounds specified
   }
 }
 
-boost::property_tree::ptree DoubleParameter::save() const {
+boost::property_tree::ptree FitParameter::save() const {
   boost::property_tree::ptree pt;
 
   // Require that name and value are provided

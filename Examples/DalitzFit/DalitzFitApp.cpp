@@ -206,14 +206,14 @@ int main(int argc, char **argv) {
   // Pass phsp sample to intensity for normalization.
   // Convert to dataPoints first.
   auto phspPoints =
-      std::make_shared<std::vector<DataPoint>>(phspSample->GetDataPoints(kin));
+      std::make_shared<std::vector<DataPoint>>(phspSample->dataPoints(kin));
   intens->setPhspSample(phspPoints, phspPoints);
 
   //---------------------------------------------------
   // 4) Generate a data sample given intensity and kinematics
   //---------------------------------------------------
   std::shared_ptr<Data> sample(new Data());
-  ComPWA::Tools::Generate(1000, kin, gen, intens, sample, phspSample, phspSample);
+  ComPWA::Tools::generate(1000, kin, gen, intens, sample, phspSample, phspSample);
 
   //---------------------------------------------------
   // 5) Fit the model to the data and print the result

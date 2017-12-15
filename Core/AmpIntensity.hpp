@@ -2,6 +2,11 @@
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
+///
+/// \file
+/// AmpIntensity base class.
+///
+
 #ifndef AMPINTENSITY_HPP_
 #define AMPINTENSITY_HPP_
 
@@ -35,8 +40,8 @@ class AmpIntensity {
 public:
   /// Constructor with an optional name, strength and efficiency
   AmpIntensity(std::string name = "",
-               std::shared_ptr<DoubleParameter> strength =
-                   std::shared_ptr<DoubleParameter>(new DoubleParameter("",
+               std::shared_ptr<FitParameter> strength =
+                   std::shared_ptr<FitParameter>(new FitParameter("",
                                                                         1.0)),
                std::shared_ptr<ComPWA::Efficiency> eff =
                    std::shared_ptr<ComPWA::Efficiency>(new UnitEfficiency))
@@ -106,7 +111,7 @@ public:
     /// Phase space depended efficiency
     std::shared_ptr<Efficiency> Eff;
 
-    std::shared_ptr<ComPWA::DoubleParameter> Strength;
+    std::shared_ptr<ComPWA::FitParameter> Strength;
 //    std::shared_ptr<ComPWA::FunctionTree> Strength;
 
     /// temporary strength
@@ -127,5 +132,5 @@ inline std::vector<std::string> splitString(std::string str) {
   return result;
 }
 
-} // namespace ComPWA
+} // ns::ComPWA
 #endif

@@ -36,14 +36,14 @@ void CoherentIntensity::load(std::shared_ptr<PartList> partL,
                     "not containt a configuration for an "
                     "CoherentIntensity!");
   Name = (pt.get<std::string>("<xmlattr>.Name"));
-  Strength = std::make_shared<ComPWA::DoubleParameter>("Strength_"+Name, 1.0);
+  Strength = std::make_shared<ComPWA::FitParameter>("Strength_"+Name, 1.0);
   setPhspVolume(kin->phspVolume());
   
   for (const auto &v : pt.get_child("")) {
     // Mass parameter
     if (v.first == "Parameter" &&
         v.second.get<std::string>("<xmlattr>.Type") != "Strength") {
-      Strength = std::make_shared<DoubleParameter>(v.second);
+      Strength = std::make_shared<FitParameter>(v.second);
     } else if (v.first == "Amplitude" &&
                v.second.get<std::string>("<xmlattr>.Class") ==
                    "SequentialPartialAmplitude") {
@@ -204,7 +204,7 @@ void CoherentIntensity::parameters(ComPWA::ParameterList &list) {
 }
 
 void CoherentIntensity::updateParameters(const ParameterList &list) {
-  std::shared_ptr<DoubleParameter> p;
+  std::shared_ptr<FitParameter> p;
   try {
     p = FindParameter(Strength->name(), list);
   } catch (std::exception &ex) {

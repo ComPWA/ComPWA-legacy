@@ -20,7 +20,7 @@ AmpFlatteRes::AmpFlatteRes(std::string name,
   auto partProp = partL->find(name)->second;
 
   SetMassParameter(
-      std::make_shared<DoubleParameter>(partProp.GetMassPar()));
+      std::make_shared<FitParameter>(partProp.GetMassPar()));
 
   auto decayTr = partProp.GetDecayInfo();
   if (partProp.GetDecayType() != "flatte")
@@ -49,10 +49,10 @@ AmpFlatteRes::AmpFlatteRes(std::string name,
     if (type == "Coupling") {
       vC.push_back(Coupling(partL, v.second));
     } else if (type == "MesonRadius") {
-      auto mesonRadius = DoubleParameter();
+      auto mesonRadius = FitParameter();
       mesonRadius.load(v.second);
       SetMesonRadiusParameter(
-          std::make_shared<DoubleParameter>(mesonRadius));
+          std::make_shared<FitParameter>(mesonRadius));
     } else {
       throw std::runtime_error("AmpFlatteRes::Factory() | Parameter of type " +
                                type + " is unknown.");
@@ -254,7 +254,7 @@ void FlatteStrategy::execute(ParameterList &paras,
                        std::to_string(check_nInt) + " expected."));
   if (nDouble != check_nDouble)
     throw(BadParameter("FlatteStrategy::execute() | "
-                       "Number of DoubleParameters does not match: " +
+                       "Number of FitParameters does not match: " +
                        std::to_string(nDouble) + " given but " +
                        std::to_string(check_nDouble) + " expected."));
   if (nComplex != check_nComplex)
@@ -351,7 +351,7 @@ void AmpFlatteRes::GetParameters(ParameterList &list) {
   // list. If so we check if both are equal and set the local parameter to the
   // parameter from the list. In this way we connect parameters that occur on
   // different positions in the amplitude.
-  std::shared_ptr<DoubleParameter> tmp;
+  std::shared_ptr<FitParameter> tmp;
   for (auto i : _g) {
     if (i.value() == 0.0)
       continue;
@@ -386,7 +386,7 @@ void AmpFlatteRes::GetParameters(ParameterList &list) {
 void AmpFlatteRes::updateParameters(const ParameterList &list) {
 
   // Try to update mesonRadius
-  std::shared_ptr<DoubleParameter> rad;
+  std::shared_ptr<FitParameter> rad;
   try {
     rad = FindParameter(_mesonRadius->name(), list);
   } catch (std::exception &ex) {
@@ -396,7 +396,7 @@ void AmpFlatteRes::updateParameters(const ParameterList &list) {
 
   // Try to update Couplings
   for (auto i : _g) {
-    std::shared_ptr<DoubleParameter> c;
+    std::shared_ptr<FitParameter> c;
     try {
       c = FindParameter(i.GetValueParameter()->name(), list);
     } catch (std::exception &ex) {

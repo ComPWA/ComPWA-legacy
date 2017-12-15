@@ -116,7 +116,7 @@ inline void multivariateGaussian(const gsl_rng *rnd, const int vecSize,
   gsl_matrix_free(tmpM);
 };
 
-inline ComPWA::DoubleParameter
+inline ComPWA::FitParameter
 CalculateFitFraction(std::shared_ptr<ComPWA::Kinematics> kin,
                      std::shared_ptr<ComPWA::AmpIntensity> intens,
                      std::shared_ptr<std::vector<DataPoint>> sample,
@@ -143,7 +143,7 @@ CalculateFitFraction(std::shared_ptr<ComPWA::Kinematics> kin,
   LOG(trace) << "CalculateFitFraction() | Result for (" << def.first << "/"
              << def.second << ") is " << integral_numerator << "/"
              << integral_denominator << "=" << ffVal;
-  return DoubleParameter(def.first, ffVal, 0.0);
+  return FitParameter(def.first, ffVal, 0.0);
 }
 
 /// Calculate fit fractions.
@@ -162,7 +162,7 @@ CalculateFitFractions(std::shared_ptr<ComPWA::Kinematics> kin,
   ComPWA::ParameterList ffList;
   for (auto i : defs) {
     auto par = CalculateFitFraction(kin, intens, sample, i);
-    ffList.addParameter(std::make_shared<ComPWA::DoubleParameter>(par));
+    ffList.addParameter(std::make_shared<ComPWA::FitParameter>(par));
   }
   return ffList;
 }
@@ -204,7 +204,7 @@ inline void CalcFractionError(
   originalPar.DeepCopy(parameters);
   
   std::vector<ParameterList> fracVect;
-  progressBar bar(nSets);
+  ProgressBar bar(nSets);
   int i = 0;
   while (i < nSets) {
     bool error = 0;
@@ -219,7 +219,7 @@ inline void CalcFractionError(
 
     std::size_t t = 0;
     for (std::size_t o = 0; o < newPar.doubleParameters().size(); o++) {
-      std::shared_ptr<DoubleParameter> outPar = newPar.doubleParameter(o);
+      std::shared_ptr<FitParameter> outPar = newPar.doubleParameter(o);
       if (outPar->isFixed())
         continue;
       // set floating values to smeared values
@@ -242,7 +242,7 @@ inline void CalcFractionError(
       continue;
     }
     fracVect.push_back(CalculateFitFractions(kin, intens, sample, defs));
-    bar.nextEvent();
+    bar.next();
     i++;
 
     /******* DEBUGGING *******/
@@ -250,27 +250,27 @@ inline void CalcFractionError(
     //        for(int t=0; t<newPar.GetNDouble();
     // t++){
     //          if(
-    // newPar.GetDoubleParameter(t)->IsFixed())
+    // newPar.GetFitParameter(t)->IsFixed())
     // continue;
     //          outFraction <<
-    // newPar.GetDoubleParameter(t)->name()<<":";
+    // newPar.GetFitParameter(t)->name()<<":";
     //        }
     //        for(int t=0; t<tmp.GetNDouble(); t++)
     //          outFraction <<
-    // tmp.GetDoubleParameter(t)->name()<<":";
+    // tmp.GetFitParameter(t)->name()<<":";
     //        outFraction << "norm" << std::endl;
     //      }
     //      for(int t=0; t<newPar.GetNDouble(); t++){
     //        if(
-    // newPar.GetDoubleParameter(t)->IsFixed())
+    // newPar.GetFitParameter(t)->IsFixed())
     // continue;
     //        outFraction <<
-    // newPar.GetDoubleParameter(t)->value()<<"
+    // newPar.GetFitParameter(t)->value()<<"
     //";
     //      }
     //      for(int t=0; t<tmp.GetNDouble(); t++)
     //        outFraction <<
-    // tmp.GetDoubleParameter(t)->value()<<"
+    // tmp.GetFitParameter(t)->value()<<"
     //";
     //      double norm = _amp->GetIntegral();
     //      outFraction << norm;

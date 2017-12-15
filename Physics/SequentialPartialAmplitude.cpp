@@ -23,9 +23,9 @@ void SequentialPartialAmplitude::load(std::shared_ptr<PartList> partL,
   for (const auto &v : pt.get_child("")) {
     if (v.first == "Parameter"){
       if (v.second.get<std::string>("<xmlattr>.Type") == "Magnitude")
-        Magnitude = std::make_shared<DoubleParameter>(v.second);
+        Magnitude = std::make_shared<FitParameter>(v.second);
       if (v.second.get<std::string>("<xmlattr>.Type") == "Phase")
-        Phase = std::make_shared<DoubleParameter>(v.second);
+        Phase = std::make_shared<FitParameter>(v.second);
     } else if (v.first == "PartialAmplitude" &&
                v.second.get<std::string>("<xmlattr>.Class") ==
                    "HelicityDecay") {
@@ -113,14 +113,14 @@ void SequentialPartialAmplitude::parameters(ParameterList &list) {
 
 void SequentialPartialAmplitude::updateParameters(const ParameterList &list) {
   // Try to update magnitude
-  std::shared_ptr<DoubleParameter> mag;
+  std::shared_ptr<FitParameter> mag;
   try {
     mag = FindParameter(Magnitude->name(), list);
   } catch (std::exception &ex) {
   }
   if (mag)
     Magnitude->updateParameter(mag);
-  std::shared_ptr<DoubleParameter> phase;
+  std::shared_ptr<FitParameter> phase;
 
   // Try to update phase
   try {

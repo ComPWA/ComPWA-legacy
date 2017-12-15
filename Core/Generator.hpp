@@ -18,16 +18,18 @@ namespace ComPWA {
 /// Virtual class for PHSP generators
 ///
 class Generator {
-private:
 public:
-  Generator(){};
-  virtual ~Generator(){};
-  virtual void Generate(Event &) = 0;
-  virtual Generator *Clone() = 0;
-  virtual void SetSeed(unsigned int) = 0;
-  virtual unsigned int GetSeed() const = 0;
-  virtual double GetUniform(double min, double max) const = 0;
-  virtual double GetGaussDist(double mu, double sigma) const { return 0; }
+  virtual void generate(Event &) = 0;
+  
+  virtual Generator *clone() = 0;
+  
+  virtual void setSeed(unsigned int) = 0;
+  
+  virtual unsigned int seed() const = 0;
+  
+  virtual double uniform(double min, double max) const = 0;
+  
+  virtual double gauss(double mu, double sigma) const { return 0; }
 };
 
 } // ns::ComPWA

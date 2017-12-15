@@ -15,7 +15,7 @@
 
 #include "Core/Event.hpp"
 #include "Core/Particle.hpp"
-#include "Core/Parameter.hpp"
+#include "Core/FitParameter.hpp"
 #include "Core/ParameterList.hpp"
 #include "Core/AmpIntensity.hpp"
 
@@ -37,11 +37,11 @@ public:
   virtual ~RootPlot() {}
 
   void SetData(std::shared_ptr<ComPWA::DataReader::Data> sample) {
-    s_data = sample->GetDataPoints(kin_);
+    s_data = sample->dataPoints(kin_);
   }
 
   void SetPhspSample(std::shared_ptr<ComPWA::DataReader::Data> sample) {
-    s_phsp = sample->GetDataPoints(kin_);
+    s_phsp = sample->dataPoints(kin_);
   }
 
   void SetData(std::vector<DataPoint> &points) { s_data = points; }

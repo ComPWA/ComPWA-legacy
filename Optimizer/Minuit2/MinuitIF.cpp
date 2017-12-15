@@ -22,7 +22,7 @@
 
 #include "Optimizer/Minuit2/MinuitIF.hpp"
 #include "Core/ParameterList.hpp"
-#include "Core/Parameter.hpp"
+#include "Core/FitParameter.hpp"
 #include "Core/FitResult.hpp"
 
 using namespace ComPWA::Optimizer::Minuit2;

@@ -16,33 +16,36 @@ namespace ComPWA {
 
 class DataCorrection {
 public:
-  virtual ~DataCorrection() {}
-  virtual double getCorrection(Event &ev) = 0;
-  virtual void Print() const = 0;
+  virtual double correction(Event &ev) = 0;
+  
+  virtual void print() const = 0;
 };
 
 class UnitCorrection : public DataCorrection {
-  virtual ~UnitCorrection() {}
-  virtual double getCorrection(Event &ev) { return 1; }
-  virtual void Print() const {
+public:
+  virtual double correction(Event &ev) { return 1; }
+  
+  virtual void print() const {
     LOG(info) << "UnitCorrection::Print() | correction factors are set to one";
   }
 };
 
 class MomentumCorrection : public DataCorrection {
 public:
-  MomentumCorrection(std::vector<CorrectionTable> inCorr, std::string t = "");
-  ~MomentumCorrection(){};
-  double getCorrection(Event &ev);
-  virtual void Print() const;
-  //! Get title
-  std::string GetTitle() { return title; }
-  //! Set title
-  void SetTitle(std::string t) { title = t; }
+  MomentumCorrection(std::vector<ComPWA::DataReader::CorrectionTable> inCorr,
+                     std::string t = "");
+
+  virtual double correction(Event &ev);
+  
+  virtual void print() const;
+  
+  std::string title() { return Title; }
+  
+  void setTitle(std::string t) { Title = t; }
 
 protected:
-  std::vector<CorrectionTable> corrections;
-  std::string title;
+  std::vector<ComPWA::DataReader::CorrectionTable> Corrections;
+  std::string Title;
 };
-}
-#endif /* DATAREADER_DATACORRECTION_HPP_ */
+} // ns::ComPWA
+#endif

@@ -119,13 +119,13 @@ inline double Maximum(std::shared_ptr<Kinematics> kin,
                       std::shared_ptr<AmpIntensity> intens,
                       std::shared_ptr<DataReader::Data> sample) {
 
-  if (!sample->GetNEvents()) {
+  if (!sample->numEvents()) {
     LOG(debug)
         << "Maximum() | MAximum can not be determined since sample is empty.";
     return 1.0;
   }
 
-  auto data = sample->GetDataPoints(kin);
+  auto data = sample->dataPoints(kin);
   double max = 0;
   DataPoint maxPoint;
   for (auto i : data) {

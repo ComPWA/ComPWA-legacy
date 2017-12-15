@@ -89,7 +89,7 @@ public:
     list.push_back(phase());
   }
 
-  virtual std::shared_ptr<ComPWA::DoubleParameter> magnitudeParameter() {
+  virtual std::shared_ptr<ComPWA::FitParameter> magnitudeParameter() {
     return Magnitude;
   }
 
@@ -98,19 +98,19 @@ public:
   }
 
   virtual void
-  setMagnitudeParameter(std::shared_ptr<ComPWA::DoubleParameter> par) {
+  setMagnitudeParameter(std::shared_ptr<ComPWA::FitParameter> par) {
     Magnitude = par;
   }
 
   virtual void setMagnitude(double par) { Magnitude->setValue(par); }
 
-  virtual std::shared_ptr<ComPWA::DoubleParameter> phaseParameter() {
+  virtual std::shared_ptr<ComPWA::FitParameter> phaseParameter() {
     return Phase;
   }
 
   virtual double phase() const { return Phase->value(); }
 
-  virtual void setPhaseParameter(std::shared_ptr<ComPWA::DoubleParameter> par) {
+  virtual void setPhaseParameter(std::shared_ptr<ComPWA::FitParameter> par) {
     Phase = par;
   }
 
@@ -140,9 +140,9 @@ protected:
 
   std::complex<double> PreFactor;
 
-  std::shared_ptr<DoubleParameter> Magnitude;
+  std::shared_ptr<FitParameter> Magnitude;
 
-  std::shared_ptr<DoubleParameter> Phase;
+  std::shared_ptr<FitParameter> Phase;
 
 private:
   double CurrentMagnitude;

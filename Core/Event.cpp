@@ -11,12 +11,6 @@ using namespace ComPWA;
 
 Event::Event() : Weight(1.), Eff(1.), Charge(0) {}
 
-Event::Event(const std::string &name) : Weight(1.), Eff(1.), Charge(0) {}
-
-Event::Event(const double inWeight, const std::string &name = "",
-             const double inEff)
-    : Weight(inWeight), Eff(inEff), Charge(0) {}
-
 void Event::addParticle(Particle inParticle) {
   Particles.push_back(inParticle);
 }
@@ -43,8 +37,8 @@ double Event::cmsEnergy() const {
 
   FourMomentum p4;
   for (auto i : Particles)
-    p4 += i.GetFourMomentum();
-  return p4.GetInvMass();
+    p4 += i.fourMomentum();
+  return p4.invMass();
 }
 
 void Event::clear() {

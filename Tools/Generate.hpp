@@ -20,7 +20,7 @@
 namespace ComPWA {
 namespace Tools {
 
-inline bool Generate(int number, std::shared_ptr<ComPWA::Kinematics> kin,
+inline bool generate(int number, std::shared_ptr<ComPWA::Kinematics> kin,
                      std::shared_ptr<ComPWA::Generator> gen,
                      std::shared_ptr<ComPWA::AmpIntensity> amp,
                      std::shared_ptr<ComPWA::DataReader::Data> data,
@@ -42,12 +42,12 @@ inline bool Generate(int number, std::shared_ptr<ComPWA::Kinematics> kin,
     throw std::runtime_error("RunManager::gen() | Generator not valid");
   if (!data)
     throw std::runtime_error("RunManager::gen() | Sample not valid");
-  if (data->GetNEvents() > 0)
+  if (data->numEvents() > 0)
     throw std::runtime_error("RunManager::gen() | Sample not empty!");
   if (phspTrue && !phsp)
     throw std::runtime_error("RunManager::gen() | We have a sample of true"
                              " phsp events, but no phsp sample!");
-  if (phspTrue && phspTrue->GetNEvents() != phsp->GetNEvents())
+  if (phspTrue && phspTrue->numEvents() != phsp->numEvents())
     throw std::runtime_error(
         "RunManager::gen() | We have a sample of true "
         "phsp events, but the sample size doesn't match that one of "
@@ -55,20 +55,20 @@ inline bool Generate(int number, std::shared_ptr<ComPWA::Kinematics> kin,
 
   double maxSampleWeight = 1.0;
   if (phsp)
-    maxSampleWeight = phsp->GetMaxWeight();
-  if (phspTrue && phspTrue->GetMaxWeight() > maxSampleWeight)
-    maxSampleWeight = phspTrue->GetMaxWeight();
+    maxSampleWeight = phsp->maximumWeight();
+  if (phspTrue && phspTrue->maximumWeight() > maxSampleWeight)
+    maxSampleWeight = phspTrue->maximumWeight();
 
   // Maximum value for random number generation. We introduce an arbitrary
   // factor of 5 to make sure that the maximum value is never reached.
   double generationMaxValue = 5 * maxSampleWeight;
 
-  unsigned int initialSeed = gen->GetSeed();
+  unsigned int initialSeed = gen->seed();
   unsigned int totalCalls = 0;
 
   unsigned int limit = 100000000; // set large limit, should never be reached;
   if (phsp) {
-    limit = phsp->GetNEvents();
+    limit = phsp->numEvents();
     generationMaxValue *= ComPWA::Tools::Maximum(kin, amp, phsp);
   }
 
@@ -77,22 +77,22 @@ inline bool Generate(int number, std::shared_ptr<ComPWA::Kinematics> kin,
 
   ComPWA::Event evt;     // event that we fill into generated sample
   ComPWA::Event evtTrue; // event that is used to evalutate amplitude
-  ComPWA::progressBar bar(number);
+  ComPWA::ProgressBar bar(number);
   if (number <= 0)
-    bar = ComPWA::progressBar(limit);
+    bar = ComPWA::ProgressBar(limit);
   for (unsigned int i = 0; i < limit; i++) {
     if (phsp && phspTrue) { // phsp and true sample is set
-      evtTrue = phspTrue->GetEvent(i);
-      evt = phsp->GetEvent(i);
+      evtTrue = phspTrue->event(i);
+      evt = phsp->event(i);
     } else if (phsp) { // phsp sample is set
-      evt = phsp->GetEvent(i);
+      evt = phsp->event(i);
       evtTrue = evt;
     } else { // otherwise generate event
-      gen->Generate(evt);
+      gen->generate(evt);
       evtTrue = evt;
     }
     if (number <= 0)
-      bar.nextEvent();
+      bar.next();
 
     // use reconstructed position for weights
     double weight = evt.weight();
@@ -106,7 +106,7 @@ inline bool Generate(int number, std::shared_ptr<ComPWA::Kinematics> kin,
     }
 
     totalCalls++;
-    double ampRnd = gen->GetUniform(0, generationMaxValue);
+    double ampRnd = gen->uniform(0, generationMaxValue);
     double AMPpdf = amp->intensity(point);
 
     // If maximum of intensity is reached we have to restart the procedure
@@ -116,10 +116,10 @@ inline bool Generate(int number, std::shared_ptr<ComPWA::Kinematics> kin,
                     "smaller then amplitude maximum! We raise the maximum "
                     "value and restart generation!";
       i = 0;
-      bar = ComPWA::progressBar(number);
-      gen->SetSeed(initialSeed);
+      bar = ComPWA::ProgressBar(number);
+      gen->setSeed(initialSeed);
       generationMaxValue = 2 * (AMPpdf * weight);
-      data->Clear();
+      data->clear();
       totalCalls = 0;
       continue;
     }
@@ -132,27 +132,27 @@ inline bool Generate(int number, std::shared_ptr<ComPWA::Kinematics> kin,
     // resulting sample is therefore unweighted
     evt.setWeight(1.);     // reset weight
     evt.setEfficiency(1.); // reset weight
-    data->PushEvent(evt);
+    data->add(evt);
 
     if (number > 0)
-      bar.nextEvent();
+      bar.next();
     // break if we have a sufficienct number of events
-    if (data->GetNEvents() >= number)
+    if (data->numEvents() >= number)
       i = limit;
   }
-  if (data->GetNEvents() < number) {
+  if (data->numEvents() < number) {
     std::cout << std::endl;
     LOG(error) << "RunManager::gen() | Not able to generate " << number
                << " events. Phsp sample too small. Current size "
                   "of sample is now "
-               << data->GetNEvents();
+               << data->numEvents();
   }
 
   if (!totalCalls)
     throw std::runtime_error("RunManager::gen() | Number of calls is zero! "
                              "There ust be something wrong!");
 
-  double genEff = (double)data->GetNEvents() / totalCalls;
+  double genEff = (double)data->numEvents() / totalCalls;
   LOG(info) << "Efficiency of toy MC generation: " << genEff << ".";
 
   return true;
@@ -165,19 +165,19 @@ inline bool GeneratePhsp(int nEvents, std::shared_ptr<ComPWA::Generator> gen,
   if (!sample)
     throw std::runtime_error("RunManager: generatePhsp() | "
                              "No phase-space sample set");
-  if (sample->GetNEvents() > 0)
+  if (sample->numEvents() > 0)
     throw std::runtime_error("RunManager: generatePhsp() | "
                              "Dataset not empty! abort!");
 
   LOG(info) << "Generating phase-space MC: [" << nEvents << " events] ";
 
-  ComPWA::progressBar bar(nEvents);
+  ComPWA::ProgressBar bar(nEvents);
   for (unsigned int i = 0; i < nEvents; i++) {
     if (i > 0)
       i--;
     ComPWA::Event tmp;
-    gen->Generate(tmp);
-    double ampRnd = gen->GetUniform(0, 1);
+    gen->generate(tmp);
+    double ampRnd = gen->uniform(0, 1);
     if (ampRnd > tmp.weight())
       continue;
 
@@ -187,8 +187,8 @@ inline bool GeneratePhsp(int nEvents, std::shared_ptr<ComPWA::Generator> gen,
 
     tmp.setEfficiency(1.);
     i++;
-    sample->PushEvent(tmp); // unfortunatly not thread safe
-    bar.nextEvent();
+    sample->add(tmp); // unfortunatly not thread safe
+    bar.next();
   }
   return true;
 }

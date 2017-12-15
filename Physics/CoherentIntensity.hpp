@@ -22,8 +22,8 @@ public:
 
   CoherentIntensity(
       std::string name = "",
-      std::shared_ptr<DoubleParameter> strength =
-          std::shared_ptr<DoubleParameter>(new DoubleParameter("", 1.0)),
+      std::shared_ptr<FitParameter> strength =
+          std::shared_ptr<FitParameter>(new FitParameter("", 1.0)),
       std::shared_ptr<Efficiency> eff =
           std::shared_ptr<Efficiency>(new UnitEfficiency))
       : AmpIntensity(name, strength, eff), PhspVolume(1.0){};

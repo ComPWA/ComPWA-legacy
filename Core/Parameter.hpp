@@ -4,188 +4,167 @@
 
 ///
 /// \file
-/// Implementations of Parameter for various data types.
+/// Parameter base class.
 ///
 
-#ifndef _PARAMETER_HPP_
-#define _PARAMETER_HPP_
+#ifndef _Parameter_HPP_
+#define _Parameter_HPP_
 
-#include <iostream>
 #include <string>
-#include <sstream>
-#include <complex>
-#include <stdexcept>
-#include <cmath>
+#include <vector>
+#include <memory>
+#include <algorithm>
+#include <fstream>
 
-#include <boost/property_tree/ptree.hpp>
-#include <boost/serialization/utility.hpp>
-#include <boost/optional.hpp>
+#include <boost/serialization/serialization.hpp>
+#include <boost/serialization/shared_ptr.hpp>
+#include <boost/serialization/nvp.hpp>
+#include <boost/serialization/level.hpp>
+#include <boost/serialization/tracking.hpp>
 
-#include "Core/AbsParameter.hpp"
-#include "Core/Exceptions.hpp"
-#include "Core/Logging.hpp"
+#include "Core/ParObserver.hpp"
 
 namespace ComPWA {
-enum ErrorType { SYM = 1, ASYM = 2, LHSCAN = 3, NOTDEF = 0 };
 
-class DoubleParameter : public Parameter {
+/// Enums for the type of the parameter, should be extended if an new parameter
+/// type is added
+enum ParType {
+  UNDEFINED = 0,
+  COMPLEX = 1,
+  DOUBLE = 2,
+  INTEGER = 3,
+  MCOMPLEX = 4,
+  MDOUBLE = 5,
+  MINTEGER = 6
+};
 
+/// Names of the parameter types, should be extended if an new parameter type is
+/// added
+static const char *ParNames[7] = {"UNDEFINED", "COMPLEX", "DOUBLE",  "INTEGER",
+                                   "MCOMPLEX",  "MDOUBLE", "MINTEGER"};
+
+/// Template functions which return above specified parameter types
+template <typename T> inline ParType typeName(void) {
+  return ParType::UNDEFINED;
+}
+
+template <> inline ParType typeName<std::vector<std::complex<double>>>(void) {
+  return ParType::MCOMPLEX;
+}
+template <> inline ParType typeName<std::vector<double>>(void) {
+  return ParType::MDOUBLE;
+}
+template <> inline ParType typeName<std::vector<int>>(void) {
+  return ParType::MINTEGER;
+}
+template <> inline ParType typeName<std::complex<double>>(void) {
+  return ParType::COMPLEX;
+}
+template <> inline ParType typeName<double>(void) { return ParType::DOUBLE; }
+template <> inline ParType typeName<int>(void) { return ParType::INTEGER; }
+
+///
+/// \class Parameter
+/// Base class for internal parameter.
+/// This class defines the internal container of a parameter. For the use in
+/// the function tree, the observer pattern is used and this class takes over
+/// the role of the Subject. Therefore the actual implementations of
+/// Parameter are the ConcreteSubjects of the observer pattern and the
+/// TreeNodes take the role of the observers.
+///
+class Parameter {
 public:
-  /// Standard constructor with no information provided. Creates parameter
-  /// with value 0 but without bounds or an error.
-  /// \param inName internal string identifier of this parameter
-  DoubleParameter(std::string inName = "");
+  /// Constructor with name of parameter and optional type
+  Parameter(std::string name, ParType type = ParType::UNDEFINED)
+      : Name(name), Type(type) {}
 
-  /// Construct parameter from a property tree. The expected tree layout is
-  /// described in load().
-  DoubleParameter(const boost::property_tree::ptree pt);
+  virtual ~Parameter() {}
 
-  /// Standard constructor with just a value provided. Creates parameter
-  /// with given value but without bounds or an error.
-  DoubleParameter(std::string inName, const double value);
+  /// Getter for name of object
+  virtual std::string name() const { return Name; }
 
-  /// Standard constructor with value and error provided. Creates parameter
-  /// with given value and error but without bounds.
-  DoubleParameter(std::string inName, const double value, const double error);
+  /// Getter for name of object
+  virtual void setName(std::string n) { Name = n; }
 
-  /// Standard constructor with value and bounds provided. Creates parameter
-  /// with given value and bounds but without error. If a check for valid
-  /// bounds fails, just the value is used.
-  DoubleParameter(std::string inName, const double value, const double min,
-                  const double max);
+  /// Getter for type of object
+  virtual ParType type() const { return Type; }
 
-  /// Standard constructor with value, bounds and error provided. Creates
-  /// parameter with the given information. If a check for valid bounds
-  /// fails, just value and error are used.
-  DoubleParameter(std::string inName, const double value, const double min,
-                  const double max, const double error);
-                  
-  DoubleParameter(const DoubleParameter &in);
+  /// Getter for typename of object, to be defined by the actual implementation
+  virtual std::string className() const = 0;
+
+  virtual bool isParameter() const { return false; }
   
-  virtual bool isParameter() const { return true; }
+  // Observer Pattern Functions
 
-  operator double() const { return Value; };
+  /// Attaches a new TreeNode as Observer
+  void Attach(std::shared_ptr<ParObserver> newObserver) {
+    OberservingNodes.push_back(newObserver);
+  }
 
-  virtual bool hasBounds() const { return HasBounds; }
+  /// Removes TreeNodes not needed as Observer anymore
+  void Detach(std::shared_ptr<ParObserver> obsoleteObserver) {
+    OberservingNodes.erase(std::remove(OberservingNodes.begin(),
+                                       OberservingNodes.end(),
+                                       obsoleteObserver),
+                           OberservingNodes.end());
+  }
 
-  virtual bool isFixed() const { return IsFixed; }
+  /// Notify all observing TreeNodes that parameter changed
+  void Notify() {
+    for (std::vector<std::shared_ptr<ParObserver>>::const_iterator iter =
+             OberservingNodes.begin();
+         iter != OberservingNodes.end(); ++iter) {
+      if (*iter != std::shared_ptr<ParObserver>()) // Ist das richtig????
+      {
+        (*iter)->update();
+      }
+    }
+  }
 
-  virtual void fixParameter(const bool fixed) { IsFixed = fixed; }
+  friend std::ostream &operator<<(std::ostream &out,
+                                  std::shared_ptr<Parameter> b) {
+    return out << b->to_str();
+  }
 
-  /// Update member variables from other DoubleParameter.
-  /// Do to the Observer pattern we can't use a copy constructor.
-  /// Therefore we use this workaround. The function ignores if parameter
-  /// is fixed!
-  virtual void updateParameter(std::shared_ptr<DoubleParameter> newPar);
+  friend std::ostream &operator<<(std::ostream &out, Parameter &b) {
+    return out << b.to_str();
+  }
 
-  //====== PARAMETER VALUE ========
-  /// Getter for value of parameter
-  virtual double value() const { return Value; }
+  /// A public function returning a string with parameter information
+  virtual std::string to_str() const = 0;
 
-  /// Setter for value of parameter
-  virtual void setValue(const double inVal);
+  /// A public function returning a string with parameter value
+  virtual std::string val_to_str() const = 0;
 
-  /// Bounds of parameter
-  virtual std::pair<double, double> bounds() const;
-
-  /// Bounds of parameter
-  virtual void setBounds(const double min, const double max);
-
-  /// Bounds of parameter
-  virtual void setBounds(const std::pair<double, double> r);
-
-  //====== PARAMETER ERROR ========
-  /// Is an error set?
-  virtual bool hasError() const;
-
-  virtual ErrorType errorType() const { return ErrType; }
-
-  /// Parameter error.
-  virtual std::pair<double, double> error() const;
-
-  /// Average arameter error (in case of asymmetric errors) or simpli parameter
-  /// error.
-  virtual double avgError() const { return 0.5 * (Error.first + Error.second); }
-
-  /// Set parameter error and assume that this parameter has asymmetri errors.
-  virtual void setError(double errLow, double errHigh);
-
-  /// Set parameter error and assume that this parameter has asymmetric errors.
-  virtual void setError(std::pair<double, double> err);
-
-  /// Setter parameter error and assume that this parameter has symmetric
-  /// errors.
-  virtual void setError(double err);
-
-  bool operator==(const DoubleParameter otherPar) const;
-
-  /// Load parameters from a ptree. This approach is more or
-  /// less equivalent to the serialization of a parameter but provides a better
-  /// readable format.
-  void load(const boost::property_tree::ptree pt);
-
-  /// Save parameter to a ptree. This approach is more or
-  /// less equivalent to the serialization of a parameter but provides a better
-  /// readable format.
-  boost::property_tree::ptree save() const;
-
-  /// String with detailed information about the parameter. Used in
-  /// operator<<().
-  virtual std::string to_str() const;
-
-  /// String with detailed information about the parameter. Used in
-  /// operator<<().
-  virtual std::string val_to_str() const;
+  //  template <typename T>
+  //  std::shared_ptr<T> GetComponent() {
+  //    return std::dynamic_pointer_cast<T>(shared_from_this());
+  //  }
 
 protected:
-  virtual std::string className() const { return "Double"; }
+  /// Name of parameter
+  std::string Name;
 
-  /// Are valid bounds defined for this parameter?
-  bool HasBounds;
+  /// Type of parameter (e.g. Double, Integer, ...)
+  ParType Type;
 
-  /// Do you want to keep parameter fixed?
-  bool IsFixed;
-
-  /// Parameter value
-  double Value;
-
-  /// Parameter bounds
-  std::pair<double, double> Bounds;
-
-  /// No error / symmetric error / asymmetric error
-  ErrorType ErrType;
-
-  /// Lower parameter error
-  std::pair<double, double> Error;
-
-  virtual void SetErrorType(ErrorType t) { ErrType = t; }
-
-  /// Check if \p min and \p max are valid bounds
-  bool check_bounds(const std::pair<double, double> bounds) const;
+  /// List of observers, e.g. TreeNodes
+  std::vector<std::shared_ptr<ParObserver>> OberservingNodes;
 
 private:
   friend class boost::serialization::access;
   template <class archive>
   void serialize(archive &ar, const unsigned int version) {
-    using namespace boost::serialization;
-    //    ar &boost::serialization::make_nvp(
-    //        "Parameter", boost::serialization::base_object<Parameter>(*this));
-    ar &make_nvp("Name", Name);
-    ar &make_nvp("Bounds", Bounds);
-    ar &make_nvp("Fix", IsFixed);
-    ar &make_nvp("Value", Value);
-    ar &make_nvp("Bounds", Bounds);
-    try {
-      ar &make_nvp("ErrorType", ErrType);
-      ar &make_nvp("Error", Error);
-    } catch (...) {
-      Error = std::pair<double, double>(0, 0);
-      ErrType = ErrorType::SYM;
-    }
+    ar &BOOST_SERIALIZATION_NVP(Name);
+    ar &BOOST_SERIALIZATION_NVP(Type);
   }
 };
-BOOST_SERIALIZATION_SHARED_PTR(ComPWA::DoubleParameter)
+} // ns::ComPWA
 
-} // namespace ComPWA
+BOOST_SERIALIZATION_SHARED_PTR(Parameter);
+
+BOOST_CLASS_IMPLEMENTATION(
+    ComPWA::Parameter, boost::serialization::level_type::object_serializable)
 
 #endif
+

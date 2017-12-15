@@ -54,11 +54,11 @@ public:
 
   //============ SET/GET =================
 
-  void SetWidthParameter(std::shared_ptr<ComPWA::DoubleParameter> w) {
+  void SetWidthParameter(std::shared_ptr<ComPWA::FitParameter> w) {
     _width = w;
   }
 
-  std::shared_ptr<ComPWA::DoubleParameter> GetWidthParameter() {
+  std::shared_ptr<ComPWA::FitParameter> GetWidthParameter() {
     return _width;
   }
 
@@ -66,11 +66,11 @@ public:
 
   double GetWidth() const { return _width->value(); }
 
-  void SetMesonRadiusParameter(std::shared_ptr<ComPWA::DoubleParameter> r) {
+  void SetMesonRadiusParameter(std::shared_ptr<ComPWA::FitParameter> r) {
     _mesonRadius = r;
   }
 
-  std::shared_ptr<ComPWA::DoubleParameter> GetMesonRadiusParameter() {
+  std::shared_ptr<ComPWA::FitParameter> GetMesonRadiusParameter() {
     return _mesonRadius;
   }
 
@@ -110,10 +110,10 @@ public:
 
 protected:
   /// Decay width of resonante state
-  std::shared_ptr<ComPWA::DoubleParameter> _width;
+  std::shared_ptr<ComPWA::FitParameter> _width;
 
   /// Meson radius of resonant state
-  std::shared_ptr<ComPWA::DoubleParameter> _mesonRadius;
+  std::shared_ptr<ComPWA::FitParameter> _mesonRadius;
 
   /// Form factor type
   formFactorType _ffType;

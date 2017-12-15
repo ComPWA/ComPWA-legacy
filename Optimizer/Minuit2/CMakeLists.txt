@@ -37,7 +37,6 @@ target_link_libraries( Minuit2IF
 
 target_include_directories( Minuit2IF
   PUBLIC ${MINUIT2_INCLUDE_DIR} ${Boost_INCLUDE_DIR}
-  /Users/weidenka/work/external/root-build/include
 )
 
 install (FILES ${lib_headers}

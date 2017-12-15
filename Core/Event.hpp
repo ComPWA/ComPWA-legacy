@@ -28,11 +28,6 @@ class Event {
 public:
   Event();
 
-  Event(const std::string &name);
-
-  Event(const double inWeight, const std::string &name,
-        const double inEff = 1.);
-
   virtual void addParticle(Particle inParticle);
 
   virtual ~Event(){};

@@ -98,7 +98,7 @@ void FitResult::PrintFitParameters(TableFormater *tableResult) {
   size_t parameterId = 0;
   for (auto p : finalParameters.doubleParameters()) {
     //    for (unsigned int o = 0; o < finalParameters.GetNDouble(); o++) {
-    std::shared_ptr<DoubleParameter> iniPar, truePar;
+    std::shared_ptr<FitParameter> iniPar, truePar;
     std::string name = p->name();
 
     if (printInitial) {
@@ -204,7 +204,7 @@ void FitResult::PrintFitFractions(TableFormater *fracTable) {
 
   double sum = 0, sumErrorSq = 0;
 
-  fracTable->Reset();
+  fracTable->reset();
 
   // print matrix
   fracTable->addColumn("Fit fractions [%]", 40); // add empty first column

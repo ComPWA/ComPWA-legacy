@@ -6,7 +6,7 @@
 using namespace ComPWA::DataReader;
 
 Data::Data(bool binning, unsigned int maxBins, double maxW)
-    : maxWeight(maxW), fBinned(binning), fmaxBins(maxBins) {}
+    : MaximumWeight(maxW), fBinned(binning), fmaxBins(maxBins) {}
 
 void ComPWA::DataReader::rndReduceSet(std::shared_ptr<ComPWA::Kinematics> kin,
                                       unsigned int size,
@@ -17,19 +17,19 @@ void ComPWA::DataReader::rndReduceSet(std::shared_ptr<ComPWA::Kinematics> kin,
     throw std::runtime_error("rndSubSet() | No input data set!");
   if (!out1)
     throw std::runtime_error("rndSubSet() | No output data set!");
-  if (out1->GetNEvents())
+  if (out1->numEvents())
     throw std::runtime_error("rndSubSet() | First output sample not empty!");
   if (in2) {
-    if (in1->GetNEvents() != in2->GetNEvents())
+    if (in1->numEvents() != in2->numEvents())
       throw std::runtime_error(
           "rndSubSet() | Samples have different event count!");
     if (!out2)
       throw std::runtime_error("rndSubSet() | Second output set is NULL!");
-    if (out2->GetNEvents())
+    if (out2->numEvents())
       throw std::runtime_error("rndSubSet() | Second output sample not empty!");
   }
 
-  unsigned int totalSize = in1->GetNEvents();
+  unsigned int totalSize = in1->numEvents();
   unsigned int newSize = totalSize;
   /* 1th method: new Sample has exact size, but possibly events are added twice.
    * We would have to store all used events in a vector and search the vector at
@@ -38,7 +38,7 @@ void ComPWA::DataReader::rndReduceSet(std::shared_ptr<ComPWA::Kinematics> kin,
    unsigned int d=0;
    while(t<newSize){
    d = (unsigned int) gen->getUniform()*totalSize;
-   newSample->pushEvent(fEvents[d]);
+   newSample->pushEvent(fEvents.at(d));
    t++;
    }*/
 
@@ -48,7 +48,7 @@ void ComPWA::DataReader::rndReduceSet(std::shared_ptr<ComPWA::Kinematics> kin,
        i++) { // count how many events are not within PHSP
     ComPWA::DataPoint point;
     try {
-      kin->convert(in1->GetEvent(i), point);
+      kin->convert(in1->event(i), point);
     } catch (ComPWA::BeyondPhsp &ex) { // event outside phase, remove
       newSize--;
       continue;
@@ -60,101 +60,101 @@ void ComPWA::DataReader::rndReduceSet(std::shared_ptr<ComPWA::Kinematics> kin,
   for (unsigned int i = 0; i < totalSize; i++) {
     ComPWA::DataPoint point;
     try {
-      kin->convert(in1->GetEvent(i), point);
+      kin->convert(in1->event(i), point);
     } catch (ComPWA::BeyondPhsp &ex) { // event outside phase, remove
       continue;
     }
     //    dataPoint point(in1->getEvent(i)); //use first sample for
     // hit&miss
     //    if(!Kinematics::instance()->isWithinPhsp(point)) continue;
-    if (gen->GetUniform(0, 1) < threshold) {
-      out1->PushEvent(in1->GetEvent(i));
+    if (gen->uniform(0, 1) < threshold) {
+      out1->add(in1->event(i));
       // write second sample if event from first sample were accepted
       if (in2)
-        out2->PushEvent(in2->GetEvent(i));
+        out2->add(in2->event(i));
     }
   }
   if (out2)
-    assert(out1->GetNEvents() == out2->GetNEvents());
+    assert(out1->numEvents() == out2->numEvents());
 
   LOG(debug) << "DataReader::rndReduceSet() | sample size reduced to "
-             << out1->GetNEvents();
+             << out1->numEvents();
   return;
 }
 
-std::shared_ptr<Data> Data::RndSubSet(std::shared_ptr<Kinematics> kin,
+std::shared_ptr<Data> Data::rndSubSet(std::shared_ptr<Kinematics> kin,
                                       unsigned int size,
                                       std::shared_ptr<Generator> gen) {
-  std::shared_ptr<Data> out(this->EmptyClone());
+  std::shared_ptr<Data> out(this->emptyClone());
   rndReduceSet(kin, size, gen, this, out.get());
   return out;
 }
 
-void Data::ResetWeights(double w) {
-  for (unsigned int i = 0; i < fEvents.size(); i++)
-    fEvents.at(i).setWeight(w);
-  maxWeight = w;
+void Data::resetWeights(double w) {
+  for (unsigned int i = 0; i < Events.size(); i++)
+    Events.at(i).setWeight(w);
+  MaximumWeight = w;
   return;
 }
 
-double Data::GetMaxWeight() const { return maxWeight; }
+double Data::maximumWeight() const { return MaximumWeight; }
 
-void Data::ReduceToPhsp(std::shared_ptr<Kinematics> kin) {
+void Data::reduceToPhsp(std::shared_ptr<Kinematics> kin) {
   std::vector<Event> tmp;
   LOG(info) << "Data::reduceToPhsp() | "
                "Remove all events outside PHSP boundary from data sample.";
 
-  for (unsigned int evt = 0; evt < fEvents.size(); evt++) {
+  for (unsigned int evt = 0; evt < Events.size(); evt++) {
     DataPoint point;
     try {
-      kin->convert(fEvents.at(evt), point);
+      kin->convert(Events.at(evt), point);
     } catch (BeyondPhsp &ex) { // event outside phase, remove
       continue;
     }
-    tmp.push_back(fEvents.at(evt));
+    tmp.push_back(Events.at(evt));
   }
   LOG(info) << "Data::reduceToPhsp() | " << tmp.size() << " from "
-            << fEvents.size() << "("
-            << ((double)tmp.size()) / fEvents.size() * 100 << "%) were kept.";
-  fEvents = tmp;
+            << Events.size() << "("
+            << ((double)tmp.size()) / Events.size() * 100 << "%) were kept.";
+  Events = tmp;
   return;
 }
 
-void Data::ResetEfficiency(double e) {
-  for (unsigned int evt = 0; evt < fEvents.size(); evt++) {
-    fEvents.at(evt).setEfficiency(e);
+void Data::resetEfficiency(double e) {
+  for (unsigned int evt = 0; evt < Events.size(); evt++) {
+    Events.at(evt).setEfficiency(e);
   }
 }
 
-void Data::Reduce(unsigned int newSize) {
-  if (newSize >= fEvents.size()) {
+void Data::reduce(unsigned int newSize) {
+  if (newSize >= Events.size()) {
     LOG(error)
         << "RooReader::reduce() requested size too large, cant reduce sample!";
     return;
   }
-  fEvents.resize(newSize);
+  Events.resize(newSize);
 }
 
-void Data::SetEfficiency(std::shared_ptr<Kinematics> kin,
+void Data::setEfficiency(std::shared_ptr<Kinematics> kin,
                          std::shared_ptr<Efficiency> eff) {
-  for (unsigned int evt = 0; evt < fEvents.size(); evt++) {
+  for (unsigned int evt = 0; evt < Events.size(); evt++) {
     DataPoint point;
     try {
-      kin->convert(fEvents.at(evt), point);
+      kin->convert(Events.at(evt), point);
     } catch (BeyondPhsp &ex) { // event outside phase, remove
       continue;
     }
     //    dataPoint point(fEvents.at(evt));
     double val = eff->evaluate(point);
-    fEvents.at(evt).setEfficiency(val);
+    Events.at(evt).setEfficiency(val);
   }
 }
-void Data::Clear() { fEvents.clear(); }
+void Data::clear() { Events.clear(); }
 
-bool Data::HasWeights() {
+bool Data::hasWeights() {
   bool has = 0;
-  for (unsigned int evt = 0; evt < fEvents.size(); evt++) {
-    if (fEvents.at(evt).weight() != 1.) {
+  for (unsigned int evt = 0; evt < Events.size(); evt++) {
+    if (Events.at(evt).weight() != 1.) {
       has = 1;
       break;
     }
@@ -163,20 +163,20 @@ bool Data::HasWeights() {
 }
 
 const ComPWA::ParameterList &
-Data::GetListOfData(std::shared_ptr<ComPWA::Kinematics> kin) {
+Data::dataList(std::shared_ptr<ComPWA::Kinematics> kin) {
   // dataList already filled? return filled one
-  if (dataList.numParameters() != 0)
-    return dataList;
+  if (DataList.numParameters() != 0)
+    return DataList;
 
   int size = kin->numVariables();
   std::vector<std::vector<double>> data(size, std::vector<double>());
   std::vector<double> eff;
-  eff.reserve(fEvents.size());
+  eff.reserve(Events.size());
   std::vector<double> weight;
-  weight.reserve(fEvents.size());
+  weight.reserve(Events.size());
 
-  auto itr = fEvents.begin();
-  for (; itr != fEvents.end(); ++itr) {
+  auto itr = Events.begin();
+  for (; itr != Events.end(); ++itr) {
     DataPoint point;
     try {
       kin->convert(*itr, point);
@@ -191,22 +191,22 @@ Data::GetListOfData(std::shared_ptr<ComPWA::Kinematics> kin) {
 
   // Add data vector to ParameterList
   for (auto i : data)
-    dataList.addValue(MDouble("", i));
+    DataList.addValue(MDouble("", i));
   // Adding efficiency at the end
-  dataList.addValue(MDouble("Efficiency", eff));
+  DataList.addValue(MDouble("Efficiency", eff));
   // Adding weight at the end
-  dataList.addValue(MDouble("Weight", weight));
+  DataList.addValue(MDouble("Weight", weight));
 
-  return dataList;
+  return DataList;
 }
 
 std::vector<ComPWA::DataPoint>
-Data::GetDataPoints(std::shared_ptr<ComPWA::Kinematics> kin) const {
+Data::dataPoints(std::shared_ptr<ComPWA::Kinematics> kin) const {
   std::vector<DataPoint> vecPoint;
-  for (int i = 0; i < fEvents.size(); i++) {
+  for (int i = 0; i < Events.size(); i++) {
     DataPoint point;
     try {
-      kin->convert(fEvents.at(i), point);
+      kin->convert(Events.at(i), point);
     } catch (BeyondPhsp &ex) { // event outside phase, remove
       continue;
     }
@@ -215,31 +215,31 @@ Data::GetDataPoints(std::shared_ptr<ComPWA::Kinematics> kin) const {
   return vecPoint;
 }
 
-void Data::SetResolution(std::shared_ptr<Resolution> res) {
-  for (int i = 0; i < fEvents.size(); i++)
-    res->resolution(fEvents.at(i));
+void Data::setResolution(std::shared_ptr<Resolution> res) {
+  for (int i = 0; i < Events.size(); i++)
+    res->resolution(Events.at(i));
 }
 
-void Data::Add(Data &otherSample) {
-  std::vector<Event> otherEvents = otherSample.GetEvents();
-  fEvents.insert(fEvents.end(), otherEvents.begin(), otherEvents.end());
-  if (otherSample.GetMaxWeight() > maxWeight)
-    maxWeight = otherSample.GetMaxWeight();
+void Data::append(Data &otherSample) {
+  std::vector<Event> otherEvents = otherSample.events();
+  Events.insert(Events.end(), otherEvents.begin(), otherEvents.end());
+  if (otherSample.maximumWeight() > MaximumWeight)
+    MaximumWeight = otherSample.maximumWeight();
   return;
 }
 
-void Data::ApplyCorrection(DataCorrection &corr) {
+void Data::applyCorrection(DataCorrection &corr) {
   double sumWeightSq = 0;
-  for (int i = 0; i < fEvents.size(); i++) {
-    double w = corr.getCorrection(fEvents.at(i));
+  for (int i = 0; i < Events.size(); i++) {
+    double w = corr.correction(Events.at(i));
     if (w < 0)
       throw std::runtime_error("Data::applyCorrection() | "
                                "Negative weight!");
     sumWeightSq += w * w;
-    double oldW = fEvents.at(i).weight();
-    if (w * oldW > maxWeight)
-      maxWeight = w * oldW;
-    fEvents.at(i).setWeight(w * oldW);
+    double oldW = Events.at(i).weight();
+    if (w * oldW > MaximumWeight)
+      MaximumWeight = w * oldW;
+    Events.at(i).setWeight(w * oldW);
   }
   LOG(info) << "Data::applyCorrection() | "
                "Sample corrected! Sum of weights squared is "
@@ -247,7 +247,7 @@ void Data::ApplyCorrection(DataCorrection &corr) {
   return;
 }
 
-const int Data::GetBin(const int i, double &m12, double &weight) {
+const int Data::bin(const int i, double &m12, double &weight) {
   if (!fBinned)
     return -1;
 
@@ -257,8 +257,8 @@ const int Data::GetBin(const int i, double &m12, double &weight) {
   return 1;
 }
 
-void Data::PushEvent(const Event &evt) {
-  fEvents.push_back(evt);
-  if (evt.weight() > maxWeight)
-    maxWeight = evt.weight();
+void Data::add(const Event &evt) {
+  Events.push_back(evt);
+  if (evt.weight() > MaximumWeight)
+    MaximumWeight = evt.weight();
 }

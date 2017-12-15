@@ -20,7 +20,7 @@
 #include <boost/serialization/vector.hpp>
 #include <boost/serialization/shared_ptr.hpp>
 
-#include "Core/Parameter.hpp"
+#include "Core/FitParameter.hpp"
 #include "Core/Exceptions.hpp"
 #include "Core/Logging.hpp"
 #include "Core/Value.hpp"
@@ -58,17 +58,17 @@ public:
   virtual void addValues(std::vector<std::shared_ptr<Parameter>> values);
 
   // Parameter
-  virtual std::shared_ptr<DoubleParameter> doubleParameter(size_t i) const {
-    return DoubleParameters.at(i);
+  virtual std::shared_ptr<FitParameter> doubleParameter(size_t i) const {
+    return FitParameters.at(i);
   };
 
-  virtual std::vector<std::shared_ptr<DoubleParameter>> &doubleParameters() {
-    return DoubleParameters;
+  virtual std::vector<std::shared_ptr<FitParameter>> &doubleParameters() {
+    return FitParameters;
   };
 
-  virtual const std::vector<std::shared_ptr<DoubleParameter>> &
+  virtual const std::vector<std::shared_ptr<FitParameter>> &
   doubleParameters() const {
-    return DoubleParameters;
+    return FitParameters;
   };
 
   // Value
@@ -218,26 +218,26 @@ protected:
   std::vector<std::shared_ptr<ComPWA::Value<std::vector<std::complex<double>>>>>
       MultiComplexValues;
 
-  std::vector<std::shared_ptr<ComPWA::DoubleParameter>> DoubleParameters;
+  std::vector<std::shared_ptr<ComPWA::FitParameter>> FitParameters;
 
 private:
   friend class boost::serialization::access;
   template <class archive>
   void serialize(archive &ar, const unsigned int version) {
     using namespace boost::serialization;
-    // currently only DoubleParameters can be serialized
-    ar &make_nvp("DoubleParameters", DoubleParameters);
+    // currently only FitParameters can be serialized
+    ar &make_nvp("FitParameters", FitParameters);
   }
 };
 
-/// Search ParameterList for a DoubleParameter with \p name. The first match is
+/// Search ParameterList for a FitParameter with \p name. The first match is
 /// returned. Be aware that name are not unique. In case no match is found
 /// a BadParameter exception is thrown.
-inline std::shared_ptr<DoubleParameter>
+inline std::shared_ptr<FitParameter>
 FindParameter(std::string name, const ComPWA::ParameterList &v) {
   auto it =
       std::find_if(v.doubleParameters().begin(), v.doubleParameters().end(),
-                   [name](const std::shared_ptr<DoubleParameter> &s) {
+                   [name](const std::shared_ptr<FitParameter> &s) {
                      return s->name() == name;
                    });
   if (it == v.doubleParameters().end())
@@ -245,14 +245,14 @@ FindParameter(std::string name, const ComPWA::ParameterList &v) {
   return *it;
 }
 
-/// Search list for a DoubleParameter with \p name. The first match is
+/// Search list for a FitParameter with \p name. The first match is
 /// returned. Be aware that name are not unique. In case no match is found
 /// a BadParameter exception is thrown.
-inline std::shared_ptr<DoubleParameter>
+inline std::shared_ptr<FitParameter>
 FindParameter(std::string name,
-              std::vector<std::shared_ptr<DoubleParameter>> &v) {
+              std::vector<std::shared_ptr<FitParameter>> &v) {
   auto it = std::find_if(v.begin(), v.end(),
-                         [name](const std::shared_ptr<DoubleParameter> &s) {
+                         [name](const std::shared_ptr<FitParameter> &s) {
                            return s->name() == name;
                          });
   if (it == v.end())

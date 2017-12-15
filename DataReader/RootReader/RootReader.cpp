@@ -48,9 +48,9 @@ RootReader::RootReader(const std::string inRootFile,
 
 RootReader::~RootReader() {}
 
-RootReader *RootReader::Clone() const { return new RootReader(*this); }
+RootReader *RootReader::clone() const { return new RootReader(*this); }
 
-RootReader *RootReader::EmptyClone() const { return new RootReader(); }
+RootReader *RootReader::emptyClone() const { return new RootReader(); }
 
 void RootReader::read(TTree *fTree, double readSize) {
 
@@ -98,13 +98,13 @@ void RootReader::read(TTree *fTree, double readSize) {
     tmp.setCharge(fCharge);
     tmp.setEfficiency(feventEff);
 
-    fEvents.push_back(tmp);
-    if (feventWeight > maxWeight)
-      maxWeight = feventWeight;
+    Events.push_back(tmp);
+    if (feventWeight > MaximumWeight)
+      MaximumWeight = feventWeight;
   } // end event loop
 }
 
-void RootReader::WriteData(std::string fileName, std::string treeName) {
+void RootReader::writeData(std::string fileName, std::string treeName) {
 
   LOG(info) << "RootReader::writeData() | Writing current "
                "vector of events to file "
@@ -113,7 +113,7 @@ void RootReader::WriteData(std::string fileName, std::string treeName) {
   TFile *fFile = new TFile(fileName.c_str(), "RECREATE");
   if (fFile->IsZombie())
     throw std::runtime_error(
-        "RootReader::WriteData() | Can't open data file: " + fileName);
+        "RootReader::writeData() | Can't open data file: " + fileName);
 
   // TTree branch variables
   TClonesArray *fParticles;
@@ -123,7 +123,7 @@ void RootReader::WriteData(std::string fileName, std::string treeName) {
   int fFlavour;
 
   TTree* fTree = new TTree(treeName.c_str(), treeName.c_str());
-  unsigned int numPart = fEvents.at(0).numParticles();
+  unsigned int numPart = Events.at(0).numParticles();
   fParticles = new TClonesArray("TParticle", numPart);
   fTree->Branch("Particles", &fParticles);
   fTree->Branch("weight", &feventWeight, "weight/D");
@@ -132,8 +132,8 @@ void RootReader::WriteData(std::string fileName, std::string treeName) {
   fTree->Branch("flavour", &fFlavour, "flavour/I");
   TClonesArray &partArray = *fParticles;
 
-  auto it = fEvents.begin();
-  for (; it != fEvents.end(); ++it) {
+  auto it = Events.begin();
+  for (; it != Events.end(); ++it) {
     fParticles->Clear();
     feventWeight = (*it).weight();
     fCharge = (*it).charge();
@@ -142,9 +142,9 @@ void RootReader::WriteData(std::string fileName, std::string treeName) {
     TLorentzVector motherMomentum(0, 0, 0, (*it).cmsEnergy());
     for (unsigned int i = 0; i < numPart; i++) {
       Particle oldParticle = (*it).particle(i);
-      TLorentzVector oldMomentum(oldParticle.GetPx(), oldParticle.GetPy(),
-                                 oldParticle.GetPz(), oldParticle.GetE());
-      new (partArray[i]) TParticle(oldParticle.GetPid(), 1, 0, 0, 0, 0,
+      TLorentzVector oldMomentum(oldParticle.px(), oldParticle.py(),
+                                 oldParticle.pz(), oldParticle.e());
+      new (partArray[i]) TParticle(oldParticle.pid(), 1, 0, 0, 0, 0,
                                    oldMomentum, motherMomentum);
     }
     fTree->Fill();

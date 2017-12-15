@@ -311,10 +311,10 @@ int main(int argc, char **argv) {
   // We need to call this after the construction of the amplitude since
   // the variables are calculated that are needed by the amplitude
   sqrtS4230._mcPoints = std::make_shared<std::vector<DataPoint>>(
-      sqrtS4230._mcSample->GetDataPoints(sqrtS4230._kin));
+      sqrtS4230._mcSample->dataPoints(sqrtS4230._kin));
   sqrtS4230._amp->setPhspSample(sqrtS4230._mcPoints, sqrtS4230._mcPoints);
 
-  ComPWA::Tools::Generate(sqrtS4230._nEvents, sqrtS4230._kin, sqrtS4230._gen,
+  ComPWA::Tools::generate(sqrtS4230._nEvents, sqrtS4230._kin, sqrtS4230._gen,
                           sqrtS4230._amp, sqrtS4230._data, sqrtS4230._mcSample);
 
   sqrtS4230._minLH = std::make_shared<Estimator::MinLogLH>(
@@ -355,10 +355,10 @@ int main(int argc, char **argv) {
   // We need to call this after the construction of the amplitude since
   // the variables are calculated that are needed by the amplitude
   sqrtS4260._mcPoints = std::make_shared<std::vector<DataPoint>>(
-      sqrtS4260._mcSample->GetDataPoints(sqrtS4260._kin));
+      sqrtS4260._mcSample->dataPoints(sqrtS4260._kin));
   sqrtS4260._amp->setPhspSample(sqrtS4260._mcPoints, sqrtS4260._mcPoints);
 
-  ComPWA::Tools::Generate(sqrtS4260._nEvents, sqrtS4260._kin, sqrtS4260._gen,
+  ComPWA::Tools::generate(sqrtS4260._nEvents, sqrtS4260._kin, sqrtS4260._gen,
                           sqrtS4260._amp, sqrtS4260._data, sqrtS4260._mcSample);
 
   sqrtS4260._minLH = std::make_shared<Estimator::MinLogLH>(

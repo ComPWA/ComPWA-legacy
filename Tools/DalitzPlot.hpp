@@ -13,7 +13,7 @@
 
 #include "Core/Event.hpp"
 #include "Core/Particle.hpp"
-#include "Core/Parameter.hpp"
+#include "Core/FitParameter.hpp"
 #include "Core/ParameterList.hpp"
 #include "Core/AmpIntensity.hpp"
 

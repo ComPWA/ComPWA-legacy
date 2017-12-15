@@ -8,7 +8,7 @@
 #include <vector>
 #include <map>
 
-#include "Core/Parameter.hpp"
+#include "Core/FitParameter.hpp"
 #include "Core/Exceptions.hpp"
 
 #include "Core/ParameterList.hpp"
@@ -16,7 +16,7 @@
 using namespace ComPWA;
 
 std::size_t ParameterList::numParameters() const {
-  return DoubleParameters.size();
+  return FitParameters.size();
 }
 
 void ParameterList::addParameters(
@@ -28,7 +28,7 @@ void ParameterList::addParameters(
 void ParameterList::addParameter(std::shared_ptr<Parameter> par) {
   switch (par->type()) {
   case ParType::DOUBLE: {
-    DoubleParameters.push_back(std::dynamic_pointer_cast<DoubleParameter>(par));
+    FitParameters.push_back(std::dynamic_pointer_cast<FitParameter>(par));
     break;
   }
   default: { break; }

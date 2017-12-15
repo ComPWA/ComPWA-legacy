@@ -2,18 +2,13 @@
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
-//! Reader for data in ASCII-Format like Pawian's epemEvtReader
-/*! \class AsciiReader
- * @file AsciiReader.hpp
- * This class reads event-based data from ascii-files in the same syntax
- * as Pawian's epemEvtReader. It implements the
- * interface of Data.hpp.
- */
+///
+/// \file
+/// Ascii reader implementation.
+///
 
-#ifndef _ASCII_READER_H_
-#define _ASCII_READER_H_
-
-//_____ I N C L U D E S _______________________________________________________
+#ifndef _ASCIIREADER_H_
+#define _ASCIIREADER_H_
 
 // ANSI C headers
 #include <vector>
@@ -25,31 +20,35 @@
 #include "Core/ParameterList.hpp"
 #include "Core/DataPoint.hpp"
 
-//_____ D E F I N I T I O N S __________________________________________________
 
 namespace ComPWA {
 namespace DataReader {
 namespace AsciiReader {
 
+///
+/// \class AsciiReader
+/// Reader for data in ASCII-Format. This class reads event-based data from
+/// ascii-files in the same syntax. as Pawian's epemEvtReader. It implements the
+/// interface of Data.hpp.
+///
 class AsciiReader : public Data {
 
 public:
-  /** Destructor */
   virtual ~AsciiReader();
 
   AsciiReader(){};
 
   AsciiReader(const std::string inConfigFile, const int particles);
 
-  virtual AsciiReader *Clone() const;
+  virtual AsciiReader *clone() const;
 
-  virtual AsciiReader *EmptyClone() const;
+  virtual AsciiReader *emptyClone() const;
 
-  virtual void WriteData(std::string file = "", std::string trName = ""){};
+  virtual void writeData(std::string file = "", std::string trName = ""){};
 };
 
-} /* namespace AsciiReader */
-} /* namespace DataReader */
-} /* namespace ComPWA */
+} // ns::AsciiReader
+} // ns::DataReader
+} // ns::ComPWA
 
-#endif /* _ASCII_READER_H_ */
+#endif

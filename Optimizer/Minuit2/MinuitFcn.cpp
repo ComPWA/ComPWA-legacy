@@ -10,7 +10,7 @@
 #include <iomanip>
 
 #include "Core/ParameterList.hpp"
-#include "Core/Parameter.hpp"
+#include "Core/FitParameter.hpp"
 #include "Core/Logging.hpp"
 #include "Optimizer/Minuit2/MinuitFcn.hpp"
 

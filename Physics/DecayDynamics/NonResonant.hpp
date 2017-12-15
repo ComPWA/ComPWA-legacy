@@ -18,7 +18,7 @@ public:
   NonResonant(std::string name = "") : AbstractDynamicalFunction(name) {
     // Set the mass parameter to make sure the pointer is set.
     SetMassParameter(
-        std::shared_ptr<DoubleParameter>(new DoubleParameter("", 0.0)));
+        std::shared_ptr<FitParameter>(new FitParameter("", 0.0)));
   };
 
   virtual ~NonResonant(){};

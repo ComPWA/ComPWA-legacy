@@ -19,7 +19,7 @@
 
 #include "Core/Exceptions.hpp"
 #include "Core/ParameterList.hpp"
-#include "Core/Parameter.hpp"
+#include "Core/FitParameter.hpp"
 #include "Core/DataPoint.hpp"
 
 namespace ComPWA {

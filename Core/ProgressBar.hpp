@@ -10,12 +10,16 @@
 
 namespace ComPWA {
 
-class progressBar {
+class ProgressBar {
 public:
-  progressBar() : hasStarted(0){};
-  ~progressBar() { std::cout << std::endl; };
-  progressBar(std::size_t size, int update = 1);
-  void nextEvent();
+  ProgressBar() : hasStarted(0){};
+
+  ~ProgressBar() { std::cout << std::endl; };
+
+  ProgressBar(std::size_t size, int update = 1);
+  
+  /// indicate the next step in process
+  void next();
 
 protected:
   double timeRemaining();
@@ -33,6 +37,6 @@ protected:
   double lastUpdate;
 };
 
-} /* namespace ComPWA */
+} // ns::ComPWA
 
-#endif /* PROGRESSBAR_HPP_ */
+#endif

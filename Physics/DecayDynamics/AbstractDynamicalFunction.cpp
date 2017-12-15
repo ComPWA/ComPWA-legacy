@@ -14,7 +14,7 @@ void AbstractDynamicalFunction::GetParameters(ParameterList &list) {
   // list. If so we check if both are equal and set the local parameter to the
   // parameter from the list. In this way we connect parameters that occur on
   // different positions in the amplitude.
-  std::shared_ptr<DoubleParameter> tmp;
+  std::shared_ptr<FitParameter> tmp;
   auto mass = GetMassParameter();
   try { // catch BadParameter
     tmp = FindParameter(mass->name(), list);

@@ -127,8 +127,8 @@ void DalitzPlot::Fill(std::shared_ptr<Kinematics> kin) {
 
   //===== Fill data histograms
   if (s_data) {
-    for (unsigned int i = 0; i < s_data->GetNEvents(); i++) { // loop over data
-      Event event(s_data->GetEvent(i));
+    for (unsigned int i = 0; i < s_data->numEvents(); i++) { // loop over data
+      Event event(s_data->event(i));
 
       double eff = 1.0;
       if (_correctForEfficiency)
@@ -155,11 +155,11 @@ void DalitzPlot::Fill(std::shared_ptr<Kinematics> kin) {
     double weightsSum = 0.0;
 
     // Loop over all events in phase space sample
-    progressBar bar(s_phsp->GetNEvents());
-    for (unsigned int i = 0; i < s_phsp->GetNEvents();
+    ProgressBar bar(s_phsp->numEvents());
+    for (unsigned int i = 0; i < s_phsp->numEvents();
          i++) { // loop over phsp MC
-      bar.nextEvent();
-      Event event(s_phsp->GetEvent(i));
+      bar.next();
+      Event event(s_phsp->event(i));
       double evWeight = event.weight();
       double eff = 1.0;
       if (_correctForEfficiency)
@@ -204,9 +204,9 @@ void DalitzPlot::Fill(std::shared_ptr<Kinematics> kin) {
 
   //===== Plot hit&miss data
   if (s_hitMiss) {
-    for (unsigned int i = 0; i < s_hitMiss->GetNEvents();
+    for (unsigned int i = 0; i < s_hitMiss->numEvents();
          i++) { // loop over data
-      Event event(s_hitMiss->GetEvent(i));
+      Event event(s_hitMiss->event(i));
       double eff = 1.0;
       if (_correctForEfficiency)
         eff = event.efficiency();

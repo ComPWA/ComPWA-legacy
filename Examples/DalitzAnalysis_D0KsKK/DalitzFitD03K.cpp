@@ -27,11 +27,11 @@
 // Core header files go here
 #include "Core/Event.hpp"
 #include "Core/Particle.hpp"
-#include "Core/Parameter.hpp"
+#include "Core/FitParameter.hpp"
 #include "Core/ParameterList.hpp"
 #include "Core/FunctionTree.hpp"
 #include "Core/TableFormater.hpp"
-#include "Core/Parameter.hpp"
+#include "Core/FitParameter.hpp"
 #include "Core/Logging.hpp"
 
 // ComPWA header files go here
@@ -357,7 +357,7 @@ int main(int argc, char **argv) {
     // sample with accepted phsp events
     phspData = std::shared_ptr<Data>(new RootReader(
         phspEfficiencyFile, phspEfficiencyFileTreeName, mcPrecision));
-    phspData->ReduceToPhsp(trueModelKin);
+    phspData->reduceToPhsp(trueModelKin);
   }
 
   // ========= AmpIntensity ========
@@ -374,25 +374,25 @@ int main(int argc, char **argv) {
   //run.SetPhspSample(toyPhspData);
   //run.GeneratePhsp(mcPrecision);
   ComPWA::Tools::GeneratePhsp(mcPrecision, gen, toyPhspData);
-  toyPhspData->SetEfficiency(trueModelKin,
+  toyPhspData->setEfficiency(trueModelKin,
                              eff); // set efficiency values for each event
 
   // Setting samples for normalization
   auto toyPoints = std::make_shared<std::vector<DataPoint>>(
-      toyPhspData->GetDataPoints(trueModelKin));
+      toyPhspData->dataPoints(trueModelKin));
   auto phspPoints = toyPoints;
   if (phspData) {
     auto phspPoints = std::make_shared<std::vector<DataPoint>>(
-        phspData->GetDataPoints(trueModelKin));
+        phspData->dataPoints(trueModelKin));
   }
   trueIntens->setPhspSample(phspPoints, toyPoints);
 
   toyPoints = std::make_shared<std::vector<DataPoint>>(
-      toyPhspData->GetDataPoints(fitModelKin));
+      toyPhspData->dataPoints(fitModelKin));
   phspPoints = toyPoints;
   if (phspData) {
     auto phspPoints = std::make_shared<std::vector<DataPoint>>(
-        phspData->GetDataPoints(fitModelKin));
+        phspData->dataPoints(fitModelKin));
   }
   intens->setPhspSample(phspPoints, toyPoints);
 
@@ -405,7 +405,7 @@ int main(int argc, char **argv) {
 
   // Smear total number of events
   if (smearNEvents && numEvents > 0)
-    numEvents += (int)gen->GetGaussDist(0, sqrt(numEvents));
+    numEvents += (int)gen->gauss(0, sqrt(numEvents));
 
   //  if (trueSignalFraction != 1. && !bkgFile.empty()) {
   //    int numBkgEvents = (int)((1 - trueSignalFraction) * numEvents);
@@ -440,14 +440,14 @@ int main(int argc, char **argv) {
     //    }
     //    exit(1);
 
-    inD->ReduceToPhsp(trueModelKin);
+    inD->reduceToPhsp(trueModelKin);
     if (resetWeights)
-      inD->ResetWeights(); // resetting weights if requested
-    inputData = inD->RndSubSet(trueModelKin, numSignalEvents, gen);
-    inputData->SetEfficiency(trueModelKin, eff);
+      inD->resetWeights(); // resetting weights if requested
+    inputData = inD->rndSubSet(trueModelKin, numSignalEvents, gen);
+    inputData->setEfficiency(trueModelKin, eff);
     //run.SetData(inputData);
     inD = std::shared_ptr<Data>();
-    sample->Add(*inputData);
+    sample->append(*inputData);
   }
   //========== Generation of data sample ===========
   // generation with unbinned efficiency correction - use full sample
@@ -460,10 +460,10 @@ int main(int argc, char **argv) {
     if (applySysCorrection) {
       MomentumCorrection *trkSys = getTrackingCorrection();
       MomentumCorrection *pidSys = getPidCorrection();
-      trkSys->Print();
-      pidSys->Print();
-      fullPhsp->ApplyCorrection(*trkSys);
-      fullPhsp->ApplyCorrection(*pidSys);
+      trkSys->print();
+      pidSys->print();
+      fullPhsp->applyCorrection(*trkSys);
+      fullPhsp->applyCorrection(*pidSys);
     }
     std::shared_ptr<Data> fullTruePhsp;
     if (!phspEfficiencyFileTrueTreeName.empty()) {
@@ -480,16 +480,11 @@ int main(int argc, char **argv) {
       // rndReduceSet(phspSampleSize,gen,fullPhsp.get(),fullPhspRed);
       // fullPhsp = std::shared_ptr<Data>(fullPhspRed);
     }
-    //run.SetPhspSample(fullPhsp, fullTruePhsp);
   }
   if (!inputData) {
     LOG(info) << "Generating sample!";
-    //run.SetData(sample);
-    //run.SetAmplitude(trueIntens);
-    //run.SetPhspSample(std::shared_ptr<Data>());
-    //run.Generate(trueModelKin, numEvents);
-    ComPWA::Tools::Generate(numEvents, trueModelKin, gen, trueIntens, sample, std::shared_ptr<Data>(), std::shared_ptr<Data>());
-    LOG(info) << "Sample size: " << sample->GetNEvents();
+    ComPWA::Tools::generate(numEvents, trueModelKin, gen, trueIntens, sample, std::shared_ptr<Data>(), std::shared_ptr<Data>());
+    LOG(info) << "Sample size: " << sample->numEvents();
   }
   // Reset phsp sample to save memory
   //run.SetPhspSample(std::shared_ptr<Data>());
@@ -501,15 +496,15 @@ int main(int argc, char **argv) {
   }
   std::stringstream s;
   s << "Printing the first 10 events of data sample:\n";
-  for (int i = 0; (i < sample->GetNEvents() && i < 10); ++i) {
+  for (int i = 0; (i < sample->numEvents() && i < 10); ++i) {
     DataPoint p;
-    trueModelKin->convert(sample->GetEvent(i), p);
+    trueModelKin->convert(sample->event(i), p);
     s << p << "\n";
   }
   LOG(info) << s.str();
 
-  // sample->WriteData("test.root","tr");
-  sample->ReduceToPhsp(trueModelKin);
+  // sample->writeData("test.root","tr");
+  sample->reduceToPhsp(trueModelKin);
 
   LOG(info) << "================== SETTINGS =================== ";
 
@@ -535,7 +530,7 @@ int main(int argc, char **argv) {
       LOG(info) << "True background model file: " << trueBkgModelFile;
     }
   }
-  LOG(info) << "Total events in input sample: " << sample->GetNEvents();
+  LOG(info) << "Total events in input sample: " << sample->numEvents();
 
   LOG(info) << "==== EFFICIENCY";
   if (!efficiencyFile.empty())
@@ -736,8 +731,8 @@ int main(int argc, char **argv) {
       ComPWA::Tools::GeneratePhsp(plotSize, gen, pl_phspSample);
     }
     // reduce sample to phsp
-    pl_phspSample->ReduceToPhsp(trueModelKin);
-    pl_phspSample->SetEfficiency(trueModelKin, eff);
+    pl_phspSample->reduceToPhsp(trueModelKin);
+    pl_phspSample->setEfficiency(trueModelKin, eff);
 
     //-------- Instance of DalitzPlot
     ComPWA::Tools::DalitzPlot pl(fitModelKin, fileNamePrefix, plotNBins);

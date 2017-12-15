@@ -4,21 +4,23 @@
 
 #include "Core/TableFormater.hpp"
 
-namespace ComPWA {
+using namespace ComPWA;
+
 void TableFormater::delim() {
-  *out << sep;
-  for (unsigned int i = 0; i < totalWidth - 1; i++)
-    *out << "-";
-  *out << sep << std::endl;
+  *OutputStream << sep;
+  for (unsigned int i = 0; i < TotalWidth - 1; i++)
+    *OutputStream << "-";
+  *OutputStream << sep << std::endl;
 }
 
 void TableFormater::footer() { delim(); }
 
 void TableFormater::header() {
   delim();
-  for (unsigned int i = 0; i < columnTitle.size(); i++)
-    *out << "| " << std::setw(columnWidth[i]) << columnTitle[i] << " ";
-  *out << "|" << std::endl;
+  for (unsigned int i = 0; i < ColumnTitle.size(); i++)
+    *OutputStream << "| " << std::setw(ColumnWidth.at(i)) << ColumnTitle.at(i)
+                  << " ";
+  *OutputStream << "|" << std::endl;
   delim();
 }
 
@@ -28,17 +30,17 @@ void TableFormater::addColumn(std::string title, unsigned int fixlength) {
     length = fixlength;
   else
     length = title.length();
-  columnWidth.push_back(length);
-  totalWidth += length + 3;
-  columnTitle.push_back(title);
+  ColumnWidth.push_back(length);
+  TotalWidth += length + 3;
+  ColumnTitle.push_back(title);
 }
 
-void TableFormater::Reset() {
-  curCol = 0;
-  curRow = 0;
-  totalWidth = 0;
-  columnWidth.clear();
-  columnTitle.clear();
+void TableFormater::reset() {
+  CurCol = 0;
+  CurRow = 0;
+  TotalWidth = 0;
+  ColumnWidth.clear();
+  ColumnTitle.clear();
 }
 
 void TableFormater::trimString(std::string &src) {
@@ -49,42 +51,42 @@ void TableFormater::trimString(std::string &src) {
     src.erase(pos2 + 1, src.length());
 }
 
-TableFormater &TableFormater::operator<<(DoubleParameter in) {
-  if (curCol == 0)
-    *out << firstSep + " ";
+TableFormater &TableFormater::operator<<(FitParameter in) {
+  if (CurCol == 0)
+    *OutputStream << firstSep + " ";
   else
-    *out << " " << sep << " ";
+    *OutputStream << " " << sep << " ";
   if (in.hasError()) {
     std::string tmp;
     if (in.errorType() == ErrorType::SYM && in.avgError() != 0) {
       unsigned int halfWidth =
-          (unsigned int)(columnWidth[curCol]) / 2; // divide column width
-      *out << std::setw(halfWidth) << in.value();
+          (unsigned int)(ColumnWidth.at(CurCol)) / 2; // divide column width
+      *OutputStream << std::setw(halfWidth) << in.value();
       tmp = pm + std::to_string((long double)in.avgError());
       trimString(tmp);
-      *out << std::setw(halfWidth) << tmp;
+      *OutputStream << std::setw(halfWidth) << tmp;
     } else if (in.errorType() == ErrorType::ASYM) {
       unsigned int w =
-          (unsigned int)(columnWidth[curCol]) / 3; // take 1/3 of column width
+          (unsigned int)(ColumnWidth.at(CurCol)) / 3; // take 1/3 of column width
       tmp = std::to_string((long double)in.value());
       trimString(tmp);
-      *out << std::setw(w) << tmp;
+      *OutputStream << std::setw(w) << tmp;
       tmp = "-" + std::to_string((long double)in.error().first);
       trimString(tmp);
-      *out << std::setw(w) << tmp;
+      *OutputStream << std::setw(w) << tmp;
       tmp = "+" + std::to_string((long double)in.error().second);
       trimString(tmp);
-      *out << std::setw(w) << tmp;
+      *OutputStream << std::setw(w) << tmp;
     } else
-      *out << std::setw(columnWidth[curCol]) << in.value();
+      *OutputStream << std::setw(ColumnWidth.at(CurCol)) << in.value();
   } else {
-    *out << std::setw(columnWidth[curCol]) << in.value();
+    *OutputStream << std::setw(ColumnWidth.at(CurCol)) << in.value();
   }
-  curCol++;
-  if (curCol == columnWidth.size()) {
-    *out << " " << lastSep << std::endl;
-    curRow++;
-    curCol = 0;
+  CurCol++;
+  if (CurCol == ColumnWidth.size()) {
+    *OutputStream << " " << lastSep << std::endl;
+    CurRow++;
+    CurCol = 0;
   }
   return *this;
 }
@@ -101,30 +103,31 @@ TexTableFormater::TexTableFormater(std::ostream *output)
 void TexTableFormater::footer() {
   delim();
   delim();
-  *out << "\\end{tabular}" << std::endl;
-  //	*out <<"\label{...}"<<endl;
-  //	*out <<"\caption{...}"<<endl;
+  *OutputStream << "\\end{tabular}" << std::endl;
+  //  *out <<"\label{...}"<<endl;
+  //  *out <<"\caption{...}"<<endl;
 };
-void TexTableFormater::header() {
-  //	*out <<"\begin{table}"<<endl;
-  //	*out <<"\centering"<<endl;
-  *out << "\\begin{tabular}{|";
-  for (int i = 0; i < columnTitle.size(); i++)
-    *out << "c|";
-  *out << "}" << std::endl;
-  delim();
-  *out << firstSep;
-  for (unsigned int i = 0; i < columnTitle.size(); i++) {
-    *out << std::setw(columnWidth[i]) << columnTitle[i];
-    if (i == columnTitle.size() - 1)
-      *out << lastSep;
-    else
-      *out << sep;
-  }
-  *out << std::endl;
-  delim();
-  delim();
-};
-void TexTableFormater::delim() { *out << "\\hline" << std::endl; }
 
-} /* namespace ComPWA */
+void TexTableFormater::header() {
+  //  *out <<"\begin{table}"<<endl;
+  //  *out <<"\centering"<<endl;
+  *OutputStream << "\\begin{tabular}{|";
+  for (int i = 0; i < ColumnTitle.size(); i++)
+    *OutputStream << "c|";
+  *OutputStream << "}" << std::endl;
+  delim();
+  *OutputStream << firstSep;
+  for (unsigned int i = 0; i < ColumnTitle.size(); i++) {
+    *OutputStream << std::setw(ColumnWidth.at(i)) << ColumnTitle.at(i);
+    if (i == ColumnTitle.size() - 1)
+      *OutputStream << lastSep;
+    else
+      *OutputStream << sep;
+  }
+  *OutputStream << std::endl;
+  delim();
+  delim();
+};
+
+void TexTableFormater::delim() { *OutputStream << "\\hline" << std::endl; }
+

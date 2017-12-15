@@ -13,8 +13,8 @@
 #include <vector>
 #include <memory>
 
-#include "Core/Parameter.hpp"
-#include "Core/Parameter.hpp"
+#include "Core/FitParameter.hpp"
+#include "Core/FitParameter.hpp"
 #include "Core/DataPoint.hpp"
 #include "Core/FunctionTree.hpp"
 #include "Core/Kinematics.hpp"
@@ -77,25 +77,25 @@ public:
     return std::polar(magnitude(), phase());
   }
 
-  std::shared_ptr<ComPWA::DoubleParameter> magnitudeParameter() {
+  std::shared_ptr<ComPWA::FitParameter> magnitudeParameter() {
     return _magnitude;
   }
 
   double magnitude() const { return std::fabs(_magnitude->value()); }
 
-  void setMagnitudeParameter(std::shared_ptr<ComPWA::DoubleParameter> par) {
+  void setMagnitudeParameter(std::shared_ptr<ComPWA::FitParameter> par) {
     _magnitude = par;
   }
 
   void setMagnitude(double par) { _magnitude->setValue(par); }
 
-  std::shared_ptr<ComPWA::DoubleParameter> phaseParameter() {
+  std::shared_ptr<ComPWA::FitParameter> phaseParameter() {
     return _phase;
   }
 
   double phase() const { return _phase->value(); }
 
-  void setPhaseParameter(std::shared_ptr<ComPWA::DoubleParameter> par) {
+  void setPhaseParameter(std::shared_ptr<ComPWA::FitParameter> par) {
     _phase = par;
   }
 
@@ -138,8 +138,8 @@ public:
 
 protected:
   std::string _name;
-  std::shared_ptr<ComPWA::DoubleParameter> _magnitude;
-  std::shared_ptr<ComPWA::DoubleParameter> _phase;
+  std::shared_ptr<ComPWA::FitParameter> _magnitude;
+  std::shared_ptr<ComPWA::FitParameter> _phase;
   std::complex<double> _preFactor;
 
   /// Phsp sample for numerical integration

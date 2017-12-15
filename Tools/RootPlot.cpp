@@ -89,9 +89,9 @@ void RootPlot::Write(std::string treePrefix, std::string fileName,
       phspTree->Branch(TString(_componentNames.at(i)), &t_weights.at(i),
                        TString(_componentNames.at(i) + "/D"));
 
-    ComPWA::progressBar bar(s_phsp.size());
+    ComPWA::ProgressBar bar(s_phsp.size());
     for (auto point : s_phsp) {
-      bar.nextEvent();
+      bar.next();
       // Fill branch references with dataPoint
       for (int i = 0; i < t_phspSample.size(); i++) {
         if (i < point.size())

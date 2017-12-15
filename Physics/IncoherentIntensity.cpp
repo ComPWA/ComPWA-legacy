@@ -25,7 +25,7 @@ void IncoherentIntensity::load(std::shared_ptr<PartList> partL,
 
   // Name is not required - default value 'empty'
   Name = (pt.get<std::string>("<xmlattr>.Name", "empty"));
-  Strength = (std::make_shared<ComPWA::DoubleParameter>("Strength_"+Name, 1.0));
+  Strength = (std::make_shared<ComPWA::FitParameter>("Strength_"+Name, 1.0));
   setPhspVolume(kin->phspVolume());
 
   for (const auto &v : pt.get_child("")) {
@@ -33,9 +33,9 @@ void IncoherentIntensity::load(std::shared_ptr<PartList> partL,
       // Parameter (e.g. Mass)
       if (v.second.get<std::string>("<xmlattr>.Type") != "Strength")
         continue;
-      auto tmp = DoubleParameter();
+      auto tmp = FitParameter();
       tmp.load(v.second);
-      Strength = std::make_shared<DoubleParameter>(tmp);
+      Strength = std::make_shared<FitParameter>(tmp);
     } else if (v.first == "Intensity" &&
                v.second.get<std::string>("<xmlattr>.Class") == "Coherent") {
       addIntensity(std::make_shared<CoherentIntensity>(partL, kin, v.second));
@@ -173,7 +173,7 @@ void IncoherentIntensity::parameters(ComPWA::ParameterList &list) {
 }
 
 void IncoherentIntensity::updateParameters(const ParameterList &list) {
-  std::shared_ptr<DoubleParameter> p;
+  std::shared_ptr<FitParameter> p;
   try {
     p = FindParameter(Strength->name(), list);
   } catch (std::exception &ex) {

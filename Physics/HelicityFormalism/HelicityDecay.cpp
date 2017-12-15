@@ -33,16 +33,16 @@ void HelicityDecay::load(std::shared_ptr<PartList> partL,
 
   _name = pt.get<std::string>("<xmlattr>.Name", "empty");
   _magnitude =
-      std::make_shared<ComPWA::DoubleParameter>("Magnitude_" + _name, 1.0);
-  _phase = std::make_shared<ComPWA::DoubleParameter>("Phase_" + _name, 0.0);
-  std::shared_ptr<DoubleParameter> mag, phase;
+      std::make_shared<ComPWA::FitParameter>("Magnitude_" + _name, 1.0);
+  _phase = std::make_shared<ComPWA::FitParameter>("Phase_" + _name, 0.0);
+  std::shared_ptr<FitParameter> mag, phase;
   for (const auto &v : pt.get_child("")) {
     if (v.first == "Parameter") {
       if (v.second.get<std::string>("<xmlattr>.Type") == "Magnitude") {
-        _magnitude = std::make_shared<DoubleParameter>(v.second);
+        _magnitude = std::make_shared<FitParameter>(v.second);
       }
       if (v.second.get<std::string>("<xmlattr>.Type") == "Phase") {
-        _phase = std::make_shared<DoubleParameter>(v.second);
+        _phase = std::make_shared<FitParameter>(v.second);
       }
     } else {
       // ignored further settings. Should we throw an error?
@@ -202,14 +202,14 @@ void HelicityDecay::parameters(ParameterList &list) {
 void HelicityDecay::updateParameters(const ParameterList &list) {
 
   // Try to update magnitude
-  std::shared_ptr<DoubleParameter> mag;
+  std::shared_ptr<FitParameter> mag;
   try {
     mag = FindParameter(_magnitude->name(), list);
   } catch (std::exception &ex) {
   }
   if (mag)
     _magnitude->updateParameter(mag);
-  std::shared_ptr<DoubleParameter> phase;
+  std::shared_ptr<FitParameter> phase;
 
   // Try to update phase
   try {

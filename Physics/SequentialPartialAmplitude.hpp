@@ -8,7 +8,7 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 
-#include "Core/Parameter.hpp"
+#include "Core/FitParameter.hpp"
 #include "Physics/Amplitude.hpp"
 #include "Physics/HelicityFormalism/HelicityDecay.hpp"
 

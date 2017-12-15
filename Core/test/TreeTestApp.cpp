@@ -33,7 +33,7 @@
 #include "Core/Functions.hpp"
 #include "Core/TreeNode.hpp"
 #include "Core/FunctionTree.hpp"
-#include "Core/Parameter.hpp"
+#include "Core/FitParameter.hpp"
 #include "Core/Value.hpp"
 
 using namespace ComPWA;
@@ -43,10 +43,10 @@ BOOST_AUTO_TEST_SUITE(FunctionTreeTest);
 BOOST_AUTO_TEST_CASE(SubTree) {
   ComPWA::Logging log("", boost::log::trivial::severity_level::trace);
 
-  std::shared_ptr<DoubleParameter> parA(new DoubleParameter("parA", 5.));
-  std::shared_ptr<DoubleParameter> parB(new DoubleParameter("parB", 2.));
-  std::shared_ptr<DoubleParameter> parC(new DoubleParameter("parC", 3.));
-  std::shared_ptr<DoubleParameter> parD(new DoubleParameter("parD", 1.));
+  std::shared_ptr<FitParameter> parA(new FitParameter("parA", 5.));
+  std::shared_ptr<FitParameter> parB(new FitParameter("parB", 2.));
+  std::shared_ptr<FitParameter> parC(new FitParameter("parC", 3.));
+  std::shared_ptr<FitParameter> parD(new FitParameter("parD", 1.));
 
   // Calculate R = a * ( b + c * d)
   auto result = std::make_shared<Value<double>>();
@@ -85,11 +85,11 @@ BOOST_AUTO_TEST_CASE(SingleParameters) {
   myTreeMult->createNode("ab", std::make_shared<Value<double>>(),
                          std::make_shared<MultAll>(ParType::DOUBLE), "R");
 
-  std::shared_ptr<Parameter> nParB(new DoubleParameter("parB", 2));
+  std::shared_ptr<Parameter> nParB(new FitParameter("parB", 2));
   myTreeMult->createLeaf("b", nParB, "ab");
   for (unsigned int i = 0; i < 10; i++) {
     std::string n = "parA_" + std::to_string(i);
-    myTreeMult->createLeaf(n, std::make_shared<DoubleParameter>(n, i + 1),
+    myTreeMult->createLeaf(n, std::make_shared<FitParameter>(n, i + 1),
                            "ab");
   }
   myTreeMult->parameter(); // Trigger recalculation
@@ -108,11 +108,11 @@ BOOST_AUTO_TEST_CASE(MultiParameters) {
 
   //------------SetUp the parameters for R = Sum of (a * b)-----------
   std::vector<double> nMasses, nPhsp;
-  std::shared_ptr<Parameter> mParB(new DoubleParameter("parB", 2));
-  std::shared_ptr<Parameter> mParD(new DoubleParameter("parD", 3));
+  std::shared_ptr<Parameter> mParB(new FitParameter("parB", 2));
+  std::shared_ptr<Parameter> mParD(new FitParameter("parD", 3));
   for (unsigned int i = 0; i < nElements; i++) {
-    // std::shared_ptr<DoubleParameter> tmpA(new
-    // DoubleParameter("parA_"+i,i+1));
+    // std::shared_ptr<FitParameter> tmpA(new
+    // FitParameter("parA_"+i,i+1));
     nMasses.push_back(i + 1);
     nPhsp.push_back(2 * i + 1);
     nPhsp.push_back(2 * i + 2);

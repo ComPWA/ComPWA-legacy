@@ -92,11 +92,11 @@ public:
 
   //============ SET/GET =================
 
-  void SetMesonRadiusParameter(std::shared_ptr<DoubleParameter> r) {
+  void SetMesonRadiusParameter(std::shared_ptr<FitParameter> r) {
     _mesonRadius = r;
   }
 
-  std::shared_ptr<DoubleParameter> GetMesonRadiusParameter() {
+  std::shared_ptr<FitParameter> GetMesonRadiusParameter() {
     return _mesonRadius;
   }
 
@@ -141,7 +141,7 @@ public:
 
 protected:
   /// Meson radius of resonant state
-  std::shared_ptr<DoubleParameter> _mesonRadius;
+  std::shared_ptr<FitParameter> _mesonRadius;
 
   /// Coupling parameters and final state masses for multiple channels
   std::vector<Coupling> _g;

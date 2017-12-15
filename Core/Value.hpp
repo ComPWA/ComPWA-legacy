@@ -11,7 +11,7 @@
 #define ParameterT_hpp
 
 #include <iterator>
-#include "Core/Parameter.hpp"
+#include "Core/FitParameter.hpp"
 namespace ComPWA {
 
 template<class T>

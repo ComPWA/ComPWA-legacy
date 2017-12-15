@@ -1,6 +1,3 @@
-
-
-
 // Copyright (c) 2017 The ComPWA Team.
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
@@ -14,7 +11,7 @@
 #include <boost/property_tree/xml_parser.hpp>
 
 #include <Core/Exceptions.hpp>
-#include <Core/Parameter.hpp>
+#include <Core/FitParameter.hpp>
 #include <Core/ParameterList.hpp>
 #include <Core/Spin.hpp>
 
@@ -55,12 +52,12 @@ public:
 
   double value() const { return _value.value(); }
 
-  void SetValuePar(ComPWA::DoubleParameter m) { _value = m; }
+  void SetValuePar(ComPWA::FitParameter m) { _value = m; }
 
-  ComPWA::DoubleParameter GetValuePar() const { return _value; }
+  ComPWA::FitParameter GetValuePar() const { return _value; }
 
 protected:
-  ComPWA::DoubleParameter _value;
+  ComPWA::FitParameter _value;
 };
 
 ///
@@ -94,7 +91,7 @@ public:
 
   double GetMass() const { return _mass.value(); }
 
-  ComPWA::DoubleParameter GetMassPar() const { return _mass; }
+  ComPWA::FitParameter GetMassPar() const { return _mass; }
 
   int GetQuantumNumber(std::string type) const;
 
@@ -107,7 +104,7 @@ public:
   }
 
 protected:
-  ComPWA::DoubleParameter _mass;
+  ComPWA::FitParameter _mass;
   std::map<std::string, int> intQuantumNumbers_;
   std::map<std::string, ComPWA::Spin> spinQuantumNumbers_;
 
@@ -225,7 +222,7 @@ inline void SaveParticles(std::shared_ptr<PartList> list,
   return;
 }
 
-inline void UpdateNode(std::shared_ptr<DoubleParameter> p,
+inline void UpdateNode(std::shared_ptr<FitParameter> p,
                        boost::property_tree::ptree &tr) {
   for (auto &v : tr.get_child("")) {
     if (v.first == "Parameter") {

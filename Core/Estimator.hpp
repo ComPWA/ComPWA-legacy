@@ -51,6 +51,6 @@ protected:
   std::shared_ptr<FunctionTree> f;
 };
 
-} // namespace ComPWA
+} // ns::ComPWA
 
 #endif

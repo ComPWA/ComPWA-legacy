@@ -57,5 +57,5 @@ protected:
   friend std::ostream &operator<<(std::ostream &os, const DataPoint &p);
 };
 
-} // namespace ComPWA
+} // ns::ComPWA
 #endif

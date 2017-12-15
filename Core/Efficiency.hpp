@@ -46,6 +46,6 @@ public:
   virtual double evaluate(const DataPoint &point) const { return 1; };
 };
 
-} // namespace ComPWA
+} // ns::ComPWA
 
 #endif

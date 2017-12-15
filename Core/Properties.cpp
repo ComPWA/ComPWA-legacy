@@ -38,7 +38,7 @@ ParticleProperties::ParticleProperties(boost::property_tree::ptree pt)
       // Parameter (e.g. Mass)
       if (v.second.get<std::string>("<xmlattr>.Type") != "Mass")
         continue;
-      _mass = DoubleParameter();
+      _mass = FitParameter();
       _mass.load(v.second);
     } else {
     }

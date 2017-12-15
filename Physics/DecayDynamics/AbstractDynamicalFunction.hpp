@@ -70,11 +70,11 @@ public:
   /// Update parameters to the values given in \p par
   virtual void updateParameters(const ParameterList &par) = 0;
 
-  virtual void SetMassParameter(std::shared_ptr<DoubleParameter> mass) {
+  virtual void SetMassParameter(std::shared_ptr<FitParameter> mass) {
     _mass = mass;
   }
 
-  virtual std::shared_ptr<DoubleParameter> GetMassParameter() { return _mass; }
+  virtual std::shared_ptr<FitParameter> GetMassParameter() { return _mass; }
 
   virtual void SetMass(double mass) { _mass->setValue(mass); }
 
@@ -121,7 +121,7 @@ protected:
   std::pair<std::string, std::string> _daughterNames;
 
   /// Resonance mass
-  std::shared_ptr<ComPWA::DoubleParameter> _mass;
+  std::shared_ptr<ComPWA::FitParameter> _mass;
 
   /// Resonance spin
   ComPWA::Spin _spin;
