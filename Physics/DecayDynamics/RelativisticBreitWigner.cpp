@@ -70,9 +70,9 @@ RelativisticBreitWigner::RelativisticBreitWigner(
 std::complex<double> RelativisticBreitWigner::evaluate(const DataPoint &point,
                                                        int pos) const {
   std::complex<double> result =
-      dynamicalFunction(point.value(pos), _mass->value(), _daughterMasses.first,
-                        _daughterMasses.second, _width->value(), (double)_spin,
-                        _mesonRadius->value(), _ffType);
+      dynamicalFunction(point.value(pos),Mass->value(), DaughterMasses.first,
+                        DaughterMasses.second,Width->value(), (double)J,
+                        MesonRadius->value(), FormFactorType);
   assert(!std::isnan(result.real()) && !std::isnan(result.imag()));
   return result;
 }
@@ -80,11 +80,11 @@ std::complex<double> RelativisticBreitWigner::evaluate(const DataPoint &point,
 bool RelativisticBreitWigner::isModified() const {
   if (AbstractDynamicalFunction::isModified())
     return true;
-  if (_width->value() != _current_width ||
-      _mesonRadius->value() != _current_mesonRadius) {
+  if (Width->value() != CurrentWidth ||
+      MesonRadius->value() != CurrentMesonRadius) {
     setModified();
-    const_cast<double &>(_current_width) = _width->value();
-    const_cast<double &>(_current_mesonRadius) = _mesonRadius->value();
+    const_cast<double &>(CurrentWidth) =Width->value();
+    const_cast<double &>(CurrentMesonRadius) = MesonRadius->value();
     return true;
   }
   return false;
@@ -143,13 +143,13 @@ RelativisticBreitWigner::tree(const ParameterList &sample, int pos,
       "RelBreitWigner" + suffix, MComplex("", sampleSize),
       std::make_shared<BreitWignerStrategy>());
 
-  tr->createLeaf("Mass", _mass, "RelBreitWigner" + suffix);
-  tr->createLeaf("Width", _width, "RelBreitWigner" + suffix);
-  tr->createLeaf("Spin", (double)_spin, "RelBreitWigner" + suffix);
-  tr->createLeaf("MesonRadius", _mesonRadius, "RelBreitWigner" + suffix);
-  tr->createLeaf("FormFactorType", _ffType, "RelBreitWigner" + suffix);
-  tr->createLeaf("MassA", _daughterMasses.first, "RelBreitWigner" + suffix);
-  tr->createLeaf("MassB", _daughterMasses.second, "RelBreitWigner" + suffix);
+  tr->createLeaf("Mass",Mass, "RelBreitWigner" + suffix);
+  tr->createLeaf("Width",Width, "RelBreitWigner" + suffix);
+  tr->createLeaf("Spin", (double)J, "RelBreitWigner" + suffix);
+  tr->createLeaf("MesonRadius", MesonRadius, "RelBreitWigner" + suffix);
+  tr->createLeaf("FormFactorType", FormFactorType, "RelBreitWigner" + suffix);
+  tr->createLeaf("MassA", DaughterMasses.first, "RelBreitWigner" + suffix);
+  tr->createLeaf("MassB", DaughterMasses.second, "RelBreitWigner" + suffix);
   tr->createLeaf("Data_mSq[" + std::to_string(pos) + "]",
                  sample.mDoubleValue(pos), "RelBreitWigner" + suffix);
 
@@ -251,41 +251,15 @@ void BreitWignerStrategy::execute(ParameterList &paras,
   }
 }
 
-void RelativisticBreitWigner::GetParameters(ParameterList &list) {
-  AbstractDynamicalFunction::GetParameters(list);
+void RelativisticBreitWigner::parameters(ParameterList &list) {
+  AbstractDynamicalFunction::parameters(list);
 
   // We check of for each parameter if a parameter of the same name exists in
   // list. If so we check if both are equal and set the local parameter to the
   // parameter from the list. In this way we connect parameters that occur on
   // different positions in the amplitude.
-  std::shared_ptr<FitParameter> tmp, width, radius;
-  width = GetWidthParameter();
-  radius = GetMesonRadiusParameter();
-  try { // catch BadParameter
-    tmp = FindParameter(width->name(), list);
-    // catch and throw std::runtime_error due to failed parameter comparisson
-    try {
-      if (*tmp == *width)
-        SetWidthParameter(tmp);
-    } catch (std::exception &ex) {
-      throw;
-    }
-  } catch (BadParameter &ex) {
-    list.addParameter(width);
-  }
-
-  try { // catch BadParameter
-    tmp = FindParameter(radius->name(), list);
-    // catch and throw std::runtime_error due to failed parameter comparisson
-    try {
-      if (*tmp == *radius)
-        SetMesonRadiusParameter(tmp);
-    } catch (std::exception &ex) {
-      throw;
-    }
-  } catch (BadParameter &ex) {
-    list.addParameter(radius);
-  }
+ Width = list.addUniqueParameter(Width);
+  MesonRadius = list.addUniqueParameter(MesonRadius);
 }
 
 void RelativisticBreitWigner::updateParameters(const ParameterList &list) {
@@ -293,20 +267,20 @@ void RelativisticBreitWigner::updateParameters(const ParameterList &list) {
   // Try to update mesonRadius
   std::shared_ptr<FitParameter> rad;
   try {
-    rad = FindParameter(_mesonRadius->name(), list);
+    rad = FindParameter(MesonRadius->name(), list);
   } catch (std::exception &ex) {
   }
   if (rad)
-    _mesonRadius->updateParameter(rad);
+    MesonRadius->updateParameter(rad);
 
   // Try to update width
   std::shared_ptr<FitParameter> width;
   try {
-    width = FindParameter(_width->name(), list);
+    width = FindParameter(Width->name(), list);
   } catch (std::exception &ex) {
   }
   if (width)
-    _width->updateParameter(width);
+   Width->updateParameter(width);
 
   return;
 }

@@ -30,7 +30,7 @@ public:
   virtual std::shared_ptr<FunctionTree> tree(const ParameterList &sample,
                                                 int pos, std::string suffix);
 
-  virtual void GetParameters(ParameterList &list){};
+  virtual void parameters(ParameterList &list){};
 
   /// Update parameters to the values given in \p par
   virtual void updateParameters(const ParameterList &par){};

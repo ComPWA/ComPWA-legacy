@@ -65,7 +65,7 @@ void phspContour(unsigned int xsys, unsigned int ysys, unsigned int n,
 
 DalitzPlot::DalitzPlot(std::shared_ptr<Kinematics> kin, std::string name,
                        int bins)
-    : _name(name), kin_(kin), _isFilled(0), _bins(bins), _globalScale(1.0),
+    :Name(name), kin_(kin), _isFilled(0), _bins(bins), _globalScale(1.0),
       _correctForEfficiency(false),
       h_weights("h_weights", "h_weights", bins, 0, 1.01),
       dataDiagrams(kin, "data", "Data", bins),
@@ -296,7 +296,7 @@ void DalitzPlot::Plot() {
   h_weights.Draw();
 
   //----- Write to TFile -----
-  TFile *tf2 = new TFile(_name + ".root", "recreate");
+  TFile *tf2 = new TFile(Name + ".root", "recreate");
   if (tf2->IsZombie()) {
     std::cout << "Error opening output file" << std::endl;
     exit(-1);
@@ -320,8 +320,8 @@ void DalitzPlot::Plot() {
     _plotHistograms.at(t).Write();
 
   // Write some canvas to single files
-  c2->Print(_name + "-invmass.root");
-  c2->Print(_name + "-invmass.pdf");
+  c2->Print(Name + "-invmass.root");
+  c2->Print(Name + "-invmass.pdf");
 
   tf2->Close();
 
@@ -362,17 +362,17 @@ void DalitzPlot::CreateHist2(unsigned int id) {
 //===================== DalitzHisto =====================
 DalitzHisto::DalitzHisto(std::shared_ptr<Kinematics> kin, std::string name,
                          std::string title, unsigned int bins, Color_t color)
-    : _name(name), _title(title), _nBins(bins), _integral(0.0), _color(color) {
+    :Name(name), _title(title), _nBins(bins), _integral(0.0), _color(color) {
 
   // we have to explicitly cast to HelicityKinematics in order to get
   // the invariant mass boundaries
   auto helkin = std::dynamic_pointer_cast<HelicityKinematics>(kin);
 
   // Initialize TTree
-  _tree = std::unique_ptr<TTree>(new TTree(TString(_name), TString(_title)));
+  _tree = std::unique_ptr<TTree>(new TTree(TString(Name), TString(_title)));
 
   // Adding branches to TTree
-  _tree->Branch(TString(_name), &t_point);
+  _tree->Branch(TString(Name), &t_point);
   _tree->Branch("efficiency", &t_eff, "eff/D");
   _tree->Branch("weight", &t_weight, "weight/D");
 
@@ -380,7 +380,7 @@ DalitzHisto::DalitzHisto(std::shared_ptr<Kinematics> kin, std::string name,
 
   // mass23sq
   SubSystem sys23({0}, {1}, {2});
-  auto m23sq_limit = helkin->GetInvMassBounds(sys23);
+  auto m23sq_limit = helkin->invMassBounds(sys23);
   double m23sq_min = m23sq_limit.first;
   double m23sq_max = m23sq_limit.second;
 
@@ -393,7 +393,7 @@ DalitzHisto::DalitzHisto(std::shared_ptr<Kinematics> kin, std::string name,
   _arr.back().Sumw2();
   // mass13sq
   SubSystem sys13({1}, {0}, {2});
-  auto m13sq_limit = helkin->GetInvMassBounds(sys13);
+  auto m13sq_limit = helkin->invMassBounds(sys13);
   double m13sq_min = m13sq_limit.first;
   double m13sq_max = m13sq_limit.second;
 
@@ -406,7 +406,7 @@ DalitzHisto::DalitzHisto(std::shared_ptr<Kinematics> kin, std::string name,
   _arr.back().Sumw2();
   // mass12sq
   SubSystem sys12({0}, {0}, {1});
-  auto m12sq_limit = helkin->GetInvMassBounds(sys12);
+  auto m12sq_limit = helkin->invMassBounds(sys12);
   double m12sq_min = m12sq_limit.first;
   double m12sq_max = m12sq_limit.second;
 
@@ -516,9 +516,9 @@ TH1D *DalitzHisto::getHistogram(unsigned int num) { return &_arr.at(num); }
 TH2D *DalitzHisto::getHistogram2D(unsigned int num) { return &_arr2D.at(num); }
 
 void DalitzHisto::Write() {
-  _tree->Write(TString(_name) + "_tree");
-  gDirectory->mkdir(TString(_name) + "_hist");
-  gDirectory->cd(TString(_name) + "_hist");
+  _tree->Write(TString(Name) + "_tree");
+  gDirectory->mkdir(TString(Name) + "_hist");
+  gDirectory->cd(TString(Name) + "_hist");
   auto n = _arr.size();
   for (int i = 0; i < n; ++i) {
     _arr.at(i).Write();

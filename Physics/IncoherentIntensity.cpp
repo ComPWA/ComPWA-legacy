@@ -79,7 +79,7 @@ double IncoherentIntensity::intensity(const ComPWA::DataPoint &point) const {
           1 / (Tools::Integral(Intensities.at(i), PhspSample, PhspVolume));
       normValues.at(i) *= Intensities.at(i)->strength();
     }
-    result += Intensities.at(i)->intensity(point) * normValues.at(i);
+    
   }
 
   const_cast<std::vector<std::vector<double>> &>(Parameters) = parameters;
@@ -106,13 +106,13 @@ IncoherentIntensity::component(std::string name) {
   bool found = false;
   // Do we want to have a combination of CoherentIntensities?
   std::vector<std::string> names = splitString(name);
-  auto icIn = std::shared_ptr<AmpIntensity>(this->clone(name));
+  auto icIn = std::make_shared<IncoherentIntensity>(*this);
+  icIn->setName(name);
   icIn->reset();
   for (auto i : names) {
     for (int j = 0; j < Intensities.size(); j++) {
       if (i == Intensities.at(j)->name()) {
-        std::dynamic_pointer_cast<IncoherentIntensity>(icIn)->addIntensity(
-            Intensities.at(j));
+        icIn->addIntensity(Intensities.at(j));
         found = true;
       }
     }
@@ -125,7 +125,7 @@ IncoherentIntensity::component(std::string name) {
   for (auto i : Intensities) {
     try {
       auto r = i->component(name);
-      std::dynamic_pointer_cast<IncoherentIntensity>(icIn)->addIntensity(r);
+      icIn->addIntensity(r);
       found = true;
     } catch (std::exception &ex) {
     }
@@ -166,7 +166,7 @@ IncoherentIntensity::tree(std::shared_ptr<Kinematics> kin,
 }
 
 void IncoherentIntensity::parameters(ComPWA::ParameterList &list) {
-  list.addParameter(Strength);
+  Strength = list.addUniqueParameter(Strength);
   for (auto i : Intensities) {
     i->parameters(list);
   }

@@ -19,22 +19,22 @@ namespace ComPWA {
 
 /// Particle ID.
 /// Usually the pid's from PDG are used here:
-/// http://pdg.lbl.gov/mc_particle_id_contents.html
+/// http://pdg.lbl.gov/mc_particleId_contents.html
 typedef int pid;
 
 class Properties {
 public:
-  Properties(std::string name = "test", pid id = -999) : _name(name), _id(id){};
+  Properties(std::string name = "test", pid id = -999) : Name(name), Id(id){};
 
-  void setName(std::string n) { _name = n; }
-  std::string name() const { return _name; }
+  void setName(std::string n) { Name = n; }
+  std::string name() const { return Name; }
 
-  void SetId(pid id) { _id = id; }
-  pid GetId() const { return _id; }
+  void SetId(pid id) { Id = id; }
+  pid GetId() const { return Id; }
 
 protected:
-  std::string _name;
-  pid _id;
+  std::string Name;
+  pid Id;
 };
 
 ///
@@ -68,13 +68,13 @@ protected:
 class PartInfoShort : public Properties {
 public:
   PartInfoShort(std::string name = "test", pid id = -999, double mass = 0)
-      : Properties(name, id), _mass(mass){};
+      : Properties(name, id), Mass(mass){};
 
-  void SetMass(double m) { _mass = m; }
-  double GetMass() const { return _mass; }
+  void SetMass(double m) {Mass = m; }
+  double GetMass() const { return Mass; }
 
 protected:
-  double _mass;
+  double Mass;
 };
 
 ///
@@ -89,28 +89,28 @@ public:
 
   virtual boost::property_tree::ptree Save();
 
-  double GetMass() const { return _mass.value(); }
+  double GetMass() const { return Mass.value(); }
 
-  ComPWA::FitParameter GetMassPar() const { return _mass; }
+  ComPWA::FitParameter GetMassPar() const { return Mass; }
 
   int GetQuantumNumber(std::string type) const;
 
   ComPWA::Spin GetSpinQuantumNumber(std::string type) const;
 
-  boost::property_tree::ptree GetDecayInfo() const { return _decayInfo; }
+  boost::property_tree::ptree GetDecayInfo() const { return DecayInfo; }
 
   std::string GetDecayType() const {
-    return _decayInfo.get<std::string>("<xmlattr>.Type");
+    return DecayInfo.get<std::string>("<xmlattr>.Type");
   }
 
 protected:
-  ComPWA::FitParameter _mass;
+  ComPWA::FitParameter Mass;
   std::map<std::string, int> intQuantumNumbers_;
   std::map<std::string, ComPWA::Spin> spinQuantumNumbers_;
 
   /// Store decay info in property_tree. The tree is later on passed to the
   /// respective class.
-  boost::property_tree::ptree _decayInfo;
+  boost::property_tree::ptree DecayInfo;
 };
 
 /// A map of particle properties is used everywhere where particle information

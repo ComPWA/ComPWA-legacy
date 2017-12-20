@@ -29,8 +29,8 @@ class AmpFlatteRes : public DecayDynamics::AbstractDynamicalFunction {
 public:
   //============ CONSTRUCTION ==================
   AmpFlatteRes()
-      : AbstractDynamicalFunction(), _ffType(noFormFactor), _current_g(0.0),
-        _current_gHidden(0.0), _current_gHidden2(0.0){};
+      : AbstractDynamicalFunction(), FormFactorType(noFormFactor), Current_g(0.0),
+        Current_gHidden(0.0), Current_gHidden2(0.0){};
 
   AmpFlatteRes(std::string name, std::pair<std::string,std::string> daughters,
                std::shared_ptr<ComPWA::PartList> partL);
@@ -93,40 +93,40 @@ public:
   //============ SET/GET =================
 
   void SetMesonRadiusParameter(std::shared_ptr<FitParameter> r) {
-    _mesonRadius = r;
+    MesonRadius = r;
   }
 
   std::shared_ptr<FitParameter> GetMesonRadiusParameter() {
-    return _mesonRadius;
+    return MesonRadius;
   }
 
-  void SetMesonRadius(double w) { _mesonRadius->setValue(w); }
+  void SetMesonRadius(double w) { MesonRadius->setValue(w); }
 
-  double GetMesonRadius() const { return _mesonRadius->value(); }
+  double GetMesonRadius() const { return MesonRadius->value(); }
 
-  void SetFormFactorType(formFactorType t) { _ffType = t; }
+  void SetFormFactorType(formFactorType t) { FormFactorType = t; }
 
-  formFactorType GetFormFactorType() { return _ffType; }
+  formFactorType GetFormFactorType() { return FormFactorType; }
 
   /// Set coupling parameter to signal channel and up to two more hidden
   /// channels.
   void SetCoupling(Coupling g1, Coupling g2 = Coupling(0.0, 0.0, 0.0),
                    Coupling g3 = Coupling(0.0, 0.0, 0.0)) {
-    _g = std::vector<Coupling>{g1, g2, g3};
+    Couplings = std::vector<Coupling>{g1, g2, g3};
   }
 
-  Coupling GetCoupling(int channel) { return _g.at(channel); }
+  Coupling GetCoupling(int channel) { return Couplings.at(channel); }
 
-  std::vector<Coupling> GetCouplings(int i) const { return _g; }
+  std::vector<Coupling> GetCouplings(int i) const { return Couplings; }
 
   void SetCouplings(std::vector<Coupling> vC);
 
-  virtual void GetParameters(ParameterList &list);
+  virtual void parameters(ParameterList &list);
 
   /// Fill vector with parameters
-  virtual void GetParametersFast(std::vector<double> &list) const {
-    AbstractDynamicalFunction::GetParametersFast(list);
-    for (auto i : _g)
+  virtual void parametersFast(std::vector<double> &list) const {
+    AbstractDynamicalFunction::parametersFast(list);
+    for (auto i : Couplings)
       list.push_back(i.value());
     list.push_back(GetMesonRadius());
   }
@@ -141,16 +141,16 @@ public:
 
 protected:
   /// Meson radius of resonant state
-  std::shared_ptr<FitParameter> _mesonRadius;
+  std::shared_ptr<FitParameter> MesonRadius;
 
   /// Coupling parameters and final state masses for multiple channels
-  std::vector<Coupling> _g;
+  std::vector<Coupling> Couplings;
 
   /// Form factor type
-  formFactorType _ffType;
+  formFactorType FormFactorType;
 
 private:
-  double _current_g, _current_gHidden, _current_gHidden2;
+  double Current_g, Current_gHidden, Current_gHidden2;
 };
 
 class FlatteStrategy : public Strategy {

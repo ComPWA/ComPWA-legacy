@@ -160,16 +160,16 @@ BOOST_AUTO_TEST_CASE(HelicityAngleTest) {
 
     //------------ Restframe (12) -------------
     // Angle in the rest frame of (12) between (1) and (3)
-    double cosTheta12_13 = kin->HelicityAngle(sqrtS, m1, m2, m3, m12sq, m13sq);
+    double cosTheta12_13 = kin->helicityAngle(sqrtS, m1, m2, m3, m12sq, m13sq);
     double cosTheta12_13_2 =
-        kin->HelicityAngle(sqrtS, m2, m1, m3, m12sq, m23sq);
+        kin->helicityAngle(sqrtS, m2, m1, m3, m12sq, m23sq);
     // Equal to the same angle calculated from m23sq
     BOOST_CHECK_EQUAL((float)cosTheta12_13, (-1) * (float)(cosTheta12_13_2));
 
     // Angle in the rest frame of (12) between (2) and (3)
-    double cosTheta12_23 = kin->HelicityAngle(sqrtS, m2, m1, m3, m12sq, m23sq);
+    double cosTheta12_23 = kin->helicityAngle(sqrtS, m2, m1, m3, m12sq, m23sq);
     double cosTheta12_23_2 =
-        kin->HelicityAngle(sqrtS, m1, m2, m3, m12sq, m13sq);
+        kin->helicityAngle(sqrtS, m1, m2, m3, m12sq, m13sq);
     // Equal to the same angle calculated from m13sq
     BOOST_CHECK_EQUAL((float)cosTheta12_23, (-1) * (float)(cosTheta12_23_2));
 
@@ -179,29 +179,29 @@ BOOST_AUTO_TEST_CASE(HelicityAngleTest) {
 
     //------------ Restframe (13) -------------
     // Angle in the rest frame of (13) between (1) and (2)
-    double cosTheta13_12 = kin->HelicityAngle(sqrtS, m1, m3, m2, m13sq, m12sq);
+    double cosTheta13_12 = kin->helicityAngle(sqrtS, m1, m3, m2, m13sq, m12sq);
     double cosTheta13_12_2 =
-        kin->HelicityAngle(sqrtS, m3, m1, m2, m13sq, m23sq);
+        kin->helicityAngle(sqrtS, m3, m1, m2, m13sq, m23sq);
     BOOST_CHECK_EQUAL((float)cosTheta13_12, (-1) * (float)(cosTheta13_12_2));
     // Angle in the rest frame of (13) between (3) and (2)
-    double cosTheta13_23 = kin->HelicityAngle(sqrtS, m3, m1, m2, m13sq, m23sq);
+    double cosTheta13_23 = kin->helicityAngle(sqrtS, m3, m1, m2, m13sq, m23sq);
     double cosTheta13_23_2 =
-        kin->HelicityAngle(sqrtS, m1, m3, m2, m13sq, m12sq);
+        kin->helicityAngle(sqrtS, m1, m3, m2, m13sq, m12sq);
     BOOST_CHECK_EQUAL((float)cosTheta13_23, (-1) * ((float)cosTheta13_23_2));
     BOOST_CHECK_EQUAL((float)cosTheta13_12, (-1) * ((float)cosTheta13_23));
     BOOST_CHECK_EQUAL((float)cosTheta13_12_2, (-1) * ((float)cosTheta13_23_2));
 
     //------------ Restframe (23) -------------
     // Angle in the rest frame of (23) between (2) and (1)
-    double cosTheta23_12 = kin->HelicityAngle(sqrtS, m2, m3, m1, m23sq, m12sq);
+    double cosTheta23_12 = kin->helicityAngle(sqrtS, m2, m3, m1, m23sq, m12sq);
     double cosTheta23_12_2 =
-        kin->HelicityAngle(sqrtS, m3, m2, m1, m23sq, m13sq);
+        kin->helicityAngle(sqrtS, m3, m2, m1, m23sq, m13sq);
     BOOST_CHECK_EQUAL((float)cosTheta23_12, (float)((-1) * cosTheta23_12_2));
 
     // Angle in the rest frame of (23) between (3) and (1)
-    double cosTheta23_13 = kin->HelicityAngle(sqrtS, m3, m2, m1, m23sq, m13sq);
+    double cosTheta23_13 = kin->helicityAngle(sqrtS, m3, m2, m1, m23sq, m13sq);
     double cosTheta23_13_2 =
-        kin->HelicityAngle(sqrtS, m2, m3, m1, m23sq, m12sq);
+        kin->helicityAngle(sqrtS, m2, m3, m1, m23sq, m12sq);
     BOOST_CHECK_EQUAL((float)cosTheta23_13, (-1) * ((float)cosTheta23_13_2));
 
     BOOST_CHECK_EQUAL((float)cosTheta23_12, (-1) * ((float)cosTheta23_13));
@@ -222,8 +222,8 @@ BOOST_AUTO_TEST_CASE(HelicityAngleTest) {
     LOG(debug) << sys12.to_string() << " : " << p12;
     LOG(debug) << sys12_CP.to_string() << " : " << p12_CP;
     LOG(debug) << "cosTheta12 "
-               << kin->HelicityAngle(sqrtS, m2, m1, m3, m12sq, m23sq) << " CP: "
-               << kin->HelicityAngle(sqrtS, m3, m1, m2, m13sq, m23sq);
+               << kin->helicityAngle(sqrtS, m2, m1, m3, m12sq, m23sq) << " CP: "
+               << kin->helicityAngle(sqrtS, m3, m1, m2, m13sq, m23sq);
 
     kin->convert(i, p13, sys13);
     kin->convert(i, p13_CP, sys13_CP);
@@ -236,8 +236,8 @@ BOOST_AUTO_TEST_CASE(HelicityAngleTest) {
     LOG(debug) << sys13.to_string() << " : " << p13;
     LOG(debug) << sys13_CP.to_string() << " : " << p13_CP;
     LOG(debug) << "cosTheta13 "
-               << kin->HelicityAngle(sqrtS, m1, m3, m2, m13sq, m12sq) << " CP: "
-               << kin->HelicityAngle(sqrtS, m1, m2, m3, m12sq, m13sq);
+               << kin->helicityAngle(sqrtS, m1, m3, m2, m13sq, m12sq) << " CP: "
+               << kin->helicityAngle(sqrtS, m1, m2, m3, m12sq, m13sq);
 
     kin->convert(i, p23, sys23);
     kin->convert(i, p23_CP, sys23_CP);
@@ -249,8 +249,8 @@ BOOST_AUTO_TEST_CASE(HelicityAngleTest) {
     LOG(debug) << sys23.to_string() << " : " << p23;
     LOG(debug) << sys23_CP.to_string() << " : " << p23_CP;
     LOG(debug) << "cosTheta23 "
-               << kin->HelicityAngle(sqrtS, m2, m3, m1, m23sq, m12sq) << " CP: "
-               << kin->HelicityAngle(sqrtS, m3, m2, m1, m23sq, m13sq);
+               << kin->helicityAngle(sqrtS, m2, m3, m1, m23sq, m12sq) << " CP: "
+               << kin->helicityAngle(sqrtS, m3, m2, m1, m23sq, m13sq);
   }
 }
 

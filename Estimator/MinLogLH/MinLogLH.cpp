@@ -22,8 +22,8 @@ MinLogLH::MinLogLH(std::shared_ptr<Kinematics> kin,
                    std::shared_ptr<DataReader::Data> accSample,
                    unsigned int firstEvent, unsigned int nEvents)
     : _kin(kin), _intens(intens), _firstEvent(firstEvent), _nEvents(nEvents),
-      _dataSample(data), _phspSample(phspSample), _phspAccSample(accSample),
-      _phspAccSampleEff(1.0) {
+      _dataSample(data), PhspSample(phspSample), PhspAcceptedSample(accSample),
+      PhspAcceptedSampleEff(1.0) {
 
   int size = _dataSample->numEvents();
 
@@ -39,11 +39,11 @@ MinLogLH::MinLogLH(std::shared_ptr<Kinematics> kin,
 
   // Get data as ParameterList
   _dataSampleList = _dataSample->dataList(_kin);
-  _phspSampleList = _phspSample->dataList(_kin);
-  if (_phspAccSample)
-    _phspAccSampleList = _phspAccSample->dataList(_kin);
+  PhspSampleList = PhspSample->dataList(_kin);
+  if (PhspAcceptedSample)
+    PhspAcceptedSampleList = PhspAcceptedSample->dataList(_kin);
   else
-    _phspAccSampleList = _phspSample->dataList(_kin);
+    PhspAcceptedSampleList = PhspSample->dataList(_kin);
 
   // Calculation sum of weights of data sample
   _sumOfWeights = 0;
@@ -139,8 +139,8 @@ void MinLogLH::IniLHtree() {
   _tree->createNode("Log", MDouble("", sampleSize),
                     std::make_shared<LogOf>(ParType::MDOUBLE),
                     "weightLog");
-  _tree->insertTree(_intens->tree(_kin, _dataSampleList, _phspAccSampleList,
-                                     _phspSampleList, _kin->numVariables()),
+  _tree->insertTree(_intens->tree(_kin, _dataSampleList, PhspAcceptedSampleList,
+                                     PhspSampleList, _kin->numVariables()),
                     "Log");
 
   _tree->parameter();

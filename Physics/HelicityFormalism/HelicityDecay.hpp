@@ -48,14 +48,10 @@ public:
 
   virtual boost::property_tree::ptree save() const;
 
-  //======= INTEGRATION/NORMALIZATION ===========
-
   /// Check of parameters have changed and normalization has to be recalculated
   virtual bool isModified() const;
 
   virtual double normalization() const;
-
-  //================ EVALUATION =================
 
   /// Evaluate function without normalization
   std::complex<double> evaluateNoNorm(const DataPoint &point) const {
@@ -66,13 +62,12 @@ public:
     assert(!std::isnan(result.real()) && !std::isnan(result.imag()));
     return result;
   };
-  //============ SET/GET =================
 
   virtual void parameters(ParameterList &list);
 
   virtual void parametersFast(std::vector<double> &list) const {
     PartialAmplitude::parametersFast(list);
-    DynamicFcn->GetParametersFast(list);
+    DynamicFcn->parametersFast(list);
   }
 
   /// Update parameters to the values given in \p list
@@ -108,7 +103,6 @@ public:
 
   virtual SubSystem subSystem() const { return SubSys; }
 
-  //=========== FUNCTIONTREE =================
   virtual bool hasTree() const { return true; }
 
   virtual std::shared_ptr<FunctionTree>

@@ -41,13 +41,18 @@ public:
   /// Clear this parameter and deep-copy all parameters from \p in. Deep-copy
   /// means that for each parameter a new object is created (not only the
   /// shared_ptr is copied).
-  void DeepCopy(const ParameterList &in){};
+  void DeepCopy(const ParameterList &in);
 
   virtual ~ParameterList(){};
 
   virtual std::size_t numParameters() const;
 
+  std::shared_ptr<FitParameter>
+  addUniqueParameter(std::shared_ptr<FitParameter> par);
+
   virtual void addParameter(std::shared_ptr<Parameter> par);
+
+  virtual void addParameter(std::shared_ptr<FitParameter> par);
 
   virtual void addParameters(std::vector<std::shared_ptr<Parameter>> pars);
 

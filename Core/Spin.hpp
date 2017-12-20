@@ -275,11 +275,11 @@ protected:
 };
 
 struct IDInfo {
-  int particle_id_;
+  int particleId_;
   std::string name_;
 
   bool operator==(const IDInfo &rhs) const {
-    if (this->particle_id_ != rhs.particle_id_)
+    if (this->particleId_ != rhs.particleId_)
       return false;
     if (this->name_ != rhs.name_)
       return false;
@@ -293,9 +293,9 @@ struct IDInfo {
   }
 
   static bool lessThenIgnoringID(const IDInfo &lhs, const IDInfo &rhs) {
-    if (lhs.particle_id_ < rhs.particle_id_)
+    if (lhs.particleId_ < rhs.particleId_)
       return true;
-    else if (lhs.particle_id_ > rhs.particle_id_)
+    else if (lhs.particleId_ > rhs.particleId_)
       return false;
     if (lhs.name_ < rhs.name_)
       return true;
@@ -307,13 +307,13 @@ struct IDInfo {
 };
 
 struct ParticleStateInfo {
-  unsigned int unique_id_;
+  unsigned int uniqueId_;
   IDInfo pid_information_;
   Spin spin_information_;
   bool coherent;
 
   bool operator==(const ParticleStateInfo &rhs) const {
-    if (this->unique_id_ != rhs.unique_id_)
+    if (this->uniqueId_ != rhs.uniqueId_)
       return false;
     if (this->pid_information_ != rhs.pid_information_)
       return false;
@@ -330,9 +330,9 @@ struct ParticleStateInfo {
   }
 
   bool operator<(const ParticleStateInfo &rhs) const {
-    if (this->unique_id_ < rhs.unique_id_)
+    if (this->uniqueId_ < rhs.uniqueId_)
       return true;
-    else if (this->unique_id_ > rhs.unique_id_)
+    else if (this->uniqueId_ > rhs.uniqueId_)
       return false;
     if (this->pid_information_ < rhs.pid_information_)
       return true;
@@ -351,9 +351,9 @@ struct ParticleStateInfo {
 
   friend std::ostream &operator<<(std::ostream &os,
                                   const ParticleStateInfo &rhs) {
-    os << "unique id: " << rhs.unique_id_ << std::endl;
+    os << "unique id: " << rhs.uniqueId_ << std::endl;
     os << "name: " << rhs.pid_information_.name_ << std::endl;
-    os << "pid: " << rhs.pid_information_.particle_id_ << std::endl;
+    os << "pid: " << rhs.pid_information_.particleId_ << std::endl;
     os << "J: " << rhs.spin_information_.GetNumerator() << "/"
        << rhs.spin_information_.GetDenominator() << "("
        << rhs.spin_information_.GetZNumerator() << ")";

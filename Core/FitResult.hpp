@@ -69,7 +69,7 @@ public:
   
   /// Get list of fit fractions
   virtual ParameterList GetFitFractions() {
-    return _fitFractions;
+    return FitFractions;
   }
 
   /// Table with fit parameters
@@ -112,7 +112,7 @@ protected:
   /// True list of parameters
   ParameterList trueParameters;
   
-  ParameterList _fitFractions;
+  ParameterList FitFractions;
   
   /// List with fit fractions and errors
   double sumFractions;
@@ -126,7 +126,7 @@ private:
     ar &BOOST_SERIALIZATION_NVP(initialParameters);
     ar &BOOST_SERIALIZATION_NVP(finalParameters);
     ar &BOOST_SERIALIZATION_NVP(trueParameters);
-    ar &BOOST_SERIALIZATION_NVP(_fitFractions);
+    ar &BOOST_SERIALIZATION_NVP(FitFractions);
     ar &BOOST_SERIALIZATION_NVP(sumFractions);
     ar &BOOST_SERIALIZATION_NVP(sumFractionsError);
   }

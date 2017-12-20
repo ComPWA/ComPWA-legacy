@@ -55,45 +55,45 @@ public:
   //============ SET/GET =================
 
   void SetWidthParameter(std::shared_ptr<ComPWA::FitParameter> w) {
-    _width = w;
+   Width = w;
   }
 
   std::shared_ptr<ComPWA::FitParameter> GetWidthParameter() {
-    return _width;
+    return Width;
   }
 
-  void SetWidth(double w) { _width->setValue(w); }
+  void SetWidth(double w) {Width->setValue(w); }
 
-  double GetWidth() const { return _width->value(); }
+  double GetWidth() const { return Width->value(); }
 
   void SetMesonRadiusParameter(std::shared_ptr<ComPWA::FitParameter> r) {
-    _mesonRadius = r;
+    MesonRadius = r;
   }
 
   std::shared_ptr<ComPWA::FitParameter> GetMesonRadiusParameter() {
-    return _mesonRadius;
+    return MesonRadius;
   }
 
-  /// \see GetMesonRadius() const { return _mesonRadius->value(); }
-  void SetMesonRadius(double w) { _mesonRadius->setValue(w); }
+  /// \see GetMesonRadius() const { return MesonRadius->value(); }
+  void SetMesonRadius(double w) { MesonRadius->setValue(w); }
 
   /// Get meson radius.
   /// The meson radius is a measure of the size of the resonant state. It is
   /// used to calculate the angular momentum barrier factors.
-  double GetMesonRadius() const { return _mesonRadius->value(); }
+  double GetMesonRadius() const { return MesonRadius->value(); }
 
   /// \see GetFormFactorType()
-  void SetFormFactorType(formFactorType t) { _ffType = t; }
+  void SetFormFactorType(formFactorType t) { FormFactorType = t; }
 
   /// Get form factor type.
   /// The type of formfactor that is used to calculate the angular momentum
   /// barrier factors.
-  formFactorType GetFormFactorType() { return _ffType; }
+  formFactorType GetFormFactorType() { return FormFactorType; }
 
-  virtual void GetParameters(ComPWA::ParameterList &list);
+  virtual void parameters(ComPWA::ParameterList &list);
 
-  virtual void GetParametersFast(std::vector<double> &list) const {
-    AbstractDynamicalFunction::GetParametersFast(list);
+  virtual void parametersFast(std::vector<double> &list) const {
+    AbstractDynamicalFunction::parametersFast(list);
     list.push_back(GetWidth());
     list.push_back(GetMesonRadius());
   }
@@ -110,18 +110,18 @@ public:
 
 protected:
   /// Decay width of resonante state
-  std::shared_ptr<ComPWA::FitParameter> _width;
+  std::shared_ptr<ComPWA::FitParameter> Width;
 
   /// Meson radius of resonant state
-  std::shared_ptr<ComPWA::FitParameter> _mesonRadius;
+  std::shared_ptr<ComPWA::FitParameter> MesonRadius;
 
   /// Form factor type
-  formFactorType _ffType;
+  formFactorType FormFactorType;
 
 private:
   /// Temporary values (used to trigger recalculation of normalization)
-  double _current_mesonRadius;
-  double _current_width;
+  double CurrentMesonRadius;
+  double CurrentWidth;
 };
 
 class BreitWignerStrategy : public ComPWA::Strategy {

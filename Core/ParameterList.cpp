@@ -15,6 +15,37 @@
 
 using namespace ComPWA;
 
+void ParameterList::DeepCopy(const ParameterList &in) {
+  IntValues.clear();
+  DoubleValues.clear();
+  ComplexValues.clear();
+  MultiIntValues.clear();
+  MultiDoubleValues.clear();
+  MultiComplexValues.clear();
+  FitParameters.clear();
+
+  for (auto p : in.IntValues)
+    IntValues.push_back(std::make_shared<ComPWA::Value<int>>(*p));
+  for (auto p : in.DoubleValues)
+    DoubleValues.push_back(std::make_shared<ComPWA::Value<double>>(*p));
+  for (auto p : in.ComplexValues)
+    ComplexValues.push_back(
+        std::make_shared<ComPWA::Value<std::complex<double>>>(*p));
+
+  for (auto p : in.MultiIntValues)
+    MultiIntValues.push_back(
+        std::make_shared<ComPWA::Value<std::vector<int>>>(*p));
+  for (auto p : in.MultiDoubleValues)
+    MultiDoubleValues.push_back(
+        std::make_shared<ComPWA::Value<std::vector<double>>>(*p));
+  for (auto p : in.MultiComplexValues)
+    MultiComplexValues.push_back(
+        std::make_shared<ComPWA::Value<std::vector<std::complex<double>>>>(*p));
+
+  for (auto p : in.FitParameters)
+    FitParameters.push_back(std::make_shared<ComPWA::FitParameter>(*p));
+}
+
 std::size_t ParameterList::numParameters() const {
   return FitParameters.size();
 }
@@ -25,15 +56,38 @@ void ParameterList::addParameters(
     addParameter(i);
 }
 
+std::shared_ptr<FitParameter>
+ParameterList::addUniqueParameter(std::shared_ptr<FitParameter> par) {
+  std::shared_ptr<FitParameter> tmp;
+  try {
+    tmp = FindParameter(par->name(), FitParameters);
+  } catch (std::exception &ex) {
+    tmp = par;
+    FitParameters.push_back(par);
+  }
+
+  if (*tmp != *par)
+    throw BadParameter("ParameterList::addUniqueParameter() |  FitParameter " +
+                       par->name() +
+                       " found in list but match is not identical!");
+
+  return tmp;
+}
+
+void ParameterList::addParameter(std::shared_ptr<FitParameter> par) {
+  FitParameters.push_back(std::dynamic_pointer_cast<FitParameter>(par));
+}
+
 void ParameterList::addParameter(std::shared_ptr<Parameter> par) {
   switch (par->type()) {
   case ParType::DOUBLE: {
-    FitParameters.push_back(std::dynamic_pointer_cast<FitParameter>(par));
+    addParameter(std::dynamic_pointer_cast<FitParameter>(par));
     break;
   }
   default: { break; }
   }
 }
+
 std::size_t ParameterList::numValues() const {
   return IntValues.size() + DoubleValues.size() + ComplexValues.size() +
          MultiIntValues.size() + MultiDoubleValues.size() +

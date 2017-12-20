@@ -162,44 +162,44 @@ public:
   }
 
   /// Get SubSystem from \p pos in list
-  virtual SubSystem GetSubSystem(int pos) const {
-    return _listSubSystem.at(pos);
+  virtual SubSystem subSystem(int pos) const {
+    return Subsystems.at(pos);
   }
 
   /// Get SubSystem from \p pos in list
-  virtual std::vector<SubSystem> GetSubSystems() const {
-    return _listSubSystem;
+  virtual std::vector<SubSystem> subSystems() const {
+    return Subsystems;
   }
 
   /// Get number of variables that are added to dataPoint
-  virtual size_t numVariables() const { return _listSubSystem.size() * 3; }
+  virtual size_t numVariables() const { return Subsystems.size() * 3; }
 
   /// Get phase space bounds for the invariant mass of \p subSys.
   virtual const std::pair<double, double> &
-  GetInvMassBounds(const SubSystem &subSys) const;
+  invMassBounds(const SubSystem &subSys) const;
 
-  virtual const std::pair<double, double> &GetInvMassBounds(int sysID) const;
+  virtual const std::pair<double, double> &invMassBounds(int sysID) const;
 
   /// Calculation of helicity angle.
   /// See (Martin and Spearman, Elementary Particle Theory. 1970)
   /// \deprecated Only used as cross-check.
-  double HelicityAngle(double M, double m, double m2, double mSpec,
+  double helicityAngle(double M, double m, double m2, double mSpec,
                        double invMassSqA, double invMassSqB) const;
 
 protected:
-  std::shared_ptr<PartList> _partList;
+  std::shared_ptr<PartList> ParticleList;
 
   ///  Calculation of n-dimensional phase space volume.
   ///  ToDo: We need to implement an analytical calculation here
   double calculatePhspVolume() const { return 1.0; }
 
   /// List of subsystems for which invariant mass and angles are calculated
-  std::vector<SubSystem> _listSubSystem;
+  std::vector<SubSystem> Subsystems;
 
   /// Invariant mass bounds for each SubSystem
-  std::vector<std::pair<double, double>> _invMassBounds;
+  std::vector<std::pair<double, double>> InvMassBounds;
 
-  std::pair<double, double> CalculateInvMassBounds(const SubSystem &sys) const;
+  std::pair<double, double> calculateInvMassBounds(const SubSystem &sys) const;
 
   /// Add \p newSys to list of SubSystems and return its ID.
   /// In case that this SubSystem is already in the list only the ID is

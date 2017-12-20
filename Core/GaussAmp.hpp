@@ -62,7 +62,7 @@ public:
     return intensity(p);
   }
 
-  virtual void GetParameters(ParameterList &list){};
+  virtual void parameters(ParameterList &list){};
 
   virtual double intensity(const dataPoint &point) const {
 
@@ -137,7 +137,7 @@ public:
     return _eff->evaluate(point);
   }
 
-  virtual void GetParameters(ParameterList &list){};
+  virtual void parameters(ParameterList &list){};
 
   virtual double IntensityNoNorm(const dataPoint &point) const { return 1.0; }
 

@@ -246,7 +246,7 @@ void MinuitResult::WriteXML(std::string filename) {
   boost::archive::xml_oarchive oa(ofs);
   // TODO: Compile error due to serialization
   oa << boost::serialization::make_nvp("FitParameters", finalParameters);
-  oa << boost::serialization::make_nvp("FitFractions", _fitFractions);
+  oa << boost::serialization::make_nvp("FitFractions",FitFractions);
   ofs.close();
   return;
 }

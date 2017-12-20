@@ -18,8 +18,6 @@ namespace Physics {
 class CoherentIntensity : public ComPWA::AmpIntensity {
 
 public:
-  //============ CONSTRUCTION ==================
-
   CoherentIntensity(
       std::string name = "",
       std::shared_ptr<FitParameter> strength =
@@ -46,12 +44,8 @@ public:
 
   virtual boost::property_tree::ptree save() const;
 
-  //================ EVALUATION =================
-
   /// Calculate intensity of amplitude at point in phase-space
   virtual double intensity(const ComPWA::DataPoint &point) const;
-
-  //============ SET/GET =================
 
   void addAmplitude(std::shared_ptr<ComPWA::Physics::Amplitude> decay) {
     Amplitudes.push_back(decay);
@@ -104,17 +98,6 @@ public:
   virtual void setPhspVolume(double vol) { PhspVolume = vol; };
 
   virtual std::shared_ptr<AmpIntensity> component(std::string name);
-
-  //======== ITERATORS/OPERATORS =============
-
-  typedef std::vector<std::shared_ptr<ComPWA::Physics::Amplitude>>::iterator
-      seqDecayItr;
-
-  seqDecayItr first() { return Amplitudes.begin(); }
-
-  seqDecayItr last() { return Amplitudes.end(); }
-
-  //========== FUNCTIONTREE =============
 
   /// Check of tree is available
   virtual bool hasTree() const { return true; }

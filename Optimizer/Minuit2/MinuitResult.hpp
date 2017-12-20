@@ -50,14 +50,19 @@ public:
 
   /// Set initial likelihood value
   virtual void SetInitialLH(double iniLH) { initialLH = iniLH; }
+  
   /// Get initial likelihood value
   virtual double GetInitialLH() { return initialLH; }
+  
   /// Set final likelihood value
   virtual void SetFinalLH(double iniLH) { finalLH = iniLH; }
+  
   /// Get final likelihood value
   virtual double GetFinalLH() { return finalLH; }
+  
   /// Set true likelihood value
   virtual void SetTrueLH(double iniLH) { trueLH = iniLH; }
+  
   /// Get true likelihood value
   virtual double GetTrueLH() { return trueLH; }
 

@@ -77,12 +77,12 @@ public:
 
   /// Fill parameters to list
   virtual void parameters(ParameterList &list) {
-    list.addParameter(Magnitude);
-    list.addParameter(Phase);
+    Magnitude = list.addUniqueParameter(Magnitude);
+    Phase = list.addUniqueParameter(Phase);
   }
 
   /// Fill vector with parameters.
-  /// In comparisson to GetParameters(ParameterList &list) no checks are
+  /// In comparisson to parameters(ParameterList &list) no checks are
   /// performed here. So this should be much faster.
   virtual void parametersFast(std::vector<double> &list) const {
     list.push_back(magnitude());

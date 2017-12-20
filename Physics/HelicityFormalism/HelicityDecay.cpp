@@ -25,24 +25,24 @@ void HelicityDecay::load(std::shared_ptr<PartList> partL,
                          std::shared_ptr<Kinematics> kin,
                          const boost::property_tree::ptree &pt) {
 
-  LOG(trace) << "HelicityDecay::Factory() |";
+  LOG(trace) << "HelicityDecay::load() |";
   SubSys = SubSystem(pt);
   DataPosition =
       3 * std::dynamic_pointer_cast<HelicityKinematics>(kin)->dataID(SubSys);
   setPhspVolume(kin->phspVolume());
 
-  _name = pt.get<std::string>("<xmlattr>.Name", "empty");
-  _magnitude =
-      std::make_shared<ComPWA::FitParameter>("Magnitude_" + _name, 1.0);
-  _phase = std::make_shared<ComPWA::FitParameter>("Phase_" + _name, 0.0);
+ Name = pt.get<std::string>("<xmlattr>.Name", "empty");
+  Magnitude =
+      std::make_shared<ComPWA::FitParameter>("Magnitude_" +Name, 1.0);
+  Phase = std::make_shared<ComPWA::FitParameter>("Phase_" +Name, 0.0);
   std::shared_ptr<FitParameter> mag, phase;
   for (const auto &v : pt.get_child("")) {
     if (v.first == "Parameter") {
       if (v.second.get<std::string>("<xmlattr>.Type") == "Magnitude") {
-        _magnitude = std::make_shared<FitParameter>(v.second);
+        Magnitude = std::make_shared<FitParameter>(v.second);
       }
       if (v.second.get<std::string>("<xmlattr>.Type") == "Phase") {
-        _phase = std::make_shared<FitParameter>(v.second);
+        Phase = std::make_shared<FitParameter>(v.second);
       }
     } else {
       // ignored further settings. Should we throw an error?
@@ -111,11 +111,11 @@ boost::property_tree::ptree HelicityDecay::save() const {
   auto pt = SubSys.save();
   pt.put<std::string>("<xmlattr>.Name", name());
 
-  boost::property_tree::ptree tmp = _magnitude->save();
+  boost::property_tree::ptree tmp = Magnitude->save();
   tmp.put("<xmlattr>.Type", "Magnitude");
   pt.add_child("Parameter", tmp);
 
-  tmp = _phase->save();
+  tmp = Phase->save();
   tmp.put("<xmlattr>.Type", "Phase");
   pt.add_child("Parameter", tmp);
 
@@ -159,9 +159,9 @@ HelicityDecay::tree(std::shared_ptr<Kinematics> kin,
       nodeName, MComplex("", n), std::make_shared<MultAll>(ParType::MCOMPLEX));
   tr->createNode("Strength", std::make_shared<Value<std::complex<double>>>(),
                  std::make_shared<Complexify>(ParType::COMPLEX), nodeName);
-  tr->createLeaf("Magnitude", _magnitude, "Strength");
-  tr->createLeaf("Phase", _phase, "Strength");
-  tr->createLeaf("PreFactor", _preFactor, nodeName);
+  tr->createLeaf("Magnitude", Magnitude, "Strength");
+  tr->createLeaf("Phase", Phase, "Strength");
+  tr->createLeaf("PreFactor", PreFactor, nodeName);
   tr->insertTree(AngularDist->tree(sample, DataPosition + 1, DataPosition + 2),
                  nodeName);
   tr->insertTree(DynamicFcn->tree(sample, DataPosition), nodeName);
@@ -174,7 +174,7 @@ HelicityDecay::tree(std::shared_ptr<Kinematics> kin,
                  "Normalization");
   tr->createNode("Integral", std::make_shared<Value<double>>(),
                  std::make_shared<MultAll>(ParType::DOUBLE), "SqrtIntegral");
-  tr->createLeaf("PhspVolume", phspVolume_, "Integral");
+  tr->createLeaf("PhspVolume", PhspVolume, "Integral");
   tr->createLeaf("InverseSampleSize", 1 / ((double)phspSize), "Integral");
   tr->createNode("Sum", std::make_shared<Value<double>>(),
                  std::make_shared<AddAll>(ParType::DOUBLE), "Integral");
@@ -195,30 +195,11 @@ HelicityDecay::tree(std::shared_ptr<Kinematics> kin,
 
 void HelicityDecay::parameters(ParameterList &list) {
   PartialAmplitude::parameters(list);
-  //    AngularDist->GetParameters(list);
-  DynamicFcn->GetParameters(list);
+  DynamicFcn->parameters(list);
 }
 
 void HelicityDecay::updateParameters(const ParameterList &list) {
-
-  // Try to update magnitude
-  std::shared_ptr<FitParameter> mag;
-  try {
-    mag = FindParameter(_magnitude->name(), list);
-  } catch (std::exception &ex) {
-  }
-  if (mag)
-    _magnitude->updateParameter(mag);
-  std::shared_ptr<FitParameter> phase;
-
-  // Try to update phase
-  try {
-    phase = FindParameter(_phase->name(), list);
-  } catch (std::exception &ex) {
-  }
-  if (phase)
-    _phase->updateParameter(phase);
-
+  PartialAmplitude::updateParameters(list);
   DynamicFcn->updateParameters(list);
 
   return;

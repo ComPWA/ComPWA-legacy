@@ -15,8 +15,6 @@ namespace Physics {
 class IncoherentIntensity : public ComPWA::AmpIntensity {
 
 public:
-  //============ CONSTRUCTION ==================
-
   IncoherentIntensity() : ComPWA::AmpIntensity(), PhspVolume(1.0) {}
 
   IncoherentIntensity(std::shared_ptr<PartList> partL,
@@ -35,12 +33,8 @@ public:
 
   virtual boost::property_tree::ptree save() const;
 
-  //================ EVALUATION =================
-
   /// Calculate intensity of amplitude at point in phase-space
   virtual double intensity(const ComPWA::DataPoint &point) const;
-
-  //================== SET/GET =================
 
   void addIntensity(std::shared_ptr<ComPWA::AmpIntensity> intens) {
     Intensities.push_back(intens);
@@ -58,14 +52,15 @@ public:
 
   virtual void reset() {
     Intensities.clear();
+    NormalizationValues.clear();
+    Parameters.clear();
     return;
   }
 
-  /// Add parameters to \p list.
-  /// Add parameters to list only if not already in
+  /// Add parameters to \p list only if not already in.
   virtual void parameters(ComPWA::ParameterList &list);
 
-  /// Fill vector with parameters
+  /// Fill vector with parameters.
   virtual void parametersFast(std::vector<double> &list) const {
     AmpIntensity::parametersFast(list);
     for (auto i : Intensities) {
@@ -96,15 +91,6 @@ public:
 
   virtual std::shared_ptr<AmpIntensity> component(std::string name);
 
-  //======== ITERATORS/OPERATORS =============
-  typedef std::vector<std::shared_ptr<ComPWA::AmpIntensity>>::iterator
-      coherentIntItr;
-
-  coherentIntItr first() { return Intensities.begin(); }
-
-  coherentIntItr last() { return Intensities.end(); }
-
-  //=========== FUNCTIONTREE =================
 
   /// Check of tree is available
   virtual bool hasTree() const { return true; }

@@ -44,7 +44,7 @@ double shiftAngle(double v) {
 }
 
 MinuitIF::MinuitIF(std::shared_ptr<IEstimator> esti, ParameterList &par)
-    : _myFcn(esti, par), estimator(esti), enableHesse(true), enableMinos(true) {
+    : Function(esti, par), Estimator(esti), UseHesse(true), UseMinos(true) {
 
 }
 
@@ -63,7 +63,11 @@ std::shared_ptr<ComPWA::FitResult> MinuitIF::exec(ParameterList &list) {
 
   MnUserParameters upar;
   int freePars = 0;
-  for( auto actPat : list.doubleParameters() ) {
+  for (auto actPat : list.doubleParameters()) {
+    if (actPat->name() == "")
+      throw BadParameter("MinuitIF::exec() | FitParameter without name in "
+                         "list. Since FitParameter names are unique we stop "
+                         "here.");
     // If no error is set or error set to 0 we use a default error,
     // otherwise minuit treads this parameter as fixed
     if (!actPat->hasError())
@@ -74,13 +78,21 @@ std::shared_ptr<ComPWA::FitResult> MinuitIF::exec(ParameterList &list) {
         actPat->name().find("phase") != actPat->name().npos)
       actPat->setValue(shiftAngle(actPat->value()));
 
+    bool rt;
     if (actPat->hasBounds()) {
-      upar.Add(actPat->name(), actPat->value(), actPat->avgError(),
-               actPat->bounds().first, actPat->bounds().second);
+      rt = upar.Add(actPat->name(), actPat->value(), actPat->avgError(),
+                    actPat->bounds().first, actPat->bounds().second);
+      if (!rt)
+        throw BadParameter(
+            "MinuitIF::exec() | FitParameter " + actPat->name() +
+            " can not be added to Minuit2 (internal) parameters.");
     } else {
-      upar.Add(actPat->name(), actPat->value(), actPat->avgError());
+      rt = upar.Add(actPat->name(), actPat->value(), actPat->avgError());
+      if (!rt)
+        throw BadParameter(
+            "MinuitIF::exec() | FitParameter " + actPat->name() +
+            " can not be added to Minuit2 (internal) parameters.");
     }
-
     if (!actPat->isFixed())
       freePars++;
     if (actPat->isFixed())
@@ -113,7 +125,7 @@ std::shared_ptr<ComPWA::FitResult> MinuitIF::exec(ParameterList &list) {
   LOG(debug) << "Hesse G2 tolerance: " << strat.HessianG2Tolerance();
 
   // MIGRAD
-  MnMigrad migrad(_myFcn, upar, strat);
+  MnMigrad migrad(Function, upar, strat);
   double maxfcn = 0.0;
   double tolerance = 0.1;
 
@@ -137,9 +149,9 @@ std::shared_ptr<ComPWA::FitResult> MinuitIF::exec(ParameterList &list) {
 
   // HESSE
   MnHesse hesse(strat);
-  if (minMin.IsValid() && enableHesse) {
+  if (minMin.IsValid() && UseHesse) {
     LOG(info) << "MinuitIF::exec() | Starting hesse";
-    hesse(_myFcn, minMin); // function minimum minMin is updated by hesse
+    hesse(Function, minMin); // function minimum minMin is updated by hesse
     LOG(info) << "MinuitIF::exec() | Hesse finished";
   } else
     LOG(info) << "MinuitIF::exec() | Migrad failed to "
@@ -150,7 +162,7 @@ std::shared_ptr<ComPWA::FitResult> MinuitIF::exec(ParameterList &list) {
             << std::setprecision(10) << minMin.Fval();
 
   // MINOS
-  MnMinos minos(_myFcn, minMin, strat);
+  MnMinos minos(Function, minMin, strat);
 
   // save minimzed values
   MnUserParameterState minState = minMin.UserState();
@@ -165,7 +177,7 @@ std::shared_ptr<ComPWA::FitResult> MinuitIF::exec(ParameterList &list) {
   std::stringstream resultsOut;
   resultsOut << "Central values of floating paramters:" << std::endl;
   size_t id = 0;
-  for ( auto finalPar : finalParList.doubleParameters() ){
+  for (auto finalPar : finalParList.doubleParameters()) {
     if (finalPar->isFixed())
       continue;
     // central value
@@ -179,15 +191,17 @@ std::shared_ptr<ComPWA::FitResult> MinuitIF::exec(ParameterList &list) {
     resultsOut << finalPar->name() << " " << val << std::endl;
     if (finalPar->errorType() == ErrorType::ASYM) {
       // Skip minos and fill symmetic errors
-      if (!minMin.IsValid() || !enableMinos) {
+      if (!minMin.IsValid() || !UseMinos) {
         LOG(info) << "MinuitIF::exec() | Skip Minos "
-                     "for parameter " << finalPar->name()<<"...";
+                     "for parameter "
+                  << finalPar->name() << "...";
         finalPar->setError(minState.Error(finalPar->name()));
         continue;
       }
       // asymmetric errors -> run minos
       LOG(info) << "MinuitIF::exec() | Run minos "
-                   "for parameter ["<<id<<"] " << finalPar->name()<<"...";
+                   "for parameter ["
+                << id << "] " << finalPar->name() << "...";
       MinosError err = minos.Minos(id);
       // lower = pair.first, upper= pair.second
       std::pair<double, double> assymErrors = err();
@@ -216,7 +230,7 @@ std::shared_ptr<ComPWA::FitResult> MinuitIF::exec(ParameterList &list) {
   double elapsed = double(clock() - begin) / CLOCKS_PER_SEC;
 
   // Create fit result
-  std::shared_ptr<FitResult> result(new MinuitResult(estimator, minMin));
+  std::shared_ptr<FitResult> result(new MinuitResult(Estimator, minMin));
   result->SetFinalParameters(finalParList);
   result->SetInitialParameters(initialParList);
   result->SetTime(elapsed);

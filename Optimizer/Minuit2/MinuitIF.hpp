@@ -25,6 +25,7 @@
 namespace ComPWA {
 namespace Optimizer {
 namespace Minuit2 {
+
 ///
 /// \class MinuitIF
 /// Wrapper of the Minuit2 Optimizer library. This class provides a wrapper
@@ -41,17 +42,17 @@ public:
 
   virtual ~MinuitIF();
 
-  virtual void SetHesse(bool onoff) { enableHesse = onoff; }
-  virtual bool GetHesse() { return enableHesse; }
-  virtual void SetMinos(bool onoff) { enableMinos = onoff; }
-  virtual bool GetMinos() { return enableMinos; }
+  virtual void SetHesse(bool onoff) { UseHesse = onoff; }
+  virtual bool GetHesse() { return UseHesse; }
+  virtual void SetMinos(bool onoff) { UseMinos = onoff; }
+  virtual bool GetMinos() { return UseMinos; }
 
 protected:
 private:
-  ROOT::Minuit2::MinuitFcn _myFcn;
-  std::shared_ptr<ComPWA::IEstimator> estimator;
-  bool enableHesse;
-  bool enableMinos;
+  ROOT::Minuit2::MinuitFcn Function;
+  std::shared_ptr<ComPWA::IEstimator> Estimator;
+  bool UseHesse;
+  bool UseMinos;
 };
 
 class MinuitStrategy : public ROOT::Minuit2::MnStrategy {

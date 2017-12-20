@@ -60,7 +60,7 @@ public:
 private:
   std::vector<TH1D> _arr;
   std::vector<TH2D> _arr2D;
-  std::string _name, _title;
+  std::string Name, _title;
   unsigned int _nBins;
 
   std::unique_ptr<TTree> _tree;
@@ -120,7 +120,7 @@ public:
   }
 
 protected:
-  TString _name;
+  TString Name;
 
   std::shared_ptr<ComPWA::Kinematics> kin_;
   bool _isFilled;

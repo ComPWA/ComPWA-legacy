@@ -57,7 +57,7 @@ void FitResult::SetTrueParameters(ParameterList &truePars) {
 }
 
 void FitResult::SetFitFractions(ParameterList &list) {
-  _fitFractions.DeepCopy(list);
+ FitFractions.DeepCopy(list);
 }
 
 void FitResult::Print(std::string opt) {
@@ -147,6 +147,7 @@ void FitResult::PrintFitParameters(TableFormater *tableResult) {
 
     // Print parameter name
     *tableResult << parameterId << p->name();
+    parameterId++;
 
     // Print initial values
     if (printInitial) {
@@ -194,7 +195,6 @@ void FitResult::PrintFitParameters(TableFormater *tableResult) {
     }
   }
   tableResult->footer();
-  parameterId++;
   return;
 }
 
@@ -211,7 +211,7 @@ void FitResult::PrintFitFractions(TableFormater *fracTable) {
   fracTable->addColumn("Fraction", 15);          // add empty first column
   fracTable->addColumn("Error", 15);             // add empty first column
   fracTable->header();
-  for( auto f : _fitFractions.doubleParameters() ){
+  for( auto f :FitFractions.doubleParameters() ){
     std::string resName = f->name();
     *fracTable << resName << f->value();
     try {

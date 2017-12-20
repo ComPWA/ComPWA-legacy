@@ -16,7 +16,7 @@ SequentialPartialAmplitude::SequentialPartialAmplitude(
 void SequentialPartialAmplitude::load(std::shared_ptr<PartList> partL,
                                       std::shared_ptr<Kinematics> kin,
                                       const boost::property_tree::ptree &pt) {
-  LOG(trace) << " SequentialPartialAmplitude::Factory() | Construction....";
+  LOG(trace) << "SequentialPartialAmplitude::Factory() | Construction....";
   setName(pt.get<std::string>("<xmlattr>.Name", "empty"));
 
   PreFactor = std::complex<double>(1, 0);
@@ -31,6 +31,11 @@ void SequentialPartialAmplitude::load(std::shared_ptr<PartList> partL,
                    "HelicityDecay") {
       addPartialAmplitude(
           std::make_shared<HelicityDecay>(partL, kin, v.second));
+    } else if (v.first == "PartialAmplitude" &&
+               v.second.get<std::string>("<xmlattr>.Class") ==
+                   "NonResonant") {
+      addPartialAmplitude(
+          std::make_shared<ComPWA::Physics::NonResonant>(partL, kin, v.second));
     } else if (v.first == "PreFactor") {
       double r = v.second.get<double>("<xmlattr>.Magnitude");
       double p = v.second.get<double>("<xmlattr>.Phase");

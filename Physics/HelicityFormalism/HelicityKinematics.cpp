@@ -22,7 +22,7 @@ HelicityKinematics::HelicityKinematics(std::shared_ptr<PartList> partL,
                                        std::vector<pid> initialState,
                                        std::vector<pid> finalState,
                                        ComPWA::FourMomentum cmsP4)
-    : Kinematics(initialState, finalState, cmsP4), _partList(partL) {
+    : Kinematics(initialState, finalState, cmsP4), ParticleList(partL) {
 
   // If the cms four-momentum is not set of set it here
   if (InitialStateP4 == FourMomentum(0, 0, 0, 0) && InitialState.size() == 1) {
@@ -51,7 +51,7 @@ HelicityKinematics::HelicityKinematics(std::shared_ptr<PartList> partL,
 
 HelicityKinematics::HelicityKinematics(std::shared_ptr<PartList> partL,
                                        boost::property_tree::ptree pt)
-    : _partList(partL) {
+    : ParticleList(partL) {
 
   auto initialS = pt.get_child("InitialState");
   InitialState = std::vector<int>(initialS.size());
@@ -107,9 +107,9 @@ bool HelicityKinematics::isWithinPhsp(const DataPoint &point) const {
   int subSystemID = 0;
   int pos = 0;
   while ((pos + 2) < point.size()) {
-    auto invMassBounds = GetInvMassBounds(GetSubSystem(subSystemID));
-    if (point.value(pos) < invMassBounds.first ||
-        point.value(pos) > invMassBounds.second)
+    auto bounds = invMassBounds(subSystem(subSystemID));
+    if (point.value(pos) < bounds.first ||
+        point.value(pos) > bounds.second)
       return false;
     if (point.value(pos + 1) < -1 || point.value(pos + 1) > +1)
       return false;
@@ -125,24 +125,24 @@ bool HelicityKinematics::isWithinPhsp(const DataPoint &point) const {
 
 void HelicityKinematics::convert(const Event &event,
                                           DataPoint &point) const {
-  assert(_listSubSystem.size() == _invMassBounds.size());
+  assert(Subsystems.size() == InvMassBounds.size());
 
-  if (!_listSubSystem.size()) {
+  if (!Subsystems.size()) {
     LOG(error) << "HelicityKinematics::convert() | No variabels were "
                   "requested before. Therefore this function is doing nothing!";
   }
-  for (int i = 0; i < _listSubSystem.size(); i++)
-    convert(event, point, _listSubSystem.at(i), _invMassBounds.at(i));
+  for (int i = 0; i < Subsystems.size(); i++)
+    convert(event, point, Subsystems.at(i), InvMassBounds.at(i));
   return;
 }
 
 void HelicityKinematics::convert(const Event &event, DataPoint &point,
                                           const SubSystem &sys) const {
-  auto massLimits = GetInvMassBounds(sys);
+  auto massLimits = invMassBounds(sys);
   convert(event, point, sys, massLimits);
 }
 
-double HelicityKinematics::HelicityAngle(double M, double m, double m2,
+double HelicityKinematics::helicityAngle(double M, double m, double m2,
                                          double mSpec, double invMassSqA,
                                          double invMassSqB) const {
   // Calculate energy and momentum of m1/m2 in the invMassSqA rest frame
@@ -290,18 +290,18 @@ void HelicityKinematics::convert(
 }
 
 const std::pair<double, double> &
-HelicityKinematics::GetInvMassBounds(const SubSystem &sys) const {
-  return GetInvMassBounds(
+HelicityKinematics::invMassBounds(const SubSystem &sys) const {
+  return invMassBounds(
       const_cast<HelicityKinematics *>(this)->dataID(sys));
 }
 
 const std::pair<double, double> &
-HelicityKinematics::GetInvMassBounds(int sysID) const {
-  return _invMassBounds.at(sysID);
+HelicityKinematics::invMassBounds(int sysID) const {
+  return InvMassBounds.at(sysID);
 }
 
 std::pair<double, double>
-HelicityKinematics::CalculateInvMassBounds(const SubSystem &sys) const {
+HelicityKinematics::calculateInvMassBounds(const SubSystem &sys) const {
 
   /// We use the formulae from (PDG2016 Kinematics Fig.47.3). I hope the
   /// generalization to n-body decays is correct.
@@ -309,11 +309,11 @@ HelicityKinematics::CalculateInvMassBounds(const SubSystem &sys) const {
   // Sum up masses of all final state particles
   for (auto j : sys.GetFinalStates())
     for (auto i : j)
-      lim.first += FindParticle(_partList, FinalState.at(i)).GetMass();
+      lim.first += FindParticle(ParticleList, FinalState.at(i)).GetMass();
   lim.first *= lim.first;
 
   for (auto i : sys.GetRecoilState())
-    lim.second -= FindParticle(_partList, FinalState.at(i)).GetMass();
+    lim.second -= FindParticle(ParticleList, FinalState.at(i)).GetMass();
   lim.second *= lim.second;
 
   return lim;
@@ -321,11 +321,11 @@ HelicityKinematics::CalculateInvMassBounds(const SubSystem &sys) const {
 
 int HelicityKinematics::createIndex(const SubSystem &newSys) {
   int results =
-      std::find(_listSubSystem.begin(), _listSubSystem.end(), newSys) -
-      _listSubSystem.begin();
-  if (results == _listSubSystem.size()) {
-    _listSubSystem.push_back(newSys);
-    _invMassBounds.push_back(CalculateInvMassBounds(newSys));
+      std::find(Subsystems.begin(), Subsystems.end(), newSys) -
+      Subsystems.begin();
+  if (results == Subsystems.size()) {
+    Subsystems.push_back(newSys);
+    InvMassBounds.push_back(calculateInvMassBounds(newSys));
 
     VariableNames.push_back("mSq_" + newSys.to_string());
     VariableNames.push_back("cosTheta_" + newSys.to_string());

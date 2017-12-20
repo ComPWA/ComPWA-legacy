@@ -34,8 +34,6 @@ public:
 
   virtual boost::property_tree::ptree save() const;
 
-  //======= INTEGRATION/NORMALIZATION ===========
-
   /// Check of parameters have changed and normalization has to be recalculatecd
   bool isModified() const {
     if (Amplitude::isModified())
@@ -46,8 +44,6 @@ public:
     return false;
   }
 
-  //================ EVALUATION =================
-
   virtual std::complex<double> evaluate(const DataPoint &point) const {
     std::complex<double> result = coefficient() * preFactor();
     for (auto i : PartialAmplitudes)
@@ -56,8 +52,6 @@ public:
     assert(!std::isnan(result.real()) && !std::isnan(result.imag()));
     return result;
   };
-
-  //============ SET/GET =================
 
   void
   addPartialAmplitude(std::shared_ptr<ComPWA::Physics::PartialAmplitude> d) {
@@ -92,17 +86,6 @@ public:
     for (auto i : PartialAmplitudes)
       i->setPhspSample(phspSample);
   }
-
-  //======== ITERATORS/OPERATORS =============
-
-  typedef std::vector<std::shared_ptr<ComPWA::Physics::PartialAmplitude>>::
-      iterator partDecayItr;
-
-  partDecayItr first() { return PartialAmplitudes.begin(); }
-
-  partDecayItr last() { return PartialAmplitudes.end(); }
-
-  //=========== FUNCTIONTREE =================
 
   virtual bool hasTree() const { return true; }
 

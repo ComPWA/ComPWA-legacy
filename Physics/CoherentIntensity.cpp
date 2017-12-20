@@ -30,7 +30,7 @@ double CoherentIntensity::intensity(const DataPoint &point) const {
 void CoherentIntensity::load(std::shared_ptr<PartList> partL,
                              std::shared_ptr<Kinematics> kin,
                              const boost::property_tree::ptree &pt) {
-  LOG(trace) << " CoherentIntensity::Factory() | Construction....";
+  LOG(trace) << "CoherentIntensity::load() | Construction....";
   if (pt.get<std::string>("<xmlattr>.Class") != "Coherent")
     throw BadConfig("CoherentIntensity::Factory() | Property tree seems to "
                     "not containt a configuration for an "
@@ -53,7 +53,6 @@ void CoherentIntensity::load(std::shared_ptr<PartList> partL,
       // ignored further settings. Should we throw an error?
     }
   }
-
 }
 
 boost::property_tree::ptree CoherentIntensity::save() const {
@@ -81,12 +80,13 @@ CoherentIntensity::component(std::string name) {
   bool found = false;
   // Do we want to have a combination of coherentintensities?
   std::vector<std::string> splitNames = splitString(name);
-  auto icIn = std::shared_ptr<AmpIntensity>(this->clone(name));
+  auto icIn = std::make_shared<CoherentIntensity>(*this);
+  icIn->setName(name);
   icIn->reset(); // delete all existing amplitudes
   for (auto i : splitNames) {
     for (auto j : Amplitudes) {
       if (i == j->name()) {
-        std::dynamic_pointer_cast<CoherentIntensity>(icIn)->addAmplitude(j);
+        icIn->addAmplitude(j);
         found = true;
       }
     }
@@ -197,7 +197,7 @@ std::shared_ptr<ComPWA::FunctionTree> CoherentIntensity::setupBasicTree(
 }
 
 void CoherentIntensity::parameters(ComPWA::ParameterList &list) {
-  list.addParameter(Strength);
+  Strength = list.addUniqueParameter(Strength);
   for (auto i : Amplitudes) {
     i->parameters(list);
   }
