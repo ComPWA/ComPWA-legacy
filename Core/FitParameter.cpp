@@ -2,6 +2,8 @@
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
+#include <iomanip>
+
 #include "Core/FitParameter.hpp"
 
 using namespace ComPWA;
@@ -198,8 +200,8 @@ bool FitParameter::check_bounds(
 
 std::string FitParameter::to_str() const {
   std::stringstream oss;
-  oss << Name;
-  oss << "\t Val = " << Value;
+  oss << std::setw(20) << Name;
+  oss << "\t Value = " << std::left << Value;
   if (ErrType == ErrorType::SYM) {
     oss << " (+-" << Error.first << ")";
   } else if (ErrType == ErrorType::ASYM) {
@@ -207,9 +209,9 @@ std::string FitParameter::to_str() const {
   }
 
   if (HasBounds)
-    oss << "\t  [" << Bounds.first << " ; " << Bounds.second << "]";
-  oss << " fix? " << isFixed();
-  oss << "\t " << className();
+    oss << " [" << Bounds.first << " ; " << Bounds.second << "]";
+  if (IsFixed)
+    oss << " fixed ";
   return oss.str();
 }
 

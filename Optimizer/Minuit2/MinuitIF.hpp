@@ -42,16 +42,21 @@ public:
 
   virtual ~MinuitIF();
 
-  virtual void SetHesse(bool onoff) { UseHesse = onoff; }
-  virtual bool GetHesse() { return UseHesse; }
-  virtual void SetMinos(bool onoff) { UseMinos = onoff; }
-  virtual bool GetMinos() { return UseMinos; }
+  virtual void setUseHesse(bool onoff) { UseHesse = onoff; }
+  
+  virtual bool useHesse() { return UseHesse; }
+  
+  virtual void setUseMinos(bool onoff) { UseMinos = onoff; }
+  
+  virtual bool useMinos() { return UseMinos; }
 
 protected:
-private:
   ROOT::Minuit2::MinuitFcn Function;
+  
   std::shared_ptr<ComPWA::IEstimator> Estimator;
+  
   bool UseHesse;
+  
   bool UseMinos;
 };
 

@@ -60,10 +60,11 @@ public:
 
   /// A public function returning a string with parameter value
   virtual std::string val_to_str() const {
-    std::stringstream stream;
-    stream << Val;
-    return stream.str();
+      std::stringstream stream;
+      stream << Val;
+      return stream.str();
   };
+
 
 protected:
   virtual std::string className() const {

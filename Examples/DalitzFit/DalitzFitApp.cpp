@@ -231,7 +231,7 @@ int main(int argc, char **argv) {
   LOG(debug) << esti->tree()->head()->print(25);
 
   auto minuitif = new Optimizer::Minuit2::MinuitIF(esti, fitPar);
-  minuitif->SetHesse(true);
+  minuitif->setUseHesse(true);
 
   // STARTING MINIMIZATION
   auto result = std::dynamic_pointer_cast<MinuitResult>(minuitif->exec(fitPar));

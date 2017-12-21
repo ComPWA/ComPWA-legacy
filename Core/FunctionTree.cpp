@@ -179,15 +179,13 @@ void FunctionTree::createLeaf(std::string name,
 
 void FunctionTree::createLeaf(std::string name, double value,
                               std::string parent) {
-  createLeaf(name, std::make_shared<Value<double>>("ParOfNode_" + name, value),
-             parent);
+  createLeaf(name, std::make_shared<Value<double>>("", value), parent);
 }
 
 void FunctionTree::createLeaf(std::string name,
                               std::complex<double> value,
                               std::string parent) {
-  createLeaf(name, std::make_shared<Value<std::complex<double>>>(
-                       "ParOfNode" + name, value),
+  createLeaf(name, std::make_shared<Value<std::complex<double>>>("", value),
              parent);
 }
 

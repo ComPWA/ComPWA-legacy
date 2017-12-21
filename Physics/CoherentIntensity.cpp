@@ -40,9 +40,9 @@ void CoherentIntensity::load(std::shared_ptr<PartList> partL,
   setPhspVolume(kin->phspVolume());
   
   for (const auto &v : pt.get_child("")) {
-    // Mass parameter
+    // Strength parameter
     if (v.first == "Parameter" &&
-        v.second.get<std::string>("<xmlattr>.Type") != "Strength") {
+        v.second.get<std::string>("<xmlattr>.Type") == "Strength") {
       Strength = std::make_shared<FitParameter>(v.second);
     } else if (v.first == "Amplitude" &&
                v.second.get<std::string>("<xmlattr>.Class") ==

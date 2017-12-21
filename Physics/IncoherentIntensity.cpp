@@ -29,13 +29,9 @@ void IncoherentIntensity::load(std::shared_ptr<PartList> partL,
   setPhspVolume(kin->phspVolume());
 
   for (const auto &v : pt.get_child("")) {
-    if (v.first == "Parameter") {
-      // Parameter (e.g. Mass)
-      if (v.second.get<std::string>("<xmlattr>.Type") != "Strength")
-        continue;
-      auto tmp = FitParameter();
-      tmp.load(v.second);
-      Strength = std::make_shared<FitParameter>(tmp);
+    if (v.first == "Parameter" &&
+      v.second.get<std::string>("<xmlattr>.Type") == "Strength") {
+      Strength = std::make_shared<FitParameter>(v.second);
     } else if (v.first == "Intensity" &&
                v.second.get<std::string>("<xmlattr>.Class") == "Coherent") {
       addIntensity(std::make_shared<CoherentIntensity>(partL, kin, v.second));
@@ -79,7 +75,7 @@ double IncoherentIntensity::intensity(const ComPWA::DataPoint &point) const {
           1 / (Tools::Integral(Intensities.at(i), PhspSample, PhspVolume));
       normValues.at(i) *= Intensities.at(i)->strength();
     }
-    
+    result += Intensities.at(i)->intensity(point) * normValues.at(i);
   }
 
   const_cast<std::vector<std::vector<double>> &>(Parameters) = parameters;

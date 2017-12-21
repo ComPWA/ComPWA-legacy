@@ -72,7 +72,7 @@ inline bool generate(int number, std::shared_ptr<ComPWA::Kinematics> kin,
     generationMaxValue *= ComPWA::Tools::Maximum(kin, amp, phsp);
   }
 
-  LOG(trace) << "RunMananger::gen() | Using " << generationMaxValue
+  LOG(trace) << "generate() | Using " << generationMaxValue
              << " as maximum value of the intensity.";
 
   ComPWA::Event evt;     // event that we fill into generated sample
@@ -136,10 +136,12 @@ inline bool generate(int number, std::shared_ptr<ComPWA::Kinematics> kin,
 
     if (number > 0)
       bar.next();
+      
     // break if we have a sufficienct number of events
     if (data->numEvents() >= number)
       i = limit;
   }
+  
   if (data->numEvents() < number) {
     std::cout << std::endl;
     LOG(error) << "RunManager::gen() | Not able to generate " << number

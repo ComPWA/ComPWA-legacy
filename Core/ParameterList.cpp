@@ -133,3 +133,47 @@ void ParameterList::addValue(std::shared_ptr<Parameter> par) {
   default: { break; }
   }
 }
+
+std::string ParameterList::to_str() const {
+  std::stringstream s;
+  if (IntValues.size()) {
+    s << "Integer values [" << IntValues.size() << "]:" << std::endl;
+    for (auto p : IntValues)
+      s << p->to_str() << std::endl;
+  }
+  if (DoubleValues.size()) {
+    s << "Double values [" << DoubleValues.size() << "]:" << std::endl;
+    for (auto p : DoubleValues)
+      s << p->to_str() << std::endl;
+  }
+  if (ComplexValues.size()) {
+    s << "Complex values [" << ComplexValues.size() << "]:" << std::endl;
+    for (auto p : ComplexValues)
+      s << p->to_str() << std::endl;
+  }
+  if (MultiIntValues.size()) {
+    s << "Multi integer values [" << MultiIntValues.size() << "]:" << std::endl;
+    for (auto p : MultiIntValues)
+      s << p->to_str() << std::endl;
+  }
+  if (MultiDoubleValues.size()) {
+    s << "Multi double values [" << MultiDoubleValues.size()
+      << "]:" << std::endl;
+    for (auto p : MultiDoubleValues)
+      s << p->to_str() << std::endl;
+  }
+  if (MultiComplexValues.size()) {
+    s << "Multi complex values [" << MultiComplexValues.size()
+      << "]:" << std::endl;
+    for (auto p : MultiComplexValues)
+      s << p->to_str() << std::endl;
+  }
+  if (FitParameters.size()) {
+    s << "Fit parameters [" << FitParameters.size() << "]:" << std::endl;
+    for (auto p : FitParameters)
+      s << p->to_str() << std::endl;
+  }
+  return s.str();
+};
+
+;

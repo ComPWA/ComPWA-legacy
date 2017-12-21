@@ -127,27 +127,28 @@ std::string TreeNode::print(int level, std::string prefix) const {
   std::stringstream oss;
   oss << prefix << Name;
 
-  if (UseCache && HasChanged && ChildNodes.size()) {
-     oss << " = ?";
-  } else  {
-    if (!UseCache)
-      oss << "[-]";
-    auto p = recalculate();
-    if (!ChildNodes.size()) // print parameter name for leafs
+  auto p = recalculate();
+  if (!ChildNodes.size()) { // Print leaf nodes
+    if ( p->name() != "" )
       oss << " [" << p->name() << "]";
-    oss << " = " << p->val_to_str();
+    oss << " = " << p->val_to_str() << std::endl;
+  } else { // Print non-leaf nodes
+          oss << " [";
+    if (!UseCache)
+      oss << "-, ";
+    oss << ChildNodes.size() << "]";
+    if (UseCache && HasChanged)
+      oss << " = ?";
+    else
+      oss << " = " << p->val_to_str() << std::endl;
   }
 
-  if (ChildNodes.size())
-    oss << " (" << ChildNodes.size() << " children/"
-        << " values)" << std::endl;
-  else
-    oss << std::endl;
-
+  // Abort recursion
   if (level == 0)
     return oss.str();
-  for (unsigned int i = 0; i < ChildNodes.size(); i++) {
-    oss << ChildNodes.at(i)->print(level - 1, prefix + ". ");
+  
+  for( auto ch : ChildNodes ) {
+    oss << ch->print(level - 1, prefix + ". ");
   }
   return oss.str();
 }

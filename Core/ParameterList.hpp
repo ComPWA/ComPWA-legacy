@@ -172,40 +172,7 @@ public:
   }
 
   /// A public function returning a string with parameter information
-  virtual std::string to_str() const {
-    std::stringstream s;
-    if (IntValues.size()) {
-      s << "Integer values:" << std::endl;
-      for (auto p : IntValues)
-        s << p->to_str();
-    }
-    if (DoubleValues.size()) {
-      s << "Double values:" << std::endl;
-      for (auto p : DoubleValues)
-        s << p->to_str();
-    }
-    if (ComplexValues.size()) {
-      s << "Complex values:" << std::endl;
-      for (auto p : ComplexValues)
-        s << p->to_str();
-    }
-    if (MultiIntValues.size()) {
-      s << "Multi integer values:" << std::endl;
-      for (auto p : MultiIntValues)
-        s << p->to_str();
-    }
-    if (MultiDoubleValues.size()) {
-      s << "Multi double values:" << std::endl;
-      for (auto p : MultiDoubleValues)
-        s << p->to_str();
-    }
-    if (MultiComplexValues.size()) {
-      s << "Multi complex values:" << std::endl;
-      for (auto p : MultiComplexValues)
-        s << p->to_str();
-    }
-    return s.str();
-  };
+  virtual std::string to_str() const;
 
 protected:
   std::vector<std::shared_ptr<ComPWA::Value<int>>> IntValues;

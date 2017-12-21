@@ -253,7 +253,7 @@ public:
   };
   
   /// Get current normalization.
-  virtual double normalization() const { return 1 / PhspVolume; };
+  virtual double normalization() const { return 1 / std::sqrt(PhspVolume); };
 
   //=========== FUNCTIONTREE =================
   virtual bool hasTree() const { return true; }
@@ -278,7 +278,7 @@ public:
                    nodeName);
 
     tr->createNode("Normalization",
-                   std::make_shared<Value<double>>(1 / PhspVolume),
+                   std::make_shared<Value<double>>(1 / std::sqrt(PhspVolume)),
                    std::make_shared<Inverse>(ParType::DOUBLE),
                    nodeName); // 1/normLH
 
