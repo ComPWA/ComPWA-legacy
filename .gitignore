@@ -23,3 +23,9 @@ build.cfg
 /Default/
 build
 install
+*.env
+*.vscode
+*.pydevproject
+*__pycache__
+*.rst
+!Physics/ExpertSystem/docs/source/index.rst
