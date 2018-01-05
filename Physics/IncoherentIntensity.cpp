@@ -25,12 +25,12 @@ void IncoherentIntensity::load(std::shared_ptr<PartList> partL,
 
   // Name is not required - default value 'empty'
   Name = (pt.get<std::string>("<xmlattr>.Name", "empty"));
-  Strength = (std::make_shared<ComPWA::FitParameter>("Strength_"+Name, 1.0));
+  Strength = (std::make_shared<ComPWA::FitParameter>("Strength_" + Name, 1.0));
   setPhspVolume(kin->phspVolume());
 
   for (const auto &v : pt.get_child("")) {
     if (v.first == "Parameter" &&
-      v.second.get<std::string>("<xmlattr>.Type") == "Strength") {
+        v.second.get<std::string>("<xmlattr>.Type") == "Strength") {
       Strength = std::make_shared<FitParameter>(v.second);
     } else if (v.first == "Intensity" &&
                v.second.get<std::string>("<xmlattr>.Class") == "Coherent") {
@@ -41,14 +41,14 @@ void IncoherentIntensity::load(std::shared_ptr<PartList> partL,
   }
 }
 
-boost::property_tree::ptree IncoherentIntensity::save() const{
+boost::property_tree::ptree IncoherentIntensity::save() const {
   boost::property_tree::ptree pt;
   pt.put<std::string>("<xmlattr>.Name", name());
   pt.add_child("Parameter", Strength->save());
   pt.put("Parameter.<xmlattr>.Type", "Strength");
   for (auto i : Intensities)
     pt.add_child("CoherentIntensity", i->save());
-  
+
   return pt;
 }
 
@@ -73,7 +73,6 @@ double IncoherentIntensity::intensity(const ComPWA::DataPoint &point) const {
       parameters.at(i) = params;
       normValues.at(i) =
           1 / (Tools::Integral(Intensities.at(i), PhspSample, PhspVolume));
-      normValues.at(i) *= Intensities.at(i)->strength();
     }
     result += Intensities.at(i)->intensity(point) * normValues.at(i);
   }
@@ -100,15 +99,30 @@ IncoherentIntensity::component(std::string name) {
   }
 
   bool found = false;
+  
   // Do we want to have a combination of CoherentIntensities?
   std::vector<std::string> names = splitString(name);
-  auto icIn = std::make_shared<IncoherentIntensity>(*this);
+  
+  // In case the requested is a direct component we return a CoherentIntensity
+  // object
+  if (names.size() == 1) {
+    for (int j = 0; j < Intensities.size(); j++) {
+      if (names.at(0) == Intensities.at(j)->name()) {
+        found = true;
+        return Intensities.at(j);
+      }
+    }
+  }
+
+  // Otherwise we hava multiple components and we build a IncoherentIntensity
+  auto icIn = std::shared_ptr<AmpIntensity>(this->clone(name));
   icIn->setName(name);
   icIn->reset();
   for (auto i : names) {
     for (int j = 0; j < Intensities.size(); j++) {
       if (i == Intensities.at(j)->name()) {
-        icIn->addIntensity(Intensities.at(j));
+        std::dynamic_pointer_cast<IncoherentIntensity>(icIn)->addIntensity(
+            Intensities.at(j));
         found = true;
       }
     }
@@ -121,7 +135,7 @@ IncoherentIntensity::component(std::string name) {
   for (auto i : Intensities) {
     try {
       auto r = i->component(name);
-      icIn->addIntensity(r);
+      std::dynamic_pointer_cast<IncoherentIntensity>(icIn)->addIntensity(r);
       found = true;
     } catch (std::exception &ex) {
     }
@@ -144,19 +158,59 @@ IncoherentIntensity::tree(std::shared_ptr<Kinematics> kin,
                           const ComPWA::ParameterList &toySample,
                           unsigned int nEvtVar, std::string suffix) {
 
-  size_t sampleSize = sample.mDoubleValue(0)->values().size();
+  size_t n = sample.mDoubleValue(0)->values().size();
+  size_t phspSize = phspSample.mDoubleValue(0)->values().size();
+
+  // Efficiency values are stored on the next to last element of the
+  // ParameterList
+  std::shared_ptr<Value<std::vector<double>>> eff =
+      phspSample.mDoubleValues().end()[-2];
+  // Weights are stored on the last element of the ParameterList
+  std::shared_ptr<Value<std::vector<double>>> weightPhsp =
+      phspSample.mDoubleValues().end()[-1];
+
+  double sumWeights = std::accumulate(weightPhsp->values().begin(),
+                                      weightPhsp->values().end(), 0.0);
 
   auto tr = std::make_shared<FunctionTree>(
-      "IncoherentIntens(" + name() + ")" + suffix, MDouble("", sampleSize),
+      "IncoherentIntens(" + name() + ")" + suffix, MDouble("", n),
       std::shared_ptr<Strategy>(new MultAll(ParType::MDOUBLE)));
   tr->createLeaf("Strength", Strength,
                  "IncoherentIntens(" + name() + ")" + suffix);
-  tr->createNode("SumOfCoherentIntens", MDouble("", sampleSize),
+  tr->createNode("SumOfCoherentIntens", MDouble("", n),
                  std::make_shared<AddAll>(ParType::MDOUBLE),
                  "IncoherentIntens(" + name() + ")" + suffix);
+
   for (auto i : Intensities) {
-    tr->insertTree(i->tree(kin, sample, phspSample, toySample, nEvtVar),
-                   "SumOfCoherentIntens");
+    std::string name = i->name();
+    // Construct tree for normalization
+    auto normTree = std::make_shared<FunctionTree>(
+        "Normalization(" + name + ")" + suffix,
+        std::make_shared<Value<double>>(),
+        std::make_shared<Inverse>(ParType::DOUBLE));
+    normTree->createNode(
+        "Integral", std::shared_ptr<Strategy>(new MultAll(ParType::DOUBLE)),
+        "Normalization(" + name + ")" + suffix);
+    normTree->createLeaf("PhspVolume", kin->phspVolume(), "Integral");
+    normTree->createLeaf("InverseSampleWeights", 1 / ((double)sumWeights),
+                         "Integral");
+    normTree->createNode("Sum",
+                         std::shared_ptr<Strategy>(new AddAll(ParType::DOUBLE)),
+                         "Integral");
+    normTree->createNode("IntensityWeighted", MDouble("", phspSize),
+                         std::make_shared<MultAll>(ParType::MDOUBLE), "Sum");
+    normTree->createLeaf("Efficiency", eff, "IntensityWeighted");
+    normTree->createLeaf("EventWeight", weightPhsp, "IntensityWeighted");
+    normTree->insertTree(
+        i->tree(kin, phspSample, phspSample, toySample, nEvtVar),
+        "IntensityWeighted");
+
+    // Construct tree and add normalization tree
+    auto intensTree = i->tree(kin, sample, phspSample, toySample, nEvtVar);
+    intensTree->insertTree(normTree,
+                           "CoherentIntensity(" + name + ")" + suffix);
+
+    tr->insertTree(intensTree, "SumOfCoherentIntens");
   }
   return tr;
 }
@@ -181,4 +235,3 @@ void IncoherentIntensity::updateParameters(const ParameterList &list) {
 
   return;
 }
-

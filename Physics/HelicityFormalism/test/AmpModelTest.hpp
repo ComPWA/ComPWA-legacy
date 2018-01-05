@@ -388,16 +388,16 @@ const std::string HelicityTestModel = R"####(
       <Value>0.99</Value>
       <Fix>true</Fix>
     </Parameter>
-    <Amplitude Name='omega'>
-      <Parameter Class='Double' Type='Magnitude' Name='Magnitude_omegaToPi0Gamma'>
+    <Amplitude Class='SequentialPartialAmplitude' Name='omega'>
+      <Parameter Class='Double' Type='Magnitude' Name='Magnitude_sosososos'>
         <Value>1.0</Value>
         <Fix>true</Fix>
       </Parameter>
-      <Parameter Class='Double' Type='Phase' Name='Phase_omegaToPi0Gamma'>
+      <Parameter Class='Double' Type='Phase' Name='Phase_sosososos'>
         <Value>0.0</Value>
         <Fix>true</Fix>
       </Parameter>
-      <PartialAmplitude Name='jpsitoOmegaPi0'>
+      <PartialAmplitude Class="HelicityDecay" Name='jpsitoOmegaPi0'>
         <Parameter Class='Double' Type='Magnitude' Name='Magnitude_jpsitoOmegaPi0'>
           <Value>1.0</Value>
           <Fix>true</Fix>
@@ -418,7 +418,7 @@ const std::string HelicityTestModel = R"####(
           <Particle Name='pi0' FinalState='2' Helicity='0' />
         </DecayProducts>
       </PartialAmplitude>
-      <PartialAmplitude Name="omegatoPi0G">
+      <PartialAmplitude Class="HelicityDecay" Name="omegatoPi0G">
         <Parameter Class='Double' Type='Magnitude' Name='Magnitude_omegaToPi0Gamma'>
           <Value>1.0</Value>
           <Fix>true</Fix>
@@ -443,6 +443,87 @@ const std::string HelicityTestModel = R"####(
     </Amplitude>
   </Intensity>
 </Intensity>
+)####";
+
+const std::string SeqPartialAmplitudeTestModel = R"####(
+    <Amplitude Class='SequentialPartialAmplitude' Name='omega'>
+      <Parameter Class='Double' Type='Magnitude' Name='Magnitude_sosososos'>
+        <Value>1.0</Value>
+        <Fix>true</Fix>
+      </Parameter>
+      <Parameter Class='Double' Type='Phase' Name='Phase_sosososos'>
+        <Value>0.0</Value>
+        <Fix>true</Fix>
+      </Parameter>
+      <PartialAmplitude Class="HelicityDecay" Name='jpsitoOmegaPi0'>
+        <Parameter Class='Double' Type='Magnitude' Name='Magnitude_jpsitoOmegaPi0'>
+          <Value>1.0</Value>
+          <Fix>true</Fix>
+          <Min>0.5</Min>
+          <Max>1.5</Max>
+          <Error>0</Error>
+        </Parameter>
+        <Parameter Class='Double' Type='Phase' Name='Phase_jpsitoOmegaPi0'>
+          <Value>1.0</Value>
+          <Fix>true</Fix>
+          <Min>0.5</Min>
+          <Max>1.5</Max>
+          <Error>0</Error>
+        </Parameter>
+        <DecayParticle Name='jpsi' Helicity='+1' />
+        <DecayProducts>
+          <Particle Name='omega' FinalState='0 1' Helicity='+1' />
+          <Particle Name='pi0' FinalState='2' Helicity='0' />
+        </DecayProducts>
+      </PartialAmplitude>
+      <PartialAmplitude Class="HelicityDecay" Name="omegatoPi0G">
+        <Parameter Class='Double' Type='Magnitude' Name='Magnitude_omegaToPi0Gamma'>
+          <Value>1.0</Value>
+          <Fix>true</Fix>
+          <Min>0.5</Min>
+          <Max>1.5</Max>
+          <Error>0</Error>
+        </Parameter>
+        <Parameter Class='Double' Type='Phase' Name='Phase_omegaToPi0Gamma'>
+          <Value>1.0</Value>
+          <Fix>true</Fix>
+          <Min>0.5</Min>
+          <Max>1.5</Max>
+          <Error>0</Error>
+        </Parameter>
+        <DecayParticle Name='omega' Helicity='+1' />
+        <RecoilSystem FinalState='2' />
+        <DecayProducts>
+          <Particle Name='gamma' FinalState='1' Helicity='+1' />
+          <Particle Name='pi0' FinalState='0' Helicity='0' />
+        </DecayProducts>
+      </PartialAmplitude>
+    </Amplitude>
+)####";
+
+const std::string PartialAmplitudeTestModel = R"####(
+      <PartialAmplitude Class="HelicityDecay" Name="omegatoPi0G">
+        <Parameter Class='Double' Type='Magnitude' Name='Magnitude_omegaToPi0Gamma'>
+          <Value>1.0</Value>
+          <Fix>true</Fix>
+          <Min>0.5</Min>
+          <Max>1.5</Max>
+          <Error>0</Error>
+        </Parameter>
+        <Parameter Class='Double' Type='Phase' Name='Phase_omegaToPi0Gamma'>
+          <Value>1.0</Value>
+          <Fix>true</Fix>
+          <Min>0.5</Min>
+          <Max>1.5</Max>
+          <Error>0</Error>
+        </Parameter>
+        <DecayParticle Name='omega' Helicity='+1' />
+        <RecoilSystem FinalState='2' />
+        <DecayProducts>
+          <Particle Name='gamma' FinalState='1' Helicity='+1' />
+          <Particle Name='pi0' FinalState='0' Helicity='0' />
+        </DecayProducts>
+      </PartialAmplitude>
 )####";
 
 #endif

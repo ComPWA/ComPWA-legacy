@@ -8,7 +8,7 @@
 
 namespace ComPWA {
 
-void FitResult::WriteText(std::string filename) {
+void FitResult::writeText(std::string filename) {
   std::ofstream myfile;
   myfile.open(filename, std::ios::app);
   genOutput(myfile);
@@ -16,7 +16,7 @@ void FitResult::WriteText(std::string filename) {
   return;
 };
 
-void FitResult::WriteSimpleText(std::string filename) {
+void FitResult::writeSimpleText(std::string filename) {
   std::ofstream myfile;
   myfile.open(filename);
   genSimpleOutput(myfile);
@@ -38,7 +38,7 @@ double FitResult::shiftAngle(double v) {
 }
 
 void FitResult::genSimpleOutput(std::ostream &out) {
-  for (auto p : finalParameters.doubleParameters()) {
+  for (auto p : FinalParameters.doubleParameters()) {
     out << p->value() << " ";
     if (p->hasError())
       out << p->avgError() << " ";
@@ -48,30 +48,30 @@ void FitResult::genSimpleOutput(std::ostream &out) {
   return;
 }
 
-void FitResult::SetFinalParameters(ParameterList &finPars) {
-  finalParameters.DeepCopy(finPars);
+void FitResult::setFinalParameters(ParameterList &finPars) {
+  FinalParameters.DeepCopy(finPars);
 }
 
-void FitResult::SetTrueParameters(ParameterList &truePars) {
-  trueParameters.DeepCopy(truePars);
+void FitResult::setTrueParameters(ParameterList &truePars) {
+  TrueParameters.DeepCopy(truePars);
 }
 
-void FitResult::SetFitFractions(ParameterList &list) {
+void FitResult::setFitFractions(ParameterList &list) {
  FitFractions.DeepCopy(list);
 }
 
-void FitResult::Print(std::string opt) {
+void FitResult::print(std::string opt) {
   std::stringstream s;
   genOutput(s, opt);
   std::string str = s.str();
   LOG(info) << str;
 }
 
-void FitResult::PrintFitParameters(TableFormater *tableResult) {
+void FitResult::printFitParameters(TableFormater *tableResult) {
   bool printTrue = 0, printInitial = 0;
-  if (trueParameters.numParameters())
+  if (TrueParameters.numParameters())
     printTrue = 1;
-  if (initialParameters.numParameters())
+  if (InitialParameters.numParameters())
     printInitial = 1;
 
   // Column width for parameter with symmetric error
@@ -79,7 +79,7 @@ void FitResult::PrintFitParameters(TableFormater *tableResult) {
 
   // Do we have a parameter with assymetric errors?
   //  for (unsigned int o = 0; o < finalParameters.GetNDouble(); o++)
-  for (auto p : finalParameters.doubleParameters()) {
+  for (auto p : FinalParameters.doubleParameters()) {
     if (p->errorType() == ErrorType::ASYM)
       parErrorWidth = 33;
   }
@@ -96,21 +96,21 @@ void FitResult::PrintFitParameters(TableFormater *tableResult) {
   tableResult->header();
 
   size_t parameterId = 0;
-  for (auto p : finalParameters.doubleParameters()) {
+  for (auto p : FinalParameters.doubleParameters()) {
     //    for (unsigned int o = 0; o < finalParameters.GetNDouble(); o++) {
     std::shared_ptr<FitParameter> iniPar, truePar;
     std::string name = p->name();
 
     if (printInitial) {
       try {
-        iniPar = FindParameter(p->name(), initialParameters);
+        iniPar = FindParameter(p->name(), InitialParameters);
       } catch (BadParameter &bad) {
         iniPar.reset();
       }
     }
     if (printTrue) {
       try {
-        truePar = FindParameter(p->name(), trueParameters);
+        truePar = FindParameter(p->name(), TrueParameters);
       } catch (BadParameter &bad) {
         truePar.reset();
       }
@@ -198,7 +198,7 @@ void FitResult::PrintFitParameters(TableFormater *tableResult) {
   return;
 }
 
-void FitResult::PrintFitFractions(TableFormater *fracTable) {
+void FitResult::printFitFractions(TableFormater *fracTable) {
   LOG(info) << " FitResult::printFitFractions() | "
                "Calculating fit fractions!";
 
@@ -226,8 +226,8 @@ void FitResult::PrintFitFractions(TableFormater *fracTable) {
   fracTable->delim();
   *fracTable << "Total" << sum << sqrt(sumErrorSq);
   fracTable->footer();
-  sumFractions = sum;
-  sumFractionsError = sqrt(sumErrorSq);
+  SumFractions = sum;
+  SumFractionsError = sqrt(sumErrorSq);
 
   return;
 }

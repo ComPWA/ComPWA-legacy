@@ -107,7 +107,7 @@ public:
 
   virtual std::shared_ptr<FunctionTree>
   tree(std::shared_ptr<Kinematics> kin, const ComPWA::ParameterList &sample,
-          const ComPWA::ParameterList &toySample, std::string suffix);
+          const ComPWA::ParameterList &toySample, std::string suffix = "");
 
 protected:
   /// Position where variables are stored in dataPoint.

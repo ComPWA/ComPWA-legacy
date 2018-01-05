@@ -52,8 +52,8 @@ public:
 
   virtual void reset() {
     Intensities.clear();
-    NormalizationValues.clear();
-    Parameters.clear();
+//    NormalizationValues.clear();
+//    Parameters.clear();
     return;
   }
 

@@ -207,7 +207,7 @@ BOOST_AUTO_TEST_CASE(HelicityAngleTest) {
     BOOST_CHECK_EQUAL((float)cosTheta23_12, (-1) * ((float)cosTheta23_13));
 
     //------------- Test of HelicityKinematics -----------------
-    // Check if calculation of helicity angles correspongs the the previously
+    // Check if calculation of helicity angles corresponds to the previously
     // calculated values
 
     DataPoint p12, p12_CP, p13, p13_CP, p23, p23_CP;

@@ -92,15 +92,15 @@ public:
   virtual std::shared_ptr<FunctionTree> tree(std::shared_ptr<Kinematics> kin,
                                              const ParameterList &sample,
                                              const ParameterList &toySample,
-                                             std::string suffix);
+                                             std::string suffix = "");
 
 protected:
   std::vector<std::shared_ptr<ComPWA::Physics::PartialAmplitude>>
       PartialAmplitudes;
 };
 
-} // namespace HelicityFormalism
-} // namespace Physics
-} // namespace ComPWA
+} // ns::HelicityFormalism
+} // ns::Physics
+} // ns::ComPWA
 
 #endif

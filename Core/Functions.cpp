@@ -242,11 +242,11 @@ void AddAll::execute(ParameterList &paras, std::shared_ptr<Parameter> &out) {
 
     // collapse multi values
     for (auto dv : paras.mComplexValues())
-      result =
+      result +=
           std::accumulate(dv->values().begin(), dv->values().end(), result);
 
     for (auto dv : paras.mDoubleValues())
-      result =
+      result +=
           std::accumulate(dv->values().begin(), dv->values().end(), result);
 
     for (auto dv : paras.mIntValues())
@@ -275,13 +275,13 @@ void AddAll::execute(ParameterList &paras, std::shared_ptr<Parameter> &out) {
       KahanSummation kaSum = {result};
       auto kaResult = std::accumulate(dv->values().begin(), dv->values().end(),
                                       kaSum, KahanSum);
-      result = kaResult.sum;
+      result += kaResult.sum;
     }
     for (auto dv : paras.mIntValues()) {
       KahanSummation kaSum = {result};
       auto kaResult = std::accumulate(dv->values().begin(), dv->values().end(),
                                       kaSum, KahanSum);
-      result = kaResult.sum;
+      result += kaResult.sum;
     }
     break;
   } // end double
@@ -301,7 +301,7 @@ void AddAll::execute(ParameterList &paras, std::shared_ptr<Parameter> &out) {
       KahanSummation kaSum = {(double)result};
       auto kaResult = std::accumulate(dv->values().begin(), dv->values().end(),
                                       kaSum, KahanSum);
-      result = kaResult.sum;
+      result += kaResult.sum;
     }
     break;
   } // end int

@@ -54,7 +54,8 @@ BOOST_AUTO_TEST_CASE(SetGetCheck) {
 }
 
 BOOST_AUTO_TEST_CASE(FixValueCheck) {
-  FitParameter emptyFloat("emptFloatPar");
+  FitParameter emptyFloat("emptyFloatPar");
+  emptyFloat.fixParameter(false);
   emptyFloat.setValue(7.);
   emptyFloat.setBounds(0., 10.);
   emptyFloat.setError(1.);

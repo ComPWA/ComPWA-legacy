@@ -380,10 +380,10 @@ int main(int argc, char **argv) {
   LOG(debug) << esti->tree()->head()->print(25);
   LOG(info) << "Fit parameter list: " << fitPar.to_str();
   auto minuitif = new Optimizer::Minuit2::MinuitIF(esti, fitPar);
-  minuitif->SetHesse(true);
+  minuitif->setUseHesse(true);
   auto result = minuitif->exec(fitPar);
 
-  result->Print();
+  result->print();
 
   //---------------------------------------------------
   // 5.1) Save the fit result

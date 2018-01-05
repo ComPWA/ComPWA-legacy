@@ -33,23 +33,23 @@ inline bool generate(int number, std::shared_ptr<ComPWA::Kinematics> kin,
 
   // Doing some checks
   if (number < 0 && !phsp)
-    throw std::runtime_error("RunManager: gen() negative number of events: " +
+    throw std::runtime_error("Tools::generate() negative number of events: " +
                              std::to_string((long double)number) +
                              ". And no phsp sample given!");
   if (!amp)
-    throw std::runtime_error("RunManager::gen() | Amplitude not valid");
+    throw std::runtime_error("Tools::generate() | Amplitude not valid");
   if (!gen)
-    throw std::runtime_error("RunManager::gen() | Generator not valid");
+    throw std::runtime_error("Tools::generate() | Generator not valid");
   if (!data)
-    throw std::runtime_error("RunManager::gen() | Sample not valid");
+    throw std::runtime_error("Tools::generate() | Sample not valid");
   if (data->numEvents() > 0)
-    throw std::runtime_error("RunManager::gen() | Sample not empty!");
+    throw std::runtime_error("Tools::generate() | Sample not empty!");
   if (phspTrue && !phsp)
-    throw std::runtime_error("RunManager::gen() | We have a sample of true"
+    throw std::runtime_error("Tools::generate() | We have a sample of true"
                              " phsp events, but no phsp sample!");
   if (phspTrue && phspTrue->numEvents() != phsp->numEvents())
     throw std::runtime_error(
-        "RunManager::gen() | We have a sample of true "
+        "Tools::generate() | We have a sample of true "
         "phsp events, but the sample size doesn't match that one of "
         "the phsp sample!");
 
@@ -72,7 +72,7 @@ inline bool generate(int number, std::shared_ptr<ComPWA::Kinematics> kin,
     generationMaxValue *= ComPWA::Tools::Maximum(kin, amp, phsp);
   }
 
-  LOG(trace) << "generate() | Using " << generationMaxValue
+  LOG(trace) << "Tools::generate() | Using " << generationMaxValue
              << " as maximum value of the intensity.";
 
   ComPWA::Event evt;     // event that we fill into generated sample
@@ -111,16 +111,17 @@ inline bool generate(int number, std::shared_ptr<ComPWA::Kinematics> kin,
 
     // If maximum of intensity is reached we have to restart the procedure
     if (generationMaxValue < (AMPpdf * weight)) {
-      LOG(trace) << "RunManager::gen() | Error in HitMiss "
-                    "procedure: Maximum value of random number generation "
-                    "smaller then amplitude maximum! We raise the maximum "
-                    "value and restart generation!";
       i = 0;
       bar = ComPWA::ProgressBar(number);
       gen->setSeed(initialSeed);
       generationMaxValue = 2 * (AMPpdf * weight);
       data->clear();
       totalCalls = 0;
+      LOG(trace) << "Tools::generate() | Error in HitMiss "
+                    "procedure: Maximum value of random number generation "
+                    "smaller then amplitude maximum! We raise the maximum "
+                    "to "
+                 << generationMaxValue << " value and restart generation!";
       continue;
     }
 
@@ -136,7 +137,7 @@ inline bool generate(int number, std::shared_ptr<ComPWA::Kinematics> kin,
 
     if (number > 0)
       bar.next();
-      
+    
     // break if we have a sufficienct number of events
     if (data->numEvents() >= number)
       i = limit;
@@ -144,14 +145,14 @@ inline bool generate(int number, std::shared_ptr<ComPWA::Kinematics> kin,
   
   if (data->numEvents() < number) {
     std::cout << std::endl;
-    LOG(error) << "RunManager::gen() | Not able to generate " << number
+    LOG(error) << "Tools::generate() | Not able to generate " << number
                << " events. Phsp sample too small. Current size "
                   "of sample is now "
                << data->numEvents();
   }
 
   if (!totalCalls)
-    throw std::runtime_error("RunManager::gen() | Number of calls is zero! "
+    throw std::runtime_error("Tools::generate() | Number of calls is zero! "
                              "There ust be something wrong!");
 
   double genEff = (double)data->numEvents() / totalCalls;
@@ -165,10 +166,10 @@ inline bool GeneratePhsp(int nEvents, std::shared_ptr<ComPWA::Generator> gen,
   if (nEvents == 0)
     return 0;
   if (!sample)
-    throw std::runtime_error("RunManager: generatePhsp() | "
+    throw std::runtime_error("Tools::GeneratePhsp() | "
                              "No phase-space sample set");
   if (sample->numEvents() > 0)
-    throw std::runtime_error("RunManager: generatePhsp() | "
+    throw std::runtime_error("Tools::GeneratePhsp() | "
                              "Dataset not empty! abort!");
 
   LOG(info) << "Generating phase-space MC: [" << nEvents << " events] ";

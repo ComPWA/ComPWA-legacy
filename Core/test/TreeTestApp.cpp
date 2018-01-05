@@ -44,9 +44,13 @@ BOOST_AUTO_TEST_CASE(SubTree) {
   ComPWA::Logging log("", boost::log::trivial::severity_level::trace);
 
   std::shared_ptr<FitParameter> parA(new FitParameter("parA", 5.));
+  parA->fixParameter(0);
   std::shared_ptr<FitParameter> parB(new FitParameter("parB", 2.));
+  parB->fixParameter(0);
   std::shared_ptr<FitParameter> parC(new FitParameter("parC", 3.));
+  parC->fixParameter(0);
   std::shared_ptr<FitParameter> parD(new FitParameter("parD", 1.));
+  parD->fixParameter(0);
 
   // Calculate R = a * ( b + c * d)
   auto result = std::make_shared<Value<double>>();

@@ -231,9 +231,9 @@ std::shared_ptr<ComPWA::FitResult> MinuitIF::exec(ParameterList &list) {
 
   // Create fit result
   std::shared_ptr<FitResult> result(new MinuitResult(Estimator, minMin));
-  result->SetFinalParameters(finalParList);
-  result->SetInitialParameters(initialParList);
-  result->SetTime(elapsed);
+  result->setFinalParameters(finalParList);
+  result->setInitialParameters(initialParList);
+  result->setTime(elapsed);
 
   // update parameters in amplitude
   //  Amplitude::UpdateAmpParameterList(estimator->getAmplitudes(),

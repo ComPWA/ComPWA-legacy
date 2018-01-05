@@ -162,15 +162,16 @@ protected:
   virtual double integral() const {
     if (!PhspSample->size()) {
       LOG(debug)
-          << "CoherentIntensity::Integral() | Integral can not be calculated "
+          << "PartialAmplitude::Integral() | Integral can not be calculated "
              "since no phsp sample is set. Set a sample using "
              "SetPhspSamples(phspSample, toySample)!";
       return 1.0;
     }
 
     double sumIntens = 0;
-    for (auto i : *PhspSample.get())
+    for (auto i : *PhspSample.get()) {
       sumIntens += std::norm(evaluateNoNorm(i));
+      }
 
     double integral = (sumIntens * PhspVolume / PhspSample->size());
     LOG(trace) << "PartialAmplitude::Integral() | Integral is " << integral

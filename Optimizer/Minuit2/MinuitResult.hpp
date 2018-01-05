@@ -46,113 +46,110 @@ public:
                  ROOT::Minuit2::FunctionMinimum result);
 
   /// Return final likelihood value
-  double GetResult() { return finalLH; }
+  double result() { return FinalLH; }
 
   /// Set initial likelihood value
-  virtual void SetInitialLH(double iniLH) { initialLH = iniLH; }
+  virtual void setInitialLH(double iniLH) { InitialLH = iniLH; }
   
   /// Get initial likelihood value
-  virtual double GetInitialLH() { return initialLH; }
+  virtual double initialLH() { return InitialLH; }
   
   /// Set final likelihood value
-  virtual void SetFinalLH(double iniLH) { finalLH = iniLH; }
+  virtual void setFinalLH(double iniLH) { FinalLH = iniLH; }
   
   /// Get final likelihood value
-  virtual double GetFinalLH() { return finalLH; }
+  virtual double finalLH() { return FinalLH; }
   
   /// Set true likelihood value
-  virtual void SetTrueLH(double iniLH) { trueLH = iniLH; }
+  virtual void setTrueLH(double iniLH) { TrueLH = iniLH; }
   
   /// Get true likelihood value
-  virtual double GetTrueLH() { return trueLH; }
+  virtual double trueLH() { return TrueLH; }
 
   /// Convert to double and return final LH values
-  operator double() const { return finalLH; }
+  operator double() const { return FinalLH; }
 
   /// Set calculation of interference terms
-  void SetCalcInterference(bool b) { calcInterference = b; }
+  void setCalcInterference(bool b) { CalcInterference = b; }
 
   /// Get calculation of interference terms
-  bool GetCalcInterference() { return calcInterference; }
+  bool calcInterference() { return CalcInterference; }
 
   /// Write list of fit parameters and list of fitfractions to XML file @param
   /// filename
-  virtual void WriteXML(std::string filename);
+  virtual void writeXML(std::string filename);
 
   /// Write fit parameters, fit fractions and cov matrix as TeX to file @param
   /// filename
-  virtual void WriteTeX(std::string filename);
-
-  /// Any errors during minimization?
-  virtual bool HasFailed();
+  virtual void writeTeX(std::string filename);
 
   /// Is minimum valid?
-  virtual bool MinimumIsValid() { return isValid; }
+  virtual bool isValid() { return IsValid; }
 
   /// Number of free parameters
-  virtual int GetNDF() { return nFreeParameter; }
+  virtual int ndf() { return NumFreeParameter; }
 
   /// Get covariance matrix
-  virtual std::vector<std::vector<double>> GetCovarianceMatrix() { return cov; }
+  virtual std::vector<std::vector<double>> covarianceMatrix() { return Cov; }
   
   /// Get correlation matrix
-  virtual std::vector<std::vector<double>> GetCorrelationMatrix() {
-    return corr;
+  virtual std::vector<std::vector<double>> correlationMatrix() {
+    return Corr;
   }
   
   /// Get global correlation coefficiencts
-  virtual std::vector<double> GetGlobalCC() { return globalCC; }
+  virtual std::vector<double> gobalCC() { return GlobalCC; }
   
   /// Get estimated distrance to minimum
-  virtual double GetEDM() { return edm; }
+  virtual double edm() { return Edm; }
 
 protected:
   /// Initialize result with Minuit2::FunctionMinimum
   void init(ROOT::Minuit2::FunctionMinimum);
 
   /// Calculate interference terms
-  bool calcInterference;
+  bool CalcInterference;
 
   /// Number of floating parameters
-  int nFreeParameter;
-
-  /// Number of events
+  int NumFreeParameter;
 
   /// Pointer to estimator
   std::shared_ptr<ComPWA::IEstimator> est;
 
   //====== MINUIT FIT RESULT =======
-  double GetCorr(unsigned int n, unsigned int t) {
+  double corr(unsigned int n, unsigned int t) {
     std::cout << "WARNING: not sure if row and column are choose correctly!"
               << std::endl;
-    if (n < corr.size() && t < corr.at(1).size() && t >= n)
-      return corr.at(n).at(t);
+    if (n < Corr.size() && t < Corr.at(1).size() && t >= n)
+      return Corr.at(n).at(t);
     else
       return -9000;
   };
 
-  bool isValid;             // result valid
-  bool covPosDef;           // covariance matrix pos.-def.
-  bool hasValidParameters;  // valid parameters
-  bool hasValidCov;         // valid covariance
-  bool hasAccCov;           // accurate covariance
-  bool hasReachedCallLimit; // call limit reached
-  bool edmAboveMax;
-  bool hesseFailed; // hesse failed
-  double errorDef;
-  unsigned int nFcn;
-  double initialLH;
-  double finalLH;
-  double trueLH;
-  double edm; // estimated distance to minimum
-  //! Covariance matrix
-  std::vector<std::vector<double>> cov;
-  //! Correlation matrix
-  std::vector<std::vector<double>> corr;
-  //! Global correlation coefficients
-  std::vector<double> globalCC;
+  bool IsValid;             // result valid
+  bool CovPosDef;           // covariance matrix pos.-def.
+  bool HasValidParameters;  // valid parameters
+  bool HasValidCov;         // valid covariance
+  bool HasAccCov;           // accurate covariance
+  bool HasReachedCallLimit; // call limit reached
+  bool EdmAboveMax;
+  bool HesseFailed; // hesse failed
+  double ErrorDef;
+  unsigned int NFcn;
+  double InitialLH;
+  double FinalLH;
+  double TrueLH;
+  double Edm; // estimated distance to minimum
+  
+  /// Covariance matrix
+  std::vector<std::vector<double>> Cov;
+  
+  /// Correlation matrix
+  std::vector<std::vector<double>> Corr;
+  
+  /// Global correlation coefficients
+  std::vector<double> GlobalCC;
 
-  //====== OUTPUT =====
   /// Full fit result output
   void genOutput(std::ostream &out, std::string opt = "");
 
@@ -161,10 +158,10 @@ protected:
                                std::shared_ptr<AmpIntensity> amp);
 
   /// Table with correlation matrix
-  void PrintCorrelationMatrix(TableFormater *fracTable);
+  void printCorrelationMatrix(TableFormater *fracTable);
 
   /// Table with covariance matrix
-  void PrintCovarianceMatrix(TableFormater *fracTable);
+  void printCovarianceMatrix(TableFormater *fracTable);
 
 private:
   friend class boost::serialization::access;
@@ -172,30 +169,30 @@ private:
   void serialize(archive &ar, const unsigned int version) {
     using namespace boost::serialization;
     ar &BOOST_SERIALIZATION_BASE_OBJECT_NVP(FitResult);
-    ar &BOOST_SERIALIZATION_NVP(calcInterference);
-    ar &BOOST_SERIALIZATION_NVP(isValid);
-    ar &BOOST_SERIALIZATION_NVP(covPosDef);
-    ar &BOOST_SERIALIZATION_NVP(hasValidParameters);
-    ar &BOOST_SERIALIZATION_NVP(hasValidCov);
-    ar &BOOST_SERIALIZATION_NVP(hasAccCov);
-    ar &BOOST_SERIALIZATION_NVP(hasReachedCallLimit);
-    ar &BOOST_SERIALIZATION_NVP(edmAboveMax);
-    ar &BOOST_SERIALIZATION_NVP(hesseFailed);
-    ar &BOOST_SERIALIZATION_NVP(errorDef);
-    ar &BOOST_SERIALIZATION_NVP(nFcn);
-    ar &BOOST_SERIALIZATION_NVP(initialLH);
-    ar &BOOST_SERIALIZATION_NVP(finalLH);
-    ar &BOOST_SERIALIZATION_NVP(trueLH);
-    ar &BOOST_SERIALIZATION_NVP(edm);
-    ar &BOOST_SERIALIZATION_NVP(cov);
-    ar &BOOST_SERIALIZATION_NVP(corr);
-    ar &BOOST_SERIALIZATION_NVP(globalCC);
-    ar &BOOST_SERIALIZATION_NVP(nFreeParameter);
+    ar &BOOST_SERIALIZATION_NVP(CalcInterference);
+    ar &BOOST_SERIALIZATION_NVP(IsValid);
+    ar &BOOST_SERIALIZATION_NVP(CovPosDef);
+    ar &BOOST_SERIALIZATION_NVP(HasValidParameters);
+    ar &BOOST_SERIALIZATION_NVP(HasValidCov);
+    ar &BOOST_SERIALIZATION_NVP(HasAccCov);
+    ar &BOOST_SERIALIZATION_NVP(HasReachedCallLimit);
+    ar &BOOST_SERIALIZATION_NVP(EdmAboveMax);
+    ar &BOOST_SERIALIZATION_NVP(HesseFailed);
+    ar &BOOST_SERIALIZATION_NVP(ErrorDef);
+    ar &BOOST_SERIALIZATION_NVP(NFcn);
+    ar &BOOST_SERIALIZATION_NVP(InitialLH);
+    ar &BOOST_SERIALIZATION_NVP(FinalLH);
+    ar &BOOST_SERIALIZATION_NVP(TrueLH);
+    ar &BOOST_SERIALIZATION_NVP(Edm);
+    ar &BOOST_SERIALIZATION_NVP(Cov);
+    ar &BOOST_SERIALIZATION_NVP(Corr);
+    ar &BOOST_SERIALIZATION_NVP(GlobalCC);
+    ar &BOOST_SERIALIZATION_NVP(NumFreeParameter);
   }
 };
 
-} // namespace Minuit2
-} // namespace Optimizer
-} // namespace ComPWA
+} // ns::Minuit2
+} // ns::Optimizer
+} // ns::ComPWA
 
 #endif

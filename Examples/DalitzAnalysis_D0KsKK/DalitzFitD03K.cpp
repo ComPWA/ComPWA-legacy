@@ -585,6 +585,23 @@ int main(int argc, char **argv) {
     intens->parameters(fitPar);
     LOG(debug) << fitPar.to_str();
 
+    //    std::cout << "phi = "
+    //    <<Tools::Integral(intens->component("phi(1020)"), toyPoints,
+    //                                 fitModelKin->phspVolume())
+    //              << std::endl;
+    //
+    //    std::cout << "a0 = " <<Tools::Integral(intens->component("a0(980)0"),
+    //    toyPoints,
+    //                                 fitModelKin->phspVolume())
+    //              << std::endl;
+    //    std::cout << "total =
+    //    "<<Tools::Integral(intens->component("D0toKSK+K-"), toyPoints,
+    //                                 fitModelKin->phspVolume())
+    //              << std::endl;
+    //    std::cout << "ff= " << Tools::CalculateFitFraction(
+    //                     fitModelKin, intens, toyPoints,
+    //                     std::make_pair("phi(1020)", "D0toKSK+K-"))
+    //              << std::endl;
     //=== Constructing likelihood
     auto esti = std::make_shared<Estimator::MinLogLH>(
         fitModelKin, intens, sample, toyPhspData, phspData, 0, 0);
@@ -608,7 +625,7 @@ int main(int argc, char **argv) {
 
     // Start minimization
     result = minuitif->exec(fitPar);
-    finalParList = result->GetFinalParameters();
+    finalParList = result->finalParameters();
 
     // Calculation of fit fractions
     std::vector<std::pair<std::string, std::string>> fitComponents;
@@ -620,12 +637,12 @@ int main(int argc, char **argv) {
         std::pair<std::string, std::string>("a0(980)+", "D0toKSK+K-"));
     fitComponents.push_back(
         std::pair<std::string, std::string>("a2(1320)-", "D0toKSK+K-"));
-    ParameterList ff = Tools::CalculateFitFractions(fitModelKin, intens,
-                                                    toyPoints, fitComponents);
-    result->SetFitFractions(ff);
+    ParameterList ff = Tools::CalculateFitFractions(
+        fitModelKin, intens->component("D0toKSK+K-"), toyPoints, fitComponents);
+    result->setFitFractions(ff);
 
     // Print fit result
-    result->Print();
+    result->print();
 
     // Save fit result
     std::ofstream ofs(fileNamePrefix + std::string("-fitResult.xml"));
@@ -659,10 +676,10 @@ int main(int argc, char **argv) {
 
       //    inResult->SetUseCorrelatedErrors(fitFractionError);
       if (calculateInterference)
-        inResult->SetCalcInterference(0);
+        inResult->setCalcInterference(0);
       //    inResult->SetFitFractions(ParameterList()); // reset fractions list
       result = inResult;
-      result->Print();
+      result->print();
     }
 
     // Fill final parameters if minimization was not run
@@ -695,26 +712,26 @@ int main(int argc, char **argv) {
       //-------- Instance of DalitzPlot
       ComPWA::Tools::DalitzPlot pl(fitModelKin, fileNamePrefix, plotNBins);
       // set data sample
-      pl.SetData(sample);
+      pl.setData(sample);
       // set phsp sample
-      pl.SetPhspData(pl_phspSample);
+      pl.setPhspData(pl_phspSample);
       // set amplitude
-      pl.SetFitAmp(intens, "", kBlue - 4);
+      pl.setFitAmp(intens, "", kBlue - 4);
       // select components to plot
-      pl.DrawComponent("D0toKSK+K-", "Signal", kGreen);
-      pl.DrawComponent("phi(1020)", "phi", kYellow);
-      pl.DrawComponent("BkgD0toKSK+K-", "Background", kRed);
+      pl.drawComponent("D0toKSK+K-", "Signal", kGreen);
+      pl.drawComponent("phi(1020)", "phi", kYellow);
+      pl.drawComponent("BkgD0toKSK+K-", "Background", kRed);
       //    pl.DrawComponent("a0(980)0", "a_{0}(980)^{0}", kMagenta+2);
       //    pl.DrawComponent("phi(1020)", "#phi(1020)", kMagenta);
 
       // Fill histograms and create canvases
-      pl.Plot();
+      pl.plot();
     }
     LOG(info) << "FINISHED!";
 
     // Exit code is exit code of fit routine. 0 is good/ 1 is bad
     if (result)
-      return result->HasFailed();
+      return result->hasFailed();
     return 0;
   }
 }

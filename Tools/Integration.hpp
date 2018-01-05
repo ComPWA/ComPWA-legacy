@@ -72,7 +72,7 @@ protected:
   }
 };
 
-inline double Integral(std::shared_ptr<AmpIntensity> intens,
+inline double Integral(std::shared_ptr<const AmpIntensity> intens,
                        std::vector<DataPoint> &sample,
                        double phspVolume = 1.0) {
 
@@ -86,11 +86,10 @@ inline double Integral(std::shared_ptr<AmpIntensity> intens,
     sumIntens += intens->intensity(i);
 
   double integral = (sumIntens * phspVolume / sample.size());
-  auto n = sample.size();
   return integral;
 }
 
-inline double Integral(std::shared_ptr<AmpIntensity> intens,
+inline double Integral(std::shared_ptr<const AmpIntensity> intens,
                        std::shared_ptr<std::vector<DataPoint>> sample,
                        double phspVolume = 1.0) {
   return Integral(intens, *sample.get(), phspVolume);
@@ -140,6 +139,6 @@ inline double Maximum(std::shared_ptr<Kinematics> kin,
   return max;
 }
 
-} // namespace Tools
-} // namespace ComPWA
-#endif /* Integration_h */
+} // ns::Tools
+} // ns::ComPWA
+#endif

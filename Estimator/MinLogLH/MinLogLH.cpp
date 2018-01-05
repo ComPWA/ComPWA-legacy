@@ -124,23 +124,20 @@ void MinLogLH::IniLHtree() {
   //-log L = (-1)*N/(\sum_{ev} w_{ev}) \sum_{ev} ...
   _tree->createLeaf("minusOne", -1, "LH");
   _tree->createLeaf("nEvents", sampleSize, "LH");
-  _tree->createNode("invSumWeights",
-                    std::make_shared<Inverse>(ParType::DOUBLE),
+  _tree->createNode("invSumWeights", std::make_shared<Inverse>(ParType::DOUBLE),
                     "LH");
-  _tree->createNode("sumEvents",
-                    std::make_shared<AddAll>(ParType::DOUBLE),
+  _tree->createNode("sumEvents", std::make_shared<AddAll>(ParType::DOUBLE),
                     "LH");
   _tree->createLeaf("SumOfWeights", _sumOfWeights, "invSumWeights");
   _tree->createNode("weightLog", MDouble("", sampleSize),
                     std::make_shared<MultAll>(ParType::MDOUBLE),
                     "sumEvents"); // w_{ev} * log( I_{ev} )
-  _tree->createLeaf("Weight",
-                    _dataSampleList.mDoubleValues().back(), "weightLog");
-  _tree->createNode("Log", MDouble("", sampleSize),
-                    std::make_shared<LogOf>(ParType::MDOUBLE),
+  _tree->createLeaf("Weight", _dataSampleList.mDoubleValues().back(),
                     "weightLog");
+  _tree->createNode("Log", MDouble("", sampleSize),
+                    std::make_shared<LogOf>(ParType::MDOUBLE), "weightLog");
   _tree->insertTree(_intens->tree(_kin, _dataSampleList, PhspAcceptedSampleList,
-                                     PhspSampleList, _kin->numVariables()),
+                                  PhspSampleList, _kin->numVariables()),
                     "Log");
 
   _tree->parameter();
