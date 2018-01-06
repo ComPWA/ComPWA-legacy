@@ -5,6 +5,7 @@
 #include "Tools/RootGenerator.hpp"
 #include "Tools/RootPlot.hpp"
 #include "Tools/FitFractions.hpp"
+#include "Tools/Generate.hpp"
 #include "Core/Generator.hpp"
 #include "Core/Event.hpp"
 #include "Core/Particle.hpp"
