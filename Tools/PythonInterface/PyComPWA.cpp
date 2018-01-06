@@ -134,14 +134,14 @@ class DataPoints {
 public:
 	DataPoints(std::shared_ptr<ComPWA::DataReader::Data> data, std::shared_ptr<ComPWA::Kinematics> kin) : nEvents(data->numEvents()), nVars(0) {
 		std::vector<ComPWA::DataPoint> dataVec =  data->dataPoints(kin);
-		nVars = dataVec[0].Size();
+		nVars = dataVec[0].size();
 		rawEvtData = new double[nEvents*(nVars+2)]; //vars + weight + efficiency
         for (unsigned int i=0; i<data->numEvents(); i++){
           for (unsigned int j=0; j<dataVec[i].size(); j++){
         	rawEvtData[nVars*i+j] = dataVec[i].values()[j];
           }
-          rawEvtData[nVars*i+dataVec[i].Size()] = dataVec[i].weight();
-          rawEvtData[nVars*i+dataVec[i].Size()+1] = dataVec[i].efficiency();
+          rawEvtData[nVars*i+dataVec[i].size()] = dataVec[i].weight();
+          rawEvtData[nVars*i+dataVec[i].size()+1] = dataVec[i].efficiency();
         }
     }
     double *getRawEvtData() { return rawEvtData; }
@@ -170,10 +170,10 @@ PYBIND11_MODULE(PyComPWA, m)
 	m.def("setErrorOnParameterList", (void (*) (ComPWA::ParameterList&, double, bool)) &setErrorOnParameterList);
 	m.def("Generate", (bool (*) (int, std::shared_ptr<ComPWA::Kinematics>,
     		std::shared_ptr<ComPWA::Generator>, std::shared_ptr<ComPWA::AmpIntensity>, std::shared_ptr<ComPWA::DataReader::Data>,
-			std::shared_ptr<ComPWA::DataReader::Data>, std::shared_ptr<ComPWA::DataReader::Data>)) &ComPWA::Tools::Generate);
+			std::shared_ptr<ComPWA::DataReader::Data>, std::shared_ptr<ComPWA::DataReader::Data>)) &ComPWA::Tools::generate);
 	        //phspTrue = std::shared_ptr<ComPWA::DataReader::Data>()
 	m.def("GeneratePhsp", (bool (*) (int, std::shared_ptr<ComPWA::Generator>,
-            std::shared_ptr<ComPWA::DataReader::Data>)) &ComPWA::Tools::GeneratePhsp);
+            std::shared_ptr<ComPWA::DataReader::Data>)) &ComPWA::Tools::generatePhsp);
 	m.def("fitComponents",  (std::vector< std::pair<std::string, std::string> > (*) ()) &fitComponents);
 	m.def("saveResults",  (void (*) (std::string, std::shared_ptr<ComPWA::FitResult>)) &saveResults);
 	m.def("saveModel",  (void (*) (std::string, std::shared_ptr<ComPWA::PartList>, ComPWA::ParameterList&, std::shared_ptr<ComPWA::AmpIntensity>)) &saveModel);
@@ -272,7 +272,7 @@ PYBIND11_MODULE(PyComPWA, m)
 
 	py::class_<ComPWA::Optimizer::Minuit2::MinuitResult, ComPWA::FitResult, std::shared_ptr<ComPWA::Optimizer::Minuit2::MinuitResult> >(m, "MinuitResult")
 	  .def("SetFitFractions", &ComPWA::Optimizer::Minuit2::MinuitResult::setFitFractions)
-	  .def("Print", &ComPWA::Optimizer::Minuit2::MinuitResult::Print, py::arg("opt") = "")
+	  .def("Print", &ComPWA::Optimizer::Minuit2::MinuitResult::print, py::arg("opt") = "")
 	;
 
 }
