@@ -69,7 +69,7 @@ BOOST_AUTO_TEST_CASE(HelicityAngleTest) {
   std::shared_ptr<ComPWA::DataReader::Data> sample(
       new ComPWA::DataReader::Data());
 
-  ComPWA::Tools::GeneratePhsp(20, gen, sample);
+  ComPWA::Tools::generatePhsp(20, gen, sample);
 
   bool useDerivedMassSq = false;
 

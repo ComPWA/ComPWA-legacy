@@ -30,7 +30,7 @@ BOOST_AUTO_TEST_CASE(WriteReadCheck) {
   std::shared_ptr<ComPWA::DataReader::Data> sample(
       new ComPWA::DataReader::RootReader());
 
-  ComPWA::Tools::GeneratePhsp(200, gen, sample);
+  ComPWA::Tools::generatePhsp(200, gen, sample);
 
   sample->writeData("RootReaderTest-output.root", "trtr");
 

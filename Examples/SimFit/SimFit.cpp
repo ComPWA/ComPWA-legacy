@@ -301,7 +301,7 @@ int main(int argc, char **argv) {
   //      "data");
   sqrtS4230._data = std::make_shared<Data>();
   sqrtS4230._mcSample = std::make_shared<Data>();
-  ComPWA::Tools::GeneratePhsp(100000, sqrtS4230._gen, sqrtS4230._mcSample);
+  ComPWA::Tools::generatePhsp(100000, sqrtS4230._gen, sqrtS4230._mcSample);
 
   // Construct intensity class from model string
   sqrtS4230._amp = std::make_shared<IncoherentIntensity>(
@@ -345,7 +345,7 @@ int main(int argc, char **argv) {
   //      "data");
   sqrtS4260._data = std::make_shared<Data>();
   sqrtS4260._mcSample = std::make_shared<Data>();
-  ComPWA::Tools::GeneratePhsp(100000, sqrtS4260._gen, sqrtS4260._mcSample);
+  ComPWA::Tools::generatePhsp(100000, sqrtS4260._gen, sqrtS4260._mcSample);
 
   // Construct intensity class from model string
   sqrtS4260._amp = std::make_shared<IncoherentIntensity>(

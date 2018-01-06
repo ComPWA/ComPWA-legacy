@@ -153,8 +153,8 @@ BOOST_AUTO_TEST_CASE(PartialAmplitudeTreeConcordance) {
   std::shared_ptr<ComPWA::DataReader::Data> toySample(
       new ComPWA::DataReader::Data());
   
-  ComPWA::Tools::GeneratePhsp(20, gen, sample);
-  ComPWA::Tools::GeneratePhsp(20000, gen, toySample);
+  ComPWA::Tools::generatePhsp(20, gen, sample);
+  ComPWA::Tools::generatePhsp(20000, gen, toySample);
 
   auto phspSample =
       std::make_shared<std::vector<DataPoint>>(sample->dataPoints(kin));
@@ -238,7 +238,7 @@ BOOST_AUTO_TEST_CASE(RelBWTreeConcordance) {
   std::shared_ptr<ComPWA::DataReader::Data> sample(
       new ComPWA::DataReader::Data());
   
-  ComPWA::Tools::GeneratePhsp(20, gen, sample);
+  ComPWA::Tools::generatePhsp(20, gen, sample);
 
   auto relBW =
       std::make_shared<ComPWA::Physics::DecayDynamics::RelativisticBreitWigner>(
@@ -318,8 +318,8 @@ BOOST_AUTO_TEST_CASE(IncoherentTreeConcordance) {
   std::shared_ptr<ComPWA::DataReader::Data> toySample(
       new ComPWA::DataReader::Data());
   
-  ComPWA::Tools::GeneratePhsp(20, gen, sample);
-  ComPWA::Tools::GeneratePhsp(20000, gen, toySample);
+  ComPWA::Tools::generatePhsp(20, gen, sample);
+  ComPWA::Tools::generatePhsp(20000, gen, toySample);
 
   auto vToySample =
       std::make_shared<std::vector<DataPoint>>(toySample->dataPoints(kin));
@@ -405,8 +405,8 @@ BOOST_AUTO_TEST_CASE(SeqPartialAmplitudeTreeConcordance) {
   std::shared_ptr<ComPWA::DataReader::Data> toySample(
       new ComPWA::DataReader::Data());
   
-  ComPWA::Tools::GeneratePhsp(20, gen, sample);
-  ComPWA::Tools::GeneratePhsp(20000, gen, toySample);
+  ComPWA::Tools::generatePhsp(20, gen, sample);
+  ComPWA::Tools::generatePhsp(20000, gen, toySample);
 
   auto phspSample =
       std::make_shared<std::vector<DataPoint>>(sample->dataPoints(kin));

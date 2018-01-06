@@ -161,7 +161,7 @@ inline bool generate(int number, std::shared_ptr<ComPWA::Kinematics> kin,
   return true;
 }
 
-inline bool GeneratePhsp(int nEvents, std::shared_ptr<ComPWA::Generator> gen,
+inline bool generatePhsp(int nEvents, std::shared_ptr<ComPWA::Generator> gen,
                          std::shared_ptr<ComPWA::DataReader::Data> sample) {
   if (nEvents == 0)
     return 0;

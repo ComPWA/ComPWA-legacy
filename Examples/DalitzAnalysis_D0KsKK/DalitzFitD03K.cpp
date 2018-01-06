@@ -372,7 +372,7 @@ int main(int argc, char **argv) {
 
   // Generation of toy phase space sample
   std::shared_ptr<Data> toyPhspData(new RootReader()); // Toy sample
-  ComPWA::Tools::GeneratePhsp(mcPrecision, gen, toyPhspData);
+  ComPWA::Tools::generatePhsp(mcPrecision, gen, toyPhspData);
   // set efficiency values for each event
   toyPhspData->setEfficiency(trueModelKin, eff);
 
@@ -703,7 +703,7 @@ int main(int argc, char **argv) {
           plotTruePhsp = std::shared_ptr<Data>(new RootReader(
               phspEfficiencyFile, phspEfficiencyFileTrueTreeName, plotSize));
       } else {
-        ComPWA::Tools::GeneratePhsp(plotSize, gen, pl_phspSample);
+        ComPWA::Tools::generatePhsp(plotSize, gen, pl_phspSample);
       }
       // reduce sample to phsp
       pl_phspSample->reduceToPhsp(trueModelKin);

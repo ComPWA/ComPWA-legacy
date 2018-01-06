@@ -188,7 +188,7 @@ int main(int argc, char **argv) {
   //---------------------------------------------------
   auto gen = std::make_shared<ComPWA::Tools::RootGenerator>(partL, kin);
   std::shared_ptr<Data> phspSample(new Data());
-  ComPWA::Tools::GeneratePhsp(100000, gen, phspSample);
+  ComPWA::Tools::generatePhsp(100000, gen, phspSample);
 
   //---------------------------------------------------
   // 3) Create intensity from pre-defined model
