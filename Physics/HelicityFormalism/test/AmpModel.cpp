@@ -25,7 +25,7 @@
 #include "Physics/HelicityFormalism/HelicityKinematics.hpp"
 #include "Physics/DecayDynamics/RelativisticBreitWigner.hpp"
 
-// Amplitude model
+// Amplitude models
 #include "Physics/HelicityFormalism/test/AmpModelTest.hpp"
 
 using namespace ComPWA;
@@ -191,10 +191,13 @@ BOOST_AUTO_TEST_CASE(PartialAmplitudeTreeConcordance) {
         std::dynamic_pointer_cast<Value<std::vector<std::complex<double>>>>(tmp);
     std::complex<double> intensityTree = intensitiesTree->values().at(i);
 
-    BOOST_TEST(intensityNoTree.real() == intensityTree.real(),
-               boost::test_tools::tolerance(0.000001));
-    BOOST_TEST(intensityNoTree.imag() == intensityTree.imag(),
-               boost::test_tools::tolerance(0.000001));
+    //// Not available in boost 1.54
+    //BOOST_TEST(intensityNoTree.real() == intensityTree.real(),
+    //            boost::test_tools::tolerance(0.000001));
+    //BOOST_TEST(intensityNoTree.imag() == intensityTree.imag(),
+    //            boost::test_tools::tolerance(0.000001));
+    BOOST_CHECK_CLOSE(intensityNoTree.real(), intensityTree.real(), 0.0000001);
+    BOOST_CHECK_CLOSE(intensityNoTree.imag(), intensityTree.imag(), 0.0000001);
 
     LOG(debug) << "point = " << p << " intensity = " << intensityNoTree
               << " intensity tree = " << intensityTree;
@@ -352,8 +355,10 @@ BOOST_AUTO_TEST_CASE(IncoherentTreeConcordance) {
         std::dynamic_pointer_cast<Value<std::vector<double>>>(tmp);
     double intensityTree = intensitiesTree->values().at(i);
     
-    BOOST_TEST(intensityNoTree == intensityTree,
-               boost::test_tools::tolerance(0.000001));
+    //// Not available in boost 1.54
+    //BOOST_TEST(intensityNoTree == intensityTree,
+    //           boost::test_tools::tolerance(0.000001));
+    BOOST_CHECK_CLOSE(intensityNoTree, intensityTree, 0.0000001);
     LOG(info) << "point = " << p << " intensity = " << intensityNoTree
               << " intensity tree = " << intensityTree;
   }
@@ -438,10 +443,13 @@ BOOST_AUTO_TEST_CASE(SeqPartialAmplitudeTreeConcordance) {
         std::dynamic_pointer_cast<Value<std::vector<std::complex<double>>>>(tmp);
     std::complex<double> intensityTree = intensitiesTree->values().at(i);
     
-    BOOST_TEST(intensityNoTree.real() == intensityTree.real(),
-               boost::test_tools::tolerance(0.000001));
-    BOOST_TEST(intensityNoTree.imag() == intensityTree.imag(),
-               boost::test_tools::tolerance(0.000001));
+    //// Not available in boost 1.54
+    //BOOST_TEST(intensityNoTree.real() == intensityTree.real(),
+    //           boost::test_tools::tolerance(0.000001));
+    //BOOST_TEST(intensityNoTree.imag() == intensityTree.imag(),
+    //           boost::test_tools::tolerance(0.000001));
+    BOOST_CHECK_CLOSE(intensityNoTree.real(), intensityTree.real(), 0.0000001);
+    BOOST_CHECK_CLOSE(intensityNoTree.imag(), intensityTree.imag(), 0.0000001);
 
     LOG(info) << "point = " << p << " intensity = " << intensityNoTree
               << " intensity tree = " << intensityTree;
