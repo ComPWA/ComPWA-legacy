@@ -1,11 +1,11 @@
 #include "Tools/ParameterTools.hpp"
 #include "Physics/ParticleList.hpp"
 #include "Physics/HelicityFormalism/HelicityKinematics.hpp"
-#include "Physics/HelicityFormalism/IncoherentIntensity.hpp"
-#include "Tools/Generate.hpp"
+#include "Physics/IncoherentIntensity.hpp"
 #include "Tools/RootGenerator.hpp"
 #include "Tools/RootPlot.hpp"
 #include "Tools/FitFractions.hpp"
+#include "Tools/Generate.hpp"
 #include "Core/Generator.hpp"
 #include "Core/Event.hpp"
 #include "Core/Particle.hpp"
@@ -38,22 +38,22 @@
 namespace py = pybind11;
 //using namespace ComPWA;
 using ComPWA::Physics::HelicityFormalism::HelicityKinematics;
-using ComPWA::Physics::HelicityFormalism::IncoherentIntensity;
+using ComPWA::Physics::IncoherentIntensity;
 using ComPWA::Optimizer::Minuit2::MinuitResult;
 
 PYBIND11_MAKE_OPAQUE(ComPWA::PartList);
 
 py::array_t<double> result_values(std::shared_ptr<ComPWA::FitResult> fitRes){
-  ComPWA::ParameterList resPar = fitRes->GetFinalParameters();
+  ComPWA::ParameterList resPar = fitRes->finalParameters();
   //std::vector<double> ret;
- // for(unsigned int i=0; i<resPar.GetNParameter(); i++){
-  //  ret.push_back(resPar.GetDoubleParameterValue(i));
+ // for(unsigned int i=0; i<resPar.numParameters(); i++){
+  //  ret.push_back(resPar.doubleParameter(i)->value());
  // }
 
-  std::size_t size = resPar.GetNParameter();
+  std::size_t size = resPar.numParameters();
   double *foo = new double[size];
   for (std::size_t i = 0; i < size; i++) {
-      foo[i] = resPar.GetDoubleParameterValue(i);
+      foo[i] = resPar.doubleParameter(i)->value();
   }
 
   // Create a Python object that will free the allocated
@@ -81,11 +81,11 @@ std::shared_ptr<ComPWA::AmpIntensity> createIntens(
   modelStream << modelStr;
   boost::property_tree::ptree modelTree;
   boost::property_tree::xml_parser::read_xml(modelStream, modelTree);
-  auto intens = IncoherentIntensity::Factory(
-    partL, kin, modelTree.get_child("IncoherentIntensity"));
+  auto intens = std::make_shared<IncoherentIntensity>(
+    partL, kin, modelTree.get_child("Intensity"));
   auto phspPoints =
-      std::make_shared<std::vector<ComPWA::dataPoint>>(phspSample->GetDataPoints(kin));
-  intens->SetPhspSample(phspPoints, phspPoints);
+      std::make_shared<std::vector<ComPWA::DataPoint>>(phspSample->dataPoints(kin));
+  intens->setPhspSample(phspPoints, phspPoints);
   return intens;
 }
 
@@ -101,7 +101,7 @@ std::vector<std::pair<std::string, std::string>> fitComponents(){
 ComPWA::ParameterList calculateFitFractions(std::shared_ptr<ComPWA::Kinematics> kin,
 		std::shared_ptr<ComPWA::AmpIntensity> intens, std::shared_ptr<ComPWA::DataReader::Data> phspSample){
   auto phspPoints =
-		  std::make_shared<std::vector<ComPWA::dataPoint>>(phspSample->GetDataPoints(kin));
+		  std::make_shared<std::vector<ComPWA::DataPoint>>(phspSample->dataPoints(kin));
   return ComPWA::Tools::CalculateFitFractions(kin, intens, phspPoints, fitComponents());
 }
 
@@ -110,8 +110,8 @@ void calcFractionError(ComPWA::ParameterList& fitPar, std::shared_ptr<ComPWA::Fi
 		std::shared_ptr<ComPWA::DataReader::Data> phspSample, int nSets){
   auto resultM = std::dynamic_pointer_cast<MinuitResult>(result);
   auto phspPoints =
-		  std::make_shared<std::vector<ComPWA::dataPoint>>(phspSample->GetDataPoints(kin));
-  ComPWA::Tools::CalcFractionError(fitPar, resultM->GetCovarianceMatrix(), fitFracs, kin,
+		  std::make_shared<std::vector<ComPWA::DataPoint>>(phspSample->dataPoints(kin));
+  ComPWA::Tools::CalcFractionError(fitPar, resultM->covarianceMatrix(), fitFracs, kin,
 	                       intens, phspPoints, nSets, fitComponents());
 }
 
@@ -127,22 +127,22 @@ void saveModel(std::string file, std::shared_ptr<ComPWA::PartList> partL, ComPWA
   boost::property_tree::ptree ptout;
   ptout.add_child("ParticleList", ComPWA::SaveParticles(partL));
   std::shared_ptr<IncoherentIntensity> intensI = std::dynamic_pointer_cast<IncoherentIntensity>(intens);
-  ptout.add_child("IncoherentIntensity", IncoherentIntensity::Save(intensI));
+  ptout.add_child("IncoherentIntensity", intensI->save());
   boost::property_tree::xml_parser::write_xml(file, ptout, std::locale());
 }
 
 class DataPoints {
 public:
-	DataPoints(std::shared_ptr<ComPWA::DataReader::Data> data, std::shared_ptr<ComPWA::Kinematics> kin) : nEvents(data->GetNEvents()), nVars(0) {
-		std::vector<ComPWA::dataPoint> dataVec =  data->GetDataPoints(kin);
-		nVars = dataVec[0].Size();
+	DataPoints(std::shared_ptr<ComPWA::DataReader::Data> data, std::shared_ptr<ComPWA::Kinematics> kin) : nEvents(data->numEvents()), nVars(0) {
+		std::vector<ComPWA::DataPoint> dataVec =  data->dataPoints(kin);
+		nVars = dataVec[0].size();
 		rawEvtData = new double[nEvents*(nVars+2)]; //vars + weight + efficiency
-        for (unsigned int i=0; i<data->GetNEvents(); i++){
-          for (unsigned int j=0; j<dataVec[i].Size(); j++){
-        	rawEvtData[nVars*i+j] = dataVec[i].GetPoint()[j];
+        for (unsigned int i=0; i<data->numEvents(); i++){
+          for (unsigned int j=0; j<dataVec[i].size(); j++){
+        	rawEvtData[nVars*i+j] = dataVec[i].values()[j];
           }
-          rawEvtData[nVars*i+dataVec[i].Size()] = dataVec[i].GetWeight();
-          rawEvtData[nVars*i+dataVec[i].Size()+1] = dataVec[i].GetEfficiency();
+          rawEvtData[nVars*i+dataVec[i].size()] = dataVec[i].weight();
+          rawEvtData[nVars*i+dataVec[i].size()+1] = dataVec[i].efficiency();
         }
     }
     double *getRawEvtData() { return rawEvtData; }
@@ -171,10 +171,10 @@ PYBIND11_MODULE(PyComPWA, m)
 	m.def("setErrorOnParameterList", (void (*) (ComPWA::ParameterList&, double, bool)) &setErrorOnParameterList);
 	m.def("Generate", (bool (*) (int, std::shared_ptr<ComPWA::Kinematics>,
     		std::shared_ptr<ComPWA::Generator>, std::shared_ptr<ComPWA::AmpIntensity>, std::shared_ptr<ComPWA::DataReader::Data>,
-			std::shared_ptr<ComPWA::DataReader::Data>, std::shared_ptr<ComPWA::DataReader::Data>)) &ComPWA::Tools::Generate);
+			std::shared_ptr<ComPWA::DataReader::Data>, std::shared_ptr<ComPWA::DataReader::Data>)) &ComPWA::Tools::generate);
 	        //phspTrue = std::shared_ptr<ComPWA::DataReader::Data>()
 	m.def("GeneratePhsp", (bool (*) (int, std::shared_ptr<ComPWA::Generator>,
-            std::shared_ptr<ComPWA::DataReader::Data>)) &ComPWA::Tools::GeneratePhsp);
+            std::shared_ptr<ComPWA::DataReader::Data>)) &ComPWA::Tools::generatePhsp);
 	m.def("fitComponents",  (std::vector< std::pair<std::string, std::string> > (*) ()) &fitComponents);
 	m.def("saveResults",  (void (*) (std::string, std::shared_ptr<ComPWA::FitResult>)) &saveResults);
 	m.def("saveModel",  (void (*) (std::string, std::shared_ptr<ComPWA::PartList>, ComPWA::ParameterList&, std::shared_ptr<ComPWA::AmpIntensity>)) &saveModel);
@@ -195,20 +195,20 @@ PYBIND11_MODULE(PyComPWA, m)
 	py::class_<ComPWA::IEstimator, std::shared_ptr<ComPWA::IEstimator> >(m, "IEstimator");
 	py::class_<ComPWA::Optimizer::Optimizer, std::shared_ptr<ComPWA::Optimizer::Optimizer> >(m, "Optimizer");
 	py::class_<ComPWA::FitResult, std::shared_ptr<ComPWA::FitResult> >(m, "FitResult")
-	  .def("GetFinalParameters", &ComPWA::FitResult::GetFinalParameters)
+	  .def("GetFinalParameters", &ComPWA::FitResult::finalParameters)
 	;
-	py::class_<ComPWA::AbsParameter, std::shared_ptr<ComPWA::AbsParameter> >(m, "AbsParameter");
+	py::class_<ComPWA::Parameter, std::shared_ptr<ComPWA::Parameter> >(m, "Parameter");
 
 	// ComPWA Classes
 	py::class_<ComPWA::AmpIntensity, std::shared_ptr<ComPWA::AmpIntensity> >(m, "AmpIntensity")
-	  .def("GetParameters", &ComPWA::AmpIntensity::GetParameters)
+	  .def("GetParameters", &ComPWA::AmpIntensity::parameters)
 	;
 
 	py::class_<ComPWA::DataReader::Data, std::shared_ptr<ComPWA::DataReader::Data> >(m, "Data")
       .def(py::init<>())
 	;
 
-	py::class_<ComPWA::dataPoint>(m, "dataPoint")
+	py::class_<ComPWA::DataPoint>(m, "dataPoint")
       .def(py::init<>())
 	;
 
@@ -231,22 +231,14 @@ PYBIND11_MODULE(PyComPWA, m)
       .def(py::init<>())
 	;
 
-	py::class_<ComPWA::DoubleParameter, ComPWA::AbsParameter, std::shared_ptr<ComPWA::DoubleParameter> >(m, "DoubleParameter")
+	py::class_<ComPWA::FitParameter, ComPWA::Parameter, std::shared_ptr<ComPWA::FitParameter> >(m, "FitParameter")
       .def(py::init<>())
       .def(py::init<std::string, const double, const double >())
 	;
 
 	py::class_<ComPWA::ParameterList>(m, "ParameterList")
       .def(py::init<>())
-	  .def("GetNParameter", &ComPWA::ParameterList::GetNParameter)
-	  .def("SetParameterValue", (void (ComPWA::ParameterList::*) (const unsigned int, const double)) &ComPWA::ParameterList::SetParameterValue)
-	  .def("SetParameterValue", (void (ComPWA::ParameterList::*) (std::string, const double)) &ComPWA::ParameterList::SetParameterValue)
-	  .def("AddParameter", (void (ComPWA::ParameterList::*) (std::shared_ptr<ComPWA::DoubleParameter>)) &ComPWA::ParameterList::AddParameter)
-	  //.def("GetDoubleParameter", (std::shared_ptr<ComPWA::DoubleParameter> (ComPWA::ParameterList::*) (const unsigned int)) &ComPWA::ParameterList::GetDoubleParameter)
-	  //.def("GetDoubleParameter", (std::shared_ptr<ComPWA::DoubleParameter> (ComPWA::ParameterList::*) (std::string))  &ComPWA::ParameterList::GetDoubleParameter)
-	  //.def("GetDoubleParameter", py::overload_cast<const unsigned int>(&ComPWA::ParameterList::GetDoubleParameter, py::const_))
-	  //.def("GetDoubleParameter", py::overload_cast<const std::string>(&ComPWA::ParameterList::GetDoubleParameter, py::const_))
-	  .def("ToString", &ComPWA::ParameterList::to_str)
+	  .def("GetNParameter", &ComPWA::ParameterList::numParameters)
 	;
 
 	py::class_<HelicityKinematics, ComPWA::Kinematics, std::shared_ptr<HelicityKinematics> >(m, "HelicityKinematics")
@@ -275,13 +267,13 @@ PYBIND11_MODULE(PyComPWA, m)
 
 	py::class_<ComPWA::Optimizer::Minuit2::MinuitIF, ComPWA::Optimizer::Optimizer, std::shared_ptr<ComPWA::Optimizer::Minuit2::MinuitIF> >(m, "MinuitIF")
       .def(py::init<std::shared_ptr<ComPWA::IEstimator>, ComPWA::ParameterList&>())
-	  .def("SetHesse", &ComPWA::Optimizer::Minuit2::MinuitIF::SetHesse)
+	  .def("SetHesse", &ComPWA::Optimizer::Minuit2::MinuitIF::setUseHesse)
 	  .def("exec", &ComPWA::Optimizer::Minuit2::MinuitIF::exec)
 	;
 
 	py::class_<ComPWA::Optimizer::Minuit2::MinuitResult, ComPWA::FitResult, std::shared_ptr<ComPWA::Optimizer::Minuit2::MinuitResult> >(m, "MinuitResult")
-	  .def("SetFitFractions", &ComPWA::Optimizer::Minuit2::MinuitResult::SetFitFractions)
-	  .def("Print", &ComPWA::Optimizer::Minuit2::MinuitResult::Print, py::arg("opt") = "")
+	  .def("SetFitFractions", &ComPWA::Optimizer::Minuit2::MinuitResult::setFitFractions)
+	  .def("Print", &ComPWA::Optimizer::Minuit2::MinuitResult::print, py::arg("opt") = "")
 	;
 
 }

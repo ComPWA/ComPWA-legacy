@@ -1,5 +1,3 @@
-
-
 // Copyright (c) 2013, 2015, 2017 The ComPWA Team.
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
@@ -10,16 +8,14 @@ using namespace ComPWA::Estimator;
 
 SumMinLogLH::SumMinLogLH() : _nCalls(0) {}
 
-double SumMinLogLH::ControlParameter(ParameterList &minPar) {
+double SumMinLogLH::controlParameter(ParameterList &minPar) {
   double lh = 0;
   if (!_tree) {
     for (auto i : _minLogLh)
-      lh = +i->ControlParameter(minPar);
+      lh = +i->controlParameter(minPar);
   } else {
-    _tree->Recalculate();
-    auto logLH =
-        std::dynamic_pointer_cast<DoubleParameter>(_tree->Head()->Parameter());
-    lh = logLH->GetValue();
+    auto logLH = std::dynamic_pointer_cast<FitParameter>(_tree->parameter());
+    lh = logLH->value();
   }
   _nCalls++;
   return lh; // return -logLH
@@ -33,7 +29,8 @@ void SumMinLogLH::UseFunctionTree(bool onoff) {
     return;
   }
   _tree = std::make_shared<FunctionTree>(
-      "SumLogLh", std::shared_ptr<Strategy>(new AddAll(ParType::DOUBLE)));
+      "SumLogLh", std::make_shared<Value<double>>(),
+      std::make_shared<AddAll>(ParType::DOUBLE));
   for (auto tr : _minLogLh) {
     try {
       tr->UseFunctionTree(true);
@@ -44,11 +41,11 @@ void SumMinLogLH::UseFunctionTree(bool onoff) {
           << ex.what();
       throw;
     }
-    _tree->InsertTree(tr->GetTree(), "SumLogLh");
+    _tree->insertTree(tr->tree(), "SumLogLh");
   }
 
-  _tree->Recalculate();
-  if (!_tree->SanityCheck()) {
+  _tree->parameter();
+  if (!_tree->sanityCheck()) {
     throw std::runtime_error(
         "SumMinLogLH::UseFunctionTree() | Tree has structural "
         "problems. Sanity check not passed!");
@@ -56,4 +53,4 @@ void SumMinLogLH::UseFunctionTree(bool onoff) {
   return;
 }
 
-std::shared_ptr<ComPWA::FunctionTree> SumMinLogLH::GetTree() { return _tree; }
+std::shared_ptr<ComPWA::FunctionTree> SumMinLogLH::tree() { return _tree; }

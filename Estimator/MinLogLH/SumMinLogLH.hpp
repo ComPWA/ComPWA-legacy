@@ -36,7 +36,7 @@ public:
   SumMinLogLH();
 
   /// Value of minimum log likelhood function.
-  virtual double ControlParameter(ComPWA::ParameterList &par);
+  virtual double controlParameter(ComPWA::ParameterList &par);
 
   virtual void AddLogLh(std::shared_ptr<ComPWA::Estimator::MinLogLH> logLh) {
     _minLogLh.push_back(logLh);
@@ -49,11 +49,11 @@ public:
 
   /// Get the FunctionTree.
   /// If no FunctionTree is available an std::runtime_error exception is thrown.
-  virtual std::shared_ptr<ComPWA::FunctionTree> GetTree();
+  virtual std::shared_ptr<ComPWA::FunctionTree> tree();
 
   /// Kind for status flag during the minimization process.
   /// (e.g. number of likelihood evaluations)
-  virtual int NSteps() const { return _nCalls; };
+  virtual int status() const { return _nCalls; };
   
 protected:
   std::vector<std::shared_ptr<ComPWA::Estimator::MinLogLH>> _minLogLh;

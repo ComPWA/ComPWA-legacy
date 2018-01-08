@@ -1,7 +1,3 @@
-
-
-
-
 // Copyright (c) 2013, 2017 The ComPWA Team.
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
@@ -27,16 +23,19 @@ void RootPlot::Write(std::string treePrefix, std::string fileName,
 
   TFile *tf = new TFile(TString(fileName), TString(option));
 
-  auto varNames = kin_->GetVarNames();
+  auto varNames = kin_->variableNames();
   varNames.push_back("weight");
   varNames.push_back("eff");
+  
+  auto varTitles = kin_->variableTitles();
+  varTitles.push_back("weight");
+  varTitles.push_back("#epsilon");
 
   size_t dataPointSize = varNames.size();
   double dataIntegral = 0.;
   // Data
   if (s_data.size()) {
-    TTree *dataTree =
-        new TTree(TString(treePrefix + "_data"), "dataSample");
+    TTree *dataTree = new TTree(TString(treePrefix + "_data"), "dataSample");
     auto t_dataSample = std::vector<double>(dataPointSize, 0.0);
     for (int i = 0; i < varNames.size(); i++)
       dataTree->Branch(TString(varNames.at(i)), &t_dataSample.at(i),
@@ -45,20 +44,20 @@ void RootPlot::Write(std::string treePrefix, std::string fileName,
     for (auto point : s_data) {
       // Fill branch references with dataPoint
       for (int i = 0; i < t_dataSample.size(); i++) {
-        if (i < point.Size())
-          t_dataSample.at(i) = point.GetValue(i);
-        else if (i == point.Size())
-          t_dataSample.at(i) = point.GetWeight();
-        else if (i == point.Size() + 1)
-          t_dataSample.at(i) = point.GetEfficiency();
+        if (i < point.size())
+          t_dataSample.at(i) = point.value(i);
+        else if (i == point.size())
+          t_dataSample.at(i) = point.weight();
+        else if (i == point.size() + 1)
+          t_dataSample.at(i) = point.efficiency();
         else { // Hopefully we don't arrive here
           throw std::runtime_error(
               "RootPlot::Write() | This should not happen!");
         }
       }
 
-      dataIntegral += point.GetWeight();
-      if (point.GetEfficiency() == 0.0) {
+      dataIntegral += point.weight();
+      if (point.efficiency() == 0.0) {
         LOG(error) << "RootPlot::Fill() | Loop over "
                       "data sample: An event with zero efficiency was found! "
                       "This should not happen! We skip it!";
@@ -74,7 +73,7 @@ void RootPlot::Write(std::string treePrefix, std::string fileName,
 
     double phspIntegral = std::accumulate(
         s_phsp.begin(), s_phsp.end(), 0.0,
-        [&](double w, dataPoint p) { return w += p.GetWeight(); });
+        [&](double w, DataPoint p) { return w += p.weight(); });
 
     TTree *phspTree = new TTree(TString(treePrefix + "_phsp"),
                                 "phspSample including amplitude weights");
@@ -90,24 +89,24 @@ void RootPlot::Write(std::string treePrefix, std::string fileName,
       phspTree->Branch(TString(_componentNames.at(i)), &t_weights.at(i),
                        TString(_componentNames.at(i) + "/D"));
 
-    ComPWA::progressBar bar(s_phsp.size());
+    ComPWA::ProgressBar bar(s_phsp.size());
     for (auto point : s_phsp) {
-      bar.nextEvent();
+      bar.next();
       // Fill branch references with dataPoint
       for (int i = 0; i < t_phspSample.size(); i++) {
-        if (i < point.Size())
-          t_phspSample.at(i) = point.GetValue(i);
-        else if (i == point.Size())
-          t_phspSample.at(i) = point.GetWeight() * dataIntegral / phspIntegral;
-        else if (i == point.Size() + 1)
-          t_phspSample.at(i) = point.GetEfficiency();
+        if (i < point.size())
+          t_phspSample.at(i) = point.value(i);
+        else if (i == point.size())
+          t_phspSample.at(i) = point.weight() * dataIntegral / phspIntegral;
+        else if (i == point.size() + 1)
+          t_phspSample.at(i) = point.efficiency();
         else { // Hopefully we don't arrive here
           throw std::runtime_error(
               "RootPlot::Write() | This should not happen!");
         }
       }
 
-      if (point.GetEfficiency() == 0.0) {
+      if (point.efficiency() == 0.0) {
         LOG(error) << "RootPlot::Fill() | Loop over "
                       "data sample: An event with zero efficiency was found! "
                       "This should not happen! We skip it!";
@@ -116,7 +115,7 @@ void RootPlot::Write(std::string treePrefix, std::string fileName,
 
       // Loop over all components that we want to plot
       for (int t = 0; t < _plotComponents.size(); t++) {
-        t_weights.at(t) = _plotComponents.at(t)->Intensity(point);
+        t_weights.at(t) = _plotComponents.at(t)->intensity(point);
       }
       phspTree->Fill();
     }

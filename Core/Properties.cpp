@@ -38,7 +38,8 @@ ParticleProperties::ParticleProperties(boost::property_tree::ptree pt)
       // Parameter (e.g. Mass)
       if (v.second.get<std::string>("<xmlattr>.Type") != "Mass")
         continue;
-      _mass = DoubleParameterFactory(v.second);
+     Mass = FitParameter();
+     Mass.load(v.second);
     } else {
     }
   }
@@ -47,17 +48,17 @@ ParticleProperties::ParticleProperties(boost::property_tree::ptree pt)
   // used by AbstractDynamicalFunctions (e.g. RelativisticBreitWigner).
   auto decayInfo = pt.get_child_optional("DecayInfo");
   if (decayInfo) {
-    _decayInfo = decayInfo.get();
+   DecayInfo = decayInfo.get();
   } else {
-    _decayInfo.put("<xmlattr>.Type", "Stable");
+   DecayInfo.put("<xmlattr>.Type", "Stable");
   }
 }
 
 boost::property_tree::ptree ParticleProperties::Save(){
   boost::property_tree::ptree pt;
-  pt.put("<xmlattr>.Name", _name);
-  pt.put("Pid", _id);
-  pt.add_child("Parameter", DoubleParameterSave(_mass));
+  pt.put("<xmlattr>.Name",Name);
+  pt.put("Pid", Id);
+  pt.add_child("Parameter",Mass.save());
   pt.put("Parameter.<xmlattr>.Type","Mass");
   for( auto& i: spinQuantumNumbers_ ){
     boost::property_tree::ptree tmp;
@@ -73,7 +74,7 @@ boost::property_tree::ptree ParticleProperties::Save(){
     tmp.put("<xmlattr>.Value",i.second);
     pt.add_child("QuantumNumber",tmp);
   }
-  pt.add_child("DecayInfo", _decayInfo);
+  pt.add_child("DecayInfo",DecayInfo);
   return pt;
 
 }

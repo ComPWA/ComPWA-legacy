@@ -13,7 +13,7 @@
 
 #include "Core/Event.hpp"
 #include "Core/Particle.hpp"
-#include "Core/Parameter.hpp"
+#include "Core/FitParameter.hpp"
 #include "Core/ParameterList.hpp"
 #include "Core/AmpIntensity.hpp"
 
@@ -32,43 +32,44 @@ public:
     //		if(tree) delete tree;
   }
 
-  //! Disable copy constructor since TTree is not copyable
+  /// Disable copy constructor since TTree is not copyable
   DalitzHisto(const DalitzHisto &that) = delete;
 
-  //! Default move constructor
+  /// Default move constructor
   DalitzHisto(DalitzHisto &&other) = default; // C++11 move constructor
 
   DalitzHisto(std::shared_ptr<ComPWA::Kinematics> kin, std::string name, std::string title, unsigned int bins,
               Color_t color = kBlack);
-  //! Switch on/off stats
-  void SetStats(bool b);
-  //! Fill event
-  void Fill(std::shared_ptr<ComPWA::Kinematics> kin, ComPWA::Event &event, double w = 1);
-  //! Scale all distributions
-  void Scale(double w);
-  //! Get 1D histogram
+  /// Switch on/off stats
+  void setStats(bool b);
+  /// Fill event
+  void fill(std::shared_ptr<ComPWA::Kinematics> kin, ComPWA::Event &event, double w = 1);
+  /// Scale all distributions
+  void scale(double w);
+  /// Get 1D histogram
   TH1D *getHistogram(unsigned int num);
-  //! Get 2D histogram
+  /// Get 2D histogram
   TH2D *getHistogram2D(unsigned int num);
-  //! set line color
+  /// set line color
   void setColor(Color_t color);
-  //! Write to TFile
-  void Write();
-  //! GetIntegral
-  double GetIntegral() { return _integral; }
+  /// Write to TFile
+  void write();
+  /// GetIntegral
+  double integral() { return Integral; }
 
 private:
-  std::vector<TH1D> _arr;
-  std::vector<TH2D> _arr2D;
-  std::string _name, _title;
-  unsigned int _nBins;
+  std::vector<TH1D> Arr;
+  std::vector<TH2D> Arr2D;
+  std::string Name, Title;
+  unsigned int NumBins;
 
-  std::unique_ptr<TTree> _tree;
+  std::unique_ptr<TTree> Tree;
+  
   // tree branches
-  std::vector<double> t_point;
-  double t_eff, t_weight;
-  double _integral;
-  Color_t _color;
+  std::vector<double> BranchPoint;
+  double BranchEff, BranchWeight;
+  double Integral;
+  Color_t Color;
 };
 
 class DalitzPlot {
@@ -77,28 +78,28 @@ public:
 
   virtual ~DalitzPlot();
 
-  void UseEfficiencyCorrection(bool s) { _correctForEfficiency = s; }
+  void useEfficiencyCorrection(bool s) { _correctForEfficiency = s; }
 
-  void SetData(std::shared_ptr<ComPWA::DataReader::Data> dataSample) {
+  void setData(std::shared_ptr<ComPWA::DataReader::Data> dataSample) {
     s_data = dataSample;
   }
 
-  void SetPhspData(std::shared_ptr<ComPWA::DataReader::Data> phsp) { s_phsp = phsp; }
+  void setPhspData(std::shared_ptr<ComPWA::DataReader::Data> phsp) { s_phsp = phsp; }
 
-  void SetHitMissData(std::shared_ptr<ComPWA::DataReader::Data> hitMiss) {
+  void setHitMissData(std::shared_ptr<ComPWA::DataReader::Data> hitMiss) {
     s_hitMiss = hitMiss;
   }
 
-  void SetFitAmp(std::shared_ptr<ComPWA::AmpIntensity> intens,
+  void setFitAmp(std::shared_ptr<ComPWA::AmpIntensity> intens,
                  std::string title = "", Color_t color = kBlack);
 
-  void SetGlobalScale(double s) { _globalScale = s; }
+  void setGlobalScale(double s) { _globalScale = s; }
 
-  void Fill(std::shared_ptr<ComPWA::Kinematics> kin);
+  void fill(std::shared_ptr<ComPWA::Kinematics> kin);
 
-  void Plot();
+  void plot();
 
-  void DrawComponent(std::string name, std::string title = "",
+  void drawComponent(std::string name, std::string title = "",
                      Color_t color = kBlack) {
     if (!_plotComponents.size())
       throw std::runtime_error("PlotData::DrawComponent() | AmpIntensity not "
@@ -106,21 +107,21 @@ public:
                                "SetFitAmp()!");
     std::shared_ptr<ComPWA::AmpIntensity> comp;
     try{
-      comp = _plotComponents.at(0)->GetComponent(name);
+      comp = _plotComponents.at(0)->component(name);
     } catch (std::exception& ex) {
       LOG(error) << "DalitzPlot::DrawComponent() | Component " << name
                  << " not found in AmpIntensity "
-                 << _plotComponents.at(0)->Name() << ".";
+                 << _plotComponents.at(0)->name() << ".";
       return;
     }
     _plotComponents.push_back(comp);
     _plotHistograms.push_back(DalitzHisto(kin_, name, title, _bins, color));
-    _plotHistograms.back().SetStats(0);
+    _plotHistograms.back().setStats(0);
     _plotLegend.push_back(title);
   }
 
 protected:
-  TString _name;
+  TString Name;
 
   std::shared_ptr<ComPWA::Kinematics> kin_;
   bool _isFilled;

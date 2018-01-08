@@ -38,17 +38,17 @@ public:
 
   ~RootGenerator() { delete[] masses; };
 
-  virtual RootGenerator *Clone();
+  virtual RootGenerator *clone();
 
-  virtual void Generate(Event &evt);
+  virtual void generate(Event &evt);
 
-  virtual void SetSeed(unsigned int seed);
+  virtual void setSeed(unsigned int seed);
 
-  virtual unsigned int GetSeed() const;
+  virtual unsigned int seed() const;
 
-  virtual double GetUniform(double min, double max) const;
+  virtual double uniform(double min, double max) const;
 
-  virtual double GetGaussDist(double mu, double sigma) const;
+  virtual double gauss(double mu, double sigma) const;
 
   virtual TGenPhaseSpace *GetGenerator() { return &event; }
 
@@ -67,13 +67,13 @@ public:
                           std::shared_ptr<Kinematics> kin, int seed,
                           double minSq_, double maxSq_)
       : RootGenerator(partL, kin, seed), minSq(minSq_), maxSq(maxSq_) {
-    if (kin->GetFinalState().size() != 2)
+    if (kin->finalState().size() != 2)
       throw std::runtime_error("UniformTwoBodyGenerator::"
                                "UniformTwoBodyGenerator() | Not a two body "
                                "decay!");
   }
-  virtual void Generate(Event &evt);
-  virtual UniformTwoBodyGenerator *Clone() {
+  virtual void generate(Event &evt);
+  virtual UniformTwoBodyGenerator *clone() {
     return (new UniformTwoBodyGenerator(*this));
   }
 

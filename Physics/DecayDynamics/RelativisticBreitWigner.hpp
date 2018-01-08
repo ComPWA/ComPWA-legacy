@@ -19,7 +19,7 @@ namespace ComPWA {
 namespace Physics {
 namespace DecayDynamics {
 
-class PartialDecay;
+class HelicityDecay;
 
 /// \class RelativisticBreitWigner
 /// Relativistic Breit-Wigner model with barrier factors
@@ -29,15 +29,14 @@ class RelativisticBreitWigner
     : public ComPWA::Physics::DecayDynamics::AbstractDynamicalFunction {
 
 public:
-  static std::shared_ptr<ComPWA::Physics::DecayDynamics::AbstractDynamicalFunction>
-  Factory(std::shared_ptr<ComPWA::PartList> partL,
-          const boost::property_tree::ptree &pt);
+  RelativisticBreitWigner(std::string name, std::pair<std::string,std::string> daughters,
+               std::shared_ptr<ComPWA::PartList> partL);
 
   /// Check of parameters have changed and normalization has to be recalculatecd
-  virtual bool CheckModified() const;
-
+  virtual bool isModified() const;
+   
   //================ EVALUATION =================
-  std::complex<double> Evaluate(const ComPWA::dataPoint &point, int pos) const;
+  std::complex<double> evaluate(const ComPWA::DataPoint &point, int pos) const;
 
   /// Dynamical Breit-Wigner function.
   /// \param mSq Invariant mass squared
@@ -55,87 +54,87 @@ public:
 
   //============ SET/GET =================
 
-  void SetWidthParameter(std::shared_ptr<ComPWA::DoubleParameter> w) {
-    _width = w;
+  void SetWidthParameter(std::shared_ptr<ComPWA::FitParameter> w) {
+   Width = w;
   }
 
-  std::shared_ptr<ComPWA::DoubleParameter> GetWidthParameter() {
-    return _width;
+  std::shared_ptr<ComPWA::FitParameter> GetWidthParameter() {
+    return Width;
   }
 
-  void SetWidth(double w) { _width->SetValue(w); }
+  void SetWidth(double w) {Width->setValue(w); }
 
-  double GetWidth() const { return _width->GetValue(); }
+  double GetWidth() const { return Width->value(); }
 
-  void SetMesonRadiusParameter(std::shared_ptr<ComPWA::DoubleParameter> r) {
-    _mesonRadius = r;
+  void SetMesonRadiusParameter(std::shared_ptr<ComPWA::FitParameter> r) {
+    MesonRadius = r;
   }
 
-  std::shared_ptr<ComPWA::DoubleParameter> GetMesonRadiusParameter() {
-    return _mesonRadius;
+  std::shared_ptr<ComPWA::FitParameter> GetMesonRadiusParameter() {
+    return MesonRadius;
   }
 
-  /// \see GetMesonRadius() const { return _mesonRadius->GetValue(); }
-  void SetMesonRadius(double w) { _mesonRadius->SetValue(w); }
+  /// \see GetMesonRadius() const { return MesonRadius->value(); }
+  void SetMesonRadius(double w) { MesonRadius->setValue(w); }
 
   /// Get meson radius.
   /// The meson radius is a measure of the size of the resonant state. It is
   /// used to calculate the angular momentum barrier factors.
-  double GetMesonRadius() const { return _mesonRadius->GetValue(); }
+  double GetMesonRadius() const { return MesonRadius->value(); }
 
   /// \see GetFormFactorType()
-  void SetFormFactorType(formFactorType t) { _ffType = t; }
+  void SetFormFactorType(formFactorType t) { FormFactorType = t; }
 
   /// Get form factor type.
   /// The type of formfactor that is used to calculate the angular momentum
   /// barrier factors.
-  formFactorType GetFormFactorType() { return _ffType; }
+  formFactorType GetFormFactorType() { return FormFactorType; }
 
-  virtual void GetParameters(ComPWA::ParameterList &list);
+  virtual void parameters(ComPWA::ParameterList &list);
 
-  virtual void GetParametersFast(std::vector<double> &list) const {
-    AbstractDynamicalFunction::GetParametersFast(list);
+  virtual void parametersFast(std::vector<double> &list) const {
+    AbstractDynamicalFunction::parametersFast(list);
     list.push_back(GetWidth());
     list.push_back(GetMesonRadius());
   }
 
   /// Update parameters to the values given in \p par
-  virtual void UpdateParameters(const ComPWA::ParameterList &par);
+  virtual void updateParameters(const ComPWA::ParameterList &par);
 
   //=========== FUNCTIONTREE =================
 
-  virtual bool HasTree() const { return true; }
+  virtual bool hasTree() const { return true; }
 
   virtual std::shared_ptr<ComPWA::FunctionTree>
-  GetTree(const ParameterList &sample, int pos, std::string suffix = "");
+  tree(const ParameterList &sample, int pos, std::string suffix = "");
 
 protected:
   /// Decay width of resonante state
-  std::shared_ptr<ComPWA::DoubleParameter> _width;
+  std::shared_ptr<ComPWA::FitParameter> Width;
 
   /// Meson radius of resonant state
-  std::shared_ptr<ComPWA::DoubleParameter> _mesonRadius;
+  std::shared_ptr<ComPWA::FitParameter> MesonRadius;
 
   /// Form factor type
-  formFactorType _ffType;
+  formFactorType FormFactorType;
 
 private:
   /// Temporary values (used to trigger recalculation of normalization)
-  double _current_mesonRadius;
-  double _current_width;
+  double CurrentMesonRadius;
+  double CurrentWidth;
 };
 
 class BreitWignerStrategy : public ComPWA::Strategy {
 public:
-  BreitWignerStrategy(const std::string resonanceName)
-      : ComPWA::Strategy(ParType::MCOMPLEX), name(resonanceName) {}
+  BreitWignerStrategy(std::string namee = "")
+      : ComPWA::Strategy(ParType::MCOMPLEX), name(namee) {}
 
   virtual const std::string to_str() const {
     return ("relativistic BreitWigner of " + name);
   }
 
-  virtual bool execute(ComPWA::ParameterList &paras,
-                       std::shared_ptr<ComPWA::AbsParameter> &out);
+  virtual void execute(ComPWA::ParameterList &paras,
+                       std::shared_ptr<ComPWA::Parameter> &out);
 
 protected:
   std::string name;

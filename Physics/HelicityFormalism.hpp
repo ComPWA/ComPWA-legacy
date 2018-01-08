@@ -4,8 +4,9 @@
 #include "Physics/DecayDynamics/RelativisticBreitWigner.hpp"
 
 #include "Physics/HelicityFormalism/AmpWignerD.hpp"
-#include "Physics/HelicityFormalism/CoherentIntensity.hpp"
+#include "Physics/CoherentIntensity.hpp"
+#include "Physics/SequentialPartialAmplitude.hpp"
+#include "Physics/IncoherentIntensity.hpp"
+#include "Physics/HelicityFormalism/HelicityDecay.hpp"
 #include "Physics/HelicityFormalism/HelicityKinematics.hpp"
-#include "Physics/HelicityFormalism/IncoherentIntensity.hpp"
-#include "Physics/HelicityFormalism/PartialDecay.hpp"
-#include "Physics/HelicityFormalism/SequentialTwoBodyDecay.hpp"
+

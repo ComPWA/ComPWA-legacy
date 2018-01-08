@@ -2,12 +2,10 @@
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
-//! ComPWA Exceptions
-/*! \class Exception
- * @file Exceptions.hpp
- * This class defines the ComPWA exception base-class and provides a set of
- * standard exceptions.
- */
+///
+/// \file
+/// ComPWA exceptions.
+///
 
 #ifndef PWAEXCEPTIONS_H
 #define PWAEXCEPTIONS_H
@@ -17,6 +15,12 @@
 
 namespace ComPWA {
 
+///
+/// \class Exception
+/// ComPWA Exceptions base class.
+/// This class defines the ComPWA exception base-class and provides a set of
+/// standard exceptions.
+///
 class Exception : public std::exception {
 public:
   Exception(const Exception &e) throw() : std::exception(e), what_(e.what_) {}

@@ -15,30 +15,29 @@ namespace DecayDynamics {
 class NonResonant : public AbstractDynamicalFunction {
 
 public:
-  NonResonant() {
-    // Set the mass parameter to make shure the pointer is set.
+  NonResonant(std::string name = "") : AbstractDynamicalFunction(name) {
+    // Set the mass parameter to make sure the pointer is set.
     SetMassParameter(
-        std::shared_ptr<DoubleParameter>(new DoubleParameter("", 0.0)));
+        std::shared_ptr<FitParameter>(new FitParameter("", 0.0)));
   };
 
   virtual ~NonResonant(){};
-
-  virtual std::complex<double> Evaluate(const dataPoint &p, int pos) const {
+  
+  virtual std::complex<double> evaluate(const DataPoint &p, int pos) const {
     return std::complex<double>(1.0, 0.0);
   }
 
-  virtual std::shared_ptr<FunctionTree> GetTree(const ParameterList &sample,
+  virtual std::shared_ptr<FunctionTree> tree(const ParameterList &sample,
                                                 int pos, std::string suffix);
 
-  virtual void GetParameters(ParameterList &list) {};
-  
+  virtual void parameters(ParameterList &list){};
+
   /// Update parameters to the values given in \p par
-  virtual void UpdateParameters(const ParameterList &par) {};
-  
+  virtual void updateParameters(const ParameterList &par){};
 };
 
-} /* namespace DecayDynamics */
-} /* namespace Physics */
-} /* namespace ComPWA */
+} // ns::DecayDynamics
+} // ns::Physics
+} // ns::ComPWA
 
-#endif /* PHYSICS_HELICITYFORMALISM_NONRESONANT */
+#endif

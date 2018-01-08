@@ -15,13 +15,12 @@
 
 using namespace ComPWA::Optimizer::Minuit2;
 
-
 MinuitResult::MinuitResult()
-    : calcInterference(0), initialLH(0), finalLH(0), trueLH(0) {}
+    : CalcInterference(0), InitialLH(0), FinalLH(0), TrueLH(0) {}
 
 MinuitResult::MinuitResult(std::shared_ptr<IEstimator> esti,
                            ROOT::Minuit2::FunctionMinimum result)
-    : calcInterference(0), initialLH(0), finalLH(0), trueLH(0) {
+    : CalcInterference(0), InitialLH(0), FinalLH(0), TrueLH(0) {
   est = std::static_pointer_cast<IEstimator>(esti);
   init(result);
 }
@@ -38,61 +37,48 @@ void MinuitResult::init(ROOT::Minuit2::FunctionMinimum min) {
   if (minState.HasCovariance()) {
     ROOT::Minuit2::MnUserCovariance minuitCovMatrix = minState.Covariance();
     // Size of Minuit covariance vector is given by dim*(dim+1)/2.
-     // dim is the dimension of the covariance matrix.
-     // The dimension can therefore be calculated as
-     // dim = -0.5+-0.5 sqrt(8*size+1)
-     //
-    nFreeParameter = minuitCovMatrix.Nrow();
-    cov = std::vector<std::vector<double>>(nFreeParameter,
-                                           std::vector<double>(nFreeParameter));
-    corr = std::vector<std::vector<double>>(
-        nFreeParameter, std::vector<double>(nFreeParameter));
-    for (unsigned i = 0; i < nFreeParameter; ++i)
-      for (unsigned j = i; j < nFreeParameter; ++j) {
-        cov.at(i).at(j) = minuitCovMatrix(j, i);
-        cov.at(j).at(i) = minuitCovMatrix(j, i); // fill lower half
+    // dim is the dimension of the covariance matrix.
+    // The dimension can therefore be calculated as
+    // dim = -0.5+-0.5 sqrt(8*size+1)
+    //
+    NumFreeParameter = minuitCovMatrix.Nrow();
+    Cov = std::vector<std::vector<double>>(NumFreeParameter,
+                                           std::vector<double>(NumFreeParameter));
+    Corr = std::vector<std::vector<double>>(
+        NumFreeParameter, std::vector<double>(NumFreeParameter));
+    for (unsigned i = 0; i < NumFreeParameter; ++i)
+      for (unsigned j = i; j < NumFreeParameter; ++j) {
+        Cov.at(i).at(j) = minuitCovMatrix(j, i);
+        Cov.at(j).at(i) = minuitCovMatrix(j, i); // fill lower half
       }
-    for (unsigned i = 0; i < nFreeParameter; ++i)
-      for (unsigned j = i; j < nFreeParameter; ++j) {
-        corr.at(i).at(j) =
-            cov.at(i).at(j) / sqrt(cov.at(i).at(i) * cov.at(j).at(j));
-        corr.at(j).at(i) = corr.at(i).at(j); // fill lower half
+    for (unsigned i = 0; i < NumFreeParameter; ++i)
+      for (unsigned j = i; j < NumFreeParameter; ++j) {
+        Corr.at(i).at(j) =
+            Cov.at(i).at(j) / sqrt(Cov.at(i).at(i) * Cov.at(j).at(j));
+        Corr.at(j).at(i) = Corr.at(i).at(j); // fill lower half
       }
 
   } else
     LOG(error) << "MinuitResult: no valid correlation matrix available!";
-  if(minState.HasGlobalCC()){
-    globalCC = minState.GlobalCC().GlobalCC();
-  }else{
-    globalCC = std::vector<double>(nFreeParameter, 0);
+  if (minState.HasGlobalCC()) {
+    GlobalCC = minState.GlobalCC().GlobalCC();
+  } else {
+    GlobalCC = std::vector<double>(NumFreeParameter, 0);
     LOG(error) << "MinuitResult: no valid global correlation available!";
   }
-  initialLH = -1;
-  finalLH = minState.Fval();
-  edm = minState.Edm();
-  isValid = min.IsValid();
-  covPosDef = min.HasPosDefCovar();
-  hasValidParameters = min.HasValidParameters();
-  hasValidCov = min.HasValidCovariance();
-  hasAccCov = min.HasAccurateCovar();
-  hasReachedCallLimit = min.HasReachedCallLimit();
-  edmAboveMax = min.IsAboveMaxEdm();
-  hesseFailed = min.HesseFailed();
-  errorDef = min.Up();
-  nFcn = min.NFcn();
-
-  return;
-}
-
-void MinuitResult::genSimpleOutput(std::ostream &out) {
-  for (unsigned int o = 0; o < finalParameters.GetNDouble(); o++) {
-    std::shared_ptr<DoubleParameter> outPar =
-        finalParameters.GetDoubleParameter(o);
-    out << outPar->GetValue() << " ";
-    if (outPar->HasError())
-      out << outPar->GetError() << " ";
-  }
-  out << "\n";
+  InitialLH = -1;
+  FinalLH = minState.Fval();
+  Edm = minState.Edm();
+  IsValid = min.IsValid();
+  CovPosDef = min.HasPosDefCovar();
+  HasValidParameters = min.HasValidParameters();
+  HasValidCov = min.HasValidCovariance();
+  HasAccCov = min.HasAccurateCovar();
+  HasReachedCallLimit = min.HasReachedCallLimit();
+  EdmAboveMax = min.IsAboveMaxEdm();
+  HesseFailed = min.HesseFailed();
+  ErrorDef = min.Up();
+  NFcn = min.NFcn();
 
   return;
 }
@@ -105,59 +91,58 @@ void MinuitResult::genOutput(std::ostream &out, std::string opt) {
   }
   out << std::endl;
   out << "--------------MINUIT2 FIT RESULT----------------" << std::endl;
-  if (!isValid)
-    out << "		*** MINIMUM NOT VALID! ***" << std::endl;
+  if (!IsValid)
+    out << "    *** MINIMUM NOT VALID! ***" << std::endl;
   out << std::setprecision(10);
-  out << "Initial Likelihood: " << initialLH << std::endl;
-  out << "Final Likelihood: " << finalLH << std::endl;
-  if (trueLH)
-    out << "True Likelihood: " << trueLH << std::endl;
+  out << "Initial Likelihood: " << InitialLH << std::endl;
+  out << "Final Likelihood: " << FinalLH << std::endl;
+  if (TrueLH)
+    out << "True Likelihood: " << TrueLH << std::endl;
 
-  out << "Estimated distance to minimumn: " << edm << std::endl;
-  if (edmAboveMax)
-    out << "		*** EDM IS ABOVE MAXIMUM! ***" << std::endl;
-  out << "Error definition: " << errorDef << std::endl;
-  out << "Number of calls: " << nFcn << std::endl;
-  if (hasReachedCallLimit)
-    out << "		*** LIMIT OF MAX CALLS REACHED! ***" << std::endl;
-  out << "CPU Time : " << time / 60 << "min" << std::endl;
+  out << "Estimated distance to minimumn: " << Edm << std::endl;
+  if (EdmAboveMax)
+    out << "    *** EDM IS ABOVE MAXIMUM! ***" << std::endl;
+  out << "Error definition: " << ErrorDef << std::endl;
+  out << "Number of calls: " << NFcn << std::endl;
+  if (HasReachedCallLimit)
+    out << "    *** LIMIT OF MAX CALLS REACHED! ***" << std::endl;
+  out << "CPU Time : " << Time / 60 << "min" << std::endl;
   out << std::setprecision(5) << std::endl;
 
-  if (!hasValidParameters)
-    out << "		*** NO VALID SET OF PARAMETERS! ***" << std::endl;
+  if (!HasValidParameters)
+    out << "    *** NO VALID SET OF PARAMETERS! ***" << std::endl;
   if (printParam) {
     out << "PARAMETERS:" << std::endl;
     TableFormater *tableResult = new TableFormater(&out);
-    PrintFitParameters(tableResult);
+    printFitParameters(tableResult);
   }
 
-  if (!hasValidCov)
-    out << "		*** COVARIANCE MATRIX NOT VALID! ***" << std::endl;
-  if (!hasAccCov)
-    out << "		*** COVARIANCE MATRIX NOT ACCURATE! ***" << std::endl;
-  if (!covPosDef)
-    out << "		*** COVARIANCE MATRIX NOT POSITIVE DEFINITE! ***"
-        << std::endl;
-  if (hesseFailed)
-    out << "		*** HESSE FAILED! ***" << std::endl;
-  if (hasValidCov) {
+  if (!HasValidCov)
+    out << "    *** COVARIANCE MATRIX NOT VALID! ***" << std::endl;
+  if (!HasAccCov)
+    out << "    *** COVARIANCE MATRIX NOT ACCURATE! ***" << std::endl;
+  if (!CovPosDef)
+    out << "    *** COVARIANCE MATRIX NOT POSITIVE DEFINITE! ***" << std::endl;
+  if (HesseFailed)
+    out << "    *** HESSE FAILED! ***" << std::endl;
+  if (HasValidCov) {
     if (printCovMatrix) {
       out << "COVARIANCE MATRIX:" << std::endl;
       TableFormater *tableCov = new TableFormater(&out);
-      PrintCovarianceMatrix(tableCov);
+      printCovarianceMatrix(tableCov);
     }
     if (printCorrMatrix) {
       out << "CORRELATION MATRIX:" << std::endl;
       TableFormater *tableCorr = new TableFormater(&out);
-      PrintCorrelationMatrix(tableCorr);
+      printCorrelationMatrix(tableCorr);
     }
   }
   out << "FIT FRACTIONS:" << std::endl;
   TableFormater tab(&out);
-  PrintFitFractions(&tab);
+  printFitFractions(&tab);
 
   out << std::setprecision(10);
-  out << "FinalLH: " << finalLH << std::endl;
+  out << "FinalLH: " << FinalLH << std::endl;
 
   out << std::setprecision(5); // reset cout precision
   return;
@@ -165,24 +150,13 @@ void MinuitResult::genOutput(std::ostream &out, std::string opt) {
 
 void MinuitResult::createInterferenceTable(std::ostream &out,
                                            std::shared_ptr<AmpIntensity> amp) {
-  out << "INTERFERENCE terms for " << amp->Name() << ": " << std::endl;
+  out << "INTERFERENCE terms for " << amp->name() << ": " << std::endl;
   TableFormater *tableInterf = new TableFormater(&out);
   tableInterf->addColumn("Name 1", 15);
   tableInterf->addColumn("Name 2", 15);
   tableInterf->addColumn("Value", 15);
   tableInterf->header();
   double sumInfTerms = 0;
-//  auto it = amp->GetResonanceItrFirst();
-//  for (; it != amp->GetResonanceItrLast(); ++it) {
-//    auto it2 = it;
-//    for (; it2 != amp->GetResonanceItrLast(); ++it2) {
-//      *tableInterf << (*it)->GetName();
-//      *tableInterf << (*it2)->GetName();
-//      double inf = amp->GetIntegralInterference(it, it2);
-//      *tableInterf << inf;
-//      sumInfTerms += inf;
-//    }
-//  }
   tableInterf->delim();
   *tableInterf << " "
                << "Sum: " << sumInfTerms;
@@ -190,42 +164,38 @@ void MinuitResult::createInterferenceTable(std::ostream &out,
   out << std::endl;
 }
 
-void MinuitResult::PrintCorrelationMatrix(TableFormater *tableCorr) {
-  if (!hasValidCov)
+void MinuitResult::printCorrelationMatrix(TableFormater *tableCorr) {
+  if (!HasValidCov)
     return;
   tableCorr->addColumn(" ", 15);        // add empty first column
   tableCorr->addColumn("GlobalCC", 10); // global correlation coefficient
 
   // add columns in correlation matrix
-  for (unsigned int o = 0; o < finalParameters.GetNDouble(); o++) {
-    std::shared_ptr<DoubleParameter> ppp =
-        finalParameters.GetDoubleParameter(o);
-    if (ppp->IsFixed())
+  for (auto p : FinalParameters.doubleParameters()) {
+    if (p->isFixed())
       continue;
-    tableCorr->addColumn(ppp->GetName(), 15);
+    tableCorr->addColumn(p->name(), 15);
   }
 
   unsigned int n = 0;
   tableCorr->header();
-  for (unsigned int o = 0; o < finalParameters.GetNDouble(); o++) {
-    std::shared_ptr<DoubleParameter> ppp =
-        finalParameters.GetDoubleParameter(o);
-    if (ppp->IsFixed())
+  for (auto p : FinalParameters.doubleParameters()) {
+    if (p->isFixed())
       continue;
-    *tableCorr << ppp->GetName();
-    try{
-      *tableCorr << globalCC.at(n);
-    }catch(...){
+    *tableCorr << p->name();
+    try {
+      *tableCorr << GlobalCC.at(n);
+    } catch (...) {
       *tableCorr << "?";
     }
 
-    for (unsigned int t = 0; t < corr.size(); t++) {
-      if (n >= corr.at(0).size()) {
+    for (unsigned int t = 0; t < Corr.size(); t++) {
+      if (n >= Corr.at(0).size()) {
         *tableCorr << " ";
         continue;
       }
       if (t >= n)
-        *tableCorr << corr.at(n).at(t);
+        *tableCorr << Corr.at(n).at(t);
       else
         *tableCorr << "";
     }
@@ -235,31 +205,33 @@ void MinuitResult::PrintCorrelationMatrix(TableFormater *tableCorr) {
   return;
 }
 
-void MinuitResult::PrintCovarianceMatrix(TableFormater *tableCov) {
-  if (!hasValidCov)
+void MinuitResult::printCovarianceMatrix(TableFormater *tableCov) {
+  if (!HasValidCov)
     return;
+    // Create table structure first
   tableCov->addColumn(" ", 17); // add empty first column
-  // add columns first
-  for (unsigned int o = 0; o < finalParameters.GetNDouble(); o++) {
-    if (!finalParameters.GetDoubleParameter(o)->IsFixed())
-      tableCov->addColumn(finalParameters.GetDoubleParameter(o)->GetName(), 17);
+                                // add columns first
+  for (auto p : FinalParameters.doubleParameters()) {
+    if (p->isFixed())
+      continue;
+    tableCov->addColumn(p->name(), 17);
   }
 
+  // Fill table
   unsigned int n = 0;
   tableCov->header();
-  for (unsigned int o = 0; o < finalParameters.GetNDouble(); o++) {
-    std::shared_ptr<DoubleParameter> ppp =
-        finalParameters.GetDoubleParameter(o);
-    if (ppp->IsFixed())
+  for (auto p : FinalParameters.doubleParameters()) {
+    if (p->isFixed())
       continue;
-    *tableCov << ppp->GetName();
-    for (unsigned int t = 0; t < cov.size(); t++) {
-      if (n >= cov.at(0).size()) {
+
+    *tableCov << p->name();
+    for (unsigned int t = 0; t < Cov.size(); t++) {
+      if (n >= Cov.at(0).size()) {
         *tableCov << " ";
         continue;
       }
       if (t >= n)
-        *tableCov << cov.at(n).at(t);
+        *tableCov << Cov.at(n).at(t);
       else
         *tableCov << "";
     }
@@ -269,43 +241,29 @@ void MinuitResult::PrintCovarianceMatrix(TableFormater *tableCov) {
   return;
 }
 
-void MinuitResult::WriteXML(std::string filename) {
+void MinuitResult::writeXML(std::string filename) {
   std::ofstream ofs(filename);
   boost::archive::xml_oarchive oa(ofs);
   // TODO: Compile error due to serialization
-  oa << boost::serialization::make_nvp("FitParameters", finalParameters);
-  oa << boost::serialization::make_nvp("FitFractions", _fitFractions);
+  oa << boost::serialization::make_nvp("FitParameters", FinalParameters);
+  oa << boost::serialization::make_nvp("FitFractions",FitFractions);
   ofs.close();
   return;
 }
 
-void MinuitResult::WriteTeX(std::string filename) {
+void MinuitResult::writeTeX(std::string filename) {
   std::ofstream out(filename);
   TableFormater *tableResult = new TexTableFormater(&out);
-  PrintFitParameters(tableResult);
-  if (hasValidCov) {
+  printFitParameters(tableResult);
+  if (HasValidCov) {
     TableFormater *tableCov = new TexTableFormater(&out);
-    PrintCovarianceMatrix(tableCov);
+    printCovarianceMatrix(tableCov);
     TableFormater *tableCorr = new TexTableFormater(&out);
-    PrintCorrelationMatrix(tableCorr);
+    printCorrelationMatrix(tableCorr);
   }
   TableFormater *fracTable = new TexTableFormater(&out);
   // calculate and print fractions if amplitude is set
-  PrintFitFractions(fracTable);
+  printFitFractions(fracTable);
   out.close();
   return;
-}
-
-bool MinuitResult::HasFailed() {
-  bool failed = 0;
-  if (!isValid)
-    failed = 1;
-  //	if(!covPosDef) failed=1;
-  //	if(!hasValidParameters) failed=1;
-  //	if(!hasValidCov) failed=1;
-  //	if(!hasAccCov) failed=1;
-  //	if(hasReachedCallLimit) failed=1;
-  //	if(hesseFailed) failed=1;
-
-  return failed;
 }

@@ -29,4 +29,4 @@ public:
 };
 }
 
-#endif /* CORE_RESOLUTION_HPP_ */
+#endif

@@ -15,17 +15,7 @@
 
 #include "Core/Exceptions.hpp"
 
-//_____ D E F I N I T I O N S __________________________________________________
-
-//_____ G L O B A L S __________________________________________________________
-
-//_____ L O C A L S ____________________________________________________________
-
-//_____ F U N C T I O N S ______________________________________________________
-
-namespace ComPWA {
-namespace DataReader {
-namespace AsciiReader {
+using namespace ComPWA::DataReader::AsciiReader;
 
 // Constructors and destructors
 AsciiReader::AsciiReader(const std::string inConfigFile, const int particles) {
@@ -42,11 +32,11 @@ AsciiReader::AsciiReader(const std::string inConfigFile, const int particles) {
 
     for (int parts = 0; parts < particles; parts++) {
       currentStream >> px >> py >> pz >> e;
-      newEvent.AddParticle(Particle(px, py, pz, e));
+      newEvent.addParticle(Particle(px, py, pz, e));
     }
 
     if (!currentStream.fail()) {
-      fEvents.push_back(newEvent);
+      Events.push_back(newEvent);
       // for ( parts = 0; parts < linesToSkip; parts++ )
       //   currentStream >> px >> py >> pz >> e;
     }
@@ -54,16 +44,13 @@ AsciiReader::AsciiReader(const std::string inConfigFile, const int particles) {
   currentStream.close();
 }
 
-AsciiReader::~AsciiReader() { fEvents.clear(); }
+AsciiReader::~AsciiReader() { Events.clear(); }
 
-AsciiReader *AsciiReader::Clone() const {
+AsciiReader *AsciiReader::clone() const {
   // TODO: implement virtual functions and uncomment the following
   //	return new AsciiReader(*this);
   return new AsciiReader();
 }
 
-AsciiReader *AsciiReader::EmptyClone() const { return new AsciiReader(); }
+AsciiReader *AsciiReader::emptyClone() const { return new AsciiReader(); }
 
-} /* namespace AsciiReader */
-} /* namespace DataReader */
-} /* namespace ComPWA */

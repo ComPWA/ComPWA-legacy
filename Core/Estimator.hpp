@@ -37,20 +37,20 @@ public:
   virtual ~IEstimator() {};
   
   /// Calculate value of Estimator given parameters \p par
-  virtual double ControlParameter(ParameterList &par) = 0;
+  virtual double controlParameter(ParameterList &par) = 0;
 
   /// Get the FunctionTree.
   /// If no FunctionTree is available an exception is thrown.
-  virtual std::shared_ptr<FunctionTree> GetTree() = 0;
+  virtual std::shared_ptr<FunctionTree> tree() = 0;
 
-  /// Kind for status flag during the minimization process.
-  /// (e.g. number of likelihood evaluations)
-  virtual int NSteps() const = 0 ;
+  /// Status flag indicating the minimization process.
+  /// E.g. number of likelihood evaluations.
+  virtual int status() const = 0 ;
 
 protected:
   std::shared_ptr<FunctionTree> f;
 };
 
-} // namespace ComPWA
+} // ns::ComPWA
 
 #endif
