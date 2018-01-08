@@ -51,7 +51,7 @@ void Logging::init(std::string out, trivial::severity_level minLevel) {
             << boost::posix_time::to_simple_string(todayUtc);
 }
 
-void Logging::SetLogLevel(boost::log::trivial::severity_level minLevel) {
+void Logging::setLogLevel(boost::log::trivial::severity_level minLevel) {
   core::get()->set_filter(trivial::severity >= minLevel);
   LOG(info) << "New severity level: " << minLevel;
 }

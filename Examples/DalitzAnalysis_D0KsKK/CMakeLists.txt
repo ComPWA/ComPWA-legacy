@@ -3,16 +3,16 @@
 ##########################################################
 
 #
-# FindRoot
-#
-find_package( ROOT REQUIRED QUIET )
-
-#
 # FindBoost
 #
 find_package(Boost COMPONENTS
                program_options
                REQUIRED QUIET
+)
+
+# Make sure all necessary targets are build
+if( TARGET Minuit2IF AND TARGET MinLogLH AND TARGET RootReader
+    AND TARGET Tools AND TARGET HelicityFormalism
 )
 
 add_executable( DalitzFitD03K
@@ -38,3 +38,8 @@ target_include_directories( DalitzFitD03K
 install(TARGETS DalitzFitD03K
   RUNTIME DESTINATION bin
 )
+
+ELSE ()
+  MESSAGE( WARNING "Required targets not found! Not building\
+                    DalitzFitD03K executable!")
+ENDIF()

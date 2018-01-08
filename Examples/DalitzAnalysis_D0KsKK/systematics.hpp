@@ -1,21 +1,20 @@
-/*
- * systematics.hpp
- *
- *  Created on: Aug 28, 2015
- *      Author: weidenka
- */
+// Copyright (c) 2013, 2017 The ComPWA Team.
+// This file is part of the ComPWA framework, check
+// https://github.com/ComPWA/ComPWA/license.txt for details.
 
 #ifndef PWA_SYSTEMATICS_HPP_
 #define PWA_SYSTEMATICS_HPP_
 
 using namespace ComPWA;
 
-MomentumCorrection* getTrackingCorrection() {
+MomentumCorrection *getTrackingCorrection() {
 
   // momentum depended efficiency difference for charged tracks
-  CorrectionTable chargedTrackingSys("Tracking systematics charged tracks");
+  DataReader::CorrectionTable chargedTrackingSys(
+      "Tracking systematics charged tracks");
+
   // momentum depended efficiency difference KS candidates
-  CorrectionTable ksSystematics("K_S^0 reconstruction systematics");
+  DataReader::CorrectionTable ksSystematics("K_S^0 reconstruction systematics");
 
   //(min, max, sys, sysError, anti-particle sys, anti-particle sysError)
   ksSystematics.Add(0.00, 0.18, 0.01, 0.001, 0.01, 0.001);
@@ -51,7 +50,7 @@ MomentumCorrection* getTrackingCorrection() {
   chargedTrackingSys.Add(0.9, 1.0, 0.01, 0.001);
   chargedTrackingSys.Add(1.0, 1.1, 0.01, 0.001);
 
-  std::vector<CorrectionTable> vecTrkSys;
+  std::vector<DataReader::CorrectionTable> vecTrkSys;
   vecTrkSys.push_back(ksSystematics);
   vecTrkSys.push_back(chargedTrackingSys);
   vecTrkSys.push_back(chargedTrackingSys);
@@ -60,9 +59,9 @@ MomentumCorrection* getTrackingCorrection() {
   return trkSys;
 }
 
-MomentumCorrection* getPidCorrection() {
+MomentumCorrection *getPidCorrection() {
   // momentum depended efficiency difference for charged tracks
-  CorrectionTable chargedPidSys("PID systematics charged tracks");
+  DataReader::CorrectionTable chargedPidSys("PID systematics charged tracks");
 
   //(min, max, sys, sysError)
   // chargedPidSys.Add(0.0, 0.1, 0.0, 1.0 );
@@ -77,8 +76,8 @@ MomentumCorrection* getPidCorrection() {
   chargedPidSys.Add(0.9, 1.0, 0.01, 0.001);
   chargedPidSys.Add(1.0, 1.1, 0.01, 0.001);
 
-  std::vector<CorrectionTable> vecPidSys;
-  vecPidSys.push_back(CorrectionTable("No corrections for K_S^0"));
+  std::vector<DataReader::CorrectionTable> vecPidSys;
+  vecPidSys.push_back(DataReader::CorrectionTable("No corrections for K_S^0"));
   vecPidSys.push_back(chargedPidSys);
   vecPidSys.push_back(chargedPidSys);
   MomentumCorrection *pidSys =
@@ -86,4 +85,4 @@ MomentumCorrection* getPidCorrection() {
   return pidSys;
 }
 
-#endif /* PWA_SYSTEMATICS_HPP_ */
+#endif

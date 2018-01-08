@@ -55,12 +55,12 @@ public:
   RootReader(const std::string inRootFile,
              const std::string inTreeName = "data", int size = -1);
 
-  virtual RootReader *Clone() const;
+  virtual RootReader *clone() const;
 
   /// Create empty clone
-  virtual RootReader *EmptyClone() const;
+  virtual RootReader *emptyClone() const;
 
-  virtual void WriteData(std::string file = "", std::string trName = "");
+  virtual void writeData(std::string file = "", std::string trName = "");
 
 protected:
   /// Open ROOT file and set branch addresses to TTree

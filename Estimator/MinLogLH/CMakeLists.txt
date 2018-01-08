@@ -13,7 +13,10 @@ target_link_libraries(
   Core
 )
 
-install (FILES ${lib_headers} DESTINATION include/ComPWA)
+install (FILES ${lib_headers}
+    DESTINATION include/ComPWA/Estimator/MinLogLH
+)
+
 install (TARGETS MinLogLH
         LIBRARY DESTINATION lib
 )

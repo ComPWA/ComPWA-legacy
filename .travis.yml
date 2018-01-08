@@ -22,15 +22,6 @@ env:
           #   via the "travis encrypt" command using the project repo's public key
         - secure: "I1LwO65P4q89f31HYnFlrlJ9yHyJ/QIAOXR5CtPfMo5FnestBtlQg6fX3p1vLNi5XdYXP4QpP51FFGJ5suz1aigC45JRaMzO98WQmMvIqYufrhkYej6lNevL0z/tHeI0aURH7N1SfSZaLwkepErssOsdjJAqP538ldA3Zz9g2gM="
 
-addons:
-  coverity_scan:
-    project:
-      name: "ComPWA/ComPWA"
-      description: "Build submitted via Travis CI"
-    notification_email: peter.weidenkaff@mailbox.org
-    build_command_prepend: "cmake ."
-    build_command: "make -j2"
-    branch_pattern: coverity_scan
 
 before_install:
       - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then 
@@ -42,88 +33,6 @@ matrix:
     - os: osx
 
   include:
-    - os: linux
-      dist: trusty
-      env: TASK="Build documentation"
-      addons: 
-        apt: 
-            packages:
-              - doxygen
-              - doxygen-doc
-              - doxygen-gui
-              - graphviz
-      script:
-        # Generate and deploy documentation
-        - cd $BASEPATH
-        - chmod +x $TRAVIS_BUILD_DIR/doc/generateDoxygen.sh
-        # Documentation is generated and deployed to gh-pages 
-        # (only if this is not a pull request).
-        - $TRAVIS_BUILD_DIR/doc/generateDoxygen.sh; 
-
-    - os: linux
-      compiler: gcc
-      dist: trusty  #Ubuntu14.04 LTS
-      env: 
-        - TASK="ROOT v6.10"
-        - ROOTSYS=$BASEPATH/root
-      addons: 
-        apt: 
-            packages:
-              - libboost-all-dev # Version 1.54 for trusty
-              - libgsl0-dev
-      before_script:
-        - env
-        - cd $BASEPATH
-          # ROOT v6.10
-        - wget https://root.cern.ch/download/root_v6.10.02.Linux-ubuntu14-x86_64-gcc4.8.tar.gz
-        - tar xpvfz root_*.tar.gz > /dev/null 2>&1
-
-    - os: linux
-      compiler: clang
-      dist: trusty  #Ubuntu14.04 LTS
-      env: 
-        - TASK="ROOT v6.10"
-        - ROOTSYS=$BASEPATH/root
-      addons: 
-        apt: 
-            packages:
-              - libboost-all-dev # Version 1.54 for trusty
-              - libgsl0-dev
-      before_script:
-        - env
-        - cd $BASEPATH
-          # ROOT v6.10
-        - wget https://root.cern.ch/download/root_v6.10.02.Linux-ubuntu14-x86_64-gcc4.8.tar.gz
-        - tar xpvfz root_*.tar.gz > /dev/null 2>&1
-
-    - os: linux
-      dist: trusty  #Ubuntu14.04 LTS
-      compiler: gcc
-      env: 
-        - TASK="ROOT v5.34"
-        - ROOTSYS=$BASEPATH/root
-      addons: 
-        apt: 
-            packages:
-              - libboost-all-dev # Version 1.54 for trusty
-              - libgsl0-dev
-                # ubuntu trusty does not provide Minuit2 header files
-              #- root-system # ROOT v.5.34 
-              #- root-plugin-math-minuit2 
-              #- libroot-math-minuit-dev
-              #- libroot-io-dev
-              #- libroot-hist-dev
-              #- libroot-tree-dev
-              #- libroot-montecarlo-eg-dev
-              #- libroot-math-physics-dev
-      before_script:
-        - env
-        - echo $ROOTSYS
-        - cd $BASEPATH
-          # ROOT v5.34
-        - wget https://root.cern.ch/download/root_v5.34.36.Linux-ubuntu14-x86_64-gcc4.8.tar.gz
-        - tar xpvfz root_*.tar.gz > /dev/null 2>&1
-
     - os: osx
       osx_image: xcode8.3
       env: TASK="ROOT v6.10"
@@ -145,14 +54,113 @@ matrix:
               brew install root;
             fi
           fi
+        - brew install python3
         #- wget https://root.cern.ch/download/root_v6.10.02.macosx64-10.12-clang81.tar.gz
         #- tar xpvfz root_*.tar.gz > /dev/null 2>&1
+        
+    - os: linux
+      dist: trusty
+      env: TASK="Build documentation"
+      addons: 
+        apt: 
+            packages:
+              - doxygen
+              - doxygen-doc
+              - doxygen-gui
+              - graphviz
+      before_script:
+        - env
+      script:
+        # Generate and deploy documentation to gh-pages 
+        # Only in case that this is not a pull request
+        # and we are on branch master
+        - if [[ "$TRAVIS_BRANCH" == "master" ]]; then 
+              cd $BASEPATH;
+              chmod +x $TRAVIS_BUILD_DIR/doc/generateDoxygen.sh;
+              $TRAVIS_BUILD_DIR/doc/generateDoxygen.sh; 
+          fi  
+
+    - os: linux
+      compiler: gcc
+      dist: trusty  #Ubuntu14.04 LTS
+      env: 
+        - TASK="ROOT v6.10"
+        - ROOTSYS=$BASEPATH/root
+      addons: 
+        apt: 
+            packages:
+              - libboost-all-dev # Version 1.54 for trusty
+              - libgsl0-dev
+              - python3
+        coverity_scan:
+            project:
+                name: "ComPWA/ComPWA"
+                description: "Build submitted via Travis CI"
+            notification_email: peter.weidenkaff@mailbox.org
+            build_command_prepend: "cd $BASEPATH/ComPWA; cmake -DPYBIND11_PYTHON_VERSION=3.4 ./"
+            build_command: "make -j2"
+            branch_pattern: coverity_scan
+      before_script:
+        - env
+        - cd $BASEPATH
+          # ROOT v6.10
+        - wget https://root.cern.ch/download/root_v6.10.02.Linux-ubuntu14-x86_64-gcc4.8.tar.gz
+        - tar xpvfz root_*.tar.gz > /dev/null 2>&1
+
+    - os: linux
+      compiler: clang
+      dist: trusty  #Ubuntu14.04 LTS
+      env: 
+        - TASK="ROOT v6.10"
+        - ROOTSYS=$BASEPATH/root
+      addons: 
+        apt: 
+            packages:
+              - libboost-all-dev # Version 1.54 for trusty
+              - libgsl0-dev
+              - python3
+      before_script:
+        - env
+        - cd $BASEPATH
+          # ROOT v6.10
+        - wget https://root.cern.ch/download/root_v6.10.02.Linux-ubuntu14-x86_64-gcc4.8.tar.gz
+        - tar xpvfz root_*.tar.gz > /dev/null 2>&1
+
+    - os: linux
+      dist: trusty  #Ubuntu14.04 LTS
+      compiler: gcc
+      env: 
+        - TASK="ROOT v5.34"
+        - ROOTSYS=$BASEPATH/root
+      addons: 
+        apt: 
+            packages:
+              - libboost-all-dev # Version 1.54 for trusty
+              - libgsl0-dev
+              - python3
+                # ubuntu trusty does not provide Minuit2 header files
+              #- root-system # ROOT v.5.34 
+              #- root-plugin-math-minuit2 
+              #- libroot-math-minuit-dev
+              #- libroot-io-dev
+              #- libroot-hist-dev
+              #- libroot-tree-dev
+              #- libroot-montecarlo-eg-dev
+              #- libroot-math-physics-dev
+      before_script:
+        - env
+        - echo $ROOTSYS
+        - cd $BASEPATH
+          # ROOT v5.34
+        - wget https://root.cern.ch/download/root_v5.34.36.Linux-ubuntu14-x86_64-gcc4.8.tar.gz
+        - tar xpvfz root_*.tar.gz > /dev/null 2>&1
 
 # Build your code e.g. by calling make
 script:
-    - mkdir $BASEPATH/build
-    - cd $BASEPATH/build
-    - cmake ../ComPWA/
-    - if [ "${COVERITY_SCAN_BRANCH}" != 1 ]; then
-      make -j2 VERBOSE=1;
-      fi
+    # Skip compilation in case we are on the coverity_scan branch
+    - if [[ "$COVERITY_SCAN_BRANCH" != "1" ]]; then 
+         mkdir $BASEPATH/build;
+         cd $BASEPATH/build;
+         cmake -DPYBIND11_PYTHON_VERSION=3.4 $BASEPATH/ComPWA/;
+         make -j2 VERBOSE=1;
+      fi  

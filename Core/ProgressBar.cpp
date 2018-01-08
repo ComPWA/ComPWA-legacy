@@ -7,13 +7,13 @@
 
 namespace ComPWA {
 
-progressBar::progressBar(std::size_t size, int update)
+ProgressBar::ProgressBar(std::size_t size, int update)
     : numEvents(size), updateInterval(update), hasStarted(0), currentEvent(0),
       lastUpdate(0) {
   if (update == 0)
     updateInterval = 1;
 }
-void progressBar::nextEvent() {
+void ProgressBar::next() {
   if (!hasStarted) {
     lastUpdate = 0;
     currentEvent = 0;
@@ -30,7 +30,7 @@ void progressBar::nextEvent() {
     std::cout << std::endl;
   }
 }
-void progressBar::update() {
+void ProgressBar::update() {
   //	std::cout<<"update()"<<std::endl;
   //	std::cout<<timePassed()<<" "<<lastUpdate<<"
   //"<<(int)((timePassed()-lastUpdate))<<std::endl;
@@ -58,18 +58,18 @@ void progressBar::update() {
   return;
 }
 
-double progressBar::timeRemaining() {
+double ProgressBar::timeRemaining() {
   if (currentPercent == 0)
     return 0.0;
   return timePassed() * (1 / currentPercent * 100 - 1);
 }
-double progressBar::timePassed() {
+double ProgressBar::timePassed() {
   time_t currentTime;
   time(&currentTime);
   return difftime(currentTime, startTime);
 }
 
-time_t progressBar::endTime() {
+time_t ProgressBar::endTime() {
   time_t currentTime;
   time(&currentTime);
   time_t estEndTime = currentTime + timeRemaining();

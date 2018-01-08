@@ -8,6 +8,8 @@
 #include "Core/TableFormater.hpp"
 #include "DataReader/CorrectionTable.hpp"
 
+using namespace ComPWA::DataReader;
+
 void CorrectionTable::Print() const {
   if (sys.size() == 0 && antiSys.size() == 0)
     return; // don't print if empty
@@ -18,21 +20,21 @@ void CorrectionTable::Print() const {
   table.addColumn("anti-Particle", 20);   // global correlation coefficient
   table.addColumn("Neutral/Average", 20); // global correlation coefficient
   table.header();
-  for (unsigned int i = 0; i < bins.size(); i++) {
+  for (unsigned int i = 0; i < Bins.size(); i++) {
     std::stringstream strBin;
-    strBin << bins.at(i).first << " - " << bins.at(i).second;
+    strBin << Bins.at(i).first << " - " << Bins.at(i).second;
     table << strBin.str();
     std::stringstream strCor;
-    strCor << GetValue(+1, bins.at(i).second);
-    //				<< " +- " <<GetError(+1,bins.at(i).second);
+    strCor << GetValue(+1, Bins.at(i).second);
+    //				<< " +- " <<GetError(+1,Bins.at(i).second);
     table << strCor.str();
     std::stringstream strAntiCor;
-    strAntiCor << GetValue(-1, bins.at(i).second);
-    //				<< " +- " <<GetError(-1,bins.at(i).second);
+    strAntiCor << GetValue(-1, Bins.at(i).second);
+    //				<< " +- " <<GetError(-1,Bins.at(i).second);
     table << strAntiCor.str();
     std::stringstream strAvg;
-    strAvg << GetValue(0, bins.at(i).second);
-    //				<< " +- " <<GetError(0,bins.at(i).second);
+    strAvg << GetValue(0, Bins.at(i).second);
+    //				<< " +- " <<GetError(0,Bins.at(i).second);
     table << strAvg.str();
   }
   table.footer();
@@ -44,7 +46,7 @@ void CorrectionTable::SetSystematics(std::vector<double> b,
   if (bError.size() == b.size()) // is error vector valid?
     sysError = bError;
   else // otherwise set errors to 0
-    sysError = std::vector<double>(bins.size(), 0.);
+    sysError = std::vector<double>(Bins.size(), 0.);
   if (!antiSys.size()) { // if anti-particle systematics is empty set is to the
                          // same values
     antiSys = b;
@@ -58,7 +60,7 @@ void CorrectionTable::SetAntiSystematics(std::vector<double> b,
   if (bError.size() == b.size()) // is error vector valid?
     antiSysError = bError;
   else // otherwise set errors to 0
-    antiSysError = std::vector<double>(bins.size(), 0.);
+    antiSysError = std::vector<double>(Bins.size(), 0.);
   return;
 }
 void CorrectionTable::SetSystematicsError(std::vector<double> bError) {
@@ -97,7 +99,7 @@ double CorrectionTable::GetValue(int charge, double momentum) const {
   int binNumber = findBin(momentum);
   if (binNumber < 0)
     throw std::runtime_error(
-        "momentumSys::GetValue() no bin found for momentum value " +
+        "momentumSys::value() no bin found for momentum value " +
         std::to_string((long double)momentum) + "!");
   
   double val = 0.0;
@@ -139,6 +141,7 @@ void CorrectionTable::AddToTotalError(int charge, double momentum) {
               << momentum << " to total systematics. We skip that track!";
   }
 }
+
 double CorrectionTable::GetTotalSystematics(bool useArithmeticMean) {
   double mean = 0;
   double sumSigma = 0;
@@ -158,6 +161,7 @@ double CorrectionTable::GetTotalSystematics(bool useArithmeticMean) {
     return mean;
   }
 }
+
 double CorrectionTable::GetTotalSystematicsError(bool useArithmeticMean) {
   double sumSigma = 0; // inverse sum over uncertainties
   double mean = GetTotalSystematics(useArithmeticMean);
@@ -172,46 +176,48 @@ double CorrectionTable::GetTotalSystematicsError(bool useArithmeticMean) {
   }
 }
 
-//! invert e_mc/e_data-1 to e_data/e_mc-1
 double CorrectionTable::inverse(double x) {
   if (x == -999 || x == -1)
     return -999;
   return 1 / (x + 1) - 1;
 }
-//! Calculate error for inversion e_mc/e_data-1 to e_data/e_mc-1
+
 double CorrectionTable::inverseError(double x, double xErr) {
   if (x == -999 || x == -1)
     return -999;
   return std::fabs(-1 / ((x + 1) * (x + 1)) * xErr);
 }
+
 int CorrectionTable::findBin(double momentum) const {
-  for (unsigned int i = 0; i < bins.size(); i++) {
-    if (momentum <= bins.at(i).second && momentum > bins.at(i).first) {
+  for (unsigned int i = 0; i < Bins.size(); i++) {
+    if (momentum <= Bins.at(i).second && momentum > Bins.at(i).first) {
       return i;
     }
   }
   return -1; // no bin found
 }
-//! check if there is a bin defined that overlaps with [min,max]
+
 int CorrectionTable::findBin(double min, double max) const {
-  for (unsigned int i = 0; i < bins.size(); i++) {
-    if ((min < bins.at(i).second && min >= bins.at(i).first) ||
-        (max <= bins.at(i).second && max > bins.at(i).first))
+  for (unsigned int i = 0; i < Bins.size(); i++) {
+    if ((min < Bins.at(i).second && min >= Bins.at(i).first) ||
+        (max <= Bins.at(i).second && max > Bins.at(i).first))
       return i;
   }
   return -1; // bin doesn't exist
 }
+
 void CorrectionTable::addBin(double min, double max) {
   if (findBin(min, max) < 0) // is a bin already defined?
-    bins.push_back(std::make_pair(min, max));
+    Bins.push_back(std::make_pair(min, max));
   else
     throw std::runtime_error("CorrectionTable::addBin() in range [" +
                              std::to_string((long double)min) + "," +
                              std::to_string((long double)max) +
                              "] a bin is already defined!");
 }
+
 bool CorrectionTable::check() const {
-  int s = bins.size();
+  int s = Bins.size();
   if (sys.size() != s || sysError.size() != s || antiSys.size() != s ||
       antiSysError.size() != s)
     return 0;

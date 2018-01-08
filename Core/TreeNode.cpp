@@ -9,227 +9,182 @@
 #include "Core/TreeNode.hpp"
 #include "Core/Functions.hpp"
 
-namespace ComPWA {
-
-TreeNode::TreeNode(std::string name, std::shared_ptr<AbsParameter> intResult,
-                   std::shared_ptr<Strategy> strat,
-                   std::shared_ptr<TreeNode> parent)
-    : _name(name), _changed(true), _strat(strat) {
-  _value.push_back(intResult);
-  if (parent) {
-    _parents.push_back(parent);
-    // parent->children.push_back(shared_from_this());
-  }
-};
+using namespace ComPWA;
 
 TreeNode::TreeNode(std::string name,
-                   std::vector<std::shared_ptr<AbsParameter>> &intResult,
-                   std::shared_ptr<Strategy> strat,
+                   std::shared_ptr<ComPWA::Parameter> parameter,
+                   std::shared_ptr<Strategy> strategy,
                    std::shared_ptr<TreeNode> parent)
-    : _name(name), _changed(true), _strat(strat) {
-  for (unsigned int i = 0; i < intResult.size(); i++) {
-    _value.push_back(intResult.at(i));
-  }
-  if (parent) {
-    _parents.push_back(parent);
-    // parent->children.push_back(shared_from_this());
-  }
-};
+    : Name(name), Parameter(parameter), HasChanged(true), UseCache(true),
+      Strat(strategy) {
+  if (!parameter)
+    UseCache = false;
+  if (!parameter && !strategy)
+    throw std::runtime_error(
+        "TreeNode::TreeNode() | Neither strategy nor parameter given!");
 
-//! Destructor
-TreeNode::~TreeNode() {
-  //;
+  if (parent) {
+    Parents.push_back(parent);
+  }
 }
 
-void TreeNode::Update() { // sollte nur von kindern oder observed objects
-                          // aufgerufen werden!
-  // std::vector<double> newVals;
-  // for(unsigned int i=0; i<children.size(); i++){
-  //    newVals.push_back(children.at(i)->value);
-  //}  //end children-loop
-  // changeVal(myStrat->execute(newVals));
-  for (unsigned int i = 0; i < _parents.size(); i++)
-    _parents.at(i)->Update();
-  _changed = true;
-}; // end update()
+TreeNode::TreeNode(std::string name, std::shared_ptr<Strategy> strategy,
+                   std::shared_ptr<TreeNode> parent)
+    : Name(name), Parameter(std::shared_ptr<ComPWA::Parameter>()),
+      HasChanged(true), UseCache(false), Strat(strategy) {
 
-void TreeNode::recalculate() {
-  if (_children.size() < 1) {
-    _changed = false;
-    return;
+  if (!strategy)
+    throw std::runtime_error(
+        "TreeNode::TreeNode() | Neither strategy nor parameter given!");
+
+  if (parent) {
+    Parents.push_back(parent);
   }
+}
 
-  if (_value.size() == 1) { // i have just one dim, merge everything
-    ParameterList newVals;
-    for (unsigned int i = 0; i < _children.size(); i++) { // all children
-      for (unsigned int ele = 0; ele < _children.at(i)->getDim();
-           ele++) { // all dims
-        if (_children.at(i)->needsCalculation()) {
-          //					LOG(debug) <<"TreeNode::recalculate() |
-          //processing "<<_children.at(i)->getName()<<std::endl;
-          _children.at(i)->recalculate();
-        }
-        std::shared_ptr<AbsParameter> para = _children.at(i)->getValue(ele);
-        if (!para)
-          LOG(error) << "TreeNode::Update() | In node "<<this->getName()
-          << " recalculation of child "<<i<<" failed.";
-        // para->type();
-        newVals.AddParameter(para);
-      } // end children-loop
-    }
-    _changed = false;
-    try {
-      _strat->execute(newVals, _value.at(0));
-    } catch (std::exception &ex) {
-      LOG(error) << "TreeNode::recalculate() | Strategy " << _strat
-                 << " failed on node " << this->getName() << ": " << ex.what();
-      throw;
-    }
-  } else { // i have a certain dim, children must fill it
+TreeNode::~TreeNode() {}
 
-    for (unsigned int ele = 0; ele < _value.size(); ele++) {
-      ParameterList newVals;
-      for (unsigned int i = 0; i < _children.size(); i++) {
-        if (!(_children.at(i)->getDim() == _value.size() ||
-              _children.at(i)->getDim() == 1))
-          continue; // TODO: exception;
-        std::shared_ptr<AbsParameter> para;
-
-        if (_children.at(i)->needsCalculation())
-          _children.at(i)->recalculate();
-
-        if (_children.at(i)->getDim() == 1) {
-          para = _children.at(i)->getValue();
-        } else {
-          para = _children.at(i)->getValue(ele);
-        }
-
-        if (!para)
-          LOG(error) << "TreeNode::Update() | In node "<<this->getName()
-          << " recalculation of child "<<i<<" failed.";
-        
-        // para->type();
-        newVals.AddParameter(para);
-      } // end children-loop
-      try {
-        _strat->execute(newVals, _value.at(ele));
-      } catch (std::exception &ex) {
-        LOG(error) << "TreeNode::recalculate() | Strategy " << _strat
-                   << " failed on node " << this->getName() << ": "
-                   << ex.what();
-        throw;
-      }
-
-      _changed = false;
-    } // end loop dims
-
-  } // end which dim of this node
-};  // end update()
-
-std::string TreeNode::to_str(int lv, std::string beginning) {
-  std::stringstream oss;
-  if (_changed && _children.size()) {
-    oss << beginning << _name << " = ?";
-  } else {
-    oss << beginning << _name;
-    auto it = _value.begin();
-    for (; it != _value.end(); ++it) {
-      if (!_children.size()) // print parameter name for leafs
-        oss << " [" << (*it)->GetName() << "]";
-      oss << " = " << (*it)->val_to_str();
-      if (it != _value.end())
-        oss << ", ";
-    }
-  }
-  if (_children.size())
-    oss << " (" << _children.size() << " children/" << _value.size()
-        << " values)" << std::endl;
-  else
-    oss << std::endl;
-
-  if (lv == 0)
-    return oss.str();
-  for (unsigned int i = 0; i < _children.size(); i++) {
-    // oss << " -> ";
-    oss << _children.at(i)->to_str(lv - 1, beginning + ". ");
-  }
-  return oss.str();
+void TreeNode::update() {
+  for (unsigned int i = 0; i < Parents.size(); i++)
+    Parents.at(i)->update();
+  HasChanged = true;
 };
 
-std::string TreeNode::print(unsigned int lv) { return to_str(lv); }
+std::shared_ptr<ComPWA::Parameter> TreeNode::parameter() {
+  if (UseCache && !Parameter)
+    throw std::runtime_error("TreeNode::parameter() | Caching is requested but "
+                             "Parameter is not initialized!");
 
-const void TreeNode::deleteLinks() {
-  _children.clear();
-  _parents.clear();
-  for (unsigned int i = 0; i < _value.size(); i++) {
-    _value.at(i)->Detach(shared_from_this());
+  if (!UseCache && !ChildNodes.size())
+    throw std::runtime_error("TreeNode::parameter() | Caching is disabled but "
+                             "Node is a lead node!");
+
+  // has been changed or is lead node -> return Parameter
+  if (Parameter && (!HasChanged || !ChildNodes.size()))
+    return Parameter;
+
+  auto result = recalculate();
+  
+  if(UseCache){
+    Parameter = result;
+    HasChanged = false;
   }
-};
 
-std::shared_ptr<TreeNode> TreeNode::getChildNode(std::string name) const {
+  return result;
+}
+
+std::shared_ptr<ComPWA::Parameter> TreeNode::recalculate() const {
+  // has been changed or is lead node -> return Parameter
+  if (Parameter && (!HasChanged || !ChildNodes.size()))
+    return Parameter;
+
+  std::shared_ptr<ComPWA::Parameter> result;
+  if (Parameter)
+    result = Parameter;
+
+  ParameterList newVals;
+  for (auto ch : ChildNodes) {
+    auto p = ch->parameter();
+    if (p->isParameter())
+      newVals.addParameter(p);
+    else
+      newVals.addValue(p);
+  }
+  try {
+    Strat->execute(newVals, result);
+  } catch (std::exception &ex) {
+    LOG(error) << "TreeNode::Recalculate() | Strategy " << Strat
+               << " failed on node " << name() << ": " << ex.what();
+    throw;
+  }
+
+  return result;
+}
+
+void TreeNode::fillParameters(ComPWA::ParameterList &list) {
+  for (auto ch : ChildNodes) {
+    ch->fillParameters(list);
+  }
+  list.addParameter(parameter());
+}
+
+std::shared_ptr<TreeNode> TreeNode::findChildNode(std::string name) const {
   std::shared_ptr<TreeNode> node;
-  if (!_children.size())
+  if (!ChildNodes.size())
     node = std::shared_ptr<TreeNode>();
-  for (unsigned int i = 0; i < _children.size(); i++) {
-    if (_children.at(i)->getName() == name) {
-      return _children.at(i);
+  for (unsigned int i = 0; i < ChildNodes.size(); i++) {
+    if (ChildNodes.at(i)->name() == name) {
+      return ChildNodes.at(i);
     } else
-      node = _children.at(i)->getChildNode(name);
+      node = ChildNodes.at(i)->findChildNode(name);
     if (node)
       return node;
   }
   return node;
 }
 
-std::shared_ptr<AbsParameter> TreeNode::getChildValue(std::string name) const {
-  std::shared_ptr<TreeNode> node = std::shared_ptr<TreeNode>();
-  node = getChildNode(name);
-  if (node)
-    return node->getValue();
-  return std::shared_ptr<AbsParameter>();
+std::string TreeNode::print(int level, std::string prefix) const {
+  std::stringstream oss;
+  oss << prefix << Name;
 
-  //	std::shared_ptr<AbsParameter> ret = std::shared_ptr<AbsParameter>();
-  //	for(unsigned int i=0; i<_children.size(); i++){
-  //		if(_children.at(i)->getName()==name)
-  //			return _children.at(i)->getValue(0);
-  //		else {
-  //			ret = _children.at(i)->getChildValue(name);
-  //			if(ret) return ret;
-  //			else continue;
-  //		}
-  //	}
-  //	return ret;
-}
-
-std::complex<double> TreeNode::getChildSingleValue(std::string name) const {
-  std::shared_ptr<TreeNode> node = std::shared_ptr<TreeNode>();
-  node = getChildNode(name);
-  if (node) {
-    std::shared_ptr<AbsParameter> val = node->getValue();
-    if (val->type() == ParType::DOUBLE)
-      return std::complex<double>(
-          (std::dynamic_pointer_cast<DoubleParameter>(val))->GetValue(), 0);
-    if (val->type() == ParType::COMPLEX)
-      return std::complex<double>(
-          (std::dynamic_pointer_cast<ComplexParameter>(val))->GetValue());
-    if (val->type() == ParType::INTEGER)
-      return std::complex<double>(
-          (std::dynamic_pointer_cast<IntegerParameter>(val))->GetValue(), 0);
-    if (val->type() == ParType::BOOL)
-      return std::complex<double>(
-          (std::dynamic_pointer_cast<BoolParameter>(val))->GetValue(), 0);
-    if (val->type() == ParType::MDOUBLE)
-      return std::complex<double>(
-          (std::dynamic_pointer_cast<MultiDouble>(val))->GetValue(0), 0);
-    if (val->type() == ParType::MCOMPLEX)
-      return std::complex<double>(
-          (std::dynamic_pointer_cast<MultiComplex>(val))->GetValue(0));
+  auto p = recalculate();
+  if (!ChildNodes.size()) { // Print leaf nodes
+    if ( p->name() != "" )
+      oss << " [" << p->name() << "]";
+    oss << " = " << p->val_to_str() << std::endl;
+  } else { // Print non-leaf nodes
+          oss << " [";
+    if (!UseCache)
+      oss << "-, ";
+    oss << ChildNodes.size() << "]";
+    if (UseCache && HasChanged)
+      oss << " = ?";
+    else
+      oss << " = " << p->val_to_str() << std::endl;
   }
-  return std::complex<double>(-999, 0);
+
+  // Abort recursion
+  if (level == 0)
+    return oss.str();
+  
+  for( auto ch : ChildNodes ) {
+    oss << ch->print(level - 1, prefix + ". ");
+  }
+  return oss.str();
 }
 
-std::ostream &operator<<(std::ostream &os, std::shared_ptr<TreeNode> p) {
-  return os << p->to_str(-1);
+void TreeNode::addChild(std::shared_ptr<TreeNode> childNode) {
+  ChildNodes.push_back(childNode);
 }
 
-} /* namespace ComPWA */
+void TreeNode::addParent(std::shared_ptr<TreeNode> parentNode) {
+  Parents.push_back(parentNode);
+  parentNode->ChildNodes.push_back(shared_from_this());
+}
+
+void TreeNode::fillParentNames(std::vector<std::string> &names) const {
+  for (auto i : Parents) {
+    names.push_back(i->name());
+  }
+}
+
+void TreeNode::linkParents() {
+  for (auto p : Parents)
+    p->ChildNodes.push_back(shared_from_this());
+}
+
+void TreeNode::deleteLinks() {
+  ChildNodes.clear();
+  Parents.clear();
+  if (Parameter)
+    this->parameter()->Detach(shared_from_this());
+}
+
+std::vector<std::shared_ptr<TreeNode>> &TreeNode::childNodes() {
+  return ChildNodes;
+}
+
+void TreeNode::fillChildNames(std::vector<std::string> &names) const {
+  for (auto ch : ChildNodes)
+    names.push_back(ch->name());
+}

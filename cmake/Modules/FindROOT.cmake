@@ -49,7 +49,9 @@ foreach(_cpt ${rootlibs} ${ROOT_FIND_COMPONENTS})
 	list(REMOVE_ITEM ROOT_FIND_COMPONENTS ${_cpt})
   endif()
 endforeach()
-list(REMOVE_DUPLICATES ROOT_LIBRARIES)
+if( ROOT_LIBRARIES )
+  list(REMOVE_DUPLICATES ROOT_LIBRARIES)
+endif()
 
 execute_process(
   COMMAND ${ROOT_CONFIG_EXECUTABLE} --cflags
@@ -76,13 +78,10 @@ find_package_handle_standard_args(ROOT DEFAULT_MSG ROOT_CONFIG_EXECUTABLE
 
 # Report some results
 IF( NOT ROOT_FIND_QUIETLY )
-  IF( DEFINED ROOT_FOUND )
+  IF( ROOT_FOUND )
 	MESSAGE(STATUS "ROOT version " ${ROOT_VERSION} " ROOTSYS=" ${ROOTSYS})
-	#MESSAGE(STATUS "FindROOT: include dir: " ${ROOT_INCLUDE_DIR})
-	#MESSAGE(STATUS "FindROOT: library dir: " ${ROOT_LIBRARY_DIR})
-	#MESSAGE(STATUS "FindROOT: library: " ${ROOT_LIBRARIES})
-  ELSE()
-	MESSAGE(STATUS "FindROOT: ROOT installation could not be found!")
+  #ELSE()
+	#MESSAGE(STATUS "FindROOT: ROOT installation could not be found!")
   ENDIF()
 ENDIF()
 

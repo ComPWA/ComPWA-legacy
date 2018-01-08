@@ -90,23 +90,23 @@ inline std::complex<double> widthToCoupling(double mSq, double mR, double width,
 class Coupling {
 public:
   Coupling(double c, double massA, double massB)
-      : _g(new DoubleParameter("", c)), _massA(massA), _massB(massB){};
+      : _g(new FitParameter("", c)), _massA(massA), _massB(massB){};
 
   Coupling(std::shared_ptr<PartList> partL,
            const boost::property_tree::ptree tr) {
-    _g = std::make_shared<DoubleParameter>(
-        ComPWA::DoubleParameterFactory(tr.get_child("")));
+    _g = std::make_shared<FitParameter>();
+    _g->load(tr.get_child(""));
     std::string nameA = tr.get<std::string>("ParticleA");
     std::string nameB = tr.get<std::string>("ParticleB");
     _massA = partL->find(nameA)->second.GetMass();
     _massB = partL->find(nameB)->second.GetMass();
   };
 
-  void SetValueParameter(std::shared_ptr<DoubleParameter> g) { _g = g; }
+  void SetValueParameter(std::shared_ptr<FitParameter> g) { _g = g; }
 
-  std::shared_ptr<DoubleParameter> GetValueParameter() { return _g; }
+  std::shared_ptr<FitParameter> GetValueParameter() { return _g; }
 
-  double GetValue() const { return _g->GetValue(); }
+  double value() const { return _g->value(); }
 
   double GetMassA() const { return _massA; }
 
@@ -117,15 +117,15 @@ public:
   void SetMassB(double m) { _massB = m; }
 
 protected:
-  std::shared_ptr<DoubleParameter> _g;
+  std::shared_ptr<FitParameter> _g;
 
   double _massA;
 
   double _massB;
 };
 
-} /* namespace DecayDynamics */
-} /* namespace Physics */
-} /* namespace ComPWA */
+} // ns::DecayDynamics
+} // ns::Physics
+} // ns::ComPWA
 
-#endif /* Coupling_h */
+#endif

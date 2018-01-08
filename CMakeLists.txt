@@ -2,10 +2,26 @@
 # refer to the root source directory of the project as ${COMPWA_SOURCE_DIR} and
 # to the root binary directory of the project as ${COMPWA_BINARY_DIR}.
 cmake_minimum_required (VERSION 3.0)
-#set(CMAKE_BUILD_TYPE Debug) 
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
+#set (CMAKE_BUILD_TYPE Debug)
+set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
+
 
 set (CMAKE_CXX_STANDARD 11)
+
+message( STATUS "Compiler ID:")
+message( STATUS "$ENV{CC}")
+
+if (NOT "$ENV{CC}" STREQUAL "clang")
+  set(CMAKE_CXX_STANDARD 14)
+  set(CMAKE_CXX_STANDARD_REQUIRED ON)
+  set(CMAKE_CXX_EXTENSIONS OFF)
+endif()
+
+# Workaround for clang+ c++14/pybind11
+#if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
+ # set (CMAKE_CXX_STANDARD 11)
+ # set(CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} -std=c++0x")
+#endif()
 
 #
 # ComPWA
@@ -31,15 +47,11 @@ set( CMAKE_SHARED_LIBRARY_PREFIX "libComPWA_" )
 find_package( OpenMP QUIET )
 if (${OPENMP_CXX_FOUND})
   message( STATUS "OpenMP version " ${OpenMP_CXX_VERSION} )
-else ()
-  message( STATUS "OpenMP not found!" )
 endif()
 
 find_package( TBB )
 if (${TBB_FOUND})
   message( STATUS "TBB found version ${TBB_VERSION}" )
-else ()
-  message( STATUS "TBB not found!" )
 endif()
 
 #
@@ -47,6 +59,7 @@ endif()
 #
 find_package( ROOT )
 find_package( Minuit2 )
+
 
 #
 # FindBoost. unit_test_framework and serialization
@@ -59,6 +72,9 @@ find_package( Boost COMPONENTS
                serialization
                REQUIRED
 )
+
+#Find Python
+#find_package( PythonLibs )
 
 # Workaround for clang+boost.python
 # ${CMAKE_CXX_COMPILER_ID} can be one of {GNU Clang AppleClang Intel MSVC}

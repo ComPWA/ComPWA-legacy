@@ -13,3 +13,7 @@ IF( ${GENEVA_FOUND} )
 ELSE ()
 	MESSAGE(WARNING "Geneva not found! Not building Geneva interface!")
 ENDIF()
+
+install (FILES Optimizer.hpp
+    DESTINATION include/ComPWA/Optimizer
+)

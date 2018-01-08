@@ -22,10 +22,10 @@ MinLogLH::MinLogLH(std::shared_ptr<Kinematics> kin,
                    std::shared_ptr<DataReader::Data> accSample,
                    unsigned int firstEvent, unsigned int nEvents)
     : _kin(kin), _intens(intens), _firstEvent(firstEvent), _nEvents(nEvents),
-      _dataSample(data), _phspSample(phspSample), _phspAccSample(accSample),
-      _phspAccSampleEff(1.0) {
+      _dataSample(data), PhspSample(phspSample), PhspAcceptedSample(accSample),
+      PhspAcceptedSampleEff(1.0) {
 
-  int size = _dataSample->GetNEvents();
+  int size = _dataSample->numEvents();
 
   // use the full sample of both are zero
   if (!_nEvents && !_firstEvent) {
@@ -38,18 +38,18 @@ MinLogLH::MinLogLH(std::shared_ptr<Kinematics> kin,
     _nEvents = size - _firstEvent;
 
   // Get data as ParameterList
-  _dataSampleList = _dataSample->GetListOfData(_kin);
-  _phspSampleList = _phspSample->GetListOfData(_kin);
-  if (_phspAccSample)
-    _phspAccSampleList = _phspAccSample->GetListOfData(_kin);
+  _dataSampleList = _dataSample->dataList(_kin);
+  PhspSampleList = PhspSample->dataList(_kin);
+  if (PhspAcceptedSample)
+    PhspAcceptedSampleList = PhspAcceptedSample->dataList(_kin);
   else
-    _phspAccSampleList = _phspSample->GetListOfData(_kin);
+    PhspAcceptedSampleList = PhspSample->dataList(_kin);
 
   // Calculation sum of weights of data sample
   _sumOfWeights = 0;
   for (unsigned int evt = _firstEvent; evt < _nEvents + _firstEvent; evt++) {
-    Event ev(_dataSample->GetEvent(evt));
-    _sumOfWeights += ev.GetWeight();
+    Event ev(_dataSample->event(evt));
+    _sumOfWeights += ev.weight();
   }
 
   LOG(info) << "MinLogLH::Init() |  Size of data sample = " << _nEvents
@@ -67,17 +67,15 @@ double MinLogLH::controlParameter(ParameterList &minPar) {
     double sumLog = 0;
     // loop over data sample
     for (unsigned int evt = _firstEvent; evt < _nEvents + _firstEvent; evt++) {
-      dataPoint point;
-      _kin->EventToDataPoint(_dataSample->GetEvent(evt), point);
-      double val = _intens->Intensity(point);
-      sumLog += std::log(val) * point.GetWeight();
+      DataPoint point;
+      _kin->convert(_dataSample->event(evt), point);
+      double val = _intens->intensity(point);
+      sumLog += std::log(val) * point.weight();
     }
     lh = (-1) * ((double)_nEvents) / _sumOfWeights * sumLog;
   } else {
-    _tree->recalculate();
-    std::shared_ptr<DoubleParameter> logLH =
-        std::dynamic_pointer_cast<DoubleParameter>(_tree->head()->getValue());
-    lh = logLH->GetValue();
+    auto logLH = std::dynamic_pointer_cast<Value<double>>(_tree->parameter());
+    lh = logLH->value();
   }
   _nCalls++;
   return lh; // return -logLH
@@ -101,9 +99,9 @@ void MinLogLH::UseFunctionTree(bool onoff) {
   return;
 }
 
-std::shared_ptr<FunctionTree> MinLogLH::GetTree() {
+std::shared_ptr<FunctionTree> MinLogLH::tree() {
   if (!_tree) {
-    throw std::runtime_error("MinLogLH::GetTree()| FunctionTree does not "
+    throw std::runtime_error("MinLogLH::tree()| FunctionTree does not "
                              "exists. Enable it first using "
                              "UseFunctionTree(true)!");
   }
@@ -114,37 +112,35 @@ void MinLogLH::IniLHtree() {
   LOG(debug) << "MinLogLH::IniLHtree() | Constructing FunctionTree!";
 
   // Ensure that a FunctionTree is provided
-  if (!_intens->HasTree())
+  if (!_intens->hasTree())
     throw std::runtime_error("MinLogLH::IniLHtree() |  AmpIntensity does not "
                              "provide a FunctionTree!");
 
-  _tree = std::shared_ptr<FunctionTree>(new FunctionTree());
-  int sampleSize = _dataSampleList.GetMultiDouble(0)->GetNValues();
+  _tree = std::make_shared<FunctionTree>(
+      "LH", std::make_shared<Value<double>>(),
+      std::make_shared<MultAll>(ParType::DOUBLE));
+  int sampleSize = _dataSampleList.mDoubleValue(0)->values().size();
 
   //-log L = (-1)*N/(\sum_{ev} w_{ev}) \sum_{ev} ...
-  _tree->createHead("LH",
-                    std::shared_ptr<Strategy>(new MultAll(ParType::DOUBLE)));
   _tree->createLeaf("minusOne", -1, "LH");
   _tree->createLeaf("nEvents", sampleSize, "LH");
-  _tree->createNode("invSumWeights",
-                    std::shared_ptr<Strategy>(new Inverse(ParType::DOUBLE)),
+  _tree->createNode("invSumWeights", std::make_shared<Inverse>(ParType::DOUBLE),
                     "LH");
-  _tree->createNode("sumEvents",
-                    std::shared_ptr<Strategy>(new AddAll(ParType::DOUBLE)),
+  _tree->createNode("sumEvents", std::make_shared<AddAll>(ParType::DOUBLE),
                     "LH");
   _tree->createLeaf("SumOfWeights", _sumOfWeights, "invSumWeights");
-  _tree->createNode("weightLog",
-                    std::shared_ptr<Strategy>(new MultAll(ParType::MDOUBLE)),
-                    "sumEvents", sampleSize,
-                    false); // w_{ev} * log( I_{ev} )
-  _tree->createNode("Log",
-                    std::shared_ptr<Strategy>(new LogOf(ParType::MDOUBLE)),
-                    "weightLog", sampleSize, false);
-  _tree->insertTree(_intens->GetTree(_kin, _dataSampleList, _phspAccSampleList,
-                                     _phspSampleList, _kin->GetNVars()),
+  _tree->createNode("weightLog", MDouble("", sampleSize),
+                    std::make_shared<MultAll>(ParType::MDOUBLE),
+                    "sumEvents"); // w_{ev} * log( I_{ev} )
+  _tree->createLeaf("Weight", _dataSampleList.mDoubleValues().back(),
+                    "weightLog");
+  _tree->createNode("Log", MDouble("", sampleSize),
+                    std::make_shared<LogOf>(ParType::MDOUBLE), "weightLog");
+  _tree->insertTree(_intens->tree(_kin, _dataSampleList, PhspAcceptedSampleList,
+                                  PhspSampleList, _kin->numVariables()),
                     "Log");
 
-  _tree->recalculate();
+  _tree->parameter();
   if (!_tree->sanityCheck()) {
     throw std::runtime_error("MinLogLH::IniLHtree() | Tree has structural "
                              "problems. Sanity check not passed!");

@@ -71,10 +71,10 @@ public:
 
   /// Get the FunctionTree.
   /// If no FunctionTree is available an std::runtime_error exception is thrown.
-  virtual std::shared_ptr<ComPWA::FunctionTree> GetTree();
+  virtual std::shared_ptr<ComPWA::FunctionTree> tree();
 
   /// Number of likelihood evaluations
-  virtual int NSteps() { return _nCalls; }
+  virtual int status() const { return _nCalls; }
 
 protected:
   /// Initialize FunctionTree.
@@ -110,19 +110,19 @@ protected:
   double _sumOfWeights;
 
   /// phsp sample for normalization
-  std::shared_ptr<ComPWA::DataReader::Data> _phspSample;
+  std::shared_ptr<ComPWA::DataReader::Data> PhspSample;
 
-  /// _phspSample stored 'horizontally' as ParameterList
-  ParameterList _phspSampleList;
+  /// PhspSample stored 'horizontally' as ParameterList
+  ParameterList PhspSampleList;
 
   /// Phsp sample with applied efficency
-  std::shared_ptr<ComPWA::DataReader::Data> _phspAccSample;
+  std::shared_ptr<ComPWA::DataReader::Data> PhspAcceptedSample;
 
-  /// _phspAccSample 'horizontally' stored as ParameterList
-  ParameterList _phspAccSampleList;
+  /// PhspAcceptedSample 'horizontally' stored as ParameterList
+  ParameterList PhspAcceptedSampleList;
 
   /// Total efficiency of phsp with applied efficency
-  double _phspAccSampleEff;
+  double PhspAcceptedSampleEff;
 };
 
 } // namespace Estimator

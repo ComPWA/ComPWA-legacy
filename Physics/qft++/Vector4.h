@@ -65,7 +65,7 @@ public:
   
   Vector4(FourMomentum __v)
     : Tensor<_Tp>::Tensor(1) {
-    this->SetV4(__v.GetE(), __v.GetPx(), __v.GetPy(), __v.GetPz());
+    this->SetV4(__v.e(), __v.px(), __v.py(), __v.pz());
   }
 
   /// Copy Constructor

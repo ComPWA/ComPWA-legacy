@@ -2,6 +2,11 @@
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
+///
+/// \file
+/// AmpIntensity base class.
+///
+
 #ifndef AMPINTENSITY_HPP_
 #define AMPINTENSITY_HPP_
 
@@ -24,7 +29,8 @@ namespace ComPWA {
 /// This class provides the interface an amplitude intensity. The intensity can
 /// be moduled with a (double) strength parameter.
 /// Since the intensity is a physically observable quantity it has to be
-/// corrected for the space depended reconstruction efficiency. The normalization
+/// corrected for the space depended reconstruction efficiency. The
+/// normalization
 /// has to take this into account as well.
 ///
 /// \par Efficiency correction
@@ -35,82 +41,79 @@ class AmpIntensity {
 public:
   /// Constructor with an optional name, strength and efficiency
   AmpIntensity(std::string name = "",
-               std::shared_ptr<DoubleParameter> strength =
-                   std::shared_ptr<DoubleParameter>(new DoubleParameter("",
-                                                                        1.0)),
-               std::shared_ptr<Efficiency> eff =
-                   std::shared_ptr<Efficiency>(new UnitEfficiency))
-      : _name(name), _eff(eff), _strength(strength), _current_strength(-999) {
-    _strength->FixParameter(true);
+               std::shared_ptr<FitParameter> strength =
+                   std::shared_ptr<FitParameter>(new FitParameter("", 1.0)),
+               std::shared_ptr<ComPWA::Efficiency> eff =
+                   std::shared_ptr<ComPWA::Efficiency>(new UnitEfficiency))
+      : Name(name), Eff(eff), Strength(strength), CurrentStrength(-999) {
+    Strength->fixParameter(true);
   }
-  
-  virtual ~AmpIntensity() {};
 
-  /// Function to create a full copy
-  virtual AmpIntensity *Clone(std::string newName = "") const = 0;
+  virtual ~AmpIntensity(){};
 
-  /// Evaluate intensity at dataPoint in phase-space
-  /// \param point Data point
-  /// \return Intensity
-  virtual double Intensity(const dataPoint &point) const = 0;
+  /// Clone pattern. Create a clone object with \p newName of type Base class.
+  virtual AmpIntensity *clone(std::string newName = "") const = 0;
 
-  //============ SET/GET =================
-  /// Get name
-  virtual std::string Name() const { return _name; }
+  virtual boost::property_tree::ptree save() const = 0;
+
+  /// Evaluate intensity of model at \p point in phase-space
+  virtual double intensity(const DataPoint &point) const = 0;
+
+  virtual std::string name() const { return Name; }
+
+  virtual void setName(std::string n) { Name = n; }
 
   /// Get strength parameter
-  double Strength() const { return _strength->GetValue(); }
+  double strength() const { return Strength->value(); }
 
-  virtual void GetParameters(ParameterList &list) = 0;
+  virtual void parameters(ParameterList &list) = 0;
 
   /// Fill vector with parameters
-  virtual void GetParametersFast(std::vector<double> &list) const {
-    list.push_back(_strength->GetValue());
+  virtual void parametersFast(std::vector<double> &list) const {
+    list.push_back(Strength->value());
   }
-  
+
   /// Update parameters in AmpIntensity to the values given in \p list
-  virtual void UpdateParameters(const ParameterList &list) = 0;
-  
-  /// Fill ParameterList with fit fractions
-  virtual void GetFitFractions(ParameterList &parList) = 0;
+  virtual void updateParameters(const ParameterList &list) = 0;
 
   /// Set phase space samples
   /// We use phase space samples to calculate the normalizations. In case of
-  /// intensities we phase space sample phspSample includes the event efficiency.
+  /// intensities we phase space sample phspSample includes the event
+  /// efficiency.
   /// The sample toySample is used for normalization calculation for e.g.
   /// Resonacnes without efficiency.
   virtual void
-  SetPhspSample(std::shared_ptr<std::vector<ComPWA::dataPoint>> phspSample,
-                std::shared_ptr<std::vector<ComPWA::dataPoint>> toySample) = 0;
+  setPhspSample(std::shared_ptr<std::vector<ComPWA::DataPoint>> phspSample,
+                std::shared_ptr<std::vector<ComPWA::DataPoint>> toySample) = 0;
 
-  virtual std::shared_ptr<AmpIntensity> GetComponent(std::string name) = 0;
+  virtual std::shared_ptr<AmpIntensity> component(std::string name) = 0;
 
-  virtual void Reset(){};
+  virtual void reset(){};
   //========== FUNCTIONTREE =============
 
   /// Check if a FunctionTree is implemented for a certain (derived) class.
-  virtual bool HasTree() const { return false; }
+  virtual bool hasTree() const { return false; }
 
   virtual std::shared_ptr<FunctionTree>
-  GetTree(std::shared_ptr<Kinematics> kin, const ParameterList &sample,
-          const ParameterList &phspSample, const ParameterList &toySample,
-          unsigned int nEvtVar, std::string suffix = "") = 0;
+  tree(std::shared_ptr<Kinematics> kin, const ParameterList &sample,
+       const ParameterList &phspSample, const ParameterList &toySample,
+       unsigned int nEvtVar, std::string suffix = "") = 0;
 
 protected:
-  //! Name
-  std::string _name;
+  /// Name
+  std::string Name;
 
-  //! Phase space depended efficiency
-  std::shared_ptr<Efficiency> _eff;
+  /// Phase space depended efficiency
+  std::shared_ptr<Efficiency> Eff;
 
-  std::shared_ptr<ComPWA::DoubleParameter> _strength;
-  //! temporary strength
-  double _current_strength;
+  std::shared_ptr<ComPWA::FitParameter> Strength;
+  //    std::shared_ptr<ComPWA::FunctionTree> Strength;
+
+  /// temporary strength
+  double CurrentStrength;
 };
-//-----------------------------------------------------------------------------
 
-//! Split string into pieces which are separated by blanks
-// Todo: wohin?
+/// Split string into pieces which are separated by blanks
 inline std::vector<std::string> splitString(std::string str) {
   std::vector<std::string> result;
   std::istringstream iStr(str);
@@ -122,5 +125,5 @@ inline std::vector<std::string> splitString(std::string str) {
   return result;
 }
 
-} /* namespace ComPWA */
+} // ns::ComPWA
 #endif

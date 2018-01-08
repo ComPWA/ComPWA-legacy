@@ -1,4 +1,4 @@
- 
+
 // Copyright (c) 2015, 2017 The ComPWA Team.
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
@@ -8,7 +8,7 @@
 
 namespace ComPWA {
 
-void FitResult::WriteText(std::string filename) {
+void FitResult::writeText(std::string filename) {
   std::ofstream myfile;
   myfile.open(filename, std::ios::app);
   genOutput(myfile);
@@ -16,7 +16,7 @@ void FitResult::WriteText(std::string filename) {
   return;
 };
 
-void FitResult::WriteSimpleText(std::string filename) {
+void FitResult::writeSimpleText(std::string filename) {
   std::ofstream myfile;
   myfile.open(filename);
   genSimpleOutput(myfile);
@@ -38,53 +38,54 @@ double FitResult::shiftAngle(double v) {
 }
 
 void FitResult::genSimpleOutput(std::ostream &out) {
-  for (unsigned int o = 0; o < finalParameters.GetNDouble(); o++) {
-    std::shared_ptr<DoubleParameter> outPar =
-        finalParameters.GetDoubleParameter(o);
-    out << outPar->GetValue() << " " << outPar->GetError() << " ";
+  for (auto p : FinalParameters.doubleParameters()) {
+    out << p->value() << " ";
+    if (p->hasError())
+      out << p->avgError() << " ";
   }
   out << "\n";
 
   return;
 }
 
-void FitResult::SetFinalParameters(ParameterList &finPars) {
-  finalParameters.DeepCopy(finPars);
+void FitResult::setFinalParameters(ParameterList &finPars) {
+  FinalParameters.DeepCopy(finPars);
 }
 
-void FitResult::SetTrueParameters(ParameterList &truePars) {
-  trueParameters.DeepCopy(truePars);
+void FitResult::setTrueParameters(ParameterList &truePars) {
+  TrueParameters.DeepCopy(truePars);
 }
 
-void FitResult::SetFitFractions(ParameterList &list) {
-  _fitFractions.DeepCopy(list);
+void FitResult::setFitFractions(ParameterList &list) {
+ FitFractions.DeepCopy(list);
 }
 
-void FitResult::Print(std::string opt) {
+void FitResult::print(std::string opt) {
   std::stringstream s;
   genOutput(s, opt);
   std::string str = s.str();
   LOG(info) << str;
 }
 
-void FitResult::PrintFitParameters(TableFormater *tableResult) {
+void FitResult::printFitParameters(TableFormater *tableResult) {
   bool printTrue = 0, printInitial = 0;
-  if (trueParameters.GetNParameter())
+  if (TrueParameters.numParameters())
     printTrue = 1;
-  if (initialParameters.GetNParameter())
+  if (InitialParameters.numParameters())
     printInitial = 1;
 
   // Column width for parameter with symmetric error
-  unsigned int parErrorWidth = 22;
+  size_t parErrorWidth = 22;
 
   // Do we have a parameter with assymetric errors?
-  for (unsigned int o = 0; o < finalParameters.GetNDouble(); o++)
-    if (finalParameters.GetDoubleParameter(o)->GetErrorType() ==
-        ErrorType::ASYM)
+  //  for (unsigned int o = 0; o < finalParameters.GetNDouble(); o++)
+  for (auto p : FinalParameters.doubleParameters()) {
+    if (p->errorType() == ErrorType::ASYM)
       parErrorWidth = 33;
+  }
 
   tableResult->addColumn("Nr");
-  tableResult->addColumn("Name", 20);
+  tableResult->addColumn("Name", 30);
   if (printInitial)
     tableResult->addColumn("Initial Value", parErrorWidth);
   tableResult->addColumn("Final Value", parErrorWidth);
@@ -94,61 +95,59 @@ void FitResult::PrintFitParameters(TableFormater *tableResult) {
     tableResult->addColumn("Deviation", 9);
   tableResult->header();
 
-  for (unsigned int o = 0; o < finalParameters.GetNDouble(); o++) {
-    std::shared_ptr<DoubleParameter> iniPar, outPar, truePar;
-    try {
-      outPar = finalParameters.GetDoubleParameter(o);
-    } catch (BadParameter &bad) {
-      LOG(error) << "FitResult::printFitParameters() | "
-                    "can't access parameter of final parameter list!";
-      throw;
-    }
+  size_t parameterId = 0;
+  for (auto p : FinalParameters.doubleParameters()) {
+    //    for (unsigned int o = 0; o < finalParameters.GetNDouble(); o++) {
+    std::shared_ptr<FitParameter> iniPar, truePar;
+    std::string name = p->name();
+
     if (printInitial) {
       try {
-        iniPar = initialParameters.GetDoubleParameter(outPar->GetName());
+        iniPar = FindParameter(p->name(), InitialParameters);
       } catch (BadParameter &bad) {
         iniPar.reset();
       }
     }
     if (printTrue) {
       try {
-        truePar = trueParameters.GetDoubleParameter(outPar->GetName());
+        truePar = FindParameter(p->name(), TrueParameters);
       } catch (BadParameter &bad) {
         truePar.reset();
       }
     }
 
-    ErrorType errorType = outPar->GetErrorType();
-    bool isFixed = outPar->IsFixed();
+    ErrorType errorType = p->errorType();
+    bool isFixed = p->isFixed();
 
     // Is parameter an angle?
     bool isAngle = 0;
-    if (outPar->GetName().find("phase") != std::string::npos)
+    if (p->name().find("phase") != std::string::npos)
       isAngle = 1;
     // ... then shift the value to the domain [-pi;pi]
     if (isAngle && !isFixed) {
-      outPar->SetValue(shiftAngle(outPar->GetValue()));
+      p->setValue(shiftAngle(p->value()));
       if (printInitial)
-        iniPar->SetValue(shiftAngle(iniPar->GetValue()));
+        iniPar->setValue(shiftAngle(iniPar->value()));
       if (printTrue)
-        truePar->SetValue(shiftAngle(truePar->GetValue()));
+        truePar->setValue(shiftAngle(truePar->value()));
     }
 
     // Is parameter a magnitude?
     bool isMag = 0;
-    if (outPar->GetName().find("mag") != std::string::npos)
+    if (p->name().find("mag") != std::string::npos)
       isMag = 1;
     // ... then make sure that it is positive
     if (isMag && !isFixed) {
-      outPar->SetValue(std::fabs(outPar->GetValue()));
+      p->setValue(std::abs(p->value()));
       if (printInitial && iniPar)
-        iniPar->SetValue(std::fabs(iniPar->GetValue()));
+        iniPar->setValue(std::abs(iniPar->value()));
       if (printTrue && truePar)
-        truePar->SetValue(std::fabs(truePar->GetValue()));
+        truePar->setValue(std::abs(truePar->value()));
     }
 
     // Print parameter name
-    *tableResult << o << outPar->GetName();
+    *tableResult << parameterId << p->name();
+    parameterId++;
 
     // Print initial values
     if (printInitial) {
@@ -161,7 +160,7 @@ void FitResult::PrintFitParameters(TableFormater *tableResult) {
 
     // Print final value
     if (!isFixed)
-      *tableResult << *outPar; // final value
+      *tableResult << *p; // final value
     else
       *tableResult << " ";
 
@@ -169,7 +168,7 @@ void FitResult::PrintFitParameters(TableFormater *tableResult) {
     if (printTrue) {
       if (truePar) {
         *tableResult << *truePar;
-        double pull = (truePar->GetValue() - outPar->GetValue());
+        double pull = (truePar->value() - p->value());
         // Shift pull by 2*pi if that reduces the deviation
         if (isAngle && !isFixed) {
           while (pull < 0 && pull < -M_PI)
@@ -177,13 +176,13 @@ void FitResult::PrintFitParameters(TableFormater *tableResult) {
           while (pull > 0 && pull > M_PI)
             pull -= 2 * M_PI;
         }
-        if (outPar->HasError()) {
+        if (p->hasError()) {
           if (errorType == ErrorType::ASYM && pull < 0)
-            pull /= outPar->GetErrorLow();
+            pull /= p->error().first;
           else if (errorType == ErrorType::ASYM && pull > 0)
-            pull /= outPar->GetErrorHigh();
+            pull /= p->error().second;
           else
-            pull /= outPar->GetError();
+            pull /= p->avgError();
         }
         if (!std::isnan(pull))
           (*tableResult) << pull;
@@ -196,45 +195,41 @@ void FitResult::PrintFitParameters(TableFormater *tableResult) {
     }
   }
   tableResult->footer();
-
   return;
 }
 
-void FitResult::PrintFitFractions(TableFormater *fracTable) {
+void FitResult::printFitFractions(TableFormater *fracTable) {
   LOG(info) << " FitResult::printFitFractions() | "
                "Calculating fit fractions!";
 
   double sum = 0, sumErrorSq = 0;
 
-  fracTable->Reset();
+  fracTable->reset();
 
   // print matrix
   fracTable->addColumn("Fit fractions [%]", 40); // add empty first column
   fracTable->addColumn("Fraction", 15);          // add empty first column
   fracTable->addColumn("Error", 15);             // add empty first column
   fracTable->header();
-  for (unsigned int i = 0; i < _fitFractions.GetNDouble(); ++i) {
-    std::shared_ptr<DoubleParameter> tmpPar =
-        _fitFractions.GetDoubleParameter(i);
-    std::string resName = tmpPar->GetName();
-
-    *fracTable << resName << tmpPar->GetValue();
+  for( auto f :FitFractions.doubleParameters() ){
+    std::string resName = f->name();
+    *fracTable << resName << f->value();
     try {
-      *fracTable << tmpPar->GetError(); // assume symmetric errors here
+      *fracTable << f->avgError(); // assume symmetric errors here
     } catch (std::exception &ex) {
       *fracTable << 0.0;
     }
-
-    sum += tmpPar->GetValue();
-    sumErrorSq += tmpPar->GetError() * tmpPar->GetError();
+    sum += f->value();
+    sumErrorSq += f->error().first * f->error().first;
   }
+
   fracTable->delim();
   *fracTable << "Total" << sum << sqrt(sumErrorSq);
   fracTable->footer();
-  sumFractions = sum;
-  sumFractionsError = sqrt(sumErrorSq);
+  SumFractions = sum;
+  SumFractionsError = sqrt(sumErrorSq);
 
   return;
 }
 
-} // namespace 
+} // namespace

@@ -2,13 +2,10 @@
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
-//! Minuit2 function to be optimized.
-/*! \class MinuitFcn
- * @file MinuitFcn.hpp
- * Based on the Minuit2 FcnBase. This class uses the ControlParameter interface
- * for the
- * optimization.
- */
+///
+/// \file
+/// Minuit2 interface FCN base class.
+///
 
 #ifndef _OIFMinuitFcn_HPP
 #define _OIFMinuitFcn_HPP
@@ -26,6 +23,11 @@
 namespace ROOT {
 namespace Minuit2 {
 
+///
+/// \class MinuitFcn
+/// Minuit2 function to be optimized based on the Minuit2 FcnBase. This class
+/// uses the ControlParameter interface for the optimization.
+///
 class MinuitFcn : public FCNBase {
 
 public:
@@ -60,7 +62,7 @@ private:
   /// List of Parameters the ControlParameter needs
   ComPWA::ParameterList &_parList;
   
-  /// mapping of minuit ids to ComPWA names 
+  /// mapping of minuit ids to ComPWA names
   std::map<unsigned int, std::string> _parNames;
 };
 

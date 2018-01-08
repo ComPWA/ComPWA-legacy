@@ -11,6 +11,7 @@ SET(lib_srcs
   RootReader.cpp
   RootEfficiency.cpp
 )
+
 SET(lib_headers
   RootReader.hpp
   RootEfficiency.hpp
@@ -19,6 +20,7 @@ SET(lib_headers
 add_library( RootReader
   SHARED ${lib_srcs} ${lib_headers}
 )
+
 target_link_libraries( RootReader
   DataReader
   ${ROOT_LIBRARIES}
@@ -27,7 +29,10 @@ target_link_libraries( RootReader
 target_include_directories( RootReader
   PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${ROOT_INCLUDE_DIR})
 
-install (FILES ${lib_headers} DESTINATION include/ComPWA)
+install (FILES ${lib_headers}
+    DESTINATION include/ComPWA/DataReader/RootReader
+)
+
 install(TARGETS RootReader
         LIBRARY DESTINATION lib
 )
@@ -55,6 +60,7 @@ foreach(testSrc ${TEST_SRCS})
     Tools
     ${Boost_LIBRARIES}
     ${ROOT_LIBRARIES}
+    pthread # We need it here, no ideo why!
   )
 
   #I like to move testing binaries into a testBin directory

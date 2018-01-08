@@ -1,630 +1,602 @@
 <ParticleList>
-	<Particle Name="K+">
-		<Pid>321</Pid>
-		<Parameter Type="Mass" Name="Mass_chargedKaon">
-			<Value>0.493677</Value>
-			<Fix>true</Fix>
-		</Parameter>
-		<QuantumNumber Class="Spin" Type="Spin" Value="0"/>
-		<QuantumNumber Class="Int" Type="Charge" Value="1"/>
-		<QuantumNumber Class="Int" Type="Parity" Value="-1"/>
-		<QuantumNumber Class="Spin" Type="IsoSpin" Value="0.5" Projection="0.5"/>
-	</Particle>
-	<Particle Name="K-">
-		<Pid>-321</Pid>
-		<Parameter Type="Mass" Name="Mass_chargedKaon">
-			<Value>0.493677</Value>
-			<Fix>true</Fix>
-		</Parameter>
-		<QuantumNumber Class="Spin" Type="Spin" Value="0"/>
-		<QuantumNumber Class="Int" Type="Charge" Value="-1"/>
-		<QuantumNumber Class="Int" Type="Parity" Value="-1"/>
-		<QuantumNumber Class="Spin" Type="IsoSpin" Value="0.5" Projection="-0.5"/>
-	</Particle>
-	<Particle Name="pi0">
-		<Pid>111</Pid>
-		<Parameter Type="Mass" Name="Mass_pi0">
-			<Value>0.1349766</Value>
-			<Error>0.0000006</Error>
-		</Parameter>
-		<QuantumNumber Class="Spin" Type="Spin" Value="0"/>
-		<QuantumNumber Class="Int" Type="Charge" Value="0"/>
-		<QuantumNumber Class="Int" Type="Parity" Value="-1"/>
-		<QuantumNumber Class="Int" Type="Cparity" Value="1"/>
-	</Particle>
-	<Particle Name="eta">
-		<Pid>221</Pid>
-		<Parameter Type="Mass" Name="Mass_eta">
-			<Value>0.547862</Value>
-			<Error>0.000018</Error>
-		</Parameter>
-		<QuantumNumber Class="Spin" Type="Spin" Value="0"/>
-		<QuantumNumber Class="Int" Type="Charge" Value="0"/>
-		<QuantumNumber Class="Int" Type="Parity" Value="-1"/>
-		<QuantumNumber Class="Int" Type="Cparity" Value="1"/>
-	</Particle>
-	<Particle Name="K_S0">
-		<Pid>310</Pid>
-		<Parameter Type="Mass" Name="Mass_neutralKaon">
-			<Value>0.497614</Value>
-			<Fix>true</Fix>
-		</Parameter>
-		<QuantumNumber Class="Spin" Type="Spin" Value="0"/>
-		<QuantumNumber Class="Int" Type="Charge" Value="0"/>
-		<QuantumNumber Class="Int" Type="Parity" Value="-1"/>
-		<QuantumNumber Class="Spin" Type="IsoSpin" Value="0.5" Projection="0.5"/>
-	</Particle>
-	<Particle Name="D0">
-		<Pid>421</Pid>
-		<Parameter Type="Mass" Name="Mass_D0">
-			<Value>1.86484</Value>
-			<Fix>true</Fix>
-		</Parameter>
-		<QuantumNumber Class="Spin" Type="Spin" Value="0"/>
-		<QuantumNumber Class="Int" Type="Charge" Value="0"/>
-		<QuantumNumber Class="Int" Type="Parity" Value="-1"/>
-		<DecayInfo Type="relativisticBreitWigner">
-			<FormFactor Type="0" />
-			<Parameter Type="Mass" Name="Width_D0">
-				<Value>0.000623</Value>
-				<Fix>true</Fix>
-			</Parameter>
-			<Parameter Type="MesonRadius" Name="Radius_D0">
-				<Value>2.5</Value>
-				<Fix>true</Fix>
-				<Min>2.0</Min>
-				<Max>3.0</Max>
-			</Parameter>
-		</DecayInfo>
-	</Particle>
-	<Particle Name="phi(1020)">
-		<Pid>333</Pid>
-		<Parameter Type="Mass" Name="Mass_phi(1020)">
-			<Value>1.019461</Value>
-			<Error>0.000019</Error>
-			<Fix>true</Fix>
-		</Parameter>
-		<QuantumNumber Class="Spin" Type="Spin" Value="1"/>
-		<QuantumNumber Class="Int" Type="Charge" Value="0"/>
-		<QuantumNumber Class="Int" Type="Parity" Value="-1"/>
-		<DecayInfo Type="relativisticBreitWigner">
-			<FormFactor Type="1" />
-			<Parameter Type="Width" Name="Width_phi(1020)">
-				<Value>0.004266</Value>
-				<Error>0.000031</Error>
-				<Fix>true</Fix>
-			</Parameter>
-			<Parameter Type="MesonRadius" Name="Radius_phi(1020)">
-				<Value>1.5</Value>
-				<Fix>true</Fix>
-				<Min>1.0</Min>
-				<Max>2.0</Max>
-			</Parameter>
-		</DecayInfo>
-	</Particle>
-	<Particle Name="a0(980)0">
-		<Pid>9000111</Pid>
-		<Parameter Type="Mass" Name="Mass_a0(980)">
-			<Value>0.994</Value>
-			<Error>0.001</Error>
-			<Fix>true</Fix>
-		</Parameter>
-		<QuantumNumber Class="Spin" Type="Spin" Value="0"/>
-		<QuantumNumber Class="Int" Type="Charge" Value="0"/>
-		<QuantumNumber Class="Int" Type="Parity" Value="1"/>
-		<DecayInfo Type="flatte">
-			<FormFactor Type="0" />
-			<Parameter Type="Coupling" Name="gKK_a0(980)">
-				<Value>3.121343843602647</Value>
-				<Error>0.001</Error>
-				<Fix>false</Fix>
-				<ParticleA>K+</ParticleA>
-				<ParticleB>K-</ParticleB>
-			</Parameter>
-			<Parameter Type="Coupling" Name="gEtaPi_a0(980)">
-				<Value>2.66</Value>
-				<Error>0.001</Error>
-				<Fix>true</Fix>
-				<ParticleA>eta</ParticleA>
-				<ParticleB>pi0</ParticleB>
-			</Parameter>
-			<Parameter Type="Coupling" Name="gKK_a0(980)">
-				<Value>3.121343843602647</Value>
-				<Error>0.001</Error>
-				<Fix>false</Fix>
-				<ParticleA>K_S0</ParticleA>
-				<ParticleB>K_S0</ParticleB>
-			</Parameter>
-			<Parameter Type="MesonRadius" Name="Radius_a0(980)">
-				<Value>1.5</Value>
-				<Fix>true</Fix>
-				<Min>1.0</Min>
-				<Max>2.0</Max>
-			</Parameter>
-		</DecayInfo>
-	</Particle>
-	<Particle Name="a0(980)+">
-		<Pid>9000211</Pid>
-		<Parameter Type="Mass" Name="Mass_a0(980)">
-			<Value>0.994</Value>
-			<Error>0.001</Error>
-			<Fix>true</Fix>
-		</Parameter>
-		<Charge>0</Charge>
-		<Spin>0</Spin>
-		<Parity>+1</Parity>
-		<QuantumNumber Class="Spin" Type="Spin" Value="0"/>
-		<QuantumNumber Class="Int" Type="Charge" Value="0"/>
-		<QuantumNumber Class="Int" Type="Parity" Value="+1"/>
-		<DecayInfo Type="flatte">
-			<FormFactor Type="0" />
-			<Parameter Type="Coupling" Name="gKK_a0(980)">
-				<Value>3.121343843602647</Value>
-				<Error>0.001</Error>
-				<Fix>false</Fix>
-				<ParticleA>K_S0</ParticleA>
-				<ParticleB>K+</ParticleB>
-			</Parameter>
-			<Parameter Type="Coupling" Name="gEtaPi_a0(980)">
-				<Value>2.66</Value>
-				<Error>0.001</Error>
-				<Fix>true</Fix>
-				<ParticleA>eta</ParticleA>
-				<ParticleB>pi0</ParticleB>
-			</Parameter>
-			<Parameter Type="MesonRadius" Name="Radius_a0(980)">
-				<Value>1.5</Value>
-				<Fix>true</Fix>
-				<Min>1.0</Min>
-				<Max>2.0</Max>
-			</Parameter>
-		</DecayInfo>
-	</Particle>
-	<Particle Name="Bkgphi(1020)">
-		<Pid>3339999</Pid>
-		<Parameter Type="Mass" Name="Mass_phi(1020)">
-			<Value>1.019461</Value>
-			<Error>0.000019</Error>
-			<Fix>true</Fix>
-		</Parameter>
-		<QuantumNumber Class="Spin" Type="Spin" Value="0"/>
-		<QuantumNumber Class="Int" Type="Charge" Value="0"/>
-		<QuantumNumber Class="Int" Type="Parity" Value="-1"/>
-		<DecayInfo Type="relativisticBreitWigner">
-			<FormFactor Type="1" />
-			<Parameter Type="Width" Name="Width_phi(1020)">
-				<Value>0.004266</Value>
-				<Error>0.000031</Error>
-				<Fix>true</Fix>
-			</Parameter>
-			<Parameter Type="MesonRadius" Name="Radius_phi(1020)">
-				<Value>1.5</Value>
-				<Fix>true</Fix>
-				<Min>1.0</Min>
-				<Max>2.0</Max>
-			</Parameter>
-		</DecayInfo>
-	</Particle>
-	<Particle Name="something">
-		<Pid>123456</Pid>
-		<Parameter Type="Mass" Name="Mass_something">
-			<Value>1.024654338170585</Value>
-			<Fix>true</Fix>
-		</Parameter>
-		<QuantumNumber Class="Spin" Type="Spin" Value="0"/>
-		<QuantumNumber Class="Int" Type="Charge" Value="0"/>
-		<QuantumNumber Class="Int" Type="Parity" Value="-1"/>
-		<DecayInfo Type="relativisticBreitWigner">
-			<FormFactor Type="1" />
-			<Parameter Type="Width" Name="Width_something">
-				<Value>0.01909658663476588</Value>
-				<Fix>true</Fix>
-			</Parameter>
-			<Parameter Type="MesonRadius" Name="Radius_something">
-				<Value>1.5</Value>
-				<Fix>true</Fix>
-			</Parameter>
-		</DecayInfo>
-	</Particle>
-	<Particle Name="a2(1320)-">
-		<Pid>215</Pid>
-		<Parameter Type="Mass" Name="Mass_a2(1320)">
-			<Value>1.3181</Value>
-			<Fix>true</Fix>
-		</Parameter>
-		<QuantumNumber Class="Spin" Type="Spin" Value="2"/>
-		<QuantumNumber Class="Int" Type="Charge" Value="0"/>
-		<QuantumNumber Class="Int" Type="Parity" Value="1"/>
-		<DecayInfo Type="relativisticBreitWigner">
-			<FormFactor Type="1" />
-			<Parameter Type="Width" Name="Width_a2(1320)">
-				<Value>0.1098</Value>
-				<Fix>true</Fix>
-			</Parameter>
-			<Parameter Type="MesonRadius" Name="Radius_a2(1320)">
-				<Value>1.5</Value>
-				<Fix>true</Fix>
-			</Parameter>
-		</DecayInfo>
-	</Particle>
+  <Particle Name="K+">
+	<Pid>321</Pid>
+	<Parameter Class="Double" Type="Mass" Name="Mass_chargedKaon">
+	  <Value>0.493677</Value>
+	  <Fix>true</Fix>
+	</Parameter>
+	<QuantumNumber Class="Spin" Type="Spin" Value="0"/>
+	<QuantumNumber Class="Int" Type="Charge" Value="1"/>
+	<QuantumNumber Class="Int" Type="Parity" Value="-1"/>
+	<QuantumNumber Class="Spin" Type="IsoSpin" Value="0.5" Projection="0.5"/>
+  </Particle>
+  <Particle Name="K-">
+	<Pid>-321</Pid>
+	<Parameter Class="Double" Type="Mass" Name="Mass_chargedKaon">
+	  <Value>0.493677</Value>
+	  <Fix>true</Fix>
+	</Parameter>
+	<QuantumNumber Class="Spin" Type="Spin" Value="0"/>
+	<QuantumNumber Class="Int" Type="Charge" Value="-1"/>
+	<QuantumNumber Class="Int" Type="Parity" Value="-1"/>
+	<QuantumNumber Class="Spin" Type="IsoSpin" Value="0.5" Projection="-0.5"/>
+  </Particle>
+  <Particle Name="pi0">
+	<Pid>111</Pid>
+	<Parameter Class="Double" Type="Mass" Name="Mass_pi0">
+	  <Value>0.1349766</Value>
+	  <Error>0.0000006</Error>
+	</Parameter>
+	<QuantumNumber Class="Spin" Type="Spin" Value="0"/>
+	<QuantumNumber Class="Int" Type="Charge" Value="0"/>
+	<QuantumNumber Class="Int" Type="Parity" Value="-1"/>
+	<QuantumNumber Class="Int" Type="Cparity" Value="1"/>
+  </Particle>
+  <Particle Name="eta">
+	<Pid>221</Pid>
+	<Parameter Class="Double" Type="Mass" Name="Mass_eta">
+	  <Value>0.547862</Value>
+	  <Error>0.000018</Error>
+	</Parameter>
+	<QuantumNumber Class="Spin" Type="Spin" Value="0"/>
+	<QuantumNumber Class="Int" Type="Charge" Value="0"/>
+	<QuantumNumber Class="Int" Type="Parity" Value="-1"/>
+	<QuantumNumber Class="Int" Type="Cparity" Value="1"/>
+  </Particle>
+  <Particle Name="K_S0">
+	<Pid>310</Pid>
+	<Parameter Class="Double" Type="Mass" Name="Mass_neutralKaon">
+	  <Value>0.497614</Value>
+	  <Fix>true</Fix>
+	</Parameter>
+	<QuantumNumber Class="Spin" Type="Spin" Value="0"/>
+	<QuantumNumber Class="Int" Type="Charge" Value="0"/>
+	<QuantumNumber Class="Int" Type="Parity" Value="-1"/>
+	<QuantumNumber Class="Spin" Type="IsoSpin" Value="0.5" Projection="0.5"/>
+  </Particle>
+  <Particle Name="D0">
+	<Pid>421</Pid>
+	<Parameter Class="Double" Type="Mass" Name="Mass_D0">
+	  <Value>1.86484</Value>
+	  <Fix>true</Fix>
+	</Parameter>
+	<QuantumNumber Class="Spin" Type="Spin" Value="0"/>
+	<QuantumNumber Class="Int" Type="Charge" Value="0"/>
+	<QuantumNumber Class="Int" Type="Parity" Value="-1"/>
+	<DecayInfo Type="relativisticBreitWigner">
+	  <FormFactor Type="0" />
+	  <Parameter Class="Double" Type="Mass" Name="Width_D0">
+		<Value>0.000623</Value>
+		<Fix>true</Fix>
+	  </Parameter>
+	  <Parameter Class="Double" Type="MesonRadius" Name="Radius_D0">
+		<Value>2.5</Value>
+		<Fix>true</Fix>
+		<Min>2.0</Min>
+		<Max>3.0</Max>
+	  </Parameter>
+	</DecayInfo>
+  </Particle>
+  <Particle Name="phi(1020)">
+	<Pid>333</Pid>
+	<Parameter Class="Double" Type="Mass" Name="Mass_phi(1020)">
+	  <Value>1.019461</Value>
+	  <Error>0.000019</Error>
+	  <Fix>true</Fix>
+	</Parameter>
+	<QuantumNumber Class="Spin" Type="Spin" Value="1"/>
+	<QuantumNumber Class="Int" Type="Charge" Value="0"/>
+	<QuantumNumber Class="Int" Type="Parity" Value="-1"/>
+	<DecayInfo Type="relativisticBreitWigner">
+	  <FormFactor Type="1" />
+	  <Parameter Class="Double" Type="Width" Name="Width_phi(1020)">
+		<Value>0.004266</Value>
+		<Error>0.000031</Error>
+		<Fix>true</Fix>
+	  </Parameter>
+	  <Parameter Class="Double" Type="MesonRadius" Name="Radius_phi(1020)">
+		<Value>1.5</Value>
+		<Fix>true</Fix>
+		<Min>1.0</Min>
+		<Max>2.0</Max>
+	  </Parameter>
+	</DecayInfo>
+  </Particle>
+  <Particle Name="a0(980)0">
+	<Pid>9000111</Pid>
+	<Parameter Class="Double" Type="Mass" Name="Mass_a0(980)">
+	  <Value>0.994</Value>
+	  <Error>0.001</Error>
+	  <Fix>true</Fix>
+	</Parameter>
+	<QuantumNumber Class="Spin" Type="Spin" Value="0"/>
+	<QuantumNumber Class="Int" Type="Charge" Value="0"/>
+	<QuantumNumber Class="Int" Type="Parity" Value="1"/>
+	<DecayInfo Type="flatte">
+	  <FormFactor Type="0" />
+	  <Parameter Class="Double" Type="Coupling" Name="gKK_a0(980)">
+		<Value>3.121343843602647</Value>
+		<Error>0.001</Error>
+		<Fix>false</Fix>
+		<ParticleA>K+</ParticleA>
+		<ParticleB>K-</ParticleB>
+	  </Parameter>
+	  <Parameter Class="Double" Type="Coupling" Name="gEtaPi_a0(980)">
+		<Value>2.66</Value>
+		<Error>0.001</Error>
+		<Fix>true</Fix>
+		<ParticleA>eta</ParticleA>
+		<ParticleB>pi0</ParticleB>
+	  </Parameter>
+	  <Parameter Class="Double" Type="Coupling" Name="gKK_a0(980)">
+		<Value>3.121343843602647</Value>
+		<Error>0.001</Error>
+		<Fix>false</Fix>
+		<ParticleA>K_S0</ParticleA>
+		<ParticleB>K_S0</ParticleB>
+	  </Parameter>
+	  <Parameter Class="Double" Type="MesonRadius" Name="Radius_a0(980)">
+		<Value>1.5</Value>
+		<Fix>true</Fix>
+		<Min>1.0</Min>
+		<Max>2.0</Max>
+	  </Parameter>
+	</DecayInfo>
+  </Particle>
+  <Particle Name="a0(980)+">
+	<Pid>9000211</Pid>
+	<Parameter Class="Double" Type="Mass" Name="Mass_a0(980)">
+	  <Value>0.994</Value>
+	  <Error>0.001</Error>
+	  <Fix>true</Fix>
+	</Parameter>
+	<Charge>0</Charge>
+	<Spin>0</Spin>
+	<Parity>+1</Parity>
+	<QuantumNumber Class="Spin" Type="Spin" Value="0"/>
+	<QuantumNumber Class="Int" Type="Charge" Value="0"/>
+	<QuantumNumber Class="Int" Type="Parity" Value="+1"/>
+	<DecayInfo Type="flatte">
+	  <FormFactor Type="0" />
+	  <Parameter Class="Double" Type="Coupling" Name="gKK_a0(980)">
+		<Value>3.121343843602647</Value>
+		<Error>0.001</Error>
+		<Fix>false</Fix>
+		<ParticleA>K_S0</ParticleA>
+		<ParticleB>K+</ParticleB>
+	  </Parameter>
+	  <Parameter Class="Double" Type="Coupling" Name="gEtaPi_a0(980)">
+		<Value>2.66</Value>
+		<Error>0.001</Error>
+		<Fix>true</Fix>
+		<ParticleA>eta</ParticleA>
+		<ParticleB>pi0</ParticleB>
+	  </Parameter>
+	  <Parameter Class="Double" Type="MesonRadius" Name="Radius_a0(980)">
+		<Value>1.5</Value>
+		<Fix>true</Fix>
+		<Min>1.0</Min>
+		<Max>2.0</Max>
+	  </Parameter>
+	</DecayInfo>
+  </Particle>
+  <Particle Name="Bkgphi(1020)">
+	<Pid>3339999</Pid>
+	<Parameter Class="Double" Type="Mass" Name="Mass_phi(1020)">
+	  <Value>1.019461</Value>
+	  <Error>0.000019</Error>
+	  <Fix>true</Fix>
+	</Parameter>
+	<QuantumNumber Class="Spin" Type="Spin" Value="0"/>
+	<QuantumNumber Class="Int" Type="Charge" Value="0"/>
+	<QuantumNumber Class="Int" Type="Parity" Value="-1"/>
+	<DecayInfo Type="relativisticBreitWigner">
+	  <FormFactor Type="1" />
+	  <Parameter Class="Double" Type="Width" Name="Width_phi(1020)">
+		<Value>0.004266</Value>
+		<Error>0.000031</Error>
+		<Fix>true</Fix>
+	  </Parameter>
+	  <Parameter Class="Double" Type="MesonRadius" Name="Radius_phi(1020)">
+		<Value>1.5</Value>
+		<Fix>true</Fix>
+		<Min>1.0</Min>
+		<Max>2.0</Max>
+	  </Parameter>
+	</DecayInfo>
+  </Particle>
+  <Particle Name="something">
+	<Pid>123456</Pid>
+	<Parameter Class="Double" Type="Mass" Name="Mass_something">
+	  <Value>1.024654338170585</Value>
+	  <Fix>true</Fix>
+	</Parameter>
+	<QuantumNumber Class="Spin" Type="Spin" Value="0"/>
+	<QuantumNumber Class="Int" Type="Charge" Value="0"/>
+	<QuantumNumber Class="Int" Type="Parity" Value="-1"/>
+	<DecayInfo Type="relativisticBreitWigner">
+	  <FormFactor Type="1" />
+	  <Parameter Class="Double" Type="Width" Name="Width_something">
+		<Value>0.01909658663476588</Value>
+		<Fix>true</Fix>
+	  </Parameter>
+	  <Parameter Class="Double" Type="MesonRadius" Name="Radius_something">
+		<Value>1.5</Value>
+		<Fix>true</Fix>
+	  </Parameter>
+	</DecayInfo>
+  </Particle>
+  <Particle Name="a2(1320)-">
+	<Pid>215</Pid>
+	<Parameter Class="Double" Type="Mass" Name="Mass_a2(1320)">
+	  <Value>1.3181</Value>
+	  <Fix>true</Fix>
+	</Parameter>
+	<QuantumNumber Class="Spin" Type="Spin" Value="2"/>
+	<QuantumNumber Class="Int" Type="Charge" Value="0"/>
+	<QuantumNumber Class="Int" Type="Parity" Value="1"/>
+	<DecayInfo Type="relativisticBreitWigner">
+	  <FormFactor Type="1" />
+	  <Parameter Class="Double" Type="Width" Name="Width_a2(1320)">
+		<Value>0.1098</Value>
+		<Fix>true</Fix>
+	  </Parameter>
+	  <Parameter Class="Double" Type="MesonRadius" Name="Radius_a2(1320)">
+		<Value>1.5</Value>
+		<Fix>true</Fix>
+	  </Parameter>
+	</DecayInfo>
+  </Particle>
 </ParticleList>
 
 <HelicityKinematics>
-	<PhspVolume>0.541493</PhspVolume>
-	<InitialState>
-		<Particle Name="D0" Id="0"/>
-	</InitialState>
-	<FinalState>
-		<Particle Name="K_S0" Id="0"/>
-		<Particle Name="K-" Id="1"/>
-		<Particle Name="K+" Id="2"/>
-	</FinalState>
+  <PhspVolume>0.541493</PhspVolume>
+  <InitialState>
+	<Particle Name="D0" Id="0"/>
+  </InitialState>
+  <FinalState>
+	<Particle Name="K_S0" Id="0"/>
+	<Particle Name="K-" Id="1"/>
+	<Particle Name="K+" Id="2"/>
+  </FinalState>
 </HelicityKinematics>
 
-<IncoherentIntensity Name="D0toKSK+K-_inc">
-	<Parameter Type="Strength" Name="strength_D0toKSK+K-_inc">
-		<Value>1</Value>
-		<Fix>true</Fix>
+<Intensity Class="Incoherent" Name="D0toKSK+K-_inc">
+  <Parameter Class="Double" Type="Strength" Name="strength_D0toKSK+K-_inc">
+	<Value>1</Value>
+	<Fix>true</Fix>
+  </Parameter>
+  <Intensity Class="Coherent" Name="D0toKSK+K-">
+	<Parameter Class="Double" Type="Strength" Name="strength_d0tokkk">
+	  <Value>0.963665</Value>
+	  <Fix>true</Fix>
 	</Parameter>
-	<CoherentIntensity Name="D0toKSK+K-">
-		<Parameter Type="Strength" Name="strength_d0tokkk">
-			<Value>0.963665</Value>
-			<Fix>true</Fix>
+	<Amplitude Class="SequentialPartialAmplitude" Name="a0(980)0">
+	  <Parameter Class="Double" Type="Magnitude"	Name="Magnitude_a0(980)0">
+		<Value>1.0</Value>
+		<Fix>true</Fix>
+	  </Parameter>
+	  <Parameter Class="Double" Type="Phase" Name="Phase_a0(980)0">
+		<Value>0.0</Value>
+		<Fix>true</Fix>
+	  </Parameter>
+	  <PartialAmplitude Class="HelicityDecay" Name="a00ToKK">
+		<Parameter Class="Double" Type="Magnitude" Name="Magnitude_a00ToKK">
+		  <Value>1.0</Value>
+		  <Fix>true</Fix>
 		</Parameter>
-		<Amplitude Name="a0(980)0">
-			<Parameter Type="Magnitude"	Name="Magnitude_a0(980)0">
-				<Value>1.0</Value>
-				<Fix>true</Fix>
-			</Parameter>
-			<Parameter Type="Phase" Name="Phase_a0(980)0">
-				<Value>0.0</Value>
-				<Fix>true</Fix>
-			</Parameter>
-			<Resonance Name="a00ToKK">
-				<Parameter Type="Magnitude" Name="Magnitude_a00ToKK">
-					<Value>1.0</Value>
-					<Fix>true</Fix>
-				</Parameter>
-				<Parameter Type="Phase" Name="Phase_a00ToKK">
-					<Value>0.0</Value>
-					<Fix>true</Fix>
-				</Parameter>
-				<DecayParticle Name="a0(980)0" Helicity="0"/>
-				<SubSystem>
-					<RecoilSystem FinalState="0" />
-					<DecayProducts>
-						<Particle Name="K-" FinalState="1"  Helicity="0"/>
-						<Particle Name="K+" FinalState="2"  Helicity="0"/>
-					</DecayProducts>
-				</SubSystem>
-			</Resonance>
-		</Amplitude>
-		<Amplitude Name="a0(980)+">
-			<Parameter Type="Magnitude" Name="Magnitude_a0(980)+">
-				<Value>0.6</Value>
-				<Min>-3</Min>
-				<Max>3</Max>
-				<Fix>false</Fix>
-			</Parameter>
-			<Parameter Type="Phase" Name="Phase_a0(980)+">
-				<Value>-3.0</Value>
-				<Min>-100</Min>
-				<Max>100</Max>
-				<Fix>false</Fix>
-			</Parameter>
-			<Resonance Name="a0+ToKK">
-				<Parameter Type="Magnitude" Name="Magnitude_a0+ToKK">
-					<Value>1.0</Value>
-					<Fix>true</Fix>
-				</Parameter>
-				<Parameter Type="Phase" Name="Phase_a0+ToKK">
-					<Value>0.0</Value>
-					<Fix>true</Fix>
-				</Parameter>
-				<DecayParticle Name="a0(980)+" Helicity="0"/>
-				<SubSystem>
-					<RecoilSystem FinalState="1" />
-					<DecayProducts>
-						<Particle Name="K_S0" FinalState="0"  Helicity="0"/>
-						<Particle Name="K+" FinalState="2"  Helicity="0"/>
-					</DecayProducts>
-				</SubSystem>
-			</Resonance>
-		</Amplitude>
-		<Amplitude Name="phi(1020)">
-			<Parameter Type="Magnitude" Name="Magnitude_phi(1020)">
-				<Value>0.7</Value>
-				<Min>-3</Min>
-				<Max>3</Max>
-				<Fix>false</Fix>
-			</Parameter>
-			<Parameter Type="Phase" Name="Phase_phi(1020)">
-				<Value>2.0</Value>
-				<Min>-100</Min>
-				<Max>100</Max>
-				<Fix>false</Fix>
-			</Parameter>
-			<Resonance Name="phiToKK">
-				<Parameter Type="Magnitude" Name="Magnitude_phiToKK">
-					<Value>1.0</Value>
-					<Fix>true</Fix>
-				</Magnitude>
-				<Parameter Type="Phase" Name="Phase_phiToKK">
-					<Value>0.0</Value>
-					<Fix>true</Fix>
-				</Parameter>
-				<DecayParticle Name="phi(1020)" Helicity="0"/>
-				<SubSystem>
-					<RecoilSystem FinalState="0" />
-					<DecayProducts>
-						<Particle Name="K-" FinalState="1"  Helicity="0"/>
-						<Particle Name="K+" FinalState="2"  Helicity="0"/>
-					</DecayProducts>
-				</SubSystem>
-			</Resonance>
-		</Amplitude>
-		<Amplitude Name="a2(1320)-">
-			<Parameter Type="Magnitude" Name="Magnitude_a2(1320)-">
-				<Value>0.0000001</Value>
-				<Min>-3</Min>
-				<Max>3</Max>
-				<Fix>false</Fix>
-			</Parameter>
-			<Parameter Type="Phase" Name="Phase_a2(1320)-">
-				<Value>0.0</Value>
-				<Min>-100</Min>
-				<Max>100</Max>
-				<Fix>false</Fix>
-			</Parameter>
-			<Resonance Name="a2(1320)MinusToKK">
-				<Parameter Type="Magnitude" Name="Magnitude_a2(1320)MinusToKK">
-					<Value>1.0</Value>
-					<Fix>true</Fix>
-				</Parameter>
-				<Parameter Type="Phase" Name="Phase_a2(1320)MinusToKK">
-					<Value>0.0</Value>
-					<Fix>true</Fix>
-				</Parameter>
-				<DecayParticle Name="a2(1320)-" Helicity="0"/>
-				<SubSystem>
-					<RecoilSystem FinalState="2" />
-					<DecayProducts>
-						<Particle Name="K_S0" FinalState="0"  Helicity="0"/>
-						<Particle Name="K-" FinalState="1"  Helicity="0"/>
-					</DecayProducts>
-				</SubSystem>
-			</Resonance>
-		</Amplitude>
-		<Amplitude Name="a0(980)0_CP">
-			<PreFactor Magnitude="0.0591608" Phase="-0.2618" />
-			<Parameter Type="Magnitude" Name="Magnitude_a0(980)0">
-				<Value>1.0</Value>
-				<Fix>true</Fix>
-			</Parameter>
-			<Parameter Type="Phase" Name="Phase_a0(980)0">
-				<Value>0.0</Value>
-				<Fix>true</Fix>
-			</Parameter>
-			<Resonance Name="a00ToKK">
-				<Parameter Type="Magnitude" Name="Magnitude_a00ToKK">
-					<Value>1.0</Value>
-					<Fix>true</Fix>
-				</Parameter>
-				<Parameter Type="Phase" Name="Phase_a00ToKK">
-					<Value>0.0</Value>
-					<Fix>true</Fix>
-				</Parameter>
-				<DecayParticle Name="a0(980)0" Helicity="0"/>
-				<SubSystem>
-					<RecoilSystem FinalState="0" />
-					<DecayProducts>
-						<Particle Name="K+" FinalState="2"  Helicity="0"/>
-						<Particle Name="K-" FinalState="1"  Helicity="0"/>
-					</DecayProducts>
-				</SubSystem>
-			</Resonance>
-		</Amplitude>
-		<Amplitude Name="a0(980)+_CP">
-			<PreFactor Magnitude="0.0591608" Phase="-0.2618" />
-			<Parameter Type="Magnitude" Name="Magnitude_a0(980)+">
-				<Value>0.6</Value>
-				<Min>-3</Min>
-				<Max>3</Max>
-				<Fix>false</Fix>
-			</Parameter>
-			<Parameter Type="Phase" Name="Phase_a0(980)+">
-				<Value>-3.0</Value>
-				<Min>-100</Min>
-				<Max>100</Max>
-				<Fix>false</Fix>
-			</Parameter>
-			<Resonance Name="a0+ToKK_CP">
-				<Parameter Type="Magnitude" Name="Magnitude_a0+ToKK">
-					<Value>1.0</Value>
-					<Fix>true</Fix>
-				</Parameter>
-				<Parameter Type="Phase" Name="Phase_a0+ToKK">
-					<Value>0.0</Value>
-					<Fix>true</Fix>
-				</Parameter>
-				<DecayParticle Name="a0(980)+" Helicity="0"/>
-				<SubSystem>
-					<RecoilSystem FinalState="2" />
-					<DecayProducts>
-						<Particle Name="K_S0" FinalState="0"  Helicity="0"/>
-						<Particle Name="K-" FinalState="1"  Helicity="0"/>
-					</DecayProducts>
-				</SubSystem>
-			</Resonance>
-		</Amplitude>
-		<Amplitude Name="phi(1020)_CP">
-			<PreFactor Magnitude="0.0591608" Phase="-0.2618" />
-			<Parameter Type="Magnitude" Name="Magnitude_phi(1020)">
-				<Value>0.7</Value>
-				<Min>-3</Min>
-				<Max>3</Max>
-				<Fix>false</Fix>
-			</Parameter>
-			<Parameter Type="Phase" Name="Phase_phi(1020)">
-				<Value>2.0</Value>
-				<Min>-100</Min>
-				<Max>100</Max>
-				<Fix>false</Fix>
-			</Parameter>
-			<Resonance Name="phiToKK_CP">
-				<Parameter Type="Magnitude" Name="Magnitude_phiToKK">
-					<Value>1.0</Value>
-					<Fix>true</Fix>
-				</Parameter>
-				<Parameter Type="Phase" Name="Phase_phiToKK">
-					<Value>0.0</Value>
-					<Fix>true</Fix>
-				</Parameter>
-				<DecayParticle Name="phi(1020)" Helicity="0"/>
-				<SubSystem>
-					<RecoilSystem FinalState="0" />
-					<DecayProducts>
-						<Particle Name="K+" FinalState="2"  Helicity="0"/>
-						<Particle Name="K-" FinalState="1"  Helicity="0"/>
-					</DecayProducts>
-				</SubSystem>
-			</Resonance>
-		</Amplitude>
-		<Amplitude Name="a2(1320)-_CP">
-			<PreFactor Magnitude="0.0591608" Phase="-0.2618" />
-			<Parameter Type="Magnitude" Name="Magnitude_a2(1320)-">
-				<Value>0.0000001</Value>
-				<Min>-3</Min>
-				<Max>3</Max>
-				<Fix>false</Fix>
-			</Parameter>
-			<Parameter Type="Phase" Name="Phase_a2(1320)-">
-				<Value>0.0</Value>
-				<Min>-100</Min>
-				<Max>100</Max>
-				<Fix>false</Fix>
-			</Parameter>
-			<Resonance Name="a2(1320)MinusToKK_CP">
-				<Parameter Type="Magnitude" Name="Magnitude_a2(1320)MinusToKK">
-					<Value>1.0</Value>
-					<Fix>true</Fix>
-				</Parameter>
-				<Parameter Type="Phase" Name="Phase_a2(1320)MinusToKK">
-					<Value>0.0</Value>
-					<Fix>true</Fix>
-				</Parameter>
-				<DecayParticle Name="a2(1320)-" Helicity="0"/>
-				<SubSystem>
-					<RecoilSystem FinalState="1" />
-					<DecayProducts>
-						<Particle Name="K_S0" FinalState="0"  Helicity="0"/>
-						<Particle Name="K+" FinalState="2"  Helicity="0"/>
-					</DecayProducts>
-				</SubSystem>
-			</Resonance>
-		</Amplitude>
-	</CoherentIntensity>
-	<!-- Background  model -->
-	<CoherentIntensity Name="BkgD0toKSK+K-">
-		<Parameter Type="Strength" Name="strength_bkgd0tokkk">
-			<Value>0.036335</Value>
-			<Fix>true</Fix>
-		</Strength>
-		<Amplitude Name="BkgNonRes">
-			<Parameter Type="Magnitude" Name="Magnitude_BkgNonRes">
-				<Value>1.0</Value>
-				<Min>-3</Min>
-				<Max>3</Max>
-				<Fix>true</Fix>
-			</Parameter>
-			<Parameter Type="Phase" Name="Phase_BkgNonRes">
-				<Value>0.0</Value>
-				<Min>-100</Min>
-				<Max>100</Max>
-				<Fix>true</Fix>
-			</Parameter>
-			<Resonance Name="nonRes3K">
-				<Parameter Type="Magnitude" Name="Magnitude_nonRes3K">
-					<Value>1.0</Value>
-					<Fix>true</Fix>
-				</Parameter>
-				<Parameter Type="Phase" Name="Phase_nonRes3K">
-					<Value>0.0</Value>
-					<Fix>true</Fix>
-				</Parameter>
-				<DecayParticle Name="D0" Helicity="0"/>
-				<SubSystem>
-				<DecayProducts>
-					<Particle Name="K+" FinalState="2"  Helicity="0"/>
-					<Particle Name="K-" FinalState="1"  Helicity="0"/>
-					<Particle Name="K_S0" FinalState="0"  Helicity="0"/>
-				</DecayProducts>
-			</SubSystem>
-			</Resonance>
-		</Amplitude>
-		<Amplitude Name="BkgPhi(1020)">
-			<Parameter Type="Magnitude" Name="Magnitude_BkgPhi(1020)">
-				<Value>0.6231278542584409</Value>
-				<Min>-3</Min>
-				<Max>3</Max>
-				<Fix>true</Fix>
-			</Parameter>
-			<Parameter Type="Phase" Name="Phase_BkgPhi(1020)">
-				<Value>1.418348299811086</Value>
-				<Min>-100</Min>
-				<Max>100</Max>
-				<Fix>true</Fix>
-			</Parameter>
-			<Resonance Name="phiToKK">
-				<Parameter Type="Magnitude" Name="Magnitude_phiToKK">
-					<Value>1.0</Value>
-					<Fix>true</Fix>
-				</Parameter>
-				<Parameter Type="Phase" Name="Phase_phiToKK">
-					<Value>0.0</Value>
-					<Fix>true</Fix>
-				</Parameter>
-				<DecayParticle Name="Bkgphi(1020)" Helicity="0"/>
-				<SubSystem>
-					<RecoilSystem FinalState="0" />
-					<DecayProducts>
-						<Particle Name="K+" FinalState="2"  Helicity="0"/>
-						<Particle Name="K-" FinalState="1"  Helicity="0"/>
-					</DecayProducts>
-				</SubSystem>
-			</Resonance>
-		</Amplitude>
-		<Amplitude Name="BkgSomething">
-			<Parameter Type="Magnitude" Name="Magnitude_BkgSomething">
-				<Value>0.3851766722981866</Value>
-				<Min>-3</Min>
-				<Max>3</Max>
-				<Fix>true</Fix>
-			</Parameter>
-			<Parameter Type="Phase" Name="Phase_BkgSomething">
-				<Value>-1.379073327661814</Value>
-				<Min>-100</Min>
-				<Max>100</Max>
-				<Fix>true</Fix>
-			</Parameter>
-			<Resonance Name="SomethingToKK">
-				<Parameter Type="Magnitude" Name="Magnitude_somethingToKK">
-					<Value>1.0</Value>
-					<Fix>true</Fix>
-				</Parameter>
-				<Parameter Type="Phase" Name="Phase_somethingToKK">
-					<Value>0.0</Value>
-					<Fix>true</Fix>
-				</Parameter>
-				<DecayParticle Name="something" Helicity="0"/>
-				<SubSystem>
-					<RecoilSystem FinalState="0" />
-					<DecayProducts>
-						<Particle Name="K+" FinalState="2"  Helicity="0"/>
-						<Particle Name="K-" FinalState="1"  Helicity="0"/>
-					</DecayProducts>
-				</SubSystem>
-			</Resonance>
-		</Amplitude>
-	</CoherentIntensity>
-</IncoherentIntensity>
+		<Parameter Class="Double" Type="Phase" Name="Phase_a00ToKK">
+		  <Value>0.0</Value>
+		  <Fix>true</Fix>
+		</Parameter>
+		<DecayParticle Name="a0(980)0" Helicity="0"/>
+		<RecoilSystem FinalState="0" />
+		<DecayProducts>
+		  <Particle Name="K-" FinalState="1"  Helicity="0"/>
+		  <Particle Name="K+" FinalState="2"  Helicity="0"/>
+		</DecayProducts>
+	  </PartialAmplitude>
+	</Amplitude>
+	<Amplitude Class="SequentialPartialAmplitude" Name="a0(980)+">
+	  <Parameter Class="Double" Type="Magnitude" Name="Magnitude_a0(980)+">
+		<Value>0.6</Value>
+		<Min>-3</Min>
+		<Max>3</Max>
+		<Fix>false</Fix>
+	  </Parameter>
+	  <Parameter Class="Double" Type="Phase" Name="Phase_a0(980)+">
+		<Value>-3.0</Value>
+		<Min>-100</Min>
+		<Max>100</Max>
+		<Fix>false</Fix>
+	  </Parameter>
+	  <PartialAmplitude Class="HelicityDecay" Name="a0+ToKK">
+		<Parameter Class="Double" Type="Magnitude" Name="Magnitude_a0+ToKK">
+		  <Value>1.0</Value>
+		  <Fix>true</Fix>
+		</Parameter>
+		<Parameter Class="Double" Type="Phase" Name="Phase_a0+ToKK">
+		  <Value>0.0</Value>
+		  <Fix>true</Fix>
+		</Parameter>
+		<DecayParticle Name="a0(980)+" Helicity="0"/>
+		<RecoilSystem FinalState="1" />
+		<DecayProducts>
+		  <Particle Name="K_S0" FinalState="0"  Helicity="0"/>
+		  <Particle Name="K+" FinalState="2"  Helicity="0"/>
+		</DecayProducts>
+	  </PartialAmplitude>
+	</Amplitude>
+	<Amplitude Class="SequentialPartialAmplitude" Name="phi(1020)">
+	  <Parameter Class="Double" Type="Magnitude" Name="Magnitude_phi(1020)">
+		<Value>0.7</Value>
+		<Min>-3</Min>
+		<Max>3</Max>
+		<Fix>false</Fix>
+	  </Parameter>
+	  <Parameter Class="Double" Type="Phase" Name="Phase_phi(1020)">
+		<Value>2.0</Value>
+		<Min>-100</Min>
+		<Max>100</Max>
+		<Fix>false</Fix>
+	  </Parameter>
+	  <PartialAmplitude Class="HelicityDecay" Name="phiToKK">
+		<Parameter Class="Double" Type="Magnitude" Name="Magnitude_phiToKK">
+		  <Value>1.0</Value>
+		  <Fix>true</Fix>
+		</Magnitude>
+		<Parameter Class="Double" Type="Phase" Name="Phase_phiToKK">
+		  <Value>0.0</Value>
+		  <Fix>true</Fix>
+		</Parameter>
+		<DecayParticle Name="phi(1020)" Helicity="0"/>
+		<RecoilSystem FinalState="0" />
+		<DecayProducts>
+		  <Particle Name="K-" FinalState="1"  Helicity="0"/>
+		  <Particle Name="K+" FinalState="2"  Helicity="0"/>
+		</DecayProducts>
+	  </PartialAmplitude>
+	</Amplitude>
+	<Amplitude Class="SequentialPartialAmplitude" Name="a2(1320)-">
+	  <Parameter Class="Double" Type="Magnitude" Name="Magnitude_a2(1320)-">
+		<Value>0.0000001</Value>
+		<Min>-3</Min>
+		<Max>3</Max>
+		<Fix>false</Fix>
+	  </Parameter>
+	  <Parameter Class="Double" Type="Phase" Name="Phase_a2(1320)-">
+		<Value>0.0</Value>
+		<Min>-100</Min>
+		<Max>100</Max>
+		<Fix>false</Fix>
+	  </Parameter>
+	  <PartialAmplitude Class="HelicityDecay" Name="a2(1320)MinusToKK">
+		<Parameter Class="Double" Type="Magnitude" Name="Magnitude_a2(1320)MinusToKK">
+		  <Value>1.0</Value>
+		  <Fix>true</Fix>
+		</Parameter>
+		<Parameter Class="Double" Type="Phase" Name="Phase_a2(1320)MinusToKK">
+		  <Value>0.0</Value>
+		  <Fix>true</Fix>
+		</Parameter>
+		<DecayParticle Name="a2(1320)-" Helicity="0"/>
+		<RecoilSystem FinalState="2" />
+		<DecayProducts>
+		  <Particle Name="K_S0" FinalState="0"  Helicity="0"/>
+		  <Particle Name="K-" FinalState="1"  Helicity="0"/>
+		</DecayProducts>
+	  </PartialAmplitude>
+	</Amplitude>
+	<Amplitude Class="SequentialPartialAmplitude" Name="a0(980)0_CP">
+	  <PreFactor Magnitude="0.0591608" Phase="-0.2618" />
+	  <Parameter Class="Double" Type="Magnitude" Name="Magnitude_a0(980)0">
+		<Value>1.0</Value>
+		<Fix>true</Fix>
+	  </Parameter>
+	  <Parameter Class="Double" Type="Phase" Name="Phase_a0(980)0">
+		<Value>0.0</Value>
+		<Fix>true</Fix>
+	  </Parameter>
+	  <PartialAmplitude Class="HelicityDecay" Name="a00ToKK">
+		<Parameter Class="Double" Type="Magnitude" Name="Magnitude_a00ToKK">
+		  <Value>1.0</Value>
+		  <Fix>true</Fix>
+		</Parameter>
+		<Parameter Class="Double" Type="Phase" Name="Phase_a00ToKK">
+		  <Value>0.0</Value>
+		  <Fix>true</Fix>
+		</Parameter>
+		<DecayParticle Name="a0(980)0" Helicity="0"/>
+		<RecoilSystem FinalState="0" />
+		<DecayProducts>
+		  <Particle Name="K+" FinalState="2"  Helicity="0"/>
+		  <Particle Name="K-" FinalState="1"  Helicity="0"/>
+		</DecayProducts>
+	  </PartialAmplitude>
+	</Amplitude>
+	<Amplitude Class="SequentialPartialAmplitude" Name="a0(980)+_CP">
+	  <PreFactor Magnitude="0.0591608" Phase="-0.2618" />
+	  <Parameter Class="Double" Type="Magnitude" Name="Magnitude_a0(980)+">
+		<Value>0.6</Value>
+		<Min>-3</Min>
+		<Max>3</Max>
+		<Fix>false</Fix>
+	  </Parameter>
+	  <Parameter Class="Double" Type="Phase" Name="Phase_a0(980)+">
+		<Value>-3.0</Value>
+		<Min>-100</Min>
+		<Max>100</Max>
+		<Fix>false</Fix>
+	  </Parameter>
+	  <PartialAmplitude Class="HelicityDecay" Name="a0+ToKK_CP">
+		<Parameter Class="Double" Type="Magnitude" Name="Magnitude_a0+ToKK">
+		  <Value>1.0</Value>
+		  <Fix>true</Fix>
+		</Parameter>
+		<Parameter Class="Double" Type="Phase" Name="Phase_a0+ToKK">
+		  <Value>0.0</Value>
+		  <Fix>true</Fix>
+		</Parameter>
+		<DecayParticle Name="a0(980)+" Helicity="0"/>
+		<RecoilSystem FinalState="2" />
+		<DecayProducts>
+		  <Particle Name="K_S0" FinalState="0"  Helicity="0"/>
+		  <Particle Name="K-" FinalState="1"  Helicity="0"/>
+		</DecayProducts>
+	  </PartialAmplitude>
+	</Amplitude>
+	<Amplitude Class="SequentialPartialAmplitude" Name="phi(1020)_CP">
+	  <PreFactor Magnitude="0.0591608" Phase="-0.2618" />
+	  <Parameter Class="Double" Type="Magnitude" Name="Magnitude_phi(1020)">
+		<Value>0.7</Value>
+		<Min>-3</Min>
+		<Max>3</Max>
+		<Fix>false</Fix>
+	  </Parameter>
+	  <Parameter Class="Double" Type="Phase" Name="Phase_phi(1020)">
+		<Value>2.0</Value>
+		<Min>-100</Min>
+		<Max>100</Max>
+		<Fix>false</Fix>
+	  </Parameter>
+	  <PartialAmplitude Class="HelicityDecay" Name="phiToKK_CP">
+		<Parameter Class="Double" Type="Magnitude" Name="Magnitude_phiToKK">
+		  <Value>1.0</Value>
+		  <Fix>true</Fix>
+		</Parameter>
+		<Parameter Class="Double" Type="Phase" Name="Phase_phiToKK">
+		  <Value>0.0</Value>
+		  <Fix>true</Fix>
+		</Parameter>
+		<DecayParticle Name="phi(1020)" Helicity="0"/>
+		<RecoilSystem FinalState="0" />
+		<DecayProducts>
+		  <Particle Name="K+" FinalState="2"  Helicity="0"/>
+		  <Particle Name="K-" FinalState="1"  Helicity="0"/>
+		</DecayProducts>
+	  </PartialAmplitude>
+	</Amplitude>
+	<Amplitude Class="SequentialPartialAmplitude" Name="a2(1320)-_CP">
+	  <PreFactor Magnitude="0.0591608" Phase="-0.2618" />
+	  <Parameter Class="Double" Type="Magnitude" Name="Magnitude_a2(1320)-">
+		<Value>0.0000001</Value>
+		<Min>-3</Min>
+		<Max>3</Max>
+		<Fix>false</Fix>
+	  </Parameter>
+	  <Parameter Class="Double" Type="Phase" Name="Phase_a2(1320)-">
+		<Value>0.0</Value>
+		<Min>-100</Min>
+		<Max>100</Max>
+		<Fix>false</Fix>
+	  </Parameter>
+	  <PartialAmplitude Class="HelicityDecay" Name="a2(1320)MinusToKK_CP">
+		<Parameter Class="Double" Type="Magnitude" Name="Magnitude_a2(1320)MinusToKK">
+		  <Value>1.0</Value>
+		  <Fix>true</Fix>
+		</Parameter>
+		<Parameter Class="Double" Type="Phase" Name="Phase_a2(1320)MinusToKK">
+		  <Value>0.0</Value>
+		  <Fix>true</Fix>
+		</Parameter>
+		<DecayParticle Name="a2(1320)-" Helicity="0"/>
+		<RecoilSystem FinalState="1" />
+		<DecayProducts>
+		  <Particle Name="K_S0" FinalState="0"  Helicity="0"/>
+		  <Particle Name="K+" FinalState="2"  Helicity="0"/>
+		</DecayProducts>
+	  </PartialAmplitude>
+	</Amplitude>
+  </Intensity>
+  <!-- Background  model -->
+  <Intensity Class="Coherent" Name="BkgD0toKSK+K-">
+	<Parameter Class="Double" Type="Strength" Name="strength_bkgd0tokkk">
+	  <Value>0.036335</Value>
+	  <Fix>true</Fix>
+	</Strength>
+	<Amplitude Class="SequentialPartialAmplitude" Name="BkgNonRes">
+	  <Parameter Class="Double" Type="Magnitude" Name="Magnitude_BkgNonRes">
+		<Value>1.0</Value>
+		<Min>-3</Min>
+		<Max>3</Max>
+		<Fix>true</Fix>
+	  </Parameter>
+	  <Parameter Class="Double" Type="Phase" Name="Phase_BkgNonRes">
+		<Value>0.0</Value>
+		<Min>-100</Min>
+		<Max>100</Max>
+		<Fix>true</Fix>
+	  </Parameter>
+	  <PartialAmplitude Class="NonResonant" Name="nonRes3K">
+		<Parameter Class="Double" Type="Magnitude" Name="Magnitude_nonRes3K">
+		  <Value>1.0</Value>
+		  <Fix>true</Fix>
+		</Parameter>
+		<Parameter Class="Double" Type="Phase" Name="Phase_nonRes3K">
+		  <Value>0.0</Value>
+		  <Fix>true</Fix>
+		</Parameter>
+	  </PartialAmplitude>
+	</Amplitude>
+	<Amplitude Class="SequentialPartialAmplitude" Name="BkgPhi(1020)">
+	  <Parameter Class="Double" Type="Magnitude" Name="Magnitude_BkgPhi(1020)">
+		<Value>0.6231278542584409</Value>
+		<Min>-3</Min>
+		<Max>3</Max>
+		<Fix>true</Fix>
+	  </Parameter>
+	  <Parameter Class="Double" Type="Phase" Name="Phase_BkgPhi(1020)">
+		<Value>1.418348299811086</Value>
+		<Min>-100</Min>
+		<Max>100</Max>
+		<Fix>true</Fix>
+	  </Parameter>
+	  <PartialAmplitude Class="HelicityDecay" Name="phiToKK">
+		<Parameter Class="Double" Type="Magnitude" Name="Magnitude_phiToKK">
+		  <Value>1.0</Value>
+		  <Fix>true</Fix>
+		</Parameter>
+		<Parameter Class="Double" Type="Phase" Name="Phase_phiToKK">
+		  <Value>0.0</Value>
+		  <Fix>true</Fix>
+		</Parameter>
+		<DecayParticle Name="Bkgphi(1020)" Helicity="0"/>
+		<RecoilSystem FinalState="0" />
+		<DecayProducts>
+		  <Particle Name="K+" FinalState="2"  Helicity="0"/>
+		  <Particle Name="K-" FinalState="1"  Helicity="0"/>
+		</DecayProducts>
+	  </PartialAmplitude>
+	</Amplitude>
+	<Amplitude Class="SequentialPartialAmplitude" Name="BkgSomething">
+	  <Parameter Class="Double" Type="Magnitude" Name="Magnitude_BkgSomething">
+		<Value>0.3851766722981866</Value>
+		<Min>-3</Min>
+		<Max>3</Max>
+		<Fix>true</Fix>
+	  </Parameter>
+	  <Parameter Class="Double" Type="Phase" Name="Phase_BkgSomething">
+		<Value>-1.379073327661814</Value>
+		<Min>-100</Min>
+		<Max>100</Max>
+		<Fix>true</Fix>
+	  </Parameter>
+	  <PartialAmplitude Class="HelicityDecay" Name="SomethingToKK">
+		<Parameter Class="Double" Type="Magnitude" Name="Magnitude_somethingToKK">
+		  <Value>1.0</Value>
+		  <Fix>true</Fix>
+		</Parameter>
+		<Parameter Class="Double" Type="Phase" Name="Phase_somethingToKK">
+		  <Value>0.0</Value>
+		  <Fix>true</Fix>
+		</Parameter>
+		<DecayParticle Name="something" Helicity="0"/>
+		<RecoilSystem FinalState="0" />
+		<DecayProducts>
+		  <Particle Name="K+" FinalState="2"  Helicity="0"/>
+		  <Particle Name="K-" FinalState="1"  Helicity="0"/>
+		</DecayProducts>
+	  </PartialAmplitude>
+	</Amplitude>
+  </Intensity>
+</Intensity>

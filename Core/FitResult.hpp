@@ -2,16 +2,10 @@
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
-//! Optimizer Interface Base-Class.
-/*! \class Optimizer
- * @file Optimizer.hpp
- * This class provides the interface to (external) optimization libraries or
- * routines. As it is pure virtual, one needs at least one implementation to
- * provide an optimizer for the analysis which varies free model-parameters. If
- * a new optimizer is derived from and fulfills this base-class, no change in
- * other modules are necessary to work with the new optimizer library or
- * routine.
- */
+///
+/// \file
+/// Base class FitResult.
+///
 
 #ifndef _FITRESULT_HPP_
 #define _FITRESULT_HPP_
@@ -37,67 +31,68 @@ namespace ComPWA {
 
 class FitResult {
 public:
-  FitResult() : time(0), sumFractions(0.0), sumFractionsError(0.0) {};
+  FitResult() : Time(0), SumFractions(0.0), SumFractionsError(0.0) {};
   
   virtual ~FitResult(){};
   
   /// Set list of initial parameters
-  virtual void SetInitialParameters(ParameterList iniPars) {
-    initialParameters.DeepCopy(iniPars);
+  virtual void setInitialParameters(ParameterList iniPars) {
+    InitialParameters.DeepCopy(iniPars);
   }
   
   /// Get list of initial parameters
-  virtual ParameterList GetInitialParameters() { return initialParameters; }
+  virtual ParameterList initialParameters() { return InitialParameters; }
   
   /// Set list of final fit parameters
-  virtual void SetFinalParameters(ParameterList &finPars);
+  virtual void setFinalParameters(ParameterList &finPars);
   
   /// Get list of final fit parameters
-  virtual ParameterList GetFinalParameters() { return finalParameters; }
+  virtual ParameterList finalParameters() { return FinalParameters; }
   
   /// Set list of true parameters
-  virtual void SetTrueParameters(ParameterList &truePars);
+  virtual void setTrueParameters(ParameterList &truePars);
   
   /// Get list of true parameters
-  virtual ParameterList GetTrueParameters() { return trueParameters; }
+  virtual ParameterList trueParameters() { return TrueParameters; }
   
   /// Set processing time for minimization
-  virtual void SetTime(double t) { time = t; }
+  virtual void setTime(double t) { Time = t; }
   
   /// Get processing time for minimization
-  virtual double GetTime() const { return time; }
+  virtual double time() const { return Time; }
   
   /// Get fit result (e.g. likelihood or chi2)
-  virtual double GetResult() = 0;
+  virtual double result() = 0;
   
   /// Set list with fit fractions
-  virtual void SetFitFractions(ParameterList &list);
+  virtual void setFitFractions(ParameterList &list);
   
   /// Get list of fit fractions
-  virtual ParameterList GetFitFractions() {
-    return _fitFractions;
+  virtual ParameterList fitFractions() {
+    return FitFractions;
   }
 
   /// Table with fit parameters
-  virtual void PrintFitParameters(TableFormater *tableResult);
+  virtual void printFitParameters(TableFormater *tableResult);
   
   /// Table with fit fractions
-  virtual void PrintFitFractions(TableFormater *tab);
+  virtual void printFitFractions(TableFormater *tab);
   
   /// Print fit result
-  virtual void Print(std::string opt = "");
+  virtual void print(std::string opt = "");
 
-  virtual void WriteTeX(std::string filename){};
-  virtual void WriteXML(std::string filename){};
-  virtual void WriteText(std::string filename);
-  virtual void WriteSimpleText(std::string filename);
+  virtual void writeTeX(std::string filename){};
+  virtual void writeXML(std::string filename){};
+  virtual void writeText(std::string filename);
+  virtual void writeSimpleText(std::string filename);
   virtual operator double() const = 0;
   friend std::ostream &operator<<(std::ostream &out, FitResult &fitres) {
-    out << fitres.GetResult();
+    out << fitres.result();
     return out;
   };
+  
   /// Any errors during minimization?
-  virtual bool HasFailed() { return 0; };
+  virtual bool hasFailed() { return 0; };
 
 protected:
   virtual double shiftAngle(double v);
@@ -106,38 +101,38 @@ protected:
 
   virtual double GetCorr(unsigned int n, unsigned int t) { return -9000; };
   
-  //! Time for minimization
-  double time;
+  /// Time for minimization
+  double Time;
   
-  //! Initial list of parameters
-  ParameterList initialParameters;
+  /// Initial list of parameters
+  ParameterList InitialParameters;
   
-  //! Final list of parameters
-  ParameterList finalParameters;
+  /// Final list of parameters
+  ParameterList FinalParameters;
   
-  //! True list of parameters
-  ParameterList trueParameters;
+  /// True list of parameters
+  ParameterList TrueParameters;
   
-  ParameterList _fitFractions;
+  ParameterList FitFractions;
   
-  //! List with fit fractions and errors
-  double sumFractions;
-  double sumFractionsError;
+  /// List with fit fractions and errors
+  double SumFractions;
+  double SumFractionsError;
 
 private:
   friend class boost::serialization::access;
   template <class archive>
   void serialize(archive &ar, const unsigned int version) {
-    ar &BOOST_SERIALIZATION_NVP(time);
-    ar &BOOST_SERIALIZATION_NVP(initialParameters);
-    ar &BOOST_SERIALIZATION_NVP(finalParameters);
-    ar &BOOST_SERIALIZATION_NVP(trueParameters);
-    ar &BOOST_SERIALIZATION_NVP(_fitFractions);
-    ar &BOOST_SERIALIZATION_NVP(sumFractions);
-    ar &BOOST_SERIALIZATION_NVP(sumFractionsError);
+    ar &BOOST_SERIALIZATION_NVP(Time);
+    ar &BOOST_SERIALIZATION_NVP(InitialParameters);
+    ar &BOOST_SERIALIZATION_NVP(FinalParameters);
+    ar &BOOST_SERIALIZATION_NVP(TrueParameters);
+    ar &BOOST_SERIALIZATION_NVP(FitFractions);
+    ar &BOOST_SERIALIZATION_NVP(SumFractions);
+    ar &BOOST_SERIALIZATION_NVP(SumFractionsError);
   }
 };
 BOOST_SERIALIZATION_ASSUME_ABSTRACT(FitResult);
-} /* namespace ComPWA */
+} // ns::ComPWA
 
 #endif

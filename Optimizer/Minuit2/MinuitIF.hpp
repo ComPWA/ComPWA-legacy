@@ -2,16 +2,13 @@
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
-//! Wrapper of the Minuit2 Optimizer library.
-/*! \class MinuitIF
- * @file MinuitIF.hpp
- * This class provides a wrapper around the Minuit2 library. It fulfills the
- * Optimizer interface to be easily adapted to other modules. The data needs to
- * be provided with the ControlParameter interface.
- */
+///
+/// \file
+/// Minuit interface
+///
 
-#ifndef _OIFMINUIT_HPP
-#define _OIFMINUIT_HPP
+#ifndef _MINUITIF_HPP
+#define _MINUITIF_HPP
 
 #include <vector>
 #include <memory>
@@ -29,27 +26,38 @@ namespace ComPWA {
 namespace Optimizer {
 namespace Minuit2 {
 
+///
+/// \class MinuitIF
+/// Wrapper of the Minuit2 Optimizer library. This class provides a wrapper
+/// around the Minuit2 library. It fulfills the
+/// Optimizer interface to be easily adapted to other modules. The data needs to
+/// be provided with the ControlParameter interface.
+///
 class MinuitIF : public Optimizer {
 
 public:
-  /// Default Constructor (0x0)
   MinuitIF(std::shared_ptr<ComPWA::IEstimator> esti, ParameterList& par);
+  
   virtual std::shared_ptr<FitResult> exec(ParameterList& par);
 
-  /** Destructor */
   virtual ~MinuitIF();
 
-  virtual void SetHesse(bool onoff) { enableHesse = onoff; }
-  virtual bool GetHesse() { return enableHesse; }
-  virtual void SetMinos(bool onoff) { enableMinos = onoff; }
-  virtual bool GetMinos() { return enableMinos; }
+  virtual void setUseHesse(bool onoff) { UseHesse = onoff; }
+  
+  virtual bool useHesse() { return UseHesse; }
+  
+  virtual void setUseMinos(bool onoff) { UseMinos = onoff; }
+  
+  virtual bool useMinos() { return UseMinos; }
 
 protected:
-private:
-  ROOT::Minuit2::MinuitFcn _myFcn;
-  std::shared_ptr<ComPWA::IEstimator> estimator;
-  bool enableHesse;
-  bool enableMinos;
+  ROOT::Minuit2::MinuitFcn Function;
+  
+  std::shared_ptr<ComPWA::IEstimator> Estimator;
+  
+  bool UseHesse;
+  
+  bool UseMinos;
 };
 
 class MinuitStrategy : public ROOT::Minuit2::MnStrategy {
@@ -85,7 +93,7 @@ private:
   friend class boost::serialization::access;
   template <class archive>
   void serialize(archive &ar, const unsigned int version) {
-    //		ar & BOOST_SERIALIZATION_NVP(fStrategy);
+    //    ar & BOOST_SERIALIZATION_NVP(fStrategy);
     ar &BOOST_SERIALIZATION_NVP(fGradNCyc);
     ar &BOOST_SERIALIZATION_NVP(fGradTlrStp);
     ar &BOOST_SERIALIZATION_NVP(fGradTlr);
@@ -96,8 +104,8 @@ private:
   }
 };
 
-} /* namespace Minuit2 */
-} /* namespace Optimizer */
-} /* namespace ComPWA */
+} // ns::Minuit2
+} // ns::Optimizer
+} // ns::ComPWA
 
-#endif /* _OIFMinuit_HPP */
+#endif

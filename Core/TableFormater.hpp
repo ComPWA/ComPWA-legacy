@@ -2,8 +2,9 @@
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
-#ifndef TABLEFORMATER_CXX_
-#define TABLEFORMATER_CXX_
+#ifndef TABLEFORMATER_HPP_
+#define TABLEFORMATER_HPP_
+
 #include <iostream>
 #include <iomanip>
 #include <vector>
@@ -19,44 +20,53 @@ namespace ComPWA {
 class TableFormater {
 public:
   TableFormater(std::ostream *output)
-      : out(output), curRow(0), curCol(0), totalWidth(0) {
+      : OutputStream(output), CurRow(0), CurCol(0), TotalWidth(0) {
     sep = "|";
     pm = "+-";
     firstSep = sep;
     lastSep = sep;
   };
+  
   virtual ~TableFormater() {}
-  virtual void Reset();
+  
+  virtual void reset();
+  
   virtual void delim();
+  
   virtual void footer();
+  
   virtual void header();
+  
   virtual void addColumn(std::string title, unsigned int fixlength = 999);
+  
   void trimString(std::string &src);
-  TableFormater &operator<<(DoubleParameter in);
+  
+  TableFormater &operator<<(FitParameter in);
+  
   template <typename T> TableFormater &operator<<(T in) {
-    if (curCol == 0)
-      *out << firstSep + " ";
+    if (CurCol == 0)
+      *OutputStream << firstSep + " ";
     else
-      *out << " " << sep << " ";
-    *out << std::setw(columnWidth[curCol]) << in;
-    curCol++;
-    if (curCol == columnWidth.size()) {
-      *out << " " << lastSep << std::endl;
-      curRow++;
-      curCol = 0;
+      *OutputStream << " " << sep << " ";
+    *OutputStream << std::setw(ColumnWidth.at(CurCol)) << in;
+    CurCol++;
+    if (CurCol == ColumnWidth.size()) {
+      *OutputStream << " " << lastSep << std::endl;
+      CurRow++;
+      CurCol = 0;
       //			delim();
     }
     return *this;
   };
 
 protected:
-  std::ostream *out;
-  std::vector<unsigned int> columnWidth;
-  std::vector<std::string> columnTitle;
+  std::ostream *OutputStream;
+  std::vector<unsigned int> ColumnWidth;
+  std::vector<std::string> ColumnTitle;
 
-  unsigned int curRow;
-  unsigned int curCol;
-  unsigned int totalWidth;
+  unsigned int CurRow;
+  unsigned int CurCol;
+  unsigned int TotalWidth;
   std::string sep;
   std::string firstSep;
   std::string lastSep;
@@ -72,6 +82,6 @@ public:
   virtual void delim();
 };
 
-} /* namespace ComPWA */
+} // ns::ComPWA
 
-#endif /* TABLEFORMATER_CXX_ */
+#endif
