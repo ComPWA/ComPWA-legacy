@@ -7,7 +7,7 @@
 		<QuantumNumber Class="Spin" Type="Spin" Value="1"/>
 		<QuantumNumber Class="Int" Type="Charge" Value="0"/>
 		<QuantumNumber Class="Int" Type="Parity" Value="-1"/>
-		<QuantumNumber Class="Int" Type="Cparity" Value="1"/>
+		<QuantumNumber Class="Int" Type="Cparity" Value="-1"/>
 	</Particle>
 
 	<!-- Leptons -->
