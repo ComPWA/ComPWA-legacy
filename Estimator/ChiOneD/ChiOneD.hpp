@@ -33,11 +33,11 @@ public:
   ChiOneD(std::shared_ptr<Kinematics> kin, std::shared_ptr<AmpIntensity>,
           std::shared_ptr<DataReader::Data>);
 
-  virtual double ControlParameter(ParameterList &minPar);
+  virtual double controlParameter(ParameterList &minPar);
 
-  virtual bool HasTree() { return false; }
+  virtual bool hasTree() { return false; }
   
-  virtual std::shared_ptr<FunctionTree> GetTree() {
+  virtual std::shared_ptr<FunctionTree> tree() {
     return std::shared_ptr<FunctionTree>();
   }
   

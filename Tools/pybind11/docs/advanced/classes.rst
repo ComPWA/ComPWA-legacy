@@ -361,8 +361,14 @@ Custom constructors
 
 The syntax for binding constructors was previously introduced, but it only
 works when a constructor of the appropriate arguments actually exists on the
-C++ side.  To extend this to more general cases, pybind11 makes it possible
-to bind factory functions as constructors. For example, suppose you have a
+C++ side.  To extend this to more general cases, pybind11 offers two different
+approaches: binding factory functions, and placement-new creation.
+
+Factory function constructors
+-----------------------------
+
+It is possible to expose a Python-side constructor from a C++ function that
+returns a new object by value or pointer.  For example, suppose you have a
 class like this:
 
 .. code-block:: cpp
@@ -374,9 +380,6 @@ class like this:
         // Factory function:
         static Example create(int a) { return Example(a); }
     };
-
-    py::class_<Example>(m, "Example")
-        .def(py::init(&Example::create));
 
 While it is possible to create a straightforward binding of the static
 ``create`` method, it may sometimes be preferable to expose it as a constructor
@@ -459,6 +462,35 @@ an alias:
         // *Always* returns an alias instance (like py::init_alias<>())
         .def(py::init([]() { return new PyExample(); }))
         ;
+
+Low-level placement-new construction
+------------------------------------
+
+A second approach for creating new instances use C++ placement new to construct
+an object in-place in preallocated memory.  To do this, you simply bind a
+method name ``__init__`` that takes the class instance as the first argument by
+pointer or reference, then uses a placement-new constructor to construct the
+object in the pre-allocated (but uninitialized) memory.
+
+For example, instead of:
+
+.. code-block:: cpp
+
+    py::class_<Example>(m, "Example")
+        .def(py::init<int>());
+
+you could equivalently write:
+
+.. code-block:: cpp
+
+    py::class_<Example>(m, "Example")
+        .def("__init__",
+            [](Example &instance, int arg) {
+                new (&instance) Example(arg);
+            }
+        );
+
+which will invoke the constructor in-place at the pre-allocated memory.
 
 Brace initialization
 --------------------
@@ -679,7 +711,7 @@ provided. Suppose the class in question has the following signature:
         int m_extra = 0;
     };
 
-Pickling support in Python is enabled by defining the ``__setstate__`` and
+Pickling support in Python is enable by defining the ``__setstate__`` and
 ``__getstate__`` methods [#f3]_. For pybind11 classes, use ``py::pickle()``
 to bind these two functions:
 

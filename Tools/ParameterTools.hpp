@@ -7,6 +7,12 @@
 /// Collection of useful routines to modify ParameterLists
 ///
 
+#include <vector>
+#include <memory>
+#include <cassert>
+
+#include "Core/ParameterList.hpp"
+
 #ifndef ParameterTools_h
 #define ParameterTools_h
 
@@ -18,7 +24,7 @@
 inline std::string expand_user(std::string p) {
   std::string path = p;
   if (not path.empty() and path[0] == '~') {
-    assert(path.size() == 1 or path[1] == '/'); // or other error handling
+	  assert(path.size() == 1 or path[1] == '/'); // or other error handling
     char const *home = getenv("HOME");
     if (home || home == getenv("USERPROFILE")) {
       path.replace(0, 1, home);
@@ -37,16 +43,15 @@ inline std::string expand_user(std::string p) {
 ///
 inline void setErrorOnParameterList(ComPWA::ParameterList &list, double error,
                                     bool asym) {
-  for (unsigned int i = 0; i < list.GetNDouble(); i++) {
-    std::shared_ptr<ComPWA::DoubleParameter> p = list.GetDoubleParameter(i);
-    if (p->IsFixed()) {
-      p->SetError(0.0);
+  for (auto p : list.doubleParameters() ) {
+    if (p->isFixed()) {
+      p->setError(0.0);
       continue;
     }
     if (asym)
-      list.GetDoubleParameter(i)->SetError(error, error);
+      p->setError(error, error);
     else
-      list.GetDoubleParameter(i)->SetError(error);
+      p->setError(error);
   }
 }
 
@@ -55,20 +60,19 @@ inline void setErrorOnParameterList(ComPWA::ParameterList &list, double error,
 /// random value is uniformly choosen within the parameter bounds
 ///
 inline void randomStartValues(ComPWA::ParameterList &fitPar) {
-  for (unsigned int i = 0; i < fitPar.GetNDouble(); i++) {
-    std::shared_ptr<ComPWA::DoubleParameter> p = fitPar.GetDoubleParameter(i);
-    if (p->IsFixed())
+  std::cout << "Randomizing parameter list. New list:" <<std::endl;
+  for (auto p : fitPar.doubleParameters() ) {
+    if (p->isFixed())
       continue;
-    double min = -999, max = 999;
-    if (p->HasBounds()) {
-      min = p->GetMinValue();
-      max = p->GetMaxValue();
+    std::pair<double, double> bounds(-999,-999);
+    if (p->hasBounds()) {
+      bounds = p->bounds();
     }
-    p->SetValue(gRandom->Uniform(min, max));
+    p->setValue(gRandom->Uniform(bounds.first, bounds.second));
+    std::cout << p->to_str() << std::endl;
   }
-  std::cout << "Randomizing parameter list. New list:" << fitPar << std::endl;
   return;
 }
 
 
-#endif /* ParameterTools_h */
+#endif

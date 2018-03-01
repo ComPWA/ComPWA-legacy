@@ -15,7 +15,7 @@
 
 #include "Core/Event.hpp"
 #include "Core/Particle.hpp"
-#include "Core/Parameter.hpp"
+#include "Core/FitParameter.hpp"
 #include "Core/ParameterList.hpp"
 #include "Core/AmpIntensity.hpp"
 
@@ -37,37 +37,42 @@ public:
   virtual ~RootPlot() {}
 
   void SetData(std::shared_ptr<ComPWA::DataReader::Data> sample) {
-    s_data = sample->GetDataPoints(kin_);
+    s_data = sample->dataPoints(kin_);
   }
 
   void SetPhspSample(std::shared_ptr<ComPWA::DataReader::Data> sample) {
-    s_phsp = sample->GetDataPoints(kin_);
+    s_phsp = sample->dataPoints(kin_);
   }
 
-  void SetData(std::vector<dataPoint> &points) { s_data = points; }
+  void SetData(std::vector<DataPoint> &points) { s_data = points; }
 
-  void SetPhspSample(std::vector<dataPoint> &points) { s_phsp = points; }
+  void SetPhspSample(std::vector<DataPoint> &points) { s_phsp = points; }
 
   void SetFitAmp(std::shared_ptr<ComPWA::AmpIntensity> intens);
 
   /// Add sub component of the Intensity. For each event in the phase space
   /// sample each component is evaluated and its value is added to the TTree.
-  void AddComponent(std::string name, std::string title = "component") {
+  void AddComponent(std::string name, std::string title = "") {
+    std::string t = title;
+    if (t == "")
+      t = name;
+    
     if (!_plotComponents.size())
       throw std::runtime_error("PlotData::DrawComponent() | AmpIntensity not "
                                "set! Set the full model first using "
                                "SetFitAmp()!");
+    
     std::shared_ptr<ComPWA::AmpIntensity> comp;
     try {
-      comp = _plotComponents.at(0)->GetComponent(name);
+        comp = _plotComponents.at(0)->component(name);
     } catch (std::exception &ex) {
       LOG(error) << "DalitzPlot::DrawComponent() | Component " << name
                  << " not found in AmpIntensity "
-                 << _plotComponents.at(0)->Name() << ".";
+                 << _plotComponents.at(0)->name() << ".";
       return;
     }
     _plotComponents.push_back(comp);
-    _componentNames.push_back(title);
+    _componentNames.push_back(t);
   }
 
   /// Create the TTree's, fill and write them to \p fileName.
@@ -84,9 +89,9 @@ protected:
   
   std::vector<std::string> _componentNames;
 
-  std::vector<dataPoint> s_data;
+  std::vector<DataPoint> s_data;
   
-  std::vector<dataPoint> s_phsp;
+  std::vector<DataPoint> s_phsp;
 };
 } // ns::Tools
 } // ns::ComPWA

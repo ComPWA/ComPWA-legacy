@@ -9,18 +9,18 @@
 
 using namespace ComPWA;
 
-double Kinematics::GetPhspVolume() const {
-  if (!is_PS_area_calculated_) {
-    const_cast<double &>(PS_area_) = calculatePSArea();
-    const_cast<bool &>(is_PS_area_calculated_) = true;
+double Kinematics::phspVolume() const {
+  if (!HasPhspVolume) {
+    const_cast<double &>(PhspVolume) = calculatePhspVolume();
+    const_cast<bool &>(HasPhspVolume) = true;
   }
-  return PS_area_;
+  return PhspVolume;
 }
 
-void Kinematics::SetPhspVolume(double vol) {
-  PS_area_ = vol;
-  is_PS_area_calculated_ = true;
+void Kinematics::setPhspVolume(double vol) {
+  PhspVolume = vol;
+  HasPhspVolume = true;
   
-  LOG(info)<<"Kinematics::SetPhspVolume() | Setting phase space "
-  "volume to "<<std::to_string(GetPhspVolume())<<".";
+  LOG(info)<<"Kinematics::setPhspVolume() | Setting phase space "
+  "volume to "<<std::to_string(phspVolume())<<".";
 }

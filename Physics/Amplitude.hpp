@@ -2,18 +2,11 @@
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
-//! Physics Interface Base-Class.
-/*! \class Amplitude
- * @file Amplitude.hpp
- * This class provides the interface to the model which tries to describe the
- * intensity. As it is pure virtual, one needs at least one implementation to
- * provide an model for the analysis which calculates intensities for an event
- * on
- * basis model parameters. If a new physics-model is derived from and fulfills
- * this base-class, no change in other modules are necessary to work with the
- * new
- * physics module.
- */
+///
+/// \file
+/// Amplitude base class.
+///
+
 
 #ifndef AMPLITUDE_HPP_
 #define AMPLITUDE_HPP_
@@ -30,31 +23,35 @@
 namespace ComPWA {
 namespace Physics {
 
+///
+/// \class Amplitude
+/// Amplitude is a base class. It describes a complex function which resembles
+/// the transition probability of a initial state to a final state via a certain
+/// process.
+///
 class Amplitude {
 
 public:
   //============ CONSTRUCTION ==================
 
-  //! Constructor with an optional, unique name and an optional efficiency
   Amplitude(std::string name = "")
-      : _name(name), _preFactor(1, 0), _current_magnitude(0.0),
-        _current_phase(0.0){};
+      : Name(name), PreFactor(1, 0), CurrentMagnitude(0.0),
+        CurrentPhase(0.0){};
 
-  //! Destructor
-  virtual ~Amplitude() { /* nothing */
-  }
+  virtual ~Amplitude() {}
 
-  //! Function to create a full copy of the amplitude
-  virtual Amplitude *Clone(std::string newName = "") const = 0;
+  /// Create a full copy of the amplitude
+  virtual Amplitude *clone(std::string newName = "") const = 0;
 
+  virtual boost::property_tree::ptree save() const = 0;
   //======= INTEGRATION/NORMALIZATION ===========
 
   /// Check if parameters have changed and ifnormalization has to be
   /// recalculatecd.
-  bool CheckModified() const {
-    if (GetMagnitude() != _current_magnitude || GetPhase() != _current_phase) {
-      const_cast<double &>(_current_magnitude) = GetMagnitude();
-      const_cast<double &>(_current_phase) = GetPhase();
+  bool isModified() const {
+    if (magnitude() != CurrentMagnitude || phase() != CurrentPhase) {
+      const_cast<double &>(CurrentMagnitude) = magnitude();
+      const_cast<double &>(CurrentPhase) = phase();
       return true;
     }
     return false;
@@ -63,121 +60,97 @@ public:
   //================ EVALUATION =================
 
   /// Calculate value of amplitude at \p point.
-  virtual std::complex<double> Evaluate(const dataPoint &point) const = 0;
+  virtual std::complex<double> evaluate(const DataPoint &point) const = 0;
 
   //============ SET/GET =================
 
-  virtual std::string GetName() const { return _name; }
+  virtual std::string name() const { return Name; }
 
-  virtual void SetName(std::string name) { _name = name; }
+  virtual void setName(std::string name) { Name = name; }
 
-  virtual std::complex<double> GetCoefficient() const {
-    return std::polar(GetMagnitude(), GetPhase());
+  virtual std::complex<double> coefficient() const {
+    return std::polar(magnitude(), phase());
   }
 
   /// Update parameters to the values given in \p list
-  virtual void UpdateParameters(const ParameterList &par) = 0;
+  virtual void updateParameters(const ParameterList &par) = 0;
 
   /// Fill parameters to list
-  virtual void GetParameters(ParameterList &list) {
-    std::shared_ptr<DoubleParameter> tmp;
-    try { // catch BadParameter
-      tmp = list.GetDoubleParameter(_phase->GetName());
-      // catch and throw std::runtime_error due to failed parameter comparisson
-      try {
-        if (*tmp == *_phase)
-          _phase = tmp;
-      } catch (std::exception &ex) {
-        throw;
-      }
-    } catch (BadParameter &ex) {
-      list.AddParameter(_phase);
-    }
-
-    try { // catch BadParameter
-      tmp = list.GetDoubleParameter(_magnitude->GetName());
-      // catch and throw std::runtime_error due to failed parameter comparisson
-      try {
-        if (*tmp == *_magnitude)
-          _magnitude = tmp;
-      } catch (std::exception &ex) {
-        throw;
-      }
-    } catch (BadParameter &ex) {
-      list.AddParameter(_magnitude);
-    }
+  virtual void parameters(ParameterList &list) {
+    Magnitude = list.addUniqueParameter(Magnitude);
+    Phase = list.addUniqueParameter(Phase);
   }
 
   /// Fill vector with parameters.
-  /// In comparisson to GetParameters(ParameterList &list) no checks are
+  /// In comparisson to parameters(ParameterList &list) no checks are
   /// performed here. So this should be much faster.
-  virtual void GetParametersFast(std::vector<double> &list) const {
-    list.push_back(GetMagnitude());
-    list.push_back(GetPhase());
+  virtual void parametersFast(std::vector<double> &list) const {
+    list.push_back(magnitude());
+    list.push_back(phase());
   }
 
-  virtual std::shared_ptr<ComPWA::DoubleParameter> GetMagnitudeParameter() {
-    return _magnitude;
+  virtual std::shared_ptr<ComPWA::FitParameter> magnitudeParameter() {
+    return Magnitude;
   }
 
-  virtual double GetMagnitude() const {
-    return std::fabs(_magnitude->GetValue());
+  virtual double magnitude() const {
+    return std::fabs(Magnitude->value());
   }
 
   virtual void
-  SetMagnitudeParameter(std::shared_ptr<ComPWA::DoubleParameter> par) {
-    _magnitude = par;
+  setMagnitudeParameter(std::shared_ptr<ComPWA::FitParameter> par) {
+    Magnitude = par;
   }
 
-  virtual void SetMagnitude(double par) { _magnitude->SetValue(par); }
+  virtual void setMagnitude(double par) { Magnitude->setValue(par); }
 
-  virtual std::shared_ptr<ComPWA::DoubleParameter> GetPhaseParameter() {
-    return _phase;
+  virtual std::shared_ptr<ComPWA::FitParameter> phaseParameter() {
+    return Phase;
   }
 
-  virtual double GetPhase() const { return _phase->GetValue(); }
+  virtual double phase() const { return Phase->value(); }
 
-  virtual void SetPhaseParameter(std::shared_ptr<ComPWA::DoubleParameter> par) {
-    _phase = par;
+  virtual void setPhaseParameter(std::shared_ptr<ComPWA::FitParameter> par) {
+    Phase = par;
   }
 
-  virtual void SetPhase(double par) { _phase->SetValue(par); }
+  virtual void setPhase(double par) { Phase->setValue(par); }
 
-  virtual void SetPreFactor(std::complex<double> pre) { _preFactor = pre; }
+  virtual void setPreFactor(std::complex<double> pre) { PreFactor = pre; }
 
-  virtual std::complex<double> GetPreFactor() const { return _preFactor; }
+  virtual std::complex<double> preFactor() const { return PreFactor; }
 
   /// Set phase space sample.
   /// We use the phase space sample to calculate the normalization. The sample
   /// should be without efficiency applied.
   virtual void
-  SetPhspSample(std::shared_ptr<std::vector<ComPWA::dataPoint>> phspSample) = 0;
+  setPhspSample(std::shared_ptr<std::vector<ComPWA::DataPoint>> phspSample) = 0;
 
   //=========== FUNCTIONTREE =================
 
-  virtual bool HasTree() const { return 0; }
+  virtual bool hasTree() const { return 0; }
 
-  virtual std::shared_ptr<FunctionTree> GetTree(std::shared_ptr<Kinematics> kin,
+  virtual std::shared_ptr<FunctionTree> tree(std::shared_ptr<Kinematics> kin,
                                                 const ParameterList &sample,
                                                 const ParameterList &toySample,
                                                 std::string suffix) = 0;
 
 protected:
-  std::string _name;
+  std::string Name;
 
-  std::complex<double> _preFactor;
+  std::complex<double> PreFactor;
 
-  std::shared_ptr<DoubleParameter> _magnitude;
+  std::shared_ptr<FitParameter> Magnitude;
 
-  std::shared_ptr<DoubleParameter> _phase;
+  std::shared_ptr<FitParameter> Phase;
 
 private:
-  double _current_magnitude;
-  double _current_phase;
+  double CurrentMagnitude;
+  double CurrentPhase;
 };
 
 typedef std::vector<std::shared_ptr<Amplitude>>::iterator ampItr;
 
-} /* namespace Physics */
-} /* namespace ComPWA */
+} // ns::Physics
+} // ns::ComPWA
 #endif

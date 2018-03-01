@@ -24,7 +24,7 @@ public:
 
     template <typename> using cast_op_type = value_and_holder &;
     operator value_and_holder &() { return *value; }
-    static constexpr auto name = _<value_and_holder>();
+    static PYBIND11_DESCR name() { return type_descr(_<value_and_holder>()); }
 
 private:
     value_and_holder *value = nullptr;
@@ -293,7 +293,7 @@ struct pickle_factory;
 template <typename Get, typename Set,
           typename RetState, typename Self, typename NewInstance, typename ArgState>
 struct pickle_factory<Get, Set, RetState(Self), NewInstance(ArgState)> {
-    static_assert(std::is_same<intrinsic_t<RetState>, intrinsic_t<ArgState>>::value,
+    static_assert(std::is_same<RetState, ArgState>::value,
                   "The type returned by `__getstate__` must be the same "
                   "as the argument accepted by `__setstate__`");
 

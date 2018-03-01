@@ -64,6 +64,9 @@ install( TARGETS Tools
         LIBRARY DESTINATION lib
 )
 
+if (NOT "${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
+  add_subdirectory(PythonInterface)
+endif()
 
 # ------ TESTING ----- #
 #Testing routines are stored in separate directory

@@ -1,6 +1,3 @@
-
-
-
 // Copyright (c) 2017 The ComPWA Team.
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
@@ -14,7 +11,7 @@
 #include <boost/property_tree/xml_parser.hpp>
 
 #include <Core/Exceptions.hpp>
-#include <Core/Parameter.hpp>
+#include <Core/FitParameter.hpp>
 #include <Core/ParameterList.hpp>
 #include <Core/Spin.hpp>
 
@@ -22,22 +19,22 @@ namespace ComPWA {
 
 /// Particle ID.
 /// Usually the pid's from PDG are used here:
-/// http://pdg.lbl.gov/mc_particle_id_contents.html
+/// http://pdg.lbl.gov/mc_particleId_contents.html
 typedef int pid;
 
 class Properties {
 public:
-  Properties(std::string name = "test", pid id = -999) : _name(name), _id(id){};
+  Properties(std::string name = "test", pid id = -999) : Name(name), Id(id){};
 
-  void SetName(std::string n) { _name = n; }
-  std::string GetName() const { return _name; }
+  void setName(std::string n) { Name = n; }
+  std::string name() const { return Name; }
 
-  void SetId(pid id) { _id = id; }
-  pid GetId() const { return _id; }
+  void SetId(pid id) { Id = id; }
+  pid GetId() const { return Id; }
 
 protected:
-  std::string _name;
-  pid _id;
+  std::string Name;
+  pid Id;
 };
 
 ///
@@ -51,16 +48,16 @@ public:
 
   Constant(boost::property_tree::ptree pt){};
 
-  void SetValue(double m) { _value.SetValue(m); }
+  void SetValue(double m) { _value.setValue(m); }
 
-  double GetValue() const { return _value.GetValue(); }
+  double value() const { return _value.value(); }
 
-  void SetValuePar(ComPWA::DoubleParameter m) { _value = m; }
+  void SetValuePar(ComPWA::FitParameter m) { _value = m; }
 
-  ComPWA::DoubleParameter GetValuePar() const { return _value; }
+  ComPWA::FitParameter GetValuePar() const { return _value; }
 
 protected:
-  ComPWA::DoubleParameter _value;
+  ComPWA::FitParameter _value;
 };
 
 ///
@@ -71,13 +68,13 @@ protected:
 class PartInfoShort : public Properties {
 public:
   PartInfoShort(std::string name = "test", pid id = -999, double mass = 0)
-      : Properties(name, id), _mass(mass){};
+      : Properties(name, id), Mass(mass){};
 
-  void SetMass(double m) { _mass = m; }
-  double GetMass() const { return _mass; }
+  void SetMass(double m) {Mass = m; }
+  double GetMass() const { return Mass; }
 
 protected:
-  double _mass;
+  double Mass;
 };
 
 ///
@@ -92,28 +89,28 @@ public:
 
   virtual boost::property_tree::ptree Save();
 
-  double GetMass() const { return _mass.GetValue(); }
+  double GetMass() const { return Mass.value(); }
 
-  ComPWA::DoubleParameter GetMassPar() const { return _mass; }
+  ComPWA::FitParameter GetMassPar() const { return Mass; }
 
   int GetQuantumNumber(std::string type) const;
 
   ComPWA::Spin GetSpinQuantumNumber(std::string type) const;
 
-  boost::property_tree::ptree GetDecayInfo() const { return _decayInfo; }
+  boost::property_tree::ptree GetDecayInfo() const { return DecayInfo; }
 
   std::string GetDecayType() const {
-    return _decayInfo.get<std::string>("<xmlattr>.Type");
+    return DecayInfo.get<std::string>("<xmlattr>.Type");
   }
 
 protected:
-  ComPWA::DoubleParameter _mass;
+  ComPWA::FitParameter Mass;
   std::map<std::string, int> intQuantumNumbers_;
   std::map<std::string, ComPWA::Spin> spinQuantumNumbers_;
 
   /// Store decay info in property_tree. The tree is later on passed to the
   /// respective class.
-  boost::property_tree::ptree _decayInfo;
+  boost::property_tree::ptree DecayInfo;
 };
 
 /// A map of particle properties is used everywhere where particle information
@@ -161,7 +158,7 @@ inline void ReadParticles(std::shared_ptr<PartList> list,
     return;
   for (auto const &v : particleTree.get()) {
     auto tmp = ParticleProperties(v.second);
-    auto p = std::make_pair(tmp.GetName(), tmp);
+    auto p = std::make_pair(tmp.name(), tmp);
     auto last = list->insert(p);
 
     if (!last.second) {
@@ -178,7 +175,7 @@ inline void ReadParticles(std::shared_ptr<PartList> list,
     } catch (std::exception &ex) {
     }
 
-    LOG(debug) << "ReadParticles() | Particle " << tmp.GetName()
+    LOG(debug) << "ReadParticles() | Particle " << tmp.name()
                << " (id=" << tmp.GetId() << ") "
                << " J(PC)=" << tmp.GetSpinQuantumNumber("Spin") << "("
                << tmp.GetQuantumNumber("Parity") << cparity << ") "
@@ -225,16 +222,16 @@ inline void SaveParticles(std::shared_ptr<PartList> list,
   return;
 }
 
-inline void UpdateNode(std::shared_ptr<DoubleParameter> p,
+inline void UpdateNode(std::shared_ptr<FitParameter> p,
                        boost::property_tree::ptree &tr) {
   for (auto &v : tr.get_child("")) {
     if (v.first == "Parameter") {
       std::string nn = v.second.get<std::string>("<xmlattr>.Name");
       std::string tt = v.second.get<std::string>("<xmlattr>.Type");
-      if (nn == p->GetName()) {
+      if (nn == p->name()) {
         //        LOG(debug) << "UpdateNode() | Updating node " << v.first
-        //        << "." << nn << " to " << p->GetValue();
-        v.second = DoubleParameterSave(*p.get());
+        //        << "." << nn << " to " << p->value();
+        v.second = p->save();
         v.second.put("<xmlattr>.Type", tt);
       }
     } else {
@@ -252,8 +249,8 @@ inline void UpdateParticleList(std::shared_ptr<PartList> &partL,
   boost::property_tree::ptree partTr;
   partTr.add_child("ParticleList", SaveParticles(partL));
   // Loop over (double) parameters
-  for (auto i : pars.GetDoubleParameters()) {
-    auto name = i->GetName();
+  for (auto i : pars.doubleParameters()) {
+    auto name = i->name();
     // Some default values may not have a name. We skip those.
     if (name == "")
       continue;
@@ -268,6 +265,6 @@ inline void UpdateParticleList(std::shared_ptr<PartList> &partL,
   return;
 }
 
-} // Namespace ComPWA
+} // ns::ComPWA
 
 #endif

@@ -2,6 +2,11 @@
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
+///
+/// \file
+/// Efficiency base class
+///
+
 #ifndef EFFICIENCY_HPP_
 #define EFFICIENCY_HPP_
 
@@ -11,12 +16,12 @@
 
 namespace ComPWA {
 
-class dataPoint;
+class DataPoint;
 
-/**
- *  \class DalitzEfficiency
- *  \brief Virtual efficiency class
- */
+///
+/// \class Efficiency
+/// Base class for efficiency desciption over the phase space.
+///
 class Efficiency {
 private:
 public:
@@ -24,22 +29,23 @@ public:
 
   virtual ~Efficiency();
 
-  virtual double Evaluate(const dataPoint &point) const = 0;
+  virtual double evaluate(const DataPoint &point) const = 0;
 };
 
-/**
- *  \class UnitEfficiency
- *  \brief implementation of virtual class efficiency. Efficiency ist constant
- * one allover the PHSP
- */
+///
+/// \class UnitEfficiency
+/// Efficiency object with unit efficiency all over the phase space.
+///
 class UnitEfficiency : public Efficiency {
 private:
 public:
   UnitEfficiency() { LOG(debug) << "Efficiency: creating UnitEfficiency!"; };
+
   ~UnitEfficiency(){};
-  virtual double Evaluate(const dataPoint &point) const { return 1; };
+
+  virtual double evaluate(const DataPoint &point) const { return 1; };
 };
 
-} /* namespace ComPWA */
+} // ns::ComPWA
 
-#endif /* EFFICIENCY_HPP_ */
+#endif

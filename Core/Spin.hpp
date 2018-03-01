@@ -2,9 +2,10 @@
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
-/*! \class Spin
- * Basic structures for amplitude calculations
- */
+///
+/// \file
+/// Spin class.
+///
 
 #ifndef CORE_UTILITY_HPP_
 #define CORE_UTILITY_HPP_
@@ -22,6 +23,10 @@ typedef std::vector<unsigned int> IndexList;
 typedef std::pair<unsigned int, unsigned int> IndexPair;
 typedef std::map<unsigned int, unsigned int> IndexMapping;
 
+///
+/// \class Spin
+/// Spin class for integer and half-integer spins.
+///
 class Spin {
 
 public:
@@ -29,17 +34,17 @@ public:
       : J_numerator_(0), J_denominator_(1), J_z_numerator_(0),
         z_component_relevant(false) {}
 
-  //! Constructor for half-integer spin
+  /// Constructor for half-integer spin
   Spin(int num, int denom)
       : J_numerator_(num), J_denominator_(denom), J_z_numerator_(0),
         z_component_relevant(false) {}
 
-  //! Constructor for integer spin
+  /// Constructor for integer spin
   Spin(unsigned int intSpin)
       : J_numerator_(intSpin), J_denominator_(1), J_z_numerator_(0),
         z_component_relevant(false) {}
 
-  //! Constructor for integer spin
+  /// Constructor for integer spin
   Spin(int intSpin)
       : J_numerator_(intSpin), J_denominator_(1), J_z_numerator_(0),
         z_component_relevant(false) {}
@@ -72,7 +77,7 @@ public:
   }
 
   Spin operator+(const Spin &rhs) const {
-    /* We calculate (a/b - c/d) = (a*d - c*b)/(bd) */
+    // We calculate (a/b - c/d) = (a*d - c*b)/(bd)
     int num = GetNumerator() * rhs.GetDenominator() +
               rhs.GetNumerator() * GetDenominator();
     int denom = rhs.GetDenominator() * GetDenominator();
@@ -87,7 +92,7 @@ public:
   }
 
   Spin operator-(const Spin &rhs) const {
-    /* We calculate (a/b - c/d) = (a*d - c*b)/(bd) */
+    // We calculate (a/b - c/d) = (a*d - c*b)/(bd)
     int num = GetNumerator() * rhs.GetDenominator() -
               rhs.GetNumerator() * GetDenominator();
     int denom = rhs.GetDenominator() * GetDenominator();
@@ -155,9 +160,6 @@ public:
     return *this; // return new value
   }
 
-  // conversion to int (type-cast operator)
-  //        operator int() const { return (int)(J_numerator_/J_denominator_); }
-
   // conversion to double (type-cast operator)
   operator double() const { return ((double)J_numerator_) / J_denominator_; }
 
@@ -173,7 +175,7 @@ public:
     }
   }
 
-  /**! Calculate largest common factor */
+  /// Calculate largest common factor
   static unsigned int ggT(unsigned int a, unsigned int b) {
     if (b == 0)
       return a;
@@ -264,20 +266,20 @@ public:
 
 protected:
   int J_numerator_;
+  
   unsigned int J_denominator_;
+  
   int J_z_numerator_;
 
   bool z_component_relevant;
 };
 
 struct IDInfo {
-  int particle_id_;
+  int particleId_;
   std::string name_;
 
   bool operator==(const IDInfo &rhs) const {
-    /* if (this->id_ != rhs.id_)
-     return false;*/
-    if (this->particle_id_ != rhs.particle_id_)
+    if (this->particleId_ != rhs.particleId_)
       return false;
     if (this->name_ != rhs.name_)
       return false;
@@ -287,18 +289,13 @@ struct IDInfo {
   bool operator!=(const IDInfo &rhs) const { return !(*this == rhs); }
 
   bool operator<(const IDInfo &rhs) const {
-    /*if (this->id_ < rhs.id_)
-     return true;
-     else if (this->id_ > rhs.id_)
-     return false;*/
-
     return lessThenIgnoringID(*this, rhs);
   }
 
   static bool lessThenIgnoringID(const IDInfo &lhs, const IDInfo &rhs) {
-    if (lhs.particle_id_ < rhs.particle_id_)
+    if (lhs.particleId_ < rhs.particleId_)
       return true;
-    else if (lhs.particle_id_ > rhs.particle_id_)
+    else if (lhs.particleId_ > rhs.particleId_)
       return false;
     if (lhs.name_ < rhs.name_)
       return true;
@@ -310,13 +307,13 @@ struct IDInfo {
 };
 
 struct ParticleStateInfo {
-  unsigned int unique_id_;
+  unsigned int uniqueId_;
   IDInfo pid_information_;
   Spin spin_information_;
   bool coherent;
 
   bool operator==(const ParticleStateInfo &rhs) const {
-    if (this->unique_id_ != rhs.unique_id_)
+    if (this->uniqueId_ != rhs.uniqueId_)
       return false;
     if (this->pid_information_ != rhs.pid_information_)
       return false;
@@ -333,9 +330,9 @@ struct ParticleStateInfo {
   }
 
   bool operator<(const ParticleStateInfo &rhs) const {
-    if (this->unique_id_ < rhs.unique_id_)
+    if (this->uniqueId_ < rhs.uniqueId_)
       return true;
-    else if (this->unique_id_ > rhs.unique_id_)
+    else if (this->uniqueId_ > rhs.uniqueId_)
       return false;
     if (this->pid_information_ < rhs.pid_information_)
       return true;
@@ -354,9 +351,9 @@ struct ParticleStateInfo {
 
   friend std::ostream &operator<<(std::ostream &os,
                                   const ParticleStateInfo &rhs) {
-    os << "unique id: " << rhs.unique_id_ << std::endl;
+    os << "unique id: " << rhs.uniqueId_ << std::endl;
     os << "name: " << rhs.pid_information_.name_ << std::endl;
-    os << "pid: " << rhs.pid_information_.particle_id_ << std::endl;
+    os << "pid: " << rhs.pid_information_.particleId_ << std::endl;
     os << "J: " << rhs.spin_information_.GetNumerator() << "/"
        << rhs.spin_information_.GetDenominator() << "("
        << rhs.spin_information_.GetZNumerator() << ")";
@@ -366,6 +363,6 @@ struct ParticleStateInfo {
   }
 };
 
-} /* namespace ComPWA */
+} // ns::ComPWA
 
-#endif /* CORE_UTILITY_HPP_ */
+#endif

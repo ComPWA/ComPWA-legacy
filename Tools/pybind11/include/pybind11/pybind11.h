@@ -92,7 +92,7 @@ protected:
     /// Special internal constructor for functors, lambda functions, etc.
     template <typename Func, typename Return, typename... Args, typename... Extra>
     void initialize(Func &&f, Return (*)(Args...), const Extra&... extra) {
-        using namespace detail;
+
         struct capture { detail::remove_reference_t<Func> f; };
 
         /* Store the function including any extra state it might have (e.g. a lambda capture object) */
@@ -163,11 +163,11 @@ protected:
         detail::process_attributes<Extra...>::init(extra..., rec);
 
         /* Generate a readable signature describing the function's arguments and return value types */
-        static constexpr auto signature = _("(") + cast_in::arg_names + _(") -> ") + cast_out::name;
-        PYBIND11_DESCR_CONSTEXPR auto types = decltype(signature)::types();
+        using detail::descr; using detail::_;
+        PYBIND11_DESCR signature = _("(") + cast_in::arg_names() + _(") -> ") + cast_out::name();
 
         /* Register the function with Python from generic (non-templated) code */
-        initialize_generic(rec, signature.text, types.data(), sizeof...(Args));
+        initialize_generic(rec, signature.text(), signature.types(), sizeof...(Args));
 
         if (cast_in::has_args) rec->has_args = true;
         if (cast_in::has_kwargs) rec->has_kwargs = true;
@@ -217,30 +217,34 @@ protected:
 
         /* Generate a proper function signature */
         std::string signature;
-        size_t type_index = 0, arg_index = 0;
-        for (auto *pc = text; *pc != '\0'; ++pc) {
-            const auto c = *pc;
+        size_t type_depth = 0, char_index = 0, type_index = 0, arg_index = 0;
+        while (true) {
+            char c = text[char_index++];
+            if (c == '\0')
+                break;
 
             if (c == '{') {
-                // Write arg name for everything except *args and **kwargs.
-                if (*(pc + 1) == '*')
-                    continue;
-
-                if (arg_index < rec->args.size() && rec->args[arg_index].name) {
-                    signature += rec->args[arg_index].name;
-                } else if (arg_index == 0 && rec->is_method) {
-                    signature += "self";
-                } else {
-                    signature += "arg" + std::to_string(arg_index - (rec->is_method ? 1 : 0));
+                // Write arg name for everything except *args, **kwargs and return type.
+                if (type_depth == 0 && text[char_index] != '*' && arg_index < args) {
+                    if (!rec->args.empty() && rec->args[arg_index].name) {
+                        signature += rec->args[arg_index].name;
+                    } else if (arg_index == 0 && rec->is_method) {
+                        signature += "self";
+                    } else {
+                        signature += "arg" + std::to_string(arg_index - (rec->is_method ? 1 : 0));
+                    }
+                    signature += ": ";
                 }
-                signature += ": ";
+                ++type_depth;
             } else if (c == '}') {
-                // Write default value if available.
-                if (arg_index < rec->args.size() && rec->args[arg_index].descr) {
-                    signature += "=";
-                    signature += rec->args[arg_index].descr;
+                --type_depth;
+                if (type_depth == 0) {
+                    if (arg_index < rec->args.size() && rec->args[arg_index].descr) {
+                        signature += "=";
+                        signature += rec->args[arg_index].descr;
+                    }
+                    arg_index++;
                 }
-                arg_index++;
             } else if (c == '%') {
                 const std::type_info *t = types[type_index++];
                 if (!t)
@@ -268,8 +272,13 @@ protected:
                 signature += c;
             }
         }
-        if (arg_index != args || types[type_index] != nullptr)
+        if (type_depth != 0 || types[type_index] != nullptr)
             pybind11_fail("Internal error while parsing type signature (2)");
+
+        #if !defined(PYBIND11_CONSTEXPR_DESCR)
+            delete[] types;
+            delete[] text;
+        #endif
 
 #if PY_MAJOR_VERSION < 3
         if (strcmp(rec->name, "__next__") == 0) {
@@ -502,7 +511,6 @@ protected:
                     if (self_value_and_holder)
                         self_value_and_holder.type->dealloc(self_value_and_holder);
 
-                    call.init_self = PyTuple_GET_ITEM(args_in, 0);
                     call.args.push_back(reinterpret_cast<PyObject *>(&self_value_and_holder));
                     call.args_convert.push_back(false);
                     ++args_copied;
@@ -685,16 +693,6 @@ protected:
             return nullptr;
         }
 
-        auto append_note_if_missing_header_is_suspected = [](std::string &msg) {
-            if (msg.find("std::") != std::string::npos) {
-                msg += "\n\n"
-                       "Did you forget to `#include <pybind11/stl.h>`? Or <pybind11/complex.h>,\n"
-                       "<pybind11/functional.h>, <pybind11/chrono.h>, etc. Some automatic\n"
-                       "conversions are optional and require extra headers to be included\n"
-                       "when compiling your pybind11 module.";
-            }
-        };
-
         if (result.ptr() == PYBIND11_TRY_NEXT_OVERLOAD) {
             if (overloads->is_operator)
                 return handle(Py_NotImplemented).inc_ref().ptr();
@@ -752,14 +750,12 @@ protected:
                 }
             }
 
-            append_note_if_missing_header_is_suspected(msg);
             PyErr_SetString(PyExc_TypeError, msg.c_str());
             return nullptr;
         } else if (!result) {
             std::string msg = "Unable to convert function return value to a "
                               "Python type! The signature was\n\t";
             msg += it->signature;
-            append_note_if_missing_header_is_suspected(msg);
             PyErr_SetString(PyExc_TypeError, msg.c_str());
             return nullptr;
         } else {
@@ -837,14 +833,6 @@ public:
         if (!obj)
             throw error_already_set();
         return reinterpret_steal<module>(obj);
-    }
-
-    /// Reload the module or throws `error_already_set`.
-    void reload() {
-        PyObject *obj = PyImport_ReloadModule(ptr());
-        if (!obj)
-            throw error_already_set();
-        *this = reinterpret_steal<module>(obj);
     }
 
     // Adds an object to the module using the given name.  Throws if an object with the given name
@@ -1347,7 +1335,7 @@ Ret init(CFunc &&c, AFunc &&a) {
 template <typename GetState, typename SetState>
 detail::initimpl::pickle_factory<GetState, SetState> pickle(GetState &&g, SetState &&s) {
     return {std::forward<GetState>(g), std::forward<SetState>(s)};
-}
+};
 
 /// Binds C++ enumerations and enumeration classes to Python
 template <typename Type> class enum_ : public class_<Type> {
@@ -1469,17 +1457,10 @@ inline void keep_alive_impl(handle nurse, handle patient) {
 }
 
 PYBIND11_NOINLINE inline void keep_alive_impl(size_t Nurse, size_t Patient, function_call &call, handle ret) {
-    auto get_arg = [&](size_t n) {
-        if (n == 0)
-            return ret;
-        else if (n == 1 && call.init_self)
-            return call.init_self;
-        else if (n <= call.args.size())
-            return call.args[n - 1];
-        return handle();
-    };
-
-    keep_alive_impl(get_arg(Nurse), get_arg(Patient));
+    keep_alive_impl(
+        Nurse   == 0 ? ret : Nurse   <= call.args.size() ? call.args[Nurse   - 1] : handle(),
+        Patient == 0 ? ret : Patient <= call.args.size() ? call.args[Patient - 1] : handle()
+    );
 }
 
 inline std::pair<decltype(internals::registered_types_py)::iterator, bool> all_type_info_get_cache(PyTypeObject *type) {

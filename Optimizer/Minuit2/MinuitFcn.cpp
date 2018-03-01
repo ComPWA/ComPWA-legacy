@@ -10,7 +10,7 @@
 #include <iomanip>
 
 #include "Core/ParameterList.hpp"
-#include "Core/Parameter.hpp"
+#include "Core/FitParameter.hpp"
 #include "Core/Logging.hpp"
 #include "Optimizer/Minuit2/MinuitFcn.hpp"
 
@@ -26,27 +26,30 @@ MinuitFcn::MinuitFcn(std::shared_ptr<ComPWA::IEstimator> myData,
 MinuitFcn::~MinuitFcn() {}
 
 double MinuitFcn::operator()(const std::vector<double> &x) const {
-  // ParameterList par;
   std::ostringstream paramOut;
-  for (unsigned int i = 0; i < x.size(); i++) {
-    std::shared_ptr<ComPWA::DoubleParameter> actPat =
-        _parList.GetDoubleParameter(i);
-    // std::cout<<i<<" "<<actPat->GetName()<<" "<<actPat->GetValue()
-    //<<" "<<x[i]<<" "<<actPat->IsFixed()<<std::endl;
-    if (!actPat->IsFixed())
-      if (x[i] == x[i]) {
-        actPat->SetValue(x[i]);
-        paramOut << x[i] << " "; // print only free parameters
-      }
+
+  size_t pos = 0;
+  for (auto p : _parList.doubleParameters()) {
+    if (p->isFixed()) {
+      pos++;
+      continue;
+    }
+    paramOut << x.at(pos) << " "; // print only free parameters
+    p->setValue(x.at(pos));
+    pos++;
   }
+  assert(x.size() == pos && "MinuitFcn::operator() | Number is (internal) "
+                            "Minuit parameters and number of ComPWA "
+                            "parameters does not match!");
+
   // Start timing
   clock_t begin = clock();
-  double result = _myDataPtr->ControlParameter(_parList);
+  double result = _myDataPtr->controlParameter(_parList);
   double sec = double(clock() - begin) / CLOCKS_PER_SEC;
 
   LOG(info) << "MinuitFcn: -log(L) = " << std::setprecision(10) << result
             << std::setprecision(4) << " Time: " << sec << "s"
-            << " nCalls: " << _myDataPtr->NSteps();
+            << " nCalls: " << _myDataPtr->status();
   LOG(debug) << "Parameters: " << paramOut.str();
 
   return result;

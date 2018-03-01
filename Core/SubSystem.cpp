@@ -6,6 +6,71 @@
 
 using namespace ComPWA;
 
+SubSystem::SubSystem(const boost::property_tree::ptree &pt) { load(pt); }
+
+void SubSystem::load(const boost::property_tree::ptree &pt) {
+  _recoilState.clear();
+  _finalStates.clear();
+  helicities_.clear();
+  _finalStatesNames.clear();
+  
+  // Read subSystem definition
+  auto recoil =
+      pt.get_optional<std::string>("RecoilSystem.<xmlattr>.FinalState");
+  if (recoil) {
+    _recoilState = stringToVectInt(recoil.get());
+  }
+  auto decayProducts = pt.get_child("DecayProducts");
+
+  for (auto i : decayProducts) {
+    _finalStates.push_back(
+        stringToVectInt(i.second.get<std::string>("<xmlattr>.FinalState")));
+    _finalStatesNames.push_back(i.second.get<std::string>("<xmlattr>.Name"));
+    helicities_.push_back(i.second.get<int>("<xmlattr>.Helicity"));
+  }
+}
+
+boost::property_tree::ptree SubSystem::save() const {
+  boost::property_tree::ptree pt;
+  auto recoilV = GetRecoilState();
+  if (recoilV.size()) {
+    std::string recoilStr;
+    for (auto i = 0; i < recoilV.size(); i++) {
+      recoilStr += std::to_string(recoilV.at(i));
+      if (i < recoilV.size() - 1)
+        recoilStr += " ";
+    }
+    pt.put("RecoilSystem.<xmlattr>.FinalState", recoilStr);
+  }
+
+  boost::property_tree::ptree daughterTr;
+
+  // Information daugher final state A
+  auto finalS = GetFinalStates();
+  auto helicities = GetHelicities();
+  auto finalSNames = GetFinalStatesNames();
+  for (int j = 0; j < finalS.size(); j++) {
+    std::string strA;
+    if (finalS.at(j).size()) {
+      for (auto i = 0; i < finalS.at(j).size(); i++) {
+        strA += std::to_string(finalS.at(j).at(i));
+        if (i < finalS.at(j).size() - 1)
+          strA += " ";
+      }
+    }
+
+    boost::property_tree::ptree fTr;
+    fTr.put("<xmlattr>.Name", finalSNames.at(j));
+    fTr.put("<xmlattr>.FinalState", strA);
+    fTr.put("<xmlattr>.Helicity", helicities.at(j));
+    daughterTr.add_child("Particle", fTr);
+  }
+
+  pt.add_child("DecayProducts", daughterTr);
+
+  return pt;
+}
+
 SubSystem::SubSystem(std::vector<int> recoilS,
                      std::vector<std::vector<int>> finalStates)
     : _recoilState(recoilS), _finalStates(finalStates) {

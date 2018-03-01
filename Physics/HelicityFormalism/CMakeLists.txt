@@ -11,14 +11,13 @@ find_package( Boost COMPONENTS
                REQUIRED QUIET
 )
 
-SET( lib_srcs IncoherentIntensity.cpp CoherentIntensity.cpp
-    AmpWignerD.cpp PartialDecay.cpp SequentialTwoBodyDecay.cpp
+SET( lib_srcs ../IncoherentIntensity.cpp ../CoherentIntensity.cpp
+    ../SequentialPartialAmplitude.cpp AmpWignerD.cpp HelicityDecay.cpp 
     HelicityKinematics.cpp )
 
-SET( lib_headers IncoherentIntensity.hpp CoherentIntensity.hpp
-    SequentialTwoBodyDecay.hpp PartialDecay.hpp PartialDecay.hpp
-    SequentialTwoBodyDecay.hpp AmpWignerD.hpp HelicityKinematics.hpp
-    ../Amplitude.hpp ../Resonance.hpp ../ParticleList.hpp)
+SET( lib_headers ../IncoherentIntensity.hpp ../CoherentIntensity.hpp
+    ../SequentialPartialAmplitude.hpp ../Amplitude.hpp ../PartialAmplitude.hpp
+    ../ParticleList.hpp  HelicityDecay.hpp AmpWignerD.hpp HelicityKinematics.hpp)
 
 add_library( HelicityFormalism
   SHARED ${lib_srcs} ${lib_headers}
@@ -49,7 +48,7 @@ file(GLOB TEST_SRCS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} test/*.cpp)
 
 
 # Check if Tools target is going to be build. Skip testing section otherwise.
-IF( TARGET Tools )
+#IF( TARGET Tools )
 
   #Run through each source
   foreach(testSrc ${TEST_SRCS})
@@ -103,7 +102,7 @@ IF( TARGET Tools )
 
   endforeach(testSrc)
 
-ELSE ()
-  MESSAGE( WARNING "Required targets not found! Not building Helicity\
-                   formalism testing module!")
-ENDIF()
+#ELSE ()
+#  MESSAGE( WARNING "Required targets not found! Not building Helicity\
+#                   formalism testing module!")
+#ENDIF()

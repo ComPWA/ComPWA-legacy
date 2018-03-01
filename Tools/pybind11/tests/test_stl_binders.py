@@ -86,9 +86,7 @@ def test_vector_buffer_numpy():
 
 
 def test_vector_bool():
-    import pybind11_cross_module_tests as cm
-
-    vv_c = cm.VectorBool()
+    vv_c = m.VectorBool()
     for i in range(10):
         vv_c.append(i % 2 == 0)
     for i in range(10):

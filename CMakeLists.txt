@@ -5,7 +5,23 @@ cmake_minimum_required (VERSION 3.0)
 #set (CMAKE_BUILD_TYPE Debug)
 set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 
+
 set (CMAKE_CXX_STANDARD 11)
+
+message( STATUS "Compiler ID:")
+message( STATUS "$ENV{CC}")
+
+if (NOT "$ENV{CC}" STREQUAL "clang")
+  set(CMAKE_CXX_STANDARD 14)
+  set(CMAKE_CXX_STANDARD_REQUIRED ON)
+  set(CMAKE_CXX_EXTENSIONS OFF)
+endif()
+
+# Workaround for clang+ c++14/pybind11
+#if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
+ # set (CMAKE_CXX_STANDARD 11)
+ # set(CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} -std=c++0x")
+#endif()
 
 #
 # ComPWA

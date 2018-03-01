@@ -9,15 +9,15 @@
 
 namespace ComPWA {
 
-dataPoint::dataPoint() : weight(1.), eff(1.) {
+DataPoint::DataPoint() : Weight(1.), Eff(1.) {
   return;
 }
 
-void dataPoint::Reset(unsigned int size) { var = std::vector<double>(size); }
+void DataPoint::reset(unsigned int size) { Values = std::vector<double>(size); }
 
-void dataPoint::SetValue(unsigned int pos, double val) {
+void DataPoint::setValue(unsigned int pos, double val) {
   try {
-    var.at(pos) = val;
+    Values.at(pos) = val;
   } catch (...) {
     LOG(error) << "dataPoint::setVal() | "
                   "Can not access index "
@@ -27,11 +27,11 @@ void dataPoint::SetValue(unsigned int pos, double val) {
   return;
 }
 
-double dataPoint::GetValue(unsigned int num) const {
+double DataPoint::value(unsigned int num) const {
   double rt;
 
   try {
-    rt = var.at(num);
+    rt = Values.at(num);
   } catch (...) {
     LOG(error) << "dataPoint::getVal() | "
                   "Can not access index "
@@ -41,11 +41,11 @@ double dataPoint::GetValue(unsigned int num) const {
   return rt;
 }
 
-std::ostream &operator<<(std::ostream &os, const dataPoint &p) {
+std::ostream &operator<<(std::ostream &os, const DataPoint &p) {
   os << "(";
-  for (int i = 0; i < p.Size(); i++){
-    os << p.GetValue(i);
-  if( i == p.Size()-1 )
+  for (int i = 0; i < p.size(); i++){
+    os << p.value(i);
+  if( i == p.size()-1 )
     os << ")";
   else 
     os << ", ";
@@ -53,4 +53,4 @@ std::ostream &operator<<(std::ostream &os, const dataPoint &p) {
   return os;
 }
 
-} /* namespace ComPWA */
+} // ns::ComPWA

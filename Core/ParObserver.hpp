@@ -22,7 +22,7 @@ namespace ComPWA {
 class ParObserver {
 public:
   /// Call this function to mark the observing node as modified.
-  virtual void Update() = 0;
+  virtual void update() = 0;
 };
 
 } // namespace ComPWA

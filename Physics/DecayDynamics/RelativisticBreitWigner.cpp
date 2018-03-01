@@ -15,18 +15,16 @@
 
 using namespace ComPWA::Physics::DecayDynamics;
 
-std::shared_ptr<AbstractDynamicalFunction>
-RelativisticBreitWigner::Factory(std::shared_ptr<PartList> partL,
-                                 const boost::property_tree::ptree &pt) {
-  auto obj = std::make_shared<RelativisticBreitWigner>();
+RelativisticBreitWigner::RelativisticBreitWigner(
+   std::string name, std::pair<std::string,std::string> daughters,
+               std::shared_ptr<ComPWA::PartList> partL) {
 
-  std::string name = pt.get<std::string>("DecayParticle.<xmlattr>.Name");
   LOG(trace) << "RelativisticBreitWigner::Factory() | Construction of " << name
              << ".";
-  obj->SetName(name);
+  setName(name);
   auto partProp = partL->find(name)->second;
-  obj->SetMassParameter(
-      std::make_shared<DoubleParameter>(partProp.GetMassPar()));
+  SetMassParameter(
+      std::make_shared<FitParameter>(partProp.GetMassPar()));
 
   auto decayTr = partProp.GetDecayInfo();
   if (partProp.GetDecayType() != "relativisticBreitWigner")
@@ -34,10 +32,10 @@ RelativisticBreitWigner::Factory(std::shared_ptr<PartList> partL,
         "RelativisticBreitWigner::Factory() | Decay type does not match! ");
 
   auto spin = partProp.GetSpinQuantumNumber("Spin");
-  obj->SetSpin(spin);
+  SetSpin(spin);
 
   auto ffType = formFactorType(decayTr.get<int>("FormFactor.<xmlattr>.Type"));
-  obj->SetFormFactorType(ffType);
+  SetFormFactorType(ffType);
 
   // Read parameters from tree. Currently parameters of type 'Width' and
   // 'MesonRadius' are required.
@@ -46,12 +44,10 @@ RelativisticBreitWigner::Factory(std::shared_ptr<PartList> partL,
       continue;
     std::string type = v.second.get<std::string>("<xmlattr>.Type");
     if (type == "Width") {
-      auto width = ComPWA::DoubleParameterFactory(v.second);
-      obj->SetWidthParameter(std::make_shared<DoubleParameter>(width));
+      SetWidthParameter(std::make_shared<FitParameter>(v.second));
     } else if (type == "MesonRadius") {
-      auto mesonRadius = ComPWA::DoubleParameterFactory(v.second);
-      obj->SetMesonRadiusParameter(
-          std::make_shared<DoubleParameter>(mesonRadius));
+      SetMesonRadiusParameter(
+          std::make_shared<FitParameter>(v.second));
     } else {
       throw std::runtime_error(
           "RelativisticBreitWigner::Factory() | Parameter of type " + type +
@@ -59,54 +55,36 @@ RelativisticBreitWigner::Factory(std::shared_ptr<PartList> partL,
     }
   }
 
-  // Get masses of decay products
-  auto decayProducts = pt.get_child("SubSystem.DecayProducts");
-  if (decayProducts.size() != 2)
-    throw boost::property_tree::ptree_error(
-        "RelativisticBreitWigner::Factory() | Expect exactly two decay "
-        "products (" +
-        std::to_string(decayProducts.size()) + " given)!");
-
-  auto firstItr = decayProducts.begin();
-  // auto secondItr = decayProducts.begin()+1; //compile error, no idea for why
-  auto secondItr = decayProducts.begin();
-  secondItr++;
-
-  std::pair<std::string, std::string> daughterNames(
-      firstItr->second.get<std::string>("<xmlattr>.Name"),
-      secondItr->second.get<std::string>("<xmlattr>.Name"));
   std::pair<double, double> daughterMasses(
-      partL->find(daughterNames.first)->second.GetMass(),
-      partL->find(daughterNames.second)->second.GetMass());
-  obj->SetDecayMasses(daughterMasses);
-  obj->SetDecayNames(daughterNames);
+      partL->find(daughters.first)->second.GetMass(),
+      partL->find(daughters.second)->second.GetMass());
+  SetDecayMasses(daughterMasses);
+  SetDecayNames(daughters);
 
   LOG(trace)
       << "RelativisticBreitWigner::Factory() | Construction of the decay "
-      << partProp.GetName() << " -> " << daughterNames.first << " + "
-      << daughterNames.second;
-
-  return std::static_pointer_cast<AbstractDynamicalFunction>(obj);
+      << partProp.name() << " -> " << daughters.first << " + "
+      << daughters.second;
 }
 
-std::complex<double> RelativisticBreitWigner::Evaluate(const dataPoint &point,
+std::complex<double> RelativisticBreitWigner::evaluate(const DataPoint &point,
                                                        int pos) const {
-  std::complex<double> result = dynamicalFunction(
-      point.GetValue(pos), _mass->GetValue(), _daughterMasses.first,
-      _daughterMasses.second, _width->GetValue(), (double)_spin,
-      _mesonRadius->GetValue(), _ffType);
+  std::complex<double> result =
+      dynamicalFunction(point.value(pos),Mass->value(), DaughterMasses.first,
+                        DaughterMasses.second,Width->value(), (double)J,
+                        MesonRadius->value(), FormFactorType);
   assert(!std::isnan(result.real()) && !std::isnan(result.imag()));
   return result;
 }
 
-bool RelativisticBreitWigner::CheckModified() const {
-  if (AbstractDynamicalFunction::CheckModified())
+bool RelativisticBreitWigner::isModified() const {
+  if (AbstractDynamicalFunction::isModified())
     return true;
-  if (_width->GetValue() != _current_width ||
-      _mesonRadius->GetValue() != _current_mesonRadius) {
-    SetModified();
-    const_cast<double &>(_current_width) = _width->GetValue();
-    const_cast<double &>(_current_mesonRadius) = _mesonRadius->GetValue();
+  if (Width->value() != CurrentWidth ||
+      MesonRadius->value() != CurrentMesonRadius) {
+    setModified();
+    const_cast<double &>(CurrentWidth) =Width->value();
+    const_cast<double &>(CurrentMesonRadius) = MesonRadius->value();
     return true;
   }
   return false;
@@ -156,31 +134,34 @@ std::complex<double> RelativisticBreitWigner::dynamicalFunction(
 }
 
 std::shared_ptr<ComPWA::FunctionTree>
-RelativisticBreitWigner::GetTree(const ParameterList &sample, int pos,
+RelativisticBreitWigner::tree(const ParameterList &sample, int pos,
                                  std::string suffix) {
 
-  //  int sampleSize = sample.GetMultiDouble(0)->GetNValues();
+  size_t sampleSize = sample.mDoubleValue(pos)->values().size();
 
-  std::shared_ptr<FunctionTree> tr(new FunctionTree());
+  auto tr = std::make_shared<FunctionTree>(
+      "RelBreitWigner" + suffix, MComplex("", sampleSize),
+      std::make_shared<BreitWignerStrategy>());
 
-  tr->CreateHead("RelBreitWigner" + suffix,
-                 std::shared_ptr<Strategy>(new BreitWignerStrategy("")));
-
-  tr->CreateLeaf("Mass", _mass, "RelBreitWigner" + suffix);
-  tr->CreateLeaf("Width", _width, "RelBreitWigner" + suffix);
-  tr->CreateLeaf("Spin", (double)_spin, "RelBreitWigner" + suffix);
-  tr->CreateLeaf("MesonRadius", _mesonRadius, "RelBreitWigner" + suffix);
-  tr->CreateLeaf("FormFactorType", _ffType, "RelBreitWigner" + suffix);
-  tr->CreateLeaf("MassA", _daughterMasses.first, "RelBreitWigner" + suffix);
-  tr->CreateLeaf("MassB", _daughterMasses.second, "RelBreitWigner" + suffix);
-  tr->CreateLeaf("Data_mSq[" + std::to_string(pos) + "]",
-                 sample.GetMultiDouble(pos), "RelBreitWigner" + suffix);
+  tr->createLeaf("Mass",Mass, "RelBreitWigner" + suffix);
+  tr->createLeaf("Width",Width, "RelBreitWigner" + suffix);
+  tr->createLeaf("Spin", (double)J, "RelBreitWigner" + suffix);
+  tr->createLeaf("MesonRadius", MesonRadius, "RelBreitWigner" + suffix);
+  tr->createLeaf("FormFactorType", FormFactorType, "RelBreitWigner" + suffix);
+  tr->createLeaf("MassA", DaughterMasses.first, "RelBreitWigner" + suffix);
+  tr->createLeaf("MassB", DaughterMasses.second, "RelBreitWigner" + suffix);
+  tr->createLeaf("Data_mSq[" + std::to_string(pos) + "]",
+                 sample.mDoubleValue(pos), "RelBreitWigner" + suffix);
 
   return tr;
 };
 
-bool BreitWignerStrategy::execute(ParameterList &paras,
-                                  std::shared_ptr<AbsParameter> &out) {
+void BreitWignerStrategy::execute(ParameterList &paras,
+                                  std::shared_ptr<Parameter> &out) {
+  if (out && checkType != out->type())
+    throw BadParameter(
+        "BreitWignerStrat::execute() | Parameter type mismatch!");
+
 #ifndef NDEBUG
   // Check parameter type
   if (checkType != out->type())
@@ -191,137 +172,115 @@ bool BreitWignerStrategy::execute(ParameterList &paras,
                        std::string(ParNames[checkType])));
 
   // How many parameters do we expect?
-  int check_nBool = 0;
-  int check_nInt = 0;
-  int check_nComplex = 0;
-  int check_nDouble = 7;
-  int check_nMDouble = 1;
-  int check_nMComplex = 0;
+  size_t check_nInt = 0;
+  size_t nInt = paras.intValues().size();
+  size_t check_nDouble = 7;
+  size_t nDouble = paras.doubleValues().size();
+  nDouble += paras.doubleParameters().size();
+  size_t check_nComplex = 0;
+  size_t nComplex = paras.complexValues().size();
+  size_t check_nMInteger = 0;
+  size_t nMInteger = paras.mIntValues().size();
+  size_t check_nMDouble = 1;
+  size_t nMDouble = paras.mDoubleValues().size();
+  size_t check_nMComplex = 0;
+  size_t nMComplex = paras.mComplexValues().size();
 
   // Check size of parameter list
-  if (paras.GetNBool() != check_nBool)
-    throw(BadParameter("BreitWignerStrat::execute() | "
-                       "Number of BoolParameters does not match: " +
-                       std::to_string(paras.GetNBool()) + " given but " +
-                       std::to_string(check_nBool) + " expected."));
-  if (paras.GetNInteger() != check_nInt)
+  if (nInt != check_nInt)
     throw(BadParameter("BreitWignerStrat::execute() | "
                        "Number of IntParameters does not match: " +
-                       std::to_string(paras.GetNInteger()) + " given but " +
+                       std::to_string(nInt) + " given but " +
                        std::to_string(check_nInt) + " expected."));
-  if (paras.GetNDouble() != check_nDouble)
+  if (nDouble != check_nDouble)
     throw(BadParameter("BreitWignerStrat::execute() | "
-                       "Number of DoubleParameters does not match: " +
-                       std::to_string(paras.GetNDouble()) + " given but " +
+                       "Number of FitParameters does not match: " +
+                       std::to_string(nDouble) + " given but " +
                        std::to_string(check_nDouble) + " expected."));
-  if (paras.GetNComplex() != check_nComplex)
+  if (nComplex != check_nComplex)
     throw(BadParameter("BreitWignerStrat::execute() | "
                        "Number of ComplexParameters does not match: " +
-                       std::to_string(paras.GetNComplex()) + " given but " +
+                       std::to_string(nComplex) + " given but " +
                        std::to_string(check_nComplex) + " expected."));
-  if (paras.GetNMultiDouble() != check_nMDouble)
+  if (nMInteger != check_nMInteger)
+    throw(BadParameter("BreitWignerStrat::execute() | "
+                       "Number of MultiInt does not match: " +
+                       std::to_string(nMInteger) + " given but " +
+                       std::to_string(check_nMInteger) + " expected."));
+  if (nMDouble != check_nMDouble)
     throw(BadParameter("BreitWignerStrat::execute() | "
                        "Number of MultiDoubles does not match: " +
-                       std::to_string(paras.GetNMultiDouble()) + " given but " +
+                       std::to_string(nMDouble) + " given but " +
                        std::to_string(check_nMDouble) + " expected."));
-  if (paras.GetNMultiComplex() != check_nMComplex)
+  if (nMComplex != check_nMComplex)
     throw(BadParameter("BreitWignerStrat::execute() | "
                        "Number of MultiComplexes does not match: " +
-                       std::to_string(paras.GetNMultiComplex()) +
-                       " given but " + std::to_string(check_nMComplex) +
-                       " expected."));
+                       std::to_string(nMComplex) + " given but " +
+                       std::to_string(check_nMComplex) + " expected."));
 #endif
 
-  /** Get parameters from ParameterList:
-   * We use the same order of the parameters as was used during tree
-   * construction
-   */
-  double m0 = paras.GetDoubleParameter(0)->GetValue();
-  double Gamma0 = paras.GetDoubleParameter(1)->GetValue();
-  unsigned int spin = (unsigned int)paras.GetDoubleParameter(2)->GetValue();
-  double d = paras.GetDoubleParameter(3)->GetValue();
-  formFactorType ffType =
-      formFactorType(paras.GetDoubleParameter(4)->GetValue());
-  double ma = paras.GetDoubleParameter(5)->GetValue();
-  double mb = paras.GetDoubleParameter(6)->GetValue();
+  size_t n = paras.mDoubleValue(0)->values().size();
+  if (!out)
+    out = MComplex("", n);
+  auto par =
+      std::static_pointer_cast<Value<std::vector<std::complex<double>>>>(out);
+  auto &results = par->values(); // reference
 
-  std::vector<double> mp = paras.GetMultiDouble(0)->GetValues();
-
-  std::vector<std::complex<double>> results(mp.size(),
-                                            std::complex<double>(0., 0.));
+  // Get parameters from ParameterList:
+  // We use the same order of the parameters as was used during tree
+  // construction.
+  double m0 = paras.doubleParameter(0)->value();
+  double Gamma0 = paras.doubleParameter(1)->value();
+  double d = paras.doubleParameter(2)->value();
+  unsigned int spin = paras.doubleValue(0)->value();
+  formFactorType ffType = formFactorType(paras.doubleValue(1)->value());
+  double ma = paras.doubleValue(2)->value();
+  double mb = paras.doubleValue(3)->value();
 
   // calc function for each point
-  for (unsigned int ele = 0; ele < mp.size(); ele++) {
+  for (unsigned int ele = 0; ele < n; ele++) {
     try {
       results.at(ele) = RelativisticBreitWigner::dynamicalFunction(
-          mp.at(ele), m0, ma, mb, Gamma0, spin, d, ffType);
+          paras.mDoubleValue(0)->values().at(ele), m0, ma, mb, Gamma0, spin, d,
+          ffType);
     } catch (std::exception &ex) {
       LOG(error) << "BreitWignerStrategy::execute() | " << ex.what();
       throw(std::runtime_error("BreitWignerStrategy::execute() | "
                                "Evaluation of dynamic function failed!"));
     }
   }
-  out =
-      std::shared_ptr<AbsParameter>(new MultiComplex(out->GetName(), results));
-  return true;
 }
 
-void RelativisticBreitWigner::GetParameters(ParameterList &list) {
-  AbstractDynamicalFunction::GetParameters(list);
+void RelativisticBreitWigner::parameters(ParameterList &list) {
+  AbstractDynamicalFunction::parameters(list);
 
   // We check of for each parameter if a parameter of the same name exists in
   // list. If so we check if both are equal and set the local parameter to the
   // parameter from the list. In this way we connect parameters that occur on
   // different positions in the amplitude.
-  std::shared_ptr<DoubleParameter> tmp, width, radius;
-  width = GetWidthParameter();
-  radius = GetMesonRadiusParameter();
-  try { // catch BadParameter
-    tmp = list.GetDoubleParameter(width->GetName());
-    // catch and throw std::runtime_error due to failed parameter comparisson
-    try { 
-      if (*tmp == *width)
-        SetWidthParameter(tmp);
-    } catch (std::exception &ex) {
-      throw;
-    }
-  } catch (BadParameter &ex) {
-    list.AddParameter(width);
-  }
-
-  try { // catch BadParameter
-    tmp = list.GetDoubleParameter(radius->GetName());
-    // catch and throw std::runtime_error due to failed parameter comparisson
-    try {
-      if (*tmp == *radius)
-        SetMesonRadiusParameter(tmp);
-    } catch (std::exception &ex) {
-      throw;
-    }
-  } catch (BadParameter &ex) {
-    list.AddParameter(radius);
-  }
+ Width = list.addUniqueParameter(Width);
+  MesonRadius = list.addUniqueParameter(MesonRadius);
 }
 
-void RelativisticBreitWigner::UpdateParameters(const ParameterList &par){
+void RelativisticBreitWigner::updateParameters(const ParameterList &list) {
 
   // Try to update mesonRadius
-  std::shared_ptr<DoubleParameter> rad;
+  std::shared_ptr<FitParameter> rad;
   try {
-    rad = par.GetDoubleParameter(_mesonRadius->GetName());
+    rad = FindParameter(MesonRadius->name(), list);
   } catch (std::exception &ex) {
   }
   if (rad)
-    _mesonRadius->UpdateParameter(rad);
-  
+    MesonRadius->updateParameter(rad);
+
   // Try to update width
-  std::shared_ptr<DoubleParameter> width;
+  std::shared_ptr<FitParameter> width;
   try {
-    width = par.GetDoubleParameter(_width->GetName());
+    width = FindParameter(Width->name(), list);
   } catch (std::exception &ex) {
   }
   if (width)
-    _width->UpdateParameter(width);
-  
+   Width->updateParameter(width);
+
   return;
 }

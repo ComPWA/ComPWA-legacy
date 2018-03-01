@@ -20,40 +20,31 @@
 
 namespace ComPWA {
 
-//-----------------------------------------------------------------------------
 class GaussAmp : public AmpIntensity {
 public:
-  GaussAmp(const char *name, DoubleParameter _resMass,
-           DoubleParameter _resWidth) {
+  GaussAmp(const char *name, FitParameter _resMass, FitParameter _resWidth) {
     params.AddParameter(
-        std::shared_ptr<DoubleParameter>(new DoubleParameter(_resMass)));
+        std::shared_ptr<FitParameter>(new FitParameter(_resMass)));
     params.AddParameter(
-        std::shared_ptr<DoubleParameter>(new DoubleParameter(_resWidth)));
+        std::shared_ptr<FitParameter>(new FitParameter(_resWidth)));
     initialise();
   }
 
   GaussAmp(const char *name, double _resMass, double _resWidth) {
-    params.AddParameter(std::shared_ptr<DoubleParameter>(
-        new DoubleParameter("mass", _resMass)));
-    params.AddParameter(std::shared_ptr<DoubleParameter>(
-        new DoubleParameter("width", _resWidth)));
+    params.AddParameter(
+        std::shared_ptr<FitParameter>(new FitParameter("mass", _resMass)));
+    params.AddParameter(
+        std::shared_ptr<FitParameter>(new FitParameter("width", _resWidth)));
     initialise();
   }
 
-  //! Clone function
-  GaussAmp *Clone(std::string newName = "") const {
-    auto tmp = (new GaussAmp(*this));
-    tmp->_name(newName);
-    return tmp;
-  }
-
   virtual void initialise() {
-    if (Kinematics::Instance()->GetNVars() != 1)
+    if (Kinematics::Instance()->numVariables() != 1)
       throw std::runtime_error("GaussAmp::initialize() | "
                                "this amplitude is for two body decays only!");
   };
-  //! Clone function
-  virtual GaussAmp *Clone(std::string newName = "") {
+
+  virtual GaussAmp *clone(std::string newName = "") const {
     auto tmp = (new GaussAmp(*this));
     tmp->_name(newName);
     return tmp;
@@ -64,19 +55,19 @@ public:
   virtual double GetNormalization() const { return 1 / Integral(); }
 
   virtual double GetMaximum(std::shared_ptr<Generator> gen) const {
-    double mass = params.GetDoubleParameter(0)->GetValue();
+    double mass = params.GetFitParameter(0)->value();
     std::vector<double> m;
     m.push_back(mass * mass);
     dataPoint p(m);
-    return Intensity(p);
+    return intensity(p);
   }
 
-  virtual void GetParameters(ParameterList &list){};
+  virtual void parameters(ParameterList &list){};
 
-  virtual double Intensity(const dataPoint &point) const {
+  virtual double intensity(const dataPoint &point) const {
 
-    double mass = params.GetDoubleParameter(0)->GetValue();
-    double width = params.GetDoubleParameter(1)->GetValue();
+    double mass = params.GetFitParameter(0)->value();
+    double width = params.GetFitParameter(1)->value();
     double sqrtS = std::sqrt(point.GetValue(0));
 
     std::complex<double> gaus(
@@ -86,7 +77,7 @@ public:
   }
 
   virtual double IntensityNoNorm(const dataPoint &point) const {
-    return Intensity(point);
+    return intensity(point);
   }
 
   virtual void GetFitFractions(ParameterList &parList) {}
@@ -106,22 +97,19 @@ public:
   }
 
 protected:
-  //! Get integral
   virtual double Integral() const {
-    return (params.GetDoubleParameter(1)->GetValue() * std::sqrt(2 * M_PI));
+    return (params.GetFitParameter(1)->value() * std::sqrt(2 * M_PI));
   }
 
-  //! List of interal parameters
+  /// List of interal parameters
   ParameterList params;
 };
-//-----------------------------------------------------------------------------
 
-//-----------------------------------------------------------------------------
-/**! UnitAmp
- *
- * Example implementation of AmpIntensity with the function value 1.0 at all
- * points in PHSP. It is used to test the likelihood normalization.
- */
+///
+/// \class UnitAmp
+/// UnitAmp. Example implementation of AmpIntensity with the function value
+/// 1.0 at all points in PHSP. It is used to test the likelihood normalization.
+///
 class UnitAmp : public AmpIntensity {
 public:
   UnitAmp() { _eff = std::shared_ptr<Efficiency>(new UnitEfficiency()); }
@@ -145,35 +133,32 @@ public:
     return 1;
   }
 
-  virtual double Intensity(const dataPoint &point) const {
-    return _eff->Evaluate(point);
+  virtual double intensity(const dataPoint &point) const {
+    return _eff->evaluate(point);
   }
 
-  virtual void GetParameters(ParameterList &list){};
+  virtual void parameters(ParameterList &list){};
 
   virtual double IntensityNoNorm(const dataPoint &point) const { return 1.0; }
 
   virtual void GetFitFractions(ParameterList &parList) {}
 
   //========== FunctionTree =============
-  //! Check of tree is available
-  virtual bool HasTree() const { return 1; }
 
-  //! Getter function for basic amp tree
-  //! Getter function for basic amp tree
-  virtual std::shared_ptr<FunctionTree> GetTree(const ParameterList &sample,
-                                                const ParameterList &toySample,
-                                                const ParameterList &sample3,
-                                                std::string suffix = "") {
+  virtual bool hasTree() const { return 1; }
+
+  virtual std::shared_ptr<FunctionTree> tree(const ParameterList &sample,
+                                             const ParameterList &toySample,
+                                             const ParameterList &sample3,
+                                             std::string suffix = "") {
     return setupBasicTree(sample, toySample, "");
   }
 
-  /*! Set phase space samples
-   * We use phase space samples to calculate the normalizations. In case of
-   * intensities we phase space sample phspSample includes the event efficiency.
-   * The sample toySample is used for normalization calculation for e.g.
-   * Resonacnes without efficiency.
-   */
+  // Set phase space samples
+  // We use phase space samples to calculate the normalizations. In case of
+  // intensities we phase space sample phspSample includes the event efficiency.
+  // The sample toySample is used for normalization calculation for e.g.
+  // Resonacnes without efficiency.
   virtual void
   SetPhspSample(std::shared_ptr<std::vector<ComPWA::dataPoint>> phspSample,
                 std::shared_ptr<std::vector<ComPWA::dataPoint>> toySample) {}
@@ -183,22 +168,11 @@ public:
   }
 
 protected:
-  /**Setup Basic Tree
-   *
-   * @param sample data sample
-   * @param toySample sample of flat toy MC events for normalization of the
-   * resonances
-   * @param suffix Which tree should be created? "data" data Tree, "norm"
-   * normalization tree
-   * with efficiency corrected toy phsp sample or "normAcc" normalization tree
-   * with sample
-   * of accepted flat phsp events
-   */
   std::shared_ptr<FunctionTree> setupBasicTree(const ParameterList &sample,
                                                const ParameterList &toySample,
                                                std::string suffix) {
 
-    int sampleSize = sample.GetMultiDouble(0)->GetNValues();
+    int sampleSize = sample.GetMultiDouble(0)->numValues();
 
     LOG(debug) << "UnitAmp::setupBasicTree() generating new tree!";
     if (sampleSize == 0) {
@@ -206,21 +180,20 @@ protected:
       return std::shared_ptr<FunctionTree>();
     }
     std::shared_ptr<FunctionTree> newTree(new FunctionTree());
-    // std::shared_ptr<MultAll> mmultDStrat(new MultAll(ParType::MDOUBLE));
 
     std::vector<double> oneVec(sampleSize, 1.0);
-    std::shared_ptr<AbsParameter> one(new MultiDouble("one", oneVec));
+    auto one = std::make_shared<MultiDouble>("one", oneVec);
     newTree->createHead("AmpIntensity" + suffix, one);
     std::cout << newTree->head()->to_str(10) << std::endl;
     return newTree;
   }
 
   virtual double Integral() const {
-    return Kinematics::Instance()->GetPhspVolume();
+    return Kinematics::Instance()->phspVolume();
   }
 };
 
-} /* namespace ComPWA */
+} // ns::ComPWA
+#endif
 
-
-#endif /* CORE_GAUSSAMP_HPP_ */
+f
