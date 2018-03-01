@@ -82,7 +82,7 @@ std::shared_ptr<ComPWA::AmpIntensity> createIntens(
   boost::property_tree::ptree modelTree;
   boost::property_tree::xml_parser::read_xml(modelStream, modelTree);
   auto intens = std::make_shared<IncoherentIntensity>(
-    partL, kin, modelTree.get_child("IncoherentIntensity"));
+    partL, kin, modelTree.get_child("Intensity"));
   auto phspPoints =
       std::make_shared<std::vector<ComPWA::DataPoint>>(phspSample->dataPoints(kin));
   intens->setPhspSample(phspPoints, phspPoints);
