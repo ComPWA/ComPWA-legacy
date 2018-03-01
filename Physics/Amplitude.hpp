@@ -80,8 +80,32 @@ public:
 
   /// Fill parameters to list
   virtual void GetParameters(ParameterList &list) {
-    list.AddParameter(_magnitude);
-    list.AddParameter(_phase);
+    std::shared_ptr<DoubleParameter> tmp;
+    try { // catch BadParameter
+      tmp = list.GetDoubleParameter(_phase->GetName());
+      // catch and throw std::runtime_error due to failed parameter comparisson
+      try {
+        if (*tmp == *_phase)
+          _phase = tmp;
+      } catch (std::exception &ex) {
+        throw;
+      }
+    } catch (BadParameter &ex) {
+      list.AddParameter(_phase);
+    }
+
+    try { // catch BadParameter
+      tmp = list.GetDoubleParameter(_magnitude->GetName());
+      // catch and throw std::runtime_error due to failed parameter comparisson
+      try {
+        if (*tmp == *_magnitude)
+          _magnitude = tmp;
+      } catch (std::exception &ex) {
+        throw;
+      }
+    } catch (BadParameter &ex) {
+      list.AddParameter(_magnitude);
+    }
   }
 
   /// Fill vector with parameters.

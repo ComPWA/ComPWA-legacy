@@ -177,7 +177,20 @@ IncoherentIntensity::GetTree(std::shared_ptr<Kinematics> kin,
 }
 
 void IncoherentIntensity::GetParameters(ComPWA::ParameterList &list) {
-  list.AddParameter(_strength);
+  std::shared_ptr<DoubleParameter> tmp;
+  try { // catch BadParameter
+    tmp = list.GetDoubleParameter(_strength->GetName());
+    // catch and throw std::runtime_error due to failed parameter comparisson
+    try {
+      if (*tmp == *_strength)
+        _strength = tmp;
+    } catch (std::exception &ex) {
+      throw;
+    }
+  } catch (BadParameter &ex) {
+    list.AddParameter(_strength);
+  }
+
   for (auto i : GetIntensities()) {
     i->GetParameters(list);
   }

@@ -101,8 +101,33 @@ public:
   void SetPhase(double par) { _phase->SetValue(par); }
 
   virtual void GetParameters(ParameterList &list) {
-    list.AddParameter(GetMagnitudeParameter());
-    list.AddParameter(GetPhaseParameter());
+      std::shared_ptr<DoubleParameter> tmp;
+    try { // catch BadParameter
+      tmp = list.GetDoubleParameter(_phase->GetName());
+      // catch and throw std::runtime_error due to failed parameter comparisson
+      try {
+        if (*tmp == *_phase)
+          _phase = tmp;
+      } catch (std::exception &ex) {
+        throw;
+      }
+    } catch (BadParameter &ex) {
+      list.AddParameter(_phase);
+    }
+
+    try { // catch BadParameter
+      tmp = list.GetDoubleParameter(_magnitude->GetName());
+      // catch and throw std::runtime_error due to failed parameter comparisson
+      try {
+        if (*tmp == *_magnitude)
+          _magnitude = tmp;
+      } catch (std::exception &ex) {
+        throw;
+      }
+    } catch (BadParameter &ex) {
+      list.AddParameter(_magnitude);
+    }
+
   }
 
   /// Fill vector with parameters (fast). No check is performed if parameters

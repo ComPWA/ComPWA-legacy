@@ -104,16 +104,17 @@ inline bool Generate(int number, std::shared_ptr<ComPWA::Kinematics> kin,
 
     // If maximum of intensity is reached we have to restart the procedure
     if (generationMaxValue < (AMPpdf * weight)) {
-      LOG(trace) << "RunManager::gen() | Error in HitMiss "
-                    "procedure: Maximum value of random number generation "
-                    "smaller then amplitude maximum! We raise the maximum "
-                    "value and restart generation!";
+
       i = 0;
       bar = ComPWA::progressBar(number);
       gen->SetSeed(initialSeed);
       generationMaxValue = 2 * (AMPpdf * weight);
       data->Clear();
       totalCalls = 0;
+      LOG(trace) << "RunManager::gen() | Error in HitMiss "
+                    "procedure: Maximum value of random number generation "
+                    "smaller then amplitude maximum! We raise the maximum to "
+                 << generationMaxValue << "value and restart generation!";
       continue;
     }
 

@@ -88,7 +88,7 @@ int main(int argc, char **argv) {
                        po::value<int>(&numEvents)->default_value(1000),
                        "set of events per fit");
   config.add_options()(
-      "seed", po::value<int>(&seed)->default_value(-1),
+      "seed", po::value<int>(&seed)->default_value(12345),
       "set random number seed; default is to used unique seed for every job");
   config.add_options()(
       "logLevel", po::value<std::string>(&logLevel)->default_value("trace"),
@@ -208,7 +208,7 @@ int main(int argc, char **argv) {
       po::value<unsigned int>(&ampMcPrecision)->default_value(0),
       "Precision for MC integration and normalization")(
       "fittingMethod",
-      po::value<std::string>(&fittingMethod)->default_value("plotOnly"),
+      po::value<std::string>(&fittingMethod)->default_value("tree"),
       "choose between 'tree', 'amplitude' and 'plotOnly'")(
       "useMinos", po::value<bool>(&useMinos)->default_value(0),
       "Run MINOS for each parameter")(
