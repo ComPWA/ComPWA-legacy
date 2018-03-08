@@ -9,23 +9,13 @@ namespace ComPWA {
 namespace Physics {
 namespace DecayDynamics {
 
-inline std::complex<double> couplingToWidth(double mSq, double mR, double g,
-                                            double ma, double mb, double spin,
-                                            double mesonRadius,
-                                            formFactorType type,
+/// Convert width to complex coupling. This is the implementation of
+/// PDG2014, Chapter 47.2, Eq. 47.21 (inverted).
+inline std::complex<double> couplingToWidth(double mR, double g,
+                                            std::complex<double> gamma,
                                             std::complex<double> phspFactor) {
-  // calculate gammaA(s_R)
-  std::complex<double> gammaA(1, 0); // spin==0
-
-  if (spin > 0 || type == formFactorType::CrystalBarrel) {
-    std::complex<double> qV = qValue(mR, ma, mb);
-    double ffR = FormFactor(mR, ma, mb, spin, mesonRadius, qV, type);
-    std::complex<double> qR = std::pow(qV, spin);
-    gammaA = ffR * qR;
-  }
-
   // calculate phsp factor
-  std::complex<double> res = std::norm(gammaA) * g * g * phspFactor / mR;
+  std::complex<double> res = std::norm(gamma) * g * g * phspFactor / mR;
 
 #ifndef NDEBUG
   // check for NaN
@@ -41,37 +31,38 @@ inline std::complex<double> couplingToWidth(double mSq, double mR, double g,
   return res;
 }
 
-inline std::complex<double> couplingToWidth(double mSq, double mR, double g,
+/// Convert width to complex coupling. This is the implementation of
+/// PDG2014, Chapter 47.2, Eq. 47.21 (inverted).
+inline std::complex<double> couplingToWidth(double sqrtS, double mR, double g,
                                             double ma, double mb, double spin,
                                             double mesonRadius,
                                             formFactorType type) {
-  double sqrtM = sqrt(mSq);
-  std::complex<double> phspF = phspFactor(sqrtM, ma, mb);
-
-  return couplingToWidth(mSq, mR, g, ma, mb, spin, mesonRadius, type, phspF);
-}
-
-inline std::complex<double> widthToCoupling(double mSq, double mR, double width,
-                                            double ma, double mb, double spin,
-                                            double mesonRadius,
-                                            formFactorType type) {
-  double sqrtS = sqrt(mSq);
-
-  // calculate gammaA(s_R)
-  std::complex<double> gammaA(1, 0); // spin==0
-  std::complex<double> qV;
-  if (spin > 0) {
-    qV = qValue(mR, ma, mb);
-    double ffR = FormFactor(mR, ma, mb, spin, mesonRadius, qV, type);
-    std::complex<double> qR = std::pow(qV, spin);
-    gammaA = ffR * qR;
+  auto qR = qValue(mR, ma, mb);
+  auto phspR = phspFactor(mR, ma, mb);
+  auto ffR = FormFactor(qR, spin, mesonRadius, type);
+  
+  // Calculate normalized vertex functions vtxA(s_R)
+  std::complex<double> vtx(1, 0); // spin==0
+  if (spin > 0 || type == formFactorType::CrystalBarrel) {
+    vtx = ffR * std::pow(qR, spin);
   }
 
-  // calculate phsp factor
-  std::complex<double> rho = phspFactor(sqrtS, ma, mb);
+  return couplingToWidth(mR, g, vtx, phspR);
+}
 
-  std::complex<double> denom = gammaA * sqrt(rho);
-  std::complex<double> res = std::complex<double>(sqrt(mR * width), 0) / denom;
+/// Convert width to complex coupling. The form factor \p formFactorR, the
+/// normalized vertex function \p gamma (both evaluated at the resonance pole)
+/// and the \p phspFactor (evaluated at sqrt(s)) can be passed in
+/// order to save computation time. This is the implementation of
+/// PDG2014, Chapter 47.2, Eq. 47.21. See also widthToCoupling(double mSq,
+/// double mR, double width, double ma, double mb, double spin, double mesonRadius,
+/// formFactorType type)
+inline std::complex<double> widthToCoupling(double mR, double width,
+                                            std::complex<double> gamma,
+                                            std::complex<double> phspFactor) {
+
+  auto denom = gamma * std::sqrt(phspFactor);
+  auto res = std::complex<double>(sqrt(mR * width), 0) / denom;
 
 #ifndef NDEBUG
   // check for NaN
@@ -85,6 +76,30 @@ inline std::complex<double> widthToCoupling(double mSq, double mR, double width,
 #endif
 
   return res;
+}
+
+/// Convert width to complex coupling. This is the implementation of
+/// PDG2014, Chapter 47.2, Eq. 47.21.
+inline std::complex<double> widthToCoupling(double sqrtS, double mR, double width,
+                                            double ma, double mb, double spin,
+                                            double mesonRadius,
+                                            formFactorType type) {
+
+  // Calculate normalized vertex function gammaA(s_R) (see PDG2014, Chapter 47.2)
+  std::complex<double> gammaA(1, 0); // spin==0
+  std::complex<double> qV;
+  if (spin > 0) {
+    qV = qValue(mR, ma, mb);
+    double ffR = FormFactor(qV, spin, mesonRadius, type);
+    std::complex<double> qR = std::pow(qV, spin);
+    gammaA = ffR * qR;
+  }
+
+  // calculate phsp factor
+  std::complex<double> rho = phspFactor(sqrtS, ma, mb);
+
+
+  return widthToCoupling(mR, width, gammaA, rho);
 }
 
 class Coupling {

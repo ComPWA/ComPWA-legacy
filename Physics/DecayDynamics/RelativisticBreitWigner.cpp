@@ -97,6 +97,7 @@ std::complex<double> RelativisticBreitWigner::dynamicalFunction(
   std::complex<double> i(0, 1);
   double sqrtS = sqrt(mSq);
 
+  // Phase space factors at sqrt(s) and at the resonance position
   auto phspFactorSqrtS = phspFactor(sqrtS, ma, mb);
   auto phspFactormR = phspFactor(mR, ma, mb);
 
@@ -104,24 +105,27 @@ std::complex<double> RelativisticBreitWigner::dynamicalFunction(
   if (phspFactorSqrtS == std::complex<double>(0, 0))
     return std::complex<double>(0, 0);
 
-  std::complex<double> qTerm =
+  std::complex<double> qRatio =
       std::pow((phspFactorSqrtS / phspFactormR) * mR / sqrtS, (2 * J + 1));
-  double barrier = FormFactor(sqrtS, ma, mb, J, mesonRadius, ffType) /
-                   FormFactor(mR, ma, mb, J, mesonRadius, ffType);
+  double ffR = FormFactor(mR, ma, mb, J, mesonRadius, ffType);
+  // Barrier factor ( F(sqrt(s)) / F(mR) )
+  double barrier = FormFactor(sqrtS, ma, mb, J, mesonRadius, ffType) / ffR;
+  std::complex<double> damping = barrier*qRatio;
 
-  // Calculate coupling constant to final state
-  std::complex<double> g_final =
-      widthToCoupling(mSq, mR, width, ma, mb, J, mesonRadius, ffType);
+  // Calculate normalized vertex function gammaA(s_R) (see PDG2014, Chapter 47.2)
+  std::complex<double> gammaA(1, 0); // spin==0
+  if (J > 0) {
+    std::complex<double> qR = std::pow(qValue(mR, ma, mb), J);
+    gammaA = ffR * qR;
+  }
+  
+  // Coupling to the final state (ma, mb)
+  std::complex<double> g_final = widthToCoupling(mR, width, gammaA, phspFactorSqrtS);
 
-  // Coupling constant from production reaction. In case of a particle decay
-  // the production coupling doesn't depend in energy since the CM energy
-  // is in the (RC) system fixed to the mass of the decaying particle
-  double g_production = 1;
+  std::complex<double> denom(mR * mR - mSq, 0);
+  denom += (-1.0) * i * sqrtS * (width * damping);
 
-  std::complex<double> denom = std::complex<double>(mR * mR - mSq, 0) +
-                               (-1.0) * i * sqrtS * (width * qTerm * barrier);
-
-  std::complex<double> result = g_final * g_production / denom;
+  std::complex<double> result = g_final / denom;
 
   assert(
       (!std::isnan(result.real()) || !std::isinf(result.real())) &&

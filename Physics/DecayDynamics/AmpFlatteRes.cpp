@@ -123,60 +123,52 @@ std::complex<double> AmpFlatteRes::dynamicalFunction(
   return result;
 }
 
+/// Helper function to calculate the coupling terms for the Flatte formular.
+inline std::complex<double> flatteCouplingTerm(double sqrtS, double mR,
+                                               double coupling, double massA,
+                                               double massB, unsigned int J,
+                                               double mesonRadius,
+                                               formFactorType ffType){
+  auto qR = qValue(mR, massA, massB);
+  auto phspR = phspFactor(sqrtS, massA, massB);
+  auto ffR = FormFactor(qR, J, mesonRadius, ffType);
+  auto barrierA = FormFactor(sqrtS, massA, massB, J, mesonRadius, ffType) / ffR;
+  
+  // Calculate normalized vertex functions vtxA(s_R)
+  std::complex<double> vtxA(1, 0); // spin==0
+  if (J > 0 || ffType == formFactorType::CrystalBarrel) {
+    vtxA = ffR * std::pow(qR, J);
+  }
+  auto width = couplingToWidth(mR, coupling, vtxA, phspR);
+  // Including the factor qTermA, as suggested by PDG 2014, Chapter 47.2,
+  // leads to an amplitude that doesn't converge.
+  //  qTermA = qValue(sqrtS,massA1,massA2) / qValue(mR,massA1,massA2);
+  //  termA = gammaA * barrierA * barrierA * std::pow(qTermA, (double)2 * J + 1);
+
+  return ( width * barrierA * barrierA );
+}
+
 std::complex<double>
 AmpFlatteRes::dynamicalFunction(double mSq, double mR, double massA1,
                                 double massA2, double gA, double massB1,
                                 double massB2, double couplingB, double massC1,
                                 double massC2, double couplingC, unsigned int J,
                                 double mesonRadius, formFactorType ffType) {
-  std::complex<double> i(0, 1);
   double sqrtS = sqrt(mSq);
 
   // channel A - signal channel
-  std::complex<double> gammaA, qTermA, termA;
-  double barrierA;
-  // break-up momentum
-  barrierA = FormFactor(sqrtS, massA1, massA2, J, mesonRadius, ffType) /
-             FormFactor(mR, massA1, massA2, J, mesonRadius, ffType);
-  // convert coupling to partial width of channel A
-  gammaA = couplingToWidth(mSq, mR, gA, massA1, massA2, J, mesonRadius, ffType);
-  // including the factor qTermA, as suggested by PDG, leads to an amplitude
-  // that doesn't converge.
-  //    qTermA = Kinematics::qValue(sqrtS,massA1,massA2) /
-  // Kinematics::qValue(mR,massA1,massA2);
-  qTermA = std::complex<double>(1, 0);
-  termA = gammaA * barrierA * barrierA * std::pow(qTermA, (double)2 * J + 1);
-
+  auto termA = flatteCouplingTerm(sqrtS, mR, gA, massA1, massA2,
+                                  J, mesonRadius, ffType);
   // channel B - hidden channel
-  std::complex<double> gammaB, qTermB, termB;
-  double barrierB, gB;
-  // break-up momentum
-  barrierB = FormFactor(sqrtS, massB1, massB2, J, mesonRadius, ffType) /
-             FormFactor(mR, massB1, massB2, J, mesonRadius, ffType);
-  gB = couplingB;
-  // convert coupling to partial width of channel B
-  gammaB = couplingToWidth(mSq, mR, gB, massB1, massB2, J, mesonRadius, ffType);
-  //    qTermB = Kinematics::qValue(sqrtS,massB1,massB2) /
-  // Kinematics::qValue(mR,massB1,massB2);
-  qTermB = std::complex<double>(1, 0);
-  termB = gammaB * barrierB * barrierB * std::pow(qTermB, (double)2 * J + 1);
-
+  auto termB = flatteCouplingTerm(sqrtS, mR, couplingB, massB1, massB2,
+                                  J, mesonRadius, ffType);
   // channel C - hidden channel
-  std::complex<double> gammaC, qTermC, termC;
-  double barrierC, gC;
+  std::complex<double> termC;
   if (couplingC != 0.0) {
-    // break-up momentum
-    barrierC = FormFactor(sqrtS, massC1, massC2, J, mesonRadius, ffType) /
-               FormFactor(mR, massC1, massC2, J, mesonRadius, ffType);
-    gC = couplingC;
-    // convert coupling to partial width of channel C
-    gammaC =
-        couplingToWidth(mSq, mR, gC, massC1, massC2, J, mesonRadius, ffType);
-    //    qTermC = Kinematics::qValue(sqrtS,massC1,massC2) /
-    // Kinematics::qValue(mR,massC1,massC2);
-    qTermC = std::complex<double>(1, 0);
-    termC = gammaC * barrierC * barrierC * std::pow(qTermC, (double)2 * J + 1);
+    termC = flatteCouplingTerm(sqrtS, mR, couplingC, massC1, massC2, J,
+                               mesonRadius, ffType);
   }
+
 
   return dynamicalFunction(mSq, mR, gA, termA, termB, termC);
 }
