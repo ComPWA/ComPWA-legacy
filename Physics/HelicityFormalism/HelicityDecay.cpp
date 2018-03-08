@@ -92,6 +92,8 @@ void HelicityDecay::load(std::shared_ptr<PartList> partL,
     } else if (decayType == "flatte") {
       DynamicFcn = std::make_shared<DecayDynamics::AmpFlatteRes>(
           name, DecayProducts, partL);
+    } else if (decayType == "virtual") {
+      DynamicFcn = std::make_shared<DecayDynamics::NonResonant>(name);
     } else {
       throw std::runtime_error(
           "HelicityDecay::Factory() | Unknown decay type " + decayType + "!");

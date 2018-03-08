@@ -12,9 +12,12 @@ double SumMinLogLH::controlParameter(ParameterList &minPar) {
   double lh = 0;
   if (!_tree) {
     for (auto i : _minLogLh)
-      lh = +i->controlParameter(minPar);
+      lh += i->controlParameter(minPar);
   } else {
-    auto logLH = std::dynamic_pointer_cast<FitParameter>(_tree->parameter());
+  _tree->print();
+  std::cout<<std::flush;
+  auto tttt = _tree->parameter();
+    auto logLH = std::dynamic_pointer_cast<Value<double>>(_tree->parameter());
     lh = logLH->value();
   }
   _nCalls++;
