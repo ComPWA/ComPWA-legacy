@@ -56,6 +56,8 @@ void HelicityDecay::load(std::shared_ptr<PartList> partL,
                              " not found in list!");
   ComPWA::Spin J = partItr->second.GetSpinQuantumNumber("Spin");
   ComPWA::Spin mu(pt.get<double>("DecayParticle.<xmlattr>.Helicity"));
+  //if the node OrbitalAngularMomentum is not exists, set it to spin J as default
+  ComPWA::Spin orbitL(pt.get<double>("DecayParticle.<xmlattr>.OrbitalAngularMomentum", (double) J));
 
   // Read name and helicities from decay products
   auto decayProducts = pt.get_child("DecayProducts");
@@ -89,9 +91,11 @@ void HelicityDecay::load(std::shared_ptr<PartList> partL,
     } else if (decayType == "relativisticBreitWigner") {
       DynamicFcn = std::make_shared<DecayDynamics::RelativisticBreitWigner>(
           name, DecayProducts, partL);
+      DynamicFcn->SetOrbitalAngularMomentum(orbitL);
     } else if (decayType == "flatte") {
       DynamicFcn = std::make_shared<DecayDynamics::AmpFlatteRes>(
           name, DecayProducts, partL);
+      DynamicFcn->SetOrbitalAngularMomentum(orbitL);
     } else {
       throw std::runtime_error(
           "HelicityDecay::Factory() | Unknown decay type " + decayType + "!");
@@ -121,6 +125,7 @@ boost::property_tree::ptree HelicityDecay::save() const {
 
   pt.put("DecayParticle.<xmlattr>.Name", DynamicFcn->name());
   pt.put("DecayParticle.<xmlattr>.Helicity", AngularDist->mu());
+  pt.put("DecayParticle.<xmlatrr>.OrbitalAngularMomentum", DynamicFcn->GetOrbitalAngularMomentum());
 
   // TODO: put helicities of daughter particles
   return pt;
