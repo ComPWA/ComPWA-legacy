@@ -33,6 +33,10 @@ RelativisticBreitWigner::RelativisticBreitWigner(
 
   auto spin = partProp.GetSpinQuantumNumber("Spin");
   SetSpin(spin);
+  //in default, using spin J as Orbital Angular Momentum
+  //update by calling SetOrbitalAngularMomentum() before any further process
+  //after RelBW is created by calling of constructor
+  SetOrbitalAngularMomentum(spin);
 
   auto ffType = formFactorType(decayTr.get<int>("FormFactor.<xmlattr>.Type"));
   SetFormFactorType(ffType);
@@ -71,7 +75,7 @@ std::complex<double> RelativisticBreitWigner::evaluate(const DataPoint &point,
                                                        int pos) const {
   std::complex<double> result =
       dynamicalFunction(point.value(pos),Mass->value(), DaughterMasses.first,
-                        DaughterMasses.second,Width->value(), (double)J,
+                        DaughterMasses.second,Width->value(), (double)L,
                         MesonRadius->value(), FormFactorType);
   assert(!std::isnan(result.real()) && !std::isnan(result.imag()));
   return result;
@@ -91,7 +95,7 @@ bool RelativisticBreitWigner::isModified() const {
 }
 
 std::complex<double> RelativisticBreitWigner::dynamicalFunction(
-    double mSq, double mR, double ma, double mb, double width, unsigned int J,
+    double mSq, double mR, double ma, double mb, double width, unsigned int L,
     double mesonRadius, formFactorType ffType) {
 
   std::complex<double> i(0, 1);
@@ -105,13 +109,13 @@ std::complex<double> RelativisticBreitWigner::dynamicalFunction(
     return std::complex<double>(0, 0);
 
   std::complex<double> qTerm =
-      std::pow((phspFactorSqrtS / phspFactormR) * mR / sqrtS, (2 * J + 1));
-  double barrier = FormFactor(sqrtS, ma, mb, J, mesonRadius, ffType) /
-                   FormFactor(mR, ma, mb, J, mesonRadius, ffType);
+      std::pow((phspFactorSqrtS / phspFactormR) * mR / sqrtS, (2 * L + 1));
+  double barrier = FormFactor(sqrtS, ma, mb, L, mesonRadius, ffType) /
+                   FormFactor(mR, ma, mb, L, mesonRadius, ffType);
 
   // Calculate coupling constant to final state
   std::complex<double> g_final =
-      widthToCoupling(mSq, mR, width, ma, mb, J, mesonRadius, ffType);
+      widthToCoupling(mSq, mR, width, ma, mb, L, mesonRadius, ffType);
 
   // Coupling constant from production reaction. In case of a particle decay
   // the production coupling doesn't depend in energy since the CM energy
@@ -145,7 +149,7 @@ RelativisticBreitWigner::tree(const ParameterList &sample, int pos,
 
   tr->createLeaf("Mass",Mass, "RelBreitWigner" + suffix);
   tr->createLeaf("Width",Width, "RelBreitWigner" + suffix);
-  tr->createLeaf("Spin", (double)J, "RelBreitWigner" + suffix);
+  tr->createLeaf("OrbitalAngularMomentum", (double)L, "ReBreitWigner" + suffix);
   tr->createLeaf("MesonRadius", MesonRadius, "RelBreitWigner" + suffix);
   tr->createLeaf("FormFactorType", FormFactorType, "RelBreitWigner" + suffix);
   tr->createLeaf("MassA", DaughterMasses.first, "RelBreitWigner" + suffix);
@@ -232,7 +236,7 @@ void BreitWignerStrategy::execute(ParameterList &paras,
   double m0 = paras.doubleParameter(0)->value();
   double Gamma0 = paras.doubleParameter(1)->value();
   double d = paras.doubleParameter(2)->value();
-  unsigned int spin = paras.doubleValue(0)->value();
+  unsigned int orbitL = paras.doubleValue(0)->value();
   formFactorType ffType = formFactorType(paras.doubleValue(1)->value());
   double ma = paras.doubleValue(2)->value();
   double mb = paras.doubleValue(3)->value();
@@ -241,7 +245,7 @@ void BreitWignerStrategy::execute(ParameterList &paras,
   for (unsigned int ele = 0; ele < n; ele++) {
     try {
       results.at(ele) = RelativisticBreitWigner::dynamicalFunction(
-          paras.mDoubleValue(0)->values().at(ele), m0, ma, mb, Gamma0, spin, d,
+          paras.mDoubleValue(0)->values().at(ele), m0, ma, mb, Gamma0, orbitL, d,
           ffType);
     } catch (std::exception &ex) {
       LOG(error) << "BreitWignerStrategy::execute() | " << ex.what();

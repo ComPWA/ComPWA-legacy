@@ -86,14 +86,14 @@ static const char *formFactorTypeString[] = {"noFormFactor", "BlattWeisskopf",
 enum formFactorType { noFormFactor = 0, BlattWeisskopf = 1, CrystalBarrel = 2 };
 
 /// Calculate form factor
-inline double FormFactor(double sqrtS, double ma, double mb, double spin,
+inline double FormFactor(double sqrtS, double ma, double mb, double orbitL,
                          double mesonRadius, std::complex<double> qValue,
                          formFactorType type) {
   if (mesonRadius == 0)
     return 1.0; // disable form factors
   if (type == formFactorType::noFormFactor)
     return 1.0; // disable form factors
-  if (type == formFactorType::BlattWeisskopf && spin == 0) {
+  if (type == formFactorType::BlattWeisskopf && orbitL == 0) {
     return 1.0;
   }
 
@@ -101,7 +101,7 @@ inline double FormFactor(double sqrtS, double ma, double mb, double spin,
 
   if (type == formFactorType::CrystalBarrel) {
     // Form factor for a0(980) used by Crystal Barrel (Phys.Rev.D78-074023)
-    if (spin == 0) {
+    if (orbitL == 0) {
       double qSq = std::norm(qValue);
       double alpha = mesonRadius * mesonRadius / 6;
       ff = std::exp(-alpha * qSq);
@@ -115,7 +115,7 @@ inline double FormFactor(double sqrtS, double ma, double mb, double spin,
     // Reference: S.U.Chung Annalen der Physik 4(1995) 404-430
     // z = q / (interaction range). For the interaction range we assume
     // 1/mesonRadius
-    if (spin == 0)
+    if (orbitL == 0)
       return 1.0;
     double qSq = std::norm(qValue);
     double z = qSq * mesonRadius * mesonRadius;
@@ -124,14 +124,14 @@ inline double FormFactor(double sqrtS, double ma, double mb, double spin,
     // don't have spin(?).
     z = std::fabs(z);
 
-    if (spin == 1) {
+    if (orbitL == 1) {
       ff = (sqrt(2 * z / (z + 1)));
-    } else if (spin == 2) {
+    } else if (orbitL == 2) {
       ff = (sqrt(13 * z * z / ((z - 3) * (z - 3) + 9 * z)));
-    } else if (spin == 3) {
+    } else if (orbitL == 3) {
       ff =
           (sqrt(277 * z * z * z / (z * (z - 15) * (z - 15) + 9 * (2 * z - 5))));
-    } else if (spin == 4) {
+    } else if (orbitL == 4) {
       ff = (sqrt(12746 * z * z * z * z /
                  ((z * z - 45 * z + 105) * (z * z - 45 * z + 105) +
                   25 * z * (2 * z - 21) * (2 * z - 21))));
@@ -150,17 +150,17 @@ inline double FormFactor(double sqrtS, double ma, double mb, double spin,
 }
 
 /// Calculate form factor
-inline double FormFactor(double sqrtS, double ma, double mb, double spin,
+inline double FormFactor(double sqrtS, double ma, double mb, double orbitL,
                          double mesonRadius, formFactorType type) {
   if (type == formFactorType::noFormFactor) {
     return 1.0;
   }
-  if (type == formFactorType::BlattWeisskopf && spin == 0) {
+  if (type == formFactorType::BlattWeisskopf && orbitL == 0) {
     return 1.0;
   }
 
   std::complex<double> qV = qValue(sqrtS, ma, mb);
-  return FormFactor(sqrtS, ma, mb, spin, mesonRadius, qV, type);
+  return FormFactor(sqrtS, ma, mb, orbitL, mesonRadius, qV, type);
 }
 
 } // ns::DecayDynamics

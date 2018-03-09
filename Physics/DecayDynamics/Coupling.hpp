@@ -10,17 +10,17 @@ namespace Physics {
 namespace DecayDynamics {
 
 inline std::complex<double> couplingToWidth(double mSq, double mR, double g,
-                                            double ma, double mb, double spin,
+                                            double ma, double mb, double orbitL,
                                             double mesonRadius,
                                             formFactorType type,
                                             std::complex<double> phspFactor) {
   // calculate gammaA(s_R)
-  std::complex<double> gammaA(1, 0); // spin==0
+  std::complex<double> gammaA(1, 0); // orbitL==0
 
-  if (spin > 0 || type == formFactorType::CrystalBarrel) {
+  if (orbitL > 0 || type == formFactorType::CrystalBarrel) {
     std::complex<double> qV = qValue(mR, ma, mb);
-    double ffR = FormFactor(mR, ma, mb, spin, mesonRadius, qV, type);
-    std::complex<double> qR = std::pow(qV, spin);
+    double ffR = FormFactor(mR, ma, mb, orbitL, mesonRadius, qV, type);
+    std::complex<double> qR = std::pow(qV, orbitL);
     gammaA = ffR * qR;
   }
 
@@ -42,28 +42,28 @@ inline std::complex<double> couplingToWidth(double mSq, double mR, double g,
 }
 
 inline std::complex<double> couplingToWidth(double mSq, double mR, double g,
-                                            double ma, double mb, double spin,
+                                            double ma, double mb, double orbitL,
                                             double mesonRadius,
                                             formFactorType type) {
   double sqrtM = sqrt(mSq);
   std::complex<double> phspF = phspFactor(sqrtM, ma, mb);
 
-  return couplingToWidth(mSq, mR, g, ma, mb, spin, mesonRadius, type, phspF);
+  return couplingToWidth(mSq, mR, g, ma, mb, orbitL, mesonRadius, type, phspF);
 }
 
 inline std::complex<double> widthToCoupling(double mSq, double mR, double width,
-                                            double ma, double mb, double spin,
+                                            double ma, double mb, double orbitL,
                                             double mesonRadius,
                                             formFactorType type) {
   double sqrtS = sqrt(mSq);
 
   // calculate gammaA(s_R)
-  std::complex<double> gammaA(1, 0); // spin==0
+  std::complex<double> gammaA(1, 0); // orbitL==0
   std::complex<double> qV;
-  if (spin > 0) {
+  if (orbitL > 0) {
     qV = qValue(mR, ma, mb);
-    double ffR = FormFactor(mR, ma, mb, spin, mesonRadius, qV, type);
-    std::complex<double> qR = std::pow(qV, spin);
+    double ffR = FormFactor(mR, ma, mb, orbitL, mesonRadius, qV, type);
+    std::complex<double> qR = std::pow(qV, orbitL);
     gammaA = ffR * qR;
   }
 

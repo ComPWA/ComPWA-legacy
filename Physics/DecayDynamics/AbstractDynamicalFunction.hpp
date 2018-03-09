@@ -100,6 +100,10 @@ public:
 
   virtual void SetSpin(ComPWA::Spin spin) { J = spin; }
 
+  virtual ComPWA::Spin GetOrbitalAngularMomentum() const { return L; }
+
+  virtual void SetOrbitalAngularMomentum(ComPWA::Spin orbitL) { L = orbitL; }
+
   //=========== FUNCTIONTREE =================
 
   virtual bool hasTree() const { return false; }
@@ -122,6 +126,8 @@ protected:
 
   /// Resonance spin
   ComPWA::Spin J;
+  /// Orbital Angular Momentum between two daughters in Resonance decay
+  ComPWA::Spin L;
 
 private:
   /// Resonance shape was modified (recalculate the normalization)

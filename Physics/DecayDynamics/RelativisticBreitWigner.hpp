@@ -25,6 +25,9 @@ class HelicityDecay;
 /// Relativistic Breit-Wigner model with barrier factors
 /// The dynamical function implemented here is taken from PDG2014 (Eq.47-22) for
 /// the one channel case.
+/// due to the implementation, after create a RelBW with constructor,
+/// one need to update the Orbital Angular Momentum intermediately before further processing
+/// otherwise spin J will be used instead of Orbital Angular Momentum
 class RelativisticBreitWigner
     : public ComPWA::Physics::DecayDynamics::AbstractDynamicalFunction {
 
@@ -44,13 +47,13 @@ public:
   /// \param ma Mass of daughter particle
   /// \param mb Mass of daughter particle
   /// \param width Decay width
-  /// \param J Spin
+  /// \param L Orbital angular momentum between two daughters a and b
   /// \param mesonRadius Meson Radius
   /// \param ffType Form factor type
   /// \return Amplitude value
   static std::complex<double>
   dynamicalFunction(double mSq, double mR, double ma, double mb, double width,
-                    unsigned int J, double mesonRadius, formFactorType ffType);
+                    unsigned int L, double mesonRadius, formFactorType ffType);
 
   //============ SET/GET =================
 
