@@ -8,6 +8,23 @@
 		<QuantumNumber Class="Int" Type="Charge" Value="0"/>
 		<QuantumNumber Class="Int" Type="Parity" Value="-1"/>
 		<QuantumNumber Class="Int" Type="Cparity" Value="-1"/>
+		<QuantumNumber Class="Spin" Type="IsoSpin" Value="0" Projection="0"/>
+		<QuantumNumber Class="Float" Type="BaryonNumber" Value="0.0"/>
+	</Particle>
+	<Particle Name="EpEm">
+		<Pid>2299</Pid>
+		<Parameter Type="Mass" Name="Mass_epem">
+			<Value>4.300</Value>
+			<Fix>true</Fix>
+		</Parameter>
+		<QuantumNumber Class="Spin" Type="Spin" Value="1"/>
+		<QuantumNumber Class="Int" Type="Charge" Value="0"/>
+		<QuantumNumber Class="Int" Type="Parity" Value="-1"/>
+		<QuantumNumber Class="Int" Type="Cparity" Value="-1"/>
+		<QuantumNumber Class="Int" Type="Gparity" Value="-1"/>
+		<QuantumNumber Class="Spin" Type="IsoSpin" Value="0" Projection="0"/>
+		<QuantumNumber Class="Int" Type="Charm" Value="0"/>
+		<QuantumNumber Class="Float" Type="BaryonNumber" Value="0.0"/>
 	</Particle>
 
 	<!-- Leptons -->
@@ -77,7 +94,9 @@
 		<QuantumNumber Class="Int" Type="Charge" Value="0"/>
 		<QuantumNumber Class="Int" Type="Parity" Value="-1"/>
 		<QuantumNumber Class="Int" Type="Cparity" Value="1"/>
+		<QuantumNumber Class="Int" Type="Gparity" Value="-1"/>
 		<QuantumNumber Class="Spin" Type="IsoSpin" Value="1" Projection="0"/>
+		<QuantumNumber Class="Float" Type="BaryonNumber" Value="0.0"/>
 	</Particle>
 	<Particle Name="pi+">
 		<Pid>211</Pid>
@@ -88,8 +107,11 @@
 		</Parameter>
 		<QuantumNumber Class="Spin" Type="Spin" Value="0"/>
 		<QuantumNumber Class="Int" Type="Charge" Value="+1"/>
-		<QuantumNumber Class="Int" Type="Parity" Value="1"/>
+		<QuantumNumber Class="Int" Type="Parity" Value="-1"/>
+		<QuantumNumber Class="Int" Type="Gparity" Value="-1"/>
 		<QuantumNumber Class="Spin" Type="IsoSpin" Value="1" Projection="1"/>
+		<QuantumNumber Class="Int" Type="Charm" Value="0"/>
+		<QuantumNumber Class="Float" Type="BaryonNumber" Value="0.0"/>
 	</Particle>
 	<Particle Name="pi-">
 		<Pid>-211</Pid>
@@ -100,8 +122,11 @@
 		</Parameter>
 		<QuantumNumber Class="Spin" Type="Spin" Value="0"/>
 		<QuantumNumber Class="Int" Type="Charge" Value="-1"/>
-		<QuantumNumber Class="Int" Type="Parity" Value="1"/>
+		<QuantumNumber Class="Int" Type="Parity" Value="-1"/>
+		<QuantumNumber Class="Int" Type="Gparity" Value="-1"/>
 		<QuantumNumber Class="Spin" Type="IsoSpin" Value="1" Projection="-1"/>
+		<QuantumNumber Class="Int" Type="Charm" Value="0"/>
+		<QuantumNumber Class="Float" Type="BaryonNumber" Value="0.0"/>
 	</Particle>
 	<Particle Name="eta">
 		<Pid>221</Pid>
@@ -188,6 +213,7 @@
 		<QuantumNumber Class="Int" Type="Parity" Value="-1"/>
 		<QuantumNumber Class="Int" Type="Cparity" Value="-1"/>
 		<QuantumNumber Class="Spin" Type="IsoSpin" Value="1" Projection="-1"/>
+		<QuantumNumber Class="Int" Type="Charm" Value="0"/>
 		<DecayInfo Type="relativisticBreitWigner">
 			<FormFactor Type="0" />
 			<Parameter Type="Width" Name="Width_rho">
@@ -225,6 +251,108 @@
 			</Parameter>
 		</DecayInfo>
 	</Particle>
+
+	<Particle Name="f0(980)">
+		<Pid>9010221</Pid>
+		<Parameter Type="Mass" Name="mass_f0980">
+			<Value>0.994</Value>
+			<Error>0.001</Error>
+			<Fix>true</Fix>
+		</Parameter>
+		<QuantumNumber Class="Spin" Type="Spin" Value="0"/>
+		<QuantumNumber Class="Int" Type="Charge" Value="0"/>
+		<QuantumNumber Class="Int" Type="Parity" Value="1"/>
+		<QuantumNumber Class="Int" Type="Cparity" Value="1"/>
+		<QuantumNumber Class="Int" Type="Gparity" Value="1"/>
+		<DecayInfo Type="relativisticBreitWigner">
+			<FormFactor Type="0" />
+			<Parameter Type="Width" Name="width_f0980">
+				<Value>0.070</Value>
+			</Parameter>
+			<Parameter Type="MesonRadius" Name="Radius_omega782">
+				<Value>1</Value>
+				<Fix>true</Fix>
+				<Min>0.0</Min>
+				<Max>2.0</Max>
+			</Parameter>
+		</DecayInfo>
+	</Particle>
+	<Particle Name="f0(1500)">
+		<Pid>9030221</Pid>
+		<Parameter Type="Mass" Name="mass_f01500">
+			<Value>1.505</Value>
+			<Error>0.006</Error>
+			<Fix>true</Fix>
+		</Parameter>
+		<QuantumNumber Class="Spin" Type="Spin" Value="0"/>
+		<QuantumNumber Class="Int" Type="Charge" Value="0"/>
+		<QuantumNumber Class="Int" Type="Parity" Value="1"/>
+		<QuantumNumber Class="Int" Type="Cparity" Value="1"/>
+		<QuantumNumber Class="Int" Type="Gparity" Value="1"/>
+		<DecayInfo Type="relativisticBreitWigner">
+			<FormFactor Type="0" />
+			<Parameter Type="Width" Name="width_f01500">
+				<Value>0.109</Value>
+			</Parameter>
+			<Parameter Type="MesonRadius" Name="Radius_f01500">
+				<Value>1</Value>
+				<Fix>true</Fix>
+				<Min>0.0</Min>
+				<Max>2.0</Max>
+			</Parameter>
+		</DecayInfo>
+	</Particle>
+	<Particle Name="f2(1270)">
+		<Pid>225</Pid>
+		<Parameter Type="Mass" Name="mass_f21270">
+			<Value>1.2751</Value>
+			<Error>0.0012</Error>
+			<Fix>true</Fix>
+		</Parameter>
+		<QuantumNumber Class="Spin" Type="Spin" Value="2"/>
+		<QuantumNumber Class="Int" Type="Charge" Value="0"/>
+		<QuantumNumber Class="Int" Type="Parity" Value="1"/>
+		<QuantumNumber Class="Int" Type="Cparity" Value="1"/>
+		<QuantumNumber Class="Int" Type="Gparity" Value="-1"/>
+		<DecayInfo Type="relativisticBreitWigner">
+			<FormFactor Type="0" />
+			<Parameter Type="Width" Name="width_f21270">
+				<Value>0.185</Value>
+			</Parameter>
+			<Parameter Type="MesonRadius" Name="Radius_f21270">
+				<Value>1</Value>
+				<Fix>true</Fix>
+				<Min>0.0</Min>
+				<Max>2.0</Max>
+			</Parameter>
+		</DecayInfo>
+	</Particle>
+	<Particle Name="f2(1950)">
+		<Pid>9050225</Pid>
+		<Parameter Type="Mass" Name="mass_f21950">
+			<Value>1.944</Value>
+			<Error>0.012</Error>
+			<Fix>true</Fix>
+		</Parameter>
+		<QuantumNumber Class="Spin" Type="Spin" Value="2"/>
+		<QuantumNumber Class="Int" Type="Charge" Value="0"/>
+		<QuantumNumber Class="Int" Type="Parity" Value="1"/>
+		<QuantumNumber Class="Int" Type="Cparity" Value="1"/>
+		<QuantumNumber Class="Int" Type="Gparity" Value="-1"/>
+		<DecayInfo Type="relativisticBreitWigner">
+			<FormFactor Type="0" />
+			<Parameter Type="Width" Name="width_f21950">
+				<Value>0.472</Value>
+			</Parameter>
+			<Parameter Type="MesonRadius" Name="Radius_f21950">
+				<Value>1</Value>
+				<Fix>true</Fix>
+				<Min>0.0</Min>
+				<Max>2.0</Max>
+			</Parameter>
+		</DecayInfo>
+	</Particle>
+
 	<Particle Name="a0(980)0">
 		<Pid>9000111</Pid>
 		<Parameter Type="Mass" Name="Mass_a0(980)">
@@ -470,7 +598,61 @@
 		<QuantumNumber Class="Spin" Type="Spin" Value="0"/>
 		<QuantumNumber Class="Int" Type="Charge" Value="0"/>
 		<QuantumNumber Class="Int" Type="Parity" Value="-1"/>
-		<QuantumNumber Class="Spin" Type="IsoSpin" Value="0.5"/>
+		<QuantumNumber Class="Spin" Type="IsoSpin" Value="0.5" Projection="-0.5"/>
+		<QuantumNumber Class="Int" Type="Charm" Value="1"/>
+		<QuantumNumber Class="Float" Type="BaryonNumber" Value="0.0"/>
+		<DecayInfo Type="relativisticBreitWigner">
+			<FormFactor Type="0" />
+			<Parameter Type="Width" Name="Width_neutralD">
+				<Value>1.605E-12</Value>
+				<Fix>true</Fix>
+			</Parameter>
+			<Parameter Type="MesonRadius" Name="Radius_neutralD">
+				<Value>2.5</Value>
+				<Fix>true</Fix>
+				<Min>2.0</Min>
+				<Max>3.0</Max>
+			</Parameter>
+		</DecayInfo>
+	</Particle>
+	<Particle Name="D0bar">
+		<Pid>-421</Pid>
+		<Parameter Type="Mass" Name="Mass_neutralD">
+			<Value>1.86483</Value>
+			<Fix>true</Fix>
+		</Parameter>
+		<QuantumNumber Class="Spin" Type="Spin" Value="0"/>
+		<QuantumNumber Class="Int" Type="Charge" Value="0"/>
+		<QuantumNumber Class="Int" Type="Parity" Value="-1"/>
+		<QuantumNumber Class="Spin" Type="IsoSpin" Value="0.5" Projection="0.5"/>
+		<QuantumNumber Class="Int" Type="Charm" Value="-1"/>
+		<QuantumNumber Class="Float" Type="BaryonNumber" Value="0.0"/>
+		<DecayInfo Type="relativisticBreitWigner">
+			<FormFactor Type="0" />
+			<Parameter Type="Width" Name="Width_neutralD">
+				<Value>1.605E-12</Value>
+				<Fix>true</Fix>
+			</Parameter>
+			<Parameter Type="MesonRadius" Name="Radius_neutralD">
+				<Value>2.5</Value>
+				<Fix>true</Fix>
+				<Min>2.0</Min>
+				<Max>3.0</Max>
+			</Parameter>
+		</DecayInfo>
+	</Particle>
+	<Particle Name="D*-(2010)">
+		<Pid>421</Pid>
+		<Parameter Type="Mass" Name="Mass_Dstarminus">
+			<Value>1.86483</Value>
+			<Fix>true</Fix>
+		</Parameter>
+		<QuantumNumber Class="Spin" Type="Spin" Value="1"/>
+		<QuantumNumber Class="Int" Type="Charge" Value="-1"/>
+		<QuantumNumber Class="Int" Type="Parity" Value="-1"/>
+		<QuantumNumber Class="Spin" Type="IsoSpin" Value="0.5" Projection="-0.5"/>
+		<QuantumNumber Class="Int" Type="Charm" Value="-1"/>
+		<QuantumNumber Class="Float" Type="BaryonNumber" Value="0.0"/>
 		<DecayInfo Type="relativisticBreitWigner">
 			<FormFactor Type="0" />
 			<Parameter Type="Width" Name="Width_neutralD">
@@ -495,7 +677,9 @@
 		<QuantumNumber Class="Int" Type="Charge" Value="0"/>
 		<QuantumNumber Class="Int" Type="Parity" Value="-1"/>
 		<QuantumNumber Class="Int" Type="Cparity" Value="-1"/>
+		<QuantumNumber Class="Int" Type="Gparity" Value="-1"/>
 		<QuantumNumber Class="Spin" Type="IsoSpin" Value="0" Projection="0"/>
+		<QuantumNumber Class="Float" Type="BaryonNumber" Value="0.0"/>
 		<DecayInfo Type="relativisticBreitWigner">
 			<FormFactor Type="0" />
 			<Parameter Type="Width" Name="Width_jpsi">
