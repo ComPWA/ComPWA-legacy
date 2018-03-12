@@ -115,6 +115,7 @@ add_subdirectory(Physics)
 add_subdirectory(Tools)
 add_subdirectory(Examples)
 add_subdirectory(executables)
+add_subdirectory(test)
 
 #
 # Doxygen

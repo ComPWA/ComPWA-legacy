@@ -3,65 +3,82 @@
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
 #include <memory>
-#include "Physics/SequentialPartialAmplitude.hpp"
 #include "Physics/HelicityFormalism/HelicityFromCanonicalSum.hpp"
+#include <cmath>
+#include "Physics/qft++/WignerD.h"
 
-using namespace ComPWA::Physics::HelicityFormalism;
+#include <string>
 
-SequentialPartialAmplitude::SequentialPartialAmplitude(
+namespace ComPWA{
+namespace Physics {
+namespace HelicityFormalism {
+
+HelicityFromCanonicalSum::HelicityFromCanonicalSum(
     std::shared_ptr<PartList> partL, std::shared_ptr<Kinematics> kin,
     const boost::property_tree::ptree &pt) {
   load(partL, kin, pt);
 }
 
-void SequentialPartialAmplitude::load(std::shared_ptr<PartList> partL,
+void HelicityFromCanonicalSum::load(std::shared_ptr<PartList> partL,
                                       std::shared_ptr<Kinematics> kin,
                                       const boost::property_tree::ptree &pt) {
-  LOG(trace) << "SequentialPartialAmplitude::Factory() | Construction....";
-  setName(pt.get<std::string>("<xmlattr>.Name", "empty"));
+  LOG(trace) << "HelicityFromCanonicalSum::Factory() | Construction....";
+//  setName(pt.get<std::string>("<xmlattr>.Name", "empty"));
 
-  PreFactor = std::complex<double>(1, 0);
+  std::string helDecName = pt.get<std::string>("<xmlattr>.Name", "empty");
+  boost::property_tree::ptree helDecTree;
+  helDecTree.put_child("PartialAmplitude", helDecTree);
+  helDecTree.put("PartialAmplitude.<xmlattr>.Class", "HelicityDecay");
+
+  std::string mothName;
   for (const auto &v : pt.get_child("")) {
-    if (v.first == "Parameter"){
-      if (v.second.get<std::string>("<xmlattr>.Type") == "Magnitude")
-        Magnitude = std::make_shared<FitParameter>(v.second);
-      if (v.second.get<std::string>("<xmlattr>.Type") == "Phase")
-        Phase = std::make_shared<FitParameter>(v.second);
-    } else if (v.first == "PartialAmplitude" &&
-               v.second.get<std::string>("<xmlattr>.Class") ==
-                   "HelicityDecay") {
-      addPartialAmplitude(
-          std::make_shared<HelicityDecay>(partL, kin, v.second));
-    } else if (v.first == "PartialAmplitude" &&
-               v.second.get<std::string>("<xmlattr>.Class") ==
-                   "HelicityFromCanonicalSum") {
-      HelicityFromCanonicalSum canonicalSum(partL, kin, v.second);
-//      for (auto &i : canoicalSum.partialAmplitudes()) {
-//        addPartialAmplitude(i);
-//      }
-    } else if (v.first == "PartialAmplitude" &&
-               v.second.get<std::string>("<xmlattr>.Class") ==
-                   "NonResonant") {
-      addPartialAmplitude(
-          std::make_shared<ComPWA::Physics::NonResonant>(partL, kin, v.second));
-    } else if (v.first == "PreFactor") {
-      double r = v.second.get<double>("<xmlattr>.Magnitude");
-      double p = v.second.get<double>("<xmlattr>.Phase");
-      PreFactor = std::polar(r, p);
-    } else {
-      // ignored further settings. Should we throw an error?
+    if (v.first == "Parameter") { //add magnitude and phase to helDecTree
+      helDecTree.add_child("PartialAmplitude.Parameter", v.second);
+    }
+    if (v.first == "DecayParticle") {
+      mothName = v.second.get<std::string>("<xmlattr>.Name");
     }
   }
+  auto partItr = partL->find(mothName);
+  if (partItr == partL->end())
+    throw std::runtime_error("HelicityFromCanonicalSum::load | Particle " + mothName +
+        " not found in list!");
+  double spinJ = (double) partItr->second.GetSpinQuantumNumber("Spin");
 
-  if (!Magnitude)
-    throw BadParameter("SequentialPartialAmplitude::Factory() | No magnitude "
-                       "parameter found.");
-  if (!Phase)
-    throw BadParameter(
-        "SequentialPartialAmplitude::Factory() | No phase parameter found.");
+  for (const auto &v : pt.get_child("")) {
+    if (v.first != "CanonicalSum") continue;
+    
+    double orbitL = v.second.get<double>("<xmlattr>.L");
+    helDecTree.put("PartialAmplitude.DecayParticle.<xmlattr>.OrbitalAngularMomentum",
+        v.second.get<std::string>("<xmlattr>.L"));
+    helDecName += "_L";
+    helDecName += v.second.get<std::string>("<xmlattr>.L");
+    helDecName += "_S";
+    helDecName += v.second.get<std::string>("<xmlattr>.S");
+    helDecTree.put("PartialAmplitude.<xmlattr>.Name", helDecName);
+
+    std::shared_ptr<HelicityDecay> ampHelDec = std::make_shared<HelicityDecay>(partL, kin, helDecTree); 
+
+    double normCoef = sqrt( (2 * orbitL + 1)/(2 * spinJ + 1) );
+    double cgCoef = 1.0;
+    for (const auto &daug : pt.get_child("")) {
+      if (v.first != "ClebschGorden") continue;
+      double j1 = v.second.get<double>("<xmlattr>.j1");
+      double m1 = v.second.get<double>("<xmlattr>.m1");
+      double j2 = v.second.get<double>("<xmlattr>.j2");
+      double m2 = v.second.get<double>("<xmlattr>.m2");
+      double J = v.second.get<double>("<xmlattr>.J");
+      double M = v.second.get<double>("<xmlattr>.M");
+      cgCoef *= ComPWA::Physics::QFT::Clebsch(j1, m1, j2, m2, J, M);
+    }
+    PreFactor = std::complex<double>(normCoef * cgCoef, 0);
+    ampHelDec->setPrefactor(PreFactor);
+
+    addPartialAmplitude(ampHelDec);
+  }
 }
 
-boost::property_tree::ptree SequentialPartialAmplitude::save() const {
+boost::property_tree::ptree HelicityFromCanonicalSum::save() const {
 
   boost::property_tree::ptree pt;
   pt.put<std::string>("<xmlattr>.Name", name());
@@ -88,7 +105,7 @@ boost::property_tree::ptree SequentialPartialAmplitude::save() const {
   return pt;
 }
 
-std::shared_ptr<ComPWA::FunctionTree> SequentialPartialAmplitude::tree(
+std::shared_ptr<ComPWA::FunctionTree> HelicityFromCanonicalSum::tree(
     std::shared_ptr<Kinematics> kin, const ParameterList &sample,
     const ParameterList &toySample, std::string suffix) {
 
@@ -117,14 +134,14 @@ std::shared_ptr<ComPWA::FunctionTree> SequentialPartialAmplitude::tree(
   return tr;
 }
 
-void SequentialPartialAmplitude::parameters(ParameterList &list) {
+void HelicityFromCanonicalSum::parameters(ParameterList &list) {
   Amplitude::parameters(list);
   for (auto i : PartialAmplitudes) {
     i->parameters(list);
   }
 }
 
-void SequentialPartialAmplitude::updateParameters(const ParameterList &list) {
+void HelicityFromCanonicalSum::updateParameters(const ParameterList &list) {
   // Try to update magnitude
   std::shared_ptr<FitParameter> mag;
   try {
@@ -148,3 +165,7 @@ void SequentialPartialAmplitude::updateParameters(const ParameterList &list) {
 
   return;
 }
+
+} // namespace HelicityFormalism
+} // namespace Physics
+} // namespace ComPWA

@@ -61,7 +61,7 @@ inline double dfact(double __x) {
   return __x * dfact(__x - 1.);
 }
 
-double Clebsch(const double _j1, const double _m1, const double _j2,
+inline double Clebsch(const double _j1, const double _m1, const double _j2,
                const double _m2, const double _J, const double _M) {
   // convert to pure integers (each 2*spin)
   int j1 = (int)(2. * _j1);
@@ -121,7 +121,7 @@ double Clebsch(const double _j1, const double _m1, const double _j2,
   return sqrt(A) * sum;
 }
 
-double Clebsch(const Spin &__j1, const Spin &__m1, const Spin &__j2,
+inline double Clebsch(const Spin &__j1, const Spin &__m1, const Spin &__j2,
                const Spin &__m2, const Spin &__J, const Spin &__M) {
   return Clebsch((double)__j1, (double)__m1, (double)__j2, (double)__m2,
                  (double)__J, (double)__M);
@@ -134,7 +134,7 @@ double Clebsch(const Spin &__j1, const Spin &__m1, const Spin &__j2,
  *  This function was copied from one written by D.P. Weygand. It shouldn't be
  *  used for spins higher than about 11/2 or 8.
  */
-double Wigner_d(const double _J, const double _M, const double _N,
+inline double Wigner_d(const double _J, const double _M, const double _N,
                 double _beta) {
 
   int J = 2 * _J;
@@ -195,7 +195,7 @@ double Wigner_d(const double _J, const double _M, const double _N,
   return d;
 }
 
-double Wigner_d(const Spin &__j, const Spin &__m, const Spin &__n,
+inline double Wigner_d(const Spin &__j, const Spin &__m, const Spin &__n,
                 double __beta) {
   return Wigner_d((double)__j, (double)__m, (double)__n, __beta);
 }
@@ -225,7 +225,7 @@ inline std::complex<double> Wigner_D(double __alpha, double __beta, double __gam
  *  performed recursively, thus these are valid to much higher spin than the
  *  single-spin version.
  */
-void Wigner_d(const Spin &__jmax, double __beta,
+inline void Wigner_d(const Spin &__jmax, double __beta,
               std::map<Spin, std::map<Spin, std::map<Spin, double>>> &__d) {
   __d.clear();
   Spin jmin, one_half = 1 / 2.;
@@ -297,7 +297,7 @@ void Wigner_d(const Spin &__jmax, double __beta,
  *  Wigner_d, thus these should be valid to much higher spin than the single
  *  spin version.
  */
-void Wigner_D(const Spin &__jmax, double __alpha, double __beta, double __gamma,
+inline void Wigner_D(const Spin &__jmax, double __alpha, double __beta, double __gamma,
               std::map<Spin, std::map<Spin, std::map<Spin, std::complex<double>>>> &__D) {
 
   std::complex<double> i(0., 1.);
