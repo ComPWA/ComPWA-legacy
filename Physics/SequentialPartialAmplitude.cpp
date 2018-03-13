@@ -36,9 +36,9 @@ void SequentialPartialAmplitude::load(std::shared_ptr<PartList> partL,
                v.second.get<std::string>("<xmlattr>.Class") ==
                    "HelicityFromCanonicalSum") {
       HelicityFromCanonicalSum canonicalSum(partL, kin, v.second);
-//      for (auto &i : canoicalSum.partialAmplitudes()) {
-//        addPartialAmplitude(i);
-//      }
+      for (auto &i : canonicalSum.partialAmplitudes()) {
+        addPartialAmplitude(i);
+      }
     } else if (v.first == "PartialAmplitude" &&
                v.second.get<std::string>("<xmlattr>.Class") ==
                    "NonResonant") {

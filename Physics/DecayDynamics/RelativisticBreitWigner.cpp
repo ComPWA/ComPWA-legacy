@@ -149,7 +149,7 @@ RelativisticBreitWigner::tree(const ParameterList &sample, int pos,
 
   tr->createLeaf("Mass",Mass, "RelBreitWigner" + suffix);
   tr->createLeaf("Width",Width, "RelBreitWigner" + suffix);
-  tr->createLeaf("OrbitalAngularMomentum", (double)L, "ReBreitWigner" + suffix);
+  tr->createLeaf("OrbitalAngularMomentum", (double)L, "RelBreitWigner" + suffix);
   tr->createLeaf("MesonRadius", MesonRadius, "RelBreitWigner" + suffix);
   tr->createLeaf("FormFactorType", FormFactorType, "RelBreitWigner" + suffix);
   tr->createLeaf("MassA", DaughterMasses.first, "RelBreitWigner" + suffix);
