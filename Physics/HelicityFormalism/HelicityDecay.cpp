@@ -7,6 +7,7 @@
 #include "Physics/DecayDynamics/RelativisticBreitWigner.hpp"
 #include "Physics/DecayDynamics/AmpFlatteRes.hpp"
 #include "Physics/DecayDynamics/NonResonant.hpp"
+#include "Physics/DecayDynamics/Voigtian.hpp"
 
 #include "Physics/HelicityFormalism/HelicityDecay.hpp"
 #include "Physics/HelicityFormalism/HelicityKinematics.hpp"
@@ -96,6 +97,9 @@ void HelicityDecay::load(std::shared_ptr<PartList> partL,
       DynamicFcn = std::make_shared<DecayDynamics::AmpFlatteRes>(
           name, DecayProducts, partL);
       DynamicFcn->SetOrbitalAngularMomentum(orbitL);
+    } else if (decayType == "voigt") {
+      DynamicFcn = std::make_shared<DecayDynamics::Voigtian>(
+          name, DecayProducts, partL); 
     } else {
       throw std::runtime_error(
           "HelicityDecay::Factory() | Unknown decay type " + decayType + "!");
