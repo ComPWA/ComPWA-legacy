@@ -92,10 +92,14 @@ std::complex<double> Voigtian::dynamicalFunction(
 
   double sqrtS = sqrt(mSq);
 
+  //the non-relativistic BreitWigner which is convoluted in Voigtian
+  //has the exactly following expression:
+  //BW(x, m, width) = 1/pi * width/2 * 1/((x - m)^2 + (width/2)^2)
+  //i.e., the Lorentz formula with Gamma = width/2 and x' = x - m
   /// https://root.cern.ch/doc/master/RooVoigtianian_8cxx_source.html
-  double argu = mSq - mR * mR;
+  double argu = sqrtS - mR;
   double c = 1.0/(sqrt(2.0) * sigma);
-  double a = c * mR * wR;
+  double a = c * 0.5 * wR;
   double u = c * argu;
   std::complex<double> z(u, a);
   std::complex<double> v = Faddeeva::w(z, 1e-13); 
@@ -103,7 +107,7 @@ std::complex<double> Voigtian::dynamicalFunction(
   double sqrtVal = sqrt(val);
 
   /// keep the phi angle of the complex BW 
-  std::complex<double> invBW(argu, mR * wR);
+  std::complex<double> invBW(argu, 0.5 * wR);
   std::complex<double> BW = 1.0/invBW;
   double phi = std::arg(BW);
   std::complex<double> result(sqrtVal * cos(phi), sqrtVal * sin(phi));
@@ -111,7 +115,11 @@ std::complex<double> Voigtian::dynamicalFunction(
   //transform width to coupling
   // Calculate coupling constant to final state
   // MesonRadius = 0.0, noFormFactor
-  std::complex<double> g_final = widthToCoupling(mSq, mR, wR, ma, mb, J, 0.0, formFactorType::noFormFactor); 
+  //std::complex<double> g_final = widthToCoupling(mSq, mR, wR, ma, mb, L, 0.0, formFactorType::noFormFactor); 
+  //the BW to convolved in voigt is 1/PI * Gamma/2 * 1/((x-m)^2 + (Gamma/2)^2)
+  //while I think the one common used in physics is Gamma/2 * 1/((x-m)^2 + (Gamma/2)^2)
+  //So we time the PI at last
+  std::complex<double> g_final = sqrt(M_PI);
   double g_production = 1;
   result *= g_production;
   result *= g_final;
