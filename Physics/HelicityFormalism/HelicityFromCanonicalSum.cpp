@@ -25,56 +25,50 @@ void HelicityFromCanonicalSum::load(std::shared_ptr<PartList> partL,
   LOG(trace) << "HelicityFromCanonicalSum::Factory() | Construction....";
 //  setName(pt.get<std::string>("<xmlattr>.Name", "empty"));
 
-  std::string helDecName = pt.get<std::string>("<xmlattr>.Name", "empty");
-  boost::property_tree::ptree helDecTree;
-  helDecTree.put_child("PartialAmplitude", helDecTree);
-  helDecTree.put("PartialAmplitude.<xmlattr>.Class", "HelicityDecay");
+  boost::property_tree::ptree helDecTree(pt);
+  helDecTree.erase("CanonicalSum");
 
-  std::string mothName;
-  for (const auto &v : pt.get_child("")) {
-    if (v.first == "Parameter") { //add magnitude and phase to helDecTree
-      helDecTree.add_child("PartialAmplitude.Parameter", v.second);
-    }
-    if (v.first == "DecayParticle") {
-      mothName = v.second.get<std::string>("<xmlattr>.Name");
-    }
-  }
+  std::string helDecName = pt.get<std::string>("<xmlattr>.Name", "empty");
+  std::string mothName = pt.get<std::string>("DecayParticle.<xmlattr>.Name");
   auto partItr = partL->find(mothName);
   if (partItr == partL->end())
     throw std::runtime_error("HelicityFromCanonicalSum::load | Particle " + mothName +
         " not found in list!");
   double spinJ = (double) partItr->second.GetSpinQuantumNumber("Spin");
 
-  for (const auto &v : pt.get_child("")) {
-    if (v.first != "CanonicalSum") continue;
-    
-    double orbitL = v.second.get<double>("<xmlattr>.L");
-    helDecTree.put("PartialAmplitude.DecayParticle.<xmlattr>.OrbitalAngularMomentum",
-        v.second.get<std::string>("<xmlattr>.L"));
+  const auto &optSumTree = pt.get_child_optional("CanonicalSum");
+  if (optSumTree) {
+    auto const &sumTree = optSumTree.get();
+
+    double orbitL = sumTree.get<double>("<xmlattr>.L");
+    helDecTree.put("DecayParticle.<xmlattr>.OrbitalAngularMomentum",
+        sumTree.get<std::string>("<xmlattr>.L"));
     helDecName += "_L";
-    helDecName += v.second.get<std::string>("<xmlattr>.L");
+    helDecName += sumTree.get<std::string>("<xmlattr>.L");
     helDecName += "_S";
-    helDecName += v.second.get<std::string>("<xmlattr>.S");
-    helDecTree.put("PartialAmplitude.<xmlattr>.Name", helDecName);
+    helDecName += sumTree.get<std::string>("<xmlattr>.S");
+    helDecTree.put("<xmlattr>.Name", helDecName);
 
     std::shared_ptr<HelicityDecay> ampHelDec = std::make_shared<HelicityDecay>(partL, kin, helDecTree); 
 
     double normCoef = sqrt( (2 * orbitL + 1)/(2 * spinJ + 1) );
     double cgCoef = 1.0;
-    for (const auto &daug : pt.get_child("")) {
-      if (v.first != "ClebschGorden") continue;
-      double j1 = v.second.get<double>("<xmlattr>.j1");
-      double m1 = v.second.get<double>("<xmlattr>.m1");
-      double j2 = v.second.get<double>("<xmlattr>.j2");
-      double m2 = v.second.get<double>("<xmlattr>.m2");
-      double J = v.second.get<double>("<xmlattr>.J");
-      double M = v.second.get<double>("<xmlattr>.M");
+    for (const auto &daug : sumTree.get_child("")) {
+      if (daug.first != "ClebschGorden") continue;
+      double j1 = daug.second.get<double>("<xmlattr>.j1");
+      double m1 = daug.second.get<double>("<xmlattr>.m1");
+      double j2 = daug.second.get<double>("<xmlattr>.j2");
+      double m2 = daug.second.get<double>("<xmlattr>.m2");
+      double J = daug.second.get<double>("<xmlattr>.J");
+      double M = daug.second.get<double>("<xmlattr>.M");
       cgCoef *= ComPWA::Physics::QFT::Clebsch(j1, m1, j2, m2, J, M);
     }
     PreFactor = std::complex<double>(normCoef * cgCoef, 0);
     ampHelDec->setPrefactor(PreFactor);
 
     addPartialAmplitude(ampHelDec);
+  } else {
+    LOG(trace) << "HelicityFromCanonicalSum::Factory() | <CanonicalSum /> in xml is not set!";
   }
 }
 
