@@ -33,25 +33,31 @@ Voigtian::Voigtian(
 
   auto spin = partProp.GetSpinQuantumNumber("Spin");
   SetSpin(spin);
+  //in default, using spin J as Orbital Angular Momentum
+  //update by calling SetOrbitalAngularMomentum() before any further process
+  //after RelBW is created by calling of constructor
+  SetOrbitalAngularMomentum(spin);
 
-  // Read parameters from tree. Currently parameters of type 'Mass", 'Width' and
-  // 'Sigma' are required.
+  //auto ffType = formFactorType(decayTr.get<int>("FormFactor.<xmlattr>.Type"));
+  //SetFormFactorType(ffType);
   for (const auto &v : decayTr.get_child("")) {
-//    if (v.first != "Parameter")
-//      continue;
+    if (v.first != "Parameter")
+      continue;
     std::string type = v.second.get<std::string>("<xmlattr>.Type");
-    if (type == "Mass") {
-      SetMassParameter(std::make_shared<FitParameter>(v.second));
-    } else if (type == "Width") {
+    if (type == "Width") {
       SetWidthParameter(std::make_shared<FitParameter>(v.second));
-    } else if (type == "Sigma") {
-      SetSigma(v.second.get_value<double>());
+    } else if (type == "MesonRadius") {
+      ; //do nothing
+//      SetMesonRadiusParameter(
+//          std::make_shared<FitParameter>(v.second));
     } else {
       throw std::runtime_error(
           "Voigtian::Factory() | Parameter of type " + type +
           " is unknown.");
     }
   }
+  double sigma = decayTr.get<double>("Resolution.<xmlattr>.Sigma");
+  SetSigma(sigma);
 
   std::pair<double, double> daughterMasses(
       partL->find(daughters.first)->second.GetMass(),
@@ -68,8 +74,7 @@ Voigtian::Voigtian(
 std::complex<double> Voigtian::evaluate(const DataPoint &point,
                                                        int pos) const {
   std::complex<double> result =
-      dynamicalFunction(point.value(pos),Mass->value(), DaughterMasses.first,
-                        DaughterMasses.second, Width->value(), (double) J, Sigma);
+      dynamicalFunction(point.value(pos),Mass->value(), Width->value(), Sigma);
   assert(!std::isnan(result.real()) && !std::isnan(result.imag()));
   return result;
 }
@@ -77,10 +82,8 @@ std::complex<double> Voigtian::evaluate(const DataPoint &point,
 bool Voigtian::isModified() const {
   if (AbstractDynamicalFunction::isModified())
     return true;
-  if (Mass->value() != CurrentMass ||
-      Width->value() != CurrentWidth) {
+    if (Width->value() != CurrentWidth) {
     setModified();
-    const_cast<double &>(CurrentMass) = Mass->value();
     const_cast<double &>(CurrentWidth) = Width->value();
     return true;
   }
@@ -88,7 +91,7 @@ bool Voigtian::isModified() const {
 }
 
 std::complex<double> Voigtian::dynamicalFunction(
-    double mSq, double mR, double ma, double mb, double wR, unsigned int J, double sigma) {
+    double mSq, double mR, double wR, double sigma) {
 
   double sqrtS = sqrt(mSq);
 
@@ -146,10 +149,7 @@ Voigtian::tree(const ParameterList &sample, int pos,
 
   tr->createLeaf("Mass",Mass, "Voigtian" + suffix);
   tr->createLeaf("Width",Width, "Voigtian" + suffix);
-  tr->createLeaf("Spin", (double) J, "Voigtian" + suffix);
   tr->createLeaf("Sigma", Sigma, "Voigtian" + suffix);
-  tr->createLeaf("MassA", DaughterMasses.first, "Voigtian" + suffix);
-  tr->createLeaf("MassB", DaughterMasses.second, "Voigtian" + suffix);
   tr->createLeaf("Data_mSq[" + std::to_string(pos) + "]",
                  sample.mDoubleValue(pos), "Voigtian" + suffix);
 
@@ -174,7 +174,7 @@ void VoigtianStrategy::execute(ParameterList &paras,
   // How many parameters do we expect?
   size_t check_nInt = 0;
   size_t nInt = paras.intValues().size();
-  size_t check_nDouble = 6;
+  size_t check_nDouble = 3;
   size_t nDouble = paras.doubleValues().size();
   nDouble += paras.doubleParameters().size();
   size_t check_nComplex = 0;
@@ -232,16 +232,13 @@ void VoigtianStrategy::execute(ParameterList &paras,
   // construction.
   double m0 = paras.doubleParameter(0)->value();
   double Gamma0 = paras.doubleParameter(1)->value();
-  unsigned int spin = paras.doubleValue(0)->value();
-  double sigma = paras.doubleValue(1)->value();
-  double ma = paras.doubleValue(2)->value();
-  double mb = paras.doubleValue(3)->value();
+  double sigma = paras.doubleValue(0)->value();
 
   // calc function for each point
   for (unsigned int ele = 0; ele < n; ele++) {
     try {
       results.at(ele) = Voigtian::dynamicalFunction(
-          paras.mDoubleValue(0)->values().at(ele), m0, ma, mb, Gamma0, spin, sigma);
+          paras.mDoubleValue(0)->values().at(ele), m0, Gamma0, sigma);
     } catch (std::exception &ex) {
       LOG(error) << "VoigtianStrategy::execute() | " << ex.what();
       throw(std::runtime_error("VoigtianStrategy::execute() | "
@@ -257,20 +254,10 @@ void Voigtian::parameters(ParameterList &list) {
   // list. If so we check if both are equal and set the local parameter to the
   // parameter from the list. In this way we connect parameters that occur on
   // different positions in the amplitude.
-  Mass = list.addUniqueParameter(Mass);
   Width = list.addUniqueParameter(Width);
 }
 
 void Voigtian::updateParameters(const ParameterList &list) {
-
-  // Try to update Mass
-  std::shared_ptr<FitParameter> rad;
-  try {
-    rad = FindParameter(Mass->name(), list);
-  } catch (std::exception &ex) {
-  }
-  if (rad)
-    Mass->updateParameter(Mass);
 
   // Try to update width
   std::shared_ptr<FitParameter> width;

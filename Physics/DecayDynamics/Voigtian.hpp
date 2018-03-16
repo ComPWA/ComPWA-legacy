@@ -50,22 +50,9 @@ public:
   /// \param sigma Width of the gaussian, i.e., the resolution of the mass spectrum at mR
   /// \return Amplitude value
   static std::complex<double>
-  dynamicalFunction(double mSq, double mR, double ma, double mb, double wR,
-      unsigned int J, double sigma);
+  dynamicalFunction(double mSq, double mR, double wR, double sigma);
 
   //============ SET/GET =================
-
-  void SetMassParameter(std::shared_ptr<ComPWA::FitParameter> m) {
-    Mass = m;
-  }
-
-  std::shared_ptr<ComPWA::FitParameter> GetMassParameter() {
-    return Mass;
-  }
-
-  void SetMass(double m) { Mass->setValue(m); }
-
-  double GetMass() const { return Mass->value(); }
 
   void SetWidthParameter(std::shared_ptr<ComPWA::FitParameter> w) {
     Width = w;
@@ -79,6 +66,30 @@ public:
 
   double GetWidth() const { return Width->value(); }
 
+  void SetMesonRadiusParameter(std::shared_ptr<ComPWA::FitParameter> r) {
+    MesonRadius = r;
+  }
+
+  std::shared_ptr<ComPWA::FitParameter> GetMesonRadiusParameter() {
+    return MesonRadius;
+  }
+
+  /// \see GetMesonRadius() const { return MesonRadius->value(); }
+  void SetMesonRadius(double w) { MesonRadius->setValue(w); }
+
+  /// Get meson radius.
+  /// The meson radius is a measure of the size of the resonant state. It is
+  /// used to calculate the angular momentum barrier factors.
+  double GetMesonRadius() const { return MesonRadius->value(); }
+
+  /// \see GetFormFactorType()
+  void SetFormFactorType(formFactorType t) { FormFactorType = t; }
+
+  /// Get form factor type.
+  /// The type of formfactor that is used to calculate the angular momentum
+  /// barrier factors.
+  formFactorType GetFormFactorType() { return FormFactorType; }
+
   void SetSigma(double sigma) { Sigma = sigma; }
 
   double GetSigma() const { return Sigma; }
@@ -87,8 +98,8 @@ public:
 
   virtual void parametersFast(std::vector<double> &list) const {
     AbstractDynamicalFunction::parametersFast(list);
-    list.push_back(GetMass());
     list.push_back(GetWidth());
+//    list.push_back(GetMesonRadius());
   }
 
   /// Update parameters to the values given in \p par
@@ -102,16 +113,20 @@ public:
   tree(const ParameterList &sample, int pos, std::string suffix = "");
 
 protected:
-  /// Mass of resonante state
-  std::shared_ptr<ComPWA::FitParameter> Mass;
   /// Decay width of resonante state
   std::shared_ptr<ComPWA::FitParameter> Width;
+
+  /// Meson radius of resonant state
+  std::shared_ptr<ComPWA::FitParameter> MesonRadius;
+
+  /// Form factor type
+  formFactorType FormFactorType;
   /// resolution: the width of gaussian function which is used to represent the resolution of mass spectrum
   double Sigma;
 
 private:
   /// Temporary values (used to trigger recalculation of normalization)
-  double CurrentMass;
+  double CurrentMesonRadius;
   double CurrentWidth;
 };
 
