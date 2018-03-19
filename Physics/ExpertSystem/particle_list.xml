@@ -667,6 +667,18 @@
 			</Parameter>
 		</DecayInfo>
 	</Particle>
+	<Particle Name="XX">
+		<Pid>1111</Pid>
+		<Parameter Type="Mass" Name="Mass_XX">
+			<Value>3.500</Value>
+			<Fix>true</Fix>
+		</Parameter>
+		<QuantumNumber Class="Spin" Type="Spin" Value="1"/>
+		<QuantumNumber Class="Int" Type="Charge" Value="-1"/>
+		<QuantumNumber Class="Int" Type="Parity" Value="-1"/>
+		<QuantumNumber Class="Spin" Type="IsoSpin" Value="1" Projection="-1"/>
+		<QuantumNumber Class="Float" Type="BaryonNumber" Value="0.0"/>
+	</Particle>
 	<Particle Name="J/psi">
 		<Pid>443</Pid>
 		<Parameter Type="Mass" Name="Mass_jpsi">
