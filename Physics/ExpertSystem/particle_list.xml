@@ -642,9 +642,9 @@
 		</DecayInfo>
 	</Particle>
 	<Particle Name="D*-(2010)">
-		<Pid>421</Pid>
+		<Pid>42221</Pid>
 		<Parameter Type="Mass" Name="Mass_Dstarminus">
-			<Value>1.86483</Value>
+			<Value>2.1</Value>
 			<Fix>true</Fix>
 		</Parameter>
 		<QuantumNumber Class="Spin" Type="Spin" Value="1"/>
@@ -670,7 +670,7 @@
 	<Particle Name="XX">
 		<Pid>1111</Pid>
 		<Parameter Type="Mass" Name="Mass_XX">
-			<Value>3.500</Value>
+			<Value>4.100</Value>
 			<Fix>true</Fix>
 		</Parameter>
 		<QuantumNumber Class="Spin" Type="Spin" Value="1"/>
