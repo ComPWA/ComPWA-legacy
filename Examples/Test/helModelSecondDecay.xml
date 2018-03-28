@@ -1,0 +1,458 @@
+<!-- Y -> pi0 D+ D-, id: 0 -> 0 1 2 -->
+<!-- Y -> D*+ D-, D*+ -> pi0 D+;
+  and Y -> D2*(2460)+ D-, D2*(2460)+ -> pi0 D+; -->
+<!-- the id of recoil system can not be a invalid value 
+     even if there is not recoil system, e.g. in D* -> pi0 D, 
+     tere is no recoil system, but if set it to -1, 
+     program can not run successfully. Need to check wether is it(id of recoil system)
+     used or not -->
+
+<!-- Particle data/information -->
+<ParticleList>
+  <Particle Name = "Y">
+    <Pid> 9020443 </Pid>
+    <Parameter Type = "Mass" Name = "Mass_Y">
+      <Value> 4.4158 </Value>
+      <Fix> true </Fix>
+    </Parameter>
+    <QuantumNumber Class='Spin' Type='Spin' Value='1'/>
+    <QuantumNumber Class='Int' Type='Charge' Value='0'/>
+    <QuantumNumber Class='Int' Type='Parity' Value='-1'/>
+    <QuantumNumber Class='Int' Type='Cparity' Value='-1'/>
+    <DecayInfo Type = "relativisticBreitWigner">
+      <!--FormFactor: 0 - noFormFactor; 1 - BlattWeisskopf; 2 - CrystaBrrel -->
+      <FormFactor Type = "1"/>
+      <Parameter Type = "Width" Name = "Width_Y">
+        <Value> 0.0000001 </Value>
+        <Fix> true </Fix>
+      </Parameter>
+      <Parameter Type = "MesonRadius" Name = "Radius_Y">
+        <Value> 2.5 </Value>
+        <Fix> true </Fix>
+        <Min> 2.0 </Min>
+        <Max> 3.0 </Max>
+      </Parameter>
+    </DecayInfo>
+  </Particle>
+  <Particle Name='pi0'>
+    <Pid>111</Pid>
+    <Parameter Type='Mass' Name='Mass_pi0'>
+      <Value>0.1349770</Value>
+      <Fix>true</Fix>
+    </Parameter>
+    <QuantumNumber Class='Spin' Type='Spin' Value='0'/>
+    <QuantumNumber Class='Int' Type='Charge' Value='0'/>
+    <QuantumNumber Class='Int' Type='Parity' Value='-1'/>
+    <QuantumNumber Class='Int' Type='Cparity' Value='1'/>
+    <QuantumNumber Class='Spin' Type='IsoSpin' Value='1' Projection='0'/>
+  </Particle>
+  <Particle Name='D+'>
+    <Pid>411</Pid>
+    <Parameter Type='Mass' Name='Mass_D+'>
+      <Value>1.86959</Value>
+      <Fix>true</Fix>  
+    </Parameter>
+    <QuantumNumber Class='Spin' Type='Spin' Value='0'/>
+    <QuantumNumber Class='Int' Type='Charge' Value='1'/>
+    <QuantumNumber Class='Int' Type='Parity' Value='-1'/>
+    <QuantumNumber Class='Spin' Type='IsoSpin' Value='0.5' Projection='0.5'/>
+  </Particle>
+  <Particle Name='D-'>
+    <Pid>-411</Pid>
+    <Parameter Type='Mass' Name='Mass_D+'>
+      <Value>1.86959</Value>
+      <Fix>true</Fix>  
+    </Parameter>
+    <QuantumNumber Class='Spin' Type='Spin' Value='0'/>
+    <QuantumNumber Class='Int' Type='Charge' Value='-1'/>
+    <QuantumNumber Class='Int' Type='Parity' Value='-1'/>
+    <QuantumNumber Class='Spin' Type='IsoSpin' Value='0.5' Projection='-0.5'/>
+  </Particle>
+  <Particle Name='D*+'>
+    <Pid>413</Pid>
+    <Parameter Type='Mass' Name='Mass_D*+'>
+      <Value>2.01026</Value>
+      <Fix>true</Fix>
+    </Parameter>
+    <QuantumNumber Class='Spin' Type='Spin' Value='1'/>
+    <QuantumNumber Class='Int' Type='Charge' Value='1'/>
+    <QuantumNumber Class='Int' Type='Parity' Value='-1'/>
+    <QuantumNumber Class='Spin' Type='IsoSpin' Value='0.5' Projection='0.5'/>
+    <DecayInfo Type='relativisticBreitWigner'>
+      <FormFactor Type='1'/>
+      <Parameter Type='Width' Name='Width_D*+'>
+        <Value>0.050</Value>
+        <Error>0.0012</Error>
+        <Fix>true</Fix>
+      </Parameter>
+      <Parameter Type='MesonRadius' Name='Raidus_D*+'>
+        <Value>2.5</Value>
+        <Fix>true</Fix>
+        <Min>2.0</Min>
+        <Max>3.0</Max>
+      </Parameter>
+    </DecayInfo>
+  </Particle>
+  <Particle Name='D*-'>
+    <Pid>-413</Pid>
+    <Parameter Type='Mass' Name='Mass_D*+'>
+      <Value>2.01026</Value>
+      <Fix>true</Fix>
+    </Parameter>
+    <QuantumNumber Class='Spin' Type='Spin' Value='1'/>
+    <QuantumNumber Class='Int' Type='Charge' Value='-1'/>
+    <QuantumNumber Class='Int' Type='Parity' Value='-1'/>
+    <QuantumNumber Class='Spin' Type='IsoSpin' Value='0.5' Projection='-0.5'/>
+    <DecayInfo Type='relativisticBreitWigner'>
+      <FormFactor Type='1'/>
+      <Parameter Type='Width' Name='Width_D*+'>
+        <Value>0.010</Value>
+        <Error>0.0012</Error>
+        <Fix>true</Fix>
+      </Parameter>
+      <Parameter Type='MesonRadius' Name='Raidus_D*+'>
+        <Value>2.5</Value>
+        <Fix>true</Fix>
+        <Min>2.0</Min>
+        <Max>3.0</Max>
+      </Parameter>
+    </DecayInfo>
+  </Particle>
+  <Particle Name='D2*(2460)+'>
+    <Pid>415</Pid>
+    <Parameter Type='Mass' Name='Mass_D2*(2460)+'>
+      <Value>2.4654</Value>
+      <Error>0.0013</Error>
+      <Fix>true</Fix>
+    </Parameter>
+    <QuantumNumber Class='Spin' Type='Spin' Value='2'/>
+    <QuantumNumber Class='Int' Type='Charge' Value='1'/>
+    <QuantumNumber Class='Int' Type='Parity' Value='1'/>
+    <QuantumNumber Class='Spin' Type='IsoSpin' Value='0.5' Projection='0.5'/>
+    <DecayInfo Type = "relativisticBreitWigner">
+      <FormFactor Type='1'/>
+      <Parameter Type='Width' Name='Width_D2*(2460)+'>
+        <Value>0.0467</Value>
+        <Error>0.0012</Error>
+        <Fix>true</Fix>
+      </Parameter>
+      <Parameter Type='MesonRadius' Name='Raidus_D2*(2460)+'>
+        <Value>2.5</Value>
+        <Fix>true</Fix>
+        <Min>2.0</Min>
+        <Max>3.0</Max>
+      </Parameter>
+    </DecayInfo>
+  </Particle>
+  <Particle Name='D2*(2460)-'>
+    <Pid>-415</Pid>
+    <Parameter Type='Mass' Name='Mass_D2*(2460)+'>
+      <Value>2.4654</Value>
+      <Error>0.0013</Error>
+      <Fix>true</Fix>
+    </Parameter>
+    <QuantumNumber Class='Spin' Type='Spin' Value='2'/>
+    <QuantumNumber Class='Int' Type='Charge' Value='-1'/>
+    <QuantumNumber Class='Int' Type='Parity' Value='1'/>
+    <QuantumNumber Class='Spin' Type='IsoSpin' Value='0.5' Projection='-0.5'/>
+    <DecayInfo Type = "relativisticBreitWigner">
+      <FormFactor Type='1'/>
+      <Parameter Type='Width' Name='Width_D2*(2460)+'>
+        <Value>0.0467</Value>
+        <Error>0.0012</Error>
+        <Fix>true</Fix>
+      </Parameter>
+      <Parameter Type='MesonRadius' Name='Raidus_D2*(2460)+'>
+        <Value>2.5</Value>
+        <Fix>true</Fix>
+        <Min>2.0</Min>
+        <Max>3.0</Max>
+      </Parameter>
+    </DecayInfo>
+  </Particle>
+</ParticleList>
+
+<!-- Decay Model in below-->
+<HelicityKinematics>
+  <!--
+  <PhspVolume>0.123456</PhspVolume>
+  -->
+  <InitialState>
+    <Particle Name = "Y" Id = "0"/>
+  </InitialState>
+  <FinalState>
+    <Particle Name = "pi0" Id = "0"/>
+    <Particle Name = "D+" Id = "1" />
+    <Particle Name = "D-" Id = "2" />
+  </FinalState>
+</HelicityKinematics>
+
+<!-- decay amplitudes of different Initial and final (not intermediate resonances')
+  state's helicities are summed incoherently -->
+<Intensity Class = "Incoherent" Name = "YDecay">
+  <Parameter Class = "Double" Type = "Strength" Name = "Strength_YDecay">
+    <Value> 1 </Value>
+    <Fix> true </Fix>
+  </Paramerer>
+  <Intensity Class = "Coherent" Name = "YDecay_init_1_final_0_0_0" >
+    <Parameter Class = "Double" Type = "Strength" Name = "Strength_YDecay_init_1_final_0_0_0">
+      <Value> 1 </Value>
+      <Fix> false </Fix>
+    </Parameter>
+    <Amplitude Class = "SequentialPartialAmplitude" Name = "YToD*+D-ToPi0D+D-_1_1_0">
+      <Parameter Class = "Double" Type = "Magnitude" Name = "Magnitude_YToD*+D-ToPi0D+D-_1_1_0">
+        <Value> 1 </Value>
+        <Min> 0 </Min>
+        <Max> 100 </Max>
+        <Fix> true </Fix>
+      </Parameter>
+      <Parameter Class = "Double" Type = "Phase" Name = "Phase_YToD*+D-ToPi0D+D-_1_1_0">
+        <Value> 0 </Value>
+        <Min> 0 </Min>
+        <Max> 100 </Max>
+        <Fix> true </Fix>
+      </Parameter>
+      <PartialAmplitude Class = "HelicityDecay" Name = "D*+ToPi0D+_1_0_0">
+        <Parameter Class = "Double" Type = "Magnitude" Name = "Magnitude_D*+ToPi0D+_1_0_0" >
+          <Value> 1 </Value>
+          <Fix> true </Fix>
+        </Parameter>
+        <Parameter Class = "Double" Type = "Phase" Name = "Phase_D*+ToPi0D+_1_0_0" >
+          <Value> 0 </Value>
+          <Fix> true </Fix>
+        </Parameter>
+        <DecayParticle Name = "D*+" Helicity = "1" />
+        <RecoilSystem FinalState = "2" />
+        <DecayProducts>
+          <Particle Name = "pi0" FinalState = "0" Helicity = "0" />
+          <Particle Name = "D+" FinalState = "1" Helicity = "0" />
+        </DecayProducts>
+      </PartialAmplitude>
+    </Amplitude>
+
+    <Amplitude Class = "SequentialPartialAmplitude" Name = "YToD*+D-ToPi0D+D-_1_-1_0">
+      <Parameter Class = "Double" Type = "Magnitude" Name = "Magnitude_YToD*+D-ToPi0D+D-_1_-1_0">
+        <Value> 1 </Value>
+        <Min> 0 </Min>
+        <Max> 100 </Max>
+        <Fix> true </Fix>
+      </Parameter>
+      <Parameter Class = "Double" Type = "Phase" Name = "Phase_YToD*+D-ToPi0D+D-_1_-1_0">
+        <Value> 0 </Value>
+        <Min> 0 </Min>
+        <Max> 100 </Max>
+        <Fix> true </Fix>
+      </Parameter>
+      <PartialAmplitude Class = "HelicityDecay" Name = "D*+ToPi0D+_-1_0_0">
+        <Parameter Class = "Double" Type = "Magnitude" Name = "Magnitude_D*+ToPi0D+_-1_0_0" >
+          <Value> 1 </Value>
+          <Fix> true </Fix>
+        </Parameter>
+        <Parameter Class = "Double" Type = "Phase" Name = "Phase_D*+ToPi0D+_-1_0_0" >
+          <Value> 0 </Value>
+          <Fix> true </Fix>
+        </Parameter>
+        <DecayParticle Name = "D*+" Helicity = "-1" />
+        <RecoilSystem FinalState = "2" />
+        <DecayProducts>
+          <Particle Name = "pi0" FinalState = "0" Helicity = "0" />
+          <Particle Name = "D+" FinalState = "1" Helicity = "0" />
+        </DecayProducts>
+      </PartialAmplitude>
+    </Amplitude>
+
+    <!--
+    <Amplitude Class = "SequentialPartialAmplitude" Name = "YToD2*(2460)+D-ToPi0D+D-_1_1_0">
+      <Parameter Class = "Double" Type = "Magnitude" Name = "Magnitude_YToD2*(2460)+D-ToPi0D+D-_1_1_0">
+        <Value> 1 </Value>
+        <Min> 0 </Min>
+        <Max> 100 </Max>
+        <Fix> true </Fix>
+      </Parameter>
+      <Parameter Class = "Double" Type = "Phase" Name = "Phase_YToD2*(2460)+D-ToPi0D+D-_1_1_0">
+        <Value> 1 </Value>
+        <Min> 0 </Min>
+        <Max> 100 </Max>
+        <Fix> true </Fix>
+      </Parameter>
+      <PartialAmplitude Class = "HelicityDecay" Name = "D2*(2460)+ToPi0D+_1_0_0">
+        <Parameter Class = "Double" Type = "Magnitude" Name = "Magnitude_D2*(2460)+ToPi0D+_1_0_0" >
+          <Value> 1 </Value>
+          <Fix> true </Fix>
+        </Parameter>
+        <Parameter Class = "Double" Type = "Phase" Name = "Phase_D2*(2460)+ToPi0D+_1_0_0" >
+          <Value> 0 </Value>
+          <Fix> true </Fix>
+        </Parameter>
+        <DecayParticle Name = "D2*(2460)+" Helicity = "1" />
+        <RecoilSystem FinalState = "2" />
+        <DecayProducts>
+          <Particle Name = "pi0" FinalState = "0" Helicity = "0" />
+          <Particle Name = "D+" FinalState = "1" Helicity = "0" />
+        </DecayProducts>
+      </PartialAmplitude>
+    </Amplitude>
+    <Amplitude Class = "SequentialPartialAmplitude" Name = "YToD2*(2460)+D-ToPi0D+D-_1_-1_0">
+      <Parameter Class = "Double" Type = "Magnitude" Name = "Magnitude_YToD2*(2460)+D-ToPi0D+D-_1_-1_0">
+        <Value> 1 </Value>
+        <Min> 0 </Min>
+        <Max> 100 </Max>
+        <Fix> true </Fix>
+      </Parameter>
+      <Parameter Class = "Double" Type = "Phase" Name = "Phase_YToD2*(2460)+D-ToPi0D+D-_1_-1_0">
+        <Value> 1 </Value>
+        <Min> 0 </Min>
+        <Max> 100 </Max>
+        <Fix> true </Fix>
+      </Parameter>
+      <PartialAmplitude Class = "HelicityDecay" Name = "D2*(2460)+ToPi0D+_-1_0_0">
+        <Parameter Class = "Double" Type = "Magnitude" Name = "Magnitude_D2*(2460)+ToPi0D+_-1_0_0" >
+          <Value> 1 </Value>
+          <Fix> true </Fix>
+        </Parameter>
+        <Parameter Class = "Double" Type = "Phase" Name = "Phase_D2*(2460)+ToPi0D+_-1_0_0" >
+          <Value> 0 </Value>
+          <Fix> true </Fix>
+        </Parameter>
+        <DecayParticle Name = "D2*(2460)+" Helicity = "-1" />
+        <RecoilSystem FinalState = "2" />
+        <DecayProducts>
+          <Particle Name = "pi0" FinalState = "0" Helicity = "0" />
+          <Particle Name = "D+" FinalState = "1" Helicity = "0" />
+        </DecayProducts>
+      </PartialAmplitude>
+    </Amplitude>
+    -->
+  </Intensity>
+
+  <!--
+  <Intensity Class = "Coherent" Name = "YDecay_init_-1_final_0_0_0" >
+    <Parameter Class = "Double" Type = "Strength" Name = "Strength_YDecay_init_-1_final_0_0_0">
+      <Value> 1 </Value>
+      <Fix> true </Fix>
+    </Parameter>
+    <Amplitude Class = "SequentialPartialAmplitude" Name = "YToD*+D-ToPi0D+D-_-1_1_0">
+      <Parameter Class = "Double" Type = "Magnitude" Name = "Magnitude_YToD*+D-ToPi0D+D-_-1_1_0">
+        <Value> 1 </Value>
+        <Min> 0 </Min>
+        <Max> 100 </Max>
+        <Fix> true </Fix>
+      </Parameter>
+      <Parameter Class = "Double" Type = "Phase" Name = "Phase_YToD*+D-ToPi0D+D-_-1_1_0">
+        <Value> 1 </Value>
+        <Min> 0 </Min>
+        <Max> 100 </Max>
+        <Fix> true </Fix>
+      </Parameter>
+      <PartialAmplitude Class = "HelicityDecay" Name = "D*+ToPi0D+_1_0_0">
+        <Parameter Class = "Double" Type = "Magnitude" Name = "Magnitude_D*+ToPi0D+_1_0_0" >
+          <Value> 1 </Value>
+          <Fix> true </Fix>
+        </Parameter>
+        <Parameter Class = "Double" Type = "Phase" Name = "Phase_D*+ToPi0D+_1_0_0" >
+          <Value> 0 </Value>
+          <Fix> true </Fix>
+        </Parameter>
+        <DecayParticle Name = "D*+" Helicity = "1" />
+        <RecoilSystem FinalState = "2" />
+        <DecayProducts>
+          <Particle Name = "pi0" FinalState = "0" Helicity = "0" />
+          <Particle Name = "D+" FinalState = "1" Helicity = "0" />
+        </DecayProducts>
+      </PartialAmplitude>
+    </Amplitude>
+    <Amplitude Class = "SequentialPartialAmplitude" Name = "YToD*+D-ToPi0D+D-_-1_-1_0">
+      <Parameter Class = "Double" Type = "Magnitude" Name = "Magnitude_YToD*+D-ToPi0D+D-_-1_-1_0">
+        <Value> 1 </Value>
+        <Min> 0 </Min>
+        <Max> 100 </Max>
+        <Fix> true </Fix>
+      </Parameter>
+      <Parameter Class = "Double" Type = "Phase" Name = "Phase_YToD*+D-ToPi0D+D-_-1_-1_0">
+        <Value> 1 </Value>
+        <Min> 0 </Min>
+        <Max> 100 </Max>
+        <Fix> true </Fix>
+      </Parameter>
+      <PartialAmplitude Class = "HelicityDecay" Name = "D*+ToPi0D+_-1_0_0">
+        <Parameter Class = "Double" Type = "Magnitude" Name = "Magnitude_D*+ToPi0D+_-1_0_0" >
+          <Value> 1 </Value>
+          <Fix> true </Fix>
+        </Parameter>
+        <Parameter Class = "Double" Type = "Phase" Name = "Phase_D*+ToPi0D+_-1_0_0" >
+          <Value> 0 </Value>
+          <Fix> true </Fix>
+        </Parameter>
+        <DecayParticle Name = "D*+" Helicity = "-1" />
+        <RecoilSystem FinalState = "2" />
+        <DecayProducts>
+          <Particle Name = "pi0" FinalState = "0" Helicity = "0" />
+          <Particle Name = "D+" FinalState = "1" Helicity = "0" />
+        </DecayProducts>
+      </PartialAmplitude>
+    </Amplitude>
+
+    <Amplitude Class = "SequentialPartialAmplitude" Name = "YToD2*(2460)+D-ToPi0D+D-_-1_1_0">
+      <Parameter Class = "Double" Type = "Magnitude" Name = "Magnitude_YToD2*(2460)+D-ToPi0D+D-_-1_1_0">
+        <Value> 1 </Value>
+        <Min> 0 </Min>
+        <Max> 100 </Max>
+        <Fix> true </Fix>
+      </Parameter>
+      <Parameter Class = "Double" Type = "Phase" Name = "Phase_YToD2*(2460)+D-ToPi0D+D-_-1_1_0">
+        <Value> 1 </Value>
+        <Min> 0 </Min>
+        <Max> 100 </Max>
+        <Fix> true </Fix>
+      </Parameter>
+      <PartialAmplitude Class = "HelicityDecay" Name = "D2*(2460)+ToPi0D+_1_0_0">
+        <Parameter Class = "Double" Type = "Magnitude" Name = "Magnitude_D2*(2460)+ToPi0D+_1_0_0" >
+          <Value> 1 </Value>
+          <Fix> true </Fix>
+        </Parameter>
+        <Parameter Class = "Double" Type = "Phase" Name = "Phase_D2*(2460)+ToPi0D+_1_0_0" >
+          <Value> 0 </Value>
+          <Fix> true </Fix>
+        </Parameter>
+        <DecayParticle Name = "D2*(2460)+" Helicity = "1" />
+        <RecoilSystem FinalState = "2" />
+        <DecayProducts>
+          <Particle Name = "pi0" FinalState = "0" Helicity = "0" />
+          <Particle Name = "D+" FinalState = "1" Helicity = "0" />
+        </DecayProducts>
+      </PartialAmplitude>
+    </Amplitude>
+    <Amplitude Class = "SequentialPartialAmplitude" Name = "YToD2*(2460)+D-ToPi0D+D-_-1_-1_0">
+      <Parameter Class = "Double" Type = "Magnitude" Name = "Magnitude_YToD2*(2460)+D-ToPi0D+D-_-1_-1_0">
+        <Value> 1 </Value>
+        <Min> 0 </Min>
+        <Max> 100 </Max>
+        <Fix> true </Fix>
+      </Parameter>
+      <Parameter Class = "Double" Type = "Phase" Name = "Phase_YToD2*(2460)+D-ToPi0D+D-_-1_-1_0">
+        <Value> 1 </Value>
+        <Min> 0 </Min>
+        <Max> 100 </Max>
+        <Fix> true </Fix>
+      </Parameter>
+      <PartialAmplitude Class = "HelicityDecay" Name = "D2*(2460)+ToPi0D+_-1_0_0">
+        <Parameter Class = "Double" Type = "Magnitude" Name = "Magnitude_D2*(2460)+ToPi0D+_-1_0_0" >
+          <Value> 1 </Value>
+          <Fix> true </Fix>
+        </Parameter>
+        <Parameter Class = "Double" Type = "Phase" Name = "Phase_D2*(2460)+ToPi0D+_-1_0_0" >
+          <Value> 0 </Value>
+          <Fix> true </Fix>
+        </Parameter>
+        <DecayParticle Name = "D2*(2460)+" Helicity = "-1" />
+        <RecoilSystem FinalState = "2" />
+        <DecayProducts>
+          <Particle Name = "pi0" FinalState = "0" Helicity = "0" />
+          <Particle Name = "D+" FinalState = "1" Helicity = "0" />
+        </DecayProducts>
+      </PartialAmplitude>
+    </Amplitude>
+  </Intensity>
+  -->
+
+</Intensity>
