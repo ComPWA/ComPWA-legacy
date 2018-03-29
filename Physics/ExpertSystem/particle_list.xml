@@ -245,6 +245,7 @@
 		<QuantumNumber Class="Int" Type="Parity" Value="-1"/>
 		<QuantumNumber Class="Int" Type="Cparity" Value="-1"/>
 		<QuantumNumber Class="Spin" Type="IsoSpin" Value="0"/>
+		<QuantumNumber Class="Int" Type="Gparity" Value="-1"/>
 		<DecayInfo Type="relativisticBreitWigner">
 			<FormFactor Type="0" />
 			<Parameter Type="Width" Name="Width_omega782">
@@ -320,7 +321,7 @@
 		<QuantumNumber Class="Int" Type="Charge" Value="0"/>
 		<QuantumNumber Class="Int" Type="Parity" Value="1"/>
 		<QuantumNumber Class="Int" Type="Cparity" Value="1"/>
-		<QuantumNumber Class="Int" Type="Gparity" Value="-1"/>
+		<QuantumNumber Class="Int" Type="Gparity" Value="1"/>
 		<DecayInfo Type="relativisticBreitWigner">
 			<FormFactor Type="0" />
 			<Parameter Type="Width" Name="width_f21270">
@@ -345,7 +346,7 @@
 		<QuantumNumber Class="Int" Type="Charge" Value="0"/>
 		<QuantumNumber Class="Int" Type="Parity" Value="1"/>
 		<QuantumNumber Class="Int" Type="Cparity" Value="1"/>
-		<QuantumNumber Class="Int" Type="Gparity" Value="-1"/>
+		<QuantumNumber Class="Int" Type="Gparity" Value="1"/>
 		<DecayInfo Type="relativisticBreitWigner">
 			<FormFactor Type="0" />
 			<Parameter Type="Width" Name="width_f21950">
@@ -371,6 +372,7 @@
 		<QuantumNumber Class="Int" Type="Charge" Value="0"/>
 		<QuantumNumber Class="Int" Type="Parity" Value="1"/>
 		<QuantumNumber Class="Spin" Type="IsoSpin" Value="1" Projection="0"/>
+		<QuantumNumber Class="Int" Type="Gparity" Value="-1"/>
 		<DecayInfo Type="flatte">
 			<FormFactor Type="0" />
 			<Parameter Type="Coupling" Name="gKK_a0(980)">
@@ -416,6 +418,7 @@
 		<QuantumNumber Class="Int" Type="Charge" Value="1"/>
 		<QuantumNumber Class="Int" Type="Parity" Value="+1"/>
 		<QuantumNumber Class="Spin" Type="IsoSpin" Value="1" Projection="1"/>
+		<QuantumNumber Class="Int" Type="Gparity" Value="-1"/>
 		<DecayInfo Type="flatte">
 			<FormFactor Type="0" />
 			<Parameter Type="Coupling" Name="gKK_a0(980)">
@@ -454,6 +457,7 @@
 		<QuantumNumber Class="Int" Type="Charge" Value="-1"/>
 		<QuantumNumber Class="Int" Type="Parity" Value="+1"/>
 		<QuantumNumber Class="Spin" Type="IsoSpin" Value="1" Projection="-1"/>
+		<QuantumNumber Class="Int" Type="Gparity" Value="-1"/>
 		<DecayInfo Type="flatte">
 			<FormFactor Type="0" />
 			<Parameter Type="Coupling" Name="gKK_a0(980)">
@@ -488,6 +492,7 @@
 		<QuantumNumber Class="Spin" Type="Spin" Value="1"/>
 		<QuantumNumber Class="Int" Type="Charge" Value="0"/>
 		<QuantumNumber Class="Int" Type="Parity" Value="-1"/>
+		<QuantumNumber Class="Int" Type="Gparity" Value="-1"/>
 		<DecayInfo Type="relativisticBreitWigner">
 			<FormFactor Type="1" />
 			<Parameter Type="Width" Name="Width_phi(1020)">
