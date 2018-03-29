@@ -29,3 +29,4 @@ install
 *__pycache__
 *.rst
 !Physics/ExpertSystem/docs/source/index.rst
+Physics/ExpertSystem/tests/.pytest_cache
