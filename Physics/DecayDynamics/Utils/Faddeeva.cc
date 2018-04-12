@@ -1,3 +1,8 @@
+///
+/// \file
+/// This file contains the implementation of the Faddeeva package, which is used only
+/// in the Voigtian class in the ComPWA framework.
+///
 //  -*- mode:c++; tab-width:2; indent-tabs-mode:nil;  -*-
 
 /* Copyright (c) 2012 Massachusetts Institute of Technology

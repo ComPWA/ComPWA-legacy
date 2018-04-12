@@ -57,7 +57,7 @@ void HelicityDecay::load(std::shared_ptr<PartList> partL,
                              " not found in list!");
   ComPWA::Spin J = partItr->second.GetSpinQuantumNumber("Spin");
   ComPWA::Spin mu(pt.get<double>("DecayParticle.<xmlattr>.Helicity"));
-  //if the node OrbitalAngularMomentum is not exists, set it to spin J as default
+  //if the node OrbitalAngularMomentum does not exist, set it to spin J as default value
   ComPWA::Spin orbitL(pt.get<double>("DecayParticle.<xmlattr>.OrbitalAngularMomentum", (double) J));
 
   // Read name and helicities from decay products

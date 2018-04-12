@@ -2,6 +2,12 @@
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
+///
+/// \file
+/// This file contains the declaration of the HelicityFromCanonicalSum class, 
+/// which is used to construct several canonical amplitudes, and the sum of
+/// these canonical amplitudes is the corresponding helicity amplitude.
+///
 #ifndef HelicityFromCanonicalSum_H
 #define HelicityFromCanonicalSum_H
 
@@ -17,6 +23,12 @@ namespace ComPWA {
 namespace Physics {
 namespace HelicityFormalism {
 
+///
+/// \class HelicityFromCanonicalSum
+/// HelicityFromCanonicalSum class constructs serveral canonical amplitudes from 
+/// a given two-body decay configuration, and these amplitudes are the sum of 
+/// the helicity decay for the given two-body decay configuration.
+///
 class HelicityFromCanonicalSum : public Amplitude {
 
 public:
@@ -45,6 +57,7 @@ public:
     return false;
   }
 
+  /// Evaluate function without normalization
   virtual std::complex<double> evaluate(const DataPoint &point) const {
     std::complex<double> result = coefficient() * preFactor();
     for (auto i : PartialAmplitudes)
