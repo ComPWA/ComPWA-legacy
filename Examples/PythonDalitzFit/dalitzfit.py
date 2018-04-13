@@ -1,229 +1,71 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import ROOT
-from ROOT import gROOT, TCanvas, TF1, TVector3, TTree
+import pycompwa as pwa
 
-from rootpy.interactive import wait
+pwa.Logging("fit.log", "debug")
 
-import numpy as np
-import matplotlib.pyplot as plt
-
-import PyComPWA as pwa
-
-import time
-
-from histogrammar.tutorial import cmsdata
-events = cmsdata.EventIterator()
-
-from histogrammar import *
-
-############################# Configuration ##############
-
-amplitudeModel = '''
-<Intensity Class='Incoherent' Name="jpsiGammaPiPi_inc">
-  <Intensity Class='Coherent' Name="jpsiGammaPiPi">
-    <Amplitude Class="SequentialPartialAmplitude" Name="f2(1270)">
-      <Parameter Class='Double' Type="Magnitude"  Name="Magnitude_f2">
-        <Value>1.0</Value>
-        <Min>-1.0</Min>
-        <Max>2.0</Max>
-        <Fix>false</Fix>
-      </Parameter>
-      <Parameter Class='Double' Type="Phase" Name="Phase_f2">
-        <Value>0.0</Value>
-        <Min>-100</Min>
-        <Max>100</Max>
-        <Fix>false</Fix>
-      </Parameter>
-      <PartialAmplitude Class="HelicityDecay" Name="f2ToPiPi">
-        <DecayParticle Name="f2(1270)" Helicity="0"/>
-        <RecoilSystem FinalState="0" />
-        <DecayProducts>
-          <Particle Name="pi0" FinalState="1"  Helicity="0"/>
-          <Particle Name="pi0" FinalState="2"  Helicity="0"/>
-        </DecayProducts>
-      </PartialAmplitude>
-    </Amplitude>
-    <Amplitude Class="SequentialPartialAmplitude" Name="myAmp">
-      <Parameter Class='Double' Type="Magnitude"  Name="Magnitude_my">
-        <Value>1.0</Value>
-        <Min>-1.0</Min>
-        <Max>2.0</Max>
-        <Fix>true</Fix>
-      </Parameter>
-      <Parameter Class='Double' Type="Phase" Name="Phase_my`">
-        <Value>0.0</Value>
-        <Min>-100</Min>
-        <Max>100</Max>
-        <Fix>true</Fix>
-      </Parameter>
-      <PartialAmplitude Class="HelicityDecay" Name="MyResToPiPi">
-        <DecayParticle Name="myRes" Helicity="0"/>
-        <RecoilSystem FinalState="0" />
-        <DecayProducts>
-          <Particle Name="pi0" FinalState="1"  Helicity="0"/>
-          <Particle Name="pi0" FinalState="2"  Helicity="0"/>
-        </DecayProducts>
-      </PartialAmplitude>
-    </Amplitude>
-  </Intensity>
-</Intensity>
-'''
-
-myParticles = '''
-<ParticleList>
-  <Particle Name="f2(1270)">
-    <Pid>225</Pid>
-    <Parameter Class='Double' Type="Mass" Name="Mass_f2(1270)">
-      <Value>1.2755</Value>
-      <Error>8.0E-04</Error>
-      <Min>0.1</Min>
-      <Max>2.0</Max>
-      <Fix>false</Fix>
-    </Parameter>
-    <QuantumNumber Class="Spin" Type="Spin" Value="2"/>
-    <QuantumNumber Class="Int" Type="Charge" Value="0"/>
-    <QuantumNumber Class="Int" Type="Parity" Value="+1"/>
-    <QuantumNumber Class="Int" Type="Cparity" Value="+1"/>
-    <DecayInfo Type="relativisticBreitWigner">
-      <FormFactor Type="0" />
-      <Parameter Class='Double' Type="Width" Name="Width_f2(1270)">
-        <Value>0.1867</Value>
-      </Parameter>
-      <Parameter Class='Double' Type="MesonRadius" Name="Radius_rho">
-        <Value>2.5</Value>
-        <Fix>true</Fix>
-      </Parameter>
-    </DecayInfo>
-  </Particle>
-  <Particle Name="myRes">
-    <Pid>999999</Pid>
-    <Parameter Class='Double' Type="Mass" Name="Mass_myRes">
-      <Value>2.0</Value>
-      <Error>8.0E-04</Error>
-    </Parameter>
-    <QuantumNumber Class="Spin" Type="Spin" Value="1"/>
-    <QuantumNumber Class="Int" Type="Charge" Value="0"/>
-    <QuantumNumber Class="Int" Type="Parity" Value="+1"/>
-    <QuantumNumber Class="Int" Type="Cparity" Value="+1"/>
-    <DecayInfo Type="relativisticBreitWigner">
-      <FormFactor Type="0" />
-      <Parameter Class='Double' Type="Width" Name="Width_myRes">
-        <Value>1.0</Value>
-        <Min>0.1</Min>
-        <Max>1.0</Max>
-        <Fix>false</Fix>
-      </Parameter>
-      <Parameter Class='Double' Type="MesonRadius" Name="Radius_myRes">
-        <Value>2.5</Value>
-        <Fix>true</Fix>
-      </Parameter>
-    </DecayInfo>
-  </Particle>
-</ParticleList>
-'''
-
-############################# Start Fit ##############
-  
-print("     Create Particle List")
-
+# Fill particle list
 partL = pwa.PartList()
-pwa.ReadParticles(partL, pwa.GetDefaultParticles())
-pwa.ReadParticles(partL, myParticles)
+pwa.read_particles(partL, pwa.default_particles())
+with open('model.xml', 'r') as content_file:
+    customPart = content_file.read()
+    pwa.read_particles(partL, customPart)
 
+# Create kinematics
+kin = pwa.HelicityKinematics(partL, pwa.initial_state(421),
+                             pwa.final_state(310, 321, -321))
 
-print("     Create Kinematics")
-
-kin = pwa.HelicityKinematics(partL, pwa.GetInitialState(443), pwa.GetFinalState(22, 111, 111))
-
-
-print("     Generate Phasespace")
-
+# Generate phase space sample
 gen = pwa.RootGenerator(partL, kin)
 phspSample = pwa.Data()
-pwa.GeneratePhsp(100000, gen, phspSample)
+pwa.generate_phsp(100000, gen, phspSample)
 
+# Create Amplitude
+with open('model.xml', 'r') as content_file:
+    amplitudeModel = content_file.read()
+    intens = pwa.incoherent_intensity(amplitudeModel, partL, kin, phspSample)
 
-print("     Create Amplitude")
-
-intens = pwa.GetIncoherentIntensity(amplitudeModel, partL, kin, phspSample)
-
-
-print("     Generate Data")
-
+# Generate Data
 sample = pwa.Data()
-pwa.Generate(1000, kin, gen, intens, sample, phspSample, phspSample)
+pwa.generate(300, kin, gen, intens, sample, phspSample, phspSample)
 
-
-print("     Fit model to data")
-
+# Fit model to data
 fitPar = pwa.ParameterList()
-intens.GetParameters(fitPar)
-pwa.setErrorOnParameterList(fitPar, 0.05, False)
+intens.parameters(fitPar)
+pwa.set_parameter_error(fitPar, 0.05, False)
 
 esti = pwa.MinLogLH(kin, intens, sample, phspSample, phspSample, 0, 0)
-esti.UseFunctionTree(True)
+esti.enable_function_tree(True)
+pwa.print_function_tree(esti)
 
 minuitif = pwa.MinuitIF(esti, fitPar)
-minuitif.SetHesse(True)
+minuitif.enable_hesse(True)
 
-result = minuitif.exec(fitPar)
+result = minuitif.minimize(fitPar)
 
-fitFracs = pwa.CalculateFitFractions(kin, intens, phspSample)
-pwa.CalcFractionError(fitPar, result, fitFracs, intens, kin,
-                            phspSample, 100)
-result.SetFitFractions(fitFracs)  
+components = [["a0(980)0", "D0toKSK+K-_inc"], ["phi(1020)", "D0toKSK+K-_inc"],
+              ["a0(980)+", "D0toKSK+K-"],["a2(1320)-", "D0toKSK+K-"]]
+fitFracs = pwa.fit_fractions(kin, intens, phspSample, components)
+# pwa.fit_fractions_error(fitPar, result, fitFracs, intens, kin, phspSample, 100)
+result.set_fit_fractions(fitFracs)
 
-result.Print()
+result.print()
 
+# Save results
+pwa.save_results("fitResult.xml", result)
+pwa.save_model("fitModel.xml", partL, fitPar, intens)
 
-print("     Save results")
+# Get results
+# mydatapoints = pwa.DataPoints(sample, kin)
 
-pwa.saveResults("PyDalitzFit-fitResult.xml", result)
-pwa.saveModel("PyDalitzFit-Model.xml", partL, fitPar, intens)
-
-print("     Get results")
-
-mydatapoints = pwa.DataPoints(sample, kin)
-mynumpydata = np.array(mydatapoints, copy = False)
-
-print("     Plot")
-
-#resultPar = result.GetFinalParameters()
-
-parPlotX = np.arange(0, mynumpydata.shape[0], 1)
-parPlotY = mynumpydata[:,0]
-plt.plot(parPlotX, parPlotY)
-
-plt.xlabel('Event ID')
-plt.ylabel('Event weight')
-plt.title('Event weights')
-plt.grid(True)
-plt.savefig("testPyPlot.png")
-plt.show()
-
-#rootpl = pwa.RootPlot(kin)
-#rootpl.SetData(sample)
-#rootpl.SetPhspSample(phspSample)
-#rootpl.SetFitAmp(intens)
-#rootpl.Write("PyTestFit", "PyRootPlot.root", "RECREATE")
-
-#resultFile = ROOT.TFile("DalitzFit.root")
-#invMassPlot = resultFile.Get("invmass")
-#invMassPlot.Draw()
-#wait()
-#time.sleep(60)
-
-#hist2d = Bin(10, -100, 100, lambda event: event.met.px,
-#             value = Bin(10, -100, 100, lambda event: event.met.py))
-
-#for i, event in enumerate(events):
-#    if i == 1000: break
-#    hist2d.fill(event)
-
-#roothist = hist2d.plot.root("name2", "title")
-#roothist.Draw("colz")
+# Plotting
+rootpl = pwa.RootPlot(kin)
+rootpl.set_data(sample)
+rootpl.set_phsp_sample(phspSample)
+rootpl.set_intensity(intens)
+rootpl.add_component(components[0][0], "a0_980_0")
+rootpl.add_component(components[1][0], "phi_1020")
+rootpl.write("", "plot.root", "RECREATE")
 
 exit()
- 
