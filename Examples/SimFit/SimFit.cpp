@@ -396,24 +396,25 @@ int main(int argc, char **argv) {
   ptree ptout;
   ptout.add_child("ParticleList", SaveParticles(partL));
   xml_parser::write_xml("fitParticles.xml", ptout, std::locale());
+  
   //---------------------------------------------------
   // 6) Plot data sample and intensity
   //---------------------------------------------------
   sqrtS4230._pl = std::make_shared<RootPlot>(sqrtS4230._kin);
-  sqrtS4230._pl->SetData(sqrtS4230._data);
-  sqrtS4230._pl->SetPhspSample(sqrtS4230._mcSample);
-  sqrtS4230._pl->SetFitAmp(sqrtS4230._amp);
-  sqrtS4230._pl->AddComponent("f0(980)", "f0_980");
-  sqrtS4230._pl->AddComponent("Zc(3900)_JpsiPiPlus + Zc(3900)_JpsiPiMinus",
+  sqrtS4230._pl->setDataSample(sqrtS4230._data);
+  sqrtS4230._pl->setPhspSample(sqrtS4230._mcSample);
+  sqrtS4230._pl->setIntensity(sqrtS4230._amp);
+  sqrtS4230._pl->addComponent("f0(980)", "f0_980");
+  sqrtS4230._pl->addComponent("Zc(3900)_JpsiPiPlus + Zc(3900)_JpsiPiMinus",
                               "Zc3900");
-  sqrtS4230._pl->Write("sqrtS4230", "plot.root", "RECREATE");
+  sqrtS4230._pl->write("sqrtS4230", "plot.root", "RECREATE");
 
   sqrtS4260._pl = std::make_shared<RootPlot>(sqrtS4260._kin);
-  sqrtS4260._pl->SetData(sqrtS4260._data);
-  sqrtS4260._pl->SetPhspSample(sqrtS4260._mcSample);
-  sqrtS4260._pl->SetFitAmp(sqrtS4260._amp);
-  sqrtS4260._pl->AddComponent("f0(980)", "f0_980");
-  sqrtS4260._pl->Write("sqrtS4260", "plot.root", "UPDATE");
+  sqrtS4260._pl->setDataSample(sqrtS4260._data);
+  sqrtS4260._pl->setPhspSample(sqrtS4260._mcSample);
+  sqrtS4260._pl->setIntensity(sqrtS4260._amp);
+  sqrtS4260._pl->addComponent("f0(980)", "f0_980");
+  sqrtS4260._pl->write("sqrtS4260", "plot.root", "UPDATE");
 
   LOG(info) << "Done";
 

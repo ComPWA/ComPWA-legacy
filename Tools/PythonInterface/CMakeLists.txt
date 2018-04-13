@@ -1,6 +1,5 @@
-# Create python module for Dalitz plot analysis
+# Create python module for ComPWA
 
-# The REQUIRED statement is somehow not working
 find_package( ROOT REQUIRED QUIET )
 
 find_package(Boost COMPONENTS
@@ -8,11 +7,13 @@ find_package(Boost COMPONENTS
                REQUIRED QUIET
 )
 
-#IF(PYTHONLIBS_FOUND)
+add_subdirectory( "${COMPWA_SOURCE_DIR}/Tools/pybind11"
+    "${CMAKE_CURRENT_BINARY_DIR}/pybind11_build"
+)
 
-  add_subdirectory("${COMPWA_SOURCE_DIR}/Tools/pybind11" "${CMAKE_CURRENT_BINARY_DIR}/pybind11_build")
-  pybind11_add_module(PyComPWA MODULE PyComPWA.cpp)
-  target_link_libraries( PyComPWA 
+pybind11_add_module( pycompwa MODULE PyComPWA.cpp )
+
+target_link_libraries( pycompwa
     PUBLIC
     HelicityFormalism
     Minuit2IF
@@ -23,20 +24,27 @@ find_package(Boost COMPONENTS
     ${ROOT_LIBRARIES} 
     ${Boost_LIBRARIES} 
     pthread 
-  )
-  target_include_directories( PyComPWA 
+)
+
+target_include_directories( pycompwa
     PUBLIC 
     ${ROOT_INCLUDE_DIR} 
     ${Boost_INCLUDE_DIR}
     ${PYTHON_INCLUDE_DIRS}
-  )
-  #IF(GENEVA_FOUND)
-  #  target_link_libraries( PyComPWA 
-  #    GenevaIF
-  #  )
-  #  target_include_directories( PyComPWA  
-  #    ${GENEVA_INCLUDE_DIR}
-  #  )
-  #ENDIF()
+)
 
+#IF(GENEVA_FOUND)
+#  target_link_libraries( PyComPWA
+#    GenevaIF
+#  )
+#  target_include_directories( pycompwa
+#    ${GENEVA_INCLUDE_DIR}
+#  )
 #ENDIF()
+
+#
+# Install
+#
+install( TARGETS pycompwa
+    LIBRARY DESTINATION lib/ComPWA
+)

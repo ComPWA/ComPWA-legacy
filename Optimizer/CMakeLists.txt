@@ -15,5 +15,5 @@ ELSE ()
 ENDIF()
 
 install (FILES Optimizer.hpp
-    DESTINATION include/ComPWA/Optimizer
+    DESTINATION include/ComPWA
 )

@@ -51,6 +51,11 @@ public:
     init(outFileName, minLevel);
   };
 
+  Logging(std::string outFileName = "output.log",
+          std::string minLevel = "debug") {
+    init(outFileName, stringToLoggingLevel(minLevel));
+  };
+
   void setLogLevel(boost::log::trivial::severity_level minLevel);
 
   void setLogLevel(std::string minLevel) {

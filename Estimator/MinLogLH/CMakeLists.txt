@@ -13,27 +13,27 @@ target_link_libraries(
   Core
 )
 
+#
+# Install
+#
 install (FILES ${lib_headers}
     DESTINATION include/ComPWA/Estimator/MinLogLH
 )
 
 install (TARGETS MinLogLH
-        LIBRARY DESTINATION lib
+        LIBRARY DESTINATION lib/ComPWA
 )
 
-#Run through each source
+# Run through each source
 foreach(testSrc ${TEST_SRCS})
-  #Extract the filename without an extension (NAME_WE)
+  # Extract the filename without an extension (NAME_WE)
   get_filename_component(fileName ${testSrc} NAME_WE)
   SET(testName "EstimatorTest_${fileName}")
 
-  #Add compile target
+  # Add compile target
   add_executable( ${testName} ${testSrc})
-  #install(TARGETS ${testName}
-  #  RUNTIME DESTINATION bin
-  #)
 
-  #link to Boost libraries AND your targets and dependencies
+  # link to Boost libraries AND your targets and dependencies
   target_link_libraries( ${testName}
     Core
     RootReader
@@ -41,9 +41,9 @@ foreach(testSrc ${TEST_SRCS})
     ${ROOT_LIBRARIES}
   )
 
-  #I like to move testing binaries into a testBin directory
+  # Move testing binaries into a testBin directory
   set_target_properties( ${testName}
-    PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${EXECUTABLE_OUTPUT_PATH}/testBin
+    PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin/test/
   )
 
   # Copy input files for test programs - we assume they have the name
@@ -58,12 +58,12 @@ foreach(testSrc ${TEST_SRCS})
       TARGET ${testName} POST_BUILD
       COMMAND ${CMAKE_COMMAND} -E copy
       ${CMAKE_CURRENT_SOURCE_DIR}/test/${TestInName}
-      ${EXECUTABLE_OUTPUT_PATH}/testBin/${TestInName} )
+      ${PROJECT_BINARY_DIR}/bin/test/${TestInName} )
   endforeach( TestIn )
 
-  #Finally add it to test execution -
-  #Notice the WORKING_DIRECTORY and COMMAND
+  # Finally add it to test execution -
+  # Notice the WORKING_DIRECTORY and COMMAND
   add_test(NAME ${testName}
-    WORKING_DIRECTORY ${EXECUTABLE_OUTPUT_PATH}/testBin
-    COMMAND ${EXECUTABLE_OUTPUT_PATH}/testBin/${testName} )
+    WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/bin/test/
+    COMMAND ${PROJECT_BINARY_DIR}/bin/test/${testName} )
 endforeach(testSrc)

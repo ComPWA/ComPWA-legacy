@@ -35,10 +35,8 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel") # using Intel C++
 endif()
 message( STATUS "CXX Compile flags: " ${CMAKE_CXX_FLAGS} )
 
-# set the default path for built executables to the "bin" directory
-set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
-
-# set the default path for built libraries to the "lib" directory
+# Automatically copy all binaries and libraries to bin/ and lib/
+#set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
 #set(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib)
 
 INCLUDE_DIRECTORIES(${COMPWA_SOURCE_DIR})
@@ -86,29 +84,9 @@ include_directories(${Boost_INCLUDE_DIR})
 link_directories(${Boost_LIBRARY_DIR})
 
 #
-# Find Python
-#
-#find_package( PythonLibs )
-
-# Workaround for clang+boost.python
-# ${CMAKE_CXX_COMPILER_ID} can be one of {GNU Clang AppleClang Intel MSVC}
-# The python interface is still work in progress, so we disable python by
-# default.
-if (NOT "${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
-  #find_package(PythonLibs 2.7 EXACT)
-  #INCLUDE_DIRECTORIES(${PYTHON_INCLUDE_PATH})
-  #LINK_DIRECTORIES(${PYTHON_LIBRARIES})
-  #find_package( Boost COMPONENTS
-  #             python
-  #             REQUIRED
-  #)
-endif()
-
-#
 # Enable target 'test'
 #
 enable_testing()
-
 
 #
 # Submodules
@@ -120,7 +98,6 @@ add_subdirectory(Optimizer)
 add_subdirectory(Physics)
 add_subdirectory(Tools)
 add_subdirectory(Examples)
-add_subdirectory(executables)
 
 #
 # Doxygen
