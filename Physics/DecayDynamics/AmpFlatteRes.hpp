@@ -64,7 +64,7 @@ public:
    * @param massC1 mass of first particle of third channel
    * @param massC2 mass of third particle of third channel
    * @param gC coupling constant for third channel
-   * @param J resonance spin
+   * @param L Orbital angular momentum between two daughters a and b
    * @param mesonRadius 1/interaction length (needed for barrier factors)
    * @param ffType formfactor type
    * @return

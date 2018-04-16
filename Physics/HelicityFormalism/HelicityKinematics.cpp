@@ -40,7 +40,7 @@ HelicityKinematics::HelicityKinematics(std::shared_ptr<PartList> partL,
   for (auto i : InitialState)
     stream << FindParticle(partL, i).name() << " ";
   stream << ")->( ";
-  for (auto i : InitialState)
+  for (auto i : FinalState)
     stream << FindParticle(partL, i).name() << " ";
   stream << ")";
 

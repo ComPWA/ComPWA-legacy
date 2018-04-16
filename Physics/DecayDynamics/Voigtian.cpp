@@ -10,16 +10,16 @@
 #include <boost/property_tree/ptree.hpp>
 
 #include "Physics/HelicityFormalism/HelicityKinematics.hpp"
-#include "Physics/DecayDynamics/RelativisticBreitWigner.hpp"
+#include "Physics/DecayDynamics/Voigtian.hpp"
 #include "Physics/DecayDynamics/Coupling.hpp"
 
 using namespace ComPWA::Physics::DecayDynamics;
 
-RelativisticBreitWigner::RelativisticBreitWigner(
+Voigtian::Voigtian(
    std::string name, std::pair<std::string,std::string> daughters,
                std::shared_ptr<ComPWA::PartList> partL) {
 
-  LOG(trace) << "RelativisticBreitWigner::Factory() | Construction of " << name
+  LOG(trace) << "Voigtian::Factory() | Construction of " << name
              << ".";
   setName(name);
   auto partProp = partL->find(name)->second;
@@ -27,9 +27,9 @@ RelativisticBreitWigner::RelativisticBreitWigner(
       std::make_shared<FitParameter>(partProp.GetMassPar()));
 
   auto decayTr = partProp.GetDecayInfo();
-  if (partProp.GetDecayType() != "relativisticBreitWigner")
+  if (partProp.GetDecayType() != "voigt")
     throw std::runtime_error(
-        "RelativisticBreitWigner::Factory() | Decay type does not match! ");
+        "Voigtian::Factory() | Decay type does not match! ");
 
   auto spin = partProp.GetSpinQuantumNumber("Spin");
   SetSpin(spin);
@@ -38,11 +38,8 @@ RelativisticBreitWigner::RelativisticBreitWigner(
   //after RelBW is created by calling of constructor
   SetOrbitalAngularMomentum(spin);
 
-  auto ffType = formFactorType(decayTr.get<int>("FormFactor.<xmlattr>.Type"));
-  SetFormFactorType(ffType);
-
-  // Read parameters from tree. Currently parameters of type 'Width' and
-  // 'MesonRadius' are required.
+  //auto ffType = formFactorType(decayTr.get<int>("FormFactor.<xmlattr>.Type"));
+  //SetFormFactorType(ffType);
   for (const auto &v : decayTr.get_child("")) {
     if (v.first != "Parameter")
       continue;
@@ -50,14 +47,17 @@ RelativisticBreitWigner::RelativisticBreitWigner(
     if (type == "Width") {
       SetWidthParameter(std::make_shared<FitParameter>(v.second));
     } else if (type == "MesonRadius") {
-      SetMesonRadiusParameter(
-          std::make_shared<FitParameter>(v.second));
+      ; //do nothing
+//      SetMesonRadiusParameter(
+//          std::make_shared<FitParameter>(v.second));
     } else {
       throw std::runtime_error(
-          "RelativisticBreitWigner::Factory() | Parameter of type " + type +
+          "Voigtian::Factory() | Parameter of type " + type +
           " is unknown.");
     }
   }
+  double sigma = decayTr.get<double>("Resolution.<xmlattr>.Sigma");
+  SetSigma(sigma);
 
   std::pair<double, double> daughterMasses(
       partL->find(daughters.first)->second.GetMass(),
@@ -66,110 +66,106 @@ RelativisticBreitWigner::RelativisticBreitWigner(
   SetDecayNames(daughters);
 
   LOG(trace)
-      << "RelativisticBreitWigner::Factory() | Construction of the decay "
+      << "Voigtian::Factory() | Construction of the decay "
       << partProp.name() << " -> " << daughters.first << " + "
       << daughters.second;
 }
 
-std::complex<double> RelativisticBreitWigner::evaluate(const DataPoint &point,
+std::complex<double> Voigtian::evaluate(const DataPoint &point,
                                                        int pos) const {
   std::complex<double> result =
-      dynamicalFunction(point.value(pos),Mass->value(), DaughterMasses.first,
-                        DaughterMasses.second,Width->value(), (double)L,
-                        MesonRadius->value(), FormFactorType);
+      dynamicalFunction(point.value(pos),Mass->value(), Width->value(), Sigma);
   assert(!std::isnan(result.real()) && !std::isnan(result.imag()));
   return result;
 }
 
-bool RelativisticBreitWigner::isModified() const {
+bool Voigtian::isModified() const {
   if (AbstractDynamicalFunction::isModified())
     return true;
-  if (Width->value() != CurrentWidth ||
-      MesonRadius->value() != CurrentMesonRadius) {
+    if (Width->value() != CurrentWidth) {
     setModified();
-    const_cast<double &>(CurrentWidth) =Width->value();
-    const_cast<double &>(CurrentMesonRadius) = MesonRadius->value();
+    const_cast<double &>(CurrentWidth) = Width->value();
     return true;
   }
   return false;
 }
 
-std::complex<double> RelativisticBreitWigner::dynamicalFunction(
-    double mSq, double mR, double ma, double mb, double width, unsigned int L,
-    double mesonRadius, formFactorType ffType) {
+std::complex<double> Voigtian::dynamicalFunction(
+    double mSq, double mR, double wR, double sigma) {
 
-  std::complex<double> i(0, 1);
   double sqrtS = sqrt(mSq);
 
-  auto phspFactorSqrtS = phspFactor(sqrtS, ma, mb);
-  auto phspFactormR = phspFactor(mR, ma, mb);
+  //the non-relativistic BreitWigner which is convoluted in Voigtian
+  //has the exactly following expression:
+  //BW(x, m, width) = 1/pi * width/2 * 1/((x - m)^2 + (width/2)^2)
+  //i.e., the Lorentz formula with Gamma = width/2 and x' = x - m
+  /// https://root.cern.ch/doc/master/RooVoigtianian_8cxx_source.html
+  double argu = sqrtS - mR;
+  double c = 1.0/(sqrt(2.0) * sigma);
+  double a = c * 0.5 * wR;
+  double u = c * argu;
+  std::complex<double> z(u, a);
+  std::complex<double> v = Faddeeva::w(z, 1e-13); 
+  double val = c * 1.0/sqrt(M_PI) * v.real();
+  double sqrtVal = sqrt(val);
 
-  // Check if we have an event which is exactly at the phase space boundary
-  if (phspFactorSqrtS == std::complex<double>(0, 0))
-    return std::complex<double>(0, 0);
+  /// keep the phi angle of the complex BW 
+  std::complex<double> invBW(argu, 0.5 * wR);
+  std::complex<double> BW = 1.0/invBW;
+  double phi = std::arg(BW);
+  std::complex<double> result(sqrtVal * cos(phi), sqrtVal * sin(phi));
 
-  std::complex<double> qTerm =
-      std::pow((phspFactorSqrtS / phspFactormR) * mR / sqrtS, (2 * L + 1));
-  double barrier = FormFactor(sqrtS, ma, mb, L, mesonRadius, ffType) /
-                   FormFactor(mR, ma, mb, L, mesonRadius, ffType);
-
+  //transform width to coupling
   // Calculate coupling constant to final state
-  std::complex<double> g_final =
-      widthToCoupling(mSq, mR, width, ma, mb, L, mesonRadius, ffType);
-
-  // Coupling constant from production reaction. In case of a particle decay
-  // the production coupling doesn't depend in energy since the CM energy
-  // is in the (RC) system fixed to the mass of the decaying particle
+  // MesonRadius = 0.0, noFormFactor
+  //std::complex<double> g_final = widthToCoupling(mSq, mR, wR, ma, mb, L, 0.0, formFactorType::noFormFactor); 
+  //the BW to convolved in voigt is 1/PI * Gamma/2 * 1/((x-m)^2 + (Gamma/2)^2)
+  //while I think the one common used in physics is Gamma/2 * 1/((x-m)^2 + (Gamma/2)^2)
+  //So we time the PI at last
+  std::complex<double> g_final = sqrt(M_PI);
   double g_production = 1;
-
-  std::complex<double> denom = std::complex<double>(mR * mR - mSq, 0) +
-                               (-1.0) * i * sqrtS * (width * qTerm * barrier);
-
-  std::complex<double> result = g_final * g_production / denom;
+  result *= g_production;
+  result *= g_final;
 
   assert(
       (!std::isnan(result.real()) || !std::isinf(result.real())) &&
-      "RelativisticBreitWigner::dynamicalFunction() | Result is NaN or Inf!");
+      "Voigtian::dynamicalFunction() | Result is NaN or Inf!");
   assert(
       (!std::isnan(result.imag()) || !std::isinf(result.imag())) &&
-      "RelativisticBreitWigner::dynamicalFunction() | Result is NaN or Inf!");
+      "Voigtian::dynamicalFunction() | Result is NaN or Inf!");
 
   return result;
 }
 
 std::shared_ptr<ComPWA::FunctionTree>
-RelativisticBreitWigner::tree(const ParameterList &sample, int pos,
+Voigtian::tree(const ParameterList &sample, int pos,
                                  std::string suffix) {
 
   size_t sampleSize = sample.mDoubleValue(pos)->values().size();
 
   auto tr = std::make_shared<FunctionTree>(
-      "RelBreitWigner" + suffix, MComplex("", sampleSize),
-      std::make_shared<BreitWignerStrategy>());
+      "Voigtian" + suffix, MComplex("", sampleSize),
+      std::make_shared<VoigtianStrategy>());
 
-  tr->createLeaf("Mass",Mass, "RelBreitWigner" + suffix);
-  tr->createLeaf("Width",Width, "RelBreitWigner" + suffix);
-  tr->createLeaf("OrbitalAngularMomentum", (double)L, "RelBreitWigner" + suffix);
-  tr->createLeaf("MesonRadius", MesonRadius, "RelBreitWigner" + suffix);
-  tr->createLeaf("FormFactorType", FormFactorType, "RelBreitWigner" + suffix);
-  tr->createLeaf("MassA", DaughterMasses.first, "RelBreitWigner" + suffix);
-  tr->createLeaf("MassB", DaughterMasses.second, "RelBreitWigner" + suffix);
+  tr->createLeaf("Mass",Mass, "Voigtian" + suffix);
+  tr->createLeaf("Width",Width, "Voigtian" + suffix);
+  tr->createLeaf("Sigma", Sigma, "Voigtian" + suffix);
   tr->createLeaf("Data_mSq[" + std::to_string(pos) + "]",
-                 sample.mDoubleValue(pos), "RelBreitWigner" + suffix);
+                 sample.mDoubleValue(pos), "Voigtian" + suffix);
 
   return tr;
 };
 
-void BreitWignerStrategy::execute(ParameterList &paras,
+void VoigtianStrategy::execute(ParameterList &paras,
                                   std::shared_ptr<Parameter> &out) {
   if (out && checkType != out->type())
     throw BadParameter(
-        "BreitWignerStrat::execute() | Parameter type mismatch!");
+        "VoigtianStrat::execute() | Parameter type mismatch!");
 
 #ifndef NDEBUG
   // Check parameter type
   if (checkType != out->type())
-    throw(WrongParType("BreitWignerStrat::execute() | "
+    throw(WrongParType("VoigtianStrat::execute() | "
                        "Output parameter is of type " +
                        std::string(ParNames[out->type()]) +
                        " and conflicts with expected type " +
@@ -178,7 +174,7 @@ void BreitWignerStrategy::execute(ParameterList &paras,
   // How many parameters do we expect?
   size_t check_nInt = 0;
   size_t nInt = paras.intValues().size();
-  size_t check_nDouble = 7;
+  size_t check_nDouble = 3;
   size_t nDouble = paras.doubleValues().size();
   nDouble += paras.doubleParameters().size();
   size_t check_nComplex = 0;
@@ -192,32 +188,33 @@ void BreitWignerStrategy::execute(ParameterList &paras,
 
   // Check size of parameter list
   if (nInt != check_nInt)
-    throw(BadParameter("BreitWignerStrat::execute() | "
+    throw(BadParameter("VoigtianStrat::execute() | "
                        "Number of IntParameters does not match: " +
                        std::to_string(nInt) + " given but " +
                        std::to_string(check_nInt) + " expected."));
+  //I do not want to set sigma as fit parameter. I would like to set it as fixed parameter/argument
   if (nDouble != check_nDouble)
-    throw(BadParameter("BreitWignerStrat::execute() | "
+    throw(BadParameter("VoigtianStrat::execute() | "
                        "Number of FitParameters does not match: " +
                        std::to_string(nDouble) + " given but " +
                        std::to_string(check_nDouble) + " expected."));
   if (nComplex != check_nComplex)
-    throw(BadParameter("BreitWignerStrat::execute() | "
+    throw(BadParameter("VoigtianStrat::execute() | "
                        "Number of ComplexParameters does not match: " +
                        std::to_string(nComplex) + " given but " +
                        std::to_string(check_nComplex) + " expected."));
   if (nMInteger != check_nMInteger)
-    throw(BadParameter("BreitWignerStrat::execute() | "
+    throw(BadParameter("VoigtianStrat::execute() | "
                        "Number of MultiInt does not match: " +
                        std::to_string(nMInteger) + " given but " +
                        std::to_string(check_nMInteger) + " expected."));
   if (nMDouble != check_nMDouble)
-    throw(BadParameter("BreitWignerStrat::execute() | "
+    throw(BadParameter("VoigtianStrat::execute() | "
                        "Number of MultiDoubles does not match: " +
                        std::to_string(nMDouble) + " given but " +
                        std::to_string(check_nMDouble) + " expected."));
   if (nMComplex != check_nMComplex)
-    throw(BadParameter("BreitWignerStrat::execute() | "
+    throw(BadParameter("VoigtianStrat::execute() | "
                        "Number of MultiComplexes does not match: " +
                        std::to_string(nMComplex) + " given but " +
                        std::to_string(check_nMComplex) + " expected."));
@@ -235,47 +232,32 @@ void BreitWignerStrategy::execute(ParameterList &paras,
   // construction.
   double m0 = paras.doubleParameter(0)->value();
   double Gamma0 = paras.doubleParameter(1)->value();
-  double d = paras.doubleParameter(2)->value();
-  unsigned int orbitL = paras.doubleValue(0)->value();
-  formFactorType ffType = formFactorType(paras.doubleValue(1)->value());
-  double ma = paras.doubleValue(2)->value();
-  double mb = paras.doubleValue(3)->value();
+  double sigma = paras.doubleValue(0)->value();
 
   // calc function for each point
   for (unsigned int ele = 0; ele < n; ele++) {
     try {
-      results.at(ele) = RelativisticBreitWigner::dynamicalFunction(
-          paras.mDoubleValue(0)->values().at(ele), m0, ma, mb, Gamma0, orbitL, d,
-          ffType);
+      results.at(ele) = Voigtian::dynamicalFunction(
+          paras.mDoubleValue(0)->values().at(ele), m0, Gamma0, sigma);
     } catch (std::exception &ex) {
-      LOG(error) << "BreitWignerStrategy::execute() | " << ex.what();
-      throw(std::runtime_error("BreitWignerStrategy::execute() | "
+      LOG(error) << "VoigtianStrategy::execute() | " << ex.what();
+      throw(std::runtime_error("VoigtianStrategy::execute() | "
                                "Evaluation of dynamic function failed!"));
     }
   }
 }
 
-void RelativisticBreitWigner::parameters(ParameterList &list) {
+void Voigtian::parameters(ParameterList &list) {
   AbstractDynamicalFunction::parameters(list);
 
   // We check of for each parameter if a parameter of the same name exists in
   // list. If so we check if both are equal and set the local parameter to the
   // parameter from the list. In this way we connect parameters that occur on
   // different positions in the amplitude.
- Width = list.addUniqueParameter(Width);
-  MesonRadius = list.addUniqueParameter(MesonRadius);
+  Width = list.addUniqueParameter(Width);
 }
 
-void RelativisticBreitWigner::updateParameters(const ParameterList &list) {
-
-  // Try to update mesonRadius
-  std::shared_ptr<FitParameter> rad;
-  try {
-    rad = FindParameter(MesonRadius->name(), list);
-  } catch (std::exception &ex) {
-  }
-  if (rad)
-    MesonRadius->updateParameter(rad);
+void Voigtian::updateParameters(const ParameterList &list) {
 
   // Try to update width
   std::shared_ptr<FitParameter> width;
