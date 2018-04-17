@@ -7,6 +7,7 @@
 #include "Physics/DecayDynamics/RelativisticBreitWigner.hpp"
 #include "Physics/DecayDynamics/AmpFlatteRes.hpp"
 #include "Physics/DecayDynamics/NonResonant.hpp"
+#include "Physics/DecayDynamics/Voigtian.hpp"
 
 #include "Physics/HelicityFormalism/HelicityDecay.hpp"
 #include "Physics/HelicityFormalism/HelicityKinematics.hpp"
@@ -56,6 +57,8 @@ void HelicityDecay::load(std::shared_ptr<PartList> partL,
                              " not found in list!");
   ComPWA::Spin J = partItr->second.GetSpinQuantumNumber("Spin");
   ComPWA::Spin mu(pt.get<double>("DecayParticle.<xmlattr>.Helicity"));
+  //if the node OrbitalAngularMomentum does not exist, set it to spin J as default value
+  ComPWA::Spin orbitL(pt.get<double>("DecayParticle.<xmlattr>.OrbitalAngularMomentum", (double) J));
 
   // Read name and helicities from decay products
   auto decayProducts = pt.get_child("DecayProducts");
@@ -89,8 +92,13 @@ void HelicityDecay::load(std::shared_ptr<PartList> partL,
     } else if (decayType == "relativisticBreitWigner") {
       DynamicFcn = std::make_shared<DecayDynamics::RelativisticBreitWigner>(
           name, DecayProducts, partL);
+      DynamicFcn->SetOrbitalAngularMomentum(orbitL);
     } else if (decayType == "flatte") {
       DynamicFcn = std::make_shared<DecayDynamics::AmpFlatteRes>(
+          name, DecayProducts, partL);
+      DynamicFcn->SetOrbitalAngularMomentum(orbitL);
+    } else if (decayType == "voigt") {
+      DynamicFcn = std::make_shared<DecayDynamics::Voigtian>(
           name, DecayProducts, partL);
     } else if (decayType == "virtual") {
       DynamicFcn = std::make_shared<DecayDynamics::NonResonant>(name);
@@ -123,6 +131,7 @@ boost::property_tree::ptree HelicityDecay::save() const {
 
   pt.put("DecayParticle.<xmlattr>.Name", DynamicFcn->name());
   pt.put("DecayParticle.<xmlattr>.Helicity", AngularDist->mu());
+  pt.put("DecayParticle.<xmlatrr>.OrbitalAngularMomentum", DynamicFcn->GetOrbitalAngularMomentum());
 
   // TODO: put helicities of daughter particles
   return pt;

@@ -2,8 +2,16 @@
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
-#ifndef PHYSICS_DECAYDYNAMICS_RELATIVISTICBREITWIGNER_HPP_
-#define PHYSICS_DECAYDYNAMICS_RELATIVISTICBREITWIGNER_HPP_
+///
+/// \file
+/// This file contains the declaration of the Voigtian class,
+/// which is used the implementation of voigt function, the convolution
+/// of a non-relativistic Breit-Wigner and a gaussian.
+/// See https://en.wikipedia.org/wiki/voigt_profile for Vogit function.
+///
+
+#ifndef VOIGT_FUNCTION_HPP 
+#define VOIGT_FUNCTION_HPP
 
 #include <vector>
 #include <memory>
@@ -14,6 +22,7 @@
 #include "Core/Exceptions.hpp"
 #include "Physics/DecayDynamics/AbstractDynamicalFunction.hpp"
 #include "Physics/HelicityFormalism/AmpWignerD.hpp"
+#include "Physics/DecayDynamics/Utils/Faddeeva.hh"
 
 namespace ComPWA {
 namespace Physics {
@@ -21,18 +30,23 @@ namespace DecayDynamics {
 
 class HelicityDecay;
 
-/// \class RelativisticBreitWigner
-/// Relativistic Breit-Wigner model with barrier factors
-/// The dynamical function implemented here is taken from PDG2014 (Eq.47-22) for
-/// the one channel case.
-/// due to the implementation, after create a RelBW with constructor,
-/// one need to update the Orbital Angular Momentum intermediately before further processing
-/// otherwise spin J will be used instead of Orbital Angular Momentum
-class RelativisticBreitWigner
+///
+/// \class Voigtian
+/// Voigtian class calculate the convolution of a non-relativisitc Breit-Wigner
+/// with a Gaussian.
+/// ref: https://en.wikipedia.org/wiki/Voigt_profile
+///      Voig(x; sigma, gamma) = \int Gaus(x';\sigma)BW(x - x';gamma) dx'
+///                            = Re[w(z)]/(\sigma\sqrt{2\pi})
+///                              and z = (x + i\gamma)/(\sigma\sqrt{s})
+/// In the calculation of voigt function, a Faddeeva Package is used to calculate w(z).
+/// ref: http://ab-initio.mit.edu/wiki/index.php/Faddeeva_Package
+///      this page is a package for computation of w(z)
+///
+class Voigtian
     : public ComPWA::Physics::DecayDynamics::AbstractDynamicalFunction {
 
 public:
-  RelativisticBreitWigner(std::string name, std::pair<std::string,std::string> daughters,
+  Voigtian(std::string name, std::pair<std::string,std::string> daughters,
                std::shared_ptr<ComPWA::PartList> partL);
 
   /// Check of parameters have changed and normalization has to be recalculatecd
@@ -41,24 +55,19 @@ public:
   //================ EVALUATION =================
   std::complex<double> evaluate(const ComPWA::DataPoint &point, int pos) const;
 
-  /// Dynamical Breit-Wigner function.
+  /// Dynamical voigt function.
   /// \param mSq Invariant mass squared
   /// \param mR Mass of the resonant state
-  /// \param ma Mass of daughter particle
-  /// \param mb Mass of daughter particle
-  /// \param width Decay width
-  /// \param L Orbital angular momentum between two daughters a and b
-  /// \param mesonRadius Meson Radius
-  /// \param ffType Form factor type
+  /// \param wR Width of the resonant state
+  /// \param sigma Width of the gaussian, i.e., the resolution of the mass spectrum at mR
   /// \return Amplitude value
   static std::complex<double>
-  dynamicalFunction(double mSq, double mR, double ma, double mb, double width,
-                    unsigned int L, double mesonRadius, formFactorType ffType);
+  dynamicalFunction(double mSq, double mR, double wR, double sigma);
 
   //============ SET/GET =================
 
   void SetWidthParameter(std::shared_ptr<ComPWA::FitParameter> w) {
-   Width = w;
+    Width = w;
   }
 
   std::shared_ptr<ComPWA::FitParameter> GetWidthParameter() {
@@ -93,12 +102,16 @@ public:
   /// barrier factors.
   formFactorType GetFormFactorType() { return FormFactorType; }
 
+  void SetSigma(double sigma) { Sigma = sigma; }
+
+  double GetSigma() const { return Sigma; }
+
   virtual void parameters(ComPWA::ParameterList &list);
 
   virtual void parametersFast(std::vector<double> &list) const {
     AbstractDynamicalFunction::parametersFast(list);
     list.push_back(GetWidth());
-    list.push_back(GetMesonRadius());
+//    list.push_back(GetMesonRadius());
   }
 
   /// Update parameters to the values given in \p par
@@ -120,6 +133,8 @@ protected:
 
   /// Form factor type
   formFactorType FormFactorType;
+  /// resolution: the width of gaussian function which is used to represent the resolution of mass spectrum
+  double Sigma;
 
 private:
   /// Temporary values (used to trigger recalculation of normalization)
@@ -127,17 +142,17 @@ private:
   double CurrentWidth;
 };
 
-class BreitWignerStrategy : public ComPWA::Strategy {
+class VoigtianStrategy : public ComPWA::Strategy {
 public:
-  BreitWignerStrategy(std::string namee = "")
-      : ComPWA::Strategy(ParType::MCOMPLEX), name(namee) {}
-
+  VoigtianStrategy(std::string sname = "")
+    : ComPWA::Strategy(ParType::MCOMPLEX), name(sname) {}
+  
   virtual const std::string to_str() const {
-    return ("relativistic BreitWigner of " + name);
+    return ("Voigtian Function of " + name);
   }
 
   virtual void execute(ComPWA::ParameterList &paras,
-                       std::shared_ptr<ComPWA::Parameter> &out);
+                       std::shared_ptr<ComPWA::Parameter> &out); 
 
 protected:
   std::string name;

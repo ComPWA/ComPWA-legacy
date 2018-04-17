@@ -34,17 +34,17 @@ inline std::complex<double> couplingToWidth(double mR, double g,
 /// Convert width to complex coupling. This is the implementation of
 /// PDG2014, Chapter 47.2, Eq. 47.21 (inverted).
 inline std::complex<double> couplingToWidth(double sqrtS, double mR, double g,
-                                            double ma, double mb, double spin,
+                                            double ma, double mb, double orbitL,
                                             double mesonRadius,
                                             formFactorType type) {
   auto qR = qValue(mR, ma, mb);
   auto phspR = phspFactor(mR, ma, mb);
-  auto ffR = FormFactor(qR, spin, mesonRadius, type);
+  auto ffR = FormFactor(qR, orbitL, mesonRadius, type);
   
   // Calculate normalized vertex functions vtxA(s_R)
   std::complex<double> vtx(1, 0); // spin==0
-  if (spin > 0 || type == formFactorType::CrystalBarrel) {
-    vtx = ffR * std::pow(qR, spin);
+  if (orbitL > 0 || type == formFactorType::CrystalBarrel) {
+    vtx = ffR * std::pow(qR, orbitL);
   }
 
   return couplingToWidth(mR, g, vtx, phspR);
@@ -74,30 +74,28 @@ inline std::complex<double> widthToCoupling(double mR, double width,
     throw std::runtime_error("AbstractDynamicalFunction::widthToCoupling() | "
                              "Result is inf!");
 #endif
-
   return res;
 }
 
 /// Convert width to complex coupling. This is the implementation of
 /// PDG2014, Chapter 47.2, Eq. 47.21.
 inline std::complex<double> widthToCoupling(double sqrtS, double mR, double width,
-                                            double ma, double mb, double spin,
+                                            double ma, double mb, double orbitL,
                                             double mesonRadius,
                                             formFactorType type) {
 
   // Calculate normalized vertex function gammaA(s_R) (see PDG2014, Chapter 47.2)
-  std::complex<double> gammaA(1, 0); // spin==0
+  std::complex<double> gammaA(1, 0); // orbitL==0
   std::complex<double> qV;
-  if (spin > 0) {
+  if (orbitL > 0) {
     qV = qValue(mR, ma, mb);
-    double ffR = FormFactor(qV, spin, mesonRadius, type);
-    std::complex<double> qR = std::pow(qV, spin);
+    double ffR = FormFactor(qV, orbitL, mesonRadius, type);
+    std::complex<double> qR = std::pow(qV, orbitL);
     gammaA = ffR * qR;
   }
 
   // calculate phsp factor
   std::complex<double> rho = phspFactor(sqrtS, ma, mb);
-
 
   return widthToCoupling(mR, width, gammaA, rho);
 }
