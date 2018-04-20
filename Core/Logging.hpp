@@ -10,7 +10,7 @@
 
 namespace ComPWA {
 
-// Redefine LOG(lvl) to LOG(lvl
+// Redefine BOOST_LOG_TRIVIAL(level) to LOG(level)
 #define LOG(lvl)                                                               \
   BOOST_LOG_STREAM_WITH_PARAMS(                                                \
       ::boost::log::trivial::logger::get(),                                    \

@@ -9,7 +9,7 @@
 
 #include <string>
 
-namespace ComPWA{
+namespace ComPWA {
 namespace Physics {
 namespace HelicityFormalism {
 
@@ -20,10 +20,10 @@ HelicityFromCanonicalSum::HelicityFromCanonicalSum(
 }
 
 void HelicityFromCanonicalSum::load(std::shared_ptr<PartList> partL,
-                                      std::shared_ptr<Kinematics> kin,
-                                      const boost::property_tree::ptree &pt) {
+                                    std::shared_ptr<Kinematics> kin,
+                                    const boost::property_tree::ptree &pt) {
   LOG(trace) << "HelicityFromCanonicalSum::Factory() | Construction....";
-//  setName(pt.get<std::string>("<xmlattr>.Name", "empty"));
+  //  setName(pt.get<std::string>("<xmlattr>.Name", "empty"));
 
   boost::property_tree::ptree helDecTree(pt);
   helDecTree.erase("CanonicalSum");
@@ -32,9 +32,9 @@ void HelicityFromCanonicalSum::load(std::shared_ptr<PartList> partL,
   std::string mothName = pt.get<std::string>("DecayParticle.<xmlattr>.Name");
   auto partItr = partL->find(mothName);
   if (partItr == partL->end())
-    throw std::runtime_error("HelicityFromCanonicalSum::load | Particle " + mothName +
-        " not found in list!");
-  double spinJ = (double) partItr->second.GetSpinQuantumNumber("Spin");
+    throw std::runtime_error("HelicityFromCanonicalSum::load | Particle " +
+                             mothName + " not found in list!");
+  double spinJ = (double)partItr->second.GetSpinQuantumNumber("Spin");
 
   const auto &optSumTree = pt.get_child_optional("CanonicalSum");
   if (optSumTree) {
@@ -42,19 +42,21 @@ void HelicityFromCanonicalSum::load(std::shared_ptr<PartList> partL,
 
     double orbitL = sumTree.get<double>("<xmlattr>.L");
     helDecTree.put("DecayParticle.<xmlattr>.OrbitalAngularMomentum",
-        sumTree.get<std::string>("<xmlattr>.L"));
+                   sumTree.get<std::string>("<xmlattr>.L"));
     helDecName += "_L";
     helDecName += sumTree.get<std::string>("<xmlattr>.L");
     helDecName += "_S";
     helDecName += sumTree.get<std::string>("<xmlattr>.S");
     helDecTree.put("<xmlattr>.Name", helDecName);
 
-    std::shared_ptr<HelicityDecay> ampHelDec = std::make_shared<HelicityDecay>(partL, kin, helDecTree); 
+    std::shared_ptr<HelicityDecay> ampHelDec =
+        std::make_shared<HelicityDecay>(partL, kin, helDecTree);
 
-    double normCoef = sqrt( (2 * orbitL + 1)/(2 * spinJ + 1) );
+    double normCoef = sqrt((2 * orbitL + 1) / (2 * spinJ + 1));
     double cgCoef = 1.0;
     for (const auto &daug : sumTree.get_child("")) {
-      if (daug.first != "ClebschGorden") continue;
+      if (daug.first != "ClebschGorden")
+        continue;
       double j1 = daug.second.get<double>("<xmlattr>.j1");
       double m1 = daug.second.get<double>("<xmlattr>.m1");
       double j2 = daug.second.get<double>("<xmlattr>.j2");
@@ -68,7 +70,8 @@ void HelicityFromCanonicalSum::load(std::shared_ptr<PartList> partL,
 
     addPartialAmplitude(ampHelDec);
   } else {
-    LOG(trace) << "HelicityFromCanonicalSum::Factory() | <CanonicalSum /> in xml is not set!";
+    LOG(trace) << "HelicityFromCanonicalSum::Factory() | <CanonicalSum /> in "
+                  "xml is not set!";
   }
 }
 
@@ -97,6 +100,31 @@ boost::property_tree::ptree HelicityFromCanonicalSum::save() const {
     pt.add_child("PartialAmplitude", i->save());
   }
   return pt;
+}
+
+bool HelicityFromCanonicalSum::isModified() const {
+  if (magnitude() != CurrentMagnitude || phase() != CurrentPhase)
+    return true;
+
+  for (auto i : PartialAmplitudes)
+    if (i->isModified())
+      return true;
+  return false;
+}
+
+void HelicityFromCanonicalSum::setModified(bool b) {
+
+  if (b) {
+    const_cast<double &>(CurrentMagnitude) =
+        std::numeric_limits<double>::quiet_NaN();
+    const_cast<double &>(CurrentPhase) =
+        std::numeric_limits<double>::quiet_NaN();
+  } else {
+    const_cast<double &>(CurrentMagnitude) = magnitude();
+    const_cast<double &>(CurrentPhase) = phase();
+  }
+  for (auto i : PartialAmplitudes)
+    i->setModified(b);
 }
 
 std::shared_ptr<ComPWA::FunctionTree> HelicityFromCanonicalSum::tree(

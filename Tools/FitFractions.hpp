@@ -134,11 +134,11 @@ CalculateFitFraction(std::shared_ptr<ComPWA::Kinematics> kin,
     denom = intens->component(def.second);
 
   double phspVolume = kin->phspVolume();
-
-  double integral_numerator =
-      ComPWA::Tools::Integral(numer, sample, phspVolume);
   double integral_denominator =
       ComPWA::Tools::Integral(denom, sample, phspVolume);
+  double integral_numerator =
+      ComPWA::Tools::Integral(numer, sample, phspVolume);
+
   double ffVal = integral_numerator / integral_denominator;
   LOG(trace) << "CalculateFitFraction() | Result for (" << def.first << "/"
              << def.second << ") is " << integral_numerator << "/"

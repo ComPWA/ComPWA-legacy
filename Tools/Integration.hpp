@@ -86,6 +86,8 @@ inline double Integral(std::shared_ptr<const AmpIntensity> intens,
     sumIntens += intens->intensity(i);
 
   double integral = (sumIntens * phspVolume / sample.size());
+//  LOG(trace) << "INTEGRAL: " << integral << " " << sumIntens << " "
+//             << phspVolume << " " << sample.size();
   return integral;
 }
 

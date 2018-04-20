@@ -4,7 +4,7 @@
 
 ///
 /// \file
-/// This file contains the declaration of the HelicityFromCanonicalSum class, 
+/// This file contains the declaration of the HelicityFromCanonicalSum class,
 /// which is used to construct several canonical amplitudes, and the sum of
 /// these canonical amplitudes is the corresponding helicity amplitude.
 ///
@@ -18,23 +18,22 @@
 #include "Physics/Amplitude.hpp"
 #include "Physics/HelicityFormalism/HelicityDecay.hpp"
 
-
 namespace ComPWA {
 namespace Physics {
 namespace HelicityFormalism {
 
 ///
 /// \class HelicityFromCanonicalSum
-/// HelicityFromCanonicalSum class constructs serveral canonical amplitudes from 
-/// a given two-body decay configuration, and these amplitudes are the sum of 
+/// HelicityFromCanonicalSum class constructs serveral canonical amplitudes from
+/// a given two-body decay configuration, and these amplitudes are the sum of
 /// the helicity decay for the given two-body decay configuration.
 ///
 class HelicityFromCanonicalSum : public Amplitude {
 
 public:
   HelicityFromCanonicalSum(std::shared_ptr<PartList> partL,
-                             std::shared_ptr<Kinematics> kin,
-                             const boost::property_tree::ptree &pt);
+                           std::shared_ptr<Kinematics> kin,
+                           const boost::property_tree::ptree &pt);
 
   virtual Amplitude *clone(std::string newName = "") const {
     auto tmp = (new HelicityFromCanonicalSum(*this));
@@ -43,19 +42,15 @@ public:
   };
 
   void load(std::shared_ptr<PartList> partL, std::shared_ptr<Kinematics> kin,
-          const boost::property_tree::ptree &pt);
+            const boost::property_tree::ptree &pt);
 
   virtual boost::property_tree::ptree save() const;
 
-  /// Check of parameters have changed and normalization has to be recalculatecd
-  bool isModified() const {
-    if (Amplitude::isModified())
-      return true;
-    for (auto i : PartialAmplitudes)
-      if (i->isModified())
-        return true;
-    return false;
-  }
+  /// Check if parameters have changed.
+  virtual bool isModified() const;
+
+  /// Label as modified/unmodified
+  virtual void setModified(bool b);
 
   /// Evaluate function without normalization
   virtual std::complex<double> evaluate(const DataPoint &point) const {

@@ -51,6 +51,9 @@ public:
   /// Check of parameters have changed and normalization has to be recalculated
   virtual bool isModified() const;
 
+  /// Label as modified/unmodified
+  virtual void setModified(bool b);
+
   virtual double normalization() const;
 
   /// Evaluate function without normalization

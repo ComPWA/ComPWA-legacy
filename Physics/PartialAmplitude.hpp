@@ -44,14 +44,10 @@ public:
   virtual double normalization() const = 0;
 
   /// Check of parameters have changed and normalization has to be recalculatecd
-  bool isModified() const {
-    if (magnitude() != CurrentMagnitude || phase() != CurrentPhase) {
-      const_cast<double &>(CurrentMagnitude) = magnitude();
-      const_cast<double &>(CurrentPhase) = phase();
-      return true;
-    }
-    return false;
-  }
+  virtual bool isModified() const = 0;
+
+  /// Label as modified/unmodified
+  virtual void setModified(bool b) = 0;
 
   /// Value of PartialAmplitude at \param point with normalization factor
   virtual std::complex<double> evaluate(const DataPoint &point) const {
@@ -63,7 +59,7 @@ public:
 
   virtual std::string name() const { return Name; }
 
-  virtual void setName(std::string name) {Name = name; }
+  virtual void setName(std::string name) { Name = name; }
 
   virtual void setPrefactor(std::complex<double> pre) { PreFactor = pre; }
 
@@ -162,16 +158,16 @@ protected:
   virtual double integral() const {
     if (!PhspSample->size()) {
       LOG(debug)
-          << "PartialAmplitude::Integral() | Integral can not be calculated "
-             "since no phsp sample is set. Set a sample using "
-             "SetPhspSamples(phspSample, toySample)!";
+          << "PartialAmplitude::Integral() | Integral can not be "
+             " calculated since no phsp sample is set. "
+             " Set a sample using SetPhspSamples(phspSample, toySample)!";
       return 1.0;
     }
 
     double sumIntens = 0;
     for (auto i : *PhspSample.get()) {
       sumIntens += std::norm(evaluateNoNorm(i));
-      }
+    }
 
     double integral = (sumIntens * PhspVolume / PhspSample->size());
     LOG(trace) << "PartialAmplitude::Integral() | Integral is " << integral
@@ -183,7 +179,6 @@ protected:
   /// Integral value (temporary)
   double CurrentIntegral;
 
-private:
   /// Temporary value of magnitude (used to trigger recalculation of
   /// normalization)
   double CurrentMagnitude;
@@ -214,7 +209,7 @@ public:
     LOG(trace) << "NonResonant::load() |";
     setPhspVolume(kin->phspVolume());
 
-   Name = pt.get<std::string>("<xmlattr>.Name", "empty");
+    Name = pt.get<std::string>("<xmlattr>.Name", "empty");
     Magnitude =
         std::make_shared<ComPWA::FitParameter>("Magnitude_" + Name, 1.0);
     Phase = std::make_shared<ComPWA::FitParameter>("Phase_" + Name, 0.0);
@@ -248,11 +243,29 @@ public:
     return pt;
   }
 
+  /// Check of parameters have changed and normalization has to be recalculatecd
+  virtual bool isModified() const {
+    if (magnitude() != CurrentMagnitude || phase() != CurrentPhase)
+      return true;
+    return false;
+  }
+
+  /// Label as modified/unmodified
+  virtual void setModified(bool b) {
+    if (b) {
+      CurrentMagnitude = std::numeric_limits<double>::quiet_NaN();
+      CurrentPhase = std::numeric_limits<double>::quiet_NaN();
+    } else {
+      CurrentMagnitude = magnitude();
+      CurrentPhase = phase();
+    }
+  }
+
   /// Value of PartialAmplitude at \param point without normalization factor
   virtual std::complex<double> evaluateNoNorm(const DataPoint &point) const {
     return std::complex<double>(1., 0.);
   };
-  
+
   /// Get current normalization.
   virtual double normalization() const { return 1 / std::sqrt(PhspVolume); };
 

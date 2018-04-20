@@ -15,6 +15,7 @@ namespace DecayDynamics {
 class NonResonant : public AbstractDynamicalFunction {
 
 public:
+  //============ CONSTRUCTION ==================
   NonResonant(std::string name = "") : AbstractDynamicalFunction(name) {
     // Set the mass parameter to make sure the pointer is set.
     SetMassParameter(
@@ -22,18 +23,29 @@ public:
   };
 
   virtual ~NonResonant(){};
+
+  //======= INTEGRATION/NORMALIZATION ===========
+  /// Check of parameters have changed and normalization has to be
+  /// recalculatecd. Since this function does not have any parameters false is
+  /// returned in all cases.
+  virtual bool isModified() const { return false; }
+
+  /// Label as modified/unmodified. Empty for this function.
+  virtual void setModified(bool b) {};
+
+  //================ EVALUATION =================
   
   virtual std::complex<double> evaluate(const DataPoint &p, int pos) const {
     return std::complex<double>(1.0, 0.0);
   }
 
-  virtual std::shared_ptr<FunctionTree> tree(const ParameterList &sample,
-                                                int pos, std::string suffix);
-
   virtual void parameters(ParameterList &list){};
 
   /// Update parameters to the values given in \p par
   virtual void updateParameters(const ParameterList &par){};
+
+  virtual std::shared_ptr<FunctionTree> tree(const ParameterList &sample,
+                                             int pos, std::string suffix);
 };
 
 } // ns::DecayDynamics

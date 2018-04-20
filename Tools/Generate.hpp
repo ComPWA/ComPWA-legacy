@@ -153,7 +153,7 @@ inline bool generate(int number, std::shared_ptr<ComPWA::Kinematics> kin,
 
   if (!totalCalls)
     throw std::runtime_error("Tools::generate() | Number of calls is zero! "
-                             "There ust be something wrong!");
+                             "There must be something wrong!");
 
   double genEff = (double)data->numEvents() / totalCalls;
   LOG(info) << "Efficiency of toy MC generation: " << genEff << ".";

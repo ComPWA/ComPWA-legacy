@@ -118,8 +118,9 @@ IncoherentIntensity::component(std::string name) {
   auto icIn = std::shared_ptr<AmpIntensity>(this->clone(name));
   icIn->setName(name);
   icIn->reset();
-  for (auto i : names) {
-    for (int j = 0; j < Intensities.size(); j++) {
+
+  for (int j = 0; j < Intensities.size(); j++) {
+    for (auto i : names) {
       if (i == Intensities.at(j)->name()) {
         std::dynamic_pointer_cast<IncoherentIntensity>(icIn)->addIntensity(
             Intensities.at(j));
