@@ -144,7 +144,6 @@ protected:
 
 private:
   /// Temporary values (used to trigger recalculation of normalization)
-  double CurrentMesonRadius;
   double CurrentWidth;
 };
 

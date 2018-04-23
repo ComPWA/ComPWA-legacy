@@ -1,5 +1,5 @@
 ##########################################################
-# Create executable for testPWA
+# Create executable for CanonicalPWA
 ##########################################################
 
 #
@@ -15,11 +15,11 @@ if( TARGET Minuit2IF AND TARGET MinLogLH AND TARGET RootReader
     AND TARGET Tools AND TARGET HelicityFormalism
 )
 
-add_executable( testPWA
-  testPWA.cpp
+add_executable( CanonicalPWA
+  CanonicalPWA.cpp
 )
 
-target_link_libraries( testPWA
+target_link_libraries( CanonicalPWA
   HelicityFormalism
   Minuit2IF
   MinLogLH
@@ -31,15 +31,15 @@ target_link_libraries( testPWA
   pthread # We need it here, no ideo why!
 )
 
-target_include_directories( testPWA
+target_include_directories( CanonicalPWA
   PUBLIC ${ROOT_INCLUDE_DIR} ${Boost_INCLUDE_DIR}
 )
 
-install(TARGETS testPWA
+install(TARGETS CanonicalPWA
   RUNTIME DESTINATION bin
 )
 
 ELSE ()
   MESSAGE( WARNING "Required targets not found! Not building\
-                    DalitzFitD03K executable!")
+                    CanonicalPWA executable!")
 ENDIF()
