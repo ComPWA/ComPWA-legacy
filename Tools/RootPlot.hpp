@@ -49,36 +49,33 @@ public:
   void setPhspSample(std::vector<DataPoint> &points) { PhspSample = points; }
 
   void setIntensity(std::shared_ptr<ComPWA::AmpIntensity> intens);
-
-  /// Add sub component of the Intensity. For each event in the phase space
-  /// sample each component is evaluated and its value is added to the TTree.
-  void addComponent(std::pair<std::string, std::string> nametitle) {
-    addComponent(nametitle.first, nametitle.second);
-  }
   
   /// Add sub component of the Intensity. For each event in the phase space
   /// sample each component is evaluated and its value is added to the TTree.
-  void addComponent(std::string name, std::string title = "") {
-    std::string t = title;
-    if (t == "")
-      t = name;
+  void addComponent(std::string componentName, std::string intensityName,
+                    std::string title = "") {
+    std::string ttt = title;
+    if (ttt == "")
+      ttt = componentName;
     
     if (!PlotComponents.size())
-      throw std::runtime_error("PlotData::DrawComponent() | AmpIntensity not "
+      throw std::runtime_error("RootPlot::addComponent() | AmpIntensity not "
                                "set! Set the full model first using "
                                "SetFitAmp()!");
     
     std::shared_ptr<ComPWA::AmpIntensity> comp;
     try {
-        comp = PlotComponents.at(0)->component(name);
+      comp = PlotComponents.at(0)
+                 ->component(intensityName)
+                 ->component(componentName);
     } catch (std::exception &ex) {
-      LOG(error) << "DalitzPlot::DrawComponent() | Component " << name
-                 << " not found in AmpIntensity "
+      LOG(error) << "RootPlot::addComponent() | Component " << componentName
+                 << " of " << componentName <<" not found in AmpIntensity "
                  << PlotComponents.at(0)->name() << ".";
       return;
     }
     PlotComponents.push_back(comp);
-    ComponentNames.push_back(t);
+    ComponentNames.push_back(ttt);
   }
 
   /// Create the TTree's, fill and write them to \p fileName.

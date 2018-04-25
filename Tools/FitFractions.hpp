@@ -122,20 +122,22 @@ CalculateFitFraction(std::shared_ptr<ComPWA::Kinematics> kin,
                      std::shared_ptr<std::vector<DataPoint>> sample,
                      const std::pair<std::string, std::string> def) {
 
-  std::shared_ptr<ComPWA::AmpIntensity> numer, denom;
-  if (def.first == intens->name())
-    numer = intens;
-  else
-    numer = intens->component(def.first);
-
+  double phspVolume = kin->phspVolume();
+  
+  std::shared_ptr<ComPWA::AmpIntensity> denom;
   if (def.second == intens->name())
     denom = intens;
   else
     denom = intens->component(def.second);
 
-  double phspVolume = kin->phspVolume();
   double integral_denominator =
       ComPWA::Tools::Integral(denom, sample, phspVolume);
+  
+  std::shared_ptr<ComPWA::AmpIntensity> numer;
+  if (def.first == denom->name())
+    numer = denom;
+  else
+    numer = denom->component(def.first);
   double integral_numerator =
       ComPWA::Tools::Integral(numer, sample, phspVolume);
 

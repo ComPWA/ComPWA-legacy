@@ -716,11 +716,11 @@ int main(int argc, char **argv) {
       // set amplitude
       pl.setFitAmp(intens, "", kBlue - 4);
       // select components to plot
-      pl.drawComponent("D0toKSK+K-", "Signal", kGreen);
-      pl.drawComponent("phi(1020)", "phi", kYellow);
-      pl.drawComponent("BkgD0toKSK+K-", "Background", kRed);
-      //    pl.DrawComponent("a0(980)0", "a_{0}(980)^{0}", kMagenta+2);
-      //    pl.DrawComponent("phi(1020)", "#phi(1020)", kMagenta);
+      pl.drawComponent("D0toKSK+K-", "D0toKSK+K-", "Signal", kGreen);
+      pl.drawComponent("a0(980)0", "D0toKSK+K-", "a_{0}(980)^{0}", kMagenta);
+      pl.drawComponent("a0(980)+", "D0toKSK+K-", "a_{0}(980)^{+}", kMagenta+2);
+      pl.drawComponent("phi(1020)", "D0toKSK+K-", "#phi(1020)", kMagenta+4);
+      pl.drawComponent("BkgD0toKSK+K-", "BkgD0toKSK+K-", "Background", kRed);
 
       // Fill histograms and create canvases
       pl.plot();

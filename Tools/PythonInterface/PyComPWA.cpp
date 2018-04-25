@@ -12,7 +12,6 @@
 #include "Core/Kinematics.hpp"
 #include "Estimator/MinLogLH/MinLogLH.hpp"
 #include "Optimizer/Minuit2/MinuitIF.hpp"
-//#include <boost/python.hpp>
 
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
@@ -133,7 +132,9 @@ PYBIND11_MODULE(pycompwa, m) {
 
   py::class_<ComPWA::DataReader::Data,
              std::shared_ptr<ComPWA::DataReader::Data>>(m, "Data")
-      .def(py::init<>());
+      .def(py::init<>())
+      .def("size", &ComPWA::DataReader::Data::numEvents)
+      .def("num_events", &ComPWA::DataReader::Data::numEvents);
 
   py::class_<ComPWA::DataPoint>(m, "DataPoint").def(py::init<>());
 
@@ -145,16 +146,6 @@ PYBIND11_MODULE(pycompwa, m) {
             ComPWA::ReadParticles);
 
   m.def("default_particles", []() { return defaultParticleList; });
-
-  m.def("initial_state", [](int id) {
-    std::vector<ComPWA::pid> initialState = {id};
-    return initialState;
-  });
-
-  m.def("final_state", [](int idA, int idB, int idC) {
-    std::vector<ComPWA::pid> finalState = {idA, idB, idC};
-    return finalState;
-  });
 
   m.def("incoherent_intensity",
         (std::shared_ptr<ComPWA::AmpIntensity>(*)(
@@ -285,6 +276,8 @@ PYBIND11_MODULE(pycompwa, m) {
   py::class_<HelicityKinematics, ComPWA::Kinematics,
              std::shared_ptr<HelicityKinematics>>(m, "HelicityKinematics")
       .def(py::init<std::shared_ptr<ComPWA::PartList>, std::vector<ComPWA::pid>,
+                    std::vector<ComPWA::pid>, std::array<double, 4>>())
+      .def(py::init<std::shared_ptr<ComPWA::PartList>, std::vector<ComPWA::pid>,
                     std::vector<ComPWA::pid>>())
       .def("set_phsp_volume", &ComPWA::Physics::HelicityFormalism::
                                   HelicityKinematics::setPhspVolume)
@@ -313,12 +306,7 @@ PYBIND11_MODULE(pycompwa, m) {
                                   std::shared_ptr<ComPWA::DataReader::Data>)) &
                                   ComPWA::Tools::RootPlot::setPhspSample)
       .def("set_intensity", &ComPWA::Tools::RootPlot::setIntensity)
-      .def("add_component", (void (ComPWA::Tools::RootPlot::*)(
-                                std::pair<std::string, std::string>)) &
-                                ComPWA::Tools::RootPlot::addComponent)
-      .def("add_component",
-           (void (ComPWA::Tools::RootPlot::*)(std::string, std::string)) &
-               ComPWA::Tools::RootPlot::addComponent)
+      .def("add_component",&ComPWA::Tools::RootPlot::addComponent)
       .def("write", &ComPWA::Tools::RootPlot::write);
 
   py::class_<ComPWA::Estimator::MinLogLH, ComPWA::IEstimator,

@@ -146,7 +146,6 @@ int main(int argc, char **argv) {
 
   unsigned int mcPrecision;
   unsigned int ampMcPrecision;
-  bool usePreFitter;
   bool useMinos;
   bool useHesse;
   bool useRandomStartValues;
@@ -346,8 +345,8 @@ int main(int argc, char **argv) {
   std::shared_ptr<Data> sample(new Data());
   if (dataFile != "") {
     std::shared_ptr<Data> inputData;
-    int numSignalEvents =
-        numEvents; // 445 data and 10000 mc for wrong matched signal
+    //    int numSignalEvents =
+    //        numEvents; // 445 data and 10000 mc for wrong matched signal
     LOG(info) << "Reading data file...";
     std::shared_ptr<Data> inD(new RootReader(dataFile, dataFileTreeName));
     inD->reduceToPhsp(fitModelKin);

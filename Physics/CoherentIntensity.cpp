@@ -73,9 +73,11 @@ CoherentIntensity::component(std::string name) {
 
   // The whole object?
   if (name == Name) {
-    LOG(error) << "CoherentIntensity::GetComponent() | You're requesting the "
-                  "full object! So just copy it!";
-    return std::shared_ptr<AmpIntensity>();
+    //    LOG(error) << "CoherentIntensity::component() | You're requesting the
+    //    "
+    //                  "full object! So just copy it!";
+    //    return std::shared_ptr<AmpIntensity>();
+    return shared_from_this();
   }
 
   bool found = false;
@@ -96,7 +98,7 @@ CoherentIntensity::component(std::string name) {
   // Nothing found
   if (!found) {
     throw std::runtime_error(
-        "CoherentIntensity::GetComponent() | Component " + name +
+        "CoherentIntensity::component() | Component " + name +
         " could not be found in CoherentIntensity " + Name + ".");
   }
 

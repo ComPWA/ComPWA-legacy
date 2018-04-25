@@ -42,6 +42,13 @@ public:
 
   FourMomentum(std::array<double, 4> p4) : P4(p4) {}
 
+  FourMomentum(std::vector<double> p4) {
+    if (p4.size() != 4)
+      throw std::runtime_error(
+          "FourMomentum::Fourmomentum() | Size of vector not equal 4!");
+    P4 = std::array<double, 4>{{p4.at(0), p4.at(1), p4.at(2), p4.at(3)}};
+  }
+
   virtual void setPx(double px) { P4.at(0) = px; }
   virtual void setPy(double py) { P4.at(1) = py; }
   virtual void setPz(double pz) { P4.at(2) = pz; }
@@ -61,7 +68,13 @@ public:
     std::transform(P4.begin(), P4.end(), pB.P4.begin(), P4.begin(),
                    std::plus<double>());
   }
-  
+
+  operator std::vector<double>() {
+    return std::vector<double>(P4.begin(), P4.end());
+  }
+
+  operator std::array<double, 4>() { return P4; }
+
   bool operator==(const FourMomentum &pB) const {
     if (P4 == pB.P4)
       return true;
@@ -75,9 +88,7 @@ public:
     return stream;
   }
 
-  virtual const std::array<double, 4> &fourMomentum() const {
-    return P4;
-  }
+  virtual const std::array<double, 4> &fourMomentum() const { return P4; }
 
   virtual void setFourMomentum(std::array<double, 4> p4) { P4 = p4; }
 

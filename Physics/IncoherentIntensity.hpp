@@ -12,7 +12,8 @@
 namespace ComPWA {
 namespace Physics {
 
-class IncoherentIntensity : public ComPWA::AmpIntensity {
+class IncoherentIntensity : public ComPWA::AmpIntensity,
+      public std::enable_shared_from_this<IncoherentIntensity> {
 
 public:
   IncoherentIntensity() : ComPWA::AmpIntensity(), PhspVolume(1.0) {}

@@ -93,12 +93,11 @@ IncoherentIntensity::component(std::string name) {
 
   // The whole object?
   if (name == Name) {
-    LOG(error) << "IncoherentIntensity::GetComponent() | You're requesting the "
-                  "full object! So just copy it!";
-    return std::shared_ptr<AmpIntensity>();
+//    LOG(error) << "IncoherentIntensity::GetComponent() | You're requesting the "
+//                  "full object! So just copy it!";
+//    return std::shared_ptr<AmpIntensity>();
+    return shared_from_this();
   }
-
-  bool found = false;
   
   // Do we want to have a combination of CoherentIntensities?
   std::vector<std::string> names = splitString(name);
@@ -108,44 +107,28 @@ IncoherentIntensity::component(std::string name) {
   if (names.size() == 1) {
     for (int j = 0; j < Intensities.size(); j++) {
       if (names.at(0) == Intensities.at(j)->name()) {
-        found = true;
         return Intensities.at(j);
       }
     }
   }
 
   // Otherwise we hava multiple components and we build a IncoherentIntensity
-  auto icIn = std::shared_ptr<AmpIntensity>(this->clone(name));
+  auto icIn = std::make_shared<IncoherentIntensity>(*this);
   icIn->setName(name);
   icIn->reset();
 
   for (int j = 0; j < Intensities.size(); j++) {
     for (auto i : names) {
       if (i == Intensities.at(j)->name()) {
-        std::dynamic_pointer_cast<IncoherentIntensity>(icIn)->addIntensity(
-            Intensities.at(j));
-        found = true;
+        icIn->addIntensity(Intensities.at(j));
       }
-    }
-  }
-  // Did we find something?
-  if (found)
-    return icIn;
-
-  // Search for components in subsequent intensities
-  for (auto i : Intensities) {
-    try {
-      auto r = i->component(name);
-      std::dynamic_pointer_cast<IncoherentIntensity>(icIn)->addIntensity(r);
-      found = true;
-    } catch (std::exception &ex) {
     }
   }
 
   // Nothing found
-  if (!found) {
+  if (names.size() != icIn->intensities().size()) {
     throw std::runtime_error(
-        "InCoherentIntensity::GetComponent() | Component " + name +
+        "InCoherentIntensity::component() | Component " + name +
         " could not be found in IncoherentIntensity " + Name + ".");
   }
 

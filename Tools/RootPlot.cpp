@@ -67,7 +67,8 @@ void RootPlot::write(std::string treePrefix, std::string fileName,
     }
     dataTree->Write();
   }
-
+  assert(ComponentNames.size() == PlotComponents.size());
+  
   // Phase space sample
   if (PhspSample.size()) {
 
@@ -75,8 +76,7 @@ void RootPlot::write(std::string treePrefix, std::string fileName,
         PhspSample.begin(), PhspSample.end(), 0.0,
         [&](double w, DataPoint p) { return w += p.weight(); });
 
-    TTree *phspTree = new TTree(TString(treePrefix + "_phsp"),
-                                "phspSample including amplitude weights");
+    TTree *phspTree = new TTree(TString(treePrefix + "_phsp"), "phspSample");
 
     auto t_phspSample = std::vector<double>(dataPointSize, 0.0);
     for (int i = 0; i < varNames.size(); i++)
@@ -94,11 +94,11 @@ void RootPlot::write(std::string treePrefix, std::string fileName,
       bar.next();
       // Fill branch references with dataPoint
       for (int i = 0; i < t_phspSample.size(); i++) {
-        if (i < point.size())
+        if (i < point.size()) // variables
           t_phspSample.at(i) = point.value(i);
-        else if (i == point.size())
+        else if (i == point.size()) // weight
           t_phspSample.at(i) = point.weight() * dataIntegral / phspIntegral;
-        else if (i == point.size() + 1)
+        else if (i == point.size() + 1) // efficiency
           t_phspSample.at(i) = point.efficiency();
         else { // Hopefully we don't arrive here
           throw std::runtime_error(
