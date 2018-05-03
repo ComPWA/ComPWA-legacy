@@ -39,7 +39,6 @@ matrix:
       allow_failures: true
       before_script:
         - env # Debugging
-        - brew tap homebrew/science
           # We have to check first if a package is installed, otherwise an error
           # is thrown.
         - if brew ls --versions boost > /dev/null; then echo 'Boost installed!'
