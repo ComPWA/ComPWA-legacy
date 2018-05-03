@@ -392,7 +392,7 @@
 			<Parameter Type="Width" Name="width_f0980">
 				<Value>0.070</Value>
 			</Parameter>
-			<Parameter Type="MesonRadius" Name="Radius_omega782">
+			<Parameter Type="MesonRadius" Name="Radius_f0980">
 				<Value>1</Value>
 				<Fix>true</Fix>
 				<Min>0.0</Min>
@@ -522,14 +522,11 @@
 	</Particle>
 	<Particle Name="a0(980)+">
 		<Pid>9000211</Pid>
-		<Parameter Type="Mass" Name="Mass_a0(980)">
+		<Parameter Type="Mass" Name="Mass_a0(980)+">
 			<Value>0.994</Value>
 			<Error>0.001</Error>
 			<Fix>true</Fix>
 		</Parameter>
-		<Charge>0</Charge>
-		<Spin>0</Spin>
-		<Parity>+1</Parity>
 		<QuantumNumber Class="Spin" Type="Spin" Value="0"/>
 		<QuantumNumber Class="Int" Type="Charge" Value="1"/>
 		<QuantumNumber Class="Int" Type="Parity" Value="+1"/>
@@ -561,14 +558,11 @@
 	</Particle>
 	<Particle Name="a0(980)-">
 		<Pid>9000211</Pid>
-		<Parameter Type="Mass" Name="Mass_a0(980)">
+		<Parameter Type="Mass" Name="Mass_a0(980)-">
 			<Value>0.994</Value>
 			<Error>0.001</Error>
 			<Fix>true</Fix>
 		</Parameter>
-		<Charge>0</Charge>
-		<Spin>0</Spin>
-		<Parity>+1</Parity>
 		<QuantumNumber Class="Spin" Type="Spin" Value="0"/>
 		<QuantumNumber Class="Int" Type="Charge" Value="-1"/>
 		<QuantumNumber Class="Int" Type="Parity" Value="+1"/>
@@ -598,6 +592,50 @@
 			</Parameter>
 		</DecayInfo>
 	</Particle>
+	<Particle Name="a2(1320)0">
+		<Pid>115</Pid>
+		<Parameter Type="Mass" Name="Mass_a2(1320)0">
+			<Value>1.3184</Value>
+			<Error>0.0005</Error>
+			<Fix>true</Fix>
+		</Parameter>
+		<QuantumNumber Class="Spin" Type="Spin" Value="2"/>
+		<QuantumNumber Class="Int" Type="Charge" Value="0"/>
+		<QuantumNumber Class="Int" Type="Parity" Value="1"/>
+		<QuantumNumber Class="Int" Type="Cparity" Value="1"/>
+		<QuantumNumber Class="Spin" Type="IsoSpin" Value="1" Projection="0"/>
+		<QuantumNumber Class="Int" Type="Gparity" Value="-1"/>
+	</Particle>
+	<Particle Name="a2(1320)+">
+		<Pid>215</Pid>
+		<Parameter Type="Mass" Name="Mass_a2(1320)+">
+			<Value>1.3184</Value>
+			<Error>0.0005</Error>
+			<Fix>true</Fix>
+		</Parameter>
+		<QuantumNumber Class="Spin" Type="Spin" Value="2"/>
+		<QuantumNumber Class="Int" Type="Charge" Value="1"/>
+		<QuantumNumber Class="Int" Type="Parity" Value="1"/>
+		<QuantumNumber Class="Int" Type="Cparity" Value="1"/>
+		<QuantumNumber Class="Spin" Type="IsoSpin" Value="1" Projection="1"/>
+		<QuantumNumber Class="Int" Type="Gparity" Value="-1"/>
+	</Particle>
+	<Particle Name="a2(1320)-">
+		<Pid>-215</Pid>
+		<Parameter Type="Mass" Name="Mass_a2(1320)-">
+			<Value>1.3184</Value>
+			<Error>0.0005</Error>
+			<Fix>true</Fix>
+		</Parameter>
+		<QuantumNumber Class="Spin" Type="Spin" Value="2"/>
+		<QuantumNumber Class="Int" Type="Charge" Value="-1"/>
+		<QuantumNumber Class="Int" Type="Parity" Value="1"/>
+		<QuantumNumber Class="Int" Type="Cparity" Value="1"/>
+		<QuantumNumber Class="Spin" Type="IsoSpin" Value="1" Projection="-1"/>
+		<QuantumNumber Class="Int" Type="Gparity" Value="-1"/>
+	</Particle>
+
+
 	<Particle Name="phi(1020)">
 		<Pid>333</Pid>
 		<Parameter Type="Mass" Name="Mass_phi(1020)">
