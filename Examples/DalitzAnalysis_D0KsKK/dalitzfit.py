@@ -67,7 +67,7 @@ pwa.fit_fractions_error(fitPar, result, fitFracs, intens, components, kin,
                         phspSample, 20)
 result.set_fit_fractions(fitFracs)
 
-result.print()
+result.log()
 
 # Save results
 result.write("out-fitResult.xml")
