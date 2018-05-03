@@ -75,6 +75,8 @@ public:
 
   operator std::array<double, 4>() { return P4; }
 
+  std::array<double, 4> operator()() const { return P4; }
+
   bool operator==(const FourMomentum &pB) const {
     if (P4 == pB.P4)
       return true;
@@ -88,9 +90,9 @@ public:
     return stream;
   }
 
-  virtual const std::array<double, 4> &fourMomentum() const { return P4; }
+  virtual const std::array<double, 4> &value() const { return P4; }
 
-  virtual void setFourMomentum(std::array<double, 4> p4) { P4 = p4; }
+  virtual void setValue(std::array<double, 4> p4) { P4 = p4; }
 
   virtual double invMassSq() const { return invariantMass(*this); }
 
@@ -102,13 +104,13 @@ public:
   }
 
   static double invariantMass(const FourMomentum &p4) {
-    auto vec = p4.fourMomentum();
+    auto vec = p4.value();
     return ((-1) * (vec.at(0) * vec.at(0) + vec.at(1) * vec.at(1) +
                     vec.at(2) * vec.at(2) - vec.at(3) * vec.at(3)));
   }
 
   static double threeMomentumSq(const FourMomentum &p4) {
-    auto vec = p4.fourMomentum();
+    auto vec = p4.value();
     return (vec.at(0) * vec.at(0) + vec.at(1) * vec.at(1) +
             vec.at(2) * vec.at(2));
   }

@@ -19,9 +19,7 @@ namespace DataReader {
 
 RootReader::RootReader() {}
 
-RootReader::RootReader(TTree *tr, int size) : Data(false) {
-  read(tr, size);
-}
+RootReader::RootReader(TTree *tr, int size) : Data(false) { read(tr, size); }
 
 RootReader::RootReader(const std::string inRootFile,
                        const std::string inTreeName, int size)
@@ -40,7 +38,6 @@ RootReader::RootReader(const std::string inRootFile,
     throw std::runtime_error("RootReader::RootReader() | Tree \"" + inTreeName +
                              "\" can not be opened from file " + inRootFile +
                              "! ");
-
   read(fTree, size);
 
   fFile->Close();
@@ -122,7 +119,7 @@ void RootReader::writeData(std::string fileName, std::string treeName) {
   int fCharge;
   int fFlavour;
 
-  TTree* fTree = new TTree(treeName.c_str(), treeName.c_str());
+  TTree *fTree = new TTree(treeName.c_str(), treeName.c_str());
   unsigned int numPart = Events.at(0).numParticles();
   fParticles = new TClonesArray("TParticle", numPart);
   fTree->Branch("Particles", &fParticles);

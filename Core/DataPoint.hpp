@@ -36,8 +36,6 @@ public:
   
   double value(unsigned int num) const;
 
-  std::vector<double>& values() { return Values; };
-
   void setWeight(double w) { Weight = w; };
   
   double weight() const { return Weight; };
@@ -45,6 +43,9 @@ public:
   void setEfficiency(double e) { Eff = e; };
   
   double efficiency() const { return Eff; };
+  
+  /// Reference to interval vector of values
+  std::vector<double>& values() { return Values; };
 
   std::vector<double>::iterator first() { return Values.begin(); }
 

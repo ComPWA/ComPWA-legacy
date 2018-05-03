@@ -19,7 +19,7 @@ BOOST_AUTO_TEST_CASE(FourMomentum) {
   BOOST_CHECK_EQUAL(p4.invMassSq(), 2.0);
   BOOST_CHECK_EQUAL(ComPWA::FourMomentum::threeMomentumSq(p4), 14.0);
   
-  p4B.setFourMomentum( std::array<double,4>{{1,2,3,5}} );
+  p4B.setValue( std::array<double,4>{{1,2,3,5}} );
   auto pTot = p4B+p4; //(2,4,6,9)
   BOOST_CHECK_EQUAL(pTot.invMassSq(), 25.0);
   

@@ -44,5 +44,5 @@ BOOST_AUTO_TEST_CASE(WriteReadCheck) {
 
 BOOST_AUTO_TEST_SUITE_END();
 
-} /* namespace DataReader */
-} /* namespace ComPWA */
+} // namespace DataReader
+} // namespace ComPWA

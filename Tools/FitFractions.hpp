@@ -182,12 +182,27 @@ inline void CalcFractionError(
     std::shared_ptr<AmpIntensity> intens,
     std::shared_ptr<std::vector<DataPoint>> sample, int nSets,
     std::vector<std::pair<std::string, std::string>> defs) {
+  LOG(info)
+      << "CalcFractionError() | Calculating errors of fit fractions using "
+      << nSets << " sets of parameters...";
+
   if (nSets <= 0)
     return;
   if (!parameters.doubleParameters().size())
     return;
-  LOG(info) << "Calculating errors of fit fractions using " << nSets
-            << " sets of parameters...";
+  if (parameters.doubleParameters().size() != covariance.size())
+      return;
+  
+  // Check wheather covariance matrix is set to zero.
+  bool leave = true;
+  for(int i=0; i<covariance.size(); i++)
+    for (int j=0; j < covariance.size(); j++)
+      if (covariance.at(i).at(j) != 0.)
+        leave = false;
+  if (leave)
+    LOG(error) << "CalcFractionError() | Covariance matrix is zero "
+                  "(everywhere)! We skip further "
+                  "calculation of fit fraction errors.";
 
   // Setting up random number generator
   const gsl_rng_type *T;
@@ -198,7 +213,7 @@ inline void CalcFractionError(
   // convert to GSL objects
   gsl_vector *gslFinalPar = gsl_parameterList2Vec(parameters);
   gsl_matrix *gslCov = gsl_vecVec2Matrix(covariance);
-  //gsl_matrix_print(gslCov); // DEBUG
+  gsl_matrix_print(gslCov); // DEBUG
 
   int nFreeParameter = covariance.size();
 
@@ -244,6 +259,8 @@ inline void CalcFractionError(
       continue;
     }
     fracVect.push_back(CalculateFitFractions(kin, intens, sample, defs));
+    for( auto i : defs)
+      std::cout << i.first << " " << i.second << std::endl;
     bar.next();
     i++;
 

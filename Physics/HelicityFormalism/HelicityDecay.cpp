@@ -100,7 +100,7 @@ void HelicityDecay::load(std::shared_ptr<PartList> partL,
     } else if (decayType == "voigt") {
       DynamicFcn = std::make_shared<DecayDynamics::Voigtian>(
           name, DecayProducts, partL);
-    } else if (decayType == "virtual") {
+    } else if (decayType == "virtual" || decayType == "nonResonant") {
       DynamicFcn = std::make_shared<DecayDynamics::NonResonant>(name);
     } else {
       throw std::runtime_error(
