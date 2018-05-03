@@ -118,6 +118,13 @@ protected:
 /// Note: Propably would be better to access particles by their pid?
 typedef std::map<std::string, ParticleProperties> PartList;
 
+inline std::ostream &operator<<(std::ostream &os, const PartList &p) {
+  for (auto i : p)
+    os << i.first << " [ " << i.second.GetId()
+       << " ]: mass = " << i.second.GetMass() << std::endl;
+  return os;
+}
+
 /// Search particle \p list for a specific particle \p id.
 /// The first entry in the list is returned. Be careful in case that multiple
 /// particles have the same pid.

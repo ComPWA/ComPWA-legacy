@@ -1,11 +1,6 @@
 
 
-
-
-
-
-
-    #include <pybind11/iostream.h>
+#include <pybind11/iostream.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 #include <pybind11/stl_bind.h>
@@ -112,7 +107,8 @@ private:
 /// USAGE:
 /// export PYTHONPATH=$PYTHONPATH:YOUR_COMPWA_BUILD_DIR/lib
 /// python3
-/// >>> from PyComPWA import *
+/// >>> import pycompwa as pwa
+/// >>> ...
 ///
 PYBIND11_MODULE(pycompwa, m) {
   m.doc() = "ComPWA python interface"; // optional module docstring
@@ -163,11 +159,22 @@ PYBIND11_MODULE(pycompwa, m) {
   py::class_<ComPWA::Particle>(m, "Particle")
       .def(py::init<std::array<double, 4>, int, int>(), "", py::arg("p4"),
            py::arg("pid"), py::arg("charge") = 0)
-      .def("p4",
-           [](const ComPWA::Particle &p) { return p.fourMomentum()(); });
+      .def("__repr__",
+           [](const ComPWA::Particle &p) {
+             std::stringstream ss;
+             ss << p;
+             return ss.str();
+           })
+      .def("p4", [](const ComPWA::Particle &p) { return p.fourMomentum()(); });
 
   py::class_<ComPWA::Event, std::shared_ptr<ComPWA::Event>>(m, "Event")
       .def(py::init<>())
+//      .def("__repr__",
+//           [](const ComPWA::Event &ev) {
+//             std::stringstream ss;
+//             ss << ev;
+//             return ss.str();
+//           })
       .def("num_particles", &ComPWA::Event::numParticles)
       .def("add_particle", &ComPWA::Event::addParticle)
       .def("cms_energy", &ComPWA::Event::cmsEnergy)
@@ -181,7 +188,7 @@ PYBIND11_MODULE(pycompwa, m) {
       .def(py::init<>())
       .def("size", &ComPWA::DataReader::Data::numEvents)
       .def("num_events", &ComPWA::DataReader::Data::numEvents)
-      .def("add_event",&ComPWA::DataReader::Data::add);
+      .def("add_event", &ComPWA::DataReader::Data::add);
 
   py::class_<ComPWA::DataReader::RootReader, ComPWA::DataReader::Data,
              std::shared_ptr<ComPWA::DataReader::RootReader>>(m, "RootReader")
@@ -195,17 +202,18 @@ PYBIND11_MODULE(pycompwa, m) {
 
   py::class_<ComPWA::DataPoint>(m, "DataPoint")
       .def(py::init<>())
-      .def("__repr__", [](ComPWA::DataPoint &p) {
-        std::stringstream ss;
-        ss << p;
-        return ss.str();
-      })
+      .def("__repr__",
+           [](ComPWA::DataPoint &p) {
+             std::stringstream ss;
+             ss << p;
+             return ss.str();
+           })
       .def("size", &ComPWA::DataPoint::size)
       .def("value", &ComPWA::DataPoint::value)
       .def("weight", &ComPWA::DataPoint::weight)
       .def("efficiency", &ComPWA::DataPoint::efficiency);
   m.def("log", [](const ComPWA::DataPoint p) { LOG(info) << p; });
-  
+
   py::class_<DataPoints>(m, "DataPoints", py::buffer_protocol())
       .def_buffer([](DataPoints &dp) -> py::buffer_info {
         return py::buffer_info(
@@ -222,23 +230,29 @@ PYBIND11_MODULE(pycompwa, m) {
       .def(py::init<std::shared_ptr<ComPWA::DataReader::Data>,
                     std::shared_ptr<ComPWA::Kinematics>>());
 
-
   // ------- Particles
 
   py::class_<ComPWA::PartList, std::shared_ptr<ComPWA::PartList>>(m, "PartList")
       .def(py::init<>())
+      .def("__repr__",
+           [](const ComPWA::PartList &p) {
+             std::stringstream ss;
+             ss << p;
+             return ss.str();
+           })
       .def("write",
            [](const ComPWA::PartList &list, std::string file) {
              boost::property_tree::ptree ptout;
              ptout.add_child("ParticleList", SaveParticles(list));
              boost::property_tree::xml_parser::write_xml(file, ptout,
                                                          std::locale());
-           },"Write particle list to XML.",
-           py::arg("file"))
+           },
+           "Write particle list to XML.", py::arg("file"))
       .def("update",
            [](ComPWA::PartList &partL, ComPWA::ParameterList &pars) {
              UpdateParticleList(partL, pars);
-           },"Update particles in list using parameter list",
+           },
+           "Update particles in list using parameter list",
            py::arg("parameters"));
 
   m.def("read_particles",
@@ -288,8 +302,8 @@ PYBIND11_MODULE(pycompwa, m) {
              ptout.add_child("IncoherentIntensity", intens.save());
              boost::property_tree::xml_parser::write_xml(file, ptout,
                                                          std::locale());
-           },"Write intensity model to XML file.",
-           py::arg("file"));
+           },
+           "Write intensity model to XML file.", py::arg("file"));
 
   m.def("incoherent_intensity",
         (std::shared_ptr<ComPWA::AmpIntensity>(*)(
@@ -355,10 +369,13 @@ PYBIND11_MODULE(pycompwa, m) {
       .def("log_function_tree",
            [](ComPWA::Estimator::MinLogLH &min) {
              LOG(info) << min.tree()->head()->print(25);
-           }, "Print FunctionTree to logging system.")
-      .def("print_function_tree", [](ComPWA::Estimator::MinLogLH &min) {
-        return min.tree()->head()->print(25);
-      },"Return FunctionTree structure as a string.");
+           },
+           "Print FunctionTree to logging system.")
+      .def("print_function_tree",
+           [](ComPWA::Estimator::MinLogLH &min) {
+             return min.tree()->head()->print(25);
+           },
+           "Return FunctionTree structure as a string.");
 
   py::class_<ComPWA::Optimizer::Optimizer,
              std::shared_ptr<ComPWA::Optimizer::Optimizer>>(m, "Optimizer");
@@ -451,7 +468,9 @@ PYBIND11_MODULE(pycompwa, m) {
                                   std::shared_ptr<ComPWA::DataReader::Data>)) &
                                   ComPWA::Tools::RootPlot::setPhspSample)
       .def("set_intensity", &ComPWA::Tools::RootPlot::setIntensity)
-      .def("add_component", &ComPWA::Tools::RootPlot::addComponent, "Add component for which weights should be calculated. A tuple of e.g.[Amplitude, "
-        "AmpIntensity] is expected.")
+      .def("add_component", &ComPWA::Tools::RootPlot::addComponent,
+           "Add component for which weights should be calculated. A tuple of "
+           "e.g.[Amplitude, "
+           "AmpIntensity] is expected.")
       .def("write", &ComPWA::Tools::RootPlot::write);
 }
