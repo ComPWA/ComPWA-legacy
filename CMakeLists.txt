@@ -29,9 +29,6 @@ if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang") # using Clang or AppleClang
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU") # using GCC
     set(CMAKE_CXX_FLAGS
         "${CMAKE_CXX_FLAGS} -ftree-vectorize -ftree-vectorizer-verbose=1")
-    #set(CMAKE_CXX_STANDARD 14)
-    #set(CMAKE_CXX_STANDARD_REQUIRED ON)
-    #set(CMAKE_CXX_EXTENSIONS OFF)
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel") # using Intel C++
      # nothing here
 endif()

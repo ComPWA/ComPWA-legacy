@@ -113,6 +113,8 @@ matrix:
       env: 
         - TASK="ROOT v6.10"
         - ROOTSYS=$BASEPATH/root
+        - export CXX=/usr/bin/clang++
+        - export CC=/usr/bin/clang
       addons: 
         apt: 
             packages:
