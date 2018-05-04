@@ -34,7 +34,7 @@ matrix:
 
   include:
     - os: osx
-      osx_image: xcode8.3
+      osx_image: xcode9.3
       env: TASK="ROOT v6"
       allow_failures: true
       before_script:
@@ -52,7 +52,7 @@ matrix:
             #else 
               #brew link --overwrite gcc;
               #brew install root;
-            #fi
+            fi
           fi
         #- wget https://root.cern.ch/download/root_v6.12.06.macosx64-10.13-clang90.tar.gz
         #- tar xpvfz root_*.tar.gz > /dev/null 2>&1
