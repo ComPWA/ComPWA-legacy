@@ -113,8 +113,6 @@ matrix:
       env: 
         - TASK="ROOT v6.10"
         - ROOTSYS=$BASEPATH/root
-        - export CXX=/usr/bin/clang++
-        - export CC=/usr/bin/clang
       addons: 
         apt: 
             packages:
@@ -128,6 +126,9 @@ matrix:
           # ROOT v6.10
         - wget https://root.cern.ch/download/root_v6.10.02.Linux-ubuntu14-x86_64-gcc4.8.tar.gz
         - tar xpvfz root_*.tar.gz > /dev/null 2>&1
+        - export CXX=/usr/bin/clang++
+        - export CC=/usr/bin/clang
+        - clang --version
 
     - os: linux
       dist: trusty  #Ubuntu14.04 LTS
