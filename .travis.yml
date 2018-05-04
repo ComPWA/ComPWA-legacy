@@ -119,6 +119,7 @@ matrix:
               - libboost-all-dev # Version 1.54 for trusty
               - libgsl0-dev
               - python3
+              - clang
       before_script:
         - env
         - cd $BASEPATH
