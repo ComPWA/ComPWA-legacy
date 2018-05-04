@@ -24,7 +24,7 @@ message( STATUS "Compiler: " ${CMAKE_CXX_COMPILER_ID} " ( " ${CMAKE_CXX_COMPILER
 # - verbose output on loop vectorization
 #
 if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang") # using Clang or AppleClang
-    #set(CMAKE_CXX_FLAGS
+	#set(CMAKE_CXX_FLAGS
         #"${CMAKE_CXX_FLAGS} -Rpass-analysis=loop-vectorize -Rpass=loop-vectorize")
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU") # using GCC
 	set(CMAKE_CXX_FLAGS
