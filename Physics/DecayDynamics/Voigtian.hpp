@@ -46,13 +46,19 @@ class Voigtian
     : public ComPWA::Physics::DecayDynamics::AbstractDynamicalFunction {
 
 public:
+  //============ CONSTRUCTION ==================
   Voigtian(std::string name, std::pair<std::string,std::string> daughters,
                std::shared_ptr<ComPWA::PartList> partL);
 
+  //======= INTEGRATION/NORMALIZATION ===========
   /// Check of parameters have changed and normalization has to be recalculatecd
   virtual bool isModified() const;
    
+     /// Label as modified/unmodified
+  virtual void setModified(bool b);
+  
   //================ EVALUATION =================
+  
   std::complex<double> evaluate(const ComPWA::DataPoint &point, int pos) const;
 
   /// Dynamical voigt function.
@@ -138,7 +144,6 @@ protected:
 
 private:
   /// Temporary values (used to trigger recalculation of normalization)
-  double CurrentMesonRadius;
   double CurrentWidth;
 };
 

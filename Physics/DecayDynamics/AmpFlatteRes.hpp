@@ -44,8 +44,11 @@ public:
 
   //======= INTEGRATION/NORMALIZATION ===========
 
-  //! Check of parameters have changed and normalization has to be recalculatecd
+  /// Check of parameters have changed and normalization has to be recalculatecd
   virtual bool isModified() const;
+
+  /// Label as modified/unmodified
+  virtual void setModified(bool b);
 
   //================ EVALUATION =================
 

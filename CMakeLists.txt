@@ -1,45 +1,47 @@
-# CMakeLists files in this project can
-# refer to the root source directory of the project as ${COMPWA_SOURCE_DIR} and
-# to the root binary directory of the project as ${COMPWA_BINARY_DIR}.
-cmake_minimum_required (VERSION 3.0)
-#set (CMAKE_BUILD_TYPE Debug)
-set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
-
-
-set (CMAKE_CXX_STANDARD 11)
-
-message( STATUS "Compiler ID:")
-message( STATUS "$ENV{CC}")
-
-if (NOT "$ENV{CC}" STREQUAL "clang")
-  set(CMAKE_CXX_STANDARD 14)
-  set(CMAKE_CXX_STANDARD_REQUIRED ON)
-  set(CMAKE_CXX_EXTENSIONS OFF)
-endif()
-
-# Workaround for clang+ c++14/pybind11
-#if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
- # set (CMAKE_CXX_STANDARD 11)
- # set(CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} -std=c++0x")
-#endif()
-
 #
-# ComPWA
+# ComPWA - A Common framework for Partial Wave Analysis
 #
 project( COMPWA )
 
-# set the default path for built executables to the "bin" directory
-set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
+#
+# CMake configuration
+#
+cmake_minimum_required (VERSION 3.0)
+set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 
-# set the default path for built libraries to the "lib" directory
-set(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib)
+# Which target should be build by default?
+set (CMAKE_BUILD_TYPE Debug)
+
+set (CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
+message( STATUS "Compiler: " ${CMAKE_CXX_COMPILER_ID} " ( " ${CMAKE_CXX_COMPILER} " )" )
+
+#
+# Additonal compile flags for various compilers
+# ${CMAKE_CXX_COMPILER_ID} can be one of {GNU Clang AppleClang Intel MSVC}
+# - verbose output on loop vectorization
+#
+if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang") # using Clang or AppleClang
+	#set(CMAKE_CXX_FLAGS
+        #"${CMAKE_CXX_FLAGS} -Rpass-analysis=loop-vectorize -Rpass=loop-vectorize")
+elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU") # using GCC
+	set(CMAKE_CXX_FLAGS
+		"${CMAKE_CXX_FLAGS} -ftree-vectorize -ftree-vectorizer-verbose=1")
+elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel") # using Intel C++
+     # nothing here
+endif()
+message( STATUS "CXX Compile flags: " ${CMAKE_CXX_FLAGS} )
+
+# Automatically copy all binaries and libraries to bin/ and lib/
+#set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
+#set(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib)
 
 INCLUDE_DIRECTORIES(${COMPWA_SOURCE_DIR})
-#LINK_DIRECTORIES(${COMPWA_SOURCE_DIR}/lib)
 
 # Setting prefix for libraries
 set( CMAKE_SHARED_LIBRARY_PREFIX "libComPWA_" )
-
 
 #
 # Frameworks for parallelization
@@ -63,7 +65,7 @@ find_package( Minuit2 )
 
 #
 # FindBoost. unit_test_framework and serialization
-# throughout the software, so we require them here
+# are used throughout the software, so we require them here
 # local dependencies should be required in each
 # module
 #
@@ -72,24 +74,6 @@ find_package( Boost COMPONENTS
                serialization
                REQUIRED
 )
-
-#Find Python
-#find_package( PythonLibs )
-
-# Workaround for clang+boost.python
-# ${CMAKE_CXX_COMPILER_ID} can be one of {GNU Clang AppleClang Intel MSVC}
-# The python interface is still work in progress, so we disable python by
-# default.
-if (NOT "${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
-  #find_package(PythonLibs 2.7 EXACT)
-  #INCLUDE_DIRECTORIES(${PYTHON_INCLUDE_PATH})
-  #LINK_DIRECTORIES(${PYTHON_LIBRARIES})
-  #find_package( Boost COMPONENTS
-  #             python
-  #             REQUIRED
-  #)
-endif()
-
 # Use dynamic libraries for log, test and serialization
 add_definitions(-DBOOST_LOG_DYN_LINK)
 add_definitions(-DBOOST_TEST_DYN_LINK)
@@ -103,7 +87,6 @@ link_directories(${Boost_LIBRARY_DIR})
 #
 enable_testing()
 
-
 #
 # Submodules
 #
@@ -114,7 +97,6 @@ add_subdirectory(Optimizer)
 add_subdirectory(Physics)
 add_subdirectory(Tools)
 add_subdirectory(Examples)
-add_subdirectory(executables)
 
 #
 # Doxygen

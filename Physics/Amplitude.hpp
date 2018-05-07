@@ -7,7 +7,6 @@
 /// Amplitude base class.
 ///
 
-
 #ifndef AMPLITUDE_HPP_
 #define AMPLITUDE_HPP_
 
@@ -35,8 +34,7 @@ public:
   //============ CONSTRUCTION ==================
 
   Amplitude(std::string name = "")
-      : Name(name), PreFactor(1, 0), CurrentMagnitude(0.0),
-        CurrentPhase(0.0){};
+      : Name(name), PreFactor(1, 0), CurrentMagnitude(0.0), CurrentPhase(0.0){};
 
   virtual ~Amplitude() {}
 
@@ -44,18 +42,12 @@ public:
   virtual Amplitude *clone(std::string newName = "") const = 0;
 
   virtual boost::property_tree::ptree save() const = 0;
-  //======= INTEGRATION/NORMALIZATION ===========
 
-  /// Check if parameters have changed and ifnormalization has to be
-  /// recalculatecd.
-  bool isModified() const {
-    if (magnitude() != CurrentMagnitude || phase() != CurrentPhase) {
-      const_cast<double &>(CurrentMagnitude) = magnitude();
-      const_cast<double &>(CurrentPhase) = phase();
-      return true;
-    }
-    return false;
-  }
+  /// Check if parameters have changed.
+  virtual bool isModified() const = 0;
+
+  /// Label as modified/unmodified
+  virtual void setModified(bool b) = 0;
 
   //================ EVALUATION =================
 
@@ -93,9 +85,7 @@ public:
     return Magnitude;
   }
 
-  virtual double magnitude() const {
-    return std::fabs(Magnitude->value());
-  }
+  virtual double magnitude() const { return std::fabs(Magnitude->value()); }
 
   virtual void
   setMagnitudeParameter(std::shared_ptr<ComPWA::FitParameter> par) {
@@ -131,9 +121,9 @@ public:
   virtual bool hasTree() const { return 0; }
 
   virtual std::shared_ptr<FunctionTree> tree(std::shared_ptr<Kinematics> kin,
-                                                const ParameterList &sample,
-                                                const ParameterList &toySample,
-                                                std::string suffix) = 0;
+                                             const ParameterList &sample,
+                                             const ParameterList &toySample,
+                                             std::string suffix) = 0;
 
 protected:
   std::string Name;
@@ -144,7 +134,6 @@ protected:
 
   std::shared_ptr<FitParameter> Phase;
 
-private:
   double CurrentMagnitude;
   double CurrentPhase;
 };

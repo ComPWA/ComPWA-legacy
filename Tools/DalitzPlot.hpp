@@ -29,7 +29,7 @@ public:
   ~DalitzHisto() {
     // Can't call delete here since there is a problem with copy/move
     // constructor
-    //		if(tree) delete tree;
+    //    if(tree) delete tree;
   }
 
   /// Disable copy constructor since TTree is not copyable
@@ -38,12 +38,13 @@ public:
   /// Default move constructor
   DalitzHisto(DalitzHisto &&other) = default; // C++11 move constructor
 
-  DalitzHisto(std::shared_ptr<ComPWA::Kinematics> kin, std::string name, std::string title, unsigned int bins,
-              Color_t color = kBlack);
+  DalitzHisto(std::shared_ptr<ComPWA::Kinematics> kin, std::string name,
+              std::string title, unsigned int bins, Color_t color = kBlack);
   /// Switch on/off stats
   void setStats(bool b);
   /// Fill event
-  void fill(std::shared_ptr<ComPWA::Kinematics> kin, ComPWA::Event &event, double w = 1);
+  void fill(std::shared_ptr<ComPWA::Kinematics> kin, ComPWA::Event &event,
+            double w = 1);
   /// Scale all distributions
   void scale(double w);
   /// Get 1D histogram
@@ -64,7 +65,7 @@ private:
   unsigned int NumBins;
 
   std::unique_ptr<TTree> Tree;
-  
+
   // tree branches
   std::vector<double> BranchPoint;
   double BranchEff, BranchWeight;
@@ -74,7 +75,8 @@ private:
 
 class DalitzPlot {
 public:
-  DalitzPlot(std::shared_ptr<ComPWA::Kinematics> kin, std::string name, int bins = 100);
+  DalitzPlot(std::shared_ptr<ComPWA::Kinematics> kin, std::string name,
+             int bins = 100);
 
   virtual ~DalitzPlot();
 
@@ -84,7 +86,9 @@ public:
     s_data = dataSample;
   }
 
-  void setPhspData(std::shared_ptr<ComPWA::DataReader::Data> phsp) { s_phsp = phsp; }
+  void setPhspData(std::shared_ptr<ComPWA::DataReader::Data> phsp) {
+    s_phsp = phsp;
+  }
 
   void setHitMissData(std::shared_ptr<ComPWA::DataReader::Data> hitMiss) {
     s_hitMiss = hitMiss;
@@ -99,25 +103,32 @@ public:
 
   void plot();
 
-  void drawComponent(std::string name, std::string title = "",
-                     Color_t color = kBlack) {
+  void drawComponent(std::string componentName, std::string intensityName,
+                     std::string title = "", Color_t color = kBlack) {
+    std::string ttt = title;
+    if (ttt == "")
+      ttt = componentName;
+
     if (!_plotComponents.size())
-      throw std::runtime_error("PlotData::DrawComponent() | AmpIntensity not "
+      throw std::runtime_error("DalitzPlot::drawComponent() | AmpIntensity not "
                                "set! Set the full model first using "
                                "SetFitAmp()!");
     std::shared_ptr<ComPWA::AmpIntensity> comp;
-    try{
-      comp = _plotComponents.at(0)->component(name);
-    } catch (std::exception& ex) {
-      LOG(error) << "DalitzPlot::DrawComponent() | Component " << name
-                 << " not found in AmpIntensity "
+    try {
+      comp = _plotComponents.at(0)
+                 ->component(intensityName)
+                 ->component(componentName);
+    } catch (std::exception &ex) {
+      LOG(error) << "DalitzPlot::drawComponent() | Component " << componentName
+                 << " of " << componentName << " not found in AmpIntensity "
                  << _plotComponents.at(0)->name() << ".";
       return;
     }
     _plotComponents.push_back(comp);
-    _plotHistograms.push_back(DalitzHisto(kin_, name, title, _bins, color));
+    _plotHistograms.push_back(
+        DalitzHisto(kin_, componentName, title, _bins, color));
     _plotHistograms.back().setStats(0);
-    _plotLegend.push_back(title);
+    _plotLegend.push_back(ttt);
   }
 
 protected:

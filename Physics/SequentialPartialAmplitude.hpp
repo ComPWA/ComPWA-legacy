@@ -34,15 +34,11 @@ public:
 
   virtual boost::property_tree::ptree save() const;
 
-  /// Check of parameters have changed and normalization has to be recalculatecd
-  bool isModified() const {
-    if (Amplitude::isModified())
-      return true;
-    for (auto i : PartialAmplitudes)
-      if (i->isModified())
-        return true;
-    return false;
-  }
+  /// Check if parameters have changed.
+  virtual bool isModified() const;
+
+  /// Label as modified/unmodified
+  virtual void setModified(bool b);
 
   virtual std::complex<double> evaluate(const DataPoint &point) const {
     std::complex<double> result = coefficient() * preFactor();

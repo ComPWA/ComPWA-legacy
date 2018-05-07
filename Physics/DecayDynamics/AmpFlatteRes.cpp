@@ -3,7 +3,8 @@
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
 #include <cmath>
-#include <math.h>
+//#include <math.h>
+#include <limits>
 #include "Physics/DecayDynamics/AmpFlatteRes.hpp"
 #include "Core/Value.hpp"
 
@@ -28,9 +29,9 @@ AmpFlatteRes::AmpFlatteRes(std::string name,
 
   auto spin = partProp.GetSpinQuantumNumber("Spin");
   SetSpin(spin);
-  //in default, using spin J as Orbital Angular Momentum
-  //update by calling SetOrbitalAngularMomentum() before any further process
-  //after RelBW is created by calling of constructor
+  // in default, using spin J as Orbital Angular Momentum
+  // update by calling SetOrbitalAngularMomentum() before any further process
+  // after RelBW is created by calling of constructor
   SetOrbitalAngularMomentum(spin);
 
   auto ffType = formFactorType(decayTr.get<int>("FormFactor.<xmlattr>.Type"));
@@ -71,17 +72,26 @@ AmpFlatteRes::AmpFlatteRes(std::string name,
 AmpFlatteRes::~AmpFlatteRes() {}
 
 bool AmpFlatteRes::isModified() const {
-  if (AbstractDynamicalFunction::isModified())
-    return true;
-  if (Couplings.at(0).value() != Current_g || Couplings.at(1).value() != Current_gHidden ||
+  if (GetMass() != Current_mass || Couplings.at(0).value() != Current_g ||
+      Couplings.at(1).value() != Current_gHidden ||
       Couplings.at(2).value() != Current_gHidden2) {
-    setModified();
-    const_cast<double &>(Current_g) = Couplings.at(0).value();
-    const_cast<double &>(Current_gHidden) = Couplings.at(1).value();
-    const_cast<double &>(Current_gHidden2) = Couplings.at(2).value();
     return true;
   }
   return false;
+}
+
+void AmpFlatteRes::setModified(bool b) {
+  if (b) {
+    Current_mass = std::numeric_limits<double>::quiet_NaN();
+    Current_g = std::numeric_limits<double>::quiet_NaN();
+    Current_gHidden = std::numeric_limits<double>::quiet_NaN();
+    Current_gHidden2 = std::numeric_limits<double>::quiet_NaN();
+  } else {
+    Current_mass = Mass->value();
+    Current_g = Couplings.at(0).value();
+    Current_gHidden = Couplings.at(1).value();
+    Current_gHidden2 = Couplings.at(2).value();
+  }
 }
 
 std::complex<double> AmpFlatteRes::evaluate(const DataPoint &point,
@@ -90,9 +100,10 @@ std::complex<double> AmpFlatteRes::evaluate(const DataPoint &point,
   std::complex<double> result;
   try {
     result = dynamicalFunction(
-        point.value(pos),Mass->value(), Couplings.at(0).GetMassA(),
-        Couplings.at(0).GetMassB(), Couplings.at(0).value(), Couplings.at(1).GetMassA(),
-        Couplings.at(1).GetMassB(), Couplings.at(1).value(), Couplings.at(2).GetMassA(),
+        point.value(pos), Mass->value(), Couplings.at(0).GetMassA(),
+        Couplings.at(0).GetMassB(), Couplings.at(0).value(),
+        Couplings.at(1).GetMassA(), Couplings.at(1).GetMassB(),
+        Couplings.at(1).value(), Couplings.at(2).GetMassA(),
         Couplings.at(2).GetMassB(), Couplings.at(2).value(), (double)L,
         MesonRadius->value(), FormFactorType);
   } catch (std::exception &ex) {
@@ -127,61 +138,53 @@ std::complex<double> AmpFlatteRes::dynamicalFunction(
   return result;
 }
 
+/// Helper function to calculate the coupling terms for the Flatte formular.
+inline std::complex<double> flatteCouplingTerm(double sqrtS, double mR,
+                                               double coupling, double massA,
+                                               double massB, unsigned int J,
+                                               double mesonRadius,
+                                               formFactorType ffType) {
+  auto qR = qValue(mR, massA, massB);
+  auto phspR = phspFactor(sqrtS, massA, massB);
+  auto ffR = FormFactor(qR, J, mesonRadius, ffType);
+  auto barrierA = FormFactor(sqrtS, massA, massB, J, mesonRadius, ffType) / ffR;
+
+  // Calculate normalized vertex functions vtxA(s_R)
+  std::complex<double> vtxA(1, 0); // spin==0
+  if (J > 0 || ffType == formFactorType::CrystalBarrel) {
+    vtxA = ffR * std::pow(qR, J);
+  }
+  auto width = couplingToWidth(mR, coupling, vtxA, phspR);
+  // Including the factor qTermA, as suggested by PDG 2014, Chapter 47.2,
+  // leads to an amplitude that doesn't converge.
+  //  qTermA = qValue(sqrtS,massA1,massA2) / qValue(mR,massA1,massA2);
+  //  termA = gammaA * barrierA * barrierA * std::pow(qTermA, (double)2 * J +
+  //  1);
+
+  return (width * barrierA * barrierA);
+}
+
 std::complex<double>
 AmpFlatteRes::dynamicalFunction(double mSq, double mR, double massA1,
                                 double massA2, double gA, double massB1,
                                 double massB2, double couplingB, double massC1,
                                 double massC2, double couplingC, unsigned int L,
                                 double mesonRadius, formFactorType ffType) {
-  std::complex<double> i(0, 1);
   double sqrtS = sqrt(mSq);
 
   // channel A - signal channel
-  std::complex<double> gammaA, qTermA, termA;
-  double barrierA;
-  // break-up momentum
-  barrierA = FormFactor(sqrtS, massA1, massA2, L, mesonRadius, ffType) /
-             FormFactor(mR, massA1, massA2, L, mesonRadius, ffType);
-  // convert coupling to partial width of channel A
-  gammaA = couplingToWidth(mSq, mR, gA, massA1, massA2, L, mesonRadius, ffType);
-  // including the factor qTermA, as suggested by PDG, leads to an amplitude
-  // that doesn't converge.
-  //    qTermA = Kinematics::qValue(sqrtS,massA1,massA2) /
-  // Kinematics::qValue(mR,massA1,massA2);
-  qTermA = std::complex<double>(1, 0);
-  termA = gammaA * barrierA * barrierA * std::pow(qTermA, (double)2 * L + 1);
-
+  auto termA =
+      flatteCouplingTerm(sqrtS, mR, gA, massA1, massA2, L, mesonRadius, ffType);
   // channel B - hidden channel
-  std::complex<double> gammaB, qTermB, termB;
-  double barrierB, gB;
-  // break-up momentum
-  barrierB = FormFactor(sqrtS, massB1, massB2, L, mesonRadius, ffType) /
-             FormFactor(mR, massB1, massB2, L, mesonRadius, ffType);
-  gB = couplingB;
-  // convert coupling to partial width of channel B
-  gammaB = couplingToWidth(mSq, mR, gB, massB1, massB2, L, mesonRadius, ffType);
-  //    qTermB = Kinematics::qValue(sqrtS,massB1,massB2) /
-  // Kinematics::qValue(mR,massB1,massB2);
-  qTermB = std::complex<double>(1, 0);
-  termB = gammaB * barrierB * barrierB * std::pow(qTermB, (double)2 * L + 1);
+  auto termB = flatteCouplingTerm(sqrtS, mR, couplingB, massB1, massB2, L,
+                                  mesonRadius, ffType);
 
   // channel C - hidden channel
-  std::complex<double> gammaC, qTermC, termC;
-  double barrierC, gC;
+  std::complex<double> termC;
   if (couplingC != 0.0) {
-    // break-up momentum
-    barrierC = FormFactor(sqrtS, massC1, massC2, L, mesonRadius, ffType) /
-               FormFactor(mR, massC1, massC2, L, mesonRadius, ffType);
-    gC = couplingC;
-    // convert coupling to partial width of channel C
-    gammaC =
-        couplingToWidth(mSq, mR, gC, massC1, massC2, L, mesonRadius, ffType);
-    //    qTermC = Kinematics::qValue(sqrtS,massC1,massC2) /
-    // Kinematics::qValue(mR,massC1,massC2);
-    qTermC = std::complex<double>(1, 0);
-    termC = gammaC * barrierC * barrierC * std::pow(qTermC, (double)2 * L + 1);
+    termC = flatteCouplingTerm(sqrtS, mR, couplingC, massC1, massC2, L,
+                               mesonRadius, ffType);
   }
-
   return dynamicalFunction(mSq, mR, gA, termA, termB, termC);
 }
 
@@ -193,14 +196,14 @@ AmpFlatteRes::tree(const ParameterList &sample, int pos, std::string suffix) {
       "Flatte" + suffix, MComplex("", sampleSize),
       std::make_shared<FlatteStrategy>(""));
 
-  tr->createLeaf("Mass",Mass, "Flatte" + suffix);
+  tr->createLeaf("Mass", Mass, "Flatte" + suffix);
   for (int i = 0; i < Couplings.size(); i++) {
-    tr->createLeaf("g_" + std::to_string(i) + "_massA", Couplings.at(i).GetMassA(),
-                   "Flatte" + suffix);
-    tr->createLeaf("g_" + std::to_string(i) + "_massB", Couplings.at(i).GetMassB(),
-                   "Flatte" + suffix);
-    tr->createLeaf("g_" + std::to_string(i), Couplings.at(i).GetValueParameter(),
-                   "Flatte" + suffix);
+    tr->createLeaf("g_" + std::to_string(i) + "_massA",
+                   Couplings.at(i).GetMassA(), "Flatte" + suffix);
+    tr->createLeaf("g_" + std::to_string(i) + "_massB",
+                   Couplings.at(i).GetMassB(), "Flatte" + suffix);
+    tr->createLeaf("g_" + std::to_string(i),
+                   Couplings.at(i).GetValueParameter(), "Flatte" + suffix);
   }
   tr->createLeaf("OrbitalAngularMomentum", (double)L, "Flatte" + suffix);
   tr->createLeaf("MesonRadius", MesonRadius, "Flatte" + suffix);
@@ -291,18 +294,18 @@ void FlatteStrategy::execute(ParameterList &paras,
       // But since Flatte resonances are usually J=0 we neglect it here.
       results.at(ele) = AmpFlatteRes::dynamicalFunction(
           paras.mDoubleValue(0)->values().at(ele),
-          paras.doubleParameter(0)->value(),            // mass
-          paras.doubleValue(0)->value(),                // g1_massA
-          paras.doubleValue(1)->value(),                // g1_massB
-          paras.doubleParameter(1)->value(),            // g1
-          paras.doubleValue(2)->value(),                // g2_massA
-          paras.doubleValue(3)->value(),                // g2_massB
-          paras.doubleParameter(2)->value(),            // g2
-          paras.doubleValue(4)->value(),                // g3_massA
-          paras.doubleValue(5)->value(),                // g3_massB
-          paras.doubleParameter(3)->value(),            // g3
-          paras.doubleValue(6)->value(),                // OrbitalAngularMomentum 
-          paras.doubleParameter(4)->value(),            // mesonRadius
+          paras.doubleParameter(0)->value(), // mass
+          paras.doubleValue(0)->value(),     // g1_massA
+          paras.doubleValue(1)->value(),     // g1_massB
+          paras.doubleParameter(1)->value(), // g1
+          paras.doubleValue(2)->value(),     // g2_massA
+          paras.doubleValue(3)->value(),     // g2_massB
+          paras.doubleParameter(2)->value(), // g2
+          paras.doubleValue(4)->value(),     // g3_massA
+          paras.doubleValue(5)->value(),     // g3_massB
+          paras.doubleParameter(3)->value(), // g3
+          paras.doubleValue(6)->value(),     // OrbitalAngularMomentum
+          paras.doubleParameter(4)->value(), // mesonRadius
           formFactorType(paras.doubleValue(7)->value()) // ffType
           );
     } catch (std::exception &ex) {
@@ -358,26 +361,20 @@ void AmpFlatteRes::parameters(ParameterList &list) {
 }
 
 void AmpFlatteRes::updateParameters(const ParameterList &list) {
-
   // Try to update mesonRadius
-  std::shared_ptr<FitParameter> rad;
   try {
-    rad = FindParameter(MesonRadius->name(), list);
-  } catch (std::exception &ex) {
-  }
-  if (rad)
+    auto rad = FindParameter(MesonRadius->name(), list);
     MesonRadius->updateParameter(rad);
-
+  } catch (BadParameter &ex) {
+  }
+  
   // Try to update Couplings
   for (auto i : Couplings) {
-    std::shared_ptr<FitParameter> c;
     try {
-      c = FindParameter(i.GetValueParameter()->name(), list);
-    } catch (std::exception &ex) {
+      auto g = FindParameter(i.GetValueParameter()->name(), list);
+      i.GetValueParameter()->updateParameter(g);
+    } catch (BadParameter &ex) {
     }
-    if (c)
-      i.GetValueParameter()->updateParameter(rad);
   }
-
   return;
 }

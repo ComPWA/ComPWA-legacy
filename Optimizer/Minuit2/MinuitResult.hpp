@@ -91,7 +91,7 @@ public:
 
   /// Get covariance matrix
   virtual std::vector<std::vector<double>> covarianceMatrix() { return Cov; }
-  
+
   /// Get correlation matrix
   virtual std::vector<std::vector<double>> correlationMatrix() {
     return Corr;

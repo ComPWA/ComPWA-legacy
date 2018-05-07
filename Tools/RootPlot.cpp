@@ -9,39 +9,39 @@
 
 using namespace ComPWA::Tools;
 
-RootPlot::RootPlot(std::shared_ptr<ComPWA::Kinematics> kin) : kin_(kin) {}
+RootPlot::RootPlot(std::shared_ptr<ComPWA::Kinematics> kin) : Kin(kin) {}
 
-void RootPlot::SetFitAmp(std::shared_ptr<ComPWA::AmpIntensity> intens) {
-  _plotComponents.clear();
-  _plotComponents.push_back(intens);
-  _componentNames.clear();
-  _componentNames.push_back("Intensity");
+void RootPlot::setIntensity(std::shared_ptr<ComPWA::AmpIntensity> intens) {
+  PlotComponents.clear();
+  PlotComponents.push_back(intens);
+  ComponentNames.clear();
+  ComponentNames.push_back("Intensity");
 }
 
-void RootPlot::Write(std::string treePrefix, std::string fileName,
+void RootPlot::write(std::string treePrefix, std::string fileName,
                      std::string option) {
 
   TFile *tf = new TFile(TString(fileName), TString(option));
 
-  auto varNames = kin_->variableNames();
+  auto varNames = Kin->variableNames();
   varNames.push_back("weight");
   varNames.push_back("eff");
   
-  auto varTitles = kin_->variableTitles();
+  auto varTitles = Kin->variableTitles();
   varTitles.push_back("weight");
   varTitles.push_back("#epsilon");
 
   size_t dataPointSize = varNames.size();
   double dataIntegral = 0.;
   // Data
-  if (s_data.size()) {
+  if (DataSample.size()) {
     TTree *dataTree = new TTree(TString(treePrefix + "_data"), "dataSample");
     auto t_dataSample = std::vector<double>(dataPointSize, 0.0);
     for (int i = 0; i < varNames.size(); i++)
       dataTree->Branch(TString(varNames.at(i)), &t_dataSample.at(i),
                        TString(varNames.at(i) + "/D"));
 
-    for (auto point : s_data) {
+    for (auto point : DataSample) {
       // Fill branch references with dataPoint
       for (int i = 0; i < t_dataSample.size(); i++) {
         if (i < point.size())
@@ -67,16 +67,16 @@ void RootPlot::Write(std::string treePrefix, std::string fileName,
     }
     dataTree->Write();
   }
-
+  assert(ComponentNames.size() == PlotComponents.size());
+  
   // Phase space sample
-  if (s_phsp.size()) {
+  if (PhspSample.size()) {
 
     double phspIntegral = std::accumulate(
-        s_phsp.begin(), s_phsp.end(), 0.0,
+        PhspSample.begin(), PhspSample.end(), 0.0,
         [&](double w, DataPoint p) { return w += p.weight(); });
 
-    TTree *phspTree = new TTree(TString(treePrefix + "_phsp"),
-                                "phspSample including amplitude weights");
+    TTree *phspTree = new TTree(TString(treePrefix + "_phsp"), "phspSample");
 
     auto t_phspSample = std::vector<double>(dataPointSize, 0.0);
     for (int i = 0; i < varNames.size(); i++)
@@ -84,21 +84,21 @@ void RootPlot::Write(std::string treePrefix, std::string fileName,
                        TString(varNames.at(i) + "/D"));
 
     std::vector<double> t_weights =
-        std::vector<double>(_componentNames.size(), 0.0);
-    for (int i = 0; i < _componentNames.size(); i++)
-      phspTree->Branch(TString(_componentNames.at(i)), &t_weights.at(i),
-                       TString(_componentNames.at(i) + "/D"));
+        std::vector<double>(ComponentNames.size(), 0.0);
+    for (int i = 0; i < ComponentNames.size(); i++)
+      phspTree->Branch(TString(ComponentNames.at(i)), &t_weights.at(i),
+                       TString(ComponentNames.at(i) + "/D"));
 
-    ComPWA::ProgressBar bar(s_phsp.size());
-    for (auto point : s_phsp) {
+    ComPWA::ProgressBar bar(PhspSample.size());
+    for (auto point : PhspSample) {
       bar.next();
       // Fill branch references with dataPoint
       for (int i = 0; i < t_phspSample.size(); i++) {
-        if (i < point.size())
+        if (i < point.size()) // variables
           t_phspSample.at(i) = point.value(i);
-        else if (i == point.size())
+        else if (i == point.size()) // weight
           t_phspSample.at(i) = point.weight() * dataIntegral / phspIntegral;
-        else if (i == point.size() + 1)
+        else if (i == point.size() + 1) // efficiency
           t_phspSample.at(i) = point.efficiency();
         else { // Hopefully we don't arrive here
           throw std::runtime_error(
@@ -114,8 +114,8 @@ void RootPlot::Write(std::string treePrefix, std::string fileName,
       }
 
       // Loop over all components that we want to plot
-      for (int t = 0; t < _plotComponents.size(); t++) {
-        t_weights.at(t) = _plotComponents.at(t)->intensity(point);
+      for (int t = 0; t < PlotComponents.size(); t++) {
+        t_weights.at(t) = PlotComponents.at(t)->intensity(point);
       }
       phspTree->Fill();
     }

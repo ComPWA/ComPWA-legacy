@@ -88,6 +88,31 @@ boost::property_tree::ptree SequentialPartialAmplitude::save() const {
   return pt;
 }
 
+bool SequentialPartialAmplitude::isModified() const {
+  if (magnitude() != CurrentMagnitude || phase() != CurrentPhase)
+    return true;
+
+  for (auto i : PartialAmplitudes)
+    if (i->isModified())
+      return true;
+  return false;
+}
+
+void SequentialPartialAmplitude::setModified(bool b) {
+
+  if (b) {
+    const_cast<double &>(CurrentMagnitude) =
+        std::numeric_limits<double>::quiet_NaN();
+    const_cast<double &>(CurrentPhase) =
+        std::numeric_limits<double>::quiet_NaN();
+  } else {
+    const_cast<double &>(CurrentMagnitude) = magnitude();
+    const_cast<double &>(CurrentPhase) = phase();
+  }
+  for (auto i : PartialAmplitudes)
+    i->setModified(b);
+}
+
 std::shared_ptr<ComPWA::FunctionTree> SequentialPartialAmplitude::tree(
     std::shared_ptr<Kinematics> kin, const ParameterList &sample,
     const ParameterList &toySample, std::string suffix) {

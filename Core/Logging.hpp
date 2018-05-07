@@ -10,7 +10,7 @@
 
 namespace ComPWA {
 
-// Redefine LOG(lvl) to LOG(lvl
+// Redefine BOOST_LOG_TRIVIAL(level) to LOG(level)
 #define LOG(lvl)                                                               \
   BOOST_LOG_STREAM_WITH_PARAMS(                                                \
       ::boost::log::trivial::logger::get(),                                    \
@@ -49,6 +49,11 @@ public:
           boost::log::trivial::severity_level minLevel =
               boost::log::trivial::debug) {
     init(outFileName, minLevel);
+  };
+
+  Logging(std::string outFileName = "output.log",
+          std::string minLevel = "debug") {
+    init(outFileName, stringToLoggingLevel(minLevel));
   };
 
   void setLogLevel(boost::log::trivial::severity_level minLevel);

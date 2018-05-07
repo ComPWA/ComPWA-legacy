@@ -50,21 +50,21 @@ inline std::complex<double> phspFactor(double sqrtS, double ma, double mb) {
   // to a good agreement between both approaches.
   std::complex<double> rho;
   double q = std::sqrt(std::fabs(qSqValue(sqrtS, ma, mb) * 4 / s));
-  if (s <= 0) { // below 0
-    rho = -q / M_PI * std::log(std::fabs((1 + q) / (1 - q)));
-  } else if (0 < s && s <= (ma + mb) * (ma + mb)) { // below threshold
-    rho = (-2.0 * q / M_PI * atan(1 / q)) / (i * 16.0 * M_PI * sqrtS);
-  } else if ((ma + mb) * (ma + mb) < s) { // above threshold
+  if ((ma + mb) * (ma + mb) < s) { // above threshold
     rho = (-q / M_PI * log(std::fabs((1 + q) / (1 - q))) + i * q) /
           (i * 16.0 * M_PI * sqrtS);
+  } else if (0 < s && s <= (ma + mb) * (ma + mb)) { // below threshold
+    rho = (-2.0 * q / M_PI * atan(1 / q)) / (i * 16.0 * M_PI * sqrtS);
+  } else if (s <= 0) { // below 0
+    rho = -q / M_PI * std::log(std::fabs((1 + q) / (1 - q)));
   } else
-    throw std::runtime_error("Kinematics::phspFactor| PhspFactor not "
+    throw std::runtime_error("phspFactor() | PhspFactor not "
                              "defined at sqrtS = " +
                              std::to_string((long double)sqrtS));
 
 #ifndef NDEBUG
   if (rho.real() != rho.real() || rho.imag() != rho.imag()) {
-    throw std::runtime_error("Kinematics::phspFactor| Result invalid (NaN)!");
+    throw std::runtime_error("phspFactor() | Result invalid (NaN)!");
   }
 #endif
 
@@ -83,12 +83,12 @@ inline std::complex<double> qValue(double sqrtS, double ma, double mb) {
 
 static const char *formFactorTypeString[] = {"noFormFactor", "BlattWeisskopf",
                                              "CrystalBarrel"};
+  
 enum formFactorType { noFormFactor = 0, BlattWeisskopf = 1, CrystalBarrel = 2 };
 
-/// Calculate form factor
-inline double FormFactor(double sqrtS, double ma, double mb, double orbitL,
-                         double mesonRadius, std::complex<double> qValue,
-                         formFactorType type) {
+/// Calculate form factor from the (complex) break-up momentum \p qValue.
+inline double FormFactor(std::complex<double> qValue, double orbitL,
+                         double mesonRadius, formFactorType type) {
   if (mesonRadius == 0)
     return 1.0; // disable form factors
   if (type == formFactorType::noFormFactor)
@@ -106,8 +106,7 @@ inline double FormFactor(double sqrtS, double ma, double mb, double orbitL,
       double alpha = mesonRadius * mesonRadius / 6;
       ff = std::exp(-alpha * qSq);
     } else
-      throw std::runtime_error("Kinematics::FormFactor() | "
-                               "Form factors of type " +
+      throw std::runtime_error("FormFactor() | Form factors of type " +
                                std::string(formFactorTypeString[type]) +
                                " are implemented for spin 0 only!");
   } else if (type == formFactorType::BlattWeisskopf) {
@@ -117,6 +116,7 @@ inline double FormFactor(double sqrtS, double ma, double mb, double orbitL,
     // 1/mesonRadius
     if (orbitL == 0)
       return 1.0;
+    
     double qSq = std::norm(qValue);
     double z = qSq * mesonRadius * mesonRadius;
     // Events below threshold. What should we do if event is below threshold?
@@ -125,23 +125,22 @@ inline double FormFactor(double sqrtS, double ma, double mb, double orbitL,
     z = std::fabs(z);
 
     if (orbitL == 1) {
-      ff = (sqrt(2 * z / (z + 1)));
+      ff = std::sqrt(2 * z / (z + 1));
     } else if (orbitL == 2) {
-      ff = (sqrt(13 * z * z / ((z - 3) * (z - 3) + 9 * z)));
+      ff = std::sqrt(13 * z * z / ((z - 3) * (z - 3) + 9 * z));
     } else if (orbitL == 3) {
       ff =
-          (sqrt(277 * z * z * z / (z * (z - 15) * (z - 15) + 9 * (2 * z - 5))));
+          std::sqrt(277 * z * z * z / (z * (z - 15) * (z - 15) + 9 * (2 * z - 5)));
     } else if (orbitL == 4) {
-      ff = (sqrt(12746 * z * z * z * z /
+      ff = std::sqrt(12746 * z * z * z * z /
                  ((z * z - 45 * z + 105) * (z * z - 45 * z + 105) +
-                  25 * z * (2 * z - 21) * (2 * z - 21))));
+                  25 * z * (2 * z - 21) * (2 * z - 21)));
     } else
-      throw std::runtime_error(
-          "Kinematics::FormFactor() | Form factors of type " +
+      throw std::runtime_error("FormFactor() | Form factors of type " +
           std::string(formFactorTypeString[type]) +
           " are implemented for spins up to 4!");
   } else {
-    throw std::runtime_error("Kinematics::FormFactor() | Form factor type " +
+    throw std::runtime_error("FormFactor() | Form factor type " +
                              std::to_string((long long int)type) +
                              " not specified!");
   }
@@ -149,7 +148,7 @@ inline double FormFactor(double sqrtS, double ma, double mb, double orbitL,
   return ff;
 }
 
-/// Calculate form factor
+/// Calculate form factor from sqrt(s) and masses of the final state particles.
 inline double FormFactor(double sqrtS, double ma, double mb, double orbitL,
                          double mesonRadius, formFactorType type) {
   if (type == formFactorType::noFormFactor) {
@@ -160,7 +159,8 @@ inline double FormFactor(double sqrtS, double ma, double mb, double orbitL,
   }
 
   std::complex<double> qV = qValue(sqrtS, ma, mb);
-  return FormFactor(sqrtS, ma, mb, orbitL, mesonRadius, qV, type);
+
+  return FormFactor(qV, orbitL, mesonRadius, type);
 }
 
 } // ns::DecayDynamics

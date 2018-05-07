@@ -106,7 +106,8 @@ std::pair<double, double> FitParameter::bounds() const { return Bounds; }
 
 void FitParameter::setBounds(const double min, const double max) {
   if (!check_bounds(std::pair<double, double>(min, max)))
-    throw BadParameter("FitParameter::setBounds() | Bounds no valid!");
+    throw BadParameter("FitParameter::setBounds() | Bounds not valid: [" +
+                       std::to_string(min) + ", " + std::to_string(max) + "]");
   Bounds.first = min;
   Bounds.second = max;
   HasBounds = true;
@@ -114,7 +115,9 @@ void FitParameter::setBounds(const double min, const double max) {
 
 void FitParameter::setBounds(const std::pair<double, double> r) {
   if (!check_bounds(r))
-    throw BadParameter("FitParameter::setBounds() | Bounds no valid!");
+    throw BadParameter("FitParameter::setBounds() | Bounds not valid: [" +
+                       std::to_string(r.first) + ", " +
+                       std::to_string(r.second) + "]");
   Bounds = r;
   HasBounds = true;
 }

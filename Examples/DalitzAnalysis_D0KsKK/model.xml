@@ -65,7 +65,7 @@
 	<QuantumNumber Class="Int" Type="Parity" Value="-1"/>
 	<DecayInfo Type="relativisticBreitWigner">
 	  <FormFactor Type="0" />
-	  <Parameter Class="Double" Type="Mass" Name="Width_D0">
+	  <Parameter Class="Double" Type="Width" Name="Width_D0">
 		<Value>0.000623</Value>
 		<Fix>true</Fix>
 	  </Parameter>

@@ -15,16 +15,14 @@
 
 using namespace ComPWA::Physics::DecayDynamics;
 
-Voigtian::Voigtian(
-   std::string name, std::pair<std::string,std::string> daughters,
-               std::shared_ptr<ComPWA::PartList> partL) {
+Voigtian::Voigtian(std::string name,
+                   std::pair<std::string, std::string> daughters,
+                   std::shared_ptr<ComPWA::PartList> partL) {
 
-  LOG(trace) << "Voigtian::Factory() | Construction of " << name
-             << ".";
+  LOG(trace) << "Voigtian::Factory() | Construction of " << name << ".";
   setName(name);
   auto partProp = partL->find(name)->second;
-  SetMassParameter(
-      std::make_shared<FitParameter>(partProp.GetMassPar()));
+  SetMassParameter(std::make_shared<FitParameter>(partProp.GetMassPar()));
 
   auto decayTr = partProp.GetDecayInfo();
   if (partProp.GetDecayType() != "voigt")
@@ -33,13 +31,14 @@ Voigtian::Voigtian(
 
   auto spin = partProp.GetSpinQuantumNumber("Spin");
   SetSpin(spin);
-  //in default, using spin J as Orbital Angular Momentum
-  //update by calling SetOrbitalAngularMomentum() before any further process
-  //after RelBW is created by calling of constructor
+  // in default, using spin J as Orbital Angular Momentum
+  // update by calling SetOrbitalAngularMomentum() before any further process
+  // after RelBW is created by calling of constructor
   SetOrbitalAngularMomentum(spin);
 
-  //auto ffType = formFactorType(decayTr.get<int>("FormFactor.<xmlattr>.Type"));
-  //SetFormFactorType(ffType);
+  // auto ffType =
+  // formFactorType(decayTr.get<int>("FormFactor.<xmlattr>.Type"));
+  // SetFormFactorType(ffType);
   for (const auto &v : decayTr.get_child("")) {
     if (v.first != "Parameter")
       continue;
@@ -47,13 +46,12 @@ Voigtian::Voigtian(
     if (type == "Width") {
       SetWidthParameter(std::make_shared<FitParameter>(v.second));
     } else if (type == "MesonRadius") {
-      ; //do nothing
-//      SetMesonRadiusParameter(
-//          std::make_shared<FitParameter>(v.second));
+      ; // do nothing
+      //      SetMesonRadiusParameter(
+      //          std::make_shared<FitParameter>(v.second));
     } else {
-      throw std::runtime_error(
-          "Voigtian::Factory() | Parameter of type " + type +
-          " is unknown.");
+      throw std::runtime_error("Voigtian::Factory() | Parameter of type " +
+                               type + " is unknown.");
     }
   }
   double sigma = decayTr.get<double>("Resolution.<xmlattr>.Sigma");
@@ -65,81 +63,83 @@ Voigtian::Voigtian(
   SetDecayMasses(daughterMasses);
   SetDecayNames(daughters);
 
-  LOG(trace)
-      << "Voigtian::Factory() | Construction of the decay "
-      << partProp.name() << " -> " << daughters.first << " + "
-      << daughters.second;
+  LOG(trace) << "Voigtian::Factory() | Construction of the decay "
+             << partProp.name() << " -> " << daughters.first << " + "
+             << daughters.second;
 }
 
-std::complex<double> Voigtian::evaluate(const DataPoint &point,
-                                                       int pos) const {
+std::complex<double> Voigtian::evaluate(const DataPoint &point, int pos) const {
   std::complex<double> result =
-      dynamicalFunction(point.value(pos),Mass->value(), Width->value(), Sigma);
+      dynamicalFunction(point.value(pos), Mass->value(), Width->value(), Sigma);
   assert(!std::isnan(result.real()) && !std::isnan(result.imag()));
   return result;
 }
 
 bool Voigtian::isModified() const {
-  if (AbstractDynamicalFunction::isModified())
+  if (GetMass() != Current_mass || Width->value() != CurrentWidth)
     return true;
-    if (Width->value() != CurrentWidth) {
-    setModified();
-    const_cast<double &>(CurrentWidth) = Width->value();
-    return true;
-  }
   return false;
 }
 
-std::complex<double> Voigtian::dynamicalFunction(
-    double mSq, double mR, double wR, double sigma) {
+void Voigtian::setModified(bool b) {
+  if (b) {
+    Current_mass = std::numeric_limits<double>::quiet_NaN();
+    CurrentWidth = std::numeric_limits<double>::quiet_NaN();
+  } else {
+    Current_mass = Mass->value();
+    CurrentWidth = Width->value();
+  }
+}
+
+std::complex<double> Voigtian::dynamicalFunction(double mSq, double mR,
+                                                 double wR, double sigma) {
 
   double sqrtS = sqrt(mSq);
 
-  //the non-relativistic BreitWigner which is convoluted in Voigtian
-  //has the exactly following expression:
-  //BW(x, m, width) = 1/pi * width/2 * 1/((x - m)^2 + (width/2)^2)
-  //i.e., the Lorentz formula with Gamma = width/2 and x' = x - m
+  // the non-relativistic BreitWigner which is convoluted in Voigtian
+  // has the exactly following expression:
+  // BW(x, m, width) = 1/pi * width/2 * 1/((x - m)^2 + (width/2)^2)
+  // i.e., the Lorentz formula with Gamma = width/2 and x' = x - m
   /// https://root.cern.ch/doc/master/RooVoigtianian_8cxx_source.html
   double argu = sqrtS - mR;
-  double c = 1.0/(sqrt(2.0) * sigma);
+  double c = 1.0 / (sqrt(2.0) * sigma);
   double a = c * 0.5 * wR;
   double u = c * argu;
   std::complex<double> z(u, a);
-  std::complex<double> v = Faddeeva::w(z, 1e-13); 
-  double val = c * 1.0/sqrt(M_PI) * v.real();
+  std::complex<double> v = Faddeeva::w(z, 1e-13);
+  double val = c * 1.0 / sqrt(M_PI) * v.real();
   double sqrtVal = sqrt(val);
 
-  /// keep the phi angle of the complex BW 
+  /// keep the phi angle of the complex BW
   std::complex<double> invBW(argu, 0.5 * wR);
-  std::complex<double> BW = 1.0/invBW;
+  std::complex<double> BW = 1.0 / invBW;
   double phi = std::arg(BW);
   std::complex<double> result(sqrtVal * cos(phi), sqrtVal * sin(phi));
 
-  //transform width to coupling
+  // transform width to coupling
   // Calculate coupling constant to final state
   // MesonRadius = 0.0, noFormFactor
-  //std::complex<double> g_final = widthToCoupling(mSq, mR, wR, ma, mb, L, 0.0, formFactorType::noFormFactor); 
-  //the BW to convolved in voigt is 1/PI * Gamma/2 * 1/((x-m)^2 + (Gamma/2)^2)
-  //while I think the one common used in physics is Gamma/2 * 1/((x-m)^2 + (Gamma/2)^2)
-  //So we time the PI at last
+  // std::complex<double> g_final = widthToCoupling(mSq, mR, wR, ma, mb, L, 0.0,
+  // formFactorType::noFormFactor);
+  // the BW to convolved in voigt is 1/PI * Gamma/2 * 1/((x-m)^2 + (Gamma/2)^2)
+  // while I think the one common used in physics is Gamma/2 * 1/((x-m)^2 +
+  // (Gamma/2)^2)
+  // So we time the PI at last
   std::complex<double> g_final = sqrt(M_PI);
   double g_production = 1;
   result *= g_production;
   result *= g_final;
 
-  assert(
-      (!std::isnan(result.real()) || !std::isinf(result.real())) &&
-      "Voigtian::dynamicalFunction() | Result is NaN or Inf!");
-  assert(
-      (!std::isnan(result.imag()) || !std::isinf(result.imag())) &&
-      "Voigtian::dynamicalFunction() | Result is NaN or Inf!");
+  assert((!std::isnan(result.real()) || !std::isinf(result.real())) &&
+         "Voigtian::dynamicalFunction() | Result is NaN or Inf!");
+  assert((!std::isnan(result.imag()) || !std::isinf(result.imag())) &&
+         "Voigtian::dynamicalFunction() | Result is NaN or Inf!");
 
   return result;
 }
 
 std::shared_ptr<ComPWA::FunctionTree>
-Voigtian::tree(const ParameterList &sample, int pos,
-                                 std::string suffix) {
+Voigtian::tree(const ParameterList &sample, int pos, std::string suffix) {
 
   size_t sampleSize = sample.mDoubleValue(pos)->values().size();
 
@@ -147,8 +147,8 @@ Voigtian::tree(const ParameterList &sample, int pos,
       "Voigtian" + suffix, MComplex("", sampleSize),
       std::make_shared<VoigtianStrategy>());
 
-  tr->createLeaf("Mass",Mass, "Voigtian" + suffix);
-  tr->createLeaf("Width",Width, "Voigtian" + suffix);
+  tr->createLeaf("Mass", Mass, "Voigtian" + suffix);
+  tr->createLeaf("Width", Width, "Voigtian" + suffix);
   tr->createLeaf("Sigma", Sigma, "Voigtian" + suffix);
   tr->createLeaf("Data_mSq[" + std::to_string(pos) + "]",
                  sample.mDoubleValue(pos), "Voigtian" + suffix);
@@ -157,10 +157,9 @@ Voigtian::tree(const ParameterList &sample, int pos,
 };
 
 void VoigtianStrategy::execute(ParameterList &paras,
-                                  std::shared_ptr<Parameter> &out) {
+                               std::shared_ptr<Parameter> &out) {
   if (out && checkType != out->type())
-    throw BadParameter(
-        "VoigtianStrat::execute() | Parameter type mismatch!");
+    throw BadParameter("VoigtianStrat::execute() | Parameter type mismatch!");
 
 #ifndef NDEBUG
   // Check parameter type
@@ -192,7 +191,8 @@ void VoigtianStrategy::execute(ParameterList &paras,
                        "Number of IntParameters does not match: " +
                        std::to_string(nInt) + " given but " +
                        std::to_string(check_nInt) + " expected."));
-  //I do not want to set sigma as fit parameter. I would like to set it as fixed parameter/argument
+  // I do not want to set sigma as fit parameter. I would like to set it as
+  // fixed parameter/argument
   if (nDouble != check_nDouble)
     throw(BadParameter("VoigtianStrat::execute() | "
                        "Number of FitParameters does not match: " +
@@ -266,7 +266,7 @@ void Voigtian::updateParameters(const ParameterList &list) {
   } catch (std::exception &ex) {
   }
   if (width)
-   Width->updateParameter(width);
+    Width->updateParameter(width);
 
   return;
 }

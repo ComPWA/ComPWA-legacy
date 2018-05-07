@@ -42,7 +42,19 @@
 #include "Estimator/MinLogLH/MinLogLH.hpp"
 #include "Optimizer/Minuit2/MinuitIF.hpp"
 #include "Optimizer/Minuit2/MinuitResult.hpp"
-#include "Physics/HelicityFormalism.hpp"
+
+// HelicityFormlism
+#include "Physics/DecayDynamics/AbstractDynamicalFunction.hpp"
+#include "Physics/DecayDynamics/AmpFlatteRes.hpp"
+#include "Physics/DecayDynamics/NonResonant.hpp"
+#include "Physics/DecayDynamics/RelativisticBreitWigner.hpp"
+
+#include "Physics/HelicityFormalism/AmpWignerD.hpp"
+#include "Physics/CoherentIntensity.hpp"
+#include "Physics/SequentialPartialAmplitude.hpp"
+#include "Physics/IncoherentIntensity.hpp"
+#include "Physics/HelicityFormalism/HelicityDecay.hpp"
+#include "Physics/HelicityFormalism/HelicityKinematics.hpp"
 
 #include "Tools/RootGenerator.hpp"
 #include "Tools/Generate.hpp"
@@ -375,7 +387,9 @@ int main(int argc, char **argv) {
   ComPWA::Tools::generatePhsp(mcPrecision, gen, toyPhspData);
   // set efficiency values for each event
   toyPhspData->setEfficiency(trueModelKin, eff);
-
+  if (!phspData) // in case no phase space sample is provided we use the toy sample
+    phspData = toyPhspData;
+  
   // Setting samples for normalization
   auto toyPoints = std::make_shared<std::vector<DataPoint>>(
       toyPhspData->dataPoints(trueModelKin));
@@ -406,39 +420,12 @@ int main(int argc, char **argv) {
   if (smearNEvents && numEvents > 0)
     numEvents += (int)gen->gauss(0, sqrt(numEvents));
 
-  //  if (trueSignalFraction != 1. && !bkgFile.empty()) {
-  //    int numBkgEvents = (int)((1 - trueSignalFraction) * numEvents);
-  //    LOG(info) << "Reading background file...";
-  //    std::shared_ptr<Data> inBkg(new RootReader(bkgFile, bkgFileTreeName));
-  //    inBkg->reduceToPhsp();
-  //    if (resetWeights)
-  //      inBkg->resetWeights(); // resetting weights of requested
-  //    inputBkg = inBkg->rndSubSet(numBkgEvents, gen);
-  //    run.setBackground(inputBkg);
-  //    inBkg = std::shared_ptr<Data>();
-  //    sample->Add(*inputBkg);
-  //  }
   if (!dataFile.empty()) {
     int numSignalEvents = numEvents;
     //    if (inputBkg)
     //      numSignalEvents -= inputBkg->getNEvents();
     LOG(info) << "Reading data file...";
     std::shared_ptr<Data> inD(new RootReader(dataFile, dataFileTreeName));
-
-    //    SubSystem s(std::vector<int>{1}, std::vector<int>{0},
-    //    std::vector<int>{2});
-    //    int id =
-    //    dynamic_cast<HelicityKinematics*>(Kinematics::Instance())->dataID(s);
-    //    for( int i=0; i<10 ; i++){
-    //      std::cout<<inD->getEvent(i)<<std::endl;
-    //      dataPoint p(inD->getEvent(i));
-    //      std::cout<<p<<std::endl;
-    //      std::cout<<"mSq="<<p.GetValue(id*3)<<"
-    //      cosTheta="<<p.GetValue(id*3+1)<<std::endl;
-    //      std::cout<<"-------"<<std::endl;
-    //    }
-    //    exit(1);
-
     inD->reduceToPhsp(trueModelKin);
     if (resetWeights)
       inD->resetWeights(); // resetting weights if requested
@@ -448,6 +435,7 @@ int main(int argc, char **argv) {
     inD = std::shared_ptr<Data>();
     sample->append(*inputData);
   }
+  
   //========== Generation of data sample ===========
   // generation with unbinned efficiency correction - use full sample
   if (!phspEfficiencyFile.empty() && (!inputData || !inputBkg)) {
@@ -482,6 +470,9 @@ int main(int argc, char **argv) {
   }
   if (!inputData) {
     LOG(info) << "Generating sample!";
+    //    ComPWA::Tools::generate(numEvents, trueModelKin, gen, trueIntens,
+    //    sample, phspData, toyPhspData);
+    // Pass Null pointers for phsp sample which are than generated on the fly
     ComPWA::Tools::generate(numEvents, trueModelKin, gen, trueIntens, sample,
                             std::shared_ptr<Data>(), std::shared_ptr<Data>());
     LOG(info) << "Sample size: " << sample->numEvents();
@@ -622,7 +613,7 @@ int main(int argc, char **argv) {
 
     auto minuitif = new Optimizer::Minuit2::MinuitIF(esti, fitPar);
     minuitif->setUseHesse(useHesse);
-
+    LOG(info) << "Norm: " << intens->intensity(phspPoints->at(0));
     // Start minimization
     result = minuitif->exec(fitPar);
     finalParList = result->finalParameters();
@@ -639,6 +630,13 @@ int main(int argc, char **argv) {
         std::pair<std::string, std::string>("a2(1320)-", "D0toKSK+K-"));
     ParameterList ff = Tools::CalculateFitFractions(
         fitModelKin, intens->component("D0toKSK+K-"), toyPoints, fitComponents);
+    Tools::CalcFractionError(
+        fitPar,
+        std::dynamic_pointer_cast<ComPWA::Optimizer::Minuit2::MinuitResult>(
+            result)
+            ->covarianceMatrix(),
+        ff, fitModelKin, intens->component("D0toKSK+K-"), toyPoints, 20,
+        fitComponents);
     result->setFitFractions(ff);
 
     // Print fit result
@@ -718,11 +716,11 @@ int main(int argc, char **argv) {
       // set amplitude
       pl.setFitAmp(intens, "", kBlue - 4);
       // select components to plot
-      pl.drawComponent("D0toKSK+K-", "Signal", kGreen);
-      pl.drawComponent("phi(1020)", "phi", kYellow);
-      pl.drawComponent("BkgD0toKSK+K-", "Background", kRed);
-      //    pl.DrawComponent("a0(980)0", "a_{0}(980)^{0}", kMagenta+2);
-      //    pl.DrawComponent("phi(1020)", "#phi(1020)", kMagenta);
+      pl.drawComponent("D0toKSK+K-", "D0toKSK+K-", "Signal", kGreen);
+      pl.drawComponent("a0(980)0", "D0toKSK+K-", "a_{0}(980)^{0}", kMagenta);
+      pl.drawComponent("a0(980)+", "D0toKSK+K-", "a_{0}(980)^{+}", kMagenta+2);
+      pl.drawComponent("phi(1020)", "D0toKSK+K-", "#phi(1020)", kMagenta+4);
+      pl.drawComponent("BkgD0toKSK+K-", "BkgD0toKSK+K-", "Background", kRed);
 
       // Fill histograms and create canvases
       pl.plot();

@@ -39,6 +39,8 @@ set(PYTHON_LIBRARIES ${PYTHON_LIBRARIES} CACHE INTERNAL "")
 set(PYTHON_MODULE_PREFIX ${PYTHON_MODULE_PREFIX} CACHE INTERNAL "")
 set(PYTHON_MODULE_EXTENSION ${PYTHON_MODULE_EXTENSION} CACHE INTERNAL "")
 
+message( STATUS "Python libraries: " ${PYTHON_LIBRARIES} )
+
 # NB: when adding a header don't forget to also add it to setup.py
 set(PYBIND11_HEADERS
   include/pybind11/detail/class.h

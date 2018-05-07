@@ -13,6 +13,7 @@
 #include <vector>
 #include <string>
 #include <memory>
+#include <chrono>
 
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
@@ -165,8 +166,10 @@ std::string myParticles = R"####(
 ///
 int main(int argc, char **argv) {
 
-  // initialize logging
-  Logging log("DalitzFit-log.txt", boost::log::trivial::debug);
+  auto startProgram = std::chrono::steady_clock::now();
+  
+  // initialize logging - set to log level error to see only the timing info
+  Logging log("benchmark.log", boost::log::trivial::error);
 
   // List with all particle information needed
   auto partL = std::make_shared<ComPWA::PartList>();
@@ -184,9 +187,14 @@ int main(int argc, char **argv) {
   //---------------------------------------------------
   // 2) Generate a large phase space sample
   //---------------------------------------------------
-  auto gen = std::make_shared<ComPWA::Tools::RootGenerator>(partL, kin);
+  auto gen = std::make_shared<ComPWA::Tools::RootGenerator>(partL, kin, 12345);
   std::shared_ptr<Data> phspSample(new Data());
-  ComPWA::Tools::generatePhsp(1000000, gen, phspSample);
+  
+  auto start = std::chrono::steady_clock::now();
+  ComPWA::Tools::generatePhsp(300000, gen, phspSample);
+  LOG(error) << "Timing: Generation of phase space MC: "
+  <<std::chrono::duration_cast<std::chrono::milliseconds>
+  (std::chrono::steady_clock::now() - start).count()<< " [ms]";
 
   //---------------------------------------------------
   // 3) Create intensity from pre-defined model
@@ -211,7 +219,11 @@ int main(int argc, char **argv) {
   // 4) Generate a data sample given intensity and kinematics
   //---------------------------------------------------
   std::shared_ptr<Data> sample(new Data());
+  start = std::chrono::steady_clock::now();
   ComPWA::Tools::generate(1000, kin, gen, intens, sample, phspSample, phspSample);
+  LOG(error) << "Timing: Generation of MC sample: "
+  <<std::chrono::duration_cast<std::chrono::milliseconds>
+  (std::chrono::steady_clock::now() - start).count()<< " [ms]";
 
   //---------------------------------------------------
   // 5) Fit the model to the data and print the result
@@ -221,18 +233,26 @@ int main(int argc, char **argv) {
   // Set start error of 0.05 for parameters, run Minos?
   setErrorOnParameterList(fitPar, 0.05, false);
 
+  start = std::chrono::steady_clock::now();
   auto esti = std::make_shared<Estimator::MinLogLH>(
       kin, intens, sample, phspSample, phspSample, 0, 0);
 
   esti->UseFunctionTree(true);
   esti->tree()->parameter();
   LOG(debug) << esti->tree()->head()->print(25);
+  LOG(error) << "Timing: Building the FunctionTree: "
+  <<std::chrono::duration_cast<std::chrono::milliseconds>
+  (std::chrono::steady_clock::now() - start).count()<< " [ms]";
 
   auto minuitif = new Optimizer::Minuit2::MinuitIF(esti, fitPar);
   minuitif->setUseHesse(true);
 
   // STARTING MINIMIZATION
+  start = std::chrono::steady_clock::now();
   auto result = std::dynamic_pointer_cast<MinuitResult>(minuitif->exec(fitPar));
+  LOG(error) << "Timing: Minimization: "
+  <<std::chrono::duration_cast<std::chrono::milliseconds>
+  (std::chrono::steady_clock::now() - start).count()<< " [ms]";
 
   // Calculate fit fractions
   std::vector<std::pair<std::string, std::string>> fitComponents;
@@ -248,9 +268,13 @@ int main(int argc, char **argv) {
   // using a numerical approach. Using the covariance matrix
   // 100 independend sets of fit parameters are generated and the fit fractions
   // are recalculated. In the end we take the RMS.
+  start = std::chrono::steady_clock::now();
 //  Tools::CalcFractionError(fitPar, result->covarianceMatrix(), fitFracs, kin,
 //                           intens->component("jpsiGammaPiPi"), phspPoints, 100,
 //                           fitComponents);
+  LOG(error) << "Timing: Fit fraction, error calculation: "
+  <<std::chrono::duration_cast<std::chrono::milliseconds>
+  (std::chrono::steady_clock::now() - start).count()<< " [ms]";
 
   result->setFitFractions(fitFracs);
   result->print();
@@ -275,8 +299,14 @@ int main(int argc, char **argv) {
   pl.setData(sample);
   pl.setPhspData(phspSample);
   pl.setFitAmp(intens, "", kBlue - 4);
+  start = std::chrono::steady_clock::now();
   pl.plot();
+  LOG(error) << "Timing: Plotting: "<<std::chrono::duration_cast<std::chrono::milliseconds>
+  (std::chrono::steady_clock::now() - start).count()<< " [ms]";
   LOG(info) << "Done";
 
+  LOG(error) << "Timing: Full programm: "
+  <<std::chrono::duration_cast<std::chrono::milliseconds>
+  (std::chrono::steady_clock::now() - startProgram).count()<< " [ms]";
   return 0;
 }

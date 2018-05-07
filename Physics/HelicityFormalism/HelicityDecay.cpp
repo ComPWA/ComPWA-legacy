@@ -99,7 +99,9 @@ void HelicityDecay::load(std::shared_ptr<PartList> partL,
       DynamicFcn->SetOrbitalAngularMomentum(orbitL);
     } else if (decayType == "voigt") {
       DynamicFcn = std::make_shared<DecayDynamics::Voigtian>(
-          name, DecayProducts, partL); 
+          name, DecayProducts, partL);
+    } else if (decayType == "virtual" || decayType == "nonResonant") {
+      DynamicFcn = std::make_shared<DecayDynamics::NonResonant>(name);
     } else {
       throw std::runtime_error(
           "HelicityDecay::Factory() | Unknown decay type " + decayType + "!");
@@ -136,20 +138,38 @@ boost::property_tree::ptree HelicityDecay::save() const {
 }
 
 bool HelicityDecay::isModified() const {
-  if (PartialAmplitude::isModified())
-    return true;
-  if (DynamicFcn->isModified()) {
-    const_cast<double &>(CurrentIntegral) = integral();
-    DynamicFcn->setModified(false);
+  if (DynamicFcn->isModified() || magnitude() != CurrentMagnitude ||
+      phase() != CurrentPhase) {
     return true;
   }
   return false;
 }
 
-double HelicityDecay::normalization() const {
-  if (DynamicFcn->isModified() || !CurrentIntegral)
+void HelicityDecay::setModified(bool b) {
+  DynamicFcn->setModified(b);
+  if (b) {
+    const_cast<double &>(CurrentIntegral) =
+        std::numeric_limits<double>::quiet_NaN();
+    const_cast<double &>(CurrentMagnitude) =
+        std::numeric_limits<double>::quiet_NaN();
+    const_cast<double &>(CurrentPhase) =
+        std::numeric_limits<double>::quiet_NaN();
+  } else {
     const_cast<double &>(CurrentIntegral) = integral();
-  DynamicFcn->setModified(false);
+    const_cast<double &>(CurrentMagnitude) = magnitude();
+    const_cast<double &>(CurrentPhase) = phase();
+  }
+}
+
+double HelicityDecay::normalization() const {
+  if (isModified()){
+    // We have to do an ugly const cast here. Otherwise we would have to remove
+    // all constness from all memeber functions...The basic design problem here
+    // is that member variables are (smart) pointer which can be changed from
+    // outside.
+    const_cast<HelicityDecay*>(this)->setModified(false);
+  }
+  
   assert(CurrentIntegral != 0.0);
   return 1 / std::sqrt(CurrentIntegral);
 }

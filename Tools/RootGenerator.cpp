@@ -26,6 +26,8 @@ RootGenerator::RootGenerator(double cmsEnergy, double m1, double m2, double m3,
 
   TLorentzVector W(cmsP4.px(), cmsP4.py(), cmsP4.pz(), cmsP4.e());
   event.SetDecay(W, nPart, masses);
+  LOG(trace) << "RootGenerator::RootGenerator() | Construct with seed "
+             << std::to_string(seed) << ".";
 }
 
 RootGenerator::RootGenerator(std::shared_ptr<PartList> partL,
@@ -57,6 +59,8 @@ RootGenerator::RootGenerator(std::shared_ptr<PartList> partL,
     masses[t] = FindParticle(partL, finalS.at(t)).GetMass();
   }
   event.SetDecay(W, nPart, masses);
+  LOG(trace) << "RootGenerator::RootGenerator() | Construct with seed "
+             << std::to_string(seed) << ".";
 };
 
 RootGenerator::RootGenerator(std::shared_ptr<PartList> partL,
@@ -83,6 +87,8 @@ RootGenerator::RootGenerator(std::shared_ptr<PartList> partL,
     masses[t] = FindParticle(partL, finalS.at(t)).GetMass();
   }
   event.SetDecay(W, nPart, masses);
+  LOG(trace) << "RootGenerator::RootGenerator() | Construct with seed "
+             << std::to_string(seed) << ".";
 };
 
 RootGenerator *RootGenerator::clone() { return (new RootGenerator(*this)); }

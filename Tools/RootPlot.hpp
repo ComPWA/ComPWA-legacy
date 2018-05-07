@@ -36,62 +36,65 @@ public:
 
   virtual ~RootPlot() {}
 
-  void SetData(std::shared_ptr<ComPWA::DataReader::Data> sample) {
-    s_data = sample->dataPoints(kin_);
+  void setDataSample(std::shared_ptr<ComPWA::DataReader::Data> sample) {
+    DataSample = sample->dataPoints(Kin);
   }
 
-  void SetPhspSample(std::shared_ptr<ComPWA::DataReader::Data> sample) {
-    s_phsp = sample->dataPoints(kin_);
+  void setPhspSample(std::shared_ptr<ComPWA::DataReader::Data> sample) {
+    PhspSample = sample->dataPoints(Kin);
   }
 
-  void SetData(std::vector<DataPoint> &points) { s_data = points; }
+  void setDataSample(std::vector<DataPoint> &points) { DataSample = points; }
 
-  void SetPhspSample(std::vector<DataPoint> &points) { s_phsp = points; }
+  void setPhspSample(std::vector<DataPoint> &points) { PhspSample = points; }
 
-  void SetFitAmp(std::shared_ptr<ComPWA::AmpIntensity> intens);
-
+  void setIntensity(std::shared_ptr<ComPWA::AmpIntensity> intens);
+  
   /// Add sub component of the Intensity. For each event in the phase space
   /// sample each component is evaluated and its value is added to the TTree.
-  void AddComponent(std::string name, std::string title = "") {
-    std::string t = title;
-    if (t == "")
-      t = name;
+  void addComponent(std::string componentName, std::string intensityName,
+                    std::string title = "") {
+    std::string ttt = title;
+    if (ttt == "")
+      ttt = componentName;
     
-    if (!_plotComponents.size())
-      throw std::runtime_error("PlotData::DrawComponent() | AmpIntensity not "
+    if (!PlotComponents.size())
+      throw std::runtime_error("RootPlot::addComponent() | AmpIntensity not "
                                "set! Set the full model first using "
                                "SetFitAmp()!");
     
     std::shared_ptr<ComPWA::AmpIntensity> comp;
     try {
-        comp = _plotComponents.at(0)->component(name);
+      comp = PlotComponents.at(0)
+                 ->component(intensityName)
+                 ->component(componentName);
     } catch (std::exception &ex) {
-      LOG(error) << "DalitzPlot::DrawComponent() | Component " << name
-                 << " not found in AmpIntensity "
-                 << _plotComponents.at(0)->name() << ".";
+      LOG(error) << "RootPlot::addComponent() | Component " << componentName
+                 << " of " << componentName <<" not found in AmpIntensity "
+                 << PlotComponents.at(0)->name() << ".";
       return;
     }
-    _plotComponents.push_back(comp);
-    _componentNames.push_back(t);
+    PlotComponents.push_back(comp);
+    ComponentNames.push_back(ttt);
   }
 
   /// Create the TTree's, fill and write them to \p fileName.
   /// \p treePrefix is added in front of each TTree name so that multiple
   /// TTree's can be written to the same file. Usual ROOT::TFile options
   /// can be added.
-  void Write(std::string treePrefix, std::string fileName,
+  void write(std::string treePrefix, std::string fileName,
              std::string option = "RECREATE");
 
 protected:
-  std::shared_ptr<ComPWA::Kinematics> kin_;
+  std::shared_ptr<ComPWA::Kinematics> Kin;
   
-  std::vector<std::shared_ptr<ComPWA::AmpIntensity>> _plotComponents;
+  std::vector<std::shared_ptr<ComPWA::AmpIntensity>> PlotComponents;
   
-  std::vector<std::string> _componentNames;
+  std::vector<std::string> ComponentNames;
 
-  std::vector<DataPoint> s_data;
+  std::vector<DataPoint> DataSample;
   
-  std::vector<DataPoint> s_phsp;
+  std::vector<DataPoint> PhspSample;
 };
 } // ns::Tools
 } // ns::ComPWA

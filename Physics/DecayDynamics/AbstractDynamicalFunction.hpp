@@ -27,24 +27,20 @@ public:
   //============ CONSTRUCTION ==================
 
   AbstractDynamicalFunction(std::string name = "")
-      :Name(name), DaughterMasses(std::pair<double, double>(-999, -999)),
-        IsModified(true), Current_mass(-999){};
+      : Name(name), DaughterMasses(std::pair<double, double>(-999, -999)),
+        Current_mass(-999){};
 
   virtual ~AbstractDynamicalFunction(){};
 
   //======= INTEGRATION/NORMALIZATION ===========
-
-  bool isModified() const {
-    if (GetMass() != Current_mass) {
-      setModified();
-      const_cast<double &>(Current_mass) =Mass->value();
-      return true;
-    }
-    return false;
-  }
-
+  /// Check of parameters have changed and normalization has to be recalculatecd
+  virtual bool isModified() const = 0;
+  
+  /// Label as modified/unmodified
+  virtual void setModified(bool b) = 0;
+  
   //================ EVALUATION =================
-
+  
   virtual std::complex<double> evaluate(const ComPWA::DataPoint &point,
                                         int pos) const = 0;
 
@@ -53,13 +49,6 @@ public:
   virtual void setName(std::string n) { Name = n; }
 
   virtual std::string name() { return Name; }
-
-  virtual void setModified(bool b = true) const {
-    const_cast<bool &>(IsModified) = b;
-    const_cast<double &>(Current_mass) =Mass->value();
-  }
-
-  virtual bool GetModified() const { return IsModified; }
 
   virtual void parameters(ParameterList &list);
 
@@ -128,10 +117,6 @@ protected:
   ComPWA::Spin J;
   /// Orbital Angular Momentum between two daughters in Resonance decay
   ComPWA::Spin L;
-
-private:
-  /// Resonance shape was modified (recalculate the normalization)
-  bool IsModified;
 
   /// Temporary value of mass (used to trigger recalculation of normalization)
   double Current_mass;

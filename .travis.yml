@@ -31,33 +31,34 @@ before_install:
 matrix:
   allow_failures: 
     - os: osx
+    - compiler: clang
 
   include:
     - os: osx
-      osx_image: xcode8.3
-      env: TASK="ROOT v6.10"
+      osx_image: xcode9.3
+      env: TASK="ROOT v6"
       allow_failures: true
       before_script:
         - env # Debugging
-        - brew tap homebrew/science
           # We have to check first if a package is installed, otherwise an error
           # is thrown.
         - if brew ls --versions boost > /dev/null; then echo 'Boost installed!'
           else brew install boost; fi
         - if brew ls --versions gsl > /dev/null; then echo 'GSL installed!';
           else brew install gsl; fi
+        - brew upgrade python
         - if brew ls --versions root > /dev/null; then echo 'ROOT installed!';
-          else 
+          else brew install root;
             if brew install root; then echo "top";
-            else 
+            else
               brew link --overwrite gcc;
               brew install root;
             fi
           fi
-        - brew install python3
-        #- wget https://root.cern.ch/download/root_v6.10.02.macosx64-10.12-clang81.tar.gz
+        #- wget https://root.cern.ch/download/root_v6.12.06.macosx64-10.13-clang90.tar.gz
         #- tar xpvfz root_*.tar.gz > /dev/null 2>&1
         
+
     - os: linux
       dist: trusty
       env: TASK="Build documentation"
@@ -119,12 +120,16 @@ matrix:
               - libboost-all-dev # Version 1.54 for trusty
               - libgsl0-dev
               - python3
+              - clang
       before_script:
         - env
         - cd $BASEPATH
           # ROOT v6.10
         - wget https://root.cern.ch/download/root_v6.10.02.Linux-ubuntu14-x86_64-gcc4.8.tar.gz
         - tar xpvfz root_*.tar.gz > /dev/null 2>&1
+        - export CXX=/usr/bin/clang++
+        - export CC=/usr/bin/clang
+        - clang --version
 
     - os: linux
       dist: trusty  #Ubuntu14.04 LTS

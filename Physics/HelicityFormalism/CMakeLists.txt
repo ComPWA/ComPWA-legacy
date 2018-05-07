@@ -15,13 +15,15 @@ SET( lib_srcs ../IncoherentIntensity.cpp ../CoherentIntensity.cpp
     ../SequentialPartialAmplitude.cpp AmpWignerD.cpp
     HelicityDecay.cpp HelicityFromCanonicalSum.cpp HelicityKinematics.cpp )
 
-SET( lib_headers ../IncoherentIntensity.hpp ../CoherentIntensity.hpp
+SET( lib_headers HelicityDecay.hpp AmpWignerD.hpp HelicityKinematics.hpp)
+
+SET( lib_physics_headers ../IncoherentIntensity.hpp ../CoherentIntensity.hpp
     ../SequentialPartialAmplitude.hpp ../Amplitude.hpp ../PartialAmplitude.hpp
     ../ParticleList.hpp  HelicityDecay.hpp 
     AmpWignerD.hpp HelicityFromCanonicalSum.hpp HelicityKinematics.hpp )
 
 add_library( HelicityFormalism
-  SHARED ${lib_srcs} ${lib_headers}
+  SHARED ${lib_srcs} ${lib_headers} ${lib_physics_headers}
 )
 
 target_link_libraries( HelicityFormalism
@@ -35,34 +37,38 @@ target_include_directories( HelicityFormalism
   PUBLIC ${Boost_INCLUDE_DIR}
 )
 
+#
+# Install
+#
 install (FILES ${lib_headers}
     DESTINATION include/ComPWA/Physics/HelicityFormalism
 )
 
 install(TARGETS HelicityFormalism
-        LIBRARY DESTINATION lib
+    LIBRARY DESTINATION lib/ComPWA
 )
 
-# ------ TESTING ----- #
-#Testing routines are stored in separate directory
+#
+# TESTING
+#
+# Testing routines are stored in separate directory
 file(GLOB TEST_SRCS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} test/*.cpp)
-
 
 # Check if Tools target is going to be build. Skip testing section otherwise.
 #IF( TARGET Tools )
 
-  #Run through each source
+  # Run through each source
   foreach(testSrc ${TEST_SRCS})
 
-    #Extract the filename without an extension (NAME_WE)
+    # Extract the filename without an extension (NAME_WE)
     get_filename_component(fileName ${testSrc} NAME_WE)
     SET(testName "HelicityFormalismTest_${fileName}")
 
-    #Add compile target
+    # Add compile target
     add_executable( ${testName} ${testSrc} )
 
 
-    #link to Boost libraries AND your targets and dependencies
+    # Link to Boost libraries AND your targets and dependencies
     target_link_libraries( ${testName}
       Core
       HelicityFormalism
@@ -75,9 +81,9 @@ file(GLOB TEST_SRCS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} test/*.cpp)
     target_include_directories( ${testName}
       PUBLIC ${ROOT_INCLUDE_DIR} ${Boost_INCLUDE_DIR} )
 
-    #I like to move testing binaries into a testBin directory
+    # Move testing binaries into a testBin directory
     set_target_properties( ${testName}
-      PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${EXECUTABLE_OUTPUT_PATH}/testBin
+      PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin/test/
     )
 
     # Copy input files for test programs - we assume they have the name
@@ -92,14 +98,14 @@ file(GLOB TEST_SRCS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} test/*.cpp)
         TARGET ${testName} POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy
         ${CMAKE_CURRENT_SOURCE_DIR}/test/${TestInName}
-        ${EXECUTABLE_OUTPUT_PATH}/testBin/${TestInName} )
+        ${PROJECT_BINARY_DIR}/bin/test/${TestInName} )
     endforeach( TestIn )
 
-    #Finally add it to test execution -
-    #Notice the WORKING_DIRECTORY and COMMAND
+    # Finally add it to test execution -
+    # Notice the WORKING_DIRECTORY and COMMAND
     add_test(NAME ${testName}
-      WORKING_DIRECTORY ${EXECUTABLE_OUTPUT_PATH}/testBin
-      COMMAND ${EXECUTABLE_OUTPUT_PATH}/testBin/${testName} )
+      WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/bin/test/
+      COMMAND ${PROJECT_BINARY_DIR}/bin/test/${testName} )
 
   endforeach(testSrc)
 

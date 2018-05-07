@@ -32,16 +32,17 @@ void MinuitResult::setResult(std::shared_ptr<IEstimator> esti,
 }
 
 void MinuitResult::init(ROOT::Minuit2::FunctionMinimum min) {
+  
   ROOT::Minuit2::MnUserParameterState minState = min.UserState();
-
+  NumFreeParameter = minState.Parameters().Trafo().VariableParameters();
+  
   if (minState.HasCovariance()) {
     ROOT::Minuit2::MnUserCovariance minuitCovMatrix = minState.Covariance();
     // Size of Minuit covariance vector is given by dim*(dim+1)/2.
     // dim is the dimension of the covariance matrix.
     // The dimension can therefore be calculated as
     // dim = -0.5+-0.5 sqrt(8*size+1)
-    //
-    NumFreeParameter = minuitCovMatrix.Nrow();
+    assert(minuitCovMatrix.Nrow() == NumFreeParameter);
     Cov = std::vector<std::vector<double>>(NumFreeParameter,
                                            std::vector<double>(NumFreeParameter));
     Corr = std::vector<std::vector<double>>(
@@ -58,8 +59,15 @@ void MinuitResult::init(ROOT::Minuit2::FunctionMinimum min) {
         Corr.at(j).at(i) = Corr.at(i).at(j); // fill lower half
       }
 
-  } else
+  } else {
     LOG(error) << "MinuitResult: no valid correlation matrix available!";
+    // Initialize empty covariance matrix with correct dimensions
+    Cov = std::vector<std::vector<double>>(
+        NumFreeParameter, std::vector<double>(NumFreeParameter, 0.));
+    // Initialize with default values(?)
+    //    for(unsigned int t = 0; t < n; t++)
+    //      Cov[t][t] = 1;
+  }
   if (minState.HasGlobalCC()) {
     GlobalCC = minState.GlobalCC().GlobalCC();
   } else {

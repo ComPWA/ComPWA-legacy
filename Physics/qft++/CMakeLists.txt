@@ -26,10 +26,13 @@ add_library( qft++
   SHARED ${lib_srcs} ${lib_headers}
 )
 
+#
+# Install
+#
 install (FILES ${lib_headers}
     DESTINATION include/ComPWA/Physics/qft++
 )
 
 install(TARGETS qft++
-        LIBRARY DESTINATION lib
+        LIBRARY DESTINATION lib/ComPWA
 )

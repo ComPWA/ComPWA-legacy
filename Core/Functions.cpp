@@ -487,14 +487,14 @@ void MultAll::execute(ParameterList &paras, std::shared_ptr<Parameter> &out) {
 void LogOf::execute(ParameterList &paras, std::shared_ptr<Parameter> &out) {
   if (out && checkType != out->type())
     throw BadParameter("LogOf::execute() | Parameter type mismatch!");
-  
+
   if (paras.numParameters() + paras.numValues() != 1)
     throw BadParameter("LogOf::execute() | Expecting only one parameter");
 
-  size_t nMC = paras.mComplexValues().size();
+  //  size_t nMC = paras.mComplexValues().size();
   size_t nMD = paras.mDoubleValues().size();
   size_t nMI = paras.mIntValues().size();
-  size_t nC = paras.complexValues().size();
+  //  size_t nC = paras.complexValues().size();
   size_t nD = paras.doubleValues().size() + paras.doubleParameters().size();
   size_t nI = paras.intValues().size();
 
@@ -681,7 +681,7 @@ void AbsSquare::execute(ParameterList &paras, std::shared_ptr<Parameter> &out) {
   size_t nMD = paras.mDoubleValues().size();
   size_t nMI = paras.mIntValues().size();
   size_t nC = paras.complexValues().size();
-  size_t nD = paras.doubleValues().size() + paras.doubleParameters().size();
+  //  size_t nD = paras.doubleValues().size() + paras.doubleParameters().size();
   size_t nI = paras.intValues().size();
 
   if (paras.numParameters() + paras.numValues() != 1)
