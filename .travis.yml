@@ -30,8 +30,8 @@ before_install:
 
 matrix:
   allow_failures: 
-    - os: osx
     - compiler: clang
+    #- os: osx
 
   include:
     - os: osx
