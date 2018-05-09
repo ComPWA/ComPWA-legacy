@@ -51,7 +51,7 @@ foreach(testSrc ${TEST_SRCS})
   target_link_libraries( ${testName}
     Core
     HelicityFormalism
-    #pthread
+    pthread
     ${Boost_LIBRARIES}
   )
 
