@@ -64,6 +64,7 @@ foreach(testSrc ${TEST_SRCS})
   # Link to Boost libraries AND your targets and dependencies
   TARGET_LINK_LIBRARIES( ${testName}
     Core
+    pthread
     ${Boost_LIBRARIES}
   )
 
