@@ -73,7 +73,7 @@ file(GLOB TEST_SRCS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} test/*.cpp)
       Core
       HelicityFormalism
       Tools
-      pthread
+      #pthread
       ${Boost_LIBRARIES}
       ${ROOT_LIBRARIES}
     )

@@ -27,7 +27,7 @@ target_link_libraries( pycompwa
     Core
     ${ROOT_LIBRARIES} 
     ${Boost_LIBRARIES} 
-    pthread 
+    #pthread 
 )
 
 target_include_directories( pycompwa
