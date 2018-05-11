@@ -605,6 +605,20 @@
 		<QuantumNumber Class="Int" Type="Cparity" Value="1"/>
 		<QuantumNumber Class="Spin" Type="IsoSpin" Value="1" Projection="0"/>
 		<QuantumNumber Class="Int" Type="Gparity" Value="-1"/>
+		<DecayInfo Type="relativisticBreitWigner">
+			<FormFactor Type="1"></FormFactor>
+			<Parameter Type="Width" Name="Width_a2(1320)-">
+				<Value>0.00107</Value>
+				<Error>0.00005</Error>
+				<Fix>true</Fix>
+			</Parameter>
+			<Parameter Type="MesonRadius" Name="Radius_a2(1320)-">
+				<Value>1.5</Value>
+				<Fix>true</Fix>
+				<Min>1.0</Min>
+				<Max>2.0</Max>
+			</Parameter>
+		</DecayInfo>
 	</Particle>
 	<Particle Name="a2(1320)+">
 		<Pid>215</Pid>
@@ -619,6 +633,20 @@
 		<QuantumNumber Class="Int" Type="Cparity" Value="1"/>
 		<QuantumNumber Class="Spin" Type="IsoSpin" Value="1" Projection="1"/>
 		<QuantumNumber Class="Int" Type="Gparity" Value="-1"/>
+		<DecayInfo Type="relativisticBreitWigner">
+			<FormFactor Type="1"></FormFactor>
+			<Parameter Type="Width" Name="Width_a2(1320)-">
+				<Value>0.00107</Value>
+				<Error>0.00005</Error>
+				<Fix>true</Fix>
+			</Parameter>
+			<Parameter Type="MesonRadius" Name="Radius_a2(1320)-">
+				<Value>1.5</Value>
+				<Fix>true</Fix>
+				<Min>1.0</Min>
+				<Max>2.0</Max>
+			</Parameter>
+		</DecayInfo>
 	</Particle>
 	<Particle Name="a2(1320)-">
 		<Pid>-215</Pid>
@@ -633,6 +661,20 @@
 		<QuantumNumber Class="Int" Type="Cparity" Value="1"/>
 		<QuantumNumber Class="Spin" Type="IsoSpin" Value="1" Projection="-1"/>
 		<QuantumNumber Class="Int" Type="Gparity" Value="-1"/>
+		<DecayInfo Type="relativisticBreitWigner">
+			<FormFactor Type="1"></FormFactor>
+			<Parameter Type="Width" Name="Width_a2(1320)-">
+				<Value>0.00107</Value>
+				<Error>0.00005</Error>
+				<Fix>true</Fix>
+			</Parameter>
+			<Parameter Type="MesonRadius" Name="Radius_a2(1320)-">
+				<Value>1.5</Value>
+				<Fix>true</Fix>
+				<Min>1.0</Min>
+				<Max>2.0</Max>
+			</Parameter>
+		</DecayInfo>
 	</Particle>
 
 
