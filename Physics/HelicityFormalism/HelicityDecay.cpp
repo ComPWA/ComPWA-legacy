@@ -29,7 +29,7 @@ void HelicityDecay::load(std::shared_ptr<PartList> partL,
   LOG(trace) << "HelicityDecay::load() |";
   SubSys = SubSystem(pt);
   DataPosition =
-      3 * std::dynamic_pointer_cast<HelicityKinematics>(kin)->dataID(SubSys);
+      3 * std::dynamic_pointer_cast<HelicityKinematics>(kin)->addSubSystem(SubSys);
   setPhspVolume(kin->phspVolume());
 
  Name = pt.get<std::string>("<xmlattr>.Name", "empty");
@@ -70,7 +70,7 @@ void HelicityDecay::load(std::shared_ptr<PartList> partL,
   auto p = decayProducts.begin();
   DecayProducts.first = p->second.get<std::string>("<xmlattr>.Name");
   DecayHelicities.first =
-      ComPWA::Spin(p->second.get<int>("<xmlattr>.Helicity"));
+      ComPWA::Spin(p->second.get<double>("<xmlattr>.Helicity"));
   ++p;
   DecayProducts.second = p->second.get<std::string>("<xmlattr>.Name");
   DecayHelicities.second =

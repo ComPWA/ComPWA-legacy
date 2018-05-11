@@ -64,7 +64,7 @@ AmpFlatteRes::AmpFlatteRes(std::string name,
   SetCouplings(vC);
 
   LOG(trace)
-      << "RelativisticBreitWigner::Factory() | Construction of the decay "
+      << "AmpFlatteRes::Factory() | Construction of the decay "
       << partProp.name() << " -> " << daughters.first << " + "
       << daughters.second;
 }
@@ -107,8 +107,8 @@ std::complex<double> AmpFlatteRes::evaluate(const DataPoint &point,
         Couplings.at(2).GetMassB(), Couplings.at(2).value(), (double)L,
         MesonRadius->value(), FormFactorType);
   } catch (std::exception &ex) {
-    LOG(error) << "AmpFlatteRes::EvaluateAmp() | "
-                  "Dynamical function can not be evalutated: "
+    LOG(error) << "AmpFlatteRes::evaluate() | "
+                  "Dynamical function can not be evaluated: "
                << ex.what();
     throw;
   }

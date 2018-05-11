@@ -29,6 +29,10 @@ message( STATUS "Compiler: " ${CMAKE_CXX_COMPILER_ID} " ( " ${CMAKE_CXX_COMPILER
 # ${CMAKE_CXX_COMPILER_ID} can be one of {GNU Clang AppleClang Intel MSVC}
 # - verbose output on loop vectorization
 #
+
+# add all warnings compiler flag
+set(CMAKE_CXX_FLAGS	"${CMAKE_CXX_FLAGS} -Wall")
+
 if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang") # using Clang or AppleClang
 	#set(CMAKE_CXX_FLAGS
         #"${CMAKE_CXX_FLAGS} -Rpass-analysis=loop-vectorize -Rpass=loop-vectorize")

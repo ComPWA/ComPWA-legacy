@@ -8,12 +8,13 @@
 
 using namespace ComPWA;
 
+
 FitParameter::FitParameter(std::string inName)
     : Parameter(inName, ParType::DOUBLE), HasBounds(false), IsFixed(true),
       Value(0), Bounds(std::pair<double, double>(0, 0)),
       ErrType(ErrorType::NOTDEF), Error(std::pair<double, double>(0, 0)) {}
 
-FitParameter::FitParameter(const boost::property_tree::ptree pt)
+FitParameter::FitParameter(const boost::property_tree::ptree &pt)
     : Parameter("", ParType::DOUBLE), HasBounds(false), IsFixed(true),
       Value(0), Bounds(std::pair<double, double>(0, 0)),
       ErrType(ErrorType::NOTDEF), Error(std::pair<double, double>(0, 0)) {
@@ -224,7 +225,7 @@ std::string FitParameter::val_to_str() const {
   return ovs.str();
 }
 
-void FitParameter::load(const boost::property_tree::ptree pt) {
+void FitParameter::load(const boost::property_tree::ptree &pt) {
 
   // Class attribute is not required. But if it is specified we expect 'Double'
   // here.

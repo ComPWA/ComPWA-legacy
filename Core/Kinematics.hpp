@@ -59,7 +59,7 @@ public:
     return InitialStateP4;
   }
 
-  virtual int dataID(const ComPWA::SubSystem &sys) = 0;
+  virtual unsigned int getDataID(const ComPWA::SubSystem &sys) const = 0;
 
   virtual std::vector<std::string> variableNames() const {
     return VariableNames;
@@ -73,6 +73,9 @@ protected:
   std::vector<pid> InitialState;
 
   std::vector<pid> FinalState;
+
+  // we use a vector instead of a map here, due to cache optimizations
+  std::vector<unsigned int> FinalStateEventPositionMapping;
 
   /// Four momentum of the initial particle reaction
   ComPWA::FourMomentum InitialStateP4;
