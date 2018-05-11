@@ -64,7 +64,10 @@ inline std::complex<double> phspFactor(double sqrtS, double ma, double mb) {
 
 #ifndef NDEBUG
   if (rho.real() != rho.real() || rho.imag() != rho.imag()) {
-    throw std::runtime_error("phspFactor() | Result invalid (NaN)!");
+    std::stringstream ss;
+    ss << "phspFactor() | Result invalid (NaN)! sqrtS=" << sqrtS
+       << ", ma=" << ma << ", mb=" << mb;
+    throw std::runtime_error(ss.str());
   }
 #endif
 

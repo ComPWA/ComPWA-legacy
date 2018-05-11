@@ -20,13 +20,50 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/serialization/utility.hpp>
 #include <boost/optional.hpp>
+#include <boost/algorithm/string/predicate.hpp>
 
 #include "Core/Parameter.hpp"
 #include "Core/Exceptions.hpp"
 #include "Core/Logging.hpp"
 
+struct BoolTranslator {
+  typedef std::string internal_type;
+  typedef bool external_type;
+
+  // Converts a string to bool
+  boost::optional<external_type> get_value(const internal_type &str) {
+    if (!str.empty()) {
+    	using boost::algorithm::iequals;
+      if (iequals(str, "true") || iequals(str, "yes") || str == "1")
+        return boost::optional<external_type>(true);
+      else
+        return boost::optional<external_type>(false);
+    } else
+      return boost::optional<external_type>(boost::none);
+  }
+
+  // Converts a bool to string
+  boost::optional<internal_type> put_value(const external_type &b) {
+    return boost::optional<internal_type>(b ? "true" : "false");
+  }
+};
+
+namespace boost {
+namespace property_tree {
+
+template<typename Ch, typename Traits, typename Alloc>
+struct translator_between<std::basic_string< Ch, Traits, Alloc >, bool>
+{
+    typedef BoolTranslator type;
+};
+
+} // namespace property_tree
+} // namespace boost
+
+
 namespace ComPWA {
 enum ErrorType { SYM = 1, ASYM = 2, LHSCAN = 3, NOTDEF = 0 };
+
 
 class FitParameter : public Parameter {
 
@@ -38,7 +75,7 @@ public:
 
   /// Construct parameter from a property tree. The expected tree layout is
   /// described in load().
-  FitParameter(const boost::property_tree::ptree pt);
+  FitParameter(const boost::property_tree::ptree &pt);
 
   /// Standard constructor with just a value provided. Creates parameter
   /// with given value but without bounds or an error.
@@ -122,7 +159,7 @@ public:
   /// Load parameters from a ptree. This approach is more or
   /// less equivalent to the serialization of a parameter but provides a better
   /// readable format.
-  void load(const boost::property_tree::ptree pt);
+  void load(const boost::property_tree::ptree &pt);
 
   /// Save parameter to a ptree. This approach is more or
   /// less equivalent to the serialization of a parameter but provides a better

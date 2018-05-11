@@ -116,7 +116,7 @@ protected:
   /// Position where variables are stored in dataPoint.
   /// We expect to find the invariant mass of the system at @param DataPosition,
   /// cosTheta at @param DataPosition+1 and phi at @param DataPosition+2
-  int DataPosition;
+  unsigned int DataPosition;
 
   ComPWA::SubSystem SubSys;
 
