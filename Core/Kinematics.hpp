@@ -10,16 +10,16 @@
 #ifndef KINEMATICS_HPP_
 #define KINEMATICS_HPP_
 
-#include <vector>
-#include <string>
 #include <complex>
+#include <string>
+#include <vector>
 
+#include "Core/DataPoint.hpp"
 #include "Core/Event.hpp"
 #include "Core/Particle.hpp"
-#include "Core/SubSystem.hpp"
 #include "Core/Properties.hpp"
 #include "Core/Spin.hpp"
-#include "Core/DataPoint.hpp"
+#include "Core/SubSystem.hpp"
 
 namespace ComPWA {
 

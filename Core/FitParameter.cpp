@@ -8,16 +8,15 @@
 
 using namespace ComPWA;
 
-
 FitParameter::FitParameter(std::string inName)
     : Parameter(inName, ParType::DOUBLE), HasBounds(false), IsFixed(true),
       Value(0), Bounds(std::pair<double, double>(0, 0)),
       ErrType(ErrorType::NOTDEF), Error(std::pair<double, double>(0, 0)) {}
 
 FitParameter::FitParameter(const boost::property_tree::ptree &pt)
-    : Parameter("", ParType::DOUBLE), HasBounds(false), IsFixed(true),
-      Value(0), Bounds(std::pair<double, double>(0, 0)),
-      ErrType(ErrorType::NOTDEF), Error(std::pair<double, double>(0, 0)) {
+    : Parameter("", ParType::DOUBLE), HasBounds(false), IsFixed(true), Value(0),
+      Bounds(std::pair<double, double>(0, 0)), ErrType(ErrorType::NOTDEF),
+      Error(std::pair<double, double>(0, 0)) {
   load(pt);
 }
 
@@ -27,13 +26,13 @@ FitParameter::FitParameter(std::string inName, const double value)
       ErrType(ErrorType::NOTDEF), Error(std::pair<double, double>(0, 0)) {}
 
 FitParameter::FitParameter(std::string inName, const double value,
-                                 const double error)
+                           const double error)
     : Parameter(inName, ParType::DOUBLE), HasBounds(false), IsFixed(true),
       Value(value), Bounds(std::pair<double, double>(0, 0)),
       ErrType(ErrorType::SYM), Error(std::pair<double, double>(error, error)) {}
 
 FitParameter::FitParameter(std::string inName, const double value,
-                                 const double min, const double max)
+                           const double min, const double max)
     : Parameter(inName, ParType::DOUBLE), HasBounds(false), IsFixed(false),
       Value(value), Bounds(std::pair<double, double>(0, 0)),
       ErrType(ErrorType::NOTDEF), Error(std::pair<double, double>(0, 0)) {
@@ -41,8 +40,8 @@ FitParameter::FitParameter(std::string inName, const double value,
 }
 
 FitParameter::FitParameter(std::string inName, const double value,
-                                 const double min, const double max,
-                                 const double error)
+                           const double min, const double max,
+                           const double error)
     : Parameter(inName, ParType::DOUBLE), HasBounds(false), IsFixed(false),
       Value(value), Bounds(std::pair<double, double>(0, 0)),
       ErrType(ErrorType::NOTDEF), Error(std::pair<double, double>(0, 0)) {
@@ -93,8 +92,8 @@ void FitParameter::setValue(const double inVal) {
     return;
 
   if (HasBounds && (inVal < bounds().first || inVal > bounds().second))
-    throw ParameterOutOfBound("FitParameter::setValue() | Parameter " +
-                              name() + " not within bounds: val=" +
+    throw ParameterOutOfBound("FitParameter::setValue() | Parameter " + name() +
+                              " not within bounds: val=" +
                               std::to_string(inVal) + " [" +
                               std::to_string(bounds().first) + ";" +
                               std::to_string(bounds().second) + "]");
@@ -194,8 +193,7 @@ bool FitParameter::operator==(const FitParameter otherPar) const {
   return true;
 }
 
-bool FitParameter::check_bounds(
-    const std::pair<double, double> bounds) const {
+bool FitParameter::check_bounds(const std::pair<double, double> bounds) const {
   if ((bounds.second > bounds.first) && (bounds.second >= Value) &&
       (bounds.first <= Value))
     return true;

@@ -4,9 +4,9 @@
 
 #include <cmath>
 //#include <math.h>
-#include <limits>
-#include "Physics/DecayDynamics/AmpFlatteRes.hpp"
 #include "Core/Value.hpp"
+#include "Physics/DecayDynamics/AmpFlatteRes.hpp"
+#include <limits>
 
 using namespace ComPWA::Physics::DecayDynamics;
 
@@ -63,10 +63,9 @@ AmpFlatteRes::AmpFlatteRes(std::string name,
   }
   SetCouplings(vC);
 
-  LOG(trace)
-      << "AmpFlatteRes::Factory() | Construction of the decay "
-      << partProp.name() << " -> " << daughters.first << " + "
-      << daughters.second;
+  LOG(trace) << "AmpFlatteRes::Factory() | Construction of the decay "
+             << partProp.name() << " -> " << daughters.first << " + "
+             << daughters.second;
 }
 
 AmpFlatteRes::~AmpFlatteRes() {}
@@ -367,7 +366,7 @@ void AmpFlatteRes::updateParameters(const ParameterList &list) {
     MesonRadius->updateParameter(rad);
   } catch (BadParameter &ex) {
   }
-  
+
   // Try to update Couplings
   for (auto i : Couplings) {
     try {
