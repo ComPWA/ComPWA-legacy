@@ -23,11 +23,11 @@ namespace ComPWA {
 /// invariant mass and angles at a two-body decay node.
 ///
 class SubSystem {
- public:
-  SubSystem(const boost::property_tree::ptree& pt);
+public:
+  SubSystem(const boost::property_tree::ptree &pt);
 
-  SubSystem(const std::vector<unsigned int>& recoilS,
-            const std::vector<std::vector<unsigned int>>& finalStates);
+  SubSystem(const std::vector<unsigned int> &recoilS,
+            const std::vector<std::vector<unsigned int>> &finalStates);
 
   /*/// Constructor for an isobar model in which it is assumed that particles
   /// always decay to two final states.
@@ -37,34 +37,34 @@ class SubSystem {
 
   virtual boost::property_tree::ptree save() const;
 
-  virtual void load(const boost::property_tree::ptree& pt);
+  virtual void load(const boost::property_tree::ptree &pt);
 
   // Create a unique title
   virtual std::string to_string() const;
 
-  bool operator==(const SubSystem& b) const;
+  bool operator==(const SubSystem &b) const;
 
-  friend std::ostream& operator<<(std::ostream& stream, const SubSystem& s) {
+  friend std::ostream &operator<<(std::ostream &stream, const SubSystem &s) {
     return stream << s.to_string();
   }
 
-  virtual void SetFinalStates(const std::vector<std::vector<unsigned int>>& v);
+  virtual void SetFinalStates(const std::vector<std::vector<unsigned int>> &v);
 
-  virtual const std::vector<std::string>& GetFinalStatesNames() const;
+  virtual const std::vector<std::string> &GetFinalStatesNames() const;
 
-  virtual void SetFinalStatesNames(const std::vector<std::string>& n);
+  virtual void SetFinalStatesNames(const std::vector<std::string> &n);
 
-  virtual const std::vector<std::vector<unsigned int>>& GetFinalStates() const;
+  virtual const std::vector<std::vector<unsigned int>> &GetFinalStates() const;
 
   virtual const std::vector<double> GetHelicities() const;
 
-  virtual void SetHelicities(const std::vector<double>& hel);
+  virtual void SetHelicities(const std::vector<double> &hel);
 
-  virtual void SetRecoilState(const std::vector<unsigned int>& r);
+  virtual void SetRecoilState(const std::vector<unsigned int> &r);
 
-  virtual const std::vector<unsigned int>& GetRecoilState() const;
+  virtual const std::vector<unsigned int> &GetRecoilState() const;
 
- protected:
+protected:
   std::string _title;
   std::vector<unsigned int> _recoilState;
   std::vector<std::vector<unsigned int>> _finalStates;
@@ -85,6 +85,6 @@ inline std::vector<unsigned int> stringToVectInt(std::string str) {
   return result;
 }
 
-}  // ns::ComPWA
+} // ns::ComPWA
 
 #endif

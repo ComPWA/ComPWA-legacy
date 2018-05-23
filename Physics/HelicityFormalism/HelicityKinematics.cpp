@@ -23,6 +23,11 @@ HelicityKinematics::HelicityKinematics(std::shared_ptr<PartList> partL,
                                        std::vector<pid> finalState,
                                        ComPWA::FourMomentum cmsP4)
     : Kinematics(initialState, finalState, cmsP4), ParticleList(partL) {
+  FinalStateEventPositionMapping.clear();
+  for (unsigned int i = 0; i < FinalState.size(); ++i) {
+    FinalStateEventPositionMapping.push_back(i);
+  }
+
   // If the cms four-momentum is not set of set it here
   if (InitialStateP4 == FourMomentum(0, 0, 0, 0) && InitialState.size() == 1) {
     double sqrtS = FindParticle(partL, InitialState.at(0)).GetMass();
@@ -30,14 +35,17 @@ HelicityKinematics::HelicityKinematics(std::shared_ptr<PartList> partL,
   }
 
   // Make sure cms momentum is set
-  if (InitialStateP4 == FourMomentum(0, 0, 0, 0)) assert(false);
+  if (InitialStateP4 == FourMomentum(0, 0, 0, 0))
+    assert(false);
 
   // Create title
   std::stringstream stream;
   stream << "( ";
-  for (auto i : InitialState) stream << FindParticle(partL, i).name() << " ";
+  for (auto i : InitialState)
+    stream << FindParticle(partL, i).name() << " ";
   stream << ")->( ";
-  for (auto i : FinalState) stream << FindParticle(partL, i).name() << " ";
+  for (auto i : FinalState)
+    stream << FindParticle(partL, i).name() << " ";
   stream << ")";
 
   LOG(info) << "HelicityKinematics::HelicityKinematics() | Initialize reaction "
@@ -66,7 +74,8 @@ HelicityKinematics::HelicityKinematics(std::shared_ptr<PartList> partL,
   }
 
   // Make sure cms momentum is set
-  if (InitialStateP4 == FourMomentum(0, 0, 0, 0)) assert(false);
+  if (InitialStateP4 == FourMomentum(0, 0, 0, 0))
+    assert(false);
 
   auto finalS = pt.get_child("FinalState");
   FinalState = std::vector<int>(finalS.size());
@@ -74,8 +83,12 @@ HelicityKinematics::HelicityKinematics(std::shared_ptr<PartList> partL,
   for (auto i : finalS) {
     std::string name = i.second.get<std::string>("<xmlattr>.Name");
     auto partP = partL->find(name)->second;
-    unsigned int pos = i.second.get<unsigned int>("<xmlattr>.PositionIndex");
     unsigned int id = i.second.get<unsigned int>("<xmlattr>.Id");
+    unsigned int pos(id);
+    boost::optional<unsigned int> opt_pos =
+        i.second.get_optional<unsigned int>("<xmlattr>.PositionIndex");
+    if (opt_pos)
+      pos = opt_pos.get();
     FinalState.at(pos) = partP.GetId();
     FinalStateEventPositionMapping[pos] = id;
   }
@@ -88,9 +101,11 @@ HelicityKinematics::HelicityKinematics(std::shared_ptr<PartList> partL,
   // Creating unique title
   std::stringstream stream;
   stream << "( ";
-  for (auto i : InitialState) stream << FindParticle(partL, i).name() << " ";
+  for (auto i : InitialState)
+    stream << FindParticle(partL, i).name() << " ";
   stream << ")->( ";
-  for (auto i : FinalState) stream << FindParticle(partL, i).name() << " ";
+  for (auto i : FinalState)
+    stream << FindParticle(partL, i).name() << " ";
   stream << ")";
 
   LOG(info) << "HelicityKinematics::HelicityKinematics() | Initialize reaction "
@@ -99,13 +114,14 @@ HelicityKinematics::HelicityKinematics(std::shared_ptr<PartList> partL,
 }
 
 bool HelicityKinematics::isWithinPhsp(const DataPoint &point) const {
-  int subSystemID = 0;
-  int pos = 0;
+  unsigned int subSystemID = 0;
+  unsigned int pos = 0;
   while ((pos + 2) < point.size()) {
     auto bounds = invMassBounds(subSystem(subSystemID));
     if (point.value(pos) < bounds.first || point.value(pos) > bounds.second)
       return false;
-    if (point.value(pos + 1) < -1 || point.value(pos + 1) > +1) return false;
+    if (point.value(pos + 1) < -1 || point.value(pos + 1) > +1)
+      return false;
     if (point.value(pos + 2) < 0 || point.value(pos + 2) > 2 * M_PI)
       return false;
 
@@ -123,7 +139,7 @@ void HelicityKinematics::convert(const Event &event, DataPoint &point) const {
     LOG(error) << "HelicityKinematics::convert() | No variabels were "
                   "requested before. Therefore this function is doing nothing!";
   }
-  for (int i = 0; i < Subsystems.size(); i++)
+  for (unsigned int i = 0; i < Subsystems.size(); i++)
     convert(event, point, Subsystems.at(i), InvMassBounds.at(i));
   return;
 }
@@ -159,7 +175,8 @@ unsigned int HelicityKinematics::getDataID(const SubSystem &subSys) const {
 
 unsigned int HelicityKinematics::addSubSystem(const SubSystem &subSys) {
   // We calculate the variables currently for two-body decays
-  if (subSys.GetFinalStates().size() != 2) return 0;
+  if (subSys.GetFinalStates().size() != 2)
+    return 0;
   unsigned int pos(Subsystems.size());
   auto const result = std::find(Subsystems.begin(), Subsystems.end(), subSys);
   if (result == Subsystems.end()) {
@@ -178,19 +195,21 @@ unsigned int HelicityKinematics::addSubSystem(const SubSystem &subSys) {
   return pos;
 }
 
-unsigned int HelicityKinematics::addSubSystem(
-    const std::vector<unsigned int> &recoilS,
-    const std::vector<unsigned int> &finalA,
-    const std::vector<unsigned int> &finalB) {
+unsigned int
+HelicityKinematics::addSubSystem(const std::vector<unsigned int> &recoilS,
+                                 const std::vector<unsigned int> &finalA,
+                                 const std::vector<unsigned int> &finalB) {
   std::vector<unsigned int> conv_recoilS;
   std::vector<std::vector<unsigned int>> conv_finalS;
   for (auto i : recoilS)
     conv_recoilS.push_back(FinalStateEventPositionMapping[i]);
   std::vector<unsigned int> temp;
-  for (auto i : finalA) temp.push_back(FinalStateEventPositionMapping[i]);
+  for (auto i : finalA)
+    temp.push_back(FinalStateEventPositionMapping[i]);
   conv_finalS.push_back(temp);
   temp.clear();
-  for (auto i : finalB) temp.push_back(FinalStateEventPositionMapping[i]);
+  for (auto i : finalB)
+    temp.push_back(FinalStateEventPositionMapping[i]);
   conv_finalS.push_back(temp);
 
   return addSubSystem(SubSystem(conv_recoilS, conv_finalS));
@@ -221,11 +240,10 @@ double HelicityKinematics::helicityAngle(double M, double m, double m2,
   //      +" mSqA="+std::to_string((long double) invMassSqA)
   //      +" mSqB="+std::to_string((long double) invMassSqB) );
   //  }
-  if (cosAngle > 1 || cosAngle < -1) {  // faster
-    throw BeyondPhsp(
-        "DalitzKinematics::helicityAngle() | "
-        "scattering angle out of range! Datapoint beyond"
-        "phsp?");
+  if (cosAngle > 1 || cosAngle < -1) { // faster
+    throw BeyondPhsp("DalitzKinematics::helicityAngle() | "
+                     "scattering angle out of range! Datapoint beyond"
+                     "phsp?");
   }
   return cosAngle;
 }
@@ -266,9 +284,8 @@ void HelicityKinematics::convert(const Event &event, DataPoint &point,
     if (ComPWA::equal(mSq, limits.first, 10))
       mSq = limits.first;
     else
-      throw BeyondPhsp(
-          "HelicityKinematics::convert() |"
-          " Point beypond phase space boundaries!");
+      throw BeyondPhsp("HelicityKinematics::convert() |"
+                       " Point beypond phase space boundaries!");
   }
   if (mSq >= limits.second) {
     // We allow for a deviation from the limits of 10 times the numerical
@@ -276,9 +293,8 @@ void HelicityKinematics::convert(const Event &event, DataPoint &point,
     if (ComPWA::equal(mSq, limits.second, 10))
       mSq = limits.second;
     else
-      throw BeyondPhsp(
-          "HelicityKinematics::convert() |"
-          " Point beypond phase space boundaries!");
+      throw BeyondPhsp("HelicityKinematics::convert() |"
+                       " Point beypond phase space boundaries!");
   }
 
   // When using finalB instead of finalA here, the WignerD changes sign. In
@@ -342,9 +358,8 @@ void HelicityKinematics::convert(const Event &event, DataPoint &point,
   //   Check if values are within allowed range.
   if (cosTheta > 1 || cosTheta < -1 || phi > M_PI || phi < (-1) * M_PI ||
       std::isnan(cosTheta) || std::isnan(phi)) {
-    throw BeyondPhsp(
-        "HelicityKinematics::convert() |"
-        " Point beypond phase space boundaries!");
+    throw BeyondPhsp("HelicityKinematics::convert() |"
+                     " Point beypond phase space boundaries!");
   }
 
   point.values().push_back(mSq);
@@ -352,18 +367,18 @@ void HelicityKinematics::convert(const Event &event, DataPoint &point,
   point.values().push_back(phi);
 }
 
-const std::pair<double, double> &HelicityKinematics::invMassBounds(
-    const SubSystem &sys) const {
+const std::pair<double, double> &
+HelicityKinematics::invMassBounds(const SubSystem &sys) const {
   return invMassBounds(getDataID(sys));
 }
 
-const std::pair<double, double> &HelicityKinematics::invMassBounds(
-    int sysID) const {
+const std::pair<double, double> &
+HelicityKinematics::invMassBounds(int sysID) const {
   return InvMassBounds.at(sysID);
 }
 
-std::pair<double, double> HelicityKinematics::calculateInvMassBounds(
-    const SubSystem &sys) const {
+std::pair<double, double>
+HelicityKinematics::calculateInvMassBounds(const SubSystem &sys) const {
   /// We use the formulae from (PDG2016 Kinematics Fig.47.3). I hope the
   /// generalization to n-body decays is correct.
   std::pair<double, double> lim(0, InitialStateP4.invMass());
@@ -384,6 +399,6 @@ std::pair<double, double> HelicityKinematics::calculateInvMassBounds(
   return lim;
 }
 
-}  // ns::HelicityFormalism
-}  // ns::Physics
-}  // ns::ComPWA
+} // ns::HelicityFormalism
+} // ns::Physics
+} // ns::ComPWA

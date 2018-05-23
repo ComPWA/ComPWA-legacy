@@ -16,14 +16,28 @@ set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/"
 cmake_policy(SET CMP0060 NEW)
 
 # Which target should be build by default?
-set (CMAKE_BUILD_TYPE Debug)
+set(DEFAULT_BUILD_TYPE "Release")
+
+if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+  message(STATUS "Setting build type to '${DEFAULT_BUILD_TYPE}' as none was specified.")
+  set(CMAKE_BUILD_TYPE "${DEFAULT_BUILD_TYPE}" CACHE
+      STRING "Choose the type of build." FORCE)
+  # Set the possible values of build type for cmake-gui
+  set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS
+    "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
+endif()
 
 set (CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 message( STATUS "Compiler: " ${CMAKE_CXX_COMPILER_ID} " ( " ${CMAKE_CXX_COMPILER} " )" )
-
+message("Using build type: " ${CMAKE_BUILD_TYPE} )
+message("All possible build types and flags are listed below:")
+message("CMAKE_CXX_FLAGS_DEBUG is ${CMAKE_CXX_FLAGS_DEBUG}")
+message("CMAKE_CXX_FLAGS_RELEASE is ${CMAKE_CXX_FLAGS_RELEASE}")
+message("CMAKE_CXX_FLAGS_RELWITHDEBINFO is ${CMAKE_CXX_FLAGS_RELWITHDEBINFO}")
+message("CMAKE_CXX_FLAGS_MINSIZEREL is ${CMAKE_CXX_FLAGS_MINSIZEREL}")
 #
 # Additonal compile flags for various compilers
 # ${CMAKE_CXX_COMPILER_ID} can be one of {GNU Clang AppleClang Intel MSVC}
@@ -42,6 +56,7 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU") # using GCC
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel") # using Intel C++
      # nothing here
 endif()
+
 message( STATUS "CXX Compile flags: " ${CMAKE_CXX_FLAGS} )
 
 # Automatically copy all binaries and libraries to bin/ and lib/
@@ -96,6 +111,13 @@ link_directories(${Boost_LIBRARY_DIR})
 # Enable target 'test'
 #
 enable_testing()
+set(CTEST_OUTPUT_ON_FAILURE TRUE)
+
+
+# also run pytest for testing
+add_test(NAME PythonTests
+         COMMAND pytest -v --ignore=Tools/PythonInterface 
+         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
 
 #
 # Submodules
@@ -107,6 +129,8 @@ add_subdirectory(Optimizer)
 add_subdirectory(Physics)
 add_subdirectory(Tools)
 add_subdirectory(Examples)
+
+
 
 #
 # Doxygen
