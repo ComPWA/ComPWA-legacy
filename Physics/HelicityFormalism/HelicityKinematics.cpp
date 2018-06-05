@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <cmath>
 #include <numeric>
+#include <stdexcept>
 
 #include "Core/DataPoint.hpp"
 #include "Core/Event.hpp"
@@ -175,8 +176,13 @@ unsigned int HelicityKinematics::getDataID(const SubSystem &subSys) const {
 
 unsigned int HelicityKinematics::addSubSystem(const SubSystem &subSys) {
   // We calculate the variables currently for two-body decays
-  if (subSys.GetFinalStates().size() != 2)
-    return 0;
+  if (subSys.getFinalStates().size() != 2) {
+    std::stringstream ss;
+    ss << "HelicityKinematics::addSubSystem(const SubSystem "
+          "&subSys): Number of final state particles = "
+       << subSys.getFinalStates().size() << ", which is != 2";
+    throw std::runtime_error(ss.str());
+  }
   unsigned int pos(Subsystems.size());
   auto const result = std::find(Subsystems.begin(), Subsystems.end(), subSys);
   if (result == Subsystems.end()) {
@@ -195,24 +201,29 @@ unsigned int HelicityKinematics::addSubSystem(const SubSystem &subSys) {
   return pos;
 }
 
-unsigned int
-HelicityKinematics::addSubSystem(const std::vector<unsigned int> &recoilS,
-                                 const std::vector<unsigned int> &finalA,
-                                 const std::vector<unsigned int> &finalB) {
-  std::vector<unsigned int> conv_recoilS;
-  std::vector<std::vector<unsigned int>> conv_finalS;
-  for (auto i : recoilS)
-    conv_recoilS.push_back(FinalStateEventPositionMapping[i]);
+unsigned int HelicityKinematics::addSubSystem(
+    const std::vector<unsigned int> &FinalA,
+    const std::vector<unsigned int> &FinalB,
+    const std::vector<unsigned int> &Recoil,
+    const std::vector<unsigned int> &ParentRecoil) {
+  std::vector<std::vector<unsigned int>> ConvertedFinalStates;
   std::vector<unsigned int> temp;
-  for (auto i : finalA)
+  for (auto i : FinalA)
     temp.push_back(FinalStateEventPositionMapping[i]);
-  conv_finalS.push_back(temp);
+  ConvertedFinalStates.push_back(temp);
   temp.clear();
-  for (auto i : finalB)
+  for (auto i : FinalB)
     temp.push_back(FinalStateEventPositionMapping[i]);
-  conv_finalS.push_back(temp);
+  ConvertedFinalStates.push_back(temp);
+  std::vector<unsigned int> ConvertedRecoil;
+  for (auto i : Recoil)
+    ConvertedRecoil.push_back(FinalStateEventPositionMapping[i]);
+  std::vector<unsigned int> ConvertedParentRecoil;
+  for (auto i : ParentRecoil)
+    ConvertedParentRecoil.push_back(FinalStateEventPositionMapping[i]);
 
-  return addSubSystem(SubSystem(conv_recoilS, conv_finalS));
+  return addSubSystem(
+      SubSystem(ConvertedFinalStates, ConvertedRecoil, ConvertedParentRecoil));
 }
 
 double HelicityKinematics::helicityAngle(double M, double m, double m2,
@@ -251,32 +262,20 @@ double HelicityKinematics::helicityAngle(double M, double m, double m2,
 void HelicityKinematics::convert(const Event &event, DataPoint &point,
                                  const SubSystem &sys,
                                  const std::pair<double, double> limits) const {
-  assert(sys.GetFinalStates().size() == 2 &&
-         "HelicityKinematics::convert() | More then two particles.");
-
-  FourMomentum cms;
-  for (auto s : sys.GetRecoilState()) {
+  FourMomentum FinalA, FinalB;
+  for (auto s : sys.getFinalStates().at(0)) {
     unsigned int index = convertFinalStateIDToPositionIndex(s);
-    cms += event.particle(index).fourMomentum();
+    FinalA += event.particle(index).fourMomentum();
   }
 
-  FourMomentum finalA, finalB;
-  for (auto s : sys.GetFinalStates().at(0)) {
+  for (auto s : sys.getFinalStates().at(1)) {
     unsigned int index = convertFinalStateIDToPositionIndex(s);
-    finalA += event.particle(index).fourMomentum();
-  }
-
-  for (auto s : sys.GetFinalStates().at(1)) {
-    unsigned int index = convertFinalStateIDToPositionIndex(s);
-    finalB += event.particle(index).fourMomentum();
+    FinalB += event.particle(index).fourMomentum();
   }
 
   // Four momentum of the decaying resonance
-  FourMomentum resP4 = finalA + finalB;
-  double mSq = resP4.invMassSq();
-
-  // Calculate sum of final states four momenta
-  cms += resP4;
+  FourMomentum State = FinalA + FinalB;
+  double mSq = State.invMassSq();
 
   if (mSq <= limits.first) {
     // We allow for a deviation from the limits of 10 times the numerical
@@ -285,7 +284,7 @@ void HelicityKinematics::convert(const Event &event, DataPoint &point,
       mSq = limits.first;
     else
       throw BeyondPhsp("HelicityKinematics::convert() |"
-                       " Point beypond phase space boundaries!");
+                       " Point beyond phase space boundaries!");
   }
   if (mSq >= limits.second) {
     // We allow for a deviation from the limits of 10 times the numerical
@@ -294,66 +293,57 @@ void HelicityKinematics::convert(const Event &event, DataPoint &point,
       mSq = limits.second;
     else
       throw BeyondPhsp("HelicityKinematics::convert() |"
-                       " Point beypond phase space boundaries!");
+                       " Point beyond phase space boundaries!");
   }
 
-  // When using finalB instead of finalA here, the WignerD changes sign. In
-  // the end this does not matter
-  QFT::Vector4<double> p4QftCms(cms);
-  QFT::Vector4<double> p4QftResonance(resP4);
-  QFT::Vector4<double> p4QftDaughter(finalB);
+  QFT::Vector4<double> DecayingState(State);
+  QFT::Vector4<double> Daughter(FinalA);
 
-  // Boost the four momentum of the decaying resonance to total CMS
-  p4QftResonance.Boost(p4QftCms);
-  // Boost the four momentum of one daughter particle to CMS of the resonance
-  p4QftDaughter.Boost(p4QftResonance);
+  // the first step is boosting everything into the rest system of the
+  // decaying state
+  Daughter.Boost(DecayingState);
 
-  // Calculate the angles between recoil system and final state.
-  // Use an Euler rotation of the coordinate system (wrong?)
-  //   p4QftDaughter.Rotate(p4QftResonance.Phi(), p4QftResonance.Theta(),
-  //                       (-1) * p4QftResonance.Phi());
-  p4QftDaughter.RotateZ((-1) * p4QftResonance.Phi());
-  p4QftDaughter.RotateY((-1) * p4QftResonance.Theta());
+  // calculate the recoil and parent recoil
+  auto const &RecoilState = sys.getRecoilState();
+  if (RecoilState.size() > 0) {
+    FourMomentum TempRecoil;
+    for (auto s : RecoilState) {
+      unsigned int index = convertFinalStateIDToPositionIndex(s);
+      TempRecoil += event.particle(index).fourMomentum();
+    }
+    QFT::Vector4<double> Recoil(TempRecoil);
+    Recoil.Boost(DecayingState);
 
-  double cosTheta = p4QftDaughter.CosTheta();
-  double phi = p4QftDaughter.Phi();
+    // rotate vectors so that recoil moves in the negative z-axis direction
+    Daughter.RotateZ(-Recoil.Phi());
+    Daughter.RotateY(M_PI - Recoil.Theta());
 
-  //  double cc;
-  //  if (sys.GetRecoilState().size() == 1 &&
-  //      sys.GetFinalStates().at(0).size() == 1 &&
-  //      sys.GetFinalStates().at(1).size() == 1) {
-  //    double invMassSqA = mSq;
-  //    double invMassSqB = (recoilP4 + finalA).GetInvMassSq();
-  //    auto mspec = PhysConst::Instance()
-  //                     ->FindParticle(_finalState.at(sys.GetRecoilState().at(0)))
-  //                     .GetMass();
-  //    auto ma =
-  //        PhysConst::Instance()
-  //            ->FindParticle(_finalState.at(sys.GetFinalStates().at(0).at(0)))
-  //            .GetMass();
-  //    auto mb =
-  //        PhysConst::Instance()
-  //            ->FindParticle(_finalState.at(sys.GetFinalStates().at(1).at(0)))
-  //            .GetMass();
-  //    auto M =
-  //    PhysConst::Instance()->FindParticle(_initialState.at(0)).GetMass();
-  //
-  //    cc = HelicityAngle(M, ma, mb, mspec, invMassSqA, invMassSqB);
-  //    std::cout << sys << std::endl;
-  //    std::cout << _initialState.at(0) << "/ (" <<
-  // sys.GetFinalStates().at(0).at(0)
-  //              << sys.GetFinalStates().at(1).at(0) << ") angle ("<<
-  // sys.GetFinalStates().at(0).at(0)
-  //              << sys.GetRecoilState().at(0) << ") - "
-  //              << " (ma=" << ma<<" mb="<<mb<<" mSpec="<<mspec<<"
-  // mABSq="<<invMassSqA << " mASpecSq=" << invMassSqB << ") = " << cc
-  //              << " " << cosTheta << std::endl;
-  //
-  //  } else {
-  //    cc = 1.0;
-  //    phi = 0.0;
-  //  }
-  //  cosTheta = cc;
+    auto const &ParentRecoilState = sys.getParentRecoilState();
+    QFT::Vector4<double> ParentRecoil;
+    if (ParentRecoilState.size() > 0) {
+      FourMomentum TempParentRecoil;
+      for (auto s : ParentRecoilState) {
+        unsigned int index = convertFinalStateIDToPositionIndex(s);
+        TempParentRecoil += event.particle(index).fourMomentum();
+      }
+      ParentRecoil = TempParentRecoil;
+    } else {
+    	// in case there is no parent recoil, it is artificially along z
+      ParentRecoil.SetP4(0, 0, 0, 1.0);
+    }
+
+    ParentRecoil.Boost(DecayingState);
+
+    ParentRecoil.RotateZ(-Recoil.Phi());
+    ParentRecoil.RotateY(M_PI - Recoil.Theta());
+
+    // rotate around the z-axis so that the parent recoil lies in the x-z
+    // plane
+    Daughter.RotateZ(M_PI - ParentRecoil.Phi());
+  }
+
+  double cosTheta = Daughter.CosTheta();
+  double phi = Daughter.Phi();
 
   //   Check if values are within allowed range.
   if (cosTheta > 1 || cosTheta < -1 || phi > M_PI || phi < (-1) * M_PI ||
@@ -383,14 +373,14 @@ HelicityKinematics::calculateInvMassBounds(const SubSystem &sys) const {
   /// generalization to n-body decays is correct.
   std::pair<double, double> lim(0, InitialStateP4.invMass());
   // Sum up masses of all final state particles
-  for (auto j : sys.GetFinalStates())
+  for (auto j : sys.getFinalStates())
     for (auto i : j) {
       unsigned int index = convertFinalStateIDToPositionIndex(i);
       lim.first += FindParticle(ParticleList, FinalState.at(index)).GetMass();
     }
   lim.first *= lim.first;
 
-  for (auto i : sys.GetRecoilState()) {
+  for (auto i : sys.getRecoilState()) {
     unsigned int index = convertFinalStateIDToPositionIndex(i);
     lim.second -= FindParticle(ParticleList, FinalState.at(index)).GetMass();
   }

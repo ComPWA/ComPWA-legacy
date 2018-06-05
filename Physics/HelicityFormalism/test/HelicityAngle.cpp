@@ -114,31 +114,19 @@ BOOST_AUTO_TEST_CASE(HelicityAngleTest) {
   // A(m_12^2,m_13^2) = Abar(m_13^2, m_12^2) -> A(sys12) = Aber(sys12_CP)
   // This is very specific to this decay.
 
-  unsigned int pos_sys12(kin->addSubSystem(std::vector<unsigned int>{2},
-                                           std::vector<unsigned int>{1},
-                                           std::vector<unsigned int>{0}));
+  unsigned int pos_sys12(kin->addSubSystem({0}, {1}, {2}, {}));
   SubSystem sys12(kin->subSystem(pos_sys12));
-  unsigned int pos_sys12_CP(kin->addSubSystem(std::vector<unsigned int>{1},
-                                              std::vector<unsigned int>{2},
-                                              std::vector<unsigned int>{0}));
+  unsigned int pos_sys12_CP(kin->addSubSystem({0}, {2}, {1}, {}));
   SubSystem sys12_CP(kin->subSystem(pos_sys12_CP));
 
-  unsigned int pos_sys13(kin->addSubSystem(std::vector<unsigned int>{1},
-                                           std::vector<unsigned int>{0},
-                                           std::vector<unsigned int>{2}));
+  unsigned int pos_sys13(kin->addSubSystem({2}, {0}, {1}, {}));
   SubSystem sys13(kin->subSystem(pos_sys13));
-  unsigned int pos_sys13_CP(kin->addSubSystem(std::vector<unsigned int>{2},
-                                              std::vector<unsigned int>{0},
-                                              std::vector<unsigned int>{1}));
+  unsigned int pos_sys13_CP(kin->addSubSystem({1}, {0}, {2}, {}));
   SubSystem sys13_CP(kin->subSystem(pos_sys13_CP));
 
-  unsigned int pos_sys23(kin->addSubSystem(std::vector<unsigned int>{0},
-                                           std::vector<unsigned int>{1},
-                                           std::vector<unsigned int>{2}));
+  unsigned int pos_sys23(kin->addSubSystem({2}, {1}, {0}, {}));
   SubSystem sys23(kin->subSystem(pos_sys23));
-  unsigned int pos_sys23_CP(kin->addSubSystem(std::vector<unsigned int>{0},
-                                              std::vector<unsigned int>{2},
-                                              std::vector<unsigned int>{1}));
+  unsigned int pos_sys23_CP(kin->addSubSystem({1}, {2}, {0}, {}));
   SubSystem sys23_CP(kin->subSystem(pos_sys23_CP));
 
   LOG(info) << "Loop over phsp events....";

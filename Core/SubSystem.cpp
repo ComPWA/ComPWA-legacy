@@ -9,17 +9,24 @@ using namespace ComPWA;
 SubSystem::SubSystem(const boost::property_tree::ptree &pt) { load(pt); }
 
 void SubSystem::load(const boost::property_tree::ptree &pt) {
-  _recoilState.clear();
-  _finalStates.clear();
-  helicities_.clear();
-  _finalStatesNames.clear();
+  RecoilFinalState.clear();
+  ParentRecoilFinalState.clear();
+  FinalStates.clear();
+  Helicities.clear();
+  FinalStateNames.clear();
 
   // Read subSystem definition
   auto recoil =
-      pt.get_optional<std::string>("RecoilSystem.<xmlattr>.FinalState");
+      pt.get_optional<std::string>("RecoilSystem.<xmlattr>.RecoilFinalState");
   if (recoil) {
-    _recoilState = stringToVectInt(recoil.get());
-    std::sort(_recoilState.begin(), _recoilState.end());
+    RecoilFinalState = stringToVectInt(recoil.get());
+    std::sort(RecoilFinalState.begin(), RecoilFinalState.end());
+  }
+  auto parent_recoil = pt.get_optional<std::string>(
+      "RecoilSystem.<xmlattr>.ParentRecoilFinalState");
+  if (parent_recoil) {
+    ParentRecoilFinalState = stringToVectInt(parent_recoil.get());
+    std::sort(ParentRecoilFinalState.begin(), ParentRecoilFinalState.end());
   }
   auto decayProducts = pt.get_child("DecayProducts");
 
@@ -27,17 +34,17 @@ void SubSystem::load(const boost::property_tree::ptree &pt) {
     auto tempvec(
         stringToVectInt(i.second.get<std::string>("<xmlattr>.FinalState")));
     std::sort(tempvec.begin(), tempvec.end());
-    _finalStates.push_back(
+    FinalStates.push_back(
         stringToVectInt(i.second.get<std::string>("<xmlattr>.FinalState")));
-    _finalStatesNames.push_back(i.second.get<std::string>("<xmlattr>.Name"));
-    helicities_.push_back(i.second.get<double>("<xmlattr>.Helicity"));
+    FinalStateNames.push_back(i.second.get<std::string>("<xmlattr>.Name"));
+    Helicities.push_back(i.second.get<double>("<xmlattr>.Helicity"));
   }
   // std::sort(_finalStates.begin(), _finalStates.end());
 }
 
 boost::property_tree::ptree SubSystem::save() const {
   boost::property_tree::ptree pt;
-  auto recoilV = GetRecoilState();
+  auto recoilV = getRecoilState();
   if (recoilV.size()) {
     std::string recoilStr;
     for (unsigned int i = 0; i < recoilV.size(); i++) {
@@ -51,9 +58,9 @@ boost::property_tree::ptree SubSystem::save() const {
   boost::property_tree::ptree daughterTr;
 
   // Information daugher final state A
-  auto finalS = GetFinalStates();
-  auto helicities = GetHelicities();
-  auto finalSNames = GetFinalStatesNames();
+  auto finalS = getFinalStates();
+  auto helicities = getHelicities();
+  auto finalSNames = getFinalStatesNames();
   for (unsigned int j = 0; j < finalS.size(); j++) {
     std::string strA;
     if (finalS.at(j).size()) {
@@ -77,39 +84,25 @@ boost::property_tree::ptree SubSystem::save() const {
 }
 
 SubSystem::SubSystem(
-    const std::vector<unsigned int> &recoilS,
-    const std::vector<std::vector<unsigned int>> &finalStates) {
-  SetFinalStates(finalStates);
-  SetRecoilState(recoilS);
-  _title = to_string();
+    const std::vector<std::vector<unsigned int>> &FinalStates,
+    const std::vector<unsigned int> &Recoil,
+    const std::vector<unsigned int> &ParentRecoil) {
+  setFinalStates(FinalStates);
+  setRecoilState(Recoil);
+  Title = to_string();
   // LOG(trace) << "SubSystem::SubSystem() | Creating sub system "<<title;
 }
-
-/*/// Constructor for an isobar model in which it is assumed that particles
-/// always decay to two final states.
-SubSystem::SubSystem(const std::vector<unsigned int>& recoilS, const
-std::vector<unsigned int>& finalA,
-                     const std::vector<unsigned int>& finalB)
-    : _recoilState(recoilS) {
-  std::vector<std::vector<unsigned int>> tmp;
-  tmp.push_back(finalA);
-  tmp.push_back(finalB);
-  SetFinalStates(tmp);
-
-  _title = to_string();
-  // LOG(trace) << "SubSystem::SubSystem() | Creating sub system "<<title;
-}*/
 
 std::string SubSystem::to_string() const {
   std::stringstream stream;
 
-  for (auto const &j : _finalStates) {
+  for (auto const &j : FinalStates) {
     for (auto const &i : j)
       stream << std::to_string(i);
     stream << "_";
   }
   stream << "vs_";
-  for (auto i : _recoilState)
+  for (auto i : RecoilFinalState)
     stream << std::to_string(i);
 
   return stream.str();
@@ -117,58 +110,68 @@ std::string SubSystem::to_string() const {
 
 bool SubSystem::operator==(const SubSystem &b) const {
   // we assume all vectors are sorted!!!
-  if (_recoilState == b._recoilState && _finalStates == b._finalStates)
+  if (RecoilFinalState == b.RecoilFinalState && FinalStates == b.FinalStates)
     return true;
   return false;
 }
 
-void SubSystem::SetFinalStates(
+void SubSystem::setFinalStates(
     const std::vector<std::vector<unsigned int>> &v) {
-  _finalStates.clear();
+  FinalStates.clear();
   for (auto fs : v) {
     std::sort(fs.begin(), fs.end());
-    _finalStates.push_back(fs);
+    FinalStates.push_back(fs);
   }
   // std::sort(_finalStates.begin(), _finalStates.end());
 }
 
-const std::vector<std::string> &SubSystem::GetFinalStatesNames() const {
-  return _finalStatesNames;
+const std::vector<std::string> &SubSystem::getFinalStatesNames() const {
+  return FinalStateNames;
 }
 
-void SubSystem::SetFinalStatesNames(const std::vector<std::string> &n) {
-  if (n.size() != _finalStates.size()) {
+void SubSystem::setFinalStatesNames(const std::vector<std::string> &n) {
+  if (n.size() != FinalStates.size()) {
     throw std::runtime_error("SubSystem::SetFinalStatesNames() | Length of "
                              "vectors does not match with the number of "
                              "final states.");
   }
-  _finalStatesNames = n;
+  FinalStateNames = n;
 }
 
 const std::vector<std::vector<unsigned int>> &
-SubSystem::GetFinalStates() const {
-  return _finalStates;
+SubSystem::getFinalStates() const {
+  return FinalStates;
 }
 
-const std::vector<double> SubSystem::GetHelicities() const {
-  if (helicities_.size() != _finalStates.size())
+const std::vector<double> SubSystem::getHelicities() const {
+  if (Helicities.size() != FinalStates.size())
     throw std::runtime_error("SubSystem::GetHelicities() | Helicities are "
                              "not defined for all final states!");
-  return helicities_;
+  return Helicities;
 }
-void SubSystem::SetHelicities(const std::vector<double> &hel) {
-  if (hel.size() != _finalStates.size())
+void SubSystem::setHelicities(const std::vector<double> &hel) {
+  if (hel.size() != FinalStates.size())
     throw std::runtime_error("SubSystem::SetHelicities() | Helicities are "
                              "not defined for all final states!");
-  helicities_ = hel;
+  Helicities = hel;
 }
 
-void SubSystem::SetRecoilState(const std::vector<unsigned int> &r) {
+void SubSystem::setRecoilState(const std::vector<unsigned int> &r) {
   auto recoil_state_copy(r);
   std::sort(recoil_state_copy.begin(), recoil_state_copy.end());
-  _recoilState = r;
+  RecoilFinalState = recoil_state_copy;
 }
 
-const std::vector<unsigned int> &SubSystem::GetRecoilState() const {
-  return _recoilState;
+void SubSystem::setParentRecoilState(const std::vector<unsigned int> &r) {
+  auto recoil_state_copy(r);
+  std::sort(recoil_state_copy.begin(), recoil_state_copy.end());
+  ParentRecoilFinalState = recoil_state_copy;
+}
+
+const std::vector<unsigned int> &SubSystem::getRecoilState() const {
+  return RecoilFinalState;
+}
+
+const std::vector<unsigned int> &SubSystem::getParentRecoilState() const {
+  return ParentRecoilFinalState;
 }

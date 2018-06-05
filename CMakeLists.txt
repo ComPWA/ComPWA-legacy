@@ -118,7 +118,9 @@ set(CTEST_OUTPUT_ON_FAILURE TRUE)
 add_test(NAME PythonTests
          COMMAND pytest -v --ignore=Tools/PythonInterface 
          WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
-
+set_property(TEST PythonTests PROPERTY
+    ENVIRONMENT "PYTHONPATH=${CMAKE_SOURCE_DIR}/Physics/ExpertSystem")
+  
 #
 # Submodules
 #
