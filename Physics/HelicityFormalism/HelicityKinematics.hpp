@@ -63,7 +63,7 @@ namespace HelicityFormalism {
 ///
 ///
 class HelicityKinematics : public ComPWA::Kinematics {
- public:
+public:
   /// Create HelicityKinematics from inital and final state particle lists.
   /// The lists contain the pid of initial and final state. The position of a
   /// particle in initial or final state list is used later on for
@@ -147,10 +147,11 @@ class HelicityKinematics : public ComPWA::Kinematics {
   virtual unsigned int addSubSystem(const SubSystem &newSys);
 
   /// Add SubSystem from \p pos indices of final state particles
-  virtual unsigned int addSubSystem(const std::vector<unsigned int> &FinalA,
-                                    const std::vector<unsigned int> &FinalB,
-                                    const std::vector<unsigned int> &Recoil,
-                                    const std::vector<unsigned int> &ParentRecoil);
+  virtual unsigned int
+  addSubSystem(const std::vector<unsigned int> &FinalA,
+               const std::vector<unsigned int> &FinalB,
+               const std::vector<unsigned int> &Recoil,
+               const std::vector<unsigned int> &ParentRecoil);
 
   /// Get SubSystem from \p pos in list
   virtual SubSystem subSystem(unsigned int pos) const {
@@ -164,8 +165,8 @@ class HelicityKinematics : public ComPWA::Kinematics {
   virtual size_t numVariables() const { return Subsystems.size() * 3; }
 
   /// Get phase space bounds for the invariant mass of \p subSys.
-  virtual const std::pair<double, double> &invMassBounds(
-      const SubSystem &subSys) const;
+  virtual const std::pair<double, double> &
+  invMassBounds(const SubSystem &subSys) const;
 
   virtual const std::pair<double, double> &invMassBounds(int sysID) const;
 
@@ -175,7 +176,7 @@ class HelicityKinematics : public ComPWA::Kinematics {
   double helicityAngle(double M, double m, double m2, double mSpec,
                        double invMassSqA, double invMassSqB) const;
 
- protected:
+protected:
   std::shared_ptr<PartList> ParticleList;
 
   ///  Calculation of n-dimensional phase space volume.
@@ -190,15 +191,15 @@ class HelicityKinematics : public ComPWA::Kinematics {
 
   std::pair<double, double> calculateInvMassBounds(const SubSystem &sys) const;
 
- private:
-  virtual unsigned int convertFinalStateIDToPositionIndex(
-      unsigned int fs_id) const;
+private:
+  virtual unsigned int
+  convertFinalStateIDToPositionIndex(unsigned int fs_id) const;
   virtual std::vector<unsigned int> convertFinalStateIDToPositionIndex(
       const std::vector<unsigned int> &fs_ids) const;
 };
 
-}  // namespace HelicityFormalism
-}  // namespace Physics
-}  // namespace ComPWA
+} // namespace HelicityFormalism
+} // namespace Physics
+} // namespace ComPWA
 
 #endif

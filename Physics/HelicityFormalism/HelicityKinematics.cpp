@@ -328,7 +328,7 @@ void HelicityKinematics::convert(const Event &event, DataPoint &point,
       }
       ParentRecoil = TempParentRecoil;
     } else {
-    	// in case there is no parent recoil, it is artificially along z
+      // in case there is no parent recoil, it is artificially along z
       ParentRecoil.SetP4(0, 0, 0, 1.0);
     }
 

@@ -140,7 +140,7 @@ Tensor<double> dual(const Tensor<double> &t2) {
 // Calculate ( \vec{p1} cross \vec{p2} ) \cdot \vec{p3} in rest frame of object
 double scalartripler3(const Vector4<double> &p0, const Vector4<double> &p1,
                       const Vector4<double> &p2, const Vector4<double> &p3) {
-	Tensor<double> l = dual(p0 % p1) * p2;
+  Tensor<double> l = dual(p0 % p1) * p2;
   return -1.0 / p0.Mass() * (l * p3);
 }
 
@@ -253,9 +253,12 @@ BOOST_AUTO_TEST_CASE(HelicityAnglesCorrectnessTest) {
         std::make_pair(compwa_point.values()[7], compwa_point.values()[8]));
 
     for (unsigned int i = 0; i < compwa_angles.size(); ++i) {
-      BOOST_CHECK_EQUAL((float)compwa_angles[i].first, (float)pawian_angles[i].first);
-      BOOST_CHECK_EQUAL((float)compwa_angles[i].first, (float)evtgen_angles[i].first);
-      BOOST_CHECK_EQUAL((float)compwa_angles[i].second, (float)evtgen_angles[i].second);
+      BOOST_CHECK_EQUAL((float)compwa_angles[i].first,
+                        (float)pawian_angles[i].first);
+      BOOST_CHECK_EQUAL((float)compwa_angles[i].first,
+                        (float)evtgen_angles[i].first);
+      BOOST_CHECK_EQUAL((float)compwa_angles[i].second,
+                        (float)evtgen_angles[i].second);
     }
   }
 }
