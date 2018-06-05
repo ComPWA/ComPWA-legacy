@@ -79,7 +79,7 @@ void HelicityDecay::load(std::shared_ptr<PartList> partL,
       ComPWA::Spin(p->second.get<double>("<xmlattr>.Helicity"));
 
   // Two-body decay
-  if (SubSys.GetFinalStates().size() == 2) {
+  if (SubSys.getFinalStates().size() == 2) {
     // Create WignerD object
     AngularDist = std::make_shared<HelicityFormalism::AmpWignerD>(
         J, mu, DecayHelicities.first - DecayHelicities.second);

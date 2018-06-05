@@ -147,9 +147,10 @@ class HelicityKinematics : public ComPWA::Kinematics {
   virtual unsigned int addSubSystem(const SubSystem &newSys);
 
   /// Add SubSystem from \p pos indices of final state particles
-  virtual unsigned int addSubSystem(const std::vector<unsigned int> &recoilS,
-                                    const std::vector<unsigned int> &finalA,
-                                    const std::vector<unsigned int> &finalB);
+  virtual unsigned int addSubSystem(const std::vector<unsigned int> &FinalA,
+                                    const std::vector<unsigned int> &FinalB,
+                                    const std::vector<unsigned int> &Recoil,
+                                    const std::vector<unsigned int> &ParentRecoil);
 
   /// Get SubSystem from \p pos in list
   virtual SubSystem subSystem(unsigned int pos) const {
