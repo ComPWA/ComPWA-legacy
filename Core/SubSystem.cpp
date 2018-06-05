@@ -83,10 +83,9 @@ boost::property_tree::ptree SubSystem::save() const {
   return pt;
 }
 
-SubSystem::SubSystem(
-    const std::vector<std::vector<unsigned int>> &FinalStates,
-    const std::vector<unsigned int> &Recoil,
-    const std::vector<unsigned int> &ParentRecoil) {
+SubSystem::SubSystem(const std::vector<std::vector<unsigned int>> &FinalStates,
+                     const std::vector<unsigned int> &Recoil,
+                     const std::vector<unsigned int> &ParentRecoil) {
   setFinalStates(FinalStates);
   setRecoilState(Recoil);
   Title = to_string();

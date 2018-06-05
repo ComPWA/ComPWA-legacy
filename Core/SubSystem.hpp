@@ -27,8 +27,8 @@ public:
   SubSystem(const boost::property_tree::ptree &pt);
 
   SubSystem(const std::vector<std::vector<unsigned int>> &FinalStates,
-  		const std::vector<unsigned int> &Recoil,
-  		const std::vector<unsigned int> &ParentRecoil);
+            const std::vector<unsigned int> &Recoil,
+            const std::vector<unsigned int> &ParentRecoil);
 
   virtual boost::property_tree::ptree save() const;
 
