@@ -863,10 +863,62 @@
 			</Parameter>
 		</DecayInfo>
 	</Particle>
-	<Particle Name="D*-(2010)">
-		<Pid>42221</Pid>
-		<Parameter Type="Mass" Name="Mass_Dstarminus">
+	<Particle Name="D*(2007)0">
+		<Pid>423</Pid>
+		<Parameter Type="Mass" Name="Mass_D*(2007)0">
 			<Value>2.1</Value>
+			<Fix>true</Fix>
+		</Parameter>
+		<QuantumNumber Class="Spin" Type="Spin" Value="1"/>
+		<QuantumNumber Class="Int" Type="Charge" Value="0"/>
+		<QuantumNumber Class="Int" Type="Parity" Value="-1"/>
+		<QuantumNumber Class="Spin" Type="IsoSpin" Value="0.5" Projection="-0.5"/>
+		<QuantumNumber Class="Int" Type="Charm" Value="1"/>
+		<QuantumNumber Class="Int" Type="BaryonNumber" Value="0"/>
+		<DecayInfo Type="relativisticBreitWigner">
+			<FormFactor Type="0" />
+			<Parameter Type="Width" Name="Width_D*(2007)0">
+				<Value>0.001</Value>
+				<Fix>true</Fix>
+			</Parameter>
+			<Parameter Type="MesonRadius" Name="Radius_D*(2007)0">
+				<Value>2.5</Value>
+				<Fix>true</Fix>
+				<Min>2.0</Min>
+				<Max>3.0</Max>
+			</Parameter>
+		</DecayInfo>
+	</Particle>
+	<Particle Name="D*(2007)0bar">
+		<Pid>-423</Pid>
+		<Parameter Type="Mass" Name="Mass_D*(2007)0bar">
+			<Value>2.1</Value>
+			<Fix>true</Fix>
+		</Parameter>
+		<QuantumNumber Class="Spin" Type="Spin" Value="1"/>
+		<QuantumNumber Class="Int" Type="Charge" Value="0"/>
+		<QuantumNumber Class="Int" Type="Parity" Value="-1"/>
+		<QuantumNumber Class="Spin" Type="IsoSpin" Value="0.5" Projection="0.5"/>
+		<QuantumNumber Class="Int" Type="Charm" Value="-1"/>
+		<QuantumNumber Class="Int" Type="BaryonNumber" Value="0"/>
+		<DecayInfo Type="relativisticBreitWigner">
+			<FormFactor Type="0" />
+			<Parameter Type="Width" Name="Width_D*(2007)0bar">
+				<Value>0.001</Value>
+				<Fix>true</Fix>
+			</Parameter>
+			<Parameter Type="MesonRadius" Name="Radius_D*(2007)0bar">
+				<Value>2.5</Value>
+				<Fix>true</Fix>
+				<Min>2.0</Min>
+				<Max>3.0</Max>
+			</Parameter>
+		</DecayInfo>
+	</Particle>
+	<Particle Name="D*(2010)-">
+		<Pid>-413</Pid>
+		<Parameter Type="Mass" Name="Mass_D*(2010)-">
+			<Value>2.01</Value>
 			<Fix>true</Fix>
 		</Parameter>
 		<QuantumNumber Class="Spin" Type="Spin" Value="1"/>
@@ -877,11 +929,11 @@
 		<QuantumNumber Class="Int" Type="BaryonNumber" Value="0"/>
 		<DecayInfo Type="relativisticBreitWigner">
 			<FormFactor Type="0" />
-			<Parameter Type="Width" Name="Width_neutralD">
-				<Value>1.605E-12</Value>
+			<Parameter Type="Width" Name="Width_D*(2010)-">
+				<Value>83.4E-6</Value>
 				<Fix>true</Fix>
 			</Parameter>
-			<Parameter Type="MesonRadius" Name="Radius_neutralD">
+			<Parameter Type="MesonRadius" Name="Radius_D*(2010)-">
 				<Value>2.5</Value>
 				<Fix>true</Fix>
 				<Min>2.0</Min>
@@ -923,6 +975,34 @@
 				<Fix>true</Fix>
 			</Parameter>
 			<Parameter Type="MesonRadius" Name="Radius_jpsi">
+				<Value>2.5</Value>
+				<Fix>true</Fix>
+				<Min>2.0</Min>
+				<Max>3.0</Max>
+			</Parameter>
+		</DecayInfo>
+	</Particle>
+
+	<Particle Name="Y">
+		<Pid>11443</Pid>
+		<Parameter Type="Mass" Name="Mass_Y">
+			<Value>4.300</Value>
+			<Fix>true</Fix>
+		</Parameter>
+		<QuantumNumber Class="Spin" Type="Spin" Value="1"/>
+		<QuantumNumber Class="Int" Type="Charge" Value="0"/>
+		<QuantumNumber Class="Int" Type="Parity" Value="-1"/>
+		<QuantumNumber Class="Int" Type="Cparity" Value="-1"/>
+		<QuantumNumber Class="Int" Type="BaryonNumber" Value="0"/>
+		<QuantumNumber Class="Int" Type="Charm" Value="0"/>
+		<QuantumNumber Class="Int" Type="Strangeness" Value="0"/>
+		<DecayInfo Type="relativisticBreitWigner">
+			<FormFactor Type="0" />
+			<Parameter Type="Width" Name="Width_Y">
+				<Value>9.29E-05</Value>
+				<Fix>true</Fix>
+			</Parameter>
+			<Parameter Type="MesonRadius" Name="Radius_Y">
 				<Value>2.5</Value>
 				<Fix>true</Fix>
 				<Min>2.0</Min>
