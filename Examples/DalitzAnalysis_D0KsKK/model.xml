@@ -252,12 +252,12 @@
 <HelicityKinematics>
   <PhspVolume>0.541493</PhspVolume>
   <InitialState>
-	<Particle Name="D0" Id="0"/>
+	<Particle Name="D0" Id="0" PositionIndex="0"/>
   </InitialState>
   <FinalState>
-	<Particle Name="K_S0" Id="0"/>
-	<Particle Name="K-" Id="1"/>
-	<Particle Name="K+" Id="2"/>
+	<Particle Name="K_S0" Id="0" PositionIndex="0"/>
+	<Particle Name="K-" Id="1" PositionIndex="1"/>
+	<Particle Name="K+" Id="2" PositionIndex="2"/>
   </FinalState>
 </HelicityKinematics>
 
@@ -290,7 +290,7 @@
 		  <Fix>true</Fix>
 		</Parameter>
 		<DecayParticle Name="a0(980)0" Helicity="0"/>
-		<RecoilSystem FinalState="0" />
+		<RecoilSystem RecoilFinalState="0" />
 		<DecayProducts>
 		  <Particle Name="K-" FinalState="1"  Helicity="0"/>
 		  <Particle Name="K+" FinalState="2"  Helicity="0"/>
@@ -320,7 +320,7 @@
 		  <Fix>true</Fix>
 		</Parameter>
 		<DecayParticle Name="a0(980)+" Helicity="0"/>
-		<RecoilSystem FinalState="1" />
+		<RecoilSystem RecoilFinalState="1" />
 		<DecayProducts>
 		  <Particle Name="K_S0" FinalState="0"  Helicity="0"/>
 		  <Particle Name="K+" FinalState="2"  Helicity="0"/>
@@ -350,7 +350,7 @@
 		  <Fix>true</Fix>
 		</Parameter>
 		<DecayParticle Name="phi(1020)" Helicity="0"/>
-		<RecoilSystem FinalState="0" />
+		<RecoilSystem RecoilFinalState="0" />
 		<DecayProducts>
 		  <Particle Name="K-" FinalState="1"  Helicity="0"/>
 		  <Particle Name="K+" FinalState="2"  Helicity="0"/>
@@ -380,7 +380,7 @@
 		  <Fix>true</Fix>
 		</Parameter>
 		<DecayParticle Name="a2(1320)-" Helicity="0"/>
-		<RecoilSystem FinalState="2" />
+		<RecoilSystem RecoilFinalState="2" />
 		<DecayProducts>
 		  <Particle Name="K_S0" FinalState="0"  Helicity="0"/>
 		  <Particle Name="K-" FinalState="1"  Helicity="0"/>
@@ -407,7 +407,7 @@
 		  <Fix>true</Fix>
 		</Parameter>
 		<DecayParticle Name="a0(980)0" Helicity="0"/>
-		<RecoilSystem FinalState="0" />
+		<RecoilSystem RecoilFinalState="0" />
 		<DecayProducts>
 		  <Particle Name="K+" FinalState="2"  Helicity="0"/>
 		  <Particle Name="K-" FinalState="1"  Helicity="0"/>
@@ -438,7 +438,7 @@
 		  <Fix>true</Fix>
 		</Parameter>
 		<DecayParticle Name="a0(980)+" Helicity="0"/>
-		<RecoilSystem FinalState="2" />
+		<RecoilSystem RecoilFinalState="2" />
 		<DecayProducts>
 		  <Particle Name="K_S0" FinalState="0"  Helicity="0"/>
 		  <Particle Name="K-" FinalState="1"  Helicity="0"/>
@@ -469,7 +469,7 @@
 		  <Fix>true</Fix>
 		</Parameter>
 		<DecayParticle Name="phi(1020)" Helicity="0"/>
-		<RecoilSystem FinalState="0" />
+		<RecoilSystem RecoilFinalState="0" />
 		<DecayProducts>
 		  <Particle Name="K+" FinalState="2"  Helicity="0"/>
 		  <Particle Name="K-" FinalState="1"  Helicity="0"/>
@@ -500,7 +500,7 @@
 		  <Fix>true</Fix>
 		</Parameter>
 		<DecayParticle Name="a2(1320)-" Helicity="0"/>
-		<RecoilSystem FinalState="1" />
+		<RecoilSystem RecoilFinalState="1" />
 		<DecayProducts>
 		  <Particle Name="K_S0" FinalState="0"  Helicity="0"/>
 		  <Particle Name="K+" FinalState="2"  Helicity="0"/>
@@ -561,7 +561,7 @@
 		  <Fix>true</Fix>
 		</Parameter>
 		<DecayParticle Name="Bkgphi(1020)" Helicity="0"/>
-		<RecoilSystem FinalState="0" />
+		<RecoilSystem RecoilFinalState="0" />
 		<DecayProducts>
 		  <Particle Name="K+" FinalState="2"  Helicity="0"/>
 		  <Particle Name="K-" FinalState="1"  Helicity="0"/>
@@ -591,7 +591,7 @@
 		  <Fix>true</Fix>
 		</Parameter>
 		<DecayParticle Name="something" Helicity="0"/>
-		<RecoilSystem FinalState="0" />
+		<RecoilSystem RecoilFinalState="0" />
 		<DecayProducts>
 		  <Particle Name="K+" FinalState="2"  Helicity="0"/>
 		  <Particle Name="K-" FinalState="1"  Helicity="0"/>
