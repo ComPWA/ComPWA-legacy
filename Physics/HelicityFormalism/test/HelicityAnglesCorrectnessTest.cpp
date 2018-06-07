@@ -58,19 +58,13 @@ pawianHelicityAngles(const Vector4<double> &motherRef,
   return std::make_pair(result.CosTheta(), result.Phi());
 }
 
-std::vector<std::pair<double, double>>
-allPawianHelicityAngles(Vector4<double> p1, Vector4<double> p2,
-                        Vector4<double> p3, Vector4<double> p4) {
+std::vector<std::pair<double, double>> allPawianHelicityAngles(
+    Vector4<double> cms_state, Vector4<double> intermediate_state1,
+    Vector4<double> intermediate_state2, Vector4<double> final) {
   std::vector<std::pair<double, double>> resultvec;
 
-  Vector4<double> cmsp4 = p1 + p2 + p3 + p4;
-
   Vector4<double> topref(0., 0., 0., -2.0);
-  Vector4<double> top(std::sqrt(cmsp4.Mass2() + 1.0), 0., 0., -1.0);
-  Vector4<double> cms_state(cmsp4);
-  Vector4<double> intermediate_state1(p1 + p2 + p3);
-  Vector4<double> intermediate_state2(p1 + p2);
-  Vector4<double> final(p1);
+  Vector4<double> top(std::sqrt(cms_state.Mass2() + 1.0), 0., 0., -1.0);
 
   resultvec.push_back(
       pawianHelicityAngles(topref, top, cms_state, intermediate_state1));
@@ -225,15 +219,16 @@ BOOST_AUTO_TEST_CASE(HelicityAnglesCorrectnessTest) {
       temp.push_back(Vector4<double>(part.fourMomentum()));
     }
 
-    // Pawian angles
-    auto pawian_angles =
-        allPawianHelicityAngles(temp[2], temp[3], temp[1], temp[0]);
-
-    // EvtGen angles
     Vector4<double> level0 = temp[0] + temp[1] + temp[2] + temp[3];
     Vector4<double> level1 = temp[1] + temp[2] + temp[3];
     Vector4<double> level2 = temp[2] + temp[3];
     Vector4<double> level3 = temp[2];
+
+    // Pawian angles
+    auto pawian_angles =
+        allPawianHelicityAngles(level0, level1, level2, level3);
+
+    // EvtGen angles
     std::vector<std::pair<double, double>> evtgen_angles;
     evtgen_angles.push_back(std::make_pair(level1.CosTheta(), level1.Phi()));
     evtgen_angles.push_back(
