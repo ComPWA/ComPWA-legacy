@@ -125,6 +125,7 @@ inline double FormFactor(std::complex<double> qValue, double orbitL,
     // Events below threshold. What should we do if event is below threshold?
     // Shouldn't really influence the result because resonances at threshold
     // don't have spin(?).
+    // Ref. for Blatt-Weisskopf: Phys. Rev. D 48, 1225
     z = std::fabs(z);
 
     if (orbitL == 1) {
@@ -133,7 +134,7 @@ inline double FormFactor(std::complex<double> qValue, double orbitL,
       ff = std::sqrt(13 * z * z / ((z - 3) * (z - 3) + 9 * z));
     } else if (orbitL == 3) {
       ff = std::sqrt(277 * z * z * z /
-                     (z * (z - 15) * (z - 15) + 9 * (2 * z - 5)));
+                     (z * (z - 15) * (z - 15) + 9 * (2 * z - 5) * (2 * z - 5)));
     } else if (orbitL == 4) {
       ff = std::sqrt(12746 * z * z * z * z /
                      ((z * z - 45 * z + 105) * (z * z - 45 * z + 105) +
