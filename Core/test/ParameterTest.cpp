@@ -32,7 +32,7 @@ namespace ComPWA {
 BOOST_AUTO_TEST_SUITE(ParameterTest);
 
 BOOST_AUTO_TEST_CASE(BoundsCheck) {
-  ComPWA::Logging log("", boost::log::trivial::severity_level::trace);
+  ComPWA::Logging log("", "trace");
 
   FitParameter parWrong("wrongPar", 7, 1);
   BOOST_CHECK_EXCEPTION(parWrong.setBounds(20, -1), BadParameter,

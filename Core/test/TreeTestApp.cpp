@@ -41,7 +41,7 @@ using namespace ComPWA;
 BOOST_AUTO_TEST_SUITE(FunctionTreeTest);
 
 BOOST_AUTO_TEST_CASE(SubTree) {
-  ComPWA::Logging log("", boost::log::trivial::severity_level::trace);
+  ComPWA::Logging log("", "trace");
 
   std::shared_ptr<FitParameter> parA(new FitParameter("parA", 5.));
   parA->fixParameter(0);

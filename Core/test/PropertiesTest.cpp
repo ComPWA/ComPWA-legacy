@@ -16,7 +16,7 @@
 BOOST_AUTO_TEST_SUITE(Core)
 
 BOOST_AUTO_TEST_CASE(XMLInput) {
-  ComPWA::Logging log("", boost::log::trivial::severity_level::trace);
+  ComPWA::Logging log("", "trace");
 
   std::stringstream XMLIn;
   XMLIn << "<ParticleList> \

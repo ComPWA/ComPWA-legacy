@@ -194,41 +194,8 @@ inline void ReadParticles(std::shared_ptr<PartList> list,
 }
 
 /// Read list of particles from a boost::property_tree
-inline void ReadParticles(PartList &list,
-                          const boost::property_tree::ptree &pt) {
-
-  auto particleTree = pt.get_child_optional("ParticleList");
-  if (!particleTree)
-    return;
-  for (auto const &v : particleTree.get()) {
-    auto tmp = ParticleProperties(v.second);
-    auto p = std::make_pair(tmp.name(), tmp);
-    auto last = list.insert(p);
-
-    if (!last.second) {
-      LOG(info) << "ReadParticles() | Particle " << last.first->first
-                << " already exists in list. We overwrite its parameters!";
-      last.first->second = tmp;
-    }
-    tmp = last.first->second;
-
-    // cparity is optional
-    double cparity = 0.0;
-    try {
-      cparity = tmp.GetQuantumNumber("Cparity");
-    } catch (std::exception &ex) {
-    }
-
-    LOG(debug) << "ReadParticles() | Particle " << tmp.name()
-               << " (id=" << tmp.GetId() << ") "
-               << " J(PC)=" << tmp.GetSpinQuantumNumber("Spin") << "("
-               << tmp.GetQuantumNumber("Parity") << cparity << ") "
-               << " mass=" << tmp.GetMass()
-               << " decayType=" << tmp.GetDecayType();
-  }
-
-  return;
-}
+void ReadParticles(PartList &list,
+                          const boost::property_tree::ptree &pt);
 
 /// Read list of particles from a stream
 inline void ReadParticles(std::shared_ptr<PartList> list,

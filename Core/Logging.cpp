@@ -4,6 +4,8 @@
 
 #include "Core/Logging.hpp"
 
+#include <boost/log/trivial.hpp>
+#include <boost/log/common.hpp>
 #include <boost/log/expressions.hpp>
 #include <boost/log/utility/setup/common_attributes.hpp>
 #include <boost/log/utility/setup/file.hpp>
@@ -13,7 +15,28 @@
 namespace ComPWA {
 using namespace boost::log;
 
-void Logging::init(std::string out, trivial::severity_level minLevel) {
+boost::log::trivial::severity_level stringToLoggingLevel(std::string logStr) {
+  boost::log::trivial::severity_level logLv;
+  if (logStr == "trace")
+    logLv = boost::log::trivial::trace;
+  else if (logStr == "debug")
+    logLv = boost::log::trivial::debug;
+  else if (logStr == "info")
+    logLv = boost::log::trivial::info;
+  else if (logStr == "warning")
+    logLv = boost::log::trivial::warning;
+  else if (logStr == "error")
+    logLv = boost::log::trivial::error;
+  else if (logStr == "fatal")
+    logLv = boost::log::trivial::fatal;
+  else
+    throw std::runtime_error("Logging stringToLogLevel | unknown log level \"" +
+                             logStr + "\"");
+  return logLv;
+}
+
+Logging::Logging(std::string out, std::string lvl) {
+  auto minLevel = stringToLoggingLevel(lvl);
   add_common_attributes();
   boost::log::add_console_log(
       std::cout,
@@ -30,7 +53,7 @@ void Logging::init(std::string out, trivial::severity_level minLevel) {
   } else {
     add_file_log(
         keywords::file_name = out,
-        //			keywords::format="(%LineID%)
+        //      keywords::format="(%LineID%)
         //[%TimeStamp%][%Severity%]: %Message%"
         keywords::format =
             (expressions::stream
@@ -49,11 +72,17 @@ void Logging::init(std::string out, trivial::severity_level minLevel) {
       boost::posix_time::second_clock::local_time().time_of_day());
   LOG(info) << "Current date and time: "
             << boost::posix_time::to_simple_string(todayUtc);
+};
+
+void Logging::log(logLvl level){
+  BOOST_LOG_STREAM_WITH_PARAMS(
+      ::boost::log::trivial::logger::get(),
+      (::boost::log::keywords::severity = ::boost::log::trivial::debug));
 }
 
-void Logging::setLogLevel(boost::log::trivial::severity_level minLevel) {
-  core::get()->set_filter(trivial::severity >= minLevel);
+void Logging::setLogLevel(std::string minLevel) {
+  core::get()->set_filter(trivial::severity >= stringToLoggingLevel(minLevel));
   LOG(info) << "New severity level: " << minLevel;
-}
+};
 
 } // namespace ComPWA

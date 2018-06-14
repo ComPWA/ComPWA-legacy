@@ -232,7 +232,7 @@ int main(int argc, char **argv) {
   if (disableFileLog)
     logFileName = "";
 
-  Logging log(logFileName, boost::log::trivial::info); // initialize logging
+  Logging log(logFileName, "info"); // initialize logging
   log.setLogLevel(logLevel);
   LOG(info) << " testPWA program for R-> XYZ";
   LOG(info) << " create/modify config.cfg to change configuration";

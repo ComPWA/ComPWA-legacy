@@ -169,7 +169,7 @@ int main(int argc, char **argv) {
   auto startProgram = std::chrono::steady_clock::now();
   
   // initialize logging - set to log level error to see only the timing info
-  Logging log("benchmark.log", boost::log::trivial::error);
+  Logging log("benchmark.log", "error");
 
   // List with all particle information needed
   auto partL = std::make_shared<ComPWA::PartList>();

@@ -310,7 +310,7 @@ int main(int argc, char **argv) {
   if (disableFileLog)
     logFileName = "";
 
-  Logging log(logFileName, boost::log::trivial::info); // initialize logging
+  Logging log(logFileName, "info"); // initialize logging
   log.setLogLevel(logLevel);
 
   // check configuration

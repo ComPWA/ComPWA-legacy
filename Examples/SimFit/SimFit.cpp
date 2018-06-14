@@ -260,7 +260,7 @@ struct energyPar {
 int main(int argc, char **argv) {
 
   // initialize logging
-  Logging log("log.txt", boost::log::trivial::debug);
+  Logging log("log.txt", "debug");
 
   ptree tmpTr;
   std::stringstream modelStream;

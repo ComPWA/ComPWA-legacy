@@ -10,60 +10,42 @@
 
 namespace ComPWA {
 
+#define LOG(lvl) Logging::log(lvl)
+#define info lvl::info
 // Redefine BOOST_LOG_TRIVIAL(level) to LOG(level)
-#define LOG(lvl)                                                               \
-  BOOST_LOG_STREAM_WITH_PARAMS(                                                \
-      ::boost::log::trivial::logger::get(),                                    \
-      (::boost::log::keywords::severity = ::boost::log::trivial::lvl))
+//#define LOG(lvl)                                                               \
+//  BOOST_LOG_STREAM_WITH_PARAMS(                                                \
+//      ::boost::log::trivial::logger::get(),                                    \
+//      (::boost::log::keywords::severity = ::boost::log::trivial::lvl))
 
-inline boost::log::trivial::severity_level
-stringToLoggingLevel(std::string logStr) {
-  boost::log::trivial::severity_level logLv;
-  if (logStr == "trace")
-    logLv = boost::log::trivial::trace;
-  else if (logStr == "debug")
-    logLv = boost::log::trivial::debug;
-  else if (logStr == "info")
-    logLv = boost::log::trivial::info;
-  else if (logStr == "warning")
-    logLv = boost::log::trivial::warning;
-  else if (logStr == "error")
-    logLv = boost::log::trivial::error;
-  else if (logStr == "fatal")
-    logLv = boost::log::trivial::fatal;
-  else
-    throw std::runtime_error("Logging stringToLogLevel | unknown log level \"" +
-                             logStr + "\"");
-  return logLv;
-}
-
+//#define BOOST_LOG_STREAM_WITH_PARAMS(logger, params_seq)                       \
+//  BOOST_LOG_STREAM_WITH_PARAMS_INTERNAL(                                       \
+//      logger, BOOST_LOG_UNIQUE_IDENTIFIER_NAME(_boost_log_record_),            \
+//      params_seq)
+//
+//#define BOOST_LOG_STREAM_WITH_PARAMS_INTERNAL(logger, rec_var, params_seq)     \
+//  for (::boost::log::record rec_var =                                          \
+//           (logger).open_record((BOOST_PP_SEQ_ENUM(params_seq)));              \
+//       !!rec_var;)                                                             \
+//  ::boost::log::aux::make_record_pump((logger), rec_var).stream()
 ///
 /// \class Logging
 /// Logging class privides an interface for logging all over the framework.
 /// Behind the scenes boost::log is currently used which allows a detailed
 /// on logging format and log levels
 ///
+operator<<
 class Logging {
 public:
   Logging(std::string outFileName = "output.log",
-          boost::log::trivial::severity_level minLevel =
-              boost::log::trivial::debug) {
-    init(outFileName, minLevel);
-  };
+          std::string minLevel = "debug");
 
-  Logging(std::string outFileName = "output.log",
-          std::string minLevel = "debug") {
-    init(outFileName, stringToLoggingLevel(minLevel));
-  };
+  enum logLvl {Trace, Debug, Info, Warning, Error, Fatal};
 
-  void setLogLevel(boost::log::trivial::severity_level minLevel);
+  static void log(logLvl level);
 
-  void setLogLevel(std::string minLevel) {
-    setLogLevel(stringToLoggingLevel(minLevel));
-  };
-
-private:
-  void init(std::string out, boost::log::trivial::severity_level minLevel);
+  void setLogLevel(std::string minLevel);
+  
 };
 
 } // namespace ComPWA

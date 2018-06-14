@@ -166,7 +166,7 @@ std::string myParticles = R"####(
 int main(int argc, char **argv) {
 
   // initialize logging
-  Logging log("DalitzFit-log.txt", boost::log::trivial::debug);
+  Logging log("DalitzFit-log.txt", "debug");
 
   // List with all particle information needed
   auto partL = std::make_shared<ComPWA::PartList>();

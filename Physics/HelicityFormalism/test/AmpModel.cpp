@@ -34,7 +34,7 @@ using namespace ComPWA::Physics::HelicityFormalism;
 BOOST_AUTO_TEST_SUITE(HelicityFormalism)
 
 BOOST_AUTO_TEST_CASE(KinematicsConstructionFromXML) {
-  ComPWA::Logging log("", boost::log::trivial::severity_level::trace);
+  ComPWA::Logging log("", "trace");
 
   boost::property_tree::ptree tr;
   std::stringstream modelStream;

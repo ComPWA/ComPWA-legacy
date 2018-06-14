@@ -43,7 +43,7 @@ BOOST_AUTO_TEST_SUITE(HelicityFormalism)
  * precision. Every not an then even with float precision the test fails.
  */
 BOOST_AUTO_TEST_CASE(HelicityAngleTest) {
-  ComPWA::Logging log("", boost::log::trivial::severity_level::debug);
+  ComPWA::Logging log("", "debug");
 
   // Construct HelicityKinematics from XML tree
   boost::property_tree::ptree tr;
