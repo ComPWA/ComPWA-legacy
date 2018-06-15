@@ -8,6 +8,7 @@
 #include "Physics/DecayDynamics/NonResonant.hpp"
 #include "Physics/DecayDynamics/RelativisticBreitWigner.hpp"
 #include "Physics/DecayDynamics/Voigtian.hpp"
+#include "Physics/qft++/WignerD.h"
 
 #include "Physics/HelicityFormalism/HelicityDecay.hpp"
 #include "Physics/HelicityFormalism/HelicityKinematics.hpp"
@@ -37,6 +38,7 @@ void HelicityDecay::load(std::shared_ptr<PartList> partL,
   Magnitude = std::make_shared<ComPWA::FitParameter>("Magnitude_" + Name, 1.0);
   Phase = std::make_shared<ComPWA::FitParameter>("Phase_" + Name, 0.0);
   std::shared_ptr<FitParameter> mag, phase;
+  PreFactor = std::complex<double>(1, 0);
   for (const auto &v : pt.get_child("")) {
     if (v.first == "Parameter") {
       if (v.second.get<std::string>("<xmlattr>.Type") == "Magnitude") {
@@ -45,6 +47,10 @@ void HelicityDecay::load(std::shared_ptr<PartList> partL,
       if (v.second.get<std::string>("<xmlattr>.Type") == "Phase") {
         Phase = std::make_shared<FitParameter>(v.second);
       }
+    } else if (v.first == "PreFactor") {
+      double r = v.second.get<double>("<xmlattr>.Magnitude");
+      double p = v.second.get<double>("<xmlattr>.Phase");
+      PreFactor = std::polar(r, p);
     } else {
       // ignored further settings. Should we throw an error?
     }
@@ -61,6 +67,24 @@ void HelicityDecay::load(std::shared_ptr<PartList> partL,
   // default value
   ComPWA::Spin orbitL(pt.get<double>(
       "DecayParticle.<xmlattr>.OrbitalAngularMomentum", (double)J));
+  
+  const auto &canoSum = pt.get_child_optional("CanonicalSum");
+  if (canoSum) {
+    const auto &sumTree = canoSum.get();
+    orbitL = sumTree.get<double>("<xmlattr>.L");
+    double coef = sqrt((2 * (double) orbitL + 1) / (2 * (double) J + 1)) ;
+    for (const auto &cg : sumTree.get_child("")) {
+      if (cg.first != "ClebschGorden") continue;
+      double j1 = cg.second.get<double>("<xmlattr>.j1");
+      double m1 = cg.second.get<double>("<xmlattr>.m1");
+      double j2 = cg.second.get<double>("<xmlattr>.j2");
+      double m2 = cg.second.get<double>("<xmlattr>.m2");
+      double J = cg.second.get<double>("<xmlattr>.J");
+      double M = cg.second.get<double>("<xmlattr>.M");
+      coef *= ComPWA::Physics::QFT::Clebsch(j1, m1, j2, m2, J, M);
+    }
+    PreFactor *= coef;
+  }
 
   // Read name and helicities from decay products
   auto decayProducts = pt.get_child("DecayProducts");
