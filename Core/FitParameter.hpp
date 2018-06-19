@@ -18,6 +18,7 @@
 #include <string>
 
 #include <boost/algorithm/string/predicate.hpp>
+#include <boost/algorithm/string/trim.hpp>
 #include <boost/optional.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/serialization/utility.hpp>
@@ -33,8 +34,12 @@ struct BoolTranslator {
   // Converts a string to bool
   boost::optional<external_type> get_value(const internal_type &str) {
     if (!str.empty()) {
+    	// first remove leading and trailing whitespace
+    	auto strcopy(str);
       using boost::algorithm::iequals;
-      if (iequals(str, "true") || iequals(str, "yes") || str == "1")
+    	using boost::algorithm::trim;
+    	trim(strcopy);
+      if (iequals(strcopy, "true") || iequals(strcopy, "yes") || strcopy == "1")
         return boost::optional<external_type>(true);
       else
         return boost::optional<external_type>(false);
