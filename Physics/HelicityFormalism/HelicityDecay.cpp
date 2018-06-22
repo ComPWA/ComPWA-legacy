@@ -4,9 +4,9 @@
 
 #include <sstream>
 
-#include "Physics/DecayDynamics/RelativisticBreitWigner.hpp"
 #include "Physics/DecayDynamics/AmpFlatteRes.hpp"
 #include "Physics/DecayDynamics/NonResonant.hpp"
+#include "Physics/DecayDynamics/RelativisticBreitWigner.hpp"
 #include "Physics/DecayDynamics/Voigtian.hpp"
 
 #include "Physics/HelicityFormalism/HelicityDecay.hpp"
@@ -29,13 +29,13 @@ void HelicityDecay::load(std::shared_ptr<PartList> partL,
   LOG(trace) << "HelicityDecay::load() |";
   SubSys = SubSystem(pt);
   DataPosition =
-      3 * std::dynamic_pointer_cast<HelicityKinematics>(kin)->dataID(SubSys);
+      3 *
+      std::dynamic_pointer_cast<HelicityKinematics>(kin)->addSubSystem(SubSys);
   setPhspVolume(kin->phspVolume());
 
- Name = pt.get<std::string>("<xmlattr>.Name", "empty");
-  Magnitude =
-      std::make_shared<ComPWA::FitParameter>("Magnitude_" +Name, 1.0);
-  Phase = std::make_shared<ComPWA::FitParameter>("Phase_" +Name, 0.0);
+  Name = pt.get<std::string>("<xmlattr>.Name", "empty");
+  Magnitude = std::make_shared<ComPWA::FitParameter>("Magnitude_" + Name, 1.0);
+  Phase = std::make_shared<ComPWA::FitParameter>("Phase_" + Name, 0.0);
   std::shared_ptr<FitParameter> mag, phase;
   for (const auto &v : pt.get_child("")) {
     if (v.first == "Parameter") {
@@ -57,8 +57,10 @@ void HelicityDecay::load(std::shared_ptr<PartList> partL,
                              " not found in list!");
   ComPWA::Spin J = partItr->second.GetSpinQuantumNumber("Spin");
   ComPWA::Spin mu(pt.get<double>("DecayParticle.<xmlattr>.Helicity"));
-  //if the node OrbitalAngularMomentum does not exist, set it to spin J as default value
-  ComPWA::Spin orbitL(pt.get<double>("DecayParticle.<xmlattr>.OrbitalAngularMomentum", (double) J));
+  // if the node OrbitalAngularMomentum does not exist, set it to spin J as
+  // default value
+  ComPWA::Spin orbitL(pt.get<double>(
+      "DecayParticle.<xmlattr>.OrbitalAngularMomentum", (double)J));
 
   // Read name and helicities from decay products
   auto decayProducts = pt.get_child("DecayProducts");
@@ -70,14 +72,14 @@ void HelicityDecay::load(std::shared_ptr<PartList> partL,
   auto p = decayProducts.begin();
   DecayProducts.first = p->second.get<std::string>("<xmlattr>.Name");
   DecayHelicities.first =
-      ComPWA::Spin(p->second.get<int>("<xmlattr>.Helicity"));
+      ComPWA::Spin(p->second.get<double>("<xmlattr>.Helicity"));
   ++p;
   DecayProducts.second = p->second.get<std::string>("<xmlattr>.Name");
   DecayHelicities.second =
       ComPWA::Spin(p->second.get<double>("<xmlattr>.Helicity"));
 
   // Two-body decay
-  if (SubSys.GetFinalStates().size() == 2) {
+  if (SubSys.getFinalStates().size() == 2) {
     // Create WignerD object
     AngularDist = std::make_shared<HelicityFormalism::AmpWignerD>(
         J, mu, DecayHelicities.first - DecayHelicities.second);
@@ -98,8 +100,8 @@ void HelicityDecay::load(std::shared_ptr<PartList> partL,
           name, DecayProducts, partL);
       DynamicFcn->SetOrbitalAngularMomentum(orbitL);
     } else if (decayType == "voigt") {
-      DynamicFcn = std::make_shared<DecayDynamics::Voigtian>(
-          name, DecayProducts, partL);
+      DynamicFcn =
+          std::make_shared<DecayDynamics::Voigtian>(name, DecayProducts, partL);
     } else if (decayType == "virtual" || decayType == "nonResonant") {
       DynamicFcn = std::make_shared<DecayDynamics::NonResonant>(name);
     } else {
@@ -131,7 +133,8 @@ boost::property_tree::ptree HelicityDecay::save() const {
 
   pt.put("DecayParticle.<xmlattr>.Name", DynamicFcn->name());
   pt.put("DecayParticle.<xmlattr>.Helicity", AngularDist->mu());
-  pt.put("DecayParticle.<xmlatrr>.OrbitalAngularMomentum", DynamicFcn->GetOrbitalAngularMomentum());
+  pt.put("DecayParticle.<xmlatrr>.OrbitalAngularMomentum",
+         DynamicFcn->GetOrbitalAngularMomentum());
 
   // TODO: put helicities of daughter particles
   return pt;
@@ -162,14 +165,14 @@ void HelicityDecay::setModified(bool b) {
 }
 
 double HelicityDecay::normalization() const {
-  if (isModified()){
+  if (isModified()) {
     // We have to do an ugly const cast here. Otherwise we would have to remove
     // all constness from all memeber functions...The basic design problem here
     // is that member variables are (smart) pointer which can be changed from
     // outside.
-    const_cast<HelicityDecay*>(this)->setModified(false);
+    const_cast<HelicityDecay *>(this)->setModified(false);
   }
-  
+
   assert(CurrentIntegral != 0.0);
   return 1 / std::sqrt(CurrentIntegral);
 }

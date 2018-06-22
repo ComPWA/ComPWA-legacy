@@ -10,16 +10,16 @@
 #ifndef KINEMATICS_HPP_
 #define KINEMATICS_HPP_
 
-#include <vector>
-#include <string>
 #include <complex>
+#include <string>
+#include <vector>
 
+#include "Core/DataPoint.hpp"
 #include "Core/Event.hpp"
 #include "Core/Particle.hpp"
-#include "Core/SubSystem.hpp"
 #include "Core/Properties.hpp"
 #include "Core/Spin.hpp"
-#include "Core/DataPoint.hpp"
+#include "Core/SubSystem.hpp"
 
 namespace ComPWA {
 
@@ -59,7 +59,7 @@ public:
     return InitialStateP4;
   }
 
-  virtual int dataID(const ComPWA::SubSystem &sys) = 0;
+  virtual unsigned int getDataID(const ComPWA::SubSystem &sys) const = 0;
 
   virtual std::vector<std::string> variableNames() const {
     return VariableNames;
@@ -73,6 +73,9 @@ protected:
   std::vector<pid> InitialState;
 
   std::vector<pid> FinalState;
+
+  // we use a vector instead of a map here, due to cache optimizations
+  std::vector<unsigned int> FinalStateEventPositionMapping;
 
   /// Four momentum of the initial particle reaction
   ComPWA::FourMomentum InitialStateP4;

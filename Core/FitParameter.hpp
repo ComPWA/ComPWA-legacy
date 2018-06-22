@@ -10,20 +10,59 @@
 #ifndef _FITPARAMETER_HPP_
 #define _FITPARAMETER_HPP_
 
-#include <iostream>
-#include <string>
-#include <sstream>
-#include <complex>
-#include <stdexcept>
 #include <cmath>
+#include <complex>
+#include <iostream>
+#include <sstream>
+#include <stdexcept>
+#include <string>
 
+#include <boost/algorithm/string/predicate.hpp>
+#include <boost/algorithm/string/trim.hpp>
+#include <boost/optional.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/serialization/utility.hpp>
-#include <boost/optional.hpp>
 
-#include "Core/Parameter.hpp"
 #include "Core/Exceptions.hpp"
 #include "Core/Logging.hpp"
+#include "Core/Parameter.hpp"
+
+struct BoolTranslator {
+  typedef std::string internal_type;
+  typedef bool external_type;
+
+  // Converts a string to bool
+  boost::optional<external_type> get_value(const internal_type &str) {
+    if (!str.empty()) {
+    	// first remove leading and trailing whitespace
+    	auto strcopy(str);
+      using boost::algorithm::iequals;
+    	using boost::algorithm::trim;
+    	trim(strcopy);
+      if (iequals(strcopy, "true") || iequals(strcopy, "yes") || strcopy == "1")
+        return boost::optional<external_type>(true);
+      else
+        return boost::optional<external_type>(false);
+    } else
+      return boost::optional<external_type>(boost::none);
+  }
+
+  // Converts a bool to string
+  boost::optional<internal_type> put_value(const external_type &b) {
+    return boost::optional<internal_type>(b ? "true" : "false");
+  }
+};
+
+namespace boost {
+namespace property_tree {
+
+template <typename Ch, typename Traits, typename Alloc>
+struct translator_between<std::basic_string<Ch, Traits, Alloc>, bool> {
+  typedef BoolTranslator type;
+};
+
+} // namespace property_tree
+} // namespace boost
 
 namespace ComPWA {
 enum ErrorType { SYM = 1, ASYM = 2, LHSCAN = 3, NOTDEF = 0 };
@@ -38,7 +77,7 @@ public:
 
   /// Construct parameter from a property tree. The expected tree layout is
   /// described in load().
-  FitParameter(const boost::property_tree::ptree pt);
+  FitParameter(const boost::property_tree::ptree &pt);
 
   /// Standard constructor with just a value provided. Creates parameter
   /// with given value but without bounds or an error.
@@ -52,16 +91,16 @@ public:
   /// with given value and bounds but without error. If a check for valid
   /// bounds fails, just the value is used.
   FitParameter(std::string inName, const double value, const double min,
-                  const double max);
+               const double max);
 
   /// Standard constructor with value, bounds and error provided. Creates
   /// parameter with the given information. If a check for valid bounds
   /// fails, just value and error are used.
   FitParameter(std::string inName, const double value, const double min,
-                  const double max, const double error);
-                  
+               const double max, const double error);
+
   FitParameter(const FitParameter &in);
-  
+
   virtual bool isParameter() const { return true; }
 
   operator double() const { return Value; };
@@ -122,7 +161,7 @@ public:
   /// Load parameters from a ptree. This approach is more or
   /// less equivalent to the serialization of a parameter but provides a better
   /// readable format.
-  void load(const boost::property_tree::ptree pt);
+  void load(const boost::property_tree::ptree &pt);
 
   /// Save parameter to a ptree. This approach is more or
   /// less equivalent to the serialization of a parameter but provides a better

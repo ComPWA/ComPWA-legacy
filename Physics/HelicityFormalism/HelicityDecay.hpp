@@ -10,13 +10,13 @@
 #ifndef HelicityDecay_HPP_
 #define HelicityDecay_HPP_
 
-#include <memory>
 #include <boost/property_tree/ptree.hpp>
+#include <memory>
 
-#include "Physics/PartialAmplitude.hpp"
 #include "Physics/DecayDynamics/AbstractDynamicalFunction.hpp"
 #include "Physics/HelicityFormalism/AmpWignerD.hpp"
 #include "Physics/HelicityFormalism/HelicityKinematics.hpp"
+#include "Physics/PartialAmplitude.hpp"
 
 namespace ComPWA {
 namespace Physics {
@@ -44,7 +44,7 @@ public:
   }
 
   void load(std::shared_ptr<PartList> partL, std::shared_ptr<Kinematics> kin,
-          const boost::property_tree::ptree &pt);
+            const boost::property_tree::ptree &pt);
 
   virtual boost::property_tree::ptree save() const;
 
@@ -110,13 +110,13 @@ public:
 
   virtual std::shared_ptr<FunctionTree>
   tree(std::shared_ptr<Kinematics> kin, const ComPWA::ParameterList &sample,
-          const ComPWA::ParameterList &toySample, std::string suffix = "");
+       const ComPWA::ParameterList &toySample, std::string suffix = "");
 
 protected:
   /// Position where variables are stored in dataPoint.
   /// We expect to find the invariant mass of the system at @param DataPosition,
   /// cosTheta at @param DataPosition+1 and phi at @param DataPosition+2
-  int DataPosition;
+  unsigned int DataPosition;
 
   ComPWA::SubSystem SubSys;
 
@@ -124,9 +124,9 @@ protected:
 
   std::shared_ptr<ComPWA::Physics::DecayDynamics::AbstractDynamicalFunction>
       DynamicFcn;
-  
+
   std::pair<std::string, std::string> DecayProducts;
-  
+
   std::pair<ComPWA::Spin, ComPWA::Spin> DecayHelicities;
 };
 

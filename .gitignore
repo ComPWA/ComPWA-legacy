@@ -23,3 +23,8 @@ build.cfg
 /Default/
 build
 install
+*.env
+*.vscode
+*.pydevproject
+*__pycache__
+.pytest_cache

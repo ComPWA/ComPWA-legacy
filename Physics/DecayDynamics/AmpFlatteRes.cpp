@@ -4,9 +4,9 @@
 
 #include <cmath>
 //#include <math.h>
-#include <limits>
-#include "Physics/DecayDynamics/AmpFlatteRes.hpp"
 #include "Core/Value.hpp"
+#include "Physics/DecayDynamics/AmpFlatteRes.hpp"
+#include <limits>
 
 using namespace ComPWA::Physics::DecayDynamics;
 
@@ -63,10 +63,9 @@ AmpFlatteRes::AmpFlatteRes(std::string name,
   }
   SetCouplings(vC);
 
-  LOG(trace)
-      << "RelativisticBreitWigner::Factory() | Construction of the decay "
-      << partProp.name() << " -> " << daughters.first << " + "
-      << daughters.second;
+  LOG(trace) << "AmpFlatteRes::Factory() | Construction of the decay "
+             << partProp.name() << " -> " << daughters.first << " + "
+             << daughters.second;
 }
 
 AmpFlatteRes::~AmpFlatteRes() {}
@@ -107,8 +106,8 @@ std::complex<double> AmpFlatteRes::evaluate(const DataPoint &point,
         Couplings.at(2).GetMassB(), Couplings.at(2).value(), (double)L,
         MesonRadius->value(), FormFactorType);
   } catch (std::exception &ex) {
-    LOG(error) << "AmpFlatteRes::EvaluateAmp() | "
-                  "Dynamical function can not be evalutated: "
+    LOG(error) << "AmpFlatteRes::evaluate() | "
+                  "Dynamical function can not be evaluated: "
                << ex.what();
     throw;
   }
@@ -367,7 +366,7 @@ void AmpFlatteRes::updateParameters(const ParameterList &list) {
     MesonRadius->updateParameter(rad);
   } catch (BadParameter &ex) {
   }
-  
+
   // Try to update Couplings
   for (auto i : Couplings) {
     try {

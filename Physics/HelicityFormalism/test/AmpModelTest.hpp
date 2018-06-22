@@ -367,7 +367,7 @@ const std::string HelicityTestKinematics = R"####(
 <HelicityKinematics>
   <PhspVolume>0.123</PhspVolume>
   <InitialState>
-    <Particle Name='jpsi' Id='0'/>
+    <Particle Name='jpsi' PositionIndex='0'/>
   </InitialState>
   <FinalState>
     <Particle Name='pi0' Id='0'/>

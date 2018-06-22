@@ -63,7 +63,6 @@ namespace HelicityFormalism {
 ///
 ///
 class HelicityKinematics : public ComPWA::Kinematics {
-
 public:
   /// Create HelicityKinematics from inital and final state particle lists.
   /// The lists contain the pid of initial and final state. The position of a
@@ -127,49 +126,40 @@ public:
   ///        frame of the resonance.
   ///     -# Calculate \f$cos\Theta\f$ and \f$\phi\f$ between those boosted
   ///        momenta.
-  void convert(const Event &event, DataPoint &point,
-                        const SubSystem &sys,
-                        const std::pair<double, double> limits) const;
+  void convert(const Event &event, DataPoint &point, const SubSystem &sys,
+               const std::pair<double, double> limits) const;
 
   /// Fill \p point with variables for \p sys.
   /// \see convert(const Event &event, dataPoint &point, SubSystem sys,
   ///                     const std::pair<double, double> limits) const;
   void convert(const Event &event, DataPoint &point,
-                        const SubSystem &sys) const;
+               const SubSystem &sys) const;
 
   /// Check if \p point is within phase space boundaries.
   bool isWithinPhsp(const DataPoint &point) const;
 
   /// Get ID of data for \p subSys.
-  /// In case that the ID was not requested before the subsystem is added to
-  /// the list and variables (m^2, cosTheta, phi) are calculated in
-  /// #convert()
-  /// and added to each dataPoint.
-  virtual int dataID(const SubSystem &subSys) {
-    // We calculate the variables currently for two-body decays
-    if (subSys.GetFinalStates().size() != 2)
-      return 0;
-    int pos = createIndex(subSys);
-    //    LOG(trace) << " SubSystem " << s << " has dataID " << pos;
-    return pos;
-  }
+  virtual unsigned int getDataID(const SubSystem &subSys) const;
 
-  /// Get ID of data for subsystem defined by \p recoilS and \p finalS.
-  /// \see dataID(SubSystem s)
-  virtual int dataID(std::vector<int> recoilS, std::vector<int> finalA,
-                        std::vector<int> finalB) {
-    return dataID(SubSystem(recoilS, finalA, finalB));
-  }
+  /// Add \p newSys to list of SubSystems and return its ID.
+  /// In case that this SubSystem is already in the list only the ID is
+  /// returned.
+  virtual unsigned int addSubSystem(const SubSystem &newSys);
+
+  /// Add SubSystem from \p pos indices of final state particles
+  virtual unsigned int
+  addSubSystem(const std::vector<unsigned int> &FinalA,
+               const std::vector<unsigned int> &FinalB,
+               const std::vector<unsigned int> &Recoil,
+               const std::vector<unsigned int> &ParentRecoil);
 
   /// Get SubSystem from \p pos in list
-  virtual SubSystem subSystem(int pos) const {
+  virtual SubSystem subSystem(unsigned int pos) const {
     return Subsystems.at(pos);
   }
 
   /// Get SubSystem from \p pos in list
-  virtual std::vector<SubSystem> subSystems() const {
-    return Subsystems;
-  }
+  virtual std::vector<SubSystem> subSystems() const { return Subsystems; }
 
   /// Get number of variables that are added to dataPoint
   virtual size_t numVariables() const { return Subsystems.size() * 3; }
@@ -201,10 +191,11 @@ protected:
 
   std::pair<double, double> calculateInvMassBounds(const SubSystem &sys) const;
 
-  /// Add \p newSys to list of SubSystems and return its ID.
-  /// In case that this SubSystem is already in the list only the ID is
-  /// returned.
-  int createIndex(const SubSystem &newSys);
+private:
+  virtual unsigned int
+  convertFinalStateIDToPositionIndex(unsigned int fs_id) const;
+  virtual std::vector<unsigned int> convertFinalStateIDToPositionIndex(
+      const std::vector<unsigned int> &fs_ids) const;
 };
 
 } // namespace HelicityFormalism

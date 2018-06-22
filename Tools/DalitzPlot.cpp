@@ -379,7 +379,7 @@ DalitzHisto::DalitzHisto(std::shared_ptr<Kinematics> kin, std::string name,
   char label[60];
 
   // mass23sq
-  SubSystem sys23({0}, {1}, {2});
+  unsigned int sys23(helkin->addSubSystem({1}, {2}, {0}, {}));
   auto m23sq_limit = helkin->invMassBounds(sys23);
   double m23sq_min = m23sq_limit.first;
   double m23sq_max = m23sq_limit.second;
@@ -392,7 +392,7 @@ DalitzHisto::DalitzHisto(std::shared_ptr<Kinematics> kin, std::string name,
   Arr.back().GetXaxis()->SetTitle("m_{23}^{2} [GeV/c^{2}]");
   Arr.back().Sumw2();
   // mass13sq
-  SubSystem sys13({1}, {0}, {2});
+  unsigned int sys13(helkin->addSubSystem({0}, {2}, {1}, {}));
   auto m13sq_limit = helkin->invMassBounds(sys13);
   double m13sq_min = m13sq_limit.first;
   double m13sq_max = m13sq_limit.second;
@@ -405,7 +405,7 @@ DalitzHisto::DalitzHisto(std::shared_ptr<Kinematics> kin, std::string name,
   Arr.back().GetXaxis()->SetTitle("m_{13}^{2} [GeV/c^{2}]");
   Arr.back().Sumw2();
   // mass12sq
-  SubSystem sys12({0}, {0}, {1});
+  unsigned int sys12(helkin->addSubSystem({0}, {1}, {2}, {}));
   auto m12sq_limit = helkin->invMassBounds(sys12);
   double m12sq_min = m12sq_limit.first;
   double m12sq_max = m12sq_limit.second;
@@ -453,9 +453,11 @@ void DalitzHisto::fill(std::shared_ptr<Kinematics> kin, Event &event,
 
   Integral += weight;
 
-  int sysId23 = kin->dataID(SubSystem({0}, {1}, {2}));
-  int sysId13 = kin->dataID(SubSystem({1}, {0}, {2}));
-  int sysId12 = kin->dataID(SubSystem({2}, {0}, {1}));
+  auto helkin = std::dynamic_pointer_cast<HelicityKinematics>(kin);
+
+  unsigned int sysId23 = helkin->addSubSystem({1}, {2}, {0}, {});
+  unsigned int sysId13 = helkin->addSubSystem({0}, {2}, {1}, {});
+  unsigned int sysId12 = helkin->addSubSystem({0}, {1}, {2}, {});
 
   DataPoint point;
   try {

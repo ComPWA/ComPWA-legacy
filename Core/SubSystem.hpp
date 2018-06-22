@@ -10,8 +10,8 @@
 #ifndef SubSystem_h
 #define SubSystem_h
 
-#include <vector>
 #include <boost/property_tree/ptree.hpp>
+#include <vector>
 
 namespace ComPWA {
 
@@ -25,17 +25,13 @@ namespace ComPWA {
 class SubSystem {
 public:
   SubSystem(const boost::property_tree::ptree &pt);
-  
-  SubSystem(std::vector<int> recoilS,
-            std::vector<std::vector<int>> finalStates);
 
-  /// Constructor for an isobar model in which it is assumed that particles
-  /// always decay to two final states.
-  SubSystem(std::vector<int> recoilS, std::vector<int> finalA,
-            std::vector<int> finalB);
+  SubSystem(const std::vector<std::vector<unsigned int>> &FinalStates,
+            const std::vector<unsigned int> &Recoil,
+            const std::vector<unsigned int> &ParentRecoil);
 
   virtual boost::property_tree::ptree save() const;
-  
+
   virtual void load(const boost::property_tree::ptree &pt);
 
   // Create a unique title
@@ -46,40 +42,45 @@ public:
   friend std::ostream &operator<<(std::ostream &stream, const SubSystem &s) {
     return stream << s.to_string();
   }
-  
-  virtual void SetFinalStates(std::vector<std::vector<int>> v);
 
-  virtual const std::vector<std::string> &GetFinalStatesNames() const;
+  virtual void setFinalStates(const std::vector<std::vector<unsigned int>> &v);
 
-  virtual void SetFinalStatesNames(std::vector<std::string> n);
+  virtual const std::vector<std::string> &getFinalStatesNames() const;
 
-  virtual const std::vector<std::vector<int>> &GetFinalStates() const;
+  virtual void setFinalStatesNames(const std::vector<std::string> &n);
 
-  virtual const std::vector<int> GetHelicities() const;
+  virtual const std::vector<std::vector<unsigned int>> &getFinalStates() const;
 
-  virtual void SetHelicities(std::vector<int> hel);
+  virtual const std::vector<double> getHelicities() const;
 
-  virtual void SetRecoilState(const std::vector<int> r);
+  virtual void setHelicities(const std::vector<double> &hel);
 
-  virtual const std::vector<int> &GetRecoilState() const;
+  virtual void setRecoilState(const std::vector<unsigned int> &r);
+
+  virtual const std::vector<unsigned int> &getRecoilState() const;
+
+  virtual void setParentRecoilState(const std::vector<unsigned int> &r);
+
+  virtual const std::vector<unsigned int> &getParentRecoilState() const;
 
 protected:
-  std::string _title;
-  std::vector<int> _recoilState;
-  std::vector<std::vector<int>> _finalStates;
-  std::vector<int> helicities_;
-  std::vector<std::string> _finalStatesNames;
+  std::string Title;
+  std::vector<unsigned int> RecoilFinalState;
+  std::vector<unsigned int> ParentRecoilFinalState;
+  std::vector<std::vector<unsigned int>> FinalStates;
+  std::vector<double> Helicities;
+  std::vector<std::string> FinalStateNames;
 };
 
 /// Helper funtions to transfor a string of space-separated numbers to a
-/// vector<int>. E.g. "1 2 3" =? vector<int>({1,2,3})
-inline std::vector<int> stringToVectInt(std::string str) {
-  std::vector<int> result;
+/// vector<unsigned int>. E.g. "1 2 3" =? vector<unsigned int>({1,2,3})
+inline std::vector<unsigned int> stringToVectInt(std::string str) {
+  std::vector<unsigned int> result;
   std::istringstream iStr(str);
   std::vector<std::string> stringFrag{std::istream_iterator<std::string>{iStr},
                                       std::istream_iterator<std::string>{}};
   for (auto i : stringFrag) {
-    result.push_back(std::stoi(i));
+    result.push_back(std::stoul(i));
   }
   return result;
 }

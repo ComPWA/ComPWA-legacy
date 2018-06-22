@@ -64,7 +64,10 @@ inline std::complex<double> phspFactor(double sqrtS, double ma, double mb) {
 
 #ifndef NDEBUG
   if (rho.real() != rho.real() || rho.imag() != rho.imag()) {
-    throw std::runtime_error("phspFactor() | Result invalid (NaN)!");
+    std::stringstream ss;
+    ss << "phspFactor() | Result invalid (NaN)! sqrtS=" << sqrtS
+       << ", ma=" << ma << ", mb=" << mb;
+    throw std::runtime_error(ss.str());
   }
 #endif
 
@@ -83,7 +86,7 @@ inline std::complex<double> qValue(double sqrtS, double ma, double mb) {
 
 static const char *formFactorTypeString[] = {"noFormFactor", "BlattWeisskopf",
                                              "CrystalBarrel"};
-  
+
 enum formFactorType { noFormFactor = 0, BlattWeisskopf = 1, CrystalBarrel = 2 };
 
 /// Calculate form factor from the (complex) break-up momentum \p qValue.
@@ -116,12 +119,13 @@ inline double FormFactor(std::complex<double> qValue, double orbitL,
     // 1/mesonRadius
     if (orbitL == 0)
       return 1.0;
-    
+
     double qSq = std::norm(qValue);
     double z = qSq * mesonRadius * mesonRadius;
     // Events below threshold. What should we do if event is below threshold?
     // Shouldn't really influence the result because resonances at threshold
     // don't have spin(?).
+    // Ref. for Blatt-Weisskopf: Phys. Rev. D 48, 1225
     z = std::fabs(z);
 
     if (orbitL == 1) {
@@ -129,16 +133,16 @@ inline double FormFactor(std::complex<double> qValue, double orbitL,
     } else if (orbitL == 2) {
       ff = std::sqrt(13 * z * z / ((z - 3) * (z - 3) + 9 * z));
     } else if (orbitL == 3) {
-      ff =
-          std::sqrt(277 * z * z * z / (z * (z - 15) * (z - 15) + 9 * (2 * z - 5)));
+      ff = std::sqrt(277 * z * z * z /
+                     (z * (z - 15) * (z - 15) + 9 * (2 * z - 5) * (2 * z - 5)));
     } else if (orbitL == 4) {
       ff = std::sqrt(12746 * z * z * z * z /
-                 ((z * z - 45 * z + 105) * (z * z - 45 * z + 105) +
-                  25 * z * (2 * z - 21) * (2 * z - 21)));
+                     ((z * z - 45 * z + 105) * (z * z - 45 * z + 105) +
+                      25 * z * (2 * z - 21) * (2 * z - 21)));
     } else
       throw std::runtime_error("FormFactor() | Form factors of type " +
-          std::string(formFactorTypeString[type]) +
-          " are implemented for spins up to 4!");
+                               std::string(formFactorTypeString[type]) +
+                               " are implemented for spins up to 4!");
   } else {
     throw std::runtime_error("FormFactor() | Form factor type " +
                              std::to_string((long long int)type) +
