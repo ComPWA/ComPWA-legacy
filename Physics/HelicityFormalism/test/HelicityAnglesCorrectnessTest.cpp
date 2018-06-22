@@ -183,7 +183,7 @@ double calculatePhiDiff(double phi1, double phi2) {
  * pawian
  */
 BOOST_AUTO_TEST_CASE(HelicityAnglesCorrectnessTest) {
-  ComPWA::Logging log("", boost::log::trivial::severity_level::debug);
+  ComPWA::Logging log("", "debug");
 
   // Construct HelicityKinematics from XML tree
   boost::property_tree::ptree tr;

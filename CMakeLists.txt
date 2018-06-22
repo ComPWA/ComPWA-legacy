@@ -59,10 +59,6 @@ endif()
 
 message( STATUS "CXX Compile flags: " ${CMAKE_CXX_FLAGS} )
 
-# Automatically copy all binaries and libraries to bin/ and lib/
-#set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
-#set(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib)
-
 INCLUDE_DIRECTORIES(${COMPWA_SOURCE_DIR})
 
 # Setting prefix for libraries
