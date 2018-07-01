@@ -118,7 +118,7 @@ PYBIND11_MODULE(pycompwa, m) {
   py::class_<ComPWA::Logging, std::shared_ptr<ComPWA::Logging>>(m, "Logging")
       .def(py::init<std::string, std::string>(), "Initialize logging system",
            py::arg("output"), py::arg("log_level"));
-  m.def("log", [](std::string msg) { LOG(info) << msg; },
+  m.def("log", [](std::string msg) { LOG(INFO) << msg; },
         "Write string to logging system.");
 
   // ------- Parameters
@@ -138,7 +138,7 @@ PYBIND11_MODULE(pycompwa, m) {
            py::arg("name"), py::arg("value"), py::arg("min"), py::arg("max"),
            py::arg("error"))
       .def("__repr__", &ComPWA::FitParameter::to_str);
-  m.def("log", [](const ComPWA::FitParameter p) { LOG(info) << p; });
+  m.def("log", [](const ComPWA::FitParameter p) { LOG(INFO) << p; });
 
   py::class_<ComPWA::ParameterList>(m, "ParameterList")
       .def(py::init<>())
@@ -151,7 +151,7 @@ PYBIND11_MODULE(pycompwa, m) {
            "Set error on all fit parameters. @use_asymmetric_errors "
            "triggers the use of MINOS (asymmetic errors).",
            py::arg("error"), py::arg("use_asymmetric_errors"));
-  m.def("log", [](const ComPWA::ParameterList l) { LOG(info) << l; },
+  m.def("log", [](const ComPWA::ParameterList l) { LOG(INFO) << l; },
         "Print ParameterList to logging system.");
 
   // ------- Data
@@ -212,7 +212,7 @@ PYBIND11_MODULE(pycompwa, m) {
       .def("value", &ComPWA::DataPoint::value)
       .def("weight", &ComPWA::DataPoint::weight)
       .def("efficiency", &ComPWA::DataPoint::efficiency);
-  m.def("log", [](const ComPWA::DataPoint p) { LOG(info) << p; });
+  m.def("log", [](const ComPWA::DataPoint p) { LOG(INFO) << p; });
 
   py::class_<DataPoints>(m, "DataPoints", py::buffer_protocol())
       .def_buffer([](DataPoints &dp) -> py::buffer_info {
@@ -284,10 +284,10 @@ PYBIND11_MODULE(pycompwa, m) {
       .def("print_sub_systems",
            [](const ComPWA::Physics::HelicityFormalism::HelicityKinematics
                   &kin) {
-             LOG(info) << "Subsystems used by HelicityKinematics:";
+             LOG(INFO) << "Subsystems used by HelicityKinematics:";
              for (auto i : kin.subSystems()) {
                // Have to add " " here (bug in boost 1.59)
-               LOG(info) << " " << i;
+               LOG(INFO) << " " << i;
              }
            });
 
@@ -368,7 +368,7 @@ PYBIND11_MODULE(pycompwa, m) {
            "of the likelihood.")
       .def("log_function_tree",
            [](ComPWA::Estimator::MinLogLH &min) {
-             LOG(info) << min.tree()->head()->print(25);
+             LOG(INFO) << min.tree()->head()->print(25);
            },
            "Print FunctionTree to logging system.")
       .def("print_function_tree",

@@ -82,7 +82,7 @@ void FunctionTree::insertNode(std::shared_ptr<TreeNode> node,
   try {
     parentNode = Nodes.at(parent);
   } catch (std::out_of_range &ex) {
-    LOG(error) << "FunctionTree::insertNode() | Parent node " << parent
+    LOG(ERROR) << "FunctionTree::insertNode() | Parent node " << parent
                << " not found in FunctionTree!";
     throw;
   }
@@ -216,12 +216,12 @@ bool FunctionTree::sanityCheck() {
   }
   if (missedChild.size()) {
     for (int i = 0; i < missedChild.size(); i++)
-      LOG(debug) << "This tree misses a child: " << missedChild[i];
+      LOG(DEBUG) << "This tree misses a child: " << missedChild[i];
     return false;
   }
   if (missedParent.size()) {
     for (int i = 0; i < missedParent.size(); i++)
-      LOG(debug) << "This tree misses a parent: " << missedParent[i];
+      LOG(DEBUG) << "This tree misses a parent: " << missedParent[i];
     return false;
   }
 

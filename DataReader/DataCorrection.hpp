@@ -26,7 +26,7 @@ public:
   virtual double correction(Event &ev) { return 1; }
   
   virtual void print() const {
-    LOG(info) << "UnitCorrection::Print() | correction factors are set to one";
+    LOG(INFO) << "UnitCorrection::Print() | correction factors are set to one";
   }
 };
 

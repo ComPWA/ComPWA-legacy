@@ -89,7 +89,7 @@ SubSystem::SubSystem(const std::vector<std::vector<unsigned int>> &FinalStates,
   setFinalStates(FinalStates);
   setRecoilState(Recoil);
   Title = to_string();
-  // LOG(trace) << "SubSystem::SubSystem() | Creating sub system "<<title;
+  // LOG(TRACE) << "SubSystem::SubSystem() | Creating sub system "<<title;
 }
 
 std::string SubSystem::to_string() const {

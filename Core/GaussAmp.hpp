@@ -128,7 +128,7 @@ public:
   virtual double GetMaximum(std::shared_ptr<Generator> gen) const { return 1; }
 
   virtual double GetNormalization() const {
-    LOG(info) << "UnitAmp::normalization() | "
+    LOG(INFO) << "UnitAmp::normalization() | "
                  "normalization not implemented!";
     return 1;
   }
@@ -174,9 +174,9 @@ protected:
 
     int sampleSize = sample.GetMultiDouble(0)->numValues();
 
-    LOG(debug) << "UnitAmp::setupBasicTree() generating new tree!";
+    LOG(DEBUG) << "UnitAmp::setupBasicTree() generating new tree!";
     if (sampleSize == 0) {
-      LOG(error) << "UnitAmp::setupBasicTree() data sample empty!";
+      LOG(ERROR) << "UnitAmp::setupBasicTree() data sample empty!";
       return std::shared_ptr<FunctionTree>();
     }
     std::shared_ptr<FunctionTree> newTree(new FunctionTree());

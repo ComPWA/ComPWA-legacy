@@ -89,7 +89,7 @@ inline void multivariateGaussian(const gsl_rng *rnd, const int vecSize,
   // Cholesky decomposition
   int status = gsl_linalg_cholesky_decomp(tmpM);
   if (status == GSL_EDOM)
-    LOG(error) << "Decomposition has failed!";
+    LOG(ERROR) << "Decomposition has failed!";
 
   // Compute vector of random gaussian variables
   for (unsigned int i = 0; i < vecSize; i++)
@@ -142,7 +142,7 @@ CalculateFitFraction(std::shared_ptr<ComPWA::Kinematics> kin,
       ComPWA::Tools::Integral(numer, sample, phspVolume);
 
   double ffVal = integral_numerator / integral_denominator;
-  LOG(trace) << "CalculateFitFraction() | Result for (" << def.first << "/"
+  LOG(TRACE) << "CalculateFitFraction() | Result for (" << def.first << "/"
              << def.second << ") is " << integral_numerator << "/"
              << integral_denominator << "=" << ffVal;
   return FitParameter(def.first, ffVal, 0.0);
@@ -182,7 +182,7 @@ inline void CalcFractionError(
     std::shared_ptr<AmpIntensity> intens,
     std::shared_ptr<std::vector<DataPoint>> sample, int nSets,
     std::vector<std::pair<std::string, std::string>> defs) {
-  LOG(info)
+  LOG(INFO)
       << "CalcFractionError() | Calculating errors of fit fractions using "
       << nSets << " sets of parameters...";
 
@@ -200,7 +200,7 @@ inline void CalcFractionError(
       if (covariance.at(i).at(j) != 0.)
         leave = false;
   if (leave)
-    LOG(error) << "CalcFractionError() | Covariance matrix is zero "
+    LOG(ERROR) << "CalcFractionError() | Covariance matrix is zero "
                   "(everywhere)! We skip further "
                   "calculation of fit fraction errors.";
 

@@ -3,11 +3,10 @@
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
 #include <memory>
-#include "Physics/HelicityFormalism/HelicityFromCanonicalSum.hpp"
 #include <cmath>
-#include "Physics/qft++/WignerD.h"
-
 #include <string>
+#include "qft++/WignerD.h"
+#include "Physics/HelicityFormalism/HelicityFromCanonicalSum.hpp"
 
 namespace ComPWA {
 namespace Physics {
@@ -22,7 +21,7 @@ HelicityFromCanonicalSum::HelicityFromCanonicalSum(
 void HelicityFromCanonicalSum::load(std::shared_ptr<PartList> partL,
                                     std::shared_ptr<Kinematics> kin,
                                     const boost::property_tree::ptree &pt) {
-  LOG(trace) << "HelicityFromCanonicalSum::Factory() | Construction....";
+  LOG(TRACE) << "HelicityFromCanonicalSum::Factory() | Construction....";
   //  setName(pt.get<std::string>("<xmlattr>.Name", "empty"));
 
   boost::property_tree::ptree helDecTree(pt);
@@ -63,14 +62,14 @@ void HelicityFromCanonicalSum::load(std::shared_ptr<PartList> partL,
       double m2 = daug.second.get<double>("<xmlattr>.m2");
       double J = daug.second.get<double>("<xmlattr>.J");
       double M = daug.second.get<double>("<xmlattr>.M");
-      cgCoef *= ComPWA::Physics::QFT::Clebsch(j1, m1, j2, m2, J, M);
+      cgCoef *= ComPWA::QFT::Clebsch(j1, m1, j2, m2, J, M);
     }
     PreFactor = std::complex<double>(normCoef * cgCoef, 0);
     ampHelDec->setPrefactor(PreFactor);
 
     addPartialAmplitude(ampHelDec);
   } else {
-    LOG(trace) << "HelicityFromCanonicalSum::Factory() | <CanonicalSum /> in "
+    LOG(TRACE) << "HelicityFromCanonicalSum::Factory() | <CanonicalSum /> in "
                   "xml is not set!";
   }
 }

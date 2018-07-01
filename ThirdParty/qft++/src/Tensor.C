@@ -23,11 +23,10 @@
  */
 //_____________________________________________________________________________
 #include <cmath>
-#include "Physics/qft++/Tensor.h"
-#include "Physics/qft++/SpecialTensors.h"
+#include "qft++/Tensor.h"
+#include "qft++/SpecialTensors.h"
 
 namespace ComPWA {
-  namespace Physics {
     namespace QFT {
 
 template class Tensor<double>;
@@ -195,6 +194,5 @@ Tensor<_Tp> Tensor<_Tp>::AntiSymmetric() const {
 //_____________________________________________________________________________
 
 
-    } /* namespace QFT */
-  }
+    } // namespace QFT
 }

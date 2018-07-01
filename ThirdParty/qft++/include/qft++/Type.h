@@ -24,7 +24,6 @@
  *  @brief Type class definition file.
  */
 namespace ComPWA {
-  namespace Physics {
     namespace QFT {
 
 //_____________________________________________________________________________
@@ -231,5 +230,5 @@ class Type<_Tp*> {
 //_____________________________________________________________________________
 #endif /* DOXYGEN_SKIP_THIS */
 
-    }}}
+    }}
 #endif /* _Type_H */

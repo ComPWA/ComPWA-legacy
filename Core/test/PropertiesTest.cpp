@@ -142,7 +142,7 @@ BOOST_AUTO_TEST_CASE(XMLOutput) {
   ReadParticles(partL, tr);
   auto ptout = SaveParticles(partL);
   
-  LOG(info) << "Writing particle list...";
+  LOG(INFO) << "Writing particle list...";
   boost::property_tree::xml_parser::write_xml("Properties-output.xml", ptout,
                                               std::locale());
 

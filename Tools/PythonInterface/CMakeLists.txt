@@ -2,18 +2,7 @@
 
 find_package( ROOT REQUIRED QUIET )
 
-find_package( Boost COMPONENTS
-               program_options
-               REQUIRED QUIET
-)
-
-# Make sure pybind uses c++11
-#set(PYBIND11_CPP_STANDARD -std=c++11)
-add_subdirectory( pybind11 )
-
-#add_subdirectory( "${COMPWA_SOURCE_DIR}/Tools/pybind11"
-#    "${CMAKE_CURRENT_BINARY_DIR}/pybind11_build"
-#)
+find_package( Boost REQUIRED QUIET )
 
 pybind11_add_module( pycompwa MODULE PyComPWA.cpp )
 

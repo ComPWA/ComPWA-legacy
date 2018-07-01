@@ -5,18 +5,13 @@
 #ifndef LOGGING_HPP_
 #define LOGGING_HPP_
 
-#include <boost/log/trivial.hpp>
-#include <boost/log/common.hpp>
+#include "easylogging++.h"
 
 namespace ComPWA {
 
-//#define LOG(lvl) Logging::log(lvl)
-//#define info lvl::info
-// Redefine BOOST_LOG_TRIVIAL(level) to LOG(level)
-#define LOG(lvl)                                                               \
-  BOOST_LOG_STREAM_WITH_PARAMS(                                                \
-      ::boost::log::trivial::logger::get(),                                    \
-      (::boost::log::keywords::severity = ::boost::log::trivial::lvl))
+#define info INFO
+#define error ERROR
+#define warning WARNING
 
 ///
 /// \class Logging
@@ -28,11 +23,9 @@ namespace ComPWA {
 class Logging {
 public:
   Logging(std::string outFileName = "output.log",
-          std::string minLevel = "debug");
+          std::string minLevel = "DEBUG");
 
-  enum logLvl {Trace, Debug, Info, Warning, Error, Fatal};
-
-  static void log(logLvl level);
+  enum logLvl {TRACE, DEBUG, INFO, WARNING, ERROR, FATAL};
 
   void setLogLevel(std::string minLevel);
   

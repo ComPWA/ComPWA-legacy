@@ -17,7 +17,7 @@ IncoherentIntensity::IncoherentIntensity(
 void IncoherentIntensity::load(std::shared_ptr<PartList> partL,
                                std::shared_ptr<Kinematics> kin,
                                const boost::property_tree::ptree &pt) {
-  LOG(trace) << " IncoherentIntensity::Factory() | Construction....";
+  LOG(TRACE) << " IncoherentIntensity::Factory() | Construction....";
   if (pt.get<std::string>("<xmlattr>.Class") != "Incoherent")
     throw BadConfig("IncoherentIntensity::Factory() | Property tree seems to "
                     "not containt a configuration for an "
@@ -93,7 +93,7 @@ IncoherentIntensity::component(std::string name) {
 
   // The whole object?
   if (name == Name) {
-//    LOG(error) << "IncoherentIntensity::GetComponent() | You're requesting the "
+//    LOG(ERROR) << "IncoherentIntensity::GetComponent() | You're requesting the "
 //                  "full object! So just copy it!";
 //    return std::shared_ptr<AmpIntensity>();
     return shared_from_this();

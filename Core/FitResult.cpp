@@ -32,7 +32,7 @@ double FitResult::shiftAngle(double v) {
   while (val < (-1) * M_PI)
     val += 2 * M_PI;
   if (val != originalVal)
-    LOG(info) << "shiftAngle(): shifting parameter from " << originalVal
+    LOG(INFO) << "shiftAngle(): shifting parameter from " << originalVal
               << " to " << val << "!";
   return val;
 }
@@ -64,7 +64,7 @@ void FitResult::print(std::string opt) {
   std::stringstream s;
   genOutput(s, opt);
   std::string str = s.str();
-  LOG(info) << str;
+  LOG(INFO) << str;
 }
 
 void FitResult::printFitParameters(TableFormater *tableResult) {
@@ -199,7 +199,7 @@ void FitResult::printFitParameters(TableFormater *tableResult) {
 }
 
 void FitResult::printFitFractions(TableFormater *fracTable) {
-  LOG(info) << " FitResult::printFitFractions() | "
+  LOG(INFO) << " FitResult::printFitFractions() | "
                "Calculating fit fractions!";
 
   double sum = 0, sumErrorSq = 0;

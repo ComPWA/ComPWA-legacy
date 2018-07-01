@@ -77,7 +77,7 @@ inline double Integral(std::shared_ptr<const AmpIntensity> intens,
                        double phspVolume = 1.0) {
 
   if (!sample.size()) {
-    LOG(debug) << "Tools::Integral() | Integral can not be calculated "
+    LOG(DEBUG) << "Tools::Integral() | Integral can not be calculated "
                   "since phsp sample is empty.";
     return 1.0;
   }
@@ -86,7 +86,7 @@ inline double Integral(std::shared_ptr<const AmpIntensity> intens,
     sumIntens += intens->intensity(i);
 
   double integral = (sumIntens * phspVolume / sample.size());
-//  LOG(trace) << "INTEGRAL: " << integral << " " << sumIntens << " "
+//  LOG(TRACE) << "INTEGRAL: " << integral << " " << sumIntens << " "
 //             << phspVolume << " " << sample.size();
   return integral;
 }
@@ -101,7 +101,7 @@ inline double Maximum(std::shared_ptr<AmpIntensity> intens,
                       std::shared_ptr<std::vector<DataPoint>> sample) {
 
   if (!sample->size()) {
-    LOG(debug)
+    LOG(DEBUG)
         << "Tools::Maximum() | Maximum can not be determined since sample is empty.";
     return 1.0;
   }
@@ -121,7 +121,7 @@ inline double Maximum(std::shared_ptr<Kinematics> kin,
                       std::shared_ptr<DataReader::Data> sample) {
 
   if (!sample->numEvents()) {
-    LOG(debug)
+    LOG(DEBUG)
         << "Maximum() | MAximum can not be determined since sample is empty.";
     return 1.0;
   }
@@ -137,7 +137,7 @@ inline double Maximum(std::shared_ptr<Kinematics> kin,
     }
   }
 
-  LOG(debug) << "Maximum() | Maximum found at " << maxPoint << ".";
+  LOG(DEBUG) << "Maximum() | Maximum found at " << maxPoint << ".";
   return max;
 }
 

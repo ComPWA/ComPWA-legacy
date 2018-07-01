@@ -226,7 +226,7 @@ int main(int argc, char **argv) {
 
   esti->UseFunctionTree(true);
   esti->tree()->parameter();
-  LOG(debug) << esti->tree()->head()->print(25);
+  LOG(DEBUG) << esti->tree()->head()->print(25);
 
   auto minuitif = new Optimizer::Minuit2::MinuitIF(esti, fitPar);
   minuitif->setUseHesse(true);
@@ -276,7 +276,7 @@ int main(int argc, char **argv) {
   pl.setPhspData(phspSample);
   pl.setFitAmp(intens, "", kBlue - 4);
   pl.plot();
-  LOG(info) << "Done";
+  LOG(INFO) << "Done";
 
   return 0;
 }

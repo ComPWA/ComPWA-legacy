@@ -70,12 +70,12 @@ BOOST_AUTO_TEST_CASE(SubTree) {
   myTree->insertTree(subTree, "bcd");
 
   myTree->parameter(); // (re-)calculation
-  LOG(info) << "Initial tree:" << std::endl << myTree;
+  LOG(INFO) << "Initial tree:" << std::endl << myTree;
   BOOST_CHECK_EQUAL(result->value(), 25);
-  LOG(info) << "Changing parameter parD to 2!";
+  LOG(INFO) << "Changing parameter parD to 2!";
   parD->setValue(2.);
   myTree->parameter();
-  LOG(info) << "Changed and recalculated tree:" << std::endl << myTree;
+  LOG(INFO) << "Changed and recalculated tree:" << std::endl << myTree;
   BOOST_CHECK_EQUAL(result->value(), 40);
 }
 
@@ -99,10 +99,10 @@ BOOST_AUTO_TEST_CASE(SingleParameters) {
   myTreeMult->parameter(); // Trigger recalculation
   BOOST_CHECK_EQUAL(result->value(), 7.2576e+06);
   
-  LOG(info) << "Multitree Setup and calculated R = Sum[a*b] with one leaf "
+  LOG(INFO) << "Multitree Setup and calculated R = Sum[a*b] with one leaf "
                "containing "
             << nElements << " elements";
-  LOG(info) << std::endl << myTreeMult;
+  LOG(INFO) << std::endl << myTreeMult;
 }
 BOOST_AUTO_TEST_CASE(MultiParameters) {
 
@@ -145,10 +145,10 @@ BOOST_AUTO_TEST_CASE(MultiParameters) {
 
   BOOST_CHECK_EQUAL(result->value(), 4950);
 
-  LOG(info) << "MultiDouble Setup and calculated R = Sum[a*b] with one leaf "
+  LOG(INFO) << "MultiDouble Setup and calculated R = Sum[a*b] with one leaf "
                "containing "
             << nElements << " elements";
-  LOG(info) << std::endl << myTreeMultD;
+  LOG(INFO) << std::endl << myTreeMultD;
 }
 
 BOOST_AUTO_TEST_SUITE_END();

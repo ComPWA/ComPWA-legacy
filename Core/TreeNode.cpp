@@ -93,7 +93,7 @@ std::shared_ptr<ComPWA::Parameter> TreeNode::recalculate() const {
   try {
     Strat->execute(newVals, result);
   } catch (std::exception &ex) {
-    LOG(error) << "TreeNode::Recalculate() | Strategy " << Strat
+    LOG(INFO) << "TreeNode::Recalculate() | Strategy " << Strat
                << " failed on node " << name() << ": " << ex.what();
     throw;
   }

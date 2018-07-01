@@ -7,13 +7,13 @@
 #include <numeric>
 #include <stdexcept>
 
+#include "qft++/Vector4.h"
+
 #include "Core/DataPoint.hpp"
 #include "Core/Event.hpp"
 #include "Core/Particle.hpp"
 #include "Core/Properties.hpp"
-
 #include "Physics/HelicityFormalism/HelicityKinematics.hpp"
-#include "Physics/qft++/Vector4.h"
 
 namespace ComPWA {
 namespace Physics {
@@ -49,7 +49,7 @@ HelicityKinematics::HelicityKinematics(std::shared_ptr<PartList> partL,
     stream << FindParticle(partL, i).name() << " ";
   stream << ")";
 
-  LOG(info) << "HelicityKinematics::HelicityKinematics() | Initialize reaction "
+  LOG(INFO) << "HelicityKinematics::HelicityKinematics() | Initialize reaction "
             << stream.str();
   return;
 }
@@ -109,7 +109,7 @@ HelicityKinematics::HelicityKinematics(std::shared_ptr<PartList> partL,
     stream << FindParticle(partL, i).name() << " ";
   stream << ")";
 
-  LOG(info) << "HelicityKinematics::HelicityKinematics() | Initialize reaction "
+  LOG(INFO) << "HelicityKinematics::HelicityKinematics() | Initialize reaction "
             << stream.str();
   return;
 }
@@ -137,7 +137,7 @@ void HelicityKinematics::convert(const Event &event, DataPoint &point) const {
   assert(Subsystems.size() == InvMassBounds.size());
 
   if (!Subsystems.size()) {
-    LOG(error) << "HelicityKinematics::convert() | No variabels were "
+    LOG(ERROR) << "HelicityKinematics::convert() | No variabels were "
                   "requested before. Therefore this function is doing nothing!";
   }
   for (unsigned int i = 0; i < Subsystems.size(); i++)

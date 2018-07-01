@@ -31,7 +31,7 @@ double CoherentIntensity::intensity(const DataPoint &point) const {
 void CoherentIntensity::load(std::shared_ptr<PartList> partL,
                              std::shared_ptr<Kinematics> kin,
                              const boost::property_tree::ptree &pt) {
-  LOG(trace) << "CoherentIntensity::load() | Construction....";
+  LOG(TRACE) << "CoherentIntensity::load() | Construction....";
   if (pt.get<std::string>("<xmlattr>.Class") != "Coherent")
     throw BadConfig("CoherentIntensity::Factory() | Property tree seems to "
                     "not containt a configuration for an "
@@ -73,7 +73,7 @@ CoherentIntensity::component(std::string name) {
 
   // The whole object?
   if (name == Name) {
-    //    LOG(error) << "CoherentIntensity::component() | You're requesting the
+    //    LOG(ERROR) << "CoherentIntensity::component() | You're requesting the
     //    "
     //                  "full object! So just copy it!";
     //    return std::shared_ptr<AmpIntensity>();

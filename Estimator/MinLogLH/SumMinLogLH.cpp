@@ -38,7 +38,7 @@ void SumMinLogLH::UseFunctionTree(bool onoff) {
     try {
       tr->UseFunctionTree(true);
     } catch (std::exception &ex) {
-      LOG(error)
+      LOG(ERROR)
           << "SumMinLogLH::UseFunctionTree() | Construction of one or more sub "
              "trees has failed! Error: "
           << ex.what();

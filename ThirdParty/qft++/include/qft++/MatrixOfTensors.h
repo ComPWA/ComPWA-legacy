@@ -24,7 +24,6 @@
 #include "../../include/tensor.h"
 
 namespace ComPWA {
-  namespace Physics {
     namespace QFT {
       
 //_____________________________________________________________________________
@@ -91,7 +90,6 @@ Matrix<Tensor<T> > BoostMatrix(const Matrix<Tensor<T> > &__matrix,
 }
 //_____________________________________________________________________________
     }
-  }
 }
 
 #endif /* _MatrixOfTensors_H */

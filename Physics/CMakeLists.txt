@@ -1,6 +1,6 @@
 add_subdirectory( DecayDynamics )
 add_subdirectory( HelicityFormalism )
-add_subdirectory( qft++ )
+#add_subdirectory( qft++ )
 #add_subdirectory( EvtGen )
 
 install (FILES CoherentIntensity.hpp PartialAmplitude.hpp 

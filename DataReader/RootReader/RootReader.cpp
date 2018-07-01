@@ -12,8 +12,6 @@
 #include "Core/Properties.hpp"
 #include "DataReader/RootReader/RootReader.hpp"
 
-using namespace boost::log;
-
 namespace ComPWA {
 namespace DataReader {
 
@@ -103,7 +101,7 @@ void RootReader::read(TTree *fTree, double readSize) {
 
 void RootReader::writeData(std::string fileName, std::string treeName) {
 
-  LOG(info) << "RootReader::writeData() | Writing current "
+  LOG(INFO) << "RootReader::writeData() | Writing current "
                "vector of events to file "
             << fileName;
 

@@ -92,7 +92,7 @@ BOOST_AUTO_TEST_CASE(ConstructionFromXML) {
 
   //  if (ptout != tr) {
   //    BOOST_CHECK(false);
-  //    LOG(error)
+  //    LOG(ERROR)
   //        << "Read-in tree and write-out tree are not the same. This is"
   //           "most likely due to an encoding problem but could also "
   //           "point to a bug in reading and writing amplitudes. Check input"
@@ -139,9 +139,9 @@ BOOST_AUTO_TEST_CASE(PartialAmplitudeTreeConcordance) {
 
   ParameterList list;
   helDecay->parameters(list);
-  LOG(info) << "List of parameters: ";
+  LOG(INFO) << "List of parameters: ";
   for( auto p : list.doubleParameters() )
-    LOG(info) << p->to_str();
+    LOG(INFO) << p->to_str();
   BOOST_CHECK_EQUAL(list.doubleParameters().size(), 5);
 
   // Generate phsp sample
@@ -167,16 +167,16 @@ BOOST_AUTO_TEST_CASE(PartialAmplitudeTreeConcordance) {
   // Testing function tree
   auto tree = helDecay->tree(kin, sampleList, toySampleList);
   tree->parameter();
-  LOG(info)<<tree->print();
+  LOG(INFO)<<tree->print();
   
-  LOG(info) << "Loop over phsp events....";
+  LOG(INFO) << "Loop over phsp events....";
   for (size_t i = 0; i < sample->numEvents(); i++) {
     ComPWA::DataPoint p;
     try {
       kin->convert(sample->event(i), p);
     } catch (std::exception &ex) {
       // Test if events outside the phase space boundaries are generated
-      LOG(error) << "Event outside phase space. This should not happen since "
+      LOG(ERROR) << "Event outside phase space. This should not happen since "
                     "we use a Monte-Carlo sample!";
       BOOST_FAIL("Event outside phase space. This should not happen since "
                  "we use a Monte-Carlo sample!");
@@ -199,7 +199,7 @@ BOOST_AUTO_TEST_CASE(PartialAmplitudeTreeConcordance) {
     BOOST_CHECK_CLOSE(intensityNoTree.real(), intensityTree.real(), 0.0000001);
     BOOST_CHECK_CLOSE(intensityNoTree.imag(), intensityTree.imag(), 0.0000001);
 
-    LOG(debug) << "point = " << p << " intensity = " << intensityNoTree
+    LOG(DEBUG) << "point = " << p << " intensity = " << intensityNoTree
               << " intensity tree = " << intensityTree;
   }
 };
@@ -247,16 +247,16 @@ BOOST_AUTO_TEST_CASE(RelBWTreeConcordance) {
   // Testing function tree
   auto tree = relBW->tree(sampleList, 3);
   tree->parameter();
-  LOG(info)<<tree->print();
+  LOG(INFO)<<tree->print();
   
-  LOG(info) << "Loop over phsp events....";
+  LOG(INFO) << "Loop over phsp events....";
   for (size_t i = 0; i < sample->numEvents(); i++) {
     ComPWA::DataPoint p;
     try {
       kin->convert(sample->event(i), p);
     } catch (std::exception &ex) {
       // Test if events outside the phase space boundaries are generated
-      LOG(error) << "Event outside phase space. This should not happen since "
+      LOG(ERROR) << "Event outside phase space. This should not happen since "
                     "we use a Monte-Carlo sample!";
       BOOST_FAIL("Event outside phase space. This should not happen since "
                  "we use a Monte-Carlo sample!");
@@ -272,7 +272,7 @@ BOOST_AUTO_TEST_CASE(RelBWTreeConcordance) {
     std::complex<double> intensityTree = intensitiesTree->values().at(i);
     
     BOOST_CHECK_EQUAL(intensityNoTree, intensityTree);
-    LOG(debug) << "point = " << p << " intensity = " << intensityNoTree
+    LOG(DEBUG) << "point = " << p << " intensity = " << intensityNoTree
               << " intensity tree = " << intensityTree;
   }
 };
@@ -304,9 +304,9 @@ BOOST_AUTO_TEST_CASE(IncoherentTreeConcordance) {
 
   ParameterList list;
   intens->parameters(list);
-  LOG(info) << "List of parameters: ";
+  LOG(INFO) << "List of parameters: ";
   for( auto p : list.doubleParameters() )
-    LOG(info) << p->to_str();
+    LOG(INFO) << p->to_str();
   BOOST_CHECK_EQUAL(list.doubleParameters().size(), 14);
 
   // Generate phsp sample
@@ -331,16 +331,16 @@ BOOST_AUTO_TEST_CASE(IncoherentTreeConcordance) {
   auto tree = intens->tree(kin, sampleList, toySampleList, toySampleList,
                            kin->numVariables());
   tree->parameter();
-  LOG(info)<<tree->print();
+  LOG(INFO)<<tree->print();
   
-  LOG(info) << "Loop over phsp events....";
+  LOG(INFO) << "Loop over phsp events....";
   for (size_t i = 0; i < sample->numEvents(); i++) {
     ComPWA::DataPoint p;
     try {
       kin->convert(sample->event(i), p);
     } catch (std::exception &ex) {
       // Test if events outside the phase space boundaries are generated
-      LOG(error) << "Event outside phase space. This should not happen since "
+      LOG(ERROR) << "Event outside phase space. This should not happen since "
                     "we use a Monte-Carlo sample!";
       BOOST_FAIL("Event outside phase space. This should not happen since "
                  "we use a Monte-Carlo sample!");
@@ -359,7 +359,7 @@ BOOST_AUTO_TEST_CASE(IncoherentTreeConcordance) {
     //BOOST_TEST(intensityNoTree == intensityTree,
     //           boost::test_tools::tolerance(0.000001));
     BOOST_CHECK_CLOSE(intensityNoTree, intensityTree, 0.0000001);
-    LOG(info) << "point = " << p << " intensity = " << intensityNoTree
+    LOG(INFO) << "point = " << p << " intensity = " << intensityNoTree
               << " intensity tree = " << intensityTree;
   }
 };
@@ -391,9 +391,9 @@ BOOST_AUTO_TEST_CASE(SeqPartialAmplitudeTreeConcordance) {
 
   ParameterList list;
   seqAmp->parameters(list);
-  LOG(info) << "List of parameters: ";
+  LOG(INFO) << "List of parameters: ";
   for( auto p : list.doubleParameters() )
-    LOG(info) << p->to_str();
+    LOG(INFO) << p->to_str();
   BOOST_CHECK_EQUAL(list.doubleParameters().size(), 12);
 
   // Generate phsp sample
@@ -419,16 +419,16 @@ BOOST_AUTO_TEST_CASE(SeqPartialAmplitudeTreeConcordance) {
   // Testing function tree
   auto tree = seqAmp->tree(kin, sampleList, toySampleList);
   tree->parameter();
-  LOG(info)<<tree->print();
+  LOG(INFO)<<tree->print();
   
-  LOG(info) << "Loop over phsp events....";
+  LOG(INFO) << "Loop over phsp events....";
   for (size_t i = 0; i < sample->numEvents(); i++) {
     ComPWA::DataPoint p;
     try {
       kin->convert(sample->event(i), p);
     } catch (std::exception &ex) {
       // Test if events outside the phase space boundaries are generated
-      LOG(error) << "Event outside phase space. This should not happen since "
+      LOG(ERROR) << "Event outside phase space. This should not happen since "
                     "we use a Monte-Carlo sample!";
       BOOST_FAIL("Event outside phase space. This should not happen since "
                  "we use a Monte-Carlo sample!");
@@ -451,7 +451,7 @@ BOOST_AUTO_TEST_CASE(SeqPartialAmplitudeTreeConcordance) {
     BOOST_CHECK_CLOSE(intensityNoTree.real(), intensityTree.real(), 0.0000001);
     BOOST_CHECK_CLOSE(intensityNoTree.imag(), intensityTree.imag(), 0.0000001);
 
-    LOG(info) << "point = " << p << " intensity = " << intensityNoTree
+    LOG(INFO) << "point = " << p << " intensity = " << intensityNoTree
               << " intensity tree = " << intensityTree;
   }
 };

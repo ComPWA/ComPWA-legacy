@@ -19,7 +19,7 @@ RelativisticBreitWigner::RelativisticBreitWigner(
     std::string name, std::pair<std::string, std::string> daughters,
     std::shared_ptr<ComPWA::PartList> partL) {
 
-  LOG(trace) << "RelativisticBreitWigner::Factory() | Construction of " << name
+  LOG(TRACE) << "RelativisticBreitWigner::Factory() | Construction of " << name
              << ".";
   setName(name);
   auto partProp = partL->find(name)->second;
@@ -63,7 +63,7 @@ RelativisticBreitWigner::RelativisticBreitWigner(
   SetDecayMasses(daughterMasses);
   SetDecayNames(daughters);
 
-  LOG(trace)
+  LOG(TRACE)
       << "RelativisticBreitWigner::Factory() | Construction of the decay "
       << partProp.name() << " -> " << daughters.first << " + "
       << daughters.second;
@@ -260,7 +260,7 @@ void BreitWignerStrategy::execute(ParameterList &paras,
           paras.mDoubleValue(0)->values().at(ele), m0, ma, mb, Gamma0, orbitL,
           d, ffType);
     } catch (std::exception &ex) {
-      LOG(error) << "BreitWignerStrategy::execute() | " << ex.what();
+      LOG(ERROR) << "BreitWignerStrategy::execute() | " << ex.what();
       throw(std::runtime_error("BreitWignerStrategy::execute() | "
                                "Evaluation of dynamic function failed!"));
     }

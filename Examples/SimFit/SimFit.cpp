@@ -377,8 +377,8 @@ int main(int argc, char **argv) {
   // Run fit
   //---------------------------------------------------
   esti->UseFunctionTree(true);
-  LOG(debug) << esti->tree()->head()->print(25);
-  LOG(info) << "Fit parameter list: " << fitPar.to_str();
+  LOG(DEBUG) << esti->tree()->head()->print(25);
+  LOG(INFO) << "Fit parameter list: " << fitPar.to_str();
   auto minuitif = new Optimizer::Minuit2::MinuitIF(esti, fitPar);
   minuitif->setUseHesse(true);
   auto result = minuitif->exec(fitPar);
@@ -416,7 +416,7 @@ int main(int argc, char **argv) {
   sqrtS4260._pl->addComponent("f0(980)", "f0_980");
   sqrtS4260._pl->write("sqrtS4260", "plot.root", "UPDATE");
 
-  LOG(info) << "Done";
+  LOG(INFO) << "Done";
 
   return 0;
 }

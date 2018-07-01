@@ -26,7 +26,7 @@ void HelicityDecay::load(std::shared_ptr<PartList> partL,
                          std::shared_ptr<Kinematics> kin,
                          const boost::property_tree::ptree &pt) {
 
-  LOG(trace) << "HelicityDecay::load() |";
+  LOG(TRACE) << "HelicityDecay::load() |";
   SubSys = SubSystem(pt);
   DataPosition =
       3 *

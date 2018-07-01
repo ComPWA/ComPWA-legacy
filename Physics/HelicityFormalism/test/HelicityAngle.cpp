@@ -129,7 +129,7 @@ BOOST_AUTO_TEST_CASE(HelicityAngleTest) {
   unsigned int pos_sys23_CP(kin->addSubSystem({1}, {2}, {0}, {}));
   SubSystem sys23_CP(kin->subSystem(pos_sys23_CP));
 
-  LOG(info) << "Loop over phsp events....";
+  LOG(INFO) << "Loop over phsp events....";
   for (auto i : sample->events()) {
     // Calculate masses from FourMomentum to make sure that the correct masses
     // are used for the calculation of the helicity angle
@@ -209,16 +209,16 @@ BOOST_AUTO_TEST_CASE(HelicityAngleTest) {
 
     DataPoint p12, p12_CP, p13, p13_CP, p23, p23_CP;
 
-    LOG(debug) << "-------- NEW EVENT ----------";
+    LOG(DEBUG) << "-------- NEW EVENT ----------";
     kin->convert(i, p12, sys12);
     kin->convert(i, p12_CP, sys12_CP);
     // BOOST_CHECK_EQUAL((float)p12.value(1), (float)cosTheta12_23);
     BOOST_CHECK(ComPWA::equal(p12.value(1), cosTheta12_23, 1000));
 
-    LOG(debug) << "-------- (12) ----------";
-    LOG(debug) << sys12.to_string() << " : " << p12;
-    LOG(debug) << sys12_CP.to_string() << " : " << p12_CP;
-    LOG(debug) << "cosTheta12 "
+    LOG(DEBUG) << "-------- (12) ----------";
+    LOG(DEBUG) << sys12.to_string() << " : " << p12;
+    LOG(DEBUG) << sys12_CP.to_string() << " : " << p12_CP;
+    LOG(DEBUG) << "cosTheta12 "
                << kin->helicityAngle(sqrtS, m2, m1, m3, m12sq, m23sq) << " CP: "
                << kin->helicityAngle(sqrtS, m3, m1, m2, m13sq, m23sq);
 
@@ -229,10 +229,10 @@ BOOST_AUTO_TEST_CASE(HelicityAngleTest) {
     BOOST_CHECK_EQUAL((float)p13.value(1), (-1) * (float)p12_CP.value(1));
     BOOST_CHECK_EQUAL((float)p12.value(1), (-1) * (float)p13_CP.value(1));
 
-    LOG(debug) << "-------- (13) ----------";
-    LOG(debug) << sys13.to_string() << " : " << p13;
-    LOG(debug) << sys13_CP.to_string() << " : " << p13_CP;
-    LOG(debug) << "cosTheta13 "
+    LOG(DEBUG) << "-------- (13) ----------";
+    LOG(DEBUG) << sys13.to_string() << " : " << p13;
+    LOG(DEBUG) << sys13_CP.to_string() << " : " << p13_CP;
+    LOG(DEBUG) << "cosTheta13 "
                << kin->helicityAngle(sqrtS, m1, m3, m2, m13sq, m12sq) << " CP: "
                << kin->helicityAngle(sqrtS, m1, m2, m3, m12sq, m13sq);
 
@@ -242,10 +242,10 @@ BOOST_AUTO_TEST_CASE(HelicityAngleTest) {
 
     BOOST_CHECK_EQUAL((float)p23.value(1), (-1) * ((float)p23_CP.value(1)));
 
-    LOG(debug) << "-------- (23) ----------";
-    LOG(debug) << sys23.to_string() << " : " << p23;
-    LOG(debug) << sys23_CP.to_string() << " : " << p23_CP;
-    LOG(debug) << "cosTheta23 "
+    LOG(DEBUG) << "-------- (23) ----------";
+    LOG(DEBUG) << sys23.to_string() << " : " << p23;
+    LOG(DEBUG) << sys23_CP.to_string() << " : " << p23_CP;
+    LOG(DEBUG) << "cosTheta23 "
                << kin->helicityAngle(sqrtS, m2, m3, m1, m23sq, m12sq) << " CP: "
                << kin->helicityAngle(sqrtS, m3, m2, m1, m23sq, m13sq);
   }

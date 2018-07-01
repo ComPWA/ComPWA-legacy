@@ -109,7 +109,7 @@ public:
   /// AsciiReader). Sine Data is not a pure virtual class we implement a function
   /// with an error message.
   virtual void writeData(std::string file = "", std::string trName = "") {
-    LOG(error)
+    LOG(ERROR)
         << "Data::writeData() | Base class does not provide functionality"
            "to write data to file.";
   };

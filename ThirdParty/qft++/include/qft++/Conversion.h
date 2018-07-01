@@ -46,7 +46,6 @@
 //_____________________________________________________________________________
 
 namespace ComPWA {
-  namespace Physics {
     namespace QFT {
 // default template:
 template <typename _T,typename _U> class Conversion {
@@ -90,9 +89,11 @@ public:
 /// Does @a Derived inherit from @a Base? (note IsDerived(T,T) is @a true)
 #define IsDerived(Derived,Base) (Conversion<const Derived*,const Base*>::exists && !Conversion<const Derived*,const void*>::same_type)
 
-#include "Physics/qft++/Type.h"
+#include "qft++/Type.h"
 /// Should @a T be passed by value?
 #define PassByValue(__T) Conversion<__T,typename Type<__T>::ParamType>::same_type
 //_____________________________________________________________________________
-    }}}
+
+}    
+}
 #endif /* _Conversion_H */

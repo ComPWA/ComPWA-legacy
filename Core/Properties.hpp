@@ -169,7 +169,7 @@ inline void ReadParticles(std::shared_ptr<PartList> list,
     auto last = list->insert(p);
 
     if (!last.second) {
-      LOG(info) << "ReadParticles() | Particle " << last.first->first
+      LOG(INFO) << "ReadParticles() | Particle " << last.first->first
                 << " already exists in list. We overwrite its parameters!";
       last.first->second = tmp;
     }
@@ -182,7 +182,7 @@ inline void ReadParticles(std::shared_ptr<PartList> list,
     } catch (std::exception &ex) {
     }
 
-    LOG(debug) << "ReadParticles() | Particle " << tmp.name()
+    LOG(DEBUG) << "ReadParticles() | Particle " << tmp.name()
                << " (id=" << tmp.GetId() << ") "
                << " J(PC)=" << tmp.GetSpinQuantumNumber("Spin") << "("
                << tmp.GetQuantumNumber("Parity") << cparity << ") "
@@ -250,7 +250,7 @@ inline void UpdateNode(std::shared_ptr<FitParameter> p,
       std::string nn = v.second.get<std::string>("<xmlattr>.Name");
       std::string tt = v.second.get<std::string>("<xmlattr>.Type");
       if (nn == p->name()) {
-        //        LOG(debug) << "UpdateNode() | Updating node " << v.first
+        //        LOG(DEBUG) << "UpdateNode() | Updating node " << v.first
         //        << "." << nn << " to " << p->value();
         v.second = p->save();
         v.second.put("<xmlattr>.Type", tt);

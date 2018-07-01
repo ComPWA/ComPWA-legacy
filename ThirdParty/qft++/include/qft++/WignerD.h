@@ -32,8 +32,9 @@
 #include <vector>
 #include <map>
 
+#include "Core/Spin.hpp"
+
 namespace ComPWA {
-  namespace Physics {
     namespace QFT {
 
 inline int factorial(int __i) {
@@ -317,7 +318,6 @@ inline void Wigner_D(const Spin &__jmax, double __alpha, double __beta, double _
   }
 }
 
-} /* namespace QFT */
-} /* namespace Physics */
-} /* namespace ComPWA */
-#endif /* _Utils_H */
+} // namespace QFT
+} // namespace ComPWA
+#endif

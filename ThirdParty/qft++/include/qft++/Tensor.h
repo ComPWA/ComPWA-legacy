@@ -26,23 +26,20 @@
 #include <vector>
 #include <complex>
 #include <cstdlib>
-// Local Headers:
-//#include "../../include/c++-template-utils.h"
-#include "Physics/qft++/Type.h"
-#include "Physics/qft++/OperationType.h"
-#include "Physics/qft++/Conversion.h"
-#include "Physics/qft++/SelectiveInclusion.h"
-#include "Physics/qft++/Matrix_Base.h"
-//#include "Physics/qft++/TemplateUtilFuncs.h"
-#include "Physics/qft++/Tensor_Base.h"
-#include "Physics/qft++/TensorIndex.h"
+// Local Headers
+#include "qft++/Type.h"
+#include "qft++/OperationType.h"
+#include "qft++/Conversion.h"
+#include "qft++/SelectiveInclusion.h"
+#include "qft++/Matrix_Base.h"
+#include "qft++/Tensor_Base.h"
+#include "qft++/TensorIndex.h"
 //_____________________________________________________________________________
 /** @file Tensor.h
  *  @brief Tensor template class definition file.
  */
 //_____________________________________________________________________________
 namespace ComPWA {
-namespace Physics {
 namespace QFT {
 
 // Some utility functions templates:
@@ -1051,7 +1048,6 @@ template <typename T> Tensor<T> Real(const Tensor<std::complex<T>> &__tensor) {
   return real;
 }
 //_____________________________________________________________________________
-}
 }
 }
 #endif /* _Tensor_H */

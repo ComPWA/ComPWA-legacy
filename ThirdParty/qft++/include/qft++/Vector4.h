@@ -28,7 +28,6 @@
 #include "Tensor.h"
 #include "Core/Particle.hpp"
 namespace ComPWA {
-  namespace Physics {
     namespace QFT {
 
 //_____________________________________________________________________________
@@ -335,5 +334,6 @@ operator*(const Vector4<T1> &__v4a,const Vector4<T2> &__v4b) {
 }
 //_____________________________________________________________________________
 
-    }}}
+    }
+}
 #endif /* _Vector4_H  */

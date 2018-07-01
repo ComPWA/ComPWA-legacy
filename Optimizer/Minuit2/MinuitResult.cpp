@@ -60,7 +60,7 @@ void MinuitResult::init(ROOT::Minuit2::FunctionMinimum min) {
       }
 
   } else {
-    LOG(error) << "MinuitResult: no valid correlation matrix available!";
+    LOG(ERROR) << "MinuitResult: no valid correlation matrix available!";
     // Initialize empty covariance matrix with correct dimensions
     Cov = std::vector<std::vector<double>>(
         NumFreeParameter, std::vector<double>(NumFreeParameter, 0.));
@@ -72,7 +72,7 @@ void MinuitResult::init(ROOT::Minuit2::FunctionMinimum min) {
     GlobalCC = minState.GlobalCC().GlobalCC();
   } else {
     GlobalCC = std::vector<double>(NumFreeParameter, 0);
-    LOG(error) << "MinuitResult: no valid global correlation available!";
+    LOG(ERROR) << "MinuitResult: no valid global correlation available!";
   }
   InitialLH = -1;
   FinalLH = minState.Fval();

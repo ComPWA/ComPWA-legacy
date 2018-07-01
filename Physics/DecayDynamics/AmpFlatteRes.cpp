@@ -14,7 +14,7 @@ AmpFlatteRes::AmpFlatteRes(std::string name,
                            std::pair<std::string, std::string> daughters,
                            std::shared_ptr<ComPWA::PartList> partL) {
 
-  LOG(trace) << "AmpFlatteRes::Factory() | Construction of " << name << ".";
+  LOG(TRACE) << "AmpFlatteRes::Factory() | Construction of " << name << ".";
   setName(name);
 
   // All further information on the decay is stored in a ParticleProperty list
@@ -63,7 +63,7 @@ AmpFlatteRes::AmpFlatteRes(std::string name,
   }
   SetCouplings(vC);
 
-  LOG(trace) << "AmpFlatteRes::Factory() | Construction of the decay "
+  LOG(TRACE) << "AmpFlatteRes::Factory() | Construction of the decay "
              << partProp.name() << " -> " << daughters.first << " + "
              << daughters.second;
 }
@@ -106,7 +106,7 @@ std::complex<double> AmpFlatteRes::evaluate(const DataPoint &point,
         Couplings.at(2).GetMassB(), Couplings.at(2).value(), (double)L,
         MesonRadius->value(), FormFactorType);
   } catch (std::exception &ex) {
-    LOG(error) << "AmpFlatteRes::evaluate() | "
+    LOG(ERROR) << "AmpFlatteRes::evaluate() | "
                   "Dynamical function can not be evaluated: "
                << ex.what();
     throw;
@@ -308,7 +308,7 @@ void FlatteStrategy::execute(ParameterList &paras,
           formFactorType(paras.doubleValue(7)->value()) // ffType
           );
     } catch (std::exception &ex) {
-      LOG(error) << "FlatteStrategy::execute() | " << ex.what();
+      LOG(ERROR) << "FlatteStrategy::execute() | " << ex.what();
       throw(std::runtime_error("FlatteStrategy::execute() | "
                                "Evaluation of dynamic function failed!"));
     }
@@ -328,7 +328,7 @@ void AmpFlatteRes::SetCouplings(std::vector<Coupling> vC) {
   // Check if one of the  coupling match the final state (_daughterMasses)
   auto mm = GetDecayMasses();
   if (mm == std::pair<double, double>(-999, -999))
-    LOG(info)
+    LOG(INFO)
         << "AmpFlatteRes::SetCouplings() | Masses of decay products not set. "
            " Can not determine if correct couplings were set.";
 
