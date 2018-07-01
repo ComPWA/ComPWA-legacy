@@ -23,11 +23,15 @@ SET( lib_headers
 )
 
 add_library( qft++
-  SHARED ${lib_srcs} ${lib_headers}
+  OBJECT ${lib_srcs} ${lib_headers}
 )
 target_include_directories( qft++ PUBLIC 
   ${CMAKE_CURRENT_SOURCE_DIR}/include )
 
+set(QFTPP $<TARGET_OBJECTS:qft++> CACHE STRING
+  "Link with this object to qft++")
+
+set(QFTPP_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/include CACHE INTERNAL "")
 #
 # Install
 #
@@ -35,6 +39,6 @@ install (FILES ${lib_headers}
     DESTINATION include/ComPWA/qft++
 )
 
-install(TARGETS qft++
-        LIBRARY DESTINATION lib/ComPWA
-)
+#install(TARGETS qft++
+#        LIBRARY DESTINATION lib/ComPWA
+#)

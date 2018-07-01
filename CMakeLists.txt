@@ -111,7 +111,8 @@ link_directories(${Boost_LIBRARY_DIR})
 add_subdirectory(ThirdParty)
 
 # Adding easylogging folder to include directories
-include_directories(${ELPP_INCLUDE_DIRS})
+include_directories( ${ELPP_INCLUDE_DIRS} )
+include_directories( ${QFTPP_INCLUDE_DIRS} )
 
 #
 # Enable target 'test'
