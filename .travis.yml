@@ -42,7 +42,7 @@ matrix:
         - env # Debugging
           # We have to check first if a package is installed, otherwise an error
           # is thrown.
-        - if brew ls --versions boost > /dev/null; then echo "Boost installed:sdd";
+        - if brew ls --versions boost > /dev/null; then echo "Boost installed:\ sdd";
           else brew install boost; fi
         #- if brew ls --versions gsl > /dev/null; then 
             #echo 'GSL installed: ';
