@@ -55,6 +55,9 @@ endif()
 # - add all warnings compiler flag
 set(CMAKE_CXX_FLAGS    "${CMAKE_CXX_FLAGS} -Wall")
 
+# Enable -fPIC flag
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
 message( STATUS "Using CXX compiler flags: " ${CMAKE_CXX_FLAGS} )
 
 INCLUDE_DIRECTORIES(${COMPWA_SOURCE_DIR})
