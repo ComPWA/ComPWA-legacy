@@ -54,6 +54,7 @@ void Logging::setLogLevel(std::string minLevel) {
   else
     throw std::runtime_error("Logging::setLogLevel() | Log level " + minLevel +
                              " unknown.");
+                             
 };
 
 } // namespace ComPWA
