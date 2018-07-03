@@ -4,6 +4,7 @@
 
 #include <iomanip>
 #include <ctime>
+
 #include "Core/Logging.hpp"
 
 INITIALIZE_EASYLOGGINGPP
@@ -27,12 +28,21 @@ Logging::Logging(std::string out, std::string lvl) {
 
   setLogLevel(lvl);
 
-  // Print local time and date at the beginning
-  std::time_t now = std::time(nullptr);
+
   LOG(INFO) << "Log file: " << out;
   LOG(INFO) << "Log level: " << lvl;
-  LOG(INFO) << "Current date and time: "
-            << std::put_time(std::localtime(&now), "%c %Z");
+
+  // Print local time and date at the beginning
+  
+  // GCC < 5.0: std::put_time is not available
+  // std::time_t now = std::time(nullptr);
+  //  LOG(INFO) << "Current date and time: "
+  //            << std::put_time(std::localtime(&now), "%c %Z");
+
+  char foo[48];
+  std::time_t now = std::time(nullptr); // now stores the current time
+  if (0 < strftime(foo, sizeof(foo), "[%c %Z] ", std::localtime(&now)))
+    LOG(INFO) << "Current date and time: " << foo;
 };
 
 void Logging::setLogLevel(std::string minLevel) {
@@ -55,7 +65,6 @@ void Logging::setLogLevel(std::string minLevel) {
   else
     throw std::runtime_error("Logging::setLogLevel() | Log level " + minLevel +
                              " unknown.");
-  
 };
 
 } // namespace ComPWA
