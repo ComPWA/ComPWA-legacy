@@ -42,21 +42,22 @@ matrix:
         - env # Debugging
           # We have to check first if a package is installed, otherwise an error
           # is thrown.
-        - if brew ls --versions boost > /dev/null; then echo "Boost installed:\ `brew ls --versions boost`";
+        - if brew ls --versions boost > /dev/null; then 
+            echo "Boost installed:\ `brew ls --versions boost`";
           else brew install boost; fi
-        #- if brew ls --versions gsl > /dev/null; then 
-            #echo 'GSL installed: ';
-          #else brew install gsl; fi
-        #- brew upgrade python
-        #- if brew ls --versions root > /dev/null; then 
-            #echo 'ROOT installed: ';
-          #else brew install root;
-            #if brew install root; then echo "top";
-            #else
-              #brew link --overwrite gcc;
-              #brew install root;
-            #fi
-          #fi
+        - if brew ls --versions gsl > /dev/null; then 
+            echo 'GSL installed:\ `brew ls --versions gsl`';
+          else brew install gsl; fi
+        - brew upgrade python
+        - if brew ls --versions root > /dev/null; then 
+            echo 'ROOT installed:\ `brew ls --versions root`';
+          else brew install root;
+            if brew install root; then echo "top";
+            else
+              brew link --overwrite gcc;
+              brew install root;
+            fi
+          fi
         #- wget https://root.cern.ch/download/root_v6.12.06.macosx64-10.13-clang90.tar.gz
         #- tar xpvfz root_*.tar.gz > /dev/null 2>&1
         
