@@ -3,6 +3,7 @@
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
 #include <iomanip>
+#include <ctime>
 #include "Core/Logging.hpp"
 
 INITIALIZE_EASYLOGGINGPP
@@ -54,7 +55,7 @@ void Logging::setLogLevel(std::string minLevel) {
   else
     throw std::runtime_error("Logging::setLogLevel() | Log level " + minLevel +
                              " unknown.");
-                             
+  
 };
 
 } // namespace ComPWA

@@ -44,11 +44,11 @@ message( STATUS "Using build type: " ${CMAKE_BUILD_TYPE} )
 # ${CMAKE_CXX_COMPILER_ID} can be one of {GNU Clang AppleClang Intel MSVC}
 # - verbose output on loop vectorization
 if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang") # using Clang or AppleClang
-    set(CMAKE_CXX_FLAGS
-        "${CMAKE_CXX_FLAGS} -Rpass-analysis=loop-vectorize -Rpass=loop-vectorize")
+    #set(CMAKE_CXX_FLAGS
+    #    "${CMAKE_CXX_FLAGS} -Rpass-analysis=loop-vectorize -Rpass=loop-vectorize")
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU") # using GCC
-    set(CMAKE_CXX_FLAGS
-        "${CMAKE_CXX_FLAGS} -ftree-vectorize -ftree-vectorizer-verbose=1")
+    #set(CMAKE_CXX_FLAGS
+    #    "${CMAKE_CXX_FLAGS} -ftree-vectorize -ftree-vectorizer-verbose=1")
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel") # using Intel C++
      # nothing here
 endif()
