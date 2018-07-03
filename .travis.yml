@@ -42,12 +42,15 @@ matrix:
         - env # Debugging
           # We have to check first if a package is installed, otherwise an error
           # is thrown.
-        - if brew ls --versions boost > /dev/null; then echo 'Boost installed: ';
+        - if brew ls --versions boost > /dev/null; then 
+            echo 'Boost installed: ';
           else brew install boost; fi
-        - if brew ls --versions gsl > /dev/null; then echo 'GSL installed: ';
+        - if brew ls --versions gsl > /dev/null; then 
+            echo 'GSL installed: ';
           else brew install gsl; fi
         - brew upgrade python
-        - if brew ls --versions root > /dev/null; then echo 'ROOT installed: `;
+        - if brew ls --versions root > /dev/null; then 
+            echo 'ROOT installed: ';
           else brew install root;
             if brew install root; then echo "top";
             else
