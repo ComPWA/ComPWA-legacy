@@ -2,14 +2,12 @@
 // This file is part of the ComPWA framework, check
 // https://github.com/ComPWA/ComPWA/license.txt for details.
 
-#include <chrono>
-#include <boost/log/support/date_time.hpp>
+#include <iomanip>
 #include "Core/Logging.hpp"
 
 INITIALIZE_EASYLOGGINGPP
 
 namespace ComPWA {
-using namespace boost::log;
 
 Logging::Logging(std::string out, std::string lvl) {
 
@@ -24,27 +22,38 @@ Logging::Logging(std::string out, std::string lvl) {
   // default logger uses default configurations
   el::Loggers::reconfigureLogger("default", fileConf);
 
-  // Logging to terminal
-  //  el::Logger* terminalLog = el::Loggers::getLogger("terminalLog");
-  //  el::Configurations terminalConf;
-  //  terminalConf.setToDefault();
-  //  terminalConf.setGlobally(el::ConfigurationType::Format,
-  //                       "%datetime [%level] %msg");
-  //  terminalConf.setGlobally(el::ConfigurationType::ToFile, "0");
-  //  terminalConf.setGlobally(el::ConfigurationType::ToStandardOutput, "1");
-  //  el::Loggers::reconfigureLogger("terminalLog", terminalConf);
+  el::Loggers::addFlag(el::LoggingFlag::HierarchicalLogging);
+
+  setLogLevel(lvl);
 
   // Print local time and date at the beginning
-  boost::posix_time::ptime todayUtc(
-      boost::gregorian::day_clock::universal_day(),
-      boost::posix_time::second_clock::local_time().time_of_day());
+  std::time_t now = std::time(nullptr);
   LOG(INFO) << "Log file: " << out;
+  LOG(INFO) << "Log level: " << lvl;
   LOG(INFO) << "Current date and time: "
-            << boost::posix_time::to_simple_string(todayUtc);
+            << std::put_time(std::localtime(&now), "%c %Z");
 };
 
-void Logging::setLogLevel(std::string minLevel){
-    // ToDo: implement setLogLevel
+void Logging::setLogLevel(std::string minLevel) {
+
+  // Capitalize string
+  std::transform(minLevel.begin(), minLevel.end(), minLevel.begin(), ::toupper);
+
+  if (minLevel == "TRACE")
+    el::Loggers::setLoggingLevel(el::Level::Trace);
+  else if (minLevel == "DEBUG")
+    el::Loggers::setLoggingLevel(el::Level::Debug);
+  else if (minLevel == "FATAL")
+    el::Loggers::setLoggingLevel(el::Level::Fatal);
+  else if (minLevel == "ERROR")
+    el::Loggers::setLoggingLevel(el::Level::Error);
+  else if (minLevel == "WARNING")
+    el::Loggers::setLoggingLevel(el::Level::Warning);
+  else if (minLevel == "INFO")
+    el::Loggers::setLoggingLevel(el::Level::Info);
+  else
+    throw std::runtime_error("Logging::setLogLevel() | Log level " + minLevel +
+                             " unknown.");
 };
 
 } // namespace ComPWA

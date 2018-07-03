@@ -120,7 +120,6 @@ include_directories( ${QFTPP_INCLUDE_DIRS} )
 enable_testing()
 set(CTEST_OUTPUT_ON_FAILURE TRUE)
 
-
 # also run pytest for testing
 add_test(NAME PythonTests
          COMMAND pytest -v --ignore=Tools/PythonInterface 

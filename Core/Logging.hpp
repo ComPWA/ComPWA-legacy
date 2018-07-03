@@ -9,10 +9,6 @@
 
 namespace ComPWA {
 
-#define info INFO
-#define error ERROR
-#define warning WARNING
-
 ///
 /// \class Logging
 /// Logging class privides an interface for logging all over the framework.
@@ -24,8 +20,6 @@ class Logging {
 public:
   Logging(std::string outFileName = "output.log",
           std::string minLevel = "DEBUG");
-
-  enum logLvl {TRACE, DEBUG, INFO, WARNING, ERROR, FATAL};
 
   void setLogLevel(std::string minLevel);
   
