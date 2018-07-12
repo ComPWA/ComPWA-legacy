@@ -123,3 +123,5 @@ endforeach(testSrc)
 ELSE ()
   MESSAGE(WARNING "Requirements not found! Not building Tools module!")
 ENDIF()
+
+add_subdirectory(Plotting)
