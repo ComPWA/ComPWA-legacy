@@ -46,6 +46,7 @@
 #include "Tools/ParameterTools.hpp"
 #include "Tools/RootGenerator.hpp"
 #include "Tools/RootPlot.hpp"
+#include "Tools/Plotting/RootPlotData.hpp"
 #include "Tools/FitFractions.hpp"
 #include "Tools/Generate.hpp"
 
@@ -64,6 +65,7 @@ createIntens(std::string modelStr, std::shared_ptr<ComPWA::PartList> partL,
   modelStream << modelStr;
   boost::property_tree::ptree modelTree;
   boost::property_tree::xml_parser::read_xml(modelStream, modelTree);
+
   auto intens = std::make_shared<ComPWA::Physics::IncoherentIntensity>(
       partL, kin, modelTree.get_child("Intensity"));
 
@@ -291,6 +293,12 @@ PYBIND11_MODULE(pycompwa, m) {
                     std::vector<ComPWA::pid>, std::array<double, 4>>())
       .def(py::init<std::shared_ptr<ComPWA::PartList>, std::vector<ComPWA::pid>,
                     std::vector<ComPWA::pid>>())
+      .def(py::init([](std::shared_ptr<ComPWA::PartList> partL, std::string model_file_path) {
+		    boost::property_tree::ptree pt;
+		    boost::property_tree::xml_parser::read_xml(model_file_path, pt);
+		    return std::make_shared<ComPWA::Physics::HelicityFormalism::HelicityKinematics>(
+				    partL, pt.get_child("HelicityKinematics"));
+	    }))
       .def("print_sub_systems",
            [](const ComPWA::Physics::HelicityFormalism::HelicityKinematics
                   &kin) {
@@ -483,5 +491,26 @@ PYBIND11_MODULE(pycompwa, m) {
            "e.g.[Amplitude, "
            "AmpIntensity] is expected.")
       .def("write", &ComPWA::Tools::RootPlot::write);
+
+  py::class_<ComPWA::Tools::Plotting::RootPlotData, std::shared_ptr<ComPWA::Tools::Plotting::RootPlotData>>(
+      m, "RootPlotData")
+      .def(py::init<std::shared_ptr<ComPWA::Kinematics>, std::shared_ptr<ComPWA::AmpIntensity>>())
+      .def("use_efficiency_correction", (void (ComPWA::Tools::Plotting::RootPlotData::*)(
+                           std::shared_ptr<ComPWA::DataReader::Data>)) &
+                           ComPWA::Tools::Plotting::RootPlotData::useEfficiencyCorrection)
+      .def("set_data", (void (ComPWA::Tools::Plotting::RootPlotData::*)(
+                           std::shared_ptr<ComPWA::DataReader::Data>)) &
+                           ComPWA::Tools::Plotting::RootPlotData::setData)
+      .def("set_phsp_mc", (void (ComPWA::Tools::Plotting::RootPlotData::*)(
+                           std::shared_ptr<ComPWA::DataReader::Data>)) &
+                           ComPWA::Tools::Plotting::RootPlotData::setPhspMC)
+      .def("set_hit_miss_mc", (void (ComPWA::Tools::Plotting::RootPlotData::*)(
+                           std::shared_ptr<ComPWA::DataReader::Data>)) &
+                           ComPWA::Tools::Plotting::RootPlotData::setHitMissMC)
+      .def("add_component", &ComPWA::Tools::Plotting::RootPlotData::addComponent,
+           "Add component for which weights should be calculated. A tuple of "
+           "e.g.[Amplitude, "
+           "AmpIntensity] is expected.")
+      .def("write", &ComPWA::Tools::Plotting::RootPlotData::write);
 }
 

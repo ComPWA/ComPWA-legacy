@@ -13,6 +13,7 @@ target_link_libraries( pycompwa
     MinLogLH
     RootReader
     Tools
+    Plotting
     Core
     ${ROOT_LIBRARIES} 
     ${Boost_LIBRARIES} 
