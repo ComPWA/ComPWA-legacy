@@ -130,6 +130,9 @@ std::string myParticles = R"####(
     <Parameter Class='Double' Type="Mass" Name="Mass_myRes">
       <Value>2.0</Value>
       <Error>8.0E-04</Error>
+      <Min>1.1</Min>
+      <Max>4.0</Max>
+      <Fix>true</Fix>
     </Parameter>
     <QuantumNumber Class="Spin" Type="Spin" Value="1"/>
     <QuantumNumber Class="Int" Type="Charge" Value="0"/>
@@ -184,7 +187,7 @@ int main(int argc, char **argv) {
   //---------------------------------------------------
   // 2) Generate a large phase space sample
   //---------------------------------------------------
-  auto gen = std::make_shared<ComPWA::Tools::RootGenerator>(partL, kin);
+  auto gen = std::make_shared<ComPWA::Tools::RootGenerator>(partL, kin, 173);
   std::shared_ptr<Data> phspSample(new Data());
   ComPWA::Tools::generatePhsp(1000000, gen, phspSample);
 

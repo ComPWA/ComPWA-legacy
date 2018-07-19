@@ -176,7 +176,7 @@ BOOST_AUTO_TEST_CASE(HelicityDalitzFit){
 	  //---------------------------------------------------
 	  // 2) Generate a large phase space sample
 	  //---------------------------------------------------
-	  auto gen = std::make_shared<ComPWA::Tools::RootGenerator>(partL, kin);
+	  auto gen = std::make_shared<ComPWA::Tools::RootGenerator>(partL, kin, 173);
 	  std::shared_ptr<Data> phspSample(new Data());
 	  ComPWA::Tools::GeneratePhsp(100000, gen, phspSample);
 
@@ -268,11 +268,11 @@ BOOST_AUTO_TEST_CASE(HelicityDalitzFit){
 	  //pl.Plot();
 	  //LOG(info) << "Done";
 
-	  BOOST_CHECK_CLOSE(result->GetFinalLH(), -99978., 1.);
-	  BOOST_CHECK_CLOSE(fitPar.GetDoubleParameterValue("Magnitude_f2"),      1.,        20.);
-	  BOOST_CHECK_CLOSE(fitPar.GetDoubleParameterValue("Phase_f2")+3.14159,  3.14159,   20.);
-	  BOOST_CHECK_CLOSE(fitPar.GetDoubleParameterValue("Mass_f2(1270)"),     1.2755,    20.);
-	  BOOST_CHECK_CLOSE(fitPar.GetDoubleParameterValue("Width_myRes"),       1.,        20.);
+	  BOOST_CHECK_CLOSE(result->finalLH(), -613, 5.);
+	  BOOST_CHECK_CLOSE(FindParameter("Magnitude_f2",fitPar)->value(),      1.017,        5.);
+	  BOOST_CHECK_CLOSE(FindParameter("Phase_f2",fitPar)->value()+3.14159,  0.0573+3.14159,  5.);
+	  BOOST_CHECK_CLOSE(FindParameter("Mass_f2(1270)",fitPar)->value(),     1.2816,    5.);
+	  BOOST_CHECK_CLOSE(FindParameter("Width_myRes",fitPar)->value(),       0.98001,        5.);
 
 
 };

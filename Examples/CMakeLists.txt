@@ -3,6 +3,7 @@ add_subdirectory( DalitzFit )
 add_subdirectory( Benchmark )
 add_subdirectory( SimFit )
 add_subdirectory( CanonicalSum )
+add_subdirectory( EvtGen )
 #add_subdirectory( SliceFit )
 
 #if (NOT "${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
