@@ -5,6 +5,8 @@
 # Create object file
 add_library(easyloggingpp_object OBJECT easylogging++.cc easylogging++.h)
 
+target_compile_options( easyloggingpp_object PRIVATE -w )
+
 target_include_directories(easyloggingpp_object PRIVATE
                            ${CMAKE_CURRENT_SOURCE_DIR})
 
