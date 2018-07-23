@@ -24,6 +24,8 @@
 #include <algorithm>
 #include <thread>
 
+#include "Core/Logging.hpp"
+
 using namespace std;
 
 static const int num_threads = 10;
