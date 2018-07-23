@@ -5,13 +5,10 @@
 # Create object file
 add_library(easyloggingpp_object OBJECT easylogging++.cc easylogging++.h)
 
-#target_compile_definitions(easyloggingpp_object
-#                           PRIVATE ${BACKWARD_DEFINITIONS})
-
 target_include_directories(easyloggingpp_object PRIVATE
                            ${CMAKE_CURRENT_SOURCE_DIR})
 
-# ${EASYLOGGINGPP_ENABLE} can be added to TARGET_LINK_LIBRARIES for earch
+# Add ${EASYLOGGINGPP_ENABLE} to TARGET_LINK_LIBRARIES for earch
 # library which uses logging
 set(EASYLOGGINGPP_ENABLE $<TARGET_OBJECTS:easyloggingpp_object> CACHE STRING
 	"Link with this object to setup easyloggingpp automatically")

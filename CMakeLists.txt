@@ -53,7 +53,7 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel") # using Intel C++
      # nothing here
 endif()
 # - add all warnings compiler flag
-set(CMAKE_CXX_FLAGS    "${CMAKE_CXX_FLAGS} -Wall")
+#set(CMAKE_CXX_FLAGS    "${CMAKE_CXX_FLAGS} -Wall")
 
 # Enable -fPIC flag
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
@@ -113,7 +113,7 @@ link_directories(${Boost_LIBRARY_DIR})
 #
 add_subdirectory(ThirdParty)
 
-# Adding easylogging folder to include directories
+# Adding ThirdParty folders to include directories
 include_directories( ${ELPP_INCLUDE_DIRS} )
 include_directories( ${QFTPP_INCLUDE_DIRS} )
 

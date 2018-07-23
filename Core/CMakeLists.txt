@@ -11,9 +11,6 @@
 FIND_PACKAGE( Boost COMPONENTS
                unit_test_framework
                serialization
-               log
-               system
-               date_time
                REQUIRED QUIET
 )
 
@@ -24,12 +21,19 @@ FILE(GLOB lib_srcs *.cpp)
 FILE(GLOB lib_headers *.hpp)
 
 ADD_LIBRARY( Core
-  SHARED ${lib_srcs} ${lib_headers}
+  SHARED ${lib_srcs} ${lib_headers} 
 )
 
 TARGET_INCLUDE_DIRECTORIES( Core
   PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
   ${Boost_INCLUDE_DIR}
+)
+
+# We add the dependency explicity (no idea for
+# why this is necessary). Otherwise, target Core 
+# complains on the first run of make.
+add_dependencies(Core 
+  easyloggingpp_object
 )
 
 TARGET_LINK_LIBRARIES( Core
@@ -61,12 +65,14 @@ foreach(testSrc ${TEST_SRCS})
   SET(testName "CoreTest_${fileName}")
 
   #Add compile target
-  add_executable( ${testName} ${testSrc})
+  add_executable( ${testName} ${testSrc} )
 
   # Link to Boost libraries AND your targets and dependencies
   TARGET_LINK_LIBRARIES( ${testName}
+	pthread
     Core
     ${Boost_LIBRARIES}
+	${EASYLOGGINGPP_ENABLE}
   )
 
   # Move testing binaries into a testBin directory
