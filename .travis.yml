@@ -28,6 +28,9 @@ before_install:
         echo -n | openssl s_client -connect scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-;
         fi
 
+install:
+  - pip install --user -r requirements.txt
+
 matrix:
   allow_failures: 
     - compiler: clang
