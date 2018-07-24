@@ -30,7 +30,7 @@ INITIALIZE_EASYLOGGINGPP
 
 using namespace std;
 
-static const int num_threads = 10;
+static const unsigned int num_threads = 10;
 
 //This function will be called from a thread
 
@@ -110,11 +110,11 @@ int main(int argc, char **argv) {
   cout << endl;
 
   //=========  Threads  ==========
-  cout << "Threads: " << endl;
+  cout << "Threads:\n";
   std::thread t[num_threads];
   //Launch a group of threads
-  for (int i = 0; i < num_threads; ++i) {
-      t[i] = thread(call_from_thread, i);
+  for (unsigned int i = 0; i < num_threads; ++i) {
+      t[i] = std::thread(call_from_thread, i);
   }
   cout << "Launched from the main\n" << endl;
   //Join the threads with the main thread
@@ -126,7 +126,7 @@ int main(int argc, char **argv) {
 
   //========= Regular Expr. ==========
   cout << "Regular Expressions: " << endl;
-  cout << "Not supported by gcc up to 4.6 " << endl;
+  cout << "Not supported by gcc up to 4.8" << endl;
   string input;
   regex integer("(\\+|-)?[[:digit:]]+");
   //As long as the input is correct ask for another number
