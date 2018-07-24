@@ -166,9 +166,10 @@ matrix:
 # Build your code e.g. by calling make
 script:
     # Skip compilation in case we are on the coverity_scan branch
-    - if [[ "$COVERITY_SCAN_BRANCH" != "1" ]]; then 
+    - if [[ "$COVERITY_SCAN_BRANCH" != "1" ]]; then
          mkdir $BASEPATH/build;
          cd $BASEPATH/build;
          cmake -DPYBIND11_PYTHON_VERSION=3.4 $BASEPATH/ComPWA/;
          make -j2 VERBOSE=1;
-      fi  
+         make test;
+      fi
