@@ -151,6 +151,7 @@ void RootPlotData::write(std::string treePrefix, std::string fileName, std::stri
 				DataPointValues[j] = point.value(j);
 			}
 
+			IntensityWeight = Intensity->intensity(point);
 			// Loop over all components that we want to plot
 			counter = 0;
 			for (auto const& amp : AmplitudeComponents) {

@@ -119,6 +119,6 @@ rootpl = pwa.RootPlotData(kin, intens)
 rootpl.set_data(sample)
 rootpl.set_phsp_mc(phspSample)
 #rootpl.add_component(components[0][0], components[0][1], "-1_-1")
-rootpl.write("", "plot.root", "RECREATE")
+rootpl.write("tree", "plot.root", "RECREATE")
 
 exit()
